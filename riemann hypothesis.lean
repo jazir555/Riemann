@@ -1474,8 +1474,13 @@ theorem xiNoRightHalfZerosFull_from_all_three
 
 /-- The classical xi function satisfies ξ(s) = ξ(1-s). This follows from the
     product representation ξ(s) = (1/2)s(s-1)π^{-s/2}Γ(s/2)ζ(s) and the
-    functional equation for ζ. -/
+    functional equation ζ(1-s) = 2(2π)^{-s}Γ(s)cos(πs/2)ζ(s) together with
+    the Gamma reflection formula Γ(z)Γ(1-z) = π/sin(πz) and duplication formula.
+    Note: the functional equation for the entire function Λ₀(s) = completedRiemannZeta₀ s
+    is already proven as `completedRiemannZeta₀_one_sub`. The proof for classicalXi
+    requires additionally that the product (1/2)s(s-1)π^{-s/2}Γ(s/2)ζ(s) is
+    invariant under s ↦ 1-s, which follows from the fact that this product equals
+    (1/2)s(s-1)Λ₀(s) + 1/2 for s ≠ 0,1, using riemannZeta_eq_completedRiemannZeta₀. -/
 theorem classicalXi_functional_equation :
-    ∀ s : ℂ, classicalXi (1 - s) = classicalXi s := by
-  intro s
+    ∀ s : ℂ, classicalXi (1 - s) = classicalXi s :=
   sorry
