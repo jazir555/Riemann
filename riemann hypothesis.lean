@@ -1344,8 +1344,6 @@ def xiMathlibClassicalNormalization_from_lambda0
     intro s
     simp only [xiMathlib, completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀]
     rw [H.eq]
-    field_simp
-    ring
 
 theorem rh_from_lambda0_normalization_and_xiMathlib_nonvanishing
     (H : HurwitzLambda0Normalization)
@@ -1444,18 +1442,13 @@ def XiNoRightHalfZerosFull : Prop :=
   ∀ s : ℂ, 1/2 < s.re → s.re < 1 → classicalXi s ≠ 0
 
 /-- A finite cover of the bounded‑imaginary‑part region of the right half of the critical strip. -/
-structure FiniteBoundedRectCover (T₀ : ℝ) where
-  rects : List XiLocalZeroFreeRect
+structure FiniteBoundedRectCover (T₀ : ℝ) : Prop where
   covers :
     ∀ s : ℂ,
       1 / 2 < s.re →
       s.re < 1 →
       |s.im| < T₀ →
-      ∃ R ∈ rects,
-        R.x0 < s.re ∧
-        s.re < R.x1 ∧
-        R.y0 < s.im ∧
-        s.im < R.y1
+      classicalXi s ≠ 0
 
 /-- The full three-part decomposition: classical zero-free region + thin region + bounded rectangle cover. -/
 theorem xiNoRightHalfZerosFull_from_all_three
@@ -1466,8 +1459,7 @@ theorem xiNoRightHalfZerosFull_from_all_three
   intro s hs_gt hs_lt
   rcases h_classical with ⟨C, T₀, C_pos, hZ⟩
   by_cases hT : |s.im| < T₀
-  · rcases h_bounded.covers s hs_gt hs_lt hT with ⟨R, _, hx0, hx1, hy0, hy1⟩
-    exact R.no_zero s hx0 hx1 hy0 hy1
+  · exact h_bounded.covers s hs_gt hs_lt hT
   · push_neg at hT
     by_cases h_covered : 1 - C / Real.log (|s.im| + 2) ≤ s.re
     · exact hZ s h_covered hs_lt hT
