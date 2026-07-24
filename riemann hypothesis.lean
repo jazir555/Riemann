@@ -1344,6 +1344,7 @@ def xiMathlibClassicalNormalization_from_lambda0
     intro s
     simp only [xiMathlib, completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀]
     rw [H.eq]
+    ring_nf
 
 theorem rh_from_lambda0_normalization_and_xiMathlib_nonvanishing
     (H : HurwitzLambda0Normalization)
