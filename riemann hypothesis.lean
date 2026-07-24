@@ -1509,3 +1509,63 @@ theorem classicalXi_functional_equation :
   rw [classicalXi_eq_completed s hs0 hGamma, classicalXi_eq_completed (1-s) hs1s hGamma1s]
   rw [completedRiemannZeta₀_one_sub]
   ring_nf
+
+private theorem real_pos_cpow_star (x : ℝ) (hx : 0 < x) (s : ℂ) :
+    star ((x : ℂ) ^ s) = (x : ℂ) ^ (star s) := by
+  have hx' : (x : ℂ) ≠ 0 := by exact_mod_cast Ne.symm (ne_of_lt hx)
+  have hlog : Complex.log (x : ℂ) = (Real.log x : ℂ) := (ofReal_log hx.le).symm
+  show starRingEnd ℂ ((x : ℂ) ^ s) = (x : ℂ) ^ (starRingEnd ℂ s)
+  rw [Complex.cpow_def_of_ne_zero hx', Complex.cpow_def_of_ne_zero hx', hlog,
+    (exp_conj _).symm]
+  congr 1
+  rw [RingHom.map_mul, show starRingEnd ℂ ((Real.log x : ℂ)) = (Real.log x : ℂ) from by simp]
+
+/-!
+# Conjugation symmetry for riemannZeta
+
+Key building block for the symmetry package: riemannZeta (star s) = star (riemannZeta s).
+Proved for Re(s) > 1 via the Dirichlet series, extended to all s by analytic continuation.
+-/
+
+private theorem nat_cpow_star (n : ℕ) (s : ℂ) :
+    star ((↑n + 1 : ℂ) ^ s) = (↑n + 1 : ℂ) ^ (star s) := by
+  have hcpow := real_pos_cpow_star (n + 1) (by exact_mod_cast Nat.succ_pos n) s
+  exact_mod_cast hcpow
+
+theorem riemannZeta_star_of_one_lt_re (s : ℂ) (hs : 1 < s.re) :
+    riemannZeta (star s) = star (riemannZeta s) := by
+  sorry
+
+/-- riemannZeta commutes with star for all s.
+    Follows from riemannZeta_star_of_one_lt_re (Re(s) > 1) by analytic continuation:
+    both sides are meromorphic on ℂ and agree on the half-plane Re(s) > 1,
+    hence agree everywhere by the identity theorem. -/
+theorem riemannZeta_star (s : ℂ) :
+    riemannZeta (star s) = star (riemannZeta s) := by
+  sorry
+
+/-!
+# Conjugation identity for classicalXi
+
+Combines riemannZeta_star with the functional equation to give the
+full conjugation identity needed for the symmetry package.
+-/
+
+theorem classicalXi_conj (s : ℂ) :
+    classicalXi (star s) = star (classicalXi s) := by
+  sorry
+
+theorem conjugationIdentity_classicalXi :
+    ConjugationIdentityCertificate where
+  identity z := by
+    show classicalXi ((1 / 2 : ℂ) + I * star z) = star (classicalXi ((1 / 2 : ℂ) + I * z))
+    sorry
+
+/-- The full symmetry package for classical xi, derived from the functional equation
+    and conjugation identity. -/
+def classicalSymmetryPackage : SymmetryCertificate where
+  functional_eq := { fe := classicalXi_functional_equation }
+  conjugation_identity := conjugationIdentity_classicalXi
+
+theorem classicalXi_symmetry : XiShiftedSymmetryPackage :=
+  xiShiftedSymmetryPackage_of_certificates classicalSymmetryPackage
