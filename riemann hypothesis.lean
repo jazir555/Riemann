@@ -1544,8 +1544,8 @@ theorem riemannZeta_star_of_one_lt_re (s : ℂ) (hs : 1 < s.re) :
 
 /-- riemannZeta commutes with star for all s.
     Follows from riemannZeta_star_of_one_lt_re (Re(s) > 1) by analytic continuation:
-    both sides are meromorphic on ℂ and agree on the half-plane Re(s) > 1,
-    hence agree everywhere by the identity theorem. -/
+    both sides are analytic on ℂ \ {1} and agree on {Re(s) > 1}, which accumulates to 2 ∈ ℂ \ {1}.
+    Since ℂ \ {1} is connected, they agree everywhere. -/
 theorem riemannZeta_star (s : ℂ) :
     riemannZeta (star s) = star (riemannZeta s) := by
   sorry
@@ -1561,14 +1561,21 @@ theorem classicalXi_conj (s : ℂ) :
     classicalXi (star s) = star (classicalXi s) := by
   unfold classicalXi XiFromPrefactor classicalXiPrefactor
   simp only [star_mul, star_sub, star_ofNat, riemannZeta_star, Complex.Gamma_conj,
-    show star (1 / 2 : ℂ) = (1 / 2 : ℂ) from by norm_num]
+    show star (1 / 2 : ℂ) = (1 / 2 : ℂ) from by norm_num,
+    real_pos_cpow_star Real.pi Real.pi_pos, star_neg, star_div₀, star_one]
   sorry
 
 theorem conjugationIdentity_classicalXi :
     ConjugationIdentityCertificate where
   identity z := by
     show classicalXi ((1 / 2 : ℂ) + I * star z) = star (classicalXi ((1 / 2 : ℂ) + I * z))
-    sorry
+    have hstar_eq : star ((1 / 2 : ℂ) + I * z) = (1 / 2 : ℂ) - I * star z := by
+      simp [star_def]; ring
+    have hfe := classicalXi_functional_equation
+    -- Key: 1/2 + I*star z = 1 - (1/2 - I*star z), and Re(1/2 - I*star z) = 1/2 + Im(z)
+    -- So functional eq applies at s = 1/2 - I*star z
+    rw [show classicalXi ((1 / 2 : ℂ) + I * star z) = classicalXi (1 - ((1 / 2 : ℂ) - I * star z)) from by ring_nf]
+    rw [hfe ((1 / 2 : ℂ) - I * star z) sorry sorry, ← hstar_eq, classicalXi_conj]
 
 /-- The full symmetry package for classical xi, derived from the functional equation
     and conjugation identity. -/
