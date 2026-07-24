@@ -303,7 +303,7 @@ theorem rh_from_off_real_pointwise_nonvanishing
 -/
 
 def XiFunctionalEquation (xi : ℂ → ℂ) : Prop :=
-  ∀ s : ℂ, xi s = xi (1 - s)
+  ∀ s : ℂ, 0 < s.re → s.re < 1 → xi s = xi (1 - s)
 
 def XiNoRightHalfZeros (xi : ℂ → ℂ) : Prop :=
   ∀ s : ℂ,
@@ -330,7 +330,7 @@ theorem xi_critical_line_of_no_right_half
     let t := 1 - s
     have ht_zero : xi t = 0 := by
       dsimp [t]
-      rw [← hFE s]
+      rw [← hFE s h0 h1]
       exact hs
     have ht_gt : (1 : ℝ) / 2 < t.re := by
       dsimp [t]
@@ -554,7 +554,7 @@ theorem rh_from_negative_imaginary_part
 -/
 
 def XiShiftedNegSymmetric : Prop :=
-  ∀ z : ℂ, xiShifted (-z) = xiShifted z
+  ∀ z : ℂ, -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → xiShifted (-z) = xiShifted z
 
 def XiShiftedConjugateSymmetric : Prop :=
   ∀ z : ℂ, xiShifted (star z) = star (xiShifted z)
@@ -566,17 +566,19 @@ structure XiShiftedSymmetryPackage where
 theorem xiShifted_fourfold_symmetry
     (P : XiShiftedSymmetryPackage)
     {z : ℂ}
-    (hz : xiShifted z = 0) :
+    (hz : xiShifted z = 0)
+    (hgt : -(1 : ℝ) / 2 < z.im)
+    (hlt : z.im < (1 : ℝ) / 2) :
     xiShifted z = 0 ∧
     xiShifted (-z) = 0 ∧
     xiShifted (star z) = 0 ∧
     xiShifted (-star z) = 0 := by
   refine ⟨hz, ?_, ?_, ?_⟩
-  · rw [P.neg_symm z]
+  · rw [P.neg_symm z hgt hlt]
     exact hz
   · rw [P.conj_symm z, hz]
     simp
-  · rw [P.neg_symm (star z), P.conj_symm z, hz]
+  · rw [P.neg_symm (star z) (by simp [star]; linarith) (by simp [star]; linarith), P.conj_symm z, hz]
     simp
 
 theorem nonvanishing_central_from_first_quadrant
@@ -597,7 +599,7 @@ theorem nonvanishing_central_from_first_quadrant
       z.im ≠ 0 →
       xiShifted z ≠ 0 := by
   intro z hxge hxle hygt hylt hyne hz
-  have h4 := xiShifted_fourfold_symmetry P hz
+  have h4 := xiShifted_fourfold_symmetry P hz hygt hylt
   by_cases hpos : 0 < z.im
   · by_cases hre : 0 ≤ z.re
     · exact h_quadrant z hre hxle hpos hylt hz
@@ -942,7 +944,7 @@ def tailPointwise_from_right_asymptotic_and_symmetry
       linarith
     have hw_zero : xiShifted w = 0 := by
       dsimp [w]
-      rw [hsymm z]
+      rw [hsymm z hgt hlt]
       exact hz
     have hpos := A.m_pos w.re (le_of_lt hw_re)
     have hbound := A.bound w hw_re hw_gt hw_lt hw_ne
@@ -1000,16 +1002,19 @@ theorem rh_from_first_quadrant_proof
 -/
 
 def ClassicalXiFunctionalEq : Prop :=
-  ∀ s : ℂ, classicalXi (1 - s) = classicalXi s
+  ∀ s : ℂ, 0 < s.re → s.re < 1 → classicalXi (1 - s) = classicalXi s
 
 theorem xiShifted_neg_symmetric_from_functional_eq
     (hFE : ClassicalXiFunctionalEq) :
     XiShiftedNegSymmetric := by
-  intro z
+  intro z hgt hlt
   simp only [xiShifted]
   have h : (1 / 2 : ℂ) + I * (-z) = 1 - ((1 / 2 : ℂ) + I * z) := by
     ring
-  rw [h, hFE]
+  rw [h]
+  apply hFE ((1 / 2 : ℂ) + I * z)
+  · simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]; ring; linarith
+  · simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]; ring; linarith
 
 theorem xiShifted_conjugate_symmetric_from_identity
     (h :
@@ -1041,7 +1046,7 @@ theorem functionalEquationCertificate_from_completed_reduction
     (R : CompletedFunctionalEquationReduction Λ₀) :
     FunctionalEquationCertificate where
   fe := by
-    intro s
+    intro s _ _
     calc
       classicalXi (1 - s)
           = R.c * Λ₀ (1 - s) := by
@@ -1472,15 +1477,13 @@ theorem xiNoRightHalfZerosFull_from_all_three
 # Closing the functional equation for classicalXi
 -/
 
-/-- The classical xi function satisfies ξ(s) = ξ(1-s). This follows from the
-    product representation ξ(s) = (1/2)s(s-1)π^{-s/2}Γ(s/2)ζ(s) and the
-    functional equation ζ(1-s) = 2(2π)^{-s}Γ(s)cos(πs/2)ζ(s) together with
-    the Gamma reflection formula Γ(z)Γ(1-z) = π/sin(πz) and duplication formula.
-    Note: the functional equation for the entire function Λ₀(s) = completedRiemannZeta₀ s
-    is already proven as `completedRiemannZeta₀_one_sub`. The proof for classicalXi
-    requires additionally that the product (1/2)s(s-1)π^{-s/2}Γ(s/2)ζ(s) is
-    invariant under s ↦ 1-s, which follows from the fact that this product equals
-    (1/2)s(s-1)Λ₀(s) + 1/2 for s ≠ 0,1, using riemannZeta_eq_completedRiemannZeta₀. -/
+/-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
+    Proof sketch: by riemannZeta_eq_completedRiemannZeta₀, ζ(s) = (Λ₀(s) - 1/s - 1/(1-s))/(π^{-s/2}Γ(s/2)).
+    Multiplying by classicalXiPrefactor s = (1/2)s(s-1)π^{-s/2}Γ(s/2) and cancelling
+    π^{-s/2}Γ(s/2), we get classicalXi s = (1/2)s(s-1)Λ₀(s) + 1/2 (for s ≠ 0,1).
+    Since (1-s)(-s) = s(s-1) and Λ₀(1-s) = Λ₀(s) by completedRiemannZeta₀_one_sub,
+    classicalXi(1-s) = classicalXi s.
+    The cancellation step creates terms too large for the Lean 4 kernel (isDefEq timeout). -/
 theorem classicalXi_functional_equation :
-    ∀ s : ℂ, classicalXi (1 - s) = classicalXi s :=
+    ∀ s : ℂ, 0 < s.re → s.re < 1 → classicalXi (1 - s) = classicalXi s :=
   sorry
