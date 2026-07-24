@@ -1510,7 +1510,7 @@ theorem classicalXi_functional_equation :
   rw [completedRiemannZeta₀_one_sub]
   ring_nf
 
-private theorem real_pos_cpow_star (x : ℝ) (hx : 0 < x) (s : ℂ) :
+theorem real_pos_cpow_star (x : ℝ) (hx : 0 < x) (s : ℂ) :
     star ((x : ℂ) ^ s) = (x : ℂ) ^ (star s) := by
   have hx' : (x : ℂ) ≠ 0 := by exact_mod_cast Ne.symm (ne_of_lt hx)
   have hlog : Complex.log (x : ℂ) = (Real.log x : ℂ) := (ofReal_log hx.le).symm
@@ -1534,7 +1534,13 @@ private theorem nat_cpow_star (n : ℕ) (s : ℂ) :
 
 theorem riemannZeta_star_of_one_lt_re (s : ℂ) (hs : 1 < s.re) :
     riemannZeta (star s) = star (riemannZeta s) := by
-  sorry
+  have hs' : 1 < (star s).re := by simp [star_def]; linarith
+  rw [zeta_eq_tsum_one_div_nat_add_one_cpow hs',
+      zeta_eq_tsum_one_div_nat_add_one_cpow hs, tsum_star]
+  congr 1; ext n
+  have hcpow := nat_cpow_star n s
+  simp only [div_eq_mul_inv, star_mul, star_one, one_mul, star_inv, ← hcpow]
+  norm_num
 
 /-- riemannZeta commutes with star for all s.
     Follows from riemannZeta_star_of_one_lt_re (Re(s) > 1) by analytic continuation:
@@ -1553,6 +1559,9 @@ full conjugation identity needed for the symmetry package.
 
 theorem classicalXi_conj (s : ℂ) :
     classicalXi (star s) = star (classicalXi s) := by
+  unfold classicalXi XiFromPrefactor classicalXiPrefactor
+  simp only [star_mul, star_sub, star_ofNat, riemannZeta_star, Complex.Gamma_conj,
+    show star (1 / 2 : ℂ) = (1 / 2 : ℂ) from by norm_num]
   sorry
 
 theorem conjugationIdentity_classicalXi :
