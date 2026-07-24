@@ -1477,13 +1477,35 @@ theorem xiNoRightHalfZerosFull_from_all_three
 # Closing the functional equation for classicalXi
 -/
 
+/-- Helper: classicalXi s = (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) on the critical strip.
+    Proved by rewriting ζ via riemannZeta_eq_completedRiemannZeta₀ and cancelling π^{-s/2}Γ(s/2). -/
+private theorem classicalXi_eq_completed (s : ℂ) (hs0 : s ≠ 0) (hGamma : Complex.Gamma (s / 2) ≠ 0) :
+    classicalXi s = (1 / 2 : ℂ) * s * (s - 1) *
+      (completedRiemannZeta₀ s - 1 / s - 1 / (1 - s)) := by
+  show classicalXiPrefactor s * zeta s = _
+  unfold zeta
+  rw [riemannZeta_eq_completedRiemannZeta₀ hs0]
+  unfold classicalXiPrefactor
+  field_simp [hGamma]
+
 /-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
-    Proof sketch: by riemannZeta_eq_completedRiemannZeta₀, ζ(s) = (Λ₀(s) - 1/s - 1/(1-s))/(π^{-s/2}Γ(s/2)).
-    Multiplying by classicalXiPrefactor s = (1/2)s(s-1)π^{-s/2}Γ(s/2) and cancelling
-    π^{-s/2}Γ(s/2), we get classicalXi s = (1/2)s(s-1)Λ₀(s) + 1/2 (for s ≠ 0,1).
-    Since (1-s)(-s) = s(s-1) and Λ₀(1-s) = Λ₀(s) by completedRiemannZeta₀_one_sub,
-    classicalXi(1-s) = classicalXi s.
-    The cancellation step creates terms too large for the Lean 4 kernel (isDefEq timeout). -/
+    Both sides reduce to (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) via
+    classicalXi_eq_completed and completedRiemannZeta₀_one_sub. -/
 theorem classicalXi_functional_equation :
-    ∀ s : ℂ, 0 < s.re → s.re < 1 → classicalXi (1 - s) = classicalXi s :=
-  sorry
+    ∀ s : ℂ, 0 < s.re → s.re < 1 → classicalXi (1 - s) = classicalXi s := by
+  intro s h0 h1
+  have hs0 : s ≠ 0 := by intro h; subst h; norm_num at h0
+  have hs1 : s ≠ 1 := by intro h; subst h; norm_num at h1
+  have hs1s : (1 : ℂ) - s ≠ 0 := by
+    intro h
+    apply hs1
+    rw [show s = (1 : ℂ) - ((1 : ℂ) - s) from by ring, h]
+    ring
+  have hGamma := classical_gamma_nonzero_instrip s h0 h1
+  have hGamma1s : Complex.Gamma ((1 - s) / 2) ≠ 0 := by
+    apply classical_gamma_nonzero_instrip
+    · rw [sub_re, one_re]; linarith
+    · rw [sub_re, one_re]; linarith
+  rw [classicalXi_eq_completed s hs0 hGamma, classicalXi_eq_completed (1-s) hs1s hGamma1s]
+  rw [completedRiemannZeta₀_one_sub]
+  ring_nf
