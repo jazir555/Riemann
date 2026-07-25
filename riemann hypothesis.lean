@@ -953,6 +953,75 @@ def tailPointwise_from_right_asymptotic_and_symmetry
       simpa using hbound
     linarith
 
+/-- A tail lower bound which is allowed to degenerate when approaching the critical
+    line.  This is the natural shape for a zero-free certificate: known zeros on the
+    critical line rule out a lower bound that is uniform in `z.im ≠ 0`. -/
+structure XiRightTailDistanceLowerBoundForX (X : ℝ) where
+  lower : ℝ → ℝ → ℝ
+  lower_pos :
+    ∀ r y : ℝ,
+      X ≤ r →
+      y ≠ 0 →
+      0 < lower r y
+  bound :
+    ∀ z : ℂ,
+      X < z.re →
+      - (1 : ℝ) / 2 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      z.im ≠ 0 →
+      lower z.re z.im ≤ ‖xiShifted z‖
+
+/-- A uniform positive lower bound is, in particular, a distance-sensitive one.
+    This adapter keeps the corrected API compatible with any future stronger result. -/
+def XiRightTailAsymptoticLowerBoundForX.toDistanceLowerBound
+    {X : ℝ}
+    (A : XiRightTailAsymptoticLowerBoundForX X) :
+    XiRightTailDistanceLowerBoundForX X where
+  lower r _ := A.m r
+  lower_pos r _ hr _ := A.m_pos r hr
+  bound z hre hgt hlt hne := A.bound z hre hgt hlt hne
+
+/-- A positive distance-sensitive lower bound on the right tail gives the exact
+    off-axis nonvanishing fact needed by the symmetry argument. -/
+def tailPointwise_from_right_distance_lower_bound_and_symmetry
+    {X : ℝ}
+    (hsymm : XiShiftedNegSymmetric)
+    (A : XiRightTailDistanceLowerBoundForX X) :
+    XiTailPointwiseNonvanishingForX X where
+  right_nonvanishing := by
+    intro z hright hgt hlt hne hz
+    have hpos := A.lower_pos z.re z.im (le_of_lt hright) hne
+    have hbound := A.bound z hright hgt hlt hne
+    rw [hz] at hbound
+    have : A.lower z.re z.im ≤ 0 := by simpa using hbound
+    linarith
+  left_nonvanishing := by
+    intro z hleft hgt hlt hne hz
+    let w := -z
+    have hw_re : X < w.re := by
+      dsimp [w]
+      linarith
+    have hw_gt : - (1 : ℝ) / 2 < w.im := by
+      dsimp [w]
+      linarith
+    have hw_lt : w.im < (1 : ℝ) / 2 := by
+      dsimp [w]
+      linarith
+    have hw_ne : w.im ≠ 0 := by
+      dsimp [w]
+      intro h
+      apply hne
+      linarith
+    have hw_zero : xiShifted w = 0 := by
+      dsimp [w]
+      rw [hsymm z hgt hlt]
+      exact hz
+    have hpos := A.lower_pos w.re w.im (le_of_lt hw_re) hw_ne
+    have hbound := A.bound w hw_re hw_gt hw_lt hw_ne
+    rw [hw_zero] at hbound
+    have : A.lower w.re w.im ≤ 0 := by simpa using hbound
+    linarith
+
 structure RHFirstQuadrantProof where
   X : ℝ
   symmetries : XiShiftedSymmetryPackage
@@ -996,6 +1065,52 @@ theorem rh_from_first_quadrant_proof
     RiemannHypothesisProp :=
   rh_from_off_real_pointwise_nonvanishing
     (xiOffRealPointwiseNonvanishing_from_first_quadrant_proof P)
+
+/-- First-quadrant proof data with a tail bound that may shrink as the point
+    approaches the critical line. -/
+structure RHFirstQuadrantDistanceProof where
+  X : ℝ
+  symmetries : XiShiftedSymmetryPackage
+  quadrant_no_zero :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      xiShifted z ≠ 0
+  right_tail : XiRightTailDistanceLowerBoundForX X
+
+theorem xiOffRealPointwiseNonvanishing_from_first_quadrant_distance_proof
+    (P : RHFirstQuadrantDistanceProof) :
+    XiOffRealPointwiseNonvanishing := by
+  have hsymm : XiShiftedNegSymmetric := P.symmetries.neg_symm
+  let central : XiCentralPointwiseNonvanishingForX P.X :=
+    {
+      central_nonvanishing := by
+        intro z hge hle hgt hlt hne
+        exact
+          nonvanishing_central_from_first_quadrant
+            P.symmetries
+            P.X
+            P.quadrant_no_zero
+            z
+            hge
+            hle
+            hgt
+            hlt
+            hne
+    }
+  let tail : XiTailPointwiseNonvanishingForX P.X :=
+    tailPointwise_from_right_distance_lower_bound_and_symmetry hsymm P.right_tail
+  exact
+    xiOffRealPointwiseNonvanishing_of_central_pointwise_and_tail_pointwise
+      central tail
+
+theorem rh_from_first_quadrant_distance_proof
+    (P : RHFirstQuadrantDistanceProof) :
+    RiemannHypothesisProp :=
+  rh_from_off_real_pointwise_nonvanishing
+    (xiOffRealPointwiseNonvanishing_from_first_quadrant_distance_proof P)
 
 /-!
 # Safe derivations of shifted symmetries from classical xi facts
@@ -1151,6 +1266,41 @@ theorem rh_from_decomposed_first_quadrant_certificate
     RiemannHypothesisProp :=
   rh_from_first_quadrant_proof
     (rhFirstQuadrantProof_of_decomposed D)
+
+/-- Decomposed first-quadrant certificate with a tail lower bound that may
+    vanish at the critical line, as it must in the presence of critical-line zeros. -/
+structure RHFirstQuadrantDistanceDecomposedCertificate (X : ℝ) where
+  sym : SymmetryCertificate
+  quadrant : FirstQuadrantLowerBoundCover X
+  tail : XiRightTailDistanceLowerBoundForX X
+
+def rhFirstQuadrantDistanceProof_of_decomposed
+    {X : ℝ}
+    (D : RHFirstQuadrantDistanceDecomposedCertificate X) :
+    RHFirstQuadrantDistanceProof where
+  X := X
+  symmetries :=
+    xiShiftedSymmetryPackage_of_certificates D.sym
+  quadrant_no_zero :=
+    quadrant_no_zero_of_lower_bound_cover D.quadrant
+  right_tail := D.tail
+
+theorem rh_from_decomposed_first_quadrant_distance_certificate
+    {X : ℝ}
+    (D : RHFirstQuadrantDistanceDecomposedCertificate X) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_distance_proof
+    (rhFirstQuadrantDistanceProof_of_decomposed D)
+
+/-- Any certificate satisfying the older, stronger uniform-tail condition also
+    satisfies the distance-sensitive formulation. -/
+def RHFirstQuadrantDecomposedCertificate.toDistanceCertificate
+    {X : ℝ}
+    (D : RHFirstQuadrantDecomposedCertificate X) :
+    RHFirstQuadrantDistanceDecomposedCertificate X where
+  sym := D.sym
+  quadrant := D.quadrant
+  tail := (rightTailAsymptotic_of_exponential D.tail).toDistanceLowerBound
 
 /-!
 # Mathlib-native completed xi chain
@@ -1569,6 +1719,18 @@ theorem completedRiemannZeta₀_critical_line_remainder_eq_xi (t : ℝ) :
     exact_mod_cast (ne_of_gt (show (0 : ℝ) < t ^ 2 + 1 / 4 by positivity))
   field_simp [ht]
   ring
+
+/-- Norm form of the critical-line remainder identity. -/
+theorem norm_completedRiemannZeta₀_critical_line_remainder (t : ℝ) :
+    ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) -
+      (1 / (t ^ 2 + 1 / 4) : ℝ)‖ =
+        (2 / (t ^ 2 + 1 / 4) : ℝ) *
+          ‖classicalXi ((1 / 2 : ℂ) + I * t)‖ := by
+  rw [completedRiemannZeta₀_critical_line_remainder_eq_xi, norm_mul]
+  have ht : 0 < t ^ 2 + 1 / 4 := by positivity
+  rw [norm_neg, Complex.norm_real, Real.norm_of_nonneg]
+  · ring
+  · positivity
 
 /-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
     Both sides reduce to (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) via
