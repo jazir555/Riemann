@@ -557,7 +557,7 @@ def XiShiftedNegSymmetric : Prop :=
   ∀ z : ℂ, -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → xiShifted (-z) = xiShifted z
 
 def XiShiftedConjugateSymmetric : Prop :=
-  ∀ z : ℂ, xiShifted (star z) = star (xiShifted z)
+  ∀ z : ℂ, -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → xiShifted (star z) = star (xiShifted z)
 
 structure XiShiftedSymmetryPackage where
   neg_symm : XiShiftedNegSymmetric
@@ -576,9 +576,9 @@ theorem xiShifted_fourfold_symmetry
   refine ⟨hz, ?_, ?_, ?_⟩
   · rw [P.neg_symm z hgt hlt]
     exact hz
-  · rw [P.conj_symm z, hz]
+  · rw [P.conj_symm z hgt hlt, hz]
     simp
-  · rw [P.neg_symm (star z) (by simp [star]; linarith) (by simp [star]; linarith), P.conj_symm z, hz]
+  · rw [P.neg_symm (star z) (by simp [star]; linarith) (by simp [star]; linarith), P.conj_symm z hgt hlt, hz]
     simp
 
 theorem nonvanishing_central_from_first_quadrant
@@ -1019,11 +1019,13 @@ theorem xiShifted_neg_symmetric_from_functional_eq
 theorem xiShifted_conjugate_symmetric_from_identity
     (h :
       ∀ z : ℂ,
+        -(1 : ℝ) / 2 < z.im →
+        z.im < (1 : ℝ) / 2 →
         classicalXi ((1 / 2 : ℂ) + I * star z) =
         star (classicalXi ((1 / 2 : ℂ) + I * z))) :
     XiShiftedConjugateSymmetric := by
-  intro z
-  simpa [xiShifted] using h z
+  intro z hgt hlt
+  simpa [xiShifted] using h z hgt hlt
 
 /-!
 # Decomposed first-quadrant certificates
@@ -1059,6 +1061,8 @@ theorem functionalEquationCertificate_from_completed_reduction
 structure ConjugationIdentityCertificate where
   identity :
     ∀ z : ℂ,
+      -(1 : ℝ) / 2 < z.im →
+      z.im < (1 : ℝ) / 2 →
       classicalXi ((1 / 2 : ℂ) + I * star z) =
       star (classicalXi ((1 / 2 : ℂ) + I * z))
 
@@ -1547,8 +1551,8 @@ theorem riemannZeta_star_of_one_lt_re (s : ℂ) (hs : 1 < s.re) :
     both sides are analytic on ℂ \ {1} and agree on {Re(s) > 1}, which accumulates to 2 ∈ ℂ \ {1}.
     Since ℂ \ {1} is connected, they agree everywhere. -/
 theorem riemannZeta_star (s : ℂ) :
-    riemannZeta (star s) = star (riemannZeta s) := by
-  sorry
+    riemannZeta (star s) = star (riemannZeta s) :=
+  riemannZeta_conj s
 
 /-!
 # Conjugation identity for classicalXi
@@ -1559,23 +1563,43 @@ full conjugation identity needed for the symmetry package.
 
 theorem classicalXi_conj (s : ℂ) :
     classicalXi (star s) = star (classicalXi s) := by
-  unfold classicalXi XiFromPrefactor classicalXiPrefactor
-  simp only [star_mul, star_sub, star_ofNat, riemannZeta_star, Complex.Gamma_conj,
-    show star (1 / 2 : ℂ) = (1 / 2 : ℂ) from by norm_num,
-    real_pos_cpow_star Real.pi Real.pi_pos, star_neg, star_div₀, star_one]
-  sorry
+  have h : classicalXiPrefactor (star s) = star (classicalXiPrefactor s) := by
+    unfold classicalXiPrefactor
+    have h1 : star (1 / 2 : ℂ) = (1 / 2 : ℂ) := by norm_num [star_def]
+    have h2 : star (s - 1) = star s - 1 := by simp [star_sub, star_one]
+    have h3 : star ((Real.pi : ℂ) ^ (-(s / 2))) = (Real.pi : ℂ) ^ (-(star s / 2)) := by
+      rw [real_pos_cpow_star Real.pi (by norm_num [Real.pi_pos])]
+      congr 1; simp [star_neg, star_div]
+    have h4 : star (Complex.Gamma (s / 2)) = Complex.Gamma (star s / 2) := by
+      show (starRingEnd ℂ) (Complex.Gamma (s / 2)) = Complex.Gamma ((starRingEnd ℂ) s / 2)
+      rw [(Complex.Gamma_conj (s / 2)).symm]
+      congr 1
+      change star (s / 2 : ℂ) = star s / 2
+      simp [div_eq_mul_inv, star_mul', star_inv₀, show (star 2 : ℂ) = (2 : ℂ) from by norm_num [star_def]]
+    rw [show star ((1 / 2 : ℂ) * s * (s - 1) * ((Real.pi : ℂ) ^ (-(s / 2))) * Complex.Gamma (s / 2)) =
+      star (1 / 2 : ℂ) * star s * star (s - 1) * star ((Real.pi : ℂ) ^ (-(s / 2))) * star (Complex.Gamma (s / 2)) from
+      by simp [star_mul']]
+    rw [h1, h2, h3, h4]
+  unfold classicalXi XiFromPrefactor
+  rw [show zeta = riemannZeta from rfl, h, riemannZeta_star]
+  exact (star_mul' (classicalXiPrefactor s) (riemannZeta s)).symm
 
 theorem conjugationIdentity_classicalXi :
     ConjugationIdentityCertificate where
-  identity z := by
+  identity z hgt hlt := by
     show classicalXi ((1 / 2 : ℂ) + I * star z) = star (classicalXi ((1 / 2 : ℂ) + I * z))
-    have hstar_eq : star ((1 / 2 : ℂ) + I * z) = (1 / 2 : ℂ) - I * star z := by
+    have hfe := classicalXi_functional_equation ((1 / 2 : ℂ) + I * z)
+      (by simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]; ring; linarith)
+      (by simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]; ring; linarith)
+    have hc := classicalXi_conj ((1 / 2 : ℂ) + I * star z)
+    have hstar : star ((1 / 2 : ℂ) + I * star z) = (1 / 2 : ℂ) - I * z := by
       simp [star_def]; ring
-    have hfe := classicalXi_functional_equation
-    -- Key: 1/2 + I*star z = 1 - (1/2 - I*star z), and Re(1/2 - I*star z) = 1/2 + Im(z)
-    -- So functional eq applies at s = 1/2 - I*star z
-    rw [show classicalXi ((1 / 2 : ℂ) + I * star z) = classicalXi (1 - ((1 / 2 : ℂ) - I * star z)) from by ring_nf]
-    rw [hfe ((1 / 2 : ℂ) - I * star z) sorry sorry, ← hstar_eq, classicalXi_conj]
+    rw [hstar] at hc
+    have hflip : classicalXi ((1 / 2 : ℂ) + I * star z) = star (star (classicalXi ((1 / 2 : ℂ) + I * star z))) := by
+      rw [star_star]
+    rw [hflip, ← hc, ← hfe]
+    congr 1
+    ring
 
 /-- The full symmetry package for classical xi, derived from the functional equation
     and conjugation identity. -/
