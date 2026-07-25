@@ -1995,3 +1995,296 @@ analytic ingredients remain:
 -- The certificate skeleton is ready; the remaining work is analytic.
 -- See `rh_from_decomposed_first_quadrant_certificate` for how these
 -- two ingredients yield RiemannHypothesisProp.
+
+
+/-!
+# Remaining proof skeleton
+
+The symmetry package is already available:
+
+    classicalXi_symmetry : XiShiftedSymmetryPackage
+
+The assembly theorem is already available:
+
+    rh_from_first_quadrant_distance_proof
+
+So the remaining work is:
+
+1. Prove first-quadrant nonvanishing:
+
+    0 ≤ Re z ≤ X, 0 < Im z < 1/2 → xiShifted z ≠ 0.
+
+2. Prove a right-tail lower bound that may degenerate as Im z → 0:
+
+    X < Re z, -1/2 < Im z < 1/2, Im z ≠ 0 →
+    lower(Re z, Im z) ≤ ‖xiShifted z‖,
+
+    with lower(r, y) > 0 for y ≠ 0.
+
+The skeleton below makes those obligations explicit.
+-/
+
+/-!
+## 1. Safe conditional skeleton, no sorry
+-/
+
+/-- First-quadrant nonvanishing obligation. -/
+structure RemainingQuadrantNonvanishing (X : ℝ) where
+  no_zero :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      xiShifted z ≠ 0
+
+/-- A finite rectangular plan for proving first-quadrant nonvanishing. -/
+structure QuadrantZeroFreePlan (X : ℝ) where
+  rects : List XiLocalZeroFreeRect
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+/-- A finite zero-free rectangular plan gives first-quadrant nonvanishing. -/
+def quadrant_nonvanishing_from_plan
+    {X : ℝ}
+    (P : QuadrantZeroFreePlan X) :
+    RemainingQuadrantNonvanishing X where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    rcases P.covers z hx0 hx1 hy0 hy1 with
+      ⟨R, _, hx0', hx1', hy0', hy1'⟩
+    exact R.no_zero z hx0' hx1' hy0' hy1' hz
+
+/-- Algebraic lower bound for `xiShifted` from an upper bound on
+    `completedRiemannZeta₀`.
+
+From
+
+    xiShifted z =
+      1/2 - (z^2 + 1/4)/2 * completedRiemannZeta₀(1/2 + i z)
+
+and
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ U,
+
+we get
+
+    ‖xiShifted z‖ ≥
+      1/2 - (‖z^2 + 1/4‖ / 2) * U.
+-/
+theorem xiShifted_lower_bound_of_completed_upper_bound
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (U : ℝ)
+    (hU : 0 ≤ U)
+    (hbound :
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ U) :
+    (1 / 2 : ℝ) -
+      (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * U ≤
+    ‖xiShifted z‖ := by
+  rw [xiShifted_eq_completed z hgt hlt]
+
+  have hsub :=
+    norm_sub_norm_le
+      (1 / 2 : ℂ)
+      ((z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z))
+
+  have hhalf : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by simp
+  rw [hhalf] at hsub
+
+  have hprod :
+      ‖(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+          completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+        (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * U := by
+    calc
+      _ = ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ *
+            ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
+        rw [norm_mul]
+      _ = (‖z ^ 2 + (1 / 4 : ℂ)‖ / ‖(2 : ℂ)‖) *
+            ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
+        rw [norm_div]
+      _ = (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+            ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
+        simp
+      _ ≤ (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * U := by
+        exact mul_le_mul_of_nonneg_left hbound (by positivity)
+
+  linarith
+
+/-- A quantitative upper bound for `completedRiemannZeta₀` in the right tail,
+    together with a positivity margin, yields a distance-sensitive lower bound
+    for `xiShifted`. -/
+structure CompletedZetaUpperBoundTail (X : ℝ) where
+  U : ℝ → ℝ → ℝ
+  U_nonneg :
+    ∀ r y : ℝ,
+      X ≤ r →
+      y ≠ 0 →
+      0 ≤ U r y
+  bound :
+    ∀ z : ℂ,
+      X < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ U z.re z.im
+  margin_pos :
+    ∀ r y : ℝ,
+      X ≤ r →
+      y ≠ 0 →
+      0 <
+        (1 / 2 : ℝ) -
+          (‖((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+            U r y
+
+/-- Convert a completed-zeta upper-bound tail estimate into a distance-sensitive
+    lower-bound tail certificate for `xiShifted`. -/
+def distanceLowerBound_from_completed_upper_bound
+    {X : ℝ}
+    (B : CompletedZetaUpperBoundTail X) :
+    XiRightTailDistanceLowerBoundForX X where
+  lower r y :=
+    (1 / 2 : ℝ) -
+      (‖((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+        B.U r y
+  lower_pos r y hr hy :=
+    B.margin_pos r y hr hy
+  bound z hre hgt hlt hne := by
+    have h :=
+      xiShifted_lower_bound_of_completed_upper_bound
+        z hgt hlt
+        (B.U z.re z.im)
+        (B.U_nonneg z.re z.im (le_of_lt hre) hne)
+        (B.bound z hre hgt hlt hne)
+    simpa [Complex.re_add_im] using h
+
+/-- The remaining RH proof obligation at cutoff X. -/
+structure RemainingRHProof (X : ℝ) where
+  quadrant : RemainingQuadrantNonvanishing X
+  tail : XiRightTailDistanceLowerBoundForX X
+
+/-- Assemble the remaining work into RH. -/
+theorem rh_from_remaining_rh_proof
+    {X : ℝ}
+    (W : RemainingRHProof X) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_distance_proof
+    {
+      X := X
+      symmetries := classicalXi_symmetry
+      quadrant_no_zero := W.quadrant.no_zero
+      right_tail := W.tail
+    }
+
+/-- Assemble directly from quadrant nonvanishing and a completed-zeta upper-bound
+    tail estimate. -/
+theorem rh_from_quadrant_and_completed_upper_bound
+    {X : ℝ}
+    (Q : RemainingQuadrantNonvanishing X)
+    (B : CompletedZetaUpperBoundTail X) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := Q
+      tail := distanceLowerBound_from_completed_upper_bound B
+    }
+
+/-!
+## 2. Development skeleton with explicit `sorry` placeholders
+
+The following is a planning skeleton. The `sorry`s are the open analytic work.
+Do not treat this as a proof of RH.
+-/
+
+/-- Placeholder first-quadrant nonvanishing at X = 10.
+
+Remaining work:
+
+Prove:
+
+    xiShifted z ≠ 0
+
+for
+
+    0 ≤ Re z ≤ 10,
+    0 < Im z < 1/2.
+
+Possible decomposition:
+
+1. Cover [0,10] × (0,1/2) by finitely many rectangles.
+2. On each rectangle, prove either:
+   - a positive lower bound for ‖xiShifted z‖, or
+   - direct nonvanishing by argument-principle / interval arithmetic.
+-/
+def remainingQuadrant_10_skeleton :
+    RemainingQuadrantNonvanishing (10 : ℝ) where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1
+    -- OPEN ANALYTIC WORK
+    sorry
+
+/-- Placeholder completed-zeta upper-bound tail estimate at X = 10.
+
+Remaining work:
+
+Prove a quantitative upper bound
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ U(Re z, Im z)
+
+for Re z > 10, -1/2 < Im z < 1/2, Im z ≠ 0,
+
+such that the margin
+
+    1/2 - (‖z^2 + 1/4‖ / 2) * U(Re z, Im z)
+
+is strictly positive for Im z ≠ 0.
+
+The qualitative decay
+
+    completedRiemannZeta₀(1/2 + i t) → 0
+
+is already formalized as:
+
+    completedRiemannZeta₀_vanishes_at_top_im
+
+The remaining task is a quantitative version, uniform enough in the imaginary
+coordinate to give a positive distance-sensitive lower bound.
+-/
+def completedZetaUpperBoundTail_10_skeleton :
+    CompletedZetaUpperBoundTail (10 : ℝ) where
+  U := fun r _y => Real.exp (-(Real.pi / 8) * r)
+  U_nonneg := by
+    intro r y hr hy
+    positivity
+  bound := by
+    intro z hre hgt hlt hne
+    -- OPEN ANALYTIC WORK:
+    -- quantitative Fourier/Mellin decay of completedRiemannZeta₀
+    sorry
+  margin_pos := by
+    intro r y hr hy
+    -- OPEN ANALYTIC WORK:
+    -- show that the exponential upper bound is small enough compared with 1/2
+    sorry
+
+/-- Placeholder full RH skeleton at X = 10.
+
+This is not a proof of RH. It shows exactly where the remaining analytic work
+enters the formal argument.
+-/
+theorem rh_proof_skeleton :
+    RiemannHypothesisProp :=
+  rh_from_quadrant_and_completed_upper_bound
+    remainingQuadrant_10_skeleton
+    completedZetaUpperBoundTail_10_skeleton
