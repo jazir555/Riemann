@@ -1966,153 +1966,33 @@ theorem completedRiemannZeta₀_vanishes_at_top_im :
   exact (hfourier.comp hfreq).div Filter.tendsto_const_nhds two_ne_zero
 
 /-!
-# Concrete first-quadrant decomposed certificate
+# Open analytic targets for the first-quadrant certificate
 
-We construct an `RHFirstQuadrantDecomposedCertificate` at X = 10,
-which combines:
-  (1) the symmetry certificate (proved above),
-  (2) a finite rectangular cover of [0,10]×(0,1/2) with positive lower bounds,
-  (3) an exponential tail lower bound for Re(z) > 10.
+To complete the Riemann Hypothesis via the decomposed first-quadrant
+certificate (`rh_from_decomposed_first_quadrant_certificate`), two
+analytic ingredients remain:
 
-## Analytic content (sorry'd lemmas below)
+1. **Finite-rectangle nonvanishing** (`xiShifted_no_zero_in_rect`):
+   `xiShifted z ≠ 0` for all z with z.re ∈ [-1, 11] and z.im ∈ (-0.1, 0.6).
+   On the critical line (z.im = 0), this follows from the known zero-free
+   region of ζ: the first non-trivial zero has Im(s) ≈ 14.13 > 11.
+   Off the critical line, the Riemann Hypothesis (all non-trivial zeros
+   have Re(s) = 1/2) would guarantee nonvanishing for z.im ∈ (-1/2, 1/2) \ {0},
+   but this is precisely what we are trying to prove.  A proof must use
+   the functional equation (symmetry in z.im) together with a separate
+   argument for |z.im| ≥ 1/2.
 
-The sorry'd lemmas below represent the genuine analytic number-theoretic content
-needed to close the certificate.
-
-- **Quantitative decay** (`completedRiemannZeta₀_cubic_decay`):
-  For t > 10, |Λ₀(1/2+It)| ≤ 1/t³. Follows from `mellin_eq_fourier` +
-  integration by parts N=3 times on the smooth, exponentially-decaying kernel.
-
-- **Lower bound** (`xiShifted_lower_bound_in_rect`):
-  On the critical line z.im = 0, the first zero of ζ occurs at Im(s) ≈ 14.13,
-  which exceeds our rectangle bound x1 = 11. Off the critical line (z.im ≠ 0),
-  the Riemann Hypothesis (all non-trivial zeros have Re(s) = 1/2) guarantees
-  xiShifted z ≠ 0. For z.im > 1/2 (outside the strip), Re(s) < 0 places us
-  outside the critical strip. Continuity of xiShifted (from `xiShifted_continuousOn`)
-  combined with compactness of the closed rectangle yields a positive minimum ≥ 0.001.
-
-- **Tail estimate** (`xiShifted_tail_lower_bound`):
-  Follows from `xiShifted_eq_completed` + `completedRiemannZeta₀_cubic_decay`.
-  Using the reverse triangle inequality:
-    ‖xiShifted z‖ ≥ 1/2 - |z²+1/4|/2 · |Λ₀(1/2+Iz)|
-                 ≥ 1/2 - (z.re²+1/4)/(2·z.re³)
-  For z.re > 10: ≥ 1/2 - 100.25/2000 = 0.449875 ≫ 4.5e-7 = 0.001·exp(-10).
+2. **Exponential tail lower bound** (`xiShifted_tail_lower_bound`):
+   For z.re > 10, some positive lower bound on ‖xiShifted z‖ that
+   decays at most exponentially.  From `xiShifted_eq_completed`,
+     xiShifted z = 1/2 − (z²+1/4)/2 · Λ₀(1/2+Iz),
+   so it suffices to show Λ₀(1/2+Iz) → 0 fast enough as Re(z) → ∞.
+   By `mellin_eq_fourier` + Riemann-Lebesgue (`completedRiemannZeta₀_vanishes_at_top_im`),
+   Λ₀(1/2+Iz) → 0, but the quantitative rate (needed to match the
+   exponential form) requires bounding the Fourier transform of the
+   kernel g(u) = exp(−u/4) · f_modif(exp(−u)).
 -/
 
-/-- Quantitative cubic decay of completedRiemannZeta₀ across the open strip:
-    |Λ₀(1/2 + Iz)| ≤ 1/(Re z)³ for Re(z) > 10 and |Im(z)| < 1/2.
-
-    This is the single analytic kernel from which both `completedRiemannZeta₀_cubic_decay`
-    (critical line) and `xiShifted_tail_lower_bound` (tail estimate) are derived.
-
-    Proof: By `mellin_eq_fourier`, Λ₀(1/2+Iz) = 𝓕(g)(z.re/(4π))/2 where
-    g(u) = exp(-(1/2-z.im)·u/2)·f_modif(exp(-u)). The kernel f_modif is smooth
-    on (0,∞) with all derivatives in L¹ (exponential decay from
-    `isBigO_atTop_evenKernel_sub`). Integration by parts N=3 times on g gives
-    |𝓕(g)(ξ)| ≤ C/(2π|ξ|)³, yielding the cubic decay rate. -/
-theorem completedRiemannZeta₀_decay_in_strip :
-    ∀ z : ℂ, 10 < z.re → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) →
-      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ 1 / z.re ^ 3 :=
-  sorry
-
-/-- Cubic decay on the critical line: |Λ₀(1/2+it)| ≤ 1/t³ for t > 10.
-    Immediate specialization of `completedRiemannZeta₀_decay_in_strip`. -/
-theorem completedRiemannZeta₀_cubic_decay :
-    ∀ t : ℝ, 10 < t →
-      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t)‖ ≤ 1 / t ^ 3 := by
-  intro t ht
-  have h1 : -(1 / 2 : ℝ) < (0 : ℝ) := by norm_num
-  have h2 : (0 : ℝ) < 1 / 2 := by norm_num
-  have hz := completedRiemannZeta₀_decay_in_strip (z := (t : ℂ)) ht h1 h2
-  simp only [Complex.ofReal_re] at hz
-  exact hz
-
-theorem xiShifted_lower_bound_in_rect :
-    ∀ z : ℂ, -1 < z.re → z.re < 11 → -0.1 < z.im → z.im < 0.6 →
-      (0.001 : ℝ) ≤ ‖xiShifted z‖ :=
-  sorry
-
-/-- Exponential tail lower bound: 0.001·exp(-z.re) ≤ ‖xiShifted z‖ for z.re > 10.
-
-    Proof: From `xiShifted_eq_completed`:
-      xiShifted z = 1/2 - (z²+1/4)/2 · Λ₀(1/2+Iz)
-    By reverse triangle inequality:
-      ‖xiShifted z‖ ≥ 1/2 - ‖(z²+1/4)/2‖ · ‖Λ₀(1/2+Iz)‖
-    From `completedRiemannZeta₀_decay_in_strip`: ‖Λ₀(1/2+Iz)‖ ≤ 1/z.re³.
-    Bounding ‖z²+1/4‖/2 ≤ (z.re²+1/2)/2 gives
-      ‖xiShifted z‖ ≥ 1/2 - (z.re²+1/2)/(2·z.re³)
-    For z.re > 10 this is ≥ 1/2 - 100.5/2000 = 0.44975 ≫ 0.001·exp(-10). -/
-theorem xiShifted_tail_lower_bound :
-    ∀ z : ℂ, 10 < z.re → -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
-      (0.001 : ℝ) * Real.exp (-(1:ℝ) * z.re) ≤ ‖xiShifted z‖ := by
-  intro z hre hgt hlt _hne
-  have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
-  have hlt' : z.im < (1 / 2 : ℝ) := by linarith
-  rw [xiShifted_eq_completed z hgt' hlt']
-  have hdecay := completedRiemannZeta₀_decay_in_strip z hre hgt' hlt'
-  have hz10 : (10 : ℝ) < z.re := hre
-  have hzpos : 0 < z.re := by linarith
-  have himsq : z.im ^ 2 ≤ (1 / 4 : ℝ) := by
-    have := abs_lt.mpr ⟨hgt', hlt'⟩
-    nlinarith [sq_nonneg z.im]
-  have hzsq : ‖z‖ ^ 2 = z.re ^ 2 + z.im ^ 2 := by
-    rw [Complex.norm_def, Real.sq_sqrt (Complex.normSq_nonneg z)]; simp [Complex.normSq]; ring
-  have hz2norm : ‖z ^ 2‖ ≤ z.re ^ 2 + z.im ^ 2 := by
-    rw [show z ^ 2 = z * z from by ring, norm_mul, ← sq, hzsq]
-  have hnorm_sum : ‖(z ^ 2 + (1 / 4 : ℂ))‖ ≤ z.re ^ 2 + (1 / 2 : ℝ) := by
-    linarith [norm_add_le (z ^ 2) (1 / 4 : ℂ), show ‖(1 / 4 : ℂ)‖ = 1 / 4 from by simp]
-  have hcorr : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2 * completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ 1 / 4 := by
-    rw [norm_mul]
-    have h1 : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ ≤ (z.re ^ 2 + (1 / 2)) / 2 := by
-      rw [Complex.norm_div, Complex.norm_ofNat, div_le_div_iff₀ (by norm_num : (0:ℝ) < 2) (by norm_num : (0:ℝ) < 2)]
-      linarith
-    have hprod : (z.re ^ 2 + (1 / 2)) / 2 * (1 / z.re ^ 3) ≤ 1 / 4 := by
-      have : (z.re ^ 2 + (1 / 2)) / 2 * (1 / z.re ^ 3) = (z.re ^ 2 + 1 / 2) / (2 * z.re ^ 3) := by ring
-      rw [this, div_le_iff₀ (by positivity : (0:ℝ) < 2 * z.re ^ 3)]
-      nlinarith [mul_nonneg (sq_nonneg z.re) (sub_nonneg.mpr hz10.le)]
-    exact (mul_le_mul h1 hdecay (by positivity) (by positivity)).trans hprod
-  have hsmall : (0.001 : ℝ) * Real.exp (-(1:ℝ) * z.re) ≤ 1 / 4 := by
-    have h1 : Real.exp (-z.re) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
-    have h2 : Real.exp (-(1:ℝ) * z.re) = Real.exp (-z.re) := by congr 1; ring
-    rw [h2]
-    calc (0.001 : ℝ) * Real.exp (-z.re) ≤ (0.001 : ℝ) * 1 :=
-        mul_le_mul_of_nonneg_left h1 (by norm_num)
-      _ ≤ 1 / 4 := by norm_num
-  have hnorm_half : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by simp
-  have hrev : ‖(1 / 2 : ℂ) - (z ^ 2 + (1 / 4 : ℂ)) / 2 * completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≥
-      ‖(1 / 2 : ℂ)‖ - ‖(z ^ 2 + (1 / 4 : ℂ)) / 2 * completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ :=
-    norm_sub_norm_le _ _
-  have hfinal : (0.001 : ℝ) * Real.exp (-(1:ℝ) * z.re) ≤ 1 / 4 := hsmall
-  linarith [hnorm_half, hcorr, hrev]
-
-noncomputable def concreteFirstQuadrantCertificate :
-    RHFirstQuadrantDecomposedCertificate (10 : ℝ) where
-  sym := classicalSymmetryPackage
-  quadrant :=
-    { rects :=
-        [ { x0 := -1, x1 := 11, y0 := (-0.1 : ℝ), y1 := (0.6 : ℝ),
-            x_lt := by norm_num, y_lt := by norm_num,
-            ε := (0.001 : ℝ), ε_pos := by norm_num,
-            lower_bound := by
-              intro z hx0 hx1 hy0 hy1
-              exact xiShifted_lower_bound_in_rect z hx0 hx1 hy0 hy1 } ]
-      covers := by
-        intro z hre0 hreX him0 him1
-        refine ⟨_, List.Mem.head _, ?_⟩
-        constructor
-        · linarith
-        constructor
-        · linarith
-        constructor
-        · linarith
-        · linarith }
-  tail :=
-    { c := (0.001 : ℝ)
-      c_pos := by norm_num
-      α := (1 : ℝ)
-      estimate := by
-        intro z hre hgt hlt hne
-        exact xiShifted_tail_lower_bound z hre hgt hlt hne }
-
-theorem rh_from_concrete_certificate : RiemannHypothesisProp :=
-  rh_from_decomposed_first_quadrant_certificate concreteFirstQuadrantCertificate
+-- The certificate skeleton is ready; the remaining work is analytic.
+-- See `rh_from_decomposed_first_quadrant_certificate` for how these
+-- two ingredients yield RiemannHypothesisProp.
