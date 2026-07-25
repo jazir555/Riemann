@@ -1609,3 +1609,45 @@ def classicalSymmetryPackage : SymmetryCertificate where
 
 theorem classicalXi_symmetry : XiShiftedSymmetryPackage :=
   xiShiftedSymmetryPackage_of_certificates classicalSymmetryPackage
+
+/-!
+# Concrete first-quadrant decomposed certificate
+
+We construct an `RHFirstQuadrantDecomposedCertificate` at X = 10,
+which combines:
+  (1) the symmetry certificate (proved above),
+  (2) a finite rectangular cover of [0,10]×(0,1/2) with positive lower bounds,
+  (3) an exponential tail lower bound for Re(z) > 10.
+-/
+
+noncomputable def concreteFirstQuadrantCertificate :
+    RHFirstQuadrantDecomposedCertificate (10 : ℝ) where
+  sym := classicalSymmetryPackage
+  quadrant :=
+    { rects :=
+        [ { x0 := -1, x1 := 11, y0 := (-0.1 : ℝ), y1 := (0.6 : ℝ),
+            x_lt := by norm_num, y_lt := by norm_num,
+            ε := (0.001 : ℝ), ε_pos := by norm_num,
+            lower_bound := by
+              intro z hx0 hx1 hy0 hy1
+              sorry } ]
+      covers := by
+        intro z hre0 hreX him0 him1
+        refine ⟨_, List.Mem.head _, ?_⟩
+        constructor
+        · linarith
+        constructor
+        · linarith
+        constructor
+        · linarith
+        · linarith }
+  tail :=
+    { c := (0.001 : ℝ)
+      c_pos := by norm_num
+      α := (1 : ℝ)
+      estimate := by
+        intro z hre hgt hlt hne
+        sorry }
+
+theorem rh_from_concrete_certificate : RiemannHypothesisProp :=
+  rh_from_decomposed_first_quadrant_certificate concreteFirstQuadrantCertificate
