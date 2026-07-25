@@ -1546,6 +1546,30 @@ theorem completedRiemannZeta₀_critical_line_remainder (t : ℝ) :
   rw [completedRiemannZeta₀_critical_line_decomposition]
   ring
 
+/-- The quadratic factor in the critical-line remainder is the negative real
+    number `t² + 1/4`. -/
+theorem critical_line_quadratic_factor (t : ℝ) :
+    ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) + I * t - 1) =
+      -(t ^ 2 + 1 / 4 : ℝ) := by
+  push_cast
+  ring_nf
+  simp only [Complex.I_sq]
+  ring
+
+/-- The polar-subtracted completion is a real scalar multiple of `classicalXi`
+    on the critical line. -/
+theorem completedRiemannZeta₀_critical_line_remainder_eq_xi (t : ℝ) :
+    completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) -
+      (1 / (t ^ 2 + 1 / 4) : ℝ) =
+        -(2 / (t ^ 2 + 1 / 4) : ℝ) *
+          classicalXi ((1 / 2 : ℂ) + I * t) := by
+  rw [completedRiemannZeta₀_critical_line_remainder,
+    critical_line_quadratic_factor]
+  have ht : (t ^ 2 + 1 / 4 : ℂ) ≠ 0 := by
+    exact_mod_cast (ne_of_gt (show (0 : ℝ) < t ^ 2 + 1 / 4 by positivity))
+  field_simp [ht]
+  ring
+
 /-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
     Both sides reduce to (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) via
     classicalXi_eq_completed and completedRiemannZeta₀_one_sub. -/
