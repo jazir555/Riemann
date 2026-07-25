@@ -1611,6 +1611,56 @@ theorem classicalXi_symmetry : XiShiftedSymmetryPackage :=
   xiShiftedSymmetryPackage_of_certificates classicalSymmetryPackage
 
 /-!
+# Algebraic identity: classicalXi in terms of completedRiemannZeta₀ (simplified)
+
+classicalXi s = (1/2)*s*(s-1)*completedRiemannZeta₀ s + 1/2
+
+Follows from the existing classicalXi_eq_completed by expanding and cancelling.
+-/
+
+theorem classicalXi_eq_completed_add_half
+    (s : ℂ) (hs : s ≠ 0) (hs1 : s ≠ 1)
+    (hΓ : Complex.Gamma (s / 2) ≠ 0) :
+    classicalXi s =
+      (1 / 2 : ℂ) * s * (s - 1) * completedRiemannZeta₀ s + (1 / 2 : ℂ) := by
+  have h := classicalXi_eq_completed s hs hΓ
+  rw [h]
+  have h1s : (1 : ℂ) - s ≠ 0 := fun h1 => hs1 (sub_eq_zero.mp h1 |>.symm)
+  field_simp [h1s]
+  ring
+
+theorem xiShifted_eq_completed (z : ℂ) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    xiShifted z = (1 / 2 : ℂ) -
+      (z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z) := by
+  simp only [xiShifted]
+  have hs : (1 / 2 : ℂ) + I * z ≠ 0 := by
+    intro h
+    have hre := congr_arg Complex.re h
+    simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im] at hre
+    norm_num at hre
+    linarith
+  have hs1 : (1 / 2 : ℂ) + I * z ≠ 1 := by
+    intro h
+    have hre := congr_arg Complex.re h
+    simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im] at hre
+    norm_num at hre
+    linarith
+  have hs_re : 0 < ((1 / 2 : ℂ) + I * z).re := by
+    rw [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+    norm_num
+    linarith
+  have hs_re1 : ((1 / 2 : ℂ) + I * z).re < 1 := by
+    rw [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+    norm_num
+    linarith
+  have hΓ := classical_gamma_nonzero_instrip _ hs_re hs_re1
+  rw [classicalXi_eq_completed_add_half _ hs hs1 hΓ]
+  ring_nf
+  simp only [Complex.I_sq]
+  ring
+
+/-!
 # Concrete first-quadrant decomposed certificate
 
 We construct an `RHFirstQuadrantDecomposedCertificate` at X = 10,
