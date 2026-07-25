@@ -1578,7 +1578,7 @@ end
 
 open Real
 
-/-- Classical zero‑free region for ζ (and thus for ξ). 
+/-- Classical zero‑free region for ζ (and thus for ξ).
   There exist constants C > 0, T₀ ≥ 0 such that for all s with Re(s) ≥ 1 - C / log(|Im(s)|+2) and |Im(s)| ≥ T₀,
   ζ(s) ≠ 0.  Since ξ(s) = prefactor(s) * ζ(s) and the prefactor is non‑zero in the critical strip,
   this gives a zero‑free region for ξ as well. -/
@@ -1660,11 +1660,28 @@ theorem completedRiemannZeta₀_eq_polar_plus_xi (s : ℂ) (hs0 : s ≠ 0)
 theorem critical_line_polar_correction (t : ℝ) :
     1 / ((1 / 2 : ℂ) + I * t) +
       1 / (1 - ((1 / 2 : ℂ) + I * t)) =
-        (1 / (t ^ 2 + 1 / 4) : ℝ) := by
-  have ht : (0 : ℝ) < t ^ 2 + 1 / 4 := by positivity
-  field_simp [ne_of_gt ht]
-  push_cast
-  ring
+        (1 / (t ^ 2 + 1 / 4 : ℝ) : ℂ) := by
+  have h1 : ((1 / 2 : ℂ) + I * t) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; norm_num at this
+  have h2 : (1 / 2 : ℂ) - I * t ≠ 0 := by
+    intro h; have := congrArg Complex.re h; norm_num at this
+  rw [show (1 : ℂ) - ((1 / 2 : ℂ) + I * t) = (1 / 2 : ℂ) - I * t from by ring]
+  have hmul : ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t) =
+      (t ^ 2 + 1 / 4 : ℂ) := by
+    rw [show ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t) =
+      ((1 / 2 : ℂ)) ^ 2 - (I * t) ^ 2 from by ring]
+    simp [Complex.I_sq]; push_cast; ring
+  have h3 : (t ^ 2 + 1 / 4 : ℂ) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; push_cast at h; nlinarith [sq_nonneg t]
+  calc 1 / ((1 / 2 : ℂ) + I * t) + 1 / ((1 / 2 : ℂ) - I * t)
+      = ((1 / 2 : ℂ) - I * t + ((1 / 2 : ℂ) + I * t)) /
+          (((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t)) := by
+        rw [add_div (1 : ℂ) _ _, div_mul_div_comm, mul_one, mul_one, add_comm]
+    _ = (1 : ℂ) / (t ^ 2 + 1 / 4 : ℂ) := by
+        rw [hmul]; congr 1; ring
+    _ = (1 / (t ^ 2 + 1 / 4 : ℝ) : ℂ) := by
+        simp [Complex.ofReal_inj, Complex.ofReal_div, Complex.ofReal_add,
+          Complex.ofReal_pow, Complex.ofReal_one, Complex.ofReal_ofNat]
 
 /-- Exact critical-line decomposition.  The final summand is the part controlled
     by the classical xi function; the first summand is the unavoidable polar term. -/
@@ -1976,11 +1993,10 @@ analytic ingredients remain:
    `xiShifted z ≠ 0` for all z with z.re ∈ [-1, 11] and z.im ∈ (-0.1, 0.6).
    On the critical line (z.im = 0), this follows from the known zero-free
    region of ζ: the first non-trivial zero has Im(s) ≈ 14.13 > 11.
-   Off the critical line, the Riemann Hypothesis (all non-trivial zeros
-   have Re(s) = 1/2) would guarantee nonvanishing for z.im ∈ (-1/2, 1/2) \ {0},
-   but this is precisely what we are trying to prove.  A proof must use
-   the functional equation (symmetry in z.im) together with a separate
-   argument for |z.im| ≥ 1/2.
+   Off the critical line, the Riemann Hypothesis would give nonvanishing
+   for z.im ∈ (-1/2, 1/2) \ {0}, but this is precisely what we are
+   trying to prove.  A proof must use the functional equation (symmetry
+   in z.im) together with a separate argument for |z.im| ≥ 1/2.
 
 2. **Exponential tail lower bound** (`xiShifted_tail_lower_bound`):
    For z.re > 10, some positive lower bound on ‖xiShifted z‖ that
@@ -1988,9 +2004,9 @@ analytic ingredients remain:
      xiShifted z = 1/2 − (z²+1/4)/2 · Λ₀(1/2+Iz),
    so it suffices to show Λ₀(1/2+Iz) → 0 fast enough as Re(z) → ∞.
    By `mellin_eq_fourier` + Riemann-Lebesgue (`completedRiemannZeta₀_vanishes_at_top_im`),
-   Λ₀(1/2+Iz) → 0, but the quantitative rate (needed to match the
-   exponential form) requires bounding the Fourier transform of the
-   kernel g(u) = exp(−u/4) · f_modif(exp(−u)).
+   Λ₀(1/2+Iz) = 𝓕(g)(Re(z)/(4π))/2 → 0, but the quantitative rate
+   (needed to match the exponential form) requires bounding the Fourier
+   transform of the kernel g(u) = exp(−u/4) · f_modif(exp(−u)).
 -/
 
 -- The certificate skeleton is ready; the remaining work is analytic.
