@@ -1492,6 +1492,60 @@ private theorem classicalXi_eq_completed (s : ℂ) (hs0 : s ≠ 0) (hGamma : Com
   unfold classicalXiPrefactor
   field_simp [hGamma]
 
+/-- `completedRiemannZeta₀` consists of the genuinely completed zeta term together
+    with its two polar corrections.  In particular, on vertical lines the corrections
+    have size of order `|Im s|⁻²`; one must subtract them before seeking cubic (or
+    faster) decay. -/
+theorem completedRiemannZeta₀_eq_polar_plus_xi (s : ℂ) (hs0 : s ≠ 0)
+    (hs1 : s ≠ 1) (hGamma : Complex.Gamma (s / 2) ≠ 0) :
+    completedRiemannZeta₀ s = 1 / s + 1 / (1 - s) +
+      2 * classicalXi s / (s * (s - 1)) := by
+  have h1s : 1 - s ≠ 0 := sub_ne_zero.mpr hs1.symm
+  rw [classicalXi_eq_completed s hs0 hGamma]
+  field_simp [hs0, hs1, h1s]
+  ring
+
+/-- On the critical line, the two polar corrections in `completedRiemannZeta₀`
+    combine to the real term `1 / (t² + 1/4)`. -/
+theorem critical_line_polar_correction (t : ℝ) :
+    1 / ((1 / 2 : ℂ) + I * t) +
+      1 / (1 - ((1 / 2 : ℂ) + I * t)) =
+        (1 / (t ^ 2 + 1 / 4) : ℝ) := by
+  have ht : (0 : ℝ) < t ^ 2 + 1 / 4 := by positivity
+  field_simp [ne_of_gt ht]
+  push_cast
+  ring
+
+/-- Exact critical-line decomposition.  The final summand is the part controlled
+    by the classical xi function; the first summand is the unavoidable polar term. -/
+theorem completedRiemannZeta₀_critical_line_decomposition (t : ℝ) :
+    completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) =
+      (1 / (t ^ 2 + 1 / 4) : ℝ) +
+        2 * classicalXi ((1 / 2 : ℂ) + I * t) /
+          (((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) + I * t - 1)) := by
+  have hs0 : (1 / 2 : ℂ) + I * t ≠ 0 := by
+    intro h
+    have := congrArg Complex.re h
+    norm_num at this
+  have hs1 : (1 / 2 : ℂ) + I * t ≠ 1 := by
+    intro h
+    have := congrArg Complex.re h
+    norm_num at this
+  have hGamma : Complex.Gamma (((1 / 2 : ℂ) + I * t) / 2) ≠ 0 :=
+    classical_gamma_nonzero_instrip _ (by norm_num) (by norm_num)
+  rw [completedRiemannZeta₀_eq_polar_plus_xi _ hs0 hs1 hGamma,
+    critical_line_polar_correction]
+
+/-- After subtracting the polar term, the critical-line remainder is exactly a
+    rational multiple of the classical xi function. -/
+theorem completedRiemannZeta₀_critical_line_remainder (t : ℝ) :
+    completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) -
+      (1 / (t ^ 2 + 1 / 4) : ℝ) =
+        2 * classicalXi ((1 / 2 : ℂ) + I * t) /
+          (((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) + I * t - 1)) := by
+  rw [completedRiemannZeta₀_critical_line_decomposition]
+  ring
+
 /-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
     Both sides reduce to (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) via
     classicalXi_eq_completed and completedRiemannZeta₀_one_sub. -/
