@@ -1666,22 +1666,11 @@ theorem critical_line_polar_correction (t : ℝ) :
   have h2 : (1 / 2 : ℂ) - I * t ≠ 0 := by
     intro h; have := congrArg Complex.re h; norm_num at this
   rw [show (1 : ℂ) - ((1 / 2 : ℂ) + I * t) = (1 / 2 : ℂ) - I * t from by ring]
-  have hmul : ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t) =
-      (t ^ 2 + 1 / 4 : ℂ) := by
-    rw [show ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t) =
-      ((1 / 2 : ℂ)) ^ 2 - (I * t) ^ 2 from by ring]
-    simp [Complex.I_sq]; push_cast; ring
-  have h3 : (t ^ 2 + 1 / 4 : ℂ) ≠ 0 := by
-    intro h; have := congrArg Complex.re h; push_cast at h; nlinarith [sq_nonneg t]
-  calc 1 / ((1 / 2 : ℂ) + I * t) + 1 / ((1 / 2 : ℂ) - I * t)
-      = ((1 / 2 : ℂ) - I * t + ((1 / 2 : ℂ) + I * t)) /
-          (((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t)) := by
-        rw [add_div (1 : ℂ) _ _, div_mul_div_comm, mul_one, mul_one, add_comm]
-    _ = (1 : ℂ) / (t ^ 2 + 1 / 4 : ℂ) := by
-        rw [hmul]; congr 1; ring
-    _ = (1 / (t ^ 2 + 1 / 4 : ℝ) : ℂ) := by
-        simp [Complex.ofReal_inj, Complex.ofReal_div, Complex.ofReal_add,
-          Complex.ofReal_pow, Complex.ofReal_one, Complex.ofReal_ofNat]
+  rw [one_div_add_one_div h1 h2]
+  have hprod : ((1 / 2 : ℂ) + I * t) * ((1 / 2 : ℂ) - I * t) = (t ^ 2 + 1 / 4 : ℂ) := by
+    ring_nf; simp only [Complex.I_sq]; ring_nf
+  have hsum : ((1 / 2 : ℂ) + I * t) + ((1 / 2 : ℂ) - I * t) = (1 : ℂ) := by ring
+  rw [hsum, hprod, show (1 : ℂ) / (t ^ 2 + 1 / 4 : ℂ) = (1 / (t ^ 2 + 1 / 4 : ℝ) : ℂ) from by simp]
 
 /-- Exact critical-line decomposition.  The final summand is the part controlled
     by the classical xi function; the first summand is the unavoidable polar term. -/
@@ -1702,6 +1691,7 @@ theorem completedRiemannZeta₀_critical_line_decomposition (t : ℝ) :
     classical_gamma_nonzero_instrip _ (by norm_num) (by norm_num)
   rw [completedRiemannZeta₀_eq_polar_plus_xi _ hs0 hs1 hGamma,
     critical_line_polar_correction]
+  norm_cast
 
 /-- After subtracting the polar term, the critical-line remainder is exactly a
     rational multiple of the classical xi function. -/
@@ -1733,9 +1723,10 @@ theorem completedRiemannZeta₀_critical_line_remainder_eq_xi (t : ℝ) :
   rw [completedRiemannZeta₀_critical_line_remainder,
     critical_line_quadratic_factor]
   have ht : (t ^ 2 + 1 / 4 : ℂ) ≠ 0 := by
-    exact_mod_cast (ne_of_gt (show (0 : ℝ) < t ^ 2 + 1 / 4 by positivity))
+    intro h; have := congrArg Complex.re h; norm_num at this; norm_cast at this
+    linarith [sq_nonneg t]
+  push_cast
   field_simp [ht]
-  ring
 
 /-- Norm form of the critical-line remainder identity. -/
 theorem norm_completedRiemannZeta₀_critical_line_remainder (t : ℝ) :
@@ -1745,9 +1736,7 @@ theorem norm_completedRiemannZeta₀_critical_line_remainder (t : ℝ) :
           ‖classicalXi ((1 / 2 : ℂ) + I * t)‖ := by
   rw [completedRiemannZeta₀_critical_line_remainder_eq_xi, norm_mul]
   have ht : 0 < t ^ 2 + 1 / 4 := by positivity
-  rw [norm_neg, Complex.norm_real, Real.norm_of_nonneg]
-  · ring
-  · positivity
+  rw [norm_neg, Complex.norm_of_nonneg (by positivity : 0 ≤ (2 / (t ^ 2 + 1 / 4) : ℝ))]
 
 /-- The classical xi function satisfies ξ(s) = ξ(1-s) on the critical strip.
     Both sides reduce to (1/2)*s*(s-1)*(Λ₀(s) - 1/s - 1/(1-s)) via
@@ -1924,7 +1913,7 @@ theorem xiShifted_eq_completed (z : ℂ) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.
 theorem xiShifted_continuousOn :
     ContinuousOn (fun z : ℂ => xiShifted z)
       {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} :=
-  have hagreement : EqOn (fun z : ℂ => xiShifted z)
+  have hagreement : Set.EqOn (fun z : ℂ => xiShifted z)
       (fun z : ℂ => (1 / 2 : ℂ) -
         (z ^ 2 + (1 / 4 : ℂ)) / 2 *
           completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z))
@@ -1935,7 +1924,8 @@ theorem xiShifted_continuousOn :
       (ContinuousOn.mul
         (ContinuousOn.div
           (ContinuousOn.add (continuousOn_pow 2) continuousOn_const)
-          continuousOn_const)
+          continuousOn_const
+          (fun z _ => by norm_num))
         (differentiable_completedZeta₀.continuous.continuousOn.comp
           (ContinuousOn.add continuousOn_const
             (ContinuousOn.mul continuousOn_const continuousOn_id))
@@ -1954,33 +1944,26 @@ theorem xiShifted_continuousOn :
     `isBigO_atTop_evenKernel_sub`). Hence the Mellin transform → 0. -/
 theorem completedRiemannZeta₀_vanishes_at_top_im :
     Filter.Tendsto (fun t : ℝ => completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t))
-      Filter.atTop (𝓝 (0 : ℂ)) := by
+      Filter.atTop (nhds (0 : ℂ)) := by
   let g : ℝ → ℂ := fun u =>
-    Real.exp (-(1 / 4 : ℝ) * u) • (hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
+    Real.exp (-(1 / 4 : ℝ) * u) • (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
   have hform : ∀ t : ℝ, completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) =
-      𝓕 g (t / (4 * Real.pi)) / 2 := by
+      FourierTransform.fourier g (t / (4 * Real.pi)) / 2 := by
     intro t
-    simp only [completedRiemannZeta₀, completedHurwitzZetaEven₀, WeakFEPair.Λ₀, g]
+    simp only [completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀, WeakFEPair.Λ₀, g]
     rw [mellin_eq_fourier]
-    congr 2
-    ext u
-    simp only [Complex.I_mul, Complex.ofReal_exp, Complex.ofReal_neg, Complex.ofReal_mul,
-      Complex.ofReal_div, Complex.ofReal_natCast, Complex.ofReal_ofNat]
-    congr 1
-    · push_cast
-      ring
-    · simp only [Complex.smul_re, Complex.smul_im]
-      push_cast
-      ring
-  have hfourier : Filter.Tendsto (𝓕 g) Filter.atTop (𝓝 (0 : ℂ)) := by
-    have hcocompact_atTop : Filter.cocompact ℝ ≤ Filter.atTop := by
-      rw [Filter.cocompact_eq_atBot_atTop]
-      exact Filter.inf_le_right
-    exact Filter.Tendsto.mono (Real.zero_at_infty_fourier g) hcocompact_atTop
+    unfold Complex.smul
+    push_cast
+    ring
+  have hfourier : Filter.Tendsto (FourierTransform.fourier g) Filter.atTop (nhds (0 : ℂ)) := by
+    have hcocompact_atTop : Filter.atTop ≤ Filter.cocompact ℝ := by
+      rw [cocompact_eq_atBot_atTop (α := ℝ)]
+      exact Filter.le_sup_right
+    exact Filter.Tendsto.mono_left (Real.zero_at_infty_fourier g) hcocompact_atTop
   have hfreq : Filter.Tendsto (fun t : ℝ => t / (4 * Real.pi)) Filter.atTop Filter.atTop :=
-    Filter.tendsto_atTop_div_const (by positivity)
+    Filter.Tendsto.atTop_div_const (by positivity : 0 < (4 : ℝ) * Real.pi) Filter.tendsto_id
   simp only [hform]
-  exact (hfourier.comp hfreq).div Filter.tendsto_const_nhds two_ne_zero
+  exact (hfourier.comp hfreq).div tendsto_const_nhds two_ne_zero |>.cast (by simp)
 
 /-!
 # Open analytic targets for the first-quadrant certificate
