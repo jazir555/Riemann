@@ -2163,11 +2163,13 @@ def distanceLowerBound_from_completed_upper_bound
   bound z hre hgt hlt hne := by
     have h :=
       xiShifted_lower_bound_of_completed_upper_bound
-        z hgt hlt
+        z (by linarith) (by linarith)
         (B.U z.re z.im)
         (B.U_nonneg z.re z.im (le_of_lt hre) hne)
-        (B.bound z hre hgt hlt hne)
-    simpa [Complex.re_add_im] using h
+        (B.bound z hre (by linarith) (by linarith) hne)
+    unfold lower at *
+    simp only [Complex.re_add_im] at *
+    exact h
 
 /-- The remaining RH proof obligation at cutoff X. -/
 structure RemainingRHProof (X : ℝ) where
@@ -2205,86 +2207,1979 @@ theorem rh_from_quadrant_and_completed_upper_bound
 
 The following is a planning skeleton. The `sorry`s are the open analytic work.
 Do not treat this as a proof of RH.
+
+The main version is the `v2` development below, which uses
+`CompletedZetaRectUpperBoundCertificate` and has margin positivity proved.
+The remaining sorrys are:
+
+1. `quadrantPlan_10_skeleton` rectangle nonvanishing (open analytics)
+2. `completedZetaUpperBoundTail_10_v2.bound` (quantitative Fourier decay)
 -/
 
-/-- Placeholder first-quadrant nonvanishing at X = 10.
 
-Remaining work:
+    /-!
+# Partial completion of the remaining proof skeleton
 
-Prove:
+This section completes the purely algebraic and bookkeeping parts of the
+remaining skeleton.
 
-    xiShifted z ≠ 0
+The two genuinely analytic `sorry`s that remain are:
 
-for
+1. `quadrantPlan_10_skeleton`:
+   nonvanishing of `xiShifted` on a rectangle covering
+   `[0,10] × (0,1/2)`.
 
-    0 ≤ Re z ≤ 10,
-    0 < Im z < 1/2.
-
-Possible decomposition:
-
-1. Cover [0,10] × (0,1/2) by finitely many rectangles.
-2. On each rectangle, prove either:
-   - a positive lower bound for ‖xiShifted z‖, or
-   - direct nonvanishing by argument-principle / interval arithmetic.
+2. `completedZetaUpperBoundTail_10_v2.bound`:
+   a quantitative upper bound for
+   `completedRiemannZeta₀ (1/2 + I*z)` in the right tail.
 -/
-def remainingQuadrant_10_skeleton :
-    RemainingQuadrantNonvanishing (10 : ℝ) where
-  no_zero := by
-    intro z hx0 hx1 hy0 hy1
-    -- OPEN ANALYTIC WORK
-    sorry
 
-/-- Placeholder completed-zeta upper-bound tail estimate at X = 10.
+/-!
+## Tail helper functions
 
-Remaining work:
-
-Prove a quantitative upper bound
-
-    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ U(Re z, Im z)
-
-for Re z > 10, -1/2 < Im z < 1/2, Im z ≠ 0,
-
-such that the margin
-
-    1/2 - (‖z^2 + 1/4‖ / 2) * U(Re z, Im z)
-
-is strictly positive for Im z ≠ 0.
-
-The qualitative decay
-
-    completedRiemannZeta₀(1/2 + i t) → 0
-
-is already formalized as:
-
-    completedRiemannZeta₀_vanishes_at_top_im
-
-The remaining task is a quantitative version, uniform enough in the imaginary
-coordinate to give a positive distance-sensitive lower bound.
+We choose a tail upper-bound shape `tailU` whose positivity margin can be
+proved algebraically. The actual proof that `completedRiemannZeta₀` is bounded
+by `tailU` remains open.
 -/
-def completedZetaUpperBoundTail_10_skeleton :
-    CompletedZetaUpperBoundTail (10 : ℝ) where
-  U := fun r _y => Real.exp (-(Real.pi / 8) * r)
-  U_nonneg := by
-    intro r y hr hy
+
+/-- The quadratic factor appearing in the shifted xi identity. -/
+noncomputable def tailD (r y : ℝ) : ℂ :=
+  ((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)
+
+/-- A candidate tail upper-bound shape.
+
+The definition is deliberately small enough that the positivity margin
+
+    1/2 - (‖tailD r y‖ / 2) * tailU r y
+
+is provably positive.
+-/
+noncomputable def tailU (r y : ℝ) : ℝ :=
+  if ‖tailD r y‖ = 0 then 0
+  else min (Real.exp (-r)) (1 / (4 * ‖tailD r y‖))
+
+/-- `tailU` is nonnegative. -/
+theorem tailU_nonneg (r y : ℝ) :
+    0 ≤ tailU r y := by
+  by_cases hD : ‖tailD r y‖ = 0
+  · simp [tailU, hD]
+  · simp [tailU, hD]
     positivity
+
+/-- The positivity margin associated to `tailU` is strictly positive. -/
+theorem tail_margin_pos (r y : ℝ) :
+    0 <
+      (1 / 2 : ℝ) -
+        (‖tailD r y‖ / 2) * tailU r y := by
+  by_cases hD : ‖tailD r y‖ = 0
+  · simp [tailU, hD]
+  · have hU : tailU r y ≤ 1 / (4 * ‖tailD r y‖) := by
+      simp only [tailU, hD, ite_false]
+      exact min_le_right _ _
+    have hprod :
+        (‖tailD r y‖ / 2) * tailU r y ≤ 1 / 8 := by
+      calc
+        _ ≤ (‖tailD r y‖ / 2) * (1 / (4 * ‖tailD r y‖)) := by
+          exact mul_le_mul_of_nonneg_left hU (by positivity)
+        _ = 1 / 8 := by
+          field_simp [hD]
+          ring
+    linarith
+
+/-- In the actual tail strip, `tailD r y` is nonzero. -/
+theorem tailD_ne_zero_of_strip
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    tailD r y ≠ 0 := by
+  intro h
+  have hre := congr_arg Complex.re h
+  have him := congr_arg Complex.im h
+  simp only [tailD, pow_two, Complex.add_re, Complex.mul_re, Complex.I_re,
+    Complex.I_im, Complex.ofReal_re, Complex.ofReal_im] at hre
+  simp only [tailD, pow_two, Complex.add_im, Complex.mul_im, Complex.I_re,
+    Complex.I_im, Complex.ofReal_re, Complex.ofReal_im] at him
+  ring_nf at hre him
+  have hy2 : y * y < 1 / 4 := by nlinarith
+  have hr2 : (100 : ℝ) ≤ r * r := by nlinarith
+  nlinarith
+
+/-- In the tail strip, `tailU r y` is strictly positive. -/
+theorem tailU_pos_of_strip
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    0 < tailU r y := by
+  have hD : tailD r y ≠ 0 := tailD_ne_zero_of_strip r y hr hgt hlt
+  have hnorm : ‖tailD r y‖ ≠ 0 := by
+    simpa [norm_eq_zero] using hD
+  simp only [tailU, hnorm, ite_false]
+  constructor
+  · positivity
+  · positivity
+
+/-!
+## Completed-zeta upper-bound tail skeleton, with margin completed
+-/
+
+/-- A completed-zeta upper-bound tail estimate at X = 10.
+
+The margin positivity is proved. The actual upper bound for
+`completedRiemannZeta₀` remains open.
+-/
+def completedZetaUpperBoundTail_10_v2 :
+    CompletedZetaUpperBoundTail (10 : ℝ) where
+  U := tailU
+  U_nonneg := by
+    intro r y _ _
+    exact tailU_nonneg r y
   bound := by
     intro z hre hgt hlt hne
     -- OPEN ANALYTIC WORK:
-    -- quantitative Fourier/Mellin decay of completedRiemannZeta₀
+    --
+    -- Prove:
+    --
+    --   ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖
+    --     ≤ tailU z.re z.im
+    --
+    -- for 10 < Re z, -1/2 < Im z < 1/2, Im z ≠ 0.
+    --
+    -- The qualitative decay `completedRiemannZeta₀_vanishes_at_top_im`
+    -- is already available, but a quantitative uniform version is needed.
     sorry
   margin_pos := by
-    intro r y hr hy
-    -- OPEN ANALYTIC WORK:
-    -- show that the exponential upper bound is small enough compared with 1/2
-    sorry
+    intro r y _ _
+    exact tail_margin_pos r y
 
-/-- Placeholder full RH skeleton at X = 10.
+/-!
+## First-quadrant rectangular plan skeleton
 
-This is not a proof of RH. It shows exactly where the remaining analytic work
-enters the formal argument.
+The covering bookkeeping is completed. The rectangle nonvanishing proof is
+still open.
 -/
-theorem rh_proof_skeleton :
+
+/-- A rectangular plan covering `[0,10] × (0,1/2)`.
+
+The rectangle is chosen slightly larger than necessary:
+
+    -1 < Re z < 11,
+     0 < Im z < 1/2.
+
+The covering proof is complete. The nonvanishing proof is open.
+-/
+def quadrantPlan_10_skeleton :
+    QuadrantZeroFreePlan (10 : ℝ) where
+  rects :=
+    [
+      {
+        x0 := -1
+        x1 := 11
+        y0 := 0
+        y1 := (1 : ℝ) / 2
+        x_lt := by norm_num
+        y_lt := by norm_num
+        no_zero := by
+          intro z hx0 hx1 hy0 hy1
+          -- OPEN ANALYTIC WORK:
+          --
+          -- Prove:
+          --
+          --   xiShifted z ≠ 0
+          --
+          -- for
+          --
+          --   -1 < Re z < 11,
+          --    0 < Im z < 1/2.
+          --
+          -- This is the finite-region nonvanishing obligation.
+          sorry
+      }
+    ]
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    refine ⟨_, List.mem_singleton_self _, ?_⟩
+    exact ⟨by linarith, by linarith, hy0, hy1⟩
+
+/-- First-quadrant nonvanishing obtained from the rectangular plan.
+
+This still depends on the open rectangle nonvanishing proof above.
+-/
+def remainingQuadrant_10_v2 :
+    RemainingQuadrantNonvanishing (10 : ℝ) :=
+  quadrant_nonvanishing_from_plan quadrantPlan_10_skeleton
+
+/-!
+## Final skeleton theorem
+
+This theorem assembles the remaining work.
+
+It currently depends on exactly two open analytic `sorry`s:
+
+1. rectangle nonvanishing in `quadrantPlan_10_skeleton`;
+2. quantitative tail bound in `completedZetaUpperBoundTail_10_v2`.
+-/
+theorem rh_proof_skeleton_v2 :
     RiemannHypothesisProp :=
   rh_from_quadrant_and_completed_upper_bound
-    remainingQuadrant_10_skeleton
-    completedZetaUpperBoundTail_10_skeleton
+    remainingQuadrant_10_v2
+    completedZetaUpperBoundTail_10_v2
+
+/-!
+# Further completion: right-half zero-free route
+
+The statement
+
+    XiNoRightHalfZerosFull
+
+says:
+
+    classicalXi s ≠ 0 whenever 1/2 < Re(s) < 1.
+
+This is equivalent to Step4Obligation, and therefore implies RH using the
+functional equation and Gamma-nonzero equivalence.
+-/
+
+/-- `XiNoRightHalfZerosFull` is equivalent to the implication form of
+    `XiNoRightHalfZeros classicalXi`. -/
+theorem xiNoRightHalfZeros_iff_full :
+    XiNoRightHalfZeros classicalXi ↔ XiNoRightHalfZerosFull := by
+  constructor
+  · intro H s hgt hlt hz
+    exact H s hz hgt hlt
+  · intro H s hz hgt hlt
+    exact H s hgt hlt hz
+
+/-- A full right-half zero-free statement implies RH. -/
+theorem rh_from_xiNoRightHalfZerosFull
+    (H : XiNoRightHalfZerosFull) :
+    RiemannHypothesisProp := by
+  have hStep : Step4Obligation :=
+    xiNoRightHalfZeros_iff_full.mpr H
+  have hCrit : XiCriticalLineZeros classicalXi :=
+    (step4_iff_xi_critical_line classicalXi_functional_equation).mp hStep
+  exact
+    (rh_iff_xi_critical_from_gamma classical_gamma_nonzero_instrip).mpr hCrit
+
+/-- A full right-half zero-free statement implies first-quadrant
+    nonvanishing for `xiShifted`. -/
+theorem quadrant_no_zero_from_xiNoRightHalfZerosFull
+    (H : XiNoRightHalfZerosFull)
+    (X : ℝ) :
+    RemainingQuadrantNonvanishing X where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    let s := (1 / 2 : ℂ) + I * z
+    have hs_zero : classicalXi s = 0 := by
+      simpa [xiShifted, s] using hz
+    have hs_re_pos : 0 < s.re := by
+      simp [s]
+      linarith
+    have hs_re_lt_one : s.re < 1 := by
+      simp [s]
+      linarith
+    let t := 1 - s
+    have ht_zero : classicalXi t = 0 := by
+      have hfe := classicalXi_functional_equation s hs_re_pos hs_re_lt_one
+      rw [hfe] at hs_zero
+      exact hs_zero
+    have ht_gt_half : (1 : ℝ) / 2 < t.re := by
+      simp [t, s]
+      linarith
+    have ht_lt_one : t.re < 1 := by
+      simp [t, s]
+      linarith
+    exact H t ht_gt_half ht_lt_one ht_zero
+
+/-- A packaged right-half decomposition proof.
+
+This uses the three-part decomposition:
+
+1. classical zero-free region;
+2. thin residual region;
+3. bounded imaginary cover.
+-/
+structure RightHalfDecompositionProof where
+  classical_region : ClassicalZeroFreeRegion
+  thin : ThinRegionNonVanishing classical_region.C classical_region.T₀
+  bounded : FiniteBoundedRectCover classical_region.T₀
+
+/-- A right-half decomposition proof implies RH. -/
+theorem rh_from_right_half_decomposition_proof
+    (P : RightHalfDecompositionProof) :
+    RiemannHypothesisProp :=
+  rh_from_xiNoRightHalfZerosFull
+    (xiNoRightHalfZerosFull_from_all_three
+      P.classical_region
+      P.thin
+      P.bounded)
+
+/-- A right-half decomposition proof also gives a first-quadrant
+    nonvanishing certificate at any cutoff X. -/
+def remainingQuadrant_from_right_half_decomposition_proof
+    (P : RightHalfDecompositionProof)
+    (X : ℝ) :
+    RemainingQuadrantNonvanishing X :=
+  quadrant_no_zero_from_xiNoRightHalfZerosFull
+    (xiNoRightHalfZerosFull_from_all_three
+      P.classical_region
+      P.thin
+      P.bounded)
+    X
+
+/-!
+## Trivial bounded cover for T₀ = 0
+
+If T₀ = 0, then the condition |Im(s)| < T₀ is impossible, so the bounded
+cover obligation is vacuous.
+-/
+
+/-- The bounded-imaginary cover is vacuous when `T₀ = 0`. -/
+def finiteBoundedRectCover_zero :
+    FiniteBoundedRectCover 0 where
+  covers := by
+    intro s _ _ him
+    have habs : 0 ≤ |s.im| := abs_nonneg s.im
+    linarith
+
+/-!
+## Alternative right-half skeleton
+
+This skeleton completes the bounded cover part by taking T₀ = 0. The remaining
+open obligations are:
+
+1. classical zero-free region;
+2. thin-region nonvanishing.
+
+Together these are still equivalent to the full right-half zero-free statement,
+so they remain RH-hard.
+-/
+
+/-- A right-half decomposition skeleton with the bounded part completed
+    vacuously. -/
+def rightHalfDecompositionProof_skeleton :
+    RightHalfDecompositionProof where
+  classical_region :=
+    {
+      C := 1
+      T₀ := 0
+      C_pos := by norm_num
+      zero_free := by
+        intro s hbound hslt him
+        -- OPEN ANALYTIC WORK:
+        --
+        -- Prove a classical zero-free region:
+        --
+        --   classicalXi s ≠ 0
+        --
+        -- when
+        --
+        --   1 - 1 / log(|Im(s)| + 2) ≤ Re(s) < 1.
+        sorry
+    }
+  thin := by
+    intro s hgt hlt him
+    -- OPEN ANALYTIC WORK:
+    --
+    -- Prove thin-region nonvanishing:
+    --
+    --   classicalXi s ≠ 0
+    --
+    -- when
+    --
+    --   1/2 < Re(s) < 1 - 1 / log(|Im(s)| + 2),
+    --   0 ≤ |Im(s)|.
+    sorry
+  bounded := finiteBoundedRectCover_zero
+
+/-- RH from the right-half decomposition skeleton.
+
+This theorem depends on the two open analytic `sorry`s inside
+`rightHalfDecompositionProof_skeleton`.
+-/
+theorem rh_proof_skeleton_via_right_half :
+    RiemannHypothesisProp :=
+  rh_from_right_half_decomposition_proof
+    rightHalfDecompositionProof_skeleton
+
+/-!
+# Completed-zeta rectangular upper-bound certificates
+
+The identity
+
+    xiShifted z =
+      1/2 - (z^2 + 1/4)/2 * completedRiemannZeta₀(1/2 + i z)
+
+shows that an upper bound
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ U
+
+gives a lower bound
+
+    ‖xiShifted z‖ ≥ 1/2 - (‖z^2 + 1/4‖ / 2) * U.
+
+If we also have a rectangle-bound
+
+    ‖z^2 + 1/4‖ / 2 ≤ D_half
+
+and a positivity margin
+
+    0 < 1/2 - D_half * U,
+
+then we obtain a positive lower bound for `xiShifted` on that rectangle.
+-/
+
+/-- A rectangular certificate giving an upper bound for
+    `completedRiemannZeta₀` and a resulting positive lower bound for
+    `xiShifted`. -/
+structure CompletedZetaRectUpperBoundCertificate where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  y_lower : -(1 / 2 : ℝ) ≤ y0
+  y_upper : y1 ≤ (1 / 2 : ℝ)
+  U : ℝ
+  U_nonneg : 0 ≤ U
+  D_half : ℝ
+  D_half_nonneg : 0 ≤ D_half
+  D_half_spec :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤ D_half
+  bound :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ U
+  margin_pos :
+    0 < (1 / 2 : ℝ) - D_half * U
+
+/-- Convert a completed-zeta rectangular upper-bound certificate into a
+    lower-bound rectangle for `xiShifted`. -/
+def xiLocalLowerBoundRect_from_completedZetaRectUpperBound
+    (C : CompletedZetaRectUpperBoundCertificate) :
+    XiLocalLowerBoundRect where
+  x0 := C.x0
+  x1 := C.x1
+  y0 := C.y0
+  y1 := C.y1
+  x_lt := C.x_lt
+  y_lt := C.y_lt
+  ε := (1 / 2 : ℝ) - C.D_half * C.U
+  ε_pos := C.margin_pos
+  lower_bound := by
+    intro z hx0 hx1 hy0 hy1
+    have hgt : -(1 / 2 : ℝ) < z.im := by
+      linarith [C.y_lower]
+    have hlt : z.im < (1 / 2 : ℝ) := by
+      linarith [C.y_upper]
+
+    have hbase :=
+      xiShifted_lower_bound_of_completed_upper_bound
+        z hgt hlt C.U C.U_nonneg
+        (C.bound z hx0 hx1 hy0 hy1)
+
+    have hD := C.D_half_spec z hx0 hx1 hy0 hy1
+
+    have hprod :
+        (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * C.U ≤
+        C.D_half * C.U :=
+      mul_le_mul_of_nonneg_right hD C.U_nonneg
+
+    have hmargin :
+        (1 / 2 : ℝ) - C.D_half * C.U ≤
+        (1 / 2 : ℝ) -
+          (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * C.U :=
+      sub_le_sub_left hprod (1 / 2)
+
+    linarith
+
+/-- A finite list of completed-zeta rectangular upper-bound certificates
+    covering the first quadrant. -/
+structure CompletedZetaRectangularPlan (X : ℝ) where
+  certs : List CompletedZetaRectUpperBoundCertificate
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ C ∈ certs,
+        C.x0 < z.re ∧
+        z.re < C.x1 ∧
+        C.y0 < z.im ∧
+        z.im < C.y1
+
+/-- Convert a completed-zeta rectangular plan into a zero-free rectangular
+    plan for `xiShifted`. -/
+def quadrantPlan_from_completedZetaPlan
+    {X : ℝ}
+    (P : CompletedZetaRectangularPlan X) :
+    QuadrantZeroFreePlan X where
+  rects :=
+    P.certs.map xiLocalLowerBoundRect_from_completedZetaRectUpperBound
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases P.covers z hx0 hx1 hy0 hy1 with
+      ⟨C, hC, hx0', hx1', hy0', hy1'⟩
+    refine ⟨_, List.mem_map.mpr ⟨C, hC, rfl⟩, ?_⟩
+    exact ⟨hx0', hx1', hy0', hy1'⟩
+
+/-- A completed-zeta rectangular plan gives first-quadrant
+    nonvanishing. -/
+def remainingQuadrant_from_completedZetaPlan
+    {X : ℝ}
+    (P : CompletedZetaRectangularPlan X) :
+    RemainingQuadrantNonvanishing X :=
+  quadrant_nonvanishing_from_plan
+    (quadrantPlan_from_completedZetaPlan P)
+
+/-!
+# Master completed-zeta RH skeleton
+
+This combines:
+
+1. a finite completed-zeta rectangular plan for the first quadrant;
+2. a completed-zeta upper-bound tail estimate.
+
+Together they imply RH by the already proved assembly theorems.
+-/
+
+/-- A master RH proof skeleton expressed entirely in terms of
+    completed-zeta upper-bound estimates. -/
+structure CompletedZetaRHProof (X : ℝ) where
+  quadrant_plan : CompletedZetaRectangularPlan X
+  tail_bound : CompletedZetaUpperBoundTail X
+
+/-- Assemble a completed-zeta RH proof skeleton into RH. -/
+theorem rh_from_completedZeta_rh_proof
+    {X : ℝ}
+    (P : CompletedZetaRHProof X) :
+    RiemannHypothesisProp :=
+  rh_from_quadrant_and_completed_upper_bound
+    (remainingQuadrant_from_completedZetaPlan P.quadrant_plan)
+    P.tail_bound
+
+/-!
+# Global completed-zeta upper-bound framework
+
+Instead of proving rectangle and tail bounds separately, we can first prove a
+global pointwise upper bound of the form
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ B(Re z, Im z)
+
+and then derive rectangle and tail certificates from it.
+-/
+
+/-- A global pointwise upper bound for `completedRiemannZeta₀` in the shifted
+    strip. -/
+structure CompletedZetaGlobalUpperBound where
+  B : ℝ → ℝ → ℝ
+  B_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ B x y
+  bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ B z.re z.im
+
+/-- The tautological global upper bound:
+
+    B(x,y) = ‖completedRiemannZeta₀(1/2 + i(x+iy))‖
+
+for y ≠ 0.
+
+This is not analytically useful by itself, but it is a canonical starting
+point. The real work is to compare this `B` with a simpler explicit function
+`U`.
+-/
+def completedZetaGlobalUpperBound_self :
+    CompletedZetaGlobalUpperBound where
+  B := fun x y =>
+    if y = 0 then 0
+    else ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * ((x : ℂ) + I * (y : ℂ)))‖
+  B_nonneg := by
+    intro x y hgt hlt hne
+    simp [hne]
+    positivity
+  bound := by
+    intro z hgt hlt hne
+    simp [hne, Complex.re_add_im]
+    exact le_rfl
+
+/-!
+## Rectangular certificates from a global bound
+-/
+
+/-- A rectangular certificate derived from a global upper bound `B`. -/
+structure CompletedZetaRectFromGlobalCertificate
+    (B : ℝ → ℝ → ℝ) where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  y_nonneg : 0 ≤ y0
+  y_upper : y1 ≤ (1 / 2 : ℝ)
+  U : ℝ
+  U_nonneg : 0 ≤ U
+  D_half : ℝ
+  D_half_nonneg : 0 ≤ D_half
+  D_half_spec :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤ D_half
+  B_le_U :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      B z.re z.im ≤ U
+  margin_pos :
+    0 < (1 / 2 : ℝ) - D_half * U
+
+/-- Convert a rectangle certificate relative to a global bound into the
+    standalone rectangle certificate. -/
+def completedZetaRectUpperBoundCertificate_from_global
+    (G : CompletedZetaGlobalUpperBound)
+    (C : CompletedZetaRectFromGlobalCertificate G.B) :
+    CompletedZetaRectUpperBoundCertificate where
+  x0 := C.x0
+  x1 := C.x1
+  y0 := C.y0
+  y1 := C.y1
+  x_lt := C.x_lt
+  y_lt := C.y_lt
+  y_lower := by linarith [C.y_nonneg]
+  y_upper := C.y_upper
+  U := C.U
+  U_nonneg := C.U_nonneg
+  D_half := C.D_half
+  D_half_nonneg := C.D_half_nonneg
+  D_half_spec := C.D_half_spec
+  bound := by
+    intro z hx0 hx1 hy0 hy1
+    have hy_pos : 0 < z.im := by linarith [C.y_nonneg]
+    have hgt : -(1 / 2 : ℝ) < z.im := by linarith
+    have hlt : z.im < (1 / 2 : ℝ) := by linarith [C.y_upper]
+    have hne : z.im ≠ 0 := by linarith
+    exact le_trans (G.bound z hgt hlt hne) (C.B_le_U z hx0 hx1 hy0 hy1)
+  margin_pos := C.margin_pos
+
+/-- A finite rectangular plan relative to a global bound. -/
+structure CompletedZetaRectangularPlanFromGlobal
+    (B : ℝ → ℝ → ℝ)
+    (X : ℝ) where
+  certs : List (CompletedZetaRectFromGlobalCertificate B)
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ C ∈ certs,
+        C.x0 < z.re ∧
+        z.re < C.x1 ∧
+        C.y0 < z.im ∧
+        z.im < C.y1
+
+/-- Convert a global-bound rectangular plan into the standalone rectangular
+    plan. -/
+def completedZetaRectangularPlan_from_global
+    {X : ℝ}
+    (G : CompletedZetaGlobalUpperBound)
+    (P : CompletedZetaRectangularPlanFromGlobal G.B X) :
+    CompletedZetaRectangularPlan X where
+  certs :=
+    P.certs.map (completedZetaRectUpperBoundCertificate_from_global G)
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases P.covers z hx0 hx1 hy0 hy1 with
+      ⟨C, hC, hx0', hx1', hy0', hy1'⟩
+    refine ⟨_, List.mem_map.mpr ⟨C, hC, rfl⟩, ?_⟩
+    exact ⟨hx0', hx1', hy0', hy1'⟩
+
+/-!
+## Tail certificates from a global bound
+-/
+
+/-- A tail certificate derived from a global upper bound `B`. -/
+structure CompletedZetaTailFromGlobalCertificate
+    (B : ℝ → ℝ → ℝ)
+    (X : ℝ) where
+  U : ℝ → ℝ → ℝ
+  U_nonneg :
+    ∀ r y : ℝ,
+      X ≤ r →
+      y ≠ 0 →
+      0 ≤ U r y
+  B_le_U :
+    ∀ z : ℂ,
+      X < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      B z.re z.im ≤ U z.re z.im
+  margin_pos :
+    ∀ r y : ℝ,
+      X ≤ r →
+      y ≠ 0 →
+      0 <
+        (1 / 2 : ℝ) -
+          (‖((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+            U r y
+
+/-- Convert a global-bound tail certificate into the standalone tail
+    certificate. -/
+def completedZetaUpperBoundTail_from_global
+    {X : ℝ}
+    (G : CompletedZetaGlobalUpperBound)
+    (T : CompletedZetaTailFromGlobalCertificate G.B X) :
+    CompletedZetaUpperBoundTail X where
+  U := T.U
+  U_nonneg := T.U_nonneg
+  bound := by
+    intro z hre hgt hlt hne
+    exact le_trans (G.bound z hgt hlt hne) (T.B_le_U z hre hgt hlt hne)
+  margin_pos := T.margin_pos
+
+/-!
+# Master global-bound RH skeleton
+-/
+
+/-- A master RH proof skeleton based on one global upper bound `B`, a finite
+    rectangular plan, and a tail estimate. -/
+structure CompletedZetaGlobalRHProof (X : ℝ) where
+  global : CompletedZetaGlobalUpperBound
+  quadrant_plan : CompletedZetaRectangularPlanFromGlobal global.B X
+  tail : CompletedZetaTailFromGlobalCertificate global.B X
+
+/-- Assemble a global-bound RH proof skeleton into RH. -/
+theorem rh_from_completedZeta_global_rh_proof
+    {X : ℝ}
+    (P : CompletedZetaGlobalRHProof X) :
+    RiemannHypothesisProp :=
+  rh_from_completedZeta_rh_proof
+    {
+      quadrant_plan :=
+        completedZetaRectangularPlan_from_global
+          P.global
+          P.quadrant_plan
+      tail_bound :=
+        completedZetaUpperBoundTail_from_global
+          P.global
+          P.tail
+    }
+/-!
+# Decomposition of completedRiemannZeta₀ into polar and xi parts
+
+We use the identity
+
+    completedRiemannZeta₀ s =
+      1/s + 1/(1-s) + 2 * classicalXi s / (s * (s - 1))
+
+in the critical strip.
+
+In shifted coordinates s = 1/2 + i z, this becomes a decomposition of
+completedRiemannZeta₀(1/2 + i z) into:
+
+1. an explicit polar term;
+2. a classical-xi term.
+
+A global upper bound can then be obtained by bounding those two terms
+separately.
+-/
+
+/-- The shifted critical-strip coordinate:
+
+    s = 1/2 + i z.
+-/
+noncomputable def shiftedS (z : ℂ) : ℂ :=
+  (1 / 2 : ℂ) + I * z
+
+theorem shiftedS_re (z : ℂ) :
+    (shiftedS z).re = (1 / 2 : ℝ) - z.im := by
+  simp [shiftedS]
+
+theorem shiftedS_ne_zero
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    shiftedS z ≠ 0 := by
+  intro h
+  have hre := congr_arg Complex.re h
+  simp [shiftedS] at hre
+  linarith
+
+theorem shiftedS_ne_one
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    shiftedS z ≠ 1 := by
+  intro h
+  have hre := congr_arg Complex.re h
+  simp [shiftedS] at hre
+  linarith
+
+theorem shiftedS_in_critical_strip
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    0 < (shiftedS z).re ∧ (shiftedS z).re < 1 := by
+  constructor
+  · simp [shiftedS]
+    linarith
+  · simp [shiftedS]
+    linarith
+
+theorem shiftedS_gamma_nonzero
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    Complex.Gamma (shiftedS z / 2) ≠ 0 := by
+  have hstrip := shiftedS_in_critical_strip z hgt hlt
+  exact classical_gamma_nonzero_instrip (shiftedS z) hstrip.1 hstrip.2
+
+/-- The polar/xi decomposition of `completedRiemannZeta₀` in shifted
+    coordinates. -/
+theorem completedZeta_decomp_polar_xi
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    completedRiemannZeta₀ (shiftedS z) =
+      1 / shiftedS z +
+      1 / (1 - shiftedS z) +
+      2 * classicalXi (shiftedS z) /
+        (shiftedS z * (shiftedS z - 1)) := by
+  exact
+    completedRiemannZeta₀_eq_polar_plus_xi
+      (shiftedS z)
+      (shiftedS_ne_zero z hgt hlt)
+      (shiftedS_ne_one z hgt hlt)
+      (shiftedS_gamma_nonzero z hgt hlt)
+
+/-!
+# Global upper bounds from sums
+-/
+
+/-- A global upper bound obtained by decomposing
+    `completedRiemannZeta₀(1/2 + i z)` as `f z + g z`. -/
+structure CompletedZetaSumBound where
+  f : ℂ → ℂ
+  g : ℂ → ℂ
+  B1 : ℝ → ℝ → ℝ
+  B2 : ℝ → ℝ → ℝ
+  B1_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ B1 x y
+  B2_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ B2 x y
+  decomp :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z) = f z + g z
+  bound1 :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖f z‖ ≤ B1 z.re z.im
+  bound2 :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖g z‖ ≤ B2 z.re z.im
+
+/-- Convert a sum decomposition with separate bounds into a global upper
+    bound. -/
+def completedZetaGlobalUpperBound_from_sum
+    (S : CompletedZetaSumBound) :
+    CompletedZetaGlobalUpperBound where
+  B := fun x y => S.B1 x y + S.B2 x y
+  B_nonneg := by
+    intro x y hgt hlt hne
+    positivity
+  bound := by
+    intro z hgt hlt hne
+    rw [S.decomp z hgt hlt hne]
+    exact
+      le_trans
+        (norm_add_le _ _)
+        (add_le_add
+          (S.bound1 z hgt hlt hne)
+          (S.bound2 z hgt hlt hne))
+
+/-!
+# Polar/xi bound skeleton
+-/
+
+/-- Separate bounds for the polar part and the classical-xi part of
+    `completedRiemannZeta₀`. -/
+structure CompletedZetaPolarXiBound where
+  Bpolar : ℝ → ℝ → ℝ
+  Bxi : ℝ → ℝ → ℝ
+  Bpolar_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ Bpolar x y
+  Bxi_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ Bxi x y
+  polar_bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖1 / shiftedS z + 1 / (1 - shiftedS z)‖ ≤
+        Bpolar z.re z.im
+  xi_bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖2 * classicalXi (shiftedS z) /
+          (shiftedS z * (shiftedS z - 1))‖ ≤
+        Bxi z.re z.im
+
+/-- Build a sum-bound from separate polar and xi bounds. -/
+def completedZetaSumBound_from_polar_xi
+    (E : CompletedZetaPolarXiBound) :
+    CompletedZetaSumBound where
+  f := fun z =>
+    1 / shiftedS z + 1 / (1 - shiftedS z)
+  g := fun z =>
+    2 * classicalXi (shiftedS z) /
+      (shiftedS z * (shiftedS z - 1))
+  B1 := E.Bpolar
+  B2 := E.Bxi
+  B1_nonneg := E.Bpolar_nonneg
+  B2_nonneg := E.Bxi_nonneg
+  decomp := by
+    intro z hgt hlt hne
+    exact completedZeta_decomp_polar_xi z hgt hlt hne
+  bound1 := E.polar_bound
+  bound2 := E.xi_bound
+
+/-- Build a global upper bound from separate polar and xi bounds. -/
+def completedZetaGlobalUpperBound_from_polar_xi
+    (E : CompletedZetaPolarXiBound) :
+    CompletedZetaGlobalUpperBound :=
+  completedZetaGlobalUpperBound_from_sum
+    (completedZetaSumBound_from_polar_xi E)
+
+/-!
+# Convenience: RH skeleton from polar/xi bounds
+
+Given separate polar/xi bounds, plus a rectangular plan and tail estimate for
+the resulting global bound, we obtain RH.
+-/
+
+/-- A master RH skeleton based on separate polar and xi bounds. -/
+structure CompletedZetaPolarXiRHProof (X : ℝ) where
+  estimate : CompletedZetaPolarXiBound
+  quadrant_plan :
+    CompletedZetaRectangularPlanFromGlobal
+      (completedZetaGlobalUpperBound_from_polar_xi estimate).B
+      X
+  tail :
+    CompletedZetaTailFromGlobalCertificate
+      (completedZetaGlobalUpperBound_from_polar_xi estimate).B
+      X
+
+/-- Assemble a polar/xi RH skeleton into RH. -/
+theorem rh_from_completedZeta_polar_xi_rh_proof
+    {X : ℝ}
+    (P : CompletedZetaPolarXiRHProof X) :
+    RiemannHypothesisProp :=
+  rh_from_completedZeta_global_rh_proof
+    {
+      global :=
+        completedZetaGlobalUpperBound_from_polar_xi P.estimate
+      quadrant_plan := P.quadrant_plan
+      tail := P.tail
+    }
+/-!
+# Explicit bound for the polar term
+
+The polar term is
+
+    1 / s + 1 / (1 - s)
+
+where s = shiftedS z = 1/2 + i z.
+
+Writing z = x + i y, we have:
+
+    s = 1/2 - y + i x,
+    1 - s = 1/2 + y - i x.
+
+Since -1/2 < y < 1/2, both real parts are positive:
+
+    Re(s) = 1/2 - y > 0,
+    Re(1 - s) = 1/2 + y > 0.
+
+Therefore:
+
+    |s| ≥ 1/2 - y,
+    |1 - s| ≥ 1/2 + y,
+
+and hence:
+
+    ‖1/s + 1/(1-s)‖ ≤ 1/(1/2 - y) + 1/(1/2 + y).
+-/
+
+/-- Explicit polar upper bound. -/
+noncomputable def polarBound (x y : ℝ) : ℝ :=
+  1 / (1 / 2 - y) + 1 / (1 / 2 + y)
+
+theorem polarBound_nonneg
+    (x y : ℝ)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    0 ≤ polarBound x y := by
+  have h1 : 0 < (1 / 2 : ℝ) - y := by linarith
+  have h2 : 0 < (1 / 2 : ℝ) + y := by linarith
+  positivity
+
+/-- Helper: the absolute value of the real part is bounded by the norm. -/
+private theorem abs_re_le_norm (w : ℂ) :
+    |w.re| ≤ ‖w‖ := by
+  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs w
+
+/-- Explicit bound for the polar term. -/
+theorem polar_bound_explicit
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    ‖1 / shiftedS z + 1 / (1 - shiftedS z)‖ ≤
+      polarBound z.re z.im := by
+  let hs := shiftedS z
+  change ‖1 / hs + 1 / (1 - hs)‖ ≤ polarBound z.re z.im
+  have hs0 : hs ≠ 0 := shiftedS_ne_zero z hgt hlt
+  have h1s : 1 - hs ≠ 0 := by
+    intro h; exact shiftedS_ne_one z hgt hlt (sub_eq_zero.mp h).symm
+  have hd1 : 0 < (1 / 2 : ℝ) - z.im := by linarith
+  have hd2 : 0 < (1 / 2 : ℝ) + z.im := by linarith
+  have hre_hs : hs.re = (1 / 2 : ℝ) - z.im := by simp [hs, shiftedS]
+  have hre_1hs : (1 - hs).re = (1 / 2 : ℝ) + z.im := by simp [hs, shiftedS]
+  have hd1le : (1 / 2 : ℝ) - z.im ≤ ‖hs‖ := by
+    have h := Complex.abs_re_le_abs hs
+    simp only [Complex.norm_eq_abs, hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
+    exact_mod_cast h
+  have hd2le : (1 / 2 : ℝ) + z.im ≤ ‖1 - hs‖ := by
+    have h := Complex.abs_re_le_abs (1 - hs)
+    simp only [Complex.norm_eq_abs, hre_1hs, Real.abs_of_nonneg (le_of_lt hd2)] at h
+    exact_mod_cast h
+  have h1 : ‖1 / hs‖ ≤ 1 / ((1 / 2 : ℝ) - z.im) := by
+    rw [norm_div, Complex.norm_one, one_div_le_one_div_iff (by positivity) (by positivity)]
+    exact hd1le
+  have h2 : ‖1 / (1 - hs)‖ ≤ 1 / ((1 / 2 : ℝ) + z.im) := by
+    rw [norm_div, Complex.norm_one, one_div_le_one_div_iff (by positivity) (by positivity)]
+    exact hd2le
+  have hsum : ‖1 / hs + 1 / (1 - hs)‖ ≤ 1 / ((1 / 2 : ℝ) - z.im) + 1 / ((1 / 2 : ℝ) + z.im) :=
+    le_trans (norm_add_le _ _) (add_le_add h1 h2)
+  exact hsum
+
+/-!
+# Isolate the remaining xi-term bound
+-/
+
+/-- A bound for the classical-xi term appearing in the polar/xi
+    decomposition. -/
+structure XiTermBound where
+  Bxi : ℝ → ℝ → ℝ
+  Bxi_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ Bxi x y
+  xi_bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖2 * classicalXi (shiftedS z) /
+          (shiftedS z * (shiftedS z - 1))‖ ≤
+        Bxi z.re z.im
+
+/-- Build a full polar/xi bound from an explicit polar bound and a supplied
+    xi-term bound. -/
+def completedZetaPolarXiBound_from_xi_bound
+    (T : XiTermBound) :
+    CompletedZetaPolarXiBound where
+  Bpolar := polarBound
+  Bxi := T.Bxi
+  Bpolar_nonneg := by
+    intro x y hgt hlt _
+    exact polarBound_nonneg x y hgt hlt
+  Bxi_nonneg := T.Bxi_nonneg
+  polar_bound := by
+    intro z hgt hlt hne
+    exact polar_bound_explicit z hgt hlt hne
+  xi_bound := T.xi_bound
+
+/-- The tautological xi-term bound.
+
+This is not analytically useful by itself, but it is a canonical placeholder.
+The real work is to replace `Bxi` with an explicit decaying or otherwise
+controllable function.
+-/
+def xiTermBound_self : XiTermBound where
+  Bxi := fun x y =>
+    if y = 0 then 0
+    else
+      ‖2 * classicalXi (shiftedS ((x : ℂ) + I * (y : ℂ))) /
+          (shiftedS ((x : ℂ) + I * (y : ℂ)) *
+            (shiftedS ((x : ℂ) + I * (y : ℂ)) - 1))‖
+  Bxi_nonneg := by
+    intro x y hgt hlt hne
+    simp [hne]
+    positivity
+  xi_bound := by
+    intro z hgt hlt hne
+    simp [hne, Complex.re_add_im]
+    exact le_rfl
+
+/-- A canonical polar/xi bound using the explicit polar bound and the
+    tautological xi bound. -/
+def completedZetaPolarXiBound_self :
+    CompletedZetaPolarXiBound :=
+  completedZetaPolarXiBound_from_xi_bound xiTermBound_self
+
+/-!
+# A fully proved geometric subproblem: bounding ‖z^2 + 1/4‖ on rectangles
+
+For a rectangle
+
+    x0 < Re z < x1,
+    y0 < Im z < y1,
+
+we prove a crude explicit bound
+
+    ‖z^2 + 1/4‖ / 2 ≤ rectangleDHalf x0 x1 y0 y1.
+
+This is not RH-hard; it is elementary complex geometry.
+-/
+
+/-- A crude explicit bound for `‖z^2 + 1/4‖ / 2` on a rectangle. -/
+noncomputable def rectangleDHalf
+    (x0 x1 y0 y1 : ℝ) : ℝ :=
+  (((|x0| + |x1| + 1) + (|y0| + |y1| + 1)) ^ 2 + 1 / 4) / 2
+
+/-- Elementary norm estimate:
+
+    ‖z^2 + 1/4‖ / 2 ≤ ((R + S)^2 + 1/4) / 2
+
+whenever `|Re z| ≤ R` and `|Im z| ≤ S`.
+-/
+theorem norm_z_sq_add_quarter_le
+    (z : ℂ)
+    (R S : ℝ)
+    (hR : 0 ≤ R)
+    (hS : 0 ≤ S)
+    (hre : |z.re| ≤ R)
+    (him : |z.im| ≤ S) :
+    ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
+      ((R + S) ^ 2 + 1 / 4) / 2 := by
+  have hnorm : ‖z‖ ≤ R + S := by
+    calc
+      ‖z‖ = ‖(z.re : ℂ) + I * (z.im : ℂ)‖ := by
+        rw [Complex.re_add_im]
+      _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im : ℂ)‖ :=
+        norm_add_le _ _
+      _ = |z.re| + |z.im| := by
+        simp [norm_mul, Complex.norm_I]
+      _ ≤ R + S :=
+        add_le_add hre him
+
+  have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 := by
+    exact pow_le_pow_left (by positivity) hnorm 2
+
+  calc
+    ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
+        (‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖) / 2 := by
+      exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
+    _ = (‖z‖ ^ 2 + 1 / 4) / 2 := by
+      simp [norm_pow, Complex.norm_ofReal,
+        abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)]
+    _ ≤ ((R + S) ^ 2 + 1 / 4) / 2 := by
+      exact div_le_div_of_nonneg_right
+        (add_le_add_right hsq (1 / 4))
+        (by norm_num)
+
+/-- The rectangle bound for `‖z^2 + 1/4‖ / 2`. -/
+theorem rectangle_D_half_spec
+    (x0 x1 y0 y1 : ℝ)
+    (x_lt : x0 < x1)
+    (y_lt : y0 < y1)
+    (z : ℂ)
+    (hx0 : x0 < z.re)
+    (hx1 : z.re < x1)
+    (hy0 : y0 < z.im)
+    (hy1 : z.im < y1) :
+    ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
+      rectangleDHalf x0 x1 y0 y1 := by
+  have hre : |z.re| ≤ |x0| + |x1| + 1 := by
+    apply abs_le.mpr
+    constructor
+    · have : -|x0| ≤ x0 := neg_abs_le_self x0
+      linarith [abs_nonneg x1]
+    · have : x1 ≤ |x1| := le_abs_self x1
+      linarith [abs_nonneg x0]
+
+  have him : |z.im| ≤ |y0| + |y1| + 1 := by
+    apply abs_le.mpr
+    constructor
+    · have : -|y0| ≤ y0 := neg_abs_le_self y0
+      linarith [abs_nonneg y1]
+    · have : y1 ≤ |y1| := le_abs_self y1
+      linarith [abs_nonneg y0]
+
+  exact
+    norm_z_sq_add_quarter_le
+      z
+      (|x0| + |x1| + 1)
+      (|y0| + |y1| + 1)
+      (by positivity)
+      (by positivity)
+      hre
+      him
+
+/-- A simplified rectangle certificate template.
+
+The geometric `D_half` bound is supplied automatically by
+`rectangle_D_half_spec`. The remaining analytic obligations are:
+
+1. `bound`: an upper bound for `completedRiemannZeta₀`;
+2. `margin_pos`: positivity of the resulting lower-bound margin.
+-/
+structure SimpleRectCertificateTemplate where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  y_nonneg : 0 ≤ y0
+  y_upper : y1 ≤ (1 / 2 : ℝ)
+  U : ℝ
+  U_nonneg : 0 ≤ U
+  bound :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ U
+  margin_pos :
+    0 < (1 / 2 : ℝ) - rectangleDHalf x0 x1 y0 y1 * U
+
+/-- Convert a simple rectangle template into a full completed-zeta rectangle
+    upper-bound certificate. -/
+def completedZetaRectUpperBoundCertificate_from_simple_template
+    (T : SimpleRectCertificateTemplate) :
+    CompletedZetaRectUpperBoundCertificate where
+  x0 := T.x0
+  x1 := T.x1
+  y0 := T.y0
+  y1 := T.y1
+  x_lt := T.x_lt
+  y_lt := T.y_lt
+  y_lower := by linarith [T.y_nonneg]
+  y_upper := T.y_upper
+  U := T.U
+  U_nonneg := T.U_nonneg
+  D_half := rectangleDHalf T.x0 T.x1 T.y0 T.y1
+  D_half_nonneg := by
+    dsimp [rectangleDHalf]
+    positivity
+  D_half_spec := by
+    intro z hx0 hx1 hy0 hy1
+    exact
+      rectangle_D_half_spec
+        T.x0 T.x1 T.y0 T.y1
+        T.x_lt T.y_lt
+        z hx0 hx1 hy0 hy1
+  bound := T.bound
+  margin_pos := T.margin_pos
+
+/-!
+# Canonical margin constructors
+
+These constructors remove the algebraic margin obligations.
+
+For rectangles, if one can prove
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ 1 / (8 * rectangleDHalf ...)
+
+then the margin
+
+    0 < 1/2 - rectangleDHalf * U
+
+is automatic.
+
+For tails, if one can prove
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ tailCanonicalU z.re z.im
+
+then the tail margin is automatic.
+-/
+
+/-- Positivity of the crude rectangle geometric bound. -/
+theorem rectangleDHalf_pos
+    (x0 x1 y0 y1 : ℝ) :
+    0 < rectangleDHalf x0 x1 y0 y1 := by
+  dsimp [rectangleDHalf]
+  positivity
+
+/-- A rectangle template with canonical margin.
+
+The only remaining obligation is the explicit upper bound.
+-/
+def simpleRectTemplate_canonical_margin
+    (x0 x1 y0 y1 : ℝ)
+    (x_lt : x0 < x1)
+    (y_lt : y0 < y1)
+    (y_nonneg : 0 ≤ y0)
+    (y_upper : y1 ≤ (1 / 2 : ℝ))
+    (bound :
+      ∀ z : ℂ,
+        x0 < z.re →
+        z.re < x1 →
+        y0 < z.im →
+        z.im < y1 →
+        ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+          1 / (8 * rectangleDHalf x0 x1 y0 y1)) :
+    SimpleRectCertificateTemplate where
+  x0 := x0
+  x1 := x1
+  y0 := y0
+  y1 := y1
+  x_lt := x_lt
+  y_lt := y_lt
+  y_nonneg := y_nonneg
+  y_upper := y_upper
+  U := 1 / (8 * rectangleDHalf x0 x1 y0 y1)
+  U_nonneg := by
+    have hD := rectangleDHalf_pos x0 x1 y0 y1
+    positivity
+  bound := bound
+  margin_pos := by
+    have hD := rectangleDHalf_pos x0 x1 y0 y1
+    have hprod :
+        rectangleDHalf x0 x1 y0 y1 *
+          (1 / (8 * rectangleDHalf x0 x1 y0 y1)) =
+        1 / 8 := by
+      field_simp
+    linarith
+
+/-!
+# Canonical tail margin
+-/
+
+/-- Canonical tail upper-bound shape.
+
+This is deliberately small enough that the margin is automatic.
+-/
+noncomputable def tailCanonicalU (r y : ℝ) : ℝ :=
+  if h : ‖tailD r y‖ = 0 then 0
+  else 1 / (8 * ‖tailD r y‖)
+
+/-- The canonical tail margin is automatically positive. -/
+theorem tailCanonicalU_margin
+    (r y : ℝ) :
+    0 <
+      (1 / 2 : ℝ) -
+        (‖tailD r y‖ / 2) * tailCanonicalU r y := by
+  by_cases h : ‖tailD r y‖ = 0
+  · simp [tailCanonicalU, h]
+    norm_num
+  · simp [tailCanonicalU, h]
+    field_simp
+    norm_num
+
+/-- The canonical tail U is nonnegative. -/
+theorem tailCanonicalU_nonneg
+    (r y : ℝ) :
+    0 ≤ tailCanonicalU r y := by
+  by_cases h : ‖tailD r y‖ = 0
+  · simp [tailCanonicalU, h]
+  · simp [tailCanonicalU, h]
+    positivity
+
+/-- A tail certificate with canonical margin.
+
+The only remaining obligation is the explicit upper bound.
+-/
+def completedZetaUpperBoundTail_canonical
+    (X : ℝ)
+    (bound :
+      ∀ z : ℂ,
+        X < z.re →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+          tailCanonicalU z.re z.im) :
+    CompletedZetaUpperBoundTail X where
+  U := tailCanonicalU
+  U_nonneg := by
+    intro r y _ _
+    exact tailCanonicalU_nonneg r y
+  bound := bound
+  margin_pos := by
+    intro r y _ _
+    exact tailCanonicalU_margin r y
+
+/-!
+# Explicit sufficient tail estimate
+
+We prove:
+
+1. For r ≥ 10 and |y| < 1/2,
+
+       r^2 ≤ ‖tailD r y‖.
+
+2. Also,
+
+       ‖tailD r y‖ ≤ (r + 1)^2.
+
+Therefore:
+
+       1 / (8 * (r + 1)^2) ≤ tailCanonicalU r y.
+
+So it is enough to prove:
+
+       ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ 1 / (8 * (Re z + 1)^2)
+
+in the tail.
+-/
+
+/-- Public helper: real part bounded by norm. -/
+theorem abs_re_le_norm_pub (w : ℂ) :
+    |w.re| ≤ ‖w‖ := by
+  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs w
+
+/-- Lower bound for the tail quadratic factor. -/
+theorem tailD_norm_ge_r_sq
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    (r : ℝ) ^ 2 ≤ ‖tailD r y‖ := by
+  have hre : (tailD r y).re = r ^ 2 - y ^ 2 + 1 / 4 := by
+    simp [
+      tailD,
+      pow_two,
+      Complex.add_re,
+      Complex.mul_re,
+      Complex.ofReal_re,
+      Complex.ofReal_im,
+      Complex.I_re,
+      Complex.I_im
+    ]
+    ring
+
+  have hy2 : y ^ 2 < 1 / 4 := by
+    nlinarith
+
+  have hreal : (r : ℝ) ^ 2 ≤ (tailD r y).re := by
+    rw [hre]
+    linarith
+
+  have hre_nonneg : 0 ≤ (tailD r y).re := by
+    rw [hre]
+    nlinarith [pow_nonneg (by linarith : 0 ≤ (r : ℝ)) 2]
+
+  have habs : |(tailD r y).re| ≤ ‖tailD r y‖ :=
+    abs_re_le_norm_pub (tailD r y)
+
+  rw [abs_of_nonneg hre_nonneg] at habs
+  linarith
+
+/-- Upper bound for the tail quadratic factor. -/
+theorem tailD_norm_le_r_plus_one_sq
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    ‖tailD r y‖ ≤ (r + 1) ^ 2 := by
+  let z : ℂ := (r : ℂ) + I * (y : ℂ)
+
+  have hznorm : ‖z‖ ≤ r + 1 / 2 := by
+    calc
+      ‖z‖ = ‖(r : ℂ) + I * (y : ℂ)‖ := rfl
+      _ ≤ ‖(r : ℂ)‖ + ‖I * (y : ℂ)‖ := norm_add_le _ _
+      _ = |r| + |y| := by
+        simp [norm_mul, Complex.norm_I]
+      _ ≤ r + 1 / 2 := by
+        have hrabs : |r| = r := abs_of_nonneg (by linarith)
+        have hyabs : |y| ≤ 1 / 2 := by
+          rw [abs_le]
+          constructor <;> linarith
+        linarith
+
+  calc
+    ‖tailD r y‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+      simp [tailD, z]
+    _ ≤ ‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖ := norm_add_le _ _
+    _ = ‖z‖ ^ 2 + 1 / 4 := by
+      simp [
+        norm_pow,
+        Complex.norm_ofReal,
+        abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
+      ]
+    _ ≤ (r + 1 / 2) ^ 2 + 1 / 4 := by
+      have hsqr : ‖z‖ ^ 2 ≤ (r + 1 / 2) ^ 2 := by
+        gcongr
+      linarith
+    _ ≤ (r + 1) ^ 2 := by
+      ring_nf
+      nlinarith
+
+/-- The canonical tail U is at least `1 / (8 * (r + 1)^2)` in the tail strip. -/
+theorem tailCanonicalU_ge_inv_r_plus_one_sq
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    1 / (8 * (r + 1) ^ 2) ≤ tailCanonicalU r y := by
+  have hDne : ‖tailD r y‖ ≠ 0 := by
+    have hge := tailD_norm_ge_r_sq r y hr hgt hlt
+    intro h
+    rw [h] at hge
+    have : (r : ℝ) ^ 2 ≤ 0 := hge
+    have : r = 0 := by
+      nlinarith
+    linarith
+
+  simp [tailCanonicalU, hDne]
+
+  have hle := tailD_norm_le_r_plus_one_sq r y hr hgt hlt
+
+  rw [div_le_div_iff (by positivity) (by positivity)]
+  nlinarith
+
+/-- A concrete polynomial decay bound sufficient for the tail certificate.
+
+If one proves
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ 1 / (8 * (Re z + 1)^2)
+
+for Re z > X ≥ 10 and |Im z| < 1/2, then the full tail certificate follows.
+-/
+theorem completedZetaUpperBoundTail_of_simple_polynomial_bound
+    (X : ℝ)
+    (hX : 10 ≤ X)
+    (bound :
+      ∀ z : ℂ,
+        X < z.re →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+          1 / (8 * (z.re + 1) ^ 2)) :
+    CompletedZetaUpperBoundTail X :=
+  completedZetaUpperBoundTail_canonical X (by
+    intro z hre hgt hlt hne
+    have hrez : 10 ≤ z.re := by linarith
+    have hsimple := bound z hre hgt hlt hne
+    exact le_trans hsimple
+      (tailCanonicalU_ge_inv_r_plus_one_sq z.re z.im hrez hgt hlt))
+
+/-!
+# Exact shifted identities
+
+Let
+
+    s = shiftedS z = 1/2 + i z,
+    D = z^2 + 1/4.
+
+Then:
+
+    s(1 - s) = D,
+    s(s - 1) = -D.
+
+Also:
+
+    1/s + 1/(1-s) = 1/D.
+
+Using the polar/xi decomposition, we get:
+
+    completedRiemannZeta₀(s) = 1/D - 2 * xiShifted(z) / D.
+
+Equivalently:
+
+    1/D - completedRiemannZeta₀(s) = 2 * xiShifted(z) / D.
+
+Thus xiShifted(z) ≠ 0 is exactly the statement that
+completedRiemannZeta₀(s) differs from 1/D.
+-/
+
+theorem shiftedS_mul_one_sub
+    (z : ℂ) :
+    shiftedS z * (1 - shiftedS z) =
+      z ^ 2 + (1 / 4 : ℂ) := by
+  simp [shiftedS]
+  ring
+
+theorem shiftedS_mul_sub_one_neg
+    (z : ℂ) :
+    shiftedS z * (shiftedS z - 1) =
+      -(z ^ 2 + (1 / 4 : ℂ)) := by
+  simp [shiftedS]
+  ring
+
+theorem polar_term_eq_inv_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    1 / shiftedS z + 1 / (1 - shiftedS z) =
+      1 / (z ^ 2 + (1 / 4 : ℂ)) := by
+  have hs0 : shiftedS z ≠ 0 := shiftedS_ne_zero z hgt hlt
+  have h1s : 1 - shiftedS z ≠ 0 := by
+    intro h
+    exact shiftedS_ne_one z hgt hlt (sub_eq_zero.mp h).symm
+
+  have hprod : shiftedS z * (1 - shiftedS z) = z ^ 2 + (1 / 4 : ℂ) :=
+    shiftedS_mul_one_sub z
+
+  calc
+    1 / shiftedS z + 1 / (1 - shiftedS z) =
+        (1 - shiftedS z + shiftedS z) /
+          (shiftedS z * (1 - shiftedS z)) := by
+      field_simp [hs0, h1s]
+    _ = 1 / (shiftedS z * (1 - shiftedS z)) := by
+      ring
+    _ = 1 / (z ^ 2 + (1 / 4 : ℂ)) := by
+      rw [hprod]
+
+theorem completedZeta_shifted_eq_inv_D_sub_two_classicalXi_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    completedRiemannZeta₀ (shiftedS z) =
+      1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      2 * classicalXi (shiftedS z) /
+        (z ^ 2 + (1 / 4 : ℂ)) := by
+  have hdecomp := completedZeta_decomp_polar_xi z hgt hlt hne
+  rw [hdecomp, polar_term_eq_inv_D z hgt hlt]
+
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+
+  have hss : shiftedS z * (shiftedS z - 1) =
+      -(z ^ 2 + (1 / 4 : ℂ)) :=
+    shiftedS_mul_sub_one_neg z
+
+  rw [hss]
+  field_simp [hD]
+  ring
+
+theorem completedZeta_shifted_eq_inv_D_sub_two_xiShifted_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    completedRiemannZeta₀ (shiftedS z) =
+      1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      2 * xiShifted z /
+        (z ^ 2 + (1 / 4 : ℂ)) := by
+  simpa [xiShifted] using
+    completedZeta_shifted_eq_inv_D_sub_two_classicalXi_div_D z hgt hlt hne
+
+theorem inv_D_sub_completedZeta_eq_two_xiShifted_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      completedRiemannZeta₀ (shiftedS z) =
+    2 * xiShifted z /
+      (z ^ 2 + (1 / 4 : ℂ)) := by
+  rw [completedZeta_shifted_eq_inv_D_sub_two_xiShifted_div_D z hgt hlt hne]
+  ring
+
+/-- The nonvanishing target is equivalent to saying that
+`completedRiemannZeta₀(shiftedS z)` is not equal to `1 / (z^2 + 1/4)`.
+-/
+theorem xiShifted_ne_zero_iff_completed_ne_inv_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    xiShifted z ≠ 0 ↔
+    completedRiemannZeta₀ (shiftedS z) ≠
+      1 / (z ^ 2 + (1 / 4 : ℂ)) := by
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+
+  constructor
+  · intro hz hbad
+    have h := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+    rw [hbad, sub_self] at h
+    have hzero : 2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := by
+      simpa using h
+    have hxi : xiShifted z = 0 := by
+      field_simp [hD] at hzero
+      simpa using hzero
+    exact hz hxi
+  · intro hne_completed hz
+    have h := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+    rw [hz] at h
+    have hzero :
+        1 / (z ^ 2 + (1 / 4 : ℂ)) -
+          completedRiemannZeta₀ (shiftedS z) = 0 := by
+      field_simp [hD] at h
+      simpa using h
+    have hbad :
+        completedRiemannZeta₀ (shiftedS z) =
+          1 / (z ^ 2 + (1 / 4 : ℂ)) := by
+      rw [sub_eq_zero] at hzero
+      exact hzero.symm
+    exact hne_completed hbad
+
+/-!
+# The remaining hard analytic problem, stated explicitly
+
+Define the statement:
+
+    For all off-real z in the shifted strip,
+
+      1 / (z^2 + 1/4) - completedRiemannZeta₀(shiftedS z) ≠ 0.
+
+This is equivalent to:
+
+    xiShifted z ≠ 0
+
+for all off-real z in the shifted strip, and therefore equivalent to RH.
+-/
+
+/-- The hard difference-nonzero statement. -/
+def HardDifferenceNonzero : Prop :=
+  ∀ z : ℂ,
+    -(1 / 2 : ℝ) < z.im →
+    z.im < (1 / 2 : ℝ) →
+    z.im ≠ 0 →
+    1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      completedRiemannZeta₀ (shiftedS z) ≠ 0
+
+/-- The hard difference-nonzero statement implies RH. -/
+theorem hardDifferenceNonzero_implies_RH :
+    HardDifferenceNonzero → RiemannHypothesisProp := by
+  intro H
+  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib]
+  intro z hgt hlt hne
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+  intro hz
+  have hdiff := H z hgt hlt hne
+  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne, hz] at hdiff
+  field_simp [hD] at hdiff
+  exact hdiff rfl
+
+/-- RH implies the hard difference-nonzero statement. -/
+theorem RH_implies_hardDifferenceNonzero :
+    RiemannHypothesisProp → HardDifferenceNonzero := by
+  intro H
+  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib] at H
+  intro z hgt hlt hne
+  have hnz := H z hgt hlt hne
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+  intro h
+  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne] at h
+  have hzero :
+      2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := h
+  rw [div_eq_zero_iff] at hzero
+  cases hzero with
+  | inl hmul =>
+    have hxi : xiShifted z = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left (by norm_num)
+    exact hnz hxi
+  | inr hD0 =>
+    exact hD hD0
+
+/-- The hard difference-nonzero statement is equivalent to RH. -/
+theorem hardDifferenceNonzero_iff_RH :
+    HardDifferenceNonzero ↔ RiemannHypothesisProp := by
+  constructor
+  · exact hardDifferenceNonzero_implies_RH
+  · exact RH_implies_hardDifferenceNonzero
+
+/-!
+# The remaining hard analytic problem, stated explicitly
+
+Define the statement:
+
+    For all off-real z in the shifted strip,
+
+      1 / (z^2 + 1/4) - completedRiemannZeta₀(shiftedS z) ≠ 0.
+
+This is equivalent to:
+
+    xiShifted z ≠ 0
+
+for all off-real z in the shifted strip, and therefore equivalent to RH.
+-/
+
+/-- The hard difference-nonzero statement. -/
+def HardDifferenceNonzero : Prop :=
+  ∀ z : ℂ,
+    -(1 / 2 : ℝ) < z.im →
+    z.im < (1 / 2 : ℝ) →
+    z.im ≠ 0 →
+    1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      completedRiemannZeta₀ (shiftedS z) ≠ 0
+
+/-- The hard difference-nonzero statement implies RH. -/
+theorem hardDifferenceNonzero_implies_RH :
+    HardDifferenceNonzero → RiemannHypothesisProp := by
+  intro H
+  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib]
+  intro z hgt hlt hne
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+  intro hz
+  have hdiff := H z hgt hlt hne
+  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne, hz] at hdiff
+  field_simp [hD] at hdiff
+  exact hdiff rfl
+
+/-- RH implies the hard difference-nonzero statement. -/
+theorem RH_implies_hardDifferenceNonzero :
+    RiemannHypothesisProp → HardDifferenceNonzero := by
+  intro H
+  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib] at H
+  intro z hgt hlt hne
+  have hnz := H z hgt hlt hne
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+  intro h
+  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne] at h
+  have hzero :
+      2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := h
+  rw [div_eq_zero_iff] at hzero
+  cases hzero with
+  | inl hmul =>
+    have hxi : xiShifted z = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left (by norm_num)
+    exact hnz hxi
+  | inr hD0 =>
+    exact hD hD0
+
+/-- The hard difference-nonzero statement is equivalent to RH. -/
+theorem hardDifferenceNonzero_iff_RH :
+    HardDifferenceNonzero ↔ RiemannHypothesisProp := by
+  constructor
+  · exact hardDifferenceNonzero_implies_RH
+  · exact RH_implies_hardDifferenceNonzero
+
+/-!
+# Partial attack: prove the difference nonzero on the imaginary axis
+
+For z = i y with -1/2 < y < 1/2 and y ≠ 0, we have
+
+    shiftedS z = 1/2 - y ∈ (0,1).
+
+Thus classicalXi(shiftedS z) is a nonzero prefactor times ζ(1/2 - y).
+So it suffices to know that ζ(t) ≠ 0 for real t ∈ (0,1).
+-/
+
+/-- Standard real nonvanishing of ζ in the open critical interval. -/
+def ZetaRealNonzeroInCritical : Prop :=
+  ∀ t : ℝ,
+    0 < t →
+    t < 1 →
+    zeta (t : ℂ) ≠ 0
+
+/-- `xiShifted` is nonzero on the imaginary axis, assuming real ζ-nonvanishing
+    in (0,1). -/
+theorem xiShifted_ne_zero_on_imaginary_axis
+    (hReal : ZetaRealNonzeroInCritical)
+    (y : ℝ)
+    (hyne : y ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    xiShifted (I * (y : ℂ)) ≠ 0 := by
+  let z : ℂ := I * (y : ℂ)
+
+  have hs : shiftedS z = ((1 / 2 - y : ℝ) : ℂ) := by
+    simp [shiftedS, z]
+    ring
+
+  have ht0 : 0 < (1 / 2 - y : ℝ) := by linarith
+  have ht1 : (1 / 2 - y : ℝ) < 1 := by linarith
+
+  have hpref :
+      classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) ≠ 0 :=
+    classical_prefactor_nonzero_instrip
+      classical_gamma_nonzero_instrip
+      _
+      (by simpa using ht0)
+      (by simpa using ht1)
+
+  intro hzero
+
+  have hmul :
+      classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) *
+        zeta ((1 / 2 - y : ℝ) : ℂ) = 0 := by
+    simpa [xiShifted, classicalXi, XiFromPrefactor, hs] using hzero
+
+  have hzeta : zeta ((1 / 2 - y : ℝ) : ℂ) = 0 :=
+    (mul_eq_zero.mp hmul).resolve_left hpref
+
+  exact hReal (1 / 2 - y) ht0 ht1 hzeta
+
+/-- Therefore the hard difference is nonzero on the imaginary axis. -/
+theorem hardDifferenceNonzero_on_imaginary_axis
+    (hReal : ZetaRealNonzeroInCritical)
+    (y : ℝ)
+    (hyne : y ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    1 / ((I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)) -
+      completedRiemannZeta₀ (shiftedS (I * (y : ℂ))) ≠ 0 := by
+  have hne : (I * (y : ℂ)).im ≠ 0 := by
+    simpa using hyne
+  have h := xiShifted_ne_zero_on_imaginary_axis hReal y hyne hgt hlt
+  exact
+    (xiShifted_ne_zero_iff_completed_ne_inv_D
+      (I * (y : ℂ)) hgt hlt hne).mp h
