@@ -7197,11 +7197,11 @@ def hardDifferenceLower_from_split
   m_pos x y hne := by
     by_cases h : |x| ≤ X
     · simpa [h] using B.m_pos x y h hne
-    · simpa [h] using T.m_pos x y (lt_of_not_le h) hne
+    · simpa [h] using T.m_pos x y (not_le.mp h) hne
   bound z hgt hlt hne := by
     by_cases h : |z.re| ≤ X
     · simpa [h] using B.bound z h hgt hlt hne
-    · simpa [h] using T.bound z (lt_of_not_le h) hgt hlt hne
+    · simpa [h] using T.bound z (not_le.mp h) hgt hlt hne
 
 /-- Bounded hard-difference lower bound + tail hard-difference lower bound
 imply RH.
@@ -7235,9 +7235,7 @@ theorem norm_hardDifference_eq_two_xi_div_D
     inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
   dsimp [hardDifference]
   rw [h]
-  simp [norm_mul, norm_div, Complex.norm_ofReal]
-  norm_num
-  ring
+  simp [norm_mul, norm_div, RCLike.norm_ofReal]
 
 /-- A tail lower bound for xiShifted. -/
 structure TailXiLower (X : ℝ) where
@@ -7284,13 +7282,13 @@ def tailHardDifference_from_xiLower
       2 * L.lower z.re z.im / (|z.re| + 1) ^ 2 ≤
           2 * ‖xiShifted z‖ / (|z.re| + 1) ^ 2 := by
         have hden : 0 < (|z.re| + 1) ^ 2 := by positivity
-        rw [div_le_div_iff hden hden]
+        rw [div_le_div_iff₀ hden hden]
         nlinarith [hxi]
       _ ≤
           2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
         have hdenA : 0 < (|z.re| + 1) ^ 2 := by positivity
         have hdenB : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ := hDpos
-        rw [div_le_div_iff hdenA hdenB]
+        rw [div_le_div_iff₀ hdenA hdenB]
         have hnonneg : 0 ≤ 2 * ‖xiShifted z‖ := by positivity
         nlinarith [hDle]
       _ = ‖hardDifference z‖ := by
@@ -7354,10 +7352,10 @@ theorem zeta_nonzero_from_afe_leaf
   have hafe := L.afe z hgt hlt hne
   have hmain_pos := L.main_pos z hgt hlt hne
   have hsmall := L.error_small z hgt hlt hne
-  have hsum : main z + error z = 0 := by
+  have hsum : L.main z + L.error z = 0 := by
     simpa [hafe] using hz
-  have hnorm_eq : ‖main z‖ = ‖error z‖ := by
-    have hmain_eq : main z = -error z := by
+  have hnorm_eq : ‖L.main z‖ = ‖L.error z‖ := by
+    have hmain_eq : L.main z = -L.error z := by
       linear_combination hsum
     rw [hmain_eq, norm_neg]
   linarith
