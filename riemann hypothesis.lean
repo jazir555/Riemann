@@ -6261,10 +6261,14 @@ def tailUnitCert_of_bound
         have h1 : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) ≥ 0 := by
           exact div_nonneg (norm_nonneg _) (by norm_num)
         have h2 := mul_le_mul_of_nonneg_left hbound h1
-        exact add_le_add_left h2 _
+        linarith
       _ = (5 / 8 : ℝ) := by
-        field_simp [add_comm (1/4 : ℂ) (z^2), hDpos.ne']
-        ring
+        have hne1 : (‖z ^ 2 + (1 / 4 : ℂ)‖ : ℝ) ≠ 0 := hDpos.ne'
+        have hne2 : (‖(1 / 4 : ℂ) + z ^ 2‖ : ℝ) ≠ 0 := by rwa [add_comm] at hne1
+        rw [show (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = (1 / 8 : ℝ) from by
+          rw [div_mul, show (1:ℝ) / 2 * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = 1 / (8 * ‖z ^ 2 + (1 / 4 : ℂ)‖) from by ring_nf]
+          rw [div_mul_cancel₀ _ hne1]]
+        norm_num
       _ < 1 := by
         norm_num
 /-!

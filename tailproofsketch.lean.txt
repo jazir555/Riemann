@@ -1,0 +1,621 @@
+/-!
+# Recursive decomposition of the explicit lower tail bound
+
+Target:
+
+  ∃ C A B, C > 0 and
+  C * |Im z| * exp(-A Re z) / (Re z + 1)^B ≤ ‖xiShifted z‖
+
+for
+
+  Re z > 10,
+  -1/2 < Im z < 1/2,
+  Im z ≠ 0.
+
+The decomposition is:
+
+xiShifted z = classicalXiPrefactor(shiftedS z) * ζ(shiftedS z)
+
+so it suffices to prove lower bounds for:
+
+1. classicalXiPrefactor(shiftedS z)
+2. ζ(shiftedS z)
+
+The prefactor is decomposed into:
+
+  1/2 * s * (s - 1) * π^(-s/2) * Γ(s/2)
+
+with s = shiftedS z.
+
+The zeta factor is decomposed using an approximate functional equation:
+
+  ζ(s) = main(s) + error(s)
+
+and then the main term is reduced to a Dirichlet-polynomial non-cancellation
+leaf. That leaf is the irreducible RH-hard core.
+-/
+
+noncomputable section
+open Complex
+
+namespace TailRecursive
+
+/-!
+## Target: explicit lower tail bound
+-/
+
+structure ExplicitTailLowerBound10 where
+  C : ℝ
+  A : ℝ
+  B : ℝ
+  C_pos : 0 < C
+  estimate :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      C * |z.im| * Real.exp (-A * z.re) / (z.re + 1) ^ B ≤
+        ‖xiShifted z‖
+
+/-- Convert the explicit lower bound into the distance-sensitive tail
+certificate used by the existing RH assembly theorem. -/
+def explicitTail_to_distanceLowerBound
+    (E : ExplicitTailLowerBound10) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) where
+  lower r y :=
+    E.C * |y| * Real.exp (-E.A * r) / (r + 1) ^ E.B
+  lower_pos r y hr hy := by
+    have hy' : 0 < |y| := abs_pos.mpr hy
+    positivity
+  bound z hre hgt hlt hne :=
+    E.estimate z hre hgt hlt hne
+
+/-!
+## Generic lower-bound objects for functions of z
+-/
+
+structure ZFunLowerBound (f : ℂ → ℂ) where
+  m : ℝ → ℝ → ℝ
+  m_nonneg :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ m r y
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖f z‖
+
+/-- Product of two lower bounds. -/
+def productBound
+    {f g : ℂ → ℂ}
+    (F : ZFunLowerBound f)
+    (G : ZFunLowerBound g) :
+    ZFunLowerBound (fun z => f z * g z) where
+  m r y := F.m r y * G.m r y
+  m_nonneg r y hr hgt hlt hne :=
+    mul_nonneg
+      (F.m_nonneg r y hr hgt hlt hne)
+      (G.m_nonneg r y hr hgt hlt hne)
+  bound z hre hgt hlt hne := by
+    have hf := F.bound z hre hgt hlt hne
+    have hg := G.bound z hre hgt hlt hne
+    calc
+      F.m z.re z.im * G.m z.re z.im ≤
+          ‖f z‖ * ‖g z‖ := by
+        exact
+          mul_le_mul
+            hf
+            hg
+            (G.m_nonneg z.re z.im (le_of_lt hre) hgt hlt hne)
+            (by positivity)
+      _ = ‖f z * g z‖ := by
+        rw [norm_mul]
+
+/-!
+## Prefactor decomposition
+
+classicalXiPrefactor(s) =
+  (1/2) * s * (s - 1) * π^(-s/2) * Γ(s/2)
+
+with s = shiftedS z.
+-/
+
+def halfFun : ℂ → ℂ := fun _ => (1 / 2 : ℂ)
+
+def halfBound : ZFunLowerBound halfFun where
+  m := fun _ _ => 1 / 2
+  m_nonneg := by
+    intro r y hr hgt hlt hne
+    norm_num
+  bound := by
+    intro z hre hgt hlt hne
+    simp [halfFun, Complex.norm_real]
+    norm_num
+
+def shiftedSFun : ℂ → ℂ := shiftedS
+
+theorem shiftedS_im_eq (z : ℂ) :
+    (shiftedS z).im = z.re := by
+  simp [shiftedS, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+
+theorem norm_shiftedS_ge_re (z : ℂ) :
+    |z.re| ≤ ‖shiftedS z‖ := by
+  have := Complex.abs_im_le_abs (shiftedS z)
+  simpa [Complex.norm_eq_abs, shiftedS_im_eq] using this
+
+def shiftedSBound : ZFunLowerBound shiftedSFun where
+  m := fun r _ => r
+  m_nonneg := by
+    intro r y hr hgt hlt hne
+    linarith
+  bound := by
+    intro z hre hgt hlt hne
+    have := norm_shiftedS_ge_re z
+    rwa [abs_of_pos (by linarith : 0 < z.re)] at this
+
+def shiftedSSubOneFun : ℂ → ℂ := fun z => shiftedS z - 1
+
+theorem shiftedS_sub_one_im_eq (z : ℂ) :
+    (shiftedS z - 1).im = z.re := by
+  simp [
+    shiftedS,
+    Complex.sub_im,
+    Complex.add_im,
+    Complex.mul_im,
+    Complex.I_re,
+    Complex.I_im
+  ]
+
+theorem norm_shiftedS_sub_one_ge_re (z : ℂ) :
+    |z.re| ≤ ‖shiftedS z - 1‖ := by
+  have := Complex.abs_im_le_abs (shiftedS z - 1)
+  simpa [Complex.norm_eq_abs, shiftedS_sub_one_im_eq] using this
+
+def shiftedSSubOneBound : ZFunLowerBound shiftedSSubOneFun where
+  m := fun r _ => r
+  m_nonneg := by
+    intro r y hr hgt hlt hne
+    linarith
+  bound := by
+    intro z hre hgt hlt hne
+    have := norm_shiftedS_sub_one_ge_re z
+    rwa [abs_of_pos (by linarith : 0 < z.re)] at this
+
+def piFactorFun : ℂ → ℂ :=
+  fun z => (Real.pi : ℂ) ^ (-(shiftedS z / 2))
+
+/-- Atomic leaf: lower bound for the pi-power factor. -/
+structure PiPowerLowerBoundLeaf where
+  m : ℝ → ℝ → ℝ
+  m_nonneg :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ m r y
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖piFactorFun z‖
+
+def piPowerBound
+    (L : PiPowerLowerBoundLeaf) :
+    ZFunLowerBound piFactorFun where
+  m := L.m
+  m_nonneg := L.m_nonneg
+  bound := L.bound
+
+def gammaFactorFun : ℂ → ℂ :=
+  fun z => Complex.Gamma (shiftedS z / 2)
+
+/-- Atomic leaf: lower bound for the Gamma factor. -/
+structure GammaLowerBoundLeaf where
+  m : ℝ → ℝ → ℝ
+  m_nonneg :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ m r y
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖gammaFactorFun z‖
+
+def gammaBound
+    (L : GammaLowerBoundLeaf) :
+    ZFunLowerBound gammaFactorFun where
+  m := L.m
+  m_nonneg := L.m_nonneg
+  bound := L.bound
+
+def prefactorZFun : ℂ → ℂ :=
+  fun z => classicalXiPrefactor (shiftedS z)
+
+theorem prefactorZFun_eq (z : ℂ) :
+    prefactorZFun z =
+      halfFun z *
+      shiftedSFun z *
+      shiftedSSubOneFun z *
+      piFactorFun z *
+      gammaFactorFun z := by
+  simp [
+    prefactorZFun,
+    halfFun,
+    shiftedSFun,
+    shiftedSSubOneFun,
+    piFactorFun,
+    gammaFactorFun,
+    classicalXiPrefactor
+  ]
+
+/-- Prefactor decomposition: pi-power leaf + Gamma leaf. -/
+structure PrefactorDecomposition10 where
+  pi : PiPowerLowerBoundLeaf
+  gamma : GammaLowerBoundLeaf
+
+/-- Assemble the prefactor lower bound from its leaves. -/
+def prefactorLower
+    (D : PrefactorDecomposition10) :
+    ZFunLowerBound prefactorZFun :=
+  let h1 := productBound halfBound shiftedSBound
+  let h2 := productBound h1 shiftedSSubOneBound
+  let h3 := productBound h2 (piPowerBound D.pi)
+  let h4 := productBound h3 (gammaBound D.gamma)
+  {
+    m := h4.m
+    m_nonneg := h4.m_nonneg
+    bound := by
+      intro z hre hgt hlt hne
+      simpa [prefactorZFun_eq z] using h4.bound z hre hgt hlt hne
+  }
+
+/-!
+## Zeta decomposition via approximate functional equation
+-/
+
+def zetaZFun : ℂ → ℂ := fun z => zeta (shiftedS z)
+
+/-- Decomposition:
+
+  ζ(shiftedS z) = main z + error z
+
+with a lower bound for `main` and an upper bound for `error`.
+-/
+structure ZetaAFEDecomposition10 where
+  main : ℂ → ℂ
+  error : ℂ → ℂ
+  m : ℝ → ℝ → ℝ
+  e : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < m r y
+  e_nonneg :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ e r y
+  afe :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zetaZFun z = main z + error z
+  main_lower :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖main z‖
+  error_upper :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖error z‖ ≤ e z.re z.im
+  gap :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      e r y < m r y
+
+/-- Reverse-triangle assembly:
+
+  ‖main + error‖ ≥ ‖main‖ - ‖error‖ ≥ m - e.
+-/
+def zetaLowerFromAFE
+    (D : ZetaAFEDecomposition10) :
+    ZFunLowerBound zetaZFun where
+  m r y := D.m r y - D.e r y
+  m_nonneg r y hr hgt hlt hne := by
+    linarith [D.gap r y hr hgt hlt hne]
+  bound z hre hgt hlt hne := by
+    have hafe := D.afe z hre hgt hlt hne
+    have hm := D.main_lower z hre hgt hlt hne
+    have he := D.error_upper z hre hgt hlt hne
+    have hrev :
+        ‖D.main z‖ - ‖D.error z‖ ≤
+          ‖D.main z + D.error z‖ := by
+      have := norm_sub_norm_le (D.main z) (-D.error z)
+      simpa [norm_neg, sub_eq_add_neg] using this
+    calc
+      D.m z.re z.im - D.e z.re z.im ≤
+          ‖D.main z‖ - ‖D.error z‖ := by
+        linarith
+      _ ≤ ‖D.main z + D.error z‖ := hrev
+      _ = ‖zetaZFun z‖ := by
+        rw [← hafe]
+
+/-!
+## Factorization theorem: prefactor lower bound + zeta lower bound
+-/
+
+theorem xiShifted_eq_prefactor_zeta (z : ℂ) :
+    xiShifted z =
+      classicalXiPrefactor (shiftedS z) * zeta (shiftedS z) := by
+  simp [xiShifted, classicalXi, XiFromPrefactor]
+
+structure PrefactorZetaFactorization10 where
+  P : ZFunLowerBound prefactorZFun
+  Z : ZFunLowerBound zetaZFun
+  C : ℝ
+  A : ℝ
+  B : ℝ
+  C_pos : 0 < C
+  majorizes :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      C * |y| * Real.exp (-A * r) / (r + 1) ^ B ≤
+        P.m r y * Z.m r y
+
+theorem explicitTail_from_factorization
+    (F : PrefactorZetaFactorization10) :
+    ExplicitTailLowerBound10 where
+  C := F.C
+  A := F.A
+  B := F.B
+  C_pos := F.C_pos
+  estimate := by
+    intro z hre hgt hlt hne
+    have hP := F.P.bound z hre hgt hlt hne
+    have hZ := F.Z.bound z hre hgt hlt hne
+    calc
+      F.C * |z.im| * Real.exp (-F.A * z.re) / (z.re + 1) ^ F.B ≤
+          F.P.m z.re z.im * F.Z.m z.re z.im := by
+        exact
+          F.majorizes
+            z.re z.im
+            (le_of_lt hre)
+            hgt hlt hne
+      _ ≤ ‖prefactorZFun z‖ * ‖zetaZFun z‖ := by
+        exact
+          mul_le_mul
+            hP
+            hZ
+            (F.Z.m_nonneg z.re z.im (le_of_lt hre) hgt hlt hne)
+            (by positivity)
+      _ = ‖xiShifted z‖ := by
+        have h := xiShifted_eq_prefactor_zeta z
+        simp only [prefactorZFun, zetaZFun] at h
+        rw [← h, norm_mul]
+
+/-!
+## Full recursive decomposition
+-/
+
+structure ExplicitTailDecomposition10 where
+  prefactor : PrefactorDecomposition10
+  zetaAfe : ZetaAFEDecomposition10
+  C : ℝ
+  A : ℝ
+  B : ℝ
+  C_pos : 0 < C
+  majorizes :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      C * |y| * Real.exp (-A * r) / (r + 1) ^ B ≤
+        (prefactorLower prefactor).m r y *
+        (zetaLowerFromAFE zetaAfe).m r y
+
+theorem explicitTail_from_decomposition
+    (D : ExplicitTailDecomposition10) :
+    ExplicitTailLowerBound10 :=
+  explicitTail_from_factorization
+    {
+      P := prefactorLower D.prefactor
+      Z := zetaLowerFromAFE D.zetaAfe
+      C := D.C
+      A := D.A
+      B := D.B
+      C_pos := D.C_pos
+      majorizes := D.majorizes
+    }
+
+/-- If we also have the bounded first-quadrant certificate, RH follows. -/
+theorem rh_from_quadrant_and_explicit_tail_decomposition
+    (Q : RemainingQuadrantNonvanishing (10 : ℝ))
+    (D : ExplicitTailDecomposition10) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := Q
+      tail :=
+        explicitTail_to_distanceLowerBound
+          (explicitTail_from_decomposition D)
+    }
+
+/-!
+## Explicit leaf forms
+
+These are convenient atomic leaf shapes.
+-/
+
+/-- Explicit pi-power leaf.
+
+A typical provable instance would be:
+
+  π^(-1/2) ≤ ‖π^(-s/2)‖
+
+because Re(s) ∈ (0,1).
+-/
+structure PiExplicitLeaf10 where
+  c : ℝ
+  c_pos : 0 < c
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      c ≤ ‖piFactorFun z‖
+
+def piLeaf_from_explicit
+    (L : PiExplicitLeaf10) :
+    PiPowerLowerBoundLeaf where
+  m := fun _ _ => L.c
+  m_nonneg := by
+    intro r y hr hgt hlt hne
+    exact le_of_lt L.c_pos
+  bound := L.bound
+
+/-- Explicit Gamma/Stirling leaf.
+
+A typical target is:
+
+  cγ * exp(-(π/4 + ε) r) / (r + 1)^Bγ
+    ≤ ‖Γ((1/2 - y + i r)/2)‖.
+
+This is standard but requires an explicit Stirling estimate with remainder.
+-/
+structure GammaExplicitStirlingLeaf10 where
+  c : ℝ
+  A : ℝ
+  B : ℝ
+  c_pos : 0 < c
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      c * Real.exp (-A * z.re) / (z.re + 1) ^ B ≤
+        ‖gammaFactorFun z‖
+
+def gammaLeaf_from_explicit
+    (L : GammaExplicitStirlingLeaf10) :
+    GammaLowerBoundLeaf where
+  m r y := L.c * Real.exp (-L.A * r) / (r + 1) ^ L.B
+  m_nonneg := by
+    intro r y hr hgt hlt hne
+    positivity
+  bound := L.bound
+
+/-- Atomic main-term non-cancellation leaf.
+
+This is the irreducible RH-hard core.
+
+It says that the main term in the approximate functional equation cannot be
+too small away from the critical line. A zero off the critical line would
+violate such a bound.
+-/
+structure MainNoCancellationLeaf10 where
+  main : ℂ → ℂ
+  c : ℝ
+  M : ℝ
+  c_pos : 0 < c
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      c * |z.im| / (z.re + 1) ^ M ≤ ‖main z‖
+
+/-- Build a zeta AFE decomposition from:
+
+1. an approximate functional equation identity;
+2. a main-term non-cancellation leaf;
+3. an error upper bound;
+4. a gap proving error < main lower bound.
+-/
+def zetaAFEDecomposition_from_noCancellation
+    {main error : ℂ → ℂ}
+    (afe :
+      ∀ z : ℂ,
+        10 < z.re →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        zetaZFun z = main z + error z)
+    (L : MainNoCancellationLeaf10 main)
+    (e : ℝ → ℝ → ℝ)
+    (e_nonneg :
+      ∀ r y : ℝ,
+        10 ≤ r →
+        -(1 / 2 : ℝ) < y →
+        y < (1 / 2 : ℝ) →
+        y ≠ 0 →
+        0 ≤ e r y)
+    (error_upper :
+      ∀ z : ℂ,
+        10 < z.re →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        ‖error z‖ ≤ e z.re z.im)
+    (gap :
+      ∀ r y : ℝ,
+        10 ≤ r →
+        -(1 / 2 : ℝ) < y →
+        y < (1 / 2 : ℝ) →
+        y ≠ 0 →
+        e r y < L.c * |y| / (r + 1) ^ L.M) :
+    ZetaAFEDecomposition10 where
+  main := main
+  error := error
+  m r y := L.c * |y| / (r + 1) ^ L.M
+  e := e
+  m_pos := by
+    intro r y hr hgt hlt hne
+    positivity
+  e_nonneg := e_nonneg
+  afe := afe
+  main_lower := L.bound
+  error_upper := error_upper
+  gap := gap
+
+end TailRecursive
+
+end
