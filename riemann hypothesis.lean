@@ -6268,8 +6268,10 @@ def tailUnitCert_of_bound
         have : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = (1 / 8 : ℝ) := by
           have hne : ‖z ^ 2 + (1 / 4 : ℂ)‖ ≠ 0 := hne1
           rw [show (4 : ℝ) * ‖z ^ 2 + (1 / 4 : ℂ)‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ * 4 from by ring]
-          field_simp [hne]
-          ring
+          rw [show ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 * (1 / (‖z ^ 2 + (1 / 4 : ℂ)‖ * 4)) =
+               (‖z ^ 2 + (1 / 4 : ℂ)‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖) * (1 / (2 * 4)) from by ring]
+          rw [div_self hne]
+          norm_num
         rw [this]
         norm_num
       _ < 1 := by
@@ -7079,3 +7081,411 @@ theorem rh_from_tractable_plan10
 end RHTractable
 
 end
+
+/-!
+# Recursive decomposition of the RH-hard leaves
+
+This file decomposes the hard analytic obligations into smaller leaves:
+
+1. A global hard-difference lower bound.
+2. Bounded/tail splitting of that lower bound.
+3. Tail xi-lower-bound conversion.
+4. AFE main-term nonvanishing leaf.
+5. Zero-based leaves: zeros real, simple zeros, zero separation,
+   derivative lower bounds, zero counting.
+-/
+
+namespace RecursiveHard
+
+/-!
+## 1. Hard-difference lower bound
+
+Recall the corrected hard difference:
+
+  hardDifference z =
+    1 / (z^2 + 1/4) - completedRiemannZeta₀(shiftedS z).
+
+The statement
+
+  hardDifference z ≠ 0
+
+for off-real z in the shifted strip is equivalent to RH.
+-/
+
+noncomputable def hardDifference (z : ℂ) : ℂ :=
+  1 / (z ^ 2 + (1 / 4 : ℂ)) -
+  completedRiemannZeta₀ (shiftedS z)
+
+/-- A quantitative global lower bound for the hard difference. -/
+structure HardDifferenceLowerLeaf where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖hardDifference z‖
+
+/-- A global hard-difference lower bound implies RH. -/
+theorem rh_from_hard_difference_lower
+    (L : HardDifferenceLowerLeaf) :
+    RiemannHypothesisProp := by
+  have H : HardDifferenceNonzero := by
+    intro z hgt hlt hne hz
+    have hpos := L.m_pos z.re z.im hne
+    have hbound := L.bound z hgt hlt hne
+    have hz' : hardDifference z = 0 := by
+      simpa [hardDifference] using hz
+    rw [hz', norm_zero] at hbound
+    linarith
+  exact hardDifferenceNonzero_implies_RH H
+
+/-!
+## 2. Bounded/tail decomposition of the hard-difference lower bound
+
+We split the x-axis into:
+
+  |x| ≤ X      bounded region
+  X < |x|      tail region
+
+The bounded region is finite and computationally tractable.
+The tail region is where the analytic difficulty concentrates.
+-/
+
+structure BoundedHardDifferenceLower (X : ℝ) where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      |x| ≤ X →
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      |z.re| ≤ X →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖hardDifference z‖
+
+structure TailHardDifferenceLower (X : ℝ) where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖hardDifference z‖
+
+/-- Combine bounded and tail lower bounds into a global lower bound. -/
+def hardDifferenceLower_from_split
+    {X : ℝ}
+    (B : BoundedHardDifferenceLower X)
+    (T : TailHardDifferenceLower X) :
+    HardDifferenceLowerLeaf where
+  m x y :=
+    if |x| ≤ X then B.m x y else T.m x y
+  m_pos x y hne := by
+    by_cases h : |x| ≤ X
+    · simpa [h] using B.m_pos x y h hne
+    · simpa [h] using T.m_pos x y (lt_of_not_le h) hne
+  bound z hgt hlt hne := by
+    by_cases h : |z.re| ≤ X
+    · simpa [h] using B.bound z h hgt hlt hne
+    · simpa [h] using T.bound z (lt_of_not_le h) hgt hlt hne
+
+/-- Bounded hard-difference lower bound + tail hard-difference lower bound
+imply RH.
+-/
+theorem rh_from_hard_difference_split
+    {X : ℝ}
+    (B : BoundedHardDifferenceLower X)
+    (T : TailHardDifferenceLower X) :
+    RiemannHypothesisProp :=
+  rh_from_hard_difference_lower
+    (hardDifferenceLower_from_split B T)
+
+/-!
+## 3. Tail hard-difference lower bound from a tail xi lower bound
+
+Using the identity
+
+  hardDifference z = 2 * xiShifted z / (z^2 + 1/4),
+
+a lower bound for xiShifted gives a lower bound for hardDifference.
+-/
+
+theorem norm_hardDifference_eq_two_xi_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    ‖hardDifference z‖ =
+      2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+  have h :=
+    inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+  dsimp [hardDifference]
+  rw [h]
+  simp [norm_mul, norm_div, Complex.norm_ofReal]
+  norm_num
+  ring
+
+/-- A tail lower bound for xiShifted. -/
+structure TailXiLower (X : ℝ) where
+  lower : ℝ → ℝ → ℝ
+  lower_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      y ≠ 0 →
+      0 < lower x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      lower z.re z.im ≤ ‖xiShifted z‖
+
+/-- Convert a tail xi lower bound into a tail hard-difference lower bound. -/
+def tailHardDifference_from_xiLower
+    {X : ℝ}
+    (L : TailXiLower X) :
+    TailHardDifferenceLower X where
+  m x y :=
+    2 * L.lower x y / (|x| + 1) ^ 2
+  m_pos x y hx hne := by
+    have hpos := L.lower_pos x y hx hne
+    positivity
+  bound z htail hgt hlt hne := by
+    have hDpos :
+        0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+      norm_pos_iff.mpr
+        (shifted_denominator_ne_zero_inside_strip z hgt hlt)
+    have hDle :
+        ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤ (|z.re| + 1) ^ 2 := by
+      have hy : |z.im| < (1 / 2 : ℝ) := by
+        rw [abs_lt]
+        constructor <;> linarith
+      have := tailD_norm_le_abs_r_plus_one_sq z.re z.im hy
+      simpa [tailD, Complex.re_add_im, mul_comm I] using this
+    have hxi := L.bound z htail hgt hlt hne
+    have hnorm :=
+      norm_hardDifference_eq_two_xi_div_D z hgt hlt hne
+    calc
+      2 * L.lower z.re z.im / (|z.re| + 1) ^ 2 ≤
+          2 * ‖xiShifted z‖ / (|z.re| + 1) ^ 2 := by
+        have hden : 0 < (|z.re| + 1) ^ 2 := by positivity
+        rw [div_le_div_iff hden hden]
+        nlinarith [hxi]
+      _ ≤
+          2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+        have hdenA : 0 < (|z.re| + 1) ^ 2 := by positivity
+        have hdenB : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ := hDpos
+        rw [div_le_div_iff hdenA hdenB]
+        have hnonneg : 0 ≤ 2 * ‖xiShifted z‖ := by positivity
+        nlinarith [hDle]
+      _ = ‖hardDifference z‖ := by
+        rw [← hnorm]
+
+/-- Bounded hard-difference lower bound + tail xi lower bound imply RH. -/
+theorem rh_from_bounded_hardDifference_and_tailXi
+    {X : ℝ}
+    (B : BoundedHardDifferenceLower X)
+    (L : TailXiLower X) :
+    RiemannHypothesisProp :=
+  rh_from_hard_difference_split
+    B
+    (tailHardDifference_from_xiLower L)
+
+/-!
+## 4. AFE main-term nonvanishing leaf
+
+Another recursive route is through an approximate functional equation:
+
+  ζ(shiftedS z) = main z + error z.
+
+If
+
+  ‖error z‖ < ‖main z‖,
+
+then ζ(shiftedS z) ≠ 0, hence xiShifted z ≠ 0, hence RH.
+-/
+
+structure AFENonzeroLeaf where
+  main : ℂ → ℂ
+  error : ℂ → ℂ
+  afe :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zeta (shiftedS z) = main z + error z
+  main_pos :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      0 < ‖main z‖
+  error_small :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖error z‖ < ‖main z‖
+
+/-- An AFE nonzero leaf gives ζ-nonvanishing in the shifted strip. -/
+theorem zeta_nonzero_from_afe_leaf
+    (L : AFENonzeroLeaf) :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zeta (shiftedS z) ≠ 0 := by
+  intro z hgt hlt hne hz
+  have hafe := L.afe z hgt hlt hne
+  have hmain_pos := L.main_pos z hgt hlt hne
+  have hsmall := L.error_small z hgt hlt hne
+  have hsum : main z + error z = 0 := by
+    simpa [hafe] using hz
+  have hnorm_eq : ‖main z‖ = ‖error z‖ := by
+    have hmain_eq : main z = -error z := by
+      linear_combination hsum
+    rw [hmain_eq, norm_neg]
+  linarith
+
+/-- An AFE nonzero leaf implies RH. -/
+theorem rh_from_afe_nonzero_leaf
+    (L : AFENonzeroLeaf) :
+    RiemannHypothesisProp := by
+  have H : XiOffRealPointwiseNonvanishing := by
+    intro z hgt hlt hne hxi
+    have hs :
+        0 < (shiftedS z).re ∧ (shiftedS z).re < 1 :=
+      shiftedS_in_critical_strip z hgt hlt
+    have hpref :
+        classicalXiPrefactor (shiftedS z) ≠ 0 :=
+      classical_prefactor_nonzero_instrip
+        classical_gamma_nonzero_instrip
+        (shiftedS z)
+        hs.1
+        hs.2
+    have hmul :
+        classicalXiPrefactor (shiftedS z) *
+          zeta (shiftedS z) = 0 := by
+      simpa [xiShifted, classicalXi, XiFromPrefactor] using hxi
+    have hzeta : zeta (shiftedS z) = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left hpref
+    exact zeta_nonzero_from_afe_leaf L z hgt hlt hne hzeta
+  exact rh_from_off_real_pointwise_nonvanishing H
+
+/-!
+## 5. Zero-based leaves
+
+These leaves correspond to the Hadamard-product / zero-distribution route.
+-/
+
+/-- Leaf: zeros of xiShifted in the shifted strip are real.
+
+This is equivalent to RH.
+-/
+abbrev ZerosRealLeaf := XiShiftedZerosReal
+
+/-- Zeros real implies RH. -/
+theorem rh_from_zeros_real_leaf
+    (H : ZerosRealLeaf) :
+    RiemannHypothesisProp := by
+  rw [rh_iff_xi_shifted_zeros_real_from_gamma
+    classical_gamma_nonzero_instrip]
+  exact H
+
+/-- Leaf: all real zeros are simple. -/
+structure SimpleZerosLeaf where
+  simple :
+    ∀ γ : ℝ,
+      xiShifted (γ : ℂ) = 0 →
+      deriv xiShifted (γ : ℂ) ≠ 0
+
+/-- Leaf: quantitative separation of real zeros. -/
+structure ZeroSeparationLeaf where
+  δ : ℝ → ℝ
+  δ_pos :
+    ∀ t : ℝ,
+      10 ≤ t →
+      0 < δ t
+  separation :
+    ∀ γ1 γ2 : ℝ,
+      xiShifted (γ1 : ℂ) = 0 →
+      xiShifted (γ2 : ℂ) = 0 →
+      10 ≤ |γ1| →
+      10 ≤ |γ2| →
+      γ1 ≠ γ2 →
+      δ (max |γ1| |γ2|) ≤ |γ1 - γ2|
+
+/-- Leaf: quantitative lower bounds for derivatives at real zeros. -/
+structure DerivativeLowerLeaf where
+  d : ℝ → ℝ
+  d_pos :
+    ∀ γ : ℝ,
+      10 ≤ |γ| →
+      0 < d γ
+  lower :
+    ∀ γ : ℝ,
+      xiShifted (γ : ℂ) = 0 →
+      10 ≤ |γ| →
+      d γ ≤ ‖deriv xiShifted (γ : ℂ)‖
+
+/-- Leaf: zero-counting control. -/
+structure ZeroCountingLeaf where
+  N : ℝ → ℝ
+  N_nonneg :
+    ∀ T : ℝ,
+      0 ≤ T →
+      0 ≤ N T
+  count_bound :
+    ∀ T : ℝ,
+      0 ≤ T →
+      ∀ s : Finset ℂ,
+        (∀ z ∈ s,
+          xiShifted z = 0 ∧
+          |z.re| ≤ T ∧
+          |z.im| ≤ T) →
+        (s.card : ℝ) ≤ N T
+
+/-- Leaf: no zeros on the line Re(s) = 1.
+
+This is a standard classical zero-free-region ingredient.
+-/
+structure ZeroFreeLineOneLeaf where
+  ne_zero :
+    ∀ t : ℝ,
+      classicalXi ((1 : ℂ) + I * (t : ℂ)) ≠ 0
+
+/-- A bundle of zero-based leaves.
+
+The important point is that `zeros_real` is already RH-equivalent.
+The other leaves are the natural quantitative refinements needed for
+Hadamard-product lower bounds.
+-/
+structure HadamardRouteLeaves where
+  zeros_real : ZerosRealLeaf
+  simple : SimpleZerosLeaf
+  separation : ZeroSeparationLeaf
+  derivative : DerivativeLowerLeaf
+  counting : ZeroCountingLeaf
+
+/-- If the zero-real leaf is proved, RH follows immediately. -/
+theorem rh_from_hadamard_route_leaves
+    (L : HadamardRouteLeaves) :
+    RiemannHypothesisProp :=
+  rh_from_zeros_real_leaf L.zeros_real
+
+end RecursiveHard
