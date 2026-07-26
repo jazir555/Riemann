@@ -3873,16 +3873,18 @@ theorem shiftedS_mul_one_sub
     (z : ℂ) :
     shiftedS z * (1 - shiftedS z) =
       z ^ 2 + (1 / 4 : ℂ) := by
-  simp [shiftedS]
-  rw [Complex.I_sq]
+  unfold shiftedS
+  ring_nf
+  simp only [Complex.I_sq, neg_one_mul]
   ring
 
 theorem shiftedS_mul_sub_one_neg
     (z : ℂ) :
     shiftedS z * (shiftedS z - 1) =
       -(z ^ 2 + (1 / 4 : ℂ)) := by
-  simp [shiftedS]
-  rw [Complex.I_sq]
+  unfold shiftedS
+  ring_nf
+  simp only [Complex.I_sq, neg_one_mul]
   ring
 
 theorem polar_term_eq_inv_D
@@ -4276,7 +4278,7 @@ theorem exists_zero_free_rect_around_imag_point
     _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im - y0)‖ :=
       norm_add_le _ _
     _ = |z.re| + |z.im - y0| := by
-      rw [norm_mul, Complex.norm_I, one_mul, ← Complex.ofReal_sub, Complex.norm_real, Complex.norm_real]
+      rw [norm_mul, Complex.norm_I, one_mul, ← Complex.ofReal_sub, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs]
     _ < δ / 2 + δ / 2 := by
       linarith
     _ = δ := by
@@ -4402,8 +4404,7 @@ theorem hardDifferenceNonzero_on_vertical_band_from_segment_cover
   have hgt : -(1 / 2 : ℝ) < z.im := by linarith
   have hlt : z.im < (1 / 2 : ℝ) := by linarith
 
-  exact
-    (xiShifted_ne_zero_iff_completed_ne_inv_D z hgt hlt hne).mp hnz
+  exact sub_ne_zero.mpr (Ne.symm ((xiShifted_ne_zero_iff_completed_ne_inv_D z hgt hlt hne).mp hnz))
 /-!
 # Compactness: finite zero-free cover of a compact imaginary segment
 
@@ -4431,7 +4432,8 @@ lemma exists_pos_delta_of_list
       exact h R (by simp [hR])
     obtain ⟨δ, hδpos, hδ⟩ := ih hrs
     refine ⟨min δ (min (-R.x0) R.x1), ?_, ?_⟩
-    · positivity
+    · simp only [lt_min_iff]
+      exact ⟨hδpos, by linarith, hR.2⟩
     · intro S hS
       simp at hS
       rcases hS with hS | hS
@@ -4445,7 +4447,7 @@ lemma exists_pos_delta_of_list
 
 /-- Build a finite imaginary-segment zero-free cover from a finite list of
     rectangles covering the y-interval. -/
-def finiteImaginarySegmentZeroFreeCover_of_list
+noncomputable def finiteImaginarySegmentZeroFreeCover_of_list
     {a b : ℝ}
     (rects : List XiLocalZeroFreeRect)
     (hrects : ∀ R ∈ rects, R.x0 < 0 ∧ 0 < R.x1)
@@ -4455,20 +4457,20 @@ def finiteImaginarySegmentZeroFreeCover_of_list
         y ≤ b →
         ∃ R ∈ rects,
           R.y0 < y ∧ y < R.y1) :
-    FiniteImaginarySegmentZeroFreeCover a b := by
-  obtain ⟨δ, hδpos, hδ⟩ := exists_pos_delta_of_list rects hrects
-  exact
-    {
-      rects := rects
-      δ := δ
-      δ_pos := hδpos
-      δ_spec := hδ
-      covers_y := covers_y
-    }
+    FiniteImaginarySegmentZeroFreeCover a b :=
+  let h := exists_pos_delta_of_list rects hrects
+  {
+    rects := rects
+    δ := Classical.choose h
+    δ_pos := (Classical.choose_spec h).1
+    δ_spec := (Classical.choose_spec h).2
+    covers_y := covers_y
+  }
 
+open Classical in
 /-- Existence of a finite imaginary-segment zero-free cover for every compact
     subinterval [a,b] ⊂ (0,1/2). -/
-classical theorem exists_finite_imaginary_segment_zero_free_cover
+theorem exists_finite_imaginary_segment_zero_free_cover
     (hReal : ZetaRealNonzeroInCritical)
     (a b : ℝ)
     (ha : 0 < a)
@@ -4718,13 +4720,15 @@ def upperBoundaryCertificate_from_negative_imag
     (b : ℝ)
     (hb : b < (1 / 2 : ℝ))
     (δ : ℝ)
-    (hδ : 0 < δ) :
+    (hδ : 0 < δ)
+    (hb_nonneg : 0 ≤ b) :
     UpperBoundaryZeroFreeCertificate b δ where
   b_lt := hb
   δ_pos := hδ
   zero_free := by
     intro z _ hzb hz1 hzero
-    have hneg := H.neg_im z hzb hz1
+    have h0im : 0 < z.im := by linarith
+    have hneg := H.neg_im z h0im hz1
     simpa [hzero] using hneg
 /-!
 # Rectangular and tail certificates for the negative-imaginary condition
@@ -5584,12 +5588,12 @@ def tailPointwise_from_rouche_certificate
     XiTailPointwiseNonvanishingForX X where
   right_nonvanishing := by
     intro z hright hgt hlt hne hz
-    have hcomp := C.comparison z (Or.inl hright) hgt hlt hne
+    have hcomp := C.comparison z (Or.inl hright) (by linarith) (by linarith) hne
     rw [hz, zero_sub, norm_neg] at hcomp
     exact lt_irrefl _ hcomp
   left_nonvanishing := by
     intro z hleft hgt hlt hne hz
-    have hcomp := C.comparison z (Or.inr hleft) hgt hlt hne
+    have hcomp := C.comparison z (Or.inr hleft) (by linarith) (by linarith) hne
     rw [hz, zero_sub, norm_neg] at hcomp
     exact lt_irrefl _ hcomp
 
@@ -5619,7 +5623,10 @@ def tailRoucheCertificate_from_unit_comparison
   g_ne_zero := by
     intro z _ _ _ _
     norm_num
-  comparison := C.comparison
+  comparison := by
+    intro z htail hgt hlt hne
+    have h := C.comparison z htail hgt hlt hne
+    simpa [norm_one] using h
 
 /-- A unit-comparison tail certificate gives pointwise tail
     nonvanishing. -/
@@ -5736,7 +5743,7 @@ structure TailCompletedZetaSmallBound (X : ℝ) where
 
 /-- A sufficiently small completed-zeta tail bound gives a Rouché tail
     certificate with comparison function g(z) = 1/2. -/
-def tailRoucheCertificate_from_completedZeta_small_bound
+noncomputable def tailRoucheCertificate_from_completedZeta_small_bound
     {X : ℝ}
     (B : TailCompletedZetaSmallBound X) :
     TailRoucheCertificate X where
@@ -5753,13 +5760,13 @@ def tailRoucheCertificate_from_completedZeta_small_bound
       ‖xiShifted z - (1 / 2 : ℂ)‖ =
           ‖((z ^ 2 + (1 / 4 : ℂ)) / 2) *
               completedRiemannZeta₀ (shiftedS z)‖ := by
-        rw [hxi]
-        ring_nf
-        simp [norm_neg]
+        rw [hxi, sub_sub_cancel_left, norm_neg]
+        simp only [shiftedS]
       _ =
           (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
             ‖completedRiemannZeta₀ (shiftedS z)‖ := by
-        simp [norm_mul, norm_div, Complex.norm_ofReal]
+        rw [norm_mul, norm_div]
+        simp
       _ ≤
           (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
             B.U z.re z.im := by
@@ -5768,8 +5775,11 @@ def tailRoucheCertificate_from_completedZeta_small_bound
             (B.bound z htail hgt hlt hne)
             (by positivity)
       _ < (1 / 2 : ℝ) := by
-        simpa [Complex.re_add_im] using
-          B.small z.re z.im htail hgt hlt hne
+        have hsmall := B.small z.re z.im htail hgt hlt hne
+        have hz : (↑z.re + I * ↑z.im : ℂ) = z := by
+          rw [mul_comm Complex.I, Complex.re_add_im]
+        rw [show z ^ 2 = (↑z.re + I * ↑z.im : ℂ) ^ 2 from congr_arg (· ^ 2) hz.symm]
+        exact hsmall
 
 /-- A sufficiently small completed-zeta tail bound gives pointwise tail
     nonvanishing. -/
@@ -6111,3 +6121,610 @@ theorem rh_from_simple_complete_rh_certificate_with_cubic_tail
       bounded := C.bounded
       tail := tailCompletedZetaSmallBound_from_cubic_bound C.tail
     }
+/-!
+# Concrete tail unit-comparison certificate from a completed-zeta bound
+-/
+
+lemma zsq_add_quarter_ne_zero
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    z ^ 2 + (1 / 4 : ℂ) ≠ 0 := by
+  have hfact :
+      z ^ 2 + (1 / 4 : ℂ) =
+        (z - I * (1 / 2 : ℂ)) * (z + I * (1 / 2 : ℂ)) := by
+    calc
+      z ^ 2 + (1 / 4 : ℂ) =
+          z ^ 2 - (I * (1 / 2 : ℂ)) ^ 2 := by
+        simp [Complex.I_sq]
+        ring
+      _ = (z - I * (1 / 2 : ℂ)) * (z + I * (1 / 2 : ℂ)) := by
+        ring
+
+  rw [hfact]
+  intro hzero
+
+  rcases mul_eq_zero.mp hzero with h | h
+  · have hz : z = I * (1 / 2 : ℂ) := by
+      linear_combination h
+    have : z.im = (1 / 2 : ℝ) := by
+      simpa [hz]
+    linarith
+  · have hz : z = -I * (1 / 2 : ℂ) := by
+      linear_combination h
+    have : z.im = -(1 / 2 : ℝ) := by
+      simpa [hz]
+    linarith
+
+lemma norm_zsq_add_quarter_pos'
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+  norm_pos_iff.mpr (zsq_add_quarter_ne_zero z hgt hlt)
+
+/-- Build a unit-comparison tail certificate from the explicit completed-zeta
+    bound
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ 1 / (4 * ‖z^2 + 1/4‖).
+-/
+def tailUnitCert_of_bound
+    (bound_completedZeta :
+      ∀ z : ℂ,
+        10 < |z.re| →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+          1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) :
+    TailUnitComparisonCertificate 10 where
+  comparison := by
+    intro z hxor hgt hlt hne
+
+    have hxabs : (10 : ℝ) < |z.re| := by
+      rcases hxor with h | h
+      · have : 0 ≤ z.re := by linarith
+        rw [abs_of_nonneg this]
+        exact h
+      · have : z.re ≤ 0 := by linarith
+        rw [abs_of_nonpos this]
+        linarith
+
+    have hbound := bound_completedZeta z hxabs hgt hlt hne
+    have hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+      norm_zsq_add_quarter_pos' z hgt hlt
+
+    have hxi_eq :
+        xiShifted z =
+          (1 / 2 : ℂ) -
+            ((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+              completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z) :=
+      xiShifted_eq_completed z hgt hlt
+
+    calc
+      ‖xiShifted z - 1‖ =
+          ‖(1 / 2 : ℂ) +
+              ((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
+        rw [hxi_eq]
+        have h :
+            (1 / 2 : ℂ) -
+                ((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+                  completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z) -
+                1 =
+              -((1 / 2 : ℂ) +
+                  ((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+                    completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)) := by
+          ring
+        rw [h, norm_neg]
+      _ ≤
+          ‖(1 / 2 : ℂ)‖ +
+            ‖((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ :=
+        norm_add_le _ _
+      _ =
+          (1 / 2 : ℝ) +
+            (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+              ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
+        simp [norm_mul, norm_div, Complex.norm_ofReal]
+        ring
+      _ ≤
+          (1 / 2 : ℝ) +
+            (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+              (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) := by
+        exact
+          add_le_add_left
+            (mul_le_mul_of_nonneg_left hbound (by positivity))
+            _
+      _ = (5 / 8 : ℝ) := by
+        field_simp [hDpos.ne']
+        ring
+      _ < 1 := by
+        norm_num
+/-!
+# Sanity check: the proposed bound would force xiShifted to be large
+
+If
+
+    ‖completedRiemannZeta₀(1/2 + i z)‖ ≤ 1 / (4 * ‖z^2 + 1/4‖),
+
+then
+
+    ‖xiShifted z‖ ≥ 3/8.
+
+This shows that the proposed bound is much stronger than mere nonvanishing.
+-/
+
+theorem proposed_bound_implies_xiShifted_uniform_lower_bound
+    (bound_completedZeta :
+      ∀ z : ℂ,
+        10 < |z.re| →
+        -(1 / 2 : ℝ) < z.im →
+        z.im < (1 / 2 : ℝ) →
+        z.im ≠ 0 →
+        ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤
+          1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) :
+    ∀ z : ℂ,
+      10 < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      (3 / 8 : ℝ) ≤ ‖xiShifted z‖ := by
+  intro z hx hgt hlt hne
+
+  have hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+    norm_zsq_add_quarter_pos' z hgt hlt
+
+  have hbound := bound_completedZeta z hx hgt hlt hne
+  have hxi := xiShifted_eq_completed z hgt hlt
+
+  let D : ℂ := z ^ 2 + (1 / 4 : ℂ)
+  let C : ℂ := completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)
+
+  have hAnorm :
+      ‖(D / 2) * C‖ =
+        (‖D‖ / 2) * ‖C‖ := by
+    simp [D, C, norm_mul, norm_div, Complex.norm_ofReal]
+
+  have hreverse :
+      (1 / 2 : ℝ) - (‖D‖ / 2) * ‖C‖ ≤
+        ‖(1 / 2 : ℂ) - (D / 2) * C‖ := by
+    have := norm_sub_norm_le (1 / 2 : ℂ) ((D / 2) * C)
+    simp [hAnorm] at this
+    exact this
+
+  calc
+    (3 / 8 : ℝ) =
+        (1 / 2 : ℝ) -
+          (‖D‖ / 2) * (1 / (4 * ‖D‖)) := by
+      field_simp [hDpos.ne']
+      ring
+    _ ≤
+        (1 / 2 : ℝ) -
+          (‖D‖ / 2) * ‖C‖ := by
+      have hprod :
+          (‖D‖ / 2) * ‖C‖ ≤
+            (‖D‖ / 2) * (1 / (4 * ‖D‖)) :=
+        mul_le_mul_of_nonneg_left hbound (by positivity)
+      linarith
+    _ ≤
+        ‖(1 / 2 : ℂ) - (D / 2) * C‖ :=
+      hreverse
+    _ = ‖xiShifted z‖ := by
+      simp [D, C, hxi]
+
+/-!
+# Best-effort RH proof scaffold
+
+This scaffold isolates the remaining hard analysis as named challenge
+structures, then uses the already-proved assembly machinery to obtain
+`RiemannHypothesisProp` conditionally.
+
+The two primary analytic challenges are:
+
+1. Bounded first-quadrant nonvanishing:
+   `xiShifted z ≠ 0` for `0 ≤ Re z ≤ 10` and `0 < Im z < 1/2`.
+
+2. Quantitative right-tail bound for `completedRiemannZeta₀`:
+   `‖completedRiemannZeta₀ (1/2 + I z)‖ ≤ tailU (Re z) (Im z)`
+   for `Re z > 10`, `|Im z| < 1/2`, `Im z ≠ 0`.
+
+The nonnegativity and margin positivity for `tailU` are already proved
+in the file, so the tail challenge is exactly the remaining quantitative
+Fourier/Mellin decay estimate.
+-/
+
+noncomputable section
+open Complex
+
+namespace AnalyticChallenge
+
+/-- Exact bounded first-quadrant analytic obligation at cutoff `X = 10`. -/
+structure FirstQuadrant10 where
+  no_zero :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ 10 →
+      0 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      xiShifted z ≠ 0
+
+/--
+Stronger rectangular form matching the existing skeleton:
+`-1 < Re z < 11`, `0 < Im z < 1/2`.
+
+This is a convenient sufficient form for the bounded obligation.
+-/
+structure BoundedRectangle10 where
+  no_zero :
+    ∀ z : ℂ,
+      -1 < z.re →
+      z.re < 11 →
+      0 < z.im →
+      z.im < (1 : ℝ) / 2 →
+      xiShifted z ≠ 0
+
+/-- The stronger rectangle challenge implies the exact first-quadrant one. -/
+def firstQuadrant_of_rectangle (R : BoundedRectangle10) : FirstQuadrant10 where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1
+    exact R.no_zero z (by linarith) (by linarith) hy0 hy1
+
+/--
+Quantitative tail obligation in the exact `tailU` shape used by the
+existing skeleton.
+
+The algebraic facts
+
+* `tailU_nonneg`
+* `tail_margin_pos`
+
+are already proved. Thus the only missing analytic content is the actual
+upper bound for `completedRiemannZeta₀`.
+-/
+structure CompletedZetaTailU10 where
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ tailU z.re z.im
+
+end AnalyticChallenge
+
+namespace RHProofScaffold
+
+open AnalyticChallenge
+
+/-- Convert the first-quadrant challenge into the existing
+`RemainingQuadrantNonvanishing` obligation. -/
+def remainingQuadrant (A : FirstQuadrant10) :
+    RemainingQuadrantNonvanishing (10 : ℝ) where
+  no_zero := A.no_zero
+
+/-- Convert the `tailU` completed-zeta challenge into the existing
+`CompletedZetaUpperBoundTail` certificate. -/
+def completedTail (B : CompletedZetaTailU10) :
+    CompletedZetaUpperBoundTail (10 : ℝ) where
+  U := tailU
+  U_nonneg := by
+    intro r y _ _
+    exact tailU_nonneg r y
+  bound := B.bound
+  margin_pos := by
+    intro r y _ _
+    simpa [tailD] using tail_margin_pos r y
+
+/-- A single package containing the two isolated analytic challenges. -/
+structure Challenges where
+  quadrant : FirstQuadrant10
+  tail : CompletedZetaTailU10
+
+/-- Main conditional theorem: solving the two isolated analytic challenges
+proves RH. -/
+theorem rh_from_first_quadrant_and_tailU
+    (A : FirstQuadrant10)
+    (B : CompletedZetaTailU10) :
+    RiemannHypothesisProp :=
+  rh_from_quadrant_and_completed_upper_bound
+    (remainingQuadrant A)
+    (completedTail B)
+
+/-- Package version. -/
+theorem rh_from_challenges (C : Challenges) : RiemannHypothesisProp :=
+  rh_from_first_quadrant_and_tailU C.quadrant C.tail
+
+/-- If one proves the stronger rectangle statement matching the existing
+skeleton, RH follows. -/
+theorem rh_from_rectangle_and_tailU
+    (R : BoundedRectangle10)
+    (B : CompletedZetaTailU10) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_and_tailU
+    (firstQuadrant_of_rectangle R)
+    B
+
+/-!
+## Alternative tail route: cubic decay
+
+A cubic decay bound for `completedRiemannZeta₀` is sufficient.
+
+The existing structure
+
+```lean
+CompletedZetaCubicTailBound (10 : ℝ)
+
+/-!
+# Fully proved analytic subchallenge: polar tail bound
+
+The polar term in the shifted decomposition is
+
+  1 / shiftedS z + 1 / (1 - shiftedS z)
+
+and in shifted coordinates this is exactly
+
+  1 / (z^2 + 1/4).
+
+We prove the explicit tail bound
+
+  ‖1 / (z^2 + 1/4)‖ ≤ 1 / (Re z)^2
+
+for Re z > 10 and |Im z| < 1/2.
+
+This is a genuine analytic inequality, and it is fully proved below.
+-/
+
+noncomputable section
+open Complex
+
+namespace AnalyticChallenge
+
+/-- A fully provable polar tail bound at cutoff 10. -/
+structure PolarTailBound10 where
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖(1 : ℂ) / (z ^ 2 + (1 / 4 : ℂ))‖ ≤ 1 / (z.re ^ 2)
+
+/-- The polar tail bound is fully proved. -/
+theorem polarTailBound10 : PolarTailBound10 where
+  bound := by
+    intro z hre hgt hlt hne
+    have hDge : (z.re : ℝ) ^ 2 ≤ ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+      simpa [tailD, Complex.re_add_im, mul_comm I] using
+        tailD_norm_ge_r_sq z.re z.im (by linarith) hgt hlt
+    have hre_pos : 0 < z.re := by linarith
+    have hnorm_pos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+      have : 0 < z.re ^ 2 := by positivity
+      linarith
+    calc
+      ‖(1 : ℂ) / (z ^ 2 + (1 / 4 : ℂ))‖ =
+          1 / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+        simp [norm_div, Complex.norm_one]
+      _ ≤ 1 / (z.re ^ 2) := by
+        rw [one_div_le_one_div_iff hnorm_pos (by positivity)]
+        exact hDge
+
+/-- The same bound, stated directly for the polar term. -/
+structure PolarTermTailCertificate10 where
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖1 / shiftedS z + 1 / (1 - shiftedS z)‖ ≤ 1 / (z.re ^ 2)
+
+/-- The polar term tail certificate is fully proved. -/
+theorem polarTermTailCertificate10 : PolarTermTailCertificate10 where
+  bound := by
+    intro z hre hgt hlt hne
+    rw [polar_term_eq_inv_D z hgt hlt]
+    exact polarTailBound10.bound z hre hgt hlt hne
+
+/-- The polar contribution to the shifted-xi identity is exactly `1/2`.
+
+Since
+
+  xiShifted z = 1/2 - (z^2 + 1/4)/2 * completedRiemannZeta₀(shiftedS z)
+
+and
+
+  completedRiemannZeta₀(shiftedS z)
+    = polar term + remainder,
+
+the polar term contributes exactly `1/2`, which cancels the leading `1/2`.
+This is why tail estimates for `completedRiemannZeta₀` itself must be
+handled carefully: the polar term is not small in the combination that
+defines `xiShifted`; it cancels.
+-/
+theorem polar_contribution_eq_half
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    (z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        (1 / shiftedS z + 1 / (1 - shiftedS z)) =
+      (1 / 2 : ℂ) := by
+  rw [polar_term_eq_inv_D z hgt hlt]
+  field_simp [shifted_denominator_ne_zero_inside_strip z hgt hlt]
+
+end AnalyticChallenge
+
+/-!
+# Corrected tail framework: subtract the polar term
+
+A cubic or exponential bound for `completedRiemannZeta₀` itself is not the
+right tail target, because the polar term
+
+  1 / shiftedS z + 1 / (1 - shiftedS z) = 1 / (z^2 + 1/4)
+
+decays only quadratically.
+
+The correct tail object is the polar-subtracted remainder
+
+  completedRiemannZeta₀(shiftedS z)
+    - (1 / shiftedS z + 1 / (1 - shiftedS z)).
+
+The identity below shows that this remainder is exactly what controls
+`xiShifted` in the tail.
+-/
+
+namespace RHProofScaffold
+
+open AnalyticChallenge
+
+/-- Positivity of the tail quadratic factor for `r ≥ 10`, `y ≠ 0`. -/
+private theorem tailD_norm_pos_of_tail
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hy : y ≠ 0) :
+    0 < ‖tailD r y‖ := by
+  rw [norm_pos_iff]
+  intro h
+  have him := congr_arg Complex.im h
+  simp only [
+    tailD,
+    pow_two,
+    Complex.add_im,
+    Complex.mul_im,
+    Complex.add_re,
+    Complex.mul_re,
+    Complex.ofReal_re,
+    Complex.ofReal_im,
+    Complex.I_re,
+    Complex.I_im
+  ] at him
+  ring_nf at him
+  have hne : (2 : ℝ) * r * y ≠ 0 := by
+    apply mul_ne_zero
+    · have h2 : (2 : ℝ) ≠ 0 := by norm_num
+      have hr0 : r ≠ 0 := by linarith
+      exact mul_ne_zero h2 hr0
+    · exact hy
+  exact hne him
+
+/-- Exact shifted identity with the polar term subtracted:
+
+  xiShifted z =
+    -(z^2 + 1/4)/2 *
+      (completedRiemannZeta₀(shiftedS z) - polar term).
+
+This is the clean tail identity.
+-/
+theorem xiShifted_eq_neg_half_D_mul_completed_minus_polar
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    xiShifted z =
+      -(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        (completedRiemannZeta₀ (shiftedS z) -
+          (1 / shiftedS z + 1 / (1 - shiftedS z))) := by
+  let D : ℂ := z ^ 2 + (1 / 4 : ℂ)
+  have hD : D ≠ 0 := shifted_denominator_ne_zero_inside_strip z hgt hlt
+  have hpolar :
+      1 / shiftedS z + 1 / (1 - shiftedS z) = 1 / D := by
+    rw [polar_term_eq_inv_D z hgt hlt]
+  have hrem :
+      completedRiemannZeta₀ (shiftedS z) - 1 / D =
+        -2 * xiShifted z / D := by
+    rw [completedZeta_shifted_eq_inv_D_sub_two_xiShifted_div_D z hgt hlt hne]
+    ring
+  calc
+    xiShifted z =
+        -D / 2 * (-2 * xiShifted z / D) := by
+      field_simp [hD]
+      rfl
+    _ =
+        -D / 2 *
+          (completedRiemannZeta₀ (shiftedS z) - 1 / D) := by
+      rw [← hrem]
+    _ =
+        -(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+          (completedRiemannZeta₀ (shiftedS z) -
+            (1 / shiftedS z + 1 / (1 - shiftedS z))) := by
+      simp only [D, ← hpolar]
+
+/-- A corrected tail challenge: a positive lower bound for the
+polar-subtracted completed zeta remainder. -/
+structure CompletedMinusPolarTailLowerBound10 where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      y ≠ 0 →
+      0 < m r y
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤
+        ‖completedRiemannZeta₀ (shiftedS z) -
+          (1 / shiftedS z + 1 / (1 - shiftedS z))‖
+
+/-- Convert a polar-subtracted tail lower bound into the distance-sensitive
+`xiShifted` tail lower bound needed by the RH assembly theorem.
+
+The lower bound is
+
+  lower(r,y) = (‖(r+iy)^2 + 1/4‖ / 2) * m(r,y).
+
+This is fully proved.
+-/
+def xiRightTailDistanceLowerBound_from_completedMinusPolar
+    (L : CompletedMinusPolarTailLowerBound10) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) where
+  lower r y := (‖tailD r y‖ / 2) * L.m r y
+  lower_pos r y hr hy := by
+    have hDpos : 0 < ‖tailD r y‖ := tailD_norm_pos_of_tail r y hr hy
+    have hmpos : 0 < L.m r y := L.m_pos r y hr hy
+    positivity
+  bound z hre hgt hlt hne := by
+    have hL := L.bound z hre hgt hlt hne
+    calc
+      (‖tailD z.re z.im‖ / 2) * L.m z.re z.im ≤
+          (‖tailD z.re z.im‖ / 2) *
+            ‖completedRiemannZeta₀ (shiftedS z) -
+              (1 / shiftedS z + 1 / (1 - shiftedS z))‖ := by
+        exact mul_le_mul_of_nonneg_left hL (by positivity)
+      _ = ‖xiShifted z‖ := by
+        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt hlt hne]
+        simp [
+          norm_mul,
+          norm_neg,
+          norm_div,
+          Complex.norm_ofNat,
+          tailD,
+          Complex.re_add_im,
+          mul_comm I
+        ]
+
+/-- If one has:
+
+1. bounded first-quadrant nonvanishing at cutoff 10;
+2. a polar-subtracted tail lower bound;
+
+then RH follows.
+
+The first obligation is still RH-hard. The second is the corrected tail
+analytic obligation.
+-/
+theorem rh_from_quadrant_and_completedMinusPolarTail
+    (Q : RemainingQuadrantNonvanishing (10 : ℝ))
+    (L : CompletedMinusPolarTailLowerBound10) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := Q
+      tail := xiRightTailDistanceLowerBound_from_completedMinusPolar L
+    }
+
+end RHProofScaffold
+
+end
