@@ -2458,7 +2458,7 @@ theorem rh_from_xiNoRightHalfZerosFull
   have hStep : Step4Obligation :=
     xiNoRightHalfZeros_iff_full.mpr H
   have hCrit : XiCriticalLineZeros classicalXi :=
-    (step4_iff_xi_critical_line classicalXi_functional_equation).mp hStep
+    (step4_iff_xi_critical_line (fun s h0 h1 => by rw [classicalXi_functional_equation s h0 h1])).mp hStep
   exact
     (rh_iff_xi_critical_from_gamma classical_gamma_nonzero_instrip).mpr hCrit
 
@@ -2482,7 +2482,8 @@ theorem quadrant_no_zero_from_xiNoRightHalfZerosFull
     let t := 1 - s
     have ht_zero : classicalXi t = 0 := by
       have hfe := classicalXi_functional_equation s hs_re_pos hs_re_lt_one
-      rw [hfe] at hs_zero
+      change classicalXi (1 - s) = 0
+      rw [hfe]
       exact hs_zero
     have ht_gt_half : (1 : ℝ) / 2 < t.re := by
       simp [t, s]
@@ -2726,7 +2727,7 @@ def quadrantPlan_from_completedZetaPlan
     (P : CompletedZetaRectangularPlan X) :
     QuadrantZeroFreePlan X where
   rects :=
-    P.certs.map xiLocalLowerBoundRect_from_completedZetaRectUpperBound
+    P.certs.map (XiLocalZeroFreeRect_of_lower_bound ∘ xiLocalLowerBoundRect_from_completedZetaRectUpperBound)
   covers := by
     intro z hx0 hx1 hy0 hy1
     rcases P.covers z hx0 hx1 hy0 hy1 with
@@ -4274,3 +4275,407 @@ theorem exists_zero_free_rect_struct_around_imag_point
     (try linarith)
   · intro z hx0 hx1 hy0' hy1'
     exact R.no_zero z hx0 hx1 hy0' hy1'
+/-!
+# Finite segment covers and zero-free vertical bands
+
+A finite segment cover is a finite list of zero-free rectangles whose
+y-intervals cover a closed interval [a,b] on the imaginary axis, together with
+a uniform horizontal half-width δ that fits inside every rectangle.
+
+Once we have such a finite cover, we immediately get a zero-free vertical band:
+
+    |Re z| < δ,
+    a ≤ Im z ≤ b.
+
+This is the next useful analytic object.
+-/
+
+structure FiniteImaginarySegmentZeroFreeCover (a b : ℝ) where
+  rects : List XiLocalZeroFreeRect
+  δ : ℝ
+  δ_pos : 0 < δ
+  δ_spec :
+    ∀ R ∈ rects,
+      δ ≤ -R.x0 ∧ δ ≤ R.x1
+  covers_y :
+    ∀ y : ℝ,
+      a ≤ y →
+      y ≤ b →
+      ∃ R ∈ rects,
+        R.y0 < y ∧ y < R.y1
+
+/-- A finite imaginary-segment zero-free cover gives a zero-free vertical
+    band. -/
+theorem zero_free_vertical_band_from_segment_cover
+    {a b : ℝ}
+    (C : FiniteImaginarySegmentZeroFreeCover a b) :
+    ∀ z : ℂ,
+      |z.re| < C.δ →
+      a ≤ z.im →
+      z.im ≤ b →
+      xiShifted z ≠ 0 := by
+  intro z hx ha hb
+
+  obtain ⟨R, hR, hy0, hy1⟩ := C.covers_y z.im ha hb
+
+  have hδ := C.δ_spec R hR
+
+  have hx0 : R.x0 < z.re := by
+    have h1 : -C.δ < z.re := by
+      rw [abs_lt] at hx
+      exact hx.1
+    linarith [hδ.1]
+
+  have hx1 : z.re < R.x1 := by
+    have h1 : z.re < C.δ := by
+      rw [abs_lt] at hx
+      exact hx.2
+    linarith [hδ.2]
+
+  exact R.no_zero z hx0 hx1 hy0 hy1
+
+/-- Therefore the hard difference is nonzero in that vertical band, provided
+    the band lies inside the shifted strip. -/
+theorem hardDifferenceNonzero_on_vertical_band_from_segment_cover
+    {a b : ℝ}
+    (C : FiniteImaginarySegmentZeroFreeCover a b)
+    (ha : -(1 / 2 : ℝ) < a)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∀ z : ℂ,
+      |z.re| < C.δ →
+      a ≤ z.im →
+      z.im ≤ b →
+      z.im ≠ 0 →
+      1 / (z ^ 2 + (1 / 4 : ℂ)) -
+        completedRiemannZeta₀ (shiftedS z) ≠ 0 := by
+  intro z hx ha' hb' hne
+
+  have hnz := zero_free_vertical_band_from_segment_cover C z hx ha' hb'
+
+  have hgt : -(1 / 2 : ℝ) < z.im := by linarith
+  have hlt : z.im < (1 / 2 : ℝ) := by linarith
+
+  exact
+    (xiShifted_ne_zero_iff_completed_ne_inv_D z hgt hlt hne).mp hnz
+/-!
+# Compactness: finite zero-free cover of a compact imaginary segment
+
+For every y ∈ [a,b] with 0 < a ≤ b < 1/2, we already have a local zero-free
+rectangle around I*y. The y-intervals of those rectangles form an open cover of
+the compact interval [a,b]. Hence finitely many suffice.
+
+Taking the minimum horizontal half-width among those finitely many rectangles
+gives a `FiniteImaginarySegmentZeroFreeCover`.
+-/
+
+/-- From a finite list of rectangles whose x-intervals all contain 0, obtain a
+    positive uniform half-width δ fitting inside all of them. -/
+lemma exists_pos_delta_of_list
+    (rects : List XiLocalZeroFreeRect)
+    (h : ∀ R ∈ rects, R.x0 < 0 ∧ 0 < R.x1) :
+    ∃ δ > 0, ∀ R ∈ rects, δ ≤ -R.x0 ∧ δ ≤ R.x1 := by
+  induction rects with
+  | nil =>
+    exact ⟨1, by norm_num, by simp⟩
+  | cons R rs ih =>
+    have hR := h R (by simp)
+    have hrs : ∀ R ∈ rs, R.x0 < 0 ∧ 0 < R.x1 := by
+      intro R hR
+      exact h R (by simp [hR])
+    obtain ⟨δ, hδpos, hδ⟩ := ih hrs
+    refine ⟨min δ (min (-R.x0) R.x1), ?_, ?_⟩
+    · positivity
+    · intro S hS
+      simp at hS
+      rcases hS with hS | hS
+      · subst hS
+        constructor
+        · exact le_trans (min_le_right _ _) (min_le_left _ _)
+        · exact le_trans (min_le_right _ _) (min_le_right _ _)
+      · have hδ'leδ : min δ (min (-R.x0) R.x1) ≤ δ := min_le_left _ _
+        have := hδ S hS
+        constructor <;> linarith
+
+/-- Build a finite imaginary-segment zero-free cover from a finite list of
+    rectangles covering the y-interval. -/
+def finiteImaginarySegmentZeroFreeCover_of_list
+    {a b : ℝ}
+    (rects : List XiLocalZeroFreeRect)
+    (hrects : ∀ R ∈ rects, R.x0 < 0 ∧ 0 < R.x1)
+    (covers_y :
+      ∀ y : ℝ,
+        a ≤ y →
+        y ≤ b →
+        ∃ R ∈ rects,
+          R.y0 < y ∧ y < R.y1) :
+    FiniteImaginarySegmentZeroFreeCover a b := by
+  obtain ⟨δ, hδpos, hδ⟩ := exists_pos_delta_of_list rects hrects
+  exact
+    {
+      rects := rects
+      δ := δ
+      δ_pos := hδpos
+      δ_spec := hδ
+      covers_y := covers_y
+    }
+
+/-- Existence of a finite imaginary-segment zero-free cover for every compact
+    subinterval [a,b] ⊂ (0,1/2). -/
+classical theorem exists_finite_imaginary_segment_zero_free_cover
+    (hReal : ZetaRealNonzeroInCritical)
+    (a b : ℝ)
+    (ha : 0 < a)
+    (hab : a ≤ b)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∃ C : FiniteImaginarySegmentZeroFreeCover a b, True := by
+  let I : Set ℝ := Set.Icc a b
+  have hI : IsCompact I := isCompact_Icc
+
+  choose R hR using fun y hy =>
+    exists_zero_free_rect_struct_around_imag_point hReal y
+      (by intro h; linarith [hy.1, h])
+      (by linarith [hy.1])
+      (by linarith [hy.2])
+
+  let V (y : ℝ) : Set ℝ := Set.Ioo (R y).y0 (R y).y1
+
+  let C : Set (Set ℝ) := {U | ∃ y ∈ I, U = V y}
+
+  have hC_open : ∀ U ∈ C, IsOpen U := by
+    rintro U ⟨y, hy, rfl⟩
+    exact isOpen_Ioo
+
+  have hcover : I ⊆ ⋃₀ C := by
+    rintro y hy
+    refine ⟨V y, ⟨y, hy, rfl⟩, ?_⟩
+    have h := hR y hy
+    exact ⟨h.2.2.1, h.2.2.2.1⟩
+
+  obtain ⟨C', hC'sub, hC'fin, hcover'⟩ :=
+    hI.elim_finite_subcover hC_open hcover
+
+  obtain ⟨F, hF⟩ := hC'fin.exists_finset
+
+  let y_of_U (U : Set ℝ) (hU : U ∈ F) : ℝ :=
+    Classical.choose
+      (by
+        have : U ∈ C' := by
+          rw [← hF]
+          exact Finset.mem_coe.mpr hU
+        exact hC'sub this)
+
+  have hy_of_U :
+      ∀ U hU,
+        y_of_U U hU ∈ I ∧ U = V (y_of_U U hU) := by
+    intro U hU
+    exact Classical.choose_spec _
+
+  let rects : List XiLocalZeroFreeRect :=
+    F.attach.toList.map
+      (fun U => R (y_of_U U.1 U.2))
+
+  have hrects : ∀ R' ∈ rects, R'.x0 < 0 ∧ 0 < R'.x1 := by
+    intro R' hR'
+    rw [rects, List.mem_map] at hR'
+    rcases hR' with ⟨⟨U, hU⟩, _, rfl⟩
+    have hy := (hy_of_U U hU).1
+    have h := hR (y_of_U U hU) hy
+    exact ⟨h.1, h.2.1⟩
+
+  have covers_y :
+      ∀ y : ℝ,
+        a ≤ y →
+        y ≤ b →
+        ∃ R' ∈ rects,
+          R'.y0 < y ∧ y < R'.y1 := by
+    intro y hay hyb
+    have hyI : y ∈ I := ⟨hay, hyb⟩
+    have hycover : y ∈ ⋃₀ C' := hcover' hyI
+    rcases hycover with ⟨U, hU, hyU⟩
+    have hUF : U ∈ F := by
+      rw [← hF] at hU
+      exact Finset.mem_coe.mp hU
+    let yU := y_of_U U hUF
+    have hyU_spec := hy_of_U U hUF
+    refine ⟨R yU, ?_, ?_⟩
+    · rw [rects, List.mem_map]
+      refine ⟨⟨U, hUF⟩, ?_, rfl⟩
+      rw [Finset.mem_toList]
+      exact Finset.mem_attach.mpr hUF
+    · rw [← hyU_spec.2] at hyU
+      exact hyU
+
+  exact
+    ⟨finiteImaginarySegmentZeroFreeCover_of_list rects hrects covers_y,
+      trivial⟩
+
+/-!
+# Near-real and upper-boundary certificates
+
+We have finite zero-free covers for compact subsegments
+
+    [a,b] ⊂ (0,1/2).
+
+To cover the whole upper half-strip near the imaginary axis, we still need:
+
+1. a near-real certificate for 0 < Im z < a;
+2. an upper-boundary certificate for b < Im z < 1/2.
+
+Once those are available, we can cover
+
+    0 < Im z < 1/2,
+    |Re z| < δ.
+-/
+
+structure NearRealZeroFreeCertificate (a δ : ℝ) where
+  a_pos : 0 < a
+  δ_pos : 0 < δ
+  zero_free :
+    ∀ z : ℂ,
+      |z.re| < δ →
+      0 < z.im →
+      z.im < a →
+      xiShifted z ≠ 0
+
+structure UpperBoundaryZeroFreeCertificate (b δ : ℝ) where
+  b_lt : b < (1 / 2 : ℝ)
+  δ_pos : 0 < δ
+  zero_free :
+    ∀ z : ℂ,
+      |z.re| < δ →
+      b < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0
+
+/-- Combine a near-real certificate and a finite segment cover to get a
+    zero-free band from 0 < Im z ≤ b. -/
+theorem zero_free_upper_band_from_near_and_segment
+    {a b : ℝ}
+    {δN : ℝ}
+    (C : FiniteImaginarySegmentZeroFreeCover a b)
+    (N : NearRealZeroFreeCertificate a δN)
+    (hab : a ≤ b) :
+    ∀ z : ℂ,
+      |z.re| < min δN C.δ →
+      0 < z.im →
+      z.im ≤ b →
+      xiShifted z ≠ 0 := by
+  intro z hx hy0 hyb
+
+  by_cases hlt : z.im < a
+  · have hδN : |z.re| < δN := by
+      calc
+        |z.re| < min δN C.δ := hx
+        _ ≤ δN := min_le_left _ _
+    exact N.zero_free z hδN hy0 hlt
+  · have hge : a ≤ z.im := le_of_not_lt hlt
+    have hδC : |z.re| < C.δ := by
+      calc
+        |z.re| < min δN C.δ := hx
+        _ ≤ C.δ := min_le_right _ _
+    exact zero_free_vertical_band_from_segment_cover C z hδC hge hyb
+
+/-- Combine near-real, finite segment, and upper-boundary certificates to get
+    a zero-free neighborhood of the whole upper half-strip near the imaginary
+    axis. -/
+theorem zero_free_upper_half_near_axis
+    {a b : ℝ}
+    {δN δU : ℝ}
+    (C : FiniteImaginarySegmentZeroFreeCover a b)
+    (N : NearRealZeroFreeCertificate a δN)
+    (U : UpperBoundaryZeroFreeCertificate b δU)
+    (hab : a ≤ b) :
+    ∀ z : ℂ,
+      |z.re| < min δN (min C.δ δU) →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0 := by
+  intro z hx hy0 hy1
+
+  have hδN : |z.re| < δN := by
+    calc
+      |z.re| < min δN (min C.δ δU) := hx
+      _ ≤ δN := min_le_left _ _
+
+  have hδC : |z.re| < C.δ := by
+    calc
+      |z.re| < min δN (min C.δ δU) := hx
+      _ ≤ min C.δ δU := min_le_right _ _
+      _ ≤ C.δ := min_le_left _ _
+
+  have hδU : |z.re| < δU := by
+    calc
+      |z.re| < min δN (min C.δ δU) := hx
+      _ ≤ min C.δ δU := min_le_right _ _
+      _ ≤ δU := min_le_right _ _
+
+  by_cases hlt_a : z.im < a
+  · exact N.zero_free z hδN hy0 hlt_a
+  · have hge_a : a ≤ z.im := le_of_not_lt hlt_a
+    by_cases hgt_b : b < z.im
+    · exact U.zero_free z hδU hgt_b hy1
+    · have hle_b : z.im ≤ b := le_of_not_gt hgt_b
+      exact zero_free_vertical_band_from_segment_cover C z hδC hge_a hle_b
+
+/-!
+# A strong analytic target: sign of the imaginary part
+
+A classical Hermite–Biehler / Laguerre–Pólya style sufficient condition for
+zero-freeness in the upper half-plane is:
+
+    Im(xiShifted z) < 0    whenever    Im z > 0.
+
+This is still RH-hard, but it is a concrete analytic target.
+-/
+
+structure UpperHalfNegativeImaginaryCertificate where
+  neg_im :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      (xiShifted z).im < 0
+
+/-- Negative imaginary part in the upper half-strip implies nonvanishing
+    there. -/
+theorem upperHalf_nonvanishing_from_negative_imag
+    (H : UpperHalfNegativeImaginaryCertificate) :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0 := by
+  intro z hy0 hy1 hz
+  have hneg := H.neg_im z hy0 hy1
+  simpa [hz] using hneg
+
+/-- A negative-imaginary certificate gives a near-real certificate for any
+    a < 1/2 and any δ > 0. -/
+def nearRealCertificate_from_negative_imag
+    (H : UpperHalfNegativeImaginaryCertificate)
+    (a : ℝ)
+    (ha : 0 < a)
+    (ha1 : a < (1 / 2 : ℝ))
+    (δ : ℝ)
+    (hδ : 0 < δ) :
+    NearRealZeroFreeCertificate a δ where
+  a_pos := ha
+  δ_pos := hδ
+  zero_free := by
+    intro z _ hz0 hza hzero
+    have hneg := H.neg_im z hz0 (by linarith)
+    simpa [hzero] using hneg
+
+/-- A negative-imaginary certificate gives an upper-boundary certificate for
+    any b < 1/2 and any δ > 0. -/
+def upperBoundaryCertificate_from_negative_imag
+    (H : UpperHalfNegativeImaginaryCertificate)
+    (b : ℝ)
+    (hb : b < (1 / 2 : ℝ))
+    (δ : ℝ)
+    (hδ : 0 < δ) :
+    UpperBoundaryZeroFreeCertificate b δ where
+  b_lt := hb
+  δ_pos := hδ
+  zero_free := by
+    intro z _ hzb hz1 hzero
+    have hneg := H.neg_im z hzb hz1
+    simpa [hzero] using hneg
