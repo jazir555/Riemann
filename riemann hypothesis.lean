@@ -2300,7 +2300,7 @@ theorem tailD_ne_zero_of_strip
     Complex.I_im, Complex.ofReal_re, Complex.ofReal_im] at hre
   simp only [tailD, pow_two, Complex.add_im, Complex.mul_im, Complex.I_re,
     Complex.I_im, Complex.ofReal_re, Complex.ofReal_im] at him
-  ring_nf at hre him
+  norm_num at hre him
   have hy2 : y * y < 1 / 4 := by nlinarith
   have hr2 : (100 : ℝ) ≤ r * r := by nlinarith
   nlinarith
@@ -2316,6 +2316,7 @@ theorem tailU_pos_of_strip
   have hnorm : ‖tailD r y‖ ≠ 0 := by
     simpa [norm_eq_zero] using hD
   simp only [tailU, hnorm, ite_false]
+  rw [lt_min_iff]
   constructor
   · positivity
   · positivity
@@ -2815,11 +2816,15 @@ def completedZetaGlobalUpperBound_self :
     else ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * ((x : ℂ) + I * (y : ℂ)))‖
   B_nonneg := by
     intro x y hgt hlt hne
-    simp [hne]
+    simp only [hne, ite_false]
     positivity
   bound := by
     intro z hgt hlt hne
-    simp [hne, Complex.re_add_im]
+    simp only [hne, ite_false]
+    have hz : z = (z.re : ℂ) + I * (z.im : ℂ) := by
+      rw [Complex.re_add_im z]
+      ring
+    rw [hz]
     exact le_rfl
 
 /-!
@@ -3019,7 +3024,7 @@ noncomputable def shiftedS (z : ℂ) : ℂ :=
 
 theorem shiftedS_re (z : ℂ) :
     (shiftedS z).re = (1 / 2 : ℝ) - z.im := by
-  simp [shiftedS]
+  simp only [shiftedS, Complex.add_re, Complex.I_mul_re, Complex.ofReal_re]
 
 theorem shiftedS_ne_zero
     (z : ℂ)
@@ -3129,7 +3134,7 @@ def completedZetaGlobalUpperBound_from_sum
   B := fun x y => S.B1 x y + S.B2 x y
   B_nonneg := by
     intro x y hgt hlt hne
-    positivity
+    exact add_nonneg (S.B1_nonneg x y hgt hlt hne) (S.B2_nonneg x y hgt hlt hne)
   bound := by
     intro z hgt hlt hne
     rw [S.decomp z hgt hlt hne]
@@ -3274,7 +3279,9 @@ theorem polarBound_nonneg
     0 ≤ polarBound x y := by
   have h1 : 0 < (1 / 2 : ℝ) - y := by linarith
   have h2 : 0 < (1 / 2 : ℝ) + y := by linarith
-  positivity
+  have h3 : 0 ≤ 1 / ((1 / 2 : ℝ) - y) := by positivity
+  have h4 : 0 ≤ 1 / ((1 / 2 : ℝ) + y) := by positivity
+  exact add_nonneg h3 h4
 
 /-- Helper: the absolute value of the real part is bounded by the norm. -/
 private theorem abs_re_le_norm (w : ℂ) :
@@ -3296,8 +3303,11 @@ theorem polar_bound_explicit
     intro h; exact shiftedS_ne_one z hgt hlt (sub_eq_zero.mp h).symm
   have hd1 : 0 < (1 / 2 : ℝ) - z.im := by linarith
   have hd2 : 0 < (1 / 2 : ℝ) + z.im := by linarith
-  have hre_hs : hs.re = (1 / 2 : ℝ) - z.im := by simp [hs, shiftedS]
-  have hre_1hs : (1 - hs).re = (1 / 2 : ℝ) + z.im := by simp [hs, shiftedS]
+  have hre_hs : hs.re = (1 / 2 : ℝ) - z.im := by
+    simp only [hs, shiftedS, Complex.add_re, Complex.I_mul_re, Complex.ofReal_re]
+  have hre_1hs : (1 - hs).re = (1 / 2 : ℝ) + z.im := by
+    simp only [hs, shiftedS, Complex.sub_re, Complex.add_re, Complex.neg_re,
+      Complex.I_mul_re, Complex.ofReal_re, Complex.ofReal_one, sub_sub_cancel]
   have hd1le : (1 / 2 : ℝ) - z.im ≤ ‖hs‖ := by
     have h := Complex.abs_re_le_abs hs
     simp only [Complex.norm_eq_abs, hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
@@ -3421,27 +3431,27 @@ theorem norm_z_sq_add_quarter_le
   have hnorm : ‖z‖ ≤ R + S := by
     calc
       ‖z‖ = ‖(z.re : ℂ) + I * (z.im : ℂ)‖ := by
-        rw [Complex.re_add_im]
+        simp [Complex.re_add_im, mul_comm]
       _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im : ℂ)‖ :=
         norm_add_le _ _
       _ = |z.re| + |z.im| := by
-        simp [norm_mul, Complex.norm_I]
+        simp [Complex.norm_I]
       _ ≤ R + S :=
         add_le_add hre him
 
-  have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 := by
-    exact pow_le_pow_left (by positivity) hnorm 2
+  have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 :=
+    pow_le_pow_left' hnorm 2
 
   calc
     ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
         (‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖) / 2 := by
       exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
     _ = (‖z‖ ^ 2 + 1 / 4) / 2 := by
-      simp [norm_pow, Complex.norm_ofReal,
+      simp [norm_pow, norm_ofReal,
         abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)]
     _ ≤ ((R + S) ^ 2 + 1 / 4) / 2 := by
       exact div_le_div_of_nonneg_right
-        (add_le_add_right hsq (1 / 4))
+        (add_le_add hsq le_rfl)
         (by norm_num)
 
 /-- The rectangle bound for `‖z^2 + 1/4‖ / 2`. -/
@@ -3630,7 +3640,6 @@ theorem tailCanonicalU_margin
         (‖tailD r y‖ / 2) * tailCanonicalU r y := by
   by_cases h : ‖tailD r y‖ = 0
   · simp [tailCanonicalU, h]
-    norm_num
   · simp [tailCanonicalU, h]
     field_simp
     norm_num
@@ -3642,7 +3651,6 @@ theorem tailCanonicalU_nonneg
   by_cases h : ‖tailD r y‖ = 0
   · simp [tailCanonicalU, h]
   · simp [tailCanonicalU, h]
-    positivity
 
 /-- A tail certificate with canonical margin.
 
@@ -3715,7 +3723,6 @@ theorem tailD_norm_ge_r_sq
       Complex.I_re,
       Complex.I_im
     ]
-    ring
 
   have hy2 : y ^ 2 < 1 / 4 := by
     nlinarith
@@ -4679,3 +4686,381 @@ def upperBoundaryCertificate_from_negative_imag
     intro z _ hzb hz1 hzero
     have hneg := H.neg_im z hzb hz1
     simpa [hzero] using hneg
+/-!
+# Rectangular and tail certificates for the negative-imaginary condition
+
+We now decompose the strong analytic target
+
+    (xiShifted z).im < 0    for    0 < Im z < 1/2
+
+into:
+
+1. a finite rectangular cover of the bounded part |Re z| ≤ X;
+2. a tail sign estimate for |Re z| > X.
+
+This gives a concrete route to:
+
+    UpperHalfNegativeImaginaryCertificate
+-/
+
+structure XiUpperNegImRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  neg_im :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      (xiShifted z).im < 0
+
+/-- A negative-imaginary rectangle is, in particular, zero-free. -/
+def xiLocalZeroFreeRect_of_upperNegImRect
+    (R : XiUpperNegImRect) :
+    XiLocalZeroFreeRect where
+  x0 := R.x0
+  x1 := R.x1
+  y0 := R.y0
+  y1 := R.y1
+  x_lt := R.x_lt
+  y_lt := R.y_lt
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    have hneg := R.neg_im z hx0 hx1 hy0 hy1
+    simpa [hz] using hneg
+
+/-- A finite rectangular cover proving the negative-imaginary condition on the
+    whole upper half-strip. -/
+structure UpperHalfNegImCover where
+  rects : List XiUpperNegImRect
+  covers :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+/-- A finite negative-imaginary rectangular cover gives a global
+    negative-imaginary certificate. -/
+def upperHalfNegativeImaginaryCertificate_of_cover
+    (C : UpperHalfNegImCover) :
+    UpperHalfNegativeImaginaryCertificate where
+  neg_im := by
+    intro z hy0 hy1
+    rcases C.covers z hy0 hy1 with
+      ⟨R, _, hx0, hx1, hy0', hy1'⟩
+    exact R.neg_im z hx0 hx1 hy0' hy1'
+
+/-- Therefore it gives upper-half nonvanishing. -/
+theorem upperHalf_nonvanishing_from_neg_im_cover
+    (C : UpperHalfNegImCover) :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0 :=
+  upperHalf_nonvanishing_from_negative_imag
+    (upperHalfNegativeImaginaryCertificate_of_cover C)
+
+/-!
+# Bounded cover plus tail decomposition
+
+For the full upper half-strip, the x-direction is unbounded. We therefore
+decompose into:
+
+1. a bounded rectangular cover for |Re z| ≤ X;
+2. a tail sign estimate for |Re z| > X.
+-/
+
+structure BoundedUpperHalfNegImCover (X : ℝ) where
+  rects : List XiUpperNegImRect
+  covers :
+    ∀ z : ℂ,
+      |z.re| ≤ X →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+structure UpperHalfNegImTailCertificate (X : ℝ) where
+  neg_im :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      (xiShifted z).im < 0
+
+structure UpperHalfNegImProof (X : ℝ) where
+  central : BoundedUpperHalfNegImCover X
+  tail : UpperHalfNegImTailCertificate X
+
+/-- Assemble a bounded cover and a tail estimate into a global
+    negative-imaginary certificate. -/
+def upperHalfNegativeImaginaryCertificate_of_proof
+    {X : ℝ}
+    (P : UpperHalfNegImProof X) :
+    UpperHalfNegativeImaginaryCertificate where
+  neg_im := by
+    intro z hy0 hy1
+
+    by_cases hle : |z.re| ≤ X
+    · rcases P.central.covers z hle hy0 hy1 with
+        ⟨R, _, hx0, hx1, hy0', hy1'⟩
+      exact R.neg_im z hx0 hx1 hy0' hy1'
+    · have habs : X < |z.re| := lt_of_not_le hle
+      have hdis : X < z.re ∨ z.re < -X := by
+        by_cases hx : 0 ≤ z.re
+        · left
+          rwa [abs_of_nonneg hx] at habs
+        · have hx' : z.re < 0 := by linarith
+          right
+          rw [abs_of_neg hx'] at habs
+          linarith
+      exact P.tail.neg_im z hdis hy0 hy1
+
+/-- Therefore a bounded cover plus tail estimate gives upper-half
+    nonvanishing. -/
+theorem upperHalf_nonvanishing_from_neg_im_proof
+    {X : ℝ}
+    (P : UpperHalfNegImProof X) :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0 :=
+  upperHalf_nonvanishing_from_negative_imag
+    (upperHalfNegativeImaginaryCertificate_of_proof P)
+/-!
+# Bounded first-quadrant zero-free decomposition
+
+We decompose the first quadrant
+
+    0 ≤ Re z ≤ X,
+    0 < Im z < 1/2
+
+into three vertical pieces:
+
+1. near-real:
+       0 < Im z < ε
+
+2. middle:
+       ε ≤ Im z ≤ 1/2 - η
+
+3. upper-boundary:
+       1/2 - η < Im z < 1/2
+
+Together with a tail certificate for Re z > X, and the fourfold symmetry
+package, this gives full off-real nonvanishing.
+-/
+
+structure BoundedNearRealZeroFreeCertificate (X ε : ℝ) where
+  zero_free :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < ε →
+      xiShifted z ≠ 0
+
+structure BoundedUpperBoundaryZeroFreeCertificate (X η : ℝ) where
+  zero_free :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      (1 / 2 : ℝ) - η < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0
+
+structure FirstQuadrantMiddleCover (X ε η : ℝ) where
+  rects : List XiLocalZeroFreeRect
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      ε ≤ z.im →
+      z.im ≤ (1 / 2 : ℝ) - η →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+structure FirstQuadrantBoundedZeroFreeProof (X ε η : ℝ) where
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  near : BoundedNearRealZeroFreeCertificate X ε
+  middle : FirstQuadrantMiddleCover X ε η
+  upper : BoundedUpperBoundaryZeroFreeCertificate X η
+
+/-- From the three bounded pieces, obtain zero-freeness in the whole bounded
+    first quadrant. -/
+theorem firstQuadrant_no_zero_of_bounded_proof
+    {X ε η : ℝ}
+    (P : FirstQuadrantBoundedZeroFreeProof X ε η) :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0 := by
+  intro z hx0 hx1 hy0 hy1
+
+  by_cases hnear : z.im < ε
+  · exact P.near.zero_free z hx0 hx1 hy0 hnear
+
+  · by_cases hupper : (1 / 2 : ℝ) - η < z.im
+    · exact P.upper.zero_free z hx0 hx1 hupper hy1
+
+    · have hge : ε ≤ z.im := le_of_not_lt hnear
+      have hle : z.im ≤ (1 / 2 : ℝ) - η := le_of_not_lt hupper
+
+      rcases P.middle.covers z hx0 hx1 hge hle with
+        ⟨R, _, hx0', hx1', hy0', hy1'⟩
+
+      exact R.no_zero z hx0' hx1' hy0' hy1'
+
+/-!
+# Assemble bounded first quadrant + tail + symmetries into RH
+-/
+
+structure FirstQuadrantBoundedRHProof (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : FirstQuadrantBoundedZeroFreeProof X ε η
+  tail : XiTailPointwiseNonvanishingForX X
+
+/-- A bounded first-quadrant zero-free proof, together with symmetries and a
+    tail certificate, implies RH. -/
+theorem rh_from_first_quadrant_bounded_rh_proof
+    {X ε η : ℝ}
+    (P : FirstQuadrantBoundedRHProof X ε η) :
+    RiemannHypothesisProp := by
+  have central : XiCentralPointwiseNonvanishingForX X :=
+    {
+      central_nonvanishing := by
+        intro z hge hle hgt hlt hne
+        exact
+          nonvanishing_central_from_first_quadrant
+            P.sym
+            X
+            (firstQuadrant_no_zero_of_bounded_proof P.bounded)
+            z
+            hge
+            hle
+            hgt
+            hlt
+            hne
+    }
+
+  have off_real : XiOffRealPointwiseNonvanishing :=
+    xiOffRealPointwiseNonvanishing_of_central_pointwise_and_tail_pointwise
+      central
+      P.tail
+
+  exact rh_from_off_real_pointwise_nonvanishing off_real
+
+/-!
+# Finite rectangular bounded first-quadrant proof
+
+We now express the bounded first-quadrant zero-free proof entirely in terms of
+finite rectangle covers.
+-/
+
+structure NearRealRectCover (X ε : ℝ) where
+  rects : List XiLocalZeroFreeRect
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < ε →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+structure UpperBoundaryRectCover (X η : ℝ) where
+  rects : List XiLocalZeroFreeRect
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      (1 / 2 : ℝ) - η < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ R ∈ rects,
+        R.x0 < z.re ∧
+        z.re < R.x1 ∧
+        R.y0 < z.im ∧
+        z.im < R.y1
+
+/-- Convert a near-real rectangular cover into a bounded near-real zero-free
+    certificate. -/
+def boundedNearRealCertificate_from_cover
+    {X ε : ℝ}
+    (C : NearRealRectCover X ε) :
+    BoundedNearRealZeroFreeCertificate X ε where
+  zero_free := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨R, _, hx0', hx1', hy0', hy1'⟩
+    exact R.no_zero z hx0' hx1' hy0' hy1'
+
+/-- Convert an upper-boundary rectangular cover into a bounded upper-boundary
+    zero-free certificate. -/
+def boundedUpperBoundaryCertificate_from_cover
+    {X η : ℝ}
+    (C : UpperBoundaryRectCover X η) :
+    BoundedUpperBoundaryZeroFreeCertificate X η where
+  zero_free := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨R, _, hx0', hx1', hy0', hy1'⟩
+    exact R.no_zero z hx0' hx1' hy0' hy1'
+
+/-- A fully finite-rectangular bounded first-quadrant zero-free proof. -/
+structure FirstQuadrantRectangularBoundedProof (X ε η : ℝ) where
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  near : NearRealRectCover X ε
+  middle : FirstQuadrantMiddleCover X ε η
+  upper : UpperBoundaryRectCover X η
+
+/-- Convert a finite-rectangular bounded proof into the earlier bounded
+    zero-free proof. -/
+def firstQuadrantBoundedZeroFreeProof_from_rectangular
+    {X ε η : ℝ}
+    (P : FirstQuadrantRectangularBoundedProof X ε η) :
+    FirstQuadrantBoundedZeroFreeProof X ε η where
+  ε_pos := P.ε_pos
+  η_pos := P.η_pos
+  near := boundedNearRealCertificate_from_cover P.near
+  middle := P.middle
+  upper := boundedUpperBoundaryCertificate_from_cover P.upper
+
+/-- A fully finite-rectangular first-quadrant RH proof: symmetries, bounded
+    rectangular covers, and a tail certificate. -/
+structure FirstQuadrantRectangularRHProof (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : FirstQuadrantRectangularBoundedProof X ε η
+  tail : XiTailPointwiseNonvanishingForX X
+
+/-- A fully finite-rectangular first-quadrant RH proof implies RH. -/
+theorem rh_from_first_quadrant_rectangular_rh_proof
+    {X ε η : ℝ}
+    (P : FirstQuadrantRectangularRHProof X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_bounded_rh_proof
+    {
+      sym := P.sym
+      bounded :=
+        firstQuadrantBoundedZeroFreeProof_from_rectangular P.bounded
+      tail := P.tail
+    }
