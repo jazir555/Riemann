@@ -123,14 +123,8 @@ theorem pi_complex_ne_zero_for_powers : (Real.pi : ℂ) ≠ 0 := by
 
 theorem pi_cpow_ne_zero (w : ℂ) :
     (Real.pi : ℂ) ^ w ≠ 0 := by
-  first
-  | rw [Complex.cpow_ne_zero_iff]
-    exact Or.inl pi_complex_ne_zero_for_powers
-  | rw [Complex.cpow_def_of_ne_zero pi_complex_ne_zero_for_powers]
-    exact Complex.exp_ne_zero _
-  | intro h
-    rw [Complex.eq_zero_cpow_iff] at h
-    exact pi_complex_ne_zero_for_powers h.1
+  rw [Complex.cpow_ne_zero_iff]
+  exact Or.inl pi_complex_ne_zero_for_powers
 
 def PiPowerNonzeroAll : Prop :=
   ∀ w : ℂ, (Real.pi : ℂ) ^ w ≠ 0
@@ -140,7 +134,7 @@ theorem piPowerNonzeroAll_mathlib : PiPowerNonzeroAll :=
 
 theorem half_re_pos {s : ℂ} (h0 : 0 < s.re) :
     0 < (s / 2).re := by
-  simp [div_eq_mul_inv, mul_re, inv_re, normSq_ofReal]
+  simp [div_eq_mul_inv, mul_re, inv_re]
   norm_num
   linarith
 
@@ -1952,13 +1946,13 @@ theorem completedRiemannZeta₀_vanishes_at_top_im :
     intro t
     simp only [completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀, WeakFEPair.Λ₀, g]
     rw [mellin_eq_fourier]
-    unfold Complex.smul
+    simp only [smul_eq_mul]
     push_cast
     ring
   have hfourier : Filter.Tendsto (FourierTransform.fourier g) Filter.atTop (nhds (0 : ℂ)) := by
     have hcocompact_atTop : Filter.atTop ≤ Filter.cocompact ℝ := by
       rw [cocompact_eq_atBot_atTop (α := ℝ)]
-      exact Filter.le_sup_right
+      exact le_sup_right
     exact Filter.Tendsto.mono_left (Real.zero_at_infty_fourier g) hcocompact_atTop
   have hfreq : Filter.Tendsto (fun t : ℝ => t / (4 * Real.pi)) Filter.atTop Filter.atTop :=
     Filter.Tendsto.atTop_div_const (by positivity : 0 < (4 : ℝ) * Real.pi) Filter.tendsto_id
@@ -3288,7 +3282,7 @@ theorem polarBound_nonneg
 /-- Helper: the absolute value of the real part is bounded by the norm. -/
 private theorem abs_re_le_norm (w : ℂ) :
     |w.re| ≤ ‖w‖ := by
-  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs w
+  exact Complex.abs_re_le_norm w
 
 /-- Explicit bound for the polar term. -/
 theorem polar_bound_explicit
@@ -3316,18 +3310,18 @@ theorem polar_bound_explicit
     norm_num
     ring
   have hd1le : (1 / 2 : ℝ) - z.im ≤ ‖hs‖ := by
-    have h := Complex.abs_re_le_abs hs
-    simp only [Complex.norm_eq_abs, hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
+    have h := Complex.abs_re_le_norm hs
+    simp only [hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
     exact_mod_cast h
   have hd2le : (1 / 2 : ℝ) + z.im ≤ ‖1 - hs‖ := by
-    have h := Complex.abs_re_le_abs (1 - hs)
-    simp only [Complex.norm_eq_abs, hre_1hs, Real.abs_of_nonneg (le_of_lt hd2)] at h
+    have h := Complex.abs_re_le_norm (1 - hs)
+    simp only [hre_1hs, Real.abs_of_nonneg (le_of_lt hd2)] at h
     exact_mod_cast h
   have h1 : ‖1 / hs‖ ≤ 1 / ((1 / 2 : ℝ) - z.im) := by
-    rw [norm_div, Complex.norm_one, one_div_le_one_div_iff (by positivity) (by positivity)]
+    rw [norm_div, norm_one, one_div_le_one_div (by positivity) (by positivity)]
     exact hd1le
   have h2 : ‖1 / (1 - hs)‖ ≤ 1 / ((1 / 2 : ℝ) + z.im) := by
-    rw [norm_div, Complex.norm_one, one_div_le_one_div_iff (by positivity) (by positivity)]
+    rw [norm_div, norm_one, one_div_le_one_div (by positivity) (by positivity)]
     exact hd2le
   have hsum : ‖1 / hs + 1 / (1 - hs)‖ ≤ 1 / ((1 / 2 : ℝ) - z.im) + 1 / ((1 / 2 : ℝ) + z.im) :=
     le_trans (norm_add_le _ _) (add_le_add h1 h2)
@@ -3478,7 +3472,7 @@ theorem rectangle_D_half_spec
   have hre : |z.re| ≤ |x0| + |x1| + 1 := by
     apply abs_le.mpr
     constructor
-    · have : -|x0| ≤ x0 := neg_abs_le_self x0
+    · have : -|x0| ≤ x0 := neg_abs_le x0
       linarith [abs_nonneg x1]
     · have : x1 ≤ |x1| := le_abs_self x1
       linarith [abs_nonneg x0]
@@ -3486,7 +3480,7 @@ theorem rectangle_D_half_spec
   have him : |z.im| ≤ |y0| + |y1| + 1 := by
     apply abs_le.mpr
     constructor
-    · have : -|y0| ≤ y0 := neg_abs_le_self y0
+    · have : -|y0| ≤ y0 := neg_abs_le y0
       linarith [abs_nonneg y1]
     · have : y1 ≤ |y1| := le_abs_self y1
       linarith [abs_nonneg y0]
@@ -3712,7 +3706,7 @@ in the tail.
 /-- Public helper: real part bounded by norm. -/
 theorem abs_re_le_norm_pub (w : ℂ) :
     |w.re| ≤ ‖w‖ := by
-  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs w
+  exact Complex.abs_re_le_norm w
 
 /-- Lower bound for the tail quadratic factor. -/
 theorem tailD_norm_ge_r_sq
@@ -3779,7 +3773,7 @@ theorem tailD_norm_le_r_plus_one_sq
     _ = ‖z‖ ^ 2 + 1 / 4 := by
       simp [
         norm_pow,
-        Complex.norm_ofReal,
+        RCLike.norm_ofReal,
         abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
       ]
     _ ≤ (r + 1 / 2) ^ 2 + 1 / 4 := by
@@ -4645,7 +4639,7 @@ theorem zero_free_upper_band_from_near_and_segment
         |z.re| < min δN C.δ := hx
         _ ≤ δN := min_le_left _ _
     exact N.zero_free z hδN hy0 hlt
-  · have hge : a ≤ z.im := le_of_not_lt hlt
+  · have hge : a ≤ z.im := not_lt.mp hlt
     have hδC : |z.re| < C.δ := by
       calc
         |z.re| < min δN C.δ := hx
@@ -4688,7 +4682,7 @@ theorem zero_free_upper_half_near_axis
 
   by_cases hlt_a : z.im < a
   · exact N.zero_free z hδN hy0 hlt_a
-  · have hge_a : a ≤ z.im := le_of_not_lt hlt_a
+  · have hge_a : a ≤ z.im := not_lt.mp hlt_a
     by_cases hgt_b : b < z.im
     · exact U.zero_free z hδU hgt_b hy1
     · have hle_b : z.im ≤ b := le_of_not_gt hgt_b
@@ -4888,7 +4882,7 @@ def upperHalfNegativeImaginaryCertificate_of_proof
     · rcases P.central.covers z hle hy0 hy1 with
         ⟨R, _, hx0, hx1, hy0', hy1'⟩
       exact R.neg_im z hx0 hx1 hy0' hy1'
-    · have habs : X < |z.re| := lt_of_not_le hle
+    · have habs : X < |z.re| := not_le.mp hle
       have hdis : X < z.re ∨ z.re < -X := by
         by_cases hx : 0 ≤ z.re
         · left
@@ -4991,8 +4985,8 @@ theorem firstQuadrant_no_zero_of_bounded_proof
   · by_cases hupper : (1 / 2 : ℝ) - η < z.im
     · exact P.upper.zero_free z hx0 hx1 hupper hy1
 
-    · have hge : ε ≤ z.im := le_of_not_lt hnear
-      have hle : z.im ≤ (1 / 2 : ℝ) - η := le_of_not_lt hupper
+    ·       have hge : ε ≤ z.im := not_lt.mp hnear
+      have hle : z.im ≤ (1 / 2 : ℝ) - η := not_lt.mp hupper
 
       rcases P.middle.covers z hx0 hx1 hge hle with
         ⟨R, _, hx0', hx1', hy0', hy1'⟩
@@ -6044,7 +6038,7 @@ theorem tailD_norm_le_abs_r_plus_one_sq
     calc
       ‖z‖ ≤ ‖(r : ℂ)‖ + ‖I * (y : ℂ)‖ := norm_add_le _ _
       _ = |r| + |y| := by
-        simp [norm_mul, Complex.norm_I, Complex.norm_ofReal]
+        simp [norm_mul, Complex.norm_I, RCLike.norm_ofReal]
       _ ≤ |r| + 1 / 2 := by
         have : |y| ≤ 1 / 2 := le_of_lt hy
         linarith
@@ -6056,7 +6050,7 @@ theorem tailD_norm_le_abs_r_plus_one_sq
     _ = ‖z‖ ^ 2 + 1 / 4 := by
       simp [
         norm_pow,
-        Complex.norm_ofReal,
+        RCLike.norm_ofReal,
         abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
       ]
     _ ≤ (|r| + 1 / 2) ^ 2 + 1 / 4 := by
@@ -6082,7 +6076,7 @@ structure CompletedZetaCubicTailBound (X : ℝ) where
 
 /-- A cubic completed-zeta tail bound gives the smallness condition needed for
     the tail Rouché certificate. -/
-def tailCompletedZetaSmallBound_from_cubic_bound
+noncomputable def tailCompletedZetaSmallBound_from_cubic_bound
     {X : ℝ}
     (B : CompletedZetaCubicTailBound X) :
     TailCompletedZetaSmallBound X where
@@ -6265,9 +6259,11 @@ def tailUnitCert_of_bound
       _ = (5 / 8 : ℝ) := by
         have hne1 : (‖z ^ 2 + (1 / 4 : ℂ)‖ : ℝ) ≠ 0 := hDpos.ne'
         have hne2 : (‖(1 / 4 : ℂ) + z ^ 2‖ : ℝ) ≠ 0 := by rwa [add_comm] at hne1
-        rw [show (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = (1 / 8 : ℝ) from by
-          rw [div_mul, show (1:ℝ) / 2 * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = 1 / (8 * ‖z ^ 2 + (1 / 4 : ℂ)‖) from by ring_nf]
-          rw [div_mul_cancel₀ _ hne1]]
+        have : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = (1 / 8 : ℝ) := by
+          have hne : ‖z ^ 2 + (1 / 4 : ℂ)‖ ≠ 0 := hne1
+          field_simp [hne]
+          ring
+        rw [this]
         norm_num
       _ < 1 := by
         norm_num
@@ -6536,10 +6532,9 @@ theorem polarTailBound10 : PolarTailBound10 where
     calc
       ‖(1 : ℂ) / (z ^ 2 + (1 / 4 : ℂ))‖ =
           1 / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
-        simp [norm_div, Complex.norm_one]
-      _ ≤ 1 / (z.re ^ 2) := by
-        rw [one_div_le_one_div_iff hnorm_pos (by positivity)]
-        exact hDge
+        simp [norm_div, norm_one]
+      _ ≤ 1 / (z.re ^ 2) :=
+        (one_div_le_one_div hnorm_pos (by positivity)).mpr hDge
 
 /-- The same bound, stated directly for the polar term. -/
 structure PolarTermTailCertificate10 where
@@ -6582,7 +6577,13 @@ theorem polar_contribution_eq_half
         (1 / shiftedS z + 1 / (1 - shiftedS z)) =
       (1 / 2 : ℂ) := by
   rw [polar_term_eq_inv_D z hgt hlt]
-  field_simp [shifted_denominator_ne_zero_inside_strip z hgt hlt]
+  have hD := shifted_denominator_ne_zero_inside_strip z hgt hlt
+  have hD4 : z ^ 2 * 4 + 1 ≠ 0 := by
+    have : z ^ 2 * 4 + 1 = 4 * (z ^ 2 + 1 / 4) := by ring
+    rw [this]
+    exact mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) hD
+  field_simp [hD, hD4]
+  norm_num
 
 end AnalyticChallenge
 
@@ -6631,13 +6632,15 @@ private theorem tailD_norm_pos_of_tail
     Complex.I_im
   ] at him
   ring_nf at him
+  have him' : (2 : ℝ) * r * y = 0 := by
+    simpa [mul_assoc] using him
   have hne : (2 : ℝ) * r * y ≠ 0 := by
     apply mul_ne_zero
     · have h2 : (2 : ℝ) ≠ 0 := by norm_num
       have hr0 : r ≠ 0 := by linarith
       exact mul_ne_zero h2 hr0
     · exact hy
-  exact hne him
+  exact hne him'
 
 /-- Exact shifted identity with the polar term subtracted:
 
@@ -6670,7 +6673,6 @@ theorem xiShifted_eq_neg_half_D_mul_completed_minus_polar
     xiShifted z =
         -D / 2 * (-2 * xiShifted z / D) := by
       field_simp [hD]
-      rfl
     _ =
         -D / 2 *
           (completedRiemannZeta₀ (shiftedS z) - 1 / D) := by
@@ -6718,7 +6720,9 @@ def xiRightTailDistanceLowerBound_from_completedMinusPolar
     have hmpos : 0 < L.m r y := L.m_pos r y hr hy
     positivity
   bound z hre hgt hlt hne := by
-    have hL := L.bound z hre hgt hlt hne
+    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
+    have hlt' : z.im < (1 / 2 : ℝ) := by linarith
+    have hL := L.bound z hre hgt' hlt' hne
     calc
       (‖tailD z.re z.im‖ / 2) * L.m z.re z.im ≤
           (‖tailD z.re z.im‖ / 2) *
@@ -6726,16 +6730,8 @@ def xiRightTailDistanceLowerBound_from_completedMinusPolar
               (1 / shiftedS z + 1 / (1 - shiftedS z))‖ := by
         exact mul_le_mul_of_nonneg_left hL (by positivity)
       _ = ‖xiShifted z‖ := by
-        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt hlt hne]
-        simp [
-          norm_mul,
-          norm_neg,
-          norm_div,
-          Complex.norm_ofNat,
-          tailD,
-          Complex.re_add_im,
-          mul_comm I
-        ]
+        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt' hlt' hne]
+        simp only [norm_mul, norm_neg, norm_div, Complex.norm_ofNat, tailD, Complex.re_add_im, mul_comm I]
 
 /-- If one has:
 
@@ -6805,7 +6801,9 @@ def remainingQuadrant_of_boundedEvidence
     intro z hx0 hx1 hy0 hy1
     exact
       firstQuadrant_no_zero_of_bounded_proof
-        (firstQuadrantRectangularBoundedProof_from_simple B.simple)
+        (firstQuadrantBoundedZeroFreeProof_from_rectangular
+          (firstQuadrantRectangularBoundedProof_of_evidenced
+            (evidencedFirstQuadrantRectangularBoundedProof_from_simple B.simple)))
         z hx0 hx1 hy0 hy1
 
 /-!
@@ -6904,7 +6902,6 @@ theorem xiShifted_eq_neg_half_D_mul_completed_minus_polar
     xiShifted z =
         -D / 2 * (-2 * xiShifted z / D) := by
       field_simp [hD]
-      rfl
     _ =
         -D / 2 *
           (completedRiemannZeta₀ (shiftedS z) - 1 / D) := by
@@ -6926,7 +6923,9 @@ def tailDistance_from_completedMinusPolar
     have hmpos : 0 < L.m r y := L.m_pos r y hr hy
     positivity
   bound z hre hgt hlt hne := by
-    have hL := L.bound z hre hgt hlt hne
+    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
+    have hlt' : z.im < (1 / 2 : ℝ) := by linarith
+    have hL := L.bound z hre hgt' hlt' hne
     calc
       (‖tailD z.re z.im‖ / 2) * L.m z.re z.im ≤
           (‖tailD z.re z.im‖ / 2) *
@@ -6934,18 +6933,10 @@ def tailDistance_from_completedMinusPolar
               (1 / shiftedS z + 1 / (1 - shiftedS z))‖ := by
         exact mul_le_mul_of_nonneg_left hL (by positivity)
       _ = ‖xiShifted z‖ := by
-        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt hlt hne]
-        simp [
-          norm_mul,
-          norm_neg,
-          norm_div,
-          Complex.norm_ofNat,
-          tailD,
-          Complex.re_add_im,
-          mul_comm I
-        ]
+        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt' hlt' hne]
+        simp only [norm_mul, norm_neg, norm_div, Complex.norm_ofNat, tailD, Complex.re_add_im, mul_comm I]
 
-/-- Convert the corrected tail lower bound into a two-sided pointwise tail
+/-- Convert the corrected tail lower bound into a two-sided pointwise
 nonvanishing certificate, using neg-symmetry. -/
 def tailPointwise_from_completedMinusPolar
     (L : CompletedMinusPolarTailLowerBound10) :
