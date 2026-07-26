@@ -4151,8 +4151,7 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   have hmul :
       classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) *
         zeta ((1 / 2 - y : ℝ) : ℂ) = 0 := by
-    have hz0 : classicalXi (shiftedS z) = 0 := by
-      simpa [xiShifted] using hzero
+    have hz0 : classicalXi (shiftedS z) = 0 := hzero
     have hz1 : classicalXiPrefactor (shiftedS z) * zeta (shiftedS z) = 0 := by
       simpa [classicalXi, XiFromPrefactor] using hz0
     rw [hs] at hz1
@@ -4277,7 +4276,7 @@ theorem exists_zero_free_rect_around_imag_point
     _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im - y0)‖ :=
       norm_add_le _ _
     _ = |z.re| + |z.im - y0| := by
-      simp [norm_mul, Complex.norm_I, Complex.norm_real]
+      rw [norm_mul, Complex.norm_I, one_mul, ← Complex.ofReal_sub, Complex.norm_real, Complex.norm_real]
     _ < δ / 2 + δ / 2 := by
       linarith
     _ = δ := by
@@ -5988,3 +5987,64 @@ theorem rh_from_simple_complete_rh_certificate_with_completed_tail
         evidencedFirstQuadrantRectangularBoundedProof_from_simple C.bounded
       tail := C.tail
     }
+/-! ## Tail unit comparison certificate (Rouché‑style) -/
+
+lemma zsq_add_quarter_ne_zero (z : ℂ) (hgt : -(1/2 : ℝ) < z.im) (hlt : z.im < (1/2 : ℝ)) :
+    z ^ 2 + (1/4 : ℂ) ≠ 0 := by
+  -- factorisation: z^2 + 1/4 = (z - i/2)*(z + i/2)
+  have hfact : z ^ 2 + (1/4 : ℂ) = (z - I * ((1/2 : ℝ) : ℂ)) * (z + I * ((1/2 : ℝ) : ℂ)) := by
+    ring; simp
+  rw [hfact]
+  intro hzero
+  rcases eq_zero_or_eq_zero_of_mul_eq_zero hzero with (h | h)
+  · -- z - i/2 = 0 → z.im = 1/2
+    have : z.im = (1/2 : ℝ) := by
+      have : z = I * ((1/2 : ℝ) : ℂ) := sub_eq_zero.mp h
+      simpa using congr_arg Complex.im this
+    linarith
+  · -- z + i/2 = 0 → z.im = -1/2
+    have : z.im = -(1/2 : ℝ) := by
+      have : z = -I * ((1/2 : ℝ) : ℂ) := by linarith
+      simpa using congr_arg Complex.im this
+    linarith
+
+lemma norm_zsq_add_quarter_pos' (z : ℂ) (hgt : -(1/2 : ℝ) < z.im) (hlt : z.im < (1/2 : ℝ)) :
+    0 < ‖z ^ 2 + (1/4 : ℂ)‖ :=
+  norm_pos_iff.mpr (zsq_add_quarter_ne_zero z hgt hlt)
+
+def tailUnitCert : TailUnitComparisonCertificate 10 where
+  comparison z hxor hgt_im hlt_im hne_im := by
+    have hxabs : (10 : ℝ) < |z.re| := by
+      rcases hxor with (h | h)
+      · have : 0 ≤ z.re := by linarith
+        rw [abs_of_nonneg this]
+        exact h
+      · have : z.re ≤ 0 := by linarith
+        rw [abs_of_nonpos this]
+        linarith
+    have hbound := bound_completedZeta z hxabs hgt_im hlt_im hne_im
+    have hDpos : 0 < ‖z ^ 2 + (1/4 : ℂ)‖ := norm_zsq_add_quarter_pos' z hgt_im hlt_im
+    have hxi_eq : xiShifted z = (1/2 : ℂ) - ((z ^ 2 + (1/4 : ℂ)) / 2) *
+                      completedRiemannZeta₀ ((1/2 : ℂ) + I * z) := by
+      exact xiShifted_eq_completed z hgt_im hlt_im
+    calc
+      ‖xiShifted z - 1‖
+          = ‖((1/2 : ℂ) - ((z ^ 2 + (1/4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1/2 : ℂ) + I * z)) - 1‖ := by rw [hxi_eq]
+      _ = ‖- (1/2 : ℂ) - ((z ^ 2 + (1/4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1/2 : ℂ) + I * z)‖ := by ring
+      _ = ‖(1/2 : ℂ) + ((z ^ 2 + (1/4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1/2 : ℂ) + I * z)‖ := by rw [norm_neg]
+      _ ≤ ‖(1/2 : ℂ)‖ + ‖((z ^ 2 + (1/4 : ℂ)) / 2) *
+                completedRiemannZeta₀ ((1/2 : ℂ) + I * z)‖ := norm_add_le _ _
+      _ = (1/2 : ℝ) + (‖z ^ 2 + (1/4 : ℂ)‖ / 2) *
+            ‖completedRiemannZeta₀ ((1/2 : ℂ) + I * z)‖ := by
+        simp; ring
+      _ ≤ (1/2 : ℝ) + (‖z ^ 2 + (1/4 : ℂ)‖ / 2) *
+            (1 / (4 * ‖z ^ 2 + (1/4 : ℂ)‖)) := by
+        nlinarith
+      _ = (1/2 : ℝ) + (1/8 : ℝ) := by
+        field_simp [hDpos.ne']
+        ring
+      _ = 0.625 := by norm_num
+      _ < 1 := by norm_num
