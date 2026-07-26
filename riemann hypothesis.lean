@@ -4060,58 +4060,6 @@ This is equivalent to:
 for all off-real z in the shifted strip, and therefore equivalent to RH.
 -/
 
-/-- The hard difference-nonzero statement. -/
-def HardDifferenceNonzero : Prop :=
-  ∀ z : ℂ,
-    -(1 / 2 : ℝ) < z.im →
-    z.im < (1 / 2 : ℝ) →
-    z.im ≠ 0 →
-    1 / (z ^ 2 + (1 / 4 : ℂ)) -
-      completedRiemannZeta₀ (shiftedS z) ≠ 0
-
-/-- The hard difference-nonzero statement implies RH. -/
-theorem hardDifferenceNonzero_implies_RH :
-    HardDifferenceNonzero → RiemannHypothesisProp := by
-  intro H
-  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib]
-  intro z hgt hlt hne
-  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
-    shifted_denominator_ne_zero_inside_strip z hgt hlt
-  intro hz
-  have hdiff := H z hgt hlt hne
-  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne, hz] at hdiff
-  field_simp [hD] at hdiff
-  exact hdiff rfl
-
-/-- RH implies the hard difference-nonzero statement. -/
-theorem RH_implies_hardDifferenceNonzero :
-    RiemannHypothesisProp → HardDifferenceNonzero := by
-  intro H
-  rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib] at H
-  intro z hgt hlt hne
-  have hnz := H z hgt hlt hne
-  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
-    shifted_denominator_ne_zero_inside_strip z hgt hlt
-  intro h
-  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne] at h
-  have hzero :
-      2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := h
-  rw [div_eq_zero_iff] at hzero
-  cases hzero with
-  | inl hmul =>
-    have hxi : xiShifted z = 0 :=
-      (mul_eq_zero.mp hmul).resolve_left (by norm_num)
-    exact hnz hxi
-  | inr hD0 =>
-    exact hD hD0
-
-/-- The hard difference-nonzero statement is equivalent to RH. -/
-theorem hardDifferenceNonzero_iff_RH :
-    HardDifferenceNonzero ↔ RiemannHypothesisProp := by
-  constructor
-  · exact hardDifferenceNonzero_implies_RH
-  · exact RH_implies_hardDifferenceNonzero
-
 /-!
 # Partial attack: prove the difference nonzero on the imaginary axis
 
@@ -4183,3 +4131,146 @@ theorem hardDifferenceNonzero_on_imaginary_axis
   exact
     (xiShifted_ne_zero_iff_completed_ne_inv_D
       (I * (y : ℂ)) hgt hlt hne).mp h
+/-!
+# Local zero-free neighborhoods around the imaginary axis
+
+From nonvanishing at `I * y0` and continuity of `xiShifted`, we obtain a ball
+around `I * y0` with no zeros. Then we convert that ball into an open
+rectangle.
+-/
+
+/-- Existence of a zero-free ball around a point `I * y0` on the imaginary
+    axis. -/
+theorem xiShifted_eventually_ne_zero_ball
+    (hReal : ZetaRealNonzeroInCritical)
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ ε > 0,
+      ∀ z : ℂ,
+        ‖z - I * (y0 : ℂ)‖ < ε →
+        xiShifted z ≠ 0 := by
+  let z0 : ℂ := I * (y0 : ℂ)
+
+  have hz0_ne : xiShifted z0 ≠ 0 := by
+    simpa [z0] using
+      xiShifted_ne_zero_on_imaginary_axis hReal y0 hy0 hgt hlt
+
+  have hnorm_pos : 0 < ‖xiShifted z0‖ :=
+    norm_pos_iff.mpr hz0_ne
+
+  have hstrip :
+      z0 ∈ {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+    simp [z0]
+    constructor <;> linarith
+
+  have hopen :
+      IsOpen {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+    exact
+      (isOpen_Ioi.preimage continuous_im).inter
+        (isOpen_Iio.preimage continuous_im)
+
+  have hcont : ContinuousAt xiShifted z0 :=
+    xiShifted_continuousOn.continuousAt (hopen.mem_nhds hstrip)
+
+  have hmetric :=
+    Metric.continuousAt_iff.mp hcont
+      (‖xiShifted z0‖ / 2) (by positivity)
+
+  rcases hmetric with ⟨ε, hεpos, hε⟩
+
+  refine ⟨ε, hεpos, ?_⟩
+  intro z hz hzero
+
+  have hdist := hε z hz
+  rw [hzero, zero_sub, norm_neg] at hdist
+  linarith
+
+/-- Convert the zero-free ball into a zero-free open rectangle around
+    `I * y0`. -/
+theorem exists_zero_free_rect_around_imag_point
+    (hReal : ZetaRealNonzeroInCritical)
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ ε > 0,
+      ∀ z : ℂ,
+        -ε < z.re →
+        z.re < ε →
+        y0 - ε < z.im →
+        z.im < y0 + ε →
+        xiShifted z ≠ 0 := by
+  obtain ⟨δ, hδpos, hball⟩ :=
+    xiShifted_eventually_ne_zero_ball hReal y0 hy0 hgt hlt
+
+  refine ⟨δ / 2, by positivity, ?_⟩
+  intro z hx0 hx1 hy0' hy1'
+
+  apply hball z
+
+  let z0 : ℂ := I * (y0 : ℂ)
+
+  have hre_abs : |z.re| < δ / 2 := by
+    rw [abs_lt]
+    constructor <;> linarith
+
+  have him_abs : |z.im - y0| < δ / 2 := by
+    rw [abs_lt]
+    constructor <;> linarith
+
+  calc
+    ‖z - z0‖ =
+        ‖(z.re : ℂ) + I * (z.im - y0)‖ := by
+      congr 1
+      ext <;> simp [z0] <;> ring
+    _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im - y0)‖ :=
+      norm_add_le _ _
+    _ = |z.re| + |z.im - y0| := by
+      simp [norm_mul, Complex.norm_I, Complex.norm_ofReal]
+    _ < δ / 2 + δ / 2 := by
+      linarith
+    _ = δ := by
+      ring
+
+/-- Existence of a `XiLocalZeroFreeRect` around each nonzero point on the
+    imaginary axis. -/
+theorem exists_zero_free_rect_struct_around_imag_point
+    (hReal : ZetaRealNonzeroInCritical)
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ R : XiLocalZeroFreeRect,
+      R.x0 < 0 ∧
+      0 < R.x1 ∧
+      R.y0 < y0 ∧
+      y0 < R.y1 ∧
+      ∀ z : ℂ,
+        R.x0 < z.re →
+        z.re < R.x1 →
+        R.y0 < z.im →
+        z.im < R.y1 →
+        xiShifted z ≠ 0 := by
+  obtain ⟨ε, hεpos, hrect⟩ :=
+    exists_zero_free_rect_around_imag_point hReal y0 hy0 hgt hlt
+
+  let R : XiLocalZeroFreeRect :=
+    {
+      x0 := -ε
+      x1 := ε
+      y0 := y0 - ε
+      y1 := y0 + ε
+      x_lt := by linarith
+      y_lt := by linarith
+      no_zero := by
+        intro z hx0 hx1 hy0' hy1'
+        exact hrect z (by linarith) (by linarith) (by linarith) (by linarith)
+    }
+
+  refine ⟨R, ?_, ?_, ?_, ?_, ?_⟩ <;>
+    (try simp [R]) <;>
+    (try linarith)
+  · intro z hx0 hx1 hy0' hy1'
+    exact R.no_zero z hx0 hx1 hy0' hy1'
