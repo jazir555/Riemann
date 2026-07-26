@@ -5987,3 +5987,127 @@ theorem rh_from_simple_complete_rh_certificate_with_completed_tail
         evidencedFirstQuadrantRectangularBoundedProof_from_simple C.bounded
       tail := C.tail
     }
+/-!
+# Cubic completed-zeta tail bound
+
+A cubic decay bound for completedRiemannZeta₀ is sufficient for the tail
+smallness condition.
+-/
+
+/-- A geometric bound for the quadratic factor in the shifted xi identity. -/
+theorem tailD_norm_le_abs_r_plus_one_sq
+    (r y : ℝ)
+    (hy : |y| < (1 / 2 : ℝ)) :
+    ‖tailD r y‖ ≤ (|r| + 1) ^ 2 := by
+  let z : ℂ := (r : ℂ) + I * (y : ℂ)
+
+  have hznorm : ‖z‖ ≤ |r| + 1 / 2 := by
+    calc
+      ‖z‖ ≤ ‖(r : ℂ)‖ + ‖I * (y : ℂ)‖ := norm_add_le _ _
+      _ = |r| + |y| := by
+        simp [norm_mul, Complex.norm_I, Complex.norm_ofReal]
+      _ ≤ |r| + 1 / 2 := by
+        have : |y| ≤ 1 / 2 := le_of_lt hy
+        linarith
+
+  calc
+    ‖tailD r y‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+      simp [tailD, z]
+    _ ≤ ‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖ := norm_add_le _ _
+    _ = ‖z‖ ^ 2 + 1 / 4 := by
+      simp [
+        norm_pow,
+        Complex.norm_ofReal,
+        abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
+      ]
+    _ ≤ (|r| + 1 / 2) ^ 2 + 1 / 4 := by
+      gcongr
+    _ ≤ (|r| + 1) ^ 2 := by
+      ring_nf
+      nlinarith [abs_nonneg r]
+
+/-- A cubic tail bound for completedRiemannZeta₀. -/
+structure CompletedZetaCubicTailBound (X : ℝ) where
+  C : ℝ
+  C_nonneg : 0 ≤ C
+  X_nonneg : 0 ≤ X
+  small : C / (X + 1) < 1
+  bound :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖completedRiemannZeta₀ (shiftedS z)‖ ≤
+        C / (|z.re| + 1) ^ 3
+
+/-- A cubic completed-zeta tail bound gives the smallness condition needed for
+    the tail Rouché certificate. -/
+def tailCompletedZetaSmallBound_from_cubic_bound
+    {X : ℝ}
+    (B : CompletedZetaCubicTailBound X) :
+    TailCompletedZetaSmallBound X where
+  U := fun r y => B.C / (|r| + 1) ^ 3
+  bound := B.bound
+  small := by
+    intro r y htail hgt hlt hne
+
+    have hy_abs : |y| < (1 / 2 : ℝ) := by
+      rw [abs_lt]
+      constructor <;> linarith
+
+    have hD := tailD_norm_le_abs_r_plus_one_sq r y hy_abs
+
+    have hbase : 0 < |r| + 1 := by positivity
+    have hX1 : 0 < X + 1 := by linarith [B.X_nonneg]
+
+    have hU_nonneg : 0 ≤ B.C / (|r| + 1) ^ 3 := by positivity
+
+    have habs_ge : X ≤ |r| := by
+      cases htail with
+      | inl h =>
+        have : 0 ≤ r := by linarith [B.X_nonneg]
+        rw [abs_of_nonneg this]
+        linarith
+      | inr h =>
+        have : r < 0 := by linarith [B.X_nonneg]
+        rw [abs_of_neg this]
+        linarith
+
+    calc
+      (‖((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+          (B.C / (|r| + 1) ^ 3) ≤
+          (((|r| + 1) ^ 2) / 2) *
+            (B.C / (|r| + 1) ^ 3) := by
+        exact mul_le_mul_of_nonneg_right (by gcongr) hU_nonneg
+      _ = B.C / (2 * (|r| + 1)) := by
+        field_simp [pow_succ, pow_two, hbase.ne']
+        ring
+      _ ≤ B.C / (2 * (X + 1)) := by
+        rw [div_le_div_iff (by positivity) (by positivity)]
+        nlinarith [habs_ge]
+      _ < 1 / 2 := by
+        have hsmall := B.small
+        rw [div_lt_iff hX1] at hsmall
+        rw [div_lt_iff (by positivity)]
+        nlinarith
+
+/-- A simple complete RH certificate using a cubic completed-zeta tail
+    bound. -/
+structure SimpleCompleteRHCertificateWithCubicTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : SimpleFirstQuadrantRectangularBoundedProof X ε η
+  tail : CompletedZetaCubicTailBound X
+
+/-- A simple complete RH certificate with a cubic completed-zeta tail implies
+    RH. -/
+theorem rh_from_simple_complete_rh_certificate_with_cubic_tail
+    {X ε η : ℝ}
+    (C : SimpleCompleteRHCertificateWithCubicTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_simple_complete_rh_certificate_with_completed_tail
+    {
+      sym := C.sym
+      bounded := C.bounded
+      tail := tailCompletedZetaSmallBound_from_cubic_bound C.tail
+    }
