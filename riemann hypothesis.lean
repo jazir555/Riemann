@@ -7368,7 +7368,7 @@ theorem rh_from_afe_nonzero_leaf
     intro z hgt hlt hne hxi
     have hs :
         0 < (shiftedS z).re ∧ (shiftedS z).re < 1 :=
-      shiftedS_in_critical_strip z hgt hlt
+      shiftedS_in_critical_strip z (by linarith) (by linarith)
     have hpref :
         classicalXiPrefactor (shiftedS z) ≠ 0 :=
       classical_prefactor_nonzero_instrip
@@ -7379,10 +7379,11 @@ theorem rh_from_afe_nonzero_leaf
     have hmul :
         classicalXiPrefactor (shiftedS z) *
           zeta (shiftedS z) = 0 := by
-      simpa [xiShifted, classicalXi, XiFromPrefactor] using hxi
+      change xiShifted z = 0
+      exact hxi
     have hzeta : zeta (shiftedS z) = 0 :=
       (mul_eq_zero.mp hmul).resolve_left hpref
-    exact zeta_nonzero_from_afe_leaf L z hgt hlt hne hzeta
+    exact zeta_nonzero_from_afe_leaf L z (by linarith) (by linarith) hne hzeta
   exact rh_from_off_real_pointwise_nonvanishing H
 
 /-!
@@ -7487,3 +7488,1064 @@ theorem rh_from_hadamard_route_leaves
   rh_from_zeros_real_leaf L.zeros_real
 
 end RecursiveHard
+
+/-!
+# Recursive decomposition of the four hard leaves
+
+This file decomposes:
+
+1. TailHardDifferenceLower
+2. TailXiLower
+3. AFENonzeroLeaf
+4. ZerosRealLeaf
+
+into smaller leaves.
+
+The implications between leaves are proved. The analytic leaves themselves
+remain open.
+-/
+
+namespace LeafDecomp
+
+/-!
+## Basic corrected hard difference
+-/
+
+noncomputable def hardDifference (z : ℂ) : ℂ :=
+  1 / (z ^ 2 + (1 / 4 : ℂ)) -
+  completedRiemannZeta₀ (shiftedS z)
+
+/-!
+## Leaf 1: TailHardDifferenceLower
+-/
+
+structure TailHardDifferenceLower (X : ℝ) where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖hardDifference z‖
+
+/-!
+## Leaf 2: TailXiLower
+-/
+
+structure TailXiLower (X : ℝ) where
+  lower : ℝ → ℝ → ℝ
+  lower_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < lower x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      lower z.re z.im ≤ ‖xiShifted z‖
+
+/-!
+## Leaf 1 reduces to Leaf 2 plus elementary geometry
+-/
+
+theorem norm_hardDifference_eq_two_xi_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    ‖hardDifference z‖ =
+      2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+  have h :=
+    inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+  dsimp [hardDifference]
+  rw [h]
+  simp [norm_mul, norm_div, RCLike.norm_ofReal]
+
+/-- A tail xi lower bound gives a tail hard-difference lower bound. -/
+def tailHardDifference_from_xiLower
+    {X : ℝ}
+    (L : TailXiLower X) :
+    TailHardDifferenceLower X where
+  m x y :=
+    2 * L.lower x y / (|x| + 1) ^ 2
+  m_pos x y hx hgt hlt hne := by
+    have hpos := L.lower_pos x y hx hgt hlt hne
+    positivity
+  bound z htail hgt hlt hne := by
+    have hDpos :
+        0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+      norm_pos_iff.mpr
+        (shifted_denominator_ne_zero_inside_strip z hgt hlt)
+    have hDle :
+        ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤ (|z.re| + 1) ^ 2 := by
+      have hy : |z.im| < (1 / 2 : ℝ) := by
+        rw [abs_lt]
+        constructor <;> linarith
+      have := tailD_norm_le_abs_r_plus_one_sq z.re z.im hy
+      simpa [tailD, Complex.re_add_im, mul_comm I] using this
+    have hxi := L.bound z htail hgt hlt hne
+    have hnorm :=
+      norm_hardDifference_eq_two_xi_div_D z hgt hlt hne
+    calc
+      2 * L.lower z.re z.im / (|z.re| + 1) ^ 2 ≤
+          2 * ‖xiShifted z‖ / (|z.re| + 1) ^ 2 := by
+        have hden : 0 < (|z.re| + 1) ^ 2 := by positivity
+        rw [div_le_div_iff₀ hden hden]
+        nlinarith [hxi]
+      _ ≤
+          2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+        have hdenA : 0 < (|z.re| + 1) ^ 2 := by positivity
+        have hdenB : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ := hDpos
+        rw [div_le_div_iff₀ hdenA hdenB]
+        have hnonneg : 0 ≤ 2 * ‖xiShifted z‖ := by positivity
+        nlinarith [hDle]
+      _ = ‖hardDifference z‖ := by
+        rw [← hnorm]
+
+/-!
+## Leaf 2 reduces to prefactor lower bound + zeta lower bound
+-/
+
+theorem xiShifted_eq_prefactor_zeta (z : ℂ) :
+    xiShifted z =
+      classicalXiPrefactor (shiftedS z) * zeta (shiftedS z) := by
+  simp [xiShifted, shiftedS, classicalXi, XiFromPrefactor]
+
+structure PrefactorLowerLeaf (X : ℝ) where
+  p : ℝ → ℝ → ℝ
+  p_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < p x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      p z.re z.im ≤ ‖classicalXiPrefactor (shiftedS z)‖
+
+structure ZetaLowerLeaf (X : ℝ) where
+  q : ℝ → ℝ → ℝ
+  q_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < q x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      q z.re z.im ≤ ‖zeta (shiftedS z)‖
+
+/-- Prefactor lower bound + zeta lower bound gives xi lower bound. -/
+def tailXiLower_from_prefactor_zeta
+    {X : ℝ}
+    (P : PrefactorLowerLeaf X)
+    (Z : ZetaLowerLeaf X) :
+    TailXiLower X where
+  lower x y := P.p x y * Z.q x y
+  lower_pos x y hx hgt hlt hne :=
+    mul_pos
+      (P.p_pos x y hx hgt hlt hne)
+      (Z.q_pos x y hx hgt hlt hne)
+  bound z htail hgt hlt hne := by
+    have hp := P.bound z htail hgt hlt hne
+    have hq := Z.bound z htail hgt hlt hne
+    calc
+      P.p z.re z.im * Z.q z.re z.im ≤
+          ‖classicalXiPrefactor (shiftedS z)‖ *
+          ‖zeta (shiftedS z)‖ := by
+        exact
+          mul_le_mul
+            hp
+            hq
+            (le_of_lt (Z.q_pos z.re z.im htail hgt hlt hne))
+            (by positivity)
+      _ = ‖xiShifted z‖ := by
+        rw [xiShifted_eq_prefactor_zeta, norm_mul]
+
+/-!
+## Prefactor lower bound reduces to five factor lower bounds
+-/
+
+def fHalf (z : ℂ) : ℂ :=
+  (1 / 2 : ℂ)
+
+def fS (z : ℂ) : ℂ :=
+  shiftedS z
+
+def fS1 (z : ℂ) : ℂ :=
+  shiftedS z - 1
+
+def fPi (z : ℂ) : ℂ :=
+  (Real.pi : ℂ) ^ (-(shiftedS z / 2))
+
+def fGamma (z : ℂ) : ℂ :=
+  Complex.Gamma (shiftedS z / 2)
+
+theorem prefactorFun_eq_factors (z : ℂ) :
+    classicalXiPrefactor (shiftedS z) =
+      fHalf z * fS z * fS1 z * fPi z * fGamma z := by
+  simp [
+    fHalf,
+    fS,
+    fS1,
+    fPi,
+    fGamma,
+    classicalXiPrefactor
+  ]
+
+structure TailFactorLower (X : ℝ) (f : ℂ → ℂ) where
+  l : ℝ → ℝ → ℝ
+  l_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < l x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      l z.re z.im ≤ ‖f z‖
+
+def tailFactorLower_mul
+    {X : ℝ}
+    {f g : ℂ → ℂ}
+    (A : TailFactorLower X f)
+    (B : TailFactorLower X g) :
+    TailFactorLower X (fun z => f z * g z) where
+  l x y := A.l x y * B.l x y
+  l_pos x y hx hgt hlt hne :=
+    mul_pos
+      (A.l_pos x y hx hgt hlt hne)
+      (B.l_pos x y hx hgt hlt hne)
+  bound z htail hgt hlt hne := by
+    have ha := A.bound z htail hgt hlt hne
+    have hb := B.bound z htail hgt hlt hne
+    calc
+      A.l z.re z.im * B.l z.re z.im ≤
+          ‖f z‖ * ‖g z‖ := by
+        exact
+          mul_le_mul
+            ha
+            hb
+            (le_of_lt (B.l_pos z.re z.im htail hgt hlt hne))
+            (by positivity)
+      _ = ‖f z * g z‖ := by
+        rw [norm_mul]
+
+/-- Assemble a prefactor lower bound from five factor lower bounds. -/
+def prefactorLower_from_factors
+    {X : ℝ}
+    (Hhalf : TailFactorLower X fHalf)
+    (HS : TailFactorLower X fS)
+    (HS1 : TailFactorLower X fS1)
+    (HPi : TailFactorLower X fPi)
+    (HGamma : TailFactorLower X fGamma) :
+    PrefactorLowerLeaf X := by
+  let h1 := tailFactorLower_mul Hhalf HS
+  let h2 := tailFactorLower_mul h1 HS1
+  let h3 := tailFactorLower_mul h2 HPi
+  let h4 := tailFactorLower_mul h3 HGamma
+  refine { p := h4.l, p_pos := h4.l_pos, bound := ?_ }
+  intro z htail hgt hlt hne
+  have := h4.bound z htail hgt hlt hne
+  simpa [prefactorFun_eq_factors z] using this
+
+/-!
+## Some factor leaves are elementary
+-/
+
+/-- The constant factor 1/2. -/
+def halfFactorLower (X : ℝ) : TailFactorLower X fHalf where
+  l := fun _ _ => 1 / 2
+  l_pos := by
+    intro x y hx hgt hlt hne
+    norm_num
+  bound := by
+    intro z htail hgt hlt hne
+    simp [fHalf, RCLike.norm_ofReal]
+
+theorem shiftedS_im_eq (z : ℂ) :
+    (shiftedS z).im = z.re := by
+  simp [
+    shiftedS,
+    Complex.add_im,
+    Complex.mul_im,
+    Complex.I_re,
+    Complex.I_im
+  ]
+
+theorem shiftedS_sub_one_im_eq (z : ℂ) :
+    (shiftedS z - 1).im = z.re := by
+  simp [
+    shiftedS,
+    Complex.sub_im,
+    Complex.add_im,
+    Complex.mul_im,
+    Complex.I_re,
+    Complex.I_im
+  ]
+
+/-- The factor s = shiftedS z. -/
+def factorSLower
+    (X : ℝ)
+    (hX : 0 ≤ X) :
+    TailFactorLower X fS where
+  l := fun x _ => |x|
+  l_pos x y hx hgt hlt hne := by
+    have : 0 < |x| := by linarith
+    exact this
+  bound z htail hgt hlt hne := by
+    have : |z.re| ≤ ‖shiftedS z‖ := by
+      have h1 : (shiftedS z).im ≤ ‖shiftedS z‖ := Complex.im_le_norm _
+      have h2 : -(shiftedS z).im ≤ ‖shiftedS z‖ := by
+        calc -(shiftedS z).im = (-shiftedS z).im := by ring
+          _ ≤ ‖-shiftedS z‖ := Complex.im_le_norm _
+          _ = ‖shiftedS z‖ := norm_neg _
+      simp only [shiftedS_im_eq] at h1 h2 ⊢
+      exact abs_le.mpr ⟨h2, h1⟩
+    simpa [fS] using this
+
+/-- The factor s - 1. -/
+def factorS1Lower
+    (X : ℝ)
+    (hX : 0 ≤ X) :
+    TailFactorLower X fS1 where
+  l := fun x _ => |x|
+  l_pos x y hx hgt hlt hne := by
+    have : 0 < |x| := by linarith
+    exact this
+  bound z htail hgt hlt hne := by
+    have : |z.re| ≤ ‖shiftedS z - 1‖ := by
+      have h1 : (shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := Complex.im_le_norm _
+      have h2 : -(shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := by
+        calc -(shiftedS z - 1).im = (-(shiftedS z - 1)).im := by ring
+          _ ≤ ‖-(shiftedS z - 1)‖ := Complex.im_le_norm _
+          _ = ‖shiftedS z - 1‖ := norm_neg _
+      simp only [shiftedS_sub_one_im_eq] at h1 h2 ⊢
+      exact abs_le.mpr ⟨h2, h1⟩
+    simpa [fS1] using this
+
+/-- Pi-power and Gamma factor leaves. -/
+abbrev PiFactorLowerLeaf (X : ℝ) := TailFactorLower X fPi
+abbrev GammaFactorLowerLeaf (X : ℝ) := TailFactorLower X fGamma
+
+/-- Prefactor lower bound from proved constant/s/s−1 factors plus pi and
+Gamma leaves.
+-/
+def prefactorLower_from_pi_gamma
+    {X : ℝ}
+    (hX : 0 ≤ X)
+    (HPi : PiFactorLowerLeaf X)
+    (HGamma : GammaFactorLowerLeaf X) :
+    PrefactorLowerLeaf X :=
+  prefactorLower_from_factors
+    (halfFactorLower X)
+    (factorSLower X hX)
+    (factorS1Lower X hX)
+    HPi
+    HGamma
+
+/-!
+## Leaf 3: AFENonzeroLeaf
+-/
+
+structure AFENonzeroLeaf where
+  main : ℂ → ℂ
+  error : ℂ → ℂ
+  afe :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zeta (shiftedS z) = main z + error z
+  main_pos :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      0 < ‖main z‖
+  error_small :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖error z‖ < ‖main z‖
+
+/-!
+## AFENonzeroLeaf reduces to AFE identity + main lower + error upper
+-/
+
+structure AFEIdentityLeaf (main error : ℂ → ℂ) where
+  eq :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zeta (shiftedS z) = main z + error z
+
+structure MainLowerLeaf (main : ℂ → ℂ) where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖main z‖
+
+structure ErrorUpperLeaf (error : ℂ → ℂ) where
+  u : ℝ → ℝ → ℝ
+  u_nonneg :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 ≤ u x y
+  bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖error z‖ ≤ u z.re z.im
+
+structure AFEFromParts (main error : ℂ → ℂ) where
+  afe : AFEIdentityLeaf main error
+  main_lower : MainLowerLeaf main
+  error_upper : ErrorUpperLeaf error
+  gap :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      error_upper.u x y < main_lower.m x y
+
+/-- AFE identity + main lower + error upper + gap gives AFENonzeroLeaf. -/
+def afeNonzero_from_parts
+    {main error : ℂ → ℂ}
+    (P : AFEFromParts main error) :
+    AFENonzeroLeaf where
+  main := main
+  error := error
+  afe := P.afe.eq
+  main_pos := by
+    intro z hgt hlt hne
+    have hm := P.main_lower.m_pos z.re z.im hgt hlt hne
+    have hb := P.main_lower.bound z hgt hlt hne
+    linarith
+  error_small := by
+    intro z hgt hlt hne
+    calc
+      ‖error z‖ ≤ P.error_upper.u z.re z.im :=
+        P.error_upper.bound z hgt hlt hne
+      _ < P.main_lower.m z.re z.im :=
+        P.gap z.re z.im hgt hlt hne
+      _ ≤ ‖main z‖ :=
+        P.main_lower.bound z hgt hlt hne
+
+/-!
+## Main lower reduces either by dominance or balanced phase
+-/
+
+structure MainSplitLeaf (main S R : ℂ → ℂ) where
+  eq :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      main z = S z + R z
+
+structure DominanceMainLowerLeaf (S R : ℂ → ℂ) where
+  s : ℝ → ℝ → ℝ
+  t : ℝ → ℝ → ℝ
+  gap_pos :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < s x y - t x y
+  S_lower :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      s z.re z.im ≤ ‖S z‖
+  R_upper :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖R z‖ ≤ t z.re z.im
+
+/-- Dominance route: if S dominates R, then main = S + R is nonzero. -/
+def mainLower_from_dominance
+    {main S R : ℂ → ℂ}
+    (split : MainSplitLeaf main S R)
+    (D : DominanceMainLowerLeaf S R) :
+    MainLowerLeaf main where
+  m x y := D.s x y - D.t x y
+  m_pos := D.gap_pos
+  bound z hgt hlt hne := by
+    have hs := D.S_lower z hgt hlt hne
+    have ht := D.R_upper z hgt hlt hne
+    have hrev :
+        ‖S z‖ - ‖R z‖ ≤ ‖S z + R z‖ := by
+      have := norm_sub_norm_le (S z) (-R z)
+      simpa [sub_eq_add_neg] using this
+    calc
+      D.s z.re z.im - D.t z.re z.im ≤
+          ‖S z‖ - ‖R z‖ := by
+        linarith
+      _ ≤ ‖S z + R z‖ := hrev
+      _ = ‖main z‖ := by
+        rw [split.eq z hgt hlt hne]
+
+/-- Balanced-phase route: direct lower bound for S + R. -/
+structure BalancedPhaseMainLowerLeaf (S R : ℂ → ℂ) where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < m x y
+  bound :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖S z + R z‖
+
+/-- Balanced-phase leaf gives a main lower bound. -/
+def mainLower_from_balanced_phase
+    {main S R : ℂ → ℂ}
+    (split : MainSplitLeaf main S R)
+    (B : BalancedPhaseMainLowerLeaf S R) :
+    MainLowerLeaf main where
+  m := B.m
+  m_pos := B.m_pos
+  bound z hgt hlt hne := by
+    have := B.bound z hgt hlt hne
+    simpa [split.eq z hgt hlt hne] using this
+
+/-!
+## AFENonzeroLeaf implies RH
+-/
+
+theorem zeta_nonzero_from_afe_leaf
+    (L : AFENonzeroLeaf) :
+    ∀ z : ℂ,
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      zeta (shiftedS z) ≠ 0 := by
+  intro z hgt hlt hne hz
+  have hafe := L.afe z hgt hlt hne
+  have hmain_pos := L.main_pos z hgt hlt hne
+  have hsmall := L.error_small z hgt hlt hne
+  have hsum : L.main z + L.error z = 0 := by
+    simpa [hafe] using hz
+  have hnorm_eq : ‖L.main z‖ = ‖L.error z‖ := by
+    have hmain_eq : L.main z = -L.error z := by
+      linear_combination hsum
+    rw [hmain_eq, norm_neg]
+  linarith
+
+theorem rh_from_afe_leaf
+    (L : AFENonzeroLeaf) :
+    RiemannHypothesisProp := by
+  have H : XiOffRealPointwiseNonvanishing := by
+    intro z hgt hlt hne hxi
+    have hs := shiftedS_in_critical_strip z (by linarith) (by linarith)
+    have hpref :
+        classicalXiPrefactor (shiftedS z) ≠ 0 :=
+      classical_prefactor_nonzero_instrip
+        classical_gamma_nonzero_instrip
+        (shiftedS z)
+        hs.1
+        hs.2
+    have hmul :
+        classicalXiPrefactor (shiftedS z) *
+          zeta (shiftedS z) = 0 := by
+      change xiShifted z = 0
+      exact hxi
+    have hzeta : zeta (shiftedS z) = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left hpref
+    exact zeta_nonzero_from_afe_leaf L z (by linarith) (by linarith) hne hzeta
+  exact rh_from_off_real_pointwise_nonvanishing H
+
+/-- AFE parts imply RH. -/
+theorem rh_from_afe_parts
+    {main error : ℂ → ℂ}
+    (P : AFEFromParts main error) :
+    RiemannHypothesisProp :=
+  rh_from_afe_leaf (afeNonzero_from_parts P)
+
+/-!
+## Zeta lower leaf from AFE parts
+-/
+
+structure ZetaLowerFromAFEParts (X : ℝ) where
+  main : ℂ → ℂ
+  error : ℂ → ℂ
+  afe : AFEIdentityLeaf main error
+  main_lower : MainLowerLeaf main
+  error_upper : ErrorUpperLeaf error
+  gap :
+    ∀ x y : ℝ,
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      error_upper.u x y < main_lower.m x y
+
+/-- AFE main lower + error upper gives a zeta lower bound. -/
+def zetaLower_from_afe_parts
+    {X : ℝ}
+    (P : ZetaLowerFromAFEParts X) :
+    ZetaLowerLeaf X where
+  q x y := P.main_lower.m x y - P.error_upper.u x y
+  q_pos x y hx hgt hlt hne := by
+    have hgap := P.gap x y hgt hlt hne
+    have hmpos := P.main_lower.m_pos x y hgt hlt hne
+    linarith
+  bound z htail hgt hlt hne := by
+    have hM := P.main_lower.bound z hgt hlt hne
+    have hE := P.error_upper.bound z hgt hlt hne
+    have hafe := P.afe.eq z hgt hlt hne
+    have hrev :
+        ‖P.main z‖ - ‖P.error z‖ ≤ ‖P.main z + P.error z‖ := by
+      have := norm_sub_norm_le (P.main z) (-P.error z)
+      simpa [sub_eq_add_neg] using this
+    calc
+      P.main_lower.m z.re z.im - P.error_upper.u z.re z.im ≤
+          ‖P.main z‖ - ‖P.error z‖ := by
+        linarith
+      _ ≤ ‖P.main z + P.error z‖ := hrev
+      _ = ‖zeta (shiftedS z)‖ := by
+        rw [← hafe]
+
+/-!
+## Leaf 4: ZerosRealLeaf
+-/
+
+abbrev ZerosRealLeaf := XiShiftedZerosReal
+
+theorem rh_from_zerosRealLeaf
+    (H : ZerosRealLeaf) :
+    RiemannHypothesisProp := by
+  rw [rh_iff_xi_shifted_zeros_real_from_gamma
+    classical_gamma_nonzero_instrip]
+  exact H
+
+/-!
+## ZerosRealLeaf reduces to upper-half nonvanishing
+-/
+
+structure UpperHalfNonvanishingLeaf where
+  nonzero :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0
+
+/-- Upper-half nonvanishing implies zeros are real in the shifted strip. -/
+theorem zerosReal_from_upperHalf
+    (H : UpperHalfNonvanishingLeaf) :
+    ZerosRealLeaf := by
+  intro z hz hgt hlt
+  by_contra hne
+  by_cases hpos : 0 < z.im
+  · exact H.nonzero z hpos hlt hz
+  · have hle : z.im ≤ 0 := not_lt.mp hpos
+    have hneg : z.im < 0 := lt_of_le_of_ne hle hne
+    have hwpos : 0 < (star z).im := by
+      simp [Complex.conj_im]
+      linarith
+    have hwlt : (star z).im < (1 / 2 : ℝ) := by
+      simp [Complex.conj_im]
+      linarith
+    have hwz : xiShifted (star z) = 0 := by
+      rw [classicalXi_symmetry.conj_symm z hgt hlt, hz]
+      simp
+    exact H.nonzero (star z) hwpos hwlt hwz
+
+/-!
+## Upper-half nonvanishing reduces to bounded + tail upper-half
+-/
+
+structure BoundedUpperHalfNonvanishing (X : ℝ) where
+  nonzero :
+    ∀ z : ℂ,
+      |z.re| ≤ X →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0
+
+structure TailUpperHalfNonvanishing (X : ℝ) where
+  nonzero :
+    ∀ z : ℂ,
+      X < |z.re| →
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      xiShifted z ≠ 0
+
+/-- Bounded upper-half nonvanishing + tail upper-half nonvanishing gives full
+upper-half nonvanishing.
+-/
+def upperHalf_from_split
+    {X : ℝ}
+    (B : BoundedUpperHalfNonvanishing X)
+    (T : TailUpperHalfNonvanishing X) :
+    UpperHalfNonvanishingLeaf where
+  nonzero z hy0 hy1 := by
+    by_cases h : |z.re| ≤ X
+    · exact B.nonzero z h hy0 hy1
+    · exact T.nonzero z (not_le.mp h) hy0 hy1
+
+/-- Bounded upper-half + tail upper-half implies RH. -/
+theorem rh_from_upper_half_split
+    {X : ℝ}
+    (B : BoundedUpperHalfNonvanishing X)
+    (T : TailUpperHalfNonvanishing X) :
+    RiemannHypothesisProp :=
+  rh_from_zerosRealLeaf
+    (zerosReal_from_upperHalf
+      (upperHalf_from_split B T))
+
+/-!
+## Upper-half nonvanishing reduces to negative-imaginary sign condition
+-/
+
+structure UpperHalfNegImLeaf where
+  neg_im :
+    ∀ z : ℂ,
+      0 < z.im →
+      z.im < (1 / 2 : ℝ) →
+      (xiShifted z).im < 0
+
+/-- Negative imaginary part in the upper half-strip implies upper-half
+nonvanishing.
+-/
+def upperHalf_from_negIm
+    (H : UpperHalfNegImLeaf) :
+    UpperHalfNonvanishingLeaf where
+  nonzero z hy0 hy1 hz := by
+    have hneg := H.neg_im z hy0 hy1
+    simpa [hz] using hneg
+
+/-- Negative-imaginary sign condition implies RH. -/
+theorem rh_from_upperHalfNegImLeaf
+    (H : UpperHalfNegImLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_zerosRealLeaf
+    (zerosReal_from_upperHalf
+      (upperHalf_from_negIm H))
+
+end LeafDecomp
+
+/-!
+# Completion of the pi-power and Gamma factor leaves
+-/
+
+noncomputable section
+open Complex
+
+namespace LeafDecomp
+
+/-!
+## A useful lemma: norm of a positive real complex power
+
+For x > 0,
+
+  ‖(x : ℂ) ^ s‖ = x ^ s.re
+-/
+private theorem norm_real_cpow_of_pos
+    {x : ℝ}
+    (hx : 0 < x)
+    (s : ℂ) :
+    ‖(x : ℂ) ^ s‖ = x ^ s.re := by
+  have hx' : (x : ℂ) ≠ 0 := by
+    exact_mod_cast hx.ne'
+  rw [Complex.cpow_def_of_ne_zero hx']
+  have hlog :
+      Complex.log (x : ℂ) = (Real.log x : ℂ) :=
+    (Complex.ofReal_log hx.le).symm
+  rw [hlog]
+  simp only [
+    Complex.norm_exp,
+    Complex.mul_re,
+    Complex.ofReal_re,
+    Complex.ofReal_im
+  ]
+  rw [Real.rpow_def_of_pos hx]
+  <;> simp [hx]
+
+/-!
+## Explicit lower bound for the pi-power factor
+
+In the shifted strip,
+
+  shiftedS z = 1/2 + i z
+
+has real part
+
+  Re(shiftedS z) = 1/2 - Im z.
+
+Since -1/2 < Im z < 1/2, we have
+
+  0 < Re(shiftedS z) < 1.
+
+Therefore
+
+  ‖π^(-shiftedS z / 2)‖
+    = π^(-Re(shiftedS z)/2)
+    ≥ π^(-1/2).
+-/
+private theorem fPi_lower_bound
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    Real.pi ^ (-(1 / 2 : ℝ)) ≤ ‖fPi z‖ := by
+  have hnorm :
+      ‖fPi z‖ =
+        Real.pi ^ (-(shiftedS z / 2)).re := by
+    dsimp [fPi]
+    rw [norm_real_cpow_of_pos Real.pi_pos]
+  rw [hnorm]
+  have hre_neg :
+      (-(shiftedS z / 2)).re =
+        - (shiftedS z).re / 2 := by
+    simp [
+      Complex.neg_re,
+      Complex.div_re,
+      Complex.ofReal_re,
+      Complex.ofReal_im,
+      Complex.normSq_ofReal
+    ]
+    ring
+  rw [hre_neg, shiftedS_re]
+  have hexp :
+      -(1 / 2 : ℝ) ≤
+        -((1 / 2 : ℝ) - z.im) / 2 := by
+    linarith
+  exact
+    Real.rpow_le_rpow_of_exponent_le
+      (by linarith [Real.pi_gt_three])
+      hexp
+
+/-- A genuine explicit lower bound for the pi-power factor.
+
+This completes:
+
+  LeafDecomp.PiFactorLowerLeaf X
+
+with the constant lower bound
+
+  π^(-1/2).
+-/
+noncomputable def piFactorLower
+    (X : ℝ) :
+    PiFactorLowerLeaf X where
+  l := fun _ _ => Real.pi ^ (-(1 / 2 : ℝ))
+  l_pos := by
+    intro x y hx hgt hlt hne
+    positivity
+  bound := by
+    intro z htail hgt hlt hne
+    exact fPi_lower_bound z hgt hlt
+
+/-!
+## Gamma factor: unconditional tautological completion
+
+We know Γ(s/2) ≠ 0 whenever Re(s) > 0. In the shifted strip,
+
+  Re(shiftedS z) = 1/2 - Im z > 0,
+
+so Γ(shiftedS z / 2) is nonzero.
+
+Thus
+
+  0 < ‖Γ(shiftedS z / 2)‖,
+
+and therefore
+
+  ‖Γ(shiftedS z / 2)‖ / 2 ≤ ‖Γ(shiftedS z / 2)‖.
+
+This gives a valid TailFactorLower, but it is tautological: it merely repackages
+positivity of the Gamma norm.
+-/
+noncomputable def gammaFactorLower_tautological
+    (X : ℝ) :
+    GammaFactorLowerLeaf X where
+  l := fun x y =>
+    ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ / 2
+  l_pos := by
+    intro x y hx hgt hlt hne
+    have hs_pos :
+        0 <
+          (shiftedS ((x : ℂ) + I * (y : ℂ))).re := by
+      rw [shiftedS_re]
+      simp [
+        Complex.add_im,
+        Complex.mul_im,
+        Complex.I_re,
+        Complex.I_im
+      ]
+      linarith
+    have hGamma_ne :
+        fGamma ((x : ℂ) + I * (y : ℂ)) ≠ 0 := by
+      dsimp [fGamma]
+      exact
+        Complex.Gamma_ne_zero_of_re_pos
+          _
+          (half_re_pos hs_pos)
+    have hnorm :
+        0 < ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ :=
+      norm_pos_iff.mpr hGamma_ne
+    show 0 < ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ / 2
+    positivity
+  bound := by
+    intro z htail hgt hlt hne
+    have hz :
+        (z.re : ℂ) + I * (z.im : ℂ) = z := by
+      rw [mul_comm I]
+      exact Complex.re_add_im z
+    have h :
+        ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ / 2 ≤
+          ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ := by
+      have hnorm :
+          0 ≤
+            ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ :=
+        norm_nonneg _
+      rw [div_le_iff (by norm_num : (0 : ℝ) < 2)]
+      linarith
+    simpa [hz] using h
+
+/-!
+## Convenience names
+-/
+
+/-- Completed pi-power factor leaf. -/
+noncomputable def completedPiFactorLowerLeaf
+    (X : ℝ) :
+    PiFactorLowerLeaf X :=
+  piFactorLower X
+
+/-- Completed Gamma factor leaf, tautological but valid. -/
+noncomputable def completedGammaFactorLowerLeaf
+    (X : ℝ) :
+    GammaFactorLowerLeaf X :=
+  gammaFactorLower_tautological X
+
+/-- Prefactor lower bound using the completed pi and Gamma leaves.
+
+This still requires `0 ≤ X` for the proved `s` and `s - 1` factor lower
+bounds from the earlier block.
+-/
+noncomputable def prefactorLower_completed_tautological
+    {X : ℝ}
+    (hX : 0 ≤ X) :
+    PrefactorLowerLeaf X :=
+  prefactorLower_from_pi_gamma
+    hX
+    (piFactorLower X)
+    (gammaFactorLower_tautological X)
+
+/-- If you also have a zeta lower bound, you get a tail xi lower bound. -/
+noncomputable def tailXiLower_from_completed_prefactor_and_zeta
+    {X : ℝ}
+    (hX : 0 ≤ X)
+    (Z : ZetaLowerLeaf X) :
+    TailXiLower X :=
+  tailXiLower_from_prefactor_zeta
+    (prefactorLower_completed_tautological hX)
+    Z
+
+/-!
+## Useful explicit Gamma/Stirling-shaped leaf
+
+The tautological Gamma completion above is not analytically useful for RH.
+A useful replacement would be a Stirling-type lower bound, for example:
+
+  c * exp(-α |Re z|) / (|Re z| + 1)^β
+    ≤ ‖Γ(shiftedS z / 2)‖.
+
+This structure names that analytic obligation.
+-/
+structure GammaStirlingLowerLeaf (X : ℝ) where
+  c : ℝ
+  α : ℝ
+  β : ℝ
+  c_pos : 0 < c
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      c * Real.exp (-α * |z.re|) / (|z.re| + 1) ^ β ≤
+        ‖fGamma z‖
+
+/-- Convert an explicit Stirling-style Gamma lower bound into a
+`GammaFactorLowerLeaf`.
+-/
+noncomputable def gammaFactorLower_from_stirling
+    {X : ℝ}
+    (S : GammaStirlingLowerLeaf X) :
+    GammaFactorLowerLeaf X where
+  l x y :=
+    S.c * Real.exp (-S.α * |x|) / (|x| + 1) ^ S.β
+  l_pos := by
+    intro x y hx hgt hlt hne
+    positivity
+  bound := by
+    intro z htail hgt hlt hne
+    exact S.bound z htail hgt hlt hne
+
+/-- If a Stirling Gamma leaf is supplied, the prefactor lower bound becomes
+analytically meaningful.
+-/
+noncomputable def prefactorLower_from_stirling_gamma
+    {X : ℝ}
+    (hX : 0 ≤ X)
+    (S : GammaStirlingLowerLeaf X) :
+    PrefactorLowerLeaf X :=
+  prefactorLower_from_pi_gamma
+    hX
+    (piFactorLower X)
+    (gammaFactorLower_from_stirling S)
+
+end LeafDecomp
+
+end
