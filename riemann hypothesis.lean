@@ -4480,11 +4480,43 @@ theorem exists_finite_imaginary_segment_zero_free_cover
   let I : Set ℝ := Set.Icc a b
   have hI : IsCompact I := isCompact_Icc
 
-  choose R hR using fun y hy =>
-    exists_zero_free_rect_struct_around_imag_point hReal y
-      (by intro h; linarith [hy.1, h])
-      (by linarith [hy.1])
-      (by linarith [hy.2])
+  have hy_ne (y : ℝ) (hy : y ∈ I) : y ≠ 0 := by intro h; linarith [hy.1, h]
+  have hy_gt (y : ℝ) (hy : y ∈ I) : -(1 / 2 : ℝ) < y := by linarith [hy.1]
+  have hy_lt (y : ℝ) (hy : y ∈ I) : y < (1 / 2 : ℝ) := by linarith [hy.2]
+
+  have hR_all : ∀ y, y ∈ I → ∃ R : XiLocalZeroFreeRect,
+      R.x0 < 0 ∧
+      0 < R.x1 ∧
+      R.y0 < y ∧
+      y < R.y1 ∧
+      ∀ z : ℂ,
+        R.x0 < z.re →
+        z.re < R.x1 →
+        R.y0 < z.im →
+        z.im < R.y1 →
+        xiShifted z ≠ 0 :=
+    fun y hy => exists_zero_free_rect_struct_around_imag_point hReal y
+      (hy_ne y hy) (hy_gt y hy) (hy_lt y hy)
+
+  have a_mem : a ∈ I := Set.mem_Icc.mpr ⟨le_refl a, hab⟩
+
+  let R (y : ℝ) : XiLocalZeroFreeRect :=
+    if hy : y ∈ I then (hR_all y hy).choose else (hR_all a a_mem).choose
+
+  have hR : ∀ y (hy : y ∈ I),
+      (R y).x0 < 0 ∧
+      0 < (R y).x1 ∧
+      (R y).y0 < y ∧
+      y < (R y).y1 ∧
+      ∀ z : ℂ,
+        (R y).x0 < z.re →
+        z.re < (R y).x1 →
+        (R y).y0 < z.im →
+        z.im < (R y).y1 →
+        xiShifted z ≠ 0 := by
+    intro y hy
+    simp only [R, hy, ite_true]
+    exact (hR_all y hy).choose_spec
 
   let V (y : ℝ) : Set ℝ := Set.Ioo (R y).y0 (R y).y1
 
@@ -4500,35 +4532,34 @@ theorem exists_finite_imaginary_segment_zero_free_cover
     have h := hR y hy
     exact ⟨h.2.2.1, h.2.2.2.1⟩
 
-  obtain ⟨C', hC'sub, hC'fin, hcover'⟩ :=
-    hI.elim_finite_subcover hC_open hcover
+  have hsU : I ⊆ ⋃ i : ↥C, (i : Set ℝ) := by
+    intro x hx
+    obtain ⟨U, hU, hxU⟩ := hcover hx
+    exact Set.mem_iUnion.2 ⟨⟨U, hU⟩, hxU⟩
 
-  obtain ⟨F, hF⟩ := hC'fin.exists_finset
+  obtain ⟨F, hF_cover⟩ :=
+    hI.elim_finite_subcover (Subtype.val : ↥C → Set ℝ)
+      (fun i => hC_open i i.2)
+      hsU
 
-  let y_of_U (U : Set ℝ) (hU : U ∈ F) : ℝ :=
-    Classical.choose
-      (by
-        have : U ∈ C' := by
-          rw [← hF]
-          exact Finset.mem_coe.mpr hU
-        exact hC'sub this)
+  let y_of_U (U : C) : ℝ :=
+    Classical.choose U.2
 
   have hy_of_U :
-      ∀ U hU,
-        y_of_U U hU ∈ I ∧ U = V (y_of_U U hU) := by
-    intro U hU
-    exact Classical.choose_spec _
+      ∀ U : C,
+        y_of_U U ∈ I ∧ (U : Set ℝ) = V (y_of_U U) :=
+    fun U => Classical.choose_spec U.2
 
   let rects : List XiLocalZeroFreeRect :=
-    F.attach.toList.map
-      (fun U => R (y_of_U U.1 U.2))
+    F.toList.map
+      (fun U => R (y_of_U U))
 
   have hrects : ∀ R' ∈ rects, R'.x0 < 0 ∧ 0 < R'.x1 := by
     intro R' hR'
-    rw [rects, List.mem_map] at hR'
-    rcases hR' with ⟨⟨U, hU⟩, _, rfl⟩
-    have hy := (hy_of_U U hU).1
-    have h := hR (y_of_U U hU) hy
+    simp only [rects, List.mem_map] at hR'
+    rcases hR' with ⟨U, _, rfl⟩
+    have hy := (hy_of_U U).1
+    have h := hR (y_of_U U) hy
     exact ⟨h.1, h.2.1⟩
 
   have covers_y :
@@ -4539,19 +4570,16 @@ theorem exists_finite_imaginary_segment_zero_free_cover
           R'.y0 < y ∧ y < R'.y1 := by
     intro y hay hyb
     have hyI : y ∈ I := ⟨hay, hyb⟩
-    have hycover : y ∈ ⋃₀ C' := hcover' hyI
-    rcases hycover with ⟨U, hU, hyU⟩
-    have hUF : U ∈ F := by
-      rw [← hF] at hU
-      exact Finset.mem_coe.mp hU
-    let yU := y_of_U U hUF
-    have hyU_spec := hy_of_U U hUF
+    have hycover : y ∈ ⋃ i ∈ F, (i : Set ℝ) := hF_cover hyI
+    obtain ⟨U, hU, hyU⟩ := Set.mem_iUnion₂.mp hycover
+    have hUF : (U : ↥C) ∈ F := hU
+    let yU := y_of_U U
+    have hyU_spec := hy_of_U U
     refine ⟨R yU, ?_, ?_⟩
-    · rw [rects, List.mem_map]
-      refine ⟨⟨U, hUF⟩, ?_, rfl⟩
-      rw [Finset.mem_toList]
-      exact Finset.mem_attach.mpr hUF
-    · rw [← hyU_spec.2] at hyU
+    · simp only [rects, List.mem_map]
+      exact ⟨U, Finset.mem_toList.mpr hU, rfl⟩
+    · change y ∈ V yU
+      rw [← hyU_spec.2]
       exact hyU
 
   exact
@@ -5773,11 +5801,13 @@ noncomputable def tailRoucheCertificate_from_completedZeta_small_bound
           mul_le_mul_of_nonneg_left
             (B.bound z htail hgt hlt hne)
             (by positivity)
-      _ < (1 / 2 : ℝ) := by
+      _ < ‖(1 / 2 : ℂ)‖ := by
         have hsmall := B.small z.re z.im htail hgt hlt hne
         have hz2 : z ^ 2 = ((z.re : ℂ) + I * (z.im : ℂ)) ^ 2 :=
           congr_arg (· ^ 2) (by rw [mul_comm Complex.I, Complex.re_add_im])
         rw [hz2]
+        have hnorm : ‖(1/2:ℂ)‖ = (1/2:ℝ) := by norm_num
+        rw [hnorm]
         exact hsmall
 
 /-- A sufficiently small completed-zeta tail bound gives pointwise tail
@@ -6070,7 +6100,7 @@ def tailCompletedZetaSmallBound_from_cubic_bound
     have hbase : 0 < |r| + 1 := by positivity
     have hX1 : 0 < X + 1 := by linarith [B.X_nonneg]
 
-    have hU_nonneg : 0 ≤ B.C / (|r| + 1) ^ 3 := by positivity
+    have hU_nonneg : 0 ≤ B.C / (|r| + 1) ^ 3 := div_nonneg B.C_nonneg (by positivity)
 
     have habs_ge : X ≤ |r| := by
       cases htail with
@@ -6088,18 +6118,16 @@ def tailCompletedZetaSmallBound_from_cubic_bound
           (B.C / (|r| + 1) ^ 3) ≤
           (((|r| + 1) ^ 2) / 2) *
             (B.C / (|r| + 1) ^ 3) := by
-        exact mul_le_mul_of_nonneg_right (by gcongr) hU_nonneg
+        exact mul_le_mul_of_nonneg_right (by rw [div_le_div_iff_of_pos_right (by norm_num : (0:ℝ) < 2)]; unfold tailD at hD; exact hD) hU_nonneg
       _ = B.C / (2 * (|r| + 1)) := by
         field_simp [pow_succ, pow_two, hbase.ne']
-        ring
       _ ≤ B.C / (2 * (X + 1)) := by
-        rw [div_le_div_iff (by positivity) (by positivity)]
-        nlinarith [habs_ge]
+        exact div_le_div_of_nonneg_left B.C_nonneg (by positivity) (by linarith [habs_ge])
       _ < 1 / 2 := by
         have hsmall := B.small
-        rw [div_lt_iff hX1] at hsmall
-        rw [div_lt_iff (by positivity)]
-        nlinarith
+        have hBC : B.C < X + 1 := (div_lt_one hX1).mp hsmall
+        field_simp
+        linarith [hBC]
 
 /-- A simple complete RH certificate using a cubic completed-zeta tail
     bound. -/
@@ -6135,7 +6163,7 @@ lemma zsq_add_quarter_ne_zero
     calc
       z ^ 2 + (1 / 4 : ℂ) =
           z ^ 2 - (I * (1 / 2 : ℂ)) ^ 2 := by
-        simp [Complex.I_sq]
+        rw [mul_pow, Complex.I_sq, pow_two]
         ring
       _ = (z - I * (1 / 2 : ℂ)) * (z + I * (1 / 2 : ℂ)) := by
         ring
@@ -6225,18 +6253,17 @@ def tailUnitCert_of_bound
           (1 / 2 : ℝ) +
             (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
               ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ := by
-        simp [norm_mul, norm_div, Complex.norm_ofReal]
-        ring
+        simp [norm_mul, norm_div, RCLike.norm_ofReal]
       _ ≤
           (1 / 2 : ℝ) +
             (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
               (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) := by
-        exact
-          add_le_add_left
-            (mul_le_mul_of_nonneg_left hbound (by positivity))
-            _
+        have h1 : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) ≥ 0 := by
+          exact div_nonneg (norm_nonneg _) (by norm_num)
+        have h2 := mul_le_mul_of_nonneg_left hbound h1
+        exact add_le_add_left h2 _
       _ = (5 / 8 : ℝ) := by
-        field_simp [hDpos.ne']
+        field_simp [add_comm (1/4 : ℂ) (z^2), hDpos.ne']
         ring
       _ < 1 := by
         norm_num
@@ -6283,20 +6310,21 @@ theorem proposed_bound_implies_xiShifted_uniform_lower_bound
   have hAnorm :
       ‖(D / 2) * C‖ =
         (‖D‖ / 2) * ‖C‖ := by
-    simp [D, C, norm_mul, norm_div, Complex.norm_ofReal]
+    simp [D, C, norm_mul, norm_div, RCLike.norm_ofReal]
 
   have hreverse :
       (1 / 2 : ℝ) - (‖D‖ / 2) * ‖C‖ ≤
         ‖(1 / 2 : ℂ) - (D / 2) * C‖ := by
     have := norm_sub_norm_le (1 / 2 : ℂ) ((D / 2) * C)
     simp [hAnorm] at this
-    exact this
+    linarith
 
   calc
     (3 / 8 : ℝ) =
         (1 / 2 : ℝ) -
           (‖D‖ / 2) * (1 / (4 * ‖D‖)) := by
-      field_simp [hDpos.ne']
+      have hne : (‖D‖ : ℝ) ≠ 0 := hDpos.ne'
+      field_simp [hne]
       ring
     _ ≤
         (1 / 2 : ℝ) -
@@ -6304,7 +6332,7 @@ theorem proposed_bound_implies_xiShifted_uniform_lower_bound
       have hprod :
           (‖D‖ / 2) * ‖C‖ ≤
             (‖D‖ / 2) * (1 / (4 * ‖D‖)) :=
-        mul_le_mul_of_nonneg_left hbound (by positivity)
+        mul_le_mul_of_nonneg_left hbound (by exact mul_nonneg (norm_nonneg D) (by norm_num))
       linarith
     _ ≤
         ‖(1 / 2 : ℂ) - (D / 2) * C‖ :=
@@ -6472,6 +6500,7 @@ We prove the explicit tail bound
 for Re z > 10 and |Im z| < 1/2.
 
 This is a genuine analytic inequality, and it is fully proved below.
+-/
 -/
 
 noncomputable section
