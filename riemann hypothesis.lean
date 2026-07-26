@@ -3446,8 +3446,11 @@ theorem norm_z_sq_add_quarter_le
       _ ≤ R + S :=
         add_le_add hre him
 
-  have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 :=
-    mul_le_mul hnorm hnorm (norm_nonneg z) (add_nonneg hR hS)
+  have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 := by
+    have h1 : 0 ≤ ‖z‖ := norm_nonneg z
+    have h2 : 0 ≤ R + S := by linarith
+    rw [pow_two, pow_two]
+    exact mul_le_mul hnorm hnorm h1 h2
 
   calc
     ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
@@ -4042,8 +4045,7 @@ theorem hardDifferenceNonzero_implies_RH :
   intro hz
   have hdiff := H z hgt' hlt' hne
   rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt' hlt' hne, hz] at hdiff
-  field_simp [hD] at hdiff
-  exact hdiff rfl
+  exact hdiff (by norm_num)
 
 /-- RH implies the hard difference-nonzero statement. -/
 theorem RH_implies_hardDifferenceNonzero :
@@ -5541,3 +5543,82 @@ def modulusEvidence_from_rectModulusBound
       ε_pos := hm
       lower_bound := B.bound
     }
+/-!
+# Tail nonvanishing by comparison / Rouché-style estimate
+
+If in the tails we can compare `xiShifted` with a function `g` satisfying:
+
+    ‖xiShifted z - g z‖ < ‖g z‖,
+
+then `xiShifted z` cannot vanish there.
+-/
+
+structure TailRoucheCertificate (X : ℝ) where
+  g : ℂ → ℂ
+  g_ne_zero :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      g z ≠ 0
+  comparison :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖xiShifted z - g z‖ < ‖g z‖
+
+/-- A tail Rouché certificate gives pointwise tail nonvanishing. -/
+def tailPointwise_from_rouche_certificate
+    {X : ℝ}
+    (C : TailRoucheCertificate X) :
+    XiTailPointwiseNonvanishingForX X where
+  right_nonvanishing := by
+    intro z hright hgt hlt hne hz
+    have hcomp := C.comparison z (Or.inl hright) hgt hlt hne
+    rw [hz, zero_sub, norm_neg] at hcomp
+    exact lt_irrefl _ hcomp
+  left_nonvanishing := by
+    intro z hleft hgt hlt hne hz
+    have hcomp := C.comparison z (Or.inr hleft) hgt hlt hne
+    rw [hz, zero_sub, norm_neg] at hcomp
+    exact lt_irrefl _ hcomp
+
+/-- A convenient special case: comparison with the constant function 1.
+
+If
+
+    ‖xiShifted z - 1‖ < 1
+
+in the tail, then xiShifted is nonzero there.
+-/
+structure TailUnitComparisonCertificate (X : ℝ) where
+  comparison :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖xiShifted z - 1‖ < 1
+
+/-- Convert a unit-comparison tail certificate into a Rouché certificate. -/
+def tailRoucheCertificate_from_unit_comparison
+    {X : ℝ}
+    (C : TailUnitComparisonCertificate X) :
+    TailRoucheCertificate X where
+  g := fun _ => 1
+  g_ne_zero := by
+    intro z _ _ _ _
+    norm_num
+  comparison := C.comparison
+
+/-- A unit-comparison tail certificate gives pointwise tail
+    nonvanishing. -/
+def tailPointwise_from_unit_comparison
+    {X : ℝ}
+    (C : TailUnitComparisonCertificate X) :
+    XiTailPointwiseNonvanishingForX X :=
+  tailPointwise_from_rouche_certificate
+    (tailRoucheCertificate_from_unit_comparison C)
