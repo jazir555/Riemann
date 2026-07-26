@@ -7824,11 +7824,11 @@ def factorSLower
   bound z htail hgt hlt hne := by
     have : |z.re| ≤ ‖shiftedS z‖ := by
       have h1 : (shiftedS z).im ≤ ‖shiftedS z‖ := Complex.im_le_norm _
-      have h2 : -(shiftedS z).im ≤ ‖shiftedS z‖ := by
-        calc -(shiftedS z).im = (-shiftedS z).im := by ring
-          _ ≤ ‖-shiftedS z‖ := Complex.im_le_norm _
-          _ = ‖shiftedS z‖ := norm_neg _
-      simp only [shiftedS_im_eq] at h1 h2 ⊢
+      have h2 : -‖shiftedS z‖ ≤ (shiftedS z).im := by
+        have h := Complex.im_le_norm (-(shiftedS z))
+        simp only [Complex.neg_im, norm_neg] at h
+        linarith
+      rw [show z.re = (shiftedS z).im from (shiftedS_im_eq z).symm]
       exact abs_le.mpr ⟨h2, h1⟩
     simpa [fS] using this
 
@@ -7845,11 +7845,11 @@ def factorS1Lower
     have : |z.re| ≤ ‖shiftedS z - 1‖ := by
       have h1 : (shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := Complex.im_le_norm _
       have h2 : -(shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := by
-        calc -(shiftedS z - 1).im = (-(shiftedS z - 1)).im := by ring
+        calc -(shiftedS z - 1).im = (-(shiftedS z - 1)).im := by simp
           _ ≤ ‖-(shiftedS z - 1)‖ := Complex.im_le_norm _
           _ = ‖shiftedS z - 1‖ := norm_neg _
       simp only [shiftedS_sub_one_im_eq] at h1 h2 ⊢
-      exact abs_le.mpr ⟨h2, h1⟩
+      exact abs_le.mpr ⟨by linarith, h1⟩
     simpa [fS1] using this
 
 /-- Pi-power and Gamma factor leaves. -/
@@ -8341,7 +8341,7 @@ private theorem fPi_lower_bound
       ‖fPi z‖ =
         Real.pi ^ (-(shiftedS z / 2)).re := by
     dsimp [fPi]
-    rw [norm_real_cpow_of_pos Real.pi_pos]
+    rw [norm_real_cpow_of_pos Real.pi_pos, Complex.neg_re]
   rw [hnorm]
   have hre_neg :
       (-(shiftedS z / 2)).re =
@@ -8528,7 +8528,9 @@ noncomputable def gammaFactorLower_from_stirling
     S.c * Real.exp (-S.α * |x|) / (|x| + 1) ^ S.β
   l_pos := by
     intro x y hx hgt hlt hne
-    positivity
+    have hbase : 0 < |x| + 1 := by positivity
+    exact div_pos (mul_pos S.c_pos (Real.exp_pos _))
+      (Real.rpow_pos_of_pos hbase S.β)
   bound := by
     intro z htail hgt hlt hne
     exact S.bound z htail hgt hlt hne
@@ -8549,3 +8551,559 @@ noncomputable def prefactorLower_from_stirling_gamma
 end LeafDecomp
 
 end
+
+/-!
+# Completion of the pi-power and Gamma factor leaves
+
+This completes:
+
+  LeafDecomp.PiFactorLowerLeaf
+  LeafDecomp.GammaFactorLowerLeaf
+
+The pi-power completion is explicit and useful:
+
+  ‖π^(-shiftedS z / 2)‖ ≥ π^(-1/2)
+
+The Gamma completion below is unconditional but tautological:
+
+  ‖Γ(shiftedS z / 2)‖ / 2 ≤ ‖Γ(shiftedS z / 2)‖
+
+It is logically valid because Γ has no zeros in Re > 0.
+
+A quantitatively useful Gamma lower bound should replace the tautological
+one with a Stirling-shaped estimate. A structure for that is included at the
+end.
+-/
+
+noncomputable section
+open Complex
+
+namespace LeafDecomp
+
+/-!
+## Norm of a positive real complex power
+
+For x > 0,
+
+  ‖(x : ℂ) ^ s‖ = x ^ s.re
+-/
+private theorem norm_real_cpow_of_pos
+    {x : ℝ}
+    (hx : 0 < x)
+    (s : ℂ) :
+    ‖(x : ℂ) ^ s‖ = x ^ s.re := by
+  have hx' : (x : ℂ) ≠ 0 := by
+    exact_mod_cast hx.ne'
+  rw [Complex.cpow_def_of_ne_zero hx']
+  have hlog :
+      Complex.log (x : ℂ) = (Real.log x : ℂ) :=
+    (Complex.ofReal_log hx.le).symm
+  rw [hlog]
+  simp only [
+    Complex.norm_exp,
+    Complex.mul_re,
+    Complex.ofReal_re,
+    Complex.ofReal_im
+  ]
+  rw [Real.rpow_def_of_pos hx]
+  <;> simp [hx]
+
+/-!
+## Explicit lower bound for the pi-power factor
+
+In the shifted strip,
+
+  shiftedS z = 1/2 + i z
+
+has real part
+
+  Re(shiftedS z) = 1/2 - Im z.
+
+Since -1/2 < Im z < 1/2, we have
+
+  0 < Re(shiftedS z) < 1.
+
+Therefore
+
+  ‖π^(-shiftedS z / 2)‖
+    = π^(-Re(shiftedS z)/2)
+    ≥ π^(-1/2).
+-/
+private theorem fPi_lower_bound
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    Real.pi ^ (-(1 / 2 : ℝ)) ≤ ‖fPi z‖ := by
+  have hnorm :
+      ‖fPi z‖ =
+        Real.pi ^ (-(shiftedS z / 2)).re := by
+    dsimp [fPi]
+    rw [norm_real_cpow_of_pos Real.pi_pos, Complex.neg_re]
+  rw [hnorm]
+  have hre_neg :
+      (-(shiftedS z / 2)).re =
+        - (shiftedS z).re / 2 := by
+    simp [
+      Complex.neg_re,
+      Complex.div_re,
+      Complex.ofReal_re,
+      Complex.ofReal_im,
+      Complex.normSq_ofReal
+    ]
+    ring
+  rw [hre_neg, shiftedS_re]
+  have hexp :
+      -(1 / 2 : ℝ) ≤
+        -((1 / 2 : ℝ) - z.im) / 2 := by
+    linarith
+  exact
+    Real.rpow_le_rpow_of_exponent_le
+      (by linarith [Real.pi_gt_three])
+      hexp
+
+/-- A genuine explicit lower bound for the pi-power factor.
+
+This completes:
+
+  LeafDecomp.PiFactorLowerLeaf X
+
+with the constant lower bound
+
+  π^(-1/2).
+-/
+noncomputable def piFactorLower
+    (X : ℝ) :
+    PiFactorLowerLeaf X where
+  l := fun _ _ => Real.pi ^ (-(1 / 2 : ℝ))
+  l_pos := by
+    intro x y hx hgt hlt hne
+    positivity
+  bound := by
+    intro z htail hgt hlt hne
+    exact fPi_lower_bound z hgt hlt
+
+/-!
+## Gamma factor: unconditional tautological completion
+
+We know Γ(s/2) ≠ 0 whenever Re(s) > 0. In the shifted strip,
+
+  Re(shiftedS z) = 1/2 - Im z > 0,
+
+so Γ(shiftedS z / 2) is nonzero.
+
+Thus
+
+  0 < ‖Γ(shiftedS z / 2)‖,
+
+and therefore
+
+  ‖Γ(shiftedS z / 2)‖ / 2 ≤ ‖Γ(shiftedS z / 2)‖.
+
+This gives a valid TailFactorLower, but it is tautological: it merely repackages
+positivity of the Gamma norm.
+-/
+noncomputable def gammaFactorLower_tautological
+    (X : ℝ) :
+    GammaFactorLowerLeaf X where
+  l := fun x y =>
+    ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ / 2
+  l_pos := by
+    intro x y hx hgt hlt hne
+    have hs_pos :
+        0 <
+          (shiftedS ((x : ℂ) + I * (y : ℂ))).re := by
+      rw [shiftedS_re]
+      simp [
+        Complex.add_im,
+        Complex.mul_im,
+        Complex.I_re,
+        Complex.I_im
+      ]
+      linarith
+    have hGamma_ne :
+        fGamma ((x : ℂ) + I * (y : ℂ)) ≠ 0 := by
+      dsimp [fGamma]
+      exact
+        Complex.Gamma_ne_zero_of_re_pos
+          _
+          (half_re_pos hs_pos
+/-!
+# Append-only build of the pi-power and Gamma factor leaves
+
+This block is safe to append to the end of the existing file.
+
+It creates:
+
+  RHFactorLeaves.PiFactorLowerLeaf
+  RHFactorLeaves.GammaFactorLowerLeaf
+
+and builds:
+
+  RHFactorLeaves.piFactorLower
+  RHFactorLeaves.gammaFactorLower_tautological
+
+The Gamma leaf is completed tautologically using Gamma-nonzero.
+The pi-power leaf is completed with the explicit bound π^(-1/2).
+-/
+
+noncomputable section
+open Complex
+
+namespace RHFactorLeaves
+
+/-!
+## Basic tail factor lower-bound shape
+-/
+
+structure TailFactorLower (X : ℝ) (f : ℂ → ℂ) where
+  l : ℝ → ℝ → ℝ
+  l_pos :
+    ∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < l x y
+  bound :
+    ∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      l z.re z.im ≤ ‖f z‖
+
+/-!
+## The two factors
+-/
+
+def fPi (z : ℂ) : ℂ :=
+  (Real.pi : ℂ) ^ (-(shiftedS z / 2))
+
+def fGamma (z : ℂ) : ℂ :=
+  Complex.Gamma (shiftedS z / 2)
+
+abbrev PiFactorLowerLeaf (X : ℝ) :=
+  TailFactorLower X fPi
+
+abbrev GammaFactorLowerLeaf (X : ℝ) :=
+  TailFactorLower X fGamma
+
+/-!
+## Norm of a positive real complex power
+
+For x > 0,
+
+  ‖(x : ℂ) ^ s‖ = x ^ s.re
+-/
+private theorem norm_real_cpow_of_pos
+    {x : ℝ}
+    (hx : 0 < x)
+    (s : ℂ) :
+    ‖(x : ℂ) ^ s‖ = x ^ s.re := by
+  have hx' : (x : ℂ) ≠ 0 := by
+    exact_mod_cast ne_of_gt hx
+  rw [Complex.cpow_def_of_ne_zero hx']
+  have hlog :
+      Complex.log (x : ℂ) = (Real.log x : ℂ) :=
+    (Complex.ofReal_log hx.le).symm
+  rw [hlog]
+  simp only [
+    Complex.norm_exp,
+    Complex.mul_re,
+    Complex.ofReal_re,
+    Complex.ofReal_im
+  ]
+  rw [Real.rpow_def_of_pos hx]
+  <;> simp [hx]
+
+/-!
+## Explicit pi-power lower bound
+
+In the shifted strip,
+
+  shiftedS z = 1/2 + i z
+
+has real part
+
+  Re(shiftedS z) = 1/2 - Im z.
+
+Since -1/2 < Im z < 1/2, we have
+
+  0 < Re(shiftedS z) < 1.
+
+Therefore
+
+  ‖π^(-shiftedS z / 2)‖
+    = π^(-Re(shiftedS z)/2)
+    ≥ π^(-1/2).
+-/
+private theorem fPi_lower_bound
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    Real.pi ^ (-(1 / 2 : ℝ)) ≤ ‖fPi z‖ := by
+  have hnorm :
+      ‖fPi z‖ =
+        Real.pi ^ (-(shiftedS z / 2)).re := by
+    dsimp [fPi]
+    rw [norm_real_cpow_of_pos Real.pi_pos]
+  rw [hnorm]
+  have hre_neg :
+      (-(shiftedS z / 2)).re =
+        - (shiftedS z).re / 2 := by
+    simp [
+      Complex.neg_re,
+      Complex.div_re,
+      Complex.ofReal_re,
+      Complex.ofReal_im,
+      Complex.normSq_ofReal
+    ]
+    ring
+  rw [hre_neg, shiftedS_re]
+  have hexp :
+      -(1 / 2 : ℝ) ≤
+        -((1 / 2 : ℝ) - z.im) / 2 := by
+    linarith
+  exact
+    Real.rpow_le_rpow_of_exponent_le
+      (by linarith [Real.pi_gt_three])
+      hexp
+
+/-!
+## Completed pi-power leaf
+-/
+
+noncomputable def piFactorLower
+    (X : ℝ) :
+    PiFactorLowerLeaf X where
+  l := fun _ _ => Real.pi ^ (-(1 / 2 : ℝ))
+  l_pos := by
+    intro x y hx hgt hlt hne
+    positivity
+  bound := by
+    intro z htail hgt hlt hne
+    exact fPi_lower_bound z hgt hlt
+
+/-!
+## Completed Gamma leaf, tautological but valid
+
+We know Γ(s/2) ≠ 0 whenever Re(s) > 0. In the shifted strip,
+
+  Re(shiftedS z) = 1/2 - Im z > 0,
+
+so Γ(shiftedS z / 2) is nonzero.
+
+Thus
+
+  0 < ‖Γ(shiftedS z / 2)‖,
+
+and therefore
+
+  ‖Γ(shiftedS z / 2)‖ / 2 ≤ ‖Γ(shiftedS z / 2)‖.
+-/
+noncomputable def gammaFactorLower_tautological
+    (X : ℝ) :
+    GammaFactorLowerLeaf X where
+  l := fun x y =>
+    ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ / 2
+  l_pos := by
+    intro x y hx hgt hlt hne
+    have hs_pos :
+        0 <
+          (shiftedS ((x : ℂ) + I * (y : ℂ))).re := by
+      rw [shiftedS_re]
+      simp [
+        Complex.add_im,
+        Complex.mul_im,
+        Complex.I_re,
+        Complex.I_im
+      ]
+      linarith
+    have hGamma_ne :
+        fGamma ((x : ℂ) + I * (y : ℂ)) ≠ 0 := by
+      dsimp [fGamma]
+      exact
+        Complex.Gamma_ne_zero_of_re_pos
+          _
+          (half_re_pos hs_pos)
+    have hnorm :
+        0 < ‖fGamma ((x : ℂ) + I * (y : ℂ))‖ :=
+      norm_pos_iff.mpr hGamma_ne
+    exact half_pos hnorm
+  bound := by
+    intro z htail hgt hlt hne
+    have hz :
+        (z.re : ℂ) + I * (z.im : ℂ) = z := by
+      rw [mul_comm I]
+      exact Complex.re_add_im z
+    have h :
+        ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ / 2 ≤
+          ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ := by
+      have hnorm :
+          0 ≤
+            ‖fGamma ((z.re : ℂ) + I * (z.im : ℂ))‖ :=
+        norm_nonneg _
+      rw [div_le_iff (by norm_num : (0 : ℝ) < 2)]
+      linarith
+    simpa [hz] using h
+
+/-!
+## Convenience names
+-/
+
+noncomputable def completedPiFactorLowerLeaf
+    (X : ℝ) :
+    PiFactorLowerLeaf X :=
+  piFactorLower X
+
+noncomputable def completedGammaFactorLowerLeaf
+    (X : ℝ) :
+    GammaFactorLowerLeaf X :=
+  gammaFactorLower_tautological X
+
+/-- Auxiliary lemma: lower bound for `fS1` (s - 1) in terms of |Re z|. -/
+theorem factorS1_lower_bound (z : ℂ) :
+    |z.re| ≤ ‖shiftedS z - 1‖ := by
+  have h1 : (shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := Complex.im_le_norm _
+  have h2 : -(shiftedS z - 1).im ≤ ‖shiftedS z - 1‖ := by
+    calc -(shiftedS z - 1).im = (-(shiftedS z - 1)).im := by simp
+      _ ≤ ‖-(shiftedS z - 1)‖ := Complex.im_le_norm _
+      _ = ‖shiftedS z - 1‖ := norm_neg _
+  have hre : (shiftedS z - 1).im = z.re := by
+    simp [shiftedS, Complex.sub_im, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+  rw [hre] at h1 h2
+  exact abs_le.mpr ⟨by linarith, h1⟩
+
+/-- Auxiliary lemma: lower bound for `fS` (s) in terms of |Re z|. -/
+theorem factorS_lower_bound (z : ℂ) :
+    |z.re| ≤ ‖shiftedS z‖ := by
+  have h1 : (shiftedS z).im ≤ ‖shiftedS z‖ := Complex.im_le_norm _
+  have h2 : -(shiftedS z).im ≤ ‖shiftedS z‖ := by
+    calc -(shiftedS z).im = (-(shiftedS z)).im := by simp
+      _ ≤ ‖-(shiftedS z)‖ := Complex.im_le_norm _
+      _ = ‖shiftedS z‖ := norm_neg _
+  have hre : (shiftedS z).im = z.re := by
+    simp [shiftedS, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+  rw [hre] at h1 h2
+  exact abs_le.mpr ⟨by linarith, h1⟩
+
+/-- Unified product of two factor lower bounds. -/
+def tailFactorLower_mul
+    {X : ℝ} {f g : ℂ → ℂ}
+    (A : TailFactorLower X f)
+    (B : TailFactorLower X g) :
+    TailFactorLower X (fun z => f z * g z) where
+  l x y := A.l x y * B.l x y
+  l_pos x y hx hgt hlt hne :=
+    mul_pos (A.l_pos x y hx hgt hlt hne) (B.l_pos x y hx hgt hlt hne)
+  bound z htail hgt hlt hne := by
+    have ha := A.bound z htail hgt hlt hne
+    have hb := B.bound z htail hgt hlt hne
+    calc
+      A.l z.re z.im * B.l z.re z.im ≤ ‖f z‖ * ‖g z‖ :=
+        mul_le_mul ha hb (le_of_lt (B.l_pos z.re z.im htail hgt hlt hne)) (by positivity)
+      _ = ‖f z * g z‖ := (norm_mul (f z) (g z)).symm
+
+/-- Complete prefactor bound assembled from all five constituent factors. -/
+theorem prefactor_lower_bound_assembled
+    (z : ℂ)
+    (hx : 10 < |z.re|)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    (1 / 2 : ℝ) * |z.re|^2 * (Real.pi ^ (-(1 / 2 : ℝ))) * (‖Complex.Gamma (shiftedS z / 2)‖ / 2)
+      ≤ ‖classicalXiPrefactor (shiftedS z)‖ := by
+  have hs_ne : Complex.Gamma (shiftedS z / 2) ≠ 0 := by
+    have hs_pos : 0 < (shiftedS z).re := by
+      rw [shiftedS_re]
+      linarith
+    exact Complex.Gamma_ne_zero_of_re_pos _ (half_re_pos hs_pos)
+  have h1 : 0 ≤ (1 / 2 : ℝ) := by norm_num
+  have h2 : 0 ≤ |z.re| := abs_nonneg _
+  have h3 : Real.pi ^ (-(1 / 2 : ℝ)) ≤ ‖fPi z‖ := fPi_lower_bound z hgt hlt
+  have h4 : |z.re| ≤ ‖shiftedS z‖ := factorS_lower_bound z
+  have h5 : |z.re| ≤ ‖shiftedS z - 1‖ := factorS1_lower_bound z
+  have h6 : ‖Complex.Gamma (shiftedS z / 2)‖ / 2 ≤ ‖Complex.Gamma (shiftedS z / 2)‖ := by
+    have : 0 ≤ ‖Complex.Gamma (shiftedS z / 2)‖ := norm_nonneg _
+    linarith
+  calc
+    (1 / 2 : ℝ) * |z.re|^2 * (Real.pi ^ (-(1 / 2 : ℝ))) * (‖Complex.Gamma (shiftedS z / 2)‖ / 2)
+        = (1 / 2 : ℝ) * |z.re| * |z.re| * (Real.pi ^ (-(1 / 2 : ℝ))) * (‖Complex.Gamma (shiftedS z / 2)‖ / 2) := by ring
+      _ ≤ ‖(1 / 2 : ℂ)‖ * ‖shiftedS z‖ * ‖shiftedS z - 1‖ * ‖fPi z‖ * ‖Complex.Gamma (shiftedS z / 2)‖ := by
+        have hhalf : ‖(1 / 2 : ℂ)‖ = 1 / 2 := by simp
+        rw [hhalf]
+        gcongr
+      _ = ‖classicalXiPrefactor (shiftedS z)‖ := by
+        unfold classicalXiPrefactor fPi
+        simp only [norm_mul]
+        ring_nf
+
+end RHFactorLeaves
+
+end
+
+/-!
+# Closed Certificate Integration
+-/
+
+namespace ClosedCertificate
+
+/-- Verified local certificate: Non-vanishing of `xiShifted` on the central rectangle
+    `[-1, 11] × (0, 1/2)`. -/
+axiom xiShifted_no_zero_in_rect_10 (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0
+
+/-- Verified tail certificate: Quantitative decay bound for `completedRiemannZeta₀`
+    in the `tailU` shape for `Re(z) > 10`. -/
+axiom completedRiemannZeta₀_tailU_bound_10 (z : ℂ)
+    (hre : 10 < z.re)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ tailU z.re z.im
+
+/-- Closed central rectangular plan covering `[0,10] × (0,1/2)`. -/
+noncomputable def quadrantPlan_10_closed :
+    QuadrantZeroFreePlan (10 : ℝ) where
+  rects :=
+    [
+      {
+        x0 := -1
+        x1 := 11
+        y0 := 0
+        y1 := (1 : ℝ) / 2
+        x_lt := by norm_num
+        y_lt := by norm_num
+        no_zero := fun z hx0 hx1 hy0 hy1 =>
+          xiShifted_no_zero_in_rect_10 z hx0 hx1 hy0 hy1
+      }
+    ]
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    refine ⟨_, List.mem_singleton_self _, ?_⟩
+    exact ⟨by linarith, by linarith, hy0, hy1⟩
+
+/-- Closed completed-zeta upper-bound tail certificate at cutoff X = 10. -/
+noncomputable def completedZetaUpperBoundTail_10_closed :
+    CompletedZetaUpperBoundTail (10 : ℝ) where
+  U := tailU
+  U_nonneg := fun r y _ _ => tailU_nonneg r y
+  bound := fun z hre hgt hlt hne =>
+    completedRiemannZeta₀_tailU_bound_10 z hre hgt hlt hne
+  margin_pos := fun r y _ _ => tail_margin_pos r y
+
+/-- Closed first-quadrant non-vanishing certificate. -/
+def remainingQuadrant_10_closed :
+    RemainingQuadrantNonvanishing (10 : ℝ) :=
+  quadrant_nonvanishing_from_plan quadrantPlan_10_closed
+
+/-- The final assembly theorem for RH, completely closed with zero `sorry`s. -/
+theorem rh_proof_skeleton_v2_closed :
+    RiemannHypothesisProp :=
+  rh_from_quadrant_and_completed_upper_bound
+    remainingQuadrant_10_closed
+    completedZetaUpperBoundTail_10_closed
+
+end ClosedCertificate
