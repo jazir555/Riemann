@@ -5760,8 +5760,7 @@ noncomputable def tailRoucheCertificate_from_completedZeta_small_bound
       ‖xiShifted z - (1 / 2 : ℂ)‖ =
           ‖((z ^ 2 + (1 / 4 : ℂ)) / 2) *
               completedRiemannZeta₀ (shiftedS z)‖ := by
-        rw [hxi, sub_sub_cancel_left, norm_neg]
-        simp only [shiftedS]
+        rw [hxi, shiftedS, sub_sub_cancel_left, norm_neg]
       _ =
           (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
             ‖completedRiemannZeta₀ (shiftedS z)‖ := by
@@ -5776,9 +5775,9 @@ noncomputable def tailRoucheCertificate_from_completedZeta_small_bound
             (by positivity)
       _ < (1 / 2 : ℝ) := by
         have hsmall := B.small z.re z.im htail hgt hlt hne
-        have hz : (↑z.re + I * ↑z.im : ℂ) = z := by
-          rw [mul_comm Complex.I, Complex.re_add_im]
-        rw [show z ^ 2 = (↑z.re + I * ↑z.im : ℂ) ^ 2 from congr_arg (· ^ 2) hz.symm]
+        have hz2 : z ^ 2 = ((z.re : ℂ) + I * (z.im : ℂ)) ^ 2 :=
+          congr_arg (· ^ 2) (by rw [mul_comm Complex.I, Complex.re_add_im])
+        rw [hz2]
         exact hsmall
 
 /-- A sufficiently small completed-zeta tail bound gives pointwise tail
@@ -6726,5 +6725,327 @@ theorem rh_from_quadrant_and_completedMinusPolarTail
     }
 
 end RHProofScaffold
+
+end
+
+/-!
+# Capstone tractable RH scaffold
+
+This scaffold reduces RH to:
+
+1. A finite, interval-arithmetic-tractable bounded first-quadrant proof.
+2. A corrected tail lower-bound obligation.
+
+The bounded part is finite and should be attackable by rigorous numerics.
+The tail part is still RH-hard, but it is now isolated in a clean analytic form.
+-/
+
+noncomputable section
+open Complex
+
+namespace RHTractable
+
+/-!
+## 1. Bounded first-quadrant evidence
+
+We use the existing simple interval/evidence front-end:
+
+  SimpleFirstQuadrantRectangularBoundedProof X ε η
+
+At cutoff X = 10, this is a finite rectangular verification problem.
+-/
+
+/-- A bounded first-quadrant evidence package at cutoff 10. -/
+structure BoundedFirstQuadrantEvidence10 where
+  ε : ℝ
+  η : ℝ
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  simple : SimpleFirstQuadrantRectangularBoundedProof 10 ε η
+
+/-- Convert bounded evidence into the existing `RemainingQuadrantNonvanishing`
+obligation. -/
+def remainingQuadrant_of_boundedEvidence
+    (B : BoundedFirstQuadrantEvidence10) :
+    RemainingQuadrantNonvanishing (10 : ℝ) where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1
+    exact
+      firstQuadrant_no_zero_of_bounded_proof
+        (firstQuadrantRectangularBoundedProof_from_simple B.simple)
+        z hx0 hx1 hy0 hy1
+
+/-!
+## 2. Corrected tail obligation
+
+The raw completed zeta function has a polar term:
+
+  completedRiemannZeta₀(shiftedS z)
+    = polar term + remainder.
+
+The polar term is exactly
+
+  1 / shiftedS z + 1 / (1 - shiftedS z)
+    = 1 / (z^2 + 1/4).
+
+The tail obligation should be placed on the polar-subtracted remainder.
+-/
+
+/-- A lower bound for the polar-subtracted completed zeta remainder in the
+right tail. -/
+structure CompletedMinusPolarTailLowerBound10 where
+  m : ℝ → ℝ → ℝ
+  m_pos :
+    ∀ r y : ℝ,
+      10 ≤ r →
+      y ≠ 0 →
+      0 < m r y
+  bound :
+    ∀ z : ℂ,
+      10 < z.re →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤
+        ‖completedRiemannZeta₀ (shiftedS z) -
+          (1 / shiftedS z + 1 / (1 - shiftedS z))‖
+
+/-- Positivity of the quadratic tail factor for r ≥ 10 and y ≠ 0. -/
+private theorem tailD_norm_pos_of_tail
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hy : y ≠ 0) :
+    0 < ‖tailD r y‖ := by
+  rw [norm_pos_iff]
+  intro h
+  have him := congr_arg Complex.im h
+  simp only [
+    tailD,
+    pow_two,
+    Complex.add_im,
+    Complex.mul_im,
+    Complex.ofReal_re,
+    Complex.ofReal_im,
+    Complex.I_re,
+    Complex.I_im
+  ] at him
+  have him' : (2 : ℝ) * r * y = 0 := by
+    ring_nf at him
+    simpa [mul_assoc] using him
+  have hne : (2 : ℝ) * r * y ≠ 0 := by
+    apply mul_ne_zero
+    · have h2 : (2 : ℝ) ≠ 0 := by norm_num
+      have hr0 : r ≠ 0 := by linarith
+      exact mul_ne_zero h2 hr0
+    · exact hy
+  exact hne him'
+
+/-- Exact shifted identity with the polar term subtracted:
+
+  xiShifted z =
+    -(z^2 + 1/4)/2 *
+      (completedRiemannZeta₀(shiftedS z) - polar term).
+
+This is the clean identity for tail analysis.
+-/
+theorem xiShifted_eq_neg_half_D_mul_completed_minus_polar
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    xiShifted z =
+      -(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        (completedRiemannZeta₀ (shiftedS z) -
+          (1 / shiftedS z + 1 / (1 - shiftedS z))) := by
+  let D : ℂ := z ^ 2 + (1 / 4 : ℂ)
+  have hD : D ≠ 0 := shifted_denominator_ne_zero_inside_strip z hgt hlt
+  have hpolar :
+      1 / shiftedS z + 1 / (1 - shiftedS z) = 1 / D := by
+    rw [polar_term_eq_inv_D z hgt hlt]
+  have hrem :
+      completedRiemannZeta₀ (shiftedS z) - 1 / D =
+        -2 * xiShifted z / D := by
+    rw [completedZeta_shifted_eq_inv_D_sub_two_xiShifted_div_D z hgt hlt hne]
+    ring
+  calc
+    xiShifted z =
+        -D / 2 * (-2 * xiShifted z / D) := by
+      field_simp [hD]
+      rfl
+    _ =
+        -D / 2 *
+          (completedRiemannZeta₀ (shiftedS z) - 1 / D) := by
+      rw [← hrem]
+    _ =
+        -(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+          (completedRiemannZeta₀ (shiftedS z) -
+            (1 / shiftedS z + 1 / (1 - shiftedS z))) := by
+      simp only [D, ← hpolar]
+
+/-- Convert a polar-subtracted tail lower bound into the distance-sensitive
+`xiShifted` tail lower bound needed by the RH assembly theorem. -/
+def tailDistance_from_completedMinusPolar
+    (L : CompletedMinusPolarTailLowerBound10) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) where
+  lower r y := (‖tailD r y‖ / 2) * L.m r y
+  lower_pos r y hr hy := by
+    have hDpos : 0 < ‖tailD r y‖ := tailD_norm_pos_of_tail r y hr hy
+    have hmpos : 0 < L.m r y := L.m_pos r y hr hy
+    positivity
+  bound z hre hgt hlt hne := by
+    have hL := L.bound z hre hgt hlt hne
+    calc
+      (‖tailD z.re z.im‖ / 2) * L.m z.re z.im ≤
+          (‖tailD z.re z.im‖ / 2) *
+            ‖completedRiemannZeta₀ (shiftedS z) -
+              (1 / shiftedS z + 1 / (1 - shiftedS z))‖ := by
+        exact mul_le_mul_of_nonneg_left hL (by positivity)
+      _ = ‖xiShifted z‖ := by
+        rw [xiShifted_eq_neg_half_D_mul_completed_minus_polar z hgt hlt hne]
+        simp [
+          norm_mul,
+          norm_neg,
+          norm_div,
+          Complex.norm_ofNat,
+          tailD,
+          Complex.re_add_im,
+          mul_comm I
+        ]
+
+/-- Convert the corrected tail lower bound into a two-sided pointwise tail
+nonvanishing certificate, using neg-symmetry. -/
+def tailPointwise_from_completedMinusPolar
+    (L : CompletedMinusPolarTailLowerBound10) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise_from_right_distance_lower_bound_and_symmetry
+    classicalXi_symmetry.neg_symm
+    (tailDistance_from_completedMinusPolar L)
+
+/-!
+## 3. Interval-arithmetic front end for the bounded region
+
+The existing file already has:
+
+  SimpleNearRealCover
+  SimpleFirstQuadrantMiddleCover
+  SimpleUpperBoundaryCover
+
+These are designed to receive finite rectangle evidence.
+-/
+
+/-- A concrete interval-style bounded first-quadrant plan at cutoff 10. -/
+structure IntervalBoundedPlan10 where
+  ε : ℝ
+  η : ℝ
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  near : SimpleNearRealCover 10 ε
+  middle : SimpleFirstQuadrantMiddleCover 10 ε η
+  upper : SimpleUpperBoundaryCover 10 η
+
+/-- Convert an interval bounded plan into the simple bounded proof used by the
+existing assembly machinery. -/
+def simpleBoundedProof_from_intervalPlan
+    (P : IntervalBoundedPlan10) :
+    SimpleFirstQuadrantRectangularBoundedProof 10 P.ε P.η where
+  ε_pos := P.ε_pos
+  η_pos := P.η_pos
+  near := P.near
+  middle := P.middle
+  upper := P.upper
+
+/-- Convert an interval bounded plan into ordinary rectangular bounded proof
+data. -/
+def rectangularBounded_from_intervalPlan
+    (P : IntervalBoundedPlan10) :
+    FirstQuadrantRectangularBoundedProof 10 P.ε P.η :=
+  firstQuadrantRectangularBoundedProof_of_evidenced
+    (evidencedFirstQuadrantRectangularBoundedProof_from_simple
+      (simpleBoundedProof_from_intervalPlan P))
+
+/-- Convert an interval bounded plan into bounded evidence. -/
+def boundedEvidence_from_intervalPlan
+    (P : IntervalBoundedPlan10) :
+    BoundedFirstQuadrantEvidence10 where
+  ε := P.ε
+  η := P.η
+  ε_pos := P.ε_pos
+  η_pos := P.η_pos
+  simple := simpleBoundedProof_from_intervalPlan P
+
+/-!
+## 4. Capstone RH theorems
+
+These are the main conditional assembly theorems.
+-/
+
+/-- RH from bounded interval evidence plus a direct distance-sensitive tail
+lower bound. -/
+theorem rh_from_direct_tail_plan
+    (B : BoundedFirstQuadrantEvidence10)
+    (T : XiRightTailDistanceLowerBoundForX (10 : ℝ)) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := remainingQuadrant_of_boundedEvidence B
+      tail := T
+    }
+
+/-- RH from bounded interval evidence plus a corrected polar-subtracted tail
+lower bound. -/
+theorem rh_from_bounded_and_corrected_tail
+    (B : BoundedFirstQuadrantEvidence10)
+    (L : CompletedMinusPolarTailLowerBound10) :
+    RiemannHypothesisProp :=
+  rh_from_direct_tail_plan
+    B
+    (tailDistance_from_completedMinusPolar L)
+
+/-- RH from an interval bounded plan plus a pointwise tail certificate. -/
+theorem rh_from_interval_plan_and_tail_pointwise
+    (P : IntervalBoundedPlan10)
+    (T : XiTailPointwiseNonvanishingForX (10 : ℝ)) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_rectangular_rh_proof
+    {
+      sym := classicalXi_symmetry
+      bounded := rectangularBounded_from_intervalPlan P
+      tail := T
+    }
+
+/-- RH from an interval bounded plan plus a corrected polar-subtracted tail
+lower bound. -/
+theorem rh_from_interval_plan_and_corrected_tail
+    (P : IntervalBoundedPlan10)
+    (L : CompletedMinusPolarTailLowerBound10) :
+    RiemannHypothesisProp :=
+  rh_from_interval_plan_and_tail_pointwise
+    P
+    (tailPointwise_from_completedMinusPolar L)
+
+/-- RH from an interval bounded plan plus a Rouché-style tail comparison. -/
+theorem rh_from_interval_plan_and_rouche_tail
+    (P : IntervalBoundedPlan10)
+    (R : TailRoucheCertificate 10) :
+    RiemannHypothesisProp :=
+  rh_from_interval_plan_and_tail_pointwise
+    P
+    (tailPointwise_from_rouche_certificate R)
+
+/-- A single packaged tractable plan using the corrected tail. -/
+structure TractableRHPlan10 where
+  bounded : IntervalBoundedPlan10
+  tail : CompletedMinusPolarTailLowerBound10
+
+/-- The master conditional theorem: a tractable bounded plan plus a corrected
+tail lower bound implies RH. -/
+theorem rh_from_tractable_plan10
+    (P : TractableRHPlan10) :
+    RiemannHypothesisProp :=
+  rh_from_interval_plan_and_corrected_tail
+    P.bounded
+    P.tail
+
+end RHTractable
 
 end
