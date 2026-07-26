@@ -2821,11 +2821,10 @@ def completedZetaGlobalUpperBound_self :
   bound := by
     intro z hgt hlt hne
     simp only [hne, ite_false]
-    have hz : z = (z.re : ℂ) + I * (z.im : ℂ) := by
-      rw [Complex.re_add_im z]
-      ring
+    have hz : (z.re : ℂ) + I * (z.im : ℂ) = z := by
+      rw [← Complex.re_add_im z]
+      simp [mul_comm]
     rw [hz]
-    exact le_rfl
 
 /-!
 ## Rectangular certificates from a global bound
@@ -3024,7 +3023,10 @@ noncomputable def shiftedS (z : ℂ) : ℂ :=
 
 theorem shiftedS_re (z : ℂ) :
     (shiftedS z).re = (1 / 2 : ℝ) - z.im := by
-  simp only [shiftedS, Complex.add_re, Complex.I_mul_re, Complex.ofReal_re]
+  unfold shiftedS
+  simp only [Complex.add_re, Complex.I_mul_re]
+  norm_num
+  ring
 
 theorem shiftedS_ne_zero
     (z : ℂ)
@@ -3304,10 +3306,15 @@ theorem polar_bound_explicit
   have hd1 : 0 < (1 / 2 : ℝ) - z.im := by linarith
   have hd2 : 0 < (1 / 2 : ℝ) + z.im := by linarith
   have hre_hs : hs.re = (1 / 2 : ℝ) - z.im := by
-    simp only [hs, shiftedS, Complex.add_re, Complex.I_mul_re, Complex.ofReal_re]
+    unfold hs shiftedS
+    simp only [Complex.add_re, Complex.I_mul_re]
+    norm_num
+    ring
   have hre_1hs : (1 - hs).re = (1 / 2 : ℝ) + z.im := by
-    simp only [hs, shiftedS, Complex.sub_re, Complex.add_re, Complex.neg_re,
-      Complex.I_mul_re, Complex.ofReal_re, Complex.ofReal_one, sub_sub_cancel]
+    unfold hs shiftedS
+    simp only [Complex.sub_re, Complex.add_re, Complex.I_mul_re]
+    norm_num
+    ring
   have hd1le : (1 / 2 : ℝ) - z.im ≤ ‖hs‖ := by
     have h := Complex.abs_re_le_abs hs
     simp only [Complex.norm_eq_abs, hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
@@ -3384,7 +3391,7 @@ def xiTermBound_self : XiTermBound where
     positivity
   xi_bound := by
     intro z hgt hlt hne
-    simp [hne, Complex.re_add_im]
+    simp only [hne, ite_false, Complex.re_add_im, mul_comm I]
     exact le_rfl
 
 /-- A canonical polar/xi bound using the explicit polar bound and the
@@ -3430,25 +3437,24 @@ theorem norm_z_sq_add_quarter_le
       ((R + S) ^ 2 + 1 / 4) / 2 := by
   have hnorm : ‖z‖ ≤ R + S := by
     calc
-      ‖z‖ = ‖(z.re : ℂ) + I * (z.im : ℂ)‖ := by
-        simp [Complex.re_add_im, mul_comm]
-      _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im : ℂ)‖ :=
+      ‖z‖ = ‖(z.re : ℂ) + (z.im : ℂ) * I‖ := by
+        exact congr_arg norm (Complex.re_add_im z).symm
+      _ ≤ ‖(z.re : ℂ)‖ + ‖(z.im : ℂ) * I‖ :=
         norm_add_le _ _
       _ = |z.re| + |z.im| := by
-        simp [Complex.norm_I]
+        simp [norm_mul, Complex.norm_I]
       _ ≤ R + S :=
         add_le_add hre him
 
   have hsq : ‖z‖ ^ 2 ≤ (R + S) ^ 2 :=
-    pow_le_pow_left' hnorm 2
+    mul_le_mul hnorm hnorm (norm_nonneg z) (add_nonneg hR hS)
 
   calc
     ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 ≤
         (‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖) / 2 := by
       exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
     _ = (‖z‖ ^ 2 + 1 / 4) / 2 := by
-      simp [norm_pow, norm_ofReal,
-        abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)]
+      simp [norm_pow, norm_div, Complex.norm_ofNat]
     _ ≤ ((R + S) ^ 2 + 1 / 4) / 2 := by
       exact div_le_div_of_nonneg_right
         (add_le_add hsq le_rfl)
@@ -3801,7 +3807,7 @@ theorem tailCanonicalU_ge_inv_r_plus_one_sq
 
   have hle := tailD_norm_le_r_plus_one_sq r y hr hgt hlt
 
-  rw [div_le_div_iff (by positivity) (by positivity)]
+  field_simp
   nlinarith
 
 /-- A concrete polynomial decay bound sufficient for the tail certificate.
@@ -3812,7 +3818,7 @@ If one proves
 
 for Re z > X ≥ 10 and |Im z| < 1/2, then the full tail certificate follows.
 -/
-theorem completedZetaUpperBoundTail_of_simple_polynomial_bound
+def completedZetaUpperBoundTail_of_simple_polynomial_bound
     (X : ℝ)
     (hX : 10 ≤ X)
     (bound :
@@ -3865,6 +3871,7 @@ theorem shiftedS_mul_one_sub
     shiftedS z * (1 - shiftedS z) =
       z ^ 2 + (1 / 4 : ℂ) := by
   simp [shiftedS]
+  rw [Complex.I_sq]
   ring
 
 theorem shiftedS_mul_sub_one_neg
@@ -3872,6 +3879,7 @@ theorem shiftedS_mul_sub_one_neg
     shiftedS z * (shiftedS z - 1) =
       -(z ^ 2 + (1 / 4 : ℂ)) := by
   simp [shiftedS]
+  rw [Complex.I_sq]
   ring
 
 theorem polar_term_eq_inv_D
@@ -3897,6 +3905,21 @@ theorem polar_term_eq_inv_D
       ring
     _ = 1 / (z ^ 2 + (1 / 4 : ℂ)) := by
       rw [hprod]
+
+theorem shifted_denominator_ne_zero_inside_strip
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    z ^ 2 + (1 / 4 : ℂ) ≠ 0 := by
+  intro h
+  have h1 := congr_arg Complex.re h
+  have h2 := congr_arg Complex.im h
+  simp only [pow_two, Complex.add_re, Complex.mul_re,
+    Complex.add_im, Complex.mul_im] at h1 h2
+  norm_num at h1 h2
+  rcases mul_eq_zero.mp (by linarith : z.re * z.im = 0) with hzre | hzim
+  · rw [hzre] at h1; nlinarith [sq_nonneg z.im]
+  · rw [hzim] at h1; nlinarith [sq_nonneg z.re]
 
 theorem completedZeta_shifted_eq_inv_D_sub_two_classicalXi_div_D
     (z : ℂ)
@@ -3930,8 +3953,11 @@ theorem completedZeta_shifted_eq_inv_D_sub_two_xiShifted_div_D
       1 / (z ^ 2 + (1 / 4 : ℂ)) -
       2 * xiShifted z /
         (z ^ 2 + (1 / 4 : ℂ)) := by
-  simpa [xiShifted] using
-    completedZeta_shifted_eq_inv_D_sub_two_classicalXi_div_D z hgt hlt hne
+  show completedRiemannZeta₀ (shiftedS z) =
+      1 / (z ^ 2 + (1 / 4 : ℂ)) -
+      2 * classicalXi (shiftedS z) /
+        (z ^ 2 + (1 / 4 : ℂ))
+  exact completedZeta_shifted_eq_inv_D_sub_two_classicalXi_div_D z hgt hlt hne
 
 theorem inv_D_sub_completedZeta_eq_two_xiShifted_div_D
     (z : ℂ)
@@ -3959,30 +3985,20 @@ theorem xiShifted_ne_zero_iff_completed_ne_inv_D
   have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
     shifted_denominator_ne_zero_inside_strip z hgt hlt
 
+  have hinv := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+
   constructor
   · intro hz hbad
-    have h := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+    have h := hinv
     rw [hbad, sub_self] at h
-    have hzero : 2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := by
-      simpa using h
-    have hxi : xiShifted z = 0 := by
-      field_simp [hD] at hzero
-      simpa using hzero
-    exact hz hxi
+    rw [eq_comm] at h
+    rcases div_eq_zero_iff.mp h with hxi | hD0
+    · exact mul_eq_zero.mp hxi |>.resolve_left (by norm_num) |> hz
+    · exact absurd hD0 hD
   · intro hne_completed hz
-    have h := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
-    rw [hz] at h
-    have hzero :
-        1 / (z ^ 2 + (1 / 4 : ℂ)) -
-          completedRiemannZeta₀ (shiftedS z) = 0 := by
-      field_simp [hD] at h
-      simpa using h
-    have hbad :
-        completedRiemannZeta₀ (shiftedS z) =
-          1 / (z ^ 2 + (1 / 4 : ℂ)) := by
-      rw [sub_eq_zero] at hzero
-      exact hzero.symm
-    exact hne_completed hbad
+    have h := hinv
+    rw [hz, mul_zero, zero_div] at h
+    exact hne_completed (sub_eq_zero.mp h |>.symm)
 
 /-!
 # The remaining hard analytic problem, stated explicitly
@@ -4015,11 +4031,17 @@ theorem hardDifferenceNonzero_implies_RH :
   intro H
   rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib]
   intro z hgt hlt hne
+  have hgt' : -(1 / 2 : ℝ) < z.im := by
+    have : -(1 : ℝ) / 2 = -(1 / 2 : ℝ) := by norm_num
+    rw [this] at hgt; exact hgt
+  have hlt' : z.im < (1 / 2 : ℝ) := by
+    have : (1 : ℝ) / 2 = 1 / 2 := by norm_num
+    rw [this] at hlt; exact hlt
   have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
-    shifted_denominator_ne_zero_inside_strip z hgt hlt
+    shifted_denominator_ne_zero_inside_strip z hgt' hlt'
   intro hz
-  have hdiff := H z hgt hlt hne
-  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne, hz] at hdiff
+  have hdiff := H z hgt' hlt' hne
+  rw [inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt' hlt' hne, hz] at hdiff
   field_simp [hD] at hdiff
   exact hdiff rfl
 
@@ -4029,7 +4051,13 @@ theorem RH_implies_hardDifferenceNonzero :
   intro H
   rw [rh_iff_xi_off_real_pointwise_nonvanishing_mathlib] at H
   intro z hgt hlt hne
-  have hnz := H z hgt hlt hne
+  have hgt' : -(1 : ℝ) / 2 < z.im := by
+    have : -(1 : ℝ) / 2 = -(1 / 2 : ℝ) := by norm_num
+    rw [this]; exact hgt
+  have hlt' : z.im < (1 : ℝ) / 2 := by
+    have : (1 : ℝ) / 2 = 1 / 2 := by norm_num
+    rw [this]; exact hlt
+  have hnz := H z hgt' hlt' hne
   have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
     shifted_denominator_ne_zero_inside_strip z hgt hlt
   intro h
@@ -4098,7 +4126,8 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   let z : ℂ := I * (y : ℂ)
 
   have hs : shiftedS z = ((1 / 2 - y : ℝ) : ℂ) := by
-    simp [shiftedS, z]
+    unfold shiftedS z
+    rw [← mul_assoc, ← pow_two, Complex.I_sq]
     ring
 
   have ht0 : 0 < (1 / 2 - y : ℝ) := by linarith
@@ -4117,7 +4146,7 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   have hmul :
       classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) *
         zeta ((1 / 2 - y : ℝ) : ℂ) = 0 := by
-    simpa [xiShifted, classicalXi, XiFromPrefactor, hs] using hzero
+    simpa [xiShifted, classicalXi, XiFromPrefactor, hs, mul_assoc, ← pow_two, Complex.I_sq] using hzero
 
   have hzeta : zeta ((1 / 2 - y : ℝ) : ℂ) = 0 :=
     (mul_eq_zero.mp hmul).resolve_left hpref
@@ -4136,9 +4165,11 @@ theorem hardDifferenceNonzero_on_imaginary_axis
   have hne : (I * (y : ℂ)).im ≠ 0 := by
     simpa using hyne
   have h := xiShifted_ne_zero_on_imaginary_axis hReal y hyne hgt hlt
-  exact
-    (xiShifted_ne_zero_iff_completed_ne_inv_D
-      (I * (y : ℂ)) hgt hlt hne).mp h
+  have hgt' : -(1 / 2 : ℝ) < (I * (y : ℂ)).im := by simp; linarith
+  have hlt' : (I * (y : ℂ)).im < (1 / 2 : ℝ) := by simp; linarith
+  have h1 := (xiShifted_ne_zero_iff_completed_ne_inv_D
+      (I * (y : ℂ)) hgt' hlt' hne).mp h
+  exact sub_ne_zero.mpr (Ne.symm h1)
 /-!
 # Local zero-free neighborhoods around the imaginary axis
 
@@ -4191,7 +4222,7 @@ theorem xiShifted_eventually_ne_zero_ball
   refine ⟨ε, hεpos, ?_⟩
   intro z hz hzero
 
-  have hdist := hε z hz
+  have hdist := hε (show dist z z0 < ε by rw [dist_eq_norm, show z0 = I * (y0:ℂ) from rfl]; exact hz)
   rw [hzero, zero_sub, norm_neg] at hdist
   linarith
 
@@ -4232,11 +4263,11 @@ theorem exists_zero_free_rect_around_imag_point
     ‖z - z0‖ =
         ‖(z.re : ℂ) + I * (z.im - y0)‖ := by
       congr 1
-      ext <;> simp [z0] <;> ring
+      apply Complex.ext <;> simp [z0] <;> ring
     _ ≤ ‖(z.re : ℂ)‖ + ‖I * (z.im - y0)‖ :=
       norm_add_le _ _
     _ = |z.re| + |z.im - y0| := by
-      simp [norm_mul, Complex.norm_I, Complex.norm_ofReal]
+      simp [norm_mul, Complex.norm_I, Complex.norm_real]
     _ < δ / 2 + δ / 2 := by
       linarith
     _ = δ := by
@@ -5063,4 +5094,450 @@ theorem rh_from_first_quadrant_rectangular_rh_proof
       bounded :=
         firstQuadrantBoundedZeroFreeProof_from_rectangular P.bounded
       tail := P.tail
+    }
+/-!
+# Evidenced zero-free rectangles
+
+For practical verification, it is useful to separate the evidence that a
+rectangle is zero-free from the rectangle itself.
+
+A rectangle can be certified zero-free by any one of:
+
+1. a modulus lower bound;
+2. strictly positive real part;
+3. strictly negative real part;
+4. strictly positive imaginary part;
+5. strictly negative imaginary part.
+-/
+
+structure XiPositiveRealRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  pos_re :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      0 < (xiShifted z).re
+
+structure XiNegativeRealRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  neg_re :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      (xiShifted z).re < 0
+
+structure XiPositiveImagRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  pos_im :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      0 < (xiShifted z).im
+
+structure XiNegativeImagRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  neg_im :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      (xiShifted z).im < 0
+
+def xiLocalZeroFreeRect_of_positive_real
+    (R : XiPositiveRealRect) :
+    XiLocalZeroFreeRect where
+  x0 := R.x0
+  x1 := R.x1
+  y0 := R.y0
+  y1 := R.y1
+  x_lt := R.x_lt
+  y_lt := R.y_lt
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    have hpos := R.pos_re z hx0 hx1 hy0 hy1
+    simpa [hz] using hpos
+
+def xiLocalZeroFreeRect_of_negative_real
+    (R : XiNegativeRealRect) :
+    XiLocalZeroFreeRect where
+  x0 := R.x0
+  x1 := R.x1
+  y0 := R.y0
+  y1 := R.y1
+  x_lt := R.x_lt
+  y_lt := R.y_lt
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    have hneg := R.neg_re z hx0 hx1 hy0 hy1
+    simpa [hz] using hneg
+
+def xiLocalZeroFreeRect_of_positive_imag
+    (R : XiPositiveImagRect) :
+    XiLocalZeroFreeRect where
+  x0 := R.x0
+  x1 := R.x1
+  y0 := R.y0
+  y1 := R.y1
+  x_lt := R.x_lt
+  y_lt := R.y_lt
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    have hpos := R.pos_im z hx0 hx1 hy0 hy1
+    simpa [hz] using hpos
+
+def xiLocalZeroFreeRect_of_negative_imag
+    (R : XiNegativeImagRect) :
+    XiLocalZeroFreeRect where
+  x0 := R.x0
+  x1 := R.x1
+  y0 := R.y0
+  y1 := R.y1
+  x_lt := R.x_lt
+  y_lt := R.y_lt
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1 hz
+    have hneg := R.neg_im z hx0 hx1 hy0 hy1
+    simpa [hz] using hneg
+
+/-- A single piece of evidence proving that a rectangle is zero-free. -/
+inductive RectNonvanishingEvidence where
+  | modulusBound (R : XiLocalLowerBoundRect)
+  | positiveReal (R : XiPositiveRealRect)
+  | negativeReal (R : XiNegativeRealRect)
+  | positiveImag (R : XiPositiveImagRect)
+  | negativeImag (R : XiNegativeImagRect)
+
+/-- Convert evidence into an actual zero-free rectangle. -/
+def RectNonvanishingEvidence.toZeroFreeRect :
+    RectNonvanishingEvidence → XiLocalZeroFreeRect
+  | modulusBound R => XiLocalZeroFreeRect_of_lower_bound R
+  | positiveReal R => xiLocalZeroFreeRect_of_positive_real R
+  | negativeReal R => xiLocalZeroFreeRect_of_negative_real R
+  | positiveImag R => xiLocalZeroFreeRect_of_positive_imag R
+  | negativeImag R => xiLocalZeroFreeRect_of_negative_imag R
+
+/-- Convert a list of evidence certificates into a list of zero-free
+    rectangles. -/
+def evidenceList_to_zeroFreeRects
+    (es : List RectNonvanishingEvidence) :
+    List XiLocalZeroFreeRect :=
+  es.map (·.toZeroFreeRect)
+
+/-!
+# Evidenced covers for the bounded first-quadrant regions
+
+We now define evidence-based versions of:
+
+1. near-real cover;
+2. middle cover;
+3. upper-boundary cover.
+
+Each cover is given as a list of `RectNonvanishingEvidence`, and we convert it
+into the corresponding list of zero-free rectangles.
+-/
+
+structure EvidencedNearRealRectCover (X ε : ℝ) where
+  evidences : List RectNonvanishingEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < ε →
+      ∃ E ∈ evidences,
+        (E.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toZeroFreeRect).x1 ∧
+        (E.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toZeroFreeRect).y1
+
+structure EvidencedFirstQuadrantMiddleCover (X ε η : ℝ) where
+  evidences : List RectNonvanishingEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      ε ≤ z.im →
+      z.im ≤ (1 / 2 : ℝ) - η →
+      ∃ E ∈ evidences,
+        (E.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toZeroFreeRect).x1 ∧
+        (E.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toZeroFreeRect).y1
+
+structure EvidencedUpperBoundaryRectCover (X η : ℝ) where
+  evidences : List RectNonvanishingEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      (1 / 2 : ℝ) - η < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ E ∈ evidences,
+        (E.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toZeroFreeRect).x1 ∧
+        (E.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toZeroFreeRect).y1
+
+/-- Convert an evidenced near-real cover into an ordinary near-real rectangle
+    cover. -/
+def nearRealRectCover_of_evidenced
+    {X ε : ℝ}
+    (C : EvidencedNearRealRectCover X ε) :
+    NearRealRectCover X ε where
+  rects := evidenceList_to_zeroFreeRects C.evidences
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toZeroFreeRect, ?_, hx0', hx1', hy0', hy1'⟩
+    rw [evidenceList_to_zeroFreeRects, List.mem_map]
+    exact ⟨E, hE, rfl⟩
+
+/-- Convert an evidenced middle cover into an ordinary middle rectangle
+    cover. -/
+def firstQuadrantMiddleCover_of_evidenced
+    {X ε η : ℝ}
+    (C : EvidencedFirstQuadrantMiddleCover X ε η) :
+    FirstQuadrantMiddleCover X ε η where
+  rects := evidenceList_to_zeroFreeRects C.evidences
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toZeroFreeRect, ?_, hx0', hx1', hy0', hy1'⟩
+    rw [evidenceList_to_zeroFreeRects, List.mem_map]
+    exact ⟨E, hE, rfl⟩
+
+/-- Convert an evidenced upper-boundary cover into an ordinary upper-boundary
+    rectangle cover. -/
+def upperBoundaryRectCover_of_evidenced
+    {X η : ℝ}
+    (C : EvidencedUpperBoundaryRectCover X η) :
+    UpperBoundaryRectCover X η where
+  rects := evidenceList_to_zeroFreeRects C.evidences
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toZeroFreeRect, ?_, hx0', hx1', hy0', hy1'⟩
+    rw [evidenceList_to_zeroFreeRects, List.mem_map]
+    exact ⟨E, hE, rfl⟩
+
+/-- An evidenced bounded first-quadrant proof. -/
+structure EvidencedFirstQuadrantRectangularBoundedProof (X ε η : ℝ) where
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  near : EvidencedNearRealRectCover X ε
+  middle : EvidencedFirstQuadrantMiddleCover X ε η
+  upper : EvidencedUpperBoundaryRectCover X η
+
+/-- Convert an evidenced bounded first-quadrant proof into the ordinary bounded
+    first-quadrant proof. -/
+def firstQuadrantRectangularBoundedProof_of_evidenced
+    {X ε η : ℝ}
+    (P : EvidencedFirstQuadrantRectangularBoundedProof X ε η) :
+    FirstQuadrantRectangularBoundedProof X ε η where
+  ε_pos := P.ε_pos
+  η_pos := P.η_pos
+  near := nearRealRectCover_of_evidenced P.near
+  middle := firstQuadrantMiddleCover_of_evidenced P.middle
+  upper := upperBoundaryRectCover_of_evidenced P.upper
+
+/-- A fully evidenced first-quadrant RH proof. -/
+structure EvidencedFirstQuadrantRectangularRHProof (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : EvidencedFirstQuadrantRectangularBoundedProof X ε η
+  tail : XiTailPointwiseNonvanishingForX X
+
+/-- A fully evidenced first-quadrant RH proof implies RH. -/
+theorem rh_from_evidenced_first_quadrant_rectangular_rh_proof
+    {X ε η : ℝ}
+    (P : EvidencedFirstQuadrantRectangularRHProof X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_first_quadrant_rectangular_rh_proof
+    {
+      sym := P.sym
+      bounded :=
+        firstQuadrantRectangularBoundedProof_of_evidenced P.bounded
+      tail := P.tail
+    }
+/-!
+# Interval-style bounds and conversion to evidence
+
+These structures model the kind of output produced by interval arithmetic or
+Taylor-model verification.
+
+A rectangle interval bound gives lower and upper bounds for the real and
+imaginary parts of `xiShifted` on a rectangle.
+-/
+
+structure XiRectIntervalBound where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  re_low : ℝ
+  re_high : ℝ
+  im_low : ℝ
+  im_high : ℝ
+  re_bound :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      re_low ≤ (xiShifted z).re ∧ (xiShifted z).re ≤ re_high
+  im_bound :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      im_low ≤ (xiShifted z).im ∧ (xiShifted z).im ≤ im_high
+
+/-- If the real part is bounded below by a positive number, the rectangle is
+    zero-free. -/
+def positiveRealEvidence_from_intervalBound
+    (B : XiRectIntervalBound)
+    (h : 0 < B.re_low) :
+    RectNonvanishingEvidence :=
+  RectNonvanishingEvidence.positiveReal
+    {
+      x0 := B.x0
+      x1 := B.x1
+      y0 := B.y0
+      y1 := B.y1
+      x_lt := B.x_lt
+      y_lt := B.y_lt
+      pos_re := by
+        intro z hx0 hx1 hy0 hy1
+        have hre := (B.re_bound z hx0 hx1 hy0 hy1).1
+        linarith
+    }
+
+/-- If the real part is bounded above by a negative number, the rectangle is
+    zero-free. -/
+def negativeRealEvidence_from_intervalBound
+    (B : XiRectIntervalBound)
+    (h : B.re_high < 0) :
+    RectNonvanishingEvidence :=
+  RectNonvanishingEvidence.negativeReal
+    {
+      x0 := B.x0
+      x1 := B.x1
+      y0 := B.y0
+      y1 := B.y1
+      x_lt := B.x_lt
+      y_lt := B.y_lt
+      neg_re := by
+        intro z hx0 hx1 hy0 hy1
+        have hre := (B.re_bound z hx0 hx1 hy0 hy1).2
+        linarith
+    }
+
+/-- If the imaginary part is bounded below by a positive number, the rectangle
+    is zero-free. -/
+def positiveImagEvidence_from_intervalBound
+    (B : XiRectIntervalBound)
+    (h : 0 < B.im_low) :
+    RectNonvanishingEvidence :=
+  RectNonvanishingEvidence.positiveImag
+    {
+      x0 := B.x0
+      x1 := B.x1
+      y0 := B.y0
+      y1 := B.y1
+      x_lt := B.x_lt
+      y_lt := B.y_lt
+      pos_im := by
+        intro z hx0 hx1 hy0 hy1
+        have him := (B.im_bound z hx0 hx1 hy0 hy1).1
+        linarith
+    }
+
+/-- If the imaginary part is bounded above by a negative number, the rectangle
+    is zero-free. -/
+def negativeImagEvidence_from_intervalBound
+    (B : XiRectIntervalBound)
+    (h : B.im_high < 0) :
+    RectNonvanishingEvidence :=
+  RectNonvanishingEvidence.negativeImag
+    {
+      x0 := B.x0
+      x1 := B.x1
+      y0 := B.y0
+      y1 := B.y1
+      x_lt := B.x_lt
+      y_lt := B.y_lt
+      neg_im := by
+        intro z hx0 hx1 hy0 hy1
+        have him := (B.im_bound z hx0 hx1 hy0 hy1).2
+        linarith
+    }
+
+/-!
+# Modulus interval bounds
+-/
+
+structure XiRectModulusBound where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  m : ℝ
+  bound :
+    ∀ z : ℂ,
+      x0 < z.re →
+      z.re < x1 →
+      y0 < z.im →
+      z.im < y1 →
+      m ≤ ‖xiShifted z‖
+
+/-- A positive modulus lower bound gives zero-free evidence. -/
+def modulusEvidence_from_rectModulusBound
+    (B : XiRectModulusBound)
+    (hm : 0 < B.m) :
+    RectNonvanishingEvidence :=
+  RectNonvanishingEvidence.modulusBound
+    {
+      x0 := B.x0
+      x1 := B.x1
+      y0 := B.y0
+      y1 := B.y1
+      x_lt := B.x_lt
+      y_lt := B.y_lt
+      ε := B.m
+      ε_pos := hm
+      lower_bound := B.bound
     }
