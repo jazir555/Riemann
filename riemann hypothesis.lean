@@ -8984,7 +8984,15 @@ theorem local_real_part_positivity_proved
     (hx : 10 < z.re) (hγ : γ < z.re)
     (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
     0 < (((z - (γ : ℂ))⁻¹).re) := by
-  sorry
+  have hw : z - (γ : ℂ) ≠ 0 := by
+    intro h
+    have hre : (z - (γ : ℂ)).re = 0 := by rw [h]; norm_num
+    rw [Complex.sub_re, Complex.ofReal_re] at hre
+    linarith
+  rw [Complex.inv_re]
+  apply div_pos
+  · rw [Complex.sub_re, Complex.ofReal_re]; linarith
+  · exact Complex.normSq_pos.mpr hw
 
 /-! ## 3. Assembly Theorem for Phase Non-Cancellation -/
 
