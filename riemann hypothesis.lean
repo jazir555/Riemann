@@ -1946,7 +1946,8 @@ theorem completedRiemannZeta₀_vanishes_at_top_im :
     intro t
     simp only [completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀, WeakFEPair.Λ₀, g]
     rw [mellin_eq_fourier]
-    simp only [smul_eq_mul]
+    simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.add_im, Complex.mul_im]
     push_cast
     ring
   have hfourier : Filter.Tendsto (FourierTransform.fourier g) Filter.atTop (nhds (0 : ℂ)) := by
@@ -1957,7 +1958,10 @@ theorem completedRiemannZeta₀_vanishes_at_top_im :
   have hfreq : Filter.Tendsto (fun t : ℝ => t / (4 * Real.pi)) Filter.atTop Filter.atTop :=
     Filter.Tendsto.atTop_div_const (by positivity : 0 < (4 : ℝ) * Real.pi) Filter.tendsto_id
   simp only [hform]
-  exact (hfourier.comp hfreq).div tendsto_const_nhds two_ne_zero |>.cast (by simp)
+  convert (hfourier.comp hfreq).div tendsto_const_nhds two_ne_zero using 1
+  funext t
+  simp
+  norm_num
 
 /-!
 # Open analytic targets for the first-quadrant certificate
@@ -2144,7 +2148,7 @@ structure CompletedZetaUpperBoundTail (X : ℝ) where
 
 /-- Convert a completed-zeta upper-bound tail estimate into a distance-sensitive
     lower-bound tail certificate for `xiShifted`. -/
-def distanceLowerBound_from_completed_upper_bound
+noncomputable def distanceLowerBound_from_completed_upper_bound
     {X : ℝ}
     (B : CompletedZetaUpperBoundTail X) :
     XiRightTailDistanceLowerBoundForX X where
@@ -2161,8 +2165,10 @@ def distanceLowerBound_from_completed_upper_bound
         (B.U z.re z.im)
         (B.U_nonneg z.re z.im (le_of_lt hre) hne)
         (B.bound z hre (by linarith) (by linarith) hne)
-    unfold lower at *
-    simp only [Complex.re_add_im] at *
+    have hz : (z.re : ℂ) + I * (z.im : ℂ) = z := by
+      rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
+    change (1 / 2 : ℝ) - (‖((z.re : ℂ) + I * (z.im : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) * B.U z.re z.im ≤ ‖xiShifted z‖
+    simp only [hz]
     exact h
 
 /-- The remaining RH proof obligation at cutoff X. -/
@@ -2324,7 +2330,7 @@ theorem tailU_pos_of_strip
 The margin positivity is proved. The actual upper bound for
 `completedRiemannZeta₀` remains open.
 -/
-def completedZetaUpperBoundTail_10_v2 :
+noncomputable def completedZetaUpperBoundTail_10_v2 :
     CompletedZetaUpperBoundTail (10 : ℝ) where
   U := tailU
   U_nonneg := by
@@ -2364,7 +2370,7 @@ The rectangle is chosen slightly larger than necessary:
 
 The covering proof is complete. The nonvanishing proof is open.
 -/
-def quadrantPlan_10_skeleton :
+noncomputable def quadrantPlan_10_skeleton :
     QuadrantZeroFreePlan (10 : ℝ) where
   rects :=
     [
@@ -2661,7 +2667,7 @@ structure CompletedZetaRectUpperBoundCertificate where
 
 /-- Convert a completed-zeta rectangular upper-bound certificate into a
     lower-bound rectangle for `xiShifted`. -/
-def xiLocalLowerBoundRect_from_completedZetaRectUpperBound
+noncomputable def xiLocalLowerBoundRect_from_completedZetaRectUpperBound
     (C : CompletedZetaRectUpperBoundCertificate) :
     XiLocalLowerBoundRect where
   x0 := C.x0
@@ -2717,7 +2723,7 @@ structure CompletedZetaRectangularPlan (X : ℝ) where
 
 /-- Convert a completed-zeta rectangular plan into a zero-free rectangular
     plan for `xiShifted`. -/
-def quadrantPlan_from_completedZetaPlan
+noncomputable def quadrantPlan_from_completedZetaPlan
     {X : ℝ}
     (P : CompletedZetaRectangularPlan X) :
     QuadrantZeroFreePlan X where
@@ -2803,7 +2809,7 @@ This is not analytically useful by itself, but it is a canonical starting
 point. The real work is to compare this `B` with a simpler explicit function
 `U`.
 -/
-def completedZetaGlobalUpperBound_self :
+noncomputable def completedZetaGlobalUpperBound_self :
     CompletedZetaGlobalUpperBound where
   B := fun x y =>
     if y = 0 then 0
@@ -3179,7 +3185,7 @@ structure CompletedZetaPolarXiBound where
         Bxi z.re z.im
 
 /-- Build a sum-bound from separate polar and xi bounds. -/
-def completedZetaSumBound_from_polar_xi
+noncomputable def completedZetaSumBound_from_polar_xi
     (E : CompletedZetaPolarXiBound) :
     CompletedZetaSumBound where
   f := fun z =>
@@ -3198,7 +3204,7 @@ def completedZetaSumBound_from_polar_xi
   bound2 := E.xi_bound
 
 /-- Build a global upper bound from separate polar and xi bounds. -/
-def completedZetaGlobalUpperBound_from_polar_xi
+noncomputable def completedZetaGlobalUpperBound_from_polar_xi
     (E : CompletedZetaPolarXiBound) :
     CompletedZetaGlobalUpperBound :=
   completedZetaGlobalUpperBound_from_sum
@@ -3311,11 +3317,11 @@ theorem polar_bound_explicit
     ring
   have hd1le : (1 / 2 : ℝ) - z.im ≤ ‖hs‖ := by
     have h := Complex.abs_re_le_norm hs
-    simp only [hre_hs, Real.abs_of_nonneg (le_of_lt hd1)] at h
+    simp only [hre_hs, abs_of_nonneg (le_of_lt hd1)] at h
     exact_mod_cast h
   have hd2le : (1 / 2 : ℝ) + z.im ≤ ‖1 - hs‖ := by
     have h := Complex.abs_re_le_norm (1 - hs)
-    simp only [hre_1hs, Real.abs_of_nonneg (le_of_lt hd2)] at h
+    simp only [hre_1hs, abs_of_nonneg (le_of_lt hd2)] at h
     exact_mod_cast h
   have h1 : ‖1 / hs‖ ≤ 1 / ((1 / 2 : ℝ) - z.im) := by
     rw [norm_div, norm_one, one_div_le_one_div (by positivity) (by positivity)]
@@ -3352,7 +3358,7 @@ structure XiTermBound where
 
 /-- Build a full polar/xi bound from an explicit polar bound and a supplied
     xi-term bound. -/
-def completedZetaPolarXiBound_from_xi_bound
+noncomputable def completedZetaPolarXiBound_from_xi_bound
     (T : XiTermBound) :
     CompletedZetaPolarXiBound where
   Bpolar := polarBound
@@ -3372,7 +3378,7 @@ This is not analytically useful by itself, but it is a canonical placeholder.
 The real work is to replace `Bxi` with an explicit decaying or otherwise
 controllable function.
 -/
-def xiTermBound_self : XiTermBound where
+noncomputable def xiTermBound_self : XiTermBound where
   Bxi := fun x y =>
     if y = 0 then 0
     else
@@ -3390,7 +3396,7 @@ def xiTermBound_self : XiTermBound where
 
 /-- A canonical polar/xi bound using the explicit polar bound and the
     tautological xi bound. -/
-def completedZetaPolarXiBound_self :
+noncomputable def completedZetaPolarXiBound_self :
     CompletedZetaPolarXiBound :=
   completedZetaPolarXiBound_from_xi_bound xiTermBound_self
 
@@ -3526,7 +3532,7 @@ structure SimpleRectCertificateTemplate where
 
 /-- Convert a simple rectangle template into a full completed-zeta rectangle
     upper-bound certificate. -/
-def completedZetaRectUpperBoundCertificate_from_simple_template
+noncomputable def completedZetaRectUpperBoundCertificate_from_simple_template
     (T : SimpleRectCertificateTemplate) :
     CompletedZetaRectUpperBoundCertificate where
   x0 := T.x0
@@ -3586,7 +3592,7 @@ theorem rectangleDHalf_pos
 
 The only remaining obligation is the explicit upper bound.
 -/
-def simpleRectTemplate_canonical_margin
+noncomputable def simpleRectTemplate_canonical_margin
     (x0 x1 y0 y1 : ℝ)
     (x_lt : x0 < x1)
     (y_lt : y0 < y1)
@@ -3659,7 +3665,7 @@ theorem tailCanonicalU_nonneg
 
 The only remaining obligation is the explicit upper bound.
 -/
-def completedZetaUpperBoundTail_canonical
+noncomputable def completedZetaUpperBoundTail_canonical
     (X : ℝ)
     (bound :
       ∀ z : ℂ,
@@ -3815,7 +3821,7 @@ If one proves
 
 for Re z > X ≥ 10 and |Im z| < 1/2, then the full tail certificate follows.
 -/
-def completedZetaUpperBoundTail_of_simple_polynomial_bound
+noncomputable def completedZetaUpperBoundTail_of_simple_polynomial_bound
     (X : ℝ)
     (hX : 10 ≤ X)
     (bound :
@@ -4985,7 +4991,7 @@ theorem firstQuadrant_no_zero_of_bounded_proof
   · by_cases hupper : (1 / 2 : ℝ) - η < z.im
     · exact P.upper.zero_free z hx0 hx1 hupper hy1
 
-    ·       have hge : ε ≤ z.im := not_lt.mp hnear
+    · have hge : ε ≤ z.im := not_lt.mp hnear
       have hle : z.im ≤ (1 / 2 : ℝ) - η := not_lt.mp hupper
 
       rcases P.middle.covers z hx0 hx1 hge hle with
@@ -6261,6 +6267,7 @@ def tailUnitCert_of_bound
         have hne2 : (‖(1 / 4 : ℂ) + z ^ 2‖ : ℝ) ≠ 0 := by rwa [add_comm] at hne1
         have : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 : ℝ) * (1 / (4 * ‖z ^ 2 + (1 / 4 : ℂ)‖)) = (1 / 8 : ℝ) := by
           have hne : ‖z ^ 2 + (1 / 4 : ℂ)‖ ≠ 0 := hne1
+          rw [show (4 : ℝ) * ‖z ^ 2 + (1 / 4 : ℂ)‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ * 4 from by ring]
           field_simp [hne]
           ring
         rw [this]
@@ -6583,7 +6590,6 @@ theorem polar_contribution_eq_half
     rw [this]
     exact mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) hD
   field_simp [hD, hD4]
-  norm_num
 
 end AnalyticChallenge
 
