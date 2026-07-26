@@ -4133,7 +4133,7 @@ theorem xiShifted_ne_zero_on_imaginary_axis
         = (1/2:ℂ) + I * I * (y:ℂ) := by rw [mul_assoc]
     _ = (1/2:ℂ) + (I^2 : ℂ) * (y:ℂ) := by rw [pow_two]
     _ = (1/2:ℂ) + (-1:ℂ) * (y:ℂ) := by rw [Complex.I_sq]
-    _ = ((1/2:ℝ) - (y:ℝ) : ℂ) := by ring
+    _ = ((1/2 - y : ℝ) : ℂ) := by simp [sub_eq_add_neg]
 
   have ht0 : 0 < (1 / 2 - y : ℝ) := by linarith
   have ht1 : (1 / 2 - y : ℝ) < 1 := by linarith
@@ -4151,10 +4151,12 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   have hmul :
       classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) *
         zeta ((1 / 2 - y : ℝ) : ℂ) = 0 := by
-    have hz0 : xiShifted z = 0 := hzero
-    simp only [xiShifted, classicalXi, XiFromPrefactor] at hz0
-    rw [show shiftedS z = ((1 / 2 - y : ℝ) : ℂ) from hs] at hz0
-    exact hz0
+    have hz0 : classicalXi (shiftedS z) = 0 := by
+      simpa [xiShifted] using hzero
+    have hz1 : classicalXiPrefactor (shiftedS z) * zeta (shiftedS z) = 0 := by
+      simpa [classicalXi, XiFromPrefactor] using hz0
+    rw [hs] at hz1
+    exact hz1
 
   have hzeta : zeta ((1 / 2 - y : ℝ) : ℂ) = 0 :=
     (mul_eq_zero.mp hmul).resolve_left hpref
@@ -5690,5 +5692,299 @@ theorem rh_from_complete_rh_certificate
     {
       sym := C.sym
       bounded := C.bounded
+      tail := C.tail
+    }
+/-!
+# Tail Rouché certificate from completed-zeta smallness
+
+We use the identity
+
+    xiShifted z =
+      1/2 - (z^2 + 1/4)/2 * completedRiemannZeta₀(shiftedS z).
+
+If
+
+    (‖z^2 + 1/4‖ / 2) * U(Re z, Im z) < 1/2
+
+and
+
+    ‖completedRiemannZeta₀(shiftedS z)‖ ≤ U(Re z, Im z),
+
+then
+
+    ‖xiShifted z - 1/2‖ < 1/2,
+
+so xiShifted z ≠ 0.
+-/
+
+structure TailCompletedZetaSmallBound (X : ℝ) where
+  U : ℝ → ℝ → ℝ
+  bound :
+    ∀ z : ℂ,
+      (X < z.re ∨ z.re < -X) →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      ‖completedRiemannZeta₀ (shiftedS z)‖ ≤ U z.re z.im
+  small :
+    ∀ r y : ℝ,
+      (X < r ∨ r < -X) →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      (‖((r : ℂ) + I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)‖ / 2) * U r y <
+        (1 / 2 : ℝ)
+
+/-- A sufficiently small completed-zeta tail bound gives a Rouché tail
+    certificate with comparison function g(z) = 1/2. -/
+def tailRoucheCertificate_from_completedZeta_small_bound
+    {X : ℝ}
+    (B : TailCompletedZetaSmallBound X) :
+    TailRoucheCertificate X where
+  g := fun _ => (1 / 2 : ℂ)
+  g_ne_zero := by
+    intro z _ _ _ _
+    norm_num
+  comparison := by
+    intro z htail hgt hlt hne
+
+    have hxi := xiShifted_eq_completed z hgt hlt
+
+    calc
+      ‖xiShifted z - (1 / 2 : ℂ)‖ =
+          ‖((z ^ 2 + (1 / 4 : ℂ)) / 2) *
+              completedRiemannZeta₀ (shiftedS z)‖ := by
+        rw [hxi]
+        ring_nf
+        simp [norm_neg]
+      _ =
+          (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+            ‖completedRiemannZeta₀ (shiftedS z)‖ := by
+        simp [norm_mul, norm_div, Complex.norm_ofReal]
+      _ ≤
+          (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+            B.U z.re z.im := by
+        exact
+          mul_le_mul_of_nonneg_left
+            (B.bound z htail hgt hlt hne)
+            (by positivity)
+      _ < (1 / 2 : ℝ) := by
+        simpa [Complex.re_add_im] using
+          B.small z.re z.im htail hgt hlt hne
+
+/-- A sufficiently small completed-zeta tail bound gives pointwise tail
+    nonvanishing. -/
+def tailPointwise_from_completedZeta_small_bound
+    {X : ℝ}
+    (B : TailCompletedZetaSmallBound X) :
+    XiTailPointwiseNonvanishingForX X :=
+  tailPointwise_from_rouche_certificate
+    (tailRoucheCertificate_from_completedZeta_small_bound B)
+
+/-- A complete RH certificate using a completed-zeta smallness tail. -/
+structure CompleteRHCertificateWithCompletedTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : EvidencedFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailCompletedZetaSmallBound X
+
+/-- A complete RH certificate with a completed-zeta smallness tail implies
+    RH. -/
+theorem rh_from_complete_rh_certificate_with_completed_tail
+    {X ε η : ℝ}
+    (C : CompleteRHCertificateWithCompletedTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_evidenced_first_quadrant_rectangular_rh_proof
+    {
+      sym := C.sym
+      bounded := C.bounded
+      tail := tailPointwise_from_completedZeta_small_bound C.tail
+    }
+/-!
+# Simple interval / modulus evidence front-end
+
+This layer is intended to be close to the output of interval arithmetic or
+Taylor-model verification.
+-/
+
+/-- An exclusion condition showing that an interval bound excludes zero. -/
+inductive IntervalExclusion : XiRectIntervalBound → Type
+  | posReal {B : XiRectIntervalBound} (h : 0 < B.re_low) : IntervalExclusion B
+  | negReal {B : XiRectIntervalBound} (h : B.re_high < 0) : IntervalExclusion B
+  | posImag {B : XiRectIntervalBound} (h : 0 < B.im_low) : IntervalExclusion B
+  | negImag {B : XiRectIntervalBound} (h : B.im_high < 0) : IntervalExclusion B
+
+/-- An interval bound together with a proof that it excludes zero. -/
+structure IntervalBoundEvidence where
+  bound : XiRectIntervalBound
+  exclusion : IntervalExclusion bound
+
+/-- Convert interval-bound evidence into rectangular nonvanishing evidence. -/
+def IntervalBoundEvidence.toRectEvidence :
+    IntervalBoundEvidence → RectNonvanishingEvidence
+  | ⟨B, IntervalExclusion.posReal h⟩ =>
+      positiveRealEvidence_from_intervalBound B h
+  | ⟨B, IntervalExclusion.negReal h⟩ =>
+      negativeRealEvidence_from_intervalBound B h
+  | ⟨B, IntervalExclusion.posImag h⟩ =>
+      positiveImagEvidence_from_intervalBound B h
+  | ⟨B, IntervalExclusion.negImag h⟩ =>
+      negativeImagEvidence_from_intervalBound B h
+
+/-- A simple rectangle evidence: either interval exclusion or modulus lower
+    bound. -/
+inductive SimpleRectEvidence where
+  | interval (E : IntervalBoundEvidence)
+  | modulusBound (B : XiRectModulusBound) (hm : 0 < B.m)
+
+/-- Convert simple evidence into rectangular nonvanishing evidence. -/
+def SimpleRectEvidence.toRectEvidence :
+    SimpleRectEvidence → RectNonvanishingEvidence
+  | interval E => E.toRectEvidence
+  | modulusBound B hm => modulusEvidence_from_rectModulusBound B hm
+
+/-!
+# Simple covers for the three bounded first-quadrant regions
+-/
+
+structure SimpleNearRealCover (X ε : ℝ) where
+  evidences : List SimpleRectEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      0 < z.im →
+      z.im < ε →
+      ∃ E ∈ evidences,
+        (E.toRectEvidence.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toRectEvidence.toZeroFreeRect).x1 ∧
+        (E.toRectEvidence.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toRectEvidence.toZeroFreeRect).y1
+
+structure SimpleFirstQuadrantMiddleCover (X ε η : ℝ) where
+  evidences : List SimpleRectEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      ε ≤ z.im →
+      z.im ≤ (1 / 2 : ℝ) - η →
+      ∃ E ∈ evidences,
+        (E.toRectEvidence.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toRectEvidence.toZeroFreeRect).x1 ∧
+        (E.toRectEvidence.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toRectEvidence.toZeroFreeRect).y1
+
+structure SimpleUpperBoundaryCover (X η : ℝ) where
+  evidences : List SimpleRectEvidence
+  covers :
+    ∀ z : ℂ,
+      0 ≤ z.re →
+      z.re ≤ X →
+      (1 / 2 : ℝ) - η < z.im →
+      z.im < (1 / 2 : ℝ) →
+      ∃ E ∈ evidences,
+        (E.toRectEvidence.toZeroFreeRect).x0 < z.re ∧
+        z.re < (E.toRectEvidence.toZeroFreeRect).x1 ∧
+        (E.toRectEvidence.toZeroFreeRect).y0 < z.im ∧
+        z.im < (E.toRectEvidence.toZeroFreeRect).y1
+
+/-- Convert a simple near-real cover into an evidenced near-real cover. -/
+def evidencedNearRealCover_from_simple
+    {X ε : ℝ}
+    (C : SimpleNearRealCover X ε) :
+    EvidencedNearRealRectCover X ε where
+  evidences := C.evidences.map SimpleRectEvidence.toRectEvidence
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toRectEvidence, ?_, hx0', hx1', hy0', hy1'⟩
+    exact List.mem_map.mpr ⟨E, hE, rfl⟩
+
+/-- Convert a simple middle cover into an evidenced middle cover. -/
+def evidencedFirstQuadrantMiddleCover_from_simple
+    {X ε η : ℝ}
+    (C : SimpleFirstQuadrantMiddleCover X ε η) :
+    EvidencedFirstQuadrantMiddleCover X ε η where
+  evidences := C.evidences.map SimpleRectEvidence.toRectEvidence
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toRectEvidence, ?_, hx0', hx1', hy0', hy1'⟩
+    exact List.mem_map.mpr ⟨E, hE, rfl⟩
+
+/-- Convert a simple upper-boundary cover into an evidenced upper-boundary
+    cover. -/
+def evidencedUpperBoundaryCover_from_simple
+    {X η : ℝ}
+    (C : SimpleUpperBoundaryCover X η) :
+    EvidencedUpperBoundaryRectCover X η where
+  evidences := C.evidences.map SimpleRectEvidence.toRectEvidence
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    rcases C.covers z hx0 hx1 hy0 hy1 with
+      ⟨E, hE, hx0', hx1', hy0', hy1'⟩
+    refine ⟨E.toRectEvidence, ?_, hx0', hx1', hy0', hy1'⟩
+    exact List.mem_map.mpr ⟨E, hE, rfl⟩
+
+/-!
+# Simple bounded first-quadrant proof and complete RH certificate
+-/
+
+structure SimpleFirstQuadrantRectangularBoundedProof (X ε η : ℝ) where
+  ε_pos : 0 < ε
+  η_pos : 0 < η
+  near : SimpleNearRealCover X ε
+  middle : SimpleFirstQuadrantMiddleCover X ε η
+  upper : SimpleUpperBoundaryCover X η
+
+/-- Convert a simple bounded proof into an evidenced bounded proof. -/
+def evidencedFirstQuadrantRectangularBoundedProof_from_simple
+    {X ε η : ℝ}
+    (P : SimpleFirstQuadrantRectangularBoundedProof X ε η) :
+    EvidencedFirstQuadrantRectangularBoundedProof X ε η where
+  ε_pos := P.ε_pos
+  η_pos := P.η_pos
+  near := evidencedNearRealCover_from_simple P.near
+  middle := evidencedFirstQuadrantMiddleCover_from_simple P.middle
+  upper := evidencedUpperBoundaryCover_from_simple P.upper
+
+/-- A simple complete RH certificate using a Rouché tail. -/
+structure SimpleCompleteRHCertificateWithRoucheTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : SimpleFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailRoucheCertificate X
+
+/-- A simple complete RH certificate with a Rouché tail implies RH. -/
+theorem rh_from_simple_complete_rh_certificate_with_rouche_tail
+    {X ε η : ℝ}
+    (C : SimpleCompleteRHCertificateWithRoucheTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_evidenced_rh_proof_with_rouche_tail
+    {
+      sym := C.sym
+      bounded :=
+        evidencedFirstQuadrantRectangularBoundedProof_from_simple C.bounded
+      tail := C.tail
+    }
+
+/-- A simple complete RH certificate using a completed-zeta smallness tail. -/
+structure SimpleCompleteRHCertificateWithCompletedTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : SimpleFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailCompletedZetaSmallBound X
+
+/-- A simple complete RH certificate with a completed-zeta smallness tail
+    implies RH. -/
+theorem rh_from_simple_complete_rh_certificate_with_completed_tail
+    {X ε η : ℝ}
+    (C : SimpleCompleteRHCertificateWithCompletedTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_complete_rh_certificate_with_completed_tail
+    {
+      sym := C.sym
+      bounded :=
+        evidencedFirstQuadrantRectangularBoundedProof_from_simple C.bounded
       tail := C.tail
     }
