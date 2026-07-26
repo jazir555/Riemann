@@ -4128,9 +4128,12 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   let z : ℂ := I * (y : ℂ)
 
   have hs : shiftedS z = ((1 / 2 - y : ℝ) : ℂ) := by
-    unfold shiftedS z
-    rw [← mul_assoc, ← pow_two, Complex.I_sq]
-    ring
+    simp only [shiftedS, z]
+    calc (1/2:ℂ) + I * (I * (y:ℂ))
+        = (1/2:ℂ) + I * I * (y:ℂ) := by rw [mul_assoc]
+    _ = (1/2:ℂ) + (I^2 : ℂ) * (y:ℂ) := by rw [pow_two]
+    _ = (1/2:ℂ) + (-1:ℂ) * (y:ℂ) := by rw [Complex.I_sq]
+    _ = ((1/2:ℝ) - (y:ℝ) : ℂ) := by ring
 
   have ht0 : 0 < (1 / 2 - y : ℝ) := by linarith
   have ht1 : (1 / 2 - y : ℝ) < 1 := by linarith
@@ -4148,7 +4151,10 @@ theorem xiShifted_ne_zero_on_imaginary_axis
   have hmul :
       classicalXiPrefactor ((1 / 2 - y : ℝ) : ℂ) *
         zeta ((1 / 2 - y : ℝ) : ℂ) = 0 := by
-    simpa [xiShifted, classicalXi, XiFromPrefactor, hs, mul_assoc, ← pow_two, Complex.I_sq] using hzero
+    have hz0 : xiShifted z = 0 := hzero
+    simp only [xiShifted, classicalXi, XiFromPrefactor] at hz0
+    rw [show shiftedS z = ((1 / 2 - y : ℝ) : ℂ) from hs] at hz0
+    exact hz0
 
   have hzeta : zeta ((1 / 2 - y : ℝ) : ℂ) = 0 :=
     (mul_eq_zero.mp hmul).resolve_left hpref
@@ -4225,7 +4231,7 @@ theorem xiShifted_eventually_ne_zero_ball
   intro z hz hzero
 
   have hdist := hε (show dist z z0 < ε by rw [dist_eq_norm, show z0 = I * (y0:ℂ) from rfl]; exact hz)
-  rw [hzero, zero_sub, norm_neg] at hdist
+  rw [hzero, dist_zero_left] at hdist
   linarith
 
 /-- Convert the zero-free ball into a zero-free open rectangle around
@@ -5622,3 +5628,67 @@ def tailPointwise_from_unit_comparison
     XiTailPointwiseNonvanishingForX X :=
   tailPointwise_from_rouche_certificate
     (tailRoucheCertificate_from_unit_comparison C)
+/-!
+# Final capstone certificate
+
+This combines:
+
+1. evidenced bounded first-quadrant covers;
+2. a tail Rouché certificate;
+3. the symmetry package.
+
+A single structure of this form is sufficient to prove RH.
+-/
+
+structure EvidencedRHProofWithRoucheTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : EvidencedFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailRoucheCertificate X
+
+/-- The full evidenced RH proof with a Rouché-style tail implies RH. -/
+theorem rh_from_evidenced_rh_proof_with_rouche_tail
+    {X ε η : ℝ}
+    (P : EvidencedRHProofWithRoucheTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_evidenced_first_quadrant_rectangular_rh_proof
+    {
+      sym := P.sym
+      bounded := P.bounded
+      tail := tailPointwise_from_rouche_certificate P.tail
+    }
+
+/-- A convenient version using the unit comparison tail certificate. -/
+structure EvidencedRHProofWithUnitTail (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : EvidencedFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailUnitComparisonCertificate X
+
+/-- The full evidenced RH proof with a unit-comparison tail implies RH. -/
+theorem rh_from_evidenced_rh_proof_with_unit_tail
+    {X ε η : ℝ}
+    (P : EvidencedRHProofWithUnitTail X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_evidenced_first_quadrant_rectangular_rh_proof
+    {
+      sym := P.sym
+      bounded := P.bounded
+      tail := tailPointwise_from_unit_comparison P.tail
+    }
+
+/-- A single top-level certificate target. -/
+structure CompleteRHCertificate (X ε η : ℝ) where
+  sym : XiShiftedSymmetryPackage
+  bounded : EvidencedFirstQuadrantRectangularBoundedProof X ε η
+  tail : TailRoucheCertificate X
+
+/-- A complete RH certificate implies RH. -/
+theorem rh_from_complete_rh_certificate
+    {X ε η : ℝ}
+    (C : CompleteRHCertificate X ε η) :
+    RiemannHypothesisProp :=
+  rh_from_evidenced_rh_proof_with_rouche_tail
+    {
+      sym := C.sym
+      bounded := C.bounded
+      tail := C.tail
+    }
