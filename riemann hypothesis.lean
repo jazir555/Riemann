@@ -8248,79 +8248,9 @@ an upper bound on `completedRiemannZeta₀` strictly forces `‖xiShifted z‖ �
 
 namespace Task1Completion
 
-open Complex Real Set
-
-/-- The compact rectangle `rect10_K = [-1, 11] × [0, 1/2]` in `ℂ`. -/
-def rect10_K : Set ℂ :=
-  {z : ℂ | -1 ≤ z.re ∧ z.re ≤ 11 ∧ 0 ≤ z.im ∧ z.im ≤ (1 / 2 : ℝ)}
-
-/-- `rect10_K` is compact in `ℂ` (Heine-Borel theorem). -/
-lemma rect10_K_isCompact : IsCompact rect10_K := by
-  have h_closed : IsClosed rect10_K := by
-    have h1 : IsClosed {z : ℂ | -1 ≤ z.re} := isClosed_le continuous_const continuous_re
-    have h2 : IsClosed {z : ℂ | z.re ≤ 11} := isClosed_le continuous_re continuous_const
-    have h3 : IsClosed {z : ℂ | 0 ≤ z.im} := isClosed_le continuous_const continuous_im
-    have h4 : IsClosed {z : ℂ | z.im ≤ (1 / 2 : ℝ)} := isClosed_le continuous_im continuous_const
-    exact h1.inter h2 |>.inter h3 |>.inter h4
-  have h_bounded : Metric.Bounded rect10_K := by
-    rw [Metric.bounded_iff_subset_ball (0 : ℂ)]
-    use 20
-    intro z hz
-    rw [Metric.mem_ball, dist_zero_right]
-    have hre : |z.re| ≤ 11 := by
-      rw [abs_le]; exact ⟨by linarith [hz.1], hz.2.1⟩
-    have him : |z.im| ≤ 1/2 := by
-      rw [abs_le]; exact ⟨by linarith [hz.2.2.1], hz.2.2.2⟩
-    calc
-      ‖z‖ ≤ |z.re| + |z.im| := Complex.abs_re_add_abs_im_ge z
-      _ ≤ 11 + 1/2 := add_le_add hre him
-      _ < 20 := by norm_num
-  exact Metric.isCompact_of_isClosed_bounded h_closed h_bounded
-
-/-- The map `z ↦ ‖completedRiemannZeta₀ ((1/2) + I * z)‖` is continuous on `ℂ`. -/
-lemma completedZeta_norm_continuous :
-    Continuous (fun z : ℂ => ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖) := by
-  refine Continuous.norm ?_
-  refine differentiable_completedZeta₀.continuous.comp ?_
-  exact continuous_const.add (continuous_const.mul continuous_id)
-
-/-- `rect10_K` is non-empty (`0 ∈ rect10_K`). -/
-lemma rect10_K_nonempty : rect10_K.Nonempty :=
-  ⟨0, by simp [rect10_K]; constructor <;> linarith⟩
-
-/-- The point in `rect10_K` where `‖completedRiemannZeta₀ ((1/2) + I * z)‖` achieves its maximum. -/
-noncomputable def rect10_z_max : ℂ :=
-  (rect10_K_isCompact.exists_isMaxOn rect10_K_nonempty
-    completedZeta_norm_continuous.continuousOn).choose
-
-lemma rect10_z_max_mem : rect10_z_max ∈ rect10_K :=
-  (rect10_K_isCompact.exists_isMaxOn rect10_K_nonempty
-    completedZeta_norm_continuous.continuousOn).choose_spec.1
-
-lemma rect10_z_max_isMax :
-    IsMaxOn (fun z => ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖) rect10_K rect10_z_max :=
-  (rect10_K_isCompact.exists_isMaxOn rect10_K_nonempty
-    completedZeta_norm_continuous.continuousOn).choose_spec.2
-
-/-- The crude geometric upper bound for `‖z^2 + 1/4‖ / 2` on `rect10_K`. -/
+/-- The crude geometric upper bound for `‖z^2 + 1/4‖ / 2` on `[-1, 11] × (0, 1/2)`. -/
 noncomputable def rect10_D_half : ℝ :=
   rectangleDHalf (-1) 11 0 (1 / 2)
-
-/-- Target upper bound `rect10_U_target` defined as the exact maximum value on `rect10_K`. -/
-noncomputable def rect10_U_target : ℝ :=
-  ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * rect10_z_max)‖
-
-/-- **LEAF 1 FULLY PROVED**: Analytical upper bound for `completedRiemannZeta₀` 
-    on the rectangle `[-1, 11] × (0, 1/2)`. ZERO `sorry`s! -/
-lemma completedZeta_bound_on_rect10
-    (z : ℂ)
-    (hx0 : -1 < z.re) (hx1 : z.re < 11)
-    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
-    ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ rect10_U_target := by
-  have hz_mem : z ∈ rect10_K := by
-    simp [rect10_K]
-    exact ⟨by linarith, by linarith, by linarith, by linarith⟩
-  exact rect10_z_max_isMax hz_mem
 
 /-- Zeta has no zeros in the low-height critical strip.
     The first non-trivial zero has |Im(s)| ≈ 14.13. -/
