@@ -9121,7 +9121,7 @@ def phase_non_cancellation_from_hadamard
     intro x y hx _hy0 _hy1 _hyne
     have h1 : 0 < |x| + 1 := by positivity
     have : 1 / (|x| + 1) ^ 3 < 1 / (|x| + 1) ^ 2 := by
-      rw [div_lt_div_iff₀] <;> [apply mul_pos; apply pow_pos] <;> positivity
+      rw [div_lt_div_iff₀] <;> nlinarith [sq_nonneg (|x|)]
     exact this
 
 end Atomic_Hadamard_Decomposition
