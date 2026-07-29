@@ -8228,6 +8228,19 @@ namespace Task1Completion
 noncomputable def rect10_D_half : ℝ :=
   rectangleDHalf (-1) 11 0 (1 / 2)
 
+/-- `termTSum s ≥ 0` for `s > 0`. -/
+private theorem termTSum_nonneg {s : ℝ} (hs : 0 < s) : 0 ≤ ZetaAsymptotics.termTSum s :=
+  tsum_nonneg (fun n => ZetaAsymptotics.term_nonneg (n + 1) s)
+
+/-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
+    For `s > 1`, this follows from `ZetaAsymptotics.termTSum_of_lt` + `riemannZeta₀_eq_inv_sub_add`
+    + `zeta_eq_tsum_one_div_nat_add_one_cpow`.
+    For `0 < s < 1`, both sides are real-analytic on `(0,∞)` and agree on `(1,∞)`,
+    so they agree on `(0,∞)` by the identity theorem. -/
+private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s :=
+  sorry
+
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
 
     Proof strategy:
@@ -8256,9 +8269,10 @@ theorem riemannZeta_ne_zero_real_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
     rw [← hζeq]; exact hz
   -- Key bound: (riemannZeta₀(σ)).re ≤ 1
   have hle : (riemannZeta₀ (σ : ℂ)).re ≤ 1 := by
-    -- riemannZeta₀(σ) = 1 - σ * termTSum σ (formula valid for all σ > 0, σ ≠ 1)
-    -- termTSum σ ≥ 0, so riemannZeta₀(σ) ≤ 1
-    sorry -- requires analytic continuation of formula to (0,1)
+    have h := riemannZeta₀_eq_one_sub_mul_termTSum h0 (by linarith : σ ≠ 1)
+    rw [h]
+    have := mul_nonneg h0.le (termTSum_nonneg h0)
+    linarith
   -- But (σ-1)⁻¹ + riemannZeta₀(σ) = 0 means riemannZeta₀(σ) = -(σ-1)⁻¹ = 1/(1-σ)
   -- And 1/(1-σ) > 1 for σ ∈ (0,1), contradicting riemannZeta₀(σ) ≤ 1
   have h1σ_pos : 0 < 1 - σ := by linarith
