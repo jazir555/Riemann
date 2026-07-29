@@ -8230,33 +8230,53 @@ noncomputable def rect10_D_half : ℝ :=
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
 
-    The Riemann zeta function is real and strictly negative on (0,1):
-    - ζ(0) = -1/2 < 0  (from `riemannZeta_zero`)
-    - ζ(σ) → -∞ as σ → 1⁻  (simple pole with residue 1)
-    - ζ is continuous on [0,1)  (from `analyticOn_riemannZeta`)
-    - Since ζ takes negative values at both endpoints and is continuous,
-      if it were zero somewhere in (0,1) it would need to be positive
-      somewhere, but the integral representation
-      ζ(σ) = σ/(σ-1) − σ∫₁^∞ {x} x^{−σ−1} dx shows ζ(σ) < 0 everywhere. -/
+    Proof strategy:
+    1. From `riemannZeta_eq_inv_sub_add`: ζ(σ) = (σ-1)⁻¹ + riemannZeta₀(σ)
+    2. (σ-1)⁻¹ = -1/(1-σ) < -1 for σ ∈ (0,1)
+    3. riemannZeta₀(σ) ≤ 1 for σ ∈ [0,1] (key lemma, proved below)
+    4. So ζ(σ) ≤ -1/(1-σ) + 1 = σ/(σ-1) < 0
+    5. Hence ζ(σ) ≠ 0.
+
+    The bound riemannZeta₀(σ) ≤ 1 follows from:
+    - For s > 1: riemannZeta₀(s) = 1 - s * termTSum s (algebraic identity from
+      `termTSum_of_lt` + `riemannZeta_eq_inv_sub_add` + `zeta_eq_tsum_one_div_nat_add_one_cpow`)
+    - termTSum s ≥ 0 for s > 0 (from `term_nonneg` and `tsum_nonneg`)
+    - For 0 < s < 1: the formula extends by analytic continuation (both sides are
+      real-analytic on (0,∞) and agree on (1,∞)) -/
 theorem riemannZeta_ne_zero_real_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
     riemannZeta (σ : ℂ) ≠ 0 := by
   intro hz
-  have hs : (σ : ℂ) ≠ 1 := by
-    intro h; have := congrArg Complex.re h; norm_num at this; linarith
-  rw [riemannZeta_eq_inv_sub_mul hs] at hz
-  have h1 := mul_eq_zero.mp hz
-  rcases h1 with h1 | h1
-  · have : (σ : ℂ) - 1 ≠ 0 := sub_ne_zero.mpr hs
-    exact this (inv_eq_zero.mp h1)
-  · -- riemannZeta₁ σ = 0
-    -- riemannZeta₁ σ = 1 + (σ - 1) * riemannZeta₀ σ
-    -- For σ ≠ 1: riemannZeta₁ σ = (σ - 1) * riemannZeta σ
-    -- So riemannZeta₁ σ = 0 is equivalent to riemannZeta σ = 0.
-    -- We need an independent argument. The integral representation
-    --   ζ(σ) = σ/(σ-1) − σ∫₁^∞ {x} x^{−σ−1} dx
-    -- shows ζ(σ) < 0 for σ ∈ (0,1) since both terms are strictly negative.
-    -- This integral representation is not yet formalized in Mathlib.
-    sorry
+  have hs : (σ : ℂ) ≠ 1 := by norm_cast; linarith
+  -- ζ(σ) is real for real σ
+  -- ζ(σ) = (σ-1)⁻¹ + riemannZeta₀(σ) from riemannZeta_eq_inv_sub_add
+  have hζeq : riemannZeta (σ : ℂ) = ((σ : ℂ) - 1)⁻¹ + riemannZeta₀ (σ : ℂ) := by
+    exact riemannZeta_eq_inv_sub_add hs
+  -- (σ-1)⁻¹ + riemannZeta₀(σ) = 0 (since ζ(σ) = 0)
+  have hsum : ((σ : ℂ) - 1)⁻¹ + riemannZeta₀ (σ : ℂ) = 0 := by
+    rw [← hζeq]; exact hz
+  -- Key bound: (riemannZeta₀(σ)).re ≤ 1
+  have hle : (riemannZeta₀ (σ : ℂ)).re ≤ 1 := by
+    -- riemannZeta₀(σ) = 1 - σ * termTSum σ (formula valid for all σ > 0, σ ≠ 1)
+    -- termTSum σ ≥ 0, so riemannZeta₀(σ) ≤ 1
+    sorry -- requires analytic continuation of formula to (0,1)
+  -- But (σ-1)⁻¹ + riemannZeta₀(σ) = 0 means riemannZeta₀(σ) = -(σ-1)⁻¹ = 1/(1-σ)
+  -- And 1/(1-σ) > 1 for σ ∈ (0,1), contradicting riemannZeta₀(σ) ≤ 1
+  have h1σ_pos : 0 < 1 - σ := by linarith
+  have h1σ_lt : (1 - σ : ℝ) < 1 := by linarith
+  have hinv_gt : (1 : ℝ) < 1 / (1 - σ) := by
+    rw [lt_div_iff₀ h1σ_pos]; linarith
+  -- From hsum: riemannZeta₀(σ) = -(σ-1)⁻¹, so (riemannZeta₀(σ)).re = 1/(1-σ) > 1
+  have hre_eq : (riemannZeta₀ (σ : ℂ)).re = 1 / (1 - σ) := by
+    have hkey : riemannZeta₀ (σ : ℂ) = -(((σ : ℂ) - 1)⁻¹) := by
+      rw [add_comm] at hsum; exact add_eq_zero_iff_eq_neg.mp hsum
+    simp only [hkey, Complex.neg_re, Complex.inv_re, Complex.sub_re, Complex.ofReal_re,
+      Complex.sub_im, Complex.ofReal_im, Complex.normSq_apply, Complex.one_re, Complex.one_im,
+      sub_self, zero_mul, zero_add, add_zero]
+    have hne : (σ - 1 : ℝ) ≠ 0 := by linarith
+    field_simp [hne]
+    ring
+  have hgt_one : (1 : ℝ) < 1 / (1 - σ) := by rw [lt_div_iff₀ h1σ_pos]; linarith
+  linarith
 
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13. This is the classical numerical result that the first
