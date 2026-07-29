@@ -8258,6 +8258,24 @@ theorem riemannZeta_ne_zero_real_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
     -- This integral representation is not yet formalized in Mathlib.
     sorry
 
+/-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
+    then |Im(s)| > 14.13. This is the classical numerical result that the first
+    non-trivial zero of ζ has |Im(ρ)| ≈ 14.1347 > 14.13.
+
+    The proof uses the following finite-rectangle argument:
+    1. `IsCompact.inter_riemannZetaZeros_finite`: the compact rectangle
+       [0,1] × [-14.12, 14.12] intersects riemannZetaZeros in finitely many points.
+    2. `riemannZeta_ne_zero_of_one_le_re`: no zero has Re(s) ≥ 1.
+    3. `riemannZeta_one_sub` (functional equation): zeros on Re(s) = 0 map under s ↦ 1-s
+       to zeros on Re(s) = 1, which are excluded by (2).
+    4. A rigorous numerical verification (Hasler 2004, Odlyzko 1987) confirms
+       no zero in {0 < Re(s) < 1, Im(s) ≠ 0} has |Im(s)| ≤ 14.12.
+       This step requires formalized interval arithmetic for ζ estimates. -/
+theorem riemannZeta_first_nontrivial_zero_height
+    {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
+    14.13 < |s.im| :=
+  sorry
+
 /-- Classical numerical result: the first non-trivial zero of the Riemann zeta function
     has |Im(ρ)| > 14.13. This was proved numerically by Hasler (2004) and independently
     verified by Odlyzko (1987). The first zero is at approximately ρ ≈ 1/2 + 14.134725i.
