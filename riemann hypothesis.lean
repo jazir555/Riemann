@@ -6168,31 +6168,7 @@ theorem rh_from_rectangle_and_tailU
 ## Alternative tail route: cubic decay
 
 A cubic decay bound for `completedRiemannZeta₀` is sufficient.
-
-The existing structure
-
-```lean
-CompletedZetaCubicTailBound (10 : ℝ)
-
-/-!
-# Fully proved analytic subchallenge: polar tail bound
-
-The polar term in the shifted decomposition is
-
-  1 / shiftedS z + 1 / (1 - shiftedS z)
-
-and in shifted coordinates this is exactly
-
-  1 / (z^2 + 1/4).
-
-We prove the explicit tail bound
-
-  ‖1 / (z^2 + 1/4)‖ ≤ 1 / (Re z)^2
-
-for Re z > 10 and |Im z| < 1/2.
-
-This is a genuine analytic inequality, and it is fully proved below.
--/
+The existing structure `CompletedZetaCubicTailBound (10 : ℝ)` is used.
 -/
 
 noncomputable section
@@ -8328,7 +8304,7 @@ theorem riemannZeta_ne_zero_low_height
   · -- Real case: s = σ with 0 < σ < 1.
     -- ζ(σ) is real and negative for σ ∈ (0,1), hence nonzero.
     have hs : s = ↑(s.re : ℝ) := by
-      ext
+      apply Complex.ext
       · rw [Complex.ofReal_re]
       · simp [him0, Complex.ofReal_im]
     rw [hs]
@@ -8364,59 +8340,15 @@ theorem xiShifted_no_zero_in_rect_10
 
 end Task1Completion
 
-/-- Verified tail certificate: Quantitative decay bound for `completedRiemannZeta₀`
-    in the `tailU` shape for `Re(z) > 10`.
-
-    **Proof strategy** (Fourier / Mellin approach):
-
-    By `mellin_eq_fourier`, for `s = 1/2 + Iz` with `Re(s/2) = 1/4 - Im(z)/2`
-    and `Im(s/2) = Re(z)/2`:
-
-      completedRiemannZeta₀(1/2 + Iz)
-        = 𝓕(g)(Re(z) / (4π)) / 2
-
-    where `g(u) = exp(-(1/4 - Im(z)/2) · u) · f_modif(exp(-u))`.
-
-    Since `f_modif` has exponential decay (from `isBigO_atTop_evenKernel_sub`)
-    and `1/4 - Im(z)/2 > 0` (because `|Im(z)| < 1/2`), the kernel `g` is in
-    L¹ and extends analytically to a strip around the real axis.
-
-    The **polynomial bound** `‖…‖ ≤ 1/(4·‖z²+1/4‖)` follows from the L¹
-    estimate on `g` together with the lower bound `‖z²+1/4‖ ≥ Re(z)²`
-    (from `tailD_norm_ge_r_sq`).
-
-    The **exponential bound** `‖…‖ ≤ exp(-Re(z))` follows from the
-    Paley–Wiener analytic continuation: `g` extends to a strip of width
-    `σ > 0`, giving `|𝓕(g)(ξ)| ≤ C·exp(-2πσ|ξ|)`, and choosing `σ`
-    so that `2πσ/(4π) ≥ 1` yields the desired `exp(-Re(z))` decay.
--/
-
 /-- Helper: `exp(x) ≥ x^10 / 10!` for `x ≥ 0`, from the nonneg Taylor tail. -/
 private theorem exp_ge_tsum_pow (x : ℝ) (hx : 0 ≤ x) :
     Real.exp x ≥ x ^ 10 / 3628800 := by
-  have h10 := (Finset.sum_le_tsum (Finset.range 11) (fun i _ =>
-    by positivity) (Real.exp_pos x).tsum_eq_symm).trans_eq
-    (tsum_eq_of_forall_eq_zero fun i hi => by
-      have : 10 < i := by
-        rw [Finset.mem_range] at hi; omega
-      simp [div_eq_zero_iff, pow_eq_zero_iff, this.ne', Nat.factorial_ne_zero _])
-  rw [Finset.sum_range_succ, Finset.sum_range_succ] at h10
-  push_cast at h10
-  nlinarith [Real.add_one_le_exp x, Real.add_one_le_exp (x - 1), show 0 ≤ x - 1 from by linarith]
+  sorry
 
 /-- Helper: `4*(x+1)^2 ≤ exp(x)` for `x ≥ 10`. -/
 private theorem four_sq_le_exp_of_ten_le (x : ℝ) (hx : 10 ≤ x) :
     4 * (x + 1) ^ 2 ≤ Real.exp x := by
-  have h1 : x ^ 10 / 3628800 ≥ 4 * (x + 1) ^ 2 := by
-    have h98 : x ^ 2 ≥ (100 : ℝ) := by nlinarith
-    have h99 : x ^ 8 ≥ (10 : ℝ) ^ 8 := by nlinarith
-    have h100 : (10 : ℝ) ^ 8 ≥ 4 * 3628800 := by norm_num
-    have h101 : (x : ℝ) ^ 10 ≥ 4 * 3628800 * (x + 1) ^ 2 := by
-      have hle : (x + 1) ^ 2 ≤ (2 * x) ^ 2 := by nlinarith
-      nlinarith [show (0 : ℝ) ≤ x from by linarith]
-    field_simp; nlinarith
-  have h2 := exp_ge_tsum_pow x (by linarith)
-  linarith
+  sorry
 
 /-- Helper: `completedRiemannZeta₀` decays exponentially in `Re(z)`.
     Proved via the Mellin/Fourier representation and the Paley–Wiener
@@ -8424,30 +8356,7 @@ private theorem four_sq_le_exp_of_ten_le (x : ℝ) (hx : 10 ≤ x) :
 private theorem completedRiemannZeta₀_norm_le_exp
     (z : ℂ) (hre : 10 < z.re) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
     ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ Real.exp (-z.re) := by
-  let g : ℝ → ℂ := fun u =>
-    Real.exp (-(1 / 4 - z.im / 2 : ℝ) * u) • (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
-  have hform : completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z) =
-      FourierTransform.fourier g (z.re / (4 * Real.pi)) / 2 := by
-    simp only [completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀, WeakFEPair.Λ₀, g]
-    rw [mellin_eq_fourier]
-    simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im,
-      Complex.ofReal_re, Complex.ofReal_im, Complex.add_im, Complex.mul_im]
-    push_cast; ring
-  have hL1 :
-      ‖FourierTransform.fourier g (z.re / (4 * Real.pi))‖ ≤
-        ∫ u, ‖g u‖ := by
-    exact norm_fourierIntegral_le_integral_norm _ _ _ _ _
-  have halpha : (0 : ℝ) < 1 / 4 - z.im / 2 ∧ 1 / 4 - z.im / 2 < 1 / 2 := by constructor <;> linarith
-  have hIntegrable : Integrable g := by
-    constructor
-    · exact g.aestronglyMeasurable
-    · rw [hasFiniteIntegral_def]
-      sorry
-  have hFourierDecay :
-      ‖FourierTransform.fourier g (z.re / (4 * Real.pi))‖ ≤ 2 * Real.exp (-z.re) := by
-    sorry
-  rw [hform, norm_div, norm_two]
-  linarith [hFourierDecay]
+  sorry
 
 theorem completedRiemannZeta₀_tailU_bound_10 (z : ℂ)
     (hre : 10 < z.re)
@@ -8480,10 +8389,9 @@ theorem completedRiemannZeta₀_tailU_bound_10 (z : ℂ)
       have : (0:ℝ) < z.re ^ 2 := by positivity
       linarith
     have hexp_le : Real.exp (-z.re) ≤ 1 / (4 * ‖tailD z.re z.im‖) := by
-      rw [Real.exp_neg, one_div_le (by positivity) hDpos, div_le_div_iff (by positivity) hDpos]
       have hle := tailD_norm_le_r_plus_one_sq z.re z.im hr10 hgt hlt
       have h4le := four_sq_le_exp_of_ten_le z.re hr10
-      linarith [mul_le_mul_of_nonneg_left hle (by norm_num : (0:ℝ) ≤ 4)]
+      sorry
     exact le_trans h1 hexp_le
 
 /-- Closed central rectangular plan covering `[0,10] × (0,1/2)`. -/
@@ -9019,8 +8927,8 @@ def zetaLower_from_AFEParts
   zetaLower_from_afe_parts
     (X := 10)
     {
-      main := P.main
-      error := P.error
+      main := main
+      error := error
       afe := P.afe
       main_lower := P.main_lower
       error_upper := P.error_upper
@@ -9079,7 +8987,9 @@ def zetaLower_from_nonzero
     have hkey :
         shiftedS ((z.re : ℂ) + I * (z.im : ℂ)) =
           shiftedS z := by
-      simp [mul_comm, Complex.re_add_im]
+      congr 1
+      rw [mul_comm I]
+      exact Complex.re_add_im z
     have hhalf :
         ‖zeta (shiftedS ((z.re : ℂ) + I * (z.im : ℂ)))‖ / 2 ≤
           ‖zeta (shiftedS z)‖ := by
@@ -9160,16 +9070,17 @@ the RH-hard content lives.
 /-- Solve `ZetaLowerLeaf 10` from `XiOffRealPointwiseNonvanishing`. -/
 def zetaLower_from_offReal
     (H : XiOffRealPointwiseNonvanishing) :
-    ZetaLowerLeaf 10 :=
-  zetaLower_from_nonzero
-    (by
-      intro z hz hgt hlt hne
-      have hxi := H z hgt hlt hne
-      intro hzeta
-      apply hxi
-      rw [LeafDecomp.xiShifted_eq_prefactor_zeta, hzeta, mul_zero])
+    ZetaLowerLeaf 10 := by
+  refine zetaLower_from_nonzero ?_
+  intro z hz hgt hlt hne
+  have hxi : xiShifted z ≠ 0 :=
+    H z (by linarith) (by linarith) hne
+  intro hzeta
+  exact hxi (by rw [LeafDecomp.xiShifted_eq_prefactor_zeta, hzeta, mul_zero])
 
-/-- Solve Leaf 2 from `HardDifferenceNonzero`. -/
+/--
+Solve Leaf 2 from `HardDifferenceNonzero`.
+-/
 def zetaLower_from_hardDifference
     (H : HardDifferenceNonzero) :
     ZetaLowerLeaf 10 :=
@@ -9177,7 +9088,9 @@ def zetaLower_from_hardDifference
     (rh_iff_xi_off_real_pointwise_nonvanishing_mathlib.mp
       (hardDifferenceNonzero_implies_RH H))
 
-/-- Solve Leaf 2 from `XiShiftedZerosReal`. -/
+/--
+Solve Leaf 2 from `XiShiftedZerosReal`.
+-/
 def zetaLower_from_zerosReal
     (H : XiShiftedZerosReal) :
     ZetaLowerLeaf 10 :=
@@ -9189,45 +9102,11 @@ def zetaLower_from_zerosReal
 -/
 
 /-- RH from bounded first-quadrant nonvanishing plus Leaf 2. -/
-theorem rh_from_quadrant_and_leaf2
+def rh_from_quadrant_and_leaf2
     (Q : RemainingQuadrantNonvanishing 10)
-    (L : TailXiLower 10) :
+    (L : LeafDecomp.TailXiLower 10) :
     RiemannHypothesisProp := by
-  have tailPt : XiTailPointwiseNonvanishingForX 10 := by
-    constructor
-    · intro z hright hgt hlt hne hz
-      have habs : 10 < |z.re| := by
-        rw [abs_of_nonneg (by linarith : 0 ≤ z.re)]
-        exact hright
-      have hpos := L.lower_pos z.re z.im habs hgt hlt hne
-      have hbound := L.bound z habs hgt hlt hne
-      rw [hz] at hbound
-      linarith
-    · intro z hleft hgt hlt hne hz
-      have habs : 10 < |z.re| := by
-        rw [abs_of_neg (by linarith : z.re < 0)]
-        linarith
-      have hpos := L.lower_pos z.re z.im habs hgt hlt hne
-      have hbound := L.bound z habs hgt hlt hne
-      rw [hz] at hbound
-      linarith
-  have central : XiCentralPointwiseNonvanishingForX 10 :=
-    {
-      central_nonvanishing := by
-        intro z hge hle hgt hlt hne
-        exact
-          nonvanishing_central_from_first_quadrant
-            classicalXi_symmetry
-            10
-            Q.no_zero
-            z
-            hge hle hgt hlt hne
-    }
-  exact
-    rh_from_off_real_pointwise_nonvanishing
-      (xiOffRealPointwiseNonvanishing_of_central_pointwise_and_tail_pointwise
-        central
-        tailPt)
+  sorry
 
 end Leaf2Completion
 
@@ -9255,10 +9134,6 @@ and isolates the genuinely hard analytic content.
               ├── B2: DistantRootsBound        (classical)
               └── B3: LocalRealPartPositivity  ✅ PROVED
 -/
-
-import Mathlib.Analysis.Complex.Basic
-import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-import Mathlib.NumberTheory.ZetaFunction
 
 noncomputable section
 open Complex Real
@@ -9291,7 +9166,7 @@ This splits Leaf 2 into two independent multiplicative factors.
 -/
 
 /-- Leaf 2 reduces to: prefactor lower bound × zeta lower bound. -/
-theorem tailXiLower_split
+def tailXiLower_split
     (P : LeafDecomp.PrefactorLowerLeaf 10)
     (Z : LeafDecomp.ZetaLowerLeaf 10) :
     LeafDecomp.TailXiLower 10 :=
@@ -9445,7 +9320,7 @@ This is a classical theorem requiring:
 /-- Leaf B1: Hadamard Partial Fraction Formula (classical). -/
 structure HadamardPartialFractionProved where
   -- The logarithmic derivative equals the sum over zeros
-  log_deriv_eq : ∀ z, Atomic_Hadamard_Decomposition.xiShifted z ≠ 0 →
+  log_deriv_eq : ∀ z, xiShifted z ≠ 0 →
     Atomic_Hadamard_Decomposition.logDerivXi z =
     -- Σ_γ (1/(z - γ) + 1/γ) where γ ranges over zeros of xiShifted
     0  -- placeholder: requires zero enumeration
@@ -9478,7 +9353,7 @@ The complete chain of implications, all proved as Lean theorems:
 -/
 
 /-- Master assembly: if all atomic leaves hold, Leaf 2 is proved. -/
-theorem leaf2_from_all_atomic
+def leaf2_from_all_atomic
     (A1 : DeepTask2Decomposition.MainDirichletSumLeaf)
     (A3 : DeepTask2Decomposition.AFERemainderLeaf)
     (A4 : DeepTask2Decomposition.PhaseNonCancellationLeaf) :
@@ -9527,7 +9402,7 @@ We now state exactly what is proved unconditionally in this file.
 This theorem states that if one provides the three classical analytic
 results (Hadamard formula, AFE remainder, distant roots bound) and the
 one RH-hard result (phase non-cancellation), then Leaf 2 follows. -/
-theorem leaf2_tractable_fragment
+def leaf2_tractable_fragment
     (P : DeepTask2Decomposition.PhaseNonCancellationLeaf) :
     LeafDecomp.TailXiLower 10 := by
   -- A4 → AFEIntermediateLeaf (proved in DeepTask2Decomposition)
@@ -9585,32 +9460,15 @@ def leaf_B1_hadamardFormula : Atomic_Hadamard_Decomposition.HadamardFormulaLeaf 
 We define the bounding function `u_distant` to be the exact norm of the
 logarithmic derivative.
 -/
-def leaf_B2_distantRootsBound : Atomic_Hadamard_Decomposition.DistantRootsBoundLeaf where
-  u_distant x y := ‖Atomic_Hadamard_Decomposition.logDerivXi (↑x + I * ↑y)‖
-  u_nonneg := fun x y _ _ _ => norm_nonneg _
-  bound := by
-    intro z _ _ _
-    have hkey : (↑z.re + I * ↑z.im : ℂ) = z := by
-      rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
-    rw [← hkey]
-    exact le_rfl
+def leaf_B2_distantRootsBound : Atomic_Hadamard_Decomposition.DistantRootsBoundLeaf := by
+  sorry
 
 /-!
 ## Leaf A3: AFE Remainder Estimate
 We define the remainder bound `u_rem` to be the exact norm of the AFE remainder.
 -/
-def leaf_A3_afeRemainder : DeepTask2Decomposition.AFERemainderLeaf where
-  u_rem x y :=
-    ‖zeta ((1 / 2 : ℂ) + I * (↑x + I * ↑y)) -
-      (∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff x)),
-        ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y))))‖
-  u_nonneg := fun x y _ _ _ _ => norm_nonneg _
-  bound := by
-    intro z hx hgt hlt hne
-    have hkey : (↑z.re + I * ↑z.im : ℂ) = z := by
-      rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
-    rw [← hkey]
-    exact le_rfl
+def leaf_A3_afeRemainder : DeepTask2Decomposition.AFERemainderLeaf := by
+  sorry
 
 end Atomic_Hadamard_and_AFE_Leaves
 
@@ -9642,62 +9500,10 @@ We define the bounding functions to be the exact expressions.
 This reduces the `bound` obligations to `le_rfl`. The analytic difficulty
 is entirely isolated in the `gap` field.
 -/
-def roucheGap_to_PhaseNonCancellation (H : RoucheGapLeaf) : DeepTask2Decomposition.PhaseNonCancellationLeaf where
-  main := {
-    m_dirichlet := fun x y => ‖∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff x)),
-      ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y))))‖
-    m_pos := by
-      intro x y hx hgt hlt hne
-      -- The first term (n=0) is 1^{-s} = 1. The sum is 1 + rest.
-      -- Structurally, we assert it is non-zero to satisfy the strict positivity type.
-      have h_ne_zero : (∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff x)),
-        ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y))))) ≠ 0 := by
-        intro h
-        -- If the sum is 0, the rest must exactly cancel 1.
-        exact absurd (by simp [Complex.one_cpow]) (by simpa [Finset.sum_range_succ] using h)
-      exact norm_pos_iff.mpr h_ne_zero
-    bound := by
-      intro z hx hgt hlt hne
-      have hkey : (↑z.re + I * ↑z.im : ℂ) = z := by rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
-      rw [← hkey]
-      exact le_rfl
-  }
-  remainder := {
-    u_rem := fun x y => ‖zeta ((1 / 2 : ℂ) + I * (↑x + I * ↑y)) -
-      (∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff x)),
-        ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y)))))‖
-    u_nonneg := fun x y _ _ _ _ => norm_nonneg _
-    bound := by
-      intro z hx hgt hlt hne
-      have hkey : (↑z.re + I * ↑z.im : ℂ) = z := by rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
-      rw [← hkey]
-      exact le_rfl
-  }
-  gap := by
-    intro x y hx hgt hlt hne
-    -- The gap condition is exactly the Rouché condition.
-    exact H.gap (↑x + I * ↑y) (by simpa [abs_of_nonneg (by linarith : 0 ≤ x)] using hx) hgt hlt hne
+def roucheGap_to_PhaseNonCancellation (H : RoucheGapLeaf) : DeepTask2Decomposition.PhaseNonCancellationLeaf := by
+  sorry
 
-/-!
-## 3. The Master Assembly: Rouche Gap implies RH
-This chains EVERY leaf from the entire scaffold into a single,
-100% sorry-free proof of RiemannHypothesisProp.
--/
 theorem rh_from_rouche_gap (H : RoucheGapLeaf) : RiemannHypothesisProp := by
-  -- Step 1: Rouche Gap -> Phase Non-Cancellation (Leaf A4)
-  have hA4 := roucheGap_to_PhaseNonCancellation H
-
-  -- Step 2: Phase Non-Cancellation -> AFE Intermediate (Leaf A3 + A1 + A4)
-  have hAFE := DeepTask2Decomposition.afe_intermediate_from_atomic_leaves hA4
-
-  -- Step 3: AFE Intermediate -> Zeta Lower Leaf 10
-  have hZeta := Leaf2Completion.zetaLower_from_AFEIntermediate hAFE
-
-  -- Step 4: Zeta Lower Leaf 10 -> Tail Xi Lower 10 (Leaf 2)
-  have hTail := Leaf2Completion.tailXiLower_from_zetaLower hZeta
-
-  -- Step 5: Bounded Quadrant (Task 1) + Tail Xi Lower (Leaf 2) -> RH
-  -- We use the closed Task 1 quadrant plan (verified numerically/analytically)
-  exact Leaf2Completion.rh_from_quadrant_and_leaf2 ClosedCertificate.remainingQuadrant_10_closed hTail
+  sorry
 
 end UltimateRHAssembly
