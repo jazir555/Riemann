@@ -8232,6 +8232,51 @@ noncomputable def rect10_D_half : ℝ :=
 private theorem termTSum_nonneg {s : ℝ} (hs : 0 < s) : 0 ≤ ZetaAsymptotics.termTSum s :=
   tsum_nonneg (fun n => ZetaAsymptotics.term_nonneg (n + 1) s)
 
+/-- For real `s ≠ 1`, `riemannZeta₀ (s : ℂ)` is real, i.e., its imaginary part is 0. -/
+private theorem riemannZeta₀_real_of_real {s : ℝ} (hs : s ≠ 1) :
+    (riemannZeta₀ (s : ℂ)).im = 0 := by
+  unfold riemannZeta₀
+  rw [if_neg (by exact_mod_cast hs : (s : ℂ) ≠ 1)]
+  simp only [Complex.sub_im, Complex.inv_im, Complex.sub_im, Complex.ofReal_im,
+    Complex.one_im, sub_zero, zero_div, neg_zero]
+  have h := riemannZeta_conj (s : ℂ)
+  rw [Complex.conj_ofReal] at h
+  have := congr_arg Complex.im h
+  simp only [Complex.conj_im] at this
+  linarith
+
+/-- For real `s` with `0 < s` and `s ≠ 1`, the real part of `riemannZeta₀ (s : ℂ)` equals
+    `(riemannZeta (s : ℂ)).re - 1/(s-1)`. -/
+private theorem riemannZeta₀_re_of_real {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
+    (riemannZeta₀ (s : ℂ)).re = (riemannZeta (s : ℂ)).re - 1 / (s - 1) := by
+  unfold riemannZeta₀
+  rw [if_neg (by exact_mod_cast hs1 : (s : ℂ) ≠ 1)]
+  simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.ofReal_im,
+    Complex.one_re, Complex.one_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero]
+  have hsne : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
+  rw [show (s : ℂ) - 1 = ((s - 1 : ℝ) : ℂ) from (Complex.ofReal_sub s 1).symm]
+  simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero,
+    mul_zero, add_zero, hsne, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    div_pow, mul_div_cancel₀ _ hsne, mul_one]
+  field_simp [hsne]
+
+/-- For `n > 0`, the function `s ↦ ZetaAsymptotics.term n s` is continuous on `[1, ∞)`.
+    This is a weaker version of differentiability, sufficient for the identity theorem. -/
+private theorem term_continuousOn {n : ℕ} (hn : 0 < n) :
+    ContinuousOn (fun s : ℝ => ZetaAsymptotics.term n s) (Set.Ici 1) := by
+  have h := ZetaAsymptotics.continuousOn_term (n - 1)
+  intro x hx
+  have key : (ZetaAsymptotics.term n : ℝ → ℝ) = ZetaAsymptotics.term ((n - 1) + 1) :=
+    congr_arg ZetaAsymptotics.term (Nat.sub_add_cancel hn).symm
+  rw [key]
+  exact h x hx
+
+/-- `termTSum` is continuous on `[1, ∞)`.
+    This is a weaker version of differentiability, sufficient for the identity theorem. -/
+private theorem termTSum_continuousOn :
+    ContinuousOn ZetaAsymptotics.termTSum (Set.Ici 1) :=
+  ZetaAsymptotics.continuousOn_termTSum
+
 /-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
     For `s > 1`, this follows from `ZetaAsymptotics.termTSum_of_lt` + `riemannZeta₀_eq_inv_sub_add`
     + `zeta_eq_tsum_one_div_nat_add_one_cpow`.
@@ -8291,6 +8336,56 @@ theorem riemannZeta_ne_zero_real_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
     ring
   have hgt_one : (1 : ℝ) < 1 / (1 - σ) := by rw [lt_div_iff₀ h1σ_pos]; linarith
   linarith
+
+private theorem riemannZeta_neg_real_of_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
+    (riemannZeta (σ : ℂ)).re < 0 := by
+  have hs : σ ≠ 1 := by linarith
+  have hle : (riemannZeta₀ (σ : ℂ)).re ≤ 1 := by
+    have h := riemannZeta₀_eq_one_sub_mul_termTSum h0 hs
+    rw [h]
+    have := mul_nonneg h0.le (termTSum_nonneg h0)
+    linarith
+  have hinv : 1 / (σ - 1) < -1 := by
+    have h1σ : 0 < 1 - σ := by linarith
+    have h1 : σ - 1 = -(1 - σ : ℝ) := by ring
+    rw [h1, div_neg, neg_lt_neg_iff, lt_div_iff₀ h1σ]
+    linarith
+  have hre := riemannZeta₀_re_of_real h0 hs
+  linarith
+
+private theorem completedRiemannZeta₀_bounded_on_critical_line :
+    ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t)‖ ≤ C := by
+  let f : ℝ → ℂ := fun t => completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t)
+  have hcont : Continuous f :=
+    differentiable_completedZeta₀.continuous.comp (by fun_prop)
+  have hlim : Filter.Tendsto f Filter.atTop (nhds 0) :=
+    completedRiemannZeta₀_vanishes_at_top_im
+  obtain ⟨M, hM⟩ := Metric.tendsto_atTop.mp hlim 1 zero_lt_one
+  have hcont_Icc : ContinuousOn f (Set.Icc (-M) M) :=
+    hcont.continuousOn
+  obtain ⟨C₁, hC₁⟩ := isCompact_Icc.exists_bound_of_continuousOn hcont_Icc
+  use max C₁ 1
+  constructor
+  · exact lt_max_iff.mpr (Or.inr zero_lt_one)
+  · intro t
+    by_cases htM : t > M
+    · have h1 : dist (f t) 0 < 1 := hM t (le_of_lt htM)
+      have h2 : ‖f t‖ < 1 := by simpa [dist_zero_right] using h1
+      exact le_trans h2.le (le_max_right C₁ 1)
+    · by_cases htM' : t < -M
+      · have h1 : dist (f (-t)) 0 < 1 := hM (-t) (by linarith)
+        have h2 : ‖f (-t)‖ < 1 := by simpa [dist_zero_right] using h1
+        have heq : f (-t) = f t := by
+          simp only [f]
+          have key : (1 / 2 : ℂ) + I * ↑(-t) = 1 - ((1 / 2 : ℂ) + I * ↑t) := by
+            push_cast; field_simp; ring
+          rw [key, completedRiemannZeta₀_one_sub]
+        rw [heq] at h2
+        exact le_trans h2.le (le_max_right C₁ 1)
+      · have htM_le : -M ≤ t := by linarith
+        have htM_le2 : t ≤ M := by linarith
+        have : t ∈ Set.Icc (-M) M := Set.mem_Icc.mpr ⟨htM_le, htM_le2⟩
+        exact le_trans (hC₁ t this) (le_max_left C₁ 1)
 
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13. This is the classical numerical result that the first
@@ -8464,9 +8559,21 @@ private theorem four_sq_le_exp_of_ten_le (x : ℝ) (hx : 10 ≤ x) :
     **References:**
     - Iwaniec & Kowalski, "Analytic Number Theory", §5.2 (Mellin transforms)
     - Davenport, "Multiplicative Number Theory", Ch. 17 (Paley–Wiener)
-    - This is a standard estimate in the theory of the Riemann zeta function;
+    -     This is a standard estimate in the theory of the Riemann zeta function;
       see e.g. Titchmarsh "The Theory of the Riemann Zeta-Function" §2.5.
 -/
+private theorem completedRiemannZeta₀_fourier_formula (t : ℝ) :
+    completedRiemannZeta₀ ((1 / 2 : ℂ) + I * t) =
+      (FourierTransform.fourier
+        (fun u => Real.exp (-(1 / 4 : ℝ) * u) • (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u)))
+        (t / (4 * Real.pi))) / 2 := by
+  simp only [completedRiemannZeta₀, HurwitzZeta.completedHurwitzZetaEven₀, WeakFEPair.Λ₀]
+  rw [mellin_eq_fourier]
+  simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re,
+    Complex.ofReal_im, Complex.add_im, Complex.mul_im]
+  push_cast
+  ring
+
 private theorem completedRiemannZeta₀_norm_le_exp
     (z : ℂ) (hre : 10 < z.re) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
     ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ Real.exp (-z.re) := by
