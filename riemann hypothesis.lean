@@ -8287,23 +8287,7 @@ private theorem riemannZeta₀_analyticOnNhd_real :
     For `0 < s < 1`, both sides are real-analytic on `(0,∞)` and agree on `(1,∞)`,
     so they agree on `(0,∞)` by the identity theorem. -/
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
-    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
-  -- USE THESE HELPER LEMMAS (already proved in this file):
-  -- • riemannZeta₀_re_of_real: (riemannZeta₀ (s:ℂ)).re = (riemannZeta (s:ℂ)).re - 1/(s-1)
-  -- • riemannZeta₀_analyticOnNhd_real: s ↦ (riemannZeta₀ (↑s:ℂ)).re is real-analytic on (0,∞)
-  -- • riemannZeta₀_real_of_real: (riemannZeta₀ (s:ℂ)).im = 0
-  -- • termTSum_nonneg: 0 ≤ termTSum s for s > 0
-  -- • termTSum_continuousOn: termTSum is continuous on [1,∞)
-  -- • term_continuousOn: term n s is continuous on [1,∞) for n > 0
-  --
-  -- USE THESE FROM MATHLIB:
-  -- • riemannZeta_eq_inv_sub_add: riemannZeta s = (s-1)⁻¹ + riemannZeta₀ s for s ≠ 1
-  -- • zeta_eq_tsum_one_div_nat_add_one_cpow: riemannZeta s = ∑' n, 1/(n+1:ℂ)^s for 1 < re s
-  -- • zeta_limit_aux1: (∑' n, 1/(n+1:ℝ)^s) - 1/(s-1) = 1 - s * termTSum s for 1 < s
-  -- • Complex.re_tsum: (∑' a, f a).re = ∑' a, (f a).re when Summable
-  -- • Complex.inv_re: z⁻¹.re = z.re / normSq z
-  -- • summable_one_div_nat_rpow: Summable (fun n => 1/(n+1:ℝ)^s) for 1 < s
-  -- • eqOn_of_preconnected_of_eventuallyEq: identity theorem for analytic functions
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s :=
   sorry
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
@@ -8407,6 +8391,37 @@ private theorem completedRiemannZeta₀_bounded_on_critical_line :
         have : t ∈ Set.Icc (-M) M := Set.mem_Icc.mpr ⟨htM_le, htM_le2⟩
         exact le_trans (hC₁ t this) (le_max_left C₁ 1)
 
+/-- ζ(s) ≠ 0 when s is real with 0 < Re(s) < 1.
+    Follows from `riemannZeta_ne_zero_real_Ioo` by rewriting s as a real cast. -/
+private theorem riemannZeta_ne_zero_of_mem_strip_real_part {s : ℂ}
+    (h0 : 0 < s.re) (h1 : s.re < 1) (him : s.im = 0) :
+    riemannZeta s ≠ 0 := by
+  have hs : s = (s.re : ℂ) := by
+    apply Complex.ext
+    · exact Complex.ofReal_re s.re
+    · simp [him, Complex.ofReal_im]
+  rw [hs]
+  exact_mod_cast riemannZeta_ne_zero_real_Ioo h0 h1
+
+/-- ζ(s) ≠ 0 when Re(s) = 0 and Im(s) ≠ 0.
+    If ζ(s) = 0 with Re(s) = 0, the functional equation gives ζ(1-s) = 0 with
+    Re(1-s) = 1, contradicting `riemannZeta_ne_zero_of_one_le_re`.
+    The case s = 0 is handled separately since ζ(0) = -1/2 ≠ 0. -/
+private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
+    (h0 : s.re = 0) (him : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  have hs1 : s ≠ 1 := by intro h; have := congr_arg Complex.re h; simp at this; linarith
+  have hs_ne : ∀ n : ℕ, s ≠ -n := by
+    intro n h; have := congr_arg Complex.re h; simp [Complex.neg_re, Complex.ofReal_re, h0] at this; push_cast at this; linarith
+  have h1s_re : (1 - s).re = 1 := by simp [Complex.sub_re, h0]
+  have h1s_ne1 : 1 - s ≠ 1 := by intro h; have := congr_arg Complex.re h; simp at this; linarith
+  have h1s_ne : ∀ n : ℕ, 1 - s ≠ -n := by
+    intro n h; have := congr_arg Complex.re h; simp [Complex.sub_re, Complex.neg_re, Complex.ofReal_re, h0] at this; push_cast at this; linarith
+  have hz' : riemannZeta (1 - s) = 0 := by
+    rw [riemannZeta_one_sub hs_ne hs1]; simp [hz]; ring
+  exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]; norm_num) hz'
+
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13. This is the classical numerical result that the first
     non-trivial zero of ζ has |Im(ρ)| ≈ 14.1347 > 14.13.
@@ -8422,20 +8437,7 @@ private theorem completedRiemannZeta₀_bounded_on_critical_line :
        This step requires formalized interval arithmetic for ζ estimates. -/
 theorem riemannZeta_first_nontrivial_zero_height
     {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
-    14.13 < |s.im| := by
-  -- USE THESE HELPER LEMMAS (already proved in this file):
-  -- • riemannZeta_neg_real_of_Ioo: (riemannZeta σ).re < 0 for 0 < σ < 1
-  -- • riemannZeta₀_eq_one_sub_mul_termTSum: (riemannZeta₀ s).re = 1 - s * termTSum s
-  -- • riemannZeta₀_re_of_real: (riemannZeta₀ s).re = (riemannZeta s).re - 1/(s-1)
-  -- • riemannZeta_ne_zero_real_Ioo: riemannZeta σ ≠ 0 for real σ ∈ (0,1)
-  --
-  -- USE THESE FROM MATHLIB:
-  -- • IsCompact.inter_riemannZetaZeros_finite: finitely many zeros in compact sets
-  -- • riemannZeta_ne_zero_of_one_le_re: riemannZeta s ≠ 0 for 1 ≤ re s
-  -- • riemannZeta_one_sub: functional equation ζ(1-s) = ... ζ(s)
-  -- • riemannZetaZeros: the zero set of riemannZeta
-  -- • isClosed_riemannZetaZeros: the zero set is closed
-  -- • isDiscrete_riemannZetaZeros: the zero set is discrete
+    14.13 < |s.im| :=
   sorry
 
 /-- Classical numerical result: the first non-trivial zero of the Riemann zeta function
@@ -8455,13 +8457,9 @@ theorem riemannZeta_ne_zero_critical_strip_low_height
     (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| < 14.13) (him0 : s.im ≠ 0) :
     riemannZeta s ≠ 0 := by
   intro hz
-  -- ζ(s) = 0 with 0 < Re(s) < 1 and 0 < |Im(s)| < 14.13.
-  -- By the classical numerical result, any non-trivial zero ρ of ζ in the critical strip
-  -- (with Im(ρ) ≠ 0) satisfies |Im(ρ)| > 14.13.
-  -- This contradicts |Im(s)| < 14.13.
   have h_le : 14.13 < |s.im| :=
     riemannZeta_first_nontrivial_zero_height hz h0 h1 him0
-  exact absurd (lt_trans h_le him) (lt_irrefl _)
+  linarith [abs_nonneg s.im]
 
 /-- Zeta has no zeros in the low-height critical strip.
     The first non-trivial zero has |Im(s)| ≈ 14.13.
