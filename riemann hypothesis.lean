@@ -8337,7 +8337,45 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (h
           (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
     rw [(_root_.Complex.ofReal_tsum (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
     simp [Complex.ofReal_re]
-  · -- Case 0 < s ≤ 1: analytic continuation
+  · /- Case 0 < s ≤ 1: analytic continuation.
+
+    GOAL: prove `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s` for `0 < s < 1`.
+
+    APPROACH: Identity theorem.  Both sides equal on `Ioi 1` (by the first branch);
+    extend to `Ioi 0` via `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`.
+
+    STEP 1 – Prove identity for ALL `t > 1` as a local `have key_gt1`,
+    replicating the algebraic proof from the first branch (zeta_limit_aux1 +
+    Complex.ofReal_tsum + push_cast).
+
+    STEP 2 – Show both sides are `AnalyticOnNhd ℝ` on `Ioi 0`:
+      • LHS: `riemannZeta₀_analyticOnNhd_real` (line 8280)
+      • RHS `s ↦ 1 - s * termTSum s`: Show termTSum is `ContDiff ℝ ∞` on
+        `Ioi 0` via `contDiff_tsum` (SmoothSeries.lean:225), since each
+        `term (n+1)` is smooth in s for x > 0.  Then the product is analytic.
+
+    STEP 3 – Apply identity theorem with `U = Set.Ioi 0` (preconnected),
+    agreement on `Set.Ioi 1` (by Step 1), and witness `2 ∈ Ioi 0`.
+
+    AVAILABLE INFRASTRUCTURE:
+      • `riemannZeta₀_analyticOnNhd_real` (line 8280): LHS analytic on Ioi 0
+      • `riemannZeta₀_re_of_real` (line 8250): real-part identity for real s
+      • `zeta_limit_aux1` (ZetaAsymp.lean:258): key identity for s > 1
+      • `riemannZeta_eq_inv_sub_add` (ZetaAsymp.lean:544): ζ(s) = (s-1)⁻¹ + ζ₀(s)
+      • `zeta_eq_tsum_one_div_nat_add_one_cpow` (RiemannZeta.lean:214): tsum for Re(s) > 1
+      • `Complex.ofReal_tsum`, `Complex.ofReal_re`, `Complex.ofReal_cpow`: coercion lemmas
+      • `push_cast`, `norm_cast`, `tsum_congr`: tactic/lemma names proven in s > 1 branch
+      • `contDiff_tsum` (SmoothSeries.lean:225): smoothness of tsum under uniform bounds
+      • `differentiable_tsum` (SmoothSeries.lean): differentiability of tsum
+      • `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` (Uniqueness.lean:223)
+      • `riemannZeta_conj` (ZetaAsymptotics): reference for how identity theorem is applied
+      • `continuousOn_termTSum` (line 8276): continuity of termTSum on Ici 1
+      • `termTSum_nonneg` (line 8232): 0 ≤ termTSum s
+      • `term_nonneg` (ZetaAsymp.lean): termwise nonnegativity
+
+    DOWNSTREAM: This identity gives `(riemannZeta₀ σ).re ≤ 1` for `0 < σ < 1`
+    (used by `riemannZeta_ne_zero_real_Ioo` at line 8370), which cascades to
+    `riemannZeta_ne_zero_of_mem_strip_real_part` and the RH proof skeleton.  -/
     sorry
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
@@ -9081,6 +9119,48 @@ theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
     s h0 h1 him him0
 
 end ZetaNumericCert
+
+/-- The single numerical certificate: a finite list of `ZetaZeroFreeInfrastructure.RectLowerBound`
+    covering `{0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0}`.
+
+    To fill this sorry, supply a `ZetaZeroFreeInfrastructure.CriticalStripCover14` with
+    a finite list of rigorously verified rectangles.
+
+    AVAILABLE INFRASTRUCTURE (all sorry-free):
+
+    ZetaZeroFreeInfrastructure:
+    - `RectLowerBound` — rectangle with ε > 0 lower bound on ‖ζ(s)‖
+    - `neZeroOfRect` — a single rectangle certifies ζ ≠ 0 there
+    - `riemannZeta_ne_zero_of_cover` — a full cover proves ζ ≠ 0 on the strip
+    - `CriticalStripCover14` — the exact cover type needed
+
+    ZetaNumericCert:
+    - `RInterval` / `CInterval` — interval arithmetic for ℝ and ℂ
+    - `RectIntervalBound` — rigorous interval bound for ζ on a rectangle
+    - `IntervalExcludesZero` — inductive proof that ζ ≠ 0 via sign exclusion
+    - `ApproxRectBound` — Euler–Maclaurin / AFE output: approx + error bound
+    - `rectIntervalBound_from_approx` — convert approx+error to RectIntervalBound
+    - `EulerMaclaurinZetaBound` — Euler–Maclaurin certificate (N + approx + error)
+    - `rectIntervalBound_from_eulerMaclaurin` — convert EM bound to RectIntervalBound
+    - `criticalStripCover14_of_two_bounds` — two-rectangle cover constructor
+    - `criticalStripCover14_of_evidence` — from CriticalStripEvidence14
+    - `riemannZeta_ne_zero_of_two_approx_bounds` — solve from two ApproxRectBounds
+    - `riemannZeta_ne_zero_of_two_euler_maclaurin_bounds` — solve from two EulerMaclaurinZetaBounds
+    - `yLimit = 14.13`, `yTop = 14.14`, `yBot = -14.14` — boundary constants
+
+    APPROACH (Hasler 2004, Odlyzko 1987):
+    1. Split the region into upper half (Im > 0) and lower half (Im < 0)
+    2. For each half, compute Euler–Maclaurin or AFE bounds on ζ
+    3. Verify ζ(s) ≠ 0 on each sub-rectangle via interval sign exclusion
+    4. Assemble using `criticalStripCover14_of_two_bounds`
+
+    EXAMPLE (schematic):
+      `criticalStripCover14_of_two_bounds
+        (rectIntervalBound_from_eulerMaclaurin upperEM) upperExcl
+        (rectIntervalBound_from_eulerMaclaurin lowerEM) lowerExcl`
+    where `upperEM : EulerMaclaurinZetaBound 0 1 0 yTop` and
+    `upperExcl : IntervalExcludesZero ...` -/
+
 noncomputable def criticalStripCover14 :
     ZetaZeroFreeInfrastructure.CriticalStripCover14 :=
   sorry
