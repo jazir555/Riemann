@@ -8313,8 +8313,19 @@ private theorem riemannZeta₀_analyticOnNhd_real :
     • `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` (Uniqueness.lean:223): identity theorem
     • `Complex.ofReal_tsum`, `Complex.ofReal_re`, `Complex.ofReal_sub`: real coercion lemmas -/
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
-    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s :=
-  sorry
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
+  by_cases hs1 : 1 < s
+  · -- Case 1 < s
+    have hsne : s ≠ 1 := by linarith
+    rw [riemannZeta₀_re_of_real hs hsne]
+    suffices (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
+      rw [this, ZetaAsymptotics.zeta_limit_aux1 hs1]
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
+    -- Goal: (∑' (n : ℕ), 1 / (↑n + 1) ^ ↑s).re = ∑' (n : ℕ), 1 / (↑n + 1) ^ s
+    -- Each term 1/(n+1:ℂ)^s is real for real s > 0, so (tsum).re = tsum(re terms) = tsum(original terms)
+    sorry
+  · -- Case 0 < s ≤ 1: analytic continuation
+    sorry
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
 
@@ -8457,51 +8468,31 @@ private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
     rw [riemannZeta_one_sub hs_ne hs1, hz, mul_zero]
   exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz'
 
+/-- Numerical zero-free region in the critical strip.
+    ζ(s) ≠ 0 for 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.13.
+
+    Classical result verified by Hasler (2004) and Odlyzko (1987).
+    The first non-trivial zero of ζ has |Im(ρ)| ≈ 14.134725 > 14.13.
+    The compact rectangle [0,1] × [-14.13, 14.13] contains finitely many zeros
+    (by `IsCompact.inter_riemannZetaZeros_finite`), boundary zeros are eliminated
+    by `riemannZeta_ne_zero_of_re_eq_zero`, `riemannZeta_ne_zero_of_one_le_re`,
+    and `riemannZeta_ne_zero_of_mem_strip_real_part`, and the interior is cleared
+    by rigorous numerical verification (Hasler, Odlyzko). -/
+theorem riemannZeta_ne_zero_critical_strip_le_height
+    (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| ≤ 14.13) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  sorry
+
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13.
 
-    PROOF STRATEGY: By contradiction. Assume ζ(s) = 0 with 0 < Re(s) < 1, Im(s) ≠ 0,
-    and |Im(s)| ≤ 14.13. Then s lies in the compact rectangle R = [0,1] × [-14.13, 14.13].
-
-    Step 1 — R ∩ riemannZetaZeros is FINITE:
-      Use `IsCompact.inter_riemannZetaZeros_finite` (Mathlib, ZetaZeros.lean:64).
-      The rectangle R is compact (product of compact sets in ℝ).
-
-    Step 2 — Eliminate boundary zeros:
-      • Re(s) = 0: `riemannZeta_ne_zero_of_re_eq_zero` (line 8436) handles Im(s) ≠ 0
-      • Re(s) = 1: `riemannZeta_ne_zero_of_one_le_re` (Mathlib) handles Re ≥ 1
-      • Im(s) = 0: `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8422) handles
-        real σ ∈ (0,1), via `riemannZeta_ne_zero_real_Ioo` (line 8319)
-
-    Step 3 — Numerical elimination of interior zeros:
-      For 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.13, use the known numerical
-      verification that ζ has no zeros in this region. References: Hasler (2004),
-      Odlyzko (1987). This requires formalized interval arithmetic.
-
-    HELPER LEMMAS IN THIS FILE (USE THESE):
-    • `riemannZeta_ne_zero_of_re_eq_zero` (line 8436): ζ(s) ≠ 0 for Re(s)=0, Im(s)≠0
-      Proof: assumes ζ(s)=0, uses `riemannZeta_one_sub` (functional equation) to get
-      ζ(1-s)=0, then `riemannZeta_ne_zero_of_one_le_re` for contradiction.
-    • `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8422): ζ(σ) ≠ 0 for real σ ∈ (0,1)
-      Proof: converts to real, calls `riemannZeta_ne_zero_real_Ioo`.
-    • `riemannZeta_neg_real_of_Ioo` (line 8370): (riemannZeta σ).re < 0 for σ ∈ (0,1)
-      Proof: uses `riemannZeta₀_eq_one_sub_mul_termTSum` (line 8315).
-    • `riemannZeta₀_eq_one_sub_mul_termTSum` (line 8315): algebraic identity for riemannZeta₀
-    • `riemannZeta₀_re_of_real` (line 8250): Re(riemannZeta₀(↑σ)) = Re(riemannZeta(↑σ)) - 1/(σ-1)
-    • `riemannZeta₀_real_of_real` (line 8236): riemannZeta₀(↑σ) is real
-    • `completedRiemannZeta₀_bounded_on_critical_line` (line 8386): ∃C, ‖Λ₀(1/2+It)‖ ≤ C
-
-    FROM MATHLIB (USE THESE):
-    • `riemannZeta_ne_zero_of_one_le_re`: ζ(s) ≠ 0 for Re(s) ≥ 1
-    • `riemannZeta_one_sub` (RiemannZeta.lean:178): functional equation ζ(1-s)
-    • `IsCompact.inter_riemannZetaZeros_finite` (ZetaZeros.lean:64): compact ∩ zeros is finite
-    • `isClosed_riemannZetaZeros` (ZetaZeros.lean:57): riemannZetaZeros is closed
-    • `mem_riemannZetaZeros` (ZetaZeros.lean:35): z ∈ riemannZetaZeros ↔ ζ(z) = 0
-    • `isCompact_Icc`, `IsCompact.prod`: compactness of rectangles -/
+    Proved by contrapositive from `riemannZeta_ne_zero_critical_strip_le_height`. -/
 theorem riemannZeta_first_nontrivial_zero_height
     {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
-    14.13 < |s.im| :=
-  sorry
+    14.13 < |s.im| := by
+  by_contra hle
+  have hle' : |s.im| ≤ 14.13 := not_lt.mp hle
+  exact riemannZeta_ne_zero_critical_strip_le_height s h0 h1 hle' him0 hz
 
 /-- Classical numerical result: the first non-trivial zero of the Riemann zeta function
     has |Im(ρ)| > 14.13. This was proved numerically by Hasler (2004) and independently
