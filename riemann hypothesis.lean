@@ -8282,10 +8282,36 @@ private theorem riemannZeta₀_analyticOnNhd_real :
   AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (↑s : ℂ))
 
 /-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
-    For `s > 1`, this follows from `ZetaAsymptotics.termTSum_of_lt` + `riemannZeta₀_eq_inv_sub_add`
-    + `zeta_eq_tsum_one_div_nat_add_one_cpow`.
-    For `0 < s < 1`, both sides are real-analytic on `(0,∞)` and agree on `(1,∞)`,
-    so they agree on `(0,∞)` by the identity theorem. -/
+
+    PROOF STRATEGY:
+    Case s > 1:
+      1. `riemannZeta₀_re_of_real`: `(riemannZeta₀ ↑s).re = (riemannZeta ↑s).re - 1/(s-1)`
+      2. `zeta_eq_tsum_one_div_nat_add_one_cpow`: `riemannZeta s = ∑' n, 1/(n+1:ℂ)^s` for 1 < Re(s)
+      3. `RCLike.re_tsum` + `summable_one_div_nat_rpow`: pull Re inside the tsum
+      4. `ZetaAsymptotics.zeta_limit_aux1`: `(∑' n, 1/(n+1:ℝ)^s) - 1/(s-1) = 1 - s * termTSum s`
+      5. Algebra to combine steps 1, 3, 4.
+
+    Case 0 < s < 1:
+      1. `riemannZeta₀_analyticOnNhd_real`: LHS is AnalyticOnNhd ℝ on Ioi 0
+      2. RHS `s ↦ 1 - s * termTSum s` is analytic on Ioi 0 (product of analytic functions;
+         `ZetaAsymptotics.continuousOn_termTSum` + `Differentiable.analyticAt` for termTSum)
+      3. `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`: both sides analytic on Ioi 0,
+         agree on Ioi 1 (by the s > 1 case), so agree on all of Ioi 0.
+
+    HELPER LEMMAS IN THIS FILE:
+    • `riemannZeta₀_re_of_real` (line 8250): `(riemannZeta₀ ↑s).re = (riemannZeta ↑s).re - 1/(s-1)`
+    • `riemannZeta₀_analyticOnNhd_real` (line 8280): `AnalyticOnNhd ℝ (fun s => (riemannZeta₀ ↑s).re) (Ioi 0)`
+    • `termTSum_nonneg` (line 8232): `0 ≤ termTSum s`
+    • `termTSum_continuousOn` (line 8276): `ContinuousOn termTSum (Ici 1)`
+
+    FROM MATHLIB:
+    • `ZetaAsymptotics.zeta_limit_aux1` (ZetaAsymp.lean:258): the key algebraic identity for s > 1
+    • `riemannZeta_eq_inv_sub_add` (ZetaAsymp.lean:544): `riemannZeta s = (s-1)⁻¹ + riemannZeta₀ s`
+    • `zeta_eq_tsum_one_div_nat_add_one_cpow` (RiemannZeta.lean:214): tsum representation for Re(s) > 1
+    • `RCLike.re_tsum` (Complex/Basic.lean:545): `(∑' a, f a).re = ∑' a, (f a).re`
+    • `summable_one_div_nat_rpow` (PSeries.lean:317): `Summable (fun n => 1/n^p) ↔ 1 < p`
+    • `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` (Uniqueness.lean:223): identity theorem
+    • `Complex.ofReal_tsum`, `Complex.ofReal_re`, `Complex.ofReal_sub`: real coercion lemmas -/
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
     (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s :=
   sorry
@@ -8411,30 +8437,53 @@ private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
     (h0 : s.re = 0) (him : s.im ≠ 0) :
     riemannZeta s ≠ 0 := by
   intro hz
-  have hs1 : s ≠ 1 := by intro h; have := congr_arg Complex.re h; simp at this; linarith
+  have hs1 : s ≠ 1 := fun h => by linarith [congr_arg Complex.re h, h0, Complex.one_re]
   have hs_ne : ∀ n : ℕ, s ≠ -n := by
-    intro n h; have := congr_arg Complex.re h; simp [Complex.neg_re, Complex.ofReal_re, h0] at this; push_cast at this; linarith
+    intro n h
+    rw [h] at him
+    simp [Complex.neg_im] at him
   have h1s_re : (1 - s).re = 1 := by simp [Complex.sub_re, h0]
-  have h1s_ne1 : 1 - s ≠ 1 := by intro h; have := congr_arg Complex.re h; simp at this; linarith
+  have h1s_ne1 : 1 - s ≠ 1 := fun h => by
+    have := congr_arg Complex.im h
+    simp only [Complex.sub_im, Complex.one_im] at this
+    exact him (by linarith)
   have h1s_ne : ∀ n : ℕ, 1 - s ≠ -n := by
-    intro n h; have := congr_arg Complex.re h; simp [Complex.sub_re, Complex.neg_re, Complex.ofReal_re, h0] at this; push_cast at this; linarith
+    intro n h
+    have := congr_arg Complex.im h
+    simp only [Complex.sub_im, Complex.neg_im, Complex.one_im] at this
+    norm_cast at this
+    exact him (by linarith)
   have hz' : riemannZeta (1 - s) = 0 := by
-    rw [riemannZeta_one_sub hs_ne hs1]; simp [hz]; ring
-  exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]; norm_num) hz'
+    rw [riemannZeta_one_sub hs_ne hs1, hz, mul_zero]
+  exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz'
 
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13. This is the classical numerical result that the first
     non-trivial zero of ζ has |Im(ρ)| ≈ 14.1347 > 14.13.
 
-    The proof uses the following finite-rectangle argument:
-    1. `IsCompact.inter_riemannZetaZeros_finite`: the compact rectangle
-       [0,1] × [-14.12, 14.12] intersects riemannZetaZeros in finitely many points.
-    2. `riemannZeta_ne_zero_of_one_le_re`: no zero has Re(s) ≥ 1.
-    3. `riemannZeta_one_sub` (functional equation): zeros on Re(s) = 0 map under s ↦ 1-s
-       to zeros on Re(s) = 1, which are excluded by (2).
-    4. A rigorous numerical verification (Hasler 2004, Odlyzko 1987) confirms
-       no zero in {0 < Re(s) < 1, Im(s) ≠ 0} has |Im(s)| ≤ 14.12.
-       This step requires formalized interval arithmetic for ζ estimates. -/
+    PROOF STRATEGY: finite-rectangle contradiction.
+    Let R = {z : ℂ | 0 ≤ z.re ∧ z.re ≤ 1 ∧ |z.im| ≤ 14.12}.
+    1. `IsCompact.inter_riemannZetaZeros_finite`: R ∩ riemannZetaZeros is finite.
+    2. Eliminate boundary cases (re = 0, re = 1) via helper lemmas below.
+    3. For 0 < re < 1, im ≠ 0: numerical verification needed.
+
+    HELPER LEMMAS IN THIS FILE:
+    • `riemannZeta_ne_zero_of_one_le_re` (Mathlib): ζ(s) ≠ 0 for Re(s) ≥ 1
+    • `riemannZeta_ne_zero_of_re_eq_zero` (line 8410): ζ(s) ≠ 0 for Re(s)=0, Im(s)≠0
+    • `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8396): ζ(σ) ≠ 0 for real σ ∈ (0,1)
+    • `riemannZeta_neg_real_of_Ioo` (line 8344): (riemannZeta σ).re < 0 for σ ∈ (0,1)
+
+    FROM MATHLIB:
+    • `IsCompact.inter_riemannZetaZeros_finite` (ZetaZeros.lean:64): compact ∩ zeros is finite
+    • `isClosed_riemannZetaZeros` (ZetaZeros.lean:57): riemannZetaZeros is closed
+    • `mem_riemannZetaZeros` (ZetaZeros.lean:35): z ∈ riemannZetaZeros ↔ ζ(z) = 0
+    • `riemannZeta_one_sub` (RiemannZeta.lean:178): functional equation for ζ(1-s)
+    • `isCompact_Icc`, `IsCompact.prod`: compactness of the rectangle
+    • `Finset.card_pos`, `Finset.not_mem_empty`: finite set manipulation
+
+    CRITICAL MISSING PIECE: Formalized interval arithmetic to verify ζ(s) ≠ 0
+    for all s with 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.12.
+    References: Hasler (2004), Odlyzko (1987). -/
 theorem riemannZeta_first_nontrivial_zero_height
     {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
     14.13 < |s.im| :=
@@ -8605,63 +8654,6 @@ private theorem completedRiemannZeta₀_fourier_formula (t : ℝ) :
   push_cast
   ring
 
-private theorem completedRiemannZeta₀_norm_le_exp
-    (z : ℂ) (hre : 10 < z.re) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
-    ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ Real.exp (-z.re) := by
-  -- USE THESE HELPER LEMMAS (already proved in this file):
-  -- • completedRiemannZeta₀_fourier_formula: Λ₀(1/2 + It) = 𝓕(g)(t/(4π))/2
-  -- • completedRiemannZeta₀_bounded_on_critical_line: ∃C, ‖Λ₀(1/2+It)‖ ≤ C
-  -- • completedRiemannZeta₀_vanishes_at_top_im: Λ₀(1/2+It) → 0 as t → ∞
-  --
-  -- USE THESE FROM MATHLIB:
-  -- • differentiable_completedZeta₀: Differentiable ℂ completedRiemannZeta₀
-  -- • completedRiemannZeta₀_one_sub: Λ₀(1-s) = Λ₀(s) (functional equation)
-  -- • mellin_eq_fourier: relates Mellin transform to Fourier transform
-  -- • Real.exp_neg: Real.exp (-x) = 1 / Real.exp x
-  -- • norm_le_norm_add_norm_sub: ‖a‖ ≤ ‖b‖ + ‖a - b‖
-  sorry
-
-theorem completedRiemannZeta₀_tailU_bound_10 (z : ℂ)
-    (hre : 10 < z.re)
-    (hgt : -(1 / 2 : ℝ) < z.im)
-    (hlt : z.im < (1 / 2 : ℝ))
-    (hne : z.im ≠ 0) :
-    ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ tailU z.re z.im := by
-  have hr10 : (10 : ℝ) ≤ z.re := le_of_lt hre
-  have hDne : tailD z.re z.im ≠ 0 :=
-    tailD_ne_zero_of_strip z.re z.im hr10 hgt hlt
-  have hnormD : ‖tailD z.re z.im‖ ≠ 0 := by
-    intro h; exact hDne (norm_eq_zero.mp h)
-  have htailU :
-      tailU z.re z.im =
-        min (Real.exp (-z.re)) (1 / (4 * ‖tailD z.re z.im‖)) := by
-    simp only [tailU, if_neg hnormD]
-  rw [htailU, le_min_iff]
-  constructor
-  · -- Goal 1: ‖completedRiemannZeta₀ (1/2 + Iz)‖ ≤ Real.exp (-z.re)
-    -- Exponential decay from the Paley–Wiener analytic continuation of the
-    -- Mellin kernel g(u) = exp(-αu) · f_modif(exp(-u)) to a strip of width σ,
-    -- yielding |𝓕(g)(ξ)| ≤ C·exp(-2πσ|ξ|) with ξ = z.re/(4π).
-    exact completedRiemannZeta₀_norm_le_exp z hre hgt hlt
-  · -- Goal 2: ‖completedRiemannZeta₀ (1/2 + Iz)‖ ≤ 1 / (4 * ‖tailD z.re z.im‖)
-    -- Polynomial decay from the L¹ bound on the Mellin kernel g combined
-    -- with the lower bound ‖tailD r y‖ ≥ r² (from tailD_norm_ge_r_sq).
-    have h1 := completedRiemannZeta₀_norm_le_exp z hre hgt hlt
-    have hDge := tailD_norm_ge_r_sq z.re z.im hr10 hgt hlt
-    have hDpos : 0 < ‖tailD z.re z.im‖ := by
-      have : (0:ℝ) < z.re ^ 2 := by positivity
-      linarith
-    have hexp_le : Real.exp (-z.re) ≤ 1 / (4 * ‖tailD z.re z.im‖) := by
-      have hle := tailD_norm_le_r_plus_one_sq z.re z.im hr10 hgt hlt
-      have h4le := four_sq_le_exp_of_ten_le z.re hr10
-      have h4norm : 4 * ‖tailD z.re z.im‖ ≤ Real.exp z.re := by
-        have := mul_le_mul_of_nonneg_left hle (by norm_num : 0 ≤ (4 : ℝ))
-        linarith
-      have hD4pos : 0 < 4 * ‖tailD z.re z.im‖ := by positivity
-      simp only [Real.exp_neg, one_div]
-      exact inv_anti₀ hD4pos h4norm
-    exact le_trans h1 hexp_le
-
 /-- Closed central rectangular plan covering `[0,10] × (0,1/2)`. -/
 noncomputable def quadrantPlan_10_closed :
     QuadrantZeroFreePlan (10 : ℝ) where
@@ -8683,26 +8675,25 @@ noncomputable def quadrantPlan_10_closed :
     refine ⟨_, List.mem_singleton_self _, ?_⟩
     exact ⟨by linarith, by linarith, hy0, hy1⟩
 
-/-- Closed completed-zeta upper-bound tail certificate at cutoff X = 10. -/
-noncomputable def completedZetaUpperBoundTail_10_closed :
-    CompletedZetaUpperBoundTail (10 : ℝ) where
-  U := tailU
-  U_nonneg := fun r y _ _ => tailU_nonneg r y
-  bound := fun z hre hgt hlt hne =>
-    completedRiemannZeta₀_tailU_bound_10 z hre hgt hlt hne
-  margin_pos := fun r y _ _ => tail_margin_pos r y
-
 /-- Closed first-quadrant non-vanishing certificate. -/
 def remainingQuadrant_10_closed :
     RemainingQuadrantNonvanishing (10 : ℝ) :=
   quadrant_nonvanishing_from_plan quadrantPlan_10_closed
 
-/-- The final assembly theorem for RH, completely closed with zero `sorry`s. -/
-theorem rh_proof_skeleton_v2_closed :
+/-- The final assembly theorem for RH, conditional on the off-real non-vanishing
+    of xiShifted.
+
+    The original version depended on `completedRiemannZeta₀_norm_le_exp`, which
+    claimed an exponential decay bound `‖Λ₀(1/2+Iz)‖ ≤ exp(-z.re)`. This bound
+    is FALSE: the completed zeta function decays only polynomially (as ~1/(t²+1/4))
+    along the critical line, not exponentially.
+
+    This version correctly reduces RH to the off-real non-vanishing of xiShifted,
+    which is equivalent to the Riemann Hypothesis by definition. -/
+theorem rh_proof_skeleton_v2_closed
+    (H : XiOffRealPointwiseNonvanishing) :
     RiemannHypothesisProp :=
-  rh_from_quadrant_and_completed_upper_bound
-    remainingQuadrant_10_closed
-    completedZetaUpperBoundTail_10_closed
+  rh_from_off_real_pointwise_nonvanishing H
 
 end ClosedCertificate
 
