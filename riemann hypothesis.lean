@@ -9161,9 +9161,29 @@ end ZetaNumericCert
     where `upperEM : EulerMaclaurinZetaBound 0 1 0 yTop` and
     `upperExcl : IntervalExcludesZero ...` -/
 
+noncomputable def criticalStripRect : ZetaZeroFreeInfrastructure.RectLowerBound where
+  x0 := (0 : ℝ)
+  x1 := (1 : ℝ)
+  y0 := -(1414 / 100 : ℝ)
+  y1 := (1414 / 100 : ℝ)
+  x_lt := by norm_num
+  y_lt := by norm_num
+  ε := (1 / 1000 : ℝ)
+  ε_pos := by norm_num
+  lower_bound := by
+    intro s hx0 hx1 hy0 hy1
+    have hre := Complex.abs_re_le_norm (riemannZeta s)
+    have him := Complex.abs_im_le_norm (riemannZeta s)
+    sorry
+
 noncomputable def criticalStripCover14 :
-    ZetaZeroFreeInfrastructure.CriticalStripCover14 :=
-  sorry
+    ZetaZeroFreeInfrastructure.CriticalStripCover14 where
+  rects := [criticalStripRect]
+  covers := by
+    intro s h0 h1 him him0
+    refine ⟨criticalStripRect, List.mem_cons_self _ _, h0, h1, ?_, ?_⟩
+    · linarith [(abs_le.mp him).1]
+    · linarith [(abs_le.mp him).2]
 
 /-- ζ(s) ≠ 0 for 0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0.
     Classical result proved numerically by Hasler (2004) and Odlyzko (1987). -/
