@@ -8277,13 +8277,33 @@ private theorem termTSum_continuousOn :
     ContinuousOn ZetaAsymptotics.termTSum (Set.Ici 1) :=
   ZetaAsymptotics.continuousOn_termTSum
 
+private theorem riemannZeta₀_analyticOnNhd_real :
+    AnalyticOnNhd ℝ (fun s : ℝ => (riemannZeta₀ (↑s : ℂ)).re) (Set.Ioi 0) := fun s hs =>
+  AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (↑s : ℂ))
+
 /-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
     For `s > 1`, this follows from `ZetaAsymptotics.termTSum_of_lt` + `riemannZeta₀_eq_inv_sub_add`
     + `zeta_eq_tsum_one_div_nat_add_one_cpow`.
     For `0 < s < 1`, both sides are real-analytic on `(0,∞)` and agree on `(1,∞)`,
     so they agree on `(0,∞)` by the identity theorem. -/
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
-    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s :=
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
+  -- USE THESE HELPER LEMMAS (already proved in this file):
+  -- • riemannZeta₀_re_of_real: (riemannZeta₀ (s:ℂ)).re = (riemannZeta (s:ℂ)).re - 1/(s-1)
+  -- • riemannZeta₀_analyticOnNhd_real: s ↦ (riemannZeta₀ (↑s:ℂ)).re is real-analytic on (0,∞)
+  -- • riemannZeta₀_real_of_real: (riemannZeta₀ (s:ℂ)).im = 0
+  -- • termTSum_nonneg: 0 ≤ termTSum s for s > 0
+  -- • termTSum_continuousOn: termTSum is continuous on [1,∞)
+  -- • term_continuousOn: term n s is continuous on [1,∞) for n > 0
+  --
+  -- USE THESE FROM MATHLIB:
+  -- • riemannZeta_eq_inv_sub_add: riemannZeta s = (s-1)⁻¹ + riemannZeta₀ s for s ≠ 1
+  -- • zeta_eq_tsum_one_div_nat_add_one_cpow: riemannZeta s = ∑' n, 1/(n+1:ℂ)^s for 1 < re s
+  -- • zeta_limit_aux1: (∑' n, 1/(n+1:ℝ)^s) - 1/(s-1) = 1 - s * termTSum s for 1 < s
+  -- • Complex.re_tsum: (∑' a, f a).re = ∑' a, (f a).re when Summable
+  -- • Complex.inv_re: z⁻¹.re = z.re / normSq z
+  -- • summable_one_div_nat_rpow: Summable (fun n => 1/(n+1:ℝ)^s) for 1 < s
+  -- • eqOn_of_preconnected_of_eventuallyEq: identity theorem for analytic functions
   sorry
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
@@ -8402,7 +8422,20 @@ private theorem completedRiemannZeta₀_bounded_on_critical_line :
        This step requires formalized interval arithmetic for ζ estimates. -/
 theorem riemannZeta_first_nontrivial_zero_height
     {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
-    14.13 < |s.im| :=
+    14.13 < |s.im| := by
+  -- USE THESE HELPER LEMMAS (already proved in this file):
+  -- • riemannZeta_neg_real_of_Ioo: (riemannZeta σ).re < 0 for 0 < σ < 1
+  -- • riemannZeta₀_eq_one_sub_mul_termTSum: (riemannZeta₀ s).re = 1 - s * termTSum s
+  -- • riemannZeta₀_re_of_real: (riemannZeta₀ s).re = (riemannZeta s).re - 1/(s-1)
+  -- • riemannZeta_ne_zero_real_Ioo: riemannZeta σ ≠ 0 for real σ ∈ (0,1)
+  --
+  -- USE THESE FROM MATHLIB:
+  -- • IsCompact.inter_riemannZetaZeros_finite: finitely many zeros in compact sets
+  -- • riemannZeta_ne_zero_of_one_le_re: riemannZeta s ≠ 0 for 1 ≤ re s
+  -- • riemannZeta_one_sub: functional equation ζ(1-s) = ... ζ(s)
+  -- • riemannZetaZeros: the zero set of riemannZeta
+  -- • isClosed_riemannZetaZeros: the zero set is closed
+  -- • isDiscrete_riemannZetaZeros: the zero set is discrete
   sorry
 
 /-- Classical numerical result: the first non-trivial zero of the Riemann zeta function
@@ -8577,6 +8610,17 @@ private theorem completedRiemannZeta₀_fourier_formula (t : ℝ) :
 private theorem completedRiemannZeta₀_norm_le_exp
     (z : ℂ) (hre : 10 < z.re) (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
     ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)‖ ≤ Real.exp (-z.re) := by
+  -- USE THESE HELPER LEMMAS (already proved in this file):
+  -- • completedRiemannZeta₀_fourier_formula: Λ₀(1/2 + It) = 𝓕(g)(t/(4π))/2
+  -- • completedRiemannZeta₀_bounded_on_critical_line: ∃C, ‖Λ₀(1/2+It)‖ ≤ C
+  -- • completedRiemannZeta₀_vanishes_at_top_im: Λ₀(1/2+It) → 0 as t → ∞
+  --
+  -- USE THESE FROM MATHLIB:
+  -- • differentiable_completedZeta₀: Differentiable ℂ completedRiemannZeta₀
+  -- • completedRiemannZeta₀_one_sub: Λ₀(1-s) = Λ₀(s) (functional equation)
+  -- • mellin_eq_fourier: relates Mellin transform to Fourier transform
+  -- • Real.exp_neg: Real.exp (-x) = 1 / Real.exp x
+  -- • norm_le_norm_add_norm_sub: ‖a‖ ≤ ‖b‖ + ‖a - b‖
   sorry
 
 theorem completedRiemannZeta₀_tailU_bound_10 (z : ℂ)
