@@ -8458,32 +8458,46 @@ private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
   exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz'
 
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
-    then |Im(s)| > 14.13. This is the classical numerical result that the first
-    non-trivial zero of ζ has |Im(ρ)| ≈ 14.1347 > 14.13.
+    then |Im(s)| > 14.13.
 
-    PROOF STRATEGY: finite-rectangle contradiction.
-    Let R = {z : ℂ | 0 ≤ z.re ∧ z.re ≤ 1 ∧ |z.im| ≤ 14.12}.
-    1. `IsCompact.inter_riemannZetaZeros_finite`: R ∩ riemannZetaZeros is finite.
-    2. Eliminate boundary cases (re = 0, re = 1) via helper lemmas below.
-    3. For 0 < re < 1, im ≠ 0: numerical verification needed.
+    PROOF STRATEGY: By contradiction. Assume ζ(s) = 0 with 0 < Re(s) < 1, Im(s) ≠ 0,
+    and |Im(s)| ≤ 14.13. Then s lies in the compact rectangle R = [0,1] × [-14.13, 14.13].
 
-    HELPER LEMMAS IN THIS FILE:
-    • `riemannZeta_ne_zero_of_one_le_re` (Mathlib): ζ(s) ≠ 0 for Re(s) ≥ 1
-    • `riemannZeta_ne_zero_of_re_eq_zero` (line 8410): ζ(s) ≠ 0 for Re(s)=0, Im(s)≠0
-    • `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8396): ζ(σ) ≠ 0 for real σ ∈ (0,1)
-    • `riemannZeta_neg_real_of_Ioo` (line 8344): (riemannZeta σ).re < 0 for σ ∈ (0,1)
+    Step 1 — R ∩ riemannZetaZeros is FINITE:
+      Use `IsCompact.inter_riemannZetaZeros_finite` (Mathlib, ZetaZeros.lean:64).
+      The rectangle R is compact (product of compact sets in ℝ).
 
-    FROM MATHLIB:
+    Step 2 — Eliminate boundary zeros:
+      • Re(s) = 0: `riemannZeta_ne_zero_of_re_eq_zero` (line 8436) handles Im(s) ≠ 0
+      • Re(s) = 1: `riemannZeta_ne_zero_of_one_le_re` (Mathlib) handles Re ≥ 1
+      • Im(s) = 0: `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8422) handles
+        real σ ∈ (0,1), via `riemannZeta_ne_zero_real_Ioo` (line 8319)
+
+    Step 3 — Numerical elimination of interior zeros:
+      For 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.13, use the known numerical
+      verification that ζ has no zeros in this region. References: Hasler (2004),
+      Odlyzko (1987). This requires formalized interval arithmetic.
+
+    HELPER LEMMAS IN THIS FILE (USE THESE):
+    • `riemannZeta_ne_zero_of_re_eq_zero` (line 8436): ζ(s) ≠ 0 for Re(s)=0, Im(s)≠0
+      Proof: assumes ζ(s)=0, uses `riemannZeta_one_sub` (functional equation) to get
+      ζ(1-s)=0, then `riemannZeta_ne_zero_of_one_le_re` for contradiction.
+    • `riemannZeta_ne_zero_of_mem_strip_real_part` (line 8422): ζ(σ) ≠ 0 for real σ ∈ (0,1)
+      Proof: converts to real, calls `riemannZeta_ne_zero_real_Ioo`.
+    • `riemannZeta_neg_real_of_Ioo` (line 8370): (riemannZeta σ).re < 0 for σ ∈ (0,1)
+      Proof: uses `riemannZeta₀_eq_one_sub_mul_termTSum` (line 8315).
+    • `riemannZeta₀_eq_one_sub_mul_termTSum` (line 8315): algebraic identity for riemannZeta₀
+    • `riemannZeta₀_re_of_real` (line 8250): Re(riemannZeta₀(↑σ)) = Re(riemannZeta(↑σ)) - 1/(σ-1)
+    • `riemannZeta₀_real_of_real` (line 8236): riemannZeta₀(↑σ) is real
+    • `completedRiemannZeta₀_bounded_on_critical_line` (line 8386): ∃C, ‖Λ₀(1/2+It)‖ ≤ C
+
+    FROM MATHLIB (USE THESE):
+    • `riemannZeta_ne_zero_of_one_le_re`: ζ(s) ≠ 0 for Re(s) ≥ 1
+    • `riemannZeta_one_sub` (RiemannZeta.lean:178): functional equation ζ(1-s)
     • `IsCompact.inter_riemannZetaZeros_finite` (ZetaZeros.lean:64): compact ∩ zeros is finite
     • `isClosed_riemannZetaZeros` (ZetaZeros.lean:57): riemannZetaZeros is closed
     • `mem_riemannZetaZeros` (ZetaZeros.lean:35): z ∈ riemannZetaZeros ↔ ζ(z) = 0
-    • `riemannZeta_one_sub` (RiemannZeta.lean:178): functional equation for ζ(1-s)
-    • `isCompact_Icc`, `IsCompact.prod`: compactness of the rectangle
-    • `Finset.card_pos`, `Finset.not_mem_empty`: finite set manipulation
-
-    CRITICAL MISSING PIECE: Formalized interval arithmetic to verify ζ(s) ≠ 0
-    for all s with 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.12.
-    References: Hasler (2004), Odlyzko (1987). -/
+    • `isCompact_Icc`, `IsCompact.prod`: compactness of rectangles -/
 theorem riemannZeta_first_nontrivial_zero_height
     {s : ℂ} (hz : riemannZeta s = 0) (h0 : 0 < s.re) (h1 : s.re < 1) (him0 : s.im ≠ 0) :
     14.13 < |s.im| :=
