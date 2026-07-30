@@ -8324,17 +8324,18 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (h
     -- Each term 1/(n+1:ℂ)^s is real for real s > 0, so (tsum).re = tsum(re terms) = tsum(original terms)
     -- Step 1: each complex term equals ofReal of the real term
     have hterm : ∀ n : ℕ,
-        (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) = (((1 : ℝ) / (↑n + 1) ^ s) : ℂ) := by
+        (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) =
+          ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
       intro n
-      have hcoe : (↑n + 1 : ℂ) = ((↑n + 1 : ℝ) : ℂ) := by norm_cast
       have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
-      rw [hcoe, ← Complex.ofReal_cpow hp, ← Complex.ofReal_div]
-    -- Step 2: rewrite the LHS tsum using hterm
+      show (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) = ((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℂ)
+      push_cast
+      rw [Complex.ofReal_cpow hp]
+      norm_cast
+    -- Rewrite the LHS tsum to use ofReal, then pull ofReal out, then simplify re
     rw [show(∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
-          (∑' n : ℕ, (((1 : ℝ) / (↑n + 1) ^ s) : ℂ)) from tsum_congr hterm]
-    -- Step 3: use ofReal_tsum to pull ofReal outside the tsum
-    rw [(Complex.ofReal_tsum _).symm]
-    -- Step 4: simplify (ofReal x).re = x
+          (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
+    rw [(_root_.Complex.ofReal_tsum (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
     simp [Complex.ofReal_re]
   · -- Case 0 < s ≤ 1: analytic continuation
     sorry
@@ -8508,11 +8509,11 @@ structure RectLowerBound where
       x0 < s.re → s.re < x1 → y0 < s.im → s.im < y1 →
       ε ≤ ‖riemannZeta s‖
 
-private lemma abs_re_le_norm' (z : ℂ) : |z.re| ≤ ‖z‖ := by
-  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs z
+private lemma abs_re_le_norm' (z : ℂ) : |z.re| ≤ ‖z‖ :=
+  Complex.abs_re_le_norm z
 
-private lemma abs_im_le_norm' (z : ℂ) : |z.im| ≤ ‖z‖ := by
-  simpa [Complex.norm_eq_abs] using Complex.abs_im_le_abs z
+private lemma abs_im_le_norm' (z : ℂ) : |z.im| ≤ ‖z‖ :=
+  Complex.abs_im_le_norm z
 
 structure RectPartBound where
   x0 : ℝ
@@ -8547,7 +8548,8 @@ noncomputable def lowerBoundOfNegRe (B : RectPartBound) (h : B.re_high < 0) :
   x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
   x_lt := B.x_lt; y_lt := B.y_lt; ε := -B.re_high; ε_pos := by linarith
   lower_bound s hx0 hx1 hy0 hy1 :=
-    have hneg := lt_of_le_of_lt ((B.re_bound s hx0 hx1 hy0 hy1).2) h
+    have hle := (B.re_bound s hx0 hx1 hy0 hy1).2
+    have hneg := lt_of_le_of_lt hle h
     calc -B.re_high ≤ -(riemannZeta s).re := by linarith
       _ = |(riemannZeta s).re| := by rw [abs_of_neg hneg]
       _ ≤ ‖riemannZeta s‖ := abs_re_le_norm' _
@@ -8565,7 +8567,8 @@ noncomputable def lowerBoundOfNegIm (B : RectPartBound) (h : B.im_high < 0) :
   x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
   x_lt := B.x_lt; y_lt := B.y_lt; ε := -B.im_high; ε_pos := by linarith
   lower_bound s hx0 hx1 hy0 hy1 :=
-    have hneg := lt_of_le_of_lt ((B.im_bound s hx0 hx1 hy0 hy1).2) h
+    have hle := (B.im_bound s hx0 hx1 hy0 hy1).2
+    have hneg := lt_of_le_of_lt hle h
     calc -B.im_high ≤ -(riemannZeta s).im := by linarith
       _ = |(riemannZeta s).im| := by rw [abs_of_neg hneg]
       _ ≤ ‖riemannZeta s‖ := abs_im_le_norm' _
@@ -8573,8 +8576,10 @@ noncomputable def lowerBoundOfNegIm (B : RectPartBound) (h : B.im_high < 0) :
 noncomputable def rectLowerBoundOfExclusion (B : RectPartBound)
     (h : 0 < B.re_low ∨ B.re_high < 0 ∨ 0 < B.im_low ∨ B.im_high < 0) :
     RectLowerBound :=
-  h.elim (lowerBoundOfPosRe B) fun h => h.elim (lowerBoundOfNegRe B) fun h =>
-    h.elim (lowerBoundOfPosIm B) (lowerBoundOfNegIm B)
+  if h₁ : 0 < B.re_low then lowerBoundOfPosRe B h₁
+  else if h₂ : B.re_high < 0 then lowerBoundOfNegRe B h₂
+  else if h₃ : 0 < B.im_low then lowerBoundOfPosIm B h₃
+  else lowerBoundOfNegIm B (h.resolve_left h₁ |>.resolve_left h₂ |>.resolve_left h₃)
 
 /-- Every point in the critical strip with `|Im(s)| ≤ 14.13` and `Im(s) ≠ 0`
     lies in at least one rectangle with a positive ζ-lower bound. -/
@@ -8642,7 +8647,9 @@ def add (I J : RInterval) : RInterval where
 theorem mem_add {x y : ℝ} {I J : RInterval}
     (hx : I.mem x) (hy : J.mem y) :
     (I.add J).mem (x + y) := by
-  constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+  have ⟨hxl, hxr⟩ := hx
+  have ⟨hyl, hyr⟩ := hy
+  constructor <;> dsimp [RInterval.add] <;> linarith
 
 /-- Interval subtraction. -/
 def sub (I J : RInterval) : RInterval where
@@ -8653,7 +8660,9 @@ def sub (I J : RInterval) : RInterval where
 theorem mem_sub {x y : ℝ} {I J : RInterval}
     (hx : I.mem x) (hy : J.mem y) :
     (I.sub J).mem (x - y) := by
-  constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+  have ⟨hxl, hxr⟩ := hx
+  have ⟨hyl, hyr⟩ := hy
+  constructor <;> dsimp [RInterval.sub] <;> linarith
 
 /-- Interval negation. -/
 def neg (I : RInterval) : RInterval where
@@ -8663,7 +8672,8 @@ def neg (I : RInterval) : RInterval where
 
 theorem mem_neg {x : ℝ} {I : RInterval} (hx : I.mem x) :
     I.neg.mem (-x) := by
-  constructor <;> linarith [hx.1, hx.2]
+  have ⟨hxl, hxr⟩ := hx
+  constructor <;> dsimp [RInterval.neg] <;> linarith
 
 /-- A coarse absolute-value bound for all points in the interval. -/
 def absBound (I : RInterval) : ℝ :=
@@ -8684,20 +8694,30 @@ theorem abs_mem_le {x : ℝ} {I : RInterval} (hx : I.mem x) :
 
 /-- Coarse interval multiplication. -/
 def mulCoarse (I J : RInterval) : RInterval :=
-  symmetric (I.absBound * J.absBound) (by positivity)
+  symmetric (I.absBound * J.absBound) (by
+    dsimp [absBound]
+    exact mul_nonneg (le_trans (abs_nonneg I.lo) (le_max_left _ _))
+      (le_trans (abs_nonneg J.lo) (le_max_left _ _)))
 
 theorem mem_mulCoarse {x y : ℝ} {I J : RInterval}
     (hx : I.mem x) (hy : J.mem y) :
     (I.mulCoarse J).mem (x * y) := by
   dsimp [mulCoarse]
+  have ⟨hxl, hxr⟩ := hx
+  have ⟨hyl, hyr⟩ := hy
   have hx' := I.abs_mem_le hx
   have hy' := J.abs_mem_le hy
+  have habsBound_nonneg : 0 ≤ I.absBound * J.absBound := by
+    dsimp [absBound]
+    exact mul_nonneg (le_trans (abs_nonneg I.lo) (le_max_left _ _))
+      (le_trans (abs_nonneg J.lo) (le_max_left _ _))
   have hxy : |x * y| ≤ I.absBound * J.absBound := by
     calc
       |x * y| = |x| * |y| := by rw [abs_mul]
-      _ ≤ I.absBound * J.absBound := by
-        exact mul_le_mul hx' hy' (abs_nonneg y) (by positivity)
-  constructor <;> linarith [abs_le.mp hxy]
+      _ ≤ I.absBound * J.absBound :=
+        mul_le_mul hx' hy' (abs_nonneg y) (le_trans (abs_nonneg I.lo) (le_max_left _ _))
+  have h := abs_le.mp hxy
+  constructor <;> dsimp [RInterval.symmetric] <;> linarith
 
 /-- Inflate an interval by an error radius `ε`. -/
 def inflate (I : RInterval) (ε : ℝ) (hε : 0 ≤ ε) : RInterval :=
@@ -8793,9 +8813,9 @@ private lemma abs_im_le_norm'' (z : ℂ) : |z.im| ≤ ‖z‖ := by
 theorem norm_mem_le {z : ℂ} {B : CInterval} (hz : B.mem z) :
     ‖z‖ ≤ B.normBound := by
   have hnorm : ‖z‖ ≤ |z.re| + |z.im| := by
+    have h := Complex.re_add_im z
     calc
-      ‖z‖ = ‖(z.re : ℂ) + (z.im : ℂ) * I‖ := by
-        rw [← Complex.re_add_im z]
+      ‖z‖ = ‖(z.re : ℂ) + (z.im : ℂ) * I‖ := by rw [h]
       _ ≤ ‖(z.re : ℂ)‖ + ‖(z.im : ℂ) * I‖ := norm_add_le _ _
       _ = |z.re| + |z.im| := by
         simp [norm_mul, Complex.norm_I]
@@ -8810,22 +8830,20 @@ def exp (B : CInterval) : CInterval where
 theorem mem_exp {z : ℂ} {B : CInterval} (hz : B.mem z) :
     (CInterval.exp B).mem (Complex.exp z) := by
   constructor
-  · dsimp [exp, RInterval.symmetric]
-    rw [abs_le]
+  · dsimp [exp, RInterval.symmetric, RInterval.mem]
     have habs : |(Complex.exp z).re| ≤ Real.exp B.re.hi := by
       calc
         |(Complex.exp z).re| ≤ ‖Complex.exp z‖ := Complex.abs_re_le_norm _
         _ = Real.exp z.re := Complex.norm_exp _
         _ ≤ Real.exp B.re.hi := Real.exp_le_exp.mpr hz.1.2
-    exact ⟨(abs_le.mp habs).1, (abs_le.mp habs).2⟩
-  · dsimp [exp, RInterval.symmetric]
-    rw [abs_le]
+    exact abs_le.mp habs
+  · dsimp [exp, RInterval.symmetric, RInterval.mem]
     have habs : |(Complex.exp z).im| ≤ Real.exp B.re.hi := by
       calc
         |(Complex.exp z).im| ≤ ‖Complex.exp z‖ := abs_im_le_norm'' _
         _ = Real.exp z.re := Complex.norm_exp _
         _ ≤ Real.exp B.re.hi := Real.exp_le_exp.mpr hz.1.2
-    exact ⟨(abs_le.mp habs).1, (abs_le.mp habs).2⟩
+    exact abs_le.mp habs
 
 end CInterval
 
@@ -8997,17 +9015,18 @@ def criticalStripCover14_of_two_bounds
   covers := by
     intro s h0 h1 him him0
     by_cases hpos : 0 < s.im
-    · exact ⟨_, List.mem_cons_self _ _, h0, h1, hpos, by
-        have hle := (abs_le.mp him).2
-        have htop : yLimit < yTop := by dsimp [yLimit, yTop]; norm_num
-        linarith⟩
+    · have hle := (abs_le.mp him).2
+      have htop : yLimit < yTop := by dsimp [yLimit, yTop]; norm_num
+      exact ⟨zeroFreeRect_of_interval U EU, List.mem_cons_self, h0, h1, hpos,
+        by dsimp [zeroFreeRect_of_interval]; linarith⟩
     · have hneg : s.im < 0 := by
         have hle := not_lt.mp hpos
         exact lt_of_le_of_ne hle him0
-      exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self _ _), h0, h1, by
-        have hge := (abs_le.mp him).1
-        have hbot : yBot < -yLimit := by dsimp [yBot, yLimit]; norm_num
-        linarith, hneg⟩
+      have hge := (abs_le.mp him).1
+      have hbot : yBot < -yLimit := by dsimp [yBot, yLimit]; norm_num
+      exact ⟨zeroFreeRect_of_interval L EL,
+        List.mem_cons_of_mem (y := zeroFreeRect_of_interval U EU) List.mem_cons_self,
+        h0, h1, by dsimp [zeroFreeRect_of_interval]; linarith, hneg⟩
 
 /-- Complete evidence package for the critical rectangle. -/
 structure CriticalStripEvidence14 where
