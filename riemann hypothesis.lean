@@ -8321,9 +8321,21 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (h
     suffices (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
       rw [this, ZetaAsymptotics.zeta_limit_aux1 hs1]
     rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
-    -- Goal: (∑' (n : ℕ), 1 / (↑n + 1) ^ ↑s).re = ∑' (n : ℕ), 1 / (↑n + 1) ^ s
     -- Each term 1/(n+1:ℂ)^s is real for real s > 0, so (tsum).re = tsum(re terms) = tsum(original terms)
-    sorry
+    -- Step 1: each complex term equals ofReal of the real term
+    have hterm : ∀ n : ℕ,
+        (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) = (((1 : ℝ) / (↑n + 1) ^ s) : ℂ) := by
+      intro n
+      have hcoe : (↑n + 1 : ℂ) = ((↑n + 1 : ℝ) : ℂ) := by norm_cast
+      have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
+      rw [hcoe, ← Complex.ofReal_cpow hp, ← Complex.ofReal_div]
+    -- Step 2: rewrite the LHS tsum using hterm
+    rw [show(∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
+          (∑' n : ℕ, (((1 : ℝ) / (↑n + 1) ^ s) : ℂ)) from tsum_congr hterm]
+    -- Step 3: use ofReal_tsum to pull ofReal outside the tsum
+    rw [(Complex.ofReal_tsum _).symm]
+    -- Step 4: simplify (ofReal x).re = x
+    simp [Complex.ofReal_re]
   · -- Case 0 < s ≤ 1: analytic continuation
     sorry
 
@@ -8468,20 +8480,598 @@ private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
     rw [riemannZeta_one_sub hs_ne hs1, hz, mul_zero]
   exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz'
 
-/-- Numerical zero-free region in the critical strip.
-    ζ(s) ≠ 0 for 0 < Re(s) < 1, Im(s) ≠ 0, |Im(s)| ≤ 14.13.
+/-!
+## Numerical zero-free infrastructure for the critical strip
 
-    Classical result verified by Hasler (2004) and Odlyzko (1987).
-    The first non-trivial zero of ζ has |Im(ρ)| ≈ 14.134725 > 14.13.
-    The compact rectangle [0,1] × [-14.13, 14.13] contains finitely many zeros
-    (by `IsCompact.inter_riemannZetaZeros_finite`), boundary zeros are eliminated
-    by `riemannZeta_ne_zero_of_re_eq_zero`, `riemannZeta_ne_zero_of_one_le_re`,
-    and `riemannZeta_ne_zero_of_mem_strip_real_part`, and the interior is cleared
-    by rigorous numerical verification (Hasler, Odlyzko). -/
+We formalize the *reduction* of `riemannZeta_ne_zero_critical_strip_le_height`
+to a finite numerical certificate.  The certificate itself (`criticalStripCover14`)
+is left as a single `sorry`; filling it amounts to a rigorous interval-arithmetic
+verification that ζ(s) ≠ 0 on each rectangle of a finite cover of
+`{0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0}`.
+-/
+
+namespace ZetaZeroFreeInfrastructure
+
+/-- A rectangle certified to be zero-free for ζ via a positive lower bound
+    `ε ≤ ‖ζ(s)‖`. -/
+structure RectLowerBound where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  ε : ℝ
+  ε_pos : 0 < ε
+  lower_bound :
+    ∀ s : ℂ,
+      x0 < s.re → s.re < x1 → y0 < s.im → s.im < y1 →
+      ε ≤ ‖riemannZeta s‖
+
+private lemma abs_re_le_norm' (z : ℂ) : |z.re| ≤ ‖z‖ := by
+  simpa [Complex.norm_eq_abs] using Complex.abs_re_le_abs z
+
+private lemma abs_im_le_norm' (z : ℂ) : |z.im| ≤ ‖z‖ := by
+  simpa [Complex.norm_eq_abs] using Complex.abs_im_le_abs z
+
+structure RectPartBound where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  x_lt : x0 < x1
+  y_lt : y0 < y1
+  re_low : ℝ
+  re_high : ℝ
+  im_low : ℝ
+  im_high : ℝ
+  re_bound :
+    ∀ s : ℂ,
+      x0 < s.re → s.re < x1 → y0 < s.im → s.im < y1 →
+      re_low ≤ (riemannZeta s).re ∧ (riemannZeta s).re ≤ re_high
+  im_bound :
+    ∀ s : ℂ,
+      x0 < s.re → s.re < x1 → y0 < s.im → s.im < y1 →
+      im_low ≤ (riemannZeta s).im ∧ (riemannZeta s).im ≤ im_high
+
+noncomputable def lowerBoundOfPosRe (B : RectPartBound) (h : 0 < B.re_low) :
+    RectLowerBound where
+  x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
+  x_lt := B.x_lt; y_lt := B.y_lt; ε := B.re_low; ε_pos := h
+  lower_bound s hx0 hx1 hy0 hy1 :=
+    le_trans ((B.re_bound s hx0 hx1 hy0 hy1).1) <|
+      le_trans (le_abs_self _) (abs_re_le_norm' _)
+
+noncomputable def lowerBoundOfNegRe (B : RectPartBound) (h : B.re_high < 0) :
+    RectLowerBound where
+  x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
+  x_lt := B.x_lt; y_lt := B.y_lt; ε := -B.re_high; ε_pos := by linarith
+  lower_bound s hx0 hx1 hy0 hy1 :=
+    have hneg := lt_of_le_of_lt ((B.re_bound s hx0 hx1 hy0 hy1).2) h
+    calc -B.re_high ≤ -(riemannZeta s).re := by linarith
+      _ = |(riemannZeta s).re| := by rw [abs_of_neg hneg]
+      _ ≤ ‖riemannZeta s‖ := abs_re_le_norm' _
+
+noncomputable def lowerBoundOfPosIm (B : RectPartBound) (h : 0 < B.im_low) :
+    RectLowerBound where
+  x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
+  x_lt := B.x_lt; y_lt := B.y_lt; ε := B.im_low; ε_pos := h
+  lower_bound s hx0 hx1 hy0 hy1 :=
+    le_trans ((B.im_bound s hx0 hx1 hy0 hy1).1) <|
+      le_trans (le_abs_self _) (abs_im_le_norm' _)
+
+noncomputable def lowerBoundOfNegIm (B : RectPartBound) (h : B.im_high < 0) :
+    RectLowerBound where
+  x0 := B.x0; x1 := B.x1; y0 := B.y0; y1 := B.y1
+  x_lt := B.x_lt; y_lt := B.y_lt; ε := -B.im_high; ε_pos := by linarith
+  lower_bound s hx0 hx1 hy0 hy1 :=
+    have hneg := lt_of_le_of_lt ((B.im_bound s hx0 hx1 hy0 hy1).2) h
+    calc -B.im_high ≤ -(riemannZeta s).im := by linarith
+      _ = |(riemannZeta s).im| := by rw [abs_of_neg hneg]
+      _ ≤ ‖riemannZeta s‖ := abs_im_le_norm' _
+
+noncomputable def rectLowerBoundOfExclusion (B : RectPartBound)
+    (h : 0 < B.re_low ∨ B.re_high < 0 ∨ 0 < B.im_low ∨ B.im_high < 0) :
+    RectLowerBound :=
+  h.elim (lowerBoundOfPosRe B) fun h => h.elim (lowerBoundOfNegRe B) fun h =>
+    h.elim (lowerBoundOfPosIm B) (lowerBoundOfNegIm B)
+
+/-- Every point in the critical strip with `|Im(s)| ≤ 14.13` and `Im(s) ≠ 0`
+    lies in at least one rectangle with a positive ζ-lower bound. -/
+structure CriticalStripCover14 where
+  rects : List RectLowerBound
+  covers :
+    ∀ s : ℂ,
+      0 < s.re → s.re < 1 → |s.im| ≤ (14.13 : ℝ) → s.im ≠ 0 →
+      ∃ R ∈ rects, R.x0 < s.re ∧ s.re < R.x1 ∧ R.y0 < s.im ∧ s.im < R.y1
+
+theorem neZeroOfRect (R : RectLowerBound) {s : ℂ}
+    (hx0 : R.x0 < s.re) (hx1 : s.re < R.x1)
+    (hy0 : R.y0 < s.im) (hy1 : s.im < R.y1) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  have h := R.lower_bound s hx0 hx1 hy0 hy1
+  rw [hz, norm_zero] at h; linarith [R.ε_pos]
+
+theorem riemannZeta_ne_zero_of_cover
+    (C : CriticalStripCover14) (s : ℂ)
+    (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| ≤ (14.13 : ℝ)) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  rcases C.covers s h0 h1 him him0 with ⟨R, -, hx0, hx1, hy0, hy1⟩
+  exact neZeroOfRect R hx0 hx1 hy0 hy1 hz
+
+end ZetaZeroFreeInfrastructure
+
+namespace ZetaNumericCert
+
+/-!
+## 1. Real interval arithmetic
+-/
+
+/-- A closed real interval `[lo, hi]` with proof `lo ≤ hi`. -/
+structure RInterval where
+  lo : ℝ
+  hi : ℝ
+  le : lo ≤ hi
+
+namespace RInterval
+
+/-- Membership in a real interval. -/
+def mem (x : ℝ) (I : RInterval) : Prop :=
+  I.lo ≤ x ∧ x ≤ I.hi
+
+/-- A point interval. -/
+def point (x : ℝ) : RInterval where
+  lo := x
+  hi := x
+  le := le_rfl
+
+/-- Symmetric interval `[-r, r]`. -/
+def symmetric (r : ℝ) (hr : 0 ≤ r) : RInterval where
+  lo := -r
+  hi := r
+  le := by linarith
+
+/-- Interval addition. -/
+def add (I J : RInterval) : RInterval where
+  lo := I.lo + J.lo
+  hi := I.hi + J.hi
+  le := add_le_add I.le J.le
+
+theorem mem_add {x y : ℝ} {I J : RInterval}
+    (hx : I.mem x) (hy : J.mem y) :
+    (I.add J).mem (x + y) := by
+  constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+
+/-- Interval subtraction. -/
+def sub (I J : RInterval) : RInterval where
+  lo := I.lo - J.hi
+  hi := I.hi - J.lo
+  le := by linarith [I.le, J.le]
+
+theorem mem_sub {x y : ℝ} {I J : RInterval}
+    (hx : I.mem x) (hy : J.mem y) :
+    (I.sub J).mem (x - y) := by
+  constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+
+/-- Interval negation. -/
+def neg (I : RInterval) : RInterval where
+  lo := -I.hi
+  hi := -I.lo
+  le := by linarith [I.le]
+
+theorem mem_neg {x : ℝ} {I : RInterval} (hx : I.mem x) :
+    I.neg.mem (-x) := by
+  constructor <;> linarith [hx.1, hx.2]
+
+/-- A coarse absolute-value bound for all points in the interval. -/
+def absBound (I : RInterval) : ℝ :=
+  max |I.lo| |I.hi|
+
+theorem abs_mem_le {x : ℝ} {I : RInterval} (hx : I.mem x) :
+    |x| ≤ I.absBound := by
+  dsimp [absBound]
+  rw [abs_le]
+  constructor
+  · have h1 : -|I.lo| ≤ I.lo := neg_abs_le I.lo
+    have h2 : -max |I.lo| |I.hi| ≤ -|I.lo| := by
+      linarith [le_max_left |I.lo| |I.hi|]
+    linarith [hx.1]
+  · have h1 : I.hi ≤ |I.hi| := le_abs_self I.hi
+    have h2 : |I.hi| ≤ max |I.lo| |I.hi| := le_max_right _ _
+    linarith [hx.2]
+
+/-- Coarse interval multiplication. -/
+def mulCoarse (I J : RInterval) : RInterval :=
+  symmetric (I.absBound * J.absBound) (by positivity)
+
+theorem mem_mulCoarse {x y : ℝ} {I J : RInterval}
+    (hx : I.mem x) (hy : J.mem y) :
+    (I.mulCoarse J).mem (x * y) := by
+  dsimp [mulCoarse]
+  have hx' := I.abs_mem_le hx
+  have hy' := J.abs_mem_le hy
+  have hxy : |x * y| ≤ I.absBound * J.absBound := by
+    calc
+      |x * y| = |x| * |y| := by rw [abs_mul]
+      _ ≤ I.absBound * J.absBound := by
+        exact mul_le_mul hx' hy' (abs_nonneg y) (by positivity)
+  constructor <;> linarith [abs_le.mp hxy]
+
+/-- Inflate an interval by an error radius `ε`. -/
+def inflate (I : RInterval) (ε : ℝ) (hε : 0 ≤ ε) : RInterval :=
+  I.add (symmetric ε hε)
+
+theorem mem_inflate {x c : ℝ} {I : RInterval} {ε : ℝ}
+    (hc : I.mem c) (hε : 0 ≤ ε) (herr : |x - c| ≤ ε) :
+    (I.inflate ε hε).mem x := by
+  have hx : x = c + (x - c) := by ring
+  rw [hx]
+  apply mem_add hc
+  dsimp [symmetric]
+  exact abs_le.mp herr
+
+end RInterval
+
+/-!
+## 2. Complex interval arithmetic
+-/
+
+/-- A complex rectangle: independent real and imaginary intervals. -/
+structure CInterval where
+  re : RInterval
+  im : RInterval
+
+namespace CInterval
+
+/-- Membership in a complex rectangle. -/
+def mem (z : ℂ) (B : CInterval) : Prop :=
+  B.re.mem z.re ∧ B.im.mem z.im
+
+/-- Point rectangle. -/
+def point (z : ℂ) : CInterval where
+  re := RInterval.point z.re
+  im := RInterval.point z.im
+
+/-- Rectangle addition. -/
+def add (B C : CInterval) : CInterval where
+  re := B.re.add C.re
+  im := B.im.add C.im
+
+theorem mem_add {z w : ℂ} {B C : CInterval}
+    (hz : B.mem z) (hw : C.mem w) :
+    (B.add C).mem (z + w) := by
+  constructor
+  · exact RInterval.mem_add hz.1 hw.1
+  · exact RInterval.mem_add hz.2 hw.2
+
+/-- Rectangle subtraction. -/
+def sub (B C : CInterval) : CInterval where
+  re := B.re.sub C.re
+  im := B.im.sub C.im
+
+theorem mem_sub {z w : ℂ} {B C : CInterval}
+    (hz : B.mem z) (hw : C.mem w) :
+    (B.sub C).mem (z - w) := by
+  constructor
+  · exact RInterval.mem_sub hz.1 hw.1
+  · exact RInterval.mem_sub hz.2 hw.2
+
+/-- Coarse rectangle multiplication. -/
+def mulCoarse (B C : CInterval) : CInterval where
+  re := (B.re.mulCoarse C.re).sub (B.im.mulCoarse C.im)
+  im := (B.re.mulCoarse C.im).add (B.im.mulCoarse C.re)
+
+theorem mem_mulCoarse {z w : ℂ} {B C : CInterval}
+    (hz : B.mem z) (hw : C.mem w) :
+    (B.mulCoarse C).mem (z * w) := by
+  constructor
+  · have hre : (z * w).re = z.re * w.re - z.im * w.im := by
+      simp [Complex.mul_re]
+    rw [hre]
+    apply RInterval.mem_sub
+    · exact RInterval.mem_mulCoarse hz.1 hw.1
+    · exact RInterval.mem_mulCoarse hz.2 hw.2
+  · have him : (z * w).im = z.re * w.im + z.im * w.re := by
+      simp [Complex.mul_im]
+    rw [him]
+    apply RInterval.mem_add
+    · exact RInterval.mem_mulCoarse hz.1 hw.2
+    · exact RInterval.mem_mulCoarse hz.2 hw.1
+
+/-- A coarse norm bound for all points in the rectangle. -/
+def normBound (B : CInterval) : ℝ :=
+  B.re.absBound + B.im.absBound
+
+private lemma abs_im_le_norm'' (z : ℂ) : |z.im| ≤ ‖z‖ := by
+  have := Complex.abs_re_le_norm (I * z)
+  have hn : ‖I * z‖ = ‖z‖ := by simp [norm_mul]
+  rw [hn] at this
+  simpa [Complex.mul_re, Complex.I_re, Complex.I_im, abs_neg] using this
+
+theorem norm_mem_le {z : ℂ} {B : CInterval} (hz : B.mem z) :
+    ‖z‖ ≤ B.normBound := by
+  have hnorm : ‖z‖ ≤ |z.re| + |z.im| := by
+    calc
+      ‖z‖ = ‖(z.re : ℂ) + (z.im : ℂ) * I‖ := by
+        rw [← Complex.re_add_im z]
+      _ ≤ ‖(z.re : ℂ)‖ + ‖(z.im : ℂ) * I‖ := norm_add_le _ _
+      _ = |z.re| + |z.im| := by
+        simp [norm_mul, Complex.norm_I]
+  dsimp [normBound]
+  linarith [B.re.abs_mem_le hz.1, B.im.abs_mem_le hz.2]
+
+/-- Complex exponential rectangle bound. -/
+def exp (B : CInterval) : CInterval where
+  re := RInterval.symmetric (Real.exp B.re.hi) (le_of_lt (Real.exp_pos _))
+  im := RInterval.symmetric (Real.exp B.re.hi) (le_of_lt (Real.exp_pos _))
+
+theorem mem_exp {z : ℂ} {B : CInterval} (hz : B.mem z) :
+    (CInterval.exp B).mem (Complex.exp z) := by
+  constructor
+  · dsimp [exp, RInterval.symmetric]
+    rw [abs_le]
+    have habs : |(Complex.exp z).re| ≤ Real.exp B.re.hi := by
+      calc
+        |(Complex.exp z).re| ≤ ‖Complex.exp z‖ := Complex.abs_re_le_norm _
+        _ = Real.exp z.re := Complex.norm_exp _
+        _ ≤ Real.exp B.re.hi := Real.exp_le_exp.mpr hz.1.2
+    exact ⟨(abs_le.mp habs).1, (abs_le.mp habs).2⟩
+  · dsimp [exp, RInterval.symmetric]
+    rw [abs_le]
+    have habs : |(Complex.exp z).im| ≤ Real.exp B.re.hi := by
+      calc
+        |(Complex.exp z).im| ≤ ‖Complex.exp z‖ := abs_im_le_norm'' _
+        _ = Real.exp z.re := Complex.norm_exp _
+        _ ≤ Real.exp B.re.hi := Real.exp_le_exp.mpr hz.1.2
+    exact ⟨(abs_le.mp habs).1, (abs_le.mp habs).2⟩
+
+end CInterval
+
+/-!
+## 3. Rectangles in the zeta plane
+-/
+
+/-- Open rectangle condition in complex coordinates. -/
+def inOpenRect (x0 x1 y0 y1 : ℝ) (s : ℂ) : Prop :=
+  x0 < s.re ∧ s.re < x1 ∧ y0 < s.im ∧ s.im < y1
+
+/-!
+## 4. Interval bounds for ζ on a rectangle
+-/
+
+/-- A rigorous interval bound for `riemannZeta` on an open rectangle. -/
+structure RectIntervalBound (x0 x1 y0 y1 : ℝ) where
+  hx : x0 < x1
+  hy : y0 < y1
+  reBox : RInterval
+  imBox : RInterval
+  re_bound :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → reBox.mem (riemannZeta s).re
+  im_bound :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → imBox.mem (riemannZeta s).im
+
+/-- Evidence that a rectangle interval bound excludes zero. -/
+inductive IntervalExcludesZero
+    {x0 x1 y0 y1 : ℝ}
+    (B : RectIntervalBound x0 x1 y0 y1) : Prop where
+  | posRe : 0 < B.reBox.lo → IntervalExcludesZero B
+  | negRe : B.reBox.hi < 0 → IntervalExcludesZero B
+  | posIm : 0 < B.imBox.lo → IntervalExcludesZero B
+  | negIm : B.imBox.hi < 0 → IntervalExcludesZero B
+
+/-- If an interval bound for ζ excludes zero, then ζ is nonzero on that rectangle. -/
+theorem riemannZeta_ne_zero_of_interval_exclusion
+    {x0 x1 y0 y1 : ℝ}
+    (B : RectIntervalBound x0 x1 y0 y1)
+    (E : IntervalExcludesZero B) :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → riemannZeta s ≠ 0 := by
+  intro s hs hz
+  cases E with
+  | posRe h =>
+    have hb := B.re_bound s hs
+    have hb0 : B.reBox.mem (0 : ℝ) := by simpa [hz] using hb
+    linarith [hb0.1]
+  | negRe h =>
+    have hb := B.re_bound s hs
+    have hb0 : B.reBox.mem (0 : ℝ) := by simpa [hz] using hb
+    linarith [hb0.2]
+  | posIm h =>
+    have hb := B.im_bound s hs
+    have hb0 : B.imBox.mem (0 : ℝ) := by simpa [hz] using hb
+    linarith [hb0.1]
+  | negIm h =>
+    have hb := B.im_bound s hs
+    have hb0 : B.imBox.mem (0 : ℝ) := by simpa [hz] using hb
+    linarith [hb0.2]
+
+/-!
+## 5. Approximation-plus-error bounds
+-/
+
+/-- An approximation plus a rigorous uniform error bound. -/
+structure ApproxRectBound (x0 x1 y0 y1 : ℝ) where
+  hx : x0 < x1
+  hy : y0 < y1
+  approx : ℂ → ℂ
+  reBox : RInterval
+  imBox : RInterval
+  approx_re :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → reBox.mem (approx s).re
+  approx_im :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → imBox.mem (approx s).im
+  err : ℝ
+  err_nonneg : 0 ≤ err
+  err_bound :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → ‖riemannZeta s - approx s‖ ≤ err
+
+/-- Convert an approximation-plus-error bound into a direct interval bound. -/
+def rectIntervalBound_from_approx
+    {x0 x1 y0 y1 : ℝ}
+    (A : ApproxRectBound x0 x1 y0 y1) :
+    RectIntervalBound x0 x1 y0 y1 where
+  hx := A.hx
+  hy := A.hy
+  reBox := A.reBox.inflate A.err A.err_nonneg
+  imBox := A.imBox.inflate A.err A.err_nonneg
+  re_bound := by
+    intro s hs
+    apply RInterval.mem_inflate (A.approx_re s hs) A.err_nonneg
+    have h := A.err_bound s hs
+    have : |(riemannZeta s - A.approx s).re| ≤ A.err := by
+      calc
+        |(riemannZeta s - A.approx s).re| ≤
+            ‖riemannZeta s - A.approx s‖ := Complex.abs_re_le_norm _
+        _ ≤ A.err := h
+    simpa [Complex.sub_re] using this
+  im_bound := by
+    intro s hs
+    apply RInterval.mem_inflate (A.approx_im s hs) A.err_nonneg
+    have h := A.err_bound s hs
+    have : |(riemannZeta s - A.approx s).im| ≤ A.err := by
+      calc
+        |(riemannZeta s - A.approx s).im| ≤
+            ‖riemannZeta s - A.approx s‖ := CInterval.abs_im_le_norm'' _
+        _ ≤ A.err := h
+    simpa [Complex.sub_im] using this
+
+/-- Euler–Maclaurin certificate skeleton. -/
+structure EulerMaclaurinZetaBound (x0 x1 y0 y1 : ℝ)
+    extends ApproxRectBound x0 x1 y0 y1 where
+  N : ℕ
+
+/-- Convert an Euler–Maclaurin certificate into an interval bound. -/
+def rectIntervalBound_from_eulerMaclaurin
+    {x0 x1 y0 y1 : ℝ}
+    (E : EulerMaclaurinZetaBound x0 x1 y0 y1) :
+    RectIntervalBound x0 x1 y0 y1 :=
+  rectIntervalBound_from_approx E.toApproxRectBound
+
+/-!
+## 6. Zero-free rectangles and finite covers
+-/
+
+/-- A rectangle on which ζ is proved nonzero. -/
+structure ZeroFreeRect where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  hx : x0 < x1
+  hy : y0 < y1
+  no_zero :
+    ∀ s, inOpenRect x0 x1 y0 y1 s → riemannZeta s ≠ 0
+
+/-- Convert an interval exclusion certificate into a zero-free rectangle. -/
+def zeroFreeRect_of_interval
+    {x0 x1 y0 y1 : ℝ}
+    (B : RectIntervalBound x0 x1 y0 y1)
+    (E : IntervalExcludesZero B) :
+    ZeroFreeRect where
+  x0 := x0; x1 := x1; y0 := y0; y1 := y1
+  hx := B.hx; hy := B.hy
+  no_zero := riemannZeta_ne_zero_of_interval_exclusion B E
+
+/-- Constants for the target height. -/
+def yLimit : ℝ := 1413 / 100
+def yTop : ℝ := 1414 / 100
+def yBot : ℝ := -1414 / 100
+
+/-- A finite rectangular cover of the critical strip region. -/
+structure CriticalStripCover14 where
+  rects : List ZeroFreeRect
+  covers :
+    ∀ s : ℂ,
+      0 < s.re → s.re < 1 → |s.im| ≤ yLimit → s.im ≠ 0 →
+      ∃ R ∈ rects, inOpenRect R.x0 R.x1 R.y0 R.y1 s
+
+/-- A two-rectangle cover: upper half and lower half. -/
+def criticalStripCover14_of_two_bounds
+    (U : RectIntervalBound 0 1 0 yTop)
+    (EU : IntervalExcludesZero U)
+    (L : RectIntervalBound 0 1 yBot 0)
+    (EL : IntervalExcludesZero L) :
+    CriticalStripCover14 where
+  rects := [zeroFreeRect_of_interval U EU, zeroFreeRect_of_interval L EL]
+  covers := by
+    intro s h0 h1 him him0
+    by_cases hpos : 0 < s.im
+    · exact ⟨_, List.mem_cons_self _ _, h0, h1, hpos, by
+        have hle := (abs_le.mp him).2
+        have htop : yLimit < yTop := by dsimp [yLimit, yTop]; norm_num
+        linarith⟩
+    · have hneg : s.im < 0 := by
+        have hle := not_lt.mp hpos
+        exact lt_of_le_of_ne hle him0
+      exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self _ _), h0, h1, by
+        have hge := (abs_le.mp him).1
+        have hbot : yBot < -yLimit := by dsimp [yBot, yLimit]; norm_num
+        linarith, hneg⟩
+
+/-- Complete evidence package for the critical rectangle. -/
+structure CriticalStripEvidence14 where
+  upper : RectIntervalBound 0 1 0 yTop
+  upper_ex : IntervalExcludesZero upper
+  lower : RectIntervalBound 0 1 yBot 0
+  lower_ex : IntervalExcludesZero lower
+
+/-- Turn evidence into a finite zero-free cover. -/
+def criticalStripCover14_of_evidence
+    (E : CriticalStripEvidence14) :
+    CriticalStripCover14 :=
+  criticalStripCover14_of_two_bounds E.upper E.upper_ex E.lower E.lower_ex
+
+/-- Solve from a finite cover. -/
+theorem riemannZeta_ne_zero_of_zeta_cover
+    (C : CriticalStripCover14) (s : ℂ)
+    (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| ≤ yLimit) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  rcases C.covers s h0 h1 him him0 with ⟨R, -, hs⟩
+  exact R.no_zero s hs hz
+
+/-- Solve from two approximation/error bounds. -/
+theorem riemannZeta_ne_zero_of_two_approx_bounds
+    (UA : ApproxRectBound 0 1 0 yTop)
+    (EU : IntervalExcludesZero (rectIntervalBound_from_approx UA))
+    (LA : ApproxRectBound 0 1 yBot 0)
+    (EL : IntervalExcludesZero (rectIntervalBound_from_approx LA))
+    (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1)
+    (him : |s.im| ≤ yLimit) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 :=
+  riemannZeta_ne_zero_of_zeta_cover
+    (criticalStripCover14_of_two_bounds
+      (rectIntervalBound_from_approx UA) EU
+      (rectIntervalBound_from_approx LA) EL)
+    s h0 h1 him him0
+
+/-- Solve from two Euler–Maclaurin certificates. -/
+theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
+    (UE : EulerMaclaurinZetaBound 0 1 0 yTop)
+    (EU : IntervalExcludesZero (rectIntervalBound_from_eulerMaclaurin UE))
+    (LE : EulerMaclaurinZetaBound 0 1 yBot 0)
+    (EL : IntervalExcludesZero (rectIntervalBound_from_eulerMaclaurin LE))
+    (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1)
+    (him : |s.im| ≤ yLimit) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 :=
+  riemannZeta_ne_zero_of_zeta_cover
+    (criticalStripCover14_of_two_bounds
+      (rectIntervalBound_from_eulerMaclaurin UE) EU
+      (rectIntervalBound_from_eulerMaclaurin LE) EL)
+    s h0 h1 him him0
+
+end ZetaNumericCert
+noncomputable def criticalStripCover14 :
+    ZetaZeroFreeInfrastructure.CriticalStripCover14 :=
+  sorry
+
+/-- ζ(s) ≠ 0 for 0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0.
+    Classical result proved numerically by Hasler (2004) and Odlyzko (1987). -/
 theorem riemannZeta_ne_zero_critical_strip_le_height
     (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| ≤ 14.13) (him0 : s.im ≠ 0) :
-    riemannZeta s ≠ 0 := by
-  sorry
+    riemannZeta s ≠ 0 :=
+  ZetaZeroFreeInfrastructure.riemannZeta_ne_zero_of_cover criticalStripCover14 s h0 h1 him him0
 
 /-- If ζ(s) = 0 and s is in the critical strip (0 < Re(s) < 1) with Im(s) ≠ 0,
     then |Im(s)| > 14.13.
