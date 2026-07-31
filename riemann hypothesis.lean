@@ -10444,3 +10444,216 @@ theorem rh_from_rouche_gap (H : RoucheGapLeaf) : RiemannHypothesisProp := by
   exact Leaf2Completion.rh_from_quadrant_and_leaf2 ClosedCertificate.remainingQuadrant_10_closed hL2
 
 end UltimateRHAssembly
+
+/-!
+# `def`-form predicate mirrors of the leaf structures
+-/
+
+/-- `PhaseNonCancellationLeaf` as a `def Prop`: there exist a main Dirichlet sum
+    bound and an AFE remainder bound whose gap is strictly positive for all
+    `|x| > 10` off the critical line. -/
+def PhaseNonCancellationLeaf : Prop :=
+  ∃ main : DeepTask2Decomposition.MainDirichletSumLeaf,
+    ∃ remainder : DeepTask2Decomposition.AFERemainderLeaf,
+      ∀ x y,
+        10 < |x| →
+        -(1 / 2 : ℝ) < y →
+        y < (1 / 2 : ℝ) →
+        y ≠ 0 →
+        remainder.u_rem x y < main.m_dirichlet x y
+
+/-- `RoucheGapLeaf` as a `def Prop`: the AFE remainder norm is strictly
+    smaller than the main Dirichlet sum norm for every `z` with `|z.re| > 10`
+    off the critical line — the exact Rouché dominance condition. -/
+def RoucheGapLeaf : Prop :=
+  ∀ (z : ℂ),
+    10 < |z.re| →
+    -(1 / 2 : ℝ) < z.im →
+    z.im < (1 / 2 : ℝ) →
+    z.im ≠ 0 →
+    ‖zeta ((1 / 2 : ℂ) + I * z) -
+      (∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff z.re)),
+        ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z))))‖ <
+    ‖∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff z.re)),
+      ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z)))‖
+
+/-- `TailOffRealPositiveLower` as a `def Prop`: there is a positive
+    pointwise lower bound `lower` on `‖xiShifted z‖` for all `z` with
+    `|z.re| > X` and `z.im ≠ 0` strictly inside the critical strip. -/
+def TailOffRealPositiveLower (X : ℝ) : Prop :=
+  ∃ lower : ℝ → ℝ → ℝ,
+    (∀ x y : ℝ,
+      X < |x| →
+      -(1 / 2 : ℝ) < y →
+      y < (1 / 2 : ℝ) →
+      y ≠ 0 →
+      0 < lower x y) ∧
+    (∀ z : ℂ,
+      X < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      lower z.re z.im ≤ ‖xiShifted z‖)
+
+/-!
+## Infrastructure: `def`-form ↔ `structure`-form bridges and the reduction chain
+
+Everything below is a *conditional* adapter. None of these lemmas asserts that any
+of the open RH-equivalent predicates actually holds; they only record the
+logical relationships needed to turn a hypothetical proof of any one of them
+(whether supplied as a `structure` certificate or as a `Prop` hypothesis) into a
+proof of `RiemannHypothesisProp`.
+-/
+
+open LeafDecomp Leaf2FullDecomposition Leaf2Completion
+
+/-- The root-scope `def PhaseNonCancellationLeaf` is propositionally equivalent
+    to the `structure`-form `DeepTask2Decomposition.PhaseNonCancellationLeaf`.
+    (The struct is referred to fully qualified so that the bare name
+    `PhaseNonCancellationLeaf` keeps meaning the root `def`.) -/
+theorem phaseNonCancellationLeaf_def_iff_struct :
+    PhaseNonCancellationLeaf ↔
+      DeepTask2Decomposition.PhaseNonCancellationLeaf := by
+  constructor
+  · rintro ⟨main, remainder, gap⟩
+    exact ⟨main, remainder, gap⟩
+  · rintro ⟨main, remainder, gap⟩
+    exact ⟨main, remainder, gap⟩
+
+/-- The root-scope `def RoucheGapLeaf` is propositionally equivalent
+    to the `structure`-form `UltimateRHAssembly.RoucheGapLeaf`. -/
+theorem roucheGapLeaf_def_iff_struct :
+    RoucheGapLeaf ↔ UltimateRHAssembly.RoucheGapLeaf := by
+  constructor
+  · intro H
+    exact ⟨H⟩
+  · intro H
+    exact H.gap
+
+/-- `TailOffRealPositiveLower X` (root `def`) is propositionally equivalent to
+    `LeafDecomp.TailXiLower X` (the `structure` certificate). -/
+theorem tailOffRealPositiveLower_def_iff_struct (X : ℝ) :
+    TailOffRealPositiveLower X ↔ LeafDecomp.TailXiLower X := by
+  constructor
+  · rintro ⟨lower, h⟩
+    obtain ⟨hpos, hbound⟩ := h
+    exact ⟨lower, hpos, hbound⟩
+  · rintro ⟨lower, hpos, hbound⟩
+    exact ⟨lower, hpos, hbound⟩
+
+/-- Rouché dominance (`def`-form) implies phase non-cancellation (`def`-form).
+
+    The main Dirichlet sum bound is taken to be `‖Σ‖` and the AFE remainder
+    bound to be `‖ζ − Σ‖`; `m_pos` follows from `norm_nonneg` and the strict
+    gap, and the `bound` fields reduce to definitional equalities. -/
+theorem roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def
+    (H : RoucheGapLeaf) : PhaseNonCancellationLeaf := by
+  have H' : UltimateRHAssembly.RoucheGapLeaf :=
+    roucheGapLeaf_def_iff_struct.mpr H
+  exact
+    phaseNonCancellationLeaf_def_iff_struct.mpr
+      (UltimateRHAssembly.roucheGap_to_PhaseNonCancellation H')
+
+/-- Phase non-cancellation (`def`-form) implies RH, by routing through the
+    existing `structure`-form chain `leaf2_tractable_fragment`. -/
+theorem phaseNonCancellationLeaf_def_implies_RH
+    (H : PhaseNonCancellationLeaf) : RiemannHypothesisProp := by
+  rw [phaseNonCancellationLeaf_def_iff_struct] at H
+  have hL2 : LeafDecomp.TailXiLower 10 :=
+    leaf2_tractable_fragment H
+  exact
+    Leaf2Completion.rh_from_quadrant_and_leaf2
+      ClosedCertificate.remainingQuadrant_10_closed hL2
+
+/-- Rouché dominance (`def`-form) implies RH. -/
+theorem roucheGapLeaf_def_implies_RH
+    (H : RoucheGapLeaf) : RiemannHypothesisProp :=
+  phaseNonCancellationLeaf_def_implies_RH
+    (roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def H)
+
+/-- `TailOffRealPositiveLower X` (root `def`) implies the `structure`-form
+    `LeafDecomp.TailXiLower X`: they have the same fields, so we just repackage
+    the existential witness. -/
+theorem tailOffRealPositiveLower_implies_tailXiLower
+    {X : ℝ} (H : TailOffRealPositiveLower X) :
+    LeafDecomp.TailXiLower X := by
+  obtain ⟨lower, h⟩ := H
+  obtain ⟨hpos, hbound⟩ := h
+  exact ⟨lower, hpos, hbound⟩
+
+/-- Any `TailOffRealPositiveLower 10` gives `LeafDecomp.TailXiLower 10` and
+    hence RH together with the closed radius-`10` first-quadrant certificate. -/
+theorem tailOffRealPositiveLower_ten_implies_RH
+    (H : TailOffRealPositiveLower 10) : RiemannHypothesisProp := by
+  have hL2 : LeafDecomp.TailXiLower 10 :=
+    tailOffRealPositiveLower_implies_tailXiLower H
+  exact
+    Leaf2Completion.rh_from_quadrant_and_leaf2
+      ClosedCertificate.remainingQuadrant_10_closed hL2
+
+/-!
+## Bridges to the existing `HardDifferenceNonzero` chain
+
+`HardDifferenceNonzero` is already known equivalent to RH in this file
+(`hardDifferenceNonzero_iff_RH`); no further analytical bridge is required for
+it to reach RH. A forward implication from `HardDifferenceNonzero` to the
+*stronger* analytical leaves `PhaseNonCancellationLeaf` or
+`TailOffRealPositiveLower 10` is not currently known and is therefore not
+recorded here (it would be a real strengthening of RH, not mere
+infrastructure). The restated iff below completes the reduction map for all
+five targets.
+-/
+
+/-!
+## Consolidated reduction map
+
+Five RH-equivalent targets, and the known conditional implications among them.
+Arrows shown are the sorry-free lemmas above.
+
+    RoucheGapLeaf (def)
+        │  roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def
+        ▼
+    PhaseNonCancellationLeaf (def)
+        │  phaseNonCancellationLeaf_def_implies_RH
+        ▼
+    RiemannHypothesisProp  ◀── tailOffRealPositiveLower_ten_implies_RH
+        ▲                           │  tailOffRealPositiveLower_implies_tailXiLower
+        │                           ▼
+        └─────────────────  TailXiLower 10  ⇔  TailOffRealPositiveLower 10
+                                            (tailOffRealPositiveLower_def_iff_struct)
+
+    HardDifferenceNonzero ──hardDifferenceNonzero_iff_RH──▶ RiemannHypothesisProp
+    XiOffRealPointwiseNonvanishing ──rh_iff_xi_off_real_pointwise_nonvanishing_mathlib──▶ ◀─
+
+The vertical def↔struct equivalences are:
+    `phaseNonCancellationLeaf_def_iff_struct`
+    `roucheGapLeaf_def_iff_struct`
+    `tailOffRealPositiveLower_def_iff_struct`
+-/
+
+/-- `XiOffRealPointwiseNonvanishing` is equivalent to RH (existing); restated
+    here so the five-target reduction map has a single entry point. -/
+theorem xiOffRealPointwiseNonvanishing_iff_RH :
+    XiOffRealPointwiseNonvanishing ↔ RiemannHypothesisProp :=
+  rh_iff_xi_off_real_pointwise_nonvanishing_mathlib.symm
+
+/-- `HardDifferenceNonzero` is equivalent to RH (existing); restated here for
+    completeness of the five-target reduction map. -/
+theorem hardDifferenceNonzero_iff_RH_restated :
+    HardDifferenceNonzero ↔ RiemannHypothesisProp :=
+  hardDifferenceNonzero_iff_RH
+
+/-- Five separated suffice-to-prove-RH lemmas, collected: proving any one of
+    `RoucheGapLeaf`, `PhaseNonCancellationLeaf`, `TailOffRealPositiveLower 10`,
+    `HardDifferenceNonzero`, or `XiOffRealPointwiseNonvanishing` yields RH. -/
+theorem rh_from_any_of_five_targets :
+    RoucheGapLeaf ∨ PhaseNonCancellationLeaf ∨
+    TailOffRealPositiveLower 10 ∨ HardDifferenceNonzero ∨
+    XiOffRealPointwiseNonvanishing →
+    RiemannHypothesisProp := by
+  rintro (hR | hP | hT | hH | hX)
+  · exact roucheGapLeaf_def_implies_RH hR
+  · exact phaseNonCancellationLeaf_def_implies_RH hP
+  · exact tailOffRealPositiveLower_ten_implies_RH hT
+  · exact hardDifferenceNonzero_implies_RH hH
+  · exact xiOffRealPointwiseNonvanishing_iff_RH.mp hX
