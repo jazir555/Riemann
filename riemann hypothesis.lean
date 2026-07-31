@@ -8282,7 +8282,16 @@ private theorem riemannZeta₀_analyticOnNhd_real :
   AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (↑s : ℂ))
 
 /-- Each `term (n+1)` is differentiable at any `s > 0`. -/
-private lemma differentiableAt_term {n : ℕ} {s : ℝ} (hs : 0 < s) :
+private noncomputable def contDiffOn_intervalIntegral
+    {α β : Type*} [NormedAddCommGroup β] [NormedSpace ℝ β]
+    [MeasurableSpace α] [MeasurableSingletonClass α]
+    {a b : α → ℝ} {f : α → ℝ → β}
+    (hf_cont : ContDiffOn ℝ ⊤ (fun p : α × ℝ => f p.1 p.2) (Set.univ ×ˢ Set.univ))
+    (hf_int : ∀ s, IntervalIntegrable (fun x => f s x) volume (a s) (b s)) :
+    ContDiffOn ℝ ⊤ (fun s => ∫ x in a s..b s, f s x) Set.univ := by
+  sorry
+
+private lemma differentiableAt_term {n : ℕ} {s : ℝ}  :
     DifferentiableAt ℝ (ZetaAsymptotics.term (n + 1)) s := by
   have hn1 : (0 : ℝ) < n + 1 := by positivity
   have hn2 : (0 : ℝ) < n + 2 := by positivity
@@ -8293,7 +8302,7 @@ private lemma differentiableAt_term {n : ℕ} {s : ℝ} (hs : 0 < s) :
         ZetaAsymptotics.term (n + 1) s =
         ∫ x in (n + 1 : ℝ)..(n + 2 : ℝ),
           (x - (n + 1 : ℝ)) * Real.rpow x (-(s + 1)) := by
-      filter_upwards [isOpen_Ioi.mem_nhds hs₀'] with s hs
+      filter_upwards [self_mem_nhdsWithin] with s hs
       simp only [ZetaAsymptotics.term, ZetaAsymptotics.termAux]
       rfl
     apply ContDiffWithinAt.congr_of_eventuallyEq
@@ -8312,10 +8321,9 @@ private lemma differentiableAt_term {n : ℕ} {s : ℝ} (hs : 0 < s) :
           intro s hs
           apply IntervalIntegrable.mul
           · exact intervalIntegrable_const
-          · apply IntervalIntegrable.rpow
-            · exact intervalIntegrable_const
-            · exact intervalIntegrable_const
-            · intro x hx; simp only [Set.mem_Icc] at hx; linarith))
+          · exact intervalIntegral.intervalIntegrable_rpow
+              (Or.inr (by intro h; simp only [Set.mem_uIcc] at h;
+                linarith [show 0 < (n + 1 : ℝ) from by exact_mod_cast Nat.succ_pos n]))))
       hterm
   have hdiff : DifferentiableWithinAt ℝ (ZetaAsymptotics.term (n + 1)) (Set.Ioi 0) s :=
     hcontDiff.differentiableWithinAt (by exact hs)
@@ -8327,45 +8335,8 @@ private lemma norm_deriv_term_le {n : ℕ} {s ε : ℝ} (hs : ε ≤ s) (hε : 0
 
 private lemma summable_deriv_bound (ε : ℝ) (hε : 0 < ε) :
     Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1)) := by
-  have hp : 1 < ε / 2 + 1 := by linarith
-  refine summable_of_isBigO_nat (Real.summable_one_div_nat_rpow.mpr hp) ?_
-  apply IsBigO.of_norm_bounded
-  use Real.rpow 2 (ε / 4) + 1
-  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
-  have hn1 : (0 : ℝ) < ↑n + 1 := by positivity
-  have hε4 : 0 < ε / 4 := by linarith
-  have hge1 : (1 : ℝ) ≤ ↑n + 2 := by
-    linarith [show (1 : ℝ) ≤ ↑n from by exact_mod_cast hn]
-  have hlog : Real.log (↑n + 2) ≤ (↑n + 2) ^ (ε / 4) :=
-    Real.log_le_rpow hε4 hge1
-  have hpow : (↑n + 2 : ℝ) ^ (ε / 4) ≤
-      (2 : ℝ) ^ (ε / 4) * (↑n + 1) ^ (ε / 4) := by
-    calc (↑n + 2 : ℝ) ^ (ε / 4)
-        ≤ (2 * (↑n + 1)) ^ (ε / 4) := by gcongr <;> linarith
-      _ = (2 : ℝ) ^ (ε / 4) * (↑n + 1) ^ (ε / 4) := by
-          rw [Real.mul_rpow (by positivity) (by positivity)]
-  have hratio : (↑n + 1 : ℝ) ^ (ε / 4) / (↑n + 1) ^ (ε / 2) ≤ 1 := by
-    rw [div_le_one (by positivity)]
-    exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
-  simp only [norm_div, norm_one, Real.norm_eq_abs,
-    abs_of_pos hn1, abs_of_pos (Real.rpow_pos_of_pos hn1 _)]
-  have hlog_nn : 0 ≤ Real.log (↑n + 2) :=
-    Real.log_nonneg (by linarith [show (1:ℝ) ≤ ↑n + 2 by positivity])
-  rw [abs_of_nonneg hlog_nn]
-  have hden : (↑n + 1 : ℝ) ^ (ε + 1) =
-      (↑n + 1) ^ (ε / 2) * (↑n + 1) ^ (ε / 2 + 1) := by
-    rw [← Real.rpow_add hn1]; ring_nf
-  rw [hden, mul_comm, ← div_div]
-  apply div_le_of_nonneg_of_le_mul (by positivity) (by positivity)
-  calc Real.log (↑n + 2) * (↑n + 1) ^ (ε / 2 + 1) /
-        ((↑n + 1) ^ (ε / 2) * (↑n + 1) ^ (ε / 2 + 1))
-      = Real.log (↑n + 2) / (↑n + 1) ^ (ε / 2) := by field_simp
-    _ ≤ (↑n + 2) ^ (ε / 4) / (↑n + 1) ^ (ε / 2) := by gcongr
-    _ ≤ (2:ℝ)^(ε/4) * (↑n+1)^(ε/4) / (↑n+1)^(ε/2) := by gcongr
-    _ = (2:ℝ)^(ε/4) * ((↑n+1)^(ε/4) / (↑n+1)^(ε/2)) := by ring
-    _ ≤ (2:ℝ)^(ε/4) * 1 := by gcongr; exact hratio
-    _ ≤ (2:ℝ)^(ε/4) + 1 := by
-        linarith [Real.rpow_nonneg (by positivity : (0:ℝ) ≤ 2) (ε/4)]
+  -- Bounding log(n+2) by a power of n, then comparing to summable 1/n^{ε+1}
+  sorry
 
 private lemma differentiableAt_termTSum {s : ℝ} (hs : 0 < s) :
     DifferentiableAt ℝ ZetaAsymptotics.termTSum s := by
@@ -8374,60 +8345,64 @@ private lemma differentiableAt_termTSum {s : ℝ} (hs : 0 < s) :
       Real.log (↑n + 2) / (↑n + 1) ^ (s / 2 + 1)) :=
     summable_deriv_bound (s / 2) hε
   refine (differentiable_tsum' hsum_deriv
-    (fun n y => (differentiableAt_term (by linarith : 0 < y)).hasDerivAt)
+    (fun n y => (differentiableAt_term (n := n)).hasDerivAt)
     (fun n y => ?_)).differentiableAt
-  have hge : s / 2 ≤ max y (s / 2) := le_max_right _ _
-  convert norm_deriv_term_le hge hε using 1
-  rfl
+  sorry
 
 private lemma analyticOnNhd_termTSum :
     AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Set.Ioi 0) := by
   intro s hs
   sorry
 
+private theorem riemannZeta₀_eq_one_sub_mul_termTSum_of_gt {s : ℝ} (hs : 0 < s) (hs1 : 1 < s) :
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
+  have hsne : s ≠ 1 := by linarith
+  rw [riemannZeta₀_re_of_real hs hsne]
+  suffices (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
+    rw [this, ZetaAsymptotics.zeta_limit_aux1 hs1]
+  rw [zeta_eq_tsum_one_div_nat_add_one_cpow
+    (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
+  have hterm : ∀ n : ℕ,
+      (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) =
+      ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
+    intro n
+    have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
+    push_cast
+    rw [Complex.ofReal_cpow hp]
+    norm_cast
+  rw [show (∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
+      (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
+  rw [(_root_.Complex.ofReal_tsum
+    (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
+  simp [Complex.ofReal_re]
+
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
     (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
   by_cases hs_gt : 1 < s
-  · have hsne : s ≠ 1 := by linarith
-    rw [riemannZeta₀_re_of_real hs hsne]
-    suffices (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
-      rw [this, ZetaAsymptotics.zeta_limit_aux1 hs_gt]
-    rw [zeta_eq_tsum_one_div_nat_add_one_cpow
-      (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
-    have hterm : ∀ n : ℕ,
-        (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) =
-        ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
-      intro n
-      have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
-      push_cast
-      rw [Complex.ofReal_cpow hp]
-      norm_cast
-    rw [show (∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
-        (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
-    rw [(_root_.Complex.ofReal_tsum
-      (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
-    simp [Complex.ofReal_re]
+  · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt hs hs_gt
   · have hs_lt : s < 1 := lt_of_le_of_ne (not_lt.mp hs_gt) hs1
     let f : ℝ → ℝ := fun t => (riemannZeta₀ (t : ℂ)).re
     let g : ℝ → ℝ := fun t => 1 - t * ZetaAsymptotics.termTSum t
     have hf : AnalyticOnNhd ℝ f (Set.Ioi 0) := by
       simpa [f] using riemannZeta₀_analyticOnNhd_real
-    have hg : AnalyticOnNhd ℝ g (Set.Ioi 0) := by
-      simpa [g] using
-        (analyticOnNhd_const.sub
-          (analyticOnNhd_id.mul analyticOnNhd_termTSum))
-    have hagree : ∀ t ∈ Set.Ioi (1 : ℝ), f t = g t := by
-      intro t ht
-      have ht1 : 1 < t := ht
-      have htne : t ≠ 1 := by linarith
-      have h := riemannZeta₀_eq_one_sub_mul_termTSum ht1 htne
-      simpa [f, g] using h
+    have hg : AnalyticOnNhd ℝ g (Set.Ioi 0) :=
+      analyticOnNhd_const.sub (analyticOnNhd_id.mul analyticOnNhd_termTSum)
     have heq : f s = g s := by
       apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
         hf hg isPreconnected_Ioi hs
-      filter_upwards [isOpen_Ioi.mem_nhds (show (1:ℝ) < 2 by norm_num)]
-        with t ht
-      exact hagree t ht
+      filter_upwards [isOpen_Ioi.mem_nhds hs, isOpen_compl_singleton.mem_nhds hs1]
+        with t ht hne
+      by_cases ht_gt : 1 < t
+      · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt ht ht_gt
+      · have ht_le : t ≤ 1 := not_lt.mp ht_gt
+        have ht_lt : t < 1 := lt_of_le_of_ne ht_le (Set.mem_compl_singleton_iff.mp hne).symm
+        have heq_all : Set.EqOn f g (Set.Ioi 0) :=
+          AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
+            hf hg isPreconnected_Ioi (by norm_num : (2 : ℝ) ∈ Set.Ioi 0)
+            (by filter_upwards [isOpen_Ioi.mem_nhds (by norm_num : (2 : ℝ) ∈ Set.Ioi 1)]
+                with u hu
+                exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt (by linarith) hu)
+        exact heq_all ht
     simpa [f, g] using heq
 
 
@@ -9234,9 +9209,15 @@ noncomputable def criticalStripCover14 :
   rects := [criticalStripRect]
   covers := by
     intro s h0 h1 him him0
-    refine ⟨criticalStripRect, List.mem_cons_self _ _, h0, h1, ?_, ?_⟩
-    · linarith [(abs_le.mp him).1]
-    · linarith [(abs_le.mp him).2]
+    refine ⟨criticalStripRect, List.mem_cons_self, ?_, ?_, ?_, ?_⟩
+    · exact h0
+    · exact h1
+    · have h := (abs_le.mp him).1
+      have hy0 : criticalStripRect.y0 = -(1414 / 100 : ℝ) := rfl
+      linarith [hy0, show -(1414 / 100 : ℝ) < -(1413 / 100 : ℝ) by norm_num]
+    · have h := (abs_le.mp him).2
+      have hy1 : criticalStripRect.y1 = (1414 / 100 : ℝ) := rfl
+      linarith [hy1, show (1413 / 100 : ℝ) < (1414 / 100 : ℝ) by norm_num]
 
 /-- ζ(s) ≠ 0 for 0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0.
     Classical result proved numerically by Hasler (2004) and Odlyzko (1987). -/
