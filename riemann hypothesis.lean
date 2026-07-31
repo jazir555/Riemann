@@ -8281,80 +8281,6 @@ private theorem riemannZeta₀_analyticOnNhd_real :
     AnalyticOnNhd ℝ (fun s : ℝ => (riemannZeta₀ (↑s : ℂ)).re) (Set.Ioi 0) := fun s hs =>
   AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (↑s : ℂ))
 
-/-- Each `term (n+1)` is differentiable at any `s > 0`. -/
-private noncomputable def contDiffOn_intervalIntegral
-    {α β : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]
-    [NormedAddCommGroup β] [NormedSpace ℝ β]
-    [MeasurableSpace α] [MeasurableSingletonClass α]
-    {a b : α → ℝ} {f : α → ℝ → β}
-    (hf_cont : ContDiffOn ℝ ⊤ (fun p : α × ℝ => f p.1 p.2) (Set.univ ×ˢ Set.univ))
-    (hf_int : ∀ s, IntervalIntegrable (fun x => f s x) volume (a s) (b s)) :
-    ContDiffOn ℝ ⊤ (fun s => ∫ x in a s..b s, f s x) Set.univ := by
-  sorry
-
-private lemma differentiableAt_term {n : ℕ} {s : ℝ}  :
-    DifferentiableAt ℝ (ZetaAsymptotics.term (n + 1)) s := by
-  have hn1 : (0 : ℝ) < n + 1 := by positivity
-  have hn2 : (0 : ℝ) < n + 2 := by positivity
-  have hcontDiff : ContDiffOn ℝ ⊤ (fun s : ℝ => ZetaAsymptotics.term (n + 1) s) (Set.Ioi 0) := by
-    intro s₀ hs₀
-    have hs₀' : s₀ ∈ Set.Ioi (0 : ℝ) := hs₀
-    have hterm : ∀ᶠ s in nhdsWithin s₀ (Set.Ioi 0),
-        ZetaAsymptotics.term (n + 1) s =
-        ∫ x in (n + 1 : ℝ)..(n + 2 : ℝ),
-          (x - (n + 1 : ℝ)) * Real.rpow x (-(s + 1)) := by
-      filter_upwards [self_mem_nhdsWithin] with s hs
-      simp only [ZetaAsymptotics.term, ZetaAsymptotics.termAux]
-      rfl
-    apply ContDiffWithinAt.congr_of_eventuallyEq
-      (contDiffOn_intervalIntegral
-        (f := fun s x => (x - (n + 1 : ℝ)) * Real.rpow x (-(s + 1)))
-        (by
-          apply ContDiffOn.mul
-          · exact contDiffOn_const
-          · apply ContDiffOn.exp
-            apply ContDiffOn.mul
-            · exact contDiffOn_const.neg
-            · exact contDiffOn_snd.contDiffOn.comp_contDiffOn
-              (Real.contDiffOn_log.mono (by
-                intro x hx; simp only [Set.mem_Ioi] at hx; linarith)))
-        (by
-          intro s hs
-          apply IntervalIntegrable.mul
-          · exact intervalIntegrable_const
-          · exact intervalIntegral.intervalIntegrable_rpow
-              (Or.inr (by intro h; simp only [Set.mem_uIcc] at h;
-                linarith [show 0 < (n + 1 : ℝ) from by exact_mod_cast Nat.succ_pos n]))))
-      hterm
-  have hdiff : DifferentiableWithinAt ℝ (ZetaAsymptotics.term (n + 1)) (Set.Ioi 0) s :=
-    hcontDiff.differentiableWithinAt (by exact hs)
-  exact hdiff.differentiableAt (isOpen_Ioi.mem_nhds hs)
-
-private lemma norm_deriv_term_le {n : ℕ} {s ε : ℝ} (hs : ε ≤ s) (hε : 0 < ε) :
-    ‖deriv (ZetaAsymptotics.term (n + 1)) s‖ ≤ Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1) := by
-  sorry
-
-private lemma summable_deriv_bound (ε : ℝ) (hε : 0 < ε) :
-    Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1)) := by
-  -- Bounding log(n+2) by a power of n, then comparing to summable 1/n^{ε+1}
-  sorry
-
-private lemma differentiableAt_termTSum {s : ℝ} (hs : 0 < s) :
-    DifferentiableAt ℝ ZetaAsymptotics.termTSum s := by
-  have hε : 0 < s / 2 := by linarith
-  have hsum_deriv : Summable (fun n : ℕ =>
-      Real.log (↑n + 2) / (↑n + 1) ^ (s / 2 + 1)) :=
-    summable_deriv_bound (s / 2) hε
-  refine (differentiable_tsum' hsum_deriv
-    (fun n y => (differentiableAt_term (n := n)).hasDerivAt)
-    (fun n y => ?_)).differentiableAt
-  sorry
-
-private lemma analyticOnNhd_termTSum :
-    AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Set.Ioi 0) := by
-  intro s hs
-  sorry
-
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum_of_gt {s : ℝ} (hs : 0 < s) (hs1 : 1 < s) :
     (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
   have hsne : s ≠ 1 := by linarith
@@ -8382,29 +8308,24 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (h
   by_cases hs_gt : 1 < s
   · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt hs hs_gt
   · have hs_lt : s < 1 := lt_of_le_of_ne (not_lt.mp hs_gt) hs1
-    let f : ℝ → ℝ := fun t => (riemannZeta₀ (t : ℂ)).re
-    let g : ℝ → ℝ := fun t => 1 - t * ZetaAsymptotics.termTSum t
-    have hf : AnalyticOnNhd ℝ f (Set.Ioi 0) := by
-      simpa [f] using riemannZeta₀_analyticOnNhd_real
-    have hg : AnalyticOnNhd ℝ g (Set.Ioi 0) :=
-      analyticOnNhd_const.sub (analyticOnNhd_id.mul analyticOnNhd_termTSum)
-    have heq : f s = g s := by
-      apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
-        hf hg isPreconnected_Ioi hs
-      filter_upwards [isOpen_Ioi.mem_nhds hs, isOpen_compl_singleton.mem_nhds hs1]
-        with t ht hne
-      by_cases ht_gt : 1 < t
-      · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt ht ht_gt
-      · have ht_le : t ≤ 1 := not_lt.mp ht_gt
-        have ht_lt : t < 1 := lt_of_le_of_ne ht_le (Set.mem_compl_singleton_iff.mp hne).symm
-        have heq_all : Set.EqOn f g (Set.Ioi 0) :=
-          AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
-            hf hg isPreconnected_Ioi (by norm_num : (2 : ℝ) ∈ Set.Ioi 0)
-            (by filter_upwards [isOpen_Ioi.mem_nhds (by norm_num : (2 : ℝ) ∈ Set.Ioi 1)]
-                with u hu
-                exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt (by linarith) hu)
-        exact heq_all ht
-    simpa [f, g] using heq
+    sorry
+
+/-- Real zeta is negative on `(0,1)`, hence nonzero there. -/
+private theorem riemannZeta_neg_real_of_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
+    (riemannZeta (σ : ℂ)).re < 0 := by
+  have hs : σ ≠ 1 := by linarith
+  have hle : (riemannZeta₀ (σ : ℂ)).re ≤ 1 := by
+    have h := riemannZeta₀_eq_one_sub_mul_termTSum h0 hs
+    rw [h]
+    have := mul_nonneg h0.le (termTSum_nonneg h0)
+    linarith
+  have hinv : 1 / (σ - 1) < -1 := by
+    have h1σ : 0 < 1 - σ := by linarith
+    have h1 : σ - 1 = -(1 - σ : ℝ) := by ring
+    rw [h1, div_neg, neg_lt_neg_iff, lt_div_iff₀ h1σ]
+    linarith
+  have hre := riemannZeta₀_re_of_real h0 hs
+  linarith
 
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
@@ -8456,22 +8377,6 @@ theorem riemannZeta_ne_zero_real_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
     field_simp [hne]
     ring
   have hgt_one : (1 : ℝ) < 1 / (1 - σ) := by rw [lt_div_iff₀ h1σ_pos]; linarith
-  linarith
-
-private theorem riemannZeta_neg_real_of_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
-    (riemannZeta (σ : ℂ)).re < 0 := by
-  have hs : σ ≠ 1 := by linarith
-  have hle : (riemannZeta₀ (σ : ℂ)).re ≤ 1 := by
-    have h := riemannZeta₀_eq_one_sub_mul_termTSum h0 hs
-    rw [h]
-    have := mul_nonneg h0.le (termTSum_nonneg h0)
-    linarith
-  have hinv : 1 / (σ - 1) < -1 := by
-    have h1σ : 0 < 1 - σ := by linarith
-    have h1 : σ - 1 = -(1 - σ : ℝ) := by ring
-    rw [h1, div_neg, neg_lt_neg_iff, lt_div_iff₀ h1σ]
-    linarith
-  have hre := riemannZeta₀_re_of_real h0 hs
   linarith
 
 private theorem completedRiemannZeta₀_bounded_on_critical_line :
@@ -9149,47 +9054,6 @@ theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
 
 end ZetaNumericCert
 
-/-- The single numerical certificate: a finite list of `ZetaZeroFreeInfrastructure.RectLowerBound`
-    covering `{0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0}`.
-
-    To fill this sorry, supply a `ZetaZeroFreeInfrastructure.CriticalStripCover14` with
-    a finite list of rigorously verified rectangles.
-
-    AVAILABLE INFRASTRUCTURE (all sorry-free):
-
-    ZetaZeroFreeInfrastructure:
-    - `RectLowerBound` — rectangle with ε > 0 lower bound on ‖ζ(s)‖
-    - `neZeroOfRect` — a single rectangle certifies ζ ≠ 0 there
-    - `riemannZeta_ne_zero_of_cover` — a full cover proves ζ ≠ 0 on the strip
-    - `CriticalStripCover14` — the exact cover type needed
-
-    ZetaNumericCert:
-    - `RInterval` / `CInterval` — interval arithmetic for ℝ and ℂ
-    - `RectIntervalBound` — rigorous interval bound for ζ on a rectangle
-    - `IntervalExcludesZero` — inductive proof that ζ ≠ 0 via sign exclusion
-    - `ApproxRectBound` — Euler–Maclaurin / AFE output: approx + error bound
-    - `rectIntervalBound_from_approx` — convert approx+error to RectIntervalBound
-    - `EulerMaclaurinZetaBound` — Euler–Maclaurin certificate (N + approx + error)
-    - `rectIntervalBound_from_eulerMaclaurin` — convert EM bound to RectIntervalBound
-    - `criticalStripCover14_of_two_bounds` — two-rectangle cover constructor
-    - `criticalStripCover14_of_evidence` — from CriticalStripEvidence14
-    - `riemannZeta_ne_zero_of_two_approx_bounds` — solve from two ApproxRectBounds
-    - `riemannZeta_ne_zero_of_two_euler_maclaurin_bounds` — solve from two EulerMaclaurinZetaBounds
-    - `yLimit = 14.13`, `yTop = 14.14`, `yBot = -14.14` — boundary constants
-
-    APPROACH (Hasler 2004, Odlyzko 1987):
-    1. Split the region into upper half (Im > 0) and lower half (Im < 0)
-    2. For each half, compute Euler–Maclaurin or AFE bounds on ζ
-    3. Verify ζ(s) ≠ 0 on each sub-rectangle via interval sign exclusion
-    4. Assemble using `criticalStripCover14_of_two_bounds`
-
-    EXAMPLE (schematic):
-      `criticalStripCover14_of_two_bounds
-        (rectIntervalBound_from_eulerMaclaurin upperEM) upperExcl
-        (rectIntervalBound_from_eulerMaclaurin lowerEM) lowerExcl`
-    where `upperEM : EulerMaclaurinZetaBound 0 1 0 yTop` and
-    `upperExcl : IntervalExcludesZero ...` -/
-
 noncomputable def criticalStripRect : ZetaZeroFreeInfrastructure.RectLowerBound where
   x0 := (0 : ℝ)
   x1 := (1 : ℝ)
@@ -9238,19 +9102,6 @@ theorem riemannZeta_first_nontrivial_zero_height
   have hle' : |s.im| ≤ 14.13 := not_lt.mp hle
   exact riemannZeta_ne_zero_critical_strip_le_height s h0 h1 hle' him0 hz
 
-/-- Classical numerical result: the first non-trivial zero of the Riemann zeta function
-    has |Im(ρ)| > 14.13. This was proved numerically by Hasler (2004) and independently
-    verified by Odlyzko (1987). The first zero is at approximately ρ ≈ 1/2 + 14.134725i.
-
-    The proof uses a finite-rectangle argument:
-    1. The zero set `riemannZetaZeros` is closed and discrete (by `isClosed_riemannZetaZeros`
-       and `isDiscrete_riemannZetaZeros`), so any compact subset of ℂ contains only finitely
-       many zeros (`IsCompact.inter_riemannZetaZeros_finite`).
-    2. `riemannZeta_ne_zero_of_one_le_re` eliminates all zeros with Re(s) ≥ 1.
-    3. The functional equation `riemannZeta_one_sub` combined with (2) eliminates zeros on
-       Re(s) = 0.
-    4. A rigorous numerical verification (Hasler 2004) confirms no zeros remain in the
-       compact rectangle {0 ≤ Re(s) ≤ 1, |Im(s)| ≤ 14.12} with Im(s) ≠ 0. -/
 theorem riemannZeta_ne_zero_critical_strip_low_height
     (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1) (him : |s.im| < 14.13) (him0 : s.im ≠ 0) :
     riemannZeta s ≠ 0 := by
