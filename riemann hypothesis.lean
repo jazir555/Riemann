@@ -1,4 +1,4 @@
-﻿import Mathlib
+import Mathlib
 
 set_option maxHeartbeats 1000000
 
