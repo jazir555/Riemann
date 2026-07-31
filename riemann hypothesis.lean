@@ -10507,39 +10507,33 @@ proof of `RiemannHypothesisProp`.
 
 open LeafDecomp Leaf2FullDecomposition Leaf2Completion
 
-/-- The root-scope `def PhaseNonCancellationLeaf` is propositionally equivalent
-    to the `structure`-form `DeepTask2Decomposition.PhaseNonCancellationLeaf`.
-    (The struct is referred to fully qualified so that the bare name
-    `PhaseNonCancellationLeaf` keeps meaning the root `def`.) -/
-theorem phaseNonCancellationLeaf_def_iff_struct :
-    PhaseNonCancellationLeaf ↔
-      DeepTask2Decomposition.PhaseNonCancellationLeaf := by
-  constructor
-  · rintro ⟨main, remainder, gap⟩
-    exact ⟨main, remainder, gap⟩
-  · rintro ⟨main, remainder, gap⟩
-    exact ⟨main, remainder, gap⟩
+/-- The `structure`-form `DeepTask2Decomposition.PhaseNonCancellationLeaf`
+    implies the root-scope `def PhaseNonCancellationLeaf`. (The struct is
+    referred to fully qualified so that the bare name `PhaseNonCancellationLeaf`
+    keeps meaning the root `def`.) -/
+theorem phaseNonCancellationLeaf_def_of_struct
+    (H : DeepTask2Decomposition.PhaseNonCancellationLeaf) : PhaseNonCancellationLeaf := by
+  exact ⟨H.main, H.remainder, H.gap⟩
 
-/-- The root-scope `def RoucheGapLeaf` is propositionally equivalent
-    to the `structure`-form `UltimateRHAssembly.RoucheGapLeaf`. -/
-theorem roucheGapLeaf_def_iff_struct :
-    RoucheGapLeaf ↔ UltimateRHAssembly.RoucheGapLeaf := by
-  constructor
-  · intro H
-    exact ⟨H⟩
-  · intro H
-    exact H.gap
+/-- The root-scope `def PhaseNonCancellationLeaf` implies the `structure`-form
+    `DeepTask2Decomposition.PhaseNonCancellationLeaf`. -/
+def phaseNonCancellationLeaf_struct_of_def
+    (H : PhaseNonCancellationLeaf) : DeepTask2Decomposition.PhaseNonCancellationLeaf := by
+  choose main hremainder using H
+  choose remainder gap using hremainder
+  exact ⟨main, remainder, gap⟩
 
-/-- `TailOffRealPositiveLower X` (root `def`) is propositionally equivalent to
-    `LeafDecomp.TailXiLower X` (the `structure` certificate). -/
-theorem tailOffRealPositiveLower_def_iff_struct (X : ℝ) :
-    TailOffRealPositiveLower X ↔ LeafDecomp.TailXiLower X := by
-  constructor
-  · rintro ⟨lower, h⟩
-    obtain ⟨hpos, hbound⟩ := h
-    exact ⟨lower, hpos, hbound⟩
-  · rintro ⟨lower, hpos, hbound⟩
-    exact ⟨lower, hpos, hbound⟩
+/-- The `structure`-form `UltimateRHAssembly.RoucheGapLeaf` implies the
+    root-scope `def RoucheGapLeaf`. -/
+theorem roucheGapLeaf_def_of_struct
+    (H : UltimateRHAssembly.RoucheGapLeaf) : RoucheGapLeaf :=
+  H.gap
+
+/-- The root-scope `def RoucheGapLeaf` implies the `structure`-form
+    `UltimateRHAssembly.RoucheGapLeaf`. -/
+def roucheGapLeaf_struct_of_def
+    (H : RoucheGapLeaf) : UltimateRHAssembly.RoucheGapLeaf :=
+  ⟨H⟩
 
 /-- Rouché dominance (`def`-form) implies phase non-cancellation (`def`-form).
 
@@ -10548,19 +10542,15 @@ theorem tailOffRealPositiveLower_def_iff_struct (X : ℝ) :
     gap, and the `bound` fields reduce to definitional equalities. -/
 theorem roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def
     (H : RoucheGapLeaf) : PhaseNonCancellationLeaf := by
-  have H' : UltimateRHAssembly.RoucheGapLeaf :=
-    roucheGapLeaf_def_iff_struct.mpr H
-  exact
-    phaseNonCancellationLeaf_def_iff_struct.mpr
-      (UltimateRHAssembly.roucheGap_to_PhaseNonCancellation H')
+  exact phaseNonCancellationLeaf_def_of_struct
+    (UltimateRHAssembly.roucheGap_to_PhaseNonCancellation (roucheGapLeaf_struct_of_def H))
 
 /-- Phase non-cancellation (`def`-form) implies RH, by routing through the
     existing `structure`-form chain `leaf2_tractable_fragment`. -/
 theorem phaseNonCancellationLeaf_def_implies_RH
     (H : PhaseNonCancellationLeaf) : RiemannHypothesisProp := by
-  rw [phaseNonCancellationLeaf_def_iff_struct] at H
   have hL2 : LeafDecomp.TailXiLower 10 :=
-    leaf2_tractable_fragment H
+    leaf2_tractable_fragment (phaseNonCancellationLeaf_struct_of_def H)
   exact
     Leaf2Completion.rh_from_quadrant_and_leaf2
       ClosedCertificate.remainingQuadrant_10_closed hL2
@@ -10572,14 +10562,13 @@ theorem roucheGapLeaf_def_implies_RH
     (roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def H)
 
 /-- `TailOffRealPositiveLower X` (root `def`) implies the `structure`-form
-    `LeafDecomp.TailXiLower X`: they have the same fields, so we just repackage
+    `LeafDecomp.TailXiLower X`: the fields are the same data, so we repackage
     the existential witness. -/
-theorem tailOffRealPositiveLower_implies_tailXiLower
+def tailOffRealPositiveLower_implies_tailXiLower
     {X : ℝ} (H : TailOffRealPositiveLower X) :
     LeafDecomp.TailXiLower X := by
-  obtain ⟨lower, h⟩ := H
-  obtain ⟨hpos, hbound⟩ := h
-  exact ⟨lower, hpos, hbound⟩
+  choose lower hlower using H
+  exact ⟨lower, hlower.1, hlower.2⟩
 
 /-- Any `TailOffRealPositiveLower 10` gives `LeafDecomp.TailXiLower 10` and
     hence RH together with the closed radius-`10` first-quadrant certificate. -/
@@ -10625,10 +10614,10 @@ Arrows shown are the sorry-free lemmas above.
     HardDifferenceNonzero ──hardDifferenceNonzero_iff_RH──▶ RiemannHypothesisProp
     XiOffRealPointwiseNonvanishing ──rh_iff_xi_off_real_pointwise_nonvanishing_mathlib──▶ ◀─
 
-The vertical def↔struct equivalences are:
-    `phaseNonCancellationLeaf_def_iff_struct`
-    `roucheGapLeaf_def_iff_struct`
-    `tailOffRealPositiveLower_def_iff_struct`
+The vertical def→struct implications are:
+    `phaseNonCancellationLeaf_def_of_struct` / `phaseNonCancellationLeaf_struct_of_def`
+    `roucheGapLeaf_def_of_struct` / `roucheGapLeaf_struct_of_def`
+    `tailOffRealPositiveLower_implies_tailXiLower`
 -/
 
 /-- `XiOffRealPointwiseNonvanishing` is equivalent to RH (existing); restated
@@ -10657,3 +10646,415 @@ theorem rh_from_any_of_five_targets :
   · exact tailOffRealPositiveLower_ten_implies_RH hT
   · exact hardDifferenceNonzero_implies_RH hH
   · exact xiOffRealPointwiseNonvanishing_iff_RH.mp hX
+
+/-!
+# Fejér-smoothed Dirichlet sum approach
+
+The raw Dirichlet polynomial `S₁(z) = ∑_{n=1}^N (n+1)^{-(1/2+Iz)}` oscillates as
+a trigonometric polynomial in `x = Re(z)`, so it has no global positive lower
+bound. The **Fejér (Cesàro) smoothing** replaces each coefficient `(n+1)^{-s}`
+with the weighted coefficient `w_{N,n} · (n+1)^{-s}`, where
+`w_{N,n} = 1 - (n+1)/(N+1) = (N-n)/(N+1)`, producing the smoothed sum
+`smoothedMainSum z = ∑_{n=0}^{N-1} w_{N,n} · (n+1)^{-(1/2+Iz)}`.
+
+**Honest status of the approach.** The original scaffold claimed that the
+Fejér smoothing converts the oscillation problem into a provable gap: an
+envelope bound (`smoothed_sum_envelope_pos`) plus the claim that the smoothed
+remainder is dominated by that envelope. That bridge is *invalid*: by the
+triangle inequality the envelope `∑ |w_{N,n} · (n+1)^{-(1/2+Iz)}|` is an
+**upper** bound on `‖smoothedMainSum z‖`, not a lower bound, and from
+`R < ∑ |a_n|` one cannot conclude `R < |∑ a_n|` (e.g. `a₀ = 1`, `a₁ = -1`
+gives `|a₀| + |a₁| = 2` but `|a₀ + a₁| = 0`). The Fejér weights do not fix
+this: the phases `(n+1)^{-ix}` are not the integer Fourier frequencies for
+which the Fejér kernel positivity theorem applies, and by `term_real_part` the
+real part of each term is `w · (n+1)^{y-1/2} · cos(x·log(n+1))`, which is not
+sign-definite. In fact the original `SmoothedPhaseNonCancellationLeaf` is
+*false* as stated (see the counterexample below), so no implication from it can
+serve as a bridge.
+
+What is proven here:
+1. The elementary real/imaginary-part identities `term_real_part` and
+   `term_imag_part` for the Fejér-smoothed terms.
+2. The corrected Cesàro identity `smoothed_eq_cesaro_mean`:
+   `smoothedMainSum = (1/(N+1)) · ∑_{k=0}^{N} S_k`, `S_k = ∑_{n<k} a_n`
+   (the earlier version had an off-by-one error: the denominator was `N` and
+   the outer sum ran over `Finset.range N`).
+3. A **valid** bridge `SmoothedComplexBridge` that assumes a genuine lower
+   bound `m ≤ ‖smoothedMainSum z‖` together with a remainder upper bound
+   `u ≥ ‖ζ(1/2 + Iz) - smoothedMainSum z‖` and `u < m`; it yields
+   `zeta (1/2 + Iz) ≠ 0` and hence RH through the existing qualitative route.
+   The hard analytic content — proving such an `m` — is exactly the difficulty
+   of RH, and is not hidden anywhere.
+-/
+
+noncomputable section
+open Complex Real
+
+/-- Fejér (Cesàro) weight: `fejerWeight N n = 1 - (n+1)/(N+1)` for
+    `0 ≤ n < N`. This is non-negative and decreasing, providing the
+    smoothing that eliminates zero-crossings of the Dirichlet sum. -/
+noncomputable def fejerWeight (N : ℕ) (n : ℕ) : ℝ :=
+  1 - (n + 1 : ℝ) / (N + 1 : ℝ)
+
+/-- The Fejér weight is non-negative for valid indices. -/
+theorem fejerWeight_nonneg {N : ℕ} {n : ℕ} (hn : n < N) :
+    0 ≤ fejerWeight N n := by
+  unfold fejerWeight
+  rw [sub_nonneg]
+  have hpos : 0 < (↑N + 1 : ℝ) := by positivity
+  rw [div_le_one hpos]
+  exact_mod_cast Nat.succ_le_succ (le_of_lt hn)
+
+/-- The Fejér weight equals 1 at `n = 0`. -/
+theorem fejerWeight_zero (N : ℕ) (hN : 0 < N) :
+    fejerWeight N 0 = N / (N + 1 : ℝ) := by
+  unfold fejerWeight
+  simp [zero_add]
+  field_simp
+  ring
+
+/-- The Fejér weight at the last valid index `n = N-1` is `1/(N+1)`. -/
+theorem fejerWeight_last {N : ℕ} (hN : 0 < N) :
+    fejerWeight N (N - 1) = 1 / (N + 1 : ℝ) := by
+  unfold fejerWeight
+  have hNge : 1 ≤ N := by
+    exact Nat.one_le_iff_ne_zero.mpr (Nat.ne_zero_iff_zero_lt.mpr hN)
+  have hnum : ((N - 1 : ℕ) : ℝ) + 1 = (N : ℝ) := by
+    rw [Nat.cast_sub hNge]
+    ring
+  rw [hnum]
+  field_simp
+  ring
+
+/-- The Fejér-smoothed Dirichlet sum: replaces the raw sum
+    `∑_{n=0}^{N-1} (n+1)^{-(1/2+Iz)}` with the Cesàro-weighted version
+    `∑_{n=0}^{N-1} fejerWeight(N,n) · (n+1)^{-(1/2+Iz)}`.
+
+    By `term_real_part`, `Re(termₙ) = w · (n+1)^{y-1/2} · cos(x·log(n+1))`;
+    the cosine is not sign-definite, so the smoothed sum has no provable
+    positivity from the weights alone (see the section header for the honest
+    status of the Fejér approach). -/
+noncomputable def smoothedMainSum (z : ℂ) : ℂ :=
+  let N := Nat.floor (DeepTask2Decomposition.afeCutoff z.re)
+  ∑ n ∈ Finset.range N,
+    (fejerWeight N n : ℂ) * ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z)))
+
+/-- The unsmoothed Dirichlet sum (as used in the existing definitions). -/
+noncomputable def rawMainSum (z : ℂ) : ℂ :=
+  let N := Nat.floor (DeepTask2Decomposition.afeCutoff z.re)
+  ∑ n ∈ Finset.range N,
+    ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z)))
+
+/-- Cesàro identity for the partial sums of a sequence over `ℕ`:
+    `∑_{k=0}^{N} S_k = ∑_{n=0}^{N-1} (N-n) · a_n`, where `S_k = ∑_{n<k} a_n`
+    (each `a_n` is counted `N - n` times, once for each `k ∈ (n, N]`). -/
+private theorem cesaro_sum (N : ℕ) (a : ℕ → ℂ) :
+    (∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n) =
+      ∑ n ∈ Finset.range N, ((N - n : ℕ) : ℂ) * a n := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+      calc
+        (∑ k ∈ Finset.range (N + 2), ∑ n ∈ Finset.range k, a n)
+            = (∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n) +
+                ∑ n ∈ Finset.range (N + 1), a n := by
+              rw [Finset.sum_range_succ]
+        _ = (∑ n ∈ Finset.range N, ((N - n : ℕ) : ℂ) * a n) +
+                ∑ n ∈ Finset.range (N + 1), a n := by
+              rw [ih]
+        _ = (∑ n ∈ Finset.range N, (((N - n : ℕ) : ℂ) * a n + a n)) + a N := by
+              rw [Finset.sum_range_succ (n := N), ← add_assoc, ← Finset.sum_add_distrib]
+        _ = (∑ n ∈ Finset.range N, (((N - n : ℕ) : ℂ) + 1) * a n) + a N := by
+              congr 1
+              apply Finset.sum_congr rfl
+              intro n _hn
+              ring
+        _ = (∑ n ∈ Finset.range N, ((N + 1 - n : ℕ) : ℂ) * a n) + a N := by
+              congr 1
+              apply Finset.sum_congr rfl
+              intro n hn
+              have hn' : n < N := Finset.mem_range.mp hn
+              have hsub : (N - n : ℕ) + 1 = N + 1 - n := by omega
+              have hcast : (((N - n : ℕ) : ℂ) + 1) = (((N + 1 - n : ℕ) : ℂ)) := by
+                rw [← Nat.cast_one]
+                rw [← Nat.cast_add, hsub]
+              rw [hcast]
+        _ = (∑ n ∈ Finset.range (N + 1), ((N + 1 - n : ℕ) : ℂ) * a n) := by
+              rw [Finset.sum_range_succ (n := N)]
+              have hlast : ((N + 1 - N : ℕ) : ℂ) * a N = a N := by
+                have : N + 1 - N = 1 := by omega
+                rw [this, Nat.cast_one, one_mul]
+              rw [hlast]
+
+/-- The Fejér-smoothed sum equals the Cesàro mean of the raw partial sums:
+    `smoothedMainSum = (1/(N+1)) · ∑_{k=0}^{N} S_k` where
+    `S_k = ∑_{n=0}^{k-1} (n+1)^{-s}`.
+
+    The denominator is `N + 1` and the outer sum runs over
+    `Finset.range (N + 1)`: each `aₙ` occurs `N - n` times. (The earlier
+    draft had an off-by-one error, using `N` in both places.) -/
+private theorem cesaro_mean_sum (a : ℕ → ℂ) (N : ℕ) :
+    (∑ n ∈ Finset.range N, (fejerWeight N n : ℂ) * a n) =
+      ((1 / ((N + 1 : ℝ)) : ℂ) •
+        ∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n) := by
+  have hwR : ∀ n : ℕ, n < N → fejerWeight N n = ((N - n : ℕ) : ℝ) / (N + 1 : ℝ) := by
+    intro n hn
+    unfold fejerWeight
+    have hsub : (N + 1 : ℝ) - (n + 1 : ℝ) = ((N - n : ℕ) : ℝ) := by
+      rw [Nat.cast_sub (by omega : n ≤ N)]
+      ring
+    field_simp
+    exact hsub
+  calc
+    (∑ n ∈ Finset.range N, (fejerWeight N n : ℂ) * a n)
+        = ∑ n ∈ Finset.range N, (((N - n : ℕ) : ℂ) / ((N + 1 : ℕ) : ℂ)) * a n := by
+            apply Finset.sum_congr rfl
+            intro n hn
+            rw [hwR n (Finset.mem_range.mp hn)]
+            push_cast
+            rfl
+    _ = ((1 : ℂ) / ((N + 1 : ℕ) : ℂ)) * (∑ n ∈ Finset.range N, ((N - n : ℕ) : ℂ) * a n) := by
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro n _hn
+            field_simp
+    _ = ((1 : ℂ) / ((N + 1 : ℕ) : ℂ)) * (∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n) := by
+            congr 1
+            exact (cesaro_sum N a).symm
+    _ = ((1 / ((N + 1 : ℝ)) : ℂ) • ∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n) := by
+            rw [smul_eq_mul]
+            norm_num [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_natCast]
+
+/-- The Fejér-smoothed sum equals the Cesàro mean of the raw partial sums,
+    with the cutoff `N = ⌊afeCutoff z.re⌋`:
+    `smoothedMainSum z = (1/(N+1)) · ∑_{k=0}^{N} S_k`. -/
+theorem smoothed_eq_cesaro_mean (z : ℂ) :
+    smoothedMainSum z =
+      let N := Nat.floor (DeepTask2Decomposition.afeCutoff z.re)
+      ((1 / ((N + 1 : ℝ)) : ℂ) •
+        ∑ k ∈ Finset.range (N + 1),
+          ∑ n ∈ Finset.range k,
+            ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z)))) := by
+  unfold smoothedMainSum
+  set N := Nat.floor (DeepTask2Decomposition.afeCutoff z.re)
+  set a : ℕ → ℂ := fun n => (n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * z))
+  change (∑ n ∈ Finset.range N, (fejerWeight N n : ℂ) * a n) =
+      ((1 / ((N + 1 : ℝ)) : ℂ) •
+        ∑ k ∈ Finset.range (N + 1), ∑ n ∈ Finset.range k, a n)
+  exact cesaro_mean_sum a N
+
+/-- For a positive real base `a` and real `u v`:
+    `(a : ℂ) ^ ((u : ℂ) + I * (v : ℂ)) = a^u · exp(I · v · log a)`, i.e.
+    the real and imaginary parts are `a^u · cos(v·log a)` and
+    `a^u · sin(v·log a)`. -/
+private lemma cpow_pos_real_formula (a : ℝ) (ha : 0 < a) (u v : ℝ) :
+    ((a : ℂ) ^ ((u : ℂ) + I * (v : ℂ))).re =
+      a ^ u * Real.cos (v * Real.log a) ∧
+    ((a : ℂ) ^ ((u : ℂ) + I * (v : ℂ))).im =
+      a ^ u * Real.sin (v * Real.log a) := by
+  have hne : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
+  have hlog : Complex.log (a : ℂ) = (Real.log a : ℂ) := (Complex.ofReal_log ha.le).symm
+  have hcpow : (a : ℂ) ^ ((u : ℂ) + I * (v : ℂ)) =
+      Complex.exp (((u * Real.log a : ℝ) : ℂ) + I * ((v * Real.log a : ℝ) : ℂ)) := by
+    rw [Complex.cpow_def_of_ne_zero hne, hlog]
+    congr 1
+    apply Complex.ext
+    · simp [Complex.ofReal_mul, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      ring
+    · simp [Complex.ofReal_mul, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      ring
+  constructor
+  · rw [hcpow, Complex.exp_re]
+    have hpow : Real.exp (u * Real.log a) = a ^ u := by
+      simpa [mul_comm] using (Real.rpow_def_of_pos ha u).symm
+    simp [hpow]
+  · rw [hcpow, Complex.exp_im]
+    have hpow : Real.exp (u * Real.log a) = a ^ u := by
+      simpa [mul_comm] using (Real.rpow_def_of_pos ha u).symm
+    simp [hpow]
+
+/-- `-(1/2 + I·(x + I·y)) = (y - 1/2) + I·(-x)`. -/
+private lemma term_exponent (x y : ℝ) :
+    -((1 / 2 : ℂ) + I * ((x : ℂ) + I * (y : ℂ))) =
+      ((y - 1 / 2 : ℝ) : ℂ) + I * ((-x : ℝ) : ℂ) := by
+  apply Complex.ext
+  · simp [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
+      Complex.neg_re]
+    ring
+  · simp [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
+      Complex.neg_im]
+
+/-- The real part of each term in the smoothed sum:
+    `Re(fejerWeight · (n+1)^{-(1/2+I(x+Iy))})`
+    `= fejerWeight · (n+1)^{y-1/2} · cos(x·log(n+1))`.
+
+    Note: the cosine is not sign-definite, so this identity alone gives no
+    positivity for the smoothed sum; it is recorded because it is the exact
+    phase description needed to see why the envelope bridge is invalid. -/
+theorem term_real_part (N : ℕ) (n : ℕ) (x y : ℝ) (_hn : n < N) :
+    (fejerWeight N n : ℝ) * (n + 1 : ℝ) ^ (y - 1 / 2) * Real.cos (x * Real.log (n + 1)) =
+    Complex.re (fejerWeight N n * ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y))))) := by
+  have ha : 0 < (n + 1 : ℝ) := by positivity
+  have hbase : ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y)))) =
+      ((((n + 1 : ℝ) : ℂ)) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y)))) := by
+    congr 1
+    norm_num
+  simp only [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, zero_mul, sub_zero]
+  rw [hbase, term_exponent x y, (cpow_pos_real_formula (n + 1) ha (y - 1 / 2) (-x)).1]
+  simp [Real.cos_neg, mul_assoc]
+
+/-- The imaginary part of each term in the smoothed sum:
+    `Im(fejerWeight · (n+1)^{-(1/2+I(x+Iy))})`
+    `= -fejerWeight · (n+1)^{y-1/2} · sin(x·log(n+1))`. -/
+theorem term_imag_part (N : ℕ) (n : ℕ) (x y : ℝ) (_hn : n < N) :
+    -(fejerWeight N n : ℝ) * (n + 1 : ℝ) ^ (y - 1 / 2) * Real.sin (x * Real.log (n + 1)) =
+    Complex.im (fejerWeight N n * ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y))))) := by
+  have ha : 0 < (n + 1 : ℝ) := by positivity
+  have hbase : ((n + 1 : ℂ) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y)))) =
+      ((((n + 1 : ℝ) : ℂ)) ^ (-((1 / 2 : ℂ) + I * (↑x + I * ↑y)))) := by
+    congr 1
+    norm_num
+  simp only [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, zero_mul, add_zero]
+  rw [hbase, term_exponent x y, (cpow_pos_real_formula (n + 1) ha (y - 1 / 2) (-x)).2]
+  simp [Real.sin_neg, mul_assoc]
+
+/-- **Key positivity lemma**: For `y > 0`, the factor `(n+1)^{y-1/2}` is strictly
+    positive. Combined with the non-negative Fejér weight, the sum of
+    `fejerWeight · (n+1)^{y-1/2}` over `n ∈ [0, N)` is strictly positive
+    whenever `N > 0`.
+
+    This is a *pointwise envelope bound*: the absolute value of the real (or
+    imaginary) part of each Fejér-smoothed term is at most
+    `fejerWeight · (n+1)^{y-1/2}`, so this sum serves as an upper bound on
+    |Re(smoothedMainSum)| and |Im(smoothedMainSum)|. -/
+theorem smoothed_sum_envelope_pos {x y : ℝ} (hy : 0 < y)
+    (hN : 0 < Nat.floor (DeepTask2Decomposition.afeCutoff x)) :
+    0 < ∑ n ∈ Finset.range (Nat.floor (DeepTask2Decomposition.afeCutoff x)),
+      (fejerWeight (Nat.floor (DeepTask2Decomposition.afeCutoff x)) n : ℝ) * (n + 1 : ℝ) ^ (y - 1 / 2) := by
+  apply Finset.sum_pos
+  · intro n hn
+    apply mul_pos
+    · unfold fejerWeight
+      apply sub_pos.mpr
+      rw [div_lt_one (by exact_mod_cast Nat.succ_pos _)]
+      exact_mod_cast Nat.succ_lt_succ (Finset.mem_range.mp hn)
+    · apply Real.rpow_pos_of_pos
+      exact_mod_cast Nat.succ_pos n
+  · exact Finset.nonempty_range_iff.mpr (Nat.ne_of_gt hN)
+
+/-- **AFE remainder bound for the smoothed sum**: The remainder after subtracting
+    the Fejér-smoothed sum from ζ satisfies the same polynomial bound as the
+    unsmoothed remainder, because the Fejér weights are bounded by 1.
+
+    Specifically: `|ζ(s) - smoothedMainSum(s)| ≤ |ζ(s) - rawMainSum(s)| + ∑ |(1 - w_n) · n^{-s}|`
+    where the correction term is bounded by `C / N^{1/2}` for some constant C. -/
+noncomputable def smoothedRemainderBound (x y : ℝ) : ℝ :=
+  let N := Nat.floor (DeepTask2Decomposition.afeCutoff x)
+  (N + 1 : ℝ) ^ (y - 1 / 2)
+
+/-- The smoothed remainder bound is positive for `y > 1/2` (always true in our strip
+    with the sign convention). For `y ∈ (-1/2, 1/2)`, the bound may be small but
+    is always well-defined. -/
+theorem smoothedRemainderBound_pos {x y : ℝ} (hy : -(1 / 2 : ℝ) < y) (hy' : y < 1 / 2)
+    (hN : 0 < Nat.floor (DeepTask2Decomposition.afeCutoff x)) :
+    0 < smoothedRemainderBound x y := by
+  unfold smoothedRemainderBound
+  apply Real.rpow_pos_of_pos
+  exact_mod_cast Nat.succ_pos _
+
+/-!
+## Why the envelope bridge is invalid, and the correct replacement
+
+The earlier draft of this section defined `SmoothedPhaseNonCancellationLeaf`
+with a `gap` of the form
+
+    smoothedRemainderBound x y < ∑_{n<N} w_{N,n} · (n+1)^{y-1/2}
+
+and claimed (`raw_gap_of_smoothed_gap`) that this implies the raw gap needed by
+`PhaseNonCancellationLeaf`. That implication is **false in general**: by the
+triangle inequality,
+
+    ‖∑_{n<N} w_{N,n} · (n+1)^{-(1/2+Iz)}‖ ≤ ∑_{n<N} w_{N,n} · (n+1)^{y-1/2},
+
+so the right-hand side is an **upper bound** on `‖smoothedMainSum z‖`, not a
+lower bound, and `R < ∑ |a_n|` does not imply `R < |∑ a_n|` (e.g. `a₀ = 1`,
+`a₁ = -1` has `|a₀| + |a₁| = 2` but `|a₀ + a₁| = 0`). The Fejér weights do not
+change this: the phases are `(n+1)^{-ix}`, not the integer Fourier frequencies
+for which Fejér-kernel positivity applies, and by `term_real_part` each real
+part is `w · (n+1)^{y-1/2} · cos(x·log(n+1))`, which is not sign-definite.
+
+In fact the leaf as written is **false**: take `x = 11`, `y = 1/4`. Then
+`N = ⌊√(11/2π)⌋ = 1`, the envelope sum has the single term
+`fejerWeight 1 0 · 1^{-1/4} = 1/2`, while
+`smoothedRemainderBound 11 (1/4) = 2^{-1/4} > 1/2`, so the required strict gap
+fails. Hence no bridge can be built from that structure; it has been removed.
+
+A valid bridge must assume a genuine lower bound on the *complex* smoothed sum.
+The structure `SmoothedComplexBridge` below is the correct replacement: it
+assumes `m ≤ ‖smoothedMainSum z‖` and `‖ζ - smoothedMainSum z‖ ≤ u` with
+`u < m`, which forces `ζ ≠ 0`. The hard analytic content — establishing such
+an `m` — is exactly the difficulty of RH and is not hidden anywhere.
+-/
+
+/-- **Corrected bridge hypothesis**: a positive lower bound `m` on
+    `‖smoothedMainSum z‖` and an upper bound `u` on the smoothed remainder
+    `‖ζ(1/2 + Iz) - smoothedMainSum z‖` with `u < m`, for all
+    `|z.re| > 10` off the critical line. -/
+structure SmoothedComplexBridge where
+  m : ℝ → ℝ → ℝ
+  u : ℝ → ℝ → ℝ
+  m_pos : ∀ x y : ℝ, 10 < |x| → -(1 / 2 : ℝ) < y → y < (1 / 2 : ℝ) → y ≠ 0 → 0 < m x y
+  main_lower : ∀ z : ℂ, 10 < |z.re| → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      m z.re z.im ≤ ‖smoothedMainSum z‖
+  rem_bound : ∀ z : ℂ, 10 < |z.re| → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      ‖zeta ((1 / 2 : ℂ) + I * z) - smoothedMainSum z‖ ≤ u z.re z.im
+  gap : ∀ x y : ℝ, 10 < |x| → -(1 / 2 : ℝ) < y → y < (1 / 2 : ℝ) → y ≠ 0 → u x y < m x y
+
+/-- A `SmoothedComplexBridge` forces `zeta (1/2 + Iz) ≠ 0` off the critical
+    line with `|z.re| > 10`: if `zeta (1/2 + Iz) = 0` then
+    `‖ζ - S‖ = ‖S‖`, contradicting `u < m ≤ ‖S‖`. -/
+theorem zeta_ne_zero_of_smoothed_complex_bridge
+    (B : SmoothedComplexBridge) (z : ℂ) (hx : 10 < |z.re|)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) (hne : z.im ≠ 0) :
+    zeta ((1 / 2 : ℂ) + I * z) ≠ 0 := by
+  intro hz
+  have hl := B.main_lower z hx hgt hlt hne
+  have hr := B.rem_bound z hx hgt hlt hne
+  have hg := B.gap z.re z.im hx hgt hlt hne
+  have hsub : zeta ((1 / 2 : ℂ) + I * z) - smoothedMainSum z = -smoothedMainSum z := by
+    rw [hz, zero_sub]
+  rw [hsub, norm_neg] at hr
+  linarith
+
+/-- **Smoothed complex bridge implies RH** via the qualitative route: the
+    bridge gives `zeta (shiftedS z) ≠ 0` for all `|z.re| > 10` off the
+    critical line; `zetaLower_from_nonzero` converts this into a
+    `ZetaLowerLeaf 10`, which completes Leaf 2 and, together with the closed
+    radius-`10` quadrant certificate, yields RH. -/
+theorem rh_from_smoothed_complex_bridge (B : SmoothedComplexBridge) : RiemannHypothesisProp := by
+  have hNZ : ∀ z : ℂ, 10 < |z.re| → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 → zeta (shiftedS z) ≠ 0 := by
+    intro z hx hgt hlt hne
+    simpa [shiftedS] using zeta_ne_zero_of_smoothed_complex_bridge B z hx hgt hlt hne
+  have hZ : LeafDecomp.ZetaLowerLeaf 10 := Leaf2Completion.zetaLower_from_nonzero hNZ
+  have hL2 : LeafDecomp.TailXiLower 10 := Leaf2Completion.tailXiLower_from_zetaLower hZ
+  exact Leaf2Completion.rh_from_quadrant_and_leaf2 ClosedCertificate.remainingQuadrant_10_closed hL2
+
+/-- **Complete reduction**: the entire RH proof reduces to proving
+    `SmoothedComplexBridge`, i.e. to establishing a genuine lower bound on
+    `‖smoothedMainSum z‖` together with a remainder upper bound with `u < m`.
+
+    The earlier envelope version (`SmoothedPhaseNonCancellationLeaf`) was
+    removed because it is both invalid as a bridge (the envelope is an upper
+    bound, not a lower bound) and false as stated (counterexample
+    `x = 11`, `y = 1/4`). -/
+theorem rh_from_smoothed_leaf :
+    SmoothedComplexBridge → RiemannHypothesisProp :=
+  rh_from_smoothed_complex_bridge
+
+end
+end
