@@ -8281,6 +8281,78 @@ private theorem riemannZeta₀_analyticOnNhd_real :
     AnalyticOnNhd ℝ (fun s : ℝ => (riemannZeta₀ (↑s : ℂ)).re) (Set.Ioi 0) := fun s hs =>
   AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (↑s : ℂ))
 
+/-- Each `term (n+1)` is differentiable at any `s > 0`. -/
+private lemma differentiableAt_term {n : ℕ} {s : ℝ} (hs : 0 < s) :
+    DifferentiableAt ℝ (ZetaAsymptotics.term (n + 1)) s := by
+  -- term (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) / x^(s+1)
+  -- The integrand is smooth in s for x > 0, and [n+1, n+2] is compact with positive x.
+  -- We show ContDiff ℝ ∞ (term (n+1)) on Ioi 0, which gives differentiability.
+  have hcontDiff : ContDiffOn ℝ ∞ (fun s : ℝ => ZetaAsymptotics.term (n + 1) s) (Set.Ioi 0) := by
+    intro s₀ hs₀
+    -- At each s₀ > 0, show ContDiffWithinAt ℝ ∞
+    -- term (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) * x^(-(s+1))
+    -- The integrand is C^∞ in s since x^(p) is C^∞ for x > 0
+    refine (contDiffOn_const.contDiffWithinAt).congr ?_ ?_
+    · -- We need the full contDiff argument for parametric interval integrals
+      sorry
+    · sorry
+  -- From ContDiffOn ℝ ∞ on Ioi 0, get DifferentiableAt at s
+  sorry
+
+/-- Bound on the derivative of `term (n+1)` for `s ≥ ε`. -/
+private lemma norm_deriv_term_le {n : ℕ} {s : ℝ} (hs : ε ≤ s) (hε : 0 < ε) :
+    ‖deriv (ZetaAsymptotics.term (n + 1)) s‖ ≤ Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1) := by
+  -- The derivative of term (n+1) at s is:
+  --   ∫ x in (n+1)..(n+2), -(x-(n+1)) * log(x) / x^(s+1)
+  -- For s ≥ ε > 0 and x ∈ [n+1, n+2]:
+  --   |-(x-(n+1)) * log(x) / x^(s+1)| ≤ 1 * log(n+2) / (n+1)^(ε+1)
+  sorry
+
+/-- `∑ n, log(n+2)/(n+1)^(ε+1)` converges for `ε > 0`. -/
+private lemma summable_deriv_bound (ε : ℝ) (hε : 0 < ε) :
+    Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1)) := by
+  -- log(n+2) / (n+1)^(ε+1) ≤ C / (n+1)^(ε/2 + 1) for large n
+  -- since log(n+2) = O((n+1)^(ε/2)), and ε/2 + 1 > 1.
+  -- Use summable_of_isBigO_nat with Real.summable_one_div_nat_rpow
+  refine summable_of_isBigO_nat (Real.summable_one_div_nat_rpow.mpr (by linarith : 1 < ε / 2 + 1)) ?_
+  -- Need: (fun n => log(n+2)/(n+1)^(ε+1)) =O[atTop] (fun n => 1/(n+1)^(ε/2+1))
+  sorry
+
+/-- `termTSum` is `DifferentiableAt ℝ` at each `s > 0`. -/
+private lemma differentiableAt_termTSum {s : ℝ} (hs : 0 < s) :
+    DifferentiableAt ℝ ZetaAsymptotics.termTSum s := by
+  -- Use SmoothSeries.differentiable_tsum' with:
+  -- (1) each term (n+1) is HasDerivAt at s (from differentiableAt_term)
+  -- (2) derivatives bounded by summable u (from norm_deriv_term_le + summable_deriv_bound)
+  -- (3) termTSum converges at some point (from term_tsum_one.summable)
+  have hε : 0 < s / 2 := by linarith
+  have hsum_deriv : Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (s / 2 + 1)) :=
+    summable_deriv_bound (s / 2) hε
+  have hsum_point : Summable (fun n : ℕ => ZetaAsymptotics.term (n + 1) 1) :=
+    ZetaAsymptotics.term_tsum_one.summable
+  -- Apply differentiable_tsum' from SmoothSeries
+  refine (differentiable_tsum' hsum_deriv (fun n y => ?_) (fun n y => ?_)).differentiableAt
+  · exact (differentiableAt_term (by linarith : 0 < y)).hasDerivAt
+  · have hpos : 0 < max y (s / 2) := by positivity
+    have hy_bound : s / 2 ≤ max y (s / 2) := le_max_right _ _
+    convert norm_deriv_term_le hy_bound hε using 1
+    sorry
+
+/-- `termTSum` is `AnalyticOnNhd ℝ` on `Set.Ioi 0`.
+This requires extending `termTSum` to a ℂ-analytic function and using `AnalyticAt.re_ofReal`.
+We mark this as sorry pending the ℂ-extension construction. -/
+private lemma analyticOnNhd_termTSum :
+    AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Set.Ioi 0) := by
+  -- PROOF STRATEGY (needs ℂ extension):
+  -- 1. Define termℂ (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) * x^(-(s+1)) for s : ℂ
+  --    where x^(-(s+1)) = exp(-(s+1) * Complex.log x).
+  -- 2. Show each termℂ (n+1) is ℂ-analytic (contour integral of analytic integrand).
+  -- 3. Show the ℂ-series ∑' n, termℂ (n+1) s converges for Re(s) > 0.
+  -- 4. Apply SmoothSeries.differentiable_tsum (ℂ version) to get ℂ-differentiability.
+  -- 5. ℂ-differentiability on open set implies ℂ-analyticity.
+  -- 6. For real s > 0: (termTSumℂ ↑s).re = termTSum s, so AnalyticAt.re_ofReal gives result.
+  sorry
+
 /-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
 
     PROOF STRATEGY:
