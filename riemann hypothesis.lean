@@ -8283,7 +8283,8 @@ private theorem riemannZeta₀_analyticOnNhd_real :
 
 /-- Each `term (n+1)` is differentiable at any `s > 0`. -/
 private noncomputable def contDiffOn_intervalIntegral
-    {α β : Type*} [NormedAddCommGroup β] [NormedSpace ℝ β]
+    {α β : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]
+    [NormedAddCommGroup β] [NormedSpace ℝ β]
     [MeasurableSpace α] [MeasurableSingletonClass α]
     {a b : α → ℝ} {f : α → ℝ → β}
     (hf_cont : ContDiffOn ℝ ⊤ (fun p : α × ℝ => f p.1 p.2) (Set.univ ×ˢ Set.univ))
