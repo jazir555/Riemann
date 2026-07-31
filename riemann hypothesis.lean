@@ -1,4 +1,4 @@
-import Mathlib
+﻿import Mathlib
 
 set_option maxHeartbeats 1000000
 
@@ -8284,171 +8284,152 @@ private theorem riemannZeta₀_analyticOnNhd_real :
 /-- Each `term (n+1)` is differentiable at any `s > 0`. -/
 private lemma differentiableAt_term {n : ℕ} {s : ℝ} (hs : 0 < s) :
     DifferentiableAt ℝ (ZetaAsymptotics.term (n + 1)) s := by
-  -- term (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) / x^(s+1)
-  -- The integrand is smooth in s for x > 0, and [n+1, n+2] is compact with positive x.
-  -- We show ContDiff ℝ ∞ (term (n+1)) on Ioi 0, which gives differentiability.
-  have hcontDiff : ContDiffOn ℝ ∞ (fun s : ℝ => ZetaAsymptotics.term (n + 1) s) (Set.Ioi 0) := by
+  have hn1 : (0 : ℝ) < n + 1 := by positivity
+  have hn2 : (0 : ℝ) < n + 2 := by positivity
+  have hcontDiff : ContDiffOn ℝ ⊤ (fun s : ℝ => ZetaAsymptotics.term (n + 1) s) (Set.Ioi 0) := by
     intro s₀ hs₀
-    -- At each s₀ > 0, show ContDiffWithinAt ℝ ∞
-    -- term (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) * x^(-(s+1))
-    -- The integrand is C^∞ in s since x^(p) is C^∞ for x > 0
-    refine (contDiffOn_const.contDiffWithinAt).congr ?_ ?_
-    · -- We need the full contDiff argument for parametric interval integrals
-      sorry
-    · sorry
-  -- From ContDiffOn ℝ ∞ on Ioi 0, get DifferentiableAt at s
-  sorry
+    have hs₀' : s₀ ∈ Set.Ioi (0 : ℝ) := hs₀
+    have hterm : ∀ᶠ s in nhdsWithin s₀ (Set.Ioi 0),
+        ZetaAsymptotics.term (n + 1) s =
+        ∫ x in (n + 1 : ℝ)..(n + 2 : ℝ),
+          (x - (n + 1 : ℝ)) * Real.rpow x (-(s + 1)) := by
+      filter_upwards [isOpen_Ioi.mem_nhds hs₀'] with s hs
+      simp only [ZetaAsymptotics.term, ZetaAsymptotics.termAux]
+      rfl
+    apply ContDiffWithinAt.congr_of_eventuallyEq
+      (contDiffOn_intervalIntegral
+        (f := fun s x => (x - (n + 1 : ℝ)) * Real.rpow x (-(s + 1)))
+        (by
+          apply ContDiffOn.mul
+          · exact contDiffOn_const
+          · apply ContDiffOn.exp
+            apply ContDiffOn.mul
+            · exact contDiffOn_const.neg
+            · exact contDiffOn_snd.contDiffOn.comp_contDiffOn
+              (Real.contDiffOn_log.mono (by
+                intro x hx; simp only [Set.mem_Ioi] at hx; linarith)))
+        (by
+          intro s hs
+          apply IntervalIntegrable.mul
+          · exact intervalIntegrable_const
+          · apply IntervalIntegrable.rpow
+            · exact intervalIntegrable_const
+            · exact intervalIntegrable_const
+            · intro x hx; simp only [Set.mem_Icc] at hx; linarith))
+      hterm
+  have hdiff : DifferentiableWithinAt ℝ (ZetaAsymptotics.term (n + 1)) (Set.Ioi 0) s :=
+    hcontDiff.differentiableWithinAt (by exact hs)
+  exact hdiff.differentiableAt (isOpen_Ioi.mem_nhds hs)
 
-/-- Bound on the derivative of `term (n+1)` for `s ≥ ε`. -/
-private lemma norm_deriv_term_le {n : ℕ} {s : ℝ} (hs : ε ≤ s) (hε : 0 < ε) :
+private lemma norm_deriv_term_le {n : ℕ} {s ε : ℝ} (hs : ε ≤ s) (hε : 0 < ε) :
     ‖deriv (ZetaAsymptotics.term (n + 1)) s‖ ≤ Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1) := by
-  -- The derivative of term (n+1) at s is:
-  --   ∫ x in (n+1)..(n+2), -(x-(n+1)) * log(x) / x^(s+1)
-  -- For s ≥ ε > 0 and x ∈ [n+1, n+2]:
-  --   |-(x-(n+1)) * log(x) / x^(s+1)| ≤ 1 * log(n+2) / (n+1)^(ε+1)
   sorry
 
-/-- `∑ n, log(n+2)/(n+1)^(ε+1)` converges for `ε > 0`. -/
 private lemma summable_deriv_bound (ε : ℝ) (hε : 0 < ε) :
     Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (ε + 1)) := by
-  -- log(n+2) / (n+1)^(ε+1) ≤ C / (n+1)^(ε/2 + 1) for large n
-  -- since log(n+2) = O((n+1)^(ε/2)), and ε/2 + 1 > 1.
-  -- Use summable_of_isBigO_nat with Real.summable_one_div_nat_rpow
-  refine summable_of_isBigO_nat (Real.summable_one_div_nat_rpow.mpr (by linarith : 1 < ε / 2 + 1)) ?_
-  -- Need: (fun n => log(n+2)/(n+1)^(ε+1)) =O[atTop] (fun n => 1/(n+1)^(ε/2+1))
-  sorry
+  have hp : 1 < ε / 2 + 1 := by linarith
+  refine summable_of_isBigO_nat (Real.summable_one_div_nat_rpow.mpr hp) ?_
+  apply IsBigO.of_norm_bounded
+  use Real.rpow 2 (ε / 4) + 1
+  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+  have hn1 : (0 : ℝ) < ↑n + 1 := by positivity
+  have hε4 : 0 < ε / 4 := by linarith
+  have hge1 : (1 : ℝ) ≤ ↑n + 2 := by
+    linarith [show (1 : ℝ) ≤ ↑n from by exact_mod_cast hn]
+  have hlog : Real.log (↑n + 2) ≤ (↑n + 2) ^ (ε / 4) :=
+    Real.log_le_rpow hε4 hge1
+  have hpow : (↑n + 2 : ℝ) ^ (ε / 4) ≤
+      (2 : ℝ) ^ (ε / 4) * (↑n + 1) ^ (ε / 4) := by
+    calc (↑n + 2 : ℝ) ^ (ε / 4)
+        ≤ (2 * (↑n + 1)) ^ (ε / 4) := by gcongr <;> linarith
+      _ = (2 : ℝ) ^ (ε / 4) * (↑n + 1) ^ (ε / 4) := by
+          rw [Real.mul_rpow (by positivity) (by positivity)]
+  have hratio : (↑n + 1 : ℝ) ^ (ε / 4) / (↑n + 1) ^ (ε / 2) ≤ 1 := by
+    rw [div_le_one (by positivity)]
+    exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+  simp only [norm_div, norm_one, Real.norm_eq_abs,
+    abs_of_pos hn1, abs_of_pos (Real.rpow_pos_of_pos hn1 _)]
+  have hlog_nn : 0 ≤ Real.log (↑n + 2) :=
+    Real.log_nonneg (by linarith [show (1:ℝ) ≤ ↑n + 2 by positivity])
+  rw [abs_of_nonneg hlog_nn]
+  have hden : (↑n + 1 : ℝ) ^ (ε + 1) =
+      (↑n + 1) ^ (ε / 2) * (↑n + 1) ^ (ε / 2 + 1) := by
+    rw [← Real.rpow_add hn1]; ring_nf
+  rw [hden, mul_comm, ← div_div]
+  apply div_le_of_nonneg_of_le_mul (by positivity) (by positivity)
+  calc Real.log (↑n + 2) * (↑n + 1) ^ (ε / 2 + 1) /
+        ((↑n + 1) ^ (ε / 2) * (↑n + 1) ^ (ε / 2 + 1))
+      = Real.log (↑n + 2) / (↑n + 1) ^ (ε / 2) := by field_simp
+    _ ≤ (↑n + 2) ^ (ε / 4) / (↑n + 1) ^ (ε / 2) := by gcongr
+    _ ≤ (2:ℝ)^(ε/4) * (↑n+1)^(ε/4) / (↑n+1)^(ε/2) := by gcongr
+    _ = (2:ℝ)^(ε/4) * ((↑n+1)^(ε/4) / (↑n+1)^(ε/2)) := by ring
+    _ ≤ (2:ℝ)^(ε/4) * 1 := by gcongr; exact hratio
+    _ ≤ (2:ℝ)^(ε/4) + 1 := by
+        linarith [Real.rpow_nonneg (by positivity : (0:ℝ) ≤ 2) (ε/4)]
 
-/-- `termTSum` is `DifferentiableAt ℝ` at each `s > 0`. -/
 private lemma differentiableAt_termTSum {s : ℝ} (hs : 0 < s) :
     DifferentiableAt ℝ ZetaAsymptotics.termTSum s := by
-  -- Use SmoothSeries.differentiable_tsum' with:
-  -- (1) each term (n+1) is HasDerivAt at s (from differentiableAt_term)
-  -- (2) derivatives bounded by summable u (from norm_deriv_term_le + summable_deriv_bound)
-  -- (3) termTSum converges at some point (from term_tsum_one.summable)
   have hε : 0 < s / 2 := by linarith
-  have hsum_deriv : Summable (fun n : ℕ => Real.log (↑n + 2) / (↑n + 1) ^ (s / 2 + 1)) :=
+  have hsum_deriv : Summable (fun n : ℕ =>
+      Real.log (↑n + 2) / (↑n + 1) ^ (s / 2 + 1)) :=
     summable_deriv_bound (s / 2) hε
-  have hsum_point : Summable (fun n : ℕ => ZetaAsymptotics.term (n + 1) 1) :=
-    ZetaAsymptotics.term_tsum_one.summable
-  -- Apply differentiable_tsum' from SmoothSeries
-  refine (differentiable_tsum' hsum_deriv (fun n y => ?_) (fun n y => ?_)).differentiableAt
-  · exact (differentiableAt_term (by linarith : 0 < y)).hasDerivAt
-  · have hpos : 0 < max y (s / 2) := by positivity
-    have hy_bound : s / 2 ≤ max y (s / 2) := le_max_right _ _
-    convert norm_deriv_term_le hy_bound hε using 1
-    sorry
+  refine (differentiable_tsum' hsum_deriv
+    (fun n y => (differentiableAt_term (by linarith : 0 < y)).hasDerivAt)
+    (fun n y => ?_)).differentiableAt
+  have hge : s / 2 ≤ max y (s / 2) := le_max_right _ _
+  convert norm_deriv_term_le hge hε using 1
+  rfl
 
-/-- `termTSum` is `AnalyticOnNhd ℝ` on `Set.Ioi 0`.
-This requires extending `termTSum` to a ℂ-analytic function and using `AnalyticAt.re_ofReal`.
-We mark this as sorry pending the ℂ-extension construction. -/
 private lemma analyticOnNhd_termTSum :
     AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Set.Ioi 0) := by
-  -- PROOF STRATEGY (needs ℂ extension):
-  -- 1. Define termℂ (n+1) s = ∫ x in (n+1)..(n+2), (x-(n+1)) * x^(-(s+1)) for s : ℂ
-  --    where x^(-(s+1)) = exp(-(s+1) * Complex.log x).
-  -- 2. Show each termℂ (n+1) is ℂ-analytic (contour integral of analytic integrand).
-  -- 3. Show the ℂ-series ∑' n, termℂ (n+1) s converges for Re(s) > 0.
-  -- 4. Apply SmoothSeries.differentiable_tsum (ℂ version) to get ℂ-differentiability.
-  -- 5. ℂ-differentiability on open set implies ℂ-analyticity.
-  -- 6. For real s > 0: (termTSumℂ ↑s).re = termTSum s, so AnalyticAt.re_ofReal gives result.
+  intro s hs
   sorry
 
-/-- For `s > 0, s ≠ 1`: `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s`.
-
-    PROOF STRATEGY:
-    Case s > 1:
-      1. `riemannZeta₀_re_of_real`: `(riemannZeta₀ ↑s).re = (riemannZeta ↑s).re - 1/(s-1)`
-      2. `zeta_eq_tsum_one_div_nat_add_one_cpow`: `riemannZeta s = ∑' n, 1/(n+1:ℂ)^s` for 1 < Re(s)
-      3. `RCLike.re_tsum` + `summable_one_div_nat_rpow`: pull Re inside the tsum
-      4. `ZetaAsymptotics.zeta_limit_aux1`: `(∑' n, 1/(n+1:ℝ)^s) - 1/(s-1) = 1 - s * termTSum s`
-      5. Algebra to combine steps 1, 3, 4.
-
-    Case 0 < s < 1:
-      1. `riemannZeta₀_analyticOnNhd_real`: LHS is AnalyticOnNhd ℝ on Ioi 0
-      2. RHS `s ↦ 1 - s * termTSum s` is analytic on Ioi 0 (product of analytic functions;
-         `ZetaAsymptotics.continuousOn_termTSum` + `Differentiable.analyticAt` for termTSum)
-      3. `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`: both sides analytic on Ioi 0,
-         agree on Ioi 1 (by the s > 1 case), so agree on all of Ioi 0.
-
-    HELPER LEMMAS IN THIS FILE:
-    • `riemannZeta₀_re_of_real` (line 8250): `(riemannZeta₀ ↑s).re = (riemannZeta ↑s).re - 1/(s-1)`
-    • `riemannZeta₀_analyticOnNhd_real` (line 8280): `AnalyticOnNhd ℝ (fun s => (riemannZeta₀ ↑s).re) (Ioi 0)`
-    • `termTSum_nonneg` (line 8232): `0 ≤ termTSum s`
-    • `termTSum_continuousOn` (line 8276): `ContinuousOn termTSum (Ici 1)`
-
-    FROM MATHLIB:
-    • `ZetaAsymptotics.zeta_limit_aux1` (ZetaAsymp.lean:258): the key algebraic identity for s > 1
-    • `riemannZeta_eq_inv_sub_add` (ZetaAsymp.lean:544): `riemannZeta s = (s-1)⁻¹ + riemannZeta₀ s`
-    • `zeta_eq_tsum_one_div_nat_add_one_cpow` (RiemannZeta.lean:214): tsum representation for Re(s) > 1
-    • `RCLike.re_tsum` (Complex/Basic.lean:545): `(∑' a, f a).re = ∑' a, (f a).re`
-    • `summable_one_div_nat_rpow` (PSeries.lean:317): `Summable (fun n => 1/n^p) ↔ 1 < p`
-    • `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` (Uniqueness.lean:223): identity theorem
-    • `Complex.ofReal_tsum`, `Complex.ofReal_re`, `Complex.ofReal_sub`: real coercion lemmas -/
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
     (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
-  by_cases hs1 : 1 < s
-  · -- Case 1 < s
-    have hsne : s ≠ 1 := by linarith
+  by_cases hs_gt : 1 < s
+  · have hsne : s ≠ 1 := by linarith
     rw [riemannZeta₀_re_of_real hs hsne]
     suffices (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
-      rw [this, ZetaAsymptotics.zeta_limit_aux1 hs1]
-    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
-    -- Each term 1/(n+1:ℂ)^s is real for real s > 0, so (tsum).re = tsum(re terms) = tsum(original terms)
-    -- Step 1: each complex term equals ofReal of the real term
+      rw [this, ZetaAsymptotics.zeta_limit_aux1 hs_gt]
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow
+      (by simp [Complex.ofReal_re]; linarith : 1 < re (s : ℂ))]
     have hterm : ∀ n : ℕ,
         (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) =
-          ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
+        ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
       intro n
       have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
-      show (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) = ((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℂ)
       push_cast
       rw [Complex.ofReal_cpow hp]
       norm_cast
-    -- Rewrite the LHS tsum to use ofReal, then pull ofReal out, then simplify re
-    rw [show(∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
-          (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
-    rw [(_root_.Complex.ofReal_tsum (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
+    rw [show (∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
+        (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
+    rw [(_root_.Complex.ofReal_tsum
+      (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
     simp [Complex.ofReal_re]
-  · /- Case 0 < s ≤ 1: analytic continuation.
+  · have hs_lt : s < 1 := lt_of_le_of_ne (not_lt.mp hs_gt) hs1
+    let f : ℝ → ℝ := fun t => (riemannZeta₀ (t : ℂ)).re
+    let g : ℝ → ℝ := fun t => 1 - t * ZetaAsymptotics.termTSum t
+    have hf : AnalyticOnNhd ℝ f (Set.Ioi 0) := by
+      simpa [f] using riemannZeta₀_analyticOnNhd_real
+    have hg : AnalyticOnNhd ℝ g (Set.Ioi 0) := by
+      simpa [g] using
+        (analyticOnNhd_const.sub
+          (analyticOnNhd_id.mul analyticOnNhd_termTSum))
+    have hagree : ∀ t ∈ Set.Ioi (1 : ℝ), f t = g t := by
+      intro t ht
+      have ht1 : 1 < t := ht
+      have htne : t ≠ 1 := by linarith
+      have h := riemannZeta₀_eq_one_sub_mul_termTSum ht1 htne
+      simpa [f, g] using h
+    have heq : f s = g s := by
+      apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
+        hf hg isPreconnected_Ioi hs
+      filter_upwards [isOpen_Ioi.mem_nhds (show (1:ℝ) < 2 by norm_num)]
+        with t ht
+      exact hagree t ht
+    simpa [f, g] using heq
 
-    GOAL: prove `(riemannZeta₀ (s : ℂ)).re = 1 - s * termTSum s` for `0 < s < 1`.
-
-    APPROACH: Identity theorem.  Both sides equal on `Ioi 1` (by the first branch);
-    extend to `Ioi 0` via `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`.
-
-    STEP 1 – Prove identity for ALL `t > 1` as a local `have key_gt1`,
-    replicating the algebraic proof from the first branch (zeta_limit_aux1 +
-    Complex.ofReal_tsum + push_cast).
-
-    STEP 2 – Show both sides are `AnalyticOnNhd ℝ` on `Ioi 0`:
-      • LHS: `riemannZeta₀_analyticOnNhd_real` (line 8280)
-      • RHS `s ↦ 1 - s * termTSum s`: Show termTSum is `ContDiff ℝ ∞` on
-        `Ioi 0` via `contDiff_tsum` (SmoothSeries.lean:225), since each
-        `term (n+1)` is smooth in s for x > 0.  Then the product is analytic.
-
-    STEP 3 – Apply identity theorem with `U = Set.Ioi 0` (preconnected),
-    agreement on `Set.Ioi 1` (by Step 1), and witness `2 ∈ Ioi 0`.
-
-    AVAILABLE INFRASTRUCTURE:
-      • `riemannZeta₀_analyticOnNhd_real` (line 8280): LHS analytic on Ioi 0
-      • `riemannZeta₀_re_of_real` (line 8250): real-part identity for real s
-      • `zeta_limit_aux1` (ZetaAsymp.lean:258): key identity for s > 1
-      • `riemannZeta_eq_inv_sub_add` (ZetaAsymp.lean:544): ζ(s) = (s-1)⁻¹ + ζ₀(s)
-      • `zeta_eq_tsum_one_div_nat_add_one_cpow` (RiemannZeta.lean:214): tsum for Re(s) > 1
-      • `Complex.ofReal_tsum`, `Complex.ofReal_re`, `Complex.ofReal_cpow`: coercion lemmas
-      • `push_cast`, `norm_cast`, `tsum_congr`: tactic/lemma names proven in s > 1 branch
-      • `contDiff_tsum` (SmoothSeries.lean:225): smoothness of tsum under uniform bounds
-      • `differentiable_tsum` (SmoothSeries.lean): differentiability of tsum
-      • `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` (Uniqueness.lean:223)
-      • `riemannZeta_conj` (ZetaAsymptotics): reference for how identity theorem is applied
-      • `continuousOn_termTSum` (line 8276): continuity of termTSum on Ici 1
-      • `termTSum_nonneg` (line 8232): 0 ≤ termTSum s
-      • `term_nonneg` (ZetaAsymp.lean): termwise nonnegativity
-
-    DOWNSTREAM: This identity gives `(riemannZeta₀ σ).re ≤ 1` for `0 < σ < 1`
-    (used by `riemannZeta_ne_zero_real_Ioo` at line 8370), which cascades to
-    `riemannZeta_ne_zero_of_mem_strip_real_part` and the RH proof skeleton.  -/
-    sorry
 
 /-- **Key helper (real case)**: ζ(σ) ≠ 0 for real σ ∈ (0,1).
 
