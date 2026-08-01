@@ -11788,7 +11788,7 @@ private lemma zeta_bound_above_near_one :
     _ ≤ ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ + ‖1 / (x : ℂ)‖ := norm_add_le _ _
     _ ≤ C' + 1 / x := by
       have h1 : ‖1 / (x : ℂ)‖ = 1 / x := by
-        rw [norm_div, norm_one, Complex.norm_ofReal, abs_of_pos hx0]
+        simp [norm_one, Complex.norm_real, abs_of_pos hx0]
       rw [h1]
       linarith
     _ ≤ (C' + 1) / x := by
@@ -11830,11 +11830,11 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
     have hBle : B ≤ B' := by dsimp [B']; linarith [le_max_left B 0]
     have hb2 : ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + I * t)‖ ≤ B' * x := by
       filter_upwards [hB, self_mem_nhdsWithin] with x hx hx0
-      have hxnorm : ‖(x : ℂ)‖ = x := by rw [Complex.norm_ofReal, abs_of_pos hx0]
+      have hxnorm : ‖(x : ℂ)‖ = x := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0]
       rw [hxnorm] at hx
       calc
         ‖zeta (1 + x + I * t)‖ ≤ B * x := hx
-        _ ≤ B' * x := by gcongr
+        _ ≤ B' * x := by exact mul_le_mul_of_nonneg_right hBle (le_of_lt hx0)
     have hcont : ContinuousAt zeta (1 + 2 * I * t) := by
       have hne : 1 + 2 * I * t ≠ 1 := by
         intro h
