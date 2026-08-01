@@ -11645,13 +11645,13 @@ private lemma eventually_nhdsGT_iff {P : ℝ → Prop} :
     (∀ᶠ x in 𝓝[>] (0 : ℝ), P x) ↔ ∃ δ : ℝ, 0 < δ ∧ ∀ x : ℝ, 0 < x → x < δ → P x := by
   constructor
   · intro h
-    rcases mem_nhdsWithin.mp h with ⟨t, ht, hsub⟩
-    rcases Metric.mem_nhds_iff.mp ht with ⟨δ, hδ, hball⟩
+    rcases mem_nhdsWithin.mp h with ⟨t, ht_open, ht0, hsub⟩
+    rcases (Metric.isOpen_iff.mp ht_open) 0 ht0 with ⟨δ, hδ, hball⟩
     refine ⟨δ, hδ, ?_⟩
     intro x hx0 hxδ
-    exact hsub ⟨hball (by simpa [Real.dist_eq, abs_of_pos hx0] using hxδ), hx0⟩
+    exact hsub ⟨by simpa [Real.dist_eq, abs_of_pos hx0] using hxδ, hx0⟩
   · rintro ⟨δ, hδ, hP⟩
-    refine mem_nhdsWithin.mpr ⟨Metric.ball (0 : ℝ) δ, Metric.ball_mem_nhds _ hδ, ?_⟩
+    refine mem_nhdsWithin.mpr ⟨Metric.ball (0 : ℝ) δ, Metric.isOpen_ball, Metric.mem_ball_self hδ, ?_⟩
     intro x hx
     exact hP x hx.2 (by simpa [Real.dist_eq, abs_of_pos hx.2] using hx.1)
 
@@ -11667,7 +11667,7 @@ theorem zeta_ne_zero_iff_one_sub_ne_zero_of_strip
   have hz_im : z.im = (1 : ℝ) / 2 - s.re := by
     dsimp [z]
     simp [shiftedZeroPreimage]
-  have hzgt : -(1 / 2 : ℝ) < z.im := by rw [hz_im]; linarith
+  have hzgt : - (1 : ℝ) / 2 < z.im := by rw [hz_im]; linarith
   have hzlt : z.im < (1 / 2 : ℝ) := by rw [hz_im]; linarith
   have hz1s : shiftedS (-z) = 1 - s := by
     calc
@@ -11679,9 +11679,11 @@ theorem zeta_ne_zero_iff_one_sub_ne_zero_of_strip
     classicalXi_symmetry.neg_symm z hzgt hzlt
   have hfe' : classicalXi (1 - s) = classicalXi s := by
     calc
-      classicalXi (1 - s) = xiShifted (-z) := by simp [xiShifted, hz1s]
+      classicalXi (1 - s) = classicalXi (shiftedS (-z)) := by rw [hz1s]
+      _ = xiShifted (-z) := by rfl
       _ = xiShifted z := hfe
-      _ = classicalXi s := by simp [xiShifted, hz1]
+      _ = classicalXi (shiftedS z) := by rfl
+      _ = classicalXi s := by rw [← hz1]
   have h0s : 0 < (1 - s).re := by
     simp
     linarith
@@ -11726,15 +11728,17 @@ theorem rightHalfTailNonvanishing_iff_leaf :
       have hth : (1 : ℝ) / 2 < (1 - s).re := by simp; linarith
       have hti : 10 < |(1 - s).im| := by simpa using hsi
       have hz' : zeta (1 - s) ≠ 0 := H (1 - s) hth ht1 hti
+      have hsub : 1 - (1 - s) = s := by ring
       exact (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz'
+        (by simpa [hsub] using hz)
   · intro H s hh hs1 hsi
-    exact H s (by linarith) hs1 (ne_of_gt hh).symm hsi
+    exact H s (by linarith) hs1 (ne_of_gt hh) hsi
 
 /-- The classical 3-4-1 (Euler product) inequality:
     `|ζ(1+x)|³ |ζ(1+x+iy)|⁴ |ζ(1+x+2iy)| ≥ 1` for `x > 0`. -/
 theorem zeta_product_ge_one {x : ℝ} (hx : 0 < x) (y : ℝ) :
     ‖zeta (1 + x) ^ 3 * zeta (1 + x + I * y) ^ 4 * zeta (1 + x + 2 * I * y)‖ ≥ 1 := by
-  simpa [zeta, LFunctionTrivChar, one_pow] using
+  simpa [zeta, one_pow] using
     (DirichletCharacter.norm_LFunction_product_ge_one (N := 1)
       (χ := (1 : DirichletCharacter ℂ 1)) hx y)
 
@@ -11742,19 +11746,24 @@ theorem zeta_product_ge_one {x : ℝ} (hx : 0 < x) (y : ℝ) :
     positive constant `C`. -/
 private lemma zeta_bound_above_near_one :
     ∃ C : ℝ, 0 < C ∧ ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ))‖ ≤ C / x := by
-  rcases isBigO_riemannZeta_sub_one_div (F := ℂ) with ⟨C, hC⟩
+  have hbigO : ∃ C : ℝ, IsBigOWith C (𝓝 (1 : ℂ))
+      (fun s : ℂ ↦ riemannZeta s - 1 / (s - 1)) (fun _ : ℂ ↦ (1 : ℂ)) := by
+    simpa [IsBigO_def] using (isBigO_riemannZeta_sub_one_div (F := ℂ))
+  rcases hbigO with ⟨C, hC⟩
+  rw [isBigOWith_iff] at hC
   let C' : ℝ := max C 0 + 1
   have hCpos : 0 < C' := by
     dsimp [C']
     linarith [le_max_right C 0]
   have hC' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
     have hT : Tendsto (fun x : ℝ ↦ (1 + (x : ℂ) : ℂ)) (𝓝[>] (0 : ℝ)) (𝓝 (1 : ℂ)) := by
-      refine (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
-        (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) _ (𝓝 (1 : ℂ)))).mono_left
-          nhdsWithin_le_nhds)
+      simpa using
+        (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
+          (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) _ (𝓝 (1 : ℂ)))).mono_left
+            nhdsWithin_le_nhds)
     have hC'' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / ((1 + (x : ℂ)) - 1)‖ ≤ C := by
       filter_upwards [hC.comp hT] with x hx
-      simpa using hx
+      simpa [zeta] using hx
     filter_upwards [hC''] with x hx
     have hle : C ≤ C' := by
       dsimp [C']
@@ -11805,11 +11814,13 @@ private lemma zeta_isBigO_horizontal_of_eq_zero {t : ℝ} (ht : t ≠ 0)
 theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
   by_cases ht : t = 0
   · subst t
-    simpa using riemannZeta_one_ne_zero
+    simpa [zeta] using riemannZeta_one_ne_zero
   · by_contra hz
     have hBigO : (fun x : ℝ ↦ zeta (1 + x + I * t)) =O[𝓝[>] 0] fun x : ℝ ↦ (x : ℂ) :=
       zeta_isBigO_horizontal_of_eq_zero ht hz
+    rw [IsBigO_def] at hBigO
     rcases hBigO with ⟨B, hB⟩
+    rw [isBigOWith_iff] at hB
     let B' : ℝ := max B 0 + 1
     have hBpos : 0 < B' := by dsimp [B']; linarith [le_max_right B 0]
     have hBle : B ≤ B' := by dsimp [B']; linarith [le_max_left B 0]
@@ -11830,10 +11841,14 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
         (fun _ : ℝ ↦ (1 : ℂ)) := by
       have hT : Tendsto (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) (𝓝[>] (0 : ℝ))
           (𝓝 (1 + 2 * I * t : ℂ)) := by
-        refine (by fun_prop : Tendsto (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) (𝓝 (0 : ℝ))
-            (𝓝 (1 + 2 * I * t : ℂ))).mono_left nhdsWithin_le_nhds
+        simpa using
+          (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
+            (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 + 2 * I * t : ℂ)) _ (𝓝 (1 + 2 * I * t : ℂ)))).mono_left
+              nhdsWithin_le_nhds)
       exact (hcont.tendsto.isBigO_one ℂ).comp_tendsto hT
+    rw [IsBigO_def] at hb3_raw
     rcases hb3_raw with ⟨C₃, hC₃⟩
+    rw [isBigOWith_iff] at hC₃
     let C₃' : ℝ := max C₃ 0 + 1
     have hC₃pos : 0 < C₃' := by dsimp [C₃']; linarith [le_max_right C₃ 0]
     have hb3 : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃' := by
