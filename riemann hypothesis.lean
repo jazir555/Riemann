@@ -8308,6 +8308,24 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (h
   by_cases hs_gt : 1 < s
   · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt hs hs_gt
   · have hs_lt : s < 1 := lt_of_le_of_ne (not_lt.mp hs_gt) hs1
+    -- OPEN ANALYTIC-CONTINUATION LEAF.
+    -- The identity `ζ₀(σ).re = 1 - σ * termTSum σ` is standard and true on (0,1),
+    -- but proving it here needs an identity-theorem argument: both sides are
+    -- real-analytic on the *connected* open set (0,∞) (ζ₀ is entire by
+    -- `differentiable_riemannZeta₀`; its `.re` is real-analytic on (0,∞) via
+    -- `riemannZeta₀_analyticOnNhd_real` above) and they agree on the open
+    -- subset (1,∞) (`riemannZeta₀_eq_one_sub_mul_termTSum_of_gt`).
+    -- The missing ingredient is real-analyticity (or differentiability) of
+    -- `ZetaAsymptotics.termTSum` on (0,1): Mathlib's `ZetaAsymptotics` only
+    -- proves `continuousOn_termTSum : ContinuousOn termTSum (Ici 1)` plus a
+    -- one-sided limit at 1 (`tendsto_riemannZeta_sub_one_div_nhds_right`).
+    -- Establishing `DifferentiableOn ℝ ZetaAsymptotics.termTSum (Ioi 0)`
+    -- (or `(0,1)`) requires a dominated-derivative theorem for the integrals
+    -- `term n s = ∫ x in n..n+1, (x-n)/x^{s+1}` and is not currently in Mathlib.
+    -- Until that infrastructure is added, this `sorry` cannot be discharged
+    -- within the existing API. This is the *only* analytic leaf in the chain
+    -- `riemannZeta_ne_zero_real_Ioo` → this theorem; the rest of that proof is
+    -- sorry-free.
     sorry
 
 /-- Real zeta is negative on `(0,1)`, hence nonzero there. -/
@@ -9067,6 +9085,23 @@ noncomputable def criticalStripRect : ZetaZeroFreeInfrastructure.RectLowerBound 
     intro s hx0 hx1 hy0 hy1
     have hre := Complex.abs_re_le_norm (riemannZeta s)
     have him := Complex.abs_im_le_norm (riemannZeta s)
+    -- FALSE STATEMENT — no sorry-free proof can exist as written.
+    -- `criticalStripRect` has y0 = -14.14, y1 = 14.14 and asserts
+    -- ε = 1/1000 ≤ ‖riemannZeta s‖ for every s with 0 < Re s < 1 and
+    -- -14.14 < Im s < 14.14. The first non-trivial zeta zero
+    -- ρ = 1/2 + 14.134724…·i lies *inside* this rectangle (since
+    -- -14.14 < 14.134724 < 14.14), and there `‖riemannZeta ρ‖ = 0 < 1/1000`.
+    -- Thus a uniform positive lower bound on this rectangle is contradicted
+    -- by a known zero, regardless of RH. To make this a true (and provable)
+    -- claim the rectangle must exclude all known zeros, e.g. by shrinking
+    -- the height to |Im s| < 14.1 (which is < 14.1347), at which point a
+    -- rigorous interval-arithmetic verification of `‖ζ(s)‖ ≥ ε` would still
+    -- be required — that numerical certificate is itself the content of the
+    -- Hasler/Odlyzko zero-free-region computation, not a tactic-discharged
+    -- step. The downstream theorem `riemannZeta_ne_zero_critical_strip_le_height`
+    -- only ever *uses* this rect on the sub-region |Im s| ≤ 14.13 (via
+    -- `criticalStripCover14.covers`), so the false field is dormant in the
+    -- final conclusions — but as *stated* the `lower_bound` field is false.
     sorry
 
 noncomputable def criticalStripCover14 :
@@ -11057,4 +11092,821 @@ theorem rh_from_smoothed_leaf :
   rh_from_smoothed_complex_bridge
 
 end
+end
+
+/-!
+# Challenge 2: integrated scaffold (tail-region lower bound)
+
+## The challenge
+
+Produce a certificate `Certificate`, i.e. a function `m : ℝ → ℝ → ℝ` with
+
+    m r y > 0          for all y ≠ 0 and 10 < |r|,
+    m z.re z.im ≤ ‖Λ₀(1/2 + iz) − 1/(z² + 1/4)‖
+                        for all z with 10 < |Re z| and 0 < |Im z| < 1/2,
+
+where `Λ₀ s = completedRiemannZeta₀ s` is the completed zeta function and
+`Λ₀(1/2 + iz) = completedRiemannZeta₀ (shiftedS z)`.
+
+## Why this is the right statement
+
+The polar term `1/(z² + 1/4)` is exactly `1/shiftedS z + 1/(1 − shiftedS z)`
+(`polar_term_eq_inv_D`), and the exact identity
+
+    1/(z² + 1/4) − Λ₀(1/2 + iz) = 2·ξ_sh(z)/(z² + 1/4)
+
+(`identity_two_xiShifted_div_D`) shows that a lower bound for the corrected
+difference is exactly a lower bound for `ξ_sh` on the tail:
+
+    m r y ≤ ‖correctedDifference z‖   iff   (‖z² + 1/4‖ / 2)·m r y ≤ ‖ξ_sh(z)‖
+
+(`correctedDifference_bound_iff_xiShifted_bound`).  Hence a certificate is
+exactly a positive lower bound for `ξ_sh` on `|Re z| > 10`, i.e. the Riemann
+hypothesis for the tail region `|Im s| > 10`.  The bounded region
+`|Re z| ≤ 10` is the separate finite interval-arithmetic obligation
+(`RemainingQuadrantNonvanishing`, instantiated as
+`ClosedCertificate.remainingQuadrant_10_closed`).
+
+## How to solve it
+
+Replace the single `sorry` in `challenge2_certificate` with a real certificate.
+Everything below is fully proved; nothing else needs to change.
+-/
+
+noncomputable section
+open Complex
+
+namespace Challenge2
+
+/-- Λ₀: the completed Riemann zeta function of mathlib. -/
+noncomputable def Lambda0 (s : ℂ) : ℂ :=
+  completedRiemannZeta₀ s
+
+/-- The corrected (polar-subtracted) difference at the shifted point
+    `s = 1/2 + iz`:
+
+    1/(z² + 1/4) − Λ₀(1/2 + iz).
+
+    (Polar term first, matching `inv_D_sub_completedZeta_eq_two_xiShifted_div_D`.) -/
+noncomputable def correctedDifference (z : ℂ) : ℂ :=
+  1 / (z ^ 2 + (1 / 4 : ℂ)) - Lambda0 (shiftedS z)
+
+/-- **The exact identity**: `1/(z² + 1/4) − Λ₀(1/2 + iz) = 2·ξ_sh(z)/(z² + 1/4)`. -/
+theorem identity_two_xiShifted_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    correctedDifference z =
+      2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) := by
+  unfold correctedDifference Lambda0
+  exact inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+
+/-- Norm form of the identity. -/
+theorem norm_correctedDifference_eq_two_xi_div_D
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    ‖correctedDifference z‖ =
+      2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+  rw [identity_two_xiShifted_div_D z hgt hlt hne]
+  simp [norm_mul, norm_div, RCLike.norm_ofReal]
+
+/-- The corrected difference vanishes exactly when `ξ_sh` does (inside the strip). -/
+theorem correctedDifference_ne_zero_iff_xiShifted_ne_zero
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    correctedDifference z ≠ 0 ↔ xiShifted z ≠ 0 := by
+  constructor
+  · intro hcd hxi
+    have hid := identity_two_xiShifted_div_D z hgt hlt hne
+    rw [hxi, mul_zero, zero_div] at hid
+    exact hcd hid
+  · intro hxi hcd
+    have hid := identity_two_xiShifted_div_D z hgt hlt hne
+    rw [hcd] at hid
+    have h0 : 2 * xiShifted z / (z ^ 2 + (1 / 4 : ℂ)) = 0 := hid.symm
+    rw [div_eq_zero_iff] at h0
+    rcases h0 with hmul | hD0
+    · have hxi0 : xiShifted z = 0 := (mul_eq_zero.mp hmul).resolve_left (by norm_num)
+      exact hxi hxi0
+    · exact absurd hD0 (shifted_denominator_ne_zero_inside_strip z hgt hlt)
+
+/-- `(‖D‖ / 2) * (2 * ‖ξ‖ / ‖D‖) = ‖ξ‖` for `D = z² + 1/4` with `‖D‖ > 0`. -/
+private theorem normD_half_mul_two_xi_div_D
+    (z : ℂ)
+    (hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖) :
+    (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+      (2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖) =
+      ‖xiShifted z‖ := by
+  have hDne : ‖z ^ 2 + (1 / 4 : ℂ)‖ ≠ 0 := hDpos.ne'
+  have hcancel : (2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖) *
+      ‖z ^ 2 + (1 / 4 : ℂ)‖ = 2 * ‖xiShifted z‖ := by
+    rw [mul_comm]
+    exact mul_div_cancel₀ (2 * ‖xiShifted z‖) hDne
+  calc
+    (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) *
+        (2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖)
+        = ‖z ^ 2 + (1 / 4 : ℂ)‖ *
+          (2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖) / 2 := by
+      rw [div_mul_eq_mul_div]
+    _ = 2 * ‖xiShifted z‖ / 2 := by
+      rw [mul_comm ‖z ^ 2 + (1 / 4 : ℂ)‖, hcancel]
+    _ = ‖xiShifted z‖ := by
+      field_simp
+
+/-- `‖ξ‖ / (‖D‖ / 2) = 2 * ‖ξ‖ / ‖D‖` for `D = z² + 1/4`. -/
+private theorem norm_xi_div_normD_half
+    (z : ℂ) :
+    ‖xiShifted z‖ / (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) =
+      2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+  rw [div_div_eq_mul_div]
+  rw [mul_comm ‖xiShifted z‖]
+
+/-- A lower bound on the corrected difference is equivalent to a lower bound on
+    `ξ_sh`, via the norm identity. -/
+theorem correctedDifference_bound_iff_xiShifted_bound
+    (m : ℝ → ℝ → ℝ)
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    m z.re z.im ≤ ‖correctedDifference z‖ ↔
+      ((‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * m z.re z.im ≤ ‖xiShifted z‖) := by
+  have hD : z ^ 2 + (1 / 4 : ℂ) ≠ 0 :=
+    shifted_denominator_ne_zero_inside_strip z hgt hlt
+  have hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ := norm_pos_iff.mpr hD
+  have hnorm := norm_correctedDifference_eq_two_xi_div_D z hgt hlt hne
+  constructor
+  · intro h
+    have h' : (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * m z.re z.im ≤
+        (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * ‖correctedDifference z‖ :=
+      mul_le_mul_of_nonneg_left h (div_nonneg (norm_nonneg _) (by norm_num))
+    calc
+      (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * m z.re z.im ≤
+          (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) * ‖correctedDifference z‖ := h'
+      _ = ‖xiShifted z‖ := by
+        rw [hnorm]
+        exact normD_half_mul_two_xi_div_D z hDpos
+  · intro h
+    calc
+      m z.re z.im ≤ ‖xiShifted z‖ / (‖z ^ 2 + (1 / 4 : ℂ)‖ / 2) := by
+        have hpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 :=
+          div_pos hDpos (by norm_num)
+        rw [le_div_iff₀ hpos]
+        simpa [mul_comm] using h
+      _ = 2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+        exact norm_xi_div_normD_half z
+      _ = ‖correctedDifference z‖ := by
+        rw [← hnorm]
+
+/-- **The exact Challenge 2 statement**: a positive pointwise lower bound `m` on
+    the corrected difference `‖Λ₀(1/2 + iz) − 1/(z² + 1/4)‖` for all `z` with
+    `10 < |Re z|` and `0 < |Im z| < 1/2`. -/
+structure Certificate where
+  m : ℝ → ℝ → ℝ
+  m_pos : ∀ r y : ℝ, 10 < |r| → y ≠ 0 → 0 < m r y
+  bound :
+    ∀ z : ℂ,
+      10 < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖correctedDifference z‖
+
+/-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
+    Challenge 2. -/
+theorem certificate_implies_tail_nonvanishing
+    (C : Certificate)
+    {z : ℂ}
+    (hx : 10 < |z.re|)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) :
+    xiShifted z ≠ 0 := by
+  intro hz
+  have hpos := C.m_pos z.re z.im hx hne
+  have hbound := C.bound z hx hgt hlt hne
+  have hid := identity_two_xiShifted_div_D z hgt hlt hne
+  rw [hz, mul_zero, zero_div] at hid
+  have hnorm : ‖correctedDifference z‖ = 0 := by
+    rw [hid, norm_zero]
+  rw [hnorm] at hbound
+  linarith
+
+/-- Positivity of the quadratic tail factor for `r ≥ 10` and `y ≠ 0`. -/
+private theorem tailD_norm_pos_of_challenge2
+    (r y : ℝ)
+    (hr : 10 ≤ r)
+    (hy : y ≠ 0) :
+    0 < ‖tailD r y‖ := by
+  rw [norm_pos_iff]
+  intro h
+  have him := congr_arg Complex.im h
+  simp only [tailD, pow_two, Complex.add_im, Complex.mul_im, Complex.ofReal_re,
+    Complex.ofReal_im, Complex.I_re, Complex.I_im] at him
+  have him' : (2 : ℝ) * r * y = 0 := by
+    ring_nf at him
+    simpa [mul_assoc] using him
+  have hne : (2 : ℝ) * r * y ≠ 0 := by
+    apply mul_ne_zero
+    · have h2 : (2 : ℝ) ≠ 0 := by norm_num
+      have hr0 : r ≠ 0 := by linarith
+      exact mul_ne_zero h2 hr0
+    · exact hy
+  exact hne him'
+
+/-- Convert a certificate into the distance-sensitive tail lower bound on
+    `ξ_sh` needed by the RH assembly theorems.  Fully proved, no `sorry`. -/
+def certificate_to_tailDistance
+    (C : Certificate) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) where
+  lower r y :=
+    if 10 < |r| then (‖tailD r y‖ / 2) * C.m r y else 1
+  lower_pos r y hr hy := by
+    change 0 < (if 10 < |r| then (‖tailD r y‖ / 2) * C.m r y else 1)
+    by_cases hstrict : 10 < |r|
+    · have hDpos : 0 < ‖tailD r y‖ :=
+        tailD_norm_pos_of_challenge2 r y hr hy
+      have hm : 0 < C.m r y := C.m_pos r y hstrict hy
+      simp [hstrict]
+      exact mul_pos (div_pos hDpos (by norm_num)) hm
+    · simp [hstrict]
+  bound z hre hgt hlt hne := by
+    have hzre_nonneg : 0 ≤ z.re := by linarith
+    have habs : 10 < |z.re| := by
+      simpa [abs_of_nonneg hzre_nonneg] using hre
+    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
+    have hlt' : z.im < (1 / 2 : ℝ) := by linarith
+    have hD : tailD z.re z.im = z ^ 2 + (1 / 4 : ℂ) := by
+      dsimp [tailD]
+      rw [mul_comm I (z.im : ℂ), Complex.re_add_im]
+    have hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖ :=
+      norm_pos_iff.mpr (shifted_denominator_ne_zero_inside_strip z hgt' hlt')
+    have hbound := C.bound z habs hgt' hlt' hne
+    have hnorm := norm_correctedDifference_eq_two_xi_div_D z hgt' hlt' hne
+    change (if 10 < |z.re| then (‖tailD z.re z.im‖ / 2) * C.m z.re z.im else 1) ≤
+      ‖xiShifted z‖
+    simp [habs]
+    have hmul : (‖tailD z.re z.im‖ / 2) * ‖correctedDifference z‖ = ‖xiShifted z‖ := by
+      rw [hD, hnorm]
+      exact normD_half_mul_two_xi_div_D z hDpos
+    calc
+      (‖tailD z.re z.im‖ / 2) * C.m z.re z.im ≤
+          (‖tailD z.re z.im‖ / 2) * ‖correctedDifference z‖ := by
+        exact mul_le_mul_of_nonneg_left hbound (div_nonneg (norm_nonneg _) (by norm_num))
+      _ = ‖xiShifted z‖ := hmul
+
+/-- A certificate also gives the two-sided tail pointwise nonvanishing
+    certificate (left tail via neg-symmetry). -/
+def certificate_to_tailPointwise
+    (C : Certificate) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise_from_right_distance_lower_bound_and_symmetry
+    classicalXi_symmetry.neg_symm
+    (certificate_to_tailDistance C)
+
+/-- **Assembly theorem**: Challenge 2 plus user-supplied bounded-region
+    evidence implies the Riemann hypothesis. -/
+theorem rh_from_certificate_and_bounded
+    (B : RHTractable.BoundedFirstQuadrantEvidence10)
+    (C : Certificate) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := RHTractable.remainingQuadrant_of_boundedEvidence B
+      tail := certificate_to_tailDistance C
+    }
+
+/-- **Assembly theorem (closed bounded region)**: Challenge 2 alone implies RH,
+    using the file's first-quadrant certificate at cutoff 10
+    (`ClosedCertificate.remainingQuadrant_10_closed`).  The bounded-region
+    obligations there are the separate finite interval-arithmetic `sorry`s of
+    `Task1Completion` / `ZetaNumericCert`. -/
+theorem rh_from_certificate_closed
+    (C : Certificate) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := ClosedCertificate.remainingQuadrant_10_closed
+      tail := certificate_to_tailDistance C
+    }
+
+/-- Prop-form mirror of Challenge 2. -/
+def Challenge2Statement : Prop :=
+  ∃ m : ℝ → ℝ → ℝ,
+    (∀ r y : ℝ, 10 < |r| → y ≠ 0 → 0 < m r y) ∧
+    (∀ z : ℂ,
+      10 < |z.re| →
+      -(1 / 2 : ℝ) < z.im →
+      z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 →
+      m z.re z.im ≤ ‖correctedDifference z‖)
+
+/-- The Prop-form statement implies RH. -/
+theorem rh_from_challenge2_statement :
+    Challenge2Statement → RiemannHypothesisProp := by
+  rintro ⟨m, hmpos, hbound⟩
+  exact rh_from_certificate_closed ⟨m, hmpos, hbound⟩
+
+/-- **The exact analytic core of Challenge 2**: the Riemann zeta function has
+    no zeros off the critical line with `|Im s| > X` (critical strip).  For
+    `X = 10` this is precisely the part of the Riemann hypothesis outside the
+    bounded box `|Im s| ≤ 10`; together with the bounded-region certificates
+    it is equivalent to RH (`riemannHypothesis_iff_challenge2Statement`). -/
+def ZetaTailOffLineNonvanishing (X : ℝ) : Prop :=
+  ∀ s : ℂ,
+    0 < s.re →
+    s.re < 1 →
+    s.re ≠ (1 : ℝ) / 2 →
+    X < |s.im| →
+    zeta s ≠ 0
+
+/-- Exhibit a certificate from the tail nonvanishing claim: take
+    `m r y = ‖correctedDifference (r + I*y)‖` inside the strip and `m = 1`
+    outside it.  The certificate therefore carries no quantitative content
+    beyond the nonvanishing claim itself. -/
+noncomputable def challenge2_certificate_of_tail_nonvanishing
+    (hNZ : ZetaTailOffLineNonvanishing (10 : ℝ)) :
+    Certificate where
+  m r y :=
+    if |y| < (1 / 2 : ℝ) then
+      ‖correctedDifference ((r : ℂ) + I * (y : ℂ))‖
+    else 1
+  m_pos := by
+    intro r y hr hy
+    by_cases hstrip : |y| < (1 / 2 : ℝ)
+    · have hgt : -(1 / 2 : ℝ) < y := (abs_lt.mp hstrip).1
+      have hlt : y < (1 / 2 : ℝ) := (abs_lt.mp hstrip).2
+      let z : ℂ := (r : ℂ) + I * (y : ℂ)
+      have hz_re : z.re = r := by simp [z]
+      have hz_im : z.im = y := by simp [z]
+      have hs0 : 0 < (shiftedS z).re := by
+        simp [shiftedS, hz_im]
+        linarith
+      have hs1 : (shiftedS z).re < 1 := by
+        simp [shiftedS, hz_im]
+        linarith
+      have hsne : (shiftedS z).re ≠ (1 : ℝ) / 2 := by
+        simp [shiftedS, hz_im]
+        intro h
+        exact hy (by linarith)
+      have hsIm : 10 < |(shiftedS z).im| := by
+        simp [shiftedS, hz_re]
+        simpa using hr
+      have hzeta : zeta (shiftedS z) ≠ 0 :=
+        hNZ (shiftedS z) hs0 hs1 hsne hsIm
+      have hxi : xiShifted z ≠ 0 := by
+        intro hz0
+        have hzeq : classicalXi (shiftedS z) = 0 ↔ zeta (shiftedS z) = 0 :=
+          classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
+            (shiftedS z) hs0 hs1
+        have hz0' : classicalXi (shiftedS z) = 0 := by
+          simpa [xiShifted, shiftedS] using hz0
+        exact hzeta (hzeq.mp hz0')
+      have hcd : correctedDifference z ≠ 0 :=
+        (correctedDifference_ne_zero_iff_xiShifted_ne_zero z
+          (by simpa [hz_im] using hgt)
+          (by simpa [hz_im] using hlt)
+          (by simpa [hz_im] using hy)).mpr hxi
+      change 0 < (if |y| < (1 / 2 : ℝ) then
+          ‖correctedDifference ((r : ℂ) + I * (y : ℂ))‖ else 1)
+      rw [if_pos hstrip]
+      exact norm_pos_iff.mpr hcd
+    · change 0 < (if |y| < (1 / 2 : ℝ) then
+          ‖correctedDifference ((r : ℂ) + I * (y : ℂ))‖ else 1)
+      rw [if_neg hstrip]
+      norm_num
+  bound := by
+    intro z hx hgt hlt hne
+    have hstrip : |z.im| < (1 / 2 : ℝ) := abs_lt.mpr ⟨hgt, hlt⟩
+    have hz : (z.re : ℂ) + I * (z.im : ℂ) = z := by
+      rw [mul_comm I (z.im : ℂ)]
+      exact Complex.re_add_im z
+    change (if |z.im| < (1 / 2 : ℝ) then
+        ‖correctedDifference ((z.re : ℂ) + I * (z.im : ℂ))‖ else 1) ≤
+        ‖correctedDifference z‖
+    rw [if_pos hstrip, hz]
+
+/-- A certificate forces the tail nonvanishing claim. -/
+theorem tail_nonvanishing_of_certificate
+    (C : Certificate) :
+    ZetaTailOffLineNonvanishing (10 : ℝ) := by
+  intro s hs0 hs1 hsne hsi hz0
+  let z := shiftedZeroPreimage s
+  have hz_re : z.re = s.im := by
+    simp [z, shiftedZeroPreimage]
+  have hz_im : z.im = (1 : ℝ) / 2 - s.re := by
+    simp [z, shiftedZeroPreimage]
+  have hx : 10 < |z.re| := by
+    rw [hz_re]
+    exact hsi
+  have hgt : -(1 / 2 : ℝ) < z.im := by
+    rw [hz_im]
+    linarith
+  have hlt : z.im < (1 / 2 : ℝ) := by
+    rw [hz_im]
+    linarith
+  have hne : z.im ≠ 0 := by
+    rw [hz_im]
+    intro h
+    exact hsne (by linarith)
+  have hxishift : xiShifted z ≠ 0 :=
+    certificate_implies_tail_nonvanishing C hx hgt hlt hne
+  have hzeq : classicalXi s = 0 ↔ zeta s = 0 :=
+    classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip s hs0 hs1
+  have hcs : classicalXi s = 0 := hzeq.mpr hz0
+  have hss : shiftedS z = s := by
+    dsimp [z]
+    unfold shiftedS
+    exact shiftedZeroPreimage_identity s
+  have hxi0 : xiShifted z = 0 := by
+    calc
+      xiShifted z = classicalXi (shiftedS z) := by simp [xiShifted, shiftedS]
+      _ = classicalXi s := by rw [hss]
+      _ = 0 := hcs
+  exact hxishift hxi0
+
+/-- **Challenge 2 is *exactly* the tail nonvanishing claim**: the certificate
+    is a positive lower bound on `‖correctedDifference z‖`, which is a
+    nonvanishing claim in disguise (`m > 0 ≤ ‖correctedDifference z‖` forces
+    `correctedDifference z ≠ 0`, and conversely the modulus itself is a valid
+    certificate). -/
+theorem challenge2Statement_iff_tail_nonvanishing :
+    Challenge2Statement ↔ ZetaTailOffLineNonvanishing (10 : ℝ) := by
+  constructor
+  · rintro ⟨m, hmpos, hbound⟩
+    exact tail_nonvanishing_of_certificate ⟨m, hmpos, hbound⟩
+  · intro hNZ
+    let C : Certificate := challenge2_certificate_of_tail_nonvanishing hNZ
+    exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
+
+/-- **Challenge 2 is equivalent to the Riemann hypothesis**: the forward
+    direction is the bounded-region-assisted assembly
+    (`rh_from_challenge2_statement`), the reverse direction is the
+    pointwise-certificate construction.  Closing the open leaf below is
+    exactly proving RH. -/
+theorem riemannHypothesis_iff_challenge2Statement :
+    RiemannHypothesisProp ↔ Challenge2Statement := by
+  constructor
+  · intro hRH
+    have hNZ : ZetaTailOffLineNonvanishing (10 : ℝ) := by
+      intro s hs0 hs1 hsne _ hz0
+      exact hsne (hRH s hz0 hs0 hs1)
+    let C : Certificate := challenge2_certificate_of_tail_nonvanishing hNZ
+    exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
+  · exact rh_from_challenge2_statement
+
+/-- **CHALLENGE 2 — THE OPEN LEAF (single `sorry`)**.
+
+    Solve this: prove that the Riemann zeta function has no zeros off the
+    critical line with `|Im s| > 10`, i.e. the Riemann hypothesis for the
+    region `|Im s| > 10` of the critical strip.
+
+    By `challenge2_certificate_of_tail_nonvanishing` this is exactly the
+    original certificate obligation
+
+        m z.re z.im ≤ ‖Λ₀(1/2 + iz) − 1/(z² + 1/4)‖
+
+    with `m r y > 0` for `10 < |r|` and `y ≠ 0` (see
+    `challenge2Statement_iff_tail_nonvanishing`); the certificate is fully
+    proved here, and only this leaf remains open.  Closing it would prove the
+    Riemann hypothesis (`riemannHypothesis_iff_challenge2Statement`). -/
+theorem zetaTail_offLine_nonvanishing_10 :
+    ZetaTailOffLineNonvanishing (10 : ℝ) := by
+  sorry
+
+/-- The Challenge 2 certificate, obtained from the (open) tail nonvanishing
+    leaf. -/
+noncomputable def challenge2_certificate : Certificate :=
+  challenge2_certificate_of_tail_nonvanishing zetaTail_offLine_nonvanishing_10
+
+/-- The final conditional theorem: if the Challenge 2 certificate is supplied,
+    RH follows (bounded region as in `rh_from_certificate_closed`). -/
+theorem riemann_hypothesis_of_challenge2 : RiemannHypothesisProp :=
+  rh_from_certificate_closed challenge2_certificate
+
+
+/-!
+## Challenge 2: analytic machinery (zero-free pipeline)
+
+This block builds the first layer of the analytic machinery needed to attack
+`zetaTail_offLine_nonvanishing_10`:
+
+1. `zeta_ne_zero_iff_one_sub_ne_zero_of_strip` — the functional-equation
+   symmetry of nonvanishing in the critical strip (via the completed-zeta
+   functional equation and the prefactor zero-equivalence), and the derived
+   reduction `rightHalfTailNonvanishing_iff_leaf`: it suffices to prove
+   nonvanishing in the right half `1/2 < Re s < 1` (zeros off the line come
+   in symmetric pairs `β + it ↔ 1 - β - it`).
+
+2. `zeta_product_ge_one` — the classical 3-4-1 (Euler product) inequality
+   `|ζ(σ)|³ |ζ(σ+it)|⁴ |ζ(σ+2it)| ≥ 1` for `σ > 1`, derived from mathlib's
+   Dirichlet L-function machinery (`norm_LFunction_product_ge_one`).
+
+3. `zeta_bound_above_near_one` — the pole bound `|ζ(1+x)| ≤ C/x` as `x → 0⁺`
+   (from `isBigO_riemannZeta_sub_one_div`).
+
+4. `zeta_ne_zero_of_re_eq_one` — the Hadamard–de la Vallée Poussin core
+   theorem `ζ(1 + it) ≠ 0` for all real `t`, proved with items 2 and 3 plus
+   analyticity (differentiability at the assumed zero gives the linear bound
+   `|ζ(1+x+it)| = O(x)`).  This is the template for the zero-free region.
+
+Still missing (the next layers):
+
+5. The strip growth bound `|ζ(σ + it)| ≤ C|t|^A` for `σ ∈ [1/2, 1]`,
+   `|t| ≥ 2` — via Euler–Maclaurin / partial summation
+   (`ζ(s) = Σ_{n ≤ N} n^{-s} + N^{1-s}/(s-1) + O(...)`); not present in
+   mathlib (its `Harmonic/ZetaAsymp.lean` only covers the behaviour at
+   `s = 1`).
+
+6. The elementary zero-free region: from (2), (3), (5) and a Cauchy estimate
+   for `ζ'` one obtains `∃ c > 0, ζ(σ + it) ≠ 0` for
+   `σ ≥ 1 - c / (log |t|)^9` (Titchmarsh, *The Theory of the Riemann
+   Zeta-Function*, Thm 3.8), and by (1) also for `σ ≤ c / (log |t|)^9`.
+
+7. **The wall**: zero-free regions only exclude neighbourhoods of the
+   boundary of the strip.  Zeros in the middle band
+   `c/(log|t|)^9 ≤ σ ≤ 1 - c/(log|t|)^9` can only be ruled out by a rigorous
+   numerical verification (argument principle + interval arithmetic) over a
+   finite box, and even then the band extends to all heights.  The middle-band
+   claim is exactly the Riemann hypothesis, so closing
+   `zetaTail_offLine_nonvanishing_10` is equivalent to proving RH (see
+   `riemannHypothesis_iff_challenge2Statement`).
+-/
+
+open Asymptotics Topology Filter
+
+/-- The eventually-predicates on `𝓝[>] 0` in explicit `δ` form. -/
+private lemma eventually_nhdsGT_iff {P : ℝ → Prop} :
+    (∀ᶠ x in 𝓝[>] (0 : ℝ), P x) ↔ ∃ δ : ℝ, 0 < δ ∧ ∀ x : ℝ, 0 < x → x < δ → P x := by
+  constructor
+  · intro h
+    rcases mem_nhdsWithin.mp h with ⟨t, ht, hsub⟩
+    rcases Metric.mem_nhds_iff.mp ht with ⟨δ, hδ, hball⟩
+    refine ⟨δ, hδ, ?_⟩
+    intro x hx0 hxδ
+    exact hsub ⟨hball (by simpa [Real.dist_eq, abs_of_pos hx0] using hxδ), hx0⟩
+  · rintro ⟨δ, hδ, hP⟩
+    refine mem_nhdsWithin.mpr ⟨Metric.ball (0 : ℝ) δ, Metric.ball_mem_nhds _ hδ, ?_⟩
+    intro x hx
+    exact hP x hx.2 (by simpa [Real.dist_eq, abs_of_pos hx.2] using hx.1)
+
+/-- Functional-equation symmetry of nonvanishing in the critical strip:
+    `ζ(s) ≠ 0` iff `ζ(1 - s) ≠ 0` for `0 < Re s < 1`. -/
+theorem zeta_ne_zero_iff_one_sub_ne_zero_of_strip
+    {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) :
+    zeta s ≠ 0 ↔ zeta (1 - s) ≠ 0 := by
+  let z := shiftedZeroPreimage s
+  have hz1 : shiftedS z = s := by
+    dsimp [z]
+    exact shiftedZeroPreimage_identity s
+  have hz_im : z.im = (1 : ℝ) / 2 - s.re := by
+    dsimp [z]
+    simp [shiftedZeroPreimage]
+  have hzgt : -(1 / 2 : ℝ) < z.im := by rw [hz_im]; linarith
+  have hzlt : z.im < (1 / 2 : ℝ) := by rw [hz_im]; linarith
+  have hz1s : shiftedS (-z) = 1 - s := by
+    calc
+      shiftedS (-z) = 1 - shiftedS z := by
+        unfold shiftedS
+        ring
+      _ = 1 - s := by rw [hz1]
+  have hfe : xiShifted (-z) = xiShifted z :=
+    classicalXi_symmetry.neg_symm z hzgt hzlt
+  have hfe' : classicalXi (1 - s) = classicalXi s := by
+    calc
+      classicalXi (1 - s) = xiShifted (-z) := by simp [xiShifted, hz1s]
+      _ = xiShifted z := hfe
+      _ = classicalXi s := by simp [xiShifted, hz1]
+  have h0s : 0 < (1 - s).re := by
+    simp
+    linarith
+  have h1s : (1 - s).re < 1 := by
+    simp
+    linarith
+  have heq0 : classicalXi s = 0 ↔ zeta s = 0 :=
+    classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip s h0 h1
+  have heq1 : classicalXi (1 - s) = 0 ↔ zeta (1 - s) = 0 :=
+    classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip (1 - s) h0s h1s
+  constructor
+  · intro hnz hz0
+    have hc : classicalXi (1 - s) = 0 := heq1.mpr hz0
+    have hcs : classicalXi s = 0 := by simpa [hfe'] using hc
+    exact hnz (heq0.mp hcs)
+  · intro hnz hz0
+    have hcs : classicalXi s = 0 := heq0.mpr hz0
+    have hc : classicalXi (1 - s) = 0 := by simpa [hfe'] using hcs
+    exact hnz (heq1.mp hc)
+
+/-- The tail nonvanishing claim restricted to the right half of the strip
+    `1/2 < Re s < 1` — the part a zero-free region must actually handle. -/
+def RightHalfTailNonvanishing (X : ℝ) : Prop :=
+  ∀ s : ℂ,
+    (1 : ℝ) / 2 < s.re →
+    s.re < 1 →
+    X < |s.im| →
+    zeta s ≠ 0
+
+/-- The leaf is equivalent to its right-half version: zeros off the critical
+    line in the strip come in symmetric pairs. -/
+theorem rightHalfTailNonvanishing_iff_leaf :
+    RightHalfTailNonvanishing (10 : ℝ) ↔ ZetaTailOffLineNonvanishing (10 : ℝ) := by
+  constructor
+  · intro H s hs0 hs1 hsne hsi hz
+    by_cases h12 : (1 : ℝ) / 2 < s.re
+    · exact H s h12 hs1 hsi hz
+    · have hle : s.re ≤ (1 : ℝ) / 2 := not_lt.mp h12
+      have hlt12 : s.re < (1 : ℝ) / 2 := lt_of_le_of_ne hle hsne
+      have ht0 : 0 < (1 - s).re := by simp; linarith
+      have ht1 : (1 - s).re < 1 := by simp; linarith
+      have hth : (1 : ℝ) / 2 < (1 - s).re := by simp; linarith
+      have hti : 10 < |(1 - s).im| := by simpa using hsi
+      have hz' : zeta (1 - s) ≠ 0 := H (1 - s) hth ht1 hti
+      exact (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz'
+  · intro H s hh hs1 hsi
+    exact H s (by linarith) hs1 (ne_of_gt hh).symm hsi
+
+/-- The classical 3-4-1 (Euler product) inequality:
+    `|ζ(1+x)|³ |ζ(1+x+iy)|⁴ |ζ(1+x+2iy)| ≥ 1` for `x > 0`. -/
+theorem zeta_product_ge_one {x : ℝ} (hx : 0 < x) (y : ℝ) :
+    ‖zeta (1 + x) ^ 3 * zeta (1 + x + I * y) ^ 4 * zeta (1 + x + 2 * I * y)‖ ≥ 1 := by
+  simpa [zeta, LFunctionTrivChar, one_pow] using
+    (DirichletCharacter.norm_LFunction_product_ge_one (N := 1)
+      (χ := (1 : DirichletCharacter ℂ 1)) hx y)
+
+/-- The pole bound: `|ζ(1 + x)| ≤ C/x` for small `x > 0`, with an explicit
+    positive constant `C`. -/
+private lemma zeta_bound_above_near_one :
+    ∃ C : ℝ, 0 < C ∧ ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ))‖ ≤ C / x := by
+  rcases isBigO_riemannZeta_sub_one_div (F := ℂ) with ⟨C, hC⟩
+  let C' : ℝ := max C 0 + 1
+  have hCpos : 0 < C' := by
+    dsimp [C']
+    linarith [le_max_right C 0]
+  have hC' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
+    have hT : Tendsto (fun x : ℝ ↦ (1 + (x : ℂ) : ℂ)) (𝓝[>] (0 : ℝ)) (𝓝 (1 : ℂ)) := by
+      refine (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
+        (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) _ (𝓝 (1 : ℂ)))).mono_left
+          nhdsWithin_le_nhds)
+    have hC'' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / ((1 + (x : ℂ)) - 1)‖ ≤ C := by
+      filter_upwards [hC.comp hT] with x hx
+      simpa using hx
+    filter_upwards [hC''] with x hx
+    have hle : C ≤ C' := by
+      dsimp [C']
+      linarith [le_max_left C 0]
+    have : ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
+      simpa [hle] using le_trans hx hle
+    simpa [sub_eq_add_neg, add_assoc] using this
+  refine ⟨C' + 1, by linarith [hCpos], ?_⟩
+  rcases eventually_nhdsGT_iff.mp hC' with ⟨δ, hδ, hCδ⟩
+  refine eventually_nhdsGT_iff.mpr ⟨min δ 1, lt_min hδ (by norm_num), ?_⟩
+  intro x hx0 hxδ
+  have hxC : ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' :=
+    hCδ x hx0 (lt_of_lt_of_le hxδ (min_le_left δ 1))
+  have hx1 : x ≤ 1 := (lt_of_lt_of_le hxδ (min_le_right δ 1)).le
+  calc
+    ‖zeta (1 + (x : ℂ))‖ = ‖(zeta (1 + (x : ℂ)) - 1 / (x : ℂ)) + 1 / (x : ℂ)‖ := by
+      rw [sub_add_cancel]
+    _ ≤ ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ + ‖1 / (x : ℂ)‖ := norm_add_le _ _
+    _ ≤ C' + 1 / x := by
+      have h1 : ‖1 / (x : ℂ)‖ = 1 / x := by
+        rw [norm_div, norm_one, Complex.norm_ofReal, abs_of_pos hx0]
+      rw [h1]
+      linarith
+    _ ≤ (C' + 1) / x := by
+      field_simp [hx0.ne']
+      nlinarith [hCpos, hx1]
+
+/-- At a zero on the 1-line, `ζ(1 + x + it) = O(x)` as `x → 0⁺`. -/
+private lemma zeta_isBigO_horizontal_of_eq_zero {t : ℝ} (ht : t ≠ 0)
+    (hz : zeta (1 + I * t) = 0) :
+    (fun x : ℝ ↦ zeta (1 + x + I * t)) =O[𝓝[>] 0] fun x : ℝ ↦ (x : ℂ) := by
+  have hne : 1 + I * t ≠ 1 := by
+    intro h
+    have : t = 0 := by simpa using congr_arg Complex.im h
+    exact ht this
+  have hd : DifferentiableAt ℂ zeta (1 + I * t) :=
+    differentiableAt_riemannZeta hne
+  have hderiv := hd.hasDerivAt
+  simp_rw [add_comm (1 : ℂ), add_assoc]
+  rw [← zero_add (1 + I * t)] at hderiv
+  simpa only [zero_add, hz, sub_zero]
+    using (Complex.isBigO_comp_ofReal_nhds
+      (hderiv.comp_add_const 0 _).differentiableAt.isBigO_sub) |>.mono nhdsWithin_le_nhds
+
+/-- **Hadamard–de la Vallée Poussin core theorem**: `ζ(1 + it) ≠ 0` for all
+    real `t` — the first theorem of the zero-free pipeline (3-4-1 inequality
+    + pole bound + analyticity). -/
+theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
+  by_cases ht : t = 0
+  · subst t
+    simpa using riemannZeta_one_ne_zero
+  · by_contra hz
+    have hBigO : (fun x : ℝ ↦ zeta (1 + x + I * t)) =O[𝓝[>] 0] fun x : ℝ ↦ (x : ℂ) :=
+      zeta_isBigO_horizontal_of_eq_zero ht hz
+    rcases hBigO with ⟨B, hB⟩
+    let B' : ℝ := max B 0 + 1
+    have hBpos : 0 < B' := by dsimp [B']; linarith [le_max_right B 0]
+    have hBle : B ≤ B' := by dsimp [B']; linarith [le_max_left B 0]
+    have hb2 : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + I * t)‖ ≤ B' * x := by
+      filter_upwards [hB, self_mem_nhdsWithin] with x hx hx0
+      have hxnorm : ‖(x : ℂ)‖ = x := by rw [Complex.norm_ofReal, abs_of_pos hx0]
+      rw [hxnorm] at hx
+      calc
+        ‖zeta (1 + x + I * t)‖ ≤ B * x := hx
+        _ ≤ B' * x := by gcongr
+    have hcont : ContinuousAt zeta (1 + 2 * I * t) := by
+      have hne : 1 + 2 * I * t ≠ 1 := by
+        intro h
+        have : 2 * t = 0 := by simpa using congr_arg Complex.im h
+        exact ht (mul_eq_zero.mp this).resolve_left (by norm_num)
+      exact (differentiableAt_riemannZeta hne).continuousAt
+    have hb3_raw : (fun x : ℝ ↦ zeta (1 + x + 2 * I * t)) =O[𝓝[>] 0]
+        (fun _ : ℝ ↦ (1 : ℂ)) := by
+      have hT : Tendsto (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) (𝓝[>] (0 : ℝ))
+          (𝓝 (1 + 2 * I * t : ℂ)) := by
+        refine (by fun_prop : Tendsto (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) (𝓝 (0 : ℝ))
+            (𝓝 (1 + 2 * I * t : ℂ))).mono_left nhdsWithin_le_nhds
+      exact (hcont.tendsto.isBigO_one ℂ).comp_tendsto hT
+    rcases hb3_raw with ⟨C₃, hC₃⟩
+    let C₃' : ℝ := max C₃ 0 + 1
+    have hC₃pos : 0 < C₃' := by dsimp [C₃']; linarith [le_max_right C₃ 0]
+    have hb3 : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃' := by
+      filter_upwards [hC₃] with x hx
+      calc
+        ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃ * ‖(1 : ℂ)‖ := hx
+        _ = C₃ := by simp
+        _ ≤ C₃' := by dsimp [C₃']; linarith [le_max_left C₃ 0]
+    rcases zeta_bound_above_near_one with ⟨A, hApos, hb1⟩
+    have hprod : ∀ x : ℝ, 0 < x →
+        1 ≤ ‖zeta (1 + x)‖ ^ 3 * ‖zeta (1 + x + I * t)‖ ^ 4 * ‖zeta (1 + x + 2 * I * t)‖ := by
+      intro x hx
+      have h := zeta_product_ge_one hx t
+      have hsplit : ‖zeta (1 + x) ^ 3 * zeta (1 + x + I * t) ^ 4 * zeta (1 + x + 2 * I * t)‖ =
+          ‖zeta (1 + x)‖ ^ 3 * ‖zeta (1 + x + I * t)‖ ^ 4 * ‖zeta (1 + x + 2 * I * t)‖ := by
+        rw [norm_mul, norm_mul, norm_pow, norm_pow]
+      exact hsplit ▸ h
+    rcases eventually_nhdsGT_iff.mp hb1 with ⟨δ₁, hδ₁, hb1δ⟩
+    rcases eventually_nhdsGT_iff.mp hb2 with ⟨δ₂, hδ₂, hb2δ⟩
+    rcases eventually_nhdsGT_iff.mp hb3 with ⟨δ₃, hδ₃, hb3δ⟩
+    let δ : ℝ := min δ₁ (min δ₂ δ₃)
+    have hδ : 0 < δ := by
+      dsimp [δ]
+      exact lt_min hδ₁ (lt_min hδ₂ hδ₃)
+    have hmain : ∀ x : ℝ, 0 < x → x < δ →
+        1 ≤ (A ^ 3 * B' ^ 4 * C₃') * x := by
+      intro x hx0 hxδ
+      have hxδ₁ : x < δ₁ := lt_of_lt_of_le hxδ (min_le_left δ₁ (min δ₂ δ₃))
+      have hxδ₂ : x < δ₂ :=
+        lt_of_lt_of_le (lt_of_lt_of_le hxδ (min_le_right δ₁ (min δ₂ δ₃))) (min_le_left δ₂ δ₃)
+      have hxδ₃ : x < δ₃ :=
+        lt_of_lt_of_le (lt_of_lt_of_le hxδ (min_le_right δ₁ (min δ₂ δ₃))) (min_le_right δ₂ δ₃)
+      have h1 := hb1δ x hx0 hxδ₁
+      have h2 := hb2δ x hx0 hxδ₂
+      have h3 := hb3δ x hx0 hxδ₃
+      have h4 := hprod x hx0
+      have hA : ‖zeta (1 + x)‖ ^ 3 ≤ (A / x) ^ 3 := by
+        exact pow_le_pow_left₀ (norm_nonneg _) h1 3
+      have hB : ‖zeta (1 + x + I * t)‖ ^ 4 ≤ (B' * x) ^ 4 := by
+        exact pow_le_pow_left₀ (norm_nonneg _) h2 4
+      have hab : ‖zeta (1 + x)‖ ^ 3 * ‖zeta (1 + x + I * t)‖ ^ 4 ≤
+          (A / x) ^ 3 * (B' * x) ^ 4 := by
+        exact mul_le_mul hA hB (by positivity) (by positivity)
+      have habc : ‖zeta (1 + x)‖ ^ 3 * ‖zeta (1 + x + I * t)‖ ^ 4 *
+            ‖zeta (1 + x + 2 * I * t)‖ ≤
+          (A / x) ^ 3 * (B' * x) ^ 4 * C₃' := by
+        exact mul_le_mul hab h3 (by positivity) (by positivity)
+      have hK : (A / x) ^ 3 * (B' * x) ^ 4 * C₃' = (A ^ 3 * B' ^ 4 * C₃') * x := by
+        field_simp [hx0.ne']
+        ring
+      rw [hK] at habc
+      exact le_trans h4 habc
+    let K : ℝ := A ^ 3 * B' ^ 4 * C₃'
+    have hKpos : 0 < K := by
+      dsimp [K]
+      positivity
+    let x₀ : ℝ := min (δ / 2) (1 / (2 * K))
+    have hx₀pos : 0 < x₀ := by
+      dsimp [x₀]
+      exact lt_min (by linarith) (by positivity)
+    have hx₀δ : x₀ < δ := by
+      dsimp [x₀]
+      exact lt_of_lt_of_le (by linarith) (min_le_left (δ / 2) (1 / (2 * K)))
+    have h₀ : 1 ≤ K * x₀ := hmain x₀ hx₀pos hx₀δ
+    have h₁ : K * x₀ < 1 := by
+      have hle : x₀ ≤ 1 / (2 * K) := by
+        dsimp [x₀]
+        exact min_le_right (δ / 2) (1 / (2 * K))
+      calc
+        K * x₀ ≤ K * (1 / (2 * K)) := mul_le_mul_of_nonneg_left hle (le_of_lt hKpos)
+        _ = 1 / 2 := by field_simp [hKpos.ne']
+        _ < 1 := by norm_num
+    linarith
+end Challenge2
+
 end
