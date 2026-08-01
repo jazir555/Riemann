@@ -1,4 +1,4 @@
-import Mathlib
+﻿import Mathlib
 
 set_option maxHeartbeats 1000000
 
@@ -11932,6 +11932,78 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
         _ = 1 / 2 := by field_simp [hKpos.ne']
         _ < 1 := by norm_num
     linarith
+
+/-!
+# Completion of the exponential tail bound for Λ₀
+-/
+
+noncomputable section
+open Complex Real
+
+namespace TailBound
+
+/-- The kernel in the Mellin-Fourier representation of Λ₀(1/2+iz). -/
+noncomputable def kernel (u : ℂ) : ℂ :=
+  Real.exp (-(1/4 : ℂ) * u) * (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
+
+/-- The kernel is analytic in a strip of width δ > 0. -/
+lemma kernel_analytic_strip (δ : ℝ) (hδ : 0 < δ) :
+    ∀ u : ℂ, |u.im| < δ → AnalyticAt ℂ kernel u :=
+begin
+  sorry
+end
+
+/-- The kernel decays super-exponentially in the strip. -/
+lemma kernel_decay_strip (δ : ℝ) (hδ : 0 < δ) (ε : ℝ) (hε : 0 < ε) :
+    ∃ C : ℝ, ∀ u : ℂ, |u.im| < δ → ‖kernel u‖ ≤ C * Real.exp (-ε * |u.re|) :=
+begin
+  sorry
+end
+
+/-- The Fourier transform of a function analytic in a strip decays exponentially. -/
+lemma fourier_transform_decay_of_analytic_strip
+    (δ : ℝ) (hδ : 0 < δ)
+    (h : ℂ → ℂ) (h_an : ∀ u : ℂ, |u.im| < δ → AnalyticAt ℂ h u)
+    (h_decay : ∀ ε > 0, ∃ C : ℝ, ∀ u : ℂ, |u.im| < δ → ‖h u‖ ≤ C * Real.exp (-ε * |u.re|))
+    (ξ : ℝ) :
+    ∃ C : ℝ, ‖FourierTransform.fourier (fun x : ℝ => h (x : ℂ)) ξ‖ ≤ C * Real.exp (-2 * π * δ * |ξ|) :=
+begin
+  sorry
+end
+
+/-- The Fourier representation of Λ₀(1/2+iz). -/
+theorem Lambda0_fourier_rep (z : ℂ) (hgt : -(1/2) < z.im) (hlt : z.im < 1/2) :
+    completedRiemannZeta₀ (1/2 + I*z) =
+      (1/2) * FourierTransform.fourier (fun x : ℝ => kernel (x : ℂ)) (z.re / (2 * π)) :=
+begin
+  sorry
+end
+
+/-- The main exponential tail bound for Λ₀. -/
+theorem Lambda0_exponential_tail (z : ℂ)
+    (hx : 10 < z.re) (hgt : -(1/2) < z.im) (hlt : z.im < 1/2) (hne : z.im ≠ 0) :
+    ‖completedRiemannZeta₀ (1/2 + I*z)‖ ≤ Real.exp (-z.re) :=
+begin
+  rw [Lambda0_fourier_rep z hgt hlt],
+  have hδ : 0 < 1 := by norm_num,
+  have h_an := kernel_analytic_strip 1 hδ,
+  have h_dec := kernel_decay_strip 1 hδ 1 (by norm_num),
+  rcases fourier_transform_decay_of_analytic_strip 1 hδ kernel h_an h_dec (z.re / (2*π)) with ⟨C, hC⟩,
+  sorry
+end
+
+end TailBound
+
+def completedZetaTailU10_from_exp : CompletedZetaTailU10 :=
+{ bound := by
+    intro z hx hgt hlt hne
+    have h1 := Lambda0_exponential_tail z hx hgt hlt hne
+    have h2 : Real.exp (-z.re) ≤ tailU z.re z.im :=
+    begin
+      sorry
+    end
+    exact le_trans h1 h2
+}
 end Challenge2
 
 end
