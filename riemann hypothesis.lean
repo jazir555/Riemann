@@ -11731,7 +11731,8 @@ theorem rightHalfTailNonvanishing_iff_leaf :
       have hti : 10 < |(1 - s).im| := by simpa using hsi
       have hz' : zeta (1 - s) ≠ 0 := H (1 - s) hth ht1 hti
       have hsub : 1 - (1 - s) = s := by ring
-      exact (by simpa [hsub] using (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz') hz
+      have hns : zeta s ≠ 0 := by simpa [hsub] using (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz'
+      exact hns hz
   · intro H s hh hs1 hsi
     exact H s (by linarith) hs1 (ne_of_gt hh) hsi
 
@@ -11746,7 +11747,7 @@ theorem zeta_product_ge_one {x : ℝ} (hx : 0 < x) (y : ℝ) :
 /-- The pole bound: `|ζ(1 + x)| ≤ C/x` for small `x > 0`, with an explicit
     positive constant `C`. -/
 private lemma zeta_bound_above_near_one :
-    ∃ C : ℝ, 0 < C ∧ ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ))‖ ≤ C / x := by
+    ∃ C : ℝ, 0 < C ∧ ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ))‖ ≤ C / x := by
   have hbigO : ∃ C : ℝ, IsBigOWith C (𝓝 (1 : ℂ))
       (fun s : ℂ ↦ riemannZeta s - 1 / (s - 1)) (fun _ : ℂ ↦ (1 : ℂ)) := by
     simpa [IsBigO_def] using (isBigO_riemannZeta_sub_one_div (F := ℂ))
@@ -11756,14 +11757,14 @@ private lemma zeta_bound_above_near_one :
   have hCpos : 0 < C' := by
     dsimp [C']
     linarith [le_max_right C 0]
-  have hC' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
+  have hC' : ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
     have hT : Tendsto (fun x : ℝ ↦ (1 + (x : ℂ) : ℂ)) (𝓝[>] (0 : ℝ)) (𝓝 (1 : ℂ)) := by
       have : Tendsto (fun x : ℝ ↦ (1 : ℂ) + (x : ℂ)) (𝓝 (0 : ℝ)) (𝓝 ((1 : ℂ) + (0 : ℂ))) :=
         (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) (𝓝 0) (𝓝 (1 : ℂ))).add
           (Complex.continuous_ofReal.tendsto (0 : ℝ))
       simp only [show (1 : ℂ) + (0 : ℂ) = (1 : ℂ) from by norm_num] at this
       exact this.mono_left (@nhdsWithin_le_nhds ℝ _ 0 (Set.Ioi 0))
-    have hC'' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / ((1 + (x : ℂ)) - 1)‖ ≤ C := by
+    have hC'' : ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / ((1 + (x : ℂ)) - 1)‖ ≤ C := by
       filter_upwards [hT.eventually hC] with x hx
       simp only [norm_one, mul_one] at hx
       simpa [zeta] using hx
@@ -11827,7 +11828,7 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
     let B' : ℝ := max B 0 + 1
     have hBpos : 0 < B' := by dsimp [B']; linarith [le_max_right B 0]
     have hBle : B ≤ B' := by dsimp [B']; linarith [le_max_left B 0]
-    have hb2 : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + I * t)‖ ≤ B' * x := by
+    have hb2 : ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + I * t)‖ ≤ B' * x := by
       filter_upwards [hB, self_mem_nhdsWithin] with x hx hx0
       have hxnorm : ‖(x : ℂ)‖ = x := by rw [Complex.norm_ofReal, abs_of_pos hx0]
       rw [hxnorm] at hx
@@ -11861,7 +11862,7 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
     rw [isBigOWith_iff] at hC₃
     let C₃' : ℝ := max C₃ 0 + 1
     have hC₃pos : 0 < C₃' := by dsimp [C₃']; linarith [le_max_right C₃ 0]
-    have hb3 : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃' := by
+    have hb3 : ∀ᶠ (x : ℝ) in 𝓝[>] (0 : ℝ), ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃' := by
       filter_upwards [hC₃] with x hx
       calc
         ‖zeta (1 + x + 2 * I * t)‖ ≤ C₃ * ‖(1 : ℂ)‖ := hx
@@ -11908,7 +11909,6 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
         exact mul_le_mul hab h3 (by positivity) (by positivity)
       have hK : (A / x) ^ 3 * (B' * x) ^ 4 * C₃' = (A ^ 3 * B' ^ 4 * C₃') * x := by
         field_simp [hx0.ne']
-        ring
       rw [hK] at habc
       exact le_trans h4 habc
     let K : ℝ := A ^ 3 * B' ^ 4 * C₃'
@@ -11921,7 +11921,7 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
       exact lt_min (by linarith) (by positivity)
     have hx₀δ : x₀ < δ := by
       dsimp [x₀]
-      exact lt_of_lt_of_le (by linarith) (min_le_left (δ / 2) (1 / (2 * K)))
+      exact lt_of_le_of_lt (min_le_left _ _) (by linarith)
     have h₀ : 1 ≤ K * x₀ := hmain x₀ hx₀pos hx₀δ
     have h₁ : K * x₀ < 1 := by
       have hle : x₀ ≤ 1 / (2 * K) := by
