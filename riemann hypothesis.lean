@@ -11649,11 +11649,13 @@ private lemma eventually_nhdsGT_iff {P : ℝ → Prop} :
     rcases (Metric.isOpen_iff.mp ht_open) 0 ht0 with ⟨δ, hδ, hball⟩
     refine ⟨δ, hδ, ?_⟩
     intro x hx0 hxδ
-    exact hsub ⟨by simpa [Real.dist_eq, abs_of_pos hx0] using hxδ, hx0⟩
+    exact hsub ⟨hball (by simpa [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos hx0] using hxδ), hx0⟩
   · rintro ⟨δ, hδ, hP⟩
     refine mem_nhdsWithin.mpr ⟨Metric.ball (0 : ℝ) δ, Metric.isOpen_ball, Metric.mem_ball_self hδ, ?_⟩
-    intro x hx
-    exact hP x hx.2 (by simpa [Real.dist_eq, abs_of_pos hx.2] using hx.1)
+    rintro x ⟨hxd, hx0⟩
+    have hx0' : 0 < x := hx0
+    simp only [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos hx0'] at hxd
+    exact hP x hx0' hxd
 
 /-- Functional-equation symmetry of nonvanishing in the critical strip:
     `ζ(s) ≠ 0` iff `ζ(1 - s) ≠ 0` for `0 < Re s < 1`. -/
@@ -11729,8 +11731,7 @@ theorem rightHalfTailNonvanishing_iff_leaf :
       have hti : 10 < |(1 - s).im| := by simpa using hsi
       have hz' : zeta (1 - s) ≠ 0 := H (1 - s) hth ht1 hti
       have hsub : 1 - (1 - s) = s := by ring
-      exact (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz'
-        (by simpa [hsub] using hz)
+      exact (by simpa [hsub] using (zeta_ne_zero_iff_one_sub_ne_zero_of_strip ht0 ht1).mp hz') hz
   · intro H s hh hs1 hsi
     exact H s (by linarith) hs1 (ne_of_gt hh) hsi
 
@@ -11757,12 +11758,14 @@ private lemma zeta_bound_above_near_one :
     linarith [le_max_right C 0]
   have hC' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / (x : ℂ)‖ ≤ C' := by
     have hT : Tendsto (fun x : ℝ ↦ (1 + (x : ℂ) : ℂ)) (𝓝[>] (0 : ℝ)) (𝓝 (1 : ℂ)) := by
-      simpa using
-        (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
-          (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) _ (𝓝 (1 : ℂ)))).mono_left
-            nhdsWithin_le_nhds)
+      have : Tendsto (fun x : ℝ ↦ (1 : ℂ) + (x : ℂ)) (𝓝 (0 : ℝ)) (𝓝 ((1 : ℂ) + (0 : ℂ))) :=
+        (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 : ℂ)) (𝓝 0) (𝓝 (1 : ℂ))).add
+          (Complex.continuous_ofReal.tendsto (0 : ℝ))
+      simp only [show (1 : ℂ) + (0 : ℂ) = (1 : ℂ) from by norm_num] at this
+      exact this.mono_left (@nhdsWithin_le_nhds ℝ _ 0 (Set.Ioi 0))
     have hC'' : ∀ᶠ x in 𝓝[>] (0 : ℝ), ‖zeta (1 + (x : ℂ)) - 1 / ((1 + (x : ℂ)) - 1)‖ ≤ C := by
-      filter_upwards [hC.comp hT] with x hx
+      filter_upwards [hT.eventually hC] with x hx
+      simp only [norm_one, mul_one] at hx
       simpa [zeta] using hx
     filter_upwards [hC''] with x hx
     have hle : C ≤ C' := by
@@ -11835,17 +11838,24 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
       have hne : 1 + 2 * I * t ≠ 1 := by
         intro h
         have : 2 * t = 0 := by simpa using congr_arg Complex.im h
-        exact ht (mul_eq_zero.mp this).resolve_left (by norm_num)
+        exact ht ((mul_eq_zero.mp this).resolve_left (by norm_num))
       exact (differentiableAt_riemannZeta hne).continuousAt
     have hb3_raw : (fun x : ℝ ↦ zeta (1 + x + 2 * I * t)) =O[𝓝[>] 0]
         (fun _ : ℝ ↦ (1 : ℂ)) := by
       have hT : Tendsto (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) (𝓝[>] (0 : ℝ))
           (𝓝 (1 + 2 * I * t : ℂ)) := by
-        simpa using
-          (((Complex.continuous_ofReal.tendsto (0 : ℝ)).add
-            (tendsto_const_nhds : Tendsto (fun _ : ℝ ↦ (1 + 2 * I * t : ℂ)) _ (𝓝 (1 + 2 * I * t : ℂ)))).mono_left
-              nhdsWithin_le_nhds)
-      exact (hcont.tendsto.isBigO_one ℂ).comp_tendsto hT
+        have h_eq : (fun x : ℝ ↦ (1 + x + 2 * I * t : ℂ)) =
+            (fun x : ℝ ↦ (1 + 2 * I * t : ℂ) + (x : ℂ)) := by
+          funext x; ring
+        rw [h_eq]
+        have : Tendsto (fun x : ℝ ↦ (1 + 2 * I * t : ℂ) + (x : ℂ)) (𝓝 (0 : ℝ))
+            (𝓝 ((1 + 2 * I * t : ℂ) + (0 : ℂ))) :=
+          (tendsto_const_nhds :
+              Tendsto (fun _ : ℝ ↦ (1 + 2 * I * t : ℂ)) (𝓝 0) (𝓝 (1 + 2 * I * t : ℂ))).add
+            (Complex.continuous_ofReal.tendsto (0 : ℝ))
+        simp only [show (1 + 2 * I * t : ℂ) + (0 : ℂ) = (1 + 2 * I * t : ℂ) from by norm_num] at this
+        exact this.mono_left (@nhdsWithin_le_nhds ℝ _ 0 (Set.Ioi 0))
+      exact (hcont.tendsto.isBigO_one (F := ℂ)).comp_tendsto hT
     rw [IsBigO_def] at hb3_raw
     rcases hb3_raw with ⟨C₃, hC₃⟩
     rw [isBigOWith_iff] at hC₃
