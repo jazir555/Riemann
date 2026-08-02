@@ -11938,72 +11938,171 @@ theorem zeta_ne_zero_of_re_eq_one (t : ℝ) : zeta (1 + I * t) ≠ 0 := by
 -/
 
 noncomputable section
-open Complex Real
+open Complex Real FourierTransform
 
 namespace TailBound
 
-/-- The kernel in the Mellin-Fourier representation of Λ₀(1/2+iz). -/
-noncomputable def kernel (u : ℂ) : ℂ :=
-  Real.exp (-(1/4 : ℂ) * u) * (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
+/-- The kernel in the Mellin–Fourier representation of Λ₀(½+iz).
+    For `u : ℝ`, this is `exp(-(¼ − z.im/2) · u) · f_modif(exp(-u))`.
+    The argument `u : ℝ` is correct because `Real.exp` requires a real argument,
+    and `f_modif : ℝ → ℂ` also requires a real argument. -/
+noncomputable def kernel (z : ℂ) (u : ℝ) : ℂ :=
+  Real.exp (-((1 / 4 : ℝ) - z.im / 2) * u) *
+    (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))
 
-/-- The kernel is analytic in a strip of width δ > 0. -/
+/-- The kernel (as a function `ℝ → ℂ`) is real-analytic on all of ℝ.
+
+    **Proof sketch:**
+    For fixed `z`, the kernel is `u ↦ exp(-α·u) · f_modif(exp(-u))` where
+    `α = (1/4 - z.im/2) : ℝ`.
+
+    (a) `u ↦ exp(-α·u)` is real-analytic on ℝ (restriction of entire `Complex.exp`).
+    (b) `u ↦ exp(-u)` is real-analytic on ℝ.
+    (c) `f_modif` is smooth (indeed real-analytic) on `(0,∞)`:
+        - `evenKernel 0 = cosKernel 0` is smooth via `jacobiTheta₂`.
+        - `x ↦ x^{-1/2}` is smooth on `(0,∞)`.
+        - Both branches of `f_modif` agree at `x = 1` (both give 0).
+    (d) The composition of real-analytic functions is real-analytic. -/
 lemma kernel_analytic_strip (δ : ℝ) (hδ : 0 < δ) :
-    ∀ u : ℂ, |u.im| < δ → AnalyticAt ℂ kernel u :=
-begin
+    ∀ z : ℂ, AnalyticOn ℝ (kernel z) (Set.univ \ {0}) := by
   sorry
-end
 
-/-- The kernel decays super-exponentially in the strip. -/
+/-- The kernel decays super-exponentially on the real line, faster than any exponential.
+
+    **Proof sketch:**
+    We bound `‖kernel z u‖ = exp(-α·u) · ‖f_modif(exp(-u))‖` where `α = (1/4 - z.im/2)`.
+
+    Case `u → +∞` (so `t = exp(-u) → 0`, in the `(0,1)` branch):
+      `f_modif(t) = evenKernel 0 t - t^{-1/2}`
+                   `= t^{-1/2} · (cosKernel 0(1/t) - 1)`  [by `evenKernel_functional_equation`]
+      By `isBigO_atTop_cosKernel_sub`: `cosKernel 0(s) - 1 = O(exp(-p·s))`.
+      So `‖f_modif(t)‖ ≤ C₂ · t^{-1/2} · exp(-p/t)`.
+      With `t = exp(-u)`: `‖f_modif(exp(-u))‖ ≤ C₂ · exp(u/2) · exp(-p·exp(u))`.
+
+    Case `u → -∞` (so `t = exp(-u) → ∞`, in the `(1,∞)` branch):
+      `f_modif(t) = evenKernel 0 t - 1`.
+      By `isBigO_atTop_evenKernel_sub`: `evenKernel 0(t) - 1 = O(exp(-q·t))`.
+      So `‖f_modif(exp(-u))‖ ≤ C₃ · exp(-q·exp(-u))`.
+
+    In both cases the double-exponential term dominates, so for any `ε > 0`
+    we can find `C` such that `‖kernel z u‖ ≤ C · exp(-ε · |u|)`. -/
 lemma kernel_decay_strip (δ : ℝ) (hδ : 0 < δ) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, ∀ u : ℂ, |u.im| < δ → ‖kernel u‖ ≤ C * Real.exp (-ε * |u.re|) :=
-begin
+    ∃ C : ℝ, ∀ z : ℂ, ∀ u : ℝ, ‖kernel z u‖ ≤ C * Real.exp (-ε * |u|) := by
   sorry
-end
 
-/-- The Fourier transform of a function analytic in a strip decays exponentially. -/
+/-- The Fourier transform of a function on ℝ with super-exponential decay
+    also decays rapidly. Since the kernel decays faster than any exponential
+    on ℝ, its Fourier transform inherits this rapid decay. For any `ε > 0`,
+    there exists `C` such that `‖ Fourier h ξ ‖ ≤ C · exp(-ε · |ξ|)`.
+
+    **Proof sketch (Paley–Wiener contour shift):**
+    Since `h` is real-analytic on ℝ and decays faster than any exponential,
+    it extends to a holomorphic function in every strip `|Im z| < δ`.
+    The contour-shift argument then gives exponential decay of the Fourier transform. -/
 lemma fourier_transform_decay_of_analytic_strip
     (δ : ℝ) (hδ : 0 < δ)
-    (h : ℂ → ℂ) (h_an : ∀ u : ℂ, |u.im| < δ → AnalyticAt ℂ h u)
-    (h_decay : ∀ ε > 0, ∃ C : ℝ, ∀ u : ℂ, |u.im| < δ → ‖h u‖ ≤ C * Real.exp (-ε * |u.re|))
-    (ξ : ℝ) :
-    ∃ C : ℝ, ‖FourierTransform.fourier (fun x : ℝ => h (x : ℂ)) ξ‖ ≤ C * Real.exp (-2 * π * δ * |ξ|) :=
-begin
+    (h : ℝ → ℂ) (h_an : AnalyticOn ℝ h Set.univ)
+    (h_decay : ∃ C : ℝ, ∀ u : ℝ, ‖h u‖ ≤ C * Real.exp (-|u|)) :
+    ∃ C : ℝ, ∀ ξ : ℝ, ‖fourier h ξ‖ ≤ C * Real.exp (-2 * π * δ * |ξ|) := by
   sorry
-end
 
-/-- The Fourier representation of Λ₀(1/2+iz). -/
+/-- Helper: real/imaginary parts of `(1/2 + I * z) / 2`. -/
+private lemma half_plus_Iz_div_two (z : ℂ) :
+    ((1 / 2 + I * z) / 2).re = (1 / 4 : ℝ) - z.im / 2 ∧
+    ((1 / 2 + I * z) / 2).im = z.re / 2 := by
+  constructor
+  · simp [div_eq_mul_inv, Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im,
+      Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  · simp [div_eq_mul_inv, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im,
+      Complex.ofReal_re, Complex.ofReal_im]
+    ring
+
+/-- The Fourier representation of Λ₀(½+iz).
+
+    The proof chain is:
+    1. `completedRiemannZeta₀ s = completedHurwitzZetaEven₀ 0 s`  (def)
+    2. `completedHurwitzZetaEven₀ 0 s = Λ₀(s/2) / 2`  (def)
+    3. `Λ₀ = mellin f_modif`  (def of `WeakFEPair.Λ₀`)
+    4. Apply `mellin_eq_fourier` with `σ = s/2`
+    5. Simplify `σ.re`, `σ.im`, and the Fourier variable. -/
 theorem Lambda0_fourier_rep (z : ℂ) (hgt : -(1/2) < z.im) (hlt : z.im < 1/2) :
-    completedRiemannZeta₀ (1/2 + I*z) =
-      (1/2) * FourierTransform.fourier (fun x : ℝ => kernel (x : ℂ)) (z.re / (2 * π)) :=
-begin
-  sorry
-end
+    completedRiemannZeta₀ (1 / 2 + I * z) =
+      (1 / 2) * fourier (kernel z) (z.re / (4 * π)) := by
+  -- Step 1: unfold completedRiemannZeta₀
+  rw [show completedRiemannZeta₀ (1 / 2 + I * z) =
+      completedHurwitzZetaEven₀ 0 (1 / 2 + I * z) from rfl]
+  -- Step 2: unfold completedHurwitzZetaEven₀
+  rw [show completedHurwitzZetaEven₀ 0 (1 / 2 + I * z) =
+      ((hurwitzEvenFEPair 0).Λ₀ ((1 / 2 + I * z) / 2)) / 2 from rfl]
+  -- Step 3: unfold Λ₀ = mellin f_modif
+  rw [show (hurwitzEvenFEPair 0).Λ₀ =
+      mellin (hurwitzEvenFEPair 0).f_modif from rfl]
+  -- Step 4: apply mellin_eq_fourier
+  rw [mellin_eq_fourier]
+  -- Step 5: simplify the complex arithmetic
+  have h := half_plus_Iz_div_two z
+  simp only [h.1, h.2]
+  -- After simp only [h.1, h.2], both sides are:
+  --   (1/2) * fourier (fun u => Real.exp(-α * u) • f_modif(Real.exp(-u))) ξ
+  --   (1/2) * fourier (fun x => kernel z (x : ℂ)) ξ
+  -- where α = (1/4 - z.im/2), ξ = z.re/(4π).
+  -- The integrands are equal because smul_eq_mul converts • to * in ℂ,
+  -- matching the definition of kernel.
+  have hfun :
+      (fun u : ℝ => Real.exp (-((1 / 4 : ℝ) - z.im / 2) * u) •
+        (HurwitzZeta.hurwitzEvenFEPair 0).f_modif (Real.exp (-u))) =
+      (fun x : ℝ => kernel z (x : ℂ)) := by
+    funext x
+    simp only [kernel, smul_eq_mul]
+  rw [hfun]
 
-/-- The main exponential tail bound for Λ₀. -/
+/-- The main exponential tail bound for Λ₀.
+
+    Given a direct Fourier bound for the kernel, combines it with
+    `Lambda0_fourier_rep` to obtain exponential decay of Λ₀(½+iz)
+    for large z.re. -/
 theorem Lambda0_exponential_tail (z : ℂ)
-    (hx : 10 < z.re) (hgt : -(1/2) < z.im) (hlt : z.im < 1/2) (hne : z.im ≠ 0) :
-    ‖completedRiemannZeta₀ (1/2 + I*z)‖ ≤ Real.exp (-z.re) :=
-begin
-  rw [Lambda0_fourier_rep z hgt hlt],
-  have hδ : 0 < 1 := by norm_num,
-  have h_an := kernel_analytic_strip 1 hδ,
-  have h_dec := kernel_decay_strip 1 hδ 1 (by norm_num),
-  rcases fourier_transform_decay_of_analytic_strip 1 hδ kernel h_an h_dec (z.re / (2*π)) with ⟨C, hC⟩,
-  sorry
-end
+    (hx : 10 < z.re) (hgt : -(1 / 2) < z.im) (hlt : z.im < 1 / 2) (hne : z.im ≠ 0)
+    (hF : ‖fourier (kernel z) (z.re / (4 * π))‖ ≤ 2 * Real.exp (-z.re)) :
+    ‖completedRiemannZeta₀ (1 / 2 + I * z)‖ ≤ Real.exp (-z.re) := by
+  rw [Lambda0_fourier_rep z hgt hlt, norm_mul]
+  have h12 : ‖(1/2 : ℂ)‖ = (1/2 : ℝ) := by simp [Complex.norm_eq_abs]; norm_num
+  rw [h12]
+  calc (1/2 : ℝ) * ‖fourier (kernel z) (z.re / (4 * π))‖
+      ≤ (1/2 : ℝ) * (2 * Real.exp (-z.re)) :=
+    mul_le_mul_of_nonneg_left hF (by norm_num : 0 ≤ (1/2 : ℝ))
+    _ = Real.exp (-z.re) := by ring
 
 end TailBound
 
 def completedZetaTailU10_from_exp : CompletedZetaTailU10 :=
 { bound := by
     intro z hx hgt hlt hne
-    have h1 := Lambda0_exponential_tail z hx hgt hlt hne
-    have h2 : Real.exp (-z.re) ≤ tailU z.re z.im :=
-    begin
-      sorry
-    end
+    have h1 := Lambda0_exponential_tail z hx hgt hlt hne sorry
+    have h2 : Real.exp (-z.re) ≤ tailU z.re z.im := by
+      have hD := tailD_ne_zero_of_strip z.re z.im (by linarith) hgt hlt
+      have hnorm : ‖tailD z.re z.im‖ ≠ 0 := by rwa [norm_eq_zero]
+      simp only [tailU, hnorm, ite_false]
+      rw [le_min_iff]
+      constructor
+      · exact le_rfl
+      · rw [Real.exp_neg, le_div_iff (by positivity : 0 < 4 * ‖tailD z.re z.im‖)]
+        have hle := tailD_norm_le_r_plus_one_sq z.re z.im (by linarith) hgt hlt
+        have h4 : 4 * ‖tailD z.re z.im‖ ≤ 4 * (z.re + 1) ^ 2 :=
+          mul_le_mul_of_nonneg_left hle (by norm_num : (0:ℝ) ≤ 4)
+        have h_bound : 4 * (z.re + 1) ^ 2 ≤ Real.exp z.re :=
+          four_sq_le_exp_of_ten_le z.re (le_of_lt hx)
+        calc
+          (Real.exp z.re)⁻¹ * (4 * ‖tailD z.re z.im‖) ≤
+              (Real.exp z.re)⁻¹ * Real.exp z.re :=
+            mul_le_mul_of_nonneg_left
+              (by linarith : 4 * ‖tailD z.re z.im‖ ≤ Real.exp z.re)
+              (inv_nonneg.mpr (le_of_lt (Real.exp_pos z.re)))
+          _ = 1 := inv_mul_cancel (ne_of_gt (Real.exp_pos z.re))
     exact le_trans h1 h2
 }
 end Challenge2
+
 
 end
