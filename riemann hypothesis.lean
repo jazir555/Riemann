@@ -11965,7 +11965,29 @@ noncomputable def kernel (z : ℂ) (u : ℝ) : ℂ :=
     (d) The composition of real-analytic functions is real-analytic. -/
 lemma kernel_analytic_strip (δ : ℝ) (hδ : 0 < δ) :
     ∀ z : ℂ, AnalyticOn ℝ (kernel z) (Set.univ \ {0}) := by
-  sorry
+  intro z
+  unfold kernel
+  apply AnalyticOn.mul
+  · -- exp(-α·u) is analytic on ℝ, hence on ℝ \ {0}
+    exact (AnalyticOn.rexp (analyticOn_const.smul analyticOn_id)).mono
+      (Set.diff_subset _ _)
+  · -- f_modif(exp(-u)) is analytic on ℝ \ {0}.
+    -- f_modif for hurwitzEvenFEPair 0 (with a=0, ε=1, k=1/2, f₀=1, g₀=1):
+    --   (Ioi 1).indicator (·↦ ofReal(evenKernel 0 ·) - 1) +
+    --   (Ioo 0 1).indicator (·↦ ofReal(evenKernel 0 ·) - ↑(· ^ (-(1/2))))
+    -- For u > 0: exp(-u) ∈ (0,1) → Ioo branch:
+    --   ofReal(evenKernel 0 (exp(-u))) - ↑((exp(-u)) ^ (-(1/2)))
+    --   Note ↑((exp(-u)) ^ (-(1/2))) = exp(u/2), entire.
+    -- For u < 0: exp(-u) ∈ (1,∞) → Ioi branch:
+    --   ofReal(evenKernel 0 (exp(-u))) - 1
+    -- Core term: evenKernel 0 ∘ exp(-·) = cosKernel 0 ∘ exp(-·)
+    --   = re ∘ jacobiTheta₂ 0 ∘ (I * ·) ∘ exp(-·)
+    -- by evenKernel_eq_cosKernel_of_zero and cosKernel_def.
+    -- jacobiTheta₂ is holomorphic for im τ > 0 (hasFDerivAt_jacobiTheta₂),
+    -- exp(-·) maps ℝ into (0,∞) so im(I * exp(-u)) = exp(-u) > 0,
+    -- making the composition complex-analytic, and AnalyticOn.re_ofReal
+    -- gives real-analyticity of the real part.
+    sorry
 
 /-- The kernel decays super-exponentially on the real line, faster than any exponential.
 
@@ -12004,6 +12026,17 @@ lemma fourier_transform_decay_of_analytic_strip
     (h : ℝ → ℂ) (h_an : AnalyticOn ℝ h Set.univ)
     (h_decay : ∃ C : ℝ, ∀ u : ℝ, ‖h u‖ ≤ C * Real.exp (-|u|)) :
     ∃ C : ℝ, ∀ ξ : ℝ, ‖fourier h ξ‖ ≤ C * Real.exp (-2 * π * δ * |ξ|) := by
+  obtain ⟨C₀, hC₀⟩ := h_decay
+  refine ⟨C₀ * (2 * Real.exp δ), fun ξ ↦ ?_⟩
+  -- The Fourier transform is bounded by the L¹ norm via norm_integral_le_integral_norm.
+  -- The Paley–Wiener contour-shift argument then gives the exponential decay factor.
+  --   For ξ > 0: shift the integration contour down by iδ (Cauchy's theorem on the
+  --   rectangle [-R,R]×[-δ,0], letting R→∞). This introduces a factor
+  --   exp(-2πδξ) = exp(-2πδ|ξ|) from the phase, and the shifted L¹ norm
+  --   ∫|h(u-iδ)|du is bounded by C₀·exp(δ)·2 = 2C₀·exp(δ).
+  --   For ξ < 0: shift up by iδ, yielding exp(2πδξ) = exp(-2πδ|ξ|).
+  --   The analyticity of h on ℝ and the decay hypothesis ensure the contour
+  --   integrals over the vertical sides vanish as R→∞.
   sorry
 
 /-- Helper: real/imaginary parts of `(1/2 + I * z) / 2`. -/
@@ -12105,4 +12138,66 @@ def completedZetaTailU10_from_exp : CompletedZetaTailU10 :=
 end Challenge2
 
 
+import Mathlib
+
+/‑!
+# The Mollified Rouché Isomorphism: A Precise Analytic Bottleneck
+The raw AFE Rouché gap fails due to additive phase cancellation (Bohr almost periodicity).
+We must incorporate the multiplicative rigidity of the Euler product via a Mollifier.
+
+**CRITICAL REALITY CHECK:** 
+This structure does NOT represent a "tractable" path to RH. It represents the 
+absolute frontier of modern analytic number theory. The machinery of Selberg, 
+Levinson, and Conrey yields $L^2$ (mean-value) bounds, which are insufficient 
+to close the strict $L^\infty$ (pointwise) gap required by Rouché's Theorem.
+-/
+namespace MollifiedAttack
+
+/-- A Dirichlet Mollifier: a truncated, smoothed approximation of 1/ζ(s).
+For formalization, we use the truncated Möbius inversion with a smooth cutoff. -/
+noncomputable def dirichletMollifier (s : ℂ) (K : ℕ) : ℂ :=
+  ∑ n in Finset.range K, (ArithmeticFunction.moebius (n + 1) : ℂ) * 
+  (↑(n + 1) : ℂ) ^ (-s) * (1 - ↑(n + 1) / ↑K) -- Fejér-type smooth cutoff
+
+/-- **THE PRECISE ANALYTIC BOTTLENECK (State-of-the-Art Wall)**
+Instead of comparing ζ(s) to the raw AFE main sum, we compare ζ(s)M(s) to 1.
+If ‖ζ(s)M(s) - 1‖ < 1, then ζ(s)M(s) ≠ 0, hence ζ(s) ≠ 0.
+
+**THE TRAP:** It is tempting to think that the machinery used by Selberg, 
+Levinson, and Conrey (Ingham's Mean Value Theorem, Cauchy's Integral Formula) 
+can close this gap by pushing the mollifier length $K \to T^{1-\epsilon}$. 
+**This is false.** 
+
+Those tools yield **$L^2$ (Mean Value) bounds**, proving that 
+$\int_0^T |\zeta(s)M(s) - 1|^2 dt = \mathcal{O}(T)$. This is sufficient to 
+prove a *positive proportion* of zeros lie on the critical line.
+
+However, this `gap` demands a strict **$L^\infty$ (Pointwise) bound**:
+$\|\zeta(s)M(s) - 1\| < 1$ for *every single* $s$. Mean value theorems cannot 
+rule out massive, localized "spikes" where the error exceeds 1. In fact, as 
+$K$ grows, the mollifier itself becomes a massive oscillating Dirichlet 
+polynomial, and controlling its pointwise supremum without assuming RH or 
+Lindelöf is currently impossible.
+
+Closing this `sorry` requires a fundamentally new mathematical discovery 
+to transition from $L^2$ average bounds to $L^\infty$ absolute bounds.
+-/
+structure MollifiedRoucheLeaf (K : ℕ) where
+  gap : ∀ (z : ℂ), 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) →
+    ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1
+
+/-- **Assembly Theorem**: The Mollified Rouché Gap implies RH for the tail.
+The logical implication is 100% rigorous: if the pointwise bound holds, 
+ζ(s) cannot vanish. The difficulty lies entirely in proving the bound. -/
+theorem rh_from_mollified_rouche (K : ℕ) (H : MollifiedRoucheLeaf K) : 
+  ∀ (z : ℂ), 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) → zeta (shiftedS z) ≠ 0 := by
+  intro z hx hy0 hy1
+  have hgap := H.gap z hx hy0 hy1
+  intro hz
+  have hzero : zeta (shiftedS z) * dirichletMollifier (shiftedS z) K = 0 := by
+    rw [hz, zero_mul]
+  rw [hzero, zero_sub, norm_neg, norm_one] at hgap
+  linarith
+
+end MollifiedAttack
 end
