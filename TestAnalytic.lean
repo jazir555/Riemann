@@ -192,7 +192,7 @@ lemma hasDerivAt_termC (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     exact (continuousOn_termC_integrand n t).mono Set.Ioc_subset_Icc_self
   have hF_int : IntervalIntegrable (F s) volume a b := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-    exact ((continuousOn_termC_integrand n s).mono Set.Ioc_subset_Icc_self).integrableOn
+    exact ContinuousOn.integrableOn_Icc (continuousOn_termC_integrand n s) |>.mono_set Set.Ioc_subset_Icc_self
   have hF'_meas : AEStronglyMeasurable (F' s) (volume.restrict (Set.uIoc a b)) := by
     rw [Set.uIoc_of_le hA]
     refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioc
@@ -206,7 +206,7 @@ lemma hasDerivAt_termC (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     · exact continuousAt_const.rpow continuousAt_id (Or.inr (by norm_num))
   have hbound_int : IntervalIntegrable bound volume a b := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-    exact (hcontBound.mono Set.Ioc_subset_Icc_self).integrableOn
+    exact ContinuousOn.integrableOn_Icc hcontBound |>.mono_set Set.Ioc_subset_Icc_self
   have h_bound : ∀ᵐ x ∂volume, x ∈ Set.uIoc a b → ∀ t ∈ halfPlane, ‖F' t x‖ ≤ bound x := by
     refine ae_of_all volume (fun x hx => ?_)
     intro t ht
@@ -284,7 +284,7 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
                 exact ((continuousOn_id.sub continuousOn_const).mono
                   Set.Ioc_subset_Icc_self).integrableOn
               · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-                exact (continuousOn_const.mono Set.Ioc_subset_Icc_self).integrableOn
+                exact ContinuousOn.integrableOn_Icc continuousOn_const |>.mono_set Set.Ioc_subset_Icc_self
               · intro x hx
                 have : x ≤ (n + 1 : ℝ) + 1 := hx.2
                 linarith
@@ -420,7 +420,7 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
                 exact ((continuousOn_id.sub continuousOn_const).mono
                   Set.Ioc_subset_Icc_self).integrableOn
               · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-                exact (continuousOn_const.mono Set.Ioc_subset_Icc_self).integrableOn
+                exact ContinuousOn.integrableOn_Icc continuousOn_const |>.mono_set Set.Ioc_subset_Icc_self
               · intro x hx
                 linarith [hx.2]
             have h5 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (1 : ℝ)) = 1 := by
@@ -503,7 +503,7 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
                   exact ((continuousOn_id.sub continuousOn_const).mono
                     Set.Ioc_subset_Icc_self).integrableOn
                 · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-                  exact (continuousOn_const.mono Set.Ioc_subset_Icc_self).integrableOn
+                  exact ContinuousOn.integrableOn_Icc continuousOn_const |>.mono_set Set.Ioc_subset_Icc_self
                 · intro x hx
                   linarith [hx.2]
               have h5 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (1 : ℝ)) = 1 := by
