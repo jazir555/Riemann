@@ -68,21 +68,29 @@ theorem zeta_ne_one_le_re {s : ℂ} (hs : 1 ≤ s.re) : riemannZeta s ≠ 0 :=
 theorem riemannZeta_ne_zero_of_zeroFreeEdge
     (s : ℂ) (ht : |s.im| ≥ 1) (hσ : s.re ≥ zeroFreeEdge s.im) :
     riemannZeta s ≠ 0 := by
-  intro hz
-  -- The formalization of the full Kadiri proof requires:
-  -- (a) The 3-4-1 product bound (proved above as norm_zeta_product_ge_one)
-  -- (b) Continuity of ζ and the fact that ζ(σ+it) → 1 as σ → ∞
-  -- (c) A zero-order estimate: if ζ has a zero of order k at s₀,
-  --     then |ζ(σ+it₀)| ~ C·|σ-σ₀|^k near the zero
-  -- (d) The bound log|ζ(σ+it)| is controlled by the integral of Re(ζ'/ζ)
-  -- (e) Contradiction: the 3-4-1 bound says the sum of logs is ≥ 0,
-  --     but a zero forces it to → −∞
-  --
-  -- Steps (b)-(e) require the theory of meromorphic functions (orders of zeros,
-  -- logarithmic derivatives, contour integration) which is not yet in Mathlib.
-  -- The key fact that IS in Mathlib is the 3-4-1 bound itself.
-  --
-  -- For a complete proof, see Kadiri (2005), Theorem 2.1.
-  sorry
+  -- Case 1: Re(s) ≥ 1. Already proved by Mathlib.
+  by_cases h1 : 1 ≤ s.re
+  · exact zeta_ne_one_le_re h1
+  · -- Case 2: zeroFreeEdge(|Im(s)|) ≤ Re(s) < 1.
+    push_neg at h1
+    -- The full Kadiri (2005) proof proceeds by contradiction:
+    -- 1. Assume ζ(s₀) = 0 with Re(s₀) ≥ zeroFreeEdge(Im(s₀)) < 1.
+    -- 2. ζ is analytic at s₀ (since s₀ ≠ 1, from analyticOn_riemannZeta).
+    -- 3. ζ has a zero of order k ≥ 1 at s₀.
+    -- 4. For σ > 1, the 3-4-1 bound gives |ζ(σ)|³|ζ(σ+it₀)|⁴|ζ(σ+2t₀)| ≥ 1.
+    -- 5. As σ → 1⁺: |ζ(σ)| ~ 1/(σ-1) (simple pole, residue 1).
+    -- 6. If ζ(1+it₀) = 0 of order k: |ζ(σ+it₀)| ~ C(σ-1)^k.
+    -- 7. Product ~ const·(σ-1)^{4k-3} → 0 for k ≥ 1, contradicting ≥ 1.
+    -- 8. If ζ(1+it₀) ≠ 0: the zero at s₀ is NOT at 1+it₀.
+    --    This case requires the Borel-Carathéodory estimate to show
+    --    that a zero at s₀ with Re(s₀) close to 1 implies ζ(1+it₀) = 0,
+    --    or uses the Phragmén-Lindelöf principle.
+    --
+    -- Ingredients (a)-(c) are in Mathlib; (d)-(e) require the
+    -- Borel-Carathéodory inequality, which is not yet formalized.
+    -- See Kadiri (2005), Theorem 2.1; Kadiri-Lamzouri (2015).
+    -- The 3-4-1 bound (norm_zeta_product_ge_one) is the hardest ingredient
+    -- and IS proved above. The remaining gap is the contradiction mechanism.
+    sorry
 
 end
