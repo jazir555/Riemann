@@ -62,16 +62,105 @@ theorem riemannZeta_ne_zero_of_zeroFreeEdge
         exact Real.log_lt_log (Real.exp_pos 1) (by linarith [exp_one_lt_three, show (3:ℝ) < 11 from by norm_num])
       have hval : kadiriConstant / Real.log 11 < (1 / 10 : ℝ) := by
         unfold kadiriConstant; field_simp; nlinarith [hlog11]
-      have hfrac : kadiriConstant / Real.log (|s.im| + 10) ≤ kadiriConstant / Real.log 11 :=
-        div_le_div_of_nonneg_left kadiriConstant_pos.le (Real.log_pos (by norm_num)) hlog
+      have hfrac := div_le_div_of_nonneg_left kadiriConstant_pos.le (Real.log_pos (by norm_num)) hlog
       linarith
-    -- Proof by contradiction using Borel-Carathéodory.
-    -- Assume ζ(s) = 0 with Re(s) < 1. Define f(z) = ζ(1+z+I*t) - ζ(1+I*t).
-    -- f(0) = 0, f differentiable on ball 0 (1/2), Re(f(z)) ≤ 2K on ball.
-    -- borelCaratheodory_zero gives |f(z₀)| ≤ 4K·|z₀|/(1/2-|z₀|).
-    -- Since |f(z₀)| = |ζ(1+I*t)| ≤ K, dividing gives 1 ≤ 4|z₀|/(1/2-|z₀|).
-    -- But |z₀| < 1/10 gives 4|z₀|/(1/2-|z₀|) < 1. Contradiction!
-    -- All the above steps are formalized below.
-    sorry
+    -- Define f(z) = ζ(1+z+I*t) - ζ(1+I*t)
+    let f : ℂ → ℂ := fun z => riemannZeta (1 + z + I * s.im) - riemannZeta (1 + I * s.im)
+    have hf0 : f 0 = 0 := by unfold f; show riemannZeta _ - riemannZeta _ = 0; ring_nf
+    -- f differentiable on ball 0 (1/2)
+    have hdiff : DifferentiableOn ℂ f (Metric.ball 0 (1/2 : ℝ)) := by
+      intro z hz
+      have hne2 : 1 + I * s.im ≠ 1 := by
+        intro heq
+        have : (I : ℂ) * ↑s.im = 0 := by linear_combination heq
+        rcases mul_eq_zero.mp this with h | h
+        · exact absurd h Complex.I_ne_zero
+        · have : (s.im : ℝ) = 0 := Complex.ofReal_injective h
+          rw [this, abs_zero] at ht₀; linarith
+      have hne1 : 1 + z + I * s.im ≠ 1 := by
+        intro heq
+        have hzt : z + I * s.im = 0 := by linear_combination heq
+        have hzn : ‖z‖ = |s.im| := by
+          have := congr_arg (‖·‖ : ℂ → ℝ) (show z = -(I * s.im : ℂ) from by linear_combination hzt)
+          simp [norm_neg, Complex.norm_mul, Complex.norm_I] at this; exact this
+        have hball : dist z 0 < 1/2 := Metric.mem_ball.mp hz
+        have hz_norm : ‖z‖ < (1/2 : ℝ) := by rwa [dist_eq_norm, sub_zero] at hball
+        by_cases ht_nonneg : 0 ≤ s.im
+        · rw [abs_of_nonneg ht_nonneg] at ht₀ hzn; linarith
+        · rw [abs_of_neg (by linarith)] at ht₀ hzn; linarith
+      unfold f
+      have h1 : DifferentiableAt ℂ (fun w => riemannZeta (1 + w + I * s.im)) z :=
+        (differentiableAt_riemannZeta hne1).comp z (by fun_prop)
+      have h2 : DifferentiableAt ℂ (fun _ => riemannZeta (1 + I * s.im)) z :=
+        differentiableAt_const _
+      exact (h1.sub h2).differentiableWithinAt
+    -- z₀ = s.re - 1 in ball 0 (1/2)
+    have hz₀_mem : (↑(s.re - 1) : ℂ) ∈ Metric.ball 0 (1/2 : ℝ) := by
+      rw [Metric.mem_ball, dist_eq_norm, sub_zero]
+      simp only [RCLike.norm_ofReal, abs_of_neg hz₀_neg]
+      linarith
+    -- f(z₀) = -ζ(1+I*t)
+    have hfz₀ : f ↑(s.re - 1) = -riemannZeta (1 + I * s.im) := by
+      unfold f
+      have hmain : (1 : ℂ) + ↑(s.re - 1) + I * ↑s.im = s := by
+        rw [Complex.ext_iff]; constructor
+        · push_cast; ring_nf
+        · push_cast; ring_nf
+      rw [hmain, hz, zero_sub]
+    -- K = max |ζ(1+w+I*t)| on closed ball, achieved by extreme value theorem
+    have hcomp : IsCompact (Metric.closedBall (0 : ℂ) (1/2 : ℝ)) :=
+      isCompact_closedBall 0 (1/2 : ℝ)
+    have hcont : Continuous (fun z : ℂ => ‖riemannZeta (1 + z + I * s.im)‖) := by
+      refine continuous_norm.comp ?_
+      refine differentiableOn_riemannZeta.continuousOn.comp_continuous
+        (continuous_const.add (continuous_id.mul continuous_const)) ?_
+      intro z hz
+      intro heq
+      have hzt : z + I * s.im = 0 := by linear_combination heq
+      have hzn : ‖z‖ = |s.im| := by
+        have := congr_arg (‖·‖ : ℂ → ℝ) (show z = -(I * s.im : ℂ) from by linear_combination hzt)
+        simp [norm_neg, Complex.norm_mul, Complex.norm_I] at this; exact this
+      by_cases ht_nonneg : 0 ≤ s.im
+      · rw [abs_of_nonneg ht_nonneg] at ht₀ hzn; linarith
+      · rw [abs_of_neg (by linarith)] at ht₀ hzn; linarith
+    obtain ⟨K, hK_mem, hK⟩ := hcomp.exists_isMaxOn
+      (Set.nonempty_of_mem (Set.mem_closedBall_self (by norm_num : (0:ℝ) < 1/2))) hcont
+    -- M = |ζ(1+K+I*t)| ≥ |ζ(1+I*t)| > 0
+    have hK_pos : ‖riemannZeta (1 + K + I * s.im)‖ > 0 := by
+      have := hK 0 (Set.mem_closedBall_self (by norm_num : (0:ℝ) < 1/2))
+      have : ‖riemannZeta (1 + I * s.im)‖ > 0 :=
+        norm_pos_iff.mpr (riemannZeta_ne_zero_of_one_le_re (by linarith))
+      linarith
+    -- Re(f(z)) ≤ 2 * M on ball where M = max |ζ|
+    have hM : ∀ z ∈ Metric.ball 0 (1/2 : ℝ), (f z).re ≤ 2 * ‖riemannZeta (1 + K + I * s.im)‖ := by
+      intro z hz
+      have hzball : z ∈ Metric.closedBall 0 (1/2 : ℝ) :=
+        Metric.closedBall_mem_closedBall (by norm_num : (0:ℝ) ≤ 1/2) (Metric.mem_ball.mp hz |>.le)
+      have h1 := hK z hzball
+      have h2 := hK 0 (Set.mem_closedBall_self (by norm_num : (0:ℝ) < 1/2))
+      unfold f at *
+      have hnf := norm_sub_le (riemannZeta (1 + z + I * s.im)) (riemannZeta (1 + I * s.im))
+      have har := Complex.abs_re_le_abs ((riemannZeta (1 + z + I * s.im)) - (riemannZeta (1 + I * s.im)))
+      linarith
+    -- Apply Borel-Carathéodory
+    have hM_pos : (0 : ℝ) < ‖riemannZeta (1 + K + I * s.im)‖ := hK_pos
+    have hbc := Complex.borelCaratheodory_zero hM_pos hdiff hM
+      (by norm_num : (0:ℝ) < 1/2) hz₀_mem hf0
+    have hfz₀_norm : ‖f ↑(s.re - 1)‖ = ‖riemannZeta (1 + I * s.im)‖ := by
+      simp only [hfz₀, norm_neg]
+    have hfz₀_le_M : ‖f ↑(s.re - 1)‖ ≤ ‖riemannZeta (1 + K + I * s.im)‖ :=
+      hfz₀_norm ▸ hK 0 (Set.mem_closedBall_self (by norm_num : (0:ℝ) < 1/2))
+    have hz₀_norm : ‖(↑(s.re - 1) : ℂ)‖ = 1 - s.re := by
+      simp only [RCLike.norm_ofReal, abs_of_neg hz₀_neg]
+    -- The contradiction
+    have h_bnd : ‖f ↑(s.re - 1)‖ ≤ 4 * ‖riemannZeta (1 + K + I * s.im)‖ * (1 - s.re) / ((1/2 : ℝ) - (1 - s.re)) := by
+      rw [hz₀_norm] at hbc; exact hbc
+    have hK_le : ‖riemannZeta (1 + K + I * s.im)‖ ≤ 4 * ‖riemannZeta (1 + K + I * s.im)‖ * (1 - s.re) / ((1/2 : ℝ) - (1 - s.re)) :=
+      le_trans hfz₀_le_M h_bnd
+    have h1_le : 1 ≤ 4 * (1 - s.re) / ((1/2 : ℝ) - (1 - s.re)) := by linarith
+    have h4lt : 4 * (1 - s.re) / ((1/2 : ℝ) - (1 - s.re)) < 1 := by
+      have hpos : 0 < (1/2 : ℝ) - (1 - s.re) := by linarith
+      rw [div_lt_one hpos]; linarith
+    linarith
 
 end
