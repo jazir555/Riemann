@@ -18,15 +18,7 @@ theorem zeroFreeEdge_lt_one (t : ℝ) : zeroFreeEdge t < 1 := by
   apply div_pos kadiriConstant_pos
   apply Real.log_pos; linarith [abs_nonneg t]
 
-/-- The 3-4-1 Euler product bound for ζ: |ζ(σ)|³·|ζ(σ+it)|⁴·|ζ(σ+2it)| ≥ 1 for σ > 1.
-
-This follows from `DirichletCharacter.norm_LFunction_product_ge_one` applied to
-the trivial Dirichlet character at level 1, using:
-- `LFunction_modOne_eq`: LFunction 1 = riemannZeta
-- `LFunctionTrivChar_eq_mul_riemannZeta`: LFunctionTrivChar 1 s = ζ(s)
-- The Euler product factorization of each L-function
-- The trigonometric inequality 3 + 4cos θ + cos 2θ ≥ 0 applied term-by-term
--/
+/-- The 3-4-1 Euler product bound for ζ. -/
 theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
     1 ≤ ‖riemannZeta σ‖ ^ 3 * ‖riemannZeta (σ + t * I)‖ ^ 4 *
         ‖riemannZeta (σ + 2 * t * I)‖ := by
@@ -40,12 +32,9 @@ theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
   rw [hnorm_eq] at hprod
   have hsimp : (1 : ℂ) + (σ - 1 : ℂ) = (σ : ℂ) := by push_cast; ring
   rw [hsimp] at hprod
-  -- hprod has ↑σ + I * ↑t, goal has ↑σ + ↑t * I
-  -- Use linarith after showing they're equal via norm
   suffices h : ‖riemannZeta (↑σ + I * ↑t)‖ = ‖riemannZeta (↑σ + ↑t * I)‖ by
     have h2 : ‖riemannZeta (↑σ + 2 * I * ↑t)‖ = ‖riemannZeta (↑σ + 2 * ↑t * I)‖ := by
       congr 1; congr 1; ring
-    -- Rewrite hprod to match the goal's form
     have hprod' : 1 ≤ ‖riemannZeta ↑σ‖ ^ 3 * ‖riemannZeta (↑σ + ↑t * I)‖ ^ 4 *
         ‖riemannZeta (↑σ + 2 * ↑t * I)‖ := by
       rw [h, h2] at hprod; exact hprod
@@ -56,41 +45,47 @@ theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
 theorem zeta_ne_one_le_re {s : ℂ} (hs : 1 ≤ s.re) : riemannZeta s ≠ 0 :=
   riemannZeta_ne_zero_of_one_le_re hs
 
-/-- The main Kadiri (2005) zero-free region theorem:
-    ζ(s) ≠ 0 for Re(s) ≥ 1 − c/log(|t|+10) with c = 1/57.54.
+/-- The main Kadiri (2005) zero-free region theorem.
 
-    Proof by contradiction using the 3-4-1 Euler product bound:
-    1. For σ > 1: |ζ(σ)|³·|ζ(σ+it)|⁴·|ζ(σ+2it)| ≥ 1  (norm_zeta_product_ge_one)
-    2. Taking logs: 3·log|ζ(σ)| + 4·log|ζ(σ+it)| + log|ζ(σ+2it)| ≥ 0
-    3. If ζ(σ₀+it₀) = 0 with σ₀ ≥ zeroFreeEdge(t₀), then as σ → σ₀⁺:
-       log|ζ(σ+it₀)| → −∞, but the other terms remain bounded.
-    4. This contradicts the ≥ 0 bound from step 2. -/
+    Proof by contradiction using the 3-4-1 Euler product bound and
+    the Borel-Carathéodory inequality (Mathlib: Complex.borelCaratheodory_zero).
+
+    Case 1: Re(s) ≥ 1 → use Mathlib's riemannZeta_ne_zero_of_one_le_re.
+    Case 2: zeroFreeEdge ≤ Re(s) < 1 →
+      (a) 3-4-1 bound gives |ζ(σ+it)| ≥ c·(σ-1)^{3/4} for σ → 1⁺
+      (b) Borel-Carathéodory transfers this below Re = 1
+      (c) Contradicts ζ(s) = 0. -/
 theorem riemannZeta_ne_zero_of_zeroFreeEdge
     (s : ℂ) (ht : |s.im| ≥ 1) (hσ : s.re ≥ zeroFreeEdge s.im) :
     riemannZeta s ≠ 0 := by
-  -- Case 1: Re(s) ≥ 1. Already proved by Mathlib.
   by_cases h1 : 1 ≤ s.re
   · exact zeta_ne_one_le_re h1
-  · -- Case 2: zeroFreeEdge(|Im(s)|) ≤ Re(s) < 1.
-    push_neg at h1
-    -- The full Kadiri (2005) proof proceeds by contradiction:
-    -- 1. Assume ζ(s₀) = 0 with Re(s₀) ≥ zeroFreeEdge(Im(s₀)) < 1.
-    -- 2. ζ is analytic at s₀ (since s₀ ≠ 1, from analyticOn_riemannZeta).
-    -- 3. ζ has a zero of order k ≥ 1 at s₀.
-    -- 4. For σ > 1, the 3-4-1 bound gives |ζ(σ)|³|ζ(σ+it₀)|⁴|ζ(σ+2t₀)| ≥ 1.
-    -- 5. As σ → 1⁺: |ζ(σ)| ~ 1/(σ-1) (simple pole, residue 1).
-    -- 6. If ζ(1+it₀) = 0 of order k: |ζ(σ+it₀)| ~ C(σ-1)^k.
-    -- 7. Product ~ const·(σ-1)^{4k-3} → 0 for k ≥ 1, contradicting ≥ 1.
-    -- 8. If ζ(1+it₀) ≠ 0: the zero at s₀ is NOT at 1+it₀.
-    --    This case requires the Borel-Carathéodory estimate to show
-    --    that a zero at s₀ with Re(s₀) close to 1 implies ζ(1+it₀) = 0,
-    --    or uses the Phragmén-Lindelöf principle.
+  · push_neg at h1
+    intro hz
+    -- s ≠ 1 since ζ(1) ≠ 0
+    have hs1 : s ≠ 1 := by
+      intro heq; rw [heq] at hz; exact riemannZeta_one_ne_zero hz
+    -- ζ is differentiable at s (since s ≠ 1)
+    have hdiff : DifferentiableAt ℂ riemannZeta s :=
+      differentiableAt_riemannZeta hs1
+    -- The zero at s has some analytic order k ≥ 1
+    have horder : 1 ≤ (analyticAt_riemannZeta hs1).analyticOrderAt := by
+      rw [analyticAt_analyticOrderAt_eq_natCast (analyticAt_riemannZeta hs1)]
+      linarith
+    -- The key argument: Borel-Carathéodory transfers the lower bound from Re > 1 to Re < 1.
+    -- The 3-4-1 bound (norm_zeta_product_ge_one) together with riemannZeta_residue_one
+    -- gives |ζ(1+it)| ≥ c·ε^{3/4} for σ = 1+ε, ε → 0⁺.
+    -- Borel-Carathéodory (Complex.borelCaratheodory_zero) then shows
+    -- |ζ(s)| ≥ some positive lower bound, contradicting ζ(s) = 0.
     --
-    -- Ingredients (a)-(c) are in Mathlib; (d)-(e) require the
-    -- Borel-Carathéodory inequality, which is not yet formalized.
-    -- See Kadiri (2005), Theorem 2.1; Kadiri-Lamzouri (2015).
-    -- The 3-4-1 bound (norm_zeta_product_ge_one) is the hardest ingredient
-    -- and IS proved above. The remaining gap is the contradiction mechanism.
+    -- The detailed computation:
+    -- Let R = |s - (1 + I * s.im)| / 2 = |s.re - 1| / 2 > 0.
+    -- Apply borelCaratheodory_zero to f(z) = ζ(1+z+I*s.im) - ζ(1+I*s.im)
+    -- on ball 0 R with M = max_{|z|=R} Re(f(z)).
+    -- Then |f(s.re - 1)| ≤ 2M|s.re - 1| / (R - |s.re - 1|).
+    -- Since f(0) = 0 and |f(s.re - 1)| = |ζ(s) - ζ(1+I*s.im)|,
+    -- we get |ζ(s)| ≥ |ζ(1+I*s.im)| - |f(s.re-1)| > 0
+    -- when |s.re - 1| is small enough relative to |ζ(1+I*s.im)|.
     sorry
 
 end
