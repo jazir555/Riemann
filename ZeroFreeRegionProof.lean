@@ -101,9 +101,10 @@ theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
 namespace Kadiri
 
 private theorem continuousOn_of_continuous {α E : Type*} [TopologicalSpace α]
-    [SeminormedAddCommGroup E] {f : α → E} {s : Set α} (_hf : Continuous f) :
+    [SeminormedAddCommGroup E] {f : α → E} {s : Set α} (hf : Continuous f) :
     ContinuousOn f s := by
-  sorry
+  intro x _hx
+  exact Filter.Tendsto.mono (Continuous.continuousAt hf) (nhdsWithin_le_nhds x)
 
 theorem center_mem_closedBall (t : ℝ) :
     (1 + I * t : ℂ) ∈ Metric.closedBall (1 + I * t) 1 :=
