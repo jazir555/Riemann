@@ -102,9 +102,8 @@ namespace Kadiri
 
 private theorem continuousOn_of_continuous {α E : Type*} [TopologicalSpace α]
     [SeminormedAddCommGroup E] {f : α → E} {s : Set α} (hf : Continuous f) :
-    ContinuousOn f s := by
-  intro x _hx
-  exact Filter.Tendsto.mono (Continuous.continuousAt hf) (nhdsWithin_le_nhds x)
+    ContinuousOn f s :=
+  (continuousOn_univ.mpr hf).mono (Set.subset_univ s)
 
 theorem center_mem_closedBall (t : ℝ) :
     (1 + I * t : ℂ) ∈ Metric.closedBall (1 + I * t) 1 :=
@@ -200,14 +199,20 @@ theorem riemannZeta_ne_zero_of_zeroFreeEdge
       rw [h] at hz; exact (mul_eq_zero.mp hz).resolve_left (inv_ne_zero (sub_ne_zero.mpr hs1))
     have h341 := norm_zeta_product_ge_one (1 + x) s.im (by linarith)
     have hdb : Kadiri.DerivativeBound riemannZeta₁ (1 + I * t) 1 := by
-      refine ⟨2, by norm_num, fun z hz => differentiable_riemannZeta₁ z, ?_⟩
-      -- Bound: ‖deriv riemannZeta₁ z‖ ≤ 2 on unit ball around 1+I*t.
-      -- Proof sketch: riemannZeta₁ differentiable everywhere (by differentiable_riemannZeta₁),
-      -- so by Differentiable.contDiff and ContDiff.continuous_deriv, deriv riemannZeta₁ is
-      -- continuous. On the compact closed ball, ‖deriv riemannZeta₁ ·‖ is bounded by ≤ 2
-      -- (the ball has radius 1, |z-1| ≤ 1+|t|, and riemannZeta₀, deriv riemannZeta₀ are
-      -- bounded on compact sets by continuous_on + compact).
-      intro z hz; sorry
+      have hcont_deriv : Continuous (deriv riemannZeta₁) :=
+        differentiable_riemannZeta₁.contDiff.continuous_deriv_one
+      have hcomp : IsCompact (Metric.closedBall (1 + I * t) 1) :=
+        isCompact_closedBall (1 + I * t) 1
+      have hcontOn : ContinuousOn (‖deriv riemannZeta₁ ·‖)
+          (Metric.closedBall (1 + I * t) 1) :=
+        continuousOn_of_continuous (continuous_norm.comp hcont_deriv)
+      have hbound := hcomp.exists_bound_of_continuousOn hcontOn
+      refine ⟨Classical.choose hbound + 1, ?_, fun z _ => differentiable_riemannZeta₁ z, ?_⟩
+      · have h1 := Classical.choose_spec hbound (1 + I * t) (Kadiri.center_mem_closedBall t)
+        linarith [norm_nonneg (deriv riemannZeta₁ (1 + I * t)), abs_of_nonneg (norm_nonneg _)]
+      · intro z hz
+        have := Classical.choose_spec hbound z hz
+        linarith [abs_of_nonneg (norm_nonneg _)]
     have hleft : s = (1 - x + I * t : ℂ) := by
       apply Complex.ext
       · show s.re = (1 - x + I * t : ℂ).re
