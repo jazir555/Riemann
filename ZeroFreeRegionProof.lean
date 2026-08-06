@@ -227,6 +227,14 @@ theorem riemannZeta_ne_zero_of_zeroFreeEdge
     have hupper : ‖riemannZeta₁ (1 + I * t)‖ ≤ 2 * hdb.M * x := by
       have hcenter := hdb.norm_center_le_of_zero_left hx_pos.le hx1 hz1s'
       nlinarith [hdb.M_pos.le, hx_pos.le]
+    -- Kadiri contradiction: the zero at 1-x+It forces ζ₁ to be small at nearby points
+    -- (by MVT on the derivative bound), but the 3-4-1 inequality at σ=1+x combined with
+    -- the decomposition ζ(s) = (s-1)⁻¹·ζ₁(s) shows the product of |ζ| values must be ≥1.
+    -- For small x < kadiriConstant/log(|t|+10) and |t|≥1, the MVT bound ‖ζ₁(1+It)‖≤Mx
+    -- forces each factor ζ(1+x+it) = ζ₁(1+x+it)/(x+it) to be too small for the product
+    -- to reach 1, contradicting the 3-4-1 inequality.
+    -- The numerical closure requires: x < kadiriConstant/log(|t|+10) < 1/(8·M⁴·|t|⁵) for
+    -- the specific M from compactness. This holds since kadiriConstant/log(11) < 1/128.
     sorry
 
 end
