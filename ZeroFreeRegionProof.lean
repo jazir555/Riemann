@@ -116,17 +116,21 @@ private theorem riemannZeta_ne_zero_of_zeroFreeEdge_aux
     -- All relevant points lie in a ball of radius 1 around z₀
     have hs_mem : s ∈ Metric.closedBall z₀ 1 := by
       rw [Metric.mem_closedBall, dist_eq_norm]
-      have hdiff : s - z₀ = (s.re - 1 : ℂ) := by
-        rw [hz₀def, htdef]; ext <;> simp [Complex.I_re, Complex.I_im]
-      rw [hdiff, Complex.norm_real, abs_of_neg hz₀_neg]; linarith
+      have hre : (s - z₀).re = s.re - 1 := by simp [hz₀def, htdef, Complex.I_re, Complex.sub_re]
+      have him : (s - z₀).im = 0 := by simp [hz₀def, htdef, Complex.I_im, Complex.sub_im]
+      rw [Complex.norm_eq_sqrt_sq_add_sq, hre, him, zero_pow two_ne_zero, add_zero]
+      have : √((s.re - 1) ^ 2) = |s.re - 1| := by rw [Real.sqrt_sq_eq_abs]
+      rw [this, abs_of_neg hz₀_neg]; linarith
     have hz₀_mem : z₀ ∈ Metric.closedBall z₀ 1 := by
       simp [Metric.mem_closedBall, dist_self]
     have h1px_mem : (1 + x + I * t) ∈ Metric.closedBall z₀ 1 := by
       rw [Metric.mem_closedBall, dist_eq_norm]
-      have hdiff : (1 + x + I * t) - z₀ = (x : ℂ) := by
-        rw [hz₀def, htdef]; ext <;> simp [Complex.I_re, Complex.I_im]; ring
-      rw [hdiff, Complex.norm_real, abs_of_nonneg hx_pos.le]
-      exact hx_small.le
+      have hre : ((1 + x + I * t) - z₀).re = x := by simp [hz₀def, htdef, Complex.I_re, Complex.sub_re]
+      have him : ((1 + x + I * t) - z₀).im = 0 := by simp [hz₀def, htdef, Complex.I_im, Complex.sub_im]
+      rw [Complex.norm_eq_sqrt_sq_add_sq, hre, him, zero_pow two_ne_zero, add_zero]
+      have : √(x ^ 2) = |x| := by rw [Real.sqrt_sq_eq_abs]
+      rw [this, abs_of_nonneg hx_pos.le]
+      linarith [hx_small.le]
     sorry)
 
 /-- Kadiri zero-free region. Proof by contradiction using Borel-Carathéodory. -/
