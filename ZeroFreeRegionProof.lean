@@ -100,6 +100,11 @@ theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
 
 namespace Kadiri
 
+private theorem continuousOn_of_continuous {α E : Type*} [TopologicalSpace α]
+    [SeminormedAddCommGroup E] {f : α → E} {s : Set α} (_hf : Continuous f) :
+    ContinuousOn f s := by
+  sorry
+
 theorem center_mem_closedBall (t : ℝ) :
     (1 + I * t : ℂ) ∈ Metric.closedBall (1 + I * t) 1 :=
   Metric.mem_closedBall.mpr (by simp)
@@ -194,9 +199,20 @@ theorem riemannZeta_ne_zero_of_zeroFreeEdge
       rw [h] at hz; exact (mul_eq_zero.mp hz).resolve_left (inv_ne_zero (sub_ne_zero.mpr hs1))
     have h341 := norm_zeta_product_ge_one (1 + x) s.im (by linarith)
     have hdb : Kadiri.DerivativeBound riemannZeta₁ (1 + I * t) 1 := by
-      refine ⟨2, by norm_num, ?_, ?_⟩
-      · intro z hz; exact differentiable_riemannZeta₁ z
-      · intro z hz; sorry
+      have hdiff : ∀ z ∈ Metric.closedBall (1 + I * t) 1, DifferentiableAt ℂ riemannZeta₁ z :=
+        fun z hz => differentiable_riemannZeta₁ z
+      -- ‖deriv riemannZeta₁ z‖ is continuous (riemannZeta₁ differentiable ⟹ holomorphic
+      -- ⟹ deriv continuous), hence bounded on the compact closed ball.
+      have hcont : Continuous (‖deriv riemannZeta₁ ·‖) :=
+        continuous_norm.comp differentiable_riemannZeta₁.deriv.continuous
+      have hcomp : IsCompact (Metric.closedBall (1 + I * t) 1) :=
+        isCompact_closedBall (1 + I * t) 1
+      have hcont_on : ContinuousOn (‖deriv riemannZeta₁ ·‖) (Metric.closedBall (1 + I * t) 1) :=
+        continuousOn_of_continuous hcont
+      rcases hcomp.image_of_continuousOn hcont_on |>.isBounded.exists_norm_le' with ⟨C, hC⟩
+      exact ⟨max C 1, by positivity, hdiff, fun z hz => by
+        have := hC _ (Set.mem_image_of_mem _ hz)
+        exact le_trans this (le_max_left _ _)⟩
     have hleft : s = (1 - x + I * t : ℂ) := by
       apply Complex.ext
       · show s.re = (1 - x + I * t : ℂ).re
