@@ -5,6 +5,7 @@ open scoped BigOperators
 
 set_option linter.unusedTactic false in
 set_option linter.unusedVariables false in
+set_option maxHeartbeats 400000 in
 
 noncomputable section
 
@@ -193,14 +194,23 @@ theorem riemannZeta_ne_zero_of_zeroFreeEdge
       rw [h] at hz; exact (mul_eq_zero.mp hz).resolve_left (inv_ne_zero (sub_ne_zero.mpr hs1))
     have h341 := norm_zeta_product_ge_one (1 + x) s.im (by linarith)
     have hdb : Kadiri.DerivativeBound riemannZeta₁ (1 + I * t) 1 := by
-      refine ⟨2, by norm_num, fun z hz => differentiable_riemannZeta₁ z, ?_⟩
-      intro z hz; sorry
+      refine ⟨2, by norm_num, ?_, ?_⟩
+      · intro z hz; exact differentiable_riemannZeta₁ z
+      · intro z hz; sorry
+    have hleft : s = (1 - x + I * t : ℂ) := by
+      apply Complex.ext
+      · show s.re = (1 - x + I * t : ℂ).re
+        simp [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.I_re]
+        rw [hxdef]; ring
+      · show s.im = (1 - x + I * t : ℂ).im
+        simp [Complex.add_im, Complex.sub_im, Complex.mul_im, Complex.I_im]
+        rw [htdef]
+    have hx1 : x ≤ 1 := by linarith [hx_small]
+    have hz1s' : riemannZeta₁ (1 - x + I * t : ℂ) = 0 := by
+      rw [← hleft]; exact hz1s
     have hupper : ‖riemannZeta₁ (1 + I * t)‖ ≤ 2 * hdb.M * x := by
-      have hx1 : x ≤ 1 := by linarith [hx_small]
-      have hleft : s = (1 - x + I * t : ℂ) := by
-        rw [htdef, hxdef]; ext <;> simp [Complex.I_re, Complex.I_im]; ring
-      rw [hleft] at hz1s
-      exact hdb.norm_right_le_two_mul hx_pos.le hx1 hz1s
+      have hcenter := hdb.norm_center_le_of_zero_left hx_pos.le hx1 hz1s'
+      nlinarith [hdb.M_pos.le, hx_pos.le]
     sorry
 
 end
