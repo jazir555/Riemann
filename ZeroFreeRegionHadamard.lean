@@ -186,5 +186,3 @@ theorem primaryFactor_log_bound (p : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1 / 2) :
   exact hb2
 
 end ZeroFreeRegionHadamard
-
-#print axioms ZeroFreeRegionHadamard.primaryFactor_log_bound
