@@ -1,5 +1,6 @@
 import Mathlib
 import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
+import Mathlib.Analysis.SpecialFunctions.Log.Summable
 
 /-!
 # Route B infrastructure: Hadamard factorization for the zero-free region
@@ -18,11 +19,8 @@ that the following are **absent** and must still be built:
 
 1. **Order of an entire function** — `orderOfEntire` (defined below, but its
    basic API and the order-1 bound for the completed zeta still need work).
-2. **Canonical product** over a zero set — defined below (finite version);
-   the infinite-product convergence for the non-trivial zeros (genus 1) is
-   missing.
-3. **Hadamard factorization theorem** itself — entirely absent.
-4. **Application to the completed zeta**: identifying the zeros of
+2. **Hadamard factorization theorem** itself — entirely absent.
+3. **Application to the completed zeta**: identifying the zeros of
    `s ↦ s(s-1)·completedRiemannZeta s` with the non-trivial zeros `ρ` of `ζ`
    (with multiplicities), proving it is entire of order 1, and taking the
    logarithmic derivative to obtain
@@ -42,7 +40,6 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 ## Remaining theorems (the actual Route B program)
 
-- `canonicalProduct_converges` (genus 1) for the non-trivial zeros `ρ`,
 - `hadamardFactorization` : for `f` entire of finite order `ρ` with zeros
   `a_n`, `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/a_n)` with `deg g ≤ ρ`,
 - `completedZeta_order_one` : `orderOfEntire (s ↦ s(s-1)·completedRiemannZeta s) = 1`,
@@ -184,5 +181,29 @@ theorem primaryFactor_log_bound (p : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1 / 2) :
     linarith
   rw [hE, Complex.log_exp (by cases abs_le.mp him; linarith) (by cases abs_le.mp him; linarith)]
   exact hb2
+
+/-! ## Infinite canonical product convergence -/
+
+/-- **Genus-`(p+1)` convergence of the canonical product over zeros `aᵢ`.**
+If `Σ 1/‖aᵢ‖^{p+1}` converges and `z` stays away from the zeros so that
+`‖z/aᵢ‖ ≤ 1/2` (e.g. for all but finitely many `i`), then the infinite product
+`∏ᵢ E_p(z/aᵢ)` is multipliable. The proof bounds
+`Σ ‖log E_p(z/aᵢ)‖` by a constant multiple of `Σ 1/‖aᵢ‖^{p+1}` using
+`primaryFactor_log_bound`, then applies `Complex.multipliable_of_summable_log`. -/
+theorem multipliable_primaryFactor_of_summable {ι : Type*} (p : ℕ) {a : ι → ℂ} {z : ℂ}
+    (haz : ∀ i, ‖z / a i‖ ≤ 1 / 2)
+    (hs : Summable fun i => 1 / ‖a i‖ ^ (p + 1)) :
+    Multipliable fun i => primaryFactor p (z / a i) := by
+  have hlog : Summable fun i => ‖Complex.log (primaryFactor p (z / a i))‖ := by
+    refine Summable.of_nonneg_of_le
+      (f := fun i => (2 / ((p : ℝ) + 1)) * ‖z‖ ^ (p + 1) * (1 / ‖a i‖ ^ (p + 1))) ?_ ?_ ?_
+    · intro _; positivity
+    · intro i
+      have hb := primaryFactor_log_bound p (haz i : ‖z / a i‖ ≤ 1/2)
+      rw [div_eq_mul_inv, norm_mul, norm_inv] at hb
+      rw [mul_pow, inv_pow, ← div_eq_mul_inv, inv_eq_one_div (‖a i‖ ^ (p + 1))] at hb
+      exact hb.trans (le_of_eq (by ring))
+    · exact hs.mul_left ((2 / ((p : ℝ) + 1)) * ‖z‖ ^ (p + 1))
+  exact Complex.multipliable_of_summable_log hlog.of_norm
 
 end ZeroFreeRegionHadamard
