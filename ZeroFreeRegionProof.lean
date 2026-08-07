@@ -617,27 +617,14 @@ theorem re_three_four_one_one_over_sub_borderline (d g : ℝ) (hd : 0 < d) :
     4 / d ≤ 3 * ((↑d - ↑g * I : ℂ)⁻¹).re + 4 * ((↑d : ℂ)⁻¹).re
       + ((↑d + ↑g * I : ℂ)⁻¹).re := by
   have h_mid : ((↑d : ℂ)⁻¹).re = 1 / d := by
-    rw [← one_div, div_re, one_re, one_im, zero_mul, add_zero, normSq_eq_norm_sq (↑d : ℂ),
-      Complex.normSq_apply, ofReal_re, ofReal_im]
-    field_simp; ring
+    rw [Complex.inv_re]; simp [Complex.normSq_apply]
   have h_lo : ((↑d - ↑g * I : ℂ)⁻¹).re = d / (d ^ 2 + g ^ 2) := by
-    rw [← one_div, div_re, one_re, one_im, zero_mul, add_zero]
-    rw [sub_re, ofReal_re, ofReal_im, I_re, I_im, mul_re, neg_re, neg_im, mul_zero, zero_mul,
-      add_zero, sub_zero, neg_zero]
-    rw [normSq_eq_norm_sq (↑d - ↑g * I : ℂ), Complex.normSq_apply,
-      ofReal_re, ofReal_im, I_re, I_im, mul_re, neg_re, neg_im, mul_zero, zero_mul,
-      add_zero, sub_zero, neg_zero]
-    field_simp; ring
+    rw [Complex.inv_re]; simp [Complex.normSq_apply]; ring_nf
   have h_hi : ((↑d + ↑g * I : ℂ)⁻¹).re = d / (d ^ 2 + g ^ 2) := by
-    rw [← one_div, div_re, one_re, one_im, zero_mul, add_zero]
-    rw [add_re, ofReal_re, ofReal_im, I_re, I_im, mul_re, mul_zero, zero_mul, add_zero]
-    rw [normSq_eq_norm_sq (↑d + ↑g * I : ℂ), Complex.normSq_apply,
-      ofReal_re, ofReal_im, I_re, I_im, mul_re, mul_zero, zero_mul, add_zero]
-    field_simp; ring
+    rw [Complex.inv_re]; simp [Complex.normSq_apply]; ring_nf
   rw [h_mid, h_lo, h_hi]
-  simp only [mul_one_div]
-  have hpos : 0 ≤ 4 * d / (d ^ 2 + g ^ 2) := div_nonneg (mul_nonneg (by norm_num) hd.le)
-    (add_nonneg (sq_nonneg d) (sq_nonneg g))
+  have hpos : 0 ≤ d / (d ^ 2 + g ^ 2) := by positivity
+  have h4 : 4 * (1 / d) = 4 / d := by ring
   linarith [hpos]
 
 /-- Generic contribution of a non-borderline zero.  If `Re s > Re ρ` at the three points
@@ -647,12 +634,12 @@ theorem re_three_four_one_one_over_sub_nonneg {σ t : ℝ} (ρ : ℂ) (hd : 0 < 
     0 ≤ 3 * ((1 : ℂ) / (σ - ρ)).re
       + 4 * ((1 : ℂ) / (σ + ↑t * I - ρ)).re
       + ((1 : ℂ) / (σ + 2 * ↑t * I - ρ)).re := by
-  have h1 : 0 ≤ (σ - ρ).re := by linarith
-  have h2 : 0 ≤ (σ + ↑t * I - ρ).re := by rw [add_re, sub_re]; linarith
-  have h3 : 0 ≤ (σ + 2 * ↑t * I - ρ).re := by rw [add_re, sub_re]; linarith
-  exact add_nonneg (mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg h1))
-    (add_nonneg (mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg h2))
-      (re_inv_nonneg_of_re_nonneg h3))
+  have h1 : 0 ≤ (↑σ - ρ).re := by simp; linarith
+  have h2 : 0 ≤ (↑σ + ↑t * I - ρ).re := by simp; linarith
+  have h3 : 0 ≤ (↑σ + 2 * ↑t * I - ρ).re := by simp; linarith
+  exact add_nonneg (add_nonneg (mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg h1))
+    (mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg h2)))
+    (re_inv_nonneg_of_re_nonneg h3)
 
 /-! ### The edge bound -/
 
@@ -678,7 +665,7 @@ theorem zeroFreeEdge_from_factorization
     σ - ρ₀.re ≥ 4 / (A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂) := by
   have hd : 0 < σ - ρ₀.re := by linarith
   set d : ℝ := σ - ρ₀.re with hd_def
-  have h3f1 := three_four_one_neg_logDeriv_riemannZeta hσ t
+  have h3f1 := three_four_one_re_LSeries_vonMangoldt hσ t
   have hLS_eq : (3 * (LSeries ↗Λ (↑σ : ℂ)).re + 4 * (LSeries ↗Λ (↑σ + ↑t * I)).re
         + (LSeries ↗Λ (↑σ + 2 * ↑t * I)).re)
       = (3 * (analytic (↑σ)).re + 4 * (analytic (↑σ + ↑t * I)).re + (analytic (↑σ + 2 * ↑t * I)).re)
@@ -689,40 +676,57 @@ theorem zeroFreeEdge_from_factorization
       h_decomp (↑σ + ↑t * I) (by simpa using hσ),
       h_decomp (↑σ + 2 * ↑t * I) (by simpa using hσ)]
     simp only [sub_re, re_sum, Finset.sum_add_distrib, add_re]
-  rw [← hLS_eq] at h3f1
-  rw [sub_nonneg] at h3f1
+    ring
+  rw [hLS_eq, sub_nonneg] at h3f1
   -- `h3f1` is now `(3-4-1 ΣT) ≤ (3-4-1 analytic)`
-  have hρ₀_1 : ↑σ - ρ₀ = ↑d - ↑t * I := by
-    ext <;> simp only [sub_re, sub_im, add_re, add_im, ofReal_re, ofReal_im, I_re, I_im, mul_re,
-      mul_im, neg_re, neg_im, hd_def, hρ₀im, zero_mul, mul_zero, add_zero, sub_zero, neg_zero]; ring
-  have hρ₀_2 : ↑σ + ↑t * I - ρ₀ = ↑d := by rw [add_sub_assoc, hρ₀_1]; ring
-  have hρ₀_3 : ↑σ + 2 * ↑t * I - ρ₀ = ↑d + ↑t * I := by rw [add_sub_assoc, hρ₀_1]; ring
+  have hρ₀eq : ρ₀ = (↑(ρ₀.re) : ℂ) + ↑t * I := by
+    apply Complex.ext <;> simp [hρ₀im]
+  have hdC : (↑d : ℂ) = ↑σ - ↑(ρ₀.re) := by rw [hd_def]; push_cast; ring
+  have hρ₀_1 : ↑σ - ρ₀ = ↑d - ↑t * I := by rw [hρ₀eq, hdC]; ring
+  have hρ₀_2 : ↑σ + ↑t * I - ρ₀ = ↑d := by rw [hρ₀eq, hdC]; ring
+  have hρ₀_3 : ↑σ + 2 * ↑t * I - ρ₀ = ↑d + ↑t * I := by rw [hρ₀eq, hdC]; ring
   have hsum : 4 / d ≤ 3 * (∑ ρ' ∈ Z, (1 / (↑σ - ρ') + 1 / ρ')).re
       + 4 * (∑ ρ' ∈ Z, (1 / (↑σ + ↑t * I - ρ') + 1 / ρ')).re
       + (∑ ρ' ∈ Z, (1 / (↑σ + 2 * ↑t * I - ρ') + 1 / ρ')).re := by
-    rw [re_sum, re_sum, re_sum]
-    simp only [Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_mul, add_re, sub_re]
-    rw [Z.sum_erase hρ₀mem]
+    have hcomb : ∀ w : ℂ, (3 * (∑ ρ' ∈ Z, (1 / (↑σ - ρ') + 1 / ρ')).re
+        + 4 * (∑ ρ' ∈ Z, (1 / (↑σ + ↑t * I - ρ') + 1 / ρ')).re
+        + (∑ ρ' ∈ Z, (1 / (↑σ + 2 * ↑t * I - ρ') + 1 / ρ')).re)
+        = ∑ ρ' ∈ Z, (3 * ((1 / (↑σ - ρ') + 1 / ρ')).re
+            + 4 * ((1 / (↑σ + ↑t * I - ρ') + 1 / ρ')).re
+            + ((1 / (↑σ + 2 * ↑t * I - ρ') + 1 / ρ')).re) := by
+      intro w
+      rw [re_sum, re_sum, re_sum, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib,
+        ← Finset.sum_add_distrib]
+    rw [hcomb 0, ← Finset.add_sum_erase Z _ hρ₀mem]
     have hc0 : 4 / d ≤ 3 * ((1 / (↑σ - ρ₀) + 1 / ρ₀)).re
         + 4 * ((1 / (↑σ + ↑t * I - ρ₀) + 1 / ρ₀)).re
         + ((1 / (↑σ + 2 * ↑t * I - ρ₀) + 1 / ρ₀)).re := by
       rw [hρ₀_1, hρ₀_2, hρ₀_3]
-      refine le_trans (re_three_four_one_one_over_sub_borderline d t hd)
-        (le_add_of_nonneg_right ?_)
-      exact mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg hρ₀re_pos.le)
-    have hrest : 0 ≤ ∑ ρ' ∈ Finset.erase Z ρ₀,
-        3 * ((1 / (↑σ - ρ') + 1 / ρ')).re
-        + 4 * ((1 / (↑σ + ↑t * I - ρ') + 1 / ρ')).re
-        + ((1 / (↑σ + 2 * ↑t * I - ρ') + 1 / ρ')).re := by
+      simp only [add_re]
+      have hb := re_three_four_one_one_over_sub_borderline d t hd
+      simp only [one_div] at hb ⊢
+      have hz : 0 ≤ (ρ₀⁻¹).re := by
+        simpa [one_div] using re_inv_nonneg_of_re_nonneg hρ₀re_pos.le
+      linarith
+    have hrest : 0 ≤ ∑ x ∈ Finset.erase Z ρ₀,
+        (3 * ((1 / (↑σ - x) + 1 / x)).re
+        + 4 * ((1 / (↑σ + ↑t * I - x) + 1 / x)).re
+        + ((1 / (↑σ + 2 * ↑t * I - x) + 1 / x)).re) := by
       apply Finset.sum_nonneg
-      intro ρ' hmem
-      refine add_nonneg (re_three_four_one_one_over_sub_nonneg ρ' (by linarith [hσ, hZre_lt ρ' hmem]))
-        (mul_nonneg (by norm_num) (re_inv_nonneg_of_re_nonneg (hZre ρ' hmem).le))
+      intro x hmem
+      have hmemZ : x ∈ Z := Finset.mem_of_mem_erase hmem
+      have hgen := re_three_four_one_one_over_sub_nonneg (σ := σ) (t := t) x
+        (by linarith [hσ, hZre_lt x hmemZ])
+      have hz : 0 ≤ ((1 : ℂ) / x).re := re_inv_nonneg_of_re_nonneg (hZre x hmemZ).le
+      simp only [add_re]
+      linarith
     exact le_trans hc0 (le_add_of_nonneg_right hrest)
   have h4 : 4 / d ≤ 3 * (analytic (↑σ)).re + 4 * (analytic (↑σ + ↑t * I)).re
       + (analytic (↑σ + 2 * ↑t * I)).re := le_trans hsum h3f1
   have h4le : 4 / d ≤ A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂ := le_trans h4 h_analytic
-  exact (le_div_iff₀ hRHS_pos).mp ((div_le_iff₀ hd).mp h4le)
+  rw [ge_iff_le, div_le_iff₀ hRHS_pos]
+  rw [div_le_iff₀ hd] at h4le
+  linarith
 
 end ZeroFreeEdge
 
