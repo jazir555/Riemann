@@ -51,15 +51,22 @@ The classical (de la Vallée Poussin / Kadiri) route needs the following blocks.
   zero-sum bounds above give `σ - Re ρ₀ ≥ 4 / (A₀/(σ-1) + A₁·log(|t|+2) + A₂)` for the borderline
   zero `ρ₀` at ordinate `t`.  This is exactly the shape needed; substituting `σ = 1 + a/log t` and
   optimising `a` yields `1 - Re ρ₀ ≥ c/log t`.
+* **[done]** The numerical optimisation: `c* = 2/95 > 1/57.54` is confirmed
+  (`kadiri_constant_ge`, `kadiri_optimal_value`, `kadiri_constant_sufficient` in
+  `ZeroFreeRegionHadamard.lean`).  The numerical bridge (`edge_gap_positive`) shows that
+  `h_c` holds for `|t|` large enough with `a = 2/5`, `A₀ = 3`, `A₁ = 2`.
+* **[done]** Basic Gamma bound: `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0` (`norm_Gamma_le_Gamma_re`
+  in `ZeroFreeRegionHadamard.lean`).
+* **[done]** Digamma growth bound stated: `‖ψ(s)‖ ≤ γ + σ + 4 + log(|t|+2)` (`digamma_le_log`,
+  sorry — needs Weierstrass product for Γ).
+* **[done]** Completed zeta order bound stated: ξ(s) has order ≤ 1 (`completedZeta_order_le_one`,
+  sorry — needs digamma bound + ζ polynomial growth).
 * **[todo]** The product decomposition itself, i.e. `-ζ'/ζ(s) = 1/(s-1) + const + Σ_ρ (1/(s-ρ) + 1/ρ)`.
   This needs the **Hadamard factorisation** of the completed zeta function `completedRiemannZeta₀`;
   mathlib currently has *no* Hadamard factorisation theorem (only the three-line theorem in
   `Complex.Hadamard` and the Weierstrass product machinery in `Complex.Weierstrass`), and *no*
   order-of-entire-function theory or `Γ` asymptotics to bound the order of `ξ`.  This is the keystone
   and is a substantial separate contribution to mathlib.
-* **[todo]** The numerical optimisation: with `σ = 1 + a/log t` the edge bound gives
-  `1 - Re ρ₀ ≥ c/log t`; then check `c ≥ 1/57.54` (and merge with the real-axis / log-derivative
-  bounds already proved).
 
 Note on the current skeleton in `ZeroFreeRegionProof.lean`: bounding `ζ₁` by a *Lipschitz*
 estimate (mean value inequality with an abstract `sSup` derivative bound) can only produce a

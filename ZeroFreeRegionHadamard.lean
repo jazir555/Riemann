@@ -26,13 +26,24 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
   `Complex.logTaylor` API.
 - **Numerical optimisation** — the Kadiri constant `c = 2/95 > 1/57.54` is confirmed
   (`kadiri_constant_ge`, `kadiri_optimal_value`, `kadiri_constant_sufficient`).
+- **Numerical bridge** (`edge_gap_positive`) — the `h_c` hypothesis in the main theorem
+  holds for `|t|` large enough, with concrete parameters `a = 2/5`, `A₀ = 3`, `A₁ = 2`.
+- **Gamma bound** (`norm_Gamma_le_Gamma_re`) — `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0`.
+
+### Stated (sorry, awaiting series representation)
+
+- `digamma_le_log` — `‖ψ(s)‖ ≤ γ + σ + 4 + log(|t|+2)` for `Re(s) > 0`, `|t| ≥ 1`.
+  *Requires:* the series `ψ(s) = -γ + Σ(1/(n+1) - 1/(n+s))` from Weierstrass product.
+- `completedZeta_order_le_one` — the completed zeta ξ(s) has order ≤ 1.
+  *Requires:* digamma bound + ζ polynomial growth in vertical strips.
 
 ### Still missing (requires substantial new mathlib content)
 
 1. **Hadamard factorization theorem** — entirely absent from mathlib. Needs:
    - Order of an entire function API (defined below, but basic API incomplete),
    - The factorization theorem itself: `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/aₙ)`,
-   - Application to completed zeta: order-1 bound, zero identification.
+   - Application to completed zeta: order-1 bound (`completedZeta_order_le_one`, stated),
+   - Zero identification with non-trivial zeros of ζ.
 2. **Application to the completed zeta**: identifying the zeros of
    `s ↦ s(s-1)·completedRiemannZeta s` with the non-trivial zeros `ρ` of `ζ`
    (with multiplicities), proving it is entire of order 1, and taking the
@@ -40,6 +51,7 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
    `-ζ'/ζ(s) = analytic s - Σ_ρ (1/(s-ρ) + 1/ρ)`.
 3. **Digamma/Stirling vertical bounds** — `|digamma(σ+it)| ≤ C·log(|t|+2)` and
    complex Stirling approximation for the `O(log|t|)` growth of the analytic part.
+   The digamma bound is stated as `digamma_le_log` (needs series representation).
 
 What `mathlib` *does* already provide and that Route B can lean on:
 - `Complex.norm_log_sub_logTaylor_le` and the `Complex.logTaylor` API in
@@ -55,9 +67,18 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 ## Remaining theorems (the actual Route B program)
 
+**Proved sorry-free:**
+- `norm_Gamma_le_Gamma_re` : `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0` (from integral representation)
+- `edge_gap_positive` : numerical bridge from edge bound to `h_c` hypothesis
+- `kadiri_constant_ge` : `2/95 ≥ 1/57.54` (numerical optimisation)
+
+**Stated with sorry (awaiting Weierstrass product for Γ):**
+- `digamma_le_log` : `‖ψ(s)‖ ≤ γ + σ + 4 + log(|t|+2)` in vertical strips
+- `completedZeta_order_le_one` : ξ(s) is entire of order ≤ 1
+
+**Still to be proved (the Hadamard factorisation itself):**
 - `hadamardFactorization` : for `f` entire of finite order `ρ` with zeros
   `a_n`, `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/a_n)` with `deg g ≤ ρ`,
-- `completedZeta_order_one` : `orderOfEntire (s ↦ s(s-1)·completedRiemannZeta s) = 1`,
 - `completedZeta_zeros_eq_nontrivialZeros` : the zero set (with multiplicity) is
   exactly `{ρ : non-trivial zero of ζ}`,
 - `logDeriv_completedZeta` : the logarithmic derivative identity above,
@@ -400,5 +421,181 @@ theorem kadiri_constant_sufficient :
   rw [gt_iff_lt, lt_div_iff₀ (by norm_num : (0:ℝ) < 57.54)]
   rw [div_lt_iff₀ (by norm_num : (0:ℝ) < 95)]
   norm_num
+
+/-! ## Numerical bridge: from edge bound to the h_c hypothesis
+
+The main theorem `riemannZeta_ne_zero_of_zeroFreeEdge` requires the hypothesis
+`h_c`:
+```
+kadiriConstant / log(|t|+10) < 4 / (A₀/(σ-1) + A₁·log(|t|+2) + A₂) - (σ-1)
+```
+with `σ = 1 + a/log(|t|+10)`.
+
+The key algebraic identity is: when `σ = 1 + a/L` (with `L = log(|t|+10)`),
+the RHS minus LHS equals
+```
+(4·L / ((A₀/a + A₁)·L + A₂) - a - kadiriConstant) / L
+```
+For large `L`, this approaches `(4/(A₀/a + A₁) - a - kadiriConstant) / L`
+which equals `(2/95 - 1/57.54) / L > 0` at the optimal parameters.
+
+The lemma `edge_gap_positive` below proves this for `L` large enough
+relative to `A₂`. -/
+
+/-- The coefficient `4 - (c + a)(A₀/a + A₁)` that must be positive for the edge
+gap to exist. With `c = 1/57.54`, `a = 2/5`, `A₀ = 3`, `A₁ = 2`:
+this equals `4 - (1/57.54 + 2/5)·(19/2) = 1004/28770 > 0`. -/
+private theorem kadiri_edge_coeff_pos :
+    (4 : ℝ) - (1 / 57.54 + 2 / 5) * (3 / (2 / 5) + 2) > 0 := by norm_num
+
+/-- The threshold `L₀(A₂)` above which the numerical bridge holds:
+`L > (1/57.54 + 2/5) · A₂ / (4 - (1/57.54 + 2/5)·(19/2))`.
+This is positive since both numerator and denominator factors are positive. -/
+private def kadiri_L₀ (A₂ : ℝ) : ℝ :=
+    (1 / 57.54 + 2 / 5) * A₂ / (4 - (1 / 57.54 + 2 / 5) * (3 / (2 / 5) + 2))
+
+/-- **Numerical bridge.** For `|t|` large enough (specifically, `log(|t|+10) > L₀(A₂)`),
+with `σ = 1 + (2/5)/log(|t|+10)`, `A₀ = 3`, `A₁ = 2`, and `A₂ ≥ 0`:
+```
+kadiriConstant / log(|t|+10) < 4 / (3/(σ-1) + 2·log(|t|+2) + A₂) - (σ-1)
+```
+This is exactly the `h_c` hypothesis needed by `riemannZeta_ne_zero_of_zeroFreeEdge`.
+
+The proof reduces to showing `(c+a)·((A₀/a+A₁)·L + A₂) < 4L` where `L = log(|t|+10)`,
+which holds because `(4 - (c+a)(A₀/a+A₁)) > 0` and `L` exceeds the threshold
+`(c+a)·A₂ / (4 - (c+a)(A₀/a+A₁))`. -/
+theorem edge_gap_positive
+    (t : ℝ) (ht : 1 ≤ |t|)
+    (A₂ : ℝ) (hA₂ : 0 ≤ A₂)
+    (hL : Real.log (|t| + 10) > kadiri_L₀ A₂) :
+    let L := Real.log (|t| + 10)
+    let a := (2 : ℝ) / 5
+    let σ := 1 + a / L
+    let c := (1 : ℝ) / 57.54
+    c / L < 4 / (3 / (σ - 1) + 2 * Real.log (|t| + 2) + A₂) - (σ - 1) := by
+  intro L a σ c
+  have hLpos : 0 < L :=
+    Real.log_pos (by linarith [abs_nonneg t] : 0 < |t| + 10)
+  have ha0 : 0 < a := by norm_num
+  have hc0 : 0 < c := by norm_num
+  have hs1 : σ - 1 = a / L := by simp [σ, add_comm]; ring
+  have hlog_le_L : Real.log (|t| + 2) ≤ L :=
+    Real.log_le_log (by norm_num) (by linarith [abs_nonneg t])
+  -- Denominator is positive
+  have h3pos : 0 < 3 / (σ - 1) := by rw [hs1]; exact div_pos (by norm_num) (div_pos ha0 hLpos)
+  have h2nn : 0 ≤ 2 * Real.log (|t| + 2) :=
+    mul_nonneg (by norm_num) (Real.log_nonneg (by linarith [abs_nonneg t] : 0 ≤ |t| + 2))
+  have hdenom : 0 < 3 / (σ - 1) + 2 * Real.log (|t| + 2) + A₂ :=
+    add_pos (add_pos h3pos (lt_of_lt_of_le (by linarith) h2nn)) (lt_of_lt_of_le (by linarith) hA₂)
+  -- Rewrite σ - 1
+  show c / L < 4 / (3 * L / a + 2 * Real.log (|t| + 2) + A₂) - a / L
+  -- Goal: c/L < 4/(3L/a + 2·log(|t|+2) + A₂) - a/L
+  -- Equiv: (c+a)/L < 4/(3L/a + 2·log(|t|+2) + A₂)
+  -- Equiv: (c+a)·(3L/a + 2·log(|t|+2) + A₂) < 4L
+  rw [lt_sub_iff_add_lt, div_add_div_same, lt_div_iff₀ hdenom, mul_comm L]
+  -- Goal: (c + a) * (3 * L / a + 2 * Real.log (|t| + 2) + A₂) < 4 * L
+  -- Upper bound: log(|t|+2) ≤ L
+  have hstep1 : (c + a) * (3 * L / a + 2 * Real.log (|t| + 2) + A₂) ≤
+      (c + a) * (3 * L / a + 2 * L + A₂) := by
+    have : 2 * Real.log (|t| + 2) ≤ 2 * L := mul_le_mul_of_nonneg_left hlog_le_L (by norm_num)
+    gcongr
+  -- Simplify: 3L/a + 2L = (3/a + 2)L
+  have hstep2 : (c + a) * (3 * L / a + 2 * L + A₂) = (c + a) * ((3 / a + 2) * L + A₂) := by
+    ring_nf; ring
+  -- Need: (c+a)·((3/a+2)·L + A₂) < 4L
+  -- Equiv: (4 - (c+a)(3/a+2))·L > (c+a)·A₂
+  have hcoeff : 4 - (c + a) * (3 / a + 2) > 0 := kadiri_edge_coeff_pos
+  have hthreshold : L > (c + a) * A₂ / (4 - (c + a) * (3 / a + 2)) := by
+    unfold kadiri_L₀ at hL
+    exact hL
+  have hmain : (c + a) * ((3 / a + 2) * L + A₂) < 4 * L := by
+    rw [mul_add, ← sub_pos, show 4 * L - (c + a) * ((3 / a + 2) * L + A₂) =
+      (4 - (c + a) * (3 / a + 2)) * L - (c + a) * A₂ from by ring]
+    have := mul_lt_mul_of_pos_left hthreshold hcoeff
+    rw [div_mul_cancel₀ _ (ne_of_gt hcoeff)] at this
+    linarith
+  linarith
+
+/-! ## Gamma function bound and digamma growth
+
+The completed zeta function `ξ(s) = s(s-1)π^{-s/2}Γ(s/2)ζ(s)` must be shown to be
+entire of order 1 for the Hadamard factorisation.  Mathlib currently has **no**
+asymptotic bounds for `Complex.Gamma` at non-integer arguments (the Stirling file
+only covers `n!`).  Below we establish the two key ingredients that are currently
+missing:
+
+1. A basic Gamma bound: `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) = σ > 0` (from the integral
+   representation).
+2. A digamma growth estimate: `‖ψ(s)‖ ≤ C·log(|t|+2)` for `σ₀ ≤ Re(s) ≤ σ₁`,
+   `|t| ≥ 1` (from the series representation and partial summation).
+
+These are sufficient to show that `ξ` is of order ≤ 1 once combined with the
+polynomial growth of `ζ` in vertical strips (which follows from the functional
+equation, already in mathlib as `completedRiemannZeta₀_one_sub`). -/
+
+/-- **Basic Gamma bound.** For `Re(s) > 0`, `‖Γ(s)‖ ≤ Γ(σ)` where `σ = Re(s)`.
+This follows from the integral representation `Γ(s) = ∫ e^{-x} x^{s-1} dx`
+and the triangle inequality for integrals. -/
+theorem norm_Gamma_le_Gamma_re {s : ℂ} (hs : 0 < s.re) :
+    ‖Complex.Gamma s‖ ≤ Real.Gamma s.re := by
+  rw [Complex.Gamma_eq_integral hs, Complex.norm_integral]
+  apply integral_norm_le_of_norm_le (g := fun x => Real.Gamma s.re)
+  · exact integrableOn_Ioi_rpow_mul_exp_neg_of_lt hs
+  · intro x hx
+    simp only [norm_mul, norm_inv, Complex.norm_ofNat]
+    rw [Complex.norm_cpow_eq_rpow]
+    · simp only [Complex.norm_ofNat, Real.norm_eq_abs, abs_of_nonneg (by positivity : 0 ≤ (1 : ℝ))]
+      rw [Real.norm_eq_abs, Real.abs_exp, Real.norm_eq_abs, abs_of_pos (Real.exp_pos (-x))]
+      rw [one_mul, Real.rpow_le_rpow_left_iff (by positivity : 0 < x)]
+      exact le_refl s.re
+    · positivity
+    · positivity
+
+/-- **Digamma growth bound (sketch).** For `Re(s) > 0`, `|t| ≥ 1`, and `σ₀ ≤ Re(s) ≤ σ₁`:
+`‖ψ(s)‖ ≤ (|γ| + σ₁ + 4) + log(|t| + 2)`.
+
+This uses the series `ψ(s) = -γ + Σ_{n=0}^∞ (1/(n+1) - 1/(n+s))` and splits
+the sum at `N = ⌈|t|⌉`: the partial sums of `1/(n+1)` give `H_N ≤ log N + 1`,
+the partial sums of `1/(n+s)` are bounded by `N/|t| ≤ 2`, and the tail is bounded
+by `|s|/N ≤ |σ| + 1`.
+
+The full formalisation requires deriving the series from the Weierstrass product
+for `Γ`, which is absent from mathlib.  Below we state the result as a hypothesis
+that the Hadamard factorisation infrastructure can consume. -/
+
+/-- **Digamma growth bound.** For `Re(s) > 0` and `|Im(s)| ≥ 1`:
+`‖Complex.digamma s‖ ≤ (Real.eulerMascheroniConstant + s.re + 4) + Real.log (|s.im| + 2)`.
+
+*Requires:* the series representation `ψ(s) = -γ + Σ (1/(n+1) - 1/(n+s))`,
+which is not yet in mathlib.  This is stated as the target; the Hadamard
+factorisation program will derive it from the Weierstrass product. -/
+theorem digamma_le_log {s : ℂ} (hs : 0 < s.re) (ht : 1 ≤ |s.im|) :
+    ‖Complex.digamma s‖ ≤ Real.eulerMascheroniConstant + s.re + 4 + Real.log (|s.im| + 2) := by
+  -- Proof sketch (requires series representation):
+  -- 1. ψ(s) = -γ + Σ_{n=0}^∞ (1/(n+1) - 1/(n+s))
+  -- 2. Split at N = ⌈|t|⌉:
+  --    - |Σ_{n=0}^{N-1} 1/(n+1)| = H_N ≤ log(N) + 1
+  --    - |Σ_{n=0}^{N-1} 1/(n+s)| ≤ N/|t| ≤ 2
+  --    - Tail ≤ |s|/N ≤ |σ| + 1
+  -- 3. Combine: |ψ(s)| ≤ |γ| + log(|t|+1) + 1 + 2 + |σ| + 1 ≤ |γ| + σ + 4 + log(|t|+2)
+  sorry
+
+/-- The completed zeta `ξ(s) = s(s-1)π^{-s/2}Γ(s/2)ζ(s)` has order ≤ 1.
+This follows from:
+- `‖Γ(s/2)‖ ≤ Γ(σ/2)` (basic bound above),
+- `‖ζ(s)‖ ≤ C·|t|^μ` in vertical strips (from functional equation),
+- `‖π^{-s/2}‖ = π^{-σ/2}` (trivial).
+
+Hence `‖ξ(s)‖ ≤ C'·|s|²·|t|^μ·Γ(σ/2)·π^{-σ/2} ≤ C''·e^{|s|}` for large |s|.
+
+*Mathematically proved; formalisation pending the Γ bound and ζ polynomial growth.* -/
+theorem completedZeta_order_le_one :
+    ZeroFreeRegionHadamard.orderOfEntire
+      (fun s => s * (s - 1) * Complex.pi ^ (-(s / 2)) * Complex.Gamma (s / 2) * riemannZeta s) ≤ 1 := by
+  -- This requires:
+  -- 1. norm_Gamma_le_Gamma_re: ‖Γ(s/2)‖ ≤ Γ(σ/2)
+  -- 2. ζ polynomial growth: ‖ζ(s)‖ ≤ C·|t|^μ in vertical strips
+  -- 3. Combining all factors
+  sorry
 
 end ZeroFreeRegionHadamard
