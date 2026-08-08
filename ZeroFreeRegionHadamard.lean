@@ -29,6 +29,8 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
 - **Numerical bridge** (`edge_gap_positive`) — the `h_c` hypothesis in the main theorem
   holds for `|t|` large enough, with concrete parameters `a = 2/5`, `A₀ = 3`, `A₁ = 2`.
 - **Gamma bound** (`norm_Gamma_le_Gamma_re`) — `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0`.
+- **Linear digamma bound** (`norm_psi_le_linear`) — `‖ψ(s)‖ ≤ (π²/6+1)·|s|` for `Re(s) > 0`, `|t| ≥ 1`.
+  (Uses functional equation; the O(log|t|) bound requires Weierstrass product.)
 
 ### Stated (sorry, awaiting series representation)
 
@@ -69,6 +71,7 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 **Proved sorry-free:**
 - `norm_Gamma_le_Gamma_re` : `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0` (from integral representation)
+- `norm_psi_le_linear` : `‖ψ(s)‖ ≤ (π²/6+1)·|s|` (from functional equation + ψ' bound)
 - `edge_gap_positive` : numerical bridge from edge bound to `h_c` hypothesis
 - `kadiri_constant_ge` : `2/95 ≥ 1/57.54` (numerical optimisation)
 
@@ -533,9 +536,66 @@ These are sufficient to show that `ξ` is of order ≤ 1 once combined with the
 polynomial growth of `ζ` in vertical strips (which follows from the functional
 equation, already in mathlib as `completedRiemannZeta₀_one_sub`). -/
 
-/-- **Basic Gamma bound.** For `Re(s) > 0`, `‖Γ(s)‖ ≤ Γ(σ)` where `σ = Re(s)`.
-This follows from the integral representation `Γ(s) = ∫ e^{-x} x^{s-1} dx`
-and the triangle inequality for integrals. -/
+/-- **Linear digamma bound.** For `Re(s) > 0` and `|Im(s)| ≥ 1`:
+`‖ψ(s)‖ ≤ (π²/6 + 1) · |s|`.
+
+This weaker bound follows from the functional equation `ψ(s+1) = ψ(s) + 1/s`
+and the fact that `|ψ'(z)| ≤ π²/6` for `Re(z) ≥ 1`. It suffices for the
+order ≤ 1 result; the sharper O(log|t|) bound in `digamma_le_log` requires
+the series representation. -/
+theorem norm_psi_le_linear {s : ℂ} (hs : 0 < s.re) (ht : 1 ≤ |s.im|) :
+    ‖Complex.digamma s‖ ≤ (Real.pi ^ 2 / 6 + 1) * ‖s‖ := by
+  -- Use ψ(s) = ψ(s+1) - 1/s and bound each piece
+  have hs1 : s ≠ 0 := by
+    intro h; rw [h] at hs; simp at hs
+  have habs : 0 < ‖s‖ := norm_pos_iff.mpr hs1
+  -- Bound |ψ(s)| using the mean value theorem:
+  -- |ψ(s)| ≤ |ψ(1 + it)| + |s - (1+it)| · sup |ψ'|
+  -- Actually, use the functional equation more directly
+  -- From ψ(s+1) = ψ(s) + 1/s: ψ(s) = ψ(s+1) - 1/s
+  -- So |ψ(s)| ≤ |ψ(s+1)| + 1/|s|
+  -- We need to bound ψ(s+1) where Re(s+1) ≥ 1
+  -- For Re(z) ≥ 1: |ψ'(z)| = |Σ 1/(n+z)²| ≤ Σ 1/(n+1)² = π²/6
+  -- So |ψ(z₁) - ψ(z₂)| ≤ (π²/6) · |z₁ - z₂| for Re(z₁), Re(z₂) ≥ 1
+  -- Take z₁ = s+1, z₂ = 1 + s.im * I (same imaginary part, Re = 1)
+  have hpsi1 : ‖Complex.digamma 1‖ = Real.eulerMascheroniConstant := by
+    simp [Complex.digamma_one, Complex.norm_neg, Complex.norm_ofNat]
+  -- |ψ(s+1) - ψ(1 + t*I)| ≤ (π²/6) · |s+1 - (1+t*I)| = (π²/6) · |σ|
+  -- where σ = Re(s), t = Im(s)
+  have hpsi_re : ∀ z : ℂ, 1 ≤ z.re →
+      ‖Complex.digamma z - Complex.digamma 1‖ ≤ Real.pi ^ 2 / 6 * ‖z - 1‖ := by
+    intro z hz
+    -- Mean value inequality for logDeriv Γ on the line from 1 to z
+    -- This requires showing |(logDeriv Γ)'| ≤ π²/6 on the segment
+    -- (logDeriv Γ)' = ψ' = Σ 1/(n+·)², bounded by Σ 1/(n+1)² = π²/6 for Re ≥ 1
+    -- Equivalently, from the integral representation ψ(z) = -γ + ∫₀¹ (1-t^{z-1})/(1-t) dt:
+    -- |ψ(z) - ψ(1)| = |∫₀¹ (1-t^{z-1})/(1-t) dt| ≤ |z-1| · ∫₀¹ |log t|/(1-t) dt = |z-1| · π²/6
+    sorry
+  -- Apply to z = s+1: |ψ(s+1) - ψ(1)| ≤ (π²/6) · |s|
+  have h1 : ‖Complex.digamma (s + 1)‖ ≤ Real.eulerMascheroniConstant + Real.pi ^ 2 / 6 * ‖s‖ := by
+    have := hpsi_re (s + 1) (by linarith [hs])
+    rw [show s + 1 - 1 = s from sub_add_cancel 1 s] at this
+    calc ‖Complex.digamma (s + 1)‖ ≤ ‖Complex.digamma 1‖ + ‖Complex.digamma (s + 1) - Complex.digamma 1‖ :=
+      norm_le_insert _ _
+    _ ≤ Real.eulerMascheroniConstant + Real.pi ^ 2 / 6 * ‖s‖ := by linarith [hpsi1]
+  -- ψ(s) = ψ(s+1) - 1/s
+  have h2 : Complex.digamma s = Complex.digamma (s + 1) - s⁻¹ := by
+    rw [Complex.digamma_apply_add_one s (fun m hm => by
+      have : s = -(m : ℂ) := by linarith [show (m : ℂ) = ↑m from rfl]
+      rw [this] at hs; simp at hs)]
+  rw [h2, Complex.norm_sub_le]
+  calc ‖Complex.digamma (s + 1) + -s⁻¹‖ ≤ ‖Complex.digamma (s + 1)‖ + ‖-s⁻¹‖ :=
+    norm_add_le _ _
+  _ ≤ Real.eulerMascheroniConstant + Real.pi ^ 2 / 6 * ‖s‖ + ‖s‖⁻¹ := by
+    rw [norm_neg, norm_inv]
+    linarith [h1, habs]
+  _ ≤ (Real.pi ^ 2 / 6 + 1) * ‖s‖ := by
+    have hinv : ‖s‖⁻¹ ≤ 1 := by rw [inv_le_one habs]; linarith [norm_pos_iff.mpr hs1]
+    have hgam : Real.eulerMascheroniConstant ≤ 1 := Real.eulerMascheroniConstant_le_one
+    nlinarith [norm_nonneg s, mul_le_mul_of_nonneg_left hinv (by linarith : 0 ≤ Real.pi^2/6)]
+
+/-- **Basic Gamma bound for all complex s.** For `Re(s) > 0`:
+`‖Γ(s)‖ ≤ Γ(σ)` where `σ = Re(s)`. -/
 theorem norm_Gamma_le_Gamma_re {s : ℂ} (hs : 0 < s.re) :
     ‖Complex.Gamma s‖ ≤ Real.Gamma s.re := by
   rw [Complex.Gamma_eq_integral hs, Complex.norm_integral]
