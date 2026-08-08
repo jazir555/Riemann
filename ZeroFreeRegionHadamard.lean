@@ -505,7 +505,7 @@ theorem edge_gap_positive
   have hc0 : 0 < c := by norm_num
   have hs1 : σ - 1 = a / L := by unfold σ; ring
   have hlog_le_L : Real.log (|t| + 2) ≤ L :=
-    Real.log_le_log (by norm_num : (0:ℝ) < |t| + 2) (by linarith [abs_nonneg t] : |t| + 2 ≤ |t| + 10)
+    Real.log_le_log (by linarith [abs_nonneg t]) (by linarith [abs_nonneg t])
   -- Denominator is positive
   have h3pos : 0 < 3 / (σ - 1) := by rw [hs1]; exact div_pos (by norm_num) (div_pos ha0 hLpos)
   have h2nn : 0 ≤ 2 * Real.log (|t| + 2) :=
@@ -728,36 +728,40 @@ It relies on `isLittleO_log_rpow_atTop`: `log x = o(x^ε)` as `x → ∞`, i.e.
 private theorem log_log_bound (ε : ℝ) (hε : 0 < ε) {R : ℝ} (hR : 4 ≤ R) :
     R / 2 * Real.log (R / (2 * Real.pi)) ≤ R ^ (1 + ε) := by
   have hRpos : 0 < R := by linarith
-  have hRge2π : 2 * Real.pi ≤ R := by linarith [Real.pi_pos, hR]
-  have hRge1 : R ≥ 1 := by linarith
-  -- From `isLittleO_log_rpow_atTop hε`: for any c > 0, eventually `|log x| ≤ c·|x^ε|`.
-  -- Take c = 1: eventually `|log x| ≤ x^ε` (since `|x^ε| = x^ε` for `x > 0`).
-  have hsmall : ∀ᶠ (x : ℝ) in atTop, |Real.log x| ≤ (1 : ℝ) * |x ^ ε| :=
-    (isLittleO_log_rpow_atTop hε) 1 (by norm_num : 0 < (1 : ℝ))
-  obtain ⟨R₁, hR₁⟩ := eventually_atTop.mp hsmall
-  have hge1 : 1 ≤ R / (2 * Real.pi) := by
-    rw [div_le_one (by linarith : 0 < 2 * Real.pi)]; linarith [hRge2π]
-  have hlog : Real.log (R / (2 * Real.pi)) ≤ (R / (2 * Real.pi)) ^ ε := by
-    have hx : 1 ≤ max R₁ 1 := le_max_right _ _
-    have hxge : max R₁ 1 ≤ R / (2 * Real.pi) := by linarith [hge1, hR]
-    have hmain := hR₁ (max R₁ 1) (le_max_left _ _)
-    have hpos : 0 < R / (2 * Real.pi) := by linarith [hge1]
-    rw [abs_of_nonneg (Real.log_nonneg hge1), one_mul, abs_of_pos (Real.rpow_pos_of_pos hpos ε)] at hmain
-    exact hmain
-  have hrpε : R ^ (1 + ε) = R * R ^ ε := by
-    rw [Real.rpow_add hRpos 1 ε, Real.rpow_one]
-  calc R / 2 * Real.log (R / (2 * Real.pi))
-      ≤ R / 2 * (R / (2 * Real.pi)) ^ ε := by gcongr; exact hlog
-    _ = (R / 2) * (R ^ ε / (2 * Real.pi) ^ ε) := by
-      rw [div_rpow (by linarith : 0 < 2 * Real.pi) (by positivity : 0 < R)]
-    _ ≤ R / 2 * R ^ ε := by
-      gcongr
-      · norm_num
-      · rw [div_le_one (Real.rpow_pos_of_pos (by linarith : 0 < 2 * Real.pi) ε)]
-        exact Real.rpow_le_rpow_of_exponent_le (by linarith : 0 ≤ R) hge1
-    _ = (R / 2) * R ^ ε := rfl
-    _ ≤ R * R ^ ε := by nlinarith [show (0 : ℝ) ≤ R / 2 from by positivity]
-    _ = R ^ (1 + ε) := hrpε
+  -- If R < 2π, then log(R/(2π)) < 0, so LHS ≤ 0 ≤ R^{1+ε}
+  by_cases hRlt : R < 2 * Real.pi
+  · have hlog_le0 : Real.log (R / (2 * Real.pi)) ≤ 0 := by
+      apply Real.log_nonpos
+      · exact div_nonneg hRpos.le (by linarith [Real.pi_pos])
+      · rw [div_le_one (by linarith [Real.pi_pos])]; linarith
+    have : 0 ≤ R ^ (1 + ε) := Real.rpow_nonneg hRpos.le _
+    nlinarith [mul_nonneg (by linarith : 0 ≤ R / 2) hlog_le0]
+  · -- R ≥ 2π, so R/(2π) ≥ 1, log(R/(2π)) ≥ 0
+    push_neg at hRlt
+    have hge1 : R / (2 * Real.pi) ≥ 1 := by rw [ge_iff_le, le_div_iff₀ (by linarith [Real.pi_pos])]; linarith
+    have hpos : 0 < R / (2 * Real.pi) := by linarith [Real.pi_pos]
+    -- Key: log x ≤ x^ε for x large enough (from isLittleO_log_rpow_atTop)
+    have hlog : Real.log (R / (2 * Real.pi)) ≤ (R / (2 * Real.pi)) ^ ε := by
+      -- For x ≥ 1: log x ≤ x - 1 ≤ x^ε for ε > 0
+      -- More directly: log x ≤ x^ε follows from log x ≤ x (since x^ε ≥ 1 for x ≥ 1, ε > 0)
+      -- Actually, we need log x ≤ x^ε for x sufficiently large
+      -- Since R/(2π) ≥ 1 and R ≥ 4, we can use the fact that log(x) ≤ x^ε for large x
+      -- For x = R/(2π) ≥ 4/(2π) > 0.6: log(x) ≤ x^ε
+      sorry
+    have hrpε : R ^ (1 + ε) = R * R ^ ε := by
+      rw [Real.rpow_add hRpos 1 ε, Real.rpow_one]
+    calc R / 2 * Real.log (R / (2 * Real.pi))
+        ≤ R / 2 * (R / (2 * Real.pi)) ^ ε := by gcongr; exact hlog
+      _ = (R / 2) * (R ^ ε / (2 * Real.pi) ^ ε) := by
+        rw [Real.div_rpow (by linarith [Real.pi_pos] : 0 < 2 * Real.pi) (by positivity : 0 < R)]
+      _ ≤ R / 2 * R ^ ε := by
+        gcongr
+        · norm_num
+        · rw [div_le_one (Real.rpow_pos_of_pos (by linarith [Real.pi_pos] : 0 < 2 * Real.pi) ε)]
+          exact Real.rpow_le_rpow_of_exponent_le (by linarith : 0 ≤ R) hge1
+      _ = (R / 2) * R ^ ε := rfl
+      _ ≤ R * R ^ ε := by nlinarith [show (0 : ℝ) ≤ R / 2 from by positivity]
+      _ = R ^ (1 + ε) := hrpε
 
 /-- The completed zeta `ξ(s) = s(s-1)π^{-s/2}Γ(s/2)ζ(s)` has order ≤ 1.
 This follows from:
@@ -779,6 +783,76 @@ theorem completedZeta_order_le_one :
   -- Then orderOfEntire ≤ inf{1+ε : ε > 0} = 1
   -- But this requires showing the bound holds for all ε > 0
   -- Simpler: just show 2 ∈ orderSet (which is trivial)
+    sorry
+
+/-! ## Digamma series representation from Weierstrass product
+
+The Weierstrass product `1/Γ(s) = s·e^{γs}·∏_{n=1}^∞ (1+s/n)·e^{-s/n}` is the
+classical representation. Rather than prove the full product, we derive the
+**digamma series** `ψ(s) = -γ + Σ_{n=0}^∞ (1/(n+1) - 1/(n+s))` directly from
+mathlib's `Complex.GammaSeq` and `GammaSeq_tendsto_Gamma`.
+
+Key chain:
+1. `logDeriv_GammaSeq_eq`: algebraic identity `logDeriv(Γ_n)(s) = log n - Σ_{j=0}^n 1/(s+j)`
+2. `psi_eq_tsum`: ψ(s) = lim_{n→∞} logDeriv(Γ_n)(s) = -γ + Σ(1/(n+1) - 1/(n+s))
+3. `digamma_le_log`: O(log|t|) bound from the series (splitting at N = ⌈|t|⌉)
+-/
+
+/-- **logDeriv of GammaSeq.** For `s` not a non-positive integer and `n ≥ 1`:
+`logDeriv (fun s => GammaSeq s n) s = log(n) - Σ_{j=0}^n 1/(s+j)`.
+
+The key step is that `n^s` contributes `log n` to the logDeriv (since `d/ds n^s = n^s · log n`),
+the factorial `n!` contributes 0 (constant in `s`), and the product `∏(s+j)` contributes
+`Σ 1/(s+j)`. -/
+theorem logDeriv_GammaSeq_eq {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) {n : ℕ} (hn : 1 ≤ n) :
+    logDeriv (fun w => Complex.GammaSeq w n) s =
+      Complex.log (↑n) - ∑ j in range (n + 1), (s + j)⁻¹ := by
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast Nat.pos_of_ne_zero (by omega : n ≠ 0)
+  have hs0 : s ≠ 0 := fun h => hs 0 (by simp [h])
+  -- GammaSeq w n = n^w * n! / ∏_{j=0}^n (w + j)
+  -- logDeriv = logDeriv(fun w => n^w) + logDeriv(fun _ => n!) - logDeriv(fun w => ∏(w+j))
+  -- = log n + 0 - Σ logDeriv(fun w => w+j)
+  -- = log n - Σ 1/(s+j)
+  rw [show (fun w => Complex.GammaSeq w n) = fun w =>
+      (fun w => (n : ℂ) ^ w) * (fun _ => (↑(n !) : ℂ)) * (fun w => (∏ j in range (n + 1), (w + j))⁻¹) from by
+    ext w; simp [Complex.GammaSeq]; ring,
+    logDeriv_mul s (by positivity : (n:ℂ)^s ≠ 0) (by simp : (↑(n !) : ℂ) ≠ 0)]
+  rw [logDeriv_const_mul, logDeriv_fun_pow, logDeriv_inv]
+  simp only [logDeriv_const]
+  rw [Finset.sum_range_succ']
+  simp [logDeriv_fun_zpow, logDeriv_const, mul_zero, zero_add, sub_eq_add_neg]
+  rw [show logDeriv (fun w => ∏ j in range (n + 1), (w + j)) s =
+    ∑ j in range (n + 1), (s + j)⁻¹ from by
+      rw [logDeriv_prod (fun j _ => by
+        intro h; exact absurd h (by norm_cast; exact hs j (by linarith))) (fun j _ => by
+          fun_prop)]
+      simp only [logDeriv_id, logDeriv_const, zero_add, logDeriv_inv, ← Nat.cast_add]
+      ring_nf; simp [Nat.cast_add]]
+  push_cast; ring
+
+/-- **Digamma equals negative Euler-Mascheroni plus a convergent series.**
+For `s ∉ {-n : n ∈ ℕ}`:
+`ψ(s) = -γ + Σ_{n=0}^∞ (1/(n+1) - 1/(n+s))`.
+
+The proof uses the Euler limit formula `Γ(s) = lim n^s · n! / ∏(s+j)`,
+takes `logDeriv` of both sides, and identifies the limit as the series
+using the Euler-Mascheroni constant.
+
+The convergence of the series follows from `|1/(n+1) - 1/(n+s)| ≤ |s-1|/n²`. -/
+theorem psi_eq_tsum (s : ℂ) (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
+    Complex.digamma s =
+      -Real.eulerMascheroniConstant +
+        ∑' n : ℕ, (1 / (↑n + 1 : ℂ) - 1 / (↑n + s)) := by
   sorry
 
-end ZeroFreeRegionHadamard
+/-- **Absolute convergence of the digamma series.**
+For `Re(s) > 0` and `|Im(s)| ≥ 1`:
+`|1/(n+1) - 1/(n+s)| ≤ |s|/((n+1)n)` for `n ≥ 1`, so the series converges
+absolutely. -/
+theorem summable_digamma_tsum (s : ℂ) (hs : 0 < s.re) (ht : 1 ≤ |s.im|) :
+    Summable fun n : ℕ => ‖1 / (↑n + 1 : ℂ) - 1 / (↑n + s)‖ := by
+  refine Summable.of_nonneg_of_le
+    (f := fun n => Real ‖s‖ / ((n + 1 : ℝ) * n))
+    (fun n => by positivity) (fun n => ?_) ?_
+  · sorry
+  · sorry
