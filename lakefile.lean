@@ -186,3 +186,4 @@ post_update pkg do
       IO.Process.setCurrentDir cwd
     if exitCode ≠ 0 then
       error s!"{pkg.baseName}: failed to fetch cache"
+

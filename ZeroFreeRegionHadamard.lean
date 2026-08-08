@@ -73,6 +73,81 @@ lemma primaryFactor_of_neg (p : ℕ) (z : ℂ) :
     primaryFactor p (-z) = (1 + z) * exp (∑ k ∈ range p, (-z) ^ (k + 1) / (k + 1)) := by
   simp [primaryFactor]
 
+/-! ## Logarithmic derivative of the genus-1 primary factor -/
+
+open scoped Topology
+
+/-- The genus-1 primary factor satisfies the (branch-free) logarithmic-derivative identity
+`logDeriv (E_1) w = -w/(1-w)` for `w ≠ 1`. This uses `logDeriv` (not `Complex.log`) so that
+it is valid everywhere the factor is differentiable, independent of the principal branch. -/
+theorem logDeriv_primaryFactor_one (w : ℂ) (hw : w ≠ 1) :
+    logDeriv (fun x => primaryFactor 1 x) w = -w / (1 - w) := by
+  have h1 : (1 - w) ≠ 0 := by
+    intro h
+    rw [sub_eq_zero] at h
+    exact hw (Eq.symm h)
+  have he : cexp w ≠ 0 := exp_ne_zero w
+  have hs : ∀ x : ℂ, ∑ k ∈ range 1, x ^ (k + 1) / (k + 1) = x := by
+    intro x
+    simp
+  have hde : DifferentiableAt ℂ (fun x => cexp x) w := Complex.differentiableAt_exp
+  have hc : DifferentiableAt ℂ (fun x : ℂ => (1 : ℂ)) w := differentiableAt_const (1 : ℂ)
+  have hd1 : DifferentiableAt ℂ (fun x : ℂ => (1 : ℂ) - x) w := hc.sub differentiableAt_id
+  have hred : (fun x => primaryFactor 1 x) = fun x => (1 - x) * cexp x := by
+    ext x
+    rw [primaryFactor, hs x]
+  rw [hred, logDeriv_apply]
+  rw [← funext (Pi.mul_apply (fun x => 1 - x) (fun x => cexp x))]
+  rw [deriv_mul hd1 hde]
+  simp
+  rw [show (-cexp w + (1 - w) * cexp w) = cexp w * (-w) by ring]
+  field_simp [he, h1]
+
+/-- Scaled genus-1 identity: for `ρ ≠ 0` and `s ≠ ρ`,
+`logDeriv (E_1(s/ρ)) = 1/(s-ρ) + 1/ρ`. This is the summand appearing in the
+logarithmic derivative of the canonical product over the non-trivial zeros `ρ`. -/
+theorem logDeriv_primaryFactor_one_scaled (s ρ : ℂ) (hρ : ρ ≠ 0) (hdiff : s ≠ ρ) :
+    logDeriv (fun x => primaryFactor 1 (x / ρ)) s = 1 / (s - ρ) + 1 / ρ := by
+  have hsr : s / ρ ≠ 1 := by
+    intro h
+    have hdiv : s / ρ * ρ = s := div_mul_cancel₀ s hρ
+    rw [h, one_mul] at hdiv
+    exact hdiff (Eq.symm hdiv)
+  have h1 : (1 - s / ρ) ≠ 0 := sub_ne_zero.mpr (Ne.symm hsr)
+  have hg : DifferentiableAt ℂ (fun x => x / ρ) s := by simp
+  have hpf : primaryFactor 1 = fun z => (1 - z) * cexp z := by
+    ext z
+    rw [primaryFactor]
+    simp
+  have hd_f : DifferentiableAt ℂ (primaryFactor 1) (s / ρ) := by
+    rw [hpf]
+    exact ((differentiableAt_const (1 : ℂ)).sub (differentiableAt_id :
+      DifferentiableAt ℂ id (s / ρ))).mul Complex.differentiableAt_exp
+  rw [show (fun x => primaryFactor 1 (x / ρ)) = primaryFactor 1 ∘ fun x => x / ρ from rfl,
+      logDeriv_apply, deriv_comp s hd_f hg]
+  rw [show (primaryFactor 1 ∘ fun x => x / ρ) s = primaryFactor 1 (s / ρ) from rfl,
+      mul_comm, mul_div_assoc, ← logDeriv_apply (primaryFactor 1) (s / ρ)]
+  rw [logDeriv_primaryFactor_one (s / ρ) hsr]
+  rw [show (fun x => x / ρ) = id / (fun _ => ρ) by rfl,
+      deriv_div differentiableAt_id (differentiableAt_const ρ) hρ]
+  simp [deriv_id']
+  field_simp [hρ, h1, hdiff]
+  ring
+
+/-- The function `x ↦ E_1(x/ρ)` is differentiable for any `ρ ≠ 0` (and any `x`). -/
+theorem differentiableAt_primaryFactor_one_scaled (ρ s : ℂ) (_hρ : ρ ≠ 0) :
+    DifferentiableAt ℂ (fun x => primaryFactor 1 (x / ρ)) s := by
+  have hpf : primaryFactor 1 = fun z => (1 - z) * cexp z := by
+    ext z
+    rw [primaryFactor]
+    simp
+  have hd0 : DifferentiableAt ℂ (primaryFactor 1) (s / ρ) := by
+    rw [hpf]
+    exact ((differentiableAt_const (1 : ℂ)).sub (differentiableAt_id :
+      DifferentiableAt ℂ id (s / ρ))).mul Complex.differentiableAt_exp
+  have hg : DifferentiableAt ℂ (fun x => x / ρ) s := by simp
+  exact DifferentiableAt.comp s hd0 hg
+
 /-! ## Order of an entire function -/
 
 /-- The set of real exponents `ρ` such that `‖f z‖ ≤ C·exp(‖z‖^ρ)` outside a
@@ -101,6 +176,44 @@ lemma canonicalProduct_empty (p : ℕ) (s : ℂ) : canonicalProduct p ∅ s = 1 
 lemma canonicalProduct_insert {p : ℕ} {Z : Finset ℂ} {z : ℂ} (hz : z ∉ Z) (s : ℂ) :
     canonicalProduct p (insert z Z) s = primaryFactor p (s / z) * canonicalProduct p Z s := by
   simp [canonicalProduct, prod_insert hz]
+
+/- For a finite set `Z` of (nonzero) zeros, the logarithmic derivative of the finite
+canonical product is the sum of the scaled genus-1 contributions:
+`logDeriv (∏_{ρ ∈ Z} E_1(s/ρ)) s = Σ_{ρ ∈ Z} (1/(s-ρ) + 1/ρ)`. -/
+theorem sum_log_primaryFactor_deriv (Z : Finset ℂ) (s : ℂ)
+    (hZ0 : ∀ z ∈ Z, z ≠ 0) (hs : ∀ z ∈ Z, s ≠ z) :
+    logDeriv (canonicalProduct 1 Z) s = ∑ z ∈ Z, (1 / (s - z) + 1 / z) := by
+  induction Z using Finset.induction_on with
+  | empty => show logDeriv (1 : ℂ → ℂ) s = 0; simp [logDeriv_apply]
+  | insert a t ha ih =>
+    have hins : canonicalProduct 1 (insert a t) =
+        fun u => primaryFactor 1 (u / a) * canonicalProduct 1 t u :=
+      funext fun u => canonicalProduct_insert ha u
+    have ha0 := hZ0 a (Finset.mem_insert_self a t)
+    have has := hs a (Finset.mem_insert_self a t)
+    rw [hins, logDeriv_mul s]
+    · rw [logDeriv_primaryFactor_one_scaled s a ha0 has,
+        ih (fun w hw => hZ0 w (Finset.mem_insert_of_mem hw))
+        (fun w hw => hs w (Finset.mem_insert_of_mem hw)), Finset.sum_insert ha]
+    · intro h; rw [primaryFactor] at h; rw [mul_eq_zero] at h
+      rcases h with h | h
+      · exact absurd (div_eq_one_iff_eq ha0 |>.mp (sub_eq_zero.mp h |>.symm)) has
+      · exact exp_ne_zero _ h
+    · have hprod : ∀ z' ∈ t, primaryFactor 1 (s / z') ≠ 0 := by
+        intro z' hz'
+        have hz'0 := hZ0 z' (Finset.mem_insert_of_mem hz')
+        have hs' := hs z' (Finset.mem_insert_of_mem hz')
+        intro h; rw [primaryFactor] at h; rw [mul_eq_zero] at h
+        rcases h with h | h
+        · exact absurd (div_eq_one_iff_eq hz'0 |>.mp (sub_eq_zero.mp h |>.symm)) hs'
+        · exact exp_ne_zero _ h
+      simp only [canonicalProduct]
+      exact Finset.prod_ne_zero_iff.mpr hprod
+    · exact differentiableAt_primaryFactor_one_scaled a s ha0
+    · exact DifferentiableAt.fun_finsetProd fun z' hz' =>
+        differentiableAt_primaryFactor_one_scaled z' s
+          (hZ0 z' (Finset.mem_insert_of_mem hz'))
+
 /-! ## Convergence estimate for the primary factor -/
 
 /-- The `(p+1)`-st Taylor polynomial of `log` at `1`, evaluated at `-z`, is exactly the
