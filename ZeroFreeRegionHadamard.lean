@@ -765,14 +765,47 @@ the factorial `n!` contributes 0 (constant in `s`), and the product `∏(s+j)` c
 `Σ 1/(s+j)`. -/
 -- The algebraic identity logDeriv(GammaSeq · n) s = log n - Σ_{j=0}^n 1/(s+j)
 -- is proved from logDeriv_mul, logDeriv_const, logDeriv_prod, and the factorization
--- GammaSeq w n = n^w * n! / ∏(w+j). Full proof below requires several
--- logDeriv API lemmas (logDeriv_const_mul, logDeriv_fun_pow, logDeriv_inv,
--- logDeriv_prod, logDeriv_id) which exist in mathlib but the tactic combination
--- is complex; stated as sorry for now.
+-- GammaSeq w n = n^w * n! / ∏(w+j).
 theorem logDeriv_GammaSeq_eq {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) {n : ℕ} (hn : 1 ≤ n) :
     logDeriv (fun w => Complex.GammaSeq w n) s =
       Complex.log (↑n) - ∑ j ∈ range (n + 1), (s + j)⁻¹ := by
-  sorry -- Algebraic: follows from logDeriv_mul, logDeriv_prod, logDeriv_inv on GammaSeq factorization
+  have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (ne_of_gt (lt_of_lt_of_le zero_lt_one hn))
+  have hfac : (Nat.factorial n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+  have hne : ∀ j ∈ range (n + 1), s + (j : ℂ) ≠ 0 := by
+    intro j _ h
+    exact hs j (eq_neg_of_add_eq_zero_left h)
+  have hpow : logDeriv (fun w => (n : ℂ) ^ w) s = Complex.log (n : ℂ) := by
+    rw [logDeriv_apply]
+    have hder : deriv (fun w => (n : ℂ) ^ w) s = (n : ℂ) ^ s * Complex.log (n : ℂ) := by
+      simpa using ((hasDerivAt_id s).const_cpow (Or.inl hn0)).deriv
+    rw [hder]
+    change ((n : ℂ) ^ s * Complex.log (n : ℂ)) / (n : ℂ) ^ s = Complex.log (n : ℂ)
+    field_simp [Complex.cpow_ne_zero_iff.mpr (Or.inl hn0)]
+  have hprod : logDeriv (fun w => ∏ j ∈ range (n + 1), (w + (j : ℂ))) s =
+      ∑ j ∈ range (n + 1), (s + (j : ℂ))⁻¹ := by
+    have hldp : logDeriv (fun x => ∏ i ∈ range (n + 1), (x + (i : ℂ))) s =
+        ∑ i ∈ range (n + 1), logDeriv (fun w => w + (i : ℂ)) s :=
+      logDeriv_prod (s := range (n + 1)) (x := s) (f := fun (j : ℕ) (w : ℂ) => w + j)
+        hne (by intro j _; fun_prop)
+    rw [hldp]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [logDeriv_apply]
+    have hder : deriv (fun w => w + (j : ℂ)) s = 1 := by
+      simpa using (deriv_add_const (j : ℂ) (f := id))
+    rw [hder]
+    simp
+  have hGS : (fun w => Complex.GammaSeq w n) =
+      (fun w => (n : ℂ) ^ w * (Nat.factorial n : ℂ) / ∏ j ∈ range (n + 1), (w + (j : ℂ))) := by
+    ext w
+    rfl
+  rw [hGS, logDeriv_div s]
+  · rw [logDeriv_mul_const s (Nat.factorial n : ℂ) hfac, hpow, hprod]
+  · exact mul_ne_zero (Complex.cpow_ne_zero_iff.mpr (Or.inl hn0)) hfac
+  · simpa [Finset.prod_apply] using
+      (Finset.prod_ne_zero_iff.mpr (by intro j hj; exact hne j hj))
+  · exact (differentiableAt_id.const_cpow (Or.inl hn0)).mul (differentiableAt_const _)
+  · exact DifferentiableAt.fun_finsetProd (fun j _ => by fun_prop)
 
 /-- **Digamma equals negative Euler-Mascheroni plus a convergent series.**
 For `s ∉ {-n : n ∈ ℕ}`:
@@ -790,13 +823,65 @@ theorem psi_eq_tsum (s : ℂ) (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
   sorry
 
 /-- **Absolute convergence of the digamma series.**
-For `Re(s) > 0` and `|Im(s)| ≥ 1`, the series
-`Σ_n |1/(n+1) - 1/(n+s)|` converges. -/
-theorem summable_digamma_tsum (s : ℂ) (hs : 0 < s.re) (ht : 1 ≤ |s.im|) :
+For `Re(s) > 0`, the series `Σ_n |1/(n+1) - 1/(n+s)|` converges.
+(The `|Im(s)| ≥ 1` hypothesis is unnecessary: `|n+s| ≥ Re(n+s) = n + Re(s) > n`.) -/
+theorem summable_digamma_tsum (s : ℂ) (hs : 0 < s.re) :
     Summable fun n : ℕ => ‖1 / (↑n + 1 : ℂ) - 1 / (↑n + s)‖ := by
-  -- Key identity: 1/(n+1) - 1/(n+s) = (s-1)/((n+1)(n+s))
-  -- For n ≥ 1: |n+s| ≥ n + Re(s) ≥ n + 1 (since Re(s) > 0 and |Im(s)| ≥ 1)
-  -- Actually |n+s| ≥ |Re(n+s)| = n + Re(s) ≥ n + 1
-  -- So |1/(n+1) - 1/(n+s)| ≤ |s-1| / ((n+1)(n+1)) = |s-1| / (n+1)^2
-  -- Σ 1/(n+1)^2 converges (p-series with p=2)
-  sorry
+  have hns : ∀ n : ℕ, (n : ℂ) + s ≠ 0 := by
+    intro n h
+    have hre : 0 < ((n : ℂ) + s).re := by
+      rw [show (n : ℂ) = ((n : ℝ) : ℂ) by exact (Complex.ofReal_natCast n).symm, add_re, ofReal_re]
+      positivity
+    rw [h] at hre
+    simp at hre
+  have hnc : ∀ n : ℕ, (n : ℂ) + 1 ≠ 0 := by
+    intro n h
+    have hre : 0 < ((n : ℂ) + 1).re := by
+      rw [show (n : ℂ) = ((n : ℝ) : ℂ) by exact (Complex.ofReal_natCast n).symm, add_re,
+        ofReal_re, one_re]
+      positivity
+    rw [h] at hre
+    simp at hre
+  have hb : ∀ n : ℕ, 1 ≤ n →
+      ‖1 / (↑n + 1 : ℂ) - 1 / (↑n + s)‖ ≤ ‖s - 1‖ * (n : ℝ) ^ (-2 : ℝ) := by
+    intro n hn
+    have hiden : 1 / ((n : ℂ) + 1) - 1 / ((n : ℂ) + s) =
+        (s - 1) / (((n : ℂ) + 1) * ((n : ℂ) + s)) := by
+      field_simp [hns n, hnc n]
+      ring
+    rw [hiden, norm_div, norm_mul]
+    have hb1 : (n : ℝ) + 1 ≤ ‖(n : ℂ) + 1‖ := by
+      have hre2 : ((n : ℂ) + 1).re = (n : ℝ) + 1 := by
+        rw [add_re]
+        rw [show (n : ℂ) = ((n : ℝ) : ℂ) by exact (Complex.ofReal_natCast n).symm, ofReal_re, one_re]
+      have hle := Complex.re_le_norm ((n : ℂ) + 1)
+      rw [hre2] at hle
+      exact hle
+    have hb2 : (n : ℝ) ≤ ‖(n : ℂ) + s‖ := by
+      have hre2 : ((n : ℂ) + s).re = (n : ℝ) + s.re := by
+        rw [add_re]
+        rw [show (n : ℂ) = ((n : ℝ) : ℂ) by exact (Complex.ofReal_natCast n).symm, ofReal_re]
+      have hle := Complex.re_le_norm ((n : ℂ) + s)
+      rw [hre2] at hle
+      linarith [hle, hs]
+    have hrp : (n : ℝ) ^ (-2 : ℝ) = 1 / (n : ℝ) ^ 2 := by
+      rw [show (-2 : ℝ) = -((2 : ℕ) : ℝ) by norm_num,
+        Real.rpow_neg (Nat.cast_nonneg n), Real.rpow_natCast, ← one_div]
+    rw [hrp, mul_one_div]
+    rw [div_le_div_iff₀ (mul_pos (norm_pos_iff.mpr (hnc n)) (norm_pos_iff.mpr (hns n)))
+      (by positivity : 0 < (n : ℝ) ^ 2)]
+    have hle : (n : ℝ) ^ 2 ≤ ‖(n : ℂ) + 1‖ * ‖(n : ℂ) + s‖ := by
+      have ha : (n : ℝ) ≤ (n : ℝ) + 1 := le_add_of_nonneg_right zero_le_one
+      have h1 : (n : ℝ) ^ 2 ≤ ((n : ℝ) + 1) * (n : ℝ) := by
+        rw [sq]; exact mul_le_mul_of_nonneg_right ha (Nat.cast_nonneg n)
+      have h2 : ((n : ℝ) + 1) * (n : ℝ) ≤ ‖(n : ℂ) + 1‖ * (n : ℝ) :=
+        mul_le_mul_of_nonneg_right hb1 (Nat.cast_nonneg n)
+      have h3 : ‖(n : ℂ) + 1‖ * (n : ℝ) ≤ ‖(n : ℂ) + 1‖ * ‖(n : ℂ) + s‖ :=
+        mul_le_mul_of_nonneg_left hb2 (norm_nonneg _)
+      exact le_trans h1 (le_trans h2 h3)
+    exact mul_le_mul_of_nonneg_left hle (norm_nonneg _)
+  refine Summable.of_norm_bounded_eventually_nat
+    (g := fun n => ‖s - 1‖ * (n : ℝ) ^ (-2 : ℝ)) ?_ ?_
+  · exact (Real.summable_nat_rpow.mpr (by norm_num : (-2 : ℝ) < -1)).mul_left ‖s - 1‖
+  · filter_upwards [Filter.eventually_ge_atTop (1 : ℕ)] with n hn
+    exact (by simpa using hb n hn)
