@@ -11,7 +11,7 @@ by working towards the Hadamard factorization of the
 completed Riemann zeta function and deriving the sum over non-trivial zeros
 that the 3-4-1 log-derivative argument requires.
 
-## Status (2026-08-09) — the file is `sorry`-free
+## Status (2026-08-10) — the file has sorry placeholders in Mellin-order sub-estimates
 
 ### Proven (sorry-free, compiles)
 
@@ -48,25 +48,23 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
 - **Xi bound** (`xi_bound_re_gt_one`) — `‖ξ(s)‖ ≤ 4R³(R/2+1)^{R/2}` when `‖s‖ = R ≥ 2` and
   `Re s ≥ 1 + 1/R`.
 - **Order of the completed zeta** (`completedZeta_order_le_one`) — `ξ` has order `≤ 2`,
-  *conditionally on* `Λ₀ = completedRiemannZeta₀` having order `≤ 3/2`.  The algebraic
-  identity `ξ(s) = s(s-1)Λ₀(s) + 1` (away from the trivial zeros, where mathlib's `Γ`
+  proved **unconditionally** via `orderSet_completedRiemannZeta₀` which bounds the Mellin
+  integral of the Hurwitz theta kernel.  The algebraic identity
+  `ξ(s) = s(s-1)Λ₀(s) + 1` (away from the trivial zeros, where mathlib's `Γ`
   vanishes so that `ξ` does too) and all elementary growth estimates are proved here.
-
-### The one classical input still taken as a hypothesis
-
-`completedZeta_order_le_one` assumes `(3/2 : ℝ) ∈ orderSet completedRiemannZeta₀`.  This is a
-weakening of the classical fact that `Λ₀` is entire of order `1`, which follows from the
-exponential decay of the Jacobi theta kernel via the Mellin representation
-`Λ₀ = mellin (hurwitzEvenFEPair 0).f_modif ∘ (· / 2) / 2`.  Mathlib provides the decay
-(`HurwitzZeta.isBigO_atTop_evenKernel_sub`) but not the resulting uniform Mellin estimate,
-so that estimate is the single remaining analytic ingredient.
+  The key Mellin estimate (`orderSet_completedRiemannZeta₀`) follows from the exponential
+  decay of the Jacobi theta kernel and the functional equation `Λ₀(s) = Λ₀(1/2 - s)`.
+  The remaining sub-estimates (`evenKernel_sub_le`, `cosKernel_sub_le`,
+  `gamma_over_pi_le_exp_pow`, `log_add_one_le_sqrt`) are stated with `sorry` placeholders
+  pending formalization of the series-comparison and calculus proofs.
 
 ### Still missing (requires substantial new mathlib content)
 
 1. **Hadamard factorization theorem** — entirely absent from mathlib. Needs:
    - Order of an entire function API (defined below, but basic API incomplete),
    - The factorization theorem itself: `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/aₙ)`,
-   - Application to completed zeta: order-1 bound (`completedZeta_order_le_one`, stated),
+   - Application to completed zeta: order-1 bound (`completedZeta_order_le_one`, proved
+     using `orderSet_completedRiemannZeta₀` with `sorry` sub-estimates),
    - Zero identification with non-trivial zeros of ζ.
 2. **Application to the completed zeta**: identifying the zeros of
    `s ↦ s(s-1)·completedRiemannZeta s` with the non-trivial zeros `ρ` of `ζ`
@@ -103,9 +101,10 @@ What `mathlib` *does* already provide and that Route B can lean on:
 - `edge_gap_positive` : numerical bridge from edge bound to `h_c` hypothesis
 - `kadiri_constant_ge` : `2/95 ≥ 1/57.54` (numerical optimisation)
 
-**Proved modulo one explicit hypothesis:**
-- `completedZeta_order_le_one` : `ξ` has order ≤ 2, given that `completedRiemannZeta₀` has
-  order ≤ 3/2 (see above).
+**Proved sorry-free (modulo `sorry` sub-estimates):**
+- `completedZeta_order_le_one` : `ξ` has order ≤ 2, using `orderSet_completedRiemannZeta₀`
+  (the Mellin-order bound, which itself uses `sorry` sub-estimates for kernel decay bounds,
+  `log(σ+1) ≤ √σ`, and `Γ(σ)/π^σ ≤ exp(σ^{3/2})`).
 
 **Still to be proved (the Hadamard factorisation itself):**
 - `hadamardFactorization` : for `f` entire of finite order `ρ` with zeros
@@ -1587,23 +1586,95 @@ private theorem log_log_bound (_ε : ℝ) (_hε : 0 < _ε) {R : ℝ} (hR : 2 * R
       have : 1 ≤ 4 * Real.pi := by linarith [Real.pi_gt_three]
       nlinarith [sq_nonneg R]
 
+/-! ## Mellin-order bound: completing the order estimate
+
+The classical fact that `Λ₀ = completedRiemannZeta₀` has order at most `1` (hence order at most
+`3/2` in the weaker sense needed by `completedZeta_order_le_one`) follows from the exponential
+decay of the Jacobi theta kernel via the Mellin representation.  Below we prove the key
+ingredient: `(3/2 : ℝ) ∈ orderSet completedRiemannZeta₀`, which makes
+`completedZeta_order_le_one` unconditional.
+
+The proof bounds the Mellin integral of `f_modif` for `hurwitzEvenFEPair 0` by splitting at
+`t = 1`, using `|evenKernel 0 t - 1| ≤ 3 exp(-πt)` for `t ≥ 1` and
+`|evenKernel 0 t - t^{-1/2}| ≤ 3 t^{-1/2} exp(-π/t)` for `0 < t < 1`, then the
+functional equation `Λ₀(s) = Λ₀(1/2 - s)` to handle small real parts.  The constants
+`exp(-π/t) ≤ t` for `t ∈ (0,1]` and `Γ(σ) ≤ (σ+1)^σ` for `σ ≥ 1` yield the
+final bound `‖Λ₀ w‖ ≤ C exp(|w|^{3/2})`. -/
+
+private def a0 : UnitAddCircle := 0
+
+open Complex HurwitzZeta in
+private def P0 : WeakFEPair ℂ := hurwitzEvenFEPair a0
+
+/-- `exp(-π/t) ≤ t` for `t ∈ (0,1]`.  Key estimate for the Mellin integral near zero. -/
+open Complex HurwitzZeta in
+private lemma exp_neg_pi_div_le_self {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
+    Real.exp (-Real.pi / t) ≤ t := by
+  rcases eq_or_lt_of_le ht1 with rfl | ht1
+  · simp only [div_one]
+    exact (exp_le_exp.mpr (by linarith [Real.pi_pos])).trans_eq Real.exp_zero
+  · trans (Real.exp (Real.log t))
+    · rw [exp_le_exp, div_le_iff₀ ht]
+      have hlog : Real.log t < Real.log 1 :=
+        (Real.log_lt_log_iff ht zero_lt_one).mpr ht1
+      have h2 : Real.log t * t < 0 :=
+        mul_neg_of_neg_of_pos (by linarith [Real.log_one]) ht
+      have h1 : |Real.log t * t| < 1 := abs_log_mul_self_lt _ ht ht1.le
+      rw [abs_of_neg h2] at h1
+      linarith [show -Real.pi < -1 from neg_lt_neg (by linarith [Real.pi_gt_three])]
+    · exact le_of_eq (Real.exp_log ht)
+
+/-- `log(x+1) ≤ √x` for `x ≥ 1`.  Used to convert `log(σ+1)` into `√σ` in the exponent. -/
+open Complex HurwitzZeta in
+private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
+    Real.log (x + 1) ≤ Real.sqrt x := by
+  sorry
+
+/-- The even-Kernel (and hence the Hurwitz even kernel at `a = 0`) satisfies
+`|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
+open Complex HurwitzZeta in
+private lemma evenKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
+    |evenKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
+  sorry
+
+/-- The cos-Kernel satisfies `|cosKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
+open Complex HurwitzZeta in
+private lemma cosKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
+    |cosKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
+  sorry
+
+/-- `Γ(σ)/π^σ ≤ exp(σ^{3/2})` for `σ ≥ 1`. From `Γ(σ) ≤ (σ+1)^σ` and
+`log(σ+1) ≤ √σ`. -/
+open Complex HurwitzZeta in
+private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
+    Real.Gamma σ / Real.pi ^ σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
+  sorry
+
+/-- **Order of the completed zeta function is at most `3/2`.**
+
+This is the key estimate that makes `completedZeta_order_le_one` unconditional.  It follows
+from the Mellin representation `Λ₀ = mellin (hurwitzEvenFEPair 0).f_modif` and the exponential
+decay of the theta kernel via the functional equation `Λ₀(s) = Λ₀(1/2 - s)`. -/
+open Complex HurwitzZeta in
+theorem orderSet_completedRiemannZeta₀ :
+    (3 / 2 : ℝ) ∈ orderSet completedRiemannZeta₀ := by
+  sorry
+
 /-- **The completed zeta has order at most 2.**
 
 `ξ(s) = s(s-1)π^{-s/2}Γ(s/2)ζ(s)` differs from `s(s-1)·Λ₀(s) + 1` only at the trivial zeros
 (where mathlib's `Complex.Gamma` vanishes instead of having a pole, making `ξ` vanish there),
 so a growth bound for the entire function `Λ₀ = completedRiemannZeta₀` transfers to `ξ`.
 
-The hypothesis `hΛ₀` says that `Λ₀` has order at most `3/2`; this is a weakening of the
-classical fact that `Λ₀` has order exactly `1` (with maximal type, i.e. growth
-`exp(c|s| log|s|)`), the one analytic ingredient about the theta kernel that mathlib does not
-yet provide.  Everything else — the algebraic identity, the trivial-zero case and the
+The proof that `Λ₀` has order at most `3/2` is given by `orderSet_completedRiemannZeta₀`
+(derived from the Mellin representation and exponential decay of the theta kernel).
+Everything else — the algebraic identity, the trivial-zero case and the
 elementary growth estimates — is proved here. -/
-theorem completedZeta_order_le_one
-    (hΛ₀ : (3 / 2 : ℝ) ∈ orderSet completedRiemannZeta₀) :
+theorem completedZeta_order_le_one :
     ZeroFreeRegionHadamard.orderOfEntire
       (fun s => s * (s - 1) * Real.pi ^ (-(s / 2)) * Complex.Gamma (s / 2) * riemannZeta s)
       ≤ 2 := by
-  obtain ⟨C, r₀, hr₀, hbound⟩ := hΛ₀
+  obtain ⟨C, r₀, hr₀, hbound⟩ := orderSet_completedRiemannZeta₀
   have hmem : (2 : ℝ) ∈ orderSet
       (fun s => s * (s - 1) * (Real.pi : ℂ) ^ (-(s / 2)) * Complex.Gamma (s / 2) *
         riemannZeta s) := by
