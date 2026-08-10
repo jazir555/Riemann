@@ -1632,42 +1632,35 @@ private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
     have := h (√x) hy
     rwa [Real.sq_sqrt (by linarith : 0 ≤ x)] at this
   intro y hy
-  -- Prove log(y²+1) ≤ y by monotonicity of g(z) = z - log(z²+1)
-  -- g'(z) = 1 - 2z/(z²+1) = (z-1)²/(z²+1) ≥ 0
-  have hmono : MonotoneOn (fun z : ℝ => z - Real.log (z ^ 2 + 1)) (Set.Ici 0) := by
-    apply monotoneOn_of_deriv_nonneg (convex_Ici 0)
-    · exact continuous_id.continuousOn.sub
-        ((continuous_log.comp (continuous_id.pow 2 |>.add continuous_const)).continuousOn)
-    · intro z hz
-      have hz_pos : 0 < z := Set.mem_Ioi.mp hz
-      have hzp : 0 < z ^ 2 + 1 := by linarith [sq_nonneg z]
-      refine (differentiableAt_id z).diffWithinAt_Ioi.sub
-          ((Real.differentiableAt_log (by linarith : z ^ 2 + 1 ≠ 0)).comp z
-            ((differentiableAt_id z).pow 2 |>.add (differentiableAt_const z 1))).diffWithinAt_Ioi
-    · intro z hz
-      have hz_pos : 0 < z := Set.mem_Ioi.mp hz
-      have hzp : 0 < z ^ 2 + 1 := by linarith [sq_nonneg z]
-      rw [deriv_sub (differentiableAt_id z)
-          ((Real.differentiableAt_log (by linarith : z ^ 2 + 1 ≠ 0)).comp z
-            ((differentiableAt_id z).pow 2 |>.add (differentiableAt_const z 1)))]
-      simp only [deriv_id', Real.deriv_log (by linarith : z ^ 2 + 1 ≠ 0)]
-      ring_nf
-      rw [div_le_iff₀ (by linarith), one_mul]
-      nlinarith [sq_nonneg (z - 1)]
-  have hf1 : 0 < 1 - Real.log 2 :=
-    sub_pos.mpr (Real.log_lt_sub_one_of_pos (by norm_num : (0:ℝ) < 2) (by norm_num))
-  linarith [hmono (Set.mem_Ici.mpr (le_refl 0)) (Set.mem_Ici.mpr (le_trans (by norm_num) hy)),
-    hmono (Set.mem_Ici.mpr (le_refl 1)) (Set.mem_Ici.mpr hy)]
+  suffices hexp : y ^ 2 + 1 ≤ Real.exp y from by
+    have h1 : 0 < y ^ 2 + 1 := by nlinarith [sq_nonneg y]
+    exact (Real.log_le_iff_le_exp h1).mpr hexp
+  have hy0 : 0 < y := by linarith
+  have h_deriv : Monotone (fun t : ℝ => Real.exp t - t ^ 2 - 1) :=
+    monotone_of_hasDerivAt_nonneg
+      (f' := fun t => Real.exp t - 2 * t)
+      (fun t => by
+        have h1 : HasDerivAt Real.exp (Real.exp t) t := Real.hasDerivAt_exp t
+        have h2 : HasDerivAt (fun x : ℝ => x ^ 2 : ℝ → ℝ) (2 * t) t := hasDerivAt_pow 2 t
+        convert h1.sub h2 using 1
+        ring)
+      (fun t => by
+        by_cases ht1 : t ≤ 1
+        · have ht1' : t + 1 ≤ Real.exp t := add_one_le_exp t
+          linarith
+        · have ht1' : 1 < t := by linarith
+          have h2 : Real.exp 1 > 2 := by norm_num [Real.exp_one]
+          nlinarith [mul_le_mul_of_nonneg_left ht1'.le (by norm_num : (0:ℝ) ≤ 2),
+            le_trans (show Real.exp 1 ≤ Real.exp t from by gcongr) h2.le])
+  have hval : Real.exp 0 - 0 ^ 2 - 1 = 0 := by simp [Real.exp_zero]; norm_num
+  have hge := h_deriv (le_refl 0) hy0.le
+  linarith [hval ▸ hge]
 
 /-- The even-Kernel (and hence the Hurwitz even kernel at `a = 0`) satisfies
 `|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
 private lemma evenKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
     |evenKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
   have ht0 : 0 < t := lt_of_lt_of_le (by norm_num) ht
-  have hge0 : 0 ≤ evenKernel (0 : UnitAddCircle) t - 1 :=
-    ((hasSum_int_evenKernel₀ (0 : ℝ) ht0)).nonneg fun n =>
-      by by_cases hn : n = 0 <;> simp [hn, Real.exp_pos]
-  rw [abs_of_nonneg hge0]
   sorry
 
 /-- The cos-Kernel satisfies `|cosKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
@@ -1684,14 +1677,15 @@ private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
   have hg : Real.Gamma σ ≤ (σ + 1) ^ σ := Real.Gamma_le_add_one_pow h
   have hlog : Real.log (σ + 1) ≤ √σ := log_add_one_le_sqrt h
   have hkey : (σ + 1) ^ σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
-    have h1 : (σ + 1) ^ σ ≤ Real.exp (σ * Real.sqrt σ) := by
-      rw [← Real.exp_le_exp, ← Real.log_le_iff_le_exp (by positivity : 0 < (σ + 1) ^ σ)]
-      rw [Real.log_rpow (by linarith : 0 < σ + 1)]
-      exact mul_le_mul_of_nonneg_left hlog (le_of_lt hσ0)
-    have h2 : σ * Real.sqrt σ = σ ^ (3 / 2 : ℝ) := by
+    have ha : 0 < σ + 1 := by linarith
+    have hlog1 : Real.log ((σ + 1) ^ σ) = σ * Real.log (σ + 1) := Real.log_rpow ha
+    have hlog2 : Real.log ((σ + 1) ^ σ) ≤ σ * Real.sqrt σ := by
+      rw [hlog1]; exact mul_le_mul_of_nonneg_left hlog (le_of_lt hσ0)
+    have h3 : σ * Real.sqrt σ = σ ^ (3 / 2 : ℝ) := by
       rw [Real.sqrt_eq_rpow, show (3 / 2 : ℝ) = 1 + 1 / 2 from by norm_num,
         Real.rpow_add (by linarith : 0 < σ), Real.rpow_one, mul_div_cancel₀ (1:ℝ) 2]
-    rwa [h2] at h1
+    rw [h3] at hlog2
+    exact Real.log_le_iff_le_exp (by positivity : 0 < (σ + 1) ^ σ) |>.mp hlog2
   calc Real.Gamma σ / Real.pi ^ σ ≤ (σ + 1) ^ σ / Real.pi ^ σ :=
       div_le_div_of_nonneg_right (Real.rpow_nonneg_of_nonneg (le_of_lt Real.pi_pos) σ) hg
     _ ≤ (σ + 1) ^ σ := by
