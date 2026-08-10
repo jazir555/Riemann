@@ -118,7 +118,7 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 namespace ZeroFreeRegionHadamard
 
-open Complex Finset
+open Complex Finset Real HurwitzZeta
 
 /-! ## Weierstrass primary factors -/
 
@@ -1603,11 +1603,9 @@ final bound `‖Λ₀ w‖ ≤ C exp(|w|^{3/2})`. -/
 
 private def a0 : UnitAddCircle := 0
 
-open Complex HurwitzZeta in
-private def P0 : WeakFEPair ℂ := hurwitzEvenFEPair a0
+private noncomputable def P0 : WeakFEPair ℂ := hurwitzEvenFEPair a0
 
 /-- `exp(-π/t) ≤ t` for `t ∈ (0,1]`.  Key estimate for the Mellin integral near zero. -/
-open Complex HurwitzZeta in
 private lemma exp_neg_pi_div_le_self {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     Real.exp (-Real.pi / t) ≤ t := by
   rcases eq_or_lt_of_le ht1 with rfl | ht1
@@ -1625,37 +1623,101 @@ private lemma exp_neg_pi_div_le_self {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     · exact le_of_eq (Real.exp_log ht)
 
 /-- `log(x+1) ≤ √x` for `x ≥ 1`.  Used to convert `log(σ+1)` into `√σ` in the exponent. -/
-open Complex HurwitzZeta in
 private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
     Real.log (x + 1) ≤ Real.sqrt x := by
-  sorry
+  have hx0 : 0 < x := by linarith
+  -- Prove log(y²+1) ≤ y for y ≥ 1 via monotonicity of y - log(y²+1)
+  suffices h : ∀ y : ℝ, 1 ≤ y → Real.log (y ^ 2 + 1) ≤ y from by
+    have hy : 1 ≤ Real.sqrt x := by
+      rw [show (1:ℝ) = Real.sqrt 1 from by norm_num [Real.sqrt_one]]
+      exact Real.sqrt_le_sqrt hx
+    have := h (Real.sqrt x) hy
+    rwa [Real.sq_sqrt (le_of_lt hx0)] at this
+  intro y hy
+  have hmono : MonotoneOn (fun z : ℝ => z - Real.log (z ^ 2 + 1)) (Set.Ici 0) := by
+    refine monotoneOn_of_deriv_nonneg (convex_Ici 0) ?_ ?_ ?_
+    · exact continuous_id.continuousOn.sub
+        (continuous_log.comp (continuous_id.pow 2 |>.add continuous_const)).continuousOn
+    · intro z hz
+      have hz' : 0 < z := Set.mem_Ioi.mp hz
+      have hzp : 0 < z ^ 2 + 1 := by linarith [sq_nonneg z]
+      refine (differentiableAt_id z).sub
+          ((differentiableAt_log hzp).comp z ((differentiableAt_id z).pow 2 |>.add (differentiableAt_const z 1))).differentiableWithinAt
+    · intro z hz
+      have hz' : 0 < z := Set.mem_Ioi.mp hz
+      have hzp : 0 < z ^ 2 + 1 := by linarith [sq_nonneg z]
+      rw [deriv_sub (differentiableAt_id z)
+          (differentiableAt_log hzp |>.comp z ((differentiableAt_id z).pow 2 |>.add (differentiableAt_const z 1)))]
+      simp only [deriv_id', deriv_log hzp, deriv_add, deriv_const, deriv_id, deriv_pow, mul_one, add_zero]
+      have hd : 1 - 2 * z / (z ^ 2 + 1) ≥ 0 := by
+        rw [sub_nonneg, div_le_div_iff₀ (by linarith) hzp]
+        nlinarith [sq_nonneg (z - 1)]
+      linarith
+  have hlog2 : Real.log 2 < 1 :=
+    Real.log_lt_sub_one_of_pos (by norm_num : (0:ℝ) < 2) (by norm_num)
+  linarith [hmono (le_refl 0) (le_trans (by norm_num) hy), hmono (le_refl 1) hy]
 
 /-- The even-Kernel (and hence the Hurwitz even kernel at `a = 0`) satisfies
 `|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
-open Complex HurwitzZeta in
 private lemma evenKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
     |evenKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
+  have ht0 : 0 < t := lt_of_lt_of_le (by norm_num) ht
+  have hge0 : 0 ≤ evenKernel (0 : UnitAddCircle) t - 1 :=
+    ((hasSum_int_evenKernel₀ (0 : ℝ) ht0)).nonneg fun n =>
+      by by_cases hn : n = 0 <;> simp [hn, Real.exp_pos]
+  rw [abs_of_nonneg hge0]
+  -- Use the HasSum to compute the evenKernel value and bound it
+  -- evenKernel 0 t = 1 + 2·Σ_{m≥1} exp(-πm²t) by hasSum_int_evenKernel₀
+  -- For t ≥ 1: each exp(-πm²t) ≤ exp(-πm·t), so the sum ≤ Σ_{m≥1} exp(-πmt) = q/(1-q)
+  -- Hence evenKernel 0 t - 1 ≤ 2·q/(1-q) ≤ 3·q = 3·exp(-πt)
+  have h1 : evenKernel (0 : UnitAddCircle) t - 1 ≤ 3 * Real.exp (-Real.pi * t) := by
+    -- Prove via the HasSum: the value equals the tsum, and bound termwise
+    have hsum := (hasSum_int_evenKernel₀ (0 : ℝ) ht0)
+    -- For the bound, we use the fact that for n ≠ 0:
+    -- exp(-πn²t) ≤ exp(-πt) (since n² ≥ 1)
+    -- and the ℤ-sum of these bounds is 2·Σ_{m≥1} exp(-πmt) = 2q/(1-q) ≤ 3q
+    sorry
+  exact h1
+  -- combine
+  have h1 : evenKernel (0 : UnitAddCircle) t - 1 ≤ 3 * q := by
+    rw [mul_comm, show (3 : ℝ) * q = 2 * q / (1 - q) + q - q * (2 / (1 - q) - 3) from by ring]
+    linarith [div_nonneg (by linarith : (0 : ℝ) ≤ 2 * q) (by linarith),
+      mul_nonneg_of_nonneg_of_nonneg hge0 (by linarith),
+      show (0 : ℝ) ≤ 2 / (1 - q) - 3 from by linarith [div_le_div_of_le_left (by norm_num) (by linarith) hq3]]
+  linarith
+  where
+    hg : HasSum (fun n : ℕ => q ^ n) (1 - q)⁻¹ := hasSum_geometric_of_lt_one hq_pos.le hq_lt
   sorry
 
 /-- The cos-Kernel satisfies `|cosKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
-open Complex HurwitzZeta in
 private lemma cosKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
     |cosKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
   sorry
 
 /-- `Γ(σ)/π^σ ≤ exp(σ^{3/2})` for `σ ≥ 1`. From `Γ(σ) ≤ (σ+1)^σ` and
 `log(σ+1) ≤ √σ`. -/
-open Complex HurwitzZeta in
 private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
     Real.Gamma σ / Real.pi ^ σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
-  sorry
+  have hσ0 : 0 < σ := lt_of_lt_of_le (by norm_num) h
+  have hπ : 1 < Real.pi := by linarith [Real.pi_gt_three]
+  have hpow : 0 < Real.pi ^ σ := Real.rpow_pos_of_pos Real.pi_pos σ
+  have hg : Real.Gamma σ ≤ (σ + 1) ^ σ := Real.Gamma_le_add_one_pow h
+  have hlog : Real.log (σ + 1) ≤ Real.sqrt σ := log_add_one_le_sqrt h
+  have hkey : (σ + 1) ^ σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
+    rw [Real.rpow_def_of_pos (by linarith : (0 : ℝ) < σ + 1),
+        Real.exp_le_exp, ← Real.rpow_def_of_pos (by linarith : (0 : ℝ) < Real.exp (Real.sqrt σ))]
+    apply Real.rpow_le_rpow (by linarith) hlog (le_of_lt (by linarith))
+  calc Real.Gamma σ / Real.pi ^ σ ≤ (σ + 1) ^ σ / Real.pi ^ σ :=
+      div_le_div_of_nonneg_right (Real.rpow_nonneg_of_nonneg (le_of_lt Real.pi_pos) σ) hg
+    _ ≤ (σ + 1) ^ σ := by
+      rw [div_le_iff₀ hpow]; nlinarith [Real.rpow_le_rpow (by linarith) (by linarith) (le_of_lt hσ0)]
+    _ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := hkey
 
 /-- **Order of the completed zeta function is at most `3/2`.**
 
 This is the key estimate that makes `completedZeta_order_le_one` unconditional.  It follows
 from the Mellin representation `Λ₀ = mellin (hurwitzEvenFEPair 0).f_modif` and the exponential
 decay of the theta kernel via the functional equation `Λ₀(s) = Λ₀(1/2 - s)`. -/
-open Complex HurwitzZeta in
 theorem orderSet_completedRiemannZeta₀ :
     (3 / 2 : ℝ) ∈ orderSet completedRiemannZeta₀ := by
   sorry
