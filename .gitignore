@@ -13,3 +13,9 @@ scripts/.rm_set_option_progress.jsonl
 
 # Output of scripts/export_crossrefs.lean
 /crossrefs.json
+
+# Node.js dependencies (if npm is used in this workspace)
+node_modules/
+
+# Embedded lean workspace/projects (as used in the OpenEvolve repos)
+lean_workspace/

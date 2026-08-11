@@ -1654,30 +1654,31 @@ private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
         simpa using h123)
       (fun t => by
         by_cases ht1 : t ≤ 1
-        · have ht1' : t + 1 ≤ Real.exp t := add_one_le_exp t
+        · -- t ≤ 1: exp(t) ≥ t+1 ≥ 2t
+          have h1 : t + 1 ≤ Real.exp t := add_one_le_exp t
+          have h2 : 2 * t ≤ t + 1 := by linarith
+          have h3 : 2 * t ≤ Real.exp t := le_trans h2 h1
           show Real.exp t - 2 * t ≥ 0
           linarith
-        · have ht1' : 1 < t := by linarith
+        · -- t > 1: exp(t) ≥ exp(1)*t ≥ 2t
           have ht0 : 0 < t := by linarith
           have h2 : Real.exp 1 > 2 := Real.exp_one_gt_two
-          show Real.exp t - 2 * t ≥ 0
           have hle : t ≤ Real.exp (t - 1) := by linarith [add_one_le_exp (t - 1)]
           have h4 : Real.exp 1 * t ≤ Real.exp 1 * Real.exp (t - 1) :=
             mul_le_mul_of_nonneg_left hle (le_of_lt (Real.exp_pos 1))
           have h5 : 2 * t ≤ Real.exp 1 * t :=
             mul_le_mul_of_nonneg_right (le_of_lt h2) (le_of_lt ht0)
-          have h6 : 2 * t ≤ Real.exp 1 * Real.exp (t - 1) := le_trans h5 h4
-          have hexp : Real.exp t = Real.exp 1 * Real.exp (t - 1) := by
-            conv_lhs => rw [show t = 1 + (t - 1) from by ring]
-            rw [Real.exp_add]
-          -- exp(t) = exp(1)*exp(t-1) ≥ exp(1)*t ≥ 2t
           have h7 : Real.exp 1 * t ≤ Real.exp t := by
+            have hexp : Real.exp t = Real.exp 1 * Real.exp (t - 1) := by
+              conv_lhs => rw [show t = 1 + (t - 1) from by ring]
+              rw [Real.exp_add]
             rw [hexp]; exact h4
-          linarith [le_trans h5 h7]
-  have hval : Real.exp 0 - 0 ^ 2 - 1 = 0 := by simp [Real.exp_zero]; norm_num
+          have h8 : 2 * t ≤ Real.exp t := le_trans h5 h7
+          show Real.exp t - 2 * t ≥ 0
+          linarith)
+  have hval : Real.exp 0 - 0 ^ 2 - 1 = 0 := by simp [Real.exp_zero]
   have hge := h_deriv hy0.le
-  have hge' : 0 ≤ Real.exp y - y ^ 2 - 1 := by linarith [hval, hge]
-  linarith
+  linarith [hval, hge]
 
 /-- The even-Kernel (and hence the Hurwitz even kernel at `a = 0`) satisfies
 `|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
@@ -1701,18 +1702,28 @@ private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
   have hlog : Real.log (σ + 1) ≤ √σ := log_add_one_le_sqrt h
   have hkey : (σ + 1) ^ σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
     have ha : 0 < σ + 1 := by linarith
-    have hlog1 : Real.log ((σ + 1) ^ σ) = σ * Real.log (σ + 1) := Real.log_rpow ha
+    have hlog1 : Real.log ((σ + 1) ^ σ) = σ * Real.log (σ + 1) :=
+      Real.log_rpow ha σ
     have hlog2 : Real.log ((σ + 1) ^ σ) ≤ σ * Real.sqrt σ := by
       rw [hlog1]; exact mul_le_mul_of_nonneg_left hlog (le_of_lt hσ0)
     have h3 : σ * Real.sqrt σ = σ ^ (3 / 2 : ℝ) := by
-      rw [Real.sqrt_eq_rpow, show (3 / 2 : ℝ) = 1 + 1 / 2 from by norm_num,
-        Real.rpow_add (by linarith : 0 < σ), Real.rpow_one, mul_div_cancel₀ (1:ℝ) 2]
+      rw [Real.sqrt_eq_rpow, mul_comm]
+      have : σ ^ (1 / 2 : ℝ) * σ = σ ^ (1 / 2 : ℝ) * σ ^ (1 : ℝ) := by simp [Real.rpow_one]
+      rw [this, ← Real.rpow_add (by linarith : 0 < σ), show (1 / 2 : ℝ) + 1 = 3 / 2 from by norm_num]
     rw [h3] at hlog2
     exact Real.log_le_iff_le_exp (by positivity : 0 < (σ + 1) ^ σ) |>.mp hlog2
   calc Real.Gamma σ / Real.pi ^ σ ≤ (σ + 1) ^ σ / Real.pi ^ σ :=
-      div_le_div_of_nonneg_right (Real.rpow_nonneg_of_nonneg (le_of_lt Real.pi_pos) σ) hg
+      div_le_div_of_nonneg_right hg (Real.rpow_nonneg (le_of_lt Real.pi_pos) σ)
     _ ≤ (σ + 1) ^ σ := by
-      rw [div_le_iff₀ hpow]; nlinarith [Real.rpow_le_rpow (by linarith) (by linarith) (le_of_lt hσ0)]
+      rw [div_le_iff₀ hpow, mul_comm ((σ + 1) ^ σ)]
+      have hpow1 : Real.pi ^ σ ≥ 1 := by
+        have hpi : 1 ≤ π := by linarith [Real.pi_gt_three]
+        have := Real.rpow_le_rpow zero_le_one hpi (le_of_lt hσ0)
+          simp only [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 1), Real.log_one,
+          zero_mul, Real.exp_zero] at this
+        exact this
+      calc (σ + 1) ^ σ = 1 * (σ + 1) ^ σ := by ring
+        _ ≤ π ^ σ * (σ + 1) ^ σ := mul_le_mul_of_nonneg_right hpow1 (by positivity)
     _ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := hkey
 
 /-- **Order of the completed zeta function is at most `3/2`.**
