@@ -1684,13 +1684,86 @@ private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
 `|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
 private lemma evenKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
     |evenKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
+  have := congr_fun evenKernel_eq_cosKernel_of_zero t
+  simp only [this]
+  exact cosKernel_sub_le t ht
+
+private lemma term_le_geom (t : ℝ) (ht : 1 ≤ t) (m : ℕ) :
+    Real.exp (-Real.pi * (m + 1) ^ 2 * t) ≤
+    Real.exp (-Real.pi * t) * Real.exp (-Real.pi * t) ^ m := by
   have ht0 : 0 < t := lt_of_lt_of_le (by norm_num) ht
-  sorry
+  have hm : 0 ≤ (m : ℝ) := Nat.cast_nonneg m
+  have hsq : (m+1:ℝ) ^ 2 ≥ (m+1:ℝ) := by nlinarith [sq_nonneg (m:ℝ)]
+  have h1 : -(Real.pi) * ((m+1:ℝ) ^ 2) * t ≤ -(Real.pi) * (m+1) * t := by
+    rw [show -(Real.pi : ℝ) * ((m+1:ℝ) ^ 2) * t = -(Real.pi * ((m+1:ℝ) ^ 2) * t) from by ring,
+        show -(Real.pi : ℝ) * (m+1:ℝ) * t = -(Real.pi * (m+1:ℝ) * t) from by ring,
+        neg_le_neg_iff]
+    exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hsq (le_of_lt Real.pi_pos)) ht0.le
+  have h2 : -(Real.pi) * ((m+1:ℝ)) * t = -(Real.pi) * t + -(Real.pi) * m * t := by ring
+  have h3 : -(Real.pi) * m * t = -(Real.pi * t) * m := by ring
+  calc _ ≤ Real.exp (-Real.pi * (m + 1) * t) := Real.exp_le_exp.mpr h1
+    _ = Real.exp (-Real.pi * t) * Real.exp (-Real.pi * m * t) := by rw [h2, Real.exp_add]
+    _ = Real.exp (-Real.pi * t) * Real.exp (-(Real.pi * t) * m) := by congr 1; rw [h3]
+    _ = _ := by rw [Real.exp_nat_mul]
+
+private lemma exp_le_third (t : ℝ) (ht : 1 ≤ t) :
+    Real.exp (-Real.pi * t) ≤ 1 / 3 := by
+  have ht0 : 0 < t := lt_of_lt_of_le (by norm_num) ht
+  have h1 : Real.exp (-Real.pi * t) ≤ Real.exp (-Real.pi) :=
+    Real.exp_le_exp.mpr (by linarith [mul_nonneg (le_of_lt Real.pi_pos) ht0.le])
+  have h2 : Real.exp (-Real.pi) ≤ Real.exp (-3) :=
+    Real.exp_le_exp.mpr (by linarith [le_of_lt Real.pi_gt_three])
+  have h3 : Real.exp (-3) = (Real.exp 3)⁻¹ := Real.exp_neg 3
+  have h4 : (8:ℝ) ≤ Real.exp 3 := by
+    have h4a : (2:ℝ) ≤ Real.exp 1 := le_of_lt Real.exp_one_gt_two
+    rw [show (3:ℝ) = 1+1+1 from by norm_num, Real.exp_add, Real.exp_add]
+    have h4b : Real.exp 1 * Real.exp 1 ≥ 4 := by
+      have := mul_le_mul h4a h4a (by linarith) (by linarith)
+      linarith [show (2:ℝ) * 2 = 4 from by norm_num]
+    have h4c : Real.exp 1 * Real.exp 1 * Real.exp 1 ≥ 8 := by
+      have := mul_le_mul h4b h4a (by linarith) (by linarith)
+      linarith [show (4:ℝ) * 2 = 8 from by norm_num]
+    exact h4c
+  have h5 : (Real.exp 3)⁻¹ ≤ (8:ℝ)⁻¹ :=
+    (inv_le_inv₀ (Real.exp_pos 3) (by norm_num : (0:ℝ) < 8)).mpr h4
+  have h6 : (8:ℝ)⁻¹ ≤ (3:ℝ)⁻¹ :=
+    (inv_le_inv₀ (by norm_num : (0:ℝ) < 8) (by norm_num : (0:ℝ) < 3)).mpr
+      (by norm_num : (3:ℝ) ≤ 8)
+  rw [show (1/3:ℝ) = (3:ℝ)⁻¹ from by norm_num]
+  exact h1.trans h2 |>.trans (h3 ▸ h5) |>.trans h6
 
 /-- The cos-Kernel satisfies `|cosKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
 private lemma cosKernel_sub_le (t : ℝ) (ht : 1 ≤ t) :
     |cosKernel (0 : UnitAddCircle) t - 1| ≤ 3 * Real.exp (-Real.pi * t) := by
-  sorry
+  have ht0 : 0 < t := lt_of_lt_of_le (by norm_num) ht
+  have hsum := hasSum_nat_cosKernel₀ (0 : ℝ) ht0
+  have hsum' : HasSum (fun n : ℕ ↦ 2 * Real.exp (-Real.pi * (n + 1) ^ 2 * t))
+      (cosKernel (0 : UnitAddCircle) t - 1) :=
+    hsum.congr_fun (fun n => by simp [Real.cos_zero])
+  have hge : 0 ≤ cosKernel (0 : UnitAddCircle) t - 1 := by
+    rw [← hsum'.tsum_eq]; exact tsum_nonneg (fun n => by positivity)
+  rw [abs_of_nonneg hge, ← hsum'.tsum_eq, tsum_mul_left]
+  have hexp1 : Real.exp (-Real.pi * t) < 1 := by
+    rw [Real.exp_lt_one_iff]; exact mul_neg_of_neg_of_pos (neg_lt_zero.mpr Real.pi_pos) ht0
+  have hsrc : Summable (fun n : ℕ => Real.exp (-Real.pi * (n + 1) ^ 2 * t)) := by
+    have hg := summable_geometric_of_lt_one (Real.exp_nonneg _) hexp1
+    exact Summable.of_norm_bounded _ (hg.mul_left _) (fun n => by
+      rw [Real.norm_of_nonneg (Real.exp_nonneg _)]; exact term_le_geom t ht n)
+  have htsum : ∑' n : ℕ, Real.exp (-Real.pi * (n + 1) ^ 2 * t) ≤
+      Real.exp (-Real.pi * t) * (1 - Real.exp (-Real.pi * t))⁻¹ := by
+    have hg := summable_geometric_of_lt_one (Real.exp_nonneg _) hexp1
+    have htsum' := Summable.tsum_le_tsum (term_le_geom t ht) hsrc (hg.mul_left _)
+    rwa [tsum_mul_left, tsum_geometric_of_lt_one (Real.exp_nonneg _) hexp1] at htsum'
+  -- 2 * tsum ≤ 2 * exp(-πt) / (1-exp(-πt)) ≤ 3 * exp(-πt)
+  have hfrac : 2 * (Real.exp (-Real.pi * t) * (1 - Real.exp (-Real.pi * t))⁻¹) ≤
+      3 * Real.exp (-Real.pi * t) := by
+    suffices 2 * (1 - Real.exp (-Real.pi * t))⁻¹ ≤ 3 by
+      have := mul_le_mul_of_nonneg_right this (le_of_lt (Real.exp_pos _))
+      rwa [show 2 * (1 - Real.exp (-Real.pi * t))⁻¹ * Real.exp (-Real.pi * t) =
+        2 * Real.exp (-Real.pi * t) * (1 - Real.exp (-Real.pi * t))⁻¹ from by ring] at this
+    rw [← div_eq_mul_inv, div_le_iff₀ (sub_pos.mpr hexp1)]
+    linarith [exp_le_third t ht, show (3:ℝ) * (1/3) = 1 from by norm_num]
+  exact (mul_le_mul_of_nonneg_left htsum (by positivity : (0:ℝ) ≤ 2)).trans hfrac
 
 /-- `Γ(σ)/π^σ ≤ exp(σ^{3/2})` for `σ ≥ 1`. From `Γ(σ) ≤ (σ+1)^σ` and
 `log(σ+1) ≤ √σ`. -/
