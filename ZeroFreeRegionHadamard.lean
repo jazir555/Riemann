@@ -1718,10 +1718,10 @@ private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
       rw [div_le_iff₀ hpow, mul_comm ((σ + 1) ^ σ)]
       have hpow1 : Real.pi ^ σ ≥ 1 := by
         have hpi : 1 ≤ π := by linarith [Real.pi_gt_three]
-        have := Real.rpow_le_rpow zero_le_one hpi (le_of_lt hσ0)
-          simp only [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 1), Real.log_one,
-          zero_mul, Real.exp_zero] at this
-        exact this
+        have h1 : (1:ℝ) ^ σ ≤ π ^ σ := Real.rpow_le_rpow zero_le_one hpi (le_of_lt hσ0)
+        simp only [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 1), Real.log_one,
+          zero_mul, Real.exp_zero] at h1
+        exact h1
       calc (σ + 1) ^ σ = 1 * (σ + 1) ^ σ := by ring
         _ ≤ π ^ σ * (σ + 1) ^ σ := mul_le_mul_of_nonneg_right hpow1 (by positivity)
     _ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := hkey
