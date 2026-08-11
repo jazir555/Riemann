@@ -1641,20 +1641,43 @@ private lemma log_add_one_le_sqrt {x : ℝ} (hx : 1 ≤ x) :
       (f' := fun t => Real.exp t - 2 * t)
       (fun t => by
         have h1 : HasDerivAt Real.exp (Real.exp t) t := Real.hasDerivAt_exp t
-        have h2 : HasDerivAt (fun x : ℝ => x ^ 2 : ℝ → ℝ) (2 * t) t := hasDerivAt_pow 2 t
-        convert h1.sub h2 using 1
-        ring)
+        have h2 : HasDerivAt (fun x : ℝ => x ^ 2) (2 * t) t := by
+          have hid : HasDerivAt (id : ℝ → ℝ) 1 t := hasDerivAt_id t
+          have hmul : HasDerivAt (id * id : ℝ → ℝ) (1 * t + t * 1) t := hid.mul hid
+          convert hmul using 1
+          · funext x; simp [id]; ring
+          · ring
+        have h3 : HasDerivAt (fun _ : ℝ => (1:ℝ)) 0 t := hasDerivAt_const t 1
+        show HasDerivAt (fun t => rexp t - t ^ 2 - 1) (rexp t - 2 * t) t
+        have h12 : HasDerivAt (fun t => rexp t - t ^ 2) (rexp t - 2 * t) t := h1.sub h2
+        have h123 : HasDerivAt (fun t => rexp t - t ^ 2 - 1) (rexp t - 2 * t - 0) t := h12.sub h3
+        simpa using h123)
       (fun t => by
         by_cases ht1 : t ≤ 1
         · have ht1' : t + 1 ≤ Real.exp t := add_one_le_exp t
+          show Real.exp t - 2 * t ≥ 0
           linarith
         · have ht1' : 1 < t := by linarith
-          have h2 : Real.exp 1 > 2 := by norm_num [Real.exp_one]
-          nlinarith [mul_le_mul_of_nonneg_left ht1'.le (by norm_num : (0:ℝ) ≤ 2),
-            le_trans (show Real.exp 1 ≤ Real.exp t from by gcongr) h2.le])
+          have ht0 : 0 < t := by linarith
+          have h2 : Real.exp 1 > 2 := Real.exp_one_gt_two
+          show Real.exp t - 2 * t ≥ 0
+          have hle : t ≤ Real.exp (t - 1) := by linarith [add_one_le_exp (t - 1)]
+          have h4 : Real.exp 1 * t ≤ Real.exp 1 * Real.exp (t - 1) :=
+            mul_le_mul_of_nonneg_left hle (le_of_lt (Real.exp_pos 1))
+          have h5 : 2 * t ≤ Real.exp 1 * t :=
+            mul_le_mul_of_nonneg_right (le_of_lt h2) (le_of_lt ht0)
+          have h6 : 2 * t ≤ Real.exp 1 * Real.exp (t - 1) := le_trans h5 h4
+          have hexp : Real.exp t = Real.exp 1 * Real.exp (t - 1) := by
+            conv_lhs => rw [show t = 1 + (t - 1) from by ring]
+            rw [Real.exp_add]
+          -- exp(t) = exp(1)*exp(t-1) ≥ exp(1)*t ≥ 2t
+          have h7 : Real.exp 1 * t ≤ Real.exp t := by
+            rw [hexp]; exact h4
+          linarith [le_trans h5 h7]
   have hval : Real.exp 0 - 0 ^ 2 - 1 = 0 := by simp [Real.exp_zero]; norm_num
-  have hge := h_deriv (le_refl 0) hy0.le
-  linarith [hval ▸ hge]
+  have hge := h_deriv hy0.le
+  have hge' : 0 ≤ Real.exp y - y ^ 2 - 1 := by linarith [hval, hge]
+  linarith
 
 /-- The even-Kernel (and hence the Hurwitz even kernel at `a = 0`) satisfies
 `|evenKernel 0 t - 1| ≤ 3 exp(-π t)` for `t ≥ 1`. -/
