@@ -1813,9 +1813,215 @@ private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
 This is the key estimate that makes `completedZeta_order_le_one` unconditional.  It follows
 from the Mellin representation `Λ₀ = mellin (hurwitzEvenFEPair 0).f_modif` and the exponential
 decay of the theta kernel via the functional equation `Λ₀(s) = Λ₀(1/2 - s)`. -/
+/-- Mellin transform of the modified kernel `f_modif` is bounded by `14·exp(σ^{3/2})`.
+For `σ ≥ 1/4`: split the integral at `t=1`, bound `(0,1)` by `3/(σ+1/2) ≤ 4`
+via `evenKernel_functional_equation` + `cosKernel_sub_le` + `exp_neg_pi_div_le_self`,
+and `(1,∞)` by `3·Γ(σ)/π^σ ≤ 3·exp(σ^{3/2})` via `evenKernel_sub_le` +
+`integral_cpow_mul_exp_neg_mul_Ioi` + `gamma_over_pi_le_exp_pow`. -/
+private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
+    ‖(hurwitzEvenFEPair 0).Λ₀ w‖ ≤ 14 * Real.exp (w.re ^ (3 / 2 : ℝ)) := by
+  set σ := w.re with hσ
+  have hσge : (1/4 : ℝ) ≤ σ := hσ ▸ hw
+  have hσpos : 0 < σ := by linarith
+  -- Λ₀(w) = mellin f_modif w
+  have hΛeq : (hurwitzEvenFEPair 0).Λ₀ w =
+      mellin ((hurwitzEvenFEPair 0).f_modif : ℝ → ℂ) w := rfl
+  -- Bound the norm by the integral of the norm
+  have hle : ‖mellin ((hurwitzEvenFEPair 0).f_modif : ℝ → ℂ) w‖ ≤
+      ∫ t in Ioi 0, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| := by
+    rw [mellin]
+    apply (norm_integral_le_integral_norm _).trans
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro t ht
+    simp only [norm_smul, norm_cpow_eq_rpow_re_of_pos ht, hσ, sub_re, one_re]
+  -- Split at t=1 and bound each part
+  -- (0,1): |f_modif(t)| ≤ 3t^{1/2} via evenKernel_functional_equation + cosKernel_sub_le + exp_neg_pi_div_le_self
+  --   so ∫₀¹ ≤ 3/(σ+1/2) ≤ 4 for σ ≥ 1/4
+  -- (1,∞): |f_modif(t)| ≤ 3exp(-πt) via evenKernel_sub_le
+  --   so ∫₁^∞ ≤ 3Γ(σ)/π^σ ≤ 3exp(σ^{3/2}) via gamma_over_pi_le_exp_pow
+  -- Total ≤ 4 + 3exp(σ^{3/2}) ≤ 14exp(σ^{3/2})
+  -- Key: bound the integral by splitting into (0,1) and (1,∞) contributions
+  -- For t∈(0,1): |f_modif(t)| ≤ 3t^{1/2}, so integrand ≤ 3t^{σ-1/2}
+  -- For t∈(1,∞): |f_modif(t)| ≤ 3exp(-πt), so integrand ≤ 3t^{σ-1}exp(-πt)
+  -- ∫₀¹ 3t^{σ-1/2} dt = 3/(σ+1/2) ≤ 4 for σ ≥ 1/4
+  -- ∫₁^∞ 3t^{σ-1}exp(-πt) dt ≤ 3Γ(σ)/π^σ ≤ 3exp(σ^{3/2}) by gamma_over_pi_le_exp_pow
+  -- Total ≤ 4 + 3exp(σ^{3/2}) ≤ 14exp(σ^{3/2})
+  -- Bound the (0,1) part using the FE and kernel bounds
+  have h01_pt : ∀ t ∈ Ioc 0 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+      3 * t ^ (σ - 1 / 2 : ℝ) := by
+    intro t ht
+    have htpos : 0 < t := (mem_Ioo.mp ht).1
+    have htle : t ≤ 1 := (mem_Ioo.mp ht).2
+    -- On (0,1): f_modif t = (evenKernel 0 t : ℂ) - (t^{-(1/2)} : ℂ)
+    -- |f_modif t| = t^{-1/2} |cosKernel 0 (1/t) - 1| (by evenKernel_functional_equation)
+    -- ≤ t^{-1/2} · 3·exp(-π/t) (by cosKernel_sub_le, since 1/t ≥ 1)
+    -- ≤ t^{-1/2} · 3·t = 3t^{1/2} (by exp_neg_pi_div_le_self, since t ≤ 1)
+    have hke : |evenKernel (0 : UnitAddCircle) t - (1 / Real.sqrt t : ℝ)| ≤
+        3 * t ^ (1 / 2 : ℝ) := by
+      -- evenKernel 0 t = t^{-1/2} cosKernel 0(1/t), so |evenKernel 0 t - t^{-1/2}| = t^{-1/2}|cosKernel 0(1/t) - 1|
+      have hkeq : evenKernel (0 : UnitAddCircle) t = (Real.sqrt t)⁻¹ * cosKernel (0 : UnitAddCircle) (1 / t) := by
+        rw [← evenKernel_functional_equation]; simp [Real.sqrt_eq_rpow]
+      rw [hkeq, show (1 / Real.sqrt t : ℝ) = (Real.sqrt t)⁻¹ from by field_simp [Real.sqrt_ne_zero_of_pos htpos], ← sub_mul, Real.sqrt_eq_rpow t htpos.le, Real.inv_rpow htpos.le]
+      refine mul_le_mul_of_nonneg_left (cosKernel_sub_le (1/t) (by linarith [one_div_le_one_of_le htpos htle])) (by positivity)
+    -- |f_modif t| = |evenKernel 0 t - t^{-1/2}|
+    have hfmod : (hurwitzEvenFEPair 0).f_modif t =
+        ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
+            (t ^ (-(1 / 2 : ℝ) : ℝ) : ℂ) := by
+      unfold WeakFEPair.f_modif
+      simp only [WeakFEPair.hurwitzEvenFEPair, P0, a0, Pi.add_apply,
+        indicator_of_not_mem (notMem_Ioi.mpr htle), zero_add,
+        indicator_of_mem (mem_Ioo.mpr ⟨htpos, htle⟩)]
+      push_cast; ring
+    rw [hfmod, Complex.norm_real, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
+      rw [Real.sqrt_eq_rpow, Real.inv_rpow htpos.le]; norm_num, ← sub_mul]
+    exact mul_le_mul_of_nonneg_left hke (by positivity)
+  -- Bound (0,1) integral by 4
+  have h01 : ∫ t in Ioc 0 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤ 4 := by
+    have hmono := setIntegral_mono
+      (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn.mono_set Ioc_subset_Ioi_self)
+      (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
+      h01_pt
+    have hcalc : ∫ t in Ioc 0 1, 3 * t ^ (σ - 1 / 2 : ℝ) = 3 / (σ + 1 / 2) := by
+      rw [integral_mul_const, integral_Ioc_rpow (by linarith : -(σ - 1 / 2 : ℝ) ≠ -1)
+          (by norm_num : (0:ℝ) ≤ 1)]; push_cast; ring
+    linarith [h01_pt, hcalc]
+  -- Bound (1,∞) integral
+  have h1inf : ∫ t in Ioi 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+      3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+    have hpt : ∀ t ∈ Ioi 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+        3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
+      intro t ht
+      have hfmod : (hurwitzEvenFEPair 0).f_modif t =
+          ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) - (1 : ℂ) := by
+        unfold WeakFEPair.f_modif
+        simp only [WeakFEPair.hurwitzEvenFEPair, P0, a0, Pi.add_apply,
+          indicator_of_mem ht, indicator_of_not_mem (notMem_Ioo_of_ge (mem_Ioi.mp ht).le)]
+        push_cast; ring
+      rw [hfmod, Complex.norm_real]
+      exact mul_le_mul_of_nonneg_left (evenKernel_sub_le t (mem_Ioi.mp ht)) (by positivity)
+    have hmono := setIntegral_mono
+      (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn.mono_set Ioi_subset_Ioi_self)
+      (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
+      hpt
+    have hext : ∫ t in Ioi 1, 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+        ∫ t in Ioi 0, 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
+      apply setIntegral_mono_set
+      · intro t ht; exact mul_nonneg (by positivity) (le_of_lt (Real.exp_pos _))
+      · exact Ioi_subset_Ioi (by norm_num : (1 : ℝ) ≤ 0 + 1)
+    have hfull : ∫ t in Ioi 0, 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+        3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+      -- ∫₀^∞ t^{σ-1} exp(-πt) dt = π^{-σ} Γ(σ) via integral_cpow_mul_exp_neg_mul_Ioi
+      -- 3 · π^{-σ} · Γ(σ) ≤ 3 · exp(σ^{3/2}) by gamma_over_pi_le_exp_pow
+      rw [integral_mul_const, show (3:ℝ) * _ = _ * 3 from mul_comm _ 3, ← integral_mul_const,
+        integral_cpow_mul_exp_neg_mul_Ioi (by exact_mod_cast hσpos : 0 < (σ : ℂ).re) Real.pi_pos,
+        show Complex.Gamma σ = Complex.ofReal (Real.Gamma σ) from Complex.Gamma_ofReal σ,
+        mul_comm, mul_assoc, show (3 : ℝ) * ((1 / Real.pi) ^ (σ : ℂ) * Complex.ofReal (Real.Gamma σ)).re = 3 * (1 / Real.pi) ^ σ * Real.Gamma σ from by
+          simp only [Complex.ofReal_cpow (le_of_lt Real.pi_pos), Complex.Gamma_ofReal, Complex.ofReal_re, Complex.ofReal_mul],
+        show Real.pi ^ (-σ) = (1 / Real.pi) ^ σ from by rw [Real.rpow_neg (by norm_num : 0 ≤ Real.pi)]; field_simp]
+      exact mul_le_mul_of_nonneg_left (gamma_over_pi_le_exp_pow hσge) (by norm_num : (0:ℝ) ≤ 3)
+    linarith [hmono, hext, hfull]
+  -- Combine using integral additivity: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1
+  have htotal : ∫ t in Ioi 0, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+      4 + 3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+    -- Split: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1 (up to measure-zero {0}), so
+    -- ∫_Ioi 0 ≤ ∫_{Ioc 0 1} + ∫_{Ioi 1}
+    have hsub : Ioi 0 ⊆ (Ioc 0 1 : Set ℝ) ∪ Ioi 1 := by
+      intro t ht; simp only [Set.mem_union, Set.mem_Ioi, Set.mem_Ioc] at *; omega
+    have hdisj : Disjoint (Ioc 0 1 : Set ℝ) (Ioi 1) := Set.Ioc_disjoint_Ioi
+    have hsplit : ∫ t in Ioi 0, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+        ∫ t in Ioc 0 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| +
+        ∫ t in Ioi 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| := by
+      have h1 := setIntegral_mono_set hsub (fun t _ => by positivity)
+      rw [integral_union hdisj measurableSet_Ioc measurableSet_Ioi] at h1
+      · exact h1
+      · exact IntegrableOn.mono_set (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn)
+          (Set.union_subset_Ioi_0 hsub)
+      · exact IntegrableOn.mono_set (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn)
+          (Set.union_subset_Ioi_0 hsub)
+    linarith [h01, h1inf]
+  have hexp3 : (3 : ℝ) * Real.exp (σ ^ (3 / 2 : ℝ)) ≤
+      10 * Real.exp (σ ^ (3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_right (by norm_num : (3:ℝ) ≤ 10) (le_of_lt (Real.exp_pos _))
+  have hexp4 : (4 : ℝ) ≤ 4 * Real.exp (σ ^ (3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left (Real.add_one_le_exp _) (by norm_num : (0:ℝ) ≤ 4)
+  linarith [hle, htotal, hexp4, hexp3]
+
+/-- Order of completedRiemannZeta₀ is at most 3/2.
+Follows from `mellin_fmodif_bound` (Mellin integral bound for the theta kernel)
+and `completedRiemannZeta₀_one_sub` (functional equation) to cover all half-planes. -/
 theorem orderSet_completedRiemannZeta₀ :
     (3 / 2 : ℝ) ∈ orderSet completedRiemannZeta₀ := by
-  sorry
+  refine ⟨10, 4, by norm_num, fun z hz => ?_⟩
+  have hz4 : (4 : ℝ) ≤ ‖z‖ := hz
+  -- Key: ‖completedRiemannZeta₀ z‖ ≤ 7 * exp(|z|^{3/2})
+  suffices h : ‖completedRiemannZeta₀ z‖ ≤ 7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) from by
+    nlinarith [Real.exp_nonneg (‖z‖ ^ (3 / 2 : ℝ))]
+  -- Case split: Re(z) ≥ 1/2 vs Re(z) < 1/2
+  by_cases hRe : (1/2 : ℝ) ≤ z.re
+  · -- Case Re(z) ≥ 1/2: use Mellin representation and integral bounds
+    -- completedRiemannZeta₀(z) = Λ₀(z/2)/2 where Λ₀ = mellin f_modif
+    set w := z / 2 with hw
+    have hwRe : (1/4 : ℝ) ≤ w.re := by
+      rw [hw, Complex.div_re]; linarith [show (2:ℝ) = (2:ℂ).re from by norm_num [Complex.ofReal_re]]
+    -- The Mellin transform is bounded: ‖mellin f_modif w‖ ≤ 14*exp(σ^{3/2})
+    -- where σ = Re(w) = Re(z)/2
+    -- On (0,1): |f_modif(t)| ≤ 3t^{1/2} via evenKernel_functional_equation + cosKernel_sub_le + exp_neg_pi_div_le_self
+    --   so ∫₀¹ t^{σ-1}|f_modif| ≤ 3/(σ+1/2) ≤ 4
+    -- On (1,∞): |f_modif(t)| ≤ 3exp(-πt) via evenKernel_sub_le
+    --   so ∫₁^∞ t^{σ-1}|f_modif| ≤ 3Γ(σ)/π^σ ≤ 3exp(σ^{3/2}) via gamma_over_pi_le_exp_pow
+    -- Total ≤ 4 + 3exp(σ^{3/2}) ≤ 7exp(|z|^{3/2})
+    exact mellin_fmodif_bound w hwRe
+    have hwle : w.re ≤ ‖z‖ / 2 := by
+      rw [hw, Complex.div_re]; linarith [show (2:ℝ) = (2:ℂ).re from by norm_num [Complex.ofReal_re]]
+    have hM : completedRiemannZeta₀ z = ((hurwitzEvenFEPair 0).Λ₀ w) / 2 := by
+      simp [hw, completedRiemannZeta₀, completedHurwitzZetaEven₀, WeakFEPair.Λ₀]
+    rw [hM, Complex.norm_div, Complex.norm_ofNat,
+        show ‖(2:ℂ)‖ = 2 from by norm_num [Complex.norm_ofNat]]
+    have hpwle : w.re ^ (3/2) ≤ (‖z‖ / 2) ^ (3/2) :=
+      Real.rpow_le_rpow (by linarith [norm_nonneg z]) hwle (by norm_num)
+    have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3/2)) :=
+      (Real.exp_le_exp.mpr (hpwle.trans (by gcongr; nlinarith [norm_nonneg z])))
+    linarith [mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)]
+  · -- Case Re(z) < 1/2: use functional equation to reflect to Re(1-z) ≥ 1/2
+    have hFE : completedRiemannZeta₀ z = completedRiemannZeta₀ (1 - z) :=
+      (completedRiemannZeta₀_one_sub z).symm
+    have hRe1s : (1/2 : ℝ) ≤ (1 - z).re := by simp [Complex.sub_re]; linarith
+    have hnorm1s : ‖1 - z‖ ≤ ‖z‖ := by
+      have h1 : (1 - z.re) ^ 2 + z.im ^ 2 = (1:ℝ) - 2 * z.re + z.re ^ 2 + z.im ^ 2 := by ring
+      have h2 : z.re ^ 2 + z.im ^ 2 = ‖z‖ ^ 2 := by
+        rw [Complex.norm_def, Complex.normSq]; ring_nf; ring
+      have h3 : (1 - z.re) ^ 2 + z.im ^ 2 = ‖1 - z‖ ^ 2 := by
+        rw [Complex.norm_def, Complex.normSq]; push_cast; ring
+      nlinarith [sq_nonneg (z.re - 1/2), hz4]
+    -- Apply Re ≥ 1/2 case to (1-z)
+    have hkey1s : ‖completedRiemannZeta₀ (1 - z)‖ ≤
+        7 * Real.exp (‖1 - z‖ ^ (3 / 2 : ℝ)) := by
+      -- Re(1-z) ≥ 1/2, so (1-z)/2 has Re ≥ 1/4
+      -- Apply the same Mellin integral bound to (1-z)
+      set w := (1 - z) / 2 with hw
+      have hwRe : (1/4 : ℝ) ≤ w.re := by
+        rw [hw, Complex.div_re]; linarith [show (2:ℝ) = (2:ℂ).re from by norm_num [Complex.ofReal_re]]
+      have hM : completedRiemannZeta₀ (1 - z) = ((hurwitzEvenFEPair 0).Λ₀ w) / 2 := by
+        simp [hw, completedRiemannZeta₀, completedHurwitzZetaEven₀, WeakFEPair.Λ₀]
+      have hb := mellin_fmodif_bound w hwRe
+      rw [show (hurwitzEvenFEPair 0).Λ₀ w = mellin ((hurwitzEvenFEPair 0).f_modif : ℝ → ℂ) w from rfl] at hb
+      have hwle : w.re ≤ ‖1 - z‖ / 2 := by
+        rw [hw, Complex.div_re]
+        linarith [show (2 : ℝ) = (2 : ℂ).re from by norm_num [Complex.ofReal_re]]
+      have hpwle : w.re ^ (3/2) ≤ (‖1 - z‖ / 2) ^ (3/2) :=
+        Real.rpow_le_rpow (by linarith [norm_nonneg (1 - z)]) hwle (by norm_num)
+      have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖1 - z‖ ^ (3/2)) :=
+        (Real.exp_le_exp.mpr (hpwle.trans (by
+          gcongr; nlinarith [norm_nonneg (1 - z)])))
+      rw [hM, Complex.norm_div, Complex.norm_ofNat,
+          show ‖(2 : ℂ)‖ = 2 from by norm_num [Complex.norm_ofNat]]
+      linarith [mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14)]
+    rw [hFE]
+    calc ‖completedRiemannZeta₀ (1 - z)‖
+        ≤ 7 * Real.exp (‖1 - z‖ ^ (3 / 2 : ℝ)) := hkey1s
+      _ ≤ 7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+        gcongr
+        exact Real.rpow_le_rpow (by linarith [norm_nonneg z]) hnorm1s (by norm_num)
 
 /-- **The completed zeta has order at most 2.**
 
