@@ -1859,16 +1859,16 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
         Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
         Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl),
-        zero_add, norm_zero, mul_zero, Real.one_rpow]
+        zero_add, norm_zero, mul_zero, Real.one_rpow]; norm_num
     · -- t < 1: functional equation for evenKernel and cosKernel_sub_le
       have hkeq : evenKernel (0 : UnitAddCircle) t =
           (Real.sqrt t)⁻¹ * cosKernel (0 : UnitAddCircle) (1 / t) := by
         rw [evenKernel_functional_equation]; simp [Real.sqrt_eq_rpow]
-      have hcos := cosKernel_sub_le (1 / t) (by linarith [one_le_one_div htpos hlt])
-      have hexp := exp_neg_pi_div_le_self htpos hlt
+      have hcos := cosKernel_sub_le (1 / t) (by linarith [one_le_one_div htpos hlt.le])
+      have hexp := exp_neg_pi_div_le_self htpos hlt.le
       have hfmod : (hurwitzEvenFEPair 0).f_modif t =
           ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
-              (t ^ (-(1 / 2 : ℝ) : ℝ) : ℂ) := by
+              (t ^ (-(1 / 2 : ℝ)) : ℂ) := by
         unfold WeakFEPair.f_modif
         simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
           Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
@@ -1986,7 +1986,7 @@ theorem orderSet_completedRiemannZeta₀ :
       gcongr
     have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3/2)) :=
       (Real.exp_le_exp.mpr (hpwle.trans (by gcongr; nlinarith [norm_nonneg z])))
-    linarith [mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)]
+    nlinarith [hb, mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)]
   · -- Case Re(z) < 1/2: use functional equation to reflect to Re(1-z) ≥ 1/2
     have hFE : completedRiemannZeta₀ z = completedRiemannZeta₀ (1 - z) :=
       (completedRiemannZeta₀_one_sub z).symm
@@ -2012,7 +2012,7 @@ theorem orderSet_completedRiemannZeta₀ :
       have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
         Real.exp_le_exp.mpr hpwle
       rw [hM, Complex.norm_div, Complex.norm_ofNat]
-      linarith [mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14)]
+      nlinarith [hb, mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14)]
     rw [hFE]; exact hkey
 
 /-- **The completed zeta has order at most 2.**

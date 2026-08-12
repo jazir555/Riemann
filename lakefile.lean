@@ -89,10 +89,6 @@ lean_lib Counterexamples where
 lean_lib TestAnalytic where
   roots := #[`TestAnalytic]
 
-lean_lib RootScratch where
-  roots := #[`ZeroFreeRegionHadamard]
-  globs := #[`ZeroFreeRegionHadamard]
-
 /-- Additional documentation in the form of modules that only contain module docstrings. -/
 lean_lib docs where
   roots := #[`docs]
