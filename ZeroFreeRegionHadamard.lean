@@ -1808,7 +1808,7 @@ private lemma gamma_over_pi_le_exp_pow {σ : ℝ} (h : 1 ≤ σ) :
         _ ≤ π ^ σ * (σ + 1) ^ σ := mul_le_mul_of_nonneg_right hpow1 (by positivity)
     _ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := hkey
 
-/-- **Order of the completed zeta function is at most `3/2`.**
+/- **Order of the completed zeta function is at most `3/2`.**
 
 This is the key estimate that makes `completedZeta_order_le_one` unconditional.  It follows
 from the Mellin representation `Λ₀ = mellin (hurwitzEvenFEPair 0).f_modif` and the exponential
@@ -2021,7 +2021,6 @@ theorem orderSet_completedRiemannZeta₀ :
         ≤ 7 * Real.exp (‖1 - z‖ ^ (3 / 2 : ℝ)) := hkey1s
       _ ≤ 7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
         gcongr
-        exact Real.rpow_le_rpow (by linarith [norm_nonneg z]) hnorm1s (by norm_num)
 
 /-- **The completed zeta has order at most 2.**
 
