@@ -1828,9 +1828,10 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       mellin ((hurwitzEvenFEPair 0).f_modif : ℝ → ℂ) w := rfl
   -- Bound the norm by the integral of the norm
   have hle : ‖mellin ((hurwitzEvenFEPair 0).f_modif : ℝ → ℂ) w‖ ≤
-      ∫ t : ℝ in Set.Ioi 0, t ^ (σ - 1) * Complex.abs ((hurwitzEvenFEPair 0).f_modif t) := by
+      ∫ t : ℝ in Set.Ioi 0, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ := by
     rw [mellin]
     apply (MeasureTheory.norm_integral_le_integral_norm _).trans
+    apply le_of_eq
     apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
     intro t ht
     simp only [norm_smul, norm_cpow_eq_rpow_re_of_pos ht, hσ, sub_re, one_re]
