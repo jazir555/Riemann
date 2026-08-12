@@ -1869,11 +1869,10 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       have hfmod : (hurwitzEvenFEPair 0).f_modif t =
           ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
               (t ^ (-(1 / 2 : ℝ)) : ℂ) := by
-        unfold WeakFEPair.f_modif
-        simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
-          Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
-          Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩)]
-        push_cast; ring
+        dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
+        simp only [Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
+          zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩)]
+        push_cast; ring_nf
       rw [hfmod, Complex.norm_real,
         show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
           rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le],
