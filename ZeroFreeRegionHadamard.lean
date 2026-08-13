@@ -1848,7 +1848,7 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
   -- ∫₁^∞ 3t^{σ-1}exp(-πt) dt ≤ 3Γ(σ)/π^σ ≤ 3exp(σ^{3/2}) by gamma_over_pi_le_exp_pow
   -- Total ≤ 4 + 3exp(σ^{3/2}) ≤ 14exp(σ^{3/2})
   -- Bound the (0,1) part using the FE and kernel bounds
-  have h01_pt : ∀ t ∈ Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)| ≤
+  have h01_pt : ∀ t ∈ Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
       3 * t ^ (σ - 1 / 2 : ℝ) := by
     intro t ht
     have htpos : 0 < t := (Set.mem_Ioc.mp ht).1
@@ -1867,23 +1867,22 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       have hcos := cosKernel_sub_le (1 / t) (by linarith [one_le_one_div htpos hlt.le])
       have hexp := exp_neg_pi_div_le_self htpos hlt.le
       have hfmod : (hurwitzEvenFEPair 0).f_modif t =
-          ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
-              (t ^ (-(1 / 2 : ℝ)) : ℂ) := by
+          Complex.ofReal (evenKernel (0 : UnitAddCircle) t) -
+              Complex.ofReal (t ^ (-(1 / 2 : ℝ))) := by
         dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
         simp only [Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
-          zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩)]
-        push_cast; ring_nf
-      rw [hfmod, Complex.norm_real,
-        show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
+          zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩),
+          smul_eq_mul, one_mul, mul_one]
+      rw [hfmod, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
           rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le],
         show (t ^ (1 / 2 : ℝ)) = Real.sqrt t from (Real.sqrt_eq_rpow t).symm,
-        ← sub_mul, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
+        ← sub_mul, Complex.norm_real, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
       nlinarith [mul_le_mul_of_nonneg_left hcos (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3))
           (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_self_sqrt (le_of_lt htpos), sqrt_nonneg t]
   -- Bound (0,1) integral by 4
-  have h01 : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| ≤ 4 := by
+  have h01 : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤ 4 := by
     have hmono := MeasureTheory.setIntegral_mono
       (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn.mono_set Set.Ioc_subset_Ioi_self)
       (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
@@ -1893,9 +1892,9 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
           (by norm_num : (0:ℝ) ≤ 1)]; push_cast; ring
     linarith [h01_pt, hcalc]
   -- Bound (1,∞) integral
-  have h1inf : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| ≤
+  have h1inf : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
       3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
-    have hpt : ∀ t ∈ Set.Ioi (1 : ℝ), t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| ≤
+    have hpt : ∀ t ∈ Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
         3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
       intro t ht
       have hfmod : (hurwitzEvenFEPair 0).f_modif t =
@@ -1928,16 +1927,16 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       exact mul_le_mul_of_nonneg_left (gamma_over_pi_le_exp_pow hσge) (by norm_num : (0:ℝ) ≤ 3)
     linarith [hmono, hext, hfull]
   -- Combine using integral additivity: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1
-  have htotal : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| ≤
+  have htotal : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
       4 + 3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
     -- Split: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1 (up to measure-zero {0}), so
     -- ∫_Ioi 0 ≤ ∫_{Ioc 0 1} + ∫_{Ioi 1}
     have hsub : Set.Ioi (0 : ℝ) ⊆ (Set.Ioc (0 : ℝ) 1 : Set ℝ) ∪ Set.Ioi (1 : ℝ) := by
       intro t ht; simp only [Set.mem_union, Set.mem_Ioi, Set.Set.mem_Ioc] at *; omega
     have hdisj : Disjoint (Set.Ioc (0 : ℝ) 1 : Set ℝ) (Set.Ioi (1 : ℝ)) := Set.Ioc_disjoint_Ioi
-    have hsplit : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| ≤
-        ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| +
-        ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * |((hurwitzEvenFEPair 0).f_modif t)|| := by
+    have hsplit : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
+        ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ +
+        ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ := by
       have h1 := MeasureTheory.setIntegral_mono_set hsub (fun t _ => by positivity)
       rw [MeasureTheory.integral_union hdisj measurableSet_Ioc measurableSet_Ioi] at h1
       · exact h1
@@ -1980,12 +1979,16 @@ theorem orderSet_completedRiemannZeta₀ :
       linarith [Complex.re_le_norm z]
     have hM : completedRiemannZeta₀ z = ((hurwitzEvenFEPair 0).Λ₀ w) / 2 := by
       simp [hw, completedRiemannZeta₀, completedHurwitzZetaEven₀, WeakFEPair.Λ₀]
-    rw [hM, Complex.norm_div, Complex.norm_ofNat]
-    have hpwle : w.re ^ (3/2) ≤ (‖z‖ / 2) ^ (3/2) := by
-      gcongr
+    have hpwle : w.re ^ (3/2) ≤ (‖z‖ / 2) ^ (3/2) := by gcongr
     have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3/2)) :=
       (Real.exp_le_exp.mpr (hpwle.trans (by gcongr; nlinarith [norm_nonneg z])))
-    nlinarith [hb, mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)]
+    rw [hM, Complex.norm_div]
+    have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
+        7 * Real.exp (‖z‖ ^ (3/2)) := by
+      norm_num
+      have := hb
+      have := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
+      linarith
   · -- Case Re(z) < 1/2: use functional equation to reflect to Re(1-z) ≥ 1/2
     have hFE : completedRiemannZeta₀ z = completedRiemannZeta₀ (1 - z) :=
       (completedRiemannZeta₀_one_sub z).symm
@@ -2010,8 +2013,13 @@ theorem orderSet_completedRiemannZeta₀ :
         gcongr
       have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
         Real.exp_le_exp.mpr hpwle
-      rw [hM, Complex.norm_div, Complex.norm_ofNat]
-      nlinarith [hb, mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14)]
+      rw [hM, Complex.norm_div]
+      have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
+          7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+        norm_num
+        have := hb
+        have := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
+        linarith
     rw [hFE]; exact hkey
 
 /-- **The completed zeta has order at most 2.**
