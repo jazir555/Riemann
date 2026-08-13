@@ -1876,7 +1876,8 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       rw [hfmod, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
           rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le],
         show (t ^ (1 / 2 : ℝ)) = Real.sqrt t from (Real.sqrt_eq_rpow t).symm,
-        ← sub_mul, Complex.norm_real, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
+        ← sub_mul, norm_mul, Complex.norm_real, Complex.norm_real, abs_mul,
+        abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
       nlinarith [mul_le_mul_of_nonneg_left hcos (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3))
           (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
@@ -1884,9 +1885,11 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
   -- Bound (0,1) integral by 4
   have h01 : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤ 4 := by
     have hmono := MeasureTheory.setIntegral_mono
-      (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn.mono_set Set.Ioc_subset_Ioi_self)
+      ((hurwitzEvenFEPair 0).hf_modif_int.norm.mono_set Set.Ioc_subset_Ioi_self
+        |>.integrableOn_isCompact Set.isCompact_Ioc)
       (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
-      h01_pt
+      (by exact_mod_cast Real.integrableOn_Ioc_rpow (by linarith : -(σ - 1/2 : ℝ) ≠ -1)
+        (by norm_num : (0:ℝ) ≤ 1))
     have hcalc : ∫ t in Set.Ioc (0 : ℝ) 1, 3 * t ^ (σ - 1 / 2 : ℝ) = 3 / (σ + 1 / 2) := by
       rw [integral_mul_const, integral_Ioc_rpow (by linarith : -(σ - 1 / 2 : ℝ) ≠ -1)
           (by norm_num : (0:ℝ) ≤ 1)]; push_cast; ring
@@ -1903,12 +1906,10 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
         simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
           Set.indicator_of_mem ht, Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le)]
         push_cast; ring
-      rw [hfmod, Complex.norm_real]
+      simp only [hfmod, Complex.norm_real]
       exact mul_le_mul_of_nonneg_left (evenKernel_sub_le t (Set.mem_Ioi.mp ht)) (by positivity)
     have hmono := MeasureTheory.setIntegral_mono
-      (((hurwitzEvenFEPair 0).hf_modif_int).norm.integrableOn.mono_set Set.Ioi_subset_Ioi_self)
       (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
-      hpt
     have hext : ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
         ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
       apply MeasureTheory.setIntegral_mono_set
@@ -1932,7 +1933,7 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
     -- Split: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1 (up to measure-zero {0}), so
     -- ∫_Ioi 0 ≤ ∫_{Ioc 0 1} + ∫_{Ioi 1}
     have hsub : Set.Ioi (0 : ℝ) ⊆ (Set.Ioc (0 : ℝ) 1 : Set ℝ) ∪ Set.Ioi (1 : ℝ) := by
-      intro t ht; simp only [Set.mem_union, Set.mem_Ioi, Set.Set.mem_Ioc] at *; omega
+      intro t ht; simp only [Set.mem_union, Set.mem_Ioi, Set.mem_Ioc] at *; omega
     have hdisj : Disjoint (Set.Ioc (0 : ℝ) 1 : Set ℝ) (Set.Ioi (1 : ℝ)) := Set.Ioc_disjoint_Ioi
     have hsplit : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
         ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ +
