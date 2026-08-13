@@ -1873,10 +1873,20 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
         simp only [Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
           zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩),
           smul_eq_mul, one_mul, mul_one]
-      rw [hfmod, hkeq, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
-          rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le],
-        ← Complex.ofReal_sub, ← sub_mul, Complex.norm_real,
-        abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
+      have hle_val : (hurwitzEvenFEPair 0).f_modif t =
+          ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
+            ((t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) : ℂ) := by
+        unfold WeakFEPair.f_modif
+        simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
+          Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
+          zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩),
+          smul_eq_mul, one_mul, mul_one]
+      have hval : (hurwitzEvenFEPair 0).f_modif t =
+          ((Real.sqrt t)⁻¹ * (cosKernel (0 : UnitAddCircle) (1 / t) - 1) : ℝ) := by
+        rw [hle_val, hkeq, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
+            rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le]]
+        push_cast; ring
+      rw [hval, Complex.norm_real, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
       nlinarith [mul_le_mul_of_nonneg_left hcos (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3))
           (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
@@ -1886,7 +1896,9 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
     have hcalc : ∫ t in Set.Ioc (0 : ℝ) 1, 3 * t ^ (σ - 1 / 2 : ℝ) = 3 / (σ + 1 / 2) := by
       rw [MeasureTheory.integral_const_mul (3 : ℝ),
         ← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
-        integral_rpow (by linarith [hσpos] : -1 < σ - 1 / 2)]; push_cast; ring
+        integral_rpow (Or.inl (by linarith [hσpos])),
+        Real.one_rpow, Real.zero_rpow (by linarith [hσpos] : σ - 1 / 2 + 1 ≠ 0),
+        sub_zero]; field_simp; ring
     linarith [h01_pt, hcalc]
   -- Bound (1,∞) integral
   have h1inf : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
@@ -1897,11 +1909,11 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       have hfmod : (hurwitzEvenFEPair 0).f_modif t =
           ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) - (1 : ℂ) := by
         unfold WeakFEPair.f_modif
-        simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
-          Set.indicator_of_mem ht, Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le),
-          add_zero]
-        norm_cast
-      rw [hfmod, Complex.norm_real]
+        dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
+        simp only [Pi.add_apply, Set.indicator_of_mem ht,
+          Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le),
+          add_zero, sub_zero, smul_eq_mul, one_mul, mul_one]
+      rw [hfmod, Complex.norm_real, abs_of_nonneg (by positivity : 0 ≤ evenKernel (0 : UnitAddCircle) t - 1)]
       exact mul_le_mul_of_nonneg_left (evenKernel_sub_le t (Set.mem_Ioi.mp ht)) (by positivity)
     have hmono : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
         ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
