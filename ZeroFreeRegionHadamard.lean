@@ -1876,22 +1876,16 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       rw [hfmod, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
           rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le],
         show (t ^ (1 / 2 : ℝ)) = Real.sqrt t from (Real.sqrt_eq_rpow t).symm,
-        ← sub_mul, norm_mul, Complex.norm_real, Complex.norm_real, abs_mul,
-        abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
+        ← sub_mul, norm_mul, Complex.ofReal_sub, Complex.norm_real, Complex.norm_real,
+        abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
       nlinarith [mul_le_mul_of_nonneg_left hcos (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3))
           (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
         mul_self_sqrt (le_of_lt htpos), sqrt_nonneg t]
   -- Bound (0,1) integral by 4
   have h01 : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤ 4 := by
-    have hmono := MeasureTheory.setIntegral_mono
-      ((hurwitzEvenFEPair 0).hf_modif_int.norm.mono_set Set.Ioc_subset_Ioi_self
-        |>.integrableOn_isCompact Set.isCompact_Ioc)
-      (by intro t ht; exact mul_nonneg (by positivity) (norm_nonneg _))
-      (by exact_mod_cast Real.integrableOn_Ioc_rpow (by linarith : -(σ - 1/2 : ℝ) ≠ -1)
-        (by norm_num : (0:ℝ) ≤ 1))
     have hcalc : ∫ t in Set.Ioc (0 : ℝ) 1, 3 * t ^ (σ - 1 / 2 : ℝ) = 3 / (σ + 1 / 2) := by
-      rw [integral_mul_const, integral_Ioc_rpow (by linarith : -(σ - 1 / 2 : ℝ) ≠ -1)
+      rw [MeasureTheory.integral_const_mul (3 : ℝ), integral_Ioc_rpow (by linarith : -(σ - 1 / 2 : ℝ) ≠ -1)
           (by norm_num : (0:ℝ) ≤ 1)]; push_cast; ring
     linarith [h01_pt, hcalc]
   -- Bound (1,∞) integral
@@ -1919,7 +1913,7 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
         3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
       -- ∫₀^∞ t^{σ-1} exp(-πt) dt = π^{-σ} Γ(σ) via integral_cpow_mul_exp_neg_mul_Ioi
       -- 3 · π^{-σ} · Γ(σ) ≤ 3 · exp(σ^{3/2}) by gamma_over_pi_le_exp_pow
-      rw [integral_mul_const, show (3:ℝ) * _ = _ * 3 from mul_comm _ 3, ← integral_mul_const,
+      rw [MeasureTheory.integral_const_mul (3 : ℝ), show (3:ℝ) * _ = _ * 3 from mul_comm _ 3, ← MeasureTheory.integral_const_mul (3 : ℝ),
         integral_cpow_mul_exp_neg_mul_Ioi (by exact_mod_cast hσpos : 0 < (σ : ℂ).re) Real.pi_pos,
         show Complex.Gamma σ = Complex.ofReal (Real.Gamma σ) from Complex.Gamma_ofReal σ,
         mul_comm, mul_assoc, show (3 : ℝ) * ((1 / Real.pi) ^ (σ : ℂ) * Complex.ofReal (Real.Gamma σ)).re = 3 * (1 / Real.pi) ^ σ * Real.Gamma σ from by
@@ -1986,7 +1980,7 @@ theorem orderSet_completedRiemannZeta₀ :
     rw [hM, Complex.norm_div]
     have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
         7 * Real.exp (‖z‖ ^ (3/2)) := by
-      norm_num
+      simp only [Complex.norm_ofNat]
       have := hb
       have := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
       linarith
@@ -2017,7 +2011,7 @@ theorem orderSet_completedRiemannZeta₀ :
       rw [hM, Complex.norm_div]
       have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
           7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
-        norm_num
+        simp only [Complex.norm_ofNat]
         have := hb
         have := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
         linarith
