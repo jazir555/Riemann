@@ -1818,6 +1818,59 @@ For `σ ≥ 1/4`: split the integral at `t=1`, bound `(0,1)` by `3/(σ+1/2) ≤ 
 via `evenKernel_functional_equation` + `cosKernel_sub_le` + `exp_neg_pi_div_le_self`,
 and `(1,∞)` by `3·Γ(σ)/π^σ ≤ 3·exp(σ^{3/2})` via `evenKernel_sub_le` +
 `integral_cpow_mul_exp_neg_mul_Ioi` + `gamma_over_pi_le_exp_pow`. -/
+/- `3 * t^(σ-1) * exp(-πt)` is integrable on `(0, ∞)` for `σ > 0`, by comparison with the
+Gamma integral. -/
+private lemma integrableOn_exp_neg_pi_mul_rpow (σ : ℝ) (hσ : 0 < σ) :
+    MeasureTheory.IntegrableOn
+      (fun t : ℝ => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 0) := by
+  have hbase : MeasureTheory.IntegrableOn
+      (fun t : ℝ => Real.exp (-t) * t ^ (σ - 1)) (Set.Ioi 0) :=
+    Real.GammaIntegral_convergent hσ
+  have hcon : ContinuousOn (fun t : ℝ => t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 0) := by
+    have hrpow : ContinuousOn (fun t : ℝ => t ^ (σ - 1)) (Set.Ioi 0) := by
+      intro t ht
+      exact (continuousAt_rpow_const t (σ - 1) (Or.inl ht.ne')).continuousWithinAt
+    have hexp : ContinuousOn (fun t : ℝ => Real.exp (-Real.pi * t)) (Set.univ : Set ℝ) := by
+      fun_prop
+    exact hrpow.mul (hexp.mono (Set.subset_univ _))
+  have hdom : ∀ t ∈ Set.Ioi (0 : ℝ), 0 ≤ t ^ (σ - 1) * Real.exp (-Real.pi * t) ∧
+      t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤ Real.exp (-t) * t ^ (σ - 1) := by
+    intro t ht
+    constructor
+    · exact mul_nonneg (Real.rpow_nonneg (le_of_lt ht) (σ - 1)) (le_of_lt (Real.exp_pos _))
+    · have hπ : Real.exp (-Real.pi * t) ≤ Real.exp (-t) := by
+        apply Real.exp_le_exp.mpr
+        have hle1 : -Real.pi ≤ -1 := by linarith [Real.pi_gt_three]
+        exact (mul_le_mul_of_nonneg_right hle1 (le_of_lt ht)).trans_eq (by simp)
+      simpa [mul_comm] using mul_le_mul_of_nonneg_left hπ (Real.rpow_nonneg (le_of_lt ht) (σ - 1))
+  have hint : MeasureTheory.IntegrableOn
+      (fun t : ℝ => t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 0) := by
+    refine MeasureTheory.Integrable.mono_nonneg (μ := MeasureTheory.volume.restrict (Set.Ioi 0))
+      hbase ?_ ?_ ?_
+    · exact hcon.aestronglyMeasurable measurableSet_Ioi
+    · exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall (fun t ht => (hdom t ht).1))
+    · exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall (fun t ht => (hdom t ht).2))
+  have h3 : MeasureTheory.IntegrableOn
+      (fun t : ℝ => 3 * (t ^ (σ - 1) * Real.exp (-Real.pi * t))) (Set.Ioi 0) :=
+    (hint.smul (3 : ℝ)).congr (Filter.Eventually.of_forall (fun t => by simp [smul_eq_mul]))
+  simpa [mul_assoc] using h3
+
+/- If `f` is continuous on `(a, ∞)`, nonnegative, and bounded above by an integrable function
+`g` on `(a, ∞)`, then `f` is integrable on `(a, ∞)`. -/
+private lemma integrableOn_Ici_of_continuousOn {f g : ℝ → ℝ} {a : ℝ}
+    (hf : ContinuousOn f (Set.Ioi a))
+    (hg : MeasureTheory.IntegrableOn g (Set.Ioi a))
+    (hfg : ∀ t ∈ Set.Ioi a, 0 ≤ f t ∧ f t ≤ g t) :
+    MeasureTheory.IntegrableOn f (Set.Ioi a) := by
+  have hmeas : MeasureTheory.AEStronglyMeasurable f (MeasureTheory.volume.restrict (Set.Ioi a)) :=
+    hf.aestronglyMeasurable measurableSet_Ioi
+  have hnonneg : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioi a)), 0 ≤ f t := by
+    exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall (fun t ht => (hfg t ht).1))
+  have hle : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioi a)), f t ≤ g t := by
+    exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr (Filter.Eventually.of_forall (fun t ht => (hfg t ht).2))
+  exact MeasureTheory.Integrable.mono_nonneg (μ := MeasureTheory.volume.restrict (Set.Ioi a))
+    hg hmeas hnonneg hle
+
 private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
     ‖(hurwitzEvenFEPair 0).Λ₀ w‖ ≤ 14 * Real.exp (w.re ^ (3 / 2 : ℝ)) := by
   set σ := w.re with hσ
@@ -1855,7 +1908,7 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
     have htle : t ≤ 1 := (Set.mem_Ioc.mp ht).2
     rcases htle.eq_or_lt with rfl | hlt
     · -- t = 1: f_modif 1 = 0 by definition (both indicators vanish at t=1)
-      unfold WeakFEPair.f_modif
+      dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
       simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
         Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
         Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl),
@@ -1876,7 +1929,7 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
       have hle_val : (hurwitzEvenFEPair 0).f_modif t =
           ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) -
             ((t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) : ℂ) := by
-        unfold WeakFEPair.f_modif
+        dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
         simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply,
           Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
           zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩),
@@ -1886,11 +1939,177 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
         rw [hle_val, hkeq, show (t ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) = (Real.sqrt t)⁻¹ from by
             rw [Real.sqrt_eq_rpow, Real.rpow_neg htpos.le]]
         push_cast; ring
-      rw [hval, Complex.norm_real, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
-      nlinarith [mul_le_mul_of_nonneg_left hcos (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
-        mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3))
-          (le_of_lt (inv_pos.2 (Real.sqrt_pos.2 htpos))),
-        mul_self_sqrt (le_of_lt htpos), sqrt_nonneg t]
+      have hnorm : ‖(hurwitzEvenFEPair 0).f_modif t‖ =
+          |(Real.sqrt t)⁻¹ * (cosKernel (0 : UnitAddCircle) (1 / t) - 1)| := by
+        rw [hval]
+        exact RCLike.norm_ofReal _
+      rw [hnorm, abs_mul, abs_of_nonneg (by positivity : 0 ≤ (Real.sqrt t)⁻¹)]
+      calc
+        t ^ (σ - 1) * ((Real.sqrt t)⁻¹ * |cosKernel (0 : UnitAddCircle) (1 / t) - 1|)
+            ≤ t ^ (σ - 1) * ((Real.sqrt t)⁻¹ * (3 * Real.exp (-Real.pi / t))) := by
+              have hcos' : |cosKernel (0 : UnitAddCircle) (1 / t) - 1| ≤
+                  3 * Real.exp (-Real.pi / t) := by
+                have hstep : (-Real.pi) * (1 / t) = -Real.pi / t := by
+                  rw [mul_one_div]
+                rwa [hstep] at hcos
+              have hA : (0 : ℝ) ≤ (Real.sqrt t)⁻¹ := by positivity
+              have hT : (0 : ℝ) ≤ t ^ (σ - 1) := Real.rpow_nonneg (le_of_lt htpos) (σ - 1)
+              exact mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hcos' hA) hT
+        _ ≤ t ^ (σ - 1) * ((Real.sqrt t)⁻¹ * (3 * t)) := by
+              have hA : (0 : ℝ) ≤ (Real.sqrt t)⁻¹ := by positivity
+              have hT : (0 : ℝ) ≤ t ^ (σ - 1) := Real.rpow_nonneg (le_of_lt htpos) (σ - 1)
+              exact mul_le_mul_of_nonneg_left
+                (mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hexp (by norm_num : (0:ℝ) ≤ 3)) hA) hT
+        _ = 3 * t ^ (σ - 1 / 2 : ℝ) := by
+              have hsqrt : (Real.sqrt t)⁻¹ * t = Real.sqrt t := by
+                have hpos : (0 : ℝ) < Real.sqrt t := Real.sqrt_pos.2 htpos
+                rw [mul_comm, ← div_eq_mul_inv, div_eq_iff hpos.ne']
+                exact (mul_self_sqrt (le_of_lt htpos)).symm
+              have hpow : t ^ (σ - 1) * Real.sqrt t = t ^ (σ - 1 / 2 : ℝ) := by
+                rw [Real.sqrt_eq_rpow]
+                rw [← Real.rpow_add htpos]
+                congr 1
+                ring
+              calc
+                t ^ (σ - 1) * ((Real.sqrt t)⁻¹ * (3 * t))
+                    = 3 * (t ^ (σ - 1) * ((Real.sqrt t)⁻¹ * t)) := by ring
+                _ = 3 * (t ^ (σ - 1) * Real.sqrt t) := by rw [hsqrt]
+                _ = 3 * t ^ (σ - 1 / 2 : ℝ) := by rw [hpow]
+  -- Pointwise bound on (1, ∞) for the integrand (used by h1inf and the splitting argument)
+  have hpt : ∀ t ∈ Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
+      3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
+    intro t ht
+    have hfmod : (hurwitzEvenFEPair 0).f_modif t =
+        ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) - (1 : ℂ) := by
+      dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
+      simp only [Pi.add_apply, Set.indicator_of_mem ht,
+        Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le),
+        add_zero, sub_zero, smul_eq_mul, one_mul, mul_one, if_true]
+    have hnorm : ‖(hurwitzEvenFEPair 0).f_modif t‖ =
+        |evenKernel (0 : UnitAddCircle) t - 1| := by
+      rw [hfmod]
+      have hc : ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) - (1 : ℂ) =
+          ((evenKernel (0 : UnitAddCircle) t - 1 : ℝ) : ℂ) := by
+        push_cast
+        ring
+      rw [hc]
+      exact RCLike.norm_ofReal _
+    rw [hnorm]
+    have ht0 : (0 : ℝ) ≤ t := by linarith [Set.mem_Ioi.mp ht]
+    simpa [mul_assoc, mul_comm, mul_left_comm] using
+      mul_le_mul_of_nonneg_left (evenKernel_sub_le t (Set.mem_Ioi.mp ht).le)
+        (Real.rpow_nonneg ht0 (σ - 1))
+  -- Integrability of the integrand on (1, ∞) (dominated by the exponential decay bound)
+  have hL1 : MeasureTheory.IntegrableOn
+      (fun t => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖) (Set.Ioi 1) := by
+    refine integrableOn_Ici_of_continuousOn ?_ (g := fun t : ℝ => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) ?_ ?_
+    · intro t ht
+      have ht0 : (0 : ℝ) < t := by linarith [Set.mem_Ioi.mp ht]
+      have hc1 : ContinuousAt (fun x : ℝ => x ^ (σ - 1)) t :=
+        continuousAt_rpow_const t (σ - 1) (Or.inl ht0.ne')
+      have hc2 : ContinuousAt (fun x : ℝ => ‖(hurwitzEvenFEPair 0).f_modif x‖) t := by
+        have hfcont : ContinuousAt (fun x : ℝ => (hurwitzEvenFEPair 0).f_modif x) t := by
+          have hfmod : (fun x : ℝ => (hurwitzEvenFEPair 0).f_modif x) =ᶠ[𝓝 t]
+              (fun x : ℝ => ((evenKernel (0 : UnitAddCircle) x : ℝ) : ℂ) - (1 : ℂ)) := by
+            filter_upwards [isOpen_Ioi.mem_nhds ht] with x hx
+            dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
+            simp only [Pi.add_apply, Set.indicator_of_mem hx,
+              Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp hx).le),
+              add_zero, sub_zero, smul_eq_mul, one_mul, mul_one, if_true]
+          have hc : ContinuousAt (fun x : ℝ => ((evenKernel (0 : UnitAddCircle) x : ℝ) : ℂ)) t :=
+            continuous_ofReal.continuousAt.comp
+              ((continuousOn_evenKernel (0 : UnitAddCircle)).continuousAt
+                (isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr (by linarith [Set.mem_Ioi.mp ht] : (0 : ℝ) < t))))
+          exact ContinuousAt.congr (hc.sub continuous_const.continuousAt) hfmod.symm
+        exact ContinuousAt.comp continuous_norm.continuousAt hfcont
+      exact (hc1.mul hc2).continuousWithinAt
+    · exact (integrableOn_exp_neg_pi_mul_rpow σ hσpos).mono_set
+        (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1))
+    · intro t ht
+      constructor
+      · exact mul_nonneg (Real.rpow_nonneg (by linarith [Set.mem_Ioi.mp ht] : (0 : ℝ) ≤ t) (σ - 1)) (norm_nonneg _)
+      · exact hpt t ht
+  -- Integrability of the comparison integrand 3*t^(σ-1/2) on (0,1]
+  have hb_rpow : MeasureTheory.IntegrableOn
+      (fun t : ℝ => 3 * t ^ (σ - 1 / 2 : ℝ)) (Set.Ioc 0 1) := by
+    have hi : IntervalIntegrable (fun t : ℝ => t ^ (σ - 1 / 2 : ℝ)) MeasureTheory.volume 0 1 :=
+      intervalIntegral.intervalIntegrable_rpow' (by linarith [hσpos])
+    have hic : IntervalIntegrable (fun t : ℝ => 3 * t ^ (σ - 1 / 2 : ℝ)) MeasureTheory.volume 0 1 :=
+      hi.const_mul 3
+    exact (intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0 : ℝ) ≤ 1)).mp hic
+  -- Integrability of the integrand on (0,1) (dominated by 3*t^(σ-1/2) via h01_pt)
+  have hf_int_Ioo : MeasureTheory.IntegrableOn
+      (fun t : ℝ => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖) (Set.Ioo 0 1) := by
+    have hcon : ContinuousOn
+        (fun t : ℝ => (hurwitzEvenFEPair 0).f_modif t) (Set.Ioo 0 1) := by
+      intro t ht
+      have ht0 : 0 < t := (Set.mem_Ioo.mp ht).1
+      have ht1 : t < 1 := (Set.mem_Ioo.mp ht).2
+      have hc1 : ContinuousAt (fun x : ℝ => ((evenKernel (0 : UnitAddCircle) x : ℝ) : ℂ)) t :=
+        continuous_ofReal.continuousAt.comp
+          ((continuousOn_evenKernel (0 : UnitAddCircle)).continuousAt
+            (isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr ht0)))
+      have hc2 : ContinuousAt
+          (fun x : ℝ => ((x ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) : ℂ) * (1 : ℂ)) t := by
+        simpa [mul_comm] using
+          (continuous_ofReal.continuousAt.comp
+            (continuousAt_rpow_const t (-(1 / 2 : ℝ)) (Or.inl ht0.ne'))).const_mul (1 : ℂ)
+      have heq : (hurwitzEvenFEPair 0).f_modif =ᶠ[𝓝 t]
+          (fun x : ℝ => ((evenKernel (0 : UnitAddCircle) x : ℝ) : ℂ) -
+            ((x ^ (-(1 / 2 : ℝ) : ℝ) : ℝ) : ℂ) * (1 : ℂ)) := by
+        filter_upwards [isOpen_Ioo.mem_nhds ⟨ht0, ht1⟩] with x hx
+        dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
+        simp only [Pi.add_apply,
+          Set.indicator_of_notMem (Set.notMem_Ioi.mpr (Set.mem_Ioo.mp hx).2.le),
+          zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr hx), smul_eq_mul, one_mul]
+      exact ContinuousAt.continuousWithinAt (ContinuousAt.congr (hc1.sub hc2) heq.symm)
+    have hmeas : MeasureTheory.AEStronglyMeasurable
+        (fun t : ℝ => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖)
+        (MeasureTheory.volume.restrict (Set.Ioo 0 1)) := by
+      have hc : ContinuousOn
+          (fun t : ℝ => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖) (Set.Ioo 0 1) := by
+        intro t ht
+        have ht0 : 0 < t := (Set.mem_Ioo.mp ht).1
+        have hc1 : ContinuousAt (fun x : ℝ => x ^ (σ - 1)) t :=
+          continuousAt_rpow_const t (σ - 1) (Or.inl ht0.ne')
+        have hc2 : ContinuousAt (fun x : ℝ => ‖(hurwitzEvenFEPair 0).f_modif x‖) t :=
+          ContinuousAt.comp continuous_norm.continuousAt
+            (hcon.continuousAt (isOpen_Ioo.mem_nhds ht))
+        exact (hc1.mul hc2).continuousWithinAt
+      exact hc.aestronglyMeasurable measurableSet_Ioo
+    have hnonneg : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioo 0 1)), 0 ≤
+        t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ := by
+      exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioo).mpr
+        (Filter.Eventually.of_forall (fun t ht =>
+          mul_nonneg (Real.rpow_nonneg (le_of_lt (Set.mem_Ioo.mp ht).1) (σ - 1)) (norm_nonneg _)))
+    have hle : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioo 0 1)),
+        t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤ 3 * t ^ (σ - 1 / 2 : ℝ) := by
+      exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioo).mpr
+        (Filter.Eventually.of_forall (fun t ht =>
+          h01_pt t ⟨(Set.mem_Ioo.mp ht).1, (Set.mem_Ioo.mp ht).2.le⟩))
+    exact MeasureTheory.Integrable.mono_nonneg
+      (μ := MeasureTheory.volume.restrict (Set.Ioo 0 1))
+      (hb_rpow.mono_set Set.Ioo_subset_Ioc_self) hmeas hnonneg hle
+  -- Integrability of the integrand on (0,1] = (0,1) ∪ {1}
+  have hf_Ioc : MeasureTheory.IntegrableOn
+      (fun t : ℝ => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖) (Set.Ioc 0 1) := by
+    have h1 : MeasureTheory.IntegrableOn
+        (fun t : ℝ => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖)
+        (Set.Ioo 0 1 ∪ ({1} : Set ℝ)) :=
+      MeasureTheory.IntegrableOn.union hf_int_Ioo
+        (MeasureTheory.integrableOn_singleton (x := (1 : ℝ)) (hx := by simp [Real.volume_singleton]))
+    have hset : Set.Ioo 0 1 ∪ ({1} : Set ℝ) = Set.Ioc (0 : ℝ) 1 := by
+      ext t
+      simp only [Set.mem_union, Set.mem_Ioo, Set.mem_Ioc, Set.mem_singleton_iff]
+      constructor
+      · rintro (h | h)
+        · exact ⟨h.1, h.2.le⟩
+        · rw [h]; exact ⟨by norm_num, le_rfl⟩
+      · intro h
+        rcases lt_or_eq_of_le h.2 with hlt | heq
+        · exact Or.inl ⟨h.1, hlt⟩
+        · exact Or.inr heq
+    rwa [hset] at h1
   -- Bound (0,1) integral by 4
   have h01 : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤ 4 := by
     have hcalc : ∫ t in Set.Ioc (0 : ℝ) 1, 3 * t ^ (σ - 1 / 2 : ℝ) = 3 / (σ + 1 / 2) := by
@@ -1898,88 +2117,177 @@ private lemma mellin_fmodif_bound {w : ℂ} (hw : (1/4 : ℝ) ≤ w.re) :
         ← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
         integral_rpow (Or.inl (by linarith [hσpos])),
         Real.one_rpow, Real.zero_rpow (by linarith [hσpos] : σ - 1 / 2 + 1 ≠ 0),
-        sub_zero]; field_simp; ring
-    linarith [h01_pt, hcalc]
+        sub_zero]
+      ring
+    have hcomp : ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
+        ∫ t in Set.Ioc (0 : ℝ) 1, 3 * t ^ (σ - 1 / 2 : ℝ) := by
+      exact MeasureTheory.setIntegral_mono_on hf_Ioc hb_rpow measurableSet_Ioc h01_pt
+    have h4 : 3 / (σ + 1 / 2) ≤ 4 := by
+      rw [div_le_iff₀ (by linarith : (0 : ℝ) < σ + 1 / 2)]
+      nlinarith [hσge]
+    linarith [hcomp, hcalc, h4]
   -- Bound (1,∞) integral
   have h1inf : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
       3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
-    have hpt : ∀ t ∈ Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
-        3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
-      intro t ht
-      have hfmod : (hurwitzEvenFEPair 0).f_modif t =
-          ((evenKernel (0 : UnitAddCircle) t : ℝ) : ℂ) - (1 : ℂ) := by
-        unfold WeakFEPair.f_modif
-        dsimp [WeakFEPair.f_modif, hurwitzEvenFEPair, P0, a0]
-        simp only [Pi.add_apply, Set.indicator_of_mem ht,
-          Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le),
-          add_zero, sub_zero, smul_eq_mul, one_mul, mul_one]
-      rw [hfmod, Complex.norm_real, abs_of_nonneg (by positivity : 0 ≤ evenKernel (0 : UnitAddCircle) t - 1)]
-      exact mul_le_mul_of_nonneg_left (evenKernel_sub_le t (Set.mem_Ioi.mp ht)) (by positivity)
     have hmono : ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
         ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
-      have hL : MeasureTheory.IntegrableOn
-          (fun t => t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t) (Set.Ioi 1) := by
-        apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-        filter_upwards [eventually_ge_atTop 1] with t ht
-        have := hpt t ht; positivity
       have hR : MeasureTheory.IntegrableOn
           (fun t => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 1) := by
-        apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-        filter_upwards [eventually_ge_atTop 1] with t ht
-        positivity
-      exact MeasureTheory.setIntegral_mono_on measurableSet_Ioi hL hR hpt
-    have hext : ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
-        ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
-      apply MeasureTheory.setIntegral_mono_set
-        (by apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-            filter_upwards [eventually_ge_atTop 0] with t ht; positivity)
-        (by intro t ht; exact mul_nonneg (by positivity) (le_of_lt (Real.exp_pos _)))
-        (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1))
-    have hfull : ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+        exact (integrableOn_exp_neg_pi_mul_rpow σ hσpos).mono_set
+          (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1))
+      exact MeasureTheory.setIntegral_mono_on hL1 hR measurableSet_Ioi hpt
+    have htail : ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
         3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
-      -- ∫₀^∞ t^{σ-1} exp(-πt) dt = π^{-σ} Γ(σ) via integral_cpow_mul_exp_neg_mul_Ioi
-      -- 3 · π^{-σ} · Γ(σ) ≤ 3 · exp(σ^{3/2}) by gamma_over_pi_le_exp_pow
-      rw [MeasureTheory.integral_const_mul (3 : ℝ), show (3:ℝ) * _ = _ * 3 from mul_comm _ 3, ← MeasureTheory.integral_const_mul (3 : ℝ),
-        integral_cpow_mul_exp_neg_mul_Ioi (by exact_mod_cast hσpos : 0 < (σ : ℂ).re) Real.pi_pos,
-        show Complex.Gamma σ = Complex.ofReal (Real.Gamma σ) from Complex.Gamma_ofReal σ,
-        mul_comm, mul_assoc, show (3 : ℝ) * ((1 / Real.pi) ^ (σ : ℂ) * Complex.ofReal (Real.Gamma σ)).re = 3 * (1 / Real.pi) ^ σ * Real.Gamma σ from by
-          simp only [Complex.ofReal_cpow (le_of_lt Real.pi_pos), Complex.Gamma_ofReal, Complex.ofReal_re, Complex.ofReal_mul],
-        show Real.pi ^ (-σ) = (1 / Real.pi) ^ σ from by rw [Real.rpow_neg (by norm_num : 0 ≤ Real.pi)]; field_simp]
-      exact mul_le_mul_of_nonneg_left (gamma_over_pi_le_exp_pow hσge) (by norm_num : (0:ℝ) ≤ 3)
-    linarith [hmono, hext, hfull]
+      by_cases hσ1 : 1 ≤ σ
+      · -- σ ≥ 1: tail ≤ full integral = π^{-σ}·Γ(σ) ≤ exp(σ^{3/2})
+        have hle0 : ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+            ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
+          have hR0 : MeasureTheory.IntegrableOn
+              (fun t => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 0) :=
+            integrableOn_exp_neg_pi_mul_rpow σ hσpos
+          have hnonneg : 0 ≤ᵐ[MeasureTheory.volume.restrict (Set.Ioi 0)]
+              (fun t => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) := by
+            exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+              (Filter.Eventually.of_forall (fun t ht =>
+                mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3)
+                  (Real.rpow_nonneg (le_of_lt (Set.mem_Ioi.mp ht)) (σ - 1)))
+                  (le_of_lt (Real.exp_pos _))))
+          exact MeasureTheory.setIntegral_mono_set hR0 hnonneg
+            (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1)).eventuallyLE
+        have hfull0 : ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+            3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+          have hid : ∫ t : ℝ in Set.Ioi 0, t ^ (σ - 1) * Real.exp (-Real.pi * t) =
+              (1 / Real.pi) ^ σ * Real.Gamma σ := by
+            have h := Real.integral_rpow_mul_exp_neg_mul_Ioi hσpos Real.pi_pos
+            simpa [neg_mul, mul_neg] using h
+          have hI : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * Real.exp (-Real.pi * t) =
+              (1 / Real.pi) ^ σ * Real.Gamma σ := by
+            rw [hid]
+          have hfull0' : ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) =
+              3 * ((1 / Real.pi) ^ σ * Real.Gamma σ) := by
+            calc
+              ∫ t in Set.Ioi (0 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)
+                  = ∫ t in Set.Ioi (0 : ℝ), (3 : ℝ) * (t ^ (σ - 1) * Real.exp (-Real.pi * t)) := by
+                    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+                    intro t ht
+                    ring
+              _ = 3 * ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * Real.exp (-Real.pi * t) := by
+                    rw [MeasureTheory.integral_const_mul (3 : ℝ)]
+              _ = 3 * ((1 / Real.pi) ^ σ * Real.Gamma σ) := by
+                    rw [hI]
+          have hg : (1 / Real.pi) ^ σ * Real.Gamma σ ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := by
+            rw [one_div, Real.inv_rpow (le_of_lt Real.pi_pos) σ]
+            rw [mul_comm, ← div_eq_mul_inv]
+            exact gamma_over_pi_le_exp_pow hσ1
+          rw [hfull0']
+          exact mul_le_mul_of_nonneg_left hg (by norm_num : (0:ℝ) ≤ 3)
+        exact hle0.trans hfull0
+      · -- σ < 1 (and σ ≥ 1/4): t^(σ-1) ≤ 1 for t ≥ 1, so ∫₁^∞ ≤ ∫₁^∞ 3e^{-πt} ≤ 3/π ≤ 3
+        have hσle1 : σ ≤ 1 := le_of_not_ge hσ1
+        have hpow : ∀ t ∈ Set.Ioi (1 : ℝ), t ^ (σ - 1) ≤ 1 := by
+          intro t ht
+          have ht1 : (1 : ℝ) ≤ t := (Set.mem_Ioi.mp ht).le
+          have hσm1 : σ - 1 ≤ 0 := by linarith
+          exact (Real.rpow_le_rpow_of_exponent_le ht1 hσm1).trans_eq (Real.rpow_zero t)
+        have hR1 : MeasureTheory.IntegrableOn
+            (fun t => 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t)) (Set.Ioi 1) :=
+          (integrableOn_exp_neg_pi_mul_rpow σ hσpos).mono_set
+            (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1))
+        have hg0 : MeasureTheory.IntegrableOn
+            (fun t => 3 * Real.exp (-Real.pi * t)) (Set.Ioi 0) := by
+          have h := integrableOn_exp_neg_pi_mul_rpow 1 (by norm_num)
+          simpa [Real.rpow_zero, mul_assoc] using h
+        have hgint : MeasureTheory.IntegrableOn
+            (fun t => 3 * Real.exp (-Real.pi * t)) (Set.Ioi 1) :=
+          hg0.mono_set (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1))
+        have hle1 : ∫ t in Set.Ioi (1 : ℝ), 3 * t ^ (σ - 1) * Real.exp (-Real.pi * t) ≤
+            ∫ t in Set.Ioi (1 : ℝ), 3 * Real.exp (-Real.pi * t) := by
+          exact MeasureTheory.setIntegral_mono_on hR1 hgint measurableSet_Ioi
+            (fun t ht => by
+              have h1 := mul_le_mul_of_nonneg_left (hpow t ht) ((Real.exp_pos (-Real.pi * t)).le)
+              have h2 := mul_le_mul_of_nonneg_left h1 (by norm_num : (0:ℝ) ≤ 3)
+              simpa [mul_assoc, mul_comm, mul_left_comm] using h2)
+        have hle2 : ∫ t in Set.Ioi (1 : ℝ), 3 * Real.exp (-Real.pi * t) ≤ 3 := by
+          have h01' : ∫ t in Set.Ioi (1 : ℝ), 3 * Real.exp (-Real.pi * t) ≤
+              ∫ t in Set.Ioi (0 : ℝ), 3 * Real.exp (-Real.pi * t) := by
+            have hnonneg : 0 ≤ᵐ[MeasureTheory.volume.restrict (Set.Ioi 0)]
+                (fun t => 3 * Real.exp (-Real.pi * t)) := by
+              exact (MeasureTheory.ae_restrict_iff' measurableSet_Ioi).mpr
+                (Filter.Eventually.of_forall (fun t ht =>
+                  mul_nonneg (by norm_num : (0 : ℝ) ≤ 3) (le_of_lt (Real.exp_pos _))))
+            exact MeasureTheory.setIntegral_mono_set hg0 hnonneg
+              (Set.Ioi_subset_Ioi (by norm_num : (0 : ℝ) ≤ 1)).eventuallyLE
+          have h02 : ∫ t in Set.Ioi (0 : ℝ), 3 * Real.exp (-Real.pi * t) = 3 * (1 / Real.pi) := by
+            have hid1 : ∫ t : ℝ in Set.Ioi 0, Real.exp (-Real.pi * t) = 1 / Real.pi := by
+              have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 1) (r := Real.pi) (by norm_num) Real.pi_pos
+              simpa [Real.rpow_zero, Real.rpow_one, Real.Gamma_one, neg_mul, mul_neg] using h
+            have hI2 : ∫ t in Set.Ioi (0 : ℝ), Real.exp (-Real.pi * t) = 1 / Real.pi := by
+              rw [hid1]
+            calc
+              ∫ t in Set.Ioi (0 : ℝ), 3 * Real.exp (-Real.pi * t)
+                  = ∫ t in Set.Ioi (0 : ℝ), (3 : ℝ) * Real.exp (-Real.pi * t) := by
+                    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+                    intro t ht
+                    ring
+              _ = 3 * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-Real.pi * t) := by
+                    rw [MeasureTheory.integral_const_mul (3 : ℝ)]
+              _ = 3 * (1 / Real.pi) := by
+                    rw [hI2]
+          have h23 : 3 * (1 / Real.pi) ≤ 3 := by
+            rw [show 3 * (1 / Real.pi) = 3 / Real.pi by ring]
+            rw [div_le_iff₀ (by positivity : (0 : ℝ) < Real.pi)]
+            nlinarith [Real.pi_gt_three]
+          exact h01'.trans (h02.trans_le h23)
+        have hle3 : 3 ≤ 3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+          have h1 : (1 : ℝ) ≤ Real.exp (σ ^ (3 / 2 : ℝ)) :=
+            (Real.one_le_exp_iff).2 (Real.rpow_nonneg (le_of_lt hσpos) (3 / 2))
+          simpa using mul_le_mul_of_nonneg_left h1 (by norm_num : (0:ℝ) ≤ 3)
+        exact (hle1.trans hle2).trans hle3
+    linarith [hmono, htail]
   -- Combine using integral additivity: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1
   have htotal : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
       4 + 3 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
     -- Split: Ioi 0 ⊆ Ioc 0 1 ∪ Ioi 1 (up to measure-zero {0}), so
     -- ∫_Ioi 0 ≤ ∫_{Ioc 0 1} + ∫_{Ioi 1}
     have hsub : Set.Ioi (0 : ℝ) ⊆ (Set.Ioc (0 : ℝ) 1 : Set ℝ) ∪ Set.Ioi (1 : ℝ) := by
-      intro t ht; simp only [Set.mem_union, Set.mem_Ioi, Set.mem_Ioc] at *; linarith
+      intro t ht
+      by_cases hle : t ≤ 1
+      · exact Or.inl ⟨ht, hle⟩
+      · exact Or.inr (lt_of_not_ge hle)
     have hdisj : Disjoint (Set.Ioc (0 : ℝ) 1 : Set ℝ) (Set.Ioi (1 : ℝ)) := Set.Ioc_disjoint_Ioi le_rfl
     have hsplit : ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ≤
-        ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ +
-        ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ := by
-      have hfunc : ∀ t, 0 ≤ t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ :=
-        fun t => mul_nonneg (by positivity) (norm_nonneg _)
-      have h1 := MeasureTheory.setIntegral_mono_set
-        (by apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-            filter_upwards [eventually_ge_atTop 0] with t ht; positivity) hfunc hsub
-      rw [MeasureTheory.integral_union hdisj measurableSet_Ioc measurableSet_Ioi] at h1
-      · exact h1
-      · exact IntegrableOn.mono_set
-          (by apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-              filter_upwards [eventually_ge_atTop 0] with t ht; positivity)
-          (Set.subset_union_left _ _)
-      · exact IntegrableOn.mono_set
-          (by apply MeasureTheory.integrableOn_Ici_of_continuousOn (fun t ht => by fun_prop)
-              filter_upwards [eventually_ge_atTop 0] with t ht; positivity)
-          (Set.subset_union_right _ _)
+        (∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖) +
+          ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ := by
+      have hunion := MeasureTheory.setIntegral_union hdisj measurableSet_Ioi hf_Ioc hL1
+      have hUI : (Set.Ioc (0 : ℝ) 1 : Set ℝ) ∪ Set.Ioi (1 : ℝ) = Set.Ioi (0 : ℝ) := by
+        ext t
+        simp only [Set.mem_union, Set.mem_Ioc, Set.mem_Ioi]
+        constructor
+        · rintro (h | h)
+          · exact h.1
+          · linarith
+        · intro ht
+          by_cases hle : t ≤ 1
+          · exact Or.inl ⟨ht, hle⟩
+          · exact Or.inr (by linarith)
+      rw [hUI] at hunion
+      rw [show (∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ∂MeasureTheory.volume) =
+            ∫ t in Set.Ioc (0 : ℝ) 1, t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ from rfl,
+        show (∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ∂MeasureTheory.volume) =
+            ∫ t in Set.Ioi (1 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ from rfl,
+        show (∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ ∂MeasureTheory.volume) =
+            ∫ t in Set.Ioi (0 : ℝ), t ^ (σ - 1) * ‖(hurwitzEvenFEPair 0).f_modif t‖ from rfl] at hunion
+      exact le_of_eq hunion
     linarith [h01, h1inf]
   have hexp3 : (3 : ℝ) * Real.exp (σ ^ (3 / 2 : ℝ)) ≤
       10 * Real.exp (σ ^ (3 / 2 : ℝ)) :=
     mul_le_mul_of_nonneg_right (by norm_num : (3:ℝ) ≤ 10) (le_of_lt (Real.exp_pos _))
-  have hexp4 : (4 : ℝ) ≤ 4 * Real.exp (σ ^ (3 / 2 : ℝ)) :=
-    mul_le_mul_of_nonneg_left (le_of_lt (Real.exp_pos _)) (by norm_num : (0:ℝ) ≤ 4)
-  linarith [hle, htotal, hexp4, hexp3]
+  have hexp4 : (4 : ℝ) ≤ 4 * Real.exp (σ ^ (3 / 2 : ℝ)) := by
+    have h1 : (1 : ℝ) ≤ Real.exp (σ ^ (3 / 2 : ℝ)) := (Real.one_le_exp_iff).2 (by positivity)
+    simpa using mul_le_mul_of_nonneg_left h1 (by norm_num : (0:ℝ) ≤ 4)
+  have hnorm : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ = ‖mellin (hurwitzEvenFEPair 0).f_modif w‖ := by
+    rw [hΛeq]
+  linarith [hle, htotal, hexp4, hexp3, hnorm]
 
 /-- Order of completedRiemannZeta₀ is at most 3/2.
 Follows from `mellin_fmodif_bound` (Mellin integral bound for the theta kernel)
@@ -2008,16 +2316,15 @@ theorem orderSet_completedRiemannZeta₀ :
       linarith [Complex.re_le_norm z]
     have hM : completedRiemannZeta₀ z = ((hurwitzEvenFEPair 0).Λ₀ w) / 2 := by
       simp [hw, completedRiemannZeta₀, completedHurwitzZetaEven₀, WeakFEPair.Λ₀]
-    have hpwle : w.re ^ (3/2) ≤ (‖z‖ / 2) ^ (3/2) := by gcongr
-    have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3/2)) :=
+    have hpwle : w.re ^ (3 / 2 : ℝ) ≤ (‖z‖ / 2) ^ (3 / 2 : ℝ) := by gcongr
+    have hexp_le : Real.exp (w.re ^ (3 / 2 : ℝ)) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
       (Real.exp_le_exp.mpr (hpwle.trans (by gcongr; nlinarith [norm_nonneg z])))
     rw [hM, Complex.norm_div]
-    have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
-        7 * Real.exp (‖z‖ ^ (3/2)) := by
-      simp only [Complex.norm_ofNat]
-      have hb1 := hb
-      have hle1 := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
-      linarith
+    rw [Complex.norm_two]
+    have hb' : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ ≤
+        14 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
+      hb.trans (mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14))
+    linarith [hb']
   · -- Case Re(z) < 1/2: use functional equation to reflect to Re(1-z) ≥ 1/2
     have hFE : completedRiemannZeta₀ z = completedRiemannZeta₀ (1 - z) :=
       (completedRiemannZeta₀_one_sub z).symm
@@ -2038,17 +2345,16 @@ theorem orderSet_completedRiemannZeta₀ :
         have h1 : (1 : ℝ) / 2 ≤ ‖z‖ / 2 := by linarith [hz4]
         have h2 : -z.re / 2 ≤ ‖z‖ / 2 := by linarith [Complex.re_le_norm (-z), norm_neg z, Complex.neg_re z]
         linarith
-      have hpwle : w.re ^ (3/2) ≤ ‖z‖ ^ (3/2) := by
+      have hpwle : w.re ^ (3 / 2 : ℝ) ≤ ‖z‖ ^ (3 / 2 : ℝ) := by
         gcongr
-      have hexp_le : Real.exp (w.re ^ (3/2)) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
+      have hexp_le : Real.exp (w.re ^ (3 / 2 : ℝ)) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
         Real.exp_le_exp.mpr hpwle
       rw [hM, Complex.norm_div]
-      have h1 : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ / ‖(2 : ℂ)‖ ≤
-          7 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
-        simp only [Complex.norm_ofNat]
-        have hb1 := hb
-        have hle1 := mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0:ℝ) ≤ 14)
-        linarith
+      rw [Complex.norm_two]
+      have hb' : ‖(hurwitzEvenFEPair 0).Λ₀ w‖ ≤
+          14 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
+        hb.trans (mul_le_mul_of_nonneg_left hexp_le (by norm_num : (0 : ℝ) ≤ 14))
+      linarith [hb']
     rw [hFE]; exact hkey
 
 /-- **The completed zeta has order at most 2.**
