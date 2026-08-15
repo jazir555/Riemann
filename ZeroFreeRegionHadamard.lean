@@ -3165,16 +3165,16 @@ theorem differentiable_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n 
   have hm : MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Set.univ : Set ℂ) :=
     multipliableLocallyUniformlyOn_primaryFactor hane p hs htend
   have htend' : TendstoLocallyUniformlyOn
-      (fun N : ℕ => fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n))
+      (fun (N : Finset ℕ) => fun z : ℂ => ∏ n ∈ N, primaryFactor p (z / a n))
       (fun z => canonicalProductNat p a z) atTop (Set.univ : Set ℂ) := by
     simpa [canonicalProductNat] using
       (hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn.mp hm.hasProdLocallyUniformlyOn)
   have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ
-      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) (Set.univ : Set ℂ) := by
-    refine eventually_of_forall (fun N => ?_)
+      (fun z : ℂ => ∏ n ∈ N, primaryFactor p (z / a n)) (Set.univ : Set ℂ) := by
+    filter_upwards [eventually_ge_atTop (∅ : Finset ℕ)] with N hN
     refine DifferentiableOn.fun_finsetProd ?_
     intro n hn
-    fun_prop
+    exact (differentiable_primaryFactor_scaled p (hane n)).differentiableOn
   have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) (Set.univ : Set ℂ) :=
     htend'.differentiableOn hF isOpen_univ
   exact differentiableOn_univ.mp hd
@@ -3308,3 +3308,148 @@ theorem logDeriv_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
     hlogsum
     ((multipliableLocallyUniformlyOn_primaryFactor hane p hs2 htend).mono (by intro x hx; trivial))
     (canonicalProductNat_ne_zero hane p hzane hs2 htend)
+
+/-! ## The holomorphic logarithm and Weierstrass factorization -/
+
+/-- An entire function without zeros is the exponential of an entire function. -/
+theorem exists_entire_log {f : ℂ → ℂ} (hf : Differentiable ℂ f) (h0 : f 0 ≠ 0)
+    (hne : ∀ z, f z ≠ 0) : ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ ∀ z, f z = Complex.exp (g z) := by
+  have hφ : Differentiable ℂ (fun z => deriv f z / f z) :=
+    Differentiable.div hf.deriv hf hne
+  rcases hφ.isExactOn_univ with ⟨η, hη⟩
+  let g : ℂ → ℂ := fun z => η z - η 0 + Complex.log (f 0)
+  have hηd : Differentiable ℂ η := fun z => (hη z trivial).differentiableAt
+  have hg_diff : Differentiable ℂ g := by
+    exact (hηd.sub (differentiable_const (η 0))).add (differentiable_const (Complex.log (f 0)))
+  have hgval : ∀ z, deriv g z = deriv f z / f z := by
+    intro z
+    have hηz := (hη z trivial).deriv
+    have h1 : deriv (fun x => η x - η 0) z = deriv η z := by
+      rw [deriv_sub (hηd z) (differentiableAt_const (η 0))]
+      rw [deriv_const z (η 0)]
+      ring
+    have h2 : deriv (fun x => (η x - η 0) + Complex.log (f 0)) z = deriv (fun x => η x - η 0) z := by
+      change deriv ((fun x => η x - η 0) + (fun x => Complex.log (f 0))) z = deriv (fun x => η x - η 0) z
+      rw [deriv_add (by exact (hηd.sub (differentiable_const (η 0))).differentiableAt)
+        (differentiableAt_const (Complex.log (f 0)))]
+      rw [deriv_const z (Complex.log (f 0))]
+      ring
+    dsimp [g]
+    rw [h2, h1, hηz]
+  have hhd : Differentiable ℂ (fun z => f z * Complex.exp (-g z)) := by
+    apply Differentiable.mul hf
+    exact Differentiable.comp Complex.differentiable_exp hg_diff.neg
+  have hderiv0 : ∀ z, deriv (fun x => f x * Complex.exp (-g x)) z = 0 := by
+    intro z
+    have hg' : HasDerivAt g (deriv g z) z := (hg_diff z).hasDerivAt
+    have hneg : HasDerivAt (fun x => -g x) (-deriv g z) z := hg'.neg
+    have hexp' : HasDerivAt (fun x => Complex.exp (-g x)) (Complex.exp (-g z) * (-deriv g z)) z :=
+      HasDerivAt.comp z (Complex.hasDerivAt_exp (-g z)) hneg
+    have hexpd : deriv (fun x => Complex.exp (-g x)) z = Complex.exp (-g z) * (-deriv g z) :=
+      hexp'.deriv
+    rw [show deriv (fun x => f x * Complex.exp (-g x)) z =
+        deriv (f * (fun x => Complex.exp (-g x))) z from rfl]
+    rw [deriv_mul hf.differentiableAt (by
+      exact (Differentiable.comp Complex.differentiable_exp hg_diff.neg).differentiableAt)]
+    rw [hexpd, hgval z]
+    field_simp [hne z]
+    ring
+  have hc : ∀ z, f z * Complex.exp (-g z) = f 0 * Complex.exp (-g 0) :=
+    fun z => is_const_of_deriv_eq_zero hhd hderiv0 z 0
+  have h01 : f 0 * Complex.exp (-g 0) = 1 := by
+    have hg0 : g 0 = Complex.log (f 0) := by
+      dsimp [g]
+      ring
+    rw [hg0, Complex.exp_neg, Complex.exp_log h0]
+    field_simp
+  have hmain : ∀ z, f z * Complex.exp (-g z) = 1 := by
+    intro z
+    exact (hc z).trans h01
+  refine ⟨g, hg_diff, ?_⟩
+  intro z
+  have hz := hmain z
+  rw [Complex.exp_neg] at hz
+  simpa using (mul_inv_eq_iff_eq_mul₀ (Complex.exp_ne_zero (g z))).mp hz
+
+/-! ## The genus-1 log-derivative identity -/
+
+/-- For `z` not a zero, the genus-1 logarithmic derivatives are summable. -/
+lemma summable_logDeriv_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) {z : ℂ}
+    (hzane : ∀ n, z ≠ a n) (hs2 : Summable fun n : ℕ => (‖a n‖ ^ 2)⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    Summable (fun n => logDeriv (fun x => primaryFactor 1 (x / a n)) z) := by
+  have heq : ∀ n, logDeriv (fun x => primaryFactor 1 (x / a n)) z = 1 / (z - a n) + 1 / a n := by
+    intro n
+    exact logDeriv_primaryFactor_one_scaled z (a n) (hane n) (hzane n)
+  rw [show (fun n => logDeriv (fun x => primaryFactor 1 (x / a n)) z) = fun n => 1 / (z - a n) + 1 / a n from funext heq]
+  -- the tail bound: ‖1/(z-aₙ) + 1/aₙ‖ ≤ 2‖z‖·(1/‖aₙ‖²) for ‖aₙ‖ ≥ 2(‖z‖+1):
+  rcases eventually_atTop.1 (htend.eventually_ge_atTop (2 * (‖z‖ + 1))) with ⟨N, hN⟩
+  have htail : Summable (fun n : ℕ => ‖1 / (z - a (n + N)) + 1 / a (n + N)‖) := by
+    refine Summable.of_nonneg_of_le
+      (f := fun n => 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2)) ?_ ?_ ?_
+    · intro n
+      positivity
+    · intro n
+      have ha : 2 * (‖z‖ + 1) ≤ ‖a (n + N)‖ := hN (n + N) (by omega)
+      have hanz : (0 : ℝ) < ‖a (n + N)‖ := by
+        have hpos : (0 : ℝ) < 2 * (‖z‖ + 1) := by positivity
+        linarith
+      have hnorm : ‖1 / (z - a (n + N)) + 1 / a (n + N)‖ ≤ 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
+        -- 1/(z-a) + 1/a = z/(a·(z-a)):
+        have hid : 1 / (z - a (n + N)) + 1 / a (n + N) = z / (a (n + N) * (z - a (n + N))) := by
+          field_simp [hane (n + N), sub_ne_zero.mpr (hzane (n + N))]
+        rw [hid]
+        -- ‖z/(a·(z-a))‖ ≤ ‖z‖/(‖a‖·‖z-a‖) ≤ ‖z‖/(‖a‖·(‖a‖-‖z‖)) ≤ 2‖z‖/‖a‖²:
+        have hzma : ‖z - a (n + N)‖ = ‖a (n + N) - z‖ := by
+          rw [← norm_neg]
+          simp
+        have hza : ‖a (n + N)‖ - ‖z‖ ≤ ‖a (n + N) - z‖ := by
+          have h₁ : ‖(a (n + N) - z) + z‖ ≤ ‖a (n + N) - z‖ + ‖z‖ := norm_add_le _ _
+          have h₂ : ‖(a (n + N) - z) + z‖ = ‖a (n + N)‖ := by
+            rw [show (a (n + N) - z) + z = a (n + N) by ring]
+          rw [h₂] at h₁
+          linarith
+        have hden : (0 : ℝ) < ‖a (n + N)‖ * (‖a (n + N)‖ - ‖z‖) := by
+          have h₁ : (0 : ℝ) < ‖a (n + N)‖ - ‖z‖ := by
+            have : ‖z‖ + 1 ≤ ‖a (n + N)‖ := by linarith
+            linarith
+          exact mul_pos hanz h₁
+        have h₁ : ‖z / (a (n + N) * (z - a (n + N)))‖
+            ≤ ‖z‖ / (‖a (n + N)‖ * (‖a (n + N)‖ - ‖z‖)) := by
+          rw [norm_div, norm_mul]
+          rw [hzma]
+          refine div_le_div_of_nonneg_left (norm_nonneg z) hden ?_
+          exact mul_le_mul_of_nonneg_left hza (le_of_lt hanz)
+        have h₂ : ‖z‖ / (‖a (n + N)‖ * (‖a (n + N)‖ - ‖z‖)) ≤ 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
+          have h₃ : ‖a (n + N)‖ * (‖a (n + N)‖ - ‖z‖) ≥ ‖a (n + N)‖ ^ 2 / 2 := by
+            nlinarith [ha, norm_nonneg z, sq_nonneg ‖a (n + N)‖, hanz]
+          have h₄ : (0 : ℝ) < ‖a (n + N)‖ ^ 2 / 2 := by positivity
+          have h₅ : ‖z‖ / (‖a (n + N)‖ * (‖a (n + N)‖ - ‖z‖)) ≤ ‖z‖ / (‖a (n + N)‖ ^ 2 / 2) :=
+            div_le_div_of_nonneg_left (norm_nonneg z) h₄ h₃
+          have h₆ : ‖z‖ / (‖a (n + N)‖ ^ 2 / 2) = 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
+            field_simp [pow_ne_zero 2 (norm_ne_zero_iff.mpr (hane (n + N)))]
+            ring
+          exact h₅.trans_eq h₆
+      exact hnorm
+    · have hshift : Summable (fun n : ℕ => (‖a (n + N)‖ ^ 2)⁻¹) := by
+        simpa [one_div] using (summable_nat_add_iff (f := fun n : ℕ => (‖a n‖ ^ 2)⁻¹) N).mpr hs2
+      simpa [one_div, mul_assoc] using (hshift.mul_left (2 * ‖z‖))
+  have hnorm : Summable (fun n : ℕ => ‖1 / (z - a n) + 1 / a n‖) :=
+    (summable_nat_add_iff (f := fun n : ℕ => ‖1 / (z - a n) + 1 / a n‖) N).mp htail
+  exact hnorm.of_norm
+
+/-- **Logarithmic derivative of the genus-1 canonical product.** For `z` not a zero,
+`logDeriv (∏ₙ E₁(·/aₙ)) z = Σₙ (1/(z-aₙ) + 1/aₙ)`. -/
+theorem logDeriv_canonicalProductNat_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
+    (hs2 : Summable fun n : ℕ => (‖a n‖ ^ 2)⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) {z : ℂ}
+    (hzane : ∀ n, z ≠ a n) :
+    logDeriv (canonicalProductNat 1 a) z = ∑' n, (1 / (z - a n) + 1 / a n) := by
+  have hsum : Summable fun n => logDeriv (fun x => primaryFactor 1 (x / a n)) z :=
+    summable_logDeriv_genus_one hane hzane hs2 htend
+  have hmain := logDeriv_canonicalProductNat hane 1 isOpen_univ (by simp : z ∈ (Set.univ : Set ℂ)) hzane hs2 htend hsum
+  have heq : (fun n => logDeriv (fun x => primaryFactor 1 (x / a n)) z) = fun n => 1 / (z - a n) + 1 / a n := by
+    funext n
+    exact logDeriv_primaryFactor_one_scaled z (a n) (hane n) (hzane n)
+  rw [heq] at hmain
+  exact hmain
