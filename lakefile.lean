@@ -192,4 +192,4 @@ lean_lib RootScratch where
   roots := #[`ZeroFreeRegionHadamard]
   globs := #[`ZeroFreeRegionHadamard]
 
-lean_lib Check35
+

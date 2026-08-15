@@ -73,7 +73,11 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
    `-ζ'/ζ(s) = (-g'(s) + 1/s + 1/(s-1) + logDeriv(·Γℝ)(s)) - Σₙ (1/(s-aₙ) + 1/aₙ)`
    from the Hadamard hypotheses (zero enumeration `a`, `hzero`, `hord`, `hinj`,
    `hs2`, `htend`), via `logDeriv_xi_of_factorization` and
-   `neg_logDeriv_riemannZeta_eq_xi`. Still missing: constructing the zero
+   `neg_logDeriv_riemannZeta_eq_xi`. **Zero set DONE (2026-08-15)**: as a set,
+   `xiZeros_eq_riemannZetaZeros_inter_closedStrip` identifies `{z | xi z = 0}`
+   with `riemannZetaZeros ∩ {0 ≤ Re s ≤ 1}`, and
+   `tendsto_xiZeros_cofinite_cocompact` transfers the discreteness/local
+   finiteness of `riemannZetaZeros`. Still missing: constructing the zero
    enumeration `a` of `ξ` with `Σ 1/‖ρ‖² < ∞` (Jensen), which turns this into
    the concrete `h_decomp` for `riemannZeta_ne_zero_of_zeroFreeEdge`.
 3. **Digamma/Stirling vertical bounds** — **DONE**: `digamma_le_log`
@@ -118,7 +122,8 @@ What `mathlib` *does* already provide and that Route B can lean on:
 - `completedZeta_zeros_eq_nontrivialZeros` : the zero set (with multiplicity) is
   exactly `{ρ : non-trivial zero of ζ}` — **DONE** in the form
   `xi_zero_iff_riemannZeta_zero` + `riemannZeta_zero_imp_critical_strip_or_trivial`
-  (`xi` is `s(s-1)Λ₀ + 1`; multiplicities are all one), 2026-08-15,
+  + `xiZeros_eq_riemannZetaZeros_inter_closedStrip` (set equality with
+  `riemannZetaZeros` in the closed strip; `xi` is `s(s-1)Λ₀ + 1`), 2026-08-15,
 - `logDeriv_completedZeta` : the logarithmic derivative identity above,
   which instantiates the `h_decomp` / `h_analytic` hypotheses of
   `riemannZeta_ne_zero_of_zeroFreeEdge` — **DONE in parametric form**
@@ -4348,3 +4353,148 @@ theorem logDeriv_completedZeta {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
   have hbridge := neg_logDeriv_riemannZeta_eq_xi hs hs1 hΓ hζ0
   rw [hbridge, hlog]
   ring
+
+/-!
+### The zero set of `xi`
+
+The zeros of `xi` are precisely the non-trivial zeros of `ζ`, i.e. the zeros of `ζ`
+lying in the critical strip `0 < Re s < 1`.  We record this as a set equality
+(`xiZeros_eq_riemannZetaZeros_inter_closedStrip`), which transfers the discreteness
+and local-finiteness of `riemannZetaZeros` to the zero set of `xi`, and gives the
+cocompact `Tendsto` needed to enumerate the zeros (`tendsto_xiZeros_cofinite_cocompact`).
+-/
+
+/-- A zero of `xi` is a zero of `ζ`. -/
+theorem xi_zero_imp_riemannZeta_zero {z : ℂ} (hxi : xi z = 0) : riemannZeta z = 0 := by
+  by_cases hs : z = 0
+  · rw [hs, xi] at hxi
+    norm_num at hxi
+  · by_cases hs1 : z = 1
+    · rw [hs1, xi] at hxi
+      norm_num at hxi
+    · have hΛ : completedRiemannZeta z = 0 := by
+        have hxi' : z * (z - 1) * completedRiemannZeta z = 0 := by
+          rwa [xi_eq_mul_completedRiemannZeta hs hs1] at hxi
+        have hsnz : z * (z - 1) ≠ 0 := mul_ne_zero hs (sub_ne_zero.mpr hs1)
+        exact (mul_eq_zero.mp hxi').resolve_left hsnz
+      rw [riemannZeta_def_of_ne_zero hs, hΛ]
+      simp
+
+/-- `xi` does not vanish at the trivial zeros `-2(n+1)` of `ζ`. -/
+theorem xi_neg_two_mul_nat_add_one_ne_zero (n : ℕ) : xi (-2 * (n + 1)) ≠ 0 := by
+  let u : ℂ := -2 * (n + 1)
+  have hpos : (n + 1 : ℕ) ≠ 0 := by omega
+  have ht0 : u ≠ 0 := by
+    dsimp [u]
+    simpa [neg_mul] using
+      neg_ne_zero.mpr (mul_ne_zero (by norm_num : (2 : ℂ) ≠ 0) (by exact_mod_cast hpos))
+  have ht1 : u ≠ 1 := by
+    dsimp [u]
+    intro h
+    have hre : (-2 * (n + 1) : ℂ).re = 1 := congrArg Complex.re h
+    simp at hre
+    have hx : (1 : ℝ) ≤ (n + 1 : ℝ) := by exact_mod_cast (show 1 ≤ n + 1 from by omega)
+    nlinarith
+  have hΓ1 : (1 + 2 * (n + 1) : ℂ).Gammaℝ ≠ 0 := by
+    rw [Complex.Gammaℝ_def]
+    apply mul_ne_zero
+    · rw [Complex.cpow_def_of_ne_zero (by exact_mod_cast Real.pi_ne_zero)]
+      exact Complex.exp_ne_zero _
+    · apply Complex.Gamma_ne_zero
+      intro m hm
+      have hre : ((1 + 2 * (n + 1) : ℂ) / 2).re = (-(m : ℂ)).re := congrArg Complex.re hm
+      simp at hre
+      have hx : (1 : ℝ) ≤ (n + 1 : ℝ) := by exact_mod_cast (show 1 ≤ n + 1 from by omega)
+      have hm0 : (0 : ℝ) ≤ (m : ℝ) := by exact_mod_cast (Nat.zero_le m)
+      nlinarith
+  have hζ1 : riemannZeta (1 + 2 * (n + 1)) ≠ 0 := by
+    apply riemannZeta_ne_zero_of_one_le_re
+    simp
+    have hx : (1 : ℝ) ≤ (n + 1 : ℝ) := by exact_mod_cast (show 1 ≤ n + 1 from by omega)
+    nlinarith
+  have hΛ1 : completedRiemannZeta (1 + 2 * (n + 1)) ≠ 0 := by
+    intro hΛ
+    have hdef := riemannZeta_def_of_ne_zero (s := 1 + 2 * (n + 1)) (by
+      intro h
+      have hre : (1 + 2 * (n + 1) : ℂ).re = 0 := congrArg Complex.re h
+      simp at hre
+      have hx : (1 : ℝ) ≤ (n + 1 : ℝ) := by exact_mod_cast (show 1 ≤ n + 1 from by omega)
+      nlinarith [hx])
+    rw [hΛ] at hdef
+    exact hζ1 (by rw [hdef]; simp)
+  have hFE : completedRiemannZeta u = completedRiemannZeta (1 - u) := by
+    simpa [u, sub_sub_cancel] using completedRiemannZeta_one_sub (1 - u)
+  have h1t : 1 - u = 1 + 2 * (n + 1) := by
+    dsimp [u]
+    ring
+  have hxi' : xi u = u * (u - 1) * completedRiemannZeta u := xi_eq_mul_completedRiemannZeta ht0 ht1
+  intro h
+  have hxi0 : u * (u - 1) * completedRiemannZeta u = 0 := by rwa [hxi'] at h
+  rw [hFE, h1t] at hxi0
+  exact (mul_eq_zero.mp hxi0).elim
+    (fun h1 => (mul_eq_zero.mp h1).elim (fun h2 => False.elim (ht0 h2))
+      (fun h2 => False.elim (ht1 (sub_eq_zero.mp h2))))
+    hΛ1
+
+/-- A zero of `xi` lies in the critical strip: `0 < Re z`. -/
+theorem xi_zero_imp_zero_lt_re {z : ℂ} (hxi : xi z = 0) : 0 < z.re := by
+  have hζ := xi_zero_imp_riemannZeta_zero hxi
+  rcases riemannZeta_zero_imp_critical_strip_or_trivial hζ with hre | ⟨n, hn⟩
+  · exact hre
+  · rw [hn] at hxi
+    exact False.elim (xi_neg_two_mul_nat_add_one_ne_zero n hxi)
+
+/-- The zero set of `xi` equals the zeros of `ζ` in the closed strip `0 ≤ Re s ≤ 1`
+(the boundary is not attained by any zero). -/
+theorem xiZeros_eq_riemannZetaZeros_inter_closedStrip :
+    {z : ℂ | xi z = 0} = riemannZetaZeros ∩ {z : ℂ | 0 ≤ z.re ∧ z.re ≤ 1} := by
+  ext z
+  constructor
+  · intro hz
+    have hζ := xi_zero_imp_riemannZeta_zero hz
+    have hre0 : 0 < z.re := xi_zero_imp_zero_lt_re hz
+    have hre1 : z.re < 1 := by
+      by_contra h
+      exact (riemannZeta_ne_zero_of_one_le_re (s := z) (le_of_not_gt h)) hζ
+    exact ⟨mem_riemannZetaZeros.mpr hζ, ⟨le_of_lt hre0, le_of_lt hre1⟩⟩
+  · intro hz
+    rcases hz with ⟨hζmem, hstrip⟩
+    have hζ : riemannZeta z = 0 := mem_riemannZetaZeros.mp hζmem
+    have hre0 : 0 < z.re := by
+      rcases riemannZeta_zero_imp_critical_strip_or_trivial hζ with hre | ⟨n, hn⟩
+      · exact hre
+      · exfalso
+        have hzre : z.re ≤ -2 := by
+          rw [hn]
+          simp
+        nlinarith [hstrip.1, hzre]
+    have hΓ : ∀ n : ℕ, z / 2 ≠ -(n : ℂ) := by
+      intro n hn
+      have hre : (z / 2).re = (-(n : ℂ)).re := congrArg Complex.re hn
+      simp at hre
+      linarith
+    exact (xi_zero_iff_riemannZeta_zero hΓ).mpr hζ
+
+/-- The zero set of `xi` is closed. -/
+theorem isClosed_xiZeros : IsClosed {z : ℂ | xi z = 0} := by
+  rw [xiZeros_eq_riemannZetaZeros_inter_closedStrip]
+  exact isClosed_riemannZetaZeros.inter (isClosed_Icc.preimage continuous_re)
+
+/-- The zero set of `xi` is discrete. -/
+theorem isDiscrete_xiZeros : IsDiscrete {z : ℂ | xi z = 0} := by
+  rw [xiZeros_eq_riemannZetaZeros_inter_closedStrip]
+  exact isDiscrete_riemannZetaZeros.mono Set.inter_subset_left
+
+/-- Any compact subset of `ℂ` contains only finitely many zeros of `xi`. -/
+theorem IsCompact.inter_xiZeros_finite {S : Set ℂ} (hS : IsCompact S) :
+    (S ∩ {z : ℂ | xi z = 0}).Finite := by
+  have hsub : S ∩ {z : ℂ | xi z = 0} ⊆ S ∩ riemannZetaZeros := by
+    intro z hz
+    exact ⟨hz.1, mem_riemannZetaZeros.mpr (xi_zero_imp_riemannZeta_zero hz.2)⟩
+  exact (hS.inter_riemannZetaZeros_finite).subset hsub
+
+/-- The zeros of `xi` escape to infinity: the inclusion `xiZeros → ℂ` is
+cofinite-to-cocompact, so the zeros can be enumerated. -/
+theorem tendsto_xiZeros_cofinite_cocompact :
+    Tendsto ((↑) : {z : ℂ | xi z = 0} → ℂ) cofinite (cocompact ℂ) :=
+  isClosed_xiZeros.tendsto_coe_cofinite_of_isDiscrete isDiscrete_xiZeros
