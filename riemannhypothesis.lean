@@ -11523,6 +11523,38 @@ theorem xiShiftedFirstLaguerreCoefficient_pos_of_blocks
     _ ≤ ∑' n : ℕ, B.block n r := hfirst
     _ = xiShiftedFirstLaguerreCoefficient r := (B.representation r hr).symm
 
+/-- A finite/cofinite version of the block target: low blocks and the
+    oscillatory tail may be proved by different methods. -/
+structure TailFirstLaguerreSplitBlockLeaf where
+  cutoff : ℕ
+  block : ℕ → ℝ → ℝ
+  finite_nonneg :
+    ∀ n : ℕ, n < cutoff → ∀ r : ℝ, 10 < |r| → 0 ≤ block n r
+  tail_nonneg :
+    ∀ n : ℕ, cutoff ≤ n → ∀ r : ℝ, 10 < |r| → 0 ≤ block n r
+  first_block_pos :
+    ∀ r : ℝ, 10 < |r| → 0 < block 0 r
+  summable :
+    ∀ r : ℝ, 10 < |r| → Summable (fun n : ℕ => block n r)
+  representation :
+    ∀ r : ℝ,
+      10 < |r| →
+      xiShiftedFirstLaguerreCoefficient r = ∑' n : ℕ, block n r
+
+/-- Assemble separately verified finite blocks and an analytically controlled
+    cofinite tail into the uniform phase-aligned block interface. -/
+noncomputable def TailFirstLaguerreSplitBlockLeaf.toBlocks
+    (B : TailFirstLaguerreSplitBlockLeaf) : TailFirstLaguerreBlockLeaf where
+  block := B.block
+  block_nonneg := by
+    intro n r hr
+    by_cases hn : n < B.cutoff
+    · exact B.finite_nonneg n hn r hr
+    · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r hr
+  first_block_pos := B.first_block_pos
+  summable := B.summable
+  representation := B.representation
+
 /-- The vertical modulus square, reparameterized by squared height. -/
 noncomputable def xiShiftedSquaredHeightProfile (r t : ℝ) : ℝ :=
   ‖xiShifted (tailVerticalPoint r (Real.sqrt t))‖ ^ 2
@@ -11570,7 +11602,7 @@ structure TailSquaredHeightCurvatureLeaf where
         (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
 
 /-- Nonnegative squared-height curvature implies the convexity interface. -/
-noncomputable def TailSquaredHeightCurvatureLeaf.toConvexity
+theorem TailSquaredHeightCurvatureLeaf.toConvexity
     (C : TailSquaredHeightCurvatureLeaf) : TailSquaredHeightConvexityLeaf where
   convex := by
     intro r hr
@@ -12148,9 +12180,10 @@ theorem riemannHypothesis_iff_challenge2Statement :
   · exact rh_from_challenge2_statement
 
 /-- **Open atomic leaf A.**  Decompose the paired-kernel representation of
-    canonical `L₁` into summable phase-aligned blocks, prove every block
-    nonnegative on `10 < |r|`, and prove one block strictly positive. -/
-noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreBlockLeaf := by
+    canonical `L₁` into summable phase-aligned blocks.  Low blocks and the
+    cofinite oscillatory tail are deliberately separated so that compact
+    certification and analytic integration-by-parts estimates can meet. -/
+noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreSplitBlockLeaf := by
   sorry
 
 /-- **Open atomic leaf B.**  Prove nonnegative second derivative of the
@@ -12162,7 +12195,7 @@ theorem tailSquaredHeightCurvature_10 : TailSquaredHeightCurvatureLeaf := by
 /-- The two atomic leaves assemble the former Laguerre-remainder obligation. -/
 theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf :=
   tailLaguerreRemainder_of_blocks_and_squaredHeight
-    tailFirstLaguerreBlocks_10 tailSquaredHeightCurvature_10.toConvexity
+    tailFirstLaguerreBlocks_10.toBlocks tailSquaredHeightCurvature_10.toConvexity
 
 /-- The Laguerre-remainder leaf specialized to integrated vertical growth. -/
 noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=
