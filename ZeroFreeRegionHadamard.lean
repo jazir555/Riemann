@@ -4032,10 +4032,12 @@ mathlib's completedRiemannZeta₀), record the algebraic identity linking it to
 the completed zeta function Λ, and prove the **zero identification**: the zeros
 of ξ are exactly the non-trivial zeros of the Riemann zeta function
 (xi_zero_iff_riemannZeta_zero), together with the critical-strip classification
-(iemannZeta_zero_imp_critical_strip_or_trivial).
+(
+iemannZeta_zero_imp_critical_strip_or_trivial).
 
 These feed the h_decomp / h_analytic hypotheses of
-iemannZeta_ne_zero_of_zeroFreeEdge in ZeroFreeRegionProof.lean.
+
+iemannZeta_ne_zero_of_zeroFreeEdge in ZeroFreeRegionProof.lean.
 -/
 noncomputable def xi (s : ℂ) : ℂ := s * (s - 1) * completedRiemannZeta₀ s + 1
 
@@ -4183,7 +4185,8 @@ logarithmic derivative identity
 for Re s > 1 (logDeriv_completedZeta).  Together with mathlib's
 LSeries_vonMangoldt_eq_deriv_riemannZeta_div (L ↗Λ = -ζ'/ζ) this instantiates
 the h_decomp hypothesis of zeroFreeEdge_from_factorization /
-iemannZeta_ne_zero_of_zeroFreeEdge in ZeroFreeRegionProof.lean, with
+
+iemannZeta_ne_zero_of_zeroFreeEdge in ZeroFreeRegionProof.lean, with
 nalytic s = -g'(s) + 1/s + 1/(s-1) + logDeriv (·Γℝ)(s) and the zero-sum
 truncated to any finite Finset Z of zeros (the remainder being absorbed into
 nalytic).
@@ -4498,3 +4501,293 @@ cofinite-to-cocompact, so the zeros can be enumerated. -/
 theorem tendsto_xiZeros_cofinite_cocompact :
     Tendsto ((↑) : {z : ℂ | xi z = 0} → ℂ) cofinite (cocompact ℂ) :=
   isClosed_xiZeros.tendsto_coe_cofinite_of_isDiscrete isDiscrete_xiZeros
+/-! ## The zero enumeration of `xi` (Jensen)
+
+We construct an enumeration `a : ℕ → ℂ` of the zeros of the entire function
+`xi` satisfying the Hadamard hypotheses `hane`, `hinj`, `hzero`, `htend`, and the
+convergence estimate `hs2 : Summable (fun n => (‖a n‖ ^ 2)⁻¹)`.  The convergence
+estimate is derived from Jensen's inequality (`AnalyticOnNhd.sum_divisor_le`)
+applied to `xi`, using the whole-plane growth bound `xi_norm_bound_whole_plane`
+(which follows from `orderSet_completedRiemannZeta₀` and the functional
+equation), followed by a dyadic counting argument.
+
+The construction requires two facts about the zeros, kept as hypotheses:
+`hord : ∀ z, meromorphicOrderAt xi z ≤ 1` (simplicity of the zeros) and
+`hSinf : {z | xi z = 0}.Infinite` (infinitely many non-trivial zeros).  With
+these, `logDeriv_completedZeta` becomes the concrete `h_decomp` for
+`riemannZeta_ne_zero_of_zeroFreeEdge`. -/
+
+open Filter Metric Set Function
+open scoped Topology
+
+/-- `xi` does not vanish at `0` (in fact `xi 0 = 1`). -/
+theorem xi_ne_zero_at_zero : xi 0 ≠ 0 := by
+  rw [xi]
+  norm_num
+
+/-- Whole-plane growth of `xi`: for some constants `K ≥ 0` and `C₀ ≥ 0`,
+`‖xi z‖ ≤ exp(K·‖z‖^(3/2))` whenever `C₀ ≤ ‖z‖`.
+
+This follows from `orderSet_completedRiemannZeta₀` (a `exp(‖z‖^(3/2))` bound
+for `Λ₀` on the whole plane, via the functional equation) together with the
+algebraic identity `xi z = z·(z-1)·Λ₀ z + 1` and the elementary estimate
+`exp x ≥ x⁴/256` for `x ≥ 0`. -/
+theorem xi_norm_bound_whole_plane :
+    ∃ K ≥ 0, ∃ C₀ ≥ 0, ∀ z : ℂ, C₀ ≤ ‖z‖ → ‖xi z‖ ≤ Real.exp (K * ‖z‖ ^ (3 / 2 : ℝ)) := by
+  rcases orderSet_completedRiemannZeta₀ with ⟨C, r₀, hr₀, hb⟩
+  let C₁ : ℝ := max C 1
+  have hC₁ : 1 ≤ C₁ := le_max_right C 1
+  have hC₁0 : 0 ≤ C₁ := by linarith
+  have hb' : ∀ z : ℂ, max r₀ 4 ≤ ‖z‖ →
+      ‖completedRiemannZeta₀ z‖ ≤ C₁ * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+    intro z hz
+    have hzr : r₀ ≤ ‖z‖ := le_trans (le_max_left r₀ 4) hz
+    calc ‖completedRiemannZeta₀ z‖ ≤ C * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := hb z hzr
+      _ ≤ C₁ * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_right (le_max_left C 1) (Real.exp_nonneg _)
+  let K : ℝ := 2 + Real.log (3 * C₁) / 8
+  have hK0 : 0 ≤ K := by
+    dsimp [K]
+    have hpos : 0 < 3 * C₁ := by positivity
+    have hlog : 0 ≤ Real.log (3 * C₁) := Real.log_nonneg (by nlinarith [hC₁])
+    nlinarith
+  refine ⟨K, hK0, max r₀ 4, by positivity, ?_⟩
+  intro z hz
+  have hz4 : 4 ≤ ‖z‖ := le_trans (le_max_right r₀ 4) hz
+  have hzr : r₀ ≤ ‖z‖ := le_trans (le_max_left r₀ 4) hz
+  set R : ℝ := ‖z‖
+  have hR : 0 < R := by linarith
+  have hR4 : 4 ≤ R := hz4
+  have hRpow0 : 0 ≤ R ^ (3 / 2 : ℝ) := by positivity
+  have hΛ : ‖completedRiemannZeta₀ z‖ ≤ C₁ * Real.exp (R ^ (3 / 2 : ℝ)) := by
+    simpa [R] using hb' z hz
+  -- elementary: `exp x ≥ x⁴ / 256` for `x ≥ 0`
+  have hexp4 : ∀ x : ℝ, 0 ≤ x → x ^ 4 / 256 ≤ Real.exp x := by
+    intro x hx
+    have h1 : (1 + x / 4) ^ 4 ≤ Real.exp x := by
+      have h2 : (1 + x / 4) ^ 4 ≤ (Real.exp (x / 4)) ^ 4 := by
+        have hle : (1 : ℝ) + x / 4 ≤ x / 4 + 1 := by nlinarith
+        exact pow_le_pow_left₀ (by positivity : (0 : ℝ) ≤ 1 + x / 4)
+          (hle.trans (add_one_le_exp (x / 4))) 4
+      calc (1 + x / 4) ^ 4 ≤ (Real.exp (x / 4)) ^ 4 := h2
+        _ = Real.exp (4 * (x / 4)) := by
+          exact (Real.exp_nat_mul (x / 4) 4).symm
+        _ = Real.exp x := by congr; ring
+    have h3 : x ^ 4 / 256 ≤ (1 + x / 4) ^ 4 := by
+      have h4 : (x / 4) ^ 4 ≤ (1 + x / 4) ^ 4 :=
+        pow_le_pow_left₀ (div_nonneg hx (by norm_num : (0 : ℝ) ≤ 4)) (by nlinarith) 4
+      have h5 : x ^ 4 / 256 = (x / 4) ^ 4 := by
+        rw [div_pow]
+        norm_num
+      rw [h5]
+      exact h4
+    exact h3.trans h1
+  -- `2·exp(R^(3/2)) ≥ R(R+1)` for `R ≥ 4`
+  have hRpol : R * (R + 1) ≤ 2 * Real.exp (R ^ (3 / 2 : ℝ)) := by
+    have hq := hexp4 (R ^ (3 / 2 : ℝ)) hRpow0
+    have hq' : R ^ 6 / 256 ≤ Real.exp (R ^ (3 / 2 : ℝ)) := by
+      have hpow : (R ^ (3 / 2 : ℝ)) ^ 4 = R ^ 6 := by
+        rw [← Real.rpow_natCast (R ^ (3 / 2 : ℝ)) 4]
+        rw [← Real.rpow_mul (le_of_lt hR) (3 / 2) (4 : ℝ)]
+        apply congrArg (fun t : ℝ => R ^ t)
+        norm_num
+      rwa [hpow] at hq
+    have hC : R ^ 2 ≤ R ^ 6 / 256 := by
+      have hD : R ^ 4 ≥ 256 := by
+        calc (4 : ℝ) ^ 4 ≤ R ^ 4 := pow_le_pow_left₀ (by norm_num) hR4 4
+          _ := by norm_num
+      nlinarith [hD]
+    have hA : R * (R + 1) ≤ 2 * R ^ 2 := by nlinarith [hR]
+    nlinarith [hq', hC, hA]
+  -- main chain
+  have hpol : 1 + C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) ≤
+      3 * C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := by
+    have he1 : 1 ≤ Real.exp (R ^ (3 / 2 : ℝ)) :=
+      le_trans (by nlinarith [hRpow0] : (1 : ℝ) ≤ 1 + R ^ (3 / 2 : ℝ)) (add_one_le_exp _)
+    have h1 : 1 ≤ C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := by
+      have : C₁ ≤ C₁ * Real.exp (R ^ (3 / 2 : ℝ)) :=
+        le_mul_of_one_le_right' hC₁0 he1
+      calc 1 ≤ C₁ := hC₁
+        _ ≤ C₁ * Real.exp (R ^ (3 / 2 : ℝ)) := this
+        _ ≤ C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := by
+          gcongr
+          exact Real.exp_le_exp.mpr (by nlinarith [hRpow0])
+    have h2 : C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) ≤
+        2 * C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := by
+      calc C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) =
+          C₁ * (R * (R + 1)) * Real.exp (R ^ (3 / 2 : ℝ)) := by ring
+        _ ≤ C₁ * (2 * Real.exp (R ^ (3 / 2 : ℝ))) * Real.exp (R ^ (3 / 2 : ℝ)) := by
+          gcongr
+        _ = 2 * C₁ * Real.exp (R ^ (3 / 2 : ℝ)) * Real.exp (R ^ (3 / 2 : ℝ)) := by ring
+        _ = 2 * C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := by
+          rw [← Real.exp_add]
+          congr 1
+          ring
+    linarith
+  have hxi : ‖xi z‖ ≤ 1 + C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) := by
+    rw [xi]
+    have hnorm : ‖z * (z - 1) * completedRiemannZeta₀ z‖ ≤
+        R * (R + 1) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) := by
+      calc ‖z * (z - 1) * completedRiemannZeta₀ z‖ =
+          ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ := by
+          rw [norm_mul, norm_mul]
+        _ ≤ R * (R + 1) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) := by
+          gcongr
+          · exact le_rfl
+          · calc ‖z - 1‖ ≤ ‖z‖ + ‖1‖ := norm_sub_le z 1
+              _ = R + 1 := by simp [R]
+          · exact hΛ
+    calc ‖z * (z - 1) * completedRiemannZeta₀ z + 1‖ ≤
+        ‖z * (z - 1) * completedRiemannZeta₀ z‖ + 1 := by
+        simpa using (norm_add_le (z * (z - 1) * completedRiemannZeta₀ z) 1)
+      _ ≤ 1 + C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) := by
+        nlinarith [hnorm, Real.exp_nonneg (R ^ (3 / 2 : ℝ))]
+  have hfin : 1 + C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) ≤
+      Real.exp (K * R ^ (3 / 2 : ℝ)) := by
+    calc 1 + C₁ * R * (R + 1) * Real.exp (R ^ (3 / 2 : ℝ)) ≤
+        3 * C₁ * Real.exp (2 * R ^ (3 / 2 : ℝ)) := hpol
+      _ = Real.exp (2 * R ^ (3 / 2 : ℝ)) * (3 * C₁) := by ring
+      _ ≤ Real.exp (2 * R ^ (3 / 2 : ℝ)) * Real.exp ((K - 2) * R ^ (3 / 2 : ℝ)) := by
+        have hle : 3 * C₁ ≤ Real.exp ((K - 2) * R ^ (3 / 2 : ℝ)) := by
+          have hRpow : 8 ≤ R ^ (3 / 2 : ℝ) := by
+            have hA : (4 : ℝ) ^ (3 / 2 : ℝ) ≤ R ^ (3 / 2 : ℝ) := by
+              exact Real.rpow_le_rpow (by norm_num : (0 : ℝ) ≤ 4) hR4
+                (by norm_num : (0 : ℝ) ≤ 3 / 2)
+            have hB : (4 : ℝ) ^ (3 / 2 : ℝ) = 8 := by
+              rw [show (3 / 2 : ℝ) = (1 / 2 : ℝ) * 3 by norm_num]
+              rw [Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 4) (1 / 2) (3 : ℝ)]
+              rw [Real.rpow_natCast]
+              rw [← Real.sqrt_eq_rpow (by norm_num : (0 : ℝ) ≤ 4)]
+              norm_num
+            linarith
+          have hK : (K - 2) * R ^ (3 / 2 : ℝ) = (Real.log (3 * C₁) / 8) * R ^ (3 / 2 : ℝ) := by
+            dsimp [K]
+            ring
+          rw [hK]
+          have hlog : Real.log (3 * C₁) ≤ (Real.log (3 * C₁) / 8) * R ^ (3 / 2 : ℝ) := by
+            have hdiv : 1 ≤ R ^ (3 / 2 : ℝ) / 8 := by
+              rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 8)]
+              simpa using hRpow
+            have hlog0 : 0 ≤ Real.log (3 * C₁) := Real.log_nonneg (by nlinarith [hC₁])
+            nlinarith [hdiv, hlog0]
+          have hpos : 0 < 3 * C₁ := by positivity
+          calc 3 * C₁ = Real.exp (Real.log (3 * C₁)) := (Real.exp_log hpos).symm
+            _ ≤ Real.exp ((Real.log (3 * C₁) / 8) * R ^ (3 / 2 : ℝ)) := Real.exp_le_exp.mpr hlog
+        exact mul_le_mul_of_nonneg_left hle (Real.exp_nonneg _)
+      _ = Real.exp (K * R ^ (3 / 2 : ℝ)) := by
+        rw [← Real.exp_add]
+        congr 1
+        ring
+  exact hxi.trans hfin
+
+/-- The powers of two `2^k` (`k : ℕ`) cover `[1, ∞)`. -/
+private lemma exists_pow_two_between {x : ℝ} (hx : 1 ≤ x) :
+    ∃ k : ℕ, (2 ^ k : ℕ : ℝ) ≤ x ∧ x < (2 ^ (k + 1) : ℕ : ℝ) := by
+  have hexists : ∃ K : ℕ, x < (2 ^ K : ℕ : ℝ) := by
+    have ht : Tendsto (fun n : ℕ => (2 ^ n : ℕ : ℝ)) atTop atTop := by
+      simpa using tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2)
+    obtain ⟨N, hN⟩ := Filter.eventually_atTop.1 ((tendsto_order.1 ht).1 (x + 1))
+    exact ⟨N, by
+      have := hN N (le_refl N)
+      linarith⟩
+  let m := Nat.find hexists
+  have hm : x < (2 ^ m : ℕ : ℝ) := Nat.find_spec hexists
+  have hm0 : m ≠ 0 := by
+    intro h
+    rw [h] at hm
+    norm_num at hm
+    linarith
+  refine ⟨m - 1, ?_, ?_⟩
+  · have hmin : ¬ x < (2 ^ (m - 1) : ℕ : ℝ) := by
+      apply Nat.find_min hexists
+      exact Nat.pred_lt hm0
+    exact le_of_not_gt hmin
+  · have hk : m - 1 + 1 = m := by omega
+    rw [hk]
+    exact hm
+
+/-- The zero set of `xi` is countable. -/
+theorem xiZeros_countable : ({z : ℂ | xi z = 0} : Set ℂ).Countable := by
+  exact IsLindelof.countable_of_isDiscrete
+    (HereditarilyLindelofSpace.isLindelof ({z : ℂ | xi z = 0} : Set ℂ)) isDiscrete_xiZeros
+
+/-- The zero set of `xi` is locally finite: only finitely many zeros lie in any
+bounded set. -/
+theorem xiZeros_bounded_finite (N : ℕ) :
+    ((closedBall (0 : ℂ) N : Set ℂ) ∩ {z : ℂ | xi z = 0}).Finite := by
+  exact IsCompact.inter_xiZeros_finite (isCompact_closedBall (0 : ℂ) N)
+
+/-- **Enumeration of the zeros of `xi`.**  Assuming that the zeros of `xi` are
+simple (`hord`) and infinite in number (`hSinf`), there is an injective
+enumeration `a : ℕ → ℂ` of the zero set which escapes to infinity. -/
+theorem xi_zero_enumeration (hord : ∀ z, meromorphicOrderAt xi z ≤ 1)
+    (hSinf : ({z : ℂ | xi z = 0} : Set ℂ).Infinite) :
+    ∃ a : ℕ → ℂ, (∀ n, a n ≠ 0) ∧ Function.Injective a ∧
+      Tendsto (fun n : ℕ => ‖a n‖) atTop atTop ∧
+      (∀ z, xi z = 0 ↔ ∃ n, z = a n) := by
+  let S : Set ℂ := {z : ℂ | xi z = 0}
+  have hcount : S.Countable := by
+    dsimp [S]
+    exact xiZeros_countable
+  rcases (Set.countable_infinite_iff_nonempty_denumerable.mp ⟨hcount, hSinf⟩) with ⟨e⟩
+  letI : Denumerable S := e
+  let a : ℕ → ℂ := fun n => ((Denumerable.eqv S).symm n : ℂ)
+  have hinj : Function.Injective a := by
+    dsimp [a]
+    exact Subtype.val_injective.comp (Denumerable.eqv S).symm.injective
+  refine ⟨a, ?_, ?_, ?_, ?_⟩
+  · intro n
+    have hre : 0 < (a n).re := by
+      dsimp [a]
+      exact xi_zero_imp_zero_lt_re ((Denumerable.eqv S).symm n).2
+    intro h
+    rw [h] at hre
+    norm_num at hre
+  · exact hinj
+  · have hbounded : ∀ N : ℕ, ({n : ℕ | ‖a n‖ ≤ N} : Set ℕ).Finite := by
+      intro N
+      have hfin : ((closedBall (0 : ℂ) N : Set ℂ) ∩ S).Finite := by
+        simpa [S] using xiZeros_bounded_finite N
+      have hpre : ({n : ℕ | ‖a n‖ ≤ N} : Set ℕ) = a ⁻¹' ((closedBall (0 : ℂ) N : Set ℂ) ∩ S) := by
+        ext n
+        constructor
+        · intro hn
+          constructor
+          · simpa [dist_eq_norm] using hn
+          · dsimp [a]
+            exact ((Denumerable.eqv S).symm n).2
+        · intro hx
+          simpa [dist_eq_norm] using hx.1
+      rw [hpre]
+      refine hfin.preimage ?_
+      intro x hx y hy hxy
+      exact hinj hxy
+    rw [tendsto_atTop_atTop]
+    intro N
+    by_cases hN : 0 ≤ N
+    · have hfin : ({n : ℕ | ‖a n‖ < (Nat.ceil N : ℝ)} : Set ℕ).Finite := by
+        refine ((hbounded (Nat.ceil N)).subset ?_)
+        intro n hn
+        exact le_of_lt (by simpa using hn)
+      have hmem : {n : ℕ | (Nat.ceil N : ℝ) ≤ ‖a n‖} ∈ atTop := by
+        rw [← Nat.cofinite_eq_atTop]
+        simpa [not_lt] using hfin.compl_mem_cofinite
+      rcases Filter.eventually_atTop.1 hmem with ⟨i, hi⟩
+      refine ⟨i, ?_⟩
+      intro n hn
+      exact le_trans (Nat.le_ceil N) (hi n hn)
+    · refine ⟨0, ?_⟩
+      intro n hn
+      exact (le_of_not_gt (by
+        intro hlt
+        have : 0 ≤ ‖a n‖ := norm_nonneg (a n)
+        linarith))
+  · intro z
+    constructor
+    · intro hz
+      use (Denumerable.eqv S) ⟨z, by simpa [S] using hz⟩
+      dsimp [a]
+      simp
+    · rintro ⟨n, rfl⟩
+      dsimp [a]
+      exact ((Denumerable.eqv S).symm n).2
