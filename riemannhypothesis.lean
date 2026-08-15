@@ -11096,7 +11096,13 @@ where `Λ₀ s = completedRiemannZeta₀ s` is the completed zeta function and
 ## Why this is the right statement
 
 The polar term `1/(z² + 1/4)` is exactly `1/shiftedS z + 1/(1 − shiftedS z)`
-(`polar_term_eq_inv_D`), and the exact identity
+(`polar_term_eq_inv_D`).  Combining this with Mathlib's
+`completedRiemannZeta_eq` first gives the simpler exact identity
+
+    correctedDifference z = -completedRiemannZeta (shiftedS z)
+
+(`correctedDifference_eq_neg_completedRiemannZeta`), so the apparent rational
+main term cancels algebraically.  Equivalently, the classical-xi identity is
 
     1/(z² + 1/4) − Λ₀(1/2 + iz) = 2·ξ_sh(z)/(z² + 1/4)
 
@@ -11114,8 +11120,10 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Replace the single `sorry` in `challenge2_certificate` with a real certificate.
-Everything below is fully proved; nothing else needs to change.
+Supply `tailVerticalGrowth_10`, the single integrated vertical-modulus-growth
+leaf.  The construction `certificate_of_tailVerticalGrowth` then produces the
+requested quantitative certificate by formal algebra, positivity, and
+conjugation symmetry.
 -/
 
 noncomputable section
@@ -11360,8 +11368,8 @@ theorem norm_xiShifted_tailVerticalPoint_abs_eq
       apply Complex.ext <;> simp [tailVerticalPoint]
     rw [hstar,
       classicalXi_symmetry.conj_symm (tailVerticalPoint r y)
-        (by simpa [tailVerticalPoint] using hgt)
-        (by simpa [tailVerticalPoint] using hlt),
+        (by simp [tailVerticalPoint]; linarith)
+        (by simp [tailVerticalPoint]; linarith),
       norm_star]
 
 /-- The integrated growth hypothesis gives the square-root modulus lower
@@ -11438,13 +11446,14 @@ noncomputable def certificate_of_tailVerticalGrowth
             ‖tailVerticalPoint z.re z.im ^ 2 + (1 / 4 : ℂ)‖ :=
       div_le_div_of_nonneg_right
         (mul_le_mul_of_nonneg_left hsqrt (by norm_num)) (norm_nonneg _)
-    rw [hz] at hscaled
     calc
       2 * Real.sqrt (tailVerticalGrowthIntegral G z.re z.im) /
-          ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤
-        2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := hscaled
-      _ = ‖correctedDifference z‖ :=
-        (norm_correctedDifference_eq_two_xi_div_D z hgt hlt hne).symm
+          ‖tailVerticalPoint z.re z.im ^ 2 + (1 / 4 : ℂ)‖ ≤
+        2 * ‖xiShifted z‖ /
+          ‖tailVerticalPoint z.re z.im ^ 2 + (1 / 4 : ℂ)‖ := hscaled
+      _ = ‖correctedDifference z‖ := by
+        rw [hz]
+        exact (norm_correctedDifference_eq_two_xi_div_D z hgt hlt hne).symm
 
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
