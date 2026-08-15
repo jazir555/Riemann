@@ -11816,6 +11816,104 @@ structure TailGeneralizedLaguerreLeaf where
       (∑' n : ℕ, coefficient n r * y ^ (2 * n)) =
         ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
 
+/-- The strengthened generalized-Laguerre route in which the coefficients are
+    the fixed derivative convolutions `xiShiftedLaguerreCoefficient`, rather
+    than an existentially chosen sequence. -/
+structure TailCanonicalGeneralizedLaguerreLeaf where
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient n r
+  coefficient_one_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < xiShiftedLaguerreCoefficient 1 r
+  series_summable :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      Summable (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
+  series_expansion :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      (∑' n : ℕ, xiShiftedLaguerreCoefficient n r * y ^ (2 * n)) =
+        ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+
+/-- Forgetting canonicity recovers the earlier generalized-Laguerre
+    interface; the `n = 1` identification is a proved algebraic theorem. -/
+noncomputable def TailCanonicalGeneralizedLaguerreLeaf.toGeneralized
+    (L : TailCanonicalGeneralizedLaguerreLeaf) : TailGeneralizedLaguerreLeaf where
+  coefficient := xiShiftedLaguerreCoefficient
+  coefficient_one_eq := xiShiftedLaguerreCoefficient_one
+  coefficient_nonneg := L.coefficient_nonneg
+  coefficient_one_pos := L.coefficient_one_pos
+  series_summable := L.series_summable
+  series_expansion := L.series_expansion
+
+/-- The only coefficient-free part of the canonical series route: convergence
+    and identification of the Taylor convolution with the vertical modulus
+    square.  This is intended to follow from analyticity, independently of all
+    positivity estimates. -/
+structure TailCanonicalLaguerreSeriesIdentityLeaf where
+  series_summable :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      Summable (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
+  series_expansion :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      (∑' n : ℕ, xiShiftedLaguerreCoefficient n r * y ^ (2 * n)) =
+        ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+
+/-- Paired blocks handle `L₁`, canonical curvature handles every `Lₙ` for
+    `n ≥ 2`, and the proved zeroth-coefficient identity handles `L₀`. -/
+theorem xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
+    0 ≤ xiShiftedLaguerreCoefficient n r := by
+  cases n with
+  | zero =>
+      rw [xiShiftedLaguerreCoefficient_zero]
+      positivity
+  | succ n =>
+      cases n with
+      | zero =>
+          rw [xiShiftedLaguerreCoefficient_one]
+          exact (xiShiftedFirstLaguerreCoefficient_pos_of_blocks B r hr).le
+      | succ n =>
+          have h := C.coefficient_nonneg n r hr
+          convert h using 1
+
+/-- The first canonical coefficient is strictly positive under the paired
+    block certificate. -/
+theorem xiShiftedLaguerreCoefficient_one_pos_of_blocks
+    (B : TailFirstLaguerreBlockLeaf) (r : ℝ) (hr : 10 < |r|) :
+    0 < xiShiftedLaguerreCoefficient 1 r := by
+  rw [xiShiftedLaguerreCoefficient_one]
+  exact xiShiftedFirstLaguerreCoefficient_pos_of_blocks B r hr
+
+/-- Novel combination used by the tail certificate: paired `L₁` blocks and
+    the canonical curvature split furnish all positivity, while a purely
+    analytic series-identity leaf furnishes convergence and expansion. -/
+theorem tailCanonicalGeneralizedLaguerre_of_blocks_curvature_series
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
+    TailCanonicalGeneralizedLaguerreLeaf where
+  coefficient_nonneg :=
+    xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature B C
+  coefficient_one_pos := xiShiftedLaguerreCoefficient_one_pos_of_blocks B
+  series_summable := S.series_summable
+  series_expansion := S.series_expansion
+
 /-- Nonnegativity of the whole Laguerre series lets us retain only its first
     nonconstant term. -/
 noncomputable def TailGeneralizedLaguerreLeaf.toQuadraticGrowth
@@ -11842,6 +11940,12 @@ noncomputable def TailGeneralizedLaguerreLeaf.toQuadraticGrowth
       _ ≤ ∑' n : ℕ, L.coefficient n r * y ^ (2 * n) := hsingle
       _ = ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 :=
         L.series_expansion r y hr hy hylt
+
+/-- The canonical coefficient expansion yields quadratic tail growth without
+    any auxiliary choice of coefficients. -/
+noncomputable def TailCanonicalGeneralizedLaguerreLeaf.toQuadraticGrowth
+    (L : TailCanonicalGeneralizedLaguerreLeaf) : TailLaguerreQuadraticLeaf :=
+  L.toGeneralized.toQuadraticGrowth
 
 /-- The full nonnegative Laguerre expansion implies integrated vertical
     growth by retaining `L₁` and integrating `2u L₁`. -/
@@ -12023,6 +12127,22 @@ noncomputable def certificate_of_tailLaguerreRemainder
 noncomputable def certificate_of_tailGeneralizedLaguerre
     (L : TailGeneralizedLaguerreLeaf) : Certificate :=
   certificate_of_tailLaguerreQuadratic L.toQuadraticGrowth
+
+/-- The same certificate route with the coefficient sequence fixed to the
+    canonical derivative convolution. -/
+noncomputable def certificate_of_tailCanonicalGeneralizedLaguerre
+    (L : TailCanonicalGeneralizedLaguerreLeaf) : Certificate :=
+  certificate_of_tailGeneralizedLaguerre L.toGeneralized
+
+/-- Direct certificate constructor for the combined method: paired positivity
+    blocks for `L₁`, canonical curvature for all higher coefficients, and the
+    analytic Taylor-convolution identity. -/
+noncomputable def certificate_of_blocks_curvature_series
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) : Certificate :=
+  certificate_of_tailCanonicalGeneralizedLaguerre
+    (tailCanonicalGeneralizedLaguerre_of_blocks_curvature_series B C S)
 
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
