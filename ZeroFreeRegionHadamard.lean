@@ -3453,3 +3453,102 @@ theorem logDeriv_canonicalProductNat_genus_one {a : ℕ → ℂ} (hane : ∀ n, 
     exact logDeriv_primaryFactor_one_scaled z (a n) (hane n) (hzane n)
   rw [heq] at hmain
   exact hmain
+
+
+
+/-! ## The Hadamard (Weierstrass) factorization theorem -/
+set_option maxHeartbeats 800000
+
+/-- The canonical product with the factor at index `k` removed. -/
+noncomputable def canonicalProductNatSkip (k : ℕ) (p : ℕ) (a : ℕ → ℂ) (z : ℂ) : ℂ :=
+  ∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, primaryFactor p (z / a m.1)
+
+/-- The canonical product splits off the `k`-th primary factor. -/
+lemma canonicalProductNat_eq_mul_skip {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) (k : ℕ)
+    (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) (z : ℂ) :
+    canonicalProductNat p a z = primaryFactor p (z / a k) * canonicalProductNatSkip k p a z := by
+  let F : ℕ → ℂ := fun n => primaryFactor p (z / a n)
+  have hm : Multipliable F :=
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp)
+  have hA : HasProd (fun n : ℕ => if n = k then F k else 1) (F k) := by
+    exact hasProd_ite_eq k (F k)
+  sorry
+  have hB : HasProd (fun n : ℕ => if n = k then 1 else F n) (canonicalProductNatSkip k p a z) := by
+    have hsub' : HasProd (fun n : ℕ => if n = k then 1 else F n)
+        (∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1) := by
+      exact (hasProd_subtype_iff_mulIndicator.mp hsub).congr_fun (by
+        intro n
+        by_cases hn : n = k
+        · subst hn
+          simp [Set.mem_compl_iff]
+        · simp [hn, Set.mem_compl_iff])
+    simpa [canonicalProductNatSkip, F] using hsub'
+  have hprod : HasProd (fun n : ℕ => (if n = k then F k else 1) * (if n = k then 1 else F n))
+      (F k * canonicalProductNatSkip k p a z) := hA.mul hB
+  have heqfun : (fun n : ℕ => (if n = k then F k else 1) * (if n = k then 1 else F n)) = F := by
+    funext n
+    by_cases hn : n = k
+    · subst hn
+      simp
+    · simp [hn]
+  have hmain : HasProd F (F k * canonicalProductNatSkip k p a z) := by
+    exact heqfun ▸ hprod
+  have hunique : F k * canonicalProductNatSkip k p a z = ∏' n : ℕ, F n :=
+    hmain.unique hm.hasProd
+  rw [canonicalProductNat]
+  simpa [F] using hunique.symm
+
+/-- A convergent product equals `exp` of the sum of the logarithms. -/
+lemma tprod_eq_exp_tsum_log_any {ι : Type*} {x : ι → ℂ} (hm : Multipliable x)
+    (hlog : Summable fun n : ι => Complex.log (x n)) (hx : ∀ n, x n ≠ 0) :
+    (∏' n : ι, x n) = Complex.exp (∑' n : ι, Complex.log (x n)) := by
+  have hprod : Tendsto (fun s : Finset ι => ∏ n ∈ s, x n) atTop (𝓝 (∏' n : ι, x n)) := by
+    simpa [HasProd, SummationFilter.unconditional] using hm.hasProd
+  have hsum : Tendsto (fun s : Finset ι => ∑ n ∈ s, Complex.log (x n)) atTop
+      (𝓝 (∑' n : ι, Complex.log (x n))) := by
+    simpa [HasSum, SummationFilter.unconditional] using hlog.hasSum
+  have hexp : Tendsto (fun s : Finset ι => Complex.exp (∑ n ∈ s, Complex.log (x n))) atTop
+      (𝓝 (Complex.exp (∑' n : ι, Complex.log (x n)))) :=
+    (Complex.continuous_exp.tendsto (∑' n : ι, Complex.log (x n))).comp hsum
+  have heq : ∀ s : Finset ι, (∏ n ∈ s, x n) = Complex.exp (∑ n ∈ s, Complex.log (x n)) := by
+    intro s
+    calc ∏ n ∈ s, x n = ∏ n ∈ s, Complex.exp (Complex.log (x n)) := by
+          refine Finset.prod_congr rfl ?_
+          intro n hn
+          rw [Complex.exp_log (hx n)]
+      _ = Complex.exp (∑ n ∈ s, Complex.log (x n)) := by rw [Complex.exp_sum]
+  exact tendsto_nhds_unique (hprod.congr' (by
+    filter_upwards with s
+    exact heq s)) hexp
+
+/-- The skipped canonical product does not vanish at the removed zero. -/
+lemma canonicalProductNatSkip_ne_zero_at {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) (k : ℕ)
+    (hinj : Function.Injective a) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    canonicalProductNatSkip k p a (a k) ≠ 0 := by
+  let F : ℕ → ℂ := fun n => primaryFactor p (a k / a n)
+  have hm : Multipliable F :=
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp)
+  have hms : Multipliable (fun m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ} => F m.1) :=
+    hm.subtype (fun n : ℕ => n ∈ ({k} : Set ℕ)ᶜ)
+  have hx : ∀ m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1 ≠ 0 := by
+    intro m
+    have hmk : m.1 ≠ k := by simpa using m.2
+    exact primaryFactor_ne_zero p (by
+      intro h
+      rw [div_eq_one_iff_eq (hane m.1)] at h
+      exact hmk (hinj h).symm)
+  have hlog : Summable (fun n : ℕ => Complex.log (F n)) :=
+    summable_log_primaryFactor hane p hs htend
+  have hlogs : Summable (fun m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ} => Complex.log (F m.1)) :=
+    hlog.subtype (fun n : ℕ => n ∈ ({k} : Set ℕ)ᶜ)
+  have heq : (∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1) =
+      Complex.exp (∑' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, Complex.log (F m.1)) :=
+    tprod_eq_exp_tsum_log_any hms hlogs hx
+  have heq' : canonicalProductNatSkip k p a (a k) =
+      Complex.exp (∑' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, Complex.log (F m.1)) := by
+    rw [canonicalProductNatSkip]
+    simpa [F] using heq
+  rw [heq']
+  exact Complex.exp_ne_zero _
