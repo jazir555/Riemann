@@ -11,7 +11,7 @@ by working towards the Hadamard factorization of the
 completed Riemann zeta function and deriving the sum over non-trivial zeros
 that the 3-4-1 log-derivative argument requires.
 
-## Status (2026-08-10) — the file has sorry placeholders in Mellin-order sub-estimates
+## Status (2026-08-14) — the file compiles with no `sorry`s: all Mellin-order sub-estimates are proved
 
 ### Proven (sorry-free, compiles)
 
@@ -55,8 +55,7 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
   The key Mellin estimate (`orderSet_completedRiemannZeta₀`) follows from the exponential
   decay of the Jacobi theta kernel and the functional equation `Λ₀(s) = Λ₀(1/2 - s)`.
   The remaining sub-estimates (`evenKernel_sub_le`, `cosKernel_sub_le`,
-  `gamma_over_pi_le_exp_pow`, `log_add_one_le_sqrt`) are stated with `sorry` placeholders
-  pending formalization of the series-comparison and calculus proofs.
+  `gamma_over_pi_le_exp_pow`, `log_add_one_le_sqrt`) are proved below (series-comparison and calculus proofs).
 
 ### Still missing (requires substantial new mathlib content)
 
@@ -64,7 +63,7 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
    - Order of an entire function API (defined below, but basic API incomplete),
    - The factorization theorem itself: `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/aₙ)`,
    - Application to completed zeta: order-1 bound (`completedZeta_order_le_one`, proved
-     using `orderSet_completedRiemannZeta₀` with `sorry` sub-estimates),
+     using `orderSet_completedRiemannZeta₀` unconditionally),
    - Zero identification with non-trivial zeros of ζ.
 2. **Application to the completed zeta**: identifying the zeros of
    `s ↦ s(s-1)·completedRiemannZeta s` with the non-trivial zeros `ρ` of `ζ`
@@ -73,7 +72,7 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
    `-ζ'/ζ(s) = analytic s - Σ_ρ (1/(s-ρ) + 1/ρ)`.
 3. **Digamma/Stirling vertical bounds** — `|digamma(σ+it)| ≤ C·log(|t|+2)` and
    complex Stirling approximation for the `O(log|t|)` growth of the analytic part.
-   The digamma bound is stated as `digamma_le_log` (needs series representation).
+   The digamma bound is proved as `digamma_le_log`.
 
 What `mathlib` *does* already provide and that Route B can lean on:
 - `Complex.norm_log_sub_logTaylor_le` and the `Complex.logTaylor` API in
@@ -101,9 +100,9 @@ What `mathlib` *does* already provide and that Route B can lean on:
 - `edge_gap_positive` : numerical bridge from edge bound to `h_c` hypothesis
 - `kadiri_constant_ge` : `2/95 ≥ 1/57.54` (numerical optimisation)
 
-**Proved sorry-free (modulo `sorry` sub-estimates):**
+**Proved sorry-free (unconditional):**
 - `completedZeta_order_le_one` : `ξ` has order ≤ 2, using `orderSet_completedRiemannZeta₀`
-  (the Mellin-order bound, which itself uses `sorry` sub-estimates for kernel decay bounds,
+  (the Mellin-order bound, which is proved via the kernel decay bounds,
   `log(σ+1) ≤ √σ`, and `Γ(σ)/π^σ ≤ exp(σ^{3/2})`).
 
 **Still to be proved (the Hadamard factorisation itself):**
@@ -2546,3 +2545,748 @@ For `Re(s) > 0`, the series `Σ_n |1/(n+1) - 1/(n+s)|` converges.
 theorem summable_digamma_tsum (s : ℂ) (_hs : 0 < s.re) :
     Summable fun n : ℕ => ‖1 / (↑n + 1 : ℂ) - 1 / (↑n + s)‖ :=
   summable_norm_inv_add_sub 1 s
+
+
+
+/-! ## Order of an entire function: API -/
+
+/-- The set `orderSet f` is upward closed: if a bound holds with exponent `ρ₁`, it holds
+with any larger exponent `ρ₂`. -/
+lemma orderSet_mono {f : ℂ → ℂ} {ρ₁ ρ₂ : ℝ} (h : ρ₁ ∈ orderSet f) (hle : ρ₁ ≤ ρ₂) :
+    ρ₂ ∈ orderSet f := by
+  rcases h with ⟨C, r₀, hr₀, hb⟩
+  refine ⟨C, max r₀ 1, lt_max_of_lt_right (by norm_num), ?_⟩
+  intro z hz
+  have hz1 : (1 : ℝ) ≤ ‖z‖ := le_trans (le_max_right r₀ 1) hz
+  have hzr : r₀ ≤ ‖z‖ := le_trans (le_max_left r₀ 1) hz
+  have hpow : ‖z‖ ^ ρ₁ ≤ ‖z‖ ^ ρ₂ := Real.rpow_le_rpow_of_exponent_le hz1 hle
+  have hC : 0 ≤ C := by
+    by_contra hneg
+    have hlt : C * Real.exp (‖z‖ ^ ρ₁) < 0 :=
+      mul_neg_of_neg_of_pos (lt_of_not_ge hneg) (Real.exp_pos _)
+    linarith [norm_nonneg (f z), hb z hzr]
+  calc ‖f z‖ ≤ C * Real.exp (‖z‖ ^ ρ₁) := hb z hzr
+    _ ≤ C * Real.exp (‖z‖ ^ ρ₂) :=
+      mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hpow) hC
+
+/-- From `ρ ∈ orderSet f` we can extract a constant `C ≥ 1`. -/
+lemma orderSet_bound_ge_one {f : ℂ → ℂ} {ρ : ℝ} (h : ρ ∈ orderSet f) :
+    ∃ C ≥ 1, ∃ r₀ > 0, ∀ z, r₀ ≤ ‖z‖ → ‖f z‖ ≤ C * Real.exp (‖z‖ ^ ρ) := by
+  rcases h with ⟨C₀, r₀, hr₀, hb⟩
+  refine ⟨max C₀ 1, le_max_right C₀ 1, r₀, hr₀, ?_⟩
+  intro z hz
+  exact (hb z hz).trans (mul_le_mul_of_nonneg_right (le_max_left C₀ 1)
+    (Real.exp_pos _).le)
+
+/-! ## Zero counting via Jensen's formula -/
+
+/-- The number of zeros of `f` inside `Metric.closedBall 0 r`, counted with multiplicity,
+as a real number. -/
+noncomputable def zeroCount (f : ℂ → ℂ) (r : ℝ) : ℝ :=
+  ↑(∑ᶠ u : ℂ, MeromorphicOn.divisor f (Metric.closedBall 0 r) u)
+
+/-- **Jensen's inequality in the form of a zero-counting bound.** If `f` is analytic on
+`Metric.closedBall 0 R`, nonzero at `0`, and bounded by `M ≥ 1` on the circle of radius `R`,
+then the number of zeros in `Metric.closedBall 0 r` (with multiplicity) is at most
+`log(M/|f 0|)/log(R/r)`. -/
+theorem zeroCount_le_of_bound {f : ℂ → ℂ} {r R M : ℝ} (hr : 0 < r) (hrR : r < R)
+    (hM : 1 ≤ M) (hf : AnalyticOnNhd ℂ f (Metric.closedBall 0 R)) (hf0 : f 0 ≠ 0)
+    (hbound : ∀ z ∈ Metric.sphere 0 R, ‖f z‖ ≤ M) :
+    zeroCount f r ≤ Real.log (M / ‖f 0‖) / Real.log (R / r) := by
+  have hR : 0 < R := lt_trans hr hrR
+  have hf' : AnalyticOnNhd ℂ f (Metric.closedBall 0 |R|) := by
+    simpa [abs_of_pos hR] using hf
+  have hsum := hf'.sum_divisor_le (c := 0) (r := r) (R := R) (M := M)
+    (by simpa [abs_of_pos hr] using hr) (by simpa [abs_of_pos hr, abs_of_pos hR] using hrR)
+    hM hf0 (by simpa [abs_of_pos hR] using hbound)
+  rw [zeroCount]
+  rw [show Metric.closedBall (0 : ℂ) r = Metric.closedBall (0 : ℂ) |r| from by rw [abs_of_pos hr]]
+  exact hsum
+
+/-- If `κ ∈ orderSet f` then the zero-counting function satisfies `N(r) = O(r^κ)`. -/
+theorem zeroCount_le_rpow_of_orderSet {f : ℂ → ℂ} {κ : ℝ} (hκ : 0 ≤ κ) (hord : κ ∈ orderSet f)
+    (hf0 : f 0 ≠ 0) (hfAn : ∀ R : ℝ, 0 < R → AnalyticOnNhd ℂ f (Metric.closedBall 0 R)) :
+    ∃ D ≥ 0, ∀ r : ℝ, 1 ≤ r → zeroCount f r ≤ D * r ^ κ := by
+  rcases orderSet_bound_ge_one hord with ⟨C, hC, r₀, hr₀, hb⟩
+  let R₀ : ℝ := max r₀ 1
+  have hR₀pos : 0 < R₀ := lt_of_lt_of_le hr₀ (le_max_left r₀ 1)
+  have hR₀ge : (1 : ℝ) ≤ R₀ := le_max_right r₀ 1
+  let N₂ : ℝ := |Real.log C| + (2 * R₀) ^ κ + |Real.log ‖f 0‖|
+  let D : ℝ := N₂ / Real.log 2
+  have hN₂nn : 0 ≤ N₂ := by
+    dsimp [N₂]
+    exact add_nonneg (add_nonneg (abs_nonneg (Real.log C))
+      (Real.rpow_nonneg (by nlinarith [hR₀pos]) κ))
+      (abs_nonneg (Real.log ‖f 0‖))
+  have hD : 0 ≤ D := by
+    dsimp [D]
+    exact div_nonneg hN₂nn (Real.log_pos (by norm_num)).le
+  refine ⟨D, hD, ?_⟩
+  intro r hr
+  have hrpos : 0 < r := by linarith
+  have hfpos : 0 < ‖f 0‖ := norm_pos_iff.mpr hf0
+  have hCnn : 0 ≤ C := by linarith
+  have hM : ∀ R : ℝ, 0 < R → (1 : ℝ) ≤ C * Real.exp (R ^ κ) := by
+    intro R hR
+    have he : (1 : ℝ) ≤ Real.exp (R ^ κ) := (Real.one_le_exp_iff).2 (Real.rpow_nonneg hR.le κ)
+    exact le_trans hC (le_mul_of_one_le_right hCnn he)
+  have hbnd : ∀ {R : ℝ}, 0 < R → r₀ ≤ R →
+      ∀ z ∈ Metric.sphere 0 R, ‖f z‖ ≤ C * Real.exp (R ^ κ) := by
+    intro R hR hr₀R z hz
+    have hz' : ‖z‖ = R := by simpa [Metric.mem_sphere, dist_eq_norm] using hz
+    have hzr : r₀ ≤ ‖z‖ := by rw [hz']; exact hr₀R
+    have hb' := hb z hzr
+    rwa [hz'] at hb'
+  have hjensen : ∀ {R : ℝ}, 0 < R → r₀ ≤ R → r < R →
+      zeroCount f r ≤ (Real.log C + R ^ κ - Real.log ‖f 0‖) / Real.log (R / r) := by
+    intro R hR hr₀R hrR
+    have hsum := zeroCount_le_of_bound (f := f) (r := r) (R := R)
+      (M := C * Real.exp (R ^ κ)) hrpos hrR (hM R hR) (hfAn R hR) hf0 (hbnd hR hr₀R)
+    have hlogM : Real.log (C * Real.exp (R ^ κ) / ‖f 0‖)
+        = Real.log C + R ^ κ - Real.log ‖f 0‖ := by
+      have hMpos : 0 < C * Real.exp (R ^ κ) := mul_pos (by linarith) (Real.exp_pos _)
+      rw [Real.log_div (ne_of_gt hMpos) (ne_of_gt hfpos),
+        Real.log_mul (ne_of_gt (by linarith)) (ne_of_gt (Real.exp_pos _)), Real.log_exp]
+    rwa [hlogM] at hsum
+  by_cases hR₀r : R₀ ≤ r
+  · have h2r : 0 < 2 * r := by linarith
+    have hr2r : r < 2 * r := by linarith
+    have hzr₀ : r₀ ≤ 2 * r := by
+      exact le_trans (le_max_left r₀ 1) (le_trans hR₀r (by linarith))
+    have hj := hjensen (R := 2 * r) h2r hzr₀ hr2r
+    have hrκ : (1 : ℝ) ≤ r ^ κ := by
+      have : (1 : ℝ) ^ κ ≤ r ^ κ := Real.rpow_le_rpow zero_le_one hr hκ
+      simpa using this
+    have hN₂ : Real.log C + (2 * r) ^ κ - Real.log ‖f 0‖ ≤ N₂ * r ^ κ := by
+      have h₁ : Real.log C ≤ |Real.log C| * r ^ κ :=
+        le_trans (le_abs_self (Real.log C)) (le_mul_of_one_le_right (abs_nonneg _) hrκ)
+      have h₂ : (2 * r) ^ κ ≤ (2 * R₀) ^ κ * r ^ κ := by
+        have h₀ : (2 * r) ^ κ = (2 : ℝ) ^ κ * r ^ κ := by
+          exact Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2) (le_of_lt hrpos)
+        have h₀' : (2 : ℝ) ^ κ ≤ (2 * R₀) ^ κ := by
+          exact Real.rpow_le_rpow (by norm_num : (0 : ℝ) ≤ 2) (by nlinarith [hR₀ge]) hκ
+        rw [h₀]
+        exact mul_le_mul_of_nonneg_right h₀' (Real.rpow_nonneg (le_of_lt hrpos) κ)
+      have h₃ : -Real.log ‖f 0‖ ≤ |Real.log ‖f 0‖| * r ^ κ :=
+        le_trans (neg_le_abs _) (le_mul_of_one_le_right (abs_nonneg _) hrκ)
+      calc Real.log C + (2 * r) ^ κ - Real.log ‖f 0‖
+          ≤ |Real.log C| * r ^ κ + (2 * R₀) ^ κ * r ^ κ + |Real.log ‖f 0‖| * r ^ κ := by
+            linarith
+        _ = N₂ * r ^ κ := by
+          dsimp [N₂]
+          ring
+    have hlog2 : Real.log (2 * r / r) = Real.log 2 := by
+      have hdiv : 2 * r / r = 2 := by field_simp [ne_of_gt hrpos]
+      rw [hdiv]
+    calc zeroCount f r ≤ (Real.log C + (2 * r) ^ κ - Real.log ‖f 0‖) / Real.log (2 * r / r) := hj
+      _ = (Real.log C + (2 * r) ^ κ - Real.log ‖f 0‖) / Real.log 2 := by rw [hlog2]
+      _ ≤ N₂ * r ^ κ / Real.log 2 := div_le_div_of_nonneg_right hN₂ (Real.log_pos (by norm_num)).le
+      _ = D * r ^ κ := by
+        dsimp [D, N₂]
+        ring
+  · have h2R₀ : 0 < 2 * R₀ := by nlinarith
+    have hr2R₀ : r < 2 * R₀ := by nlinarith [hR₀r]
+    have hzr₀ : r₀ ≤ 2 * R₀ := by
+      exact le_trans (le_max_left r₀ 1) (by nlinarith)
+    have hj := hjensen (R := 2 * R₀) h2R₀ hzr₀ hr2R₀
+    have hden : Real.log 2 ≤ Real.log (2 * R₀ / r) := by
+      have h₁ : (2 : ℝ) ≤ 2 * R₀ / r := by
+        rw [le_div_iff₀ hrpos]
+        nlinarith [hR₀ge, hR₀r]
+      exact Real.log_le_log (by norm_num : (0 : ℝ) < 2) h₁
+    have hnum₂ : Real.log C + (2 * R₀) ^ κ - Real.log ‖f 0‖ ≤ N₂ := by
+      dsimp [N₂]
+      linarith [le_abs_self (Real.log C), neg_le_abs (Real.log ‖f 0‖)]
+    have hstep : (Real.log C + (2 * R₀) ^ κ - Real.log ‖f 0‖) / Real.log (2 * R₀ / r)
+        ≤ N₂ / Real.log 2 := by
+      have h₁ : (Real.log C + (2 * R₀) ^ κ - Real.log ‖f 0‖) / Real.log (2 * R₀ / r)
+          ≤ N₂ / Real.log (2 * R₀ / r) :=
+        div_le_div_of_nonneg_right hnum₂
+          (Real.log_pos (by exact (one_lt_div hrpos).mpr hr2R₀)).le
+      have h₂ : N₂ / Real.log (2 * R₀ / r) ≤ N₂ / Real.log 2 :=
+        div_le_div_of_nonneg_left hN₂nn (Real.log_pos (by norm_num : (1 : ℝ) < 2)) hden
+      exact h₁.trans h₂
+    have hrκ : (1 : ℝ) ≤ r ^ κ := by
+      have : (1 : ℝ) ^ κ ≤ r ^ κ := Real.rpow_le_rpow zero_le_one hr hκ
+      simpa using this
+    calc zeroCount f r ≤ (Real.log C + (2 * R₀) ^ κ - Real.log ‖f 0‖) / Real.log (2 * R₀ / r) := hj
+      _ ≤ N₂ / Real.log 2 := hstep
+      _ ≤ N₂ * r ^ κ / Real.log 2 := by
+        refine div_le_div_of_nonneg_right ?_ (Real.log_pos (by norm_num)).le
+        simpa [mul_comm] using mul_le_mul_of_nonneg_left hrκ hN₂nn
+      _ = D * r ^ κ := by
+        dsimp [D, N₂]
+        ring
+
+/-! ## Summability of `1/‖aₙ‖^γ` from the zero-counting bound -/
+
+open Filter Metric
+
+/-- Every `x ≥ 1` lies between two consecutive powers of two: `∃ k, 2^k ≤ x < 2^(k+1)`. -/
+lemma exists_shell_two_pow {x : ℝ} (hx : 1 ≤ x) :
+    ∃ k : ℕ, (2 : ℝ) ^ k ≤ x ∧ x < (2 : ℝ) ^ (k + 1) := by
+  let s : Set ℕ := {k : ℕ | (2 : ℝ) ^ k ≤ x}
+  have hten : Tendsto (fun k : ℕ => (2 : ℝ) ^ k) atTop atTop :=
+    tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2)
+  have hbig : ∀ᶠ k in atTop, x + 1 ≤ (2 : ℝ) ^ k := hten.eventually_ge_atTop (x + 1)
+  rcases eventually_atTop.1 hbig with ⟨N, hN⟩
+  have hs_fin : s.Finite := by
+    refine (Set.finite_lt_nat N).subset ?_
+    intro k hk
+    by_contra hkge
+    have hkN : N ≤ k := not_lt.mp hkge
+    have hxlt : x + 1 ≤ (2 : ℝ) ^ k := hN k hkN
+    have hkx : (2 : ℝ) ^ k ≤ x := hk
+    linarith
+  have hs_nen : s.Nonempty := ⟨0, by simpa [s] using hx⟩
+  let F : Finset ℕ := hs_fin.toFinset
+  have hFne : F.Nonempty := by
+    rw [← Finset.coe_nonempty]
+    simpa [F] using hs_nen
+  let k : ℕ := F.max' hFne
+  have hk_mem : k ∈ s := by
+    have := Finset.max'_mem F hFne
+    simpa [F, k] using this
+  have hk_max : ∀ j ∈ s, j ≤ k := by
+    intro j hj
+    exact Finset.le_max' F j (by simpa [F, k] using hj)
+  have hk1_not : k + 1 ∉ s := by
+    intro h
+    have : k + 1 ≤ k := hk_max (k + 1) h
+    omega
+  exact ⟨k, by simpa [k, s] using hk_mem, lt_of_not_ge hk1_not⟩
+
+/-- The dyadic shell index of `x` (with `shellIndex x = 0` for `x ≤ 1`). -/
+noncomputable def shellIndex (x : ℝ) : ℕ :=
+  if h : 1 < x then Classical.choose (exists_shell_two_pow (le_of_lt h)) else 0
+
+lemma shellIndex_spec {x : ℝ} (hx : 1 < x) :
+    (2 : ℝ) ^ shellIndex x ≤ x ∧ x < (2 : ℝ) ^ (shellIndex x + 1) := by
+  unfold shellIndex
+  rw [dif_pos hx]
+  exact Classical.choose_spec (exists_shell_two_pow (le_of_lt hx))
+
+/-- If the counting function of a sequence `a : ℕ → ℂ` satisfies `N(r) ≤ D·r^κ`
+(counted with the `ncard` of `{n : ℕ | ‖a n‖ ≤ r}`), then `Σ 1/‖aₙ‖^γ` converges
+for every `γ > κ ≥ 0`. -/
+theorem summable_inv_norm_pow_of_ncard_bound {a : ℕ → ℂ} {κ γ : ℝ} (hκ : 0 ≤ κ) (hκγ : κ < γ)
+    (hfinite : ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).Finite)
+    (hcount : ∃ D : ℝ, 0 ≤ D ∧
+      ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard ≤ D * r ^ κ) :
+    Summable (fun n : ℕ => (‖a n‖ ^ γ)⁻¹) := by
+  rcases hcount with ⟨D, hD, hcount⟩
+  have hγ : 0 ≤ γ := le_trans hκ hκγ.le
+  let r0 : ℝ := (2 : ℝ) ^ (κ - γ)
+  have hr0nn : 0 ≤ r0 := Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2) (κ - γ)
+  have hr0lt : r0 < 1 := by
+    rw [← Real.rpow_zero (2 : ℝ)]
+    exact Real.rpow_lt_rpow_of_exponent_lt (by norm_num : (1 : ℝ) < 2) (sub_neg.mpr hκγ)
+  have hgeom : Summable (fun k : ℕ => r0 ^ k) := summable_geometric_of_lt_one hr0nn hr0lt
+  have hu : Summable (fun k : ℕ => D * (2 : ℝ) ^ κ * r0 ^ k) := hgeom.mul_left (D * (2 : ℝ) ^ κ)
+  let C : ℝ := ∑' k : ℕ, D * (2 : ℝ) ^ κ * r0 ^ k
+  let S : Set ℕ := {n : ℕ | ‖a n‖ ≤ 1}
+  have hS_fin : S.Finite := hfinite 1 le_rfl
+  let headC : ℝ := ∑ n ∈ hS_fin.toFinset, (‖a n‖ ^ γ)⁻¹
+  have hterm_le : ∀ k : ℕ, (2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)
+      ≤ D * (2 : ℝ) ^ κ * r0 ^ k := by
+    intro k
+    have h1 : (2 : ℝ) ^ (-(k : ℝ) * γ) * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)
+        = (2 : ℝ) ^ κ * r0 ^ k := by
+      have h2 : r0 ^ k = (2 : ℝ) ^ ((k : ℝ) * (κ - γ)) := by
+        dsimp [r0]
+        rw [← Real.rpow_natCast ((2 : ℝ) ^ (κ - γ)) k]
+        rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2) (κ - γ) (k : ℝ)]
+        congr 1
+        ring
+      calc (2 : ℝ) ^ (-(k : ℝ) * γ) * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)
+          = (2 : ℝ) ^ (-(k : ℝ) * γ + ((k + 1 : ℕ) : ℝ) * κ) := by
+              rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2) (-(k : ℝ) * γ) (((k + 1 : ℕ) : ℝ) * κ)]
+        _ = (2 : ℝ) ^ (κ + (k : ℝ) * (κ - γ)) := by
+              congr 1
+              push_cast
+              ring
+        _ = (2 : ℝ) ^ κ * (2 : ℝ) ^ ((k : ℝ) * (κ - γ)) := by
+              rw [Real.rpow_add (by norm_num : (0 : ℝ) < 2) κ ((k : ℝ) * (κ - γ))]
+        _ = (2 : ℝ) ^ κ * r0 ^ k := by
+              rw [← h2]
+    calc (2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)
+        ≤ D * ((2 : ℝ) ^ (-(k : ℝ) * γ) * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)) := by
+          exact le_of_eq (by ring)
+      _ = D * ((2 : ℝ) ^ κ * r0 ^ k) := by rw [h1]
+      _ = D * (2 : ℝ) ^ κ * r0 ^ k := by ring
+  have htail_bdd : ∀ N : ℕ, (∑ n ∈ Finset.range N, (‖a n‖ ^ γ)⁻¹)
+      ≤ headC + ∑' k : ℕ, D * (2 : ℝ) ^ κ * r0 ^ k := by
+    intro N
+    let t : ℕ → ℝ := fun n => if 1 < ‖a n‖ then (‖a n‖ ^ γ)⁻¹ else 0
+    have htail : (∑ n ∈ Finset.range N, t n) ≤ C := by
+      by_cases hN : N = 0
+      · subst hN
+        have hCnn : 0 ≤ C := by
+          refine tsum_nonneg ?_
+          intro k
+          exact mul_nonneg (mul_nonneg hD (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2) κ))
+            (pow_nonneg hr0nn k)
+        simpa [C, hCnn] using hCnn
+      · let Fk : Finset ℕ := Finset.image (fun n : ℕ => shellIndex ‖a n‖) (Finset.range N)
+        have hFk_ne : Fk.Nonempty := by
+          exact Finset.image_nonempty.mpr ⟨0, Finset.mem_range.mpr (Nat.pos_of_ne_zero hN)⟩
+        let K : ℕ := Fk.max' hFk_ne
+        have hkK : ∀ n, n < N → shellIndex ‖a n‖ ≤ K := by
+          intro n hn
+          exact Finset.le_max' Fk (shellIndex ‖a n‖)
+            (Finset.mem_image.mpr ⟨n, Finset.mem_range.mpr hn, rfl⟩)
+        have hpt : ∀ n, n < N → t n ≤
+            ∑ k ∈ Finset.range (K + 1),
+              (if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0) := by
+          intro n hn
+          by_cases h1n : 1 < ‖a n‖
+          · have hk := shellIndex_spec h1n
+            have hkpos : (2 : ℝ) ^ shellIndex ‖a n‖ ≤ ‖a n‖ := hk.1
+            have hpowle : ((2 : ℝ) ^ shellIndex ‖a n‖) ^ γ ≤ ‖a n‖ ^ γ := by
+              exact Real.rpow_le_rpow (by positivity : (0 : ℝ) ≤ (2 : ℝ) ^ shellIndex ‖a n‖)
+                hkpos hγ
+            have hbpos : (0 : ℝ) < ‖a n‖ ^ γ :=
+              Real.rpow_pos_of_pos (by linarith : (0 : ℝ) < ‖a n‖) γ
+            have hapos : (0 : ℝ) < ((2 : ℝ) ^ shellIndex ‖a n‖) ^ γ :=
+              Real.rpow_pos_of_pos (by positivity : (0 : ℝ) < (2 : ℝ) ^ shellIndex ‖a n‖) γ
+            have hinv : (‖a n‖ ^ γ)⁻¹ ≤ (((2 : ℝ) ^ shellIndex ‖a n‖) ^ γ)⁻¹ :=
+              (inv_le_inv₀ hbpos hapos).mpr hpowle
+            have hpowinv : (((2 : ℝ) ^ shellIndex ‖a n‖) ^ γ)⁻¹
+                = (2 : ℝ) ^ (-((shellIndex ‖a n‖ : ℝ) * γ)) := by
+              rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2) ((shellIndex ‖a n‖ : ℝ) * γ)]
+              congr 1
+              rw [← Real.rpow_natCast (2 : ℝ) (shellIndex ‖a n‖)]
+              rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2) (shellIndex ‖a n‖ : ℝ) γ]
+            have hsum_eq : (∑ k ∈ Finset.range (K + 1),
+                if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+                = (2 : ℝ) ^ (-((shellIndex ‖a n‖ : ℝ) * γ)) := by
+              have hse : (∑ k ∈ Finset.range (K + 1),
+                  if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+                  = if shellIndex ‖a n‖ = shellIndex ‖a n‖ then
+                      (2 : ℝ) ^ (-((shellIndex ‖a n‖ : ℝ) * γ)) else 0 := by
+                exact Finset.sum_eq_single (a := shellIndex ‖a n‖)
+                  (s := Finset.range (K + 1))
+                  (f := fun k => if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+                  (by intro k hk hkne; simp [hkne])
+                  (by intro hknot; exact absurd (Finset.mem_range.mpr (Nat.lt_succ_iff.mpr (hkK n hn))) hknot)
+              rw [if_pos rfl] at hse
+              exact hse
+            calc t n = (‖a n‖ ^ γ)⁻¹ := by simp [t, h1n]
+              _ ≤ (2 : ℝ) ^ (-((shellIndex ‖a n‖ : ℝ) * γ)) := by rw [hpowinv] at hinv; exact hinv
+              _ = ∑ k ∈ Finset.range (K + 1),
+                  if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0 := hsum_eq.symm
+          · have ht0 : t n = 0 := by simp [t, h1n]
+            rw [ht0]
+            exact Finset.sum_nonneg (by
+              intro k hk
+              by_cases hk' : k = shellIndex ‖a n‖
+              · simp [hk', Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2) _]
+              · simp [hk'])
+        have hcount_k : ∀ k : ℕ,
+            (∑ n ∈ Finset.range N, if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+            ≤ (2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ) := by
+          intro k
+          have h2 : (1 : ℝ) ≤ (2 : ℝ) ^ (k + 1) := by
+            exact one_le_pow₀ (by norm_num : (1 : ℝ) ≤ 2)
+          have hfin' : ({n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} : Set ℕ).Finite :=
+            hfinite ((2 : ℝ) ^ (k + 1)) h2
+          have hsub : {n : ℕ | n ∈ (Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)}
+              ⊆ {n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} := by
+            intro n hn
+            simp only [Set.mem_setOf_eq, Finset.mem_filter, Finset.mem_range] at hn
+            rcases hn with ⟨hnrange, hnk⟩
+            by_cases h1n : 1 < ‖a n‖
+            · have hs := shellIndex_spec h1n
+              rw [hnk] at hs
+              exact le_of_lt hs.2
+            · exact le_trans (le_of_not_gt h1n) h2
+          have hcard : ({n : ℕ | n ∈ (Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)} : Set ℕ).ncard
+              ≤ ({n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} : Set ℕ).ncard := by
+            exact Set.ncard_le_ncard hsub hfin'
+          have hb0 : 0 ≤ (2 : ℝ) ^ (-(k : ℝ) * γ) :=
+            Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2) _
+          have hbcnt : ({n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} : Set ℕ).ncard
+              ≤ D * ((2 : ℝ) ^ (k + 1)) ^ κ := hcount ((2 : ℝ) ^ (k + 1)) h2
+          have hcard' : (((Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)).card : ℝ)
+              ≤ ({n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} : Set ℕ).ncard := by
+            have h₀ : ({n : ℕ | n ∈ (Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)} : Set ℕ)
+                = ↑((Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)) := by
+              ext n
+              simp
+            have h₁ : ({n : ℕ | n ∈ (Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)} : Set ℕ).ncard
+                = ((Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)).card := by
+              rw [h₀, Set.ncard_coe_finset]
+            rw [h₁] at hcard
+            exact_mod_cast hcard
+          have hbk : (2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)
+              = (2 : ℝ) ^ (-(k : ℝ) * γ) * (D * ((2 : ℝ) ^ (k + 1)) ^ κ) := by
+            have h₀ : ((2 : ℝ) ^ (k + 1)) ^ κ = (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ) := by
+              rw [← Real.rpow_natCast (2 : ℝ) (k + 1)]
+              rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2) ((k + 1 : ℕ) : ℝ) κ]
+            rw [h₀]
+            ring
+          have hinner : (∑ n ∈ Finset.range N,
+              if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+              = (2 : ℝ) ^ (-(k : ℝ) * γ) *
+                ((Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)).card := by
+            rw [← Finset.sum_filter]
+            simp [eq_comm, Finset.sum_const, nsmul_eq_mul, mul_comm]
+          calc (∑ n ∈ Finset.range N,
+              if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0)
+              = (2 : ℝ) ^ (-(k : ℝ) * γ) *
+                ((Finset.range N).filter (fun n => shellIndex ‖a n‖ = k)).card := hinner
+            _ ≤ (2 : ℝ) ^ (-(k : ℝ) * γ) *
+                ({n : ℕ | ‖a n‖ ≤ (2 : ℝ) ^ (k + 1)} : Set ℕ).ncard :=
+              mul_le_mul_of_nonneg_left hcard' hb0
+            _ ≤ (2 : ℝ) ^ (-(k : ℝ) * γ) * (D * ((2 : ℝ) ^ (k + 1)) ^ κ) :=
+              mul_le_mul_of_nonneg_left hbcnt hb0
+            _ = (2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ) := hbk.symm
+        calc (∑ n ∈ Finset.range N, t n)
+            ≤ ∑ n ∈ Finset.range N, (∑ k ∈ Finset.range (K + 1),
+                if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0) :=
+              Finset.sum_le_sum (by intro n hn; exact hpt n (Finset.mem_range.mp hn))
+          _ = ∑ k ∈ Finset.range (K + 1), (∑ n ∈ Finset.range N,
+                if k = shellIndex ‖a n‖ then (2 : ℝ) ^ (-((k : ℝ) * γ)) else 0) := by
+              rw [Finset.sum_comm]
+          _ ≤ ∑ k ∈ Finset.range (K + 1),
+              ((2 : ℝ) ^ (-(k : ℝ) * γ) * D * (2 : ℝ) ^ (((k + 1 : ℕ) : ℝ) * κ)) :=
+              Finset.sum_le_sum (by intro k hk; exact hcount_k k)
+          _ ≤ ∑ k ∈ Finset.range (K + 1), (D * (2 : ℝ) ^ κ * r0 ^ k) :=
+              Finset.sum_le_sum (by intro k hk; exact hterm_le k)
+          _ ≤ ∑' k : ℕ, D * (2 : ℝ) ^ κ * r0 ^ k :=
+              hu.sum_le_tsum (Finset.range (K + 1)) (by
+                intro k hk
+                exact mul_nonneg (mul_nonneg hD (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 2) κ))
+                  (pow_nonneg hr0nn k))
+          _ = C := rfl
+    have hhead : (∑ n ∈ Finset.range N, ((‖a n‖ ^ γ)⁻¹ - t n)) ≤ headC := by
+      have hdiff : ∀ n, (‖a n‖ ^ γ)⁻¹ - t n = if ‖a n‖ ≤ 1 then (‖a n‖ ^ γ)⁻¹ else 0 := by
+        intro n
+        by_cases h1n : 1 < ‖a n‖
+        · have hle' : ¬ ‖a n‖ ≤ 1 := by linarith
+          simp [t, h1n, hle']
+        · have hle' : ‖a n‖ ≤ 1 := le_of_not_gt h1n
+          simp [t, h1n, hle']
+      calc (∑ n ∈ Finset.range N, ((‖a n‖ ^ γ)⁻¹ - t n))
+          = ∑ n ∈ Finset.range N, if ‖a n‖ ≤ 1 then (‖a n‖ ^ γ)⁻¹ else 0 := by
+              exact Finset.sum_congr rfl (fun n hn => hdiff n)
+        _ = ∑ n ∈ (Finset.range N).filter (fun n => ‖a n‖ ≤ 1), (‖a n‖ ^ γ)⁻¹ := by
+              rw [← Finset.sum_filter]
+        _ ≤ ∑ n ∈ hS_fin.toFinset, (‖a n‖ ^ γ)⁻¹ := by
+              refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
+              · intro n hn
+                rw [Finset.mem_filter, Finset.mem_range] at hn
+                simpa [S] using hn.2
+              · intro n hn hnot
+                exact inv_nonneg.mpr (Real.rpow_nonneg (norm_nonneg (a n)) γ)
+        _ = headC := rfl
+    calc (∑ n ∈ Finset.range N, (‖a n‖ ^ γ)⁻¹)
+        = (∑ n ∈ Finset.range N, t n) + (∑ n ∈ Finset.range N, ((‖a n‖ ^ γ)⁻¹ - t n)) := by
+          rw [← Finset.sum_add_distrib]
+          exact Finset.sum_congr rfl (fun n hn => by ring)
+      _ ≤ C + headC := add_le_add htail hhead
+      _ = headC + C := by rw [add_comm]
+  have hmono : Monotone (fun N : ℕ => ∑ n ∈ Finset.range N, (‖a n‖ ^ γ)⁻¹) := by
+    intro N M hNM
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
+    · exact Finset.range_subset.mpr (by
+        intro x hx
+        exact Finset.mem_range.mpr (lt_of_lt_of_le hx hNM))
+    · intro n hn hnot
+      exact inv_nonneg.mpr (Real.rpow_nonneg (norm_nonneg (a n)) γ)
+  have hbdd : BddAbove (Set.range (fun N : ℕ => ∑ n ∈ Finset.range N, (‖a n‖ ^ γ)⁻¹)) := by
+    refine ⟨headC + C, ?_⟩
+    rintro y ⟨N, rfl⟩
+    exact htail_bdd N
+  exact summable_of_sum_range_le
+    (by intro n; exact inv_nonneg.mpr (Real.rpow_nonneg (norm_nonneg (a n)) γ))
+    (fun N => htail_bdd N)
+
+/-! ## The canonical product over the zeros -/
+
+/-- The canonical product `∏ₙ E_p(z/aₙ)` over a sequence of (nonzero) zeros. -/
+noncomputable def canonicalProductNat (p : ℕ) (a : ℕ → ℂ) (z : ℂ) : ℂ :=
+  ∏' n : ℕ, primaryFactor p (z / a n)
+
+lemma primaryFactor_ne_zero (p : ℕ) {z : ℂ} (hz : z ≠ 1) : primaryFactor p z ≠ 0 := by
+  rw [primaryFactor, mul_ne_zero_iff]
+  constructor
+  · exact sub_ne_zero.mpr hz
+  · exact exp_ne_zero _
+
+lemma primaryFactor_eq_zero_iff (p : ℕ) (z : ℂ) : primaryFactor p z = 0 ↔ z = 1 := by
+  constructor
+  · intro h
+    rw [primaryFactor, mul_eq_zero] at h
+    rcases h with h | h
+    · exact sub_eq_zero.mp h
+    · exact absurd h (exp_ne_zero _)
+  · intro h
+    rw [h, primaryFactor_one]
+
+/-- Pointwise bound `‖E_p(w) - 1‖ ≤ 4/(p+1) · ‖w‖^{p+1}` for `‖w‖ ≤ 1/2`. -/
+lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2) :
+    ‖primaryFactor p w - 1‖ ≤ (4 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1) := by
+  have hw1 : w ≠ 1 := by
+    intro h
+    rw [h, norm_one] at hw
+    norm_num at hw
+  have hL := primaryFactor_log_bound p hw
+  have hLle1 : ‖Complex.log (primaryFactor p w)‖ ≤ 1 := by
+    have h₁ : ‖w‖ ^ (p + 1) ≤ (1 / 2 : ℝ) ^ (p + 1) := by
+      exact pow_le_pow_left₀ (norm_nonneg w) hw (p + 1)
+    have h₂ : (1 / 2 : ℝ) ^ (p + 1) ≤ 1 / 2 := by
+      rw [pow_succ]
+      nlinarith [pow_le_one₀ (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num : (1 : ℝ) / 2 ≤ 1) (n := p),
+        pow_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2) p]
+    have h₃ : 2 / ((p : ℝ) + 1) ≤ 2 := by
+      rw [div_le_iff₀ (by positivity : (0 : ℝ) < (p : ℝ) + 1)]
+      have : (0 : ℝ) ≤ p := Nat.cast_nonneg p
+      linarith
+    have hpos : (0 : ℝ) ≤ 2 / ((p : ℝ) + 1) := by positivity
+    calc ‖Complex.log (primaryFactor p w)‖ ≤ 2 / ((p : ℝ) + 1) * ‖w‖ ^ (p + 1) := hL
+      _ ≤ 2 / ((p : ℝ) + 1) * (1 / 2) := mul_le_mul_of_nonneg_left (h₁.trans h₂) hpos
+      _ ≤ 2 * (1 / 2) := by nlinarith
+      _ = 1 := by norm_num
+  have hpf : primaryFactor p w = Complex.exp (Complex.log (primaryFactor p w)) := by
+    rw [Complex.exp_log (primaryFactor_ne_zero p hw1)]
+  calc ‖primaryFactor p w - 1‖
+      = ‖Complex.exp (Complex.log (primaryFactor p w)) - 1‖ := by rw [hpf]
+    _ ≤ 2 * ‖Complex.log (primaryFactor p w)‖ := Complex.norm_exp_sub_one_le hLle1
+    _ ≤ (4 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1) := by
+      rw [show 2 * (2 / (p + 1 : ℝ)) = 4 / (p + 1 : ℝ) by ring]
+      exact mul_le_mul_of_nonneg_right hL (pow_nonneg (norm_nonneg w) (p + 1))
+
+/-- The canonical product converges locally uniformly on `ℂ`. -/
+theorem multipliableLocallyUniformlyOn_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ)
+    (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) univ := by
+  have hball : ∀ R : ℝ, 0 < R → MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
+    intro R hR
+    let c : ℕ → ℝ := fun n => (4 / (p + 1 : ℝ)) * R ^ (p + 1) * (1 / ‖a n‖ ^ (p + 1))
+    have hc : Summable c := by
+      simpa [c, one_div, mul_assoc] using
+        (hs.mul_left ((4 / (p + 1 : ℝ)) * R ^ (p + 1)))
+    have hev : ∀ᶠ n in atTop, ∀ z ∈ Metric.ball (0 : ℂ) R,
+        ‖primaryFactor p (z / a n) - 1‖ ≤ c n := by
+      filter_upwards [htend.eventually_ge_atTop (2 * R)] with n hn z hz
+      have hz' : ‖z‖ ≤ R := le_of_lt (mem_ball_zero_iff.mp hz)
+      have hanz : (0 : ℝ) < ‖a n‖ := by linarith
+      have hnorm : ‖z / a n‖ ≤ 1 / 2 := by
+        rw [norm_div]
+        have h₁ : ‖z‖ / ‖a n‖ ≤ R / ‖a n‖ :=
+          div_le_div_of_nonneg_right hz' (le_of_lt hanz)
+        have h₂ : R / ‖a n‖ ≤ 1 / 2 := by
+          rw [div_le_iff₀ hanz]
+          nlinarith
+        exact h₁.trans h₂
+      have hb := norm_primaryFactor_sub_one_le p hnorm
+      have hb' : ‖primaryFactor p (z / a n) - 1‖ ≤ (4 / (p + 1 : ℝ)) * (‖z‖ ^ (p + 1) / ‖a n‖ ^ (p + 1)) := by
+        simpa [norm_div, div_pow] using hb
+      have hRpow : ‖z‖ ^ (p + 1) ≤ R ^ (p + 1) :=
+        pow_le_pow_left₀ (norm_nonneg z) hz' (p + 1)
+      have h₀ : (4 / (p + 1 : ℝ)) * (‖z‖ ^ (p + 1) / ‖a n‖ ^ (p + 1))
+          ≤ (4 / (p + 1 : ℝ)) * (R ^ (p + 1) / ‖a n‖ ^ (p + 1)) := by
+        exact mul_le_mul_of_nonneg_left
+          (div_le_div_of_nonneg_right hRpow (pow_nonneg (norm_nonneg (a n)) (p + 1)))
+          (by positivity : (0 : ℝ) ≤ 4 / (p + 1 : ℝ))
+      have h₁ : (4 / (p + 1 : ℝ)) * (R ^ (p + 1) / ‖a n‖ ^ (p + 1)) = c n := by
+        have hanz0 : ‖a n‖ ^ (p + 1) ≠ 0 := pow_ne_zero (p + 1) (norm_ne_zero_iff.mpr (hane n))
+        simp [c, div_eq_mul_inv, one_div, mul_assoc, hanz0]
+      exact hb'.trans (h₀.trans_eq h₁)
+    have hcts : ∀ n, ContinuousOn (fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
+      intro n
+      fun_prop
+    have hm : MultipliableLocallyUniformlyOn
+        (fun n : ℕ => fun z : ℂ => 1 + (primaryFactor p (z / a n) - 1)) (Metric.ball (0 : ℂ) R) := by
+      refine Summable.multipliableLocallyUniformlyOn_nat_one_add Metric.isOpen_ball hc ?_ ?_
+      · exact hev
+      · intro n
+        exact (hcts n).sub continuousOn_const
+    have heq : (fun (n : ℕ) (z : ℂ) => 1 + (primaryFactor p (z / a n) - 1))
+        = fun (n : ℕ) => fun z : ℂ => primaryFactor p (z / a n) := by
+      funext n z
+      ring
+    rwa [heq] at hm
+  refine multipliableLocallyUniformlyOn_of_of_forall_exists_nhds ?_
+  intro z hz
+  let R : ℝ := ‖z‖ + 1
+  have hR : 0 < R := by positivity
+  have hzmem : z ∈ Metric.ball (0 : ℂ) R := by
+    simp [R, Metric.mem_ball, dist_eq_norm]
+  have hzR : ‖z‖ < R := by simp [R]
+  have hballR : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) :=
+    hball R hR
+  have hballR1 : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) (R + 1)) :=
+    hball (R + 1) (by positivity)
+  have hmono' : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.closedBall (0 : ℂ) R) :=
+    hballR1.mono (by
+      intro x hx
+      rw [Metric.mem_closedBall, dist_eq_norm] at hx
+      rw [Metric.mem_ball, dist_eq_norm]
+      nlinarith)
+  have hcompact : MultipliableUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.closedBall (0 : ℂ) R) :=
+    hmono'.multipliableUniformlyOn_of_isCompact (isCompact_closedBall (0 : ℂ) R)
+  have huniform : MultipliableUniformlyOn
+      (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
+    rcases hcompact with ⟨g, hg⟩
+    exact ⟨g, hg.mono (by intro x hx; rw [Metric.mem_closedBall, dist_eq_norm]; exact le_of_lt (by simpa [Metric.mem_ball, dist_eq_norm] using hx))⟩
+  refine ⟨Metric.ball (0 : ℂ) R, Filter.mem_nhdsWithin_of_mem_nhds (Metric.isOpen_ball.mem_nhds hzmem), huniform⟩
+
+/-- The canonical product over the zeros defines an entire function. -/
+theorem differentiable_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ)
+    (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    Differentiable ℂ (canonicalProductNat p a) := by
+  have hm : MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) univ :=
+    multipliableLocallyUniformlyOn_primaryFactor hane p hs htend
+  have htend' : TendstoLocallyUniformlyOn
+      (fun N : ℕ => fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n))
+      (fun z => canonicalProductNat p a z) atTop univ := by
+    simpa [canonicalProductNat] using
+      (hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn.mp hm.hasProdLocallyUniformlyOn)
+  have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ
+      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) univ := by
+    refine eventually_of_forall (fun N => ?_)
+    refine DifferentiableOn.fun_finsetProd ?_
+    intro n hn
+    fun_prop
+  have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) univ :=
+    htend'.differentiableOn hF isOpen_univ
+  exact differentiableOn_univ.mp hd
+
+/-- For `z` not a zero, the log series converges. -/
+lemma summable_log_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) {z : ℂ}
+    (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    Summable (fun n : ℕ => Complex.log (primaryFactor p (z / a n))) := by
+  rcases (htend.eventually_ge_atTop (2 * (‖z‖ + 1))) with ⟨N, hN⟩
+  have htail : Summable (fun n : ℕ => ‖Complex.log (primaryFactor p (z / a (n + N)))‖) := by
+    refine Summable.of_nonneg_of_le
+      (f := fun n => (2 / (p + 1 : ℝ)) * (2 * (‖z‖ + 1)) ^ (p + 1) * (1 / ‖a (n + N)‖ ^ (p + 1))) ?_ ?_ ?_
+    · intro n
+      positivity
+    · intro n
+      have ha : 2 * (‖z‖ + 1) ≤ ‖a (n + N)‖ := hN (n + N) (by omega)
+      have hanz : (0 : ℝ) < ‖a (n + N)‖ := by
+        have hpos : (0 : ℝ) < 2 * (‖z‖ + 1) := by positivity
+        linarith
+      have hz1 : ‖z‖ / ‖a (n + N)‖ ≤ 1 / 2 := by
+        have h₁ : ‖z‖ / ‖a (n + N)‖ ≤ ‖z‖ / (2 * (‖z‖ + 1)) :=
+          div_le_div_of_nonneg_left (norm_nonneg z) hanz ha
+        have h₂ : ‖z‖ / (2 * (‖z‖ + 1)) ≤ 1 / 2 := by
+          rw [div_le_iff₀ (by positivity : (0 : ℝ) < 2 * (‖z‖ + 1))]
+          nlinarith
+        exact h₁.trans h₂
+      have hnorm0 : ‖z / a (n + N)‖ ≤ 1 / 2 := by
+        rw [norm_div]
+        exact hz1
+      have hb := primaryFactor_log_bound p hnorm0
+      calc ‖Complex.log (primaryFactor p (z / a (n + N)))‖
+          ≤ (2 / (p + 1 : ℝ)) * ‖z / a (n + N)‖ ^ (p + 1) := hb
+        _ ≤ (2 / (p + 1 : ℝ)) * ((2 * (‖z‖ + 1)) / ‖a (n + N)‖) ^ (p + 1) := by
+            refine mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (norm_nonneg _) ?_ (p + 1))
+              (by positivity : (0 : ℝ) ≤ 2 / (p + 1 : ℝ))
+            rw [norm_div]
+            exact div_le_div_of_nonneg_right (by nlinarith [norm_nonneg z]) (le_of_lt hanz)
+        _ = (2 / (p + 1 : ℝ)) * ((2 * (‖z‖ + 1)) ^ (p + 1) / ‖a (n + N)‖ ^ (p + 1)) := by
+            rw [div_pow]
+        _ = (2 / (p + 1 : ℝ)) * (2 * (‖z‖ + 1)) ^ (p + 1) * (1 / ‖a (n + N)‖ ^ (p + 1)) := by
+            rw [mul_div_assoc, one_div]
+    · have hshift : Summable (fun n : ℕ => (‖a (n + N)‖ ^ (p + 1))⁻¹) := by
+        simpa [one_div] using (summable_nat_add_iff (f := fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹) N).mpr hs
+      simpa [one_div, mul_assoc] using
+        (hshift.mul_left ((2 / (p + 1 : ℝ)) * (2 * (‖z‖ + 1)) ^ (p + 1)))
+  have hnorm : Summable (fun n : ℕ => ‖Complex.log (primaryFactor p (z / a n))‖) :=
+    (summable_nat_add_iff (f := fun n : ℕ => ‖Complex.log (primaryFactor p (z / a n))‖) N).mp htail
+  exact hnorm.of_norm
+
+/-- Off the zeros, the canonical product equals `exp` of the sum of the logarithms. -/
+lemma tprod_eq_exp_tsum_log {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) {z : ℂ}
+    (hz : ∀ n, z ≠ a n) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    canonicalProductNat p a z = Complex.exp (∑' n : ℕ, Complex.log (primaryFactor p (z / a n))) := by
+  have hlog : Summable (fun n : ℕ => Complex.log (primaryFactor p (z / a n))) :=
+    summable_log_primaryFactor hane p hs htend
+  have hm : Multipliable (fun n : ℕ => primaryFactor p (z / a n)) :=
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (mem_univ z)
+  have hprod : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) atTop
+      (𝓝 (canonicalProductNat p a z)) := by
+    simpa [canonicalProductNat] using hm.hasProd.tendsto_prod_nat
+  have hsum : Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N, Complex.log (primaryFactor p (z / a n))) atTop
+      (𝓝 (∑' n : ℕ, Complex.log (primaryFactor p (z / a n)))) :=
+    hlog.hasSum.tendsto_sum_nat
+  have hexp : Tendsto (fun N : ℕ => Complex.exp (∑ n ∈ Finset.range N, Complex.log (primaryFactor p (z / a n)))) atTop
+      (𝓝 (Complex.exp (∑' n : ℕ, Complex.log (primaryFactor p (z / a n))))) :=
+    (Complex.continuous_exp.tendsto (∑' n : ℕ, Complex.log (primaryFactor p (z / a n)))).comp hsum
+  have heq : ∀ N : ℕ, (∏ n ∈ Finset.range N, primaryFactor p (z / a n))
+      = Complex.exp (∑ n ∈ Finset.range N, Complex.log (primaryFactor p (z / a n))) := by
+    intro N
+    calc ∏ n ∈ Finset.range N, primaryFactor p (z / a n)
+        = ∏ n ∈ Finset.range N, Complex.exp (Complex.log (primaryFactor p (z / a n))) := by
+            refine Finset.prod_congr rfl ?_
+            intro n hn
+            rw [Complex.exp_log (primaryFactor_ne_zero p (by
+              intro h
+              apply hz n
+              rw [div_eq_one_iff_eq (hane n)] at h
+              exact h))]
+      _ = Complex.exp (∑ n ∈ Finset.range N, Complex.log (primaryFactor p (z / a n))) := by
+            rw [Complex.exp_sum]
+  exact tendsto_nhds_unique (hprod.congr' (by
+    filter_upwards with N
+    exact heq N)) hexp
+
+/-- The canonical product does not vanish away from the zeros. -/
+theorem canonicalProductNat_ne_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) {z : ℂ}
+    (hz : ∀ n, z ≠ a n) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    canonicalProductNat p a z ≠ 0 := by
+  rw [tprod_eq_exp_tsum_log hane p hz hs htend]
+  exact Complex.exp_ne_zero _
+
+/-- The canonical product vanishes at each zero `aₙ`. -/
+theorem canonicalProductNat_eq_zero_of_mem {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) {z : ℂ}
+    (hzm : ∃ n, z = a n) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    canonicalProductNat p a z = 0 := by
+  rcases hzm with ⟨n₀, rfl⟩
+  have hm : Multipliable (fun n : ℕ => primaryFactor p (a n₀ / a n)) :=
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (mem_univ (a n₀))
+  have hprod : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) atTop
+      (𝓝 (canonicalProductNat p a (a n₀))) := by
+    simpa [canonicalProductNat] using hm.hasProd.tendsto_prod_nat
+  have hz0 : ∀ᶠ N in atTop, (∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) = 0 := by
+    filter_upwards [eventually_ge_atTop (n₀ + 1)] with N hN
+    refine Finset.prod_eq_zero (Finset.mem_range.mpr (by omega)) ?_
+    rw [div_self (hane n₀), primaryFactor_one]
+  have hprod0 : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) atTop
+      (𝓝 (0 : ℂ)) :=
+    (tendsto_const_nhds : Tendsto (fun N : ℕ => (0 : ℂ)) atTop (𝓝 (0 : ℂ))).congr' (by
+      filter_upwards [hz0] with N hN
+      exact hN.symm)
+  exact tendsto_nhds_unique hprod hprod0
+
+/-- Logarithmic derivative of the canonical product. -/
+theorem logDeriv_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) {s : Set ℂ}
+    (hs : IsOpen s) {z : ℂ} (hz : z ∈ s) (hzane : ∀ n, z ≠ a n)
+    (hs2 : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop)
+    (hlogsum : Summable fun n => logDeriv (fun x => primaryFactor p (x / a n)) z) :
+    logDeriv (canonicalProductNat p a) z = ∑' n, logDeriv (fun x => primaryFactor p (x / a n)) z := by
+  exact logDeriv_tprod_eq_tsum hs hz
+    (fun n => primaryFactor_ne_zero p (by
+      intro h
+      apply hzane n
+      rw [div_eq_one_iff_eq (hane n)] at h
+      exact h))
+    (fun n => by fun_prop)
+    hlogsum
+    ((multipliableLocallyUniformlyOn_primaryFactor hane p hs2 htend).mono (subset_univ s))
+    (canonicalProductNat_ne_zero hane p hzane hs2 htend)
