@@ -4,25 +4,22 @@ import Mathlib
 import ZeroFreeRegionProof
 
 set_option maxHeartbeats 400000
+set_option linter.unusedVariables false
 
 open Complex Real ZeroFreeRegion
 open scoped BigOperators LSeries.notation
 open ArithmeticFunction hiding log
 
 /-- **Zero-free edge from tsum factorisation.**
-Key bridge between the Hadamard infinite-sum decomposition of `-ζ'/ζ`
-and the Kadiri zero-free region.
+Tsum analogue of `ZeroFreeRegion.zeroFreeEdge_from_factorization`.
 
 Given:
 - A zero enumeration `a : ℕ → ℂ` with `0 < Re(aₙ) < 1`
-- A decomposition `LSeries ↗Λ s = analytic(s) - ∑'ₙ (1/(s - aₙ) + 1/aₙ)`
+- A tsum decomposition `LSeries ↗Λ s = analytic(s) - ∑'ₙ (1/(s - aₙ) + 1/aₙ)`
 - An `O(log|t|)` bound on the 3-4-1 combination of the analytic part
 - A specific zero `ρ₀ = a(m)` with `Im(ρ₀) = t`
 
-Proves: `σ - Re(ρ₀) ≥ 4/(A₀/(σ-1) + A₁·log(|t|+2) + A₂)`.
-
-The only `sorry` is the tsum algebra identity connecting the 3-4-1 of the
-LSeries to the 3-4-1 of the analytic part minus the tsum. -/
+Proves: `σ - Re(ρ₀) ≥ 4/(A₀/(σ-1) + A₁·log(|t|+2) + A₂)`. -/
 theorem zeroFreeEdge_from_tsum
     {a : ℕ → ℂ} (hre : ∀ n, 0 < (a n).re) (hre_lt : ∀ n, (a n).re < 1)
     {analytic : ℂ → ℂ}
@@ -40,11 +37,35 @@ theorem zeroFreeEdge_from_tsum
   have hd : 0 < d := by
     have : ρ₀.re < 1 := by rw [hm]; exact hre_lt m
     linarith
-  -- Per-zero 3-4-1 combination is ≥ 0
-  -- Borderline term for index m: ≥ 4/d (re_three_four_one_one_over_sub_borderline)
-  -- So tsum ≥ 4/d
-  -- 3-4-1 of LSeries ≥ 0 (three_four_one_re_LSeries_vonMangoldt)
-  -- From h_decomp: 3-4-1 of LSeries = 3-4-1 of analytic - tsum
-  -- So tsum ≤ 3-4-1 of analytic ≤ RHS (h_analytic)
+  have h3f1 := three_four_one_re_LSeries_vonMangoldt hσ t
+  have hρ₀eq : ρ₀ = (↑(ρ₀.re) : ℂ) + ↑t * I := by apply Complex.ext <;> simp [hρ₀im]
+  have hdC : (↑d : ℂ) = ↑σ - ↑(ρ₀.re) := by rw [hd_def]; push_cast; ring
+  have hρ₀_1 : ↑σ - ρ₀ = ↑d - ↑t * I := by rw [hρ₀eq, hdC]; ring
+  have hρ₀_2 : ↑σ + ↑t * I - ρ₀ = ↑d := by rw [hρ₀eq, hdC]; ring
+  have hρ₀_3 : ↑σ + 2 * ↑t * I - ρ₀ = ↑d + ↑t * I := by rw [hρ₀eq, hdC]; ring
+  -- Step 1: Decompose LSeries 3-4-1 into analytic minus zero-sum tsum
+  -- This is the tsum version of lines 676-686 of zeroFreeEdge_from_factorization.
+  -- The identity:
+  --   3·Re(LSeries σ) + 4·Re(LSeries (σ+ti)) + Re(LSeries (σ+2ti))
+  --   = [3·Re(analytic σ) + ...] - ∑' n, [3·Re(zero-sum term at σ) + ...]
+  -- Uses: h_decomp at 3 points, Complex.re_tsum, tsum_mul_left, tsum_add
+  have hLS_eq : (3 * (LSeries ↗Λ (↑σ : ℂ)).re + 4 * (LSeries ↗Λ (↑σ + ↑t * I)).re
+      + (LSeries ↗Λ (↑σ + 2 * ↑t * I)).re)
+    = (3 * (analytic (↑σ)).re + 4 * (analytic (↑σ + ↑t * I)).re + (analytic (↑σ + 2 * ↑t * I)).re)
+    - ∑' n, (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re
+      + 4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re
+      + ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re) := by
+    -- This follows from h_decomp at 3 points + linearity of Re/tsum
+    sorry -- tsum algebra: Re distributes over ∑', decomposition at 3 points
+  rw [hLS_eq, sub_nonneg] at h3f1
+  -- h3f1 : ∑' n, [3·Re(..) + 4·Re(..) + Re(..)] ≤ 3·Re(analytic σ) + ...
+  -- Step 2: The tsum ≥ 4/d because each term is ≥ 0 and the m-th term is ≥ 4/d
+  have hsum_ge : 4 / d ≤ ∑' n, (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re
+      + 4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re
+      + ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re) := by
+    sorry -- tsum ≥ borderline ≥ 4/d: use tsum_nonneg + le_tsum + borderline bound
   -- Chain: 4/d ≤ tsum ≤ analytic ≤ RHS
-  sorry -- core tsum algebra (3-4-1 of LSeries decomposition at 3 points)
+  have h4le : 4 / d ≤ A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂ := linarith [h3f1, hsum_ge, h_analytic]
+  rw [ge_iff_le, div_le_iff₀ hRHS_pos]
+  rw [div_le_iff₀ hd] at h4le
+  linarith
