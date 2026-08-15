@@ -1926,6 +1926,33 @@ theorem xiShifted_continuousOn :
           (fun z _ => Set.mem_range_self _))))
     hagreement
 
+/-- The completed-zeta identity also supplies complex differentiability of
+    `xiShifted` throughout the shifted critical strip.  This is the analytic
+    input needed for Taylor-series convergence at a real center. -/
+theorem xiShifted_differentiableOn :
+    DifferentiableOn ℂ (fun z : ℂ => xiShifted z)
+      {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+  apply DifferentiableOn.congr
+    (f := fun z : ℂ => (1 / 2 : ℂ) -
+      (z ^ 2 + (1 / 4 : ℂ)) / 2 *
+        completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z))
+    (by
+      have harg : Differentiable ℂ (fun z : ℂ => (1 / 2 : ℂ) + I * z) :=
+        (differentiable_id.const_mul I).const_add (1 / 2 : ℂ)
+      have hcomp : Differentiable ℂ
+          (fun z : ℂ => completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)) :=
+        differentiable_completedZeta₀.comp harg
+      have hpoly : Differentiable ℂ
+          (fun z : ℂ => (z ^ 2 + (1 / 4 : ℂ)) / 2) :=
+        ((differentiable_id.pow 2).add_const (1 / 4 : ℂ)).div_const 2
+      have hprod : Differentiable ℂ
+          (fun z : ℂ => (z ^ 2 + (1 / 4 : ℂ)) / 2 *
+            completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)) :=
+        hpoly.mul hcomp
+      exact ((differentiable_const _).sub hprod).differentiableOn)
+  intro z hz
+  exact xiShifted_eq_completed z hz.1 hz.2
+
 /-- The completed Riemann zeta₀ function decays to 0 along horizontal lines
     in the critical strip: completedRiemannZeta₀(σ + it) → 0 as t → ∞ for any fixed σ.
 
@@ -11315,6 +11342,122 @@ function alone does not imply positivity of its interval integral.
 noncomputable def tailVerticalPoint (r y : ℝ) : ℂ :=
   (r : ℂ) + I * (y : ℂ)
 
+/-- The complex ball of radius `1/2` about a real point stays inside the
+    shifted critical strip. -/
+theorem ball_realCenter_half_subset_shiftedStrip (r : ℝ) :
+    Metric.ball (r : ℂ) (1 / 2 : ℝ) ⊆
+      {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+  intro z hz
+  have hnorm : ‖z - (r : ℂ)‖ < (1 / 2 : ℝ) := by
+    simpa only [Metric.mem_ball, Complex.dist_eq] using hz
+  have him : |z.im| < (1 / 2 : ℝ) := by
+    calc
+      |z.im| = |(z - (r : ℂ)).im| := by simp
+      _ ≤ ‖z - (r : ℂ)‖ := Complex.abs_im_le_norm _
+      _ < (1 / 2 : ℝ) := hnorm
+  exact (abs_lt.mp him)
+
+/-- Mathlib's Taylor theorem applied to `xiShifted` at a real center.  Thus
+    convergence of each individual vertical Taylor series is no longer an
+    open assumption; only the subsequent Cauchy-product/even-term
+    identification remains in the Laguerre-series leaf. -/
+theorem xiShifted_hasSum_taylor_realCenter
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum
+      (fun n : ℕ =>
+        (n.factorial : ℂ)⁻¹ •
+          (tailVerticalPoint r y - (r : ℂ)) ^ n •
+            iteratedDeriv n xiShifted (r : ℂ))
+      (xiShifted (tailVerticalPoint r y)) := by
+  apply Complex.hasSum_taylorSeries_on_ball
+    (xiShifted_differentiableOn.mono
+      (ball_realCenter_half_subset_shiftedStrip r))
+  simp only [Metric.mem_ball, Complex.dist_eq, tailVerticalPoint]
+  simpa [norm_mul] using hy
+
+/-- The same Taylor convergence statement in the scalar form used by the
+    canonical derivative convolution. -/
+theorem xiShifted_hasSum_verticalTaylor
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum
+      (fun n : ℕ =>
+        (n.factorial : ℂ)⁻¹ * (I * (y : ℂ)) ^ n *
+          iteratedDeriv n xiShifted (r : ℂ))
+      (xiShifted (tailVerticalPoint r y)) := by
+  simpa [tailVerticalPoint, smul_eq_mul, mul_assoc] using
+    xiShifted_hasSum_taylor_realCenter r y hy
+
+/-- Both vertical Taylor factors needed for the modulus-square Cauchy product
+    converge on `|y| < 1/2`. -/
+theorem xiShifted_verticalTaylor_pair_summable
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    Summable
+        (fun n : ℕ =>
+          (n.factorial : ℂ)⁻¹ * (I * (y : ℂ)) ^ n *
+            iteratedDeriv n xiShifted (r : ℂ)) ∧
+      Summable
+        (fun n : ℕ =>
+          (n.factorial : ℂ)⁻¹ * (I * ((-y : ℝ) : ℂ)) ^ n *
+            iteratedDeriv n xiShifted (r : ℂ)) := by
+  constructor
+  · exact (xiShifted_hasSum_verticalTaylor r y hy).summable
+  · exact (xiShifted_hasSum_verticalTaylor r (-y) (by simpa using hy)).summable
+
+/-- A named Taylor term for the vertical expansion at the real center `r`. -/
+noncomputable def xiShiftedVerticalTaylorTerm
+    (n : ℕ) (r y : ℝ) : ℂ :=
+  (n.factorial : ℂ)⁻¹ * (I * (y : ℂ)) ^ n *
+    iteratedDeriv n xiShifted (r : ℂ)
+
+theorem xiShiftedVerticalTaylorTerm_hasSum
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum (fun n : ℕ => xiShiftedVerticalTaylorTerm n r y)
+      (xiShifted (tailVerticalPoint r y)) := by
+  simpa only [xiShiftedVerticalTaylorTerm] using
+    xiShifted_hasSum_verticalTaylor r y hy
+
+/-- The Cauchy coefficient obtained by multiplying the vertical Taylor series
+    by its conjugate. -/
+noncomputable def xiShiftedVerticalCauchyCoefficient
+    (m : ℕ) (r y : ℝ) : ℂ :=
+  ∑ j ∈ Finset.range (m + 1),
+    xiShiftedVerticalTaylorTerm j r y *
+      star (xiShiftedVerticalTaylorTerm (m - j) r y)
+
+/-- Absolute summability in finite-dimensional `ℂ`, followed by Mathlib's
+    Cauchy-product theorem, gives the full (not yet even-regrouped) Taylor
+    expansion of the modulus square. -/
+theorem xiShiftedVerticalCauchyCoefficient_hasSum
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum (fun m : ℕ => xiShiftedVerticalCauchyCoefficient m r y)
+      (xiShifted (tailVerticalPoint r y) *
+        star (xiShifted (tailVerticalPoint r y))) := by
+  have ha := xiShiftedVerticalTaylorTerm_hasSum r y hy
+  have hb := ha.star
+  have hanorm : Summable
+      (fun n : ℕ => ‖xiShiftedVerticalTaylorTerm n r y‖) :=
+    summable_norm_iff.mpr ha.summable
+  have hbnorm : Summable
+      (fun n : ℕ => ‖star (xiShiftedVerticalTaylorTerm n r y)‖) :=
+    summable_norm_iff.mpr hb.summable
+  have hp := hasSum_sum_range_mul_of_summable_norm hanorm hbnorm
+  rw [ha.tsum_eq, hb.tsum_eq] at hp
+  simpa only [xiShiftedVerticalCauchyCoefficient] using hp
+
+/-- Taking real parts turns the Cauchy product into a real series summing to
+    the squared modulus.  The remaining series-identity work is now purely
+    finite coefficient algebra plus removal of the odd powers. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_hasSum
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum (fun m : ℕ => (xiShiftedVerticalCauchyCoefficient m r y).re)
+      (‖xiShifted (tailVerticalPoint r y)‖ ^ 2) := by
+  have h := RCLike.hasSum_re ℂ
+    (xiShiftedVerticalCauchyCoefficient_hasSum r y hy)
+  convert h using 1
+  · rfl
+  · rw [Complex.mul_conj]
+    exact Complex.sq_norm (xiShifted (tailVerticalPoint r y))
+
 /-- An integrated vertical-modulus-growth leaf for the tail.  Its `growth`
     field is the RH-hard analytic input; the remaining conversion to
     `Certificate` is formal. -/
@@ -11699,15 +11842,46 @@ structure TailSquaredHeightSplitCurvatureBlockLeaf where
       HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
         (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
 
+/-- The coefficient-sign core of the split curvature leaf.  This deliberately
+    contains no differentiability, curvature-series, or endpoint data: the
+    direct `HasSum` truncation argument only needs the signs of `Lₙ`, `n ≥ 2`.
+    Keeping the finite and cofinite regimes separate lets the two ranges be
+    attacked by unrelated estimates. -/
+structure TailHigherLaguerreCoefficientSplitLeaf where
+  cutoff : ℕ
+  finite_nonneg :
+    ∀ n : ℕ, n < cutoff → ∀ r : ℝ, 10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient (n + 2) r
+  tail_nonneg :
+    ∀ n : ℕ, cutoff ≤ n → ∀ r : ℝ, 10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient (n + 2) r
+
+/-- The finite/cofinite split covers every canonical coefficient of order at
+    least two, without imposing any analytic regularity assumptions. -/
+theorem TailHigherLaguerreCoefficientSplitLeaf.coefficient_nonneg
+    (B : TailHigherLaguerreCoefficientSplitLeaf)
+    (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
+    0 ≤ xiShiftedLaguerreCoefficient (n + 2) r := by
+  by_cases hn : n < B.cutoff
+  · exact B.finite_nonneg n hn r hr
+  · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r hr
+
+/-- Forget the analytic fields of a split curvature certificate and retain
+    only the higher canonical coefficient signs used by direct truncation. -/
+noncomputable def TailSquaredHeightSplitCurvatureBlockLeaf.toHigherCoefficients
+    (B : TailSquaredHeightSplitCurvatureBlockLeaf) :
+    TailHigherLaguerreCoefficientSplitLeaf where
+  cutoff := B.cutoff
+  finite_nonneg := B.finite_nonneg
+  tail_nonneg := B.tail_nonneg
+
 /-- The finite/cofinite split covers every canonical coefficient of order at
     least two. -/
 theorem TailSquaredHeightSplitCurvatureBlockLeaf.coefficient_nonneg
     (B : TailSquaredHeightSplitCurvatureBlockLeaf)
     (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
     0 ≤ xiShiftedLaguerreCoefficient (n + 2) r := by
-  by_cases hn : n < B.cutoff
-  · exact B.finite_nonneg n hn r hr
-  · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r hr
+  exact B.toHigherCoefficients.coefficient_nonneg n r hr
 
 /-- Assemble finite curvature blocks and their cofinite tail using the same
     infinite-sum positivity mechanism as the first Laguerre coefficient. -/
@@ -11858,25 +12032,82 @@ noncomputable def TailCanonicalGeneralizedLaguerreLeaf.toGeneralized
     square.  This is intended to follow from analyticity, independently of all
     positivity estimates. -/
 structure TailCanonicalLaguerreSeriesIdentityLeaf where
-  series_summable :
+  series_hasSum :
     ∀ r y : ℝ,
       10 < |r| →
       0 < y →
       y < (1 / 2 : ℝ) →
-      Summable (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
-  series_expansion :
-    ∀ r y : ℝ,
-      10 < |r| →
-      0 < y →
-      y < (1 / 2 : ℝ) →
-      (∑' n : ℕ, xiShiftedLaguerreCoefficient n r * y ^ (2 * n)) =
-        ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+      HasSum (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
+        (‖xiShifted (tailVerticalPoint r y)‖ ^ 2)
 
-/-- Paired blocks handle `L₁`, canonical curvature handles every `Lₙ` for
-    `n ≥ 2`, and the proved zeroth-coefficient identity handles `L₀`. -/
-theorem xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature
+/-- Summability is a consequence of the single analytic `HasSum` identity. -/
+theorem TailCanonicalLaguerreSeriesIdentityLeaf.series_summable
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r y : ℝ) (hr : 10 < |r|) (hy : 0 < y) (hylt : y < (1 / 2 : ℝ)) :
+    Summable (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n)) :=
+  (S.series_hasSum r y hr hy hylt).summable
+
+/-- The `tsum` equality is the other immediate consequence of `HasSum`. -/
+theorem TailCanonicalLaguerreSeriesIdentityLeaf.series_expansion
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r y : ℝ) (hr : 10 < |r|) (hy : 0 < y) (hylt : y < (1 / 2 : ℝ)) :
+    (∑' n : ℕ, xiShiftedLaguerreCoefficient n r * y ^ (2 * n)) =
+      ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 :=
+  (S.series_hasSum r y hr hy hylt).tsum_eq
+
+/-- The squared-height profile at the origin is its canonical zeroth
+    Laguerre coefficient. -/
+theorem xiShiftedSquaredHeightProfile_zero (r : ℝ) :
+    xiShiftedSquaredHeightProfile r 0 = xiShiftedLaguerreCoefficient 0 r := by
+  rw [xiShiftedLaguerreCoefficient_zero]
+  simp [xiShiftedSquaredHeightProfile, tailVerticalPoint]
+
+/-- The vertical even-power `HasSum` identity transfers exactly to the
+    ordinary power series in squared height. -/
+theorem TailCanonicalLaguerreSeriesIdentityLeaf.squaredHeight_hasSum
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r t : ℝ) (hr : 10 < |r|) (ht : 0 < t) (htlt : t < (1 / 4 : ℝ)) :
+    HasSum (fun n : ℕ => xiShiftedLaguerreCoefficient n r * t ^ n)
+      (xiShiftedSquaredHeightProfile r t) := by
+  have hsqrt_pos : 0 < Real.sqrt t := Real.sqrt_pos.2 ht
+  have hsqrt_lt : Real.sqrt t < (1 / 2 : ℝ) := by
+    apply (Real.sqrt_lt ht.le (by norm_num)).2
+    norm_num
+    exact htlt
+  have hsum := S.series_hasSum r (Real.sqrt t) hr hsqrt_pos hsqrt_lt
+  have hsum' :
+      HasSum (fun n : ℕ => xiShiftedLaguerreCoefficient n r * t ^ n)
+        (‖xiShifted (tailVerticalPoint r (Real.sqrt t))‖ ^ 2) :=
+    by
+      convert hsum using 1
+      funext n
+      congr 1
+      rw [pow_mul, Real.sq_sqrt ht.le]
+  simpa only [xiShiftedSquaredHeightProfile] using hsum'
+
+/-- Convergence of the vertical even-power series transfers exactly to the
+    ordinary power series in squared height. -/
+theorem TailCanonicalLaguerreSeriesIdentityLeaf.squaredHeight_summable
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r t : ℝ) (hr : 10 < |r|) (ht : 0 < t) (htlt : t < (1 / 4 : ℝ)) :
+    Summable (fun n : ℕ => xiShiftedLaguerreCoefficient n r * t ^ n) :=
+  (S.squaredHeight_hasSum r t hr ht htlt).summable
+
+/-- On `0 < t < 1/4`, the canonical vertical Taylor convolution is literally
+    the ordinary power series `∑ Lₙ(r)tⁿ` for the squared-height profile. -/
+theorem TailCanonicalLaguerreSeriesIdentityLeaf.squaredHeight_expansion
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r t : ℝ) (hr : 10 < |r|) (ht : 0 < t) (htlt : t < (1 / 4 : ℝ)) :
+    xiShiftedSquaredHeightProfile r t =
+      ∑' n : ℕ, xiShiftedLaguerreCoefficient n r * t ^ n :=
+  (S.squaredHeight_hasSum r t hr ht htlt).tsum_eq.symm
+
+/-- Paired blocks handle `L₁`, the finite/cofinite higher-coefficient split
+    handles every `Lₙ` for `n ≥ 2`, and the proved zeroth identity handles
+    `L₀`. -/
+theorem xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_higherCoefficients
     (B : TailFirstLaguerreBlockLeaf)
-    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
     (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
     0 ≤ xiShiftedLaguerreCoefficient n r := by
   cases n with
@@ -11889,8 +12120,17 @@ theorem xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature
           rw [xiShiftedLaguerreCoefficient_one]
           exact (xiShiftedFirstLaguerreCoefficient_pos_of_blocks B r hr).le
       | succ n =>
-          have h := C.coefficient_nonneg n r hr
+          have h := H.coefficient_nonneg n r hr
           convert h using 1
+
+/-- Compatibility wrapper for the stronger curvature package. -/
+theorem xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
+    0 ≤ xiShiftedLaguerreCoefficient n r :=
+  xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_higherCoefficients
+    B C.toHigherCoefficients n r hr
 
 /-- The first canonical coefficient is strictly positive under the paired
     block certificate. -/
@@ -11900,19 +12140,87 @@ theorem xiShiftedLaguerreCoefficient_one_pos_of_blocks
   rw [xiShiftedLaguerreCoefficient_one]
   exact xiShiftedFirstLaguerreCoefficient_pos_of_blocks B r hr
 
-/-- Novel combination used by the tail certificate: paired `L₁` blocks and
-    the canonical curvature split furnish all positivity, while a purely
-    analytic series-identity leaf furnishes convergence and expansion. -/
+/-- Paired `L₁` blocks and a higher-coefficient split furnish all positivity,
+    while a purely analytic series-identity leaf furnishes convergence and
+    expansion.  No curvature representation is needed on this branch. -/
+theorem tailCanonicalGeneralizedLaguerre_of_blocks_higherCoefficients_series
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
+    TailCanonicalGeneralizedLaguerreLeaf where
+  coefficient_nonneg :=
+    xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_higherCoefficients B H
+  coefficient_one_pos := xiShiftedLaguerreCoefficient_one_pos_of_blocks B
+  series_summable := S.series_summable
+  series_expansion := S.series_expansion
+
+/-- Compatibility wrapper accepting the stronger curvature package. -/
 theorem tailCanonicalGeneralizedLaguerre_of_blocks_curvature_series
     (B : TailFirstLaguerreBlockLeaf)
     (C : TailSquaredHeightSplitCurvatureBlockLeaf)
     (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
-    TailCanonicalGeneralizedLaguerreLeaf where
-  coefficient_nonneg :=
-    xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_curvature B C
-  coefficient_one_pos := xiShiftedLaguerreCoefficient_one_pos_of_blocks B
-  series_summable := S.series_summable
-  series_expansion := S.series_expansion
+    TailCanonicalGeneralizedLaguerreLeaf :=
+  tailCanonicalGeneralizedLaguerre_of_blocks_higherCoefficients_series
+    B C.toHigherCoefficients S
+
+/-- Direct two-term truncation of the canonical squared-height series.  This
+    bypasses termwise differentiation: all terms outside `{0,1}` are
+    nonnegative, so the full profile lies above `L₀(r) + t L₁(r)`. -/
+theorem xiShiftedSquaredHeightProfile_linear_lower_bound
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf)
+    (r t : ℝ) (hr : 10 < |r|) (ht : 0 < t) (htlt : t < (1 / 4 : ℝ)) :
+    xiShiftedLaguerreCoefficient 0 r +
+        xiShiftedLaguerreCoefficient 1 r * t ≤
+      xiShiftedSquaredHeightProfile r t := by
+  have hsum := (S.squaredHeight_summable r t hr ht htlt).sum_le_tsum
+    ({0, 1} : Finset ℕ)
+    (fun n _ => mul_nonneg
+      (xiShiftedLaguerreCoefficient_nonneg_of_blocks_and_higherCoefficients
+        B H n r hr)
+      (pow_nonneg ht.le n))
+  calc
+    xiShiftedLaguerreCoefficient 0 r +
+        xiShiftedLaguerreCoefficient 1 r * t =
+      ∑ n ∈ ({0, 1} : Finset ℕ),
+        xiShiftedLaguerreCoefficient n r * t ^ n := by
+          norm_num [Finset.sum_insert]
+    _ ≤ ∑' n : ℕ, xiShiftedLaguerreCoefficient n r * t ^ n := hsum
+    _ = xiShiftedSquaredHeightProfile r t :=
+      (S.squaredHeight_expansion r t hr ht htlt).symm
+
+/-- The direct series truncation yields the original aggregate-remainder leaf
+    without invoking derivatives, curvature regularity, or a supporting-line
+    theorem. -/
+theorem tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
+    TailLaguerreRemainderLeaf where
+  L1_pos := xiShiftedFirstLaguerreCoefficient_pos_of_blocks B
+  remainder_nonneg := by
+    intro r y hr hy hylt
+    have hlin := xiShiftedSquaredHeightProfile_linear_lower_bound
+      B H S r (y ^ 2) hr (sq_pos_of_pos hy) (by nlinarith)
+    have hlin' :
+        ‖xiShifted (tailVerticalPoint r 0)‖ ^ 2 +
+            xiShiftedFirstLaguerreCoefficient r * y ^ 2 ≤
+          ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 := by
+      simpa [xiShiftedLaguerreCoefficient_zero,
+        xiShiftedLaguerreCoefficient_one, xiShiftedSquaredHeightProfile,
+        Real.sqrt_sq hy.le, tailVerticalPoint] using hlin
+    unfold xiShiftedLaguerreRemainder
+    nlinarith
+
+/-- Compatibility wrapper accepting the stronger curvature package. -/
+theorem tailLaguerreRemainder_of_blocks_curvature_series_direct
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
+    TailLaguerreRemainderLeaf :=
+  tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct
+    B C.toHigherCoefficients S
 
 /-- Nonnegativity of the whole Laguerre series lets us retain only its first
     nonconstant term. -/
@@ -12144,6 +12452,17 @@ noncomputable def certificate_of_blocks_curvature_series
   certificate_of_tailCanonicalGeneralizedLaguerre
     (tailCanonicalGeneralizedLaguerre_of_blocks_curvature_series B C S)
 
+/-- The smaller direct certificate constructor.  Its higher-order input is
+    only a sign split for the canonical coefficients; it does not request a
+    curvature series, differentiability of the squared-height profile, or an
+    endpoint derivative. -/
+noncomputable def certificate_of_blocks_higherCoefficients_series_direct
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) : Certificate :=
+  certificate_of_tailLaguerreRemainder
+    (tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct B H S)
+
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
 theorem certificate_implies_tail_nonvanishing
@@ -12261,6 +12580,18 @@ theorem rh_from_certificate_closed
       quadrant := ClosedCertificate.remainingQuadrant_10_closed
       tail := certificate_to_tailDistance C
     }
+
+/-- Minimal direct-series frontier for the tail argument.  Together with the
+    already closed bounded region, these three independent inputs imply RH:
+    strict `L₁` paired blocks, signs of `Lₙ` for `n ≥ 2`, and the analytic
+    Taylor/Cauchy-product identity. -/
+theorem rh_from_laguerre_blocks_higherCoefficients_series
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf)
+    (S : TailCanonicalLaguerreSeriesIdentityLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_certificate_closed
+    (certificate_of_blocks_higherCoefficients_series_direct B H S)
 
 /-- Prop-form mirror of Challenge 2. -/
 def Challenge2Statement : Prop :=
