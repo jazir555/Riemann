@@ -3060,7 +3060,7 @@ lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2)
   have hpf : primaryFactor p w = Complex.exp (Complex.log (primaryFactor p w)) := by
     rw [Complex.exp_log (primaryFactor_ne_zero p hw1)]
   calc ‖primaryFactor p w - 1‖
-      = ‖Complex.exp (Complex.log (primaryFactor p w)) - 1‖ := by rw [hpf]
+      = ‖Complex.exp (Complex.log (primaryFactor p w)) - 1‖ := by rw [← hpf]
     _ ≤ 2 * ‖Complex.log (primaryFactor p w)‖ := Complex.norm_exp_sub_one_le hLle1
     _ ≤ (4 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1) := by
       calc 2 * ‖Complex.log (primaryFactor p w)‖
@@ -3072,7 +3072,7 @@ lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2)
 theorem multipliableLocallyUniformlyOn_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ)
     (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
     (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
-    MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (univ : Set ℂ) := by
+    MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Set.univ : Set ℂ) := by
   have hball : ∀ R : ℝ, 0 < R → MultipliableLocallyUniformlyOn
       (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
     intro R hR
@@ -3159,16 +3159,16 @@ theorem differentiable_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n 
     multipliableLocallyUniformlyOn_primaryFactor hane p hs htend
   have htend' : TendstoLocallyUniformlyOn
       (fun N : ℕ => fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n))
-      (fun z => canonicalProductNat p a z) atTop (univ : Set ℂ) := by
+      (fun z => canonicalProductNat p a z) atTop (Set.univ : Set ℂ) := by
     simpa [canonicalProductNat] using
       (hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn.mp hm.hasProdLocallyUniformlyOn)
   have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ
-      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) (univ : Set ℂ) := by
+      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) (Set.univ : Set ℂ) := by
     refine eventually_of_forall (fun N => ?_)
     refine DifferentiableOn.fun_finsetProd ?_
     intro n hn
     fun_prop
-  have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) (univ : Set ℂ) :=
+  have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) (Set.univ : Set ℂ) :=
     htend'.differentiableOn hF isOpen_univ
   exact differentiableOn_univ.mp hd
 
