@@ -3011,7 +3011,7 @@ noncomputable def canonicalProductNat (p : ℕ) (a : ℕ → ℂ) (z : ℂ) : �
 lemma primaryFactor_ne_zero (p : ℕ) {z : ℂ} (hz : z ≠ 1) : primaryFactor p z ≠ 0 := by
   rw [primaryFactor, mul_ne_zero_iff]
   constructor
-  · exact sub_ne_zero.mpr hz
+  · exact sub_ne_zero.mpr (Ne.symm hz)
   · exact exp_ne_zero _
 
 lemma primaryFactor_eq_zero_iff (p : ℕ) (z : ℂ) : primaryFactor p z = 0 ↔ z = 1 := by
@@ -3019,10 +3019,19 @@ lemma primaryFactor_eq_zero_iff (p : ℕ) (z : ℂ) : primaryFactor p z = 0 ↔ 
   · intro h
     rw [primaryFactor, mul_eq_zero] at h
     rcases h with h | h
-    · exact sub_eq_zero.mp h
+    · exact (sub_eq_zero.mp h).symm
     · exact absurd h (exp_ne_zero _)
   · intro h
     rw [h, primaryFactor_one]
+
+/-- The Weierstrass primary factor is entire. -/
+lemma differentiable_primaryFactor (p : ℕ) : Differentiable ℂ (primaryFactor p) := by
+  fun_prop
+
+/-- The scaled primary factor `z ↦ E_p(z/a)` is entire for `a ≠ 0`. -/
+lemma differentiable_primaryFactor_scaled (p : ℕ) {a : ℂ} (ha : a ≠ 0) :
+    Differentiable ℂ (fun z => primaryFactor p (z / a)) := by
+  fun_prop
 
 /-- Pointwise bound `‖E_p(w) - 1‖ ≤ 4/(p+1) · ‖w‖^{p+1}` for `‖w‖ ≤ 1/2`. -/
 lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2) :
@@ -3046,7 +3055,7 @@ lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2)
     have hpos : (0 : ℝ) ≤ 2 / ((p : ℝ) + 1) := by positivity
     calc ‖Complex.log (primaryFactor p w)‖ ≤ 2 / ((p : ℝ) + 1) * ‖w‖ ^ (p + 1) := hL
       _ ≤ 2 / ((p : ℝ) + 1) * (1 / 2) := mul_le_mul_of_nonneg_left (h₁.trans h₂) hpos
-      _ ≤ 2 * (1 / 2) := by nlinarith
+      _ ≤ 2 * (1 / 2) := mul_le_mul_of_nonneg_right h₃ (by norm_num : (0 : ℝ) ≤ 1 / 2)
       _ = 1 := by norm_num
   have hpf : primaryFactor p w = Complex.exp (Complex.log (primaryFactor p w)) := by
     rw [Complex.exp_log (primaryFactor_ne_zero p hw1)]
@@ -3054,14 +3063,16 @@ lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2)
       = ‖Complex.exp (Complex.log (primaryFactor p w)) - 1‖ := by rw [hpf]
     _ ≤ 2 * ‖Complex.log (primaryFactor p w)‖ := Complex.norm_exp_sub_one_le hLle1
     _ ≤ (4 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1) := by
-      rw [show 2 * (2 / (p + 1 : ℝ)) = 4 / (p + 1 : ℝ) by ring]
-      exact mul_le_mul_of_nonneg_right hL (pow_nonneg (norm_nonneg w) (p + 1))
+      calc 2 * ‖Complex.log (primaryFactor p w)‖
+          ≤ 2 * ((2 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1)) := by
+              exact mul_le_mul_of_nonneg_left hL (by norm_num : (0 : ℝ) ≤ 2)
+        _ = (4 / (p + 1 : ℝ)) * ‖w‖ ^ (p + 1) := by ring
 
 /-- The canonical product converges locally uniformly on `ℂ`. -/
 theorem multipliableLocallyUniformlyOn_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ)
     (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
     (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
-    MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) univ := by
+    MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (univ : Set ℂ) := by
   have hball : ∀ R : ℝ, 0 < R → MultipliableLocallyUniformlyOn
       (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
     intro R hR
@@ -3148,16 +3159,16 @@ theorem differentiable_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n 
     multipliableLocallyUniformlyOn_primaryFactor hane p hs htend
   have htend' : TendstoLocallyUniformlyOn
       (fun N : ℕ => fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n))
-      (fun z => canonicalProductNat p a z) atTop univ := by
+      (fun z => canonicalProductNat p a z) atTop (univ : Set ℂ) := by
     simpa [canonicalProductNat] using
       (hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn.mp hm.hasProdLocallyUniformlyOn)
   have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ
-      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) univ := by
+      (fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) (univ : Set ℂ) := by
     refine eventually_of_forall (fun N => ?_)
     refine DifferentiableOn.fun_finsetProd ?_
     intro n hn
     fun_prop
-  have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) univ :=
+  have hd : DifferentiableOn ℂ (fun z => canonicalProductNat p a z) (univ : Set ℂ) :=
     htend'.differentiableOn hF isOpen_univ
   exact differentiableOn_univ.mp hd
 
@@ -3166,7 +3177,7 @@ lemma summable_log_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p 
     (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
     (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
     Summable (fun n : ℕ => Complex.log (primaryFactor p (z / a n))) := by
-  rcases (htend.eventually_ge_atTop (2 * (‖z‖ + 1))) with ⟨N, hN⟩
+  rcases eventually_atTop.1 (htend.eventually_ge_atTop (2 * (‖z‖ + 1))) with ⟨N, hN⟩
   have htail : Summable (fun n : ℕ => ‖Complex.log (primaryFactor p (z / a (n + N)))‖) := by
     refine Summable.of_nonneg_of_le
       (f := fun n => (2 / (p + 1 : ℝ)) * (2 * (‖z‖ + 1)) ^ (p + 1) * (1 / ‖a (n + N)‖ ^ (p + 1))) ?_ ?_ ?_
@@ -3179,7 +3190,7 @@ lemma summable_log_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p 
         linarith
       have hz1 : ‖z‖ / ‖a (n + N)‖ ≤ 1 / 2 := by
         have h₁ : ‖z‖ / ‖a (n + N)‖ ≤ ‖z‖ / (2 * (‖z‖ + 1)) :=
-          div_le_div_of_nonneg_left (norm_nonneg z) hanz ha
+          div_le_div_of_nonneg_left (norm_nonneg z) (by positivity : (0 : ℝ) < 2 * (‖z‖ + 1)) ha
         have h₂ : ‖z‖ / (2 * (‖z‖ + 1)) ≤ 1 / 2 := by
           rw [div_le_iff₀ (by positivity : (0 : ℝ) < 2 * (‖z‖ + 1))]
           nlinarith
@@ -3198,7 +3209,7 @@ lemma summable_log_primaryFactor {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p 
         _ = (2 / (p + 1 : ℝ)) * ((2 * (‖z‖ + 1)) ^ (p + 1) / ‖a (n + N)‖ ^ (p + 1)) := by
             rw [div_pow]
         _ = (2 / (p + 1 : ℝ)) * (2 * (‖z‖ + 1)) ^ (p + 1) * (1 / ‖a (n + N)‖ ^ (p + 1)) := by
-            rw [mul_div_assoc, one_div]
+            rw [← mul_div_assoc, div_eq_mul_inv, one_div]
     · have hshift : Summable (fun n : ℕ => (‖a (n + N)‖ ^ (p + 1))⁻¹) := by
         simpa [one_div] using (summable_nat_add_iff (f := fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹) N).mpr hs
       simpa [one_div, mul_assoc] using
@@ -3264,7 +3275,7 @@ theorem canonicalProductNat_eq_zero_of_mem {a : ℕ → ℂ} (hane : ∀ n, a n 
     simpa [canonicalProductNat] using hm.hasProd.tendsto_prod_nat
   have hz0 : ∀ᶠ N in atTop, (∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) = 0 := by
     filter_upwards [eventually_ge_atTop (n₀ + 1)] with N hN
-    refine Finset.prod_eq_zero (Finset.mem_range.mpr (by omega)) ?_
+    refine Finset.prod_eq_zero (Finset.mem_range.mpr (Nat.lt_of_lt_of_le (Nat.lt_succ_self n₀) hN)) ?_
     rw [div_self (hane n₀), primaryFactor_one]
   have hprod0 : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) atTop
       (𝓝 (0 : ℂ)) :=
