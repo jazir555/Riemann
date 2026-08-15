@@ -11120,10 +11120,15 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply `tailVerticalGrowth_10`, the single integrated vertical-modulus-growth
-leaf.  The construction `certificate_of_tailVerticalGrowth` then produces the
-requested quantitative certificate by formal algebra, positivity, and
-conjugation symmetry.
+Supply `tailGeneralizedLaguerre_10`, the nonnegative generalized-Laguerre-series
+leaf.  The formal chain
+
+    Laguerre series → first quadratic term → integrated vertical growth
+      → quantitative certificate
+
+is implemented by `certificate_of_tailGeneralizedLaguerre`.  This refines the
+analytic frontier into coefficient positivity, summability, and the exact
+modulus-square expansion; no finite sampling is promoted to a theorem.
 -/
 
 noncomputable section
@@ -11332,6 +11337,115 @@ structure TailVerticalGrowthLeaf where
       (∫ u in (0 : ℝ)..y, q r u) ≤
         ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
 
+/-!
+### Laguerre-series route to vertical growth
+
+For a real entire function `F`, the generalized Laguerre expansion has the
+shape
+
+`‖F(r + iy)‖² = ∑' n, Lₙ(r) y^(2n)`.
+
+The next two structures split the proposed tail argument into independently
+checkable pieces.  The first only asks for the quadratic lower bound furnished
+by `L₁`; the second asks for a convergent nonnegative Laguerre series and
+formally discards every term except `n = 1`.  No truncation or numerical-grid
+argument is used in either conversion.
+-/
+
+/-- The first generalized Laguerre coefficient gives a quadratic lower bound
+    for the shifted xi modulus in the tail. -/
+structure TailLaguerreQuadraticLeaf where
+  L1 : ℝ → ℝ
+  L1_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < L1 r
+  quadratic_growth :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      y ^ 2 * L1 r ≤ ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+
+private theorem integral_two_mul_linear (c y : ℝ) :
+    (∫ u in (0 : ℝ)..y, 2 * u * c) = y ^ 2 * c := by
+  rw [intervalIntegral.integral_mul_const]
+  rw [intervalIntegral.integral_const_mul]
+  rw [integral_id]
+  ring
+
+/-- A positive first Laguerre coefficient supplies the integrated growth rate
+    `q(r,u) = 2u L₁(r)`. -/
+noncomputable def TailLaguerreQuadraticLeaf.toTailVerticalGrowth
+    (L : TailLaguerreQuadraticLeaf) : TailVerticalGrowthLeaf where
+  q r u := 2 * u * L.L1 r
+  q_pos := by
+    intro r y hr hy _
+    exact mul_pos (mul_pos (by norm_num) hy) (L.L1_pos r hr)
+  q_intervalIntegrable := by
+    intro r y _ _ _
+    exact (by fun_prop : Continuous (fun u : ℝ => 2 * u * L.L1 r)).intervalIntegrable 0 y
+  growth := by
+    intro r y hr hy hylt
+    rw [integral_two_mul_linear]
+    exact L.quadratic_growth r y hr hy hylt
+
+/-- A tail-local generalized Laguerre expansion with nonnegative coefficients.
+    The `n = 1` coefficient is required to be strictly positive so that the
+    resulting certificate is strictly positive off the real axis. -/
+structure TailGeneralizedLaguerreLeaf where
+  coefficient : ℕ → ℝ → ℝ
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < |r| →
+      0 ≤ coefficient n r
+  coefficient_one_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < coefficient 1 r
+  series_summable :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      Summable (fun n : ℕ => coefficient n r * y ^ (2 * n))
+  series_expansion :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      (∑' n : ℕ, coefficient n r * y ^ (2 * n)) =
+        ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+
+/-- Nonnegativity of the whole Laguerre series lets us retain only its first
+    nonconstant term. -/
+noncomputable def TailGeneralizedLaguerreLeaf.toQuadraticGrowth
+    (L : TailGeneralizedLaguerreLeaf) : TailLaguerreQuadraticLeaf where
+  L1 := L.coefficient 1
+  L1_pos := L.coefficient_one_pos
+  quadratic_growth := by
+    intro r y hr hy hylt
+    have hsingle :
+        L.coefficient 1 r * y ^ (2 * 1) ≤
+          ∑' n : ℕ, L.coefficient n r * y ^ (2 * n) := by
+      have hsum := (L.series_summable r y hr hy hylt).sum_le_tsum
+        ({1} : Finset ℕ)
+        (fun n _ => mul_nonneg (L.coefficient_nonneg n r hr) (by
+          rw [pow_mul]
+          positivity))
+      simpa using hsum
+    calc
+      y ^ 2 * L.coefficient 1 r = L.coefficient 1 r * y ^ (2 * 1) := by ring
+      _ ≤ ∑' n : ℕ, L.coefficient n r * y ^ (2 * n) := hsingle
+      _ = ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 :=
+        L.series_expansion r y hr hy hylt
+
+/-- The full nonnegative Laguerre expansion implies integrated vertical
+    growth by retaining `L₁` and integrating `2u L₁`. -/
+noncomputable def TailGeneralizedLaguerreLeaf.toTailVerticalGrowth
+    (L : TailGeneralizedLaguerreLeaf) : TailVerticalGrowthLeaf :=
+  L.toQuadraticGrowth.toTailVerticalGrowth
+
 /-- The positive quantity accumulated between the real axis and height
     `|y|`. -/
 noncomputable def tailVerticalGrowthIntegral
@@ -11454,6 +11568,19 @@ noncomputable def certificate_of_tailVerticalGrowth
       _ = ‖correctedDifference z‖ := by
         rw [hz]
         exact (norm_correctedDifference_eq_two_xi_div_D z hgt hlt hne).symm
+
+/-- The explicit quadratic Laguerre-growth route to a Challenge 2
+    certificate. -/
+noncomputable def certificate_of_tailLaguerreQuadratic
+    (L : TailLaguerreQuadraticLeaf) : Certificate :=
+  certificate_of_tailVerticalGrowth L.toTailVerticalGrowth
+
+/-- A nonnegative generalized Laguerre expansion yields a Challenge 2
+    certificate through the chain
+    `Laguerre series → quadratic growth → integrated growth → certificate`. -/
+noncomputable def certificate_of_tailGeneralizedLaguerre
+    (L : TailGeneralizedLaguerreLeaf) : Certificate :=
+  certificate_of_tailLaguerreQuadratic L.toQuadraticGrowth
 
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
@@ -11738,12 +11865,17 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **The sole open tail leaf.**  This is deliberately stated as integrated
-    vertical modulus growth.  Proving it remains RH-hard; no finite grid or
-    ordinary zero-free region is claimed to establish the assertion for all
-    heights. -/
-noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf := by
+/-- **The sole open tail leaf.**  The proposed route is now the generalized
+    Laguerre expansion of `‖ξ_sh(r+iy)‖²`: prove all coefficients nonnegative
+    on `10 < |r|` and the first coefficient strictly positive.  This is a
+    stronger, coefficient-wise target than bare vertical growth; proving it
+    remains RH-hard. -/
+noncomputable def tailGeneralizedLaguerre_10 : TailGeneralizedLaguerreLeaf := by
   sorry
+
+/-- The Laguerre-series leaf specialized to the integrated growth interface. -/
+noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=
+  tailGeneralizedLaguerre_10.toTailVerticalGrowth
 
 /-- The vertical-growth leaf implies tail nonvanishing through the completely
     formal conversion to a positive `Certificate`. -/
@@ -11756,7 +11888,7 @@ theorem xiShifted_nonvanishing_on_tail :
       xiShifted z ≠ 0 := by
   intro z hx hgt hlt hne
   exact certificate_implies_tail_nonvanishing
-    (certificate_of_tailVerticalGrowth tailVerticalGrowth_10)
+    (certificate_of_tailGeneralizedLaguerre tailGeneralizedLaguerre_10)
     hx hgt hlt hne
 
 /-- The analytic core of Challenge 2, derived from the vertical-growth leaf.
@@ -11785,10 +11917,10 @@ theorem zetaTail_offLine_nonvanishing_10 :
       _ = 0 := hcs
   exact xiShifted_nonvanishing_on_tail z hx hgt hlt hne hxi0
 
-/-- The Challenge 2 certificate, obtained directly from the open integrated
-    vertical-growth leaf. -/
+/-- The Challenge 2 certificate, obtained by retaining the first positive term
+    of the open generalized Laguerre expansion. -/
 noncomputable def challenge2_certificate : Certificate :=
-  certificate_of_tailVerticalGrowth tailVerticalGrowth_10
+  certificate_of_tailGeneralizedLaguerre tailGeneralizedLaguerre_10
 
 /-- The final conditional theorem: if the Challenge 2 certificate is supplied,
     RH follows (bounded region as in `rh_from_certificate_closed`). -/
