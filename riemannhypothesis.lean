@@ -11120,15 +11120,16 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply `tailGeneralizedLaguerre_10`, the nonnegative generalized-Laguerre-series
-leaf.  The formal chain
+Supply `tailLaguerreRemainder_10`, the canonical first-Laguerre-coefficient plus
+aggregate-remainder leaf.  The formal chain
 
-    Laguerre series → first quadratic term → integrated vertical growth
+    L₁ + nonnegative remainder → quadratic term → integrated vertical growth
       → quantitative certificate
 
-is implemented by `certificate_of_tailGeneralizedLaguerre`.  This refines the
-analytic frontier into coefficient positivity, summability, and the exact
-modulus-square expansion; no finite sampling is promoted to a theorem.
+is implemented by `certificate_of_tailLaguerreRemainder`.  The stronger
+coefficient-wise route remains available through
+`certificate_of_tailGeneralizedLaguerre`; no finite sampling is promoted to a
+theorem.
 -/
 
 noncomputable section
@@ -11390,11 +11391,69 @@ noncomputable def TailLaguerreQuadraticLeaf.toTailVerticalGrowth
     rw [integral_two_mul_linear]
     exact L.quadratic_growth r y hr hy hylt
 
+/-- Conjugation symmetry makes shifted xi real-valued on the real axis. -/
+theorem xiShifted_realAxis_im_eq_zero (r : ℝ) :
+    (xiShifted (r : ℂ)).im = 0 := by
+  have hstar : xiShifted (star (r : ℂ)) = star (xiShifted (r : ℂ)) :=
+    classicalXi_symmetry.conj_symm (r : ℂ) (by norm_num) (by norm_num)
+  have hself : xiShifted (r : ℂ) = star (xiShifted (r : ℂ)) := by
+    simpa using hstar
+  have him := congrArg Complex.im hself
+  have himneg : (xiShifted (r : ℂ)).im = -(xiShifted (r : ℂ)).im := by
+    simpa [Complex.star_def] using him
+  linarith
+
+/-- The canonical first generalized Laguerre coefficient of shifted xi on the
+    real axis.  For a real entire profile `F`, this is the familiar
+    `F'(r)^2 - F(r)F''(r)`; the norm/real-part form remains meaningful before
+    the real-valuedness lemmas are installed. -/
+noncomputable def xiShiftedFirstLaguerreCoefficient (r : ℝ) : ℝ :=
+  ‖deriv xiShifted (r : ℂ)‖ ^ 2 -
+    ((iteratedDeriv 2 xiShifted (r : ℂ)) * star (xiShifted (r : ℂ))).re
+
+/-- The part of the vertical modulus-square growth left after removing its
+    real-axis value and canonical quadratic Laguerre term.  Treating all
+    higher even orders as one remainder is weaker than requiring every
+    generalized Laguerre coefficient to be nonnegative. -/
+noncomputable def xiShiftedLaguerreRemainder (r y : ℝ) : ℝ :=
+  ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 -
+    ‖xiShifted (tailVerticalPoint r 0)‖ ^ 2 -
+    y ^ 2 * xiShiftedFirstLaguerreCoefficient r
+
+/-- A two-part tail target: positivity of the canonical first Laguerre
+    coefficient and nonnegativity of the aggregate higher-order remainder. -/
+structure TailLaguerreRemainderLeaf where
+  L1_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < xiShiftedFirstLaguerreCoefficient r
+  remainder_nonneg :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      0 ≤ xiShiftedLaguerreRemainder r y
+
+/-- Dropping the nonnegative real-axis square and aggregate remainder leaves
+    precisely the required quadratic lower bound. -/
+noncomputable def TailLaguerreRemainderLeaf.toQuadraticGrowth
+    (L : TailLaguerreRemainderLeaf) : TailLaguerreQuadraticLeaf where
+  L1 := xiShiftedFirstLaguerreCoefficient
+  L1_pos := L.L1_pos
+  quadratic_growth := by
+    intro r y hr hy hylt
+    have hrem := L.remainder_nonneg r y hr hy hylt
+    unfold xiShiftedLaguerreRemainder at hrem
+    nlinarith [sq_nonneg ‖xiShifted (tailVerticalPoint r 0)‖]
+
 /-- A tail-local generalized Laguerre expansion with nonnegative coefficients.
     The `n = 1` coefficient is required to be strictly positive so that the
     resulting certificate is strictly positive off the real axis. -/
 structure TailGeneralizedLaguerreLeaf where
   coefficient : ℕ → ℝ → ℝ
+  coefficient_one_eq :
+    ∀ r : ℝ,
+      coefficient 1 r = xiShiftedFirstLaguerreCoefficient r
   coefficient_nonneg :
     ∀ n : ℕ, ∀ r : ℝ,
       10 < |r| →
@@ -11421,10 +11480,14 @@ structure TailGeneralizedLaguerreLeaf where
     nonconstant term. -/
 noncomputable def TailGeneralizedLaguerreLeaf.toQuadraticGrowth
     (L : TailGeneralizedLaguerreLeaf) : TailLaguerreQuadraticLeaf where
-  L1 := L.coefficient 1
-  L1_pos := L.coefficient_one_pos
+  L1 := xiShiftedFirstLaguerreCoefficient
+  L1_pos := by
+    intro r hr
+    rw [← L.coefficient_one_eq r]
+    exact L.coefficient_one_pos r hr
   quadratic_growth := by
     intro r y hr hy hylt
+    rw [← L.coefficient_one_eq r]
     have hsingle :
         L.coefficient 1 r * y ^ (2 * 1) ≤
           ∑' n : ℕ, L.coefficient n r * y ^ (2 * n) := by
@@ -11451,6 +11514,15 @@ noncomputable def TailGeneralizedLaguerreLeaf.toTailVerticalGrowth
 noncomputable def tailVerticalGrowthIntegral
     (G : TailVerticalGrowthLeaf) (r y : ℝ) : ℝ :=
   ∫ u in (0 : ℝ)..|y|, G.q r u
+
+/-- For the Laguerre rate `2u L₁(r)`, the accumulated growth is the explicit
+    quadratic quantity `|y|² L₁(r)`. -/
+theorem tailVerticalGrowthIntegral_laguerreQuadratic
+    (L : TailLaguerreQuadraticLeaf) (r y : ℝ) :
+    tailVerticalGrowthIntegral L.toTailVerticalGrowth r y =
+      |y| ^ 2 * L.L1 r := by
+  unfold tailVerticalGrowthIntegral TailLaguerreQuadraticLeaf.toTailVerticalGrowth
+  exact integral_two_mul_linear (L.L1 r) |y|
 
 theorem tailVerticalGrowthIntegral_pos
     (G : TailVerticalGrowthLeaf)
@@ -11517,6 +11589,30 @@ noncomputable def tailVerticalLowerBound
       ‖tailVerticalPoint r y ^ 2 + (1 / 4 : ℂ)‖
   else 1
 
+/-- Closed form of the certificate lower bound supplied by the first
+    Laguerre coefficient inside the open strip. -/
+theorem tailVerticalLowerBound_laguerreQuadratic_formula
+    (L : TailLaguerreQuadraticLeaf) (r y : ℝ)
+    (hylt : |y| < (1 / 2 : ℝ)) (hy : y ≠ 0) :
+    tailVerticalLowerBound L.toTailVerticalGrowth r y =
+      2 * Real.sqrt (|y| ^ 2 * L.L1 r) /
+        ‖tailVerticalPoint r y ^ 2 + (1 / 4 : ℂ)‖ := by
+  unfold tailVerticalLowerBound
+  rw [if_pos ⟨hylt, hy⟩]
+  rw [tailVerticalGrowthIntegral_laguerreQuadratic]
+
+/-- The same bound with the square root factored: its numerator is linear in
+    the distance `|y|` from the critical line. -/
+theorem tailVerticalLowerBound_laguerreQuadratic_explicit
+    (L : TailLaguerreQuadraticLeaf) (r y : ℝ)
+    (hylt : |y| < (1 / 2 : ℝ)) (hy : y ≠ 0) :
+    tailVerticalLowerBound L.toTailVerticalGrowth r y =
+      2 * |y| * Real.sqrt (L.L1 r) /
+        ‖tailVerticalPoint r y ^ 2 + (1 / 4 : ℂ)‖ := by
+  rw [tailVerticalLowerBound_laguerreQuadratic_formula L r y hylt hy]
+  rw [Real.sqrt_mul (sq_nonneg |y|), Real.sqrt_sq (abs_nonneg y)]
+  ring
+
 /-- Formula (C) from the vertical-growth approach, converted into the exact
     `Certificate` requested by Challenge 2. -/
 noncomputable def certificate_of_tailVerticalGrowth
@@ -11574,6 +11670,12 @@ noncomputable def certificate_of_tailVerticalGrowth
 noncomputable def certificate_of_tailLaguerreQuadratic
     (L : TailLaguerreQuadraticLeaf) : Certificate :=
   certificate_of_tailVerticalGrowth L.toTailVerticalGrowth
+
+/-- Canonical `L₁` positivity plus a nonnegative aggregate higher-order
+    remainder yields the Challenge 2 certificate. -/
+noncomputable def certificate_of_tailLaguerreRemainder
+    (L : TailLaguerreRemainderLeaf) : Certificate :=
+  certificate_of_tailLaguerreQuadratic L.toQuadraticGrowth
 
 /-- A nonnegative generalized Laguerre expansion yields a Challenge 2
     certificate through the chain
@@ -11865,17 +11967,17 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **The sole open tail leaf.**  The proposed route is now the generalized
-    Laguerre expansion of `‖ξ_sh(r+iy)‖²`: prove all coefficients nonnegative
-    on `10 < |r|` and the first coefficient strictly positive.  This is a
-    stronger, coefficient-wise target than bare vertical growth; proving it
-    remains RH-hard. -/
-noncomputable def tailGeneralizedLaguerre_10 : TailGeneralizedLaguerreLeaf := by
+/-- **The sole open tail leaf.**  Prove positivity of the canonical first
+    Laguerre coefficient and nonnegativity of the aggregate higher-order
+    vertical remainder on `10 < |r|`.  This avoids the stronger demand that
+    every generalized Laguerre coefficient be nonnegative, but it remains the
+    RH-hard analytic step. -/
+theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf := by
   sorry
 
-/-- The Laguerre-series leaf specialized to the integrated growth interface. -/
+/-- The Laguerre-remainder leaf specialized to integrated vertical growth. -/
 noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=
-  tailGeneralizedLaguerre_10.toTailVerticalGrowth
+  tailLaguerreRemainder_10.toQuadraticGrowth.toTailVerticalGrowth
 
 /-- The vertical-growth leaf implies tail nonvanishing through the completely
     formal conversion to a positive `Certificate`. -/
@@ -11888,7 +11990,7 @@ theorem xiShifted_nonvanishing_on_tail :
       xiShifted z ≠ 0 := by
   intro z hx hgt hlt hne
   exact certificate_implies_tail_nonvanishing
-    (certificate_of_tailGeneralizedLaguerre tailGeneralizedLaguerre_10)
+    (certificate_of_tailLaguerreRemainder tailLaguerreRemainder_10)
     hx hgt hlt hne
 
 /-- The analytic core of Challenge 2, derived from the vertical-growth leaf.
@@ -11917,10 +12019,10 @@ theorem zetaTail_offLine_nonvanishing_10 :
       _ = 0 := hcs
   exact xiShifted_nonvanishing_on_tail z hx hgt hlt hne hxi0
 
-/-- The Challenge 2 certificate, obtained by retaining the first positive term
-    of the open generalized Laguerre expansion. -/
+/-- The Challenge 2 certificate, obtained from the positive first Laguerre
+    coefficient and nonnegative aggregate remainder. -/
 noncomputable def challenge2_certificate : Certificate :=
-  certificate_of_tailGeneralizedLaguerre tailGeneralizedLaguerre_10
+  certificate_of_tailLaguerreRemainder tailLaguerreRemainder_10
 
 /-- The final conditional theorem: if the Challenge 2 certificate is supplied,
     RH follows (bounded region as in `rh_from_certificate_closed`). -/
