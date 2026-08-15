@@ -11136,6 +11136,29 @@ noncomputable def Lambda0 (s : ℂ) : ℂ :=
 noncomputable def correctedDifference (z : ℂ) : ℂ :=
   1 / (z ^ 2 + (1 / 4 : ℂ)) - Lambda0 (shiftedS z)
 
+/-- The rational term in `correctedDifference` is exactly the polar part of
+    `completedRiemannZeta₀`.  Thus, inside the shifted critical strip, the
+    corrected difference is simply the negative completed zeta function `Λ`.
+
+    This is the preferred front door for analytic estimates: no estimate of a
+    cancellation between two separate terms is required. -/
+theorem correctedDifference_eq_neg_completedRiemannZeta
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    correctedDifference z = -completedRiemannZeta (shiftedS z) := by
+  unfold correctedDifference Lambda0
+  rw [completedRiemannZeta_eq, ← polar_term_eq_inv_D z hgt hlt]
+  ring
+
+/-- Norm form of `correctedDifference_eq_neg_completedRiemannZeta`. -/
+theorem norm_correctedDifference_eq_completedRiemannZeta
+    (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im)
+    (hlt : z.im < (1 / 2 : ℝ)) :
+    ‖correctedDifference z‖ = ‖completedRiemannZeta (shiftedS z)‖ := by
+  rw [correctedDifference_eq_neg_completedRiemannZeta z hgt hlt, norm_neg]
+
 /-- **The exact identity**: `1/(z² + 1/4) − Λ₀(1/2 + iz) = 2·ξ_sh(z)/(z² + 1/4)`. -/
 theorem identity_two_xiShifted_div_D
     (z : ℂ)
@@ -11261,6 +11284,167 @@ structure Certificate where
       z.im < (1 / 2 : ℝ) →
       z.im ≠ 0 →
       m z.re z.im ≤ ‖correctedDifference z‖
+
+/-!
+### Integrated vertical-growth certificate
+
+The genuinely hard tail assertion is isolated below as growth of
+`‖xiShifted (r + iy)‖²` away from the real axis.  The integrated formulation
+avoids derivative and fundamental-theorem-of-calculus plumbing.  We include
+interval integrability explicitly: in Lean, positivity of a non-integrable
+function alone does not imply positivity of its interval integral.
+-/
+
+/-- The point `r + iy` in shifted-xi coordinates. -/
+noncomputable def tailVerticalPoint (r y : ℝ) : ℂ :=
+  (r : ℂ) + I * (y : ℂ)
+
+/-- An integrated vertical-modulus-growth leaf for the tail.  Its `growth`
+    field is the RH-hard analytic input; the remaining conversion to
+    `Certificate` is formal. -/
+structure TailVerticalGrowthLeaf where
+  q : ℝ → ℝ → ℝ
+  q_pos :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      0 < q r y
+  q_intervalIntegrable :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      IntervalIntegrable (q r) MeasureTheory.volume 0 y
+  growth :
+    ∀ r y : ℝ,
+      10 < |r| →
+      0 < y →
+      y < (1 / 2 : ℝ) →
+      (∫ u in (0 : ℝ)..y, q r u) ≤
+        ‖xiShifted (tailVerticalPoint r y)‖ ^ 2
+
+/-- The positive quantity accumulated between the real axis and height
+    `|y|`. -/
+noncomputable def tailVerticalGrowthIntegral
+    (G : TailVerticalGrowthLeaf) (r y : ℝ) : ℝ :=
+  ∫ u in (0 : ℝ)..|y|, G.q r u
+
+theorem tailVerticalGrowthIntegral_pos
+    (G : TailVerticalGrowthLeaf)
+    (r y : ℝ)
+    (hr : 10 < |r|)
+    (hy : y ≠ 0)
+    (hylt : |y| < (1 / 2 : ℝ)) :
+    0 < tailVerticalGrowthIntegral G r y := by
+  unfold tailVerticalGrowthIntegral
+  have habsy : 0 < |y| := abs_pos.mpr hy
+  exact intervalIntegral.intervalIntegral_pos_of_pos_on
+    (G.q_intervalIntegrable r |y| hr habsy hylt)
+    (fun u hu => G.q_pos r u hr hu.1 (hu.2.trans hylt))
+    habsy
+
+/-- Conjugation symmetry identifies the modulus below the real axis with the
+    modulus at the corresponding positive height. -/
+theorem norm_xiShifted_tailVerticalPoint_abs_eq
+    (r y : ℝ)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ)) :
+    ‖xiShifted (tailVerticalPoint r |y|)‖ =
+      ‖xiShifted (tailVerticalPoint r y)‖ := by
+  by_cases hy : 0 ≤ y
+  · rw [abs_of_nonneg hy]
+  · have hyneg : y < 0 := lt_of_not_ge hy
+    rw [abs_of_neg hyneg]
+    have hstar : tailVerticalPoint r (-y) = star (tailVerticalPoint r y) := by
+      apply Complex.ext <;> simp [tailVerticalPoint]
+    rw [hstar,
+      classicalXi_symmetry.conj_symm (tailVerticalPoint r y)
+        (by simpa [tailVerticalPoint] using hgt)
+        (by simpa [tailVerticalPoint] using hlt),
+      norm_star]
+
+/-- The integrated growth hypothesis gives the square-root modulus lower
+    bound at either sign of `y`. -/
+theorem sqrt_tailVerticalGrowthIntegral_le_norm_xiShifted
+    (G : TailVerticalGrowthLeaf)
+    (r y : ℝ)
+    (hr : 10 < |r|)
+    (hgt : -(1 / 2 : ℝ) < y)
+    (hlt : y < (1 / 2 : ℝ))
+    (hy : y ≠ 0) :
+    Real.sqrt (tailVerticalGrowthIntegral G r y) ≤
+      ‖xiShifted (tailVerticalPoint r y)‖ := by
+  have hylt : |y| < (1 / 2 : ℝ) := abs_lt.mpr ⟨hgt, hlt⟩
+  have habsy : 0 < |y| := abs_pos.mpr hy
+  have hgrowth := G.growth r |y| hr habsy hylt
+  have hsqrt : Real.sqrt (tailVerticalGrowthIntegral G r y) ≤
+      ‖xiShifted (tailVerticalPoint r |y|)‖ :=
+    Real.sqrt_le_iff.mpr
+      ⟨norm_nonneg _, by simpa [tailVerticalGrowthIntegral] using hgrowth⟩
+  rw [norm_xiShifted_tailVerticalPoint_abs_eq r y hgt hlt] at hsqrt
+  exact hsqrt
+
+/-- The quantitative lower bound supplied by a vertical-growth leaf.  Outside
+    the open strip (or on the real axis) it is set to `1`, since `Certificate`
+    only uses the bound inside the strip and asks for global positivity. -/
+noncomputable def tailVerticalLowerBound
+    (G : TailVerticalGrowthLeaf) (r y : ℝ) : ℝ :=
+  if |y| < (1 / 2 : ℝ) ∧ y ≠ 0 then
+    2 * Real.sqrt (tailVerticalGrowthIntegral G r y) /
+      ‖tailVerticalPoint r y ^ 2 + (1 / 4 : ℂ)‖
+  else 1
+
+/-- Formula (C) from the vertical-growth approach, converted into the exact
+    `Certificate` requested by Challenge 2. -/
+noncomputable def certificate_of_tailVerticalGrowth
+    (G : TailVerticalGrowthLeaf) : Certificate where
+  m := tailVerticalLowerBound G
+  m_pos := by
+    intro r y hr hy
+    by_cases hstrip : |y| < (1 / 2 : ℝ)
+    · have hgt : -(1 / 2 : ℝ) < y := (abs_lt.mp hstrip).1
+      have hlt : y < (1 / 2 : ℝ) := (abs_lt.mp hstrip).2
+      have hIpos : 0 < tailVerticalGrowthIntegral G r y :=
+        tailVerticalGrowthIntegral_pos G r y hr hy hstrip
+      have hDpos : 0 < ‖tailVerticalPoint r y ^ 2 + (1 / 4 : ℂ)‖ :=
+        norm_pos_iff.mpr
+          (shifted_denominator_ne_zero_inside_strip (tailVerticalPoint r y)
+            (by simpa [tailVerticalPoint] using hgt)
+            (by simpa [tailVerticalPoint] using hlt))
+      unfold tailVerticalLowerBound
+      rw [if_pos ⟨hstrip, hy⟩]
+      exact div_pos (mul_pos (by norm_num) (Real.sqrt_pos.mpr hIpos)) hDpos
+    · unfold tailVerticalLowerBound
+      rw [if_neg (fun h => hstrip h.1)]
+      norm_num
+  bound := by
+    intro z hr hgt hlt hne
+    have hstrip : |z.im| < (1 / 2 : ℝ) := abs_lt.mpr ⟨hgt, hlt⟩
+    have hz : tailVerticalPoint z.re z.im = z := by
+      unfold tailVerticalPoint
+      rw [mul_comm I (z.im : ℂ)]
+      exact Complex.re_add_im z
+    have hsqrt :=
+      sqrt_tailVerticalGrowthIntegral_le_norm_xiShifted
+        G z.re z.im hr hgt hlt hne
+    rw [hz] at hsqrt
+    unfold tailVerticalLowerBound
+    rw [if_pos ⟨hstrip, hne⟩]
+    have hscaled :
+        2 * Real.sqrt (tailVerticalGrowthIntegral G z.re z.im) /
+            ‖tailVerticalPoint z.re z.im ^ 2 + (1 / 4 : ℂ)‖ ≤
+          2 * ‖xiShifted z‖ /
+            ‖tailVerticalPoint z.re z.im ^ 2 + (1 / 4 : ℂ)‖ :=
+      div_le_div_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hsqrt (by norm_num)) (norm_nonneg _)
+    rw [hz] at hscaled
+    calc
+      2 * Real.sqrt (tailVerticalGrowthIntegral G z.re z.im) /
+          ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤
+        2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := hscaled
+      _ = ‖correctedDifference z‖ :=
+        (norm_correctedDifference_eq_two_xi_div_D z hgt hlt hne).symm
 
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
@@ -11545,26 +11729,31 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **Numerical verification (from Python rh_certificate.py)**:
--- `|xiShifted z|` is bounded below by a positive constant on the grid
--- covering {z : |z.re| > 10, |z.im| < 1/2} \ {z.im = 0}.
--- The Python computation found min |xiShifted(z)| ≈ 4.39e-26 over
--- [0,80] × [0,0.49]; for |Re(z)| > 80 the classical zero-free region
--- gives a quantitative lower bound.  This is the sole analytic input. -/
+/-- **The sole open tail leaf.**  This is deliberately stated as integrated
+    vertical modulus growth.  Proving it remains RH-hard; no finite grid or
+    ordinary zero-free region is claimed to establish the assertion for all
+    heights. -/
+noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf := by
+  sorry
+
+/-- The vertical-growth leaf implies tail nonvanishing through the completely
+    formal conversion to a positive `Certificate`. -/
 theorem xiShifted_nonvanishing_on_tail :
     ∀ z : ℂ,
       10 < |z.re| →
       -(1 / 2 : ℝ) < z.im →
       z.im < (1 / 2 : ℝ) →
       z.im ≠ 0 →
-      xiShifted z ≠ 0 :=
-  sorry
+      xiShifted z ≠ 0 := by
+  intro z hx hgt hlt hne
+  exact certificate_implies_tail_nonvanishing
+    (certificate_of_tailVerticalGrowth tailVerticalGrowth_10)
+    hx hgt hlt hne
 
-/-- The analytic core of Challenge 2, proved via the numerical lemma
-    `xiShifted_nonvanishing_on_tail` (which carries the sole `sorry`).
+/-- The analytic core of Challenge 2, derived from the vertical-growth leaf.
     The proof converts a hypothetical zeta zero `s` to shifted coordinates
     `z = shiftedZeroPreimage s`, shows `xiShifted z = 0`, then appeals to
-    the numerical nonvanishing result to obtain a contradiction. -/
+    tail nonvanishing to obtain a contradiction. -/
 theorem zetaTail_offLine_nonvanishing_10 :
     ZetaTailOffLineNonvanishing (10 : ℝ) := by
   intro s hs0 hs1 hsne hsi hz0
@@ -11587,10 +11776,10 @@ theorem zetaTail_offLine_nonvanishing_10 :
       _ = 0 := hcs
   exact xiShifted_nonvanishing_on_tail z hx hgt hlt hne hxi0
 
-/-- The Challenge 2 certificate, obtained from the (open) tail nonvanishing
-    leaf. -/
+/-- The Challenge 2 certificate, obtained directly from the open integrated
+    vertical-growth leaf. -/
 noncomputable def challenge2_certificate : Certificate :=
-  challenge2_certificate_of_tail_nonvanishing zetaTail_offLine_nonvanishing_10
+  certificate_of_tailVerticalGrowth tailVerticalGrowth_10
 
 /-- The final conditional theorem: if the Challenge 2 certificate is supplied,
     RH follows (bounded region as in `rh_from_certificate_closed`). -/
