@@ -3694,3 +3694,271 @@ lemma canonicalProductNatSkip_ne_zero_at {a : ℕ → ℂ} (hane : ∀ n, a n �
     simpa [x] using heq
   rw [heq']
   exact Complex.exp_ne_zero _
+
+/-- Two analytic functions equal on a punctured neighbourhood agree at the point. -/
+lemma analytic_extension_unique {g₁ g₂ : ℂ → ℂ} {z₀ : ℂ}
+    (hg₁ : AnalyticAt ℂ g₁ z₀) (hg₂ : AnalyticAt ℂ g₂ z₀)
+    (heq : g₁ =ᶠ[𝓝[≠] z₀] g₂) : g₁ z₀ = g₂ z₀ := by
+  have ht₁ : Tendsto g₁ (𝓝[≠] z₀) (𝓝 (g₁ z₀)) :=
+    hg₁.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+  have ht₂ : Tendsto g₂ (𝓝[≠] z₀) (𝓝 (g₂ z₀)) :=
+    hg₂.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+  exact tendsto_nhds_unique ht₁ (ht₂.congr' heq.symm)
+
+/-- The order of a non-vanishing analytic function at a point is zero. -/
+lemma meromorphicOrderAt_eq_zero_of_ne_zero {f : ℂ → ℂ} (hf : AnalyticAt ℂ f z₀) (hf₀ : f z₀ ≠ 0) :
+    meromorphicOrderAt f z₀ = 0 := by
+  exact (meromorphicOrderAt_eq_int_iff (n := 0) hf.meromorphicAt).mpr ⟨f, hf, hf₀, by
+    filter_upwards with z
+    simp⟩
+
+/-- The order of the skipped canonical product at the removed zero is zero. -/
+lemma meromorphicOrderAt_canonicalProductNatSkip_eq_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
+    (p : ℕ) (k : ℕ) (hinj : Function.Injective a) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    meromorphicOrderAt (fun z => canonicalProductNatSkip k p a z) (a k) = 0 := by
+  have hskip : AnalyticAt ℂ (fun z => canonicalProductNatSkip k p a z) (a k) :=
+    Differentiable.analyticAt (differentiable_canonicalProductNatSkip hane p k hs htend) (a k)
+  have hne : (fun z => canonicalProductNatSkip k p a z) (a k) ≠ 0 :=
+    canonicalProductNatSkip_ne_zero_at hane p k hinj hs htend
+  exact (meromorphicOrderAt_eq_int_iff (n := 0) hskip.meromorphicAt).mpr ⟨
+    fun z => canonicalProductNatSkip k p a z, hskip, hne, by
+      filter_upwards with z
+      simp⟩
+
+/-- The order of the `k`-th primary factor at the zero `a k` is one. -/
+lemma meromorphicOrderAt_primaryFactor_one_scaled_at_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (k : ℕ) :
+    meromorphicOrderAt (fun z => primaryFactor 1 (z / a k)) (a k) = 1 := by
+  have hform : (fun z : ℂ => primaryFactor 1 (z / a k)) =
+      fun z : ℂ => (1 - z / a k) * Complex.exp (z / a k) := by
+    funext z
+    simp [primaryFactor]
+  rw [hform]
+  have hdiff : AnalyticAt ℂ (fun z : ℂ => z / a k) (a k) :=
+    Differentiable.analyticAt (differentiable_id.div (differentiable_const (a k)) (fun _ => hane k)) (a k)
+  have h₀ : meromorphicOrderAt (fun z : ℂ => Complex.exp (z / a k)) (a k) = 0 := by
+    have he : AnalyticAt ℂ (fun z : ℂ => Complex.exp (z / a k)) (a k) :=
+      AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff
+    exact (meromorphicOrderAt_eq_int_iff (n := 0) he.meromorphicAt).mpr ⟨
+      fun z => Complex.exp (z / a k), he, by simp, by
+        filter_upwards with z
+        simp⟩
+  have h₁ : meromorphicOrderAt (fun z : ℂ => 1 - z / a k) (a k) = 1 := by
+    have hform1 : (fun z : ℂ => 1 - z / a k) = fun z : ℂ => (-1 / a k) * (z - a k) := by
+      funext z
+      field_simp [hane k]
+      ring
+    rw [hform1]
+    have hc : meromorphicOrderAt (fun z : ℂ => (-1 / a k)) (a k) = 0 := by
+      have hne : (-1 / a k) ≠ 0 := by
+        exact div_ne_zero (by norm_num) (hane k)
+      rw [meromorphicOrderAt_const (a k) (-1 / a k)]
+      simp [hne]
+    have hsub : meromorphicOrderAt (fun z : ℂ => z - a k) (a k) = 1 := by
+      simpa using (meromorphicOrderAt_id_sub_const (𝕜 := ℂ) (x := a k))
+    calc meromorphicOrderAt ((fun z : ℂ => (-1 / a k)) * (fun z : ℂ => z - a k)) (a k)
+        = meromorphicOrderAt (fun z : ℂ => (-1 / a k)) (a k) +
+            meromorphicOrderAt (fun z : ℂ => z - a k) (a k) := by
+        exact meromorphicOrderAt_mul
+          (AnalyticAt.meromorphicAt ((differentiable_const (-1 / a k)).analyticAt (a k)))
+          (AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_id.sub (differentiable_const (a k))) (a k)))
+      _ = 1 := by rw [hc, hsub]; simp
+  calc meromorphicOrderAt ((fun z : ℂ => 1 - z / a k) * (fun z : ℂ => Complex.exp (z / a k))) (a k)
+      = meromorphicOrderAt (fun z : ℂ => 1 - z / a k) (a k) +
+          meromorphicOrderAt (fun z : ℂ => Complex.exp (z / a k)) (a k) := by
+          exact meromorphicOrderAt_mul
+            (AnalyticAt.meromorphicAt (Differentiable.analyticAt
+              ((differentiable_const (1 : ℂ)).sub (differentiable_id.div (differentiable_const (a k)) (fun _ => hane k))) (a k)))
+            (AnalyticAt.meromorphicAt (AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff))
+    _ = 1 := by rw [h₁, h₀]; simp
+
+/-- The order of the canonical product at the zero `a k` is one. -/
+lemma meromorphicOrderAt_canonicalProductNat_one_at_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
+    (k : ℕ) (hinj : Function.Injective a) (hs2 : Summable fun n : ℕ => (‖a n‖ ^ 2)⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    meromorphicOrderAt (canonicalProductNat 1 a) (a k) = 1 := by
+  have hsplit : canonicalProductNat 1 a =
+      fun z : ℂ => primaryFactor 1 (z / a k) * canonicalProductNatSkip k 1 a z := by
+    funext z
+    exact canonicalProductNat_eq_mul_skip hane 1 k hs2 htend z
+  have hF : MeromorphicAt (fun z : ℂ => primaryFactor 1 (z / a k)) (a k) :=
+    AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_primaryFactor_scaled 1 (hane k)) (a k))
+  have hS : MeromorphicAt (fun z : ℂ => canonicalProductNatSkip k 1 a z) (a k) :=
+    AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_canonicalProductNatSkip hane 1 k hs2 htend) (a k))
+  calc meromorphicOrderAt (canonicalProductNat 1 a) (a k)
+      = meromorphicOrderAt ((fun z : ℂ => primaryFactor 1 (z / a k)) *
+          (fun z : ℂ => canonicalProductNatSkip k 1 a z)) (a k) := by
+          rw [hsplit]
+      _ = meromorphicOrderAt (fun z : ℂ => primaryFactor 1 (z / a k)) (a k) +
+          meromorphicOrderAt (fun z : ℂ => canonicalProductNatSkip k 1 a z) (a k) := by
+          exact meromorphicOrderAt_mul hF hS
+    _ = 1 := by
+          rw [meromorphicOrderAt_primaryFactor_one_scaled_at_zero hane k,
+            meromorphicOrderAt_canonicalProductNatSkip_eq_zero hane 1 k hinj hs2 htend]
+          simp
+
+/-- An analytic function vanishing at `z₀` with order at most one has order exactly one. -/
+lemma meromorphicOrderAt_eq_one_of_mem {f : ℂ → ℂ} (hf : Differentiable ℂ f) {z₀ : ℂ}
+    (hf₀ : f z₀ = 0) (hord : meromorphicOrderAt f z₀ ≤ 1) :
+    meromorphicOrderAt f z₀ = 1 := by
+  have hfₐ : AnalyticAt ℂ f z₀ := Differentiable.analyticAt hf z₀
+  have hge : 1 ≤ meromorphicOrderAt f z₀ := by
+    have hne : analyticOrderAt f z₀ ≠ 0 := analyticOrderAt_ne_zero.mpr ⟨hfₐ, hf₀⟩
+    cases h₀ : analyticOrderAt f z₀ with
+    | top =>
+      rw [hfₐ.meromorphicOrderAt_eq, h₀, ENat.map_top]
+      exact le_top
+    | coe n =>
+      have hn : n ≠ 0 := by
+        intro hn0
+        apply hne
+        rw [hn0]
+        simp
+      have hn1 : 1 ≤ n := Nat.succ_le_iff.mpr (Nat.pos_of_ne_zero hn)
+      rw [hfₐ.meromorphicOrderAt_eq, h₀, ENat.map_natCast]
+      exact_mod_cast hn1
+  exact le_antisymm hord hge
+
+/-- The Hadamard factorization theorem for genus one. -/
+theorem hadamard_factorization_genus_one {f : ℂ → ℂ} {a : ℕ → ℂ}
+    (hf : Differentiable ℂ f) (hane : ∀ n, a n ≠ 0)
+    (hzero : ∀ z, f z = 0 ↔ ∃ n, z = a n)
+    (hord : ∀ z, meromorphicOrderAt f z ≤ 1)
+    (hinj : Function.Injective a) (hs2 : Summable fun n : ℕ => (‖a n‖ ^ 2)⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ ∀ z, f z = Complex.exp (g z) * canonicalProductNat 1 a z := by
+  let P : ℂ → ℂ := canonicalProductNat 1 a
+  have hPd : Differentiable ℂ P := differentiable_canonicalProductNat hane 1 hs2 htend
+  have hPne : ∀ z, (∀ n, z ≠ a n) → P z ≠ 0 := by
+    intro z hz
+    exact canonicalProductNat_ne_zero hane 1 hz hs2 htend
+  have hPz : ∀ k : ℕ, P (a k) = 0 := by
+    intro k
+    exact canonicalProductNat_eq_zero_of_mem hane 1 ⟨k, rfl⟩ hs2 htend
+  have hordP : ∀ k : ℕ, meromorphicOrderAt P (a k) = 1 := by
+    intro k
+    exact meromorphicOrderAt_canonicalProductNat_one_at_zero hane k hinj hs2 htend
+  have hordf : ∀ k : ℕ, meromorphicOrderAt f (a k) = 1 := by
+    intro k
+    exact meromorphicOrderAt_eq_one_of_mem hf ((hzero (a k)).2 ⟨k, rfl⟩) (hord (a k))
+  have hordQ₀ : ∀ k : ℕ, meromorphicOrderAt (fun z => f z / P z) (a k) = 0 := by
+    intro k
+    calc meromorphicOrderAt ((fun z : ℂ => f z) / P) (a k)
+        = meromorphicOrderAt (fun z : ℂ => f z) (a k) - meromorphicOrderAt P (a k) := by
+            exact meromorphicOrderAt_div (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf (a k)))
+              (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd (a k)))
+      _ = 0 := by
+            rw [hordf k, hordP k]
+            simp
+  have hQ : ∀ z₀ : ℂ, ∃ g₀ : ℂ → ℂ, AnalyticAt ℂ g₀ z₀ ∧ g₀ z₀ ≠ 0 ∧
+      (fun z => f z / P z) =ᶠ[𝓝[≠] z₀] g₀ := by
+    intro z₀
+    by_cases hz₀ : ∃ n, z₀ = a n
+    · rcases hz₀ with ⟨k, rfl⟩
+      have h₀ : meromorphicOrderAt (fun z => f z / P z) (a k) = 0 := hordQ₀ k
+      rcases (meromorphicOrderAt_eq_int_iff (n := 0) (by
+        change MeromorphicAt ((fun z : ℂ => f z) / P) (a k)
+        exact MeromorphicAt.mul (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf (a k)))
+          (MeromorphicAt.inv (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd (a k)))))))) with ⟨g₀, hg₀, hg₀ne, hgeq⟩
+      refine ⟨g₀, hg₀, hg₀ne, ?_⟩
+      filter_upwards [hgeq] with z hz
+      simp at hz
+      exact hz
+    · have hf₀ : f z₀ ≠ 0 := by
+        intro h
+        exact hz₀ ((hzero z₀).1 h)
+      have hP₀ : P z₀ ≠ 0 := hPne z₀ (by
+        intro n hn
+        exact hz₀ ⟨n, hn⟩)
+      refine ⟨fun z => f z / P z, ?_, ?_, ?_⟩
+      · exact AnalyticAt.div (Differentiable.analyticAt hf z₀) (Differentiable.analyticAt hPd z₀) hP₀
+      · exact div_ne_zero hf₀ hP₀
+      · filter_upwards with z
+        rfl
+  let Q : ℂ → ℂ := fun z₀ => (Classical.choose (hQ z₀)) z₀
+  have hQval : ∀ z₀, Q z₀ = (Classical.choose (hQ z₀)) z₀ := by
+    intro z₀
+    rfl
+  have hQeq : ∀ z₀, Q =ᶠ[𝓝[≠] z₀] (fun z => f z / P z) := by
+    intro z₀
+    have hg := (Classical.choose_spec (hQ z₀)).2.2
+    have hgQ : Q =ᶠ[𝓝[≠] z₀] (Classical.choose (hQ z₀)) := by
+      filter_upwards with z
+      rw [hQval z]
+    exact hgQ.trans (hg.symm)
+  have hQanal : ∀ z₀, AnalyticAt ℂ Q z₀ := by
+    intro z₀
+    have hmero : MeromorphicAt Q z₀ := by
+      have hq : MeromorphicAt (fun z => f z / P z) z₀ := by
+        change MeromorphicAt ((fun z : ℂ => f z) / P) z₀
+        exact MeromorphicAt.mul (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf z₀))
+          (MeromorphicAt.inv (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd z₀)))
+      exact MeromorphicAt.congr hq (hQeq z₀).symm
+    have hcont : ContinuousAt Q z₀ := by
+      rcases hQ z₀ with ⟨g₀, hg₀, hg₀ne, hgeq⟩
+      have h₀ : 0 ≤ meromorphicOrderAt (fun z => f z / P z) z₀ := by
+        by_cases hz₀ : ∃ n, z₀ = a n
+        · rcases hz₀ with ⟨k, rfl⟩
+          rw [hordQ₀ k]
+        · have hf₀ : f z₀ ≠ 0 := by
+            intro h
+            exact hz₀ ((hzero z₀).1 h)
+          have hP₀ : P z₀ ≠ 0 := hPne z₀ (by
+            intro n hn
+            exact hz₀ ⟨n, hn⟩)
+          change meromorphicOrderAt ((fun z : ℂ => f z) / P) z₀ ≥ 0
+          rw [meromorphicOrderAt_div (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf z₀))
+            (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd z₀))]
+          rw [meromorphicOrderAt_eq_zero_of_ne_zero (Differentiable.analyticAt hf z₀) hf₀,
+            meromorphicOrderAt_eq_zero_of_ne_zero (Differentiable.analyticAt hPd z₀) hP₀]
+          simp
+      rcases tendsto_nhds_of_meromorphicOrderAt_nonneg (by
+        change MeromorphicAt ((fun z : ℂ => f z) / P) z₀
+        exact MeromorphicAt.mul (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf z₀))
+          (MeromorphicAt.inv (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd z₀)))) h₀ with ⟨c, hc⟩
+      have hc' : c = g₀ z₀ := by
+        have hg₀' : Tendsto g₀ (𝓝[≠] z₀) (𝓝 (g₀ z₀)) :=
+          hg₀.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
+        exact tendsto_nhds_unique (Tendsto.congr' hgeq hc) hg₀'
+      have hQz₀ : Q z₀ = g₀ z₀ := by
+        rw [hQval z₀]
+        exact analytic_extension_unique (Classical.choose_spec (hQ z₀)).1 hg₀
+          ((Classical.choose_spec (hQ z₀)).2.2.symm.trans hgeq)
+      have hQt : Tendsto Q (𝓝[≠] z₀) (𝓝 (Q z₀)) := by
+        rw [hQz₀, ← hc']
+        exact Tendsto.congr' (hQeq z₀).symm hc
+      exact continuousAt_iff_punctured_nhds.mpr hQt
+    exact MeromorphicAt.analyticAt hmero hcont
+  have hQd : Differentiable ℂ Q := by
+    have hQan : AnalyticOnNhd ℂ Q (Set.univ : Set ℂ) := by
+      intro z hz
+      exact hQanal z
+    exact differentiableOn_univ.mp (hQan.differentiableOn)
+  have hQne : ∀ z, Q z ≠ 0 := by
+    intro z
+    exact (Classical.choose_spec (hQ z)).2.1
+  rcases exists_entire_log (f := Q) hQd hQne with ⟨g, hgd, hgeq⟩
+  refine ⟨g, hgd, ?_⟩
+  intro z
+  by_cases hz : f z = 0
+  · rcases (hzero z).1 hz with ⟨k, rfl⟩
+    rw [hPz k]
+    simp
+  · have hzane : ∀ n, z ≠ a n := by
+      intro n hn
+      apply hz
+      exact (hzero z).2 ⟨n, hn⟩
+    have hP₀ : P z ≠ 0 := hPne z hzane
+    have h₃ : Q z = f z / P z := by
+      rw [hQval z]
+      exact analytic_extension_unique (Classical.choose_spec (hQ z)).1
+        (AnalyticAt.div (Differentiable.analyticAt hf z) (Differentiable.analyticAt hPd z) hP₀)
+        ((Classical.choose_spec (hQ z)).2.2.symm.trans (by
+          filter_upwards with w
+          rfl))
+    have h₄ : f z = Q z * P z := by
+      rw [h₃]
+      field_simp [hP₀]
+    have h₅ : Q z = Complex.exp (g z) := hgeq z
+    rw [h₄, h₅]
+    ring
