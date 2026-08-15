@@ -65,7 +65,8 @@ theorem zeroFreeEdge_from_tsum
       + ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re) := by
     sorry -- tsum ≥ borderline ≥ 4/d: use tsum_nonneg + le_tsum + borderline bound
   -- Chain: 4/d ≤ tsum ≤ analytic ≤ RHS
-  have h4le : 4 / d ≤ A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂ := linarith [h3f1, hsum_ge, h_analytic]
+  have h4le : 4 / d ≤ A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂ := by
+    linarith [h3f1, hsum_ge, h_analytic]
   rw [ge_iff_le, div_le_iff₀ hRHS_pos]
   rw [div_le_iff₀ hd] at h4le
   linarith
