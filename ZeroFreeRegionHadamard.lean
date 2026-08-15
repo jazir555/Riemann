@@ -3025,13 +3025,19 @@ lemma primaryFactor_eq_zero_iff (p : ℕ) (z : ℂ) : primaryFactor p z = 0 ↔ 
     rw [h, primaryFactor_one]
 
 /-- The Weierstrass primary factor is entire. -/
+@[fun_prop]
 lemma differentiable_primaryFactor (p : ℕ) : Differentiable ℂ (primaryFactor p) := by
-  fun_prop
+  have h : primaryFactor p = fun z => (1 - z) * Complex.exp (∑ k ∈ Finset.range p, z ^ (k + 1) / (k + 1)) := rfl
+  rw [h]
+  apply Differentiable.mul
+  · fun_prop
+  · exact Differentiable.comp Complex.differentiable_exp (by fun_prop)
 
 /-- The scaled primary factor `z ↦ E_p(z/a)` is entire for `a ≠ 0`. -/
+@[fun_prop]
 lemma differentiable_primaryFactor_scaled (p : ℕ) {a : ℂ} (ha : a ≠ 0) :
     Differentiable ℂ (fun z => primaryFactor p (z / a)) := by
-  fun_prop
+  exact (differentiable_primaryFactor p).comp (by fun_prop)
 
 /-- Pointwise bound `‖E_p(w) - 1‖ ≤ 4/(p+1) · ‖w‖^{p+1}` for `‖w‖ ≤ 1/2`. -/
 lemma norm_primaryFactor_sub_one_le (p : ℕ) {w : ℂ} (hw : ‖w‖ ≤ 1 / 2) :
@@ -3109,7 +3115,7 @@ theorem multipliableLocallyUniformlyOn_primaryFactor {a : ℕ → ℂ} (hane : �
       exact hb'.trans (h₀.trans_eq h₁)
     have hcts : ∀ n, ContinuousOn (fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
       intro n
-      fun_prop
+      exact (differentiable_primaryFactor_scaled p (hane n)).continuous.continuousOn
     have hm : MultipliableLocallyUniformlyOn
         (fun n : ℕ => fun z : ℂ => 1 + (primaryFactor p (z / a n) - 1)) (Metric.ball (0 : ℂ) R) := by
       refine Summable.multipliableLocallyUniformlyOn_nat_one_add Metric.isOpen_ball hc ?_ ?_
@@ -3147,15 +3153,16 @@ theorem multipliableLocallyUniformlyOn_primaryFactor {a : ℕ → ℂ} (hane : �
   have huniform : MultipliableUniformlyOn
       (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
     rcases hcompact with ⟨g, hg⟩
-    exact ⟨g, hg.mono (by intro x hx; rw [Metric.mem_closedBall, dist_eq_norm]; exact le_of_lt (by simpa [Metric.mem_ball, dist_eq_norm] using hx))⟩
-  refine ⟨Metric.ball (0 : ℂ) R, Filter.mem_nhdsWithin_of_mem_nhds (Metric.isOpen_ball.mem_nhds hzmem), huniform⟩
+    exact ⟨g, HasProdUniformlyOn.mono hg (by intro x hx; rw [Metric.mem_closedBall, dist_eq_norm]; exact le_of_lt (by simpa [Metric.mem_ball, dist_eq_norm] using hx))⟩
+  refine ⟨Metric.ball (0 : ℂ) R, ?_, huniform⟩
+  simpa [nhdsWithin_univ] using (Metric.isOpen_ball.mem_nhds hzmem)
 
 /-- The canonical product over the zeros defines an entire function. -/
 theorem differentiable_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ)
     (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
     (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
     Differentiable ℂ (canonicalProductNat p a) := by
-  have hm : MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) univ :=
+  have hm : MultipliableLocallyUniformlyOn (fun n : ℕ => fun z : ℂ => primaryFactor p (z / a n)) (Set.univ : Set ℂ) :=
     multipliableLocallyUniformlyOn_primaryFactor hane p hs htend
   have htend' : TendstoLocallyUniformlyOn
       (fun N : ℕ => fun z : ℂ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n))
@@ -3226,7 +3233,7 @@ lemma tprod_eq_exp_tsum_log {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ
   have hlog : Summable (fun n : ℕ => Complex.log (primaryFactor p (z / a n))) :=
     summable_log_primaryFactor hane p hs htend
   have hm : Multipliable (fun n : ℕ => primaryFactor p (z / a n)) :=
-    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (mem_univ z)
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp : z ∈ (Set.univ : Set ℂ))
   have hprod : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (z / a n)) atTop
       (𝓝 (canonicalProductNat p a z)) := by
     simpa [canonicalProductNat] using hm.hasProd.tendsto_prod_nat
@@ -3269,7 +3276,7 @@ theorem canonicalProductNat_eq_zero_of_mem {a : ℕ → ℂ} (hane : ∀ n, a n 
     canonicalProductNat p a z = 0 := by
   rcases hzm with ⟨n₀, rfl⟩
   have hm : Multipliable (fun n : ℕ => primaryFactor p (a n₀ / a n)) :=
-    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (mem_univ (a n₀))
+    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp : a n₀ ∈ (Set.univ : Set ℂ))
   have hprod : Tendsto (fun N : ℕ => ∏ n ∈ Finset.range N, primaryFactor p (a n₀ / a n)) atTop
       (𝓝 (canonicalProductNat p a (a n₀))) := by
     simpa [canonicalProductNat] using hm.hasProd.tendsto_prod_nat
@@ -3297,7 +3304,7 @@ theorem logDeriv_canonicalProductNat {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
       apply hzane n
       rw [div_eq_one_iff_eq (hane n)] at h
       exact h))
-    (fun n => by fun_prop)
+    (fun n => (differentiable_primaryFactor_scaled p (hane n)).differentiableOn)
     hlogsum
-    ((multipliableLocallyUniformlyOn_primaryFactor hane p hs2 htend).mono (subset_univ s))
+    ((multipliableLocallyUniformlyOn_primaryFactor hane p hs2 htend).mono (by intro x hx; trivial))
     (canonicalProductNat_ne_zero hane p hzane hs2 htend)
