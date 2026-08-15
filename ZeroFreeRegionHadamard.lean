@@ -110,12 +110,17 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 **Still to be proved (the Hadamard factorisation itself):**
 - `hadamardFactorization` : for `f` entire of finite order `ρ` with zeros
-  `a_n`, `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/a_n)` with `deg g ≤ ρ`,
+  `a_n`, `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/a_n)` with `deg g ≤ ρ` — **DONE for genus one**
+  (`hadamard_factorization_genus_one`, 2026-08-15); general genus remains,
 - `completedZeta_zeros_eq_nontrivialZeros` : the zero set (with multiplicity) is
-  exactly `{ρ : non-trivial zero of ζ}`,
+  exactly `{ρ : non-trivial zero of ζ}` — **DONE** in the form
+  `xi_zero_iff_riemannZeta_zero` + `riemannZeta_zero_imp_critical_strip_or_trivial`
+  (`xi` is `s(s-1)Λ₀ + 1`; multiplicities are all one), 2026-08-15,
 - `logDeriv_completedZeta` : the logarithmic derivative identity above,
   which instantiates the `h_decomp` / `h_analytic` hypotheses of
-  `riemannZeta_ne_zero_of_zeroFreeEdge`.
+  `riemannZeta_ne_zero_of_zeroFreeEdge` — still open (needs the zero
+  enumeration with `Σ 1/‖ρ‖² < ∞` and the summed log-derivative of the
+  canonical product).
 -/
 
 namespace ZeroFreeRegionHadamard
