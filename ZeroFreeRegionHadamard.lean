@@ -3325,6 +3325,7 @@ theorem exists_entire_log {f : ℂ → ℂ} (hf : Differentiable ℂ f) (h0 : f 
     intro z
     have hηz := (hη z trivial).deriv
     have h1 : deriv (fun x => η x - η 0) z = deriv η z := by
+      change deriv (η - fun x => η 0) z = deriv η z
       rw [deriv_sub (hηd z) (differentiableAt_const (η 0))]
       rw [deriv_const z (η 0)]
       ring
@@ -3398,6 +3399,7 @@ lemma summable_logDeriv_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) {z
         -- 1/(z-a) + 1/a = z/(a·(z-a)):
         have hid : 1 / (z - a (n + N)) + 1 / a (n + N) = z / (a (n + N) * (z - a (n + N))) := by
           field_simp [hane (n + N), sub_ne_zero.mpr (hzane (n + N))]
+          ring
         rw [hid]
         -- ‖z/(a·(z-a))‖ ≤ ‖z‖/(‖a‖·‖z-a‖) ≤ ‖z‖/(‖a‖·(‖a‖-‖z‖)) ≤ 2‖z‖/‖a‖²:
         have hzma : ‖z - a (n + N)‖ = ‖a (n + N) - z‖ := by
@@ -3428,7 +3430,6 @@ lemma summable_logDeriv_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) {z
             div_le_div_of_nonneg_left (norm_nonneg z) h₄ h₃
           have h₆ : ‖z‖ / (‖a (n + N)‖ ^ 2 / 2) = 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
             field_simp [pow_ne_zero 2 (norm_ne_zero_iff.mpr (hane (n + N)))]
-            ring
           exact h₅.trans_eq h₆
       exact hnorm
     · have hshift : Summable (fun n : ℕ => (‖a (n + N)‖ ^ 2)⁻¹) := by
