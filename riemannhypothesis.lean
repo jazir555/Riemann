@@ -11120,16 +11120,18 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply `tailLaguerreRemainder_10`, the canonical first-Laguerre-coefficient plus
-aggregate-remainder leaf.  The formal chain
+Supply the two atomic leaves `tailFirstLaguerreBlocks_10` and
+`tailSquaredHeightCurvature_10`.  The formal chain
 
-    L₁ + nonnegative remainder → quadratic term → integrated vertical growth
+    positive phase-aligned paired-kernel blocks
+      + nonnegative curvature in t=y²
+      → L₁ + nonnegative remainder → quadratic vertical growth
       → quantitative certificate
 
-is implemented by `certificate_of_tailLaguerreRemainder`.  The stronger
-coefficient-wise route remains available through
-`certificate_of_tailGeneralizedLaguerre`; no finite sampling is promoted to a
-theorem.
+is implemented by `tailLaguerreRemainder_of_blocks_and_squaredHeight` followed
+by `certificate_of_tailLaguerreRemainder`.  Pointwise paired-kernel positivity
+and the stronger coefficient-wise route remain available as alternatives; no
+finite sampling is promoted to a theorem.
 -/
 
 noncomputable section
@@ -11445,6 +11447,184 @@ noncomputable def TailLaguerreRemainderLeaf.toQuadraticGrowth
     have hrem := L.remainder_nonneg r y hr hy hylt
     unfold xiShiftedLaguerreRemainder at hrem
     nlinarith [sq_nonneg ‖xiShifted (tailVerticalPoint r 0)‖]
+
+/-!
+### Two independent attacks on the Laguerre-remainder leaf
+
+The first coefficient is reduced to a positive paired-kernel integral.  The
+remainder is attacked by changing variables from height `y` to squared height
+`t = y²`: it becomes the error above the tangent line at `t = 0`, hence is
+nonnegative whenever the squared-height modulus profile is convex.
+-/
+
+/-- A positive paired-kernel representation of the first Laguerre
+    coefficient.  Strict positivity is certified measure-theoretically by a
+    nonnegative integrable kernel with support of positive product measure. -/
+structure TailFirstLaguerreKernelLeaf where
+  kernel : ℝ → (ℝ × ℝ) → ℝ
+  integrable :
+    ∀ r : ℝ,
+      10 < |r| →
+      MeasureTheory.Integrable (kernel r)
+  nonneg :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 ≤ kernel r
+  support_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < MeasureTheory.volume (Function.support (kernel r))
+  representation :
+    ∀ r : ℝ,
+      10 < |r| →
+      xiShiftedFirstLaguerreCoefficient r = ∫ p : ℝ × ℝ, kernel r p
+
+/-- The paired-kernel hypotheses imply strict positivity of canonical `L₁`. -/
+theorem xiShiftedFirstLaguerreCoefficient_pos_of_kernel
+    (K : TailFirstLaguerreKernelLeaf) (r : ℝ) (hr : 10 < |r|) :
+    0 < xiShiftedFirstLaguerreCoefficient r := by
+  rw [K.representation r hr]
+  exact (MeasureTheory.integral_pos_iff_support_of_nonneg
+    (K.nonneg r hr) (K.integrable r hr)).2 (K.support_pos r hr)
+
+/-- Phase-aligned contributions to the paired-kernel integral.  This interface
+    permits compact blocks to be certified separately and the oscillatory tail
+    to be controlled analytically. -/
+structure TailFirstLaguerreBlockLeaf where
+  block : ℕ → ℝ → ℝ
+  block_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < |r| →
+      0 ≤ block n r
+  first_block_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      0 < block 0 r
+  summable :
+    ∀ r : ℝ,
+      10 < |r| →
+      Summable (fun n : ℕ => block n r)
+  representation :
+    ∀ r : ℝ,
+      10 < |r| →
+      xiShiftedFirstLaguerreCoefficient r = ∑' n : ℕ, block n r
+
+/-- A summable phase-aligned block decomposition with one strictly positive
+    block proves strict positivity of `L₁`. -/
+theorem xiShiftedFirstLaguerreCoefficient_pos_of_blocks
+    (B : TailFirstLaguerreBlockLeaf) (r : ℝ) (hr : 10 < |r|) :
+    0 < xiShiftedFirstLaguerreCoefficient r := by
+  have hsum := (B.summable r hr).sum_le_tsum ({0} : Finset ℕ)
+    (fun n _ => B.block_nonneg n r hr)
+  have hfirst : B.block 0 r ≤ ∑' n : ℕ, B.block n r := by
+    simpa using hsum
+  calc
+    0 < B.block 0 r := B.first_block_pos r hr
+    _ ≤ ∑' n : ℕ, B.block n r := hfirst
+    _ = xiShiftedFirstLaguerreCoefficient r := (B.representation r hr).symm
+
+/-- The vertical modulus square, reparameterized by squared height. -/
+noncomputable def xiShiftedSquaredHeightProfile (r t : ℝ) : ℝ :=
+  ‖xiShifted (tailVerticalPoint r (Real.sqrt t))‖ ^ 2
+
+/-- Convexity in squared height, together with identification of the tangent
+    slope at the critical line with `L₁`. -/
+structure TailSquaredHeightConvexityLeaf where
+  convex :
+    ∀ r : ℝ,
+      10 < |r| →
+      ConvexOn ℝ (Set.Icc 0 (1 / 4 : ℝ)) (xiShiftedSquaredHeightProfile r)
+  tangent :
+    ∀ r : ℝ,
+      10 < |r| →
+      HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
+        (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
+
+/-- A curvature-level route to squared-height convexity.  It exposes the
+    concrete analytic tasks used by Mathlib's second-derivative convexity
+    theorem. -/
+structure TailSquaredHeightCurvatureLeaf where
+  continuous :
+    ∀ r : ℝ,
+      10 < |r| →
+      ContinuousOn (xiShiftedSquaredHeightProfile r) (Set.Icc 0 (1 / 4 : ℝ))
+  differentiable :
+    ∀ r : ℝ,
+      10 < |r| →
+      DifferentiableOn ℝ (xiShiftedSquaredHeightProfile r)
+        (interior (Set.Icc 0 (1 / 4 : ℝ)))
+  deriv_differentiable :
+    ∀ r : ℝ,
+      10 < |r| →
+      DifferentiableOn ℝ (deriv (xiShiftedSquaredHeightProfile r))
+        (interior (Set.Icc 0 (1 / 4 : ℝ)))
+  curvature_nonneg :
+    ∀ r : ℝ,
+      10 < |r| →
+      ∀ t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)),
+        0 ≤ (deriv^[2] (xiShiftedSquaredHeightProfile r)) t
+  tangent :
+    ∀ r : ℝ,
+      10 < |r| →
+      HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
+        (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
+
+/-- Nonnegative squared-height curvature implies the convexity interface. -/
+noncomputable def TailSquaredHeightCurvatureLeaf.toConvexity
+    (C : TailSquaredHeightCurvatureLeaf) : TailSquaredHeightConvexityLeaf where
+  convex := by
+    intro r hr
+    exact convexOn_of_deriv2_nonneg (convex_Icc 0 (1 / 4 : ℝ))
+      (C.continuous r hr) (C.differentiable r hr)
+      (C.deriv_differentiable r hr) (C.curvature_nonneg r hr)
+  tangent := C.tangent
+
+/-- Squared-height convexity proves the entire higher-order remainder
+    nonnegative once strict positivity of `L₁` has been supplied separately. -/
+theorem tailLaguerreRemainder_of_L1_and_squaredHeight
+    (hL1 : ∀ r : ℝ, 10 < |r| → 0 < xiShiftedFirstLaguerreCoefficient r)
+    (C : TailSquaredHeightConvexityLeaf) :
+    TailLaguerreRemainderLeaf where
+  L1_pos := hL1
+  remainder_nonneg := by
+    intro r y hr hy hylt
+    have htpos : 0 < y ^ 2 := sq_pos_of_pos hy
+    have htmem : y ^ 2 ∈ Set.Icc (0 : ℝ) (1 / 4 : ℝ) := by
+      constructor
+      · positivity
+      · nlinarith
+    have hslope := (C.convex r hr).le_slope_of_hasDerivWithinAt_Ioi
+      (by norm_num : (0 : ℝ) ∈ Set.Icc 0 (1 / 4 : ℝ))
+      htmem htpos (C.tangent r hr)
+    have hline :
+        xiShiftedFirstLaguerreCoefficient r * y ^ 2 ≤
+          xiShiftedSquaredHeightProfile r (y ^ 2) -
+            xiShiftedSquaredHeightProfile r 0 := by
+      apply (le_div_iff₀ htpos).mp
+      simpa [slope_def_field] using hslope
+    have hline' :
+        xiShiftedFirstLaguerreCoefficient r * y ^ 2 ≤
+          ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 -
+            ‖xiShifted (tailVerticalPoint r 0)‖ ^ 2 := by
+      simpa [xiShiftedSquaredHeightProfile, Real.sqrt_sq hy.le] using hline
+    unfold xiShiftedLaguerreRemainder
+    nlinarith
+
+/-- Paired-kernel positivity combined with squared-height convexity. -/
+theorem tailLaguerreRemainder_of_kernel_and_squaredHeight
+    (K : TailFirstLaguerreKernelLeaf)
+    (C : TailSquaredHeightConvexityLeaf) :
+    TailLaguerreRemainderLeaf :=
+  tailLaguerreRemainder_of_L1_and_squaredHeight
+    (xiShiftedFirstLaguerreCoefficient_pos_of_kernel K) C
+
+/-- Phase-aligned block positivity combined with squared-height convexity. -/
+theorem tailLaguerreRemainder_of_blocks_and_squaredHeight
+    (B : TailFirstLaguerreBlockLeaf)
+    (C : TailSquaredHeightConvexityLeaf) :
+    TailLaguerreRemainderLeaf :=
+  tailLaguerreRemainder_of_L1_and_squaredHeight
+    (xiShiftedFirstLaguerreCoefficient_pos_of_blocks B) C
 
 /-- A tail-local generalized Laguerre expansion with nonnegative coefficients.
     The `n = 1` coefficient is required to be strictly positive so that the
@@ -11967,13 +12147,22 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **The sole open tail leaf.**  Prove positivity of the canonical first
-    Laguerre coefficient and nonnegativity of the aggregate higher-order
-    vertical remainder on `10 < |r|`.  This avoids the stronger demand that
-    every generalized Laguerre coefficient be nonnegative, but it remains the
-    RH-hard analytic step. -/
-theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf := by
+/-- **Open atomic leaf A.**  Decompose the paired-kernel representation of
+    canonical `L₁` into summable phase-aligned blocks, prove every block
+    nonnegative on `10 < |r|`, and prove one block strictly positive. -/
+noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreBlockLeaf := by
   sorry
+
+/-- **Open atomic leaf B.**  Prove nonnegative second derivative of the
+    shifted-xi modulus square as a function of squared vertical height,
+    together with the endpoint tangent identity. -/
+theorem tailSquaredHeightCurvature_10 : TailSquaredHeightCurvatureLeaf := by
+  sorry
+
+/-- The two atomic leaves assemble the former Laguerre-remainder obligation. -/
+theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf :=
+  tailLaguerreRemainder_of_blocks_and_squaredHeight
+    tailFirstLaguerreBlocks_10 tailSquaredHeightCurvature_10.toConvexity
 
 /-- The Laguerre-remainder leaf specialized to integrated vertical growth. -/
 noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=

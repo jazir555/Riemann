@@ -189,7 +189,7 @@ post_update pkg do
 
 
 lean_lib RootScratch where
-  roots := #[`ZeroFreeRegionHadamard]
-  globs := #[`ZeroFreeRegionHadamard]
+  roots := #[`ZeroFreeRegionHadamard, `ZeroFreeRegionProof, `riemann_hypothesis, `HadamardBridge]
+  globs := #[`ZeroFreeRegionHadamard, `ZeroFreeRegionProof, `riemann_hypothesis, `HadamardBridge]
 
 
