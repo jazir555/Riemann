@@ -59,20 +59,23 @@ Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
 
 ### Still missing (requires substantial new mathlib content)
 
-1. **Hadamard factorization theorem** — entirely absent from mathlib. Needs:
-   - Order of an entire function API (defined below, but basic API incomplete),
-   - The factorization theorem itself: `f(z) = z^m e^{g(z)} ∏ E_{⌊ρ⌋}(z/aₙ)`,
-   - Application to completed zeta: order-1 bound (`completedZeta_order_le_one`, proved
-     using `orderSet_completedRiemannZeta₀` unconditionally),
-   - Zero identification with non-trivial zeros of ζ.
-2. **Application to the completed zeta**: identifying the zeros of
-   `s ↦ s(s-1)·completedRiemannZeta s` with the non-trivial zeros `ρ` of `ζ`
-   (with multiplicities), proving it is entire of order 1, and taking the
-   logarithmic derivative to obtain
-   `-ζ'/ζ(s) = analytic s - Σ_ρ (1/(s-ρ) + 1/ρ)`.
-3. **Digamma/Stirling vertical bounds** — `|digamma(σ+it)| ≤ C·log(|t|+2)` and
-   complex Stirling approximation for the `O(log|t|)` growth of the analytic part.
-   The digamma bound is proved as `digamma_le_log`.
+1. **Hadamard factorization theorem** — **DONE (2026-08-15)**: the genus-one
+   factorization `hadamard_factorization_genus_one` is proved in this file
+   (`f = e^g · canonicalProductNat 1 a` for entire `f` with simple zeros `a`).
+   The full genus-`⌊ρ⌋` statement and the order-`ρ` bound (`completedZeta_order_le_one`)
+   remain future work.
+2. **Application to the completed zeta** — **zero identification DONE (2026-08-15)**:
+   `xi_zero_iff_riemannZeta_zero` identifies the zeros of the entire function
+   `ξ(s) = s(s-1)Λ₀(s) + 1` with the non-trivial zeros of `ζ`, and
+   `riemannZeta_zero_imp_critical_strip_or_trivial` gives the critical-strip
+   classification. Still missing: the logarithmic derivative identity
+   `-ζ'/ζ(s) = analytic s - Σ_ρ (1/(s-ρ) + 1/ρ)` (needs the zero enumeration with
+   `Σ 1/‖ρ‖² < ∞` from Jensen, and the log-derivative of the canonical product
+   summed over all zeros) that instantiates the `h_decomp` hypothesis of
+   `riemannZeta_ne_zero_of_zeroFreeEdge`.
+3. **Digamma/Stirling vertical bounds** — **DONE**: `digamma_le_log`
+   (`‖ψ(s)‖ ≤ γ + 2σ + 7 + log(|t|+2)`) and `norm_psi_le_linear`
+   (`‖ψ(s)‖ ≤ (π²+1)·|s|`).
 
 What `mathlib` *does* already provide and that Route B can lean on:
 - `Complex.norm_log_sub_logTaylor_le` and the `Complex.logTaylor` API in
@@ -3729,48 +3732,23 @@ lemma meromorphicOrderAt_canonicalProductNatSkip_eq_zero {a : ℕ → ℂ} (hane
 /-- The order of the `k`-th primary factor at the zero `a k` is one. -/
 lemma meromorphicOrderAt_primaryFactor_one_scaled_at_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (k : ℕ) :
     meromorphicOrderAt (fun z => primaryFactor 1 (z / a k)) (a k) = 1 := by
-  have hform : (fun z : ℂ => primaryFactor 1 (z / a k)) =
-      fun z : ℂ => (1 - z / a k) * Complex.exp (z / a k) := by
-    funext z
-    simp [primaryFactor]
-  rw [hform]
   have hdiff : AnalyticAt ℂ (fun z : ℂ => z / a k) (a k) :=
     Differentiable.analyticAt (differentiable_id.div (differentiable_const (a k)) (fun _ => hane k)) (a k)
-  have h₀ : meromorphicOrderAt (fun z : ℂ => Complex.exp (z / a k)) (a k) = 0 := by
-    have he : AnalyticAt ℂ (fun z : ℂ => Complex.exp (z / a k)) (a k) :=
-      AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff
-    exact (meromorphicOrderAt_eq_int_iff (n := 0) he.meromorphicAt).mpr ⟨
-      fun z => Complex.exp (z / a k), he, by simp, by
-        filter_upwards with z
-        simp⟩
-  have h₁ : meromorphicOrderAt (fun z : ℂ => 1 - z / a k) (a k) = 1 := by
-    have hform1 : (fun z : ℂ => 1 - z / a k) = fun z : ℂ => (-1 / a k) * (z - a k) := by
-      funext z
-      field_simp [hane k]
-      ring
-    rw [hform1]
-    have hc : meromorphicOrderAt (fun z : ℂ => (-1 / a k)) (a k) = 0 := by
-      have hne : (-1 / a k) ≠ 0 := by
-        exact div_ne_zero (by norm_num) (hane k)
-      rw [meromorphicOrderAt_const (a k) (-1 / a k)]
-      simp [hne]
-    have hsub : meromorphicOrderAt (fun z : ℂ => z - a k) (a k) = 1 := by
-      simpa using (meromorphicOrderAt_id_sub_const (𝕜 := ℂ) (x := a k))
-    calc meromorphicOrderAt ((fun z : ℂ => (-1 / a k)) * (fun z : ℂ => z - a k)) (a k)
-        = meromorphicOrderAt (fun z : ℂ => (-1 / a k)) (a k) +
-            meromorphicOrderAt (fun z : ℂ => z - a k) (a k) := by
-        exact meromorphicOrderAt_mul
-          (AnalyticAt.meromorphicAt ((differentiable_const (-1 / a k)).analyticAt (a k)))
-          (AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_id.sub (differentiable_const (a k))) (a k)))
-      _ = 1 := by rw [hc, hsub]; simp
-  calc meromorphicOrderAt ((fun z : ℂ => 1 - z / a k) * (fun z : ℂ => Complex.exp (z / a k))) (a k)
-      = meromorphicOrderAt (fun z : ℂ => 1 - z / a k) (a k) +
-          meromorphicOrderAt (fun z : ℂ => Complex.exp (z / a k)) (a k) := by
-          exact meromorphicOrderAt_mul
-            (AnalyticAt.meromorphicAt (Differentiable.analyticAt
-              ((differentiable_const (1 : ℂ)).sub (differentiable_id.div (differentiable_const (a k)) (fun _ => hane k))) (a k)))
-            (AnalyticAt.meromorphicAt (AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff))
-    _ = 1 := by rw [h₁, h₀]; simp
+  have hg : AnalyticAt ℂ (fun z => (-1 / a k) * Complex.exp (z / a k)) (a k) :=
+    AnalyticAt.mul (analyticAt_const (v := (-1 / a k)))
+      (AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff)
+  have hg_ne : ((-1 / a k) * Complex.exp (a k / a k)) ≠ 0 := by
+    rw [div_self (hane k)]
+    exact mul_ne_zero (div_ne_zero (by norm_num) (hane k)) (Complex.exp_ne_zero 1)
+  have hgeq : ∀ᶠ z in 𝓝[≠] (a k),
+      primaryFactor 1 (z / a k) = (z - a k) ^ (1 : ℤ) • ((-1 / a k) * Complex.exp (z / a k)) := by
+    filter_upwards with z
+    simp [primaryFactor]
+    field_simp [hane k]
+    ring
+  exact (meromorphicOrderAt_eq_int_iff (n := 1)
+    (AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_primaryFactor_scaled 1 (hane k)) (a k)))).mpr
+    ⟨fun z => (-1 / a k) * Complex.exp (z / a k), hg, hg_ne, hgeq⟩
 
 /-- The order of the canonical product at the zero `a k` is one. -/
 lemma meromorphicOrderAt_canonicalProductNat_one_at_zero {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
@@ -3781,21 +3759,27 @@ lemma meromorphicOrderAt_canonicalProductNat_one_at_zero {a : ℕ → ℂ} (hane
       fun z : ℂ => primaryFactor 1 (z / a k) * canonicalProductNatSkip k 1 a z := by
     funext z
     exact canonicalProductNat_eq_mul_skip hane 1 k hs2 htend z
-  have hF : MeromorphicAt (fun z : ℂ => primaryFactor 1 (z / a k)) (a k) :=
-    AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_primaryFactor_scaled 1 (hane k)) (a k))
-  have hS : MeromorphicAt (fun z : ℂ => canonicalProductNatSkip k 1 a z) (a k) :=
-    AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_canonicalProductNatSkip hane 1 k hs2 htend) (a k))
-  calc meromorphicOrderAt (canonicalProductNat 1 a) (a k)
-      = meromorphicOrderAt ((fun z : ℂ => primaryFactor 1 (z / a k)) *
-          (fun z : ℂ => canonicalProductNatSkip k 1 a z)) (a k) := by
-          rw [hsplit]
-      _ = meromorphicOrderAt (fun z : ℂ => primaryFactor 1 (z / a k)) (a k) +
-          meromorphicOrderAt (fun z : ℂ => canonicalProductNatSkip k 1 a z) (a k) := by
-          exact meromorphicOrderAt_mul hF hS
-    _ = 1 := by
-          rw [meromorphicOrderAt_primaryFactor_one_scaled_at_zero hane k,
-            meromorphicOrderAt_canonicalProductNatSkip_eq_zero hane 1 k hinj hs2 htend]
-          simp
+  have hdiff : AnalyticAt ℂ (fun z : ℂ => z / a k) (a k) :=
+    Differentiable.analyticAt (differentiable_id.div (differentiable_const (a k)) (fun _ => hane k)) (a k)
+  have hgan : AnalyticAt ℂ (fun z => (-1 / a k) * Complex.exp (z / a k) * canonicalProductNatSkip k 1 a z) (a k) :=
+    AnalyticAt.mul
+      (AnalyticAt.mul (analyticAt_const (v := (-1 / a k)))
+        (AnalyticAt.comp (Differentiable.analyticAt Complex.differentiable_exp (a k / a k)) hdiff))
+      (Differentiable.analyticAt (differentiable_canonicalProductNatSkip hane 1 k hs2 htend) (a k))
+  have hgan_ne : ((-1 / a k) * Complex.exp (a k / a k) * canonicalProductNatSkip k 1 a (a k)) ≠ 0 := by
+    rw [div_self (hane k)]
+    exact mul_ne_zero (mul_ne_zero (div_ne_zero (by norm_num) (hane k)) (Complex.exp_ne_zero 1))
+      (canonicalProductNatSkip_ne_zero_at hane 1 k hinj hs2 htend)
+  have hgeq : ∀ᶠ z in 𝓝[≠] (a k),
+      canonicalProductNat 1 a z = (z - a k) ^ (1 : ℤ) • ((-1 / a k) * Complex.exp (z / a k) * canonicalProductNatSkip k 1 a z) := by
+    filter_upwards with z
+    rw [hsplit]
+    simp [primaryFactor, mul_assoc]
+    field_simp [hane k]
+    ring
+  exact (meromorphicOrderAt_eq_int_iff (n := 1)
+    (AnalyticAt.meromorphicAt (Differentiable.analyticAt (differentiable_canonicalProductNat hane 1 hs2 htend) (a k)))).mpr
+    ⟨fun z => (-1 / a k) * Complex.exp (z / a k) * canonicalProductNatSkip k 1 a z, hgan, hgan_ne, hgeq⟩
 
 /-- An analytic function vanishing at `z₀` with order at most one has order exactly one. -/
 lemma meromorphicOrderAt_eq_one_of_mem {f : ℂ → ℂ} (hf : Differentiable ℂ f) {z₀ : ℂ}
@@ -3812,7 +3796,7 @@ lemma meromorphicOrderAt_eq_one_of_mem {f : ℂ → ℂ} (hf : Differentiable �
       have hn : n ≠ 0 := by
         intro hn0
         apply hne
-        rw [hn0]
+        rw [h₀, hn0]
         simp
       have hn1 : 1 ≤ n := Nat.succ_le_iff.mpr (Nat.pos_of_ne_zero hn)
       rw [hfₐ.meromorphicOrderAt_eq, h₀, ENat.map_natCast]
@@ -3859,7 +3843,7 @@ theorem hadamard_factorization_genus_one {f : ℂ → ℂ} {a : ℕ → ℂ}
       rcases (meromorphicOrderAt_eq_int_iff (n := 0) (by
         change MeromorphicAt ((fun z : ℂ => f z) / P) (a k)
         exact MeromorphicAt.mul (AnalyticAt.meromorphicAt (Differentiable.analyticAt hf (a k)))
-          (MeromorphicAt.inv (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd (a k)))))))) with ⟨g₀, hg₀, hg₀ne, hgeq⟩
+          (MeromorphicAt.inv (AnalyticAt.meromorphicAt (Differentiable.analyticAt hPd (a k)))))).mp h₀ with ⟨g₀, hg₀, hg₀ne, hgeq⟩
       refine ⟨g₀, hg₀, hg₀ne, ?_⟩
       filter_upwards [hgeq] with z hz
       simp at hz
@@ -3879,13 +3863,75 @@ theorem hadamard_factorization_genus_one {f : ℂ → ℂ} {a : ℕ → ℂ}
   have hQval : ∀ z₀, Q z₀ = (Classical.choose (hQ z₀)) z₀ := by
     intro z₀
     rfl
+  have zeros_isolated : ∀ z₀ : ℂ, ∀ᶠ z in 𝓝[≠] z₀, f z ≠ 0 := by
+    intro z₀
+    rcases (Differentiable.analyticAt hf z₀).eventually_eq_zero_or_eventually_ne_zero with h | h
+    · exfalso
+      classical
+      rcases _root_.eventually_nhds_iff.mp h with ⟨s, hs_sub, hs_open, hs_mem⟩
+      rcases Metric.isOpen_iff.mp hs_open z₀ hs_mem with ⟨r, hr, hr_sub⟩
+      rcases Filter.Eventually.exists_forall_of_atTop
+        (htend.eventually (Filter.eventually_ge_atTop (‖z₀‖ + 1))) with ⟨N, hN⟩
+      let ρ : ℝ := min r 1
+      have hρ : 0 < ρ := lt_min hr zero_lt_one
+      let bad : Finset ℝ := (Finset.range N).image
+        (fun n => if h : ∃ r : ℝ, (r : ℂ) = a n - z₀ then Classical.choose h else 0)
+      have hpick : ∃ t : ℝ, t ∈ Set.Ioo 0 ρ ∧ t ∉ (bad : Set ℝ) := by
+        rcases Set.Infinite.exists_notMem_finite (Set.Ioo_infinite hρ) bad.finite_toSet with
+          ⟨t, htI, htb⟩
+        exact ⟨t, htI, htb⟩
+      rcases hpick with ⟨t, htI, htb⟩
+      let z : ℂ := z₀ + (t : ℂ)
+      have hz1 : ‖z - z₀‖ < ρ := by
+        simp [z]
+        rw [abs_of_pos htI.1]
+        exact htI.2
+      have hz2 : ∀ n : ℕ, z ≠ a n := by
+        intro n
+        by_cases hn : n < N
+        · intro heq
+          have ht' : (t : ℂ) = a n - z₀ := by
+            rw [← heq]
+            simp [z]
+          have hc : ∃ r : ℝ, (r : ℂ) = a n - z₀ := ⟨t, ht'⟩
+          have hch : Classical.choose hc = t := by
+            have h1 : ((Classical.choose hc : ℝ) : ℂ) = (t : ℂ) := by
+              rw [Classical.choose_spec hc, ← ht']
+            exact congrArg Complex.re h1
+          have hbad : t ∈ bad := by
+            dsimp [bad]
+            refine Finset.mem_image.mpr ⟨n, Finset.mem_range.mpr hn, ?_⟩
+            simp [hc, hch]
+          exact htb hbad
+        · intro heq
+          have hnN : N ≤ n := Nat.le_of_not_gt hn
+          have hnorm : ‖z₀‖ + 1 ≤ ‖a n‖ := hN n hnN
+          have hz1' : ‖z - z₀‖ < 1 := lt_of_lt_of_le hz1 (min_le_right r 1)
+          have hdist : ‖a n - z₀‖ < 1 := by
+            rw [← heq]
+            exact hz1'
+          have htri : ‖a n‖ ≤ ‖a n - z₀‖ + ‖z₀‖ := by
+            simpa [sub_eq_add_neg, add_assoc] using norm_add_le (a n - z₀) z₀
+          linarith
+      have hzs : z ∈ s := hr_sub (by
+        simpa [Metric.mem_ball, dist_eq_norm] using
+          lt_of_lt_of_le hz1 (min_le_left r 1))
+      have hfz : f z = 0 := hs_sub z hzs
+      rcases (hzero z).1 hfz with ⟨n, hn⟩
+      exact hz2 n hn
+    · exact h
   have hQeq : ∀ z₀, Q =ᶠ[𝓝[≠] z₀] (fun z => f z / P z) := by
     intro z₀
-    have hg := (Classical.choose_spec (hQ z₀)).2.2
-    have hgQ : Q =ᶠ[𝓝[≠] z₀] (Classical.choose (hQ z₀)) := by
-      filter_upwards with z
-      rw [hQval z]
-    exact hgQ.trans (hg.symm)
+    filter_upwards [zeros_isolated z₀] with z hfz
+    have hz : P z ≠ 0 := hPne z (by
+      intro n hn
+      exact hfz ((hzero z).2 ⟨n, hn⟩))
+    rw [hQval z]
+    exact analytic_extension_unique (Classical.choose_spec (hQ z)).1
+      (AnalyticAt.div (Differentiable.analyticAt hf z) (Differentiable.analyticAt hPd z) hz)
+      ((Classical.choose_spec (hQ z)).2.2.symm.trans (by
+        filter_upwards with w
+        rfl))
   have hQanal : ∀ z₀, AnalyticAt ℂ Q z₀ := by
     intro z₀
     have hmero : MeromorphicAt Q z₀ := by
@@ -3937,13 +3983,13 @@ theorem hadamard_factorization_genus_one {f : ℂ → ℂ} {a : ℕ → ℂ}
   have hQne : ∀ z, Q z ≠ 0 := by
     intro z
     exact (Classical.choose_spec (hQ z)).2.1
-  rcases exists_entire_log (f := Q) hQd hQne with ⟨g, hgd, hgeq⟩
+  rcases exists_entire_log (f := Q) hQd (hQne 0) hQne with ⟨g, hgd, hgeq⟩
   refine ⟨g, hgd, ?_⟩
   intro z
   by_cases hz : f z = 0
   · rcases (hzero z).1 hz with ⟨k, rfl⟩
-    rw [hPz k]
-    simp
+    rw [canonicalProductNat_eq_zero_of_mem hane 1 ⟨k, rfl⟩ hs2 htend]
+    simpa using hz
   · have hzane : ∀ n, z ≠ a n := by
       intro n hn
       apply hz
@@ -3961,4 +4007,150 @@ theorem hadamard_factorization_genus_one {f : ℂ → ℂ} {a : ℕ → ℂ}
       field_simp [hP₀]
     have h₅ : Q z = Complex.exp (g z) := hgeq z
     rw [h₄, h₅]
-    ring
+
+/-!
+## Application to the completed Riemann zeta function
+
+We define the entire function xi (ξ(s) = s(s-1)·Λ₀(s) + 1, where Λ₀ is
+mathlib's completedRiemannZeta₀), record the algebraic identity linking it to
+the completed zeta function Λ, and prove the **zero identification**: the zeros
+of ξ are exactly the non-trivial zeros of the Riemann zeta function
+(xi_zero_iff_riemannZeta_zero), together with the critical-strip classification
+(iemannZeta_zero_imp_critical_strip_or_trivial).
+
+These feed the h_decomp / h_analytic hypotheses of
+iemannZeta_ne_zero_of_zeroFreeEdge in ZeroFreeRegionProof.lean.
+-/
+noncomputable def xi (s : ℂ) : ℂ := s * (s - 1) * completedRiemannZeta₀ s + 1
+
+set_option maxHeartbeats 800000 in
+theorem xi_differentiable : Differentiable ℂ xi := by
+  unfold xi
+  apply Differentiable.add
+  · apply Differentiable.mul
+    · apply Differentiable.mul <;> fun_prop
+    · exact differentiable_completedZeta₀
+  · fun_prop
+
+set_option maxHeartbeats 800000 in
+theorem xi_eq_mul_completedRiemannZeta {s : ℂ} (hs : s ≠ 0) (hs' : s ≠ 1) :
+    xi s = s * (s - 1) * completedRiemannZeta s := by
+  rw [xi, completedRiemannZeta_eq]
+  field_simp [hs, sub_ne_zero.mpr hs']
+  ring
+
+set_option maxHeartbeats 800000 in
+theorem xi_zero_iff_riemannZeta_zero {s : ℂ} (hΓ : ∀ n : ℕ, s / 2 ≠ -(n : ℂ)) :
+    xi s = 0 ↔ riemannZeta s = 0 := by
+  constructor
+  · intro hxi
+    by_cases hs : s = 0
+    · rw [hs, xi] at hxi
+      norm_num at hxi
+    · by_cases hs1 : s = 1
+      · rw [hs1, xi] at hxi
+        norm_num at hxi
+      · have hΛ : completedRiemannZeta s = 0 := by
+          have hxi' : s * (s - 1) * completedRiemannZeta s = 0 := by
+            rwa [xi_eq_mul_completedRiemannZeta hs hs1] at hxi
+          have hsnz : s * (s - 1) ≠ 0 := mul_ne_zero hs (sub_ne_zero.mpr hs1)
+          exact (mul_eq_zero.mp hxi').resolve_left hsnz
+        rw [riemannZeta_def_of_ne_zero hs, hΛ]
+        simp
+  · intro hζ
+    by_cases hs : s = 0
+    · rw [hs, riemannZeta_zero] at hζ
+      norm_num at hζ
+    · by_cases hs1 : s = 1
+      · rw [hs1] at hζ
+        exact False.elim ((riemannZeta_ne_zero_of_one_le_re (s := 1) (by norm_num)) hζ)
+      · have hΓne : s.Gammaℝ ≠ 0 := by
+          rw [Complex.Gammaℝ_def]
+          apply mul_ne_zero
+          · rw [Complex.cpow_def_of_ne_zero (by exact_mod_cast Real.pi_ne_zero)]
+            exact Complex.exp_ne_zero _
+          · exact Complex.Gamma_ne_zero hΓ
+        have hΛ : completedRiemannZeta s = 0 := by
+          rw [riemannZeta_def_of_ne_zero hs] at hζ
+          exact (div_eq_zero_iff.mp hζ).resolve_right hΓne
+        rw [xi_eq_mul_completedRiemannZeta hs hs1, hΛ]
+        simp
+
+set_option maxHeartbeats 800000 in
+theorem riemannZeta_zero_imp_critical_strip_or_trivial {s : ℂ} (hζ : riemannZeta s = 0) :
+    0 < s.re ∨ ∃ n : ℕ, s = -2 * (n + 1) := by
+  by_contra h
+  push_neg at h
+  have hsre : s.re ≤ 0 := h.1
+  have hs1 : s ≠ 1 := by
+    intro hs
+    rw [hs] at hsre
+    norm_num at hsre
+  by_cases hint : ∃ n : ℕ, s = -n
+  · rcases hint with ⟨n, rfl⟩
+    by_cases hn : n = 0
+    · subst n
+      simp only [neg_zero, Nat.cast_zero] at hζ
+      rw [riemannZeta_zero] at hζ
+      norm_num at hζ
+    · rcases Nat.even_or_odd n with ⟨m, rfl⟩ | ⟨m, rfl⟩
+      · have hm : 1 ≤ m := by
+          by_contra hm'
+          have : m = 0 := by omega
+          subst m
+          simp at hn
+        exact h.2 (m - 1) (by
+          rw [Nat.cast_sub hm]
+          norm_num
+          ring)
+      · have hne : riemannZeta (-((2 * m + 1 : ℕ) : ℂ)) ≠ 0 := by
+          let n' : ℕ := 2 * m + 1
+          have hn'0 : (n' : ℂ) ≠ 0 := by exact_mod_cast (show n' ≠ 0 by omega)
+          have hΓneg : (-(n' : ℂ)).Gammaℝ ≠ 0 := by
+            rw [Complex.Gammaℝ_def]
+            apply mul_ne_zero
+            · rw [Complex.cpow_def_of_ne_zero (by exact_mod_cast Real.pi_ne_zero)]
+              exact Complex.exp_ne_zero _
+            · apply Complex.Gamma_ne_zero
+              intro k hk
+              have hre : (-(n' : ℂ) / 2).re = (-(k : ℂ)).re := congrArg Complex.re hk
+              have h1 : (-(n' : ℂ) / 2).re = -(n' : ℝ) / 2 := by simp
+              have h2 : (-(k : ℂ)).re = -(k : ℝ) := by simp
+              rw [h1, h2] at hre
+              have hrn : (n' : ℝ) = 2 * (k : ℝ) := by linarith
+              have hn' : n' = 2 * k := by exact_mod_cast hrn
+              dsimp [n'] at hn'
+              omega
+          have hζ1 : riemannZeta (1 + (n' : ℂ)) ≠ 0 :=
+            riemannZeta_ne_zero_of_one_le_re (s := 1 + (n' : ℂ)) (by simp)
+          have hΛ1 : completedRiemannZeta (1 + (n' : ℂ)) ≠ 0 := by
+            intro hΛ
+            have hdef := riemannZeta_def_of_ne_zero (s := 1 + (n' : ℂ))
+              (by
+                have h : 1 ≤ (1 + (n' : ℂ)).re := by simp
+                intro h0
+                rw [h0] at h
+                norm_num at h)
+            rw [hΛ] at hdef
+            exact hζ1 (by simpa using hdef)
+          have hΛneg : completedRiemannZeta (1 + (n' : ℂ)) = completedRiemannZeta (-(n' : ℂ)) := by
+            simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using
+              (completedRiemannZeta_one_sub (1 + (n' : ℂ))).symm
+          intro hz
+          have hdef := riemannZeta_def_of_ne_zero (s := -(n' : ℂ)) (neg_ne_zero.mpr hn'0)
+          rw [hdef] at hz
+          have hΛ0 : completedRiemannZeta (-(n' : ℂ)) = 0 :=
+            (div_eq_zero_iff.mp hz).resolve_right hΓneg
+          exact hΛ1 (by
+            rw [hΛneg]
+            exact hΛ0)
+        exact hne hζ
+  · push_neg at hint
+    have hfe := riemannZeta_one_sub (s := s) hint hs1
+    have hζ1s : riemannZeta (1 - s) = 0 := by
+      rw [hfe, hζ]
+      simp
+    have hre1 : 1 ≤ (1 - s).re := by
+      simp
+      linarith
+    exact (riemannZeta_ne_zero_of_one_le_re (s := 1 - s) hre1) hζ1s
