@@ -11455,8 +11455,12 @@ theorem xiShiftedVerticalCauchyCoefficient_re_hasSum
     (xiShiftedVerticalCauchyCoefficient_hasSum r y hy)
   convert h using 1
   · rfl
-  · rw [Complex.mul_conj]
-    exact Complex.sq_norm (xiShifted (tailVerticalPoint r y))
+  · change ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 =
+      (xiShifted (tailVerticalPoint r y) *
+        star (xiShifted (tailVerticalPoint r y))).re
+    simp only [star_def]
+    rw [Complex.mul_conj]
+    simpa using Complex.sq_norm (xiShifted (tailVerticalPoint r y))
 
 /-- An integrated vertical-modulus-growth leaf for the tail.  Its `growth`
     field is the RH-hard analytic input; the remaining conversion to
