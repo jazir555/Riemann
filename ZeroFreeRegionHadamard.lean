@@ -3461,7 +3461,131 @@ set_option maxHeartbeats 800000
 
 /-- The canonical product with the factor at index `k` removed. -/
 noncomputable def canonicalProductNatSkip (k : ℕ) (p : ℕ) (a : ℕ → ℂ) (z : ℂ) : ℂ :=
-  ∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, primaryFactor p (z / a m.1)
+  ∏' n : ℕ, (if n = k then 1 else primaryFactor p (z / a n))
+
+/-- The skipped canonical product converges locally uniformly on `ℂ`. -/
+theorem multipliableLocallyUniformlyOn_primaryFactorSkip {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0)
+    (p : ℕ) (k : ℕ) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n))
+      (Set.univ : Set ℂ) := by
+  have hball : ∀ R : ℝ, 0 < R → MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n))
+      (Metric.ball (0 : ℂ) R) := by
+    intro R hR
+    let c : ℕ → ℝ := fun n => (4 / (p + 1 : ℝ)) * R ^ (p + 1) * (1 / ‖a n‖ ^ (p + 1))
+    have hc : Summable c := by
+      simpa [c, one_div, mul_assoc] using
+        (hs.mul_left ((4 / (p + 1 : ℝ)) * R ^ (p + 1)))
+    have hev : ∀ᶠ n in atTop, ∀ z ∈ Metric.ball (0 : ℂ) R,
+        ‖(if n = k then 1 else primaryFactor p (z / a n)) - 1‖ ≤ c n := by
+      filter_upwards [htend.eventually_ge_atTop (2 * R)] with n hn z hz
+      by_cases hnk : n = k
+      · have hak : (0 : ℝ) < ‖a n‖ := norm_pos_iff.mpr (hane n)
+        simp [hnk, c]
+        positivity
+      · have hz' : ‖z‖ ≤ R := le_of_lt (mem_ball_zero_iff.mp hz)
+        have hanz : (0 : ℝ) < ‖a n‖ := by linarith
+        have hnorm : ‖z / a n‖ ≤ 1 / 2 := by
+          rw [norm_div]
+          have h₁ : ‖z‖ / ‖a n‖ ≤ R / ‖a n‖ :=
+            div_le_div_of_nonneg_right hz' (le_of_lt hanz)
+          have h₂ : R / ‖a n‖ ≤ 1 / 2 := by
+            rw [div_le_iff₀ hanz]
+            nlinarith
+          exact h₁.trans h₂
+        have hb := norm_primaryFactor_sub_one_le p hnorm
+        have hb' : ‖primaryFactor p (z / a n) - 1‖ ≤ (4 / (p + 1 : ℝ)) * (‖z‖ ^ (p + 1) / ‖a n‖ ^ (p + 1)) := by
+          simpa [norm_div, div_pow] using hb
+        have hRpow : ‖z‖ ^ (p + 1) ≤ R ^ (p + 1) :=
+          pow_le_pow_left₀ (norm_nonneg z) hz' (p + 1)
+        have h₀ : (4 / (p + 1 : ℝ)) * (‖z‖ ^ (p + 1) / ‖a n‖ ^ (p + 1))
+            ≤ (4 / (p + 1 : ℝ)) * (R ^ (p + 1) / ‖a n‖ ^ (p + 1)) := by
+          exact mul_le_mul_of_nonneg_left
+            (div_le_div_of_nonneg_right hRpow (pow_nonneg (norm_nonneg (a n)) (p + 1)))
+            (by positivity : (0 : ℝ) ≤ 4 / (p + 1 : ℝ))
+        have h₁ : (4 / (p + 1 : ℝ)) * (R ^ (p + 1) / ‖a n‖ ^ (p + 1)) = c n := by
+          have hanz0 : ‖a n‖ ^ (p + 1) ≠ 0 := pow_ne_zero (p + 1) (norm_ne_zero_iff.mpr (hane n))
+          simp [c, div_eq_mul_inv, one_div, mul_assoc, hanz0]
+        simp [hnk]
+        exact hb'.trans (h₀.trans_eq h₁)
+    have hcts : ∀ n, ContinuousOn (fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n))
+        (Metric.ball (0 : ℂ) R) := by
+      intro n
+      by_cases hnk : n = k
+      · simpa [hnk] using
+          (continuousOn_const : ContinuousOn (fun _ : ℂ => (1 : ℂ)) (Metric.ball (0 : ℂ) R))
+      · simp [hnk]
+        exact (differentiable_primaryFactor_scaled p (hane n)).continuous.continuousOn
+    have hm : MultipliableLocallyUniformlyOn
+        (fun n : ℕ => fun z : ℂ => 1 + ((if n = k then 1 else primaryFactor p (z / a n)) - 1))
+        (Metric.ball (0 : ℂ) R) := by
+      refine Summable.multipliableLocallyUniformlyOn_nat_one_add Metric.isOpen_ball hc ?_ ?_
+      · exact hev
+      · intro n
+        exact (hcts n).sub continuousOn_const
+    have heq : (fun (n : ℕ) (z : ℂ) => 1 + ((if n = k then 1 else primaryFactor p (z / a n)) - 1))
+        = fun (n : ℕ) => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n) := by
+      funext n z
+      ring
+    rwa [heq] at hm
+  refine multipliableLocallyUniformlyOn_of_of_forall_exists_nhds ?_
+  intro z hz
+  let R : ℝ := ‖z‖ + 1
+  have hR : 0 < R := by positivity
+  have hzmem : z ∈ Metric.ball (0 : ℂ) R := by
+    simp [R, Metric.mem_ball, dist_eq_norm]
+  have hballR : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) :=
+    hball R hR
+  have hballR1 : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) (R + 1)) :=
+    hball (R + 1) (by positivity)
+  have hmono' : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Metric.closedBall (0 : ℂ) R) :=
+    hballR1.mono (by
+      intro x hx
+      rw [Metric.mem_closedBall, dist_eq_norm] at hx
+      rw [Metric.mem_ball, dist_eq_norm]
+      nlinarith)
+  have hcompact : MultipliableUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Metric.closedBall (0 : ℂ) R) :=
+    hmono'.multipliableUniformlyOn_of_isCompact (isCompact_closedBall (0 : ℂ) R)
+  have huniform : MultipliableUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Metric.ball (0 : ℂ) R) := by
+    rcases hcompact with ⟨g, hg⟩
+    exact ⟨g, HasProdUniformlyOn.mono hg (by
+      intro x hx
+      rw [Metric.mem_closedBall, dist_eq_norm]
+      exact le_of_lt (by simpa [Metric.mem_ball, dist_eq_norm] using hx))⟩
+  refine ⟨Metric.ball (0 : ℂ) R, ?_, huniform⟩
+  simpa [nhdsWithin_univ] using (Metric.isOpen_ball.mem_nhds hzmem)
+
+/-- The skipped canonical product is entire. -/
+theorem differentiable_canonicalProductNatSkip {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) (k : ℕ)
+    (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
+    (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
+    Differentiable ℂ (canonicalProductNatSkip k p a) := by
+  have hm : MultipliableLocallyUniformlyOn
+      (fun n : ℕ => fun z : ℂ => if n = k then 1 else primaryFactor p (z / a n)) (Set.univ : Set ℂ) :=
+    multipliableLocallyUniformlyOn_primaryFactorSkip hane p k hs htend
+  have htend' : TendstoLocallyUniformlyOn
+      (fun (N : Finset ℕ) => fun z : ℂ => ∏ n ∈ N, (if n = k then 1 else primaryFactor p (z / a n)))
+      (fun z => canonicalProductNatSkip k p a z) atTop (Set.univ : Set ℂ) := by
+    simpa [canonicalProductNatSkip] using
+      (hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn.mp hm.hasProdLocallyUniformlyOn)
+  have hF : ∀ᶠ N in atTop, DifferentiableOn ℂ
+      (fun z : ℂ => ∏ n ∈ N, (if n = k then 1 else primaryFactor p (z / a n))) (Set.univ : Set ℂ) := by
+    filter_upwards [eventually_ge_atTop (∅ : Finset ℕ)] with N hN
+    refine DifferentiableOn.fun_finsetProd ?_
+    intro n hn
+    by_cases hnk : n = k
+    · simpa [hnk] using (differentiable_const (1 : ℂ)).differentiableOn
+    · simpa [hnk] using (differentiable_primaryFactor_scaled p (hane n)).differentiableOn
+  have hd : DifferentiableOn ℂ (fun z => canonicalProductNatSkip k p a z) (Set.univ : Set ℂ) :=
+    htend'.differentiableOn hF isOpen_univ
+  exact differentiableOn_univ.mp hd
 
 /-- The canonical product splits off the `k`-th primary factor. -/
 lemma canonicalProductNat_eq_mul_skip {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) (p : ℕ) (k : ℕ)
@@ -3471,33 +3595,42 @@ lemma canonicalProductNat_eq_mul_skip {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0
   let F : ℕ → ℂ := fun n => primaryFactor p (z / a n)
   have hm : Multipliable F :=
     (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp)
-  have hA : HasProd (fun n : ℕ => if n = k then F k else 1) (F k) := by
-    exact hasProd_ite_eq k (F k)
-  sorry
-  have hB : HasProd (fun n : ℕ => if n = k then 1 else F n) (canonicalProductNatSkip k p a z) := by
-    have hsub' : HasProd (fun n : ℕ => if n = k then 1 else F n)
-        (∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1) := by
-      exact (hasProd_subtype_iff_mulIndicator.mp hsub).congr_fun (by
-        intro n
-        by_cases hn : n = k
-        · subst hn
-          simp [Set.mem_compl_iff]
-        · simp [hn, Set.mem_compl_iff])
-    simpa [canonicalProductNatSkip, F] using hsub'
-  have hprod : HasProd (fun n : ℕ => (if n = k then F k else 1) * (if n = k then 1 else F n))
-      (F k * canonicalProductNatSkip k p a z) := hA.mul hB
-  have heqfun : (fun n : ℕ => (if n = k then F k else 1) * (if n = k then 1 else F n)) = F := by
-    funext n
-    by_cases hn : n = k
-    · subst hn
-      simp
-    · simp [hn]
-  have hmain : HasProd F (F k * canonicalProductNatSkip k p a z) := by
-    exact heqfun ▸ hprod
-  have hunique : F k * canonicalProductNatSkip k p a z = ∏' n : ℕ, F n :=
-    hmain.unique hm.hasProd
-  rw [canonicalProductNat]
-  simpa [F] using hunique.symm
+  by_cases hz : z = a k
+  · subst hz
+    have h₀ : primaryFactor p (a k / a k) = 0 := by
+      rw [primaryFactor_eq_zero_iff p (a k / a k)]
+      exact div_self (hane k)
+    rw [canonicalProductNat_eq_zero_of_mem hane p ⟨k, rfl⟩ hs htend, h₀]
+    simp
+  · have hFk : F k ≠ 0 := by
+      dsimp [F]
+      exact primaryFactor_ne_zero p (by
+        intro h
+        rw [div_eq_one_iff_eq (hane k)] at h
+        exact hz h)
+    have hinv : HasProd (fun n : ℕ => if n = k then (F k)⁻¹ else 1) ((F k)⁻¹) := by
+      exact hasProd_ite_eq k ((F k)⁻¹)
+    have hmul : HasProd (fun n : ℕ => F n * (if n = k then (F k)⁻¹ else 1))
+        ((∏' n : ℕ, F n) * (F k)⁻¹) :=
+      hm.hasProd.mul hinv
+    have heqfun : (fun n : ℕ => F n * (if n = k then (F k)⁻¹ else 1)) =
+        (fun n : ℕ => if n = k then 1 else F n) := by
+      funext n
+      by_cases hn : n = k
+      · subst hn
+        simp [hFk]
+      · simp [hn]
+    have hite : HasProd (fun n : ℕ => if n = k then 1 else F n)
+        ((∏' n : ℕ, F n) * (F k)⁻¹) := by
+      exact heqfun ▸ hmul
+    have hmit : Multipliable (fun n : ℕ => if n = k then 1 else F n) :=
+      ⟨(∏' n : ℕ, F n) * (F k)⁻¹, hite⟩
+    have hskip_val : (∏' n : ℕ, (if n = k then 1 else F n)) = (∏' n : ℕ, F n) * (F k)⁻¹ :=
+      (hite.unique hmit.hasProd).symm
+    have hsplit : canonicalProductNat p a z * (F k)⁻¹ = canonicalProductNatSkip k p a z := by
+      rw [canonicalProductNatSkip]
+      simpa [canonicalProductNat, F] using hskip_val.symm
+    simpa [F, mul_comm] using (mul_inv_eq_iff_eq_mul₀ hFk).mp hsplit
 
 /-- A convergent product equals `exp` of the sum of the logarithms. -/
 lemma tprod_eq_exp_tsum_log_any {ι : Type*} {x : ι → ℂ} (hm : Multipliable x)
@@ -3527,28 +3660,37 @@ lemma canonicalProductNatSkip_ne_zero_at {a : ℕ → ℂ} (hane : ∀ n, a n �
     (hinj : Function.Injective a) (hs : Summable fun n : ℕ => (‖a n‖ ^ (p + 1))⁻¹)
     (htend : Tendsto (fun n : ℕ => ‖a n‖) atTop atTop) :
     canonicalProductNatSkip k p a (a k) ≠ 0 := by
-  let F : ℕ → ℂ := fun n => primaryFactor p (a k / a n)
-  have hm : Multipliable F :=
-    (multipliableLocallyUniformlyOn_primaryFactor hane p hs htend).multipliable (by simp)
-  have hms : Multipliable (fun m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ} => F m.1) :=
-    hm.subtype (fun n : ℕ => n ∈ ({k} : Set ℕ)ᶜ)
-  have hx : ∀ m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1 ≠ 0 := by
-    intro m
-    have hmk : m.1 ≠ k := by simpa using m.2
-    exact primaryFactor_ne_zero p (by
-      intro h
-      rw [div_eq_one_iff_eq (hane m.1)] at h
-      exact hmk (hinj h).symm)
-  have hlog : Summable (fun n : ℕ => Complex.log (F n)) :=
-    summable_log_primaryFactor hane p hs htend
-  have hlogs : Summable (fun m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ} => Complex.log (F m.1)) :=
-    hlog.subtype (fun n : ℕ => n ∈ ({k} : Set ℕ)ᶜ)
-  have heq : (∏' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, F m.1) =
-      Complex.exp (∑' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, Complex.log (F m.1)) :=
-    tprod_eq_exp_tsum_log_any hms hlogs hx
+  let x : ℕ → ℂ := fun n => if n = k then 1 else primaryFactor p (a k / a n)
+  have hm : Multipliable x := by
+    exact (multipliableLocallyUniformlyOn_primaryFactorSkip hane p k hs htend).multipliable (by simp)
+  have hx : ∀ n, x n ≠ 0 := by
+    intro n
+    by_cases hn : n = k
+    · subst hn
+      simp [x]
+    · simp [x, hn]
+      exact primaryFactor_ne_zero p (by
+        intro h
+        rw [div_eq_one_iff_eq (hane n)] at h
+        exact hn (hinj h).symm)
+  have hlog : Summable fun n : ℕ => Complex.log (x n) := by
+    have hlg : Summable (fun n : ℕ => Complex.log (primaryFactor p (a k / a n))) :=
+      summable_log_primaryFactor hane p hs htend
+    have h₀ : primaryFactor p (a k / a k) = 0 := by
+      rw [primaryFactor_eq_zero_iff p (a k / a k)]
+      exact div_self (hane k)
+    have hcong : (fun n : ℕ => Complex.log (x n)) = fun n : ℕ => Complex.log (primaryFactor p (a k / a n)) := by
+      funext n
+      by_cases hn : n = k
+      · subst hn
+        simp [x, h₀]
+      · simp [x, hn]
+    simpa [hcong] using hlg
+  have heq : (∏' n : ℕ, x n) = Complex.exp (∑' n : ℕ, Complex.log (x n)) :=
+    tprod_eq_exp_tsum_log_any hm hlog hx
   have heq' : canonicalProductNatSkip k p a (a k) =
-      Complex.exp (∑' m : {m : ℕ // m ∈ ({k} : Set ℕ)ᶜ}, Complex.log (F m.1)) := by
+      Complex.exp (∑' n : ℕ, Complex.log (x n)) := by
     rw [canonicalProductNatSkip]
-    simpa [F] using heq
+    simpa [x] using heq
   rw [heq']
   exact Complex.exp_ne_zero _

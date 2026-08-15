@@ -1,51 +1,15 @@
 import Mathlib
 
-#check Multipliable.subtype
-#check Summable.subtype
-#check Summable.comp_injective
-#check Multipliable.tprod_subtype_mul_tprod_subtype_compl
-#check Finset.tprod_subtype
-#check HasProd.unique
-#check hasProd_singleton
-#check Set.domRestrict
-#check tprod_congr_subtype
-#check multipliable_subtype_iff_mulIndicator
-#check hasProd_subtype_iff_mulIndicator
-#check tprod_subtype
-#check tprod_eq_finprod
-#check HasProd.tendsto_prod_nat
-#check Multipliable.hasProd
-#check Summable.hasSum
-#check HasSum.tendsto_sum_nat
-#check Complex.exp_sum
-#check Complex.log_zero
-#check Complex.exp_log
-#check meromorphicOrderAt_eq_int_iff
-#check meromorphicOrderAt_div
-#check meromorphicOrderAt_mul
-#check meromorphicOrderAt_id_sub_const
-#check meromorphicOrderAt_const
-#check AnalyticAt.meromorphicOrderAt_eq
-#check analyticOrderAt_ne_zero
-#check AnalyticAt.analyticOrderAt_ne_top
-#check Differentiable.analyticAt
-#check DifferentiableOn.analyticAt
-#check analyticOnNhd_iff_differentiableOn
-#check MeromorphicAt.inv
-#check MeromorphicAt.mul
-#check MeromorphicAt.analyticAt
-#check tendsto_nhds_iff_meromorphicOrderAt_nonneg
-#check MultipliableLocallyUniformlyOn.multipliable
-#check MultipliableLocallyUniformlyOn.mono
-#check hasProdLocallyUniformlyOn_iff_tendstoLocallyUniformlyOn
-#check TendstoLocallyUniformlyOn.differentiableOn
-#check DifferentiableOn.fun_finsetProd
-#check Differentiable.comp
-#check Complex.hasDerivAt_exp
-#check DifferentiableOn.analyticOnNhd
-#check analyticOnNhd_iff_differentiableOn
-#check DifferentiableOn.differentiable
-#check Set.mem_compl_iff
-#check Function.Injective
-#check div_eq_one_iff_eq
-#check Complex.exp_ne_zero
+set_option maxHeartbeats 800000 in
+example {F : ℕ → ℂ} (k : ℕ) : (∏' n : ℕ, (if n = k then 1 else F n)) = (∏' n : ℕ, (if n = k then 1 else F n)) := rfl
+
+set_option maxHeartbeats 800000 in
+example {F : ℕ → ℂ} (k : ℕ) : (∏' n : ℕ, F n) = (∏' n : ℕ, F n) := rfl
+
+set_option maxHeartbeats 800000 in
+example {F : ℕ → ℂ} (k : ℕ) : HasProd (fun n : ℕ => if n = k then F k else 1) (F k) := by
+  exact hasProd_ite_eq k (F k)
+
+set_option maxHeartbeats 800000 in
+example {F : ℕ → ℂ} (k : ℕ) : HasProd (fun n : ℕ => if n = k then 1 else F n) (∏' n : ℕ, (if n = k then 1 else F n)) := by
+  sorry
