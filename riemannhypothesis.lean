@@ -11120,11 +11120,10 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply the two atomic leaves `tailFirstLaguerreBlocks_10` and
-`tailSquaredHeightCurvature_10`.  The formal chain
+Supply the two atomic block leaves `tailFirstLaguerreBlocks_10` and
+`tailSquaredHeightCurvatureBlocks_10`.  The formal chain
 
-    positive phase-aligned paired-kernel blocks
-      + nonnegative curvature in t=y²
+    positive phase-aligned paired-kernel blocks for L₁ and curvature in t=y²
       → L₁ + nonnegative remainder → quadratic vertical growth
       → quantitative certificate
 
@@ -11600,6 +11599,72 @@ structure TailSquaredHeightCurvatureLeaf where
       10 < |r| →
       HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
         (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
+
+/-- A phase-aligned block attack on squared-height curvature.  As for `L₁`,
+    finitely many initial oscillatory blocks and the cofinite tail are exposed
+    separately, while regularity and the endpoint tangent remain explicit. -/
+structure TailSquaredHeightSplitCurvatureBlockLeaf where
+  cutoff : ℕ
+  block : ℕ → ℝ → ℝ → ℝ
+  finite_nonneg :
+    ∀ n : ℕ, n < cutoff →
+      ∀ r t : ℝ,
+        10 < |r| →
+        t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
+        0 ≤ block n r t
+  tail_nonneg :
+    ∀ n : ℕ, cutoff ≤ n →
+      ∀ r t : ℝ,
+        10 < |r| →
+        t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
+        0 ≤ block n r t
+  summable :
+    ∀ r t : ℝ,
+      10 < |r| →
+      t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
+      Summable (fun n : ℕ => block n r t)
+  representation :
+    ∀ r t : ℝ,
+      10 < |r| →
+      t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
+      (deriv^[2] (xiShiftedSquaredHeightProfile r)) t =
+        ∑' n : ℕ, block n r t
+  continuous :
+    ∀ r : ℝ,
+      10 < |r| →
+      ContinuousOn (xiShiftedSquaredHeightProfile r) (Set.Icc 0 (1 / 4 : ℝ))
+  differentiable :
+    ∀ r : ℝ,
+      10 < |r| →
+      DifferentiableOn ℝ (xiShiftedSquaredHeightProfile r)
+        (interior (Set.Icc 0 (1 / 4 : ℝ)))
+  deriv_differentiable :
+    ∀ r : ℝ,
+      10 < |r| →
+      DifferentiableOn ℝ (deriv (xiShiftedSquaredHeightProfile r))
+        (interior (Set.Icc 0 (1 / 4 : ℝ)))
+  tangent :
+    ∀ r : ℝ,
+      10 < |r| →
+      HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
+        (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
+
+/-- Assemble finite curvature blocks and their cofinite tail using the same
+    infinite-sum positivity mechanism as the first Laguerre coefficient. -/
+theorem TailSquaredHeightSplitCurvatureBlockLeaf.toCurvature
+    (B : TailSquaredHeightSplitCurvatureBlockLeaf) :
+    TailSquaredHeightCurvatureLeaf where
+  continuous := B.continuous
+  differentiable := B.differentiable
+  deriv_differentiable := B.deriv_differentiable
+  curvature_nonneg := by
+    intro r hr t ht
+    rw [B.representation r t hr ht]
+    exact tsum_nonneg fun n => by
+      by_cases hn : n < B.cutoff
+      · exact B.finite_nonneg n hn r t hr ht
+      · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r t hr ht
+  tangent := B.tangent
 
 /-- Nonnegative squared-height curvature implies the convexity interface. -/
 theorem TailSquaredHeightCurvatureLeaf.toConvexity
@@ -12186,11 +12251,16 @@ theorem riemannHypothesis_iff_challenge2Statement :
 noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreSplitBlockLeaf := by
   sorry
 
-/-- **Open atomic leaf B.**  Prove nonnegative second derivative of the
-    shifted-xi modulus square as a function of squared vertical height,
-    together with the endpoint tangent identity. -/
-theorem tailSquaredHeightCurvature_10 : TailSquaredHeightCurvatureLeaf := by
+/-- **Open atomic leaf B.**  Split the squared-height curvature into
+    phase-aligned blocks, prove the finite prefix and cofinite tail nonnegative,
+    and establish the regularity and endpoint tangent identities. -/
+noncomputable def tailSquaredHeightCurvatureBlocks_10 :
+    TailSquaredHeightSplitCurvatureBlockLeaf := by
   sorry
+
+/-- The block-level curvature leaf assembles to ordinary nonnegative curvature. -/
+theorem tailSquaredHeightCurvature_10 : TailSquaredHeightCurvatureLeaf :=
+  tailSquaredHeightCurvatureBlocks_10.toCurvature
 
 /-- The two atomic leaves assemble the former Laguerre-remainder obligation. -/
 theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf :=
