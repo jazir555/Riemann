@@ -11123,7 +11123,8 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 Supply the two atomic block leaves `tailFirstLaguerreBlocks_10` and
 `tailSquaredHeightCurvatureBlocks_10`.  The formal chain
 
-    positive phase-aligned paired-kernel blocks for L₁ and curvature in t=y²
+    positive phase-aligned paired-kernel blocks for L₁
+      + canonical generalized-Laguerre curvature terms in t=y²
       → L₁ + nonnegative remainder → quadratic vertical growth
       → quantitative certificate
 
@@ -11412,6 +11413,36 @@ noncomputable def xiShiftedFirstLaguerreCoefficient (r : ℝ) : ℝ :=
   ‖deriv xiShifted (r : ℂ)‖ ^ 2 -
     ((iteratedDeriv 2 xiShifted (r : ℂ)) * star (xiShifted (r : ℂ))).re
 
+/-- The canonical `n`th generalized Laguerre coefficient of shifted xi.
+    This is the coefficient obtained by multiplying the Taylor expansions at
+    `r + iy` and `r - iy`; the binomial/factorial normalization makes the
+    finite convolution explicit and leaves no freely chosen coefficient
+    sequence in the later series certificate. -/
+noncomputable def xiShiftedLaguerreCoefficient (n : ℕ) (r : ℝ) : ℝ :=
+  (∑ j ∈ Finset.range (2 * n + 1),
+      (-1 : ℝ) ^ (n + j) * (Nat.choose (2 * n) j : ℝ) *
+        ((iteratedDeriv j xiShifted (r : ℂ)) *
+          star (iteratedDeriv (2 * n - j) xiShifted (r : ℂ))).re) /
+    (Nat.factorial (2 * n) : ℝ)
+
+/-- The zeroth canonical coefficient is the real-axis modulus square. -/
+theorem xiShiftedLaguerreCoefficient_zero (r : ℝ) :
+    xiShiftedLaguerreCoefficient 0 r = ‖xiShifted (r : ℂ)‖ ^ 2 := by
+  norm_num [xiShiftedLaguerreCoefficient, Finset.sum_range_succ]
+  rw [Complex.sq_norm, Complex.normSq_apply]
+
+/-- The finite-convolution definition at `n = 1` is exactly the existing
+    first Laguerre coefficient `‖ξ′‖² - Re(ξ″ · conj ξ)`. -/
+theorem xiShiftedLaguerreCoefficient_one (r : ℝ) :
+    xiShiftedLaguerreCoefficient 1 r = xiShiftedFirstLaguerreCoefficient r := by
+  norm_num [xiShiftedLaguerreCoefficient, xiShiftedFirstLaguerreCoefficient,
+    Finset.sum_range_succ]
+  rw [Complex.sq_norm]
+  change _ =
+    (deriv xiShifted (r : ℂ)).re * (deriv xiShifted (r : ℂ)).re +
+      (deriv xiShifted (r : ℂ)).im * (deriv xiShifted (r : ℂ)).im - _
+  ring
+
 /-- The part of the vertical modulus-square growth left after removing its
     real-axis value and canonical quadratic Laguerre term.  Treating all
     higher even orders as one remainder is weaker than requiring every
@@ -11558,6 +11589,31 @@ noncomputable def TailFirstLaguerreSplitBlockLeaf.toBlocks
 noncomputable def xiShiftedSquaredHeightProfile (r t : ℝ) : ℝ :=
   ‖xiShifted (tailVerticalPoint r (Real.sqrt t))‖ ^ 2
 
+/-- The canonical `n`th term in the second derivative of the squared-height
+    generalized Laguerre series.  If
+    `hᵣ(t) = ∑ Lₖ(r)tᵏ`, then
+    `hᵣ''(t) = ∑ (n+2)(n+1)Lₙ₊₂(r)tⁿ`. -/
+noncomputable def xiShiftedLaguerreCurvatureTerm (n : ℕ) (r t : ℝ) : ℝ :=
+  ((n + 2 : ℕ) : ℝ) * ((n + 1 : ℕ) : ℝ) *
+    xiShiftedLaguerreCoefficient (n + 2) r * t ^ n
+
+/-- At positive squared height the sign of a curvature term is exactly the
+    sign of its canonical generalized Laguerre coefficient. -/
+theorem xiShiftedLaguerreCurvatureTerm_nonneg_iff
+    (n : ℕ) (r t : ℝ) (ht : 0 < t) :
+    0 ≤ xiShiftedLaguerreCurvatureTerm n r t ↔
+      0 ≤ xiShiftedLaguerreCoefficient (n + 2) r := by
+  have hw :
+      0 < ((n + 2 : ℕ) : ℝ) * ((n + 1 : ℕ) : ℝ) * t ^ n := by
+    positivity
+  rw [xiShiftedLaguerreCurvatureTerm]
+  rw [show
+      ((n + 2 : ℕ) : ℝ) * ((n + 1 : ℕ) : ℝ) *
+          xiShiftedLaguerreCoefficient (n + 2) r * t ^ n =
+        (((n + 2 : ℕ) : ℝ) * ((n + 1 : ℕ) : ℝ) * t ^ n) *
+          xiShiftedLaguerreCoefficient (n + 2) r by ring]
+  exact mul_nonneg_iff_of_pos_left hw
+
 /-- Convexity in squared height, together with identification of the tangent
     slope at the critical line with `L₁`. -/
 structure TailSquaredHeightConvexityLeaf where
@@ -11600,35 +11656,29 @@ structure TailSquaredHeightCurvatureLeaf where
       HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
         (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
 
-/-- A phase-aligned block attack on squared-height curvature.  As for `L₁`,
-    finitely many initial oscillatory blocks and the cofinite tail are exposed
-    separately, while regularity and the endpoint tangent remain explicit. -/
+/-- A canonical generalized-Laguerre attack on squared-height curvature.
+    Finitely many initial coefficients and the cofinite tail are exposed
+    separately, while the series representation, regularity, and endpoint
+    tangent remain explicit. -/
 structure TailSquaredHeightSplitCurvatureBlockLeaf where
   cutoff : ℕ
-  block : ℕ → ℝ → ℝ → ℝ
   finite_nonneg :
-    ∀ n : ℕ, n < cutoff →
-      ∀ r t : ℝ,
-        10 < |r| →
-        t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
-        0 ≤ block n r t
+    ∀ n : ℕ, n < cutoff → ∀ r : ℝ, 10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient (n + 2) r
   tail_nonneg :
-    ∀ n : ℕ, cutoff ≤ n →
-      ∀ r t : ℝ,
-        10 < |r| →
-        t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
-        0 ≤ block n r t
+    ∀ n : ℕ, cutoff ≤ n → ∀ r : ℝ, 10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient (n + 2) r
   summable :
     ∀ r t : ℝ,
       10 < |r| →
       t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
-      Summable (fun n : ℕ => block n r t)
+      Summable (fun n : ℕ => xiShiftedLaguerreCurvatureTerm n r t)
   representation :
     ∀ r t : ℝ,
       10 < |r| →
       t ∈ interior (Set.Icc 0 (1 / 4 : ℝ)) →
       (deriv^[2] (xiShiftedSquaredHeightProfile r)) t =
-        ∑' n : ℕ, block n r t
+        ∑' n : ℕ, xiShiftedLaguerreCurvatureTerm n r t
   continuous :
     ∀ r : ℝ,
       10 < |r| →
@@ -11649,6 +11699,16 @@ structure TailSquaredHeightSplitCurvatureBlockLeaf where
       HasDerivWithinAt (xiShiftedSquaredHeightProfile r)
         (xiShiftedFirstLaguerreCoefficient r) (Set.Ioi 0) 0
 
+/-- The finite/cofinite split covers every canonical coefficient of order at
+    least two. -/
+theorem TailSquaredHeightSplitCurvatureBlockLeaf.coefficient_nonneg
+    (B : TailSquaredHeightSplitCurvatureBlockLeaf)
+    (n : ℕ) (r : ℝ) (hr : 10 < |r|) :
+    0 ≤ xiShiftedLaguerreCoefficient (n + 2) r := by
+  by_cases hn : n < B.cutoff
+  · exact B.finite_nonneg n hn r hr
+  · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r hr
+
 /-- Assemble finite curvature blocks and their cofinite tail using the same
     infinite-sum positivity mechanism as the first Laguerre coefficient. -/
 theorem TailSquaredHeightSplitCurvatureBlockLeaf.toCurvature
@@ -11660,10 +11720,13 @@ theorem TailSquaredHeightSplitCurvatureBlockLeaf.toCurvature
   curvature_nonneg := by
     intro r hr t ht
     rw [B.representation r t hr ht]
+    have htpos : 0 < t := by
+      have ht' : t ∈ Set.Ioo (0 : ℝ) (1 / 4 : ℝ) := by
+        simpa only [interior_Icc] using ht
+      exact ht'.1
     exact tsum_nonneg fun n => by
-      by_cases hn : n < B.cutoff
-      · exact B.finite_nonneg n hn r t hr ht
-      · exact B.tail_nonneg n (Nat.le_of_not_gt hn) r t hr ht
+      apply (xiShiftedLaguerreCurvatureTerm_nonneg_iff n r t htpos).2
+      exact B.coefficient_nonneg n r hr
   tangent := B.tangent
 
 /-- Nonnegative squared-height curvature implies the convexity interface. -/
@@ -12251,9 +12314,10 @@ theorem riemannHypothesis_iff_challenge2Statement :
 noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreSplitBlockLeaf := by
   sorry
 
-/-- **Open atomic leaf B.**  Split the squared-height curvature into
-    phase-aligned blocks, prove the finite prefix and cofinite tail nonnegative,
-    and establish the regularity and endpoint tangent identities. -/
+/-- **Open atomic leaf B.**  Prove the finite prefix and cofinite tail of the
+    canonical generalized Laguerre coefficients nonnegative, establish the
+    termwise-differentiated curvature series, and discharge regularity and the
+    endpoint tangent identity. -/
 noncomputable def tailSquaredHeightCurvatureBlocks_10 :
     TailSquaredHeightSplitCurvatureBlockLeaf := by
   sorry
