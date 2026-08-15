@@ -11409,6 +11409,15 @@ noncomputable def xiShiftedVerticalTaylorTerm
   (n.factorial : ℂ)⁻¹ * (I * (y : ℂ)) ^ n *
     iteratedDeriv n xiShifted (r : ℂ)
 
+/-- All height dependence of a vertical Taylor term is the homogeneous factor
+    `yⁿ`. -/
+theorem xiShiftedVerticalTaylorTerm_eq_pow_mul
+    (n : ℕ) (r y : ℝ) :
+    xiShiftedVerticalTaylorTerm n r y =
+      (y : ℂ) ^ n * xiShiftedVerticalTaylorTerm n r 1 := by
+  simp only [xiShiftedVerticalTaylorTerm, ofReal_one, mul_one, mul_pow]
+  ring
+
 theorem xiShiftedVerticalTaylorTerm_hasSum
     (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
     HasSum (fun n : ℕ => xiShiftedVerticalTaylorTerm n r y)
@@ -11423,6 +11432,49 @@ noncomputable def xiShiftedVerticalCauchyCoefficient
   ∑ j ∈ Finset.range (m + 1),
     xiShiftedVerticalTaylorTerm j r y *
       star (xiShiftedVerticalTaylorTerm (m - j) r y)
+
+/-- Each Cauchy coefficient is homogeneous of its total degree in the real
+    height variable. -/
+theorem xiShiftedVerticalCauchyCoefficient_eq_pow_mul
+    (m : ℕ) (r y : ℝ) :
+    xiShiftedVerticalCauchyCoefficient m r y =
+      (y : ℂ) ^ m * xiShiftedVerticalCauchyCoefficient m r 1 := by
+  unfold xiShiftedVerticalCauchyCoefficient
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [xiShiftedVerticalTaylorTerm_eq_pow_mul j r y,
+    xiShiftedVerticalTaylorTerm_eq_pow_mul (m - j) r y]
+  have hjle : j ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+  rw [star_mul]
+  rw [show star ((y : ℂ) ^ (m - j)) = (y : ℂ) ^ (m - j) by simp]
+  have hpow : (y : ℂ) ^ j * (y : ℂ) ^ (m - j) = (y : ℂ) ^ m := by
+    rw [← pow_add, Nat.add_sub_of_le hjle]
+  calc
+    _ = ((y : ℂ) ^ j * (y : ℂ) ^ (m - j)) *
+        (xiShiftedVerticalTaylorTerm j r 1 *
+          star (xiShiftedVerticalTaylorTerm (m - j) r 1)) := by ring
+    _ = _ := by rw [hpow]
+
+/-- Real parts inherit the same homogeneity, now entirely over `ℝ`. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul
+    (m : ℕ) (r y : ℝ) :
+    (xiShiftedVerticalCauchyCoefficient m r y).re =
+      y ^ m * (xiShiftedVerticalCauchyCoefficient m r 1).re := by
+  rw [xiShiftedVerticalCauchyCoefficient_eq_pow_mul]
+  simp
+
+/-- Negating the height multiplies the degree-`m` real Cauchy coefficient by
+    `(-1)ᵐ`; this is the parity mechanism used to discard odd degrees. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_neg
+    (m : ℕ) (r y : ℝ) :
+    (xiShiftedVerticalCauchyCoefficient m r (-y)).re =
+      (-1 : ℝ) ^ m *
+        (xiShiftedVerticalCauchyCoefficient m r y).re := by
+  rw [xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul,
+    xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul]
+  rw [neg_pow]
+  ring
 
 /-- Absolute summability in finite-dimensional `ℂ`, followed by Mathlib's
     Cauchy-product theorem, gives the full (not yet even-regrouped) Taylor

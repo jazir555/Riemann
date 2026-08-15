@@ -11,14 +11,7 @@ open scoped BigOperators LSeries.notation
 open ArithmeticFunction hiding log
 
 /-- **Zero-free edge from tsum factorisation.**
-Tsum analogue of `ZeroFreeRegion.zeroFreeEdge_from_factorization`.
-
-The two sorry's:
-1. `hLS_eq`: Algebraic identity decomposing the 3-4-1 of LSeries into analytic
-   minus the per-zero tsum. Uses `h_decomp` at 3 points + `Complex.re_tsum` +
-   `tsum_mul_left` + `tsum_add`. Mirror of lines 682-686 of `zeroFreeEdge_from_factorization`.
-2. `hsum_ge`: The per-zero tsum ≥ 4/d. Uses `Summable.tsum_le` (tsum ≥ any term)
-   with non-negativity and borderline bound. Mirror of lines 695-730. -/
+Tsum analogue of `ZeroFreeRegion.zeroFreeEdge_from_factorization`. -/
 theorem zeroFreeEdge_from_tsum
     {a : ℕ → ℂ} (hre : ∀ n, 0 < (a n).re) (hre_lt : ∀ n, (a n).re < 1)
     {analytic : ℂ → ℂ}
@@ -81,38 +74,39 @@ theorem zeroFreeEdge_from_tsum
     have hσs : 1 < (↑σ : ℂ).re := by simpa using hσ
     have ht1s : 1 < (↑σ + ↑t * I : ℂ).re := by simpa using hσ
     have ht2s : 1 < (↑σ + 2 * ↑t * I : ℂ).re := by simpa using hσ
-    -- Prove the algebraic identity: 3*(∑' g₀).re + 4*(∑' g₁).re + (∑' g₂).re = ∑' F(n)
-    -- Then the main goal follows by ring + linarith
+    rw [h_decomp _ hσs, h_decomp _ ht1s, h_decomp _ ht2s]
+    simp only [sub_re]
+    -- Convert (∑' g).re to ∑' g.re using Complex.re_tsum
+    have hr0 := Complex.re_tsum hs₀
+    have hr1 := Complex.re_tsum hs₁
+    have hr2 := Complex.re_tsum hs₂
+    rw [hr0, hr1, hr2]
+    -- Now prove the key identity: 3*∑' g₀.re + 4*∑' g₁.re + ∑' g₂.re = ∑' F(n)
     have hkey : 3 * (∑' n, ((1 / (↑σ - a n) + 1 / a n : ℂ)).re) +
         4 * (∑' n, ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re) +
         (∑' n, ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re)
       = ∑' n, F n := by
-      -- Goal: ∑' (3*g₀.re) + ∑' (4*g₁.re) + ∑' g₂.re = ∑' F n
-      -- tsum_mul_left pulls 3,4 inside the tsums
-      -- tsum_add combines two tsums into one
-      rw [← h₀r.tsum_mul_left (3 : ℝ), ← h₁r.tsum_mul_left (4 : ℝ)]
-      -- Goal: ∑' (3*g₀.re) + ∑' (4*g₁.re) + ∑' g₂.re = ∑' F n
-      rw [show ∑' (n : ℕ), 3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re
-              + ∑' (n : ℕ), 4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re
-          = ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
-              4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re) from
-          (h₀r.mul_left 3).tsum_add (h₁r.mul_left 4) |>.symm]
-      rw [show ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
-              4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re)
-              + ∑' (n : ℕ), ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re
-          = ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
-              4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re +
-              ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re) from
-          ((h₀r.mul_left 3).add (h₁r.mul_left 4)).tsum_add h₂r |>.symm]
-      unfold F; ring
-    -- Goal: 3*(A - B₀) + 4*(C - B₁) + (D - B₂) = 3*A + 4*C + D - ∑' F(n)
-    -- where B_i = (∑' g_i).re. By ring: LHS = (3A+4C+D) - (3B₀+4B₁+B₂)
-    -- So suffices: 3B₀+4B₁+B₂ = ∑' F(n), which is hkey
-    nlinarith [hkey]
+      rw [← h₀r.tsum_mul_left (3 : ℝ), ← h₁r.tsum_mul_left (4 : ℝ),
+          show ∑' (n : ℕ), 3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re
+                + ∑' (n : ℕ), 4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re
+            = ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
+                4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re) from
+            (h₀r.mul_left 3).tsum_add (h₁r.mul_left 4) |>.symm,
+          show ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
+                4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re)
+                + ∑' (n : ℕ), ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re
+            = ∑' (n : ℕ), (3 * ((1 / (↑σ - a n) + 1 / a n : ℂ)).re +
+                4 * ((1 / (↑σ + ↑t * I - a n) + 1 / a n : ℂ)).re +
+                ((1 / (↑σ + 2 * ↑t * I - a n) + 1 / a n : ℂ)).re) from
+            ((h₀r.mul_left 3).add (h₁r.mul_left 4)).tsum_add h₂r |>.symm]
+    linarith [hkey]
   -- Convert h3f1 using hLS_eq
   have h3f1' : ∑' n, F n ≤ 3 * (analytic (↑σ : ℂ)).re + 4 * (analytic (↑σ + ↑t * I)).re
       + (analytic (↑σ + 2 * ↑t * I)).re := by
-    have := hLS_eq ▸ h3f1; linarith
+    have : 0 ≤ (3 * (analytic (↑σ)).re + 4 * (analytic (↑σ + ↑t * I)).re
+        + (analytic (↑σ + 2 * ↑t * I)).re) - ∑' n, F n := by
+      rw [← hLS_eq]; exact h3f1
+    linarith
   -- Step 2: hsum_ge: 4/d ≤ ∑' F(n)
   have hsum_ge : 4 / d ≤ ∑' n, F n := by
     have h1 : F m ≤ Finset.sum (Finset.range (m + 1)) F :=
@@ -123,9 +117,6 @@ theorem zeroFreeEdge_from_tsum
   -- Chain: 4/d ≤ tsum ≤ analytic ≤ RHS
   have h4le : 4 / d ≤ A₀ / (σ - 1) + A₁ * Real.log (|t| + 2) + A₂ :=
     le_trans (le_trans hsum_ge h3f1') h_analytic
-  rw [ge_iff_le, div_le_iff₀ hRHS_pos]
-  rw [div_le_iff₀ hd] at h4le
-  linarith
   rw [ge_iff_le, div_le_iff₀ hRHS_pos]
   rw [div_le_iff₀ hd] at h4le
   linarith
