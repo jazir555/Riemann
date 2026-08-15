@@ -3396,12 +3396,10 @@ lemma summable_logDeriv_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) {z
         have hpos : (0 : ℝ) < 2 * (‖z‖ + 1) := by positivity
         linarith
       have hnorm : ‖1 / (z - a (n + N)) + 1 / a (n + N)‖ ≤ 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
-        -- 1/(z-a) + 1/a = z/(a·(z-a)):
         have hid : 1 / (z - a (n + N)) + 1 / a (n + N) = z / (a (n + N) * (z - a (n + N))) := by
           field_simp [hane (n + N), sub_ne_zero.mpr (hzane (n + N))]
           ring
         rw [hid]
-        -- ‖z/(a·(z-a))‖ ≤ ‖z‖/(‖a‖·‖z-a‖) ≤ ‖z‖/(‖a‖·(‖a‖-‖z‖)) ≤ 2‖z‖/‖a‖²:
         have hzma : ‖z - a (n + N)‖ = ‖a (n + N) - z‖ := by
           rw [← norm_neg]
           simp
@@ -3431,6 +3429,7 @@ lemma summable_logDeriv_genus_one {a : ℕ → ℂ} (hane : ∀ n, a n ≠ 0) {z
           have h₆ : ‖z‖ / (‖a (n + N)‖ ^ 2 / 2) = 2 * ‖z‖ * (1 / ‖a (n + N)‖ ^ 2) := by
             field_simp [pow_ne_zero 2 (norm_ne_zero_iff.mpr (hane (n + N)))]
           exact h₅.trans_eq h₆
+        exact h₁.trans h₂
       exact hnorm
     · have hshift : Summable (fun n : ℕ => (‖a (n + N)‖ ^ 2)⁻¹) := by
         simpa [one_div] using (summable_nat_add_iff (f := fun n : ℕ => (‖a n‖ ^ 2)⁻¹) N).mpr hs2
