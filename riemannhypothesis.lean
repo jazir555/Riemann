@@ -11147,20 +11147,19 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply the two atomic leaves `tailFirstLaguerreBlocks_10` and
-`tailHigherLaguerreCoefficients_10`.  The formal chain
+Supply the multiplicity-robust atomic leaf
+`tailCanonicalLaguerrePositivity_10`.  The formal chain
 
-    positive phase-aligned paired-kernel blocks for L₁
-      + finite/cofinite signs of canonical Lₙ for n ≥ 2
+    every canonical Lₙ is nonnegative
+      + at least one Lₙ is positive at each real tail center
       + the proved analytic Taylor/Cauchy-product identity
-      → L₁ + nonnegative remainder → quadratic vertical growth
-      → quantitative certificate
+      → strict vertical modulus positivity at every nonzero height
+      → tail nonvanishing
 
-is implemented by
-`tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct` followed by
-`certificate_of_tailLaguerreRemainder`.  No differentiability of the
-squared-height profile or termwise-differentiated curvature series remains in
-the direct frontier, and no finite sampling is promoted to a theorem.
+is implemented by `rh_from_tailCanonicalLaguerrePositivity`.  Unlike the
+earlier strict-`L₁` route, this does not assume simplicity of real zeros.  The
+paired-block and finite/cofinite interfaces remain available as optional ways
+to prove coefficient signs; no finite sampling is promoted to a theorem.
 -/
 
 noncomputable section
@@ -12314,18 +12313,175 @@ theorem tailCanonicalLaguerreSeriesIdentity_mathlib :
 structure TailCanonicalLaguerrePositivityLeaf where
   coefficient_nonneg :
     ∀ n : ℕ, ∀ r : ℝ,
-      10 < |r| →
+      10 < r →
       0 ≤ xiShiftedLaguerreCoefficient n r
   coefficient_exists_pos :
     ∀ r : ℝ,
-      10 < |r| →
+      10 < r →
       ∃ n : ℕ, 0 < xiShiftedLaguerreCoefficient n r
+
+/-- The coefficient-sign half of the probe strategy. -/
+structure TailCanonicalLaguerreNonnegativeLeaf where
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < r →
+      0 ≤ xiShiftedLaguerreCoefficient n r
+
+/-- Minimal sign input: only positive-order coefficients are requested,
+    because the zeroth coefficient is the already-proved square
+    `‖xiShifted r‖²`. -/
+structure TailPositiveOrderLaguerreNonnegativeLeaf where
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < r →
+      0 ≤ xiShiftedLaguerreCoefficient (n + 1) r
+
+/-- Restore the automatic zeroth sign and obtain the full nonnegative
+    coefficient interface. -/
+theorem TailPositiveOrderLaguerreNonnegativeLeaf.toCanonical
+    (P : TailPositiveOrderLaguerreNonnegativeLeaf) :
+    TailCanonicalLaguerreNonnegativeLeaf where
+  coefficient_nonneg := by
+    intro n r hr
+    cases n with
+    | zero =>
+        rw [xiShiftedLaguerreCoefficient_zero]
+        positivity
+    | succ n =>
+        exact P.coefficient_nonneg n r hr
+
+/-- A single selectable zero-free probe in each vertical fiber.  The probe may
+    be chosen close to `Re(s)=1`, allowing an ordinary explicit zero-free
+    region to be combined with the Laguerre sign criterion. -/
+structure TailZetaProbeLeaf where
+  probe : ℝ → ℝ
+  probe_mem :
+    ∀ r : ℝ,
+      10 < r →
+      |probe r| < (1 / 2 : ℝ)
+  probe_ne_zero :
+    ∀ r : ℝ,
+      10 < r →
+      probe r ≠ 0
+  zeta_nonvanishing :
+    ∀ r : ℝ,
+      10 < r →
+      zeta (shiftedS (tailVerticalPoint r (probe r))) ≠ 0
+
+/-- Conventional right-edge formulation of the zeta probe.  A standard
+    zero-free region naturally produces `sigma(r)` with
+    `1/2 < sigma(r) < 1` and nonvanishing at `sigma(r) + i r`. -/
+structure TailZetaRightEdgeLeaf where
+  sigma : ℝ → ℝ
+  sigma_mem :
+    ∀ r : ℝ,
+      10 < r →
+      (1 / 2 : ℝ) < sigma r ∧ sigma r < 1
+  zeta_nonvanishing :
+    ∀ r : ℝ,
+      10 < r →
+      zeta ((sigma r : ℂ) + I * (r : ℂ)) ≠ 0
+
+/-- Convert a conventional near-`Re(s)=1` zero-free point into shifted-xi
+    height coordinates via `y = 1/2 - sigma(r)`. -/
+noncomputable def TailZetaRightEdgeLeaf.toProbe
+    (E : TailZetaRightEdgeLeaf) : TailZetaProbeLeaf where
+  probe r := (1 / 2 : ℝ) - E.sigma r
+  probe_mem := by
+    intro r hr
+    exact abs_lt.mpr ⟨by linarith [(E.sigma_mem r hr).2],
+      by linarith [(E.sigma_mem r hr).1]⟩
+  probe_ne_zero := by
+    intro r hr hzero
+    have := (E.sigma_mem r hr).1
+    linarith
+  zeta_nonvanishing := by
+    intro r hr
+    have hpoint :
+        shiftedS (tailVerticalPoint r ((1 / 2 : ℝ) - E.sigma r)) =
+          (E.sigma r : ℂ) + I * (r : ℂ) := by
+      apply Complex.ext <;>
+        simp [shiftedS, tailVerticalPoint, Complex.mul_re, Complex.mul_im]
+    rw [hpoint]
+    exact E.zeta_nonvanishing r hr
+
+/-- A probe-height version of the multiplicity-robust frontier.  It separates
+    coefficient signs from a single zero-free input near either edge of the
+    strip.  Once the signs are known, one nonzero height at each real center
+    propagates to every nonzero height. -/
+structure TailCanonicalLaguerreProbeLeaf where
+  probe : ℝ → ℝ
+  probe_mem :
+    ∀ r : ℝ,
+      10 < r →
+      |probe r| < (1 / 2 : ℝ)
+  probe_ne_zero :
+    ∀ r : ℝ,
+      10 < r →
+      probe r ≠ 0
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < r →
+      0 ≤ xiShiftedLaguerreCoefficient n r
+  probe_nonvanishing :
+    ∀ r : ℝ,
+      10 < r →
+      xiShifted (tailVerticalPoint r (probe r)) ≠ 0
+
+/-- If every coefficient were zero, the proved Laguerre series would force
+    shifted xi to vanish at the probe height.  Thus the probe supplies the
+    strictly positive coefficient required by the multiplicity-robust leaf. -/
+theorem TailCanonicalLaguerreProbeLeaf.toPositivity
+    (P : TailCanonicalLaguerreProbeLeaf) :
+    TailCanonicalLaguerrePositivityLeaf where
+  coefficient_nonneg := P.coefficient_nonneg
+  coefficient_exists_pos := by
+    intro r hr
+    by_contra hex
+    push_neg at hex
+    have hzero : ∀ n : ℕ, xiShiftedLaguerreCoefficient n r = 0 := by
+      intro n
+      exact le_antisymm (hex n) (P.coefficient_nonneg n r hr)
+    have hs := xiShiftedLaguerreSeries_hasSum r (P.probe r) (P.probe_mem r hr)
+    have hnormsq : ‖xiShifted (tailVerticalPoint r (P.probe r))‖ ^ 2 = 0 := by
+      rw [← hs.tsum_eq]
+      simp [hzero]
+    have hnorm : ‖xiShifted (tailVerticalPoint r (P.probe r))‖ = 0 := by
+      nlinarith [norm_nonneg (xiShifted (tailVerticalPoint r (P.probe r)))]
+    exact P.probe_nonvanishing r hr (norm_eq_zero.mp hnorm)
+
+/-- A zeta zero-free probe in the critical strip is a shifted-xi zero-free
+    probe, because the classical prefactor is nonzero there. -/
+noncomputable def tailCanonicalLaguerreProbe_of_zetaProbe
+    (N : TailCanonicalLaguerreNonnegativeLeaf)
+    (Z : TailZetaProbeLeaf) :
+    TailCanonicalLaguerreProbeLeaf where
+  probe := Z.probe
+  probe_mem := Z.probe_mem
+  probe_ne_zero := Z.probe_ne_zero
+  coefficient_nonneg := N.coefficient_nonneg
+  probe_nonvanishing := by
+    intro r hr hxi
+    let w := tailVerticalPoint r (Z.probe r)
+    have hmem := abs_lt.mp (Z.probe_mem r hr)
+    have hs0 : 0 < (shiftedS w).re := by
+      simp [w, shiftedS, tailVerticalPoint]
+      linarith [hmem.2]
+    have hs1 : (shiftedS w).re < 1 := by
+      simp [w, shiftedS, tailVerticalPoint]
+      linarith [hmem.1]
+    have heq : classicalXi (shiftedS w) = 0 ↔ zeta (shiftedS w) = 0 :=
+      classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
+        (shiftedS w) hs0 hs1
+    apply Z.zeta_nonvanishing r hr
+    apply heq.mp
+    simpa [w, xiShifted, shiftedS] using hxi
 
 /-- A positive canonical coefficient and nonnegativity of every other term
     make the vertical modulus square strictly positive at nonzero height. -/
 theorem norm_xiShifted_tailVerticalPoint_sq_pos_of_laguerre
     (P : TailCanonicalLaguerrePositivityLeaf)
-    (r y : ℝ) (hr : 10 < |r|)
+    (r y : ℝ) (hr : 10 < r)
     (hy : |y| < (1 / 2 : ℝ)) (hyne : y ≠ 0) :
     0 < ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 := by
   rcases P.coefficient_exists_pos r hr with ⟨n, hn⟩
@@ -12363,11 +12519,8 @@ noncomputable def TailCanonicalLaguerrePositivityLeaf.toRightTailDistance
     intro r y hr hyne
     by_cases h : 10 < r ∧ |y| < (1 / 2 : ℝ)
     · rw [if_pos h]
-      have hrabs : 10 < |r| := by
-        rw [abs_of_pos (by linarith)]
-        exact h.1
       have hsq := norm_xiShifted_tailVerticalPoint_sq_pos_of_laguerre
-        P r y hrabs h.2 hyne
+        P r y h.1 h.2 hyne
       nlinarith [norm_nonneg (xiShifted (tailVerticalPoint r y))]
     · rw [if_neg h]
       norm_num
@@ -12392,6 +12545,37 @@ theorem rh_from_tailCanonicalLaguerrePositivity
       quadrant := ClosedCertificate.remainingQuadrant_10_closed
       tail := P.toRightTailDistance
     }
+
+/-- The probe-height criterion therefore implies RH through coefficient-sign
+    propagation and the closed bounded-region certificate. -/
+theorem rh_from_tailCanonicalLaguerreProbe
+    (P : TailCanonicalLaguerreProbeLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_tailCanonicalLaguerrePositivity P.toPositivity
+
+/-- Combined frontier: canonical coefficient signs plus one ordinary zeta
+    zero-free probe near an edge of each right-tail vertical fiber imply RH. -/
+theorem rh_from_laguerreNonnegative_and_zetaProbe
+    (N : TailCanonicalLaguerreNonnegativeLeaf)
+    (Z : TailZetaProbeLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_tailCanonicalLaguerreProbe
+    (tailCanonicalLaguerreProbe_of_zetaProbe N Z)
+
+/-- Standard zero-free-region form of the combined frontier. -/
+theorem rh_from_laguerreNonnegative_and_zetaRightEdge
+    (N : TailCanonicalLaguerreNonnegativeLeaf)
+    (E : TailZetaRightEdgeLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_laguerreNonnegative_and_zetaProbe N E.toProbe
+
+/-- Fully minimized edge-probe frontier: signs only for `L_{n+1}`, plus a
+    conventional right-edge zeta zero-free point in every tail fiber. -/
+theorem rh_from_positiveOrderLaguerre_and_zetaRightEdge
+    (N : TailPositiveOrderLaguerreNonnegativeLeaf)
+    (E : TailZetaRightEdgeLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_laguerreNonnegative_and_zetaRightEdge N.toCanonical E
 
 /-- Summability is a consequence of the single analytic `HasSum` identity. -/
 theorem TailCanonicalLaguerreSeriesIdentityLeaf.series_summable
@@ -13129,33 +13313,18 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **Open atomic leaf A.**  Decompose the paired-kernel representation of
-    canonical `L₁` into summable phase-aligned blocks.  Low blocks and the
-    cofinite oscillatory tail are deliberately separated so that compact
-    certification and analytic integration-by-parts estimates can meet. -/
-noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreSplitBlockLeaf := by
+/-- **Open atomic tail leaf.**  Prove all canonical Laguerre coefficients
+    nonnegative on the right tail and prove that their sequence is not
+    identically zero at any right-tail real center.  Negation symmetry supplies
+    the left tail.  This formulation permits
+    arbitrary real-zero multiplicity and contains no convergence or
+    differentiability obligations. -/
+theorem tailCanonicalLaguerrePositivity_10 :
+    TailCanonicalLaguerrePositivityLeaf := by
   sorry
 
-/-- **Open atomic leaf B.**  Prove the finite prefix and cofinite tail of the
-    canonical generalized Laguerre coefficients of order at least two
-    nonnegative.  The earlier curvature, differentiability, and endpoint
-    tangent obligations have been eliminated by direct series truncation. -/
-noncomputable def tailHigherLaguerreCoefficients_10 :
-    TailHigherLaguerreCoefficientSplitLeaf := by
-  sorry
-
-/-- The two atomic leaves assemble the former Laguerre-remainder obligation. -/
-theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf :=
-  tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct
-    tailFirstLaguerreBlocks_10.toBlocks tailHigherLaguerreCoefficients_10
-      tailCanonicalLaguerreSeriesIdentity_mathlib
-
-/-- The Laguerre-remainder leaf specialized to integrated vertical growth. -/
-noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=
-  tailLaguerreRemainder_10.toQuadraticGrowth.toTailVerticalGrowth
-
-/-- The vertical-growth leaf implies tail nonvanishing through the completely
-    formal conversion to a positive `Certificate`. -/
+/-- Canonical coefficient positivity and nontriviality imply tail
+    nonvanishing directly through the proved Laguerre series. -/
 theorem xiShifted_nonvanishing_on_tail :
     ∀ z : ℂ,
       10 < |z.re| →
@@ -13164,9 +13333,14 @@ theorem xiShifted_nonvanishing_on_tail :
       z.im ≠ 0 →
       xiShifted z ≠ 0 := by
   intro z hx hgt hlt hne
-  exact certificate_implies_tail_nonvanishing
-    (certificate_of_tailLaguerreRemainder tailLaguerreRemainder_10)
-    hx hgt hlt hne
+  let T : XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+    tailPointwise_from_right_distance_lower_bound_and_symmetry
+      classicalXi_symmetry.neg_symm
+      tailCanonicalLaguerrePositivity_10.toRightTailDistance
+  have hgt' : -(1 : ℝ) / 2 < z.im := by linarith
+  rcases (lt_abs.mp hx) with hright | hneg
+  · exact T.right_nonvanishing z hright hgt' hlt hne
+  · exact T.left_nonvanishing z (by linarith) hgt' hlt hne
 
 /-- The analytic core of Challenge 2, derived from the vertical-growth leaf.
     The proof converts a hypothetical zeta zero `s` to shifted coordinates
@@ -13194,15 +13368,15 @@ theorem zetaTail_offLine_nonvanishing_10 :
       _ = 0 := hcs
   exact xiShifted_nonvanishing_on_tail z hx hgt hlt hne hxi0
 
-/-- The Challenge 2 certificate, obtained from the positive first Laguerre
-    coefficient and nonnegative aggregate remainder. -/
+/-- The Challenge 2 certificate obtained from multiplicity-robust canonical
+    Laguerre positivity. -/
 noncomputable def challenge2_certificate : Certificate :=
-  certificate_of_tailLaguerreRemainder tailLaguerreRemainder_10
+  challenge2_certificate_of_tail_nonvanishing zetaTail_offLine_nonvanishing_10
 
 /-- The final conditional theorem: if the Challenge 2 certificate is supplied,
     RH follows (bounded region as in `rh_from_certificate_closed`). -/
 theorem riemann_hypothesis_of_challenge2 : RiemannHypothesisProp :=
-  rh_from_certificate_closed challenge2_certificate
+  rh_from_tailCanonicalLaguerrePositivity tailCanonicalLaguerrePositivity_10
 
 
 /-!

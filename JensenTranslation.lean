@@ -126,6 +126,85 @@ theorem real_affine_hyperbolic {a b : ℝ} (h : a ≠ 0 ∨ b ≠ 0) :
     rw [hx'']
     simp
 
+/-- A real quadratic `c + b·X + a·X²` with `a ≠ 0` and nonnegative
+    discriminant is hyperbolic: its two roots are real.  Completes the
+    d = 2 base case of the Jensen criterion. -/
+theorem real_quadratic_hyperbolic_of_discriminant {a b c : ℝ} (ha : a ≠ 0)
+    (hd : b ^ 2 ≥ 4 * a * c) :
+    Hyperbolic (Polynomial.map (algebraMap ℝ ℂ)
+      (Polynomial.C c + Polynomial.monomial 1 b + Polynomial.monomial 2 a)) := by
+  unfold Hyperbolic
+  intro x hx
+  have hx' : (c : ℂ) + (b : ℂ) * x + (a : ℂ) * x ^ 2 = 0 := by
+    simpa [Polynomial.eval_add, Polynomial.eval_monomial, Polynomial.map_add,
+      Polynomial.map_monomial, pow_two] using hx
+  let z : ℂ := 2 * (a : ℂ) * x + (b : ℂ)
+  have hx'' : (a : ℂ) * x ^ 2 + (b : ℂ) * x + (c : ℂ) = 0 := by
+    simpa [pow_two, add_assoc, add_comm, add_left_comm] using hx'
+  have hz2 : z ^ 2 = ((b ^ 2 - 4 * a * c : ℝ) : ℂ) := by
+    dsimp [z]
+    have hlin : 4 * (a : ℂ) * ((a : ℂ) * x ^ 2 + (b : ℂ) * x + (c : ℂ)) = 0 := by
+      rw [hx'']; ring
+    have h0 : 4 * (a : ℂ) * (a : ℂ) * x ^ 2 + 4 * (a : ℂ) * (b : ℂ) * x + 4 * (a : ℂ) * (c : ℂ) = 0 := by
+      calc 4 * (a : ℂ) * (a : ℂ) * x ^ 2 + 4 * (a : ℂ) * (b : ℂ) * x + 4 * (a : ℂ) * (c : ℂ)
+          = 4 * (a : ℂ) * ((a : ℂ) * x ^ 2 + (b : ℂ) * x + (c : ℂ)) := by ring
+        _ = 0 := hlin
+    calc (2 * (a : ℂ) * x + (b : ℂ)) ^ 2
+        = 4 * (a : ℂ) * (a : ℂ) * x ^ 2 + 4 * (a : ℂ) * (b : ℂ) * x + (b : ℂ) ^ 2 := by ring
+      _ = (b : ℂ) ^ 2 - 4 * (a : ℂ) * (c : ℂ) := by
+        calc 4 * (a : ℂ) * (a : ℂ) * x ^ 2 + 4 * (a : ℂ) * (b : ℂ) * x + (b : ℂ) ^ 2
+            = 4 * (a : ℂ) * (a : ℂ) * x ^ 2 + 4 * (a : ℂ) * (b : ℂ) * x + 4 * (a : ℂ) * (c : ℂ) + (b : ℂ) ^ 2 - 4 * (a : ℂ) * (c : ℂ) := by ring
+          _ = (b : ℂ) ^ 2 - 4 * (a : ℂ) * (c : ℂ) := by rw [h0]; ring
+      _ = ((b ^ 2 - 4 * a * c : ℝ) : ℂ) := by push_cast; ring
+  have hD : 0 ≤ b ^ 2 - 4 * a * c := by nlinarith
+  -- z.im = 0 : z² is a nonnegative real, so z is real
+  have hzim : z.im = 0 := by
+    have him2 : (z ^ 2).im = 0 := by
+      rw [hz2]
+      exact Complex.ofReal_im (b ^ 2 - 4 * a * c)
+    have hre2 : (z ^ 2).re = b ^ 2 - 4 * a * c := by
+      rw [hz2]
+      exact Complex.ofReal_re (b ^ 2 - 4 * a * c)
+    have hre_sq : (z ^ 2).re = z.re ^ 2 - z.im ^ 2 := by simp [pow_two, Complex.mul_re]
+    have him_sq : (z ^ 2).im = 2 * z.re * z.im := by
+      simp [pow_two, Complex.mul_im]
+      ring
+    have hmul0 : z.re * z.im = 0 := by
+      have : 2 * z.re * z.im = 0 := by
+        rw [← him_sq, him2]
+      nlinarith
+    by_cases hzi : z.im = 0
+    · exact hzi
+    · have hzr : z.re = 0 := (mul_eq_zero.mp hmul0).resolve_right hzi
+      have hD' : 0 ≤ -z.im ^ 2 := by
+        have : -z.im ^ 2 = b ^ 2 - 4 * a * c := by
+          calc -z.im ^ 2 = z.re ^ 2 - z.im ^ 2 := by simp [hzr]
+            _ = (z ^ 2).re := hre_sq.symm
+            _ = b ^ 2 - 4 * a * c := hre2
+        rw [this]
+        exact hD
+      have hzi2 : z.im ^ 2 ≤ 0 := by linarith
+      have hzi' : z.im ^ 2 = 0 := le_antisymm hzi2 (sq_nonneg z.im)
+      exact sq_eq_zero_iff.mp hzi'
+  -- x = (z - b)/(2a) is the image of a real number
+  have hxeq : x = (z - (b : ℂ)) / (2 * (a : ℂ)) := by
+    have hden : 2 * (a : ℂ) ≠ 0 := by exact_mod_cast (mul_ne_zero (by norm_num) ha)
+    dsimp [z]
+    rw [eq_div_iff hden]
+    ring
+  have hzre : z = ((z.re : ℝ) : ℂ) := by
+    apply Complex.ext <;> simp [hzim]
+  rw [hxeq, hzre]
+  have hnum : ((z.re : ℝ) : ℂ) - (b : ℂ) = ((z.re - b : ℝ) : ℂ) := by
+    apply Complex.ext <;> simp
+  have hdiv : ((z.re - b : ℝ) : ℂ) / (2 * (a : ℂ)) =
+      (((z.re - b) / (2 * a) : ℝ) : ℂ) := by
+    rw [Complex.ofReal_div]
+    push_cast
+    ring
+  rw [hnum, hdiv]
+  exact Complex.ofReal_im ((z.re - b) / (2 * a))
+
 /-- Degree 1: J_{1,n}(x) = γₙ + (1/2)γₙ₊₁ x is a real linear polynomial;
     if it is not the zero polynomial, its single root is real, hence it is
     hyperbolic.  PROVED — this is the first genuine step in the translated
