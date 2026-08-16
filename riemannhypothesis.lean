@@ -11147,18 +11147,20 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Supply the two atomic block leaves `tailFirstLaguerreBlocks_10` and
-`tailSquaredHeightCurvatureBlocks_10`.  The formal chain
+Supply the two atomic leaves `tailFirstLaguerreBlocks_10` and
+`tailHigherLaguerreCoefficients_10`.  The formal chain
 
     positive phase-aligned paired-kernel blocks for L₁
-      + canonical generalized-Laguerre curvature terms in t=y²
+      + finite/cofinite signs of canonical Lₙ for n ≥ 2
+      + the proved analytic Taylor/Cauchy-product identity
       → L₁ + nonnegative remainder → quadratic vertical growth
       → quantitative certificate
 
-is implemented by `tailLaguerreRemainder_of_blocks_and_squaredHeight` followed
-by `certificate_of_tailLaguerreRemainder`.  Pointwise paired-kernel positivity
-and the stronger coefficient-wise route remain available as alternatives; no
-finite sampling is promoted to a theorem.
+is implemented by
+`tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct` followed by
+`certificate_of_tailLaguerreRemainder`.  No differentiability of the
+squared-height profile or termwise-differentiated curvature series remains in
+the direct frontier, and no finite sampling is promoted to a theorem.
 -/
 
 noncomputable section
@@ -11433,6 +11435,80 @@ noncomputable def xiShiftedVerticalCauchyCoefficient
     xiShiftedVerticalTaylorTerm j r y *
       star (xiShiftedVerticalTaylorTerm (m - j) r y)
 
+private theorem negOne_sub_even (n j : ℕ) (hj : j ≤ 2 * n) :
+    (-1 : ℝ) ^ (2 * n - j) = (-1 : ℝ) ^ j := by
+  have hprod :
+      (-1 : ℝ) ^ j * (-1 : ℝ) ^ (2 * n - j) = 1 := by
+    rw [← pow_add, Nat.add_sub_of_le hj, pow_mul]
+    norm_num
+  have hsq : (-1 : ℝ) ^ j * (-1 : ℝ) ^ j = 1 := by
+    rw [← pow_add]
+    rw [show j + j = 2 * j by omega, pow_mul]
+    norm_num
+  exact (mul_left_cancel₀ (pow_ne_zero j (by norm_num : (-1 : ℝ) ≠ 0)))
+    (hprod.trans hsq.symm)
+
+/-- The phase in the degree-`2n` vertical Taylor convolution is the real
+    sign appearing in the canonical Laguerre coefficient. -/
+private theorem verticalTaylorPhase_even
+    (n j : ℕ) (hj : j ≤ 2 * n) :
+    I ^ j * star (I ^ (2 * n - j)) =
+      (((-1 : ℝ) ^ (n + j) : ℝ) : ℂ) := by
+  have hstar : star I = -I := by
+    apply Complex.ext <;> norm_num [star]
+  rw [star_pow, hstar, neg_pow]
+  have hsign : (-1 : ℂ) ^ (2 * n - j) = (-1 : ℂ) ^ j := by
+    exact_mod_cast negOne_sub_even n j hj
+  rw [hsign]
+  push_cast
+  calc
+    I ^ j * ((-1 : ℂ) ^ j * I ^ (2 * n - j)) =
+        (-1 : ℂ) ^ j * I ^ (j + (2 * n - j)) := by
+      rw [pow_add]
+      ring
+    _ = (-1 : ℂ) ^ j * I ^ (2 * n) := by rw [Nat.add_sub_of_le hj]
+    _ = (-1 : ℂ) ^ j * (-1 : ℂ) ^ n := by rw [pow_mul, Complex.I_sq]
+    _ = (-1 : ℂ) ^ (n + j) := by rw [pow_add]; ring
+
+/-- The reciprocal Taylor factorials combine into the binomial normalization
+    of the canonical Laguerre coefficient. -/
+private theorem verticalTaylorFactorial_even
+    (n j : ℕ) (hj : j ≤ 2 * n) :
+    (j.factorial : ℂ)⁻¹ * ((2 * n - j).factorial : ℂ)⁻¹ =
+      (Nat.choose (2 * n) j : ℂ) * ((2 * n).factorial : ℂ)⁻¹ := by
+  have hnat := Nat.choose_mul_factorial_mul_factorial hj
+  have hcast : ((2 * n).factorial : ℂ) =
+      (Nat.choose (2 * n) j : ℂ) * (j.factorial : ℂ) *
+        ((2 * n - j).factorial : ℂ) := by
+    exact_mod_cast hnat.symm
+  have hc : (Nat.choose (2 * n) j : ℂ) ≠ 0 := by
+    exact Nat.cast_ne_zero.mpr (Nat.ne_of_gt (Nat.choose_pos hj))
+  have hjc : (j.factorial : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+  have hkc : ((2 * n - j).factorial : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
+  rw [hcast, mul_inv]
+  field_simp
+
+private theorem verticalTaylorProduct_even
+    (n j : ℕ) (hj : j ≤ 2 * n) (a b : ℂ) :
+    ((j.factorial : ℂ)⁻¹ * I ^ j * a) *
+        star (((2 * n - j).factorial : ℂ)⁻¹ * I ^ (2 * n - j) * b) =
+      ((((-1 : ℝ) ^ (n + j) * Nat.choose (2 * n) j /
+          (2 * n).factorial : ℝ) : ℝ) : ℂ) * (a * star b) := by
+  have hfacstar : star (((2 * n - j).factorial : ℂ)⁻¹) =
+      ((2 * n - j).factorial : ℂ)⁻¹ := by simp
+  calc
+    _ = ((j.factorial : ℂ)⁻¹ * ((2 * n - j).factorial : ℂ)⁻¹) *
+          (I ^ j * star (I ^ (2 * n - j))) * (a * star b) := by
+      rw [star_mul, star_mul, hfacstar]
+      ring
+    _ = _ := by
+      rw [verticalTaylorPhase_even n j hj,
+        verticalTaylorFactorial_even n j hj]
+      push_cast
+      ring
+
 /-- Each Cauchy coefficient is homogeneous of its total degree in the real
     height variable. -/
 theorem xiShiftedVerticalCauchyCoefficient_eq_pow_mul
@@ -11461,8 +11537,17 @@ theorem xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul
     (m : ℕ) (r y : ℝ) :
     (xiShiftedVerticalCauchyCoefficient m r y).re =
       y ^ m * (xiShiftedVerticalCauchyCoefficient m r 1).re := by
-  rw [xiShiftedVerticalCauchyCoefficient_eq_pow_mul]
-  simp
+  have hcast : (y : ℂ) ^ m = ((y ^ m : ℝ) : ℂ) := by norm_cast
+  have hre : ((y : ℂ) ^ m).re = y ^ m := by
+    simpa only [Complex.ofReal_re] using congrArg Complex.re hcast
+  have him : ((y : ℂ) ^ m).im = 0 := by
+    simpa only [Complex.ofReal_im] using congrArg Complex.im hcast
+  calc
+    _ = ((y : ℂ) ^ m *
+        xiShiftedVerticalCauchyCoefficient m r 1).re :=
+      congrArg Complex.re
+        (xiShiftedVerticalCauchyCoefficient_eq_pow_mul m r y)
+    _ = _ := by rw [Complex.mul_re, hre, him]; ring
 
 /-- Negating the height multiplies the degree-`m` real Cauchy coefficient by
     `(-1)ᵐ`; this is the parity mechanism used to discard odd degrees. -/
@@ -11471,10 +11556,27 @@ theorem xiShiftedVerticalCauchyCoefficient_re_neg
     (xiShiftedVerticalCauchyCoefficient m r (-y)).re =
       (-1 : ℝ) ^ m *
         (xiShiftedVerticalCauchyCoefficient m r y).re := by
-  rw [xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul,
-    xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul]
+  rw [xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul m r (-y),
+    xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul m r y]
   rw [neg_pow]
   ring
+
+/-- Conjugation symmetry identifies the vertical modulus at opposite heights. -/
+theorem norm_xiShifted_tailVerticalPoint_neg_eq
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    ‖xiShifted (tailVerticalPoint r (-y))‖ =
+      ‖xiShifted (tailVerticalPoint r y)‖ := by
+  have hpoint : tailVerticalPoint r (-y) = star (tailVerticalPoint r y) := by
+    apply Complex.ext <;> simp [tailVerticalPoint]
+  have hstrip :
+      -(1 / 2 : ℝ) < (tailVerticalPoint r y).im ∧
+        (tailVerticalPoint r y).im < (1 / 2 : ℝ) := by
+    simpa [tailVerticalPoint] using (abs_lt.mp hy)
+  have hgt : -(1 : ℝ) / 2 < (tailVerticalPoint r y).im := by
+    linarith [hstrip.1]
+  rw [hpoint]
+  rw [classicalXi_symmetry.conj_symm
+    (tailVerticalPoint r y) hgt hstrip.2, norm_star]
 
 /-- Absolute summability in finite-dimensional `ℂ`, followed by Mathlib's
     Cauchy-product theorem, gives the full (not yet even-regrouped) Taylor
@@ -11513,6 +11615,42 @@ theorem xiShiftedVerticalCauchyCoefficient_re_hasSum
     simp only [star_def]
     rw [Complex.mul_conj]
     simpa using Complex.sq_norm (xiShifted (tailVerticalPoint r y))
+
+/-- Averaging the expansions at opposite heights preserves the squared
+    modulus and projects the Cauchy series onto its even part. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_evenProjection_hasSum
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum
+      (fun m : ℕ =>
+        ((xiShiftedVerticalCauchyCoefficient m r y).re +
+          (xiShiftedVerticalCauchyCoefficient m r (-y)).re) / 2)
+      (‖xiShifted (tailVerticalPoint r y)‖ ^ 2) := by
+  have hp := xiShiftedVerticalCauchyCoefficient_re_hasSum r y hy
+  have hm := xiShiftedVerticalCauchyCoefficient_re_hasSum r (-y) (by simpa using hy)
+  rw [norm_xiShifted_tailVerticalPoint_neg_eq r y hy] at hm
+  have havg := (hp.add hm).mul_left (1 / 2 : ℝ)
+  have hhalf : (2 : ℝ) * 2⁻¹ = 1 := by norm_num
+  simpa only [div_eq_mul_inv, one_mul, mul_comm, ← two_mul,
+    ← mul_assoc, hhalf] using havg
+
+/-- Opposite-height averaging fixes every even Cauchy coefficient. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_evenProjection_two_mul
+    (n : ℕ) (r y : ℝ) :
+    ((xiShiftedVerticalCauchyCoefficient (2 * n) r y).re +
+        (xiShiftedVerticalCauchyCoefficient (2 * n) r (-y)).re) / 2 =
+      (xiShiftedVerticalCauchyCoefficient (2 * n) r y).re := by
+  rw [xiShiftedVerticalCauchyCoefficient_re_neg]
+  rw [pow_mul]
+  norm_num
+
+/-- Opposite-height averaging kills every odd Cauchy coefficient. -/
+theorem xiShiftedVerticalCauchyCoefficient_re_evenProjection_two_mul_add_one
+    (n : ℕ) (r y : ℝ) :
+    ((xiShiftedVerticalCauchyCoefficient (2 * n + 1) r y).re +
+        (xiShiftedVerticalCauchyCoefficient (2 * n + 1) r (-y)).re) / 2 = 0 := by
+  rw [xiShiftedVerticalCauchyCoefficient_re_neg]
+  rw [pow_succ, pow_mul]
+  norm_num
 
 /-- An integrated vertical-modulus-growth leaf for the tail.  Its `growth`
     field is the RH-hard analytic input; the remaining conversion to
@@ -11623,6 +11761,68 @@ noncomputable def xiShiftedLaguerreCoefficient (n : ℕ) (r : ℝ) : ℝ :=
         ((iteratedDeriv j xiShifted (r : ℂ)) *
           star (iteratedDeriv (2 * n - j) xiShifted (r : ℂ))).re) /
     (Nat.factorial (2 * n) : ℝ)
+
+/-- The real part of the degree-`2n` Taylor Cauchy coefficient at unit
+    height is exactly the canonical `n`th Laguerre coefficient. -/
+theorem xiShiftedVerticalCauchyCoefficient_two_mul_re_one
+    (n : ℕ) (r : ℝ) :
+    (xiShiftedVerticalCauchyCoefficient (2 * n) r 1).re =
+      xiShiftedLaguerreCoefficient n r := by
+  unfold xiShiftedVerticalCauchyCoefficient xiShiftedLaguerreCoefficient
+  change Complex.reCLM
+      (∑ j ∈ Finset.range (2 * n + 1),
+        xiShiftedVerticalTaylorTerm j r 1 *
+          star (xiShiftedVerticalTaylorTerm (2 * n - j) r 1)) = _
+  rw [map_sum, Finset.sum_div]
+  apply Finset.sum_congr rfl
+  intro j hj
+  change (xiShiftedVerticalTaylorTerm j r 1 *
+    star (xiShiftedVerticalTaylorTerm (2 * n - j) r 1)).re = _
+  have hjle : j ≤ 2 * n :=
+    Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+  have hterm := verticalTaylorProduct_even n j hjle
+    (iteratedDeriv j xiShifted (r : ℂ))
+    (iteratedDeriv (2 * n - j) xiShifted (r : ℂ))
+  simp only [xiShiftedVerticalTaylorTerm, ofReal_one, mul_one]
+  rw [hterm]
+  simp only [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+    zero_mul, sub_zero]
+  ring
+
+/-- At arbitrary real height, the degree-`2n` Cauchy coefficient is the
+    canonical Laguerre coefficient times `y^(2n)`. -/
+theorem xiShiftedVerticalCauchyCoefficient_two_mul_re
+    (n : ℕ) (r y : ℝ) :
+    (xiShiftedVerticalCauchyCoefficient (2 * n) r y).re =
+      xiShiftedLaguerreCoefficient n r * y ^ (2 * n) := by
+  rw [xiShiftedVerticalCauchyCoefficient_re_eq_pow_mul,
+    xiShiftedVerticalCauchyCoefficient_two_mul_re_one]
+  ring
+
+/-- The averaged all-degree Taylor product can be regrouped in adjacent
+    even/odd pairs.  The odd member vanishes and the even member is the
+    canonical Laguerre term, giving the desired series without an additional
+    analytic assumption. -/
+theorem xiShiftedLaguerreSeries_hasSum
+    (r y : ℝ) (hy : |y| < (1 / 2 : ℝ)) :
+    HasSum
+      (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
+      (‖xiShifted (tailVerticalPoint r y)‖ ^ 2) := by
+  have h := xiShiftedVerticalCauchyCoefficient_re_evenProjection_hasSum r y hy
+  replace h := (Nat.divModEquiv 2).symm.hasSum_iff.mpr h
+  dsimp [Function.comp_def] at h
+  refine h.prod_fiberwise fun n => ?_
+  convert! hasSum_fintype (_ : Fin 2 → ℝ) using 1
+  rw [Fin.sum_univ_two]
+  change xiShiftedLaguerreCoefficient n r * y ^ (2 * n) =
+    ((xiShiftedVerticalCauchyCoefficient (n * 2) r y).re +
+        (xiShiftedVerticalCauchyCoefficient (n * 2) r (-y)).re) / 2 +
+      ((xiShiftedVerticalCauchyCoefficient (n * 2 + 1) r y).re +
+        (xiShiftedVerticalCauchyCoefficient (n * 2 + 1) r (-y)).re) / 2
+  rw [Nat.mul_comm n 2]
+  rw [xiShiftedVerticalCauchyCoefficient_re_evenProjection_two_mul,
+    xiShiftedVerticalCauchyCoefficient_re_evenProjection_two_mul_add_one,
+    add_zero, xiShiftedVerticalCauchyCoefficient_two_mul_re]
 
 /-- The zeroth canonical coefficient is the real-axis modulus square. -/
 theorem xiShiftedLaguerreCoefficient_zero (r : ℝ) :
@@ -12096,6 +12296,103 @@ structure TailCanonicalLaguerreSeriesIdentityLeaf where
       HasSum (fun n : ℕ => xiShiftedLaguerreCoefficient n r * y ^ (2 * n))
         (‖xiShifted (tailVerticalPoint r y)‖ ^ 2)
 
+/-- Analyticity of shifted xi, the absolutely convergent Cauchy product, and
+    opposite-height parity together discharge the canonical series identity
+    leaf.  Consequently this is no longer an RH-hard assumption. -/
+theorem tailCanonicalLaguerreSeriesIdentity_mathlib :
+    TailCanonicalLaguerreSeriesIdentityLeaf where
+  series_hasSum := by
+    intro r y _ hy hylt
+    apply xiShiftedLaguerreSeries_hasSum r y
+    simpa [abs_of_pos hy] using hylt
+
+/-- A multiplicity-robust canonical Laguerre frontier.  Requiring `L₁ > 0`
+    everywhere would force every real zero to be simple.  For off-real
+    nonvanishing it is enough that all coefficients are nonnegative and that
+    at least one coefficient (whose index may depend on the center) is
+    strictly positive. -/
+structure TailCanonicalLaguerrePositivityLeaf where
+  coefficient_nonneg :
+    ∀ n : ℕ, ∀ r : ℝ,
+      10 < |r| →
+      0 ≤ xiShiftedLaguerreCoefficient n r
+  coefficient_exists_pos :
+    ∀ r : ℝ,
+      10 < |r| →
+      ∃ n : ℕ, 0 < xiShiftedLaguerreCoefficient n r
+
+/-- A positive canonical coefficient and nonnegativity of every other term
+    make the vertical modulus square strictly positive at nonzero height. -/
+theorem norm_xiShifted_tailVerticalPoint_sq_pos_of_laguerre
+    (P : TailCanonicalLaguerrePositivityLeaf)
+    (r y : ℝ) (hr : 10 < |r|)
+    (hy : |y| < (1 / 2 : ℝ)) (hyne : y ≠ 0) :
+    0 < ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 := by
+  rcases P.coefficient_exists_pos r hr with ⟨n, hn⟩
+  have hs := xiShiftedLaguerreSeries_hasSum r y hy
+  have hsum := hs.summable.sum_le_tsum ({n} : Finset ℕ) (fun k _ => by
+    apply mul_nonneg (P.coefficient_nonneg k r hr)
+    rw [pow_mul]
+    positivity)
+  have hterm_pos :
+      0 < xiShiftedLaguerreCoefficient n r * y ^ (2 * n) := by
+    apply mul_pos hn
+    rw [pow_mul]
+    exact pow_pos (sq_pos_of_ne_zero hyne) n
+  have hterm_le :
+      xiShiftedLaguerreCoefficient n r * y ^ (2 * n) ≤
+        ∑' k : ℕ, xiShiftedLaguerreCoefficient k r * y ^ (2 * k) := by
+    simpa using hsum
+  calc
+    0 < xiShiftedLaguerreCoefficient n r * y ^ (2 * n) := hterm_pos
+    _ ≤ ∑' k : ℕ, xiShiftedLaguerreCoefficient k r * y ^ (2 * k) := hterm_le
+    _ = ‖xiShifted (tailVerticalPoint r y)‖ ^ 2 := hs.tsum_eq
+
+/-- The multiplicity-robust coefficient criterion gives the distance-sensitive
+    right-tail lower bound needed by the closed RH assembly.  Outside the
+    shifted strip (or at the cutoff endpoint) the auxiliary lower bound is set
+    to `1`, because the assembly never queries those values. -/
+noncomputable def TailCanonicalLaguerrePositivityLeaf.toRightTailDistance
+    (P : TailCanonicalLaguerrePositivityLeaf) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) where
+  lower r y :=
+    if 10 < r ∧ |y| < (1 / 2 : ℝ) then
+      ‖xiShifted (tailVerticalPoint r y)‖
+    else 1
+  lower_pos := by
+    intro r y hr hyne
+    by_cases h : 10 < r ∧ |y| < (1 / 2 : ℝ)
+    · rw [if_pos h]
+      have hrabs : 10 < |r| := by
+        rw [abs_of_pos (by linarith)]
+        exact h.1
+      have hsq := norm_xiShifted_tailVerticalPoint_sq_pos_of_laguerre
+        P r y hrabs h.2 hyne
+      nlinarith [norm_nonneg (xiShifted (tailVerticalPoint r y))]
+    · rw [if_neg h]
+      norm_num
+  bound := by
+    intro z hre hgt hlt hne
+    have hstrip : |z.im| < (1 / 2 : ℝ) :=
+      abs_lt.mpr ⟨by linarith, by linarith⟩
+    have hz : tailVerticalPoint z.re z.im = z := by
+      unfold tailVerticalPoint
+      rw [mul_comm I (z.im : ℂ)]
+      exact Complex.re_add_im z
+    change (if 10 < z.re ∧ |z.im| < (1 / 2 : ℝ) then
+        ‖xiShifted (tailVerticalPoint z.re z.im)‖ else 1) ≤ ‖xiShifted z‖
+    rw [if_pos ⟨hre, hstrip⟩, hz]
+
+/-- Reduced multiplicity-robust RH frontier. -/
+theorem rh_from_tailCanonicalLaguerrePositivity
+    (P : TailCanonicalLaguerrePositivityLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_remaining_rh_proof
+    {
+      quadrant := ClosedCertificate.remainingQuadrant_10_closed
+      tail := P.toRightTailDistance
+    }
+
 /-- Summability is a consequence of the single analytic `HasSum` identity. -/
 theorem TailCanonicalLaguerreSeriesIdentityLeaf.series_summable
     (S : TailCanonicalLaguerreSeriesIdentityLeaf)
@@ -12519,6 +12816,15 @@ noncomputable def certificate_of_blocks_higherCoefficients_series_direct
   certificate_of_tailLaguerreRemainder
     (tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct B H S)
 
+/-- With the canonical series identity proved from analyticity, the direct
+    certificate needs only strict first-coefficient blocks and signs for the
+    higher canonical coefficients. -/
+noncomputable def certificate_of_blocks_higherCoefficients_direct
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf) : Certificate :=
+  certificate_of_blocks_higherCoefficients_series_direct B H
+    tailCanonicalLaguerreSeriesIdentity_mathlib
+
 /-- A certificate forces `ξ_sh(z) ≠ 0` on the tail — the semantic content of
     Challenge 2. -/
 theorem certificate_implies_tail_nonvanishing
@@ -12648,6 +12954,15 @@ theorem rh_from_laguerre_blocks_higherCoefficients_series
     RiemannHypothesisProp :=
   rh_from_certificate_closed
     (certificate_of_blocks_higherCoefficients_series_direct B H S)
+
+/-- Reduced direct-series frontier: the Taylor/Cauchy-product identity is now
+    closed, so these two coefficient-positivity inputs suffice for RH. -/
+theorem rh_from_laguerre_blocks_higherCoefficients
+    (B : TailFirstLaguerreBlockLeaf)
+    (H : TailHigherLaguerreCoefficientSplitLeaf) :
+    RiemannHypothesisProp :=
+  rh_from_certificate_closed
+    (certificate_of_blocks_higherCoefficients_direct B H)
 
 /-- Prop-form mirror of Challenge 2. -/
 def Challenge2Statement : Prop :=
@@ -12822,21 +13137,18 @@ noncomputable def tailFirstLaguerreBlocks_10 : TailFirstLaguerreSplitBlockLeaf :
   sorry
 
 /-- **Open atomic leaf B.**  Prove the finite prefix and cofinite tail of the
-    canonical generalized Laguerre coefficients nonnegative, establish the
-    termwise-differentiated curvature series, and discharge regularity and the
-    endpoint tangent identity. -/
-noncomputable def tailSquaredHeightCurvatureBlocks_10 :
-    TailSquaredHeightSplitCurvatureBlockLeaf := by
+    canonical generalized Laguerre coefficients of order at least two
+    nonnegative.  The earlier curvature, differentiability, and endpoint
+    tangent obligations have been eliminated by direct series truncation. -/
+noncomputable def tailHigherLaguerreCoefficients_10 :
+    TailHigherLaguerreCoefficientSplitLeaf := by
   sorry
-
-/-- The block-level curvature leaf assembles to ordinary nonnegative curvature. -/
-theorem tailSquaredHeightCurvature_10 : TailSquaredHeightCurvatureLeaf :=
-  tailSquaredHeightCurvatureBlocks_10.toCurvature
 
 /-- The two atomic leaves assemble the former Laguerre-remainder obligation. -/
 theorem tailLaguerreRemainder_10 : TailLaguerreRemainderLeaf :=
-  tailLaguerreRemainder_of_blocks_and_squaredHeight
-    tailFirstLaguerreBlocks_10.toBlocks tailSquaredHeightCurvature_10.toConvexity
+  tailLaguerreRemainder_of_blocks_higherCoefficients_series_direct
+    tailFirstLaguerreBlocks_10.toBlocks tailHigherLaguerreCoefficients_10
+      tailCanonicalLaguerreSeriesIdentity_mathlib
 
 /-- The Laguerre-remainder leaf specialized to integrated vertical growth. -/
 noncomputable def tailVerticalGrowth_10 : TailVerticalGrowthLeaf :=
