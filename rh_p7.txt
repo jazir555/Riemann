@@ -1,0 +1,43 @@
+﻿ContinuousOn.aestronglyMeasurable.{u_1, u_2} {α : Type u_1} {β : Type u_2} {mα : MeasurableSpace α} [TopologicalSpace α]
+  [TopologicalSpace β] [h : SecondCountableTopologyEither α β] [OpensMeasurableSpace α]
+  [TopologicalSpace.PseudoMetrizableSpace β] {f : α → β} {s : Set α} {μ : Measure α} (hf : ContinuousOn f s)
+  (hs : MeasurableSet s) : AEStronglyMeasurable f (μ.restrict s)
+measurableSet_uIoc.{u_1} {α : Type u_1} [TopologicalSpace α] {mα : MeasurableSpace α} [OpensMeasurableSpace α]
+  [LinearOrder α] {a b : α} [ClosedIicTopology α] : MeasurableSet (Ι a b)
+Set.uIoc_subset_uIcc.{u_1} {α : Type u_1} [LinearOrder α] {a b : α} : Ι a b ⊆ [[a, b]]
+ContinuousOn.mono.{u_1, u_2} {α : Type u_1} {β : Type u_2} [TopologicalSpace α] [TopologicalSpace β] {f : α → β}
+  {s t : Set α} (hf : ContinuousOn f s) (h : t ⊆ s) : ContinuousOn f t
+ContinuousAt.rpow_const.{u_1} {α : Type u_1} [TopologicalSpace α] {f : α → ℝ} {x : α} {p : ℝ} (hf : ContinuousAt f x)
+  (h : f x ≠ 0 ∨ 0 ≤ p) : ContinuousAt (fun x => f x ^ p) x
+Real.continuousAt_log {x : ℝ} (hx : x ≠ 0) : ContinuousAt log x
+rh_probe7.lean:11:7: error(lean.unknownIdentifier): Unknown identifier `continuousOn_rpow_const`
+continuousOn_of_forall_continuousAt.{u_1, u_2} {α : Type u_1} {β : Type u_2} [TopologicalSpace α] [TopologicalSpace β]
+  {f : α → β} {s : Set α} (hcont : ∀ x ∈ s, ContinuousAt f x) : ContinuousOn f s
+Real.rpow_neg {x : ℝ} (hx : 0 ≤ x) (y : ℝ) : x ^ (-y) = (x ^ y)⁻¹
+rh_probe7.lean:14:7: error(lean.unknownIdentifier): Unknown identifier `exp_neg_mul_log`
+Real.rpow_add {x : ℝ} (hx : 0 < x) (y z : ℝ) : x ^ (y + z) = x ^ y * x ^ z
+Real.exp_eq_exp_ℝ : rexp = NormedSpace.exp
+Continuous.intervalIntegrable.{u_5} {E : Type u_5} [NormedAddCommGroup E] {μ : Measure ℝ} [IsLocallyFiniteMeasure μ]
+  {u : ℝ → E} (hu : Continuous u) (a b : ℝ) : IntervalIntegrable u μ a b
+ContinuousOn.intervalIntegrable.{u_5} {E : Type u_5} [NormedAddCommGroup E] {μ : Measure ℝ} [IsLocallyFiniteMeasure μ]
+  {u : ℝ → E} {a b : ℝ} (hu : ContinuousOn u [[a, b]]) : IntervalIntegrable u μ a b
+rh_probe7.lean:30:101: error(lean.invalidField): Invalid field `mul`: The environment does not contain `Function.mul`, so it is not possible to project the field `mul` from an expression
+  ContinuousAt.div
+    (ContinuousAt.mul (ContinuousAt.mul (ContinuousAt.mul continuousAt_const ?m.253) continuousAt_const) ?m.278)
+    continuousAt_const
+of type
+  ?m.294 ≠ 0 → ContinuousAt (((fun x => ?m.243) * ?m.251 * fun x => ?m.268) * ?m.276 / fun x => ?m.294) ?m.293
+rh_probe7.lean:31:4: error: No goals to be solved
+rh_probe7.lean:34:42: error: Application type mismatch: The argument
+  hcont
+has type
+  ContinuousOn (fun x => (x - (↑n + 1)) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * 0 ^ k)
+    (Icc (↑n + 1) (↑n + 1 + 1))
+but is expected to have type
+  ContinuousOn (fun x => (x - (↑n + 1)) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * 0 ^ k)
+    (Ι (↑n + 1) (↑n + 1 + 1))
+in the application
+  ContinuousOn.aestronglyMeasurable hcont
+rh_probe7.lean:34:52: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`

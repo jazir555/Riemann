@@ -1,0 +1,35 @@
+﻿rh_probe8.lean:5:7: error(lean.unknownIdentifier): Unknown constant `HasSum.congr`
+rh_probe8.lean:6:7: error(lean.unknownIdentifier): Unknown constant `HasSum.congr'`
+HasSum.summable.{u_1, u_2} {α : Type u_1} {β : Type u_2} [AddCommMonoid α] [TopologicalSpace α] {L : SummationFilter β}
+  {f : β → α} {a : α} (h : HasSum f a L) : Summable f L
+rh_probe8.lean:8:7: error: Invalid field notation: Function `Function.const_mul` does not have a usable parameter of type `Function` for which to substitute `@Summable
+  ?m.1 ?m.2 ?m.3 ?m.4`
+
+Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+Summable.mul_left.{u_1, u_3} {ι : Type u_1} {α : Type u_3} {L : SummationFilter ι} [NonUnitalNonAssocSemiring α]
+  [TopologicalSpace α] [IsTopologicalSemiring α] {f : ι → α} (a : α) (hf : Summable f L) : Summable (fun i => a * f i) L
+rh_probe8.lean:10:7: error(lean.unknownIdentifier): Unknown identifier `abs_neg_one`
+abs_one.{u_1} {α : Type u_1} [Ring α] [LinearOrder α] [IsOrderedRing α] : |1| = 1
+abs_neg.{u_1} {α : Type u_1} [Lattice α] [AddGroup α] (a : α) : |(-a)| = |a|
+one_pow.{u_2} {M : Type u_2} [Monoid M] (n : ℕ) : 1 ^ n = 1
+abs_pow.{u_1} {α : Type u_1} [Ring α] [LinearOrder α] [IsOrderedRing α] (a : α) (n : ℕ) : |a ^ n| = |a| ^ n
+rh_probe8.lean:15:7: error: Invalid field notation: Function `Function.const_mul` does not have a usable parameter of type `Function` for which to substitute `@HasSum
+  ?m.1 ?m.2 ?m.3 ?m.4`
+
+Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+rh_probe8.lean:18:33: warning: Variable name `k` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _k
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+rh_probe8.lean:18:62: warning: Variable name `k` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _k
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+rh_probe8.lean:24:10: error(lean.invalidField): Invalid field `const_mul`: The environment does not contain `Exists.const_mul`, so it is not possible to project the field `const_mul` from an expression
+  h
+of type
+  ∃ a, HasSum (fun k => 1 ^ k / ↑k.factorial) a

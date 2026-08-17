@@ -1,0 +1,76 @@
+﻿rh_term_fps.lean:162:71: error: unexpected token ']]'; expected ']'
+rh_term_fps.lean:151:104: error: unsolved goals
+n : ℕ
+s₀ : ℝ
+hs₀ : 0 < s₀
+ρ : ℝ := s₀ / 2
+hρ : 0 < ρ
+c : ℝ := ↑n + 1
+hc : 1 ≤ c
+hc_le : c ≤ c + 1
+hxpos_of : ∀ x ∈ Icc c (c + 1), 0 < x
+y : ℝ
+hy : |y| < ρ
+F : ℕ → ℝ → ℝ := fun k x => (x - c) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * y ^ k
+f : ℝ → ℝ := fun x => (x - c) / x ^ (s₀ + y + 1)
+hF_meas : ∀ (k : ℕ), AEStronglyMeasurable (F k) (volume.restrict (Ι c (c + 1)))
+h_bound : ∀ (k : ℕ), ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → ‖F k x‖ ≤ (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+h_lim : ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → HasSum (fun k => F k x) (f x)
+bound_summable :
+  ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → Summable fun k => (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+⊢ ContinuousOn (fun x => (x - c) * x ^ (-(s₀ + 1)) * rexp (ρ * log x)) [[c, c + 1]]
+rh_term_fps.lean:149:104: error: unsolved goals
+n : ℕ
+s₀ : ℝ
+hs₀ : 0 < s₀
+ρ : ℝ := s₀ / 2
+hρ : 0 < ρ
+c : ℝ := ↑n + 1
+hc : 1 ≤ c
+hc_le : c ≤ c + 1
+hxpos_of : ∀ x ∈ Icc c (c + 1), 0 < x
+y : ℝ
+hy : |y| < ρ
+F : ℕ → ℝ → ℝ := fun k x => (x - c) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * y ^ k
+f : ℝ → ℝ := fun x => (x - c) / x ^ (s₀ + y + 1)
+hF_meas : ∀ (k : ℕ), AEStronglyMeasurable (F k) (volume.restrict (Ι c (c + 1)))
+h_bound : ∀ (k : ℕ), ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → ‖F k x‖ ≤ (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+h_lim : ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → HasSum (fun k => F k x) (f x)
+bound_summable :
+  ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → Summable fun k => (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+hcont : ContinuousOn (fun x => ∑' (k : ℕ), (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial) [[c, c + 1]]
+⊢ IntervalIntegrable (fun x => ∑' (k : ℕ), (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial) volume c (c + 1)
+rh_term_fps.lean:43:83: error: unsolved goals
+n : ℕ
+s₀ : ℝ
+hs₀ : 0 < s₀
+ρ : ℝ := s₀ / 2
+hρ : 0 < ρ
+c : ℝ := ↑n + 1
+hc : 1 ≤ c
+hc_le : c ≤ c + 1
+hxpos_of : ∀ x ∈ Icc c (c + 1), 0 < x
+y : ℝ
+hy : |y| < ρ
+F : ℕ → ℝ → ℝ := fun k x => (x - c) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * y ^ k
+f : ℝ → ℝ := fun x => (x - c) / x ^ (s₀ + y + 1)
+hF_meas : ∀ (k : ℕ), AEStronglyMeasurable (F k) (volume.restrict (Ι c (c + 1)))
+h_bound : ∀ (k : ℕ), ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → ‖F k x‖ ≤ (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+h_lim : ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → HasSum (fun k => F k x) (f x)
+bound_summable :
+  ∀ᵐ (x : ℝ), x ∈ Ι c (c + 1) → Summable fun k => (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial
+bound_integrable :
+  IntervalIntegrable (fun x => ∑' (k : ℕ), (x - c) * x ^ (-(s₀ + 1)) * (ρ * log x) ^ k / ↑k.factorial) volume c (c + 1)
+⊢ HasSum (fun k => termFPScoeff n s₀ k * y ^ k) (term (n + 1) (s₀ + y))
+rh_term_fps.lean:33:73: error: unsolved goals
+n : ℕ
+s₀ : ℝ
+hs₀ : 0 < s₀
+ρ : ℝ := s₀ / 2
+hρ : 0 < ρ
+c : ℝ := ↑n + 1
+hc : 1 ≤ c
+hc_le : c ≤ c + 1
+hxpos_of : ∀ x ∈ Icc c (c + 1), 0 < x
+hmain : ∀ {y : ℝ}, |y| < ρ → HasSum (fun k => termFPScoeff n s₀ k * y ^ k) (term (n + 1) (s₀ + y))
+⊢ HasFPowerSeriesAt (fun s => term (n + 1) s) (termFPS n s₀) s₀

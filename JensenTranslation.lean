@@ -80,12 +80,15 @@ theorem taylorCoeff_eq (n : ℕ) :
     taylorCoeff n = ((Nat.factorial (2 * n) : ℝ)⁻¹) * (deriv^[2 * n] xiMathlibShifted 0).re := by
   sorry
 
-/-- The Jensen polynomial of degree d and shift n, viewed over ℂ:
-    J_{d,n}(x) = Σ_{k=0}^d binom(d,k)/binom(d+k,k) · γ_{n+k} · x^k. -/
+/-- The Jensen polynomial of degree d and shift n, viewed over ℂ, in the
+    Pólya–GORZ convention:
+    J_{d,n}(x) = Σ_{k=0}^d binom(d,k) · γ_{n+k} · x^k.  (The binomial
+    convention matters: the differentiation identity
+    J'_{d+1,n} = (d+1)·J_{d,n+1} holds precisely in this convention,
+    which yields Pólya's shift reduction below.) -/
 noncomputable def jensenPoly (d n : ℕ) : Polynomial ℂ :=
   (Finset.sum (Finset.range (d + 1)) (fun k =>
-    Polynomial.monomial k ((Nat.choose d k : ℝ) / (Nat.choose (d + k) k : ℝ) *
-      taylorCoeff (n + k))))
+    Polynomial.monomial k ((Nat.choose d k : ℝ) * taylorCoeff (n + k))))
     |>.map (algebraMap ℝ ℂ)
 
 /-- A polynomial is hyperbolic if all its complex roots are real. -/
@@ -215,20 +218,54 @@ theorem jensen_degree_one_hyperbolic (n : ℕ)
     Hyperbolic (jensenPoly 1 n) := by
   have hp : jensenPoly 1 n =
       Polynomial.map (algebraMap ℝ ℂ)
-        (Polynomial.C (taylorCoeff n) + Polynomial.monomial 1 (2⁻¹ * taylorCoeff (n + 1))) := by
+        (Polynomial.C (taylorCoeff n) + Polynomial.monomial 1 (taylorCoeff (n + 1))) := by
     simp [jensenPoly, Finset.sum_range_succ, Nat.choose]
   rw [hp]
   exact real_affine_hyperbolic (by
     rcases h with h0 | h1
     · exact Or.inl h0
-    · exact Or.inr (mul_ne_zero (by norm_num) h1))
+    · exact Or.inr h1)
 
-/-- Degree 2: J_{2,n}(x) = γₙ + (2/3)γₙ₊₁ x + (1/6)γₙ₊₂ x² is hyperbolic
-    iff its discriminant is nonnegative:
-    2 γₙ₊₁² ≥ 3 γₙ γₙ₊₂. -/
+/-- Degree 2: J_{2,n}(x) = γₙ + 2γₙ₊₁ x + γₙ₊₂ x² is hyperbolic iff its
+    discriminant is nonnegative:
+    γₙ₊₁² ≥ γₙ γₙ₊₂   (log-concavity of the Taylor coefficients).
+    This is the d = 2 case of the higher Turán inequalities. -/
 theorem jensen_degree_two_hyperbolic_iff (n : ℕ) :
     Hyperbolic (jensenPoly 2 n) ↔
-      2 * taylorCoeff (n + 1) ^ 2 ≥ 3 * taylorCoeff n * taylorCoeff (n + 2) := by
+      taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2) := by
+  sorry
+
+/-- Differentiation identity for Jensen polynomials (Pólya–GORZ convention):
+    J'_{d+1,n} = (d+1)·J_{d,n+1}.  Proof: (k+1)·C(d+1,k+1) = (d+1)·C(d,k),
+    a pure binomial identity, plus Polynomial.derivative_monomial. -/
+theorem jensenPoly_derivative (d n : ℕ) :
+    (jensenPoly (d + 1) n).derivative =
+      Polynomial.C ((d + 1 : ℕ) : ℂ) * jensenPoly d (n + 1) := by
+  sorry
+
+/-- Rolle for polynomials: the derivative of a hyperbolic polynomial is
+    hyperbolic (the roots of p' interlace those of p).  This is the
+    classical fact that makes the shift reduction work. -/
+theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p) :
+    Hyperbolic p.derivative := by
+  sorry
+
+/-- PÓLYA'S SHIFT REDUCTION (Pólya 1927; GORZ 2019):
+    Hyperbolicity at shift n = 0 for every degree d implies hyperbolicity
+    for all shifts n, because J_{d,n} is a constant multiple of the n-th
+    derivative of J_{d+n,0} (by iterating `jensenPoly_derivative`) and
+    differentiation preserves hyperbolicity (by `derivative_hyperbolic`).
+    Hence RH ⟺ ∀ d, J_{d,0} is hyperbolic. -/
+theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
+    ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
+  sorry
+
+/-- THE SHIFT-REDUCED TRANSLATION: RH ⟺ hyperbolicity of the Jensen
+    polynomials at shift zero, for every degree d.
+    (Pólya 1927; Griffin–Ono–Rolen–Zagier 2019, "it would be enough to
+    show hyperbolicity for the J_{d,0}".) -/
+theorem rh_iff_jensen_zero :
+    RiemannHypothesisProp ↔ ∀ d : ℕ, Hyperbolic (jensenPoly d 0) := by
   sorry
 
 /-- The open leaf of `riemann hypothesis.lean` — tail nonvanishing of the

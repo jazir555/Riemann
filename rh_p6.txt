@@ -1,0 +1,11 @@
+﻿NormedSpace.expSeries_hasSum_exp_of_mem_ball'.{u_1, u_2} {𝕂 : Type u_1} {𝔸 : Type u_2} [NontriviallyNormedField 𝕂]
+  [NormedRing 𝔸] [NormedAlgebra 𝕂 𝔸] [CompleteSpace 𝔸] [CharZero 𝕂] (x : 𝔸)
+  (hx : x ∈ Metric.eball 0 (NormedSpace.expSeries 𝕂 𝔸).radius) :
+  HasSum (fun n => (↑n.factorial)⁻¹ • x ^ n) (NormedSpace.exp x)
+NormedSpace.expSeries_div_hasSum_exp_of_mem_ball.{u_1, u_2} (𝕂 : Type u_1) {𝔸 : Type u_2} [NontriviallyNormedField 𝕂]
+  [NormedDivisionRing 𝔸] [NormedAlgebra 𝕂 𝔸] [CharZero 𝕂] [CompleteSpace 𝔸] (x : 𝔸)
+  (hx : x ∈ Metric.eball 0 (NormedSpace.expSeries 𝕂 𝔸).radius) :
+  HasSum (fun n => x ^ n / ↑n.factorial) (NormedSpace.exp x)
+rh_probe6.lean:7:7: error(lean.unknownIdentifier): Unknown identifier `expSeries_radius_eq_top`
+NormedSpace.expSeries_radius_eq_top.{u_1, u_2} (𝕂 : Type u_1) (𝔸 : Type u_2) [NontriviallyNormedField 𝕂] [CharZero 𝕂]
+  [ContinuousSMul ℚ 𝕂] [NormedRing 𝔸] [NormedAlgebra 𝕂 𝔸] : (NormedSpace.expSeries 𝕂 𝔸).radius = ⊤
