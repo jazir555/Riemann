@@ -42,14 +42,14 @@ lemma termC_eq_term {n : ℕ} (hn : 0 < n) {s : ℝ} :
   rw [← intervalIntegral.integral_ofReal]
   apply intervalIntegral.integral_congr
   intro x hx
+  dsimp only []
   have hx0 : 0 ≤ x := by
     rw [Set.uIcc_of_le (by linarith : (n : ℝ) ≤ (n : ℝ) + 1)] at hx
     exact le_trans (by exact_mod_cast (Nat.zero_le n)) hx.1
   rw [show -((s : ℂ) + 1) = ((-(s + 1) : ℝ) : ℂ) by norm_num]
   rw [← Complex.ofReal_cpow hx0 (-(s + 1))]
   rw [Real.rpow_neg hx0]
-  rw [← Complex.ofReal_mul]
-  rw [← div_eq_mul_inv]
+  norm_cast
 
 /-- `termTSumC` agrees with `ZetaAsymptotics.termTSum` on the positive real axis. -/
 lemma termTSumC_eq_termTSum {s : ℝ} (_hs : 0 < s) :
@@ -132,7 +132,7 @@ lemma norm_termC'_integrand_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) {x : ℝ}
   have hlog : Complex.log (x : ℂ) = (Real.log x : ℂ) := (Complex.ofReal_log hxpos.le).symm
   rw [hlog]
   have h1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
-    rw [norm_neg, ← RCLike.ofReal_sub, RCLike.norm_ofReal,
+    rw [norm_neg, RCLike.norm_ofReal,
       abs_of_nonneg (sub_nonneg.mpr hx1)]
   have h2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
     rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]
@@ -164,7 +164,7 @@ lemma norm_termC_integrand_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) {x : ℝ}
     linarith
   rw [norm_mul]
   have h1 : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
-    rw [← RCLike.ofReal_sub, RCLike.norm_ofReal,
+    rw [RCLike.norm_ofReal,
       abs_of_nonneg (sub_nonneg.mpr hx1)]
   rw [h1]
   have h2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
@@ -199,11 +199,13 @@ lemma hasDerivAt_termC (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     exact (continuousOn_termC'_integrand n s).mono Set.Ioc_subset_Icc_self
   have hcontBound : ContinuousOn bound (Set.Icc a b) := by
     intro x hx
-    have hxpos : 0 < x := by linarith [hx.1]
+    have hxpos : 0 < x := by
+      have : 0 < (n + 1 : ℝ) := by positivity
+      linarith [hx.1]
     dsimp [bound]
-    refine ContinuousAt.mul (ContinuousAt.sub continuousAt_const continuousAt_const) ?_
-    refine ContinuousAt.mul ?_ (Real.continuousAt_log (by linarith : x ≠ 0))
-    · exact continuousAt_const.rpow continuousAt_id (Or.inr (by norm_num))
+    refine (ContinuousAt.mul (ContinuousAt.sub continuousAt_id continuousAt_const) ?_).continuousWithinAt
+    · refine ContinuousAt.mul ?_ (Real.continuousAt_log (by linarith : x ≠ 0))
+      · exact Real.continuousAt_rpow_const x (-(1 : ℝ)) (Or.inl (by linarith : x ≠ 0))
   have hbound_int : IntervalIntegrable bound volume a b := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
     exact ContinuousOn.integrableOn_Icc hcontBound |>.mono_set Set.Ioc_subset_Icc_self
@@ -211,29 +213,33 @@ lemma hasDerivAt_termC (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     refine ae_of_all volume (fun x hx => ?_)
     intro t ht
     have hx1 : (n + 1 : ℝ) ≤ x := by
-      rwa [Set.uIoc_of_le hA] at hx
+      rw [Set.uIoc_of_le hA] at hx
+      exact hx.1
     dsimp [F', bound]
-    exact norm_termC'_integrand_le n ht.1 hx1
+    exact norm_termC'_integrand_le n ht hx1
   have h_diff : ∀ᵐ x ∂volume, x ∈ Set.uIoc a b → ∀ t ∈ halfPlane,
       HasDerivAt (fun t => F t x) (F' t x) t := by
     refine ae_of_all volume (fun x hx => ?_)
     intro t ht
     have hx1 : 1 ≤ x := by
       have : (n + 1 : ℝ) ≤ x := by
-        rwa [Set.uIoc_of_le hA] at hx
+        rw [Set.uIoc_of_le hA] at hx
+        exact hx.1
+      have : 1 ≤ (n + 1 : ℝ) := by linarith
       linarith
     dsimp [F, F']
     simpa [Nat.cast_add, Nat.cast_one, add_comm] using hasDerivAt_termC_integrand (n + 1) hx1
   have h := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le (𝕜 := ℂ)
     (μ := volume) (a := a) (b := b) (bound := bound) hhalf_mem hF_meas hF_int hF'_meas h_bound
     hbound_int h_diff
+  dsimp only [F, F', a, b, termC, termC'] at h ⊢
   exact h.2
 
 /-- The norm of `termC (n+1)` at a point of the right half-plane. -/
 lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     ‖termC (n + 1) s‖ ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
   have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by linarith
-  simp only [termC]
+  rw [termC]
   calc
     ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
         ((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖
@@ -380,8 +386,8 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
                   (Complex.ofReal_log hxpos.le).symm
                 rw [hlog]
                 have hn1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
-                  rw [norm_neg, ← RCLike.ofReal_sub, RCLike.norm_ofReal,
-                    abs_of_nonneg (sub_nonneg.mpr hx.1)]
+  rw [norm_neg, RCLike.norm_ofReal,
+    abs_of_nonneg (sub_nonneg.mpr hx.1)]
                 have hn2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
                   rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]
                   rw [show (-(s + 1)).re = -(s.re + 1) by simp]
@@ -541,16 +547,10 @@ lemma analyticOnNhd_termTSum_real : AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (
 /-- For real `s` with `s ≠ 1`, `riemannZeta₀ (s : ℂ)` has the expected real part. -/
 lemma riemannZeta₀_re_of_real {s : ℝ} (hs : s ≠ 1) :
     (riemannZeta₀ (s : ℂ)).re = (riemannZeta (s : ℂ)).re - 1 / (s - 1) := by
-  unfold riemannZeta₀
-  rw [if_neg (by exact_mod_cast hs : (s : ℂ) ≠ 1)]
-  simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.normSq_apply,
-    sub_zero, mul_zero, add_zero]
-  have hsne : s - 1 ≠ 0 := sub_ne_zero.mpr hs
-  rw [show (s : ℂ) - 1 = ((s - 1 : ℝ) : ℂ) from (Complex.ofReal_sub s 1).symm]
-  simp only [Complex.ofReal_re, Complex.normSq_apply, sub_zero,
-    mul_zero, add_zero, hsne, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-    div_pow, mul_div_cancel₀ _ hsne, mul_one]
-  field_simp [hsne]
+  rw [riemannZeta₀, if_neg (by exact_mod_cast hs : (s : ℂ) ≠ 1)]
+  rw [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, normSq_of_real]
+  rw [pow_two (s - 1)]
+  rw [div_mul_cancel (s - 1) (sub_ne_zero.mpr hs)]
 
 /-- For `s > 1`, the identity holds (algebraically, via the Dirichlet series). -/
 lemma riemannZeta₀_eq_one_sub_mul_termTSum_of_gt {s : ℝ} (hs : 0 < s) (hs1 : 1 < s) :
