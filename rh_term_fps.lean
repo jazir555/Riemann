@@ -24,6 +24,12 @@ noncomputable def termFPScoeff (n : ℕ) (s₀ : ℝ) (k : ℕ) : ℝ :=
 noncomputable def termFPS (n : ℕ) (s₀ : ℝ) : FormalMultilinearSeries ℝ ℝ ℝ :=
   fun k => (termFPScoeff n s₀ k) • (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin k) ℝ)
 
+/-- The `k`-th coefficient of `termFPS n s₀` equals `termFPScoeff n s₀ k`. -/
+lemma termFPS_coeff (n : ℕ) (s₀ : ℝ) (k : ℕ) :
+    (termFPS n s₀).coeff k = termFPScoeff n s₀ k := by
+  simp [termFPS, FormalMultilinearSeries.coeff, ContinuousMultilinearMap.mkPiAlgebra_apply,
+    Finset.prod_const_one, smul_eq_mul, mul_one]
+
 /-- `x ^ (-y) = 1 / x ^ y` for `0 ≤ x`. -/
 lemma rpow_neg_eq_one_div' {x : ℝ} (hx : 0 ≤ x) (y : ℝ) : x ^ (-y) = 1 / x ^ y := by
   rw [rpow_neg hx, one_div]
@@ -180,13 +186,18 @@ lemma hasFPowerSeriesAt_term_succ (n : ℕ) {s₀ : ℝ} (hs₀ : 0 < s₀) :
       hF_meas h_bound bound_summable bound_integrable h_lim
     have hterm : (∫ x in c..(c + 1), f x) = term (n + 1) (s₀ + y) := by
       dsimp [f, c]
-      rw [term]
+      rw [term, Nat.cast_succ]
     have hcoeff : ∀ k, (∫ x in c..(c + 1), F k x) = termFPScoeff n s₀ k * y ^ k := by
       intro k
-      dsimp [F, termFPScoeff, c]
-      rw [intervalIntegral.integral_const_mul]
-      congr 1
-      field_simp [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)]
+      dsimp [F, c]
+      rw [show termFPScoeff n s₀ k =
+            (-1) ^ k / ↑k.factorial * ∫ x in (↑n + 1)..(↑n + 1 + 1),
+              (x - (↑n + 1)) * log x ^ k * x ^ (-(s₀ + 1)) by
+          simp only [termFPScoeff]; norm_cast]
+      simp_rw [show ∀ (x : ℝ), (x - (↑n + 1)) * x ^ (-(s₀ + 1)) * (-1) ^ k * log x ^ k / ↑k.factorial * y ^ k =
+            (y ^ k * ((-1) ^ k / ↑k.factorial)) * ((x - (↑n + 1)) * log x ^ k * x ^ (-(s₀ + 1))) by
+          intro x; ring,
+        intervalIntegral.integral_const_mul]
       ring
     rw [← hterm]
     exact hsum.congr_fun (fun k => (hcoeff k).symm)
@@ -194,8 +205,8 @@ lemma hasFPowerSeriesAt_term_succ (n : ℕ) {s₀ : ℝ} (hs₀ : 0 < s₀) :
   filter_upwards [Metric.ball_mem_nhds 0 hρ] with z hz
   have hz_abs : |z| < ρ := by
     simpa [Metric.mem_ball, Real.dist_eq] using hz
-  simpa [termFPS, FormalMultilinearSeries.apply_eq_pow_smul_coeff, mul_comm, mul_left_comm,
-    mul_assoc, smul_eq_mul] using hmain (y := z) hz_abs
+  simpa [termFPS, termFPS_coeff, FormalMultilinearSeries.apply_eq_pow_smul_coeff, mul_comm,
+    mul_left_comm, mul_assoc, smul_eq_mul] using hmain (y := z) hz_abs
 
 /-- `term (n+1)` is real-analytic on `(0, ∞)`. -/
 lemma analyticOnNhd_term_succ (n : ℕ) :
