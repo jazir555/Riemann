@@ -300,8 +300,8 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
       (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
     rw [intervalIntegral.integral_const, smul_eq_mul]
     ring_nf
-    norm_num
   rw [h3] at h2
+  norm_cast at *
   linarith [h1, h2]
 
 /-- `termTSumC` is differentiable on the right half-plane. -/
