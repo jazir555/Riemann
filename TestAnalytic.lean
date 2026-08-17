@@ -256,7 +256,53 @@ but not syntactically identical, causing `exact`/`change`/`show` to fail.
 /-- The norm of `termC (n+1)` at a point of the right half-plane. -/
 lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
     ‖termC (n + 1) s‖ ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
-  sorry
+  unfold termC
+  have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by norm_num
+  have h1 : ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ :=
+    intervalIntegral.norm_integral_le_integral_norm hA
+  have hbound : ∀ x, x ∈ Set.uIoc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1) →
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    intro x hx
+    have hx1 : (n + 1 : ℝ) ≤ x := by rw [Set.uIoc_of_le hA] at hx; exact hx.1.le
+    have hxpos : 0 < x := by
+      have : 0 < (n + 1 : ℝ) := by positivity
+      exact lt_of_lt_of_le this hx1
+    have h1 : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+      have : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = |x - (n + 1 : ℝ)| := by norm_cast
+      rw [this]
+      exact abs_of_nonneg (by linarith)
+    have h2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]; simp
+    rw [norm_mul, h1, h2]
+    have hpow : x ^ (-(s.re + 1)) ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+      exact rpow_le_rpow_of_nonpos (by positivity : 0 < (n + 1 : ℝ)) hx1 (by linarith [hs])
+    have h5 : (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+      have h6 : (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(s.re + 1)) :=
+        mul_le_mul_of_nonneg_left hpow (by linarith)
+      have h7 : x - (n + 1 : ℝ) ≤ 1 := by
+        have : x ≤ (n + 1 : ℝ) + 1 := by
+          rw [Set.uIoc_of_le hA] at hx; exact hx.2
+        linarith
+      have h8 : (n + 1 : ℝ) ^ (-(s.re + 1)) ≥ 0 := rpow_nonneg (by positivity) _
+      calc (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1))
+        ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(s.re + 1)) := h6
+      _ ≤ 1 * (n + 1 : ℝ) ^ (-(s.re + 1)) := mul_le_mul_of_nonneg_right h7 h8
+      _ = (n + 1 : ℝ) ^ (-(s.re + 1)) := one_mul _
+    exact h5
+  have h2 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖) ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    sorry
+  have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    rw [intervalIntegral.integral_const, smul_eq_mul]
+    ring_nf
+    norm_num
+  rw [h3] at h2
+  linarith [h1, h2]
 
 /-- `termTSumC` is differentiable on the right half-plane. -/
 lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
