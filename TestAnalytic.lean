@@ -352,9 +352,8 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
           mul_le_mul_of_nonneg_left hlog hnonneg
       _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * ((2 * (↑n + 1)) ^ (σ / 4) / (σ / 4)) := by
         apply mul_le_mul_of_nonneg_left _ hnonneg
-        have hpow2 : 0 < σ / 4 := by linarith [hσpos]
-        have hmain : (↑n + 2 : ℝ) ^ (σ / 4) ≤ (2 * (↑n + 1 : ℝ)) ^ (σ / 4) := hpow
-        sorry
+        rw [div_eq_mul_inv, div_eq_mul_inv]
+        exact mul_le_mul_of_nonneg_right hpow (inv_nonneg.mpr (le_of_lt (by linarith [hσpos])))
       _ = (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * (2 ^ (σ / 4) * (↑n + 1) ^ (σ / 4) / (σ / 4)) := by rw [h2]
       _ = (n + 1 : ℝ) ^ (-(σ / 4 + 1)) * (2 ^ (σ / 4) / (σ / 4)) := by
         rw [← hpow2]; ring
@@ -363,12 +362,6 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
   have hg0 : Summable (fun n : ℕ => termC (n + 1) s) := by
     refine Summable.of_norm_bounded (hsum_pow (-(σ + 1)) (by linarith [hσpos])) (fun n => ?_)
     simpa [σ] using norm_termC_le n hs
-  have hterm' : ∀ n : ℕ, ‖termC' (n + 1) s‖ ≤ u n := by
-    intro n
-    dsimp [u]
-    have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by linarith
-    simp only [termC']
-    sorry
   have hg : ∀ n y, y ∈ t → HasDerivAt (fun z : ℂ => termC (n + 1) z) (termC' (n + 1) y) y := by
     intro n y hy
     have hypos : 0 < y.re := by
@@ -380,7 +373,7 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
     have hyre : σ / 2 < y.re := by dsimp [t] at hy; exact hy
     have hypos : 0 < y.re := by linarith [hσpos]
     have hbound_s : ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
-      sorry -- derivative bound proof
+      sorry
     have hle : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
       push_cast
       exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
