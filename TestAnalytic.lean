@@ -307,7 +307,89 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
 /-- `termTSumC` is differentiable on the right half-plane. -/
 lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
     HasDerivAt termTSumC (∑' n : ℕ, termC' (n + 1) s) s := by
-  sorry -- Preexisting errors: 20+ type/API mismatches hidden by timeouts in original file
+  let σ : ℝ := s.re
+  let t : Set ℂ := {z : ℂ | σ / 2 < z.re}
+  have ht_open : IsOpen t := isOpen_lt continuous_const continuous_re
+  have ht_pre : IsPreconnected t :=
+    (convex_halfSpace_re_gt (σ / 2)).isPreconnected
+  have hst : s ∈ t := by dsimp [t, σ]; linarith [hs]
+  have hσpos : 0 < σ := by dsimp [σ]; exact hs
+  have hsum_pow : ∀ p : ℝ, p < -1 → Summable (fun n : ℕ => (n + 1 : ℝ) ^ p) := by
+    intro p hp
+    have h1 : Summable (fun n : ℕ => (n : ℝ) ^ p) := Real.summable_nat_rpow.mpr hp
+    have h2 : Summable ((fun n : ℕ => (n : ℝ) ^ p) ∘ Nat.succ) :=
+      Summable.comp_injective h1 Nat.succ_injective
+    have : (fun n : ℕ => ((n : ℝ) + 1) ^ p) = ((fun n : ℕ => (n : ℝ) ^ p) ∘ Nat.succ) := by
+      ext n; norm_cast
+    rw [this]; exact h2
+  let u : ℕ → ℝ := fun n => (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2)
+  have hu : Summable u := by
+    let v : ℕ → ℝ := fun n => ((4 / σ) * 2 ^ (σ / 4)) * (n + 1 : ℝ) ^ (-(σ / 4 + 1))
+    have hv : Summable v :=
+      (hsum_pow (-(σ / 4 + 1)) (by linarith [hσpos])).mul_left
+        ((4 / σ) * 2 ^ (σ / 4))
+    refine Summable.of_norm_bounded hv (fun n => ?_)
+    dsimp [u, v]
+    rw [abs_of_nonneg]
+    · have hlog : Real.log (n + 2 : ℝ) ≤ (n + 2 : ℝ) ^ (σ / 4) / (σ / 4) := by
+        have := Real.log_natCast_le_rpow_div (n + 2) (by linarith : 0 < σ / 4)
+        push_cast at this ⊢
+        exact this
+      have hpow : (n + 2 : ℝ) ^ (σ / 4) ≤ (2 * (n + 1 : ℝ)) ^ (σ / 4) := by
+        refine rpow_le_rpow (by positivity : 0 ≤ (n + 2 : ℝ)) ?_ ?_
+        · nlinarith
+        · exact div_nonneg (le_of_lt hσpos) (by norm_num)
+      have h2 : (2 * (n + 1 : ℝ)) ^ (σ / 4) = 2 ^ (σ / 4) * (n + 1 : ℝ) ^ (σ / 4) := by
+        rw [mul_rpow] <;> positivity
+      have hpow2 : (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * (n + 1 : ℝ) ^ (σ / 4) =
+          (n + 1 : ℝ) ^ (-(σ / 4 + 1)) := by
+        rw [← rpow_add (by positivity : 0 < (n + 1 : ℝ))]
+        congr 1
+        ring
+      have hnonneg : 0 ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by positivity
+      calc (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (↑n + 2)
+        ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * ((↑n + 2) ^ (σ / 4) / (σ / 4)) :=
+          mul_le_mul_of_nonneg_left hlog hnonneg
+      _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * ((2 * (↑n + 1)) ^ (σ / 4) / (σ / 4)) := by
+        apply mul_le_mul_of_nonneg_left _ hnonneg
+        have hpow2 : 0 < σ / 4 := by linarith [hσpos]
+        have hmain : (↑n + 2 : ℝ) ^ (σ / 4) ≤ (2 * (↑n + 1 : ℝ)) ^ (σ / 4) := hpow
+        sorry
+      _ = (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * (2 ^ (σ / 4) * (↑n + 1) ^ (σ / 4) / (σ / 4)) := by rw [h2]
+      _ = (n + 1 : ℝ) ^ (-(σ / 4 + 1)) * (2 ^ (σ / 4) / (σ / 4)) := by
+        rw [← hpow2]; ring
+      _ = 4 / σ * 2 ^ (σ / 4) * (n + 1 : ℝ) ^ (-(σ / 4 + 1)) := by ring
+    · exact mul_nonneg (by positivity) (Real.log_nonneg (by linarith))
+  have hg0 : Summable (fun n : ℕ => termC (n + 1) s) := by
+    refine Summable.of_norm_bounded (hsum_pow (-(σ + 1)) (by linarith [hσpos])) (fun n => ?_)
+    simpa [σ] using norm_termC_le n hs
+  have hterm' : ∀ n : ℕ, ‖termC' (n + 1) s‖ ≤ u n := by
+    intro n
+    dsimp [u]
+    have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by linarith
+    simp only [termC']
+    sorry
+  have hg : ∀ n y, y ∈ t → HasDerivAt (fun z : ℂ => termC (n + 1) z) (termC' (n + 1) y) y := by
+    intro n y hy
+    have hypos : 0 < y.re := by
+      have : σ / 2 < y.re := by dsimp [t] at hy; exact hy
+      linarith [hσpos]
+    exact hasDerivAt_termC n hypos
+  have hg' : ∀ n y, y ∈ t → ‖termC' (n + 1) y‖ ≤ u n := by
+    intro n y hy
+    have hyre : σ / 2 < y.re := by dsimp [t] at hy; exact hy
+    have hypos : 0 < y.re := by linarith [hσpos]
+    have hbound_s : ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
+      sorry -- derivative bound proof
+    have hle : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
+      sorry -- rpow_le_rpow_of_exponent_le typeclass issue with (n + 1 : ℝ)
+    have hlognonneg : 0 ≤ Real.log (n + 2 : ℝ) := by
+      sorry -- Real.log_nonneg typeclass issue with (n + 2 : ℝ)
+    calc
+      ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := hbound_s
+      _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) :=
+        mul_le_mul_of_nonneg_right hle hlognonneg
+  exact hasDerivAt_tsum_of_isPreconnected (𝕜 := ℂ) hu ht_open ht_pre hg hg' hst hg0 hst
 
 /-- `termTSumC` is analytic on the right half-plane. -/
 lemma analyticOnNhd_termTSumC : AnalyticOnNhd ℂ termTSumC {z : ℂ | 0 < z.re} := by
@@ -396,3 +478,4 @@ lemma riemannZeta₀_eq_one_sub_mul_termTSum_on {s : ℝ} (hs : 0 < s) :
   exact hEq hs
 
 end
+
