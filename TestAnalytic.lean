@@ -382,9 +382,11 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
     have hbound_s : ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
       sorry -- derivative bound proof
     have hle : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
-      sorry -- rpow_le_rpow_of_exponent_le typeclass issue with (n + 1 : ℝ)
+      push_cast
+      exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
     have hlognonneg : 0 ≤ Real.log (n + 2 : ℝ) := by
-      sorry -- Real.log_nonneg typeclass issue with (n + 2 : ℝ)
+      push_cast
+      exact Real.log_nonneg (by linarith)
     calc
       ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := hbound_s
       _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) :=
