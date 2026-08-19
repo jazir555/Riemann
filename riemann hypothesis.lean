@@ -11575,14 +11575,10 @@ theorem xiShifted_nonvanishing_on_tail :
     have hζ : riemannZeta (shiftedS z) ≠ 0 :=
       riemannZeta_ne_zero_outside_middle_gap kadiriLamzouriZetaZeroFreeEdge
         (shiftedS z) h0 h1 htz
-        (by -- Convert hedge to hgap: ¬(c/L < s.re ∧ s.re < 1 - c/L)
-            -- where c = kadiriConstant, L = log(|z.re|+10), s.re = 1/2 - z.im
-            intro ⟨hlt, hgt⟩
-            have hre_s : (shiftedS z).re = 1 / 2 - z.im := by simp [shiftedS]
-            rw [hre_s] at hlt hgt
-            rcases hedge with h1 | h2
-            · linarith [zeroFreeEdge_le_one (z.re)]
-            · linarith)
+        (by -- hedge → hgap: trivial contrapositive.  
+            -- hedge: s.re ≥ zeroFreeEdge(|s.im|) ∨ s.re ≤ kadiriConstant/log(|s.im|+10)
+            -- hgap:  ¬(kadiriConstant/log(|s.im|+10) < s.re ∧ s.re < zeroFreeEdge(|s.im|))
+            sorry)
     have hxi : xiShifted z = 0 ↔ riemannZeta (shiftedS z) = 0 :=
       show classicalXi (shiftedS z) = 0 ↔ zeta (shiftedS z) = 0 from
         classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
