@@ -295,12 +295,12 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
   have h2 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
       ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖) ≤
       ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (n + 1 : ℝ) ^ (-(s.re + 1)) := by
-    apply intervalIntegral.integral_mono hA
+    refine intervalIntegral.integral_mono_on hA ?_ ?_ (fun x hx => ?_)
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
       exact (continuous_norm.comp_continuousOn (continuousOn_termC_integrand n s)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
       exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-    · sorry
+    · exact hbound x (by rw [show Set.Ioc _ _ = Set.uIoc _ _ from (Set.uIoc_of_le hA).symm]; exact hx)
   have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
       (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
     rw [intervalIntegral.integral_const, smul_eq_mul]
