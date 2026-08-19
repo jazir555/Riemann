@@ -388,21 +388,13 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
         ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
           ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ :=
       intervalIntegral.norm_integral_le_integral_norm hA
-    have hbnd : ∀ x ∈ Set.Icc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1),
+    have hbnd : ∀ x, (n + 1 : ℝ) ≤ x → x ≤ (n + 1 : ℝ) + 1 →
         ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
           (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
-      intro x hx
-      have hx1 : (n + 1 : ℝ) ≤ x := hx.1
-      have hx2 : x ≤ (n + 1 : ℝ) + 1 := hx.2
+      intro x hx1 hx2
       by_cases heq : x = n + 1
-      · subst heq
-        simp only [sub_self, zero_mul, norm_zero]
-        positivity
-      · have hx1' : (n + 1 : ℝ) < x := lt_of_le_of_ne hx1 (Ne.symm heq)
-        have hxIoc : x ∈ Set.uIoc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1) := by
-          rw [Set.uIoc_of_le hA]; exact ⟨hx1', hx2⟩
-      have hx2 : x ≤ (n + 1 : ℝ) + 1 := by
-        rw [Set.uIoc_of_le hA] at hx; exact hx.2
+      · subst heq; simp [neg_zero, zero_mul, norm_zero]; exact mul_nonneg (rpow_nonneg (by positivity) _) (Real.log_nonneg (by linarith [Nat.le_add_left 1 n]))
+      have hx1' : (n + 1 : ℝ) < x := lt_of_le_of_ne hx1 (Ne.symm heq)
       have hxpos : 0 < x := by
         have h : 0 < (n + 1 : ℝ) := by positivity
         linarith
@@ -418,8 +410,8 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
           ‖(Real.log x : ℂ)‖ = |Real.log x| := RCLike.norm_ofReal (Real.log x)
           _ = Real.log x := abs_of_nonneg (Real.log_nonneg hxge1)
       rw [norm_mul, norm_mul, h1, h2, h3]
-      have hpow_le : x ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) := by
-        exact rpow_le_rpow_of_nonpos (by positivity) hx1 (by linarith)
+      have hpow_le : x ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) :=
+        rpow_le_rpow_of_nonpos (by positivity) hx1 (by linarith)
       have hpow2 : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
         apply rpow_le_rpow_of_exponent_le _ (by linarith)
         linarith [Nat.le_succ n]
@@ -445,13 +437,12 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
         exact (continuous_norm.comp_continuousOn (continuousOn_termC'_integrand n y)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
       · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
         exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-      · exact hbnd x (Set.Ioc_subset_uIoc ⟨lt_of_le_of_ne hx.1 (by intro heq; subst heq; simp [norm_zero, mul_zero]; positivity), hx.2⟩)
-    have hconst :
-        ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
-          (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) ≤
-        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
-      rw [intervalIntegral.integral_const, smul_eq_mul]; ring_nf
-    linarith [hnorm, hint, hconst]
+      · exact hbnd x hx.1 hx.2
+    have hconst : ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) ≤
+      (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      rw [intervalIntegral.integral_const]; simp [smul_eq_mul, mul_one]
+    exact_mod_cast le_trans hnorm (le_trans hint hconst)
   exact hasDerivAt_tsum_of_isPreconnected (𝕜 := ℂ) hu ht_open ht_pre hg hg' hst hg0 hst
 
 /-- `termTSumC` is analytic on the right half-plane. -/
