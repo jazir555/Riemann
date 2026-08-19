@@ -11569,8 +11569,24 @@ theorem xiShifted_nonvanishing_on_tail :
   by_cases hedge :
       (1 / 2 : ℝ) - z.im ≥ zeroFreeEdge (z.re) ∨
       (1 / 2 : ℝ) - z.im ≤ kadiriConstant / Real.log (|z.re| + 10)
-  · -- Edge strip: zero-free region covers this region via kadiriLamzouriZetaZeroFreeEdge
-    sorry
+  · -- Edge strip: s = shiftedS z = 1/2 + i·z satisfies
+    --   s.re = 1/2 - z.im  (via shiftedS_re)
+    --   s.im = z.re         (by computation)
+    -- hedge is exactly: s.re ≥ zeroFreeEdge(s.im) ∨ s.re ≤ kadiriConstant/log(|s.im|+10)
+    set s := shiftedS z with hs_def
+    have hs_re : s.re = 1 / 2 - z.im := shiftedS_re z
+    have hs_im : s.im = z.re := by
+      show ((1 / 2 : ℂ) + I * z).im = z.re
+      simp [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+    have hs0 : 0 < s.re := by rw [hs_re]; linarith
+    have hs1 : s.re < 1 := by rw [hs_re]; linarith
+    have htim : 10 ≤ |s.im| := by rw [hs_im]; linarith
+    have hζ : riemannZeta s ≠ 0 :=
+      riemannZeta_ne_zero_near_edges kadiriLamzouriZetaZeroFreeEdge s hs0 hs1 htim
+        (by rw [hs_re, hs_im]; exact hedge)
+    have hxi : xiShifted z = 0 ↔ riemannZeta s = 0 := by
+      exact classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip s hs0 hs1
+    exact fun h => hζ (hxi.mp h)
   · -- Middle gap: `z.im` is close to 0, so `re(shiftedS z)` lies in the
     -- critical-strip middle where the zero-free region does not reach.  This
     -- is equivalent to RH for `|Im s| > 10`; it is the deep research target and
