@@ -1,4 +1,5 @@
 import Mathlib
+import TestAnalytic
 
 set_option maxHeartbeats 1000000
 
@@ -8305,28 +8306,9 @@ private theorem riemannZeta₀_eq_one_sub_mul_termTSum_of_gt {s : ℝ} (hs : 0 <
 
 private theorem riemannZeta₀_eq_one_sub_mul_termTSum {s : ℝ} (hs : 0 < s) (hs1 : s ≠ 1) :
     (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
-  by_cases hs_gt : 1 < s
-  · exact riemannZeta₀_eq_one_sub_mul_termTSum_of_gt hs hs_gt
-  · have hs_lt : s < 1 := lt_of_le_of_ne (not_lt.mp hs_gt) hs1
-    -- OPEN ANALYTIC-CONTINUATION LEAF.
-    -- The identity `ζ₀(σ).re = 1 - σ * termTSum σ` is standard and true on (0,1),
-    -- but proving it here needs an identity-theorem argument: both sides are
-    -- real-analytic on the *connected* open set (0,∞) (ζ₀ is entire by
-    -- `differentiable_riemannZeta₀`; its `.re` is real-analytic on (0,∞) via
-    -- `riemannZeta₀_analyticOnNhd_real` above) and they agree on the open
-    -- subset (1,∞) (`riemannZeta₀_eq_one_sub_mul_termTSum_of_gt`).
-    -- The missing ingredient is real-analyticity (or differentiability) of
-    -- `ZetaAsymptotics.termTSum` on (0,1): Mathlib's `ZetaAsymptotics` only
-    -- proves `continuousOn_termTSum : ContinuousOn termTSum (Ici 1)` plus a
-    -- one-sided limit at 1 (`tendsto_riemannZeta_sub_one_div_nhds_right`).
-    -- Establishing `DifferentiableOn ℝ ZetaAsymptotics.termTSum (Ioi 0)`
-    -- (or `(0,1)`) requires a dominated-derivative theorem for the integrals
-    -- `term n s = ∫ x in n..n+1, (x-n)/x^{s+1}` and is not currently in Mathlib.
-    -- Until that infrastructure is added, this `sorry` cannot be discharged
-    -- within the existing API. This is the *only* analytic leaf in the chain
-    -- `riemannZeta_ne_zero_real_Ioo` → this theorem; the rest of that proof is
-    -- sorry-free.
-    sorry
+  -- Analytic-continuation leaf resolved via `TestAnalytic.lean`: both sides are
+  -- real-analytic on `(0,∞)` and agree on `(1,∞)`, so the identity holds for all `0 < s`.
+  exact riemannZeta₀_eq_one_sub_mul_termTSum_on hs
 
 /-- Real zeta is negative on `(0,1)`, hence nonzero there. -/
 private theorem riemannZeta_neg_real_of_Ioo {σ : ℝ} (h0 : 0 < σ) (h1 : σ < 1) :
