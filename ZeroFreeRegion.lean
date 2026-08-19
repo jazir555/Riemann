@@ -1,4 +1,4 @@
-import Mathlib
+import ZeroFreeRegionProof
 
 open Complex Real Topology Filter
 open scoped BigOperators
@@ -19,23 +19,7 @@ theorem trig_inequality (θ : ℝ) :
   rw [hsq]
   exact mul_nonneg (by norm_num) (sq_nonneg _)
 
-/-- Kadiri–Lamzouri constant used in the explicit zero-free region. -/
-def kadiriConstant : ℝ := 1 / 57.54
-
-theorem kadiriConstant_pos : 0 < kadiriConstant := by
-  unfold kadiriConstant
-  exact div_pos zero_lt_one (by norm_num)
-
-/-- The zero-free edge σ = 1 - c / log(|t| + 10). -/
-def zeroFreeEdge (t : ℝ) : ℝ :=
-  1 - kadiriConstant / Real.log (|t| + 10)
-
-theorem zeroFreeEdge_lt_one (t : ℝ) : zeroFreeEdge t < 1 := by
-  unfold zeroFreeEdge
-  apply sub_lt_self
-  apply div_pos kadiriConstant_pos
-  apply Real.log_pos
-  linarith [abs_nonneg t]
+-- kadiriConstant and zeroFreeEdge are now imported from ZeroFreeRegionProof
 
 /-- Correct conditional zero-free statement.
 
