@@ -9,9 +9,14 @@ open scoped LSeries.notation
 
 noncomputable section
 
-/-- Kadiri–Lamzouri zero-free region for ζ.
-    All building blocks are sorry-free in the codebase; remaining sorrys are
-    the assembly glue (zero enumeration, 3/4/1 bound, h_c via private kadiri_L₀). -/
+/-- The Kadiri numerical bridge: 1/57.54 < 2/95. -/
+private theorem kadiri_numerical_bridge :
+    (1 : ℝ) / 57.54 < 2 / 95 := by
+  norm_num
+
+/-- kadiriLamzouriZetaZeroFreeEdge: ζ(s) ≠ 0 when |Im s| ≥ 1 and
+    Re s ≥ 1 - (1/57.54)/log(|Im s|+10).  The sole remaining assembly gap is
+    the Hadamard decomposition (zero enumeration + 3/4/1 bound). -/
 theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
     (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 := by
   sorry
