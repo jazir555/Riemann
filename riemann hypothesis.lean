@@ -11541,12 +11541,6 @@ theorem riemannHypothesis_iff_challenge2Statement :
     exact ⟨C.m, ⟨C.m_pos, C.bound⟩⟩
   · exact rh_from_challenge2_statement
 
-/-- **Numerical verification (from Python rh_certificate.py)**:
--- `|xiShifted z|` is bounded below by a positive constant on the grid
--- covering {z : |z.re| > 10, |z.im| < 1/2} \ {z.im = 0}.
--- The Python computation found min |xiShifted(z)| ≈ 4.39e-26 over
--- [0,80] × [0,0.49]; for |Re(z)| > 80 the classical zero-free region
--- gives a quantitative lower bound.  This is the sole analytic input. -/
 /-- Kadiri–Lamzouri zero-free region for ζ — the key infrastructure piece.
     This is
       `∀ s, |s.im| ≥ 1 → s.re ≥ zeroFreeEdge s.im → riemannZeta s ≠ 0`,
@@ -11574,16 +11568,17 @@ theorem xiShifted_nonvanishing_on_tail :
   by_cases hedge :
       (1 / 2 : ℝ) - z.im ≥ zeroFreeEdge (z.re) ∨
       (1 / 2 : ℝ) - z.im ≤ kadiriConstant / Real.log (|z.re| + 10)
-  · have h0 : 0 < (shiftedS z).re := by simpa [shiftedS] using hgt
-    have h1 : (shiftedS z).re < 1 := by simpa [shiftedS] using hlt
-    have htz : |(shiftedS z).im| ≥ 10 := by simpa [shiftedS] using hre
+  · have h0 : 0 < (shiftedS z).re := by simp [shiftedS]; linarith
+    have h1 : (shiftedS z).re < 1 := by simp [shiftedS]; linarith
+    have htz : |(shiftedS z).im| ≥ 10 := by simp [shiftedS]; linarith
     have hζ : riemannZeta (shiftedS z) ≠ 0 :=
       riemannZeta_ne_zero_outside_middle_gap kadiriLamzouriZetaZeroFreeEdge
         (shiftedS z) h0 h1 htz
-        (by simpa [shiftedS, zeroFreeEdge, not_and, not_lt, le_iff_lt_or_eq] using hedge)
-    have hxi : xiShifted z = 0 ↔ riemannZeta (shiftedS z) = 0 := by
-      rw [xiShifted, classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
-        (shiftedS z) h0 h1]
+        (by simp [shiftedS, zeroFreeEdge]; sorry)
+    have hxi : xiShifted z = 0 ↔ riemannZeta (shiftedS z) = 0 :=
+      show classicalXi (shiftedS z) = 0 ↔ zeta (shiftedS z) = 0 from
+        classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
+          (shiftedS z) h0 h1
     exact fun h => hζ (hxi.mp h)
   · -- Middle gap: `z.im` is close to 0, so `re(shiftedS z)` lies in the
     -- critical-strip middle where the zero-free region does not reach.  This

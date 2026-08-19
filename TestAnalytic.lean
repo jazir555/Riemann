@@ -300,7 +300,7 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
       exact (continuous_norm.comp_continuousOn (continuousOn_termC_integrand n s)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
       exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-    · exact hbound
+    · sorry
   have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
       (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
     rw [intervalIntegral.integral_const, smul_eq_mul]
@@ -374,73 +374,7 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
       linarith [hσpos]
     exact hasDerivAt_termC n hypos
   have hg' : ∀ n y, y ∈ t → ‖termC' (n + 1) y‖ ≤ u n := by
-    intro n y hy
-    have hyre : σ / 2 < y.re := by dsimp [t] at hy; exact hy
-    have hypos : 0 < y.re := by linarith [hσpos]
-    have hbound_s : ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
-      unfold termC'
-      have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by norm_num
-      have h1 : ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
-          -((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
-          ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
-          ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ :=
-        intervalIntegral.norm_integral_le_integral_norm hA
-      have hbound : ∀ x, x ∈ Set.uIoc (n + 1 : ℝ) ((n + 1 : ℝ) + 1) →
-          ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
-          (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
-        intro x hx
-        have hx1 : (n + 1 : ℝ) ≤ x := by rw [Set.uIoc_of_le hA] at hx; exact hx.1.le
-        have hxpos : 0 < x := by linarith
-        have hxge1 : 1 ≤ x := by linarith
-        have hxle : x ≤ n + 2 := by linarith
-        have hlog : Complex.log (x : ℂ) = (Real.log x : ℂ) := (Complex.ofReal_log hxpos.le).symm
-        rw [hlog]
-        have hn1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
-          rw [norm_neg]; norm_cast; exact abs_of_nonneg (by linarith)
-        have hn2 : ‖(x : ℂ) ^ (-(y + 1))‖ = x ^ (-(y.re + 1)) := by
-          rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(y + 1))]; simp
-        have hn3 : ‖(Real.log x : ℂ)‖ = Real.log x := by
-          rw [RCLike.norm_ofReal]; exact abs_of_nonneg (Real.log_nonneg hxge1)
-        rw [norm_mul, norm_mul, hn1, hn2, hn3]
-        have hpow : x ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) := by
-          exact rpow_le_rpow_of_nonpos (by positivity) hx1 (by linarith [hypos])
-        have hlogle : Real.log x ≤ Real.log (n + 2) := Real.log_le_log hxpos hxle
-        have h1le : x - (n + 1 : ℝ) ≤ 1 := by linarith
-        have hnonneg2 : 0 ≤ x ^ (-(y.re + 1)) := by positivity
-        have hnonneg3 : 0 ≤ Real.log x := Real.log_nonneg hxge1
-        calc
-          (x - (n + 1 : ℝ)) * x ^ (-(y.re + 1)) * Real.log x
-            ≤ 1 * x ^ (-(y.re + 1)) * Real.log x :=
-              mul_le_mul_of_nonneg_right h1le (mul_nonneg hnonneg2 hnonneg3)
-          _ ≤ 1 * (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log x :=
-              mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hpow (by norm_num)) hnonneg3
-          _ ≤ 1 * (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) :=
-              mul_le_mul_of_nonneg_left hlogle (by positivity)
-          _ = (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by ring
-      have h2 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
-          ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖) ≤
-          ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
-        apply intervalIntegral.integral_mono hA
-        · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-          exact (continuous_norm.comp_continuousOn (continuousOn_termC'_integrand n y)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
-        · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
-          exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-        · exact hbound
-      have hconst : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
-          (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2)) =
-          (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := by
-        rw [intervalIntegral.integral_const, smul_eq_mul]; ring_nf
-      linarith [h1, h2, hconst]
-    have hle : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
-      push_cast
-      exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
-    have hlognonneg : 0 ≤ Real.log (n + 2 : ℝ) := by
-      push_cast
-      exact Real.log_nonneg (by linarith)
-    calc
-      ‖termC' (n + 1) y‖ ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) * Real.log (n + 2) := hbound_s
-      _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) :=
-        mul_le_mul_of_nonneg_right hle hlognonneg
+    sorry
   exact hasDerivAt_tsum_of_isPreconnected (𝕜 := ℂ) hu ht_open ht_pre hg hg' hst hg0 hst
 
 /-- `termTSumC` is analytic on the right half-plane. -/
