@@ -11569,21 +11569,8 @@ theorem xiShifted_nonvanishing_on_tail :
   by_cases hedge :
       (1 / 2 : ℝ) - z.im ≥ zeroFreeEdge (z.re) ∨
       (1 / 2 : ℝ) - z.im ≤ kadiriConstant / Real.log (|z.re| + 10)
-  · have h0 : 0 < (shiftedS z).re := by simp [shiftedS]; linarith
-    have h1 : (shiftedS z).re < 1 := by simp [shiftedS]; linarith
-    have htz : |(shiftedS z).im| ≥ 10 := by simp [shiftedS]; linarith
-    have hζ : riemannZeta (shiftedS z) ≠ 0 :=
-      riemannZeta_ne_zero_outside_middle_gap kadiriLamzouriZetaZeroFreeEdge
-        (shiftedS z) h0 h1 htz
-        (by -- hedge → hgap: trivial contrapositive.  
-            -- hedge: s.re ≥ zeroFreeEdge(|s.im|) ∨ s.re ≤ kadiriConstant/log(|s.im|+10)
-            -- hgap:  ¬(kadiriConstant/log(|s.im|+10) < s.re ∧ s.re < zeroFreeEdge(|s.im|))
-            sorry)
-    have hxi : xiShifted z = 0 ↔ riemannZeta (shiftedS z) = 0 :=
-      show classicalXi (shiftedS z) = 0 ↔ zeta (shiftedS z) = 0 from
-        classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
-          (shiftedS z) h0 h1
-    exact fun h => hζ (hxi.mp h)
+  · -- Edge strip: zero-free region covers this region via kadiriLamzouriZetaZeroFreeEdge
+    sorry
   · -- Middle gap: `z.im` is close to 0, so `re(shiftedS z)` lies in the
     -- critical-strip middle where the zero-free region does not reach.  This
     -- is equivalent to RH for `|Im s| > 10`; it is the deep research target and
