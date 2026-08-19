@@ -300,9 +300,11 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
       exact (continuous_norm.comp_continuousOn (continuousOn_termC_integrand n s)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
       exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-    · -- The bound holds on [n+1, n+2] by hbound; outside the interval it's
-      -- needed for integral_mono but doesn't affect the integral value.
-      sorry
+    · by_cases heq : x = n + 1
+      · subst heq; simp [norm_zero, mul_zero]; positivity
+      · have hx' : x ∈ Set.uIoc (n + 1 : ℝ) ((n + 1 : ℝ) + 1) := by
+          rw [Set.uIoc_of_le hA]; exact ⟨lt_of_le_of_ne hx.1 (Ne.symm heq), hx.2⟩
+        exact hbound x hx'
   have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
       (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
     rw [intervalIntegral.integral_const, smul_eq_mul]
@@ -376,7 +378,80 @@ lemma hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
       linarith [hσpos]
     exact hasDerivAt_termC n hypos
   have hg' : ∀ n y, y ∈ t → ‖termC' (n + 1) y‖ ≤ u n := by
-    sorry
+    intro n y hy
+    dsimp [termC', u]
+    have hyσ : σ / 2 ≤ y.re := le_of_lt (by dsimp [t] at hy; exact hy)
+    have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by norm_num
+    have hnorm :
+        ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+          -((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+        ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+          ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ :=
+      intervalIntegral.norm_integral_le_integral_norm hA
+    have hbnd : ∀ x ∈ Set.Icc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1),
+        ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+          (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      intro x hx
+      have hx1 : (n + 1 : ℝ) ≤ x := hx.1
+      have hx2 : x ≤ (n + 1 : ℝ) + 1 := hx.2
+      by_cases heq : x = n + 1
+      · subst heq
+        simp only [sub_self, zero_mul, norm_zero]
+        positivity
+      · have hx1' : (n + 1 : ℝ) < x := lt_of_le_of_ne hx1 (Ne.symm heq)
+        have hxIoc : x ∈ Set.uIoc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1) := by
+          rw [Set.uIoc_of_le hA]; exact ⟨hx1', hx2⟩
+      have hx2 : x ≤ (n + 1 : ℝ) + 1 := by
+        rw [Set.uIoc_of_le hA] at hx; exact hx.2
+      have hxpos : 0 < x := by
+        have h : 0 < (n + 1 : ℝ) := by positivity
+        linarith
+      have hxge1 : 1 ≤ x := by linarith
+      have hlogc : Complex.log (x : ℂ) = (Real.log x : ℂ) := (Complex.ofReal_log hxpos.le).symm
+      rw [hlogc]
+      have h1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+        rw [norm_neg]; norm_cast; exact abs_of_nonneg (sub_nonneg.mpr (by exact_mod_cast hx1))
+      have h2 : ‖(x : ℂ) ^ (-(y + 1))‖ = x ^ (-(y.re + 1)) := by
+        rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(y + 1))]; simp
+      have h3 : ‖(Real.log x : ℂ)‖ = Real.log x := by
+        calc
+          ‖(Real.log x : ℂ)‖ = |Real.log x| := RCLike.norm_ofReal (Real.log x)
+          _ = Real.log x := abs_of_nonneg (Real.log_nonneg hxge1)
+      rw [norm_mul, norm_mul, h1, h2, h3]
+      have hpow_le : x ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) := by
+        exact rpow_le_rpow_of_nonpos (by positivity) hx1 (by linarith)
+      have hpow2 : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
+        apply rpow_le_rpow_of_exponent_le _ (by linarith)
+        linarith [Nat.le_succ n]
+      have hlog : Real.log x ≤ Real.log (n + 2) :=
+        Real.log_le_log (by positivity) (by push_cast; linarith)
+      have hn1 : 0 ≤ x - (n + 1 : ℝ) := sub_nonneg.mpr hx1
+      have hn2 : 0 ≤ Real.log x := Real.log_nonneg hxge1
+      have hn3 : 0 ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by positivity
+      calc (x - (n + 1 : ℝ)) * x ^ (-(y.re + 1)) * Real.log x
+        ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x :=
+            mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (le_trans hpow_le hpow2) hn1) hn2
+        _ ≤ 1 * (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x :=
+            mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (by linarith) hn3) hn2
+        _ = (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x := by ring
+        _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) :=
+            mul_le_mul_of_nonneg_left hlog hn3
+    have hint : ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      refine intervalIntegral.integral_mono_on hA ?_ ?_ (fun x hx => ?_)
+      · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+        exact (continuous_norm.comp_continuousOn (continuousOn_termC'_integrand n y)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
+      · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+        exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+      · exact hbnd x (Set.Ioc_subset_uIoc ⟨lt_of_le_of_ne hx.1 (by intro heq; subst heq; simp [norm_zero, mul_zero]; positivity), hx.2⟩)
+    have hconst :
+        ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+          (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) ≤
+        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      rw [intervalIntegral.integral_const, smul_eq_mul]; ring_nf
+    linarith [hnorm, hint, hconst]
   exact hasDerivAt_tsum_of_isPreconnected (𝕜 := ℂ) hu ht_open ht_pre hg hg' hst hg0 hst
 
 /-- `termTSumC` is analytic on the right half-plane. -/
