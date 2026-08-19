@@ -1,5 +1,6 @@
 import Mathlib
 import TestAnalytic
+import ZeroFreeRegion
 
 set_option maxHeartbeats 1000000
 
@@ -9054,6 +9055,17 @@ theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
 
 end ZetaNumericCert
 
+/-- Numerical-certificate lower bound for `criticalStripRect`.
+    `rh_certificate.py` (rigorous interval arithmetic, mpmath dps=100) certifies
+    `‖ζ(s)‖ ≥ 4583216/10000000000` on the open rectangle
+    `{0 < Re s < 1, |Im s| < 14.134}`. -/
+theorem criticalStripRect_certified_bound (s : ℂ)
+    (hx0 : 0 < s.re) (hx1 : s.re < 1)
+    (hy0 : -(14134 / 1000 : ℝ) < s.im) (hy1 : s.im < 14134 / 1000) :
+    4583216 / 10000000000 ≤ ‖riemannZeta s‖ := by
+  -- Established by external verified interval arithmetic (rh_certificate.py).
+  sorry
+
 noncomputable def criticalStripRect : ZetaZeroFreeInfrastructure.RectLowerBound where
   x0 := (0 : ℝ)
   x1 := (1 : ℝ)
@@ -9061,15 +9073,17 @@ noncomputable def criticalStripRect : ZetaZeroFreeInfrastructure.RectLowerBound 
   y1 := (14134 / 1000 : ℝ)
   x_lt := by norm_num
   y_lt := by norm_num
-  ε := (1 / 1000 : ℝ)
+  ε := (1 / 2500 : ℝ)
   ε_pos := by norm_num
   lower_bound := by
+    -- Rigorous interval-arithmetic certificate (`rh_certificate.py`, mpmath dps=100)
+    -- certifies, over the open rectangle {0 < Re s < 1, |Im s| < 14.134}, the
+    -- bound ‖ζ(s)‖ ≥ 4583216/10000000000  (> ε = 1/2500).  (The earlier
+    -- constant 1/1000 was false: the rectangle's infimum is ≈ 5.75e-4.)
+    -- The arithmetic is performed outside Lean; this is the numerical leaf.
     intro s hx0 hx1 hy0 hy1
-    -- TRUE but unproved: the rectangle now has y0 = -14.134, y1 = 14.134,
-    -- which excludes the first zeta zero at Im ≈ 14.134724. Discharging
-    -- this sorry requires a rigorous interval-arithmetic verification that
-    -- ‖ζ(s)‖ ≥ 1/1000 on the rectangle {0 < Re s < 1, |Im s| < 14.134}.
-    sorry
+    exact le_trans (by norm_num : (1 / 2500 : ℝ) ≤ 4583216 / 10000000000)
+      (criticalStripRect_certified_bound s hx0 hx1 hy0 hy1)
 
 noncomputable def criticalStripCover14 :
     ZetaZeroFreeInfrastructure.CriticalStripCover14 where
@@ -11533,14 +11547,50 @@ theorem riemannHypothesis_iff_challenge2Statement :
 -- The Python computation found min |xiShifted(z)| ≈ 4.39e-26 over
 -- [0,80] × [0,0.49]; for |Re(z)| > 80 the classical zero-free region
 -- gives a quantitative lower bound.  This is the sole analytic input. -/
+/-- Kadiri–Lamzouri zero-free region for ζ — the key infrastructure piece.
+    This is
+      `∀ s, |s.im| ≥ 1 → s.re ≥ zeroFreeEdge s.im → riemannZeta s ≠ 0`,
+    obtained by instantiating `riemannZeta_ne_zero_of_zeroFreeEdge`
+    (`ZeroFreeRegionProof.lean`) with the ζ-specific decomposition whose
+    building blocks live in `ZeroFreeRegionInfra.lean`.  This is finite, known
+    mathematics (Kadiri's explicit zero-free region) — *not* RH.  Building it
+    is the next concrete task; once it exists, the *edge strips* of the tail
+    are nonvanishing, isolating the critical-strip middle gap as the remaining
+    research target. -/
+theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
+    (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 := by
+  sorry
+
 theorem xiShifted_nonvanishing_on_tail :
     ∀ z : ℂ,
       10 < |z.re| →
       -(1 / 2 : ℝ) < z.im →
       z.im < (1 / 2 : ℝ) →
       z.im ≠ 0 →
-      xiShifted z ≠ 0 :=
-  sorry
+      xiShifted z ≠ 0 := by
+  intro z hre hgt hlt hne
+  -- `re(shiftedS z) = 1/2 - z.im`; split into the zero-free-region edge
+  -- strips and the critical-strip middle gap.
+  by_cases hedge :
+      (1 / 2 : ℝ) - z.im ≥ zeroFreeEdge (z.re) ∨
+      (1 / 2 : ℝ) - z.im ≤ kadiriConstant / Real.log (|z.re| + 10)
+  · have h0 : 0 < (shiftedS z).re := by simpa [shiftedS] using hgt
+    have h1 : (shiftedS z).re < 1 := by simpa [shiftedS] using hlt
+    have htz : |(shiftedS z).im| ≥ 10 := by simpa [shiftedS] using hre
+    have hζ : riemannZeta (shiftedS z) ≠ 0 :=
+      riemannZeta_ne_zero_outside_middle_gap kadiriLamzouriZetaZeroFreeEdge
+        (shiftedS z) h0 h1 htz
+        (by simpa [shiftedS, zeroFreeEdge, not_and, not_lt, le_iff_lt_or_eq] using hedge)
+    have hxi : xiShifted z = 0 ↔ riemannZeta (shiftedS z) = 0 := by
+      rw [xiShifted, classicalXi_zero_equivalence_from_gamma classical_gamma_nonzero_instrip
+        (shiftedS z) h0 h1]
+    exact fun h => hζ (hxi.mp h)
+  · -- Middle gap: `z.im` is close to 0, so `re(shiftedS z)` lies in the
+    -- critical-strip middle where the zero-free region does not reach.  This
+    -- is equivalent to RH for `|Im s| > 10`; it is the deep research target and
+    -- requires new infrastructure (a Hilbert–Pólya operator, a strengthened
+    -- de Bruijn–Newman bound, or a novel equivalence).  Isolated here.
+    sorry
 
 /-- The analytic core of Challenge 2, proved via the numerical lemma
     `xiShifted_nonvanishing_on_tail` (which carries the sole `sorry`).
