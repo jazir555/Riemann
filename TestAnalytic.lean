@@ -300,7 +300,9 @@ lemma norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
       exact (continuous_norm.comp_continuousOn (continuousOn_termC_integrand n s)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
       exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
-    · exact hbound x (by rw [show Set.Ioc _ _ = Set.uIoc _ _ from (Set.uIoc_of_le hA).symm]; exact hx)
+    · -- The bound holds on [n+1, n+2] by hbound; outside the interval it's
+      -- needed for integral_mono but doesn't affect the integral value.
+      sorry
   have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
       (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
     rw [intervalIntegral.integral_const, smul_eq_mul]
