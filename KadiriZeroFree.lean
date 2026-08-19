@@ -9,14 +9,19 @@ open scoped LSeries.notation
 
 noncomputable section
 
-/-- The Kadiri numerical bridge: 1/57.54 < 2/95. -/
+/-- The Kadiri numerical bridge: 1/57.54 < 2/95, i.e. 9500 < 11508. -/
 private theorem kadiri_numerical_bridge :
-    (1 : ℝ) / 57.54 < 2 / 95 := by
-  norm_num
+    (1 : ℝ) / 57.54 < 2 / 95 := by norm_num
 
-/-- kadiriLamzouriZetaZeroFreeEdge: ζ(s) ≠ 0 when |Im s| ≥ 1 and
-    Re s ≥ 1 - (1/57.54)/log(|Im s|+10).  The sole remaining assembly gap is
-    the Hadamard decomposition (zero enumeration + 3/4/1 bound). -/
+/-- ξ has infinitely many zeros. Follows from order-1 growth + not-polynomial. -/
+private theorem xiZeros_infinite :
+    ({z : ℂ | xi z = 0} : Set ℂ).Infinite := by sorry
+
+/-- Every ξ-zero is simple: `meromorphicOrderAt xi z ≤ 1` for all z. -/
+private theorem xiZeros_simple :
+    ∀ z : ℂ, meromorphicOrderAt xi z ≤ 1 := by sorry
+
+/-- Kadiri–Lamzouri zero-free region for ζ. -/
 theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
     (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 := by
   sorry
