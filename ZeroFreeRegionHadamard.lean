@@ -4534,7 +4534,94 @@ algebraic identity `xi z = z·(z-1)·Λ₀ z + 1` and the elementary estimate
 `exp x ≥ x⁴/256` for `x ≥ 0`. -/
 theorem xi_norm_bound_whole_plane :
     ∃ K ≥ 0, ∃ C₀ ≥ 0, ∀ z : ℂ, C₀ ≤ ‖z‖ → ‖xi z‖ ≤ Real.exp (K * ‖z‖ ^ (3 / 2 : ℝ)) := by
-  sorry
+  obtain ⟨C, r₀, hr₀, hbound⟩ := orderSet_completedRiemannZeta₀
+  have hCpos : 0 ≤ C := by
+    by_contra h
+    have h1 := hbound (r₀ : ℂ) (by rw [Complex.norm_of_nonneg (le_of_lt hr₀)])
+    have h2 := norm_nonneg (completedRiemannZeta₀ (r₀ : ℂ))
+    have h3 : C * Real.exp (‖(r₀ : ℂ)‖ ^ (3 / 2 : ℝ)) < 0 :=
+      mul_neg_of_neg_of_pos (not_le.mp h) (Real.exp_pos (‖(r₀ : ℂ)‖ ^ (3 / 2 : ℝ)))
+    linarith [h1, h2, h3]
+  refine ⟨C + 3, by linarith, max r₀ 10, by linarith [le_max_right r₀ 10], fun z hz => ?_⟩
+  have hzr : r₀ ≤ ‖z‖ := le_trans (le_max_left r₀ 10) hz
+  have hz10 : (10 : ℝ) ≤ ‖z‖ := le_trans (le_max_right r₀ 10) hz
+  have hRpos : (0 : ℝ) < ‖z‖ := by linarith
+  have hz1n : ‖z - 1‖ ≤ ‖z‖ + 1 := by
+    calc ‖z - 1‖ ≤ ‖z‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+      _ = ‖z‖ + 1 := by rw [norm_one]
+  have hprod : ‖z‖ * ‖z - 1‖ ≤ ‖z‖ ^ 2 + ‖z‖ := by nlinarith [norm_nonneg z, hz1n]
+  have hbound' := hbound z hzr
+  have hkey : ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ + 1 ≤ Real.exp ((C + 3) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+    have hs1 : ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ ≤ (‖z‖ ^ 2 + ‖z‖) * (C * Real.exp (‖z‖ ^ (3 / 2 : ℝ))) :=
+      mul_le_mul hprod hbound' (norm_nonneg _) (by nlinarith [norm_nonneg z])
+    have hs2 : (‖z‖ ^ 2 + ‖z‖) * (C * Real.exp (‖z‖ ^ (3 / 2 : ℝ))) ≤
+        2 * C * ‖z‖ ^ 2 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+      have : ‖z‖ ^ 2 + ‖z‖ ≤ 2 * ‖z‖ ^ 2 := by nlinarith [hz10]
+      nlinarith [mul_nonneg hCpos (Real.exp_nonneg (‖z‖ ^ (3 / 2 : ℝ)))]
+    have hs3 : 2 * C * ‖z‖ ^ 2 * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) ≤
+        2 * C * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) := by
+      rw [mul_assoc (2 * C) (‖z‖ ^ 2), show Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) =
+        Real.exp (‖z‖ ^ (3 / 2 : ℝ)) * Real.exp (‖z‖ ^ (3 / 2 : ℝ)) from by
+          rw [← Real.exp_add]; ring_nf, mul_comm (‖z‖ ^ 2) (Real.exp _)]
+      refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (by norm_num : (0:ℝ) ≤ 2) hCpos)
+      refine mul_le_mul_of_nonneg_left ?_ (Real.exp_nonneg _)
+      have hsq_le_exp : (‖z‖ : ℝ) ^ 2 ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+        have hle : (‖z‖ : ℝ) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2) := Real.add_one_le_exp _
+        have h2 := mul_le_mul (norm_nonneg z) (Real.exp_nonneg (‖z‖ ^ (3 / 2 : ℝ) / 2)) hle hle
+        rwa [show Real.exp _ * Real.exp _ = Real.exp (‖z‖ ^ (3 / 2 : ℝ)) from by rw [← Real.exp_add]; ring_nf] at h2
+      have h2z : (2:ℝ) * ‖z‖ ≤ ‖z‖ ^ (3 / 2 : ℝ) := by
+        have h4 : (4:ℝ) ≤ ‖z‖ := by linarith
+        have hsqrt : (2:ℝ) ≤ ‖z‖ ^ (1 / 2 : ℝ) := by
+          rw [show (2:ℝ) = (4:ℝ) ^ (1 / 2 : ℝ) from by norm_num [Real.sqrt_eq_rpow]]
+          exact Real.rpow_le_rpow (by norm_num) h4 (by norm_num)
+        have h12 : (1:ℝ) ≤ ‖z‖ := by linarith
+        calc (2:ℝ) * ‖z‖ ≤ ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ :=
+            mul_le_mul_of_nonneg_right hsqrt (le_of_lt hRpos)
+          _ = ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ ^ (1:ℝ) := by rw [Real.rpow_one]
+          _ = ‖z‖ ^ (1 / 2 + 1 : ℝ) := by rw [← Real.rpow_add (le_of_lt hRpos)]
+          _ = ‖z‖ ^ (3 / 2 : ℝ) := by norm_num
+      have hzle : (‖z‖ : ℝ) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2) :=
+        by linarith [Real.add_one_le_exp (‖z‖ ^ (3 / 2 : ℝ) / 2)]
+      calc (‖z‖ : ℝ) ^ 2
+          ≤ (Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2)) ^ 2 := pow_le_pow_left₀ (by linarith) hzle 2
+        _ = Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by rw [sq, ← Real.exp_add]; ring_nf
+    have hs4 : 2 * C * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) ≤
+        Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+      have h2c : 2 * C ≤ Real.exp (C * ‖z‖ ^ (3 / 2 : ℝ)) := by
+        have := Real.add_one_le_exp (C * ‖z‖ ^ (3 / 2 : ℝ)); nlinarith [Real.exp_nonneg _]
+      calc 2 * C * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ))
+          ≤ Real.exp (C * ‖z‖ ^ (3 / 2 : ℝ)) * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) :=
+              mul_le_mul_of_nonneg_right h2c (Real.exp_nonneg _)
+        _ = Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by rw [← Real.exp_add]; ring_nf
+    have hchain : ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ ≤ Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+      linarith [hs1, hs2, hs3, hs4]
+    have hRge1 : (1 : ℝ) ≤ ‖z‖ ^ (3 / 2 : ℝ) := by
+      rw [← Real.one_rpow (3 / 2 : ℝ)]
+      exact Real.rpow_le_rpow (by norm_num) (by linarith [hz10]) (by norm_num)
+    have hone : (1 : ℝ) ≤ Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+      have h1 := Real.add_one_le_exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ))
+      have h2 : 0 ≤ (C + 2) * ‖z‖ ^ (3 / 2 : ℝ) := mul_nonneg (by linarith) (by positivity)
+      linarith
+    have hgap : Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) + 1 ≤ Real.exp ((C + 3) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+      have h2le : (2 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp (1 : ℝ)]
+      have hle : Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) + 1 ≤ Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ) + 1) := by
+        calc Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) + 1
+            ≤ Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) + Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by
+              rw [add_le_add_iff_left]; exact hone
+          _ = 2 * Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by ring
+          _ ≤ Real.exp 1 * Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) :=
+                mul_le_mul_of_nonneg_right h2le (Real.exp_nonneg _)
+          _ = Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ) + 1) := by rw [Real.exp_add, mul_comm]
+      have hexp_le : Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ) + 1) ≤ Real.exp ((C + 3) * ‖z‖ ^ (3 / 2 : ℝ)) :=
+        Real.exp_le_exp.mpr (by nlinarith [hRge1])
+      exact hle.trans hexp_le
+    linarith [hchain, hgap]
+  have hxi : ‖xi z‖ ≤ ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ + 1 := by
+    unfold xi
+    have := norm_add_le (z * (z - 1) * completedRiemannZeta₀ z) 1
+    simp only [norm_mul, norm_one] at this
+    linarith
+  linarith [hxi, hkey]
 
 /-- The zero set of `xi` is countable. -/
 theorem xiZeros_countable : ({z : ℂ | xi z = 0} : Set ℂ).Countable := by

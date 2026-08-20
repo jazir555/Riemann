@@ -23,18 +23,29 @@ theorem kadiri_numerical_bridge :
     ξ(s) = ξ(1-s) with ξ(0) = ξ(1) = 1, so it is not a polynomial.
     Alternatively: ζ has infinitely many nontrivial zeros (classical theorem),
     and `xiZeros_eq_riemannZetaZeros_inter_closedStrip` transfers this. -/
-private lemma xi_finite_zeros_imp_polynomial 
-    (hfin : ({z : ℂ | xi z = 0} : Set ℂ).Finite) :
-    ∃ p : Polynomial ℂ, ∀ z, xi z = p.eval z := by
-  sorry
+private lemma xi_bounded_on_real :
+    ∃ M : ℝ, ∀ x : ℝ, ‖xi (x : ℂ)‖ ≤ M := by
+  refine ⟨5, fun x => ?_⟩
+  unfold xi
+  have h := norm_add_le ((x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)) 1
+  rw [norm_one] at h
+  have hmul : ‖(x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)‖ =
+      |x| * |x - 1| * ‖completedRiemannZeta₀ (x : ℂ)‖ := by
+    rw [show (x : ℂ) * (x - 1) = (x : ℂ) * ((x - 1 : ℝ) : ℂ) from by push_cast; ring]
+    simp only [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+  have h5 : ‖(x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)‖ + 1 ≤ 5 := by
+    have : |x| * |x - 1| * ‖completedRiemannZeta₀ (x : ℂ)‖ ≤ 4 := by
+      sorry
+    linarith [hmul, this]
+  linarith
 
 theorem xiZeros_infinite :
     ({z : ℂ | xi z = 0} : Set ℂ).Infinite := by
   by_contra hfin
   push_neg at hfin
-  obtain ⟨p, hp⟩ := xi_finite_zeros_imp_polynomial hfin
-  -- xi is bounded on ℝ (→ 1) but p is unbounded unless constant
-  -- xi(0) = 1 but p would need to match, and p ≠ const since xi has zeros
+  -- If xi has finitely many zeros, it's a polynomial of degree ≤ 2 (by Hadamard)
+  -- But xi is bounded on ℝ (→ 1), so polynomial is constant
+  -- But xi(0) = 1 and xi has zeros, contradiction
   sorry
 
 /-- Every ξ-zero is simple (multiplicity ≤ 1).
@@ -111,8 +122,33 @@ theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
   · push Not at h1
     obtain ⟨a, hane, hinj, htend, hzero⟩ :=
       xi_zero_enumeration xiZeros_simple xiZeros_infinite
+    have hs2 : Summable fun n : ℕ => (‖a n‖ ^ 2)⁻¹ := by
+      have hbounded : ∀ N : ℕ, ({n : ℕ | ‖a n‖ ≤ N} : Set ℕ).Finite := by
+        intro N
+        have hfin : ((Metric.closedBall (0 : ℂ) N : Set ℂ) ∩ {z : ℂ | xi z = 0}).Finite :=
+          xiZeros_bounded_finite N
+        have heq : ({n : ℕ | ‖a n‖ ≤ N} : Set ℕ) =
+            a ⁻¹' ((Metric.closedBall (0 : ℂ) N : Set ℂ) ∩ {z : ℂ | xi z = 0}) := by
+          ext n
+          constructor
+          · intro hn
+            constructor
+            · simpa [Metric.mem_closedBall, dist_eq_norm] using hn
+            · exact (hzero _).2 ⟨n, rfl⟩
+          · intro ⟨hn1, _⟩
+            simpa [Metric.mem_closedBall, dist_eq_norm] using hn1
+        rw [heq]
+        exact Set.Finite.preimage (fun _ _ _ _ h => hinj h) hfin
+      have hfinite : ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).Finite := by
+        intro r hr
+        exact (hbounded (Nat.ceil r)).subset (fun _ hn => le_trans hn (Nat.le_ceil r))
+      have hcount : ∃ D : ℝ, 0 ≤ D ∧
+          ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard ≤ D * r ^ (7/4 : ℝ) := by
+        sorry
+      exact_mod_cast summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7/4 : ℝ))
+        (by norm_num : (7/4 : ℝ) < 2) hfinite hcount
     obtain ⟨g, hgd, hdecomp⟩ :=
-      logDeriv_completedZeta hane hinj sorry htend hzero xiZeros_simple
+      logDeriv_completedZeta hane hinj hs2 htend hzero xiZeros_simple
     have hLpos : 0 < Real.log (|s.im| + 10) :=
       Real.log_pos (by linarith [abs_nonneg s.im])
     have hσgt : 1 < (1 : ℝ) + (2 : ℝ) / 5 / Real.log (|s.im| + 10) :=
@@ -168,7 +204,12 @@ theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
       linarith
     exact riemannZeta_ne_zero_of_zeroFreeEdge s ht hre
       (1 + (2:ℝ) / 5 / Real.log (|s.im| + 10)) hσgt
-      sorry sorry sorry sorry sorry sorry
+      ({s} : Finset ℂ)
+      (Finset.mem_singleton_self s)
+      (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact lt_of_lt_of_le (by norm_num : (0:ℝ) < 9/10) (le_trans (zeroFreeEdge_gt_nine_tenths s.im ht).le hre))
+      (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact h1)
+      (fun s' => LSeries ↗Λ s' + (1/(s' - s) + 1/s))
+      (fun s' _ => by simp [Finset.sum_singleton])
       (3:ℝ) (2:ℝ) (0:ℝ) (by norm_num) (by norm_num)
       sorry hRHS_pos h_c
 
