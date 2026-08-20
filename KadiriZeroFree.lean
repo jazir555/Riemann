@@ -73,16 +73,16 @@ theorem xiZeros_simple :
     -- Step 2: Decompose product order
     rw [meromorphicOrderAt_congr heq1]
     rw [show (fun s : ℂ => s * (s - 1) * completedRiemannZeta s) =
-        (fun s => s * (s - 1)) * (fun s => completedRiemannZeta s) from by ext; ring]
-    have han1 : MeromorphicAt (fun s : ℂ => s * (s - 1)) z :=
-      (differentiable_mul (differentiable_id) (differentiable_id.sub differentiable_const)).meromorphicAt
-    have han2 : MeromorphicAt completedRiemannZeta z :=
-      (differentiableAt_completedZeta hz0 hz1).meromorphicAt
+        (fun s => s * (s - 1)) * (fun s => completedRiemannZeta s) from by ext; ring_nf; ring]
+    have han1 : MeromorphicAt (fun s : ℂ => s * (s - 1)) z := by
+      fun_prop
+    have han2 : MeromorphicAt completedRiemannZeta z := by
+      exact ((differentiableAt_completedZeta hz0 hz1).analyticAt).meromorphicAt
     rw [meromorphicOrderAt_mul han1 han2]
     -- Step 3: s*(s-1) doesn't vanish at z, so order is 0
     have hord_poly : meromorphicOrderAt (fun s : ℂ => s * (s - 1)) z = 0 :=
       meromorphicOrderAt_eq_zero_of_ne_zero
-        (differentiable_mul differentiable_id (differentiable_id.sub differentiable_const)).analyticAt
+        (differentiable_id.mul (differentiable_id.sub differentiable_const)).analyticAt
         (mul_ne_zero hz0 (sub_ne_zero.mpr hz1))
     rw [hord_poly, zero_add]
     -- Step 4: Relate completedRiemannZeta to riemannZeta via Gammaℝ
@@ -96,10 +96,8 @@ theorem xiZeros_simple :
     rw [meromorphicOrderAt_congr heqΛ]
     rw [show (fun s : ℂ => Gammaℝ s * riemannZeta s) =
         (fun s => Gammaℝ s) * (fun s => riemannZeta s) from by ext; ring]
-    have hanΓ : MeromorphicAt Gammaℝ z :=
-      (differentiable_Gammaℝ).meromorphicAt
-    have hanZ : MeromorphicAt riemannZeta z :=
-      (differentiableAt_riemannZeta hz1).meromorphicAt
+    have hanΓ : MeromorphicAt Gammaℝ z := by fun_prop
+    have hanZ : MeromorphicAt riemannZeta z := by fun_prop
     rw [meromorphicOrderAt_mul hanΓ hanZ]
     -- Step 5: Gammaℝ z ≠ 0, so order is 0
     have hΓ_ord : meromorphicOrderAt (fun s : ℂ => Gammaℝ s) z = 0 :=

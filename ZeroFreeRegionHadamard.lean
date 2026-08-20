@@ -4532,20 +4532,6 @@ This follows from `orderSet_completedRiemannZeta₀` (a `exp(‖z‖^(3/2))` bou
 for `Λ₀` on the whole plane, via the functional equation) together with the
 algebraic identity `xi z = z·(z-1)·Λ₀ z + 1` and the elementary estimate
 `exp x ≥ x⁴/256` for `x ≥ 0`. -/
-private lemma rpow_sq_le_exp_rpow_three_halves (x : ℝ) (hx : 10 ≤ x) :
-    x ^ 2 ≤ Real.exp (x ^ (3 / 2 : ℝ)) := by
-  have h1 : x ^ 2 ≤ x ^ 3 := by
-    have : (1 : ℝ) ≤ x := by linarith
-    calc x ^ 2 = x ^ 2 * 1 := by ring
-      _ ≤ x ^ 2 * x := by nlinarith
-      _ = x ^ 3 := by ring
-  have h2 : x ^ 3 ≤ (x ^ (3 / 2 : ℝ)) ^ 2 := by
-    rw [← Real.rpow_natCast x 3, ← Real.rpow_mul (by linarith : 0 ≤ x)]
-    simp; ring_nf
-  have h3 : Real.exp (x ^ (3 / 2 : ℝ)) ≥ x ^ (3 / 2 : ℝ) + 1 :=
-    Real.add_one_le_exp _
-  nlinarith [Real.exp_pos (x ^ (3 / 2 : ℝ)), h1, h2, h3]
-
 theorem xi_norm_bound_whole_plane :
     ∃ K ≥ 0, ∃ C₀ ≥ 0, ∀ z : ℂ, C₀ ≤ ‖z‖ → ‖xi z‖ ≤ Real.exp (K * ‖z‖ ^ (3 / 2 : ℝ)) := by
   sorry
