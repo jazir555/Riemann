@@ -23,8 +23,18 @@ theorem kadiri_numerical_bridge :
     ξ(s) = ξ(1-s) with ξ(0) = ξ(1) = 1, so it is not a polynomial.
     Alternatively: ζ has infinitely many nontrivial zeros (classical theorem),
     and `xiZeros_eq_riemannZetaZeros_inter_closedStrip` transfers this. -/
+private lemma xi_finite_zeros_imp_polynomial 
+    (hfin : ({z : ℂ | xi z = 0} : Set ℂ).Finite) :
+    ∃ p : Polynomial ℂ, ∀ z, xi z = p.eval z := by
+  sorry
+
 theorem xiZeros_infinite :
     ({z : ℂ | xi z = 0} : Set ℂ).Infinite := by
+  by_contra hfin
+  push_neg at hfin
+  obtain ⟨p, hp⟩ := xi_finite_zeros_imp_polynomial hfin
+  -- xi is bounded on ℝ (→ 1) but p is unbounded unless constant
+  -- xi(0) = 1 but p would need to match, and p ≠ const since xi has zeros
   sorry
 
 /-- Every ξ-zero is simple (multiplicity ≤ 1).
@@ -35,9 +45,73 @@ theorem xiZeros_infinite :
     Therefore meromorphicOrderAt xi z ≤ 1 iff ζ'(z) ≠ 0, i.e., the ζ-zero is simple.
     Simplicity of ζ-zeros is a classical result (follows from the explicit formula
     or from -ζ'/ζ having only simple poles at nontrivial zeros). -/
+private lemma meromorphicOrderAt_xi_of_ne_zero {z : ℂ} (hz : xi z ≠ 0) :
+    meromorphicOrderAt xi z ≤ 1 := by
+  have h := meromorphicOrderAt_eq_zero_of_ne_zero
+    (xi_differentiable.analyticAt z) hz
+  rw [h]; exact zero_le_one
+
 theorem xiZeros_simple :
     ∀ z : ℂ, meromorphicOrderAt xi z ≤ 1 := by
-  sorry
+  intro z
+  by_cases hz : xi z = 0
+  · -- Zero case
+    have hζ : riemannZeta z = 0 := xi_zero_imp_riemannZeta_zero hz
+    have hstrip : 0 < z.re := xi_zero_imp_zero_lt_re hz
+    have hre1 : z.re < 1 := by
+      by_contra h; exact (riemannZeta_ne_zero_of_one_le_re (le_of_not_gt h)) hζ
+    have hz0 : z ≠ 0 := by intro h0; rw [h0] at hstrip; exact absurd hstrip (by norm_num)
+    have hz1 : z ≠ 1 := by intro h1; rw [h1] at hre1; exact absurd hre1 (by norm_num)
+    -- Step 1: Transfer order from xi to s*(s-1)*completedRiemannZeta
+    have hfull1 : ∀ᶠ s in 𝓝 z, xi s = s * (s - 1) * completedRiemannZeta s := by
+      filter_upwards [isOpen_compl_singleton.mem_nhds hz0, isOpen_compl_singleton.mem_nhds hz1]
+        with s hs0 hs1
+      exact xi_eq_mul_completedRiemannZeta hs0 hs1
+    have heq1 : (fun s : ℂ => xi s) =ᶠ[𝓝[≠] z]
+        (fun s => s * (s - 1) * completedRiemannZeta s) :=
+      hfull1.filter_mono (nhdsWithin_le_nhds)
+    -- Step 2: Decompose product order
+    rw [meromorphicOrderAt_congr heq1]
+    rw [show (fun s : ℂ => s * (s - 1) * completedRiemannZeta s) =
+        (fun s => s * (s - 1)) * (fun s => completedRiemannZeta s) from by ext; ring]
+    have han1 : MeromorphicAt (fun s : ℂ => s * (s - 1)) z :=
+      (differentiable_mul (differentiable_id) (differentiable_id.sub differentiable_const)).meromorphicAt
+    have han2 : MeromorphicAt completedRiemannZeta z :=
+      (differentiableAt_completedZeta hz0 hz1).meromorphicAt
+    rw [meromorphicOrderAt_mul han1 han2]
+    -- Step 3: s*(s-1) doesn't vanish at z, so order is 0
+    have hord_poly : meromorphicOrderAt (fun s : ℂ => s * (s - 1)) z = 0 :=
+      meromorphicOrderAt_eq_zero_of_ne_zero
+        (differentiable_mul differentiable_id (differentiable_id.sub differentiable_const)).analyticAt
+        (mul_ne_zero hz0 (sub_ne_zero.mpr hz1))
+    rw [hord_poly, zero_add]
+    -- Step 4: Relate completedRiemannZeta to riemannZeta via Gammaℝ
+    have hfullΛ : ∀ᶠ s in 𝓝 z, completedRiemannZeta s = Gammaℝ s * riemannZeta s := by
+      filter_upwards [isOpen_compl_singleton.mem_nhds hz0,
+        (isOpen_lt continuous_const Complex.continuous_re).mem_nhds hstrip] with s hs0 hsre
+      exact (completedRiemannZeta_eq_Gammaℝ_mul hs0 (Gammaℝ_ne_zero_of_re_pos hsre)).symm
+    have heqΛ : (fun s : ℂ => completedRiemannZeta s) =ᶠ[𝓝[≠] z]
+        (fun s => Gammaℝ s * riemannZeta s) :=
+      hfullΛ.filter_mono (nhdsWithin_le_nhds)
+    rw [meromorphicOrderAt_congr heqΛ]
+    rw [show (fun s : ℂ => Gammaℝ s * riemannZeta s) =
+        (fun s => Gammaℝ s) * (fun s => riemannZeta s) from by ext; ring]
+    have hanΓ : MeromorphicAt Gammaℝ z :=
+      (differentiable_Gammaℝ).meromorphicAt
+    have hanZ : MeromorphicAt riemannZeta z :=
+      (differentiableAt_riemannZeta hz1).meromorphicAt
+    rw [meromorphicOrderAt_mul hanΓ hanZ]
+    -- Step 5: Gammaℝ z ≠ 0, so order is 0
+    have hΓ_ord : meromorphicOrderAt (fun s : ℂ => Gammaℝ s) z = 0 :=
+      meromorphicOrderAt_eq_zero_of_ne_zero differentiable_Gammaℝ.analyticAt
+        (Gammaℝ_ne_zero_of_re_pos hstrip)
+    rw [hΓ_ord, zero_add]
+    -- Step 6: riemannZeta is analytic at z (z≠1), convert to analyticOrderAt
+    have hanZeta : AnalyticAt ℂ riemannZeta z := (differentiableAt_riemannZeta hz1).analyticAt
+    rw [hanZeta.meromorphicOrderAt_eq]
+    -- Final gap: need analyticOrderAt riemannZeta z ≤ 1
+    sorry
+  · exact meromorphicOrderAt_xi_of_ne_zero hz
 
 /-- Kadiri–Lamzouri zero-free region for ζ:
     `ζ(s) ≠ 0` whenever `|Im s| ≥ 1` and `Re s ≥ 1 - (1/57.54)/log(|Im s|+10)`.
