@@ -4565,30 +4565,32 @@ theorem xi_norm_bound_whole_plane :
           rw [← Real.exp_add]; ring_nf, mul_comm (‖z‖ ^ 2) (Real.exp _)]
       refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (by norm_num : (0:ℝ) ≤ 2) hCpos)
       refine mul_le_mul_of_nonneg_left ?_ (Real.exp_nonneg _)
-      have hsq_le_exp : (‖z‖ : ℝ) ^ 2 ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
-        have hle : (‖z‖ : ℝ) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2) := Real.add_one_le_exp _
-        have h2 := mul_le_mul (norm_nonneg z) (Real.exp_nonneg (‖z‖ ^ (3 / 2 : ℝ) / 2)) hle hle
-        rwa [show Real.exp _ * Real.exp _ = Real.exp (‖z‖ ^ (3 / 2 : ℝ)) from by rw [← Real.exp_add]; ring_nf] at h2
       have h2z : (2:ℝ) * ‖z‖ ≤ ‖z‖ ^ (3 / 2 : ℝ) := by
         have h4 : (4:ℝ) ≤ ‖z‖ := by linarith
-        have hsqrt : (2:ℝ) ≤ ‖z‖ ^ (1 / 2 : ℝ) := by
-          rw [show (2:ℝ) = (4:ℝ) ^ (1 / 2 : ℝ) from by norm_num [Real.sqrt_eq_rpow]]
-          exact Real.rpow_le_rpow (by norm_num) h4 (by norm_num)
-        have h12 : (1:ℝ) ≤ ‖z‖ := by linarith
-        calc (2:ℝ) * ‖z‖ ≤ ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ :=
-            mul_le_mul_of_nonneg_right hsqrt (le_of_lt hRpos)
-          _ = ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ ^ (1:ℝ) := by rw [Real.rpow_one]
-          _ = ‖z‖ ^ (1 / 2 + 1 : ℝ) := by rw [← Real.rpow_add (le_of_lt hRpos)]
+        have : (2:ℝ) ≤ ‖z‖ ^ (1 / 2 : ℝ) := by
+          have := Real.rpow_le_rpow (by norm_num : (0:ℝ) ≤ (4:ℝ)) h4 (by norm_num : (0:ℝ) ≤ (1/2:ℝ))
+          rwa [show (4:ℝ) ^ (1/2 : ℝ) = 2 from by norm_num [Real.sqrt_eq_rpow]] at this
+        calc (2:ℝ) * ‖z‖ ≤ ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ := mul_le_mul_of_nonneg_right this (le_of_lt hRpos)
+          _ = ‖z‖ ^ (1 / 2 : ℝ) * ‖z‖ ^ (1 : ℝ) := by simp [Real.rpow_one]
+          _ = ‖z‖ ^ (1 / 2 + 1 : ℝ) := by rw [← Real.rpow_add hRpos]
           _ = ‖z‖ ^ (3 / 2 : ℝ) := by norm_num
-      have hzle : (‖z‖ : ℝ) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2) :=
-        by linarith [Real.add_one_le_exp (‖z‖ ^ (3 / 2 : ℝ) / 2)]
-      calc (‖z‖ : ℝ) ^ 2
-          ≤ (Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2)) ^ 2 := pow_le_pow_left₀ (by linarith) hzle 2
-        _ = Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by rw [sq, ← Real.exp_add]; ring_nf
+      have hsq_le_exp : (‖z‖ : ℝ) ^ 2 ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ)) := by
+        have hle : (‖z‖ : ℝ) ≤ Real.exp (‖z‖ ^ (3 / 2 : ℝ) / 2) := by
+          have := Real.add_one_le_exp (‖z‖ ^ (3 / 2 : ℝ) / 2)
+          linarith
+        have := mul_le_mul hle hle (norm_nonneg z) (Real.exp_nonneg _)
+        rwa [← sq, show Real.exp _ * Real.exp _ = Real.exp (‖z‖ ^ (3 / 2 : ℝ)) from by rw [← Real.exp_add]; ring_nf] at this
+      exact hsq_le_exp
     have hs4 : 2 * C * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) ≤
         Real.exp ((C + 2) * ‖z‖ ^ (3 / 2 : ℝ)) := by
       have h2c : 2 * C ≤ Real.exp (C * ‖z‖ ^ (3 / 2 : ℝ)) := by
-        have := Real.add_one_le_exp (C * ‖z‖ ^ (3 / 2 : ℝ)); nlinarith [Real.exp_nonneg _]
+        have h := Real.add_one_le_exp (C * ‖z‖ ^ (3 / 2 : ℝ))
+        have hz32 : (2:ℝ) ≤ ‖z‖ ^ (3 / 2 : ℝ) := by
+          have h4 : (4:ℝ) ≤ ‖z‖ := by linarith
+          have := Real.rpow_le_rpow (by norm_num : (0:ℝ) ≤ (4:ℝ)) h4 (by norm_num : (0:ℝ) ≤ (3/2:ℝ))
+          have : (4:ℝ) ^ (3 / 2 : ℝ) = (8:ℝ) := by norm_num [Real.sqrt_eq_rpow]
+          linarith
+        nlinarith [Real.exp_nonneg (C * ‖z‖ ^ (3 / 2 : ℝ))]
       calc 2 * C * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ))
           ≤ Real.exp (C * ‖z‖ ^ (3 / 2 : ℝ)) * Real.exp (2 * ‖z‖ ^ (3 / 2 : ℝ)) :=
               mul_le_mul_of_nonneg_right h2c (Real.exp_nonneg _)
