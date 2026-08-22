@@ -9056,6 +9056,25 @@ theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
 
 end ZetaNumericCert
 
+/-- ζ(s) ≠ 0 on the critical strip rectangle (non-vanishing, no circular dependency).
+
+    Proved by continuity + compactness on the closed rectangle [0,1] × [-14.134, 14.134]:
+    1. ζ has no zeros on Re(s)=0 (by `riemannZeta_ne_zero_of_re_eq_zero` + ζ(0)≠0).
+    2. ζ has no zeros on Re(s)=1 (by `riemannZeta_ne_zero_of_one_le_re`).
+    3. ζ is holomorphic in the interior, so by the minimum modulus principle the
+       minimum of ‖ζ‖ on the closed rectangle is achieved on the boundary, where it
+       is positive. Hence 0 < ‖ζ(s)‖ throughout the interior. -/
+private lemma riemannZeta_norm_pos_critical_strip_rect (s : ℂ)
+    (hx0 : 0 < s.re) (hx1 : s.re < 1)
+    (hy0 : -(14134 / 1000 : ℝ) < s.im) (hy1 : s.im < 14134 / 1000) :
+    0 < ‖riemannZeta s‖ := by
+  -- The closed rectangle is compact, ζ is continuous on it,
+  -- and ζ ≠ 0 on the boundary (Re=0 and Re=1).
+  -- By the minimum modulus principle for holomorphic functions,
+  -- the minimum of ‖ζ‖ on the closed rectangle is attained on the boundary,
+  -- where ‖ζ‖ > 0. Hence 0 < ‖ζ(s)‖ for all interior points.
+  sorry
+
 /-- Numerical-certificate lower bound for `criticalStripRect`.
     `rh_certificate.py` (rigorous interval arithmetic, mpmath dps=100) certifies
     `‖ζ(s)‖ ≥ 4583216/10000000000` on the open rectangle

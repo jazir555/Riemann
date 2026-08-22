@@ -411,8 +411,7 @@ theorem zeta_cert_min_modulus_pos : 0 < zeta_cert_min_modulus := by
   unfold zeta_cert_min_modulus; norm_num
 
 /- Verified by mpmath: all |zeta(s)| >= 1.131262e+00 on the grid -/
+set_option maxRecDepth 1000000
 theorem zeta_cert_data_all_positive :
     ∀ t ∈ zeta_cert_data, 0 < t.2.2.2.2 := by
-  intro t ht
-  -- Verified computationally by rh_zeta_cert.py
-  sorry
+  decide

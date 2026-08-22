@@ -241,7 +241,21 @@ theorem jensen_degree_two_hyperbolic_iff (n : ℕ) :
 theorem jensenPoly_derivative (d n : ℕ) :
     (jensenPoly (d + 1) n).derivative =
       Polynomial.C ((d + 1 : ℕ) : ℂ) * jensenPoly d (n + 1) := by
-  sorry
+  have hbin (k : ℕ) :
+      (↑(Nat.choose (d + 1) (k + 1)) : ℝ) * ↑(k + 1) = ↑(d + 1) * ↑(Nat.choose d k) := by
+    rw [Nat.cast_mul, Nat.cast_mul, Nat.add_one_mul_choose_eq d k, mul_comm]
+  have hcoef (k : ℕ) :
+      (↑(Nat.choose (d + 1) (k + 1)) * taylorCoeff (n + k + 1)) * ↑(k + 1) =
+        ↑(d + 1) * (↑(Nat.choose d k) * taylorCoeff (n + k + 1)) := by
+    rw [mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc, hbin k, ← mul_assoc]
+  simp only [jensenPoly]
+  rw [Polynomial.derivative_map (algebraMap ℝ ℂ), Polynomial.derivative_sum]
+  rw [Finset.sum_range_succ]
+  rw [Polynomial.derivative_monomial]
+  rw [Nat.succ_sub_one, Nat.zero_sub, mul_zero, Polynomial.monomial_zero, zero_add]
+  rw [Finset.sum_congr rfl (fun k _ => congrArg (Polynomial.monomial k) (hcoef k))]
+  rw [Finset.mul_sum, Polynomial.map_mul, Polynomial.map_C]
+  rw [← jensenPoly]
 
 /-- Rolle for polynomials: the derivative of a hyperbolic polynomial is
     hyperbolic (the roots of p' interlace those of p).  This is the

@@ -1,0 +1,56 @@
+JensenTranslation.lean:76:31: warning: Variable name `n` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _n
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+JensenTranslation.lean:79:8: warning: declaration uses `sorry`
+JensenTranslation.lean:100:8: warning: declaration uses `sorry`
+JensenTranslation.lean:106:8: warning: declaration uses `sorry`
+JensenTranslation.lean:123:42: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:233:8: warning: declaration uses `sorry`
+JensenTranslation.lean:246:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ↑(?m * ?n)
+in the target expression
+  ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+
+d n k : ℕ
+⊢ ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+JensenTranslation.lean:250:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  taylorCoeff (n + k + 1) * ↑(k + 1)
+in the target expression
+  ↑((d + 1).choose (k + 1)) * taylorCoeff (n + k + 1) * ↑(k + 1) = ↑(d + 1) * (↑(d.choose k) * taylorCoeff (n + k + 1))
+
+d n : ℕ
+hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+k : ℕ
+⊢ ↑((d + 1).choose (k + 1)) * taylorCoeff (n + k + 1) * ↑(k + 1) = ↑(d + 1) * (↑(d.choose k) * taylorCoeff (n + k + 1))
+JensenTranslation.lean:252:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  Polynomial.derivative (Polynomial.map ?f ?m.177)
+in the target expression
+  Polynomial.derivative
+      (Polynomial.map (algebraMap ℝ ℂ)
+        (∑ k ∈ Finset.range (d + 1 + 1), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k)))) =
+    Polynomial.C ↑(d + 1) *
+      Polynomial.map (algebraMap ℝ ℂ)
+        (∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k)))
+
+d n : ℕ
+hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+hcoef :
+  ∀ (k : ℕ),
+    ↑((d + 1).choose (k + 1)) * taylorCoeff (n + k + 1) * ↑(k + 1) =
+      ↑(d + 1) * (↑(d.choose k) * taylorCoeff (n + k + 1))
+⊢ Polynomial.derivative
+      (Polynomial.map (algebraMap ℝ ℂ)
+        (∑ k ∈ Finset.range (d + 1 + 1), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k)))) =
+    Polynomial.C ↑(d + 1) *
+      Polynomial.map (algebraMap ℝ ℂ)
+        (∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k)))
+JensenTranslation.lean:263:8: warning: declaration uses `sorry`
+JensenTranslation.lean:273:8: warning: declaration uses `sorry`
+JensenTranslation.lean:281:8: warning: declaration uses `sorry`
+JensenTranslation.lean:288:8: warning: declaration uses `sorry`
+EXITCODE:1
