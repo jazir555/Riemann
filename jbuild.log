@@ -23,20 +23,17 @@ h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)
 ⊢ Hyperbolic
     (Polynomial.C ↑(taylorCoeff n) + (Polynomial.monomial 1) (2 * ↑(taylorCoeff (n + 1))) +
       (Polynomial.monomial 2) ↑(taylorCoeff (n + 2)))
-JensenTranslation.lean:276:87: error: unsolved goals
-d n : ℕ
-φ : ℝ →+* ℂ := algebraMap ℝ ℂ
-q : Polynomial ℝ := ∑ k ∈ Finset.range (d + 2), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k))
-p : Polynomial ℝ := ∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k))
-hq : Polynomial.map φ q = jensenPoly (d + 1) n
-hp : Polynomial.map φ p = jensenPoly d (n + 1)
-hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
-k : ℕ
-⊢ ↑((d + 1) * d.choose k) = ↑(d + 1) * ↑(d.choose k)
-JensenTranslation.lean:278:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
-  Polynomial.map φ q
+JensenTranslation.lean:279:37: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  HMul (Polynomial ℕ) (Polynomial ℝ) (Polynomial ℝ)
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+JensenTranslation.lean:281:26: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  0 - ?n
 in the target expression
-  Polynomial.derivative (jensenPoly (d + 1) n) = Polynomial.C ↑(d + 1) * jensenPoly d (n + 1)
+  ∑ x ∈ Finset.range (d + 1),
+        Polynomial.derivative ((Polynomial.monomial x) (↑((d + 1).choose x) * taylorCoeff (n + x))) +
+      (Polynomial.monomial d) (↑((d + 1).choose (d + 1)) * taylorCoeff (n + (d + 1)) * ↑(d + 1)) =
+    Polynomial.C (d + 1) * p
 
 d n : ℕ
 φ : ℝ →+* ℂ := algebraMap ℝ ℂ
@@ -46,9 +43,36 @@ hq : Polynomial.map φ q = jensenPoly (d + 1) n
 hp : Polynomial.map φ p = jensenPoly d (n + 1)
 hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
 hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
-⊢ Polynomial.derivative (jensenPoly (d + 1) n) = Polynomial.C ↑(d + 1) * jensenPoly d (n + 1)
-JensenTranslation.lean:289:8: warning: declaration uses `sorry`
-JensenTranslation.lean:299:8: warning: declaration uses `sorry`
-JensenTranslation.lean:307:8: warning: declaration uses `sorry`
-JensenTranslation.lean:314:8: warning: declaration uses `sorry`
+⊢ ∑ x ∈ Finset.range (d + 1),
+        Polynomial.derivative ((Polynomial.monomial x) (↑((d + 1).choose x) * taylorCoeff (n + x))) +
+      (Polynomial.monomial d) (↑((d + 1).choose (d + 1)) * taylorCoeff (n + (d + 1)) * ↑(d + 1)) =
+    Polynomial.C (d + 1) * p
+JensenTranslation.lean:285:6: error(lean.unknownIdentifier): Unknown identifier `h`
+JensenTranslation.lean:264:63: error: unsolved goals
+case refine_1
+d n : ℕ
+φ : ℝ →+* ℂ := ⋯
+q : Polynomial ℝ := ⋯
+p : Polynomial ℝ := ⋯
+hq : Polynomial.map φ q = jensenPoly (d + 1) n
+hp : Polynomial.map φ p = jensenPoly d (n + 1)
+hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
+hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+⊢ HMul (Polynomial ℕ) (Polynomial ℝ) (Polynomial ℝ)
+
+case refine_2
+d n : ℕ
+φ : ℝ →+* ℂ := algebraMap ℝ ℂ
+q : Polynomial ℝ := ∑ k ∈ Finset.range (d + 2), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k))
+p : Polynomial ℝ := ∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k))
+hq : Polynomial.map φ q = jensenPoly (d + 1) n
+hp : Polynomial.map φ p = jensenPoly d (n + 1)
+hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
+hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+h : Polynomial.derivative q = Polynomial.C (d + 1) * p
+⊢ Polynomial.map φ (Polynomial.derivative q) = Polynomial.C ↑(d + 1) * Polynomial.map φ p
+JensenTranslation.lean:290:8: warning: declaration uses `sorry`
+JensenTranslation.lean:300:8: warning: declaration uses `sorry`
+JensenTranslation.lean:308:8: warning: declaration uses `sorry`
+JensenTranslation.lean:315:8: warning: declaration uses `sorry`
 EXIT:1

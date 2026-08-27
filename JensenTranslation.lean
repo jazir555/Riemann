@@ -274,13 +274,14 @@ theorem jensenPoly_derivative (d n : ℕ) :
     rw [Nat.add_one_mul_choose_eq d k]
   have hbin (k : ℕ) :
       (↑(Nat.choose (d + 1) (k + 1)) : ℝ) * ↑(k + 1) = ↑(d + 1) * ↑(Nat.choose d k) := by
-    rw [← Nat.cast_mul, hbinom k]
-  rw [hq, hp, Polynomial.derivative_map φ]
+    rw [← Nat.cast_mul, hbinom k, Nat.cast_mul]
+  rw [← hq, ← hp, Polynomial.derivative_map q φ]
   have h : Polynomial.derivative q = Polynomial.C (↑(d + 1)) * p := by
     rw [Polynomial.derivative_sum, Finset.sum_range_succ, Polynomial.derivative_monomial,
         Nat.succ_sub_one, Nat.zero_sub, mul_zero, Polynomial.monomial_zero, zero_add]
-    rw [Finset.sum_congr rfl (fun k _ => ?_)]
-    · rw [mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc, hbin k]
+    rw [Finset.sum_congr rfl (fun k _ => by
+      rw [mul_assoc, mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc,
+          add_assoc, add_comm k 1, ← add_assoc, hbin k, mul_assoc])]
   rw [h, Polynomial.map_mul, Polynomial.map_C, hp, RingHom.map_natCast]
 
 /-- Rolle for polynomials: the derivative of a hyperbolic polynomial is
