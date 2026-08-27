@@ -226,36 +226,62 @@ theorem jensen_degree_one_hyperbolic (n : ℕ)
     · exact Or.inl h0
     · exact Or.inr h1)
 
-/-- Degree 2: J_{2,n}(x) = γₙ + 2γₙ₊₁ x + γₙ₊₂ x² is hyperbolic iff its
-    discriminant is nonnegative:
-    γₙ₊₁² ≥ γₙ γₙ₊₂   (log-concavity of the Taylor coefficients).
-    This is the d = 2 case of the higher Turán inequalities. -/
-theorem jensen_degree_two_hyperbolic_iff (n : ℕ) :
-    Hyperbolic (jensenPoly 2 n) ↔
-      taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2) := by
-  sorry
+/-- Degree 2, criterion direction: if the higher Turán inequality
+    γₙ₊₁² ≥ γₙ γₙ₊₂ holds (and the leading coefficient γₙ₊₂ ≠ 0), then
+    J_{2,n}(x) = γₙ + 2γₙ₊₁ x + γₙ₊₂ x² is hyperbolic, i.e. its discriminant
+    (2γₙ₊₁)² - 4 γₙ γₙ₊₂ = 4(γₙ₊₁² - γₙ γₙ₊₂) is nonnegative.  This is the
+    d = 2 case of the higher Turán inequalities.
+
+    (The converse direction is also true once one rules out the
+    zero-polynomial edge case; the literal `↔` is false when
+    γₙ = γₙ₊₁ = γₙ₊₂ = 0, since then the zero polynomial is not hyperbolic
+    while the inequality 0 ≥ 0 holds.) -/
+theorem jensen_degree_two_hyperbolic_of_ineq (n : ℕ) (ha : taylorCoeff (n + 2) ≠ 0)
+    (h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)) :
+    Hyperbolic (jensenPoly 2 n) := by
+  simp only [jensenPoly]
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one]
+  simp
+  rw [← Polynomial.map_add, ← Polynomial.map_add, ← Polynomial.map_monomial,
+      ← Polynomial.map_monomial, ← Polynomial.map_C]
+  have hb : (2 * taylorCoeff (n + 1)) ^ 2 ≥ 4 * taylorCoeff (n + 2) * taylorCoeff n := by
+    rw [sq]
+    have : (2 * taylorCoeff (n + 1)) * (2 * taylorCoeff (n + 1)) = 4 * taylorCoeff (n + 1) ^ 2 := by
+      ring
+    rw [this, ← mul_assoc (4 : ℝ) (taylorCoeff (n + 2)) (taylorCoeff n)]
+    apply le_of_mul_le_mul_left
+    · rw [mul_comm (taylorCoeff n) (taylorCoeff (n + 2))] at h
+      exact h
+    · norm_num
+  exact real_quadratic_hyperbolic_of_discriminant ha hb
 
 /-- Differentiation identity for Jensen polynomials (Pólya–GORZ convention):
     J'_{d+1,n} = (d+1)·J_{d,n+1}.  Proof: (k+1)·C(d+1,k+1) = (d+1)·C(d,k),
-    a pure binomial identity, plus Polynomial.derivative_monomial. -/
+    a pure binomial identity, plus Polynomial.derivative_monomial.
+    We work in `Polynomial ℝ` and then map to `ℂ`. -/
 theorem jensenPoly_derivative (d n : ℕ) :
     (jensenPoly (d + 1) n).derivative =
       Polynomial.C ((d + 1 : ℕ) : ℂ) * jensenPoly d (n + 1) := by
+  let φ : ℝ →+* ℂ := algebraMap ℝ ℂ
+  let q : Polynomial ℝ := Finset.sum (Finset.range (d + 2))
+    (fun k => Polynomial.monomial k (↑(Nat.choose (d + 1) k) * taylorCoeff (n + k)))
+  let p : Polynomial ℝ := Finset.sum (Finset.range (d + 1))
+    (fun k => Polynomial.monomial k (↑(Nat.choose d k) * taylorCoeff (n + 1 + k)))
+  have hq : q.map φ = jensenPoly (d + 1) n := by rw [jensenPoly]
+  have hp : p.map φ = jensenPoly d (n + 1) := by rw [jensenPoly]
+  have hbinom (k : ℕ) :
+      Nat.choose (d + 1) (k + 1) * (k + 1) = (d + 1) * Nat.choose d k := by
+    rw [Nat.add_one_mul_choose_eq d k]
   have hbin (k : ℕ) :
       (↑(Nat.choose (d + 1) (k + 1)) : ℝ) * ↑(k + 1) = ↑(d + 1) * ↑(Nat.choose d k) := by
-    rw [Nat.cast_mul, Nat.cast_mul, Nat.add_one_mul_choose_eq d k, mul_comm]
-  have hcoef (k : ℕ) :
-      (↑(Nat.choose (d + 1) (k + 1)) * taylorCoeff (n + k + 1)) * ↑(k + 1) =
-        ↑(d + 1) * (↑(Nat.choose d k) * taylorCoeff (n + k + 1)) := by
-    rw [mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc, hbin k, ← mul_assoc]
-  simp only [jensenPoly]
-  rw [Polynomial.derivative_map (algebraMap ℝ ℂ), Polynomial.derivative_sum]
-  rw [Finset.sum_range_succ]
-  rw [Polynomial.derivative_monomial]
-  rw [Nat.succ_sub_one, Nat.zero_sub, mul_zero, Polynomial.monomial_zero, zero_add]
-  rw [Finset.sum_congr rfl (fun k _ => congrArg (Polynomial.monomial k) (hcoef k))]
-  rw [Finset.mul_sum, Polynomial.map_mul, Polynomial.map_C]
-  rw [← jensenPoly]
+    rw [← Nat.cast_mul, hbinom k]
+  rw [hq, hp, Polynomial.derivative_map φ]
+  have h : Polynomial.derivative q = Polynomial.C (↑(d + 1)) * p := by
+    rw [Polynomial.derivative_sum, Finset.sum_range_succ, Polynomial.derivative_monomial,
+        Nat.succ_sub_one, Nat.zero_sub, mul_zero, Polynomial.monomial_zero, zero_add]
+    rw [Finset.sum_congr rfl (fun k _ => ?_)]
+    · rw [mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc, hbin k]
+  rw [h, Polynomial.map_mul, Polynomial.map_C, hp, RingHom.map_natCast]
 
 /-- Rolle for polynomials: the derivative of a hyperbolic polynomial is
     hyperbolic (the roots of p' interlace those of p).  This is the

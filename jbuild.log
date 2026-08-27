@@ -1,0 +1,54 @@
+JensenTranslation.lean:76:31: warning: Variable name `n` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _n
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+JensenTranslation.lean:79:8: warning: declaration uses `sorry`
+JensenTranslation.lean:100:8: warning: declaration uses `sorry`
+JensenTranslation.lean:106:8: warning: declaration uses `sorry`
+JensenTranslation.lean:123:42: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:245:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  Polynomial.map ?f ?m.58 + Polynomial.map ?f ?m.59
+in the target expression
+  Hyperbolic
+    (Polynomial.C ↑(taylorCoeff n) + (Polynomial.monomial 1) (2 * ↑(taylorCoeff (n + 1))) +
+      (Polynomial.monomial 2) ↑(taylorCoeff (n + 2)))
+
+n : ℕ
+ha : taylorCoeff (n + 2) ≠ 0
+h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)
+⊢ Hyperbolic
+    (Polynomial.C ↑(taylorCoeff n) + (Polynomial.monomial 1) (2 * ↑(taylorCoeff (n + 1))) +
+      (Polynomial.monomial 2) ↑(taylorCoeff (n + 2)))
+JensenTranslation.lean:276:87: error: unsolved goals
+d n : ℕ
+φ : ℝ →+* ℂ := algebraMap ℝ ℂ
+q : Polynomial ℝ := ∑ k ∈ Finset.range (d + 2), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k))
+p : Polynomial ℝ := ∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k))
+hq : Polynomial.map φ q = jensenPoly (d + 1) n
+hp : Polynomial.map φ p = jensenPoly d (n + 1)
+hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
+k : ℕ
+⊢ ↑((d + 1) * d.choose k) = ↑(d + 1) * ↑(d.choose k)
+JensenTranslation.lean:278:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  Polynomial.map φ q
+in the target expression
+  Polynomial.derivative (jensenPoly (d + 1) n) = Polynomial.C ↑(d + 1) * jensenPoly d (n + 1)
+
+d n : ℕ
+φ : ℝ →+* ℂ := algebraMap ℝ ℂ
+q : Polynomial ℝ := ∑ k ∈ Finset.range (d + 2), (Polynomial.monomial k) (↑((d + 1).choose k) * taylorCoeff (n + k))
+p : Polynomial ℝ := ∑ k ∈ Finset.range (d + 1), (Polynomial.monomial k) (↑(d.choose k) * taylorCoeff (n + 1 + k))
+hq : Polynomial.map φ q = jensenPoly (d + 1) n
+hp : Polynomial.map φ p = jensenPoly d (n + 1)
+hbinom : ∀ (k : ℕ), (d + 1).choose (k + 1) * (k + 1) = (d + 1) * d.choose k
+hbin : ∀ (k : ℕ), ↑((d + 1).choose (k + 1)) * ↑(k + 1) = ↑(d + 1) * ↑(d.choose k)
+⊢ Polynomial.derivative (jensenPoly (d + 1) n) = Polynomial.C ↑(d + 1) * jensenPoly d (n + 1)
+JensenTranslation.lean:289:8: warning: declaration uses `sorry`
+JensenTranslation.lean:299:8: warning: declaration uses `sorry`
+JensenTranslation.lean:307:8: warning: declaration uses `sorry`
+JensenTranslation.lean:314:8: warning: declaration uses `sorry`
+EXIT:1

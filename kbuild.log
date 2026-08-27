@@ -1,0 +1,5 @@
+KadiriZeroFree.lean:28:14: warning: declaration uses `sorry`
+KadiriZeroFree.lean:81:8: warning: declaration uses `sorry`
+KadiriZeroFree.lean:113:8: warning: declaration uses `sorry`
+KadiriZeroFree.lean:275:8: warning: declaration uses `sorry`
+EXIT:0
