@@ -1,5 +1,5 @@
 import Mathlib
-import riemannhypothesis
+import riemann_hypothesis
 
 set_option maxHeartbeats 2000000
 
