@@ -9069,7 +9069,7 @@ theorem riemannZeta_ne_zero_of_two_euler_maclaurin_bounds
 
 end ZetaNumericCert
 
-/-- The numeric zero-free rectangle machinery (`criticalStripRect`,
+/- The numeric zero-free rectangle machinery (`criticalStripRect`,
     `criticalStripCover14`, `riemannZeta_ne_zero_critical_strip_le_height`, …)
     required a rigorous numerical certificate that `ζ(s) ≠ 0` throughout the open
     rectangle `{0 < Re s < 1, |Im s| < 14.134}`.  That claim is true (the first

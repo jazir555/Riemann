@@ -52,13 +52,12 @@ theorem sum_primes_recip (x : ℝ) (hx : 10 ≤ x) :
   have hpos : ∀ p, p ∈ Nat.primesLE ⌊x⌋₊ → (0 : ℝ) < p := by
     intro p hp
     exact_mod_cast ((show (0 : ℕ) < 2 by norm_num).trans_le (Nat.Prime.two_le (Finset.mem_filter.mp hp).2))
-  have : ∀ p, p ∈ Nat.primesLE ⌊x⌋₊ → (1 : ℝ) / p ≤ 1 / 2 := by
-    intro p hp
-    exact (one_div_le_one_div (by norm_num) (hpos p hp)).mpr
-      (by exact_mod_cast Nat.Prime.two_le (Finset.mem_filter.mp hp).2)
   calc
-    ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, 1 / 2 :=
-      Finset.sum_le_sum (fun p hp => div_nonneg (by norm_num) (le_of_lt (hpos p hp))) this
+    ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / 2 := by
+      apply Finset.sum_le_sum
+      intro p hp
+      exact (one_div_le_one_div (hpos p hp) (by norm_num : (0 : ℝ) < 2)).mpr
+        (by exact_mod_cast Nat.Prime.two_le (Finset.mem_filter.mp hp).2)
     _ = ((Nat.primesLE ⌊x⌋₊).card : ℝ) * (1 / 2 : ℝ) := by
       rw [Finset.sum_const (1 / 2 : ℝ)]; simp
     _ = (Nat.primeCounting ⌊x⌋₊ : ℝ) * (1 / 2 : ℝ) := by

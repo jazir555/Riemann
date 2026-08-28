@@ -1,0 +1,1040 @@
+riemann hypothesis.lean:154:2: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:177:6: warning: Try `simp at h0` instead of `simpa using h0`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:184:6: warning: Try `simp at h1` instead of `simpa using h1`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:203:0: warning: Definition `classicalXi_zero_equivalence_from_gamma` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:530:4: warning: Try `simp at hp` instead of `simpa using hp`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:553:4: warning: Try `simp at hn` instead of `simpa using hn`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:710:0: warning: Definition `centralPointwise_of_zero_free_cover` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:734:0: warning: Definition `tailPointwise_of_asymptotic_lower_bound` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:925:0: warning: Definition `tailPointwise_from_right_asymptotic_and_symmetry` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:994:0: warning: Definition `tailPointwise_from_right_distance_lower_bound_and_symmetry` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+riemann hypothesis.lean:1198:0: warning: Definition `xiShiftedSymmetryPackage_of_certificates` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:1633:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.
+If you'd rather continue using `push_neg` in your project, you can implement it as follows:
+```
+open Lean.Parser.Tactic in
+macro "push_neg" cfg:optConfig loc:(location)? : tactic =>
+  `(tactic| push $cfg:optConfig Not $[$loc]?)
+```
+riemann hypothesis.lean:1797:41: warning: This simp argument is unused:
+  star_def
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1802:29: warning: This simp argument is unused:
+  star_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [div_eq_mul_inv, star_one, one_mul, star_inv, ← hcpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1802:39: warning: This simp argument is unused:
+  star_one
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [div_eq_mul_inv, star_mul, one_mul, star_inv, ← hcpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1802:58: warning: This simp argument is unused:
+  star_inv
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [div_eq_mul_inv, star_mul, star_one, one_mul, ← hcpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1828:31: warning: This simp argument is unused:
+  star_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [star_neg]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1834:50: warning: This simp argument is unused:
+  show (star 2 : ℂ) = (2 : ℂ) from by norm_num [star_def]
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [div_eq_mul_inv, star_mul', star_inv₀]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+riemann hypothesis.lean:1852:12: warning: This simp argument is unused:
+  star_def
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:1860:0: warning: Definition `classicalSymmetryPackage` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+riemann hypothesis.lean:1967:4: warning: 'push_cast' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:2070:0: warning: Definition `quadrant_nonvanishing_from_plan` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:2103:5: warning: Variable name `hU` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hU
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:2438:0: warning: Definition `remainingQuadrant_from_completedZetaPlan` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:2732:5: warning: Variable name `hgt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hgt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:2743:5: warning: Variable name `hlt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hlt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:2775:5: warning: Variable name `hne` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hne
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:2973:30: warning: Variable name `x` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _x
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:2997:5: warning: Variable name `hne` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hne
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3144:14: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.norm_I]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3159:22: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, Complex.norm_ofNat]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3159:32: warning: This simp argument is unused:
+  Complex.norm_ofNat
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3168:5: warning: Variable name `x_lt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _x_lt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3169:5: warning: Variable name `y_lt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _y_lt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3340:5: warning: Variable name `h` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _h
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3419:5: warning: Variable name `hr` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hr
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3466:14: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.norm_I]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3481:8: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3482:8: warning: This simp argument is unused:
+  abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:3825:5: warning: Variable name `hyne` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hyne
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:3976:42: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+riemann hypothesis.lean:3976:42: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:4178:6: warning: Variable name `C` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _C
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:4217:22: warning: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [R, hy]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:4333:5: warning: Variable name `hab` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hab
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:4363:5: warning: Variable name `hab` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hab
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:4424:2: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4441:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4426:0: warning: Definition `nearRealCertificate_from_negative_imag` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4459:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4443:0: warning: Definition `upperBoundaryCertificate_from_negative_imag` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4505:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4521:0: warning: Definition `upperHalfNegativeImaginaryCertificate_of_cover` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4577:0: warning: Definition `upperHalfNegativeImaginaryCertificate_of_proof` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4775:0: warning: Definition `boundedNearRealCertificate_from_cover` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4787:0: warning: Definition `boundedUpperBoundaryCertificate_from_cover` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:4925:4: warning: Try `simp at hpos` instead of `simpa using hpos`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4939:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4953:4: warning: Try `simp at hpos` instead of `simpa using hpos`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:4967:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:5311:0: warning: Definition `tailPointwise_from_rouche_certificate` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:5358:0: warning: Definition `tailPointwise_from_unit_comparison` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:5512:0: warning: Definition `tailPointwise_from_completedZeta_small_bound` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:5746:14: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.norm_I, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5746:40: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, Complex.norm_I]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5758:8: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5759:8: warning: This simp argument is unused:
+  abs_of_pos (by norm_num : (0 : ℝ) < 1 / 4)
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_pow, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5877:6: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:5882:6: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:5892:0: warning: Definition `tailUnitCert_of_bound` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:5955:14: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5955:24: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:5955:34: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6021:16: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [D, C, norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6021:26: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [D, C, norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6021:36: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [D, C, norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6027:10: warning: This simp argument is unused:
+  hAnorm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp at this
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6102:0: warning: Definition `firstQuadrant_of_rectangle` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:6135:0: warning: Definition `remainingQuadrant` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:6219:14: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6219:24: warning: This simp argument is unused:
+  norm_one
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6336:8: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.xiShifted_eq_neg_half_D_mul_completed_minus_polar`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6378:2: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.CompletedMinusPolarTailLowerBound10.bound`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6372:2: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.CompletedMinusPolarTailLowerBound10.m`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6373:2: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.CompletedMinusPolarTailLowerBound10.m_pos`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6371:10: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.CompletedMinusPolarTailLowerBound10`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6371:10: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.CompletedMinusPolarTailLowerBound10.mk`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6397:4: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6429:8: warning: The namespace `RHProofScaffold` is duplicated in the declaration `RHProofScaffold.RHProofScaffold.rh_from_quadrant_and_completedMinusPolarTail`.
+
+Note: This linter can be disabled with `set_option linter.dupNamespace false`
+riemann hypothesis.lean:6478:0: warning: Definition `remainingQuadrant_of_boundedEvidence` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:6622:0: warning: Definition `tailPointwise_from_completedMinusPolar` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:6913:8: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6913:18: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:6913:28: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7250:8: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7250:18: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7250:28: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7367:11: warning: Variable name `z` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _z
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:7467:17: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [fHalf]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7898:0: warning: Definition `upperHalf_from_split` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:7940:4: warning: Try `simp at hneg` instead of `simpa using hneg`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:7932:0: warning: Definition `upperHalf_from_negIm` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:7987:12: warning: This simp argument is unused:
+  hx
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:7987:2: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+riemann hypothesis.lean:8013:5: warning: Variable name `hlt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hlt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:8026:6: warning: This simp argument is unused:
+  Complex.div_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.neg_re, Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8027:6: warning: This simp argument is unused:
+  Complex.ofReal_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.neg_re, Complex.div_re, Complex.ofReal_im, Complex.normSq_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8028:6: warning: This simp argument is unused:
+  Complex.ofReal_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.neg_re, Complex.div_re, Complex.ofReal_re, Complex.normSq_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8029:6: warning: This simp argument is unused:
+  Complex.normSq_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.neg_re, Complex.div_re, Complex.ofReal_re, Complex.ofReal_im]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8125:4: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+riemann hypothesis.lean:8248:41: warning: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:8266:49: warning: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:8270:64: warning: This simp argument is unused:
+  Complex.ofReal_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.one_re, Complex.one_im,
+    Complex.normSq_apply, sub_zero, mul_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8271:20: warning: This simp argument is unused:
+  Complex.one_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.ofReal_im, Complex.one_re,
+    Complex.normSq_apply, sub_zero, mul_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8271:58: warning: This simp argument is unused:
+  sub_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.ofReal_im, Complex.one_re,
+    Complex.one_im, Complex.normSq_apply, mul_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8271:68: warning: This simp argument is unused:
+  mul_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.ofReal_im, Complex.one_re,
+    Complex.one_im, Complex.normSq_apply, sub_zero, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8271:78: warning: This simp argument is unused:
+  add_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.ofReal_im, Complex.one_re,
+    Complex.one_im, Complex.normSq_apply, sub_zero, mul_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8274:13: warning: This simp argument is unused:
+  Complex.ofReal_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne, ne_eq,
+    OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8274:51: warning: This simp argument is unused:
+  Complex.normSq_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, sub_zero, mul_zero, add_zero, hsne, ne_eq,
+    OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8274:73: warning: This simp argument is unused:
+  sub_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, mul_zero, add_zero, hsne, ne_eq,
+    OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8275:24: warning: This simp argument is unused:
+  hsne
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, ne_eq,
+    OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8275:30: warning: This simp argument is unused:
+  ne_eq
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8275:37: warning: This simp argument is unused:
+  OfNat.ofNat_ne_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    ne_eq, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8275:58: warning: This simp argument is unused:
+  not_false_eq_true
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    ne_eq, OfNat.ofNat_ne_zero, div_pow, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8276:4: warning: This simp argument is unused:
+  div_pow
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel₀ _ hsne, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8276:13: warning: This simp argument is unused:
+  mul_div_cancel₀ _ hsne
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8276:37: warning: This simp argument is unused:
+  mul_one
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.ofReal_re, Complex.ofReal_im, Complex.normSq_apply, sub_zero, mul_zero, add_zero, hsne,
+    ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_pow, mul_div_cancel₀ _ hsne]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8297:83: warning: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:8322:75: warning: Variable name `hs1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:8390:26: warning: This simp argument is unused:
+  zero_add
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hkey, Complex.neg_re, Complex.inv_re, Complex.sub_re, Complex.ofReal_re, Complex.sub_im,
+    Complex.ofReal_im, Complex.normSq_apply, Complex.one_re, Complex.one_im, sub_self, zero_mul, add_zero]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8796:38: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:8808:14: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.norm_I]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9091:5: warning: Variable name `hx0` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx0
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9091:23: warning: Variable name `hx1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9136:61: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+riemann hypothesis.lean:9194:2: warning: 'push_cast' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:9218:0: warning: Definition `remainingQuadrant_10_closed` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:9283:13: warning: This simp argument is unused:
+  Complex.I_sq
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [pow_two, Complex.add_re, Complex.mul_re, Complex.neg_re, Complex.ofReal_re, Complex.I_re,
+    Complex.I_im, Complex.add_im, Complex.mul_im, Complex.neg_im, Complex.ofReal_im, Complex.zero_re, Complex.zero_im,
+    zero_mul, mul_zero, zero_add, add_zero] at h1 h2
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9284:4: warning: This simp argument is unused:
+  Complex.neg_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.I_sq, pow_two, Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.I_re,
+    Complex.I_im, Complex.add_im, Complex.mul_im, Complex.neg_im, Complex.ofReal_im, Complex.zero_re, Complex.zero_im,
+    zero_mul, mul_zero, zero_add, add_zero] at h1 h2
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9285:36: warning: This simp argument is unused:
+  Complex.neg_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.I_sq, pow_two, Complex.add_re, Complex.mul_re, Complex.neg_re, Complex.ofReal_re,
+    Complex.I_re, Complex.I_im, Complex.add_im, Complex.mul_im, Complex.ofReal_im, Complex.zero_re, Complex.zero_im,
+    zero_mul, mul_zero, zero_add, add_zero] at h1 h2
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9286:68: warning: This simp argument is unused:
+  add_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.I_sq, pow_two, Complex.add_re, Complex.mul_re, Complex.neg_re, Complex.ofReal_re,
+    Complex.I_re, Complex.I_im, Complex.add_im, Complex.mul_im, Complex.neg_im, Complex.ofReal_im, Complex.zero_re,
+    Complex.zero_im, zero_mul, mul_zero, zero_add] at h1 h2
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9301:8: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9301:18: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9301:28: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9417:5: warning: Variable name `G` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _G
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9418:13: warning: Variable name `hx` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9422:26: warning: This simp argument is unused:
+  Complex.I_mul_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.add_re]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9425:26: warning: This simp argument is unused:
+  Complex.I_mul_re
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.add_re]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:9600:17: warning: Variable name `z` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _z
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9600:19: warning: Variable name `hgt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hgt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9600:23: warning: Variable name `hlt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hlt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9600:27: warning: Variable name `hne` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hne
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9625:5: warning: Variable name `hx` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9626:5: warning: Variable name `hy0` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy0
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9626:22: warning: Variable name `hy1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:9903:0: warning: Definition `rh_from_quadrant_and_leaf2` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:9994:5: warning: Variable name `P` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _P
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10084:5: warning: Variable name `hx` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hx
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10086:5: warning: Variable name `hy0` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy0
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10087:5: warning: Variable name `hy1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10124:8: warning: Variable name `N` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _N
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10181:5: warning: Variable name `A1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _A1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10182:5: warning: Variable name `A3` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _A3
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10277:17: warning: Variable name `z` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _z
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10277:19: warning: Variable name `hgt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hgt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10277:23: warning: Variable name `hlt` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hlt
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10277:27: warning: Variable name `hne` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hne
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10361:24: warning: This simp argument is unused:
+  xi_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [xi_re] at hz
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:10378:22: warning: This simp argument is unused:
+  xi_im
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [xi_re] at hz
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:10472:0: warning: Definition `roucheGapLeaf_struct_of_def` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:10874:45: warning: Variable name `hy` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10902:46: warning: Variable name `hy` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10902:70: warning: Variable name `hy'` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hy'
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:10903:5: warning: Variable name `hN` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hN
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+riemann hypothesis.lean:11079:8: warning: This simp argument is unused:
+  norm_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_div, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:11079:18: warning: This simp argument is unused:
+  norm_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, RCLike.norm_ofReal]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:11079:28: warning: This simp argument is unused:
+  RCLike.norm_ofReal
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [norm_mul, norm_div]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+riemann hypothesis.lean:11235:4: warning: 'change 0 < (if 10 < |r| then (‖tailD r y‖ / 2) * C.m r y else 1)' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:11268:0: warning: Definition `certificate_to_tailPointwise` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+riemann hypothesis.lean:11384:6: warning: 'change 0 < (if |y| < (1 / 2 : ℝ) then ‖correctedDifference ((r : ℂ) + I * (y : ℂ))‖ else 1)' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+riemann hypothesis.lean:11746:14: warning: This simp argument is unused:
+  norm_one
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Complex.norm_real, abs_of_pos hx0]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+EXIT:0
