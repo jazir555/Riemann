@@ -28,9 +28,9 @@ lemma gamma_norm_ge_one_rpow (s : ℂ) (hs : 1 ≤ s.re) :
 lemma gamma_norm_halfplane_le (z : ℂ) (hz : 0 < z.re) :
     ‖Complex.Gamma (z / 2)‖ ≤ (z.re / 2 + 2) ^ (z.re / 2 + 1) / (‖z‖ / 2) := by
   have hrec : Complex.Gamma (z / 2) = Complex.Gamma (z / 2 + 1) / (z / 2) := by
-    rw [← Complex.Gamma_add_one (by simpa : z / 2 ≠ 0)]; field_simp
-  rw [hrec, norm_div, norm_natCast, Complex.norm_of_nonneg (by linarith : 0 ≤ ‖z‖ / 2)]
-  have h1 : 1 ≤ (z / 2).re + 1 := by simpa using hz
+    rw [← Complex.Gamma_add_one (by simp)]; field_simp
+  rw [hrec, norm_div, Complex.norm_div, Complex.norm_natCast]
+  have h1 : 1 ≤ (z / 2 + 1).re := by linarith
   exact (norm_Gamma_le_Gamma_re (by simpa : 0 < (z / 2 + 1).re)).trans (gamma_norm_ge_one_rpow (z / 2 + 1) h1)
 
 -- `completedRiemannZeta ∈ orderSet(1)` given uniform ζ growth `hζ`.
@@ -58,7 +58,7 @@ theorem completedRiemannZeta_order_one
       rw [div_le_one (by norm_num)]
       have := Complex.abs_im_le_norm (1 - z)
       have hdist : ‖1 - z‖ ≥ ‖z‖ - 1 := by
-        calc ‖1 - z‖ ≥ |‖1‖ - ‖z‖ | := norm_sub_le ‖(1 : ℂ)‖ z
+        calc ‖1 - z‖ ≥ |‖1‖ - ‖z‖ | := norm_sub_le (1 : ℂ) z
           _ = |1 - ‖z‖| := by rw [norm_one]
           _ = ‖z‖ - 1 := by rw [abs_of_nonneg (by linarith)]
       linarith [hdist]

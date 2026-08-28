@@ -168,3 +168,8 @@ theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
       sorry hRHS_pos h_c
 
 end
+
+theorem xiFE (s : ℂ) : xi (1 - s) = xi s := by
+  unfold xi
+  rw [completedRiemannZeta₀_one_sub]
+  ring

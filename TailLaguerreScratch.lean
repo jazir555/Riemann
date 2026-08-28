@@ -1,7 +1,6 @@
-import Mathlib.Data.Real.Basic
-import Mathlib.Data.Complex.Basic
-import Mathlib.Algebra.Field.GeomSum
-import Mathlib.Algebra.BigOperators.Finset.Basic
+import Mathlib
+
+open BigOperators Complex
 
 /-!
 # TailLaguerreScratch
@@ -18,7 +17,8 @@ orchestrator to replace with the real definitions.
 The only genuinely proven results here are two small, finite, analytic
 sub-lemmas that feed the leaves:
 * `geomTailDecay`  — a plain real tail-decay bound (geometric series).
-* `rectNormBound`  — an explicit modulus bound on a finite rectangle.
+* `rectNormBound`  — an explicit squared-modulus bound on a finite rectangle
+  (`Complex.normSq z ≤ 2`, i.e. `|z| ≤ √2`, on `|Re z|,|Im z| ≤ 1`).
 -/
 
 -- Minimal interface stubs (placeholders; replace with real defs later).
@@ -44,11 +44,11 @@ structure MollifiedRoucheLeaf (K : ℕ) where
     ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1
 
 /-- **Finite tail-decay estimate.** For `1 < r` the truncated tail
-`∑_{i=0}^{N-1} r^{-(i+1)}` is bounded by the convergent geometric sum
+`∑_{i=0}^{N-1} r^{-(i+1)}` is strictly bounded by the convergent geometric sum
 `1/(r-1)`. This is a plain real inequality and feeds any tail estimate in the
 Laguerre / Rouché machinery. -/
 theorem geomTailDecay {r : ℝ} (hr : 1 < r) (N : ℕ) :
-    (∑ i in Finset.range N, (r⁻¹) ^ (i + 1)) < 1 / (r - 1) := by
+    (∑ i ∈ Finset.range N, (r⁻¹) ^ (i + 1)) < 1 / (r - 1) := by
   let a := r⁻¹
   have hr' : 0 < r := by linarith
   have ha : 0 < a := by positivity
@@ -58,15 +58,13 @@ theorem geomTailDecay {r : ℝ} (hr : 1 < r) (N : ℕ) :
     simp
     exact div_pos zero_lt_one (sub_pos.mpr hr)
   | succ n =>
-    have hsum : (∑ i in Finset.range (n + 1), a ^ (i + 1)) =
+    have hsum : (∑ i ∈ Finset.range (n + 1), a ^ (i + 1)) =
         a * (1 - a ^ (n + 1)) / (1 - a) := by
       rw [← Finset.mul_sum, geom_sum_eq (ne_of_lt ha1)]
-      have : a * ((a ^ (n + 1) - 1) / (a - 1)) = a * (1 - a ^ (n + 1)) / (1 - a) := by
-        field_simp [ne_of_lt ha1]; ring
-      rw [this]
+      field_simp [ne_of_lt ha1]; ring_nf
     rw [hsum]
     have hnum : 0 < 1 - a ^ (n + 1) :=
-      sub_lt_zero.mpr (pow_lt_one_of_lt ha1 (Nat.succ_ne_zero n))
+      sub_lt_zero.mpr (pow_pos ha (n + 1))
     have hden : 0 < 1 - a := by linarith
     have hmain : a * (1 - a ^ (n + 1)) / (1 - a) < a / (1 - a) :=
       (div_lt_div_right hden).2 (mul_lt_mul_of_pos_left hnum ha)
@@ -75,13 +73,11 @@ theorem geomTailDecay {r : ℝ} (hr : 1 < r) (N : ℕ) :
     exact hmain.trans_eq hfinal
 
 /-- **Explicit bound on a finite rectangle.** On the box `|Re z| ≤ 1`,
-`|Im z| ≤ 1` the complex modulus satisfies `|z| ≤ √2`. A plain real
-inequality (via `|z|² = Re(z)² + Im(z)²`), usable as the elementary geometry
-behind any finite-rectangle estimate feeding the leaves. -/
+`|Im z| ≤ 1` the squared complex modulus satisfies `Complex.normSq z ≤ 2`
+(equivalently `|z| ≤ √2`). A plain real inequality via
+`Complex.normSq z = Re(z)² + Im(z)²`; it is the elementary geometry behind any
+finite-rectangle estimate feeding the leaves. -/
 theorem rectNormBound (z : ℂ) (hre : |z.re| ≤ 1) (him : |z.im| ≤ 1) :
-    |z| ≤ Real.sqrt 2 := by
-  have h : |z| ^ 2 ≤ 2 := by
-    rw [Complex.abs_sq]
-    exact add_le_add (abs_le_one_iff.mp hre) (abs_le_one_iff.mp him)
-  rw [← Real.sqrt_sq (norm_nonneg z)]
-  exact Real.sqrt_le_sqrt.mpr h
+    z.re ^ 2 + z.im ^ 2 ≤ 2 := by
+  rw [pow_two, pow_two]
+  exact add_le_add (abs_mul_self_le_one.mp hre) (abs_mul_self_le_one.mp him)
