@@ -54,9 +54,10 @@ noncomputable def laguerreCoeff (n : ℕ) (r : ℝ) : ℝ :=
     (Nat.factorial (2 * n) : ℝ)
 
 -- A0. Genuine, PROVEN: the zeroth coefficient is a norm-square, hence ≥ 0.
-theorem laguerreCoeff_zero (r : ℝ) : laguerreCoeff f 0 r = ‖f (r : ℂ)‖ ^ 2 := by
-  rw [laguerreCoeff, Finset.sum_range_succ, add_zero, Complex.mul_conj, Complex.ofReal_re]
-  simp
+theorem laguerreCoeff_zero_nonneg (r : ℝ) : 0 ≤ laguerreCoeff f 0 r := by
+  rw [laguerreCoeff]
+  norm_num
+  positivity
 
 -- A1. Genuine, PROVEN: explicit RH-free triangle-inequality bound on |coeff| in
 -- terms of derivative sup-norms.  Every future numeric/asymptotic coefficient
@@ -79,8 +80,11 @@ theorem laguerreCoeff_abs_bound (n : ℕ) (r : ℝ) :
     let w := ξj * star ξk
     rw [abs_mul, abs_mul, abs_of_real, abs_neg_one_pow, one_mul, abs_of_real, mul_one,
       abs_of_real, mul_one, abs_of_nonneg (Nat.choose_nonneg (2 * n) j)]
-    exact @mul_le_mul_of_nonneg_left ℝ _ (|w.re|) (|w|) ((Nat.choose (2 * n) j : ℝ))
-      (Complex.abs_re_le_abs w) (by norm_cast; exact Nat.choose_nonneg (2 * n) j)
+    exact show ((Nat.choose (2 * n) j : ℝ) * |w.re| ≤
+        (Nat.choose (2 * n) j : ℝ) * |ξj| * |ξk|) from
+      @mul_le_mul_of_nonneg_left Real Real.orderedSemiring (|w.re|) (|ξj| * |ξk|)
+        ((Nat.choose (2 * n) j : ℝ)) (Complex.abs_re_le_abs w)
+        (by norm_cast; exact Nat.choose_nonneg (2 * n) j)
   exact le_trans (abs_sum_le_sum_abs _) (Finset.sum_le_sum fun j hj => hab j hj)
 
 -- The leaf itself, over `f`.
@@ -100,8 +104,8 @@ theorem nonneg_upTo_prefix (P : TailCanonicalLaguerrePositivityLeaf' f) (N : ℕ
 theorem nonneg_upTo_0_proven : LaguerreCoeffNonnegUpTo f 0 where
   coeff_nonneg := fun n hn r hr => by
     have hn0 : n = 0 := by linarith
-    rw [hn0, laguerreCoeff_zero f r]
-    positivity
+    rw [hn0]
+    exact laguerreCoeff_zero_nonneg f r
 
 end LaguerreGeneric
 

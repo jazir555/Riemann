@@ -98,7 +98,9 @@ theorem thin_region_is_exact_gap (ξ : ℂ → ℂ)
     NoRightHalfZeros ξ ↔ ThinRegion ξ hC.C hC.T₀ := by
   constructor
   · intro hNZ s hs_gt hs_lt hT₀
-    exact hNZ s hs_gt hs_lt
+    have hpos : 0 < hC.C / Real.log (abs s.im + 2) := by
+      exact div_pos hC.Cpos (Real.log_pos (by linarith))
+    exact hNZ s hs_gt (by linarith [hs_lt, hpos])
   · intro hT s hs_gt hs_lt
     rcases hC with ⟨C, T₀, _, hZ⟩
     by_cases hT0 : abs s.im < T₀
@@ -124,7 +126,8 @@ theorem crit_line_iff_no_right_half (ξ : ℂ → ℂ) (hfe : XiFE ξ) :
     XiCriticalLineZeros ξ ↔ NoRightHalfZeros ξ := by
   constructor
   · intro h s hgt hlt hs
-    exact h s hs hgt hlt
+    have hline : s.re = 1 / 2 := h s hs (by linarith) hlt
+    linarith
   · intro h s hs hgt hlt
     by_contra hne
     rcases (lt_or_gt_of_ne hne) with (hlow | hhigh)
