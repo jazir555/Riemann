@@ -1,7 +1,105 @@
-JTest.lean:10:17: warning: Variable name `n` is not explicitly referenced.
+JensenTranslation.lean:101:8: warning: declaration uses `sorry`
+JensenTranslation.lean:107:8: warning: declaration uses `sorry`
+JensenTranslation.lean:124:42: warning: try 'simp' instead of 'simpa'
 
-Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
-  [apply] _n
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:306:2: error: Tactic `induction` failed: major premise type is not an inductive type
+  Quot ⇑(List.isSetoid ℝ)
 
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-EXIT:0
+Explanation: the `induction` tactic is for constructor-based reasoning as well as for applying custom induction principles with a 'using' clause or a registered '@[induction_eliminator]' theorem. The above type neither is an inductive type nor has a registered theorem.
+
+M : Multiset ℝ
+h : ∀ x ∈ M, 0 ≤ x
+⊢ 0 ≤ M.sum
+JensenTranslation.lean:316:2: error: Tactic `induction` failed: major premise type is not an inductive type
+  Quot ⇑(List.isSetoid ℝ)
+
+Explanation: the `induction` tactic is for constructor-based reasoning as well as for applying custom induction principles with a 'using' clause or a registered '@[induction_eliminator]' theorem. The above type neither is an inductive type nor has a registered theorem.
+
+M : Multiset ℝ
+h : ∀ x ∈ M, 0 < x
+hn : M ≠ 0
+⊢ 0 < M.sum
+JensenTranslation.lean:333:2: error: Tactic `induction` failed: major premise type is not an inductive type
+  Quot ⇑(List.isSetoid ℂ)
+
+Explanation: the `induction` tactic is for constructor-based reasoning as well as for applying custom induction principles with a 'using' clause or a registered '@[induction_eliminator]' theorem. The above type neither is an inductive type nor has a registered theorem.
+
+M : Multiset ℂ
+w : ℂ
+hne : ∀ r ∈ M, w ≠ r
+⊢ let Q := (Multiset.map (fun r => Polynomial.X - Polynomial.C r) M).prod;
+  Polynomial.eval w (Polynomial.derivative Q) = Polynomial.eval w Q * (Multiset.map (fun r => (w - r)⁻¹) M).sum
+JensenTranslation.lean:353:2: error: Tactic `induction` failed: major premise type is not an inductive type
+  Quot ⇑(List.isSetoid ℂ)
+
+Explanation: the `induction` tactic is for constructor-based reasoning as well as for applying custom induction principles with a 'using' clause or a registered '@[induction_eliminator]' theorem. The above type neither is an inductive type nor has a registered theorem.
+
+w : ℂ
+M : Multiset ℂ
+hre : ∀ r ∈ M, r.im = 0
+hne : ∀ r ∈ M, w ≠ r
+⊢ (Multiset.map (fun r => (w - r)⁻¹) M).sum.im = -w.im * (Multiset.map (fun r => (normSq (w - r))⁻¹) M).sum
+JensenTranslation.lean:373:4: error: Type mismatch
+  Polynomial.C_leadingCoeff_mul_prod_multiset_X_sub_C hcard
+has type
+  Polynomial.C p.leadingCoeff * (Multiset.map (fun a => Polynomial.X - Polynomial.C a) p.roots).prod = p
+but is expected to have type
+  p = Polynomial.C p.leadingCoeff * P
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+JensenTranslation.lean:378:57: error: unsolved goals
+p : Polynomial ℂ
+hp : Hyperbolic p
+hdeg : 0 < p.natDegree
+w : ℂ
+hw : Polynomial.eval w (Polynomial.derivative p) = 0
+hroot : ¬Polynomial.eval w p = 0
+hwnotroot : ∀ r ∈ p.roots, w ≠ r
+P : Polynomial ℂ := (Multiset.map (fun r => Polynomial.X - Polynomial.C r) p.roots).prod
+hcard : p.roots.card = p.natDegree
+hfact : p = Polynomial.C p.leadingCoeff * P
+hIdent :
+  Polynomial.eval w (Polynomial.derivative P) = Polynomial.eval w P * (Multiset.map (fun r => (w - r)⁻¹) p.roots).sum
+⊢ p.leadingCoeff * Polynomial.eval w P * (Multiset.map (fun x => (w - x)⁻¹) p.roots).sum =
+    Polynomial.eval w (Polynomial.C p.leadingCoeff * P) *
+      (Multiset.map (fun x => (w - x)⁻¹) (Polynomial.C p.leadingCoeff * P).roots).sum
+JensenTranslation.lean:395:10: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  0 < ?m.373⁻¹
+in the target expression
+  0 < r
+
+case h
+p : Polynomial ℂ
+hp : Hyperbolic p
+hdeg : 0 < p.natDegree
+w : ℂ
+hw : Polynomial.eval w (Polynomial.derivative p) = 0
+hroot : ¬Polynomial.eval w p = 0
+hwnotroot : ∀ r ∈ p.roots, w ≠ r
+P : Polynomial ℂ := (Multiset.map (fun r => Polynomial.X - Polynomial.C r) p.roots).prod
+hcard : p.roots.card = p.natDegree
+hfact : p = Polynomial.C p.leadingCoeff * P
+hIdent :
+  Polynomial.eval w (Polynomial.derivative P) = Polynomial.eval w P * (Multiset.map (fun r => (w - r)⁻¹) p.roots).sum
+hPE :
+  Polynomial.eval w (Polynomial.derivative p) = Polynomial.eval w p * (Multiset.map (fun r => (w - r)⁻¹) p.roots).sum
+hsum0 : (Multiset.map (fun r => (w - r)⁻¹) p.roots).sum = 0
+S : ℝ := (Multiset.map (fun r => (normSq (w - r))⁻¹) p.roots).sum
+hIm : 0 = -w.im * S
+r : ℝ
+hr : r ∈ Multiset.map (fun r => (normSq (w - r))⁻¹) p.roots
+⊢ 0 < r
+JensenTranslation.lean:397:6: error: Type mismatch: After simplification, term
+  hdeg
+ has type
+  0 < p.natDegree
+but is expected to have type
+  ¬p.roots = 0
+JensenTranslation.lean:409:8: warning: declaration uses `sorry`
+JensenTranslation.lean:417:8: warning: declaration uses `sorry`
+JensenTranslation.lean:424:8: warning: declaration uses `sorry`

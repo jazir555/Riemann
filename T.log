@@ -1,0 +1,14 @@
+T.lean:1:0: error: unknown module prefix 'JensenTranslation'
+
+No directory 'JensenTranslation' or file 'JensenTranslation.olean' in the search path entries:
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\Cli\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\batteries\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\Qq\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\aesop\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\proofwidgets\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\importGraph\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\LeanSearchClient\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\packages\plausible\.lake\build\lib\lean
+C:\Users\mmeadow\Documents\Lean\mathlib4\.lake\build\lib\lean
+c:\Users\mmeadow\.elan\toolchains\leanprover--lean4---v4.33.0-rc1\lib\lean
+c:\Users\mmeadow\.elan\toolchains\leanprover--lean4---v4.33.0-rc1\lib\lean
