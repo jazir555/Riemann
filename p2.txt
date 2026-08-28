@@ -1,0 +1,4 @@
+probe2.lean:2:8: error(lean.unknownIdentifier): Unknown constant `Real.log_le_sub_one`
+probe2.lean:3:8: error(lean.unknownIdentifier): Unknown constant `Real.log_le`
+probe2.lean:4:8: error(lean.unknownIdentifier): Unknown constant `Real.exp_le_of_le`
+probe2.lean:5:8: error(lean.unknownIdentifier): Unknown constant `Real.exp_le`

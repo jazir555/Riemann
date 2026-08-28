@@ -63,10 +63,10 @@ structure ClassicalZFR (ξ : ℂ → ℂ) where
   (C T₀ : ℝ)
   (Cpos : 0 < C)
   (zeroFree : ∀ s : ℂ,
-    1 - C / Real.log (Real.abs s.im + 2) ≤ s.re →
-    s.re < 1 →
-    T₀ ≤ Real.abs s.im →
-    ξ s ≠ 0)
+     1 - C / Real.log (abs s.im + 2) ≤ s.re →
+     s.re < 1 →
+     T₀ ≤ abs s.im →
+     ξ s ≠ 0)
 
 /-- The thin region: the ONLY place an off-critical-line zero could still hide
 once the classical ZFR and a bounded cover are in place.  This is the exact
@@ -74,15 +74,15 @@ open leaf. -/
 def ThinRegion (ξ : ℂ → ℂ) (C T₀ : ℝ) : Prop :=
   ∀ s : ℂ,
     1 / 2 < s.re →
-    s.re < 1 - C / Real.log (Real.abs s.im + 2) →
-    T₀ ≤ Real.abs s.im →
+    s.re < 1 - C / Real.log (abs s.im + 2) →
+    T₀ ≤ abs s.im →
     ξ s ≠ 0
 
-/-- A finite zero-free cover of the bounded part near the real axis.  This is a
+/- A finite zero-free cover of the bounded part near the real axis.  This is a
 TRUE finite numerical fact (rigorous interval arithmetic). -/
 structure BoundedCover (ξ : ℂ → ℂ) (T₀ : ℝ) where
   covers : ∀ s : ℂ,
-    1 / 2 < s.re → s.re < 1 → Real.abs s.im < T₀ → ξ s ≠ 0
+    1 / 2 < s.re → s.re < 1 → abs s.im < T₀ → ξ s ≠ 0
 
 /-- Full zero-freeness of the right half of the critical strip. -/
 def NoRightHalfZeros (ξ : ℂ → ℂ) : Prop :=
@@ -101,33 +101,56 @@ theorem thin_region_is_exact_gap (ξ : ℂ → ℂ)
     exact hNZ s hs_gt hs_lt
   · intro hT s hs_gt hs_lt
     rcases hC with ⟨C, T₀, _, hZ⟩
-    by_cases hT0 : Real.abs s.im < T₀
+    by_cases hT0 : abs s.im < T₀
     · exact hB.covers s hs_gt hs_lt hT0
-    · push_neg at hT0
-      by_cases hcov : 1 - C / Real.log (Real.abs s.im + 2) ≤ s.re
+    · push Not at hT0
+      by_cases hcov : 1 - C / Real.log (abs s.im + 2) ≤ s.re
       · exact hZ s hcov hs_lt hT0
-      · have hlt : s.re < 1 - C / Real.log (Real.abs s.im + 2) := by linarith
+      · have hlt : s.re < 1 - C / Real.log (abs s.im + 2) := by linarith
         exact hT s hs_gt hlt hT0
 
 /-- **RH is exactly the thin region.**  Under the standard xi symmetries, the
 classical ZFR, and a bounded cover (all true), the Riemann Hypothesis is
 logically equivalent to zero-freeness on the thin region.  Therefore closing
 RH = proving `ThinRegion`.  This is the precise final leaf. -/
+/-- Critical-line zeros of `ξ`: every zero in the strip lies on `Re s = 1/2`. -/
+def XiCriticalLineZeros (ξ : ℂ → ℂ) : Prop :=
+  ∀ s : ℂ, ξ s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2
+
+/-- Given the functional equation `ξ(s) = ξ(1 - s)`, off-critical-line zeros are
+exactly ruled out by zero-freeness of the right half.  Pure logic; `simp`
+resolves `Re(1 - s)`. -/
+theorem crit_line_iff_no_right_half (ξ : ℂ → ℂ) (hfe : XiFE ξ) :
+    XiCriticalLineZeros ξ ↔ NoRightHalfZeros ξ := by
+  constructor
+  · intro h s hgt hlt hs
+    exact h s hs hgt hlt
+  · intro h s hs hgt hlt
+    by_contra hne
+    rcases (lt_or_gt_of_ne hne) with (hlow | hhigh)
+    · let t := 1 - s
+      have ht_zero : ξ t = 0 := by rw [← hfe s] <;> exact hs
+      have ht_gt : 1 / 2 < t.re := by dsimp [t] <;> linarith
+      have ht_lt : t.re < 1 := by dsimp [t] <;> linarith
+      exact h t ht_gt ht_lt ht_zero
+    · exact h s hhigh hlt hs
+
 theorem rh_iff_thin_region (ξ : ℂ → ℂ)
     (hξ : XiZeroEquivInStrip ξ) (hfe : XiFE ξ)
     (hC : ClassicalZFR ξ) (hB : BoundedCover ξ hC.T₀) :
     (∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2)
     ↔ ThinRegion ξ hC.C hC.T₀ := by
-  constructor
-  · intro hRH s hs_gt hs_lt hT₀ hzero
-    have hz : riemannZeta s = 0 := (hξ s (by linarith) (by linarith)).mp hzero
-    have hline : s.re = 1 / 2 := hRH s hz (by linarith) (by linarith)
-    linarith
-  · intro hT s hz hs0 hs1
-    have hNZ := (thin_region_is_exact_gap ξ hξ hfe hC hB).mpr hT
-    have hxi0 : ξ s = 0 := (hξ s hs0 hs1).mpr hz
-    have hgt : 1 / 2 < s.re := by linarith
-    exact hNZ s hgt hs1 hxi0
+  have hcrit : (∀ s, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2)
+                ↔ XiCriticalLineZeros ξ := by
+    constructor
+    · intro h s hs h0 h1
+      have hζ : riemannZeta s = 0 := (hξ s h0 h1).mp hs
+      exact h s hζ h0 h1
+    · intro h s hζ h0 h1
+      have hξs : ξ s = 0 := (hξ s h0 h1).mpr hζ
+      exact h s hξs h0 h1
+  rw [hcrit, crit_line_iff_no_right_half ξ hfe,
+      thin_region_is_exact_gap ξ hξ hfe hC hB]
 
 /-- Corollaries of the isolation theorem.
 

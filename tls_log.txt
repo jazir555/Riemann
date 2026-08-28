@@ -1,0 +1,35 @@
+TailLaguerreScratch.lean:58:44: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ?a + 0
+in the target expression
+  (∑ x ∈ range (2 * 0),
+          (-1) ^ (0 + x) * ↑((2 * 0).choose x) * (iteratedDeriv x f ↑r * star (iteratedDeriv (2 * 0 - x) f ↑r)).re +
+        (-1) ^ (0 + 2 * 0) * ↑((2 * 0).choose (2 * 0)) *
+          (iteratedDeriv (2 * 0) f ↑r * star (iteratedDeriv (2 * 0 - 2 * 0) f ↑r)).re) /
+      ↑(2 * 0).factorial =
+    ‖f ↑r‖ ^ 2
+
+f : ℂ → ℂ
+r : ℝ
+⊢ (∑ x ∈ range (2 * 0),
+          (-1) ^ (0 + x) * ↑((2 * 0).choose x) * (iteratedDeriv x f ↑r * star (iteratedDeriv (2 * 0 - x) f ↑r)).re +
+        (-1) ^ (0 + 2 * 0) * ↑((2 * 0).choose (2 * 0)) *
+          (iteratedDeriv (2 * 0) f ↑r * star (iteratedDeriv (2 * 0 - 2 * 0) f ↑r)).re) /
+      ↑(2 * 0).factorial =
+    ‖f ↑r‖ ^ 2
+TailLaguerreScratch.lean:68:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Lattice ℂ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+TailLaguerreScratch.lean:69:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Lattice ℂ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+TailLaguerreScratch.lean:126:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Lattice ℂ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+TailLaguerreScratch.lean:127:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Lattice ℂ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+EXIT:1

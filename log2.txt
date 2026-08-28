@@ -1,0 +1,39 @@
+OrderXiScratch.lean:31:32: error: Application type mismatch: The argument
+  ?m.97
+has type
+  z / 2 ≠ 0
+of sort `Prop` but is expected to have type
+  ℂ
+of sort `Type` in the application
+  Complex.Gamma_add_one ?m.97
+OrderXiScratch.lean:32:22: error: Ambiguous term
+  norm_natCast
+Possible interpretations:
+  _root_.norm_natCast : ∀ (a : ℕ), ‖↑a‖ = ↑a
+  
+  Real.norm_natCast : ∀ (n : ℕ), ‖↑n‖ = ↑n
+  
+  Complex.norm_natCast : ∀ (n : ℕ), ‖↑n‖ = ↑n
+OrderXiScratch.lean:29:77: error: unsolved goals
+z : ℂ
+hz : 0 < z.re
+hrec : Complex.Gamma (z / 2) = Complex.Gamma (z / 2 + 1) / (z / 2)
+⊢ ‖Complex.Gamma (z / 2 + 1)‖ / ‖z / 2‖ ≤ (z.re / 2 + 2) ^ (z.re / 2 + 1) / (‖z‖ / 2)
+OrderXiScratch.lean:61:34: error: expected no space before
+OrderXiScratch.lean:45:4: error: Type mismatch: After simplification, term
+  completedRiemannZeta_eq z
+ has type
+  completedRiemannZeta z = completedRiemannZeta₀ z - z⁻¹ - (1 - z)⁻¹
+but is expected to have type
+  completedRiemannZeta z = ↑π ^ (-(z / 2)) * Complex.Gamma (z / 2) * riemannZeta z
+OrderXiScratch.lean:48:14: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  HPow ℝ ℂ ?m.148
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+OrderXiScratch.lean:40:47: error: unsolved goals
+hζ : ∀ (s : ℂ), 0 < s.re → s ≠ 1 → ‖riemannZeta s‖ ≤ 1 / 2 + 1 / ‖1 - s‖ + ‖s‖ / s.re
+z : ℂ
+hz hz8 : 8 ≤ ‖z‖
+hRpos : 0 < ‖z‖
+hzc : completedRiemannZeta z = ↑π ^ (-(z / 2)) * Complex.Gamma (z / 2) * riemannZeta z
+⊢ ‖↑π ^ (-(z / 2))‖ * ‖Complex.Gamma (z / 2)‖ * ‖riemannZeta z‖ ≤ 12 * rexp (‖z‖ ^ 1)
