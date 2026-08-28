@@ -1,0 +1,14 @@
+riemannZeta : ℂ → ℂ
+probe.lean:7:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_eq_sum`
+probe.lean:8:8: error(lean.unknownIdentifier): Unknown identifier `hasSum_riemannZeta_series`
+probe.lean:9:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_series`
+probe.lean:10:8: error(lean.unknownIdentifier): Unknown identifier `tsum_riemannZeta`
+probe.lean:11:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_summable`
+probe.lean:12:8: error(lean.unknownIdentifier): Unknown identifier `summable_riemannZeta_nat`
+probe.lean:13:8: error(lean.unknownIdentifier): Unknown constant `Complex.norm_riemannZeta_le_of_re''`
+probe.lean:14:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_le`
+probe.lean:15:8: error(lean.unknownIdentifier): Unknown constant `Real.riemannZeta_two`
+riemannZeta_two : riemannZeta 2 = ↑π ^ 2 / 6
+probe.lean:17:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_pos`
+probe.lean:18:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_eq_sum_of_re`
+probe.lean:19:8: error(lean.unknownIdentifier): Unknown identifier `riemannZeta_def'`
