@@ -98,6 +98,7 @@ theorem thin_region_is_exact_gap (ξ : ℂ → ℂ)
     NoRightHalfZeros ξ ↔ ThinRegion ξ hC.C hC.T₀ := by
   constructor
   · intro hNZ s hs_gt hs_lt hT₀
+    have hnonneg : 0 ≤ abs s.im := abs_nonneg s.im
     have hpos : 0 < hC.C / Real.log (abs s.im + 2) := by
       exact div_pos hC.Cpos (Real.log_pos (by linarith))
     exact hNZ s hs_gt (by linarith [hs_lt, hpos])
@@ -111,11 +112,7 @@ theorem thin_region_is_exact_gap (ξ : ℂ → ℂ)
       · have hlt : s.re < 1 - C / Real.log (abs s.im + 2) := by linarith
         exact hT s hs_gt hlt hT0
 
-/-- **RH is exactly the thin region.**  Under the standard xi symmetries, the
-classical ZFR, and a bounded cover (all true), the Riemann Hypothesis is
-logically equivalent to zero-freeness on the thin region.  Therefore closing
-RH = proving `ThinRegion`.  This is the precise final leaf. -/
-/-- Critical-line zeros of `ξ`: every zero in the strip lies on `Re s = 1/2`. -/
+/- Critical-line zeros of `ξ`: every zero in the strip lies on `Re s = 1/2`. -/
 def XiCriticalLineZeros (ξ : ℂ → ℂ) : Prop :=
   ∀ s : ℂ, ξ s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2
 
@@ -138,6 +135,10 @@ theorem crit_line_iff_no_right_half (ξ : ℂ → ℂ) (hfe : XiFE ξ) :
       exact h t ht_gt ht_lt ht_zero
     · exact h s hhigh hlt hs
 
+/-- **RH is exactly the thin region.**  Under the standard xi symmetries, the
+classical ZFR, and a bounded cover (all true), the Riemann Hypothesis is
+logically equivalent to zero-freeness on the thin region.  Therefore closing
+RH = proving `ThinRegion`.  This is the precise final leaf. -/
 theorem rh_iff_thin_region (ξ : ℂ → ℂ)
     (hξ : XiZeroEquivInStrip ξ) (hfe : XiFE ξ)
     (hC : ClassicalZFR ξ) (hB : BoundedCover ξ hC.T₀) :
@@ -152,15 +153,6 @@ theorem rh_iff_thin_region (ξ : ℂ → ℂ)
     · intro h s hζ h0 h1
       have hξs : ξ s = 0 := (hξ s h0 h1).mpr hζ
       exact h s hξs h0 h1
-  rw [hcrit, crit_line_iff_no_right_half ξ hfe,
-      thin_region_is_exact_gap ξ hξ hfe hC hB]
-
-/-- Corollaries of the isolation theorem.
-
-The classical zero-free region (de la Vallée Poussin) supplies some fixed
-constant `C`, so the residual `ThinRegion ξ C T₀` always contains points
-(`1/2 < Re s < 1 - C/log(|Im s|+2)` is non-empty for any `C`).  Hence the ZFR
-alone can never rule out off-critical-line zeros: closing RH is *exactly*
-proving `ξ ≠ 0` on that residual thin region.  This is the precise final leaf
-of `riemannhypothesis.lean` (its sorries 13324 and 13764). -/
+  exact ((hcrit.trans (crit_line_iff_no_right_half ξ hfe)).trans
+    (thin_region_is_exact_gap ξ hξ hfe hC hB))
 

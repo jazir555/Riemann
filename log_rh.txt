@@ -1,26 +1,22 @@
-rh_residual_gap.lean:102:46: error: linarith failed to find a contradiction
-ξ : ℂ → ℂ
-hξ : XiZeroEquivInStrip ξ
-hfe : XiFE ξ
-hC : ClassicalZFR ξ
-hB : BoundedCover ξ hC.T₀
-hNZ : NoRightHalfZeros ξ
-s : ℂ
-hs_gt : 1 / 2 < s.re
-hs_lt : s.re < 1 - hC.C / Real.log (|s.im| + 2)
-hT₀ : hC.T₀ ≤ |s.im|
-a✝ : |s.im| + 2 ≤ 1
-⊢ False
-failed
-rh_residual_gap.lean:117:62: error: unexpected token '/--'; expected 'lemma'
-rh_residual_gap.lean:135:48: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+rh_residual_gap.lean:96:5: warning: Variable name `hξ` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hξ
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+rh_residual_gap.lean:96:33: warning: Variable name `hfe` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hfe
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+rh_residual_gap.lean:132:48: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-rh_residual_gap.lean:136:48: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+rh_residual_gap.lean:133:48: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-rh_residual_gap.lean:137:44: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+rh_residual_gap.lean:134:44: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-rh_residual_gap.lean:167:0: error: unexpected end of input; expected 'lemma'
-EXIT:1
+EXIT:0

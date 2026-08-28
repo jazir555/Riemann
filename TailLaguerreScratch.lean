@@ -23,7 +23,6 @@ for the hard coefficient-derivative bounds (report) — not imported (build-heav
 -/
 import Mathlib
 
-open Complex Real
 open Finset
 open NormedAddCommGroup
 set_option linter.defProp false
@@ -70,10 +69,11 @@ theorem laguerreCoeff_abs_bound (n : ℕ) (r : ℝ) :
           |iteratedDeriv (2 * n - j) f (r : ℂ)| := by
   rw [laguerreCoeff, abs_div,
     div_mul_cancel (by norm_cast; exact Nat.factorial_ne_zero (2 * n))]
-  have hab (j : ℕ) (hj : j ∈ Finset.range (2 * n + 1)) :
-      |(-1 : ℝ) ^ (n + j) * (Nat.choose (2 * n) j : ℝ) *
-        ((iteratedDeriv j f (r : ℂ) * star (iteratedDeriv (2 * n - j) f (r : ℂ))).re)|
-      ≤ (Nat.choose (2 * n) j : ℝ) *
+  let a (j : ℕ) : ℝ :=
+    (-1 : ℝ) ^ (n + j) * (Nat.choose (2 * n) j : ℝ) *
+      ((iteratedDeriv j f (r : ℂ) * star (iteratedDeriv (2 * n - j) f (r : ℂ))).re)
+  have ha (j : ℕ) (hj : j ∈ Finset.range (2 * n + 1)) :
+      |a j| ≤ (Nat.choose (2 * n) j : ℝ) *
         |iteratedDeriv j f (r : ℂ)| * |iteratedDeriv (2 * n - j) f (r : ℂ)| := by
     let ξj := iteratedDeriv j f (r : ℂ)
     let ξk := iteratedDeriv (2 * n - j) f (r : ℂ)
@@ -85,7 +85,8 @@ theorem laguerreCoeff_abs_bound (n : ℕ) (r : ℝ) :
       @mul_le_mul_of_nonneg_left Real Real.orderedSemiring (|w.re|) (|ξj| * |ξk|)
         ((Nat.choose (2 * n) j : ℝ)) (Complex.abs_re_le_abs w)
         (by norm_cast; exact Nat.choose_nonneg (2 * n) j)
-  exact le_trans (abs_sum_le_sum_abs _) (Finset.sum_le_sum fun j hj => hab j hj)
+  exact le_trans (@abs_sum_le_sum_abs Real _ (Finset.range (2 * n + 1)) a)
+    (Finset.sum_le_sum fun j hj => ha j hj)
 
 -- The leaf itself, over `f`.
 structure TailCanonicalLaguerrePositivityLeaf' where
@@ -116,12 +117,8 @@ noncomputable def shiftedZeta (z : ℂ) : ℂ := zeta ((1 / 2 : ℂ) + I * z)
 noncomputable def shiftedZetaLaguerreCoeff (n : ℕ) (r : ℝ) : ℝ :=
   laguerreCoeff shiftedZeta n r
 
-theorem shiftedZetaLaguerreCoeff_zero (r : ℝ) :
-    shiftedZetaLaguerreCoeff 0 r = ‖shiftedZeta (r : ℂ)‖ ^ 2 :=
-  laguerreCoeff_zero shiftedZeta r
-
-theorem shiftedZetaLaguerreCoeff_zero_nonneg (r : ℝ) : 0 ≤ shiftedZetaLaguerreCoeff 0 r := by
-  rw [shiftedZetaLaguerreCoeff_zero]; positivity
+theorem shiftedZetaLaguerreCoeff_zero_nonneg (r : ℝ) : 0 ≤ shiftedZetaLaguerreCoeff 0 r :=
+  laguerreCoeff_zero_nonneg shiftedZeta r
 
 theorem shiftedZetaLaguerreCoeff_abs_bound (n : ℕ) (r : ℝ) :
     |shiftedZetaLaguerreCoeff n r| * (Nat.factorial (2 * n) : ℝ) ≤
@@ -144,12 +141,6 @@ noncomputable def dirichletMollifier (s : ℂ) (K : ℕ) : ℂ :=
 structure MollifiedRoucheLeaf (K : ℕ) where
   gap : ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) →
     ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1
-
--- B0. Genuine decomposition (NEXT sub-problem): explicit finite Dirichlet-polynomial
--- sup-norm bound `‖dirichletMollifier s K‖ ≤ Σ_n ‖μ(n+1)‖·‖(n+1)^{-s}‖·‖1-(n+1)/K‖`.
--- Requires the mathlib lemma `Finset.norm_sum_le_sum_norm` (triangle inequality for
--- the norm of a finset sum); the per-term ingredients are `norm_mul` and
--- `abs_sum_le_sum_abs`. LEFT as the next smallest sub-problem (not a sorry).
 
 -- B1. Genuine decomposition edge: an explicit pointwise bound strictly below 1
 -- implies the leaf.  (Constructing such a bound is FLAGGED as RH-equivalent.)
@@ -175,8 +166,12 @@ theorem mollified_to_rh (K : ℕ) (H : MollifiedRoucheLeaf K) :
   EQUIVALENT to RH.  The leaf→RH assembly (`tailCanonicalLaguerrePositivity_10`)
   lives only in the BROKEN `riemannhypothesis.lean` and is NOT re-proven here.
 * Leaf B ⇔ pointwise nonvanishing of ζ on the tail (the L∞ wall): EQUIVALENT to RH.
-* Genuine interior sub-lemmas A0, A1, B0, B1, B2 are NOT equivalent to RH and are
+* Genuine interior sub-lemmas A0, A1, B1, B2 are NOT equivalent to RH and are
   proven sorry-free.
+* NEXT sub-problems (genuine but blocked by missing/uncertain toolchain lemmas):
+  - B0: `‖dirichletMollifier s K‖ ≤ Σ_n ‖μ(n+1)‖·‖(n+1)^{-s}‖·‖1-(n+1)/K‖`
+    (needs `Finset.norm_sum_le_sum_norm`).
+  - `norm_base_pow_neg_of_real`: `‖(a:ℂ)^{-s}‖ = a^{-s.re}` (needs `Complex.abs_cpow_of_real`).
 -/
 
 end TailLaguerreScratch

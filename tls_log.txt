@@ -1,17 +1,19 @@
-TailLaguerreScratch.lean:59:2: error: `simp` made no progress
-TailLaguerreScratch.lean:71:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+TailLaguerreScratch.lean:35:56: error(lean.unknownIdentifier): Unknown identifier `I`
+TailLaguerreScratch.lean:59:2: error: failed to prove positivity/nonnegativity/nonzeroness
+TailLaguerreScratch.lean:68:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
   Lattice ℂ
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-TailLaguerreScratch.lean:72:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+TailLaguerreScratch.lean:69:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
   Lattice ℂ
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-TailLaguerreScratch.lean:129:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+TailLaguerreScratch.lean:115:65: error(lean.unknownIdentifier): Unknown identifier `I`
+TailLaguerreScratch.lean:127:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
   Lattice ℂ
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-TailLaguerreScratch.lean:130:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+TailLaguerreScratch.lean:128:10: error(lean.synthInstanceFailed): failed to synthesize instance of type class
   Lattice ℂ
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
