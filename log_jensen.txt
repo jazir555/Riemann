@@ -1,0 +1,10 @@
+JensenTranslation.lean:101:8: warning: declaration uses `sorry`
+JensenTranslation.lean:107:8: warning: declaration uses `sorry`
+JensenTranslation.lean:124:42: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:307:8: warning: declaration uses `sorry`
+JensenTranslation.lean:317:8: warning: declaration uses `sorry`
+JensenTranslation.lean:325:8: warning: declaration uses `sorry`
+JensenTranslation.lean:332:8: warning: declaration uses `sorry`
+EXIT:0

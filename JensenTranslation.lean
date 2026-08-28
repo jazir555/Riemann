@@ -240,20 +240,18 @@ theorem jensen_degree_one_hyperbolic (n : ℕ)
 theorem jensen_degree_two_hyperbolic_of_ineq (n : ℕ) (ha : taylorCoeff (n + 2) ≠ 0)
     (h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)) :
     Hyperbolic (jensenPoly 2 n) := by
-  rw [jensenPoly, Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one]
-  simp only [Polynomial.monomial_zero, add_zero, mul_one, one_mul, Nat.choose_one,
-             Nat.choose_succ_succ, Nat.succ_eq_add_one]
-  rw [← Polynomial.map_add, ← Polynomial.map_add]
-  have hb : (2 * taylorCoeff (n + 1)) ^ 2 ≥ 4 * taylorCoeff (n + 2) * taylorCoeff n := by
-    rw [sq]
-    have : (2 * taylorCoeff (n + 1)) * (2 * taylorCoeff (n + 1)) = 4 * taylorCoeff (n + 1) ^ 2 := by
-      ring
-    rw [this, ← mul_assoc (4 : ℝ) (taylorCoeff (n + 2)) (taylorCoeff n)]
-    apply le_of_mul_le_mul_left
-    · rw [mul_comm (taylorCoeff n) (taylorCoeff (n + 2))] at h
-      exact h
-    · norm_num
-  exact real_quadratic_hyperbolic_of_discriminant ha hb
+  rw [jensenPoly, Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one,
+    Finset.sum_singleton]
+  rw [Nat.choose_zero_right, Nat.choose_one_right, Nat.choose_self]
+  simp only [Nat.cast_one, one_mul]
+  rw [Polynomial.monomial_zero_left]
+  have hd : (2 * taylorCoeff (n + 1)) ^ 2 ≥ 4 * taylorCoeff (n + 2) * taylorCoeff n := by
+    calc (2 * taylorCoeff (n + 1)) ^ 2 = 4 * taylorCoeff (n + 1) ^ 2 := by ring
+      _ ≥ 4 * (taylorCoeff n * taylorCoeff (n + 2)) :=
+        mul_le_mul_of_nonneg_left h.le (by norm_num : (0 : ℝ) ≤ 4)
+      _ = 4 * taylorCoeff (n + 2) * taylorCoeff n :=
+        by rw [mul_comm (taylorCoeff n) (taylorCoeff (n + 2)), ← mul_assoc (4 : ℝ)]
+  exact real_quadratic_hyperbolic_of_discriminant ha hd
 
 /-- Pure binomial identity: `(k+1)·C(d+1,k+1) = (d+1)·C(d,k)` (cast to ℝ). -/
 lemma hbin (d k : ℕ) :
