@@ -6,6 +6,5 @@ macro "push_neg" cfg:optConfig loc:(location)? : tactic =>
   `(tactic| push $cfg:optConfig Not $[$loc]?)
 ```
 KadiriZeroFree.lean:18:8: warning: declaration uses `sorry`
-KadiriZeroFree.lean:41:8: warning: declaration uses `sorry`
-KadiriZeroFree.lean:94:8: warning: declaration uses `sorry`
+KadiriZeroFree.lean:72:8: warning: declaration uses `sorry`
 EXIT:0

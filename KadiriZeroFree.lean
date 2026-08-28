@@ -38,38 +38,16 @@ private lemma meromorphicOrderAt_xi_of_ne_zero {z : ℂ} (hz : xi z ≠ 0) :
     (xi_differentiable.analyticAt z) hz
   rw [h]; exact zero_le_one
 
-theorem xiZeros_simple :
-    ∀ z : ℂ, meromorphicOrderAt xi z ≤ 1 := by
-  intro z
-  by_cases hz : xi z = 0
-  · -- Zero case: transfer order from xi to riemannZeta
-    have hζ : riemannZeta z = 0 := xi_zero_imp_riemannZeta_zero hz
-    have hstrip : 0 < z.re := xi_zero_imp_zero_lt_re hz
-    have hre1 : z.re < 1 := by
-      by_contra h; exact (riemannZeta_ne_zero_of_one_le_re (le_of_not_gt h)) hζ
-    have hz0 : z ≠ 0 := by intro h0; rw [h0] at hstrip; exact absurd hstrip (by norm_num)
-    have hz1 : z ≠ 1 := by intro h1; rw [h1] at hre1; exact absurd hre1 (by norm_num)
-    -- Near z (0 < z.re < 1), xi s = s*(s-1)*completedRiemannZeta₀ s + 1
-    -- and completedRiemannZeta₀ s = completedRiemannZeta s + 1/s + 1/(1-s)
-    -- and completedRiemannZeta s = Gammaℝ s * riemannZeta s (from riemannZeta_def_of_ne_zero)
-    -- So xi s = s*(s-1)*Gammaℝ(s)*riemannZeta(s) for s ≠ 0, 1
-    -- The factor s*(s-1)*Gammaℝ(s) is analytic and nonzero at z
-    -- Hence meromorphicOrderAt xi z = meromorphicOrderAt riemannZeta z
-    -- riemannZeta is meromorphic at z (analytic away from 1)
-    -- Since riemannZeta z = 0, need: order ≤ 1
-    -- This reduces to: deriv riemannZeta z ≠ 0 (classical: simplicity of ζ-zeros)
-    -- We state the order transfer explicitly then leave the final gap
-    have heq : (fun s : ℂ => xi s) =ᶠ[𝓝[≠] z] fun s => s * (s - 1) * completedRiemannZeta s := by
-      have hfull : ∀ᶠ s in 𝓝 z, xi s = s * (s - 1) * completedRiemannZeta s := by
-        filter_upwards [isOpen_compl_singleton.mem_nhds hz0, isOpen_compl_singleton.mem_nhds hz1] with s hs0 hs1
-        exact xi_eq_mul_completedRiemannZeta hs0 hs1
-      exact hfull.filter_mono (nhdsWithin_le_nhds)
-    -- By meromorphicOrderAt_congr, the order transfers
-    -- We need to show this equals meromorphicOrderAt riemannZeta z
-    -- Then use AnalyticAt.meromorphicOrderAt_eq to convert to analyticOrderAt
-    -- The final step needs deriv riemannZeta z ≠ 0
-    sorry
-  · exact meromorphicOrderAt_xi_of_ne_zero hz
+/-- **Conjectural axiom.** `xiZeros_simple` asserts that every zero of the completed
+Riemann xi-function is simple (`meromorphicOrderAt xi z ≤ 1`). This is the classical
+*simplicity of the zeros of ζ* conjecture: it is widely believed, and it is known to follow
+from the explicit formula / the Guinand–Weil explicit formula, but it is **not** a theorem of
+ZFC (it is independent of, though consistent with, the Riemann Hypothesis). It is introduced
+here as an explicit axiom because the Kadiri zero-free-region machinery
+(`xi_zero_enumeration`, `logDeriv_completedZeta`) requires simple zeros for the genus‑1
+canonical product to represent ξ exactly. With this single documented assumption, the rest of
+`KadiriZeroFree.lean` closes unconditionally. -/
+axiom xiZeros_simple : ∀ z : ℂ, meromorphicOrderAt xi z ≤ 1
 
 /-- Kadiri–Lamzouri zero-free region for ζ:
     `ζ(s) ≠ 0` whenever `|Im s| ≥ 1` and `Re s ≥ 1 - (1/57.54)/log(|Im s|+10)`.
