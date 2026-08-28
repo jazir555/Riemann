@@ -73,12 +73,13 @@ namespace JensenRH
 /-- The even Taylor coefficients of Ξ(z) = xiMathlibShifted(z) at 0.
     Ξ is even (functional equation) and real on ℝ (conjugation), so
     Ξ(z) = Σ γₙ z^{2n}/(2n)! with γₙ ∈ ℝ. -/
-noncomputable def taylorCoeff (n : ℕ) : ℝ := 0
+noncomputable def taylorCoeff (n : ℕ) : ℝ :=
+  ((Nat.factorial (2 * n) : ℝ)⁻¹) * (deriv^[2 * n] xiMathlibShifted 0).re
 
 /-- Bridge: γₙ is the (2n)-th Taylor coefficient of the shifted xi function. -/
 theorem taylorCoeff_eq (n : ℕ) :
     taylorCoeff n = ((Nat.factorial (2 * n) : ℝ)⁻¹) * (deriv^[2 * n] xiMathlibShifted 0).re := by
-  sorry
+  rfl
 
 /-- The Jensen polynomial of degree d and shift n, viewed over ℂ, in the
     Pólya–GORZ convention:
@@ -239,11 +240,10 @@ theorem jensen_degree_one_hyperbolic (n : ℕ)
 theorem jensen_degree_two_hyperbolic_of_ineq (n : ℕ) (ha : taylorCoeff (n + 2) ≠ 0)
     (h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)) :
     Hyperbolic (jensenPoly 2 n) := by
-  simp only [jensenPoly]
-  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one]
-  simp
-  rw [← Polynomial.map_add, ← Polynomial.map_add, ← Polynomial.map_monomial,
-      ← Polynomial.map_monomial, ← Polynomial.map_C]
+  rw [jensenPoly, Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one]
+  simp only [Polynomial.monomial_zero, add_zero, mul_one, one_mul, Nat.choose_one,
+             Nat.choose_succ_succ, Nat.succ_eq_add_one]
+  rw [← Polynomial.map_add, ← Polynomial.map_add]
   have hb : (2 * taylorCoeff (n + 1)) ^ 2 ≥ 4 * taylorCoeff (n + 2) * taylorCoeff n := by
     rw [sq]
     have : (2 * taylorCoeff (n + 1)) * (2 * taylorCoeff (n + 1)) = 4 * taylorCoeff (n + 1) ^ 2 := by
@@ -255,6 +255,36 @@ theorem jensen_degree_two_hyperbolic_of_ineq (n : ℕ) (ha : taylorCoeff (n + 2)
     · norm_num
   exact real_quadratic_hyperbolic_of_discriminant ha hb
 
+/-- Pure binomial identity: `(k+1)·C(d+1,k+1) = (d+1)·C(d,k)` (cast to ℝ). -/
+lemma hbin (d k : ℕ) :
+    (↑(Nat.choose (d + 1) (k + 1)) : ℝ) * ↑(k + 1) = ↑(d + 1) * ↑(Nat.choose d k) := by
+  rw [← Nat.cast_mul, ← Nat.add_one_mul_choose_eq d k, Nat.cast_mul]
+
+/-- Pure algebraic identity: derivative of J_{d+1,n} equals (d+1)·J_{d,n+1} (over ℝ). -/
+theorem derivative_q_eq (d n : ℕ) :
+    (Polynomial.derivative
+        (Finset.sum (Finset.range (d + 2)) (fun k =>
+          Polynomial.monomial k (↑(Nat.choose (d + 1) k) * taylorCoeff (n + k)))) :
+        Polynomial ℝ) =
+      Polynomial.C ((d + 1 : ℕ) : ℝ) *
+        (Finset.sum (Finset.range (d + 1)) (fun k =>
+          Polynomial.monomial k (↑(Nat.choose d k) * taylorCoeff (n + 1 + k)))) := by
+  apply Polynomial.ext
+  intro m
+  rw [Polynomial.coeff_derivative, Polynomial.coeff_C_mul,
+      Polynomial.finsetSum_coeff, Polynomial.finsetSum_coeff]
+  simp_rw [Polynomial.coeff_monomial]
+  by_cases hm : m ≤ d
+  · have h1 : m + 1 ∈ Finset.range (d + 2) := by simp; omega
+    have h2 : m ∈ Finset.range (d + 1) := by simp; omega
+    rw [Finset.sum_ite_eq', Finset.sum_ite_eq', if_pos h1, if_pos h2]
+    rw [← Nat.cast_add_one, mul_assoc, mul_comm (taylorCoeff (n + (m + 1))) (↑(m + 1)),
+        ← mul_assoc, hbin d m, mul_assoc, add_comm m 1, Nat.add_assoc]
+  · have h1 : ¬ m + 1 ∈ Finset.range (d + 2) := by simp; omega
+    have h2 : ¬ m ∈ Finset.range (d + 1) := by simp; omega
+    rw [Finset.sum_ite_eq', Finset.sum_ite_eq', if_neg h1, if_neg h2]
+    simp
+
 /-- Differentiation identity for Jensen polynomials (Pólya–GORZ convention):
     J'_{d+1,n} = (d+1)·J_{d,n+1}.  Proof: (k+1)·C(d+1,k+1) = (d+1)·C(d,k),
     a pure binomial identity, plus Polynomial.derivative_monomial.
@@ -263,26 +293,15 @@ theorem jensenPoly_derivative (d n : ℕ) :
     (jensenPoly (d + 1) n).derivative =
       Polynomial.C ((d + 1 : ℕ) : ℂ) * jensenPoly d (n + 1) := by
   let φ : ℝ →+* ℂ := algebraMap ℝ ℂ
-  let q : Polynomial ℝ := Finset.sum (Finset.range (d + 2))
+  let Q := Finset.sum (Finset.range (d + 2))
     (fun k => Polynomial.monomial k (↑(Nat.choose (d + 1) k) * taylorCoeff (n + k)))
-  let p : Polynomial ℝ := Finset.sum (Finset.range (d + 1))
+  let P := Finset.sum (Finset.range (d + 1))
     (fun k => Polynomial.monomial k (↑(Nat.choose d k) * taylorCoeff (n + 1 + k)))
-  have hq : q.map φ = jensenPoly (d + 1) n := by rw [jensenPoly]
-  have hp : p.map φ = jensenPoly d (n + 1) := by rw [jensenPoly]
-  have hbinom (k : ℕ) :
-      Nat.choose (d + 1) (k + 1) * (k + 1) = (d + 1) * Nat.choose d k := by
-    rw [Nat.add_one_mul_choose_eq d k]
-  have hbin (k : ℕ) :
-      (↑(Nat.choose (d + 1) (k + 1)) : ℝ) * ↑(k + 1) = ↑(d + 1) * ↑(Nat.choose d k) := by
-    rw [← Nat.cast_mul, hbinom k, Nat.cast_mul]
-  rw [← hq, ← hp, Polynomial.derivative_map q φ]
-  have h : Polynomial.derivative q = Polynomial.C (↑(d + 1)) * p := by
-    rw [Polynomial.derivative_sum, Finset.sum_range_succ, Polynomial.derivative_monomial,
-        Nat.succ_sub_one, Nat.zero_sub, mul_zero, Polynomial.monomial_zero, zero_add]
-    rw [Finset.sum_congr rfl (fun k _ => by
-      rw [mul_assoc, mul_comm (taylorCoeff (n + k + 1)) ↑(k + 1), mul_assoc,
-          add_assoc, add_comm k 1, ← add_assoc, hbin k, mul_assoc])]
-  rw [h, Polynomial.map_mul, Polynomial.map_C, hp, RingHom.map_natCast]
+  have hQ : Q.map φ = jensenPoly (d + 1) n := rfl
+  have hP : P.map φ = jensenPoly d (n + 1) := rfl
+  rw [← hQ, ← hP, Polynomial.derivative_map Q φ, derivative_q_eq d n,
+      Polynomial.map_mul, Polynomial.map_C, hP]
+  simp
 
 /-- Rolle for polynomials: the derivative of a hyperbolic polynomial is
     hyperbolic (the roots of p' interlace those of p).  This is the

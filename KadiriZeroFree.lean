@@ -15,30 +15,6 @@ noncomputable section
 theorem kadiri_numerical_bridge :
     (1 : ℝ) / 57.54 < 2 / 95 := by norm_num
 
-/-- ξ has infinitely many zeros.
-
-    Proof sketch: By the Hadamard factorization theory, an entire function of
-    positive order that is not a polynomial must have infinitely many zeros.
-    ξ is entire of order ≤ 1 (`completedZeta_order_le_one`), and satisfies
-    ξ(s) = ξ(1-s) with ξ(0) = ξ(1) = 1, so it is not a polynomial.
-    Alternatively: ζ has infinitely many nontrivial zeros (classical theorem),
-    and `xiZeros_eq_riemannZetaZeros_inter_closedStrip` transfers this. -/
-private lemma xi_bounded_on_real :
-    ∃ M : ℝ, ∀ x : ℝ, ‖xi (x : ℂ)‖ ≤ M := by
-  refine ⟨5, fun x => ?_⟩
-  unfold xi
-  have h := norm_add_le ((x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)) 1
-  rw [norm_one] at h
-  have hmul : ‖(x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)‖ =
-      |x| * |x - 1| * ‖completedRiemannZeta₀ (x : ℂ)‖ := by
-    rw [show (x : ℂ) * (x - 1) = (x : ℂ) * ((x - 1 : ℝ) : ℂ) from by push_cast; ring]
-    simp only [norm_mul, Complex.norm_real, Real.norm_eq_abs]
-  have h5 : ‖(x : ℂ) * (x - 1) * completedRiemannZeta₀ (x : ℂ)‖ + 1 ≤ 5 := by
-    have : |x| * |x - 1| * ‖completedRiemannZeta₀ (x : ℂ)‖ ≤ 4 := by
-      sorry
-    linarith [hmul, this]
-  linarith
-
 theorem xiZeros_infinite :
     ({z : ℂ | xi z = 0} : Set ℂ).Infinite := by
   by_contra hfin

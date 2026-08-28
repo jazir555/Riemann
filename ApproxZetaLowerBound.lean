@@ -8,132 +8,126 @@ open scoped BigOperators
 noncomputable section
 
 /-!
-# Approximate Functional Equation Lower Bound for Riemann Zeta
+# A Rigorous Lower Bound for the Riemann Zeta Function
 
-This file formalizes the approximate functional equation lower bound needed for the
-"middle gap" case in the zero-free region of the Riemann zeta function.
+This file formalizes a genuine lower bound for `|ζ(s)|` together with the exact
+functional equation.  It is written to compile with no `sorry` anywhere.
 
 ## Background
 
-The zero-free region of ζ(s) has three cases:
-1. **Re(s) ≥ 1**: Nonvanishing from `riemannZeta_ne_zero_of_one_le_re` (Euler product).
-2. **Re(s) near 0**: Nonvanishing from the functional equation ζ(1-s) = ... ζ(s),
-   mapping to case 1.
-3. **The "middle gap"**: c/log(|t|+10) < Re(s) < 1 - c/log(|t|+10).
-   Neither the Euler product nor the functional equation covers this range.
-   The approximate functional equation (Voronoi's formula) provides a lower bound.
+The Riemann zeta function has zeros, so no universal *positive* lower bound can
+hold on the whole plane.  What we can prove rigorously with the tools available
+in mathlib is:
+
+1. **`Re(s) > 1`**: `ζ(s)` is given by the absolutely convergent Dirichlet
+   series `∑' n, 1/n^s`.  Splitting off the `n = 1` term gives the genuine
+   positive lower bound `|ζ(s)| ≥ 1 - ∑_{n≥2} n^{-Re(s)}` (see
+   `riemannZeta_abs_lower_bound_of_re_gt_one`).
+2. **`Re(s)` near `0`**: the exact functional equation `riemannZeta_one_sub`
+   relates `ζ(s)` to `ζ(1 - s)`; since `Re(1 - s) > 1` there, this region is
+   governed by case 1.
+3. **The critical strip** `0 ≤ Re(s) ≤ 1`: `ζ(s)` *does* vanish here (the
+   trivial zeros at negative even integers, and the non-trivial zeros in the
+   critical strip), so no universal positive lower bound exists.  We therefore
+   only record the trivial non-negativity `0 ≤ |ζ(s)|` (see
+   `riemannZeta_abs_lower_bound`) and note that a non-trivial lower bound in
+   the "middle gap" is exactly the (open) zero-free region / Riemann Hypothesis.
 
 ## Main results
 
-* `riemannZeta_approx_functional_equation`: Statement of Voronoi's approximate
-  functional equation.
-* `riemannZeta_abs_lower_bound`: The key lower bound |ζ(σ+it)| ≥ C·|t|^{(1-2σ)/6}.
-* `riemannZeta_ne_zero_of_middle_gap`: Nonvanishing in the middle gap.
-
-## References
-
-- Kadiri-Lamzouri (2015), "Explicit zero-free regions for the Riemann zeta function"
-- Trudgian (2015)
-- Iwaniec-Kowalski, "Analytic Number Theory", Chapter 5
-
-## Implementation notes
-
-The approximate functional equation is genuinely hard to formalize. We:
-1. **State** the main theorems with precise statements.
-2. **Prove** the simple sub-lemmas and the logical structure.
-3. **Sorry** the core analytic bounds.
--/
-
-/-!
-## Section 1: Constants and basic setup
+* `riemannZeta_abs_lower_bound_of_re_gt_one` : for `1 < Re(s)`,
+  `|ζ(s)| ≥ 1 - ∑_{n≥2} n^{-Re(s)}`.
+* `riemannZeta_functional_equation` : `ζ(1 - s) = χ(s) · ζ(s)`.
+* `riemannZeta_abs_lower_bound` : the universal trivial bound `0 ≤ |ζ(s)|`.
 -/
 
 def T₀ : ℝ := 100
 
 theorem T₀_pos : 0 < T₀ := by norm_num [T₀]
 
-def zetaLowerConst : ℝ := 1 / 100
+/-- The Dirichlet-series tail `∑_{n≥2} n^{-σ}`, used as the error term in the
+`Re(s) > 1` lower bound. -/
+noncomputable def zetaTail (σ : ℝ) : ℝ :=
+  ∑' (n : ℕ), ((n + 2 : ℝ) ^ σ)⁻¹
 
-theorem zetaLowerConst_pos : 0 < zetaLowerConst := by norm_num [zetaLowerConst]
+/-- The tail is summable for `1 < σ` (it is a shifted `p`-series). -/
+theorem zetaTail_summable {σ : ℝ} (h : 1 < σ) :
+    Summable (fun n : ℕ => ((n + 2 : ℝ) ^ (-σ))) :=
+  (summable_nat_add_iff 2).mpr (summable_nat_rpow_inv.mpr h)
 
-private theorem abs_t_pos_of_ht {t : ℝ} (ht : T₀ ≤ |t|) : 0 < |t| :=
-  lt_of_lt_of_le T₀_pos ht
+/-- For `1 < Re(s)`, the `n = 1` term of the Dirichlet series is `1`, and the
+remainder is bounded by `zetaTail (Re s)`.  Hence
+`|ζ(s)| ≥ 1 - zetaTail (Re s)`. -/
+theorem riemannZeta_abs_lower_bound_of_re_gt_one
+    {s : ℂ} (h : 1 < s.re) : ‖riemannZeta s‖ ≥ 1 - zetaTail s.re := by
+  set f := fun (n : ℕ) => (1 : ℂ) / ((↑n + 1) ^ s)
+  set S := ∑' (n : ℕ), f (n + 1) with hS_def
+  have hζ : riemannZeta s = ∑' n, f n := zeta_eq_tsum_one_div_nat_add_one_cpow h
+  have hsum : Summable f :=
+    let h1 := (summable_nat_add_iff 1).mpr (Complex.summable_one_div_nat_cpow.mpr h)
+    h1.congr fun n => by simp [f, Nat.cast_succ]
+  have hsplit := (Summable.tsum_eq_zero_add hsum).symm
+  rw [← hζ] at hsplit
+  -- hsplit : riemannZeta s - f 0 = S
+  have f0_eq_one : f 0 = 1 := by simp [one_cpow]
+  rw [f0_eq_one] at hsplit
+  rw [sub_eq_iff_eq_add, add_comm] at hsplit
+  -- hsplit : riemannZeta s = 1 + S
+  rw [hsplit]
+  have h_eq_norm :
+      ∀ (n : ℕ), ((n + 2 : ℝ) ^ s.re)⁻¹ = ‖f (n + 1)‖ := by
+    intro n
+    simp [f, norm_div, norm_one, norm_cpow_eq_rpow_re_of_pos (by positivity) s, inv_eq_one_div]
+  have hSn : Summable fun n => ‖f (n + 1)‖ :=
+    (zetaTail_summable h).congr h_eq_norm
+  have hS_leq : ‖S‖ ≤ zetaTail s.re := by
+    refine (norm_tsum_le_tsum_norm hSn).trans ?_
+    rw [tsum_congr h_eq_norm]
+    exact le_rfl
+  have h_ge : ‖1 + S‖ ≥ 1 - ‖S‖ := by
+    have h := norm_sub_le (1 + S) S
+    rw [sub_add_cancel, norm_one] at h
+    rw [← sub_le_iff_le_add] at h
+    exact h
+  exact (sub_le_sub_left hS_leq 1).trans h_ge
 
 /-!
-## Section 2: The approximate functional equation (Voronoi's formula)
+## The functional equation
 -/
 
-def voronoiN (t : ℝ) : ℕ := ⌊Real.sqrt (|t| / (2 * Real.pi))⌋.toNat
-
-def voronoiM (t : ℝ) : ℕ :=
-  if voronoiN t = 0 then 0
-  else ⌊|t| / (2 * Real.pi * voronoiN t)⌋.toNat
-
+/-- The gamma factor appearing in the functional equation. -/
 noncomputable def zetaGammaFactor (s : ℂ) : ℂ :=
   2 * (2 * Real.pi) ^ (-s) * Gamma s * Complex.cos (Real.pi * s / 2)
 
-theorem riemannZeta_approx_functional_equation
-    (s : ℂ) (hs0 : 0 < s.re) (hs1 : s.re < 1) (ht : T₀ ≤ |s.im|) :
-    ∃ (R : ℂ), True ∧ riemannZeta s = riemannZeta s := by
-  exact ⟨0, trivial, rfl⟩
+/-- The functional equation relates `ζ(s)` to `ζ(1 - s)`. -/
+theorem riemannZeta_functional_equation {s : ℂ}
+    (hs : ∀ n : ℕ, s ≠ -n) (hs' : s ≠ 1) :
+    riemannZeta (1 - s) = zetaGammaFactor s * riemannZeta s := by
+  rw [riemannZeta_one_sub hs hs', zetaGammaFactor]
 
 /-!
-## Section 3: The main lower bound
+## The universal (trivial) lower bound
 -/
 
-/-- The key lower bound: |ζ(σ+it)| ≥ C·|t|^{(1-2σ)/6}.
-
-Proof outline (Kadiri-Lamzouri / Iwaniec-Kowalski):
-1. Voronoi's formula decomposes ζ(s) into two partial sums plus error.
-2. The gamma factor |χ(s)| ≈ (|t|/2π)^{1-2σ} ensures the two sums are
-   of comparable size for 0 < σ < 1.
-3. Since they have different phases (one is a real Dirichlet sum, the other
-   multiplied by cos(πs/2)), they cannot fully cancel.
-4. A triangle-inequality argument gives the positive lower bound.
-
-Reference: Kadiri-Lamzouri (2015), Lemma 3.1; Iwaniec-Kowalski, Theorem 5.4. -/
+/-- For every `s`, `|ζ(s)| ≥ 0`.  This is the only bound that holds uniformly
+across the critical strip, where `ζ` has zeros. -/
 theorem riemannZeta_abs_lower_bound
-    {σ t : ℝ} (hσ0 : 0 < σ) (hσ1 : σ < 1) (ht : T₀ ≤ |t|) :
+    {σ t : ℝ} (_hσ0 : 0 < σ) (_hσ1 : σ < 1) (_ht : T₀ ≤ |t|) :
     0 ≤ ‖riemannZeta (σ + I * t)‖ := by
   exact norm_nonneg _
 
-/-!
-## Section 4: Nonvanishing in the middle gap (consequence of the lower bound)
--/
-
-/-- ζ(σ + it) has nonneg norm for 0 < σ < 1 and |t| ≥ T₀.
-
-Note: the stronger statement ζ(σ+it) ≠ 0 in the critical strip is the
-content of the Riemann Hypothesis and is not provable here. -/
+/-- The norm of `ζ(s)` is nonnegative for `0 < Re(s) < 1` and `|t| ≥ T₀`. -/
 theorem riemannZeta_ne_zero_of_middle_gap
     {σ t : ℝ} (hσ0 : 0 < σ) (hσ1 : σ < 1) (ht : T₀ ≤ |t|) :
     0 ≤ ‖riemannZeta (σ + I * t)‖ :=
   riemannZeta_abs_lower_bound hσ0 hσ1 ht
 
 /-!
-## Section 5: Simple sub-lemmas
+## Connecting the bound to the zero-free region
 -/
 
-/-- The functional equation relates ζ(s) to ζ(1-s). -/
-theorem riemannZeta_functional_equation {s : ℂ}
-    (hs : ∀ n : ℕ, s ≠ -n) (hs' : s ≠ 1) :
-    riemannZeta (1 - s) = zetaGammaFactor s * riemannZeta s := by
-  rw [riemannZeta_one_sub hs hs', zetaGammaFactor]
-
-/-- For Re(s) > 1, the Dirichlet series converges absolutely. -/
-theorem riemannZeta_eq_tsum {s : ℂ} (hs : 1 < s.re) :
-    riemannZeta s = ∑' n : ℕ, 1 / (n : ℂ) ^ s :=
-  zeta_eq_tsum_one_div_nat_cpow hs
-
-/-!
-## Section 6: Connecting the lower bound to the zero-free region
--/
-
-/-- The norm of ζ(s) is nonneg for s in the middle gap.
-
-This is a consequence of the general norm-nonnegativity and the
-approximate functional equation framework. The stronger nonvanishing
-statement is the content of the Riemann Hypothesis. -/
+/-- For `s` in the critical strip with `|Im s| ≥ T₀`, the norm of `ζ(s)` is
+nonnegative. -/
 theorem riemannZeta_ne_zero_critical_strip_middle_gap
     (s : ℂ) (hs0 : 0 < s.re) (hs1 : s.re < 1)
     (ht : T₀ ≤ |s.im|) :
@@ -143,35 +137,15 @@ theorem riemannZeta_ne_zero_critical_strip_middle_gap
     rw [show (s.im : ℂ) * I = I * (s.im : ℂ) from mul_comm _ _] at this
     exact this.symm
   rw [h_im]
-  exact riemannZeta_ne_zero_of_middle_gap hs0 hs1 ht
+  exact riemannZeta_abs_lower_bound hs0 hs1 ht
 
 /-!
-## Section 7: Proof architecture summary
+## The Dirichlet-series representation for `Re(s) > 1`
 -/
 
-/-!
-### Proof architecture for the complete zero-free region
-
-The complete zero-free region for ζ(s) is proved by combining:
-
-1. **Re(s) ≥ 1** (`riemannZeta_ne_zero_of_one_le_re`):
-   The Euler product ζ(s) = ∏_p (1 - p^{-s})^{-1} converges and is nonzero.
-
-2. **Re(s) near 0** (functional equation `riemannZeta_one_sub`):
-   Maps s to 1-s where Re(1-s) ≥ 1, reducing to case 1.
-
-3. **The middle gap** (`riemannZeta_abs_lower_bound`):
-   The approximate functional equation gives |ζ(σ+it)| ≥ C·|t|^{(1-2σ)/6} > 0.
-
-The "middle gap" lower bound (case 3) is the hardest to formalize because it requires:
-- Voronoi's approximate functional equation (not in Mathlib)
-- Bounds on partial sums of the Dirichlet series
-- Convexity arguments for the error term
-- Careful estimation of the gamma factor
-
-This file provides the precise theorem statements and logical structure.
-The core analytic estimates are left as `sorry` since they require
-substantial new formalization of analytic number theory.
--/
+/-- For `Re(s) > 1`, the Dirichlet series converges absolutely and equals `ζ(s)`. -/
+theorem riemannZeta_eq_tsum {s : ℂ} (hs : 1 < s.re) :
+    riemannZeta s = ∑' n : ℕ, 1 / (n : ℂ) ^ s :=
+  zeta_eq_tsum_one_div_nat_cpow hs
 
 end

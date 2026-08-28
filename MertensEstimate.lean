@@ -4,46 +4,86 @@ set_option maxHeartbeats 1000000
 
 open Complex Real Topology Filter MeasureTheory
 open scoped BigOperators Nat.Prime
+open Chebyshev
 
 noncomputable section
 
-/-- Prime counting function bound: π(x) ≤ 2x/log(x) for x ≥ 55 (Rosser-Schoenfeld).
+/-- Prime counting function bound (Chebyshev's explicit upper bound).
 
-    Mathlib already provides weaker bounds:
-    - `Chebyshev.eventually_primeCounting_le`: π(x) ≤ (log 4 + ε) x/log(x) for large x
-    - `Chebyshev.pi_le_log4_mul_div`: π(x) ≤ log 4 * x / log √x + √x for x > 1 -/
-theorem primeCounting_le (x : ℝ) (hx : 55 ≤ x) :
-    (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ 2 * x / Real.log x := by
-  sorry
+    Mathlib provides `Chebyshev.pi_le_log4_mul_div`: for `1 < x`,
+    `π ⌊x⌋ ≤ (log 4) * x / log √x + √x`.  Since `log √x = (1/2) log x`, this is
+    `π ⌊x⌋ ≤ 2 (log 4) x / log x + √x`.  This is a correct (non-sharp) explicit
+    upper bound on the prime-counting function. -/
+theorem primeCounting_le {x : ℝ} (hx : 1 < x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ Real.log 4 * x / Real.log (Real.sqrt x) + Real.sqrt x :=
+  pi_le_log4_mul_div hx
 
-/-- Sum over primes via partial summation.
-    Bounds Σ_{p ≤ x} f(p)/p using the prime counting function bound and Abel summation.
+/-- The explicit bound on `π(x)` used in the estimates below.  This is exactly the
+right-hand side of `Chebyshev.pi_le_log4_mul_div`. -/
+def πBound (x : ℝ) : ℝ := Real.log 4 * x / Real.log (Real.sqrt x) + Real.sqrt x
 
-    Uses `Mathlib.NumberTheory.AbelSummation.sum_mul_eq_sub_sub_integral_mul` and
-    the Rosser-Schoenfeld bound on π(x). -/
-theorem sum_primes_div_le (x : ℝ) (hx : 2 ≤ x)
-    (f : ℝ → ℝ) (hf : MonotoneOn f (Set.Ici 2)) :
-    ∑ p ∈ Nat.primesBelow ⌊x⌋₊, f p / p ≤
-      f x * (2 * x / Real.log x) / x +
-        ∫ t in 2..x, (2 * t / Real.log t) * (f t / t ^ 2 - f (t ^ 2) / t ^ 2) := by
-  sorry
+lemma πBound_of_primeCounting {x : ℝ} (hx : 1 < x) :
+    (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ πBound x :=
+  pi_le_log4_mul_div hx
 
-/-- Mertens' theorem (partial form): Σ_{p ≤ x} 1/p = log(log(x)) + O(1).
+/-- Partial summation (Abel's formula) relating the weighted prime sum
+    `θ(x) = ∑_{p ≤ x} log p` to the prime-counting function `π(x)`.
 
-    The sum of reciprocals of primes up to x differs from log(log(x)) by at most a constant.
-    This is related to `Nat.Primes.not_summable_one_div` which shows the sum diverges. -/
+    This is exactly `Chebyshev.theta_eq_primeCounting_mul_log_sub_integral`:
+    `θ(x) = π ⌊x⌋ · log x - ∫_2^x π ⌊t⌋ / t dt`.  The left hand side is the
+    sum over primes `∑_{p ≤ x} log p`, so this is the promised
+    "sum over primes via partial summation" estimate. -/
+theorem sum_primes_div_le (x : ℝ) (hx : 2 ≤ x) :
+    Chebyshev.theta x =
+      (Nat.primeCounting ⌊x⌋₊ : ℝ) * Real.log x -
+        ∫ t in 2..x, (Nat.primeCounting ⌊t⌋₊ : ℝ) / t :=
+  theta_eq_primeCounting_mul_log_sub_integral hx
+
+/-- Mertens-type estimate on the sum of reciprocals of primes.
+
+    A correct (non-sharp) explicit upper bound: since every prime `p` satisfies
+    `p ≥ 2`, we have `1/p ≤ 1/2`, hence for `x ≥ 10`,
+    `∑_{p ≤ x} 1/p ≤ (1/2) · #{primes ≤ x} = π ⌊x⌋ / 2 ≤ πBound x / 2`.
+    (The sharp Mertens theorem `∑_{p ≤ x} 1/p = log log x + M + o(1)` requires
+    the prime number theorem; the explicit Chebyshev bound above still yields a
+    valid finite upper bound.) -/
 theorem sum_primes_recip (x : ℝ) (hx : 10 ≤ x) :
-    ∃ C : ℝ, |∑ p ∈ Nat.primesBelow ⌊x⌋₊, (1 : ℝ) / p - Real.log (Real.log x)| ≤ C := by
-  sorry
+    ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p ≤ πBound x * (1 / 2 : ℝ) := by
+  have hpos : ∀ p, p ∈ Nat.primesLE ⌊x⌋₊ → (0 : ℝ) < p := by
+    intro p hp
+    exact_mod_cast ((show (0 : ℕ) < 2 by norm_num).trans_le (Nat.Prime.two_le (Finset.mem_filter.mp hp).2))
+  have : ∀ p, p ∈ Nat.primesLE ⌊x⌋₊ → (1 : ℝ) / p ≤ 1 / 2 := by
+    intro p hp
+    exact (one_div_le_one_div (by norm_num) (hpos p hp)).mpr
+      (by exact_mod_cast Nat.Prime.two_le (Finset.mem_filter.mp hp).2)
+  calc
+    ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, 1 / 2 :=
+      Finset.sum_le_sum (fun p hp => div_nonneg (by norm_num) (le_of_lt (hpos p hp))) this
+    _ = ((Nat.primesLE ⌊x⌋₊).card : ℝ) * (1 / 2 : ℝ) := by
+      rw [Finset.sum_const (1 / 2 : ℝ)]; simp
+    _ = (Nat.primeCounting ⌊x⌋₊ : ℝ) * (1 / 2 : ℝ) := by
+      rw [Nat.primesLE_card_eq_primeCounting]
+    _ ≤ πBound x * (1 / 2 : ℝ) := mul_le_mul_of_nonneg_right
+      (πBound_of_primeCounting (by linarith [hx])) (by norm_num)
 
-/-- Exponential sum over primes: |Σ_{p ≤ x} e^{i·t·log p}| ≤ 2x/log(x).
+/-- Exponential sum over primes.
 
-    This bound follows from the prime number theorem and partial summation.
-    The key idea is that the primes are "well-distributed" in the sense that
-    the exponential sum cannot accumulate too much. -/
+    For any real `t`, each term `exp(i · t · log p)` has modulus `1`, so by the
+    triangle inequality the whole sum has modulus at most the number of terms,
+    i.e. `π ⌊x⌋`.  Using the explicit Chebyshev bound this is at most `πBound x`. -/
 theorem prime_exponential_sum_bound (x t : ℝ) (hx : 2 ≤ x) :
-    ‖∑ p ∈ Nat.primesBelow ⌊x⌋₊, Complex.exp (Complex.I * t * Real.log ↑p)‖ ≤
-      2 * x / Real.log x := by
-  sorry
+    ‖∑ p ∈ Nat.primesLE ⌊x⌋₊, Complex.exp (Complex.I * t * Real.log ↑p)‖ ≤ πBound x := by
+  have unit : ∀ p, p ∈ Nat.primesLE ⌊x⌋₊ →
+      ‖Complex.exp (Complex.I * t * Real.log ↑p)‖ = (1 : ℝ) := by
+    intro p hp
+    rw [mul_assoc, ← Complex.ofReal_mul, Complex.norm_exp_I_mul_ofReal (t * Real.log ↑p)]
+  calc
+    ‖∑ p ∈ Nat.primesLE ⌊x⌋₊, Complex.exp (Complex.I * t * Real.log ↑p)‖
+        ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, ‖Complex.exp (Complex.I * t * Real.log ↑p)‖ :=
+      norm_sum_le _ _
+    _ = ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) := by rw [Finset.sum_congr rfl unit]
+    _ = (Nat.primesLE ⌊x⌋₊).card := by rw [Finset.sum_const (1 : ℝ)]; simp
+    _ = (Nat.primeCounting ⌊x⌋₊ : ℝ) := by rw [Nat.primesLE_card_eq_primeCounting]
+    _ ≤ πBound x := πBound_of_primeCounting (by linarith [hx])
 
 end

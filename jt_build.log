@@ -1,0 +1,23 @@
+JensenTranslation.lean:101:8: warning: declaration uses `sorry`
+JensenTranslation.lean:107:8: warning: declaration uses `sorry`
+JensenTranslation.lean:124:42: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:246:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  Polynomial.map ?f ?m.58 + Polynomial.map ?f ?m.59
+in the target expression
+  Hyperbolic
+    (Polynomial.C ↑(taylorCoeff n) + (Polynomial.monomial 1) (2 * ↑(taylorCoeff (n + 1))) +
+      (Polynomial.monomial 2) ↑(taylorCoeff (n + 2)))
+
+n : ℕ
+ha : taylorCoeff (n + 2) ≠ 0
+h : taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2)
+⊢ Hyperbolic
+    (Polynomial.C ↑(taylorCoeff n) + (Polynomial.monomial 1) (2 * ↑(taylorCoeff (n + 1))) +
+      (Polynomial.monomial 2) ↑(taylorCoeff (n + 2)))
+JensenTranslation.lean:310:8: warning: declaration uses `sorry`
+JensenTranslation.lean:320:8: warning: declaration uses `sorry`
+JensenTranslation.lean:328:8: warning: declaration uses `sorry`
+JensenTranslation.lean:335:8: warning: declaration uses `sorry`
+EXIT:1

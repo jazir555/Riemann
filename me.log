@@ -1,0 +1,27 @@
+MertensEstimate.lean:57:31: error: unsolved goals
+x : ℝ
+hx : 10 ≤ x
+hpos : ∀ p ∈ ⌊x⌋₊.primesLE, 0 < ↑p
+p : ℕ
+hp : p ∈ ⌊x⌋₊.primesLE
+⊢ 0 < ?m.113
+MertensEstimate.lean:58:10: error: mod_cast has type
+  2 ≤ p
+but is expected to have type
+  ↑p ≤ ?m.113
+MertensEstimate.lean:61:6: error: Function expected at
+  Finset.sum_le_sum fun p hp => div_nonneg ?m.195 (le_of_lt (hpos p hp))
+but this term has type
+  ∑ i ∈ ⌊x⌋₊.primesLE, 0 ≤ ∑ i ∈ ⌊x⌋₊.primesLE, ?m.192 i / ↑i
+
+Note: Expected a function because this term is being applied to the argument
+  this
+MertensEstimate.lean:61:49: error: unsolved goals
+x : ℝ
+hx : 10 ≤ x
+hpos : ∀ p ∈ ⌊x⌋₊.primesLE, 0 < ↑p
+this : ∀ p ∈ ⌊x⌋₊.primesLE, 1 / ↑p ≤ 1 / 2
+p : ℕ
+hp : p ∈ ⌊x⌋₊.primesLE
+⊢ 0 ≤ ?m.192 p
+EXIT:1

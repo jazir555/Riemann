@@ -1,0 +1,23 @@
+ApproxZetaLowerBound.lean:56:2: error: Type mismatch
+  (summable_nat_add_iff 2).mpr (summable_nat_rpow_inv.mpr h)
+has type
+  Summable fun n => (↑(n + 2) ^ σ)⁻¹
+but is expected to have type
+  Summable fun n => (↑n + 2) ^ (-σ)
+ApproxZetaLowerBound.lean:72:33: error: `simp` made no progress
+ApproxZetaLowerBound.lean:74:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ?m.136 - ?m.137 = ?m.138
+in the target expression
+  1 + ∑' (b : ℕ), f (b + 1) = riemannZeta s
+
+s : ℂ
+h : 1 < s.re
+f : ℕ → ℂ := fun n => 1 / (↑n + 1) ^ s
+S : ℂ := ∑' (n : ℕ), f (n + 1)
+hS_def : S = ∑' (n : ℕ), f (n + 1)
+hζ : riemannZeta s = ∑' (n : ℕ), f n
+hsum : Summable f
+hsplit : 1 + ∑' (b : ℕ), f (b + 1) = riemannZeta s
+f0_eq_one : f 0 = 1
+⊢ ‖riemannZeta s‖ ≥ 1 - zetaTail s.re
+EXIT:1
