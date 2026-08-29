@@ -1,4 +1,5 @@
 import Mathlib
+import Zeta23.FromPNTPlus.Mertens
 
 set_option maxHeartbeats 1000000
 
@@ -84,5 +85,87 @@ theorem prime_exponential_sum_bound (x t : ℝ) (hx : 2 ≤ x) :
     _ = (Nat.primesLE ⌊x⌋₊).card := by rw [Finset.sum_const (1 : ℝ)]; simp
     _ = (Nat.primeCounting ⌊x⌋₊ : ℝ) := by rw [Nat.primesLE_card_eq_primeCounting]
     _ ≤ πBound x := πBound_of_primeCounting (by linarith [hx])
+
+/-! ## Sharp Mertens estimates, imported from the `Zeta23` library
+
+The bounds above are the elementary Chebyshev ones (`π(x) ≤ πBound x`), which are
+*correct but not sharp*.  `Zeta23.FromPNTPlus.Mertens` proves **Mertens' first theorem
+with an explicit constant**, stated against Mathlib's `ArithmeticFunction.vonMangoldt`:
+
+  `|∑_{d ≤ x} Λ(d)/d − log x| ≤ log 4 + 4`   (`Mertens.sum_mangoldt_div_eq_log`).
+
+Since `Zeta23` uses Mathlib's `vonMangoldt` (and Mathlib's `riemannZeta`), that estimate
+transfers verbatim; everything below is unconditional and sorry-free.  In particular
+`sum_primes_recip_le_log` replaces the `πBound x / 2 = O(x / log x)` bound of
+`sum_primes_recip` by the far better `O(log x)` bound. -/
+
+/-- **Mertens' first theorem (von Mangoldt form), with an explicit constant**:
+`|∑_{d ≤ x} Λ(d)/d − log x| ≤ log 4 + 4` for `x ≥ 1`.  This is
+`Zeta23`'s `Mertens.sum_mangoldt_div_eq_log`, applied to Mathlib's `vonMangoldt`. -/
+theorem mertens_first_vonMangoldt {x : ℝ} (hx : 1 ≤ x) :
+    |∑ d ∈ Finset.Ioc 0 ⌊x⌋₊, ArithmeticFunction.vonMangoldt d / d - Real.log x|
+      ≤ Real.log 4 + 4 :=
+  Mertens.sum_mangoldt_div_eq_log hx
+
+/-- Upper half of Mertens' first theorem. -/
+theorem sum_vonMangoldt_div_le {x : ℝ} (hx : 1 ≤ x) :
+    ∑ d ∈ Finset.Ioc 0 ⌊x⌋₊, ArithmeticFunction.vonMangoldt d / d
+      ≤ Real.log x + (Real.log 4 + 4) := by
+  have h := abs_le.mp (mertens_first_vonMangoldt hx)
+  linarith [h.2]
+
+/-- Lower half of Mertens' first theorem. -/
+theorem sum_vonMangoldt_div_ge {x : ℝ} (hx : 1 ≤ x) :
+    Real.log x - (Real.log 4 + 4)
+      ≤ ∑ d ∈ Finset.Ioc 0 ⌊x⌋₊, ArithmeticFunction.vonMangoldt d / d := by
+  have h := abs_le.mp (mertens_first_vonMangoldt hx)
+  linarith [h.1]
+
+/-- **Sharp Chebyshev–Mertens bound for the prime sum** `∑_{p ≤ x} (log p)/p ≤ log x + log 4 + 4`.
+The primes form a subset of `Ioc 0 ⌊x⌋₊` on which `Λ p = log p`, and all `Λ`-terms are
+nonnegative, so this follows from `sum_vonMangoldt_div_le`. -/
+theorem sum_primes_log_div_le {x : ℝ} (hx : 1 ≤ x) :
+    ∑ p ∈ Nat.primesLE ⌊x⌋₊, Real.log p / p ≤ Real.log x + (Real.log 4 + 4) := by
+  have hsubset : Nat.primesLE ⌊x⌋₊ ⊆ Finset.Ioc 0 ⌊x⌋₊ := by
+    intro p hp
+    exact Finset.mem_Ioc.mpr ⟨(Nat.prime_of_mem_primesLE hp).pos, Nat.le_of_mem_primesLE hp⟩
+  have heq : ∑ p ∈ Nat.primesLE ⌊x⌋₊, Real.log p / p
+      = ∑ p ∈ Nat.primesLE ⌊x⌋₊, ArithmeticFunction.vonMangoldt p / p :=
+    Finset.sum_congr rfl (fun p hp => by
+      rw [ArithmeticFunction.vonMangoldt_apply_prime (Nat.prime_of_mem_primesLE hp)])
+  rw [heq]
+  refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsubset ?_) (sum_vonMangoldt_div_le hx)
+  intro d _ _
+  exact div_nonneg ArithmeticFunction.vonMangoldt_nonneg (Nat.cast_nonneg d)
+
+/-- **Mertens-type bound on the sum of prime reciprocals**:
+`∑_{p ≤ x} 1/p ≤ (log x + log 4 + 4)/log 2`.
+Each prime satisfies `log 2 ≤ log p`, so `1/p ≤ (log p / p)/log 2`, and the claim follows from
+`sum_primes_log_div_le`.  (The truly sharp form `∑_{p ≤ x} 1/p = log log x + M + o(1)` needs
+partial summation on top of Mertens' first theorem; this `O(log x)` bound is already an
+exponential improvement on the Chebyshev bound `sum_primes_recip`.) -/
+theorem sum_primes_recip_le_log {x : ℝ} (hx : 1 ≤ x) :
+    ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p
+      ≤ (Real.log x + (Real.log 4 + 4)) / Real.log 2 := by
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hterm : ∀ p ∈ Nat.primesLE ⌊x⌋₊,
+      (1 : ℝ) / p ≤ (Real.log p / p) / Real.log 2 := by
+    intro p hp
+    have hprime := Nat.prime_of_mem_primesLE hp
+    have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hprime.two_le
+    have hppos : (0 : ℝ) < (p : ℝ) := by linarith
+    have hlogp : Real.log 2 ≤ Real.log p := Real.log_le_log (by norm_num) hp2
+    rw [le_div_iff₀ hlog2]
+    have hdiv : Real.log 2 / (p : ℝ) ≤ Real.log p / (p : ℝ) := by gcongr
+    calc (1 : ℝ) / p * Real.log 2 = Real.log 2 / (p : ℝ) := by ring
+      _ ≤ Real.log p / (p : ℝ) := hdiv
+  calc ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p
+      ≤ ∑ p ∈ Nat.primesLE ⌊x⌋₊, (Real.log p / p) / Real.log 2 :=
+        Finset.sum_le_sum hterm
+    _ = (∑ p ∈ Nat.primesLE ⌊x⌋₊, Real.log p / p) / Real.log 2 := by
+        rw [Finset.sum_div]
+    _ ≤ (Real.log x + (Real.log 4 + 4)) / Real.log 2 := by
+        gcongr
+        exact sum_primes_log_div_le hx
 
 end

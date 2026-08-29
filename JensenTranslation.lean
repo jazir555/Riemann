@@ -302,8 +302,14 @@ theorem jensenPoly_derivative (d n : ℕ) :
   simp
 
 /-- A sum of a multiset of nonnegative reals is nonnegative. -/
-lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum :=
-  Multiset.sum_nonneg h
+lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp
+  | cons a M ih =>
+    rw [Multiset.sum_cons]
+    have ha : 0 ≤ a := h a (Multiset.mem_cons_self a M)
+    have hM : 0 ≤ M.sum := ih (fun x hx => h x (Multiset.mem_cons_of_mem hx))
+    linarith
 
 /-- A nonempty sum of positive reals is positive. -/
 lemma msum_pos {M : Multiset ℝ} (h : ∀ x ∈ M, 0 < x) (hn : M ≠ 0) : 0 < M.sum := by
@@ -425,20 +431,32 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     · linarith
   exact hwim hwim0
 
-/-- PÓLYA'S SHIFT REDUCTION (Pólya 1927; GORZ 2019):
-    Hyperbolicity at shift n = 0 for every degree d implies hyperbolicity
-    for all shifts n, because J_{d,n} is a constant multiple of the n-th
-    derivative of J_{d+n,0} (by iterating `jensenPoly_derivative`) and
-    differentiation preserves hyperbolicity (by `derivative_hyperbolic`).
-    Hence RH ⟺ ∀ d, J_{d,0} is hyperbolic. -/
+/-- OUT OF SCOPE (left as the open translation).  The genuine content is the
+    Gauss–Lucas step: `jensenPoly d n` is a nonzero scalar multiple of the
+    `n`-th derivative of `jensenPoly (d+n) 0` (by iterating `jensenPoly_derivative`),
+    and `derivative_hyperbolic` shows differentiation preserves hyperbolicity.
+    Concretely one would prove
+        `Hyperbolic (jensenPoly (d+n) 0) → Hyperbolic (jensenPoly d n)`
+    under the non-degeneracy hypothesis `n ≤ natDegree (jensenPoly (d+n) 0)`;
+    this needs the base polynomials to have full degree, which is *not* derivable
+    from the present root infrastructure and is itself part of the open
+    RH/Jensen equivalence.  (E.g. if γ₀ = 1 and γ_k = 0 for k ≥ 1 then every
+    `J_{d,0}` is the constant 1 — hyperbolic — yet every `J_{d,n}` with n ≥ 1 is
+    the zero polynomial, which is not hyperbolic.)  Hence the unconditional
+    statement cannot be proved here and is left as `sorry`. -/
 theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
     ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
   sorry
 
-/-- THE SHIFT-REDUCED TRANSLATION: RH ⟺ hyperbolicity of the Jensen
-    polynomials at shift zero, for every degree d.
-    (Pólya 1927; Griffin–Ono–Rolen–Zagier 2019, "it would be enough to
-    show hyperbolicity for the J_{d,0}".) -/
+/-- OUT OF SCOPE (left as the open translation).  This is exactly the
+    Jensen/GORZ characterization of RH: Ξ belongs to the Laguerre–Pólya class
+    (all its zeros real) iff every Jensen polynomial is hyperbolic, i.e.
+    `RiemannHypothesisProp ↔ ∀ d, Hyperbolic (jensenPoly d 0)`.  It is
+    *equivalent* to RH and its proof requires the deep analysis connecting the
+    zeros of the shifted xi function to hyperbolicity of the Jensen
+    polynomials — material that is not present in the root infrastructure
+    (which only defines `jensenPoly`, `Hyperbolic`, and the `rh_iff_*` engines
+    that reduce RH to zero-free rectangles).  It is therefore left as `sorry`. -/
 theorem rh_iff_jensen_zero :
     RiemannHypothesisProp ↔ ∀ d : ℕ, Hyperbolic (jensenPoly d 0) := by
   sorry

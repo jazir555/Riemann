@@ -3,6 +3,7 @@ import ZeroFreeRegionHadamard
 import Zeta23.RvM.Statement
 import Zeta23.GammaFacts.Complete
 import Zeta23.Assembly
+import Zeta23.FromPNTPlus.ZetaBounds
 
 open Complex Real Topology
 open scoped BigOperators
@@ -240,27 +241,66 @@ canonical product to represent ξ exactly. With this single documented assumptio
 `KadiriZeroFree.lean` closes unconditionally. -/
 axiom xiZeros_simple : ∀ z : ℂ, meromorphicOrderAt xi z ≤ 1
 
-/-- Kadiri–Lamzouri zero-free region for ζ:
-    `ζ(s) ≠ 0` whenever `|Im s| ≥ 1` and `Re s ≥ 1 - (1/57.54)/log(|Im s|+10)`.
+/-! ### What `Zeta23` does give unconditionally
 
-    **Assembly chain** (all building blocks are sorry-free in the codebase):
+`Zeta23.FromPNTPlus.ZetaBounds.ZetaZeroFree` (the PNT+ zero-free region, for **Mathlib's**
+`riemannZeta`) is sorry-free and applies verbatim here.  It yields the region
+`Re s ≥ 1 − A/(log|Im s|)^9` for some unspecified `A > 0`, which is *strictly thinner* than
+Kadiri's `Re s ≥ 1 − (1/57.54)/log(|Im s|+10)`; hence it cannot discharge
+`KadiriAnalyticInput` below, but it is an unconditional zero-free region in its own right. -/
 
-    1. `xiZeros_infinite` + `xiZeros_simple` [sorry]
-       → `xi_zero_enumeration` (ZeroFreeRegionHadamard, sorry-free)
+/-- **Unconditional zero-free region for ζ** (Zeta23/PNT+ shape): there is `A > 0` with
+`ζ(s) ≠ 0` whenever `3 < |Im s|` and `Re s ≥ 1 − A/(log |Im s|)^9`.  Sorry-free. -/
+theorem zeta_ne_zero_of_pow_edge :
+    ∃ A : ℝ, 0 < A ∧ ∀ s : ℂ, 3 < |s.im| →
+      1 - A / (Real.log |s.im|) ^ 9 ≤ s.re → riemannZeta s ≠ 0 := by
+  obtain ⟨A, hA, h⟩ := ZetaZeroFree
+  refine ⟨A, hA.1, ?_⟩
+  intro s hs hedge
+  by_cases h1 : 1 ≤ s.re
+  · exact riemannZeta_ne_zero_of_one_le_re h1
+  · push Not at h1
+    have hz := h s.re s.im hs (Set.mem_Ico.mpr ⟨hedge, h1⟩)
+    rwa [Complex.re_add_im] at hz
+
+/-- **The single remaining deep analytic input** of Kadiri's argument, in exactly the shape
+consumed by `riemannZeta_ne_zero_of_zeroFreeEdge` with constants `(A₀, A₁, A₂) = (3, 2, 0)`:
+the sharp 3–4–1 estimate for the *analytic part* of `−ζ′/ζ` after the zero at `s` has been
+removed.  Kadiri's proof of it needs explicit digamma/Hadamard estimates; nothing in
+`Zeta23` (whose zero-free input is the much thinner `1 − A/(log|t|)^9` region with
+unspecified `A`) implies it. -/
+def KadiriAnalyticInput : Prop :=
+  ∀ (s : ℂ) (σ : ℝ) (analytic : ℂ → ℂ), 1 < σ → 1 ≤ |s.im| → s.re < 1 →
+    (∀ s' : ℂ, 1 < s'.re →
+      LSeries ↗Λ s' = analytic s' - ∑ ρ ∈ ({s} : Finset ℂ), (1 / (s' - ρ) + 1 / ρ)) →
+    3 * (analytic (σ : ℂ)).re + 4 * (analytic ((σ : ℂ) + (s.im : ℂ) * I)).re
+        + (analytic ((σ : ℂ) + 2 * (s.im : ℂ) * I)).re
+      ≤ 3 / (σ - 1) + 2 * Real.log (|s.im| + 2) + 0
+
+/-- Kadiri–Lamzouri zero-free region for ζ, **conditional on the one missing estimate**
+`KadiriAnalyticInput` — and otherwise completely sorry-free:
+`ζ(s) ≠ 0` whenever `|Im s| ≥ 1` and `Re s ≥ 1 - (1/57.54)/log(|Im s|+10)`.
+
+    **Assembly chain** (every other building block is now sorry-free):
+
+    1. `xiZeros_infinite` (proved above from `Zeta23`'s Riemann–von Mangoldt formula)
+       + `xiZeros_simple` (documented axiom: simplicity of the ζ-zeros)
+       → `xi_zero_enumeration` (ZeroFreeRegionHadamard)
        → injective enumeration `a : ℕ → ℂ` of ξ-zeros escaping to infinity
 
-    2. `logDeriv_completedZeta` (ZeroFreeRegionHadamard, sorry-free)
-       → Hadamard decomposition:
-         `-ζ'/ζ(s) = (-g'(s) + 1/s + 1/(s-1) + logDeriv Γℝ s)
-                      - ∑ₙ (1/(s-aₙ) + 1/aₙ)`
+    2. `xi_enum_ncard_bound` (proved above from `Zeta23`'s local zero count)
+       → `Summable (fun n => (‖aₙ‖ ^ 2)⁻¹)`
 
-    3. Truncate the infinite zero-sum to a finite Finset Z, absorb tail into
-       `analytic`. The 3/4/1 inequality bounds analytic; `kadiri_numerical_bridge`
-       gives h_c.
+    3. `logDeriv_completedZeta` (ZeroFreeRegionHadamard)
+       → Hadamard decomposition
+         `-ζ'/ζ(s) = (-g'(s) + 1/s + 1/(s-1) + logDeriv Γℝ s) - ∑ₙ (1/(s-aₙ) + 1/aₙ)`
 
-    4. `riemannZeta_ne_zero_of_zeroFreeEdge` (ZeroFreeRegionProof, sorry-free)
-       → conclusion: ζ(s) ≠ 0. -/
-theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
+    4. truncation of the zero-sum to `Z = {s}`; `h_analytic` is exactly
+       `KadiriAnalyticInput`; `kadiri_numerical_bridge` gives `h_c`
+
+    5. `riemannZeta_ne_zero_of_zeroFreeEdge` (ZeroFreeRegionProof) → `ζ(s) ≠ 0`. -/
+theorem kadiriLamzouriZetaZeroFreeEdge_of_analyticInput (hIn : KadiriAnalyticInput)
+    (s : ℂ) (ht : |s.im| ≥ 1)
     (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 := by
   by_cases h1 : 1 ≤ s.re
   · exact riemannZeta_ne_zero_of_one_le_re h1
@@ -356,7 +396,19 @@ theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
       (fun s' => LSeries ↗Λ s' + (1/(s' - s) + 1/s))
       (fun s' _ => by simp [Finset.sum_singleton])
       (3:ℝ) (2:ℝ) (0:ℝ) (by norm_num) (by norm_num)
-      sorry hRHS_pos h_c
+      (hIn s (1 + (2:ℝ) / 5 / Real.log (|s.im| + 10))
+        (fun s' => LSeries ↗Λ s' + (1/(s' - s) + 1/s)) hσgt ht h1
+        (fun s' _ => by simp [Finset.sum_singleton]))
+      hRHS_pos h_c
+
+/-- Kadiri–Lamzouri zero-free region for ζ (unconditional statement).  Every step is
+sorry-free except the single named leaf `KadiriAnalyticInput` (Kadiri's sharp 3–4–1
+estimate), which is supplied here by `sorry`; see
+`kadiriLamzouriZetaZeroFreeEdge_of_analyticInput` for the sorry-free conditional form and
+`zeta_ne_zero_of_pow_edge` for the unconditional (but thinner) `Zeta23`/PNT+ region. -/
+theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
+    (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 :=
+  kadiriLamzouriZetaZeroFreeEdge_of_analyticInput (sorry : KadiriAnalyticInput) s ht hre
 
 end
 

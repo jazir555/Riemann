@@ -48,11 +48,11 @@ theorem T₀_pos : 0 < T₀ := by norm_num [T₀]
 /-- The Dirichlet-series tail `∑_{n≥2} n^{-σ}`, used as the error term in the
 `Re(s) > 1` lower bound. -/
 noncomputable def zetaTail (σ : ℝ) : ℝ :=
-  ∑' (n : ℕ), ((n + 2 : ℝ) ^ σ)⁻¹
+  ∑' (n : ℕ), ((↑(n + 2) : ℝ) ^ (-σ))
 
 /-- The tail is summable for `1 < σ` (it is a shifted `p`-series). -/
 theorem zetaTail_summable {σ : ℝ} (h : 1 < σ) :
-    Summable (fun n : ℕ => ((n + 2 : ℝ) ^ (-σ))) :=
+    Summable (fun n : ℕ => ((↑(n + 2) : ℝ) ^ (-σ))) :=
   (summable_nat_add_iff 2).mpr (summable_nat_rpow.mpr (neg_lt_neg h))
 
 /-- For `1 < Re(s)`, the `n = 1` term of the Dirichlet series is `1`, and the
@@ -60,32 +60,35 @@ remainder is bounded by `zetaTail (Re s)`.  Hence
 `|ζ(s)| ≥ 1 - zetaTail (Re s)`. -/
 theorem riemannZeta_abs_lower_bound_of_re_gt_one
     {s : ℂ} (h : 1 < s.re) : ‖riemannZeta s‖ ≥ 1 - zetaTail s.re := by
-  set f := fun (n : ℕ) => (1 : ℂ) / ((n + 1 : ℂ) ^ s)
+  set f := fun (n : ℕ) => (1 : ℂ) / ((↑(n + 1) : ℂ) ^ s)
   set S := ∑' (n : ℕ), f (n + 1) with hS_def
-  have hζ : riemannZeta s = ∑' n, f n := zeta_eq_tsum_one_div_nat_add_one_cpow h
+  have hζ : riemannZeta s = ∑' n, f n := by
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow h]
+    congr 1; ext n; simp [f, Nat.cast_succ]
   have hsum : Summable f :=
     (summable_nat_add_iff 1).mpr (Complex.summable_one_div_nat_cpow.mpr h)
   have hsplit : ∑' n, f n = f 0 + ∑' n, f (n + 1) :=
-    (Summable.tsum_eq_zero_add hsum).symm
-  rw [← hζ, hsplit]
+    Summable.tsum_eq_zero_add hsum
+  rw [hζ, hsplit]
   -- riemannZeta s = f 0 + S
-  have f0_eq_one : f 0 = 1 := by simp only [f, one_cpow (Complex.one_ne_zero), div_one]
+  have f0_eq_one : f 0 = 1 := by simp [f]
   rw [f0_eq_one]
   -- riemannZeta s = 1 + S
   have h_eq_norm :
-      ∀ (n : ℕ), ((n + 2 : ℝ) ^ s.re)⁻¹ = ‖f (n + 1)‖ := by
+      ∀ (n : ℕ), ((↑(n + 2) : ℝ) ^ (-s.re)) = ‖f (n + 1)‖ := by
     intro n
+    rw [rpow_neg (by positivity : 0 ≤ (↑(n + 2) : ℝ)) s.re]
     simp only [f, norm_div, norm_one, inv_eq_one_div]
-    rw [norm_cpow_eq_rpow_re_of_pos (by positivity : 0 < (n + 2 : ℝ))]
+    rw [← ofReal_natCast, norm_cpow_eq_rpow_re_of_pos (by positivity : 0 < (↑(n + 2) : ℝ))]
   have hSn : Summable fun n => ‖f (n + 1)‖ :=
     (zetaTail_summable h).congr h_eq_norm
   have hS_leq : ‖S‖ ≤ zetaTail s.re := by
     refine (norm_tsum_le_tsum_norm hSn).trans ?_
-    rw [tsum_congr h_eq_norm]
+    rw [tsum_congr fun n => (h_eq_norm n).symm]
     exact le_rfl
   have h_ge : ‖1 + S‖ ≥ 1 - ‖S‖ := by
     have h := norm_sub_le (1 + S) S
-    rw [sub_add_cancel, norm_one] at h
+    rw [show (1 + S) - S = (1 : ℂ) from by simp, norm_one] at h
     rw [← sub_le_iff_le_add] at h
     exact h
   exact (sub_le_sub_left hS_leq 1).trans h_ge
