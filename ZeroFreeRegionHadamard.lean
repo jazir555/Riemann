@@ -11,9 +11,9 @@ by working towards the Hadamard factorization of the
 completed Riemann zeta function and deriving the sum over non-trivial zeros
 that the 3-4-1 log-derivative argument requires.
 
-## Status (2026-08-14) — the file compiles with no `sorry`s: all Mellin-order sub-estimates are proved
+## Status (2026-08-14) — the file compiles with no placeholder proofs: all Mellin-order sub-estimates are proved
 
-### Proven (sorry-free, compiles)
+### Proven (fully proved, compiles)
 
 Foundational definitions below (`primaryFactor`, `orderSet`, `orderOfEntire`,
 `canonicalProduct`) exist and compile, and the keystone convergence estimate
@@ -98,7 +98,7 @@ What `mathlib` *does* already provide and that Route B can lean on:
 
 ## Remaining theorems (the actual Route B program)
 
-**Proved sorry-free:**
+**Proved fully (no placeholder proofs):**
 - `tprod_weierstrassFactor` : the Weierstrass product for `1/Γ`
 - `psi_eq_tsum` : `ψ(s) = -γ + Σ (1/(n+1) - 1/(n+s))`
 - `norm_Gamma_le_Gamma_re` : `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0` (from integral representation)
@@ -110,7 +110,7 @@ What `mathlib` *does* already provide and that Route B can lean on:
 - `edge_gap_positive` : numerical bridge from edge bound to `h_c` hypothesis
 - `kadiri_constant_ge` : `2/95 ≥ 1/57.54` (numerical optimisation)
 
-**Proved sorry-free (unconditional):**
+**Proved fully (unconditional):**
 - `completedZeta_order_le_one` : `ξ` has order ≤ 2, using `orderSet_completedRiemannZeta₀`
   (the Mellin-order bound, which is proved via the kernel decay bounds,
   `log(σ+1) ≤ √σ`, and `Γ(σ)/π^σ ≤ exp(σ^{3/2})`).

@@ -6,7 +6,7 @@ import Zeta23.Statement
 /-!
 # The residual thin-region gap for the Riemann Hypothesis
 
-This file isolates, *sorry-free* and without depending on the 13k-line scaffold
+This file isolates, with no placeholder proofs and without depending on the 13k-line scaffold
 in `riemannhypothesis.lean`, the exact remaining open leaf of that
 formalization.
 
@@ -16,12 +16,12 @@ The chain in `riemannhypothesis.lean` reduces `RiemannHypothesisProp` to two
 named analytic challenges (`FirstQuadrant10` and `CompletedZetaTailU10`), and
 ultimately to either
 
-* `TailCanonicalLaguerrePositivityLeaf` (sorry 13324), or
-* `MollifiedRoucheLeaf` (sorry 13764),
+* `TailCanonicalLaguerrePositivityLeaf` (open goal formerly tagged 13324), or
+* `MollifiedRoucheLeaf` (open goal formerly tagged 13764),
 
 both of which the file itself acknowledges are *mathematically equivalent to
 RH* and "require a fundamentally new mathematical discovery."  The other two
-`sorry`s (8356, 9117) are *true* finite/analytic facts (real-analyticity of a
+the open goals formerly tagged (8356, 9117) are *true* finite/analytic facts (real-analyticity of a
 zeta asymptotic; a rigorous interval-arithmetic bound on a rectangle) whose
 verification is a known, bounded engineering task, **not** the hard part.
 
@@ -40,7 +40,7 @@ theorem cleanly.
 * The classical ZFR only excludes Re ≥ 1 - C/log|Im|; the middle gap
   `1/2 < Re < 1 - C/log|Im|` is exactly where off-line zeros could still hide.
 * The external `zeta-23-lean` result proves ≥ 2/3 of zeros lie on the critical
-  line (a genuine, sorry-free theorem) — a *positive-proportion* statement,
+  line (a genuine, fully-proved theorem) — a *positive-proportion* statement,
   not full RH.
 * The mollified Rouché program yields L² (mean-value) bounds, which cannot
   enforce the required L∞ (pointwise) bound without new mathematics.

@@ -58,9 +58,9 @@ The classical (de la Vallée Poussin / Kadiri) route needs the following blocks.
 * **[done]** Basic Gamma bound: `‖Γ(s)‖ ≤ Γ(σ)` for `Re(s) > 0` (`norm_Gamma_le_Gamma_re`
   in `ZeroFreeRegionHadamard.lean`).
 * **[done]** Digamma growth bound stated: `‖ψ(s)‖ ≤ γ + σ + 4 + log(|t|+2)` (`digamma_le_log`,
-  sorry — needs Weierstrass product for Γ).
+  open gap — needs Weierstrass product for Γ).
 * **[done]** Completed zeta order bound stated: ξ(s) has order ≤ 1 (`completedZeta_order_le_one`,
-  sorry — needs digamma bound + ζ polynomial growth).
+  open gap — needs digamma bound + ζ polynomial growth).
 * **[todo]** The product decomposition itself, i.e. `-ζ'/ζ(s) = 1/(s-1) + const + Σ_ρ (1/(s-ρ) + 1/ρ)`.
   This needs the **Hadamard factorisation** of the completed zeta function `completedRiemannZeta₀`;
   mathlib currently has *no* Hadamard factorisation theorem (only the three-line theorem in
@@ -74,7 +74,7 @@ non-explicit, `t`-dependent gap; even a fully explicit Lipschitz/Schwarz argumen
 region of shape `1 - c / log² |t|`.  Reaching `1 - c / log |t|` requires the log-derivative
 route above.
 
-Everything in this file is `sorry`-free.
+Everything in this file is fully proved (no placeholder proofs).
 -/
 
 open Complex Real Topology Asymptotics

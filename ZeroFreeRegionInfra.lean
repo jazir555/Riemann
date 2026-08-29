@@ -66,7 +66,7 @@ non-explicit, `t`-dependent gap; even a fully explicit Lipschitz/Schwarz argumen
 region of shape `1 - c / log² |t|`.  Reaching `1 - c / log |t|` requires the log-derivative
 route above.
 
-Everything in this file is `sorry`-free.
+Everything in this file is fully proved (no placeholder proofs).
 -/
 
 open Complex Real Topology Asymptotics

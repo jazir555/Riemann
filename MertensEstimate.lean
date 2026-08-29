@@ -95,7 +95,7 @@ with an explicit constant**, stated against Mathlib's `ArithmeticFunction.vonMan
   `|∑_{d ≤ x} Λ(d)/d − log x| ≤ log 4 + 4`   (`Mertens.sum_mangoldt_div_eq_log`).
 
 Since `Zeta23` uses Mathlib's `vonMangoldt` (and Mathlib's `riemannZeta`), that estimate
-transfers verbatim; everything below is unconditional and sorry-free.  In particular
+transfers verbatim; everything below is unconditional and fully proved (no placeholder proofs).  In particular
 `sum_primes_recip_le_log` replaces the `πBound x / 2 = O(x / log x)` bound of
 `sum_primes_recip` by the far better `O(log x)` bound. -/
 

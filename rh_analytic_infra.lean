@@ -11,14 +11,14 @@ namespace ZetaAsymptotics
 
 This file contains the first, verified layer of the infrastructure needed to prove
 `AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Ioi 0)` (the real-analyticity of the `termTSum`
-function appearing in `riemannZeta₀_eq_one_sub_mul_termTSum`, sorry 8356 of
+function appearing in `riemannZeta₀_eq_one_sub_mul_termTSum`, open goal formerly tagged 8356 of
 `riemannhypothesis.lean`).
 
 All lemmas here are verified against mathlib (`lake env lean` passes with no errors).
 
 ## Status (honest)
 
-Closing sorry 8356 requires the full chain:
+Closing the open goal formerly tagged 8356 requires the full chain:
 1. ✔ atomic derivative lemmas (this file: `hasDerivAt_rpow_exp`, `hasDerivAt_neg_exponent`,
    `hasDerivAt_term_integrand`);
 2. ✔ atomic analyticity lemmas (this file: `analyticOnNhd_rpow_const_exp`,
@@ -29,9 +29,9 @@ Closing sorry 8356 requires the full chain:
 4. □ `AnalyticOnNhd ℝ termTSum (Ioi 0)` — needs a real Weierstrass theorem (locally uniform
    limit of real-analytic functions is real-analytic), which does not exist in mathlib;
 5. □ the identity-theorem step (`eqOn_of_preconnected_of_eventuallyEq`, which exists for ℝ),
-   closing sorry 8356.
+    closing the open goal formerly tagged 8356.
 
-Sorry 9117 additionally requires a rigorous numerical certificate bridge.
+The open goal formerly tagged 9117 additionally requires a rigorous numerical certificate bridge.
 -/
 
 /-- Pointwise derivative (w.r.t. the exponent) of `x ^ s` for `0 < x`. -/

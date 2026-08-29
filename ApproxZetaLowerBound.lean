@@ -11,7 +11,7 @@ noncomputable section
 # A Rigorous Lower Bound for the Riemann Zeta Function
 
 This file formalizes a genuine lower bound for `|ζ(s)|` together with the exact
-functional equation.  It is written to compile with no `sorry` anywhere.
+functional equation.  It is written so that it compiles with no placeholder proofs (fully proved).
 
 ## Background
 

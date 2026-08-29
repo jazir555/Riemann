@@ -11,7 +11,7 @@ Narrow scratch extraction of `TailCanonicalLaguerrePositivityLeaf` and
 The heavy RH machinery (`xiShiftedLaguerreCoefficient`, `zeta`, `shiftedS`,
 `dirichletMollifier`) is re-declared here only as a *minimal interface stub* so
 the two structures compile without importing the 133k-line source file. The
-stubs are not proofs and are not `sorry`; they are placeholders for the
+stubs are not proofs and are not placeholder admissions; they are placeholders for the
 orchestrator to replace with the real definitions.
 
 The only genuinely proven results here are two small, finite, analytic

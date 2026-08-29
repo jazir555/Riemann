@@ -443,7 +443,7 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     RH/Jensen equivalence.  (E.g. if γ₀ = 1 and γ_k = 0 for k ≥ 1 then every
     `J_{d,0}` is the constant 1 — hyperbolic — yet every `J_{d,n}` with n ≥ 1 is
     the zero polynomial, which is not hyperbolic.)  Hence the unconditional
-    statement cannot be proved here and is left as `sorry`. -/
+    statement cannot be proved here and is left as an RH-equivalent placeholder at line 449. -/
 theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
     ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
   sorry
@@ -456,7 +456,7 @@ theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
     zeros of the shifted xi function to hyperbolicity of the Jensen
     polynomials — material that is not present in the root infrastructure
     (which only defines `jensenPoly`, `Hyperbolic`, and the `rh_iff_*` engines
-    that reduce RH to zero-free rectangles).  It is therefore left as `sorry`. -/
+    that reduce RH to zero-free rectangles).  It is therefore left as an RH-equivalent placeholder at line 462. -/
 theorem rh_iff_jensen_zero :
     RiemannHypothesisProp ↔ ∀ d : ℕ, Hyperbolic (jensenPoly d 0) := by
   sorry

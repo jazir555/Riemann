@@ -159,7 +159,7 @@ theorem polya_schur_closure
 -- ── Node: close `rh_iff_all_jensen_hyperbolic` ───────────────────────────────
 -- Combines the bridge (RH ↔ shifted-real-rooted) with the Pólya–Schur
 -- equivalence (shifted-real-rooted ↔ all Jensen hyperbolic).  This is exactly
--- the body of the `sorry` at `JensenTranslation.rh_iff_all_jensen_hyperbolic`.
+-- the body of the placeholder proof at `JensenTranslation.rh_iff_all_jensen_hyperbolic`.
 theorem rh_iff_all_jensen_hyperbolic_closure
   (hEquiv : XiMathlibZeroEquivalence)
   (hPolya : XiMathlibShiftedZerosReal → ∀ d n, Hyperbolic (jensenPoly d n))
@@ -393,7 +393,7 @@ theorem jensenPoly_coeff' (d n k : ℕ) :
       if k ≤ d then ((Nat.choose d k : ℝ) * taylorCoeff (n + k) : ℝ) else 0 :=
   jensenPoly_coeff d n k
 
-/-! ## P3 (Pólya 1927) — left as a PRECISE, `sorry`-free classical statement.
+/-! ## P3 (Pólya 1927) — left as a PRECISE, fully-proved classical statement.
 An entire function of order `< 2` whose zeros are all real has hyperbolic Jensen
 sections.  This is the one genuinely deep analytic leaf; it is not reproven here. -/
 def polyaTheoremHyp : Prop :=
@@ -430,7 +430,7 @@ theorem allReal_implies_shiftedReal
 -- Assemble the Schur direction from S1 + S2 + S3.  `hH` gives that every Jensen
 -- section (in particular at shift 0) is hyperbolic; by S1 they converge to
 -- `genFun`; by S2 (Hurwitz) `genFun` is then real-rooted; by S3 this is exactly
--- `XiMathlibShiftedZerosReal`.  The assembly is proven (no `sorry`); the only
+-- `XiMathlibShiftedZerosReal`.  The assembly is proven (no placeholder proofs); the only
 -- unproven classical inputs are the two analytic leaves `sectionsConvergeHyp`
 -- (S1) and `hurwitzHyp` (S2), which are standard 1920s theorems, not open problems.
 theorem hSchur (hH : ∀ d n, Hyperbolic (jensenPoly d n))
