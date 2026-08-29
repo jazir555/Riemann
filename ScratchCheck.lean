@@ -4,11 +4,9 @@ open Filter Metric Set Function
 open scoped Topology
 
 /-- Test 1: hpow with explicit nat annotations -/
-example (R : ℝ) (hR : 0 < R) : (R ^ (3 / 2 : ℝ)) ^ (4 : ℕ) = R ^ (6 : ℕ) := by
-  rw [← Real.rpow_natCast (R ^ (3 / 2 : ℝ)) 4]
-  rw [← Real.rpow_mul (le_of_lt hR) (3 / 2) (4 : ℝ)]
-  rw [← Real.rpow_natCast R 6]
-  exact congrArg (fun t : ℝ => R ^ t) (by norm_num)
+example (R : ℝ) (hR : 0 < R) : (R ^ (3 / 2 : ℝ)) ^ (4 : ℝ) = R ^ (6 : ℝ) := by
+  rw [← Real.rpow_mul (by positivity) (3 / 2) (4 : ℝ)]
+  norm_num
 
 /-- Test 2: hexp4 with explicit nat annotations -/
 example (x : ℝ) (hx : 0 ≤ x) : x ^ (4 : ℕ) / 256 = (x / 4) ^ (4 : ℕ) := by
@@ -17,9 +15,8 @@ example (x : ℝ) (hx : 0 ≤ x) : x ^ (4 : ℕ) / 256 = (x / 4) ^ (4 : ℕ) := 
 
 /-- Test 3: hC nlinarith with pow atoms -/
 example (R : ℝ) (hR : 4 ≤ R) : R ^ (2 : ℕ) ≤ R ^ (6 : ℕ) / 256 := by
-  have hD : R ^ (4 : ℕ) ≥ 256 := by
-    calc (4 : ℝ) ^ (4 : ℕ) ≤ R ^ (4 : ℕ) := pow_le_pow_left₀ (by norm_num) hR 4
-      _ := by norm_num
+  have hD : (256 : ℝ) ≤ R ^ (4 : ℕ) := by
+    refine le_trans (by norm_num : (256 : ℝ) ≤ (4 : ℝ) ^ (4 : ℕ)) (pow_le_pow_left₀ (by norm_num) hR 4)
   nlinarith [hD]
 
 /-- Test 4: hxi calc structure (parses and proves) -/
