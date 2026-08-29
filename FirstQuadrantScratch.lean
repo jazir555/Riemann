@@ -21,7 +21,7 @@ non-vanishing.  The rectangle and the tail are the two GENUINE finite/analytic
 leaves (the sorries 8356 / 9117 of `riemannhypothesis.lean`).
 -/
 
-open Complex Real
+open Complex Real ComplexConjugate
 
 section RhResidualGap
 
@@ -72,7 +72,12 @@ theorem thin_region_is_exact_gap (ξ : ℂ → ℂ)
     NoRightHalfZeros ξ ↔ ThinRegion ξ hC.C hC.T₀ := by
   constructor
   · intro hNZ s hs_gt hs_lt hT₀
-    exact hNZ s hs_gt hs_lt
+    have hlogpos : 0 < Real.log (abs s.im + 2) :=
+      Real.log_pos (by linarith [abs_nonneg s.im])
+    have hs_lt_one : s.re < 1 := by
+      have hCdivpos : 0 < hC.C / Real.log (abs s.im + 2) := div_pos hC.Cpos hlogpos
+      linarith
+    exact hNZ s hs_gt hs_lt_one
   · intro hT s hs_gt hs_lt
     rcases hC with ⟨C, T₀, _, hZ⟩
     by_cases hT0 : abs s.im < T₀
@@ -150,8 +155,8 @@ theorem xiShifted_fourfold_symmetry {ξ : ℂ → ℂ}
   refine ⟨hz, ?_, ?_, ?_⟩
   · rw [P.neg_symm z hgt hlt] <;> exact hz
   · rw [P.conj_symm z hgt hlt, hz] <;> simp
-  · have h1 : -(1 : ℝ) / 2 < (conj z).im := by simpa [Complex.conj_im] using hlt
-    have h2 : (conj z).im < 1 / 2 := by simpa [Complex.conj_im] using hgt
+  · have h1 : -(1 : ℝ) / 2 < (conj z).im := by simpa [conj_im] using hlt
+    have h2 : (conj z).im < 1 / 2 := by simpa [conj_im] using hgt
     rw [P.neg_symm (conj z) h1 h2, P.conj_symm z hgt hlt, hz] <;> simp
 
 /-- Local zero-free rectangle. -/
@@ -203,14 +208,19 @@ def tailPointwise_of_asymptotic_lower_bound {ξ : ℂ → ℂ} {X : ℝ}
     (∀ z, z.re < -X → -(1 : ℝ) / 2 < z.im → z.im < 1 / 2 → z.im ≠ 0 → ξ z ≠ 0) := by
   constructor
   · intro z hright hgt hlt hne hz
-    have hpos := A.m_pos (abs z.re) (le_of_lt hright)
+    have habs : X ≤ abs z.re := le_trans (le_of_lt hright) (le_abs_self z.re)
+    have hpos := A.m_pos (abs z.re) habs
     have hbound := A.bound z (Or.inl hright) hgt hlt hne
     rw [hz] at hbound
     have : A.m (abs z.re) ≤ 0 := by simpa using hbound
     linarith
   · intro z hleft hgt hlt hne hz
     have hX : X ≤ abs z.re := by
-      rw [abs_of_neg (by linarith)] <;> linarith
+      by_cases hXpos : 0 < X
+      · have hzneg : z.re < 0 := by linarith
+        rw [abs_of_neg hzneg]
+        linarith
+      · exact le_trans (not_lt.mp hXpos) (abs_nonneg z.re)
     have hpos := A.m_pos (abs z.re) hX
     have hbound := A.bound z (Or.inr hleft) hgt hlt hne
     rw [hz] at hbound
@@ -225,7 +235,7 @@ structure XiExponentialTailEstimate (ξ : ℂ → ℂ) (X : ℝ) where
     ∀ z : ℂ, (X < z.re ∨ z.re < -X) → -(1 : ℝ) / 2 < z.im → z.im < 1 / 2 →
     z.im ≠ 0 → c * Real.exp (-α * abs z.re) ≤ ‖ξ z‖)
 
-def tailAsymptotic_of_exponential {ξ : ℂ → ℂ} {X : ℝ}
+noncomputable def tailAsymptotic_of_exponential {ξ : ℂ → ℂ} {X : ℝ}
     (E : XiExponentialTailEstimate ξ X) : XiTailAsymptoticLowerBoundForX ξ X where
   m := fun r => E.c * Real.exp (-E.α * r)
   m_pos := by intro r _ <;> exact mul_pos E.c_pos (Real.exp_pos _)
@@ -266,18 +276,18 @@ theorem nonvanishing_central_from_first_quadrant {ξ : ℂ → ℂ}
       exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.2.2
   · have hneg : z.im < 0 := lt_of_le_of_ne (not_lt.mp hpos) hyne
     by_cases hre : 0 ≤ z.re
-    · let w := conj z
-      have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> exact hre
-      have hw_re_le : w.re ≤ X := by dsimp [w] <;> exact hxle
-      have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact hneg
-      have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> exact hylt
-      exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.2.1
-    · let w := -z
-      have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> linarith
-      have hw_re_le : w.re ≤ X := by dsimp [w] <;> linarith
-      have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact hneg
-      have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> exact hylt
-      exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.1
+     · let w := conj z
+       have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> exact hre
+       have hw_re_le : w.re ≤ X := by dsimp [w] <;> exact hxle
+       have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact (neg_pos.2 hneg)
+       have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> linarith [hygt]
+       exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.2.1
+     · let w := -z
+       have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> linarith
+       have hw_re_le : w.re ≤ X := by dsimp [w] <;> linarith
+       have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact (neg_pos.2 hneg)
+       have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> linarith [hygt]
+       exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.1
 
 /-- Assemble central + tail pointwise non-vanishing into off-real pointwise
 non-vanishing.  Pure case split.  Proven. -/
@@ -309,9 +319,9 @@ theorem rh_first_quadrant_proof_to_off_real {ξ : ℂ → ℂ}
     (P : RHFirstQuadrantProof ξ) :
     XiOffRealPointwiseNonvanishing ξ := by
   let central : XiCentralPointwiseNonvanishingForX ξ P.X :=
-    { central_nonvanishing := fun z hge hle hgt hlt hne =>
-        nonvanishing_central_from_first_quadrant P.symmetries P.X
-          P.quadrant_no_zero z hge hle hgt hlt hne }
+    fun z hge hle hgt hlt hne =>
+      nonvanishing_central_from_first_quadrant P.symmetries P.X
+        P.quadrant_no_zero z hge hle hgt hlt hne
   let tail : XiTailPointwiseNonvanishingForX ξ P.X :=
     tailPointwise_of_asymptotic_lower_bound P.right_tail
   exact xiOffRealPointwiseNonvanishing_of_central_and_tail central tail

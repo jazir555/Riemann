@@ -188,8 +188,23 @@ post_update pkg do
       error s!"{pkg.baseName}: failed to fetch cache"
 
 
+/-- Custom RH root modules created during the RH formalization effort.
+These are ordinary root-level `.lean` files (not under `Mathlib.`/etc.) and must be
+registered here so that `import` can resolve them and `lake` can build them.
+They are listed inline (as literals) because the `lean_lib` macro only auto-converts
+literal `#[...]` module lists, not `def`-referenced arrays. -/
 lean_lib RootScratch where
-  roots := #[`ZeroFreeRegionHadamard, `ZeroFreeRegionProof, `riemann_hypothesis, `HadamardBridge, `Zeta23]
-  globs := #[`ZeroFreeRegionHadamard, `ZeroFreeRegionProof, `riemann_hypothesis, `HadamardBridge, `Zeta23.+]
+  roots :=
+    #[`ZeroFreeRegionHadamard, `ZeroFreeRegionProof, `riemann_hypothesis, `HadamardBridge, `Zeta23,
+      `KadiriZeroFree, `KadiriOrderInfra, `KadiriZerosInfra2, `KadiriHScratch,
+      `ZeroFreeRegion, `ZeroFreeRegionInfra,
+      `JensenTranslation, `JensenScratch,
+      `riemann_hypothesis_newsection,
+      `rh_residual_gap, `rh_certificate, `rh_certificate_infra, `rh_analytic_infra,
+      `rh_infra, `rh_term_fps, `rh_term_deriv, `rh_zeta_cert_data,
+      `MertensEstimate, `SorryFix, `ApproxZetaLowerBound, `BorelCaratheodory,
+      `ktest, `ScratchCheck, `JTest, `XiStub, `TestScratch, `TestZeta0,
+      `XiZerosInfiniteScratch, `OrderXiScratch, `TailLaguerreScratch, `FirstQuadrantScratch]
+  globs := #[Glob.one `ZeroFreeRegionHadamard, Glob.one `ZeroFreeRegionProof, Glob.one `riemann_hypothesis, Glob.one `HadamardBridge, Glob.submodules `Zeta23, Glob.one `KadiriZeroFree, Glob.one `KadiriOrderInfra, Glob.one `KadiriZerosInfra2, Glob.one `KadiriHScratch, Glob.one `ZeroFreeRegion, Glob.one `ZeroFreeRegionInfra, Glob.one `JensenTranslation, Glob.one `JensenScratch, Glob.one `riemann_hypothesis_newsection, Glob.one `rh_residual_gap, Glob.one `rh_certificate, Glob.one `rh_certificate_infra, Glob.one `rh_analytic_infra, Glob.one `rh_infra, Glob.one `rh_term_fps, Glob.one `rh_term_deriv, Glob.one `rh_zeta_cert_data, Glob.one `MertensEstimate, Glob.one `SorryFix, Glob.one `ApproxZetaLowerBound, Glob.one `BorelCaratheodory, Glob.one `ktest, Glob.one `ScratchCheck, Glob.one `JTest, Glob.one `XiStub, Glob.one `TestScratch, Glob.one `TestZeta0, Glob.one `XiZerosInfiniteScratch, Glob.one `OrderXiScratch, Glob.one `TailLaguerreScratch, Glob.one `FirstQuadrantScratch]
 
 

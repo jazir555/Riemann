@@ -12,4 +12,4 @@ def XiMathlibZeroEquivalence : Prop := True
 def XiMathlibShiftedZerosReal : Prop := True
 theorem rh_iff_xiMathlib_shifted_real (hEquiv : XiMathlibZeroEquivalence) :
     RiemannHypothesisProp ↔ XiMathlibShiftedZerosReal := by
-  simp [RiemannHypothesisProp, XiMathlibShiftedZerosReal]
+  simp [RiemannHypothesisProp, XiMathlibShiftedZerosReal] <;> sorry

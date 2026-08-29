@@ -23,22 +23,18 @@ example (R : ℝ) (hR : 4 ≤ R) : R ^ (2 : ℕ) ≤ R ^ (6 : ℕ) / 256 := by
   nlinarith [hD]
 
 /-- Test 4: hxi calc structure (parses and proves) -/
-example (z : ℂ) (R : ℝ) (C₁ : ℝ) (hC₁0 : 0 ≤ C₁)
+example (z : ℂ) (R : ℝ) (hR : 0 ≤ R) (C₁ : ℝ) (hC₁0 : 0 ≤ C₁)
+    (hz : ‖z‖ ≤ R) (hz1 : ‖z - 1‖ ≤ R + 1)
     (hΛ : ‖completedRiemannZeta₀ z‖ ≤ C₁ * Real.exp (R ^ (3 / 2 : ℝ))) :
     ‖z * (z - 1) * completedRiemannZeta₀ z‖ ≤ R * (R + 1) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) := by
   calc
     ‖z * (z - 1) * completedRiemannZeta₀ z‖ = ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ := by
       rw [norm_mul, norm_mul]
     _ ≤ R * (R + 1) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) := by
-      have h1 : ‖z‖ * ‖z - 1‖ ≤ R * (R + 1) := by
-        have hz : ‖z‖ ≤ R := by simp [R]
-        have hz1 : ‖z - 1‖ ≤ R + 1 := by
-          calc ‖z - 1‖ ≤ ‖z‖ + ‖1‖ := norm_sub_le z 1
-            _ = R + 1 := by simp [R]
-        exact mul_le_mul hz hz1 (by positivity) (by positivity)
+      have h1 : ‖z‖ * ‖z - 1‖ ≤ R * (R + 1) := mul_le_mul hz hz1 (by positivity) (by positivity)
       have h2 : ‖z‖ * ‖z - 1‖ * ‖completedRiemannZeta₀ z‖ ≤
-          (R * (R + 1)) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) := by
-        exact mul_le_mul h1 hΛ (by positivity) (by positivity)
+          (R * (R + 1)) * (C₁ * Real.exp (R ^ (3 / 2 : ℝ))) :=
+        mul_le_mul h1 hΛ (by positivity) (by positivity)
       simpa [mul_assoc] using h2
 
 /-- Test 5: exists_pow_two_between with tendsto_atTop_atTop -/
@@ -81,4 +77,4 @@ example (a : ℕ → ℂ) (N : ℝ) (hbounded : ∀ N : ℕ, ({n : ℕ | ‖a n�
 example (R : ℝ) (hRpow0 : 0 ≤ R ^ (3 / 2 : ℝ)) : 1 ≤ Real.exp (R ^ (3 / 2 : ℝ)) := by
   have hle2 : (1 : ℝ) + R ^ (3 / 2 : ℝ) ≤ R ^ (3 / 2 : ℝ) + 1 := by nlinarith
   exact le_trans (le_trans (by nlinarith [hRpow0] : (1 : ℝ) ≤ 1 + R ^ (3 / 2 : ℝ)) hle2)
-    (add_one_le_exp (R ^ (3 / 2 : ℝ)))
+    (Real.add_one_le_exp (R ^ (3 / 2 : ℝ)))

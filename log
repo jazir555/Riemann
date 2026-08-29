@@ -1,1 +1,124 @@
-EXIT:0
+JensenTranslation.lean:101:8: warning: declaration uses `sorry`
+JensenTranslation.lean:107:8: warning: declaration uses `sorry`
+JensenTranslation.lean:124:42: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+JensenTranslation.lean:308:24: error: Application type mismatch: The argument
+  Multiset.mem_cons_self x M
+has type
+  x ∈ x ::ₘ M
+but is expected to have type
+  x ∈ M✝
+in the application
+  h x (Multiset.mem_cons_self x M)
+JensenTranslation.lean:309:5: error: Function expected at
+  ih
+but this term has type
+  0 ≤ M.sum
+
+Note: Expected a function because this term is being applied to the argument
+  fun y hy => h y (Multiset.mem_cons_of_mem hy)
+JensenTranslation.lean:313:73: error: Application type mismatch: The argument
+  rfl
+has type
+  ?m.28 = ?m.28
+but is expected to have type
+  M = 0
+in the application
+  hn rfl
+JensenTranslation.lean:341:28: error: Application type mismatch: The argument
+  Multiset.mem_cons_self r M
+has type
+  r ∈ r ::ₘ M
+but is expected to have type
+  r ∈ M✝
+in the application
+  hne r (Multiset.mem_cons_self r M)
+JensenTranslation.lean:342:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ?a * (?b + ?c)
+in the target expression
+  Polynomial.eval w 1 * Polynomial.eval w Q +
+      (w - r) * (Polynomial.eval w Q * (Multiset.map (fun r' => (w - r')⁻¹) M).sum) =
+    (w - r) * Polynomial.eval w Q * ((w - r)⁻¹ ::ₘ Multiset.map (fun r' => (w - r')⁻¹) M).sum
+
+M✝ : Multiset ℂ
+w : ℂ
+hne : ∀ r ∈ M✝, w ≠ r
+r : ℂ
+M : Multiset ℂ
+Q : Polynomial ℂ := (Multiset.map (fun r => Polynomial.X - Polynomial.C r) M).prod
+ih hQ' : Polynomial.eval w (Polynomial.derivative Q) = Polynomial.eval w Q * (Multiset.map (fun r' => (w - r')⁻¹) M).sum
+hwr : w ≠ r
+⊢ Polynomial.eval w 1 * Polynomial.eval w Q +
+      (w - r) * (Polynomial.eval w Q * (Multiset.map (fun r' => (w - r')⁻¹) M).sum) =
+    (w - r) * Polynomial.eval w Q * ((w - r)⁻¹ ::ₘ Multiset.map (fun r' => (w - r')⁻¹) M).sum
+JensenTranslation.lean:356:48: error: Application type mismatch: The argument
+  Multiset.mem_cons_self r M
+has type
+  r ∈ r ::ₘ M
+but is expected to have type
+  r ∈ M✝
+in the application
+  hre r (Multiset.mem_cons_self r M)
+JensenTranslation.lean:350:57: error: unsolved goals
+w : ℂ
+M✝ : Multiset ℂ
+hre : ∀ r ∈ M✝, r.im = 0
+hne : ∀ r ∈ M✝, w ≠ r
+r : ℂ
+M : Multiset ℂ
+ih : (Multiset.map (fun r => (w - r)⁻¹) M).sum.im = -w.im * (Multiset.map (fun r => (normSq (w - r))⁻¹) M).sum
+⊢ -(w.im - r.im) / normSq (w - r) + -w.im * (Multiset.map (fun r => (normSq (w - r))⁻¹) M).sum =
+    -w.im * ((normSq (w - r))⁻¹ + (Multiset.map (fun r => (normSq (w - r))⁻¹) M).sum)
+JensenTranslation.lean:375:24: error: Application type mismatch: The argument
+  Polynomial.leadingCoeff_eq_zero.mp h
+has type
+  p = 0
+but is expected to have type
+  p.natDegree = 0
+in the application
+  ne_of_gt hdeg (Polynomial.leadingCoeff_eq_zero.mp h)
+JensenTranslation.lean:377:33: error: Application type mismatch: The argument
+  P
+has type
+  Polynomial ℂ
+of sort `Type` but is expected to have type
+  ?m.155 ≠ 0
+of sort `Prop` in the application
+  Polynomial.roots_C_mul ?m.158 P
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+JensenTranslation.lean:382:57: error: unsolved goals
+p : Polynomial ℂ
+hp : Hyperbolic p
+hdeg : 0 < p.natDegree
+w : ℂ
+hw : Polynomial.eval w (Polynomial.derivative p) = 0
+hroot : ¬Polynomial.eval w p = 0
+hwnotroot : ∀ r ∈ p.roots, w ≠ r
+P : Polynomial ℂ := (Multiset.map (fun r => Polynomial.X - Polynomial.C r) p.roots).prod
+hcard : p.roots.card = p.natDegree
+hfact : p = Polynomial.C p.leadingCoeff * P
+ha : p.leadingCoeff ≠ 0
+hrootseq : (Polynomial.C p.leadingCoeff * P).roots = p.roots
+hIdent :
+  Polynomial.eval w (Polynomial.derivative P) = Polynomial.eval w P * (Multiset.map (fun r => (w - r)⁻¹) p.roots).sum
+⊢ p.leadingCoeff * Polynomial.eval w P *
+      (Multiset.map (fun x => (w - x)⁻¹) (Polynomial.C p.leadingCoeff * P).roots).sum =
+    (Multiset.map (fun x => (w - x)⁻¹) (Polynomial.C p.leadingCoeff * P).roots).sum *
+      Polynomial.eval w (Polynomial.C p.leadingCoeff * P)
+JensenTranslation.lean:402:13: error: Function expected at
+  normSq_pos
+but this term has type
+  0 < normSq ?m.457 ↔ ?m.457 ≠ 0
+
+Note: Expected a function because this term is being applied to the argument
+  (w - r')
+JensenTranslation.lean:418:8: warning: declaration uses `sorry`
+JensenTranslation.lean:426:8: warning: declaration uses `sorry`
+JensenTranslation.lean:433:8: warning: declaration uses `sorry`
+EXIT:1

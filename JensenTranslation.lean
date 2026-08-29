@@ -303,46 +303,44 @@ theorem jensenPoly_derivative (d n : ℕ) :
 
 /-- A sum of a multiset of nonnegative reals is nonnegative. -/
 lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum := by
-  induction M with
-  | empty => simp
-  | cons x M ih =>
-    simp only [Multiset.sum_cons]
-    apply add_nonneg
-    · exact h x (Multiset.mem_cons_self x M)
-    · exact ih (fun y hy => h y (Multiset.mem_cons_of_mem hy))
+  refine @Multiset.induction_on ℝ (fun s => 0 ≤ s.sum) M (by simp) (fun x M ih => ?_)
+  simp only [Multiset.sum_cons]
+  exact add_nonneg (h x (Multiset.mem_cons_self x M))
+    (ih fun y hy => h y (Multiset.mem_cons_of_mem hy))
 
 /-- A nonempty sum of positive reals is positive. -/
 lemma msum_pos {M : Multiset ℝ} (h : ∀ x ∈ M, 0 < x) (hn : M ≠ 0) : 0 < M.sum := by
-  induction M with
-  | empty => exact False.elim (hn rfl)
-  | cons x M ih =>
-    simp only [Multiset.sum_cons]
-    have hx : 0 < x := h x (Multiset.mem_cons_self x M)
-    by_cases hM : M = 0
-    · rw [hM]
-      simpa [Multiset.sum_cons, Multiset.sum_zero, add_zero] using hx
-    · exact add_pos hx ih
+  refine @Multiset.induction_on ℝ (fun s => 0 < s.sum) M (False.elim (hn rfl))
+    (fun x M ih => ?_)
+  simp only [Multiset.sum_cons]
+  have hx : 0 < x := h x (Multiset.mem_cons_self x M)
+  by_cases hM : M = 0
+  · rw [hM]
+    simpa [Multiset.sum_cons, Multiset.sum_zero, add_zero] using hx
+  · exact add_pos hx ih
 
 /-- Logarithmic-derivative identity for a product of linear factors over ℂ:
      for `w` distinct from all roots `r`, `(∏ (X - r))'(w) = (∏ (X - r))(w)·Σ (w-r)⁻¹`. -/
 lemma deriv_prod_identity (M : Multiset ℂ) (w : ℂ)
     (hne : ∀ r ∈ M, w ≠ r) :
-    let Q := (M.map fun r => Polynomial.X - Polynomial.C r).prod
-    (Polynomial.derivative Q).eval w =
-      Q.eval w * (M.map fun r => (w - r)⁻¹).sum := by
-  induction M with
-  | empty => simp
-  | cons r M ih =>
-    simp only [Multiset.map_cons, Multiset.prod_cons]
-    set Q := (M.map fun r => Polynomial.X - Polynomial.C r).prod
-    have hQ' : (Polynomial.derivative Q).eval w =
-        Q.eval w * (M.map fun r' => (w - r')⁻¹).sum := ih
-    simp only [Polynomial.derivative_mul, Polynomial.derivative_sub, Polynomial.derivative_X,
-        Polynomial.derivative_C, sub_zero, Polynomial.eval_add, Polynomial.eval_mul,
-        Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, hQ']
-    have hwr : w ≠ r := hne r (Multiset.mem_cons_self r M)
-    rw [mul_add, mul_comm (w - r) Q.eval w, ← mul_assoc, mul_inv_cancel (by simpa using hwr), mul_one]
-    ring
+    (Polynomial.derivative ((M.map fun r => Polynomial.X - Polynomial.C r).prod)).eval w =
+      (M.map fun r => Polynomial.X - Polynomial.C r).prod.eval w *
+        (M.map fun r => (w - r)⁻¹).sum := by
+  refine @Multiset.induction_on ℂ
+    (fun s => (Polynomial.derivative ((s.map fun r => Polynomial.X - Polynomial.C r).prod)).eval w =
+      (s.map fun r => Polynomial.X - Polynomial.C r).prod.eval w *
+        (s.map fun r => (w - r)⁻¹).sum) M (by simp)
+    (fun r M ih => ?_)
+  simp only [Multiset.map_cons, Multiset.prod_cons]
+  set Q := (M.map fun r => Polynomial.X - Polynomial.C r).prod
+  have hQ' : (Polynomial.derivative Q).eval w =
+      Q.eval w * (M.map fun r' => (w - r')⁻¹).sum := ih
+  simp only [Polynomial.derivative_mul, Polynomial.derivative_sub, Polynomial.derivative_X,
+      Polynomial.derivative_C, sub_zero, Polynomial.eval_add, Polynomial.eval_mul,
+      Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, hQ']
+  have hwr : w ≠ r := hne r (Multiset.mem_cons_self r M)
+  rw [mul_add, mul_comm (w - r) Q.eval w, ← mul_assoc, mul_inv_cancel (by simpa using hwr), mul_one]
+  ring
 
 /-- Imaginary part of the sum of reciprocals `(w - r)⁻¹` over real roots `r`:
      it equals `-w.im` times the sum of `‖w - r‖⁻²`. -/
@@ -350,12 +348,13 @@ lemma sum_im_inv (w : ℂ) (M : Multiset ℂ)
     (hre : ∀ r ∈ M, r.im = 0) (hne : ∀ r ∈ M, w ≠ r) :
     ((M.map fun r => (w - r)⁻¹).sum).im =
       -w.im * (M.map fun r => (normSq (w - r))⁻¹).sum := by
-  induction M with
-  | empty => simp
-  | cons r M ih =>
-    simp only [Multiset.map_cons, Multiset.sum_cons, Complex.add_im]
-    rw [ih, Complex.inv_im, Complex.sub_im, hre r (Multiset.mem_cons_self r M), sub_zero, div_eq_mul_inv]
-    ring
+  refine @Multiset.induction_on ℂ
+    (fun s => ((s.map fun r => (w - r)⁻¹).sum).im =
+      -w.im * (s.map fun r => (normSq (w - r))⁻¹).sum) M (by simp)
+    (fun r M ih => ?_)
+  simp only [Multiset.map_cons, Multiset.sum_cons, Complex.add_im]
+  rw [ih, Complex.inv_im, Complex.sub_im, hre r (Multiset.mem_cons_self r M), sub_zero, div_eq_mul_inv]
+  ring
 
 theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     (hdeg : 0 < Polynomial.natDegree p) : Hyperbolic p.derivative := by
@@ -370,7 +369,12 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
   set P := (p.roots.map fun r => Polynomial.X - Polynomial.C r).prod
   have hcard : Multiset.card p.roots = p.natDegree := IsAlgClosed.card_roots_eq_natDegree
   have hfact : p = Polynomial.C p.leadingCoeff * P :=
-    Polynomial.C_leadingCoeff_mul_prod_multiset_X_sub_C hcard
+    (Polynomial.C_leadingCoeff_mul_prod_multiset_X_sub_C hcard).symm
+  have ha : p.leadingCoeff ≠ 0 := by
+    intro h
+    exact ne_of_gt hdeg (Polynomial.leadingCoeff_eq_zero.mp h)
+  have hrootseq : (Polynomial.C p.leadingCoeff * P).roots = p.roots := by
+    rw [Polynomial.roots_C_mul _ P ha, roots_multiset_prod_X_sub_C]
   have hIdent : (Polynomial.derivative P).eval w =
       P.eval w * (p.roots.map fun r => (w - r)⁻¹).sum :=
     deriv_prod_identity p.roots w (fun r hr => hwnotroot r hr)
@@ -378,6 +382,7 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
       p.eval w * (p.roots.map fun r => (w - r)⁻¹).sum := by
     rw [hfact, Polynomial.derivative_mul, Polynomial.derivative_C, zero_mul, zero_add,
         Polynomial.eval_mul, Polynomial.eval_C, hIdent]
+    rw [← hrootseq]
     ring
   have hsum0 : (p.roots.map fun r => (w - r)⁻¹).sum = 0 := by
     have h : p.eval w * (p.roots.map fun r => (w - r)⁻¹).sum = 0 := by rw [← hPE, hw]
@@ -392,9 +397,13 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
   have hSpos : 0 < S := by
     apply msum_pos
     · intro r hr
+      obtain ⟨r', hmem, rfl⟩ := Multiset.mem_map.mp hr
       rw [inv_pos]
-      exact normSq_pos (hwnotroot r hr)
-    · simpa [Multiset.card_eq_zero, IsAlgClosed.card_roots_eq_natDegree] using hdeg
+      exact (normSq_pos (w - r')).mp (hwnotroot r' hmem)
+    · have hneq : (p.roots.map fun r => (normSq (w - r))⁻¹).card ≠ 0 ↔
+        (p.roots.map fun r => (normSq (w - r))⁻¹) ≠ 0 := by simp [Multiset.card_eq_zero]
+      rw [← hneq, Multiset.card_map, IsAlgClosed.card_roots_eq_natDegree]
+      exact ne_of_gt hdeg
   have hzero : -w.im * S = 0 := hIm.symm
   by_contra hnim
   have hbad : -w.im * S ≠ 0 := mul_ne_zero (by simpa using hnim) (ne_of_gt hSpos)

@@ -4,22 +4,6 @@ Hint: The binding can be removed (if unused) or named `_` (if used implicitly). 
   [apply] _hEquiv
 
 Note: This linter can be disabled with `set_option linter.unusedVariables false`
-JensenScratch.lean:115:9: error: Application type mismatch: The argument
-  hAll
-has type
-  ∀ (d n : ℕ), Hyperbolic (jensenPoly d n)
-of sort `Prop` but is expected to have type
-  ℕ
-of sort `Type` in the application
-  hSchur hAll
-JensenScratch.lean:124:27: error: Application type mismatch: The argument
-  h
-has type
-  ∀ (d n : ℕ), Hyperbolic (jensenPoly d n)
-of sort `Prop` but is expected to have type
-  ℕ
-of sort `Type` in the application
-  hSchur h
 JensenScratch.lean:185:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
   ∑ x ∈ ?s, if x = ?a then ?b x else 0
 in the target expression
