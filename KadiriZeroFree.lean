@@ -263,12 +263,20 @@ theorem zeta_ne_zero_of_pow_edge :
     have hz := h s.re s.im hs (Set.mem_Ico.mpr ⟨hedge, h1⟩)
     rwa [Complex.re_add_im] at hz
 
-/-- **The single remaining deep analytic input** of Kadiri's argument, in exactly the shape
-consumed by `riemannZeta_ne_zero_of_zeroFreeEdge` with constants `(A₀, A₁, A₂) = (3, 2, 0)`:
-the sharp 3–4–1 estimate for the *analytic part* of `−ζ′/ζ` after the zero at `s` has been
-removed.  Kadiri's proof of it needs explicit digamma/Hadamard estimates; nothing in
-`Zeta23` (whose zero-free input is the much thinner `1 − A/(log|t|)^9` region with
-unspecified `A`) implies it. -/
+/-- **The (as-stated *refutable*) shape of Kadiri's deep analytic input**, in exactly the
+shape consumed by `riemannZeta_ne_zero_of_zeroFreeEdge` with constants
+`(A₀, A₁, A₂) = (3, 2, 0)`: the sharp 3–4–1 estimate for the *analytic part* of `−ζ′/ζ`
+after the zero at `s` has been removed.
+
+**Warning.**  As literally stated this proposition is *false*: see
+`not_kadiriAnalyticInput` below.  The reason is that it quantifies over *all* `s` with
+`Re s < 1` (and `1 ≤ |Im s|`) **without assuming that `s` is a zero of `ζ`**, while the
+Hadamard hypothesis is truncated to the single-element set `Z = {s}`; that hypothesis then
+holds for the *trivial* choice `analytic s' = L(Λ,s') + 1/(s'-s) + 1/s` by pure algebra, and
+for that choice the asserted bound fails (concretely at `s = 0.995 + i`, `σ = 1.1`).
+It must therefore **never** be turned into an `axiom`: doing so would make this file
+inconsistent.  The repaired statement — which additionally assumes `ζ s = 0`, i.e. which
+really is Kadiri's estimate *at a zero* — is `KadiriAnalyticInputAtZero` below. -/
 def KadiriAnalyticInput : Prop :=
   ∀ (s : ℂ) (σ : ℝ) (analytic : ℂ → ℂ), 1 < σ → 1 ≤ |s.im| → s.re < 1 →
     (∀ s' : ℂ, 1 < s'.re →
@@ -277,8 +285,78 @@ def KadiriAnalyticInput : Prop :=
         + (analytic ((σ : ℂ) + 2 * (s.im : ℂ) * I)).re
       ≤ 3 / (σ - 1) + 2 * Real.log (|s.im| + 2) + 0
 
-/-- Kadiri–Lamzouri zero-free region for ζ, **conditional on the one missing estimate**
-`KadiriAnalyticInput` — and otherwise completely sorry-free:
+/-- **What `KadiriAnalyticInput` would give for an arbitrary point of the critical strip.**
+
+Feed `ZeroFreeRegion.zeroFreeEdge_from_factorization` the *trivial* one-element truncation
+`Z = {s}` together with `analytic s' = L(Λ,s') + (1/(s'-s) + 1/s)`.  The Hadamard
+decomposition hypothesis
+`L(Λ,s') = analytic s' - ∑_{ρ ∈ {s}} (1/(s'-ρ) + 1/ρ)`
+then holds by pure algebra — **no** relation between `s` and the zeros of `ζ` is used — so
+`KadiriAnalyticInput` would force the edge inequality
+`σ - Re s ≥ 4/(3/(σ-1) + 2·log(|Im s|+2))`
+for *every* point `s` of the critical strip and *every* `σ > 1`.  That is absurd (take
+`Re s` close to `1` and `σ - 1` about `3(1 - Re s)`), which is what
+`not_kadiriAnalyticInput` makes precise. -/
+theorem re_edge_of_kadiriAnalyticInput (hIn : KadiriAnalyticInput) (s : ℂ) (σ : ℝ)
+    (hσ : 1 < σ) (ht : 1 ≤ |s.im|) (hpos : 0 < s.re) (hlt : s.re < 1) :
+    σ - s.re ≥ 4 / (3 / (σ - 1) + 2 * Real.log (|s.im| + 2) + 0) := by
+  have hlogpos : 0 < Real.log (|s.im| + 2) :=
+    Real.log_pos (by linarith [abs_nonneg s.im])
+  have h3 : 0 < (3 : ℝ) / (σ - 1) := div_pos (by norm_num) (by linarith)
+  have hRHS_pos : 0 < 3 / (σ - 1) + 2 * Real.log (|s.im| + 2) + 0 := by linarith
+  have hdecomp : ∀ s' : ℂ, 1 < s'.re →
+      LSeries ↗Λ s' = (fun w : ℂ => LSeries ↗Λ w + (1 / (w - s) + 1 / s)) s'
+        - ∑ ρ ∈ ({s} : Finset ℂ), (1 / (s' - ρ) + 1 / ρ) :=
+    fun s' _ => by simp [Finset.sum_singleton]
+  exact ZeroFreeRegion.zeroFreeEdge_from_factorization σ s.im hσ ({s} : Finset ℂ) s
+    (Finset.mem_singleton_self s) rfl hpos hlt
+    (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact hpos)
+    (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact hlt)
+    (fun w : ℂ => LSeries ↗Λ w + (1 / (w - s) + 1 / s)) hdecomp
+    3 2 0 (by norm_num) (by norm_num)
+    (hIn s σ (fun w : ℂ => LSeries ↗Λ w + (1 / (w - s) + 1 / s)) hσ ht hlt hdecomp)
+    hRHS_pos
+
+/-- **`KadiriAnalyticInput`, as currently stated, is false.**
+
+Take `s = 995/1000 + i` (a perfectly ordinary point of the critical strip, *not* a zero of
+`ζ`) and `σ = 11/10`.  Then `re_edge_of_kadiriAnalyticInput` would give
+`11/10 - 995/1000 ≥ 4/(30 + 2·log 3)`, i.e. `0.105 ≥ 0.124…`, using only `log 3 ≤ 2`.
+
+The mathematical content of the failure is that the hypothesis truncates the Hadamard
+zero-sum to `Z = {s}` *without* assuming `ζ s = 0`: the term `4·Re(1/(σ + i·Im s - s))`
+`= 4/(σ - Re s)` of the truncated sum is then not compensated by a pole of `-ζ′/ζ`, and it
+alone exceeds the right-hand side `3/(σ-1) + 2·log(|Im s|+2)` as soon as
+`1 - Re s ≪ σ - 1 ≪ 1`.  Consequently
+`kadiriLamzouriZetaZeroFreeEdge_of_analyticInput` is *vacuous*, and the missing input has to
+be stated at a zero: see `KadiriAnalyticInputAtZero`. -/
+theorem not_kadiriAnalyticInput : ¬ KadiriAnalyticInput := by
+  intro hIn
+  have hzre : ((((995 : ℝ) / 1000 : ℝ) : ℂ) + I).re = 995 / 1000 := by simp
+  have hzim : ((((995 : ℝ) / 1000 : ℝ) : ℂ) + I).im = 1 := by simp
+  have hedge := re_edge_of_kadiriAnalyticInput hIn ((((995 : ℝ) / 1000 : ℝ) : ℂ) + I) (11 / 10)
+    (by norm_num) (by rw [hzim]; norm_num) (by rw [hzre]; norm_num) (by rw [hzre]; norm_num)
+  rw [hzre, hzim] at hedge
+  have habs : |(1 : ℝ)| + 2 = 3 := by rw [abs_one]; norm_num
+  rw [habs] at hedge
+  have hlog3le : Real.log 3 ≤ 2 := by
+    have h := Real.log_le_sub_one_of_pos (show (0 : ℝ) < 3 by norm_num)
+    linarith
+  have hlog3pos : 0 < Real.log 3 := Real.log_pos (by norm_num)
+  have h30 : (3 : ℝ) / (11 / 10 - 1) = 30 := by norm_num
+  have hDpos : 0 < (3 : ℝ) / (11 / 10 - 1) + 2 * Real.log 3 + 0 := by rw [h30]; linarith
+  have hDle : (3 : ℝ) / (11 / 10 - 1) + 2 * Real.log 3 + 0 ≤ 34 := by rw [h30]; linarith
+  have hlow : (4 : ℝ) / 34 ≤ 4 / ((3 : ℝ) / (11 / 10 - 1) + 2 * Real.log 3 + 0) :=
+    div_le_div_of_nonneg_left (by norm_num) hDpos hDle
+  have hnum : (11 : ℝ) / 10 - 995 / 1000 < 4 / 34 := by norm_num
+  linarith
+
+/-- Kadiri–Lamzouri zero-free region for ζ, **conditional on the estimate**
+`KadiriAnalyticInput` — sorry-free, but **vacuous**: `not_kadiriAnalyticInput` shows that the
+hypothesis `hIn` can never be supplied, because `KadiriAnalyticInput` omits the assumption
+`ζ s = 0`.  It is kept only for backwards compatibility; the usable form is
+`kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero`.
+
 `ζ(s) ≠ 0` whenever `|Im s| ≥ 1` and `Re s ≥ 1 - (1/57.54)/log(|Im s|+10)`.
 
     **Assembly chain** (every other building block is now sorry-free):
@@ -401,16 +479,170 @@ theorem kadiriLamzouriZetaZeroFreeEdge_of_analyticInput (hIn : KadiriAnalyticInp
         (fun s' _ => by simp [Finset.sum_singleton]))
       hRHS_pos h_c
 
+/-- **The repaired deep analytic input: Kadiri's 3–4–1 estimate *at a zero*.**
+
+This is `KadiriAnalyticInput` with the three hypotheses that were missing (and whose absence
+made that version refutable, see `not_kadiriAnalyticInput`):
+
+* `riemannZeta s = 0` — `s` really is a zero, so the pole of `−ζ′/ζ` at `s` cancels the
+  term `1/(s' - s)` of the truncated Hadamard sum;
+* `0 < s.re` — `s` lies in the critical strip;
+* `1 < σ ≤ 9/8` — the only range of `σ` used by the assembly below (namely
+  `σ = 1 + (1/8)/log(|Im s| + 10)`, and `log(|Im s| + 10) ≥ log 11 > 1`).
+
+The constant `A₁` has also been relaxed from `2` to `4` (with `A₂` still `0`, which is what
+the numerical bridge really needs): with the classical estimates
+`Re ψ(z) ≤ log|z|`, `Re(logDeriv Γℝ)(s) = -(log π)/2 + (1/2)·Re ψ(s/2)` and the Hadamard
+constant identity `Re B = -∑_ρ Re(1/ρ)`, the 3–4–1 combination of the analytic part is
+`≤ 3/(σ-1) + (5/2)·log|Im s| + O(1)`, and `(5/2)·log|t| + O(1) ≤ 4·log(|t|+2)` holds on
+`|t| ≥ 1` with room to spare, whereas the original `A₁ = 2` does not even hold
+asymptotically.  The relaxation is harmless: `kadiriConstant`-admissibility only needs
+`A₁ < 4.13…` when `A₂ = 0` (see the proof of `h_c` in
+`kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero`, which now closes on the clean
+numerical bridge `1/57.54 < 1/56`).
+
+Proving this proposition is exactly the analytic core of Kadiri's paper.  With the material
+available here it reduces to two classical facts that are *not* in `Mathlib` or in
+`ZeroFreeRegionHadamard`: (i) the sharp digamma bound `Re ψ(z) ≤ log |z|` for `Re z > 0`
+(only `ZeroFreeRegionHadamard.digamma_le_log`, which carries an additive `γ + 2Re z + 7`,
+is available, and an additive constant is fatal because `A₂ = 0`), and (ii) the fact that
+the Hadamard exponent `g` of `xi` is *affine*, so that `deriv g ≡ B` with
+`Re B = -∑_ρ Re(1/ρ)` — `hadamard_factorization_genus_one` only returns
+`Differentiable ℂ g`, and without `Re (deriv g)` being pinned down the analytic part is not
+bounded at all. -/
+def KadiriAnalyticInputAtZero : Prop :=
+  ∀ (s : ℂ) (σ : ℝ) (analytic : ℂ → ℂ), 1 < σ → σ ≤ 9 / 8 → 1 ≤ |s.im| → 0 < s.re →
+    s.re < 1 → riemannZeta s = 0 →
+    (∀ s' : ℂ, 1 < s'.re →
+      LSeries ↗Λ s' = analytic s' - ∑ ρ ∈ ({s} : Finset ℂ), (1 / (s' - ρ) + 1 / ρ)) →
+    3 * (analytic (σ : ℂ)).re + 4 * (analytic ((σ : ℂ) + (s.im : ℂ) * I)).re
+        + (analytic ((σ : ℂ) + 2 * (s.im : ℂ) * I)).re
+      ≤ 3 / (σ - 1) + 4 * Real.log (|s.im| + 2) + 0
+
+/-- **Kadiri–Lamzouri zero-free region, conditional on the repaired input
+`KadiriAnalyticInputAtZero`** — and otherwise completely sorry-free.
+
+Unlike `kadiriLamzouriZetaZeroFreeEdge_of_analyticInput` (whose hypothesis is refutable, hence
+which is vacuous), this reduction is genuine: the proof first *assumes* `ζ s = 0` (`intro hz`)
+and only then applies `riemannZeta_ne_zero_of_zeroFreeEdge`, which is what allows the deep
+input to be stated at a zero.
+
+The parameters are `σ = 1 + (1/8)/log(|Im s| + 10)` and `(A₀, A₁, A₂) = (3, 4, 0)`, for which
+the admissibility condition `h_c` of `riemannZeta_ne_zero_of_zeroFreeEdge` reduces to the
+clean numerical bridge
+`kadiriConstant = 1/57.54 < 1/56 = 1/7 - 1/8`:
+indeed `3/(σ-1) = 24·log(|Im s|+10)` and `4·log(|Im s|+2) ≤ 4·log(|Im s|+10)`, so
+`4/(A₀/(σ-1) + A₁ log(|Im s|+2)) ≥ 4/(28 log(|Im s|+10)) = 1/(7 log(|Im s|+10))`. -/
+theorem kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
+    (hIn : KadiriAnalyticInputAtZero) (s : ℂ) (ht : |s.im| ≥ 1)
+    (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 := by
+  by_cases h1 : 1 ≤ s.re
+  · exact riemannZeta_ne_zero_of_one_le_re h1
+  · push Not at h1
+    intro hz
+    have habs0 : (0 : ℝ) ≤ |s.im| := abs_nonneg _
+    have hL1 : 1 < Real.log (|s.im| + 10) :=
+      lt_of_lt_of_le log_eleven_gt_one (Real.log_le_log (by norm_num) (by linarith))
+    have hLpos : 0 < Real.log (|s.im| + 10) := by linarith
+    have hσgt : 1 < 1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10) := by
+      have h : 0 < (1 : ℝ) / 8 / Real.log (|s.im| + 10) := by positivity
+      linarith
+    have hσle : 1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10) ≤ 9 / 8 := by
+      have h : (1 : ℝ) / 8 / Real.log (|s.im| + 10) ≤ 1 / 8 :=
+        div_le_self (by norm_num) hL1.le
+      linarith
+    have hspos : 0 < s.re := by
+      have h := zeroFreeEdge_gt_nine_tenths s.im ht
+      linarith
+    have hσm1 : (1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1
+        = (1 : ℝ) / 8 / Real.log (|s.im| + 10) := by ring
+    have h24 : (3 : ℝ) / ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1)
+        = 24 * Real.log (|s.im| + 10) := by
+      rw [hσm1, div_div, one_div, div_eq_mul_inv, inv_inv]; ring
+    have hlog2 : Real.log (|s.im| + 2) ≤ Real.log (|s.im| + 10) :=
+      Real.log_le_log (by linarith) (by linarith)
+    have hlog2pos : 0 < Real.log (|s.im| + 2) := Real.log_pos (by linarith)
+    have hDpos : 0 < (3 : ℝ) / ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1)
+        + 4 * Real.log (|s.im| + 2) + 0 := by rw [h24]; linarith
+    have hDle : (3 : ℝ) / ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1)
+        + 4 * Real.log (|s.im| + 2) + 0 ≤ 28 * Real.log (|s.im| + 10) := by
+      rw [h24]; linarith
+    have hfrac : 4 / (28 * Real.log (|s.im| + 10))
+        ≤ 4 / ((3 : ℝ) / ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1)
+            + 4 * Real.log (|s.im| + 2) + 0) :=
+      div_le_div_of_nonneg_left (by norm_num) hDpos hDle
+    have hkey : kadiriConstant / Real.log (|s.im| + 10)
+        + (1 : ℝ) / 8 / Real.log (|s.im| + 10) < 4 / (28 * Real.log (|s.im| + 10)) := by
+      have hd : 0 < 4 / 28 / Real.log (|s.im| + 10)
+          - (kadiriConstant + 1 / 8) / Real.log (|s.im| + 10) := by
+        rw [← sub_div]
+        refine div_pos ?_ hLpos
+        simp only [kadiriConstant]
+        norm_num
+      rw [div_div] at hd
+      rw [add_div] at hd
+      linarith
+    have h_c : kadiriConstant / Real.log (|s.im| + 10) <
+        4 / ((3 : ℝ) / ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1)
+            + 4 * Real.log (|s.im| + 2) + 0)
+          - ((1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) - 1) := by
+      linarith [hfrac, hkey, hσm1]
+    exact (riemannZeta_ne_zero_of_zeroFreeEdge s ht hre
+      (1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10)) hσgt ({s} : Finset ℂ)
+      (Finset.mem_singleton_self s)
+      (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact hspos)
+      (fun ρ hρ => by rw [Finset.mem_singleton.mp hρ]; exact h1)
+      (fun s' => LSeries ↗Λ s' + (1 / (s' - s) + 1 / s))
+      (fun s' _ => by simp [Finset.sum_singleton])
+      3 4 0 (by norm_num) (by norm_num)
+      (hIn s (1 + (1 : ℝ) / 8 / Real.log (|s.im| + 10))
+        (fun s' => LSeries ↗Λ s' + (1 / (s' - s) + 1 / s)) hσgt hσle ht hspos h1 hz
+        (fun s' _ => by simp [Finset.sum_singleton]))
+      hDpos h_c) hz
+
 /-- Kadiri–Lamzouri zero-free region for ζ (unconditional statement).  Every step is
-sorry-free except the single named leaf `KadiriAnalyticInput` (Kadiri's sharp 3–4–1
-estimate), which is supplied here by `sorry`; see
-`kadiriLamzouriZetaZeroFreeEdge_of_analyticInput` for the sorry-free conditional form and
-`zeta_ne_zero_of_pow_edge` for the unconditional (but thinner) `Zeta23`/PNT+ region. -/
+sorry-free except the single named leaf `KadiriAnalyticInputAtZero` (Kadiri's sharp 3–4–1
+estimate for the analytic part of `−ζ′/ζ` **at a zero**), which is supplied here by `sorry`;
+see `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` for the sorry-free conditional
+form and `zeta_ne_zero_of_pow_edge` for the unconditional (but thinner) `Zeta23`/PNT+ region.
+
+**Why the leaf is still open.**  The previous version of this file discharged the leaf with
+`(sorry : KadiriAnalyticInput)`; that could never be completed, because
+`KadiriAnalyticInput` is *false* (`not_kadiriAnalyticInput`) — it omitted the hypothesis
+`ζ s = 0`, and without it the truncated Hadamard sum contributes an uncompensated
+`4/(σ - Re s)`.  The leaf has therefore been restated at a zero, and with `A₁ = 4` instead
+of `A₁ = 2` (see `KadiriAnalyticInputAtZero` for why `A₁ = 2` is not even asymptotically
+true, and why `A₁ = 4, A₂ = 0` is still admissible for `kadiriConstant`).  What remains is
+genuinely the analytic core of Kadiri's paper; it needs two classical ingredients that are
+absent from `Mathlib` and from `ZeroFreeRegionHadamard`: the sharp digamma bound
+`Re ψ(z) ≤ log|z|` (an additive constant is fatal, since `A₂ = 0`) and the affineness of the
+Hadamard exponent of `xi` (which gives `deriv g ≡ B` with `Re B = -∑_ρ Re(1/ρ)`).
+
+If you want a `sorry`-free build and are willing to accept Kadiri's analytic estimate as a
+documented hypothesis (as this file already does for `xiZeros_simple`), replace the `sorry`
+below by a term of type `KadiriAnalyticInputAtZero` produced by
+`axiom kadiriAnalyticInputAtZero_holds : KadiriAnalyticInputAtZero`.
+Do **not** do this for `KadiriAnalyticInput`: `not_kadiriAnalyticInput` shows that axiom
+would be inconsistent. -/
 theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
     (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 :=
-  kadiriLamzouriZetaZeroFreeEdge_of_analyticInput (sorry : KadiriAnalyticInput) s ht hre
+  kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
+    (sorry : KadiriAnalyticInputAtZero) s ht hre
 
 end
+
+/-! ### Axiom audit (checked with `#print axioms`)
+
+* `not_kadiriAnalyticInput` : `[propext, Classical.choice, Quot.sound]`
+  — i.e. the refutation of the old leaf is a genuine, sorry-free theorem.
+* `re_edge_of_kadiriAnalyticInput` : `[propext, Classical.choice, Quot.sound]`
+* `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` :
+  `[propext, Classical.choice, Quot.sound]`
+  — the repaired reduction is sorry-free and, unlike the old one, does not even use the
+  `xiZeros_simple` axiom (the Hadamard enumeration is no longer needed for it).
+* `kadiriLamzouriZetaZeroFreeEdge` : `[propext, sorryAx, Classical.choice, Quot.sound]`
+  — the single remaining gap is the leaf `KadiriAnalyticInputAtZero`.
+-/
 
 theorem xiFE (s : ℂ) : xi (1 - s) = xi s := by
   unfold xi
