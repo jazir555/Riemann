@@ -108,7 +108,7 @@ theorem polya_direction_closure
 -- (S1 + S2 + S3) is proven in `hSchur` below.
 theorem schur_direction_closure
   (hS1 : sectionsConvergeHyp) (hS2 : hurwitzHyp)
-  (hSchur : ∀ d n, Hyperbolic (jensenPoly d n) → sectionsConvergeHyp →
+  (hSchur : (∀ d n, Hyperbolic (jensenPoly d n)) → sectionsConvergeHyp →
     hurwitzHyp → XiMathlibShiftedZerosReal)
   (hAll : ∀ d n, Hyperbolic (jensenPoly d n)) :
   XiMathlibShiftedZerosReal :=
@@ -118,7 +118,7 @@ theorem schur_direction_closure
 theorem polya_schur_closure
   (hPolya : XiMathlibShiftedZerosReal → ∀ d n, Hyperbolic (jensenPoly d n))
   (hS1 : sectionsConvergeHyp) (hS2 : hurwitzHyp)
-  (hSchur : ∀ d n, Hyperbolic (jensenPoly d n) → sectionsConvergeHyp →
+  (hSchur : (∀ d n, Hyperbolic (jensenPoly d n)) → sectionsConvergeHyp →
     hurwitzHyp → XiMathlibShiftedZerosReal) :
   XiMathlibShiftedZerosReal ↔ ∀ d n, Hyperbolic (jensenPoly d n) :=
   ⟨hPolya, fun h => hSchur h hS1 hS2⟩
@@ -131,7 +131,7 @@ theorem rh_iff_all_jensen_hyperbolic_closure
   (hEquiv : XiMathlibZeroEquivalence)
   (hPolya : XiMathlibShiftedZerosReal → ∀ d n, Hyperbolic (jensenPoly d n))
   (hS1 : sectionsConvergeHyp) (hS2 : hurwitzHyp)
-  (hSchur : ∀ d n, Hyperbolic (jensenPoly d n) → sectionsConvergeHyp →
+  (hSchur : (∀ d n, Hyperbolic (jensenPoly d n)) → sectionsConvergeHyp →
     hurwitzHyp → XiMathlibShiftedZerosReal) :
   RiemannHypothesisProp ↔ ∀ d n, Hyperbolic (jensenPoly d n) := by
   rw [rh_bridge hEquiv, polya_schur_closure hPolya hS1 hS2 hSchur]
