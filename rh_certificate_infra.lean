@@ -299,6 +299,117 @@ theorem boundary_strip_nonvanishing_of_nonzero_base
   have h_norm_pos : 0 < ‖f z‖ := lt_of_lt_of_le h_pos_margin h_lower
   exact norm_pos_iff.mp h_norm_pos
 
+/-! ### Second-order Taylor estimate with the sharp `1/2` factor
+
+Mathlib only provides the *first-order* mean-value inequality
+(`Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le'`,
+`Convex.norm_image_sub_le_of_norm_deriv_le`), which applied to `deriv f` yields the
+remainder bound `M₂ · y²` — off by a factor of `2` from the sharp Taylor constant.
+
+The sharp `½ M₂ y²` is recovered below from the *fencing* theorem
+`image_norm_le_of_norm_deriv_right_le_deriv_boundary`: the first-order Taylor
+remainder `F t = f(x + i t) - f(x) - t · i · f'(x)` satisfies `F 0 = 0` and
+`‖F' t‖ ≤ M₂ t`, so comparing with `B t = ½ M₂ t²` (which has `B 0 = 0` and
+`B' t = M₂ t`) gives `‖F t‖ ≤ ½ M₂ t²`.  This is the integral form of Taylor's
+theorem in differential-inequality disguise.
+-/
+
+/-- `t ↦ (t : ℂ)` has derivative `1` as a map `ℝ → ℂ`. -/
+lemma hasDerivAt_ofReal_toComplex (t : ℝ) : HasDerivAt (fun u : ℝ => (u : ℂ)) 1 t := by
+  simpa [Complex.real_smul] using (hasDerivAt_id t).smul_const (1 : ℂ)
+
+/-- The vertical line `t ↦ x + i t` has derivative `I`. -/
+lemma hasDerivAt_vertLine (x t : ℝ) :
+    HasDerivAt (fun u : ℝ => (x : ℂ) + I * (u : ℂ)) I t := by
+  have h := ((hasDerivAt_id t).smul_const I).const_add ((x : ℂ))
+  simpa [Complex.real_smul, mul_comm] using h
+
+/-- Chain rule along the vertical line `t ↦ x + i t`: if `g` is holomorphic then
+`t ↦ g (x + i t)` has derivative `i · g' (x + i t)`. -/
+lemma hasDerivAt_comp_vertLine {g : ℂ → ℂ} (hg : Differentiable ℂ g) (x t : ℝ) :
+    HasDerivAt (fun u : ℝ => g ((x : ℂ) + I * (u : ℂ)))
+      (I * deriv g ((x : ℂ) + I * (t : ℂ))) t := by
+  have hgat : HasDerivAt g (deriv g ((x : ℂ) + I * (t : ℂ))) ((x : ℂ) + I * (t : ℂ)) :=
+    (hg _).hasDerivAt
+  have hcomp := hgat.scomp t (hasDerivAt_vertLine x t)
+  simpa [Function.comp_def, smul_eq_mul] using hcomp
+
+/-- **Second-order Taylor estimate with the sharp `1/2` factor**, along a vertical
+segment.  If `‖f''‖ ≤ M₂` on `{x + i t : t ∈ [0, η]}` and `0 < y ≤ η`, then
+`‖f(x + iy) - (f(x) + f'(x) · (iy))‖ ≤ ½ M₂ y²`. -/
+lemma norm_sub_taylor_le_half_mul_sq
+    {f : ℂ → ℂ} (hf : Differentiable ℂ f) (hf' : Differentiable ℂ (deriv f))
+    (x : ℝ) {M2 η : ℝ}
+    (h_deriv2 : ∀ t ∈ Icc (0 : ℝ) η, ‖deriv (deriv f) ((x : ℂ) + I * (t : ℂ))‖ ≤ M2)
+    {y : ℝ} (hy_pos : 0 < y) (hy_le : y ≤ η) :
+    ‖f ((x : ℂ) + I * (y : ℂ)) - (f (x : ℂ) + deriv f (x : ℂ) * (I * (y : ℂ)))‖
+      ≤ 1 / 2 * M2 * y ^ 2 := by
+  have hsub : Icc (0 : ℝ) y ⊆ Icc (0 : ℝ) η := Icc_subset_Icc le_rfl hy_le
+  -- derivative of `t ↦ f'(x + i t)`
+  have hG : ∀ t : ℝ, HasDerivAt (fun u : ℝ => deriv f ((x : ℂ) + I * (u : ℂ)))
+      (I * deriv (deriv f) ((x : ℂ) + I * (t : ℂ))) t := fun t =>
+    hasDerivAt_comp_vertLine hf' x t
+  -- derivative of the first-order Taylor remainder
+  have hF : ∀ t : ℝ, HasDerivAt
+      (fun u : ℝ => f ((x : ℂ) + I * (u : ℂ)) - f (x : ℂ) - (u : ℂ) * (I * deriv f (x : ℂ)))
+      (I * deriv f ((x : ℂ) + I * (t : ℂ)) - I * deriv f (x : ℂ)) t := by
+    intro t
+    have h1 := (hasDerivAt_comp_vertLine hf x t).sub_const (f (x : ℂ))
+    have h2 := (hasDerivAt_ofReal_toComplex t).mul_const (I * deriv f (x : ℂ))
+    have h3 := h1.sub h2
+    have hrw : I * deriv f ((x : ℂ) + I * (t : ℂ)) - I * deriv f (x : ℂ)
+        = I * deriv f ((x : ℂ) + I * (t : ℂ)) - 1 * (I * deriv f (x : ℂ)) := by ring
+    rw [hrw]
+    exact h3
+  -- Step A: `f'` is `M₂`-Lipschitz along the segment.
+  have hA : ∀ t ∈ Icc (0 : ℝ) y,
+      ‖deriv f ((x : ℂ) + I * (t : ℂ)) - deriv f (x : ℂ)‖ ≤ M2 * t := by
+    have hseg := norm_image_sub_le_of_norm_deriv_right_le_segment
+      (f := fun u : ℝ => deriv f ((x : ℂ) + I * (u : ℂ)))
+      (f' := fun u : ℝ => I * deriv (deriv f) ((x : ℂ) + I * (u : ℂ)))
+      (C := M2) (a := 0) (b := y)
+      (fun t _ => (hG t).continuousAt.continuousWithinAt)
+      (fun t _ => (hG t).hasDerivWithinAt)
+      (fun t ht => by
+        rw [norm_mul, Complex.norm_I, one_mul]
+        exact h_deriv2 t (hsub (Ico_subset_Icc_self ht)))
+    intro t ht
+    have h := hseg t ht
+    rw [Complex.ofReal_zero, mul_zero, add_zero, sub_zero] at h
+    exact h
+  -- Step B: fence the remainder against `B t = ½ M₂ t²`.
+  have hBderiv : ∀ t : ℝ, HasDerivAt (fun u : ℝ => 1 / 2 * M2 * u ^ 2) (M2 * t) t := by
+    intro t
+    have hsq : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      simpa using hasDerivAt_pow 2 t
+    have h := hsq.const_mul (1 / 2 * M2)
+    have hrw : 1 / 2 * M2 * (2 * t) = M2 * t := by ring
+    rw [hrw] at h
+    exact h
+  have hzero : ‖f ((x : ℂ) + I * ((0 : ℝ) : ℂ)) - f (x : ℂ)
+      - ((0 : ℝ) : ℂ) * (I * deriv f (x : ℂ))‖ ≤ 1 / 2 * M2 * (0 : ℝ) ^ 2 := by
+    simp
+  have hfence := image_norm_le_of_norm_deriv_right_le_deriv_boundary
+    (f := fun u : ℝ => f ((x : ℂ) + I * (u : ℂ)) - f (x : ℂ) - (u : ℂ) * (I * deriv f (x : ℂ)))
+    (f' := fun u : ℝ => I * deriv f ((x : ℂ) + I * (u : ℂ)) - I * deriv f (x : ℂ))
+    (B := fun u : ℝ => 1 / 2 * M2 * u ^ 2) (B' := fun u : ℝ => M2 * u)
+    (a := 0) (b := y)
+    (fun t _ => (hF t).continuousAt.continuousWithinAt)
+    (fun t _ => (hF t).hasDerivWithinAt)
+    hzero hBderiv
+    (fun t ht => by
+      have hle := hA t (Ico_subset_Icc_self ht)
+      calc ‖I * deriv f ((x : ℂ) + I * (t : ℂ)) - I * deriv f (x : ℂ)‖
+          = ‖deriv f ((x : ℂ) + I * (t : ℂ)) - deriv f (x : ℂ)‖ := by
+            rw [← mul_sub, norm_mul, Complex.norm_I, one_mul]
+        _ ≤ M2 * t := hle)
+  have hres := hfence (⟨hy_pos.le, le_rfl⟩ : y ∈ Icc (0 : ℝ) y)
+  have heq : f ((x : ℂ) + I * (y : ℂ)) - (f (x : ℂ) + deriv f (x : ℂ) * (I * (y : ℂ)))
+      = f ((x : ℂ) + I * (y : ℂ)) - f (x : ℂ) - (y : ℂ) * (I * deriv f (x : ℂ)) := by
+    ring
+  rw [heq]
+  exact hres
+
 /-- **Theorem 2**: If $f(x) = 0$ with a simple zero ($d_0 = \|f'(x)\| > 0$) and
 $\|f''\| \le M_2$ on $[0, \eta]$, then for all $y \in (0, \min(\eta, 2 d_0 / M_2))$,
 $f(x + i y) \neq 0$. -/
@@ -317,37 +428,13 @@ theorem boundary_strip_nonvanishing_of_simple_zero_base
   have h_dist : ‖z - z0‖ = y := by
     have hzz : z - z0 = I * (y : ℂ) := by simp only [hzdef, hz0def]; ring
     rw [hzz, norm_mul, Complex.norm_I, one_mul, Complex.norm_of_nonneg hy_pos.le]
-  have h_deriv_lip : ‖deriv f z - deriv f z0‖ ≤ M2 * y := by
-    have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-      intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
-      subst hw1 hw2
-      refine ⟨a * t1 + b * t2, (convex_Icc 0 η) ht1 ht2 ha hb hab, ?_⟩
-      have hab' : (a : ℂ) + (b : ℂ) = 1 := by
-        rw [← Complex.ofReal_add, hab, Complex.ofReal_one]
-      simp only [Complex.real_smul]
-      push_cast
-      linear_combination (x : ℂ) * hab'
-    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-      refine ⟨y, hy_icc, ?_⟩
-      simp only [hzdef]
-    have h_mem_z0 : z0 ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-      refine ⟨0, h0_icc, ?_⟩
-      simp only [hz0def, Complex.ofReal_zero, mul_zero, add_zero]
-    have h_deriv2_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)},
-        ‖deriv (deriv f) w‖ ≤ M2 := by
-      rintro w ⟨t, ht, rfl⟩
-      exact h_deriv2 t ht
-    have hres := Convex.norm_image_sub_le_of_norm_deriv_le (f := deriv f) (fun w _ => hf' w)
-      h_deriv2_bound h_convex h_mem_z0 h_mem_z
-    rwa [h_dist] at hres
+  -- Sharp second-order Taylor bound (factor `½`), via the fencing argument above.
   have h_taylor : ‖f z - (f z0 + deriv f z0 * (z - z0))‖ ≤ (1 / 2) * M2 * y ^ 2 := by
-    have h_int : ‖f z - (f z0 + deriv f z0 * (z - z0))‖ ≤ (1 / 2) * M2 * ‖z - z0‖ ^ 2 := by
-      -- Genuine infrastructure gap: the second-order MVT
-      -- `Convex.norm_image_sub_sub_deriv_le_of_forall_hasDerivAt` was removed from mathlib.
-      -- The bound holds by the standard integral form of Taylor's theorem.
-      sorry
-    rw [h_dist] at h_int
-    exact h_int
+    have hzz : z - z0 = I * (y : ℂ) := by simp only [hzdef, hz0def]; ring
+    have hz' : z = (x : ℂ) + I * (y : ℂ) := hzdef
+    have hz0' : z0 = (x : ℂ) := hz0def
+    rw [hzz, hz', hz0']
+    exact norm_sub_taylor_le_half_mul_sq hf hf' x h_deriv2 hy_pos hy_lt.le
   rw [h_zero, zero_add] at h_taylor
   have h_lin_norm : ‖deriv f z0 * (z - z0)‖ = ‖deriv f z0‖ * y := by
     rw [norm_mul, h_dist]
