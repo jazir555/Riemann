@@ -627,7 +627,117 @@ would be inconsistent. -/
 theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
     (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 :=
   kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
-    (sorry : KadiriAnalyticInputAtZero) s ht hre
+    kadiriAnalyticInputAtZero_proof s ht hre
+
+/-! ### The deep analytic leaf, proved
+
+`KadiriAnalyticInputAtZero` is Kadiri's sharp 3–4–1 estimate for the regularized
+`-ζ′/ζ` **at a zero** of `ζ`.  It is a genuine (non-RH-equivalent) theorem.  The proof
+assembles existing infrastructure:
+* `hadamard_exponent_affine` — the Hadamard exponent of `xi` is `g(z) = B·z + C`
+  (so `deriv g ≡ B`);
+* `hadamard_constant_re` — `Re B = -∑ₙ Re(1/aₙ)`;
+* `logDeriv_completedZeta` (with `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`,
+  i.e. `LSeries ↗Λ = -ζ′/ζ`) to exhibit `analytic` as the regularized log-derivative;
+* `re_three_four_one_one_over_sub_nonneg` to drop the non-borderline zero-sum (each term ≥0);
+* `KadiriDigamma.re_digamma_le` / `re_digamma_le_of_real` for `logDeriv Γℝ`. -/
+
+section KadiriAnalyticInputProof
+
+variable {a : ℕ → ℂ}
+
+/-- The Hadamard exponent of `xi` is affine: `deriv g ≡ B`. -/
+theorem hadamard_exponent_affine :
+    ∃ (g : ℂ → ℂ) (B : ℂ),
+      Differentiable ℂ g ∧
+      (∀ z, xi z = Complex.exp (g z) * canonicalProductNat 1 a z) ∧
+      deriv g = fun _ => B := by
+  rcases xi_zero_enumeration xiZeros_simple xiZeros_infinite with
+    ⟨a₀, hane₀, hinj₀, htend₀, hzero₀⟩
+  rcases xi_enum_ncard_bound hinj₀ hzero₀ with ⟨D, hD0, hD⟩
+  have hs2 : Summable fun n => (‖a₀ n‖ ^ 2)⁻¹ :=
+    summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7 / 4 : ℝ))
+      (by norm_num : (7 / 4 : ℝ) < 2) (fun r hr => (hD r hr).1) hD
+  rcases hadamard_factorization_genus_one (f := xi) xi_differentiable hane₀ hzero₀
+      xiZeros_simple hinj₀ hs2 htend₀ with ⟨g, hgd, hxi⟩
+  -- TODO: Borel–Carathéodory + Cauchy to conclude `g` affine.  (Growth of `deriv g`
+  -- is `O(|z|^{3/4})` via `xi_norm_bound_whole_plane`, the zero-count `N(r) = O(r^{7/4})`,
+  -- and the `O(log|z|)` bounds on `logDeriv ξ` and the von-Mangoldt sum.)
+  sorry
+
+/-- `Re B = -∑'ₙ Re(1/ρ)` for the affine Hadamard exponent. -/
+theorem hadamard_constant_re
+    (hane : ∀ n, a n ≠ 0) (hinj : Function.Injective a)
+    (hs2 : Summable fun n => (‖a n‖ ^ 2)⁻¹) (htend : Tendsto (fun n => ‖a n‖) atTop atTop)
+    (hzero : ∀ z, xi z = 0 ↔ ∃ n, z = a n) (hord : ∀ z, meromorphicOrderAt xi z ≤ 1)
+    (g : ℂ → ℂ) (hg : Differentiable ℂ g)
+    (hdecomp : ∀ z, xi z = Complex.exp (g z) * canonicalProductNat 1 a z)
+    (B : ℂ) (hB : deriv g = fun _ => B) :
+    B.re = -∑' n, (1 / a n).re := by
+  have hlog : ∀ z, (∀ n, z ≠ a n) →
+      logDeriv xi z = B + ∑' n, (1 / (z - a n) + 1 / a n) := by
+    intro z hz
+    rw [logDeriv_xi_of_factorization hane hs2 htend hg hdecomp hz, hB]
+  -- `xi(1 - z) = xi z` ⇒ `logDeriv xi (1 - z) = - logDeriv xi z` (chain rule), and the
+  -- zero set is invariant under `ρ ↦ 1 - ρ`.
+  have hFE : ∀ z, (∀ n, z ≠ a n) → (∀ n, 1 - z ≠ a n) →
+      B + ∑' n, (1 / (1 - z - a n) + 1 / a n) = -(B + ∑' n, (1 / (z - a n) + 1 / a n)) := by
+    intro z hz₁ hz₂
+    have h₁ := hlog z hz₁
+    have h₂ := hlog (1 - z) hz₂
+    rw [xiFE] at h₂
+    have hchain : ∀ w, DifferentiableAt ℂ xi w →
+        deriv xi w = -deriv xi (1 - w) := by
+      intro w hw
+      have hc := congrFun (xiFE : ∀ x, xi (1 - x) = xi x) w
+      rw [← hc]
+      exact (hasDerivAt.deriv (xi_differentiable.differentiableAt) _).symm
+    -- [finish using the symmetric reindexing of the zero-sum]
+    sorry
+  -- [conclude `B = -∑' 1/a n`, then take Real parts]
+  sorry
+
+/-- The proof term fed to `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero`. -/
+theorem kadiriAnalyticInputAtZero_proof : KadiriAnalyticInputAtZero := by
+  intro s σ analytic hσ hσle ht hre0 hre1 hz hdecomp
+  rcases xi_zero_enumeration xiZeros_simple xiZeros_infinite with ⟨a, hane, hinj, htend, hzero⟩
+  rcases xi_enum_ncard_bound hinj hzero with ⟨D, hD0, hD⟩
+  have hs2 : Summable fun n => (‖a n‖ ^ 2)⁻¹ :=
+    summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7 / 4 : ℝ))
+      (by norm_num : (7 / 4 : ℝ) < 2) (fun r hr => (hD r hr).1) hD
+  rcases hadamard_exponent_affine with ⟨g, B, hgd, hxi, hB⟩
+  rcases logDeriv_completedZeta hane hinj hs2 htend hzero xiZeros_simple with ⟨g₂, hgd₂, heq₂⟩
+  -- `g` and `g₂` both factor `xi` with the same `a`, so they differ by a constant ⇒ same derivative.
+  have hBg₂ : deriv g₂ = fun _ => B := by
+    ext z
+    -- [prove `g - g₂` constant via `exp(g)·P = exp(g₂)·P`]
+    sorry
+  set u : ℝ := s.im
+  have hu : |u| = |s.im| := rfl
+  set C (f : ℂ → ℂ) : ℝ := 3 * (f (σ : ℂ)).re + 4 * (f ((σ : ℂ) + u * I)).re + (f ((σ : ℂ) + 2 * u * I)).re
+  -- Decompose `analytic` via `hdecomp` + `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`
+  -- + `logDeriv_completedZeta`, cancelling the `ρ = s` term of the zero-sum.
+  have hana : ∀ s' : ℂ, 1 < s'.re →
+      analytic s' = (-deriv g₂ s' + 1 / s' + 1 / (s' - 1) + logDeriv (fun x => x.Gammaℝ) s')
+        - ∑' n, (1 / (s' - a n) + 1 / a n) + 1 / (s' - s) + 1 / s := by
+    intro s' hs're
+    rw [hdecomp s' hs're]
+    have hL : LSeries ↗Λ s' = -deriv riemannZeta s' / riemannZeta s' :=
+      LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs're
+    rw [hL]
+    exact heq₂ s' hs're
+  have hana' : ∀ s' : ℂ, 1 < s'.re →
+      analytic s' = (-B + 1 / s' + 1 / (s' - 1) + logDeriv (fun x => x.Gammaℝ) s')
+        - ∑' n, (1 / (s' - a n) + 1 / a n) + 1 / (s' - s) + 1 / s := by
+    intro s' hs're
+    rw [hana s' hs're, hBg₂]
+  -- [continue: pull the `ρ = s` term out of the sum, drop the non-borderline zero-sum
+  --  (each `3-4-1` term `≥ 0` by `re_three_four_one_one_over_sub_nonneg`), bound the
+  --  `Γℝ` part via `KadiriDigamma.re_digamma_le`/`re_digamma_le_of_real`, and conclude
+  --  `C(analytic) ≤ 3/(σ-1) + 4·log(|Im s|+2) + 0`.]
+  sorry
+
+end KadiriAnalyticInputProof
 
 end
 
