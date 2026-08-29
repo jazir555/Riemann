@@ -1,0 +1,208 @@
+JensenScratch.lean:21:39: warning: Variable name `hEquiv` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hEquiv
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+JensenScratch.lean:115:9: error: Application type mismatch: The argument
+  hAll
+has type
+  ∀ (d n : ℕ), Hyperbolic (jensenPoly d n)
+of sort `Prop` but is expected to have type
+  ℕ
+of sort `Type` in the application
+  hSchur hAll
+JensenScratch.lean:124:27: error: Application type mismatch: The argument
+  h
+has type
+  ∀ (d n : ℕ), Hyperbolic (jensenPoly d n)
+of sort `Prop` but is expected to have type
+  ℕ
+of sort `Type` in the application
+  hSchur h
+JensenScratch.lean:185:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ∑ x ∈ ?s, if x = ?a then ?b x else 0
+in the target expression
+  (algebraMap ℝ ℂ) (∑ b ∈ Finset.range (d + 1), ((monomial b) (↑(d.choose b) * taylorCoeff (n + b))).coeff k) =
+    ↑(if k ≤ d then ↑(d.choose k) * taylorCoeff (n + k) else 0)
+
+d n k : ℕ
+⊢ (algebraMap ℝ ℂ) (∑ b ∈ Finset.range (d + 1), ((monomial b) (↑(d.choose b) * taylorCoeff (n + b))).coeff k) =
+    ↑(if k ≤ d then ↑(d.choose k) * taylorCoeff (n + k) else 0)
+JensenScratch.lean:199:2: error: Type mismatch
+  jensenPoly_coeff d 0 k
+has type
+  (jensenPoly d 0).coeff k = ↑(if k ≤ d then ↑(d.choose k) * taylorCoeff (0 + k) else 0)
+but is expected to have type
+  (jensenPoly d 0).coeff k = ↑(if k ≤ d then ↑(d.choose k) * taylorCoeff k else 0)
+JensenScratch.lean:205:11: error(lean.unknownIdentifier): Unknown identifier `natDegree_le_of_coeff_ne_zero`
+JensenScratch.lean:206:8: error: No goals to be solved
+JensenScratch.lean:208:11: error(lean.unknownIdentifier): Unknown identifier `le_natDegree_of_ne_zero_coeff`
+JensenScratch.lean:209:8: error: No goals to be solved
+JensenScratch.lean:218:4: error: Type mismatch
+  hz
+has type
+  eval z (derivative p) = 0
+but is expected to have type
+  derivative p ≠ 0 ∧ eval z (derivative p) = 0
+JensenScratch.lean:221:64: error: Tactic `assumption` failed
+
+p : ℂ[X]
+hp : Hyperbolic p
+hdeg : 0 < p.natDegree
+z : ℂ
+hz : eval z (derivative p) = 0
+hz' : z ∈ (derivative p).rootSet ℂ
+hp0 : p ≠ 0
+⊢ 0 < ↑p.natDegree
+JensenScratch.lean:227:6: error(lean.unknownIdentifier): Unknown identifier `realAxis_convex`
+JensenScratch.lean:225:35: error(lean.unknownIdentifier): Unknown constant `Polynomial.isRoot`
+JensenScratch.lean:225:28: error: Type mismatch: After simplification, term
+  hw
+ has type
+  ¬p = 0 ∧ eval w p = 0
+but is expected to have type
+  eval w p = 0
+JensenScratch.lean:230:57: error: unsolved goals
+x : ℂ
+hx : x ∈ {z | z.im = 0}
+y : ℂ
+hy : y ∈ {z | z.im = 0}
+a b : ℝ
+ha : 0 ≤ a
+hb : 0 ≤ b
+hab : a + b = 1
+⊢ a * x.im + b * y.im = 0
+JensenScratch.lean:233:46: warning: This simp argument is unused:
+  hx
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.add_im, Complex.smul_im, hy]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+JensenScratch.lean:233:50: warning: This simp argument is unused:
+  hy
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Complex.add_im, Complex.smul_im, hx]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+JensenScratch.lean:248:46: error: unsolved goals
+d n k : ℕ
+hk : k ≤ d
+⊢ ↑(d + 1) * ↑(d.choose k) = (↑d + 1) * ↑(d.choose k)
+JensenScratch.lean:251:59: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ?a * ?b * ?c
+in the target expression
+  (↑k + 1) * ↑(↑((d + 1).choose (k + 1)) * taylorCoeff (n + (k + 1))) =
+    ↑(d + 1) * ↑(↑(d.choose k) * taylorCoeff (n + 1 + k))
+
+case pos
+d n k : ℕ
+hk : k ≤ d
+hbin : (↑k + 1) * ↑((d + 1).choose (k + 1)) = (↑d + 1) * ↑(d.choose k)
+⊢ (↑k + 1) * ↑(↑((d + 1).choose (k + 1)) * taylorCoeff (n + (k + 1))) =
+    ↑(d + 1) * ↑(↑(d.choose k) * taylorCoeff (n + 1 + k))
+JensenScratch.lean:254:4: error: `simp` made no progress
+JensenScratch.lean:271:4: error: Type mismatch
+  Hyperbolic_const_mul (Nat.cast_ne_zero.mpr (Nat.succ_ne_zero d)) hder
+has type
+  Hyperbolic (C ↑d.succ * (C ↑(d + 1) * jensenPoly d (n + 1)))
+but is expected to have type
+  Hyperbolic (jensenPoly d (n + 1))
+JensenScratch.lean:288:12: error(lean.unknownIdentifier): Unknown constant `Complex.norm_sub_le`
+JensenScratch.lean:296:21: error(lean.unknownIdentifier): Unknown constant `Complex.norm_add_le`
+JensenScratch.lean:307:26: error: Application type mismatch: The argument
+  norm_nonneg ‖1 / 2 + I * z‖
+has type
+  0 ≤ ‖‖1 / 2 + I * z‖‖
+but is expected to have type
+  0 ≤ ‖1 / 2 + I * z‖
+in the application
+  Real.rpow_le_rpow (norm_nonneg ‖1 / 2 + I * z‖)
+JensenScratch.lean:309:36: error: Application type mismatch: The argument
+  norm_nonneg ‖z‖
+has type
+  0 ≤ ‖‖z‖‖
+but is expected to have type
+  0 ≤ ‖z‖
+in the application
+  Real.mul_rpow ?m.644 (norm_nonneg ‖z‖)
+JensenScratch.lean:316:14: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  (2 ^ ?y) ^ ?z
+in the target expression
+  64 ^ (1 / 4) = 2 ^ (6 * (1 / 4))
+
+C : ℝ
+hCge1 : C ≥ 1
+r₀ : ℝ
+hr₀ : r₀ > 0
+hb : ∀ (z : ℂ), r₀ ≤ ‖z‖ → ‖completedRiemannZeta₀ z‖ ≤ C * Real.exp (‖z‖ ^ (3 / 2))
+r₁ : ℝ := max (r₀ + 1 / 2) 64
+h₁ : 64 ≤ r₁
+h₂ : r₀ + 1 / 2 ≤ r₁
+hr₁ : 0 < r₁
+z : ℂ
+hz : r₁ ≤ ‖z‖
+hz64 : 64 ≤ ‖z‖
+hzr0 : r₀ ≤ ‖z‖ - 1 / 2
+hXlo : ‖z‖ - 1 / 2 ≤ ‖1 / 2 + I * z‖
+hXge : r₀ ≤ ‖1 / 2 + I * z‖
+hc : ‖completedRiemannZeta₀ (1 / 2 + I * z)‖ ≤ C * Real.exp (‖1 / 2 + I * z‖ ^ (3 / 2))
+hXup : ‖1 / 2 + I * z‖ ≤ ‖z‖ + 1 / 2
+h12 : ‖z‖ + 1 / 2 ≤ 2 * ‖z‖
+hX2 : ‖1 / 2 + I * z‖ ≤ 2 * ‖z‖
+hz14 : ‖z‖ ^ (1 / 4) ≥ 64 ^ (1 / 4)
+⊢ 64 ^ (1 / 4) = 2 ^ (6 * (1 / 4))
+JensenScratch.lean:319:10: error: linarith failed to find a contradiction
+C : ℝ
+hCge1 : C ≥ 1
+r₀ : ℝ
+hr₀ : r₀ > 0
+hb : ∀ (z : ℂ), r₀ ≤ ‖z‖ → ‖completedRiemannZeta₀ z‖ ≤ C * Real.exp (‖z‖ ^ (3 / 2))
+r₁ : ℝ := max (r₀ + 1 / 2) 64
+h₁ : 64 ≤ r₁
+h₂ : r₀ + 1 / 2 ≤ r₁
+hr₁ : 0 < r₁
+z : ℂ
+hz : r₁ ≤ ‖z‖
+hz64 : 64 ≤ ‖z‖
+hzr0 : r₀ ≤ ‖z‖ - 1 / 2
+hXlo : ‖z‖ - 1 / 2 ≤ ‖1 / 2 + I * z‖
+hXge : r₀ ≤ ‖1 / 2 + I * z‖
+hc : ‖completedRiemannZeta₀ (1 / 2 + I * z)‖ ≤ C * Real.exp (‖1 / 2 + I * z‖ ^ (3 / 2))
+hXup : ‖1 / 2 + I * z‖ ≤ ‖z‖ + 1 / 2
+h12 : ‖z‖ + 1 / 2 ≤ 2 * ‖z‖
+hX2 : ‖1 / 2 + I * z‖ ≤ 2 * ‖z‖
+hz14 : ‖z‖ ^ (1 / 4) ≥ 64 ^ (1 / 4)
+h64 : 64 ^ (1 / 4) = 2 ^ (3 / 2)
+⊢ False
+failed
+JensenScratch.lean:320:12: error: failed to synthesize
+  Zero ?m.686
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+JensenScratch.lean:322:26: error: Application type mismatch: The argument
+  norm_nonneg ‖z‖
+has type
+  0 ≤ ‖‖z‖‖
+but is expected to have type
+  0 < ‖z‖
+in the application
+  Real.rpow_add (norm_nonneg ‖z‖)
+JensenScratch.lean:333:43: error: unsolved goals
+n : ℕ
+⊢ ↑((↑(2 * n).factorial)⁻¹ * (deriv^[2 * n] xiMathlibShifted 0).re) =
+    (↑(2 * n).factorial)⁻¹ * ↑(deriv^[2 * n] genFun 0).re
+JensenScratch.lean:334:26: warning: This simp argument is unused:
+  genFun
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [taylorCoeff]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+JensenScratch.lean:382:8: error: Tactic `introN` failed: There are no additional binders or `let` bindings in the goal to introduce
+
+h : ∀ (z : ℂ), genFun z = 0 → z.im = 0
+⊢ XiMathlibShiftedZerosReal
+EXIT:1

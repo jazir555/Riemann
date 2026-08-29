@@ -22,10 +22,10 @@ sub-lemmas that feed the leaves:
 -/
 
 -- Minimal interface stubs (placeholders; replace with real defs later).
-noncomputable def xiShiftedLaguerreCoefficient (n : ℕ) (r : ℝ) : ℝ := 0
-noncomputable def zeta (s : ℂ) : ℂ := 0
+noncomputable def xiShiftedLaguerreCoefficient (_n : ℕ) (_r : ℝ) : ℝ := 0
+noncomputable def zeta (_s : ℂ) : ℂ := 0
 def shiftedS (s : ℂ) : ℂ := s
-def dirichletMollifier (s : ℂ) (K : ℕ) : ℂ := 1
+def dirichletMollifier (_s : ℂ) (_K : ℕ) : ℂ := 1
 
 /-- Extracted from `riemannhypothesis.lean` (structure at line 12269). -/
 structure TailCanonicalLaguerrePositivityLeaf where
@@ -52,24 +52,41 @@ theorem geomTailDecay {r : ℝ} (hr : 1 < r) (N : ℕ) :
   let a := r⁻¹
   have hr' : 0 < r := by linarith
   have ha : 0 < a := by positivity
-  have ha1 : a < 1 := by rw [inv_lt_one]; linarith
+  have ha1 : a < 1 := by
+    rw [show a = r⁻¹ by rfl]
+    field_simp [ne_of_gt hr']
+    linarith
   cases N with
   | zero =>
-    simp
+    rw [Finset.range_zero, Finset.sum_empty]
     exact div_pos zero_lt_one (sub_pos.mpr hr)
   | succ n =>
     have hsum : (∑ i ∈ Finset.range (n + 1), a ^ (i + 1)) =
         a * (1 - a ^ (n + 1)) / (1 - a) := by
-      rw [← Finset.mul_sum, geom_sum_eq (ne_of_lt ha1)]
-      field_simp [ne_of_lt ha1]; ring_nf
+      calc
+        (∑ i ∈ Finset.range (n + 1), a ^ (i + 1))
+            = (∑ i ∈ Finset.range (n + 1), a ^ i * a) := by
+              refine Finset.sum_congr rfl ?_
+              intro i hi
+              exact pow_succ a i
+        _ = (∑ i ∈ Finset.range (n + 1), a ^ i) * a := by rw [Finset.sum_mul]
+        _ = a * (∑ i ∈ Finset.range (n + 1), a ^ i) := by rw [mul_comm]
+        _ = a * ((a ^ (n + 1) - 1) / (a - 1)) := by rw [geom_sum_eq (ne_of_lt ha1) (n + 1)]
+        _ = a * (1 - a ^ (n + 1)) / (1 - a) := by
+              have h1 : (a ^ (n + 1) - 1) / (a - 1) = (1 - a ^ (n + 1)) / (1 - a) := by
+                field_simp [sub_ne_zero.mpr (ne_of_lt ha1), sub_ne_zero.mpr (ne_of_lt ha1).symm]
+                ring_nf
+              rw [h1, mul_div_assoc]
     rw [hsum]
-    have hnum : 0 < 1 - a ^ (n + 1) :=
-      sub_lt_zero.mpr (pow_pos ha (n + 1))
+    have hlt : a * (1 - a ^ (n + 1)) < a := by
+      nlinarith [mul_pos ha (pow_pos ha (n + 1))]
     have hden : 0 < 1 - a := by linarith
-    have hmain : a * (1 - a ^ (n + 1)) / (1 - a) < a / (1 - a) :=
-      (div_lt_div_right hden).2 (mul_lt_mul_of_pos_left hnum ha)
+    have hmain : a * (1 - a ^ (n + 1)) / (1 - a) < a / (1 - a) := by
+      rw [div_eq_mul_inv, div_eq_mul_inv]
+      exact mul_lt_mul_of_pos_right hlt (inv_pos.mpr hden)
     have hfinal : a / (1 - a) = 1 / (r - 1) := by
-      rw [a]; field_simp [ne_of_gt hr']; ring
+      rw [show a = r⁻¹ by rfl]
+      field_simp [ne_of_gt hr']
     exact hmain.trans_eq hfinal
 
 /-- **Explicit bound on a finite rectangle.** On the box `|Re z| ≤ 1`,
@@ -80,4 +97,7 @@ finite-rectangle estimate feeding the leaves. -/
 theorem rectNormBound (z : ℂ) (hre : |z.re| ≤ 1) (him : |z.im| ≤ 1) :
     z.re ^ 2 + z.im ^ 2 ≤ 2 := by
   rw [pow_two, pow_two]
-  exact add_le_add (abs_mul_self_le_one.mp hre) (abs_mul_self_le_one.mp him)
+  calc
+    z.re * z.re + z.im * z.im ≤ 1 + 1 :=
+      add_le_add (abs_le_one_iff_mul_self_le_one.mp hre) (abs_le_one_iff_mul_self_le_one.mp him)
+    _ ≤ 2 := by norm_num

@@ -1,0 +1,240 @@
+ZeroFreeRegionHadamard.lean:1930:17: warning: This simp argument is unused:
+  hurwitzEvenFEPair
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [P0, a0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl), zero_add, norm_zero, mul_zero, Real.one_rpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1930:36: warning: This simp argument is unused:
+  P0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, a0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl), zero_add, norm_zero, mul_zero, Real.one_rpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1930:40: warning: This simp argument is unused:
+  a0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, P0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl), zero_add, norm_zero, mul_zero, Real.one_rpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1930:44: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, P0, a0, Set.indicator_of_notMem (Set.notMem_Ioi.mpr le_rfl),
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge le_rfl), zero_add, norm_zero, mul_zero, Real.one_rpow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1944:19: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), smul_eq_mul, one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1946:10: warning: This simp argument is unused:
+  smul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1951:19: warning: This simp argument is unused:
+  hurwitzEvenFEPair
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [P0, a0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), smul_eq_mul, one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1951:38: warning: This simp argument is unused:
+  P0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, a0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), smul_eq_mul, one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1951:42: warning: This simp argument is unused:
+  a0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, P0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), smul_eq_mul, one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1951:46: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, P0, a0, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), smul_eq_mul, one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:1954:10: warning: This simp argument is unused:
+  smul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [hurwitzEvenFEPair, P0, a0, Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr htle),
+    zero_add, Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨htpos, hlt⟩), one_mul, mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2003:17: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Set.indicator_of_mem ht, Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le),
+    add_zero, sub_zero, smul_eq_mul, one_mul, mul_one, if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2005:18: warning: This simp argument is unused:
+  sub_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_mem ht,
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le), add_zero, smul_eq_mul, one_mul, mul_one,
+    if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2005:28: warning: This simp argument is unused:
+  smul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_mem ht,
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp ht).le), add_zero, sub_zero, one_mul, mul_one,
+    if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2034:23: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Set.indicator_of_mem hx, Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp hx).le),
+    add_zero, sub_zero, smul_eq_mul, one_mul, mul_one, if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2036:24: warning: This simp argument is unused:
+  sub_zero
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_mem hx,
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp hx).le), add_zero, smul_eq_mul, one_mul, mul_one,
+    if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2036:34: warning: This simp argument is unused:
+  smul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_mem hx,
+    Set.indicator_of_notMem (Set.notMem_Ioo_of_ge (Set.mem_Ioi.mp hx).le), add_zero, sub_zero, one_mul, mul_one,
+    if_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2080:19: warning: This simp argument is unused:
+  Pi.add_apply
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Set.indicator_of_notMem (Set.notMem_Ioi.mpr (Set.mem_Ioo.mp hx).2.le), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr hx), smul_eq_mul, one_mul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2082:63: warning: This simp argument is unused:
+  smul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [Pi.add_apply, Set.indicator_of_notMem (Set.notMem_Ioi.mpr (Set.mem_Ioo.mp hx).2.le), zero_add,
+    Set.indicator_of_mem (Set.mem_Ioo.mpr hx), one_mul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2118:77: warning: This simp argument is unused:
+  Real.volume_singleton
+
+Hint: Omit it from the simp argument list.
+  [apply] simp
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:2848:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+ZeroFreeRegionHadamard.lean:2915:23: warning: `Set.mem_setOf_eq` has been deprecated: Use `Set.mem_ofPred_eq` instead
+ZeroFreeRegionHadamard.lean:3057:59: warning: Variable name `ha` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _ha
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ZeroFreeRegionHadamard.lean:3133:33: warning: This simp argument is unused:
+  one_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [c, div_eq_mul_inv, mul_assoc, hanz0]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:3133:53: warning: This simp argument is unused:
+  hanz0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [c, div_eq_mul_inv, one_div, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:3202:46: warning: Variable name `hane` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hane
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ZeroFreeRegionHadamard.lean:3529:35: warning: This simp argument is unused:
+  one_div
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [c, div_eq_mul_inv, mul_assoc, hanz0]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:3529:55: warning: This simp argument is unused:
+  hanz0
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [c, div_eq_mul_inv, one_div, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ZeroFreeRegionHadamard.lean:3603:6: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+ZeroFreeRegionHadamard.lean:4101:2: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.
+If you'd rather continue using `push_neg` in your project, you can implement it as follows:
+```
+open Lean.Parser.Tactic in
+macro "push_neg" cfg:optConfig loc:(location)? : tactic =>
+  `(tactic| push $cfg:optConfig Not $[$loc]?)
+```
+ZeroFreeRegionHadamard.lean:4166:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.
+If you'd rather continue using `push_neg` in your project, you can implement it as follows:
+```
+open Lean.Parser.Tactic in
+macro "push_neg" cfg:optConfig loc:(location)? : tactic =>
+  `(tactic| push $cfg:optConfig Not $[$loc]?)
+```
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+ZeroFreeRegionHadamard.lean:4304:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+ZeroFreeRegionHadamard.lean:4642:29: warning: Variable name `hord` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hord
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+EXIT:0

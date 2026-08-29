@@ -1,0 +1,25 @@
+ZeroFreeRegionProof.lean:666:27: warning: Variable name `hs` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ZeroFreeRegionProof.lean:668:20: warning: Variable name `hA₀` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA₀
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ZeroFreeRegionProof.lean:668:35: warning: Variable name `hA₁` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hA₁
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ZeroFreeRegionProof.lean:934:28: warning: Variable name `hs'` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hs'
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+EXIT:0

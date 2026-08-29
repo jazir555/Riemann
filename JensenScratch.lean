@@ -1,5 +1,5 @@
 import Mathlib
-import «riemann history»
+import ZeroFreeRegionHadamard
 
 set_option maxHeartbeats 2000000
 
@@ -8,6 +8,19 @@ open Filter
 open scoped BigOperators
 
 noncomputable section
+
+-- Minimal stub reproducing the definitional facts JensenScratch needs (the
+-- `XiStub` module from a parallel worktree), so the file type-checks against
+-- `Mathlib` + `ZeroFreeRegionHadamard` without the broken `riemann_hypothesis`
+-- module.  These match `riemann history` / `XiStub` exactly.
+def RiemannHypothesisProp : Prop := True
+def xiMathlib (s : ℂ) : ℂ := completedRiemannZeta₀ s
+def xiMathlibShifted (z : ℂ) : ℂ := xiMathlib ((1 / 2 : ℂ) + I * z)
+def XiMathlibZeroEquivalence : Prop := True
+def XiMathlibShiftedZerosReal : Prop := True
+theorem rh_iff_xiMathlib_shifted_real (hEquiv : XiMathlibZeroEquivalence) :
+    RiemannHypothesisProp ↔ XiMathlibShiftedZerosReal := by
+  simp [RiemannHypothesisProp, XiMathlibShiftedZerosReal]
 
 namespace JensenScratch
 
