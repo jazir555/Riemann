@@ -39,6 +39,15 @@ axiom RiemannHypothesisProp_apply :
     s.re = (1 : ℝ) / 2
 
 /-!
+# WARNING — this file does NOT prove the Riemann hypothesis.
+The declaration `RiemannHypothesisProp_apply` above is an `axiom` that *assumes*
+RH. Every "RH-equivalent" leaf in this file is therefore conditional on that
+axiom; there is no unconditional proof of RH here. The auxiliary scaffolding
+lemmas are genuinely proved (no placeholder tactics are used), but the only
+unformalised mathematical assumption is the `axiom` itself.
+-/
+
+/-!
 # Generic xi-zero equivalence framework
 -/
 
@@ -2039,7 +2048,7 @@ The skeleton below makes those obligations explicit.
 -/
 
 /-!
-## 1. Safe conditional skeleton, no sorry
+## 1. Safe conditional skeleton (RH assumed via `RiemannHypothesisProp_apply`)
 -/
 
 /-- First-quadrant nonvanishing obligation. -/
@@ -8473,9 +8482,10 @@ private theorem riemannZeta_ne_zero_of_re_eq_zero {s : ℂ}
 
 We formalize the *reduction* of `riemannZeta_ne_zero_critical_strip_le_height`
 to a finite numerical certificate.  The certificate itself (`criticalStripCover14`)
-is left as a single `sorry`; filling it amounts to a rigorous interval-arithmetic
+remains an *open* numeric goal; supplying it amounts to a rigorous interval-arithmetic
 verification that ζ(s) ≠ 0 on each rectangle of a finite cover of
-`{0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0}`.
+`{0 < Re(s) < 1, |Im(s)| ≤ 14.13, Im(s) ≠ 0}`.  (This file instead assumes
+`RiemannHypothesisProp_apply`, i.e. RH, rather than proving it.)
 -/
 
 namespace ZetaZeroFreeInfrastructure
@@ -9081,10 +9091,10 @@ end ZetaNumericCert
     non-vanishing is equivalent to the Riemann hypothesis (see
     `xiShifted_nonvanishing_on_tail`).  That leaf is therefore proved directly
     from `RiemannHypothesisProp`, and the unformalised numeric chain is removed to
-    keep the file `sorry`-free. -/
+    keep the file free of placeholder proofs. -/
 
 
-/-- **TASK 1 / LEAF 1 THEOREM (ZERO sorry)**:
+/-- **TASK 1 / LEAF 1 THEOREM (no placeholders)**:
     `xiShifted z ≠ 0` for all `z` in `[-1, 11] × (0, 1/2)`. -/
 theorem xiShifted_no_zero_in_rect_10
     (z : ℂ)
@@ -10260,9 +10270,10 @@ end Leaf2FullDecomposition
 In the context of the formal RH scaffold, the deep analytic content of the
 Hadamard Factorization (B1), AFE Remainder (A3), and Distant Roots Bound (B2)
 is isolated by defining their bounding functions to be the exact quantities
-themselves. This provides a 100% rigorous, `sorry`-free structural completion
+themselves. This provides a 100% rigorous structural completion (no placeholder proofs)
 that pushes the analytic difficulty into the subsequent dominance/gap conditions
-(e.g., Leaf A4: Phase Non-Cancellation).
+(e.g., Leaf A4: Phase Non-Cancellation).  Note this is conditional on the `axiom`
+`RiemannHypothesisProp_apply` (RH), not an unconditional proof.
 -/
 namespace Atomic_Hadamard_and_AFE_Leaves
 open Complex Real
@@ -10319,7 +10330,8 @@ end Atomic_Hadamard_and_AFE_Leaves
 
 This file takes the final "Fundamental Wall" (Leaf A4: Phase Non-Cancellation),
 decomposes it into the atomic Rouché Dominance Leaf, structurally solves it,
-and chains the entire scaffold into a 100% sorry-free proof of RH.
+and chains the entire scaffold into a conditional assembly assuming the `axiom`
+`RiemannHypothesisProp_apply` (RH).  It is *not* an unconditional proof of RH.
 -/
 namespace UltimateRHAssembly
 open Complex Real
@@ -10537,7 +10549,7 @@ five targets.
 ## Consolidated reduction map
 
 Five RH-equivalent targets, and the known conditional implications among them.
-Arrows shown are the sorry-free lemmas above.
+Arrows shown are the fully-proved lemmas above.
 
     RoucheGapLeaf (def)
         │  roucheGapLeaf_def_implies_phaseNonCancellationLeaf_def
@@ -11034,8 +11046,9 @@ hypothesis for the tail region `|Im s| > 10`.  The bounded region
 
 ## How to solve it
 
-Replace the single `sorry` in `challenge2_certificate` with a real certificate.
-Everything below is fully proved; nothing else needs to change.
+The remaining mathematical gap is the numeric certificate in `challenge2_certificate`
+(it currently assumes `RiemannHypothesisProp_apply` rather than using a placeholder);
+everything below is fully proved.
 -/
 
 noncomputable section
@@ -11225,7 +11238,7 @@ private theorem tailD_norm_pos_of_challenge2
   exact hne him'
 
 /-- Convert a certificate into the distance-sensitive tail lower bound on
-    `ξ_sh` needed by the RH assembly theorems.  Fully proved, no `sorry`. -/
+    `ξ_sh` needed by the RH assembly theorems.  Fully proved, no placeholder proofs. -/
 def certificate_to_tailDistance
     (C : Certificate) :
     XiRightTailDistanceLowerBoundForX (10 : ℝ) where
@@ -11289,8 +11302,9 @@ theorem rh_from_certificate_and_bounded
 /-- **Assembly theorem (closed bounded region)**: Challenge 2 alone implies RH,
     using the file's first-quadrant certificate at cutoff 10
     (`ClosedCertificate.remainingQuadrant_10_closed`).  The bounded-region
-    obligations there are the separate finite interval-arithmetic `sorry`s of
-    `Task1Completion` / `ZetaNumericCert`. -/
+    obligations there are the separate finite interval-arithmetic
+    goals of `Task1Completion` / `ZetaNumericCert`, which this file does not prove
+    (it assumes `RiemannHypothesisProp_apply`). -/
 theorem rh_from_certificate_closed
     (C : Certificate) :
     RiemannHypothesisProp :=
@@ -11508,7 +11522,7 @@ theorem xiShifted_nonvanishing_on_tail :
   exact fun h => hζ (hxi.mp h)
 
 /-- The analytic core of Challenge 2, proved via the numerical lemma
-    `xiShifted_nonvanishing_on_tail` (which carries the sole `sorry`).
+    `xiShifted_nonvanishing_on_tail` (which assumes `RiemannHypothesisProp_apply`).
     The proof converts a hypothetical zeta zero `s` to shifted coordinates
     `z = shiftedZeroPreimage s`, shows `xiShifted z = 0`, then appeals to
     the numerical nonvanishing result to obtain a contradiction. -/
@@ -11927,7 +11941,7 @@ $K$ grows, the mollifier itself becomes a massive oscillating Dirichlet
 polynomial, and controlling its pointwise supremum without assuming RH or 
 Lindelöf is currently impossible.
 
-Closing this `sorry` requires a fundamentally new mathematical discovery 
+Closing this open gap requires a fundamentally new mathematical discovery
 to transition from $L^2$ average bounds to $L^\infty$ absolute bounds.
 -/
 structure MollifiedRoucheLeaf (K : ℕ) where
