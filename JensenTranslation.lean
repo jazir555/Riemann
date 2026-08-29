@@ -302,10 +302,19 @@ theorem jensenPoly_derivative (d n : ℕ) :
   simp
 
 /-- A sum of a multiset of nonnegative reals is nonnegative. -/
-lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum := by sorry
+lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum :=
+  Multiset.sum_nonneg h
 
 /-- A nonempty sum of positive reals is positive. -/
-lemma msum_pos {M : Multiset ℝ} (h : ∀ x ∈ M, 0 < x) (hn : M ≠ 0) : 0 < M.sum := by sorry
+lemma msum_pos {M : Multiset ℝ} (h : ∀ x ∈ M, 0 < x) (hn : M ≠ 0) : 0 < M.sum := by
+  induction M using Multiset.induction_on with
+  | empty => exact absurd rfl hn
+  | cons a M ih =>
+      rw [Multiset.sum_cons]
+      have ha : 0 < a := h a (Multiset.mem_cons_self a M)
+      have hM : 0 ≤ M.sum :=
+        msum_nonneg (fun x hx => le_of_lt (h x (Multiset.mem_cons_of_mem hx)))
+      linarith
 
 /-- Logarithmic-derivative identity for a product of linear factors over ℂ:
      for `w` distinct from all roots `r`, `(∏ (X - r))'(w) = (∏ (X - r))(w)·Σ (w-r)⁻¹`. -/
@@ -313,17 +322,108 @@ lemma deriv_prod_identity (M : Multiset ℂ) (w : ℂ)
     (hne : ∀ r ∈ M, w ≠ r) :
     (Polynomial.derivative ((M.map fun r => Polynomial.X - Polynomial.C r).prod)).eval w =
       (M.map fun r => Polynomial.X - Polynomial.C r).prod.eval w *
-        (M.map fun r => (w - r)⁻¹).sum := by sorry
+        (M.map fun r => (w - r)⁻¹).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp
+  | cons a M ih =>
+      have hane : w ≠ a := hne a (Multiset.mem_cons_self a M)
+      have hsub : (w - a) ≠ 0 := sub_ne_zero.mpr hane
+      have ihM := ih (fun r hr => hne r (Multiset.mem_cons_of_mem hr))
+      simp only [Multiset.map_cons, Multiset.prod_cons, Multiset.sum_cons,
+        Polynomial.derivative_mul, Polynomial.derivative_sub, Polynomial.derivative_X,
+        Polynomial.derivative_C, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_sub,
+        Polynomial.eval_X, Polynomial.eval_C, sub_zero, one_mul]
+      rw [ihM]
+      field_simp
 
 /-- Imaginary part of the sum of reciprocals `(w - r)⁻¹` over real roots `r`:
      it equals `-w.im` times the sum of `‖w - r‖⁻²`. -/
 lemma sum_im_inv (w : ℂ) (M : Multiset ℂ)
     (hre : ∀ r ∈ M, r.im = 0) (hne : ∀ r ∈ M, w ≠ r) :
     ((M.map fun r => (w - r)⁻¹).sum).im =
-      -w.im * (M.map fun r => (normSq (w - r))⁻¹).sum := by sorry
+      -w.im * (M.map fun r => (normSq (w - r))⁻¹).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp
+  | cons a M ih =>
+      have hane : w ≠ a := hne a (Multiset.mem_cons_self a M)
+      have hare : a.im = 0 := hre a (Multiset.mem_cons_self a M)
+      have ihM := ih (fun r hr => hre r (Multiset.mem_cons_of_mem hr))
+        (fun r hr => hne r (Multiset.mem_cons_of_mem hr))
+      rw [Multiset.map_cons, Multiset.sum_cons, Complex.add_im, ihM, Multiset.map_cons,
+        Multiset.sum_cons]
+      rw [Complex.inv_im]
+      have hsubim : (w - a).im = w.im := by simp [Complex.sub_im, hare]
+      rw [hsubim]
+      field_simp
+      ring
 
+/-- **Gauss–Lucas for hyperbolic polynomials**: the derivative of a hyperbolic
+polynomial of positive degree is hyperbolic.  If `p'(w) = 0` with `w.im ≠ 0`, then `w`
+is not a root of `p` (all roots of `p` are real), so `Σ_ρ (w - ρ)⁻¹ = p'(w)/p(w) = 0`;
+taking imaginary parts gives `w.im · Σ_ρ ‖w - ρ‖⁻² = 0` with a strictly positive sum. -/
 theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
-    (hdeg : 0 < Polynomial.natDegree p) : Hyperbolic p.derivative := by sorry
+    (hdeg : 0 < Polynomial.natDegree p) : Hyperbolic p.derivative := by
+  intro w hw
+  by_contra hwim
+  have hp0 : p ≠ 0 := by
+    intro h; rw [h] at hdeg; simp at hdeg
+  have hsplit : Polynomial.Splits p := IsAlgClosed.splits p
+  have hcard : p.roots.card = p.natDegree := Polynomial.splits_iff_card_roots.mp hsplit
+  have hrootsne : p.roots ≠ 0 := by
+    intro h
+    rw [h] at hcard
+    simp at hcard
+    omega
+  have hrootre : ∀ r ∈ p.roots, r.im = 0 := fun r hr =>
+    hp r (Polynomial.isRoot_of_mem_roots hr)
+  have hwne : ∀ r ∈ p.roots, w ≠ r := by
+    intro r hr h
+    exact hwim (h ▸ hrootre r hr)
+  have hfac : p = Polynomial.C p.leadingCoeff *
+      (p.roots.map fun a => Polynomial.X - Polynomial.C a).prod :=
+    hsplit.eq_prod_roots
+  have hlc : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp0
+  have hPeval : ((p.roots.map fun a => Polynomial.X - Polynomial.C a).prod).eval w ≠ 0 := by
+    rw [Polynomial.eval_multiset_prod, Multiset.map_map]
+    apply Multiset.prod_ne_zero
+    intro hmem
+    rw [Multiset.mem_map] at hmem
+    obtain ⟨r, hr, hz⟩ := hmem
+    simp only [Function.comp_apply, Polynomial.eval_sub, Polynomial.eval_X,
+      Polynomial.eval_C] at hz
+    exact hwne r hr (sub_eq_zero.mp hz)
+  have hderiv : Polynomial.derivative p = Polynomial.C p.leadingCoeff *
+      Polynomial.derivative ((p.roots.map fun a => Polynomial.X - Polynomial.C a).prod) := by
+    conv_lhs => rw [hfac]
+    rw [Polynomial.derivative_C_mul]
+  have hzero : p.leadingCoeff *
+      (((p.roots.map fun a => Polynomial.X - Polynomial.C a).prod).eval w *
+        (p.roots.map fun r => (w - r)⁻¹).sum) = 0 := by
+    have h := hw
+    rw [hderiv, Polynomial.eval_mul, Polynomial.eval_C,
+      deriv_prod_identity p.roots w hwne] at h
+    exact h
+  have hS : (p.roots.map fun r => (w - r)⁻¹).sum = 0 := by
+    rcases mul_eq_zero.mp hzero with h | h
+    · exact absurd h hlc
+    · rcases mul_eq_zero.mp h with h' | h'
+      · exact absurd h' hPeval
+      · exact h'
+  have hSim : ((p.roots.map fun r => (w - r)⁻¹).sum).im = 0 := by rw [hS]; simp
+  rw [sum_im_inv w p.roots hrootre hwne] at hSim
+  have hpos : 0 < (p.roots.map fun r => (normSq (w - r))⁻¹).sum := by
+    apply msum_pos
+    · intro x hx
+      rw [Multiset.mem_map] at hx
+      obtain ⟨r, hr, rfl⟩ := hx
+      have hne0 : w - r ≠ 0 := sub_ne_zero.mpr (hwne r hr)
+      exact inv_pos.mpr (Complex.normSq_pos.mpr hne0)
+    · simpa [Multiset.map_eq_zero] using hrootsne
+  have hwim0 : w.im = 0 := by
+    rcases mul_eq_zero.mp hSim with h | h
+    · linarith [neg_eq_zero.mp h]
+    · linarith
+  exact hwim hwim0
 
 /-- PÓLYA'S SHIFT REDUCTION (Pólya 1927; GORZ 2019):
     Hyperbolicity at shift n = 0 for every degree d implies hyperbolicity

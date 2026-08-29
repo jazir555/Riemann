@@ -817,7 +817,10 @@ theorem zeroFree_gap
 -- The 3-4-1 product inequality
 -- ============================================================
 
-theorem norm_zeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
+-- (renamed from `norm_zeta_product_ge_one` to avoid a root-namespace clash with
+-- `Zeta23.FromPNTPlus.ZetaBounds`, which declares a lemma of that name at root level;
+-- both files must be importable into `KadiriZeroFree.lean`.)
+theorem norm_riemannZeta_product_ge_one (σ : ℝ) (t : ℝ) (hσ : 1 < σ) :
     1 ≤ ‖riemannZeta σ‖ ^ 3 * ‖riemannZeta (σ + t * I)‖ ^ 4 *
         ‖riemannZeta (σ + 2 * t * I)‖ := by
   have hσ₀ : 0 < σ - 1 := sub_pos.mpr hσ

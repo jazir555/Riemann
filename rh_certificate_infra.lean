@@ -6,12 +6,6 @@ noncomputable section
 
 namespace CellProofEngine
 
-/-!
-# Formal 2D Complex Interval Cell Bounding Engine
-This module provides a completely `sorry`-free formalization of the cell-bounding
-mechanism over 2D complex rectangles using the Mean Value Theorem / Lipschitz bounds.
--/
-
 /-- A 2D complex rectangle $[x_0, x_1] \times [y_0, y_1]$. -/
 structure Rect2D where
   x0 : ℝ
@@ -50,32 +44,31 @@ theorem dy_pos (R : Rect2D) : 0 < R.dy := by
 theorem radius_pos (R : Rect2D) : 0 < R.radius := by
   dsimp [radius]
   apply Real.sqrt_pos.mpr
-  have h1 : 0 < R.dx ^ 2 := sq_pos_of_ne_zero _ (ne_of_gt (R.dx_pos))
+  have h1 : 0 < R.dx ^ 2 := sq_pos_of_pos R.dx_pos
   have h2 : 0 ≤ R.dy ^ 2 := sq_nonneg _
   linarith
 
-/-- **Lemma 1 (`sorry`-free)**: Every point $z \in R$ satisfies $\|z - z_0\| \le \text{radius}(R)$. -/
+/-- **Lemma 1**: Every point $z \in R$ satisfies $\|z - z_0\| \le \text{radius}(R)$. -/
 theorem norm_sub_center_le_radius (R : Rect2D) {z : ℂ} (hz : R.mem z) :
     ‖z - R.center‖ ≤ R.radius := by
   have hre : |(z - R.center).re| ≤ R.dx := by
-    dsimp [center, dx]
-    rw [Complex.sub_re, Complex.add_re, Complex.ofReal_re, Complex.I_mul_re, Complex.ofReal_im]
+    simp [center, dx]
     ring_nf
     rw [abs_le]
-    constructor <;> linarith [hz.1, hz.2.1]
+    constructor <;> linarith [hz.1, hz.2.1, R.hx]
   have him : |(z - R.center).im| ≤ R.dy := by
-    dsimp [center, dy]
-    rw [Complex.sub_im, Complex.add_im, Complex.ofReal_im, Complex.I_mul_im, Complex.ofReal_re]
+    simp [center, dx]
     ring_nf
     rw [abs_le]
-    constructor <;> linarith [hz.2.2.1, hz.2.2.2]
-  have hsq_re : (z - R.center).re ^ 2 ≤ R.dx ^ 2 := sq_le_sq.mpr (by
-    rw [abs_abs]; exact hre)
-  have hsq_im : (z - R.center).im ^ 2 ≤ R.dy ^ 2 := sq_le_sq.mpr (by
-    rw [abs_abs]; exact him)
+    constructor <;> linarith [hz.2.2.1, hz.2.2.2, R.hy]
+  have hsq_re : (z - R.center).re ^ 2 ≤ R.dx ^ 2 := by
+    rw [← abs_of_nonneg R.dx_pos.le] at hre
+    exact sq_le_sq.mpr hre
+  have hsq_im : (z - R.center).im ^ 2 ≤ R.dy ^ 2 := by
+    rw [← abs_of_nonneg R.dy_pos.le] at him
+    exact sq_le_sq.mpr him
   have hnorm_sq : ‖z - R.center‖ ^ 2 = (z - R.center).re ^ 2 + (z - R.center).im ^ 2 := by
-    rw [Complex.norm_def, Real.sq_sqrt (by positivity)]
-    rfl
+    rw [Complex.sq_norm, Complex.normSq_apply, pow_two, pow_two]
   have h_sum : ‖z - R.center‖ ^ 2 ≤ R.dx ^ 2 + R.dy ^ 2 := by
     rw [hnorm_sq]
     linarith
@@ -86,70 +79,66 @@ theorem norm_sub_center_le_radius (R : Rect2D) {z : ℂ} (hz : R.mem z) :
 
 end Rect2D
 
-/-!
-### Mean Value Inequality for Complex Functions
--/
-
-/-- **Lemma 2 (`sorry`-free)**: Reverse triangle inequality for complex values. -/
+/-- **Lemma 2**: Reverse triangle inequality for complex values. -/
 theorem norm_ge_center_sub_diff (w w0 : ℂ) :
     ‖w0‖ - ‖w - w0‖ ≤ ‖w‖ := by
   have h := norm_sub_norm_le w0 w
   rw [norm_sub_rev w0 w] at h
   linarith
 
-/-- **Lemma 3 (`sorry`-free)**: Lipschitz bound on a convex set from a derivative bound. -/
+/-- **Lemma 3**: Lipschitz bound on a convex set from a derivative bound. -/
 theorem norm_image_sub_le_of_deriv_bound {f : ℂ → ℂ} {s : Set ℂ} (hs : Convex ℝ s)
     {M : ℝ} (hd : DifferentiableOn ℂ f s)
     (hM : ∀ z ∈ s, ‖deriv f z‖ ≤ M) {z z0 : ℂ} (hz : z ∈ s) (hz0 : z0 ∈ s) :
     ‖f z - f z0‖ ≤ M * ‖z - z0‖ := by
-  have h_bound := Convex.norm_image_sub_le_of_norm_deriv_le hs hd (fun x hx => by
-    have h_deriv : HasDerivAt f (deriv f x) x := (hd x hx).hasDerivAt (isOpen_univ.mem_nhds (by trivial))
-    exact h_deriv.hasFDerivAt) hM hz hz0
-  exact h_bound
+  exact Convex.norm_image_sub_le_of_norm_deriv_le (fun x hx => hd x hx) hM hs hz hz0
 
 /-- As a Set in $\mathbb{C}$, `R` is convex. -/
 theorem rect2D_convex (R : Rect2D) : Convex ℝ {z : ℂ | R.mem z} := by
   intro z1 hz1 z2 hz2 a b ha hb hab
-  simp only [Set.mem_setOf_eq, Rect2D.mem] at hz1 hz2 ⊢
+  simp only [Rect2D.mem, Set.mem_ofPred_eq] at hz1 hz2 ⊢
   refine ⟨?_, ?_, ?_, ?_⟩
   · calc R.x0 = a * R.x0 + b * R.x0 := by linear_combination -R.x0 * hab
-      _ ≤ a * z1.re + b * z2.re := by gcongr
-      _ = (a • z1 + b • z2).re := by simp [Complex.add_re, Complex.smul_re]
-  · calc (a • z1 + b • z2).re = a * z1.re + b * z2.re := by simp [Complex.add_re, Complex.smul_re]
-      _ ≤ a * R.x1 + b * R.x1 := by gcongr
-      _ = R.x1 := by linear_combination R.x1 * hab
+    _ ≤ a * z1.re + b * z2.re := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_left hz1.1 ha
+      · exact mul_le_mul_of_nonneg_left hz2.1 hb
+    _ ≤ (a • z1 + b • z2).re := by
+      rw [Complex.add_re, Complex.smul_re, Complex.smul_re]
+      rfl
+  · calc (a • z1 + b • z2).re = a * z1.re + b * z2.re := by
+      rw [Complex.add_re, Complex.smul_re, Complex.smul_re]
+      rfl
+    _ ≤ R.x1 := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_left hz1.2.1 ha
+      · exact mul_le_mul_of_nonneg_left hz2.2.1 hb
   · calc R.y0 = a * R.y0 + b * R.y0 := by linear_combination -R.y0 * hab
-      _ ≤ a * z1.im + b * z2.im := by gcongr
-      _ = (a • z1 + b • z2).im := by simp [Complex.add_im, Complex.smul_im]
-  · calc (a • z1 + b • z2).im = a * z1.im + b * z2.im := by simp [Complex.add_im, Complex.smul_im]
-      _ ≤ a * R.y1 + b * R.y1 := by gcongr
-      _ = R.y1 := by linear_combination R.y1 * hab
+    _ ≤ a * z1.im + b * z2.im := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_left hz1.2.2.1 ha
+      · exact mul_le_mul_of_nonneg_left hz2.2.2.1 hb
+    _ ≤ (a • z1 + b • z2).im := by
+      rw [Complex.add_im, Complex.smul_im, Complex.smul_im]
+      rfl
+  · calc (a • z1 + b • z2).im = a * z1.im + b * z2.im := by
+      rw [Complex.add_im, Complex.smul_im, Complex.smul_im]
+      rfl
+    _ ≤ R.y1 := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_left hz1.2.2.2 ha
+      · exact mul_le_mul_of_nonneg_left hz2.2.2.2 hb
 
 theorem center_mem_rect2D (R : Rect2D) : R.mem R.center := by
   refine ⟨?_, ?_, ?_, ?_⟩
-  · dsimp [Rect2D.center]
-    rw [Complex.add_re, Complex.ofReal_re, Complex.I_mul_re, Complex.ofReal_im]
-    ring_nf; linarith [R.hx]
-  · dsimp [Rect2D.center]
-    rw [Complex.add_re, Complex.ofReal_re, Complex.I_mul_re, Complex.ofReal_im]
-    ring_nf; linarith [R.hx]
-  · dsimp [Rect2D.center]
-    rw [Complex.add_im, Complex.ofReal_im, Complex.I_mul_im, Complex.ofReal_re]
-    ring_nf; linarith [R.hy]
-  · dsimp [Rect2D.center]
-    rw [Complex.add_im, Complex.ofReal_im, Complex.I_mul_im, Complex.ofReal_re]
-    ring_nf; linarith [R.hy]
+  · simp [Rect2D.center]; ring_nf; linarith [R.hx]
+  · simp [Rect2D.center]; ring_nf; linarith [R.hx]
+  · simp [Rect2D.center]; ring_nf; linarith [R.hy]
+  · simp [Rect2D.center]; ring_nf; linarith [R.hy]
 
-/-!
-### Master Cell Lower Bound Theorem
--/
-
-/-- **Master Theorem (`sorry`-free)**:
-Given an entire function $f : \mathbb{C} \to \mathbb{C}$, a 2D box $R$,
-an upper bound $M$ on $\|f'\|$ over $R$, and a center evaluation $\|f(z_0)\| \ge \varepsilon_0$,
-then for EVERY continuous point $z \in R$,
-$$\|f(z)\| \ge \varepsilon_0 - M \cdot \text{radius}(R).$$
--/
+/-- **Master Theorem**: given an entire function with a derivative bound over $R$ and a
+center evaluation $\|f(z_0)\| \ge \varepsilon_0$, then for every $z \in R$,
+$\|f(z)\| \ge \varepsilon_0 - M \cdot \text{radius}(R)$. -/
 theorem cell_lower_bound_from_center_and_deriv
     (f : ℂ → ℂ) (hf : Differentiable ℂ f)
     (R : Rect2D) (M : ℝ) (hM : ∀ z, R.mem z → ‖deriv f z‖ ≤ M)
@@ -173,19 +162,11 @@ theorem cell_lower_bound_from_center_and_deriv
 
 end CellProofEngine
 
-import Mathlib
-
-open Complex Real Topology
+open Complex Real Topology Set
 
 noncomputable section
 
 namespace TailProofEngine
-
-/-!
-# Formal Infinite Tail Lower Bound Engine
-This module provides a completely `sorry`-free formalization of the tail reduction
-for the completed Riemann zeta function over $x \in (40, \infty)$.
--/
 
 /-- Shifted complex coordinate $s(z) = 1/2 + i z$. -/
 def shiftedS (z : ℂ) : ℂ :=
@@ -215,17 +196,14 @@ def classicalXi (s : ℂ) : ℂ :=
 def xiShifted (z : ℂ) : ℂ :=
   classicalXi (shiftedS z)
 
-/-!
-### Norm Decomposition Lemmas
--/
-
-/-- **Lemma 1 (`sorry`-free)**: Norm of shifted $\xi(z)$ equals the product of the norms of its 4 components. -/
+/-- **Lemma 1**: Norm of shifted $\xi(z)$ equals the product of the norms of its 4 components. -/
 theorem norm_xiShifted_eq_prod_norms (z : ℂ) :
-    ‖xiShifted z‖ = ‖fPoly (shiftedS z)‖ * ‖fPi (shiftedS z)‖ * ‖fGamma (shiftedS z)‖ * ‖fZeta (shiftedS z)‖ := by
+    ‖xiShifted z‖ = ‖fPoly (shiftedS z)‖ * ‖fPi (shiftedS z)‖ * ‖fGamma (shiftedS z)‖ *
+      ‖fZeta (shiftedS z)‖ := by
   dsimp [xiShifted, classicalXi]
   rw [norm_mul, norm_mul, norm_mul]
 
-/-- **Lemma 2 (`sorry`-free)**: Product lower bound rule for four non-negative real quantities. -/
+/-- **Lemma 2**: Product lower bound rule for four non-negative real quantities. -/
 theorem prod_four_ge_of_ge {a b c d A B C D : ℝ}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (hd : 0 ≤ d)
     (hA : A ≤ a) (hB : B ≤ b) (hC : C ≤ c) (hD : D ≤ d)
@@ -239,25 +217,16 @@ theorem prod_four_ge_of_ge {a b c d A B C D : ℝ}
   have habc0 : 0 ≤ a * b * c := mul_nonneg hab0 hc
   exact mul_le_mul hABC hD hD0 habc0
 
-/-!
-### Exponential Reduction Theorems
--/
-
-/-- **Lemma 3 (`sorry`-free)**: Combining a polynomial/constant prefactor bound with an exponential Gamma bound. -/
+/-- **Lemma 3**: Combining a polynomial/constant prefactor bound with an exponential Gamma bound. -/
 theorem exp_decay_mul_const_le (C_pre C_gam α x : ℝ)
     (h_pre : 0 ≤ C_pre) (h_gam : 0 ≤ C_gam) :
     (C_pre * C_gam) * Real.exp (-α * x) = C_pre * (C_gam * Real.exp (-α * x)) := by
   ring
 
-/-- **Master Tail Reduction Theorem (`sorry`-free)**:
-If the four component functions satisfy explicit lower bounds over $x \in (40, \infty)$:
-1. $\|f_{poly}(1/2 + iz)\| \ge C_{poly}$
-2. $\|f_{\pi}(1/2 + iz)\| \ge C_{\pi}$
-3. $\|f_{\Gamma}(1/2 + iz)\| \ge C_{\Gamma} \cdot e^{-\alpha x}$  (Stirling lower bound)
-4. $\|f_{\zeta}(1/2 + iz)\| \ge C_{\zeta}$                     (Zeta lower bound)
-
-Then for $c_{tail} = C_{poly} \cdot C_{\pi} \cdot C_{\Gamma} \cdot C_{\zeta}$,
-$$\|\xi(1/2 + ix + iy)\| \ge c_{tail} \cdot e^{-\alpha x}.$$
+/-- **Master Tail Reduction Theorem**:
+If the four component functions satisfy explicit lower bounds over $x \in (40, \infty)$,
+then for $c_{tail} = C_{poly} \cdot C_{\pi} \cdot C_{\Gamma} \cdot C_{\zeta}$,
+$\|\xi(1/2 + ix + iy)\| \ge c_{tail} \cdot e^{-\alpha x}$.
 -/
 theorem tail_lower_bound_from_component_bounds
     (X_min : ℝ) (z : ℂ) (hz_x : X_min < |z.re|)
@@ -281,33 +250,19 @@ theorem tail_lower_bound_from_component_bounds
 
 end TailProofEngine
 
-import Mathlib
-
 open Complex Real Topology Set
 
 noncomputable section
 
 namespace BoundaryProofEngine
 
-/-!
-# Formal Boundary-Strip Non-Vanishing Engine
-This module provides a completely `sorry`-free formalization of local Taylor expansion
-mechanics for boundary strips near $y \to 0^+$ (critical line) and $y \to 0.5^-$ (outer edge).
--/
-
 /-- Line segment evaluation $g(y) = f(x + i y)$ for a fixed real height $x$. -/
 def lineEval (f : ℂ → ℂ) (x : ℝ) (y : ℝ) : ℂ :=
   f ((x : ℂ) + I * (y : ℂ))
 
-/-!
-### Case 1: Non-Zero Base Point on the Line ($y \to 0^+$)
--/
-
-/-- **Theorem 1 (`sorry`-free)**:
-If $f(x) \neq 0$ at height $x$ on the line ($y = 0$) with $\|f(x)\| \ge \varepsilon_0 > 0$,
-and $\|f'\| \le M_1$ on the vertical strip $[0, \eta]$, then for all $y \in (0, \min(\eta, \varepsilon_0 / M_1))$,
-$$\|f(x + i y)\| > 0 \implies f(x + i y) \neq 0.$$
--/
+/-- **Theorem 1**: If $f(x) \neq 0$ at height $x$ with $\|f(x)\| \ge \varepsilon_0 > 0$ and
+$\|f'\| \le M_1$ on the vertical strip $[0, \eta]$, then for all
+$y \in (0, \min(\eta, \varepsilon_0 / M_1))$, $f(x + i y) \neq 0$. -/
 theorem boundary_strip_nonvanishing_of_nonzero_base
     (f : ℂ → ℂ) (hf : Differentiable ℂ f) (x : ℝ)
     (ε0 M1 η : ℝ) (hε0 : 0 < ε0) (hM1 : 0 < M1) (hη : 0 < η)
@@ -317,56 +272,45 @@ theorem boundary_strip_nonvanishing_of_nonzero_base
     f ((x : ℂ) + I * (y : ℂ)) ≠ 0 := by
   have hy_icc : y ∈ Icc 0 η := ⟨le_of_lt hy_pos, le_of_lt hy_lt⟩
   have h0_icc : (0 : ℝ) ∈ Icc 0 η := ⟨le_rfl, le_of_lt hη⟩
-  -- Apply MVT / Lipschitz bound between z0 = x and z = x + i*y
   set z0 : ℂ := (x : ℂ)
   set z : ℂ := (x : ℂ) + I * (y : ℂ)
-  have h_seg : Convex ℝ (Icc (0 : ℝ) η) := convex_Icc 0 η
-  have h_diff : DifferentiableOn ℂ (fun t : ℝ => f ((x : ℂ) + I * (t : ℂ))) (Icc 0 η) := by
-    apply Differentiable.comp_differentiableOn
-    · exact hf
-    · apply Differentiable.differentiableOn
-      fun_prop
+  have h_seg : Convex ℝ (Icc 0 η) := convex_Icc 0 η
   have h_dist : ‖z - z0‖ = y := by
-    dsimp [z, z0]
-    rw [add_sub_cancel_left, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, abs_of_pos hy_pos]
+    simp [z, z0]
+    rw [norm_mul, Complex.norm_I, one_mul]
+    norm_cast
+    rw [abs_of_pos hy_pos]
   have h_lip : ‖f z - f z0‖ ≤ M1 * y := by
-    have h_chain : ‖f z - f z0‖ ≤ M1 * ‖z - z0‖ := by
-      have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-        intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
-        subst hw1 hw2
-        use a * t1 + b * t2
-        refine ⟨h_seg ht1 ht2 ha hb hab, ?_⟩
-        push_cast; ring
-      have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨y, hy_icc, rfl⟩
-      have h_mem_z0 : z0 ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-        use 0, h0_icc
-        push_cast; ring
-      have h_deriv_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)}, ‖deriv f w‖ ≤ M1 := by
-        rintro w ⟨t, ht, rfl⟩
-        exact h_deriv t ht
-      exact Convex.norm_image_sub_le_of_norm_deriv_le h_convex hf.differentiableOn h_deriv_bound h_mem_z h_mem_z0
-    rw [h_dist] at h_chain
-    exact h_chain
+    have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
+      intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
+      subst hw1 hw2
+      use a * t1 + b * t2
+      refine ⟨h_seg ht1 ht2 ha hb hab, ?_⟩
+      ext; simp [smul_add, add_smul, one_smul, hab, mul_comm, add_comm]
+    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨y, hy_icc, by simp [z]; rfl⟩
+    have h_mem_z0 : z0 ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
+      use 0, h0_icc
+      simp [z0]; rfl
+    have h_deriv_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)},
+        ‖deriv f w‖ ≤ M1 := by
+      rintro w ⟨t, ht, rfl⟩
+      exact h_deriv t ht
+      exact Convex.norm_image_sub_le_of_norm_deriv_le (fun w _ => hf.differentiableAt w)
+      h_deriv_bound h_convex h_mem_z h_mem_z0
   have h_lower : ε0 - M1 * y ≤ ‖f z‖ := by
-    have h_rev := norm_sub_norm_le (f z0) (f z - f z0)
-    rw [sub_sub_cancel] at h_rev
-    have h_base_sub : ‖f z0‖ - M1 * y ≤ ‖f z‖ := by linarith
-    linarith
+    have h_rev := norm_sub_norm_le (f z0) (f z)
+    have h_base_sub : ‖f z0‖ - ‖f z - f z0‖ ≤ ‖f z‖ := by linarith [h_rev]
+    linarith [h_base, h_lip, h_base_sub]
   have h_pos_margin : 0 < ε0 - M1 * y := by
     rw [sub_pos]
-    exact (lt_div_iff₀ hM1).mp hy_margin
+    have := (lt_div_iff₀ hM1).mp hy_margin
+    rwa [mul_comm]
   have h_norm_pos : 0 < ‖f z‖ := lt_of_lt_of_le h_pos_margin h_lower
   exact norm_pos_iff.mp h_norm_pos
 
-/-!
-### Case 2: Simple Zero Base Point on the Line ($y \to 0^+$)
--/
-
-/-- **Theorem 2 (`sorry`-free)**:
-If $f(x) = 0$ on the line ($y = 0$), but $d_0 = \|f'(x)\| > 0$ (a simple zero),
-and $\|f''\| \le M_2$ on $[0, \eta]$, then for all $y \in (0, \min(\eta, 2 d_0 / M_2))$,
-$$\|f(x + i y)\| \ge y (d_0 - \frac{1}{2} M_2 y) > 0 \implies f(x + i y) \neq 0.$$
--/
+/-- **Theorem 2**: If $f(x) = 0$ with a simple zero ($d_0 = \|f'(x)\| > 0$) and
+$\|f''\| \le M_2$ on $[0, \eta]$, then for all $y \in (0, \min(\eta, 2 d_0 / M_2))$,
+$f(x + i y) \neq 0$. -/
 theorem boundary_strip_nonvanishing_of_simple_zero_base
     (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hf' : Differentiable ℂ (deriv f)) (x : ℝ)
     (d0 M2 η : ℝ) (hd0 : 0 < d0) (hM2 : 0 < M2) (hη : 0 < η)
@@ -379,44 +323,34 @@ theorem boundary_strip_nonvanishing_of_simple_zero_base
   set z : ℂ := (x : ℂ) + I * (y : ℂ)
   have hy_icc : y ∈ Icc 0 η := ⟨le_of_lt hy_pos, le_of_lt hy_lt⟩
   have h0_icc : (0 : ℝ) ∈ Icc 0 η := ⟨le_rfl, le_of_lt hη⟩
-  -- First derivative Lipschitz bound: ‖f'(z) - f'(z0)‖ ≤ M2 * y
   have h_dist : ‖z - z0‖ = y := by
-    dsimp [z, z0]
-    rw [add_sub_cancel_left, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, abs_of_pos hy_pos]
+    simp [z, z0]
+    rw [norm_mul, Complex.norm_I, one_mul]
+    norm_cast
+    rw [abs_of_pos hy_pos]
   have h_deriv_lip : ‖deriv f z - deriv f z0‖ ≤ M2 * y := by
     have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
       intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
       subst hw1 hw2
       use a * t1 + b * t2
       refine ⟨(convex_Icc 0 η) ht1 ht2 ha hb hab, ?_⟩
-      push_cast; ring
-    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨y, hy_icc, rfl⟩
-    have h_mem_z0 : z0 ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨0, h0_icc, by push_cast; ring⟩
-    have h_deriv2_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)}, ‖deriv (deriv f) w‖ ≤ M2 := by
+      push_cast; ring_nf
+    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨y, hy_icc, by simp [z]; rfl⟩
+    have h_mem_z0 : z0 ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := ⟨0, h0_icc, by simp [z0]; rfl⟩
+    have h_deriv2_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)},
+        ‖deriv (deriv f) w‖ ≤ M2 := by
       rintro w ⟨t, ht, rfl⟩
       exact h_deriv2 t ht
-    have h_step := Convex.norm_image_sub_le_of_norm_deriv_le h_convex hf'.differentiableOn h_deriv2_bound h_mem_z h_mem_z0
-    rw [h_dist] at h_step
-    exact h_step
-  -- First order Taylor expansion: ‖f(z) - (f(z0) + f'(z0)(z - z0))‖ ≤ (1/2) * M2 * y^2
+      exact Convex.norm_image_sub_le_of_norm_deriv_le (fun w _ => hf'.differentiableAt w)
+      h_deriv2_bound h_convex h_mem_z h_mem_z0
   have h_taylor : ‖f z - (f z0 + deriv f z0 * (z - z0))‖ ≤ (1 / 2) * M2 * y ^ 2 := by
     have h_int : ‖f z - (f z0 + deriv f z0 * (z - z0))‖ ≤ (1 / 2) * M2 * ‖z - z0‖ ^ 2 := by
-      -- Quadratic Taylor remainder bound from deriv Lipschitz bound
-      have h_int_bound := Convex.norm_image_sub_sub_deriv_le_of_forall_hasDerivAt hf hf' (by
-        intro w hw
-        have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc 0 η, w = (x : ℂ) + I * (t : ℂ)} := by
-          intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
-          subst hw1 hw2
-          use a * t1 + b * t2
-          refine ⟨(convex_Icc 0 η) ht1 ht2 ha hb hab, ?_⟩
-          push_cast; ring
-        exact h_convex) (by
-        rintro w ⟨t, ht, rfl⟩
-        exact h_deriv2 t ht) ⟨y, hy_icc, rfl⟩ ⟨0, h0_icc, by push_cast; ring⟩
-      exact h_int_bound
+      -- Genuine infrastructure gap: the second-order MVT
+      -- `Convex.norm_image_sub_sub_deriv_le_of_forall_hasDerivAt` was removed from mathlib.
+      -- The bound holds by the standard integral form of Taylor's theorem.
+      sorry
     rw [h_dist] at h_int
     exact h_int
-  -- Substitute f(z0) = 0 and ‖f'(z0)(z - z0)‖ = ‖f'(z0)‖ * y
   rw [h_zero, zero_add] at h_taylor
   have h_lin_norm : ‖deriv f z0 * (z - z0)‖ = ‖deriv f z0‖ * y := by
     rw [norm_mul, h_dist]
@@ -424,26 +358,20 @@ theorem boundary_strip_nonvanishing_of_simple_zero_base
     rw [h_lin_norm]
     exact mul_le_mul_of_nonneg_right h_simple (le_of_lt hy_pos)
   have h_f_lower : d0 * y - (1 / 2) * M2 * y ^ 2 ≤ ‖f z‖ := by
-    have h_rev := norm_sub_norm_le (deriv f z0 * (z - z0)) (f z - deriv f z0 * (z - z0))
-    have h_sub_eq : deriv f z0 * (z - z0) - (f z - deriv f z0 * (z - z0)) = 2 • (deriv f z0 * (z - z0)) - f z := by ring
-    linarith
+    have h_rev := norm_sub_norm_le (deriv f z0 * (z - z0)) (f z)
+    linarith [h_rev, h_lin_lower, h_taylor]
   have h_factor : d0 * y - (1 / 2) * M2 * y ^ 2 = y * (d0 - (1 / 2) * M2 * y) := by ring
   rw [h_factor] at h_f_lower
   have h_inner_pos : 0 < d0 - (1 / 2) * M2 * y := by
-    have h_div : y < 2 * d0 / M2 := hy_margin
-    linarith
+    rw [sub_pos]
+    have := (lt_div_iff₀ hM2).mp hy_margin
+    rwa [mul_comm]
   have h_prod_pos : 0 < y * (d0 - (1 / 2) * M2 * y) := mul_pos hy_pos h_inner_pos
   have h_norm_pos : 0 < ‖f z‖ := lt_of_lt_of_le h_prod_pos h_f_lower
   exact norm_pos_iff.mp h_norm_pos
 
-/-!
-### Case 3: Outer Boundary Non-Vanishing ($y \to 0.5^-$)
--/
-
-/-- **Theorem 3 (`sorry`-free)**:
-If $f(x + i \cdot 0.5) \neq 0$ at the outer boundary ($y = 0.5$) with $\|f\| \ge \varepsilon_{top}$,
-and $\|f'\| \le M_1$, then non-vanishing holds in $y \in (0.5 - \varepsilon_{top}/M_1, 0.5)$.
--/
+/-- **Theorem 3**: If $f(x + i \cdot 0.5) \neq 0$ with $\|f\| \ge \varepsilon_{top}$ and
+$\|f'\| \le M_1$, then non-vanishing holds in $y \in (0.5 - \varepsilon_{top}/M_1, 0.5)$. -/
 theorem upper_boundary_nonvanishing_from_outer_bound
     (f : ℂ → ℂ) (hf : Differentiable ℂ f) (x : ℝ)
     (ε_top M1 : ℝ) (hε : 0 < ε_top) (hM1 : 0 < M1)
@@ -454,35 +382,40 @@ theorem upper_boundary_nonvanishing_from_outer_bound
   set z_top : ℂ := (x : ℂ) + I * (1 / 2 : ℂ)
   set z : ℂ := (x : ℂ) + I * (y : ℂ)
   have h_dist : ‖z_top - z‖ = 1 / 2 - y := by
-    dsimp [z_top, z]
-    rw [← sub_mul, add_sub_add_left, norm_mul, Complex.norm_I, one_mul]
-    have h_sub : (1 / 2 : ℂ) - (y : ℂ) = (((1 / 2 - y : ℝ) : ℂ)) := by push_cast; ring
-    rw [h_sub, Complex.norm_real, abs_of_nonneg (by linarith)]
+    simp [z_top, z]
+    rw [norm_mul, Complex.norm_I, one_mul]
+    norm_cast
+    rw [abs_of_nonneg (by linarith [hy_top])]
   have h_lip : ‖f z_top - f z‖ ≤ M1 * (1 / 2 - y) := by
-    have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2), w = (x : ℂ) + I * (t : ℂ)} := by
+    have h_convex : Convex ℝ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2),
+        w = (x : ℂ) + I * (t : ℂ)} := by
       intro w1 ⟨t1, ht1, hw1⟩ w2 ⟨t2, ht2, hw2⟩ a b ha hb hab
       subst hw1 hw2
       use a * t1 + b * t2
       refine ⟨(convex_Icc (1 / 2 - ε_top / M1) (1 / 2)) ht1 ht2 ha hb hab, ?_⟩
-      push_cast; ring
-    have h_mem_ztop : z_top ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2), w = (x : ℂ) + I * (t : ℂ)} := by
-      use 1 / 2, ⟨by linarith [div_pos hε hM1], le_rfl⟩, rfl
-    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2), w = (x : ℂ) + I * (t : ℂ)} := by
-      use y, ⟨le_of_lt hy_low, hy_top⟩, rfl
-    have h_deriv_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2), w = (x : ℂ) + I * (t : ℂ)}, ‖deriv f w‖ ≤ M1 := by
+      push_cast; ring_nf
+    have h_mem_ztop : z_top ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2),
+        w = (x : ℂ) + I * (t : ℂ)} := by
+      use (1 / 2 : ℝ), ⟨by linarith [div_pos hε hM1], le_rfl⟩
+      simp [z_top]; rfl
+    have h_mem_z : z ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2),
+        w = (x : ℂ) + I * (t : ℂ)} := by
+      use y, ⟨le_of_lt hy_low, hy_top⟩
+      simp [z]; rfl
+    have h_deriv_bound : ∀ w ∈ {w : ℂ | ∃ t ∈ Icc (1 / 2 - ε_top / M1) (1 / 2),
+        w = (x : ℂ) + I * (t : ℂ)}, ‖deriv f w‖ ≤ M1 := by
       rintro w ⟨t, ht, rfl⟩
       exact h_deriv t ht
-    have h_step := Convex.norm_image_sub_le_of_norm_deriv_le h_convex hf.differentiableOn h_deriv_bound h_mem_ztop h_mem_z
-    rw [h_dist] at h_step
-    exact h_step
+      exact Convex.norm_image_sub_le_of_norm_deriv_le (fun w _ => hf.differentiableAt w)
+      h_deriv_bound h_convex h_mem_ztop h_mem_z
   have h_lower : ε_top - M1 * (1 / 2 - y) ≤ ‖f z‖ := by
-    have h_rev := norm_sub_norm_le (f z_top) (f z_top - f z)
-    linarith
+    have h_rev := norm_sub_norm_le (f z_top) (f z)
+    have h_base_sub : ‖f z_top‖ - ‖f z_top - f z‖ ≤ ‖f z‖ := by linarith [h_rev]
+    linarith [h_top, h_lip, h_base_sub]
   have h_pos_margin : 0 < ε_top - M1 * (1 / 2 - y) := by
-    have : M1 * (1 / 2 - y) < ε_top := by
-      rw [mul_sub]
-      linarith [(lt_div_iff₀ hM1).mp hy_low]
-    linarith
+    rw [sub_pos]
+    have := (lt_div_iff₀ hM1).mp (by linarith [hy_low])
+    rwa [mul_comm]
   have h_norm_pos : 0 < ‖f z‖ := lt_of_lt_of_le h_pos_margin h_lower
   exact norm_pos_iff.mp h_norm_pos
 

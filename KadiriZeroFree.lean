@@ -1,5 +1,8 @@
 import ZeroFreeRegionProof
 import ZeroFreeRegionHadamard
+import Zeta23.RvM.Statement
+import Zeta23.GammaFacts.Complete
+import Zeta23.Assembly
 
 open Complex Real Topology
 open scoped BigOperators
@@ -15,14 +18,202 @@ noncomputable section
 theorem kadiri_numerical_bridge :
     (1 : ℝ) / 57.54 < 2 / 95 := by norm_num
 
+/-! ### The ξ-zero facts, imported from the (sorry-free) `Zeta23` library
+
+`Zeta23` works with **Mathlib's** `riemannZeta`, so its Riemann–von Mangoldt
+formula (`Zeta23.RvM.riemannVonMangoldt`, unconditional given
+`Zeta23.gammaFacts`) and its local zero count
+(`Zeta23.RvM.zeta_local_zero_count`: `N(t, t+1] ≤ A₀ log(|t| + 3)`) apply
+verbatim to the zeros of the root `xi = s(s-1)Λ₀(s) + 1`, whose zero set is
+exactly the set of nontrivial zeros of `ζ` (`xi_zero_iff_isNontrivialZero`). -/
+
+/-- A zero of `xi` is exactly a nontrivial zero of `ζ` in `Zeta23`'s sense. -/
+theorem xi_zero_iff_isNontrivialZero {z : ℂ} :
+    xi z = 0 ↔ Zeta23.IsNontrivialZero z := by
+  constructor
+  · intro h
+    have hζ := xi_zero_imp_riemannZeta_zero h
+    have h0 : 0 < z.re := xi_zero_imp_zero_lt_re h
+    have h1 : z.re < 1 := by
+      by_contra hc
+      exact riemannZeta_ne_zero_of_one_le_re (le_of_not_gt hc) hζ
+    exact ⟨hζ, h0, h1⟩
+  · rintro ⟨hζ, h0, h1⟩
+    have hΓ : ∀ n : ℕ, z / 2 ≠ -(n : ℂ) := by
+      intro n hn
+      have hre : (z / 2).re = (-(n : ℂ)).re := congrArg Complex.re hn
+      simp only [Complex.div_re, Complex.neg_re, Complex.natCast_re] at hre
+      have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+      simp at hre
+      nlinarith [hre, h0, hn0]
+    exact (xi_zero_iff_riemannZeta_zero hΓ).mpr hζ
+
+/-- An empty ordinate window carries no zeros. -/
+theorem Ncount_self (t : ℝ) : Zeta23.Ncount t t = 0 := by
+  have h : Zeta23.zerosIn t t = ∅ := by
+    ext ρ
+    simp only [Zeta23.zerosIn, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+    rintro ⟨-, h1, h2⟩
+    linarith
+  simp [Zeta23.Ncount, h]
+
+/-- Telescoping `Zeta23`'s local zero count `N(t, t+1] ≤ A₀ log(|t| + 3)` over `k`
+consecutive unit windows. -/
+theorem Ncount_window_le {A₀ C : ℝ} (hA₀ : 0 ≤ A₀)
+    (hloc : ∀ t : ℝ, (Zeta23.Ncount t (t + 1) : ℝ) ≤ A₀ * Real.log (|t| + 3)) :
+    ∀ (k : ℕ) (t : ℝ), (∀ j : ℕ, j < k → A₀ * Real.log (|t + (j : ℝ)| + 3) ≤ C) →
+      (Zeta23.Ncount t (t + (k : ℝ)) : ℝ) ≤ (k : ℝ) * C := by
+  intro k
+  induction k with
+  | zero => intro t _; simp [Ncount_self]
+  | succ k ih =>
+      intro t hC
+      have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+      have h1 : t ≤ t + (k : ℝ) := by linarith
+      have h2 : t + (k : ℝ) ≤ t + ((k + 1 : ℕ) : ℝ) := by push_cast; linarith
+      have hsplit := Zeta23.Ncount_add h1 h2
+      have hstep : (Zeta23.Ncount (t + (k : ℝ)) (t + ((k + 1 : ℕ) : ℝ)) : ℝ)
+          ≤ A₀ * Real.log (|t + (k : ℝ)| + 3) := by
+        have := hloc (t + (k : ℝ))
+        have heq : t + (k : ℝ) + 1 = t + ((k + 1 : ℕ) : ℝ) := by push_cast; ring
+        rwa [heq] at this
+      have hCk : A₀ * Real.log (|t + (k : ℝ)| + 3) ≤ C := hC k (Nat.lt_succ_self k)
+      have hprev : (Zeta23.Ncount t (t + (k : ℝ)) : ℝ) ≤ (k : ℝ) * C :=
+        ih t (fun j hj => hC j (Nat.lt_succ_of_lt hj))
+      have hcast : ((Zeta23.Ncount t (t + ((k + 1 : ℕ) : ℝ))) : ℝ)
+          = (Zeta23.Ncount t (t + (k : ℝ)) : ℝ)
+            + (Zeta23.Ncount (t + (k : ℝ)) (t + ((k + 1 : ℕ) : ℝ)) : ℝ) := by
+        rw [hsplit]; push_cast; ring
+      rw [hcast]
+      have hCsucc : ((k + 1 : ℕ) : ℝ) * C = (k : ℝ) * C + C := by push_cast; ring
+      rw [hCsucc]
+      linarith
+
+/-- **ξ has infinitely many zeros.**  Proof: `Zeta23`'s Riemann–von Mangoldt formula
+(`Zeta23.RvM.riemannVonMangoldt`, unconditional via `Zeta23.gammaFacts`) forces
+`N(T, 2T] → ∞` (`Zeta23.Assembly.tendsto_N_atTop`), so nontrivial ζ-zeros occur with
+arbitrarily large ordinate; by `xi_zero_iff_isNontrivialZero` these are exactly the
+zeros of `xi`, whose set therefore cannot be finite (a finite set of zeros would have
+bounded ordinates). -/
 theorem xiZeros_infinite :
     ({z : ℂ | xi z = 0} : Set ℂ).Infinite := by
-  by_contra hfin
-  push_neg at hfin
-  -- If xi has finitely many zeros, it's a polynomial of degree ≤ 2 (by Hadamard)
-  -- But xi is bounded on ℝ (→ 1), so polynomial is constant
-  -- But xi(0) = 1 and xi has zeros, contradiction
-  sorry
+  have hRvM : Zeta23.RiemannVonMangoldt Zeta23.zetaZeroConfig :=
+    Zeta23.RvM.riemannVonMangoldt Zeta23.gammaFacts
+  have htend := Zeta23.Assembly.tendsto_N_atTop Zeta23.zetaZeroConfig hRvM
+  by_contra hcon
+  rw [Set.not_infinite] at hcon
+  obtain ⟨M, hM⟩ := (hcon.image (fun z : ℂ => z.im)).bddAbove
+  have hev : ∀ᶠ T : ℝ in Filter.atTop, (1 : ℝ) ≤ (Zeta23.zetaZeroConfig.N T (2 * T) : ℝ) :=
+    htend.eventually_ge_atTop 1
+  obtain ⟨T, hT1, hT2⟩ := (hev.and (Filter.eventually_ge_atTop M)).exists
+  have hN1 : 1 ≤ Zeta23.zetaZeroConfig.N T (2 * T) := by exact_mod_cast hT1
+  have hne : (Zeta23.zetaZeroConfig.window T (2 * T)).Nonempty := by
+    rcases Set.eq_empty_or_nonempty (Zeta23.zetaZeroConfig.window T (2 * T)) with he | h
+    · rw [Zeta23.ZeroConfig.N, he] at hN1
+      simp at hN1
+    · exact h
+  obtain ⟨ρ, hρ⟩ := hne
+  have hρz : Zeta23.IsNontrivialZero ρ := hρ.1
+  have hxiρ : xi ρ = 0 := xi_zero_iff_isNontrivialZero.mpr hρz
+  have himle : ρ.im ≤ M := hM (Set.mem_image_of_mem _ hxiρ)
+  have hgt : T < ρ.im := hρ.2.1
+  linarith
+
+/-- The Jensen-type counting input for `Summable (fun n => (‖a n‖ ^ 2)⁻¹)`:
+an enumeration of the ξ-zeros has at most `42·A₀·r^(7/4)` terms in the disc of
+radius `r`.  Proof: a ξ-zero of modulus `≤ r` has ordinate in `(-r-1, r+1]`, and
+`Zeta23`'s local count `N(t, t+1] ≤ A₀ log(|t| + 3)` telescoped over the
+`2⌈r⌉+2` unit windows bounds that count by `(2⌈r⌉+2)·A₀·log(⌈r⌉+4) ≤ 42·A₀·r^(7/4)`. -/
+theorem xi_enum_ncard_bound {a : ℕ → ℂ} (hinj : Function.Injective a)
+    (hzero : ∀ z, xi z = 0 ↔ ∃ n, z = a n) :
+    ∃ D : ℝ, 0 ≤ D ∧ ∀ r : ℝ, 1 ≤ r →
+      (({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard : ℝ) ≤ D * r ^ (7 / 4 : ℝ) := by
+  obtain ⟨A₀, hA₀, hloc⟩ := Zeta23.RvM.zeta_local_zero_count
+  have hA₀0 : (0 : ℝ) ≤ A₀ := by linarith
+  refine ⟨42 * A₀, by linarith, ?_⟩
+  intro r hr
+  have hrpos : (0 : ℝ) < r := by linarith
+  set m : ℕ := ⌈r⌉₊ with hmdef
+  have hrm : r ≤ (m : ℝ) := Nat.le_ceil r
+  have hmr : (m : ℝ) ≤ r + 1 := by
+    have h := Nat.ceil_lt_add_one (le_of_lt hrpos)
+    have hcast : ((⌈r⌉₊ : ℕ) : ℝ) < r + 1 := by exact_mod_cast h
+    rw [hmdef]; linarith
+  have hsub : (a '' {n : ℕ | ‖a n‖ ≤ r})
+      ⊆ Zeta23.zetaZeroConfig.window (-(m : ℝ) - 1) ((m : ℝ) + 1) := by
+    rintro z ⟨n, hn, rfl⟩
+    have hxz : xi (a n) = 0 := (hzero (a n)).mpr ⟨n, rfl⟩
+    have hz : Zeta23.IsNontrivialZero (a n) := xi_zero_iff_isNontrivialZero.mp hxz
+    have hnorm : ‖a n‖ ≤ r := hn
+    have him : |(a n).im| ≤ r := le_trans (Complex.abs_im_le_norm _) hnorm
+    have him1 : |(a n).im| ≤ (m : ℝ) := le_trans him hrm
+    have h1 : -(m : ℝ) ≤ (a n).im := neg_le_of_abs_le him1
+    have h2 : (a n).im ≤ (m : ℝ) := le_of_abs_le him1
+    exact ⟨hz, by constructor <;> linarith⟩
+  have hcard_eq : ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard = (a '' {n : ℕ | ‖a n‖ ≤ r}).ncard :=
+    (Set.ncard_image_of_injective _ hinj).symm
+  have hle1 : (a '' {n : ℕ | ‖a n‖ ≤ r}).ncard
+      ≤ Zeta23.Ncount (-(m : ℝ) - 1) ((m : ℝ) + 1) := by
+    have hA := Zeta23.zetaZeroConfig.ncard_le_finsum_mult (-(m : ℝ) - 1) ((m : ℝ) + 1) hsub
+    have hB := Zeta23.zetaZeroConfig.finsum_mult_mono (-(m : ℝ) - 1) ((m : ℝ) + 1)
+      hsub (subset_rfl)
+    have hN : Zeta23.zetaZeroConfig.N (-(m : ℝ) - 1) ((m : ℝ) + 1)
+        = Zeta23.Ncount (-(m : ℝ) - 1) ((m : ℝ) + 1) :=
+      Zeta23.zetaZeroConfig_N _ _
+    rw [Zeta23.ZeroConfig.N] at hN
+    omega
+  have hwin : (Zeta23.Ncount (-(m : ℝ) - 1) ((m : ℝ) + 1) : ℝ)
+      ≤ (2 * (m : ℝ) + 2) * (A₀ * Real.log ((m : ℝ) + 4)) := by
+    have hkey := Ncount_window_le (A₀ := A₀) (C := A₀ * Real.log ((m : ℝ) + 4)) hA₀0 hloc
+      (2 * m + 2) (-(m : ℝ) - 1) ?_
+    · have heq : -(m : ℝ) - 1 + ((2 * m + 2 : ℕ) : ℝ) = (m : ℝ) + 1 := by push_cast; ring
+      rw [heq] at hkey
+      have hcast : ((2 * m + 2 : ℕ) : ℝ) = 2 * (m : ℝ) + 2 := by push_cast; ring
+      rw [hcast] at hkey
+      exact hkey
+    · intro j hj
+      have hjr : (j : ℝ) ≤ 2 * (m : ℝ) + 1 := by
+        have hjn : j ≤ 2 * m + 1 := by omega
+        have hc : ((j : ℕ) : ℝ) ≤ ((2 * m + 1 : ℕ) : ℝ) := by exact_mod_cast hjn
+        push_cast at hc; linarith
+      have hj0 : (0 : ℝ) ≤ (j : ℝ) := Nat.cast_nonneg j
+      have habs : |-(m : ℝ) - 1 + (j : ℝ)| ≤ (m : ℝ) + 1 := by
+        rw [abs_le]; constructor <;> linarith
+      have hlog : Real.log (|-(m : ℝ) - 1 + (j : ℝ)| + 3) ≤ Real.log ((m : ℝ) + 4) := by
+        apply Real.log_le_log (by positivity)
+        linarith
+      exact mul_le_mul_of_nonneg_left hlog hA₀0
+  have hone : (1 : ℝ) ≤ r ^ (3 / 4 : ℝ) := by
+    calc (1 : ℝ) = (1 : ℝ) ^ (3 / 4 : ℝ) := (Real.one_rpow _).symm
+      _ ≤ r ^ (3 / 4 : ℝ) := Real.rpow_le_rpow zero_le_one hr (by norm_num)
+  have hlogr : Real.log r ≤ (4 / 3) * r ^ (3 / 4 : ℝ) := by
+    have h1 : Real.log (r ^ (3 / 4 : ℝ)) ≤ r ^ (3 / 4 : ℝ) - 1 :=
+      Real.log_le_sub_one_of_pos (by positivity)
+    rw [Real.log_rpow hrpos] at h1
+    linarith
+  have hlog6 : Real.log 6 ≤ 5 := by
+    have := Real.log_le_sub_one_of_pos (show (0 : ℝ) < 6 by norm_num)
+    linarith
+  have hlogm : Real.log ((m : ℝ) + 4) ≤ 7 * r ^ (3 / 4 : ℝ) := by
+    have hle : (m : ℝ) + 4 ≤ 6 * r := by linarith
+    have h1 : Real.log ((m : ℝ) + 4) ≤ Real.log (6 * r) :=
+      Real.log_le_log (by positivity) hle
+    rw [Real.log_mul (by norm_num) (ne_of_gt hrpos)] at h1
+    linarith
+  have hrpow : r * r ^ (3 / 4 : ℝ) = r ^ (7 / 4 : ℝ) := by
+    have h : r ^ (7 / 4 : ℝ) = r ^ (1 + 3 / 4 : ℝ) := by norm_num
+    rw [h, Real.rpow_add hrpos, Real.rpow_one]
+  have hlogm0 : 0 ≤ Real.log ((m : ℝ) + 4) := by
+    apply Real.log_nonneg; linarith
+  calc (({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard : ℝ)
+      = ((a '' {n : ℕ | ‖a n‖ ≤ r}).ncard : ℝ) := by rw [hcard_eq]
+    _ ≤ (Zeta23.Ncount (-(m : ℝ) - 1) ((m : ℝ) + 1) : ℝ) := by exact_mod_cast hle1
+    _ ≤ (2 * (m : ℝ) + 2) * (A₀ * Real.log ((m : ℝ) + 4)) := hwin
+    _ ≤ (6 * r) * (A₀ * (7 * r ^ (3 / 4 : ℝ))) := by
+        apply mul_le_mul (by linarith) (by nlinarith) (by positivity) (by linarith)
+    _ = 42 * A₀ * (r * r ^ (3 / 4 : ℝ)) := by ring
+    _ = 42 * A₀ * r ^ (7 / 4 : ℝ) := by rw [hrpow]
+
 
 /-- Every ξ-zero is simple (multiplicity ≤ 1).
 
@@ -97,8 +288,8 @@ theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
         intro r hr
         exact (hbounded (Nat.ceil r)).subset (fun _ hn => le_trans hn (Nat.le_ceil r))
       have hcount : ∃ D : ℝ, 0 ≤ D ∧
-          ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard ≤ D * r ^ (7/4 : ℝ) := by
-        sorry
+          ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).ncard ≤ D * r ^ (7/4 : ℝ) :=
+        xi_enum_ncard_bound hinj hzero
       exact_mod_cast summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7/4 : ℝ))
         (by norm_num : (7/4 : ℝ) < 2) hfinite hcount
     obtain ⟨g, hgd, hdecomp⟩ :=

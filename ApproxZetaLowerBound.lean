@@ -53,31 +53,30 @@ noncomputable def zetaTail (σ : ℝ) : ℝ :=
 /-- The tail is summable for `1 < σ` (it is a shifted `p`-series). -/
 theorem zetaTail_summable {σ : ℝ} (h : 1 < σ) :
     Summable (fun n : ℕ => ((n + 2 : ℝ) ^ (-σ))) :=
-  (summable_nat_add_iff 2).mpr (summable_nat_rpow_inv.mpr h)
+  (summable_nat_add_iff 2).mpr (summable_nat_rpow.mpr (neg_lt_neg h))
 
 /-- For `1 < Re(s)`, the `n = 1` term of the Dirichlet series is `1`, and the
 remainder is bounded by `zetaTail (Re s)`.  Hence
 `|ζ(s)| ≥ 1 - zetaTail (Re s)`. -/
 theorem riemannZeta_abs_lower_bound_of_re_gt_one
     {s : ℂ} (h : 1 < s.re) : ‖riemannZeta s‖ ≥ 1 - zetaTail s.re := by
-  set f := fun (n : ℕ) => (1 : ℂ) / ((↑n + 1) ^ s)
+  set f := fun (n : ℕ) => (1 : ℂ) / ((n + 1 : ℂ) ^ s)
   set S := ∑' (n : ℕ), f (n + 1) with hS_def
   have hζ : riemannZeta s = ∑' n, f n := zeta_eq_tsum_one_div_nat_add_one_cpow h
   have hsum : Summable f :=
-    let h1 := (summable_nat_add_iff 1).mpr (Complex.summable_one_div_nat_cpow.mpr h)
-    h1.congr fun n => by simp [f, Nat.cast_succ]
-  have hsplit := (Summable.tsum_eq_zero_add hsum).symm
-  rw [← hζ] at hsplit
-  -- hsplit : riemannZeta s - f 0 = S
-  have f0_eq_one : f 0 = 1 := by simp [one_cpow]
-  rw [f0_eq_one] at hsplit
-  rw [sub_eq_iff_eq_add, add_comm] at hsplit
-  -- hsplit : riemannZeta s = 1 + S
-  rw [hsplit]
+    (summable_nat_add_iff 1).mpr (Complex.summable_one_div_nat_cpow.mpr h)
+  have hsplit : ∑' n, f n = f 0 + ∑' n, f (n + 1) :=
+    (Summable.tsum_eq_zero_add hsum).symm
+  rw [← hζ, hsplit]
+  -- riemannZeta s = f 0 + S
+  have f0_eq_one : f 0 = 1 := by simp only [f, one_cpow (Complex.one_ne_zero), div_one]
+  rw [f0_eq_one]
+  -- riemannZeta s = 1 + S
   have h_eq_norm :
       ∀ (n : ℕ), ((n + 2 : ℝ) ^ s.re)⁻¹ = ‖f (n + 1)‖ := by
     intro n
-    simp [f, norm_div, norm_one, norm_cpow_eq_rpow_re_of_pos (by positivity) s, inv_eq_one_div]
+    simp only [f, norm_div, norm_one, inv_eq_one_div]
+    rw [norm_cpow_eq_rpow_re_of_pos (by positivity : 0 < (n + 2 : ℝ))]
   have hSn : Summable fun n => ‖f (n + 1)‖ :=
     (zetaTail_summable h).congr h_eq_norm
   have hS_leq : ‖S‖ ≤ zetaTail s.re := by

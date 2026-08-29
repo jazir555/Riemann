@@ -13,5 +13,5 @@ open ZeroFreeRegionHadamard
 #check @ZeroFreeRegionHadamard.xi_norm_bound_whole_plane
 
 example (r : ℝ) : ZeroFreeRegionHadamard.zeroCount ZeroFreeRegionHadamard.xi r
-    = ((∑ᶠ u : ℂ, MeromorphicOn.divisor ZeroFreeRegionHadamard.xi (Metric.closedBall 0 r) u : ℤ) : ℝ) := by
-  simp only [ZeroFreeRegionHadamard.zeroCount] <;> sorry
+    = ((∑ᶠ u : ℂ, MeromorphicOn.divisor ZeroFreeRegionHadamard.xi (Metric.closedBall 0 r) u : ℤ) : ℝ) :=
+  rfl
