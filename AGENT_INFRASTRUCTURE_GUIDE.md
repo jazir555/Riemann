@@ -209,9 +209,9 @@ Two layers — both already in Mathlib, both imported:
     KadiriAnalyticInputAtZero)`. **Replace that `sorry` with a proof term.** This is THE
     remaining non-RH-equivalent goal.
   - `xiFE` (647): `xi (1 - s) = xi s` (functional equation; gives the ρ↦1-ρ involution).
-- **`KadiriDigammaBound.lean`** (namespace `KadiriDigamma`, 287 lines, builds clean): the
-  **sharp digamma bound** used in place of `Re ψ ≤ log|z|`. `re_digamma_le` (253):
-  `0<z.re → z.re≤1 → z.im≠0 → (Complex.digamma z).re ≤ Real.log (|z.im|+2)+1`;
+- **`KadiriDigammaBound.lean`** (namespace `KadiriDigamma`, 314 lines, builds clean): the
+  **sharp digamma bound** used in place of `Re ψ ≤ log|z|`. Full documentation in **§9b**.
+  `re_digamma_le` (253): `0<z.re → z.re≤1 → z.im≠0 → (Complex.digamma z).re ≤ Real.log (|z.im|+2)+1`;
   `re_digamma_le_of_real` (268), `re_digamma_eq_tsum` (114), `summable_re_digamma_terms` (133),
   `tsum_re_digamma_terms_le` (169). The `+1` constant fits `A₂=0`.
 - **`KadiriOrderInfra.lean`** (47 lines): `orderSet_xi_of` (18), `orderSet_xi` (51): the genuine
@@ -219,6 +219,189 @@ Two layers — both already in Mathlib, both imported:
 - **`KadiriZerosInfra2.lean`** (5 lines): sanity re-export (`example : Differentiable ℂ xi := xi_differentiable`).
 - **`KadiriHScratch.lean`** (42 lines): scratch — `kadiriLamzouriZetaZeroFreeEdge'` (34),
   `xiZeros_infinite_holds` (42), `zeta_ne_zero_of_pow_edge'` (47).
+
+### 9b. `KadiriDigammaBound.lean` — the sharp digamma bound (namespace `KadiriDigamma`)
+
+This file exists **because** the public bound in `ZeroFreeRegionHadamard`
+(`digamma_le_log`, ≈ `γ + 2·Re z + 7 ≈ 8.7` additive constant on the strip) is too weak for the
+Kadiri 3-4-1 budget. In the combination the digamma term enters with total weight
+`(3+4+1)/2 = 4`, and `riemannZeta_ne_zero_of_zeroFreeEdge` (with `kadiriConstant = 1/57.54`)
+only tolerates an additive constant of about `6.2` in `h_analytic`. The `+1` constant here costs
+`4·1 = 4 < 6.2`, so it is what makes the `(A₀,A₁,A₂)=(3,4,0)` bridge close (see Appendix L).
+
+**Imports / scope:** `import Mathlib`, `import ZeroFreeRegionHadamard`; `open Finset
+ZeroFreeRegionHadamard`; `open scoped BigOperators`; `namespace KadiriDigamma`. It reuses
+`ZeroFreeRegionHadamard.psi_eq_tsum` (the digamma series `ψ(z) = -γ + Σ_n (1/(n+1) - 1/(n+z))`)
+and `summable_inv_add_sub`.
+
+**Key declarations (verified line numbers):**
+
+- `tsum_one_div_add_sq_le {a : ℝ} (ha : 1 < a)` (47):
+  `∑' k, 1/((k+a)²) ≤ 1/(a-1)` — telescoping tail bound, the workhorse for estimating the digamma
+  series tail.
+- `summable_one_div_add_sq {a : ℝ} (ha : 1 ≤ a)` (79): convergence of `Σ_k 1/(k+a)²`.
+- `re_digamma_eq_tsum {z} (hs : ∀ m, z ≠ -(m:ℂ))` (114):
+  `(Complex.digamma z).re = -γ + ∑' n, (1/((n:ℝ)+1) - ((n:ℝ)+z.re)/(((n:ℝ)+z.re)² + z.im²))`.
+  The real-part expansion of the digamma series.
+- `summable_re_digamma_terms (z)` (133): summability of that real series (via
+  `summable_inv_add_sub`).
+- `term_le {z} (hx0 : 0<z.re) (hx1 : z.re≤1) (n)` (142, `private`): the termwise estimate
+  `Re(1/(n+1) - 1/(n+z)) ≤ |z.im| / (2·(n+z.re)²)`. **This is the only nontrivial inequality**;
+  everything else is assembly over it.
+- `tsum_re_digamma_terms_le {z} (hx0) (hx1) (hy : z.im≠0)` (169):
+  `∑' n, … ≤ Real.log (|z.im|+2) + 3/2` (head `1+log` via `harmonic_le_one_add_log` + tail `≤ 1/2`
+  from `tsum_one_div_add_sq_le`). Combines with `γ > 1/2` to yield the `+1` final constant.
+- **`re_digamma_le {z} (hx0 : 0<z.re) (hx1 : z.re≤1) (hy : z.im≠0)` (253)** — the headline theorem:
+  `(Complex.digamma z).re ≤ Real.log (|z.im|+2) + 1`.
+- `re_digamma_le_of_real {x} (hx0 : 0<x) (hx1 : x≤1)` (268): companion real-argument bound
+  `(Complex.digamma (x:ℂ)).re ≤ 1 - 1/x - γ` (all non-`n=0` series terms are `≤ 0`).
+
+**How the target uses it (Appendix D, Step 3):** the decomposition `logDeriv_completedZeta` gives a
+`logDeriv Γℝ s` term. Since `Gammaℝ s = π^(-s/2)·Γ(s/2)`, `Re(logDeriv Γℝ)(s) = -(log π)/2 +
+(1/2)·Re ψ(s/2)`. With `s` on `Re ∈ (1, 9/8]` the argument `z = s/2` has `Re z ∈ (1/2, 9/16] ⊆
+(0,1]` and `Im z ≠ 0`, so each `Re ψ(s/2)` is bounded by `KadiriDigamma.re_digamma_le`. The `1/2`
+factor and the 3-4-1 weights turn the `+1` into a `4·1 = 4` contribution, well inside the `A₂=0`
+budget. **Do NOT substitute `digamma_le_log`** (the crude `≈ 8.7` constant) — it blows the budget.
+
+**Build:** `lake build KadiriDigammaBound` (clean, no sorries).
+
+**Where it plugs into the sorry (cross-ref to §9c):** the digamma file is *one* of the two
+classical ingredients needed to close the `sorry` at `KadiriZeroFree.lean:630` (the leaf
+`KadiriAnalyticInputAtZero`). It is consumed inside the assembly proof
+`kadiriAnalyticInputAtZero_proof` (the `sorry` at `KadiriZeroFree.lean:738`, see the TODO comment
+at line 736: "bound the `Γℝ` part via `KadiriDigamma.re_digamma_le`/`re_digamma_le_of_real`"). The
+other ingredient is the affine Hadamard exponent (`hadamard_exponent_affine` sorry at :666 and
+`hadamard_constant_re` sorries at :696/:698). All three lemmas live in the `KadiriAnalyticInputProof`
+section (645–740).
+
+### 9c. Using `KadiriDigammaBound.lean` to close the KadiriZeroFree sorry — multiple strategies
+
+**The target bound.** `KadiriAnalyticInputAtZero` (513) asks you, for `s` a zero of `ζ` with
+`1 < σ ≤ 9/8`, `1 ≤ |s.im|`, `0 < s.re < 1`, to prove
+`C(analytic) ≤ 3/(σ-1) + 4·log(|s.im|+2) + 0`
+where `C(f) = 3·f(σ).re + 4·f(σ+t·I).re + f(σ+2t·I).re` (`t = s.im`) and
+`analytic s' = (-deriv g₂ s' + 1/s' + 1/(s'-1) + logDeriv Γℝ s') - Σ' (1/(s'-a n)+1/a n) + 1/(s'-s) + 1/s`
+(from `hana'` at :729, after pinning `deriv g₂ ≡ B` via `hadamard_exponent_affine`).
+
+**The digamma identity** (Appendix A.1 / `Gammaℝ s = π^(-s/2)·Γ(s/2)`):
+`Re(logDeriv Γℝ)(s') = -(log π)/2 + (1/2)·Re ψ(s'/2)`.
+So the digamma contribution to `C(analytic)` is
+`-(log π)/2·(3+4+1) + (1/2)·[3·Re ψ(σ/2) + 4·Re ψ((σ+t·i)/2) + 1·Re ψ((σ+2t·i)/2)]`
+= `-4·log π + (1/2)·[3·Re ψ(σ/2) + 4·Re ψ(σ/2 + (t/2)i) + Re ψ(σ/2 + t·i)]`.
+The three arguments have `Re ∈ (1/2, 9/16] ⊆ (0,1]`; the first is **real**, the other two have
+`Im ≠ 0` (`t ≥ 1`). This is exactly the domain of `KadiriDigamma.re_digamma_le` /
+`re_digamma_le_of_real`.
+
+Below are four strategies for supplying this ingredient; **A** is the intended path, **B** is a
+self-contained variant, **C** is a budget-tightening refinement, **D** explains why nothing weaker works.
+
+---
+
+**Strategy A — headline `re_digamma_le` (intended).**
+Apply `KadiriDigamma.re_digamma_le` to the two non-real arguments and
+`KadiriDigamma.re_digamma_le_of_real` to the real argument `σ/2`, inside `C(·)`:
+- `Re ψ(σ/2) ≤ 1 - 1/(σ/2) - γ` (real, negative — *free*, even helps the budget);
+- `Re ψ(σ/2 + (t/2)i) ≤ log(|t/2|+2) + 1`;
+- `Re ψ(σ/2 + t·i) ≤ log(|t|+2) + 1`.
+Then `C(logDeriv Γℝ) ≤ -4·log π + (1/2)·[ (≤0) + 4·(log(|t/2|+2)+1) + (log(|t|+2)+1) ]`.
+Using `log(|t/2|+2) ≤ log(|t|+2)` this is `≤ -4·log π + (1/2)·(5·log(|t|+2) + 5)`
+`= -4·log π + 2.5·log(|t|+2) + 2.5`. The constant `-4·log π + 2.5 ≈ -4.58 + 2.5 < 0`, so the
+digamma part contributes at most `2.5·log(|t|+2) ≤ 4·log(|t|+2)` — leaving `1.5·log(|t|+2)` of the
+`A₁ = 4` budget plus the whole `A₂ = 0` slot for the `-B` constant (`hadamard_constant_re`) and the
+dropped non-borderline zero-sum (`re_three_four_one_one_over_sub_nonneg`, each term `≥ 0`). This is
+the path the skeleton at :736 expects; it is also what makes the `(3,4,0)` bridge admissible
+(Appendix L). **Use this unless you have a reason to track the constant exactly.**
+
+**Strategy B — series-level `re_digamma_eq_tsum` + `tsum_re_digamma_terms_le` (self-contained).**
+Instead of calling the headline `re_digamma_le`, expand each `Re ψ(z)` as the `γ`-adjusted tsum via
+`KadiriDigamma.re_digamma_eq_tsum` (114) and bound it with
+`KadiriDigamma.tsum_re_digamma_terms_le` (169), which yields the *intermediate* `log(|Im z|+2)+3/2`.
+Then `C(logDeriv Γℝ) ≤ -4·log π + (1/2)·[3·(≤log(2)+3/2-γ) + 4·(log(|t/2|+2)+3/2) + (log(|t|+2)+3/2)]`.
+Subtract `γ > 1/2` to reach the same `+1` per complex term. This variant keeps `γ` and the `3/2`
+explicit, so the additive bookkeeping with the `-B`/`-Σ Re(1/ρ)` constant (from `hadamard_constant_re`)
+is fully transparent and you can prove the final `≤ 3/(σ-1) + 4·log(|t|+2)` by plain `linarith`
+rather than trusting `re_digamma_le` as a black box. Prefer B when you want the *entire* `sorry` at
+:738 to be a single self-contained `linarith` after the two classical lemmas are in scope.
+
+**Strategy C — real-argument specialization to tighten the budget.**
+The borderline `1/(s'-1)` pole (`ρ = 1`) is dropped via `re_three_four_one_one_over_sub_nonneg` at
+`ρ = 1` (the `1/a n` shift `1/1 = 1` is nonneg by `re_inv_nonneg_of_re_nonneg`). `Strategy A`'s
+real digamma term `Re ψ(σ/2) ≤ 1 - 1/(σ/2) - γ` is *negative*, so the `ρ = 1` borderline costs
+literally nothing from the digamma side — you spend `0` of the `A₁` budget on it and even gain a
+negative constant. Document this so a later agent does not accidentally "improve" the real bound to
+a positive `log`-type bound and waste budget. (If `σ` were ever taken `> 2` the real term would flip
+sign, but the assembly fixes `σ ≤ 9/8`, so the negative real term is guaranteed.)
+
+**Strategy D — why nothing weaker works (mandatory-sharpness argument).**
+The public Mathlib/Hadamard bound `digamma_le_log` gives `Re ψ(z) ≤ γ + 2·Re z + 7 + log(|Im z|+2)`
+with additive constant `≈ 8.7` on this strip. Fed through the same `1/2`-weight-3-4-1 combination it
+would dump `4·8.7 ≈ 34.8` into `h_analytic`, i.e. it would *require* `A₂ ≳ 34.8`. But the numerical
+bridge (`kadiriConstant = 1/57.54 < 1/56`, Appendix L) only closes for `A₂ = 0`; any `A₂ > 0` makes
+`kadiriConstant/log(...) < 4/RHS - (σ-1)` fail. Hence **`KadiriDigamma.re_digamma_le` (constant `1`)
+is not merely convenient but necessary** — a looser digamma bound cannot be compensated by the `-B`
+constant or by dropping borderline terms, because the dropped terms are `≥ 0` and the `-B` constant is
+already fully needed to cancel the `3/(σ-1)`-independent part of the von-Mangoldt sum. Consequence:
+do **not** substitute `digamma_le_log`, and do **not** raise `A₂` to make room — the bridge is tuned
+to `(3,4,0)` by design.
+
+**Integration checklist (what must also hold for the `sorry` at :738 to close):**
+1. `hadamard_exponent_affine` (:666) — `deriv g₂ ≡ B` (Borel–Carathéodory + `norm_deriv_le_div_of_mapsTo_ball`).
+2. `hadamard_constant_re` (:696/:698) — `Re B = -Σ' Re(1/a n)`, so the constant part of `-deriv g₂` cancels the `1/ρ`-shift sum's real part.
+3. `re_three_four_one_one_over_sub_nonneg` — drops every non-`s`, non-`0`, non-`1` zero term (each `≥ 0`).
+4. **`KadiriDigamma.re_digamma_le` / `re_digamma_le_of_real`** (this file) — bounds the `logDeriv Γℝ` term as in Strategies A–C above.
+With (1)–(4) in scope, the `sorry` at :738 is a `linarith`/`positivity` assembly; the `sorry` at
+:714 (`deriv g₂ = fun _ => B`, i.e. `g` and `g₂` agree up to a constant) follows from
+`exp(g)·P = exp(g₂)·P` (factor both `xi` with the same `a`).
+
+---
+
+### 9d. Full custom-architecture bill of materials to close the KadiriZeroFree sorry
+
+**Scope.** This lists *every* fact in our custom build (plus the one Mathlib junction) that the proof
+skeleton `KadiriZeroFree.lean:645–740` and the sorry-free conditional reduction
+`kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` (536) rely on — i.e. what you must **call**
+and what you must still **write**, beyond `KadiriDigammaBound.lean` (§9b/§9c). Grouped by the
+sub-goal each serves. Names verified by grep; `private` lemmas excluded.
+
+**Legend:** ✅ = already proven, just call it · ✎ = new lemma you must write (currently a `sorry`).
+
+#### Group 0 — sorry-free, called by the conditional theorem (no work)
+- ✅ `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` (`KadiriZeroFree.lean:536`) — already proven; consumes a `KadiriAnalyticInputAtZero` term.
+- ✅ `riemannZeta_ne_zero_of_zeroFreeEdge` (`ZeroFreeRegionProof.lean:930`) — the generic 3-4-1 edge; the conditional theorem calls it at :590.
+- ✅ `kadiriConstant` (`ZeroFreeRegionProof.lean:758`) + `kadiri_numerical_bridge` (`KadiriZeroFree.lean:19`) — the `(3,4,0)` numerical bridge `1/57.54 < 1/56`, already proven (closes `h_c` at :585).
+- ✅ `zeroFreeEdge_gt_nine_tenths` (`ZeroFreeRegionProof.lean:785`) — gives `0 < s.re` (used at :554), in scope after `open ZeroFreeRegion`.
+- ✅ `LSeries_vonMangoldt_eq_deriv_riemannZeta_div` (`Mathlib/NumberTheory/LSeries/Dirichlet.lean:436`, `open ArithmeticFunction`) — `LSeries ↗Λ s = -deriv riemannZeta s / riemannZeta s` for `1 < s.re`; the junction used at :726 to equate `hdecomp` with `logDeriv_completedZeta`.
+
+#### Group 1 — feeds `hadamard_exponent_affine` (✎ `KadiriZeroFree.lean:666`)
+- ✅ `xi_differentiable` (`ZeroFreeRegionHadamard.lean:4045`).
+- ✅ `xi_zero_enumeration` (`ZeroFreeRegionHadamard.lean:4642`) — needs the simplicity axiom `xiZeros_simple` (`KadiriZeroFree.lean:242`, an `axiom`, not a `sorry`) and `xiZeros_infinite` (`KadiriZeroFree.lean:99`); yields the zero enumeration `a`.
+- ✅ `xi_enum_ncard_bound` (`KadiriZeroFree.lean:128`) — `N(r) ≤ D·r^{7/4}`; together with `orderSet_xi` (`KadiriOrderInfra.lean:51`, the genuine `(7/4) ∈ orderSet xi`) feeds
+  ✅ `summable_inv_norm_pow_of_ncard_bound` (`ZeroFreeRegionHadamard.lean:2791`) to produce `hs2 : Summable (1/‖a n‖²)` (the genus-1 summability hypothesis).
+- ✅ `hadamard_factorization_genus_one` (`ZeroFreeRegionHadamard.lean:3823`) — `∃ g, xi = exp g · canonicalProductNat 1 a` (called at :661).
+- ✅ `xi_norm_bound_whole_plane` (`ZeroFreeRegionHadamard.lean:4535`, **public** — NOT the `private xi_bound_re_gt_one`) — whole-plane growth input to Borel–Carathéodory.
+- ✅ `Complex.borelCaratheodory` / `_zero` (`Mathlib/Analysis/Complex/BorelCaratheodory.lean:109/86`) + ✅ `Complex.norm_deriv_le_div_of_mapsTo_ball` (`Mathlib/Analysis/Complex/Schwarz.lean:257`) — bound `Re g = O(R·log R)` on a disk, then kill `g''` ⇒ `g` affine ⇒ `deriv g ≡ B`. (The canonical-product lower bound to feed Borel–Carathéodory can come from `Zeta23.WeilEF.Landau.*` + `xi_enum_ncard_bound`; see Appendix K.)
+- ✎ the assembly itself (`hadamard_exponent_affine`, :650–666) — shortest new proof: factor `xi` (above) + Borel–Carathéodory + the Cauchy derivative estimate.
+
+#### Group 2 — feeds `hadamard_constant_re` (✎ `KadiriZeroFree.lean:696`/:698)
+- ✅ `logDeriv_xi_of_factorization` (`ZeroFreeRegionHadamard.lean:4194`) — `logDeriv xi z = B + Σ' (1/(z-a n)+1/a n)` for `z` away from zeros (called at :680).
+- ✅ `xiFE` (`KadiriZeroFree.lean:757`) — `xi(1-z) = xi z`; with the chain rule from `xi_differentiable` this gives `logDeriv xi (1-z) = -logDeriv xi z`. Reindex the zero-sum under `ρ ↦ 1-ρ` (a bijection of the zero set) to equate the two sides and read off `B.re = -Σ' Re(1/a n)` (the `sorry`s at :696/:698).
+- ✅ `xiZeros_simple` (again) — required for the genus-1 factorization to be valid.
+
+#### Group 3 — feeds the 3-4-1 drop in `kadiriAnalyticInputAtZero_proof` (✎ `:738`)
+- ✅ `re_three_four_one_one_over_sub_nonneg` (`ZeroFreeRegionInfra.lean:632` / `ZeroFreeRegionProof.lean:640`, after `open ZeroFreeRegion`) — for every non-`s`, non-`0`, non-`1` zero `a n` with `0 < Re(a n) < 1 < σ`, the `1/(s'-a n)` part of `C(·)` is `≥ 0`; drop it (reduces `C(analytic)`).
+- ✅ `re_inv_nonneg_of_re_nonneg` (`ZeroFreeRegionInfra.lean:556` / `ZeroFreeRegionProof.lean:564`) — the `+1/a n` shift term (and the `ρ = 1` borderline `1/1`) is `≥ 0`.
+- The borderline poles `ρ = 0` (`1/s'`) and `ρ = 1` (`1/(s'-1)`) are bounded by the *same* per-zero lemma at `ρ = 0` and `ρ = 1` (their `1/ρ` shifts handled by `re_inv_nonneg_of_re_nonneg`).
+
+#### Group 4 — feeds the final assembly `kadiriAnalyticInputAtZero_proof` (✎ `:738`)
+- ✅ `logDeriv_completedZeta` (`ZeroFreeRegionHadamard.lean:4320`) — the decomposition `heq₂` (called at :709), giving `-ζ'/ζ = (-deriv g₂ + 1/s' + 1/(s'-1) + logDeriv Γℝ s') - Σ'(1/(s'-a n)+1/a n)`.
+- ✎ cancellation `deriv g₂ = fun _ => B` (`:714`) — `g` and `g₂` both factor `xi` with the same `a`, so `exp(g)·P = exp(g₂)·P` ⇒ `g - g₂` constant ⇒ same derivative.
+- ✅ `KadiriDigamma.re_digamma_le` / `re_digamma_le_of_real` (`KadiriDigammaBound.lean`, §9b/§9c) — bounds the `logDeriv Γℝ` term (Strategies A–D in §9c).
+- ✎ `kadiriAnalyticInputAtZero_proof` itself (`:701`, `sorry` at `:738`) — the final `linarith` assembly once Groups 1–4 are all in scope.
+
+**Summary of what still has a `sorry` (the only real work):** `hadamard_exponent_affine` (:666),
+`hadamard_constant_re` (:696/:698), the `g`-vs-`g₂` derivative cancellation (:714), and the terminal
+assembly (:738). Everything else is existing, proven custom infrastructure — grep it before
+reimplementing. The digamma file (§9b) supplies exactly the `logDeriv Γℝ` ingredient of Group 4.
 
 ---
 
