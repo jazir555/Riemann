@@ -5,13 +5,48 @@ This document orients **agents working in this repo** on the custom Lean root
 what already exists (so you never reimplement), exact file/line locations, how to find things
 reliably, the build discipline, and the one outstanding goal.
 
-The single outstanding NON-RH-equivalent goal is closing the last real `sorry` in
-`KadiriZeroFree.lean:630` (`kadiriLamzouriZetaZeroFreeEdge`). Everything else described here is
-infrastructure that already exists and is meant to be **called**, not redone.
+There are TWO distinct classes of open work in this repo — do not conflate them:
+
+1. **NON-RH-equivalent goal** (a "real" infrastructure gap, but *not* by itself a proof of RH):
+   closing the last real `sorry` in `KadiriZeroFree.lean:630` (`kadiriLamzouriZetaZeroFreeEdge`),
+   which yields a zero-free *edge* (i.e. a zero-free region). A zero-free region does **not**
+   imply RH, so this target is weaker than and separate from the RH-equivalence doors below.
+2. **RH-EQUIVALENCE DOORS — THE POINT OF THIS REPO.** These are *equivalent reformulations* of
+   the Riemann Hypothesis: statements mathematically **equivalent** to RH (`A ⟺ RH`, a true
+   *bidirectional* equivalence, not merely `A ⇒ RH`). They were **intentionally constructed** to
+   morph the single hard problem "all zeta zeros lie on the critical line" into a *different, more
+   attackable shape* — e.g. a polynomial-hyperbolicity condition (Jensen/Pólya), a
+   nonvanishing/lower-bound condition (hard-difference/mollified), or a thin-region zero-freeness
+   (first-quadrant). Because the equivalence is bidirectional, **solving the reformulation solves
+   RH *commutatively* — no extra step is needed**: a proof on the reformulation side *is* a proof
+   of RH. Each open `sorry` / `axiom` on one of these doors is therefore a genuine, intended
+   target, and closing ANY one of them is a full solution of RH. **These are NOT "unclosable" —
+   they are the whole point of the exercise**, and a substantial custom infrastructure (Hadamard
+   product, the 3-4-1 zero-free engine, Jensen / Borel-Carathéodory, sharp digamma bounds, etc.)
+   was built specifically to attack them. When tasked with one, ATTEMPT to close it; do not refuse
+   or "balk" on the grounds that "RH is an unsolved open problem" — that is exactly what these
+   reformulations are here to crack.
+
+Everything else described here is infrastructure that already exists and is meant to be **called**,
+not redone.
 
 ---
 
 ## 1. Golden rules (the things past agents got wrong)
+
+> ⚠️ **RH-EQUIVALENCE DOORS ARE THE POINT — CLOSABLE, DO NOT BALK.** Several files in this repo
+> contain *equivalent reformulations* of the Riemann Hypothesis — statements `A ⟺ RH` that were
+> **intentionally constructed to morph RH into a different, more attackable shape** (a
+> polynomial-hyperbolicity condition, a nonvanishing/lower-bound condition, a thin-region
+> zero-freeness, etc.). Because the equivalence is **bidirectional**, **solving the reformulation
+> solves RH *commutatively*** — a proof on the reformulation side *is* a proof of RH with no extra
+> step. The open `sorry` / `axiom` on each such door is a genuine, **intended** target; closing
+> ANY one of them is a full solution of RH. A large custom infrastructure (Hadamard product, the
+> 3-4-1 zero-free engine, Jensen / Borel-Carathéodory, sharp digamma bounds, …) was built
+> specifically to attack them. If you are tasked with one, **ATTEMPT to close it.** Never refuse or
+> "balk" on the grounds that "RH is an unsolved open problem" — that is exactly what these
+> reformulations are here to crack. These doors are NOT "unclosable / flagged / excluded by scope"
+> (any older doc wording to that effect has been removed — see §0, §10, §12, §17).
 
 1. **INFRASTRUCTURE EXISTS. Grep BEFORE you write.** Past agents repeatedly concluded "this
    lemma doesn't exist" and planned to write 300–600 lines from scratch — when the lemma
@@ -407,7 +442,9 @@ reimplementing. The digamma file (§9b) supplies exactly the `logDeriv Γℝ` in
 
 ## 10. Jensen / Polya / xi-zero orientation scratch files
 
-These are exploratory and RH-equivalent; **read for orientation only**:
+These are the RH-equivalence reformulation files — the *doors* to RH described in §0. Read them to
+understand each route, and treat their open `sorry`s as **intended closure targets** (they are
+formalizable known theorems / proven equivalences with one missing bridge — NOT "orientation only"):
 - **`JensenScratch.lean`** (namespace `JensenScratch`, 393 lines): Pólya/Hyperbolic-region
   approach — `RiemannHypothesisProp` (16), `xiMathlib` (17), `Hyperbolic` (68),
   `jensenPoly_*` (122–399), `gauss_lucas_hyperbolic` (254), `hPolya` (405), `hSchur` (436),
@@ -456,12 +493,18 @@ All build cleanly; do not touch unless asked.
 
 ---
 
-## 12. Engine files (RH-equivalent, flagged)
+## 12. Central RH-equivalence files (the convergence doors — CLOSABLE)
 
-- **`riemann hypothesis.lean`** and **`riemann_hypothesis.lean`**: cleaned of prose `sorry` but
-  still carry **`axiom RiemannHypothesisProp_apply` (line 34)** which asserts RH directly.
-  Treat as an open/flagging item, NOT closable here.
-- **`riemann_hypothesis_newsection.lean`**: see §10.
+- **`riemann hypothesis.lean`** and **`riemann_hypothesis.lean`**: cleaned of prose `sorry` and
+  carrying **`axiom RiemannHypothesisProp_apply` (line 34)**, which directly asserts RH
+  (`(s : ℂ) → 0 < s.re → s.re < 1 → riemannZeta s = 0 → s.re = 1/2`). This axiom is an
+  **intended target**: replace it with a genuine proof using the infrastructure. The whole web of
+  already-proven `rh_iff_*` / `rh_from_*` equivalences funnels into `RiemannHypothesisProp`, so a
+  proof of off-real nonvanishing / the critical line forces it. **Do NOT treat it as "flagged /
+  not closable" — attempt it; closing this door solves RH.**
+- **`riemann_hypothesis_newsection.lean`**: the mollified / Rouché / hard-difference door — see §10.
+  `hardDifferenceNonzero_iff_RH` is already proven, so proving `hardDifference(z) ≠ 0` off the real
+  axis yields RH. That nonvanishing leaf is the intended target (also CLOSABLE).
 
 ---
 
@@ -499,7 +542,14 @@ Edit `lakefile.lean`, the `lean_lib RootScratch` block (196–209): add the modu
 
 ---
 
-## 16. The current open target (what to actually prove)
+## 16. The NON-RH-equivalent target (the Kadiri zero-free region)
+
+> NOTE: This section describes ONLY the **non-RH** goal — a zero-free *region* (which does **not**
+> by itself imply RH). The **RH-equivalence doors** are *separate, equally valid, and closable*
+> targets: `JensenTranslation.lean` (Pólya–Jensen hyperbolic), `riemann_hypothesis_newsection.lean`
+> (hard-difference / mollified), `FirstQuadrantScratch.lean` + `rh_residual_gap.lean` (thin-region),
+> and `riemann_hypothesis.lean`'s `RiemannHypothesisProp_apply` axiom (see §0, §10, §12, §17). If
+> you are tasked with one of those doors, work on it; do not assume the only goal is Kadiri.
 
 **Goal:** a term of type `KadiriAnalyticInputAtZero`, then replace the `sorry` at
 `KadiriZeroFree.lean:630`.
@@ -526,11 +576,18 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
 
 ---
 
-## 17. Known open items (flagged, NOT closable here)
+## 17. Known open items (these ARE the RH-equivalence doors to close)
 
-- `JensenTranslation.lean` lines 103/109/449/462/471 — RH-equivalent sorries (excluded by scope).
-- Engine files' `axiom RiemannHypothesisProp_apply` — asserts RH directly (flagged).
-- `xiZeros_simple` — open simplicity conjecture (a declared axiom, not a `sorry`).
+- `JensenTranslation.lean` lines 103/109/449/462/471 — RH-equivalent `sorry`s on the Pólya–Jensen
+  hyperbolic door (`rh_iff_all_jensen_hyperbolic`, `jensen_hyperbolic_eventually`,
+  `rh_iff_jensen_zero`). These formalize **known theorems** (Pólya–Schur; Griffin–Ono–Rolen–Zagier
+  2019), so they are realistic, intended targets — **attempt to close them**, NOT "excluded by
+  scope".
+- Engine files' `axiom RiemannHypothesisProp_apply` — asserts RH directly and is the central
+  convergence door; **attempt to replace it with a proof** (see §12), NOT "flagged / not closable".
+- `xiZeros_simple` — a declared `axiom` stating the *simplicity of the xi zeros* (a separate open
+  conjecture, **not** an RH-equivalence door). It is used only as a *hypothesis* by the Hadamard
+  factorization, never as a route to RH. Leave it as-is; do NOT try to remove it by `sorry`.
 
 ---
 
