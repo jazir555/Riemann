@@ -1903,10 +1903,8 @@ theorem xiShifted_real_on_real (x : ℝ) :
   have h1 : w.re < 1 := by rw [hwr]; norm_num
   have hfe : classicalXi (1 - w) = classicalXi w := classicalXi_functional_equation w h0 h1
   have hstar : star w = 1 - w := by
-    rw [star_def]
-    apply Complex.ext
-    · simp [star_def]
-    · simp [star_def]
+    simp only [w]
+    simp [star_def]; ring
   exact Eq.trans (hfe.symm) (Eq.trans (congrArg classicalXi (Eq.symm hstar)) hc)
 
 /- Bundled reality/evenness: `xiShifted` restricted to the real axis is a real even
