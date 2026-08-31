@@ -1,4 +1,4 @@
-﻿import riemann_hypothesis
+import riemann_hypothesis
 
 /-!
 # Corrected Fourier representation and hard-difference identity

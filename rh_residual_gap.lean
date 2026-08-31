@@ -269,3 +269,107 @@ theorem strip_criterion_of_riemannHypothesis (h : RiemannHypothesis) :
     ∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2 :=
   fun s hz h0 h1 => Zeta23.RH_implies_on_line h ⟨hz, h0, h1⟩
 
+/-! ## The symmetric zero-free region — the known bridge from "region" to "line-adjacent band"
+
+The classical zero-free region (`ClassicalZFR`) rules out the wedge near `Re s = 1`.
+The functional equation `ξ(s) = ξ(1 - s)` (`XiFE`) reflects that wedge across
+`Re s = 1/2`, so it automatically rules out the *mirror* wedge near `Re s = 0`.
+Hence (within the critical strip) the only place an off-critical-line zero can still
+hide, once the classical ZFR and a bounded cover are in force, is the *symmetric band*
+
+    C / log(|Im s| + 2) < Re s < 1 - C / log(|Im s| + 2),   |Im s| ≥ T₀
+
+— a band centred on the critical line.  This is the genuine residual of RH (it is
+mathematically equivalent to RH); the bridge below is the well-known region-symmetry
+argument and is what makes the "thin region" formulation *symmetric* about the line.
+
+These lemmas are finite, unconditional, and use only the hypotheses already carried by
+`rh_iff_thin_region`; they make the staging for any novel line-forcing argument explicit.
+-/
+
+/-- **Symmetric zero-free region (known bridge).** Given the classical ZFR (`ClassicalZFR`)
+and the functional equation (`XiFE`), `ξ` is also zero-free on the left wedge
+`0 < Re s ≤ C / log(|Im s| + 2)` (with `Re s < 1 - C/log(|Im|+2)` and `|Im s| ≥ T₀`),
+because such an `s` reflects to `1 - s` in the right wedge covered by `ClassicalZFR`. -/
+theorem symmetric_zero_free_region {ξ : ℂ → ℂ}
+    (hfe : XiFE ξ) (hC : ClassicalZFR ξ)
+    (s : ℂ) (hs_pos : 0 < s.re)
+    (hs_le : s.re ≤ hC.C / Real.log (abs s.im + 2))
+    (_hs_lt : s.re < 1 - hC.C / Real.log (abs s.im + 2))
+    (hT₀ : hC.T₀ ≤ abs s.im) :
+    ξ s ≠ 0 := by
+  have h1_re_ge : 1 - hC.C / Real.log (abs (1 - s).im + 2) ≤ (1 - s).re := by
+    simp only [sub_eq_add_neg, Complex.add_re, Complex.add_im, Complex.one_re, Complex.one_im,
+      Complex.neg_re, Complex.neg_im, zero_add, abs_neg]
+    linarith [hs_le]
+  have h1_re_lt : (1 - s).re < 1 := by
+    simp only [sub_eq_add_neg, Complex.add_re, Complex.one_re, Complex.neg_re]
+    linarith [hs_pos]
+  have h1_T₀ : hC.T₀ ≤ abs (1 - s).im := by
+    simp only [sub_eq_add_neg, Complex.add_im, Complex.one_im, Complex.neg_im, zero_add, abs_neg]
+    exact hT₀
+  have h1nz : ξ (1 - s) ≠ 0 := hC.zeroFree (1 - s) h1_re_ge h1_re_lt h1_T₀
+  rwa [← hfe s] at h1nz
+
+/-- The residual off-critical-line band, symmetric about `Re s = 1/2`: `ξ` is non-vanishing
+on the band `C/log(|Im|+2) < Re s < 1 - C/log(|Im|+2)` for `|Im s| ≥ T₀`, *except* on the
+critical line `Re s = 1/2`.  This is exactly RH (see `rh_iff_off_line_thin_band`). -/
+def OffLineThinBand (ξ : ℂ → ℂ) (C T₀ : ℝ) : Prop :=
+  ∀ s : ℂ,
+    C / Real.log (abs s.im + 2) < s.re →
+    s.re < 1 - C / Real.log (abs s.im + 2) →
+    T₀ ≤ abs s.im →
+    s.re ≠ 1 / 2 →
+    ξ s ≠ 0
+
+/-- **RH ⇔ zero-freeness on the symmetric off-line band.**  Combined with `rh_iff_thin_region`
+this shows the functional equation turns the one-sided thin region into a band symmetric
+about the critical line; the only residual is to force `Re s = 1/2`, i.e. precisely RH. -/
+theorem rh_iff_off_line_thin_band (ξ : ℂ → ℂ)
+    (hξ : XiZeroEquivInStrip ξ) (hfe : XiFE ξ)
+    (hC : ClassicalZFR ξ) (hB : BoundedCover ξ hC.T₀) :
+    (∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2)
+    ↔ OffLineThinBand ξ hC.C hC.T₀ := by
+  constructor
+  · intro h s hgt hlt hT₀ hne hz
+    have hlogpos : 0 < Real.log (abs s.im + 2) :=
+      Real.log_pos (lt_of_lt_of_le one_lt_two (by linarith [abs_nonneg s.im]))
+    have hCdiv : 0 < hC.C / Real.log (abs s.im + 2) := div_pos hC.Cpos hlogpos
+    have h0 : 0 < s.re := by linarith [hgt, hCdiv]
+    have h1 : s.re < 1 := by linarith [hlt]
+    have hζ : riemannZeta s = 0 := (hξ s h0 h1).mp hz
+    have hline := h s hζ h0 h1
+    exact hne hline
+  · intro H
+    have hT : ThinRegion ξ hC.C hC.T₀ := fun s hs_gt hs_lt hT₀ =>
+      if hsmall : hC.C / Real.log (abs s.im + 2) < 1 / 2
+      then H s (by linarith [hs_gt, hsmall]) hs_lt hT₀ (by linarith)
+      else False.elim (by linarith [hs_gt, hs_lt, hsmall])
+    exact (rh_iff_thin_region ξ hξ hfe hC hB).mpr hT
+
+/-- **Geometry of a hypothetical band zero (the residual structure).**  If `ξ` vanished at
+`s` inside the symmetric off-line band, the functional equation forces `ξ(1 - s) = 0` with
+`1 - s` *also* inside the band, mirrored across `Re = 1/2`.  Off-line band zeros therefore
+come in reflected pairs — there is no classical theorem collapsing this band to the line, so
+this lemma records precisely where a novel argument must engage (and is the honest residual
+of the door; it is *not* a contradiction, because such pairs are exactly consistent with
+everything currently known). -/
+theorem band_zero_reflects {ξ : ℂ → ℂ} (hfe : XiFE ξ) (hC : ClassicalZFR ξ)
+    {s : ℂ} (hs_in : hC.C / Real.log (abs s.im + 2) < s.re)
+    (hs_in' : s.re < 1 - hC.C / Real.log (abs s.im + 2))
+    (hT₀ : hC.T₀ ≤ abs s.im) (hξ0 : ξ s = 0) :
+    ξ (1 - s) = 0 ∧
+    hC.C / Real.log (abs (1 - s).im + 2) < (1 - s).re ∧
+    (1 - s).re < 1 - hC.C / Real.log (abs (1 - s).im + 2) ∧
+    hC.T₀ ≤ abs (1 - s).im := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [← hfe s] <;> exact hξ0
+  · simp only [sub_eq_add_neg, Complex.add_re, Complex.add_im, Complex.one_re, Complex.one_im,
+      Complex.neg_re, Complex.neg_im, zero_add, abs_neg]
+    linarith [hs_in']
+  · simp only [sub_eq_add_neg, Complex.add_re, Complex.add_im, Complex.one_re, Complex.one_im,
+      Complex.neg_re, Complex.neg_im, zero_add, abs_neg]
+    linarith [hs_in]
+  · simp only [sub_eq_add_neg, Complex.add_im, Complex.one_im, Complex.neg_im, zero_add, abs_neg]
+    exact hT₀
+

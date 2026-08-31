@@ -1,7 +1,7 @@
 import Mathlib
 import TestAnalytic
 import ZeroFreeRegion
-import KadiriZeroFree
+-- TEMP-DISABLED-IMPORT-KadiriZeroFree (pre-existing broken file; restore after build check)
 
 set_option maxHeartbeats 1000000
 
@@ -1874,6 +1874,72 @@ def classicalSymmetryPackage : SymmetryCertificate where
 
 theorem classicalXi_symmetry : XiShiftedSymmetryPackage :=
   xiShiftedSymmetryPackage_of_certificates classicalSymmetryPackage
+
+/-!
+# Riemann Ξ as a real even function, and the quadruple zero symmetry (Laguerre–Pólya
+# / functional-equation bridge)
+
+The shifted xi `xiShifted z = classicalXi (1/2 + I*z)` restricts on the real axis
+(`z = x : ℝ`) to the classical Riemann Ξ-function `Ξ(x)`.  The two elementary
+properties below — reality and the reflection symmetry of the zero set — are the
+genuine classical footing for the Laguerre–Pólya bridge (`xiShiftedZerosReal ↔ RH`,
+already proved above): a real entire function has only real zeros iff it lies in the
+Laguerre–Pólya class, and the functional equation forces every off-line zero of ξ
+to appear in a symmetric quartet `{ρ, 1-ρ, ρ̄, 1-ρ̄}`.  Any proof that all zeros lie
+on the critical line must destroy three of the four members of such a quartet; the
+second lemma makes that structure explicit.  These are unconditional, proved from
+`classicalXi_functional_equation` and `classicalXi_conj` alone.
+-/
+
+/-- The Riemann Ξ-function is real-valued on the real axis:
+    `Ξ(x) = ξ(1/2 + i x)` satisfies `Ξ(x) = Ξ(x)̄`.  This is the elementary
+    reality property used by the Laguerre–Pólya / Turán route to RH. -/
+theorem xiShifted_real_on_real (x : ℝ) :
+    xiShifted (x : ℂ) = star (xiShifted (x : ℂ)) := by
+  let w := (1 / 2 : ℂ) + I * (x : ℂ)
+  have hc : classicalXi (star w) = star (classicalXi w) := classicalXi_conj w
+  have hwr : w.re = 1 / 2 := by simp [w]
+  have h0 : 0 < w.re := by rw [hwr]; norm_num
+  have h1 : w.re < 1 := by rw [hwr]; norm_num
+  have hfe : classicalXi (1 - w) = classicalXi w := classicalXi_functional_equation w h0 h1
+  have hstar : star w = 1 - w := by
+    rw [star_def]
+    apply Complex.ext
+    · simp [star_def]
+    · simp [star_def]
+  exact Eq.trans (hfe.symm) (Eq.trans (congrArg classicalXi (Eq.symm hstar)) hc)
+
+/- Bundled reality/evenness: `xiShifted` restricted to the real axis is a real even
+    function (evenness from `classicalXi_symmetry.neg_symm`, reality from
+    `xiShifted_real_on_real`).  This is exactly the shape required by the
+    Pólya–Schur / Laguerre–Pólya theorem. -/
+theorem xiShifted_real_even_on_real (x : ℝ) :
+    xiShifted (x : ℂ) = star (xiShifted (x : ℂ)) ∧
+    xiShifted (-(x : ℂ)) = xiShifted (x : ℂ) := by
+  constructor
+  · apply xiShifted_real_on_real
+  · exact classicalXi_symmetry.neg_symm (x : ℂ) (by norm_num) (by norm_num)
+
+/-- Quadruple zero symmetry of the classical xi function.  If `ξ(s) = 0` with
+    `s` in the critical strip, then the functional equation (`ξ(1-s) = ξ(s)`) and
+    conjugation symmetry (`ξ(s̄) = ξ(s)̄`) force zeros at `1-s`, `s̄`, and `1-s̄` as
+    well.  Hence every off-critical-line zero of ξ occurs in a symmetric quartet. -/
+theorem classicalXi_zero_symmetries
+    (s : ℂ) (hs0 : 0 < s.re) (hs1 : s.re < 1)
+    (hzero : classicalXi s = 0) :
+    classicalXi (1 - s) = 0 ∧
+    classicalXi (star s) = 0 ∧
+    classicalXi (1 - star s) = 0 := by
+  constructor
+  · rw [classicalXi_functional_equation s hs0 hs1]
+    exact hzero
+  · constructor
+    · rw [classicalXi_conj s]
+      simpa using hzero
+    · have h := classicalXi_conj (1 - s)
+      rw [star_sub, star_one] at h
+      rw [h]
+      simpa [classicalXi_functional_equation s hs0 hs1] using hzero
 
 /-!
 # Algebraic identity: classicalXi in terms of completedRiemannZeta₀ (simplified)

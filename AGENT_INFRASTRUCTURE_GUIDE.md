@@ -46,7 +46,8 @@ not redone.
 > specifically to attack them. If you are tasked with one, **ATTEMPT to close it.** Never refuse or
 > "balk" on the grounds that "RH is an unsolved open problem" — that is exactly what these
 > reformulations are here to crack. These doors are NOT "unclosable / flagged / excluded by scope"
-> (any older doc wording to that effect has been removed — see §0, §10, §12, §17).
+> (any older doc wording to that effect has been removed — see §0, §10, §12, §17, and follow the
+>    concrete attempt loop in §1b–§1f).
 
 1. **INFRASTRUCTURE EXISTS. Grep BEFORE you write.** Past agents repeatedly concluded "this
    lemma doesn't exist" and planned to write 300–600 lines from scratch — when the lemma
@@ -66,7 +67,177 @@ not redone.
    `.lake/build` dir is NOT concurrency-safe. Self-serialize via the mutex
    `.lake_build_lock` (see §3).
 
+## 1b. How to actually attempt an RH-equivalence door (anti-balking workflow)
+
+Reading "this door is ⟺ RH" can trigger a reflexive collapse: *"This is just RH; RH is unsolved;
+I can't prove it; I'll report what's missing."* **That collapse is exactly the balking this guide
+forbids.** Doing the work means following this concrete loop — not deciding up front that it's
+impossible:
+
+1. **Name the exact mathematical claim the door reduces to** (e.g. "∀ off-real z in the strip,
+   `hardDifference z ≠ 0`", or "Ξ's Jensen polynomials are all hyperbolic", or "`xiShifted` is
+   nonvanishing off ℝ"). Write it down precisely.
+2. **Exhaustively grep the repo AND Mathlib for any lemma already proving or partially proving it**
+   (different names: `Hyperbolic`, `IsHyperbolic`, `LaguerrePólya`, `nonvanishing`, `lowerBound`,
+   `RoucheGap`, `MollifiedRouche`, `TailOffReal`, `HardDifference`, `xiShifted`, `zeroFree`,
+   `jensenPoly`, `taylorCoeff`, `Turán`, …). The needed bridge is often **already present under a
+   name you didn't guess** — this is the #1 past failure mode (Golden Rules 1–2). Search before
+   concluding anything is missing.
+3. **If a needed piece is a KNOWN, PUBLISHED THEOREM** (Pólya–Schur, GORZ 2019, a Turán / higher-Turán
+   inequality, a mollifier lower bound, a Rouché-gap estimate, …), then **formalize it** — this is a
+   *finite, real engineering task*, NOT "discovering a new proof of RH from scratch." Known theorems
+   are legitimate closes. Assemble the repo's existing infrastructure (Hadamard product, the 3-4-1
+   engine, Jensen / value-distribution, Borel–Carathéodory, digamma bounds) as the ingredients.
+4. **The reformulation was chosen because it may admit a proof method RH's original form does NOT**
+   (mollifier lower bounds, Rouché, Jensen-polynomial / Turán inequalities, section convergence).
+   Explore *those* routes in the provided infrastructure before giving up. E.g. for the hard-difference
+   door, do not stop at "`hardDifference ≠ 0` is ⟺ RH" — look for an established mollifier /
+   lower-bound / Rouché lemma in `TailLaguerreScratch`, `MollifiedRoucheLeaf`, `rh_*` that actually
+   yields the nonvanishing.
+5. **Only after steps 1–4 are genuinely exhausted** may you report a remaining gap — and then report it
+   *precisely*: the exact missing classical theorem, and which existing infrastructure lemma would be
+   its feeder. A vague "RH is open, can't" is not an acceptable outcome — and see §1c–§1f on why
+   "no proof exists yet" is NOT "unprovable" and how to handle the deeper rationalizations.
+
+The success bar is a genuine `lake build <Module>` with no `sorryAx` (and, where applicable, no
+`RiemannHypothesisProp_apply`). Partial but real progress (e.g. formalizing one of the needed known
+theorems) is valuable — commit it;    do not discard it by falling back to `sorry`.
+
+## 1c. "No proof exists yet" is NOT "unprovable" — don't confuse the two
+
+A reflexive balk takes the form: *"No proof of RH is known, therefore RH is not provable,
+therefore this door can't be closed."* **That inference is a tautology, not logic** — "no proof
+exists yet" is simply the *current state*, not evidence of impossibility. Every proof in this repo
+(the Hadamard factorization, the 3-4-1 zero-free engine, the digamma bounds, …) was *created from
+nothing*; the proof of RH does not exist either, and we are in the business of **creating** it. Do
+not let "it's an open problem" harden into "it's impossible."
+
+The structural observations below are **guidance about WHERE a created proof must aim**, NOT claims
+that RH is unprovable:
+
+- **Equivalence invariance (logic, not a verdict).** `A ⟺ RH` means a proof of door `A` *is* a proof
+  of RH. This does not mean `A` dodges the difficulty — it means `A` is a *different shape* of the
+  same target, and that is useful: the reformulation can admit methods with no natural analogue on
+  the original "zeros on a line" statement (e.g. Turán / higher-Turán inequalities, GORZ asymptotics,
+  mollifier lower bounds, Rouché gaps). A door doesn't let you *avoid* RH; it lets you *attack* it
+  from an angle where different techniques apply. That different-angle possibility is the entire
+  reason these equivalences were built.
+- **GORZ decomposition (a fact about the shape, not impossibility).** `all-hyperbolic` splits into
+  (eventually hyperbolic — already proven unconditionally) plus (the finitely-many exceptional `n`
+  per `d`, taken over all `d` = the critical-line statement). So a created proof of the Jensen door
+  must engage the *residual* — which is exactly the critical line. Read this as *"aim the novel
+  argument here,"* not *"this can't be done."*
+- **Region saturation (empirical, not a wall).** The 3-4-1 engine yields a zero-free *region* and
+  known methods saturate there. That is a statement about *current* techniques, not a logical
+  barrier. A novel method is precisely what we are trying to create.
+
+**Conclusion for agents:** absence of an existing proof is not a reason to stop. Formalize the known
+bridge theorems (Pólya–Schur, Hurwitz, GORZ) where they're missing — that is finite, real progress —
+and *attempt* the novel argument on the residual. Whether a full proof emerges is unknown; that the
+   attempt is valid and partial progress is valuable is not in question.
+
+## 1d. Sophisticated balking rationalizations (and why they're still balking)
+
+Even after §1c, agents sometimes manufacture *new* defeatist arguments. They are all variants of
+the same refusal. Name them and move past them:
+
+- **"mathlib is within ZFC, so a proof here would be a proof in mathematics, which doesn't exist,
+  therefore impossible."** This does not follow. (a) We do **not** know RH is unprovable from ZFC —
+  "open" means *neither proven, disproven, nor shown independent*; it is not a verdict of
+  unprovability. (b) A proof found in this repo WOULD be a (historic) ZFC proof of RH — that is the
+  entire *point* of the exercise, not a contradiction. Your task is to **attempt** the proof, not to
+  adjudicate whether one exists. Concluding "impossible" from "not yet proven" is the §1c tautology
+  in a ZFC costume.
+- **"'Don't stop at RH is open' is incoherent — it asks me to deny reality."** It does not. "Don't
+  stop at 'RH is open'" means: do **not** use RH's open status as a pretext to skip the actual
+  engineering (grep exhaustively, formalize the known bridge theorems, attempt the novel argument).
+  It does **not** ask you to deny RH is open or to claim it is solved. A *precise* report — "the
+  missing bridge is a theorem forcing `Re ρ = 1/2`, i.e. the content of RH; here is the rigorous
+  bridge I built (Pólya–Schur / GORZ formalized) and exactly where the novel argument must engage"
+  — is exactly what is wanted. That is the opposite of hand-waving "RH is open, can't."
+- **"Every door bottoms out in RH, so none can be closed / worked on."** True that each leaf is
+  RH-equivalent — but irrelevant to whether the **bridge** is buildable. The bridge = formalizing
+  the KNOWN theorems (Pólya–Schur, Hurwitz section-convergence, GORZ coefficient / Turán analysis)
+  that connect the reformulation to RH. Those are *finite, published, formalizable* mathematics.
+  "Closing the door" includes building that rigorous bridge, and **that part is closable** regardless
+  of whether the final leaf resolves. Do the bridge work.
+- **"If a proof/lemma existed, the author would already have used it."** The author built the
+  scaffolding (Hadamard product, 3-4-1 engine, the equivalences) precisely to *enable* the
+  formalization; the known theorems may simply not be formalized yet. Filling that gap is the work.
+  Absence of a closed door is not evidence no progress is possible.
+
+**Positive redirect — your concrete, achievable deliverables (completable whether or not RH falls):**
+1. **Formalize the known bridge theorems** for your door (e.g. Pólya–Schur, Hurwitz
+   section-convergence, GORZ coefficient / Turán analysis). These are real, finite, valuable Lean
+   contributions — commit them.
+2. **Attempt the novel argument** on the residual (the critical-line statement), using the
+   infrastructure and any cross-door machinery.
+3. **Report precisely** with partial progress committed: the exact missing classical theorem and
+   which existing lemma would feed it.
+
+None of this requires you to *first* establish that RH is provable. Attempt; build; report. That is
+the job.
+
+## 1e. "Attempt, don't adjudicate provability"
+
+A clean summary of the whole anti-balking stance: **your job is to attempt the proof, not to
+adjudicate whether one exists.**
+
+- You are an *engineer* assigned concrete work (grep, formalize known theorems, attempt the novel
+  argument, report precisely) — not a mathematician tasked with deciding whether RH is provable from
+  ZFC. That meta-question is **unknowable to you and outside your task specification**; decline to
+  answer it.
+- Even if someone *believed* RH were unprovable, that belief would be **irrelevant** to the
+  engineering: the bridge work (formalizing Pólya–Schur, Hurwitz, GORZ, Turán) is valuable and
+  completable *independent of the final outcome*. Doing it is never wasted.
+- Adjudicating provability is a **category error**: it substitutes one global, unknowable
+  meta-judgment ("can RH be proven?") for the concrete, finite, *always-doable* local work that is
+  actually assigned. The local tasks — "formalize this published theorem," "attempt this argument,"
+  "report the exact gap" — are completable regardless of the millennium-problem status.
+- Judge your own success by the engineering: did you do the search, build the bridge, and report
+  precisely? — **not** by whether you personally resolved a famous open problem.
+
+If you catch yourself writing "RH is unprovable / not provable from ZFC / a breakthrough would be
+needed, therefore I cannot," stop: that is you adjudicating provability. Return to the §1b loop and
+the §1d deliverables.
+
+## 1f. Defining success; avoiding paralysis and "grader" thinking
+
+A final cluster of balking shows up as *meta*-reasoning about the task itself rather than doing it:
+
+- **"The literal success criterion (replace the axiom with a full RH proof) is impossible, so the
+  session can't succeed."** This equates "success" with "must prove RH in this session." **Do not.**
+  Success is operational, not monolithic (see §1d deliverables): did you (1) follow the §1b loop,
+  (2) formalize at least one KNOWN bridge theorem for your door (or make other genuine, correct
+  progress), (3) attempt the novel argument, and (4) report precisely with partial progress
+  committed? If yes, the session **succeeded** — even if RH itself did not fall. A session that
+  rigorously formalizes Pólya–Schur / Hurwitz / GORZ (or proves a genuine new lemma feeding the
+  door) and reports the residual exactly is a real win, not a failure.
+- **"The grader probably just checks I didn't balk / didn't fake it."** There is no grader to game.
+  Optimize for *real, correct, committed progress and an honest report to the user*, not for a
+  hypothetical evaluator. Speculating about how you'll be scored is a distraction that replaces
+  engineering with posturing.
+- **Paralysis / circling in a huge file.** Reading 12k-line files forever is not progress. After the
+  §1b grep loop, **commit to formalizing the single most promising KNOWN theorem** and write it. A
+  correct, compiling, committed lemma is concrete progress; endless reading is not.
+- **"Nothing to fill — the only open piece is the axiom; related facts are already conditional."**
+  Even if the axiom is the only `sorry`/`axiom`, the bridge theorems (Pólya–Schur, Hurwitz, GORZ,
+  Turán) are **not** in this file and **are** missing — that is the work. Moreover, promoting a
+  *conditionally*-proven fact (one that currently consumes an RH assumption) to an unconditional
+  proof of a genuine classical theorem is real progress and is exactly the kind of bridge §1d asks
+  for.
+- **Fear of breakage.** Adding a self-contained, genuinely-correct new theorem in a quiet spot is
+  low-risk. Verify with `lake build <Module>` under the mutex; if it compiles and the `sorryAx` /
+  `RiemannHypothesisProp_apply` axioms are unchanged, you have not broken anything. A correct new
+  lemma is **never wasted**, even if a related statement already exists — a tighter or unconditional
+  version is still a contribution.
+
+Bottom line: define success by the engineering you actually did, not by whether a famous open problem
+closed. Do the work; commit it; report precisely.
+
 ---
+
+
 
 ## 2. How to find things (reliable recipe)
 

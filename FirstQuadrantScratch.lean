@@ -155,8 +155,8 @@ theorem xiShifted_fourfold_symmetry {ξ : ℂ → ℂ}
   refine ⟨hz, ?_, ?_, ?_⟩
   · rw [P.neg_symm z hgt hlt] <;> exact hz
   · rw [P.conj_symm z hgt hlt, hz] <;> simp
-  · have h1 : -(1 : ℝ) / 2 < (conj z).im := by simpa [conj_im] using hlt
-    have h2 : (conj z).im < 1 / 2 := by simpa [conj_im] using hgt
+  · have h1 : -(1 : ℝ) / 2 < (conj z).im := by rw [conj_im] <;> linarith [hlt]
+    have h2 : (conj z).im < 1 / 2 := by rw [conj_im] <;> linarith [hgt]
     rw [P.neg_symm (conj z) h1 h2, P.conj_symm z hgt hlt, hz] <;> simp
 
 /-- Local zero-free rectangle. -/
@@ -262,32 +262,40 @@ theorem nonvanishing_central_from_first_quadrant {ξ : ℂ → ℂ}
       ∀ z : ℂ, 0 ≤ z.re → z.re ≤ X → 0 < z.im → z.im < 1 / 2 → ξ z ≠ 0)
     (z : ℂ) (hxge : -X ≤ z.re) (hxle : z.re ≤ X)
     (hygt : -(1 : ℝ) / 2 < z.im) (hylt : z.im < 1 / 2) (hyne : z.im ≠ 0) :
-    ξ z ≠ 0 := by
+     ξ z ≠ 0 := by
   intro hz
   have h4 := xiShifted_fourfold_symmetry P hz hygt hylt
   by_cases hpos : 0 < z.im
   · by_cases hre : 0 ≤ z.re
-    · exact h_quadrant z hre hxle hpos hylt hz
+    · exact False.elim ((h_quadrant z hre hxle hpos hylt) hz)
     · let w := -conj z
-      have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> linarith
-      have hw_re_le : w.re ≤ X := by dsimp [w] <;> linarith
-      have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact hpos
-      have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> exact hylt
-      exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.2.2
+      have hw_re_ge : 0 ≤ w.re := by
+        simp only [w, Complex.conj_re, Complex.neg_re] <;> linarith [not_le.mp hre]
+      have hw_re_le : w.re ≤ X := by
+        simp only [w, Complex.conj_re, Complex.neg_re] <;> linarith [hxge]
+      have hw_im_pos : 0 < w.im := by
+        simp only [w, Complex.conj_re, Complex.conj_im, Complex.neg_re, Complex.neg_im, neg_neg] <;>
+          exact hpos
+      have hw_im_lt : w.im < 1 / 2 := by
+        simp only [w, Complex.conj_re, Complex.conj_im, Complex.neg_re, Complex.neg_im, neg_neg] <;>
+          exact hylt
+      exact False.elim ((h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt) h4.2.2.2)
   · have hneg : z.im < 0 := lt_of_le_of_ne (not_lt.mp hpos) hyne
     by_cases hre : 0 ≤ z.re
      · let w := conj z
-       have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> exact hre
-       have hw_re_le : w.re ≤ X := by dsimp [w] <;> exact hxle
-       have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact (neg_pos.2 hneg)
-       have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> linarith [hygt]
-       exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.2.1
+       have hw_re_ge : 0 ≤ w.re := by simp only [w, Complex.conj_re] <;> exact hre
+       have hw_re_le : w.re ≤ X := by simp only [w, Complex.conj_re] <;> exact hxle
+       have hw_im_pos : 0 < w.im := by
+         simp only [w, Complex.conj_im, Complex.neg_im] <;> exact (neg_pos.2 hneg)
+       have hw_im_lt : w.im < 1 / 2 := by
+         simp only [w, Complex.conj_im, Complex.neg_im] <;> linarith [hygt]
+       exact False.elim ((h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt) h4.2.2.1)
      · let w := -z
-       have hw_re_ge : 0 ≤ w.re := by dsimp [w] <;> linarith
-       have hw_re_le : w.re ≤ X := by dsimp [w] <;> linarith
-       have hw_im_pos : 0 < w.im := by dsimp [w] <;> exact (neg_pos.2 hneg)
-       have hw_im_lt : w.im < 1 / 2 := by dsimp [w] <;> linarith [hygt]
-       exact h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt h4.2.1
+       have hw_re_ge : 0 ≤ w.re := by simp only [w, Complex.neg_re] <;> linarith [not_le.mp hre]
+       have hw_re_le : w.re ≤ X := by simp only [w, Complex.neg_re] <;> linarith [hxge]
+       have hw_im_pos : 0 < w.im := by simp only [w, Complex.neg_im] <;> exact (neg_pos.2 hneg)
+       have hw_im_lt : w.im < 1 / 2 := by simp only [w, Complex.neg_im] <;> linarith [hygt]
+       exact False.elim ((h_quadrant w hw_re_ge hw_re_le hw_im_pos hw_im_lt) h4.2.1)
 
 /-- Assemble central + tail pointwise non-vanishing into off-real pointwise
 non-vanishing.  Pure case split.  Proven. -/
