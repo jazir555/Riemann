@@ -60,7 +60,7 @@ not redone.
 > "balk" on the grounds that "RH is an unsolved open problem" — that is exactly what these
 > reformulations are here to crack. These doors are NOT "unclosable / flagged / excluded by scope"
 > (any older doc wording to that effect has been removed — see §0, §10, §12, §17, and follow the
-> concrete attempt loop in §1b–§1g).
+> concrete attempt loop in §1b–§1h).
 
 1. **INFRASTRUCTURE EXISTS. Grep BEFORE you write.** Past agents repeatedly concluded "this
    lemma doesn't exist" and planned to write 300–600 lines from scratch — when the lemma
@@ -109,7 +109,7 @@ impossible:
    yields the nonvanishing.
 5. **Only after steps 1–4 are genuinely exhausted** may you report a remaining gap — and then report it
    *precisely*: the exact missing classical theorem, and which existing infrastructure lemma would be
-   its feeder. A vague "RH is open, can't" is not an acceptable outcome — and see §1c–§1g on why
+   its feeder. A vague "RH is open, can't" is not an acceptable outcome — and see §1c–§1h on why
    "no proof exists yet" is NOT "unprovable" and how to handle the deeper rationalizations.
 
 The success bar is a genuine `lake build <Module>` with no `sorryAx` (and, where applicable, no
@@ -280,6 +280,30 @@ this repo and the task you were given.
 If you catch yourself writing "this is a deep theorem that cannot be formalized" or "this requires
 infrastructure that doesn't exist," stop: you are adjudicating feasibility instead of doing the work.
 Grep for the stepping stones (they are there), decompose the theorem, and formalize the next step.
+
+## 1h. "I keep re-running the same command" / "the data doesn't match the task" (stop, report, don't spin)
+
+Two failure modes that waste entire sessions:
+
+1. **Re-running the same command without progress.** If you have grepped for the same stem, read the
+   same file region, or run the same build **3 times** without learning anything new, you are looping.
+   **Stop.** Commit to the conclusion the data supports, write it down, and either act on it or report
+   it as a blocker. Looping is not diligence — it is avoidance. The §1b loop says "grep before
+   writing"; it does NOT say "grep forever."
+
+2. **The data genuinely does not match the task description.** If you have verified (once, carefully)
+   that the provided data/code does not match what the task claims — e.g. the `zeta_cert_data` grid
+   covers `Im s ∈ [10, 12]` (the tail, already closed) while the central rectangle needs
+   `Im s ∈ [-10, 10]` (NOT covered); or a required lemma has a different type than described; or a
+   structure field does not exist — **report the discrepancy clearly and STOP.** Do not re-run the same
+   checks hoping the data will change. Do not try to "fix" a mismatch that is real. Write a precise
+   report: "DATA/RANGE: the cert grid covers X, but the task needs Y. The central rectangle is
+   uncovered." Then stop. The user would rather hear about a real blocker in paragraph 1 than read 50
+   lines of circular reasoning.
+
+**The rule:** verify carefully ONCE (or twice, if the first check was ambiguous). If the result is
+stable and contradicts the task description, that is a FINDING, not a failure. Report it precisely and
+move on. Spinning helps no one.
 
 ---
 
