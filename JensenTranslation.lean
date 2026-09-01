@@ -529,4 +529,12 @@ theorem tail_nonvanishing_iff_jensen :
       ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
   sorry
 
+/-- The 0-th Taylor coefficient of the shifted xi function is nonzero.
+    `taylorCoeff 0 = (completedRiemannZeta₀ (1/2)).re`, and since
+    `completedRiemannZeta₀ (1/2) = π^(-1/4) * Γ(1/4) * ζ(1/2) < 0`,
+    this is nonzero. -/
+lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
+  simp [taylorCoeff, xiMathlibShifted, xiMathlib]
+  norm_num
+
 end JensenRH
