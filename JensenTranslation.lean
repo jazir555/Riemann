@@ -301,6 +301,39 @@ theorem jensenPoly_derivative (d n : ℕ) :
       Polynomial.map_mul, Polynomial.map_C, hP]
   simp
 
+/-- Coefficient formula for Jensen polynomials. -/
+theorem jensenPoly_coeff (d n k : ℕ) :
+    ((jensenPoly d n).coeff k : ℂ) =
+      if k ≤ d then ((Nat.choose d k : ℝ) * taylorCoeff (n + k) : ℝ) else 0 := by
+  have key : (Finset.sum (Finset.range (d + 1)) (fun j =>
+      Polynomial.monomial j ((Nat.choose d j : ℝ) * taylorCoeff (n + j)))).coeff k
+      = if k ≤ d then ((Nat.choose d k : ℝ) * taylorCoeff (n + k)) else 0 := by
+    rw [Polynomial.finsetSum_coeff]
+    simp only [Polynomial.coeff_monomial, Finset.sum_ite_eq', Finset.mem_range,
+      Nat.lt_succ_iff]
+  simp only [jensenPoly, Polynomial.coeff_map, key]
+  by_cases hk : k ≤ d <;> simp [hk]
+
+/-- Cancelling a constant factor preserves hyperbolicity:
+    if `Hyperbolic (C c * p)` and `c ≠ 0`, then `Hyperbolic p`. -/
+theorem Hyperbolic_of_const_mul (c : ℂ) (hc : c ≠ 0) {p : Polynomial ℂ}
+    (hp : Hyperbolic (Polynomial.C c * p)) : Hyperbolic p := by
+  intro x hx
+  refine hp x ?_
+  rw [Polynomial.eval_mul, Polynomial.eval_C, hx, mul_zero]
+
+/-- If all Taylor coefficients are nonzero, every `jensenPoly d n` has degree `d`. -/
+theorem jensenPoly_natDegree (hC : ∀ k, taylorCoeff k ≠ 0) (d n : ℕ) :
+    (jensenPoly d n).natDegree = d := by
+  apply le_antisymm
+  · rw [Polynomial.natDegree_le_iff_coeff_eq_zero]
+    intro m hm
+    rw [jensenPoly_coeff d n m, if_neg (not_le.mpr hm)]
+    simp
+  · refine Polynomial.le_natDegree_of_ne_zero ?_
+    rw [jensenPoly_coeff d n d, if_pos (le_refl d)]
+    simp only [Nat.choose_self, Nat.cast_one, one_mul, ne_eq, Complex.ofReal_eq_zero]
+    exact hC (n + d)
 /-- A sum of a multiset of nonnegative reals is nonnegative. -/
 lemma msum_nonneg {M : Multiset ℝ} (h : ∀ x ∈ M, 0 ≤ x) : 0 ≤ M.sum := by
   induction M using Multiset.induction_on with
@@ -431,6 +464,32 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     · linarith
   exact hwim hwim0
 
+/-- **Conditional shift reduction** (Pólya–GORZ algebraic mechanism): under the
+    non-degeneracy hypothesis `hC : ∀ k, taylorCoeff k ≠ 0` (all Taylor coefficients
+    of Ξ nonzero, so every `jensenPoly d n` has full degree `d`), hyperbolicity
+    propagates from shift 0 to all shifts:
+    `(∀ d, Hyperbolic (jensenPoly d 0)) → (∀ d n, Hyperbolic (jensenPoly d n))`.
+
+    Proof: `J_{d,n}` is a nonzero scalar multiple of the `n`-th derivative of
+    `J_{d+n,0}` (by iterating `jensenPoly_derivative`), and `derivative_hyperbolic`
+    shows differentiation preserves hyperbolicity.  This is the algebraic heart of
+    the Pólya direction of the Jensen criterion.  The non-degeneracy hypothesis is
+    necessary: if some `γ_k = 0` the degree drops and the Gauss–Lucas step fails. -/
+theorem all_shifts_from_zero_of_nonvanishing (hC : ∀ k, taylorCoeff k ≠ 0)
+    (h0 : ∀ d, Hyperbolic (jensenPoly d 0)) : ∀ d n, Hyperbolic (jensenPoly d n) := by
+  intro d n
+  induction n generalizing d with
+  | zero => exact h0 d
+  | succ n ih =>
+    have hd := ih (d + 1)
+    have hdeg : 0 < (jensenPoly (d + 1) n).natDegree := by
+      rw [jensenPoly_natDegree hC (d + 1) n]
+      norm_num
+    have hder := derivative_hyperbolic hd hdeg
+    rw [jensenPoly_derivative d n] at hder
+    exact Hyperbolic_of_const_mul ((d + 1 : ℕ) : ℂ)
+      (by exact_mod_cast (Nat.succ_ne_zero d)) hder
+
 /-- OUT OF SCOPE (left as the open translation).  The genuine content is the
     Gauss–Lucas step: `jensenPoly d n` is a nonzero scalar multiple of the
     `n`-th derivative of `jensenPoly (d+n) 0` (by iterating `jensenPoly_derivative`),
@@ -443,7 +502,7 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     RH/Jensen equivalence.  (E.g. if γ₀ = 1 and γ_k = 0 for k ≥ 1 then every
     `J_{d,0}` is the constant 1 — hyperbolic — yet every `J_{d,n}` with n ≥ 1 is
     the zero polynomial, which is not hyperbolic.)  Hence the unconditional
-    statement cannot be proved here and is left as an RH-equivalent placeholder at line 449. -/
+    statement cannot be proved here and is left as an RH-equivalent placeholder at line 483. -/
 theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
     ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
   sorry
