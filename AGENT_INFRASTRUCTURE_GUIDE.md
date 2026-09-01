@@ -60,7 +60,7 @@ not redone.
 > "balk" on the grounds that "RH is an unsolved open problem" — that is exactly what these
 > reformulations are here to crack. These doors are NOT "unclosable / flagged / excluded by scope"
 > (any older doc wording to that effect has been removed — see §0, §10, §12, §17, and follow the
-> concrete attempt loop in §1b–§1h).
+> concrete attempt loop in §1b–§1i).
 
 1. **INFRASTRUCTURE EXISTS. Grep BEFORE you write.** Past agents repeatedly concluded "this
    lemma doesn't exist" and planned to write 300–600 lines from scratch — when the lemma
@@ -109,7 +109,7 @@ impossible:
    yields the nonvanishing.
 5. **Only after steps 1–4 are genuinely exhausted** may you report a remaining gap — and then report it
    *precisely*: the exact missing classical theorem, and which existing infrastructure lemma would be
-   its feeder. A vague "RH is open, can't" is not an acceptable outcome — and see §1c–§1h on why
+   its feeder. A vague "RH is open, can't" is not an acceptable outcome — and see §1c–§1i on why
    "no proof exists yet" is NOT "unprovable" and how to handle the deeper rationalizations.
 
 The success bar is a genuine `lake build <Module>` with no `sorryAx` (and, where applicable, no
@@ -280,6 +280,31 @@ this repo and the task you were given.
 If you catch yourself writing "this is a deep theorem that cannot be formalized" or "this requires
 infrastructure that doesn't exist," stop: you are adjudicating feasibility instead of doing the work.
 Grep for the stepping stones (they are there), decompose the theorem, and formalize the next step.
+
+## 1i. "I'm going in circles theorizing" (try the tactic, don't think about it)
+
+A common failure mode, especially for concrete-arithmetic tasks (e.g. "prove this constant is
+nonzero", "evaluate this derivative at 0"): the agent spends its entire output budget THEORIZING about
+whether an approach will work — debating computability of `riemannZeta`, whether `norm_num` applies,
+whether `native_compute` will succeed — instead of just RUNNING the tactic. It then either gets cut
+off (empty result) or concludes "it's too complex" without ever trying.
+
+**The fix: TRY the direct tactic FIRST. Do not theorize about computability.**
+
+- If the task is "prove this concrete real constant is nonzero": write the lemma, apply `norm_num` or
+  `native_compute` or `decide`, and SEE WHAT HAPPENS. If it works, done. If it fails with a specific
+  error, report THAT error precisely (§1h) and try the next tactic. Do not write three paragraphs
+  speculating about whether `completedRiemannZeta₀` is computable — just run `norm_num` on it.
+- If the task is "evaluate this derivative at 0": apply `simp`, `rw`, `norm_num` in sequence and read
+  the goal after each step. The goal state tells you more than speculation.
+- **Budget rule:** if you have not run a single tactic after 2 minutes of thinking, you are looping.
+  Run SOMETHING — `simp`, `norm_num`, `native_compute`, `decide`, `linarith`, `ring` — and read the
+  result. Wrong attempts with concrete errors are worth more than correct theories never executed.
+- When you are cut off mid-thought (empty result), it almost always means you speculated instead of
+  executing. Next time: type the tactic on line 1, run it, then think about the result.
+
+This supplements §1h (stop re-running the SAME command). §1i is the converse: stop thinking about
+DIFFERENT commands and just RUN one.
 
 ## 1h. "I keep re-running the same command" / "the data doesn't match the task" (stop, report, don't spin)
 
