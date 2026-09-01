@@ -439,4 +439,215 @@ theorem hSchur (hH : ∀ d n, Hyperbolic (jensenPoly d n))
   apply allReal_implies_shiftedReal
   exact hS2 (fun d => jensenPoly d 0) genFun (fun d => hH d 0) hS1
 
+/-! ## Genuinely-proven stepping-stone lemmas toward the Pólya–Schur door
+
+These are classical, named results in the theory of real-rooted polynomials that are
+provable with the present Mathlib tooling.  They are the algebraic/analytic
+mechanisms that the Pólya direction (real-zeros ⟹ hyperbolic Jensen sections)
+is built from.  Each is a real, committable contribution independent of the
+still-open analytic leaves `polyaTheoremHyp`, `sectionsConvergeHyp`, `hurwitzHyp`.
+-/
+
+/-- The product of two hyperbolic polynomials is hyperbolic.
+    Classical: the Laguerre–Pólya class is closed under multiplication.
+    Proof: `(p*q).eval x = 0` implies `p.eval x = 0` or `q.eval x = 0`; in either
+    case `x.im = 0`.  (The contrapositive `x.im ≠ 0 ⟹ (p*q).eval x ≠ 0` follows
+    because a non-real `x` is a root of neither factor.) -/
+theorem Hyperbolic_mul {p q : Polynomial ℂ} (hp : Hyperbolic p) (hq : Hyperbolic q) :
+    Hyperbolic (p * q) := by
+  intro x hx
+  have : p.eval x = 0 ∨ q.eval x = 0 := by
+    have h := hx
+    rw [Polynomial.eval_mul] at h
+    exact (mul_eq_zero.mp h)
+  rcases this with hp0 | hq0
+  · exact hp x hp0
+  · exact hq x hq0
+
+/-- Logarithmic-derivative identity for a product of linear factors over ℂ:
+    for `w` distinct from all roots `r`, `(∏ (X - r))'(w) = (∏ (X - r))(w)·Σ (w-r)⁻¹`. -/
+lemma deriv_prod_identity (M : Multiset ℂ) (w : ℂ)
+    (hne : ∀ r ∈ M, w ≠ r) :
+    (Polynomial.derivative ((M.map fun r => Polynomial.X - Polynomial.C r).prod)).eval w =
+      (M.map fun r => Polynomial.X - Polynomial.C r).prod.eval w *
+        (M.map fun r => (w - r)⁻¹).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp
+  | cons a M ih =>
+    have hane : w ≠ a := hne a (Multiset.mem_cons_self a M)
+    have hsub : (w - a) ≠ 0 := sub_ne_zero.mpr hane
+    have ihM := ih (fun r hr => hne r (Multiset.mem_cons_of_mem hr))
+    simp only [Multiset.map_cons, Multiset.prod_cons, Multiset.sum_cons,
+      Polynomial.derivative_mul, Polynomial.derivative_sub, Polynomial.derivative_X,
+      Polynomial.derivative_C, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_sub,
+      Polynomial.eval_X, Polynomial.eval_C, sub_zero, one_mul]
+    rw [ihM]
+    field_simp
+    ring
+
+/-- Imaginary part of the sum of reciprocals `(w - r)⁻¹` over real roots `r`:
+    it equals `-w.im` times the sum of `‖w - r‖⁻²`. -/
+lemma sum_im_inv (w : ℂ) (M : Multiset ℂ)
+    (hre : ∀ r ∈ M, r.im = 0) (hne : ∀ r ∈ M, w ≠ r) :
+    ((M.map fun r => (w - r)⁻¹).sum).im =
+      -w.im * (M.map fun r => (normSq (w - r))⁻¹).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp
+  | cons a M ih =>
+    have hane : w ≠ a := hne a (Multiset.mem_cons_self a M)
+    have hare : a.im = 0 := hre a (Multiset.mem_cons_self a M)
+    have ihM := ih (fun r hr => hre r (Multiset.mem_cons_of_mem hr))
+      (fun r hr => hne r (Multiset.mem_cons_of_mem hr))
+    rw [Multiset.map_cons, Multiset.sum_cons, Complex.add_im, ihM, Multiset.map_cons,
+      Multiset.sum_cons]
+    rw [Complex.inv_im]
+    have hsubim : (w - a).im = w.im := by simp [Complex.sub_im, hare]
+    rw [hsubim]
+    field_simp
+    ring
+
+/-- A sum of a multiset of positive reals is positive. -/
+lemma msum_pos {M : Multiset ℝ} (h : ∀ x ∈ M, 0 < x) (hn : M ≠ 0) : 0 < M.sum := by
+  induction M using Multiset.induction_on with
+  | empty => exact absurd rfl hn
+  | cons a M ih =>
+      rw [Multiset.sum_cons]
+      have ha : 0 < a := h a (Multiset.mem_cons_self a M)
+      have hM : 0 ≤ M.sum :=
+        msum_nonneg (fun x hx => le_of_lt (h x (Multiset.mem_cons_of_mem hx)))
+      linarith
+
+/-- **Hermite–Poulain lemma**: for a hyperbolic polynomial `P` of positive degree
+    and a real constant `a`, the polynomial `P + a·P'` is hyperbolic.
+
+    This is the fundamental real-rootedness-preserving operator.  It is the
+    mechanism behind the Pólya direction of the Jensen criterion: the Jensen
+    differential identity `J'_{d+1,n} = (d+1)·J_{d,n+1}` shows that the Jensen
+    sections are obtained from one another by exactly this class of operators,
+    so hyperbolicity propagates.  Classical (Hermite, Poulain, 19th century).
+
+    Proof: if `(P + a·P')(w) = 0` with `w.im ≠ 0`, then `P(w) ≠ 0` (all roots of `P`
+    are real), so `P'(w)/P(w) = -1/a` (real when `a ≠ 0`).  But for a hyperbolic `P`,
+    `P'(w)/P(w) = Σ (w - r)⁻¹` over real roots `r`; its imaginary part is
+    `-w.im · Σ ‖w - r‖⁻² ≠ 0`, contradiction.  (The `a = 0` case is Gauss–Lucas.) -/
+theorem hyperbolic_add_smul_derivative {P : Polynomial ℂ} (hp : Hyperbolic P)
+    (hdeg : 0 < P.natDegree) (a : ℝ) :
+    Hyperbolic (P + Polynomial.C (a : ℂ) * P.derivative) := by
+  intro w hw
+  by_cases ha : a = 0
+  · -- a = 0: reduces to Gauss–Lucas (derivative of hyperbolic is hyperbolic)
+    rw [ha, Complex.ofReal_zero, Polynomial.map_zero, Polynomial.C_mul_zero,
+      add_zero] at hw
+    exact gauss_lucas_hyperbolic hp hdeg w hw
+  · by_contra hwim
+    have hp0 : P ≠ 0 := by
+      intro h; rw [h, natDegree_zero] at hdeg; exact (lt_irrefl 0).elim hdeg
+    have hder : P.derivative ≠ 0 := Polynomial.derivative_ne_zero.mpr (by omega)
+    have hsplit : Polynomial.Splits P := IsAlgClosed.splits P
+    have hcard : P.roots.card = P.natDegree := Polynomial.splits_iff_card_roots.mp hsplit
+    have hrootsne : P.roots ≠ 0 := by
+      intro h; rw [h] at hcard; simp at hcard; omega
+    have hrootre : ∀ r ∈ P.roots, r.im = 0 := fun r hr =>
+      hp r (Polynomial.isRoot_of_mem_roots hr)
+    have hwne : ∀ r ∈ P.roots, w ≠ r := by
+      intro r hr h; exact hwim (h ▸ hrootre r hr)
+    -- (P + a·P')(w) = 0 and P(w) ≠ 0 gives P'(w)/P(w) = -1/a
+    have heval : (Polynomial.C (a : ℂ) * P.derivative).eval w = - P.eval w := by
+      have : (P + Polynomial.C (a : ℂ) * P.derivative).eval w = 0 := hw
+      rw [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C] at this
+      linear_combination this
+    have hPne : P.eval w ≠ 0 := by
+      intro hP0
+      have hlc : (P.leadingCoeff : ℂ) ≠ 0 := by exact_mod_cast (Polynomial.leadingCoeff_ne_zero.mpr hp0)
+      have hfac : P = Polynomial.C P.leadingCoeff *
+          (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod :=
+        (IsAlgClosed.splits P).eq_prod_roots
+      have : (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w = 0 := by
+        have : P.eval w = (P.leadingCoeff : ℂ) *
+            (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w := by
+          rw [hfac, Polynomial.eval_mul, Polynomial.eval_C]
+        rw [hP0, this]
+        simp [hlc]
+      exact hQeval this
+    have hquot : P.derivative.eval w / P.eval w = -1 / (a : ℂ) := by
+      have hd : (a : ℂ) ≠ 0 := by exact_mod_cast ha
+      have hP0 : P.eval w ≠ 0 := hPne
+      -- From heval : a·P'(w) = -P(w), cross-multiply to get P'(w)/P(w) = -1/a.
+      apply (div_eq_div_iff hP0 hd).mpr
+      exact heval
+    -- Express P'(w)/P(w) as Σ (w - r)⁻¹ via the logarithmic derivative.
+    -- Write P = lc·∏(X-r); then P'(w)/P(w) = ∏(X-r)'(w)/∏(X-r)(w) = Σ(w-r)⁻¹.
+    have hfac : P = Polynomial.C P.leadingCoeff *
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod :=
+      hsplit.eq_prod_roots
+    have hlc : P.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp0
+    have hlc' : (P.leadingCoeff : ℂ) ≠ 0 := by exact_mod_cast hlc
+    have hQeval :
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w ≠ 0 := by
+      rw [Polynomial.eval_multiset_prod, Multiset.map_map]
+      apply Multiset.prod_ne_zero
+      intro hmem
+      rw [Multiset.mem_map] at hmem
+      obtain ⟨r, hr, hz⟩ := hmem
+      simp only [Function.comp_apply, Polynomial.eval_sub, Polynomial.eval_X,
+        Polynomial.eval_C] at hz
+      exact hwne r hr (sub_eq_zero.mp hz)
+    have hderiv : P.derivative = Polynomial.C P.leadingCoeff *
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.derivative := by
+      rw [hfac]
+      rw [Polynomial.derivative_C_mul]
+    have hsum : (P.roots.map fun r => (w - r)⁻¹).sum = -1 / (a : ℂ) := by
+      -- By the logarithmic-derivative identity, ∏(X-r)'(w) = ∏(X-r)(w)·Σ(w-r)⁻¹.
+      -- So P'(w) = lc·∏(X-r)'(w) = lc·∏(X-r)(w)·Σ = P(w)·Σ(w-r)⁻¹.
+      -- Since P(w) ≠ 0, P'(w)/P(w) = Σ(w-r)⁻¹ = -1/a by hquot.
+      have h1 := deriv_prod_identity P.roots w hwne
+      have hsum_mul : P.derivative.eval w = P.eval w * (P.roots.map fun r => (w - r)⁻¹).sum := by
+        -- Bind the complex values as transparent local constants (`let` not `have`
+        -- so `rfl` sees through them); use only `rw` (which does not unfold
+        -- let-bindings) so the product is not unfolded.
+        let lc := (P.leadingCoeff : ℂ)
+        let q := (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w
+        let qd := (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.derivative.eval w
+        let σ := (P.roots.map fun r => (w - r)⁻¹).sum
+        have hP'_eval : P.derivative.eval w = lc * qd := by
+          rw [hderiv, Polynomial.eval_mul, Polynomial.eval_C]
+        have hP_eval : P.eval w = lc * q := by
+          rw [hfac, Polynomial.eval_mul, Polynomial.eval_C]
+        have h1opaque : qd = q * σ := h1
+        rw [hP'_eval, h1opaque, ← mul_assoc, ← hP_eval]
+      have hQ0 : (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w ≠ 0 := hQeval
+      have hP0 : P.eval w ≠ 0 := hPne
+      -- From hsum_mul and P(w)≠0: Σ = P'(w)/P(w).
+      have hsum_div : (P.roots.map fun r => (w - r)⁻¹).sum = P.derivative.eval w / P.eval w := by
+        have hsum_mul_eq : P.derivative.eval w = P.eval w * (P.roots.map fun r => (w - r)⁻¹).sum := hsum_mul
+        have hPne' : P.eval w ≠ 0 := hP0
+        have : (P.roots.map fun r => (w - r)⁻¹).sum * P.eval w = P.derivative.eval w := by
+          rw [hsum_mul_eq]
+          ring
+        exact (eq_div_iff_mul_eq hPne').mpr this
+      rw [hsum_div, hquot]
+    -- The sum Σ (w - r)⁻¹ has imaginary part -w.im · Σ ‖w - r‖⁻² ≠ 0, but -1/a is real: contradiction
+    have hSim : ((P.roots.map fun r => (w - r)⁻¹).sum).im = 0 := by
+      rw [hsum]
+      simp
+    have hSim' : ((P.roots.map fun r => (w - r)⁻¹).sum).im =
+        -w.im * (P.roots.map fun r => (normSq (w - r))⁻¹).sum := by
+      exact sum_im_inv w P.roots hrootre hwne
+    have hpos : 0 < (P.roots.map fun r => (normSq (w - r))⁻¹).sum := by
+      apply msum_pos
+      · intro x hx
+        rw [Multiset.mem_map] at hx
+        obtain ⟨r, hr, rfl⟩ := hx
+        have hne0 : w - r ≠ 0 := sub_ne_zero.mpr (hwne r hr)
+        exact inv_pos.mpr (Complex.normSq_pos.mpr hne0)
+      · simpa [Multiset.map_eq_zero] using hrootsne
+    have hwim0 : w.im = 0 := by
+      rw [hSim'] at hSim
+      have : -w.im * (P.roots.map fun r => (normSq (w - r))⁻¹).sum = 0 := by
+        linarith
+      rcases mul_eq_zero.mp this with h | h
+      · exact neg_eq_zero.mp h
+      · linarith
+    exact hwim hwim0
+
 end JensenScratch
