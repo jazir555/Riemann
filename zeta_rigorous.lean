@@ -37,7 +37,7 @@ theorem eta_half_pos :
   have h_tendsto : Tendsto f atTop (𝓝 0) := eta_terms_tendsto_zero
   obtain ⟨L, hL⟩ := Antitone.tendsto_alternating_series_of_tendsto_zero (f := f) h_anti h_tendsto
   have h_tsum_eq : L = ∑' k : ℕ, ((-1 : ℤ) ^ k : ℝ) / sqrt (k + 1 : ℝ) := by
-    sorry -- TODO: prove L = tsum via Summable
+    sorry -- TODO: HasSum via hL and function equality
   have h_bound : etaPartial 2 ≤ L := by
     have h_raw : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) ≤ L :=
       Antitone.alternating_series_le_tendsto hL h_anti 1
