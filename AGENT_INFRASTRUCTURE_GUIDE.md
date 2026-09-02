@@ -1092,16 +1092,37 @@ no trusted Float — pure Mathlib `Real` analysis).
 - `eta_half_pos` — `0 < ∑' k, (-1)^k/√(k+1)` (the eta series limit is positive). Proved via
   Mathlib's `Antitone.cauchySeq_alternating_series_of_tendsto_zero` (the alternating series test):
   the even partial sum `S₂ = 1 - 1/√2` is a lower bound, and `1 - 1/√2 > 0` because `√2 > 1`.
-- **Current status:** iterative build with 3 intermediary `sorry`s (`eta_terms_tendsto_zero`,
-  `L = tsum` equality, `etaPartial 2 ≤ L` bound). `eta_terms_antitone` and `etaPartial 2 > 0`
-  are fully proved; the remaining `sorry`s are the `tendsto`/`tsum`/`bound` links to be filled in
-  subsequent turns (see §1f — intermediary `sorry`s are expected).
+- **Current status:** iterative build with **2 intermediary `sorry`s** (`eta_terms_tendsto_zero`
+  and `L = tsum` equality). `eta_terms_antitone`, `etaPartial 2 ≤ L` (via
+  `Antitone.alternating_series_le_tendsto`), and `etaPartial 2 > 0` (`1 - 1/√2 > 0` via `√2 > 1`)
+  are fully proved. The `tendsto`/`tsum` links remain for subsequent turns (see §1f).
 
 **Why this matters:** this is the model for closing the Float→ℝ bridge without `sorry`. The
 Float layer proves `ζ(1/2) < 0` via `native_decide`; this file proves `η(1/2) > 0` (hence
 `ζ(1/2) < 0`) via Mathlib's real analysis. Together they show both paths.
 
-**Build:** `lake build zeta_rigorous` (currently 3 `sorry`s; `etaPartial 2 > 0` builds).
+**Build:** `lake build zeta_rigorous` (currently 2 `sorry`s; `etaPartial 2 > 0` and `etaPartial 2 ≤ L`
+build).
+
+### 18b.8 What `zeta_rigorous` unlocks and what remains
+
+Once its 2 remaining `sorry`s are filled, `eta_half_pos` (`0 < η(1/2)`) is fully rigorous — **no
+`sorry`, no axioms, no Float**. From it:
+
+- `η(1/2) > 0` + `ζ(s) = η(s)/(1 - 2^{1-s})` gives `ζ(1/2) < 0` (since `1 - √2 < 0`).
+- `ξ(1/2) = ½·(1/2-1)·π^{-1/4}·Γ(1/4)·ζ(1/2)` has prefactor `−1/8 < 0` times `ζ(1/2) < 0` → `ξ(1/2) > 0`.
+- `ξ(1/2) > 0` closes `taylorCoeff_zero_ne_zero` (`taylorCoeff 0 = ξ(1/2) ≠ 0`) in
+  `JensenTranslation.lean:530` — **one** instance of `hC : ∀ k, taylorCoeff k ≠ 0`.
+
+`hC` needs **all** `k`, and `all_shifts_from_zero_of_nonvanishing` (`JensenScratch.lean:508`)
+needs `hC` plus `∀ d, Hyperbolic (jensenPoly d 0)` to get `∀ d n, Hyperbolic`. So
+`zeta_rigorous` closes **one coefficient**, not the full Jensen door. Likewise, the central cover
+(`central_cover_trusted.lean`) needs the same Float→ℝ bridge but for **32 distinct cell centers**,
+not one point. The `zeta_rigorous` proof is the **reusable template** for that bridge.
+
+In short: `zeta_rigorous` proves one coefficient and demonstrates the rigorous bridge pattern. A
+full door still requires applying that pattern to **all** coefficients (Jensen) or to **all 32 cells**
+(central cover), plus the `tendsto`/`tsum` links now being filled.
 
 ---
 
