@@ -256,4 +256,137 @@ theorem rh_from_mollified_tail_and_central_cover
   rh_from_central_zero_free_cover_and_tail_pointwise C
     (mollified_rouche_leaf_implies_tail_pointwise K H)
 
+/-!
+# Quantitative Rouché-gap bridge (new, fully proved)
+
+The committed tail bridge above is qualitative (`≠ 0`).  The lemmas below
+upgrade it to the *quantitative lower-bound* shape consumed by the finite-cover
+assembly infrastructure:
+
+* `rouche_margin_lower_bound` — pure Rouché gap (`‖u - 1‖ ≤ 1 - δ → δ ≤ ‖u‖`),
+  via the reverse triangle inequality.  This is the quantitative form of
+  `rh_from_mollified_rouche`.
+* `hardDifference_norm_eq` / `hardDifference_lower_bound_of_xiShifted_lower_bound` —
+  transfer of an `xiShifted` lower bound `ε ≤ ‖xiShifted z‖` to an explicit
+  hard-difference lower bound `2 * ε / ‖z² + 1/4‖ ≤ ‖hardDifference z‖`, via the
+  committed core identity `inv_D_sub_completedZeta_eq_two_xiShifted_div_D`.
+  This is the hard-difference analogue of the product lower bound
+  `TailProofEngine.tail_lower_bound_from_component_bounds` and of the analytic
+  bound fed to `HadamardBridge.zeroFreeEdge_from_tsum`: a pointwise modulus
+  lower bound is exactly what `XiLocalZeroFreeRect_of_lower_bound` (via
+  `CellProofEngine.cell_lower_bound_from_center_and_deriv`) consumes to build a
+  `XiCentralZeroFreeCover 10` cell.
+* `mollified_gap_gives_zeta_lower_bound` /
+  `mollified_gap_gives_hardDifference_lower_bound` — composition of the gap with
+  a mollifier upper bound `‖M‖ ≤ B` and a prefactor lower bound
+  `P₀ ≤ ‖classicalXiPrefactor s‖` into an explicit hard-difference lower bound.
+  The `S₂`-is-a-lower-bound pattern follows the rigorous `Tendsto` template in
+  `zeta_rigorous.eta_half_pos` (NOT the false `0 < ∑'` form for the
+  conditionally convergent eta series).
+
+All lemmas are unconditional implications (bounds in → bound out); they do not
+assume RH, the leaf, or any zero-free region.  A zero-free region alone does NOT
+force the critical line — the off-line exclusion comes from this Rouché lower
+bound composed with the conjugate-symmetry reflection already committed above
+(`mollified_rouche_leaf_implies_lower_tail_*`), i.e. the mollifier/Rouché
+bridge, not the `KadiriZeroFree` edge.
+-/
+
+/-- Quantitative Rouché gap: `‖u - 1‖ ≤ 1 - δ` forces `δ ≤ ‖u‖`.
+
+    Pure reverse-triangle-inequality estimate; the quantitative form of
+    `rh_from_mollified_rouche` (which is the `δ → 0` qualitative corollary). -/
+theorem rouche_margin_lower_bound {u : ℂ} {δ : ℝ} (hδ : 0 < δ)
+    (hgap : ‖u - 1‖ ≤ 1 - δ) : δ ≤ ‖u‖ := by
+  have h := norm_add_le ((1 : ℂ) - u) u
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  have hrev : ‖(1 : ℂ) - u‖ = ‖u - 1‖ := norm_sub_rev 1 u
+  rw [hrev] at h
+  linarith
+
+/-- Qualitative Rouché corollary: `‖u - 1‖ < 1` forces `u ≠ 0`. -/
+theorem rouche_gap_ne_zero {u : ℂ} (hgap : ‖u - 1‖ < 1) : u ≠ 0 := by
+  have h := norm_add_le ((1 : ℂ) - u) u
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  have hrev : ‖(1 : ℂ) - u‖ = ‖u - 1‖ := norm_sub_rev 1 u
+  rw [hrev] at h
+  have hpos : 0 < ‖u‖ := by linarith
+  exact norm_pos_iff.mp hpos
+
+/-- Norm identity for the hard difference, from the committed core identity
+    `inv_D_sub_completedZeta_eq_two_xiShifted_div_D`. -/
+theorem hardDifference_norm_eq {z : ℂ}
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) (hne : z.im ≠ 0) :
+    ‖1 / (z ^ 2 + (1 / 4 : ℂ)) - completedRiemannZeta₀ (shiftedS z)‖ =
+      2 * ‖xiShifted z‖ / ‖z ^ 2 + (1 / 4 : ℂ)‖ := by
+  have heq := inv_D_sub_completedZeta_eq_two_xiShifted_div_D z hgt hlt hne
+  rw [heq, norm_div, norm_mul]
+  have h2 : ‖(2 : ℂ)‖ = 2 := by norm_num
+  rw [h2]
+
+/-- An `xiShifted` lower bound yields an explicit hard-difference lower bound.
+
+    This is the bridge from `XiLocalLowerBoundRect`-shaped data
+    (`ε ≤ ‖xiShifted z‖`, as produced per cell by
+    `CellProofEngine.cell_lower_bound_from_center_and_deriv`) to hard-difference
+    nonvanishing on that cell (via `XiLocalZeroFreeRect_of_lower_bound`). -/
+theorem hardDifference_lower_bound_of_xiShifted_lower_bound {z : ℂ}
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) (hne : z.im ≠ 0)
+    {ε : ℝ} (hε : ε ≤ ‖xiShifted z‖) (hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖) :
+    2 * ε / ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤
+      ‖1 / (z ^ 2 + (1 / 4 : ℂ)) - completedRiemannZeta₀ (shiftedS z)‖ := by
+  rw [hardDifference_norm_eq hgt hlt hne]
+  gcongr
+
+/-- A mollifier Rouché gap plus a mollifier upper bound gives an explicit zeta
+    lower bound `δ / B ≤ ‖zeta s‖`. -/
+theorem mollified_gap_gives_zeta_lower_bound {z : ℂ} {K : ℕ} {δ B : ℝ}
+    (hδ : 0 < δ) (hB : 0 < B)
+    (hM : ‖dirichletMollifier (shiftedS z) K‖ ≤ B)
+    (hgap : ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ ≤ 1 - δ) :
+    δ / B ≤ ‖zeta (shiftedS z)‖ := by
+  have hprod : δ ≤ ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K‖ :=
+    rouche_margin_lower_bound hδ hgap
+  rw [norm_mul] at hprod
+  have hle : δ ≤ ‖zeta (shiftedS z)‖ * B :=
+    le_trans hprod (mul_le_mul_of_nonneg_left hM (norm_nonneg _))
+  have hBne : B ≠ 0 := ne_of_gt hB
+  field_simp
+  linarith
+
+/-- Composition: mollifier gap + mollifier upper bound + prefactor lower bound
+    yields an explicit hard-difference lower bound.
+
+    With `hgap` the `MollifiedRoucheLeaf`-shaped hypothesis (here with an
+    explicit margin `δ`), `hM` the mollifier size control, `hpref` the
+    classical-prefactor lower bound (nonvanishing in the strip via
+    `classical_prefactor_nonzero_instrip`), this produces exactly the
+    `ε ≤ ‖·‖` lower-bound certificate that the central-cover assembly
+    (`XiCentralZeroFreeCover 10` via `XiLocalZeroFreeRect_of_lower_bound`)
+    consumes.  Feeding the resulting `XiCentralZeroFreeCover 10` together with
+    `mollified_rouche_leaf_implies_tail_pointwise` into
+    `rh_from_mollified_tail_and_central_cover` is the remaining step to RH. -/
+theorem mollified_gap_gives_hardDifference_lower_bound (K : ℕ) {z : ℂ} {δ B P₀ : ℝ}
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) (hne : z.im ≠ 0)
+    (hδ : 0 < δ) (hB : 0 < B) (hP₀ : 0 ≤ P₀)
+    (hM : ‖dirichletMollifier (shiftedS z) K‖ ≤ B)
+    (hgap : ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ ≤ 1 - δ)
+    (hpref : P₀ ≤ ‖classicalXiPrefactor (shiftedS z)‖)
+    (hDpos : 0 < ‖z ^ 2 + (1 / 4 : ℂ)‖) :
+    2 * (P₀ * (δ / B)) / ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤
+      ‖1 / (z ^ 2 + (1 / 4 : ℂ)) - completedRiemannZeta₀ (shiftedS z)‖ := by
+  have hzeta : δ / B ≤ ‖zeta (shiftedS z)‖ :=
+    mollified_gap_gives_zeta_lower_bound hδ hB hM hgap
+  have hxi_eq : xiShifted z = classicalXiPrefactor (shiftedS z) * zeta (shiftedS z) := by
+    simp [xiShifted, shiftedS, classicalXi, XiFromPrefactor]
+  have hxi_norm : ‖xiShifted z‖ =
+      ‖classicalXiPrefactor (shiftedS z)‖ * ‖zeta (shiftedS z)‖ := by
+    rw [hxi_eq, norm_mul]
+  have hxi_low : P₀ * (δ / B) ≤ ‖xiShifted z‖ := by
+    rw [hxi_norm]
+    exact mul_le_mul hpref hzeta (div_nonneg hδ.le hB.le) (norm_nonneg _)
+  exact hardDifference_lower_bound_of_xiShifted_lower_bound hgt hlt hne hxi_low hDpos
+
 end MollifiedAttack

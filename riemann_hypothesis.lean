@@ -12030,3 +12030,90 @@ end MollifiedAttack
 end Challenge2
 
 end
+
+/-!
+# Unconditional zeta→xi bridge (partial progress toward RH)
+
+This section adds **unconditional** (axiom-free) nonvanishing results that form
+one proven step of the `eta → ζ(1/2) → ξ(1/2)` bridge described in the task:
+
+- `zetaRealNonzeroInCritical_holds` discharges the hypothesis
+  `ZetaRealNonzeroInStrip` used throughout the imaginary-axis development,
+  via the already-proven `ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo`
+  (real ζ negativity on `(0,1)`).
+- `xiShifted_imag_axis_nonvanishing_unconditional` turns that into
+  `xiShifted ≠ 0` on the imaginary axis `Re z = 0` — a one-dimensional
+  unconditional slice of `XiOffRealPointwiseNonvanishing`.
+- `zeta_half_ne_zero`, `classicalXi_half_ne_zero`, `xiShifted_at_zero_ne_zero`
+  give the central-value `ζ(1/2)/ξ(1/2)` nonvanishing (the `zeta → xi`
+  factorization step via the classical prefactor).
+- `hardDifference_imag_axis_nonvanishing_unconditional` is the corresponding
+  hard-difference nonvanishing on the imaginary axis.
+
+Mathlib contains no Dirichlet-eta API, so the `eta → zeta` step cannot be
+formalized as an `eta = (1 - 2^{1-s})·ζ` identity here; instead the real-zeta
+route above subsumes its consequence (`ζ(1/2) ≠ 0`) unconditionally.
+`zeta_rigorous.lean`'s `eta_half_pos` (`∃ L, Tendsto … ∧ 0 < L`) is the
+parallel real-analysis template for the same central value.
+
+The `axiom RiemannHypothesisProp_apply` is **retained** — RH itself remains
+open. The remaining gap is forcing `Re ρ = 1/2` for all off-line zeros
+(functional-equation involution / off-line-zero contradiction / mollifier /
+Rouché), i.e. the full `XiOffRealPointwiseNonvanishing` from
+`rh_iff_xi_off_real_pointwise_nonvanishing_mathlib`.
+-/
+
+/-- Unconditional real nonvanishing of ζ on `(0,1)`, discharging
+    `ZetaRealNonzeroInCritical`. Proved via real negativity
+    (`ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo`). -/
+theorem zetaRealNonzeroInCritical_holds : ZetaRealNonzeroInCritical := by
+  intro t h0 h1
+  have h :=
+    ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo (σ := t) h0 h1
+  simpa [zeta] using h
+
+/-- Unconditional `xiShifted` nonvanishing on the imaginary axis `Re z = 0`:
+    a one-dimensional unconditional slice of `XiOffRealPointwiseNonvanishing`. -/
+theorem xiShifted_imag_axis_nonvanishing_unconditional (y : ℝ) (hyne : y ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y) (hlt : y < (1 / 2 : ℝ)) :
+    xiShifted (Complex.I * (y : ℂ)) ≠ 0 :=
+  xiShifted_ne_zero_on_imaginary_axis zetaRealNonzeroInCritical_holds y hyne hgt hlt
+
+/-- Unconditional central value: `ζ(1/2) ≠ 0` (real cast). -/
+theorem zeta_half_ne_zero : zeta (((1 / 2 : ℝ)) : ℂ) ≠ 0 :=
+  zetaRealNonzeroInCritical_holds _ (by norm_num) (by norm_num)
+
+/-- Unconditional central value for the classical xi: `classicalXi(1/2) ≠ 0`,
+    via the nonzero prefactor (`zeta → xi` factorization step). -/
+theorem classicalXi_half_ne_zero : classicalXi (((1 / 2 : ℝ)) : ℂ) ≠ 0 := by
+  have h0 : (0 : ℝ) < ((((1 / 2 : ℝ)) : ℂ)).re := by
+    simp only [Complex.ofReal_re]
+    norm_num
+  have h1 : ((((1 / 2 : ℝ)) : ℂ)).re < 1 := by
+    simp only [Complex.ofReal_re]
+    norm_num
+  have hpref :=
+    classical_prefactor_nonzero_instrip classical_gamma_nonzero_instrip _ h0 h1
+  have hzeta := zetaRealNonzeroInCritical_holds _ (by norm_num : (0 : ℝ) < 1 / 2)
+    (by norm_num : (1 / 2 : ℝ) < 1)
+  have hmul : classicalXiPrefactor (((1 / 2 : ℝ)) : ℂ) * zeta (((1 / 2 : ℝ)) : ℂ) ≠ 0 :=
+    mul_ne_zero hpref hzeta
+  simpa [classicalXi, XiFromPrefactor] using hmul
+
+/-- Unconditional nonvanishing of the shifted xi at the origin:
+    `xiShifted 0 = classicalXi(1/2) ≠ 0`. -/
+theorem xiShifted_at_zero_ne_zero : xiShifted 0 ≠ 0 := by
+  have harg : ((1 / 2 : ℂ) + Complex.I * (0 : ℂ)) = ((((1 / 2 : ℝ)) : ℂ)) := by
+    simp
+  have h : xiShifted 0 = classicalXi ((((1 / 2 : ℝ)) : ℂ)) := by
+    unfold xiShifted
+    rw [harg]
+  rw [h]
+  exact classicalXi_half_ne_zero
+
+/-- Unconditional hard-difference nonvanishing on the imaginary axis. -/
+theorem hardDifference_imag_axis_nonvanishing_unconditional (y : ℝ) (hyne : y ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y) (hlt : y < (1 / 2 : ℝ)) :
+    1 / ((Complex.I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)) -
+      completedRiemannZeta₀ (shiftedS (Complex.I * (y : ℂ))) ≠ 0 :=
+  hardDifferenceNonzero_on_imaginary_axis zetaRealNonzeroInCritical_holds y hyne hgt hlt

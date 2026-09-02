@@ -2,6 +2,7 @@ import Mathlib
 import Zeta23.FromPNTPlus.ZetaBounds
 import Zeta23.ZetaReflect
 import Zeta23.Statement
+import rh_zeta_cert_data
 
 /-!
 # The residual thin-region gap for the Riemann Hypothesis
@@ -372,4 +373,111 @@ theorem band_zero_reflects {ξ : ℂ → ℂ} (hfe : XiFE ξ) (hC : ClassicalZFR
     linarith [hs_in]
   · simp only [sub_eq_add_neg, Complex.add_im, Complex.one_im, Complex.neg_im, zero_add, abs_neg]
     exact hT₀
+
+/-! ## Symmetric (left-edge) zero-free region for ζ + off-line thin band (proven bridge)
+
+The `Zeta23` edge (`zeta_zeroFree_pow`) rules out the wedge near `Re s = 1`.
+Reflecting across `Re s = 1/2` via `zeta_strip_zero_reflect` (`ρ ↦ 1 - conj ρ`)
+rules out the mirror wedge near `Re s = 0` unconditionally. The only place an
+off-line zero can still hide is therefore the symmetric band
+`A/log^9 < Re s < 1 - A/log^9`, and (with a bounded cover) RH is exactly
+zero-freeness on that band minus the critical line. All lemmas below are
+unconditional and use only `Zeta23`; they do NOT prove the band itself
+(which is RH-equivalent), but they make the residual explicit.
+-/
+
+/-- **Mirror of the `Zeta23` edge (proven).** If `ζ ≠ 0` on the right wedge
+`1 - A/log^9 ≤ Re < 1` for `|Im| > 3`, then `ζ ≠ 0` on the left wedge
+`0 < Re ≤ A/log^9` for `|Im| > 3`, by `ρ ↦ 1 - conj ρ`. -/
+theorem zeta_left_wedge_zeroFree {A : ℝ} (_hA : 0 < A)
+    (hzfr : ∀ s : ℂ, 3 < |s.im| →
+      1 - A / (Real.log |s.im|) ^ 9 ≤ s.re → s.re < 1 → riemannZeta s ≠ 0)
+    {s : ℂ} (h3 : 3 < |s.im|) (h0 : 0 < s.re) (h1 : s.re < 1)
+    (hle : s.re ≤ A / (Real.log |s.im|) ^ 9) :
+    riemannZeta s ≠ 0 := by
+  have hre' : (1 - (starRingEnd ℂ) s).re = 1 - s.re := by simp
+  have him_eq : (1 - (starRingEnd ℂ) s).im = s.im := by simp
+  have habs : |(1 - (starRingEnd ℂ) s).im| = |s.im| := by rw [him_eq]
+  have h3' : 3 < |(1 - (starRingEnd ℂ) s).im| := by rw [habs]; exact h3
+  have hlog_eq : Real.log |(1 - (starRingEnd ℂ) s).im| = Real.log |s.im| := by
+    rw [habs]
+  have hedge' : 1 - A / (Real.log |(1 - (starRingEnd ℂ) s).im|) ^ 9 ≤
+      (1 - (starRingEnd ℂ) s).re := by
+    rw [hlog_eq, hre']
+    linarith [hle]
+  have hlt' : (1 - (starRingEnd ℂ) s).re < 1 := by rw [hre']; linarith [h0]
+  have hne := hzfr _ h3' hedge' hlt'
+  intro hz
+  have hz' : riemannZeta (1 - (starRingEnd ℂ) s) = 0 :=
+    zeta_strip_zero_reflect hz h0 h1
+  exact hne hz'
+
+/-- The symmetric off-line thin band for ζ: nonvanishing on
+`A/log^9 < Re < 1 - A/log^9`, `|Im| ≥ T₀`, except possibly on `Re = 1/2`.
+This is exactly RH (see `rh_iff_off_line_thin_band_zeta`). -/
+def OffLineThinBandZeta (A T₀ : ℝ) : Prop :=
+  ∀ s : ℂ, A / (Real.log |s.im|) ^ 9 < s.re →
+    s.re < 1 - A / (Real.log |s.im|) ^ 9 → T₀ ≤ |s.im| →
+    s.re ≠ 1 / 2 → riemannZeta s ≠ 0
+
+/-- **RH ⇔ zero-freeness on the symmetric off-line band (ζ-native, proven).**
+Forward uses only that an RH zero has `Re = 1/2`; reverse feeds
+`rh_iff_thin_region_zeta` (the thin region sits inside the band once
+`1/2 < Re < 1 - A/log^9` forces `A/log^9 < 1/2`). -/
+theorem rh_iff_off_line_thin_band_zeta {A T₀ : ℝ} (hA : 0 < A) (hT₀ : 3 < T₀)
+    (hzfr : ∀ s : ℂ, 3 < |s.im| →
+      1 - A / (Real.log |s.im|) ^ 9 ≤ s.re → s.re < 1 → riemannZeta s ≠ 0)
+    (hB : BoundedCoverZeta T₀) :
+    (∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.re = 1 / 2)
+      ↔ OffLineThinBandZeta A T₀ := by
+  constructor
+  · intro h s hgt hlt hT hne hz
+    have h3 : (3 : ℝ) < |s.im| := by linarith
+    have hlogpos : 0 < Real.log |s.im| := Real.log_pos (by linarith)
+    have hAdiv : 0 < A / (Real.log |s.im|) ^ 9 :=
+      div_pos hA (pow_pos hlogpos 9)
+    have h0 : 0 < s.re := by linarith
+    have h1 : s.re < 1 := by linarith
+    have hline := h s hz h0 h1
+    exact hne hline
+  · intro H
+    have hT : ThinRegionZeta A T₀ := by
+      intro s hs_gt hs_lt hT₀
+      have hband_lo : A / (Real.log |s.im|) ^ 9 < s.re := by
+        have hsmall : A / (Real.log |s.im|) ^ 9 < 1 / 2 := by linarith
+        linarith
+      have hne : s.re ≠ 1 / 2 := by linarith
+      exact H s hband_lo hs_lt hT₀ hne
+    exact (rh_iff_thin_region_zeta hA hT₀ hzfr hB).mpr hT
+
+/-! ## Certificate-data range audit: the `zeta_cert_data` grid is tail-only (machine-checked)
+
+`zeta_cert_data` (`rh_zeta_cert_data.lean`, ~400 entries) is sometimes mistaken for
+central-region fuel. It is not: every entry has imaginary part `y₀ ≥ 10`, i.e. it
+covers `Im s ∈ [10, 12]` (the tail, already closed by the mollified-Rouché bridge),
+while `BoundedCoverZeta T₀` with `T₀ = 10` needs `|Im s| < 10` (the central rectangle).
+The theorem below machine-checks the range (`decide`, same pattern as
+`zeta_cert_data_all_positive`); the disjointness from the central rectangle is then
+immediate by `linarith` on any `|s.im| < 10`. Do NOT cite this grid as central cover.
+
+By contrast `central_cert_data` (`rh_zeta_cert_central.lean`, 32 cells,
+`Re z ∈ [-10,10]`, `Im z ∈ [0.01,0.49]`) DOES cover the central rectangle, but its
+Float→ℝ bridge (`bridged_center_bound`/`bridged_deriv_bound` in
+`central_cover_trusted.lean`) is currently `sorry`/TRUSTED (mpmath 50 dps,
+margin ≥ 1.235e-02). Closing that bridge — one `Real`-analytic lower bound per cell
+via the `zeta_rigorous.lean` template (`eta_half_pos`, in `Tendsto` form, NOT
+`0 < ∑'`; grep before writing) — is the exact remaining leaf.
+-/
+
+set_option maxRecDepth 1000000 in
+/-- Every `zeta_cert_data` cell lies at `y₀ ≥ 10`: the grid is tail-only. -/
+theorem zeta_cert_data_y0_ge_ten :
+    ∀ t ∈ zeta_cert_data, (10.0 : Float) ≤ t.2.2.1 := by
+  decide
+
+set_option maxRecDepth 1000000 in
+/-- Every `zeta_cert_data` cell lies at `y₁ ≤ 12`: the grid is `Im ∈ [10,12]`. -/
+theorem zeta_cert_data_y1_le_twelve :
+    ∀ t ∈ zeta_cert_data, t.2.2.2.1 ≤ (12.0 : Float) := by
+  decide
 

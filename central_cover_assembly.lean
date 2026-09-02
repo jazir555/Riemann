@@ -177,6 +177,100 @@ def centralCover : XiCentralZeroFreeCover 10 where
   rects := centralZeroFreeRects
   covers := centralCovers
 
+/-! ## Proven inner-tiling combinatorics + numeric fencing data (sorry-free)
+
+The analytic `coversUpper` (§ above) remains open: `center_bound`/`deriv_bound`
+need the Float→ℝ bridge (`bridged_center_bound`/`bridged_deriv_bound` in
+`central_cover_trusted.lean`, currently `sorry`/TRUSTED, mpmath 50 dps).
+What IS provable here with no analysis is:
+
+1. the pure 1D tilings: the explicit `x`-intervals cover `(-10,10)` and the
+   explicit `y`-intervals cover `(0.01,0.49)` with strict inequalities;
+2. one numeric Taylor-fencing radius bound for the corner cell
+   `[-10,-7.5]×[0.01,0.2]` (`radius < 1.26`), plus the `ε>0`/`M≥0` margins
+   for that cell as `ℝ` facts (mirroring `central_cert_eps_pos`/`_M_nonneg`,
+   which are `Float`/`decide`).
+
+Gap precisely: the grid below covers only the INNER rectangle
+`(-10,10)×(0.01,0.49)`. It does NOT cover the boundary strips
+`(0,0.01]`, `[0.49,1/2)`, the endpoints `±10`, or (for `centralCovers`) the
+lower half — those need `BoundaryProofEngine.boundary_strip_nonvanishing_*`
+(real-axis fencing), the outer-bound lemma
+`upper_boundary_nonvanishing_from_outer_bound`, and conjugate symmetry
+(`XiLocalZeroFreeRect.conj`, whose two `R.y`-bound `sorry`s above remain).
+The per-cell `‖ξ‖` lower bounds themselves
+(`cell.center_bound`/`deriv_bound`) are the hard leaf and are NOT closed here;
+they need one `Real`-analytic bound per cell via the `zeta_rigorous.lean`
+template (`eta_half_pos`, `Tendsto` form).
+-/
+
+/-- The four `x`-intervals used by `centralCells` (as pure `ℝ` data, no proofs). -/
+def innerGridX : List (ℝ × ℝ) :=
+  [(-10, -5), (-6, 0), (-1, 5), (0, 10)]
+
+/-- The four `y`-intervals used by `centralCells` (upper half). -/
+def innerGridY : List (ℝ × ℝ) :=
+  [(0.3, 0.49), (0.2, 0.4), (0.1, 0.3), (0.01, 0.2)]
+
+/-- The `x`-intervals tile `(-10,10)` with strict inequalities (pure `linarith`). -/
+theorem innerGridX_covers {x : ℝ} (hx_lo : -10 < x) (hx_hi : x < 10) :
+    ∃ p ∈ innerGridX, p.1 < x ∧ x < p.2 := by
+  unfold innerGridX
+  by_cases h1 : x < -5
+  · exact ⟨(-10, -5), by simp, hx_lo, h1⟩
+  · push_neg at h1
+    by_cases h2 : x < 0
+    · exact ⟨(-6, 0), by simp, by linarith, h2⟩
+    · push_neg at h2
+      by_cases h3 : x < 5
+      · exact ⟨(-1, 5), by simp, by linarith, h3⟩
+      · push_neg at h3
+        exact ⟨(0, 10), by simp, by linarith, hx_hi⟩
+
+/-- The `y`-intervals tile `(0.01,0.49)` with strict inequalities. -/
+theorem innerGridY_covers {y : ℝ} (hy_lo : 0.01 < y) (hy_hi : y < 0.49) :
+    ∃ q ∈ innerGridY, q.1 < y ∧ y < q.2 := by
+  unfold innerGridY
+  by_cases h1 : 0.3 < y
+  · exact ⟨(0.3, 0.49), by simp, h1, hy_hi⟩
+  · push_neg at h1
+    by_cases h2 : 0.2 < y
+    · exact ⟨(0.2, 0.4), by simp, h2, by linarith⟩
+    · push_neg at h2
+      by_cases h3 : 0.1 < y
+      · exact ⟨(0.1, 0.3), by simp, h3, by linarith⟩
+      · push_neg at h3
+        exact ⟨(0.01, 0.2), by simp, hy_lo, by linarith⟩
+
+/-- Combined inner-tile: every `(x,y) ∈ (-10,10)×(0.01,0.49)` lies strictly
+inside some grid `x`-interval and some (possibly different) grid `y`-interval.
+Upgrading the pair to a SINGLE 2D cell of the 16-cell product is immediate
+(the product list contains all 16 combos); the analytic `no_zero` for that
+cell is the remaining leaf. -/
+theorem innerGrid_covers_inner {x y : ℝ}
+    (hx_lo : -10 < x) (hx_hi : x < 10)
+    (hy_lo : 0.01 < y) (hy_hi : y < 0.49) :
+    (∃ p ∈ innerGridX, p.1 < x ∧ x < p.2) ∧
+    (∃ q ∈ innerGridY, q.1 < y ∧ y < q.2) :=
+  ⟨innerGridX_covers hx_lo hx_hi, innerGridY_covers hy_lo hy_hi⟩
+
+/-- Numeric radius bound for the corner cell `[-10,-7.5]×[0.01,0.2]`:
+`dx = 1.25`, `dy = 0.095`, `radius = √(1.25²+0.095²) = √1.571525 < 1.26`.
+Pure `Real` arithmetic; the fencing margin `ε + M·radius ≤ ‖ξ(center)‖`
+for this cell must therefore beat `ε + M·1.26` (with `ε,M` below). -/
+theorem sample_cell_radius_bound :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) < 1.26 := by
+  have hlt : (1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2 < (1.26 : ℝ) ^ 2 := by norm_num
+  have h := Real.sqrt_lt_sqrt (by positivity) hlt
+  rwa [Real.sqrt_sq (by norm_num)] at h
+
+/-- `ε>0` for the corner cell (first `central_cert_data` entry,
+`ε = 0.006177051945015177`): the Taylor-fencing residual is positive as `ℝ`. -/
+theorem sample_cell_eps_pos : (0 : ℝ) < 0.006177051945015177 := by norm_num
+
+/-- `M≥0` for the corner cell (`M = 0.04902931207867841`). -/
+theorem sample_cell_M_nonneg : (0 : ℝ) ≤ 0.04902931207867841 := by norm_num
+
 end CentralCoverAssembly
 
 end

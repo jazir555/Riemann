@@ -1,7 +1,7 @@
 import Mathlib
 import riemann_hypothesis
 
-set_option maxHeartbeats 1000000
+set_option maxHeartbeats 2000000
 
 open Complex
 open Filter
@@ -322,6 +322,44 @@ theorem Hyperbolic_of_const_mul (c : ℂ) (hc : c ≠ 0) {p : Polynomial ℂ}
   refine hp x ?_
   rw [Polynomial.eval_mul, Polynomial.eval_C, hx, mul_zero]
 
+/-- Scaling by a nonzero constant preserves hyperbolicity (forward direction).
+    Classical: the Laguerre–Pólya class is closed under nonzero scaling.
+    Feeds the Pólya shift-reduction (`jensenPoly_derivative` produces a
+    `C (d+1) * J` factor that must be cancelled/introduced). -/
+theorem Hyperbolic_const_mul {c : ℂ} (hc : c ≠ 0) {p : Polynomial ℂ}
+    (hp : Hyperbolic p) : Hyperbolic (Polynomial.C c * p) := by
+  intro x hx
+  have h' : Polynomial.eval x p = 0 := by
+    rw [Polynomial.eval_mul, Polynomial.eval_C] at hx
+    exact (mul_eq_zero.mp hx).resolve_left hc
+  exact hp x h'
+
+/-- The product of two hyperbolic polynomials is hyperbolic.
+    Classical: the Laguerre–Pólya class is closed under multiplication.
+    Proof: `(p*q).eval x = 0` implies `p.eval x = 0` or `q.eval x = 0`; in either
+    case `x.im = 0`. -/
+theorem Hyperbolic_mul {p q : Polynomial ℂ} (hp : Hyperbolic p) (hq : Hyperbolic q) :
+    Hyperbolic (p * q) := by
+  intro x hx
+  have : p.eval x = 0 ∨ q.eval x = 0 := by
+    have h := hx
+    rw [Polynomial.eval_mul] at h
+    exact (mul_eq_zero.mp h)
+  rcases this with hp0 | hq0
+  · exact hp x hp0
+  · exact hq x hq0
+
+/-- Degree-0 Jensen section: `J_{0,n} = C (γₙ)`.
+    Hence `Hyperbolic (jensenPoly 0 n) ↔ taylorCoeff n ≠ 0`
+    (constant nonzero polynomials are vacuously hyperbolic; the zero
+    polynomial is not). -/
+theorem jensenPoly_zero (n : ℕ) :
+    jensenPoly 0 n = Polynomial.C ((taylorCoeff n : ℝ) : ℂ) := by
+  simp only [jensenPoly]
+  rw [Finset.range_one, Finset.sum_singleton, Nat.choose_zero_right, Nat.cast_one,
+    one_mul, Polynomial.monomial_zero_left, Polynomial.map_C]
+  simp
+
 /-- If all Taylor coefficients are nonzero, every `jensenPoly d n` has degree `d`. -/
 theorem jensenPoly_natDegree (hC : ∀ k, taylorCoeff k ≠ 0) (d n : ℕ) :
     (jensenPoly d n).natDegree = d := by
@@ -464,6 +502,130 @@ theorem derivative_hyperbolic {p : Polynomial ℂ} (hp : Hyperbolic p)
     · linarith
   exact hwim hwim0
 
+/-- **Hermite–Poulain lemma**: for a hyperbolic polynomial `P` of positive degree
+    and a real constant `a`, the polynomial `P + a·P'` is hyperbolic.
+
+    This is the fundamental real-rootedness-preserving operator. It is the
+    mechanism behind the Pólya direction of the Jensen criterion: the Jensen
+    differential identity `J'_{d+1,n} = (d+1)·J_{d,n+1}` shows that the Jensen
+    sections are obtained from one another by exactly this class of operators,
+    so hyperbolicity propagates. Classical (Hermite, Poulain, 19th century).
+
+    Proof: if `(P + a·P')(w) = 0` with `w.im ≠ 0`, then `P(w) ≠ 0` (all roots of `P`
+    are real), so `P'(w)/P(w) = -1/a` (real when `a ≠ 0`). But for a hyperbolic `P`,
+    `P'(w)/P(w) = Σ (w - r)⁻¹` over real roots `r`; its imaginary part is
+    `-w.im · Σ ‖w - r‖⁻² ≠ 0`, contradiction. (The `a = 0` case is Gauss–Lucas.) -/
+theorem hyperbolic_add_smul_derivative {P : Polynomial ℂ} (hp : Hyperbolic P)
+    (hdeg : 0 < P.natDegree) (a : ℝ) :
+    Hyperbolic (P + Polynomial.C (a : ℂ) * P.derivative) := by
+  intro w hw
+  by_cases ha : a = 0
+  · subst ha
+    simp only [Complex.ofReal_zero, Polynomial.C_0, zero_mul, add_zero] at hw
+    exact hp w hw
+  · by_contra hwim
+    have hp0 : P ≠ 0 := by
+      intro h; rw [h, Polynomial.natDegree_zero] at hdeg; exact (lt_irrefl 0).elim hdeg
+    have hsplit : Polynomial.Splits P := IsAlgClosed.splits P
+    have hcard : P.roots.card = P.natDegree := Polynomial.splits_iff_card_roots.mp hsplit
+    have hrootsne : P.roots ≠ 0 := by
+      intro h; rw [h] at hcard; simp at hcard; omega
+    have hrootre : ∀ r ∈ P.roots, r.im = 0 := fun r hr =>
+      hp r (Polynomial.isRoot_of_mem_roots hr)
+    have hwne : ∀ r ∈ P.roots, w ≠ r := by
+      intro r hr h; exact hwim (h ▸ hrootre r hr)
+    have hfac : P = Polynomial.C P.leadingCoeff *
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod :=
+      hsplit.eq_prod_roots
+    have hlc : P.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp0
+    have hlc' : (P.leadingCoeff : ℂ) ≠ 0 := by exact_mod_cast hlc
+    have hQeval :
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w ≠ 0 := by
+      rw [Polynomial.eval_multiset_prod, Multiset.map_map]
+      apply Multiset.prod_ne_zero
+      intro hmem
+      rw [Multiset.mem_map] at hmem
+      obtain ⟨r, hr, hz⟩ := hmem
+      simp only [Function.comp_apply, Polynomial.eval_sub, Polynomial.eval_X,
+        Polynomial.eval_C] at hz
+      exact hwne r hr (sub_eq_zero.mp hz)
+    have heval : (Polynomial.C (a : ℂ) * P.derivative).eval w = - P.eval w := by
+      have h1 := hw
+      rw [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C] at h1
+      rw [Polynomial.eval_mul, Polynomial.eval_C]
+      rw [← add_eq_zero_iff_eq_neg]
+      rw [add_comm]
+      exact h1
+    have hPne : P.eval w ≠ 0 := by
+      intro hP0
+      have h1' : P.eval w = (P.leadingCoeff : ℂ) *
+          (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w := by
+        conv_lhs => rw [hfac]
+        rw [Polynomial.eval_mul, Polynomial.eval_C]
+      have : (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w = 0 := by
+        calc (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w
+            = (P.leadingCoeff : ℂ)⁻¹ * P.eval w := by
+              rw [h1']
+              field_simp [hlc']
+          _ = (P.leadingCoeff : ℂ)⁻¹ * 0 := by rw [hP0]
+          _ = 0 := by simp
+      exact hQeval this
+    have hquot : P.derivative.eval w / P.eval w = -1 / (a : ℂ) := by
+      have hd : (a : ℂ) ≠ 0 := by exact_mod_cast ha
+      have hP0 : P.eval w ≠ 0 := hPne
+      rw [div_eq_div_iff hP0 hd]
+      field_simp [hd]
+      have h := heval
+      rw [Polynomial.eval_mul, Polynomial.eval_C] at h
+      linear_combination h
+    have hderiv : P.derivative = Polynomial.C P.leadingCoeff *
+        (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.derivative := by
+      conv_lhs => rw [hfac]
+      rw [Polynomial.derivative_C_mul]
+    have hsum : (P.roots.map fun r => (w - r)⁻¹).sum = -1 / (a : ℂ) := by
+      have h1 := deriv_prod_identity P.roots w hwne
+      have hsum_mul : P.derivative.eval w = P.eval w * (P.roots.map fun r => (w - r)⁻¹).sum := by
+        let lc := (P.leadingCoeff : ℂ)
+        let q := (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.eval w
+        let qd := (P.roots.map fun r => Polynomial.X - Polynomial.C r).prod.derivative.eval w
+        let σ := (P.roots.map fun r => (w - r)⁻¹).sum
+        have hP'_eval : P.derivative.eval w = lc * qd := by
+          rw [hderiv, Polynomial.eval_mul, Polynomial.eval_C]
+        have hP_eval : P.eval w = lc * q := by
+          rw [hfac, Polynomial.eval_mul, Polynomial.eval_C]
+        have h1opaque : qd = q * σ := h1
+        rw [hP'_eval, h1opaque, ← mul_assoc, ← hP_eval]
+      have hP0 : P.eval w ≠ 0 := hPne
+      have hsum_div : (P.roots.map fun r => (w - r)⁻¹).sum = P.derivative.eval w / P.eval w := by
+        have hsum_mul_eq : P.derivative.eval w = P.eval w * (P.roots.map fun r => (w - r)⁻¹).sum := hsum_mul
+        have : (P.roots.map fun r => (w - r)⁻¹).sum * P.eval w = P.derivative.eval w := by
+          rw [hsum_mul_eq]
+          ring
+        exact (eq_div_iff_mul_eq hP0).mpr this
+      rw [hsum_div, hquot]
+    have hSim : ((P.roots.map fun r => (w - r)⁻¹).sum).im = 0 := by
+      rw [hsum]
+      simp
+    have hSim' : ((P.roots.map fun r => (w - r)⁻¹).sum).im =
+        -w.im * (P.roots.map fun r => (normSq (w - r))⁻¹).sum := by
+      exact sum_im_inv w P.roots hrootre hwne
+    have hpos : 0 < (P.roots.map fun r => (normSq (w - r))⁻¹).sum := by
+      apply msum_pos
+      · intro x hx
+        rw [Multiset.mem_map] at hx
+        obtain ⟨r, hr, rfl⟩ := hx
+        have hne0 : w - r ≠ 0 := sub_ne_zero.mpr (hwne r hr)
+        exact inv_pos.mpr (Complex.normSq_pos.mpr hne0)
+      · simpa [Multiset.map_eq_zero] using hrootsne
+    have hwim0 : w.im = 0 := by
+      rw [hSim'] at hSim
+      have : -w.im * (P.roots.map fun r => (normSq (w - r))⁻¹).sum = 0 := by
+        linarith
+      rcases mul_eq_zero.mp this with h | h
+      · exact neg_eq_zero.mp h
+      · linarith
+    exact hwim hwim0
+
 /-- **Conditional shift reduction** (Pólya–GORZ algebraic mechanism): under the
     non-degeneracy hypothesis `hC : ∀ k, taylorCoeff k ≠ 0` (all Taylor coefficients
     of Ξ nonzero, so every `jensenPoly d n` has full degree `d`), hyperbolicity
@@ -528,6 +690,16 @@ theorem tail_nonvanishing_iff_jensen :
       z.im ≠ 0 → xiShifted z ≠ 0)
       ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
   sorry
+
+/-- Unconditional bridge identity: `taylorCoeff 0` is the real part of the
+    completed zeta value at `1/2`. This isolates the analytic content of
+    `taylorCoeff_zero_ne_zero` to a single transcendental nonvanishing fact,
+    fed by `zeta_rigorous.eta_half_pos` (Tendsto form) via
+    `completedRiemannZeta = Gammaℝ * riemannZeta` and
+    `completedRiemannZeta₀ = completedRiemannZeta + 1/s + 1/(1-s)`. -/
+theorem taylorCoeff_zero_eq :
+    taylorCoeff 0 = (completedRiemannZeta₀ (1/2 : ℂ)).re := by
+  simp [taylorCoeff, xiMathlibShifted, xiMathlib]
 
 /-- The 0-th Taylor coefficient of the shifted xi function is nonzero.
     `taylorCoeff 0 = (completedRiemannZeta₀ (1/2)).re`, and since
