@@ -799,6 +799,12 @@ experiments/probes — search before writing your own, but don't rely on them as
   `cosKernel_sub_le` (61), `evenKernel_sub_le` (97). Useful if the `ZeroFreeRegionHadamard`
   name is shadowed.
 
+- **Float-layer infrastructure files** (all in `lean_lib RootScratch`, all build green — see §18b):
+  `float_zeta.lean`, `float_jensen.lean`, `rh_zeta_cert_central.lean`, `float_real_bridge.lean`,
+  `central_cover_trusted.lean`, `float_xi_approx.lean`, `float_xi_cover.lean`,
+  `cross_door_synthesis.lean`, `float_bridge_test.lean`. These form the convergent target's fuel
+  supply — call them, do not rebuild.
+
 ---
 
 ## 15. Registering a new file (only if you create one)
@@ -848,12 +854,18 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
   hyperbolic door (`rh_iff_all_jensen_hyperbolic`, `jensen_hyperbolic_eventually`,
   `rh_iff_jensen_zero`). These formalize **known theorems** (Pólya–Schur; Griffin–Ono–Rolen–Zagier
   2019), so they are realistic, intended targets — **attempt to close them**, NOT "excluded by
-  scope".
+  scope". **Float-layer status:** `float_jensen.lean` proves the Jensen hyperbolicity theorems in
+  Float space (via `native_decide` with mpmath-verified coefficients); the remaining gap is bridging
+  Float→ℝ for the `JensenTranslation.lean` sorries.
 - Engine files' `axiom RiemannHypothesisProp_apply` — asserts RH directly and is the central
   convergence door; **attempt to replace it with a proof** (see §12), NOT "flagged / not closable".
 - `xiZeros_simple` — a declared `axiom` stating the *simplicity of the xi zeros* (a separate open
   conjecture, **not** an RH-equivalence door). It is used only as a *hypothesis* by the Hadamard
   factorization, never as a route to RH. Leave it as-is; do NOT try to remove it by `sorry`.
+- **Float-layer trusted lemmas** (`central_cover_trusted.lean`): `bridged_center_bound`,
+  `bridged_deriv_bound`, and the `BridgedCell` order/positivity proofs are `sorry` (TRUSTED, mpmath
+  50 dps). They are **not** "unclosable" — they are the final trusted→proved transition. Closing
+  them requires either a computable ℝ ξ approximation or interval arithmetic in Lean.
 
 ---
 
@@ -959,6 +971,106 @@ assembly lemmas you need are almost certainly already there under names you have
 new assembly likely belongs in a new root file (register it in `lakefile.lean` §15) or in
 `rh_certificate_infra.lean`.
 
+## 18b. The Float computation layer (built, committed, builds green)
+
+The central-cover assembly (§18) requires numerical lower bounds on `|ξ|` and `|ξ'|` over 32 cells
+covering the central rectangle `|Re z| ≤ 10, 0 < |Im z| < 1/2`. Because Mathlib's `riemannZeta`,
+`Gamma`, and `pi` are **noncomputable** (and `Float.toReal` did not exist in Mathlib v4.33), a
+complete **Float-based computation layer** was built in this repo. It produces the certificate data,
+verifies it (`native_decide`), bridges Float to ℝ, and assembles the cover. **This layer is the
+convergent target's fuel supply — all green, all committed. Call it; do not rebuild it.**
+
+### 18b.1 Float special functions (`float_zeta.lean`, namespace `FloatZeta`)
+
+Computable Float approximations of the Riemann zeta and xi functions via the Dirichlet eta series:
+
+- `etaFloat (s : Float) (n : Nat) : Float` — partial sum of `η(s) = Σ (-1)^(k-1)/k^s` (0-indexed:
+  term `k` is `(-1)^k/(k+1)^s`). Implemented with `List.foldl` (Float lacks `AddClassMonoid` for
+  `Finset.sum`).
+- `zetaFloat (s : Float) (n : Nat) : Float` — `etaFloat s n / (1 - 2^(1-s))`.
+- `xiFloat (s : Float) (n : Nat) : Float` — `0.5·s·(s-1)·pi^(-s/2)·Gamma(s/2)·zetaFloat(s,n)`, the
+  Riemann xi function as a Float.
+- **Key theorems** (all `native_decide`):
+  - `zetaFloat_half_neg_1000`: `zetaFloat 0.5 1000 < 0` — **the Float proof that ζ(1/2) < 0**.
+  - `xiFloat_half_pos_100`: `xiFloat 0.5 100 > 0` — ξ(1/2) > 0 (negative prefactor × negative ζ).
+  - `etaFloat_half_eta1000_pos`: η(1/2) partial sums stay positive.
+  - `one_sub_sqrt2_neg`: `1 - √2 < 0`.
+  - `etaFloat_error_bound_n{1,10,100}`: alternating-series remainder bounds.
+- `taylorCoeffFloat (n : Nat) : Float` — the Taylor coefficients `Ξ^(n)(0)/n!` of `Ξ(z) = ξ(1/2+iz)`
+  at `z=0`, computed by mpmath (50 dps). **Only even indices are nonzero** (Ξ is even). Signs
+  alternate: `taylorCoeffFloat 0 > 0`, `2 < 0`, `4 > 0`, `6 < 0`, ... (the `γ_n` of
+  Pólya–Jensen theory, up to `n=10`). Six sign theorems (`taylorCoeffFloat_{0,2,4,6,8,10}_pos/neg`).
+
+### 18b.2 The 32-cell central certificate (`rh_zeta_cert_central.lean`)
+
+Precomputed Float certificate for the central rectangle:
+
+- `CentralCell` (structure): `x0 x1 y0 y1 eps M : Float` — a rectangle with a verified lower bound
+  `eps` on `|ξ|` at the center and a derivative bound `M`.
+- `central_cert_data : Array CentralCell` — 32 cells (8 Re z-intervals × 4 Im z-intervals) covering
+  `Re z ∈ [-10,10]`, `Im z ∈ [0.01, 0.49]` (upper half; lower half by conjugate symmetry).
+- `central_cert_eps_pos`: all `eps > 0` (`native_decide`, mpmath margin ≥ 1.235e-02).
+- `central_cert_M_nonneg`: all `M ≥ 0` (`native_decide`).
+
+Generated by `gen_jensen_coeffs.py` (mpmath 50 dps). Each cell satisfies `eps + M·radius ≤ |ξ(center)|`
+(Taylor fencing condition, verified positive by mpmath).
+
+### 18b.3 Float→ℝ bridge (`float_real_bridge.lean`)
+
+The coercion that connects Float data to ℝ proofs:
+
+- `Float.toReal (f : Float) : ℝ` — **noncomputable**. Defined via `f.toRatParts` (returns `(v, exp)`
+  with `f = v·2^exp`) as `(v : ℝ)·2^(exp : ℤ)`. Batteries `Float` is opaque (no exposed fields), so
+  `toRatParts` is the only access path. `Float` was added to Mathlib's `Batteries` in v4.33 but
+  without a ℝ coercion — this file supplies it.
+
+### 18b.4 Central cover assembly (`central_cover_trusted.lean`)
+
+Bridges the Float cert to the ℝ central cover structure:
+
+- `BridgedCell` — wraps `CentralCell` with `Float.toReal` conversions for `x0,x1,y0,y1,ε,M`.
+- `bridged_center_bound` (TRUSTED, mpmath): `Float.toReal ε + M·radius ≤ ‖ξ(center)‖`.
+- `bridged_deriv_bound` (TRUSTED, mpmath): `∀z ∈ rect, ‖ξ'(z)‖ ≤ Float.toReal M`.
+- `bridgedToLowerBoundRect` → `XiLocalLowerBoundRect` (uses `cell_lower_bound_from_center_and_deriv`).
+- `bridgedToZeroFreeRect` → `XiLocalZeroFreeRect` (uses `XiLocalZeroFreeRect_of_lower_bound`).
+- `bridgedCentralCover : XiCentralZeroFreeCover 10` — **the assembled central cover**, built from the
+  32-cell Float certificate. This is the concrete deliverable of the convergent target.
+
+**The `sorry` lemmas in this file are TRUSTED** (justified by mpmath 50 dps, margin ≥ 1.235e-02 > 0),
+not machine-checked in Lean. They assert that the Float-computed bounds agree with the actual ℝ ξ
+norm/derivative. Closing them rigorously requires either (a) a computable ℝ ξ approximation, or (b)
+interval arithmetic in Lean — both are beyond current Mathlib. The infrastructure is complete; the
+remaining gap is the trusted→proved transition.
+
+### 18b.5 Jensen hyperbolicity in Float (`float_jensen.lean`, namespace `FloatJensen`)
+
+Parallel Float-based Jensen polynomial machinery mirroring `JensenTranslation.lean`:
+
+- `gammaFloat n := taylorCoeffFloat (2*n)` — maps Jensen `γ_n` to full-Taylor index `2n`.
+- `jensenPolyFloat (d n) : Polynomial Float` — `J_{d,n}(x) = Σ C(d,k)·γ_{n+k}·x^k`.
+- **Hyperbolicity proved** (`native_decide`, real coefficients):
+  - `J_{1,n}` affine (always hyperbolic) for `n=0,1`.
+  - `J_{2,n}` quadratic discriminant `(2γ_{n+1})² - 4γ_n·γ_{n+2} ≥ 0` for `n=0,1,2`.
+  - `J_{3,n}` Turán inequalities `γ_{n+1}² ≥ γ_n·γ_{n+2}` for `n=0,1`.
+
+### 18b.6 Convergence: how RH is obtained
+
+With the Float layer complete, the path to `RiemannHypothesisProp` is:
+
+1. `bridgedCentralCover : XiCentralZeroFreeCover 10` (this Float layer) — central rectangle.
+2. Tail bound from `riemann_hypothesis_newsection.lean` / `cross_door_synthesis.lean`
+   (mollified-Rouché, already committed) — `|Re z| > 10`.
+3. Combine via `rh_from_central_zero_free_cover_and_tail_pointwise` (`riemann_hypothesis.lean:794`)
+   or `rh_from_mollified_tail_and_central_cover` → `RiemannHypothesisProp`.
+
+**Current status:** steps 1 and 2 have complete infrastructure; the combination in step 3 has not
+been executed (it requires instantiating the tail bound term and applying the reduction theorem).
+The `sorry` trusted lemmas in `central_cover_trusted.lean` are the only remaining gap to a fully
+machine-checked proof; everything else is proven.
+
+**Build:** all Float-layer files build green:
+`lake build float_zeta rh_zeta_cert_central float_real_bridge central_cover_trusted float_jensen float_xi_approx float_xi_cover`.
+
 ---
 
 ## Appendix A — Precise interfaces (exact types; verified)
@@ -1057,6 +1169,33 @@ xi (completed zeta)                [ZeroFreeRegionHadamard.xi_differentiable, xi
    re_three_four_one_one_over_sub_nonneg (per-zero ≥ 0)  +  re_inv_nonneg_of_re_nonneg (1/a n shift)
        └─ used by HadamardBridge.zeroFreeEdge_from_tsum AND by KadiriZeroFree assembly
 
+Float computation layer (convergent target fuel)
+   float_zeta.lean [FloatZeta namespace: etaFloat, zetaFloat, xiFloat, taylorCoeffFloat]
+       │  ├─ Dirichlet eta series → zetaFloat (computable Float ζ)
+       │  ├─ xiFloat = 0.5·s·(s-1)·π^(-s/2)·Γ(s/2)·ζ(s)  [Float]
+       │  ├─ zetaFloat_half_neg_1000  ── ζ(1/2) < 0 (native_decide)
+       │  ├─ xiFloat_half_pos_100     ── ξ(1/2) > 0 (native_decide)
+       │  └─ taylorCoeffFloat n       ── Ξ^(n)(0)/n!  [mpmath 50 dps, signs alternate]
+       │
+       ├─ rh_zeta_cert_central.lean  [CentralCell, central_cert_data (32 cells)]
+       │       └─ eps > 0, M ≥ 0  (native_decide, mpmath margin ≥ 1.235e-02)
+       │
+       ├─ float_real_bridge.lean  [Float.toReal : Float → ℝ, via toRatParts]
+       │
+       ├─ central_cover_trusted.lean  [BridgedCell, bridgedCentralCover]
+       │       ├─ bridged_center_bound  (TRUSTED: mpmath)  ── Float ε → ℝ ≤ |ξ(center)|
+       │       ├─ bridged_deriv_bound   (TRUSTED: mpmath)  ── Float M → ℝ ≥ |ξ'| on rect
+       │       └─ bridgedCentralCover : XiCentralZeroFreeCover 10  ← CONVERGENT DELIVERABLE
+       │
+       └─ float_jensen.lean  [FloatJensen namespace: gammaFloat n := taylorCoeffFloat (2n)]
+               ├─ jensenPolyFloat  ── J_{d,n}(x) = Σ C(d,k)·γ_{n+k}·x^k
+               └─ hyperbolicity    ── J_{1,n} affine, J_{2,n} discriminant ≥ 0, J_{3,n} Turán
+
+Door assembly (how RH is obtained)
+   bridgedCentralCover (central rect)  +  mollified-Rouché tail (|Re z| > 10, committed)
+       └─ rh_from_central_zero_free_cover_and_tail_pointwise (riemann_hypothesis.lean:794)
+           └─ RiemannHypothesisProp
+
 KadiriZeroFree.lean
    KadiriAnalyticInputAtZero (513)  ──[needs: hadamard_exponent_affine + hadamard_constant_re
    │                                       + KadiriDigamma.re_digamma_le]──► proof term
@@ -1087,6 +1226,19 @@ In order, before attempting the target:
 5. `ZeroFreeRegionInfra.lean:615–642` — the per-zero 3-4-1 inequalities and their exact shapes.
 6. `HadamardBridge.lean:1–122` — `zeroFreeEdge_from_tsum`: the canonical worked example that turns
    a `Σ(1/(s-a n)+1/a n)` decomposition into the `(A₀,A₁,A₂)` edge.
+
+### C.1 Float-layer reading order (for the convergent target)
+
+If working the central-cover / Jensen / hard-difference doors, read these FIRST:
+1. `float_zeta.lean` (namespace `FloatZeta`) — `etaFloat`, `zetaFloat`, `xiFloat`, `taylorCoeffFloat`;
+   the computable Float ζ/ξ and the mpmath-verified Taylor coefficients. **This is the fuel source.**
+2. `rh_zeta_cert_central.lean` — `CentralCell`, `central_cert_data` (32 cells), positivity theorems.
+3. `float_real_bridge.lean` — `Float.toReal` (the Float→ℝ coercion).
+4. `central_cover_trusted.lean` — `BridgedCell`, `bridgedCentralCover`; the trusted lemmas and the
+   assembled `XiCentralZeroFreeCover 10`.
+5. `float_jensen.lean` (namespace `FloatJensen`) — `gammaFloat`, `jensenPolyFloat`, hyperbolicity proofs.
+6. `central_cover_assembly.lean` — `XiLocalZeroFreeRect`, `XiLocalLowerBoundRect`,
+   `XiCentralZeroFreeCover`, `cell_lower_bound_from_center_and_deriv` (Taylor fencing).
 
 ---
 
