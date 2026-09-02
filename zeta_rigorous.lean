@@ -39,7 +39,12 @@ theorem eta_half_pos :
   have h_tsum_eq : L = ∑' k : ℕ, ((-1 : ℤ) ^ k : ℝ) / sqrt (k + 1 : ℝ) := by
     sorry -- TODO: prove L = tsum via Summable
   have h_bound : etaPartial 2 ≤ L := by
-    sorry -- TODO: via Antitone.alternating_series_le_tendsto
+    have h_raw : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) ≤ L :=
+      Antitone.alternating_series_le_tendsto hL h_anti 1
+    have h_eq : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) = etaPartial 2 := by
+      simp [etaPartial, f]
+      ring
+    linarith
   have h_eps : 0 < etaPartial 2 := by
     have h_eq : etaPartial 2 = 1 - 1 / Real.sqrt 2 := by
       simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
