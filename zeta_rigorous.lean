@@ -202,3 +202,175 @@ theorem eta_half_two_sided_tight :
       atTop (𝓝 L) ∧ etaPartial 2 ≤ L ∧ L ≤ etaPartial 3 ∧ 0 < L := by
   obtain ⟨L, hL, hpos⟩ := eta_half_pos
   exact ⟨L, hL, eta_half_ge_S2 L hL, eta_half_le_S3 L hL, hpos⟩
+
+/-!
+## Dirichlet-eta API feeder (partial).
+
+Goal feeder: `riemannZeta (1/2 : ℂ) = (L : ℂ) / (1 - √2)` where `L` is the
+`Tendsto` alternating-series limit from `eta_half_pos` (here `√2` is
+`((Real.sqrt 2 : ℝ) : ℂ)`).
+
+Status of each step:
+
+(a) Eta partial sums / limit: `etaPartial` exists above; here we add the `etaTerm` /
+    `etaTermℂ` / `etaPartialℂ` API and restate `eta_half_pos` through it
+    (`eta_half_pos_etaTerm`, `eta_complex_tendsto`).
+
+(b) HasSum / tsum links, proved ONLY in the valid directions:
+    * `eta_hasSum_imp_tendsto`: `HasSum f L → Tendsto` of `range` partial sums —
+      always true (`HasSum.tendsto_sum_nat`).
+    * `eta_tendsto_tsum_eq_of_summable`: `Tendsto + Summable → L = ∑'`.
+    The converse (`Tendsto` of `range` sums `→ HasSum`) is FALSE without `Summable`:
+    `HasSum` is unconditional convergence over all finite sets, while `Tendsto` of
+    `range` sums is strictly weaker for conditionally convergent series (cf.
+    `Summable.hasSum_iff_tendsto_nat`, whose reverse direction needs `Summable`).
+    In particular the eta series is NOT summable (`eta_not_summable`, via the
+    `p = 1/2` p-series `Real.summable_one_div_nat_rpow`), so its `tsum` is `0`
+    (`eta_tsum_eq_zero` via `tsum_eq_zero_of_not_summable`) — the `0 < ∑'` tsum
+    form is FALSE, and only the `Tendsto` form carries the positivity.
+
+(c) The eta–zeta identity `η(s) = (1 - 2 ^ (1 - s)) * ζ(s)`: for `1 < s.re` this is
+    a Dirichlet-series rearrangement available from Mathlib's Hurwitz API
+    (`HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re`, `LSeriesHasSum_one`), but
+    Mathlib has NO Dirichlet-eta API (`dirichletEta` greps empty) and NO
+    `η = (1 - 2 ^ (1 - s)) ζ` identity for `re > 0`. Transporting the identity from
+    `re > 1` to `s = 1/2` needs analytic continuation (the eta side as an
+    alternating Hurwitz difference, entire via
+    `HurwitzZeta.differentiable_hurwitzZeta_sub_hurwitzZeta`, plus uniqueness of
+    analytic continuation) — that bridge is NOT in Mathlib and is the remaining
+    gap (see the `hEta` hypothesis below).
+
+(d) We therefore commit the CONDITIONAL bridge: `zeta_half_eq_eta_div_of_identity`
+    and the packaged `zeta_half_feeder_of_identity`, which turn the single
+    analytic-continuation hypothesis `hEta` into
+    `riemannZeta (1/2 : ℂ) = (L : ℂ) / (1 - √2)` with `0 < L`.
+-/
+
+/-- Dirichlet eta term at `s = 1/2` (real): `(-1)^k / √(k+1)`. -/
+def etaTerm (k : ℕ) : ℝ := ((-1 : ℤ) ^ k : ℝ) / Real.sqrt (k + 1 : ℝ)
+
+/-- Complex Dirichlet eta term: the real term coerced to `ℂ`. -/
+def etaTermℂ (k : ℕ) : ℂ := (etaTerm k : ℂ)
+
+/-- Complex eta partial sums. -/
+def etaPartialℂ (n : ℕ) : ℂ := ∑ i ∈ Finset.range n, etaTermℂ i
+
+/-- `etaTerm` partial sums agree with `etaPartial`. -/
+theorem etaTerm_sum_eq_etaPartial (n : ℕ) :
+    (∑ i ∈ Finset.range n, etaTerm i) = etaPartial n := by
+  simp only [etaTerm, etaPartial]
+
+/-- Restatement of `eta_half_pos` through the `etaTerm` API. -/
+theorem eta_half_pos_etaTerm :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, etaTerm i) atTop (𝓝 L) ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, by simpa only [etaTerm] using hL, hpos⟩
+
+/-- VALID HasSum → Tendsto direction (true with no summability hypothesis). -/
+theorem eta_hasSum_imp_tendsto {f : ℕ → ℝ} {L : ℝ} (h : HasSum f L) :
+    Tendsto (fun n => ∑ i ∈ Finset.range n, f i) atTop (𝓝 L) :=
+  h.tendsto_sum_nat
+
+/-- VALID Tendsto + Summable → `L = tsum` link. The `Summable` hypothesis is essential. -/
+theorem eta_tendsto_tsum_eq_of_summable {f : ℕ → ℝ} {L : ℝ}
+    (hT : Tendsto (fun n => ∑ i ∈ Finset.range n, f i) atTop (𝓝 L))
+    (hS : Summable f) : L = ∑' i, f i :=
+  tendsto_nhds_unique hT hS.hasSum.tendsto_sum_nat
+
+/-- Norm of the eta term. -/
+theorem etaTerm_norm (k : ℕ) : ‖etaTerm k‖ = 1 / Real.sqrt ((k : ℝ) + 1) := by
+  have h1 : (((-1 : ℤ) ^ k : ℝ)) = (-1 : ℝ) ^ k := by push_cast; ring
+  simp only [etaTerm, h1, norm_div, norm_pow, norm_neg, norm_one, one_pow,
+    Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+
+/-- Shifted harmonic series diverges (from Mathlib's `Real.tendsto_sum_range_one_div_nat_succ_atTop`). -/
+theorem harm_shift_not_summable : ¬Summable (fun n : ℕ => 1 / ((n : ℝ) + 1)) := by
+  rw [not_summable_iff_tendsto_nat_atTop_of_nonneg (fun n => by positivity)]
+  exact Real.tendsto_sum_range_one_div_nat_succ_atTop
+
+/-- The absolute eta series diverges by comparison (`1/(n+1) ≤ 1/√(n+1)`). -/
+theorem eta_norm_not_summable : ¬Summable (fun k => ‖etaTerm k‖) := by
+  have hle : ∀ n : ℕ, 1 / ((n : ℝ) + 1) ≤ ‖etaTerm n‖ := by
+    intro n
+    rw [etaTerm_norm, Real.sqrt_eq_rpow]
+    have hy1 : (1 : ℝ) ≤ (n : ℝ) + 1 := by
+      have hnn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+      linarith
+    have hpos : (0 : ℝ) < ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) :=
+      Real.rpow_pos_of_pos (by linarith) _
+    apply one_div_le_one_div_of_le hpos
+    calc ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) ≤ ((n : ℝ) + 1) ^ (1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hy1 (by norm_num)
+      _ = (n : ℝ) + 1 := Real.rpow_one _
+  have hnn : ∀ n : ℕ, 0 ≤ 1 / ((n : ℝ) + 1) := fun n => by positivity
+  exact mt (Summable.of_nonneg_of_le hnn hle) harm_shift_not_summable
+
+/-- Hence the eta series is not unconditionally summable (in finite dimensions,
+unconditional and absolute summability coincide: `summable_norm_iff`). -/
+theorem eta_not_summable : ¬Summable etaTerm := by
+  intro h
+  exact eta_norm_not_summable (summable_norm_iff.mpr h)
+
+/-- ...so its `tsum` is `0` by definition: the `0 < ∑'` tsum form is FALSE. -/
+theorem eta_tsum_eq_zero : (∑' k, etaTerm k) = 0 :=
+  tsum_eq_zero_of_not_summable eta_not_summable
+
+/-- `etaPartialℂ` is the coercion of `etaPartial`. -/
+theorem etaPartialℂ_eq_coe (n : ℕ) : etaPartialℂ n = ((etaPartial n : ℝ) : ℂ) := by
+  simp only [etaPartialℂ, etaTermℂ, etaPartial, etaTerm, ← Complex.ofReal_sum]
+
+/-- Complex `Tendsto` form of eta positivity (bridge-ready). -/
+theorem eta_complex_tendsto :
+    ∃ L : ℝ, Tendsto etaPartialℂ atTop (𝓝 (L : ℂ)) ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  refine ⟨L, ?_, hpos⟩
+  have hL2 : Tendsto (fun n => ∑ i ∈ Finset.range n, etaTerm i) atTop (𝓝 L) := by
+    simpa only [etaTerm] using hL
+  have hC := (Complex.continuous_ofReal.tendsto L).comp hL2
+  have hfun : etaPartialℂ = fun n => ((∑ i ∈ Finset.range n, etaTerm i : ℝ) : ℂ) := by
+    funext n
+    simp only [etaPartialℂ, etaTermℂ, Complex.ofReal_sum]
+  rw [hfun]
+  simpa only [Function.comp_def] using hC
+
+/-- `1 - √2 ≠ 0` over `ℝ` (since `√2 > 1`). -/
+theorem one_sub_sqrt2_ne_zero : (1 : ℝ) - Real.sqrt 2 ≠ 0 := by
+  have h : (1 : ℝ) < Real.sqrt 2 := by
+    calc (1 : ℝ) = Real.sqrt 1 := by simp
+      _ < Real.sqrt 2 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  intro hcon
+  linarith
+
+/-- ...hence over `ℂ`. -/
+theorem one_sub_sqrt2_ne_zeroℂ : (1 : ℂ) - ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by
+  have h2 := Complex.ofReal_ne_zero.mpr one_sub_sqrt2_ne_zero
+  simpa only [Complex.ofReal_sub, Complex.ofReal_one] using h2
+
+/-- CONDITIONAL eta–zeta bridge at `s = 1/2`: from the analytic-continuation identity
+`η(1/2) = (1 - √2) * ζ(1/2)` (hypothesis `hEta` — the exact remaining gap, see above),
+divide to get `ζ(1/2) = L / (1 - √2)`. -/
+theorem zeta_half_eq_eta_div_of_identity (L : ℝ)
+    (hEta : (L : ℂ) = (1 - ((Real.sqrt 2 : ℝ) : ℂ)) * riemannZeta (1 / 2 : ℂ)) :
+    riemannZeta (1 / 2 : ℂ) = (L : ℂ) / (1 - ((Real.sqrt 2 : ℝ) : ℂ)) := by
+  rw [eq_div_iff one_sub_sqrt2_ne_zeroℂ]
+  calc riemannZeta (1 / 2 : ℂ) * (1 - ((Real.sqrt 2 : ℝ) : ℂ))
+      = (1 - ((Real.sqrt 2 : ℝ) : ℂ)) * riemannZeta (1 / 2 : ℂ) := mul_comm _ _
+    _ = (L : ℂ) := hEta.symm
+
+/-- Packaged conditional feeder: eta positivity plus the single analytic-continuation
+hypothesis `hEta` yields `L > 0` and `ζ(1/2) = L / (1 - √2)`. -/
+theorem zeta_half_feeder_of_identity
+    (hEta : ∀ L : ℝ, Tendsto etaPartialℂ atTop (𝓝 (L : ℂ)) →
+      (L : ℂ) = (1 - ((Real.sqrt 2 : ℝ) : ℂ)) * riemannZeta (1 / 2 : ℂ)) :
+    ∃ L : ℝ, 0 < L ∧
+      riemannZeta (1 / 2 : ℂ) = (L : ℂ) / (1 - ((Real.sqrt 2 : ℝ) : ℂ)) := by
+  obtain ⟨L, hL, hpos⟩ := eta_complex_tendsto
+  exact ⟨L, hpos, zeta_half_eq_eta_div_of_identity L (hEta L hL)⟩
+
+#print axioms eta_hasSum_imp_tendsto
+#print axioms eta_tendsto_tsum_eq_of_summable
+#print axioms eta_not_summable
+#print axioms eta_tsum_eq_zero
+#print axioms eta_complex_tendsto
+#print axioms zeta_half_eq_eta_div_of_identity
+#print axioms zeta_half_feeder_of_identity

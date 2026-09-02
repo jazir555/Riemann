@@ -850,6 +850,234 @@ theorem completed₀_half_ne_zero_of_product_ne_neg_four
   apply h
   linarith
 
+/-! ## Two-sided rigorous bounds on `Gamma(1/4)` (reflection + convexity).
+
+We prove `3.33 < Gamma(1/4) < 3.78` (true value ≈ 3.6256) and
+`0.751 < π^(-1/4) < 0.752` (true value ≈ 0.7511), hence
+`2.50 < (Gammaℝ(1/2)).re < 2.85` (true value ≈ 2.7233).
+Ingredients (all Mathlib, no `sorry`):
+* upper: convexity chord of `Gamma` on `[1, 3/2]` at `5/4`, via
+  `Gamma(3/2) = √π/2`, then `Gamma(1/4) = 4·Gamma(5/4)`;
+* lower: Euler's reflection `Gamma(1/4)·Gamma(3/4) = π√2` plus the
+  log-convexity chord on `[1/2, 1]` at `3/4`, giving `Gamma(3/4) < 1.3314`;
+* numerics: `Real.pi_gt_d4`/`Real.pi_lt_d4` (4-digit π bounds) and explicit
+  square/fourth-power comparisons discharged by `norm_num`.
+-/
+
+/-- `Gamma(3/2) = √π/2`, from the recurrence at `1/2`. -/
+theorem gamma_three_half_eq : Real.Gamma (3/2 : ℝ) = Real.sqrt Real.pi / 2 := by
+  have h := Real.Gamma_add_one (show (1/2 : ℝ) ≠ 0 by norm_num)
+  have e : ((1/2 : ℝ) + 1) = (3/2 : ℝ) := by norm_num
+  rw [e, Real.Gamma_one_half_eq] at h
+  linarith
+
+/-- Convexity upper bound at `5/4` on the chord `[1, 3/2]`
+(`5/4 = (1/2)·1 + (1/2)·(3/2)`). -/
+theorem gamma_five_quarter_le :
+    Real.Gamma (5/4 : ℝ) ≤ (1 + Real.sqrt Real.pi / 2) / 2 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (3/2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 h1 h2 (show (0 : ℝ) ≤ 1/2 by norm_num)
+    (show (0 : ℝ) ≤ 1/2 by norm_num) (by norm_num)
+  have heq : (1/2 : ℝ) • (1 : ℝ) + (1/2 : ℝ) • (3/2 : ℝ) = (5/4 : ℝ) := by
+    simp only [smul_eq_mul]
+    ring
+  rw [heq, Real.Gamma_one, gamma_three_half_eq] at h
+  simp only [smul_eq_mul] at h
+  linarith
+
+/-- Transfer: `Gamma(1/4) ≤ 2 + √π`, via `Gamma(5/4) = (1/4)·Gamma(1/4)`. -/
+theorem gamma_quarter_le_two_add_sqrt_pi :
+    Real.Gamma (1/4 : ℝ) ≤ 2 + Real.sqrt Real.pi := by
+  have h5 := gamma_five_quarter_le
+  have hadd : Real.Gamma (5/4 : ℝ) = (1/4 : ℝ) * Real.Gamma (1/4 : ℝ) := by
+    have h := Real.Gamma_add_one (show (1/4 : ℝ) ≠ 0 by norm_num)
+    have h54 : ((1/4 : ℝ) + 1) = (5/4 : ℝ) := by ring
+    rw [h54] at h
+    exact h
+  rw [hadd] at h5
+  linarith
+
+/-- Euler's reflection at `1/4`: `Gamma(1/4)·Gamma(3/4) = π√2`. -/
+theorem gamma_quarter_mul_gamma_three_quarter :
+    Real.Gamma (1/4 : ℝ) * Real.Gamma (3/4 : ℝ) = Real.pi * Real.sqrt 2 := by
+  have hrefl := Real.Gamma_mul_Gamma_one_sub (1/4 : ℝ)
+  have e1 : (1 : ℝ) - (1/4 : ℝ) = (3/4 : ℝ) := by norm_num
+  have e2 : Real.pi * (1/4 : ℝ) = Real.pi / 4 := by ring
+  rw [e1, e2, Real.sin_pi_div_four] at hrefl
+  have hsq : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt (by norm_num)
+  have hsqrt_pos : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
+  have h2pos : (0 : ℝ) < Real.sqrt 2 / 2 := div_pos hsqrt_pos (by norm_num)
+  rw [eq_div_iff_mul_eq (ne_of_gt h2pos)] at hrefl
+  have h2 : Real.Gamma (1/4 : ℝ) * Real.Gamma (3/4 : ℝ) * Real.sqrt 2
+      = 2 * Real.pi := by
+    linarith [hrefl]
+  linear_combination (Real.sqrt 2 / 2) * h2 -
+    (Real.Gamma (1/4 : ℝ) * Real.Gamma (3/4 : ℝ) / 2) * hsq
+
+/-- Log-convexity chord on `[1/2, 1]` at `3/4`: `log Gamma(3/4) ≤ (log π)/4`. -/
+theorem log_gamma_three_quarter_le :
+    Real.log (Real.Gamma (3/4 : ℝ)) ≤ Real.log Real.pi / 4 := by
+  have hconv := Real.convexOn_log_Gamma
+  have h1 : (1/2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 h1 h2 (show (0 : ℝ) ≤ 1/2 by norm_num)
+    (show (0 : ℝ) ≤ 1/2 by norm_num) (by norm_num)
+  have heq : (1/2 : ℝ) • (1/2 : ℝ) + (1/2 : ℝ) • (1 : ℝ) = (3/4 : ℝ) := by
+    simp only [smul_eq_mul]
+    ring
+  rw [heq] at h
+  simp only [Function.comp_apply, smul_eq_mul] at h
+  rw [Real.Gamma_one_half_eq, Real.Gamma_one] at h
+  have hsqrt : Real.log (Real.sqrt Real.pi) = Real.log Real.pi / 2 := by
+    rw [Real.sqrt_eq_rpow, Real.log_rpow Real.pi_pos]
+    ring
+  rw [hsqrt, Real.log_one] at h
+  linarith
+
+/-- `Gamma(3/4) < 1.3314` (true value ≈ 1.2254). -/
+theorem gamma_three_quarter_lt : Real.Gamma (3/4 : ℝ) < 1.3314 := by
+  have hlog := log_gamma_three_quarter_le
+  have h4 : (3.1416 : ℝ) < (1.3314 : ℝ) ^ 4 := by norm_num
+  have hpi : Real.pi < (1.3314 : ℝ) ^ 4 := lt_trans Real.pi_lt_d4 h4
+  have hlog2 : Real.log Real.pi < 4 * Real.log (1.3314 : ℝ) := by
+    have h := (Real.log_lt_log_iff Real.pi_pos (by positivity)).mpr hpi
+    rw [Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hfin : Real.log (Real.Gamma (3/4 : ℝ)) < Real.log (1.3314 : ℝ) := by
+    linarith
+  exact (Real.log_lt_log_iff (Real.Gamma_pos_of_pos (by norm_num)) (by norm_num)).mp hfin
+
+/-- `√2 > 1.4142`. -/
+theorem sqrt_two_gt : (1.4142 : ℝ) < Real.sqrt 2 := by
+  apply Real.lt_sqrt_of_sq_lt
+  norm_num
+
+/-- `√2 < 1.4143`. -/
+theorem sqrt_two_lt : Real.sqrt 2 < (1.4143 : ℝ) := by
+  rw [Real.sqrt_lt' (by norm_num)]
+  norm_num
+
+/-- `√π < 1.7725`. -/
+theorem sqrt_pi_lt : Real.sqrt Real.pi < 1.7725 := by
+  rw [Real.sqrt_lt' (by norm_num)]
+  exact lt_trans Real.pi_lt_d4 (by norm_num)
+
+/-- Lower bound: `3.33 < Gamma(1/4)` (true value ≈ 3.6256). -/
+theorem gamma_quarter_gt : (3.33 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hprod := gamma_quarter_mul_gamma_three_quarter
+  have h34 := gamma_three_quarter_lt
+  have h34pos : 0 < Real.Gamma (3/4 : ℝ) := Real.Gamma_pos_of_pos (by norm_num)
+  have h34ne : Real.Gamma (3/4 : ℝ) ≠ 0 := ne_of_gt h34pos
+  have hnum : (4.4427093 : ℝ) < Real.pi * Real.sqrt 2 := by
+    calc (4.4427093 : ℝ) = 3.1415 * 1.4142 := by norm_num
+      _ < Real.pi * 1.4142 :=
+        mul_lt_mul_of_pos_right Real.pi_gt_d4 (by norm_num)
+      _ < Real.pi * Real.sqrt 2 :=
+        mul_lt_mul_of_pos_left sqrt_two_gt Real.pi_pos
+  have hdecomp : Real.Gamma (1/4 : ℝ)
+      = (Real.pi * Real.sqrt 2) / Real.Gamma (3/4 : ℝ) := by
+    rw [eq_div_iff_mul_eq h34ne]
+    exact hprod
+  rw [hdecomp, lt_div_iff₀ h34pos]
+  have hmul : (3.33 : ℝ) * Real.Gamma (3/4 : ℝ) < 3.33 * 1.3314 :=
+    mul_lt_mul_of_pos_left h34 (by norm_num)
+  have hle : (3.33 : ℝ) * 1.3314 < 4.4427093 := by norm_num
+  linarith [hnum]
+
+/-- Upper bound: `Gamma(1/4) < 3.78` (true value ≈ 3.6256). -/
+theorem gamma_quarter_lt : Real.Gamma (1/4 : ℝ) < 3.78 := by
+  have hle := gamma_quarter_le_two_add_sqrt_pi
+  have hsq := sqrt_pi_lt
+  linarith
+
+/-- Two-sided interval: `3.33 < Gamma(1/4) < 3.78` (width `0.45`). -/
+theorem gamma_quarter_bounds :
+    (3.33 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < 3.78 :=
+  ⟨gamma_quarter_gt, gamma_quarter_lt⟩
+
+/-- `π^(1/4) > 1.3313`. -/
+theorem pi_rpow_quarter_gt : (1.3313 : ℝ) < Real.pi ^ ((1/4 : ℝ)) := by
+  have h4 : (1.3313 : ℝ) ^ 4 < 3.1415 := by norm_num
+  have hpi : (1.3313 : ℝ) ^ 4 < Real.pi := lt_trans h4 Real.pi_gt_d4
+  have hlog : 4 * Real.log (1.3313 : ℝ) < Real.log Real.pi := by
+    have h := (Real.log_lt_log_iff (by positivity) Real.pi_pos).mpr hpi
+    rw [Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hrw : Real.log (Real.pi ^ ((1/4 : ℝ))) = (1/4) * Real.log Real.pi :=
+    Real.log_rpow Real.pi_pos _
+  have hfin : Real.log (1.3313 : ℝ) < Real.log (Real.pi ^ ((1/4 : ℝ))) := by
+    rw [hrw]
+    linarith
+  exact (Real.log_lt_log_iff (by norm_num)
+    (Real.rpow_pos_of_pos Real.pi_pos _)).mp hfin
+
+/-- `π^(1/4) < 1.3314`. -/
+theorem pi_rpow_quarter_lt : Real.pi ^ ((1/4 : ℝ)) < (1.3314 : ℝ) := by
+  have h4 : (3.1416 : ℝ) < (1.3314 : ℝ) ^ 4 := by norm_num
+  have hpi : Real.pi < (1.3314 : ℝ) ^ 4 := lt_trans Real.pi_lt_d4 h4
+  have hlog : Real.log Real.pi < 4 * Real.log (1.3314 : ℝ) := by
+    have h := (Real.log_lt_log_iff Real.pi_pos (by positivity)).mpr hpi
+    rw [Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hrw : Real.log (Real.pi ^ ((1/4 : ℝ))) = (1/4) * Real.log Real.pi :=
+    Real.log_rpow Real.pi_pos _
+  have hfin : Real.log (Real.pi ^ ((1/4 : ℝ))) < Real.log (1.3314 : ℝ) := by
+    rw [hrw]
+    linarith
+  exact (Real.log_lt_log_iff (Real.rpow_pos_of_pos Real.pi_pos _) (by norm_num)).mp hfin
+
+/-- `π^(-1/4) ∈ (0.751, 0.752)` (true value ≈ 0.7511). -/
+theorem pi_rpow_neg_quarter_bounds :
+    (0.751 : ℝ) < Real.pi ^ (-(1/4) : ℝ) ∧ Real.pi ^ (-(1/4) : ℝ) < 0.752 := by
+  have hP1 := pi_rpow_quarter_gt
+  have hP2 := pi_rpow_quarter_lt
+  have hPpos : (0 : ℝ) < Real.pi ^ ((1/4 : ℝ)) :=
+    Real.rpow_pos_of_pos Real.pi_pos _
+  have heq : Real.pi ^ (-(1/4) : ℝ) = 1 / Real.pi ^ ((1/4 : ℝ)) := by
+    have e1 : (-(1/4) : ℝ) = -((1/4) : ℝ) := by ring
+    rw [e1, Real.rpow_neg (le_of_lt Real.pi_pos), inv_eq_one_div]
+  rw [heq]
+  have h1 : (1 : ℝ) / 1.3314 < 1 / Real.pi ^ ((1/4 : ℝ)) :=
+    one_div_lt_one_div_of_lt hPpos hP2
+  have h2 : 1 / Real.pi ^ ((1/4 : ℝ)) < 1 / (1.3313 : ℝ) :=
+    one_div_lt_one_div_of_lt (by norm_num) hP1
+  have b1 : (0.751 : ℝ) < 1 / 1.3314 := by norm_num
+  have b2 : (1 : ℝ) / 1.3313 < 0.752 := by norm_num
+  exact ⟨lt_trans b1 h1, lt_trans h2 b2⟩
+
+/-- `(Gammaℝ(1/2)).re ∈ (2.50, 2.85)` (true value ≈ 2.7233). -/
+theorem Gammaℝ_half_re_bounds :
+    (2.50 : ℝ) < (Complex.Gammaℝ (1/2 : ℂ)).re ∧
+      (Complex.Gammaℝ (1/2 : ℂ)).re < 2.85 := by
+  rw [Gammaℝ_half_eq_real]
+  simp only [Complex.ofReal_re]
+  have hg1 := gamma_quarter_gt
+  have hg2 := gamma_quarter_lt
+  have hp1 := pi_rpow_neg_quarter_bounds.1
+  have hp2 := pi_rpow_neg_quarter_bounds.2
+  have hgpos : 0 < Real.Gamma (1/4 : ℝ) := gamma_quarter_pos
+  have hppos : 0 < Real.pi ^ (-(1/4) : ℝ) := pi_rpow_neg_quarter_pos
+  constructor
+  · have e1 : (0.751 : ℝ) * 3.33 < 0.751 * Real.Gamma (1/4 : ℝ) :=
+      mul_lt_mul_of_pos_left hg1 (by norm_num)
+    have e2 : (0.751 : ℝ) * Real.Gamma (1/4 : ℝ)
+        < Real.pi ^ (-(1/4) : ℝ) * Real.Gamma (1/4 : ℝ) :=
+      mul_lt_mul_of_pos_right hp1 hgpos
+    norm_num at e1
+    linarith
+  · have e1 : Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ)
+        < 3.78 * Real.pi ^ (-(1/4) : ℝ) :=
+      mul_lt_mul_of_pos_right hg2 hppos
+    have e2 : (3.78 : ℝ) * Real.pi ^ (-(1/4) : ℝ) < 3.78 * 0.752 :=
+      mul_lt_mul_of_pos_left hp2 (by norm_num)
+    norm_num at e2
+    linarith
+
 /-! ### Remaining gap (no `sorry`; explicit hypotheses).
 
 With the unconditional pieces above plus `zeta_rigorous`
@@ -862,13 +1090,22 @@ With the unconditional pieces above plus `zeta_rigorous`
   alternating-series `HasSum` at `s = 1/2` plus analytic continuation, i.e. the
   `tendsto`/`HasSum` link currently absent.
 * MISSING FEEDER 2 (tightness): `Λ₀(1/2) = Γℝ(1/2)·ζ(1/2)+4 ≈ 0.023` lies
-  `≈ 0.02` from 0. The crude intervals proved here
-  (`0 < Γ(1/4) ≤ 4`, `0 < π^(-1/4) < 1`, hence `0 < Γℝ(1/2).re ≤ 4`, and
-  `S₂ = 1-1/√2 ≈ 0.293 ≤ L ≤ 1`) give `Γℝ·|ζ| ∈ (0, 10)`, so
-  `Γℝ·ζ+4 ∈ (-6, 4) ∋ 0` — no separation. Closing needs `L` to `±0.003`
-  (∼10⁴ alternating terms, remainder `≤ 1/√(N+1)`) and `Γ(1/4)` to `±0.01`
-  (e.g. via Stirling with explicit remainder or verified quadrature for the
-  `Real.Gamma` integral), then `completed₀_half_ne_zero_of_product_ne_neg_four`.
+  `≈ 0.02` from 0. Status: the Gamma side now has a rigorous two-sided
+  interval `3.33 < Γ(1/4) < 3.78` (`gamma_quarter_bounds`, width `0.45`,
+  true value ≈ 3.6256), `0.751 < π^(-1/4) < 0.752`
+  (`pi_rpow_neg_quarter_bounds`), hence `2.50 < Γℝ(1/2).re < 2.85`
+  (`Gammaℝ_half_re_bounds`, true value ≈ 2.7233) — a ~10× tightening over
+  the old crude `(0, 4]`. This alone does not separate yet: with
+  `S₂ = 1-1/√2 ≈ 0.293 ≤ L ≤ 1` the product interval still contains `-4`.
+  Closing needs `L` to `±0.003` (∼10⁴ alternating terms,
+  remainder `≤ 1/√(N+1)`) and `Γ(1/4)` to `±0.01`. The natural next step on
+  the Gamma side is finite Bohr–Mollerup approximants
+  (`BohrMollerup.ge_logGammaSeq`/`le_logGammaSeq` at `x = 1/4`, whose values
+  are exact `log`-of-rational identities, e.g. `n = 1` gives `Γ(1/4) ≥ 16/5`)
+  plus fourth-root bounds as in `pi_rpow_quarter_gt/lt` (width there scales
+  like `O(1/n)` in `log`, so `n ≈ 60`–`100` suffices for `±0.01`), or
+  verified quadrature of the `Real.Gamma` integral; then
+  `completed₀_half_ne_zero_of_product_ne_neg_four`.
 * `taylorCoeff_zero_ne_zero` follows from `taylorCoeff_zero_eq` plus the above
   once feeders 1–2 are supplied.
 -/

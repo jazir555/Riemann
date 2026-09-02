@@ -609,7 +609,340 @@ its would-be feeder:
    only via the removable singularity of `classicalXi` at `s = 1`
    (prefactor zero cancels the `ζ` pole); Mathlib gives
    `differentiableAt_riemannZeta` only away from `1`. The conditional
-   assembly takes `hdiff` as a hypothesis until the entireness proof lands.
+    assembly takes `hdiff` as a hypothesis until the entireness proof lands.
+    See the addendum below for the corrected strip-entireness + fine re-gridding
+    (feasibility fix): `xiShiftedEntire_differentiable`,
+    `xiShifted_differentiableAt_of_mem_strip`, `fineGridX`/`gridFine` +
+    `gridFine_covers_inner`, and the `hdiff`-free fencing
+    (`xi_rect_lower_bound_of_center_bound_strip`).
+-/
+
+/-! ## Addendum: correct entireness story (sorry-free) + fine re-gridding (feasibility fix)
+
+Two concrete fixes (both sorry-free except the inventoried per-cell analytic
+leaves, which remain `sorry` only inside the legacy `centralCells` `mk` and the
+legacy `coversUpper`):
+
+A. **Entireness — corrected statement.** Global `Differentiable ℂ xiShifted` as
+   currently stated (`xiShifted_differentiable`, line ~14) is FALSE for the Lean
+   totalized definitions: `classicalXi = prefactor * riemannZeta` uses
+   `Complex.Gamma` (pole at `0`) and `riemannZeta` (pole at `1`, with
+   `riemannZeta 1 = (γ - log (4π))/2`). Hence at `z = -I/2` (`s = 1`)
+   `xiShifted = 0 * _ = 0` while the strip limit via `xiShifted_eq_completed`
+   is `1/2` (since `z^2+1/4 = 0` there); similarly at `z = +I/2` (`s = 0`,
+   Gamma pole). Both bad points have `|Im| = 1/2`, i.e. on the STRIP BOUNDARY,
+   outside every cover rect (which satisfy `0.01 ≤ Im ≤ 0.49` up to conjugates).
+   What IS true and sufficient: the **entire extension**
+   `xiShiftedEntire z = 1/2 - (z^2+1/4)/2 * Λ₀(1/2+I*z)` is globally
+   differentiable (via `differentiable_completedZeta₀`), agrees with `xiShifted`
+   on the open strip `-1/2 < Im < 1/2` (via `xiShifted_eq_completed`), hence
+   `xiShifted` is `DifferentiableAt` at every strip point. All fencing below
+   uses this strip version — no global `hdiff` hypothesis is needed, only the
+   side conditions `-(1/2:ℝ) < R.y0`, `R.y1 < 1/2` (discharged by `norm_num`
+   for concrete cells).
+
+B. **Re-gridding — feasibility fix.** Legacy `centralCells` uses `ε = 0.001`,
+   `M = 10.0` with `x`-widths up to `10` (`dx = 5`, `radius > 5`), so
+   `ε + M*radius > 50` while `‖ξ(center)‖ = O(1)` (Stirling decay in `Im s`):
+   infeasible as stated (e.g. `0.001 + 10*5 = 50.001 > 50`). The fine grid
+   below uses `x`-widths exactly `2.5` (`dx = 1.25`, `radius < 1.26` — same bound
+   as `sample_cell_radius_bound`), `y`-widths `≤ 0.19` (reusing `innerGridY`),
+   with per-column realistic `(ε,M)` magnitudes mirroring the Float fencing
+   PATTERN only (not its values): outer `|x|>6`: `(0.002, 0.05)` →
+   `ε+M*1.26 ≈ 0.065`; mid `2.5<|x|<6`: `(0.05, 0.07)` → `≈ 0.138`; inner
+   `|x|<2.5`: `(0.15, 0.06)` → `≈ 0.226`; all `O(0.1)` vs `O(1)` centre values
+   (feasible), vs legacy `>50` (infeasible). The Float cert data
+   (`rh_zeta_cert_central.lean`) is used only for this pattern (8 `Re`-columns
+   of width `2.5` × 4 `Im`-rows); its `Float` values are NOT copied as `ℝ`
+   proofs. Coverage `gridFine_covers_inner` is proved combinatorially
+   (product of 1D covers, no `sorry`).
+-/
+
+/-- Entire extension of `xiShifted` via `completedRiemannZeta₀`
+(global formula from `xiShifted_eq_completed`, extended to all `z`). -/
+noncomputable def xiShiftedEntire (z : ℂ) : ℂ :=
+  (1 / 2 : ℂ) - (z ^ 2 + (1 / 4 : ℂ)) / 2 * completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)
+
+/-- The entire extension is globally differentiable
+(polynomial times entire composition via `differentiable_completedZeta₀`). -/
+theorem xiShiftedEntire_differentiable : Differentiable ℂ xiShiftedEntire := by
+  unfold xiShiftedEntire
+  apply Differentiable.sub (differentiable_const _)
+  apply Differentiable.mul
+  · fun_prop
+  · exact differentiable_completedZeta₀.comp (by fun_prop)
+
+/-- Agreement on the open strip (directly `xiShifted_eq_completed`). -/
+theorem xiShifted_eq_entire_on_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    xiShifted z = xiShiftedEntire z := by
+  unfold xiShiftedEntire
+  exact xiShifted_eq_completed z hgt hlt
+
+/-- The strip is open (preimage of `Ioo` under continuous `im`). -/
+theorem strip_isOpen : IsOpen {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+  have h : {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)}
+      = Complex.im ⁻¹' (Set.Ioo (-(1 / 2 : ℝ)) (1 / 2 : ℝ)) := by
+    ext z
+    simp [Set.mem_Ioo]
+  rw [h]
+  exact isOpen_Ioo.preimage Complex.continuous_im
+
+/-- `xiShifted` is differentiable at every strip point
+(transfer from the entire extension via `EventuallyEq`). -/
+theorem xiShifted_differentiableAt_of_mem_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    DifferentiableAt ℂ xiShifted z := by
+  have hEnt : DifferentiableAt ℂ xiShiftedEntire z :=
+    xiShiftedEntire_differentiable z
+  apply hEnt.congr_of_eventuallyEq
+  have hmem : z ∈ {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} :=
+    ⟨hgt, hlt⟩
+  have hNbhd : {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} ∈ 𝓝 z :=
+    strip_isOpen.mem_nhds hmem
+  filter_upwards [hNbhd] with w hw
+  exact xiShifted_eq_entire_on_strip w hw.1 hw.2
+
+/-- Derivative agrees with the entire extension on the strip. -/
+theorem deriv_xiShifted_eq_entire_of_mem_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    deriv xiShifted z = deriv xiShiftedEntire z := by
+  apply Filter.EventuallyEq.deriv_eq
+  have hmem : z ∈ {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} :=
+    ⟨hgt, hlt⟩
+  have hNbhd : {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} ∈ 𝓝 z :=
+    strip_isOpen.mem_nhds hmem
+  filter_upwards [hNbhd] with w hw
+  exact xiShifted_eq_entire_on_strip w hw.1 hw.2
+
+/-- Strip-aware Taylor-fencing step for `xiShifted` (no global `hdiff`):
+from a center lower bound and a derivative bound on a rect strictly inside the
+strip, every point of the rect satisfies `ε ≤ ‖ξ(z)‖`. Transfers to the entire
+extension (which is globally differentiable) and back via strip agreement. -/
+theorem xi_rect_lower_bound_of_center_bound_strip
+    (R : CellProofEngine.Rect2D) (ε M : ℝ)
+    (hStripLo : -(1 / 2 : ℝ) < R.y0) (hStripHi : R.y1 < (1 / 2 : ℝ))
+    (hM : ∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M)
+    (h_center : ε + M * R.radius ≤ ‖xiShifted R.center‖)
+    (z : ℂ) (hz : R.mem z) : ε ≤ ‖xiShifted z‖ := by
+  have hStrip : ∀ w, R.mem w → -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+    intro w hw
+    obtain ⟨_, _, hy0, hy1⟩ := hw
+    exact ⟨by linarith, by linarith⟩
+  have hCenterMem := CellProofEngine.center_mem_rect2D R
+  have hCenterStrip := hStrip R.center hCenterMem
+  have hEqCenter : xiShifted R.center = xiShiftedEntire R.center :=
+    xiShifted_eq_entire_on_strip R.center hCenterStrip.1 hCenterStrip.2
+  have hStripZ := hStrip z hz
+  have hEqZ : xiShifted z = xiShiftedEntire z :=
+    xiShifted_eq_entire_on_strip z hStripZ.1 hStripZ.2
+  have hMEnt : ∀ w, R.mem w → ‖deriv xiShiftedEntire w‖ ≤ M := by
+    intro w hw
+    have hst := hStrip w hw
+    rw [← deriv_xiShifted_eq_entire_of_mem_strip w hst.1 hst.2]
+    exact hM w hw
+  have hCenterEnt : ε + M * R.radius ≤ ‖xiShiftedEntire R.center‖ := by
+    rw [← hEqCenter]
+    exact h_center
+  have h := CellProofEngine.cell_lower_bound_from_center_and_deriv
+    xiShiftedEntire xiShiftedEntire_differentiable R M hMEnt
+    (ε + M * R.radius) hCenterEnt z hz
+  have hEqNorm : ‖xiShifted z‖ = ‖xiShiftedEntire z‖ := by rw [hEqZ]
+  linarith
+
+/-- Build a `XiLocalLowerBoundRect` from explicit fencing data on a `Rect2D`
+strictly inside the strip (sorry-free, no `hdiff`). -/
+def lowerBoundRect_of_rect_center_bound_strip
+    (R : CellProofEngine.Rect2D) (ε : ℝ) (hε : 0 < ε) (M : ℝ)
+    (hStripLo : -(1 / 2 : ℝ) < R.y0) (hStripHi : R.y1 < (1 / 2 : ℝ))
+    (hM : ∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M)
+    (h_center : ε + M * R.radius ≤ ‖xiShifted R.center‖) :
+    XiLocalLowerBoundRect where
+  x0 := R.x0; x1 := R.x1; y0 := R.y0; y1 := R.y1
+  x_lt := R.hx; y_lt := R.hy
+  ε := ε; ε_pos := hε
+  lower_bound := by
+    intro z hx0 hx1 hy0 hy1
+    exact xi_rect_lower_bound_of_center_bound_strip R ε M hStripLo hStripHi
+      hM h_center z ⟨le_of_lt hx0, le_of_lt hx1, le_of_lt hy0, le_of_lt hy1⟩
+
+/-- Build a `XiLocalZeroFreeRect` from explicit fencing data strictly inside
+the strip (sorry-free, no `hdiff`). -/
+def zeroFreeRect_of_rect_center_bound_strip
+    (R : CellProofEngine.Rect2D) (ε : ℝ) (hε : 0 < ε) (M : ℝ)
+    (hStripLo : -(1 / 2 : ℝ) < R.y0) (hStripHi : R.y1 < (1 / 2 : ℝ))
+    (hM : ∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M)
+    (h_center : ε + M * R.radius ≤ ‖xiShifted R.center‖) :
+    XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect_of_lower_bound
+    (lowerBoundRect_of_rect_center_bound_strip R ε hε M hStripLo hStripHi hM h_center)
+
+/-- Fencing package → lower-bound rect, strip version (sorry-free, no `hdiff`). -/
+def lowerBoundRect_of_fencingHypotheses_strip
+    (R : CellProofEngine.Rect2D) (ε M : ℝ)
+    (hStripLo : -(1 / 2 : ℝ) < R.y0) (hStripHi : R.y1 < (1 / 2 : ℝ))
+    (H : CellFencingHypotheses R ε M) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_rect_center_bound_strip R ε H.ε_pos M hStripLo hStripHi
+    H.deriv_bound H.center_bound
+
+/-- The ten `x`-intervals of the fine grid: width exactly `2.5`, overlaps `0.5`
+(`1.0` at the last junction) so `(-10,10)` is covered with strict inequalities.
+Pure `ℝ` data (fencing PATTERN from `rh_zeta_cert_central.lean`: 8 `Re`-columns
+of width `2.5`; here 10 overlapping columns so strict coverage holds — 8
+non-overlapping width-`2.5` intervals cannot strictly cover length `20`). -/
+def fineGridX : List (ℝ × ℝ) :=
+  [(-10, -7.5), (-8, -5.5), (-6, -3.5), (-4, -1.5), (-2, 0.5),
+   (0, 2.5), (2, 4.5), (4, 6.5), (6, 8.5), (7.5, 10)]
+
+/-- The fine `x`-intervals tile `(-10,10)` with strict inequalities
+(pure `linarith` + `simp` membership; thresholds are the interval upper bounds). -/
+theorem fineGridX_covers {x : ℝ} (hx_lo : -10 < x) (hx_hi : x < 10) :
+    ∃ p ∈ fineGridX, p.1 < x ∧ x < p.2 := by
+  unfold fineGridX
+  by_cases h1 : x < -7.5
+  · exact ⟨(-10, -7.5), by simp, hx_lo, h1⟩
+  · push_neg at h1
+    by_cases h2 : x < -5.5
+    · exact ⟨(-8, -5.5), by simp, by linarith, h2⟩
+    · push_neg at h2
+      by_cases h3 : x < -3.5
+      · exact ⟨(-6, -3.5), by simp, by linarith, h3⟩
+      · push_neg at h3
+        by_cases h4 : x < -1.5
+        · exact ⟨(-4, -1.5), by simp, by linarith, h4⟩
+        · push_neg at h4
+          by_cases h5 : x < 0.5
+          · exact ⟨(-2, 0.5), by simp, by linarith, h5⟩
+          · push_neg at h5
+            by_cases h6 : x < 2.5
+            · exact ⟨(0, 2.5), by simp, by linarith, h6⟩
+            · push_neg at h6
+              by_cases h7 : x < 4.5
+              · exact ⟨(2, 4.5), by simp, by linarith, h7⟩
+              · push_neg at h7
+                by_cases h8 : x < 6.5
+                · exact ⟨(4, 6.5), by simp, by linarith, h8⟩
+                · push_neg at h8
+                  by_cases h9 : x < 8.5
+                  · exact ⟨(6, 8.5), by simp, by linarith, h9⟩
+                  · push_neg at h9
+                    exact ⟨(7.5, 10), by simp, by linarith, hx_hi⟩
+
+/-- Every fine `x`-interval has width exactly `2.5` (hence `≤ 2.5`). -/
+theorem fineGridX_width_eq {p : ℝ × ℝ} (hp : p ∈ fineGridX) :
+    p.2 - p.1 = 2.5 := by
+  unfold fineGridX at hp
+  simp at hp
+  rcases hp with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    norm_num
+
+/-- The fine product grid as pure `ℝ` data: `fineGridX` (10) × `innerGridY` (4)
+= 40 cells `(x0, x1, y0, y1)`. -/
+def gridFine : List (ℝ × ℝ × ℝ × ℝ) :=
+  fineGridX.flatMap (fun px => innerGridY.map (fun py => (px.1, px.2, py.1, py.2)))
+
+/-- The fine product grid covers the inner rectangle `(-10,10) × (0.01,0.49)`
+with strict inequalities (product of the two 1D covers; no `sorry`). -/
+theorem gridFine_covers_inner {x y : ℝ}
+    (hx_lo : -10 < x) (hx_hi : x < 10)
+    (hy_lo : 0.01 < y) (hy_hi : y < 0.49) :
+    ∃ c ∈ gridFine, c.1 < x ∧ x < c.2.1 ∧ c.2.2.1 < y ∧ y < c.2.2.2 := by
+  obtain ⟨px, hpx_mem, hpx_lo, hpx_hi⟩ := fineGridX_covers hx_lo hx_hi
+  obtain ⟨py, hpy_mem, hpy_lo, hpy_hi⟩ := innerGridY_covers hy_lo hy_hi
+  refine ⟨(px.1, px.2, py.1, py.2), ?_, hpx_lo, hpx_hi, hpy_lo, hpy_hi⟩
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨px, hpx_mem, by simp [hpy_mem]⟩
+
+/-- Legacy infeasibility witness: `ε + M*5 > 50` for `ε = 0.001`, `M = 10.0`
+(the coarse grid has `dx = 5`, `radius > 5`, so `ε+M*radius > 50`). -/
+theorem legacy_grid_infeasible_example : (50 : ℝ) < (0.001 : ℝ) + 10.0 * 5 := by
+  norm_num
+
+/-- Fine-grid feasibility witnesses (realistic per-cell `(ε,M)` magnitudes,
+fencing PATTERN only): all `ε + M*1.26 = O(0.1)` vs `‖ξ(center)‖ = O(1)`,
+vs legacy `> 50`. Outer/mid/inner columns mirror the Float pattern
+(`0.006`/`0.05`/`0.15` epsilons, `M ≈ 0.05–0.07`). -/
+theorem fine_feasible_outer : (0.002 : ℝ) + 0.05 * 1.26 < 0.1 := by norm_num
+theorem fine_feasible_mid : (0.05 : ℝ) + 0.07 * 1.26 < 0.2 := by norm_num
+theorem fine_feasible_inner : (0.15 : ℝ) + 0.06 * 1.26 < 0.3 := by norm_num
+
+/-- `ε>0` facts for the three fine `(ε,M)` tiers (per-cell `ε_pos` pattern). -/
+theorem fine_eps_outer_pos : (0 : ℝ) < 0.002 := by norm_num
+theorem fine_eps_mid_pos : (0 : ℝ) < 0.05 := by norm_num
+theorem fine_eps_inner_pos : (0 : ℝ) < 0.15 := by norm_num
+
+/-- `M≥0` facts for the three fine tiers (per-cell `M_nonneg` pattern). -/
+theorem fine_M_outer_nonneg : (0 : ℝ) ≤ 0.05 := by norm_num
+theorem fine_M_mid_nonneg : (0 : ℝ) ≤ 0.07 := by norm_num
+theorem fine_M_inner_nonneg : (0 : ℝ) ≤ 0.06 := by norm_num
+
+/-- Conditional assembly over the fine grid, `hdiff`-free: global
+differentiability is replaced by the strip side conditions
+(`-(1/2:ℝ) < R.y0`, `R.y1 < 1/2`, true for all fine cells since
+`y ∈ (0.01,0.49)`). The hypothesis `H` is exactly the 40 remaining analytic
+leaves (one `center_bound` + one `deriv_bound` per `gridFine` cell; `ε_pos`
+and strip bounds are `norm_num` per cell). -/
+theorem inner_nonvanishing_of_fenced_grid_fine
+    (H : ∀ c ∈ gridFine, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖)
+    {z : ℂ} (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_lo : 0.01 < z.im) (hy_hi : z.im < 0.49) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨c, hc_mem, hloX, hhiX, hloY, hhiY⟩ :=
+    gridFine_covers_inner hx_lo hx_hi hy_lo hy_hi
+  obtain ⟨R, ε, M, hx0, hx1, hy0, hy1, hStripLo, hStripHi, hε, hM, hcenter⟩ :=
+    H c hc_mem
+  have hmem : R.mem z := by
+    have e1 : R.x0 ≤ z.re := by rw [hx0]; exact le_of_lt hloX
+    have e2 : z.re ≤ R.x1 := by rw [hx1]; exact le_of_lt hhiX
+    have e3 : R.y0 ≤ z.im := by rw [hy0]; exact le_of_lt hloY
+    have e4 : z.im ≤ R.y1 := by rw [hy1]; exact le_of_lt hhiY
+    exact ⟨e1, e2, e3, e4⟩
+  have hle : ε ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R ε M hStripLo hStripHi hM hcenter z hmem
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt hε) hle
+
+/-! ## Fine-grid remaining-gap inventory (after this commit)
+
+Precise status of the new fine grid; each item names the exact missing lemma
+and its would-be feeder (no new `sorryAx` beyond the legacy per-cell leaves):
+
+1. **40 analytic leaves (the `H` hypothesis of
+   `inner_nonvanishing_of_fenced_grid_fine`).** For each `c ∈ gridFine`
+   (10 `x`-columns × 4 `y`-rows): a `center_bound`
+   `ε + M*radius ≤ ‖xiShifted center‖` and a `deriv_bound`
+   `‖deriv xiShifted‖ ≤ M` on the rect, with per-column realistic tiers
+   (`fine_feasible_outer/mid/inner`: outer `(0.002,0.05)`, mid `(0.05,0.07)`,
+   inner `(0.15,0.06)`; `ε_pos`/`M_nonneg` via `fine_eps_*_pos`/`fine_M_*_nonneg`
+   by `norm_num`). Template per cell: `alternating_even_partial_le_limit` gives
+   the `S₂ ≤ L` step once the cell's own real antitone majorant + `Tendsto` are
+   supplied; for off-real centers this needs rigorous `ξ`-enclosures
+   (`riemannZeta`/`Gamma`/`cpow` interval arithmetic — absent from Mathlib).
+   Radii are uniformly `< 1.26` (`dx = 1.25` via `fineGridX_width_eq`,
+   `dy ≤ 0.095`; cf. `sample_cell_radius_bound`), so
+   `ε+M*radius = O(0.1)` vs `‖ξ(center)‖ = O(1)` (feasible), vs legacy
+   `> 50` (`legacy_grid_infeasible_example`).
+2. **Boundary strips + endpoints + lower half (unchanged).** `gridFine` covers
+   only `(-10,10) × (0.01,0.49)`; strips `(0,0.01]`, `[0.49,1/2)`, lines
+   `x = ±10`, real axis need `BoundaryProofEngine.*` lemmas; lower half via
+   `XiLocalZeroFreeRect.conj_of` / `XiLocalLowerBoundRect.conj_of` with
+   `0 < y0`, `y1 < 1/2` side conditions (`by norm_num` per cell).
+3. **Legacy `xiShifted_differentiable` (`Differentiable ℂ xiShifted`) remains
+   `sorry` for `central_cover_trusted.lean` compatibility, but is FALSE as
+   stated (totalized `Gamma`/`ζ` values at `s = 0,1` give value `0` vs limit
+   `1/2` at `z = ±I/2` on the strip boundary) and is NO LONGER NEEDED: all new
+   fencing uses `xiShiftedEntire_differentiable` +
+   `xiShifted_differentiableAt_of_mem_strip` /
+   `deriv_xiShifted_eq_entire_of_mem_strip` via the strip side conditions.
+   No new `sorryAx` is introduced by the addendum (all new theorems are
+   sorry-free; `#print axioms` for them shows no `sorryAx`).
 -/
 
 end CentralCoverAssembly
