@@ -1,5 +1,6 @@
 import Mathlib
 import riemann_hypothesis
+import zeta_rigorous
 
 set_option maxHeartbeats 2000000
 
@@ -715,5 +716,161 @@ lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
   unfold completedRiemannZeta₀
   -- Goal: ¬(HurwitzZeta.completedHurwitzZetaEven₀ 0 2⁻¹).re = 0
   sorry
+
+/-! ## Quantitative Gamma / π intervals for `taylorCoeff_zero_ne_zero`.
+
+The 0-th coefficient is `(completedRiemannZeta₀ (1/2)).re = (Λ(1/2)+4).re`
+with `Λ(1/2) = Gammaℝ(1/2)·ζ(1/2)` and `Gammaℝ(1/2) = π^(-1/4)·Γ(1/4)`.
+Since `Λ(1/2) ≈ -3.97`, separating `Λ(1/2)+4 ≈ 0.023` from 0 needs
+two-sided bounds on the eta limit L (see `zeta_rigorous`: `S₂ ≤ L ≤ S₃ ≤ 1`)
+plus tight intervals on `Γ(1/4)` and `π^(-1/4)`. The lemmas below are the
+rigorous, unconditional part of that program (no `sorry`); the remaining gap
+is documented after them.
+-/
+
+/-- Real Gamma at 1/4 is positive. -/
+theorem gamma_quarter_pos : 0 < Real.Gamma (1/4 : ℝ) :=
+  Real.Gamma_pos_of_pos (by norm_num)
+
+/-- Gamma(5/4) ≤ 1 via convexity of Gamma on (0,∞) with Gamma(1)=Gamma(2)=1.
+`5/4 = (3/4)·1 + (1/4)·2`. -/
+theorem gamma_five_quarter_le_one : Real.Gamma (5/4 : ℝ) ≤ 1 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 h1 h2 (show (0 : ℝ) ≤ 3/4 by norm_num)
+    (show (0 : ℝ) ≤ 1/4 by norm_num) (by norm_num)
+  rw [Real.Gamma_one, Real.Gamma_two] at h
+  simp only [smul_eq_mul] at h
+  have h54 : (3/4 : ℝ) * 1 + (1/4 : ℝ) * 2 = 5/4 := by ring
+  rw [h54] at h
+  have h1' : (3/4 : ℝ) * 1 + (1/4 : ℝ) * 1 = (1 : ℝ) := by ring
+  rw [h1'] at h
+  exact h
+
+/-- Gamma(1/4) ≤ 4 via `Gamma(5/4) = (1/4)·Gamma(1/4)`. -/
+theorem gamma_quarter_le_four : Real.Gamma (1/4 : ℝ) ≤ 4 := by
+  have h5 := gamma_five_quarter_le_one
+  have hadd : Real.Gamma (5/4 : ℝ) = (1/4 : ℝ) * Real.Gamma (1/4 : ℝ) := by
+    have h := Real.Gamma_add_one (show (1/4 : ℝ) ≠ 0 by norm_num)
+    have h54 : ((1/4 : ℝ) + 1) = (5/4 : ℝ) := by ring
+    rw [h54] at h
+    -- h : Gamma(5/4) = 1/4 * Gamma(1/4); Lean has `1/4 * Gamma` vs `(1/4) * Gamma`
+    exact h
+  rw [hadd] at h5
+  linarith
+
+/-- The archimedean factor `π^(-1/4)` is positive. -/
+theorem pi_rpow_neg_quarter_pos : 0 < Real.pi ^ (-(1/4) : ℝ) :=
+  Real.rpow_pos_of_pos Real.pi_pos _
+
+/-- The archimedean factor `π^(-1/4)` is < 1 (since π > 1, exponent negative). -/
+theorem pi_rpow_neg_quarter_lt_one : Real.pi ^ (-(1/4) : ℝ) < 1 := by
+  apply Real.rpow_lt_one_of_one_lt_of_neg
+  · linarith [Real.pi_gt_three]
+  · norm_num
+
+/-- `Gammaℝ(1/2)` as a real number: `π^(-1/4)·Γ(1/4)`. -/
+theorem Gammaℝ_half_eq_real :
+    Complex.Gammaℝ (1/2 : ℂ)
+      = ((Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ) : ℝ) : ℂ) := by
+  rw [Complex.Gammaℝ_def]
+  have hs1 : (-(1/2 : ℂ) / 2) = (((-(1/4) : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  have hs2 : ((1/2 : ℂ) / 2) = (((1/4) : ℝ) : ℂ) := by
+    push_cast
+    ring
+  rw [hs1, hs2, Complex.Gamma_ofReal,
+    ← Complex.ofReal_cpow Real.pi_pos.le (-(1/4) : ℝ)]
+  rw [mul_comm ((Real.pi ^ (-(1/4) : ℝ) : ℝ) : ℂ) _]
+  rw [← Complex.ofReal_mul]
+
+/-- `Gammaℝ(1/2)` has positive real part. -/
+theorem Gammaℝ_half_re_pos : 0 < (Complex.Gammaℝ (1/2 : ℂ)).re := by
+  rw [Gammaℝ_half_eq_real]
+  simp only [Complex.ofReal_re]
+  exact mul_pos gamma_quarter_pos pi_rpow_neg_quarter_pos
+
+/-- `Gammaℝ(1/2)` is nonzero. -/
+theorem Gammaℝ_half_ne_zero : Complex.Gammaℝ (1/2 : ℂ) ≠ 0 := by
+  have h := Gammaℝ_half_re_pos
+  intro hz
+  rw [hz] at h
+  simp at h
+
+/-- Crude rigorous upper bound: `(Gammaℝ(1/2)).re ≤ 4`. -/
+theorem Gammaℝ_half_re_le_four : (Complex.Gammaℝ (1/2 : ℂ)).re ≤ 4 := by
+  rw [Gammaℝ_half_eq_real]
+  simp only [Complex.ofReal_re]
+  calc Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ)
+      ≤ 4 * 1 := by
+        apply mul_le_mul gamma_quarter_le_four pi_rpow_neg_quarter_lt_one.le
+        · exact le_of_lt pi_rpow_neg_quarter_pos
+        · norm_num
+    _ = 4 := by ring
+
+/-- Bridge: `Λ₀(1/2) = Λ(1/2) + 4` (the two polar terms are each 2). -/
+theorem completedRiemannZeta₀_half_eq :
+    completedRiemannZeta (1/2 : ℂ) + 4 = completedRiemannZeta₀ (1/2 : ℂ) := by
+  have h := completedRiemannZeta_eq (1/2 : ℂ)
+  have h1 : (1 : ℂ) / (1/2 : ℂ) = 2 := by norm_num
+  have h2 : (1 : ℂ) / (1 - (1/2 : ℂ)) = 2 := by norm_num
+  rw [h1, h2] at h
+  linear_combination h
+
+/-- Bridge: `Λ(1/2) = ζ(1/2)·Gammaℝ(1/2)`. -/
+theorem completedRiemannZeta_half_eq :
+    completedRiemannZeta (1/2 : ℂ)
+      = riemannZeta (1/2 : ℂ) * Complex.Gammaℝ (1/2 : ℂ) := by
+  have h := riemannZeta_def_of_ne_zero (show (1/2 : ℂ) ≠ 0 by norm_num)
+  have hG := Gammaℝ_half_ne_zero
+  rw [h]
+  field_simp
+
+/-- Combined bridge: `Λ₀(1/2) = ζ(1/2)·Gammaℝ(1/2) + 4`. -/
+theorem completedRiemannZeta₀_half_eq_mul :
+    completedRiemannZeta₀ (1/2 : ℂ)
+      = riemannZeta (1/2 : ℂ) * Complex.Gammaℝ (1/2 : ℂ) + 4 := by
+  have h0 := completedRiemannZeta₀_half_eq
+  have h1 := completedRiemannZeta_half_eq
+  linear_combination h1 - h0
+
+/-- Conditional separation template: it suffices to show the product is not `-4`.
+This isolates the exact remaining numeric goal; see the gap note below. -/
+theorem completed₀_half_ne_zero_of_product_ne_neg_four
+    (h : (riemannZeta (1/2 : ℂ) * Complex.Gammaℝ (1/2 : ℂ)).re ≠ -4) :
+    (completedRiemannZeta₀ (1/2 : ℂ)).re ≠ 0 := by
+  have hre : (completedRiemannZeta₀ (1/2 : ℂ)).re
+      = (riemannZeta (1/2 : ℂ) * Complex.Gammaℝ (1/2 : ℂ)).re + 4 := by
+    rw [completedRiemannZeta₀_half_eq_mul, Complex.add_re]
+    simp
+  rw [hre]
+  intro h0
+  apply h
+  linarith
+
+/-! ### Remaining gap (no `sorry`; explicit hypotheses).
+
+With the unconditional pieces above plus `zeta_rigorous`
+(`etaPartial 2 ≤ L ≤ etaPartial 3 ≤ 1`, `0 < etaPartial 2`):
+
+* MISSING FEEDER 1 (analytic continuation): the identity
+  `riemannZeta (1/2:ℂ) = (L:ℂ) / (1 - √2)` where `L` is the Tendsto limit of
+  the eta partial sums (`L ≈ 0.604`). Mathlib has no Dirichlet-eta function and
+  no `η(s) = (1 - 2^(1-s))·ζ(s)` for `Re s > 0, s ≠ 1`; proving it needs the
+  alternating-series `HasSum` at `s = 1/2` plus analytic continuation, i.e. the
+  `tendsto`/`HasSum` link currently absent.
+* MISSING FEEDER 2 (tightness): `Λ₀(1/2) = Γℝ(1/2)·ζ(1/2)+4 ≈ 0.023` lies
+  `≈ 0.02` from 0. The crude intervals proved here
+  (`0 < Γ(1/4) ≤ 4`, `0 < π^(-1/4) < 1`, hence `0 < Γℝ(1/2).re ≤ 4`, and
+  `S₂ = 1-1/√2 ≈ 0.293 ≤ L ≤ 1`) give `Γℝ·|ζ| ∈ (0, 10)`, so
+  `Γℝ·ζ+4 ∈ (-6, 4) ∋ 0` — no separation. Closing needs `L` to `±0.003`
+  (∼10⁴ alternating terms, remainder `≤ 1/√(N+1)`) and `Γ(1/4)` to `±0.01`
+  (e.g. via Stirling with explicit remainder or verified quadrature for the
+  `Real.Gamma` integral), then `completed₀_half_ne_zero_of_product_ne_neg_four`.
+* `taylorCoeff_zero_ne_zero` follows from `taylorCoeff_zero_eq` plus the above
+  once feeders 1–2 are supplied.
+-/
 
 end JensenRH

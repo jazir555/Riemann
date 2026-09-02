@@ -88,3 +88,117 @@ theorem eta_half_pos :
       (div_lt_one (Real.sqrt_pos.mpr (by norm_num))).mpr h_sqrt2_gt_1
     linarith
   exact ⟨L, hL', lt_of_lt_of_le h_eps h_bound⟩
+
+/-- Eta partial sum S₁ = 1. -/
+theorem etaPartial_one_eq : etaPartial 1 = 1 := by
+  simp [etaPartial, Real.sqrt_one]
+
+/-- Eta partial sum S₃ = 1 - 1/√2 + 1/√3. -/
+theorem etaPartial_three_eq :
+    etaPartial 3 = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- S₃ ≤ S₁ = 1 (since 1/√3 ≤ 1/√2). The S₃ upper bound is strictly tighter. -/
+theorem etaPartial_three_le_one : etaPartial 3 ≤ 1 := by
+  rw [etaPartial_three_eq]
+  have h23 : Real.sqrt 2 ≤ Real.sqrt 3 :=
+    Real.sqrt_le_sqrt (by norm_num)
+  have hpos2 : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
+  have h13 : (1 : ℝ) / Real.sqrt 3 ≤ 1 / Real.sqrt 2 :=
+    one_div_le_one_div_of_le hpos2 h23
+  linarith
+
+/-- LOWER BOUND (standalone): every eta limit L satisfies S₂ ≤ L. -/
+theorem eta_half_ge_S2 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : etaPartial 2 ≤ L := by
+  let f : ℕ → ℝ := fun k => 1 / sqrt (k + 1 : ℝ)
+  have h_anti : Antitone f := eta_terms_antitone
+  have h_fun_eq : (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) =
+      (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext n
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [f]
+    push_cast
+    ring
+  have hL' : Tendsto (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) atTop (𝓝 L) := by
+    rw [h_fun_eq]
+    exact hL
+  have h_raw : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) ≤ L :=
+    Antitone.alternating_series_le_tendsto hL' h_anti 1
+  have h_eq : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) = etaPartial 2 := by
+    simp [etaPartial, f, Finset.sum_range_succ]
+    ring
+  linarith
+
+/-- UPPER BOUND S₁: every eta limit L satisfies L ≤ 1 (odd partial sum, k = 0). -/
+theorem eta_half_le_one (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ 1 := by
+  let f : ℕ → ℝ := fun k => 1 / sqrt (k + 1 : ℝ)
+  have h_anti : Antitone f := eta_terms_antitone
+  have h_fun_eq : (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) =
+      (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext n
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [f]
+    push_cast
+    ring
+  have hL' : Tendsto (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) atTop (𝓝 L) := by
+    rw [h_fun_eq]
+    exact hL
+  have h_up := Antitone.tendsto_le_alternating_series hL' h_anti 0
+  have h_eq : (∑ i ∈ Finset.range (2 * 0 + 1), (-1 : ℝ) ^ i * f i) = etaPartial 1 := by
+    have h3 : (∑ i ∈ Finset.range 1, (-1 : ℝ) ^ i * f i) =
+        (∑ i ∈ Finset.range 1, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) :=
+      congrFun h_fun_eq 1
+    have h31 : (2 * 0 + 1 : ℕ) = 1 := rfl
+    rw [h31, h3]
+    rfl
+  rw [h_eq, etaPartial_one_eq] at h_up
+  exact h_up
+
+/-- UPPER BOUND S₃ (tighter): every eta limit L satisfies L ≤ S₃ (odd partial sum, k = 1). -/
+theorem eta_half_le_S3 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ etaPartial 3 := by
+  let f : ℕ → ℝ := fun k => 1 / sqrt (k + 1 : ℝ)
+  have h_anti : Antitone f := eta_terms_antitone
+  have h_fun_eq : (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) =
+      (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext n
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [f]
+    push_cast
+    ring
+  have hL' : Tendsto (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) atTop (𝓝 L) := by
+    rw [h_fun_eq]
+    exact hL
+  have h_up := Antitone.tendsto_le_alternating_series hL' h_anti 1
+  have h_eq : (∑ i ∈ Finset.range (2 * 1 + 1), (-1 : ℝ) ^ i * f i) = etaPartial 3 := by
+    have h3 : (∑ i ∈ Finset.range 3, (-1 : ℝ) ^ i * f i) =
+        (∑ i ∈ Finset.range 3, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) :=
+      congrFun h_fun_eq 3
+    have h31 : (2 * 1 + 1 : ℕ) = 3 := rfl
+    rw [h31, h3]
+    rfl
+  rw [h_eq] at h_up
+  exact h_up
+
+/-- TWO-SIDED interval with S₁: ∃ L, Tendsto ∧ 0 < L ∧ L ≤ 1. -/
+theorem eta_half_two_sided :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ 0 < L ∧ L ≤ 1 := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, hL, hpos, eta_half_le_one L hL⟩
+
+/-- TWO-SIDED tight interval: ∃ L, Tendsto ∧ S₂ ≤ L ∧ L ≤ S₃ (hence 0 < L). -/
+theorem eta_half_two_sided_tight :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ etaPartial 2 ≤ L ∧ L ≤ etaPartial 3 ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, hL, eta_half_ge_S2 L hL, eta_half_le_S3 L hL, hpos⟩

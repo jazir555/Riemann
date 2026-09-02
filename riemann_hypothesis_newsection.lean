@@ -389,4 +389,192 @@ theorem mollified_gap_gives_hardDifference_lower_bound (K : ℕ) {z : ℂ} {δ B
     exact mul_le_mul hpref hzeta (div_nonneg hδ.le hB.le) (norm_nonneg _)
   exact hardDifference_lower_bound_of_xiShifted_lower_bound hgt hlt hne hxi_low hDpos
 
+/-!
+# Explicit mollifier bounds (partial leaf: `‖M‖ ≤ B` with concrete `B`)
+
+The `MollifiedRoucheLeaf K` needs two estimates: a mollifier upper bound
+`‖M‖ ≤ B` and a Rouché gap `‖ζ*M - 1‖ ≤ 1 - δ`.  This section proves the
+first one unconditionally, with explicit `B`, plus the exact values of the
+mollifier at the smallest `K`.  The gap itself is reduced to an explicit
+zeta estimate (see `mollified_K2_gap_implies_zeta_bound`); that zeta estimate
+is the precise remaining leaf gap.
+-/
+
+/-- Möbius factor is bounded by 1 in complex norm. -/
+theorem moebius_complex_norm_le_one (n : ℕ) :
+    ‖((ArithmeticFunction.moebius n : ℤ) : ℂ)‖ ≤ 1 := by
+  rcases ArithmeticFunction.moebius_eq_or n with h | h | h
+  · simp [h]
+  · rw [h]; simp
+  · rw [h]; simp
+
+/-- Dirichlet monomial bound: `‖(n+1)^{-s}‖ ≤ 1` for `0 ≤ Re s`. -/
+theorem natCast_cpow_neg_norm_le_one (n : ℕ) (s : ℂ) (hs : 0 ≤ s.re) :
+    ‖((n + 1 : ℕ) : ℂ) ^ (-s)‖ ≤ 1 := by
+  have hpos : (0 : ℝ) < (((n + 1 : ℕ) : ℝ)) := by positivity
+  have hbase : (((n + 1 : ℕ) : ℂ)) = (((((n + 1 : ℕ) : ℝ))) : ℂ) := by simp
+  rw [hbase, Complex.norm_cpow_eq_rpow_re_of_pos hpos]
+  have hre : (-s).re = -s.re := Complex.neg_re s
+  rw [hre]
+  apply Real.rpow_le_one_of_one_le_of_nonpos
+  · have h1 : 1 ≤ n + 1 := Nat.succ_le_succ (Nat.zero_le n)
+    exact_mod_cast h1
+  · linarith
+
+/-- Smoothing weight bound: `‖1 - (n+1)/K‖ ≤ 1` for `n < K`, `1 ≤ K`. -/
+theorem mollifier_weight_norm_le_one (n K : ℕ) (hK : 1 ≤ K) (hmem : n < K) :
+    ‖((1 - ((n + 1 : ℕ) : ℂ) / ((K : ℕ) : ℂ)) : ℂ)‖ ≤ 1 := by
+  have hKne : (K : ℝ) ≠ 0 := by
+    exact_mod_cast (ne_of_gt (Nat.lt_of_lt_of_le (Nat.zero_lt_one) hK))
+  have hKpos : (0 : ℝ) < (K : ℝ) := by
+    exact_mod_cast (Nat.lt_of_lt_of_le (Nat.zero_lt_one) hK)
+  have hnK : ((((n + 1 : ℕ) : ℝ))) ≤ ((K : ℕ) : ℝ) := by
+    have hle : n + 1 ≤ K := hmem
+    exact_mod_cast hle
+  have hnn : (0 : ℝ) ≤ ((((n + 1 : ℕ) : ℝ))) := by positivity
+  have hdiv_nonneg : (0 : ℝ) ≤ ((((n + 1 : ℕ) : ℝ))) / ((K : ℕ) : ℝ) :=
+    div_nonneg hnn hKpos.le
+  have hdiv_le_one : ((((n + 1 : ℕ) : ℝ))) / ((K : ℕ) : ℝ) ≤ 1 := by
+    rw [div_le_one hKpos]
+    exact hnK
+  have hcast : ((1 - ((n + 1 : ℕ) : ℂ) / ((K : ℕ) : ℂ)) : ℂ) =
+      (((1 - ((((n + 1 : ℕ) : ℝ))) / (((K : ℕ) : ℝ)) : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  rw [hcast, Complex.norm_real, Real.norm_eq_abs]
+  rw [abs_le]
+  constructor <;> linarith
+
+/-- Explicit mollifier `L∞` bound: `‖M(s,K)‖ ≤ K` for `0 ≤ Re s`.
+
+Each of the `K` summands is a product of three factors each of norm `≤ 1`
+(Möbius, Dirichlet monomial, smoothing weight), hence has norm `≤ 1`; the
+triangle inequality gives `≤ K`.  This supplies the `hM : ‖M‖ ≤ B` hypothesis
+(with `B = K`) consumed by `mollified_gap_gives_zeta_lower_bound` and
+`mollified_gap_gives_hardDifference_lower_bound`. -/
+theorem dirichletMollifier_norm_le (s : ℂ) (K : ℕ) (hs : 0 ≤ s.re) :
+    ‖dirichletMollifier s K‖ ≤ (K : ℝ) := by
+  unfold dirichletMollifier
+  by_cases hK0 : K = 0
+  · subst hK0
+    simp
+  · have hK1 : 1 ≤ K := Nat.one_le_iff_ne_zero.mpr hK0
+    calc ‖∑ n ∈ Finset.range K, (ArithmeticFunction.moebius (n + 1) : ℂ) *
+            (↑(n + 1) : ℂ) ^ (-s) * (1 - ↑(n + 1) / ↑K)‖
+        ≤ ∑ n ∈ Finset.range K, ‖(ArithmeticFunction.moebius (n + 1) : ℂ) *
+            (↑(n + 1) : ℂ) ^ (-s) * (1 - ↑(n + 1) / ↑K)‖ :=
+          norm_sum_le _ _
+      _ ≤ ∑ _n ∈ Finset.range K, (1 : ℝ) := by
+          apply Finset.sum_le_sum
+          intro n hn
+          have hnK : n < K := Finset.mem_range.mp hn
+          have hmu := moebius_complex_norm_le_one (n + 1)
+          have hcp := natCast_cpow_neg_norm_le_one n s hs
+          have hwt := mollifier_weight_norm_le_one n K hK1 hnK
+          rw [norm_mul, norm_mul]
+          have h12 : ‖((ArithmeticFunction.moebius (n + 1) : ℤ) : ℂ)‖ *
+              ‖(((n + 1 : ℕ) : ℂ) ^ (-s))‖ ≤ 1 :=
+            mul_le_one₀ hmu (norm_nonneg _) hcp
+          exact mul_le_one₀ h12 (norm_nonneg _) hwt
+      _ = (K : ℝ) := by simp
+
+/-- The `K = 0` mollifier vanishes (empty sum). -/
+theorem dirichletMollifier_zero (s : ℂ) : dirichletMollifier s 0 = 0 := by
+  simp [dirichletMollifier]
+
+/-- The `K = 1` mollifier vanishes: the single term carries weight `1 - 1/1 = 0`. -/
+theorem dirichletMollifier_one (s : ℂ) : dirichletMollifier s 1 = 0 := by
+  unfold dirichletMollifier
+  simp [Complex.one_cpow]
+
+/-- The `K = 2` mollifier is the constant `1/2`: the `n = 0` term contributes
+`1 * 1 * (1/2)` and the `n = 1` term carries weight `1 - 2/2 = 0`.  This is the
+smallest nontrivial Dirichlet mollifier. -/
+theorem dirichletMollifier_two (s : ℂ) : dirichletMollifier s 2 = 1 / 2 := by
+  have hsum : (∑ n ∈ Finset.range 2, (ArithmeticFunction.moebius (n + 1) : ℂ) *
+      (↑(n + 1) : ℂ) ^ (-s) * (1 - ↑(n + 1) / ↑(2 : ℕ))) =
+      ((ArithmeticFunction.moebius 1 : ℂ) * ((1 : ℕ) : ℂ) ^ (-s) *
+        (1 - ((1 : ℕ) : ℂ) / ((2 : ℕ) : ℂ))) +
+      ((ArithmeticFunction.moebius 2 : ℂ) * ((2 : ℕ) : ℂ) ^ (-s) *
+        (1 - ((2 : ℕ) : ℂ) / ((2 : ℕ) : ℂ))) := by
+    simp only [Finset.sum_range_succ, Finset.range_zero, Finset.sum_empty, zero_add]
+  have hmu1 : ((ArithmeticFunction.moebius 1 : ℤ) : ℂ) = 1 := by
+    simp
+  have hcp1 : (((1 : ℕ) : ℂ) ^ (-s)) = 1 := by
+    have h1 : (((1 : ℕ) : ℂ)) = (1 : ℂ) := by simp
+    rw [h1, Complex.one_cpow]
+  have hw1 : ((1 - ((1 : ℕ) : ℂ) / ((2 : ℕ) : ℂ)) : ℂ) = 1 / 2 := by
+    norm_num
+  have hw2 : ((1 - ((2 : ℕ) : ℂ) / ((2 : ℕ) : ℂ)) : ℂ) = 0 := by
+    have h2 : ((2 : ℕ) : ℂ) / ((2 : ℕ) : ℂ) = 1 := by
+      apply div_self
+      norm_num
+    rw [h2, sub_self]
+  have e0 : ((ArithmeticFunction.moebius 1 : ℂ) * ((1 : ℕ) : ℂ) ^ (-s) *
+      (1 - ((1 : ℕ) : ℂ) / ((2 : ℕ) : ℂ))) = 1 / 2 := by
+    rw [hmu1, hcp1, hw1, one_mul, one_mul]
+  have e1 : ((ArithmeticFunction.moebius 2 : ℂ) * ((2 : ℕ) : ℂ) ^ (-s) *
+      (1 - ((2 : ℕ) : ℂ) / ((2 : ℕ) : ℂ))) = 0 := by
+    rw [hw2, mul_zero]
+  unfold dirichletMollifier
+  rw [hsum, e0, e1, add_zero]
+
+/-- `K = 2` mollifier norm: `‖M(s,2)‖ = 1/2`. -/
+theorem dirichletMollifier_two_norm (s : ℂ) :
+    ‖dirichletMollifier s 2‖ ≤ 1 / 2 := by
+  rw [dirichletMollifier_two]
+  norm_num
+
+/-- Tail specialization of the `L∞` bound: on the shifted strip
+`-(1/2) < Im z < 1/2` one has `Re(shiftedS z) = 1/2 - Im z ≥ 0`, so
+`‖M(shiftedS z, K)‖ ≤ K`.  This is exactly the `hM` input for the quantitative
+Rouché-gap chain on the tail. -/
+theorem dirichletMollifier_tail_norm_le (z : ℂ) (K : ℕ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    ‖dirichletMollifier (shiftedS z) K‖ ≤ (K : ℝ) := by
+  apply dirichletMollifier_norm_le
+  rw [shiftedS_re]
+  linarith
+
+/-- Tail specialization at `K = 2` with the sharp constant `1/2`. -/
+theorem dirichletMollifier_tail_two_norm_le (z : ℂ) :
+    ‖dirichletMollifier (shiftedS z) 2‖ ≤ 1 / 2 :=
+  dirichletMollifier_two_norm _
+
+/-- `K = 2` Rouché product identity: `ζ * M₂ - 1 = ζ/2 - 1`. -/
+theorem mollified_K2_gap_eq (z : ℂ) :
+    zeta (shiftedS z) * dirichletMollifier (shiftedS z) 2 - 1 =
+      zeta (shiftedS z) / 2 - 1 := by
+  rw [dirichletMollifier_two]
+  ring
+
+/-- `K = 2` gap forces a uniform zeta upper bound on the tail:
+`‖ζ*M₂ - 1‖ ≤ 1 - δ` implies `‖ζ‖ ≤ 4 - 2δ`.
+
+Hence a `MollifiedRoucheLeaf 2` (which asserts the gap hypothesis for every
+tail `z`) would force `‖zeta(shiftedS z)‖ ≤ 4` uniformly for
+`10 < |Re z|`, `0 < Im z < 1/2`.  Proving that uniform zeta bound is the
+precise remaining gap for the `K = 2` leaf; no lemma currently in the repo
+(`ZeroFreeRegion*` gives a zero-free edge near `Re = 1`, `KadiriDigammaBound`
+bounds `Re ψ`, and Mathlib's Dirichlet-series API gives no strip upper bound
+for `ζ`) supplies it.  A full leaf additionally needs `K` growing with `|Re z|`
+(a fixed-`K` Dirichlet polynomial is uniformly bounded in `Im` while `ζ` on
+`0 < Re < 1/2` is not), so the `K = 2` reduction below is the sharpest
+fixed-`K` statement available. -/
+theorem mollified_K2_gap_implies_zeta_bound {z : ℂ} {δ : ℝ}
+    (hgap : ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) 2 - 1‖ ≤ 1 - δ) :
+    ‖zeta (shiftedS z)‖ ≤ 4 - 2 * δ := by
+  have heq := mollified_K2_gap_eq z
+  rw [heq] at hgap
+  have htri := norm_add_le (zeta (shiftedS z) / 2 - 1) (1 : ℂ)
+  rw [sub_add_cancel] at htri
+  rw [norm_one] at htri
+  have h2 : ‖zeta (shiftedS z) / 2‖ ≤ (1 - δ) + 1 :=
+    le_trans htri (by linarith)
+  have hmul : ‖zeta (shiftedS z) / 2‖ = ‖zeta (shiftedS z)‖ / 2 := by
+    rw [norm_div]
+    norm_num
+  rw [hmul] at h2
+  linarith
+
 end MollifiedAttack
