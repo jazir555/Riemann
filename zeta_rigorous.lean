@@ -43,7 +43,7 @@ theorem eta_half_pos :
       Antitone.alternating_series_le_tendsto hL h_anti 1
     have h_eq : Finset.sum (Finset.range (2 * 1)) (fun i => (-1 : ℝ) ^ i * f i) = etaPartial 2 := by
       simp [etaPartial, f]
-      ring
+      ring_nf
     linarith
   have h_eps : 0 < etaPartial 2 := by
     have h_eq : etaPartial 2 = 1 - 1 / Real.sqrt 2 := by
