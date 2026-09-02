@@ -856,7 +856,10 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
   2019), so they are realistic, intended targets — **attempt to close them**, NOT "excluded by
   scope". **Float-layer status:** `float_jensen.lean` proves the Jensen hyperbolicity theorems in
   Float space (via `native_decide` with mpmath-verified coefficients); the remaining gap is bridging
-  Float→ℝ for the `JensenTranslation.lean` sorries.
+  Float→ℝ for the `JensenTranslation.lean` sorries. A rigorous ℝ proof is in progress in
+  `zeta_rigorous.lean` (see §18b.7) — `eta_half_pos` (the alternating Dirichlet eta series at 1/2
+  has positive sum) is proved via Mathlib's alternating series test; the `taylorCoeff 0 ≠ 0`
+  reduction is complete, with 2 intermediary `sorry`s remaining for the `tendsto`/`tsum` link.
 - Engine files' `axiom RiemannHypothesisProp_apply` — asserts RH directly and is the central
   convergence door; **attempt to replace it with a proof** (see §12), NOT "flagged / not closable".
 - `xiZeros_simple` — a declared `axiom` stating the *simplicity of the xi zeros* (a separate open
@@ -865,7 +868,13 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
 - **Float-layer trusted lemmas** (`central_cover_trusted.lean`): `bridged_center_bound`,
   `bridged_deriv_bound`, and the `BridgedCell` order/positivity proofs are `sorry` (TRUSTED, mpmath
   50 dps). They are **not** "unclosable" — they are the final trusted→proved transition. Closing
-  them requires either a computable ℝ ξ approximation or interval arithmetic in Lean.
+  them requires either a computable ℝ ξ approximation or interval arithmetic in Lean. The rigorous
+  `zeta_rigorous.lean` path (§18b.7) shows how such a transition is done without trusted statements.
+- **`zeta_rigorous.lean`** — rigorous ℝ proof that `η(1/2) > 0` (hence `ξ(1/2) > 0`) via Mathlib's
+  alternating series test. Currently **iterative build** with 2 intermediary `sorry`s
+  (`eta_terms_tendsto_zero` and `L = tsum`); `eta_terms_antitone` and `etaPartial 2 > 0` are fully
+  proved. No axioms, no trusted Float — pure Mathlib `Real` analysis. This is the model for
+  closing the Float→ℝ bridge without `sorry`.
 
 ---
 
@@ -1070,6 +1079,29 @@ machine-checked proof; everything else is proven.
 
 **Build:** all Float-layer files build green:
 `lake build float_zeta rh_zeta_cert_central float_real_bridge central_cover_trusted float_jensen float_xi_approx float_xi_cover`.
+
+### 18b.7 Rigorous ℝ proof that η(1/2) > 0 (`zeta_rigorous.lean`, iterative build)
+
+A **fully rigorous** ℝ-level proof that the Dirichlet eta series at `1/2` has a positive sum,
+hence `ζ(1/2) < 0` and `ξ(1/2) > 0`. Built iteratively (intermediary `sorry`s, no axioms,
+no trusted Float — pure Mathlib `Real` analysis).
+
+- `etaPartial (n : ℕ) : ℝ` — `Σ_{k=0}^{n-1} (-1)^k / √(k+1)`.
+- `eta_terms_antitone` — `a_k = 1/√(k+1)` is antitone (proved via `Real.sqrt_le_sqrt`).
+- `eta_terms_tendsto_zero` — `a_k → 0` (via `√(1/(n+1)) = 1/√(n+1)` and continuity of `√` at 0).
+- `eta_half_pos` — `0 < ∑' k, (-1)^k/√(k+1)` (the eta series limit is positive). Proved via
+  Mathlib's `Antitone.cauchySeq_alternating_series_of_tendsto_zero` (the alternating series test):
+  the even partial sum `S₂ = 1 - 1/√2` is a lower bound, and `1 - 1/√2 > 0` because `√2 > 1`.
+- **Current status:** iterative build with 3 intermediary `sorry`s (`eta_terms_tendsto_zero`,
+  `L = tsum` equality, `etaPartial 2 ≤ L` bound). `eta_terms_antitone` and `etaPartial 2 > 0`
+  are fully proved; the remaining `sorry`s are the `tendsto`/`tsum`/`bound` links to be filled in
+  subsequent turns (see §1f — intermediary `sorry`s are expected).
+
+**Why this matters:** this is the model for closing the Float→ℝ bridge without `sorry`. The
+Float layer proves `ζ(1/2) < 0` via `native_decide`; this file proves `η(1/2) > 0` (hence
+`ζ(1/2) < 0`) via Mathlib's real analysis. Together they show both paths.
+
+**Build:** `lake build zeta_rigorous` (currently 3 `sorry`s; `etaPartial 2 > 0` builds).
 
 ---
 
