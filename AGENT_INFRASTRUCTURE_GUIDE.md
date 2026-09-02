@@ -1124,6 +1124,45 @@ In short: `zeta_rigorous` proves one coefficient and demonstrates the rigorous b
 full door still requires applying that pattern to **all** coefficients (Jensen) or to **all 32 cells**
 (central cover), plus the `tendsto`/`tsum` links now being filled.
 
+### 18b.9 How the template fits each door
+
+`zeta_rigorous` is not a door itself — it is the **reusable Real-analysis template** that each
+door's Float→ℝ bridge instantiates. How it fits, door by door:
+
+- **Jensen door** (`JensenTranslation.lean:103,109,449,462,471` + `JensenScratch.lean:508`).
+  Needs `hC : ∀ k, taylorCoeff k ≠ 0` to feed `all_shifts_from_zero_of_nonvanishing`
+  (`hC` + `∀ d, Hyperbolic (jensenPoly d 0)` → `∀ d n, Hyperbolic (jensenPoly d n)`).
+  `zeta_rigorous` gives `taylorCoeff 0 = ξ(1/2) > 0` (one `k`). To fit: prove `taylorCoeff k ≠ 0`
+  for `k = 1,2,…` by the **same** alternating-series pattern applied to the higher even derivatives
+  `Ξ^{(2k)}(0)` (each is an alternating series with the same antitone/tendsto structure, different
+  `a_k`). The `eta_terms_antitone`/`eta_terms_tendsto_zero`/`alternating_series_le_tendsto` chain
+  is the template; instantiate it per `k` with the `k`-th derivative's `a_k`.
+
+- **Central cover door** (`central_cover_trusted.lean:91` + `central_cover_assembly.lean`).
+  Needs `bridged_center_bound` and `bridged_deriv_bound` for **32 distinct cell centers**,
+  each of the form `ε_i + M_i·r_i ≤ ‖ξ(center_i)‖`. Today those are `sorry` (TRUSTED, mpmath).
+  `zeta_rigorous` is the template for **one** such bound proved in `Real` without Float:
+  replace the Float lower bound `ε_i` with the `etaPartial 2 ≤ L` lower-bound step, and the
+  `‖ξ(center_i)‖` lower bound with the same `S₂`-is-a-lower-bound argument applied to the
+  cell's `a_k`. In other words, `eta_half_pos`'s `S₂ = 1 - 1/√2 > 0` becomes, per cell,
+  `S_{2}^{(i)} > 0` for that cell's alternating series.
+
+- **Hard-difference door** (`riemann_hypothesis_newsection.lean` + `cross_door_synthesis.lean`).
+  Fits identically to the central cover: `rh_from_mollified_tail_and_central_cover` consumes the
+  same `XiCentralZeroFreeCover 10` as the central door. Closing the central cover closes this door
+  transitively.
+
+- **Thin-region door** (`rh_residual_gap.lean:247` + `FirstQuadrantScratch.lean`).
+  Fits via `rh_iff_thin_region_zeta` which consumes `BoundedCoverZeta T₀` — the same 32-cell
+  finite-cover data, just expressed in `s`-plane `ζ` coordinates. The `zeta_rigorous` template
+  applies verbatim: each cell's `η`/`ζ` lower bound is an `eta_terms_antitone`-style antitone
+  sequence with a `tendsto_zero` and an `S₂`-lower-bound.
+
+In every case the work is: **instantiate the `zeta_rigorous` alternating-series chain per index
+(`k` for Jensen coefficients, `i` for cover cells), prove its `antitone`/`tendsto_zero`, then
+`S₂ ≤ L` and `S₂ > 0` to get positivity.** No new ideas are needed — only per-index `a_k`
+definitions and the same three lemmas.
+
 ---
 
 ## Appendix A — Precise interfaces (exact types; verified)
