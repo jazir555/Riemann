@@ -23,6 +23,8 @@ structure CentralCell where
   eps : Float
   M : Float
 
+deriving instance Inhabited for CentralCell
+
 def central_cert_data : Array CentralCell := #[
   CentralCell.mk (-10.0:Float) (-7.5:Float) (0.01:Float) (0.2:Float) (0.006177051945015177:Float) (0.04902931207867841:Float),
   CentralCell.mk (-7.5:Float) (-5.0:Float) (0.01:Float) (0.2:Float) (0.0559279239515775:Float) (0.06662501762533198:Float),
