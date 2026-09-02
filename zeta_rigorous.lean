@@ -27,7 +27,7 @@ theorem eta_terms_antitone : Antitone (fun k : ℕ => 1 / sqrt (k + 1 : ℝ)) :=
 
 /-- The terms tend to 0. -/
 theorem eta_terms_tendsto_zero : Tendsto (fun k : ℕ => 1 / sqrt (k + 1 : ℝ)) atTop (𝓝 0) := by
-  sorry -- TODO: via sqrt(1/(n+1)) = 1/sqrt(n+1) and continuity of sqrt at 0
+  sorry -- TODO: via 1/√(n+1) = √(1/(n+1)) and continuity of sqrt at 0
 
 /-- KEY: The alternating Dirichlet eta series at 1/2 has a positive sum. -/
 theorem eta_half_pos :
