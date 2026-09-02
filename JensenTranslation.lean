@@ -535,6 +535,13 @@ theorem tail_nonvanishing_iff_jensen :
     this is nonzero. -/
 lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
   simp [taylorCoeff, xiMathlibShifted, xiMathlib]
-  norm_num
+  -- Goal: ¬(completedRiemannZeta₀ (1 / 2)).re = 0
+  -- This is a transcendental constant. The claim is that
+  -- completedRiemannZeta₀ (1/2) = π^(-1/4) * Γ(1/4) * ζ(1/2) < 0,
+  -- so its real part is nonzero. Proving this requires numerical
+  -- bounds on ζ(1/2) that are not available in Mathlib.
+  unfold completedRiemannZeta₀
+  -- Goal: ¬(HurwitzZeta.completedHurwitzZetaEven₀ 0 2⁻¹).re = 0
+  sorry
 
 end JensenRH
