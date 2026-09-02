@@ -171,4 +171,62 @@ theorem xiFloat_half_pos_100 : xiFloat 0.5 100 > 0 := by
 theorem xiFloat_half_ne_0 : xiFloat 0.5 100 != 0 := by
   native_decide
 
+/-!
+# Float Taylor coefficients of Xi(z) = xi(1/2 + iz) at z=0
+
+The Riemann xi function satisfies the functional equation `xi(s) = xi(1-s)`,
+so `Xi(z) = xi(1/2 + iz)` is an even function of `z`. Its Taylor series at
+`z = 0` has only even-order terms:
+
+  Xi(z) = sum_{k=0}^∞ taylorCoeff(2k) * z^{2k}
+
+The coefficients are computed by mpmath at 50 dps and hardcoded here as
+computable Float constants.
+-/
+
+/-- Float Taylor coefficients of `Xi(z) = xi(1/2 + iz)` at `z = 0`,
+    computed by mpmath (50 dps).
+
+    `taylorCoeff(n) = Xi^(n)(0) / n!`
+
+    Since `Xi` is even, all odd coefficients are zero. -/
+def taylorCoeffFloat (n : Nat) : Float :=
+  match n with
+  | 0 => 4.9712077818831410e-1
+  | 1 => 0.0
+  | 2 => -1.1485972157572718e-2
+  | 3 => 0.0
+  | 4 => 1.2345201807031800e-4
+  | 5 => 0.0
+  | 6 => -8.323554813855270e-7
+  | 7 => 0.0
+  | 8 => 3.992226551344137e-9
+  | 9 => 0.0
+  | 10 => -1.461602576011096e-11
+  | _ => 0.0  -- not computed
+
+/-- `taylorCoeffFloat 0 > 0`: the constant term `Xi(0) = xi(1/2) > 0`. -/
+theorem taylorCoeffFloat_0_pos : taylorCoeffFloat 0 > 0 := by
+  native_decide
+
+/-- `taylorCoeffFloat 2 < 0`: the quadratic coefficient is negative. -/
+theorem taylorCoeffFloat_2_neg : taylorCoeffFloat 2 < 0 := by
+  native_decide
+
+/-- `taylorCoeffFloat 4 > 0`: the quartic coefficient is positive. -/
+theorem taylorCoeffFloat_4_pos : taylorCoeffFloat 4 > 0 := by
+  native_decide
+
+/-- `taylorCoeffFloat 6 < 0`: the sextic coefficient is negative. -/
+theorem taylorCoeffFloat_6_neg : taylorCoeffFloat 6 < 0 := by
+  native_decide
+
+/-- `taylorCoeffFloat 8 > 0`: the octic coefficient is positive. -/
+theorem taylorCoeffFloat_8_pos : taylorCoeffFloat 8 > 0 := by
+  native_decide
+
+/-- `taylorCoeffFloat 10 < 0`: the degree-10 coefficient is negative. -/
+theorem taylorCoeffFloat_10_neg : taylorCoeffFloat 10 < 0 := by
+  native_decide
+
 end FloatZeta
