@@ -1163,6 +1163,47 @@ In every case the work is: **instantiate the `zeta_rigorous` alternating-series 
 `S₂ ≤ L` and `S₂ > 0` to get positivity.** No new ideas are needed — only per-index `a_k`
 definitions and the same three lemmas.
 
+## 18c. What solving a door does (consequence)
+
+Solving a door means: **its `sorry`/`axiom` leaves are replaced by machine-checked proofs,
+`lake build` for that door is green, and `#print axioms` shows no `sorryAx` and — where the door
+carried an `axiom` — no `RiemannHypothesisProp_apply`.** What follows is forced.
+
+**Mathematically, RH is proved.** Each door is a *bidirectional* equivalence `A_i ⟺ RH`
+(`rh_iff_all_jensen_hyperbolic` for Jensen, `rh_iff_thin_region_zeta` for thin-region,
+`hardDifferenceNonzero_iff_RH` for hard-difference, `rh_from_central_zero_free_cover...` for the
+central cover). Proving `A_i` therefore proves `RH`. Concretely:
+
+- **Jensen:** `∀ d n, Hyperbolic (jensenPoly d n)` → `RiemannHypothesisProp`.
+- **Thin-region / central cover:** `ThinRegionZeta` / `XiCentralZeroFreeCover 10` → `RH`.
+- **Hard-difference:** `HardDifferenceNonzero` → `RH`.
+- **Central `axiom`:** `RiemannHypothesisProp_apply` itself.
+
+**Transitively, every other door closes.** Since each `A_i ⟺ RH`, we get `A_i ⟺ A_j` for all
+`i,j`. Proving one `A_i` proves `RH`, and `RH` proves every other `A_j`. The remaining doors
+become **corollaries / alternative proofs** — their `sorry`s are then closable by composing the
+already-proved equivalence with the now-proved `RH`. In Lean terms: after one door is green, the
+other doors' `sorry`s can be replaced by `have hRH : RiemannHypothesisProp := <proved door>` then
+`exact (rh_iff_...).mpr hRH` (or the appropriate direction).
+
+**For the project, the open problem is closed.** The repo's proof of RH is then the chain
+`A_i → RH` already committed in that door's file plus the now-filled `A_i` leaves. No further
+`RH`-equivalent work is required; subsequent work is **hardening** (removing `Float.toReal` trusted
+lemmas, tightening bounds, generalizing) and **documentation**.
+
+**In Lean terms, "solved" looks like:**
+
+- `lake build JensenTranslation` / `lake build rh_residual_gap` / `lake build central_cover_trusted`
+  (or `lake build riemann_hypothesis` for the `axiom` door) — **EXIT 0**.
+- `lake build zeta_rigorous` — **EXIT 0, 0 `sorry`s**.
+- `#print axioms <door_theorem>` — **no `sorryAx`**.
+- `#print axioms riemann_hypothesis` — **no `RiemannHypothesisProp_apply`** (for the `axiom` door).
+
+At that point `RiemannHypothesisProp` is a theorem of Lean+Mathlib, and every `rh_iff_*` is a
+two-way equivalence with both directions proved. The `Float` layer (`float_zeta`, `float_jensen`,
+`rh_zeta_cert_central`, `float_real_bridge`) remains as **computational evidence**; the `Real`
+layer (`zeta_rigorous` instantiated per `k`/`i`) is the **machine-checked proof** that consumes it.
+
 ---
 
 ## Appendix A — Precise interfaces (exact types; verified)
