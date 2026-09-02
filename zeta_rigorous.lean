@@ -41,7 +41,16 @@ theorem eta_half_pos :
   have h_bound : etaPartial 2 ≤ L := by
     sorry -- TODO: via Antitone.alternating_series_le_tendsto
   have h_eps : 0 < etaPartial 2 := by
-    sorry -- TODO: etaPartial 2 = 1 - 1/√2 > 0
+    have h_eq : etaPartial 2 = 1 - 1 / Real.sqrt 2 := by
+      simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+      ring
+    rw [h_eq]
+    have h_sqrt2_gt_1 : Real.sqrt 2 > 1 := by
+      calc 1 = Real.sqrt 1 := by simp
+        _ < Real.sqrt 2 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+    have h_inv_lt : (1 / Real.sqrt 2 : ℝ) < 1 :=
+      (div_lt_one (Real.sqrt_pos.mpr (by norm_num))).mpr h_sqrt2_gt_1
+    linarith
   have h_tsum : (0 : ℝ) < (∑' k : ℕ, ((-1 : ℤ) ^ k : ℝ) / sqrt (k + 1 : ℝ)) := by
     rw [← h_tsum_eq]
     exact lt_of_lt_of_le h_eps h_bound
