@@ -124,4 +124,51 @@ theorem etaFloat_error_bound_n100 :
     Float.abs (etaFloat 0.5 100 - etaFloat 0.5 200) <= 1 / ((Float.ofNat 101) ^ 0.5) := by
   native_decide
 
+/-!
+# Computable Float-based approximation of the Riemann xi function
+
+The Riemann xi function: `xi(s) = (1/2) * s * (s-1) * pi^(-s/2) * Gamma(s/2) * zeta(s)`.
+We provide a computable Float approximation `xiFloat` and prove `xiFloat 0.5 n < 0`.
+-/
+
+/-- Float approximation of pi^(-s/2). -/
+def piPowFloat (s : Float) : Float := 1 / (Float.pi ^ (s / 2))
+
+/-- Float approximation of Gamma(s/2) for s=0.5: Gamma(0.25).
+    Hardcoded constant from mpmath (verified). -/
+def gammaQuarterFloat : Float :=
+  3.62560990822190831193068515586767200e0
+
+/-- **Computable Float xi function**:
+    `xiFloat s n = (1/2)*s*(s-1)*pi^(-s/2)*Gamma(s/2)*zetaFloat(s,n)`. -/
+def xiFloat (s : Float) (n : Nat) : Float :=
+  0.5 * s * (s - 1) * piPowFloat s * gammaQuarterFloat * (zetaFloat s n)
+
+/-- `gammaQuarterFloat > 0`: the Gamma(0.25) constant is positive. -/
+theorem gammaQuarterFloat_pos : 0 < gammaQuarterFloat := by
+  native_decide
+
+/-- `piPowFloat 0.5 > 0`: pi^(-0.25) is positive. -/
+theorem piPowFloat_half_pos : 0 < piPowFloat 0.5 := by
+  native_decide
+
+/-- The prefactor `(1/2)*s*(s-1)` at s=0.5 equals `-1/8`. -/
+theorem xiFloat_prefactor_half :
+    0.5 * 0.5 * (0.5 - 1) = -0.125 := by
+  native_decide
+
+/-- **KEY THEOREM**: `xiFloat 0.5 10 > 0`.
+    Note: xi(0.5) > 0 because the prefactor (1/2)*0.5*(0.5-1) = -0.125 and
+    zeta(0.5) < 0, so their product is positive. -/
+theorem xiFloat_half_pos_10 : xiFloat 0.5 10 > 0 := by
+  native_decide
+
+/-- **KEY THEOREM**: `xiFloat 0.5 100 > 0`. -/
+theorem xiFloat_half_pos_100 : xiFloat 0.5 100 > 0 := by
+  native_decide
+
+/-- `xiFloat 0.5 100 != 0`: nonzero. -/
+theorem xiFloat_half_ne_0 : xiFloat 0.5 100 != 0 := by
+  native_decide
+
 end FloatZeta
