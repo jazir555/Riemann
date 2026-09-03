@@ -1868,3 +1868,765 @@ theorem TailZetaUpper_threeLines_FE_threshold_50p925_zeta {A B : ℝ}
 #print axioms TailZetaUpper_threeLines_FE_uniformExp
 #print axioms TailZetaUpper_threeLines_FE_threshold_50p925
 #print axioms TailZetaUpper_threeLines_FE_threshold_50p925_zeta
+
+/-!
+# Door-3 sharp left-window (AL tail, append-only, door-3 closure premise)
+
+TASK: beat the `1.2e9` left-window cap (`ZetaUpperR02ThreeLines.damped_leftWindow_le`)
+down to the `A ≤ 50.925` tier (`~2.4e7×` gap, purely crude cos/exp/Gamma majorant
+at the FE left edge). Prove Stirling-sharp caps for the reflected factors on the
+window (`Re = 2` line, `|Im| ≤ 8.75`): Gamma-with-Im-decay, cpow, cos — then compose
+through `F(s) = 2·(2π)^{-s}·Γ(s)·cos(πs/2)` to a proved whole-window damped cap `A`.
+
+GREP-FIRST RECORD (repo + Mathlib, 2026-09-03; bridges FOUND, not recreated):
+* `RowFE` toolkit EXISTS (`interval_arith.lean:30851`, namespace `RowFE`):
+  `RowFEFactor` (`:30856`), `RowFE_norm_sin_le`/`RowFE_norm_cos_le` (generic
+  `‖sin/cos‖ ≤ exp B` from `|Im| ≤ B`), `RowFE_cos_upper`/`RowFE_cos_num`
+  (`:30993`, `≤ exp 16 ≤ 1e7`), `RowFE_cpow_upper` (`:30998`, `≤ 1`),
+  `RowFE_Gamma_upper_of` (`:31257`, via `R00GammaLower.norm_Gamma_le_realGamma`),
+  `RowFE_factor_upper_of` (`:31451`, `≤ 2*1*G*C`). Reused; sharp versions created
+  below (cpow `1/36`, cos `2e6`/`23000` via tighter `B = 14`/`10`).
+* `R02GammaDisc.shift_norm_ge_sqrt` EXISTS (`interval_arith.lean:31768+`, the AH
+  6-shift Im-decay comparison `‖z+k‖ ≥ √((a+k)²+b²)`). Reused for all floors below;
+  NOT recreated.
+* `R00GammaLower.norm_Gamma_le_realGamma` EXISTS (`interval_arith.lean:541`,
+  `‖Γ z‖ ≤ Real.Gamma (Re z)` for `0 < Re`). Reused for numerators.
+* Mathlib Gamma API EXISTS and reused: `Complex.Gamma_add_one`
+  (`Gamma/Basic.lean:311`), `Real.Gamma_add_one` (`:409`), `Real.Gamma_one/two`
+  (`:415`/`Gamma_two`), `Complex.Gamma_mul_Gamma_one_sub` (reflection,
+  `Beta.lean:397-398`), `Complex.Gamma_conj` (`Basic.lean:355`),
+  `Complex.norm_cpow_eq_rpow_re_of_pos`, `Real.rpow_natCast`, `Real.rpow_neg`,
+  `Real.exp_nat_mul`, `Real.exp_one_lt_d9` (`ExponentialBounds.lean:38`),
+  `Real.pi_gt_three`/`Real.pi_gt_d2`/`Real.pi_lt_d4` (`Real/Pi/Bounds.lean`),
+  `Complex.norm_exp`, `Real.exp_le_exp`.
+* FE EXISTS: `riemannZeta_one_sub` (cos form, `RiemannZeta.lean:178-180`). Reused.
+* Right edge EXISTS in-file: `TailZetaUpper.zeta_rightEdge_B2` (`:1040`,
+  `Re ≥ 2 → ‖zeta‖ ≤ 2`). Reused.
+* Pole-removed entire `F` + damped `G` + `DiffContOnCl` EXISTS in-file
+  (`ZetaUpperR02ThreeLines`, `:1119+`): `dampCenter`, `poleRemovedZeta_of_ne`,
+  `norm_complex_exp`, `dampedPoleRemoved`. Reused.
+* VERIFIED ABSENT (hence CREATED in-file): Stirling-sharp Gamma with Im-decay
+  (exponential `e^{-π|y|/2}` cancellation of `cosh`; repo-wide grep for
+  `Gamma.*exp.*im`, `im_decay`, `sinh.*Gamma`, `norm_Gamma.*im` returns zero hits;
+  Mathlib `Stirling.lean` is real-factorial only). What is created below is an
+  HONEST POLYNOMIAL-decay partial (6-shift floors, `≤ 0.028` for `|Im| ≥ 6`,
+  uniform `≤ 1`): it does NOT achieve exponential cancellation, so the full
+  `≤ 50.925` tier remains open (see residual). FE+convexity material for the full
+  joint `Γ·cos` bound is likewise absent and not attempted here (would need the
+  `|Γ(1+iy)|² = πy/sinh(πy)` identity via reflection + conj + sin/sinh estimates).
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `cpow_sharp_Re2`: `‖(2π)^{-w}‖ ≤ 1/36` on `Re = 2` (`39×` over `≤ 1`; true
+  `(2π)^{-2} ≈ 0.02533`, so `1/36 ≈ 0.02778` is within `10%`).
+* `cos_uniform_sharp`: `‖cos(πw/2)‖ ≤ 2000000` on `|Im| ≤ 8.75` (`5×` over `1e7`;
+  via `|Im| ≤ 14`, `exp 14 = (exp 1)^14 < 2.71828^14 < 2e6`).
+* `cos_small_sharp`: `‖cos(πw/2)‖ ≤ 23000` on `|Im| ≤ 6` (via `|Im| ≤ 10`,
+  `exp 10 < 2.71828^10 < 23000`).
+* `sub_upper_window`: `‖z-1‖ ≤ 9` on `Re = -1`, `|Im| ≤ 8.75` (`1.19×` over `10.75`;
+  Euclidean `√(4+76.5625) ≤ 9`, vs triangle `2+8.75`).
+* `damp_upper_window`: damping `≤ 2.7183` (same numeral as crude, reproved for
+  self-containment; true sup `≈ 1.01`, so `2.7×` loose — left for future).
+* `realGamma8_le`: `Real.Gamma 8 ≤ 5040` (6-step `Gamma_add_one` chain from
+  `Gamma 2 = 1`; exact, `7! = 5040`).
+* `Re2_shift_floor0/1/2/3/4/5`: Im-decay floors `6.32/6.70/7.21/7.81/8.48/9.21`
+  for `‖w+k‖` (`k = 0..5`) when `Re w ≥ 2`, `|Im w| ≥ 6` (mirror of
+  `R02GammaDisc.disc_shift_floor*`, via reused `shift_norm_ge_sqrt`;
+  `6.32² = 39.94 ≤ 40`, `6.7² = 44.89 ≤ 45`, `7.21² = 51.98 ≤ 52`,
+  `7.81² = 61.00 ≤ 61`, `8.48² = 71.91 ≤ 72`, `9.21² = 84.82 ≤ 85`).
+* `gamma_uniform_Re2`: `‖Γ w‖ ≤ 1` on `Re = 2` (via reused `RowFE_Gamma_upper_of`
+  + `Gamma 2 = 1`; sharp at `y = 0`, no gain — stated for the small-`|y|` branch).
+* `gamma_decay_ge6`: `‖Γ w‖ ≤ 0.028` for `Re = 2`, `|Im| ≥ 6` (6-shift chain:
+  numerator `≤ 5040`, denominator `≥ 180000` from floors above,
+  `5040/180000 = 0.028`; `36×` over crude `≤ 1` in the large-`|y|` region).
+* `factor_small_le`: `‖RowFEFactor w‖ ≤ 1280` for `Re = 2`, `|Im| ≤ 6`
+  (`2·(1/36)·1·23000 = 1277.8 ≤ 1280`).
+* `factor_large_le`: `‖RowFEFactor w‖ ≤ 3120` for `Re = 2`, `6 ≤ |Im| ≤ 8.75`
+  (`2·(1/36)·0.028·2e6 = 3111.1 ≤ 3120`).
+* `damped_window_sharp` (MAIN): `‖G(z)‖ ≤ 160000` on `Re = -1`, `|Im| ≤ 8.75`
+  (small branch `9·1280·2·2.7183 ≈ 62630`, large branch `9·3120·2·2.7183 ≈ 152660`,
+  sup `≤ 160000`).
+
+NUMERIC CAP ACHIEVED vs `1.2e9` / `50.925` (exact, `norm_num`-checked):
+* Proved window cap `160000` vs crude `1200000000`: `160000·7500 = 1200000000`,
+  i.e. `7500×` improvement (statement `window_sharp_7500x` would be `by norm_num`,
+  left as comment to keep the build minimal).
+* Residual to tier: `50.925·3142 = 160020.3 ≥ 160000`, i.e. `~3142×` above `50.925`
+  (`160000/50.925 ≈ 3141.9`). True window sup is `O(10)` (`≈ 23` at the damp peak,
+  `≈ 2.2` at the edge), so the remaining `~7000×` looseness vs true is pure
+  exponential-cancellation loss (separate `Γ ≤ 1`/`cosh` majorants never meet).
+
+RESIDUAL (report-and-stop, don't spin): full `A ≤ 50.925` needs the JOINT
+`Γ·cos` bound with exponential cancellation (`|Γ(2+iy)|·cosh(π|y|/2) = O(|y|^{3/2})`,
+true sup `≈ 32`, vs our separate `0.028·2e6 = 56000`, i.e. `~1700×` of the residual).
+That needs the `|Γ(1+iy)|² = πy/sinh(πy)` identity (reflection + `Gamma_conj` +
+`|sin|² = sin²+sinh²` + `sinh/cosh` bounds) — absent from Mathlib/repo, a major
+formalization (second-derivative/van der Corput class), not attempted here.
+Windows cannot close it (polynomial floors vs exponential growth); no further
+crude-factor tuning in this file can reach `50.925`.
+-/
+
+namespace Door3SharpWindow
+
+/-- Sharp cpow on `Re = 2`: `‖(2π)^{-w}‖ = (2π)^{-2} = 1/(2π)² ≤ 1/36`
+(since `2π ≥ 6`). `36×` over `RowFE_cpow_upper` (`≤ 1`). -/
+theorem cpow_sharp_Re2 {w : ℂ} (hw : w.re = 2) :
+    ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 1 / 36 := by
+  have hbase_pos : (0 : ℝ) < 2 * Real.pi := by
+    have h := Real.pi_pos
+    linarith
+  have hbase_nn : (0 : ℝ) ≤ 2 * Real.pi := le_of_lt hbase_pos
+  have h2pi : ((2 * Real.pi : ℝ) : ℂ) = 2 * (Real.pi : ℂ) := by
+    push_cast
+    ring
+  have hnorm : ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ = (2 * Real.pi) ^ (-(w.re)) := by
+    rw [← h2pi, Complex.norm_cpow_eq_rpow_re_of_pos hbase_pos, Complex.neg_re]
+  rw [hnorm, hw]
+  have hpi3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have hbase6 : (6 : ℝ) ≤ 2 * Real.pi := by linarith
+  have hge36 : (36 : ℝ) ≤ (2 * Real.pi) ^ (2 : ℕ) := by
+    have hsq : (6 : ℝ) ^ (2 : ℕ) ≤ (2 * Real.pi) ^ (2 : ℕ) :=
+      pow_le_pow_left₀ (by norm_num) hbase6 2
+    have h36 : (6 : ℝ) ^ (2 : ℕ) = 36 := by norm_num
+    rw [← h36]
+    exact hsq
+  have e2cast : (((2 : ℕ)) : ℝ) = (2 : ℝ) := by norm_num
+  have hrw_nat : (2 * Real.pi : ℝ) ^ ((((2 : ℕ))) : ℝ) = (2 * Real.pi) ^ (2 : ℕ) :=
+    Real.rpow_natCast _ _
+  have hge_rpow : (36 : ℝ) ≤ (2 * Real.pi) ^ (2 : ℝ) := by
+    have h1 : (2 * Real.pi : ℝ) ^ (2 : ℝ) = (2 * Real.pi : ℝ) ^ ((((2 : ℕ))) : ℝ) := by
+      rw [e2cast]
+    rw [h1, hrw_nat]
+    exact hge36
+  have hneg_eq : (2 * Real.pi : ℝ) ^ (-(2 : ℝ)) = ((2 * Real.pi : ℝ) ^ (2 : ℝ))⁻¹ :=
+    Real.rpow_neg hbase_nn 2
+  rw [hneg_eq]
+  have h36pos : (0 : ℝ) < 36 := by norm_num
+  have hle : (1 : ℝ) / ((2 * Real.pi) ^ (2 : ℝ)) ≤ 1 / 36 :=
+    one_div_le_one_div_of_le h36pos hge_rpow
+  have einv : ((((2 * Real.pi : ℝ) ^ (2 : ℝ))⁻¹ : ℝ)) = 1 / ((2 * Real.pi) ^ (2 : ℝ)) := by
+    rw [inv_eq_one_div]
+  rw [einv]
+  exact hle
+
+/-- Sharp uniform cos on the window: `‖cos(πw/2)‖ ≤ 2000000` for `|Im w| ≤ 8.75`
+(`|Im(πw/2)| = π|Im w|/2 ≤ 3.1416·4.375 = 13.7445 ≤ 14`, `exp 14 < 2e6`). -/
+theorem cos_uniform_sharp {w : ℂ} (him : |w.im| ≤ 8.75) :
+    ‖Complex.cos ((Real.pi : ℂ) * (w / 2))‖ ≤ 2000000 := by
+  have hs2im : (w / 2).im = w.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (w / 2)).im = Real.pi * (w.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hB : |(((Real.pi : ℂ) * (w / 2)).im)| ≤ 14 := by
+    rw [hw_im, abs_mul]
+    have h1 : |Real.pi| ≤ 3.1416 := by
+      rw [abs_of_pos Real.pi_pos]
+      exact le_of_lt Real.pi_lt_d4
+    have h2 : |w.im / 2| ≤ 4.375 := by
+      rw [abs_div, abs_two]
+      have h3 : |w.im| / 2 ≤ 4.375 := by linarith [him]
+      linarith
+    calc |Real.pi| * |w.im / 2| ≤ 3.1416 * 4.375 :=
+          mul_le_mul h1 h2 (by positivity) (by norm_num)
+      _ ≤ 14 := by norm_num
+  have hle : ‖Complex.cos ((Real.pi : ℂ) * (w / 2))‖ ≤ Real.exp 14 :=
+    RowFE.RowFE_norm_cos_le hB
+  have hexp14 : Real.exp (14 : ℝ) ≤ 2000000 := by
+    have h1 : Real.exp (14 : ℝ) = (Real.exp 1) ^ (14 : ℕ) := by
+      have h := Real.exp_nat_mul (1 : ℝ) (14 : ℕ)
+      simpa using h.symm
+    have h2 : (Real.exp 1) ^ (14 : ℕ) < (2.7182818286 : ℝ) ^ (14 : ℕ) := by
+      apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+    have h3 : (2.7182818286 : ℝ) ^ (14 : ℕ) < 2000000 := by norm_num
+    rw [h1]
+    exact le_of_lt (lt_trans h2 h3)
+  exact le_trans hle hexp14
+
+/-- Sharp small-`|Im|` cos: `‖cos(πw/2)‖ ≤ 23000` for `|Im w| ≤ 6`
+(`|Im| ≤ π·3 ≤ 9.4248 ≤ 10`, `exp 10 < 23000`). -/
+theorem cos_small_sharp {w : ℂ} (him : |w.im| ≤ 6) :
+    ‖Complex.cos ((Real.pi : ℂ) * (w / 2))‖ ≤ 23000 := by
+  have hs2im : (w / 2).im = w.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (w / 2)).im = Real.pi * (w.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hB : |(((Real.pi : ℂ) * (w / 2)).im)| ≤ 10 := by
+    rw [hw_im, abs_mul]
+    have h1 : |Real.pi| ≤ 3.1416 := by
+      rw [abs_of_pos Real.pi_pos]
+      exact le_of_lt Real.pi_lt_d4
+    have h2 : |w.im / 2| ≤ 3 := by
+      rw [abs_div, abs_two]
+      have h3 : |w.im| / 2 ≤ 3 := by linarith [him]
+      linarith
+    calc |Real.pi| * |w.im / 2| ≤ 3.1416 * 3 :=
+          mul_le_mul h1 h2 (by positivity) (by norm_num)
+      _ ≤ 10 := by norm_num
+  have hle : ‖Complex.cos ((Real.pi : ℂ) * (w / 2))‖ ≤ Real.exp 10 :=
+    RowFE.RowFE_norm_cos_le hB
+  have hexp10 : Real.exp (10 : ℝ) ≤ 23000 := by
+    have h1 : Real.exp (10 : ℝ) = (Real.exp 1) ^ (10 : ℕ) := by
+      have h := Real.exp_nat_mul (1 : ℝ) (10 : ℕ)
+      simpa using h.symm
+    have h2 : (Real.exp 1) ^ (10 : ℕ) < (2.7182818286 : ℝ) ^ (10 : ℕ) := by
+      apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+    have h3 : (2.7182818286 : ℝ) ^ (10 : ℕ) < 23000 := by norm_num
+    rw [h1]
+    exact le_of_lt (lt_trans h2 h3)
+  exact le_trans hle hexp10
+
+/-- Sharp `‖z-1‖ ≤ 9` on `Re = -1`, `|Im| ≤ 8.75` (Euclidean, vs triangle `10.75`). -/
+theorem sub_upper_window {z : ℂ} (hre : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖z - 1‖ ≤ 9 := by
+  have e : ‖z - 1‖ ^ 2 = (z.re - 1) ^ 2 + z.im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im, sub_zero]
+    ring
+  have hzim2 : z.im ^ 2 ≤ 76.5625 := by
+    have h1 : |z.im| ^ 2 ≤ (8.75 : ℝ) ^ 2 := pow_le_pow_left₀ (abs_nonneg _) him 2
+    have h2 : |z.im| ^ 2 = z.im ^ 2 := sq_abs _
+    have h3 : (8.75 : ℝ) ^ 2 = 76.5625 := by norm_num
+    rw [h3] at h1
+    rwa [h2] at h1
+  have hsq : ‖z - 1‖ ^ 2 ≤ 81 := by
+    rw [e, hre]
+    have h4 : ((-1 : ℝ) - 1) ^ 2 = 4 := by norm_num
+    rw [h4]
+    linarith [hzim2]
+  have hle := Real.sqrt_le_sqrt hsq
+  have hsqrt81 : Real.sqrt (81 : ℝ) = 9 := by
+    rw [show (81 : ℝ) = 9 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+  have hsqrt_self : Real.sqrt (‖z - 1‖ ^ 2) = ‖z - 1‖ :=
+    Real.sqrt_sq (norm_nonneg _)
+  rw [hsqrt_self, hsqrt81] at hle
+  exact hle
+
+/-- Damping upper `≤ 2.7183` on the window (same numeral as crude, reproved for
+self-containment via `ZetaUpperR02ThreeLines.norm_complex_exp`). -/
+theorem damp_upper_window {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 2.7183 := by
+  have hsq2 : ((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 1 - (z.im + 6.75) ^ 2 := by
+    have e1 : (z - ZetaUpperR02ThreeLines.dampCenter).re = -1 := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, hz_re, sub_zero]
+    have e2 : (z - ZetaUpperR02ThreeLines.dampCenter).im = z.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ 0.01 := by
+    have hwm : ((((1 / 100 : ℝ)) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+        = (1 / 100) * ((((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+      rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [hwm, hsq2]
+    have ht2 : (0 : ℝ) ≤ (z.im + 6.75) ^ 2 := sq_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  have h1 : Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ Real.exp 1 :=
+    Real.exp_le_exp.mpr (by linarith)
+  have h2 : Real.exp (1 : ℝ) ≤ 2.7183 :=
+    le_trans (le_of_lt Real.exp_one_lt_d9) (by norm_num)
+  linarith
+
+/-- Numerator endpoint: `Real.Gamma 8 ≤ 5040` (`7!`, 6-step chain from `Γ 2 = 1`). -/
+theorem realGamma8_le : Real.Gamma 8 ≤ 5040 := by
+  have hG2 : Real.Gamma 2 = 1 := Real.Gamma_two
+  have g3 : Real.Gamma 3 ≤ 2 := by
+    have h : Real.Gamma ((2 : ℝ) + 1) = (2 : ℝ) * Real.Gamma 2 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((2 : ℝ) + 1) = 3 := by norm_num
+    rw [e] at h
+    rw [h, hG2, mul_one]
+  have g4 : Real.Gamma 4 ≤ 6 := by
+    have h : Real.Gamma ((3 : ℝ) + 1) = (3 : ℝ) * Real.Gamma 3 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((3 : ℝ) + 1) = 4 := by norm_num
+    rw [e] at h
+    rw [h]
+    calc (3 : ℝ) * Real.Gamma 3 ≤ 3 * 2 :=
+          mul_le_mul_of_nonneg_left g3 (by norm_num)
+      _ = 6 := by norm_num
+  have g5 : Real.Gamma 5 ≤ 24 := by
+    have h : Real.Gamma ((4 : ℝ) + 1) = (4 : ℝ) * Real.Gamma 4 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((4 : ℝ) + 1) = 5 := by norm_num
+    rw [e] at h
+    rw [h]
+    calc (4 : ℝ) * Real.Gamma 4 ≤ 4 * 6 :=
+          mul_le_mul_of_nonneg_left g4 (by norm_num)
+      _ = 24 := by norm_num
+  have g6 : Real.Gamma 6 ≤ 120 := by
+    have h : Real.Gamma ((5 : ℝ) + 1) = (5 : ℝ) * Real.Gamma 5 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((5 : ℝ) + 1) = 6 := by norm_num
+    rw [e] at h
+    rw [h]
+    calc (5 : ℝ) * Real.Gamma 5 ≤ 5 * 24 :=
+          mul_le_mul_of_nonneg_left g5 (by norm_num)
+      _ = 120 := by norm_num
+  have g7 : Real.Gamma 7 ≤ 720 := by
+    have h : Real.Gamma ((6 : ℝ) + 1) = (6 : ℝ) * Real.Gamma 6 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((6 : ℝ) + 1) = 7 := by norm_num
+    rw [e] at h
+    rw [h]
+    calc (6 : ℝ) * Real.Gamma 6 ≤ 6 * 120 :=
+          mul_le_mul_of_nonneg_left g6 (by norm_num)
+      _ = 720 := by norm_num
+  have g8 : Real.Gamma 8 ≤ 5040 := by
+    have h : Real.Gamma ((7 : ℝ) + 1) = (7 : ℝ) * Real.Gamma 7 :=
+      Real.Gamma_add_one (by norm_num)
+    have e : ((7 : ℝ) + 1) = 8 := by norm_num
+    rw [e] at h
+    rw [h]
+    calc (7 : ℝ) * Real.Gamma 7 ≤ 7 * 720 :=
+          mul_le_mul_of_nonneg_left g7 (by norm_num)
+      _ = 5040 := by norm_num
+  exact g8
+
+/-- Floor `k = 0`: `6.32 ≤ ‖z‖` for `Re ≥ 2`, `|Im| ≥ 6` (`6.32² ≤ 40`). -/
+theorem Re2_shift_floor0 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (6.32 : ℝ) ≤ ‖z‖ := by
+  have h1 : (2 : ℝ) * 2 ≤ z.re * z.re :=
+    mul_le_mul hre hre (by norm_num) (by linarith)
+  have h2 : (6 : ℝ) * 6 ≤ z.im * z.im := by
+    have h := mul_le_mul him him (by norm_num) (abs_nonneg _)
+    rwa [abs_mul_abs_self] at h
+  have hsq : (6.32 : ℝ) ^ 2 ≤ ‖z‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    linarith [h1, h2]
+  calc (6.32 : ℝ) = Real.sqrt ((6.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖z‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖z‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Floor `k = 1`: `6.70 ≤ ‖z+1‖` (`6.7² ≤ 45`). -/
+theorem Re2_shift_floor1 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (6.70 : ℝ) ≤ ‖z + ((1 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 2 6 1 (by norm_num) (by norm_num) hre him
+  have hs : (6.70 : ℝ) ≤ Real.sqrt ((2 + (((1 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2) := by
+    have hsq : (6.70 : ℝ) ^ 2 ≤ (2 + (((1 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2 := by norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Floor `k = 2`: `7.21 ≤ ‖z+2‖` (`7.21² ≤ 52`). -/
+theorem Re2_shift_floor2 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (7.21 : ℝ) ≤ ‖z + ((2 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 2 6 2 (by norm_num) (by norm_num) hre him
+  have hs : (7.21 : ℝ) ≤ Real.sqrt ((2 + (((2 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2) := by
+    have hsq : (7.21 : ℝ) ^ 2 ≤ (2 + (((2 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2 := by norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Floor `k = 3`: `7.81 ≤ ‖z+3‖` (`7.81² ≤ 61`). -/
+theorem Re2_shift_floor3 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (7.81 : ℝ) ≤ ‖z + ((3 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 2 6 3 (by norm_num) (by norm_num) hre him
+  have hs : (7.81 : ℝ) ≤ Real.sqrt ((2 + (((3 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2) := by
+    have hsq : (7.81 : ℝ) ^ 2 ≤ (2 + (((3 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2 := by norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Floor `k = 4`: `8.48 ≤ ‖z+4‖` (`8.48² ≤ 72`). -/
+theorem Re2_shift_floor4 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (8.48 : ℝ) ≤ ‖z + ((4 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 2 6 4 (by norm_num) (by norm_num) hre him
+  have hs : (8.48 : ℝ) ≤ Real.sqrt ((2 + (((4 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2) := by
+    have hsq : (8.48 : ℝ) ^ 2 ≤ (2 + (((4 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2 := by norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Floor `k = 5`: `9.21 ≤ ‖z+5‖` (`9.21² ≤ 85`). -/
+theorem Re2_shift_floor5 {z : ℂ} (hre : (2 : ℝ) ≤ z.re) (him : (6 : ℝ) ≤ |z.im|) :
+    (9.21 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 2 6 5 (by norm_num) (by norm_num) hre him
+  have hs : (9.21 : ℝ) ≤ Real.sqrt ((2 + (((5 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2) := by
+    have hsq : (9.21 : ℝ) ^ 2 ≤ (2 + (((5 : ℕ)) : ℝ)) ^ 2 + 6 ^ 2 := by norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Uniform Gamma on `Re = 2`: `‖Γ w‖ ≤ 1` (sharp at `y = 0`; small-branch use). -/
+theorem gamma_uniform_Re2 {w : ℂ} (hw : w.re = 2) :
+    ‖Complex.Gamma w‖ ≤ 1 :=
+  RowFE.RowFE_Gamma_upper_of (s := w) (v := 2) (G := 1) hw Real.Gamma_two.le
+    (by norm_num)
+
+/-- Im-decay Gamma on `Re = 2`: `‖Γ w‖ ≤ 0.028` for `|Im w| ≥ 6` (6-shift chain,
+`5040/180000 = 0.028`; large-branch use). -/
+theorem gamma_decay_ge6 {w : ℂ} (hw : w.re = 2) (him : (6 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w‖ ≤ 0.028 := by
+  have hre : (2 : ℝ) ≤ w.re := le_of_eq hw.symm
+  have hnez : w ≠ 0 := by
+    intro hcon
+    have hr := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hr
+    linarith [hre]
+  have hne : ∀ k : ℕ, k ≤ 5 → w + ((k : ℕ) : ℂ) ≠ 0 := by
+    intro k _ hcon
+    have hr := congrArg Complex.re hcon
+    simp only [Complex.add_re, Complex.natCast_re, Complex.zero_re] at hr
+    have hknn : (0 : ℝ) ≤ (((k : ℕ)) : ℝ) := Nat.cast_nonneg k
+    linarith
+  have e0 : Complex.Gamma (w + ((1 : ℕ) : ℂ)) = w * Complex.Gamma w := by
+    have c1 : (((1 : ℕ)) : ℂ) = 1 := by norm_num
+    rw [c1]
+    exact Complex.Gamma_add_one _ hnez
+  have e1 : Complex.Gamma (w + ((2 : ℕ) : ℂ))
+      = (w + ((1 : ℕ) : ℂ)) * Complex.Gamma (w + ((1 : ℕ) : ℂ)) := by
+    have h : w + ((2 : ℕ) : ℂ) = ((w + ((1 : ℕ) : ℂ)) + 1) := by
+      have c2 : (((2 : ℕ)) : ℂ) = 2 := by norm_num
+      have c1 : (((1 : ℕ)) : ℂ) = 1 := by norm_num
+      rw [c2, c1]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 1 (by norm_num))
+  have e2 : Complex.Gamma (w + ((3 : ℕ) : ℂ))
+      = (w + ((2 : ℕ) : ℂ)) * Complex.Gamma (w + ((2 : ℕ) : ℂ)) := by
+    have h : w + ((3 : ℕ) : ℂ) = ((w + ((2 : ℕ) : ℂ)) + 1) := by
+      have c3 : (((3 : ℕ)) : ℂ) = 3 := by norm_num
+      have c2 : (((2 : ℕ)) : ℂ) = 2 := by norm_num
+      rw [c3, c2]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 2 (by norm_num))
+  have e3 : Complex.Gamma (w + ((4 : ℕ) : ℂ))
+      = (w + ((3 : ℕ) : ℂ)) * Complex.Gamma (w + ((3 : ℕ) : ℂ)) := by
+    have h : w + ((4 : ℕ) : ℂ) = ((w + ((3 : ℕ) : ℂ)) + 1) := by
+      have c4 : (((4 : ℕ)) : ℂ) = 4 := by norm_num
+      have c3 : (((3 : ℕ)) : ℂ) = 3 := by norm_num
+      rw [c4, c3]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 3 (by norm_num))
+  have e4 : Complex.Gamma (w + ((5 : ℕ) : ℂ))
+      = (w + ((4 : ℕ) : ℂ)) * Complex.Gamma (w + ((4 : ℕ) : ℂ)) := by
+    have h : w + ((5 : ℕ) : ℂ) = ((w + ((4 : ℕ) : ℂ)) + 1) := by
+      have c5 : (((5 : ℕ)) : ℂ) = 5 := by norm_num
+      have c4 : (((4 : ℕ)) : ℂ) = 4 := by norm_num
+      rw [c5, c4]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 4 (by norm_num))
+  have e5 : Complex.Gamma (w + ((6 : ℕ) : ℂ))
+      = (w + ((5 : ℕ) : ℂ)) * Complex.Gamma (w + ((5 : ℕ) : ℂ)) := by
+    have h : w + ((6 : ℕ) : ℂ) = ((w + ((5 : ℕ) : ℂ)) + 1) := by
+      have c6 : (((6 : ℕ)) : ℂ) = 6 := by norm_num
+      have c5 : (((5 : ℕ)) : ℂ) = 5 := by norm_num
+      rw [c6, c5]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 5 (by norm_num))
+  have n0 : ‖Complex.Gamma (w + ((1 : ℕ) : ℂ))‖
+      = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (w + ((2 : ℕ) : ℂ))‖
+      = ‖w + ((1 : ℕ) : ℂ)‖ * ‖Complex.Gamma (w + ((1 : ℕ) : ℂ))‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (w + ((3 : ℕ) : ℂ))‖
+      = ‖w + ((2 : ℕ) : ℂ)‖ * ‖Complex.Gamma (w + ((2 : ℕ) : ℂ))‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (w + ((4 : ℕ) : ℂ))‖
+      = ‖w + ((3 : ℕ) : ℂ)‖ * ‖Complex.Gamma (w + ((3 : ℕ) : ℂ))‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (w + ((5 : ℕ) : ℂ))‖
+      = ‖w + ((4 : ℕ) : ℂ)‖ * ‖Complex.Gamma (w + ((4 : ℕ) : ℂ))‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (w + ((6 : ℕ) : ℂ))‖
+      = ‖w + ((5 : ℕ) : ℂ)‖ * ‖Complex.Gamma (w + ((5 : ℕ) : ℂ))‖ := by
+    rw [e5, norm_mul]
+  have hprod : ‖Complex.Gamma (w + ((6 : ℕ) : ℂ))‖
+      = ‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖
+        * (‖w‖ * ‖Complex.Gamma w‖))))) := by
+    rw [n5, n4, n3, n2, n1, n0]
+  have fz := Re2_shift_floor0 hre him
+  have f1 := Re2_shift_floor1 hre him
+  have f2 := Re2_shift_floor2 hre him
+  have f3 := Re2_shift_floor3 hre him
+  have f4 := Re2_shift_floor4 hre him
+  have f5 := Re2_shift_floor5 hre him
+  have q1 : (6.70 : ℝ) * 6.32 ≤ ‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖ :=
+    mul_le_mul f1 fz (by norm_num) (norm_nonneg _)
+  have q2 : (7.21 : ℝ) * (6.70 * 6.32)
+      ≤ ‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖) :=
+    mul_le_mul f2 q1 (by positivity) (norm_nonneg _)
+  have q3 : (7.81 : ℝ) * (7.21 * (6.70 * 6.32))
+      ≤ ‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)) :=
+    mul_le_mul f3 q2 (by positivity) (norm_nonneg _)
+  have q4 : (8.48 : ℝ) * (7.81 * (7.21 * (6.70 * 6.32)))
+      ≤ ‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖))) :=
+    mul_le_mul f4 q3 (by positivity) (norm_nonneg _)
+  have q5 : (9.21 : ℝ) * (8.48 * (7.81 * (7.21 * (6.70 * 6.32))))
+      ≤ ‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))) :=
+    mul_le_mul f5 q4 (by positivity) (norm_nonneg _)
+  have hDlo : (180000 : ℝ)
+      ≤ 9.21 * (8.48 * (7.81 * (7.21 * (6.70 * 6.32)))) := by
+    norm_num
+  have hD_ge : (180000 : ℝ)
+      ≤ ‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))) :=
+    le_trans hDlo q5
+  have hD_pos : (0 : ℝ)
+      < ‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖ * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  have eR6 : ((((6 : ℕ)) : ℝ)) = 6 := by norm_num
+  have hw6re : (w + ((6 : ℕ) : ℂ)).re = w.re + 6 := by
+    rw [Complex.add_re, Complex.natCast_re, eR6]
+  have hx8 : (w + ((6 : ℕ) : ℂ)).re = 8 := by
+    rw [hw6re, hw]
+    norm_num
+  have hGN_re : (0 : ℝ) < (w + ((6 : ℕ) : ℂ)).re := by
+    rw [hx8]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (w + ((6 : ℕ) : ℂ))‖ ≤ 5040 := by
+    have h1 : ‖Complex.Gamma (w + ((6 : ℕ) : ℂ))‖
+        ≤ Real.Gamma ((w + ((6 : ℕ) : ℂ)).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    rw [hx8] at h1
+    exact le_trans h1 realGamma8_le
+  have hD_mul : (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))))
+        * ‖Complex.Gamma w‖
+      = ‖Complex.Gamma (w + ((6 : ℕ) : ℂ))‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))))
+        * ‖Complex.Gamma w‖ ≤ 5040 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma w‖
+        * (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))))
+        ≤ 5040 := by
+    calc ‖Complex.Gamma w‖ * _
+          = _ * ‖Complex.Gamma w‖ := mul_comm _ _
+      _ ≤ 5040 := hle
+  have hdiv : ‖Complex.Gamma w‖
+      ≤ 5040 / (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖))))) :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (5040 : ℝ)
+      ≤ 0.028 * (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖))))) := by
+    calc (5040 : ℝ) ≤ 0.028 * 180000 := by norm_num
+      _ ≤ 0.028 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 5040 / (‖w + ((5 : ℕ) : ℂ)‖
+        * (‖w + ((4 : ℕ) : ℂ)‖
+        * (‖w + ((3 : ℕ) : ℂ)‖
+        * (‖w + ((2 : ℕ) : ℂ)‖
+        * (‖w + ((1 : ℕ) : ℂ)‖ * ‖w‖)))))
+      ≤ 0.028 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+/-- Small-`|Im|` FE factor: `‖F(w)‖ ≤ 1280` for `Re = 2`, `|Im| ≤ 6`. -/
+theorem factor_small_le {w : ℂ} (hw : w.re = 2) (him : |w.im| ≤ 6) :
+    ‖RowFE.RowFEFactor w‖ ≤ 1280 := by
+  have hcp := cpow_sharp_Re2 hw
+  have hG := gamma_uniform_Re2 hw
+  have hcos := cos_small_sharp him
+  have hcos' : ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ≤ 23000 := by
+    rw [mul_div_assoc]
+    exact hcos
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖ =
+      ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ *
+        ‖Complex.Gamma w‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ := by
+    unfold RowFE.RowFEFactor
+    simp [norm_mul, mul_assoc]
+  have h2P : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36 : ℝ) :=
+    mul_le_mul (le_refl 2) hcp (norm_nonneg _) (by norm_num)
+  have h2PG : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ * ‖Complex.Gamma w‖
+      ≤ 2 * (1 / 36 : ℝ) * 1 :=
+    mul_le_mul h2P hG (norm_nonneg _) (by norm_num)
+  have hfin : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ * ‖Complex.Gamma w‖ *
+      ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ≤ 2 * (1 / 36 : ℝ) * 1 * 23000 :=
+    mul_le_mul h2PG hcos' (norm_nonneg _) (by norm_num)
+  rw [hnorm_eq, e2]
+  have heq : (2 : ℝ) * (1 / 36) * 1 * 23000 ≤ 1280 := by norm_num
+  exact le_trans hfin heq
+
+/-- Large-`|Im|` FE factor: `‖F(w)‖ ≤ 3120` for `Re = 2`, `6 ≤ |Im| ≤ 8.75`. -/
+theorem factor_large_le {w : ℂ} (hw : w.re = 2) (hge6 : (6 : ℝ) ≤ |w.im|)
+    (hle875 : |w.im| ≤ 8.75) :
+    ‖RowFE.RowFEFactor w‖ ≤ 3120 := by
+  have hcp := cpow_sharp_Re2 hw
+  have hG := gamma_decay_ge6 hw hge6
+  have hcos0 := cos_uniform_sharp hle875
+  have hcos' : ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ≤ 2000000 := by
+    rw [mul_div_assoc]
+    exact hcos0
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖ =
+      ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ *
+        ‖Complex.Gamma w‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ := by
+    unfold RowFE.RowFEFactor
+    simp [norm_mul, mul_assoc]
+  have h2P : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36 : ℝ) :=
+    mul_le_mul (le_refl 2) hcp (norm_nonneg _) (by norm_num)
+  have h2PG : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ * ‖Complex.Gamma w‖
+      ≤ 2 * (1 / 36 : ℝ) * 0.028 :=
+    mul_le_mul h2P hG (norm_nonneg _) (by norm_num)
+  have hfin : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ * ‖Complex.Gamma w‖ *
+      ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 2 * (1 / 36 : ℝ) * 0.028 * 2000000 :=
+    mul_le_mul h2PG hcos' (norm_nonneg _) (by norm_num)
+  rw [hnorm_eq, e2]
+  have heq : (2 : ℝ) * (1 / 36) * 0.028 * 2000000 ≤ 3120 := by norm_num
+  exact le_trans hfin heq
+
+/-- MAIN window cap (sharp): `‖G(z)‖ ≤ 160000` on `Re = -1`, `|Im| ≤ 8.75`
+(`7500×` over `1.2e9`; residual `~3142×` to `50.925`; see file header). -/
+theorem damped_window_sharp {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 160000 := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz_re]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz_re] at hre
+    have hnn : (0 : ℝ) ≤ (((n : ℕ)) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz_re] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have himw875 : |((1 : ℂ) - z).im| ≤ 8.75 := by
+    rw [hw_im, abs_neg]
+    exact him
+  have hsub : ‖z - 1‖ ≤ 9 := sub_upper_window hz_re him
+  have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 2.7183 :=
+    damp_upper_window hz_re him
+  by_cases hsmall : |((1 : ℂ) - z).im| ≤ 6
+  · have hFactor : ‖RowFE.RowFEFactor (1 - z)‖ ≤ 1280 :=
+      factor_small_le hw_re hsmall
+    have hZ : ‖riemannZeta z‖ ≤ 2560 := by
+      rw [hFE', norm_mul]
+      calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+            ≤ 1280 * 2 :=
+              mul_le_mul hFactor hZrefl (norm_nonneg _) (by norm_num)
+        _ = 2560 := by norm_num
+    have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ ≤ 23040 := by
+      rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+      calc ‖z - 1‖ * ‖riemannZeta z‖ ≤ 9 * 2560 :=
+            mul_le_mul hsub hZ (norm_nonneg _) (by norm_num)
+        _ = 23040 := by norm_num
+    have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+        ZetaUpperR02ThreeLines.poleRemovedZeta z *
+          Complex.exp (((1 / 100 : ℝ) : ℂ) *
+            (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+    rw [hfin, norm_mul]
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+        ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+          ≤ 23040 * 2.7183 :=
+            mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+      _ ≤ 160000 := by norm_num
+  · have hge6 : (6 : ℝ) ≤ |((1 : ℂ) - z).im| :=
+      le_of_lt (lt_of_not_ge hsmall)
+    have hFactor : ‖RowFE.RowFEFactor (1 - z)‖ ≤ 3120 :=
+      factor_large_le hw_re hge6 himw875
+    have hZ : ‖riemannZeta z‖ ≤ 6240 := by
+      rw [hFE', norm_mul]
+      calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+            ≤ 3120 * 2 :=
+              mul_le_mul hFactor hZrefl (norm_nonneg _) (by norm_num)
+        _ = 6240 := by norm_num
+    have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ ≤ 56160 := by
+      rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+      calc ‖z - 1‖ * ‖riemannZeta z‖ ≤ 9 * 6240 :=
+            mul_le_mul hsub hZ (norm_nonneg _) (by norm_num)
+        _ = 56160 := by norm_num
+    have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+        ZetaUpperR02ThreeLines.poleRemovedZeta z *
+          Complex.exp (((1 / 100 : ℝ) : ℂ) *
+            (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+    rw [hfin, norm_mul]
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+        ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+          ≤ 56160 * 2.7183 :=
+            mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+      _ ≤ 160000 := by norm_num
+
+#print axioms Door3SharpWindow.cpow_sharp_Re2
+#print axioms Door3SharpWindow.cos_uniform_sharp
+#print axioms Door3SharpWindow.cos_small_sharp
+#print axioms Door3SharpWindow.sub_upper_window
+#print axioms Door3SharpWindow.damp_upper_window
+#print axioms Door3SharpWindow.realGamma8_le
+#print axioms Door3SharpWindow.gamma_uniform_Re2
+#print axioms Door3SharpWindow.gamma_decay_ge6
+#print axioms Door3SharpWindow.factor_small_le
+#print axioms Door3SharpWindow.factor_large_le
+#print axioms Door3SharpWindow.damped_window_sharp
+
+end Door3SharpWindow
+
