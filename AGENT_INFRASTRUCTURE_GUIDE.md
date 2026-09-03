@@ -1238,6 +1238,53 @@ two-way equivalence with both directions proved. The `Float` layer (`float_zeta`
 `rh_zeta_cert_central`, `float_real_bridge`) remains as **computational evidence**; the `Real`
 layer (`zeta_rigorous` instantiated per `k`/`i`) is the **machine-checked proof** that consumes it.
 
+### 18b.10 What remains to close the doors (precise, current)
+
+Every door's residual is a finite, named set of proofs. The single bottleneck is the **40-cell
+complex interval arithmetic** for the central cover; closing it closes doors 2, 3, and (given the
+mollifier leaf) 4. Door 1 additionally needs the Pólya–Schur/Hurwitz/GORZ formalization and a final
+`Γ·ζ+4` separation.
+
+**Door 1 — Jensen–Pólya (`JensenTranslation.lean`, 6 `sorry`s at 104/110/671/684/693/718).**
+Bridge work committed, rigorous: Hermite–Poulain lemma, `Hyperbolic_const_mul/mul`,
+`jensenPoly_zero`, `taylorCoeff_zero_eq`, Gamma bounds `3.611 < Γ(1/4) < 3.634`. Remaining:
+- **Pólya–Schur criterion** (`polyaTheoremHyp`: order<2 + real-rooted ⇒ hyperbolic sections) + Hurwitz
+  section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
+- **GORZ asymptotics** (`jensen_hyperbolic_eventually`): coefficient/Turán asymptotic analysis.
+- **`∀ k, taylorCoeff k ≠ 0`** — the content is `ξ(1/2) ≠ 0`, reduced to a quantitative separation of
+  `Λ₀(1/2) = Γℝ·ζ + 4` from 0. Feeders: Gamma at width 0.023 (need n≈50–60 → ~0.02); `L` (η-limit) at
+  width 0.0041 (done). Remaining: the final **`Γ·ζ + 4 ≠ 0` product separation** feeding
+  `taylorCoeff_zero_ne_zero`.
+
+**Door 2 — Xi-critical (`riemann_hypothesis.lean:34`, `axiom RiemannHypothesisProp_apply`).**
+`rh_iff_xi_off_real_pointwise_nonvanishing_mathlib` / `hardDifferenceNonzero_iff_RH` chain proven.
+Remaining: full `XiOffRealPointwiseNonvanishing` for `Re z ≠ 0`. Committed (0 sorrys): imaginary-axis
+slice, `xiShifted_at_zero_ne_zero`, `classicalXi_half_ne_zero`, `zeta_half_ne_zero` (closed η→ζ→ξ
+chain). Closing the central cover (door 3) + tail closes this door.
+
+**Door 3 — Thin-region / central cover (`rh_residual_gap.lean` 1 sorry, `central_cover_assembly.lean`
+39 sorrys). THE BOTTLENECK.**
+Committed (rigorous, 0 sorrys): all **40 cells** packaged (R00–R10 bottom, R11–R40 upper) with
+fencing/strip/H-instances; boundary strip `(0,0.01]`; lower half via `conj_of`; `full_central_covered`;
+`rh_iff_off_line_thin_band_zeta`; tail-range certification of `zeta_cert_data`. Remaining:
+- **80 per-cell numerical enclosures**: for each of the 40 cells prove `ε + M·radius ≤ ‖ξ(center)‖`
+  and `‖deriv ξ‖ ≤ M` in ℝ. Needs **rigorous complex ζ/Γ/cpow interval arithmetic absent from
+  Mathlib** (real `Re>1` ζ bounds only; cell centers off the real axis). Committed partials:
+  `interval_arith.lean` closed poly/pi/Gamma factors, `1/26 ≤ ‖ζ(sR00)‖` (eta-limit + remainder +
+  continuation), R00/R01 numeric-ball framework.
+- **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine), and globally
+  `xiShifted_differentiable` (strip-version entireness is proved; the global statement is false-as-stated).
+
+**Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
+Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. Remaining: instantiate a
+`MollifiedRoucheLeaf K` with the gap `‖ζ·M − 1‖ ≤ 1−δ` on the tail — needs a **uniform ζ upper bound
+on `0<Re<1/2` as `|Im|→∞`** (K growing with `|Re z|`, convexity/Phragmén–Lindelöf + functional
+equation + Stirling). Then feeds the same central cover.
+
+**Net:** rigorous per-cell complex interval arithmetic for ζ/Γ/ξ (40 cells) is the one piece whose
+absence blocks doors 2, 3, 4 simultaneously. Doors 1's remaining work (Pólya–Schur/Hurwitz/GORZ +
+`Γ·ζ+4` separation) is independent of that.
+
 ---
 
 ## Appendix A — Precise interfaces (exact types; verified)
