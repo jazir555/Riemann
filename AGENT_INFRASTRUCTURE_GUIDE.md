@@ -1318,9 +1318,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `Gamma_add_one` shift (numerator `≤313M`, denominator `≥33B`) — 150× better than the old `1.5`
   (true value `~7e-3`). But **uniform `≤0.01` over all 40 centers is FALSE** (inner cells `|s.im|≈0.75`
   have true values `≈1.0`), and reflection + the `1/1e7` lower bound is infeasible in principle (needs
-  `‖sin‖≥3.1e9`). Remaining: mechanical per-center replication of the 12-shift template (each center needs
-  own `re`/`im`, `cₖ` floors, numerator cap); outer-tier `|s.im|≥8` cells can reach `≤0.01`, inner ones
-  cannot — inner cells must live with larger Gamma constants in their budgets.
+  `‖sin‖≥3.1e9`).   **Update — 8/8 outer-tier cells `≤0.01` closed:** R11/R10/R20 (n=12, reusing the `12.85` chain or R00's)
+  + R21/R30 (row 2, `re=0.9`, n=14, `N≤6.95e10/D≥7e12`) + R31/R40 (row 3, `re=0.9475`, n=15,
+  `N≤1.16e12/D≥1.2e14`) — the brief's "n=12 for all outer-tier" was mathematically impossible (true n=12
+  ratios `0.01038/0.01091` rows 2/3), resolved by deeper shifts. Remaining: **32 inner centers**
+  (no bound yet; the 4 numerator chains are reusable as-is; expected n=12 caps `~0.035/0.11/0.27–0.37/0.8–1.1`
+  from center outward).
 - **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine). The `(0,0.01]` bottom strip
   IS packaged conditionally (`BottomStripObligations` + `bottom_strip_covered`); global
   `xiShifted_differentiable` is false-as-stated (strip-version entireness proved — use that).
