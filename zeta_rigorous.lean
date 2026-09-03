@@ -374,3 +374,412 @@ theorem zeta_half_feeder_of_identity
 #print axioms eta_complex_tendsto
 #print axioms zeta_half_eq_eta_div_of_identity
 #print axioms zeta_half_feeder_of_identity
+
+/-!
+## Eta–zeta Dirichlet identity on `1 < s.re` (Re>1 rearrangement).
+
+`etaDirichletTerm s n = (-1)^n / (n+1)^s`. For `1 < s.re` the series is
+absolutely convergent, so even/odd rearrangement is legitimate and yields
+`∑' n, eta = (1 - 2^(1-s)) * ζ(s)`. This is the Re>1 input to analytic
+continuation. No Hurwitz API is needed for this part.
+-/
+
+/-- Dirichlet eta term at general `s`: `(-1)^n / (n+1)^s`. -/
+def etaDirichletTerm (s : ℂ) (n : ℕ) : ℂ := (-1 : ℂ) ^ n / ((((n + 1 : ℕ) : ℂ)) ^ s)
+
+/-- The zeta summand `1/(n+1)^s` is summable for `1 < s.re`. -/
+theorem summable_one_div_nat_add_one_cpow {s : ℂ} (hs : 1 < s.re) :
+    Summable (fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) := by
+  have h0 : Summable (fun n : ℕ => (1 : ℂ) / ((n : ℂ) ^ s)) :=
+    Complex.summable_one_div_nat_cpow.mpr hs
+  have h1 : Summable (fun n : ℕ => (fun m : ℕ => (1 : ℂ) / ((m : ℂ) ^ s)) (n + 1)) :=
+    (summable_nat_add_iff (G := ℂ) 1).mpr h0
+  simpa only [] using h1
+
+/-- Eta Dirichlet series is summable for `1 < s.re` (absolute convergence). -/
+theorem etaDirichlet_summable {s : ℂ} (hs : 1 < s.re) :
+    Summable (etaDirichletTerm s) := by
+  have hf := summable_one_div_nat_add_one_cpow hs
+  have hAlt : Summable (fun n : ℕ => (-1 : ℂ) ^ n * ((1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s))) :=
+    hf.alternating
+  refine hAlt.congr (fun n => ?_)
+  simp only [etaDirichletTerm, div_eq_mul_inv, one_mul]
+
+/-- Even zeta subseries summand equals odd-denominator terms. -/
+theorem zeta_even_summable {s : ℂ} (hs : 1 < s.re) :
+    Summable (fun k : ℕ => (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s)) := by
+  have hf := summable_one_div_nat_add_one_cpow hs
+  have hcomp : Summable ((fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) ∘ (fun k : ℕ => 2 * k)) :=
+    hf.comp_injective (mul_right_injective₀ (by norm_num : (2 : ℕ) ≠ 0))
+  simpa only [Function.comp_def] using hcomp
+
+/-- Odd zeta subseries (even denominators) is summable. -/
+theorem zeta_odd_summable {s : ℂ} (hs : 1 < s.re) :
+    Summable (fun k : ℕ => (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := by
+  have hf := summable_one_div_nat_add_one_cpow hs
+  have hinj : Function.Injective (fun k : ℕ => 2 * k + 1) := by
+    intro a b h
+    simp only at h
+    omega
+  have hcomp : Summable ((fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) ∘ (fun k : ℕ => 2 * k + 1)) :=
+    hf.comp_injective hinj
+  have heq : ((fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) ∘ (fun k : ℕ => 2 * k + 1))
+      = (fun k : ℕ => (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := by
+    funext k
+    rfl
+  rwa [heq] at hcomp
+
+/-- `(2k+2)^s = 2^s * (k+1)^s` as complex cpow (naturals). -/
+theorem two_mul_add_two_cpow (k : ℕ) (s : ℂ) :
+    ((((2 * k + 2 : ℕ) : ℂ)) ^ s) = (2 : ℂ) ^ s * ((((k + 1 : ℕ) : ℂ)) ^ s) := by
+  have h : (2 * k + 2 : ℕ) = 2 * (k + 1) := by ring
+  conv_lhs => rw [h]
+  rw [Nat.cast_mul, Complex.natCast_mul_natCast_cpow]
+  norm_cast
+
+/-- The even-denominator subseries equals `2^{-s} ζ(s)` in tsum form. -/
+theorem zeta_odd_tsum_eq {s : ℂ} (hs : 1 < s.re) :
+    (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s))
+      = ((2 : ℂ) ^ s)⁻¹ * riemannZeta s := by
+  have hterm : ∀ k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)
+      = ((2 : ℂ) ^ s)⁻¹ * ((1 : ℂ) / ((((k + 1 : ℕ) : ℂ)) ^ s)) := by
+    intro k
+    rw [two_mul_add_two_cpow k s]
+    simp only [one_div, mul_inv_rev]
+    ring
+  simp_rw [hterm]
+  rw [Summable.tsum_mul_left _ (summable_one_div_nat_add_one_cpow hs)]
+  congr 1
+  have hzeta := zeta_eq_tsum_one_div_nat_add_one_cpow hs
+  have hcast : (∑' k : ℕ, (1 : ℂ) / ((((k + 1 : ℕ) : ℂ)) ^ s))
+      = (∑' n : ℕ, (1 : ℂ) / (((n : ℂ) + 1) ^ s)) := by
+    apply tsum_congr
+    intro n
+    congr 1
+    congr 1
+    push_cast
+    ring
+  rw [hcast, ← hzeta]
+
+set_option maxHeartbeats 400000 in
+/-- Zeta even/odd split: odd-denominator tsum + even-denominator tsum = ζ. -/
+theorem zeta_even_add_odd_tsum {s : ℂ} (hs : 1 < s.re) :
+    (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+      + (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s))
+      = riemannZeta s := by
+  have heven : Summable (fun k : ℕ =>
+      (fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) (2 * k)) :=
+    zeta_even_summable hs
+  have hodd : Summable (fun k : ℕ =>
+      (fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) (2 * k + 1)) :=
+    zeta_odd_summable hs
+  have hsplit := tsum_even_add_odd (f := (fun n : ℕ => (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) ) heven hodd
+  have hzeta := zeta_eq_tsum_one_div_nat_add_one_cpow hs
+  have hcast : (∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s))
+      = (∑' n : ℕ, (1 : ℂ) / (((n : ℂ) + 1) ^ s)) := by
+    apply tsum_congr
+    intro n
+    congr 1
+    congr 1
+    push_cast
+    ring
+  have hsplit2 : (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+      + (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s))
+      = (∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) :=
+    hsplit
+  rw [hsplit2, hcast, ← hzeta]
+
+/-- `(-1)^(2k) = 1` over `ℂ`. -/
+theorem neg_one_pow_two_mul (k : ℕ) : ((-1 : ℂ) ^ (2 * k) = 1) := by
+  rw [pow_mul]
+  simp
+
+/-- `(-1)^(2k+1) = -1` over `ℂ`. -/
+theorem neg_one_pow_two_mul_add_one (k : ℕ) : ((-1 : ℂ) ^ (2 * k + 1) = -1) := by
+  rw [pow_succ]
+  rw [neg_one_pow_two_mul k, one_mul]
+
+/-- Eta even subseries equals zeta odd-denominator subseries. -/
+theorem eta_even_tsum_eq {s : ℂ} :
+    (∑' k : ℕ, etaDirichletTerm s (2 * k))
+      = (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s)) := by
+  have heq : ∀ k : ℕ, etaDirichletTerm s (2 * k)
+      = (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s) := by
+    intro k
+    simp only [etaDirichletTerm]
+    rw [neg_one_pow_two_mul k]
+  simp_rw [heq]
+
+/-- Eta odd subseries equals negated zeta even-denominator subseries. -/
+theorem eta_odd_tsum_eq {s : ℂ} :
+    (∑' k : ℕ, etaDirichletTerm s (2 * k + 1))
+      = - (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := by
+  have heq : ∀ k : ℕ, etaDirichletTerm s (2 * k + 1)
+      = - ((1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := by
+    intro k
+    simp only [etaDirichletTerm]
+    rw [neg_one_pow_two_mul_add_one k]
+    ring
+  simp_rw [heq]
+  exact tsum_neg
+
+/-- `2^(1-s) = 2 * (2^s)⁻¹`. -/
+theorem two_cpow_one_sub (s : ℂ) : (2 : ℂ) ^ ((1 : ℂ) - s) = 2 * ((2 : ℂ) ^ s)⁻¹ := by
+  rw [Complex.cpow_sub _ _ (by norm_num), Complex.cpow_one, div_eq_mul_inv]
+
+/-- MAIN Re>1 identity: `∑' eta = (1 - 2^(1-s)) ζ(s)` for `1 < s.re`. -/
+theorem eta_tsum_eq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    (∑' n : ℕ, etaDirichletTerm s n) = (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+  have heta := etaDirichlet_summable hs
+  have heven : Summable (fun k : ℕ => etaDirichletTerm s (2 * k)) :=
+    heta.comp_injective (mul_right_injective₀ (by norm_num : (2 : ℕ) ≠ 0))
+  have hinj_odd : Function.Injective (fun k : ℕ => 2 * k + 1) := by
+    intro a b h
+    simp only at h
+    omega
+  have hodd : Summable (fun k : ℕ => etaDirichletTerm s (2 * k + 1)) :=
+    heta.comp_injective hinj_odd
+  have hsplit := tsum_even_add_odd (f := etaDirichletTerm s) heven hodd
+  have heta_split : (∑' n : ℕ, etaDirichletTerm s n)
+      = (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+        - (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := by
+    rw [← hsplit, eta_even_tsum_eq, eta_odd_tsum_eq, sub_eq_add_neg]
+  have hzeta_split := zeta_even_add_odd_tsum hs
+  have hodd_eq := zeta_odd_tsum_eq hs
+  have hpow := two_cpow_one_sub s
+  calc (∑' n : ℕ, etaDirichletTerm s n)
+      = (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+        - (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 2 : ℕ) : ℂ)) ^ s)) := heta_split
+    _ = riemannZeta s - 2 * (((2 : ℂ) ^ s)⁻¹ * riemannZeta s) := by
+        rw [hodd_eq] at hzeta_split ⊢
+        linear_combination hzeta_split
+    _ = (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+        rw [hpow]
+        ring
+
+/-!
+## Entire Hurwitz-difference continuation of eta.
+
+`etaHurwitz s = 2^{-s} (H(1/2,s) - H(1,s))`, entire via
+`HurwitzZeta.differentiable_hurwitzZeta_sub_hurwitzZeta`.
+For `1 < s.re` it agrees with the Dirichlet eta tsum (hence with
+`(1-2^{1-s})ζ(s)`); by analytic continuation on `{1}ᶜ` it agrees at `s=1/2`.
+-/
+
+/-- Entire eta continuation via alternating Hurwitz difference. -/
+noncomputable def etaHurwitz (s : ℂ) : ℂ :=
+  ((2 : ℂ) ^ s)⁻¹ * (HurwitzZeta.hurwitzZeta ((1 / 2 : ℝ) : UnitAddCircle) s
+    - HurwitzZeta.hurwitzZeta ((1 : ℝ) : UnitAddCircle) s)
+
+/-- `2^s ≠ 0`. -/
+theorem two_cpow_ne_zero (s : ℂ) : (2 : ℂ) ^ s ≠ 0 :=
+  Complex.cpow_ne_zero_iff.mpr (Or.inl (by norm_num))
+
+/-- `fun s => ((2:ℂ)^s)⁻¹` is differentiable (entire). -/
+theorem differentiable_inv_two_cpow : Differentiable ℂ (fun s : ℂ => ((2 : ℂ) ^ s)⁻¹) :=
+  (differentiable_const_cpow_of_neZero (2 : ℂ)).inv two_cpow_ne_zero
+
+/-- `etaHurwitz` is differentiable everywhere (entire). -/
+theorem differentiable_etaHurwitz : Differentiable ℂ etaHurwitz := by
+  unfold etaHurwitz
+  exact differentiable_inv_two_cpow.mul
+    (HurwitzZeta.differentiable_hurwitzZeta_sub_hurwitzZeta _ _)
+
+/-- `etaHurwitz` is analytic everywhere. -/
+theorem analytic_etaHurwitz : AnalyticOnNhd ℂ etaHurwitz Set.univ :=
+  differentiable_etaHurwitz.differentiableOn.analyticOnNhd isOpen_univ
+
+theorem hurwitz_half_cpow_eq (n : ℕ) (s : ℂ) :
+    (((2 * n + 1 : ℕ) : ℂ) ^ s)
+      = (2 : ℂ) ^ s * ((((n : ℕ) : ℂ)) + (((1 / 2 : ℝ) : ℂ))) ^ s := by
+  have h2n_real : ((2 * n + 1 : ℕ) : ℝ) = 2 * ((n : ℝ) + 1 / 2) := by
+    push_cast
+    ring
+  have hL : (((2 * n + 1 : ℕ) : ℂ)) = ((((2 * n + 1 : ℕ) : ℝ) : ℂ)) :=
+    (Complex.ofReal_natCast _).symm
+  have hR1 : (2 : ℂ) = (((2 : ℝ)) : ℂ) := by norm_cast
+  have hR2 : ((((n : ℕ) : ℂ)) + (((1 / 2 : ℝ) : ℂ))) = ((((n : ℝ) + 1 / 2 : ℝ)) : ℂ) := by
+    rw [← Complex.ofReal_natCast n, ← Complex.ofReal_add]
+  have han : (0 : ℝ) ≤ ((n : ℝ) + 1 / 2) := by positivity
+  have h2pos : (0 : ℝ) ≤ (2 : ℝ) := by norm_num
+  calc (((2 * n + 1 : ℕ) : ℂ) ^ s)
+      = (((((2 * n + 1 : ℕ) : ℝ)) : ℂ) ^ s) := by rw [← hL]
+    _ = (((2 * (((n : ℝ) + 1 / 2))) : ℝ) : ℂ) ^ s := by rw [h2n_real]
+    _ = ((((2 : ℝ)) : ℂ) ^ s * (((((n : ℝ) + 1 / 2 : ℝ))) : ℂ) ^ s) := by
+        rw [Complex.ofReal_mul]
+        rw [Complex.mul_cpow_ofReal_nonneg h2pos han s]
+    _ = (2 : ℂ) ^ s * ((((n : ℕ) : ℂ)) + (((1 / 2 : ℝ) : ℂ))) ^ s := by
+        rw [hR1, hR2]
+
+/-- Hurwitz at `1/2` equals `2^s` times odd-denominator zeta subseries (Re>1). -/
+theorem hurwitz_half_eq_two_cpow_mul_odd {s : ℂ} (hs : 1 < s.re) :
+    HurwitzZeta.hurwitzZeta ((1 / 2 : ℝ) : UnitAddCircle) s
+      = (2 : ℂ) ^ s * (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s)) := by
+  have ha : (1 / 2 : ℝ) ∈ Set.Icc 0 1 := ⟨by norm_num, by norm_num⟩
+  have hHas := HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re ha (s := s) hs
+  have htsum := hHas.tsum_eq
+  have hterm : ∀ n : ℕ, (1 : ℂ) / (((((n : ℕ) : ℂ)) + (((1 / 2 : ℝ) : ℂ))) ^ s)
+      = (2 : ℂ) ^ s * ((1 : ℂ) / ((((2 * n + 1 : ℕ) : ℂ)) ^ s)) := by
+    intro n
+    rw [hurwitz_half_cpow_eq n s]
+    have h2 := two_cpow_ne_zero s
+    field_simp
+  have hcongr : (∑' n : ℕ, (1 : ℂ) / (((((n : ℕ) : ℂ)) + (((1 / 2 : ℝ) : ℂ))) ^ s))
+      = (2 : ℂ) ^ s * (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s)) := by
+    simp_rw [hterm]
+    rw [Summable.tsum_mul_left _ (zeta_even_summable hs)]
+  rw [← hcongr, htsum]
+
+/-- Hurwitz at `1` equals zeta (Re>1, via series). -/
+theorem hurwitz_one_eq_zeta {s : ℂ} (hs : 1 < s.re) :
+    HurwitzZeta.hurwitzZeta ((1 : ℝ) : UnitAddCircle) s = riemannZeta s := by
+  have ha : (1 : ℝ) ∈ Set.Icc 0 1 := ⟨by norm_num, by norm_num⟩
+  have hHas := HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re ha (s := s) hs
+  have htsum := hHas.tsum_eq
+  have hterm : ∀ n : ℕ, (1 : ℂ) / (((((n : ℕ) : ℂ)) + (((1 : ℝ) : ℂ))) ^ s)
+      = (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s) := by
+    intro n
+    congr 1
+    congr 1
+    have h1 : ((((1 : ℝ) : ℂ))) = (1 : ℂ) := Complex.ofReal_one
+    rw [h1]
+    push_cast
+    ring
+  have hcongr : (∑' n : ℕ, (1 : ℂ) / (((((n : ℕ) : ℂ)) + (((1 : ℝ) : ℂ))) ^ s))
+      = (∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)) := by
+    apply tsum_congr
+    intro n
+    exact hterm n
+  have hzeta := zeta_eq_tsum_one_div_nat_add_one_cpow hs
+  have hcast : (∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s))
+      = (∑' n : ℕ, (1 : ℂ) / (((n : ℂ) + 1) ^ s)) := by
+    apply tsum_congr
+    intro n
+    congr 1
+    congr 1
+    push_cast
+    ring
+  rw [← htsum, hcongr, hcast, ← hzeta]
+
+/-- `etaHurwitz` agrees with `(1-2^{1-s})ζ(s)` on `1 < s.re`. -/
+theorem etaHurwitz_eq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    etaHurwitz s = (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+  have hhalf := hurwitz_half_eq_two_cpow_mul_odd hs
+  have hone := hurwitz_one_eq_zeta hs
+  have hodd_eq := zeta_odd_tsum_eq hs
+  have hzeta_split := zeta_even_add_odd_tsum hs
+  have heta_eq := eta_tsum_eq_of_one_lt_re hs
+  have h2ne := two_cpow_ne_zero s
+  have hpow := two_cpow_one_sub s
+  unfold etaHurwitz
+  rw [hhalf, hone]
+  have hcalc : ((2 : ℂ) ^ s)⁻¹ * ((2 : ℂ) ^ s * (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+      - riemannZeta s)
+      = (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+        - ((2 : ℂ) ^ s)⁻¹ * riemannZeta s := by
+    field_simp
+  rw [hcalc]
+  rw [hodd_eq] at hzeta_split
+  have hfinal : (∑' k : ℕ, (1 : ℂ) / ((((2 * k + 1 : ℕ) : ℂ)) ^ s))
+      - ((2 : ℂ) ^ s)⁻¹ * riemannZeta s
+      = (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+    rw [hpow]
+    linear_combination hzeta_split
+  exact hfinal
+
+/-- RHS function `(1-2^{1-s})ζ(s)`, analytic on `{1}ᶜ`. -/
+noncomputable def etaRHS (s : ℂ) : ℂ := (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s
+
+/-- `fun s => (2:ℂ)^((1:ℂ)-s)` is differentiable everywhere. -/
+theorem differentiable_two_cpow_one_sub : Differentiable ℂ (fun s : ℂ => (2 : ℂ) ^ ((1 : ℂ) - s)) :=
+  (differentiable_const_cpow_of_neZero (2 : ℂ)).comp
+    ((differentiable_const (1 : ℂ)).sub differentiable_id)
+
+/-- `etaRHS` agrees with `etaHurwitz` on `1 < s.re`. -/
+theorem etaHurwitz_eq_etaRHS_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    etaHurwitz s = etaRHS s := by
+  rw [etaHurwitz_eq_of_one_lt_re hs]
+  rfl
+
+/-- `etaRHS` is analytic on `{1}ᶜ`. -/
+theorem analytic_etaRHS : AnalyticOnNhd ℂ etaRHS ({1}ᶜ : Set ℂ) := by
+  unfold etaRHS
+  apply DifferentiableOn.analyticOnNhd _ isOpen_compl_singleton
+  intro s hs
+  simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hs
+  exact ((differentiable_two_cpow_one_sub.differentiableAt.const_sub 1).mul
+    (differentiableAt_riemannZeta hs)).differentiableWithinAt
+
+/-- `etaHurwitz` restricted to `{1}ᶜ` is analytic. -/
+theorem analytic_etaHurwitz_compl : AnalyticOnNhd ℂ etaHurwitz ({1}ᶜ : Set ℂ) :=
+  analytic_etaHurwitz.mono (Set.subset_univ _)
+
+/-- Analytic continuation: `etaHurwitz = etaRHS` on all of `{1}ᶜ` (hence at `1/2`). -/
+theorem etaHurwitz_eq_etaRHS_compl :
+    Set.EqOn etaHurwitz etaRHS ({1}ᶜ : Set ℂ) := by
+  have hpc : IsPreconnected ({1}ᶜ : Set ℂ) :=
+    (isConnected_compl_singleton_of_one_lt_rank (by simp) _).isPreconnected
+  have hne : (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) := by simp
+  refine AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq (𝕜 := ℂ)
+    analytic_etaHurwitz_compl analytic_etaRHS hpc hne ?_
+  refine eventually_of_mem ?_ (fun t ht => etaHurwitz_eq_etaRHS_of_one_lt_re ht)
+  exact (Complex.continuous_re.isOpen_preimage _ isOpen_Ioi).mem_nhds (by simp : (1 : ℝ) < (2 : ℂ).re)
+
+/-- `2^(1-1/2) = √2` (as complex of real sqrt). -/
+theorem two_cpow_one_sub_half :
+    (2 : ℂ) ^ ((1 : ℂ) - (1 / 2 : ℂ)) = (((Real.sqrt 2 : ℝ)) : ℂ) := by
+  have h12 : ((1 : ℂ) - (1 / 2 : ℂ)) = (1 / 2 : ℂ) := by ring
+  have h12r : (1 / 2 : ℂ) = ((((1 / 2 : ℝ))) : ℂ) := by simp
+  rw [h12, h12r]
+  have hsqrt : Real.sqrt 2 = (2 : ℝ) ^ ((1 / 2 : ℝ)) := by
+    rw [Real.sqrt_eq_rpow]
+  have h2c : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by simp
+  rw [h2c, hsqrt, Complex.ofReal_cpow (by norm_num)]
+
+/-- Continued identity at `s = 1/2`: `etaHurwitz(1/2) = (1-√2)ζ(1/2)`. -/
+theorem etaHurwitz_half_eq :
+    etaHurwitz (1 / 2 : ℂ) = (1 - (((Real.sqrt 2 : ℝ)) : ℂ)) * riemannZeta (1 / 2 : ℂ) := by
+  have hmem : (1 / 2 : ℂ) ∈ ({1}ᶜ : Set ℂ) := by simp
+  have heq := etaHurwitz_eq_etaRHS_compl hmem
+  unfold etaRHS at heq
+  rw [two_cpow_one_sub_half] at heq
+  exact heq
+
+/-!
+## Closing `hEta` modulo the series-to-continuation limit.
+
+Proved above (no hypotheses, no sorries):
+* `eta_tsum_eq_of_one_lt_re`: Dirichlet eta tsum `= (1-2^{1-s})ζ(s)` on `1 < s.re`;
+* `etaHurwitz_eq_of_one_lt_re`: entire `etaHurwitz` agrees there;
+* `etaHurwitz_half_eq`: continued `etaHurwitz(1/2) = (1-√2)ζ(1/2)` via
+  `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` on `{1}ᶜ`.
+
+Exact remaining step (ONE hypothesis): the `Tendsto` eta limit `L`
+from `eta_half_pos`/`eta_complex_tendsto` equals the continued value
+`etaHurwitz(1/2)`. This is the conditional-convergence bridge
+(paired differences `O(n^{-3/2})` summable at `1/2`, whose tsum defines a
+holomorphic `G` on `0 < s.re` agreeing with `etaHurwitz` on `1 < s.re`,
+hence at `1/2` by the identity theorem) — not attempted here.
+From it, `hEta` follows by rewriting with `etaHurwitz_half_eq`.
+-/
+
+/-- `hEta` from the single series-to-continuation limit hypothesis. -/
+theorem hEta_of_etaHurwitz_lim (L : ℝ)
+    (hLim : (L : ℂ) = etaHurwitz (1 / 2 : ℂ)) :
+    (L : ℂ) = (1 - (((Real.sqrt 2 : ℝ)) : ℂ)) * riemannZeta (1 / 2 : ℂ) := by
+  rw [hLim, etaHurwitz_half_eq]
+
+/-- Packaged feeder: eta positivity + ONE continuation hypothesis yields ζ(1/2) form. -/
+theorem zeta_half_feeder_of_etaHurwitz_lim
+    (hLim : ∀ L : ℝ, Tendsto etaPartialℂ atTop (𝓝 (L : ℂ)) →
+      (L : ℂ) = etaHurwitz (1 / 2 : ℂ)) :
+    ∃ L : ℝ, 0 < L ∧
+      riemannZeta (1 / 2 : ℂ) = (L : ℂ) / (1 - (((Real.sqrt 2 : ℝ)) : ℂ)) := by
+  obtain ⟨L, hL, hpos⟩ := eta_complex_tendsto
+  exact ⟨L, hpos, zeta_half_eq_eta_div_of_identity L (hEta_of_etaHurwitz_lim L (hLim L hL))⟩
+
+#print axioms eta_tsum_eq_of_one_lt_re
+#print axioms etaHurwitz_eq_of_one_lt_re
+#print axioms etaHurwitz_half_eq
+#print axioms hEta_of_etaHurwitz_lim
+#print axioms zeta_half_feeder_of_etaHurwitz_lim
