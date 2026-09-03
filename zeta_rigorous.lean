@@ -5062,3 +5062,764 @@ theorem KL_AE_phase_small (n : ℕ) (hn1 : 1024 ≤ n) :
 #print axioms KL_log_gap_ge
 #print axioms KL_AE_phase_gap_lower
 #print axioms KL_AE_phase_small
+
+/-!
+## Tier-2 Abel assembly: partial-summation bridge + TV bound + AE block `[1024,2048)`.
+
+GOAL (door-3 Tier-2, toward `‖S_{2048}(1-s0)‖ ≥ 1/3` premise of `zeta_S1_lower_of_S2048`
+with `Azeta1 = 1/39`; `s1 = 1 - s0`, `σ = 0.605`, `t = 8.75`):
+convert AK2 Tier-1 phase-gap bounds (`KL_linear_firstDerivTest`, `KL_AE_phase_gap_lower`,
+`KL_AE_phase_small`) into an amplitude-weighted block bound via Abel summation, and close
+the TV bound on `1/(e^{iΔ}-1)` weights that Tier-1 left open. Reuse Tier-1, do NOT add
+linear-KL blocks (they scale as `N^{+0.395}`, divergent). Pair-absolute/Tendsto forms only;
+no `∑'`-with-`0 <` tsum claims.
+
+GREP-FIRST RECORD (run before writing; repo `zeta_rigorous.lean` + `Mathlib/`):
+* `Finset.sum_range_by_parts` -- EXISTS (`Mathlib/Algebra/BigOperators/Module.lean:57`,
+  `Finset.sum_range_by_parts`, Abel transformation, reserved/not consumed). Consumed below
+  as `T2_abel_eq` (ℂ form via `smul_eq_mul`); norm form `T2_abel_norm` is new.
+* `KL_geom_unit_norm_le` (`geom_sum_mul` core), `KL_log_gap_ge` (log MVT lower),
+  `KL_AE_phase_gap_lower`/`KL_AE_phase_small` (AE numbers `8.75/2049`, `≪ π/2`) -- all in
+  this file (read-only reuse). `T2_alt_le_one` reuses the geometric core at `w = -1`;
+  `T2_gap_upper` mirrors `KL_AE_phase_small`'s `log(1+1/n) ≤ 1/n` pattern;
+  `T2_gap_lower` is `KL_log_gap_ge (k+1)` + `push_cast`.
+* `norm_etaPairTerm_le` (MVT pair bound `‖s‖·(2m+1)^{-Re-1}`) -- in this file; `T2_cpow_diff_le`
+  below is the same MVT proof generalized from `a = 2m+1` to general consecutive `a/b = a+1`
+  (needed for ALL `k`, not just even-odd pairs). No Mathlib MVT recreated:
+  reuses `Convex.norm_image_sub_le_of_norm_deriv_le`, `hasDerivAt_ofReal_cpow_const`,
+  `Complex.deriv_ofReal_cpow_const`, `Complex.norm_cpow_eq_rpow_re_of_pos`,
+  `Real.rpow_le_rpow_of_nonpos` (same as source).
+* `Complex.norm_exp_sub_one_le` (`‖exp x - 1‖ ≤ 2‖x‖`, `‖x‖ ≤ 1`,
+  `Mathlib/Analysis/Complex/Exponential.lean:441`) -- EXISTS, consumed for `T2_exp_lipschitz`.
+* `Complex.exp_ofReal_mul_I_re` / `_im`, `Complex.norm_exp_ofReal_mul_I`
+  (`Mathlib/Analysis/Complex/Trigonometric.lean:528/532/950`) -- EXIST, consumed for the
+  denominator `Re` lower bound and unit-modulus facts.
+* `Complex.abs_re_le_norm` (`Mathlib/Analysis/Complex/Norm.lean:38`) -- EXISTS, consumed for
+  `‖z‖ ≥ |z.re|`.
+* `Real.cos_pi_sub` (`Mathlib/Analysis/SpecialFunctions/Trigonometric/Basic.lean:333`),
+  `Real.cos_pos_of_mem_Ioo` (`:457`), `Real.pi_gt_three` -- EXIST, consumed for
+  `cos(π-δ) = -cos δ ≥ 0` with `|δ| ≤ π/2`.
+* `Real.rpow_le_rpow` / `Real.rpow_le_rpow_of_nonpos` / `Real.rpow_neg` / `Real.rpow_add` /
+  `Real.rpow_one` / `Real.rpow_pos_of_pos`, `Real.log_le_sub_one_of_pos`, `Real.log_mul`,
+  `Real.log_le_log`, `inv_le_inv₀`, `one_div_le_one_div_of_le`, `div_le_iff₀`,
+  `mul_le_mul_of_nonneg_left/right`, `norm_sum_le`, `Finset.sum_le_sum`, `Nat.card_Ico`,
+  `Finset.sum_const`, `nsmul_eq_mul`, `pow_add`, `pow_mul`, `Complex.exp_add`,
+  `Complex.ofReal_natCast` -- all pre-existing Mathlib/already-used-in-file patterns,
+  mirrored (not recreated).
+* `zetaCellS0_re` (`= 0.395`), `zetaRefl_re` (`= 0.605`), `zetaRefl_pos`, `zetaRefl_norm_le`
+  (`≤ 10`), `zetaRefl_M1024_rpow_ge` (`1024^0.605 ≥ 64`), `etaDirichletTerm_eq_cpow_neg` --
+  all in this file (read-only reuse). No `zetaRefl*`/`Azeta1` redefined.
+* `Kuzmin|van der Corput|exponent.?[Pp]air` in `Mathlib/` -- 0 hits (Tier-3 absent, not attempted).
+* Name-clash check (`T2_abel|T2_alt|T2_gap|T2_AE|T2_Delta|T2_w_|T2_exp_|T2_cpow|T2_block|T2_shifted`) --
+  0 hits before writing.
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (A) Abel bridge: `T2_abel_eq` (ℂ equation from `sum_range_by_parts`) + `T2_abel_norm`
+  (uniform-`B` norm bound).
+* (B) Alternating engine: `T2_alt_le_one` (`‖∑_{<n} (-1)^i‖ ≤ 1` via the geometric core at
+  `w = -1`, `‖-1-1‖ = 2`) + `T2_pow1024_one` + `T2_shifted_alt_eq`/`T2_shifted_alt_le`
+  (the `[1024,1024+k)` shifted partial sums are also `≤ 1`, since `1024` is even).
+* (C) Log gaps: `T2_gap_upper` (`≤ 1/(k+1)`, mirrors `KL_AE_phase_small`) + `T2_gap_lower`
+  (`≥ 1/(k+2)`, from `KL_log_gap_ge`) + `T2_gap_abs_diff_le`
+  (`|gap_{k+1}-gap_k| ≤ 1/(k+1)-1/(k+3)`, bracketing gives monotonicity for free).
+* (D) Amplitudes at `s1 = 1 - s0`: `T2_AE_f` (`n^{-s1}` cpow form) + `T2_AE_eta_eq`
+  (`eta = f·(-1)^k`, defeq to `etaDirichletTerm_eq_cpow_neg`) + `T2_AE_f_norm`
+  (`‖f_k‖ = (k+1)^{-0.605}`) + `T2_AE_f_le` (`k ≥ 1024 → ‖f_k‖ ≤ 1/64`,
+  from `1024^0.605 ≥ 64` + base monotonicity, Nat-cast form throughout so no
+  `1025`-literal conversion is needed).
+* (E) MVT single-step: `T2_cpow_diff_le` (general `a/b = a+1` cpow difference
+  `≤ ‖s1‖·a^{-0.605-1}`, same MVT proof as `norm_etaPairTerm_le`) + `T2_AE_f_diff_le`
+  (specialized to `a = (k:ℝ)+1`, `≤ 10/((k+1)^{0.605}·(k+1))` shape via `rpow_add`).
+* (F) AE block `[1024,2048)`: `T2_block_upper`
+  (`‖∑_{i<1024} eta_{1024+i}‖ ≤ 1/5`, via (A)+(B)+(D)+(E) with uniform `B = 1`,
+  `sup ≤ 1/64`, per-step `≤ 10/(64·1024)`, `1023` steps `≤ 10230/65536`,
+  total `≤ (4096+10230)/65536 = 14326/65536 ≤ 1/5`; all numerals by `norm_num`).
+  Since `1/5 = 0.2 < 1/3`, the `[1024,2048)` Dirichlet block is SMALLER than AE's
+  `1/3` threshold with margin `2/15 ≈ 0.133`.
+* (G) TV bound (the Tier-1 open): `T2_Delta` (`π - 8.75·gap_k`) + `T2_w`
+  (`(e^{iΔ}-1)^{-1}`) + `T2_denom_ge_one` (`‖e^{iΔ}-1‖ ≥ 1` via `Re = -cos δ - 1`,
+  `|Re| = 1+cos δ ≥ 1`) + `T2_w_sup` (`‖w‖ ≤ 1`) + `T2_exp_lipschitz`
+  (`‖e^{ia}-e^{ib}‖ ≤ 2|a-b|`, `|a-b| ≤ 1`, from `norm_exp_sub_one_le`) +
+  `T2_gap_abs_diff_le` (C) + `T2_w_diff_le`
+  (`‖w_{k+1}-w_k‖ ≤ 35/(((k:ℝ)+1)·((k:ℝ)+3))`, via
+  `(e_b-e_a)/(den_a·den_b)` + denom `≥ 1` + Lipschitz `2·8.75·|gap diff|`) +
+  `T2_w_TV_total` (`∑_{Ico 1024 2048} ‖w_{k+1}-w_k‖ ≤ 1/25`,
+  `1024` terms `≤ 35/(1024·1024)` each, `35840/1048576 ≤ 1/25` by `norm_num`).
+
+NUMBERS (exact, proved in-file; python scratch only for the report):
+* Block: `sup ≤ 1/64 = 0.015625`; per-step `≤ 10/(64·1024) = 5/32768 ≈ 0.0001526`;
+  `1023` steps `≤ 5115/32768 ≈ 0.1561`; total `≤ 1/64 + 5115/32768 = 5627/32768 ≈ 0.1717 ≤ 1/5`.
+  Margin to `1/3`: `1/3 - 1/5 = 2/15 ≈ 0.1333` (block is `1.67×` BELOW the threshold).
+* Weights: `sup ≤ 1`; per-step `≤ 35/((k+1)(k+3)) ≤ 35/1048576 ≈ 3.34e-05`;
+  total TV `≤ 1024·35/1048576 = 35840/1048576 ≈ 0.0342 ≤ 1/25 = 0.04`.
+* Triangle comparison: the same `[1024,2048)` block via amplitude triangle is
+  `≈ 12.4` (guide §18b.10); Abel improves it `≈ 72×` to `≤ 0.2`. The linear-KL
+  constant `π/δ ≈ 736` is never used (divergent `N^{+0.395}` scaling avoided by design).
+
+RESIDUAL (exact, quantified -- report-and-stop, no spin):
+* `‖S_{2048}(s1)‖ ≥ 1/3` is STILL OPEN. What Tier-2 gives is an UPPER bound on the
+  second-half block (`≤ 1/5`); a LOWER bound on `S_{2048} = S_{1024} + block` needs a
+  LOWER bound on `S_{1024}` (`‖S_{1024}‖ ≥ 1/3 + 1/5 = 8/15 ≈ 0.533` would suffice via
+  reverse triangle, true value `≈ 0.56` has only `≈ 0.027` margin). The early block
+  `[2,1024)` via the same Abel+MVT route is `≤ 8.6` (sup `≈ 0.514` at `k = 2` plus
+  `∑_{k<1024} 10·(k+1)^{-1.605}`), i.e. `≈ 16×` too large to preserve `S_2 ≥ 1/3`
+  (needs `< 1/3 - 1/3 = 0`, impossible since `‖S_2‖ = 1/3` has zero margin for the
+  full `[2,2048)` block). Hence no UPPER-bound refinement of `[2,1024)` can close
+  `S_{2048}` from `S_2`; the missing piece is a LOWER-bound technology for `S_{1024}`
+  (rigorous complex interval arithmetic on `cos`/`sin(8.75·log n)`, `n ≤ 1024`, or
+  Tier-3 second-derivative/van der Corput for a sharper early-block UPPER `< 0.05`
+  to preserve a refined `S_K` lower at some `2 < K ≪ 1024`). The conditional
+  `zeta_S1_lower_of_S2048` (`1/39 ≤ ‖ζ(s1)‖`) + downstream `zeta_S0_lower_of_S1`
+  (`1/2340000000 ≤ ‖ζ(s0)‖`) are unchanged and ready.
+-/
+
+/-- (A) Abel bridge equation (ℂ form of `Finset.sum_range_by_parts`). -/
+theorem T2_abel_eq (f g : ℕ → ℂ) (n : ℕ) :
+    ∑ i ∈ Finset.range n, f i * g i =
+      f (n - 1) * (∑ i ∈ Finset.range n, g i) -
+      ∑ i ∈ Finset.range (n - 1), (f (i + 1) - f i) * (∑ j ∈ Finset.range (i + 1), g j) := by
+  have h := Finset.sum_range_by_parts f g n
+  simp only [smul_eq_mul] at h
+  exact h
+
+/-- (A) Abel bridge norm bound (uniform partial-sum cap `B`). -/
+theorem T2_abel_norm (f g : ℕ → ℂ) (n : ℕ) (B : ℝ)
+    (hB : ∀ k, k ≤ n → ‖∑ j ∈ Finset.range k, g j‖ ≤ B) (hB0 : 0 ≤ B) :
+    ‖∑ i ∈ Finset.range n, f i * g i‖ ≤
+      ‖f (n - 1)‖ * B + ∑ i ∈ Finset.range (n - 1), ‖f (i + 1) - f i‖ * B := by
+  rw [T2_abel_eq f g n]
+  have h1 : ‖f (n - 1) * (∑ i ∈ Finset.range n, g i)‖ ≤ ‖f (n - 1)‖ * B := by
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hB n le_rfl) (norm_nonneg _)
+  have h2 : ‖∑ i ∈ Finset.range (n - 1), (f (i + 1) - f i) * (∑ j ∈ Finset.range (i + 1), g j)‖ ≤
+      ∑ i ∈ Finset.range (n - 1), ‖f (i + 1) - f i‖ * B := by
+    calc ‖∑ i ∈ Finset.range (n - 1), (f (i + 1) - f i) * (∑ j ∈ Finset.range (i + 1), g j)‖
+        ≤ ∑ i ∈ Finset.range (n - 1), ‖(f (i + 1) - f i) * (∑ j ∈ Finset.range (i + 1), g j)‖ :=
+          norm_sum_le _ _
+      _ ≤ ∑ i ∈ Finset.range (n - 1), ‖f (i + 1) - f i‖ * B := by
+          apply Finset.sum_le_sum
+          intro i hi
+          rw [norm_mul]
+          apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
+          apply hB
+          have hi2 : i < n - 1 := Finset.mem_range.mp hi
+          omega
+  exact le_trans (norm_sub_le _ _) (add_le_add h1 h2)
+
+/-- (B) Alternating partial sums are `≤ 1` (geometric core at `w = -1`). -/
+theorem T2_alt_le_one (n : ℕ) :
+    ‖∑ i ∈ Finset.range n, (-1 : ℂ) ^ i‖ ≤ 1 := by
+  have hcore := KL_geom_unit_norm_le (-1 : ℂ) (by simp) n
+  have hden : ‖(-1 : ℂ) - 1‖ = 2 := by
+    have heq : (-1 : ℂ) - 1 = -2 := by ring
+    rw [heq, norm_neg]
+    norm_num
+  rw [hden] at hcore
+  linarith
+
+/-- (B) `(-1)^1024 = 1` (no parity API needed: `1024 = 2·512`). -/
+theorem T2_pow1024_one : (-1 : ℂ) ^ (1024 : ℕ) = 1 := by
+  have h1024 : (1024 : ℕ) = 2 * 512 := by norm_num
+  rw [h1024, pow_mul]
+  have h2 : (-1 : ℂ) ^ 2 = 1 := by norm_num
+  rw [h2, one_pow]
+
+/-- (B) Shifted alternating terms agree with unshifted ones (`1024` even). -/
+theorem T2_shifted_alt_eq (j : ℕ) : (-1 : ℂ) ^ (1024 + j) = (-1 : ℂ) ^ j := by
+  rw [pow_add, T2_pow1024_one, one_mul]
+
+/-- (B) Shifted alternating partial sums are also `≤ 1`. -/
+theorem T2_shifted_alt_le (k : ℕ) :
+    ‖∑ j ∈ Finset.range k, (-1 : ℂ) ^ (1024 + j)‖ ≤ 1 := by
+  have heq : (∑ j ∈ Finset.range k, (-1 : ℂ) ^ (1024 + j))
+      = ∑ j ∈ Finset.range k, (-1 : ℂ) ^ j := by
+    apply Finset.sum_congr rfl
+    intro j _
+    exact T2_shifted_alt_eq j
+  rw [heq]
+  exact T2_alt_le_one k
+
+/-- (C) Log-gap upper: `log(k+2)-log(k+1) ≤ 1/(k+1)` (mirrors `KL_AE_phase_small`). -/
+theorem T2_gap_upper (k : ℕ) :
+    Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) ≤ 1 / ((k : ℝ) + 1) := by
+  have hk1 : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hk1ne : ((k : ℝ) + 1) ≠ 0 := ne_of_gt hk1
+  have h1n : (0 : ℝ) < 1 + 1 / ((k : ℝ) + 1) := by
+    have hinv : (0 : ℝ) < 1 / ((k : ℝ) + 1) := one_div_pos.mpr hk1
+    linarith
+  have hlog_le : Real.log (1 + 1 / ((k : ℝ) + 1)) ≤ 1 / ((k : ℝ) + 1) := by
+    have h := Real.log_le_sub_one_of_pos h1n
+    linarith
+  have hsplit : Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)
+      = Real.log (1 + 1 / ((k : ℝ) + 1)) := by
+    have h1 : (k : ℝ) + 2 = ((k : ℝ) + 1) * (1 + 1 / ((k : ℝ) + 1)) := by
+      field_simp
+      ring
+    rw [h1, Real.log_mul hk1ne (ne_of_gt h1n)]
+    rw [add_sub_cancel_left]
+  rw [hsplit]
+  exact hlog_le
+
+/-- (C) Log-gap lower from `KL_log_gap_ge (k+1)`. -/
+theorem T2_gap_lower (k : ℕ) :
+    1 / ((k : ℝ) + 2) ≤ Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) := by
+  have h := KL_log_gap_ge (k + 1) (by omega)
+  push_cast at h
+  have e1 : (k : ℝ) + 1 + 1 = (k : ℝ) + 2 := by ring
+  rw [e1] at h
+  exact h
+
+/-- (C) Gap nonnegativity (log monotonicity). -/
+theorem T2_gap_nonneg (k : ℕ) :
+    0 ≤ Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) := by
+  have hk1 : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hle : (k : ℝ) + 1 ≤ (k : ℝ) + 2 := by linarith
+  have h := Real.log_le_log hk1 hle
+  linarith
+
+/-- (C) Second-difference bound: `|gap_{k+1}-gap_k| ≤ 1/(k+1)-1/(k+3)` (bracketing). -/
+theorem T2_gap_abs_diff_le (k : ℕ) :
+    |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+      (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|
+      ≤ 1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3) := by
+  have hUk : Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) ≤ 1 / ((k : ℝ) + 1) :=
+    T2_gap_upper k
+  have hLk : 1 / ((k : ℝ) + 2) ≤ Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) :=
+    T2_gap_lower k
+  have hUk1raw := T2_gap_upper (k + 1)
+  have hLk1raw := T2_gap_lower (k + 1)
+  push_cast at hUk1raw hLk1raw
+  have e32 : (k : ℝ) + 1 + 2 = (k : ℝ) + 3 := by ring
+  have e21 : (k : ℝ) + 1 + 1 = (k : ℝ) + 2 := by ring
+  rw [e32, e21] at hUk1raw hLk1raw
+  -- hUk1raw : log(k+3)-log(k+2) ≤ 1/(k+2); hLk1raw : 1/(k+3) ≤ log(k+3)-log(k+2)
+  have h_nn : (0 : ℝ) ≤ 1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3) := by
+    have hk1 : (0 : ℝ) < (k : ℝ) + 1 := by
+      have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+      linarith
+    have hk3 : (0 : ℝ) < (k : ℝ) + 3 := by linarith
+    have hle : (1 : ℝ) / ((k : ℝ) + 3) ≤ 1 / ((k : ℝ) + 1) :=
+      one_div_le_one_div_of_le hk1 (by linarith)
+    linarith
+  rw [abs_le]
+  constructor
+  · linarith [hUk, hLk1raw]
+  · have hle0 : (Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+        (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)) ≤ 0 := by
+      linarith [hUk1raw, hLk]
+    linarith [hle0, h_nn]
+
+/-- (D) AE amplitude in cpow form: `((k+1):ℝ)^{-s1}` with `s1 = 1 - s0`. -/
+noncomputable def T2_AE_f (k : ℕ) : ℂ :=
+  (((((k : ℝ) + 1 : ℝ)) : ℂ)) ^ (-(1 - zetaCellS0))
+
+/-- (D) `eta = f·(-1)^k` (defeq to `etaDirichletTerm_eq_cpow_neg`). -/
+theorem T2_AE_eta_eq (k : ℕ) :
+    etaDirichletTerm (1 - zetaCellS0) k = T2_AE_f k * (-1 : ℂ) ^ k := by
+  unfold T2_AE_f
+  rw [mul_comm]
+  exact etaDirichletTerm_eq_cpow_neg _ _
+
+/-- (D) Norm of the amplitude: `‖f_k‖ = (k+1)^{-0.605}`. -/
+theorem T2_AE_f_norm (k : ℕ) :
+    ‖T2_AE_f k‖ = (((k : ℝ) + 1 : ℝ) ^ (-0.605 : ℝ)) := by
+  unfold T2_AE_f
+  have hpos : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hre : (-(1 - zetaCellS0)).re = (-0.605 : ℝ) := by
+    rw [Complex.neg_re, Complex.sub_re, Complex.one_re, zetaCellS0_re]
+    norm_num
+  have hnorm := Complex.norm_cpow_eq_rpow_re_of_pos hpos (-(1 - zetaCellS0))
+  rw [hnorm, hre]
+
+/-- (D) Head amplitude `≤ 1/64` for `k ≥ 1024` (Nat-cast form, no `1025` literal). -/
+theorem T2_AE_f_le {k : ℕ} (hk : 1024 ≤ k) : ‖T2_AE_f k‖ ≤ 1 / 64 := by
+  rw [T2_AE_f_norm]
+  have h1024 := zetaRefl_M1024_rpow_ge
+  have hkR : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) + 1 := by
+    have hle : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk
+    linarith
+  have hge : (64 : ℝ) ≤ (((k : ℝ) + 1 : ℝ) ^ (0.605 : ℝ)) := by
+    have hmono : (((((1024 : ℕ)) : ℝ)) ^ (0.605 : ℝ)) ≤ ((((k : ℝ) + 1 : ℝ)) ^ (0.605 : ℝ)) :=
+      Real.rpow_le_rpow (Nat.cast_nonneg _) hkR (by norm_num)
+    linarith [h1024, hmono]
+  have hposA : (0 : ℝ) < ((((k : ℝ) + 1 : ℝ)) ^ (0.605 : ℝ)) := by
+    have hpos : (0 : ℝ) < (k : ℝ) + 1 := by
+      have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+      linarith
+    exact Real.rpow_pos_of_pos hpos _
+  have hrw : ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ))
+      = (((((k : ℝ) + 1 : ℝ)) ^ (0.605 : ℝ)))⁻¹ := by
+    have hpos : (0 : ℝ) < (k : ℝ) + 1 := by
+      have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+      linarith
+    exact Real.rpow_neg (le_of_lt hpos) _
+  rw [hrw]
+  have hInv : ((((k : ℝ) + 1 : ℝ) ^ (0.605 : ℝ)))⁻¹ ≤ (64 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hposA (by norm_num)).mpr hge
+  have heq : (64 : ℝ)⁻¹ = 1 / 64 := by norm_num
+  rw [heq] at hInv
+  exact hInv
+
+/-- (E) General consecutive-cpow MVT bound (generalizes `norm_etaPairTerm_le` from
+`2m+1/2m+2` to any `a/b = a+1`). -/
+theorem T2_cpow_diff_le (a b : ℝ) (ha : 0 < a) (hb : b = a + 1) :
+    ‖(((b : ℂ)) ^ (-(1 - zetaCellS0)) - (((a : ℂ)) ^ (-(1 - zetaCellS0))))‖ ≤
+      ‖1 - zetaCellS0‖ * (a ^ (-(1 - zetaCellS0).re - 1)) := by
+  have hs : 0 < (1 - zetaCellS0).re := zetaRefl_pos
+  have hs0 : (1 - zetaCellS0) ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_re] at hs
+    exact lt_irrefl _ hs
+  have hnegs : -(1 - zetaCellS0) ≠ 0 := neg_ne_zero.mpr hs0
+  have hab : a ≤ b := by rw [hb]; linarith
+  have hdiff : ∀ x ∈ Set.Icc a b,
+      DifferentiableAt ℝ (fun t : ℝ => (t : ℂ) ^ (-(1 - zetaCellS0))) x := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha (Set.mem_Icc.mp hx).1
+    exact (hasDerivAt_ofReal_cpow_const (ne_of_gt hx0) hnegs).differentiableAt
+  have hderiv_eq : ∀ x : ℝ, x ≠ 0 →
+      deriv (fun t : ℝ => (t : ℂ) ^ (-(1 - zetaCellS0))) x
+        = (-(1 - zetaCellS0)) * (x : ℂ) ^ (-(1 - zetaCellS0) - 1) := by
+    intro x hx0
+    have h := Complex.deriv_ofReal_cpow_const hx0 (c := -(1 - zetaCellS0)) hnegs
+    simpa using h
+  have hexp_nonpos : -(1 - zetaCellS0).re - 1 ≤ 0 := by linarith
+  have hbound : ∀ x ∈ Set.Icc a b, ‖deriv (fun t : ℝ => (t : ℂ) ^ (-(1 - zetaCellS0))) x‖
+      ≤ ‖1 - zetaCellS0‖ * (a ^ (-(1 - zetaCellS0).re - 1)) := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha (Set.mem_Icc.mp hx).1
+    have hax : a ≤ x := (Set.mem_Icc.mp hx).1
+    rw [hderiv_eq x (ne_of_gt hx0)]
+    have hnorm_cpow : ‖(x : ℂ) ^ (-(1 - zetaCellS0) - 1)‖ = x ^ ((-((1 - zetaCellS0)) - 1).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+    have hre : ((-((1 - zetaCellS0)) - 1).re) = -(1 - zetaCellS0).re - 1 := by
+      rw [Complex.sub_re, Complex.neg_re, Complex.one_re]
+    have hle : x ^ (-(1 - zetaCellS0).re - 1) ≤ a ^ (-(1 - zetaCellS0).re - 1) :=
+      Real.rpow_le_rpow_of_nonpos ha hax hexp_nonpos
+    have hnorm_neg : ‖-(1 - zetaCellS0)‖ = ‖1 - zetaCellS0‖ := norm_neg _
+    calc ‖-(1 - zetaCellS0) * (x : ℂ) ^ (-(1 - zetaCellS0) - 1)‖
+        = ‖1 - zetaCellS0‖ * (x ^ (-(1 - zetaCellS0).re - 1)) := by
+          rw [norm_mul, hnorm_neg, hnorm_cpow, hre]
+      _ ≤ ‖1 - zetaCellS0‖ * (a ^ (-(1 - zetaCellS0).re - 1)) :=
+          mul_le_mul_of_nonneg_left hle (norm_nonneg _)
+  have hmvt := Convex.norm_image_sub_le_of_norm_deriv_le hdiff hbound
+    (convex_Icc a b) (Set.left_mem_Icc.mpr hab) (Set.right_mem_Icc.mpr hab)
+  have hba : ‖b - a‖ = 1 := by
+    have hsub : b - a = 1 := by rw [hb]; ring
+    rw [hsub, norm_one]
+  rw [hba, mul_one] at hmvt
+  exact hmvt
+
+/-- (E) Single-step amplitude difference at `k ≥ 1024`, in `rpow` form. -/
+theorem T2_AE_f_diff_le {k : ℕ} (hk : 1024 ≤ k) :
+    ‖T2_AE_f (k + 1) - T2_AE_f k‖ ≤ 10 * (((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) / 1024) := by
+  have hC : ‖1 - zetaCellS0‖ ≤ 10 := zetaRefl_norm_le
+  have ha_pos : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have ha1024 : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) + 1 := by
+    have hle : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk
+    linarith
+  have e_next : ((((k + 1 : ℕ) : ℝ) + 1 : ℝ)) = ((k : ℝ) + 1 + 1 : ℝ) := by
+    push_cast
+    ring
+  have e_base : T2_AE_f (k + 1) - T2_AE_f k
+      = ((((k : ℝ) + 1 + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0))
+        - (((((k : ℝ) + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0))) := by
+    unfold T2_AE_f
+    rw [e_next]
+  rw [e_base]
+  have a_eq : ((k : ℝ) + 1 + 1 : ℝ) = ((k : ℝ) + 1 : ℝ) + 1 := by ring
+  rw [a_eq]
+  have hMVT := T2_cpow_diff_le ((k : ℝ) + 1) (((k : ℝ) + 1) + 1) ha_pos rfl
+  have hsplit : ((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1))
+      = ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) * ((((k : ℝ) + 1 : ℝ)) ^ (-1 : ℝ)) := by
+    have hadd : (-(1 - zetaCellS0).re - 1 : ℝ) = (-0.605 : ℝ) + (-1 : ℝ) := by
+      have hre : (-(1 - zetaCellS0).re) = (-0.605 : ℝ) := by
+        rw [zetaRefl_re]
+      rw [hre]
+      ring
+    rw [hadd, Real.rpow_add ha_pos]
+  have hUp : ((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1))
+      ≤ ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) / 1024 := by
+    rw [hsplit]
+    have hInv : ((((k : ℝ) + 1 : ℝ)) ^ (-1 : ℝ)) ≤ 1 / 1024 := by
+      have hrw : ((((k : ℝ) + 1 : ℝ)) ^ (-1 : ℝ)) = (((((k : ℝ) + 1 : ℝ)) ^ (1 : ℝ)))⁻¹ := by
+        have hx : (0 : ℝ) ≤ (k : ℝ) + 1 := le_of_lt ha_pos
+        have := Real.rpow_neg hx (1 : ℝ)
+        simpa using this
+      rw [hrw]
+      have h1ge : (1024 : ℝ) ≤ ((((k : ℝ) + 1 : ℝ)) ^ (1 : ℝ)) := by
+        rw [Real.rpow_one]
+        have hle : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk
+        have e1024 : (1024 : ℝ) = ((((1024 : ℕ)) : ℝ)) := by norm_cast
+        rw [e1024]
+        linarith
+      have hpos1 : (0 : ℝ) < ((((k : ℝ) + 1 : ℝ)) ^ (1 : ℝ)) :=
+        Real.rpow_pos_of_pos ha_pos _
+      have hInv2 : (((((k : ℝ) + 1 : ℝ)) ^ (1 : ℝ)))⁻¹ ≤ (1024 : ℝ)⁻¹ :=
+        (inv_le_inv₀ hpos1 (by norm_num)).mpr h1ge
+      have heq : (1024 : ℝ)⁻¹ = 1 / 1024 := by norm_num
+      rw [heq] at hInv2
+      exact hInv2
+    have hnn : (0 : ℝ) ≤ ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) :=
+      le_of_lt (Real.rpow_pos_of_pos ha_pos _)
+    calc ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) * ((((k : ℝ) + 1 : ℝ)) ^ (-1 : ℝ))
+        ≤ ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) * (1 / 1024) :=
+          mul_le_mul_of_nonneg_left hInv hnn
+      _ = ((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) / 1024 := by ring
+  calc ‖((((k : ℝ) + 1 : ℝ) + 1 : ℝ) : ℂ) ^ (-(1 - zetaCellS0))
+          - (((((k : ℝ) + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0)))‖
+      ≤ ‖1 - zetaCellS0‖ * (((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1))) := hMVT
+    _ ≤ 10 * (((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) / 1024) := by
+        have hXnn : (0 : ℝ) ≤ ((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1)) :=
+          le_of_lt (Real.rpow_pos_of_pos ha_pos _)
+        have h1 : ‖1 - zetaCellS0‖ * (((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1)))
+            ≤ 10 * (((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1))) :=
+          mul_le_mul_of_nonneg_right hC hXnn
+        have h2 : (10 : ℝ) * (((((k : ℝ) + 1 : ℝ)) ^ (-(1 - zetaCellS0).re - 1)))
+            ≤ 10 * (((((k : ℝ) + 1 : ℝ)) ^ (-0.605 : ℝ)) / 1024) :=
+          mul_le_mul_of_nonneg_left hUp (by norm_num)
+        linarith [h1, h2]
+
+set_option maxHeartbeats 800000 in
+/-- (F) AE block `[1024,2048)` is `≤ 1/5` (Abel with uniform `B = 1`). -/
+theorem T2_block_upper :
+    ‖∑ i ∈ Finset.range 1024, etaDirichletTerm (1 - zetaCellS0) (1024 + i)‖ ≤ 1 / 5 := by
+  let f : ℕ → ℂ := fun i => T2_AE_f (1024 + i)
+  let g : ℕ → ℂ := fun i => (-1 : ℂ) ^ (1024 + i)
+  have heq : (∑ i ∈ Finset.range 1024, etaDirichletTerm (1 - zetaCellS0) (1024 + i))
+      = ∑ i ∈ Finset.range 1024, f i * g i := by
+    apply Finset.sum_congr rfl
+    intro i _
+    show etaDirichletTerm _ _ = T2_AE_f _ * _
+    exact T2_AE_eta_eq _
+  rw [heq]
+  have hB : ∀ k, k ≤ 1024 → ‖∑ j ∈ Finset.range k, g j‖ ≤ 1 := by
+    intro k _
+    show ‖∑ j ∈ Finset.range k, (-1 : ℂ) ^ (1024 + j)‖ ≤ 1
+    exact T2_shifted_alt_le k
+  have hAbel := T2_abel_norm f g 1024 1 hB (by norm_num)
+  have hsup : ‖f (1024 - 1)‖ ≤ 1 / 64 := by
+    show ‖T2_AE_f (1024 + (1024 - 1))‖ ≤ 1 / 64
+    have e : 1024 + (1024 - 1) = 2047 := by norm_num
+    rw [e]
+    exact T2_AE_f_le (by norm_num)
+  have hTV : ∑ i ∈ Finset.range (1024 - 1), ‖f (i + 1) - f i‖ * 1
+      ≤ 5115 / 32768 := by
+    have h1023 : (1024 - 1 : ℕ) = 1023 := by norm_num
+    rw [h1023]
+    calc ∑ i ∈ Finset.range 1023, ‖f (i + 1) - f i‖ * 1
+        = ∑ i ∈ Finset.range 1023, ‖f (i + 1) - f i‖ := by
+          simp
+      _ ≤ ∑ _i ∈ Finset.range 1023, (10 * ((1 / 64) / 1024)) := by
+          apply Finset.sum_le_sum
+          intro i _
+          have hk : 1024 ≤ 1024 + i := Nat.le_add_right _ _
+          have hdiff : ‖f (i + 1) - f i‖ ≤ 10 * (((((1024 + i : ℕ) : ℝ) + 1 : ℝ) ^ (-0.605 : ℝ)) / 1024) := by
+            show ‖T2_AE_f (1024 + (i + 1)) - T2_AE_f (1024 + i)‖ ≤ _
+            have e : 1024 + (i + 1) = (1024 + i) + 1 := by omega
+            rw [e]
+            exact T2_AE_f_diff_le hk
+          have hamp : ((((1024 + i : ℕ) : ℝ) + 1 : ℝ) ^ (-0.605 : ℝ)) ≤ 1 / 64 := by
+            have hk2 : 1024 ≤ 1024 + i := Nat.le_add_right _ _
+            have hle : ‖T2_AE_f (1024 + i)‖ ≤ 1 / 64 := T2_AE_f_le hk2
+            rw [T2_AE_f_norm] at hle
+            exact hle
+          calc ‖f (i + 1) - f i‖ ≤ 10 * (((((1024 + i : ℕ) : ℝ) + 1 : ℝ) ^ (-0.605 : ℝ)) / 1024) := hdiff
+            _ ≤ 10 * ((1 / 64) / 1024) := by
+                apply mul_le_mul_of_nonneg_left _ (by norm_num)
+                exact div_le_div_of_nonneg_right hamp (by norm_num)
+      _ = 5115 / 32768 := by
+          rw [Finset.sum_const, Finset.card_range]
+          norm_num [nsmul_eq_mul]
+  have hfin : ‖f (1024 - 1)‖ * 1 + ∑ i ∈ Finset.range (1024 - 1), ‖f (i + 1) - f i‖ * 1
+      ≤ 1 / 5 := by
+    have h1023 : (1024 - 1 : ℕ) = 1023 := by norm_num
+    have hsup64 : ‖f (1024 - 1)‖ * 1 ≤ 512 / 32768 := by
+      have : ‖f (1024 - 1)‖ ≤ 1 / 64 := hsup
+      have e : (1 : ℝ) / 64 = 512 / 32768 := by norm_num
+      linarith
+    linarith [hsup64, hTV]
+  calc ‖∑ i ∈ Finset.range 1024, f i * g i‖
+      ≤ ‖f (1024 - 1)‖ * 1 + ∑ i ∈ Finset.range (1024 - 1), ‖f (i + 1) - f i‖ * 1 := hAbel
+    _ ≤ 1 / 5 := hfin
+
+/-- (G) AE phase increment `Δ_k = π - 8.75·gap_k`. -/
+noncomputable def T2_Delta (k : ℕ) : ℝ :=
+  Real.pi - 8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))
+
+/-- (G) AE weight `w_k = (e^{iΔ_k}-1)^{-1}` (the Tier-1 open). -/
+noncomputable def T2_w (k : ℕ) : ℂ :=
+  (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1)⁻¹
+
+/-- (G) Denominator lower `‖e^{iΔ_k}-1‖ ≥ 1` for `k ≥ 1024` (via `Re`). -/
+theorem T2_denom_ge_one {k : ℕ} (hk : 1024 ≤ k) :
+    1 ≤ ‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ := by
+  have hgap_up := T2_gap_upper k
+  have hkR : (1024 : ℝ) ≤ (k : ℝ) := by
+    have : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk
+    have e1024 : (1024 : ℝ) = ((((1024 : ℕ)) : ℝ)) := by norm_cast
+    rw [e1024]
+    exact this
+  have hgap_le : Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1) ≤ 1 / 1025 := by
+    have h1 : (1 : ℝ) / ((k : ℝ) + 1) ≤ 1 / 1025 := by
+      apply one_div_le_one_div_of_le (by norm_num) (by linarith)
+    linarith [hgap_up, h1]
+  have hdelta_nn : (0 : ℝ) ≤ 8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)) := by
+    apply mul_nonneg (by norm_num)
+    exact T2_gap_nonneg k
+  have hdelta_le : 8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)) ≤ 8.75 / 1025 := by
+    have := mul_le_mul_of_nonneg_left hgap_le (by norm_num : (0 : ℝ) ≤ 8.75)
+    linarith [this]
+  have hdelta_small : |8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))| ≤ Real.pi / 2 := by
+    have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    rw [abs_of_nonneg hdelta_nn]
+    linarith
+  have hcos_nn : 0 ≤ Real.cos (8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))) := by
+    have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    have hmem : 8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))
+        ∈ Set.Ioo (-(Real.pi / 2)) (Real.pi / 2) := by
+      constructor
+      · linarith
+      · linarith [hdelta_le, hpi]
+    exact le_of_lt (Real.cos_pos_of_mem_Ioo hmem)
+  have hRe : (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1).re
+      = -Real.cos (8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))) - 1 := by
+    have hcos : Real.cos (T2_Delta k) = -Real.cos (8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))) := by
+      unfold T2_Delta
+      rw [Real.cos_pi_sub]
+    have hre : (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)).re = Real.cos (T2_Delta k) := by
+      have := Complex.exp_ofReal_mul_I_re (T2_Delta k)
+      simpa using this
+    rw [Complex.sub_re, Complex.one_re, hre, hcos]
+  have habs : |((Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1).re)| ≥ 1 := by
+    rw [hRe]
+    have : |-Real.cos (8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))) - 1|
+        = 1 + Real.cos (8.75 * (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))) := by
+      rw [abs_of_nonpos (by linarith [hcos_nn])]
+      ring
+    rw [this]
+    linarith [hcos_nn]
+  exact le_trans habs (Complex.abs_re_le_norm _)
+
+/-- (G) Weight sup `‖w_k‖ ≤ 1`. -/
+theorem T2_w_sup {k : ℕ} (hk : 1024 ≤ k) : ‖T2_w k‖ ≤ 1 := by
+  unfold T2_w
+  rw [norm_inv]
+  have hden := T2_denom_ge_one hk
+  have hpos : (0 : ℝ) < ‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ :=
+    lt_of_lt_of_le (by norm_num) hden
+  have hInv : (‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖)⁻¹ ≤ (1 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hden
+  have heq : (1 : ℝ)⁻¹ = 1 := by norm_num
+  rw [heq] at hInv
+  exact hInv
+
+/-- (G) Imaginary-exponential Lipschitz: `‖e^{ia}-e^{ib}‖ ≤ 2|a-b|`, `|a-b| ≤ 1`. -/
+theorem T2_exp_lipschitz (a b : ℝ) (hab : |a - b| ≤ 1) :
+    ‖Complex.exp (((a : ℂ)) * Complex.I) - Complex.exp (((b : ℂ)) * Complex.I)‖ ≤ 2 * |a - b| := by
+  have hsub : Complex.exp (((a : ℂ)) * Complex.I) - Complex.exp (((b : ℂ)) * Complex.I)
+      = Complex.exp (((b : ℂ)) * Complex.I) * (Complex.exp (((((a - b : ℝ))) : ℂ) * Complex.I) - 1) := by
+    have hadd : ((a : ℂ)) * Complex.I = ((b : ℂ)) * Complex.I + ((((a - b : ℝ))) : ℂ) * Complex.I := by
+      push_cast
+      ring
+    rw [hadd, Complex.exp_add]
+    ring
+  rw [hsub, norm_mul, Complex.norm_exp_ofReal_mul_I]
+  rw [one_mul]
+  have hnorm_eq : ‖((((a - b : ℝ))) : ℂ) * Complex.I‖ = |a - b| := by
+    rw [norm_mul, Complex.norm_I]
+    rw [mul_one]
+    rw [Complex.norm_real, Real.norm_eq_abs]
+  have hle : ‖((((a - b : ℝ))) : ℂ) * Complex.I‖ ≤ 1 := by
+    rw [hnorm_eq]
+    exact hab
+  have hcore := Complex.norm_exp_sub_one_le (x := ((((a - b : ℝ))) : ℂ) * Complex.I) hle
+  linarith [hcore, hnorm_eq]
+
+/-- (G) Per-step weight TV `≤ 35/(((k:ℝ)+1)·((k:ℝ)+3))`. -/
+theorem T2_w_diff_le {k : ℕ} (hk : 1024 ≤ k) :
+    ‖T2_w (k + 1) - T2_w k‖ ≤ 35 / ((((k : ℝ) + 1) * ((k : ℝ) + 3))) := by
+  have hkR : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hkR3 : (0 : ℝ) < (k : ℝ) + 3 := by linarith
+  have hden_a := T2_denom_ge_one hk
+  have hden_b := T2_denom_ge_one (le_trans hk (Nat.le_succ _))
+  have hden_a_ne : (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1) ≠ 0 := by
+    have hpos : (0 : ℝ) < ‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ :=
+      lt_of_lt_of_le (by norm_num) hden_a
+    exact norm_pos_iff.mp hpos
+  have hden_b_ne : (Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1) ≠ 0 := by
+    have hpos : (0 : ℝ) < ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1‖ :=
+      lt_of_lt_of_le (by norm_num) hden_b
+    exact norm_pos_iff.mp hpos
+  have hform : T2_w (k + 1) - T2_w k
+      = -((Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+        - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I))
+        / ((Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1)
+          * (Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1))) := by
+    unfold T2_w
+    rw [inv_sub_inv hden_b_ne hden_a_ne]
+    have hD : (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1)
+          - (Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1)
+        = -((Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+          - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I))) := by
+      ring
+    have hden_comm : (Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1)
+          * (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1)
+        = (Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1)
+          * (Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1) := by
+      ring
+    rw [hD, hden_comm, neg_div]
+  rw [hform, norm_neg, norm_div, norm_mul]
+  have hden_ge : (1 : ℝ) ≤ ‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ *
+      ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1‖ := by
+    have h1 : (1 : ℝ) * 1 ≤ _ := mul_le_mul hden_a hden_b (by norm_num) (by linarith [hden_a])
+    simpa using h1
+  have hnum_le : ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+        - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)‖
+      ≤ 17.5 * (1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3)) := by
+    have hDelta_eq : T2_Delta (k + 1) - T2_Delta k
+        = -(8.75 * (((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1))))) := by
+      unfold T2_Delta
+      push_cast
+      ring
+    have hgap := T2_gap_abs_diff_le k
+    push_cast at hgap ⊢
+    have e32 : (k : ℝ) + 1 + 2 = (k : ℝ) + 3 := by ring
+    have e21 : (k : ℝ) + 1 + 1 = (k : ℝ) + 2 := by ring
+    have habs1 : |T2_Delta (k + 1) - T2_Delta k|
+        = 8.75 * |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))| := by
+      rw [hDelta_eq, abs_neg, abs_mul]
+      rw [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 8.75)]
+    have habs_le : |T2_Delta (k + 1) - T2_Delta k| ≤ 1 := by
+      rw [habs1]
+      have h1 : |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|
+          ≤ 1 / ((k : ℝ) + 1) := by
+        have h2 := T2_gap_abs_diff_le k
+        have hBnn : (0 : ℝ) ≤ 1 / ((k : ℝ) + 3) :=
+          le_of_lt (one_div_pos.mpr hkR3)
+        linarith [h2, hBnn]
+      have h2 : 8.75 * |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))| ≤ 8.75 * (1 / ((k : ℝ) + 1)) := by
+        exact mul_le_mul_of_nonneg_left h1 (by norm_num)
+      have h3 : 8.75 * (1 / ((k : ℝ) + 1)) ≤ 1 := by
+        have hle : (1 : ℝ) / ((k : ℝ) + 1) ≤ 1 / 1024 := by
+          apply one_div_le_one_div_of_le (by norm_num) (by
+            have hle2 : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk
+            have e1024 : (1024 : ℝ) = ((((1024 : ℕ)) : ℝ)) := by norm_cast
+            rw [e1024]
+            linarith)
+        linarith [hle]
+      linarith [h2, h3]
+    have hlip := T2_exp_lipschitz (T2_Delta (k + 1)) (T2_Delta k) habs_le
+    rw [habs1] at hlip
+    have h35 : (2 : ℝ) * (8.75 * |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+        (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|)
+        = 35 * ((1 / 2) * |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|) := by ring
+    have hfin : (2 : ℝ) * (8.75 * |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+        (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|)
+        ≤ 17.5 * (1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3)) := by
+      have h1 : |((Real.log ((k : ℝ) + 3) - Real.log ((k : ℝ) + 2)) -
+          (Real.log ((k : ℝ) + 2) - Real.log ((k : ℝ) + 1)))|
+          ≤ 1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3) := hgap
+      have hmul := mul_le_mul_of_nonneg_left h1 (by norm_num : (0 : ℝ) ≤ 2 * 8.75)
+      have heq : (2 : ℝ) * 8.75 = 17.5 := by norm_num
+      linarith [hmul, heq]
+    linarith [hlip, hfin]
+  have hdiv_le : ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+        - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)‖ /
+        (‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ *
+          ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1‖)
+      ≤ ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+        - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)‖ := by
+    have hpos : (0 : ℝ) < ‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ *
+        ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1‖ :=
+      lt_of_lt_of_le (by norm_num) hden_ge
+    rw [div_le_iff₀ hpos]
+    have hle : ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+        - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)‖ * 1
+        ≤ ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I)
+          - Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I)‖ *
+          (‖Complex.exp ((((T2_Delta k : ℝ)) : ℂ) * Complex.I) - 1‖ *
+            ‖Complex.exp ((((T2_Delta (k + 1) : ℝ)) : ℂ) * Complex.I) - 1‖) := by
+      apply mul_le_mul_of_nonneg_left hden_ge (norm_nonneg _)
+    linarith [hle]
+  have hfield : (17.5 : ℝ) * (1 / ((k : ℝ) + 1) - 1 / ((k : ℝ) + 3))
+      = 35 / (((k : ℝ) + 1) * ((k : ℝ) + 3)) := by
+    have hk1ne : ((k : ℝ) + 1) ≠ 0 := ne_of_gt hkR
+    have hk3ne : ((k : ℝ) + 3) ≠ 0 := ne_of_gt hkR3
+    field_simp
+    ring_nf
+  linarith [hnum_le, hdiv_le, hfield]
+
+set_option maxHeartbeats 800000 in
+/-- (G) Total weight TV over `[1024,2048)` is `≤ 1/25`. -/
+theorem T2_w_TV_total :
+    ∑ k ∈ Finset.Ico 1024 2048, ‖T2_w (k + 1) - T2_w k‖ ≤ 1 / 25 := by
+  have hper : ∀ k ∈ Finset.Ico 1024 2048, ‖T2_w (k + 1) - T2_w k‖ ≤ 35 / (1024 * 1024 : ℝ) := by
+    intro k hk
+    have hk1 : 1024 ≤ k := (Finset.mem_Ico.mp hk).1
+    have hle := T2_w_diff_le hk1
+    have hkR1 : (1024 : ℝ) ≤ (k : ℝ) + 1 := by
+      have hle2 : ((((1024 : ℕ)) : ℝ)) ≤ (k : ℝ) := Nat.cast_le.mpr hk1
+      have e1024 : (1024 : ℝ) = ((((1024 : ℕ)) : ℝ)) := by norm_cast
+      rw [e1024]
+      linarith
+    have hkR3 : (1024 : ℝ) ≤ (k : ℝ) + 3 := by linarith
+    have hden_ge : (1024 * 1024 : ℝ) ≤ ((k : ℝ) + 1) * ((k : ℝ) + 3) := by
+      have h1 : (1024 : ℝ) * 1024 ≤ ((k : ℝ) + 1) * ((k : ℝ) + 3) :=
+        mul_le_mul hkR1 hkR3 (by norm_num) (by linarith)
+      linarith [h1]
+    have hpos1 : (0 : ℝ) < ((k : ℝ) + 1) * ((k : ℝ) + 3) := by positivity
+    have h1div : (1 : ℝ) / (((k : ℝ) + 1) * ((k : ℝ) + 3)) ≤ 1 / (1024 * 1024 : ℝ) :=
+      one_div_le_one_div_of_le (by norm_num) hden_ge
+    have h35 : (35 : ℝ) / (((k : ℝ) + 1) * ((k : ℝ) + 3)) ≤ 35 / (1024 * 1024 : ℝ) := by
+      have hmul := mul_le_mul_of_nonneg_left h1div (by norm_num : (0 : ℝ) ≤ 35)
+      rw [mul_one_div, mul_one_div] at hmul
+      exact hmul
+    linarith [hle, h35]
+  calc ∑ k ∈ Finset.Ico 1024 2048, ‖T2_w (k + 1) - T2_w k‖
+      ≤ ∑ _k ∈ Finset.Ico 1024 2048, (35 / (1024 * 1024 : ℝ)) :=
+        Finset.sum_le_sum hper
+    _ ≤ 1 / 25 := by
+        rw [Finset.sum_const, Nat.card_Ico]
+        norm_num [nsmul_eq_mul]
+
+#print axioms T2_abel_eq
+#print axioms T2_abel_norm
+#print axioms T2_alt_le_one
+#print axioms T2_pow1024_one
+#print axioms T2_shifted_alt_eq
+#print axioms T2_shifted_alt_le
+#print axioms T2_gap_upper
+#print axioms T2_gap_lower
+#print axioms T2_gap_nonneg
+#print axioms T2_gap_abs_diff_le
+#print axioms T2_AE_f
+#print axioms T2_AE_eta_eq
+#print axioms T2_AE_f_norm
+#print axioms T2_AE_f_le
+#print axioms T2_cpow_diff_le
+#print axioms T2_AE_f_diff_le
+#print axioms T2_block_upper
+#print axioms T2_Delta
+#print axioms T2_w
+#print axioms T2_denom_ge_one
+#print axioms T2_w_sup
+#print axioms T2_exp_lipschitz
+#print axioms T2_w_diff_le
+#print axioms T2_w_TV_total
+
