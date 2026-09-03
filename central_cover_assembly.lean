@@ -10,18 +10,74 @@ namespace CentralCoverAssembly
 
 open CellProofEngine
 
-/-- Differentiability of xiShifted (infrastructure). -/
-noncomputable def xiShifted_differentiable : Differentiable ℂ xiShifted := by
-  unfold xiShifted classicalXi XiFromPrefactor
-  sorry
+/-- Legacy `xiShifted_differentiable : Differentiable ℂ xiShifted` was FALSE as stated.
+Totalized `Complex.Gamma` (pole at `0`) and `riemannZeta` (pole at `1`) give
+`xiShifted = 0` at `z = ±I/2` (`s = 0,1`) while the strip limit via
+`xiShifted_eq_completed` is `1/2` (`z^2+1/4 = 0` there); both bad points have
+`|Im| = 1/2`, on the STRIP BOUNDARY, outside every cover rect
+(`0.01 ≤ Im ≤ 0.49` up to conjugates). TRUE strip story below (top copies for
+ordering; canonical later at 661+: `xiShiftedEntire`,
+`xiShiftedEntire_differentiable`, `xiShifted_differentiableAt_of_mem_strip`).
+External importer `central_cover_trusted.lean:66` must migrate to
+`xiShifted_differentiableOn_strip` / `xiShifted_differentiableAt_of_mem_strip_top`
+with strip side conditions from `CellData.y0_gt_neg_half` / `y1_lt_half`.
+Documented pointer only; no `sorryAx`. -/
+noncomputable def xiShiftedEntire_top (z : ℂ) : ℂ :=
+  (1 / 2 : ℂ) - (z ^ 2 + (1 / 4 : ℂ)) / 2 * completedRiemannZeta₀ ((1 / 2 : ℂ) + I * z)
 
-/-- Conjugate rect for the lower half. -/
-def XiLocalZeroFreeRect.conj (R : XiLocalZeroFreeRect) : XiLocalZeroFreeRect where
+theorem xiShiftedEntire_top_differentiable : Differentiable ℂ xiShiftedEntire_top := by
+  unfold xiShiftedEntire_top
+  apply Differentiable.sub (differentiable_const _)
+  apply Differentiable.mul
+  · fun_prop
+  · exact differentiable_completedZeta₀.comp (by fun_prop)
+
+theorem xiShifted_eq_top_on_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    xiShifted z = xiShiftedEntire_top z := by
+  unfold xiShiftedEntire_top
+  exact xiShifted_eq_completed z hgt hlt
+
+theorem strip_isOpen_top : IsOpen {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+  have h : {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)}
+      = Complex.im ⁻¹' (Set.Ioo (-(1 / 2 : ℝ)) (1 / 2 : ℝ)) := by
+    ext z
+    simp [Set.mem_Ioo]
+  rw [h]
+  exact isOpen_Ioo.preimage Complex.continuous_im
+
+theorem xiShifted_differentiableAt_of_mem_strip_top (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    DifferentiableAt ℂ xiShifted z := by
+  have hEnt : DifferentiableAt ℂ xiShiftedEntire_top z :=
+    xiShiftedEntire_top_differentiable z
+  apply hEnt.congr_of_eventuallyEq
+  have hmem : z ∈ {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} :=
+    ⟨hgt, hlt⟩
+  have hNbhd : {w : ℂ | -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ)} ∈ 𝓝 z :=
+    strip_isOpen_top.mem_nhds hmem
+  filter_upwards [hNbhd] with w hw
+  exact xiShifted_eq_top_on_strip w hw.1 hw.2
+
+theorem xiShifted_differentiableOn_strip :
+    DifferentiableOn ℂ xiShifted {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)} := by
+  intro z hz
+  exact (xiShifted_differentiableAt_of_mem_strip_top z hz.1 hz.2).differentiableWithinAt
+
+/-- Conjugate rect for the lower half (CORRECTED: explicit strip hypotheses).
+Legacy unary `conj` was FALSE for arbitrary `R`: placing `z.im ∈ (-1/2,1/2)` for
+`classicalXi_symmetry.conj_symm` needs `0 < R.y0` and `R.y1 < 1/2`, which do NOT
+follow from `R.x_lt`/`R.y_lt` alone (counterexample: `R.y0 = 10`, `R.y1 = 11`
+gives `-R.y0 = -10 ≰ 0`). True binary version below (same as `conj_of` at 361,
+kept here for ordering). External importers `central_cover_trusted.lean:84,122`
+must supply `hy0,hy1` (true for all bridged cells with `y0 ≥ 0.01`, `y1 ≤ 0.49`
+by `norm_num` per cell). -/
+def XiLocalZeroFreeRect.conj (R : XiLocalZeroFreeRect) (hy0 : 0 < R.y0) (hy1 : R.y1 < 1 / 2) : XiLocalZeroFreeRect where
   x0 := R.x0; x1 := R.x1; y0 := -R.y1; y1 := -R.y0
   x_lt := R.x_lt
   y_lt := by linarith [R.y_lt]
   no_zero := by
-    intro z hx0 hx1 hy0 hy1 hz
+    intro z hx0 hx1 hy0' hy1' hz
     -- z is in the conjugate rect, so star z is in the original rect
     have hsx0 : R.x0 < (star z).re := by
       simp [conj_re]; linarith
@@ -33,19 +89,15 @@ def XiLocalZeroFreeRect.conj (R : XiLocalZeroFreeRect) : XiLocalZeroFreeRect whe
       simp [conj_im]; linarith
     have h_nz : xiShifted (star z) ≠ 0 :=
       R.no_zero (star z) hsx0 hsx1 hsy0 hsy1
-    -- Use conjugate symmetry: xiShifted z = 0 would imply xiShifted (star z) = 0
-    -- Bounds: in conjugate rect, z.im ∈ (-R.y1, -R.y0) where R.y0, R.y1 are the
-    -- original rect's y-bounds. Since all my cells have R.y0 > 0 and R.y1 < 1/2,
-    -- we have z.im ∈ (-1/2, 0) ⊂ (-1/2, 1/2).
+    -- Use conjugate symmetry: xiShifted z = 0 would imply xiShifted (star z) = 0.
+    -- With `hy0,hy1`, `z.im ∈ (-R.y1,-R.y0) ⊂ (-1/2,1/2)`.
     have h_im_lt : z.im < 1 / 2 := by
       have h1 : z.im < -R.y0 := by linarith
-      -- R.y0 > 0 is true for all cells in our grid; we use sorry for this
-      have h2 : -R.y0 ≤ 0 := by sorry
+      have h2 : -R.y0 ≤ 0 := by linarith [hy0]
       linarith
     have h_im_gt : -1 / 2 < z.im := by
       have h1 : -R.y1 < z.im := by linarith
-      -- R.y1 < 1/2 is true for all cells in our grid; we use sorry for this
-      have h2 : -1 / 2 ≤ -R.y1 := by sorry
+      have h2 : -1 / 2 ≤ -R.y1 := by linarith [hy1]
       linarith
     have hsym := classicalXi_symmetry.conj_symm z h_im_gt h_im_lt
     have h1 := hsym
@@ -73,7 +125,10 @@ structure CellData where
     ≤ ‖xiShifted (((x0 + x1) / 2 : ℝ) + I * ((y0 + y1) / 2 : ℝ))‖
   deriv_bound : ∀ z, x0 ≤ z.re → z.re ≤ x1 → y0 ≤ z.im → z.im ≤ y1 → ‖deriv xiShifted z‖ ≤ M
 
-/-- Build a XiLocalLowerBoundRect from a CellData. -/
+/-- Build a XiLocalLowerBoundRect from a CellData (REPOINTED to strip entireness).
+Uses `xiShifted_differentiableAt_of_mem_strip_top` (no global `Differentiable`)
+via `CellProofEngine.norm_image_sub_le_of_deriv_bound`; strip membership comes
+from `cell.y0_gt_neg_half` / `cell.y1_lt_half`. Same name/type as before. -/
 def XiLocalLowerBoundRect_of_cell (cell : CellData) : XiLocalLowerBoundRect where
   x0 := cell.x0; x1 := cell.x1; y0 := cell.y0; y1 := cell.y1
   x_lt := cell.x_lt; y_lt := cell.y_lt
@@ -88,94 +143,199 @@ def XiLocalLowerBoundRect_of_cell (cell : CellData) : XiLocalLowerBoundRect wher
       have := cell.center_bound
       simp [R, Rect2D.radius, Rect2D.dx, Rect2D.dy, Rect2D.center] at this ⊢
       exact this
-    have h := cell_lower_bound_from_center_and_deriv
-      xiShifted xiShifted_differentiable R cell.M hM
-      (cell.ε + cell.M * R.radius) h_center z hz
-    simpa using h
+    have hStrip : ∀ w, R.mem w → -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+      intro w hw
+      obtain ⟨_, _, hy0w, hy1w⟩ := hw
+      exact ⟨by linarith [cell.y0_gt_neg_half], by linarith [cell.y1_lt_half]⟩
+    have hDiffAt : ∀ w ∈ {w : ℂ | R.mem w}, DifferentiableAt ℂ xiShifted w := by
+      intro w hw
+      have hst := hStrip w hw
+      exact xiShifted_differentiableAt_of_mem_strip_top w hst.1 hst.2
+    have hLip := CellProofEngine.norm_image_sub_le_of_deriv_bound
+      (CellProofEngine.rect2D_convex R) hDiffAt (fun w hw => hM w hw)
+      hz (CellProofEngine.center_mem_rect2D R)
+    have hRad := R.norm_sub_center_le_radius hz
+    have hM_nonneg : 0 ≤ cell.M := by
+      have hb := hM R.center (CellProofEngine.center_mem_rect2D R)
+      exact le_trans (norm_nonneg _) hb
+    have hDist : ‖xiShifted z - xiShifted R.center‖ ≤ cell.M * R.radius := by
+      calc ‖xiShifted z - xiShifted R.center‖ ≤ cell.M * ‖z - R.center‖ := hLip
+        _ ≤ cell.M * R.radius := mul_le_mul_of_nonneg_left hRad hM_nonneg
+    have hRev := CellProofEngine.norm_ge_center_sub_diff (xiShifted z) (xiShifted R.center)
+    linarith
 
 /-- Build XiLocalZeroFreeRect from a CellData. -/
 def XiLocalZeroFreeRect_of_cell (cell : CellData) : XiLocalZeroFreeRect :=
   XiLocalZeroFreeRect_of_lower_bound (XiLocalLowerBoundRect_of_cell cell)
 
-/-- All 16 s-cells covering Re s ∈ (0, 0.5], Im s ∈ (-10, 10). -/
-def centralCells : List CellData :=
-  let mk := fun (x0 x1 y0 y1 : ℝ) =>
-    CellData.mk x0 x1 y0 y1 (by sorry) (by sorry) (by sorry) (by sorry) 0.001 (by norm_num) 10.0
-      (by norm_num) (by sorry) (by sorry)
-  [
-    mk (-10.0) (-5.0) 0.3 0.49,
-    mk (-6.0) 0.0 0.3 0.49,
-    mk (-1.0) 5.0 0.3 0.49,
-    mk 0.0 10.0 0.3 0.49,
-    mk (-10.0) (-5.0) 0.2 0.4,
-    mk (-6.0) 0.0 0.2 0.4,
-    mk (-1.0) 5.0 0.2 0.4,
-    mk 0.0 10.0 0.2 0.4,
-    mk (-10.0) (-5.0) 0.1 0.3,
-    mk (-6.0) 0.0 0.1 0.3,
-    mk (-1.0) 5.0 0.1 0.3,
-    mk 0.0 10.0 0.1 0.3,
-    mk (-10.0) (-5.0) 0.01 0.2,
-    mk (-6.0) 0.0 0.01 0.2,
-    mk (-1.0) 5.0 0.01 0.2,
-    mk 0.0 10.0 0.01 0.2]
+/-- Legacy `centralCells : List CellData` was FALSE as stated (verdict below).
+Geometric side-conditions (`x_lt,y_lt,y0_gt_neg_half,y1_lt_half`) are TRUE per
+concrete numbers (proved below as `centralCellsData_*` by `norm_num`, 16 cases
+each). Analytic `center_bound`/`deriv_bound` with `ε = 0.001`, `M = 10.0` are
+INFEASIBLE hence FALSE: `x`-widths up to `10` give `radius > 5`,
+`ε + M*radius > 50` while `‖ξ(center)‖ = O(1)` (Stirling decay; Float fencing
+pattern `O(0.1)` vs `O(1)`). Counterexample numbers: cell `(0,10,0.01,0.2)` has
+`dx/2 = 5`, `radius = √(25+0.095²) > 5` (`legacy_grid_infeasible_wide_top`),
+`LHS = 0.001+10*radius > 50.001`; similarly `(0,10,0.3,0.49)` (`dx = 10`),
+`(-1,5,*)`/`(-6,0,*)` (`dx = 6`, `radius > 3`, `LHS > 30`), `(-10,-5,*)`
+(`dx = 5`, `radius > 2.5`, `LHS > 25`). All 16 `center_bound`s exceed `25` while
+true `‖ξ‖ = O(1)`. Corrected rects are the fine grid (`gridFine`, width `2.5`,
+`radius < 1.26`, tiers `O(0.1)` vs `O(1)`; see `gridFine_covers_inner`,
+`fine_feasible_*` at 842+). One explicit corrected `Rect2D` is proved below
+(`correctedCell_wide_example`). Downstream `H_instance`s left for coordinator;
+never faked. Pure combinatorial data below (no analytic, no `sorry`). -/
+def centralCellsData : List (ℝ × ℝ × ℝ × ℝ) :=
+  [(-10.0, -5.0, 0.3, 0.49),
+   (-6.0, 0.0, 0.3, 0.49),
+   (-1.0, 5.0, 0.3, 0.49),
+   (0.0, 10.0, 0.3, 0.49),
+   (-10.0, -5.0, 0.2, 0.4),
+   (-6.0, 0.0, 0.2, 0.4),
+   (-1.0, 5.0, 0.2, 0.4),
+   (0.0, 10.0, 0.2, 0.4),
+   (-10.0, -5.0, 0.1, 0.3),
+   (-6.0, 0.0, 0.1, 0.3),
+   (-1.0, 5.0, 0.1, 0.3),
+   (0.0, 10.0, 0.1, 0.3),
+   (-10.0, -5.0, 0.01, 0.2),
+   (-6.0, 0.0, 0.01, 0.2),
+   (-1.0, 5.0, 0.01, 0.2),
+   (0.0, 10.0, 0.01, 0.2)]
 
-/-- Upper-half rects. -/
-def centralZeroFreeRectsUpper : List XiLocalZeroFreeRect :=
-  centralCells.map (fun c => XiLocalZeroFreeRect_of_cell c)
+theorem centralCellsData_x_lt : ∀ c ∈ centralCellsData, c.1 < c.2.1 := by
+  intro c hc
+  unfold centralCellsData at hc
+  simp at hc
+  rcases hc with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> norm_num
 
-/-- All rects (upper + lower conjugates). -/
-def centralZeroFreeRects : List XiLocalZeroFreeRect :=
-  centralZeroFreeRectsUpper ++ centralZeroFreeRectsUpper.map XiLocalZeroFreeRect.conj
+theorem centralCellsData_y_lt : ∀ c ∈ centralCellsData, c.2.2.1 < c.2.2.2 := by
+  intro c hc
+  unfold centralCellsData at hc
+  simp at hc
+  rcases hc with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> norm_num
 
-/-- The upper-half covers theorem (pure combinatorics, provable from grid). -/
-theorem coversUpper (z : ℂ) (hre_neg : -10 ≤ z.re) (hre_pos : z.re ≤ 10)
-    (him_pos : 0 < z.im) (him_lt : z.im < (1 : ℝ) / 2) :
-    ∃ R ∈ centralZeroFreeRectsUpper,
-      R.x0 < z.re ∧ z.re < R.x1 ∧ R.y0 < z.im ∧ z.im < R.y1 := by
-  sorry
+theorem centralCellsData_y0_gt_neg_half : ∀ c ∈ centralCellsData, -(1 / 2 : ℝ) < c.2.2.1 := by
+  intro c hc
+  unfold centralCellsData at hc
+  simp at hc
+  rcases hc with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> norm_num
 
-/-- Full covers theorem. -/
-theorem centralCovers :
-    ∀ z : ℂ,
-      -10 ≤ z.re → z.re ≤ 10 →
-      -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
-      ∃ R ∈ centralZeroFreeRects,
-        R.x0 < z.re ∧ z.re < R.x1 ∧ R.y0 < z.im ∧ z.im < R.y1 := by
-  intro z hre_neg hre_pos him_gt him_lt hne
-  by_cases hpos : 0 < z.im
-  · obtain ⟨R, hR_mem, hx0, hx1, hy0, hy1⟩ := coversUpper z hre_neg hre_pos hpos him_lt
-    use R
-    constructor; · simp [centralZeroFreeRects]; exact Or.inl hR_mem
-    exact ⟨hx0, hx1, hy0, hy1⟩
-  · have hneg : z.im < 0 := by
-      have hle : z.im ≤ 0 := by linarith
-      exact lt_of_le_of_ne hle hne
-    have hstar_re_eq : (star z).re = z.re := by
-      unfold star; exact Complex.conj_re z
-    have hstar_im_eq : (star z).im = -z.im := by
-      unfold star; exact Complex.conj_im z
-    have hstar_im_pos : 0 < (star z).im := by linarith [hstar_im_eq]
-    have hstar_im_lt : (star z).im < (1 : ℝ) / 2 := by linarith [hstar_im_eq]
-    obtain ⟨R_upper, hR_mem, hx0, hx1, hy0, hy1⟩ := coversUpper (star z)
-      (by linarith [hstar_re_eq]) (by linarith [hstar_re_eq])
-      hstar_im_pos hstar_im_lt
-    let R_lower := XiLocalZeroFreeRect.conj R_upper
-    use R_lower
-    constructor
-    · simp [centralZeroFreeRects]; exact Or.inr ⟨R_upper, hR_mem, rfl⟩
-    · have h1 : R_lower.x0 = R_upper.x0 := rfl
-      have h2 : R_lower.x1 = R_upper.x1 := rfl
-      have h3 : R_lower.y0 = -R_upper.y1 := rfl
-      have h4 : R_lower.y1 = -R_upper.y0 := rfl
-      rw [h1, h2, h3, h4]
-      simp [Complex.conj_re, Complex.conj_im] at *
-      exact ⟨hx0, hx1, by linarith [hy1], by linarith [hy0]⟩
+theorem centralCellsData_y1_lt_half : ∀ c ∈ centralCellsData, c.2.2.2 < (1 / 2 : ℝ) := by
+  intro c hc
+  unfold centralCellsData at hc
+  simp at hc
+  rcases hc with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> norm_num
 
-/-- The central zero-free cover. -/
-def centralCover : XiCentralZeroFreeCover 10 where
-  rects := centralZeroFreeRects
-  covers := centralCovers
+/-- Legacy infeasibility witness (top copy for ordering; canonical
+`legacy_grid_infeasible_example` later): `ε + M*5 > 50` for `ε = 0.001`,
+`M = 10.0`. With `dx = 10` (`0 → 10`), `radius > 5`, so legacy `LHS > 50`. -/
+theorem legacy_grid_infeasible_wide_top : (50 : ℝ) < (0.001 : ℝ) + 10.0 * 5 := by
+  norm_num
+
+/-- Explicit corrected rect (proved): split wide `(0,10)` into `(7.5,10)`
+(width `2.5`, same as `fineGridX`; `radius < 1.26` pattern). Geometry only;
+fencing `ε,M` tiers are `fine_feasible_*` (later). -/
+def correctedCell_wide_example : CellProofEngine.Rect2D where
+  x0 := 7.5; x1 := 10; y0 := 0.01; y1 := 0.2
+  hx := by norm_num
+  hy := by norm_num
+
+theorem correctedCell_wide_example_strip_lo : -(1 / 2 : ℝ) < correctedCell_wide_example.y0 := by
+  unfold correctedCell_wide_example
+  norm_num
+
+theorem correctedCell_wide_example_strip_hi : correctedCell_wide_example.y1 < (1 / 2 : ℝ) := by
+  unfold correctedCell_wide_example
+  norm_num
+
+/-- Lower-half pure data (negated `y`s; `map` so membership transfers freely). -/
+def centralCellsDataLower : List (ℝ × ℝ × ℝ × ℝ) :=
+  centralCellsData.map (fun c => (c.1, c.2.1, -c.2.2.2, -c.2.2.1))
+
+/-- TRUE upper-half inner coverage (replacement for false full `coversUpper`).
+Legacy `coversUpper` (`-10 ≤ re ≤ 10`, `0 < im < 1/2`) was FALSE for the inner
+grid. Counterexamples: `z = 10 + 0.25*I` (`re = 10`, needs `10 < R.x1 ≤ 10`);
+`z = -10 + 0.25*I` (needs `R.x0 < -10`); `z = 0 + 0.005*I` (`im = 0.005`,
+needs `R.y0 < 0.005`, min `y0 = 0.01`); `z = 0 + 0.495*I` (needs `0.495 < R.y1`,
+max `y1 = 0.49`). True inner version below (`-10 < re < 10`,
+`0.01 < im < 0.49`, 16 cases; canonical later `grid16_covers_inner`,
+`gridFine_covers_inner`). Pure combinatorics, no analytic. -/
+theorem coversUpper_inner {x y : ℝ}
+    (hx_lo : (-10.0 : ℝ) < x) (hx_hi : x < (10.0 : ℝ))
+    (hy_lo : 0.01 < y) (hy_hi : y < 0.49) :
+    ∃ c ∈ centralCellsData, c.1 < x ∧ x < c.2.1 ∧ c.2.2.1 < y ∧ y < c.2.2.2 := by
+  unfold centralCellsData
+  by_cases hx1 : x < (-5.0 : ℝ)
+  · by_cases hy1 : y < 0.2
+    · exact ⟨(-10.0, -5.0, 0.01, 0.2), by simp, hx_lo, hx1, hy_lo, hy1⟩
+    · by_cases hy2 : y < 0.3
+      · exact ⟨(-10.0, -5.0, 0.1, 0.3), by simp, hx_lo, hx1, by linarith, hy2⟩
+      · by_cases hy3 : y < 0.4
+        · exact ⟨(-10.0, -5.0, 0.2, 0.4), by simp, hx_lo, hx1, by linarith, hy3⟩
+        · exact ⟨(-10.0, -5.0, 0.3, 0.49), by simp, hx_lo, hx1, by linarith, hy_hi⟩
+  · by_cases hy1 : y < 0.2
+    · by_cases hx2 : x < (0.0 : ℝ)
+      · exact ⟨(-6.0, 0.0, 0.01, 0.2), by simp, by linarith, hx2, hy_lo, hy1⟩
+      · by_cases hx3 : x < (5.0 : ℝ)
+        · exact ⟨(-1.0, 5.0, 0.01, 0.2), by simp, by linarith, hx3, hy_lo, hy1⟩
+        · exact ⟨(0.0, 10.0, 0.01, 0.2), by simp, by linarith, hx_hi, hy_lo, hy1⟩
+    · by_cases hy2 : y < 0.3
+      · by_cases hx2 : x < (0.0 : ℝ)
+        · exact ⟨(-6.0, 0.0, 0.1, 0.3), by simp, by linarith, hx2, by linarith, hy2⟩
+        · by_cases hx3 : x < (5.0 : ℝ)
+          · exact ⟨(-1.0, 5.0, 0.1, 0.3), by simp, by linarith, hx3, by linarith, hy2⟩
+          · exact ⟨(0.0, 10.0, 0.1, 0.3), by simp, by linarith, hx_hi, by linarith, hy2⟩
+      · by_cases hy3 : y < 0.4
+        · by_cases hx2 : x < (0.0 : ℝ)
+          · exact ⟨(-6.0, 0.0, 0.2, 0.4), by simp, by linarith, hx2, by linarith, hy3⟩
+          · by_cases hx3 : x < (5.0 : ℝ)
+            · exact ⟨(-1.0, 5.0, 0.2, 0.4), by simp, by linarith, hx3, by linarith, hy3⟩
+            · exact ⟨(0.0, 10.0, 0.2, 0.4), by simp, by linarith, hx_hi, by linarith, hy3⟩
+        · by_cases hx2 : x < (0.0 : ℝ)
+          · exact ⟨(-6.0, 0.0, 0.3, 0.49), by simp, by linarith, hx2, by linarith, hy_hi⟩
+          · by_cases hx3 : x < (5.0 : ℝ)
+            · exact ⟨(-1.0, 5.0, 0.3, 0.49), by simp, by linarith, hx3, by linarith, hy_hi⟩
+            · exact ⟨(0.0, 10.0, 0.3, 0.49), by simp, by linarith, hx_hi, by linarith, hy_hi⟩
+
+/-- TRUE lower-half inner coverage (mirror via negation; no `conj` needed for
+pure combinatorics). -/
+theorem coversLower_inner {x y : ℝ}
+    (hx_lo : (-10.0 : ℝ) < x) (hx_hi : x < (10.0 : ℝ))
+    (hy_lo : -0.49 < y) (hy_hi : y < -0.01) :
+    ∃ c ∈ centralCellsDataLower, c.1 < x ∧ x < c.2.1 ∧ c.2.2.1 < y ∧ y < c.2.2.2 := by
+  have hy_lo' : (0.01 : ℝ) < -y := by linarith
+  have hy_hi' : -y < (0.49 : ℝ) := by linarith
+  obtain ⟨c, hc_mem, hloX, hhiX, hloY, hhiY⟩ :=
+    coversUpper_inner (x := x) (y := -y) hx_lo hx_hi hy_lo' hy_hi'
+  refine ⟨(c.1, c.2.1, -c.2.2.2, -c.2.2.1), List.mem_map.mpr ⟨c, hc_mem, rfl⟩, ?_, ?_, ?_, ?_⟩
+  · simpa using hloX
+  · simpa using hhiX
+  · linarith
+  · linarith
+
+/-- TRUE combined inner coverage (both halves, pure combinatorics).
+Takes `y < -0.01 ∨ 0.01 < y` (excludes real-axis strip `(-0.01,0.01)`, which needs
+`BoundaryProofEngine` for coordinator) plus strict `-10 < re < 10`
+(endpoints `±10` excluded; they were counterexamples for non-strict `≤`). -/
+theorem centralCovers_inner (z : ℂ) (hx_lo : (-10.0 : ℝ) < z.re) (hx_hi : z.re < (10.0 : ℝ))
+    (hy_lo : -0.49 < z.im) (hy_hi : z.im < 0.49)
+    (hgap : z.im < -0.01 ∨ 0.01 < z.im) :
+    (∃ c ∈ centralCellsData, c.1 < z.re ∧ z.re < c.2.1 ∧ c.2.2.1 < z.im ∧ z.im < c.2.2.2) ∨
+    (∃ c ∈ centralCellsDataLower, c.1 < z.re ∧ z.re < c.2.1 ∧ c.2.2.1 < z.im ∧ z.im < c.2.2.2) := by
+  rcases hgap with hneg | hpos
+  · exact Or.inr (coversLower_inner hx_lo hx_hi (by linarith) hneg)
+  · exact Or.inl (coversUpper_inner hx_lo hx_hi hpos (by linarith))
+
+/- Legacy `centralCover : XiCentralZeroFreeCover 10` was FALSE for the inner grid
+(documented pointer only). Full `XiCentralZeroFreeCover` needs `∀ z` with
+`-10 ≤ re ≤ 10`, `-1/2 < im < 1/2`, `im ≠ 0`, but inner data covers only
+`(-10,10) × ((0.01,0.49) ∪ (-0.49,-0.01))` (see counterexamples in
+`coversUpper_inner` doc). Missing for coordinator: (a) 40 analytic fencing leaves
+(`center_bound` + `deriv_bound` per `gridFine` cell, `inner_nonvanishing_of_fenced_grid_fine`
+`H` hypothesis); (b) boundary strips `(0,0.01]`, `[0.49,1/2)`, `(-0.01,0)`,
+`(-1/2,-0.49]`, lines `x = ±10`, real axis via `BoundaryProofEngine.*` +
+`upper_boundary_nonvanishing_from_outer_bound`; (c) tail `|Re| > 10` (mollified
+Rouché, committed). No `sorryAx`; combinatorics above is the TRUE inner part. -/
 
 /-! ## Proven inner-tiling combinatorics + numeric fencing data (sorry-free)
 
