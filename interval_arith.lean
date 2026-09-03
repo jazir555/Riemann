@@ -8461,3 +8461,22362 @@ theorem gamma_one_sub_half_upper_R40 :
 
 end R40GammaUpper
 
+/-!
+Inner Gamma upper caps (machine-generated from verified outer templates).
+Each block replicates the corresponding outer-tier template (same n/numerator chain,
+same row re) with substituted center (xcenter/ycenter), zUp im, denominator floors c_k,
+denominator product floor D_lo and cap. All numeric claims pre-checked via exact Fractions.
+-/
+
+namespace R02GammaUpper
+
+/-- The R02 `s`-plane center: `s = 1/2 + I·z` at `z = R02.center`. -/
+noncomputable def sR02 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center
+
+/-- `R02.center = -6.75 + 0.105·I` (from `R02_x0/x1/y0/y1`). -/
+theorem R02_center_eq :
+    CentralCoverAssembly.R02.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+
+/-- `Re sR02 = 0.395`. -/
+theorem sR02_re : sR02.re = 0.395 := by
+  unfold sR02
+  rw [R02_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR02 = -6.75`. -/
+theorem sR02_im : sR02.im = -6.75 := by
+  unfold sR02
+  rw [R02_center_eq]
+  simp
+
+/-- `Re(1 - sR02/2) = 0.8025`. -/
+theorem zUpR02_re : (1 - sR02 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR02_re]
+  norm_num
+
+/-- `Im(1 - sR02/2) = 3.375`. -/
+theorem zUpR02_im : (1 - sR02 / 2).im = 3.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR02_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.46 ≤ ‖1 - sR02 / 2‖`. -/
+theorem norm_zUpR02_0_ge :
+    (3.46 : ℝ) ≤ ‖1 - sR02 / 2‖ := by
+  have hsq : (3.46 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR02_re, zUpR02_im]
+    norm_num
+  calc (3.46 : ℝ) = Real.sqrt ((3.46 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.82 ≤ ‖1 - sR02 / 2 + 1‖`. -/
+theorem norm_zUpR02_1_ge :
+    (3.82 : ℝ) ≤ ‖1 - sR02 / 2 + 1‖ := by
+  have hre : (1 - sR02 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR02 / 2 + 1).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.one_im]
+    norm_num
+  have hsq : (3.82 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.82 : ℝ) = Real.sqrt ((3.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.38 ≤ ‖1 - sR02 / 2 + 2‖`. -/
+theorem norm_zUpR02_2_ge :
+    (4.38 : ℝ) ≤ ‖1 - sR02 / 2 + 2‖ := by
+  have hre : (1 - sR02 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 2).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.38 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.38 : ℝ) = Real.sqrt ((4.38 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.08 ≤ ‖1 - sR02 / 2 + 3‖`. -/
+theorem norm_zUpR02_3_ge :
+    (5.08 : ℝ) ≤ ‖1 - sR02 / 2 + 3‖ := by
+  have hre : (1 - sR02 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 3).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.08 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.08 : ℝ) = Real.sqrt ((5.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.86 ≤ ‖1 - sR02 / 2 + 4‖`. -/
+theorem norm_zUpR02_4_ge :
+    (5.86 : ℝ) ≤ ‖1 - sR02 / 2 + 4‖ := by
+  have hre : (1 - sR02 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 4).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.86 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.86 : ℝ) = Real.sqrt ((5.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.71 ≤ ‖1 - sR02 / 2 + 5‖`. -/
+theorem norm_zUpR02_5_ge :
+    (6.71 : ℝ) ≤ ‖1 - sR02 / 2 + 5‖ := by
+  have hre : (1 - sR02 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 5).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.71 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.71 : ℝ) = Real.sqrt ((6.71 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.59 ≤ ‖1 - sR02 / 2 + 6‖`. -/
+theorem norm_zUpR02_6_ge :
+    (7.59 : ℝ) ≤ ‖1 - sR02 / 2 + 6‖ := by
+  have hre : (1 - sR02 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 6).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.59 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.59 : ℝ) = Real.sqrt ((7.59 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.5 ≤ ‖1 - sR02 / 2 + 7‖`. -/
+theorem norm_zUpR02_7_ge :
+    (8.5 : ℝ) ≤ ‖1 - sR02 / 2 + 7‖ := by
+  have hre : (1 - sR02 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 7).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.5 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.5 : ℝ) = Real.sqrt ((8.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.42 ≤ ‖1 - sR02 / 2 + 8‖`. -/
+theorem norm_zUpR02_8_ge :
+    (9.42 : ℝ) ≤ ‖1 - sR02 / 2 + 8‖ := by
+  have hre : (1 - sR02 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 8).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.42 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.42 : ℝ) = Real.sqrt ((9.42 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.36 ≤ ‖1 - sR02 / 2 + 9‖`. -/
+theorem norm_zUpR02_9_ge :
+    (10.36 : ℝ) ≤ ‖1 - sR02 / 2 + 9‖ := by
+  have hre : (1 - sR02 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 9).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.36 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.36 : ℝ) = Real.sqrt ((10.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.31 ≤ ‖1 - sR02 / 2 + 10‖`. -/
+theorem norm_zUpR02_10_ge :
+    (11.31 : ℝ) ≤ ‖1 - sR02 / 2 + 10‖ := by
+  have hre : (1 - sR02 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 10).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.31 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.31 : ℝ) = Real.sqrt ((11.31 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.27 ≤ ‖1 - sR02 / 2 + 11‖`. -/
+theorem norm_zUpR02_11_ge :
+    (12.27 : ℝ) ≤ ‖1 - sR02 / 2 + 11‖ := by
+  have hre : (1 - sR02 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR02 / 2 + 11).im = 3.375 := by
+    simp only [Complex.add_im, zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.27 : ℝ) ^ 2 ≤ ‖1 - sR02 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.27 : ℝ) = Real.sqrt ((12.27 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR02 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR02 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR02_ne0 : (1 - sR02 / 2) ≠ 0 := by
+  have hre : (1 - sR02 / 2).re = 0.8025 := zUpR02_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add1_ne0 : (1 - sR02 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add2_ne0 : (1 - sR02 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add3_ne0 : (1 - sR02 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add4_ne0 : (1 - sR02 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add5_ne0 : (1 - sR02 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add6_ne0 : (1 - sR02 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add7_ne0 : (1 - sR02 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add8_ne0 : (1 - sR02 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add9_ne0 : (1 - sR02 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add10_ne0 : (1 - sR02 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02_add11_ne0 : (1 - sR02 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR02 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R02 corner:
+`‖Complex.Gamma (1 - sR02 / 2)‖ ≤ 0.05` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R02 :
+    ‖Complex.Gamma (1 - sR02 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR02 / 2 + 1)
+      = (1 - sR02 / 2) * Complex.Gamma (1 - sR02 / 2) :=
+    Complex.Gamma_add_one _ zUpR02_ne0
+  have e1 : Complex.Gamma (1 - sR02 / 2 + 2)
+      = (1 - sR02 / 2 + 1)
+        * Complex.Gamma (1 - sR02 / 2 + 1) := by
+    have h : (1 - sR02 / 2 + 2)
+        = ((1 - sR02 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add1_ne0
+  have e2 : Complex.Gamma (1 - sR02 / 2 + 3)
+      = (1 - sR02 / 2 + 2)
+        * Complex.Gamma (1 - sR02 / 2 + 2) := by
+    have h : (1 - sR02 / 2 + 3)
+        = ((1 - sR02 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add2_ne0
+  have e3 : Complex.Gamma (1 - sR02 / 2 + 4)
+      = (1 - sR02 / 2 + 3)
+        * Complex.Gamma (1 - sR02 / 2 + 3) := by
+    have h : (1 - sR02 / 2 + 4)
+        = ((1 - sR02 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add3_ne0
+  have e4 : Complex.Gamma (1 - sR02 / 2 + 5)
+      = (1 - sR02 / 2 + 4)
+        * Complex.Gamma (1 - sR02 / 2 + 4) := by
+    have h : (1 - sR02 / 2 + 5)
+        = ((1 - sR02 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add4_ne0
+  have e5 : Complex.Gamma (1 - sR02 / 2 + 6)
+      = (1 - sR02 / 2 + 5)
+        * Complex.Gamma (1 - sR02 / 2 + 5) := by
+    have h : (1 - sR02 / 2 + 6)
+        = ((1 - sR02 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add5_ne0
+  have e6 : Complex.Gamma (1 - sR02 / 2 + 7)
+      = (1 - sR02 / 2 + 6)
+        * Complex.Gamma (1 - sR02 / 2 + 6) := by
+    have h : (1 - sR02 / 2 + 7)
+        = ((1 - sR02 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add6_ne0
+  have e7 : Complex.Gamma (1 - sR02 / 2 + 8)
+      = (1 - sR02 / 2 + 7)
+        * Complex.Gamma (1 - sR02 / 2 + 7) := by
+    have h : (1 - sR02 / 2 + 8)
+        = ((1 - sR02 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add7_ne0
+  have e8 : Complex.Gamma (1 - sR02 / 2 + 9)
+      = (1 - sR02 / 2 + 8)
+        * Complex.Gamma (1 - sR02 / 2 + 8) := by
+    have h : (1 - sR02 / 2 + 9)
+        = ((1 - sR02 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add8_ne0
+  have e9 : Complex.Gamma (1 - sR02 / 2 + 10)
+      = (1 - sR02 / 2 + 9)
+        * Complex.Gamma (1 - sR02 / 2 + 9) := by
+    have h : (1 - sR02 / 2 + 10)
+        = ((1 - sR02 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add9_ne0
+  have e10 : Complex.Gamma (1 - sR02 / 2 + 11)
+      = (1 - sR02 / 2 + 10)
+        * Complex.Gamma (1 - sR02 / 2 + 10) := by
+    have h : (1 - sR02 / 2 + 11)
+        = ((1 - sR02 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add10_ne0
+  have e11 : Complex.Gamma (1 - sR02 / 2 + 12)
+      = (1 - sR02 / 2 + 11)
+        * Complex.Gamma (1 - sR02 / 2 + 11) := by
+    have h : (1 - sR02 / 2 + 12)
+        = ((1 - sR02 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR02 / 2 + 1)‖
+      = ‖1 - sR02 / 2‖
+        * ‖Complex.Gamma (1 - sR02 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR02 / 2 + 2)‖
+      = ‖1 - sR02 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR02 / 2 + 3)‖
+      = ‖1 - sR02 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR02 / 2 + 4)‖
+      = ‖1 - sR02 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR02 / 2 + 5)‖
+      = ‖1 - sR02 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR02 / 2 + 6)‖
+      = ‖1 - sR02 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR02 / 2 + 7)‖
+      = ‖1 - sR02 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR02 / 2 + 8)‖
+      = ‖1 - sR02 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR02 / 2 + 9)‖
+      = ‖1 - sR02 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR02 / 2 + 10)‖
+      = ‖1 - sR02 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR02 / 2 + 11)‖
+      = ‖1 - sR02 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR02 / 2 + 12)‖
+      = ‖1 - sR02 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR02 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR02 / 2 + 12)‖
+      = ‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+        * (‖1 - sR02 / 2‖
+          * ‖Complex.Gamma (1 - sR02 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.82 : ℝ) * 3.46
+      ≤ ‖1 - sR02 / 2 + 1‖ * ‖1 - sR02 / 2‖ :=
+    mul_le_mul norm_zUpR02_1_ge norm_zUpR02_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.38 : ℝ) * (3.82 * (3.46))
+      ≤ ‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖)) :=
+    mul_le_mul norm_zUpR02_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.08 : ℝ) * (4.38 * (3.82 * (3.46)))
+      ≤ ‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))) :=
+    mul_le_mul norm_zUpR02_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.86 : ℝ) * (5.08 * (4.38 * (3.82 * (3.46))))
+      ≤ ‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖)))) :=
+    mul_le_mul norm_zUpR02_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.71 : ℝ) * (5.86 * (5.08 * (4.38 * (3.82 * (3.46)))))
+      ≤ ‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))) :=
+    mul_le_mul norm_zUpR02_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.59 : ℝ) * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46))))))
+      ≤ ‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖)))))) :=
+    mul_le_mul norm_zUpR02_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.5 : ℝ) * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46)))))))
+      ≤ ‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))))) :=
+    mul_le_mul norm_zUpR02_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.42 : ℝ) * (8.5 * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46))))))))
+      ≤ ‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR02_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.36 : ℝ) * (9.42 * (8.5 * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46)))))))))
+      ≤ ‖1 - sR02 / 2 + 9‖ * (‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR02_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.31 : ℝ) * (10.36 * (9.42 * (8.5 * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46))))))))))
+      ≤ ‖1 - sR02 / 2 + 10‖ * (‖1 - sR02 / 2 + 9‖ * (‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR02_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.27 : ℝ) * (11.31 * (10.36 * (9.42 * (8.5 * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46)))))))))))
+      ≤ ‖1 - sR02 / 2 + 11‖ * (‖1 - sR02 / 2 + 10‖ * (‖1 - sR02 / 2 + 9‖ * (‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR02_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (10000000000 : ℝ)
+      ≤ (12.27 : ℝ) * (11.31 * (10.36 * (9.42 * (8.5 * (7.59 * (6.71 * (5.86 * (5.08 * (4.38 * (3.82 * (3.46))))))))))) := by
+    norm_num
+  have hD_ge : (10000000000 : ℝ)
+      ≤ ‖1 - sR02 / 2 + 11‖ * (‖1 - sR02 / 2 + 10‖ * (‖1 - sR02 / 2 + 9‖ * (‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR02 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR02 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR02 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR02 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR02 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR02 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR02 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR02 / 2)‖ = ‖Complex.Gamma (1 - sR02 / 2 + 12)‖ ≤ 313000000`, `D ≤ 10000000000`.
+  have hD_mul : (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR02 / 2)‖
+      = ‖Complex.Gamma (1 - sR02 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR02 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR02 / 2)‖
+        * (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR02 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR02 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR02 / 2)‖
+      ≤ 313000000 / (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR02 / 2 + 11‖
+        * (‖1 - sR02 / 2 + 10‖
+        * (‖1 - sR02 / 2 + 9‖
+        * (‖1 - sR02 / 2 + 8‖
+        * (‖1 - sR02 / 2 + 7‖
+        * (‖1 - sR02 / 2 + 6‖
+        * (‖1 - sR02 / 2 + 5‖
+        * (‖1 - sR02 / 2 + 4‖
+        * (‖1 - sR02 / 2 + 3‖
+        * (‖1 - sR02 / 2 + 2‖
+        * (‖1 - sR02 / 2 + 1‖
+          * ‖1 - sR02 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.05 * 10000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR02 / 2 + 11‖ * (‖1 - sR02 / 2 + 10‖ * (‖1 - sR02 / 2 + 9‖ * (‖1 - sR02 / 2 + 8‖ * (‖1 - sR02 / 2 + 7‖ * (‖1 - sR02 / 2 + 6‖ * (‖1 - sR02 / 2 + 5‖ * (‖1 - sR02 / 2 + 4‖ * (‖1 - sR02 / 2 + 3‖ * (‖1 - sR02 / 2 + 2‖ * (‖1 - sR02 / 2 + 1‖ * (‖1 - sR02 / 2‖))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R02GammaUpper
+
+namespace R03GammaUpper
+
+/-- The R03 `s`-plane center: `s = 1/2 + I·z` at `z = R03.center`. -/
+noncomputable def sR03 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R03.center
+
+/-- `R03.center = -4.75 + 0.105·I` (from `R03_x0/x1/y0/y1`). -/
+theorem R03_center_eq :
+    CentralCoverAssembly.R03.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R03_x0, CentralCoverAssembly.R03_x1,
+      CentralCoverAssembly.R03_y0, CentralCoverAssembly.R03_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R03_x0, CentralCoverAssembly.R03_x1,
+      CentralCoverAssembly.R03_y0, CentralCoverAssembly.R03_y1]
+    simp
+    norm_num
+
+/-- `Re sR03 = 0.395`. -/
+theorem sR03_re : sR03.re = 0.395 := by
+  unfold sR03
+  rw [R03_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR03 = -4.75`. -/
+theorem sR03_im : sR03.im = -4.75 := by
+  unfold sR03
+  rw [R03_center_eq]
+  simp
+
+/-- `Re(1 - sR03/2) = 0.8025`. -/
+theorem zUpR03_re : (1 - sR03 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR03_re]
+  norm_num
+
+/-- `Im(1 - sR03/2) = 2.375`. -/
+theorem zUpR03_im : (1 - sR03 / 2).im = 2.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR03_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.5 ≤ ‖1 - sR03 / 2‖`. -/
+theorem norm_zUpR03_0_ge :
+    (2.5 : ℝ) ≤ ‖1 - sR03 / 2‖ := by
+  have hsq : (2.5 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR03_re, zUpR03_im]
+    norm_num
+  calc (2.5 : ℝ) = Real.sqrt ((2.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.98 ≤ ‖1 - sR03 / 2 + 1‖`. -/
+theorem norm_zUpR03_1_ge :
+    (2.98 : ℝ) ≤ ‖1 - sR03 / 2 + 1‖ := by
+  have hre : (1 - sR03 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR03 / 2 + 1).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.one_im]
+    norm_num
+  have hsq : (2.98 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.98 : ℝ) = Real.sqrt ((2.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.67 ≤ ‖1 - sR03 / 2 + 2‖`. -/
+theorem norm_zUpR03_2_ge :
+    (3.67 : ℝ) ≤ ‖1 - sR03 / 2 + 2‖ := by
+  have hre : (1 - sR03 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 2).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.67 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.67 : ℝ) = Real.sqrt ((3.67 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.48 ≤ ‖1 - sR03 / 2 + 3‖`. -/
+theorem norm_zUpR03_3_ge :
+    (4.48 : ℝ) ≤ ‖1 - sR03 / 2 + 3‖ := by
+  have hre : (1 - sR03 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 3).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.48 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.48 : ℝ) = Real.sqrt ((4.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.35 ≤ ‖1 - sR03 / 2 + 4‖`. -/
+theorem norm_zUpR03_4_ge :
+    (5.35 : ℝ) ≤ ‖1 - sR03 / 2 + 4‖ := by
+  have hre : (1 - sR03 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 4).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.35 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.35 : ℝ) = Real.sqrt ((5.35 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.26 ≤ ‖1 - sR03 / 2 + 5‖`. -/
+theorem norm_zUpR03_5_ge :
+    (6.26 : ℝ) ≤ ‖1 - sR03 / 2 + 5‖ := by
+  have hre : (1 - sR03 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 5).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.26 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.26 : ℝ) = Real.sqrt ((6.26 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.2 ≤ ‖1 - sR03 / 2 + 6‖`. -/
+theorem norm_zUpR03_6_ge :
+    (7.2 : ℝ) ≤ ‖1 - sR03 / 2 + 6‖ := by
+  have hre : (1 - sR03 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 6).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.2 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.2 : ℝ) = Real.sqrt ((7.2 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.15 ≤ ‖1 - sR03 / 2 + 7‖`. -/
+theorem norm_zUpR03_7_ge :
+    (8.15 : ℝ) ≤ ‖1 - sR03 / 2 + 7‖ := by
+  have hre : (1 - sR03 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 7).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.15 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.15 : ℝ) = Real.sqrt ((8.15 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.11 ≤ ‖1 - sR03 / 2 + 8‖`. -/
+theorem norm_zUpR03_8_ge :
+    (9.11 : ℝ) ≤ ‖1 - sR03 / 2 + 8‖ := by
+  have hre : (1 - sR03 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 8).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.11 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.11 : ℝ) = Real.sqrt ((9.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.08 ≤ ‖1 - sR03 / 2 + 9‖`. -/
+theorem norm_zUpR03_9_ge :
+    (10.08 : ℝ) ≤ ‖1 - sR03 / 2 + 9‖ := by
+  have hre : (1 - sR03 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 9).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.08 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.08 : ℝ) = Real.sqrt ((10.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.06 ≤ ‖1 - sR03 / 2 + 10‖`. -/
+theorem norm_zUpR03_10_ge :
+    (11.06 : ℝ) ≤ ‖1 - sR03 / 2 + 10‖ := by
+  have hre : (1 - sR03 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 10).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.06 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.06 : ℝ) = Real.sqrt ((11.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.03 ≤ ‖1 - sR03 / 2 + 11‖`. -/
+theorem norm_zUpR03_11_ge :
+    (12.03 : ℝ) ≤ ‖1 - sR03 / 2 + 11‖ := by
+  have hre : (1 - sR03 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR03 / 2 + 11).im = 2.375 := by
+    simp only [Complex.add_im, zUpR03_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.03 : ℝ) ^ 2 ≤ ‖1 - sR03 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.03 : ℝ) = Real.sqrt ((12.03 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR03 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR03 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR03_ne0 : (1 - sR03 / 2) ≠ 0 := by
+  have hre : (1 - sR03 / 2).re = 0.8025 := zUpR03_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add1_ne0 : (1 - sR03 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add2_ne0 : (1 - sR03 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add3_ne0 : (1 - sR03 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add4_ne0 : (1 - sR03 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add5_ne0 : (1 - sR03 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add6_ne0 : (1 - sR03 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add7_ne0 : (1 - sR03 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add8_ne0 : (1 - sR03 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add9_ne0 : (1 - sR03 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add10_ne0 : (1 - sR03 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR03_add11_ne0 : (1 - sR03 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR03 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R03 corner:
+`‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.15` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R03 :
+    ‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR03 / 2 + 1)
+      = (1 - sR03 / 2) * Complex.Gamma (1 - sR03 / 2) :=
+    Complex.Gamma_add_one _ zUpR03_ne0
+  have e1 : Complex.Gamma (1 - sR03 / 2 + 2)
+      = (1 - sR03 / 2 + 1)
+        * Complex.Gamma (1 - sR03 / 2 + 1) := by
+    have h : (1 - sR03 / 2 + 2)
+        = ((1 - sR03 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add1_ne0
+  have e2 : Complex.Gamma (1 - sR03 / 2 + 3)
+      = (1 - sR03 / 2 + 2)
+        * Complex.Gamma (1 - sR03 / 2 + 2) := by
+    have h : (1 - sR03 / 2 + 3)
+        = ((1 - sR03 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add2_ne0
+  have e3 : Complex.Gamma (1 - sR03 / 2 + 4)
+      = (1 - sR03 / 2 + 3)
+        * Complex.Gamma (1 - sR03 / 2 + 3) := by
+    have h : (1 - sR03 / 2 + 4)
+        = ((1 - sR03 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add3_ne0
+  have e4 : Complex.Gamma (1 - sR03 / 2 + 5)
+      = (1 - sR03 / 2 + 4)
+        * Complex.Gamma (1 - sR03 / 2 + 4) := by
+    have h : (1 - sR03 / 2 + 5)
+        = ((1 - sR03 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add4_ne0
+  have e5 : Complex.Gamma (1 - sR03 / 2 + 6)
+      = (1 - sR03 / 2 + 5)
+        * Complex.Gamma (1 - sR03 / 2 + 5) := by
+    have h : (1 - sR03 / 2 + 6)
+        = ((1 - sR03 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add5_ne0
+  have e6 : Complex.Gamma (1 - sR03 / 2 + 7)
+      = (1 - sR03 / 2 + 6)
+        * Complex.Gamma (1 - sR03 / 2 + 6) := by
+    have h : (1 - sR03 / 2 + 7)
+        = ((1 - sR03 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add6_ne0
+  have e7 : Complex.Gamma (1 - sR03 / 2 + 8)
+      = (1 - sR03 / 2 + 7)
+        * Complex.Gamma (1 - sR03 / 2 + 7) := by
+    have h : (1 - sR03 / 2 + 8)
+        = ((1 - sR03 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add7_ne0
+  have e8 : Complex.Gamma (1 - sR03 / 2 + 9)
+      = (1 - sR03 / 2 + 8)
+        * Complex.Gamma (1 - sR03 / 2 + 8) := by
+    have h : (1 - sR03 / 2 + 9)
+        = ((1 - sR03 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add8_ne0
+  have e9 : Complex.Gamma (1 - sR03 / 2 + 10)
+      = (1 - sR03 / 2 + 9)
+        * Complex.Gamma (1 - sR03 / 2 + 9) := by
+    have h : (1 - sR03 / 2 + 10)
+        = ((1 - sR03 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add9_ne0
+  have e10 : Complex.Gamma (1 - sR03 / 2 + 11)
+      = (1 - sR03 / 2 + 10)
+        * Complex.Gamma (1 - sR03 / 2 + 10) := by
+    have h : (1 - sR03 / 2 + 11)
+        = ((1 - sR03 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add10_ne0
+  have e11 : Complex.Gamma (1 - sR03 / 2 + 12)
+      = (1 - sR03 / 2 + 11)
+        * Complex.Gamma (1 - sR03 / 2 + 11) := by
+    have h : (1 - sR03 / 2 + 12)
+        = ((1 - sR03 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR03_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR03 / 2 + 1)‖
+      = ‖1 - sR03 / 2‖
+        * ‖Complex.Gamma (1 - sR03 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR03 / 2 + 2)‖
+      = ‖1 - sR03 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR03 / 2 + 3)‖
+      = ‖1 - sR03 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR03 / 2 + 4)‖
+      = ‖1 - sR03 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR03 / 2 + 5)‖
+      = ‖1 - sR03 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR03 / 2 + 6)‖
+      = ‖1 - sR03 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR03 / 2 + 7)‖
+      = ‖1 - sR03 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR03 / 2 + 8)‖
+      = ‖1 - sR03 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR03 / 2 + 9)‖
+      = ‖1 - sR03 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR03 / 2 + 10)‖
+      = ‖1 - sR03 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR03 / 2 + 11)‖
+      = ‖1 - sR03 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR03 / 2 + 12)‖
+      = ‖1 - sR03 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR03 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR03 / 2 + 12)‖
+      = ‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+        * (‖1 - sR03 / 2‖
+          * ‖Complex.Gamma (1 - sR03 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.98 : ℝ) * 2.5
+      ≤ ‖1 - sR03 / 2 + 1‖ * ‖1 - sR03 / 2‖ :=
+    mul_le_mul norm_zUpR03_1_ge norm_zUpR03_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.67 : ℝ) * (2.98 * (2.5))
+      ≤ ‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖)) :=
+    mul_le_mul norm_zUpR03_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.48 : ℝ) * (3.67 * (2.98 * (2.5)))
+      ≤ ‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))) :=
+    mul_le_mul norm_zUpR03_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.35 : ℝ) * (4.48 * (3.67 * (2.98 * (2.5))))
+      ≤ ‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖)))) :=
+    mul_le_mul norm_zUpR03_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.26 : ℝ) * (5.35 * (4.48 * (3.67 * (2.98 * (2.5)))))
+      ≤ ‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))) :=
+    mul_le_mul norm_zUpR03_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.2 : ℝ) * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5))))))
+      ≤ ‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖)))))) :=
+    mul_le_mul norm_zUpR03_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.15 : ℝ) * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5)))))))
+      ≤ ‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))) :=
+    mul_le_mul norm_zUpR03_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.11 : ℝ) * (8.15 * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5))))))))
+      ≤ ‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR03_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.08 : ℝ) * (9.11 * (8.15 * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5)))))))))
+      ≤ ‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR03_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.06 : ℝ) * (10.08 * (9.11 * (8.15 * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5))))))))))
+      ≤ ‖1 - sR03 / 2 + 10‖ * (‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR03_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.03 : ℝ) * (11.06 * (10.08 * (9.11 * (8.15 * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5)))))))))))
+      ≤ ‖1 - sR03 / 2 + 11‖ * (‖1 - sR03 / 2 + 10‖ * (‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR03_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (2900000000 : ℝ)
+      ≤ (12.03 : ℝ) * (11.06 * (10.08 * (9.11 * (8.15 * (7.2 * (6.26 * (5.35 * (4.48 * (3.67 * (2.98 * (2.5))))))))))) := by
+    norm_num
+  have hD_ge : (2900000000 : ℝ)
+      ≤ ‖1 - sR03 / 2 + 11‖ * (‖1 - sR03 / 2 + 10‖ * (‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR03 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR03 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR03_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR03 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR03 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR03 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR03 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR03 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR03 / 2)‖ = ‖Complex.Gamma (1 - sR03 / 2 + 12)‖ ≤ 313000000`, `D ≤ 2900000000`.
+  have hD_mul : (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR03 / 2)‖
+      = ‖Complex.Gamma (1 - sR03 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR03 / 2)‖
+        * (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR03 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR03 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR03 / 2)‖
+      ≤ 313000000 / (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR03 / 2 + 11‖
+        * (‖1 - sR03 / 2 + 10‖
+        * (‖1 - sR03 / 2 + 9‖
+        * (‖1 - sR03 / 2 + 8‖
+        * (‖1 - sR03 / 2 + 7‖
+        * (‖1 - sR03 / 2 + 6‖
+        * (‖1 - sR03 / 2 + 5‖
+        * (‖1 - sR03 / 2 + 4‖
+        * (‖1 - sR03 / 2 + 3‖
+        * (‖1 - sR03 / 2 + 2‖
+        * (‖1 - sR03 / 2 + 1‖
+          * ‖1 - sR03 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.15 * 2900000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR03 / 2 + 11‖ * (‖1 - sR03 / 2 + 10‖ * (‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R03GammaUpper
+
+namespace R04GammaUpper
+
+/-- The R04 `s`-plane center: `s = 1/2 + I·z` at `z = R04.center`. -/
+noncomputable def sR04 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R04.center
+
+/-- `R04.center = -2.75 + 0.105·I` (from `R04_x0/x1/y0/y1`). -/
+theorem R04_center_eq :
+    CentralCoverAssembly.R04.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R04_x0, CentralCoverAssembly.R04_x1,
+      CentralCoverAssembly.R04_y0, CentralCoverAssembly.R04_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R04_x0, CentralCoverAssembly.R04_x1,
+      CentralCoverAssembly.R04_y0, CentralCoverAssembly.R04_y1]
+    simp
+    norm_num
+
+/-- `Re sR04 = 0.395`. -/
+theorem sR04_re : sR04.re = 0.395 := by
+  unfold sR04
+  rw [R04_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR04 = -2.75`. -/
+theorem sR04_im : sR04.im = -2.75 := by
+  unfold sR04
+  rw [R04_center_eq]
+  simp
+
+/-- `Re(1 - sR04/2) = 0.8025`. -/
+theorem zUpR04_re : (1 - sR04 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR04_re]
+  norm_num
+
+/-- `Im(1 - sR04/2) = 1.375`. -/
+theorem zUpR04_im : (1 - sR04 / 2).im = 1.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR04_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.59 ≤ ‖1 - sR04 / 2‖`. -/
+theorem norm_zUpR04_0_ge :
+    (1.59 : ℝ) ≤ ‖1 - sR04 / 2‖ := by
+  have hsq : (1.59 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR04_re, zUpR04_im]
+    norm_num
+  calc (1.59 : ℝ) = Real.sqrt ((1.59 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.26 ≤ ‖1 - sR04 / 2 + 1‖`. -/
+theorem norm_zUpR04_1_ge :
+    (2.26 : ℝ) ≤ ‖1 - sR04 / 2 + 1‖ := by
+  have hre : (1 - sR04 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR04 / 2 + 1).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.one_im]
+    norm_num
+  have hsq : (2.26 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.26 : ℝ) = Real.sqrt ((2.26 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.12 ≤ ‖1 - sR04 / 2 + 2‖`. -/
+theorem norm_zUpR04_2_ge :
+    (3.12 : ℝ) ≤ ‖1 - sR04 / 2 + 2‖ := by
+  have hre : (1 - sR04 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 2).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.12 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.12 : ℝ) = Real.sqrt ((3.12 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.04 ≤ ‖1 - sR04 / 2 + 3‖`. -/
+theorem norm_zUpR04_3_ge :
+    (4.04 : ℝ) ≤ ‖1 - sR04 / 2 + 3‖ := by
+  have hre : (1 - sR04 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 3).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.04 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.04 : ℝ) = Real.sqrt ((4.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.99 ≤ ‖1 - sR04 / 2 + 4‖`. -/
+theorem norm_zUpR04_4_ge :
+    (4.99 : ℝ) ≤ ‖1 - sR04 / 2 + 4‖ := by
+  have hre : (1 - sR04 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 4).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.99 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.99 : ℝ) = Real.sqrt ((4.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.96 ≤ ‖1 - sR04 / 2 + 5‖`. -/
+theorem norm_zUpR04_5_ge :
+    (5.96 : ℝ) ≤ ‖1 - sR04 / 2 + 5‖ := by
+  have hre : (1 - sR04 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 5).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.96 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.96 : ℝ) = Real.sqrt ((5.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.94 ≤ ‖1 - sR04 / 2 + 6‖`. -/
+theorem norm_zUpR04_6_ge :
+    (6.94 : ℝ) ≤ ‖1 - sR04 / 2 + 6‖ := by
+  have hre : (1 - sR04 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 6).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.94 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.94 : ℝ) = Real.sqrt ((6.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.92 ≤ ‖1 - sR04 / 2 + 7‖`. -/
+theorem norm_zUpR04_7_ge :
+    (7.92 : ℝ) ≤ ‖1 - sR04 / 2 + 7‖ := by
+  have hre : (1 - sR04 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 7).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.92 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.92 : ℝ) = Real.sqrt ((7.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.9 ≤ ‖1 - sR04 / 2 + 8‖`. -/
+theorem norm_zUpR04_8_ge :
+    (8.9 : ℝ) ≤ ‖1 - sR04 / 2 + 8‖ := by
+  have hre : (1 - sR04 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 8).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.9 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.9 : ℝ) = Real.sqrt ((8.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.89 ≤ ‖1 - sR04 / 2 + 9‖`. -/
+theorem norm_zUpR04_9_ge :
+    (9.89 : ℝ) ≤ ‖1 - sR04 / 2 + 9‖ := by
+  have hre : (1 - sR04 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 9).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.89 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.89 : ℝ) = Real.sqrt ((9.89 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.88 ≤ ‖1 - sR04 / 2 + 10‖`. -/
+theorem norm_zUpR04_10_ge :
+    (10.88 : ℝ) ≤ ‖1 - sR04 / 2 + 10‖ := by
+  have hre : (1 - sR04 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 10).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.88 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.88 : ℝ) = Real.sqrt ((10.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.88 ≤ ‖1 - sR04 / 2 + 11‖`. -/
+theorem norm_zUpR04_11_ge :
+    (11.88 : ℝ) ≤ ‖1 - sR04 / 2 + 11‖ := by
+  have hre : (1 - sR04 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR04 / 2 + 11).im = 1.375 := by
+    simp only [Complex.add_im, zUpR04_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.88 : ℝ) ^ 2 ≤ ‖1 - sR04 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.88 : ℝ) = Real.sqrt ((11.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR04 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR04 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR04_ne0 : (1 - sR04 / 2) ≠ 0 := by
+  have hre : (1 - sR04 / 2).re = 0.8025 := zUpR04_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add1_ne0 : (1 - sR04 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add2_ne0 : (1 - sR04 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add3_ne0 : (1 - sR04 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add4_ne0 : (1 - sR04 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add5_ne0 : (1 - sR04 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add6_ne0 : (1 - sR04 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add7_ne0 : (1 - sR04 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add8_ne0 : (1 - sR04 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add9_ne0 : (1 - sR04 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add10_ne0 : (1 - sR04 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR04_add11_ne0 : (1 - sR04 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR04 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R04 corner:
+`‖Complex.Gamma (1 - sR04 / 2)‖ ≤ 0.5` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R04 :
+    ‖Complex.Gamma (1 - sR04 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR04 / 2 + 1)
+      = (1 - sR04 / 2) * Complex.Gamma (1 - sR04 / 2) :=
+    Complex.Gamma_add_one _ zUpR04_ne0
+  have e1 : Complex.Gamma (1 - sR04 / 2 + 2)
+      = (1 - sR04 / 2 + 1)
+        * Complex.Gamma (1 - sR04 / 2 + 1) := by
+    have h : (1 - sR04 / 2 + 2)
+        = ((1 - sR04 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add1_ne0
+  have e2 : Complex.Gamma (1 - sR04 / 2 + 3)
+      = (1 - sR04 / 2 + 2)
+        * Complex.Gamma (1 - sR04 / 2 + 2) := by
+    have h : (1 - sR04 / 2 + 3)
+        = ((1 - sR04 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add2_ne0
+  have e3 : Complex.Gamma (1 - sR04 / 2 + 4)
+      = (1 - sR04 / 2 + 3)
+        * Complex.Gamma (1 - sR04 / 2 + 3) := by
+    have h : (1 - sR04 / 2 + 4)
+        = ((1 - sR04 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add3_ne0
+  have e4 : Complex.Gamma (1 - sR04 / 2 + 5)
+      = (1 - sR04 / 2 + 4)
+        * Complex.Gamma (1 - sR04 / 2 + 4) := by
+    have h : (1 - sR04 / 2 + 5)
+        = ((1 - sR04 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add4_ne0
+  have e5 : Complex.Gamma (1 - sR04 / 2 + 6)
+      = (1 - sR04 / 2 + 5)
+        * Complex.Gamma (1 - sR04 / 2 + 5) := by
+    have h : (1 - sR04 / 2 + 6)
+        = ((1 - sR04 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add5_ne0
+  have e6 : Complex.Gamma (1 - sR04 / 2 + 7)
+      = (1 - sR04 / 2 + 6)
+        * Complex.Gamma (1 - sR04 / 2 + 6) := by
+    have h : (1 - sR04 / 2 + 7)
+        = ((1 - sR04 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add6_ne0
+  have e7 : Complex.Gamma (1 - sR04 / 2 + 8)
+      = (1 - sR04 / 2 + 7)
+        * Complex.Gamma (1 - sR04 / 2 + 7) := by
+    have h : (1 - sR04 / 2 + 8)
+        = ((1 - sR04 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add7_ne0
+  have e8 : Complex.Gamma (1 - sR04 / 2 + 9)
+      = (1 - sR04 / 2 + 8)
+        * Complex.Gamma (1 - sR04 / 2 + 8) := by
+    have h : (1 - sR04 / 2 + 9)
+        = ((1 - sR04 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add8_ne0
+  have e9 : Complex.Gamma (1 - sR04 / 2 + 10)
+      = (1 - sR04 / 2 + 9)
+        * Complex.Gamma (1 - sR04 / 2 + 9) := by
+    have h : (1 - sR04 / 2 + 10)
+        = ((1 - sR04 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add9_ne0
+  have e10 : Complex.Gamma (1 - sR04 / 2 + 11)
+      = (1 - sR04 / 2 + 10)
+        * Complex.Gamma (1 - sR04 / 2 + 10) := by
+    have h : (1 - sR04 / 2 + 11)
+        = ((1 - sR04 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add10_ne0
+  have e11 : Complex.Gamma (1 - sR04 / 2 + 12)
+      = (1 - sR04 / 2 + 11)
+        * Complex.Gamma (1 - sR04 / 2 + 11) := by
+    have h : (1 - sR04 / 2 + 12)
+        = ((1 - sR04 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR04_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR04 / 2 + 1)‖
+      = ‖1 - sR04 / 2‖
+        * ‖Complex.Gamma (1 - sR04 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR04 / 2 + 2)‖
+      = ‖1 - sR04 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR04 / 2 + 3)‖
+      = ‖1 - sR04 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR04 / 2 + 4)‖
+      = ‖1 - sR04 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR04 / 2 + 5)‖
+      = ‖1 - sR04 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR04 / 2 + 6)‖
+      = ‖1 - sR04 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR04 / 2 + 7)‖
+      = ‖1 - sR04 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR04 / 2 + 8)‖
+      = ‖1 - sR04 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR04 / 2 + 9)‖
+      = ‖1 - sR04 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR04 / 2 + 10)‖
+      = ‖1 - sR04 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR04 / 2 + 11)‖
+      = ‖1 - sR04 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR04 / 2 + 12)‖
+      = ‖1 - sR04 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR04 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR04 / 2 + 12)‖
+      = ‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+        * (‖1 - sR04 / 2‖
+          * ‖Complex.Gamma (1 - sR04 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.26 : ℝ) * 1.59
+      ≤ ‖1 - sR04 / 2 + 1‖ * ‖1 - sR04 / 2‖ :=
+    mul_le_mul norm_zUpR04_1_ge norm_zUpR04_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.12 : ℝ) * (2.26 * (1.59))
+      ≤ ‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖)) :=
+    mul_le_mul norm_zUpR04_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.04 : ℝ) * (3.12 * (2.26 * (1.59)))
+      ≤ ‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))) :=
+    mul_le_mul norm_zUpR04_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.99 : ℝ) * (4.04 * (3.12 * (2.26 * (1.59))))
+      ≤ ‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖)))) :=
+    mul_le_mul norm_zUpR04_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.96 : ℝ) * (4.99 * (4.04 * (3.12 * (2.26 * (1.59)))))
+      ≤ ‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))) :=
+    mul_le_mul norm_zUpR04_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.94 : ℝ) * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59))))))
+      ≤ ‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖)))))) :=
+    mul_le_mul norm_zUpR04_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.92 : ℝ) * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59)))))))
+      ≤ ‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))))) :=
+    mul_le_mul norm_zUpR04_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.9 : ℝ) * (7.92 * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59))))))))
+      ≤ ‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR04_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.89 : ℝ) * (8.9 * (7.92 * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59)))))))))
+      ≤ ‖1 - sR04 / 2 + 9‖ * (‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR04_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.88 : ℝ) * (9.89 * (8.9 * (7.92 * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59))))))))))
+      ≤ ‖1 - sR04 / 2 + 10‖ * (‖1 - sR04 / 2 + 9‖ * (‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR04_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.88 : ℝ) * (10.88 * (9.89 * (8.9 * (7.92 * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59)))))))))))
+      ≤ ‖1 - sR04 / 2 + 11‖ * (‖1 - sR04 / 2 + 10‖ * (‖1 - sR04 / 2 + 9‖ * (‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR04_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (840000000 : ℝ)
+      ≤ (11.88 : ℝ) * (10.88 * (9.89 * (8.9 * (7.92 * (6.94 * (5.96 * (4.99 * (4.04 * (3.12 * (2.26 * (1.59))))))))))) := by
+    norm_num
+  have hD_ge : (840000000 : ℝ)
+      ≤ ‖1 - sR04 / 2 + 11‖ * (‖1 - sR04 / 2 + 10‖ * (‖1 - sR04 / 2 + 9‖ * (‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR04 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR04 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR04_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR04 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR04 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR04 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR04 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR04 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR04 / 2)‖ = ‖Complex.Gamma (1 - sR04 / 2 + 12)‖ ≤ 313000000`, `D ≤ 840000000`.
+  have hD_mul : (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR04 / 2)‖
+      = ‖Complex.Gamma (1 - sR04 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR04 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR04 / 2)‖
+        * (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR04 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR04 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR04 / 2)‖
+      ≤ 313000000 / (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR04 / 2 + 11‖
+        * (‖1 - sR04 / 2 + 10‖
+        * (‖1 - sR04 / 2 + 9‖
+        * (‖1 - sR04 / 2 + 8‖
+        * (‖1 - sR04 / 2 + 7‖
+        * (‖1 - sR04 / 2 + 6‖
+        * (‖1 - sR04 / 2 + 5‖
+        * (‖1 - sR04 / 2 + 4‖
+        * (‖1 - sR04 / 2 + 3‖
+        * (‖1 - sR04 / 2 + 2‖
+        * (‖1 - sR04 / 2 + 1‖
+          * ‖1 - sR04 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.5 * 840000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR04 / 2 + 11‖ * (‖1 - sR04 / 2 + 10‖ * (‖1 - sR04 / 2 + 9‖ * (‖1 - sR04 / 2 + 8‖ * (‖1 - sR04 / 2 + 7‖ * (‖1 - sR04 / 2 + 6‖ * (‖1 - sR04 / 2 + 5‖ * (‖1 - sR04 / 2 + 4‖ * (‖1 - sR04 / 2 + 3‖ * (‖1 - sR04 / 2 + 2‖ * (‖1 - sR04 / 2 + 1‖ * (‖1 - sR04 / 2‖))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R04GammaUpper
+
+namespace R05GammaUpper
+
+/-- The R05 `s`-plane center: `s = 1/2 + I·z` at `z = R05.center`. -/
+noncomputable def sR05 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R05.center
+
+/-- `R05.center = -0.75 + 0.105·I` (from `R05_x0/x1/y0/y1`). -/
+theorem R05_center_eq :
+    CentralCoverAssembly.R05.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R05_x0, CentralCoverAssembly.R05_x1,
+      CentralCoverAssembly.R05_y0, CentralCoverAssembly.R05_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R05_x0, CentralCoverAssembly.R05_x1,
+      CentralCoverAssembly.R05_y0, CentralCoverAssembly.R05_y1]
+    simp
+    norm_num
+
+/-- `Re sR05 = 0.395`. -/
+theorem sR05_re : sR05.re = 0.395 := by
+  unfold sR05
+  rw [R05_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR05 = -0.75`. -/
+theorem sR05_im : sR05.im = -0.75 := by
+  unfold sR05
+  rw [R05_center_eq]
+  simp
+
+/-- `Re(1 - sR05/2) = 0.8025`. -/
+theorem zUpR05_re : (1 - sR05 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR05_re]
+  norm_num
+
+/-- `Im(1 - sR05/2) = 0.375`. -/
+theorem zUpR05_im : (1 - sR05 / 2).im = 0.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR05_im]
+  norm_num
+
+/-- Denominator floor `c0 = 0.88 ≤ ‖1 - sR05 / 2‖`. -/
+theorem norm_zUpR05_0_ge :
+    (0.88 : ℝ) ≤ ‖1 - sR05 / 2‖ := by
+  have hsq : (0.88 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR05_re, zUpR05_im]
+    norm_num
+  calc (0.88 : ℝ) = Real.sqrt ((0.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.84 ≤ ‖1 - sR05 / 2 + 1‖`. -/
+theorem norm_zUpR05_1_ge :
+    (1.84 : ℝ) ≤ ‖1 - sR05 / 2 + 1‖ := by
+  have hre : (1 - sR05 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR05 / 2 + 1).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.one_im]
+    norm_num
+  have hsq : (1.84 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.84 : ℝ) = Real.sqrt ((1.84 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.82 ≤ ‖1 - sR05 / 2 + 2‖`. -/
+theorem norm_zUpR05_2_ge :
+    (2.82 : ℝ) ≤ ‖1 - sR05 / 2 + 2‖ := by
+  have hre : (1 - sR05 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 2).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.82 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.82 : ℝ) = Real.sqrt ((2.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.82 ≤ ‖1 - sR05 / 2 + 3‖`. -/
+theorem norm_zUpR05_3_ge :
+    (3.82 : ℝ) ≤ ‖1 - sR05 / 2 + 3‖ := by
+  have hre : (1 - sR05 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 3).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.82 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.82 : ℝ) = Real.sqrt ((3.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.81 ≤ ‖1 - sR05 / 2 + 4‖`. -/
+theorem norm_zUpR05_4_ge :
+    (4.81 : ℝ) ≤ ‖1 - sR05 / 2 + 4‖ := by
+  have hre : (1 - sR05 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 4).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.81 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.81 : ℝ) = Real.sqrt ((4.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.81 ≤ ‖1 - sR05 / 2 + 5‖`. -/
+theorem norm_zUpR05_5_ge :
+    (5.81 : ℝ) ≤ ‖1 - sR05 / 2 + 5‖ := by
+  have hre : (1 - sR05 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 5).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.81 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.81 : ℝ) = Real.sqrt ((5.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.81 ≤ ‖1 - sR05 / 2 + 6‖`. -/
+theorem norm_zUpR05_6_ge :
+    (6.81 : ℝ) ≤ ‖1 - sR05 / 2 + 6‖ := by
+  have hre : (1 - sR05 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 6).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.81 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.81 : ℝ) = Real.sqrt ((6.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.81 ≤ ‖1 - sR05 / 2 + 7‖`. -/
+theorem norm_zUpR05_7_ge :
+    (7.81 : ℝ) ≤ ‖1 - sR05 / 2 + 7‖ := by
+  have hre : (1 - sR05 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 7).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.81 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.81 : ℝ) = Real.sqrt ((7.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.81 ≤ ‖1 - sR05 / 2 + 8‖`. -/
+theorem norm_zUpR05_8_ge :
+    (8.81 : ℝ) ≤ ‖1 - sR05 / 2 + 8‖ := by
+  have hre : (1 - sR05 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 8).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.81 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.81 : ℝ) = Real.sqrt ((8.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.8 ≤ ‖1 - sR05 / 2 + 9‖`. -/
+theorem norm_zUpR05_9_ge :
+    (9.8 : ℝ) ≤ ‖1 - sR05 / 2 + 9‖ := by
+  have hre : (1 - sR05 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 9).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.8 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.8 : ℝ) = Real.sqrt ((9.8 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.8 ≤ ‖1 - sR05 / 2 + 10‖`. -/
+theorem norm_zUpR05_10_ge :
+    (10.8 : ℝ) ≤ ‖1 - sR05 / 2 + 10‖ := by
+  have hre : (1 - sR05 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 10).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.8 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.8 : ℝ) = Real.sqrt ((10.8 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.8 ≤ ‖1 - sR05 / 2 + 11‖`. -/
+theorem norm_zUpR05_11_ge :
+    (11.8 : ℝ) ≤ ‖1 - sR05 / 2 + 11‖ := by
+  have hre : (1 - sR05 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR05 / 2 + 11).im = 0.375 := by
+    simp only [Complex.add_im, zUpR05_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.8 : ℝ) ^ 2 ≤ ‖1 - sR05 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.8 : ℝ) = Real.sqrt ((11.8 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR05 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR05 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR05_ne0 : (1 - sR05 / 2) ≠ 0 := by
+  have hre : (1 - sR05 / 2).re = 0.8025 := zUpR05_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add1_ne0 : (1 - sR05 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add2_ne0 : (1 - sR05 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add3_ne0 : (1 - sR05 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add4_ne0 : (1 - sR05 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add5_ne0 : (1 - sR05 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add6_ne0 : (1 - sR05 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add7_ne0 : (1 - sR05 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add8_ne0 : (1 - sR05 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add9_ne0 : (1 - sR05 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add10_ne0 : (1 - sR05 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR05_add11_ne0 : (1 - sR05 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR05 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R05 corner:
+`‖Complex.Gamma (1 - sR05 / 2)‖ ≤ 1.5` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R05 :
+    ‖Complex.Gamma (1 - sR05 / 2)‖ ≤ 1.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR05 / 2 + 1)
+      = (1 - sR05 / 2) * Complex.Gamma (1 - sR05 / 2) :=
+    Complex.Gamma_add_one _ zUpR05_ne0
+  have e1 : Complex.Gamma (1 - sR05 / 2 + 2)
+      = (1 - sR05 / 2 + 1)
+        * Complex.Gamma (1 - sR05 / 2 + 1) := by
+    have h : (1 - sR05 / 2 + 2)
+        = ((1 - sR05 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add1_ne0
+  have e2 : Complex.Gamma (1 - sR05 / 2 + 3)
+      = (1 - sR05 / 2 + 2)
+        * Complex.Gamma (1 - sR05 / 2 + 2) := by
+    have h : (1 - sR05 / 2 + 3)
+        = ((1 - sR05 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add2_ne0
+  have e3 : Complex.Gamma (1 - sR05 / 2 + 4)
+      = (1 - sR05 / 2 + 3)
+        * Complex.Gamma (1 - sR05 / 2 + 3) := by
+    have h : (1 - sR05 / 2 + 4)
+        = ((1 - sR05 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add3_ne0
+  have e4 : Complex.Gamma (1 - sR05 / 2 + 5)
+      = (1 - sR05 / 2 + 4)
+        * Complex.Gamma (1 - sR05 / 2 + 4) := by
+    have h : (1 - sR05 / 2 + 5)
+        = ((1 - sR05 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add4_ne0
+  have e5 : Complex.Gamma (1 - sR05 / 2 + 6)
+      = (1 - sR05 / 2 + 5)
+        * Complex.Gamma (1 - sR05 / 2 + 5) := by
+    have h : (1 - sR05 / 2 + 6)
+        = ((1 - sR05 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add5_ne0
+  have e6 : Complex.Gamma (1 - sR05 / 2 + 7)
+      = (1 - sR05 / 2 + 6)
+        * Complex.Gamma (1 - sR05 / 2 + 6) := by
+    have h : (1 - sR05 / 2 + 7)
+        = ((1 - sR05 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add6_ne0
+  have e7 : Complex.Gamma (1 - sR05 / 2 + 8)
+      = (1 - sR05 / 2 + 7)
+        * Complex.Gamma (1 - sR05 / 2 + 7) := by
+    have h : (1 - sR05 / 2 + 8)
+        = ((1 - sR05 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add7_ne0
+  have e8 : Complex.Gamma (1 - sR05 / 2 + 9)
+      = (1 - sR05 / 2 + 8)
+        * Complex.Gamma (1 - sR05 / 2 + 8) := by
+    have h : (1 - sR05 / 2 + 9)
+        = ((1 - sR05 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add8_ne0
+  have e9 : Complex.Gamma (1 - sR05 / 2 + 10)
+      = (1 - sR05 / 2 + 9)
+        * Complex.Gamma (1 - sR05 / 2 + 9) := by
+    have h : (1 - sR05 / 2 + 10)
+        = ((1 - sR05 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add9_ne0
+  have e10 : Complex.Gamma (1 - sR05 / 2 + 11)
+      = (1 - sR05 / 2 + 10)
+        * Complex.Gamma (1 - sR05 / 2 + 10) := by
+    have h : (1 - sR05 / 2 + 11)
+        = ((1 - sR05 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add10_ne0
+  have e11 : Complex.Gamma (1 - sR05 / 2 + 12)
+      = (1 - sR05 / 2 + 11)
+        * Complex.Gamma (1 - sR05 / 2 + 11) := by
+    have h : (1 - sR05 / 2 + 12)
+        = ((1 - sR05 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR05_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR05 / 2 + 1)‖
+      = ‖1 - sR05 / 2‖
+        * ‖Complex.Gamma (1 - sR05 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR05 / 2 + 2)‖
+      = ‖1 - sR05 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR05 / 2 + 3)‖
+      = ‖1 - sR05 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR05 / 2 + 4)‖
+      = ‖1 - sR05 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR05 / 2 + 5)‖
+      = ‖1 - sR05 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR05 / 2 + 6)‖
+      = ‖1 - sR05 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR05 / 2 + 7)‖
+      = ‖1 - sR05 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR05 / 2 + 8)‖
+      = ‖1 - sR05 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR05 / 2 + 9)‖
+      = ‖1 - sR05 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR05 / 2 + 10)‖
+      = ‖1 - sR05 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR05 / 2 + 11)‖
+      = ‖1 - sR05 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR05 / 2 + 12)‖
+      = ‖1 - sR05 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR05 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR05 / 2 + 12)‖
+      = ‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+        * (‖1 - sR05 / 2‖
+          * ‖Complex.Gamma (1 - sR05 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.84 : ℝ) * 0.88
+      ≤ ‖1 - sR05 / 2 + 1‖ * ‖1 - sR05 / 2‖ :=
+    mul_le_mul norm_zUpR05_1_ge norm_zUpR05_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.82 : ℝ) * (1.84 * (0.88))
+      ≤ ‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖)) :=
+    mul_le_mul norm_zUpR05_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.82 : ℝ) * (2.82 * (1.84 * (0.88)))
+      ≤ ‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))) :=
+    mul_le_mul norm_zUpR05_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.81 : ℝ) * (3.82 * (2.82 * (1.84 * (0.88))))
+      ≤ ‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖)))) :=
+    mul_le_mul norm_zUpR05_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.81 : ℝ) * (4.81 * (3.82 * (2.82 * (1.84 * (0.88)))))
+      ≤ ‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))) :=
+    mul_le_mul norm_zUpR05_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.81 : ℝ) * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88))))))
+      ≤ ‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖)))))) :=
+    mul_le_mul norm_zUpR05_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.81 : ℝ) * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88)))))))
+      ≤ ‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))))) :=
+    mul_le_mul norm_zUpR05_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.81 : ℝ) * (7.81 * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88))))))))
+      ≤ ‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR05_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.8 : ℝ) * (8.81 * (7.81 * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88)))))))))
+      ≤ ‖1 - sR05 / 2 + 9‖ * (‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR05_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.8 : ℝ) * (9.8 * (8.81 * (7.81 * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88))))))))))
+      ≤ ‖1 - sR05 / 2 + 10‖ * (‖1 - sR05 / 2 + 9‖ * (‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR05_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.8 : ℝ) * (10.8 * (9.8 * (8.81 * (7.81 * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88)))))))))))
+      ≤ ‖1 - sR05 / 2 + 11‖ * (‖1 - sR05 / 2 + 10‖ * (‖1 - sR05 / 2 + 9‖ * (‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR05_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (280000000 : ℝ)
+      ≤ (11.8 : ℝ) * (10.8 * (9.8 * (8.81 * (7.81 * (6.81 * (5.81 * (4.81 * (3.82 * (2.82 * (1.84 * (0.88))))))))))) := by
+    norm_num
+  have hD_ge : (280000000 : ℝ)
+      ≤ ‖1 - sR05 / 2 + 11‖ * (‖1 - sR05 / 2 + 10‖ * (‖1 - sR05 / 2 + 9‖ * (‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR05 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR05 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR05_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR05 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR05 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR05 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR05 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR05 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR05 / 2)‖ = ‖Complex.Gamma (1 - sR05 / 2 + 12)‖ ≤ 313000000`, `D ≤ 280000000`.
+  have hD_mul : (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR05 / 2)‖
+      = ‖Complex.Gamma (1 - sR05 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR05 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR05 / 2)‖
+        * (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR05 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR05 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR05 / 2)‖
+      ≤ 313000000 / (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 1.5 * (‖1 - sR05 / 2 + 11‖
+        * (‖1 - sR05 / 2 + 10‖
+        * (‖1 - sR05 / 2 + 9‖
+        * (‖1 - sR05 / 2 + 8‖
+        * (‖1 - sR05 / 2 + 7‖
+        * (‖1 - sR05 / 2 + 6‖
+        * (‖1 - sR05 / 2 + 5‖
+        * (‖1 - sR05 / 2 + 4‖
+        * (‖1 - sR05 / 2 + 3‖
+        * (‖1 - sR05 / 2 + 2‖
+        * (‖1 - sR05 / 2 + 1‖
+          * ‖1 - sR05 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 1.5 * 280000000 := by norm_num
+      _ ≤ 1.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR05 / 2 + 11‖ * (‖1 - sR05 / 2 + 10‖ * (‖1 - sR05 / 2 + 9‖ * (‖1 - sR05 / 2 + 8‖ * (‖1 - sR05 / 2 + 7‖ * (‖1 - sR05 / 2 + 6‖ * (‖1 - sR05 / 2 + 5‖ * (‖1 - sR05 / 2 + 4‖ * (‖1 - sR05 / 2 + 3‖ * (‖1 - sR05 / 2 + 2‖ * (‖1 - sR05 / 2 + 1‖ * (‖1 - sR05 / 2‖))))))))))))
+      ≤ 1.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R05GammaUpper
+
+namespace R06GammaUpper
+
+/-- The R06 `s`-plane center: `s = 1/2 + I·z` at `z = R06.center`. -/
+noncomputable def sR06 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R06.center
+
+/-- `R06.center = 1.25 + 0.105·I` (from `R06_x0/x1/y0/y1`). -/
+theorem R06_center_eq :
+    CentralCoverAssembly.R06.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R06_x0, CentralCoverAssembly.R06_x1,
+      CentralCoverAssembly.R06_y0, CentralCoverAssembly.R06_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R06_x0, CentralCoverAssembly.R06_x1,
+      CentralCoverAssembly.R06_y0, CentralCoverAssembly.R06_y1]
+    simp
+    norm_num
+
+/-- `Re sR06 = 0.395`. -/
+theorem sR06_re : sR06.re = 0.395 := by
+  unfold sR06
+  rw [R06_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR06 = 1.25`. -/
+theorem sR06_im : sR06.im = 1.25 := by
+  unfold sR06
+  rw [R06_center_eq]
+  simp
+
+/-- `Re(1 - sR06/2) = 0.8025`. -/
+theorem zUpR06_re : (1 - sR06 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR06_re]
+  norm_num
+
+/-- `Im(1 - sR06/2) = -0.625`. -/
+theorem zUpR06_im : (1 - sR06 / 2).im = -0.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR06_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.01 ≤ ‖1 - sR06 / 2‖`. -/
+theorem norm_zUpR06_0_ge :
+    (1.01 : ℝ) ≤ ‖1 - sR06 / 2‖ := by
+  have hsq : (1.01 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR06_re, zUpR06_im]
+    norm_num
+  calc (1.01 : ℝ) = Real.sqrt ((1.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.9 ≤ ‖1 - sR06 / 2 + 1‖`. -/
+theorem norm_zUpR06_1_ge :
+    (1.9 : ℝ) ≤ ‖1 - sR06 / 2 + 1‖ := by
+  have hre : (1 - sR06 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR06 / 2 + 1).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.one_im]
+    norm_num
+  have hsq : (1.9 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.9 : ℝ) = Real.sqrt ((1.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.87 ≤ ‖1 - sR06 / 2 + 2‖`. -/
+theorem norm_zUpR06_2_ge :
+    (2.87 : ℝ) ≤ ‖1 - sR06 / 2 + 2‖ := by
+  have hre : (1 - sR06 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 2).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.87 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.87 : ℝ) = Real.sqrt ((2.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.85 ≤ ‖1 - sR06 / 2 + 3‖`. -/
+theorem norm_zUpR06_3_ge :
+    (3.85 : ℝ) ≤ ‖1 - sR06 / 2 + 3‖ := by
+  have hre : (1 - sR06 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 3).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.85 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.85 : ℝ) = Real.sqrt ((3.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.84 ≤ ‖1 - sR06 / 2 + 4‖`. -/
+theorem norm_zUpR06_4_ge :
+    (4.84 : ℝ) ≤ ‖1 - sR06 / 2 + 4‖ := by
+  have hre : (1 - sR06 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 4).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.84 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.84 : ℝ) = Real.sqrt ((4.84 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.83 ≤ ‖1 - sR06 / 2 + 5‖`. -/
+theorem norm_zUpR06_5_ge :
+    (5.83 : ℝ) ≤ ‖1 - sR06 / 2 + 5‖ := by
+  have hre : (1 - sR06 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 5).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.83 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.83 : ℝ) = Real.sqrt ((5.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.83 ≤ ‖1 - sR06 / 2 + 6‖`. -/
+theorem norm_zUpR06_6_ge :
+    (6.83 : ℝ) ≤ ‖1 - sR06 / 2 + 6‖ := by
+  have hre : (1 - sR06 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 6).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.83 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.83 : ℝ) = Real.sqrt ((6.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.82 ≤ ‖1 - sR06 / 2 + 7‖`. -/
+theorem norm_zUpR06_7_ge :
+    (7.82 : ℝ) ≤ ‖1 - sR06 / 2 + 7‖ := by
+  have hre : (1 - sR06 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 7).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.82 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.82 : ℝ) = Real.sqrt ((7.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.82 ≤ ‖1 - sR06 / 2 + 8‖`. -/
+theorem norm_zUpR06_8_ge :
+    (8.82 : ℝ) ≤ ‖1 - sR06 / 2 + 8‖ := by
+  have hre : (1 - sR06 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 8).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.82 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.82 : ℝ) = Real.sqrt ((8.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.82 ≤ ‖1 - sR06 / 2 + 9‖`. -/
+theorem norm_zUpR06_9_ge :
+    (9.82 : ℝ) ≤ ‖1 - sR06 / 2 + 9‖ := by
+  have hre : (1 - sR06 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 9).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.82 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.82 : ℝ) = Real.sqrt ((9.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.82 ≤ ‖1 - sR06 / 2 + 10‖`. -/
+theorem norm_zUpR06_10_ge :
+    (10.82 : ℝ) ≤ ‖1 - sR06 / 2 + 10‖ := by
+  have hre : (1 - sR06 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 10).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.82 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.82 : ℝ) = Real.sqrt ((10.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.81 ≤ ‖1 - sR06 / 2 + 11‖`. -/
+theorem norm_zUpR06_11_ge :
+    (11.81 : ℝ) ≤ ‖1 - sR06 / 2 + 11‖ := by
+  have hre : (1 - sR06 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR06 / 2 + 11).im = -0.625 := by
+    simp only [Complex.add_im, zUpR06_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.81 : ℝ) ^ 2 ≤ ‖1 - sR06 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.81 : ℝ) = Real.sqrt ((11.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR06 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR06 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR06_ne0 : (1 - sR06 / 2) ≠ 0 := by
+  have hre : (1 - sR06 / 2).re = 0.8025 := zUpR06_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add1_ne0 : (1 - sR06 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add2_ne0 : (1 - sR06 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add3_ne0 : (1 - sR06 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add4_ne0 : (1 - sR06 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add5_ne0 : (1 - sR06 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add6_ne0 : (1 - sR06 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add7_ne0 : (1 - sR06 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add8_ne0 : (1 - sR06 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add9_ne0 : (1 - sR06 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add10_ne0 : (1 - sR06 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR06_add11_ne0 : (1 - sR06 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR06 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R06 corner:
+`‖Complex.Gamma (1 - sR06 / 2)‖ ≤ 1.2` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R06 :
+    ‖Complex.Gamma (1 - sR06 / 2)‖ ≤ 1.2 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR06 / 2 + 1)
+      = (1 - sR06 / 2) * Complex.Gamma (1 - sR06 / 2) :=
+    Complex.Gamma_add_one _ zUpR06_ne0
+  have e1 : Complex.Gamma (1 - sR06 / 2 + 2)
+      = (1 - sR06 / 2 + 1)
+        * Complex.Gamma (1 - sR06 / 2 + 1) := by
+    have h : (1 - sR06 / 2 + 2)
+        = ((1 - sR06 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add1_ne0
+  have e2 : Complex.Gamma (1 - sR06 / 2 + 3)
+      = (1 - sR06 / 2 + 2)
+        * Complex.Gamma (1 - sR06 / 2 + 2) := by
+    have h : (1 - sR06 / 2 + 3)
+        = ((1 - sR06 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add2_ne0
+  have e3 : Complex.Gamma (1 - sR06 / 2 + 4)
+      = (1 - sR06 / 2 + 3)
+        * Complex.Gamma (1 - sR06 / 2 + 3) := by
+    have h : (1 - sR06 / 2 + 4)
+        = ((1 - sR06 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add3_ne0
+  have e4 : Complex.Gamma (1 - sR06 / 2 + 5)
+      = (1 - sR06 / 2 + 4)
+        * Complex.Gamma (1 - sR06 / 2 + 4) := by
+    have h : (1 - sR06 / 2 + 5)
+        = ((1 - sR06 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add4_ne0
+  have e5 : Complex.Gamma (1 - sR06 / 2 + 6)
+      = (1 - sR06 / 2 + 5)
+        * Complex.Gamma (1 - sR06 / 2 + 5) := by
+    have h : (1 - sR06 / 2 + 6)
+        = ((1 - sR06 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add5_ne0
+  have e6 : Complex.Gamma (1 - sR06 / 2 + 7)
+      = (1 - sR06 / 2 + 6)
+        * Complex.Gamma (1 - sR06 / 2 + 6) := by
+    have h : (1 - sR06 / 2 + 7)
+        = ((1 - sR06 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add6_ne0
+  have e7 : Complex.Gamma (1 - sR06 / 2 + 8)
+      = (1 - sR06 / 2 + 7)
+        * Complex.Gamma (1 - sR06 / 2 + 7) := by
+    have h : (1 - sR06 / 2 + 8)
+        = ((1 - sR06 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add7_ne0
+  have e8 : Complex.Gamma (1 - sR06 / 2 + 9)
+      = (1 - sR06 / 2 + 8)
+        * Complex.Gamma (1 - sR06 / 2 + 8) := by
+    have h : (1 - sR06 / 2 + 9)
+        = ((1 - sR06 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add8_ne0
+  have e9 : Complex.Gamma (1 - sR06 / 2 + 10)
+      = (1 - sR06 / 2 + 9)
+        * Complex.Gamma (1 - sR06 / 2 + 9) := by
+    have h : (1 - sR06 / 2 + 10)
+        = ((1 - sR06 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add9_ne0
+  have e10 : Complex.Gamma (1 - sR06 / 2 + 11)
+      = (1 - sR06 / 2 + 10)
+        * Complex.Gamma (1 - sR06 / 2 + 10) := by
+    have h : (1 - sR06 / 2 + 11)
+        = ((1 - sR06 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add10_ne0
+  have e11 : Complex.Gamma (1 - sR06 / 2 + 12)
+      = (1 - sR06 / 2 + 11)
+        * Complex.Gamma (1 - sR06 / 2 + 11) := by
+    have h : (1 - sR06 / 2 + 12)
+        = ((1 - sR06 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR06_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR06 / 2 + 1)‖
+      = ‖1 - sR06 / 2‖
+        * ‖Complex.Gamma (1 - sR06 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR06 / 2 + 2)‖
+      = ‖1 - sR06 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR06 / 2 + 3)‖
+      = ‖1 - sR06 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR06 / 2 + 4)‖
+      = ‖1 - sR06 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR06 / 2 + 5)‖
+      = ‖1 - sR06 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR06 / 2 + 6)‖
+      = ‖1 - sR06 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR06 / 2 + 7)‖
+      = ‖1 - sR06 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR06 / 2 + 8)‖
+      = ‖1 - sR06 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR06 / 2 + 9)‖
+      = ‖1 - sR06 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR06 / 2 + 10)‖
+      = ‖1 - sR06 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR06 / 2 + 11)‖
+      = ‖1 - sR06 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR06 / 2 + 12)‖
+      = ‖1 - sR06 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR06 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR06 / 2 + 12)‖
+      = ‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+        * (‖1 - sR06 / 2‖
+          * ‖Complex.Gamma (1 - sR06 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.9 : ℝ) * 1.01
+      ≤ ‖1 - sR06 / 2 + 1‖ * ‖1 - sR06 / 2‖ :=
+    mul_le_mul norm_zUpR06_1_ge norm_zUpR06_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.87 : ℝ) * (1.9 * (1.01))
+      ≤ ‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖)) :=
+    mul_le_mul norm_zUpR06_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.85 : ℝ) * (2.87 * (1.9 * (1.01)))
+      ≤ ‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))) :=
+    mul_le_mul norm_zUpR06_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.84 : ℝ) * (3.85 * (2.87 * (1.9 * (1.01))))
+      ≤ ‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖)))) :=
+    mul_le_mul norm_zUpR06_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.83 : ℝ) * (4.84 * (3.85 * (2.87 * (1.9 * (1.01)))))
+      ≤ ‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))) :=
+    mul_le_mul norm_zUpR06_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.83 : ℝ) * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01))))))
+      ≤ ‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖)))))) :=
+    mul_le_mul norm_zUpR06_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.82 : ℝ) * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01)))))))
+      ≤ ‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))))) :=
+    mul_le_mul norm_zUpR06_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.82 : ℝ) * (7.82 * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01))))))))
+      ≤ ‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR06_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.82 : ℝ) * (8.82 * (7.82 * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01)))))))))
+      ≤ ‖1 - sR06 / 2 + 9‖ * (‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR06_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.82 : ℝ) * (9.82 * (8.82 * (7.82 * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01))))))))))
+      ≤ ‖1 - sR06 / 2 + 10‖ * (‖1 - sR06 / 2 + 9‖ * (‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR06_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.81 : ℝ) * (10.82 * (9.82 * (8.82 * (7.82 * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01)))))))))))
+      ≤ ‖1 - sR06 / 2 + 11‖ * (‖1 - sR06 / 2 + 10‖ * (‖1 - sR06 / 2 + 9‖ * (‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR06_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (350000000 : ℝ)
+      ≤ (11.81 : ℝ) * (10.82 * (9.82 * (8.82 * (7.82 * (6.83 * (5.83 * (4.84 * (3.85 * (2.87 * (1.9 * (1.01))))))))))) := by
+    norm_num
+  have hD_ge : (350000000 : ℝ)
+      ≤ ‖1 - sR06 / 2 + 11‖ * (‖1 - sR06 / 2 + 10‖ * (‖1 - sR06 / 2 + 9‖ * (‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR06 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR06 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR06_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR06 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR06 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR06 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR06 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR06 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR06 / 2)‖ = ‖Complex.Gamma (1 - sR06 / 2 + 12)‖ ≤ 313000000`, `D ≤ 350000000`.
+  have hD_mul : (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR06 / 2)‖
+      = ‖Complex.Gamma (1 - sR06 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR06 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR06 / 2)‖
+        * (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR06 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR06 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR06 / 2)‖
+      ≤ 313000000 / (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 1.2 * (‖1 - sR06 / 2 + 11‖
+        * (‖1 - sR06 / 2 + 10‖
+        * (‖1 - sR06 / 2 + 9‖
+        * (‖1 - sR06 / 2 + 8‖
+        * (‖1 - sR06 / 2 + 7‖
+        * (‖1 - sR06 / 2 + 6‖
+        * (‖1 - sR06 / 2 + 5‖
+        * (‖1 - sR06 / 2 + 4‖
+        * (‖1 - sR06 / 2 + 3‖
+        * (‖1 - sR06 / 2 + 2‖
+        * (‖1 - sR06 / 2 + 1‖
+          * ‖1 - sR06 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 1.2 * 350000000 := by norm_num
+      _ ≤ 1.2 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR06 / 2 + 11‖ * (‖1 - sR06 / 2 + 10‖ * (‖1 - sR06 / 2 + 9‖ * (‖1 - sR06 / 2 + 8‖ * (‖1 - sR06 / 2 + 7‖ * (‖1 - sR06 / 2 + 6‖ * (‖1 - sR06 / 2 + 5‖ * (‖1 - sR06 / 2 + 4‖ * (‖1 - sR06 / 2 + 3‖ * (‖1 - sR06 / 2 + 2‖ * (‖1 - sR06 / 2 + 1‖ * (‖1 - sR06 / 2‖))))))))))))
+      ≤ 1.2 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R06GammaUpper
+
+namespace R07GammaUpper
+
+/-- The R07 `s`-plane center: `s = 1/2 + I·z` at `z = R07.center`. -/
+noncomputable def sR07 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R07.center
+
+/-- `R07.center = 3.25 + 0.105·I` (from `R07_x0/x1/y0/y1`). -/
+theorem R07_center_eq :
+    CentralCoverAssembly.R07.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R07_x0, CentralCoverAssembly.R07_x1,
+      CentralCoverAssembly.R07_y0, CentralCoverAssembly.R07_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R07_x0, CentralCoverAssembly.R07_x1,
+      CentralCoverAssembly.R07_y0, CentralCoverAssembly.R07_y1]
+    simp
+    norm_num
+
+/-- `Re sR07 = 0.395`. -/
+theorem sR07_re : sR07.re = 0.395 := by
+  unfold sR07
+  rw [R07_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR07 = 3.25`. -/
+theorem sR07_im : sR07.im = 3.25 := by
+  unfold sR07
+  rw [R07_center_eq]
+  simp
+
+/-- `Re(1 - sR07/2) = 0.8025`. -/
+theorem zUpR07_re : (1 - sR07 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR07_re]
+  norm_num
+
+/-- `Im(1 - sR07/2) = -1.625`. -/
+theorem zUpR07_im : (1 - sR07 / 2).im = -1.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR07_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.81 ≤ ‖1 - sR07 / 2‖`. -/
+theorem norm_zUpR07_0_ge :
+    (1.81 : ℝ) ≤ ‖1 - sR07 / 2‖ := by
+  have hsq : (1.81 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR07_re, zUpR07_im]
+    norm_num
+  calc (1.81 : ℝ) = Real.sqrt ((1.81 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.42 ≤ ‖1 - sR07 / 2 + 1‖`. -/
+theorem norm_zUpR07_1_ge :
+    (2.42 : ℝ) ≤ ‖1 - sR07 / 2 + 1‖ := by
+  have hre : (1 - sR07 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR07 / 2 + 1).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.one_im]
+    norm_num
+  have hsq : (2.42 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.42 : ℝ) = Real.sqrt ((2.42 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.23 ≤ ‖1 - sR07 / 2 + 2‖`. -/
+theorem norm_zUpR07_2_ge :
+    (3.23 : ℝ) ≤ ‖1 - sR07 / 2 + 2‖ := by
+  have hre : (1 - sR07 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 2).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.23 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.23 : ℝ) = Real.sqrt ((3.23 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.13 ≤ ‖1 - sR07 / 2 + 3‖`. -/
+theorem norm_zUpR07_3_ge :
+    (4.13 : ℝ) ≤ ‖1 - sR07 / 2 + 3‖ := by
+  have hre : (1 - sR07 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 3).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.13 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.13 : ℝ) = Real.sqrt ((4.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.06 ≤ ‖1 - sR07 / 2 + 4‖`. -/
+theorem norm_zUpR07_4_ge :
+    (5.06 : ℝ) ≤ ‖1 - sR07 / 2 + 4‖ := by
+  have hre : (1 - sR07 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 4).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.06 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.06 : ℝ) = Real.sqrt ((5.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.02 ≤ ‖1 - sR07 / 2 + 5‖`. -/
+theorem norm_zUpR07_5_ge :
+    (6.02 : ℝ) ≤ ‖1 - sR07 / 2 + 5‖ := by
+  have hre : (1 - sR07 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 5).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.02 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.02 : ℝ) = Real.sqrt ((6.02 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.99 ≤ ‖1 - sR07 / 2 + 6‖`. -/
+theorem norm_zUpR07_6_ge :
+    (6.99 : ℝ) ≤ ‖1 - sR07 / 2 + 6‖ := by
+  have hre : (1 - sR07 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 6).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.99 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.99 : ℝ) = Real.sqrt ((6.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.96 ≤ ‖1 - sR07 / 2 + 7‖`. -/
+theorem norm_zUpR07_7_ge :
+    (7.96 : ℝ) ≤ ‖1 - sR07 / 2 + 7‖ := by
+  have hre : (1 - sR07 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 7).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.96 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.96 : ℝ) = Real.sqrt ((7.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.95 ≤ ‖1 - sR07 / 2 + 8‖`. -/
+theorem norm_zUpR07_8_ge :
+    (8.95 : ℝ) ≤ ‖1 - sR07 / 2 + 8‖ := by
+  have hre : (1 - sR07 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 8).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.95 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.95 : ℝ) = Real.sqrt ((8.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.93 ≤ ‖1 - sR07 / 2 + 9‖`. -/
+theorem norm_zUpR07_9_ge :
+    (9.93 : ℝ) ≤ ‖1 - sR07 / 2 + 9‖ := by
+  have hre : (1 - sR07 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 9).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.93 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.93 : ℝ) = Real.sqrt ((9.93 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.92 ≤ ‖1 - sR07 / 2 + 10‖`. -/
+theorem norm_zUpR07_10_ge :
+    (10.92 : ℝ) ≤ ‖1 - sR07 / 2 + 10‖ := by
+  have hre : (1 - sR07 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 10).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.92 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.92 : ℝ) = Real.sqrt ((10.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.91 ≤ ‖1 - sR07 / 2 + 11‖`. -/
+theorem norm_zUpR07_11_ge :
+    (11.91 : ℝ) ≤ ‖1 - sR07 / 2 + 11‖ := by
+  have hre : (1 - sR07 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR07 / 2 + 11).im = -1.625 := by
+    simp only [Complex.add_im, zUpR07_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.91 : ℝ) ^ 2 ≤ ‖1 - sR07 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.91 : ℝ) = Real.sqrt ((11.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR07 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR07 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR07_ne0 : (1 - sR07 / 2) ≠ 0 := by
+  have hre : (1 - sR07 / 2).re = 0.8025 := zUpR07_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add1_ne0 : (1 - sR07 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add2_ne0 : (1 - sR07 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add3_ne0 : (1 - sR07 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add4_ne0 : (1 - sR07 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add5_ne0 : (1 - sR07 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add6_ne0 : (1 - sR07 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add7_ne0 : (1 - sR07 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add8_ne0 : (1 - sR07 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add9_ne0 : (1 - sR07 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add10_ne0 : (1 - sR07 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR07_add11_ne0 : (1 - sR07 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR07 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R07 corner:
+`‖Complex.Gamma (1 - sR07 / 2)‖ ≤ 0.5` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R07 :
+    ‖Complex.Gamma (1 - sR07 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR07 / 2 + 1)
+      = (1 - sR07 / 2) * Complex.Gamma (1 - sR07 / 2) :=
+    Complex.Gamma_add_one _ zUpR07_ne0
+  have e1 : Complex.Gamma (1 - sR07 / 2 + 2)
+      = (1 - sR07 / 2 + 1)
+        * Complex.Gamma (1 - sR07 / 2 + 1) := by
+    have h : (1 - sR07 / 2 + 2)
+        = ((1 - sR07 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add1_ne0
+  have e2 : Complex.Gamma (1 - sR07 / 2 + 3)
+      = (1 - sR07 / 2 + 2)
+        * Complex.Gamma (1 - sR07 / 2 + 2) := by
+    have h : (1 - sR07 / 2 + 3)
+        = ((1 - sR07 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add2_ne0
+  have e3 : Complex.Gamma (1 - sR07 / 2 + 4)
+      = (1 - sR07 / 2 + 3)
+        * Complex.Gamma (1 - sR07 / 2 + 3) := by
+    have h : (1 - sR07 / 2 + 4)
+        = ((1 - sR07 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add3_ne0
+  have e4 : Complex.Gamma (1 - sR07 / 2 + 5)
+      = (1 - sR07 / 2 + 4)
+        * Complex.Gamma (1 - sR07 / 2 + 4) := by
+    have h : (1 - sR07 / 2 + 5)
+        = ((1 - sR07 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add4_ne0
+  have e5 : Complex.Gamma (1 - sR07 / 2 + 6)
+      = (1 - sR07 / 2 + 5)
+        * Complex.Gamma (1 - sR07 / 2 + 5) := by
+    have h : (1 - sR07 / 2 + 6)
+        = ((1 - sR07 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add5_ne0
+  have e6 : Complex.Gamma (1 - sR07 / 2 + 7)
+      = (1 - sR07 / 2 + 6)
+        * Complex.Gamma (1 - sR07 / 2 + 6) := by
+    have h : (1 - sR07 / 2 + 7)
+        = ((1 - sR07 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add6_ne0
+  have e7 : Complex.Gamma (1 - sR07 / 2 + 8)
+      = (1 - sR07 / 2 + 7)
+        * Complex.Gamma (1 - sR07 / 2 + 7) := by
+    have h : (1 - sR07 / 2 + 8)
+        = ((1 - sR07 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add7_ne0
+  have e8 : Complex.Gamma (1 - sR07 / 2 + 9)
+      = (1 - sR07 / 2 + 8)
+        * Complex.Gamma (1 - sR07 / 2 + 8) := by
+    have h : (1 - sR07 / 2 + 9)
+        = ((1 - sR07 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add8_ne0
+  have e9 : Complex.Gamma (1 - sR07 / 2 + 10)
+      = (1 - sR07 / 2 + 9)
+        * Complex.Gamma (1 - sR07 / 2 + 9) := by
+    have h : (1 - sR07 / 2 + 10)
+        = ((1 - sR07 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add9_ne0
+  have e10 : Complex.Gamma (1 - sR07 / 2 + 11)
+      = (1 - sR07 / 2 + 10)
+        * Complex.Gamma (1 - sR07 / 2 + 10) := by
+    have h : (1 - sR07 / 2 + 11)
+        = ((1 - sR07 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add10_ne0
+  have e11 : Complex.Gamma (1 - sR07 / 2 + 12)
+      = (1 - sR07 / 2 + 11)
+        * Complex.Gamma (1 - sR07 / 2 + 11) := by
+    have h : (1 - sR07 / 2 + 12)
+        = ((1 - sR07 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR07_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR07 / 2 + 1)‖
+      = ‖1 - sR07 / 2‖
+        * ‖Complex.Gamma (1 - sR07 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR07 / 2 + 2)‖
+      = ‖1 - sR07 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR07 / 2 + 3)‖
+      = ‖1 - sR07 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR07 / 2 + 4)‖
+      = ‖1 - sR07 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR07 / 2 + 5)‖
+      = ‖1 - sR07 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR07 / 2 + 6)‖
+      = ‖1 - sR07 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR07 / 2 + 7)‖
+      = ‖1 - sR07 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR07 / 2 + 8)‖
+      = ‖1 - sR07 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR07 / 2 + 9)‖
+      = ‖1 - sR07 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR07 / 2 + 10)‖
+      = ‖1 - sR07 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR07 / 2 + 11)‖
+      = ‖1 - sR07 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR07 / 2 + 12)‖
+      = ‖1 - sR07 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR07 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR07 / 2 + 12)‖
+      = ‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+        * (‖1 - sR07 / 2‖
+          * ‖Complex.Gamma (1 - sR07 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.42 : ℝ) * 1.81
+      ≤ ‖1 - sR07 / 2 + 1‖ * ‖1 - sR07 / 2‖ :=
+    mul_le_mul norm_zUpR07_1_ge norm_zUpR07_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.23 : ℝ) * (2.42 * (1.81))
+      ≤ ‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖)) :=
+    mul_le_mul norm_zUpR07_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.13 : ℝ) * (3.23 * (2.42 * (1.81)))
+      ≤ ‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))) :=
+    mul_le_mul norm_zUpR07_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.06 : ℝ) * (4.13 * (3.23 * (2.42 * (1.81))))
+      ≤ ‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖)))) :=
+    mul_le_mul norm_zUpR07_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.02 : ℝ) * (5.06 * (4.13 * (3.23 * (2.42 * (1.81)))))
+      ≤ ‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))) :=
+    mul_le_mul norm_zUpR07_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.99 : ℝ) * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81))))))
+      ≤ ‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖)))))) :=
+    mul_le_mul norm_zUpR07_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.96 : ℝ) * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81)))))))
+      ≤ ‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))))) :=
+    mul_le_mul norm_zUpR07_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.95 : ℝ) * (7.96 * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81))))))))
+      ≤ ‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR07_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.93 : ℝ) * (8.95 * (7.96 * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81)))))))))
+      ≤ ‖1 - sR07 / 2 + 9‖ * (‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR07_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.92 : ℝ) * (9.93 * (8.95 * (7.96 * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81))))))))))
+      ≤ ‖1 - sR07 / 2 + 10‖ * (‖1 - sR07 / 2 + 9‖ * (‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR07_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.91 : ℝ) * (10.92 * (9.93 * (8.95 * (7.96 * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81)))))))))))
+      ≤ ‖1 - sR07 / 2 + 11‖ * (‖1 - sR07 / 2 + 10‖ * (‖1 - sR07 / 2 + 9‖ * (‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR07_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (1100000000 : ℝ)
+      ≤ (11.91 : ℝ) * (10.92 * (9.93 * (8.95 * (7.96 * (6.99 * (6.02 * (5.06 * (4.13 * (3.23 * (2.42 * (1.81))))))))))) := by
+    norm_num
+  have hD_ge : (1100000000 : ℝ)
+      ≤ ‖1 - sR07 / 2 + 11‖ * (‖1 - sR07 / 2 + 10‖ * (‖1 - sR07 / 2 + 9‖ * (‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR07 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR07 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR07_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR07 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR07 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR07 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR07 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR07 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR07 / 2)‖ = ‖Complex.Gamma (1 - sR07 / 2 + 12)‖ ≤ 313000000`, `D ≤ 1100000000`.
+  have hD_mul : (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR07 / 2)‖
+      = ‖Complex.Gamma (1 - sR07 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR07 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR07 / 2)‖
+        * (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR07 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR07 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR07 / 2)‖
+      ≤ 313000000 / (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR07 / 2 + 11‖
+        * (‖1 - sR07 / 2 + 10‖
+        * (‖1 - sR07 / 2 + 9‖
+        * (‖1 - sR07 / 2 + 8‖
+        * (‖1 - sR07 / 2 + 7‖
+        * (‖1 - sR07 / 2 + 6‖
+        * (‖1 - sR07 / 2 + 5‖
+        * (‖1 - sR07 / 2 + 4‖
+        * (‖1 - sR07 / 2 + 3‖
+        * (‖1 - sR07 / 2 + 2‖
+        * (‖1 - sR07 / 2 + 1‖
+          * ‖1 - sR07 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.5 * 1100000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR07 / 2 + 11‖ * (‖1 - sR07 / 2 + 10‖ * (‖1 - sR07 / 2 + 9‖ * (‖1 - sR07 / 2 + 8‖ * (‖1 - sR07 / 2 + 7‖ * (‖1 - sR07 / 2 + 6‖ * (‖1 - sR07 / 2 + 5‖ * (‖1 - sR07 / 2 + 4‖ * (‖1 - sR07 / 2 + 3‖ * (‖1 - sR07 / 2 + 2‖ * (‖1 - sR07 / 2 + 1‖ * (‖1 - sR07 / 2‖))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R07GammaUpper
+
+namespace R08GammaUpper
+
+/-- The R08 `s`-plane center: `s = 1/2 + I·z` at `z = R08.center`. -/
+noncomputable def sR08 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R08.center
+
+/-- `R08.center = 5.25 + 0.105·I` (from `R08_x0/x1/y0/y1`). -/
+theorem R08_center_eq :
+    CentralCoverAssembly.R08.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R08_x0, CentralCoverAssembly.R08_x1,
+      CentralCoverAssembly.R08_y0, CentralCoverAssembly.R08_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R08_x0, CentralCoverAssembly.R08_x1,
+      CentralCoverAssembly.R08_y0, CentralCoverAssembly.R08_y1]
+    simp
+    norm_num
+
+/-- `Re sR08 = 0.395`. -/
+theorem sR08_re : sR08.re = 0.395 := by
+  unfold sR08
+  rw [R08_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR08 = 5.25`. -/
+theorem sR08_im : sR08.im = 5.25 := by
+  unfold sR08
+  rw [R08_center_eq]
+  simp
+
+/-- `Re(1 - sR08/2) = 0.8025`. -/
+theorem zUpR08_re : (1 - sR08 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR08_re]
+  norm_num
+
+/-- `Im(1 - sR08/2) = -2.625`. -/
+theorem zUpR08_im : (1 - sR08 / 2).im = -2.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR08_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.74 ≤ ‖1 - sR08 / 2‖`. -/
+theorem norm_zUpR08_0_ge :
+    (2.74 : ℝ) ≤ ‖1 - sR08 / 2‖ := by
+  have hsq : (2.74 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR08_re, zUpR08_im]
+    norm_num
+  calc (2.74 : ℝ) = Real.sqrt ((2.74 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.18 ≤ ‖1 - sR08 / 2 + 1‖`. -/
+theorem norm_zUpR08_1_ge :
+    (3.18 : ℝ) ≤ ‖1 - sR08 / 2 + 1‖ := by
+  have hre : (1 - sR08 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR08 / 2 + 1).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.one_im]
+    norm_num
+  have hsq : (3.18 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.18 : ℝ) = Real.sqrt ((3.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.83 ≤ ‖1 - sR08 / 2 + 2‖`. -/
+theorem norm_zUpR08_2_ge :
+    (3.83 : ℝ) ≤ ‖1 - sR08 / 2 + 2‖ := by
+  have hre : (1 - sR08 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 2).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.83 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.83 : ℝ) = Real.sqrt ((3.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.62 ≤ ‖1 - sR08 / 2 + 3‖`. -/
+theorem norm_zUpR08_3_ge :
+    (4.62 : ℝ) ≤ ‖1 - sR08 / 2 + 3‖ := by
+  have hre : (1 - sR08 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 3).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.62 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.62 : ℝ) = Real.sqrt ((4.62 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.47 ≤ ‖1 - sR08 / 2 + 4‖`. -/
+theorem norm_zUpR08_4_ge :
+    (5.47 : ℝ) ≤ ‖1 - sR08 / 2 + 4‖ := by
+  have hre : (1 - sR08 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 4).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.47 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.47 : ℝ) = Real.sqrt ((5.47 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.36 ≤ ‖1 - sR08 / 2 + 5‖`. -/
+theorem norm_zUpR08_5_ge :
+    (6.36 : ℝ) ≤ ‖1 - sR08 / 2 + 5‖ := by
+  have hre : (1 - sR08 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 5).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.36 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.36 : ℝ) = Real.sqrt ((6.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.29 ≤ ‖1 - sR08 / 2 + 6‖`. -/
+theorem norm_zUpR08_6_ge :
+    (7.29 : ℝ) ≤ ‖1 - sR08 / 2 + 6‖ := by
+  have hre : (1 - sR08 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 6).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.29 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.29 : ℝ) = Real.sqrt ((7.29 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.23 ≤ ‖1 - sR08 / 2 + 7‖`. -/
+theorem norm_zUpR08_7_ge :
+    (8.23 : ℝ) ≤ ‖1 - sR08 / 2 + 7‖ := by
+  have hre : (1 - sR08 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 7).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.23 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.23 : ℝ) = Real.sqrt ((8.23 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.18 ≤ ‖1 - sR08 / 2 + 8‖`. -/
+theorem norm_zUpR08_8_ge :
+    (9.18 : ℝ) ≤ ‖1 - sR08 / 2 + 8‖ := by
+  have hre : (1 - sR08 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 8).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.18 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.18 : ℝ) = Real.sqrt ((9.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.14 ≤ ‖1 - sR08 / 2 + 9‖`. -/
+theorem norm_zUpR08_9_ge :
+    (10.14 : ℝ) ≤ ‖1 - sR08 / 2 + 9‖ := by
+  have hre : (1 - sR08 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 9).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.14 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.14 : ℝ) = Real.sqrt ((10.14 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.11 ≤ ‖1 - sR08 / 2 + 10‖`. -/
+theorem norm_zUpR08_10_ge :
+    (11.11 : ℝ) ≤ ‖1 - sR08 / 2 + 10‖ := by
+  have hre : (1 - sR08 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 10).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.11 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.11 : ℝ) = Real.sqrt ((11.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.09 ≤ ‖1 - sR08 / 2 + 11‖`. -/
+theorem norm_zUpR08_11_ge :
+    (12.09 : ℝ) ≤ ‖1 - sR08 / 2 + 11‖ := by
+  have hre : (1 - sR08 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR08 / 2 + 11).im = -2.625 := by
+    simp only [Complex.add_im, zUpR08_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.09 : ℝ) ^ 2 ≤ ‖1 - sR08 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.09 : ℝ) = Real.sqrt ((12.09 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR08 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR08 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR08_ne0 : (1 - sR08 / 2) ≠ 0 := by
+  have hre : (1 - sR08 / 2).re = 0.8025 := zUpR08_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add1_ne0 : (1 - sR08 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add2_ne0 : (1 - sR08 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add3_ne0 : (1 - sR08 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add4_ne0 : (1 - sR08 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add5_ne0 : (1 - sR08 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add6_ne0 : (1 - sR08 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add7_ne0 : (1 - sR08 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add8_ne0 : (1 - sR08 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add9_ne0 : (1 - sR08 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add10_ne0 : (1 - sR08 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR08_add11_ne0 : (1 - sR08 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR08 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R08 corner:
+`‖Complex.Gamma (1 - sR08 / 2)‖ ≤ 0.15` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R08 :
+    ‖Complex.Gamma (1 - sR08 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR08 / 2 + 1)
+      = (1 - sR08 / 2) * Complex.Gamma (1 - sR08 / 2) :=
+    Complex.Gamma_add_one _ zUpR08_ne0
+  have e1 : Complex.Gamma (1 - sR08 / 2 + 2)
+      = (1 - sR08 / 2 + 1)
+        * Complex.Gamma (1 - sR08 / 2 + 1) := by
+    have h : (1 - sR08 / 2 + 2)
+        = ((1 - sR08 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add1_ne0
+  have e2 : Complex.Gamma (1 - sR08 / 2 + 3)
+      = (1 - sR08 / 2 + 2)
+        * Complex.Gamma (1 - sR08 / 2 + 2) := by
+    have h : (1 - sR08 / 2 + 3)
+        = ((1 - sR08 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add2_ne0
+  have e3 : Complex.Gamma (1 - sR08 / 2 + 4)
+      = (1 - sR08 / 2 + 3)
+        * Complex.Gamma (1 - sR08 / 2 + 3) := by
+    have h : (1 - sR08 / 2 + 4)
+        = ((1 - sR08 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add3_ne0
+  have e4 : Complex.Gamma (1 - sR08 / 2 + 5)
+      = (1 - sR08 / 2 + 4)
+        * Complex.Gamma (1 - sR08 / 2 + 4) := by
+    have h : (1 - sR08 / 2 + 5)
+        = ((1 - sR08 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add4_ne0
+  have e5 : Complex.Gamma (1 - sR08 / 2 + 6)
+      = (1 - sR08 / 2 + 5)
+        * Complex.Gamma (1 - sR08 / 2 + 5) := by
+    have h : (1 - sR08 / 2 + 6)
+        = ((1 - sR08 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add5_ne0
+  have e6 : Complex.Gamma (1 - sR08 / 2 + 7)
+      = (1 - sR08 / 2 + 6)
+        * Complex.Gamma (1 - sR08 / 2 + 6) := by
+    have h : (1 - sR08 / 2 + 7)
+        = ((1 - sR08 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add6_ne0
+  have e7 : Complex.Gamma (1 - sR08 / 2 + 8)
+      = (1 - sR08 / 2 + 7)
+        * Complex.Gamma (1 - sR08 / 2 + 7) := by
+    have h : (1 - sR08 / 2 + 8)
+        = ((1 - sR08 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add7_ne0
+  have e8 : Complex.Gamma (1 - sR08 / 2 + 9)
+      = (1 - sR08 / 2 + 8)
+        * Complex.Gamma (1 - sR08 / 2 + 8) := by
+    have h : (1 - sR08 / 2 + 9)
+        = ((1 - sR08 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add8_ne0
+  have e9 : Complex.Gamma (1 - sR08 / 2 + 10)
+      = (1 - sR08 / 2 + 9)
+        * Complex.Gamma (1 - sR08 / 2 + 9) := by
+    have h : (1 - sR08 / 2 + 10)
+        = ((1 - sR08 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add9_ne0
+  have e10 : Complex.Gamma (1 - sR08 / 2 + 11)
+      = (1 - sR08 / 2 + 10)
+        * Complex.Gamma (1 - sR08 / 2 + 10) := by
+    have h : (1 - sR08 / 2 + 11)
+        = ((1 - sR08 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add10_ne0
+  have e11 : Complex.Gamma (1 - sR08 / 2 + 12)
+      = (1 - sR08 / 2 + 11)
+        * Complex.Gamma (1 - sR08 / 2 + 11) := by
+    have h : (1 - sR08 / 2 + 12)
+        = ((1 - sR08 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR08_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR08 / 2 + 1)‖
+      = ‖1 - sR08 / 2‖
+        * ‖Complex.Gamma (1 - sR08 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR08 / 2 + 2)‖
+      = ‖1 - sR08 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR08 / 2 + 3)‖
+      = ‖1 - sR08 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR08 / 2 + 4)‖
+      = ‖1 - sR08 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR08 / 2 + 5)‖
+      = ‖1 - sR08 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR08 / 2 + 6)‖
+      = ‖1 - sR08 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR08 / 2 + 7)‖
+      = ‖1 - sR08 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR08 / 2 + 8)‖
+      = ‖1 - sR08 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR08 / 2 + 9)‖
+      = ‖1 - sR08 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR08 / 2 + 10)‖
+      = ‖1 - sR08 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR08 / 2 + 11)‖
+      = ‖1 - sR08 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR08 / 2 + 12)‖
+      = ‖1 - sR08 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR08 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR08 / 2 + 12)‖
+      = ‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+        * (‖1 - sR08 / 2‖
+          * ‖Complex.Gamma (1 - sR08 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.18 : ℝ) * 2.74
+      ≤ ‖1 - sR08 / 2 + 1‖ * ‖1 - sR08 / 2‖ :=
+    mul_le_mul norm_zUpR08_1_ge norm_zUpR08_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.83 : ℝ) * (3.18 * (2.74))
+      ≤ ‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖)) :=
+    mul_le_mul norm_zUpR08_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.62 : ℝ) * (3.83 * (3.18 * (2.74)))
+      ≤ ‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))) :=
+    mul_le_mul norm_zUpR08_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.47 : ℝ) * (4.62 * (3.83 * (3.18 * (2.74))))
+      ≤ ‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖)))) :=
+    mul_le_mul norm_zUpR08_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.36 : ℝ) * (5.47 * (4.62 * (3.83 * (3.18 * (2.74)))))
+      ≤ ‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))) :=
+    mul_le_mul norm_zUpR08_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.29 : ℝ) * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74))))))
+      ≤ ‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖)))))) :=
+    mul_le_mul norm_zUpR08_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.23 : ℝ) * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74)))))))
+      ≤ ‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))))) :=
+    mul_le_mul norm_zUpR08_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.18 : ℝ) * (8.23 * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74))))))))
+      ≤ ‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR08_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.14 : ℝ) * (9.18 * (8.23 * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74)))))))))
+      ≤ ‖1 - sR08 / 2 + 9‖ * (‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR08_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.11 : ℝ) * (10.14 * (9.18 * (8.23 * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74))))))))))
+      ≤ ‖1 - sR08 / 2 + 10‖ * (‖1 - sR08 / 2 + 9‖ * (‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR08_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.09 : ℝ) * (11.11 * (10.14 * (9.18 * (8.23 * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74)))))))))))
+      ≤ ‖1 - sR08 / 2 + 11‖ * (‖1 - sR08 / 2 + 10‖ * (‖1 - sR08 / 2 + 9‖ * (‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR08_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (4000000000 : ℝ)
+      ≤ (12.09 : ℝ) * (11.11 * (10.14 * (9.18 * (8.23 * (7.29 * (6.36 * (5.47 * (4.62 * (3.83 * (3.18 * (2.74))))))))))) := by
+    norm_num
+  have hD_ge : (4000000000 : ℝ)
+      ≤ ‖1 - sR08 / 2 + 11‖ * (‖1 - sR08 / 2 + 10‖ * (‖1 - sR08 / 2 + 9‖ * (‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR08 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR08 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR08_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR08 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR08 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR08 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR08 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR08 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR08 / 2)‖ = ‖Complex.Gamma (1 - sR08 / 2 + 12)‖ ≤ 313000000`, `D ≤ 4000000000`.
+  have hD_mul : (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR08 / 2)‖
+      = ‖Complex.Gamma (1 - sR08 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR08 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR08 / 2)‖
+        * (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR08 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR08 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR08 / 2)‖
+      ≤ 313000000 / (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR08 / 2 + 11‖
+        * (‖1 - sR08 / 2 + 10‖
+        * (‖1 - sR08 / 2 + 9‖
+        * (‖1 - sR08 / 2 + 8‖
+        * (‖1 - sR08 / 2 + 7‖
+        * (‖1 - sR08 / 2 + 6‖
+        * (‖1 - sR08 / 2 + 5‖
+        * (‖1 - sR08 / 2 + 4‖
+        * (‖1 - sR08 / 2 + 3‖
+        * (‖1 - sR08 / 2 + 2‖
+        * (‖1 - sR08 / 2 + 1‖
+          * ‖1 - sR08 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.15 * 4000000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR08 / 2 + 11‖ * (‖1 - sR08 / 2 + 10‖ * (‖1 - sR08 / 2 + 9‖ * (‖1 - sR08 / 2 + 8‖ * (‖1 - sR08 / 2 + 7‖ * (‖1 - sR08 / 2 + 6‖ * (‖1 - sR08 / 2 + 5‖ * (‖1 - sR08 / 2 + 4‖ * (‖1 - sR08 / 2 + 3‖ * (‖1 - sR08 / 2 + 2‖ * (‖1 - sR08 / 2 + 1‖ * (‖1 - sR08 / 2‖))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R08GammaUpper
+
+namespace R09GammaUpper
+
+/-- The R09 `s`-plane center: `s = 1/2 + I·z` at `z = R09.center`. -/
+noncomputable def sR09 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R09.center
+
+/-- `R09.center = 7.25 + 0.105·I` (from `R09_x0/x1/y0/y1`). -/
+theorem R09_center_eq :
+    CentralCoverAssembly.R09.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R09_x0, CentralCoverAssembly.R09_x1,
+      CentralCoverAssembly.R09_y0, CentralCoverAssembly.R09_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R09_x0, CentralCoverAssembly.R09_x1,
+      CentralCoverAssembly.R09_y0, CentralCoverAssembly.R09_y1]
+    simp
+    norm_num
+
+/-- `Re sR09 = 0.395`. -/
+theorem sR09_re : sR09.re = 0.395 := by
+  unfold sR09
+  rw [R09_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR09 = 7.25`. -/
+theorem sR09_im : sR09.im = 7.25 := by
+  unfold sR09
+  rw [R09_center_eq]
+  simp
+
+/-- `Re(1 - sR09/2) = 0.8025`. -/
+theorem zUpR09_re : (1 - sR09 / 2).re = 0.8025 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR09_re]
+  norm_num
+
+/-- `Im(1 - sR09/2) = -3.625`. -/
+theorem zUpR09_im : (1 - sR09 / 2).im = -3.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR09_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.71 ≤ ‖1 - sR09 / 2‖`. -/
+theorem norm_zUpR09_0_ge :
+    (3.71 : ℝ) ≤ ‖1 - sR09 / 2‖ := by
+  have hsq : (3.71 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR09_re, zUpR09_im]
+    norm_num
+  calc (3.71 : ℝ) = Real.sqrt ((3.71 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 4.04 ≤ ‖1 - sR09 / 2 + 1‖`. -/
+theorem norm_zUpR09_1_ge :
+    (4.04 : ℝ) ≤ ‖1 - sR09 / 2 + 1‖ := by
+  have hre : (1 - sR09 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR09 / 2 + 1).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.one_im]
+    norm_num
+  have hsq : (4.04 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.04 : ℝ) = Real.sqrt ((4.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.58 ≤ ‖1 - sR09 / 2 + 2‖`. -/
+theorem norm_zUpR09_2_ge :
+    (4.58 : ℝ) ≤ ‖1 - sR09 / 2 + 2‖ := by
+  have hre : (1 - sR09 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 2).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.58 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.58 : ℝ) = Real.sqrt ((4.58 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.25 ≤ ‖1 - sR09 / 2 + 3‖`. -/
+theorem norm_zUpR09_3_ge :
+    (5.25 : ℝ) ≤ ‖1 - sR09 / 2 + 3‖ := by
+  have hre : (1 - sR09 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 3).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.25 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.25 : ℝ) = Real.sqrt ((5.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 6.01 ≤ ‖1 - sR09 / 2 + 4‖`. -/
+theorem norm_zUpR09_4_ge :
+    (6.01 : ℝ) ≤ ‖1 - sR09 / 2 + 4‖ := by
+  have hre : (1 - sR09 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 4).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.01 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.01 : ℝ) = Real.sqrt ((6.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.84 ≤ ‖1 - sR09 / 2 + 5‖`. -/
+theorem norm_zUpR09_5_ge :
+    (6.84 : ℝ) ≤ ‖1 - sR09 / 2 + 5‖ := by
+  have hre : (1 - sR09 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 5).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.84 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.84 : ℝ) = Real.sqrt ((6.84 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.7 ≤ ‖1 - sR09 / 2 + 6‖`. -/
+theorem norm_zUpR09_6_ge :
+    (7.7 : ℝ) ≤ ‖1 - sR09 / 2 + 6‖ := by
+  have hre : (1 - sR09 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 6).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.7 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.7 : ℝ) = Real.sqrt ((7.7 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.6 ≤ ‖1 - sR09 / 2 + 7‖`. -/
+theorem norm_zUpR09_7_ge :
+    (8.6 : ℝ) ≤ ‖1 - sR09 / 2 + 7‖ := by
+  have hre : (1 - sR09 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 7).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.6 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.6 : ℝ) = Real.sqrt ((8.6 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.51 ≤ ‖1 - sR09 / 2 + 8‖`. -/
+theorem norm_zUpR09_8_ge :
+    (9.51 : ℝ) ≤ ‖1 - sR09 / 2 + 8‖ := by
+  have hre : (1 - sR09 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 8).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.51 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.51 : ℝ) = Real.sqrt ((9.51 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.45 ≤ ‖1 - sR09 / 2 + 9‖`. -/
+theorem norm_zUpR09_9_ge :
+    (10.45 : ℝ) ≤ ‖1 - sR09 / 2 + 9‖ := by
+  have hre : (1 - sR09 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 9).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.45 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.45 : ℝ) = Real.sqrt ((10.45 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.39 ≤ ‖1 - sR09 / 2 + 10‖`. -/
+theorem norm_zUpR09_10_ge :
+    (11.39 : ℝ) ≤ ‖1 - sR09 / 2 + 10‖ := by
+  have hre : (1 - sR09 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 10).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.39 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.39 : ℝ) = Real.sqrt ((11.39 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.34 ≤ ‖1 - sR09 / 2 + 11‖`. -/
+theorem norm_zUpR09_11_ge :
+    (12.34 : ℝ) ≤ ‖1 - sR09 / 2 + 11‖ := by
+  have hre : (1 - sR09 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR09 / 2 + 11).im = -3.625 := by
+    simp only [Complex.add_im, zUpR09_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.34 : ℝ) ^ 2 ≤ ‖1 - sR09 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.34 : ℝ) = Real.sqrt ((12.34 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR09 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR09 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR09_ne0 : (1 - sR09 / 2) ≠ 0 := by
+  have hre : (1 - sR09 / 2).re = 0.8025 := zUpR09_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add1_ne0 : (1 - sR09 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 1).re = 1.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add2_ne0 : (1 - sR09 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 2).re = 2.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add3_ne0 : (1 - sR09 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 3).re = 3.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add4_ne0 : (1 - sR09 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 4).re = 4.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add5_ne0 : (1 - sR09 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 5).re = 5.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add6_ne0 : (1 - sR09 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 6).re = 6.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add7_ne0 : (1 - sR09 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 7).re = 7.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add8_ne0 : (1 - sR09 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 8).re = 8.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add9_ne0 : (1 - sR09 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 9).re = 9.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add10_ne0 : (1 - sR09 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 10).re = 10.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR09_add11_ne0 : (1 - sR09 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR09 / 2 + 11).re = 11.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R09 corner:
+`‖Complex.Gamma (1 - sR09 / 2)‖ ≤ 0.05` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+theorem gamma_one_sub_half_upper_R09 :
+    ‖Complex.Gamma (1 - sR09 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR09 / 2 + 1)
+      = (1 - sR09 / 2) * Complex.Gamma (1 - sR09 / 2) :=
+    Complex.Gamma_add_one _ zUpR09_ne0
+  have e1 : Complex.Gamma (1 - sR09 / 2 + 2)
+      = (1 - sR09 / 2 + 1)
+        * Complex.Gamma (1 - sR09 / 2 + 1) := by
+    have h : (1 - sR09 / 2 + 2)
+        = ((1 - sR09 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add1_ne0
+  have e2 : Complex.Gamma (1 - sR09 / 2 + 3)
+      = (1 - sR09 / 2 + 2)
+        * Complex.Gamma (1 - sR09 / 2 + 2) := by
+    have h : (1 - sR09 / 2 + 3)
+        = ((1 - sR09 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add2_ne0
+  have e3 : Complex.Gamma (1 - sR09 / 2 + 4)
+      = (1 - sR09 / 2 + 3)
+        * Complex.Gamma (1 - sR09 / 2 + 3) := by
+    have h : (1 - sR09 / 2 + 4)
+        = ((1 - sR09 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add3_ne0
+  have e4 : Complex.Gamma (1 - sR09 / 2 + 5)
+      = (1 - sR09 / 2 + 4)
+        * Complex.Gamma (1 - sR09 / 2 + 4) := by
+    have h : (1 - sR09 / 2 + 5)
+        = ((1 - sR09 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add4_ne0
+  have e5 : Complex.Gamma (1 - sR09 / 2 + 6)
+      = (1 - sR09 / 2 + 5)
+        * Complex.Gamma (1 - sR09 / 2 + 5) := by
+    have h : (1 - sR09 / 2 + 6)
+        = ((1 - sR09 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add5_ne0
+  have e6 : Complex.Gamma (1 - sR09 / 2 + 7)
+      = (1 - sR09 / 2 + 6)
+        * Complex.Gamma (1 - sR09 / 2 + 6) := by
+    have h : (1 - sR09 / 2 + 7)
+        = ((1 - sR09 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add6_ne0
+  have e7 : Complex.Gamma (1 - sR09 / 2 + 8)
+      = (1 - sR09 / 2 + 7)
+        * Complex.Gamma (1 - sR09 / 2 + 7) := by
+    have h : (1 - sR09 / 2 + 8)
+        = ((1 - sR09 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add7_ne0
+  have e8 : Complex.Gamma (1 - sR09 / 2 + 9)
+      = (1 - sR09 / 2 + 8)
+        * Complex.Gamma (1 - sR09 / 2 + 8) := by
+    have h : (1 - sR09 / 2 + 9)
+        = ((1 - sR09 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add8_ne0
+  have e9 : Complex.Gamma (1 - sR09 / 2 + 10)
+      = (1 - sR09 / 2 + 9)
+        * Complex.Gamma (1 - sR09 / 2 + 9) := by
+    have h : (1 - sR09 / 2 + 10)
+        = ((1 - sR09 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add9_ne0
+  have e10 : Complex.Gamma (1 - sR09 / 2 + 11)
+      = (1 - sR09 / 2 + 10)
+        * Complex.Gamma (1 - sR09 / 2 + 10) := by
+    have h : (1 - sR09 / 2 + 11)
+        = ((1 - sR09 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add10_ne0
+  have e11 : Complex.Gamma (1 - sR09 / 2 + 12)
+      = (1 - sR09 / 2 + 11)
+        * Complex.Gamma (1 - sR09 / 2 + 11) := by
+    have h : (1 - sR09 / 2 + 12)
+        = ((1 - sR09 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR09_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR09 / 2 + 1)‖
+      = ‖1 - sR09 / 2‖
+        * ‖Complex.Gamma (1 - sR09 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR09 / 2 + 2)‖
+      = ‖1 - sR09 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR09 / 2 + 3)‖
+      = ‖1 - sR09 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR09 / 2 + 4)‖
+      = ‖1 - sR09 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR09 / 2 + 5)‖
+      = ‖1 - sR09 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR09 / 2 + 6)‖
+      = ‖1 - sR09 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR09 / 2 + 7)‖
+      = ‖1 - sR09 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR09 / 2 + 8)‖
+      = ‖1 - sR09 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR09 / 2 + 9)‖
+      = ‖1 - sR09 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR09 / 2 + 10)‖
+      = ‖1 - sR09 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR09 / 2 + 11)‖
+      = ‖1 - sR09 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR09 / 2 + 12)‖
+      = ‖1 - sR09 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR09 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR09 / 2 + 12)‖
+      = ‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+        * (‖1 - sR09 / 2‖
+          * ‖Complex.Gamma (1 - sR09 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (4.04 : ℝ) * 3.71
+      ≤ ‖1 - sR09 / 2 + 1‖ * ‖1 - sR09 / 2‖ :=
+    mul_le_mul norm_zUpR09_1_ge norm_zUpR09_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.58 : ℝ) * (4.04 * (3.71))
+      ≤ ‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖)) :=
+    mul_le_mul norm_zUpR09_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.25 : ℝ) * (4.58 * (4.04 * (3.71)))
+      ≤ ‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))) :=
+    mul_le_mul norm_zUpR09_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (6.01 : ℝ) * (5.25 * (4.58 * (4.04 * (3.71))))
+      ≤ ‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖)))) :=
+    mul_le_mul norm_zUpR09_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.84 : ℝ) * (6.01 * (5.25 * (4.58 * (4.04 * (3.71)))))
+      ≤ ‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))) :=
+    mul_le_mul norm_zUpR09_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.7 : ℝ) * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71))))))
+      ≤ ‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖)))))) :=
+    mul_le_mul norm_zUpR09_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.6 : ℝ) * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71)))))))
+      ≤ ‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))))) :=
+    mul_le_mul norm_zUpR09_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.51 : ℝ) * (8.6 * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71))))))))
+      ≤ ‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR09_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.45 : ℝ) * (9.51 * (8.6 * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71)))))))))
+      ≤ ‖1 - sR09 / 2 + 9‖ * (‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR09_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.39 : ℝ) * (10.45 * (9.51 * (8.6 * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71))))))))))
+      ≤ ‖1 - sR09 / 2 + 10‖ * (‖1 - sR09 / 2 + 9‖ * (‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR09_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.34 : ℝ) * (11.39 * (10.45 * (9.51 * (8.6 * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71)))))))))))
+      ≤ ‖1 - sR09 / 2 + 11‖ * (‖1 - sR09 / 2 + 10‖ * (‖1 - sR09 / 2 + 9‖ * (‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR09_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (13000000000 : ℝ)
+      ≤ (12.34 : ℝ) * (11.39 * (10.45 * (9.51 * (8.6 * (7.7 * (6.84 * (6.01 * (5.25 * (4.58 * (4.04 * (3.71))))))))))) := by
+    norm_num
+  have hD_ge : (13000000000 : ℝ)
+      ≤ ‖1 - sR09 / 2 + 11‖ * (‖1 - sR09 / 2 + 10‖ * (‖1 - sR09 / 2 + 9‖ * (‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR09 / 2 + 12)‖ ≤ Real.Gamma(12.8025) ≤ 313000000`.
+  have hre12 : (1 - sR09 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, zUpR09_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR09 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR09 / 2 + 12)‖ ≤ 313000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR09 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR09 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR09 / 2 + 12).re) = 12.8025 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper.realGamma_128025_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR09 / 2)‖ = ‖Complex.Gamma (1 - sR09 / 2 + 12)‖ ≤ 313000000`, `D ≤ 13000000000`.
+  have hD_mul : (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR09 / 2)‖
+      = ‖Complex.Gamma (1 - sR09 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR09 / 2)‖ ≤ 313000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR09 / 2)‖
+        * (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖)))))))))))
+        ≤ 313000000 := by
+    calc ‖Complex.Gamma (1 - sR09 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR09 / 2)‖ := mul_comm _ _
+      _ ≤ 313000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR09 / 2)‖
+      ≤ 313000000 / (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (313000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR09 / 2 + 11‖
+        * (‖1 - sR09 / 2 + 10‖
+        * (‖1 - sR09 / 2 + 9‖
+        * (‖1 - sR09 / 2 + 8‖
+        * (‖1 - sR09 / 2 + 7‖
+        * (‖1 - sR09 / 2 + 6‖
+        * (‖1 - sR09 / 2 + 5‖
+        * (‖1 - sR09 / 2 + 4‖
+        * (‖1 - sR09 / 2 + 3‖
+        * (‖1 - sR09 / 2 + 2‖
+        * (‖1 - sR09 / 2 + 1‖
+          * ‖1 - sR09 / 2‖))))))))))) := by
+    calc (313000000 : ℝ) ≤ 0.05 * 13000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 313000000 / (‖1 - sR09 / 2 + 11‖ * (‖1 - sR09 / 2 + 10‖ * (‖1 - sR09 / 2 + 9‖ * (‖1 - sR09 / 2 + 8‖ * (‖1 - sR09 / 2 + 7‖ * (‖1 - sR09 / 2 + 6‖ * (‖1 - sR09 / 2 + 5‖ * (‖1 - sR09 / 2 + 4‖ * (‖1 - sR09 / 2 + 3‖ * (‖1 - sR09 / 2 + 2‖ * (‖1 - sR09 / 2 + 1‖ * (‖1 - sR09 / 2‖))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R09GammaUpper
+
+namespace R12GammaUpper
+
+/-- The R12 `s`-plane center: `s = 1/2 + I·z` at `z = R12.center`. -/
+noncomputable def sR12 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R12.center
+
+/-- `R12.center = -6.75 + 0.2·I` (from `R12_x0/x1/y0/y1`). -/
+theorem R12_center_eq :
+    CentralCoverAssembly.R12.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R12_x0, CentralCoverAssembly.R12_x1,
+      CentralCoverAssembly.R12_y0, CentralCoverAssembly.R12_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R12_x0, CentralCoverAssembly.R12_x1,
+      CentralCoverAssembly.R12_y0, CentralCoverAssembly.R12_y1]
+    simp
+    norm_num
+
+/-- `Re sR12 = 0.3`. -/
+theorem sR12_re : sR12.re = 0.3 := by
+  unfold sR12
+  rw [R12_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR12 = -6.75`. -/
+theorem sR12_im : sR12.im = -6.75 := by
+  unfold sR12
+  rw [R12_center_eq]
+  simp
+
+/-- `Re(1 - sR12/2) = 0.85`. -/
+theorem zUpR12_re : (1 - sR12 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR12_re]
+  norm_num
+
+/-- `Im(1 - sR12/2) = 3.375`. -/
+theorem zUpR12_im : (1 - sR12 / 2).im = 3.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR12_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.48 ≤ ‖1 - sR12 / 2‖`. -/
+theorem norm_zUpR12_0_ge :
+    (3.48 : ℝ) ≤ ‖1 - sR12 / 2‖ := by
+  have hsq : (3.48 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR12_re, zUpR12_im]
+    norm_num
+  calc (3.48 : ℝ) = Real.sqrt ((3.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.84 ≤ ‖1 - sR12 / 2 + 1‖`. -/
+theorem norm_zUpR12_1_ge :
+    (3.84 : ℝ) ≤ ‖1 - sR12 / 2 + 1‖ := by
+  have hre : (1 - sR12 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR12 / 2 + 1).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.one_im]
+    norm_num
+  have hsq : (3.84 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.84 : ℝ) = Real.sqrt ((3.84 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.41 ≤ ‖1 - sR12 / 2 + 2‖`. -/
+theorem norm_zUpR12_2_ge :
+    (4.41 : ℝ) ≤ ‖1 - sR12 / 2 + 2‖ := by
+  have hre : (1 - sR12 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 2).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.41 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.41 : ℝ) = Real.sqrt ((4.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.11 ≤ ‖1 - sR12 / 2 + 3‖`. -/
+theorem norm_zUpR12_3_ge :
+    (5.11 : ℝ) ≤ ‖1 - sR12 / 2 + 3‖ := by
+  have hre : (1 - sR12 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 3).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.11 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.11 : ℝ) = Real.sqrt ((5.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.9 ≤ ‖1 - sR12 / 2 + 4‖`. -/
+theorem norm_zUpR12_4_ge :
+    (5.9 : ℝ) ≤ ‖1 - sR12 / 2 + 4‖ := by
+  have hre : (1 - sR12 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 4).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.9 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.9 : ℝ) = Real.sqrt ((5.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.75 ≤ ‖1 - sR12 / 2 + 5‖`. -/
+theorem norm_zUpR12_5_ge :
+    (6.75 : ℝ) ≤ ‖1 - sR12 / 2 + 5‖ := by
+  have hre : (1 - sR12 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 5).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.75 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.75 : ℝ) = Real.sqrt ((6.75 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.63 ≤ ‖1 - sR12 / 2 + 6‖`. -/
+theorem norm_zUpR12_6_ge :
+    (7.63 : ℝ) ≤ ‖1 - sR12 / 2 + 6‖ := by
+  have hre : (1 - sR12 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 6).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.63 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.63 : ℝ) = Real.sqrt ((7.63 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.54 ≤ ‖1 - sR12 / 2 + 7‖`. -/
+theorem norm_zUpR12_7_ge :
+    (8.54 : ℝ) ≤ ‖1 - sR12 / 2 + 7‖ := by
+  have hre : (1 - sR12 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 7).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.54 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.54 : ℝ) = Real.sqrt ((8.54 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.47 ≤ ‖1 - sR12 / 2 + 8‖`. -/
+theorem norm_zUpR12_8_ge :
+    (9.47 : ℝ) ≤ ‖1 - sR12 / 2 + 8‖ := by
+  have hre : (1 - sR12 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 8).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.47 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.47 : ℝ) = Real.sqrt ((9.47 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.41 ≤ ‖1 - sR12 / 2 + 9‖`. -/
+theorem norm_zUpR12_9_ge :
+    (10.41 : ℝ) ≤ ‖1 - sR12 / 2 + 9‖ := by
+  have hre : (1 - sR12 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 9).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.41 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.41 : ℝ) = Real.sqrt ((10.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.36 ≤ ‖1 - sR12 / 2 + 10‖`. -/
+theorem norm_zUpR12_10_ge :
+    (11.36 : ℝ) ≤ ‖1 - sR12 / 2 + 10‖ := by
+  have hre : (1 - sR12 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 10).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.36 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.36 : ℝ) = Real.sqrt ((11.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.32 ≤ ‖1 - sR12 / 2 + 11‖`. -/
+theorem norm_zUpR12_11_ge :
+    (12.32 : ℝ) ≤ ‖1 - sR12 / 2 + 11‖ := by
+  have hre : (1 - sR12 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR12 / 2 + 11).im = 3.375 := by
+    simp only [Complex.add_im, zUpR12_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.32 : ℝ) ^ 2 ≤ ‖1 - sR12 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.32 : ℝ) = Real.sqrt ((12.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR12 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR12 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR12_ne0 : (1 - sR12 / 2) ≠ 0 := by
+  have hre : (1 - sR12 / 2).re = 0.85 := zUpR12_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add1_ne0 : (1 - sR12 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add2_ne0 : (1 - sR12 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add3_ne0 : (1 - sR12 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add4_ne0 : (1 - sR12 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add5_ne0 : (1 - sR12 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add6_ne0 : (1 - sR12 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add7_ne0 : (1 - sR12 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add8_ne0 : (1 - sR12 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add9_ne0 : (1 - sR12 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add10_ne0 : (1 - sR12 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR12_add11_ne0 : (1 - sR12 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR12 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R12 corner:
+`‖Complex.Gamma (1 - sR12 / 2)‖ ≤ 0.05` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R12 :
+    ‖Complex.Gamma (1 - sR12 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR12 / 2 + 1)
+      = (1 - sR12 / 2) * Complex.Gamma (1 - sR12 / 2) :=
+    Complex.Gamma_add_one _ zUpR12_ne0
+  have e1 : Complex.Gamma (1 - sR12 / 2 + 2)
+      = (1 - sR12 / 2 + 1)
+        * Complex.Gamma (1 - sR12 / 2 + 1) := by
+    have h : (1 - sR12 / 2 + 2)
+        = ((1 - sR12 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add1_ne0
+  have e2 : Complex.Gamma (1 - sR12 / 2 + 3)
+      = (1 - sR12 / 2 + 2)
+        * Complex.Gamma (1 - sR12 / 2 + 2) := by
+    have h : (1 - sR12 / 2 + 3)
+        = ((1 - sR12 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add2_ne0
+  have e3 : Complex.Gamma (1 - sR12 / 2 + 4)
+      = (1 - sR12 / 2 + 3)
+        * Complex.Gamma (1 - sR12 / 2 + 3) := by
+    have h : (1 - sR12 / 2 + 4)
+        = ((1 - sR12 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add3_ne0
+  have e4 : Complex.Gamma (1 - sR12 / 2 + 5)
+      = (1 - sR12 / 2 + 4)
+        * Complex.Gamma (1 - sR12 / 2 + 4) := by
+    have h : (1 - sR12 / 2 + 5)
+        = ((1 - sR12 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add4_ne0
+  have e5 : Complex.Gamma (1 - sR12 / 2 + 6)
+      = (1 - sR12 / 2 + 5)
+        * Complex.Gamma (1 - sR12 / 2 + 5) := by
+    have h : (1 - sR12 / 2 + 6)
+        = ((1 - sR12 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add5_ne0
+  have e6 : Complex.Gamma (1 - sR12 / 2 + 7)
+      = (1 - sR12 / 2 + 6)
+        * Complex.Gamma (1 - sR12 / 2 + 6) := by
+    have h : (1 - sR12 / 2 + 7)
+        = ((1 - sR12 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add6_ne0
+  have e7 : Complex.Gamma (1 - sR12 / 2 + 8)
+      = (1 - sR12 / 2 + 7)
+        * Complex.Gamma (1 - sR12 / 2 + 7) := by
+    have h : (1 - sR12 / 2 + 8)
+        = ((1 - sR12 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add7_ne0
+  have e8 : Complex.Gamma (1 - sR12 / 2 + 9)
+      = (1 - sR12 / 2 + 8)
+        * Complex.Gamma (1 - sR12 / 2 + 8) := by
+    have h : (1 - sR12 / 2 + 9)
+        = ((1 - sR12 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add8_ne0
+  have e9 : Complex.Gamma (1 - sR12 / 2 + 10)
+      = (1 - sR12 / 2 + 9)
+        * Complex.Gamma (1 - sR12 / 2 + 9) := by
+    have h : (1 - sR12 / 2 + 10)
+        = ((1 - sR12 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add9_ne0
+  have e10 : Complex.Gamma (1 - sR12 / 2 + 11)
+      = (1 - sR12 / 2 + 10)
+        * Complex.Gamma (1 - sR12 / 2 + 10) := by
+    have h : (1 - sR12 / 2 + 11)
+        = ((1 - sR12 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add10_ne0
+  have e11 : Complex.Gamma (1 - sR12 / 2 + 12)
+      = (1 - sR12 / 2 + 11)
+        * Complex.Gamma (1 - sR12 / 2 + 11) := by
+    have h : (1 - sR12 / 2 + 12)
+        = ((1 - sR12 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR12_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR12 / 2 + 1)‖
+      = ‖1 - sR12 / 2‖
+        * ‖Complex.Gamma (1 - sR12 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR12 / 2 + 2)‖
+      = ‖1 - sR12 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR12 / 2 + 3)‖
+      = ‖1 - sR12 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR12 / 2 + 4)‖
+      = ‖1 - sR12 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR12 / 2 + 5)‖
+      = ‖1 - sR12 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR12 / 2 + 6)‖
+      = ‖1 - sR12 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR12 / 2 + 7)‖
+      = ‖1 - sR12 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR12 / 2 + 8)‖
+      = ‖1 - sR12 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR12 / 2 + 9)‖
+      = ‖1 - sR12 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR12 / 2 + 10)‖
+      = ‖1 - sR12 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR12 / 2 + 11)‖
+      = ‖1 - sR12 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR12 / 2 + 12)‖
+      = ‖1 - sR12 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR12 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR12 / 2 + 12)‖
+      = ‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+        * (‖1 - sR12 / 2‖
+          * ‖Complex.Gamma (1 - sR12 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.84 : ℝ) * 3.48
+      ≤ ‖1 - sR12 / 2 + 1‖ * ‖1 - sR12 / 2‖ :=
+    mul_le_mul norm_zUpR12_1_ge norm_zUpR12_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.41 : ℝ) * (3.84 * (3.48))
+      ≤ ‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖)) :=
+    mul_le_mul norm_zUpR12_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.11 : ℝ) * (4.41 * (3.84 * (3.48)))
+      ≤ ‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))) :=
+    mul_le_mul norm_zUpR12_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.9 : ℝ) * (5.11 * (4.41 * (3.84 * (3.48))))
+      ≤ ‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖)))) :=
+    mul_le_mul norm_zUpR12_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.75 : ℝ) * (5.9 * (5.11 * (4.41 * (3.84 * (3.48)))))
+      ≤ ‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))) :=
+    mul_le_mul norm_zUpR12_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.63 : ℝ) * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48))))))
+      ≤ ‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖)))))) :=
+    mul_le_mul norm_zUpR12_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.54 : ℝ) * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48)))))))
+      ≤ ‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))))) :=
+    mul_le_mul norm_zUpR12_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.47 : ℝ) * (8.54 * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48))))))))
+      ≤ ‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR12_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.41 : ℝ) * (9.47 * (8.54 * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48)))))))))
+      ≤ ‖1 - sR12 / 2 + 9‖ * (‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR12_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.36 : ℝ) * (10.41 * (9.47 * (8.54 * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48))))))))))
+      ≤ ‖1 - sR12 / 2 + 10‖ * (‖1 - sR12 / 2 + 9‖ * (‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR12_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.32 : ℝ) * (11.36 * (10.41 * (9.47 * (8.54 * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48)))))))))))
+      ≤ ‖1 - sR12 / 2 + 11‖ * (‖1 - sR12 / 2 + 10‖ * (‖1 - sR12 / 2 + 9‖ * (‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR12_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (10000000000 : ℝ)
+      ≤ (12.32 : ℝ) * (11.36 * (10.41 * (9.47 * (8.54 * (7.63 * (6.75 * (5.9 * (5.11 * (4.41 * (3.84 * (3.48))))))))))) := by
+    norm_num
+  have hD_ge : (10000000000 : ℝ)
+      ≤ ‖1 - sR12 / 2 + 11‖ * (‖1 - sR12 / 2 + 10‖ * (‖1 - sR12 / 2 + 9‖ * (‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR12 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR12 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR12_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR12 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR12 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR12 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR12 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR12 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR12 / 2)‖ = ‖Complex.Gamma (1 - sR12 / 2 + 12)‖ ≤ 348000000`, `D ≤ 10000000000`.
+  have hD_mul : (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR12 / 2)‖
+      = ‖Complex.Gamma (1 - sR12 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR12 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR12 / 2)‖
+        * (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR12 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR12 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR12 / 2)‖
+      ≤ 348000000 / (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR12 / 2 + 11‖
+        * (‖1 - sR12 / 2 + 10‖
+        * (‖1 - sR12 / 2 + 9‖
+        * (‖1 - sR12 / 2 + 8‖
+        * (‖1 - sR12 / 2 + 7‖
+        * (‖1 - sR12 / 2 + 6‖
+        * (‖1 - sR12 / 2 + 5‖
+        * (‖1 - sR12 / 2 + 4‖
+        * (‖1 - sR12 / 2 + 3‖
+        * (‖1 - sR12 / 2 + 2‖
+        * (‖1 - sR12 / 2 + 1‖
+          * ‖1 - sR12 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.05 * 10000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR12 / 2 + 11‖ * (‖1 - sR12 / 2 + 10‖ * (‖1 - sR12 / 2 + 9‖ * (‖1 - sR12 / 2 + 8‖ * (‖1 - sR12 / 2 + 7‖ * (‖1 - sR12 / 2 + 6‖ * (‖1 - sR12 / 2 + 5‖ * (‖1 - sR12 / 2 + 4‖ * (‖1 - sR12 / 2 + 3‖ * (‖1 - sR12 / 2 + 2‖ * (‖1 - sR12 / 2 + 1‖ * (‖1 - sR12 / 2‖))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R12GammaUpper
+
+namespace R13GammaUpper
+
+/-- The R13 `s`-plane center: `s = 1/2 + I·z` at `z = R13.center`. -/
+noncomputable def sR13 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R13.center
+
+/-- `R13.center = -4.75 + 0.2·I` (from `R13_x0/x1/y0/y1`). -/
+theorem R13_center_eq :
+    CentralCoverAssembly.R13.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R13_x0, CentralCoverAssembly.R13_x1,
+      CentralCoverAssembly.R13_y0, CentralCoverAssembly.R13_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R13_x0, CentralCoverAssembly.R13_x1,
+      CentralCoverAssembly.R13_y0, CentralCoverAssembly.R13_y1]
+    simp
+    norm_num
+
+/-- `Re sR13 = 0.3`. -/
+theorem sR13_re : sR13.re = 0.3 := by
+  unfold sR13
+  rw [R13_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR13 = -4.75`. -/
+theorem sR13_im : sR13.im = -4.75 := by
+  unfold sR13
+  rw [R13_center_eq]
+  simp
+
+/-- `Re(1 - sR13/2) = 0.85`. -/
+theorem zUpR13_re : (1 - sR13 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR13_re]
+  norm_num
+
+/-- `Im(1 - sR13/2) = 2.375`. -/
+theorem zUpR13_im : (1 - sR13 / 2).im = 2.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR13_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.52 ≤ ‖1 - sR13 / 2‖`. -/
+theorem norm_zUpR13_0_ge :
+    (2.52 : ℝ) ≤ ‖1 - sR13 / 2‖ := by
+  have hsq : (2.52 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR13_re, zUpR13_im]
+    norm_num
+  calc (2.52 : ℝ) = Real.sqrt ((2.52 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.01 ≤ ‖1 - sR13 / 2 + 1‖`. -/
+theorem norm_zUpR13_1_ge :
+    (3.01 : ℝ) ≤ ‖1 - sR13 / 2 + 1‖ := by
+  have hre : (1 - sR13 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR13 / 2 + 1).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.one_im]
+    norm_num
+  have hsq : (3.01 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.01 : ℝ) = Real.sqrt ((3.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.7 ≤ ‖1 - sR13 / 2 + 2‖`. -/
+theorem norm_zUpR13_2_ge :
+    (3.7 : ℝ) ≤ ‖1 - sR13 / 2 + 2‖ := by
+  have hre : (1 - sR13 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 2).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.7 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.7 : ℝ) = Real.sqrt ((3.7 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.52 ≤ ‖1 - sR13 / 2 + 3‖`. -/
+theorem norm_zUpR13_3_ge :
+    (4.52 : ℝ) ≤ ‖1 - sR13 / 2 + 3‖ := by
+  have hre : (1 - sR13 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 3).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.52 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.52 : ℝ) = Real.sqrt ((4.52 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.4 ≤ ‖1 - sR13 / 2 + 4‖`. -/
+theorem norm_zUpR13_4_ge :
+    (5.4 : ℝ) ≤ ‖1 - sR13 / 2 + 4‖ := by
+  have hre : (1 - sR13 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 4).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.4 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.4 : ℝ) = Real.sqrt ((5.4 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.31 ≤ ‖1 - sR13 / 2 + 5‖`. -/
+theorem norm_zUpR13_5_ge :
+    (6.31 : ℝ) ≤ ‖1 - sR13 / 2 + 5‖ := by
+  have hre : (1 - sR13 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 5).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.31 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.31 : ℝ) = Real.sqrt ((6.31 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.25 ≤ ‖1 - sR13 / 2 + 6‖`. -/
+theorem norm_zUpR13_6_ge :
+    (7.25 : ℝ) ≤ ‖1 - sR13 / 2 + 6‖ := by
+  have hre : (1 - sR13 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 6).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.25 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.25 : ℝ) = Real.sqrt ((7.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.2 ≤ ‖1 - sR13 / 2 + 7‖`. -/
+theorem norm_zUpR13_7_ge :
+    (8.2 : ℝ) ≤ ‖1 - sR13 / 2 + 7‖ := by
+  have hre : (1 - sR13 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 7).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.2 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.2 : ℝ) = Real.sqrt ((8.2 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.16 ≤ ‖1 - sR13 / 2 + 8‖`. -/
+theorem norm_zUpR13_8_ge :
+    (9.16 : ℝ) ≤ ‖1 - sR13 / 2 + 8‖ := by
+  have hre : (1 - sR13 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 8).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.16 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.16 : ℝ) = Real.sqrt ((9.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.13 ≤ ‖1 - sR13 / 2 + 9‖`. -/
+theorem norm_zUpR13_9_ge :
+    (10.13 : ℝ) ≤ ‖1 - sR13 / 2 + 9‖ := by
+  have hre : (1 - sR13 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 9).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.13 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.13 : ℝ) = Real.sqrt ((10.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.1 ≤ ‖1 - sR13 / 2 + 10‖`. -/
+theorem norm_zUpR13_10_ge :
+    (11.1 : ℝ) ≤ ‖1 - sR13 / 2 + 10‖ := by
+  have hre : (1 - sR13 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 10).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.1 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.1 : ℝ) = Real.sqrt ((11.1 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.08 ≤ ‖1 - sR13 / 2 + 11‖`. -/
+theorem norm_zUpR13_11_ge :
+    (12.08 : ℝ) ≤ ‖1 - sR13 / 2 + 11‖ := by
+  have hre : (1 - sR13 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR13 / 2 + 11).im = 2.375 := by
+    simp only [Complex.add_im, zUpR13_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.08 : ℝ) ^ 2 ≤ ‖1 - sR13 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.08 : ℝ) = Real.sqrt ((12.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR13 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR13 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR13_ne0 : (1 - sR13 / 2) ≠ 0 := by
+  have hre : (1 - sR13 / 2).re = 0.85 := zUpR13_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add1_ne0 : (1 - sR13 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add2_ne0 : (1 - sR13 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add3_ne0 : (1 - sR13 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add4_ne0 : (1 - sR13 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add5_ne0 : (1 - sR13 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add6_ne0 : (1 - sR13 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add7_ne0 : (1 - sR13 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add8_ne0 : (1 - sR13 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add9_ne0 : (1 - sR13 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add10_ne0 : (1 - sR13 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR13_add11_ne0 : (1 - sR13 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR13 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R13 corner:
+`‖Complex.Gamma (1 - sR13 / 2)‖ ≤ 0.15` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R13 :
+    ‖Complex.Gamma (1 - sR13 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR13 / 2 + 1)
+      = (1 - sR13 / 2) * Complex.Gamma (1 - sR13 / 2) :=
+    Complex.Gamma_add_one _ zUpR13_ne0
+  have e1 : Complex.Gamma (1 - sR13 / 2 + 2)
+      = (1 - sR13 / 2 + 1)
+        * Complex.Gamma (1 - sR13 / 2 + 1) := by
+    have h : (1 - sR13 / 2 + 2)
+        = ((1 - sR13 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add1_ne0
+  have e2 : Complex.Gamma (1 - sR13 / 2 + 3)
+      = (1 - sR13 / 2 + 2)
+        * Complex.Gamma (1 - sR13 / 2 + 2) := by
+    have h : (1 - sR13 / 2 + 3)
+        = ((1 - sR13 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add2_ne0
+  have e3 : Complex.Gamma (1 - sR13 / 2 + 4)
+      = (1 - sR13 / 2 + 3)
+        * Complex.Gamma (1 - sR13 / 2 + 3) := by
+    have h : (1 - sR13 / 2 + 4)
+        = ((1 - sR13 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add3_ne0
+  have e4 : Complex.Gamma (1 - sR13 / 2 + 5)
+      = (1 - sR13 / 2 + 4)
+        * Complex.Gamma (1 - sR13 / 2 + 4) := by
+    have h : (1 - sR13 / 2 + 5)
+        = ((1 - sR13 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add4_ne0
+  have e5 : Complex.Gamma (1 - sR13 / 2 + 6)
+      = (1 - sR13 / 2 + 5)
+        * Complex.Gamma (1 - sR13 / 2 + 5) := by
+    have h : (1 - sR13 / 2 + 6)
+        = ((1 - sR13 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add5_ne0
+  have e6 : Complex.Gamma (1 - sR13 / 2 + 7)
+      = (1 - sR13 / 2 + 6)
+        * Complex.Gamma (1 - sR13 / 2 + 6) := by
+    have h : (1 - sR13 / 2 + 7)
+        = ((1 - sR13 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add6_ne0
+  have e7 : Complex.Gamma (1 - sR13 / 2 + 8)
+      = (1 - sR13 / 2 + 7)
+        * Complex.Gamma (1 - sR13 / 2 + 7) := by
+    have h : (1 - sR13 / 2 + 8)
+        = ((1 - sR13 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add7_ne0
+  have e8 : Complex.Gamma (1 - sR13 / 2 + 9)
+      = (1 - sR13 / 2 + 8)
+        * Complex.Gamma (1 - sR13 / 2 + 8) := by
+    have h : (1 - sR13 / 2 + 9)
+        = ((1 - sR13 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add8_ne0
+  have e9 : Complex.Gamma (1 - sR13 / 2 + 10)
+      = (1 - sR13 / 2 + 9)
+        * Complex.Gamma (1 - sR13 / 2 + 9) := by
+    have h : (1 - sR13 / 2 + 10)
+        = ((1 - sR13 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add9_ne0
+  have e10 : Complex.Gamma (1 - sR13 / 2 + 11)
+      = (1 - sR13 / 2 + 10)
+        * Complex.Gamma (1 - sR13 / 2 + 10) := by
+    have h : (1 - sR13 / 2 + 11)
+        = ((1 - sR13 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add10_ne0
+  have e11 : Complex.Gamma (1 - sR13 / 2 + 12)
+      = (1 - sR13 / 2 + 11)
+        * Complex.Gamma (1 - sR13 / 2 + 11) := by
+    have h : (1 - sR13 / 2 + 12)
+        = ((1 - sR13 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR13_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR13 / 2 + 1)‖
+      = ‖1 - sR13 / 2‖
+        * ‖Complex.Gamma (1 - sR13 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR13 / 2 + 2)‖
+      = ‖1 - sR13 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR13 / 2 + 3)‖
+      = ‖1 - sR13 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR13 / 2 + 4)‖
+      = ‖1 - sR13 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR13 / 2 + 5)‖
+      = ‖1 - sR13 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR13 / 2 + 6)‖
+      = ‖1 - sR13 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR13 / 2 + 7)‖
+      = ‖1 - sR13 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR13 / 2 + 8)‖
+      = ‖1 - sR13 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR13 / 2 + 9)‖
+      = ‖1 - sR13 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR13 / 2 + 10)‖
+      = ‖1 - sR13 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR13 / 2 + 11)‖
+      = ‖1 - sR13 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR13 / 2 + 12)‖
+      = ‖1 - sR13 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR13 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR13 / 2 + 12)‖
+      = ‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+        * (‖1 - sR13 / 2‖
+          * ‖Complex.Gamma (1 - sR13 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.01 : ℝ) * 2.52
+      ≤ ‖1 - sR13 / 2 + 1‖ * ‖1 - sR13 / 2‖ :=
+    mul_le_mul norm_zUpR13_1_ge norm_zUpR13_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.7 : ℝ) * (3.01 * (2.52))
+      ≤ ‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖)) :=
+    mul_le_mul norm_zUpR13_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.52 : ℝ) * (3.7 * (3.01 * (2.52)))
+      ≤ ‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))) :=
+    mul_le_mul norm_zUpR13_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.4 : ℝ) * (4.52 * (3.7 * (3.01 * (2.52))))
+      ≤ ‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖)))) :=
+    mul_le_mul norm_zUpR13_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.31 : ℝ) * (5.4 * (4.52 * (3.7 * (3.01 * (2.52)))))
+      ≤ ‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))) :=
+    mul_le_mul norm_zUpR13_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.25 : ℝ) * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52))))))
+      ≤ ‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖)))))) :=
+    mul_le_mul norm_zUpR13_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.2 : ℝ) * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52)))))))
+      ≤ ‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))))) :=
+    mul_le_mul norm_zUpR13_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.16 : ℝ) * (8.2 * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52))))))))
+      ≤ ‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR13_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.13 : ℝ) * (9.16 * (8.2 * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52)))))))))
+      ≤ ‖1 - sR13 / 2 + 9‖ * (‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR13_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.1 : ℝ) * (10.13 * (9.16 * (8.2 * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52))))))))))
+      ≤ ‖1 - sR13 / 2 + 10‖ * (‖1 - sR13 / 2 + 9‖ * (‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR13_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.08 : ℝ) * (11.1 * (10.13 * (9.16 * (8.2 * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52)))))))))))
+      ≤ ‖1 - sR13 / 2 + 11‖ * (‖1 - sR13 / 2 + 10‖ * (‖1 - sR13 / 2 + 9‖ * (‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR13_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (3100000000 : ℝ)
+      ≤ (12.08 : ℝ) * (11.1 * (10.13 * (9.16 * (8.2 * (7.25 * (6.31 * (5.4 * (4.52 * (3.7 * (3.01 * (2.52))))))))))) := by
+    norm_num
+  have hD_ge : (3100000000 : ℝ)
+      ≤ ‖1 - sR13 / 2 + 11‖ * (‖1 - sR13 / 2 + 10‖ * (‖1 - sR13 / 2 + 9‖ * (‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR13 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR13 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR13_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR13 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR13 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR13 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR13 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR13 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR13 / 2)‖ = ‖Complex.Gamma (1 - sR13 / 2 + 12)‖ ≤ 348000000`, `D ≤ 3100000000`.
+  have hD_mul : (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR13 / 2)‖
+      = ‖Complex.Gamma (1 - sR13 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR13 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR13 / 2)‖
+        * (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR13 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR13 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR13 / 2)‖
+      ≤ 348000000 / (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR13 / 2 + 11‖
+        * (‖1 - sR13 / 2 + 10‖
+        * (‖1 - sR13 / 2 + 9‖
+        * (‖1 - sR13 / 2 + 8‖
+        * (‖1 - sR13 / 2 + 7‖
+        * (‖1 - sR13 / 2 + 6‖
+        * (‖1 - sR13 / 2 + 5‖
+        * (‖1 - sR13 / 2 + 4‖
+        * (‖1 - sR13 / 2 + 3‖
+        * (‖1 - sR13 / 2 + 2‖
+        * (‖1 - sR13 / 2 + 1‖
+          * ‖1 - sR13 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.15 * 3100000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR13 / 2 + 11‖ * (‖1 - sR13 / 2 + 10‖ * (‖1 - sR13 / 2 + 9‖ * (‖1 - sR13 / 2 + 8‖ * (‖1 - sR13 / 2 + 7‖ * (‖1 - sR13 / 2 + 6‖ * (‖1 - sR13 / 2 + 5‖ * (‖1 - sR13 / 2 + 4‖ * (‖1 - sR13 / 2 + 3‖ * (‖1 - sR13 / 2 + 2‖ * (‖1 - sR13 / 2 + 1‖ * (‖1 - sR13 / 2‖))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R13GammaUpper
+
+namespace R14GammaUpper
+
+/-- The R14 `s`-plane center: `s = 1/2 + I·z` at `z = R14.center`. -/
+noncomputable def sR14 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R14.center
+
+/-- `R14.center = -2.75 + 0.2·I` (from `R14_x0/x1/y0/y1`). -/
+theorem R14_center_eq :
+    CentralCoverAssembly.R14.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R14_x0, CentralCoverAssembly.R14_x1,
+      CentralCoverAssembly.R14_y0, CentralCoverAssembly.R14_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R14_x0, CentralCoverAssembly.R14_x1,
+      CentralCoverAssembly.R14_y0, CentralCoverAssembly.R14_y1]
+    simp
+    norm_num
+
+/-- `Re sR14 = 0.3`. -/
+theorem sR14_re : sR14.re = 0.3 := by
+  unfold sR14
+  rw [R14_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR14 = -2.75`. -/
+theorem sR14_im : sR14.im = -2.75 := by
+  unfold sR14
+  rw [R14_center_eq]
+  simp
+
+/-- `Re(1 - sR14/2) = 0.85`. -/
+theorem zUpR14_re : (1 - sR14 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR14_re]
+  norm_num
+
+/-- `Im(1 - sR14/2) = 1.375`. -/
+theorem zUpR14_im : (1 - sR14 / 2).im = 1.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR14_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.61 ≤ ‖1 - sR14 / 2‖`. -/
+theorem norm_zUpR14_0_ge :
+    (1.61 : ℝ) ≤ ‖1 - sR14 / 2‖ := by
+  have hsq : (1.61 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR14_re, zUpR14_im]
+    norm_num
+  calc (1.61 : ℝ) = Real.sqrt ((1.61 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.3 ≤ ‖1 - sR14 / 2 + 1‖`. -/
+theorem norm_zUpR14_1_ge :
+    (2.3 : ℝ) ≤ ‖1 - sR14 / 2 + 1‖ := by
+  have hre : (1 - sR14 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR14 / 2 + 1).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.one_im]
+    norm_num
+  have hsq : (2.3 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.3 : ℝ) = Real.sqrt ((2.3 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.16 ≤ ‖1 - sR14 / 2 + 2‖`. -/
+theorem norm_zUpR14_2_ge :
+    (3.16 : ℝ) ≤ ‖1 - sR14 / 2 + 2‖ := by
+  have hre : (1 - sR14 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 2).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.16 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.16 : ℝ) = Real.sqrt ((3.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.08 ≤ ‖1 - sR14 / 2 + 3‖`. -/
+theorem norm_zUpR14_3_ge :
+    (4.08 : ℝ) ≤ ‖1 - sR14 / 2 + 3‖ := by
+  have hre : (1 - sR14 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 3).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.08 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.08 : ℝ) = Real.sqrt ((4.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.04 ≤ ‖1 - sR14 / 2 + 4‖`. -/
+theorem norm_zUpR14_4_ge :
+    (5.04 : ℝ) ≤ ‖1 - sR14 / 2 + 4‖ := by
+  have hre : (1 - sR14 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 4).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.04 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.04 : ℝ) = Real.sqrt ((5.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.0 ≤ ‖1 - sR14 / 2 + 5‖`. -/
+theorem norm_zUpR14_5_ge :
+    (6.0 : ℝ) ≤ ‖1 - sR14 / 2 + 5‖ := by
+  have hre : (1 - sR14 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 5).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.0 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.0 : ℝ) = Real.sqrt ((6.0 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.98 ≤ ‖1 - sR14 / 2 + 6‖`. -/
+theorem norm_zUpR14_6_ge :
+    (6.98 : ℝ) ≤ ‖1 - sR14 / 2 + 6‖ := by
+  have hre : (1 - sR14 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 6).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.98 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.98 : ℝ) = Real.sqrt ((6.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.96 ≤ ‖1 - sR14 / 2 + 7‖`. -/
+theorem norm_zUpR14_7_ge :
+    (7.96 : ℝ) ≤ ‖1 - sR14 / 2 + 7‖ := by
+  have hre : (1 - sR14 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 7).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.96 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.96 : ℝ) = Real.sqrt ((7.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.95 ≤ ‖1 - sR14 / 2 + 8‖`. -/
+theorem norm_zUpR14_8_ge :
+    (8.95 : ℝ) ≤ ‖1 - sR14 / 2 + 8‖ := by
+  have hre : (1 - sR14 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 8).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.95 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.95 : ℝ) = Real.sqrt ((8.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.94 ≤ ‖1 - sR14 / 2 + 9‖`. -/
+theorem norm_zUpR14_9_ge :
+    (9.94 : ℝ) ≤ ‖1 - sR14 / 2 + 9‖ := by
+  have hre : (1 - sR14 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 9).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.94 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.94 : ℝ) = Real.sqrt ((9.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.93 ≤ ‖1 - sR14 / 2 + 10‖`. -/
+theorem norm_zUpR14_10_ge :
+    (10.93 : ℝ) ≤ ‖1 - sR14 / 2 + 10‖ := by
+  have hre : (1 - sR14 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 10).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.93 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.93 : ℝ) = Real.sqrt ((10.93 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.92 ≤ ‖1 - sR14 / 2 + 11‖`. -/
+theorem norm_zUpR14_11_ge :
+    (11.92 : ℝ) ≤ ‖1 - sR14 / 2 + 11‖ := by
+  have hre : (1 - sR14 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR14 / 2 + 11).im = 1.375 := by
+    simp only [Complex.add_im, zUpR14_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.92 : ℝ) ^ 2 ≤ ‖1 - sR14 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.92 : ℝ) = Real.sqrt ((11.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR14 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR14 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR14_ne0 : (1 - sR14 / 2) ≠ 0 := by
+  have hre : (1 - sR14 / 2).re = 0.85 := zUpR14_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add1_ne0 : (1 - sR14 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add2_ne0 : (1 - sR14 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add3_ne0 : (1 - sR14 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add4_ne0 : (1 - sR14 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add5_ne0 : (1 - sR14 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add6_ne0 : (1 - sR14 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add7_ne0 : (1 - sR14 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add8_ne0 : (1 - sR14 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add9_ne0 : (1 - sR14 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add10_ne0 : (1 - sR14 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR14_add11_ne0 : (1 - sR14 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR14 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R14 corner:
+`‖Complex.Gamma (1 - sR14 / 2)‖ ≤ 0.5` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R14 :
+    ‖Complex.Gamma (1 - sR14 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR14 / 2 + 1)
+      = (1 - sR14 / 2) * Complex.Gamma (1 - sR14 / 2) :=
+    Complex.Gamma_add_one _ zUpR14_ne0
+  have e1 : Complex.Gamma (1 - sR14 / 2 + 2)
+      = (1 - sR14 / 2 + 1)
+        * Complex.Gamma (1 - sR14 / 2 + 1) := by
+    have h : (1 - sR14 / 2 + 2)
+        = ((1 - sR14 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add1_ne0
+  have e2 : Complex.Gamma (1 - sR14 / 2 + 3)
+      = (1 - sR14 / 2 + 2)
+        * Complex.Gamma (1 - sR14 / 2 + 2) := by
+    have h : (1 - sR14 / 2 + 3)
+        = ((1 - sR14 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add2_ne0
+  have e3 : Complex.Gamma (1 - sR14 / 2 + 4)
+      = (1 - sR14 / 2 + 3)
+        * Complex.Gamma (1 - sR14 / 2 + 3) := by
+    have h : (1 - sR14 / 2 + 4)
+        = ((1 - sR14 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add3_ne0
+  have e4 : Complex.Gamma (1 - sR14 / 2 + 5)
+      = (1 - sR14 / 2 + 4)
+        * Complex.Gamma (1 - sR14 / 2 + 4) := by
+    have h : (1 - sR14 / 2 + 5)
+        = ((1 - sR14 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add4_ne0
+  have e5 : Complex.Gamma (1 - sR14 / 2 + 6)
+      = (1 - sR14 / 2 + 5)
+        * Complex.Gamma (1 - sR14 / 2 + 5) := by
+    have h : (1 - sR14 / 2 + 6)
+        = ((1 - sR14 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add5_ne0
+  have e6 : Complex.Gamma (1 - sR14 / 2 + 7)
+      = (1 - sR14 / 2 + 6)
+        * Complex.Gamma (1 - sR14 / 2 + 6) := by
+    have h : (1 - sR14 / 2 + 7)
+        = ((1 - sR14 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add6_ne0
+  have e7 : Complex.Gamma (1 - sR14 / 2 + 8)
+      = (1 - sR14 / 2 + 7)
+        * Complex.Gamma (1 - sR14 / 2 + 7) := by
+    have h : (1 - sR14 / 2 + 8)
+        = ((1 - sR14 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add7_ne0
+  have e8 : Complex.Gamma (1 - sR14 / 2 + 9)
+      = (1 - sR14 / 2 + 8)
+        * Complex.Gamma (1 - sR14 / 2 + 8) := by
+    have h : (1 - sR14 / 2 + 9)
+        = ((1 - sR14 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add8_ne0
+  have e9 : Complex.Gamma (1 - sR14 / 2 + 10)
+      = (1 - sR14 / 2 + 9)
+        * Complex.Gamma (1 - sR14 / 2 + 9) := by
+    have h : (1 - sR14 / 2 + 10)
+        = ((1 - sR14 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add9_ne0
+  have e10 : Complex.Gamma (1 - sR14 / 2 + 11)
+      = (1 - sR14 / 2 + 10)
+        * Complex.Gamma (1 - sR14 / 2 + 10) := by
+    have h : (1 - sR14 / 2 + 11)
+        = ((1 - sR14 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add10_ne0
+  have e11 : Complex.Gamma (1 - sR14 / 2 + 12)
+      = (1 - sR14 / 2 + 11)
+        * Complex.Gamma (1 - sR14 / 2 + 11) := by
+    have h : (1 - sR14 / 2 + 12)
+        = ((1 - sR14 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR14_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR14 / 2 + 1)‖
+      = ‖1 - sR14 / 2‖
+        * ‖Complex.Gamma (1 - sR14 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR14 / 2 + 2)‖
+      = ‖1 - sR14 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR14 / 2 + 3)‖
+      = ‖1 - sR14 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR14 / 2 + 4)‖
+      = ‖1 - sR14 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR14 / 2 + 5)‖
+      = ‖1 - sR14 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR14 / 2 + 6)‖
+      = ‖1 - sR14 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR14 / 2 + 7)‖
+      = ‖1 - sR14 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR14 / 2 + 8)‖
+      = ‖1 - sR14 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR14 / 2 + 9)‖
+      = ‖1 - sR14 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR14 / 2 + 10)‖
+      = ‖1 - sR14 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR14 / 2 + 11)‖
+      = ‖1 - sR14 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR14 / 2 + 12)‖
+      = ‖1 - sR14 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR14 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR14 / 2 + 12)‖
+      = ‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+        * (‖1 - sR14 / 2‖
+          * ‖Complex.Gamma (1 - sR14 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.3 : ℝ) * 1.61
+      ≤ ‖1 - sR14 / 2 + 1‖ * ‖1 - sR14 / 2‖ :=
+    mul_le_mul norm_zUpR14_1_ge norm_zUpR14_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.16 : ℝ) * (2.3 * (1.61))
+      ≤ ‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖)) :=
+    mul_le_mul norm_zUpR14_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.08 : ℝ) * (3.16 * (2.3 * (1.61)))
+      ≤ ‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))) :=
+    mul_le_mul norm_zUpR14_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.04 : ℝ) * (4.08 * (3.16 * (2.3 * (1.61))))
+      ≤ ‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖)))) :=
+    mul_le_mul norm_zUpR14_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.0 : ℝ) * (5.04 * (4.08 * (3.16 * (2.3 * (1.61)))))
+      ≤ ‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))) :=
+    mul_le_mul norm_zUpR14_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.98 : ℝ) * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61))))))
+      ≤ ‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖)))))) :=
+    mul_le_mul norm_zUpR14_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.96 : ℝ) * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61)))))))
+      ≤ ‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))))) :=
+    mul_le_mul norm_zUpR14_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.95 : ℝ) * (7.96 * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61))))))))
+      ≤ ‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR14_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.94 : ℝ) * (8.95 * (7.96 * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61)))))))))
+      ≤ ‖1 - sR14 / 2 + 9‖ * (‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR14_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.93 : ℝ) * (9.94 * (8.95 * (7.96 * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61))))))))))
+      ≤ ‖1 - sR14 / 2 + 10‖ * (‖1 - sR14 / 2 + 9‖ * (‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR14_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.92 : ℝ) * (10.93 * (9.94 * (8.95 * (7.96 * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61)))))))))))
+      ≤ ‖1 - sR14 / 2 + 11‖ * (‖1 - sR14 / 2 + 10‖ * (‖1 - sR14 / 2 + 9‖ * (‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR14_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (920000000 : ℝ)
+      ≤ (11.92 : ℝ) * (10.93 * (9.94 * (8.95 * (7.96 * (6.98 * (6.0 * (5.04 * (4.08 * (3.16 * (2.3 * (1.61))))))))))) := by
+    norm_num
+  have hD_ge : (920000000 : ℝ)
+      ≤ ‖1 - sR14 / 2 + 11‖ * (‖1 - sR14 / 2 + 10‖ * (‖1 - sR14 / 2 + 9‖ * (‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR14 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR14 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR14_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR14 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR14 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR14 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR14 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR14 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR14 / 2)‖ = ‖Complex.Gamma (1 - sR14 / 2 + 12)‖ ≤ 348000000`, `D ≤ 920000000`.
+  have hD_mul : (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR14 / 2)‖
+      = ‖Complex.Gamma (1 - sR14 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR14 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR14 / 2)‖
+        * (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR14 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR14 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR14 / 2)‖
+      ≤ 348000000 / (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR14 / 2 + 11‖
+        * (‖1 - sR14 / 2 + 10‖
+        * (‖1 - sR14 / 2 + 9‖
+        * (‖1 - sR14 / 2 + 8‖
+        * (‖1 - sR14 / 2 + 7‖
+        * (‖1 - sR14 / 2 + 6‖
+        * (‖1 - sR14 / 2 + 5‖
+        * (‖1 - sR14 / 2 + 4‖
+        * (‖1 - sR14 / 2 + 3‖
+        * (‖1 - sR14 / 2 + 2‖
+        * (‖1 - sR14 / 2 + 1‖
+          * ‖1 - sR14 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.5 * 920000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR14 / 2 + 11‖ * (‖1 - sR14 / 2 + 10‖ * (‖1 - sR14 / 2 + 9‖ * (‖1 - sR14 / 2 + 8‖ * (‖1 - sR14 / 2 + 7‖ * (‖1 - sR14 / 2 + 6‖ * (‖1 - sR14 / 2 + 5‖ * (‖1 - sR14 / 2 + 4‖ * (‖1 - sR14 / 2 + 3‖ * (‖1 - sR14 / 2 + 2‖ * (‖1 - sR14 / 2 + 1‖ * (‖1 - sR14 / 2‖))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R14GammaUpper
+
+namespace R15GammaUpper
+
+/-- The R15 `s`-plane center: `s = 1/2 + I·z` at `z = R15.center`. -/
+noncomputable def sR15 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R15.center
+
+/-- `R15.center = -0.75 + 0.2·I` (from `R15_x0/x1/y0/y1`). -/
+theorem R15_center_eq :
+    CentralCoverAssembly.R15.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R15_x0, CentralCoverAssembly.R15_x1,
+      CentralCoverAssembly.R15_y0, CentralCoverAssembly.R15_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R15_x0, CentralCoverAssembly.R15_x1,
+      CentralCoverAssembly.R15_y0, CentralCoverAssembly.R15_y1]
+    simp
+    norm_num
+
+/-- `Re sR15 = 0.3`. -/
+theorem sR15_re : sR15.re = 0.3 := by
+  unfold sR15
+  rw [R15_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR15 = -0.75`. -/
+theorem sR15_im : sR15.im = -0.75 := by
+  unfold sR15
+  rw [R15_center_eq]
+  simp
+
+/-- `Re(1 - sR15/2) = 0.85`. -/
+theorem zUpR15_re : (1 - sR15 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR15_re]
+  norm_num
+
+/-- `Im(1 - sR15/2) = 0.375`. -/
+theorem zUpR15_im : (1 - sR15 / 2).im = 0.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR15_im]
+  norm_num
+
+/-- Denominator floor `c0 = 0.92 ≤ ‖1 - sR15 / 2‖`. -/
+theorem norm_zUpR15_0_ge :
+    (0.92 : ℝ) ≤ ‖1 - sR15 / 2‖ := by
+  have hsq : (0.92 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR15_re, zUpR15_im]
+    norm_num
+  calc (0.92 : ℝ) = Real.sqrt ((0.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.88 ≤ ‖1 - sR15 / 2 + 1‖`. -/
+theorem norm_zUpR15_1_ge :
+    (1.88 : ℝ) ≤ ‖1 - sR15 / 2 + 1‖ := by
+  have hre : (1 - sR15 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR15 / 2 + 1).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.one_im]
+    norm_num
+  have hsq : (1.88 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.88 : ℝ) = Real.sqrt ((1.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.87 ≤ ‖1 - sR15 / 2 + 2‖`. -/
+theorem norm_zUpR15_2_ge :
+    (2.87 : ℝ) ≤ ‖1 - sR15 / 2 + 2‖ := by
+  have hre : (1 - sR15 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 2).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.87 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.87 : ℝ) = Real.sqrt ((2.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.86 ≤ ‖1 - sR15 / 2 + 3‖`. -/
+theorem norm_zUpR15_3_ge :
+    (3.86 : ℝ) ≤ ‖1 - sR15 / 2 + 3‖ := by
+  have hre : (1 - sR15 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 3).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.86 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.86 : ℝ) = Real.sqrt ((3.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.86 ≤ ‖1 - sR15 / 2 + 4‖`. -/
+theorem norm_zUpR15_4_ge :
+    (4.86 : ℝ) ≤ ‖1 - sR15 / 2 + 4‖ := by
+  have hre : (1 - sR15 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 4).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.86 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.86 : ℝ) = Real.sqrt ((4.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.86 ≤ ‖1 - sR15 / 2 + 5‖`. -/
+theorem norm_zUpR15_5_ge :
+    (5.86 : ℝ) ≤ ‖1 - sR15 / 2 + 5‖ := by
+  have hre : (1 - sR15 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 5).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.86 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.86 : ℝ) = Real.sqrt ((5.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.86 ≤ ‖1 - sR15 / 2 + 6‖`. -/
+theorem norm_zUpR15_6_ge :
+    (6.86 : ℝ) ≤ ‖1 - sR15 / 2 + 6‖ := by
+  have hre : (1 - sR15 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 6).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.86 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.86 : ℝ) = Real.sqrt ((6.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.85 ≤ ‖1 - sR15 / 2 + 7‖`. -/
+theorem norm_zUpR15_7_ge :
+    (7.85 : ℝ) ≤ ‖1 - sR15 / 2 + 7‖ := by
+  have hre : (1 - sR15 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 7).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.85 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.85 : ℝ) = Real.sqrt ((7.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.85 ≤ ‖1 - sR15 / 2 + 8‖`. -/
+theorem norm_zUpR15_8_ge :
+    (8.85 : ℝ) ≤ ‖1 - sR15 / 2 + 8‖ := by
+  have hre : (1 - sR15 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 8).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.85 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.85 : ℝ) = Real.sqrt ((8.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.85 ≤ ‖1 - sR15 / 2 + 9‖`. -/
+theorem norm_zUpR15_9_ge :
+    (9.85 : ℝ) ≤ ‖1 - sR15 / 2 + 9‖ := by
+  have hre : (1 - sR15 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 9).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.85 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.85 : ℝ) = Real.sqrt ((9.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.85 ≤ ‖1 - sR15 / 2 + 10‖`. -/
+theorem norm_zUpR15_10_ge :
+    (10.85 : ℝ) ≤ ‖1 - sR15 / 2 + 10‖ := by
+  have hre : (1 - sR15 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 10).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.85 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.85 : ℝ) = Real.sqrt ((10.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.85 ≤ ‖1 - sR15 / 2 + 11‖`. -/
+theorem norm_zUpR15_11_ge :
+    (11.85 : ℝ) ≤ ‖1 - sR15 / 2 + 11‖ := by
+  have hre : (1 - sR15 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR15 / 2 + 11).im = 0.375 := by
+    simp only [Complex.add_im, zUpR15_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.85 : ℝ) ^ 2 ≤ ‖1 - sR15 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.85 : ℝ) = Real.sqrt ((11.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR15 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR15 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR15_ne0 : (1 - sR15 / 2) ≠ 0 := by
+  have hre : (1 - sR15 / 2).re = 0.85 := zUpR15_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add1_ne0 : (1 - sR15 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add2_ne0 : (1 - sR15 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add3_ne0 : (1 - sR15 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add4_ne0 : (1 - sR15 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add5_ne0 : (1 - sR15 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add6_ne0 : (1 - sR15 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add7_ne0 : (1 - sR15 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add8_ne0 : (1 - sR15 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add9_ne0 : (1 - sR15 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add10_ne0 : (1 - sR15 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR15_add11_ne0 : (1 - sR15 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR15 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R15 corner:
+`‖Complex.Gamma (1 - sR15 / 2)‖ ≤ 1.5` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R15 :
+    ‖Complex.Gamma (1 - sR15 / 2)‖ ≤ 1.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR15 / 2 + 1)
+      = (1 - sR15 / 2) * Complex.Gamma (1 - sR15 / 2) :=
+    Complex.Gamma_add_one _ zUpR15_ne0
+  have e1 : Complex.Gamma (1 - sR15 / 2 + 2)
+      = (1 - sR15 / 2 + 1)
+        * Complex.Gamma (1 - sR15 / 2 + 1) := by
+    have h : (1 - sR15 / 2 + 2)
+        = ((1 - sR15 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add1_ne0
+  have e2 : Complex.Gamma (1 - sR15 / 2 + 3)
+      = (1 - sR15 / 2 + 2)
+        * Complex.Gamma (1 - sR15 / 2 + 2) := by
+    have h : (1 - sR15 / 2 + 3)
+        = ((1 - sR15 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add2_ne0
+  have e3 : Complex.Gamma (1 - sR15 / 2 + 4)
+      = (1 - sR15 / 2 + 3)
+        * Complex.Gamma (1 - sR15 / 2 + 3) := by
+    have h : (1 - sR15 / 2 + 4)
+        = ((1 - sR15 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add3_ne0
+  have e4 : Complex.Gamma (1 - sR15 / 2 + 5)
+      = (1 - sR15 / 2 + 4)
+        * Complex.Gamma (1 - sR15 / 2 + 4) := by
+    have h : (1 - sR15 / 2 + 5)
+        = ((1 - sR15 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add4_ne0
+  have e5 : Complex.Gamma (1 - sR15 / 2 + 6)
+      = (1 - sR15 / 2 + 5)
+        * Complex.Gamma (1 - sR15 / 2 + 5) := by
+    have h : (1 - sR15 / 2 + 6)
+        = ((1 - sR15 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add5_ne0
+  have e6 : Complex.Gamma (1 - sR15 / 2 + 7)
+      = (1 - sR15 / 2 + 6)
+        * Complex.Gamma (1 - sR15 / 2 + 6) := by
+    have h : (1 - sR15 / 2 + 7)
+        = ((1 - sR15 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add6_ne0
+  have e7 : Complex.Gamma (1 - sR15 / 2 + 8)
+      = (1 - sR15 / 2 + 7)
+        * Complex.Gamma (1 - sR15 / 2 + 7) := by
+    have h : (1 - sR15 / 2 + 8)
+        = ((1 - sR15 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add7_ne0
+  have e8 : Complex.Gamma (1 - sR15 / 2 + 9)
+      = (1 - sR15 / 2 + 8)
+        * Complex.Gamma (1 - sR15 / 2 + 8) := by
+    have h : (1 - sR15 / 2 + 9)
+        = ((1 - sR15 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add8_ne0
+  have e9 : Complex.Gamma (1 - sR15 / 2 + 10)
+      = (1 - sR15 / 2 + 9)
+        * Complex.Gamma (1 - sR15 / 2 + 9) := by
+    have h : (1 - sR15 / 2 + 10)
+        = ((1 - sR15 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add9_ne0
+  have e10 : Complex.Gamma (1 - sR15 / 2 + 11)
+      = (1 - sR15 / 2 + 10)
+        * Complex.Gamma (1 - sR15 / 2 + 10) := by
+    have h : (1 - sR15 / 2 + 11)
+        = ((1 - sR15 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add10_ne0
+  have e11 : Complex.Gamma (1 - sR15 / 2 + 12)
+      = (1 - sR15 / 2 + 11)
+        * Complex.Gamma (1 - sR15 / 2 + 11) := by
+    have h : (1 - sR15 / 2 + 12)
+        = ((1 - sR15 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR15_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR15 / 2 + 1)‖
+      = ‖1 - sR15 / 2‖
+        * ‖Complex.Gamma (1 - sR15 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR15 / 2 + 2)‖
+      = ‖1 - sR15 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR15 / 2 + 3)‖
+      = ‖1 - sR15 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR15 / 2 + 4)‖
+      = ‖1 - sR15 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR15 / 2 + 5)‖
+      = ‖1 - sR15 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR15 / 2 + 6)‖
+      = ‖1 - sR15 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR15 / 2 + 7)‖
+      = ‖1 - sR15 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR15 / 2 + 8)‖
+      = ‖1 - sR15 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR15 / 2 + 9)‖
+      = ‖1 - sR15 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR15 / 2 + 10)‖
+      = ‖1 - sR15 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR15 / 2 + 11)‖
+      = ‖1 - sR15 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR15 / 2 + 12)‖
+      = ‖1 - sR15 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR15 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR15 / 2 + 12)‖
+      = ‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+        * (‖1 - sR15 / 2‖
+          * ‖Complex.Gamma (1 - sR15 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.88 : ℝ) * 0.92
+      ≤ ‖1 - sR15 / 2 + 1‖ * ‖1 - sR15 / 2‖ :=
+    mul_le_mul norm_zUpR15_1_ge norm_zUpR15_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.87 : ℝ) * (1.88 * (0.92))
+      ≤ ‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖)) :=
+    mul_le_mul norm_zUpR15_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.86 : ℝ) * (2.87 * (1.88 * (0.92)))
+      ≤ ‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))) :=
+    mul_le_mul norm_zUpR15_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.86 : ℝ) * (3.86 * (2.87 * (1.88 * (0.92))))
+      ≤ ‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖)))) :=
+    mul_le_mul norm_zUpR15_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.86 : ℝ) * (4.86 * (3.86 * (2.87 * (1.88 * (0.92)))))
+      ≤ ‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))) :=
+    mul_le_mul norm_zUpR15_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.86 : ℝ) * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92))))))
+      ≤ ‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖)))))) :=
+    mul_le_mul norm_zUpR15_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.85 : ℝ) * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92)))))))
+      ≤ ‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))))) :=
+    mul_le_mul norm_zUpR15_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.85 : ℝ) * (7.85 * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92))))))))
+      ≤ ‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR15_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.85 : ℝ) * (8.85 * (7.85 * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92)))))))))
+      ≤ ‖1 - sR15 / 2 + 9‖ * (‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR15_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.85 : ℝ) * (9.85 * (8.85 * (7.85 * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92))))))))))
+      ≤ ‖1 - sR15 / 2 + 10‖ * (‖1 - sR15 / 2 + 9‖ * (‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR15_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.85 : ℝ) * (10.85 * (9.85 * (8.85 * (7.85 * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92)))))))))))
+      ≤ ‖1 - sR15 / 2 + 11‖ * (‖1 - sR15 / 2 + 10‖ * (‖1 - sR15 / 2 + 9‖ * (‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR15_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (320000000 : ℝ)
+      ≤ (11.85 : ℝ) * (10.85 * (9.85 * (8.85 * (7.85 * (6.86 * (5.86 * (4.86 * (3.86 * (2.87 * (1.88 * (0.92))))))))))) := by
+    norm_num
+  have hD_ge : (320000000 : ℝ)
+      ≤ ‖1 - sR15 / 2 + 11‖ * (‖1 - sR15 / 2 + 10‖ * (‖1 - sR15 / 2 + 9‖ * (‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR15 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR15 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR15_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR15 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR15 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR15 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR15 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR15 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR15 / 2)‖ = ‖Complex.Gamma (1 - sR15 / 2 + 12)‖ ≤ 348000000`, `D ≤ 320000000`.
+  have hD_mul : (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR15 / 2)‖
+      = ‖Complex.Gamma (1 - sR15 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR15 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR15 / 2)‖
+        * (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR15 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR15 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR15 / 2)‖
+      ≤ 348000000 / (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 1.5 * (‖1 - sR15 / 2 + 11‖
+        * (‖1 - sR15 / 2 + 10‖
+        * (‖1 - sR15 / 2 + 9‖
+        * (‖1 - sR15 / 2 + 8‖
+        * (‖1 - sR15 / 2 + 7‖
+        * (‖1 - sR15 / 2 + 6‖
+        * (‖1 - sR15 / 2 + 5‖
+        * (‖1 - sR15 / 2 + 4‖
+        * (‖1 - sR15 / 2 + 3‖
+        * (‖1 - sR15 / 2 + 2‖
+        * (‖1 - sR15 / 2 + 1‖
+          * ‖1 - sR15 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 1.5 * 320000000 := by norm_num
+      _ ≤ 1.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR15 / 2 + 11‖ * (‖1 - sR15 / 2 + 10‖ * (‖1 - sR15 / 2 + 9‖ * (‖1 - sR15 / 2 + 8‖ * (‖1 - sR15 / 2 + 7‖ * (‖1 - sR15 / 2 + 6‖ * (‖1 - sR15 / 2 + 5‖ * (‖1 - sR15 / 2 + 4‖ * (‖1 - sR15 / 2 + 3‖ * (‖1 - sR15 / 2 + 2‖ * (‖1 - sR15 / 2 + 1‖ * (‖1 - sR15 / 2‖))))))))))))
+      ≤ 1.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R15GammaUpper
+
+namespace R16GammaUpper
+
+/-- The R16 `s`-plane center: `s = 1/2 + I·z` at `z = R16.center`. -/
+noncomputable def sR16 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R16.center
+
+/-- `R16.center = 1.25 + 0.2·I` (from `R16_x0/x1/y0/y1`). -/
+theorem R16_center_eq :
+    CentralCoverAssembly.R16.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R16_x0, CentralCoverAssembly.R16_x1,
+      CentralCoverAssembly.R16_y0, CentralCoverAssembly.R16_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R16_x0, CentralCoverAssembly.R16_x1,
+      CentralCoverAssembly.R16_y0, CentralCoverAssembly.R16_y1]
+    simp
+    norm_num
+
+/-- `Re sR16 = 0.3`. -/
+theorem sR16_re : sR16.re = 0.3 := by
+  unfold sR16
+  rw [R16_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR16 = 1.25`. -/
+theorem sR16_im : sR16.im = 1.25 := by
+  unfold sR16
+  rw [R16_center_eq]
+  simp
+
+/-- `Re(1 - sR16/2) = 0.85`. -/
+theorem zUpR16_re : (1 - sR16 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR16_re]
+  norm_num
+
+/-- `Im(1 - sR16/2) = -0.625`. -/
+theorem zUpR16_im : (1 - sR16 / 2).im = -0.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR16_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.05 ≤ ‖1 - sR16 / 2‖`. -/
+theorem norm_zUpR16_0_ge :
+    (1.05 : ℝ) ≤ ‖1 - sR16 / 2‖ := by
+  have hsq : (1.05 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR16_re, zUpR16_im]
+    norm_num
+  calc (1.05 : ℝ) = Real.sqrt ((1.05 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.95 ≤ ‖1 - sR16 / 2 + 1‖`. -/
+theorem norm_zUpR16_1_ge :
+    (1.95 : ℝ) ≤ ‖1 - sR16 / 2 + 1‖ := by
+  have hre : (1 - sR16 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR16 / 2 + 1).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.one_im]
+    norm_num
+  have hsq : (1.95 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.95 : ℝ) = Real.sqrt ((1.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.91 ≤ ‖1 - sR16 / 2 + 2‖`. -/
+theorem norm_zUpR16_2_ge :
+    (2.91 : ℝ) ≤ ‖1 - sR16 / 2 + 2‖ := by
+  have hre : (1 - sR16 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 2).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.91 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.91 : ℝ) = Real.sqrt ((2.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.9 ≤ ‖1 - sR16 / 2 + 3‖`. -/
+theorem norm_zUpR16_3_ge :
+    (3.9 : ℝ) ≤ ‖1 - sR16 / 2 + 3‖ := by
+  have hre : (1 - sR16 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 3).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.9 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.9 : ℝ) = Real.sqrt ((3.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.89 ≤ ‖1 - sR16 / 2 + 4‖`. -/
+theorem norm_zUpR16_4_ge :
+    (4.89 : ℝ) ≤ ‖1 - sR16 / 2 + 4‖ := by
+  have hre : (1 - sR16 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 4).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.89 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.89 : ℝ) = Real.sqrt ((4.89 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.88 ≤ ‖1 - sR16 / 2 + 5‖`. -/
+theorem norm_zUpR16_5_ge :
+    (5.88 : ℝ) ≤ ‖1 - sR16 / 2 + 5‖ := by
+  have hre : (1 - sR16 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 5).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.88 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.88 : ℝ) = Real.sqrt ((5.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.87 ≤ ‖1 - sR16 / 2 + 6‖`. -/
+theorem norm_zUpR16_6_ge :
+    (6.87 : ℝ) ≤ ‖1 - sR16 / 2 + 6‖ := by
+  have hre : (1 - sR16 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 6).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.87 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.87 : ℝ) = Real.sqrt ((6.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.87 ≤ ‖1 - sR16 / 2 + 7‖`. -/
+theorem norm_zUpR16_7_ge :
+    (7.87 : ℝ) ≤ ‖1 - sR16 / 2 + 7‖ := by
+  have hre : (1 - sR16 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 7).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.87 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.87 : ℝ) = Real.sqrt ((7.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.87 ≤ ‖1 - sR16 / 2 + 8‖`. -/
+theorem norm_zUpR16_8_ge :
+    (8.87 : ℝ) ≤ ‖1 - sR16 / 2 + 8‖ := by
+  have hre : (1 - sR16 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 8).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.87 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.87 : ℝ) = Real.sqrt ((8.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.86 ≤ ‖1 - sR16 / 2 + 9‖`. -/
+theorem norm_zUpR16_9_ge :
+    (9.86 : ℝ) ≤ ‖1 - sR16 / 2 + 9‖ := by
+  have hre : (1 - sR16 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 9).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.86 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.86 : ℝ) = Real.sqrt ((9.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.86 ≤ ‖1 - sR16 / 2 + 10‖`. -/
+theorem norm_zUpR16_10_ge :
+    (10.86 : ℝ) ≤ ‖1 - sR16 / 2 + 10‖ := by
+  have hre : (1 - sR16 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 10).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.86 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.86 : ℝ) = Real.sqrt ((10.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.86 ≤ ‖1 - sR16 / 2 + 11‖`. -/
+theorem norm_zUpR16_11_ge :
+    (11.86 : ℝ) ≤ ‖1 - sR16 / 2 + 11‖ := by
+  have hre : (1 - sR16 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR16 / 2 + 11).im = -0.625 := by
+    simp only [Complex.add_im, zUpR16_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.86 : ℝ) ^ 2 ≤ ‖1 - sR16 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.86 : ℝ) = Real.sqrt ((11.86 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR16 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR16 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR16_ne0 : (1 - sR16 / 2) ≠ 0 := by
+  have hre : (1 - sR16 / 2).re = 0.85 := zUpR16_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add1_ne0 : (1 - sR16 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add2_ne0 : (1 - sR16 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add3_ne0 : (1 - sR16 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add4_ne0 : (1 - sR16 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add5_ne0 : (1 - sR16 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add6_ne0 : (1 - sR16 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add7_ne0 : (1 - sR16 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add8_ne0 : (1 - sR16 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add9_ne0 : (1 - sR16 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add10_ne0 : (1 - sR16 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR16_add11_ne0 : (1 - sR16 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR16 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R16 corner:
+`‖Complex.Gamma (1 - sR16 / 2)‖ ≤ 1.2` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R16 :
+    ‖Complex.Gamma (1 - sR16 / 2)‖ ≤ 1.2 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR16 / 2 + 1)
+      = (1 - sR16 / 2) * Complex.Gamma (1 - sR16 / 2) :=
+    Complex.Gamma_add_one _ zUpR16_ne0
+  have e1 : Complex.Gamma (1 - sR16 / 2 + 2)
+      = (1 - sR16 / 2 + 1)
+        * Complex.Gamma (1 - sR16 / 2 + 1) := by
+    have h : (1 - sR16 / 2 + 2)
+        = ((1 - sR16 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add1_ne0
+  have e2 : Complex.Gamma (1 - sR16 / 2 + 3)
+      = (1 - sR16 / 2 + 2)
+        * Complex.Gamma (1 - sR16 / 2 + 2) := by
+    have h : (1 - sR16 / 2 + 3)
+        = ((1 - sR16 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add2_ne0
+  have e3 : Complex.Gamma (1 - sR16 / 2 + 4)
+      = (1 - sR16 / 2 + 3)
+        * Complex.Gamma (1 - sR16 / 2 + 3) := by
+    have h : (1 - sR16 / 2 + 4)
+        = ((1 - sR16 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add3_ne0
+  have e4 : Complex.Gamma (1 - sR16 / 2 + 5)
+      = (1 - sR16 / 2 + 4)
+        * Complex.Gamma (1 - sR16 / 2 + 4) := by
+    have h : (1 - sR16 / 2 + 5)
+        = ((1 - sR16 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add4_ne0
+  have e5 : Complex.Gamma (1 - sR16 / 2 + 6)
+      = (1 - sR16 / 2 + 5)
+        * Complex.Gamma (1 - sR16 / 2 + 5) := by
+    have h : (1 - sR16 / 2 + 6)
+        = ((1 - sR16 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add5_ne0
+  have e6 : Complex.Gamma (1 - sR16 / 2 + 7)
+      = (1 - sR16 / 2 + 6)
+        * Complex.Gamma (1 - sR16 / 2 + 6) := by
+    have h : (1 - sR16 / 2 + 7)
+        = ((1 - sR16 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add6_ne0
+  have e7 : Complex.Gamma (1 - sR16 / 2 + 8)
+      = (1 - sR16 / 2 + 7)
+        * Complex.Gamma (1 - sR16 / 2 + 7) := by
+    have h : (1 - sR16 / 2 + 8)
+        = ((1 - sR16 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add7_ne0
+  have e8 : Complex.Gamma (1 - sR16 / 2 + 9)
+      = (1 - sR16 / 2 + 8)
+        * Complex.Gamma (1 - sR16 / 2 + 8) := by
+    have h : (1 - sR16 / 2 + 9)
+        = ((1 - sR16 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add8_ne0
+  have e9 : Complex.Gamma (1 - sR16 / 2 + 10)
+      = (1 - sR16 / 2 + 9)
+        * Complex.Gamma (1 - sR16 / 2 + 9) := by
+    have h : (1 - sR16 / 2 + 10)
+        = ((1 - sR16 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add9_ne0
+  have e10 : Complex.Gamma (1 - sR16 / 2 + 11)
+      = (1 - sR16 / 2 + 10)
+        * Complex.Gamma (1 - sR16 / 2 + 10) := by
+    have h : (1 - sR16 / 2 + 11)
+        = ((1 - sR16 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add10_ne0
+  have e11 : Complex.Gamma (1 - sR16 / 2 + 12)
+      = (1 - sR16 / 2 + 11)
+        * Complex.Gamma (1 - sR16 / 2 + 11) := by
+    have h : (1 - sR16 / 2 + 12)
+        = ((1 - sR16 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR16_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR16 / 2 + 1)‖
+      = ‖1 - sR16 / 2‖
+        * ‖Complex.Gamma (1 - sR16 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR16 / 2 + 2)‖
+      = ‖1 - sR16 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR16 / 2 + 3)‖
+      = ‖1 - sR16 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR16 / 2 + 4)‖
+      = ‖1 - sR16 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR16 / 2 + 5)‖
+      = ‖1 - sR16 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR16 / 2 + 6)‖
+      = ‖1 - sR16 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR16 / 2 + 7)‖
+      = ‖1 - sR16 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR16 / 2 + 8)‖
+      = ‖1 - sR16 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR16 / 2 + 9)‖
+      = ‖1 - sR16 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR16 / 2 + 10)‖
+      = ‖1 - sR16 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR16 / 2 + 11)‖
+      = ‖1 - sR16 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR16 / 2 + 12)‖
+      = ‖1 - sR16 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR16 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR16 / 2 + 12)‖
+      = ‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+        * (‖1 - sR16 / 2‖
+          * ‖Complex.Gamma (1 - sR16 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.95 : ℝ) * 1.05
+      ≤ ‖1 - sR16 / 2 + 1‖ * ‖1 - sR16 / 2‖ :=
+    mul_le_mul norm_zUpR16_1_ge norm_zUpR16_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.91 : ℝ) * (1.95 * (1.05))
+      ≤ ‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖)) :=
+    mul_le_mul norm_zUpR16_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.9 : ℝ) * (2.91 * (1.95 * (1.05)))
+      ≤ ‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))) :=
+    mul_le_mul norm_zUpR16_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.89 : ℝ) * (3.9 * (2.91 * (1.95 * (1.05))))
+      ≤ ‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖)))) :=
+    mul_le_mul norm_zUpR16_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.88 : ℝ) * (4.89 * (3.9 * (2.91 * (1.95 * (1.05)))))
+      ≤ ‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))) :=
+    mul_le_mul norm_zUpR16_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.87 : ℝ) * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05))))))
+      ≤ ‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖)))))) :=
+    mul_le_mul norm_zUpR16_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.87 : ℝ) * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05)))))))
+      ≤ ‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))))) :=
+    mul_le_mul norm_zUpR16_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.87 : ℝ) * (7.87 * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05))))))))
+      ≤ ‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR16_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.86 : ℝ) * (8.87 * (7.87 * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05)))))))))
+      ≤ ‖1 - sR16 / 2 + 9‖ * (‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR16_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.86 : ℝ) * (9.86 * (8.87 * (7.87 * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05))))))))))
+      ≤ ‖1 - sR16 / 2 + 10‖ * (‖1 - sR16 / 2 + 9‖ * (‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR16_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.86 : ℝ) * (10.86 * (9.86 * (8.87 * (7.87 * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05)))))))))))
+      ≤ ‖1 - sR16 / 2 + 11‖ * (‖1 - sR16 / 2 + 10‖ * (‖1 - sR16 / 2 + 9‖ * (‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR16_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (400000000 : ℝ)
+      ≤ (11.86 : ℝ) * (10.86 * (9.86 * (8.87 * (7.87 * (6.87 * (5.88 * (4.89 * (3.9 * (2.91 * (1.95 * (1.05))))))))))) := by
+    norm_num
+  have hD_ge : (400000000 : ℝ)
+      ≤ ‖1 - sR16 / 2 + 11‖ * (‖1 - sR16 / 2 + 10‖ * (‖1 - sR16 / 2 + 9‖ * (‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR16 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR16 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR16_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR16 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR16 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR16 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR16 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR16 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR16 / 2)‖ = ‖Complex.Gamma (1 - sR16 / 2 + 12)‖ ≤ 348000000`, `D ≤ 400000000`.
+  have hD_mul : (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR16 / 2)‖
+      = ‖Complex.Gamma (1 - sR16 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR16 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR16 / 2)‖
+        * (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR16 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR16 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR16 / 2)‖
+      ≤ 348000000 / (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 1.2 * (‖1 - sR16 / 2 + 11‖
+        * (‖1 - sR16 / 2 + 10‖
+        * (‖1 - sR16 / 2 + 9‖
+        * (‖1 - sR16 / 2 + 8‖
+        * (‖1 - sR16 / 2 + 7‖
+        * (‖1 - sR16 / 2 + 6‖
+        * (‖1 - sR16 / 2 + 5‖
+        * (‖1 - sR16 / 2 + 4‖
+        * (‖1 - sR16 / 2 + 3‖
+        * (‖1 - sR16 / 2 + 2‖
+        * (‖1 - sR16 / 2 + 1‖
+          * ‖1 - sR16 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 1.2 * 400000000 := by norm_num
+      _ ≤ 1.2 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR16 / 2 + 11‖ * (‖1 - sR16 / 2 + 10‖ * (‖1 - sR16 / 2 + 9‖ * (‖1 - sR16 / 2 + 8‖ * (‖1 - sR16 / 2 + 7‖ * (‖1 - sR16 / 2 + 6‖ * (‖1 - sR16 / 2 + 5‖ * (‖1 - sR16 / 2 + 4‖ * (‖1 - sR16 / 2 + 3‖ * (‖1 - sR16 / 2 + 2‖ * (‖1 - sR16 / 2 + 1‖ * (‖1 - sR16 / 2‖))))))))))))
+      ≤ 1.2 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R16GammaUpper
+
+namespace R17GammaUpper
+
+/-- The R17 `s`-plane center: `s = 1/2 + I·z` at `z = R17.center`. -/
+noncomputable def sR17 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R17.center
+
+/-- `R17.center = 3.25 + 0.2·I` (from `R17_x0/x1/y0/y1`). -/
+theorem R17_center_eq :
+    CentralCoverAssembly.R17.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R17_x0, CentralCoverAssembly.R17_x1,
+      CentralCoverAssembly.R17_y0, CentralCoverAssembly.R17_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R17_x0, CentralCoverAssembly.R17_x1,
+      CentralCoverAssembly.R17_y0, CentralCoverAssembly.R17_y1]
+    simp
+    norm_num
+
+/-- `Re sR17 = 0.3`. -/
+theorem sR17_re : sR17.re = 0.3 := by
+  unfold sR17
+  rw [R17_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR17 = 3.25`. -/
+theorem sR17_im : sR17.im = 3.25 := by
+  unfold sR17
+  rw [R17_center_eq]
+  simp
+
+/-- `Re(1 - sR17/2) = 0.85`. -/
+theorem zUpR17_re : (1 - sR17 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR17_re]
+  norm_num
+
+/-- `Im(1 - sR17/2) = -1.625`. -/
+theorem zUpR17_im : (1 - sR17 / 2).im = -1.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR17_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.83 ≤ ‖1 - sR17 / 2‖`. -/
+theorem norm_zUpR17_0_ge :
+    (1.83 : ℝ) ≤ ‖1 - sR17 / 2‖ := by
+  have hsq : (1.83 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR17_re, zUpR17_im]
+    norm_num
+  calc (1.83 : ℝ) = Real.sqrt ((1.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.46 ≤ ‖1 - sR17 / 2 + 1‖`. -/
+theorem norm_zUpR17_1_ge :
+    (2.46 : ℝ) ≤ ‖1 - sR17 / 2 + 1‖ := by
+  have hre : (1 - sR17 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR17 / 2 + 1).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.one_im]
+    norm_num
+  have hsq : (2.46 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.46 : ℝ) = Real.sqrt ((2.46 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.28 ≤ ‖1 - sR17 / 2 + 2‖`. -/
+theorem norm_zUpR17_2_ge :
+    (3.28 : ℝ) ≤ ‖1 - sR17 / 2 + 2‖ := by
+  have hre : (1 - sR17 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 2).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.28 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.28 : ℝ) = Real.sqrt ((3.28 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.17 ≤ ‖1 - sR17 / 2 + 3‖`. -/
+theorem norm_zUpR17_3_ge :
+    (4.17 : ℝ) ≤ ‖1 - sR17 / 2 + 3‖ := by
+  have hre : (1 - sR17 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 3).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.17 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.17 : ℝ) = Real.sqrt ((4.17 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.11 ≤ ‖1 - sR17 / 2 + 4‖`. -/
+theorem norm_zUpR17_4_ge :
+    (5.11 : ℝ) ≤ ‖1 - sR17 / 2 + 4‖ := by
+  have hre : (1 - sR17 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 4).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.11 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.11 : ℝ) = Real.sqrt ((5.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.07 ≤ ‖1 - sR17 / 2 + 5‖`. -/
+theorem norm_zUpR17_5_ge :
+    (6.07 : ℝ) ≤ ‖1 - sR17 / 2 + 5‖ := by
+  have hre : (1 - sR17 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 5).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.07 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.07 : ℝ) = Real.sqrt ((6.07 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.04 ≤ ‖1 - sR17 / 2 + 6‖`. -/
+theorem norm_zUpR17_6_ge :
+    (7.04 : ℝ) ≤ ‖1 - sR17 / 2 + 6‖ := by
+  have hre : (1 - sR17 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 6).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.04 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.04 : ℝ) = Real.sqrt ((7.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.01 ≤ ‖1 - sR17 / 2 + 7‖`. -/
+theorem norm_zUpR17_7_ge :
+    (8.01 : ℝ) ≤ ‖1 - sR17 / 2 + 7‖ := by
+  have hre : (1 - sR17 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 7).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.01 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.01 : ℝ) = Real.sqrt ((8.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.99 ≤ ‖1 - sR17 / 2 + 8‖`. -/
+theorem norm_zUpR17_8_ge :
+    (8.99 : ℝ) ≤ ‖1 - sR17 / 2 + 8‖ := by
+  have hre : (1 - sR17 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 8).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.99 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.99 : ℝ) = Real.sqrt ((8.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.98 ≤ ‖1 - sR17 / 2 + 9‖`. -/
+theorem norm_zUpR17_9_ge :
+    (9.98 : ℝ) ≤ ‖1 - sR17 / 2 + 9‖ := by
+  have hre : (1 - sR17 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 9).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.98 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.98 : ℝ) = Real.sqrt ((9.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.97 ≤ ‖1 - sR17 / 2 + 10‖`. -/
+theorem norm_zUpR17_10_ge :
+    (10.97 : ℝ) ≤ ‖1 - sR17 / 2 + 10‖ := by
+  have hre : (1 - sR17 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 10).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.97 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.97 : ℝ) = Real.sqrt ((10.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.96 ≤ ‖1 - sR17 / 2 + 11‖`. -/
+theorem norm_zUpR17_11_ge :
+    (11.96 : ℝ) ≤ ‖1 - sR17 / 2 + 11‖ := by
+  have hre : (1 - sR17 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR17 / 2 + 11).im = -1.625 := by
+    simp only [Complex.add_im, zUpR17_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.96 : ℝ) ^ 2 ≤ ‖1 - sR17 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.96 : ℝ) = Real.sqrt ((11.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR17 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR17 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR17_ne0 : (1 - sR17 / 2) ≠ 0 := by
+  have hre : (1 - sR17 / 2).re = 0.85 := zUpR17_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add1_ne0 : (1 - sR17 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add2_ne0 : (1 - sR17 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add3_ne0 : (1 - sR17 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add4_ne0 : (1 - sR17 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add5_ne0 : (1 - sR17 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add6_ne0 : (1 - sR17 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add7_ne0 : (1 - sR17 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add8_ne0 : (1 - sR17 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add9_ne0 : (1 - sR17 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add10_ne0 : (1 - sR17 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR17_add11_ne0 : (1 - sR17 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR17 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R17 corner:
+`‖Complex.Gamma (1 - sR17 / 2)‖ ≤ 0.5` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R17 :
+    ‖Complex.Gamma (1 - sR17 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR17 / 2 + 1)
+      = (1 - sR17 / 2) * Complex.Gamma (1 - sR17 / 2) :=
+    Complex.Gamma_add_one _ zUpR17_ne0
+  have e1 : Complex.Gamma (1 - sR17 / 2 + 2)
+      = (1 - sR17 / 2 + 1)
+        * Complex.Gamma (1 - sR17 / 2 + 1) := by
+    have h : (1 - sR17 / 2 + 2)
+        = ((1 - sR17 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add1_ne0
+  have e2 : Complex.Gamma (1 - sR17 / 2 + 3)
+      = (1 - sR17 / 2 + 2)
+        * Complex.Gamma (1 - sR17 / 2 + 2) := by
+    have h : (1 - sR17 / 2 + 3)
+        = ((1 - sR17 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add2_ne0
+  have e3 : Complex.Gamma (1 - sR17 / 2 + 4)
+      = (1 - sR17 / 2 + 3)
+        * Complex.Gamma (1 - sR17 / 2 + 3) := by
+    have h : (1 - sR17 / 2 + 4)
+        = ((1 - sR17 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add3_ne0
+  have e4 : Complex.Gamma (1 - sR17 / 2 + 5)
+      = (1 - sR17 / 2 + 4)
+        * Complex.Gamma (1 - sR17 / 2 + 4) := by
+    have h : (1 - sR17 / 2 + 5)
+        = ((1 - sR17 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add4_ne0
+  have e5 : Complex.Gamma (1 - sR17 / 2 + 6)
+      = (1 - sR17 / 2 + 5)
+        * Complex.Gamma (1 - sR17 / 2 + 5) := by
+    have h : (1 - sR17 / 2 + 6)
+        = ((1 - sR17 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add5_ne0
+  have e6 : Complex.Gamma (1 - sR17 / 2 + 7)
+      = (1 - sR17 / 2 + 6)
+        * Complex.Gamma (1 - sR17 / 2 + 6) := by
+    have h : (1 - sR17 / 2 + 7)
+        = ((1 - sR17 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add6_ne0
+  have e7 : Complex.Gamma (1 - sR17 / 2 + 8)
+      = (1 - sR17 / 2 + 7)
+        * Complex.Gamma (1 - sR17 / 2 + 7) := by
+    have h : (1 - sR17 / 2 + 8)
+        = ((1 - sR17 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add7_ne0
+  have e8 : Complex.Gamma (1 - sR17 / 2 + 9)
+      = (1 - sR17 / 2 + 8)
+        * Complex.Gamma (1 - sR17 / 2 + 8) := by
+    have h : (1 - sR17 / 2 + 9)
+        = ((1 - sR17 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add8_ne0
+  have e9 : Complex.Gamma (1 - sR17 / 2 + 10)
+      = (1 - sR17 / 2 + 9)
+        * Complex.Gamma (1 - sR17 / 2 + 9) := by
+    have h : (1 - sR17 / 2 + 10)
+        = ((1 - sR17 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add9_ne0
+  have e10 : Complex.Gamma (1 - sR17 / 2 + 11)
+      = (1 - sR17 / 2 + 10)
+        * Complex.Gamma (1 - sR17 / 2 + 10) := by
+    have h : (1 - sR17 / 2 + 11)
+        = ((1 - sR17 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add10_ne0
+  have e11 : Complex.Gamma (1 - sR17 / 2 + 12)
+      = (1 - sR17 / 2 + 11)
+        * Complex.Gamma (1 - sR17 / 2 + 11) := by
+    have h : (1 - sR17 / 2 + 12)
+        = ((1 - sR17 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR17_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR17 / 2 + 1)‖
+      = ‖1 - sR17 / 2‖
+        * ‖Complex.Gamma (1 - sR17 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR17 / 2 + 2)‖
+      = ‖1 - sR17 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR17 / 2 + 3)‖
+      = ‖1 - sR17 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR17 / 2 + 4)‖
+      = ‖1 - sR17 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR17 / 2 + 5)‖
+      = ‖1 - sR17 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR17 / 2 + 6)‖
+      = ‖1 - sR17 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR17 / 2 + 7)‖
+      = ‖1 - sR17 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR17 / 2 + 8)‖
+      = ‖1 - sR17 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR17 / 2 + 9)‖
+      = ‖1 - sR17 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR17 / 2 + 10)‖
+      = ‖1 - sR17 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR17 / 2 + 11)‖
+      = ‖1 - sR17 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR17 / 2 + 12)‖
+      = ‖1 - sR17 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR17 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR17 / 2 + 12)‖
+      = ‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+        * (‖1 - sR17 / 2‖
+          * ‖Complex.Gamma (1 - sR17 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.46 : ℝ) * 1.83
+      ≤ ‖1 - sR17 / 2 + 1‖ * ‖1 - sR17 / 2‖ :=
+    mul_le_mul norm_zUpR17_1_ge norm_zUpR17_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.28 : ℝ) * (2.46 * (1.83))
+      ≤ ‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖)) :=
+    mul_le_mul norm_zUpR17_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.17 : ℝ) * (3.28 * (2.46 * (1.83)))
+      ≤ ‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))) :=
+    mul_le_mul norm_zUpR17_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.11 : ℝ) * (4.17 * (3.28 * (2.46 * (1.83))))
+      ≤ ‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖)))) :=
+    mul_le_mul norm_zUpR17_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.07 : ℝ) * (5.11 * (4.17 * (3.28 * (2.46 * (1.83)))))
+      ≤ ‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))) :=
+    mul_le_mul norm_zUpR17_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.04 : ℝ) * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83))))))
+      ≤ ‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖)))))) :=
+    mul_le_mul norm_zUpR17_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.01 : ℝ) * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83)))))))
+      ≤ ‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))))) :=
+    mul_le_mul norm_zUpR17_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.99 : ℝ) * (8.01 * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83))))))))
+      ≤ ‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR17_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.98 : ℝ) * (8.99 * (8.01 * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83)))))))))
+      ≤ ‖1 - sR17 / 2 + 9‖ * (‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR17_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.97 : ℝ) * (9.98 * (8.99 * (8.01 * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83))))))))))
+      ≤ ‖1 - sR17 / 2 + 10‖ * (‖1 - sR17 / 2 + 9‖ * (‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR17_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.96 : ℝ) * (10.97 * (9.98 * (8.99 * (8.01 * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83)))))))))))
+      ≤ ‖1 - sR17 / 2 + 11‖ * (‖1 - sR17 / 2 + 10‖ * (‖1 - sR17 / 2 + 9‖ * (‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR17_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (1200000000 : ℝ)
+      ≤ (11.96 : ℝ) * (10.97 * (9.98 * (8.99 * (8.01 * (7.04 * (6.07 * (5.11 * (4.17 * (3.28 * (2.46 * (1.83))))))))))) := by
+    norm_num
+  have hD_ge : (1200000000 : ℝ)
+      ≤ ‖1 - sR17 / 2 + 11‖ * (‖1 - sR17 / 2 + 10‖ * (‖1 - sR17 / 2 + 9‖ * (‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR17 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR17 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR17_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR17 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR17 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR17 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR17 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR17 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR17 / 2)‖ = ‖Complex.Gamma (1 - sR17 / 2 + 12)‖ ≤ 348000000`, `D ≤ 1200000000`.
+  have hD_mul : (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR17 / 2)‖
+      = ‖Complex.Gamma (1 - sR17 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR17 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR17 / 2)‖
+        * (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR17 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR17 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR17 / 2)‖
+      ≤ 348000000 / (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR17 / 2 + 11‖
+        * (‖1 - sR17 / 2 + 10‖
+        * (‖1 - sR17 / 2 + 9‖
+        * (‖1 - sR17 / 2 + 8‖
+        * (‖1 - sR17 / 2 + 7‖
+        * (‖1 - sR17 / 2 + 6‖
+        * (‖1 - sR17 / 2 + 5‖
+        * (‖1 - sR17 / 2 + 4‖
+        * (‖1 - sR17 / 2 + 3‖
+        * (‖1 - sR17 / 2 + 2‖
+        * (‖1 - sR17 / 2 + 1‖
+          * ‖1 - sR17 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.5 * 1200000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR17 / 2 + 11‖ * (‖1 - sR17 / 2 + 10‖ * (‖1 - sR17 / 2 + 9‖ * (‖1 - sR17 / 2 + 8‖ * (‖1 - sR17 / 2 + 7‖ * (‖1 - sR17 / 2 + 6‖ * (‖1 - sR17 / 2 + 5‖ * (‖1 - sR17 / 2 + 4‖ * (‖1 - sR17 / 2 + 3‖ * (‖1 - sR17 / 2 + 2‖ * (‖1 - sR17 / 2 + 1‖ * (‖1 - sR17 / 2‖))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R17GammaUpper
+
+namespace R18GammaUpper
+
+/-- The R18 `s`-plane center: `s = 1/2 + I·z` at `z = R18.center`. -/
+noncomputable def sR18 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R18.center
+
+/-- `R18.center = 5.25 + 0.2·I` (from `R18_x0/x1/y0/y1`). -/
+theorem R18_center_eq :
+    CentralCoverAssembly.R18.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R18_x0, CentralCoverAssembly.R18_x1,
+      CentralCoverAssembly.R18_y0, CentralCoverAssembly.R18_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R18_x0, CentralCoverAssembly.R18_x1,
+      CentralCoverAssembly.R18_y0, CentralCoverAssembly.R18_y1]
+    simp
+    norm_num
+
+/-- `Re sR18 = 0.3`. -/
+theorem sR18_re : sR18.re = 0.3 := by
+  unfold sR18
+  rw [R18_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR18 = 5.25`. -/
+theorem sR18_im : sR18.im = 5.25 := by
+  unfold sR18
+  rw [R18_center_eq]
+  simp
+
+/-- `Re(1 - sR18/2) = 0.85`. -/
+theorem zUpR18_re : (1 - sR18 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR18_re]
+  norm_num
+
+/-- `Im(1 - sR18/2) = -2.625`. -/
+theorem zUpR18_im : (1 - sR18 / 2).im = -2.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR18_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.75 ≤ ‖1 - sR18 / 2‖`. -/
+theorem norm_zUpR18_0_ge :
+    (2.75 : ℝ) ≤ ‖1 - sR18 / 2‖ := by
+  have hsq : (2.75 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR18_re, zUpR18_im]
+    norm_num
+  calc (2.75 : ℝ) = Real.sqrt ((2.75 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.21 ≤ ‖1 - sR18 / 2 + 1‖`. -/
+theorem norm_zUpR18_1_ge :
+    (3.21 : ℝ) ≤ ‖1 - sR18 / 2 + 1‖ := by
+  have hre : (1 - sR18 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR18 / 2 + 1).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.one_im]
+    norm_num
+  have hsq : (3.21 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.21 : ℝ) = Real.sqrt ((3.21 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.87 ≤ ‖1 - sR18 / 2 + 2‖`. -/
+theorem norm_zUpR18_2_ge :
+    (3.87 : ℝ) ≤ ‖1 - sR18 / 2 + 2‖ := by
+  have hre : (1 - sR18 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 2).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.87 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.87 : ℝ) = Real.sqrt ((3.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.65 ≤ ‖1 - sR18 / 2 + 3‖`. -/
+theorem norm_zUpR18_3_ge :
+    (4.65 : ℝ) ≤ ‖1 - sR18 / 2 + 3‖ := by
+  have hre : (1 - sR18 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 3).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.65 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.65 : ℝ) = Real.sqrt ((4.65 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.51 ≤ ‖1 - sR18 / 2 + 4‖`. -/
+theorem norm_zUpR18_4_ge :
+    (5.51 : ℝ) ≤ ‖1 - sR18 / 2 + 4‖ := by
+  have hre : (1 - sR18 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 4).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.51 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.51 : ℝ) = Real.sqrt ((5.51 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.41 ≤ ‖1 - sR18 / 2 + 5‖`. -/
+theorem norm_zUpR18_5_ge :
+    (6.41 : ℝ) ≤ ‖1 - sR18 / 2 + 5‖ := by
+  have hre : (1 - sR18 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 5).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.41 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.41 : ℝ) = Real.sqrt ((6.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.33 ≤ ‖1 - sR18 / 2 + 6‖`. -/
+theorem norm_zUpR18_6_ge :
+    (7.33 : ℝ) ≤ ‖1 - sR18 / 2 + 6‖ := by
+  have hre : (1 - sR18 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 6).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.33 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.33 : ℝ) = Real.sqrt ((7.33 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.27 ≤ ‖1 - sR18 / 2 + 7‖`. -/
+theorem norm_zUpR18_7_ge :
+    (8.27 : ℝ) ≤ ‖1 - sR18 / 2 + 7‖ := by
+  have hre : (1 - sR18 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 7).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.27 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.27 : ℝ) = Real.sqrt ((8.27 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.23 ≤ ‖1 - sR18 / 2 + 8‖`. -/
+theorem norm_zUpR18_8_ge :
+    (9.23 : ℝ) ≤ ‖1 - sR18 / 2 + 8‖ := by
+  have hre : (1 - sR18 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 8).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.23 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.23 : ℝ) = Real.sqrt ((9.23 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.19 ≤ ‖1 - sR18 / 2 + 9‖`. -/
+theorem norm_zUpR18_9_ge :
+    (10.19 : ℝ) ≤ ‖1 - sR18 / 2 + 9‖ := by
+  have hre : (1 - sR18 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 9).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.19 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.19 : ℝ) = Real.sqrt ((10.19 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.16 ≤ ‖1 - sR18 / 2 + 10‖`. -/
+theorem norm_zUpR18_10_ge :
+    (11.16 : ℝ) ≤ ‖1 - sR18 / 2 + 10‖ := by
+  have hre : (1 - sR18 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 10).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.16 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.16 : ℝ) = Real.sqrt ((11.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.13 ≤ ‖1 - sR18 / 2 + 11‖`. -/
+theorem norm_zUpR18_11_ge :
+    (12.13 : ℝ) ≤ ‖1 - sR18 / 2 + 11‖ := by
+  have hre : (1 - sR18 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR18 / 2 + 11).im = -2.625 := by
+    simp only [Complex.add_im, zUpR18_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.13 : ℝ) ^ 2 ≤ ‖1 - sR18 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.13 : ℝ) = Real.sqrt ((12.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR18 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR18 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR18_ne0 : (1 - sR18 / 2) ≠ 0 := by
+  have hre : (1 - sR18 / 2).re = 0.85 := zUpR18_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add1_ne0 : (1 - sR18 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add2_ne0 : (1 - sR18 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add3_ne0 : (1 - sR18 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add4_ne0 : (1 - sR18 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add5_ne0 : (1 - sR18 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add6_ne0 : (1 - sR18 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add7_ne0 : (1 - sR18 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add8_ne0 : (1 - sR18 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add9_ne0 : (1 - sR18 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add10_ne0 : (1 - sR18 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR18_add11_ne0 : (1 - sR18 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR18 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R18 corner:
+`‖Complex.Gamma (1 - sR18 / 2)‖ ≤ 0.15` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R18 :
+    ‖Complex.Gamma (1 - sR18 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR18 / 2 + 1)
+      = (1 - sR18 / 2) * Complex.Gamma (1 - sR18 / 2) :=
+    Complex.Gamma_add_one _ zUpR18_ne0
+  have e1 : Complex.Gamma (1 - sR18 / 2 + 2)
+      = (1 - sR18 / 2 + 1)
+        * Complex.Gamma (1 - sR18 / 2 + 1) := by
+    have h : (1 - sR18 / 2 + 2)
+        = ((1 - sR18 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add1_ne0
+  have e2 : Complex.Gamma (1 - sR18 / 2 + 3)
+      = (1 - sR18 / 2 + 2)
+        * Complex.Gamma (1 - sR18 / 2 + 2) := by
+    have h : (1 - sR18 / 2 + 3)
+        = ((1 - sR18 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add2_ne0
+  have e3 : Complex.Gamma (1 - sR18 / 2 + 4)
+      = (1 - sR18 / 2 + 3)
+        * Complex.Gamma (1 - sR18 / 2 + 3) := by
+    have h : (1 - sR18 / 2 + 4)
+        = ((1 - sR18 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add3_ne0
+  have e4 : Complex.Gamma (1 - sR18 / 2 + 5)
+      = (1 - sR18 / 2 + 4)
+        * Complex.Gamma (1 - sR18 / 2 + 4) := by
+    have h : (1 - sR18 / 2 + 5)
+        = ((1 - sR18 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add4_ne0
+  have e5 : Complex.Gamma (1 - sR18 / 2 + 6)
+      = (1 - sR18 / 2 + 5)
+        * Complex.Gamma (1 - sR18 / 2 + 5) := by
+    have h : (1 - sR18 / 2 + 6)
+        = ((1 - sR18 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add5_ne0
+  have e6 : Complex.Gamma (1 - sR18 / 2 + 7)
+      = (1 - sR18 / 2 + 6)
+        * Complex.Gamma (1 - sR18 / 2 + 6) := by
+    have h : (1 - sR18 / 2 + 7)
+        = ((1 - sR18 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add6_ne0
+  have e7 : Complex.Gamma (1 - sR18 / 2 + 8)
+      = (1 - sR18 / 2 + 7)
+        * Complex.Gamma (1 - sR18 / 2 + 7) := by
+    have h : (1 - sR18 / 2 + 8)
+        = ((1 - sR18 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add7_ne0
+  have e8 : Complex.Gamma (1 - sR18 / 2 + 9)
+      = (1 - sR18 / 2 + 8)
+        * Complex.Gamma (1 - sR18 / 2 + 8) := by
+    have h : (1 - sR18 / 2 + 9)
+        = ((1 - sR18 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add8_ne0
+  have e9 : Complex.Gamma (1 - sR18 / 2 + 10)
+      = (1 - sR18 / 2 + 9)
+        * Complex.Gamma (1 - sR18 / 2 + 9) := by
+    have h : (1 - sR18 / 2 + 10)
+        = ((1 - sR18 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add9_ne0
+  have e10 : Complex.Gamma (1 - sR18 / 2 + 11)
+      = (1 - sR18 / 2 + 10)
+        * Complex.Gamma (1 - sR18 / 2 + 10) := by
+    have h : (1 - sR18 / 2 + 11)
+        = ((1 - sR18 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add10_ne0
+  have e11 : Complex.Gamma (1 - sR18 / 2 + 12)
+      = (1 - sR18 / 2 + 11)
+        * Complex.Gamma (1 - sR18 / 2 + 11) := by
+    have h : (1 - sR18 / 2 + 12)
+        = ((1 - sR18 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR18_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR18 / 2 + 1)‖
+      = ‖1 - sR18 / 2‖
+        * ‖Complex.Gamma (1 - sR18 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR18 / 2 + 2)‖
+      = ‖1 - sR18 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR18 / 2 + 3)‖
+      = ‖1 - sR18 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR18 / 2 + 4)‖
+      = ‖1 - sR18 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR18 / 2 + 5)‖
+      = ‖1 - sR18 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR18 / 2 + 6)‖
+      = ‖1 - sR18 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR18 / 2 + 7)‖
+      = ‖1 - sR18 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR18 / 2 + 8)‖
+      = ‖1 - sR18 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR18 / 2 + 9)‖
+      = ‖1 - sR18 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR18 / 2 + 10)‖
+      = ‖1 - sR18 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR18 / 2 + 11)‖
+      = ‖1 - sR18 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR18 / 2 + 12)‖
+      = ‖1 - sR18 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR18 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR18 / 2 + 12)‖
+      = ‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+        * (‖1 - sR18 / 2‖
+          * ‖Complex.Gamma (1 - sR18 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.21 : ℝ) * 2.75
+      ≤ ‖1 - sR18 / 2 + 1‖ * ‖1 - sR18 / 2‖ :=
+    mul_le_mul norm_zUpR18_1_ge norm_zUpR18_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.87 : ℝ) * (3.21 * (2.75))
+      ≤ ‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖)) :=
+    mul_le_mul norm_zUpR18_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.65 : ℝ) * (3.87 * (3.21 * (2.75)))
+      ≤ ‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))) :=
+    mul_le_mul norm_zUpR18_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.51 : ℝ) * (4.65 * (3.87 * (3.21 * (2.75))))
+      ≤ ‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖)))) :=
+    mul_le_mul norm_zUpR18_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.41 : ℝ) * (5.51 * (4.65 * (3.87 * (3.21 * (2.75)))))
+      ≤ ‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))) :=
+    mul_le_mul norm_zUpR18_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.33 : ℝ) * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75))))))
+      ≤ ‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖)))))) :=
+    mul_le_mul norm_zUpR18_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.27 : ℝ) * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75)))))))
+      ≤ ‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))))) :=
+    mul_le_mul norm_zUpR18_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.23 : ℝ) * (8.27 * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75))))))))
+      ≤ ‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR18_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.19 : ℝ) * (9.23 * (8.27 * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75)))))))))
+      ≤ ‖1 - sR18 / 2 + 9‖ * (‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR18_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.16 : ℝ) * (10.19 * (9.23 * (8.27 * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75))))))))))
+      ≤ ‖1 - sR18 / 2 + 10‖ * (‖1 - sR18 / 2 + 9‖ * (‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR18_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.13 : ℝ) * (11.16 * (10.19 * (9.23 * (8.27 * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75)))))))))))
+      ≤ ‖1 - sR18 / 2 + 11‖ * (‖1 - sR18 / 2 + 10‖ * (‖1 - sR18 / 2 + 9‖ * (‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR18_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (4300000000 : ℝ)
+      ≤ (12.13 : ℝ) * (11.16 * (10.19 * (9.23 * (8.27 * (7.33 * (6.41 * (5.51 * (4.65 * (3.87 * (3.21 * (2.75))))))))))) := by
+    norm_num
+  have hD_ge : (4300000000 : ℝ)
+      ≤ ‖1 - sR18 / 2 + 11‖ * (‖1 - sR18 / 2 + 10‖ * (‖1 - sR18 / 2 + 9‖ * (‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR18 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR18 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR18_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR18 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR18 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR18 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR18 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR18 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR18 / 2)‖ = ‖Complex.Gamma (1 - sR18 / 2 + 12)‖ ≤ 348000000`, `D ≤ 4300000000`.
+  have hD_mul : (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR18 / 2)‖
+      = ‖Complex.Gamma (1 - sR18 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR18 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR18 / 2)‖
+        * (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR18 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR18 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR18 / 2)‖
+      ≤ 348000000 / (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR18 / 2 + 11‖
+        * (‖1 - sR18 / 2 + 10‖
+        * (‖1 - sR18 / 2 + 9‖
+        * (‖1 - sR18 / 2 + 8‖
+        * (‖1 - sR18 / 2 + 7‖
+        * (‖1 - sR18 / 2 + 6‖
+        * (‖1 - sR18 / 2 + 5‖
+        * (‖1 - sR18 / 2 + 4‖
+        * (‖1 - sR18 / 2 + 3‖
+        * (‖1 - sR18 / 2 + 2‖
+        * (‖1 - sR18 / 2 + 1‖
+          * ‖1 - sR18 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.15 * 4300000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR18 / 2 + 11‖ * (‖1 - sR18 / 2 + 10‖ * (‖1 - sR18 / 2 + 9‖ * (‖1 - sR18 / 2 + 8‖ * (‖1 - sR18 / 2 + 7‖ * (‖1 - sR18 / 2 + 6‖ * (‖1 - sR18 / 2 + 5‖ * (‖1 - sR18 / 2 + 4‖ * (‖1 - sR18 / 2 + 3‖ * (‖1 - sR18 / 2 + 2‖ * (‖1 - sR18 / 2 + 1‖ * (‖1 - sR18 / 2‖))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R18GammaUpper
+
+namespace R19GammaUpper
+
+/-- The R19 `s`-plane center: `s = 1/2 + I·z` at `z = R19.center`. -/
+noncomputable def sR19 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R19.center
+
+/-- `R19.center = 7.25 + 0.2·I` (from `R19_x0/x1/y0/y1`). -/
+theorem R19_center_eq :
+    CentralCoverAssembly.R19.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R19_x0, CentralCoverAssembly.R19_x1,
+      CentralCoverAssembly.R19_y0, CentralCoverAssembly.R19_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R19_x0, CentralCoverAssembly.R19_x1,
+      CentralCoverAssembly.R19_y0, CentralCoverAssembly.R19_y1]
+    simp
+    norm_num
+
+/-- `Re sR19 = 0.3`. -/
+theorem sR19_re : sR19.re = 0.3 := by
+  unfold sR19
+  rw [R19_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR19 = 7.25`. -/
+theorem sR19_im : sR19.im = 7.25 := by
+  unfold sR19
+  rw [R19_center_eq]
+  simp
+
+/-- `Re(1 - sR19/2) = 0.85`. -/
+theorem zUpR19_re : (1 - sR19 / 2).re = 0.85 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR19_re]
+  norm_num
+
+/-- `Im(1 - sR19/2) = -3.625`. -/
+theorem zUpR19_im : (1 - sR19 / 2).im = -3.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR19_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.72 ≤ ‖1 - sR19 / 2‖`. -/
+theorem norm_zUpR19_0_ge :
+    (3.72 : ℝ) ≤ ‖1 - sR19 / 2‖ := by
+  have hsq : (3.72 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR19_re, zUpR19_im]
+    norm_num
+  calc (3.72 : ℝ) = Real.sqrt ((3.72 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 4.06 ≤ ‖1 - sR19 / 2 + 1‖`. -/
+theorem norm_zUpR19_1_ge :
+    (4.06 : ℝ) ≤ ‖1 - sR19 / 2 + 1‖ := by
+  have hre : (1 - sR19 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR19 / 2 + 1).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.one_im]
+    norm_num
+  have hsq : (4.06 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.06 : ℝ) = Real.sqrt ((4.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.61 ≤ ‖1 - sR19 / 2 + 2‖`. -/
+theorem norm_zUpR19_2_ge :
+    (4.61 : ℝ) ≤ ‖1 - sR19 / 2 + 2‖ := by
+  have hre : (1 - sR19 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 2).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.61 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.61 : ℝ) = Real.sqrt ((4.61 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.28 ≤ ‖1 - sR19 / 2 + 3‖`. -/
+theorem norm_zUpR19_3_ge :
+    (5.28 : ℝ) ≤ ‖1 - sR19 / 2 + 3‖ := by
+  have hre : (1 - sR19 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 3).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.28 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.28 : ℝ) = Real.sqrt ((5.28 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 6.05 ≤ ‖1 - sR19 / 2 + 4‖`. -/
+theorem norm_zUpR19_4_ge :
+    (6.05 : ℝ) ≤ ‖1 - sR19 / 2 + 4‖ := by
+  have hre : (1 - sR19 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 4).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.05 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.05 : ℝ) = Real.sqrt ((6.05 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.88 ≤ ‖1 - sR19 / 2 + 5‖`. -/
+theorem norm_zUpR19_5_ge :
+    (6.88 : ℝ) ≤ ‖1 - sR19 / 2 + 5‖ := by
+  have hre : (1 - sR19 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 5).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.88 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.88 : ℝ) = Real.sqrt ((6.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.75 ≤ ‖1 - sR19 / 2 + 6‖`. -/
+theorem norm_zUpR19_6_ge :
+    (7.75 : ℝ) ≤ ‖1 - sR19 / 2 + 6‖ := by
+  have hre : (1 - sR19 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 6).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.75 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.75 : ℝ) = Real.sqrt ((7.75 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.64 ≤ ‖1 - sR19 / 2 + 7‖`. -/
+theorem norm_zUpR19_7_ge :
+    (8.64 : ℝ) ≤ ‖1 - sR19 / 2 + 7‖ := by
+  have hre : (1 - sR19 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 7).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.64 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.64 : ℝ) = Real.sqrt ((8.64 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.56 ≤ ‖1 - sR19 / 2 + 8‖`. -/
+theorem norm_zUpR19_8_ge :
+    (9.56 : ℝ) ≤ ‖1 - sR19 / 2 + 8‖ := by
+  have hre : (1 - sR19 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 8).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.56 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.56 : ℝ) = Real.sqrt ((9.56 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.49 ≤ ‖1 - sR19 / 2 + 9‖`. -/
+theorem norm_zUpR19_9_ge :
+    (10.49 : ℝ) ≤ ‖1 - sR19 / 2 + 9‖ := by
+  have hre : (1 - sR19 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 9).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.49 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.49 : ℝ) = Real.sqrt ((10.49 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.43 ≤ ‖1 - sR19 / 2 + 10‖`. -/
+theorem norm_zUpR19_10_ge :
+    (11.43 : ℝ) ≤ ‖1 - sR19 / 2 + 10‖ := by
+  have hre : (1 - sR19 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 10).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.43 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.43 : ℝ) = Real.sqrt ((11.43 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.39 ≤ ‖1 - sR19 / 2 + 11‖`. -/
+theorem norm_zUpR19_11_ge :
+    (12.39 : ℝ) ≤ ‖1 - sR19 / 2 + 11‖ := by
+  have hre : (1 - sR19 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR19 / 2 + 11).im = -3.625 := by
+    simp only [Complex.add_im, zUpR19_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.39 : ℝ) ^ 2 ≤ ‖1 - sR19 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.39 : ℝ) = Real.sqrt ((12.39 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR19 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR19 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR19_ne0 : (1 - sR19 / 2) ≠ 0 := by
+  have hre : (1 - sR19 / 2).re = 0.85 := zUpR19_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add1_ne0 : (1 - sR19 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 1).re = 1.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add2_ne0 : (1 - sR19 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 2).re = 2.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add3_ne0 : (1 - sR19 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 3).re = 3.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add4_ne0 : (1 - sR19 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 4).re = 4.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add5_ne0 : (1 - sR19 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 5).re = 5.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add6_ne0 : (1 - sR19 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 6).re = 6.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add7_ne0 : (1 - sR19 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 7).re = 7.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add8_ne0 : (1 - sR19 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 8).re = 8.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add9_ne0 : (1 - sR19 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 9).re = 9.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add10_ne0 : (1 - sR19 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 10).re = 10.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR19_add11_ne0 : (1 - sR19 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR19 / 2 + 11).re = 11.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R19 corner:
+`‖Complex.Gamma (1 - sR19 / 2)‖ ≤ 0.05` (row-1 outer-tier, `re = 0.85`). -/
+theorem gamma_one_sub_half_upper_R19 :
+    ‖Complex.Gamma (1 - sR19 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR19 / 2 + 1)
+      = (1 - sR19 / 2) * Complex.Gamma (1 - sR19 / 2) :=
+    Complex.Gamma_add_one _ zUpR19_ne0
+  have e1 : Complex.Gamma (1 - sR19 / 2 + 2)
+      = (1 - sR19 / 2 + 1)
+        * Complex.Gamma (1 - sR19 / 2 + 1) := by
+    have h : (1 - sR19 / 2 + 2)
+        = ((1 - sR19 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add1_ne0
+  have e2 : Complex.Gamma (1 - sR19 / 2 + 3)
+      = (1 - sR19 / 2 + 2)
+        * Complex.Gamma (1 - sR19 / 2 + 2) := by
+    have h : (1 - sR19 / 2 + 3)
+        = ((1 - sR19 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add2_ne0
+  have e3 : Complex.Gamma (1 - sR19 / 2 + 4)
+      = (1 - sR19 / 2 + 3)
+        * Complex.Gamma (1 - sR19 / 2 + 3) := by
+    have h : (1 - sR19 / 2 + 4)
+        = ((1 - sR19 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add3_ne0
+  have e4 : Complex.Gamma (1 - sR19 / 2 + 5)
+      = (1 - sR19 / 2 + 4)
+        * Complex.Gamma (1 - sR19 / 2 + 4) := by
+    have h : (1 - sR19 / 2 + 5)
+        = ((1 - sR19 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add4_ne0
+  have e5 : Complex.Gamma (1 - sR19 / 2 + 6)
+      = (1 - sR19 / 2 + 5)
+        * Complex.Gamma (1 - sR19 / 2 + 5) := by
+    have h : (1 - sR19 / 2 + 6)
+        = ((1 - sR19 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add5_ne0
+  have e6 : Complex.Gamma (1 - sR19 / 2 + 7)
+      = (1 - sR19 / 2 + 6)
+        * Complex.Gamma (1 - sR19 / 2 + 6) := by
+    have h : (1 - sR19 / 2 + 7)
+        = ((1 - sR19 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add6_ne0
+  have e7 : Complex.Gamma (1 - sR19 / 2 + 8)
+      = (1 - sR19 / 2 + 7)
+        * Complex.Gamma (1 - sR19 / 2 + 7) := by
+    have h : (1 - sR19 / 2 + 8)
+        = ((1 - sR19 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add7_ne0
+  have e8 : Complex.Gamma (1 - sR19 / 2 + 9)
+      = (1 - sR19 / 2 + 8)
+        * Complex.Gamma (1 - sR19 / 2 + 8) := by
+    have h : (1 - sR19 / 2 + 9)
+        = ((1 - sR19 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add8_ne0
+  have e9 : Complex.Gamma (1 - sR19 / 2 + 10)
+      = (1 - sR19 / 2 + 9)
+        * Complex.Gamma (1 - sR19 / 2 + 9) := by
+    have h : (1 - sR19 / 2 + 10)
+        = ((1 - sR19 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add9_ne0
+  have e10 : Complex.Gamma (1 - sR19 / 2 + 11)
+      = (1 - sR19 / 2 + 10)
+        * Complex.Gamma (1 - sR19 / 2 + 10) := by
+    have h : (1 - sR19 / 2 + 11)
+        = ((1 - sR19 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add10_ne0
+  have e11 : Complex.Gamma (1 - sR19 / 2 + 12)
+      = (1 - sR19 / 2 + 11)
+        * Complex.Gamma (1 - sR19 / 2 + 11) := by
+    have h : (1 - sR19 / 2 + 12)
+        = ((1 - sR19 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR19_add11_ne0
+  have n0 : ‖Complex.Gamma (1 - sR19 / 2 + 1)‖
+      = ‖1 - sR19 / 2‖
+        * ‖Complex.Gamma (1 - sR19 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR19 / 2 + 2)‖
+      = ‖1 - sR19 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR19 / 2 + 3)‖
+      = ‖1 - sR19 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR19 / 2 + 4)‖
+      = ‖1 - sR19 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR19 / 2 + 5)‖
+      = ‖1 - sR19 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR19 / 2 + 6)‖
+      = ‖1 - sR19 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR19 / 2 + 7)‖
+      = ‖1 - sR19 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR19 / 2 + 8)‖
+      = ‖1 - sR19 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR19 / 2 + 9)‖
+      = ‖1 - sR19 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR19 / 2 + 10)‖
+      = ‖1 - sR19 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR19 / 2 + 11)‖
+      = ‖1 - sR19 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR19 / 2 + 12)‖
+      = ‖1 - sR19 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR19 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR19 / 2 + 12)‖
+      = ‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+        * (‖1 - sR19 / 2‖
+          * ‖Complex.Gamma (1 - sR19 / 2)‖))))))))))) := by
+    rw [n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (4.06 : ℝ) * 3.72
+      ≤ ‖1 - sR19 / 2 + 1‖ * ‖1 - sR19 / 2‖ :=
+    mul_le_mul norm_zUpR19_1_ge norm_zUpR19_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.61 : ℝ) * (4.06 * (3.72))
+      ≤ ‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖)) :=
+    mul_le_mul norm_zUpR19_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.28 : ℝ) * (4.61 * (4.06 * (3.72)))
+      ≤ ‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))) :=
+    mul_le_mul norm_zUpR19_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (6.05 : ℝ) * (5.28 * (4.61 * (4.06 * (3.72))))
+      ≤ ‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖)))) :=
+    mul_le_mul norm_zUpR19_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.88 : ℝ) * (6.05 * (5.28 * (4.61 * (4.06 * (3.72)))))
+      ≤ ‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))) :=
+    mul_le_mul norm_zUpR19_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.75 : ℝ) * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72))))))
+      ≤ ‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖)))))) :=
+    mul_le_mul norm_zUpR19_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.64 : ℝ) * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72)))))))
+      ≤ ‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))))) :=
+    mul_le_mul norm_zUpR19_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.56 : ℝ) * (8.64 * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72))))))))
+      ≤ ‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR19_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.49 : ℝ) * (9.56 * (8.64 * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72)))))))))
+      ≤ ‖1 - sR19 / 2 + 9‖ * (‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR19_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.43 : ℝ) * (10.49 * (9.56 * (8.64 * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72))))))))))
+      ≤ ‖1 - sR19 / 2 + 10‖ * (‖1 - sR19 / 2 + 9‖ * (‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR19_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.39 : ℝ) * (11.43 * (10.49 * (9.56 * (8.64 * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72)))))))))))
+      ≤ ‖1 - sR19 / 2 + 11‖ * (‖1 - sR19 / 2 + 10‖ * (‖1 - sR19 / 2 + 9‖ * (‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR19_11_ge q10 (by positivity) (norm_nonneg _)
+  have hDlo : (14000000000 : ℝ)
+      ≤ (12.39 : ℝ) * (11.43 * (10.49 * (9.56 * (8.64 * (7.75 * (6.88 * (6.05 * (5.28 * (4.61 * (4.06 * (3.72))))))))))) := by
+    norm_num
+  have hD_ge : (14000000000 : ℝ)
+      ≤ ‖1 - sR19 / 2 + 11‖ * (‖1 - sR19 / 2 + 10‖ * (‖1 - sR19 / 2 + 9‖ * (‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))))))))) :=
+    le_trans hDlo q11
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR19 / 2 + 12)‖ ≤ Real.Gamma(12.85) ≤ 348000000`.
+  have hre12 : (1 - sR19 / 2 + 12).re = 12.85 := by
+    simp only [Complex.add_re, zUpR19_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR19 / 2 + 12).re := by
+    rw [hre12]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR19 / 2 + 12)‖ ≤ 348000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR19 / 2 + 12)‖
+        ≤ Real.Gamma ((1 - sR19 / 2 + 12).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR19 / 2 + 12).re) = 12.85 := hre12
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper085.realGamma_1285_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR19 / 2)‖ = ‖Complex.Gamma (1 - sR19 / 2 + 12)‖ ≤ 348000000`, `D ≤ 14000000000`.
+  have hD_mul : (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR19 / 2)‖
+      = ‖Complex.Gamma (1 - sR19 / 2 + 12)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖)))))))))))
+        * ‖Complex.Gamma (1 - sR19 / 2)‖ ≤ 348000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR19 / 2)‖
+        * (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖)))))))))))
+        ≤ 348000000 := by
+    calc ‖Complex.Gamma (1 - sR19 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR19 / 2)‖ := mul_comm _ _
+      _ ≤ 348000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR19 / 2)‖
+      ≤ 348000000 / (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖)))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (348000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR19 / 2 + 11‖
+        * (‖1 - sR19 / 2 + 10‖
+        * (‖1 - sR19 / 2 + 9‖
+        * (‖1 - sR19 / 2 + 8‖
+        * (‖1 - sR19 / 2 + 7‖
+        * (‖1 - sR19 / 2 + 6‖
+        * (‖1 - sR19 / 2 + 5‖
+        * (‖1 - sR19 / 2 + 4‖
+        * (‖1 - sR19 / 2 + 3‖
+        * (‖1 - sR19 / 2 + 2‖
+        * (‖1 - sR19 / 2 + 1‖
+          * ‖1 - sR19 / 2‖))))))))))) := by
+    calc (348000000 : ℝ) ≤ 0.05 * 14000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 348000000 / (‖1 - sR19 / 2 + 11‖ * (‖1 - sR19 / 2 + 10‖ * (‖1 - sR19 / 2 + 9‖ * (‖1 - sR19 / 2 + 8‖ * (‖1 - sR19 / 2 + 7‖ * (‖1 - sR19 / 2 + 6‖ * (‖1 - sR19 / 2 + 5‖ * (‖1 - sR19 / 2 + 4‖ * (‖1 - sR19 / 2 + 3‖ * (‖1 - sR19 / 2 + 2‖ * (‖1 - sR19 / 2 + 1‖ * (‖1 - sR19 / 2‖))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R19GammaUpper
+
+namespace R22GammaUpper
+
+/-- The R22 `s`-plane center: `s = 1/2 + I·z` at `z = R22.center`. -/
+noncomputable def sR22 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R22.center
+
+/-- `R22.center = -6.75 + 0.3·I` (from `R22_x0/x1/y0/y1`). -/
+theorem R22_center_eq :
+    CentralCoverAssembly.R22.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R22_x0, CentralCoverAssembly.R22_x1,
+      CentralCoverAssembly.R22_y0, CentralCoverAssembly.R22_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R22_x0, CentralCoverAssembly.R22_x1,
+      CentralCoverAssembly.R22_y0, CentralCoverAssembly.R22_y1]
+    simp
+    norm_num
+
+/-- `Re sR22 = 0.2`. -/
+theorem sR22_re : sR22.re = 0.2 := by
+  unfold sR22
+  rw [R22_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR22 = -6.75`. -/
+theorem sR22_im : sR22.im = -6.75 := by
+  unfold sR22
+  rw [R22_center_eq]
+  simp
+
+/-- `Re(1 - sR22/2) = 0.9`. -/
+theorem zUpR22_re : (1 - sR22 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR22_re]
+  norm_num
+
+/-- `Im(1 - sR22/2) = 3.375`. -/
+theorem zUpR22_im : (1 - sR22 / 2).im = 3.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR22_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.49 ≤ ‖1 - sR22 / 2‖`. -/
+theorem norm_zUpR22_0_ge :
+    (3.49 : ℝ) ≤ ‖1 - sR22 / 2‖ := by
+  have hsq : (3.49 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR22_re, zUpR22_im]
+    norm_num
+  calc (3.49 : ℝ) = Real.sqrt ((3.49 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.87 ≤ ‖1 - sR22 / 2 + 1‖`. -/
+theorem norm_zUpR22_1_ge :
+    (3.87 : ℝ) ≤ ‖1 - sR22 / 2 + 1‖ := by
+  have hre : (1 - sR22 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR22 / 2 + 1).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.one_im]
+    norm_num
+  have hsq : (3.87 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.87 : ℝ) = Real.sqrt ((3.87 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.44 ≤ ‖1 - sR22 / 2 + 2‖`. -/
+theorem norm_zUpR22_2_ge :
+    (4.44 : ℝ) ≤ ‖1 - sR22 / 2 + 2‖ := by
+  have hre : (1 - sR22 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 2).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.44 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.44 : ℝ) = Real.sqrt ((4.44 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.15 ≤ ‖1 - sR22 / 2 + 3‖`. -/
+theorem norm_zUpR22_3_ge :
+    (5.15 : ℝ) ≤ ‖1 - sR22 / 2 + 3‖ := by
+  have hre : (1 - sR22 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 3).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.15 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.15 : ℝ) = Real.sqrt ((5.15 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.94 ≤ ‖1 - sR22 / 2 + 4‖`. -/
+theorem norm_zUpR22_4_ge :
+    (5.94 : ℝ) ≤ ‖1 - sR22 / 2 + 4‖ := by
+  have hre : (1 - sR22 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 4).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.94 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.94 : ℝ) = Real.sqrt ((5.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.79 ≤ ‖1 - sR22 / 2 + 5‖`. -/
+theorem norm_zUpR22_5_ge :
+    (6.79 : ℝ) ≤ ‖1 - sR22 / 2 + 5‖ := by
+  have hre : (1 - sR22 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 5).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.79 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.79 : ℝ) = Real.sqrt ((6.79 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.68 ≤ ‖1 - sR22 / 2 + 6‖`. -/
+theorem norm_zUpR22_6_ge :
+    (7.68 : ℝ) ≤ ‖1 - sR22 / 2 + 6‖ := by
+  have hre : (1 - sR22 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 6).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.68 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.68 : ℝ) = Real.sqrt ((7.68 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.59 ≤ ‖1 - sR22 / 2 + 7‖`. -/
+theorem norm_zUpR22_7_ge :
+    (8.59 : ℝ) ≤ ‖1 - sR22 / 2 + 7‖ := by
+  have hre : (1 - sR22 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 7).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.59 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.59 : ℝ) = Real.sqrt ((8.59 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.51 ≤ ‖1 - sR22 / 2 + 8‖`. -/
+theorem norm_zUpR22_8_ge :
+    (9.51 : ℝ) ≤ ‖1 - sR22 / 2 + 8‖ := by
+  have hre : (1 - sR22 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 8).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.51 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.51 : ℝ) = Real.sqrt ((9.51 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.45 ≤ ‖1 - sR22 / 2 + 9‖`. -/
+theorem norm_zUpR22_9_ge :
+    (10.45 : ℝ) ≤ ‖1 - sR22 / 2 + 9‖ := by
+  have hre : (1 - sR22 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 9).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.45 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.45 : ℝ) = Real.sqrt ((10.45 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.41 ≤ ‖1 - sR22 / 2 + 10‖`. -/
+theorem norm_zUpR22_10_ge :
+    (11.41 : ℝ) ≤ ‖1 - sR22 / 2 + 10‖ := by
+  have hre : (1 - sR22 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 10).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.41 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.41 : ℝ) = Real.sqrt ((11.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.36 ≤ ‖1 - sR22 / 2 + 11‖`. -/
+theorem norm_zUpR22_11_ge :
+    (12.36 : ℝ) ≤ ‖1 - sR22 / 2 + 11‖ := by
+  have hre : (1 - sR22 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 11).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.36 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.36 : ℝ) = Real.sqrt ((12.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.33 ≤ ‖1 - sR22 / 2 + 12‖`. -/
+theorem norm_zUpR22_12_ge :
+    (13.33 : ℝ) ≤ ‖1 - sR22 / 2 + 12‖ := by
+  have hre : (1 - sR22 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 12).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.33 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.33 : ℝ) = Real.sqrt ((13.33 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.3 ≤ ‖1 - sR22 / 2 + 13‖`. -/
+theorem norm_zUpR22_13_ge :
+    (14.3 : ℝ) ≤ ‖1 - sR22 / 2 + 13‖ := by
+  have hre : (1 - sR22 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR22 / 2 + 13).im = 3.375 := by
+    simp only [Complex.add_im, zUpR22_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.3 : ℝ) ^ 2 ≤ ‖1 - sR22 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.3 : ℝ) = Real.sqrt ((14.3 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR22 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR22 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR22_ne0 : (1 - sR22 / 2) ≠ 0 := by
+  have hre : (1 - sR22 / 2).re = 0.9 := zUpR22_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add1_ne0 : (1 - sR22 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add2_ne0 : (1 - sR22 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add3_ne0 : (1 - sR22 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add4_ne0 : (1 - sR22 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add5_ne0 : (1 - sR22 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add6_ne0 : (1 - sR22 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add7_ne0 : (1 - sR22 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add8_ne0 : (1 - sR22 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add9_ne0 : (1 - sR22 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add10_ne0 : (1 - sR22 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add11_ne0 : (1 - sR22 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add12_ne0 : (1 - sR22 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR22_add13_ne0 : (1 - sR22 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR22 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R22 corner:
+`‖Complex.Gamma (1 - sR22 / 2)‖ ≤ 0.05` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R22 :
+    ‖Complex.Gamma (1 - sR22 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR22 / 2 + 1)
+      = (1 - sR22 / 2) * Complex.Gamma (1 - sR22 / 2) :=
+    Complex.Gamma_add_one _ zUpR22_ne0
+  have e1 : Complex.Gamma (1 - sR22 / 2 + 2)
+      = (1 - sR22 / 2 + 1)
+        * Complex.Gamma (1 - sR22 / 2 + 1) := by
+    have h : (1 - sR22 / 2 + 2)
+        = ((1 - sR22 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add1_ne0
+  have e2 : Complex.Gamma (1 - sR22 / 2 + 3)
+      = (1 - sR22 / 2 + 2)
+        * Complex.Gamma (1 - sR22 / 2 + 2) := by
+    have h : (1 - sR22 / 2 + 3)
+        = ((1 - sR22 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add2_ne0
+  have e3 : Complex.Gamma (1 - sR22 / 2 + 4)
+      = (1 - sR22 / 2 + 3)
+        * Complex.Gamma (1 - sR22 / 2 + 3) := by
+    have h : (1 - sR22 / 2 + 4)
+        = ((1 - sR22 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add3_ne0
+  have e4 : Complex.Gamma (1 - sR22 / 2 + 5)
+      = (1 - sR22 / 2 + 4)
+        * Complex.Gamma (1 - sR22 / 2 + 4) := by
+    have h : (1 - sR22 / 2 + 5)
+        = ((1 - sR22 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add4_ne0
+  have e5 : Complex.Gamma (1 - sR22 / 2 + 6)
+      = (1 - sR22 / 2 + 5)
+        * Complex.Gamma (1 - sR22 / 2 + 5) := by
+    have h : (1 - sR22 / 2 + 6)
+        = ((1 - sR22 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add5_ne0
+  have e6 : Complex.Gamma (1 - sR22 / 2 + 7)
+      = (1 - sR22 / 2 + 6)
+        * Complex.Gamma (1 - sR22 / 2 + 6) := by
+    have h : (1 - sR22 / 2 + 7)
+        = ((1 - sR22 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add6_ne0
+  have e7 : Complex.Gamma (1 - sR22 / 2 + 8)
+      = (1 - sR22 / 2 + 7)
+        * Complex.Gamma (1 - sR22 / 2 + 7) := by
+    have h : (1 - sR22 / 2 + 8)
+        = ((1 - sR22 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add7_ne0
+  have e8 : Complex.Gamma (1 - sR22 / 2 + 9)
+      = (1 - sR22 / 2 + 8)
+        * Complex.Gamma (1 - sR22 / 2 + 8) := by
+    have h : (1 - sR22 / 2 + 9)
+        = ((1 - sR22 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add8_ne0
+  have e9 : Complex.Gamma (1 - sR22 / 2 + 10)
+      = (1 - sR22 / 2 + 9)
+        * Complex.Gamma (1 - sR22 / 2 + 9) := by
+    have h : (1 - sR22 / 2 + 10)
+        = ((1 - sR22 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add9_ne0
+  have e10 : Complex.Gamma (1 - sR22 / 2 + 11)
+      = (1 - sR22 / 2 + 10)
+        * Complex.Gamma (1 - sR22 / 2 + 10) := by
+    have h : (1 - sR22 / 2 + 11)
+        = ((1 - sR22 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add10_ne0
+  have e11 : Complex.Gamma (1 - sR22 / 2 + 12)
+      = (1 - sR22 / 2 + 11)
+        * Complex.Gamma (1 - sR22 / 2 + 11) := by
+    have h : (1 - sR22 / 2 + 12)
+        = ((1 - sR22 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add11_ne0
+  have e12 : Complex.Gamma (1 - sR22 / 2 + 13)
+      = (1 - sR22 / 2 + 12)
+        * Complex.Gamma (1 - sR22 / 2 + 12) := by
+    have h : (1 - sR22 / 2 + 13)
+        = ((1 - sR22 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add12_ne0
+  have e13 : Complex.Gamma (1 - sR22 / 2 + 14)
+      = (1 - sR22 / 2 + 13)
+        * Complex.Gamma (1 - sR22 / 2 + 13) := by
+    have h : (1 - sR22 / 2 + 14)
+        = ((1 - sR22 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR22_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR22 / 2 + 1)‖
+      = ‖1 - sR22 / 2‖
+        * ‖Complex.Gamma (1 - sR22 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR22 / 2 + 2)‖
+      = ‖1 - sR22 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR22 / 2 + 3)‖
+      = ‖1 - sR22 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR22 / 2 + 4)‖
+      = ‖1 - sR22 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR22 / 2 + 5)‖
+      = ‖1 - sR22 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR22 / 2 + 6)‖
+      = ‖1 - sR22 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR22 / 2 + 7)‖
+      = ‖1 - sR22 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR22 / 2 + 8)‖
+      = ‖1 - sR22 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR22 / 2 + 9)‖
+      = ‖1 - sR22 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR22 / 2 + 10)‖
+      = ‖1 - sR22 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR22 / 2 + 11)‖
+      = ‖1 - sR22 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR22 / 2 + 12)‖
+      = ‖1 - sR22 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR22 / 2 + 13)‖
+      = ‖1 - sR22 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR22 / 2 + 14)‖
+      = ‖1 - sR22 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR22 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR22 / 2 + 14)‖
+      = ‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+        * (‖1 - sR22 / 2‖
+          * ‖Complex.Gamma (1 - sR22 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.87 : ℝ) * 3.49
+      ≤ ‖1 - sR22 / 2 + 1‖ * ‖1 - sR22 / 2‖ :=
+    mul_le_mul norm_zUpR22_1_ge norm_zUpR22_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.44 : ℝ) * (3.87 * (3.49))
+      ≤ ‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)) :=
+    mul_le_mul norm_zUpR22_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.15 : ℝ) * (4.44 * (3.87 * (3.49)))
+      ≤ ‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))) :=
+    mul_le_mul norm_zUpR22_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.94 : ℝ) * (5.15 * (4.44 * (3.87 * (3.49))))
+      ≤ ‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)))) :=
+    mul_le_mul norm_zUpR22_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.79 : ℝ) * (5.94 * (5.15 * (4.44 * (3.87 * (3.49)))))
+      ≤ ‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))) :=
+    mul_le_mul norm_zUpR22_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.68 : ℝ) * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49))))))
+      ≤ ‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)))))) :=
+    mul_le_mul norm_zUpR22_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.59 : ℝ) * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49)))))))
+      ≤ ‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))) :=
+    mul_le_mul norm_zUpR22_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.51 : ℝ) * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49))))))))
+      ≤ ‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR22_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.45 : ℝ) * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49)))))))))
+      ≤ ‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR22_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.41 : ℝ) * (10.45 * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49))))))))))
+      ≤ ‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR22_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.36 : ℝ) * (11.41 * (10.45 * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49)))))))))))
+      ≤ ‖1 - sR22 / 2 + 11‖ * (‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR22_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.33 : ℝ) * (12.36 * (11.41 * (10.45 * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49))))))))))))
+      ≤ ‖1 - sR22 / 2 + 12‖ * (‖1 - sR22 / 2 + 11‖ * (‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR22_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.3 : ℝ) * (13.33 * (12.36 * (11.41 * (10.45 * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49)))))))))))))
+      ≤ ‖1 - sR22 / 2 + 13‖ * (‖1 - sR22 / 2 + 12‖ * (‖1 - sR22 / 2 + 11‖ * (‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR22_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (2100000000000 : ℝ)
+      ≤ (14.3 : ℝ) * (13.33 * (12.36 * (11.41 * (10.45 * (9.51 * (8.59 * (7.68 * (6.79 * (5.94 * (5.15 * (4.44 * (3.87 * (3.49))))))))))))) := by
+    norm_num
+  have hD_ge : (2100000000000 : ℝ)
+      ≤ ‖1 - sR22 / 2 + 13‖ * (‖1 - sR22 / 2 + 12‖ * (‖1 - sR22 / 2 + 11‖ * (‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR22 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR22 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR22_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR22 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR22 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR22 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR22 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR22 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR22 / 2)‖ = ‖Complex.Gamma (1 - sR22 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 2100000000000`.
+  have hD_mul : (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR22 / 2)‖
+      = ‖Complex.Gamma (1 - sR22 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR22 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR22 / 2)‖
+        * (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR22 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR22 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR22 / 2)‖
+      ≤ 69500000000 / (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR22 / 2 + 13‖
+        * (‖1 - sR22 / 2 + 12‖
+        * (‖1 - sR22 / 2 + 11‖
+        * (‖1 - sR22 / 2 + 10‖
+        * (‖1 - sR22 / 2 + 9‖
+        * (‖1 - sR22 / 2 + 8‖
+        * (‖1 - sR22 / 2 + 7‖
+        * (‖1 - sR22 / 2 + 6‖
+        * (‖1 - sR22 / 2 + 5‖
+        * (‖1 - sR22 / 2 + 4‖
+        * (‖1 - sR22 / 2 + 3‖
+        * (‖1 - sR22 / 2 + 2‖
+        * (‖1 - sR22 / 2 + 1‖
+          * ‖1 - sR22 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.05 * 2100000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR22 / 2 + 13‖ * (‖1 - sR22 / 2 + 12‖ * (‖1 - sR22 / 2 + 11‖ * (‖1 - sR22 / 2 + 10‖ * (‖1 - sR22 / 2 + 9‖ * (‖1 - sR22 / 2 + 8‖ * (‖1 - sR22 / 2 + 7‖ * (‖1 - sR22 / 2 + 6‖ * (‖1 - sR22 / 2 + 5‖ * (‖1 - sR22 / 2 + 4‖ * (‖1 - sR22 / 2 + 3‖ * (‖1 - sR22 / 2 + 2‖ * (‖1 - sR22 / 2 + 1‖ * (‖1 - sR22 / 2‖))))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R22GammaUpper
+
+namespace R23GammaUpper
+
+/-- The R23 `s`-plane center: `s = 1/2 + I·z` at `z = R23.center`. -/
+noncomputable def sR23 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R23.center
+
+/-- `R23.center = -4.75 + 0.3·I` (from `R23_x0/x1/y0/y1`). -/
+theorem R23_center_eq :
+    CentralCoverAssembly.R23.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R23_x0, CentralCoverAssembly.R23_x1,
+      CentralCoverAssembly.R23_y0, CentralCoverAssembly.R23_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R23_x0, CentralCoverAssembly.R23_x1,
+      CentralCoverAssembly.R23_y0, CentralCoverAssembly.R23_y1]
+    simp
+    norm_num
+
+/-- `Re sR23 = 0.2`. -/
+theorem sR23_re : sR23.re = 0.2 := by
+  unfold sR23
+  rw [R23_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR23 = -4.75`. -/
+theorem sR23_im : sR23.im = -4.75 := by
+  unfold sR23
+  rw [R23_center_eq]
+  simp
+
+/-- `Re(1 - sR23/2) = 0.9`. -/
+theorem zUpR23_re : (1 - sR23 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR23_re]
+  norm_num
+
+/-- `Im(1 - sR23/2) = 2.375`. -/
+theorem zUpR23_im : (1 - sR23 / 2).im = 2.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR23_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.53 ≤ ‖1 - sR23 / 2‖`. -/
+theorem norm_zUpR23_0_ge :
+    (2.53 : ℝ) ≤ ‖1 - sR23 / 2‖ := by
+  have hsq : (2.53 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR23_re, zUpR23_im]
+    norm_num
+  calc (2.53 : ℝ) = Real.sqrt ((2.53 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.04 ≤ ‖1 - sR23 / 2 + 1‖`. -/
+theorem norm_zUpR23_1_ge :
+    (3.04 : ℝ) ≤ ‖1 - sR23 / 2 + 1‖ := by
+  have hre : (1 - sR23 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR23 / 2 + 1).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.one_im]
+    norm_num
+  have hsq : (3.04 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.04 : ℝ) = Real.sqrt ((3.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.74 ≤ ‖1 - sR23 / 2 + 2‖`. -/
+theorem norm_zUpR23_2_ge :
+    (3.74 : ℝ) ≤ ‖1 - sR23 / 2 + 2‖ := by
+  have hre : (1 - sR23 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 2).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.74 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.74 : ℝ) = Real.sqrt ((3.74 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.56 ≤ ‖1 - sR23 / 2 + 3‖`. -/
+theorem norm_zUpR23_3_ge :
+    (4.56 : ℝ) ≤ ‖1 - sR23 / 2 + 3‖ := by
+  have hre : (1 - sR23 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 3).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.56 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.56 : ℝ) = Real.sqrt ((4.56 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.44 ≤ ‖1 - sR23 / 2 + 4‖`. -/
+theorem norm_zUpR23_4_ge :
+    (5.44 : ℝ) ≤ ‖1 - sR23 / 2 + 4‖ := by
+  have hre : (1 - sR23 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 4).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.44 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.44 : ℝ) = Real.sqrt ((5.44 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.36 ≤ ‖1 - sR23 / 2 + 5‖`. -/
+theorem norm_zUpR23_5_ge :
+    (6.36 : ℝ) ≤ ‖1 - sR23 / 2 + 5‖ := by
+  have hre : (1 - sR23 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 5).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.36 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.36 : ℝ) = Real.sqrt ((6.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.29 ≤ ‖1 - sR23 / 2 + 6‖`. -/
+theorem norm_zUpR23_6_ge :
+    (7.29 : ℝ) ≤ ‖1 - sR23 / 2 + 6‖ := by
+  have hre : (1 - sR23 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 6).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.29 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.29 : ℝ) = Real.sqrt ((7.29 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.24 ≤ ‖1 - sR23 / 2 + 7‖`. -/
+theorem norm_zUpR23_7_ge :
+    (8.24 : ℝ) ≤ ‖1 - sR23 / 2 + 7‖ := by
+  have hre : (1 - sR23 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 7).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.24 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.24 : ℝ) = Real.sqrt ((8.24 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.21 ≤ ‖1 - sR23 / 2 + 8‖`. -/
+theorem norm_zUpR23_8_ge :
+    (9.21 : ℝ) ≤ ‖1 - sR23 / 2 + 8‖ := by
+  have hre : (1 - sR23 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 8).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.21 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.21 : ℝ) = Real.sqrt ((9.21 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.18 ≤ ‖1 - sR23 / 2 + 9‖`. -/
+theorem norm_zUpR23_9_ge :
+    (10.18 : ℝ) ≤ ‖1 - sR23 / 2 + 9‖ := by
+  have hre : (1 - sR23 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 9).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.18 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.18 : ℝ) = Real.sqrt ((10.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.15 ≤ ‖1 - sR23 / 2 + 10‖`. -/
+theorem norm_zUpR23_10_ge :
+    (11.15 : ℝ) ≤ ‖1 - sR23 / 2 + 10‖ := by
+  have hre : (1 - sR23 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 10).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.15 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.15 : ℝ) = Real.sqrt ((11.15 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.13 ≤ ‖1 - sR23 / 2 + 11‖`. -/
+theorem norm_zUpR23_11_ge :
+    (12.13 : ℝ) ≤ ‖1 - sR23 / 2 + 11‖ := by
+  have hre : (1 - sR23 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 11).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.13 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.13 : ℝ) = Real.sqrt ((12.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.11 ≤ ‖1 - sR23 / 2 + 12‖`. -/
+theorem norm_zUpR23_12_ge :
+    (13.11 : ℝ) ≤ ‖1 - sR23 / 2 + 12‖ := by
+  have hre : (1 - sR23 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 12).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.11 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.11 : ℝ) = Real.sqrt ((13.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.1 ≤ ‖1 - sR23 / 2 + 13‖`. -/
+theorem norm_zUpR23_13_ge :
+    (14.1 : ℝ) ≤ ‖1 - sR23 / 2 + 13‖ := by
+  have hre : (1 - sR23 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR23 / 2 + 13).im = 2.375 := by
+    simp only [Complex.add_im, zUpR23_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.1 : ℝ) ^ 2 ≤ ‖1 - sR23 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.1 : ℝ) = Real.sqrt ((14.1 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR23 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR23 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR23_ne0 : (1 - sR23 / 2) ≠ 0 := by
+  have hre : (1 - sR23 / 2).re = 0.9 := zUpR23_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add1_ne0 : (1 - sR23 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add2_ne0 : (1 - sR23 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add3_ne0 : (1 - sR23 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add4_ne0 : (1 - sR23 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add5_ne0 : (1 - sR23 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add6_ne0 : (1 - sR23 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add7_ne0 : (1 - sR23 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add8_ne0 : (1 - sR23 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add9_ne0 : (1 - sR23 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add10_ne0 : (1 - sR23 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add11_ne0 : (1 - sR23 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add12_ne0 : (1 - sR23 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR23_add13_ne0 : (1 - sR23 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR23 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R23 corner:
+`‖Complex.Gamma (1 - sR23 / 2)‖ ≤ 0.15` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R23 :
+    ‖Complex.Gamma (1 - sR23 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR23 / 2 + 1)
+      = (1 - sR23 / 2) * Complex.Gamma (1 - sR23 / 2) :=
+    Complex.Gamma_add_one _ zUpR23_ne0
+  have e1 : Complex.Gamma (1 - sR23 / 2 + 2)
+      = (1 - sR23 / 2 + 1)
+        * Complex.Gamma (1 - sR23 / 2 + 1) := by
+    have h : (1 - sR23 / 2 + 2)
+        = ((1 - sR23 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add1_ne0
+  have e2 : Complex.Gamma (1 - sR23 / 2 + 3)
+      = (1 - sR23 / 2 + 2)
+        * Complex.Gamma (1 - sR23 / 2 + 2) := by
+    have h : (1 - sR23 / 2 + 3)
+        = ((1 - sR23 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add2_ne0
+  have e3 : Complex.Gamma (1 - sR23 / 2 + 4)
+      = (1 - sR23 / 2 + 3)
+        * Complex.Gamma (1 - sR23 / 2 + 3) := by
+    have h : (1 - sR23 / 2 + 4)
+        = ((1 - sR23 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add3_ne0
+  have e4 : Complex.Gamma (1 - sR23 / 2 + 5)
+      = (1 - sR23 / 2 + 4)
+        * Complex.Gamma (1 - sR23 / 2 + 4) := by
+    have h : (1 - sR23 / 2 + 5)
+        = ((1 - sR23 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add4_ne0
+  have e5 : Complex.Gamma (1 - sR23 / 2 + 6)
+      = (1 - sR23 / 2 + 5)
+        * Complex.Gamma (1 - sR23 / 2 + 5) := by
+    have h : (1 - sR23 / 2 + 6)
+        = ((1 - sR23 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add5_ne0
+  have e6 : Complex.Gamma (1 - sR23 / 2 + 7)
+      = (1 - sR23 / 2 + 6)
+        * Complex.Gamma (1 - sR23 / 2 + 6) := by
+    have h : (1 - sR23 / 2 + 7)
+        = ((1 - sR23 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add6_ne0
+  have e7 : Complex.Gamma (1 - sR23 / 2 + 8)
+      = (1 - sR23 / 2 + 7)
+        * Complex.Gamma (1 - sR23 / 2 + 7) := by
+    have h : (1 - sR23 / 2 + 8)
+        = ((1 - sR23 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add7_ne0
+  have e8 : Complex.Gamma (1 - sR23 / 2 + 9)
+      = (1 - sR23 / 2 + 8)
+        * Complex.Gamma (1 - sR23 / 2 + 8) := by
+    have h : (1 - sR23 / 2 + 9)
+        = ((1 - sR23 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add8_ne0
+  have e9 : Complex.Gamma (1 - sR23 / 2 + 10)
+      = (1 - sR23 / 2 + 9)
+        * Complex.Gamma (1 - sR23 / 2 + 9) := by
+    have h : (1 - sR23 / 2 + 10)
+        = ((1 - sR23 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add9_ne0
+  have e10 : Complex.Gamma (1 - sR23 / 2 + 11)
+      = (1 - sR23 / 2 + 10)
+        * Complex.Gamma (1 - sR23 / 2 + 10) := by
+    have h : (1 - sR23 / 2 + 11)
+        = ((1 - sR23 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add10_ne0
+  have e11 : Complex.Gamma (1 - sR23 / 2 + 12)
+      = (1 - sR23 / 2 + 11)
+        * Complex.Gamma (1 - sR23 / 2 + 11) := by
+    have h : (1 - sR23 / 2 + 12)
+        = ((1 - sR23 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add11_ne0
+  have e12 : Complex.Gamma (1 - sR23 / 2 + 13)
+      = (1 - sR23 / 2 + 12)
+        * Complex.Gamma (1 - sR23 / 2 + 12) := by
+    have h : (1 - sR23 / 2 + 13)
+        = ((1 - sR23 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add12_ne0
+  have e13 : Complex.Gamma (1 - sR23 / 2 + 14)
+      = (1 - sR23 / 2 + 13)
+        * Complex.Gamma (1 - sR23 / 2 + 13) := by
+    have h : (1 - sR23 / 2 + 14)
+        = ((1 - sR23 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR23_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR23 / 2 + 1)‖
+      = ‖1 - sR23 / 2‖
+        * ‖Complex.Gamma (1 - sR23 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR23 / 2 + 2)‖
+      = ‖1 - sR23 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR23 / 2 + 3)‖
+      = ‖1 - sR23 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR23 / 2 + 4)‖
+      = ‖1 - sR23 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR23 / 2 + 5)‖
+      = ‖1 - sR23 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR23 / 2 + 6)‖
+      = ‖1 - sR23 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR23 / 2 + 7)‖
+      = ‖1 - sR23 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR23 / 2 + 8)‖
+      = ‖1 - sR23 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR23 / 2 + 9)‖
+      = ‖1 - sR23 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR23 / 2 + 10)‖
+      = ‖1 - sR23 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR23 / 2 + 11)‖
+      = ‖1 - sR23 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR23 / 2 + 12)‖
+      = ‖1 - sR23 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR23 / 2 + 13)‖
+      = ‖1 - sR23 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR23 / 2 + 14)‖
+      = ‖1 - sR23 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR23 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR23 / 2 + 14)‖
+      = ‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+        * (‖1 - sR23 / 2‖
+          * ‖Complex.Gamma (1 - sR23 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.04 : ℝ) * 2.53
+      ≤ ‖1 - sR23 / 2 + 1‖ * ‖1 - sR23 / 2‖ :=
+    mul_le_mul norm_zUpR23_1_ge norm_zUpR23_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.74 : ℝ) * (3.04 * (2.53))
+      ≤ ‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)) :=
+    mul_le_mul norm_zUpR23_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.56 : ℝ) * (3.74 * (3.04 * (2.53)))
+      ≤ ‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))) :=
+    mul_le_mul norm_zUpR23_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.44 : ℝ) * (4.56 * (3.74 * (3.04 * (2.53))))
+      ≤ ‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)))) :=
+    mul_le_mul norm_zUpR23_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.36 : ℝ) * (5.44 * (4.56 * (3.74 * (3.04 * (2.53)))))
+      ≤ ‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))) :=
+    mul_le_mul norm_zUpR23_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.29 : ℝ) * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53))))))
+      ≤ ‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)))))) :=
+    mul_le_mul norm_zUpR23_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.24 : ℝ) * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53)))))))
+      ≤ ‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))) :=
+    mul_le_mul norm_zUpR23_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.21 : ℝ) * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53))))))))
+      ≤ ‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR23_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.18 : ℝ) * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53)))))))))
+      ≤ ‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR23_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.15 : ℝ) * (10.18 * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53))))))))))
+      ≤ ‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR23_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.13 : ℝ) * (11.15 * (10.18 * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53)))))))))))
+      ≤ ‖1 - sR23 / 2 + 11‖ * (‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR23_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.11 : ℝ) * (12.13 * (11.15 * (10.18 * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53))))))))))))
+      ≤ ‖1 - sR23 / 2 + 12‖ * (‖1 - sR23 / 2 + 11‖ * (‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR23_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.1 : ℝ) * (13.11 * (12.13 * (11.15 * (10.18 * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53)))))))))))))
+      ≤ ‖1 - sR23 / 2 + 13‖ * (‖1 - sR23 / 2 + 12‖ * (‖1 - sR23 / 2 + 11‖ * (‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR23_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (630000000000 : ℝ)
+      ≤ (14.1 : ℝ) * (13.11 * (12.13 * (11.15 * (10.18 * (9.21 * (8.24 * (7.29 * (6.36 * (5.44 * (4.56 * (3.74 * (3.04 * (2.53))))))))))))) := by
+    norm_num
+  have hD_ge : (630000000000 : ℝ)
+      ≤ ‖1 - sR23 / 2 + 13‖ * (‖1 - sR23 / 2 + 12‖ * (‖1 - sR23 / 2 + 11‖ * (‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR23 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR23 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR23_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR23 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR23 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR23 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR23 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR23 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR23 / 2)‖ = ‖Complex.Gamma (1 - sR23 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 630000000000`.
+  have hD_mul : (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR23 / 2)‖
+      = ‖Complex.Gamma (1 - sR23 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR23 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR23 / 2)‖
+        * (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR23 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR23 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR23 / 2)‖
+      ≤ 69500000000 / (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR23 / 2 + 13‖
+        * (‖1 - sR23 / 2 + 12‖
+        * (‖1 - sR23 / 2 + 11‖
+        * (‖1 - sR23 / 2 + 10‖
+        * (‖1 - sR23 / 2 + 9‖
+        * (‖1 - sR23 / 2 + 8‖
+        * (‖1 - sR23 / 2 + 7‖
+        * (‖1 - sR23 / 2 + 6‖
+        * (‖1 - sR23 / 2 + 5‖
+        * (‖1 - sR23 / 2 + 4‖
+        * (‖1 - sR23 / 2 + 3‖
+        * (‖1 - sR23 / 2 + 2‖
+        * (‖1 - sR23 / 2 + 1‖
+          * ‖1 - sR23 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.15 * 630000000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR23 / 2 + 13‖ * (‖1 - sR23 / 2 + 12‖ * (‖1 - sR23 / 2 + 11‖ * (‖1 - sR23 / 2 + 10‖ * (‖1 - sR23 / 2 + 9‖ * (‖1 - sR23 / 2 + 8‖ * (‖1 - sR23 / 2 + 7‖ * (‖1 - sR23 / 2 + 6‖ * (‖1 - sR23 / 2 + 5‖ * (‖1 - sR23 / 2 + 4‖ * (‖1 - sR23 / 2 + 3‖ * (‖1 - sR23 / 2 + 2‖ * (‖1 - sR23 / 2 + 1‖ * (‖1 - sR23 / 2‖))))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R23GammaUpper
+
+namespace R24GammaUpper
+
+/-- The R24 `s`-plane center: `s = 1/2 + I·z` at `z = R24.center`. -/
+noncomputable def sR24 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R24.center
+
+/-- `R24.center = -2.75 + 0.3·I` (from `R24_x0/x1/y0/y1`). -/
+theorem R24_center_eq :
+    CentralCoverAssembly.R24.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R24_x0, CentralCoverAssembly.R24_x1,
+      CentralCoverAssembly.R24_y0, CentralCoverAssembly.R24_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R24_x0, CentralCoverAssembly.R24_x1,
+      CentralCoverAssembly.R24_y0, CentralCoverAssembly.R24_y1]
+    simp
+    norm_num
+
+/-- `Re sR24 = 0.2`. -/
+theorem sR24_re : sR24.re = 0.2 := by
+  unfold sR24
+  rw [R24_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR24 = -2.75`. -/
+theorem sR24_im : sR24.im = -2.75 := by
+  unfold sR24
+  rw [R24_center_eq]
+  simp
+
+/-- `Re(1 - sR24/2) = 0.9`. -/
+theorem zUpR24_re : (1 - sR24 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR24_re]
+  norm_num
+
+/-- `Im(1 - sR24/2) = 1.375`. -/
+theorem zUpR24_im : (1 - sR24 / 2).im = 1.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR24_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.64 ≤ ‖1 - sR24 / 2‖`. -/
+theorem norm_zUpR24_0_ge :
+    (1.64 : ℝ) ≤ ‖1 - sR24 / 2‖ := by
+  have hsq : (1.64 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR24_re, zUpR24_im]
+    norm_num
+  calc (1.64 : ℝ) = Real.sqrt ((1.64 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.34 ≤ ‖1 - sR24 / 2 + 1‖`. -/
+theorem norm_zUpR24_1_ge :
+    (2.34 : ℝ) ≤ ‖1 - sR24 / 2 + 1‖ := by
+  have hre : (1 - sR24 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR24 / 2 + 1).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.one_im]
+    norm_num
+  have hsq : (2.34 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.34 : ℝ) = Real.sqrt ((2.34 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.2 ≤ ‖1 - sR24 / 2 + 2‖`. -/
+theorem norm_zUpR24_2_ge :
+    (3.2 : ℝ) ≤ ‖1 - sR24 / 2 + 2‖ := by
+  have hre : (1 - sR24 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 2).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.2 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.2 : ℝ) = Real.sqrt ((3.2 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.13 ≤ ‖1 - sR24 / 2 + 3‖`. -/
+theorem norm_zUpR24_3_ge :
+    (4.13 : ℝ) ≤ ‖1 - sR24 / 2 + 3‖ := by
+  have hre : (1 - sR24 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 3).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.13 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.13 : ℝ) = Real.sqrt ((4.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.08 ≤ ‖1 - sR24 / 2 + 4‖`. -/
+theorem norm_zUpR24_4_ge :
+    (5.08 : ℝ) ≤ ‖1 - sR24 / 2 + 4‖ := by
+  have hre : (1 - sR24 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 4).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.08 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.08 : ℝ) = Real.sqrt ((5.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.05 ≤ ‖1 - sR24 / 2 + 5‖`. -/
+theorem norm_zUpR24_5_ge :
+    (6.05 : ℝ) ≤ ‖1 - sR24 / 2 + 5‖ := by
+  have hre : (1 - sR24 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 5).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.05 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.05 : ℝ) = Real.sqrt ((6.05 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.03 ≤ ‖1 - sR24 / 2 + 6‖`. -/
+theorem norm_zUpR24_6_ge :
+    (7.03 : ℝ) ≤ ‖1 - sR24 / 2 + 6‖ := by
+  have hre : (1 - sR24 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 6).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.03 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.03 : ℝ) = Real.sqrt ((7.03 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.01 ≤ ‖1 - sR24 / 2 + 7‖`. -/
+theorem norm_zUpR24_7_ge :
+    (8.01 : ℝ) ≤ ‖1 - sR24 / 2 + 7‖ := by
+  have hre : (1 - sR24 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 7).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.01 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.01 : ℝ) = Real.sqrt ((8.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.0 ≤ ‖1 - sR24 / 2 + 8‖`. -/
+theorem norm_zUpR24_8_ge :
+    (9.0 : ℝ) ≤ ‖1 - sR24 / 2 + 8‖ := by
+  have hre : (1 - sR24 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 8).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.0 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.0 : ℝ) = Real.sqrt ((9.0 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.99 ≤ ‖1 - sR24 / 2 + 9‖`. -/
+theorem norm_zUpR24_9_ge :
+    (9.99 : ℝ) ≤ ‖1 - sR24 / 2 + 9‖ := by
+  have hre : (1 - sR24 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 9).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.99 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.99 : ℝ) = Real.sqrt ((9.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.98 ≤ ‖1 - sR24 / 2 + 10‖`. -/
+theorem norm_zUpR24_10_ge :
+    (10.98 : ℝ) ≤ ‖1 - sR24 / 2 + 10‖ := by
+  have hre : (1 - sR24 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 10).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.98 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.98 : ℝ) = Real.sqrt ((10.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.97 ≤ ‖1 - sR24 / 2 + 11‖`. -/
+theorem norm_zUpR24_11_ge :
+    (11.97 : ℝ) ≤ ‖1 - sR24 / 2 + 11‖ := by
+  have hre : (1 - sR24 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 11).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.97 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.97 : ℝ) = Real.sqrt ((11.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 12.97 ≤ ‖1 - sR24 / 2 + 12‖`. -/
+theorem norm_zUpR24_12_ge :
+    (12.97 : ℝ) ≤ ‖1 - sR24 / 2 + 12‖ := by
+  have hre : (1 - sR24 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 12).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.97 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.97 : ℝ) = Real.sqrt ((12.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.96 ≤ ‖1 - sR24 / 2 + 13‖`. -/
+theorem norm_zUpR24_13_ge :
+    (13.96 : ℝ) ≤ ‖1 - sR24 / 2 + 13‖ := by
+  have hre : (1 - sR24 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR24 / 2 + 13).im = 1.375 := by
+    simp only [Complex.add_im, zUpR24_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.96 : ℝ) ^ 2 ≤ ‖1 - sR24 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.96 : ℝ) = Real.sqrt ((13.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR24 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR24 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR24_ne0 : (1 - sR24 / 2) ≠ 0 := by
+  have hre : (1 - sR24 / 2).re = 0.9 := zUpR24_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add1_ne0 : (1 - sR24 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add2_ne0 : (1 - sR24 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add3_ne0 : (1 - sR24 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add4_ne0 : (1 - sR24 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add5_ne0 : (1 - sR24 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add6_ne0 : (1 - sR24 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add7_ne0 : (1 - sR24 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add8_ne0 : (1 - sR24 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add9_ne0 : (1 - sR24 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add10_ne0 : (1 - sR24 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add11_ne0 : (1 - sR24 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add12_ne0 : (1 - sR24 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR24_add13_ne0 : (1 - sR24 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR24 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R24 corner:
+`‖Complex.Gamma (1 - sR24 / 2)‖ ≤ 0.5` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R24 :
+    ‖Complex.Gamma (1 - sR24 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR24 / 2 + 1)
+      = (1 - sR24 / 2) * Complex.Gamma (1 - sR24 / 2) :=
+    Complex.Gamma_add_one _ zUpR24_ne0
+  have e1 : Complex.Gamma (1 - sR24 / 2 + 2)
+      = (1 - sR24 / 2 + 1)
+        * Complex.Gamma (1 - sR24 / 2 + 1) := by
+    have h : (1 - sR24 / 2 + 2)
+        = ((1 - sR24 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add1_ne0
+  have e2 : Complex.Gamma (1 - sR24 / 2 + 3)
+      = (1 - sR24 / 2 + 2)
+        * Complex.Gamma (1 - sR24 / 2 + 2) := by
+    have h : (1 - sR24 / 2 + 3)
+        = ((1 - sR24 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add2_ne0
+  have e3 : Complex.Gamma (1 - sR24 / 2 + 4)
+      = (1 - sR24 / 2 + 3)
+        * Complex.Gamma (1 - sR24 / 2 + 3) := by
+    have h : (1 - sR24 / 2 + 4)
+        = ((1 - sR24 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add3_ne0
+  have e4 : Complex.Gamma (1 - sR24 / 2 + 5)
+      = (1 - sR24 / 2 + 4)
+        * Complex.Gamma (1 - sR24 / 2 + 4) := by
+    have h : (1 - sR24 / 2 + 5)
+        = ((1 - sR24 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add4_ne0
+  have e5 : Complex.Gamma (1 - sR24 / 2 + 6)
+      = (1 - sR24 / 2 + 5)
+        * Complex.Gamma (1 - sR24 / 2 + 5) := by
+    have h : (1 - sR24 / 2 + 6)
+        = ((1 - sR24 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add5_ne0
+  have e6 : Complex.Gamma (1 - sR24 / 2 + 7)
+      = (1 - sR24 / 2 + 6)
+        * Complex.Gamma (1 - sR24 / 2 + 6) := by
+    have h : (1 - sR24 / 2 + 7)
+        = ((1 - sR24 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add6_ne0
+  have e7 : Complex.Gamma (1 - sR24 / 2 + 8)
+      = (1 - sR24 / 2 + 7)
+        * Complex.Gamma (1 - sR24 / 2 + 7) := by
+    have h : (1 - sR24 / 2 + 8)
+        = ((1 - sR24 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add7_ne0
+  have e8 : Complex.Gamma (1 - sR24 / 2 + 9)
+      = (1 - sR24 / 2 + 8)
+        * Complex.Gamma (1 - sR24 / 2 + 8) := by
+    have h : (1 - sR24 / 2 + 9)
+        = ((1 - sR24 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add8_ne0
+  have e9 : Complex.Gamma (1 - sR24 / 2 + 10)
+      = (1 - sR24 / 2 + 9)
+        * Complex.Gamma (1 - sR24 / 2 + 9) := by
+    have h : (1 - sR24 / 2 + 10)
+        = ((1 - sR24 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add9_ne0
+  have e10 : Complex.Gamma (1 - sR24 / 2 + 11)
+      = (1 - sR24 / 2 + 10)
+        * Complex.Gamma (1 - sR24 / 2 + 10) := by
+    have h : (1 - sR24 / 2 + 11)
+        = ((1 - sR24 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add10_ne0
+  have e11 : Complex.Gamma (1 - sR24 / 2 + 12)
+      = (1 - sR24 / 2 + 11)
+        * Complex.Gamma (1 - sR24 / 2 + 11) := by
+    have h : (1 - sR24 / 2 + 12)
+        = ((1 - sR24 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add11_ne0
+  have e12 : Complex.Gamma (1 - sR24 / 2 + 13)
+      = (1 - sR24 / 2 + 12)
+        * Complex.Gamma (1 - sR24 / 2 + 12) := by
+    have h : (1 - sR24 / 2 + 13)
+        = ((1 - sR24 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add12_ne0
+  have e13 : Complex.Gamma (1 - sR24 / 2 + 14)
+      = (1 - sR24 / 2 + 13)
+        * Complex.Gamma (1 - sR24 / 2 + 13) := by
+    have h : (1 - sR24 / 2 + 14)
+        = ((1 - sR24 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR24_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR24 / 2 + 1)‖
+      = ‖1 - sR24 / 2‖
+        * ‖Complex.Gamma (1 - sR24 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR24 / 2 + 2)‖
+      = ‖1 - sR24 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR24 / 2 + 3)‖
+      = ‖1 - sR24 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR24 / 2 + 4)‖
+      = ‖1 - sR24 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR24 / 2 + 5)‖
+      = ‖1 - sR24 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR24 / 2 + 6)‖
+      = ‖1 - sR24 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR24 / 2 + 7)‖
+      = ‖1 - sR24 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR24 / 2 + 8)‖
+      = ‖1 - sR24 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR24 / 2 + 9)‖
+      = ‖1 - sR24 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR24 / 2 + 10)‖
+      = ‖1 - sR24 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR24 / 2 + 11)‖
+      = ‖1 - sR24 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR24 / 2 + 12)‖
+      = ‖1 - sR24 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR24 / 2 + 13)‖
+      = ‖1 - sR24 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR24 / 2 + 14)‖
+      = ‖1 - sR24 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR24 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR24 / 2 + 14)‖
+      = ‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+        * (‖1 - sR24 / 2‖
+          * ‖Complex.Gamma (1 - sR24 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.34 : ℝ) * 1.64
+      ≤ ‖1 - sR24 / 2 + 1‖ * ‖1 - sR24 / 2‖ :=
+    mul_le_mul norm_zUpR24_1_ge norm_zUpR24_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.2 : ℝ) * (2.34 * (1.64))
+      ≤ ‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)) :=
+    mul_le_mul norm_zUpR24_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.13 : ℝ) * (3.2 * (2.34 * (1.64)))
+      ≤ ‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))) :=
+    mul_le_mul norm_zUpR24_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.08 : ℝ) * (4.13 * (3.2 * (2.34 * (1.64))))
+      ≤ ‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)))) :=
+    mul_le_mul norm_zUpR24_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.05 : ℝ) * (5.08 * (4.13 * (3.2 * (2.34 * (1.64)))))
+      ≤ ‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))) :=
+    mul_le_mul norm_zUpR24_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.03 : ℝ) * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64))))))
+      ≤ ‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)))))) :=
+    mul_le_mul norm_zUpR24_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.01 : ℝ) * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64)))))))
+      ≤ ‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))) :=
+    mul_le_mul norm_zUpR24_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.0 : ℝ) * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64))))))))
+      ≤ ‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR24_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.99 : ℝ) * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64)))))))))
+      ≤ ‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR24_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.98 : ℝ) * (9.99 * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64))))))))))
+      ≤ ‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR24_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.97 : ℝ) * (10.98 * (9.99 * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64)))))))))))
+      ≤ ‖1 - sR24 / 2 + 11‖ * (‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR24_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (12.97 : ℝ) * (11.97 * (10.98 * (9.99 * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64))))))))))))
+      ≤ ‖1 - sR24 / 2 + 12‖ * (‖1 - sR24 / 2 + 11‖ * (‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR24_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.96 : ℝ) * (12.97 * (11.97 * (10.98 * (9.99 * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64)))))))))))))
+      ≤ ‖1 - sR24 / 2 + 13‖ * (‖1 - sR24 / 2 + 12‖ * (‖1 - sR24 / 2 + 11‖ * (‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR24_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (180000000000 : ℝ)
+      ≤ (13.96 : ℝ) * (12.97 * (11.97 * (10.98 * (9.99 * (9.0 * (8.01 * (7.03 * (6.05 * (5.08 * (4.13 * (3.2 * (2.34 * (1.64))))))))))))) := by
+    norm_num
+  have hD_ge : (180000000000 : ℝ)
+      ≤ ‖1 - sR24 / 2 + 13‖ * (‖1 - sR24 / 2 + 12‖ * (‖1 - sR24 / 2 + 11‖ * (‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR24 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR24 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR24_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR24 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR24 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR24 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR24 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR24 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR24 / 2)‖ = ‖Complex.Gamma (1 - sR24 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 180000000000`.
+  have hD_mul : (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR24 / 2)‖
+      = ‖Complex.Gamma (1 - sR24 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR24 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR24 / 2)‖
+        * (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR24 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR24 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR24 / 2)‖
+      ≤ 69500000000 / (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR24 / 2 + 13‖
+        * (‖1 - sR24 / 2 + 12‖
+        * (‖1 - sR24 / 2 + 11‖
+        * (‖1 - sR24 / 2 + 10‖
+        * (‖1 - sR24 / 2 + 9‖
+        * (‖1 - sR24 / 2 + 8‖
+        * (‖1 - sR24 / 2 + 7‖
+        * (‖1 - sR24 / 2 + 6‖
+        * (‖1 - sR24 / 2 + 5‖
+        * (‖1 - sR24 / 2 + 4‖
+        * (‖1 - sR24 / 2 + 3‖
+        * (‖1 - sR24 / 2 + 2‖
+        * (‖1 - sR24 / 2 + 1‖
+          * ‖1 - sR24 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.5 * 180000000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR24 / 2 + 13‖ * (‖1 - sR24 / 2 + 12‖ * (‖1 - sR24 / 2 + 11‖ * (‖1 - sR24 / 2 + 10‖ * (‖1 - sR24 / 2 + 9‖ * (‖1 - sR24 / 2 + 8‖ * (‖1 - sR24 / 2 + 7‖ * (‖1 - sR24 / 2 + 6‖ * (‖1 - sR24 / 2 + 5‖ * (‖1 - sR24 / 2 + 4‖ * (‖1 - sR24 / 2 + 3‖ * (‖1 - sR24 / 2 + 2‖ * (‖1 - sR24 / 2 + 1‖ * (‖1 - sR24 / 2‖))))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R24GammaUpper
+
+namespace R25GammaUpper
+
+/-- The R25 `s`-plane center: `s = 1/2 + I·z` at `z = R25.center`. -/
+noncomputable def sR25 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R25.center
+
+/-- `R25.center = -0.75 + 0.3·I` (from `R25_x0/x1/y0/y1`). -/
+theorem R25_center_eq :
+    CentralCoverAssembly.R25.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R25_x0, CentralCoverAssembly.R25_x1,
+      CentralCoverAssembly.R25_y0, CentralCoverAssembly.R25_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R25_x0, CentralCoverAssembly.R25_x1,
+      CentralCoverAssembly.R25_y0, CentralCoverAssembly.R25_y1]
+    simp
+    norm_num
+
+/-- `Re sR25 = 0.2`. -/
+theorem sR25_re : sR25.re = 0.2 := by
+  unfold sR25
+  rw [R25_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR25 = -0.75`. -/
+theorem sR25_im : sR25.im = -0.75 := by
+  unfold sR25
+  rw [R25_center_eq]
+  simp
+
+/-- `Re(1 - sR25/2) = 0.9`. -/
+theorem zUpR25_re : (1 - sR25 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR25_re]
+  norm_num
+
+/-- `Im(1 - sR25/2) = 0.375`. -/
+theorem zUpR25_im : (1 - sR25 / 2).im = 0.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR25_im]
+  norm_num
+
+/-- Denominator floor `c0 = 0.97 ≤ ‖1 - sR25 / 2‖`. -/
+theorem norm_zUpR25_0_ge :
+    (0.97 : ℝ) ≤ ‖1 - sR25 / 2‖ := by
+  have hsq : (0.97 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR25_re, zUpR25_im]
+    norm_num
+  calc (0.97 : ℝ) = Real.sqrt ((0.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.93 ≤ ‖1 - sR25 / 2 + 1‖`. -/
+theorem norm_zUpR25_1_ge :
+    (1.93 : ℝ) ≤ ‖1 - sR25 / 2 + 1‖ := by
+  have hre : (1 - sR25 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR25 / 2 + 1).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.one_im]
+    norm_num
+  have hsq : (1.93 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.93 : ℝ) = Real.sqrt ((1.93 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.92 ≤ ‖1 - sR25 / 2 + 2‖`. -/
+theorem norm_zUpR25_2_ge :
+    (2.92 : ℝ) ≤ ‖1 - sR25 / 2 + 2‖ := by
+  have hre : (1 - sR25 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 2).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.92 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.92 : ℝ) = Real.sqrt ((2.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.91 ≤ ‖1 - sR25 / 2 + 3‖`. -/
+theorem norm_zUpR25_3_ge :
+    (3.91 : ℝ) ≤ ‖1 - sR25 / 2 + 3‖ := by
+  have hre : (1 - sR25 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 3).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.91 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.91 : ℝ) = Real.sqrt ((3.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.91 ≤ ‖1 - sR25 / 2 + 4‖`. -/
+theorem norm_zUpR25_4_ge :
+    (4.91 : ℝ) ≤ ‖1 - sR25 / 2 + 4‖ := by
+  have hre : (1 - sR25 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 4).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.91 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.91 : ℝ) = Real.sqrt ((4.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.91 ≤ ‖1 - sR25 / 2 + 5‖`. -/
+theorem norm_zUpR25_5_ge :
+    (5.91 : ℝ) ≤ ‖1 - sR25 / 2 + 5‖ := by
+  have hre : (1 - sR25 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 5).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.91 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.91 : ℝ) = Real.sqrt ((5.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.91 ≤ ‖1 - sR25 / 2 + 6‖`. -/
+theorem norm_zUpR25_6_ge :
+    (6.91 : ℝ) ≤ ‖1 - sR25 / 2 + 6‖ := by
+  have hre : (1 - sR25 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 6).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.91 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.91 : ℝ) = Real.sqrt ((6.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.9 ≤ ‖1 - sR25 / 2 + 7‖`. -/
+theorem norm_zUpR25_7_ge :
+    (7.9 : ℝ) ≤ ‖1 - sR25 / 2 + 7‖ := by
+  have hre : (1 - sR25 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 7).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.9 : ℝ) = Real.sqrt ((7.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.9 ≤ ‖1 - sR25 / 2 + 8‖`. -/
+theorem norm_zUpR25_8_ge :
+    (8.9 : ℝ) ≤ ‖1 - sR25 / 2 + 8‖ := by
+  have hre : (1 - sR25 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 8).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.9 : ℝ) = Real.sqrt ((8.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.9 ≤ ‖1 - sR25 / 2 + 9‖`. -/
+theorem norm_zUpR25_9_ge :
+    (9.9 : ℝ) ≤ ‖1 - sR25 / 2 + 9‖ := by
+  have hre : (1 - sR25 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 9).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.9 : ℝ) = Real.sqrt ((9.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.9 ≤ ‖1 - sR25 / 2 + 10‖`. -/
+theorem norm_zUpR25_10_ge :
+    (10.9 : ℝ) ≤ ‖1 - sR25 / 2 + 10‖ := by
+  have hre : (1 - sR25 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 10).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.9 : ℝ) = Real.sqrt ((10.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.9 ≤ ‖1 - sR25 / 2 + 11‖`. -/
+theorem norm_zUpR25_11_ge :
+    (11.9 : ℝ) ≤ ‖1 - sR25 / 2 + 11‖ := by
+  have hre : (1 - sR25 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 11).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.9 : ℝ) = Real.sqrt ((11.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 12.9 ≤ ‖1 - sR25 / 2 + 12‖`. -/
+theorem norm_zUpR25_12_ge :
+    (12.9 : ℝ) ≤ ‖1 - sR25 / 2 + 12‖ := by
+  have hre : (1 - sR25 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 12).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.9 : ℝ) = Real.sqrt ((12.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.9 ≤ ‖1 - sR25 / 2 + 13‖`. -/
+theorem norm_zUpR25_13_ge :
+    (13.9 : ℝ) ≤ ‖1 - sR25 / 2 + 13‖ := by
+  have hre : (1 - sR25 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR25 / 2 + 13).im = 0.375 := by
+    simp only [Complex.add_im, zUpR25_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.9 : ℝ) ^ 2 ≤ ‖1 - sR25 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.9 : ℝ) = Real.sqrt ((13.9 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR25 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR25 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR25_ne0 : (1 - sR25 / 2) ≠ 0 := by
+  have hre : (1 - sR25 / 2).re = 0.9 := zUpR25_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add1_ne0 : (1 - sR25 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add2_ne0 : (1 - sR25 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add3_ne0 : (1 - sR25 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add4_ne0 : (1 - sR25 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add5_ne0 : (1 - sR25 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add6_ne0 : (1 - sR25 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add7_ne0 : (1 - sR25 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add8_ne0 : (1 - sR25 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add9_ne0 : (1 - sR25 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add10_ne0 : (1 - sR25 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add11_ne0 : (1 - sR25 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add12_ne0 : (1 - sR25 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR25_add13_ne0 : (1 - sR25 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR25 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R25 corner:
+`‖Complex.Gamma (1 - sR25 / 2)‖ ≤ 1.5` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R25 :
+    ‖Complex.Gamma (1 - sR25 / 2)‖ ≤ 1.5 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR25 / 2 + 1)
+      = (1 - sR25 / 2) * Complex.Gamma (1 - sR25 / 2) :=
+    Complex.Gamma_add_one _ zUpR25_ne0
+  have e1 : Complex.Gamma (1 - sR25 / 2 + 2)
+      = (1 - sR25 / 2 + 1)
+        * Complex.Gamma (1 - sR25 / 2 + 1) := by
+    have h : (1 - sR25 / 2 + 2)
+        = ((1 - sR25 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add1_ne0
+  have e2 : Complex.Gamma (1 - sR25 / 2 + 3)
+      = (1 - sR25 / 2 + 2)
+        * Complex.Gamma (1 - sR25 / 2 + 2) := by
+    have h : (1 - sR25 / 2 + 3)
+        = ((1 - sR25 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add2_ne0
+  have e3 : Complex.Gamma (1 - sR25 / 2 + 4)
+      = (1 - sR25 / 2 + 3)
+        * Complex.Gamma (1 - sR25 / 2 + 3) := by
+    have h : (1 - sR25 / 2 + 4)
+        = ((1 - sR25 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add3_ne0
+  have e4 : Complex.Gamma (1 - sR25 / 2 + 5)
+      = (1 - sR25 / 2 + 4)
+        * Complex.Gamma (1 - sR25 / 2 + 4) := by
+    have h : (1 - sR25 / 2 + 5)
+        = ((1 - sR25 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add4_ne0
+  have e5 : Complex.Gamma (1 - sR25 / 2 + 6)
+      = (1 - sR25 / 2 + 5)
+        * Complex.Gamma (1 - sR25 / 2 + 5) := by
+    have h : (1 - sR25 / 2 + 6)
+        = ((1 - sR25 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add5_ne0
+  have e6 : Complex.Gamma (1 - sR25 / 2 + 7)
+      = (1 - sR25 / 2 + 6)
+        * Complex.Gamma (1 - sR25 / 2 + 6) := by
+    have h : (1 - sR25 / 2 + 7)
+        = ((1 - sR25 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add6_ne0
+  have e7 : Complex.Gamma (1 - sR25 / 2 + 8)
+      = (1 - sR25 / 2 + 7)
+        * Complex.Gamma (1 - sR25 / 2 + 7) := by
+    have h : (1 - sR25 / 2 + 8)
+        = ((1 - sR25 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add7_ne0
+  have e8 : Complex.Gamma (1 - sR25 / 2 + 9)
+      = (1 - sR25 / 2 + 8)
+        * Complex.Gamma (1 - sR25 / 2 + 8) := by
+    have h : (1 - sR25 / 2 + 9)
+        = ((1 - sR25 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add8_ne0
+  have e9 : Complex.Gamma (1 - sR25 / 2 + 10)
+      = (1 - sR25 / 2 + 9)
+        * Complex.Gamma (1 - sR25 / 2 + 9) := by
+    have h : (1 - sR25 / 2 + 10)
+        = ((1 - sR25 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add9_ne0
+  have e10 : Complex.Gamma (1 - sR25 / 2 + 11)
+      = (1 - sR25 / 2 + 10)
+        * Complex.Gamma (1 - sR25 / 2 + 10) := by
+    have h : (1 - sR25 / 2 + 11)
+        = ((1 - sR25 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add10_ne0
+  have e11 : Complex.Gamma (1 - sR25 / 2 + 12)
+      = (1 - sR25 / 2 + 11)
+        * Complex.Gamma (1 - sR25 / 2 + 11) := by
+    have h : (1 - sR25 / 2 + 12)
+        = ((1 - sR25 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add11_ne0
+  have e12 : Complex.Gamma (1 - sR25 / 2 + 13)
+      = (1 - sR25 / 2 + 12)
+        * Complex.Gamma (1 - sR25 / 2 + 12) := by
+    have h : (1 - sR25 / 2 + 13)
+        = ((1 - sR25 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add12_ne0
+  have e13 : Complex.Gamma (1 - sR25 / 2 + 14)
+      = (1 - sR25 / 2 + 13)
+        * Complex.Gamma (1 - sR25 / 2 + 13) := by
+    have h : (1 - sR25 / 2 + 14)
+        = ((1 - sR25 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR25_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR25 / 2 + 1)‖
+      = ‖1 - sR25 / 2‖
+        * ‖Complex.Gamma (1 - sR25 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR25 / 2 + 2)‖
+      = ‖1 - sR25 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR25 / 2 + 3)‖
+      = ‖1 - sR25 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR25 / 2 + 4)‖
+      = ‖1 - sR25 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR25 / 2 + 5)‖
+      = ‖1 - sR25 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR25 / 2 + 6)‖
+      = ‖1 - sR25 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR25 / 2 + 7)‖
+      = ‖1 - sR25 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR25 / 2 + 8)‖
+      = ‖1 - sR25 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR25 / 2 + 9)‖
+      = ‖1 - sR25 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR25 / 2 + 10)‖
+      = ‖1 - sR25 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR25 / 2 + 11)‖
+      = ‖1 - sR25 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR25 / 2 + 12)‖
+      = ‖1 - sR25 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR25 / 2 + 13)‖
+      = ‖1 - sR25 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR25 / 2 + 14)‖
+      = ‖1 - sR25 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR25 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR25 / 2 + 14)‖
+      = ‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+        * (‖1 - sR25 / 2‖
+          * ‖Complex.Gamma (1 - sR25 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.93 : ℝ) * 0.97
+      ≤ ‖1 - sR25 / 2 + 1‖ * ‖1 - sR25 / 2‖ :=
+    mul_le_mul norm_zUpR25_1_ge norm_zUpR25_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.92 : ℝ) * (1.93 * (0.97))
+      ≤ ‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)) :=
+    mul_le_mul norm_zUpR25_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.91 : ℝ) * (2.92 * (1.93 * (0.97)))
+      ≤ ‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))) :=
+    mul_le_mul norm_zUpR25_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.91 : ℝ) * (3.91 * (2.92 * (1.93 * (0.97))))
+      ≤ ‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)))) :=
+    mul_le_mul norm_zUpR25_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.91 : ℝ) * (4.91 * (3.91 * (2.92 * (1.93 * (0.97)))))
+      ≤ ‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))) :=
+    mul_le_mul norm_zUpR25_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.91 : ℝ) * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97))))))
+      ≤ ‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)))))) :=
+    mul_le_mul norm_zUpR25_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.9 : ℝ) * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97)))))))
+      ≤ ‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))) :=
+    mul_le_mul norm_zUpR25_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.9 : ℝ) * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97))))))))
+      ≤ ‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR25_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.9 : ℝ) * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97)))))))))
+      ≤ ‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR25_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.9 : ℝ) * (9.9 * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97))))))))))
+      ≤ ‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR25_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.9 : ℝ) * (10.9 * (9.9 * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97)))))))))))
+      ≤ ‖1 - sR25 / 2 + 11‖ * (‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR25_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (12.9 : ℝ) * (11.9 * (10.9 * (9.9 * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97))))))))))))
+      ≤ ‖1 - sR25 / 2 + 12‖ * (‖1 - sR25 / 2 + 11‖ * (‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR25_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.9 : ℝ) * (12.9 * (11.9 * (10.9 * (9.9 * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97)))))))))))))
+      ≤ ‖1 - sR25 / 2 + 13‖ * (‖1 - sR25 / 2 + 12‖ * (‖1 - sR25 / 2 + 11‖ * (‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR25_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (69000000000 : ℝ)
+      ≤ (13.9 : ℝ) * (12.9 * (11.9 * (10.9 * (9.9 * (8.9 * (7.9 * (6.91 * (5.91 * (4.91 * (3.91 * (2.92 * (1.93 * (0.97))))))))))))) := by
+    norm_num
+  have hD_ge : (69000000000 : ℝ)
+      ≤ ‖1 - sR25 / 2 + 13‖ * (‖1 - sR25 / 2 + 12‖ * (‖1 - sR25 / 2 + 11‖ * (‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR25 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR25 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR25_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR25 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR25 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR25 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR25 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR25 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR25 / 2)‖ = ‖Complex.Gamma (1 - sR25 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 69000000000`.
+  have hD_mul : (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR25 / 2)‖
+      = ‖Complex.Gamma (1 - sR25 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR25 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR25 / 2)‖
+        * (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR25 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR25 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR25 / 2)‖
+      ≤ 69500000000 / (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 1.5 * (‖1 - sR25 / 2 + 13‖
+        * (‖1 - sR25 / 2 + 12‖
+        * (‖1 - sR25 / 2 + 11‖
+        * (‖1 - sR25 / 2 + 10‖
+        * (‖1 - sR25 / 2 + 9‖
+        * (‖1 - sR25 / 2 + 8‖
+        * (‖1 - sR25 / 2 + 7‖
+        * (‖1 - sR25 / 2 + 6‖
+        * (‖1 - sR25 / 2 + 5‖
+        * (‖1 - sR25 / 2 + 4‖
+        * (‖1 - sR25 / 2 + 3‖
+        * (‖1 - sR25 / 2 + 2‖
+        * (‖1 - sR25 / 2 + 1‖
+          * ‖1 - sR25 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 1.5 * 69000000000 := by norm_num
+      _ ≤ 1.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR25 / 2 + 13‖ * (‖1 - sR25 / 2 + 12‖ * (‖1 - sR25 / 2 + 11‖ * (‖1 - sR25 / 2 + 10‖ * (‖1 - sR25 / 2 + 9‖ * (‖1 - sR25 / 2 + 8‖ * (‖1 - sR25 / 2 + 7‖ * (‖1 - sR25 / 2 + 6‖ * (‖1 - sR25 / 2 + 5‖ * (‖1 - sR25 / 2 + 4‖ * (‖1 - sR25 / 2 + 3‖ * (‖1 - sR25 / 2 + 2‖ * (‖1 - sR25 / 2 + 1‖ * (‖1 - sR25 / 2‖))))))))))))))
+      ≤ 1.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R25GammaUpper
+
+namespace R26GammaUpper
+
+/-- The R26 `s`-plane center: `s = 1/2 + I·z` at `z = R26.center`. -/
+noncomputable def sR26 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R26.center
+
+/-- `R26.center = 1.25 + 0.3·I` (from `R26_x0/x1/y0/y1`). -/
+theorem R26_center_eq :
+    CentralCoverAssembly.R26.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R26_x0, CentralCoverAssembly.R26_x1,
+      CentralCoverAssembly.R26_y0, CentralCoverAssembly.R26_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R26_x0, CentralCoverAssembly.R26_x1,
+      CentralCoverAssembly.R26_y0, CentralCoverAssembly.R26_y1]
+    simp
+    norm_num
+
+/-- `Re sR26 = 0.2`. -/
+theorem sR26_re : sR26.re = 0.2 := by
+  unfold sR26
+  rw [R26_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR26 = 1.25`. -/
+theorem sR26_im : sR26.im = 1.25 := by
+  unfold sR26
+  rw [R26_center_eq]
+  simp
+
+/-- `Re(1 - sR26/2) = 0.9`. -/
+theorem zUpR26_re : (1 - sR26 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR26_re]
+  norm_num
+
+/-- `Im(1 - sR26/2) = -0.625`. -/
+theorem zUpR26_im : (1 - sR26 / 2).im = -0.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR26_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.09 ≤ ‖1 - sR26 / 2‖`. -/
+theorem norm_zUpR26_0_ge :
+    (1.09 : ℝ) ≤ ‖1 - sR26 / 2‖ := by
+  have hsq : (1.09 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR26_re, zUpR26_im]
+    norm_num
+  calc (1.09 : ℝ) = Real.sqrt ((1.09 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.0 ≤ ‖1 - sR26 / 2 + 1‖`. -/
+theorem norm_zUpR26_1_ge :
+    (2.0 : ℝ) ≤ ‖1 - sR26 / 2 + 1‖ := by
+  have hre : (1 - sR26 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR26 / 2 + 1).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.one_im]
+    norm_num
+  have hsq : (2.0 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.0 : ℝ) = Real.sqrt ((2.0 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.96 ≤ ‖1 - sR26 / 2 + 2‖`. -/
+theorem norm_zUpR26_2_ge :
+    (2.96 : ℝ) ≤ ‖1 - sR26 / 2 + 2‖ := by
+  have hre : (1 - sR26 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 2).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.96 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.96 : ℝ) = Real.sqrt ((2.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.94 ≤ ‖1 - sR26 / 2 + 3‖`. -/
+theorem norm_zUpR26_3_ge :
+    (3.94 : ℝ) ≤ ‖1 - sR26 / 2 + 3‖ := by
+  have hre : (1 - sR26 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 3).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.94 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.94 : ℝ) = Real.sqrt ((3.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.93 ≤ ‖1 - sR26 / 2 + 4‖`. -/
+theorem norm_zUpR26_4_ge :
+    (4.93 : ℝ) ≤ ‖1 - sR26 / 2 + 4‖ := by
+  have hre : (1 - sR26 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 4).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.93 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.93 : ℝ) = Real.sqrt ((4.93 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.93 ≤ ‖1 - sR26 / 2 + 5‖`. -/
+theorem norm_zUpR26_5_ge :
+    (5.93 : ℝ) ≤ ‖1 - sR26 / 2 + 5‖ := by
+  have hre : (1 - sR26 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 5).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.93 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.93 : ℝ) = Real.sqrt ((5.93 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.92 ≤ ‖1 - sR26 / 2 + 6‖`. -/
+theorem norm_zUpR26_6_ge :
+    (6.92 : ℝ) ≤ ‖1 - sR26 / 2 + 6‖ := by
+  have hre : (1 - sR26 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 6).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.92 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.92 : ℝ) = Real.sqrt ((6.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.92 ≤ ‖1 - sR26 / 2 + 7‖`. -/
+theorem norm_zUpR26_7_ge :
+    (7.92 : ℝ) ≤ ‖1 - sR26 / 2 + 7‖ := by
+  have hre : (1 - sR26 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 7).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.92 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.92 : ℝ) = Real.sqrt ((7.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.92 ≤ ‖1 - sR26 / 2 + 8‖`. -/
+theorem norm_zUpR26_8_ge :
+    (8.92 : ℝ) ≤ ‖1 - sR26 / 2 + 8‖ := by
+  have hre : (1 - sR26 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 8).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.92 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.92 : ℝ) = Real.sqrt ((8.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.91 ≤ ‖1 - sR26 / 2 + 9‖`. -/
+theorem norm_zUpR26_9_ge :
+    (9.91 : ℝ) ≤ ‖1 - sR26 / 2 + 9‖ := by
+  have hre : (1 - sR26 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 9).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.91 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.91 : ℝ) = Real.sqrt ((9.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.91 ≤ ‖1 - sR26 / 2 + 10‖`. -/
+theorem norm_zUpR26_10_ge :
+    (10.91 : ℝ) ≤ ‖1 - sR26 / 2 + 10‖ := by
+  have hre : (1 - sR26 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 10).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.91 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.91 : ℝ) = Real.sqrt ((10.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.91 ≤ ‖1 - sR26 / 2 + 11‖`. -/
+theorem norm_zUpR26_11_ge :
+    (11.91 : ℝ) ≤ ‖1 - sR26 / 2 + 11‖ := by
+  have hre : (1 - sR26 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 11).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.91 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.91 : ℝ) = Real.sqrt ((11.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 12.91 ≤ ‖1 - sR26 / 2 + 12‖`. -/
+theorem norm_zUpR26_12_ge :
+    (12.91 : ℝ) ≤ ‖1 - sR26 / 2 + 12‖ := by
+  have hre : (1 - sR26 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 12).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.91 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.91 : ℝ) = Real.sqrt ((12.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.91 ≤ ‖1 - sR26 / 2 + 13‖`. -/
+theorem norm_zUpR26_13_ge :
+    (13.91 : ℝ) ≤ ‖1 - sR26 / 2 + 13‖ := by
+  have hre : (1 - sR26 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR26 / 2 + 13).im = -0.625 := by
+    simp only [Complex.add_im, zUpR26_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.91 : ℝ) ^ 2 ≤ ‖1 - sR26 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.91 : ℝ) = Real.sqrt ((13.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR26 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR26 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR26_ne0 : (1 - sR26 / 2) ≠ 0 := by
+  have hre : (1 - sR26 / 2).re = 0.9 := zUpR26_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add1_ne0 : (1 - sR26 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add2_ne0 : (1 - sR26 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add3_ne0 : (1 - sR26 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add4_ne0 : (1 - sR26 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add5_ne0 : (1 - sR26 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add6_ne0 : (1 - sR26 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add7_ne0 : (1 - sR26 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add8_ne0 : (1 - sR26 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add9_ne0 : (1 - sR26 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add10_ne0 : (1 - sR26 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add11_ne0 : (1 - sR26 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add12_ne0 : (1 - sR26 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR26_add13_ne0 : (1 - sR26 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR26 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R26 corner:
+`‖Complex.Gamma (1 - sR26 / 2)‖ ≤ 1.2` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R26 :
+    ‖Complex.Gamma (1 - sR26 / 2)‖ ≤ 1.2 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR26 / 2 + 1)
+      = (1 - sR26 / 2) * Complex.Gamma (1 - sR26 / 2) :=
+    Complex.Gamma_add_one _ zUpR26_ne0
+  have e1 : Complex.Gamma (1 - sR26 / 2 + 2)
+      = (1 - sR26 / 2 + 1)
+        * Complex.Gamma (1 - sR26 / 2 + 1) := by
+    have h : (1 - sR26 / 2 + 2)
+        = ((1 - sR26 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add1_ne0
+  have e2 : Complex.Gamma (1 - sR26 / 2 + 3)
+      = (1 - sR26 / 2 + 2)
+        * Complex.Gamma (1 - sR26 / 2 + 2) := by
+    have h : (1 - sR26 / 2 + 3)
+        = ((1 - sR26 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add2_ne0
+  have e3 : Complex.Gamma (1 - sR26 / 2 + 4)
+      = (1 - sR26 / 2 + 3)
+        * Complex.Gamma (1 - sR26 / 2 + 3) := by
+    have h : (1 - sR26 / 2 + 4)
+        = ((1 - sR26 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add3_ne0
+  have e4 : Complex.Gamma (1 - sR26 / 2 + 5)
+      = (1 - sR26 / 2 + 4)
+        * Complex.Gamma (1 - sR26 / 2 + 4) := by
+    have h : (1 - sR26 / 2 + 5)
+        = ((1 - sR26 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add4_ne0
+  have e5 : Complex.Gamma (1 - sR26 / 2 + 6)
+      = (1 - sR26 / 2 + 5)
+        * Complex.Gamma (1 - sR26 / 2 + 5) := by
+    have h : (1 - sR26 / 2 + 6)
+        = ((1 - sR26 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add5_ne0
+  have e6 : Complex.Gamma (1 - sR26 / 2 + 7)
+      = (1 - sR26 / 2 + 6)
+        * Complex.Gamma (1 - sR26 / 2 + 6) := by
+    have h : (1 - sR26 / 2 + 7)
+        = ((1 - sR26 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add6_ne0
+  have e7 : Complex.Gamma (1 - sR26 / 2 + 8)
+      = (1 - sR26 / 2 + 7)
+        * Complex.Gamma (1 - sR26 / 2 + 7) := by
+    have h : (1 - sR26 / 2 + 8)
+        = ((1 - sR26 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add7_ne0
+  have e8 : Complex.Gamma (1 - sR26 / 2 + 9)
+      = (1 - sR26 / 2 + 8)
+        * Complex.Gamma (1 - sR26 / 2 + 8) := by
+    have h : (1 - sR26 / 2 + 9)
+        = ((1 - sR26 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add8_ne0
+  have e9 : Complex.Gamma (1 - sR26 / 2 + 10)
+      = (1 - sR26 / 2 + 9)
+        * Complex.Gamma (1 - sR26 / 2 + 9) := by
+    have h : (1 - sR26 / 2 + 10)
+        = ((1 - sR26 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add9_ne0
+  have e10 : Complex.Gamma (1 - sR26 / 2 + 11)
+      = (1 - sR26 / 2 + 10)
+        * Complex.Gamma (1 - sR26 / 2 + 10) := by
+    have h : (1 - sR26 / 2 + 11)
+        = ((1 - sR26 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add10_ne0
+  have e11 : Complex.Gamma (1 - sR26 / 2 + 12)
+      = (1 - sR26 / 2 + 11)
+        * Complex.Gamma (1 - sR26 / 2 + 11) := by
+    have h : (1 - sR26 / 2 + 12)
+        = ((1 - sR26 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add11_ne0
+  have e12 : Complex.Gamma (1 - sR26 / 2 + 13)
+      = (1 - sR26 / 2 + 12)
+        * Complex.Gamma (1 - sR26 / 2 + 12) := by
+    have h : (1 - sR26 / 2 + 13)
+        = ((1 - sR26 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add12_ne0
+  have e13 : Complex.Gamma (1 - sR26 / 2 + 14)
+      = (1 - sR26 / 2 + 13)
+        * Complex.Gamma (1 - sR26 / 2 + 13) := by
+    have h : (1 - sR26 / 2 + 14)
+        = ((1 - sR26 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR26_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR26 / 2 + 1)‖
+      = ‖1 - sR26 / 2‖
+        * ‖Complex.Gamma (1 - sR26 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR26 / 2 + 2)‖
+      = ‖1 - sR26 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR26 / 2 + 3)‖
+      = ‖1 - sR26 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR26 / 2 + 4)‖
+      = ‖1 - sR26 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR26 / 2 + 5)‖
+      = ‖1 - sR26 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR26 / 2 + 6)‖
+      = ‖1 - sR26 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR26 / 2 + 7)‖
+      = ‖1 - sR26 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR26 / 2 + 8)‖
+      = ‖1 - sR26 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR26 / 2 + 9)‖
+      = ‖1 - sR26 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR26 / 2 + 10)‖
+      = ‖1 - sR26 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR26 / 2 + 11)‖
+      = ‖1 - sR26 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR26 / 2 + 12)‖
+      = ‖1 - sR26 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR26 / 2 + 13)‖
+      = ‖1 - sR26 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR26 / 2 + 14)‖
+      = ‖1 - sR26 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR26 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR26 / 2 + 14)‖
+      = ‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+        * (‖1 - sR26 / 2‖
+          * ‖Complex.Gamma (1 - sR26 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.0 : ℝ) * 1.09
+      ≤ ‖1 - sR26 / 2 + 1‖ * ‖1 - sR26 / 2‖ :=
+    mul_le_mul norm_zUpR26_1_ge norm_zUpR26_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.96 : ℝ) * (2.0 * (1.09))
+      ≤ ‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)) :=
+    mul_le_mul norm_zUpR26_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.94 : ℝ) * (2.96 * (2.0 * (1.09)))
+      ≤ ‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))) :=
+    mul_le_mul norm_zUpR26_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.93 : ℝ) * (3.94 * (2.96 * (2.0 * (1.09))))
+      ≤ ‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)))) :=
+    mul_le_mul norm_zUpR26_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.93 : ℝ) * (4.93 * (3.94 * (2.96 * (2.0 * (1.09)))))
+      ≤ ‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))) :=
+    mul_le_mul norm_zUpR26_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.92 : ℝ) * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09))))))
+      ≤ ‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)))))) :=
+    mul_le_mul norm_zUpR26_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.92 : ℝ) * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09)))))))
+      ≤ ‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))) :=
+    mul_le_mul norm_zUpR26_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.92 : ℝ) * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09))))))))
+      ≤ ‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR26_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.91 : ℝ) * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09)))))))))
+      ≤ ‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR26_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.91 : ℝ) * (9.91 * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09))))))))))
+      ≤ ‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR26_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.91 : ℝ) * (10.91 * (9.91 * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09)))))))))))
+      ≤ ‖1 - sR26 / 2 + 11‖ * (‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR26_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (12.91 : ℝ) * (11.91 * (10.91 * (9.91 * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09))))))))))))
+      ≤ ‖1 - sR26 / 2 + 12‖ * (‖1 - sR26 / 2 + 11‖ * (‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR26_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.91 : ℝ) * (12.91 * (11.91 * (10.91 * (9.91 * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09)))))))))))))
+      ≤ ‖1 - sR26 / 2 + 13‖ * (‖1 - sR26 / 2 + 12‖ * (‖1 - sR26 / 2 + 11‖ * (‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR26_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (84000000000 : ℝ)
+      ≤ (13.91 : ℝ) * (12.91 * (11.91 * (10.91 * (9.91 * (8.92 * (7.92 * (6.92 * (5.93 * (4.93 * (3.94 * (2.96 * (2.0 * (1.09))))))))))))) := by
+    norm_num
+  have hD_ge : (84000000000 : ℝ)
+      ≤ ‖1 - sR26 / 2 + 13‖ * (‖1 - sR26 / 2 + 12‖ * (‖1 - sR26 / 2 + 11‖ * (‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR26 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR26 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR26_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR26 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR26 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR26 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR26 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR26 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR26 / 2)‖ = ‖Complex.Gamma (1 - sR26 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 84000000000`.
+  have hD_mul : (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR26 / 2)‖
+      = ‖Complex.Gamma (1 - sR26 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR26 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR26 / 2)‖
+        * (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR26 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR26 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR26 / 2)‖
+      ≤ 69500000000 / (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 1.2 * (‖1 - sR26 / 2 + 13‖
+        * (‖1 - sR26 / 2 + 12‖
+        * (‖1 - sR26 / 2 + 11‖
+        * (‖1 - sR26 / 2 + 10‖
+        * (‖1 - sR26 / 2 + 9‖
+        * (‖1 - sR26 / 2 + 8‖
+        * (‖1 - sR26 / 2 + 7‖
+        * (‖1 - sR26 / 2 + 6‖
+        * (‖1 - sR26 / 2 + 5‖
+        * (‖1 - sR26 / 2 + 4‖
+        * (‖1 - sR26 / 2 + 3‖
+        * (‖1 - sR26 / 2 + 2‖
+        * (‖1 - sR26 / 2 + 1‖
+          * ‖1 - sR26 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 1.2 * 84000000000 := by norm_num
+      _ ≤ 1.2 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR26 / 2 + 13‖ * (‖1 - sR26 / 2 + 12‖ * (‖1 - sR26 / 2 + 11‖ * (‖1 - sR26 / 2 + 10‖ * (‖1 - sR26 / 2 + 9‖ * (‖1 - sR26 / 2 + 8‖ * (‖1 - sR26 / 2 + 7‖ * (‖1 - sR26 / 2 + 6‖ * (‖1 - sR26 / 2 + 5‖ * (‖1 - sR26 / 2 + 4‖ * (‖1 - sR26 / 2 + 3‖ * (‖1 - sR26 / 2 + 2‖ * (‖1 - sR26 / 2 + 1‖ * (‖1 - sR26 / 2‖))))))))))))))
+      ≤ 1.2 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R26GammaUpper
+
+namespace R27GammaUpper
+
+/-- The R27 `s`-plane center: `s = 1/2 + I·z` at `z = R27.center`. -/
+noncomputable def sR27 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R27.center
+
+/-- `R27.center = 3.25 + 0.3·I` (from `R27_x0/x1/y0/y1`). -/
+theorem R27_center_eq :
+    CentralCoverAssembly.R27.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R27_x0, CentralCoverAssembly.R27_x1,
+      CentralCoverAssembly.R27_y0, CentralCoverAssembly.R27_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R27_x0, CentralCoverAssembly.R27_x1,
+      CentralCoverAssembly.R27_y0, CentralCoverAssembly.R27_y1]
+    simp
+    norm_num
+
+/-- `Re sR27 = 0.2`. -/
+theorem sR27_re : sR27.re = 0.2 := by
+  unfold sR27
+  rw [R27_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR27 = 3.25`. -/
+theorem sR27_im : sR27.im = 3.25 := by
+  unfold sR27
+  rw [R27_center_eq]
+  simp
+
+/-- `Re(1 - sR27/2) = 0.9`. -/
+theorem zUpR27_re : (1 - sR27 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR27_re]
+  norm_num
+
+/-- `Im(1 - sR27/2) = -1.625`. -/
+theorem zUpR27_im : (1 - sR27 / 2).im = -1.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR27_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.85 ≤ ‖1 - sR27 / 2‖`. -/
+theorem norm_zUpR27_0_ge :
+    (1.85 : ℝ) ≤ ‖1 - sR27 / 2‖ := by
+  have hsq : (1.85 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR27_re, zUpR27_im]
+    norm_num
+  calc (1.85 : ℝ) = Real.sqrt ((1.85 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.5 ≤ ‖1 - sR27 / 2 + 1‖`. -/
+theorem norm_zUpR27_1_ge :
+    (2.5 : ℝ) ≤ ‖1 - sR27 / 2 + 1‖ := by
+  have hre : (1 - sR27 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR27 / 2 + 1).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.one_im]
+    norm_num
+  have hsq : (2.5 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.5 : ℝ) = Real.sqrt ((2.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.32 ≤ ‖1 - sR27 / 2 + 2‖`. -/
+theorem norm_zUpR27_2_ge :
+    (3.32 : ℝ) ≤ ‖1 - sR27 / 2 + 2‖ := by
+  have hre : (1 - sR27 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 2).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.32 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.32 : ℝ) = Real.sqrt ((3.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.22 ≤ ‖1 - sR27 / 2 + 3‖`. -/
+theorem norm_zUpR27_3_ge :
+    (4.22 : ℝ) ≤ ‖1 - sR27 / 2 + 3‖ := by
+  have hre : (1 - sR27 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 3).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.22 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.22 : ℝ) = Real.sqrt ((4.22 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.16 ≤ ‖1 - sR27 / 2 + 4‖`. -/
+theorem norm_zUpR27_4_ge :
+    (5.16 : ℝ) ≤ ‖1 - sR27 / 2 + 4‖ := by
+  have hre : (1 - sR27 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 4).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.16 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.16 : ℝ) = Real.sqrt ((5.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.11 ≤ ‖1 - sR27 / 2 + 5‖`. -/
+theorem norm_zUpR27_5_ge :
+    (6.11 : ℝ) ≤ ‖1 - sR27 / 2 + 5‖ := by
+  have hre : (1 - sR27 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 5).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.11 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.11 : ℝ) = Real.sqrt ((6.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.08 ≤ ‖1 - sR27 / 2 + 6‖`. -/
+theorem norm_zUpR27_6_ge :
+    (7.08 : ℝ) ≤ ‖1 - sR27 / 2 + 6‖ := by
+  have hre : (1 - sR27 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 6).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.08 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.08 : ℝ) = Real.sqrt ((7.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.06 ≤ ‖1 - sR27 / 2 + 7‖`. -/
+theorem norm_zUpR27_7_ge :
+    (8.06 : ℝ) ≤ ‖1 - sR27 / 2 + 7‖ := by
+  have hre : (1 - sR27 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 7).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.06 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.06 : ℝ) = Real.sqrt ((8.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.04 ≤ ‖1 - sR27 / 2 + 8‖`. -/
+theorem norm_zUpR27_8_ge :
+    (9.04 : ℝ) ≤ ‖1 - sR27 / 2 + 8‖ := by
+  have hre : (1 - sR27 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 8).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.04 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.04 : ℝ) = Real.sqrt ((9.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.03 ≤ ‖1 - sR27 / 2 + 9‖`. -/
+theorem norm_zUpR27_9_ge :
+    (10.03 : ℝ) ≤ ‖1 - sR27 / 2 + 9‖ := by
+  have hre : (1 - sR27 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 9).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.03 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.03 : ℝ) = Real.sqrt ((10.03 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.02 ≤ ‖1 - sR27 / 2 + 10‖`. -/
+theorem norm_zUpR27_10_ge :
+    (11.02 : ℝ) ≤ ‖1 - sR27 / 2 + 10‖ := by
+  have hre : (1 - sR27 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 10).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.02 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.02 : ℝ) = Real.sqrt ((11.02 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.01 ≤ ‖1 - sR27 / 2 + 11‖`. -/
+theorem norm_zUpR27_11_ge :
+    (12.01 : ℝ) ≤ ‖1 - sR27 / 2 + 11‖ := by
+  have hre : (1 - sR27 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 11).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.01 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.01 : ℝ) = Real.sqrt ((12.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.0 ≤ ‖1 - sR27 / 2 + 12‖`. -/
+theorem norm_zUpR27_12_ge :
+    (13.0 : ℝ) ≤ ‖1 - sR27 / 2 + 12‖ := by
+  have hre : (1 - sR27 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 12).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.0 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.0 : ℝ) = Real.sqrt ((13.0 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.99 ≤ ‖1 - sR27 / 2 + 13‖`. -/
+theorem norm_zUpR27_13_ge :
+    (13.99 : ℝ) ≤ ‖1 - sR27 / 2 + 13‖ := by
+  have hre : (1 - sR27 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR27 / 2 + 13).im = -1.625 := by
+    simp only [Complex.add_im, zUpR27_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.99 : ℝ) ^ 2 ≤ ‖1 - sR27 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.99 : ℝ) = Real.sqrt ((13.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR27 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR27 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR27_ne0 : (1 - sR27 / 2) ≠ 0 := by
+  have hre : (1 - sR27 / 2).re = 0.9 := zUpR27_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add1_ne0 : (1 - sR27 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add2_ne0 : (1 - sR27 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add3_ne0 : (1 - sR27 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add4_ne0 : (1 - sR27 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add5_ne0 : (1 - sR27 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add6_ne0 : (1 - sR27 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add7_ne0 : (1 - sR27 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add8_ne0 : (1 - sR27 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add9_ne0 : (1 - sR27 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add10_ne0 : (1 - sR27 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add11_ne0 : (1 - sR27 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add12_ne0 : (1 - sR27 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR27_add13_ne0 : (1 - sR27 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR27 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R27 corner:
+`‖Complex.Gamma (1 - sR27 / 2)‖ ≤ 0.5` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R27 :
+    ‖Complex.Gamma (1 - sR27 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR27 / 2 + 1)
+      = (1 - sR27 / 2) * Complex.Gamma (1 - sR27 / 2) :=
+    Complex.Gamma_add_one _ zUpR27_ne0
+  have e1 : Complex.Gamma (1 - sR27 / 2 + 2)
+      = (1 - sR27 / 2 + 1)
+        * Complex.Gamma (1 - sR27 / 2 + 1) := by
+    have h : (1 - sR27 / 2 + 2)
+        = ((1 - sR27 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add1_ne0
+  have e2 : Complex.Gamma (1 - sR27 / 2 + 3)
+      = (1 - sR27 / 2 + 2)
+        * Complex.Gamma (1 - sR27 / 2 + 2) := by
+    have h : (1 - sR27 / 2 + 3)
+        = ((1 - sR27 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add2_ne0
+  have e3 : Complex.Gamma (1 - sR27 / 2 + 4)
+      = (1 - sR27 / 2 + 3)
+        * Complex.Gamma (1 - sR27 / 2 + 3) := by
+    have h : (1 - sR27 / 2 + 4)
+        = ((1 - sR27 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add3_ne0
+  have e4 : Complex.Gamma (1 - sR27 / 2 + 5)
+      = (1 - sR27 / 2 + 4)
+        * Complex.Gamma (1 - sR27 / 2 + 4) := by
+    have h : (1 - sR27 / 2 + 5)
+        = ((1 - sR27 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add4_ne0
+  have e5 : Complex.Gamma (1 - sR27 / 2 + 6)
+      = (1 - sR27 / 2 + 5)
+        * Complex.Gamma (1 - sR27 / 2 + 5) := by
+    have h : (1 - sR27 / 2 + 6)
+        = ((1 - sR27 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add5_ne0
+  have e6 : Complex.Gamma (1 - sR27 / 2 + 7)
+      = (1 - sR27 / 2 + 6)
+        * Complex.Gamma (1 - sR27 / 2 + 6) := by
+    have h : (1 - sR27 / 2 + 7)
+        = ((1 - sR27 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add6_ne0
+  have e7 : Complex.Gamma (1 - sR27 / 2 + 8)
+      = (1 - sR27 / 2 + 7)
+        * Complex.Gamma (1 - sR27 / 2 + 7) := by
+    have h : (1 - sR27 / 2 + 8)
+        = ((1 - sR27 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add7_ne0
+  have e8 : Complex.Gamma (1 - sR27 / 2 + 9)
+      = (1 - sR27 / 2 + 8)
+        * Complex.Gamma (1 - sR27 / 2 + 8) := by
+    have h : (1 - sR27 / 2 + 9)
+        = ((1 - sR27 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add8_ne0
+  have e9 : Complex.Gamma (1 - sR27 / 2 + 10)
+      = (1 - sR27 / 2 + 9)
+        * Complex.Gamma (1 - sR27 / 2 + 9) := by
+    have h : (1 - sR27 / 2 + 10)
+        = ((1 - sR27 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add9_ne0
+  have e10 : Complex.Gamma (1 - sR27 / 2 + 11)
+      = (1 - sR27 / 2 + 10)
+        * Complex.Gamma (1 - sR27 / 2 + 10) := by
+    have h : (1 - sR27 / 2 + 11)
+        = ((1 - sR27 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add10_ne0
+  have e11 : Complex.Gamma (1 - sR27 / 2 + 12)
+      = (1 - sR27 / 2 + 11)
+        * Complex.Gamma (1 - sR27 / 2 + 11) := by
+    have h : (1 - sR27 / 2 + 12)
+        = ((1 - sR27 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add11_ne0
+  have e12 : Complex.Gamma (1 - sR27 / 2 + 13)
+      = (1 - sR27 / 2 + 12)
+        * Complex.Gamma (1 - sR27 / 2 + 12) := by
+    have h : (1 - sR27 / 2 + 13)
+        = ((1 - sR27 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add12_ne0
+  have e13 : Complex.Gamma (1 - sR27 / 2 + 14)
+      = (1 - sR27 / 2 + 13)
+        * Complex.Gamma (1 - sR27 / 2 + 13) := by
+    have h : (1 - sR27 / 2 + 14)
+        = ((1 - sR27 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR27_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR27 / 2 + 1)‖
+      = ‖1 - sR27 / 2‖
+        * ‖Complex.Gamma (1 - sR27 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR27 / 2 + 2)‖
+      = ‖1 - sR27 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR27 / 2 + 3)‖
+      = ‖1 - sR27 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR27 / 2 + 4)‖
+      = ‖1 - sR27 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR27 / 2 + 5)‖
+      = ‖1 - sR27 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR27 / 2 + 6)‖
+      = ‖1 - sR27 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR27 / 2 + 7)‖
+      = ‖1 - sR27 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR27 / 2 + 8)‖
+      = ‖1 - sR27 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR27 / 2 + 9)‖
+      = ‖1 - sR27 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR27 / 2 + 10)‖
+      = ‖1 - sR27 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR27 / 2 + 11)‖
+      = ‖1 - sR27 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR27 / 2 + 12)‖
+      = ‖1 - sR27 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR27 / 2 + 13)‖
+      = ‖1 - sR27 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR27 / 2 + 14)‖
+      = ‖1 - sR27 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR27 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR27 / 2 + 14)‖
+      = ‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+        * (‖1 - sR27 / 2‖
+          * ‖Complex.Gamma (1 - sR27 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.5 : ℝ) * 1.85
+      ≤ ‖1 - sR27 / 2 + 1‖ * ‖1 - sR27 / 2‖ :=
+    mul_le_mul norm_zUpR27_1_ge norm_zUpR27_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.32 : ℝ) * (2.5 * (1.85))
+      ≤ ‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)) :=
+    mul_le_mul norm_zUpR27_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.22 : ℝ) * (3.32 * (2.5 * (1.85)))
+      ≤ ‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))) :=
+    mul_le_mul norm_zUpR27_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.16 : ℝ) * (4.22 * (3.32 * (2.5 * (1.85))))
+      ≤ ‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)))) :=
+    mul_le_mul norm_zUpR27_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.11 : ℝ) * (5.16 * (4.22 * (3.32 * (2.5 * (1.85)))))
+      ≤ ‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))) :=
+    mul_le_mul norm_zUpR27_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.08 : ℝ) * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85))))))
+      ≤ ‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)))))) :=
+    mul_le_mul norm_zUpR27_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.06 : ℝ) * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85)))))))
+      ≤ ‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))) :=
+    mul_le_mul norm_zUpR27_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.04 : ℝ) * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85))))))))
+      ≤ ‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR27_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.03 : ℝ) * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85)))))))))
+      ≤ ‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR27_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.02 : ℝ) * (10.03 * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85))))))))))
+      ≤ ‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR27_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.01 : ℝ) * (11.02 * (10.03 * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85)))))))))))
+      ≤ ‖1 - sR27 / 2 + 11‖ * (‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR27_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.0 : ℝ) * (12.01 * (11.02 * (10.03 * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85))))))))))))
+      ≤ ‖1 - sR27 / 2 + 12‖ * (‖1 - sR27 / 2 + 11‖ * (‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR27_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.99 : ℝ) * (13.0 * (12.01 * (11.02 * (10.03 * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85)))))))))))))
+      ≤ ‖1 - sR27 / 2 + 13‖ * (‖1 - sR27 / 2 + 12‖ * (‖1 - sR27 / 2 + 11‖ * (‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR27_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (250000000000 : ℝ)
+      ≤ (13.99 : ℝ) * (13.0 * (12.01 * (11.02 * (10.03 * (9.04 * (8.06 * (7.08 * (6.11 * (5.16 * (4.22 * (3.32 * (2.5 * (1.85))))))))))))) := by
+    norm_num
+  have hD_ge : (250000000000 : ℝ)
+      ≤ ‖1 - sR27 / 2 + 13‖ * (‖1 - sR27 / 2 + 12‖ * (‖1 - sR27 / 2 + 11‖ * (‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR27 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR27 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR27_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR27 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR27 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR27 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR27 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR27 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR27 / 2)‖ = ‖Complex.Gamma (1 - sR27 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 250000000000`.
+  have hD_mul : (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR27 / 2)‖
+      = ‖Complex.Gamma (1 - sR27 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR27 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR27 / 2)‖
+        * (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR27 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR27 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR27 / 2)‖
+      ≤ 69500000000 / (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR27 / 2 + 13‖
+        * (‖1 - sR27 / 2 + 12‖
+        * (‖1 - sR27 / 2 + 11‖
+        * (‖1 - sR27 / 2 + 10‖
+        * (‖1 - sR27 / 2 + 9‖
+        * (‖1 - sR27 / 2 + 8‖
+        * (‖1 - sR27 / 2 + 7‖
+        * (‖1 - sR27 / 2 + 6‖
+        * (‖1 - sR27 / 2 + 5‖
+        * (‖1 - sR27 / 2 + 4‖
+        * (‖1 - sR27 / 2 + 3‖
+        * (‖1 - sR27 / 2 + 2‖
+        * (‖1 - sR27 / 2 + 1‖
+          * ‖1 - sR27 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.5 * 250000000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR27 / 2 + 13‖ * (‖1 - sR27 / 2 + 12‖ * (‖1 - sR27 / 2 + 11‖ * (‖1 - sR27 / 2 + 10‖ * (‖1 - sR27 / 2 + 9‖ * (‖1 - sR27 / 2 + 8‖ * (‖1 - sR27 / 2 + 7‖ * (‖1 - sR27 / 2 + 6‖ * (‖1 - sR27 / 2 + 5‖ * (‖1 - sR27 / 2 + 4‖ * (‖1 - sR27 / 2 + 3‖ * (‖1 - sR27 / 2 + 2‖ * (‖1 - sR27 / 2 + 1‖ * (‖1 - sR27 / 2‖))))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R27GammaUpper
+
+namespace R28GammaUpper
+
+/-- The R28 `s`-plane center: `s = 1/2 + I·z` at `z = R28.center`. -/
+noncomputable def sR28 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R28.center
+
+/-- `R28.center = 5.25 + 0.3·I` (from `R28_x0/x1/y0/y1`). -/
+theorem R28_center_eq :
+    CentralCoverAssembly.R28.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R28_x0, CentralCoverAssembly.R28_x1,
+      CentralCoverAssembly.R28_y0, CentralCoverAssembly.R28_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R28_x0, CentralCoverAssembly.R28_x1,
+      CentralCoverAssembly.R28_y0, CentralCoverAssembly.R28_y1]
+    simp
+    norm_num
+
+/-- `Re sR28 = 0.2`. -/
+theorem sR28_re : sR28.re = 0.2 := by
+  unfold sR28
+  rw [R28_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR28 = 5.25`. -/
+theorem sR28_im : sR28.im = 5.25 := by
+  unfold sR28
+  rw [R28_center_eq]
+  simp
+
+/-- `Re(1 - sR28/2) = 0.9`. -/
+theorem zUpR28_re : (1 - sR28 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR28_re]
+  norm_num
+
+/-- `Im(1 - sR28/2) = -2.625`. -/
+theorem zUpR28_im : (1 - sR28 / 2).im = -2.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR28_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.77 ≤ ‖1 - sR28 / 2‖`. -/
+theorem norm_zUpR28_0_ge :
+    (2.77 : ℝ) ≤ ‖1 - sR28 / 2‖ := by
+  have hsq : (2.77 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR28_re, zUpR28_im]
+    norm_num
+  calc (2.77 : ℝ) = Real.sqrt ((2.77 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.24 ≤ ‖1 - sR28 / 2 + 1‖`. -/
+theorem norm_zUpR28_1_ge :
+    (3.24 : ℝ) ≤ ‖1 - sR28 / 2 + 1‖ := by
+  have hre : (1 - sR28 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR28 / 2 + 1).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.one_im]
+    norm_num
+  have hsq : (3.24 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.24 : ℝ) = Real.sqrt ((3.24 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.91 ≤ ‖1 - sR28 / 2 + 2‖`. -/
+theorem norm_zUpR28_2_ge :
+    (3.91 : ℝ) ≤ ‖1 - sR28 / 2 + 2‖ := by
+  have hre : (1 - sR28 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 2).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.91 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.91 : ℝ) = Real.sqrt ((3.91 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.7 ≤ ‖1 - sR28 / 2 + 3‖`. -/
+theorem norm_zUpR28_3_ge :
+    (4.7 : ℝ) ≤ ‖1 - sR28 / 2 + 3‖ := by
+  have hre : (1 - sR28 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 3).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.7 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.7 : ℝ) = Real.sqrt ((4.7 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.55 ≤ ‖1 - sR28 / 2 + 4‖`. -/
+theorem norm_zUpR28_4_ge :
+    (5.55 : ℝ) ≤ ‖1 - sR28 / 2 + 4‖ := by
+  have hre : (1 - sR28 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 4).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.55 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.55 : ℝ) = Real.sqrt ((5.55 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.45 ≤ ‖1 - sR28 / 2 + 5‖`. -/
+theorem norm_zUpR28_5_ge :
+    (6.45 : ℝ) ≤ ‖1 - sR28 / 2 + 5‖ := by
+  have hre : (1 - sR28 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 5).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.45 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.45 : ℝ) = Real.sqrt ((6.45 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.38 ≤ ‖1 - sR28 / 2 + 6‖`. -/
+theorem norm_zUpR28_6_ge :
+    (7.38 : ℝ) ≤ ‖1 - sR28 / 2 + 6‖ := by
+  have hre : (1 - sR28 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 6).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.38 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.38 : ℝ) = Real.sqrt ((7.38 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.32 ≤ ‖1 - sR28 / 2 + 7‖`. -/
+theorem norm_zUpR28_7_ge :
+    (8.32 : ℝ) ≤ ‖1 - sR28 / 2 + 7‖ := by
+  have hre : (1 - sR28 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 7).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.32 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.32 : ℝ) = Real.sqrt ((8.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.27 ≤ ‖1 - sR28 / 2 + 8‖`. -/
+theorem norm_zUpR28_8_ge :
+    (9.27 : ℝ) ≤ ‖1 - sR28 / 2 + 8‖ := by
+  have hre : (1 - sR28 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 8).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.27 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.27 : ℝ) = Real.sqrt ((9.27 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.24 ≤ ‖1 - sR28 / 2 + 9‖`. -/
+theorem norm_zUpR28_9_ge :
+    (10.24 : ℝ) ≤ ‖1 - sR28 / 2 + 9‖ := by
+  have hre : (1 - sR28 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 9).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.24 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.24 : ℝ) = Real.sqrt ((10.24 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.21 ≤ ‖1 - sR28 / 2 + 10‖`. -/
+theorem norm_zUpR28_10_ge :
+    (11.21 : ℝ) ≤ ‖1 - sR28 / 2 + 10‖ := by
+  have hre : (1 - sR28 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 10).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.21 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.21 : ℝ) = Real.sqrt ((11.21 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.18 ≤ ‖1 - sR28 / 2 + 11‖`. -/
+theorem norm_zUpR28_11_ge :
+    (12.18 : ℝ) ≤ ‖1 - sR28 / 2 + 11‖ := by
+  have hre : (1 - sR28 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 11).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.18 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.18 : ℝ) = Real.sqrt ((12.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.16 ≤ ‖1 - sR28 / 2 + 12‖`. -/
+theorem norm_zUpR28_12_ge :
+    (13.16 : ℝ) ≤ ‖1 - sR28 / 2 + 12‖ := by
+  have hre : (1 - sR28 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 12).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.16 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.16 : ℝ) = Real.sqrt ((13.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.14 ≤ ‖1 - sR28 / 2 + 13‖`. -/
+theorem norm_zUpR28_13_ge :
+    (14.14 : ℝ) ≤ ‖1 - sR28 / 2 + 13‖ := by
+  have hre : (1 - sR28 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR28 / 2 + 13).im = -2.625 := by
+    simp only [Complex.add_im, zUpR28_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.14 : ℝ) ^ 2 ≤ ‖1 - sR28 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.14 : ℝ) = Real.sqrt ((14.14 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR28 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR28 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR28_ne0 : (1 - sR28 / 2) ≠ 0 := by
+  have hre : (1 - sR28 / 2).re = 0.9 := zUpR28_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add1_ne0 : (1 - sR28 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add2_ne0 : (1 - sR28 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add3_ne0 : (1 - sR28 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add4_ne0 : (1 - sR28 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add5_ne0 : (1 - sR28 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add6_ne0 : (1 - sR28 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add7_ne0 : (1 - sR28 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add8_ne0 : (1 - sR28 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add9_ne0 : (1 - sR28 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add10_ne0 : (1 - sR28 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add11_ne0 : (1 - sR28 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add12_ne0 : (1 - sR28 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR28_add13_ne0 : (1 - sR28 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR28 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R28 corner:
+`‖Complex.Gamma (1 - sR28 / 2)‖ ≤ 0.15` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R28 :
+    ‖Complex.Gamma (1 - sR28 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR28 / 2 + 1)
+      = (1 - sR28 / 2) * Complex.Gamma (1 - sR28 / 2) :=
+    Complex.Gamma_add_one _ zUpR28_ne0
+  have e1 : Complex.Gamma (1 - sR28 / 2 + 2)
+      = (1 - sR28 / 2 + 1)
+        * Complex.Gamma (1 - sR28 / 2 + 1) := by
+    have h : (1 - sR28 / 2 + 2)
+        = ((1 - sR28 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add1_ne0
+  have e2 : Complex.Gamma (1 - sR28 / 2 + 3)
+      = (1 - sR28 / 2 + 2)
+        * Complex.Gamma (1 - sR28 / 2 + 2) := by
+    have h : (1 - sR28 / 2 + 3)
+        = ((1 - sR28 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add2_ne0
+  have e3 : Complex.Gamma (1 - sR28 / 2 + 4)
+      = (1 - sR28 / 2 + 3)
+        * Complex.Gamma (1 - sR28 / 2 + 3) := by
+    have h : (1 - sR28 / 2 + 4)
+        = ((1 - sR28 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add3_ne0
+  have e4 : Complex.Gamma (1 - sR28 / 2 + 5)
+      = (1 - sR28 / 2 + 4)
+        * Complex.Gamma (1 - sR28 / 2 + 4) := by
+    have h : (1 - sR28 / 2 + 5)
+        = ((1 - sR28 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add4_ne0
+  have e5 : Complex.Gamma (1 - sR28 / 2 + 6)
+      = (1 - sR28 / 2 + 5)
+        * Complex.Gamma (1 - sR28 / 2 + 5) := by
+    have h : (1 - sR28 / 2 + 6)
+        = ((1 - sR28 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add5_ne0
+  have e6 : Complex.Gamma (1 - sR28 / 2 + 7)
+      = (1 - sR28 / 2 + 6)
+        * Complex.Gamma (1 - sR28 / 2 + 6) := by
+    have h : (1 - sR28 / 2 + 7)
+        = ((1 - sR28 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add6_ne0
+  have e7 : Complex.Gamma (1 - sR28 / 2 + 8)
+      = (1 - sR28 / 2 + 7)
+        * Complex.Gamma (1 - sR28 / 2 + 7) := by
+    have h : (1 - sR28 / 2 + 8)
+        = ((1 - sR28 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add7_ne0
+  have e8 : Complex.Gamma (1 - sR28 / 2 + 9)
+      = (1 - sR28 / 2 + 8)
+        * Complex.Gamma (1 - sR28 / 2 + 8) := by
+    have h : (1 - sR28 / 2 + 9)
+        = ((1 - sR28 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add8_ne0
+  have e9 : Complex.Gamma (1 - sR28 / 2 + 10)
+      = (1 - sR28 / 2 + 9)
+        * Complex.Gamma (1 - sR28 / 2 + 9) := by
+    have h : (1 - sR28 / 2 + 10)
+        = ((1 - sR28 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add9_ne0
+  have e10 : Complex.Gamma (1 - sR28 / 2 + 11)
+      = (1 - sR28 / 2 + 10)
+        * Complex.Gamma (1 - sR28 / 2 + 10) := by
+    have h : (1 - sR28 / 2 + 11)
+        = ((1 - sR28 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add10_ne0
+  have e11 : Complex.Gamma (1 - sR28 / 2 + 12)
+      = (1 - sR28 / 2 + 11)
+        * Complex.Gamma (1 - sR28 / 2 + 11) := by
+    have h : (1 - sR28 / 2 + 12)
+        = ((1 - sR28 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add11_ne0
+  have e12 : Complex.Gamma (1 - sR28 / 2 + 13)
+      = (1 - sR28 / 2 + 12)
+        * Complex.Gamma (1 - sR28 / 2 + 12) := by
+    have h : (1 - sR28 / 2 + 13)
+        = ((1 - sR28 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add12_ne0
+  have e13 : Complex.Gamma (1 - sR28 / 2 + 14)
+      = (1 - sR28 / 2 + 13)
+        * Complex.Gamma (1 - sR28 / 2 + 13) := by
+    have h : (1 - sR28 / 2 + 14)
+        = ((1 - sR28 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR28_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR28 / 2 + 1)‖
+      = ‖1 - sR28 / 2‖
+        * ‖Complex.Gamma (1 - sR28 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR28 / 2 + 2)‖
+      = ‖1 - sR28 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR28 / 2 + 3)‖
+      = ‖1 - sR28 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR28 / 2 + 4)‖
+      = ‖1 - sR28 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR28 / 2 + 5)‖
+      = ‖1 - sR28 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR28 / 2 + 6)‖
+      = ‖1 - sR28 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR28 / 2 + 7)‖
+      = ‖1 - sR28 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR28 / 2 + 8)‖
+      = ‖1 - sR28 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR28 / 2 + 9)‖
+      = ‖1 - sR28 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR28 / 2 + 10)‖
+      = ‖1 - sR28 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR28 / 2 + 11)‖
+      = ‖1 - sR28 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR28 / 2 + 12)‖
+      = ‖1 - sR28 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR28 / 2 + 13)‖
+      = ‖1 - sR28 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR28 / 2 + 14)‖
+      = ‖1 - sR28 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR28 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR28 / 2 + 14)‖
+      = ‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+        * (‖1 - sR28 / 2‖
+          * ‖Complex.Gamma (1 - sR28 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.24 : ℝ) * 2.77
+      ≤ ‖1 - sR28 / 2 + 1‖ * ‖1 - sR28 / 2‖ :=
+    mul_le_mul norm_zUpR28_1_ge norm_zUpR28_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.91 : ℝ) * (3.24 * (2.77))
+      ≤ ‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)) :=
+    mul_le_mul norm_zUpR28_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.7 : ℝ) * (3.91 * (3.24 * (2.77)))
+      ≤ ‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))) :=
+    mul_le_mul norm_zUpR28_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.55 : ℝ) * (4.7 * (3.91 * (3.24 * (2.77))))
+      ≤ ‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)))) :=
+    mul_le_mul norm_zUpR28_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.45 : ℝ) * (5.55 * (4.7 * (3.91 * (3.24 * (2.77)))))
+      ≤ ‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))) :=
+    mul_le_mul norm_zUpR28_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.38 : ℝ) * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77))))))
+      ≤ ‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)))))) :=
+    mul_le_mul norm_zUpR28_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.32 : ℝ) * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77)))))))
+      ≤ ‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))) :=
+    mul_le_mul norm_zUpR28_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.27 : ℝ) * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77))))))))
+      ≤ ‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR28_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.24 : ℝ) * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77)))))))))
+      ≤ ‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR28_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.21 : ℝ) * (10.24 * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77))))))))))
+      ≤ ‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR28_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.18 : ℝ) * (11.21 * (10.24 * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77)))))))))))
+      ≤ ‖1 - sR28 / 2 + 11‖ * (‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR28_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.16 : ℝ) * (12.18 * (11.21 * (10.24 * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77))))))))))))
+      ≤ ‖1 - sR28 / 2 + 12‖ * (‖1 - sR28 / 2 + 11‖ * (‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR28_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.14 : ℝ) * (13.16 * (12.18 * (11.21 * (10.24 * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77)))))))))))))
+      ≤ ‖1 - sR28 / 2 + 13‖ * (‖1 - sR28 / 2 + 12‖ * (‖1 - sR28 / 2 + 11‖ * (‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR28_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (870000000000 : ℝ)
+      ≤ (14.14 : ℝ) * (13.16 * (12.18 * (11.21 * (10.24 * (9.27 * (8.32 * (7.38 * (6.45 * (5.55 * (4.7 * (3.91 * (3.24 * (2.77))))))))))))) := by
+    norm_num
+  have hD_ge : (870000000000 : ℝ)
+      ≤ ‖1 - sR28 / 2 + 13‖ * (‖1 - sR28 / 2 + 12‖ * (‖1 - sR28 / 2 + 11‖ * (‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR28 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR28 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR28_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR28 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR28 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR28 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR28 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR28 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR28 / 2)‖ = ‖Complex.Gamma (1 - sR28 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 870000000000`.
+  have hD_mul : (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR28 / 2)‖
+      = ‖Complex.Gamma (1 - sR28 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR28 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR28 / 2)‖
+        * (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR28 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR28 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR28 / 2)‖
+      ≤ 69500000000 / (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR28 / 2 + 13‖
+        * (‖1 - sR28 / 2 + 12‖
+        * (‖1 - sR28 / 2 + 11‖
+        * (‖1 - sR28 / 2 + 10‖
+        * (‖1 - sR28 / 2 + 9‖
+        * (‖1 - sR28 / 2 + 8‖
+        * (‖1 - sR28 / 2 + 7‖
+        * (‖1 - sR28 / 2 + 6‖
+        * (‖1 - sR28 / 2 + 5‖
+        * (‖1 - sR28 / 2 + 4‖
+        * (‖1 - sR28 / 2 + 3‖
+        * (‖1 - sR28 / 2 + 2‖
+        * (‖1 - sR28 / 2 + 1‖
+          * ‖1 - sR28 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.15 * 870000000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR28 / 2 + 13‖ * (‖1 - sR28 / 2 + 12‖ * (‖1 - sR28 / 2 + 11‖ * (‖1 - sR28 / 2 + 10‖ * (‖1 - sR28 / 2 + 9‖ * (‖1 - sR28 / 2 + 8‖ * (‖1 - sR28 / 2 + 7‖ * (‖1 - sR28 / 2 + 6‖ * (‖1 - sR28 / 2 + 5‖ * (‖1 - sR28 / 2 + 4‖ * (‖1 - sR28 / 2 + 3‖ * (‖1 - sR28 / 2 + 2‖ * (‖1 - sR28 / 2 + 1‖ * (‖1 - sR28 / 2‖))))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R28GammaUpper
+
+namespace R29GammaUpper
+
+/-- The R29 `s`-plane center: `s = 1/2 + I·z` at `z = R29.center`. -/
+noncomputable def sR29 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R29.center
+
+/-- `R29.center = 7.25 + 0.3·I` (from `R29_x0/x1/y0/y1`). -/
+theorem R29_center_eq :
+    CentralCoverAssembly.R29.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R29_x0, CentralCoverAssembly.R29_x1,
+      CentralCoverAssembly.R29_y0, CentralCoverAssembly.R29_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R29_x0, CentralCoverAssembly.R29_x1,
+      CentralCoverAssembly.R29_y0, CentralCoverAssembly.R29_y1]
+    simp
+    norm_num
+
+/-- `Re sR29 = 0.2`. -/
+theorem sR29_re : sR29.re = 0.2 := by
+  unfold sR29
+  rw [R29_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR29 = 7.25`. -/
+theorem sR29_im : sR29.im = 7.25 := by
+  unfold sR29
+  rw [R29_center_eq]
+  simp
+
+/-- `Re(1 - sR29/2) = 0.9`. -/
+theorem zUpR29_re : (1 - sR29 / 2).re = 0.9 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR29_re]
+  norm_num
+
+/-- `Im(1 - sR29/2) = -3.625`. -/
+theorem zUpR29_im : (1 - sR29 / 2).im = -3.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR29_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.73 ≤ ‖1 - sR29 / 2‖`. -/
+theorem norm_zUpR29_0_ge :
+    (3.73 : ℝ) ≤ ‖1 - sR29 / 2‖ := by
+  have hsq : (3.73 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR29_re, zUpR29_im]
+    norm_num
+  calc (3.73 : ℝ) = Real.sqrt ((3.73 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 4.09 ≤ ‖1 - sR29 / 2 + 1‖`. -/
+theorem norm_zUpR29_1_ge :
+    (4.09 : ℝ) ≤ ‖1 - sR29 / 2 + 1‖ := by
+  have hre : (1 - sR29 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR29 / 2 + 1).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.one_im]
+    norm_num
+  have hsq : (4.09 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.09 : ℝ) = Real.sqrt ((4.09 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.64 ≤ ‖1 - sR29 / 2 + 2‖`. -/
+theorem norm_zUpR29_2_ge :
+    (4.64 : ℝ) ≤ ‖1 - sR29 / 2 + 2‖ := by
+  have hre : (1 - sR29 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 2).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.64 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.64 : ℝ) = Real.sqrt ((4.64 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.32 ≤ ‖1 - sR29 / 2 + 3‖`. -/
+theorem norm_zUpR29_3_ge :
+    (5.32 : ℝ) ≤ ‖1 - sR29 / 2 + 3‖ := by
+  have hre : (1 - sR29 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 3).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.32 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.32 : ℝ) = Real.sqrt ((5.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 6.09 ≤ ‖1 - sR29 / 2 + 4‖`. -/
+theorem norm_zUpR29_4_ge :
+    (6.09 : ℝ) ≤ ‖1 - sR29 / 2 + 4‖ := by
+  have hre : (1 - sR29 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 4).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.09 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.09 : ℝ) = Real.sqrt ((6.09 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.92 ≤ ‖1 - sR29 / 2 + 5‖`. -/
+theorem norm_zUpR29_5_ge :
+    (6.92 : ℝ) ≤ ‖1 - sR29 / 2 + 5‖ := by
+  have hre : (1 - sR29 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 5).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.92 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.92 : ℝ) = Real.sqrt ((6.92 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.79 ≤ ‖1 - sR29 / 2 + 6‖`. -/
+theorem norm_zUpR29_6_ge :
+    (7.79 : ℝ) ≤ ‖1 - sR29 / 2 + 6‖ := by
+  have hre : (1 - sR29 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 6).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.79 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.79 : ℝ) = Real.sqrt ((7.79 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.69 ≤ ‖1 - sR29 / 2 + 7‖`. -/
+theorem norm_zUpR29_7_ge :
+    (8.69 : ℝ) ≤ ‖1 - sR29 / 2 + 7‖ := by
+  have hre : (1 - sR29 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 7).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.69 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.69 : ℝ) = Real.sqrt ((8.69 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.6 ≤ ‖1 - sR29 / 2 + 8‖`. -/
+theorem norm_zUpR29_8_ge :
+    (9.6 : ℝ) ≤ ‖1 - sR29 / 2 + 8‖ := by
+  have hre : (1 - sR29 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 8).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.6 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.6 : ℝ) = Real.sqrt ((9.6 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.54 ≤ ‖1 - sR29 / 2 + 9‖`. -/
+theorem norm_zUpR29_9_ge :
+    (10.54 : ℝ) ≤ ‖1 - sR29 / 2 + 9‖ := by
+  have hre : (1 - sR29 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 9).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.54 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.54 : ℝ) = Real.sqrt ((10.54 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.48 ≤ ‖1 - sR29 / 2 + 10‖`. -/
+theorem norm_zUpR29_10_ge :
+    (11.48 : ℝ) ≤ ‖1 - sR29 / 2 + 10‖ := by
+  have hre : (1 - sR29 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 10).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.48 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.48 : ℝ) = Real.sqrt ((11.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.43 ≤ ‖1 - sR29 / 2 + 11‖`. -/
+theorem norm_zUpR29_11_ge :
+    (12.43 : ℝ) ≤ ‖1 - sR29 / 2 + 11‖ := by
+  have hre : (1 - sR29 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 11).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.43 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.43 : ℝ) = Real.sqrt ((12.43 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.39 ≤ ‖1 - sR29 / 2 + 12‖`. -/
+theorem norm_zUpR29_12_ge :
+    (13.39 : ℝ) ≤ ‖1 - sR29 / 2 + 12‖ := by
+  have hre : (1 - sR29 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 12).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.39 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.39 : ℝ) = Real.sqrt ((13.39 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.36 ≤ ‖1 - sR29 / 2 + 13‖`. -/
+theorem norm_zUpR29_13_ge :
+    (14.36 : ℝ) ≤ ‖1 - sR29 / 2 + 13‖ := by
+  have hre : (1 - sR29 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR29 / 2 + 13).im = -3.625 := by
+    simp only [Complex.add_im, zUpR29_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.36 : ℝ) ^ 2 ≤ ‖1 - sR29 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.36 : ℝ) = Real.sqrt ((14.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR29 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR29 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR29_ne0 : (1 - sR29 / 2) ≠ 0 := by
+  have hre : (1 - sR29 / 2).re = 0.9 := zUpR29_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add1_ne0 : (1 - sR29 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 1).re = 1.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add2_ne0 : (1 - sR29 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 2).re = 2.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add3_ne0 : (1 - sR29 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 3).re = 3.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add4_ne0 : (1 - sR29 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 4).re = 4.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add5_ne0 : (1 - sR29 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 5).re = 5.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add6_ne0 : (1 - sR29 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 6).re = 6.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add7_ne0 : (1 - sR29 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 7).re = 7.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add8_ne0 : (1 - sR29 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 8).re = 8.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add9_ne0 : (1 - sR29 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 9).re = 9.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add10_ne0 : (1 - sR29 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 10).re = 10.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add11_ne0 : (1 - sR29 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 11).re = 11.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add12_ne0 : (1 - sR29 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 12).re = 12.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR29_add13_ne0 : (1 - sR29 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR29 / 2 + 13).re = 13.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R29 corner:
+`‖Complex.Gamma (1 - sR29 / 2)‖ ≤ 0.05` (row-2 outer-tier, `re = 0.9`, 14 shifts). -/
+theorem gamma_one_sub_half_upper_R29 :
+    ‖Complex.Gamma (1 - sR29 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+14) = (z0+13)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR29 / 2 + 1)
+      = (1 - sR29 / 2) * Complex.Gamma (1 - sR29 / 2) :=
+    Complex.Gamma_add_one _ zUpR29_ne0
+  have e1 : Complex.Gamma (1 - sR29 / 2 + 2)
+      = (1 - sR29 / 2 + 1)
+        * Complex.Gamma (1 - sR29 / 2 + 1) := by
+    have h : (1 - sR29 / 2 + 2)
+        = ((1 - sR29 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add1_ne0
+  have e2 : Complex.Gamma (1 - sR29 / 2 + 3)
+      = (1 - sR29 / 2 + 2)
+        * Complex.Gamma (1 - sR29 / 2 + 2) := by
+    have h : (1 - sR29 / 2 + 3)
+        = ((1 - sR29 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add2_ne0
+  have e3 : Complex.Gamma (1 - sR29 / 2 + 4)
+      = (1 - sR29 / 2 + 3)
+        * Complex.Gamma (1 - sR29 / 2 + 3) := by
+    have h : (1 - sR29 / 2 + 4)
+        = ((1 - sR29 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add3_ne0
+  have e4 : Complex.Gamma (1 - sR29 / 2 + 5)
+      = (1 - sR29 / 2 + 4)
+        * Complex.Gamma (1 - sR29 / 2 + 4) := by
+    have h : (1 - sR29 / 2 + 5)
+        = ((1 - sR29 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add4_ne0
+  have e5 : Complex.Gamma (1 - sR29 / 2 + 6)
+      = (1 - sR29 / 2 + 5)
+        * Complex.Gamma (1 - sR29 / 2 + 5) := by
+    have h : (1 - sR29 / 2 + 6)
+        = ((1 - sR29 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add5_ne0
+  have e6 : Complex.Gamma (1 - sR29 / 2 + 7)
+      = (1 - sR29 / 2 + 6)
+        * Complex.Gamma (1 - sR29 / 2 + 6) := by
+    have h : (1 - sR29 / 2 + 7)
+        = ((1 - sR29 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add6_ne0
+  have e7 : Complex.Gamma (1 - sR29 / 2 + 8)
+      = (1 - sR29 / 2 + 7)
+        * Complex.Gamma (1 - sR29 / 2 + 7) := by
+    have h : (1 - sR29 / 2 + 8)
+        = ((1 - sR29 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add7_ne0
+  have e8 : Complex.Gamma (1 - sR29 / 2 + 9)
+      = (1 - sR29 / 2 + 8)
+        * Complex.Gamma (1 - sR29 / 2 + 8) := by
+    have h : (1 - sR29 / 2 + 9)
+        = ((1 - sR29 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add8_ne0
+  have e9 : Complex.Gamma (1 - sR29 / 2 + 10)
+      = (1 - sR29 / 2 + 9)
+        * Complex.Gamma (1 - sR29 / 2 + 9) := by
+    have h : (1 - sR29 / 2 + 10)
+        = ((1 - sR29 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add9_ne0
+  have e10 : Complex.Gamma (1 - sR29 / 2 + 11)
+      = (1 - sR29 / 2 + 10)
+        * Complex.Gamma (1 - sR29 / 2 + 10) := by
+    have h : (1 - sR29 / 2 + 11)
+        = ((1 - sR29 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add10_ne0
+  have e11 : Complex.Gamma (1 - sR29 / 2 + 12)
+      = (1 - sR29 / 2 + 11)
+        * Complex.Gamma (1 - sR29 / 2 + 11) := by
+    have h : (1 - sR29 / 2 + 12)
+        = ((1 - sR29 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add11_ne0
+  have e12 : Complex.Gamma (1 - sR29 / 2 + 13)
+      = (1 - sR29 / 2 + 12)
+        * Complex.Gamma (1 - sR29 / 2 + 12) := by
+    have h : (1 - sR29 / 2 + 13)
+        = ((1 - sR29 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add12_ne0
+  have e13 : Complex.Gamma (1 - sR29 / 2 + 14)
+      = (1 - sR29 / 2 + 13)
+        * Complex.Gamma (1 - sR29 / 2 + 13) := by
+    have h : (1 - sR29 / 2 + 14)
+        = ((1 - sR29 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR29_add13_ne0
+  have n0 : ‖Complex.Gamma (1 - sR29 / 2 + 1)‖
+      = ‖1 - sR29 / 2‖
+        * ‖Complex.Gamma (1 - sR29 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR29 / 2 + 2)‖
+      = ‖1 - sR29 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR29 / 2 + 3)‖
+      = ‖1 - sR29 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR29 / 2 + 4)‖
+      = ‖1 - sR29 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR29 / 2 + 5)‖
+      = ‖1 - sR29 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR29 / 2 + 6)‖
+      = ‖1 - sR29 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR29 / 2 + 7)‖
+      = ‖1 - sR29 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR29 / 2 + 8)‖
+      = ‖1 - sR29 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR29 / 2 + 9)‖
+      = ‖1 - sR29 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR29 / 2 + 10)‖
+      = ‖1 - sR29 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR29 / 2 + 11)‖
+      = ‖1 - sR29 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR29 / 2 + 12)‖
+      = ‖1 - sR29 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR29 / 2 + 13)‖
+      = ‖1 - sR29 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR29 / 2 + 14)‖
+      = ‖1 - sR29 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR29 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR29 / 2 + 14)‖
+      = ‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+        * (‖1 - sR29 / 2‖
+          * ‖Complex.Gamma (1 - sR29 / 2)‖))))))))))))) := by
+    rw [n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (4.09 : ℝ) * 3.73
+      ≤ ‖1 - sR29 / 2 + 1‖ * ‖1 - sR29 / 2‖ :=
+    mul_le_mul norm_zUpR29_1_ge norm_zUpR29_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.64 : ℝ) * (4.09 * (3.73))
+      ≤ ‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)) :=
+    mul_le_mul norm_zUpR29_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.32 : ℝ) * (4.64 * (4.09 * (3.73)))
+      ≤ ‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))) :=
+    mul_le_mul norm_zUpR29_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (6.09 : ℝ) * (5.32 * (4.64 * (4.09 * (3.73))))
+      ≤ ‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)))) :=
+    mul_le_mul norm_zUpR29_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.92 : ℝ) * (6.09 * (5.32 * (4.64 * (4.09 * (3.73)))))
+      ≤ ‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))) :=
+    mul_le_mul norm_zUpR29_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.79 : ℝ) * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73))))))
+      ≤ ‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)))))) :=
+    mul_le_mul norm_zUpR29_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.69 : ℝ) * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73)))))))
+      ≤ ‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))) :=
+    mul_le_mul norm_zUpR29_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.6 : ℝ) * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73))))))))
+      ≤ ‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR29_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.54 : ℝ) * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73)))))))))
+      ≤ ‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR29_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.48 : ℝ) * (10.54 * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73))))))))))
+      ≤ ‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR29_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.43 : ℝ) * (11.48 * (10.54 * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73)))))))))))
+      ≤ ‖1 - sR29 / 2 + 11‖ * (‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR29_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.39 : ℝ) * (12.43 * (11.48 * (10.54 * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73))))))))))))
+      ≤ ‖1 - sR29 / 2 + 12‖ * (‖1 - sR29 / 2 + 11‖ * (‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR29_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.36 : ℝ) * (13.39 * (12.43 * (11.48 * (10.54 * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73)))))))))))))
+      ≤ ‖1 - sR29 / 2 + 13‖ * (‖1 - sR29 / 2 + 12‖ * (‖1 - sR29 / 2 + 11‖ * (‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR29_13_ge q12 (by positivity) (norm_nonneg _)
+  have hDlo : (2900000000000 : ℝ)
+      ≤ (14.36 : ℝ) * (13.39 * (12.43 * (11.48 * (10.54 * (9.6 * (8.69 * (7.79 * (6.92 * (6.09 * (5.32 * (4.64 * (4.09 * (3.73))))))))))))) := by
+    norm_num
+  have hD_ge : (2900000000000 : ℝ)
+      ≤ ‖1 - sR29 / 2 + 13‖ * (‖1 - sR29 / 2 + 12‖ * (‖1 - sR29 / 2 + 11‖ * (‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))))))))) :=
+    le_trans hDlo q13
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR29 / 2 + 14)‖ ≤ Real.Gamma(14.9) ≤ 69500000000`.
+  have hre14 : (1 - sR29 / 2 + 14).re = 14.9 := by
+    simp only [Complex.add_re, zUpR29_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR29 / 2 + 14).re := by
+    rw [hre14]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR29 / 2 + 14)‖ ≤ 69500000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR29 / 2 + 14)‖
+        ≤ Real.Gamma ((1 - sR29 / 2 + 14).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR29 / 2 + 14).re) = 14.9 := hre14
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09.realGamma_149_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR29 / 2)‖ = ‖Complex.Gamma (1 - sR29 / 2 + 14)‖ ≤ 69500000000`, `D ≤ 2900000000000`.
+  have hD_mul : (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR29 / 2)‖
+      = ‖Complex.Gamma (1 - sR29 / 2 + 14)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖)))))))))))))
+        * ‖Complex.Gamma (1 - sR29 / 2)‖ ≤ 69500000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR29 / 2)‖
+        * (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖)))))))))))))
+        ≤ 69500000000 := by
+    calc ‖Complex.Gamma (1 - sR29 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR29 / 2)‖ := mul_comm _ _
+      _ ≤ 69500000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR29 / 2)‖
+      ≤ 69500000000 / (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖)))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (69500000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR29 / 2 + 13‖
+        * (‖1 - sR29 / 2 + 12‖
+        * (‖1 - sR29 / 2 + 11‖
+        * (‖1 - sR29 / 2 + 10‖
+        * (‖1 - sR29 / 2 + 9‖
+        * (‖1 - sR29 / 2 + 8‖
+        * (‖1 - sR29 / 2 + 7‖
+        * (‖1 - sR29 / 2 + 6‖
+        * (‖1 - sR29 / 2 + 5‖
+        * (‖1 - sR29 / 2 + 4‖
+        * (‖1 - sR29 / 2 + 3‖
+        * (‖1 - sR29 / 2 + 2‖
+        * (‖1 - sR29 / 2 + 1‖
+          * ‖1 - sR29 / 2‖))))))))))))) := by
+    calc (69500000000 : ℝ) ≤ 0.05 * 2900000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 69500000000 / (‖1 - sR29 / 2 + 13‖ * (‖1 - sR29 / 2 + 12‖ * (‖1 - sR29 / 2 + 11‖ * (‖1 - sR29 / 2 + 10‖ * (‖1 - sR29 / 2 + 9‖ * (‖1 - sR29 / 2 + 8‖ * (‖1 - sR29 / 2 + 7‖ * (‖1 - sR29 / 2 + 6‖ * (‖1 - sR29 / 2 + 5‖ * (‖1 - sR29 / 2 + 4‖ * (‖1 - sR29 / 2 + 3‖ * (‖1 - sR29 / 2 + 2‖ * (‖1 - sR29 / 2 + 1‖ * (‖1 - sR29 / 2‖))))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R29GammaUpper
+
+namespace R32GammaUpper
+
+/-- The R32 `s`-plane center: `s = 1/2 + I·z` at `z = R32.center`. -/
+noncomputable def sR32 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R32.center
+
+/-- `R32.center = -6.75 + 0.395·I` (from `R32_x0/x1/y0/y1`). -/
+theorem R32_center_eq :
+    CentralCoverAssembly.R32.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R32_x0, CentralCoverAssembly.R32_x1,
+      CentralCoverAssembly.R32_y0, CentralCoverAssembly.R32_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R32_x0, CentralCoverAssembly.R32_x1,
+      CentralCoverAssembly.R32_y0, CentralCoverAssembly.R32_y1]
+    simp
+    norm_num
+
+/-- `Re sR32 = 0.105`. -/
+theorem sR32_re : sR32.re = 0.105 := by
+  unfold sR32
+  rw [R32_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR32 = -6.75`. -/
+theorem sR32_im : sR32.im = -6.75 := by
+  unfold sR32
+  rw [R32_center_eq]
+  simp
+
+/-- `Re(1 - sR32/2) = 0.9475`. -/
+theorem zUpR32_re : (1 - sR32 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR32_re]
+  norm_num
+
+/-- `Im(1 - sR32/2) = 3.375`. -/
+theorem zUpR32_im : (1 - sR32 / 2).im = 3.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR32_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.5 ≤ ‖1 - sR32 / 2‖`. -/
+theorem norm_zUpR32_0_ge :
+    (3.5 : ℝ) ≤ ‖1 - sR32 / 2‖ := by
+  have hsq : (3.5 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR32_re, zUpR32_im]
+    norm_num
+  calc (3.5 : ℝ) = Real.sqrt ((3.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.89 ≤ ‖1 - sR32 / 2 + 1‖`. -/
+theorem norm_zUpR32_1_ge :
+    (3.89 : ℝ) ≤ ‖1 - sR32 / 2 + 1‖ := by
+  have hre : (1 - sR32 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR32 / 2 + 1).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.one_im]
+    norm_num
+  have hsq : (3.89 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.89 : ℝ) = Real.sqrt ((3.89 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.48 ≤ ‖1 - sR32 / 2 + 2‖`. -/
+theorem norm_zUpR32_2_ge :
+    (4.48 : ℝ) ≤ ‖1 - sR32 / 2 + 2‖ := by
+  have hre : (1 - sR32 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 2).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.48 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.48 : ℝ) = Real.sqrt ((4.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.19 ≤ ‖1 - sR32 / 2 + 3‖`. -/
+theorem norm_zUpR32_3_ge :
+    (5.19 : ℝ) ≤ ‖1 - sR32 / 2 + 3‖ := by
+  have hre : (1 - sR32 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 3).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.19 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.19 : ℝ) = Real.sqrt ((5.19 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.98 ≤ ‖1 - sR32 / 2 + 4‖`. -/
+theorem norm_zUpR32_4_ge :
+    (5.98 : ℝ) ≤ ‖1 - sR32 / 2 + 4‖ := by
+  have hre : (1 - sR32 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 4).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.98 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.98 : ℝ) = Real.sqrt ((5.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.83 ≤ ‖1 - sR32 / 2 + 5‖`. -/
+theorem norm_zUpR32_5_ge :
+    (6.83 : ℝ) ≤ ‖1 - sR32 / 2 + 5‖ := by
+  have hre : (1 - sR32 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 5).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.83 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.83 : ℝ) = Real.sqrt ((6.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.72 ≤ ‖1 - sR32 / 2 + 6‖`. -/
+theorem norm_zUpR32_6_ge :
+    (7.72 : ℝ) ≤ ‖1 - sR32 / 2 + 6‖ := by
+  have hre : (1 - sR32 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 6).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.72 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.72 : ℝ) = Real.sqrt ((7.72 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.63 ≤ ‖1 - sR32 / 2 + 7‖`. -/
+theorem norm_zUpR32_7_ge :
+    (8.63 : ℝ) ≤ ‖1 - sR32 / 2 + 7‖ := by
+  have hre : (1 - sR32 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 7).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.63 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.63 : ℝ) = Real.sqrt ((8.63 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.56 ≤ ‖1 - sR32 / 2 + 8‖`. -/
+theorem norm_zUpR32_8_ge :
+    (9.56 : ℝ) ≤ ‖1 - sR32 / 2 + 8‖ := by
+  have hre : (1 - sR32 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 8).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.56 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.56 : ℝ) = Real.sqrt ((9.56 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.5 ≤ ‖1 - sR32 / 2 + 9‖`. -/
+theorem norm_zUpR32_9_ge :
+    (10.5 : ℝ) ≤ ‖1 - sR32 / 2 + 9‖ := by
+  have hre : (1 - sR32 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 9).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.5 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.5 : ℝ) = Real.sqrt ((10.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.45 ≤ ‖1 - sR32 / 2 + 10‖`. -/
+theorem norm_zUpR32_10_ge :
+    (11.45 : ℝ) ≤ ‖1 - sR32 / 2 + 10‖ := by
+  have hre : (1 - sR32 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 10).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.45 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.45 : ℝ) = Real.sqrt ((11.45 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.41 ≤ ‖1 - sR32 / 2 + 11‖`. -/
+theorem norm_zUpR32_11_ge :
+    (12.41 : ℝ) ≤ ‖1 - sR32 / 2 + 11‖ := by
+  have hre : (1 - sR32 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 11).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.41 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.41 : ℝ) = Real.sqrt ((12.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.38 ≤ ‖1 - sR32 / 2 + 12‖`. -/
+theorem norm_zUpR32_12_ge :
+    (13.38 : ℝ) ≤ ‖1 - sR32 / 2 + 12‖ := by
+  have hre : (1 - sR32 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 12).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.38 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.38 : ℝ) = Real.sqrt ((13.38 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.35 ≤ ‖1 - sR32 / 2 + 13‖`. -/
+theorem norm_zUpR32_13_ge :
+    (14.35 : ℝ) ≤ ‖1 - sR32 / 2 + 13‖ := by
+  have hre : (1 - sR32 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 13).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.35 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.35 : ℝ) = Real.sqrt ((14.35 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.32 ≤ ‖1 - sR32 / 2 + 14‖`. -/
+theorem norm_zUpR32_14_ge :
+    (15.32 : ℝ) ≤ ‖1 - sR32 / 2 + 14‖ := by
+  have hre : (1 - sR32 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR32 / 2 + 14).im = 3.375 := by
+    simp only [Complex.add_im, zUpR32_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.32 : ℝ) ^ 2 ≤ ‖1 - sR32 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.32 : ℝ) = Real.sqrt ((15.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR32 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR32 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR32_ne0 : (1 - sR32 / 2) ≠ 0 := by
+  have hre : (1 - sR32 / 2).re = 0.9475 := zUpR32_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add1_ne0 : (1 - sR32 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add2_ne0 : (1 - sR32 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add3_ne0 : (1 - sR32 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add4_ne0 : (1 - sR32 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add5_ne0 : (1 - sR32 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add6_ne0 : (1 - sR32 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add7_ne0 : (1 - sR32 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add8_ne0 : (1 - sR32 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add9_ne0 : (1 - sR32 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add10_ne0 : (1 - sR32 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add11_ne0 : (1 - sR32 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add12_ne0 : (1 - sR32 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add13_ne0 : (1 - sR32 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR32_add14_ne0 : (1 - sR32 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR32 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R32 corner:
+`‖Complex.Gamma (1 - sR32 / 2)‖ ≤ 0.05` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R32 :
+    ‖Complex.Gamma (1 - sR32 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR32 / 2 + 1)
+      = (1 - sR32 / 2) * Complex.Gamma (1 - sR32 / 2) :=
+    Complex.Gamma_add_one _ zUpR32_ne0
+  have e1 : Complex.Gamma (1 - sR32 / 2 + 2)
+      = (1 - sR32 / 2 + 1)
+        * Complex.Gamma (1 - sR32 / 2 + 1) := by
+    have h : (1 - sR32 / 2 + 2)
+        = ((1 - sR32 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add1_ne0
+  have e2 : Complex.Gamma (1 - sR32 / 2 + 3)
+      = (1 - sR32 / 2 + 2)
+        * Complex.Gamma (1 - sR32 / 2 + 2) := by
+    have h : (1 - sR32 / 2 + 3)
+        = ((1 - sR32 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add2_ne0
+  have e3 : Complex.Gamma (1 - sR32 / 2 + 4)
+      = (1 - sR32 / 2 + 3)
+        * Complex.Gamma (1 - sR32 / 2 + 3) := by
+    have h : (1 - sR32 / 2 + 4)
+        = ((1 - sR32 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add3_ne0
+  have e4 : Complex.Gamma (1 - sR32 / 2 + 5)
+      = (1 - sR32 / 2 + 4)
+        * Complex.Gamma (1 - sR32 / 2 + 4) := by
+    have h : (1 - sR32 / 2 + 5)
+        = ((1 - sR32 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add4_ne0
+  have e5 : Complex.Gamma (1 - sR32 / 2 + 6)
+      = (1 - sR32 / 2 + 5)
+        * Complex.Gamma (1 - sR32 / 2 + 5) := by
+    have h : (1 - sR32 / 2 + 6)
+        = ((1 - sR32 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add5_ne0
+  have e6 : Complex.Gamma (1 - sR32 / 2 + 7)
+      = (1 - sR32 / 2 + 6)
+        * Complex.Gamma (1 - sR32 / 2 + 6) := by
+    have h : (1 - sR32 / 2 + 7)
+        = ((1 - sR32 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add6_ne0
+  have e7 : Complex.Gamma (1 - sR32 / 2 + 8)
+      = (1 - sR32 / 2 + 7)
+        * Complex.Gamma (1 - sR32 / 2 + 7) := by
+    have h : (1 - sR32 / 2 + 8)
+        = ((1 - sR32 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add7_ne0
+  have e8 : Complex.Gamma (1 - sR32 / 2 + 9)
+      = (1 - sR32 / 2 + 8)
+        * Complex.Gamma (1 - sR32 / 2 + 8) := by
+    have h : (1 - sR32 / 2 + 9)
+        = ((1 - sR32 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add8_ne0
+  have e9 : Complex.Gamma (1 - sR32 / 2 + 10)
+      = (1 - sR32 / 2 + 9)
+        * Complex.Gamma (1 - sR32 / 2 + 9) := by
+    have h : (1 - sR32 / 2 + 10)
+        = ((1 - sR32 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add9_ne0
+  have e10 : Complex.Gamma (1 - sR32 / 2 + 11)
+      = (1 - sR32 / 2 + 10)
+        * Complex.Gamma (1 - sR32 / 2 + 10) := by
+    have h : (1 - sR32 / 2 + 11)
+        = ((1 - sR32 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add10_ne0
+  have e11 : Complex.Gamma (1 - sR32 / 2 + 12)
+      = (1 - sR32 / 2 + 11)
+        * Complex.Gamma (1 - sR32 / 2 + 11) := by
+    have h : (1 - sR32 / 2 + 12)
+        = ((1 - sR32 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add11_ne0
+  have e12 : Complex.Gamma (1 - sR32 / 2 + 13)
+      = (1 - sR32 / 2 + 12)
+        * Complex.Gamma (1 - sR32 / 2 + 12) := by
+    have h : (1 - sR32 / 2 + 13)
+        = ((1 - sR32 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add12_ne0
+  have e13 : Complex.Gamma (1 - sR32 / 2 + 14)
+      = (1 - sR32 / 2 + 13)
+        * Complex.Gamma (1 - sR32 / 2 + 13) := by
+    have h : (1 - sR32 / 2 + 14)
+        = ((1 - sR32 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add13_ne0
+  have e14 : Complex.Gamma (1 - sR32 / 2 + 15)
+      = (1 - sR32 / 2 + 14)
+        * Complex.Gamma (1 - sR32 / 2 + 14) := by
+    have h : (1 - sR32 / 2 + 15)
+        = ((1 - sR32 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR32_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR32 / 2 + 1)‖
+      = ‖1 - sR32 / 2‖
+        * ‖Complex.Gamma (1 - sR32 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR32 / 2 + 2)‖
+      = ‖1 - sR32 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR32 / 2 + 3)‖
+      = ‖1 - sR32 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR32 / 2 + 4)‖
+      = ‖1 - sR32 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR32 / 2 + 5)‖
+      = ‖1 - sR32 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR32 / 2 + 6)‖
+      = ‖1 - sR32 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR32 / 2 + 7)‖
+      = ‖1 - sR32 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR32 / 2 + 8)‖
+      = ‖1 - sR32 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR32 / 2 + 9)‖
+      = ‖1 - sR32 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR32 / 2 + 10)‖
+      = ‖1 - sR32 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR32 / 2 + 11)‖
+      = ‖1 - sR32 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR32 / 2 + 12)‖
+      = ‖1 - sR32 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR32 / 2 + 13)‖
+      = ‖1 - sR32 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR32 / 2 + 14)‖
+      = ‖1 - sR32 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR32 / 2 + 15)‖
+      = ‖1 - sR32 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR32 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR32 / 2 + 15)‖
+      = ‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+        * (‖1 - sR32 / 2‖
+          * ‖Complex.Gamma (1 - sR32 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.89 : ℝ) * 3.5
+      ≤ ‖1 - sR32 / 2 + 1‖ * ‖1 - sR32 / 2‖ :=
+    mul_le_mul norm_zUpR32_1_ge norm_zUpR32_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.48 : ℝ) * (3.89 * (3.5))
+      ≤ ‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)) :=
+    mul_le_mul norm_zUpR32_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.19 : ℝ) * (4.48 * (3.89 * (3.5)))
+      ≤ ‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))) :=
+    mul_le_mul norm_zUpR32_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.98 : ℝ) * (5.19 * (4.48 * (3.89 * (3.5))))
+      ≤ ‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))) :=
+    mul_le_mul norm_zUpR32_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.83 : ℝ) * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))
+      ≤ ‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))))) :=
+    mul_le_mul norm_zUpR32_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.72 : ℝ) * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5))))))
+      ≤ ‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))) :=
+    mul_le_mul norm_zUpR32_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.63 : ℝ) * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))))
+      ≤ ‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))))))) :=
+    mul_le_mul norm_zUpR32_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.56 : ℝ) * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5))))))))
+      ≤ ‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR32_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.5 : ℝ) * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))))))
+      ≤ ‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR32_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.45 : ℝ) * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5))))))))))
+      ≤ ‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR32_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.41 : ℝ) * (11.45 * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))))))))
+      ≤ ‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR32_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.38 : ℝ) * (12.41 * (11.45 * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5))))))))))))
+      ≤ ‖1 - sR32 / 2 + 12‖ * (‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR32_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.35 : ℝ) * (13.38 * (12.41 * (11.45 * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))))))))))
+      ≤ ‖1 - sR32 / 2 + 13‖ * (‖1 - sR32 / 2 + 12‖ * (‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR32_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.32 : ℝ) * (14.35 * (13.38 * (12.41 * (11.45 * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5))))))))))))))
+      ≤ ‖1 - sR32 / 2 + 14‖ * (‖1 - sR32 / 2 + 13‖ * (‖1 - sR32 / 2 + 12‖ * (‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR32_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (36000000000000 : ℝ)
+      ≤ (15.32 : ℝ) * (14.35 * (13.38 * (12.41 * (11.45 * (10.5 * (9.56 * (8.63 * (7.72 * (6.83 * (5.98 * (5.19 * (4.48 * (3.89 * (3.5)))))))))))))) := by
+    norm_num
+  have hD_ge : (36000000000000 : ℝ)
+      ≤ ‖1 - sR32 / 2 + 14‖ * (‖1 - sR32 / 2 + 13‖ * (‖1 - sR32 / 2 + 12‖ * (‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR32 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR32 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR32_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR32 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR32 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR32 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR32 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR32 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR32 / 2)‖ = ‖Complex.Gamma (1 - sR32 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 36000000000000`.
+  have hD_mul : (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR32 / 2)‖
+      = ‖Complex.Gamma (1 - sR32 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR32 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR32 / 2)‖
+        * (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR32 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR32 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR32 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR32 / 2 + 14‖
+        * (‖1 - sR32 / 2 + 13‖
+        * (‖1 - sR32 / 2 + 12‖
+        * (‖1 - sR32 / 2 + 11‖
+        * (‖1 - sR32 / 2 + 10‖
+        * (‖1 - sR32 / 2 + 9‖
+        * (‖1 - sR32 / 2 + 8‖
+        * (‖1 - sR32 / 2 + 7‖
+        * (‖1 - sR32 / 2 + 6‖
+        * (‖1 - sR32 / 2 + 5‖
+        * (‖1 - sR32 / 2 + 4‖
+        * (‖1 - sR32 / 2 + 3‖
+        * (‖1 - sR32 / 2 + 2‖
+        * (‖1 - sR32 / 2 + 1‖
+          * ‖1 - sR32 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.05 * 36000000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR32 / 2 + 14‖ * (‖1 - sR32 / 2 + 13‖ * (‖1 - sR32 / 2 + 12‖ * (‖1 - sR32 / 2 + 11‖ * (‖1 - sR32 / 2 + 10‖ * (‖1 - sR32 / 2 + 9‖ * (‖1 - sR32 / 2 + 8‖ * (‖1 - sR32 / 2 + 7‖ * (‖1 - sR32 / 2 + 6‖ * (‖1 - sR32 / 2 + 5‖ * (‖1 - sR32 / 2 + 4‖ * (‖1 - sR32 / 2 + 3‖ * (‖1 - sR32 / 2 + 2‖ * (‖1 - sR32 / 2 + 1‖ * (‖1 - sR32 / 2‖)))))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R32GammaUpper
+
+namespace R33GammaUpper
+
+/-- The R33 `s`-plane center: `s = 1/2 + I·z` at `z = R33.center`. -/
+noncomputable def sR33 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R33.center
+
+/-- `R33.center = -4.75 + 0.395·I` (from `R33_x0/x1/y0/y1`). -/
+theorem R33_center_eq :
+    CentralCoverAssembly.R33.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R33_x0, CentralCoverAssembly.R33_x1,
+      CentralCoverAssembly.R33_y0, CentralCoverAssembly.R33_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R33_x0, CentralCoverAssembly.R33_x1,
+      CentralCoverAssembly.R33_y0, CentralCoverAssembly.R33_y1]
+    simp
+    norm_num
+
+/-- `Re sR33 = 0.105`. -/
+theorem sR33_re : sR33.re = 0.105 := by
+  unfold sR33
+  rw [R33_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR33 = -4.75`. -/
+theorem sR33_im : sR33.im = -4.75 := by
+  unfold sR33
+  rw [R33_center_eq]
+  simp
+
+/-- `Re(1 - sR33/2) = 0.9475`. -/
+theorem zUpR33_re : (1 - sR33 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR33_re]
+  norm_num
+
+/-- `Im(1 - sR33/2) = 2.375`. -/
+theorem zUpR33_im : (1 - sR33 / 2).im = 2.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR33_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.55 ≤ ‖1 - sR33 / 2‖`. -/
+theorem norm_zUpR33_0_ge :
+    (2.55 : ℝ) ≤ ‖1 - sR33 / 2‖ := by
+  have hsq : (2.55 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR33_re, zUpR33_im]
+    norm_num
+  calc (2.55 : ℝ) = Real.sqrt ((2.55 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.07 ≤ ‖1 - sR33 / 2 + 1‖`. -/
+theorem norm_zUpR33_1_ge :
+    (3.07 : ℝ) ≤ ‖1 - sR33 / 2 + 1‖ := by
+  have hre : (1 - sR33 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR33 / 2 + 1).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.one_im]
+    norm_num
+  have hsq : (3.07 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.07 : ℝ) = Real.sqrt ((3.07 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.78 ≤ ‖1 - sR33 / 2 + 2‖`. -/
+theorem norm_zUpR33_2_ge :
+    (3.78 : ℝ) ≤ ‖1 - sR33 / 2 + 2‖ := by
+  have hre : (1 - sR33 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 2).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.78 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.78 : ℝ) = Real.sqrt ((3.78 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.6 ≤ ‖1 - sR33 / 2 + 3‖`. -/
+theorem norm_zUpR33_3_ge :
+    (4.6 : ℝ) ≤ ‖1 - sR33 / 2 + 3‖ := by
+  have hre : (1 - sR33 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 3).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.6 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.6 : ℝ) = Real.sqrt ((4.6 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.48 ≤ ‖1 - sR33 / 2 + 4‖`. -/
+theorem norm_zUpR33_4_ge :
+    (5.48 : ℝ) ≤ ‖1 - sR33 / 2 + 4‖ := by
+  have hre : (1 - sR33 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 4).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.48 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.48 : ℝ) = Real.sqrt ((5.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.4 ≤ ‖1 - sR33 / 2 + 5‖`. -/
+theorem norm_zUpR33_5_ge :
+    (6.4 : ℝ) ≤ ‖1 - sR33 / 2 + 5‖ := by
+  have hre : (1 - sR33 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 5).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.4 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.4 : ℝ) = Real.sqrt ((6.4 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.34 ≤ ‖1 - sR33 / 2 + 6‖`. -/
+theorem norm_zUpR33_6_ge :
+    (7.34 : ℝ) ≤ ‖1 - sR33 / 2 + 6‖ := by
+  have hre : (1 - sR33 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 6).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.34 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.34 : ℝ) = Real.sqrt ((7.34 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.29 ≤ ‖1 - sR33 / 2 + 7‖`. -/
+theorem norm_zUpR33_7_ge :
+    (8.29 : ℝ) ≤ ‖1 - sR33 / 2 + 7‖ := by
+  have hre : (1 - sR33 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 7).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.29 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.29 : ℝ) = Real.sqrt ((8.29 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.25 ≤ ‖1 - sR33 / 2 + 8‖`. -/
+theorem norm_zUpR33_8_ge :
+    (9.25 : ℝ) ≤ ‖1 - sR33 / 2 + 8‖ := by
+  have hre : (1 - sR33 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 8).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.25 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.25 : ℝ) = Real.sqrt ((9.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.22 ≤ ‖1 - sR33 / 2 + 9‖`. -/
+theorem norm_zUpR33_9_ge :
+    (10.22 : ℝ) ≤ ‖1 - sR33 / 2 + 9‖ := by
+  have hre : (1 - sR33 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 9).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.22 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.22 : ℝ) = Real.sqrt ((10.22 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.2 ≤ ‖1 - sR33 / 2 + 10‖`. -/
+theorem norm_zUpR33_10_ge :
+    (11.2 : ℝ) ≤ ‖1 - sR33 / 2 + 10‖ := by
+  have hre : (1 - sR33 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 10).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.2 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.2 : ℝ) = Real.sqrt ((11.2 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.18 ≤ ‖1 - sR33 / 2 + 11‖`. -/
+theorem norm_zUpR33_11_ge :
+    (12.18 : ℝ) ≤ ‖1 - sR33 / 2 + 11‖ := by
+  have hre : (1 - sR33 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 11).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.18 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.18 : ℝ) = Real.sqrt ((12.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.16 ≤ ‖1 - sR33 / 2 + 12‖`. -/
+theorem norm_zUpR33_12_ge :
+    (13.16 : ℝ) ≤ ‖1 - sR33 / 2 + 12‖ := by
+  have hre : (1 - sR33 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 12).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.16 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.16 : ℝ) = Real.sqrt ((13.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.14 ≤ ‖1 - sR33 / 2 + 13‖`. -/
+theorem norm_zUpR33_13_ge :
+    (14.14 : ℝ) ≤ ‖1 - sR33 / 2 + 13‖ := by
+  have hre : (1 - sR33 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 13).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.14 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.14 : ℝ) = Real.sqrt ((14.14 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.13 ≤ ‖1 - sR33 / 2 + 14‖`. -/
+theorem norm_zUpR33_14_ge :
+    (15.13 : ℝ) ≤ ‖1 - sR33 / 2 + 14‖ := by
+  have hre : (1 - sR33 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR33 / 2 + 14).im = 2.375 := by
+    simp only [Complex.add_im, zUpR33_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.13 : ℝ) ^ 2 ≤ ‖1 - sR33 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.13 : ℝ) = Real.sqrt ((15.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR33 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR33 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR33_ne0 : (1 - sR33 / 2) ≠ 0 := by
+  have hre : (1 - sR33 / 2).re = 0.9475 := zUpR33_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add1_ne0 : (1 - sR33 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add2_ne0 : (1 - sR33 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add3_ne0 : (1 - sR33 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add4_ne0 : (1 - sR33 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add5_ne0 : (1 - sR33 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add6_ne0 : (1 - sR33 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add7_ne0 : (1 - sR33 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add8_ne0 : (1 - sR33 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add9_ne0 : (1 - sR33 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add10_ne0 : (1 - sR33 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add11_ne0 : (1 - sR33 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add12_ne0 : (1 - sR33 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add13_ne0 : (1 - sR33 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR33_add14_ne0 : (1 - sR33 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR33 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R33 corner:
+`‖Complex.Gamma (1 - sR33 / 2)‖ ≤ 0.15` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R33 :
+    ‖Complex.Gamma (1 - sR33 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR33 / 2 + 1)
+      = (1 - sR33 / 2) * Complex.Gamma (1 - sR33 / 2) :=
+    Complex.Gamma_add_one _ zUpR33_ne0
+  have e1 : Complex.Gamma (1 - sR33 / 2 + 2)
+      = (1 - sR33 / 2 + 1)
+        * Complex.Gamma (1 - sR33 / 2 + 1) := by
+    have h : (1 - sR33 / 2 + 2)
+        = ((1 - sR33 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add1_ne0
+  have e2 : Complex.Gamma (1 - sR33 / 2 + 3)
+      = (1 - sR33 / 2 + 2)
+        * Complex.Gamma (1 - sR33 / 2 + 2) := by
+    have h : (1 - sR33 / 2 + 3)
+        = ((1 - sR33 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add2_ne0
+  have e3 : Complex.Gamma (1 - sR33 / 2 + 4)
+      = (1 - sR33 / 2 + 3)
+        * Complex.Gamma (1 - sR33 / 2 + 3) := by
+    have h : (1 - sR33 / 2 + 4)
+        = ((1 - sR33 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add3_ne0
+  have e4 : Complex.Gamma (1 - sR33 / 2 + 5)
+      = (1 - sR33 / 2 + 4)
+        * Complex.Gamma (1 - sR33 / 2 + 4) := by
+    have h : (1 - sR33 / 2 + 5)
+        = ((1 - sR33 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add4_ne0
+  have e5 : Complex.Gamma (1 - sR33 / 2 + 6)
+      = (1 - sR33 / 2 + 5)
+        * Complex.Gamma (1 - sR33 / 2 + 5) := by
+    have h : (1 - sR33 / 2 + 6)
+        = ((1 - sR33 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add5_ne0
+  have e6 : Complex.Gamma (1 - sR33 / 2 + 7)
+      = (1 - sR33 / 2 + 6)
+        * Complex.Gamma (1 - sR33 / 2 + 6) := by
+    have h : (1 - sR33 / 2 + 7)
+        = ((1 - sR33 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add6_ne0
+  have e7 : Complex.Gamma (1 - sR33 / 2 + 8)
+      = (1 - sR33 / 2 + 7)
+        * Complex.Gamma (1 - sR33 / 2 + 7) := by
+    have h : (1 - sR33 / 2 + 8)
+        = ((1 - sR33 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add7_ne0
+  have e8 : Complex.Gamma (1 - sR33 / 2 + 9)
+      = (1 - sR33 / 2 + 8)
+        * Complex.Gamma (1 - sR33 / 2 + 8) := by
+    have h : (1 - sR33 / 2 + 9)
+        = ((1 - sR33 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add8_ne0
+  have e9 : Complex.Gamma (1 - sR33 / 2 + 10)
+      = (1 - sR33 / 2 + 9)
+        * Complex.Gamma (1 - sR33 / 2 + 9) := by
+    have h : (1 - sR33 / 2 + 10)
+        = ((1 - sR33 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add9_ne0
+  have e10 : Complex.Gamma (1 - sR33 / 2 + 11)
+      = (1 - sR33 / 2 + 10)
+        * Complex.Gamma (1 - sR33 / 2 + 10) := by
+    have h : (1 - sR33 / 2 + 11)
+        = ((1 - sR33 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add10_ne0
+  have e11 : Complex.Gamma (1 - sR33 / 2 + 12)
+      = (1 - sR33 / 2 + 11)
+        * Complex.Gamma (1 - sR33 / 2 + 11) := by
+    have h : (1 - sR33 / 2 + 12)
+        = ((1 - sR33 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add11_ne0
+  have e12 : Complex.Gamma (1 - sR33 / 2 + 13)
+      = (1 - sR33 / 2 + 12)
+        * Complex.Gamma (1 - sR33 / 2 + 12) := by
+    have h : (1 - sR33 / 2 + 13)
+        = ((1 - sR33 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add12_ne0
+  have e13 : Complex.Gamma (1 - sR33 / 2 + 14)
+      = (1 - sR33 / 2 + 13)
+        * Complex.Gamma (1 - sR33 / 2 + 13) := by
+    have h : (1 - sR33 / 2 + 14)
+        = ((1 - sR33 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add13_ne0
+  have e14 : Complex.Gamma (1 - sR33 / 2 + 15)
+      = (1 - sR33 / 2 + 14)
+        * Complex.Gamma (1 - sR33 / 2 + 14) := by
+    have h : (1 - sR33 / 2 + 15)
+        = ((1 - sR33 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR33_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR33 / 2 + 1)‖
+      = ‖1 - sR33 / 2‖
+        * ‖Complex.Gamma (1 - sR33 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR33 / 2 + 2)‖
+      = ‖1 - sR33 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR33 / 2 + 3)‖
+      = ‖1 - sR33 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR33 / 2 + 4)‖
+      = ‖1 - sR33 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR33 / 2 + 5)‖
+      = ‖1 - sR33 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR33 / 2 + 6)‖
+      = ‖1 - sR33 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR33 / 2 + 7)‖
+      = ‖1 - sR33 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR33 / 2 + 8)‖
+      = ‖1 - sR33 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR33 / 2 + 9)‖
+      = ‖1 - sR33 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR33 / 2 + 10)‖
+      = ‖1 - sR33 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR33 / 2 + 11)‖
+      = ‖1 - sR33 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR33 / 2 + 12)‖
+      = ‖1 - sR33 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR33 / 2 + 13)‖
+      = ‖1 - sR33 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR33 / 2 + 14)‖
+      = ‖1 - sR33 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR33 / 2 + 15)‖
+      = ‖1 - sR33 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR33 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR33 / 2 + 15)‖
+      = ‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+        * (‖1 - sR33 / 2‖
+          * ‖Complex.Gamma (1 - sR33 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.07 : ℝ) * 2.55
+      ≤ ‖1 - sR33 / 2 + 1‖ * ‖1 - sR33 / 2‖ :=
+    mul_le_mul norm_zUpR33_1_ge norm_zUpR33_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.78 : ℝ) * (3.07 * (2.55))
+      ≤ ‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)) :=
+    mul_le_mul norm_zUpR33_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.6 : ℝ) * (3.78 * (3.07 * (2.55)))
+      ≤ ‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))) :=
+    mul_le_mul norm_zUpR33_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.48 : ℝ) * (4.6 * (3.78 * (3.07 * (2.55))))
+      ≤ ‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))) :=
+    mul_le_mul norm_zUpR33_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.4 : ℝ) * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))
+      ≤ ‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))))) :=
+    mul_le_mul norm_zUpR33_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.34 : ℝ) * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55))))))
+      ≤ ‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))) :=
+    mul_le_mul norm_zUpR33_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.29 : ℝ) * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))))
+      ≤ ‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))))))) :=
+    mul_le_mul norm_zUpR33_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.25 : ℝ) * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55))))))))
+      ≤ ‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR33_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.22 : ℝ) * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))))))
+      ≤ ‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR33_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.2 : ℝ) * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55))))))))))
+      ≤ ‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR33_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.18 : ℝ) * (11.2 * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))))))))
+      ≤ ‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR33_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.16 : ℝ) * (12.18 * (11.2 * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55))))))))))))
+      ≤ ‖1 - sR33 / 2 + 12‖ * (‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR33_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.14 : ℝ) * (13.16 * (12.18 * (11.2 * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))))))))))
+      ≤ ‖1 - sR33 / 2 + 13‖ * (‖1 - sR33 / 2 + 12‖ * (‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR33_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.13 : ℝ) * (14.14 * (13.16 * (12.18 * (11.2 * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55))))))))))))))
+      ≤ ‖1 - sR33 / 2 + 14‖ * (‖1 - sR33 / 2 + 13‖ * (‖1 - sR33 / 2 + 12‖ * (‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR33_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (10000000000000 : ℝ)
+      ≤ (15.13 : ℝ) * (14.14 * (13.16 * (12.18 * (11.2 * (10.22 * (9.25 * (8.29 * (7.34 * (6.4 * (5.48 * (4.6 * (3.78 * (3.07 * (2.55)))))))))))))) := by
+    norm_num
+  have hD_ge : (10000000000000 : ℝ)
+      ≤ ‖1 - sR33 / 2 + 14‖ * (‖1 - sR33 / 2 + 13‖ * (‖1 - sR33 / 2 + 12‖ * (‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR33 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR33 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR33_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR33 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR33 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR33 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR33 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR33 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR33 / 2)‖ = ‖Complex.Gamma (1 - sR33 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 10000000000000`.
+  have hD_mul : (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR33 / 2)‖
+      = ‖Complex.Gamma (1 - sR33 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR33 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR33 / 2)‖
+        * (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR33 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR33 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR33 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR33 / 2 + 14‖
+        * (‖1 - sR33 / 2 + 13‖
+        * (‖1 - sR33 / 2 + 12‖
+        * (‖1 - sR33 / 2 + 11‖
+        * (‖1 - sR33 / 2 + 10‖
+        * (‖1 - sR33 / 2 + 9‖
+        * (‖1 - sR33 / 2 + 8‖
+        * (‖1 - sR33 / 2 + 7‖
+        * (‖1 - sR33 / 2 + 6‖
+        * (‖1 - sR33 / 2 + 5‖
+        * (‖1 - sR33 / 2 + 4‖
+        * (‖1 - sR33 / 2 + 3‖
+        * (‖1 - sR33 / 2 + 2‖
+        * (‖1 - sR33 / 2 + 1‖
+          * ‖1 - sR33 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.15 * 10000000000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR33 / 2 + 14‖ * (‖1 - sR33 / 2 + 13‖ * (‖1 - sR33 / 2 + 12‖ * (‖1 - sR33 / 2 + 11‖ * (‖1 - sR33 / 2 + 10‖ * (‖1 - sR33 / 2 + 9‖ * (‖1 - sR33 / 2 + 8‖ * (‖1 - sR33 / 2 + 7‖ * (‖1 - sR33 / 2 + 6‖ * (‖1 - sR33 / 2 + 5‖ * (‖1 - sR33 / 2 + 4‖ * (‖1 - sR33 / 2 + 3‖ * (‖1 - sR33 / 2 + 2‖ * (‖1 - sR33 / 2 + 1‖ * (‖1 - sR33 / 2‖)))))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R33GammaUpper
+
+namespace R34GammaUpper
+
+/-- The R34 `s`-plane center: `s = 1/2 + I·z` at `z = R34.center`. -/
+noncomputable def sR34 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R34.center
+
+/-- `R34.center = -2.75 + 0.395·I` (from `R34_x0/x1/y0/y1`). -/
+theorem R34_center_eq :
+    CentralCoverAssembly.R34.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R34_x0, CentralCoverAssembly.R34_x1,
+      CentralCoverAssembly.R34_y0, CentralCoverAssembly.R34_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R34_x0, CentralCoverAssembly.R34_x1,
+      CentralCoverAssembly.R34_y0, CentralCoverAssembly.R34_y1]
+    simp
+    norm_num
+
+/-- `Re sR34 = 0.105`. -/
+theorem sR34_re : sR34.re = 0.105 := by
+  unfold sR34
+  rw [R34_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR34 = -2.75`. -/
+theorem sR34_im : sR34.im = -2.75 := by
+  unfold sR34
+  rw [R34_center_eq]
+  simp
+
+/-- `Re(1 - sR34/2) = 0.9475`. -/
+theorem zUpR34_re : (1 - sR34 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR34_re]
+  norm_num
+
+/-- `Im(1 - sR34/2) = 1.375`. -/
+theorem zUpR34_im : (1 - sR34 / 2).im = 1.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR34_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.66 ≤ ‖1 - sR34 / 2‖`. -/
+theorem norm_zUpR34_0_ge :
+    (1.66 : ℝ) ≤ ‖1 - sR34 / 2‖ := by
+  have hsq : (1.66 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR34_re, zUpR34_im]
+    norm_num
+  calc (1.66 : ℝ) = Real.sqrt ((1.66 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.38 ≤ ‖1 - sR34 / 2 + 1‖`. -/
+theorem norm_zUpR34_1_ge :
+    (2.38 : ℝ) ≤ ‖1 - sR34 / 2 + 1‖ := by
+  have hre : (1 - sR34 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR34 / 2 + 1).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.one_im]
+    norm_num
+  have hsq : (2.38 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.38 : ℝ) = Real.sqrt ((2.38 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.25 ≤ ‖1 - sR34 / 2 + 2‖`. -/
+theorem norm_zUpR34_2_ge :
+    (3.25 : ℝ) ≤ ‖1 - sR34 / 2 + 2‖ := by
+  have hre : (1 - sR34 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 2).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.25 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.25 : ℝ) = Real.sqrt ((3.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.18 ≤ ‖1 - sR34 / 2 + 3‖`. -/
+theorem norm_zUpR34_3_ge :
+    (4.18 : ℝ) ≤ ‖1 - sR34 / 2 + 3‖ := by
+  have hre : (1 - sR34 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 3).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.18 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.18 : ℝ) = Real.sqrt ((4.18 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.13 ≤ ‖1 - sR34 / 2 + 4‖`. -/
+theorem norm_zUpR34_4_ge :
+    (5.13 : ℝ) ≤ ‖1 - sR34 / 2 + 4‖ := by
+  have hre : (1 - sR34 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 4).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.13 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.13 : ℝ) = Real.sqrt ((5.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.1 ≤ ‖1 - sR34 / 2 + 5‖`. -/
+theorem norm_zUpR34_5_ge :
+    (6.1 : ℝ) ≤ ‖1 - sR34 / 2 + 5‖ := by
+  have hre : (1 - sR34 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 5).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.1 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.1 : ℝ) = Real.sqrt ((6.1 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.08 ≤ ‖1 - sR34 / 2 + 6‖`. -/
+theorem norm_zUpR34_6_ge :
+    (7.08 : ℝ) ≤ ‖1 - sR34 / 2 + 6‖ := by
+  have hre : (1 - sR34 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 6).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.08 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.08 : ℝ) = Real.sqrt ((7.08 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.06 ≤ ‖1 - sR34 / 2 + 7‖`. -/
+theorem norm_zUpR34_7_ge :
+    (8.06 : ℝ) ≤ ‖1 - sR34 / 2 + 7‖ := by
+  have hre : (1 - sR34 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 7).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.06 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.06 : ℝ) = Real.sqrt ((8.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.05 ≤ ‖1 - sR34 / 2 + 8‖`. -/
+theorem norm_zUpR34_8_ge :
+    (9.05 : ℝ) ≤ ‖1 - sR34 / 2 + 8‖ := by
+  have hre : (1 - sR34 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 8).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.05 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.05 : ℝ) = Real.sqrt ((9.05 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.04 ≤ ‖1 - sR34 / 2 + 9‖`. -/
+theorem norm_zUpR34_9_ge :
+    (10.04 : ℝ) ≤ ‖1 - sR34 / 2 + 9‖ := by
+  have hre : (1 - sR34 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 9).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.04 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.04 : ℝ) = Real.sqrt ((10.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.03 ≤ ‖1 - sR34 / 2 + 10‖`. -/
+theorem norm_zUpR34_10_ge :
+    (11.03 : ℝ) ≤ ‖1 - sR34 / 2 + 10‖ := by
+  have hre : (1 - sR34 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 10).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.03 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.03 : ℝ) = Real.sqrt ((11.03 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.02 ≤ ‖1 - sR34 / 2 + 11‖`. -/
+theorem norm_zUpR34_11_ge :
+    (12.02 : ℝ) ≤ ‖1 - sR34 / 2 + 11‖ := by
+  have hre : (1 - sR34 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 11).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.02 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.02 : ℝ) = Real.sqrt ((12.02 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.02 ≤ ‖1 - sR34 / 2 + 12‖`. -/
+theorem norm_zUpR34_12_ge :
+    (13.02 : ℝ) ≤ ‖1 - sR34 / 2 + 12‖ := by
+  have hre : (1 - sR34 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 12).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.02 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.02 : ℝ) = Real.sqrt ((13.02 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.01 ≤ ‖1 - sR34 / 2 + 13‖`. -/
+theorem norm_zUpR34_13_ge :
+    (14.01 : ℝ) ≤ ‖1 - sR34 / 2 + 13‖ := by
+  have hre : (1 - sR34 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 13).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.01 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.01 : ℝ) = Real.sqrt ((14.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.01 ≤ ‖1 - sR34 / 2 + 14‖`. -/
+theorem norm_zUpR34_14_ge :
+    (15.01 : ℝ) ≤ ‖1 - sR34 / 2 + 14‖ := by
+  have hre : (1 - sR34 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR34 / 2 + 14).im = 1.375 := by
+    simp only [Complex.add_im, zUpR34_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.01 : ℝ) ^ 2 ≤ ‖1 - sR34 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.01 : ℝ) = Real.sqrt ((15.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR34 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR34 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR34_ne0 : (1 - sR34 / 2) ≠ 0 := by
+  have hre : (1 - sR34 / 2).re = 0.9475 := zUpR34_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add1_ne0 : (1 - sR34 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add2_ne0 : (1 - sR34 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add3_ne0 : (1 - sR34 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add4_ne0 : (1 - sR34 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add5_ne0 : (1 - sR34 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add6_ne0 : (1 - sR34 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add7_ne0 : (1 - sR34 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add8_ne0 : (1 - sR34 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add9_ne0 : (1 - sR34 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add10_ne0 : (1 - sR34 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add11_ne0 : (1 - sR34 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add12_ne0 : (1 - sR34 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add13_ne0 : (1 - sR34 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR34_add14_ne0 : (1 - sR34 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR34 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R34 corner:
+`‖Complex.Gamma (1 - sR34 / 2)‖ ≤ 0.5` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R34 :
+    ‖Complex.Gamma (1 - sR34 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR34 / 2 + 1)
+      = (1 - sR34 / 2) * Complex.Gamma (1 - sR34 / 2) :=
+    Complex.Gamma_add_one _ zUpR34_ne0
+  have e1 : Complex.Gamma (1 - sR34 / 2 + 2)
+      = (1 - sR34 / 2 + 1)
+        * Complex.Gamma (1 - sR34 / 2 + 1) := by
+    have h : (1 - sR34 / 2 + 2)
+        = ((1 - sR34 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add1_ne0
+  have e2 : Complex.Gamma (1 - sR34 / 2 + 3)
+      = (1 - sR34 / 2 + 2)
+        * Complex.Gamma (1 - sR34 / 2 + 2) := by
+    have h : (1 - sR34 / 2 + 3)
+        = ((1 - sR34 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add2_ne0
+  have e3 : Complex.Gamma (1 - sR34 / 2 + 4)
+      = (1 - sR34 / 2 + 3)
+        * Complex.Gamma (1 - sR34 / 2 + 3) := by
+    have h : (1 - sR34 / 2 + 4)
+        = ((1 - sR34 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add3_ne0
+  have e4 : Complex.Gamma (1 - sR34 / 2 + 5)
+      = (1 - sR34 / 2 + 4)
+        * Complex.Gamma (1 - sR34 / 2 + 4) := by
+    have h : (1 - sR34 / 2 + 5)
+        = ((1 - sR34 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add4_ne0
+  have e5 : Complex.Gamma (1 - sR34 / 2 + 6)
+      = (1 - sR34 / 2 + 5)
+        * Complex.Gamma (1 - sR34 / 2 + 5) := by
+    have h : (1 - sR34 / 2 + 6)
+        = ((1 - sR34 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add5_ne0
+  have e6 : Complex.Gamma (1 - sR34 / 2 + 7)
+      = (1 - sR34 / 2 + 6)
+        * Complex.Gamma (1 - sR34 / 2 + 6) := by
+    have h : (1 - sR34 / 2 + 7)
+        = ((1 - sR34 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add6_ne0
+  have e7 : Complex.Gamma (1 - sR34 / 2 + 8)
+      = (1 - sR34 / 2 + 7)
+        * Complex.Gamma (1 - sR34 / 2 + 7) := by
+    have h : (1 - sR34 / 2 + 8)
+        = ((1 - sR34 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add7_ne0
+  have e8 : Complex.Gamma (1 - sR34 / 2 + 9)
+      = (1 - sR34 / 2 + 8)
+        * Complex.Gamma (1 - sR34 / 2 + 8) := by
+    have h : (1 - sR34 / 2 + 9)
+        = ((1 - sR34 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add8_ne0
+  have e9 : Complex.Gamma (1 - sR34 / 2 + 10)
+      = (1 - sR34 / 2 + 9)
+        * Complex.Gamma (1 - sR34 / 2 + 9) := by
+    have h : (1 - sR34 / 2 + 10)
+        = ((1 - sR34 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add9_ne0
+  have e10 : Complex.Gamma (1 - sR34 / 2 + 11)
+      = (1 - sR34 / 2 + 10)
+        * Complex.Gamma (1 - sR34 / 2 + 10) := by
+    have h : (1 - sR34 / 2 + 11)
+        = ((1 - sR34 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add10_ne0
+  have e11 : Complex.Gamma (1 - sR34 / 2 + 12)
+      = (1 - sR34 / 2 + 11)
+        * Complex.Gamma (1 - sR34 / 2 + 11) := by
+    have h : (1 - sR34 / 2 + 12)
+        = ((1 - sR34 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add11_ne0
+  have e12 : Complex.Gamma (1 - sR34 / 2 + 13)
+      = (1 - sR34 / 2 + 12)
+        * Complex.Gamma (1 - sR34 / 2 + 12) := by
+    have h : (1 - sR34 / 2 + 13)
+        = ((1 - sR34 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add12_ne0
+  have e13 : Complex.Gamma (1 - sR34 / 2 + 14)
+      = (1 - sR34 / 2 + 13)
+        * Complex.Gamma (1 - sR34 / 2 + 13) := by
+    have h : (1 - sR34 / 2 + 14)
+        = ((1 - sR34 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add13_ne0
+  have e14 : Complex.Gamma (1 - sR34 / 2 + 15)
+      = (1 - sR34 / 2 + 14)
+        * Complex.Gamma (1 - sR34 / 2 + 14) := by
+    have h : (1 - sR34 / 2 + 15)
+        = ((1 - sR34 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR34_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR34 / 2 + 1)‖
+      = ‖1 - sR34 / 2‖
+        * ‖Complex.Gamma (1 - sR34 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR34 / 2 + 2)‖
+      = ‖1 - sR34 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR34 / 2 + 3)‖
+      = ‖1 - sR34 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR34 / 2 + 4)‖
+      = ‖1 - sR34 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR34 / 2 + 5)‖
+      = ‖1 - sR34 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR34 / 2 + 6)‖
+      = ‖1 - sR34 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR34 / 2 + 7)‖
+      = ‖1 - sR34 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR34 / 2 + 8)‖
+      = ‖1 - sR34 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR34 / 2 + 9)‖
+      = ‖1 - sR34 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR34 / 2 + 10)‖
+      = ‖1 - sR34 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR34 / 2 + 11)‖
+      = ‖1 - sR34 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR34 / 2 + 12)‖
+      = ‖1 - sR34 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR34 / 2 + 13)‖
+      = ‖1 - sR34 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR34 / 2 + 14)‖
+      = ‖1 - sR34 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR34 / 2 + 15)‖
+      = ‖1 - sR34 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR34 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR34 / 2 + 15)‖
+      = ‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+        * (‖1 - sR34 / 2‖
+          * ‖Complex.Gamma (1 - sR34 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.38 : ℝ) * 1.66
+      ≤ ‖1 - sR34 / 2 + 1‖ * ‖1 - sR34 / 2‖ :=
+    mul_le_mul norm_zUpR34_1_ge norm_zUpR34_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.25 : ℝ) * (2.38 * (1.66))
+      ≤ ‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)) :=
+    mul_le_mul norm_zUpR34_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.18 : ℝ) * (3.25 * (2.38 * (1.66)))
+      ≤ ‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))) :=
+    mul_le_mul norm_zUpR34_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.13 : ℝ) * (4.18 * (3.25 * (2.38 * (1.66))))
+      ≤ ‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))) :=
+    mul_le_mul norm_zUpR34_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.1 : ℝ) * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))
+      ≤ ‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))))) :=
+    mul_le_mul norm_zUpR34_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.08 : ℝ) * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66))))))
+      ≤ ‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))) :=
+    mul_le_mul norm_zUpR34_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.06 : ℝ) * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))))
+      ≤ ‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))))))) :=
+    mul_le_mul norm_zUpR34_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.05 : ℝ) * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66))))))))
+      ≤ ‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR34_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.04 : ℝ) * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))))))
+      ≤ ‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR34_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.03 : ℝ) * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66))))))))))
+      ≤ ‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR34_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.02 : ℝ) * (11.03 * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))))))))
+      ≤ ‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR34_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.02 : ℝ) * (12.02 * (11.03 * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66))))))))))))
+      ≤ ‖1 - sR34 / 2 + 12‖ * (‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR34_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.01 : ℝ) * (13.02 * (12.02 * (11.03 * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))))))))))
+      ≤ ‖1 - sR34 / 2 + 13‖ * (‖1 - sR34 / 2 + 12‖ * (‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR34_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.01 : ℝ) * (14.01 * (13.02 * (12.02 * (11.03 * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66))))))))))))))
+      ≤ ‖1 - sR34 / 2 + 14‖ * (‖1 - sR34 / 2 + 13‖ * (‖1 - sR34 / 2 + 12‖ * (‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR34_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (3100000000000 : ℝ)
+      ≤ (15.01 : ℝ) * (14.01 * (13.02 * (12.02 * (11.03 * (10.04 * (9.05 * (8.06 * (7.08 * (6.1 * (5.13 * (4.18 * (3.25 * (2.38 * (1.66)))))))))))))) := by
+    norm_num
+  have hD_ge : (3100000000000 : ℝ)
+      ≤ ‖1 - sR34 / 2 + 14‖ * (‖1 - sR34 / 2 + 13‖ * (‖1 - sR34 / 2 + 12‖ * (‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR34 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR34 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR34_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR34 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR34 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR34 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR34 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR34 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR34 / 2)‖ = ‖Complex.Gamma (1 - sR34 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 3100000000000`.
+  have hD_mul : (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR34 / 2)‖
+      = ‖Complex.Gamma (1 - sR34 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR34 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR34 / 2)‖
+        * (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR34 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR34 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR34 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR34 / 2 + 14‖
+        * (‖1 - sR34 / 2 + 13‖
+        * (‖1 - sR34 / 2 + 12‖
+        * (‖1 - sR34 / 2 + 11‖
+        * (‖1 - sR34 / 2 + 10‖
+        * (‖1 - sR34 / 2 + 9‖
+        * (‖1 - sR34 / 2 + 8‖
+        * (‖1 - sR34 / 2 + 7‖
+        * (‖1 - sR34 / 2 + 6‖
+        * (‖1 - sR34 / 2 + 5‖
+        * (‖1 - sR34 / 2 + 4‖
+        * (‖1 - sR34 / 2 + 3‖
+        * (‖1 - sR34 / 2 + 2‖
+        * (‖1 - sR34 / 2 + 1‖
+          * ‖1 - sR34 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.5 * 3100000000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR34 / 2 + 14‖ * (‖1 - sR34 / 2 + 13‖ * (‖1 - sR34 / 2 + 12‖ * (‖1 - sR34 / 2 + 11‖ * (‖1 - sR34 / 2 + 10‖ * (‖1 - sR34 / 2 + 9‖ * (‖1 - sR34 / 2 + 8‖ * (‖1 - sR34 / 2 + 7‖ * (‖1 - sR34 / 2 + 6‖ * (‖1 - sR34 / 2 + 5‖ * (‖1 - sR34 / 2 + 4‖ * (‖1 - sR34 / 2 + 3‖ * (‖1 - sR34 / 2 + 2‖ * (‖1 - sR34 / 2 + 1‖ * (‖1 - sR34 / 2‖)))))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R34GammaUpper
+
+namespace R35GammaUpper
+
+/-- The R35 `s`-plane center: `s = 1/2 + I·z` at `z = R35.center`. -/
+noncomputable def sR35 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R35.center
+
+/-- `R35.center = -0.75 + 0.395·I` (from `R35_x0/x1/y0/y1`). -/
+theorem R35_center_eq :
+    CentralCoverAssembly.R35.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R35_x0, CentralCoverAssembly.R35_x1,
+      CentralCoverAssembly.R35_y0, CentralCoverAssembly.R35_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R35_x0, CentralCoverAssembly.R35_x1,
+      CentralCoverAssembly.R35_y0, CentralCoverAssembly.R35_y1]
+    simp
+    norm_num
+
+/-- `Re sR35 = 0.105`. -/
+theorem sR35_re : sR35.re = 0.105 := by
+  unfold sR35
+  rw [R35_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR35 = -0.75`. -/
+theorem sR35_im : sR35.im = -0.75 := by
+  unfold sR35
+  rw [R35_center_eq]
+  simp
+
+/-- `Re(1 - sR35/2) = 0.9475`. -/
+theorem zUpR35_re : (1 - sR35 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR35_re]
+  norm_num
+
+/-- `Im(1 - sR35/2) = 0.375`. -/
+theorem zUpR35_im : (1 - sR35 / 2).im = 0.375 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR35_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.01 ≤ ‖1 - sR35 / 2‖`. -/
+theorem norm_zUpR35_0_ge :
+    (1.01 : ℝ) ≤ ‖1 - sR35 / 2‖ := by
+  have hsq : (1.01 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR35_re, zUpR35_im]
+    norm_num
+  calc (1.01 : ℝ) = Real.sqrt ((1.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 1.98 ≤ ‖1 - sR35 / 2 + 1‖`. -/
+theorem norm_zUpR35_1_ge :
+    (1.98 : ℝ) ≤ ‖1 - sR35 / 2 + 1‖ := by
+  have hre : (1 - sR35 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR35 / 2 + 1).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.one_im]
+    norm_num
+  have hsq : (1.98 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (1.98 : ℝ) = Real.sqrt ((1.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 2.97 ≤ ‖1 - sR35 / 2 + 2‖`. -/
+theorem norm_zUpR35_2_ge :
+    (2.97 : ℝ) ≤ ‖1 - sR35 / 2 + 2‖ := by
+  have hre : (1 - sR35 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 2).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (2.97 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.97 : ℝ) = Real.sqrt ((2.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.96 ≤ ‖1 - sR35 / 2 + 3‖`. -/
+theorem norm_zUpR35_3_ge :
+    (3.96 : ℝ) ≤ ‖1 - sR35 / 2 + 3‖ := by
+  have hre : (1 - sR35 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 3).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.96 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.96 : ℝ) = Real.sqrt ((3.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.96 ≤ ‖1 - sR35 / 2 + 4‖`. -/
+theorem norm_zUpR35_4_ge :
+    (4.96 : ℝ) ≤ ‖1 - sR35 / 2 + 4‖ := by
+  have hre : (1 - sR35 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 4).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.96 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.96 : ℝ) = Real.sqrt ((4.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.95 ≤ ‖1 - sR35 / 2 + 5‖`. -/
+theorem norm_zUpR35_5_ge :
+    (5.95 : ℝ) ≤ ‖1 - sR35 / 2 + 5‖ := by
+  have hre : (1 - sR35 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 5).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.95 : ℝ) = Real.sqrt ((5.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.95 ≤ ‖1 - sR35 / 2 + 6‖`. -/
+theorem norm_zUpR35_6_ge :
+    (6.95 : ℝ) ≤ ‖1 - sR35 / 2 + 6‖ := by
+  have hre : (1 - sR35 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 6).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.95 : ℝ) = Real.sqrt ((6.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.95 ≤ ‖1 - sR35 / 2 + 7‖`. -/
+theorem norm_zUpR35_7_ge :
+    (7.95 : ℝ) ≤ ‖1 - sR35 / 2 + 7‖ := by
+  have hre : (1 - sR35 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 7).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.95 : ℝ) = Real.sqrt ((7.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.95 ≤ ‖1 - sR35 / 2 + 8‖`. -/
+theorem norm_zUpR35_8_ge :
+    (8.95 : ℝ) ≤ ‖1 - sR35 / 2 + 8‖ := by
+  have hre : (1 - sR35 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 8).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.95 : ℝ) = Real.sqrt ((8.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.95 ≤ ‖1 - sR35 / 2 + 9‖`. -/
+theorem norm_zUpR35_9_ge :
+    (9.95 : ℝ) ≤ ‖1 - sR35 / 2 + 9‖ := by
+  have hre : (1 - sR35 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 9).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.95 : ℝ) = Real.sqrt ((9.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.95 ≤ ‖1 - sR35 / 2 + 10‖`. -/
+theorem norm_zUpR35_10_ge :
+    (10.95 : ℝ) ≤ ‖1 - sR35 / 2 + 10‖ := by
+  have hre : (1 - sR35 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 10).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.95 : ℝ) = Real.sqrt ((10.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.95 ≤ ‖1 - sR35 / 2 + 11‖`. -/
+theorem norm_zUpR35_11_ge :
+    (11.95 : ℝ) ≤ ‖1 - sR35 / 2 + 11‖ := by
+  have hre : (1 - sR35 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 11).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.95 : ℝ) = Real.sqrt ((11.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 12.95 ≤ ‖1 - sR35 / 2 + 12‖`. -/
+theorem norm_zUpR35_12_ge :
+    (12.95 : ℝ) ≤ ‖1 - sR35 / 2 + 12‖ := by
+  have hre : (1 - sR35 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 12).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.95 : ℝ) = Real.sqrt ((12.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.95 ≤ ‖1 - sR35 / 2 + 13‖`. -/
+theorem norm_zUpR35_13_ge :
+    (13.95 : ℝ) ≤ ‖1 - sR35 / 2 + 13‖ := by
+  have hre : (1 - sR35 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 13).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.95 : ℝ) = Real.sqrt ((13.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 14.95 ≤ ‖1 - sR35 / 2 + 14‖`. -/
+theorem norm_zUpR35_14_ge :
+    (14.95 : ℝ) ≤ ‖1 - sR35 / 2 + 14‖ := by
+  have hre : (1 - sR35 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR35 / 2 + 14).im = 0.375 := by
+    simp only [Complex.add_im, zUpR35_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.95 : ℝ) ^ 2 ≤ ‖1 - sR35 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.95 : ℝ) = Real.sqrt ((14.95 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR35 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR35 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR35_ne0 : (1 - sR35 / 2) ≠ 0 := by
+  have hre : (1 - sR35 / 2).re = 0.9475 := zUpR35_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add1_ne0 : (1 - sR35 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add2_ne0 : (1 - sR35 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add3_ne0 : (1 - sR35 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add4_ne0 : (1 - sR35 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add5_ne0 : (1 - sR35 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add6_ne0 : (1 - sR35 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add7_ne0 : (1 - sR35 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add8_ne0 : (1 - sR35 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add9_ne0 : (1 - sR35 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add10_ne0 : (1 - sR35 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add11_ne0 : (1 - sR35 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add12_ne0 : (1 - sR35 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add13_ne0 : (1 - sR35 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR35_add14_ne0 : (1 - sR35 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR35 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R35 corner:
+`‖Complex.Gamma (1 - sR35 / 2)‖ ≤ 1.5` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R35 :
+    ‖Complex.Gamma (1 - sR35 / 2)‖ ≤ 1.5 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR35 / 2 + 1)
+      = (1 - sR35 / 2) * Complex.Gamma (1 - sR35 / 2) :=
+    Complex.Gamma_add_one _ zUpR35_ne0
+  have e1 : Complex.Gamma (1 - sR35 / 2 + 2)
+      = (1 - sR35 / 2 + 1)
+        * Complex.Gamma (1 - sR35 / 2 + 1) := by
+    have h : (1 - sR35 / 2 + 2)
+        = ((1 - sR35 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add1_ne0
+  have e2 : Complex.Gamma (1 - sR35 / 2 + 3)
+      = (1 - sR35 / 2 + 2)
+        * Complex.Gamma (1 - sR35 / 2 + 2) := by
+    have h : (1 - sR35 / 2 + 3)
+        = ((1 - sR35 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add2_ne0
+  have e3 : Complex.Gamma (1 - sR35 / 2 + 4)
+      = (1 - sR35 / 2 + 3)
+        * Complex.Gamma (1 - sR35 / 2 + 3) := by
+    have h : (1 - sR35 / 2 + 4)
+        = ((1 - sR35 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add3_ne0
+  have e4 : Complex.Gamma (1 - sR35 / 2 + 5)
+      = (1 - sR35 / 2 + 4)
+        * Complex.Gamma (1 - sR35 / 2 + 4) := by
+    have h : (1 - sR35 / 2 + 5)
+        = ((1 - sR35 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add4_ne0
+  have e5 : Complex.Gamma (1 - sR35 / 2 + 6)
+      = (1 - sR35 / 2 + 5)
+        * Complex.Gamma (1 - sR35 / 2 + 5) := by
+    have h : (1 - sR35 / 2 + 6)
+        = ((1 - sR35 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add5_ne0
+  have e6 : Complex.Gamma (1 - sR35 / 2 + 7)
+      = (1 - sR35 / 2 + 6)
+        * Complex.Gamma (1 - sR35 / 2 + 6) := by
+    have h : (1 - sR35 / 2 + 7)
+        = ((1 - sR35 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add6_ne0
+  have e7 : Complex.Gamma (1 - sR35 / 2 + 8)
+      = (1 - sR35 / 2 + 7)
+        * Complex.Gamma (1 - sR35 / 2 + 7) := by
+    have h : (1 - sR35 / 2 + 8)
+        = ((1 - sR35 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add7_ne0
+  have e8 : Complex.Gamma (1 - sR35 / 2 + 9)
+      = (1 - sR35 / 2 + 8)
+        * Complex.Gamma (1 - sR35 / 2 + 8) := by
+    have h : (1 - sR35 / 2 + 9)
+        = ((1 - sR35 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add8_ne0
+  have e9 : Complex.Gamma (1 - sR35 / 2 + 10)
+      = (1 - sR35 / 2 + 9)
+        * Complex.Gamma (1 - sR35 / 2 + 9) := by
+    have h : (1 - sR35 / 2 + 10)
+        = ((1 - sR35 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add9_ne0
+  have e10 : Complex.Gamma (1 - sR35 / 2 + 11)
+      = (1 - sR35 / 2 + 10)
+        * Complex.Gamma (1 - sR35 / 2 + 10) := by
+    have h : (1 - sR35 / 2 + 11)
+        = ((1 - sR35 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add10_ne0
+  have e11 : Complex.Gamma (1 - sR35 / 2 + 12)
+      = (1 - sR35 / 2 + 11)
+        * Complex.Gamma (1 - sR35 / 2 + 11) := by
+    have h : (1 - sR35 / 2 + 12)
+        = ((1 - sR35 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add11_ne0
+  have e12 : Complex.Gamma (1 - sR35 / 2 + 13)
+      = (1 - sR35 / 2 + 12)
+        * Complex.Gamma (1 - sR35 / 2 + 12) := by
+    have h : (1 - sR35 / 2 + 13)
+        = ((1 - sR35 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add12_ne0
+  have e13 : Complex.Gamma (1 - sR35 / 2 + 14)
+      = (1 - sR35 / 2 + 13)
+        * Complex.Gamma (1 - sR35 / 2 + 13) := by
+    have h : (1 - sR35 / 2 + 14)
+        = ((1 - sR35 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add13_ne0
+  have e14 : Complex.Gamma (1 - sR35 / 2 + 15)
+      = (1 - sR35 / 2 + 14)
+        * Complex.Gamma (1 - sR35 / 2 + 14) := by
+    have h : (1 - sR35 / 2 + 15)
+        = ((1 - sR35 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR35_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR35 / 2 + 1)‖
+      = ‖1 - sR35 / 2‖
+        * ‖Complex.Gamma (1 - sR35 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR35 / 2 + 2)‖
+      = ‖1 - sR35 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR35 / 2 + 3)‖
+      = ‖1 - sR35 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR35 / 2 + 4)‖
+      = ‖1 - sR35 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR35 / 2 + 5)‖
+      = ‖1 - sR35 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR35 / 2 + 6)‖
+      = ‖1 - sR35 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR35 / 2 + 7)‖
+      = ‖1 - sR35 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR35 / 2 + 8)‖
+      = ‖1 - sR35 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR35 / 2 + 9)‖
+      = ‖1 - sR35 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR35 / 2 + 10)‖
+      = ‖1 - sR35 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR35 / 2 + 11)‖
+      = ‖1 - sR35 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR35 / 2 + 12)‖
+      = ‖1 - sR35 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR35 / 2 + 13)‖
+      = ‖1 - sR35 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR35 / 2 + 14)‖
+      = ‖1 - sR35 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR35 / 2 + 15)‖
+      = ‖1 - sR35 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR35 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR35 / 2 + 15)‖
+      = ‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+        * (‖1 - sR35 / 2‖
+          * ‖Complex.Gamma (1 - sR35 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (1.98 : ℝ) * 1.01
+      ≤ ‖1 - sR35 / 2 + 1‖ * ‖1 - sR35 / 2‖ :=
+    mul_le_mul norm_zUpR35_1_ge norm_zUpR35_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (2.97 : ℝ) * (1.98 * (1.01))
+      ≤ ‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)) :=
+    mul_le_mul norm_zUpR35_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.96 : ℝ) * (2.97 * (1.98 * (1.01)))
+      ≤ ‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))) :=
+    mul_le_mul norm_zUpR35_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.96 : ℝ) * (3.96 * (2.97 * (1.98 * (1.01))))
+      ≤ ‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))) :=
+    mul_le_mul norm_zUpR35_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.95 : ℝ) * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))
+      ≤ ‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))))) :=
+    mul_le_mul norm_zUpR35_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.95 : ℝ) * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01))))))
+      ≤ ‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))) :=
+    mul_le_mul norm_zUpR35_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.95 : ℝ) * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))))
+      ≤ ‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))))))) :=
+    mul_le_mul norm_zUpR35_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.95 : ℝ) * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01))))))))
+      ≤ ‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR35_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.95 : ℝ) * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))))))
+      ≤ ‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR35_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.95 : ℝ) * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01))))))))))
+      ≤ ‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR35_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.95 : ℝ) * (10.95 * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))))))))
+      ≤ ‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR35_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (12.95 : ℝ) * (11.95 * (10.95 * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01))))))))))))
+      ≤ ‖1 - sR35 / 2 + 12‖ * (‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR35_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.95 : ℝ) * (12.95 * (11.95 * (10.95 * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))))))))))
+      ≤ ‖1 - sR35 / 2 + 13‖ * (‖1 - sR35 / 2 + 12‖ * (‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR35_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (14.95 : ℝ) * (13.95 * (12.95 * (11.95 * (10.95 * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01))))))))))))))
+      ≤ ‖1 - sR35 / 2 + 14‖ * (‖1 - sR35 / 2 + 13‖ * (‖1 - sR35 / 2 + 12‖ * (‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR35_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (1200000000000 : ℝ)
+      ≤ (14.95 : ℝ) * (13.95 * (12.95 * (11.95 * (10.95 * (9.95 * (8.95 * (7.95 * (6.95 * (5.95 * (4.96 * (3.96 * (2.97 * (1.98 * (1.01)))))))))))))) := by
+    norm_num
+  have hD_ge : (1200000000000 : ℝ)
+      ≤ ‖1 - sR35 / 2 + 14‖ * (‖1 - sR35 / 2 + 13‖ * (‖1 - sR35 / 2 + 12‖ * (‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR35 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR35 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR35_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR35 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR35 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR35 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR35 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR35 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR35 / 2)‖ = ‖Complex.Gamma (1 - sR35 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 1200000000000`.
+  have hD_mul : (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR35 / 2)‖
+      = ‖Complex.Gamma (1 - sR35 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR35 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR35 / 2)‖
+        * (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR35 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR35 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR35 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 1.5 * (‖1 - sR35 / 2 + 14‖
+        * (‖1 - sR35 / 2 + 13‖
+        * (‖1 - sR35 / 2 + 12‖
+        * (‖1 - sR35 / 2 + 11‖
+        * (‖1 - sR35 / 2 + 10‖
+        * (‖1 - sR35 / 2 + 9‖
+        * (‖1 - sR35 / 2 + 8‖
+        * (‖1 - sR35 / 2 + 7‖
+        * (‖1 - sR35 / 2 + 6‖
+        * (‖1 - sR35 / 2 + 5‖
+        * (‖1 - sR35 / 2 + 4‖
+        * (‖1 - sR35 / 2 + 3‖
+        * (‖1 - sR35 / 2 + 2‖
+        * (‖1 - sR35 / 2 + 1‖
+          * ‖1 - sR35 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 1.5 * 1200000000000 := by norm_num
+      _ ≤ 1.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR35 / 2 + 14‖ * (‖1 - sR35 / 2 + 13‖ * (‖1 - sR35 / 2 + 12‖ * (‖1 - sR35 / 2 + 11‖ * (‖1 - sR35 / 2 + 10‖ * (‖1 - sR35 / 2 + 9‖ * (‖1 - sR35 / 2 + 8‖ * (‖1 - sR35 / 2 + 7‖ * (‖1 - sR35 / 2 + 6‖ * (‖1 - sR35 / 2 + 5‖ * (‖1 - sR35 / 2 + 4‖ * (‖1 - sR35 / 2 + 3‖ * (‖1 - sR35 / 2 + 2‖ * (‖1 - sR35 / 2 + 1‖ * (‖1 - sR35 / 2‖)))))))))))))))
+      ≤ 1.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R35GammaUpper
+
+namespace R36GammaUpper
+
+/-- The R36 `s`-plane center: `s = 1/2 + I·z` at `z = R36.center`. -/
+noncomputable def sR36 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R36.center
+
+/-- `R36.center = 1.25 + 0.395·I` (from `R36_x0/x1/y0/y1`). -/
+theorem R36_center_eq :
+    CentralCoverAssembly.R36.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R36_x0, CentralCoverAssembly.R36_x1,
+      CentralCoverAssembly.R36_y0, CentralCoverAssembly.R36_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R36_x0, CentralCoverAssembly.R36_x1,
+      CentralCoverAssembly.R36_y0, CentralCoverAssembly.R36_y1]
+    simp
+    norm_num
+
+/-- `Re sR36 = 0.105`. -/
+theorem sR36_re : sR36.re = 0.105 := by
+  unfold sR36
+  rw [R36_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR36 = 1.25`. -/
+theorem sR36_im : sR36.im = 1.25 := by
+  unfold sR36
+  rw [R36_center_eq]
+  simp
+
+/-- `Re(1 - sR36/2) = 0.9475`. -/
+theorem zUpR36_re : (1 - sR36 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR36_re]
+  norm_num
+
+/-- `Im(1 - sR36/2) = -0.625`. -/
+theorem zUpR36_im : (1 - sR36 / 2).im = -0.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR36_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.13 ≤ ‖1 - sR36 / 2‖`. -/
+theorem norm_zUpR36_0_ge :
+    (1.13 : ℝ) ≤ ‖1 - sR36 / 2‖ := by
+  have hsq : (1.13 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR36_re, zUpR36_im]
+    norm_num
+  calc (1.13 : ℝ) = Real.sqrt ((1.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.04 ≤ ‖1 - sR36 / 2 + 1‖`. -/
+theorem norm_zUpR36_1_ge :
+    (2.04 : ℝ) ≤ ‖1 - sR36 / 2 + 1‖ := by
+  have hre : (1 - sR36 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR36 / 2 + 1).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.one_im]
+    norm_num
+  have hsq : (2.04 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.04 : ℝ) = Real.sqrt ((2.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.01 ≤ ‖1 - sR36 / 2 + 2‖`. -/
+theorem norm_zUpR36_2_ge :
+    (3.01 : ℝ) ≤ ‖1 - sR36 / 2 + 2‖ := by
+  have hre : (1 - sR36 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 2).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.01 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.01 : ℝ) = Real.sqrt ((3.01 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 3.99 ≤ ‖1 - sR36 / 2 + 3‖`. -/
+theorem norm_zUpR36_3_ge :
+    (3.99 : ℝ) ≤ ‖1 - sR36 / 2 + 3‖ := by
+  have hre : (1 - sR36 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 3).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.99 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.99 : ℝ) = Real.sqrt ((3.99 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 4.98 ≤ ‖1 - sR36 / 2 + 4‖`. -/
+theorem norm_zUpR36_4_ge :
+    (4.98 : ℝ) ≤ ‖1 - sR36 / 2 + 4‖ := by
+  have hre : (1 - sR36 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 4).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.98 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.98 : ℝ) = Real.sqrt ((4.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 5.98 ≤ ‖1 - sR36 / 2 + 5‖`. -/
+theorem norm_zUpR36_5_ge :
+    (5.98 : ℝ) ≤ ‖1 - sR36 / 2 + 5‖ := by
+  have hre : (1 - sR36 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 5).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.98 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.98 : ℝ) = Real.sqrt ((5.98 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 6.97 ≤ ‖1 - sR36 / 2 + 6‖`. -/
+theorem norm_zUpR36_6_ge :
+    (6.97 : ℝ) ≤ ‖1 - sR36 / 2 + 6‖ := by
+  have hre : (1 - sR36 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 6).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.97 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.97 : ℝ) = Real.sqrt ((6.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 7.97 ≤ ‖1 - sR36 / 2 + 7‖`. -/
+theorem norm_zUpR36_7_ge :
+    (7.97 : ℝ) ≤ ‖1 - sR36 / 2 + 7‖ := by
+  have hre : (1 - sR36 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 7).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.97 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.97 : ℝ) = Real.sqrt ((7.97 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 8.96 ≤ ‖1 - sR36 / 2 + 8‖`. -/
+theorem norm_zUpR36_8_ge :
+    (8.96 : ℝ) ≤ ‖1 - sR36 / 2 + 8‖ := by
+  have hre : (1 - sR36 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 8).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.96 : ℝ) = Real.sqrt ((8.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 9.96 ≤ ‖1 - sR36 / 2 + 9‖`. -/
+theorem norm_zUpR36_9_ge :
+    (9.96 : ℝ) ≤ ‖1 - sR36 / 2 + 9‖ := by
+  have hre : (1 - sR36 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 9).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.96 : ℝ) = Real.sqrt ((9.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 10.96 ≤ ‖1 - sR36 / 2 + 10‖`. -/
+theorem norm_zUpR36_10_ge :
+    (10.96 : ℝ) ≤ ‖1 - sR36 / 2 + 10‖ := by
+  have hre : (1 - sR36 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 10).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.96 : ℝ) = Real.sqrt ((10.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 11.96 ≤ ‖1 - sR36 / 2 + 11‖`. -/
+theorem norm_zUpR36_11_ge :
+    (11.96 : ℝ) ≤ ‖1 - sR36 / 2 + 11‖ := by
+  have hre : (1 - sR36 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 11).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.96 : ℝ) = Real.sqrt ((11.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 12.96 ≤ ‖1 - sR36 / 2 + 12‖`. -/
+theorem norm_zUpR36_12_ge :
+    (12.96 : ℝ) ≤ ‖1 - sR36 / 2 + 12‖ := by
+  have hre : (1 - sR36 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 12).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.96 : ℝ) = Real.sqrt ((12.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 13.96 ≤ ‖1 - sR36 / 2 + 13‖`. -/
+theorem norm_zUpR36_13_ge :
+    (13.96 : ℝ) ≤ ‖1 - sR36 / 2 + 13‖ := by
+  have hre : (1 - sR36 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 13).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.96 : ℝ) = Real.sqrt ((13.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 14.96 ≤ ‖1 - sR36 / 2 + 14‖`. -/
+theorem norm_zUpR36_14_ge :
+    (14.96 : ℝ) ≤ ‖1 - sR36 / 2 + 14‖ := by
+  have hre : (1 - sR36 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR36 / 2 + 14).im = -0.625 := by
+    simp only [Complex.add_im, zUpR36_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.96 : ℝ) ^ 2 ≤ ‖1 - sR36 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.96 : ℝ) = Real.sqrt ((14.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR36 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR36 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR36_ne0 : (1 - sR36 / 2) ≠ 0 := by
+  have hre : (1 - sR36 / 2).re = 0.9475 := zUpR36_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add1_ne0 : (1 - sR36 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add2_ne0 : (1 - sR36 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add3_ne0 : (1 - sR36 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add4_ne0 : (1 - sR36 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add5_ne0 : (1 - sR36 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add6_ne0 : (1 - sR36 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add7_ne0 : (1 - sR36 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add8_ne0 : (1 - sR36 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add9_ne0 : (1 - sR36 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add10_ne0 : (1 - sR36 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add11_ne0 : (1 - sR36 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add12_ne0 : (1 - sR36 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add13_ne0 : (1 - sR36 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR36_add14_ne0 : (1 - sR36 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR36 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R36 corner:
+`‖Complex.Gamma (1 - sR36 / 2)‖ ≤ 1.2` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R36 :
+    ‖Complex.Gamma (1 - sR36 / 2)‖ ≤ 1.2 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR36 / 2 + 1)
+      = (1 - sR36 / 2) * Complex.Gamma (1 - sR36 / 2) :=
+    Complex.Gamma_add_one _ zUpR36_ne0
+  have e1 : Complex.Gamma (1 - sR36 / 2 + 2)
+      = (1 - sR36 / 2 + 1)
+        * Complex.Gamma (1 - sR36 / 2 + 1) := by
+    have h : (1 - sR36 / 2 + 2)
+        = ((1 - sR36 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add1_ne0
+  have e2 : Complex.Gamma (1 - sR36 / 2 + 3)
+      = (1 - sR36 / 2 + 2)
+        * Complex.Gamma (1 - sR36 / 2 + 2) := by
+    have h : (1 - sR36 / 2 + 3)
+        = ((1 - sR36 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add2_ne0
+  have e3 : Complex.Gamma (1 - sR36 / 2 + 4)
+      = (1 - sR36 / 2 + 3)
+        * Complex.Gamma (1 - sR36 / 2 + 3) := by
+    have h : (1 - sR36 / 2 + 4)
+        = ((1 - sR36 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add3_ne0
+  have e4 : Complex.Gamma (1 - sR36 / 2 + 5)
+      = (1 - sR36 / 2 + 4)
+        * Complex.Gamma (1 - sR36 / 2 + 4) := by
+    have h : (1 - sR36 / 2 + 5)
+        = ((1 - sR36 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add4_ne0
+  have e5 : Complex.Gamma (1 - sR36 / 2 + 6)
+      = (1 - sR36 / 2 + 5)
+        * Complex.Gamma (1 - sR36 / 2 + 5) := by
+    have h : (1 - sR36 / 2 + 6)
+        = ((1 - sR36 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add5_ne0
+  have e6 : Complex.Gamma (1 - sR36 / 2 + 7)
+      = (1 - sR36 / 2 + 6)
+        * Complex.Gamma (1 - sR36 / 2 + 6) := by
+    have h : (1 - sR36 / 2 + 7)
+        = ((1 - sR36 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add6_ne0
+  have e7 : Complex.Gamma (1 - sR36 / 2 + 8)
+      = (1 - sR36 / 2 + 7)
+        * Complex.Gamma (1 - sR36 / 2 + 7) := by
+    have h : (1 - sR36 / 2 + 8)
+        = ((1 - sR36 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add7_ne0
+  have e8 : Complex.Gamma (1 - sR36 / 2 + 9)
+      = (1 - sR36 / 2 + 8)
+        * Complex.Gamma (1 - sR36 / 2 + 8) := by
+    have h : (1 - sR36 / 2 + 9)
+        = ((1 - sR36 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add8_ne0
+  have e9 : Complex.Gamma (1 - sR36 / 2 + 10)
+      = (1 - sR36 / 2 + 9)
+        * Complex.Gamma (1 - sR36 / 2 + 9) := by
+    have h : (1 - sR36 / 2 + 10)
+        = ((1 - sR36 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add9_ne0
+  have e10 : Complex.Gamma (1 - sR36 / 2 + 11)
+      = (1 - sR36 / 2 + 10)
+        * Complex.Gamma (1 - sR36 / 2 + 10) := by
+    have h : (1 - sR36 / 2 + 11)
+        = ((1 - sR36 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add10_ne0
+  have e11 : Complex.Gamma (1 - sR36 / 2 + 12)
+      = (1 - sR36 / 2 + 11)
+        * Complex.Gamma (1 - sR36 / 2 + 11) := by
+    have h : (1 - sR36 / 2 + 12)
+        = ((1 - sR36 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add11_ne0
+  have e12 : Complex.Gamma (1 - sR36 / 2 + 13)
+      = (1 - sR36 / 2 + 12)
+        * Complex.Gamma (1 - sR36 / 2 + 12) := by
+    have h : (1 - sR36 / 2 + 13)
+        = ((1 - sR36 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add12_ne0
+  have e13 : Complex.Gamma (1 - sR36 / 2 + 14)
+      = (1 - sR36 / 2 + 13)
+        * Complex.Gamma (1 - sR36 / 2 + 13) := by
+    have h : (1 - sR36 / 2 + 14)
+        = ((1 - sR36 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add13_ne0
+  have e14 : Complex.Gamma (1 - sR36 / 2 + 15)
+      = (1 - sR36 / 2 + 14)
+        * Complex.Gamma (1 - sR36 / 2 + 14) := by
+    have h : (1 - sR36 / 2 + 15)
+        = ((1 - sR36 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR36_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR36 / 2 + 1)‖
+      = ‖1 - sR36 / 2‖
+        * ‖Complex.Gamma (1 - sR36 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR36 / 2 + 2)‖
+      = ‖1 - sR36 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR36 / 2 + 3)‖
+      = ‖1 - sR36 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR36 / 2 + 4)‖
+      = ‖1 - sR36 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR36 / 2 + 5)‖
+      = ‖1 - sR36 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR36 / 2 + 6)‖
+      = ‖1 - sR36 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR36 / 2 + 7)‖
+      = ‖1 - sR36 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR36 / 2 + 8)‖
+      = ‖1 - sR36 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR36 / 2 + 9)‖
+      = ‖1 - sR36 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR36 / 2 + 10)‖
+      = ‖1 - sR36 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR36 / 2 + 11)‖
+      = ‖1 - sR36 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR36 / 2 + 12)‖
+      = ‖1 - sR36 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR36 / 2 + 13)‖
+      = ‖1 - sR36 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR36 / 2 + 14)‖
+      = ‖1 - sR36 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR36 / 2 + 15)‖
+      = ‖1 - sR36 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR36 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR36 / 2 + 15)‖
+      = ‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+        * (‖1 - sR36 / 2‖
+          * ‖Complex.Gamma (1 - sR36 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.04 : ℝ) * 1.13
+      ≤ ‖1 - sR36 / 2 + 1‖ * ‖1 - sR36 / 2‖ :=
+    mul_le_mul norm_zUpR36_1_ge norm_zUpR36_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.01 : ℝ) * (2.04 * (1.13))
+      ≤ ‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)) :=
+    mul_le_mul norm_zUpR36_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (3.99 : ℝ) * (3.01 * (2.04 * (1.13)))
+      ≤ ‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))) :=
+    mul_le_mul norm_zUpR36_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.98 : ℝ) * (3.99 * (3.01 * (2.04 * (1.13))))
+      ≤ ‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))) :=
+    mul_le_mul norm_zUpR36_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.98 : ℝ) * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))
+      ≤ ‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))))) :=
+    mul_le_mul norm_zUpR36_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (6.97 : ℝ) * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13))))))
+      ≤ ‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))) :=
+    mul_le_mul norm_zUpR36_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (7.97 : ℝ) * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))))
+      ≤ ‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))))))) :=
+    mul_le_mul norm_zUpR36_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (8.96 : ℝ) * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13))))))))
+      ≤ ‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR36_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (9.96 : ℝ) * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))))))
+      ≤ ‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR36_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (10.96 : ℝ) * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13))))))))))
+      ≤ ‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR36_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (11.96 : ℝ) * (10.96 * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))))))))
+      ≤ ‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR36_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (12.96 : ℝ) * (11.96 * (10.96 * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13))))))))))))
+      ≤ ‖1 - sR36 / 2 + 12‖ * (‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR36_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (13.96 : ℝ) * (12.96 * (11.96 * (10.96 * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))))))))))
+      ≤ ‖1 - sR36 / 2 + 13‖ * (‖1 - sR36 / 2 + 12‖ * (‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR36_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (14.96 : ℝ) * (13.96 * (12.96 * (11.96 * (10.96 * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13))))))))))))))
+      ≤ ‖1 - sR36 / 2 + 14‖ * (‖1 - sR36 / 2 + 13‖ * (‖1 - sR36 / 2 + 12‖ * (‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR36_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (1400000000000 : ℝ)
+      ≤ (14.96 : ℝ) * (13.96 * (12.96 * (11.96 * (10.96 * (9.96 * (8.96 * (7.97 * (6.97 * (5.98 * (4.98 * (3.99 * (3.01 * (2.04 * (1.13)))))))))))))) := by
+    norm_num
+  have hD_ge : (1400000000000 : ℝ)
+      ≤ ‖1 - sR36 / 2 + 14‖ * (‖1 - sR36 / 2 + 13‖ * (‖1 - sR36 / 2 + 12‖ * (‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR36 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR36 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR36_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR36 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR36 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR36 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR36 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR36 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR36 / 2)‖ = ‖Complex.Gamma (1 - sR36 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 1400000000000`.
+  have hD_mul : (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR36 / 2)‖
+      = ‖Complex.Gamma (1 - sR36 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR36 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR36 / 2)‖
+        * (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR36 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR36 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR36 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 1.2 * (‖1 - sR36 / 2 + 14‖
+        * (‖1 - sR36 / 2 + 13‖
+        * (‖1 - sR36 / 2 + 12‖
+        * (‖1 - sR36 / 2 + 11‖
+        * (‖1 - sR36 / 2 + 10‖
+        * (‖1 - sR36 / 2 + 9‖
+        * (‖1 - sR36 / 2 + 8‖
+        * (‖1 - sR36 / 2 + 7‖
+        * (‖1 - sR36 / 2 + 6‖
+        * (‖1 - sR36 / 2 + 5‖
+        * (‖1 - sR36 / 2 + 4‖
+        * (‖1 - sR36 / 2 + 3‖
+        * (‖1 - sR36 / 2 + 2‖
+        * (‖1 - sR36 / 2 + 1‖
+          * ‖1 - sR36 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 1.2 * 1400000000000 := by norm_num
+      _ ≤ 1.2 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR36 / 2 + 14‖ * (‖1 - sR36 / 2 + 13‖ * (‖1 - sR36 / 2 + 12‖ * (‖1 - sR36 / 2 + 11‖ * (‖1 - sR36 / 2 + 10‖ * (‖1 - sR36 / 2 + 9‖ * (‖1 - sR36 / 2 + 8‖ * (‖1 - sR36 / 2 + 7‖ * (‖1 - sR36 / 2 + 6‖ * (‖1 - sR36 / 2 + 5‖ * (‖1 - sR36 / 2 + 4‖ * (‖1 - sR36 / 2 + 3‖ * (‖1 - sR36 / 2 + 2‖ * (‖1 - sR36 / 2 + 1‖ * (‖1 - sR36 / 2‖)))))))))))))))
+      ≤ 1.2 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R36GammaUpper
+
+namespace R37GammaUpper
+
+/-- The R37 `s`-plane center: `s = 1/2 + I·z` at `z = R37.center`. -/
+noncomputable def sR37 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R37.center
+
+/-- `R37.center = 3.25 + 0.395·I` (from `R37_x0/x1/y0/y1`). -/
+theorem R37_center_eq :
+    CentralCoverAssembly.R37.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R37_x0, CentralCoverAssembly.R37_x1,
+      CentralCoverAssembly.R37_y0, CentralCoverAssembly.R37_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R37_x0, CentralCoverAssembly.R37_x1,
+      CentralCoverAssembly.R37_y0, CentralCoverAssembly.R37_y1]
+    simp
+    norm_num
+
+/-- `Re sR37 = 0.105`. -/
+theorem sR37_re : sR37.re = 0.105 := by
+  unfold sR37
+  rw [R37_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR37 = 3.25`. -/
+theorem sR37_im : sR37.im = 3.25 := by
+  unfold sR37
+  rw [R37_center_eq]
+  simp
+
+/-- `Re(1 - sR37/2) = 0.9475`. -/
+theorem zUpR37_re : (1 - sR37 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR37_re]
+  norm_num
+
+/-- `Im(1 - sR37/2) = -1.625`. -/
+theorem zUpR37_im : (1 - sR37 / 2).im = -1.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR37_im]
+  norm_num
+
+/-- Denominator floor `c0 = 1.88 ≤ ‖1 - sR37 / 2‖`. -/
+theorem norm_zUpR37_0_ge :
+    (1.88 : ℝ) ≤ ‖1 - sR37 / 2‖ := by
+  have hsq : (1.88 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR37_re, zUpR37_im]
+    norm_num
+  calc (1.88 : ℝ) = Real.sqrt ((1.88 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 2.53 ≤ ‖1 - sR37 / 2 + 1‖`. -/
+theorem norm_zUpR37_1_ge :
+    (2.53 : ℝ) ≤ ‖1 - sR37 / 2 + 1‖ := by
+  have hre : (1 - sR37 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR37 / 2 + 1).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.one_im]
+    norm_num
+  have hsq : (2.53 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (2.53 : ℝ) = Real.sqrt ((2.53 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.36 ≤ ‖1 - sR37 / 2 + 2‖`. -/
+theorem norm_zUpR37_2_ge :
+    (3.36 : ℝ) ≤ ‖1 - sR37 / 2 + 2‖ := by
+  have hre : (1 - sR37 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 2).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.36 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.36 : ℝ) = Real.sqrt ((3.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.26 ≤ ‖1 - sR37 / 2 + 3‖`. -/
+theorem norm_zUpR37_3_ge :
+    (4.26 : ℝ) ≤ ‖1 - sR37 / 2 + 3‖ := by
+  have hre : (1 - sR37 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 3).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.26 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.26 : ℝ) = Real.sqrt ((4.26 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.2 ≤ ‖1 - sR37 / 2 + 4‖`. -/
+theorem norm_zUpR37_4_ge :
+    (5.2 : ℝ) ≤ ‖1 - sR37 / 2 + 4‖ := by
+  have hre : (1 - sR37 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 4).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.2 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.2 : ℝ) = Real.sqrt ((5.2 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.16 ≤ ‖1 - sR37 / 2 + 5‖`. -/
+theorem norm_zUpR37_5_ge :
+    (6.16 : ℝ) ≤ ‖1 - sR37 / 2 + 5‖ := by
+  have hre : (1 - sR37 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 5).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.16 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.16 : ℝ) = Real.sqrt ((6.16 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.13 ≤ ‖1 - sR37 / 2 + 6‖`. -/
+theorem norm_zUpR37_6_ge :
+    (7.13 : ℝ) ≤ ‖1 - sR37 / 2 + 6‖ := by
+  have hre : (1 - sR37 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 6).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.13 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.13 : ℝ) = Real.sqrt ((7.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.11 ≤ ‖1 - sR37 / 2 + 7‖`. -/
+theorem norm_zUpR37_7_ge :
+    (8.11 : ℝ) ≤ ‖1 - sR37 / 2 + 7‖ := by
+  have hre : (1 - sR37 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 7).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.11 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.11 : ℝ) = Real.sqrt ((8.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.09 ≤ ‖1 - sR37 / 2 + 8‖`. -/
+theorem norm_zUpR37_8_ge :
+    (9.09 : ℝ) ≤ ‖1 - sR37 / 2 + 8‖ := by
+  have hre : (1 - sR37 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 8).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.09 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.09 : ℝ) = Real.sqrt ((9.09 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.07 ≤ ‖1 - sR37 / 2 + 9‖`. -/
+theorem norm_zUpR37_9_ge :
+    (10.07 : ℝ) ≤ ‖1 - sR37 / 2 + 9‖ := by
+  have hre : (1 - sR37 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 9).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.07 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.07 : ℝ) = Real.sqrt ((10.07 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.06 ≤ ‖1 - sR37 / 2 + 10‖`. -/
+theorem norm_zUpR37_10_ge :
+    (11.06 : ℝ) ≤ ‖1 - sR37 / 2 + 10‖ := by
+  have hre : (1 - sR37 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 10).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.06 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.06 : ℝ) = Real.sqrt ((11.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.05 ≤ ‖1 - sR37 / 2 + 11‖`. -/
+theorem norm_zUpR37_11_ge :
+    (12.05 : ℝ) ≤ ‖1 - sR37 / 2 + 11‖ := by
+  have hre : (1 - sR37 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 11).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.05 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.05 : ℝ) = Real.sqrt ((12.05 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.04 ≤ ‖1 - sR37 / 2 + 12‖`. -/
+theorem norm_zUpR37_12_ge :
+    (13.04 : ℝ) ≤ ‖1 - sR37 / 2 + 12‖ := by
+  have hre : (1 - sR37 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 12).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.04 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.04 : ℝ) = Real.sqrt ((13.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.04 ≤ ‖1 - sR37 / 2 + 13‖`. -/
+theorem norm_zUpR37_13_ge :
+    (14.04 : ℝ) ≤ ‖1 - sR37 / 2 + 13‖ := by
+  have hre : (1 - sR37 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 13).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.04 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.04 : ℝ) = Real.sqrt ((14.04 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.03 ≤ ‖1 - sR37 / 2 + 14‖`. -/
+theorem norm_zUpR37_14_ge :
+    (15.03 : ℝ) ≤ ‖1 - sR37 / 2 + 14‖ := by
+  have hre : (1 - sR37 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR37 / 2 + 14).im = -1.625 := by
+    simp only [Complex.add_im, zUpR37_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.03 : ℝ) ^ 2 ≤ ‖1 - sR37 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.03 : ℝ) = Real.sqrt ((15.03 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR37 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR37 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR37_ne0 : (1 - sR37 / 2) ≠ 0 := by
+  have hre : (1 - sR37 / 2).re = 0.9475 := zUpR37_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add1_ne0 : (1 - sR37 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add2_ne0 : (1 - sR37 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add3_ne0 : (1 - sR37 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add4_ne0 : (1 - sR37 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add5_ne0 : (1 - sR37 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add6_ne0 : (1 - sR37 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add7_ne0 : (1 - sR37 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add8_ne0 : (1 - sR37 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add9_ne0 : (1 - sR37 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add10_ne0 : (1 - sR37 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add11_ne0 : (1 - sR37 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add12_ne0 : (1 - sR37 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add13_ne0 : (1 - sR37 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR37_add14_ne0 : (1 - sR37 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR37 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R37 corner:
+`‖Complex.Gamma (1 - sR37 / 2)‖ ≤ 0.5` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R37 :
+    ‖Complex.Gamma (1 - sR37 / 2)‖ ≤ 0.5 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR37 / 2 + 1)
+      = (1 - sR37 / 2) * Complex.Gamma (1 - sR37 / 2) :=
+    Complex.Gamma_add_one _ zUpR37_ne0
+  have e1 : Complex.Gamma (1 - sR37 / 2 + 2)
+      = (1 - sR37 / 2 + 1)
+        * Complex.Gamma (1 - sR37 / 2 + 1) := by
+    have h : (1 - sR37 / 2 + 2)
+        = ((1 - sR37 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add1_ne0
+  have e2 : Complex.Gamma (1 - sR37 / 2 + 3)
+      = (1 - sR37 / 2 + 2)
+        * Complex.Gamma (1 - sR37 / 2 + 2) := by
+    have h : (1 - sR37 / 2 + 3)
+        = ((1 - sR37 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add2_ne0
+  have e3 : Complex.Gamma (1 - sR37 / 2 + 4)
+      = (1 - sR37 / 2 + 3)
+        * Complex.Gamma (1 - sR37 / 2 + 3) := by
+    have h : (1 - sR37 / 2 + 4)
+        = ((1 - sR37 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add3_ne0
+  have e4 : Complex.Gamma (1 - sR37 / 2 + 5)
+      = (1 - sR37 / 2 + 4)
+        * Complex.Gamma (1 - sR37 / 2 + 4) := by
+    have h : (1 - sR37 / 2 + 5)
+        = ((1 - sR37 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add4_ne0
+  have e5 : Complex.Gamma (1 - sR37 / 2 + 6)
+      = (1 - sR37 / 2 + 5)
+        * Complex.Gamma (1 - sR37 / 2 + 5) := by
+    have h : (1 - sR37 / 2 + 6)
+        = ((1 - sR37 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add5_ne0
+  have e6 : Complex.Gamma (1 - sR37 / 2 + 7)
+      = (1 - sR37 / 2 + 6)
+        * Complex.Gamma (1 - sR37 / 2 + 6) := by
+    have h : (1 - sR37 / 2 + 7)
+        = ((1 - sR37 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add6_ne0
+  have e7 : Complex.Gamma (1 - sR37 / 2 + 8)
+      = (1 - sR37 / 2 + 7)
+        * Complex.Gamma (1 - sR37 / 2 + 7) := by
+    have h : (1 - sR37 / 2 + 8)
+        = ((1 - sR37 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add7_ne0
+  have e8 : Complex.Gamma (1 - sR37 / 2 + 9)
+      = (1 - sR37 / 2 + 8)
+        * Complex.Gamma (1 - sR37 / 2 + 8) := by
+    have h : (1 - sR37 / 2 + 9)
+        = ((1 - sR37 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add8_ne0
+  have e9 : Complex.Gamma (1 - sR37 / 2 + 10)
+      = (1 - sR37 / 2 + 9)
+        * Complex.Gamma (1 - sR37 / 2 + 9) := by
+    have h : (1 - sR37 / 2 + 10)
+        = ((1 - sR37 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add9_ne0
+  have e10 : Complex.Gamma (1 - sR37 / 2 + 11)
+      = (1 - sR37 / 2 + 10)
+        * Complex.Gamma (1 - sR37 / 2 + 10) := by
+    have h : (1 - sR37 / 2 + 11)
+        = ((1 - sR37 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add10_ne0
+  have e11 : Complex.Gamma (1 - sR37 / 2 + 12)
+      = (1 - sR37 / 2 + 11)
+        * Complex.Gamma (1 - sR37 / 2 + 11) := by
+    have h : (1 - sR37 / 2 + 12)
+        = ((1 - sR37 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add11_ne0
+  have e12 : Complex.Gamma (1 - sR37 / 2 + 13)
+      = (1 - sR37 / 2 + 12)
+        * Complex.Gamma (1 - sR37 / 2 + 12) := by
+    have h : (1 - sR37 / 2 + 13)
+        = ((1 - sR37 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add12_ne0
+  have e13 : Complex.Gamma (1 - sR37 / 2 + 14)
+      = (1 - sR37 / 2 + 13)
+        * Complex.Gamma (1 - sR37 / 2 + 13) := by
+    have h : (1 - sR37 / 2 + 14)
+        = ((1 - sR37 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add13_ne0
+  have e14 : Complex.Gamma (1 - sR37 / 2 + 15)
+      = (1 - sR37 / 2 + 14)
+        * Complex.Gamma (1 - sR37 / 2 + 14) := by
+    have h : (1 - sR37 / 2 + 15)
+        = ((1 - sR37 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR37_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR37 / 2 + 1)‖
+      = ‖1 - sR37 / 2‖
+        * ‖Complex.Gamma (1 - sR37 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR37 / 2 + 2)‖
+      = ‖1 - sR37 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR37 / 2 + 3)‖
+      = ‖1 - sR37 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR37 / 2 + 4)‖
+      = ‖1 - sR37 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR37 / 2 + 5)‖
+      = ‖1 - sR37 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR37 / 2 + 6)‖
+      = ‖1 - sR37 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR37 / 2 + 7)‖
+      = ‖1 - sR37 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR37 / 2 + 8)‖
+      = ‖1 - sR37 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR37 / 2 + 9)‖
+      = ‖1 - sR37 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR37 / 2 + 10)‖
+      = ‖1 - sR37 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR37 / 2 + 11)‖
+      = ‖1 - sR37 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR37 / 2 + 12)‖
+      = ‖1 - sR37 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR37 / 2 + 13)‖
+      = ‖1 - sR37 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR37 / 2 + 14)‖
+      = ‖1 - sR37 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR37 / 2 + 15)‖
+      = ‖1 - sR37 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR37 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR37 / 2 + 15)‖
+      = ‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+        * (‖1 - sR37 / 2‖
+          * ‖Complex.Gamma (1 - sR37 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (2.53 : ℝ) * 1.88
+      ≤ ‖1 - sR37 / 2 + 1‖ * ‖1 - sR37 / 2‖ :=
+    mul_le_mul norm_zUpR37_1_ge norm_zUpR37_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.36 : ℝ) * (2.53 * (1.88))
+      ≤ ‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)) :=
+    mul_le_mul norm_zUpR37_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.26 : ℝ) * (3.36 * (2.53 * (1.88)))
+      ≤ ‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))) :=
+    mul_le_mul norm_zUpR37_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.2 : ℝ) * (4.26 * (3.36 * (2.53 * (1.88))))
+      ≤ ‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))) :=
+    mul_le_mul norm_zUpR37_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.16 : ℝ) * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))
+      ≤ ‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))))) :=
+    mul_le_mul norm_zUpR37_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.13 : ℝ) * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88))))))
+      ≤ ‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))) :=
+    mul_le_mul norm_zUpR37_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.11 : ℝ) * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))))
+      ≤ ‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))))))) :=
+    mul_le_mul norm_zUpR37_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.09 : ℝ) * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88))))))))
+      ≤ ‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR37_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.07 : ℝ) * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))))))
+      ≤ ‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR37_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.06 : ℝ) * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88))))))))))
+      ≤ ‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR37_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.05 : ℝ) * (11.06 * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))))))))
+      ≤ ‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR37_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.04 : ℝ) * (12.05 * (11.06 * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88))))))))))))
+      ≤ ‖1 - sR37 / 2 + 12‖ * (‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR37_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.04 : ℝ) * (13.04 * (12.05 * (11.06 * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))))))))))
+      ≤ ‖1 - sR37 / 2 + 13‖ * (‖1 - sR37 / 2 + 12‖ * (‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR37_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.03 : ℝ) * (14.04 * (13.04 * (12.05 * (11.06 * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88))))))))))))))
+      ≤ ‖1 - sR37 / 2 + 14‖ * (‖1 - sR37 / 2 + 13‖ * (‖1 - sR37 / 2 + 12‖ * (‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR37_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (4200000000000 : ℝ)
+      ≤ (15.03 : ℝ) * (14.04 * (13.04 * (12.05 * (11.06 * (10.07 * (9.09 * (8.11 * (7.13 * (6.16 * (5.2 * (4.26 * (3.36 * (2.53 * (1.88)))))))))))))) := by
+    norm_num
+  have hD_ge : (4200000000000 : ℝ)
+      ≤ ‖1 - sR37 / 2 + 14‖ * (‖1 - sR37 / 2 + 13‖ * (‖1 - sR37 / 2 + 12‖ * (‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR37 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR37 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR37_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR37 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR37 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR37 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR37 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR37 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR37 / 2)‖ = ‖Complex.Gamma (1 - sR37 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 4200000000000`.
+  have hD_mul : (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR37 / 2)‖
+      = ‖Complex.Gamma (1 - sR37 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR37 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR37 / 2)‖
+        * (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR37 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR37 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR37 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.5 * (‖1 - sR37 / 2 + 14‖
+        * (‖1 - sR37 / 2 + 13‖
+        * (‖1 - sR37 / 2 + 12‖
+        * (‖1 - sR37 / 2 + 11‖
+        * (‖1 - sR37 / 2 + 10‖
+        * (‖1 - sR37 / 2 + 9‖
+        * (‖1 - sR37 / 2 + 8‖
+        * (‖1 - sR37 / 2 + 7‖
+        * (‖1 - sR37 / 2 + 6‖
+        * (‖1 - sR37 / 2 + 5‖
+        * (‖1 - sR37 / 2 + 4‖
+        * (‖1 - sR37 / 2 + 3‖
+        * (‖1 - sR37 / 2 + 2‖
+        * (‖1 - sR37 / 2 + 1‖
+          * ‖1 - sR37 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.5 * 4200000000000 := by norm_num
+      _ ≤ 0.5 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR37 / 2 + 14‖ * (‖1 - sR37 / 2 + 13‖ * (‖1 - sR37 / 2 + 12‖ * (‖1 - sR37 / 2 + 11‖ * (‖1 - sR37 / 2 + 10‖ * (‖1 - sR37 / 2 + 9‖ * (‖1 - sR37 / 2 + 8‖ * (‖1 - sR37 / 2 + 7‖ * (‖1 - sR37 / 2 + 6‖ * (‖1 - sR37 / 2 + 5‖ * (‖1 - sR37 / 2 + 4‖ * (‖1 - sR37 / 2 + 3‖ * (‖1 - sR37 / 2 + 2‖ * (‖1 - sR37 / 2 + 1‖ * (‖1 - sR37 / 2‖)))))))))))))))
+      ≤ 0.5 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R37GammaUpper
+
+namespace R38GammaUpper
+
+/-- The R38 `s`-plane center: `s = 1/2 + I·z` at `z = R38.center`. -/
+noncomputable def sR38 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R38.center
+
+/-- `R38.center = 5.25 + 0.395·I` (from `R38_x0/x1/y0/y1`). -/
+theorem R38_center_eq :
+    CentralCoverAssembly.R38.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R38_x0, CentralCoverAssembly.R38_x1,
+      CentralCoverAssembly.R38_y0, CentralCoverAssembly.R38_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R38_x0, CentralCoverAssembly.R38_x1,
+      CentralCoverAssembly.R38_y0, CentralCoverAssembly.R38_y1]
+    simp
+    norm_num
+
+/-- `Re sR38 = 0.105`. -/
+theorem sR38_re : sR38.re = 0.105 := by
+  unfold sR38
+  rw [R38_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR38 = 5.25`. -/
+theorem sR38_im : sR38.im = 5.25 := by
+  unfold sR38
+  rw [R38_center_eq]
+  simp
+
+/-- `Re(1 - sR38/2) = 0.9475`. -/
+theorem zUpR38_re : (1 - sR38 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR38_re]
+  norm_num
+
+/-- `Im(1 - sR38/2) = -2.625`. -/
+theorem zUpR38_im : (1 - sR38 / 2).im = -2.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR38_im]
+  norm_num
+
+/-- Denominator floor `c0 = 2.79 ≤ ‖1 - sR38 / 2‖`. -/
+theorem norm_zUpR38_0_ge :
+    (2.79 : ℝ) ≤ ‖1 - sR38 / 2‖ := by
+  have hsq : (2.79 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR38_re, zUpR38_im]
+    norm_num
+  calc (2.79 : ℝ) = Real.sqrt ((2.79 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 3.26 ≤ ‖1 - sR38 / 2 + 1‖`. -/
+theorem norm_zUpR38_1_ge :
+    (3.26 : ℝ) ≤ ‖1 - sR38 / 2 + 1‖ := by
+  have hre : (1 - sR38 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR38 / 2 + 1).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.one_im]
+    norm_num
+  have hsq : (3.26 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.26 : ℝ) = Real.sqrt ((3.26 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 3.94 ≤ ‖1 - sR38 / 2 + 2‖`. -/
+theorem norm_zUpR38_2_ge :
+    (3.94 : ℝ) ≤ ‖1 - sR38 / 2 + 2‖ := by
+  have hre : (1 - sR38 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 2).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (3.94 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (3.94 : ℝ) = Real.sqrt ((3.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 4.74 ≤ ‖1 - sR38 / 2 + 3‖`. -/
+theorem norm_zUpR38_3_ge :
+    (4.74 : ℝ) ≤ ‖1 - sR38 / 2 + 3‖ := by
+  have hre : (1 - sR38 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 3).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.74 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.74 : ℝ) = Real.sqrt ((4.74 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 5.6 ≤ ‖1 - sR38 / 2 + 4‖`. -/
+theorem norm_zUpR38_4_ge :
+    (5.6 : ℝ) ≤ ‖1 - sR38 / 2 + 4‖ := by
+  have hre : (1 - sR38 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 4).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.6 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.6 : ℝ) = Real.sqrt ((5.6 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.5 ≤ ‖1 - sR38 / 2 + 5‖`. -/
+theorem norm_zUpR38_5_ge :
+    (6.5 : ℝ) ≤ ‖1 - sR38 / 2 + 5‖ := by
+  have hre : (1 - sR38 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 5).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.5 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.5 : ℝ) = Real.sqrt ((6.5 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.42 ≤ ‖1 - sR38 / 2 + 6‖`. -/
+theorem norm_zUpR38_6_ge :
+    (7.42 : ℝ) ≤ ‖1 - sR38 / 2 + 6‖ := by
+  have hre : (1 - sR38 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 6).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.42 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.42 : ℝ) = Real.sqrt ((7.42 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.36 ≤ ‖1 - sR38 / 2 + 7‖`. -/
+theorem norm_zUpR38_7_ge :
+    (8.36 : ℝ) ≤ ‖1 - sR38 / 2 + 7‖ := by
+  have hre : (1 - sR38 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 7).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.36 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.36 : ℝ) = Real.sqrt ((8.36 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.32 ≤ ‖1 - sR38 / 2 + 8‖`. -/
+theorem norm_zUpR38_8_ge :
+    (9.32 : ℝ) ≤ ‖1 - sR38 / 2 + 8‖ := by
+  have hre : (1 - sR38 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 8).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.32 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.32 : ℝ) = Real.sqrt ((9.32 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.28 ≤ ‖1 - sR38 / 2 + 9‖`. -/
+theorem norm_zUpR38_9_ge :
+    (10.28 : ℝ) ≤ ‖1 - sR38 / 2 + 9‖ := by
+  have hre : (1 - sR38 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 9).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.28 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.28 : ℝ) = Real.sqrt ((10.28 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.25 ≤ ‖1 - sR38 / 2 + 10‖`. -/
+theorem norm_zUpR38_10_ge :
+    (11.25 : ℝ) ≤ ‖1 - sR38 / 2 + 10‖ := by
+  have hre : (1 - sR38 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 10).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.25 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.25 : ℝ) = Real.sqrt ((11.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.23 ≤ ‖1 - sR38 / 2 + 11‖`. -/
+theorem norm_zUpR38_11_ge :
+    (12.23 : ℝ) ≤ ‖1 - sR38 / 2 + 11‖ := by
+  have hre : (1 - sR38 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 11).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.23 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.23 : ℝ) = Real.sqrt ((12.23 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.21 ≤ ‖1 - sR38 / 2 + 12‖`. -/
+theorem norm_zUpR38_12_ge :
+    (13.21 : ℝ) ≤ ‖1 - sR38 / 2 + 12‖ := by
+  have hre : (1 - sR38 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 12).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.21 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.21 : ℝ) = Real.sqrt ((13.21 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.19 ≤ ‖1 - sR38 / 2 + 13‖`. -/
+theorem norm_zUpR38_13_ge :
+    (14.19 : ℝ) ≤ ‖1 - sR38 / 2 + 13‖ := by
+  have hre : (1 - sR38 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 13).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.19 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.19 : ℝ) = Real.sqrt ((14.19 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.17 ≤ ‖1 - sR38 / 2 + 14‖`. -/
+theorem norm_zUpR38_14_ge :
+    (15.17 : ℝ) ≤ ‖1 - sR38 / 2 + 14‖ := by
+  have hre : (1 - sR38 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR38 / 2 + 14).im = -2.625 := by
+    simp only [Complex.add_im, zUpR38_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.17 : ℝ) ^ 2 ≤ ‖1 - sR38 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.17 : ℝ) = Real.sqrt ((15.17 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR38 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR38 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR38_ne0 : (1 - sR38 / 2) ≠ 0 := by
+  have hre : (1 - sR38 / 2).re = 0.9475 := zUpR38_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add1_ne0 : (1 - sR38 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add2_ne0 : (1 - sR38 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add3_ne0 : (1 - sR38 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add4_ne0 : (1 - sR38 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add5_ne0 : (1 - sR38 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add6_ne0 : (1 - sR38 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add7_ne0 : (1 - sR38 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add8_ne0 : (1 - sR38 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add9_ne0 : (1 - sR38 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add10_ne0 : (1 - sR38 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add11_ne0 : (1 - sR38 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add12_ne0 : (1 - sR38 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add13_ne0 : (1 - sR38 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR38_add14_ne0 : (1 - sR38 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR38 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R38 corner:
+`‖Complex.Gamma (1 - sR38 / 2)‖ ≤ 0.15` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R38 :
+    ‖Complex.Gamma (1 - sR38 / 2)‖ ≤ 0.15 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR38 / 2 + 1)
+      = (1 - sR38 / 2) * Complex.Gamma (1 - sR38 / 2) :=
+    Complex.Gamma_add_one _ zUpR38_ne0
+  have e1 : Complex.Gamma (1 - sR38 / 2 + 2)
+      = (1 - sR38 / 2 + 1)
+        * Complex.Gamma (1 - sR38 / 2 + 1) := by
+    have h : (1 - sR38 / 2 + 2)
+        = ((1 - sR38 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add1_ne0
+  have e2 : Complex.Gamma (1 - sR38 / 2 + 3)
+      = (1 - sR38 / 2 + 2)
+        * Complex.Gamma (1 - sR38 / 2 + 2) := by
+    have h : (1 - sR38 / 2 + 3)
+        = ((1 - sR38 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add2_ne0
+  have e3 : Complex.Gamma (1 - sR38 / 2 + 4)
+      = (1 - sR38 / 2 + 3)
+        * Complex.Gamma (1 - sR38 / 2 + 3) := by
+    have h : (1 - sR38 / 2 + 4)
+        = ((1 - sR38 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add3_ne0
+  have e4 : Complex.Gamma (1 - sR38 / 2 + 5)
+      = (1 - sR38 / 2 + 4)
+        * Complex.Gamma (1 - sR38 / 2 + 4) := by
+    have h : (1 - sR38 / 2 + 5)
+        = ((1 - sR38 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add4_ne0
+  have e5 : Complex.Gamma (1 - sR38 / 2 + 6)
+      = (1 - sR38 / 2 + 5)
+        * Complex.Gamma (1 - sR38 / 2 + 5) := by
+    have h : (1 - sR38 / 2 + 6)
+        = ((1 - sR38 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add5_ne0
+  have e6 : Complex.Gamma (1 - sR38 / 2 + 7)
+      = (1 - sR38 / 2 + 6)
+        * Complex.Gamma (1 - sR38 / 2 + 6) := by
+    have h : (1 - sR38 / 2 + 7)
+        = ((1 - sR38 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add6_ne0
+  have e7 : Complex.Gamma (1 - sR38 / 2 + 8)
+      = (1 - sR38 / 2 + 7)
+        * Complex.Gamma (1 - sR38 / 2 + 7) := by
+    have h : (1 - sR38 / 2 + 8)
+        = ((1 - sR38 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add7_ne0
+  have e8 : Complex.Gamma (1 - sR38 / 2 + 9)
+      = (1 - sR38 / 2 + 8)
+        * Complex.Gamma (1 - sR38 / 2 + 8) := by
+    have h : (1 - sR38 / 2 + 9)
+        = ((1 - sR38 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add8_ne0
+  have e9 : Complex.Gamma (1 - sR38 / 2 + 10)
+      = (1 - sR38 / 2 + 9)
+        * Complex.Gamma (1 - sR38 / 2 + 9) := by
+    have h : (1 - sR38 / 2 + 10)
+        = ((1 - sR38 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add9_ne0
+  have e10 : Complex.Gamma (1 - sR38 / 2 + 11)
+      = (1 - sR38 / 2 + 10)
+        * Complex.Gamma (1 - sR38 / 2 + 10) := by
+    have h : (1 - sR38 / 2 + 11)
+        = ((1 - sR38 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add10_ne0
+  have e11 : Complex.Gamma (1 - sR38 / 2 + 12)
+      = (1 - sR38 / 2 + 11)
+        * Complex.Gamma (1 - sR38 / 2 + 11) := by
+    have h : (1 - sR38 / 2 + 12)
+        = ((1 - sR38 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add11_ne0
+  have e12 : Complex.Gamma (1 - sR38 / 2 + 13)
+      = (1 - sR38 / 2 + 12)
+        * Complex.Gamma (1 - sR38 / 2 + 12) := by
+    have h : (1 - sR38 / 2 + 13)
+        = ((1 - sR38 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add12_ne0
+  have e13 : Complex.Gamma (1 - sR38 / 2 + 14)
+      = (1 - sR38 / 2 + 13)
+        * Complex.Gamma (1 - sR38 / 2 + 13) := by
+    have h : (1 - sR38 / 2 + 14)
+        = ((1 - sR38 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add13_ne0
+  have e14 : Complex.Gamma (1 - sR38 / 2 + 15)
+      = (1 - sR38 / 2 + 14)
+        * Complex.Gamma (1 - sR38 / 2 + 14) := by
+    have h : (1 - sR38 / 2 + 15)
+        = ((1 - sR38 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR38_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR38 / 2 + 1)‖
+      = ‖1 - sR38 / 2‖
+        * ‖Complex.Gamma (1 - sR38 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR38 / 2 + 2)‖
+      = ‖1 - sR38 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR38 / 2 + 3)‖
+      = ‖1 - sR38 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR38 / 2 + 4)‖
+      = ‖1 - sR38 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR38 / 2 + 5)‖
+      = ‖1 - sR38 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR38 / 2 + 6)‖
+      = ‖1 - sR38 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR38 / 2 + 7)‖
+      = ‖1 - sR38 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR38 / 2 + 8)‖
+      = ‖1 - sR38 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR38 / 2 + 9)‖
+      = ‖1 - sR38 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR38 / 2 + 10)‖
+      = ‖1 - sR38 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR38 / 2 + 11)‖
+      = ‖1 - sR38 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR38 / 2 + 12)‖
+      = ‖1 - sR38 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR38 / 2 + 13)‖
+      = ‖1 - sR38 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR38 / 2 + 14)‖
+      = ‖1 - sR38 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR38 / 2 + 15)‖
+      = ‖1 - sR38 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR38 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR38 / 2 + 15)‖
+      = ‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+        * (‖1 - sR38 / 2‖
+          * ‖Complex.Gamma (1 - sR38 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.26 : ℝ) * 2.79
+      ≤ ‖1 - sR38 / 2 + 1‖ * ‖1 - sR38 / 2‖ :=
+    mul_le_mul norm_zUpR38_1_ge norm_zUpR38_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (3.94 : ℝ) * (3.26 * (2.79))
+      ≤ ‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)) :=
+    mul_le_mul norm_zUpR38_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.74 : ℝ) * (3.94 * (3.26 * (2.79)))
+      ≤ ‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))) :=
+    mul_le_mul norm_zUpR38_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.6 : ℝ) * (4.74 * (3.94 * (3.26 * (2.79))))
+      ≤ ‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))) :=
+    mul_le_mul norm_zUpR38_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.5 : ℝ) * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))
+      ≤ ‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))))) :=
+    mul_le_mul norm_zUpR38_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.42 : ℝ) * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79))))))
+      ≤ ‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))) :=
+    mul_le_mul norm_zUpR38_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.36 : ℝ) * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))))
+      ≤ ‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))))))) :=
+    mul_le_mul norm_zUpR38_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.32 : ℝ) * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79))))))))
+      ≤ ‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR38_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.28 : ℝ) * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))))))
+      ≤ ‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR38_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.25 : ℝ) * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79))))))))))
+      ≤ ‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR38_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.23 : ℝ) * (11.25 * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))))))))
+      ≤ ‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR38_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.21 : ℝ) * (12.23 * (11.25 * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79))))))))))))
+      ≤ ‖1 - sR38 / 2 + 12‖ * (‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR38_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.19 : ℝ) * (13.21 * (12.23 * (11.25 * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))))))))))
+      ≤ ‖1 - sR38 / 2 + 13‖ * (‖1 - sR38 / 2 + 12‖ * (‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR38_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.17 : ℝ) * (14.19 * (13.21 * (12.23 * (11.25 * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79))))))))))))))
+      ≤ ‖1 - sR38 / 2 + 14‖ * (‖1 - sR38 / 2 + 13‖ * (‖1 - sR38 / 2 + 12‖ * (‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR38_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (14000000000000 : ℝ)
+      ≤ (15.17 : ℝ) * (14.19 * (13.21 * (12.23 * (11.25 * (10.28 * (9.32 * (8.36 * (7.42 * (6.5 * (5.6 * (4.74 * (3.94 * (3.26 * (2.79)))))))))))))) := by
+    norm_num
+  have hD_ge : (14000000000000 : ℝ)
+      ≤ ‖1 - sR38 / 2 + 14‖ * (‖1 - sR38 / 2 + 13‖ * (‖1 - sR38 / 2 + 12‖ * (‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR38 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR38 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR38_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR38 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR38 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR38 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR38 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR38 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR38 / 2)‖ = ‖Complex.Gamma (1 - sR38 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 14000000000000`.
+  have hD_mul : (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR38 / 2)‖
+      = ‖Complex.Gamma (1 - sR38 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR38 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR38 / 2)‖
+        * (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR38 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR38 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR38 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.15 * (‖1 - sR38 / 2 + 14‖
+        * (‖1 - sR38 / 2 + 13‖
+        * (‖1 - sR38 / 2 + 12‖
+        * (‖1 - sR38 / 2 + 11‖
+        * (‖1 - sR38 / 2 + 10‖
+        * (‖1 - sR38 / 2 + 9‖
+        * (‖1 - sR38 / 2 + 8‖
+        * (‖1 - sR38 / 2 + 7‖
+        * (‖1 - sR38 / 2 + 6‖
+        * (‖1 - sR38 / 2 + 5‖
+        * (‖1 - sR38 / 2 + 4‖
+        * (‖1 - sR38 / 2 + 3‖
+        * (‖1 - sR38 / 2 + 2‖
+        * (‖1 - sR38 / 2 + 1‖
+          * ‖1 - sR38 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.15 * 14000000000000 := by norm_num
+      _ ≤ 0.15 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR38 / 2 + 14‖ * (‖1 - sR38 / 2 + 13‖ * (‖1 - sR38 / 2 + 12‖ * (‖1 - sR38 / 2 + 11‖ * (‖1 - sR38 / 2 + 10‖ * (‖1 - sR38 / 2 + 9‖ * (‖1 - sR38 / 2 + 8‖ * (‖1 - sR38 / 2 + 7‖ * (‖1 - sR38 / 2 + 6‖ * (‖1 - sR38 / 2 + 5‖ * (‖1 - sR38 / 2 + 4‖ * (‖1 - sR38 / 2 + 3‖ * (‖1 - sR38 / 2 + 2‖ * (‖1 - sR38 / 2 + 1‖ * (‖1 - sR38 / 2‖)))))))))))))))
+      ≤ 0.15 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R38GammaUpper
+
+namespace R39GammaUpper
+
+/-- The R39 `s`-plane center: `s = 1/2 + I·z` at `z = R39.center`. -/
+noncomputable def sR39 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R39.center
+
+/-- `R39.center = 7.25 + 0.395·I` (from `R39_x0/x1/y0/y1`). -/
+theorem R39_center_eq :
+    CentralCoverAssembly.R39.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R39_x0, CentralCoverAssembly.R39_x1,
+      CentralCoverAssembly.R39_y0, CentralCoverAssembly.R39_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R39_x0, CentralCoverAssembly.R39_x1,
+      CentralCoverAssembly.R39_y0, CentralCoverAssembly.R39_y1]
+    simp
+    norm_num
+
+/-- `Re sR39 = 0.105`. -/
+theorem sR39_re : sR39.re = 0.105 := by
+  unfold sR39
+  rw [R39_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR39 = 7.25`. -/
+theorem sR39_im : sR39.im = 7.25 := by
+  unfold sR39
+  rw [R39_center_eq]
+  simp
+
+/-- `Re(1 - sR39/2) = 0.9475`. -/
+theorem zUpR39_re : (1 - sR39 / 2).re = 0.9475 := by
+  rw [Complex.sub_re, Complex.one_re, Complex.div_ofNat_re, sR39_re]
+  norm_num
+
+/-- `Im(1 - sR39/2) = -3.625`. -/
+theorem zUpR39_im : (1 - sR39 / 2).im = -3.625 := by
+  rw [Complex.sub_im, Complex.one_im, Complex.div_ofNat_im, sR39_im]
+  norm_num
+
+/-- Denominator floor `c0 = 3.74 ≤ ‖1 - sR39 / 2‖`. -/
+theorem norm_zUpR39_0_ge :
+    (3.74 : ℝ) ≤ ‖1 - sR39 / 2‖ := by
+  have hsq : (3.74 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zUpR39_re, zUpR39_im]
+    norm_num
+  calc (3.74 : ℝ) = Real.sqrt ((3.74 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c1 = 4.11 ≤ ‖1 - sR39 / 2 + 1‖`. -/
+theorem norm_zUpR39_1_ge :
+    (4.11 : ℝ) ≤ ‖1 - sR39 / 2 + 1‖ := by
+  have hre : (1 - sR39 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.one_re]
+    norm_num
+  have him : (1 - sR39 / 2 + 1).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.one_im]
+    norm_num
+  have hsq : (4.11 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.11 : ℝ) = Real.sqrt ((4.11 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c2 = 4.67 ≤ ‖1 - sR39 / 2 + 2‖`. -/
+theorem norm_zUpR39_2_ge :
+    (4.67 : ℝ) ≤ ‖1 - sR39 / 2 + 2‖ := by
+  have hre : (1 - sR39 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 2).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (4.67 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 2‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (4.67 : ℝ) = Real.sqrt ((4.67 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 2‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 2‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c3 = 5.35 ≤ ‖1 - sR39 / 2 + 3‖`. -/
+theorem norm_zUpR39_3_ge :
+    (5.35 : ℝ) ≤ ‖1 - sR39 / 2 + 3‖ := by
+  have hre : (1 - sR39 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 3).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (5.35 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 3‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (5.35 : ℝ) = Real.sqrt ((5.35 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 3‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 3‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c4 = 6.13 ≤ ‖1 - sR39 / 2 + 4‖`. -/
+theorem norm_zUpR39_4_ge :
+    (6.13 : ℝ) ≤ ‖1 - sR39 / 2 + 4‖ := by
+  have hre : (1 - sR39 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 4).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.13 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 4‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.13 : ℝ) = Real.sqrt ((6.13 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 4‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 4‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c5 = 6.96 ≤ ‖1 - sR39 / 2 + 5‖`. -/
+theorem norm_zUpR39_5_ge :
+    (6.96 : ℝ) ≤ ‖1 - sR39 / 2 + 5‖ := by
+  have hre : (1 - sR39 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 5).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (6.96 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 5‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (6.96 : ℝ) = Real.sqrt ((6.96 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 5‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 5‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c6 = 7.83 ≤ ‖1 - sR39 / 2 + 6‖`. -/
+theorem norm_zUpR39_6_ge :
+    (7.83 : ℝ) ≤ ‖1 - sR39 / 2 + 6‖ := by
+  have hre : (1 - sR39 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 6).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (7.83 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 6‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (7.83 : ℝ) = Real.sqrt ((7.83 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 6‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 6‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c7 = 8.73 ≤ ‖1 - sR39 / 2 + 7‖`. -/
+theorem norm_zUpR39_7_ge :
+    (8.73 : ℝ) ≤ ‖1 - sR39 / 2 + 7‖ := by
+  have hre : (1 - sR39 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 7).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (8.73 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 7‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (8.73 : ℝ) = Real.sqrt ((8.73 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 7‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 7‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c8 = 9.65 ≤ ‖1 - sR39 / 2 + 8‖`. -/
+theorem norm_zUpR39_8_ge :
+    (9.65 : ℝ) ≤ ‖1 - sR39 / 2 + 8‖ := by
+  have hre : (1 - sR39 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 8).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (9.65 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 8‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (9.65 : ℝ) = Real.sqrt ((9.65 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 8‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 8‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c9 = 10.58 ≤ ‖1 - sR39 / 2 + 9‖`. -/
+theorem norm_zUpR39_9_ge :
+    (10.58 : ℝ) ≤ ‖1 - sR39 / 2 + 9‖ := by
+  have hre : (1 - sR39 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 9).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (10.58 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 9‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (10.58 : ℝ) = Real.sqrt ((10.58 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 9‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 9‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c10 = 11.53 ≤ ‖1 - sR39 / 2 + 10‖`. -/
+theorem norm_zUpR39_10_ge :
+    (11.53 : ℝ) ≤ ‖1 - sR39 / 2 + 10‖ := by
+  have hre : (1 - sR39 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 10).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (11.53 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (11.53 : ℝ) = Real.sqrt ((11.53 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c11 = 12.48 ≤ ‖1 - sR39 / 2 + 11‖`. -/
+theorem norm_zUpR39_11_ge :
+    (12.48 : ℝ) ≤ ‖1 - sR39 / 2 + 11‖ := by
+  have hre : (1 - sR39 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 11).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (12.48 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (12.48 : ℝ) = Real.sqrt ((12.48 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c12 = 13.44 ≤ ‖1 - sR39 / 2 + 12‖`. -/
+theorem norm_zUpR39_12_ge :
+    (13.44 : ℝ) ≤ ‖1 - sR39 / 2 + 12‖ := by
+  have hre : (1 - sR39 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 12).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.44 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.44 : ℝ) = Real.sqrt ((13.44 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.41 ≤ ‖1 - sR39 / 2 + 13‖`. -/
+theorem norm_zUpR39_13_ge :
+    (14.41 : ℝ) ≤ ‖1 - sR39 / 2 + 13‖ := by
+  have hre : (1 - sR39 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 13).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.41 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.41 : ℝ) = Real.sqrt ((14.41 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.38 ≤ ‖1 - sR39 / 2 + 14‖`. -/
+theorem norm_zUpR39_14_ge :
+    (15.38 : ℝ) ≤ ‖1 - sR39 / 2 + 14‖ := by
+  have hre : (1 - sR39 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - sR39 / 2 + 14).im = -3.625 := by
+    simp only [Complex.add_im, zUpR39_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.38 : ℝ) ^ 2 ≤ ‖1 - sR39 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.38 : ℝ) = Real.sqrt ((15.38 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - sR39 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - sR39 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Shift nonvanishing (`Re > 0` so `{NE} 0`). -/
+theorem zUpR39_ne0 : (1 - sR39 / 2) ≠ 0 := by
+  have hre : (1 - sR39 / 2).re = 0.9475 := zUpR39_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add1_ne0 : (1 - sR39 / 2 + 1) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 1).re = 1.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.one_re]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add2_ne0 : (1 - sR39 / 2 + 2) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 2).re = 2.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add3_ne0 : (1 - sR39 / 2 + 3) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 3).re = 3.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add4_ne0 : (1 - sR39 / 2 + 4) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 4).re = 4.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add5_ne0 : (1 - sR39 / 2 + 5) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 5).re = 5.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add6_ne0 : (1 - sR39 / 2 + 6) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 6).re = 6.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add7_ne0 : (1 - sR39 / 2 + 7) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 7).re = 7.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add8_ne0 : (1 - sR39 / 2 + 8) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 8).re = 8.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add9_ne0 : (1 - sR39 / 2 + 9) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 9).re = 9.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add10_ne0 : (1 - sR39 / 2 + 10) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 10).re = 10.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add11_ne0 : (1 - sR39 / 2 + 11) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 11).re = 11.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add12_ne0 : (1 - sR39 / 2 + 12) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 12).re = 12.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add13_ne0 : (1 - sR39 / 2 + 13) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 13).re = 13.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR39_add14_ne0 : (1 - sR39 / 2 + 14) ≠ 0 := by
+  have hre : (1 - sR39 / 2 + 14).re = 14.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN uniform UPPER bound at the R39 corner:
+`‖Complex.Gamma (1 - sR39 / 2)‖ ≤ 0.05` (row-3 outer-tier, `re = 0.9475`, 15 shifts). -/
+theorem gamma_one_sub_half_upper_R39 :
+    ‖Complex.Gamma (1 - sR39 / 2)‖ ≤ 0.05 := by
+  -- Shift chain `Gamma(z0+15) = (z0+14)..z0*Gamma(z0)`.
+  have e0 : Complex.Gamma (1 - sR39 / 2 + 1)
+      = (1 - sR39 / 2) * Complex.Gamma (1 - sR39 / 2) :=
+    Complex.Gamma_add_one _ zUpR39_ne0
+  have e1 : Complex.Gamma (1 - sR39 / 2 + 2)
+      = (1 - sR39 / 2 + 1)
+        * Complex.Gamma (1 - sR39 / 2 + 1) := by
+    have h : (1 - sR39 / 2 + 2)
+        = ((1 - sR39 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add1_ne0
+  have e2 : Complex.Gamma (1 - sR39 / 2 + 3)
+      = (1 - sR39 / 2 + 2)
+        * Complex.Gamma (1 - sR39 / 2 + 2) := by
+    have h : (1 - sR39 / 2 + 3)
+        = ((1 - sR39 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add2_ne0
+  have e3 : Complex.Gamma (1 - sR39 / 2 + 4)
+      = (1 - sR39 / 2 + 3)
+        * Complex.Gamma (1 - sR39 / 2 + 3) := by
+    have h : (1 - sR39 / 2 + 4)
+        = ((1 - sR39 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add3_ne0
+  have e4 : Complex.Gamma (1 - sR39 / 2 + 5)
+      = (1 - sR39 / 2 + 4)
+        * Complex.Gamma (1 - sR39 / 2 + 4) := by
+    have h : (1 - sR39 / 2 + 5)
+        = ((1 - sR39 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add4_ne0
+  have e5 : Complex.Gamma (1 - sR39 / 2 + 6)
+      = (1 - sR39 / 2 + 5)
+        * Complex.Gamma (1 - sR39 / 2 + 5) := by
+    have h : (1 - sR39 / 2 + 6)
+        = ((1 - sR39 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add5_ne0
+  have e6 : Complex.Gamma (1 - sR39 / 2 + 7)
+      = (1 - sR39 / 2 + 6)
+        * Complex.Gamma (1 - sR39 / 2 + 6) := by
+    have h : (1 - sR39 / 2 + 7)
+        = ((1 - sR39 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add6_ne0
+  have e7 : Complex.Gamma (1 - sR39 / 2 + 8)
+      = (1 - sR39 / 2 + 7)
+        * Complex.Gamma (1 - sR39 / 2 + 7) := by
+    have h : (1 - sR39 / 2 + 8)
+        = ((1 - sR39 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add7_ne0
+  have e8 : Complex.Gamma (1 - sR39 / 2 + 9)
+      = (1 - sR39 / 2 + 8)
+        * Complex.Gamma (1 - sR39 / 2 + 8) := by
+    have h : (1 - sR39 / 2 + 9)
+        = ((1 - sR39 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add8_ne0
+  have e9 : Complex.Gamma (1 - sR39 / 2 + 10)
+      = (1 - sR39 / 2 + 9)
+        * Complex.Gamma (1 - sR39 / 2 + 9) := by
+    have h : (1 - sR39 / 2 + 10)
+        = ((1 - sR39 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add9_ne0
+  have e10 : Complex.Gamma (1 - sR39 / 2 + 11)
+      = (1 - sR39 / 2 + 10)
+        * Complex.Gamma (1 - sR39 / 2 + 10) := by
+    have h : (1 - sR39 / 2 + 11)
+        = ((1 - sR39 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add10_ne0
+  have e11 : Complex.Gamma (1 - sR39 / 2 + 12)
+      = (1 - sR39 / 2 + 11)
+        * Complex.Gamma (1 - sR39 / 2 + 11) := by
+    have h : (1 - sR39 / 2 + 12)
+        = ((1 - sR39 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add11_ne0
+  have e12 : Complex.Gamma (1 - sR39 / 2 + 13)
+      = (1 - sR39 / 2 + 12)
+        * Complex.Gamma (1 - sR39 / 2 + 12) := by
+    have h : (1 - sR39 / 2 + 13)
+        = ((1 - sR39 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add12_ne0
+  have e13 : Complex.Gamma (1 - sR39 / 2 + 14)
+      = (1 - sR39 / 2 + 13)
+        * Complex.Gamma (1 - sR39 / 2 + 13) := by
+    have h : (1 - sR39 / 2 + 14)
+        = ((1 - sR39 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add13_ne0
+  have e14 : Complex.Gamma (1 - sR39 / 2 + 15)
+      = (1 - sR39 / 2 + 14)
+        * Complex.Gamma (1 - sR39 / 2 + 14) := by
+    have h : (1 - sR39 / 2 + 15)
+        = ((1 - sR39 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR39_add14_ne0
+  have n0 : ‖Complex.Gamma (1 - sR39 / 2 + 1)‖
+      = ‖1 - sR39 / 2‖
+        * ‖Complex.Gamma (1 - sR39 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - sR39 / 2 + 2)‖
+      = ‖1 - sR39 / 2 + 1‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - sR39 / 2 + 3)‖
+      = ‖1 - sR39 / 2 + 2‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - sR39 / 2 + 4)‖
+      = ‖1 - sR39 / 2 + 3‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - sR39 / 2 + 5)‖
+      = ‖1 - sR39 / 2 + 4‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - sR39 / 2 + 6)‖
+      = ‖1 - sR39 / 2 + 5‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - sR39 / 2 + 7)‖
+      = ‖1 - sR39 / 2 + 6‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - sR39 / 2 + 8)‖
+      = ‖1 - sR39 / 2 + 7‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - sR39 / 2 + 9)‖
+      = ‖1 - sR39 / 2 + 8‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - sR39 / 2 + 10)‖
+      = ‖1 - sR39 / 2 + 9‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - sR39 / 2 + 11)‖
+      = ‖1 - sR39 / 2 + 10‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - sR39 / 2 + 12)‖
+      = ‖1 - sR39 / 2 + 11‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - sR39 / 2 + 13)‖
+      = ‖1 - sR39 / 2 + 12‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - sR39 / 2 + 14)‖
+      = ‖1 - sR39 / 2 + 13‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - sR39 / 2 + 15)‖
+      = ‖1 - sR39 / 2 + 14‖
+        * ‖Complex.Gamma (1 - sR39 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - sR39 / 2 + 15)‖
+      = ‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+        * (‖1 - sR39 / 2‖
+          * ‖Complex.Gamma (1 - sR39 / 2)‖)))))))))))))) := by
+    rw [n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (4.11 : ℝ) * 3.74
+      ≤ ‖1 - sR39 / 2 + 1‖ * ‖1 - sR39 / 2‖ :=
+    mul_le_mul norm_zUpR39_1_ge norm_zUpR39_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.67 : ℝ) * (4.11 * (3.74))
+      ≤ ‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)) :=
+    mul_le_mul norm_zUpR39_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.35 : ℝ) * (4.67 * (4.11 * (3.74)))
+      ≤ ‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))) :=
+    mul_le_mul norm_zUpR39_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (6.13 : ℝ) * (5.35 * (4.67 * (4.11 * (3.74))))
+      ≤ ‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))) :=
+    mul_le_mul norm_zUpR39_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.96 : ℝ) * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))
+      ≤ ‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))))) :=
+    mul_le_mul norm_zUpR39_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.83 : ℝ) * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74))))))
+      ≤ ‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))) :=
+    mul_le_mul norm_zUpR39_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.73 : ℝ) * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))))
+      ≤ ‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))))))) :=
+    mul_le_mul norm_zUpR39_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.65 : ℝ) * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74))))))))
+      ≤ ‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))) :=
+    mul_le_mul norm_zUpR39_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.58 : ℝ) * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))))))
+      ≤ ‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))))))))) :=
+    mul_le_mul norm_zUpR39_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.53 : ℝ) * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74))))))))))
+      ≤ ‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))))) :=
+    mul_le_mul norm_zUpR39_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.48 : ℝ) * (11.53 * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))))))))
+      ≤ ‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))))))))))) :=
+    mul_le_mul norm_zUpR39_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.44 : ℝ) * (12.48 * (11.53 * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74))))))))))))
+      ≤ ‖1 - sR39 / 2 + 12‖ * (‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR39_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.41 : ℝ) * (13.44 * (12.48 * (11.53 * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))))))))))
+      ≤ ‖1 - sR39 / 2 + 13‖ * (‖1 - sR39 / 2 + 12‖ * (‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR39_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.38 : ℝ) * (14.41 * (13.44 * (12.48 * (11.53 * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74))))))))))))))
+      ≤ ‖1 - sR39 / 2 + 14‖ * (‖1 - sR39 / 2 + 13‖ * (‖1 - sR39 / 2 + 12‖ * (‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR39_14_ge q13 (by positivity) (norm_nonneg _)
+  have hDlo : (49000000000000 : ℝ)
+      ≤ (15.38 : ℝ) * (14.41 * (13.44 * (12.48 * (11.53 * (10.58 * (9.65 * (8.73 * (7.83 * (6.96 * (6.13 * (5.35 * (4.67 * (4.11 * (3.74)))))))))))))) := by
+    norm_num
+  have hD_ge : (49000000000000 : ℝ)
+      ≤ ‖1 - sR39 / 2 + 14‖ * (‖1 - sR39 / 2 + 13‖ * (‖1 - sR39 / 2 + 12‖ * (‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))))))))) :=
+    le_trans hDlo q14
+  have hD_pos : (0 : ℝ)
+      < (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖)))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (1 - sR39 / 2 + 15)‖ ≤ Real.Gamma(15.9475) ≤ 1160000000000`.
+  have hre15 : (1 - sR39 / 2 + 15).re = 15.9475 := by
+    simp only [Complex.add_re, zUpR39_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - sR39 / 2 + 15).re := by
+    rw [hre15]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - sR39 / 2 + 15)‖ ≤ 1160000000000 := by
+    have h1 : ‖Complex.Gamma (1 - sR39 / 2 + 15)‖
+        ≤ Real.Gamma ((1 - sR39 / 2 + 15).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - sR39 / 2 + 15).re) = 15.9475 := hre15
+    rw [hreNb] at h1
+    exact le_trans h1 CellGammaUpper09475.realGamma_159475_le
+  -- Combine: `D * ‖Complex.Gamma (1 - sR39 / 2)‖ = ‖Complex.Gamma (1 - sR39 / 2 + 15)‖ ≤ 1160000000000`, `D ≤ 49000000000000`.
+  have hD_mul : (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR39 / 2)‖
+      = ‖Complex.Gamma (1 - sR39 / 2 + 15)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖))))))))))))))
+        * ‖Complex.Gamma (1 - sR39 / 2)‖ ≤ 1160000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - sR39 / 2)‖
+        * (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖))))))))))))))
+        ≤ 1160000000000 := by
+    calc ‖Complex.Gamma (1 - sR39 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - sR39 / 2)‖ := mul_comm _ _
+      _ ≤ 1160000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - sR39 / 2)‖
+      ≤ 1160000000000 / (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (1160000000000 : ℝ)
+      ≤ 0.05 * (‖1 - sR39 / 2 + 14‖
+        * (‖1 - sR39 / 2 + 13‖
+        * (‖1 - sR39 / 2 + 12‖
+        * (‖1 - sR39 / 2 + 11‖
+        * (‖1 - sR39 / 2 + 10‖
+        * (‖1 - sR39 / 2 + 9‖
+        * (‖1 - sR39 / 2 + 8‖
+        * (‖1 - sR39 / 2 + 7‖
+        * (‖1 - sR39 / 2 + 6‖
+        * (‖1 - sR39 / 2 + 5‖
+        * (‖1 - sR39 / 2 + 4‖
+        * (‖1 - sR39 / 2 + 3‖
+        * (‖1 - sR39 / 2 + 2‖
+        * (‖1 - sR39 / 2 + 1‖
+          * ‖1 - sR39 / 2‖)))))))))))))) := by
+    calc (1160000000000 : ℝ) ≤ 0.05 * 49000000000000 := by norm_num
+      _ ≤ 0.05 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 1160000000000 / (‖1 - sR39 / 2 + 14‖ * (‖1 - sR39 / 2 + 13‖ * (‖1 - sR39 / 2 + 12‖ * (‖1 - sR39 / 2 + 11‖ * (‖1 - sR39 / 2 + 10‖ * (‖1 - sR39 / 2 + 9‖ * (‖1 - sR39 / 2 + 8‖ * (‖1 - sR39 / 2 + 7‖ * (‖1 - sR39 / 2 + 6‖ * (‖1 - sR39 / 2 + 5‖ * (‖1 - sR39 / 2 + 4‖ * (‖1 - sR39 / 2 + 3‖ * (‖1 - sR39 / 2 + 2‖ * (‖1 - sR39 / 2 + 1‖ * (‖1 - sR39 / 2‖)))))))))))))))
+      ≤ 0.05 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+end R39GammaUpper
+
