@@ -1386,7 +1386,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   central cells (`Azeta` + tight upper).
 
 **Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
-Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. Remaining: instantiate a
+Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. **Euler right edge closed
+(`TailZetaUpper`):** Im-uniform `‖ζ‖ ≤ 1+1/δ` on `Re ≥ 1+δ` (`B=3` at `3/2`, `B=2` at `2`;
+Im-uniformity free from the majorant). Cross-confirms PL/three-lines existence. Exact next lemma
+`TailZetaUpper_threeLines_FE_assembly` (not proved): right edge + FE left edge + three-lines on
+pole-removed `(s−1)·ζ` ⇒ Im-uniform `‖ζ‖≤B` on `0<Re<1/2`, feeding the `MollifiedRoucheLeaf` gap.
+Remaining: instantiate a
 `MollifiedRoucheLeaf K` with the gap `‖ζ·M − 1‖ ≤ 1−δ` on the tail — needs a **uniform ζ upper bound
 on `0<Re<1/2` as `|Im|→∞`** (K growing with `|Re z|`, convexity/Phragmén–Lindelöf + functional
 equation + Stirling). Then feeds the same central cover.
