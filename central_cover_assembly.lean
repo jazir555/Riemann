@@ -6795,3 +6795,1126 @@ Residual (each names exact missing lemma, same wall as 40 central cells):
 1. Edge strips `y` in `[0.49,1/2)` (10 cells `edgeStripCells`, upper plus `conj_of` lower halves): per cell CENTER lower `ε+M*radius≤‖xiShifted center‖` needs `Azeta` lower `‖zeta s_center‖≥Azeta` at NEW re-value `s.re` in `(0,0.01]` (`s=0.005-8.75*I` for `EdgeS00`, true `|zeta|=O(1)`, needs Dirichlet-eta plus remainder `zetaCell_even_remainder_le` instantiation at `σ=0.005` where `r(M)=C*M^{-σ}/σ` decays too slowly for feasible `M`, plus smarter-bound wall); per cell DERIV upper `‖deriv xiShifted‖≤M` needs tight `‖zeta‖≤10` on disc `s`-rect (true `O(1)`, needs FE plus Stirling plus convexity, crude eta M-test gives `≤1012` hence `M=6800640` too large for `ε+M*1.26` fencing); top-touching `y1=0.5` additionally needs `upper_boundary_nonvanishing_from_outer_bound` outer value `ε_top≤‖xiShiftedEntire (x+0.5*I)‖` plus vertical deriv bound (both need same `zeta` upper).
 2. Cutoff lines `Re=±10` (2 thin rects `CutL10`, `CutR10`): per rect CENTER plus DERIV same two `zeta` enclosures on vertical `s`-rects (`Re` in `[0.01,0.99]`, `Im=±10`, true `O(1)`), then `inner_nonvanishing_of_fenced_grid_fine` H-leaf plus `cutoffLines_either` assembly; lines with `0.49≤|Im|<1/2` additionally need strip item 1.
 -/
+/-! ## Edge-strip upper columns S01-S09 (EdgeS00 template replication, 0-sorry)
+
+Grep-first record (verified 2026-09-03, repo + Mathlib, via grep tool):
+* `edgeStripCells|EdgeS00|edgeS00|CutL10|CutR10` -> central_cover_assembly EdgeS00 template + CutL10/R10 + guide 18b.10; no EdgeS01-09 defs (no clash).
+* `conj_of|lower mirror|LowerHalf` -> sorry-free `XiLocalZeroFreeRect.conj_of` / `XiLocalLowerBoundRect.conj_of` + 41 lower-half `RXX_conjZF/LB` defs (each needs packaged upper R plus `0 < y0`, `y1 < 1/2`); strips have no packaged R (zeta wall) so conj_of inapplicable yet, no new transfer invented.
+* `norm_Gamma_le_realGamma|realGamma_le_40_of_mem|polyOf|piOf` -> `DerivCauchyBridge` helpers + `interval_arith` 40-center machine (READ-ONLY, NOT imported); this file mirrors minimal helpers with distinct `edgeS00_*` names, reused below.
+* `XiCentralEdgeStrips10` -> `riemann_hypothesis` capstone def + assembly + guide 18b.10; hypothesis Props only, no proofs.
+* `upper_boundary_nonvanishing_from_outer_bound` -> `rh_certificate_infra` Theorem 3 (generic `f`) + inventory mentions; no strip instantiation (outer-bound needed since `y1=0.5`).
+* `fineGridX` -> this file `fineGridX` 10 cols width `2.5` + `gridFine` 40 cells + covers; `edgeStripCells` reuses same 10 `x`-intervals with `y=(0.49,0.5)`.
+
+Reuse rationale (read EdgeS00 lines, not assumed):
+* All 10 upper strips share `y=(0.49,0.5)` so `dx=1.25`, `dy=0.005`, `radius=sqrt(1.25^2+0.005^2)<1.26` via shared `edgeStrip_radius_bound`.
+* All share `y`-center `0.495` so `sCenter.re=0.005`, `s/2.re=0.0025`: Gamma `400` chain reuses center-independent `edgeS00_realGamma_00025_le` (plus `edgeS00_realGamma_10025_le_one` feeder) + `DerivCauchyBridge.norm_Gamma_le_realGamma` directly.
+* Poly `56` body reuses `10.01*11/2` numeral-for-numeral; only `him_lo/hi` change per column (`|s.im|<=10` still follows by `linarith` since all `x`-intervals lie in `[-10,10]`).
+* Pi `1` lemma `edgeS00_pi_upper_rect` is already generic (`0<=s.re` only): per-column wrappers call it directly.
+* Center `x`-centers per `edgeStripCells`: `-6.75,-4.75,-2.75,-0.75,1.25,3.25,5.25,7.25,8.75` (`y`-center `0.495` shared).
+* Lower-half mirrors via `conj_of` REQUIRE packaged upper rects plus `0<y0`, `y1<1/2`; strips have neither (no H-leaf zeta wall; plus `y1=0.5` fails `y1<1/2`): no transfer invented, lower mirrors stay residual.
+
+Correctness: tail Float certs do not cover strips; global `xiShifted_differentiable` false-as-stated, strip entireness only; no `sorry`/`admit`/`axiom`; fully-verified factors only, zero cells claimed closed.
+-/
+
+namespace CentralCoverAssembly
+
+open CellProofEngine
+
+/-- The edge-strip cell `(-8,-5.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS01 : CellProofEngine.Rect2D :=
+  ⟨-8, -5.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS01_x0 : EdgeS01.x0 = -8 := rfl
+theorem EdgeS01_x1 : EdgeS01.x1 = -5.5 := rfl
+theorem EdgeS01_y0 : EdgeS01.y0 = 0.49 := rfl
+theorem EdgeS01_y1 : EdgeS01.y1 = 0.5 := rfl
+
+theorem EdgeS01_dx_eq : EdgeS01.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS01_x0, EdgeS01_x1]; norm_num
+
+theorem EdgeS01_dy_eq : EdgeS01.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS01_y0, EdgeS01_y1]; norm_num
+
+theorem EdgeS01_radius_eq :
+    EdgeS01.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS01_dx_eq, EdgeS01_dy_eq]
+
+theorem EdgeS01_radius_lt : EdgeS01.radius < 1.26 := by
+  rw [EdgeS01_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS01_strip_lo : -(1 / 2 : ℝ) < EdgeS01.y0 := by rw [EdgeS01_y0]; norm_num
+
+/-- `EdgeS01` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS01_touches_top : ¬ EdgeS01.y1 < (1 / 2 : ℝ) := by rw [EdgeS01_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS01` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[-8,-5.5]`; numerals mirror EdgeS00). -/
+theorem edgeS01_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : -8 ≤ s.im) (him_hi : s.im ≤ -5.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS01_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS01.center = -6.75 + 0.495*I`. -/
+theorem EdgeS01_center_eq :
+    EdgeS01.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS01_x0, EdgeS01_x1, EdgeS01_y0, EdgeS01_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS01_x0, EdgeS01_x1, EdgeS01_y0, EdgeS01_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS01` `s`-plane center `s=1/2+I*z` at `z=EdgeS01.center`. -/
+noncomputable def edgeS01_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS01.center
+
+/-- `Re edgeS01_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS01_sCenter_re : edgeS01_sCenter.re = 0.005 := by
+  unfold edgeS01_sCenter
+  rw [EdgeS01_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS01_sCenter = -6.75`. -/
+theorem edgeS01_sCenter_im : edgeS01_sCenter.im = -6.75 := by
+  unfold edgeS01_sCenter
+  rw [EdgeS01_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS01` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS01_gamma_upper_center :
+    ‖Complex.Gamma (edgeS01_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS01_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS01_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS01_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS01_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(-6,-3.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS02 : CellProofEngine.Rect2D :=
+  ⟨-6, -3.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS02_x0 : EdgeS02.x0 = -6 := rfl
+theorem EdgeS02_x1 : EdgeS02.x1 = -3.5 := rfl
+theorem EdgeS02_y0 : EdgeS02.y0 = 0.49 := rfl
+theorem EdgeS02_y1 : EdgeS02.y1 = 0.5 := rfl
+
+theorem EdgeS02_dx_eq : EdgeS02.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS02_x0, EdgeS02_x1]; norm_num
+
+theorem EdgeS02_dy_eq : EdgeS02.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS02_y0, EdgeS02_y1]; norm_num
+
+theorem EdgeS02_radius_eq :
+    EdgeS02.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS02_dx_eq, EdgeS02_dy_eq]
+
+theorem EdgeS02_radius_lt : EdgeS02.radius < 1.26 := by
+  rw [EdgeS02_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS02_strip_lo : -(1 / 2 : ℝ) < EdgeS02.y0 := by rw [EdgeS02_y0]; norm_num
+
+/-- `EdgeS02` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS02_touches_top : ¬ EdgeS02.y1 < (1 / 2 : ℝ) := by rw [EdgeS02_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS02` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[-6,-3.5]`; numerals mirror EdgeS00). -/
+theorem edgeS02_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : -6 ≤ s.im) (him_hi : s.im ≤ -3.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS02_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS02.center = -4.75 + 0.495*I`. -/
+theorem EdgeS02_center_eq :
+    EdgeS02.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS02_x0, EdgeS02_x1, EdgeS02_y0, EdgeS02_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS02_x0, EdgeS02_x1, EdgeS02_y0, EdgeS02_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS02` `s`-plane center `s=1/2+I*z` at `z=EdgeS02.center`. -/
+noncomputable def edgeS02_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS02.center
+
+/-- `Re edgeS02_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS02_sCenter_re : edgeS02_sCenter.re = 0.005 := by
+  unfold edgeS02_sCenter
+  rw [EdgeS02_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS02_sCenter = -4.75`. -/
+theorem edgeS02_sCenter_im : edgeS02_sCenter.im = -4.75 := by
+  unfold edgeS02_sCenter
+  rw [EdgeS02_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS02` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS02_gamma_upper_center :
+    ‖Complex.Gamma (edgeS02_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS02_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS02_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS02_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS02_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(-4,-1.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS03 : CellProofEngine.Rect2D :=
+  ⟨-4, -1.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS03_x0 : EdgeS03.x0 = -4 := rfl
+theorem EdgeS03_x1 : EdgeS03.x1 = -1.5 := rfl
+theorem EdgeS03_y0 : EdgeS03.y0 = 0.49 := rfl
+theorem EdgeS03_y1 : EdgeS03.y1 = 0.5 := rfl
+
+theorem EdgeS03_dx_eq : EdgeS03.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS03_x0, EdgeS03_x1]; norm_num
+
+theorem EdgeS03_dy_eq : EdgeS03.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS03_y0, EdgeS03_y1]; norm_num
+
+theorem EdgeS03_radius_eq :
+    EdgeS03.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS03_dx_eq, EdgeS03_dy_eq]
+
+theorem EdgeS03_radius_lt : EdgeS03.radius < 1.26 := by
+  rw [EdgeS03_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS03_strip_lo : -(1 / 2 : ℝ) < EdgeS03.y0 := by rw [EdgeS03_y0]; norm_num
+
+/-- `EdgeS03` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS03_touches_top : ¬ EdgeS03.y1 < (1 / 2 : ℝ) := by rw [EdgeS03_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS03` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[-4,-1.5]`; numerals mirror EdgeS00). -/
+theorem edgeS03_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : -4 ≤ s.im) (him_hi : s.im ≤ -1.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS03_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS03.center = -2.75 + 0.495*I`. -/
+theorem EdgeS03_center_eq :
+    EdgeS03.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS03_x0, EdgeS03_x1, EdgeS03_y0, EdgeS03_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS03_x0, EdgeS03_x1, EdgeS03_y0, EdgeS03_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS03` `s`-plane center `s=1/2+I*z` at `z=EdgeS03.center`. -/
+noncomputable def edgeS03_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS03.center
+
+/-- `Re edgeS03_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS03_sCenter_re : edgeS03_sCenter.re = 0.005 := by
+  unfold edgeS03_sCenter
+  rw [EdgeS03_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS03_sCenter = -2.75`. -/
+theorem edgeS03_sCenter_im : edgeS03_sCenter.im = -2.75 := by
+  unfold edgeS03_sCenter
+  rw [EdgeS03_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS03` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS03_gamma_upper_center :
+    ‖Complex.Gamma (edgeS03_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS03_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS03_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS03_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS03_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(-2,0.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS04 : CellProofEngine.Rect2D :=
+  ⟨-2, 0.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS04_x0 : EdgeS04.x0 = -2 := rfl
+theorem EdgeS04_x1 : EdgeS04.x1 = 0.5 := rfl
+theorem EdgeS04_y0 : EdgeS04.y0 = 0.49 := rfl
+theorem EdgeS04_y1 : EdgeS04.y1 = 0.5 := rfl
+
+theorem EdgeS04_dx_eq : EdgeS04.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS04_x0, EdgeS04_x1]; norm_num
+
+theorem EdgeS04_dy_eq : EdgeS04.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS04_y0, EdgeS04_y1]; norm_num
+
+theorem EdgeS04_radius_eq :
+    EdgeS04.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS04_dx_eq, EdgeS04_dy_eq]
+
+theorem EdgeS04_radius_lt : EdgeS04.radius < 1.26 := by
+  rw [EdgeS04_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS04_strip_lo : -(1 / 2 : ℝ) < EdgeS04.y0 := by rw [EdgeS04_y0]; norm_num
+
+/-- `EdgeS04` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS04_touches_top : ¬ EdgeS04.y1 < (1 / 2 : ℝ) := by rw [EdgeS04_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS04` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[-2,0.5]`; numerals mirror EdgeS00). -/
+theorem edgeS04_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : -2 ≤ s.im) (him_hi : s.im ≤ 0.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS04_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS04.center = -0.75 + 0.495*I`. -/
+theorem EdgeS04_center_eq :
+    EdgeS04.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS04_x0, EdgeS04_x1, EdgeS04_y0, EdgeS04_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS04_x0, EdgeS04_x1, EdgeS04_y0, EdgeS04_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS04` `s`-plane center `s=1/2+I*z` at `z=EdgeS04.center`. -/
+noncomputable def edgeS04_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS04.center
+
+/-- `Re edgeS04_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS04_sCenter_re : edgeS04_sCenter.re = 0.005 := by
+  unfold edgeS04_sCenter
+  rw [EdgeS04_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS04_sCenter = -0.75`. -/
+theorem edgeS04_sCenter_im : edgeS04_sCenter.im = -0.75 := by
+  unfold edgeS04_sCenter
+  rw [EdgeS04_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS04` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS04_gamma_upper_center :
+    ‖Complex.Gamma (edgeS04_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS04_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS04_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS04_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS04_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(0,2.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS05 : CellProofEngine.Rect2D :=
+  ⟨0, 2.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS05_x0 : EdgeS05.x0 = 0 := rfl
+theorem EdgeS05_x1 : EdgeS05.x1 = 2.5 := rfl
+theorem EdgeS05_y0 : EdgeS05.y0 = 0.49 := rfl
+theorem EdgeS05_y1 : EdgeS05.y1 = 0.5 := rfl
+
+theorem EdgeS05_dx_eq : EdgeS05.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS05_x0, EdgeS05_x1]; norm_num
+
+theorem EdgeS05_dy_eq : EdgeS05.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS05_y0, EdgeS05_y1]; norm_num
+
+theorem EdgeS05_radius_eq :
+    EdgeS05.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS05_dx_eq, EdgeS05_dy_eq]
+
+theorem EdgeS05_radius_lt : EdgeS05.radius < 1.26 := by
+  rw [EdgeS05_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS05_strip_lo : -(1 / 2 : ℝ) < EdgeS05.y0 := by rw [EdgeS05_y0]; norm_num
+
+/-- `EdgeS05` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS05_touches_top : ¬ EdgeS05.y1 < (1 / 2 : ℝ) := by rw [EdgeS05_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS05` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[0,2.5]`; numerals mirror EdgeS00). -/
+theorem edgeS05_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : 0 ≤ s.im) (him_hi : s.im ≤ 2.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS05_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS05.center = 1.25 + 0.495*I`. -/
+theorem EdgeS05_center_eq :
+    EdgeS05.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS05_x0, EdgeS05_x1, EdgeS05_y0, EdgeS05_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS05_x0, EdgeS05_x1, EdgeS05_y0, EdgeS05_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS05` `s`-plane center `s=1/2+I*z` at `z=EdgeS05.center`. -/
+noncomputable def edgeS05_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS05.center
+
+/-- `Re edgeS05_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS05_sCenter_re : edgeS05_sCenter.re = 0.005 := by
+  unfold edgeS05_sCenter
+  rw [EdgeS05_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS05_sCenter = 1.25`. -/
+theorem edgeS05_sCenter_im : edgeS05_sCenter.im = 1.25 := by
+  unfold edgeS05_sCenter
+  rw [EdgeS05_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS05` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS05_gamma_upper_center :
+    ‖Complex.Gamma (edgeS05_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS05_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS05_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS05_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS05_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(2,4.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS06 : CellProofEngine.Rect2D :=
+  ⟨2, 4.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS06_x0 : EdgeS06.x0 = 2 := rfl
+theorem EdgeS06_x1 : EdgeS06.x1 = 4.5 := rfl
+theorem EdgeS06_y0 : EdgeS06.y0 = 0.49 := rfl
+theorem EdgeS06_y1 : EdgeS06.y1 = 0.5 := rfl
+
+theorem EdgeS06_dx_eq : EdgeS06.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS06_x0, EdgeS06_x1]; norm_num
+
+theorem EdgeS06_dy_eq : EdgeS06.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS06_y0, EdgeS06_y1]; norm_num
+
+theorem EdgeS06_radius_eq :
+    EdgeS06.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS06_dx_eq, EdgeS06_dy_eq]
+
+theorem EdgeS06_radius_lt : EdgeS06.radius < 1.26 := by
+  rw [EdgeS06_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS06_strip_lo : -(1 / 2 : ℝ) < EdgeS06.y0 := by rw [EdgeS06_y0]; norm_num
+
+/-- `EdgeS06` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS06_touches_top : ¬ EdgeS06.y1 < (1 / 2 : ℝ) := by rw [EdgeS06_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS06` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[2,4.5]`; numerals mirror EdgeS00). -/
+theorem edgeS06_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : 2 ≤ s.im) (him_hi : s.im ≤ 4.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS06_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS06.center = 3.25 + 0.495*I`. -/
+theorem EdgeS06_center_eq :
+    EdgeS06.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS06_x0, EdgeS06_x1, EdgeS06_y0, EdgeS06_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS06_x0, EdgeS06_x1, EdgeS06_y0, EdgeS06_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS06` `s`-plane center `s=1/2+I*z` at `z=EdgeS06.center`. -/
+noncomputable def edgeS06_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS06.center
+
+/-- `Re edgeS06_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS06_sCenter_re : edgeS06_sCenter.re = 0.005 := by
+  unfold edgeS06_sCenter
+  rw [EdgeS06_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS06_sCenter = 3.25`. -/
+theorem edgeS06_sCenter_im : edgeS06_sCenter.im = 3.25 := by
+  unfold edgeS06_sCenter
+  rw [EdgeS06_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS06` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS06_gamma_upper_center :
+    ‖Complex.Gamma (edgeS06_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS06_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS06_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS06_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS06_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(4,6.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS07 : CellProofEngine.Rect2D :=
+  ⟨4, 6.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS07_x0 : EdgeS07.x0 = 4 := rfl
+theorem EdgeS07_x1 : EdgeS07.x1 = 6.5 := rfl
+theorem EdgeS07_y0 : EdgeS07.y0 = 0.49 := rfl
+theorem EdgeS07_y1 : EdgeS07.y1 = 0.5 := rfl
+
+theorem EdgeS07_dx_eq : EdgeS07.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS07_x0, EdgeS07_x1]; norm_num
+
+theorem EdgeS07_dy_eq : EdgeS07.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS07_y0, EdgeS07_y1]; norm_num
+
+theorem EdgeS07_radius_eq :
+    EdgeS07.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS07_dx_eq, EdgeS07_dy_eq]
+
+theorem EdgeS07_radius_lt : EdgeS07.radius < 1.26 := by
+  rw [EdgeS07_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS07_strip_lo : -(1 / 2 : ℝ) < EdgeS07.y0 := by rw [EdgeS07_y0]; norm_num
+
+/-- `EdgeS07` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS07_touches_top : ¬ EdgeS07.y1 < (1 / 2 : ℝ) := by rw [EdgeS07_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS07` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[4,6.5]`; numerals mirror EdgeS00). -/
+theorem edgeS07_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : 4 ≤ s.im) (him_hi : s.im ≤ 6.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS07_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS07.center = 5.25 + 0.495*I`. -/
+theorem EdgeS07_center_eq :
+    EdgeS07.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS07_x0, EdgeS07_x1, EdgeS07_y0, EdgeS07_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS07_x0, EdgeS07_x1, EdgeS07_y0, EdgeS07_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS07` `s`-plane center `s=1/2+I*z` at `z=EdgeS07.center`. -/
+noncomputable def edgeS07_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS07.center
+
+/-- `Re edgeS07_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS07_sCenter_re : edgeS07_sCenter.re = 0.005 := by
+  unfold edgeS07_sCenter
+  rw [EdgeS07_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS07_sCenter = 5.25`. -/
+theorem edgeS07_sCenter_im : edgeS07_sCenter.im = 5.25 := by
+  unfold edgeS07_sCenter
+  rw [EdgeS07_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS07` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS07_gamma_upper_center :
+    ‖Complex.Gamma (edgeS07_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS07_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS07_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS07_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS07_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(6,8.5)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS08 : CellProofEngine.Rect2D :=
+  ⟨6, 8.5, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS08_x0 : EdgeS08.x0 = 6 := rfl
+theorem EdgeS08_x1 : EdgeS08.x1 = 8.5 := rfl
+theorem EdgeS08_y0 : EdgeS08.y0 = 0.49 := rfl
+theorem EdgeS08_y1 : EdgeS08.y1 = 0.5 := rfl
+
+theorem EdgeS08_dx_eq : EdgeS08.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS08_x0, EdgeS08_x1]; norm_num
+
+theorem EdgeS08_dy_eq : EdgeS08.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS08_y0, EdgeS08_y1]; norm_num
+
+theorem EdgeS08_radius_eq :
+    EdgeS08.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS08_dx_eq, EdgeS08_dy_eq]
+
+theorem EdgeS08_radius_lt : EdgeS08.radius < 1.26 := by
+  rw [EdgeS08_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS08_strip_lo : -(1 / 2 : ℝ) < EdgeS08.y0 := by rw [EdgeS08_y0]; norm_num
+
+/-- `EdgeS08` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS08_touches_top : ¬ EdgeS08.y1 < (1 / 2 : ℝ) := by rw [EdgeS08_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS08` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[6,8.5]`; numerals mirror EdgeS00). -/
+theorem edgeS08_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : 6 ≤ s.im) (him_hi : s.im ≤ 8.5) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS08_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS08.center = 7.25 + 0.495*I`. -/
+theorem EdgeS08_center_eq :
+    EdgeS08.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS08_x0, EdgeS08_x1, EdgeS08_y0, EdgeS08_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS08_x0, EdgeS08_x1, EdgeS08_y0, EdgeS08_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS08` `s`-plane center `s=1/2+I*z` at `z=EdgeS08.center`. -/
+noncomputable def edgeS08_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS08.center
+
+/-- `Re edgeS08_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS08_sCenter_re : edgeS08_sCenter.re = 0.005 := by
+  unfold edgeS08_sCenter
+  rw [EdgeS08_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS08_sCenter = 7.25`. -/
+theorem edgeS08_sCenter_im : edgeS08_sCenter.im = 7.25 := by
+  unfold edgeS08_sCenter
+  rw [EdgeS08_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS08` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS08_gamma_upper_center :
+    ‖Complex.Gamma (edgeS08_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS08_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS08_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS08_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS08_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+/-- The edge-strip cell `(7.5,10)` times `(0.49,0.5)` (EdgeS00 template replica). -/
+def EdgeS09 : CellProofEngine.Rect2D :=
+  ⟨7.5, 10, 0.49, 0.5, by norm_num, by norm_num⟩
+
+theorem EdgeS09_x0 : EdgeS09.x0 = 7.5 := rfl
+theorem EdgeS09_x1 : EdgeS09.x1 = 10 := rfl
+theorem EdgeS09_y0 : EdgeS09.y0 = 0.49 := rfl
+theorem EdgeS09_y1 : EdgeS09.y1 = 0.5 := rfl
+
+theorem EdgeS09_dx_eq : EdgeS09.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [EdgeS09_x0, EdgeS09_x1]; norm_num
+
+theorem EdgeS09_dy_eq : EdgeS09.dy = 0.005 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [EdgeS09_y0, EdgeS09_y1]; norm_num
+
+theorem EdgeS09_radius_eq :
+    EdgeS09.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.005 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [EdgeS09_dx_eq, EdgeS09_dy_eq]
+
+theorem EdgeS09_radius_lt : EdgeS09.radius < 1.26 := by
+  rw [EdgeS09_radius_eq]; exact edgeStrip_radius_bound
+
+theorem EdgeS09_strip_lo : -(1 / 2 : ℝ) < EdgeS09.y0 := by rw [EdgeS09_y0]; norm_num
+
+/-- `EdgeS09` touches the strip boundary (`y1=0.5`), so inner strip fencing does NOT apply; outer-bound tool needed (same as EdgeS00). -/
+theorem EdgeS09_touches_top : ¬ EdgeS09.y1 < (1 / 2 : ℝ) := by rw [EdgeS09_y1]; norm_num
+
+/-- Hypothesis-free poly upper `56` on the `EdgeS09` rect `s`-rect (`Re` in `[0,0.01]`, `Im` in `[7.5,10]`; numerals mirror EdgeS00). -/
+theorem edgeS09_poly_upper_rect {s : ℂ}
+    (hre_lo : 0 ≤ s.re) (hre_hi : s.re ≤ 0.01)
+    (him_lo : 7.5 ≤ s.im) (him_hi : s.im ≤ 10) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 56 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 10.01 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.01 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 10 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 11 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 1 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 10 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 10.01 * 11 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 10.01 * 11 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (10.01 : ℝ) * 11 / 2 ≤ 56 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `1` for `0≤s.re` (EdgeS00 generic reused; per-column wrapper). -/
+theorem edgeS09_pi_upper_rect {s : ℂ} (hre_lo : 0 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  edgeS00_pi_upper_rect hre_lo
+
+/-- `EdgeS09.center = 8.75 + 0.495*I`. -/
+theorem EdgeS09_center_eq :
+    EdgeS09.center =
+      (((8.75 : ℝ))) + Complex.I * ((((0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS09_x0, EdgeS09_x1, EdgeS09_y0, EdgeS09_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [EdgeS09_x0, EdgeS09_x1, EdgeS09_y0, EdgeS09_y1]
+    simp
+    norm_num
+
+/-- The `EdgeS09` `s`-plane center `s=1/2+I*z` at `z=EdgeS09.center`. -/
+noncomputable def edgeS09_sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * EdgeS09.center
+
+/-- `Re edgeS09_sCenter = 0.005` (`1/2-0.495`, same re-value as EdgeS00). -/
+theorem edgeS09_sCenter_re : edgeS09_sCenter.re = 0.005 := by
+  unfold edgeS09_sCenter
+  rw [EdgeS09_center_eq]
+  simp
+  norm_num
+
+/-- `Im edgeS09_sCenter = 8.75`. -/
+theorem edgeS09_sCenter_im : edgeS09_sCenter.im = 8.75 := by
+  unfold edgeS09_sCenter
+  rw [EdgeS09_center_eq]
+  simp
+
+/-- Hypothesis-free Gamma upper `400` at the `EdgeS09` center (`s/2` has `Re=0.0025`; reuses center-independent `edgeS00_realGamma_00025_le`). -/
+theorem edgeS09_gamma_upper_center :
+    ‖Complex.Gamma (edgeS09_sCenter / 2)‖ ≤ 400 := by
+  have h2re : (edgeS09_sCenter / 2).re = 0.0025 := by
+    rw [Complex.div_ofNat_re, edgeS09_sCenter_re]
+    norm_num
+  have hzpos : (0 : ℝ) < (edgeS09_sCenter / 2).re := by
+    rw [h2re]
+    norm_num
+  have hle := DerivCauchyBridge.norm_Gamma_le_realGamma hzpos
+  have hreal : Real.Gamma ((edgeS09_sCenter / 2).re) ≤ 400 := by
+    rw [h2re]
+    exact edgeS00_realGamma_00025_le
+  linarith
+
+#print axioms EdgeS01_radius_lt
+#print axioms edgeS01_poly_upper_rect
+#print axioms edgeS01_pi_upper_rect
+#print axioms edgeS01_gamma_upper_center
+#print axioms EdgeS02_radius_lt
+#print axioms edgeS02_poly_upper_rect
+#print axioms edgeS02_pi_upper_rect
+#print axioms edgeS02_gamma_upper_center
+#print axioms EdgeS03_radius_lt
+#print axioms edgeS03_poly_upper_rect
+#print axioms edgeS03_pi_upper_rect
+#print axioms edgeS03_gamma_upper_center
+#print axioms EdgeS04_radius_lt
+#print axioms edgeS04_poly_upper_rect
+#print axioms edgeS04_pi_upper_rect
+#print axioms edgeS04_gamma_upper_center
+#print axioms EdgeS05_radius_lt
+#print axioms edgeS05_poly_upper_rect
+#print axioms edgeS05_pi_upper_rect
+#print axioms edgeS05_gamma_upper_center
+#print axioms EdgeS06_radius_lt
+#print axioms edgeS06_poly_upper_rect
+#print axioms edgeS06_pi_upper_rect
+#print axioms edgeS06_gamma_upper_center
+#print axioms EdgeS07_radius_lt
+#print axioms edgeS07_poly_upper_rect
+#print axioms edgeS07_pi_upper_rect
+#print axioms edgeS07_gamma_upper_center
+#print axioms EdgeS08_radius_lt
+#print axioms edgeS08_poly_upper_rect
+#print axioms edgeS08_pi_upper_rect
+#print axioms edgeS08_gamma_upper_center
+#print axioms EdgeS09_radius_lt
+#print axioms edgeS09_poly_upper_rect
+#print axioms edgeS09_pi_upper_rect
+#print axioms edgeS09_gamma_upper_center
+
+end CentralCoverAssembly
+
+/-! ## Edge-strip S01-S09 packaged + residual inventory (honest, no `sorry`)
+
+Packaged this append (unconditional end-to-end, hypothesis-free factors, green below):
+* 9 upper strip columns `EdgeS01`-`EdgeS09` geometry each (`x0/x1/y0/y1` by `rfl`, `dx=1.25`, `dy=0.005`, `radius_eq` + `radius_lt<1.26` via shared `edgeStrip_radius_bound`, `strip_lo`, `touches_top` showing `y1=0.5` so inner fencing inapplicable).
+* Per column center (`EdgeSXX_center_eq`: `x_c + 0.495*I` with `x_c` in `-6.75,-4.75,-2.75,-0.75,1.25,3.25,5.25,7.25,8.75`) + `sCenter` (`re=0.005` shared re-value, `im=x_c`).
+* Per column `edgeSXX_poly_upper_rect` (`<=56`, same `10.01*11/2` numerals, only `Im` hypotheses per `edgeStripCells` interval) + `edgeSXX_pi_upper_rect` (`<=1`, wrapper over generic `edgeS00_pi_upper_rect`) + `edgeSXX_gamma_upper_center` (`<=400`, reuses center-independent `edgeS00_realGamma_00025_le` + `DerivCauchyBridge.norm_Gamma_le_realGamma`).
+* Cell IDs packaged: `EdgeS01 (-8,-5.5)`, `EdgeS02 (-6,-3.5)`, `EdgeS03 (-4,-1.5)`, `EdgeS04 (-2,0.5)`, `EdgeS05 (0,2.5)`, `EdgeS06 (2,4.5)`, `EdgeS07 (4,6.5)`, `EdgeS08 (6,8.5)`, `EdgeS09 (7.5,10)`, all at `y=(0.49,0.5)`; with prior `EdgeS00 (-10,-7.5)` all 10 upper columns now have packaged factors.
+
+Closed cells this append (unconditional end-to-end, no hypotheses): NONE (0). Full cell closure (H-leaf) stays blocked by the zeta wall, NOT claimed.
+
+Residual (each names exact missing lemma):
+1. Upper strips `EdgeS01`-`EdgeS09` (9 cells): per cell CENTER lower `eps+M*radius<=||xiShifted center||` needs `Azeta` lower `||zeta s_center||>=Azeta` at shared re-value `s.re=0.005` (`s=0.005+x_c*I`, true `|zeta|=O(1)`, needs Dirichlet-eta plus `zetaCell_even_remainder_le` at `sigma=0.005` where `r(M)=C*M^-sigma/sigma` decays too slowly plus smarter-bound wall); per cell DERIV upper `||deriv xiShifted||<=M` needs tight `||zeta||<=10` on disc `s`-rect (true `O(1)`, needs FE+Stirling+convexity; crude eta M-test gives `<=1012` hence `M=6800640` too large for `eps+M*1.26` fencing); top-touching `y1=0.5` additionally needs `upper_boundary_nonvanishing_from_outer_bound` outer value plus vertical deriv bound (same `zeta` upper). Same wall as `EdgeS00` + 40 central cells.
+2. Lower-half mirrors (10 cells `y` in `(-0.5,-0.49)`): NO `conj_of` invented. Existing `XiLocalZeroFreeRect.conj_of` / `XiLocalLowerBoundRect.conj_of` pattern (read from 40-cell `RXX_conjZF/LB` defs) requires a packaged upper rect plus `0<y0`, `y1<1/2` side conditions; upper strips have no packaged rect (item 1 zeta wall) and `y1=0.5` fails `y1<1/2`, so transfer is blocked pending item 1. Lower `s`-centers would also carry a DIFFERENT re-value (`0.995`) needing a new Gamma chain, not the shared `0.005` reuse.
+3. Cutoff lines `Re=+-10` (`CutL10`/`CutR10` already packaged geometry): per rect CENTER plus DERIV same two `zeta` enclosures on vertical `s`-rects (`Re` in `[0.01,0.99]`, `Im=+-10`), then H-leaf plus `cutoffLines_either` assembly; lines with `0.49<=|Im|<1/2` additionally need items 1-2.
+-/
