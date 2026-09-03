@@ -1288,9 +1288,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `zetaCell_even_remainder_le`, `r(M) = C·M^{−σ}/σ`, instantiated at the R00 corner
   (`C=10`, `σ=0.395`) with power-of-two-minimal `N = 4194304` giving `r ≈ 0.081 ≤ 0.1`
   (`zetaCellS0_tail_2097152_le`; `2^20` gives `r≈0.106>0.1`, so `2^21` minimal among `2^k`).
-  Still missing: (a) `∑' pairs(s0) = etaHurwitz(s0)` at cell centers — existing pair-limit lemmas cover only
-  `Re>1` / `s=1/2`; needs `G(s)=∑' pairs` analytic on `{Re>0}` + identity theorem (note
-  `etaHurwitz_eq_etaRHS_compl` already gives `etaHurwitz=(1−2^{1−s})ζ(s)` on `{1}ᶜ`); (b) any `Azeta>0` —
+  Still missing: (a) is now CLOSED for all centers (`etaPairLim_eq_etaHurwitz_cellCenter`:
+  pair-tsum analytic on `{Re>0}` via E's majorant + `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`
+  against agreement on `{Re>1}`; covers `0.395/0.3/0.2/0.105`). Downstream per-cell `Azeta` now needs only:
+  `etaHurwitz=etaRHS` specialization (already `etaHurwitz_eq_etaRHS_compl`), `1−2^{1−s}≠0` + division to
+  `riemannZeta s0`, and numeric `S_N` + `zetaCell_even_remainder_le` instantiation. (b) any `Azeta>0` —
   **strategic finding:** `N=4194304` makes the explicit-partial-sum lower bound infeasible (4M cpow terms),
   so the `S_N`-direct route to `Azeta` is computationally dead at the R00 corner; a smarter zeta lower
   bound is needed (functional equation / reflection to a large-`ζ` region, not longer partial sums).
