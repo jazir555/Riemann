@@ -4363,3 +4363,226 @@ theorem zetaUpper_riemannZeta_norm_le_tsum {s : ℂ} (hs : 1 < s.re) :
 #print axioms zetaUpper_norm_term_eq
 #print axioms zetaUpper_norm_summable
 #print axioms zetaUpper_riemannZeta_norm_le_tsum
+
+/-!
+## Reflected-eta pilot at R00 (s1 = 1 - s0, Re = 0.605).
+
+Grep-first record (searches run 2026-09-03, repo + Mathlib, documented per brief):
+* `zetaCellS0`, `zetaCellS0_re/im/pos/norm_le`, `two_cpow_norm`, `zetaCell_even_remainder_le`,
+  `zeta_of_etaPairLim_of_re_ne`, `etaFactor_ne_zero_of_re_ne`, `zetaFEFactor`,
+  `zetaFE_factor_upper_S0/lower_S0`, `etaDirichlet_S0_two_norm_ge`, `zetaCellS0_rpow_0395_ge/0605_le`
+  -- all in this file (read-only reuse, no modification); no `zetaRefl*`, `S1refl*`, `Azeta1` exist
+  (`Select-String zetaRefl|S1refl|Azeta1` -- 0 hits before writing).
+* Mathlib FE cos-form `riemannZeta_one_sub` (`Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178-180`):
+  `riemannZeta (1 - s) = 2*(2*pi)^(-s)*Gamma s*cos(pi*s/2)*riemannZeta s`
+  with `hs : forall n : Nat, s != -n` and `s != 1`; `zetaFEFactor` in this file is exactly this `F`.
+  Direction is `zeta(1-s) = F(s)*zeta(s)`, so `zeta(s0) = zeta(1-s0)/F(s0)` needs `F` UPPER (6e7),
+  not LOWER -- prompt orientation corrected below (any Azeta>0 still closes pilot).
+* `Complex.sub_re/sub_im/one_re/one_im` (`Mathlib/Data/Complex/Basic.lean:147/151/639/643`);
+  `Complex.neg_im/natCast_im` (`:188/:356`); `le_of_pow_le_pow_left0`, `inv_le_inv0`,
+  `Real.rpow_le_rpow_of_exponent_le`, `Real.one_rpow`, `norm_inv`, `norm_add_le`
+  -- all already used in this file (same patterns mirrored).
+* Import graph: this file `import Mathlib` only (no new imports below, avoids cycles).
+
+What is proved (all unconditional, no sorry/admit/axiom):
+* (1) SHORT-SUM LOWER at s1 = 1 - s0, M = 1 (N = 2): `zetaRefl_re/im/pos/norm_le`,
+  `zetaRefl_rpow_0605_ge` (3/2 <= 2^0.605 via (3/2)^5 <= 2^3 + 3/5 <= 0.605),
+  `etaDirichlet_S1refl_*` closed form + `norm_..._second_le` (<= 2/3) +
+  `etaDirichlet_S1refl_two_norm_ge` (1/3 <= ||S2(s1)||, reverse-triangle, mirrors S0 1/5).
+  True ||S2|| ~ 0.387 (1 - 0.657*exp phase), so 1/3 is honest with small margin.
+* TAIL at s1: `zetaRefl_tail_general` (C = 10, sigma = 0.605 via `zetaCell_even_remainder_le`),
+  `zetaRefl_tail_1_le` (||G - S2|| <= 17, since 10/0.605 ~ 16.53).
+  Hence slow - rtail = 1/3 - 17 < 0 -- no positive Azeta1 at M = 1 (wall quantified in-file).
+* (2)/(3) INFRASTRUCTURE (unconditional, for future larger-M or smarter-bound work):
+  `etaFactor_ne_zero_S1refl` + `zeta_of_etaPairLim_S1refl` (division at s1 via existing
+  `zeta_of_etaPairLim_of_re_ne`, since s1.re = 0.605 != 1 -- generalizes cellCenter bridge which only
+  covers {0.395,0.3,0.2,0.105}), `zetaCellS0_ne_neg_nat/ne_one` + `zetaFE_refl_eq_S0`
+  (`zeta(1-s0) = F(s0)*zeta(s0)` via `riemannZeta_one_sub`).
+
+Honest residual (numbers):
+* M = 1, c_S = 1/3, r(1) = 10/0.605 ~ 16.53 <= 17, net negative -- Azeta1/Azeta NOT closed.
+* Threshold for net positive with current tail: r(M) = 10*M^-0.605/0.605 < 1/3 needs M >= 635
+  (N >= 1270 cpow terms); for c_S = 1/4 needs M >= 1021 (N >= 2042). Both infeasible for explicit
+  Finset.range norm_num (each term is a complex cpow). Smarter bound (not longer sums) needed.
+-/
+
+/-- Reflected point real part: `(1 - s0).re = 0.605`. -/
+theorem zetaRefl_re : (1 - zetaCellS0).re = (0.605 : ℝ) := by
+  rw [Complex.sub_re, Complex.one_re, zetaCellS0_re]
+  norm_num
+
+/-- Reflected point imaginary part: `(1 - s0).im = 8.75`. -/
+theorem zetaRefl_im : (1 - zetaCellS0).im = (8.75 : ℝ) := by
+  rw [Complex.sub_im, Complex.one_im, zetaCellS0_im]
+  norm_num
+
+/-- Reflected point has positive real part. -/
+theorem zetaRefl_pos : 0 < (1 - zetaCellS0).re := by
+  rw [zetaRefl_re]
+  norm_num
+
+/-- Reflected point norm bound `||1 - s0|| <= 10` (mirrors `zetaCellS0_norm_le`). -/
+theorem zetaRefl_norm_le : ‖1 - zetaCellS0‖ ≤ 10 := by
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  have him : (1 - zetaCellS0).im = (8.75 : ℝ) := zetaRefl_im
+  have hsq : ‖1 - zetaCellS0‖ ^ 2 ≤ (10 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+/-- Numeral rpow lower `3/2 <= 2^0.605` (cleared: `(3/2)^5 <= 2^3`, since `3/5 <= 0.605`). -/
+theorem zetaRefl_rpow_0605_ge : (3 / 2 : ℝ) ≤ (2 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((3 / 2 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((2 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((2 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (2 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 2 3
+    rw [e]
+    norm_num
+  have hstep : (3 / 2 : ℝ) ≤ (2 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (3 / 2 : ℝ) ≤ (2 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (2 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- `etaDirichletTerm` at `1 - s0`, `k = 0` equals `1`. -/
+theorem etaDirichletTerm_S1refl_zero :
+    etaDirichletTerm (1 - zetaCellS0) 0 = 1 := by
+  have h01 : (0 + 1 : ℕ) = 1 := rfl
+  have hcast : ((((0 + 1 : ℕ)) : ℂ)) = 1 := by rw [h01, Nat.cast_one]
+  simp only [etaDirichletTerm, pow_zero, hcast, Complex.one_cpow, div_one]
+
+/-- `etaDirichletTerm` at `1 - s0`, `k = 1` equals `-(2^s1)⁻¹`. -/
+theorem etaDirichletTerm_S1refl_one :
+    etaDirichletTerm (1 - zetaCellS0) 1 = -((((2 : ℕ) : ℂ) ^ (1 - zetaCellS0))⁻¹) := by
+  unfold etaDirichletTerm
+  rw [pow_one]
+  rw [show (((1 + 1 : ℕ) : ℂ)) = ((((2 : ℕ)) : ℂ)) by norm_num]
+  rw [neg_div, one_div]
+
+/-- Two-term partial sum `S2` at `1 - s0` in closed form. -/
+theorem etaDirichlet_S1refl_two_eq :
+    (∑ k ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) k)
+      = 1 - ((((2 : ℕ) : ℂ) ^ (1 - zetaCellS0))⁻¹) := by
+  have hsum : (∑ k ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) k)
+      = etaDirichletTerm (1 - zetaCellS0) 0 + etaDirichletTerm (1 - zetaCellS0) 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum, etaDirichletTerm_S1refl_zero, etaDirichletTerm_S1refl_one]
+  ring
+
+/-- Modulus of the second term at `1 - s0`: `‖(2^s1)⁻¹‖ = 2^-0.605 <= 2/3`. -/
+theorem norm_etaDirichlet_S1refl_second_le :
+    ‖((((2 : ℕ) : ℂ) ^ (1 - zetaCellS0))⁻¹)‖ ≤ 2 / 3 := by
+  have h2eq : ((((2 : ℕ)) : ℂ)) = (2 : ℂ) := by norm_cast
+  rw [h2eq, norm_inv, two_cpow_norm, zetaRefl_re]
+  have hge := zetaRefl_rpow_0605_ge
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  rw [show (2 / 3 : ℝ) = ((3 / 2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Two-term lower bound `1/3 <= ||S2(1-s0)||` (reverse triangle; mirrors `etaDirichlet_S0_two_norm_ge`). -/
+theorem etaDirichlet_S1refl_two_norm_ge :
+    (1 / 3 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  rw [etaDirichlet_S1refl_two_eq]
+  have hX := norm_etaDirichlet_S1refl_second_le
+  have h := norm_add_le
+    (1 - ((((2 : ℕ) : ℂ) ^ (1 - zetaCellS0))⁻¹))
+    ((((2 : ℕ) : ℂ) ^ (1 - zetaCellS0))⁻¹)
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  linarith
+
+/-- Tail general at `1 - s0`: `||G - S_{2M}|| <= 10*(M^-0.605/0.605)` (via `zetaCell_even_remainder_le`). -/
+theorem zetaRefl_tail_general (M : ℕ) (hM : 1 ≤ M) :
+    ‖(∑' m, etaPairTerm (1 - zetaCellS0) m) -
+      (∑ k ∈ Finset.range (2 * M), etaDirichletTerm (1 - zetaCellS0) k)‖ ≤
+      10 * (((((M : ℕ)) : ℝ) ^ (-0.605 : ℝ)) / (0.605 : ℝ)) := by
+  have hs : 0 < (1 - zetaCellS0).re := zetaRefl_pos
+  have hC : ‖1 - zetaCellS0‖ ≤ 10 := zetaRefl_norm_le
+  have h := zetaCell_even_remainder_le hs hC (by norm_num) M hM
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  rw [hre] at h
+  exact h
+
+/-- Honest small-`N` tail at `1 - s0`: `||G - S2|| <= 17` (`M = 1`, `10/0.605 ~ 16.53`). -/
+theorem zetaRefl_tail_1_le :
+    ‖(∑' m, etaPairTerm (1 - zetaCellS0) m)
+      - (∑ k ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) k)‖ ≤ 17 := by
+  have hgen := zetaRefl_tail_general 1 (by norm_num)
+  have h21 : 2 * 1 = 2 := by norm_num
+  rw [h21] at hgen
+  have h1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_cast
+  rw [h1, Real.one_rpow] at hgen
+  have hle : (10 : ℝ) * (1 / (0.605 : ℝ)) ≤ 17 := by norm_num
+  linarith
+
+/-- Factor nonvanishing at `1 - s0` (via `Re = 0.605 != 1`; generalizes `etaFactor_ne_zero_cellCenter`). -/
+theorem etaFactor_ne_zero_S1refl :
+    (1 - (2 : ℂ) ^ ((1 : ℂ) - (1 - zetaCellS0))) ≠ 0 := by
+  apply etaFactor_ne_zero_of_re_ne
+  rw [zetaRefl_re]
+  norm_num
+
+/-- Division at `1 - s0` through YOUR bridge (covers `Re = 0.605`, outside cellCenter set). -/
+theorem zeta_of_etaPairLim_S1refl :
+    riemannZeta (1 - zetaCellS0) =
+      (∑' m, etaPairTerm (1 - zetaCellS0) m) / (1 - (2 : ℂ) ^ ((1 : ℂ) - (1 - zetaCellS0))) := by
+  have hs : 0 < (1 - zetaCellS0).re := zetaRefl_pos
+  have hre : (1 - zetaCellS0).re ≠ 1 := by
+    rw [zetaRefl_re]
+    norm_num
+  exact zeta_of_etaPairLim_of_re_ne hs hre
+
+/-- `zetaCellS0` avoids all `(-n : ℂ)` (Im = -8.75 != 0), for Mathlib FE side condition. -/
+theorem zetaCellS0_ne_neg_nat : ∀ n : ℕ, zetaCellS0 ≠ -((n : ℂ)) := by
+  intro n h
+  have him := congrArg Complex.im h
+  have hrhs : (-((n : ℂ))).im = 0 := by
+    rw [Complex.neg_im, Complex.natCast_im, neg_zero]
+  rw [zetaCellS0_im, hrhs] at him
+  norm_num at him
+
+/-- `zetaCellS0 != 1` (Re = 0.395 != 1), for Mathlib FE side condition. -/
+theorem zetaCellS0_ne_one : zetaCellS0 ≠ 1 := by
+  intro h
+  have hre := congrArg Complex.re h
+  rw [zetaCellS0_re, Complex.one_re] at hre
+  norm_num at hre
+
+/-- FE link at R00: `zeta(1-s0) = F(s0)*zeta(s0)` via `riemannZeta_one_sub` (correct direction). -/
+theorem zetaFE_refl_eq_S0 :
+    riemannZeta (1 - zetaCellS0) = zetaFEFactor zetaCellS0 * riemannZeta zetaCellS0 := by
+  have hs_ne : ∀ n : ℕ, zetaCellS0 ≠ -((n : ℂ)) := zetaCellS0_ne_neg_nat
+  have hs1 : zetaCellS0 ≠ 1 := zetaCellS0_ne_one
+  have h := riemannZeta_one_sub hs_ne hs1
+  have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-zetaCellS0) * Complex.Gamma zetaCellS0 *
+        Complex.cos ((Real.pi : ℂ) * zetaCellS0 / 2) * riemannZeta zetaCellS0) =
+      zetaFEFactor zetaCellS0 * riemannZeta zetaCellS0 := by
+    unfold zetaFEFactor
+    ring
+  rw [← h2]
+  exact h
+
+#print axioms zetaRefl_re
+#print axioms zetaRefl_im
+#print axioms zetaRefl_pos
+#print axioms zetaRefl_norm_le
+#print axioms zetaRefl_rpow_0605_ge
+#print axioms etaDirichletTerm_S1refl_zero
+#print axioms etaDirichletTerm_S1refl_one
+#print axioms etaDirichlet_S1refl_two_eq
+#print axioms norm_etaDirichlet_S1refl_second_le
+#print axioms etaDirichlet_S1refl_two_norm_ge
+#print axioms zetaRefl_tail_general
+#print axioms zetaRefl_tail_1_le
+#print axioms etaFactor_ne_zero_S1refl
+#print axioms zeta_of_etaPairLim_S1refl
+#print axioms zetaCellS0_ne_neg_nat
+#print axioms zetaCellS0_ne_one
+#print axioms zetaFE_refl_eq_S0
