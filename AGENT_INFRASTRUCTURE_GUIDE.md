@@ -1258,22 +1258,43 @@ Bridge work committed, rigorous: Hermite–Poulain lemma, `Hyperbolic_const_mul/
 
 **Door 2 — Xi-critical (`riemann_hypothesis.lean:34`, `axiom RiemannHypothesisProp_apply`).**
 `rh_iff_xi_off_real_pointwise_nonvanishing_mathlib` / `hardDifferenceNonzero_iff_RH` chain proven.
-Remaining: full `XiOffRealPointwiseNonvanishing` for `Re z ≠ 0`. Committed (0 sorrys): imaginary-axis
-slice, `xiShifted_at_zero_ne_zero`, `classicalXi_half_ne_zero`, `zeta_half_ne_zero` (closed η→ζ→ξ
-chain). Closing the central cover (door 3) + tail closes this door.
+Committed (0 sorrys): imaginary-axis slice, `xiShifted_at_zero_ne_zero`, `classicalXi_half_ne_zero`,
+`zeta_half_ne_zero` (closed η→ζ→ξ chain). **Capstone committed (`ce2c8fe9`, `lake build
+riemann_hypothesis` green):** hypothesis Props mirroring supplier shapes (`XiCentralMainBand10`,
+`XiCentralEdgeStrips10`, `XiCutoffLines10`, `XiCentralRect10`) + master canned theorem
+**`rh_from_mainBand10_edgeStrips10_tail10_cutoff`** (main band + edge strips + tail + cutoff lines →
+`RiemannHypothesisProp`) + `tailPointwise10_of_absTail` adapter (plugs a door-4 mollifier leaf into the
+tail hypothesis) + feeders showing the new hyps are weaker than `XiCentralZeroFreeCover 10`. Residual is
+four named supplier obligations: 80 per-cell enclosures (door 3), edge strips `y∈[0.49,1/2)`, tail leaf
+(door 4), lines `Re=±10`.
 
-**Door 3 — Thin-region / central cover (`rh_residual_gap.lean` 1 sorry, `central_cover_assembly.lean`
-39 sorrys). THE BOTTLENECK.**
+**Door 3 — Thin-region / central cover. THE BOTTLENECK.**
+Count correction (verified 2026-09-03; old "39/1" was naive-substring counting `sorry-free`):
+`central_cover_assembly.lean` has **10 sorry-terms in 4 legacy declarations** (lines 14–16/43/48/103–104/136,
+deliberately untouched — consumed read-only by `central_cover_trusted.lean`, several false-as-stated);
+`rh_residual_gap.lean` has **0**; `interval_arith.lean` has **0**. `RXX_mem_gridFine` already exists for
+R00 and R02–R40 and all 41 `H_instance`s exist (R01 correctly has none: `(-7.5,-5) ∉ fineGridX`).
 Committed (rigorous, 0 sorrys): all **40 cells** packaged (R00–R10 bottom, R11–R40 upper) with
 fencing/strip/H-instances; boundary strip `(0,0.01]`; lower half via `conj_of`; `full_central_covered`;
-`rh_iff_off_line_thin_band_zeta`; tail-range certification of `zeta_cert_data`. Remaining:
-- **80 per-cell numerical enclosures**: for each of the 40 cells prove `ε + M·radius ≤ ‖ξ(center)‖`
-  and `‖deriv ξ‖ ≤ M` in ℝ. Needs **rigorous complex ζ/Γ/cpow interval arithmetic absent from
-  Mathlib** (real `Re>1` ζ bounds only; cell centers off the real axis). Committed partials:
-  `interval_arith.lean` closed poly/pi/Gamma factors, `1/26 ≤ ‖ζ(sR00)‖` (eta-limit + remainder +
-  continuation), R00/R01 numeric-ball framework.
-- **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine), and globally
-  `xiShifted_differentiable` (strip-version entireness is proved; the global statement is false-as-stated).
+`rh_iff_off_line_thin_band_zeta`; tail-range certification of `zeta_cert_data`. **New (`7b965356`,
+`lake build interval_arith` green, `#print axioms` clean):** `CellGammaUniform` (hypothesis-free
+`1/10000000 ≤ ‖Gamma (s/2)‖` for all 40 centers), `CellUniform` (`pi_lower_of_re`, generic four-factor
+`center_bound_of_component_bounds`), `R02Uniform` (R02 copy-paste template: hypothesis-free poly 22,
+pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures). Remaining:
+- **Zeta factor (all 40 cells):** `‖zeta s_center‖ ≥ Azeta`. Missing: (a) eta–zeta identity
+  `zeta s * etaCvtFactor s = L` at `Re<1` (complex analytic continuation; Mathlib has only real `Re>1` ζ
+  material); (b) explicit remainder with usable radius — `≤25` exists but the S₂-route is numerically dead
+  (`|S₂−η|≈0.96`, need `≲0.1`); needs `S_N`, `N>2`, generalizing the paired M-test tail bound.
+- **Deriv factor (all 40 cells):** uniform `‖deriv xiShifted w‖ ≤ M`. Missing entirely — no
+  Cauchy/uniform-derivative infrastructure for `xiShifted` exists; needs a Cauchy estimate via
+  `xiShiftedEntire`.
+- **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
+  infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`). Missing: a
+  **Stirling-type complex-Gamma upper bound** for `Gamma(1−s/2)` at `|Im|≈4–9` (true `~10⁻³` vs proved
+  `1.5`; Mathlib has none). **This is the true next bottleneck for every cell's center bound.**
+- **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine). The `(0,0.01]` bottom strip
+  IS packaged conditionally (`BottomStripObligations` + `bottom_strip_covered`); global
+  `xiShifted_differentiable` is false-as-stated (strip-version entireness proved — use that).
 
 **Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
 Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. Remaining: instantiate a
