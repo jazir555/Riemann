@@ -1363,7 +1363,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   thin rects (`y∈(−0.49,0.49)`, radius `<0.56`) with line-membership lemmas. **All 10/10 upper columns
   packaged** (EdgeS01–S09 numeral-for-numeral; shared re-value maximally reused, no Gamma-chain
   duplication). Lower mirrors blocked (no packaged upper rect for `conj_of`, `y1<1/2` fails, new `0.995`
-  Gamma chain needed). **Zero strip cells fully closed** — full closure needs the same zeta wall as
+  Gamma chain needed). **Update — all 10/10 LOWER mirrors packaged** (EdgeS00_Lower–S09_Lower:
+  geometry, poly `≤56` generic, pi `≤1`, Gamma `≤2` at re `0.995` + `≤3` at `0.4975` via new
+  center-independent chains). **Y1 verdict:** direct `conj_of` inapplicable even with closed upper
+  H-leaves (`¬y1<1/2` proved for all 10 uppers); shrunk variants (`y1=0.499`, explicit gaps
+  `[0.499,0.5)`/`(−0.5,−0.499]`) satisfy the hypotheses with coord mirrors conditional on shrunk upper
+  packaging. **Zero strip cells fully closed** — full closure needs the same zeta wall as
   central cells (`Azeta` + tight upper).
 
 **Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
