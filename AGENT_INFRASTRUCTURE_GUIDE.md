@@ -1294,13 +1294,27 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **strategic finding:** `N=4194304` makes the explicit-partial-sum lower bound infeasible (4M cpow terms),
   so the `S_N`-direct route to `Azeta` is computationally dead at the R00 corner; a smarter zeta lower
   bound is needed (functional equation / reflection to a large-`ζ` region, not longer partial sums).
-- **Deriv factor (all 40 cells):** uniform `‖deriv xiShifted w‖ ≤ M`. Missing entirely — no
-  Cauchy/uniform-derivative infrastructure for `xiShifted` exists; needs a Cauchy estimate via
-  `xiShiftedEntire`.
+- **Deriv factor (all 40 cells):** uniform `‖deriv xiShifted w‖ ≤ M`. **Generic infrastructure closed
+  (`82da3e16`, `lake build central_cover_assembly` green, axioms clean):** `DerivCauchyBridge`
+  (`deriv_xiShifted_le_of_entire_sphere_bound`: `‖deriv xiShifted w‖ ≤ C/R` from strip entireness via
+  Mathlib `Complex.norm_deriv_le_of_forall_mem_sphere_norm_le` — no new circle-integral material was
+  needed) + `uniform_deriv_of_sphere_bound` / `uniform_deriv_of_closedBall_bound` (`M=C/r` from one
+  closed-ball sup). **R02 first concrete `M=67200` conditional** on `R02_zeta_upper_obligation`
+  (`‖zeta‖≤10` on the disc; poly `≤42`/pi `≤1`/Gamma `≤40` discharged hypothesis-free; `r=0.25` stays in
+  the strip). Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
+  crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
+  + tighter zeta upper to reach tier `M≈0.05`. Remaining 39 cells: same shape, different `s`-rects
+  (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
-  infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`). Missing: a
-  **Stirling-type complex-Gamma upper bound** for `Gamma(1−s/2)` at `|Im|≈4–9` (true `~10⁻³` vs proved
-  `1.5`; Mathlib has none). **This is the true next bottleneck for every cell's center bound.**
+  infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
+  **Pointwise closed at the R00 corner (`bce40202`, green, axioms clean):**
+  `CellGammaUpper.gamma_one_sub_half_upper_R00`, `‖Gamma(1−sR00/2)‖ ≤ 0.01` via a 12-step
+  `Gamma_add_one` shift (numerator `≤313M`, denominator `≥33B`) — 150× better than the old `1.5`
+  (true value `~7e-3`). But **uniform `≤0.01` over all 40 centers is FALSE** (inner cells `|s.im|≈0.75`
+  have true values `≈1.0`), and reflection + the `1/1e7` lower bound is infeasible in principle (needs
+  `‖sin‖≥3.1e9`). Remaining: mechanical per-center replication of the 12-shift template (each center needs
+  own `re`/`im`, `cₖ` floors, numerator cap); outer-tier `|s.im|≥8` cells can reach `≤0.01`, inner ones
+  cannot — inner cells must live with larger Gamma constants in their budgets.
 - **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine). The `(0,0.01]` bottom strip
   IS packaged conditionally (`BottomStripObligations` + `bottom_strip_covered`); global
   `xiShifted_differentiable` is false-as-stated (strip-version entireness proved — use that).
@@ -1541,6 +1555,10 @@ positive/divergent, you have mis-cancelled the `{s}` pole in Step 1.
 - **Namespace confusion:** `re_three_four_one_one_over_sub_nonneg` exists both in `ZeroFreeRegion`
   (Infra + Proof) and is called by `HadamardBridge`/`KadiriZeroFree` after `open ZeroFreeRegion`.
 - **Concurrency:** never run two `lake`/`lean` processes; always take `.lake_build_lock` (§3).
+- **Line endings:** this repo mixes LF and CRLF per file (e.g. `zeta_rigorous.lean` LF,
+  `central_cover_assembly.lean` CRLF). When appending to a file, PRESERVE its existing endings —
+  a whole-file flip buries the real diff (this happened once to `interval_arith.lean` in `bce40202`).
+  Verify with `git diff --numstat` (expect small dels) before finishing.
 
 ---
 
