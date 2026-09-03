@@ -32326,3 +32326,279 @@ theorem gammaOf_upper_disc_R02 {s : ℂ}
 #print axioms R02GammaDisc.gammaOf_upper_disc_R02
 
 end R02GammaDisc
+
+namespace R02GammaLower
+
+/-! ## Stirling-grade Gamma LOWER with Im-decay at the R02 center (`≥ 0.002`)
+
+**Problem.** The committed center lower is the uniform `1/1e7`
+(`R02Uniform.gamma_lower_R02`, via `CellGammaUniform.gamma_lower_wide`:
+reflection with the crude sine cap `‖sin‖ ≤ exp 16 < 1e7` and the crude
+real-Gamma cap `‖Gamma(1-s/2)‖ ≤ 1.5`). `R02_closed_of_factorBounds`
+(`central_cover_assembly.lean:9618`) needs `Agam ≥ 0.006` — a `60000×` gap —
+and reflection + `1e-7` is infeasible in principle (needs `‖sin‖ ≥ 3e9`).
+
+**Result.** `gamma_lower_R02_center`: `(0.002 : ℝ) ≤ ‖Gamma (sR02/2)‖` at
+`R02GammaUpper.sR02 = 0.395 - 6.75·I` (so `w = s/2 = 0.1975 - 3.375·I`),
+plus the drop-in `gammaOf_lower_R02` for
+`DerivCauchyBridge.gammaOf R02Pilot.sCenter`. That is `20000×` sharper than
+`1/1e7` (`improvement_over_uniform`); the residual to `0.006` is exactly `3×`
+(`gap_to_threshold`). With `Agam = 0.002` the product threshold now needs
+only `Azeta ≥ 2.95` (`required_Azeta_of_this_Gamma`) instead of `≥ 59090`.
+
+**Method (reflection with Stirling-sharp Im-decay uppers on BOTH factors).**
+`‖Gamma w‖ = π / (‖sin(πw)‖·‖Gamma(1-w)‖)`:
+* `‖Gamma(1-w)‖ ≤ 0.05` REUSED from
+  `R02GammaUpper.gamma_one_sub_half_upper_R02` — the same shift-floor +
+  convexity method as AH's `R02GammaDisc` (12-shift Im-decay floors
+  `3.46/3.82/…/12.27`, product `≥ 1e10`, real-Gamma chain `≤ 313M`),
+  applied at the reflected point `1 - sR02/2 = 0.8025 + 3.375·I`
+  (true value `≈ 0.018`, so `0.05` is within `2.8×`).
+* `‖sin(πw)‖ ≤ 30000` proved here (`sin_upper_R02`): `|Im(πw)| = π·3.375 ≤ 11`
+  and the HALVED triangle cap `(exp 11 + 1)/2` — one exponential is `≤ 1`
+  because `Im(πw) < 0` — with `exp 11 < 59999` (`exp_eleven_lt`, true
+  `e^11 ≈ 59874.14`, via the `(exp 1)^n` + `exp_one_lt_d9` pattern).
+  True `‖sin‖ ≈ 20067`, so `30000` is within `1.5×`.
+Ratio: `3 / (30000·0.05) = 3/1500 = 0.002`.
+(Route note: the brief's direct `Γ(z) = Γ(z+n)/prod` shape would need a
+complex-numerator LOWER with Im-decay, but `‖Γ‖ ≤ Real.Gamma ∘ Re` goes the
+wrong way — a real-convexity lower does NOT transfer to `‖Γ(z+n)‖` with
+large `Im`. Reflection is what turns convexity uppers into a lower; the
+shift floors enter through the reflected upper, and the triangle bound
+through the sine. The `π ≥ 3` numerator lower plays the "numerator" role.)
+
+**Full-tier verdict (report-and-stop).** `0.006` needs `S·U ≤ 523.6`
+(`π/0.006`). Banked `S·U = 30000·0.05 = 1500`. With `U = 0.05` fixed, even a
+perfect sine (`S = 20067`) gives `1003 > 523` — infeasible in principle on
+this `U`. With a perfect sine, need `U ≤ 0.0261` (true `U ≈ 0.018`): a
+deeper reflected shift chain (`n ≈ 15`, same template) plus a sine within
+`~4%` of true could close it — beyond this turn. Banked `0.002`, gap `3×`.
+
+**Grep-first record (2026-09-03, verified, documented per HARD RULES).**
+* Mathlib complex-Gamma lower with Im-decay: ABSENT. Only the reflection
+  identity `Complex.Gamma_mul_Gamma_one_sub` (`Beta.lean:398`, REUSED) and
+  the integral-majorant direction (`norm_Gamma_le_realGamma`-style uppers);
+  no `‖Gamma‖ ≥` lemma seeing `Im` anywhere in
+  `Mathlib/Analysis/SpecialFunctions/Gamma/`.
+* Repo pointwise Gamma lower at the R02 center: ABSENT — only the uniform
+  `1/1e7` (`R02Uniform.gamma_lower_R02`, `CellGammaUniform.gamma_lower_wide`).
+* Sharp pointwise sine upper at R02 (`≤ 30000`): ABSENT — only the wide
+  `≤ exp 16 < 1e7` caps (`R00GammaLower.norm_sin_pi_half_le`,
+  `CellGammaUniform.norm_sin_pi_half_le_wide`, `RowFE_sin_half_num`).
+* `Real.exp 11` numeral cap: ABSENT — only `exp 16 < 1e7`
+  (`R00GammaLower.exp_sixteen_lt`) and `exp 28 < 2e12` (`RowFE_exp28_lt`);
+  created here by the same `(exp 1)^n` pattern.
+* Namespace `R02GammaLower`: ABSENT (`rg` zero hits); no clash with
+  `R02GammaUpper` / `R02GammaDisc` / `R02Uniform` / `R02Pilot`.
+-/
+
+/-- `Real.exp 11 < 59999` via `(exp 1)^11` and `exp_one_lt_d9`
+(`e^11 ≈ 59874.14`; mirrors `R00GammaLower.exp_sixteen_lt`). -/
+theorem exp_eleven_lt : Real.exp 11 < 59999 := by
+  have h1 : Real.exp (11 : ℝ) = (Real.exp 1) ^ (11 : ℕ) := by
+    have := Real.exp_nat_mul (1 : ℝ) (11 : ℕ)
+    simpa using this.symm
+  have h2 : (Real.exp 1) ^ (11 : ℕ) < (2.7182818286 : ℝ) ^ (11 : ℕ) := by
+    apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+  have h3 : (2.7182818286 : ℝ) ^ (11 : ℕ) < 59999 := by norm_num
+  rw [h1]
+  exact lt_trans h2 h3
+
+/-- `(sR02/2).im = -3.375`. -/
+theorem sR02_half_im : (R02GammaUpper.sR02 / 2).im = -3.375 := by
+  rw [Complex.div_ofNat_im, R02GammaUpper.sR02_im]
+  norm_num
+
+/-- `Im(π·(sR02/2)) = π·(-3.375)`. -/
+theorem pi_half_im_eq :
+    ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im = Real.pi * -3.375 := by
+  have hs2 : (R02GammaUpper.sR02 / 2).im = -3.375 := sR02_half_im
+  have hexpand : ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im
+      = Real.pi * (R02GammaUpper.sR02 / 2).im := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
+  rw [hexpand, hs2]
+
+/-- `|Im(π·(sR02/2))| ≤ 11` (`π·3.375 ≤ 3.1416·3.375 = 10.6029`). -/
+theorem pi_half_im_abs_le :
+    |((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im| ≤ 11 := by
+  rw [pi_half_im_eq]
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have habs : |Real.pi * -3.375| = Real.pi * 3.375 := by
+    rw [abs_mul]
+    have h1 : |-3.375| = (3.375 : ℝ) := by norm_num
+    rw [h1, abs_of_pos Real.pi_pos]
+  rw [habs]
+  calc Real.pi * 3.375 ≤ 3.1416 * 3.375 :=
+        mul_le_mul_of_nonneg_right hpi (by norm_num)
+    _ ≤ 11 := by norm_num
+
+/-- `Im(π·(sR02/2)) ≤ 0` (halving input: one exponential is `≤ 1`). -/
+theorem pi_half_im_nonpos :
+    ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im ≤ 0 := by
+  rw [pi_half_im_eq]
+  exact mul_nonpos_of_nonneg_of_nonpos (le_of_lt Real.pi_pos) (by norm_num)
+
+/-- Sharp sine cap `‖sin(π·(sR02/2))‖ ≤ 30000` (true `≈ 20067`, within `1.5×`;
+halved triangle cap `(exp 11 + 1)/2` since `Im < 0`). -/
+theorem sin_upper_R02 :
+    ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ ≤ 30000 := by
+  set w : ℂ := (Real.pi : ℂ) * (R02GammaUpper.sR02 / 2) with hw_def
+  have habs : |w.im| ≤ 11 := by
+    rw [hw_def]
+    exact pi_half_im_abs_le
+  have hnonpos : w.im ≤ 0 := by
+    rw [hw_def]
+    exact pi_half_im_nonpos
+  have hsin_eq : Complex.sin w
+      = (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ 1 := by
+    calc Real.exp w.im ≤ Real.exp 0 := Real.exp_le_exp.mpr hnonpos
+      _ = 1 := Real.exp_zero
+  have e2 : Real.exp (-w.im) ≤ Real.exp 11 := by
+    apply Real.exp_le_exp.mpr
+    exact le_trans (neg_le_abs _) habs
+  have hfin : (Real.exp w.im + Real.exp (-w.im)) / 2 ≤ 30000 := by
+    have hexp := exp_eleven_lt
+    linarith
+  exact le_trans hle hfin
+
+/-- Sine is nonzero at `π·(sR02/2)` (`Im ≠ 0`, so not an integer multiple of π;
+mirrors `R00GammaLower.sin_pi_half_ne`). -/
+theorem sin_ne_R02 :
+    Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)) ≠ 0 := by
+  intro hzero
+  rw [Complex.sin_eq_zero_iff] at hzero
+  obtain ⟨k, hk⟩ := hzero
+  have hs2im : (R02GammaUpper.sR02 / 2).im = -3.375 := sR02_half_im
+  have hIm_eq : ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im
+      = ((k : ℂ) * (Real.pi : ℂ)).im := by rw [hk]
+  have hL : ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im = Real.pi * -3.375 := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hR : ((k : ℂ) * (Real.pi : ℂ)).im = 0 := by
+    simp [Complex.mul_im]
+  rw [hL, hR] at hIm_eq
+  have hpi_pos := Real.pi_pos
+  have hsim : (-3.375 : ℝ) = 0 := by
+    have hcon : Real.pi * -3.375 = 0 := hIm_eq
+    rcases mul_eq_zero.mp hcon with h | h
+    · exact absurd h (ne_of_gt hpi_pos)
+    · exact h
+  norm_num at hsim
+
+/-- MAIN pointwise lower: `0.002 ≤ ‖Gamma(sR02/2)‖` at the R02 center, from
+reflection `Gamma(w)·Gamma(1-w) = π/sin(πw)` with `‖Gamma(1-w)‖ ≤ 0.05`
+(`R02GammaUpper.gamma_one_sub_half_upper_R02`) and `‖sin‖ ≤ 30000`:
+`3/(30000·0.05) = 3/1500 = 0.002`. -/
+theorem gamma_lower_R02_center :
+    (0.002 : ℝ) ≤ ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖ := by
+  have h1w_re : (0 : ℝ) < (1 - R02GammaUpper.sR02 / 2).re := by
+    rw [R02GammaUpper.zUpR02_re]
+    norm_num
+  have hG1_ne : Complex.Gamma (1 - R02GammaUpper.sR02 / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1w_re
+  have hsin_ne := sin_ne_R02
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (R02GammaUpper.sR02 / 2)
+  have hnorm : ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      = Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ := by
+    have h := congrArg (fun x : ℂ => ‖x‖) hrefl
+    simp only [norm_mul, norm_div] at h
+    have hpi_norm : ‖(Real.pi : ℂ)‖ = Real.pi := by
+      rw [Complex.norm_real]
+      exact Real.norm_of_nonneg Real.pi_pos.le
+    rw [hpi_norm] at h
+    exact h
+  have hG1_le : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≤ 0.05 :=
+    R02GammaUpper.gamma_one_sub_half_upper_R02
+  have hsin_le : ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ ≤ 30000 :=
+    sin_upper_R02
+  have hpos1 : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ :=
+    norm_pos_iff.mpr hsin_ne
+  have hpos2 : (0 : ℝ) < ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+    norm_pos_iff.mpr hG1_ne
+  have hden_pos : (0 : ℝ)
+      < ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+    mul_pos hpos1 hpos2
+  have hden_le : ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      ≤ 30000 * 0.05 :=
+    mul_le_mul hsin_le hG1_le (norm_nonneg _) (by norm_num)
+  have hfrac_le : Real.pi / (30000 * 0.05)
+      ≤ Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖) :=
+    div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) hden_pos hden_le
+  have hnum : Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+      * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖)
+      = ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖ := by
+    have hb_ne : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≠ 0 := ne_of_gt hpos2
+    have h1 : ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖
+        = (Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖)
+          / ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+      eq_div_of_mul_eq hb_ne hnorm
+    rw [h1, div_div]
+  have hbase : (0.002 : ℝ) ≤ Real.pi / (30000 * 0.05) := by
+    have h1500 : (30000 : ℝ) * 0.05 = 1500 := by norm_num
+    rw [h1500, le_div_iff₀ (by norm_num)]
+    nlinarith [Real.pi_gt_three]
+  exact le_trans hbase (hfrac_le.trans_eq hnum)
+
+/-- The two `sR02` spellings coincide (`R02GammaUpper` vs `R02Pilot`). -/
+theorem sR02_eq_pilot : R02GammaUpper.sR02 = R02Pilot.sCenter := by
+  simp only [R02GammaUpper.sR02, R02Pilot.sCenter]
+
+/-- Drop-in for `R02_closed_of_factorBounds`: `0.002 ≤ ‖gammaOf sCenter‖`. -/
+theorem gammaOf_lower_R02 :
+    (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖ := by
+  have h := gamma_lower_R02_center
+  rw [sR02_eq_pilot] at h
+  show (0.002 : ℝ) ≤ ‖Complex.Gamma (R02Pilot.sCenter / 2)‖
+  exact h
+
+/-- `20000×` sharper than the committed `1/1e7`. -/
+theorem improvement_over_uniform : (1 / 10000000 : ℝ) * 20000 = 0.002 := by norm_num
+
+/-- Exact residual: `0.002` is `3×` below the `0.006` premise of
+`R02_closed_of_factorBounds`. -/
+theorem gap_to_threshold : (0.002 : ℝ) * 3 = 0.006 := by norm_num
+
+/-- Product consequence: with `Agam = 0.002` the R02 threshold needs only
+`Azeta ≥ 2.95` (was `≥ 59090` with `Agam = 1/1e7`). -/
+theorem required_Azeta_of_this_Gamma {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * 0.002 * Azeta) :
+    (2.95 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+  rw [hb] at h
+  have hcoeff : (22 : ℝ) * (1 / 2) * 0.002 = 0.022 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 0.022 := by norm_num
+  have hdiv : (0.065 : ℝ) / 0.022 ≤ Azeta := by
+    rw [div_le_iff₀ hpos, mul_comm Azeta 0.022]
+    exact h
+  have hnum : (2.95 : ℝ) ≤ 0.065 / 0.022 := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+#print axioms R02GammaLower.exp_eleven_lt
+#print axioms R02GammaLower.sin_upper_R02
+#print axioms R02GammaLower.sin_ne_R02
+#print axioms R02GammaLower.gamma_lower_R02_center
+#print axioms R02GammaLower.gammaOf_lower_R02
+
+end R02GammaLower
