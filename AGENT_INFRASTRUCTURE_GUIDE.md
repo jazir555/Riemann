@@ -1348,7 +1348,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Wall quantified:** `r(M)=10·M^{−0.605}/0.605` needs `M≥635` (`N≥1270` terms, infeasible explicit)
   for `r<1/3` — the `hSlow` wall shifted from 4M to ~1–2k terms, not removed. Missing exactly:
   `Azeta1>0` at `1−s0` without explicit 1k+ sums (smarter tail with cancellation, or non-pair route);
-  then `Azeta=Azeta1/6e7` is immediate. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+     then `Azeta=Azeta1/6e7` is immediate. **Conditional closure proved (`zeta_S1_lower_of_S2048`,
+   `zeta_S0_lower_of_S1`):** `Azeta1=1/39` at `1−s0` from `‖S_{2048}‖≥1/3` (M=1024 tail `r≤4/15`, margin
+   ~70% — true `|ζ(s1)|≈1.40`) ⇒ downstream `Azeta=1/2340000000`. **Wall proved both sides:**
+   all `M≤343` fail (`r≥1/3`, so ≥688 terms necessary), M=1024 works; true minimal M=635 (bracket
+   `[344,1024]` formalized). No small-M closure exists under any triangle bound (`r(1)≥16` vs `1/3`;
+   proved tail ~2500× loose vs true — the gap is pure inter-pair phase cancellation). Honest routes:
+   Kuzmin–Landau cancellation tail (absent from Mathlib, major) or rigorous complex interval arithmetic. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
