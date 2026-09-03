@@ -1256,6 +1256,11 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   `all_shifts_from_zero` (669), `rh_iff_jensen_zero` (682), `tail_nonvanishing_iff_jensen` (689).
 - **Pólya–Schur criterion** (`polyaTheoremHyp`: order<2 + real-rooted ⇒ hyperbolic sections) + Hurwitz
   section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
+  **First stones closed:** real-linear `Hyperbolic` blocks (`Hyperbolic_X_sub_C_real`), finite real-rooted
+  products (`Hyperbolic_multiset_prod_real_linear`), iterated Gauss–Lucas (`hyperbolic_iterate_derivative`).
+  Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
+  three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
+  genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
 - **`∀ k≥1, taylorCoeff k ≠ 0`** (`Ξ^{(2k)}(0)` alternating series per `k`) still open — only `k=0` closed.
 
 **Door 2 — Xi-critical (`riemann_hypothesis.lean:34`, `axiom RiemannHypothesisProp_apply`).**
