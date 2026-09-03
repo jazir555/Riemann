@@ -9040,3 +9040,366 @@ Residual (each names exact missing lemma):
 
 Correctness: tail Float certs do not cover strips; global `xiShifted_differentiable` false-as-stated, strip entireness only.
 -/
+
+/-! ## Rouché zero-count stability, Jensen route, disc-only, sorry-free
+
+GREP verdict 2026-09-03, cites verified by reading:
+- Mathlib complex Rouché, Hurwitz, winding number, argument principle: ABSENT.
+  Mathlib/Analysis/Complex/LocallyUniformLimit.lean:136 gives holomorphic limit only,
+  Mathlib/Analysis/Analytic/IsolatedZeros.lean:125 gives isolated zeros only,
+  Mathlib/Analysis/Complex/JensenFormula.lean:308,376,390 gives Jensen equality
+  plus a zero-count UPPER bound only, no Rouché equality of counts.
+  No windingNumber, no argumentPrinciple, no countZeros in Mathlib.
+  Docs docs/1000.yaml:1377 and :1503 list Hurwitz and Rouché titles with NO decl.
+- Consumer READ-ONLY: JensenTranslation.lean:20295 and :20335,
+  guide AGENT_INFRASTRUCTURE_GUIDE.md:1269-1271. This block closes the narrow
+  disc-only Jensen-route transfer. No project Jensen imports, Mathlib only.
+
+Proved here, all sorry-free, no axiom:
+- log_sub_log_le_of_le, abs_log_sub_log_le_of_lower, log-Lipschitz helpers.
+- divisor_eq_zero_of_ne_zero, analytic divisor at nonzero points.
+- jensen_gap_of_divisor_pos, Jensen counting gap for divisor at interior point.
+- rouche_nonvanishing_of_uniform, sup-norm zero-free preservation.
+- hurwitz_zero_transfer, uniform limit with interior divisor forces zeros.
+- door1_nonreal_zero_forced, disc avoiding reals forces nonreal zero.
+-/
+
+namespace RoucheCount
+
+theorem log_sub_log_le_of_le {t τ : ℝ} (hτ : 0 < τ) (h : τ ≤ t) :
+    Real.log t - Real.log τ ≤ (t - τ) / τ := by
+  have ht : 0 < t := lt_of_lt_of_le hτ h
+  rw [← Real.log_div ht.ne' hτ.ne']
+  have hpos : 0 < t / τ := div_pos ht hτ
+  have h1 := Real.log_le_sub_one_of_pos hpos
+  have hτn : τ ≠ 0 := ne_of_gt hτ
+  have e : t / τ - 1 = (t - τ) / τ := by field_simp
+  linarith
+
+theorem abs_log_sub_log_le_of_lower {m t τ : ℝ} (hm : 0 < m)
+    (ht : m ≤ t) (hτ : m ≤ τ) :
+    |Real.log t - Real.log τ| ≤ |t - τ| / m := by
+  have ht0 : 0 < t := lt_of_lt_of_le hm ht
+  have hτ0 : 0 < τ := lt_of_lt_of_le hm hτ
+  have hmin : m ≤ min t τ := le_min ht hτ
+  have hlog : |Real.log t - Real.log τ| ≤ |t - τ| / min t τ := by
+    rcases le_total τ t with h | h
+    · have hlg : Real.log τ ≤ Real.log t := Real.log_le_log hτ0 h
+      rw [min_eq_right h, abs_of_nonneg (by linarith), abs_of_nonneg (by linarith)]
+      exact log_sub_log_le_of_le hτ0 h
+    · have hlg : Real.log t ≤ Real.log τ := Real.log_le_log ht0 h
+      rw [min_eq_left h, abs_of_nonpos (by linarith), abs_of_nonpos (by linarith),
+        neg_sub, neg_sub]
+      exact log_sub_log_le_of_le ht0 h
+  calc |Real.log t - Real.log τ| ≤ |t - τ| / min t τ := hlog
+    _ ≤ |t - τ| / m := div_le_div_of_nonneg_left (abs_nonneg _) hm hmin
+
+theorem divisor_eq_zero_of_ne_zero {c : ℂ} {R : ℝ} {G : ℂ → ℂ}
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    {u : ℂ} (hu : u ∈ Metric.closedBall c R) (hGu : G u ≠ 0) :
+    MeromorphicOn.divisor G (Metric.closedBall c R) u = 0 := by
+  have hord : analyticOrderAt G u = 0 :=
+    (hG u hu).analyticOrderAt_eq_zero.mpr hGu
+  rw [MeromorphicOn.AnalyticOnNhd.divisor_apply hG hu, hord]
+  simp
+
+theorem jensen_gap_of_divisor_pos {c : ℂ} {R : ℝ} {G : ℂ → ℂ}
+    (hR : 0 < R)
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    (hGc : G c ≠ 0)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hdiv : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w) :
+    Real.log ‖G c‖ + Real.log (R / ‖c - w‖) ≤
+      Real.circleAverage (fun z => Real.log ‖G z‖) c R := by
+  have hRabs : |R| = R := abs_of_pos hR
+  have hRne : R ≠ 0 := ne_of_gt hR
+  have hGabs : AnalyticOnNhd ℂ G (Metric.closedBall c |R|) := by rwa [hRabs]
+  have hdivAbs : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c |R|) w := by
+    rwa [hRabs]
+  have hJen := AnalyticOnNhd.circleAverage_log_norm hRne hGabs hGc
+  have hcw_pos : 0 < ‖c - w‖ :=
+    norm_pos_iff.mpr (sub_ne_zero_of_ne (Ne.symm hwc))
+  have hcw_lt : ‖c - w‖ < R := by
+    have hmem := Metric.mem_ball.mp hw
+    rw [dist_eq_norm] at hmem
+    have hrev : ‖w - c‖ = ‖c - w‖ := norm_sub_rev w c
+    linarith
+  have hlog_pos : 0 < Real.log (R / ‖c - w‖) := by
+    apply Real.log_pos
+    rw [lt_div_iff₀ hcw_pos]
+    simpa using hcw_lt
+  have heq_log : Real.log (R / ‖c - w‖) = Real.log (R * ‖c - w‖⁻¹) := by
+    rw [div_eq_mul_inv]
+  have hDfin : (MeromorphicOn.divisor G (Metric.closedBall c |R|)).support.Finite :=
+    (MeromorphicOn.divisor G (Metric.closedBall c |R|)).finiteSupport
+      (isCompact_closedBall c |R|)
+  have hsub : Function.support
+      (fun u : ℂ => ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+        Real.log (R * ‖c - u‖⁻¹)) ⊆ ↑(hDfin.toFinset) := by
+    intro u hu
+    rw [Set.Finite.coe_toFinset]
+    rw [Function.mem_support] at hu ⊢
+    intro hDu
+    apply hu
+    simp [hDu]
+  have hEq : (∑ᶠ u : ℂ, ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+        Real.log (R * ‖c - u‖⁻¹))
+      = ∑ u ∈ hDfin.toFinset, ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+        Real.log (R * ‖c - u‖⁻¹) :=
+    finsum_eq_sum_of_support_subset _ hsub
+  have hwSupp : w ∈ (MeromorphicOn.divisor G (Metric.closedBall c |R|)).support := by
+    rw [Function.mem_support]
+    intro h0
+    have hle := hdivAbs
+    rw [h0] at hle
+    norm_num at hle
+  have hwmem : w ∈ hDfin.toFinset := hDfin.mem_toFinset.mpr hwSupp
+  have hnn : ∀ u ∈ hDfin.toFinset,
+      0 ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+        Real.log (R * ‖c - u‖⁻¹) := by
+    intro u hu
+    have huSupp : u ∈ (MeromorphicOn.divisor G (Metric.closedBall c |R|)).support :=
+      hDfin.mem_toFinset.mp hu
+    have huCB : u ∈ Metric.closedBall c |R| :=
+      (MeromorphicOn.divisor G (Metric.closedBall c |R|)).supportWithinDomain huSupp
+    by_cases huc : u = c
+    · have hDu : MeromorphicOn.divisor G (Metric.closedBall c |R|) u = 0 := by
+        rw [huc]
+        have hcCB : c ∈ Metric.closedBall c |R| := by
+          rw [Metric.mem_closedBall, dist_self]
+          exact abs_nonneg R
+        exact divisor_eq_zero_of_ne_zero hGabs hcCB hGc
+      rw [hDu]
+      simp
+    · have hDnn : (0 : ℝ) ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) := by
+        exact_mod_cast MeromorphicOn.AnalyticOnNhd.divisor_nonneg hGabs u
+      have hnorm_pos : 0 < ‖c - u‖ :=
+        norm_pos_iff.mpr (sub_ne_zero_of_ne (Ne.symm huc))
+      have hnorm_le : ‖c - u‖ ≤ R := by
+        have hmem := Metric.mem_closedBall.mp (hRabs ▸ huCB)
+        rw [dist_eq_norm] at hmem
+        have hrev : ‖u - c‖ = ‖c - u‖ := norm_sub_rev u c
+        linarith
+      have h1 : (1 : ℝ) ≤ R / ‖c - u‖ := by
+        rw [le_div_iff₀ hnorm_pos]
+        simpa using hnorm_le
+      have hlog : 0 ≤ Real.log (R * ‖c - u‖⁻¹) := by
+        have heq : R * ‖c - u‖⁻¹ = R / ‖c - u‖ := by rw [div_eq_mul_inv]
+        rw [heq]
+        exact Real.log_nonneg h1
+      exact mul_nonneg hDnn hlog
+  have hwTerm : Real.log (R / ‖c - w‖)
+      ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) w : ℤ) : ℝ) *
+        Real.log (R * ‖c - w‖⁻¹) := by
+    have hD1 : (1 : ℝ) ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) w : ℤ) : ℝ) := by
+      exact_mod_cast hdivAbs
+    have hlog_nn : 0 ≤ Real.log (R * ‖c - w‖⁻¹) := by
+      have heq : R * ‖c - w‖⁻¹ = R / ‖c - w‖ := by rw [div_eq_mul_inv]
+      rw [heq]
+      exact le_of_lt hlog_pos
+    rw [heq_log]
+    calc Real.log (R * ‖c - w‖⁻¹) = 1 * Real.log (R * ‖c - w‖⁻¹) := by rw [one_mul]
+      _ ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) w : ℤ) : ℝ) *
+          Real.log (R * ‖c - w‖⁻¹) :=
+        mul_le_mul_of_nonneg_right hD1 hlog_nn
+  have hsum_ge : Real.log (R / ‖c - w‖)
+      ≤ ∑ᶠ u : ℂ, ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+        Real.log (R * ‖c - u‖⁻¹) := by
+    rw [hEq]
+    calc Real.log (R / ‖c - w‖)
+        ≤ ((MeromorphicOn.divisor G (Metric.closedBall c |R|) w : ℤ) : ℝ) *
+          Real.log (R * ‖c - w‖⁻¹) := hwTerm
+      _ ≤ ∑ u ∈ hDfin.toFinset, ((MeromorphicOn.divisor G (Metric.closedBall c |R|) u : ℤ) : ℝ) *
+          Real.log (R * ‖c - u‖⁻¹) := Finset.single_le_sum hnn hwmem
+  linarith [hJen, hsum_ge]
+
+theorem rouche_nonvanishing_of_uniform {c : ℂ} {R : ℝ}
+    {F G : ℂ → ℂ}
+    (_hGne : ∀ z ∈ Metric.closedBall c R, G z ≠ 0)
+    (hlt : ∀ z ∈ Metric.closedBall c R, ‖F z - G z‖ < ‖G z‖) :
+    ∀ z ∈ Metric.closedBall c R, F z ≠ 0 := by
+  intro z hz hFz
+  have h1 := hlt z hz
+  rw [hFz] at h1
+  simp at h1
+
+theorem hurwitz_zero_transfer {c : ℂ} {R : ℝ} (hR : 0 < R)
+    {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+    (hF : ∀ n, AnalyticOnNhd ℂ (F n) (Metric.closedBall c R))
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    (hGc : G c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, G z ≠ 0)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hdiv : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖F n z - G z‖ < ε) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∃ u ∈ Metric.closedBall c R, F n u = 0 := by
+  have hRabs : |R| = R := abs_of_pos hR
+  have hgap := jensen_gap_of_divisor_pos hR hG hGc hw hwc hdiv
+  have hcw_pos : 0 < ‖c - w‖ :=
+    norm_pos_iff.mpr (sub_ne_zero_of_ne (Ne.symm hwc))
+  have hcw_lt : ‖c - w‖ < R := by
+    have hmem := Metric.mem_ball.mp hw
+    rw [dist_eq_norm] at hmem
+    have hrev : ‖w - c‖ = ‖c - w‖ := norm_sub_rev w c
+    linarith
+  have hgapPos : 0 < Real.log (R / ‖c - w‖) :=
+    Real.log_pos (by rw [lt_div_iff₀ hcw_pos]; simpa using hcw_lt)
+  have hSphNe : (Metric.sphere c R).Nonempty :=
+    NormedSpace.sphere_nonempty.mpr hR.le
+  have hGcontSph : ContinuousOn G (Metric.sphere c R) :=
+    (AnalyticOnNhd.continuousOn hG).mono Metric.sphere_subset_closedBall
+  have hNormCont : ContinuousOn (fun z => ‖G z‖) (Metric.sphere c R) :=
+    continuous_norm.comp_continuousOn hGcontSph
+  obtain ⟨m0, hm0mem, hm0min⟩ :=
+    (isCompact_sphere c R).exists_isMinOn hSphNe hNormCont
+  have hmpos : 0 < ‖G m0‖ :=
+    norm_pos_iff.mpr (hGsph m0 hm0mem)
+  have hmin : ∀ y ∈ Metric.sphere c R, ‖G m0‖ ≤ ‖G y‖ :=
+    fun y hy => hm0min hy
+  have hmcpos : 0 < ‖G c‖ := norm_pos_iff.mpr hGc
+  have hcCB : c ∈ Metric.closedBall c R :=
+    Metric.mem_closedBall.mpr (by rw [dist_self]; exact hR.le)
+  set a0 : ℝ := min ‖G m0‖ ‖G c‖ with ha0def
+  set g0 : ℝ := min (Real.log (R / ‖c - w‖)) 1 with hg0def
+  have ha0pos : 0 < a0 := lt_min hmpos hmcpos
+  have hg0pos : 0 < g0 := lt_min hgapPos one_pos
+  set eps : ℝ := a0 * g0 / 8 with hepsdef
+  have hepspos : 0 < eps := div_pos (mul_pos ha0pos hg0pos) (by norm_num)
+  obtain ⟨N, hN⟩ := hConv eps hepspos
+  refine ⟨N, fun n hn => ?_⟩
+  have hUnif : ∀ z ∈ Metric.closedBall c R, ‖F n z - G z‖ < eps :=
+    fun z hz => hN n hn z hz
+  have hUnifSph : ∀ z ∈ Metric.sphere c R, ‖F n z - G z‖ < eps :=
+    fun z hz => hUnif z (Metric.sphere_subset_closedBall hz)
+  have hCen : ‖F n c - G c‖ < eps := hUnif c hcCB
+  have ha0m : a0 ≤ ‖G m0‖ := min_le_left _ _
+  have ha0mc : a0 ≤ ‖G c‖ := min_le_right _ _
+  have hg0g : g0 ≤ Real.log (R / ‖c - w‖) := min_le_left _ _
+  have ha0nn : 0 ≤ a0 := le_of_lt ha0pos
+  have hg0nn : 0 ≤ g0 := le_of_lt hg0pos
+  have heps_le_m : eps ≤ ‖G m0‖ / 2 := by
+    have h1 : a0 * g0 ≤ ‖G m0‖ * 1 :=
+      mul_le_mul ha0m (min_le_right _ _) hg0nn (le_of_lt hmpos)
+    linarith [hepsdef]
+  have heps_le_mc : eps ≤ ‖G c‖ / 2 := by
+    have h1 : a0 * g0 ≤ ‖G c‖ * 1 :=
+      mul_le_mul ha0mc (min_le_right _ _) hg0nn (le_of_lt hmcpos)
+    linarith [hepsdef]
+  have hB1 : eps / (‖G m0‖ / 2) ≤ Real.log (R / ‖c - w‖) / 4 := by
+    have hpos2 : 0 < ‖G m0‖ / 2 := by linarith
+    rw [div_le_iff₀ hpos2]
+    have hprod : a0 * g0 ≤ ‖G m0‖ * Real.log (R / ‖c - w‖) :=
+      mul_le_mul ha0m hg0g hg0nn (le_of_lt hmpos)
+    linarith [hprod, hepsdef]
+  have hB2 : eps / (‖G c‖ / 2) ≤ Real.log (R / ‖c - w‖) / 4 := by
+    have hposC : 0 < ‖G c‖ / 2 := by linarith
+    rw [div_le_iff₀ hposC]
+    have hprod : a0 * g0 ≤ ‖G c‖ * Real.log (R / ‖c - w‖) :=
+      mul_le_mul ha0mc hg0g hg0nn (le_of_lt hmcpos)
+    linarith [hprod, hepsdef]
+  by_contra hcon
+  push_neg at hcon
+  have hCBLEq : Metric.closedBall c |R| = Metric.closedBall c R := by rw [hRabs]
+  have hFnAbs : AnalyticOnNhd ℂ (F n) (Metric.closedBall c |R|) := by
+    rw [hCBLEq]; exact hF n
+  have hFnFree : ∀ u ∈ Metric.closedBall c |R|, F n u ≠ 0 := by
+    intro u hu
+    exact hcon u (hCBLEq ▸ hu)
+  have hAvgFn := AnalyticOnNhd.circleAverage_log_norm_of_ne_zero hFnAbs hFnFree
+  have hSphEq : Metric.sphere c |R| = Metric.sphere c R := by rw [hRabs]
+  have hFnSph : AnalyticOnNhd ℂ (F n) (Metric.sphere c |R|) := by
+    rw [hSphEq]
+    exact AnalyticOnNhd.mono (hF n) Metric.sphere_subset_closedBall
+  have hGSph : AnalyticOnNhd ℂ G (Metric.sphere c |R|) := by
+    rw [hSphEq]
+    exact AnalyticOnNhd.mono hG Metric.sphere_subset_closedBall
+  have hIntFn : CircleIntegrable (fun x => Real.log ‖F n x‖) c R :=
+    MeromorphicOn.circleIntegrable_log_norm
+      (AnalyticOnNhd.meromorphicOn hFnSph)
+  have hIntG : CircleIntegrable (fun x => Real.log ‖G x‖) c R :=
+    MeromorphicOn.circleIntegrable_log_norm
+      (AnalyticOnNhd.meromorphicOn hGSph)
+  have hIntH2 : CircleIntegrable (fun z => Real.log ‖G z‖ - Real.log ‖F n z‖) c R :=
+    CircleIntegrable.sub hIntG hIntFn
+  have hAvgH2 : Real.circleAverage (fun z => Real.log ‖G z‖ - Real.log ‖F n z‖) c R
+      = Real.circleAverage (fun z => Real.log ‖G z‖) c R -
+        Real.circleAverage (fun z => Real.log ‖F n z‖) c R :=
+    Real.circleAverage_fun_sub hIntG hIntFn
+  have hAbsSph : ∀ z ∈ Metric.sphere c R,
+      |Real.log ‖F n z‖ - Real.log ‖G z‖| ≤ eps / (‖G m0‖ / 2) := by
+    intro z hz
+    have hGz : ‖G m0‖ / 2 ≤ ‖G z‖ := by linarith [hmin z hz]
+    have hFz : ‖G m0‖ / 2 ≤ ‖F n z‖ := by
+      have h1 := hUnifSph z hz
+      have h2 := hmin z hz
+      have h3 : ‖G z‖ - ‖F n z‖ ≤ ‖F n z - G z‖ := by
+        calc ‖G z‖ - ‖F n z‖ ≤ ‖G z - F n z‖ := norm_sub_norm_le _ _
+          _ = ‖F n z - G z‖ := norm_sub_rev _ _
+      linarith [heps_le_m]
+    have hpos2 : 0 < ‖G m0‖ / 2 := by linarith
+    have hLip := abs_log_sub_log_le_of_lower hpos2 hFz hGz
+    have hNorm : |‖F n z‖ - ‖G z‖| ≤ eps := by
+      calc |‖F n z‖ - ‖G z‖| ≤ ‖F n z - G z‖ := abs_norm_sub_norm_le _ _
+        _ ≤ eps := le_of_lt (hUnifSph z hz)
+    calc |Real.log ‖F n z‖ - Real.log ‖G z‖|
+        ≤ |‖F n z‖ - ‖G z‖| / (‖G m0‖ / 2) := hLip
+      _ ≤ eps / (‖G m0‖ / 2) :=
+          div_le_div_of_nonneg_right hNorm (le_of_lt hpos2)
+  have hUp2 : Real.circleAverage (fun z => Real.log ‖G z‖ - Real.log ‖F n z‖) c R
+      ≤ eps / (‖G m0‖ / 2) := by
+    apply Real.circleAverage_mono_on_of_le_circle hIntH2
+    intro x hx
+    have hxR : x ∈ Metric.sphere c R := hRabs ▸ hx
+    have h0 := hAbsSph x hxR
+    rw [abs_sub_comm] at h0
+    exact le_trans (le_abs_self _) h0
+  have hAvgBd2 : Real.circleAverage (fun z => Real.log ‖G z‖) c R -
+      Real.circleAverage (fun z => Real.log ‖F n z‖) c R ≤ eps / (‖G m0‖ / 2) := by
+    rw [← hAvgH2]; exact hUp2
+  have hFc_ge : ‖G c‖ / 2 ≤ ‖F n c‖ := by
+    have h3 : ‖G c‖ - ‖F n c‖ ≤ ‖F n c - G c‖ := by
+      calc ‖G c‖ - ‖F n c‖ ≤ ‖G c - F n c‖ := norm_sub_norm_le _ _
+        _ = ‖F n c - G c‖ := norm_sub_rev _ _
+    linarith [heps_le_mc]
+  have hGc_ge : ‖G c‖ / 2 ≤ ‖G c‖ := by linarith
+  have hposC : 0 < ‖G c‖ / 2 := by linarith
+  have hCenAbs : |Real.log ‖F n c‖ - Real.log ‖G c‖| ≤ eps / (‖G c‖ / 2) := by
+    have hLip := abs_log_sub_log_le_of_lower hposC hFc_ge hGc_ge
+    have hNorm : |‖F n c‖ - ‖G c‖| ≤ eps := by
+      calc |‖F n c‖ - ‖G c‖| ≤ ‖F n c - G c‖ := abs_norm_sub_norm_le _ _
+        _ ≤ eps := le_of_lt hCen
+    calc |Real.log ‖F n c‖ - Real.log ‖G c‖|
+        ≤ |‖F n c‖ - ‖G c‖| / (‖G c‖ / 2) := hLip
+      _ ≤ eps / (‖G c‖ / 2) :=
+          div_le_div_of_nonneg_right hNorm (le_of_lt hposC)
+  have hCen1 : Real.log ‖F n c‖ - Real.log ‖G c‖ ≤ eps / (‖G c‖ / 2) :=
+    le_trans (le_abs_self _) hCenAbs
+  linarith [hgap, hAvgFn, hAvgBd2, hCen1, hB1, hB2, hgapPos]
+
+theorem door1_nonreal_zero_forced {c : ℂ} {R : ℝ} (hR0 : 0 < R)
+    (hRim : R < |c.im|)
+    {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+    (hF : ∀ n, AnalyticOnNhd ℂ (F n) (Metric.closedBall c R))
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    (hGc : G c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, G z ≠ 0)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hdiv : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖F n z - G z‖ < ε) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∃ u ∈ Metric.closedBall c R, (F n u = 0 ∧ u.im ≠ 0) := by
+  obtain ⟨N, hN⟩ := hurwitz_zero_transfer hR0 hF hG hGc hGsph hw hwc hdiv hConv
+  refine ⟨N, fun n hn => ?_⟩
+  obtain ⟨u, huCB, hFu⟩ := hN n hn
+  refine ⟨u, huCB, hFu, ?_⟩
+  intro him
+  have hdist : dist u c ≤ R := Metric.mem_closedBall.mp huCB
+  rw [dist_eq_norm] at hdist
+  have him_le : |(u - c).im| ≤ ‖u - c‖ := Complex.abs_im_le_norm _
+  rw [Complex.sub_im, him] at him_le
+  have hzero : |(0 : ℝ) - c.im| = |c.im| := by rw [zero_sub, abs_neg]
+  rw [hzero] at him_le
+  linarith
+
+end RoucheCount
