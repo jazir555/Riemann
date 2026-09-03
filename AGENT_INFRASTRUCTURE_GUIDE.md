@@ -1303,7 +1303,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   needed) + `uniform_deriv_of_sphere_bound` / `uniform_deriv_of_closedBall_bound` (`M=C/r` from one
   closed-ball sup). **R02 first concrete `M=67200` conditional** on `R02_zeta_upper_obligation`
   (`‖zeta‖≤10` on the disc; poly `≤42`/pi `≤1`/Gamma `≤40` discharged hypothesis-free; `r=0.25` stays in
-  the strip). Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
+  the strip). **Update:** first UNCONDITIONAL end-to-end cell bound closed (newsection
+  `R02ZetaUpper`+`R02DerivBridge`+`R02Unconditional`, consuming the identity theorem):
+  `‖zeta‖≤1012` on the disc (sharp at `M=1` — `r(M)≈180·M^{−0.05}` needs `M≥10^{31}` terms for `r≤5`) ⇒
+  `R02_deriv_bound_unconditional` (`M=6800640`). The `≤10` obligation (hence `M≈0.05` tier) needs
+  FE+Stirling+convexity, not the eta M-test. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
