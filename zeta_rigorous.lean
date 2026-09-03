@@ -4845,3 +4845,220 @@ theorem zeta_S0_lower_of_S1 (h1 : (1 / 39 : ℝ) ≤ ‖riemannZeta (1 - zetaCel
 #print axioms zetaRefl_r_1_ge
 #print axioms zeta_S1_lower_of_S2048
 #print axioms zeta_S0_lower_of_S1
+
+/-!
+## Kuzmin–Landau first-derivative test (linear phase) + AE phase-gap inputs.
+
+GOAL (brief 2026-09-03, Tier 1): a standalone, reusable Kuzmin–Landau-type
+exponential-sum bound proved from scratch (geometric sum + Jordan's inequality
++ elementary log phase-gaps), as the first bankable step toward cancellation
+tails for AE's premise `‖S_{2048}(1-s0)‖ ≥ 1/3` in `zeta_S1_lower_of_S2048`
+(`s1 = 1 - s0`, `Re = 0.605`, phase `t = 8.75`).
+
+GREP-FIRST RECORD (searches run before writing; `Mathlib/` = repo-root `Mathlib/`):
+* `Kuzmin|van der Corput|VanDerCorput|xponent.?[Pp]air` -- 0 hits: no
+  Kuzmin–Landau / van der Corput / exponent-pair material exists in Mathlib.
+  The test below is therefore created in-file (Tier 1 = linear phase, i.e. the
+  geometric-sum core + denominator gap; the nonlinear assembly is residual).
+* `sum_range_by_parts` -- EXISTS (`Mathlib/Algebra/BigOperators/Module.lean:57`,
+  `Finset.sum_range_by_parts`, Abel transformation): the partial-summation half
+  of a future nonlinear assembly is available; not consumed here (the linear
+  test needs no summation by parts).
+* Lower bounds on `‖riemannZeta‖`: ABSENT (no `norm`-`riemannZeta`-lower
+  material in `Mathlib/`; agrees with the `§18b.10` record).
+* Consumed Mathlib lemmas (every name verified by grep before use):
+  `geom_sum_mul` (`Mathlib/Algebra/Ring/GeomSum.lean:232`, root namespace),
+  `Complex.exp_nat_mul` (`Mathlib/Analysis/Complex/Exponential.lean:157`),
+  `Complex.norm_exp_ofReal_mul_I`
+  (`Mathlib/Analysis/Complex/Trigonometric.lean:950`),
+  `Complex.exp_ofReal_mul_I_im` (same file, `:532`),
+  `Complex.abs_im_le_norm` (`Mathlib/Analysis/Complex/Norm.lean:185`),
+  `Real.mul_abs_le_abs_sin`
+  (`Mathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean:93`),
+  `Real.log_le_sub_one_of_pos` / `Real.log_div` / `Real.log_mul` /
+  `Real.log_le_log` (`Mathlib/Analysis/SpecialFunctions/Log/Basic.lean`),
+  `Real.pi_gt_three` (`Mathlib/Analysis/Real/Pi/Bounds.lean`),
+  `le_div_iff₀` / `one_div_le_one_div_of_le` (order/field basics).
+
+PROVED (all unconditional, no `sorry`/`admit`/`axiom`):
+* (KL-a) `KL_geom_unit_norm_le`: geometric core
+  `‖∑_{n<N} w^n‖ * ‖w-1‖ ≤ 2` for `‖w‖ = 1`.
+* (KL-b) `KL_exp_lin_norm_le`: linear-phase exponential form
+  (`e^{inθ} = (e^{iθ})^n` + unit modulus).
+* (KL-c) `KL_denom_gap_le`: denominator ("first derivative") lower bound
+  `2/π * |θ| ≤ ‖e^{iθ}-1‖` for `|θ| ≤ π/2` (Jordan via `‖z‖ ≥ |z.im|`).
+* (KL-d) `KL_linear_firstDerivTest`: headline test
+  `‖∑_{n<N} e^{inθ}‖ ≤ π/|θ|` for `0 < |θ| ≤ π/2`.
+* (KL-e) `KL_log_gap_ge`: log phase-gap `1/(n+1) ≤ log(n+1) - log n`
+  (the mean-value bound `1/ξ ≥ 1/(n+1)` via the elementary log inequality).
+* (KL-f) `KL_AE_phase_gap_lower` / `KL_AE_phase_small`: exact AE numbers on
+  the dyadic block `1024 ≤ n ≤ 2048` at `t = 8.75`:
+  `8.75/2049 ≤ 8.75·(log(n+1)-log n)` (`≈ 0.00427`) and
+  `|8.75·(log(n+1)-log n)| ≤ π/2` (so (KL-d) applies with `θ = 8.75·gap`).
+
+RESIDUAL (quantified; Tier 2 needs, see final report):
+* the nonlinear assembly (Abel bridge over `Finset.sum_range_by_parts` +
+  total variation of `n ↦ 1/(e^{iΔₙ}-1)`) is still open;
+* the numbers show the first-derivative test alone is quantitatively
+  insufficient at AE parameters (`π/δ ≈ 736` on the `[1024,2048)` block vs the
+  amplitude-weighted triangle `≈ 12.4`; per-dyadic-block KL weights diverge as
+  `N^{0.395}`): closing the tail needs second-derivative / van der Corput
+  machinery or rigorous complex interval arithmetic, not a sharper KL constant.
+-/
+
+/-- (KL-a) Geometric-sum core of Kuzmin–Landau: for a unit-modulus ratio,
+`‖∑_{n<N} w^n‖ * ‖w-1‖ ≤ 2` (from `(∑ w^n)(w-1) = w^N-1` + triangle). -/
+theorem KL_geom_unit_norm_le (w : ℂ) (hw : ‖w‖ = 1) (N : ℕ) :
+    ‖∑ n ∈ Finset.range N, w ^ n‖ * ‖w - 1‖ ≤ 2 := by
+  have hgeom := geom_sum_mul w N
+  have hnorm : ‖∑ n ∈ Finset.range N, w ^ n‖ * ‖w - 1‖ = ‖w ^ N - 1‖ := by
+    rw [← norm_mul, hgeom]
+  rw [hnorm]
+  have htri := norm_sub_le (w ^ N) (1 : ℂ)
+  rw [norm_one] at htri
+  have hpow : ‖w ^ N‖ = 1 := by rw [norm_pow, hw, one_pow]
+  linarith
+
+/-- (KL-b) Linear-phase exponential form: `e^{inθ} = (e^{iθ})^n`, and
+`‖e^{iθ}‖ = 1`, so (KL-a) applies directly. -/
+theorem KL_exp_lin_norm_le (θ : ℝ) (N : ℕ) :
+    ‖∑ n ∈ Finset.range N, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I)‖ *
+      ‖Complex.exp ((θ : ℂ) * Complex.I) - 1‖ ≤ 2 := by
+  have hterm : ∀ n : ℕ, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I)
+      = (Complex.exp ((θ : ℂ) * Complex.I)) ^ n := by
+    intro n
+    have e : ((n : ℂ) * (θ : ℂ) * Complex.I) = ((n : ℂ) * ((θ : ℂ) * Complex.I)) := by
+      ring
+    rw [e]
+    exact Complex.exp_nat_mul _ n
+  have hsum : (∑ n ∈ Finset.range N, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I))
+      = ∑ n ∈ Finset.range N, (Complex.exp ((θ : ℂ) * Complex.I)) ^ n :=
+    Finset.sum_congr rfl (fun n _ => hterm n)
+  rw [hsum]
+  exact KL_geom_unit_norm_le _ (Complex.norm_exp_ofReal_mul_I θ) N
+
+/-- (KL-c) Denominator ("first derivative") lower bound: `2/π * |θ| ≤ ‖e^{iθ}-1‖`
+for `|θ| ≤ π/2`, via `‖z‖ ≥ |z.im|`, `(e^{iθ}-1).im = sin θ`, and Jordan. -/
+theorem KL_denom_gap_le (θ : ℝ) (hθ : |θ| ≤ Real.pi / 2) :
+    2 / Real.pi * |θ| ≤ ‖Complex.exp ((θ : ℂ) * Complex.I) - 1‖ := by
+  have him : (Complex.exp ((θ : ℂ) * Complex.I) - 1).im = Real.sin θ := by
+    rw [Complex.sub_im, Complex.exp_ofReal_mul_I_im, Complex.one_im, sub_zero]
+  have h1 : |Real.sin θ| ≤ ‖Complex.exp ((θ : ℂ) * Complex.I) - 1‖ := by
+    have h := Complex.abs_im_le_norm (Complex.exp ((θ : ℂ) * Complex.I) - 1)
+    rwa [him] at h
+  exact le_trans (Real.mul_abs_le_abs_sin hθ) h1
+
+/-- (KL-d) Headline Kuzmin–Landau first-derivative test, linear phase:
+`‖∑_{n<N} e^{inθ}‖ ≤ π/|θ|` for `θ ≠ 0`, `|θ| ≤ π/2`. -/
+theorem KL_linear_firstDerivTest (θ : ℝ) (hθ0 : θ ≠ 0) (hθ : |θ| ≤ Real.pi / 2)
+    (N : ℕ) :
+    ‖∑ n ∈ Finset.range N, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I)‖ ≤
+      Real.pi / |θ| := by
+  have hpos : (0 : ℝ) < |θ| := abs_pos.mpr hθ0
+  have hpi : (0 : ℝ) < Real.pi := Real.pi_pos
+  have hpi0 : Real.pi ≠ 0 := ne_of_gt hpi
+  have hθ0' : |θ| ≠ 0 := ne_of_gt hpos
+  have hsmall : (0 : ℝ) < 2 / Real.pi * |θ| := mul_pos (div_pos two_pos hpi) hpos
+  have hdenom : 2 / Real.pi * |θ| ≤ ‖Complex.exp ((θ : ℂ) * Complex.I) - 1‖ :=
+    KL_denom_gap_le θ hθ
+  have hcore := KL_exp_lin_norm_le θ N
+  have hmul : ‖∑ n ∈ Finset.range N, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I)‖ *
+      (2 / Real.pi * |θ|) ≤ 2 :=
+    le_trans (mul_le_mul_of_nonneg_left hdenom (norm_nonneg _)) hcore
+  have hle : ‖∑ n ∈ Finset.range N, Complex.exp ((n : ℂ) * (θ : ℂ) * Complex.I)‖ ≤
+      2 / (2 / Real.pi * |θ|) := (le_div_iff₀ hsmall).mpr hmul
+  have heq : (2 : ℝ) / (2 / Real.pi * |θ|) = Real.pi / |θ| := by
+    field_simp
+  rwa [heq] at hle
+
+/-- (KL-e) Log phase-gap: `1/(n+1) ≤ log(n+1) - log n` for `1 ≤ n`
+(the mean-value bound `log(n+1)-log n = 1/ξ ≥ 1/(n+1)` via
+`log x ≤ x - 1` applied to `n/(n+1)`). -/
+theorem KL_log_gap_ge (n : ℕ) (hn : 1 ≤ n) :
+    1 / ((n : ℝ) + 1) ≤ Real.log ((n : ℝ) + 1) - Real.log (n : ℝ) := by
+  have hn0 : (0 : ℕ) < n := by omega
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn0
+  have h1 : (0 : ℝ) < (n : ℝ) + 1 := by
+    have hnn : (0 : ℝ) ≤ (n : ℝ) := by exact_mod_cast Nat.zero_le n
+    linarith
+  have hfrac : (0 : ℝ) < (n : ℝ) / ((n : ℝ) + 1) := div_pos hnR h1
+  have hlog := Real.log_le_sub_one_of_pos hfrac
+  have hsplit : Real.log ((n : ℝ) / ((n : ℝ) + 1))
+      = Real.log (n : ℝ) - Real.log ((n : ℝ) + 1) :=
+    Real.log_div (ne_of_gt hnR) (ne_of_gt h1)
+  have h10 : ((n : ℝ) + 1) ≠ 0 := ne_of_gt h1
+  have heq : (n : ℝ) / ((n : ℝ) + 1) - 1 = -(1 / ((n : ℝ) + 1)) := by
+    field_simp
+    ring
+  linarith
+
+/-- (KL-f, lower) AE phase-gap on the dyadic block: for `1024 ≤ n ≤ 2048`,
+`8.75/2049 ≤ 8.75·(log(n+1) - log n)` (value `≈ 0.00427`). -/
+theorem KL_AE_phase_gap_lower (n : ℕ) (hn1 : 1024 ≤ n) (hn2 : n ≤ 2048) :
+    (8.75 : ℝ) / 2049 ≤ 8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ)) := by
+  have hn : 1 ≤ n := by omega
+  have hgap := KL_log_gap_ge n hn
+  have hnR : ((n : ℝ) + 1) ≤ 2049 := by
+    have hle : (n : ℝ) ≤ 2048 := by exact_mod_cast hn2
+    linarith
+  have hpos : (0 : ℝ) < (n : ℝ) + 1 := by
+    have hnn : (0 : ℝ) ≤ (n : ℝ) := by exact_mod_cast Nat.zero_le n
+    linarith
+  have h1 : (1 : ℝ) / 2049 ≤ 1 / ((n : ℝ) + 1) :=
+    one_div_le_one_div_of_le hpos hnR
+  have h2 : (8.75 : ℝ) * (1 / 2049) ≤ 8.75 * (1 / ((n : ℝ) + 1)) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have h3 : (8.75 : ℝ) * (1 / ((n : ℝ) + 1))
+      ≤ 8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ)) :=
+    mul_le_mul_of_nonneg_left hgap (by norm_num)
+  have e1 : (8.75 : ℝ) / 2049 = 8.75 * (1 / 2049) := by ring
+  linarith
+
+/-- (KL-f, upper) AE phase-step smallness: for `1024 ≤ n`,
+`|8.75·(log(n+1) - log n)| ≤ π/2`, so (KL-d) applies with `θ = 8.75·gap`
+(step `≤ 8.75/1024 ≈ 0.00854 ≪ π/2`). -/
+theorem KL_AE_phase_small (n : ℕ) (hn1 : 1024 ≤ n) :
+    |8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ))| ≤ Real.pi / 2 := by
+  have hn0 : (0 : ℕ) < n := by omega
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn0
+  have hnR0 : (n : ℝ) ≠ 0 := ne_of_gt hnR
+  have hn1024 : (1024 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn1
+  have hinv : (0 : ℝ) < 1 / (n : ℝ) := one_div_pos.mpr hnR
+  have h1n : (0 : ℝ) < 1 + 1 / (n : ℝ) := by linarith
+  have hlog_le : Real.log (1 + 1 / (n : ℝ)) ≤ 1 / (n : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos h1n
+    linarith
+  have hsplit : Real.log ((n : ℝ) + 1) - Real.log (n : ℝ)
+      = Real.log (1 + 1 / (n : ℝ)) := by
+    have h1 : ((n : ℝ) + 1) = (n : ℝ) * (1 + 1 / (n : ℝ)) := by
+      field_simp
+    rw [h1, Real.log_mul (ne_of_gt hnR) (ne_of_gt h1n)]
+    rw [add_sub_cancel_left]
+  have hnn : (0 : ℝ) ≤ Real.log ((n : ℝ) + 1) - Real.log (n : ℝ) := by
+    have hle : (n : ℝ) ≤ (n : ℝ) + 1 := by linarith
+    have h := Real.log_le_log hnR hle
+    linarith
+  have hstep : (1 : ℝ) / (n : ℝ) ≤ 1 / 1024 :=
+    one_div_le_one_div_of_le (by norm_num) hn1024
+  have hpi3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have hgap_nn : (0 : ℝ) ≤ 8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ)) :=
+    mul_nonneg (by norm_num) hnn
+  have hbound : 8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ)) ≤ Real.pi / 2 := by
+    have h8 : 8.75 * (Real.log ((n : ℝ) + 1) - Real.log (n : ℝ))
+        ≤ 8.75 * (1 / (n : ℝ)) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      rw [hsplit]
+      exact hlog_le
+    have h9 : (8.75 : ℝ) * (1 / (n : ℝ)) ≤ 8.75 * (1 / 1024) :=
+      mul_le_mul_of_nonneg_left hstep (by norm_num)
+    linarith
+  rw [abs_of_nonneg hgap_nn]
+  exact hbound
+
+#print axioms KL_geom_unit_norm_le
+#print axioms KL_exp_lin_norm_le
+#print axioms KL_denom_gap_le
+#print axioms KL_linear_firstDerivTest
+#print axioms KL_log_gap_ge
+#print axioms KL_AE_phase_gap_lower
+#print axioms KL_AE_phase_small
