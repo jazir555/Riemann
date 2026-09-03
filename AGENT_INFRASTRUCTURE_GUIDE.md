@@ -1258,6 +1258,9 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
   **First stones closed:** real-linear `Hyperbolic` blocks (`Hyperbolic_X_sub_C_real`), finite real-rooted
   products (`Hyperbolic_multiset_prod_real_linear`), iterated Gauss–Lucas (`hyperbolic_iterate_derivative`).
+  **Closed since:** d=2 converse `real_quadratic_discriminant_nonneg_of_hyperbolic` (real coefficients,
+  contrapositive via explicit nonreal root — no sqrt API needed) + Jensen degree-2 Turán inequality
+  `jensen_degree_two_ineq_of_hyperbolic` (`γ_{n+1}² ≥ γ_n·γ_{n+2}` from `Hyperbolic (jensenPoly 2 n)`).
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
@@ -1339,6 +1342,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
 - **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine). The `(0,0.01]` bottom strip
   IS packaged conditionally (`BottomStripObligations` + `bottom_strip_covered`); global
   `xiShifted_differentiable` is false-as-stated (strip-version entireness proved — use that).
+  **Scaffolding closed:** 10 edge-strip cells packaged (`edgeStripCells` + coverage combinatorics),
+  `EdgeS00` template (geometry `dx=1.25/dy=0.005/radius<1.26`, poly `≤56`/pi `≤1` hypothesis-free, Gamma
+  `≤400` at the NEW re-value `0.005` via `Real.Gamma 1.0025 ≤ 1` one-over-x route), `CutL10`/`CutR10`
+  thin rects (`y∈(−0.49,0.49)`, radius `<0.56`) with line-membership lemmas. **Zero strip cells fully
+  closed** — full closure needs the same zeta wall as central cells (`Azeta` + tight upper).
 
 **Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
 Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. Remaining: instantiate a
