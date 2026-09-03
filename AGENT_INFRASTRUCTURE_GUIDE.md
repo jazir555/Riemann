@@ -1285,7 +1285,12 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   in central_cover):** Jensen-gap counting lemma + `hurwitz_zero_transfer` (uniform convergence ⇒
   approximants inherit a zero) + `door1_nonreal_zero_forced` (disc `R<|c.im|` ⇒ forced zero nonreal).
   Built from scratch (no winding/argument-principle/count-zeros anywhere in Mathlib — verified).
-  Remaining S2 links: (S2a) zero ⇒ divisor `≥1` (needs finite-order packaging from isolated zeros);
+   Remaining S2 links: (S2a) zero ⇒ divisor `≥1` (needs finite-order packaging from isolated zeros);
+   **S2a CLOSED (`RoucheCount.divisor_ge_one_of_zero` + `hurwitz_zero_transfer_of_zero` +
+   `door1_nonreal_zero_forced_of_zero` wrappers):** `G w = 0` alone insufficient (divisor maps `⊤↦0`);
+   `G c ≠ 0` gives `orderAt c = 0 ≠ ⊤`, transferred via preconnected closed-ball clopen argument +
+   `orderAt w ≠ 0` ⇒ `1 ≤ divisor`. Wrappers match `hurwitz_zero_transfer`/`door1_nonreal_zero_forced`
+   signatures with `hdiv` replaced by `hGw : G w = 0` — S2b now feeds directly from a zero witness.
   (S2b) polynomial-eval packaging + `hyperbolic_zeroFree_off_real` composition in door-1 file;
   (S2c) per-disc convergence + center-nonzero from S1 machinery.
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
