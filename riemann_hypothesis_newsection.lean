@@ -1,4 +1,6 @@
 import riemann_hypothesis
+import zeta_rigorous
+import central_cover_assembly
 
 /-!
 # The hard-difference / mollified / Rouché door to RH
@@ -578,3 +580,328 @@ theorem mollified_K2_gap_implies_zeta_bound {z : ℂ} {δ : ℝ}
   linarith
 
 end MollifiedAttack
+
+/-!
+# R02 zeta-upper bridge (eta-limit + denominator lower, toward door 4 + R02 deriv M)
+
+This section supplies unconditional eta-side bounds on the R02 disc `s`-rect
+`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]` (exactly
+`DerivCauchyBridge.R02_zeta_upper_obligation`'s rect, see
+`central_cover_assembly.lean`), reusing `zeta_rigorous.lean` (imported above;
+acyclic: that file imports only `Mathlib`) without copying:
+
+* `R02_norm_le_of_mem` — `‖s‖ ≤ 9` on the rect (triangle `|Re|+|Im|`).
+* `R02_cvtFactor_norm_ge` — uniform conversion-factor lower
+  `0.18 ≤ ‖1 - 2^{1-s}‖` for `s.re ≤ 0.74` (via `|2^{1-s}| = 2^{1-Re} ≥ 2^{0.25}
+  ≥ 1.18` + reverse triangle; the `1.18 ≤ 2^{0.25}` step clears to
+  `1.18^4 ≤ 2` exactly as `R00ZetaEM.rpow_two_R00_ge`).
+* `R02_etaDirichlet_S2_norm_le` — two-term eta partial sum `‖S₂(s)‖ ≤ 2` for
+  `0.05 ≤ Re` (term norms `(n+1)^{-Re} ≤ 1`).
+* `R02_etaPairLim_upper` — unconditional paired-eta-limit upper
+  `‖∑' m, etaPairTerm s m‖ ≤ 182` on the rect (`S₂ ≤ 2` +
+  `zetaCell_even_remainder_le` at `M = 1`, `C = 9`, `σ ≥ 0.05` giving tail
+  `9/σ ≤ 180`; `M = 1` gives `M^{-σ} = 1`, so no rpow lower is needed).
+* `R02_zeta_upper_of_etaPairLim_eq` — conditional zeta upper
+  `‖zeta s‖ ≤ 1012` on the rect from the single continuation premise
+  `∀ s in rect, (∑' m, etaPairTerm s m) = etaHurwitz s`
+  (via `etaHurwitz_eq_etaRHS_compl` on `{1}ᶜ` + denominator lower +
+  `‖G‖ ≤ 182`; `182/0.18 ≤ 1012`).
+
+Honest residual (no `sorry`/`axiom`/stand-ins; all lemmas below are proved as
+implications with explicit premises):
+* The sole analytic premise `hCont` (`G = etaHurwitz` on the rect) is NOT proved
+  here. It needs `G` analytic on an open rectangle `U ⊃ rect ∪ {2}` with uniform
+  majorant (`Re ≥ 0.025`, `‖s‖ ≤ 12` gives `12*(m+1)^{-1.025}` summable) + the
+  identity theorem from agreement on `1 < Re` (`etaPairLim_eq_of_one_lt_re`);
+  the existing `zeta_rigorous` ball proof (`ball 1 (3/4)`) does not cover the
+  rect (`Im ≈ -6`), so a new `U` is required. This is one precise lemma.
+* The constant `1012` (hence deriv `M = 6800640` via the general bridge to be
+  added next) is far from the `10` in `R02_zeta_upper_obligation` (which would
+  give `M = 67200`). With `σ = 0.05`, `r(M) = C*M^{-σ}/σ ≈ 180*M^{-0.05}`;
+  reaching `r ≤ 5` needs `M ≥ 36^{20} ≈ 1.3e31` terms — infeasible. Thus `≤ 10`
+  is not reachable by this `M = 1` crude route; `≤ 1012` is the sharp
+  `M = 1` consequence. Closing `≤ 10` needs either astronomically large `M`
+  (impossible) or a different analytic input (functional equation + Stirling +
+  convexity), which is the door-4 tail-gap remainder.
+-/
+
+namespace R02ZetaUpper
+
+theorem R02_norm_le_of_mem {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖s‖ ≤ 9 := by
+  have h := Complex.norm_le_abs_re_add_abs_im s
+  have hre_abs : |s.re| ≤ 0.74 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have him_abs : |s.im| ≤ 8.25 := by
+    rw [abs_le]
+    constructor <;> linarith
+  linarith
+
+set_option maxHeartbeats 800000 in
+theorem R02_cvtFactor_norm_ge {s : ℂ} (hre_hi : s.re ≤ 0.74) :
+    (0.18 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hre1 : ((1 : ℂ) - s).re = 1 - s.re := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hbase : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ = (2 : ℝ) ^ (((1 : ℂ) - s).re) := by
+    rw [hbase]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hre_ge : (0.25 : ℝ) ≤ (((1 : ℂ) - s).re) := by
+    rw [hre1]
+    linarith
+  have h118_025 : (1.18 : ℝ) ≤ (2 : ℝ) ^ ((0.25 : ℝ)) := by
+    have hpow : ((1.18 : ℝ)) ^ ((4 : ℕ)) ≤ ((((2 : ℝ) ^ ((0.25 : ℝ)))) ^ ((4 : ℕ)) : ℝ) := by
+      have e : ((((2 : ℝ) ^ ((0.25 : ℝ)))) ^ ((4 : ℕ)) : ℝ) = (2 : ℝ) ^ ((1 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+        rw [show (0.25 : ℝ) * ((((4 : ℕ)) : ℝ)) = (1 : ℝ) by norm_num]
+        rw [show (1 : ℝ) = ((((1 : ℕ)) : ℝ)) by norm_num]
+        exact Real.rpow_natCast 2 1
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  have h118_le : (1.18 : ℝ) ≤ (2 : ℝ) ^ (((1 : ℂ) - s).re) :=
+    le_trans h118_025 (Real.rpow_le_rpow_of_exponent_le (by norm_num) hre_ge)
+  have hw_ge : (1.18 : ℝ) ≤ ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hnorm]
+    exact h118_le
+  have htri := norm_add_le ((2 : ℂ) ^ ((1 : ℂ) - s) - 1) (1 : ℂ)
+  rw [sub_add_cancel] at htri
+  rw [norm_one] at htri
+  have hrev : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := norm_sub_rev _ _
+  rw [hrev] at htri
+  linarith
+
+theorem R02_etaDirichlet_S2_norm_le {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
+    ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ 2 := by
+  have h0 : etaDirichletTerm s 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hterm1_eq : etaDirichletTerm s 1 = -1 / ((((2 : ℕ)) : ℂ) ^ s) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ s)‖ = (2 : ℝ) ^ (s.re) := by
+    rw [h2cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have h2ge : (1 : ℝ) ≤ (2 : ℝ) ^ (s.re) := by
+    have hexp_nonneg : (0 : ℝ) ≤ s.re := by linarith
+    calc (1 : ℝ) = (2 : ℝ) ^ ((0 : ℝ)) := by rw [Real.rpow_zero]
+      _ ≤ (2 : ℝ) ^ (s.re) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_nonneg
+  have h1_norm : ‖etaDirichletTerm s 1‖ ≤ 1 := by
+    rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm]
+    rw [div_le_one (Real.rpow_pos_of_pos (by norm_num) _)]
+    exact h2ge
+  have hsum2 : (∑ k ∈ Finset.range 2, etaDirichletTerm s k) =
+      etaDirichletTerm s 0 + etaDirichletTerm s 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum2, h0]
+  calc ‖(1 : ℂ) + etaDirichletTerm s 1‖
+      ≤ ‖(1 : ℂ)‖ + ‖etaDirichletTerm s 1‖ := norm_add_le _ _
+    _ ≤ 1 + 1 := by rw [norm_one]; linarith [h1_norm]
+    _ = 2 := by norm_num
+
+theorem R02_etaPairLim_upper {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖∑' m, etaPairTerm s m‖ ≤ 182 := by
+  have hspos : 0 < s.re := by linarith
+  have hC : ‖s‖ ≤ 9 := R02_norm_le_of_mem hre_lo hre_hi him_lo him_hi
+  have hC0 : (0 : ℝ) ≤ 9 := by norm_num
+  have hS2 : ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ 2 :=
+    R02_etaDirichlet_S2_norm_le hre_lo
+  have hM1 : ((((1 : ℕ)) : ℝ) ^ (-s.re)) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  have hrem0 := zetaCell_even_remainder_le hspos hC hC0 1 (by norm_num)
+  rw [show (2 * 1 : ℕ) = 2 by norm_num, hM1] at hrem0
+  have hdiv : (9 : ℝ) * (1 / s.re) ≤ 180 := by
+    have hpos : (0 : ℝ) < s.re := hspos
+    have hinv : 1 / s.re ≤ 20 := by
+      rw [div_le_iff₀ hpos]
+      linarith
+    have h9 : (9 : ℝ) * (1 / s.re) ≤ 9 * 20 :=
+      mul_le_mul_of_nonneg_left hinv (by norm_num)
+    linarith
+  have htail180 : ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ 180 :=
+    le_trans hrem0 hdiv
+  have htri := norm_add_le (∑ k ∈ Finset.range 2, etaDirichletTerm s k)
+    ((∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range 2, etaDirichletTerm s k))
+  rw [add_sub_cancel] at htri
+  linarith
+
+theorem R02_zeta_upper_of_etaPairLim_eq
+    (hCont : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      (∑' m, etaPairTerm s m) = etaHurwitz s) :
+    ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ 1012 := by
+  intro s hre_lo hre_hi him_lo him_hi
+  have hG := R02_etaPairLim_upper hre_lo hre_hi him_lo him_hi
+  have hConts := hCont s hre_lo hre_hi him_lo him_hi
+  have hne1 : s ≠ 1 := by
+    intro h
+    have hs1 : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hmem : s ∈ ({1}ᶜ : Set ℂ) := by
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    exact hne1
+  have heq := etaHurwitz_eq_etaRHS_compl hmem
+  have hGeq : (∑' m, etaPairTerm s m) =
+      (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+    rw [hConts, heq]
+    rfl
+  have hden_ge := R02_cvtFactor_norm_ge hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hden_ne : (1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s) ≠ 0 :=
+    norm_pos_iff.mp hden_pos
+  have hZeq : riemannZeta s =
+      (∑' m, etaPairTerm s m) / ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)) := by
+    rw [eq_div_iff hden_ne, mul_comm]
+    exact hGeq.symm
+  have hZnorm : ‖riemannZeta s‖ =
+      ‖∑' m, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      182 / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hG
+      (inv_nonneg.mpr (le_trans (by norm_num) hden_ge))
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖)⁻¹ ≤ ((0.18 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hstep2 : (182 : ℝ) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 182 / 0.18 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have hle : ‖∑' m, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      182 / 0.18 := le_trans hstep1 hstep2
+  have h182 : (182 : ℝ) / 0.18 ≤ 1012 := by norm_num
+  have hzeta_eq : zeta s = riemannZeta s := rfl
+  rw [hzeta_eq, hZnorm]
+  exact le_trans hle h182
+
+end R02ZetaUpper
+
+/-!
+# R02 general deriv bridge (any `B`) + conditional `M = 6800640` from the eta premise
+
+This section generalizes `DerivCauchyBridge.xiShifted_upper_of_zeta_upper_R02`
+(`B = 10` giving `16800` and `M = 67200`) to any `B`, reusing the
+hypothesis-free poly/pi/Gamma uppers (`poly_upper_R02_disc`,
+`pi_upper_R02_disc`, `gamma_upper_R02_disc`) and Cauchy machinery
+(`R02_s_of_sphere_re_im`, `R02_sphere_mem_strip`, `uniform_deriv_of_sphere_bound`)
+via the imports above. Combined with `R02_zeta_upper_of_etaPairLim_eq`
+(`B = 1012` from `hCont`), this yields an end-to-end (modulo the single
+`hCont`) cell deriv bound `‖deriv xiShifted‖ ≤ 6800640` on `R02`
+(`42*1*40*1012/0.25 = 6800640`). Still far from fencing (`M ≈ 0.05`), but it is
+the first unconditional-shape deriv `M` whose only premise is the precise
+continuation identity `G = etaHurwitz` on the rect (now being closed in
+`zeta_rigorous.lean` by the concurrent `{Re > 0}` identity proof).
+-/
+
+namespace R02DerivBridge
+
+theorem R02_xiShifted_upper_of_zeta_upper_general {B : ℝ}
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ B)
+    {w u : ℂ} (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    ‖xiShifted u‖ ≤ 42 * 1 * 40 * B := by
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    DerivCauchyBridge.R02_s_of_sphere_re_im hw hu
+  have hpoly := DerivCauchyBridge.poly_upper_R02_disc hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := DerivCauchyBridge.pi_upper_R02_disc hsre_lo
+  have hgam := DerivCauchyBridge.gamma_upper_R02_disc hsre_lo hsre_hi
+  have hzeta : ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ B :=
+    hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 * 40 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  exact mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+
+theorem R02_entire_upper_of_zeta_upper_general {B : ℝ}
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ B)
+    {w u : ℂ} (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    ‖CentralCoverAssembly.xiShiftedEntire u‖ ≤ 42 * 1 * 40 * B := by
+  obtain ⟨hlo, hhi⟩ := DerivCauchyBridge.R02_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  exact R02_xiShifted_upper_of_zeta_upper_general hZ hw hu
+
+theorem R02_uniform_sphere_bound_general {B : ℝ}
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ B) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 42 * 1 * 40 * B := by
+  intro w hw z hz
+  exact R02_entire_upper_of_zeta_upper_general hZ hw hz
+
+theorem R02_deriv_bound_of_zeta_upper_general {B : ℝ}
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ B) :
+    ∀ w, CentralCoverAssembly.R02.mem w →
+      ‖deriv xiShifted w‖ ≤ 42 * 1 * 40 * B / 0.25 := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R02 0.25 (42 * 1 * 40 * B) (by norm_num)
+    (fun w hw => DerivCauchyBridge.R02_strip_of_mem hw)
+    (R02_uniform_sphere_bound_general hZ)
+  exact hM
+
+theorem R02_deriv_bound_of_etaPairLim_eq
+    (hCont : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      (∑' m, etaPairTerm s m) = etaHurwitz s) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ 6800640 := by
+  have hZ := R02ZetaUpper.R02_zeta_upper_of_etaPairLim_eq hCont
+  have hD := R02_deriv_bound_of_zeta_upper_general hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (42 : ℝ) * 1 * 40 * 1012 / 0.25 = 6800640 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+end R02DerivBridge
+
+/-!
+# R02 unconditional zeta/deriv bounds via the `{Re > 0}` identity (concurrent)
+
+The concurrent `zeta_rigorous.lean` identity
+`etaPairLim_eq_etaHurwitz_of_pos : 0 < s.re → (∑' m, etaPairTerm s m) =
+etaHurwitz s` (analytic `G` on `{Re > 0}` + identity theorem from `Re > 1`,
+covering the R02 rect since `0.05 ≤ Re`) discharges the sole `hCont` premise
+above. Instantiating gives unconditional `‖zeta‖ ≤ 1012` on the R02 disc
+`s`-rect and `‖deriv xiShifted‖ ≤ 6800640` on `R02` — the first end-to-end
+cell deriv bound in the repo (with larger `M` than the `67200` conditional on
+`≤ 10`; `≤ 10` itself remains open for the reasons in `R02ZetaUpper`).
+-/
+
+namespace R02Unconditional
+
+theorem R02_hCont_of_pos : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 →
+    -8.25 ≤ s.im → s.im ≤ -5.25 →
+    (∑' m, etaPairTerm s m) = etaHurwitz s := by
+  intro s hre_lo _ _ _
+  exact etaPairLim_eq_etaHurwitz_of_pos (by linarith)
+
+theorem R02_zeta_upper_unconditional : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 →
+    -8.25 ≤ s.im → s.im ≤ -5.25 → ‖zeta s‖ ≤ 1012 :=
+  R02ZetaUpper.R02_zeta_upper_of_etaPairLim_eq R02_hCont_of_pos
+
+theorem R02_deriv_bound_unconditional : ∀ w,
+    CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ 6800640 :=
+  R02DerivBridge.R02_deriv_bound_of_etaPairLim_eq R02_hCont_of_pos
+
+end R02Unconditional
