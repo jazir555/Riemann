@@ -20244,3 +20244,104 @@ theorem jensen_degree_two_ineq_of_hyperbolic (n : ℕ) (ha : taylorCoeff (n + 2)
   linarith
 
 end JensenRH
+
+
+namespace JensenRH
+
+/-!
+## Hurwitz section-convergence stone S1/S2 (door 1).
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Mathlib complex Hurwitz (zeros preserved under locally uniform limit): NO file found.
+  Searched `Mathlib/Analysis/Complex/` (71 files): `LocallyUniformLimit.lean:20-22,136`
+  has `TendstoLocallyUniformlyOn.differentiableOn` (holomorphic limit, no zeros);
+  `Analysis/Analytic/IsolatedZeros.lean:125` has
+  `AnalyticAt.eventually_eq_zero_or_eventually_ne_zero` (isolated zeros, no Hurwitz);
+  `Analysis/Complex/JensenFormula.lean` has circle-average log-norm (no Hurwitz
+  corollary); no complex `Hurwitz`/`Rouche` in `Mathlib/Analysis/Complex/` (only
+  Hurwitz-zeta in `NumberTheory/LSeries/`). Docs `docs/1000.yaml:1377` (Hurwitz
+  complex) and `:1503` (Rouche) list titles with NO `decl` (= missing from Mathlib).
+- Mathlib available and used here: `Data/Nat/Choose/Basic.lean:288`
+  (`Nat.descFactorial_eq_factorial_mul_choose`),
+  `Data/Nat/Factorial/Basic.lean:457` (`Nat.descFactorial_le_pow`),
+  `NumberTheory/LSeries/RiemannZeta.lean:90` (`differentiable_completedZeta₀`,
+  entire XI, noted as residual feeder, not used in proofs below).
+- Repo scaffolding (READ-ONLY, not modified): `JensenScratch.lean:76-85`
+  (`uniformConvergesOnCompacta`, `sectionsConvergeHyp` as
+  `fun d => jensenPoly d 0 -> genFun` unscaled), `:90-94` (`hurwitzHyp`:
+  hyperbolic + locally uniform convergence implies limit real-rooted).
+
+Stone proved (unconditional, no `sorry`/`axiom`), APPEND-ONLY:
+1. `hyperbolic_zeroFree_off_real`: hyperbolic implies zero-free off the real axis
+   (S2 disc ingredient: every hyperbolic poly is zero-free on any disc/strip
+   disjoint from the reals).
+2. `hyperbolic_ne_zero_of_im_near`: strip version (`|w.im - c.im| < |c.im|`
+   implies zero-free at `w`).
+3. `choose_mul_factorial_le_pow` (+ real version): `C(d,k) * k ! <= d ^ k`
+   (S1 scaling mechanism, from falling factorials).
+4. `choose_div_pow_le_one_div_factorial`: `C(d,k) / d ^ k <= 1 / k !` for `0 < d`
+   (S1 M-test majorant for scaled sections `J_{d,0}(z/d)`).
+5. `uniform_limit_boundary_stability`: explicit-eps/N uniform limit preserves being
+   bounded away from zero on a set (S2 boundary step, no Filter/Rouche needed).
+
+How it fits S1/S2: S1 as scaffolded (`J_{d,0} -> Xi` unscaled) diverges since
+`C(d,k)` grows like `d ^ k / k !`; the correct S1 needs `1/d` scaling with M-test
+majorant (4) plus head convergence `C(d,k)/d^k -> 1/k!` (residual) toward the
+associated Jensen entire function (not `Xi` itself; the scaffolding limit function
+also needs correction, see residual). S2 needs (1)+(5) plus Rouche zero-counting
+(residual: Mathlib has no complex Rouche/Hurwitz per GREP above).
+-/
+
+/-- S2 ingredient: a hyperbolic polynomial is zero-free off the real axis. -/
+theorem hyperbolic_zeroFree_off_real {p : Polynomial ℂ} (hp : Hyperbolic p) {w : ℂ}
+    (hw : w.im ≠ 0) : p.eval w ≠ 0 :=
+  fun h => hw (hp w h)
+
+/-- S2 strip/disc shape: zero-free on any horizontal strip avoiding the reals. -/
+theorem hyperbolic_ne_zero_of_im_near {p : Polynomial ℂ} (hp : Hyperbolic p)
+    {c w : ℂ} (h : |w.im - c.im| < |c.im|) : p.eval w ≠ 0 := by
+  apply hyperbolic_zeroFree_off_real hp
+  intro him
+  rw [him, zero_sub, abs_neg] at h
+  exact lt_irrefl _ h
+
+/-- S1 mechanism (Nat): `C(d,k) * k ! <= d ^ k` via falling factorials. -/
+theorem choose_mul_factorial_le_pow (d k : ℕ) :
+    Nat.choose d k * Nat.factorial k ≤ d ^ k := by
+  have h := Nat.descFactorial_le_pow d k
+  rw [Nat.descFactorial_eq_factorial_mul_choose] at h
+  calc Nat.choose d k * Nat.factorial k = Nat.factorial k * Nat.choose d k := by ring
+    _ ≤ d ^ k := h
+
+/-- S1 mechanism (real cast, for the M-test). -/
+theorem choose_mul_factorial_le_pow_real (d k : ℕ) :
+    (Nat.choose d k : ℝ) * (Nat.factorial k : ℝ) ≤ (d : ℝ) ^ k := by
+  have h := choose_mul_factorial_le_pow d k
+  exact_mod_cast h
+
+/-- S1 M-test majorant: `C(d,k) / d ^ k <= 1 / k !` for `0 < d`. -/
+theorem choose_div_pow_le_one_div_factorial (d k : ℕ) (hd : 0 < d) :
+    (Nat.choose d k : ℝ) / (d : ℝ) ^ k ≤ 1 / (Nat.factorial k : ℝ) := by
+  have hMul : (Nat.choose d k : ℝ) * (Nat.factorial k : ℝ) ≤ (d : ℝ) ^ k :=
+    choose_mul_factorial_le_pow_real d k
+  have hFact : (0 : ℝ) < (Nat.factorial k : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos k)
+  have hPow : (0 : ℝ) < (d : ℝ) ^ k := pow_pos (Nat.cast_pos.mpr hd) k
+  rw [div_le_iff₀ hPow, div_mul_eq_mul_div, one_mul, le_div_iff₀ hFact]
+  exact hMul
+
+/-- S2 boundary step (explicit eps-N, no Filter): a uniform limit bounded away from
+    zero on `K` forces approximants eventually bounded away from zero on `K`. -/
+theorem uniform_limit_boundary_stability {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ} {K : Set ℂ}
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ K, ‖F n z - G z‖ < ε)
+    {m : ℝ} (hm : 0 < m) (hG : ∀ z ∈ K, m ≤ ‖G z‖) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ K, m / 2 ≤ ‖F n z‖ := by
+  obtain ⟨N, hN⟩ := hConv (m / 2) (by linarith)
+  exact ⟨N, fun n hn z hz => by
+    have h1 := hN n hn z hz
+    have h2 := hG z hz
+    have hle : ‖G z‖ - ‖F n z‖ ≤ ‖G z - F n z‖ := norm_sub_norm_le _ _
+    have hrev : ‖G z - F n z‖ = ‖F n z - G z‖ := norm_sub_rev _ _
+    linarith⟩
+
+end JensenRH
