@@ -1245,16 +1245,18 @@ complex interval arithmetic** for the central cover; closing it closes doors 2, 
 mollifier leaf) 4. Door 1 additionally needs the Pólya–Schur/Hurwitz/GORZ formalization and a final
 `Γ·ζ+4` separation.
 
-**Door 1 — Jensen–Pólya (`JensenTranslation.lean`, 6 `sorry`s at 104/110/671/684/693/718).**
+**Door 1 — Jensen–Pólya (`JensenTranslation.lean`, 5 `sorry`s at 102/108/669/682/689).**
 Bridge work committed, rigorous: Hermite–Poulain lemma, `Hyperbolic_const_mul/mul`,
-`jensenPoly_zero`, `taylorCoeff_zero_eq`, Gamma bounds `3.611 < Γ(1/4) < 3.634`. Remaining:
+`jensenPoly_zero`, `taylorCoeff_zero_eq`, Gamma bounds `3.611 < Γ(1/4) < 3.634`. **Closed (`88c75900`,
+`lake build JensenTranslation` green): `taylorCoeff_zero_ne_zero`** (`taylorCoeff 0 = ξ(1/2) ≠ 0`) via the
+`Γ·ζ+4 ≠ 0` product separation `L*G < 4*(√2−1)`: `L ≤ 0.6069` (etaPartial16 `≤0.4819` + tail8; interval
+`[0.6029,0.6069]`, width 0.0040), `Gammaℝ(1/2).re ≤ 2.72973` (BM40 + tight `π^(-1/4)∈(0.7510,0.75116)`,
+width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 tightening was needed. Remaining:
+- 5 sorries: `rh_iff_all_jensen_hyperbolic` (102), `jensen_hyperbolic_eventually` (108, GORZ asymptotics),
+  `all_shifts_from_zero` (669), `rh_iff_jensen_zero` (682), `tail_nonvanishing_iff_jensen` (689).
 - **Pólya–Schur criterion** (`polyaTheoremHyp`: order<2 + real-rooted ⇒ hyperbolic sections) + Hurwitz
   section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
-- **GORZ asymptotics** (`jensen_hyperbolic_eventually`): coefficient/Turán asymptotic analysis.
-- **`∀ k, taylorCoeff k ≠ 0`** — the content is `ξ(1/2) ≠ 0`, reduced to a quantitative separation of
-  `Λ₀(1/2) = Γℝ·ζ + 4` from 0. Feeders: Gamma at width 0.023 (need n≈50–60 → ~0.02); `L` (η-limit) at
-  width 0.0041 (done). Remaining: the final **`Γ·ζ + 4 ≠ 0` product separation** feeding
-  `taylorCoeff_zero_ne_zero`.
+- **`∀ k≥1, taylorCoeff k ≠ 0`** (`Ξ^{(2k)}(0)` alternating series per `k`) still open — only `k=0` closed.
 
 **Door 2 — Xi-critical (`riemann_hypothesis.lean:34`, `axiom RiemannHypothesisProp_apply`).**
 `rh_iff_xi_off_real_pointwise_nonvanishing_mathlib` / `hardDifferenceNonzero_iff_RH` chain proven.
