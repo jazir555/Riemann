@@ -31754,3 +31754,575 @@ theorem RowFE_factor_lower_0105 {s : ℂ} (hre : s.re = 0.105) (him : |s.im| ≤
 
 
 end RowFE
+
+namespace R02GammaDisc
+
+/-! ## Stirling-sharp Gamma upper with Im-decay on the R02 disc (`≤ 0.097`)
+
+**Problem.** `DerivCauchyBridge.gamma_upper_R02_disc` (in `central_cover_assembly.lean`)
+proves `‖gammaOf s‖ ≤ 40` on the R02 disc `s`-rect
+(`s.re ∈ [0.05, 0.74]`, `s.im ∈ [-8.25, -5.25]`) via the integral majorant
+`‖Γ z‖ ≤ Real.Gamma (Re z)`, which discards `Im` entirely.  True sup on the disc
+is `≈ 0.026` (Stirling estimate at the worst corner `Re = 0.025`, `|Im| = 2.625`).
+
+**Result.** `gamma_upper_disc_R02`: `‖Complex.Gamma (s / 2)‖ ≤ 0.097` on the same
+rect — `412×` sharper than `40`, within `4×` of the true sup (`0.097 / 0.026`),
+and within `10×` of the center-true value `~0.01`.  `gammaOf_upper_disc_R02` is
+the drop-in restatement for `DerivCauchyBridge.gammaOf` (identical hypotheses).
+Downstream (coordinator to wire; this file only supplies the Gamma factor):
+sphere sup `42 * 1 * 40 * 10 = 16800` becomes `42 * 1 * 0.097 * 10 = 40.74`,
+so the conditional deriv bound `M = 67200` becomes `M ≈ 163`.
+
+**Method (elementary Stirling-sharp decay, no Stirling input).**
+`Γ(z) = Γ(z+6) / (z (z+1) ⋯ (z+5))` by six `Complex.Gamma_add_one` steps
+(explicit chain `e0`–`e5`, mirroring `R02GammaUpper`).  Each denominator factor
+is floored by the general Im-decay comparison lemma `shift_norm_ge_sqrt`:
+`‖z + k‖ ≥ √((a+k)² + b²)` for `a ≤ Re z`, `b ≤ |Im z|` — the `b²` term is
+exactly what the crude majorant throws away.  With `a = 0.025`, `b = 2.625`:
+floors `2.62 / 2.81 / 3.31 / 4.0 / 4.8 / 5.66`, product `≥ 2648`.
+The numerator `Real.Gamma ((z+6).re)` with `(z+6).re ∈ [6.025, 6.37]` is capped
+uniformly by `256.78`: two fresh endpoint chains (`6.025 ≤ 127` from base
+`Γ(1.025) ≤ 1`; `6.37 ≤ 256.78` from base `Γ(1.37) ≤ 1`, both bases by
+`Real.convexOn_Gamma` on `[1, 2]`) joined by convexity on `[6.025, 6.37]`
+(`realGamma_uniform_6025_637`).  Ratio: `256.78 / 2648 = 0.09697… ≤ 0.097`.
+
+**Grep-first record (verified 2026-09-03).**
+Mathlib `Stirling.lean` is real-factorial only (`stirlingSeq`); no complex-Gamma
+norm-vs-`Im` lemma exists anywhere in `Mathlib/Analysis/SpecialFunctions/Gamma/`
+(zero hits for norm/`Im` patterns).  Repo-wide grep for Im-decay Gamma
+(`Gamma.*exp.*im`, `im_decay`, `Im-decay`, …) returns zero hits: the
+Stirling-sharp Gamma-with-Im-decay piece is missing repo-wide, so it is built
+here from `Gamma_add_one` + integral majorant + convexity only.
+
+**Residual (not claimed).** The three-lines left-edge window
+(`ZetaUpperR02ThreeLines.damped_leftWindow_le`, proved cap `1.2e9` vs needed
+`A ≤ 50.925`) needs cos/exp-factor work at `Re = 2` plus the zeta-upper half;
+this file supplies only the Gamma-disc factor.  The deriv-`M` tier additionally
+needs the zeta upper (`R02_zeta_upper_obligation`).
+-/
+
+/-- GENERAL Im-decay comparison lemma: each forward-shift factor sees the full
+imaginary part, `‖z + k‖ ≥ √((a+k)² + b²)`, whenever `a ≤ Re z` and
+`b ≤ |Im z|`.  In particular every factor is `≥ b`, while the crude majorant
+effectively floors each factor by its real part alone. -/
+theorem shift_norm_ge_sqrt (z : ℂ) (a b : ℝ) (k : ℕ)
+    (ha0 : 0 ≤ a) (hb0 : 0 ≤ b) (hre : a ≤ z.re) (him : b ≤ |z.im|) :
+    Real.sqrt ((a + (k : ℝ)) ^ 2 + b ^ 2) ≤ ‖z + (k : ℂ)‖ := by
+  have hre_k : (z + (k : ℂ)).re = z.re + (k : ℝ) := by
+    simp only [Complex.add_re, Complex.natCast_re]
+  have him_k : (z + (k : ℂ)).im = z.im := by
+    simp only [Complex.add_im, Complex.natCast_im, add_zero]
+  have hkc : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+  have hle : a + (k : ℝ) ≤ z.re + (k : ℝ) := by linarith
+  have hnn : (0 : ℝ) ≤ a + (k : ℝ) := by linarith
+  have h1 : (a + (k : ℝ)) ^ 2 ≤ (z.re + (k : ℝ)) * (z.re + (k : ℝ)) := by
+    have h := pow_le_pow_left₀ hnn hle 2
+    calc (a + (k : ℝ)) ^ 2 ≤ (z.re + (k : ℝ)) ^ 2 := h
+      _ = (z.re + (k : ℝ)) * (z.re + (k : ℝ)) := pow_two _
+  have h2 : b ^ 2 ≤ z.im * z.im := by
+    have h := mul_le_mul him him hb0 (abs_nonneg _)
+    rw [abs_mul_abs_self] at h
+    rwa [pow_two]
+  have hsq : (a + (k : ℝ)) ^ 2 + b ^ 2 ≤ ‖z + (k : ℂ)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre_k, him_k]
+    linarith [h1, h2]
+  calc Real.sqrt ((a + (k : ℝ)) ^ 2 + b ^ 2)
+      ≤ Real.sqrt (‖z + (k : ℂ)‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖z + (k : ℂ)‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Disc floor at `k = 0` (no shift): `2.62 ≤ ‖z‖`
+(`2.62² = 6.8644 ≤ 0.025² + 2.625² = 6.89125`). -/
+theorem disc_shift_floor_z {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (2.62 : ℝ) ≤ ‖z‖ := by
+  have h1 : (0.025 : ℝ) * 0.025 ≤ z.re * z.re :=
+    mul_le_mul hre hre (by norm_num) (by linarith)
+  have h2 : (2.625 : ℝ) * 2.625 ≤ z.im * z.im := by
+    have h := mul_le_mul him him (by norm_num) (abs_nonneg _)
+    rwa [abs_mul_abs_self] at h
+  have hsq : (2.62 : ℝ) ^ 2 ≤ ‖z‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    linarith [h1, h2]
+  calc (2.62 : ℝ) = Real.sqrt ((2.62 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖z‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖z‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Disc floor at `k = 1`: `2.81 ≤ ‖z + 1‖`
+(`2.81² = 7.8961 ≤ 1.025² + 2.625² = 7.94125`). -/
+theorem disc_shift_floor1 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) :
+    (2.81 : ℝ) ≤ ‖z + ((1 : ℕ) : ℂ)‖ := by
+  have h := shift_norm_ge_sqrt z 0.025 2.625 1 (by norm_num) (by norm_num) hre him
+  have hs : (2.81 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (2.81 : ℝ) ^ 2 ≤ (0.025 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Disc floor at `k = 2`: `3.31 ≤ ‖z + 2‖`
+(`3.31² = 10.9561 ≤ 2.025² + 2.625² = 10.99125`). -/
+theorem disc_shift_floor2 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) :
+    (3.31 : ℝ) ≤ ‖z + ((2 : ℕ) : ℂ)‖ := by
+  have h := shift_norm_ge_sqrt z 0.025 2.625 2 (by norm_num) (by norm_num) hre him
+  have hs : (3.31 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (3.31 : ℝ) ^ 2 ≤ (0.025 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Disc floor at `k = 3`: `4.0 ≤ ‖z + 3‖`
+(`4.0² = 16 ≤ 3.025² + 2.625² = 16.04125`). -/
+theorem disc_shift_floor3 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) :
+    (4.0 : ℝ) ≤ ‖z + ((3 : ℕ) : ℂ)‖ := by
+  have h := shift_norm_ge_sqrt z 0.025 2.625 3 (by norm_num) (by norm_num) hre him
+  have hs : (4.0 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.0 : ℝ) ^ 2 ≤ (0.025 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Disc floor at `k = 4`: `4.8 ≤ ‖z + 4‖`
+(`4.8² = 23.04 ≤ 4.025² + 2.625² = 23.09125`). -/
+theorem disc_shift_floor4 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) :
+    (4.8 : ℝ) ≤ ‖z + ((4 : ℕ) : ℂ)‖ := by
+  have h := shift_norm_ge_sqrt z 0.025 2.625 4 (by norm_num) (by norm_num) hre him
+  have hs : (4.8 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.8 : ℝ) ^ 2 ≤ (0.025 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Disc floor at `k = 5`: `5.66 ≤ ‖z + 5‖`
+(`5.66² = 32.0356 ≤ 5.025² + 2.625² = 32.14125`). -/
+theorem disc_shift_floor5 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) :
+    (5.66 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖ := by
+  have h := shift_norm_ge_sqrt z 0.025 2.625 5 (by norm_num) (by norm_num) hre him
+  have hs : (5.66 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (5.66 : ℝ) ^ 2 ≤ (0.025 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Real convexity feeder: `Real.Gamma 1.025 ≤ 1`
+(`1.025 = 0.975·1 + 0.025·2`, `Gamma 1 = Gamma 2 = 1`). -/
+theorem realGamma_1025_le_one : Real.Gamma 1.025 ≤ 1 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.975 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.025 := by norm_num
+  have hab : (0.975 : ℝ) + 0.025 = 1 := by norm_num
+  have h := hconv.2 h1 h2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (0.975 : ℝ) * 1 + 0.025 * 2 = 1.025 := by norm_num
+  have hrhs : (0.975 : ℝ) * 1 + 0.025 * 1 = (1 : ℝ) := by norm_num
+  rw [heq] at h
+  rw [hrhs] at h
+  exact h
+
+/-- Real convexity feeder: `Real.Gamma 1.37 ≤ 1`
+(`1.37 = 0.63·1 + 0.37·2`, `Gamma 1 = Gamma 2 = 1`). -/
+theorem realGamma_137_le_one : Real.Gamma 1.37 ≤ 1 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.63 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.37 := by norm_num
+  have hab : (0.63 : ℝ) + 0.37 = 1 := by norm_num
+  have h := hconv.2 h1 h2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (0.63 : ℝ) * 1 + 0.37 * 2 = 1.37 := by norm_num
+  have hrhs : (0.63 : ℝ) * 1 + 0.37 * 1 = (1 : ℝ) := by norm_num
+  rw [heq] at h
+  rw [hrhs] at h
+  exact h
+
+/-- Numerator endpoint chain (bottom): `Real.Gamma 6.025 ≤ 127`
+(`1.025·2.025·3.025·4.025·5.025 = 126.9919… ≤ 127`). -/
+theorem realGamma_6025_le : Real.Gamma 6.025 ≤ 127 := by
+  have g1 : Real.Gamma 2.025 ≤ 1.025 := by
+    have h : Real.Gamma (1.025 + 1) = 1.025 * Real.Gamma 1.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.025 : ℝ) + 1 = 2.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (1.025 : ℝ) * Real.Gamma 1.025 ≤ 1.025 * 1 :=
+          mul_le_mul_of_nonneg_left realGamma_1025_le_one (by norm_num)
+      _ = 1.025 := mul_one _
+  have g2 : Real.Gamma 3.025 ≤ 1.025 * 2.025 := by
+    have h : Real.Gamma (2.025 + 1) = 2.025 * Real.Gamma 2.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.025 : ℝ) + 1 = 3.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (2.025 : ℝ) * Real.Gamma 2.025 ≤ 2.025 * 1.025 :=
+          mul_le_mul_of_nonneg_left g1 (by norm_num)
+      _ = 1.025 * 2.025 := mul_comm _ _
+  have g3 : Real.Gamma 4.025 ≤ 1.025 * 2.025 * 3.025 := by
+    have h : Real.Gamma (3.025 + 1) = 3.025 * Real.Gamma 3.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.025 : ℝ) + 1 = 4.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 3.025 * Real.Gamma 3.025 ≤ 3.025 * (1.025 * 2.025) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.025 : ℝ) * Real.Gamma 3.025 ≤ 3.025 * (1.025 * 2.025) := hle
+      _ = 1.025 * 2.025 * 3.025 := by ring
+  have g4 : Real.Gamma 5.025 ≤ 1.025 * 2.025 * 3.025 * 4.025 := by
+    have h : Real.Gamma (4.025 + 1) = 4.025 * Real.Gamma 4.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.025 : ℝ) + 1 = 5.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 4.025 * Real.Gamma 4.025 ≤ 4.025 * (1.025 * 2.025 * 3.025) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.025 : ℝ) * Real.Gamma 4.025 ≤ 4.025 * (1.025 * 2.025 * 3.025) := hle
+      _ = 1.025 * 2.025 * 3.025 * 4.025 := by ring
+  have g5 : Real.Gamma 6.025 ≤ 1.025 * 2.025 * 3.025 * 4.025 * 5.025 := by
+    have h : Real.Gamma (5.025 + 1) = 5.025 * Real.Gamma 5.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.025 : ℝ) + 1 = 6.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 5.025 * Real.Gamma 5.025
+        ≤ 5.025 * (1.025 * 2.025 * 3.025 * 4.025) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.025 : ℝ) * Real.Gamma 5.025
+          ≤ 5.025 * (1.025 * 2.025 * 3.025 * 4.025) := hle
+      _ = 1.025 * 2.025 * 3.025 * 4.025 * 5.025 := by ring
+  have hfin : (1.025 : ℝ) * 2.025 * 3.025 * 4.025 * 5.025 ≤ 127 := by norm_num
+  exact le_trans g5 hfin
+
+/-- Numerator endpoint chain (top): `Real.Gamma 6.37 ≤ 256.78`
+(`1.37·2.37·3.37·4.37·5.37 = 256.7760… ≤ 256.78`). -/
+theorem realGamma_637_le : Real.Gamma 6.37 ≤ 256.78 := by
+  have g1 : Real.Gamma 2.37 ≤ 1.37 := by
+    have h : Real.Gamma (1.37 + 1) = 1.37 * Real.Gamma 1.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.37 : ℝ) + 1 = 2.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (1.37 : ℝ) * Real.Gamma 1.37 ≤ 1.37 * 1 :=
+          mul_le_mul_of_nonneg_left realGamma_137_le_one (by norm_num)
+      _ = 1.37 := mul_one _
+  have g2 : Real.Gamma 3.37 ≤ 1.37 * 2.37 := by
+    have h : Real.Gamma (2.37 + 1) = 2.37 * Real.Gamma 2.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.37 : ℝ) + 1 = 3.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (2.37 : ℝ) * Real.Gamma 2.37 ≤ 2.37 * 1.37 :=
+          mul_le_mul_of_nonneg_left g1 (by norm_num)
+      _ = 1.37 * 2.37 := mul_comm _ _
+  have g3 : Real.Gamma 4.37 ≤ 1.37 * 2.37 * 3.37 := by
+    have h : Real.Gamma (3.37 + 1) = 3.37 * Real.Gamma 3.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.37 : ℝ) + 1 = 4.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 3.37 * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.37 : ℝ) * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37) := hle
+      _ = 1.37 * 2.37 * 3.37 := by ring
+  have g4 : Real.Gamma 5.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 := by
+    have h : Real.Gamma (4.37 + 1) = 4.37 * Real.Gamma 4.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.37 : ℝ) + 1 = 5.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 4.37 * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.37 : ℝ) * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 := by ring
+  have g5 : Real.Gamma 6.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 5.37 := by
+    have h : Real.Gamma (5.37 + 1) = 5.37 * Real.Gamma 5.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.37 : ℝ) + 1 = 6.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 5.37 * Real.Gamma 5.37
+        ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.37 : ℝ) * Real.Gamma 5.37
+          ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 5.37 := by ring
+  have hfin : (1.37 : ℝ) * 2.37 * 3.37 * 4.37 * 5.37 ≤ 256.78 := by norm_num
+  exact le_trans g5 hfin
+
+/-- Uniform numerator: `Real.Gamma x ≤ 256.78` for `x ∈ [6.025, 6.37]`
+(convexity between the two endpoint chains; no monotonicity input needed). -/
+theorem realGamma_uniform_6025_637 {x : ℝ} (hlo : (6.025 : ℝ) ≤ x)
+    (hhi : x ≤ (6.37 : ℝ)) : Real.Gamma x ≤ 256.78 := by
+  set w1 : ℝ := (6.37 - x) / 0.345 with hw1
+  set w2 : ℝ := (x - 6.025) / 0.345 with hw2
+  have hw1nn : (0 : ℝ) ≤ w1 := div_nonneg (by linarith) (by norm_num)
+  have hw2nn : (0 : ℝ) ≤ w2 := div_nonneg (by linarith) (by norm_num)
+  have hnum : (6.37 - x) + (x - 6.025) = (0.345 : ℝ) := by ring
+  have hne : (0.345 : ℝ) ≠ 0 := by norm_num
+  have hsum : w1 + w2 = 1 := by
+    rw [hw1, hw2, ← add_div, hnum]
+    exact div_self hne
+  have hcombo : w1 * 6.025 + w2 * 6.37 = x := by
+    rw [hw1, hw2]
+    field_simp
+    ring
+  have hconv := Real.convexOn_Gamma
+  have hm1 : (6.025 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hm2 : (6.37 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 hm1 hm2 hw1nn hw2nn hsum
+  simp only [smul_eq_mul] at h
+  rw [hcombo] at h
+  have e1 : Real.Gamma 6.025 ≤ 256.78 := le_trans realGamma_6025_le (by norm_num)
+  have e2 : Real.Gamma 6.37 ≤ 256.78 := le_trans realGamma_637_le (le_refl _)
+  have f1 : w1 * Real.Gamma 6.025 ≤ w1 * 256.78 :=
+    mul_le_mul_of_nonneg_left e1 hw1nn
+  have f2 : w2 * Real.Gamma 6.37 ≤ w2 * 256.78 :=
+    mul_le_mul_of_nonneg_left e2 hw2nn
+  have hfin : w1 * 256.78 + w2 * 256.78 ≤ 256.78 := by
+    have he : w1 * 256.78 + w2 * 256.78 = (w1 + w2) * 256.78 := by ring
+    rw [he, hsum, one_mul]
+  exact le_trans h (le_trans (add_le_add f1 f2) hfin)
+
+/-- MAIN disc-sup Gamma upper: `‖Complex.Gamma (s / 2)‖ ≤ 0.097` on the R02
+disc `s`-rect (`Re ∈ [0.05, 0.74]`, `Im ∈ [-8.25, -5.25]`), i.e. `z = s / 2`
+with `Re ∈ [0.025, 0.37]`, `|Im| ≥ 2.625`.  Six-shift chain
+(`D · ‖Γ z‖ = ‖Γ (z+6)‖ ≤ 256.78`, `D ≥ 2648`), so
+`‖Γ z‖ ≤ 256.78 / 2648 = 0.09697… ≤ 0.097`. -/
+theorem gamma_upper_disc_R02 {s : ℂ}
+    (hre_lo : (0.05 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.74 : ℝ))
+    (him_lo : (-8.25 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.25 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 0.097 := by
+  set z : ℂ := s / 2 with hz
+  have hzre : z.re = s.re / 2 := by
+    rw [hz, Complex.div_ofNat_re]
+  have hzim : z.im = s.im / 2 := by
+    rw [hz, Complex.div_ofNat_im]
+  have hzre_lo : (0.025 : ℝ) ≤ z.re := by rw [hzre]; linarith
+  have hzre_hi : z.re ≤ (0.37 : ℝ) := by rw [hzre]; linarith
+  have hzim_lo : z.im ≤ (-2.625 : ℝ) := by rw [hzim]; linarith
+  have habs : (2.625 : ℝ) ≤ |z.im| := by
+    have hneg : z.im < 0 := by linarith
+    rw [abs_of_neg hneg]
+    linarith
+  have hnez : z ≠ 0 := by
+    intro hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hre
+    linarith [hzre_lo]
+  have hne : ∀ k : ℕ, k ≤ 5 → z + (k : ℂ) ≠ 0 := by
+    intro k _ hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.add_re, Complex.natCast_re, Complex.zero_re] at hre
+    have hknn : (0 : ℝ) ≤ ((k : ℕ) : ℝ) := Nat.cast_nonneg k
+    linarith
+  have e0 : Complex.Gamma (z + ((1 : ℕ) : ℂ))
+      = z * Complex.Gamma z := by
+    have c1 : ((1 : ℕ) : ℂ) = 1 := by norm_num
+    rw [c1]
+    exact Complex.Gamma_add_one _ hnez
+  have e1 : Complex.Gamma (z + ((2 : ℕ) : ℂ))
+      = (z + ((1 : ℕ) : ℂ)) * Complex.Gamma (z + ((1 : ℕ) : ℂ)) := by
+    have h : z + ((2 : ℕ) : ℂ) = ((z + ((1 : ℕ) : ℂ)) + 1) := by
+      have c2 : ((2 : ℕ) : ℂ) = 2 := by norm_num
+      have c1 : ((1 : ℕ) : ℂ) = 1 := by norm_num
+      rw [c2, c1]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 1 (by norm_num))
+  have e2 : Complex.Gamma (z + ((3 : ℕ) : ℂ))
+      = (z + ((2 : ℕ) : ℂ)) * Complex.Gamma (z + ((2 : ℕ) : ℂ)) := by
+    have h : z + ((3 : ℕ) : ℂ) = ((z + ((2 : ℕ) : ℂ)) + 1) := by
+      have c3 : ((3 : ℕ) : ℂ) = 3 := by norm_num
+      have c2 : ((2 : ℕ) : ℂ) = 2 := by norm_num
+      rw [c3, c2]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 2 (by norm_num))
+  have e3 : Complex.Gamma (z + ((4 : ℕ) : ℂ))
+      = (z + ((3 : ℕ) : ℂ)) * Complex.Gamma (z + ((3 : ℕ) : ℂ)) := by
+    have h : z + ((4 : ℕ) : ℂ) = ((z + ((3 : ℕ) : ℂ)) + 1) := by
+      have c4 : ((4 : ℕ) : ℂ) = 4 := by norm_num
+      have c3 : ((3 : ℕ) : ℂ) = 3 := by norm_num
+      rw [c4, c3]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 3 (by norm_num))
+  have e4 : Complex.Gamma (z + ((5 : ℕ) : ℂ))
+      = (z + ((4 : ℕ) : ℂ)) * Complex.Gamma (z + ((4 : ℕ) : ℂ)) := by
+    have h : z + ((5 : ℕ) : ℂ) = ((z + ((4 : ℕ) : ℂ)) + 1) := by
+      have c5 : ((5 : ℕ) : ℂ) = 5 := by norm_num
+      have c4 : ((4 : ℕ) : ℂ) = 4 := by norm_num
+      rw [c5, c4]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 4 (by norm_num))
+  have e5 : Complex.Gamma (z + ((6 : ℕ) : ℂ))
+      = (z + ((5 : ℕ) : ℂ)) * Complex.Gamma (z + ((5 : ℕ) : ℂ)) := by
+    have h : z + ((6 : ℕ) : ℂ) = ((z + ((5 : ℕ) : ℂ)) + 1) := by
+      have c6 : ((6 : ℕ) : ℂ) = 6 := by norm_num
+      have c5 : ((5 : ℕ) : ℂ) = 5 := by norm_num
+      rw [c6, c5]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 5 (by norm_num))
+  have n0 : ‖Complex.Gamma (z + ((1 : ℕ) : ℂ))‖
+      = ‖z‖ * ‖Complex.Gamma z‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (z + ((2 : ℕ) : ℂ))‖
+      = ‖z + ((1 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((1 : ℕ) : ℂ))‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (z + ((3 : ℕ) : ℂ))‖
+      = ‖z + ((2 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((2 : ℕ) : ℂ))‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (z + ((4 : ℕ) : ℂ))‖
+      = ‖z + ((3 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((3 : ℕ) : ℂ))‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (z + ((5 : ℕ) : ℂ))‖
+      = ‖z + ((4 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((4 : ℕ) : ℂ))‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+      = ‖z + ((5 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((5 : ℕ) : ℂ))‖ := by
+    rw [e5, norm_mul]
+  have hprod : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+      = ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖
+        * (‖z‖ * ‖Complex.Gamma z‖))))) := by
+    rw [n5, n4, n3, n2, n1, n0]
+  have fz := disc_shift_floor_z hzre_lo habs
+  have f1 := disc_shift_floor1 hzre_lo habs
+  have f2 := disc_shift_floor2 hzre_lo habs
+  have f3 := disc_shift_floor3 hzre_lo habs
+  have f4 := disc_shift_floor4 hzre_lo habs
+  have f5 := disc_shift_floor5 hzre_lo habs
+  have q1 : (2.81 : ℝ) * 2.62 ≤ ‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖ :=
+    mul_le_mul f1 fz (by norm_num) (norm_nonneg _)
+  have q2 : (3.31 : ℝ) * (2.81 * 2.62)
+      ≤ ‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖) :=
+    mul_le_mul f2 q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.0 : ℝ) * (3.31 * (2.81 * 2.62))
+      ≤ ‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)) :=
+    mul_le_mul f3 q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.8 : ℝ) * (4.0 * (3.31 * (2.81 * 2.62)))
+      ≤ ‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))) :=
+    mul_le_mul f4 q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.66 : ℝ) * (4.8 * (4.0 * (3.31 * (2.81 * 2.62))))
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    mul_le_mul f5 q4 (by positivity) (norm_nonneg _)
+  have hDlo : (2648 : ℝ)
+      ≤ 5.66 * (4.8 * (4.0 * (3.31 * (2.81 * 2.62)))) := by
+    norm_num
+  have hD_ge : (2648 : ℝ)
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    le_trans hDlo q5
+  have hD_pos : (0 : ℝ)
+      < ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  have eR6 : ((6 : ℕ) : ℝ) = 6 := by norm_num
+  have hz6re : (z + ((6 : ℕ) : ℂ)).re = z.re + 6 := by
+    rw [Complex.add_re, Complex.natCast_re, eR6]
+  have hx_lo : (6.025 : ℝ) ≤ (z + ((6 : ℕ) : ℂ)).re := by
+    rw [hz6re]; linarith [hzre_lo]
+  have hx_hi : (z + ((6 : ℕ) : ℂ)).re ≤ (6.37 : ℝ) := by
+    rw [hz6re]; linarith [hzre_hi]
+  have hGN_re : (0 : ℝ) < (z + ((6 : ℕ) : ℂ)).re := by linarith
+  have hGN_le : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ ≤ 256.78 := by
+    have h1 : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+        ≤ Real.Gamma ((z + ((6 : ℕ) : ℂ)).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    exact le_trans h1 (realGamma_uniform_6025_637 hx_lo hx_hi)
+  have hD_mul : (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        * ‖Complex.Gamma z‖
+      = ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        * ‖Complex.Gamma z‖ ≤ 256.78 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma z‖
+        * (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        ≤ 256.78 := by
+    calc ‖Complex.Gamma z‖ * _
+          = _ * ‖Complex.Gamma z‖ := mul_comm _ _
+      _ ≤ 256.78 := hle
+  have hdiv : ‖Complex.Gamma z‖
+      ≤ 256.78 / (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))))) :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (256.78 : ℝ)
+      ≤ 0.097 * (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))))) := by
+    calc (256.78 : ℝ) ≤ 0.097 * 2648 := by norm_num
+      _ ≤ 0.097 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 256.78 / (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+      ≤ 0.097 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+/-- Drop-in for the deriv-`M` wall: identical hypotheses to
+`DerivCauchyBridge.gamma_upper_R02_disc` (`≤ 40`), conclusion `≤ 0.097`. -/
+theorem gammaOf_upper_disc_R02 {s : ℂ}
+    (hre_lo : (0.05 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.74 : ℝ))
+    (him_lo : (-8.25 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.25 : ℝ)) :
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ 0.097 := by
+  show ‖Complex.Gamma (s / 2)‖ ≤ 0.097
+  exact gamma_upper_disc_R02 hre_lo hre_hi him_lo him_hi
+
+#print axioms R02GammaDisc.shift_norm_ge_sqrt
+#print axioms R02GammaDisc.realGamma_uniform_6025_637
+#print axioms R02GammaDisc.gamma_upper_disc_R02
+#print axioms R02GammaDisc.gammaOf_upper_disc_R02
+
+end R02GammaDisc
