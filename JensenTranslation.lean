@@ -702,20 +702,11 @@ theorem taylorCoeff_zero_eq :
     taylorCoeff 0 = (completedRiemannZeta₀ (1/2 : ℂ)).re := by
   simp [taylorCoeff, xiMathlibShifted, xiMathlib]
 
-/-- The 0-th Taylor coefficient of the shifted xi function is nonzero.
-    `taylorCoeff 0 = (completedRiemannZeta₀ (1/2)).re`, and since
-    `completedRiemannZeta₀ (1/2) = π^(-1/4) * Γ(1/4) * ζ(1/2) < 0`,
-    this is nonzero. -/
-lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
-  simp [taylorCoeff, xiMathlibShifted, xiMathlib]
-  -- Goal: ¬(completedRiemannZeta₀ (1 / 2)).re = 0
-  -- This is a transcendental constant. The claim is that
-  -- completedRiemannZeta₀ (1/2) = π^(-1/4) * Γ(1/4) * ζ(1/2) < 0,
-  -- so its real part is nonzero. Proving this requires numerical
-  -- bounds on ζ(1/2) that are not available in Mathlib.
-  unfold completedRiemannZeta₀
-  -- Goal: ¬(HurwitzZeta.completedHurwitzZetaEven₀ 0 2⁻¹).re = 0
-  sorry
+/- The 0-th Taylor coefficient nonvanishing statement is proved at the end of
+    this file as `taylorCoeff_zero_ne_zero` (using BM40 Gamma bounds plus the
+    tight eta/pi separation). This placeholder records the move and avoids a
+    duplicate name. -/
+-- (proved version at end of file)
 
 /-! ## Quantitative Gamma / π intervals for `taylorCoeff_zero_ne_zero`.
 
@@ -19719,5 +19710,300 @@ With the unconditional pieces above plus `zeta_rigorous`
 * `taylorCoeff_zero_ne_zero` follows from `taylorCoeff_zero_eq` plus the above
   once feeders 1–2 are supplied.
 -/
+
+/-! ## Tightened `Λ₀(1/2)` separation closing `taylorCoeff_zero_ne_zero`.
+
+The true value is `Λ₀(1/2) = Γℝ(1/2)·ζ(1/2)+4 ≈ 0.023 > 0`, so `≠ 0` follows
+from a quantitative upper bound `L·G < 4·(√2-1)` where `L ≈ 0.604` is the
+eta limit (`ζ(1/2) = L/(1-√2)`) and `G = Γ(1/4)·π^(-1/4) ≈ 2.723`.
+With BM40 `Γ ∈ [3.611, 3.634]` (width 0.023) and best2 `L ∈ [0.6029, 0.6070]`
+(width 0.0041) the crude product interval `[-4.005, -3.946]+4` still contains
+0 (miss by ≈ 0.005). Two small tightenings close it with margin ≈ 0.0001:
+
+* `S₁₆ ≤ 0.4819` (5-decimal `√`-enclosures; previous 4-decimal gave `0.4820`),
+  hence `L = S₁₆+T₈ ≤ 0.4819+0.125 = 0.6069`;
+* `π^(-1/4) < 0.75116` (previous `< 0.752`), hence
+  `G ≤ 3.634·0.75116 ≤ 2.72973`.
+
+Then `L·G ≤ 0.6069·2.72973 ≈ 1.65667 < 1.6568 = 4·0.4142 ≤ 4·(√2-1)`,
+so `Λ₀(1/2) > 0`. All lemmas below are unconditional (no `sorry`/`axiom`);
+they use only `zeta_rigorous` (eta→ζ→ξ chain, 0-sorry) and the BM40 Gamma
+bounds already in this file. GREP performed before writing (see final report):
+repo `taylorCoeff_zero_ne_zero`/`Gammaℝ_half`/`pi_rpow` (only this file),
+Mathlib `taylorCoeff_zero`/`Gammaℝ_half_re`/`completedRiemannZeta₀_half`
+(no files found) — hence these bridge lemmas are new and created here.
+-/
+
+/-- 5-decimal `√2` enclosure (tighter than `sqrt2_bounds4`; same square-comparison pattern). -/
+theorem sqrt2_bounds5 : (1.41421 : ℝ) < Real.sqrt 2 ∧ Real.sqrt 2 < 1.41422 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.41421 : ℝ) = Real.sqrt (1.41421 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 2 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 2 < Real.sqrt (1.41422 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.41422 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√3` enclosure. -/
+theorem sqrt3_bounds5 : (1.73205 : ℝ) < Real.sqrt 3 ∧ Real.sqrt 3 < 1.73206 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.73205 : ℝ) = Real.sqrt (1.73205 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 3 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 3 < Real.sqrt (1.73206 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.73206 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√5` enclosure. -/
+theorem sqrt5_bounds5 : (2.23606 : ℝ) < Real.sqrt 5 ∧ Real.sqrt 5 < 2.23607 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.23606 : ℝ) = Real.sqrt (2.23606 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 5 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 5 < Real.sqrt (2.23607 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.23607 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√6` enclosure. -/
+theorem sqrt6_bounds5 : (2.44948 : ℝ) < Real.sqrt 6 ∧ Real.sqrt 6 < 2.44949 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.44948 : ℝ) = Real.sqrt (2.44948 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 6 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 6 < Real.sqrt (2.44949 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.44949 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√7` enclosure. -/
+theorem sqrt7_bounds5 : (2.64575 : ℝ) < Real.sqrt 7 ∧ Real.sqrt 7 < 2.64576 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.64575 : ℝ) = Real.sqrt (2.64575 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 7 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 7 < Real.sqrt (2.64576 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.64576 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√8` enclosure. -/
+theorem sqrt8_bounds5 : (2.82842 : ℝ) < Real.sqrt 8 ∧ Real.sqrt 8 < 2.82843 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.82842 : ℝ) = Real.sqrt (2.82842 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 8 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 8 < Real.sqrt (2.82843 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.82843 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√10` enclosure. -/
+theorem sqrt10_bounds5 : (3.16227 : ℝ) < Real.sqrt 10 ∧ Real.sqrt 10 < 3.16228 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.16227 : ℝ) = Real.sqrt (3.16227 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 10 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 10 < Real.sqrt (3.16228 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.16228 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√11` enclosure. -/
+theorem sqrt11_bounds5 : (3.31662 : ℝ) < Real.sqrt 11 ∧ Real.sqrt 11 < 3.31663 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.31662 : ℝ) = Real.sqrt (3.31662 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 11 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 11 < Real.sqrt (3.31663 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.31663 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√12` enclosure. -/
+theorem sqrt12_bounds5 : (3.46410 : ℝ) < Real.sqrt 12 ∧ Real.sqrt 12 < 3.46411 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.46410 : ℝ) = Real.sqrt (3.46410 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 12 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 12 < Real.sqrt (3.46411 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.46411 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√13` enclosure. -/
+theorem sqrt13_bounds5 : (3.60555 : ℝ) < Real.sqrt 13 ∧ Real.sqrt 13 < 3.60556 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.60555 : ℝ) = Real.sqrt (3.60555 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 13 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 13 < Real.sqrt (3.60556 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.60556 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√14` enclosure. -/
+theorem sqrt14_bounds5 : (3.74165 : ℝ) < Real.sqrt 14 ∧ Real.sqrt 14 < 3.74166 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.74165 : ℝ) = Real.sqrt (3.74165 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 14 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 14 < Real.sqrt (3.74166 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.74166 := Real.sqrt_sq (by norm_num)
+
+/-- 5-decimal `√15` enclosure. -/
+theorem sqrt15_bounds5 : (3.87298 : ℝ) < Real.sqrt 15 ∧ Real.sqrt 15 < 3.87299 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.87298 : ℝ) = Real.sqrt (3.87298 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 15 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 15 < Real.sqrt (3.87299 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.87299 := Real.sqrt_sq (by norm_num)
+
+/-- Tightened `S₁₆ ≤ 0.4819` (previous 4-decimal gave `0.4820`; true `S₁₆ ≈ 0.48185`).
+Uses the 5-decimal enclosures above; same `one_div_le_one_div_of_le` pattern as
+`etaPartial_sixteen_hi` in `zeta_rigorous`. -/
+theorem etaPartial_sixteen_hi_tight : _root_.etaPartial 16 ≤ (0.4819 : ℝ) := by
+  rw [_root_.etaPartial_sixteen_eq]
+  have t2 : 1 / 1.41422 ≤ 1 / Real.sqrt 2 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt2_bounds5.2.le
+  have t3 : 1 / Real.sqrt 3 ≤ 1 / 1.73205 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt3_bounds5.1.le
+  have t5 : 1 / Real.sqrt 5 ≤ 1 / 2.23606 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt5_bounds5.1.le
+  have t6 : 1 / 2.44949 ≤ 1 / Real.sqrt 6 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt6_bounds5.2.le
+  have t7 : 1 / Real.sqrt 7 ≤ 1 / 2.64575 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt7_bounds5.1.le
+  have t8 : 1 / 2.82843 ≤ 1 / Real.sqrt 8 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt8_bounds5.2.le
+  have t10 : 1 / 3.16228 ≤ 1 / Real.sqrt 10 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt10_bounds5.2.le
+  have t11 : 1 / Real.sqrt 11 ≤ 1 / 3.31662 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt11_bounds5.1.le
+  have t12 : 1 / 3.46411 ≤ 1 / Real.sqrt 12 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt12_bounds5.2.le
+  have t13 : 1 / Real.sqrt 13 ≤ 1 / 3.60555 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt13_bounds5.1.le
+  have t14 : 1 / 3.74166 ≤ 1 / Real.sqrt 14 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt14_bounds5.2.le
+  have t15 : 1 / Real.sqrt 15 ≤ 1 / 3.87298 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt15_bounds5.1.le
+  have num : 1 - 1 / 1.41422 + 1 / 1.73205 - 1 / 2 + 1 / 2.23606 - 1 / 2.44949
+        + 1 / 2.64575 - 1 / 2.82843 + 1 / 3 - 1 / 3.16228 + 1 / 3.31662
+        - 1 / 3.46411 + 1 / 3.60555 - 1 / 3.74166 + 1 / 3.87298 - 1 / 4
+        ≤ (0.4819 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Tightened archimedean factor: `π^(-1/4) ∈ (0.7510, 0.75116)`
+(previous `(0.751, 0.752)`; true value `≈ 0.75113`). Same proof as
+`pi_rpow_neg_quarter_bounds`, only the final `norm_num` constants tighten
+(`1/1.3314 ≈ 0.751089`, `1/1.3313 ≈ 0.751146`). -/
+theorem pi_rpow_neg_quarter_bounds_tight :
+    (0.7510 : ℝ) < Real.pi ^ (-(1/4) : ℝ) ∧ Real.pi ^ (-(1/4) : ℝ) < 0.75116 := by
+  have hP1 := pi_rpow_quarter_gt
+  have hP2 := pi_rpow_quarter_lt
+  have hPpos : (0 : ℝ) < Real.pi ^ ((1/4 : ℝ)) :=
+    Real.rpow_pos_of_pos Real.pi_pos _
+  have heq : Real.pi ^ (-(1/4) : ℝ) = 1 / Real.pi ^ ((1/4 : ℝ)) := by
+    have e1 : (-(1/4) : ℝ) = -((1/4) : ℝ) := by ring
+    rw [e1, Real.rpow_neg (le_of_lt Real.pi_pos), inv_eq_one_div]
+  rw [heq]
+  have h1 : (1 : ℝ) / 1.3314 < 1 / Real.pi ^ ((1/4 : ℝ)) :=
+    one_div_lt_one_div_of_lt hPpos hP2
+  have h2 : 1 / Real.pi ^ ((1/4 : ℝ)) < 1 / (1.3313 : ℝ) :=
+    one_div_lt_one_div_of_lt (by norm_num) hP1
+  have b1 : (0.7510 : ℝ) < 1 / 1.3314 := by norm_num
+  have b2 : (1 : ℝ) / 1.3313 < 0.75116 := by norm_num
+  exact ⟨lt_trans b1 h1, lt_trans h2 b2⟩
+
+/-- Tightened `Gammaℝ(1/2)` upper bound: `(Gammaℝ(1/2)).re ≤ 2.72973`
+(`3.634·0.75116 = 2.729715…`; true value `≈ 2.72329`). Uses BM40
+`gamma_quarter_lt_BM40` plus the tight `π` upper above. -/
+theorem Gammaℝ_half_re_upper_tight :
+    (Complex.Gammaℝ (1/2 : ℂ)).re ≤ (2.72973 : ℝ) := by
+  rw [Gammaℝ_half_eq_real]
+  simp only [Complex.ofReal_re]
+  have hg : Real.Gamma (1/4 : ℝ) ≤ 3.634 := le_of_lt gamma_quarter_lt_BM40
+  have hp : Real.pi ^ (-(1/4) : ℝ) ≤ 0.75116 :=
+    le_of_lt pi_rpow_neg_quarter_bounds_tight.2
+  have hppos : (0 : ℝ) ≤ Real.pi ^ (-(1/4) : ℝ) :=
+    le_of_lt pi_rpow_neg_quarter_pos
+  have hle : Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ) ≤ 3.634 * 0.75116 :=
+    mul_le_mul hg hp hppos (by norm_num)
+  have hnum : (3.634 : ℝ) * 0.75116 ≤ 2.72973 := by norm_num
+  linarith
+
+/-- Universal tightened eta upper bound: every `Tendsto` eta limit satisfies
+`L ≤ 0.6069` (`0.4819+0.125`; previous best2 gave `0.6070`). Uses the tight
+`S₁₆` above plus the exact `T₈ ≤ 0.125` tail (`√16 = 4`). -/
+theorem eta_limit_upper_tight (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n,
+      (((-1 : ℤ) ^ i : ℝ) / Real.sqrt (i + 1 : ℝ))) atTop (nhds L)) :
+    L ≤ (0.6069 : ℝ) := by
+  have hS := _root_.eta_limit_S16_split L hL
+  have hhi := etaPartial_sixteen_hi_tight
+  have ht := _root_.etaPair_tail8_upper
+  linarith
+
+/-- Quantitative separation: `Λ₀(1/2)` has positive real part
+(`≈ 0.023`), hence is nonzero. Combines the eta limit (`L ≤ 0.6069`,
+`0 < L`), the tight `Gammaℝ` upper (`≤ 2.72973`), `√2 ≥ 1.4142`, and the
+unconditional `eta → ζ → ξ` chain from `zeta_rigorous`
+(`eta_half_pos`, `etaTendsto_eq_etaHurwitz`, `hEta_of_etaHurwitz_lim`,
+`zeta_half_eq_eta_div_of_identity`). -/
+theorem completed₀_half_pos :
+    0 < (completedRiemannZeta₀ (1/2 : ℂ)).re := by
+  obtain ⟨L, hLreal, hLpos⟩ := _root_.eta_half_pos
+  have hL2 : Tendsto (fun n => ∑ i ∈ Finset.range n, _root_.etaTerm i)
+      atTop (nhds L) := by
+    simpa only [_root_.etaTerm] using hLreal
+  have hC := (Complex.continuous_ofReal.tendsto L).comp hL2
+  have hfun : _root_.etaPartialℂ =
+      fun n => (((∑ i ∈ Finset.range n, _root_.etaTerm i : ℝ)) : ℂ) := by
+    funext n
+    simp only [_root_.etaPartialℂ, _root_.etaTermℂ, Complex.ofReal_sum]
+  have hLcomplex : Tendsto _root_.etaPartialℂ atTop (nhds ((L : ℝ) : ℂ)) := by
+    rw [hfun]
+    simpa only [Function.comp_def] using hC
+  have hLim : ((L : ℝ) : ℂ) = _root_.etaHurwitz (1 / 2 : ℂ) :=
+    _root_.etaTendsto_eq_etaHurwitz L hLcomplex
+  have hEta : ((L : ℝ) : ℂ) =
+      (1 - ((Real.sqrt 2 : ℝ) : ℂ)) * riemannZeta (1 / 2 : ℂ) :=
+    _root_.hEta_of_etaHurwitz_lim L hLim
+  have hZeta : riemannZeta (1 / 2 : ℂ) =
+      ((L : ℝ) : ℂ) / (1 - ((Real.sqrt 2 : ℝ) : ℂ)) :=
+    _root_.zeta_half_eq_eta_div_of_identity L hEta
+  have hLle : L ≤ (0.6069 : ℝ) := eta_limit_upper_tight L hLreal
+  have hGle : Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ) ≤ (2.72973 : ℝ) := by
+    have h := Gammaℝ_half_re_upper_tight
+    rw [Gammaℝ_half_eq_real, Complex.ofReal_re] at h
+    exact h
+  have hGnonneg : (0 : ℝ) ≤ Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ) :=
+    mul_nonneg (le_of_lt gamma_quarter_pos) (le_of_lt pi_rpow_neg_quarter_pos)
+  have hspos : (0 : ℝ) < Real.sqrt 2 - 1 := by
+    have hlow := _root_.sqrt2_bounds4.1
+    linarith
+  have hLG : L * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ))
+      < 4 * (Real.sqrt 2 - 1) := by
+    have h1 : L * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ))
+        ≤ (0.6069 : ℝ) * 2.72973 :=
+      mul_le_mul hLle hGle hGnonneg (by norm_num)
+    have h2 : (0.6069 : ℝ) * 2.72973 < 4 * (1.4142 - 1) := by norm_num
+    have h3 : (4 : ℝ) * (1.4142 - 1) ≤ 4 * (Real.sqrt 2 - 1) := by
+      have hlow := _root_.sqrt2_bounds4.1
+      linarith
+    linarith
+  have hZreal : riemannZeta (1/2 : ℂ)
+      = (((L / (1 - Real.sqrt 2) : ℝ)) : ℂ) := by
+    rw [hZeta]
+    have hden : (1 : ℂ) - ((Real.sqrt 2 : ℝ) : ℂ)
+        = (((1 - Real.sqrt 2 : ℝ)) : ℂ) := by
+      rw [Complex.ofReal_sub, Complex.ofReal_one]
+    rw [hden, ← Complex.ofReal_div]
+  have hGreal : Complex.Gammaℝ (1/2 : ℂ)
+      = (((Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ) : ℝ)) : ℂ) :=
+    Gammaℝ_half_eq_real
+  have hComp : completedRiemannZeta₀ (1/2 : ℂ)
+      = (((L / (1 - Real.sqrt 2)
+        * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ)) + 4 : ℝ)) : ℂ) := by
+    rw [completedRiemannZeta₀_half_eq_mul, hZreal, hGreal]
+    have h4 : (4 : ℂ) = (((4 : ℝ)) : ℂ) := by norm_num
+    rw [h4, ← Complex.ofReal_mul, ← Complex.ofReal_add]
+  have hre : (completedRiemannZeta₀ (1/2 : ℂ)).re
+      = L / (1 - Real.sqrt 2)
+        * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ)) + 4 := by
+    rw [hComp, Complex.ofReal_re]
+  rw [hre]
+  have hdiv : L / (1 - Real.sqrt 2)
+      * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ)) + 4
+      = 4 - L * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ))
+        / (Real.sqrt 2 - 1) := by
+    have h1 : (1 : ℝ) - Real.sqrt 2 = -(Real.sqrt 2 - 1) := by ring
+    rw [h1, div_neg, neg_mul, div_mul_eq_mul_div]
+    ring
+  rw [hdiv]
+  have hLGdiv : L * (Real.Gamma (1/4 : ℝ) * Real.pi ^ (-(1/4) : ℝ))
+      / (Real.sqrt 2 - 1) < 4 := by
+    rw [div_lt_iff₀ hspos]
+    exact hLG
+  linarith
+
+/-- The 0-th Taylor coefficient of the shifted xi function is nonzero.
+` taylorCoeff 0 = (completedRiemannZeta₀ (1/2)).re > 0` by `completed₀_half_pos`. -/
+lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
+  rw [taylorCoeff_zero_eq]
+  exact ne_of_gt completed₀_half_pos
 
 end JensenRH
