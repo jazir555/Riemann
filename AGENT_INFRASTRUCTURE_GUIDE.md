@@ -1298,6 +1298,11 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
    `orderAt w ≠ 0` ⇒ `1 ≤ divisor`. Wrappers match `hurwitz_zero_transfer`/`door1_nonreal_zero_forced`
    signatures with `hdiv` replaced by `hGw : G w = 0` — S2b now feeds directly from a zero witness.
   (S2b) polynomial-eval packaging + `hyperbolic_zeroFree_off_real` composition in door-1 file;
+   **S2b CLOSED (`scaledSection` + `schur_disc_no_interior_zero_of_hyperbolic_sections` +
+   `schur_limit_zero_real_of_hyperbolic_sections`):** approximant analyticity discharged in-file,
+   zero witness ⇒ forced nonreal zero ⇒ hyperbolicity contradiction, corollary in exactly the reality
+   shape `schur_partial_assembly` needs past Rouché. Explicit residual: (S2c) `hConv` per-disc uniform
+   convergence (S1 gives only pointwise) + (CENTER) `hGc` + (SPHERE) `hGsph` + (LIMIT-ANALYTIC) `hG`.
   (S2c) per-disc convergence + center-nonzero from S1 machinery.
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
@@ -1365,7 +1370,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    all `M≤343` fail (`r≥1/3`, so ≥688 terms necessary), M=1024 works; true minimal M=635 (bracket
    `[344,1024]` formalized). No small-M closure exists under any triangle bound (`r(1)≥16` vs `1/3`;
    proved tail ~2500× loose vs true — the gap is pure inter-pair phase cancellation). Honest routes:
-   Kuzmin–Landau cancellation tail (absent from Mathlib, major) or rigorous complex interval arithmetic. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+   Kuzmin–Landau cancellation tail (absent from Mathlib, major) or rigorous complex interval arithmetic.
+    **KL Tier-1 CLOSED:** first-derivative test `‖∑e^{inθ}‖≤π/|θ|` from scratch (geometric core + Jordan
+    denominator bound) + AE-block phase gap (`8.75/2049`, tight to 0.02%) + smallness (`≪π/2`, 184× margin).
+    Stopping honesty: linear-KL scales as `N^{+0.395}` per dyadic block (diverges where triangle converges) —
+    Tier 2 needs the Abel bridge (`Finset.sum_range_by_parts`, reserved) + TV bound; Tier 3 needs
+    second-derivative/van der Corput or interval arithmetic. `S_{2048}` premise stays conditional. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
@@ -1404,7 +1414,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   zeta-lower open; deriv `1.34M×` (vs 67200) / `136M×` (vs 6800640). Poly `22`, pi `1/2`,
   Gamma-upper `0.05` at R02: no gap. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
-  + tighter zeta upper to reach tier `M≈0.05`. Remaining 39 cells: same shape, different `s`-rects
+  + tighter zeta upper to reach tier `M≈0.05`. **Stirling disc-upper CLOSED (`R02GammaDisc`, 412×):**
+  6-shift Im-decay floors (`D≥2648`) + convexity uniform numerator (`≤256.78`) ⇒ `‖Γ(s/2)‖≤0.097`
+  on the R02 disc (true sup `~0.026`, within 3.7×) + drop-in `gammaOf_upper_disc_R02`; downstream sphere
+  sup `16800→40.74`, conditional deriv `M=67200→~163`. Gamma done — deriv now needs only the zeta upper
+  (`‖ζ‖≤10` obligation). Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
@@ -1439,8 +1453,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
 Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. **Euler right edge closed
 (`TailZetaUpper`):** Im-uniform `‖ζ‖ ≤ 1+1/δ` on `Re ≥ 1+δ` (`B=3` at `3/2`, `B=2` at `2`;
 Im-uniformity free from the majorant). Cross-confirms PL/three-lines existence. Exact next lemma
-`TailZetaUpper_threeLines_FE_assembly` (not proved): right edge + FE left edge + three-lines on
-pole-removed `(s−1)·ζ` ⇒ Im-uniform `‖ζ‖≤B` on `0<Re<1/2`, feeding the `MollifiedRoucheLeaf` gap.
+`TailZetaUpper_threeLines_FE_assembly` (assembly CLOSED conditional): whole-line `A`(`Re=−1`) +
+`B`(`Re=2`) + `BddAbove` ⇒ strip bound `A^(1−t)·B^t/(‖s−1‖·‖damp‖)` + `50.925`-threshold form
+(`‖ζ‖≤101.85·exp(((|τ|+6.75)²)/100)`). Honest limits: conclusion explicitly-growing in `|τ|`, NOT
+Im-uniform; even uniform `B₀` ≠ mollifier gap (K=2 needs phase `‖ζ−2‖≤2−2δ`, not size).
 Remaining: instantiate a
 `MollifiedRoucheLeaf K` with the gap `‖ζ·M − 1‖ ≤ 1−δ` on the tail — needs a **uniform ζ upper bound
 on `0<Re<1/2` as `|Im|→∞`** (K growing with `|Re z|`, convexity/Phragmén–Lindelöf + functional
