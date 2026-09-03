@@ -1145,6 +1145,4961 @@ theorem gamma_quarter_gt_BM2 : (3.38 : ℝ) < Real.Gamma (1/4 : ℝ) := by
   rw [hseq, hsum]
   linarith [hlog4, e152]
 
+/-- `3^(1/4) < 1.3184` (true value ≈ 1.31607). -/
+theorem three_rpow_quarter_lt : (3 : ℝ) ^ ((1/4 : ℝ)) < (1.3184 : ℝ) := by
+  have h4 : (3 : ℝ) < (1.3184 : ℝ) ^ 4 := by norm_num
+  have hlog : Real.log 3 < 4 * Real.log (1.3184 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by norm_num) (by positivity)).mpr h4
+    rw [Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hrw : Real.log ((3 : ℝ) ^ ((1/4 : ℝ))) = (1/4) * Real.log 3 :=
+    Real.log_rpow (by norm_num) _
+  have hfin : Real.log ((3 : ℝ) ^ ((1/4 : ℝ))) < Real.log (1.3184 : ℝ) := by
+    rw [hrw]
+    linarith
+  exact (Real.log_lt_log_iff (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mp hfin
+
+/-- Bohr–Mollerup `n = 2` upper bound at `x = 1/4`: `Gamma(1/4) < 3.751`
+(mirror of `gamma_quarter_gt_BM2`; exact form `Γ ≤ 128·3^{1/4}/45 ≈ 3.743`;
+new interval `3.38 < Γ(1/4) < 3.751`, width `0.371`). -/
+theorem gamma_quarter_lt_BM2 : Real.Gamma (1/4 : ℝ) < (3.751 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 2
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c2 : ((2 : ℕ) : ℝ) = (2 : ℝ) := by norm_num
+  rw [c2] at hle
+  have c3 : (2 : ℝ) + 1 = (3 : ℝ) := by norm_num
+  rw [c3] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 2
+      = (5/4 : ℝ) * Real.log 2
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)) := by
+    have f2 : Nat.factorial 2 = 2 := by decide
+    have c2' : ((2 : ℕ) : ℝ) = (2 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + (2 : ℝ) = 9/4 := by norm_num
+    have r2 : (2 : ℕ) = 1 + 1 := by norm_num
+    have rr : Finset.range (2 : ℕ) = Finset.range (1 + 1) := by rw [r2]
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [Finset.sum_range_succ, rr, Finset.sum_range_succ, Finset.sum_range_one,
+      f2, c2', a0, a1, a2]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+      = Real.log 45 - 6 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have p : ((1/4 : ℝ) * (5/4)) * (9/4) = 45 / 64 := by norm_num
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log 45 - Real.log 64 := by
+      rw [← Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l64 : Real.log (64 : ℝ) = 6 * Real.log 2 := by
+      have e64 : (64 : ℝ) = 2 ^ 6 := by norm_num
+      rw [e64, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, l64]
+  have h3 := three_rpow_quarter_lt
+  have hlog3 : Real.log ((3 : ℝ) ^ ((1/4 : ℝ))) < Real.log (1.3184 : ℝ) :=
+    (Real.log_lt_log_iff (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr h3
+  have hrw3 : Real.log ((3 : ℝ) ^ ((1/4 : ℝ))) = (1/4) * Real.log 3 :=
+    Real.log_rpow (by norm_num) _
+  have hq : (1/4 : ℝ) * Real.log 3 < Real.log (1.3184 : ℝ) := by
+    rw [← hrw3]
+    exact hlog3
+  have hC : (1.3184 : ℝ) * 128 < 3.751 * 45 := by norm_num
+  have hlogC : Real.log ((1.3184 : ℝ) * 128) < Real.log ((3.751 : ℝ) * 45) :=
+    (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hC
+  have l128 : Real.log ((1.3184 : ℝ) * 128)
+      = Real.log 1.3184 + 7 * Real.log 2 := by
+    have e128 : (128 : ℝ) = 2 ^ 7 := by norm_num
+    have hm := Real.log_mul (show (1.3184 : ℝ) ≠ 0 by norm_num)
+      (show (128 : ℝ) ≠ 0 by norm_num)
+    rw [hm, e128, Real.log_pow]
+    push_cast
+    ring
+  have r45 : Real.log ((3.751 : ℝ) * 45) = Real.log 3.751 + Real.log 45 :=
+    Real.log_mul (by norm_num) (by norm_num)
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum]
+  linarith [hq, hlogC, l128, r45]
+
+/-- Bohr–Mollerup `n = 3` lower bound at `x = 1/4`: `3.455 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM2`; exact `log`-of-rational value
+`logΓ ≥ 9·log 2 - (3/4)·log 3 - log 5 - log 13 ≈ 1.240`,
+i.e. `Γ ≥ 2^36/(3^3·5^4·13^4)` fourth root `≈ 3.4555`;
+new interval `3.455 < Γ(1/4) < 3.751`, width `0.296`). -/
+theorem gamma_quarter_gt_BM3 : (3.455 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (3 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 3
+      = (1/4 : ℝ) * Real.log 3 + Real.log 6
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+          + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ)) := by
+    have f3 : Nat.factorial 3 = 6 := by decide
+    have c3 : ((3 : ℕ) : ℝ) = (3 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f3, c3, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one, a0, a1, a2, a3]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ)
+      = Real.log 585 - 8 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have p : (((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4) = 585 / 256 := by norm_num
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log 585 - Real.log 256 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l256 : Real.log (256 : ℝ) = 8 * Real.log 2 := by
+      have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+      rw [e256, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, l256]
+  have h6 : Real.log (6 : ℝ) = Real.log 2 + Real.log 3 := by
+    have e6 : (6 : ℝ) = 2 * 3 := by norm_num
+    rw [e6, Real.log_mul (by norm_num) (by norm_num)]
+  have h585 : Real.log (585 : ℝ) = 2 * Real.log 3 + Real.log 5 + Real.log 13 := by
+    have e585 : (585 : ℝ) = (9 * 5) * 13 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e585, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e9, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (481966875 : ℝ)
+      = 3 * Real.log 3 + 4 * Real.log 5 + 4 * Real.log 13 := by
+    have eK : (481966875 : ℝ) = (3 ^ 3 * 5 ^ 4) * 13 ^ 4 := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.455 : ℝ) ^ 4 * 481966875 < 2 ^ 36 := by norm_num
+  have hlog4 : 4 * Real.log (3.455 : ℝ) + Real.log (481966875 : ℝ)
+      < 36 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h6, h585]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 3` upper bound at `x = 1/4`: `Gamma(1/4) < 3.714`
+(mirror of `gamma_quarter_gt_BM3`; exact value
+`logΓ ≤ (19/2)·log 2 - log 3 - log 5 - log 13 ≈ 1.312`,
+i.e. `Γ ≤ 2^19/(195^2)` square root `≈ 3.7132`;
+new interval `3.455 < Γ(1/4) < 3.714`, width `0.259`). -/
+theorem gamma_quarter_lt_BM3 : Real.Gamma (1/4 : ℝ) < (3.714 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 3
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c3 : ((3 : ℕ) : ℝ) = (3 : ℝ) := by norm_num
+  rw [c3] at hle
+  have c4 : (3 : ℝ) + 1 = (4 : ℝ) := by norm_num
+  rw [c4] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 3
+      = (1/4 : ℝ) * Real.log 3 + Real.log 6
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+          + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ)) := by
+    have f3 : Nat.factorial 3 = 6 := by decide
+    have c3' : ((3 : ℕ) : ℝ) = (3 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f3, c3', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one, a0, a1, a2, a3]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ)
+      = Real.log 585 - 8 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have p : (((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4) = 585 / 256 := by norm_num
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log 585 - Real.log 256 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l256 : Real.log (256 : ℝ) = 8 * Real.log 2 := by
+      have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+      rw [e256, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, l256]
+  have h6 : Real.log (6 : ℝ) = Real.log 2 + Real.log 3 := by
+    have e6 : (6 : ℝ) = 2 * 3 := by norm_num
+    rw [e6, Real.log_mul (by norm_num) (by norm_num)]
+  have h585 : Real.log (585 : ℝ) = 2 * Real.log 3 + Real.log 5 + Real.log 13 := by
+    have e585 : (585 : ℝ) = (9 * 5) * 13 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e585, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e9, Real.log_pow]
+    push_cast
+    ring
+  have l4 : Real.log (4 : ℝ) = 2 * Real.log 2 := by
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e4, Real.log_pow]
+    push_cast
+    ring
+  have h195 : Real.log (195 : ℝ) = Real.log 3 + Real.log 5 + Real.log 13 := by
+    have e195 : (195 : ℝ) = (3 * 5) * 13 := by norm_num
+    rw [e195, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num)]
+  have hpowC : (2 : ℝ) ^ 19 < (195 * 3.714) ^ 2 := by norm_num
+  have hlogC : 19 * Real.log 2 < 2 * Real.log (195 * 3.714) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have rC : Real.log (195 * 3.714) = Real.log 195 + Real.log 3.714 :=
+    Real.log_mul (by norm_num) (by norm_num)
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h6, h585, l4]
+  linarith [hlogC, rC, h195]
+
+/-- Two-sided Bohr–Mollerup `n = 3` interval: `3.455 < Γ(1/4) < 3.714`
+(width `0.259`, tightening the `n = 2` interval `3.38 < Γ < 3.751`, width `0.371`). -/
+theorem gamma_quarter_bounds_BM3 :
+    (3.455 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.714 : ℝ) :=
+  ⟨gamma_quarter_gt_BM3, gamma_quarter_lt_BM3⟩
+
+/-- Bohr–Mollerup `n = 4` lower bound at `x = 1/4`: `3.494 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM3`; exact `log`-of-rational value
+`logΓ ≥ (27/2)·log 2 - log 3 - log 5 - log 13 - log 17 ≈ 1.2513`,
+i.e. `Γ ≥ sqrt(2^27/(3^2·5^2·13^2·17^2)) ≈ 3.49479`;
+new interval `3.494 < Γ(1/4) < 3.714`, width `0.220`). -/
+theorem gamma_quarter_gt_BM4 : (3.494 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (4 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 4
+      = (1/4 : ℝ) * Real.log 4 + Real.log 24
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+          + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ)) := by
+    have f4 : Nat.factorial 4 = 24 := by decide
+    have c4 : ((4 : ℕ) : ℝ) = (4 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f4, c4, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ)
+      = Real.log 9945 - 10 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have p : ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4) = 9945 / 1024 := by
+      norm_num
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log 9945 - Real.log 1024 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1024 : Real.log (1024 : ℝ) = 10 * Real.log 2 := by
+      have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+      rw [e1024, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, l1024]
+  have h24 : Real.log (24 : ℝ) = 3 * Real.log 2 + Real.log 3 := by
+    have e24 : (24 : ℝ) = 8 * 3 := by norm_num
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e24, Real.log_mul (by norm_num) (by norm_num), e8, Real.log_pow]
+    push_cast
+    ring
+  have l4 : Real.log (4 : ℝ) = 2 * Real.log 2 := by
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e4, Real.log_pow]
+    push_cast
+    ring
+  have h9945 : Real.log (9945 : ℝ)
+      = 2 * Real.log 3 + Real.log 5 + Real.log 13 + Real.log 17 := by
+    have e9945 : (9945 : ℝ) = ((9 * 5) * 13) * 17 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e9945, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e9, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (10989225 : ℝ)
+      = 2 * Real.log 3 + 2 * Real.log 5 + 2 * Real.log 13 + 2 * Real.log 17 := by
+    have eK : (10989225 : ℝ) = ((3 ^ 2 * 5 ^ 2) * 13 ^ 2) * 17 ^ 2 := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.494 : ℝ) ^ 2 * 10989225 < 2 ^ 27 := by norm_num
+  have hlog2 : 2 * Real.log (3.494 : ℝ) + Real.log (10989225 : ℝ)
+      < 27 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h24, l4, h9945]
+  linarith [hlog2, hK]
+
+/-- Bohr–Mollerup `n = 4` upper bound at `x = 1/4`: `Gamma(1/4) < 3.696`
+(mirror of `gamma_quarter_gt_BM4`; exact value
+`logΓ ≤ 13·log 2 - log 3 - (3/4)·log 5 - log 13 - log 17 ≈ 1.3071`,
+i.e. `Γ ≤ (2^52/(3^4·5^3·13^4·17^4))^{1/4} ≈ 3.69529`;
+new interval `3.494 < Γ(1/4) < 3.696`, width `0.202`). -/
+theorem gamma_quarter_lt_BM4 : Real.Gamma (1/4 : ℝ) < (3.696 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 4
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c4 : ((4 : ℕ) : ℝ) = (4 : ℝ) := by norm_num
+  rw [c4] at hle
+  have c5 : (4 : ℝ) + 1 = (5 : ℝ) := by norm_num
+  rw [c5] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 4
+      = (1/4 : ℝ) * Real.log 4 + Real.log 24
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+          + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ)) := by
+    have f4 : Nat.factorial 4 = 24 := by decide
+    have c4' : ((4 : ℕ) : ℝ) = (4 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f4, c4', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ)
+      = Real.log 9945 - 10 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have p : ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4) = 9945 / 1024 := by
+      norm_num
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log 9945 - Real.log 1024 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1024 : Real.log (1024 : ℝ) = 10 * Real.log 2 := by
+      have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+      rw [e1024, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, l1024]
+  have h24 : Real.log (24 : ℝ) = 3 * Real.log 2 + Real.log 3 := by
+    have e24 : (24 : ℝ) = 8 * 3 := by norm_num
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e24, Real.log_mul (by norm_num) (by norm_num), e8, Real.log_pow]
+    push_cast
+    ring
+  have l4 : Real.log (4 : ℝ) = 2 * Real.log 2 := by
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e4, Real.log_pow]
+    push_cast
+    ring
+  have h9945 : Real.log (9945 : ℝ)
+      = 2 * Real.log 3 + Real.log 5 + Real.log 13 + Real.log 17 := by
+    have e9945 : (9945 : ℝ) = ((9 * 5) * 13) * 17 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e9945, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e9, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (24152613220125 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + 4 * Real.log 13 + 4 * Real.log 17 := by
+    have eK : (24152613220125 : ℝ) = ((3 ^ 4 * 5 ^ 3) * 13 ^ 4) * 17 ^ 4 := by
+      norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 52 < (3.696 : ℝ) ^ 4 * 24152613220125 := by norm_num
+  have hlogC : 52 * Real.log 2
+      < 4 * Real.log (3.696 : ℝ) + Real.log (24152613220125 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h24, l4, h9945]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 4` interval: `3.494 < Γ(1/4) < 3.696`
+(width `0.202`, tightening the `n = 3` interval `3.455 < Γ < 3.714`, width `0.259`). -/
+theorem gamma_quarter_bounds_BM4 :
+    (3.494 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.696 : ℝ) :=
+  ⟨gamma_quarter_gt_BM4, gamma_quarter_lt_BM4⟩
+
+/-- Bohr–Mollerup `n = 5` lower bound at `x = 1/4`: `3.519 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM4`; exact `log`-of-rational value
+`logΓ ≥ 15·log 2 - 2·log 3 + (1/4)·log 5 - log 7 - log 13 - log 17 ≈ 1.2583`,
+i.e. `Γ ≥ (2^60·5/(3^8·7^4·13^4·17^4))^{1/4} ≈ 3.51933`;
+new interval `3.519 < Γ(1/4) < 3.696`, width `0.177`). -/
+theorem gamma_quarter_gt_BM5 : (3.519 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (5 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 5
+      = (1/4 : ℝ) * Real.log 5 + Real.log 120
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)) := by
+    have f5 : Nat.factorial 5 = 120 := by decide
+    have c5 : ((5 : ℕ) : ℝ) = (5 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f5, c5, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one, a0, a1, a2, a3, a4, a5]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+      = Real.log 208845 - 12 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have p : (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) * (21/4)
+        = 208845 / 4096 := by norm_num
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log 208845 - Real.log 4096 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l4096 : Real.log (4096 : ℝ) = 12 * Real.log 2 := by
+      have e4096 : (4096 : ℝ) = 2 ^ 12 := by norm_num
+      rw [e4096, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, l4096]
+  have h120 : Real.log (120 : ℝ) = 3 * Real.log 2 + Real.log 3 + Real.log 5 := by
+    have e120 : (120 : ℝ) = (8 * 3) * 5 := by norm_num
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e120, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e8, Real.log_pow]
+    push_cast
+    ring
+  have h208845 : Real.log (208845 : ℝ)
+      = 3 * Real.log 3 + Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 := by
+    have e208845 : (208845 : ℝ) = (((27 * 5) * 7) * 13) * 17 := by norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    rw [e208845, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (37577794973305041 : ℝ)
+      = 8 * Real.log 3 + 4 * Real.log 7 + 4 * Real.log 13
+        + 4 * Real.log 17 := by
+    have eK : (37577794973305041 : ℝ)
+        = ((3 ^ 8 * 7 ^ 4) * 13 ^ 4) * 17 ^ 4 := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.519 : ℝ) ^ 4 * 37577794973305041 < 2 ^ 60 * 5 := by norm_num
+  have hlog4 : 4 * Real.log (3.519 : ℝ) + Real.log (37577794973305041 : ℝ)
+      < 60 * Real.log 2 + Real.log 5 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h120, h208845]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 5` upper bound at `x = 1/4`: `Gamma(1/4) < 3.684`
+(mirror of `gamma_quarter_gt_BM5`; exact value
+`logΓ ≤ (61/4)·log 2 - (7/4)·log 3 - log 7 - log 13 - log 17 ≈ 1.3039`,
+i.e. `Γ ≤ (2^61/(3^7·7^4·13^4·17^4))^{1/4} ≈ 3.68345`;
+new interval `3.519 < Γ(1/4) < 3.684`, width `0.165`). -/
+theorem gamma_quarter_lt_BM5 : Real.Gamma (1/4 : ℝ) < (3.684 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 5
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c5 : ((5 : ℕ) : ℝ) = (5 : ℝ) := by norm_num
+  rw [c5] at hle
+  have c6 : (5 : ℝ) + 1 = (6 : ℝ) := by norm_num
+  rw [c6] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 5
+      = (1/4 : ℝ) * Real.log 5 + Real.log 120
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)) := by
+    have f5 : Nat.factorial 5 = 120 := by decide
+    have c5' : ((5 : ℕ) : ℝ) = (5 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f5, c5', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one, a0, a1, a2, a3, a4, a5]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+      = Real.log 208845 - 12 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have p : (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) * (21/4)
+        = 208845 / 4096 := by norm_num
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log 208845 - Real.log 4096 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l4096 : Real.log (4096 : ℝ) = 12 * Real.log 2 := by
+      have e4096 : (4096 : ℝ) = 2 ^ 12 := by norm_num
+      rw [e4096, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, l4096]
+  have h120 : Real.log (120 : ℝ) = 3 * Real.log 2 + Real.log 3 + Real.log 5 := by
+    have e120 : (120 : ℝ) = (8 * 3) * 5 := by norm_num
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e120, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e8, Real.log_pow]
+    push_cast
+    ring
+  have h208845 : Real.log (208845 : ℝ)
+      = 3 * Real.log 3 + Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 := by
+    have e208845 : (208845 : ℝ) = (((27 * 5) * 7) * 13) * 17 := by norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    rw [e208845, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, Real.log_pow]
+    push_cast
+    ring
+  have h6 : Real.log (6 : ℝ) = Real.log 2 + Real.log 3 := by
+    have e6 : (6 : ℝ) = 2 * 3 := by norm_num
+    rw [e6, Real.log_mul (by norm_num) (by norm_num)]
+  have hKup : Real.log (12525931657768347 : ℝ)
+      = 7 * Real.log 3 + 4 * Real.log 7 + 4 * Real.log 13
+        + 4 * Real.log 17 := by
+    have eK : (12525931657768347 : ℝ)
+        = ((3 ^ 7 * 7 ^ 4) * 13 ^ 4) * 17 ^ 4 := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 61 < (3.684 : ℝ) ^ 4 * 12525931657768347 := by norm_num
+  have hlogC : 61 * Real.log 2
+      < 4 * Real.log (3.684 : ℝ) + Real.log (12525931657768347 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h120, h208845, h6]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 5` interval: `3.519 < Γ(1/4) < 3.684`
+(width `0.165`, tightening the `n = 4` interval `3.494 < Γ < 3.696`, width `0.202`). -/
+theorem gamma_quarter_bounds_BM5 :
+    (3.519 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.684 : ℝ) :=
+  ⟨gamma_quarter_gt_BM5, gamma_quarter_lt_BM5⟩
+
+/-- Bohr–Mollerup `n = 6` lower bound at `x = 1/4`: `3.536 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM5`; exact `log`-of-rational value
+`logΓ ≥ (73/4)·log 2 - (3/4)·log 3 - 2·log 5 - log 7 - log 13 - log 17 ≈ 1.2630`,
+i.e. `Γ ≥ (2^73/(3^3·5^8·7^4·13^4·17^4))^{1/4} ≈ 3.53611`;
+new interval `3.536 < Γ(1/4) < 3.684`, width `0.148`). -/
+theorem gamma_quarter_gt_BM6 : (3.536 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (6 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 6
+      = (1/4 : ℝ) * Real.log 6 + Real.log 720
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ)) := by
+    have f6 : Nat.factorial 6 = 720 := by decide
+    have c6 : ((6 : ℕ) : ℝ) = (6 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f6, c6, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one, a0, a1, a2, a3, a4, a5, a6]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ)
+      = Real.log 5221125 - 14 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have p : ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) * (21/4))
+        * (25/4) = 5221125 / 16384 := by norm_num
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log 5221125 - Real.log 16384 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l16384 : Real.log (16384 : ℝ) = 14 * Real.log 2 := by
+      have e16384 : (16384 : ℝ) = 2 ^ 14 := by norm_num
+      rw [e16384, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, l16384]
+  have h720 : Real.log (720 : ℝ)
+      = 4 * Real.log 2 + 2 * Real.log 3 + Real.log 5 := by
+    have e720 : (720 : ℝ) = (16 * 9) * 5 := by norm_num
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e720, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e16, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h5221125 : Real.log (5221125 : ℝ)
+      = 3 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 := by
+    have e5221125 : (5221125 : ℝ) = ((((27 * 125) * 7) * 13) * 17) := by norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [e5221125, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h6 : Real.log (6 : ℝ) = Real.log 2 + Real.log 3 := by
+    have e6 : (6 : ℝ) = 2 * 3 := by norm_num
+    rw [e6, Real.log_mul (by norm_num) (by norm_num)]
+  have hK : Real.log (60406692022416796875 : ℝ)
+      = 3 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 13
+        + 4 * Real.log 17 := by
+    have eK : (60406692022416796875 : ℝ)
+        = ((((3 ^ 3 * 5 ^ 8) * 7 ^ 4) * 13 ^ 4) * 17 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.536 : ℝ) ^ 4 * 60406692022416796875 < 2 ^ 73 := by norm_num
+  have hlog4 : 4 * Real.log (3.536 : ℝ) + Real.log (60406692022416796875 : ℝ)
+      < 73 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h720, h5221125, h6]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 6` upper bound at `x = 1/4`: `Gamma(1/4) < 3.676`
+(mirror of `gamma_quarter_gt_BM6`; exact value
+`logΓ ≤ 18·log 2 - log 3 - 2·log 5 - (3/4)·log 7 - log 13 - log 17 ≈ 1.3016`,
+i.e. `Γ ≤ (2^72/(3^4·5^8·7^3·13^4·17^4))^{1/4} ≈ 3.67505`;
+new interval `3.536 < Γ(1/4) < 3.676`, width `0.140`). -/
+theorem gamma_quarter_lt_BM6 : Real.Gamma (1/4 : ℝ) < (3.676 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 6
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c6 : ((6 : ℕ) : ℝ) = (6 : ℝ) := by norm_num
+  rw [c6] at hle
+  have c7 : (6 : ℝ) + 1 = (7 : ℝ) := by norm_num
+  rw [c7] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 6
+      = (1/4 : ℝ) * Real.log 6 + Real.log 720
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ)) := by
+    have f6 : Nat.factorial 6 = 720 := by decide
+    have c6' : ((6 : ℕ) : ℝ) = (6 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f6, c6', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one, a0, a1, a2, a3, a4, a5, a6]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ)
+      = Real.log 5221125 - 14 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have p : ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) * (21/4))
+        * (25/4) = 5221125 / 16384 := by norm_num
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log 5221125 - Real.log 16384 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l16384 : Real.log (16384 : ℝ) = 14 * Real.log 2 := by
+      have e16384 : (16384 : ℝ) = 2 ^ 14 := by norm_num
+      rw [e16384, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, l16384]
+  have h720 : Real.log (720 : ℝ)
+      = 4 * Real.log 2 + 2 * Real.log 3 + Real.log 5 := by
+    have e720 : (720 : ℝ) = (16 * 9) * 5 := by norm_num
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e720, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e16, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h5221125 : Real.log (5221125 : ℝ)
+      = 3 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 := by
+    have e5221125 : (5221125 : ℝ) = ((((27 * 125) * 7) * 13) * 17) := by norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [e5221125, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h6 : Real.log (6 : ℝ) = Real.log 2 + Real.log 3 := by
+    have e6 : (6 : ℝ) = 2 * 3 := by norm_num
+    rw [e6, Real.log_mul (by norm_num) (by norm_num)]
+  have h7 : Real.log (7 : ℝ) = Real.log 7 := rfl
+  have hKup : Real.log (25888582295321484375 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 3 * Real.log 7 + 4 * Real.log 13
+        + 4 * Real.log 17 := by
+    have eK : (25888582295321484375 : ℝ)
+        = ((((3 ^ 4 * 5 ^ 8) * 7 ^ 3) * 13 ^ 4) * 17 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 72 < (3.676 : ℝ) ^ 4 * 25888582295321484375 := by norm_num
+  have hlogC : 72 * Real.log 2
+      < 4 * Real.log (3.676 : ℝ) + Real.log (25888582295321484375 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h720, h5221125, h6, h7]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 6` interval: `3.536 < Γ(1/4) < 3.676`
+(width `0.140`, tightening the `n = 5` interval `3.519 < Γ < 3.684`, width `0.165`). -/
+theorem gamma_quarter_bounds_BM6 :
+    (3.536 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.676 : ℝ) :=
+  ⟨gamma_quarter_gt_BM6, gamma_quarter_lt_BM6⟩
+
+/-- Bohr–Mollerup `n = 7` lower bound at `x = 1/4`: `3.548 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM6`; exact `log`-of-rational value
+`logΓ ≥ 20·log 2 - log 3 - 2·log 5 + (1/4)·log 7 - log 13 - log 17 - log 29 ≈ 1.2665`,
+i.e. `Γ ≥ (2^80·7/(3^4·5^8·13^4·17^4·29^4))^{1/4} ≈ 3.54832`;
+new interval `3.548 < Γ(1/4) < 3.676`, width `0.128`). -/
+theorem gamma_quarter_gt_BM7 : (3.548 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (7 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 7
+      = (1/4 : ℝ) * Real.log 7 + Real.log 5040
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ)) := by
+    have f7 : Nat.factorial 7 = 5040 := by decide
+    have c7 : ((7 : ℕ) : ℝ) = (7 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f7, c7, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ)
+      = Real.log 151412625 - 16 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have p : (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4) = 151412625 / 65536 := by norm_num
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log 151412625 - Real.log 65536 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l65536 : Real.log (65536 : ℝ) = 16 * Real.log 2 := by
+      have e65536 : (65536 : ℝ) = 2 ^ 16 := by norm_num
+      rw [e65536, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, l65536]
+  have h5040 : Real.log (5040 : ℝ)
+      = 4 * Real.log 2 + 2 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e5040 : (5040 : ℝ) = ((16 * 9) * 5) * 7 := by norm_num
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e5040, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e16, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (151412625 : ℝ)
+      = 3 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 + Real.log 29 := by
+    have eN : (151412625 : ℝ) = (((((27 * 125) * 7) * 13) * 17) * 29) := by
+      norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (53383388846697594140625 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 := by
+    have eK : (53383388846697594140625 : ℝ)
+        = ((((3 ^ 4 * 5 ^ 8) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.548 : ℝ) ^ 4 * 53383388846697594140625 < 2 ^ 80 * 7 := by
+    norm_num
+  have hlog4 : 4 * Real.log (3.548 : ℝ) + Real.log (53383388846697594140625 : ℝ)
+      < 80 * Real.log 2 + Real.log 7 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h5040, hN]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 7` upper bound at `x = 1/4`: `Gamma(1/4) < 3.669`
+(mirror of `gamma_quarter_gt_BM7`; exact value
+`logΓ ≤ 20.75·log 2 - log 3 - 2·log 5 - log 13 - log 17 - log 29 ≈ 1.2999`,
+i.e. `Γ ≤ (2^83/(3^4·5^8·13^4·17^4·29^4))^{1/4} ≈ 3.66877`;
+new interval `3.548 < Γ(1/4) < 3.669`, width `0.121`). -/
+theorem gamma_quarter_lt_BM7 : Real.Gamma (1/4 : ℝ) < (3.669 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 7
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c7 : ((7 : ℕ) : ℝ) = (7 : ℝ) := by norm_num
+  rw [c7] at hle
+  have c8 : (7 : ℝ) + 1 = (8 : ℝ) := by norm_num
+  rw [c8] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 7
+      = (1/4 : ℝ) * Real.log 7 + Real.log 5040
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ)) := by
+    have f7 : Nat.factorial 7 = 5040 := by decide
+    have c7' : ((7 : ℕ) : ℝ) = (7 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f7, c7', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ)
+      = Real.log 151412625 - 16 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have p : (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4) = 151412625 / 65536 := by norm_num
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log 151412625 - Real.log 65536 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l65536 : Real.log (65536 : ℝ) = 16 * Real.log 2 := by
+      have e65536 : (65536 : ℝ) = 2 ^ 16 := by norm_num
+      rw [e65536, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, l65536]
+  have h5040 : Real.log (5040 : ℝ)
+      = 4 * Real.log 2 + 2 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e5040 : (5040 : ℝ) = ((16 * 9) * 5) * 7 := by norm_num
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e5040, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e16, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (151412625 : ℝ)
+      = 3 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 13
+        + Real.log 17 + Real.log 29 := by
+    have eN : (151412625 : ℝ) = (((((27 * 125) * 7) * 13) * 17) * 29) := by
+      norm_num
+    have e27 : (27 : ℝ) = 3 ^ 3 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e27, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h8 : Real.log (8 : ℝ) = 3 * Real.log 2 := by
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e8, Real.log_pow]
+    push_cast
+    ring
+  have h7 : Real.log (7 : ℝ) = Real.log 7 := rfl
+  have hKup : Real.log (53383388846697594140625 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 := by
+    have eK : (53383388846697594140625 : ℝ)
+        = ((((3 ^ 4 * 5 ^ 8) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 83 < (3.669 : ℝ) ^ 4 * 53383388846697594140625 := by
+    norm_num
+  have hlogC : 83 * Real.log 2
+      < 4 * Real.log (3.669 : ℝ) + Real.log (53383388846697594140625 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h5040, hN, h8, h7]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 7` interval: `3.548 < Γ(1/4) < 3.669`
+(width `0.121`, tightening the `n = 6` interval `3.536 < Γ < 3.676`, width `0.140`). -/
+theorem gamma_quarter_bounds_BM7 :
+    (3.548 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.669 : ℝ) :=
+  ⟨gamma_quarter_gt_BM7, gamma_quarter_lt_BM7⟩
+
+/-- Bohr–Mollerup `n = 8` lower bound at `x = 1/4`: `3.557 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM7`; exact `log`-of-rational value
+`logΓ ≥ 25.75·log 2 - 2·log 3 - 2·log 5 - log 11 - log 13 - log 17 - log 29 ≈ 1.2691`,
+i.e. `Γ ≥ (2^103/(3^8·5^8·11^4·13^4·17^4·29^4))^{1/4} ≈ 3.55760`;
+new interval `3.557 < Γ(1/4) < 3.669`, width `0.112`). -/
+theorem gamma_quarter_gt_BM8 : (3.557 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (8 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 8
+      = (1/4 : ℝ) * Real.log 8 + Real.log 40320
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)) := by
+    have f8 : Nat.factorial 8 = 40320 := by decide
+    have c8 : ((8 : ℕ) : ℝ) = (8 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f8, c8, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one, a0, a1, a2, a3, a4, a5, a6, a7, a8]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+      = Real.log 4996616625 - 18 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have p : ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4) = 4996616625 / 262144 := by
+      norm_num
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log 4996616625 - Real.log 262144 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l262144 : Real.log (262144 : ℝ) = 18 * Real.log 2 := by
+      have e262144 : (262144 : ℝ) = 2 ^ 18 := by norm_num
+      rw [e262144, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, l262144]
+  have h40320 : Real.log (40320 : ℝ)
+      = 7 * Real.log 2 + 2 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e40320 : (40320 : ℝ) = ((128 * 9) * 5) * 7 := by norm_num
+    have e128 : (128 : ℝ) = 2 ^ 7 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e40320, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e128, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (4996616625 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 := by
+    have eN : (4996616625 : ℝ) = ((((((81 * 125) * 7) * 11) * 13) * 17) * 29) := by
+      norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h8 : Real.log (8 : ℝ) = 3 * Real.log 2 := by
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e8, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (63308481884464457540844140625 : ℝ)
+      = 8 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 11
+        + 4 * Real.log 13 + 4 * Real.log 17 + 4 * Real.log 29 := by
+    have eK : (63308481884464457540844140625 : ℝ)
+        = (((((3 ^ 8 * 5 ^ 8) * 11 ^ 4) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) := by
+      norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.557 : ℝ) ^ 4 * 63308481884464457540844140625 < 2 ^ 103 := by
+    norm_num
+  have hlog4 : 4 * Real.log (3.557 : ℝ)
+        + Real.log (63308481884464457540844140625 : ℝ) < 103 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h40320, hN, h8]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 8` upper bound at `x = 1/4`: `Gamma(1/4) < 3.664`
+(mirror of `gamma_quarter_gt_BM8`; exact value
+`logΓ ≤ 25·log 2 - 1.5·log 3 - 2·log 5 - log 11 - log 13 - log 17 - log 29 ≈ 1.2985`,
+i.e. `Γ ≤ (2^100/(3^6·5^8·11^4·13^4·17^4·29^4))^{1/4} ≈ 3.66391`;
+new interval `3.557 < Γ(1/4) < 3.664`, width `0.107`). -/
+theorem gamma_quarter_lt_BM8 : Real.Gamma (1/4 : ℝ) < (3.664 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 8
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c8 : ((8 : ℕ) : ℝ) = (8 : ℝ) := by norm_num
+  rw [c8] at hle
+  have c9 : (8 : ℝ) + 1 = (9 : ℝ) := by norm_num
+  rw [c9] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 8
+      = (1/4 : ℝ) * Real.log 8 + Real.log 40320
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)) := by
+    have f8 : Nat.factorial 8 = 40320 := by decide
+    have c8' : ((8 : ℕ) : ℝ) = (8 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f8, c8', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one, a0, a1, a2, a3, a4, a5, a6, a7, a8]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+      = Real.log 4996616625 - 18 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have p : ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4) = 4996616625 / 262144 := by
+      norm_num
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log 4996616625 - Real.log 262144 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l262144 : Real.log (262144 : ℝ) = 18 * Real.log 2 := by
+      have e262144 : (262144 : ℝ) = 2 ^ 18 := by norm_num
+      rw [e262144, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, l262144]
+  have h40320 : Real.log (40320 : ℝ)
+      = 7 * Real.log 2 + 2 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e40320 : (40320 : ℝ) = ((128 * 9) * 5) * 7 := by norm_num
+    have e128 : (128 : ℝ) = 2 ^ 7 := by norm_num
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e40320, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e128, e9,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (4996616625 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 := by
+    have eN : (4996616625 : ℝ) = ((((((81 * 125) * 7) * 11) * 13) * 17) * 29) := by
+      norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h8 : Real.log (8 : ℝ) = 3 * Real.log 2 := by
+    have e8 : (8 : ℝ) = 2 ^ 3 := by norm_num
+    rw [e8, Real.log_pow]
+    push_cast
+    ring
+  have h9 : Real.log (9 : ℝ) = 2 * Real.log 3 := by
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e9, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (7034275764940495282316015625 : ℝ)
+      = 6 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 11
+        + 4 * Real.log 13 + 4 * Real.log 17 + 4 * Real.log 29 := by
+    have eK : (7034275764940495282316015625 : ℝ)
+        = (((((3 ^ 6 * 5 ^ 8) * 11 ^ 4) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) := by
+      norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 100 < (3.664 : ℝ) ^ 4 * 7034275764940495282316015625 := by
+    norm_num
+  have hlogC : 100 * Real.log 2
+      < 4 * Real.log (3.664 : ℝ) + Real.log (7034275764940495282316015625 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h40320, hN, h8, h9]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 8` interval: `3.557 < Γ(1/4) < 3.664`
+(width `0.107`, tightening the `n = 7` interval `3.548 < Γ < 3.669`, width `0.121`). -/
+theorem gamma_quarter_bounds_BM8 :
+    (3.557 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.664 : ℝ) :=
+  ⟨gamma_quarter_gt_BM8, gamma_quarter_lt_BM8⟩
+
+/-- Bohr–Mollerup `n = 9` lower bound at `x = 1/4`: `3.564 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM8`; exact `log`-of-rational value
+`logΓ ≥ 27·log 2 + 0.5·log 3 - 2·log 5 - log 11 - log 13 - log 17 - log 29
+- log 37 ≈ 1.2711`,
+i.e. `Γ ≥ (2^108·3^2/(5^8·11^4·13^4·17^4·29^4·37^4))^{1/4} ≈ 3.56489`;
+new interval `3.564 < Γ(1/4) < 3.664`, width `0.100`). -/
+theorem gamma_quarter_gt_BM9 : (3.564 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (9 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 9
+      = (1/4 : ℝ) * Real.log 9 + Real.log 362880
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ)) := by
+    have f9 : Nat.factorial 9 = 362880 := by decide
+    have c9 : ((9 : ℕ) : ℝ) = (9 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f9, c9, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ)
+      = Real.log 184874815125 - 20 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have p : (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)
+        = 184874815125 / 1048576 := by norm_num
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log 184874815125 - Real.log 1048576 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1048576 : Real.log (1048576 : ℝ) = 20 * Real.log 2 := by
+      have e1048576 : (1048576 : ℝ) = 2 ^ 20 := by norm_num
+      rw [e1048576, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, l1048576]
+  have h362880 : Real.log (362880 : ℝ)
+      = 7 * Real.log 2 + 4 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e362880 : (362880 : ℝ) = ((128 * 81) * 5) * 7 := by norm_num
+    have e128 : (128 : ℝ) = 2 ^ 7 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    rw [e362880, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e128, e81,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (184874815125 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37 := by
+    have eN : (184874815125 : ℝ)
+        = (((((((81 * 125) * 7) * 11) * 13) * 17) * 29) * 37) := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h9 : Real.log (9 : ℝ) = 2 * Real.log 3 := by
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e9, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (18084177368856849902332875390625 : ℝ)
+      = 8 * Real.log 5 + 4 * Real.log 11 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37 := by
+    have eK : (18084177368856849902332875390625 : ℝ)
+        = (((((5 ^ 8 * 11 ^ 4) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4) := by
+      norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.564 : ℝ) ^ 4 * 18084177368856849902332875390625
+      < 2 ^ 108 * 3 ^ 2 := by norm_num
+  have hlog4 : 4 * Real.log (3.564 : ℝ)
+        + Real.log (18084177368856849902332875390625 : ℝ)
+      < 108 * Real.log 2 + 2 * Real.log 3 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h362880, hN, h9]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 9` upper bound at `x = 1/4`: `Gamma(1/4) < 3.661`
+(mirror of `gamma_quarter_gt_BM9`; exact value
+`logΓ ≤ 27.25·log 2 - 1.75·log 5 - log 11 - log 13 - log 17 - log 29
+- log 37 ≈ 1.2975`,
+i.e. `Γ ≤ (2^109/(5^7·11^4·13^4·17^4·29^4·37^4))^{1/4} ≈ 3.66003`;
+new interval `3.564 < Γ(1/4) < 3.661`, width `0.097`). -/
+theorem gamma_quarter_lt_BM9 : Real.Gamma (1/4 : ℝ) < (3.661 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 9
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c9 : ((9 : ℕ) : ℝ) = (9 : ℝ) := by norm_num
+  rw [c9] at hle
+  have c10 : (9 : ℝ) + 1 = (10 : ℝ) := by norm_num
+  rw [c10] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 9
+      = (1/4 : ℝ) * Real.log 9 + Real.log 362880
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ)) := by
+    have f9 : Nat.factorial 9 = 362880 := by decide
+    have c9' : ((9 : ℕ) : ℝ) = (9 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f9, c9', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ)
+      = Real.log 184874815125 - 20 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have p : (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)
+        = 184874815125 / 1048576 := by norm_num
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log 184874815125 - Real.log 1048576 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1048576 : Real.log (1048576 : ℝ) = 20 * Real.log 2 := by
+      have e1048576 : (1048576 : ℝ) = 2 ^ 20 := by norm_num
+      rw [e1048576, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, l1048576]
+  have h362880 : Real.log (362880 : ℝ)
+      = 7 * Real.log 2 + 4 * Real.log 3 + Real.log 5 + Real.log 7 := by
+    have e362880 : (362880 : ℝ) = ((128 * 81) * 5) * 7 := by norm_num
+    have e128 : (128 : ℝ) = 2 ^ 7 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    rw [e362880, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e128, e81,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (184874815125 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37 := by
+    have eN : (184874815125 : ℝ)
+        = (((((((81 * 125) * 7) * 11) * 13) * 17) * 29) * 37) := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h9 : Real.log (9 : ℝ) = 2 * Real.log 3 := by
+    have e9 : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e9, Real.log_pow]
+    push_cast
+    ring
+  have h10 : Real.log (10 : ℝ) = Real.log 2 + Real.log 5 := by
+    have e10 : (10 : ℝ) = 2 * 5 := by norm_num
+    rw [e10, Real.log_mul (by norm_num) (by norm_num)]
+  have hKup : Real.log (3616835473771369980466575078125 : ℝ)
+      = 7 * Real.log 5 + 4 * Real.log 11 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37 := by
+    have eK : (3616835473771369980466575078125 : ℝ)
+        = (((((5 ^ 7 * 11 ^ 4) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4) := by
+      norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 109 < (3.661 : ℝ) ^ 4 * 3616835473771369980466575078125 := by
+    norm_num
+  have hlogC : 109 * Real.log 2
+      < 4 * Real.log (3.661 : ℝ) + Real.log (3616835473771369980466575078125 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h362880, hN, h9, h10]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 9` interval: `3.564 < Γ(1/4) < 3.661`
+(width `0.097`, tightening the `n = 8` interval `3.557 < Γ < 3.664`, width `0.107`). -/
+theorem gamma_quarter_bounds_BM9 :
+    (3.564 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.661 : ℝ) :=
+  ⟨gamma_quarter_gt_BM9, gamma_quarter_lt_BM9⟩
+
+/-- Bohr–Mollerup `n = 10` lower bound at `x = 1/4`: `3.570 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM9`; exact `log`-of-rational value
+`logΓ ≥ 30.25·log 2 - 0.75·log 5 - log 11 - log 13 - log 17 - log 29
+- log 37 - log 41 ≈ 1.2728`,
+i.e. `Γ ≥ (2^121/(5^3·11^4·13^4·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.57077`;
+new interval `3.570 < Γ(1/4) < 3.661`, width `0.091`). -/
+theorem gamma_quarter_gt_BM10 : (3.570 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (10 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 10
+      = (1/4 : ℝ) * Real.log 10 + Real.log 3628800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)) := by
+    have f10 : Nat.factorial 10 = 3628800 := by decide
+    have c10 : ((10 : ℕ) : ℝ) = (10 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f10, c10, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+      = Real.log 7579867420125 - 22 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have p : ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)
+        = 7579867420125 / 4194304 := by norm_num
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log 7579867420125 - Real.log 4194304 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l4194304 : Real.log (4194304 : ℝ) = 22 * Real.log 2 := by
+      have e4194304 : (4194304 : ℝ) = 2 ^ 22 := by norm_num
+      rw [e4194304, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, l4194304]
+  have h3628800 : Real.log (3628800 : ℝ)
+      = 8 * Real.log 2 + 4 * Real.log 3 + 2 * Real.log 5 + Real.log 7 := by
+    have e3628800 : (3628800 : ℝ) = ((256 * 81) * 25) * 7 := by norm_num
+    have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e3628800, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e256, e81, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (7579867420125 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (7579867420125 : ℝ)
+        = ((((((((81 * 125) * 7) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h10 : Real.log (10 : ℝ) = Real.log 2 + Real.log 5 := by
+    have e10 : (10 : ℝ) = 2 * 5 := by norm_num
+    rw [e10, Real.log_mul (by norm_num) (by norm_num)]
+  have hK : Real.log (16352500200319456331797135454940125 : ℝ)
+      = 3 * Real.log 5 + 4 * Real.log 11 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (16352500200319456331797135454940125 : ℝ)
+        = ((((((5 ^ 3 * 11 ^ 4) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4)
+          * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.570 : ℝ) ^ 4 * 16352500200319456331797135454940125
+      < 2 ^ 121 := by norm_num
+  have hlog4 : 4 * Real.log (3.570 : ℝ)
+        + Real.log (16352500200319456331797135454940125 : ℝ)
+      < 121 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h3628800, hN, h10]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 10` upper bound at `x = 1/4`: `Gamma(1/4) < 3.657`
+(mirror of `gamma_quarter_gt_BM10`; exact value
+`logΓ ≤ 30·log 2 - log 5 - 0.75·log 11 - log 13 - log 17 - log 29
+- log 37 - log 41 ≈ 1.2966`,
+i.e. `Γ ≤ (2^120/(5^4·11^3·13^4·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.65687`;
+new interval `3.570 < Γ(1/4) < 3.657`, width `0.087`). -/
+theorem gamma_quarter_lt_BM10 : Real.Gamma (1/4 : ℝ) < (3.657 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 10
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c10 : ((10 : ℕ) : ℝ) = (10 : ℝ) := by norm_num
+  rw [c10] at hle
+  have c11 : (10 : ℝ) + 1 = (11 : ℝ) := by norm_num
+  rw [c11] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 10
+      = (1/4 : ℝ) * Real.log 10 + Real.log 3628800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)) := by
+    have f10 : Nat.factorial 10 = 3628800 := by decide
+    have c10' : ((10 : ℕ) : ℝ) = (10 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f10, c10', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+      = Real.log 7579867420125 - 22 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have p : ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)
+        = 7579867420125 / 4194304 := by norm_num
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log 7579867420125 - Real.log 4194304 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne', p, Real.log_div (by norm_num) (by norm_num)]
+    have l4194304 : Real.log (4194304 : ℝ) = 22 * Real.log 2 := by
+      have e4194304 : (4194304 : ℝ) = 2 ^ 22 := by norm_num
+      rw [e4194304, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, l4194304]
+  have h3628800 : Real.log (3628800 : ℝ)
+      = 8 * Real.log 2 + 4 * Real.log 3 + 2 * Real.log 5 + Real.log 7 := by
+    have e3628800 : (3628800 : ℝ) = ((256 * 81) * 25) * 7 := by norm_num
+    have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e3628800, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e256, e81, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (7579867420125 : ℝ)
+      = 4 * Real.log 3 + 3 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (7579867420125 : ℝ)
+        = ((((((((81 * 125) * 7) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e81, e125,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h10 : Real.log (10 : ℝ) = Real.log 2 + Real.log 5 := by
+    have e10 : (10 : ℝ) = 2 * 5 := by norm_num
+    rw [e10, Real.log_mul (by norm_num) (by norm_num)]
+  have h11 : Real.log (11 : ℝ) = Real.log 11 := rfl
+  have hKup : Real.log (7432954636508843787180516115881875 : ℝ)
+      = 4 * Real.log 5 + 3 * Real.log 11 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (7432954636508843787180516115881875 : ℝ)
+        = ((((((5 ^ 4 * 11 ^ 3) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4)
+          * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 120 < (3.657 : ℝ) ^ 4 * 7432954636508843787180516115881875 := by
+    norm_num
+  have hlogC : 120 * Real.log 2
+      < 4 * Real.log (3.657 : ℝ) + Real.log (7432954636508843787180516115881875 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h3628800, hN, h10, h11]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 10` interval: `3.570 < Γ(1/4) < 3.657`
+(width `0.087`, tightening the `n = 9` interval `3.564 < Γ < 3.661`, width `0.097`). -/
+theorem gamma_quarter_bounds_BM10 :
+    (3.570 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.657 : ℝ) :=
+  ⟨gamma_quarter_gt_BM10, gamma_quarter_lt_BM10⟩
+
+/-- Bohr–Mollerup `n = 11` lower bound at `x = 1/4`: `3.575 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM10`; exact `log`-of-rational value
+`logΓ ≥ 32·log 2 - 2·log 3 - 2·log 5 + 0.25·log 11 - log 13 - log 17
+- log 29 - log 37 - log 41 ≈ 1.2744`,
+i.e. `Γ ≥ (2^128·11/(3^8·5^8·13^4·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.57561`;
+new interval `3.575 < Γ(1/4) < 3.657`, width `0.082`). -/
+theorem gamma_quarter_gt_BM11 : (3.575 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (11 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 11
+      = (1/4 : ℝ) * Real.log 11 + Real.log 39916800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+          + Real.log (45/4 : ℝ)) := by
+    have f11 : Nat.factorial 11 = 39916800 := by decide
+    have c11 : ((11 : ℕ) : ℝ) = (11 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = 45/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f11, c11, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hpos454 : (0 : ℝ) < 45/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+      = Real.log 341094033905625 - 24 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne').symm
+    have p : (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)
+        = 341094033905625 / 16777216 := by norm_num
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+        + Real.log (45/4 : ℝ)
+        = Real.log 341094033905625 - Real.log 16777216 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne')
+        hpos374.ne') hpos414.ne') hpos454.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l16777216 : Real.log (16777216 : ℝ) = 24 * Real.log 2 := by
+      have e16777216 : (16777216 : ℝ) = 2 ^ 24 := by norm_num
+      rw [e16777216, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, l16777216]
+  have h39916800 : Real.log (39916800 : ℝ)
+      = 8 * Real.log 2 + 4 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+        + Real.log 11 := by
+    have e39916800 : (39916800 : ℝ) = ((((256 * 81) * 25) * 7) * 11) := by
+      norm_num
+    have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e39916800, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e256, e81, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (341094033905625 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (341094033905625 : ℝ)
+        = ((((((((729 * 625) * 7) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e729, e625,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (22899894520160839635467395866031640625 : ℝ)
+      = 8 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (22899894520160839635467395866031640625 : ℝ)
+        = ((((((3 ^ 8 * 5 ^ 8) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4)
+          * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.575 : ℝ) ^ 4 * 22899894520160839635467395866031640625
+      < 2 ^ 128 * 11 := by norm_num
+  have hlog4 : 4 * Real.log (3.575 : ℝ)
+        + Real.log (22899894520160839635467395866031640625 : ℝ)
+      < 128 * Real.log 2 + Real.log 11 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h39916800, hN]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 11` upper bound at `x = 1/4`: `Gamma(1/4) < 3.655`
+(mirror of `gamma_quarter_gt_BM11`; exact value
+`logΓ ≤ 32.5·log 2 - 1.75·log 3 - 2·log 5 - log 13 - log 17 - log 29
+- log 37 - log 41 ≈ 1.2961`,
+i.e. `Γ ≤ (2^130/(3^7·5^8·13^4·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.65424`;
+new interval `3.575 < Γ(1/4) < 3.655`, width `0.080`). -/
+theorem gamma_quarter_lt_BM11 : Real.Gamma (1/4 : ℝ) < (3.655 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 11
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c11 : ((11 : ℕ) : ℝ) = (11 : ℝ) := by norm_num
+  rw [c11] at hle
+  have c12 : (11 : ℝ) + 1 = (12 : ℝ) := by norm_num
+  rw [c12] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 11
+      = (1/4 : ℝ) * Real.log 11 + Real.log 39916800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+          + Real.log (45/4 : ℝ)) := by
+    have f11 : Nat.factorial 11 = 39916800 := by decide
+    have c11' : ((11 : ℕ) : ℝ) = (11 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = 45/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f11, c11', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hpos454 : (0 : ℝ) < 45/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+      = Real.log 341094033905625 - 24 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne').symm
+    have p : (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)
+        = 341094033905625 / 16777216 := by norm_num
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+        + Real.log (45/4 : ℝ)
+        = Real.log 341094033905625 - Real.log 16777216 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne')
+        hpos374.ne') hpos414.ne') hpos454.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l16777216 : Real.log (16777216 : ℝ) = 24 * Real.log 2 := by
+      have e16777216 : (16777216 : ℝ) = 2 ^ 24 := by norm_num
+      rw [e16777216, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, l16777216]
+  have h39916800 : Real.log (39916800 : ℝ)
+      = 8 * Real.log 2 + 4 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+        + Real.log 11 := by
+    have e39916800 : (39916800 : ℝ) = ((((256 * 81) * 25) * 7) * 11) := by
+      norm_num
+    have e256 : (256 : ℝ) = 2 ^ 8 := by norm_num
+    have e81 : (81 : ℝ) = 3 ^ 4 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e39916800, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e256, e81, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (341094033905625 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (341094033905625 : ℝ)
+        = ((((((((729 * 625) * 7) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e729, e625,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h12 : Real.log (12 : ℝ) = 2 * Real.log 2 + Real.log 3 := by
+    have e12 : (12 : ℝ) = 4 * 3 := by norm_num
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e12, Real.log_mul (by norm_num) (by norm_num), e4, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (7633298173386946545155798622010546875 : ℝ)
+      = 7 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (7633298173386946545155798622010546875 : ℝ)
+        = ((((((3 ^ 7 * 5 ^ 8) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4)
+          * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 130 < (3.655 : ℝ) ^ 4 * 7633298173386946545155798622010546875 := by
+    norm_num
+  have hlogC : 130 * Real.log 2
+      < 4 * Real.log (3.655 : ℝ) + Real.log (7633298173386946545155798622010546875 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h39916800, hN, h12]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 11` interval: `3.575 < Γ(1/4) < 3.655`
+(width `0.080`, tightening the `n = 10` interval `3.570 < Γ < 3.657`, width `0.087`). -/
+theorem gamma_quarter_bounds_BM11 :
+    (3.575 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.655 : ℝ) :=
+  ⟨gamma_quarter_gt_BM11, gamma_quarter_lt_BM11⟩
+
+/-- Bohr–Mollerup `n = 12` lower bound at `x = 1/4`: `3.579 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM11`; exact `log`-of-rational value
+`logΓ ≥ 36.5·log 2 - 0.75·log 3 - 2·log 5 - 2·log 7 - log 13 - log 17
+- log 29 - log 37 - log 41 ≈ 1.2754`,
+i.e. `Γ ≥ (2^146/(3^3·5^8·7^8·13^4·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.57966`;
+new interval `3.579 < Γ(1/4) < 3.655`, width `0.076`). -/
+theorem gamma_quarter_gt_BM12 : (3.579 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (12 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 12
+      = (1/4 : ℝ) * Real.log 12 + Real.log 479001600
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+          + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ)) := by
+    have f12 : Nat.factorial 12 = 479001600 := by decide
+    have c12 : ((12 : ℕ) : ℝ) = (12 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = 45/4 := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = 49/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f12, c12, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hpos454 : (0 : ℝ) < 45/4 := by norm_num
+  have hpos494 : (0 : ℝ) < 49/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ)
+      = Real.log 16713607661375625 - 26 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+        + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne')
+        hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have p : ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)) * (49/4)
+        = 16713607661375625 / 67108864 := by norm_num
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4))
+        + Real.log (49/4 : ℝ)
+        = Real.log 16713607661375625 - Real.log 67108864 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne')
+        hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l67108864 : Real.log (67108864 : ℝ) = 26 * Real.log 2 := by
+      have e67108864 : (67108864 : ℝ) = 2 ^ 26 := by norm_num
+      rw [e67108864, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, l67108864]
+  have h479001600 : Real.log (479001600 : ℝ)
+      = 10 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+        + Real.log 11 := by
+    have e479001600 : (479001600 : ℝ) = ((((1024 * 243) * 25) * 7) * 11) := by
+      norm_num
+    have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e479001600, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e1024, e243, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (16713607661375625 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (16713607661375625 : ℝ)
+        = ((((((((729 * 625) * 343) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e729, e625, e343,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h12 : Real.log (12 : ℝ) = 2 * Real.log 2 + Real.log 3 := by
+    have e12 : (12 : ℝ) = 4 * 3 := by norm_num
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e12, Real.log_mul (by norm_num) (by norm_num), e4, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (543264752385669664573588803110679291796875 : ℝ)
+      = 3 * Real.log 3 + 8 * Real.log 5 + 8 * Real.log 7 + 4 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (543264752385669664573588803110679291796875 : ℝ)
+        = (((((((3 ^ 3 * 5 ^ 8) * 7 ^ 8) * 13 ^ 4) * 17 ^ 4) * 29 ^ 4)
+          * 37 ^ 4) * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.579 : ℝ) ^ 4 * 543264752385669664573588803110679291796875
+      < 2 ^ 146 := by norm_num
+  have hlog4 : 4 * Real.log (3.579 : ℝ)
+        + Real.log (543264752385669664573588803110679291796875 : ℝ)
+      < 146 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h479001600, hN, h12]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 12` upper bound at `x = 1/4`: `Gamma(1/4) < 3.653`
+(mirror of `gamma_quarter_gt_BM12`; exact value
+`logΓ ≤ 36·log 2 - log 3 - 2·log 5 - 2·log 7 - 0.75·log 13 - log 17
+- log 29 - log 37 - log 41 ≈ 1.2956`,
+i.e. `Γ ≤ (2^144/(3^4·5^8·7^8·13^3·17^4·29^4·37^4·41^4))^{1/4} ≈ 3.65201`;
+new interval `3.579 < Γ(1/4) < 3.653`, width `0.074`). -/
+theorem gamma_quarter_lt_BM12 : Real.Gamma (1/4 : ℝ) < (3.653 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 12
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c12 : ((12 : ℕ) : ℝ) = (12 : ℝ) := by norm_num
+  rw [c12] at hle
+  have c13 : (12 : ℝ) + 1 = (13 : ℝ) := by norm_num
+  rw [c13] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 12
+      = (1/4 : ℝ) * Real.log 12 + Real.log 479001600
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ)
+          + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ)) := by
+    have f12 : Nat.factorial 12 = 479001600 := by decide
+    have c12' : ((12 : ℕ) : ℝ) = (12 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = 9/4 := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = 13/4 := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = 17/4 := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = 21/4 := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = 25/4 := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = 29/4 := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = 33/4 := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = 37/4 := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = 41/4 := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = 45/4 := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = 49/4 := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f12, c12', Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hpos134 : (0 : ℝ) < 13/4 := by norm_num
+  have hpos174 : (0 : ℝ) < 17/4 := by norm_num
+  have hpos214 : (0 : ℝ) < 21/4 := by norm_num
+  have hpos254 : (0 : ℝ) < 25/4 := by norm_num
+  have hpos294 : (0 : ℝ) < 29/4 := by norm_num
+  have hpos334 : (0 : ℝ) < 33/4 := by norm_num
+  have hpos374 : (0 : ℝ) < 37/4 := by norm_num
+  have hpos414 : (0 : ℝ) < 41/4 := by norm_num
+  have hpos454 : (0 : ℝ) < 45/4 := by norm_num
+  have hpos494 : (0 : ℝ) < 49/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ)
+      = Real.log 16713607661375625 - 26 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4)) * (9/4)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4))
+        + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+        + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne')
+        hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne')
+        hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne'
+        hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne')
+        hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4))
+        + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne')
+        hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne')
+        hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+        + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne')
+        hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne')
+        hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have p : ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4)) * (49/4)
+        = 16713607661375625 / 67108864 := by norm_num
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4)) * (9/4)) * (13/4)) * (17/4))
+          * (21/4)) * (25/4)) * (29/4)) * (33/4)) * (37/4)) * (41/4))
+          * (45/4))
+        + Real.log (49/4 : ℝ)
+        = Real.log 16713607661375625 - Real.log 67108864 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+        (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne')
+        hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne')
+        hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l67108864 : Real.log (67108864 : ℝ) = 26 * Real.log 2 := by
+      have e67108864 : (67108864 : ℝ) = 2 ^ 26 := by norm_num
+      rw [e67108864, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, l67108864]
+  have h479001600 : Real.log (479001600 : ℝ)
+      = 10 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+        + Real.log 11 := by
+    have e479001600 : (479001600 : ℝ) = ((((1024 * 243) * 25) * 7) * 11) := by
+      norm_num
+    have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e479001600, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e1024, e243, e25,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (16713607661375625 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+        + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+        + Real.log 41 := by
+    have eN : (16713607661375625 : ℝ)
+        = ((((((((729 * 625) * 343) * 11) * 13) * 17) * 29) * 37) * 41) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [eN, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num), e729, e625, e343,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h12 : Real.log (12 : ℝ) = 2 * Real.log 2 + Real.log 3 := by
+    have e12 : (12 : ℝ) = 4 * 3 := by norm_num
+    have e4 : (4 : ℝ) = 2 ^ 2 := by norm_num
+    rw [e12, Real.log_mul (by norm_num) (by norm_num), e4, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (125368789012077614901597416102464451953125 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 8 * Real.log 7 + 3 * Real.log 13
+        + 4 * Real.log 17 + 4 * Real.log 29 + 4 * Real.log 37
+        + 4 * Real.log 41 := by
+    have eK : (125368789012077614901597416102464451953125 : ℝ)
+        = (((((((3 ^ 4 * 5 ^ 8) * 7 ^ 8) * 13 ^ 3) * 17 ^ 4) * 29 ^ 4)
+          * 37 ^ 4) * 41 ^ 4) := by norm_num
+    rw [eK, Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_mul (by norm_num) (by norm_num),
+      Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow,
+      Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 144 < (3.653 : ℝ) ^ 4 * 125368789012077614901597416102464451953125 := by
+    norm_num
+  have hlogC : 144 * Real.log 2
+      < 4 * Real.log (3.653 : ℝ) + Real.log (125368789012077614901597416102464451953125 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h479001600, hN, h12]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 12` interval: `3.579 < Γ(1/4) < 3.653`
+(width `0.074`, tightening the `n = 11` interval `3.575 < Γ < 3.655`, width `0.080`). -/
+theorem gamma_quarter_bounds_BM12 :
+    (3.579 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.653 : ℝ) :=
+  ⟨gamma_quarter_gt_BM12, gamma_quarter_lt_BM12⟩
+
+/-- Bohr–Mollerup `n = 13` lower bound at `x = 1/4`: `3.583 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM12`; exact `log`-of-rational value
+`logΓ ≥ 38·log 2 - log 3 - 2·log 5 - 2·log 7 + 0.25·log 13 - log 17 - log 29 - log 37 - log 41 - log 53 ≈ 1.276231, Γ ≈ 3.58311`,
+i.e. `Γ ≥ (2^152·13/(3^4·5^8·7^8·17^4·29^4·37^4·41^4·53^4))^{1/4}`;
+new interval `3.583 < Γ(1/4) < 3.651`, width `0.068`). -/
+theorem gamma_quarter_gt_BM13 : (3.583 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (13 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 13
+      = (1/4 : ℝ) * Real.log 13 + Real.log 6227020800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+          + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ)) := by
+    have f13 : Nat.factorial 13 = 6227020800 := by decide
+    have c13' : ((13 : ℕ) : ℝ) = (13 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f13, c13', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ)
+      = Real.log 885821206052908125 - 28 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have p : ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ))
+        = 885821206052908125 / 268435456 := by norm_num
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ))
+        + Real.log (53/4 : ℝ)
+        = Real.log 885821206052908125 - Real.log 268435456 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l268435456 : Real.log (268435456 : ℝ) = 28 * Real.log 2 := by
+      have e268435456 : (268435456 : ℝ) = 2 ^ 28 := by norm_num
+      rw [e268435456, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, l268435456]
+  have h6227020800 : Real.log (6227020800 : ℝ)
+      = 10 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e6227020800 : (6227020800 : ℝ) = ((((((1024 * 243) * 25) * 7) * 11) * 13)) := by
+      norm_num
+    have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e6227020800, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e1024, e243, e25, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (885821206052908125 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+      + Real.log 41 + Real.log 53 := by
+    have e885821206052908125 : (885821206052908125 : ℝ) = ((((((((((729 * 625) * 343) * 11) * 13) * 17) * 29) * 37) * 41) * 53)) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e885821206052908125, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e729, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (450259466405465266684738862724437783937890625 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 8 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 29 + 4 * Real.log 37 + 4 * Real.log 41
+      + 4 * Real.log 53 := by
+    have e450259466405465266684738862724437783937890625 : (450259466405465266684738862724437783937890625 : ℝ) = ((((((((3 ^ 4 * 5 ^ 8) * 7 ^ 8) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4)) := by
+      norm_num
+    rw [e450259466405465266684738862724437783937890625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.583 : ℝ) ^ 4 * 450259466405465266684738862724437783937890625
+      < 13 * 2 ^ 152 := by norm_num
+  have hlog4 : 4 * Real.log (3.583 : ℝ)
+        + Real.log (450259466405465266684738862724437783937890625 : ℝ)
+      < Real.log 13 + 152 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_mul (by norm_num) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum, h6227020800, hN]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 13` upper bound at `x = 1/4`: `Gamma(1/4) < 3.651`
+(mirror of `gamma_quarter_gt_BM13`; exact value
+`logΓ ≤ 38.25·log 2 - log 3 - 2·log 5 - 1.75·log 7 - log 17 - log 29 - log 37 - log 41 - log 53 ≈ 1.294758, Γ ≈ 3.65011`,
+i.e. `Γ ≤ (2^153/(3^4·5^8·7^7·17^4·29^4·37^4·41^4·53^4))^{1/4}`;
+new interval `3.583 < Γ(1/4) < 3.651`, width `0.068`). -/
+theorem gamma_quarter_lt_BM13 : Real.Gamma (1/4 : ℝ) < (3.651 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 13
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c13 : ((13 : ℕ) : ℝ) = (13 : ℝ) := by norm_num
+  rw [c13] at hle
+  have c14 : (13 : ℝ) + 1 = (14 : ℝ) := by norm_num
+  rw [c14] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 13
+      = (1/4 : ℝ) * Real.log 13 + Real.log 6227020800
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+          + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ)) := by
+    have f13 : Nat.factorial 13 = 6227020800 := by decide
+    have c13' : ((13 : ℕ) : ℝ) = (13 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f13, c13', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ)
+      = Real.log 885821206052908125 - 28 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have p : ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ))
+        = 885821206052908125 / 268435456 := by norm_num
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ))
+        + Real.log (53/4 : ℝ)
+        = Real.log 885821206052908125 - Real.log 268435456 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l268435456 : Real.log (268435456 : ℝ) = 28 * Real.log 2 := by
+      have e268435456 : (268435456 : ℝ) = 2 ^ 28 := by norm_num
+      rw [e268435456, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, l268435456]
+  have h6227020800 : Real.log (6227020800 : ℝ)
+      = 10 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e6227020800 : (6227020800 : ℝ) = ((((((1024 * 243) * 25) * 7) * 11) * 13)) := by
+      norm_num
+    have e1024 : (1024 : ℝ) = 2 ^ 10 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    rw [e6227020800, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e1024, e243, e25, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (885821206052908125 : ℝ)
+      = 6 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 29 + Real.log 37
+      + Real.log 41 + Real.log 53 := by
+    have e885821206052908125 : (885821206052908125 : ℝ) = ((((((((((729 * 625) * 343) * 11) * 13) * 17) * 29) * 37) * 41) * 53)) := by
+      norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e885821206052908125, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e729, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h14 : Real.log (14 : ℝ) = Real.log 2 + Real.log 7 := by
+    have e14 : (14 : ℝ) = 2 * 7 := by norm_num
+    rw [e14, Real.log_mul (by norm_num) (by norm_num)]
+  have hKup : Real.log (64322780915066466669248408960633969133984375 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 7 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 29 + 4 * Real.log 37 + 4 * Real.log 41
+      + 4 * Real.log 53 := by
+    have e64322780915066466669248408960633969133984375 : (64322780915066466669248408960633969133984375 : ℝ) = ((((((((3 ^ 4 * 5 ^ 8) * 7 ^ 7) * 17 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4)) := by
+      norm_num
+    rw [e64322780915066466669248408960633969133984375, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 153 < (3.651 : ℝ) ^ 4 * 64322780915066466669248408960633969133984375 := by
+    norm_num
+  have hlogC : 153 * Real.log 2
+      < 4 * Real.log (3.651 : ℝ) + Real.log (64322780915066466669248408960633969133984375 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h6227020800, hN, h14]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 13` interval: `3.583 < Γ(1/4) < 3.651`
+(width `0.068`, tightening the `n = 12` interval `3.579 < Γ < 3.653`, width `0.074`). -/
+theorem gamma_quarter_bounds_BM13 :
+    (3.583 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.651 : ℝ) :=
+  ⟨gamma_quarter_gt_BM13, gamma_quarter_lt_BM13⟩
+
+/-- Bohr–Mollerup `n = 14` lower bound at `x = 1/4`: `3.586 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM13`; exact `log`-of-rational value
+`logΓ ≥ 41.25·log 2 - 2·log 3 - 2·log 5 - 0.75·log 7 - log 17 - log 19 - log 29 - log 37 - log 41 - log 53 ≈ 1.277058, Γ ≈ 3.58607`,
+i.e. `Γ ≥ (2^165/(3^8·5^8·7^3·17^4·19^4·29^4·37^4·41^4·53^4))^{1/4}`;
+new interval `3.586 < Γ(1/4) < 3.649`, width `0.063`). -/
+theorem gamma_quarter_gt_BM14 : (3.586 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (14 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 14
+      = (1/4 : ℝ) * Real.log 14 + Real.log 87178291200
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+          + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)) := by
+    have f14 : Nat.factorial 14 = 87178291200 := by decide
+    have c14' : ((14 : ℕ) : ℝ) = (14 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f14, c14', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+      = Real.log 50491808745015763125 - 30 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have p : (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ))
+        = 50491808745015763125 / 1073741824 := by norm_num
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ))
+        + Real.log (57/4 : ℝ)
+        = Real.log 50491808745015763125 - Real.log 1073741824 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1073741824 : Real.log (1073741824 : ℝ) = 30 * Real.log 2 := by
+      have e1073741824 : (1073741824 : ℝ) = 2 ^ 30 := by norm_num
+      rw [e1073741824, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, l1073741824]
+  have h87178291200 : Real.log (87178291200 : ℝ)
+      = 11 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e87178291200 : (87178291200 : ℝ) = ((((((2048 * 243) * 25) * 49) * 11) * 13)) := by
+      norm_num
+    have e2048 : (2048 : ℝ) = 2 ^ 11 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e87178291200, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2048, e243, e25, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (50491808745015763125 : ℝ)
+      = 7 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 := by
+    have e50491808745015763125 : (50491808745015763125 : ℝ) = (((((((((((2187 * 625) * 343) * 11) * 13) * 17) * 19) * 29) * 37) * 41) * 53)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e50491808745015763125, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (282795226848072693555623854326056284386633984375 : ℝ)
+      = 8 * Real.log 3 + 8 * Real.log 5 + 3 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 19 + 4 * Real.log 29 + 4 * Real.log 37
+      + 4 * Real.log 41 + 4 * Real.log 53 := by
+    have e282795226848072693555623854326056284386633984375 : (282795226848072693555623854326056284386633984375 : ℝ) = (((((((((3 ^ 8 * 5 ^ 8) * 7 ^ 3) * 17 ^ 4) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4)) := by
+      norm_num
+    rw [e282795226848072693555623854326056284386633984375, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.586 : ℝ) ^ 4 * 282795226848072693555623854326056284386633984375
+      < 2 ^ 165 := by norm_num
+  have hlog4 : 4 * Real.log (3.586 : ℝ)
+        + Real.log (282795226848072693555623854326056284386633984375 : ℝ)
+      < 165 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  have h14 : Real.log (14 : ℝ) = Real.log 2 + Real.log 7 := by
+    have e14 : (14 : ℝ) = 2 * 7 := by norm_num
+    rw [e14, Real.log_mul (by norm_num) (by norm_num)]
+  rw [hseq, hsum, h87178291200, hN, h14]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 14` upper bound at `x = 1/4`: `Gamma(1/4) < 3.649`
+(mirror of `gamma_quarter_gt_BM14`; exact value
+`logΓ ≤ 41·log 2 - 1.75·log 3 - 1.75·log 5 - log 7 - log 17 - log 19 - log 29 - log 37 - log 41 - log 53 ≈ 1.294306, Γ ≈ 3.64846`,
+i.e. `Γ ≤ (2^164/(3^7·5^7·7^4·17^4·19^4·29^4·37^4·41^4·53^4))^{1/4}`;
+new interval `3.586 < Γ(1/4) < 3.649`, width `0.063`). -/
+theorem gamma_quarter_lt_BM14 : Real.Gamma (1/4 : ℝ) < (3.649 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 14
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c14 : ((14 : ℕ) : ℝ) = (14 : ℝ) := by norm_num
+  rw [c14] at hle
+  have c15 : (14 : ℝ) + 1 = (15 : ℝ) := by norm_num
+  rw [c15] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 14
+      = (1/4 : ℝ) * Real.log 14 + Real.log 87178291200
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+          + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+          + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+          + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+          + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)) := by
+    have f14 : Nat.factorial 14 = 87178291200 := by decide
+    have c14' : ((14 : ℕ) : ℝ) = (14 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f14, c14', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+      = Real.log 50491808745015763125 - 30 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have p : (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ))
+        = 50491808745015763125 / 1073741824 := by norm_num
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ))
+        + Real.log (57/4 : ℝ)
+        = Real.log 50491808745015763125 - Real.log 1073741824 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l1073741824 : Real.log (1073741824 : ℝ) = 30 * Real.log 2 := by
+      have e1073741824 : (1073741824 : ℝ) = 2 ^ 30 := by norm_num
+      rw [e1073741824, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, l1073741824]
+  have h87178291200 : Real.log (87178291200 : ℝ)
+      = 11 * Real.log 2 + 5 * Real.log 3 + 2 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e87178291200 : (87178291200 : ℝ) = ((((((2048 * 243) * 25) * 49) * 11) * 13)) := by
+      norm_num
+    have e2048 : (2048 : ℝ) = 2 ^ 11 := by norm_num
+    have e243 : (243 : ℝ) = 3 ^ 5 := by norm_num
+    have e25 : (25 : ℝ) = 5 ^ 2 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e87178291200, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2048, e243, e25, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (50491808745015763125 : ℝ)
+      = 7 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 := by
+    have e50491808745015763125 : (50491808745015763125 : ℝ) = (((((((((((2187 * 625) * 343) * 11) * 13) * 17) * 19) * 29) * 37) * 41) * 53)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e50491808745015763125, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h15 : Real.log (15 : ℝ) = Real.log 3 + Real.log 5 := by
+    have e15 : (15 : ℝ) = 3 * 5 := by norm_num
+    rw [e15, Real.log_mul (by norm_num) (by norm_num)]
+  have hKup : Real.log (131971105862433923659291132018826266047095859375 : ℝ)
+      = 7 * Real.log 3 + 7 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 19 + 4 * Real.log 29 + 4 * Real.log 37
+      + 4 * Real.log 41 + 4 * Real.log 53 := by
+    have e131971105862433923659291132018826266047095859375 : (131971105862433923659291132018826266047095859375 : ℝ) = (((((((((3 ^ 7 * 5 ^ 7) * 7 ^ 4) * 17 ^ 4) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4)) := by
+      norm_num
+    rw [e131971105862433923659291132018826266047095859375, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 164 < (3.649 : ℝ) ^ 4 * 131971105862433923659291132018826266047095859375 := by
+    norm_num
+  have hlogC : 164 * Real.log 2
+      < 4 * Real.log (3.649 : ℝ) + Real.log (131971105862433923659291132018826266047095859375 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h87178291200, hN, h15]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 14` interval: `3.586 < Γ(1/4) < 3.649`
+(width `0.063`, tightening the `n = 13` interval `3.583 < Γ < 3.651`, width `0.068`). -/
+theorem gamma_quarter_bounds_BM14 :
+    (3.586 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.649 : ℝ) :=
+  ⟨gamma_quarter_gt_BM14, gamma_quarter_lt_BM14⟩
+
+/-- Bohr–Mollerup `n = 15` lower bound at `x = 1/4`: `3.588 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM14`; exact `log`-of-rational value
+`logΓ ≥ 43·log 2 - 0.75·log 3 - 0.75·log 5 - log 7 - log 17 - log 19 - log 29 - log 37 - log 41 - log 53 - log 61 ≈ 1.277777, Γ ≈ 3.58865`,
+i.e. `Γ ≥ (2^172/(3^3·5^3·7^4·17^4·19^4·29^4·37^4·41^4·53^4·61^4))^{1/4}`;
+new interval `3.588 < Γ(1/4) < 3.648`, width `0.060`). -/
+theorem gamma_quarter_gt_BM15 : (3.588 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (15 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 15
+      = (1/4 : ℝ) * Real.log 15 + Real.log 1307674368000
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ) + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ) + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ) + Real.log (61/4 : ℝ)) := by
+    have f15 : Nat.factorial 15 = 1307674368000 := by decide
+    have c15' : ((15 : ℕ) : ℝ) = (15 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    have a15 : (1/4 : ℝ) + ((15 : ℕ) : ℝ) = (61/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f15, c15', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+        + Real.log (61/4 : ℝ)
+      = Real.log 3080000333445961550625 - 32 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have hpos614 : (0 : ℝ) < (61/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) + Real.log (57/4 : ℝ)
+        = Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne').symm
+    have p : ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ))
+        = 3080000333445961550625 / 4294967296 := by norm_num
+    have m15 : Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ))
+        + Real.log (61/4 : ℝ)
+        = Real.log 3080000333445961550625 - Real.log 4294967296 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l4294967296 : Real.log (4294967296 : ℝ) = 32 * Real.log 2 := by
+      have e4294967296 : (4294967296 : ℝ) = 2 ^ 32 := by norm_num
+      rw [e4294967296, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, l4294967296]
+  have h1307674368000 : Real.log (1307674368000 : ℝ)
+      = 11 * Real.log 2 + 6 * Real.log 3 + 3 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e1307674368000 : (1307674368000 : ℝ) = ((((((2048 * 729) * 125) * 49) * 11) * 13)) := by
+      norm_num
+    have e2048 : (2048 : ℝ) = 2 ^ 11 := by norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e1307674368000, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2048, e729, e125, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (3080000333445961550625 : ℝ)
+      = 7 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 + Real.log 61 := by
+    have e3080000333445961550625 : (3080000333445961550625 : ℝ) = ((((((((((((2187 * 625) * 343) * 11) * 13) * 17) * 19) * 29) * 37) * 41) * 53) * 61)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e3080000333445961550625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (36093845893638083555411025908991160223442721593375 : ℝ)
+      = 3 * Real.log 3 + 3 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 19 + 4 * Real.log 29 + 4 * Real.log 37
+      + 4 * Real.log 41 + 4 * Real.log 53 + 4 * Real.log 61 := by
+    have e36093845893638083555411025908991160223442721593375 : (36093845893638083555411025908991160223442721593375 : ℝ) = ((((((((((3 ^ 3 * 5 ^ 3) * 7 ^ 4) * 17 ^ 4) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4) * 61 ^ 4)) := by
+      norm_num
+    rw [e36093845893638083555411025908991160223442721593375, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.588 : ℝ) ^ 4 * 36093845893638083555411025908991160223442721593375
+      < 2 ^ 172 := by norm_num
+  have hlog4 : 4 * Real.log (3.588 : ℝ)
+        + Real.log (36093845893638083555411025908991160223442721593375 : ℝ)
+      < 172 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  have h15 : Real.log (15 : ℝ) = Real.log 3 + Real.log 5 := by
+    have e15 : (15 : ℝ) = 3 * 5 := by norm_num
+    rw [e15, Real.log_mul (by norm_num) (by norm_num)]
+  rw [hseq, hsum, h1307674368000, hN, h15]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 15` upper bound at `x = 1/4`: `Gamma(1/4) < 3.648`
+(mirror of `gamma_quarter_gt_BM15`; exact value
+`logΓ ≤ 44·log 2 - log 3 - log 5 - log 7 - log 17 - log 19 - log 29 - log 37 - log 41 - log 53 - log 61 ≈ 1.293912, Γ ≈ 3.64702`,
+i.e. `Γ ≤ (2^176/(3^4·5^4·7^4·17^4·19^4·29^4·37^4·41^4·53^4·61^4))^{1/4}`;
+new interval `3.588 < Γ(1/4) < 3.648`, width `0.060`). -/
+theorem gamma_quarter_lt_BM15 : Real.Gamma (1/4 : ℝ) < (3.648 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 15
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c15 : ((15 : ℕ) : ℝ) = (15 : ℝ) := by norm_num
+  rw [c15] at hle
+  have c16 : (15 : ℝ) + 1 = (16 : ℝ) := by norm_num
+  rw [c16] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 15
+      = (1/4 : ℝ) * Real.log 15 + Real.log 1307674368000
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ) + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ) + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ) + Real.log (61/4 : ℝ)) := by
+    have f15 : Nat.factorial 15 = 1307674368000 := by decide
+    have c15' : ((15 : ℕ) : ℝ) = (15 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    have a15 : (1/4 : ℝ) + ((15 : ℕ) : ℝ) = (61/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f15, c15', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+        + Real.log (61/4 : ℝ)
+      = Real.log 3080000333445961550625 - 32 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have hpos614 : (0 : ℝ) < (61/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) + Real.log (57/4 : ℝ)
+        = Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne').symm
+    have p : ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ))
+        = 3080000333445961550625 / 4294967296 := by norm_num
+    have m15 : Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ))
+        + Real.log (61/4 : ℝ)
+        = Real.log 3080000333445961550625 - Real.log 4294967296 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l4294967296 : Real.log (4294967296 : ℝ) = 32 * Real.log 2 := by
+      have e4294967296 : (4294967296 : ℝ) = 2 ^ 32 := by norm_num
+      rw [e4294967296, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, l4294967296]
+  have h1307674368000 : Real.log (1307674368000 : ℝ)
+      = 11 * Real.log 2 + 6 * Real.log 3 + 3 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e1307674368000 : (1307674368000 : ℝ) = ((((((2048 * 729) * 125) * 49) * 11) * 13)) := by
+      norm_num
+    have e2048 : (2048 : ℝ) = 2 ^ 11 := by norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e1307674368000, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2048, e729, e125, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (3080000333445961550625 : ℝ)
+      = 7 * Real.log 3 + 4 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 + Real.log 61 := by
+    have e3080000333445961550625 : (3080000333445961550625 : ℝ) = ((((((((((((2187 * 625) * 343) * 11) * 13) * 17) * 19) * 29) * 37) * 41) * 53) * 61)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e625 : (625 : ℝ) = 5 ^ 4 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    rw [e3080000333445961550625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e625, e343, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have h16 : Real.log (16 : ℝ) = 4 * Real.log 2 := by
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    rw [e16, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (541407688404571253331165388634867403351640823900625 : ℝ)
+      = 4 * Real.log 3 + 4 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 17
+      + 4 * Real.log 19 + 4 * Real.log 29 + 4 * Real.log 37
+      + 4 * Real.log 41 + 4 * Real.log 53 + 4 * Real.log 61 := by
+    have e541407688404571253331165388634867403351640823900625 : (541407688404571253331165388634867403351640823900625 : ℝ) = ((((((((((3 ^ 4 * 5 ^ 4) * 7 ^ 4) * 17 ^ 4) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4) * 61 ^ 4)) := by
+      norm_num
+    rw [e541407688404571253331165388634867403351640823900625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 176 < (3.648 : ℝ) ^ 4 * 541407688404571253331165388634867403351640823900625 := by
+    norm_num
+  have hlogC : 176 * Real.log 2
+      < 4 * Real.log (3.648 : ℝ) + Real.log (541407688404571253331165388634867403351640823900625 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h1307674368000, hN, h16]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 15` interval: `3.588 < Γ(1/4) < 3.648`
+(width `0.060`, tightening the `n = 14` interval `3.586 < Γ < 3.649`, width `0.063`). -/
+theorem gamma_quarter_bounds_BM15 :
+    (3.588 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.648 : ℝ) :=
+  ⟨gamma_quarter_gt_BM15, gamma_quarter_lt_BM15⟩
+
+/-- Bohr–Mollerup `n = 16` lower bound at `x = 1/4`: `3.59 < Gamma(1/4)`
+(tightens `gamma_quarter_gt_BM15`; exact `log`-of-rational value
+`logΓ ≥ 50·log 2 - log 3 - 2·log 5 - log 7 - log 13 - log 17 - log 19 - log 29 - log 37 - log 41 - log 53 - log 61 ≈ 1.278407, Γ ≈ 3.59092`,
+i.e. `Γ ≥ (2^200/(3^4·5^8·7^4·13^4·17^4·19^4·29^4·37^4·41^4·53^4·61^4))^{1/4}`;
+new interval `3.59 < Γ(1/4) < 3.646`, width `0.056`). -/
+theorem gamma_quarter_gt_BM16 : (3.59 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (16 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 16
+      = (1/4 : ℝ) * Real.log 16 + Real.log 20922789888000
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ) + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ) + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ) + Real.log (61/4 : ℝ) + Real.log (65/4 : ℝ)) := by
+    have f16 : Nat.factorial 16 = 20922789888000 := by decide
+    have c16' : ((16 : ℕ) : ℝ) = (16 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    have a15 : (1/4 : ℝ) + ((15 : ℕ) : ℝ) = (61/4 : ℝ) := by norm_num
+    have a16 : (1/4 : ℝ) + ((16 : ℕ) : ℝ) = (65/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f16, c16', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+        + Real.log (61/4 : ℝ) + Real.log (65/4 : ℝ)
+      = Real.log 200200021673987500790625 - 34 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have hpos614 : (0 : ℝ) < (61/4 : ℝ) := by norm_num
+    have hpos654 : (0 : ℝ) < (65/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) + Real.log (57/4 : ℝ)
+        = Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne').symm
+    have m15 : Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) + Real.log (61/4 : ℝ)
+        = Real.log ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne').symm
+    have p : (((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ)) * (65/4 : ℝ))
+        = 200200021673987500790625 / 17179869184 := by norm_num
+    have m16 : Real.log ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ))
+        + Real.log (65/4 : ℝ)
+        = Real.log 200200021673987500790625 - Real.log 17179869184 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne') hpos654.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l17179869184 : Real.log (17179869184 : ℝ) = 34 * Real.log 2 := by
+      have e17179869184 : (17179869184 : ℝ) = 2 ^ 34 := by norm_num
+      rw [e17179869184, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, l17179869184]
+  have h20922789888000 : Real.log (20922789888000 : ℝ)
+      = 15 * Real.log 2 + 6 * Real.log 3 + 3 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e20922789888000 : (20922789888000 : ℝ) = ((((((32768 * 729) * 125) * 49) * 11) * 13)) := by
+      norm_num
+    have e32768 : (32768 : ℝ) = 2 ^ 15 := by norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e20922789888000, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e32768, e729, e125, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (200200021673987500790625 : ℝ)
+      = 7 * Real.log 3 + 5 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + 2 * Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 + Real.log 61 := by
+    have e200200021673987500790625 : (200200021673987500790625 : ℝ) = ((((((((((((2187 * 3125) * 343) * 11) * 169) * 17) * 19) * 29) * 37) * 41) * 53) * 61)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e3125 : (3125 : ℝ) = 5 ^ 5 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    have e169 : (169 : ℝ) = 13 ^ 2 := by norm_num
+    rw [e200200021673987500790625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e3125, e343, e169, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hK : Real.log (9664465617826849728994634165500279941953883482141094140625 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 13
+      + 4 * Real.log 17 + 4 * Real.log 19 + 4 * Real.log 29
+      + 4 * Real.log 37 + 4 * Real.log 41 + 4 * Real.log 53 + 4 * Real.log 61 := by
+    have e9664465617826849728994634165500279941953883482141094140625 : (9664465617826849728994634165500279941953883482141094140625 : ℝ) = (((((((((((3 ^ 4 * 5 ^ 8) * 7 ^ 4) * 13 ^ 4) * 17 ^ 4) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4) * 61 ^ 4)) := by
+      norm_num
+    rw [e9664465617826849728994634165500279941953883482141094140625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpow : (3.59 : ℝ) ^ 4 * 9664465617826849728994634165500279941953883482141094140625
+      < 2 ^ 200 := by norm_num
+  have hlog4 : 4 * Real.log (3.59 : ℝ)
+        + Real.log (9664465617826849728994634165500279941953883482141094140625 : ℝ)
+      < 200 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpow
+    rw [Real.log_mul (by positivity) (by positivity),
+      Real.log_pow, Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  have h16 : Real.log (16 : ℝ) = 4 * Real.log 2 := by
+    have e16 : (16 : ℝ) = 2 ^ 4 := by norm_num
+    rw [e16, Real.log_pow]
+    push_cast
+    ring
+  rw [hseq, hsum, h20922789888000, hN, h16]
+  linarith [hlog4, hK]
+
+/-- Bohr–Mollerup `n = 16` upper bound at `x = 1/4`: `Gamma(1/4) < 3.646`
+(mirror of `gamma_quarter_gt_BM16`; exact value
+`logΓ ≤ 49·log 2 - log 3 - 2·log 5 - log 7 - log 13 - 0.75·log 17 - log 19 - log 29 - log 37 - log 41 - log 53 - log 61 ≈ 1.293564, Γ ≈ 3.64576`,
+i.e. `Γ ≤ (2^196/(3^4·5^8·7^4·13^4·17^3·19^4·29^4·37^4·41^4·53^4·61^4))^{1/4}`;
+new interval `3.59 < Γ(1/4) < 3.646`, width `0.056`). -/
+theorem gamma_quarter_lt_BM16 : Real.Gamma (1/4 : ℝ) < (3.646 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hx' : (1/4 : ℝ) ≤ 1 := by norm_num
+  have hle := Real.BohrMollerup.le_logGammaSeq Real.convexOn_log_Gamma hfeq hx hx' 16
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hle
+  have c16 : ((16 : ℕ) : ℝ) = (16 : ℝ) := by norm_num
+  rw [c16] at hle
+  have c17 : (16 : ℝ) + 1 = (17 : ℝ) := by norm_num
+  rw [c17] at hle
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 16
+      = (1/4 : ℝ) * Real.log 16 + Real.log 20922789888000
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ) + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ) + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ) + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ) + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ) + Real.log (61/4 : ℝ) + Real.log (65/4 : ℝ)) := by
+    have f16 : Nat.factorial 16 = 20922789888000 := by decide
+    have c16' : ((16 : ℕ) : ℝ) = (16 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = (1/4 : ℝ) := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = (5/4 : ℝ) := by norm_num
+    have a2 : (1/4 : ℝ) + ((2 : ℕ) : ℝ) = (9/4 : ℝ) := by norm_num
+    have a3 : (1/4 : ℝ) + ((3 : ℕ) : ℝ) = (13/4 : ℝ) := by norm_num
+    have a4 : (1/4 : ℝ) + ((4 : ℕ) : ℝ) = (17/4 : ℝ) := by norm_num
+    have a5 : (1/4 : ℝ) + ((5 : ℕ) : ℝ) = (21/4 : ℝ) := by norm_num
+    have a6 : (1/4 : ℝ) + ((6 : ℕ) : ℝ) = (25/4 : ℝ) := by norm_num
+    have a7 : (1/4 : ℝ) + ((7 : ℕ) : ℝ) = (29/4 : ℝ) := by norm_num
+    have a8 : (1/4 : ℝ) + ((8 : ℕ) : ℝ) = (33/4 : ℝ) := by norm_num
+    have a9 : (1/4 : ℝ) + ((9 : ℕ) : ℝ) = (37/4 : ℝ) := by norm_num
+    have a10 : (1/4 : ℝ) + ((10 : ℕ) : ℝ) = (41/4 : ℝ) := by norm_num
+    have a11 : (1/4 : ℝ) + ((11 : ℕ) : ℝ) = (45/4 : ℝ) := by norm_num
+    have a12 : (1/4 : ℝ) + ((12 : ℕ) : ℝ) = (49/4 : ℝ) := by norm_num
+    have a13 : (1/4 : ℝ) + ((13 : ℕ) : ℝ) = (53/4 : ℝ) := by norm_num
+    have a14 : (1/4 : ℝ) + ((14 : ℕ) : ℝ) = (57/4 : ℝ) := by norm_num
+    have a15 : (1/4 : ℝ) + ((15 : ℕ) : ℝ) = (61/4 : ℝ) := by norm_num
+    have a16 : (1/4 : ℝ) + ((16 : ℕ) : ℝ) = (65/4 : ℝ) := by norm_num
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [f16, c16', Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16]
+    ring
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+        + Real.log (13/4 : ℝ) + Real.log (17/4 : ℝ) + Real.log (21/4 : ℝ)
+        + Real.log (25/4 : ℝ) + Real.log (29/4 : ℝ) + Real.log (33/4 : ℝ)
+        + Real.log (37/4 : ℝ) + Real.log (41/4 : ℝ) + Real.log (45/4 : ℝ)
+        + Real.log (49/4 : ℝ) + Real.log (53/4 : ℝ) + Real.log (57/4 : ℝ)
+        + Real.log (61/4 : ℝ) + Real.log (65/4 : ℝ)
+      = Real.log 200200021673987500790625 - 34 * Real.log 2 := by
+    have hpos14 : (0 : ℝ) < (1/4 : ℝ) := by norm_num
+    have hpos54 : (0 : ℝ) < (5/4 : ℝ) := by norm_num
+    have hpos94 : (0 : ℝ) < (9/4 : ℝ) := by norm_num
+    have hpos134 : (0 : ℝ) < (13/4 : ℝ) := by norm_num
+    have hpos174 : (0 : ℝ) < (17/4 : ℝ) := by norm_num
+    have hpos214 : (0 : ℝ) < (21/4 : ℝ) := by norm_num
+    have hpos254 : (0 : ℝ) < (25/4 : ℝ) := by norm_num
+    have hpos294 : (0 : ℝ) < (29/4 : ℝ) := by norm_num
+    have hpos334 : (0 : ℝ) < (33/4 : ℝ) := by norm_num
+    have hpos374 : (0 : ℝ) < (37/4 : ℝ) := by norm_num
+    have hpos414 : (0 : ℝ) < (41/4 : ℝ) := by norm_num
+    have hpos454 : (0 : ℝ) < (45/4 : ℝ) := by norm_num
+    have hpos494 : (0 : ℝ) < (49/4 : ℝ) := by norm_num
+    have hpos534 : (0 : ℝ) < (53/4 : ℝ) := by norm_num
+    have hpos574 : (0 : ℝ) < (57/4 : ℝ) := by norm_num
+    have hpos614 : (0 : ℝ) < (61/4 : ℝ) := by norm_num
+    have hpos654 : (0 : ℝ) < (65/4 : ℝ) := by norm_num
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4 : ℝ)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have m2 : Real.log ((1/4 : ℝ) * (5/4 : ℝ)) + Real.log (9/4 : ℝ)
+        = Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne').symm
+    have m3 : Real.log (((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) + Real.log (13/4 : ℝ)
+        = Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne').symm
+    have m4 : Real.log ((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) + Real.log (17/4 : ℝ)
+        = Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne').symm
+    have m5 : Real.log (((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) + Real.log (21/4 : ℝ)
+        = Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne').symm
+    have m6 : Real.log ((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) + Real.log (25/4 : ℝ)
+        = Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne').symm
+    have m7 : Real.log (((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) + Real.log (29/4 : ℝ)
+        = Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne').symm
+    have m8 : Real.log ((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) + Real.log (33/4 : ℝ)
+        = Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne').symm
+    have m9 : Real.log (((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) + Real.log (37/4 : ℝ)
+        = Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne').symm
+    have m10 : Real.log ((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) + Real.log (41/4 : ℝ)
+        = Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne').symm
+    have m11 : Real.log (((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) + Real.log (45/4 : ℝ)
+        = Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne').symm
+    have m12 : Real.log ((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) + Real.log (49/4 : ℝ)
+        = Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne').symm
+    have m13 : Real.log (((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) + Real.log (53/4 : ℝ)
+        = Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne').symm
+    have m14 : Real.log ((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) + Real.log (57/4 : ℝ)
+        = Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne').symm
+    have m15 : Real.log (((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) + Real.log (61/4 : ℝ)
+        = Real.log ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ)) :=
+      (Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne').symm
+    have p : (((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ)) * (65/4 : ℝ))
+        = 200200021673987500790625 / 17179869184 := by norm_num
+    have m16 : Real.log ((((((((((((((((1/4 : ℝ) * (5/4 : ℝ)) * (9/4 : ℝ)) * (13/4 : ℝ)) * (17/4 : ℝ)) * (21/4 : ℝ)) * (25/4 : ℝ)) * (29/4 : ℝ)) * (33/4 : ℝ)) * (37/4 : ℝ)) * (41/4 : ℝ)) * (45/4 : ℝ)) * (49/4 : ℝ)) * (53/4 : ℝ)) * (57/4 : ℝ)) * (61/4 : ℝ))
+        + Real.log (65/4 : ℝ)
+        = Real.log 200200021673987500790625 - Real.log 17179869184 := by
+      rw [← Real.log_mul (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne') hpos134.ne') hpos174.ne') hpos214.ne') hpos254.ne') hpos294.ne') hpos334.ne') hpos374.ne') hpos414.ne') hpos454.ne') hpos494.ne') hpos534.ne') hpos574.ne') hpos614.ne') hpos654.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l17179869184 : Real.log (17179869184 : ℝ) = 34 * Real.log 2 := by
+      have e17179869184 : (17179869184 : ℝ) = 2 ^ 34 := by norm_num
+      rw [e17179869184, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, l17179869184]
+  have h20922789888000 : Real.log (20922789888000 : ℝ)
+      = 15 * Real.log 2 + 6 * Real.log 3 + 3 * Real.log 5 + 2 * Real.log 7
+      + Real.log 11 + Real.log 13 := by
+    have e20922789888000 : (20922789888000 : ℝ) = ((((((32768 * 729) * 125) * 49) * 11) * 13)) := by
+      norm_num
+    have e32768 : (32768 : ℝ) = 2 ^ 15 := by norm_num
+    have e729 : (729 : ℝ) = 3 ^ 6 := by norm_num
+    have e125 : (125 : ℝ) = 5 ^ 3 := by norm_num
+    have e49 : (49 : ℝ) = 7 ^ 2 := by norm_num
+    rw [e20922789888000, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e32768, e729, e125, e49, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hN : Real.log (200200021673987500790625 : ℝ)
+      = 7 * Real.log 3 + 5 * Real.log 5 + 3 * Real.log 7 + Real.log 11
+      + 2 * Real.log 13 + Real.log 17 + Real.log 19 + Real.log 29
+      + Real.log 37 + Real.log 41 + Real.log 53 + Real.log 61 := by
+    have e200200021673987500790625 : (200200021673987500790625 : ℝ) = ((((((((((((2187 * 3125) * 343) * 11) * 169) * 17) * 19) * 29) * 37) * 41) * 53) * 61)) := by
+      norm_num
+    have e2187 : (2187 : ℝ) = 3 ^ 7 := by norm_num
+    have e3125 : (3125 : ℝ) = 5 ^ 5 := by norm_num
+    have e343 : (343 : ℝ) = 7 ^ 3 := by norm_num
+    have e169 : (169 : ℝ) = 13 ^ 2 := by norm_num
+    rw [e200200021673987500790625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), e2187, e3125, e343, e169, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hKup : Real.log (568497977519226454646743186205898820114934322478887890625 : ℝ)
+      = 4 * Real.log 3 + 8 * Real.log 5 + 4 * Real.log 7 + 4 * Real.log 13
+      + 3 * Real.log 17 + 4 * Real.log 19 + 4 * Real.log 29
+      + 4 * Real.log 37 + 4 * Real.log 41 + 4 * Real.log 53 + 4 * Real.log 61 := by
+    have e568497977519226454646743186205898820114934322478887890625 : (568497977519226454646743186205898820114934322478887890625 : ℝ) = (((((((((((3 ^ 4 * 5 ^ 8) * 7 ^ 4) * 13 ^ 4) * 17 ^ 3) * 19 ^ 4) * 29 ^ 4) * 37 ^ 4) * 41 ^ 4) * 53 ^ 4) * 61 ^ 4)) := by
+      norm_num
+    rw [e568497977519226454646743186205898820114934322478887890625, Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_mul (by norm_num) (by norm_num), Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow, Real.log_pow]
+    push_cast
+    ring
+  have hpowC : (2 : ℝ) ^ 196 < (3.646 : ℝ) ^ 4 * 568497977519226454646743186205898820114934322478887890625 := by
+    norm_num
+  have hlogC : 196 * Real.log 2
+      < 4 * Real.log (3.646 : ℝ) + Real.log (568497977519226454646743186205898820114934322478887890625 : ℝ) := by
+    have h := (Real.log_lt_log_iff (by positivity) (by positivity)).mpr hpowC
+    rw [Real.log_pow, Real.log_mul (by positivity) (by positivity),
+      Real.log_pow] at h
+    push_cast at h
+    linarith
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff hGpos (by norm_num)]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_le_of_lt hle ?_
+  rw [hseq, hsum, h20922789888000, hN]
+  linarith [hlogC, hKup]
+
+/-- Two-sided Bohr–Mollerup `n = 16` interval: `3.59 < Γ(1/4) < 3.646`
+(width `0.056`, tightening the `n = 15` interval `3.588 < Γ < 3.648`, width `0.060`). -/
+theorem gamma_quarter_bounds_BM16 :
+    (3.59 : ℝ) < Real.Gamma (1/4 : ℝ) ∧ Real.Gamma (1/4 : ℝ) < (3.646 : ℝ) :=
+  ⟨gamma_quarter_gt_BM16, gamma_quarter_lt_BM16⟩
+
+
+
 /-! ### Remaining gap (no `sorry`; explicit hypotheses).
 
 With the unconditional pieces above plus `zeta_rigorous`

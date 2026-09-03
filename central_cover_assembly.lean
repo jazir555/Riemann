@@ -1063,6 +1063,156 @@ theorem R00_H_instance (h : R00_leaf_obligations)
 
 #print axioms R00_H_instance
 
+/-! ## Next bottom-row cell R01 (mid tier): full fencing package
+
+Cell choice: `c01 = (-7.5, -5, 0.01, 0.2)` — bottom row `y ∈ (0.01, 0.2)`.
+Geometry `(dx, dy) = (1.25, 0.095)` exactly matches `sample_cell_radius_bound`
+(`radius < 1.26`), same as `R00`.
+Tier: mid `(ε, M) = (0.05, 0.07)` (`fine_feasible_mid`, `fine_eps_mid_pos`,
+`fine_M_mid_nonneg`).
+
+What is proved here (sorry-free): the same fencing assembly as `R00` —
+`R01` as a `Rect2D`, strip bounds, `ε_pos`, radius `< 1.26`, and the
+`H`-conclusion shape of `inner_nonvanishing_of_fenced_grid_fine` at `c01`
+via the same three strip lemmas (`xi_rect_lower_bound_of_center_bound_strip`,
+`lowerBoundRect_of_fencingHypotheses_strip`,
+`zeroFreeRect_of_rect_center_bound_strip`) — conditional on exactly the two
+numerical enclosures (`R01_leaf_obligations`): `center_bound` and
+`deriv_bound` (rigorous `ξ`-enclosures, absent from Mathlib, taken as
+explicit hypotheses exactly as `R00` does).
+
+DATA NOTE (§1h, verified once): `(-7.5, -5) ∉ fineGridX` — the fine grid uses
+overlapping columns `[(-10,-7.5), (-8,-5.5), …]`, so `c01` is NOT a member of
+`gridFine` and no `R01_mem_gridFine` lemma is stated (it would be false). The
+`H`-leaf below is therefore given in membership-free form (`hc_eq` only, no
+`hc_mem`); it supplies the `H`-conclusion for any grid containing `c01`.
+-/
+
+/-- The next bottom-row cell `(-7.5, -5) × (0.01, 0.2)`. -/
+def R01 : CellProofEngine.Rect2D :=
+  ⟨-7.5, -5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R01_x0 : R01.x0 = -7.5 := rfl
+theorem R01_x1 : R01.x1 = -5 := rfl
+theorem R01_y0 : R01.y0 = 0.01 := rfl
+theorem R01_y1 : R01.y1 = 0.2 := rfl
+
+/-- Same `2.5` x-width as every other bottom-row cell. -/
+theorem R01_width_eq : R01.x1 - R01.x0 = 2.5 := by
+  rw [R01_x0, R01_x1]; norm_num
+
+theorem R01_strip_lo : -(1 / 2 : ℝ) < R01.y0 := by rw [R01_y0]; norm_num
+theorem R01_strip_hi : R01.y1 < (1 / 2 : ℝ) := by rw [R01_y1]; norm_num
+
+theorem R01_dx_eq : R01.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R01_x0, R01_x1]; norm_num
+
+theorem R01_dy_eq : R01.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R01_y0, R01_y1]; norm_num
+
+theorem R01_radius_eq :
+    R01.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R01_dx_eq, R01_dy_eq]
+
+theorem R01_radius_lt : R01.radius < 1.26 := by
+  rw [R01_radius_eq]; exact sample_cell_radius_bound
+
+/-- The two remaining numerical enclosures for `R01` (mid tier).
+`center_bound` needs `‖ξ‖` at the cell center; `deriv_bound` needs a
+uniform `‖ξ'‖` bound on the rect. Both are currently unprovable in Mathlib
+(`riemannZeta`/`Gamma`/`cpow` interval arithmetic is absent) and are taken
+as explicit hypotheses, exactly as `R00_leaf_obligations` does. -/
+def R01_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R01.radius ≤ ‖xiShifted R01.center‖) ∧
+  (∀ w, R01.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+/-- Obligations → fencing package (strip version, no `hdiff`). -/
+theorem R01_fencing_of_bounds (h : R01_leaf_obligations) :
+    CellFencingHypotheses R01 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+/-- Obligations → lower-bound rect (`lowerBoundRect_of_fencingHypotheses_strip`). -/
+noncomputable def R01_lowerBound_of_bounds (h : R01_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R01 0.05 0.07
+    R01_strip_lo R01_strip_hi (R01_fencing_of_bounds h)
+
+/-- Obligations → zero-free rect (`zeroFreeRect_of_rect_center_bound_strip`). -/
+noncomputable def R01_zeroFree_of_bounds (h : R01_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R01 0.05 fine_eps_mid_pos 0.07
+    R01_strip_lo R01_strip_hi h.2 h.1
+
+/-- Obligations → pointwise nonvanishing on `R01`
+(`xi_rect_lower_bound_of_center_bound_strip`). -/
+theorem R01_nonvanishing_of_bounds (h : R01_leaf_obligations) {z : ℂ}
+    (hx0 : R01.x0 ≤ z.re) (hx1 : z.re ≤ R01.x1)
+    (hy0 : R01.y0 ≤ z.im) (hy1 : z.im ≤ R01.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R01 0.05 0.07
+      R01_strip_lo R01_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+/-- Obligations discharge the `H`-conclusion shape of
+`inner_nonvanishing_of_fenced_grid_fine` at `c01 = (-7.5, -5, 0.01, 0.2)`
+(mid tier). Membership-free form: `c01 ∉ gridFine` (see DATA NOTE above),
+so only `hc_eq` is required. -/
+theorem R01_H_instance (h : R01_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ)
+    (hc_eq : c = (-7.5, -5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R01, 0.05, 0.07, rfl, rfl, rfl, rfl, R01_strip_lo, R01_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+#print axioms R01_H_instance
+
 end CentralCoverAssembly
 
 end
+
+/-! ## R00 one-cell appendix: budget + conditional closure inventory
+
+Outer tier `(ε, M) = (0.002, 0.05)` on `c00 = (-10,-7.5,0.01,0.2)`:
+`R00_radius_lt` gives `radius < 1.26`, so `ε + M * radius < 0.1`
+(`R00_budget_lt_app`). The full `R00_leaf_obligations` (center + deriv)
+decompose via the four-part xi product (bridge in the new `interval_arith`
+module, which reuses `ZetaNumericCert`) into poly / pi-power / Gamma / zeta
+component lower bounds. The Gamma and zeta enclosures on the `s`-rectangle
+are not in Mathlib and remain as explicit hypotheses below; nothing here is
+hidden.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R00 outer tier on the true radius. -/
+theorem R00_budget_lt_app : (0.002 : ℝ) + 0.05 * R00.radius < 0.1 := by
+  have h := R00_radius_lt
+  have hM : 0.05 * R00.radius < 0.05 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+/-- The remaining gap for `c00`, stated exactly as the existing obligations. -/
+def R00_gap : Prop := R00_leaf_obligations
+
+/-- Gap discharge is exactly the existing strip lemma. -/
+theorem R00_close_of_gap (h : R00_gap) {z : ℂ}
+    (hx0 : R00.x0 ≤ z.re) (hx1 : z.re ≤ R00.x1)
+    (hy0 : R00.y0 ≤ z.im) (hy1 : z.im ≤ R00.y1) :
+    xiShifted z ≠ 0 :=
+  R00_nonvanishing_of_bounds h hx0 hx1 hy0 hy1
+
+#print axioms R00_budget_lt_app
+#print axioms R00_close_of_gap
+
+end CentralCoverAssembly

@@ -783,3 +783,400 @@ theorem zeta_half_feeder_of_etaHurwitz_lim
 #print axioms etaHurwitz_half_eq
 #print axioms hEta_of_etaHurwitz_lim
 #print axioms zeta_half_feeder_of_etaHurwitz_lim
+
+/-!
+## `hLim`: the Tendsto limit equals the continued Hurwitz value at `s = 1/2`.
+
+Mathlib greps used (all pre-existing, only called):
+* uniqueness of limits: `tendsto_nhds_unique`
+  (`Mathlib/Topology/Separation/Hausdorff.lean`);
+* Weierstrass M-test: `Summable.of_norm_bounded`
+  (`Mathlib/Analysis/Normed/Group/InfiniteSum.lean`);
+* Hurwitz API: `HurwitzZeta.hasSum_hurwitzZeta_of_one_lt_re`,
+  `HurwitzZeta.differentiable_hurwitzZeta_sub_hurwitzZeta`
+  (`Mathlib/NumberTheory/LSeries/HurwitzZeta.lean`);
+* tsum holomorphicity: `Complex.differentiableOn_tsum_of_summable_norm`
+  (`Mathlib/Analysis/Complex/LocallyUniformLimit.lean`);
+* identity theorem: `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`
+  (`Mathlib/Analysis/Analytic/Uniqueness.lean`).
+
+Route (the `R00EtaConv` paired-difference pattern from `interval_arith.lean`,
+generalized from `sR00` to general `s` with `0 < s.re`, closed via the
+continuation framework above in this file):
+1. `etaPairTerm s m`: paired increment; MVT gives
+   `‖pair‖ ≤ ‖s‖ * (2m+1)^{-Re s - 1}` (`norm_etaPairTerm_le`);
+2. M-test gives `Summable (etaPairTerm s)` for `0 < s.re`
+   (`summable_etaPairTerm`);
+3. even partial sums `S_{2M}(s)` are sums of pairs
+   (`etaDirichlet_even_partial`), hence tend to `∑' m, etaPairTerm s m`
+   (`etaDirichlet_even_tendsto_pair`);
+4. on `1 < s.re` the same even partials tend to `∑' etaDirichletTerm s`,
+   so `∑' pairs = etaHurwitz` there (`etaPairLim_eq_of_one_lt_re`);
+5. `G(s) = ∑' pairs` is analytic on the ball `B = ball 1 (3/4)`
+   (uniform majorant `(7/4) * (m+1)^{-5/4}`); `B` is preconnected,
+   contains `1/2` and `3/2`, and `G = etaHurwitz` near `3/2` — hence
+   `G = etaHurwitz` on `B`, in particular at `1/2`;
+6. at `s = 1/2`, `etaDirichletTerm = etaTermℂ` termwise, so the even
+   partials tend to both `(L:ℂ)` (from `hL`) and `etaHurwitz (1/2)`;
+   `tendsto_nhds_unique` closes.
+-/
+
+/-- Paired Dirichlet-eta increment at general `s`: `S_{2(m+1)} - S_{2m}`. -/
+noncomputable def etaPairTerm (s : ℂ) (m : ℕ) : ℂ :=
+  etaDirichletTerm s (2 * m) + etaDirichletTerm s (2 * m + 1)
+
+/-- Dirichlet eta term in cpow-neg form. -/
+theorem etaDirichletTerm_eq_cpow_neg (s : ℂ) (n : ℕ) :
+    etaDirichletTerm s n = (-1 : ℂ) ^ n * (((((n : ℝ) + 1 : ℝ)) : ℂ) ^ (-s)) := by
+  have hcast : ((((n + 1 : ℕ) : ℂ))) = (((((n : ℝ) + 1 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  simp only [etaDirichletTerm, div_eq_mul_inv, ← Complex.cpow_neg]
+  rw [hcast]
+
+/-- Pair in cpow-difference form. -/
+theorem etaPairTerm_eq_cpow_sub (s : ℂ) (m : ℕ) :
+    etaPairTerm s m
+      = (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-s))
+        - (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-s)) := by
+  have e0 := etaDirichletTerm_eq_cpow_neg s (2 * m)
+  have e1 := etaDirichletTerm_eq_cpow_neg s (2 * m + 1)
+  have hcast0 : ((((2 * m : ℕ) : ℝ) + 1 : ℝ)) = ((((2 * m + 1 : ℕ) : ℝ))) := by
+    push_cast
+    ring
+  have hcast1 : ((((2 * m + 1 : ℕ) : ℝ) + 1 : ℝ)) = ((((2 * m + 2 : ℕ) : ℝ))) := by
+    push_cast
+    ring
+  show etaDirichletTerm s (2 * m) + etaDirichletTerm s (2 * m + 1) = _
+  rw [e0, e1, neg_one_pow_two_mul, neg_one_pow_two_mul_add_one, hcast0, hcast1]
+  ring
+
+/-- Mean-value pair bound `‖pair m‖ ≤ ‖s‖ * (2m+1)^{-Re s - 1}` (`0 < Re s`). -/
+theorem norm_etaPairTerm_le (s : ℂ) (hs : 0 < s.re) (m : ℕ) :
+    ‖etaPairTerm s m‖ ≤ ‖s‖ * (((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1))) := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_re] at hs
+    exact lt_irrefl _ hs
+  have hnegs : -s ≠ 0 := neg_ne_zero.mpr hs0
+  set a : ℝ := (((2 * m + 1 : ℕ) : ℝ)) with ha
+  set b : ℝ := (((2 * m + 2 : ℕ) : ℝ)) with hb
+  have ha_pos : (0 : ℝ) < a := by
+    rw [ha]
+    exact Nat.cast_pos.mpr (by omega)
+  have hab : a ≤ b := by
+    rw [ha, hb]
+    exact Nat.cast_le.mpr (by omega)
+  have hb_eq : b = a + 1 := by
+    rw [ha, hb]
+    have heq : 2 * m + 1 + 1 = 2 * m + 2 := by omega
+    calc ((((2 * m + 2 : ℕ)) : ℝ))
+        = ((((2 * m + 1 + 1 : ℕ)) : ℝ)) := by rw [heq]
+      _ = ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by rw [Nat.cast_add, Nat.cast_one]
+  have hpair : etaPairTerm s m = (a : ℂ) ^ (-s) - (b : ℂ) ^ (-s) := by
+    rw [etaPairTerm_eq_cpow_sub]
+  have hdiff : ∀ x ∈ Set.Icc a b,
+      DifferentiableAt ℝ (fun t : ℝ => (t : ℂ) ^ (-s)) x := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha_pos (Set.mem_Icc.mp hx).1
+    exact (hasDerivAt_ofReal_cpow_const (ne_of_gt hx0) hnegs).differentiableAt
+  have hderiv_eq : ∀ x : ℝ, x ≠ 0 →
+      deriv (fun t : ℝ => (t : ℂ) ^ (-s)) x = (-s) * (x : ℂ) ^ (-s - 1) := by
+    intro x hx0
+    have h := Complex.deriv_ofReal_cpow_const hx0 (c := -s) hnegs
+    simpa using h
+  have hexp_nonpos : -s.re - 1 ≤ 0 := by linarith
+  have hbound : ∀ x ∈ Set.Icc a b, ‖deriv (fun t : ℝ => (t : ℂ) ^ (-s)) x‖
+      ≤ ‖s‖ * (a ^ (-s.re - 1)) := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha_pos (Set.mem_Icc.mp hx).1
+    have hax : a ≤ x := (Set.mem_Icc.mp hx).1
+    rw [hderiv_eq x (ne_of_gt hx0)]
+    have hnorm_cpow : ‖(x : ℂ) ^ (-s - 1)‖ = x ^ ((-s - 1).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+    have hre : ((-s - 1).re) = -s.re - 1 := by
+      rw [Complex.sub_re, Complex.neg_re, Complex.one_re]
+    have hle : x ^ (-s.re - 1) ≤ a ^ (-s.re - 1) :=
+      Real.rpow_le_rpow_of_nonpos ha_pos hax hexp_nonpos
+    calc ‖-s * (x : ℂ) ^ (-s - 1)‖
+        = ‖s‖ * (x ^ (-s.re - 1)) := by
+          rw [norm_mul, norm_neg, hnorm_cpow, hre]
+      _ ≤ ‖s‖ * (a ^ (-s.re - 1)) :=
+          mul_le_mul_of_nonneg_left hle (norm_nonneg _)
+  have hmvt := Convex.norm_image_sub_le_of_norm_deriv_le hdiff hbound
+    (convex_Icc a b) (Set.left_mem_Icc.mpr hab) (Set.right_mem_Icc.mpr hab)
+  have hba : ‖b - a‖ = 1 := by
+    have hsub : b - a = 1 := by rw [hb_eq]; ring
+    rw [hsub, norm_one]
+  rw [hba, mul_one] at hmvt
+  have hrev : ‖(a : ℂ) ^ (-s) - (b : ℂ) ^ (-s)‖
+      = ‖(b : ℂ) ^ (-s) - (a : ℂ) ^ (-s)‖ := norm_sub_rev _ _
+  rw [hpair, hrev]
+  simpa only [] using hmvt
+
+/-- The paired series is summable for `0 < s.re` (M-test vs `p = Re+1 > 1`). -/
+theorem summable_etaPairTerm {s : ℂ} (hs : 0 < s.re) :
+    Summable (etaPairTerm s) := by
+  have hp1 : (1 : ℝ) < s.re + 1 := by linarith
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (s.re + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have hC : Summable (fun m : ℕ => ‖s‖ * ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹) :=
+    hshift.mul_left _
+  refine Summable.of_norm_bounded hC (fun m => ?_)
+  have hle1 := norm_etaPairTerm_le s hs m
+  have ha_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_pos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp_nonneg : (0 : ℝ) ≤ s.re + 1 := by linarith
+  have hrpow_eq : ((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1))
+      = ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by
+    have e : -s.re - 1 = -(s.re + 1) := by ring
+    rw [e]
+    exact Real.rpow_neg (Nat.cast_nonneg _) _
+  have hrpow_le : ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹
+      ≤ ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by
+    apply (inv_le_inv₀ (Real.rpow_pos_of_pos ha_pos _)
+      (Real.rpow_pos_of_pos hm_pos _)).mpr
+    exact Real.rpow_le_rpow (Nat.cast_nonneg _) hm_le hexp_nonneg
+  calc ‖etaPairTerm s m‖ ≤ ‖s‖ * ((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1)) := hle1
+    _ = ‖s‖ * ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by rw [hrpow_eq]
+    _ ≤ ‖s‖ * ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ :=
+        mul_le_mul_of_nonneg_left hrpow_le (norm_nonneg _)
+
+/-- Even partial sums are sums of pairs (induction, two `sum_range_succ`). -/
+theorem etaDirichlet_even_partial (s : ℂ) (M : ℕ) :
+    (∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k)
+      = ∑ m ∈ Finset.range M, etaPairTerm s m := by
+  induction M with
+  | zero => simp
+  | succ M ih =>
+    have h2s : 2 * (M + 1) = (2 * M + 1) + 1 := by ring
+    have hpair : etaPairTerm s M
+        = etaDirichletTerm s (2 * M) + etaDirichletTerm s (2 * M + 1) := rfl
+    calc (∑ k ∈ Finset.range (2 * (M + 1)), etaDirichletTerm s k)
+        = (∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k)
+          + etaDirichletTerm s (2 * M) + etaDirichletTerm s (2 * M + 1) := by
+          rw [h2s, Finset.sum_range_succ, Finset.sum_range_succ]
+      _ = (∑ m ∈ Finset.range M, etaPairTerm s m) + etaPairTerm s M := by
+          rw [ih, hpair, add_assoc]
+      _ = ∑ m ∈ Finset.range (M + 1), etaPairTerm s m := by
+          rw [Finset.sum_range_succ]
+
+/-- Even subsequence tends to the paired tsum. -/
+theorem etaDirichlet_even_tendsto_pair {s : ℂ} (hs : 0 < s.re) :
+    Tendsto (fun M : ℕ => ∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k)
+      atTop (𝓝 (∑' m, etaPairTerm s m)) := by
+  have h := (summable_etaPairTerm hs).hasSum.tendsto_sum_nat
+  simpa [etaDirichlet_even_partial] using h
+
+/-- `M ↦ 2 * M` tends to `atTop`. -/
+theorem tendsto_two_mul_atTop : Tendsto (fun M : ℕ => 2 * M) atTop atTop := by
+  apply Filter.tendsto_atTop_mono (fun M => Nat.le_mul_of_pos_left M (by norm_num))
+  exact Filter.tendsto_id
+
+/-- On `1 < s.re`, the paired tsum equals the continued `etaHurwitz`. -/
+theorem etaPairLim_eq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
+    (∑' m, etaPairTerm s m) = etaHurwitz s := by
+  have hs0 : 0 < s.re := by linarith
+  have hev_pair := etaDirichlet_even_tendsto_pair hs0
+  have hfull : Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, etaDirichletTerm s k)
+      atTop (𝓝 (∑' n, etaDirichletTerm s n)) :=
+    (etaDirichlet_summable hs).hasSum.tendsto_sum_nat
+  have hev_full : Tendsto (fun M : ℕ => ∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k)
+      atTop (𝓝 (∑' n, etaDirichletTerm s n)) :=
+    hfull.comp tendsto_two_mul_atTop
+  have huniq := tendsto_nhds_unique hev_full hev_pair
+  have h1 := eta_tsum_eq_of_one_lt_re hs
+  have h2 := etaHurwitz_eq_of_one_lt_re hs
+  rw [← huniq, h1]
+  exact h2.symm
+
+/-- `1/2` as a complex ofReal (for norm/Re computations). -/
+theorem coe_half_eq : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by simp
+
+/-- `3/2` as a complex ofReal. -/
+theorem coe_three_half_eq : ((3 / 2 : ℂ)) = ((((3 / 2 : ℝ))) : ℂ) := by simp
+
+/-- `1/2` lies in the ball `ball 1 (3/4)`. -/
+theorem mem_ball_half : ((1 / 2 : ℂ)) ∈ Metric.ball (1 : ℂ) (3 / 4 : ℝ) := by
+  have e1 : (1 : ℂ) = ((((1 : ℝ))) : ℂ) := by simp
+  rw [Metric.mem_ball, dist_eq_norm, coe_half_eq, e1, ← Complex.ofReal_sub,
+    Complex.norm_real, Real.norm_eq_abs]
+  norm_num
+
+/-- `3/2` lies in the ball `ball 1 (3/4)`. -/
+theorem mem_ball_three_half : ((3 / 2 : ℂ)) ∈ Metric.ball (1 : ℂ) (3 / 4 : ℝ) := by
+  have e1 : (1 : ℂ) = ((((1 : ℝ))) : ℂ) := by simp
+  rw [Metric.mem_ball, dist_eq_norm, coe_three_half_eq, e1, ← Complex.ofReal_sub,
+    Complex.norm_real, Real.norm_eq_abs]
+  norm_num
+
+/-- Real parts stay `≥ 1/4` on the ball. -/
+theorem hre_ball : ∀ w ∈ Metric.ball (1 : ℂ) (3 / 4 : ℝ), (1 / 4 : ℝ) ≤ w.re := by
+  intro w hw
+  rw [Metric.mem_ball, dist_eq_norm] at hw
+  have habs := Complex.abs_re_le_norm (w - 1)
+  rw [abs_le] at habs
+  have hre_sub : (w - 1).re = w.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  rw [hre_sub] at habs
+  linarith [habs.1, hw]
+
+/-- Norms stay `≤ 7/4` on the ball. -/
+theorem hnorm_ball : ∀ w ∈ Metric.ball (1 : ℂ) (3 / 4 : ℝ), ‖w‖ ≤ 7 / 4 := by
+  intro w hw
+  rw [Metric.mem_ball, dist_eq_norm] at hw
+  have e : w = 1 + (w - 1) := by ring
+  calc ‖w‖ = ‖1 + (w - 1)‖ := by conv_lhs => rw [e]
+    _ ≤ ‖(1 : ℂ)‖ + ‖w - 1‖ := norm_add_le _ _
+    _ ≤ 7 / 4 := by rw [norm_one]; linarith
+
+/-- Uniform summable majorant on the ball (`p = 5/4 > 1`). -/
+theorem etaPair_majorant_summable :
+    Summable (fun m : ℕ => (7 / 4 : ℝ) * ((((m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹) := by
+  have hp1 : (1 : ℝ) < (5 / 4 : ℝ) := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (5 / 4 : ℝ)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  exact hshift.mul_left _
+
+/-- Pointwise uniform bound on the ball. -/
+theorem etaPair_bound_ball (m : ℕ) (w : ℂ) (hw : w ∈ Metric.ball (1 : ℂ) (3 / 4 : ℝ)) :
+    ‖etaPairTerm w m‖ ≤ (7 / 4 : ℝ) * ((((m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹ := by
+  have hw14 := hre_ball w hw
+  have hwnorm := hnorm_ball w hw
+  have hs_pos : 0 < w.re := by linarith
+  have hle1 := norm_etaPairTerm_le w hs_pos m
+  have ha1 : (1 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    exact_mod_cast (show 1 ≤ 2 * m + 1 by omega)
+  have hm_pos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have ha_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp_le : -w.re - 1 ≤ -(5 / 4 : ℝ) := by linarith
+  have hstep1 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-w.re - 1))
+      ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ))) :=
+    Real.rpow_le_rpow_of_exponent_le ha1 hexp_le
+  have hrpow_eq : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ)))
+      = ((((2 * m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹ :=
+    Real.rpow_neg (Nat.cast_nonneg _) _
+  have hinv_le : ((((2 * m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹
+      ≤ ((((m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹ := by
+    apply (inv_le_inv₀ (Real.rpow_pos_of_pos ha_pos _)
+      (Real.rpow_pos_of_pos hm_pos _)).mpr
+    exact Real.rpow_le_rpow (Nat.cast_nonneg _) hm_le (by norm_num)
+  calc ‖etaPairTerm w m‖ ≤ ‖w‖ * ((((2 * m + 1 : ℕ) : ℝ)) ^ (-w.re - 1)) := hle1
+    _ ≤ (7 / 4) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(5 / 4 : ℝ))) :=
+        mul_le_mul hwnorm hstep1
+          (Real.rpow_nonneg (Nat.cast_nonneg _) _) (by norm_num)
+    _ = (7 / 4) * ((((2 * m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹ := by rw [hrpow_eq]
+    _ ≤ (7 / 4) * ((((m + 1 : ℕ) : ℝ) ^ (5 / 4 : ℝ)))⁻¹ :=
+        mul_le_mul_of_nonneg_left hinv_le (by norm_num)
+
+/-- Each pair term is entire in `s`. -/
+theorem etaPairTerm_differentiable (m : ℕ) :
+    Differentiable ℂ (fun s : ℂ => etaPairTerm s m) := by
+  have diff_of_term : ∀ k : ℕ,
+      Differentiable ℂ (fun s : ℂ => etaDirichletTerm s k) := by
+    intro k
+    have hbase : ((((k + 1 : ℕ) : ℂ))) ≠ 0 := by
+      simp only [ne_eq, Nat.cast_eq_zero]
+      exact Nat.succ_ne_zero k
+    haveI : NeZero ((((k + 1 : ℕ) : ℂ)) : ℂ) := ⟨hbase⟩
+    have hcpow : Differentiable ℂ (fun s : ℂ => ((((k + 1 : ℕ) : ℂ)) ^ s)) :=
+      differentiable_const_cpow_of_neZero _
+    have hdenom : ∀ s : ℂ, ((((k + 1 : ℕ) : ℂ)) ^ s) ≠ 0 :=
+      fun s => Complex.cpow_ne_zero_iff.mpr (Or.inl hbase)
+    show Differentiable ℂ (fun s : ℂ => ((-1 : ℂ) ^ k) / ((((k + 1 : ℕ) : ℂ)) ^ s))
+    exact (differentiable_const _).div hcpow hdenom
+  show Differentiable ℂ
+    (fun s : ℂ => etaDirichletTerm s (2 * m) + etaDirichletTerm s (2 * m + 1))
+  exact (diff_of_term _).add (diff_of_term _)
+
+/-- `G` is analytic on the ball (locally uniform tsum). -/
+theorem analyticOn_etaPairLim_ball :
+    AnalyticOnNhd ℂ (fun s => ∑' m, etaPairTerm s m)
+      (Metric.ball (1 : ℂ) (3 / 4 : ℝ)) := by
+  have hdiff : DifferentiableOn ℂ (fun s => ∑' m, etaPairTerm s m)
+      (Metric.ball (1 : ℂ) (3 / 4 : ℝ)) :=
+    Complex.differentiableOn_tsum_of_summable_norm etaPair_majorant_summable
+      (fun m => (etaPairTerm_differentiable m).differentiableOn)
+      Metric.isOpen_ball (fun m w hw => etaPair_bound_ball m w hw)
+  exact hdiff.analyticOnNhd Metric.isOpen_ball
+
+/-- `etaHurwitz` is analytic on the ball. -/
+theorem analytic_etaHurwitz_ball :
+    AnalyticOnNhd ℂ etaHurwitz (Metric.ball (1 : ℂ) (3 / 4 : ℝ)) :=
+  analytic_etaHurwitz.mono (Set.subset_univ _)
+
+/-- `G = etaHurwitz` on the ball (identity theorem from agreement on `1 < Re`). -/
+theorem etaPairLim_eq_etaHurwitz_ball :
+    Set.EqOn (fun s => ∑' m, etaPairTerm s m) etaHurwitz
+      (Metric.ball (1 : ℂ) (3 / 4 : ℝ)) := by
+  refine AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq analyticOn_etaPairLim_ball
+    analytic_etaHurwitz_ball Metric.isPreconnected_ball mem_ball_three_half ?_
+  refine eventually_of_mem ?_ (fun t ht => etaPairLim_eq_of_one_lt_re ht)
+  exact (Complex.continuous_re.isOpen_preimage _ isOpen_Ioi).mem_nhds (by
+    show (1 : ℝ) < ((3 / 2 : ℂ)).re
+    rw [coe_three_half_eq, Complex.ofReal_re]
+    norm_num)
+
+/-- In particular at `s = 1/2`. -/
+theorem etaPairLim_half :
+    (∑' m, etaPairTerm ((1 / 2 : ℂ)) m) = etaHurwitz (1 / 2 : ℂ) :=
+  etaPairLim_eq_etaHurwitz_ball mem_ball_half
+
+/-- `etaDirichletTerm` at `1/2` is the real eta term coerced. -/
+theorem etaDirichletTerm_half_eq (k : ℕ) :
+    etaDirichletTerm (1 / 2 : ℂ) k = etaTermℂ k := by
+  have hcast : ((((k + 1 : ℕ) : ℂ))) = (((((k : ℝ) + 1 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  have hsqrt : ((((k : ℝ) + 1 : ℝ)) ^ ((1 / 2 : ℝ))) = Real.sqrt (((k : ℝ) + 1)) :=
+    (Real.sqrt_eq_rpow _).symm
+  have h1 : (((-1 : ℤ) ^ k : ℝ)) = (-1 : ℝ) ^ k := by push_cast; ring
+  have hnum : ((-1 : ℂ) ^ k) = (((((-1 : ℤ) ^ k : ℝ))) : ℂ) := by
+    rw [h1, Complex.ofReal_pow, Complex.ofReal_neg, Complex.ofReal_one]
+  simp only [etaDirichletTerm, etaTermℂ, etaTerm]
+  rw [hcast, coe_half_eq, ← Complex.ofReal_cpow (by positivity : (0 : ℝ) ≤ (k : ℝ) + 1),
+    hsqrt, hnum, Complex.ofReal_div]
+
+/-- MAIN `hLim`: any `Tendsto` eta limit coerces to the continued Hurwitz value. -/
+theorem etaTendsto_eq_etaHurwitz (L : ℝ)
+    (hL : Tendsto etaPartialℂ atTop (𝓝 ((L : ℝ) : ℂ))) :
+    ((L : ℝ) : ℂ) = etaHurwitz (1 / 2 : ℂ) := by
+  have h2M := tendsto_two_mul_atTop
+  have hevL : Tendsto (fun M : ℕ => etaPartialℂ (2 * M)) atTop (𝓝 ((L : ℝ) : ℂ)) :=
+    hL.comp h2M
+  have hevG : Tendsto
+      (fun M : ℕ => ∑ k ∈ Finset.range (2 * M), etaDirichletTerm (1 / 2 : ℂ) k)
+      atTop (𝓝 (∑' m, etaPairTerm (1 / 2 : ℂ) m)) :=
+    etaDirichlet_even_tendsto_pair (by
+      show (0 : ℝ) < ((1 / 2 : ℂ)).re
+      rw [coe_half_eq, Complex.ofReal_re]
+      norm_num)
+  have hev_eq : (fun M : ℕ => etaPartialℂ (2 * M))
+      = (fun M : ℕ => ∑ k ∈ Finset.range (2 * M), etaDirichletTerm (1 / 2 : ℂ) k) := by
+    funext M
+    simp only [etaPartialℂ]
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [etaDirichletTerm_half_eq]
+  rw [hev_eq] at hevL
+  have huniq := tendsto_nhds_unique hevL hevG
+  rw [huniq]
+  exact etaPairLim_half
+
+/-- Unconditional `ζ(1/2)` feeder: positivity + `hLim` (no hypotheses). -/
+theorem zeta_half_value :
+    ∃ L : ℝ, 0 < L ∧
+      riemannZeta (1 / 2 : ℂ) = (L : ℂ) / (1 - (((Real.sqrt 2 : ℝ)) : ℂ)) :=
+  zeta_half_feeder_of_etaHurwitz_lim (fun L hL => etaTendsto_eq_etaHurwitz L hL)
+
+#print axioms etaTendsto_eq_etaHurwitz
+#print axioms zeta_half_value
+#print axioms etaPairLim_half

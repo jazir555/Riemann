@@ -207,8 +207,8 @@ lean_lib RootScratch where
        `MertensEstimate, `SorryFix, `ApproxZetaLowerBound, `BorelCaratheodory,
        `ktest, `ScratchCheck, `JTest, `XiStub, `TestScratch, `TestZeta0,
          `XiZerosInfiniteScratch, `OrderXiScratch, `TailLaguerreScratch, `FirstQuadrantScratch,
-         `KadiriHadamardAffine, `central_cover_assembly, `central_cover_trusted]
+         `KadiriHadamardAffine, `central_cover_assembly, `central_cover_trusted, `interval_arith]
   globs := #[Glob.one `ZeroFreeRegionHadamard, Glob.one `ZeroFreeRegionProof, Glob.one `riemann_hypothesis, Glob.one `HadamardBridge, Glob.submodules `Zeta23, Glob.one `KadiriZeroFree, Glob.one `KadiriOrderInfra, Glob.one `KadiriZerosInfra2, Glob.one `KadiriHScratch, Glob.one `KadiriDigammaBound, Glob.one `ZeroFreeRegion, Glob.one `ZeroFreeRegionInfra, Glob.one `JensenTranslation, Glob.one `JensenScratch,         Glob.one `riemann_hypothesis_newsection, Glob.one `cross_door_synthesis, Glob.one `rh_residual_gap, Glob.one `rh_certificate, Glob.one `rh_certificate_infra, Glob.one `rh_analytic_infra, Glob.one `rh_infra, Glob.one `rh_term_fps, Glob.one `rh_term_deriv,         Glob.one `rh_zeta_cert_data,         Glob.one `rh_zeta_cert_central, Glob.one `float_xi_cover, Glob.one `float_xi_approx,         Glob.one `float_zeta, Glob.one `float_xi_bridge, Glob.one `float_real_bridge, Glob.one `float_jensen, Glob.one `zeta_rigorous, Glob.one `MertensEstimate, Glob.one `SorryFix, Glob.one `ApproxZetaLowerBound, Glob.one `BorelCaratheodory, Glob.one `ktest, Glob.one `ScratchCheck, Glob.one `JTest, Glob.one `XiStub, Glob.one `TestScratch, Glob.one `TestZeta0, Glob.one `XiZerosInfiniteScratch, Glob.one `OrderXiScratch, Glob.one `TailLaguerreScratch, Glob.one `FirstQuadrantScratch,
-         Glob.one `KadiriHadamardAffine, Glob.one `central_cover_assembly, Glob.one `central_cover_trusted]
+         Glob.one `KadiriHadamardAffine, Glob.one `central_cover_assembly, Glob.one `central_cover_trusted, Glob.one `interval_arith]
 
 
