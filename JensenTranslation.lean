@@ -21231,3 +21231,259 @@ theorem schur_partial_assembly
   exact ⟨hne, fun h0 => scaled_eval_hyperbolic (by omega) (hH n) h0⟩
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## Door-1 genus-from-order + section-link packaging (Agent AF, 2026-09-03).
+
+Orientation: `AGENT_INFRASTRUCTURE_GUIDE.md` §18b.10 door-1 bullet. The door-1
+Pólya-direction assembly (`genusOne_forward`, 21120) is conditional on the genus
+premise `GenusOneRealRooted`. This block discharges the ORDER half of that
+premise unconditionally and packages the GENUS half as far as honestly possible.
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Mathlib: NO Hadamard factorization / canonical product / genus / entire-order
+  API (`Hadamard factorization|hadamard_factor|canonicalProduct|genus.*entire`,
+  `def orderSet|orderOfEntire` — zero hits); NO Hermite–Biehler / Laguerre–Pólya
+  (`Biehler|Laguerre.*Pólya` — zero hits). PRESENT and reused here:
+  Gauss–Lucas convex-hull form (`Mathlib/Analysis/Complex/Polynomial/GaussLucas.lean:54`,
+  consumed in-file via `derivative_hyperbolic` (442) → `hyperbolic_iterate_derivative`
+  (20090)); three-lines Hadamard (`Mathlib/Analysis/Complex/Hadamard.lean`,
+  `norm_le_interp_of_mem_verticalClosedStrip` — noted, not needed here).
+  Exp-series identification: `expSeries_div_hasSum_exp`
+  (`Mathlib/Analysis/Normed/Algebra/Exponential.lean:639`) +
+  `Real.exp_eq_exp_ℝ` (`Mathlib/Analysis/SpecialFunctions/Exponential.lean:214`),
+  same pattern as `Mathlib/Combinatorics/Derangements/Exponential.lean:42-43`.
+  Tsum tools: `norm_tsum_le_tsum_norm`
+  (`Mathlib/Analysis/Normed/Group/InfiniteSum.lean:149`), `Summable.tsum_le_tsum`,
+  `tsum_mul_left`, `Real.summable_pow_div_factorial`
+  (`Mathlib/Analysis/SpecificLimits/Normed.lean:896`, already wrapped in-file as
+  `exp_majorant_summable` (20540)).
+- Repo (present, read-only, NOT redeclared): `orderSet`
+  (`ZeroFreeRegionHadamard.lean:239`), `hadamard_factorization_genus_one`
+  (`ZeroFreeRegionHadamard.lean:3823`), `xi_differentiable` (4045),
+  `xi_zero_enumeration` (4642). None is imported here: `JensenTranslation.lean`
+  imports only `Mathlib`, `riemann_hypothesis`, `zeta_rigorous`, so the order
+  predicate is mirrored locally as `orderBoundAt` (identical shape to `orderSet`).
+- In-file stones reused: `taylorCoeff_cauchy_bound` (20807, Cauchy at fixed `R`,
+  no Stirling), `taylorCoeff_summable_of_orderBound` (20847, S1-unconditional),
+  `jensenEntire_summable_of_orderBound` (20892), `xiMathlibShifted_differentiable_aux`
+  (20802), `hadamardPartial` (20998), `hadamardPartial_hyperbolic` (21004),
+  `hyperbolic_iterate_derivative` (20090), `Hyperbolic_const_mul` (330),
+  `GenusOneData` (21017), `GenusOneRealRooted` (21037), `genusOne_forward` (21120).
+- Name-clash check (`orderBoundAt|JensenHadamardData|jensenEntire_order|
+  hadamardData_|polya_full_conditional|GenusOneRealRooted_of|jensenEntire_norm_le|
+  taylorCoeff_abs_le`): zero repo hits before writing.
+
+Proved below, APPEND-ONLY, FULL proofs, no `sorry`/`admit`/`axiom`:
+1. `jensenEntire_sphere_bound_one`: `xiMathlibShifted` is bounded on `‖z‖ = 1`.
+2. `taylorCoeff_abs_le_sphere_one`: `|γₖ| ≤ |C|` (Cauchy at fixed `R = 1`).
+3. `jensenEntire_norm_le_exp`: `‖jensenEntire z‖ ≤ |C| * Real.exp ‖z‖`.
+4. `jensenEntire_order_le_one` / `jensenEntire_order_lt_two`: the ORDER hypothesis
+   — `jensenEntire` satisfies an order-`1 < 2` bound (growth ⇒ order<2, closed).
+5. `JensenHadamardData` (structure, DEFINITION): genus-1 product data for
+   `jensenEntire` (real nodes + `Summable 1/nodes²` certificate + lead/slope +
+   `HasProd` identity), mirroring `GenusOneData` minus the analytic residuals.
+6. `hadamardData_partials_hyperbolic`: genus-1 data supplies everything the
+   `section_link` RHS needs (finite real-rooted products + Gauss–Lucas + scaling).
+7. `hadamardData_to_genusOneData` + `GenusOneRealRooted_of_hadamardData` +
+   `genusOne_forward_of_hadamardData` + `polya_full_conditional`: wiring into
+   `GenusOneData` / `genusOne_forward` with every remaining premise explicit.
+
+Honest residual (named premises, NOT assumed — each appears as an explicit
+hypothesis of `polya_full_conditional` except the discharged order bound):
+- (R1) `JensenHadamardData` itself (Hadamard existence for `jensenEntire`):
+  needs a zero enumeration + simplicity + `Summable 1/‖a‖²` + escape for
+  `jensenEntire`, i.e. an application of a general Hadamard genus theorem that
+  exists nowhere in Mathlib or the repo (only the `xi`-specific
+  `hadamard_factorization_genus_one`, whose zeros are `xi`'s, not `jensenEntire`'s).
+- (R2) `zeros_real`: `jensenEntire` real-rooted (the RH-content for `E`).
+- (R3) `coeff_ne` for `k ≥ 1` (only `k = 0` is closed via `taylorCoeff_zero_ne_zero`).
+- (R4) `section_link`: each `J_{D,0}` equals a nonzero scalar multiple of an
+  iterated derivative of a finite partial product. This is kept as an explicit
+  premise (not derived from the Hadamard identity) because it is a
+  coefficient-matching constraint: the Hadamard nodes are fixed globally while
+  the equality imposes `D+1` coefficient equations per `D` — an overdetermined
+  system, not a formal consequence of the product identity. What IS proved is
+  that every such RHS polynomial is hyperbolic (`hadamardData_partials_hyperbolic`),
+  so `section_link` is isolated as the single equality premise consumed by
+  `genusOne_forward` via `genusOne_shiftZero_hyperbolic`.
+-/
+
+/-- Local order-bound predicate for an entire function, mirroring
+`ZeroFreeRegionHadamard.orderSet` (identical shape; defined here to avoid
+importing that module — see grep record above). -/
+def orderBoundAt (f : ℂ → ℂ) (ρ : ℝ) : Prop :=
+  ∃ C r₀ : ℝ, 0 < r₀ ∧ ∀ z : ℂ, r₀ ≤ ‖z‖ → ‖f z‖ ≤ C * Real.exp (‖z‖ ^ ρ)
+
+/-- `xiMathlibShifted` is bounded on the unit sphere (compactness + continuity,
+same pattern as `taylorCoeff_summable_of_orderBound`). -/
+theorem jensenEntire_sphere_bound_one :
+    ∃ C : ℝ, ∀ z ∈ Metric.sphere (0 : ℂ) 1, ‖_root_.xiMathlibShifted z‖ ≤ C :=
+  (isCompact_sphere (0 : ℂ) 1).exists_bound_of_continuousOn
+    (xiMathlibShifted_differentiable_aux.continuous.continuousOn)
+
+/-- Coefficient growth at fixed radius `R = 1`: `|γₖ| ≤ |C|`
+(Cauchy estimate `taylorCoeff_cauchy_bound`, no Stirling, no per-`k` optimization). -/
+theorem taylorCoeff_abs_le_sphere_one (C : ℝ)
+    (hC : ∀ z ∈ Metric.sphere (0 : ℂ) 1, ‖_root_.xiMathlibShifted z‖ ≤ C)
+    (k : ℕ) : |taylorCoeff k| ≤ |C| := by
+  have h := taylorCoeff_cauchy_bound (1 : ℝ) one_pos C hC k
+  simpa using h
+
+/-- Exponential majorant for the associated Jensen entire function:
+`‖jensenEntire z‖ ≤ |C| * Real.exp ‖z‖` (order `≤ 1`). -/
+theorem jensenEntire_norm_le_exp (C : ℝ)
+    (hC : ∀ z ∈ Metric.sphere (0 : ℂ) 1, ‖_root_.xiMathlibShifted z‖ ≤ C)
+    (z : ℂ) : ‖jensenEntire z‖ ≤ |C| * Real.exp ‖z‖ := by
+  have hγ : ∀ k : ℕ, |taylorCoeff k| ≤ |C| :=
+    fun k => taylorCoeff_abs_le_sphere_one C hC k
+  have hmajor : Summable (fun k : ℕ => |C| * (‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ))) :=
+    (Real.summable_pow_div_factorial ‖z‖).mul_left |C|
+  have hterm : ∀ k : ℕ,
+      ‖limitTerm k z‖ ≤ |C| * (‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ)) := by
+    intro k
+    have hFactPos : (0 : ℝ) < (((Nat.factorial k : ℕ)) : ℝ) :=
+      Nat.cast_pos.mpr (Nat.factorial_pos k)
+    have hNormEq : ‖limitTerm k z‖
+        = 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| * ‖z‖ ^ k := by
+      unfold limitTerm
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, norm_pow]
+      have hAbs : |(1 / (((Nat.factorial k : ℕ)) : ℝ) * taylorCoeff k : ℝ)|
+          = 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| := by
+        rw [abs_mul, abs_of_nonneg (div_nonneg zero_le_one (le_of_lt hFactPos))]
+      rw [hAbs]
+    calc ‖limitTerm k z‖
+        = 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| * ‖z‖ ^ k := hNormEq
+      _ ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * |C| * ‖z‖ ^ k := by
+          have h1 : 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k|
+              ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * |C| :=
+            mul_le_mul_of_nonneg_left (hγ k)
+              (div_nonneg zero_le_one (le_of_lt hFactPos))
+          exact mul_le_mul_of_nonneg_right h1 (pow_nonneg (norm_nonneg z) k)
+      _ = |C| * (‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ)) := by ring
+  have hsum_lim : Summable (fun k : ℕ => limitTerm k z) :=
+    jensenEntire_summable_of_orderBound ‖z‖ z le_rfl
+  have hsum_norm : Summable (fun k : ℕ => ‖limitTerm k z‖) := by
+    apply hmajor.of_norm_bounded
+    intro k
+    rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    exact hterm k
+  -- cf. Mathlib/Combinatorics/Derangements/Exponential.lean:42-43
+  have hexp : HasSum (fun k : ℕ => ‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ))
+      (Real.exp ‖z‖) := by
+    rw [Real.exp_eq_exp_ℝ]
+    exact NormedSpace.expSeries_div_hasSum_exp _
+  have htsum_major : (∑' k : ℕ, |C| * (‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ)))
+      = |C| * Real.exp ‖z‖ := by
+    rw [tsum_mul_left, hexp.tsum_eq]
+  calc ‖jensenEntire z‖ = ‖∑' k : ℕ, limitTerm k z‖ := rfl
+    _ ≤ ∑' k : ℕ, ‖limitTerm k z‖ := norm_tsum_le_tsum_norm hsum_norm
+    _ ≤ ∑' k : ℕ, |C| * (‖z‖ ^ k / (((Nat.factorial k : ℕ)) : ℝ)) :=
+        Summable.tsum_le_tsum hterm hsum_norm hmajor
+    _ = |C| * Real.exp ‖z‖ := htsum_major
+
+/-- ORDER discharged: `jensenEntire` has order at most `1`
+(growth ⇒ order bound, unconditional). -/
+theorem jensenEntire_order_le_one : orderBoundAt jensenEntire 1 := by
+  obtain ⟨C, hC⟩ := jensenEntire_sphere_bound_one
+  exact ⟨|C|, 1, one_pos, fun z _ => by
+    rw [Real.rpow_one]
+    exact jensenEntire_norm_le_exp C hC z⟩
+
+/-- ORDER discharged in `< 2` form: the order hypothesis feeding any
+Hadamard genus-`≤ 1` argument for `jensenEntire`. -/
+theorem jensenEntire_order_lt_two :
+    ∃ ρ : ℝ, ρ < 2 ∧ orderBoundAt jensenEntire ρ :=
+  ⟨1, by norm_num, jensenEntire_order_le_one⟩
+
+/-- Genus-1 Hadamard product data for `jensenEntire` (a DEFINITION, zero sorrys):
+real nodes, the genus-1 convergence certificate (`Summable 1/nodes²`), lead/slope,
+and the product limit identity — exactly the `GenusOneData` fields minus the
+analytic residuals (`zeros_real`, `coeff_ne`, `section_link`), which stay explicit
+premises (see residual R1–R4 above). -/
+structure JensenHadamardData where
+  nodes : ℕ → ℝ
+  nodes_ne : ∀ n, nodes n ≠ 0
+  genus_cert : Summable (fun n : ℕ => (1 : ℝ) / (nodes n) ^ 2)
+  lead : ℝ
+  lead_ne : lead ≠ 0
+  slope : ℝ
+  hadamard : ∀ z : ℂ, HasProd
+    (fun n : ℕ => (1 - z / ((nodes n : ℝ) : ℂ)) * Complex.exp (z / ((nodes n : ℝ) : ℂ)))
+    (jensenEntire z / (Complex.exp ((slope : ℂ) * z) * ((lead : ℂ))))
+
+/-- Genus-1 data supplies everything the `section_link` RHS needs: every nonzero
+scalar multiple of an iterated derivative of a finite partial product is
+hyperbolic (finite real-rooted products + iterated Gauss–Lucas + scaling). -/
+theorem hadamardData_partials_hyperbolic (H : JensenHadamardData) (N m : ℕ)
+    (hdeg : m ≤ (hadamardPartial H.nodes N).natDegree) (c : ℂ) (hc : c ≠ 0) :
+    Hyperbolic (Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial H.nodes N)) :=
+  Hyperbolic_const_mul hc
+    (hyperbolic_iterate_derivative m (hadamardPartial_hyperbolic H.nodes N) hdeg)
+
+/-- Wiring into `GenusOneData` as far as honestly possible: Hadamard data plus the
+three named analytic residuals assembles the full genus-one package. -/
+def hadamardData_to_genusOneData (H : JensenHadamardData)
+    (hzeros : ∀ z : ℂ, jensenEntire z = 0 → z.im = 0)
+    (hcoeff : ∀ k, taylorCoeff k ≠ 0)
+    (hlink : ∀ D : ℕ, ∃ N m : ℕ, ∃ c : ℂ, c ≠ 0 ∧
+      m ≤ (hadamardPartial H.nodes N).natDegree ∧
+      jensenPoly D 0 = Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial H.nodes N)) :
+    GenusOneData :=
+  { nodes := H.nodes,
+    nodes_ne := H.nodes_ne,
+    genus_cert := H.genus_cert,
+    lead := H.lead,
+    lead_ne := H.lead_ne,
+    slope := H.slope,
+    hadamard := H.hadamard,
+    zeros_real := hzeros,
+    coeff_ne := hcoeff,
+    section_link := hlink }
+
+/-- `GenusOneRealRooted` from Hadamard data + the three named residuals. -/
+theorem GenusOneRealRooted_of_hadamardData (H : JensenHadamardData)
+    (hzeros : ∀ z : ℂ, jensenEntire z = 0 → z.im = 0)
+    (hcoeff : ∀ k, taylorCoeff k ≠ 0)
+    (hlink : ∀ D : ℕ, ∃ N m : ℕ, ∃ c : ℂ, c ≠ 0 ∧
+      m ≤ (hadamardPartial H.nodes N).natDegree ∧
+      jensenPoly D 0 = Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial H.nodes N)) :
+    GenusOneRealRooted :=
+  ⟨hadamardData_to_genusOneData H hzeros hcoeff hlink⟩
+
+/-- Pólya direction from Hadamard data: all Jensen sections hyperbolic,
+conditional on exactly the three named residuals. -/
+theorem genusOne_forward_of_hadamardData (H : JensenHadamardData)
+    (hzeros : ∀ z : ℂ, jensenEntire z = 0 → z.im = 0)
+    (hcoeff : ∀ k, taylorCoeff k ≠ 0)
+    (hlink : ∀ D : ℕ, ∃ N m : ℕ, ∃ c : ℂ, c ≠ 0 ∧
+      m ≤ (hadamardPartial H.nodes N).natDegree ∧
+      jensenPoly D 0 = Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial H.nodes N)) :
+    ∀ d n, Hyperbolic (jensenPoly d n) :=
+  genusOne_forward (GenusOneRealRooted_of_hadamardData H hzeros hcoeff hlink)
+
+/-- Master conditional: the ORDER premise is discharged (`jensenEntire_order_lt_two`)
+while hyperbolicity is conditional on exactly R1 (the `JensenHadamardData` argument)
++ R2 (`hzeros`) + R3 (`hcoeff`, only `k = 0` closed) + R4 (`hlink`). -/
+theorem polya_full_conditional (H : JensenHadamardData)
+    (hzeros : ∀ z : ℂ, jensenEntire z = 0 → z.im = 0)
+    (hcoeff : ∀ k, taylorCoeff k ≠ 0)
+    (hlink : ∀ D : ℕ, ∃ N m : ℕ, ∃ c : ℂ, c ≠ 0 ∧
+      m ≤ (hadamardPartial H.nodes N).natDegree ∧
+      jensenPoly D 0 = Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial H.nodes N)) :
+    (∃ ρ : ℝ, ρ < 2 ∧ orderBoundAt jensenEntire ρ) ∧
+      ∀ d n, Hyperbolic (jensenPoly d n) :=
+  ⟨jensenEntire_order_lt_two,
+    genusOne_forward_of_hadamardData H hzeros hcoeff hlink⟩
+
+#print axioms JensenRH.jensenEntire_norm_le_exp
+#print axioms JensenRH.jensenEntire_order_le_one
+#print axioms JensenRH.jensenEntire_order_lt_two
+#print axioms JensenRH.hadamardData_partials_hyperbolic
+#print axioms JensenRH.hadamardData_to_genusOneData
+#print axioms JensenRH.genusOne_forward_of_hadamardData
+#print axioms JensenRH.polya_full_conditional
+
+end JensenRH
