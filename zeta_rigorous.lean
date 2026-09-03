@@ -2867,3 +2867,269 @@ theorem zetaCellS0_r_1048576_gt :
 #print axioms zetaCellS0_r_2097152_le
 #print axioms zetaCellS0_tail_2097152_le
 #print axioms zetaCellS0_r_1048576_gt
+
+/-!
+## Central-cover identity: `∑' pairs = etaHurwitz` on `{Re > 0}` (identity theorem).
+
+GOAL (docs §18b.10 zeta bullet residual, lemma (a) blocking every cell's `Azeta`):
+prove `∑' m, etaPairTerm s m = etaHurwitz s` at the central-cover cell centers
+(`s.re ∈ {0.395, 0.3, 0.2, 0.105}`, all in `{Re > 0}`), outside every existing
+pair-limit lemma's domain (`etaPairLim_eq_of_one_lt_re` needs `1 < s.re`;
+`etaPairLim_half` / `etaTendsto_eq_etaHurwitz` need `s = 1/2`).
+
+ROUTE: `G(s) = ∑' m, etaPairTerm s m` is analytic on `{Re > 0}` (locally uniform
+convergence from the paired M-test tail bound — E's `r(M)` majorant, here in the
+uniform-on-ball form `C * (m+1)^{-σ₀-1}`) and agrees with `etaHurwitz` on
+`{Re > 1}` (via `etaPairLim_eq_of_one_lt_re`); the identity theorem extends
+equality to all of `{Re > 0}`, covering every center.
+
+GREP DOCUMENTATION (searches run before writing; repo + Mathlib):
+* `dirichletEta` — no Mathlib hit (confirmed pre-existing gap; this file's
+  `etaDirichletTerm` / `etaPairTerm` / `etaHurwitz` mirror is the API, no import).
+* `differentiableOn_tsum_of_summable_norm` — found in
+  `Mathlib/Analysis/Complex/LocallyUniformLimit.lean:171` (already used by
+  `analyticOn_etaPairLim_ball` in this file); reused below for the `{Re > 0}` ball.
+* `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` — found in
+  `Mathlib/Analysis/Analytic/Uniqueness.lean:223` (already used by
+  `etaPairLim_eq_etaHurwitz_ball` and `etaHurwitz_eq_etaRHS_compl`); reused below.
+* `Convex.isPreconnected` — found in `Mathlib/Analysis/Convex/PathConnected.lean:95`
+  (needs `Convex ℝ s`); proved for `{Re > 0}` below.
+* `convex_iff_add_mem` — found in `Mathlib/Analysis/Convex/Basic.lean:71`.
+* `Real.summable_nat_rpow_inv`, `summable_nat_add_iff` — already used in this file
+  (`summable_etaPairTerm`, `etaPair_majorant_summable`, `zetaCell_majorant_*`);
+  same pattern reused for the local majorant (no duplication of Mathlib).
+* `Real.rpow_le_rpow_of_exponent_le`, `Real.rpow_le_rpow_of_nonpos`,
+  `Real.rpow_neg`, `Real.rpow_nonneg` — already used in this file
+  (`etaPair_bound_ball`, `summable_etaPairTerm`); same pattern reused.
+* `Complex.continuous_re`, `isOpen_Ioi`, `Complex.abs_re_le_norm`, `Complex.sub_re`,
+  `Complex.add_re`, `Complex.smul_re`, `smul_eq_mul`, `Metric.isOpen_ball`,
+  `dist_eq_norm` — all pre-existing Mathlib + already used in this file
+  (`hre_ball`, `hnorm_ball`, `etaPairLim_eq_etaHurwitz_ball`); reused.
+* `zetaCellS0`, `zetaCellS0_pos`, `norm_etaPairTerm_le`, `etaPairTerm_differentiable`,
+  `etaPairLim_eq_of_one_lt_re`, `analytic_etaHurwitz`, `coe_three_half_eq` —
+  all in this file (read-only reuse, no modification).
+* Import graph: this file imports only `Mathlib`; no new imports below
+  (avoids cycles with `interval_arith` / `central_cover_assembly`).
+
+WHAT IS PROVED (all unconditional, no `sorry`/`admit`/`axiom`/hypotheses):
+* (1) Analyticity: `rePos_isOpen`, `rePos_convex`, `rePos_isPreconnected`,
+  `etaPair_local_radius_pos`, `etaPair_local_mem_bounds`,
+  `etaPair_local_majorant_summable`, `etaPair_local_bound`, `etaPair_local_diffOn`,
+  `differentiableOn_etaPairG_rePos`, `analytic_etaPairG_rePos`,
+  `analytic_etaHurwitz_rePos`.
+* (2) Identity step: `etaPairG_eq_etaHurwitz_rePos`
+  (`EqOn` on `{Re > 0}` from agreement on `{Re > 1}` at `z₀ = 3/2`).
+* (3) Corner/general: `etaPairLim_eq_etaHurwitz_of_pos` (all `0 < s.re`),
+  `etaPairLim_eq_etaHurwitz_cellS0` (R00 corner `zetaCellS0`),
+  `etaPairLim_eq_etaHurwitz_cellCenter` (every center with
+  `s.re ∈ {0.395, 0.3, 0.2, 0.105}`).
+-/
+
+/-- `{Re > 0}` is open (preimage of `Ioi 0` under continuous `Re`). -/
+theorem rePos_isOpen : IsOpen {s : ℂ | 0 < s.re} := by
+  have h : IsOpen (Complex.re ⁻¹' Set.Ioi (0 : ℝ)) :=
+    Complex.continuous_re.isOpen_preimage _ isOpen_Ioi
+  have heq : {s : ℂ | 0 < s.re} = Complex.re ⁻¹' Set.Ioi (0 : ℝ) := by
+    ext x
+    simp
+  rw [heq]
+  exact h
+
+/-- `{Re > 0}` is convex (real convex combination preserves `Re > 0`). -/
+theorem rePos_convex : Convex ℝ {s : ℂ | 0 < s.re} := by
+  rw [convex_iff_add_mem]
+  intro x hx y hy a b ha hb hab
+  have hx' : (0 : ℝ) < x.re := hx
+  have hy' : (0 : ℝ) < y.re := hy
+  have hre : (a • x + b • y).re = a * x.re + b * y.re := by
+    rw [Complex.add_re, Complex.smul_re, Complex.smul_re, smul_eq_mul, smul_eq_mul]
+  show (0 : ℝ) < (a • x + b • y).re
+  rw [hre]
+  by_cases ha0 : a = 0
+  · subst ha0
+    have hb1 : b = 1 := by linarith
+    rw [hb1]
+    simpa using hy'
+  · have ha' : (0 : ℝ) < a := lt_of_le_of_ne ha (Ne.symm ha0)
+    have h1 : (0 : ℝ) < a * x.re := mul_pos ha' hx'
+    have h2 : (0 : ℝ) ≤ b * y.re := mul_nonneg hb (le_of_lt hy')
+    exact add_pos_of_pos_of_nonneg h1 h2
+
+/-- `{Re > 0}` is preconnected (from convexity). -/
+theorem rePos_isPreconnected : IsPreconnected {s : ℂ | 0 < s.re} :=
+  rePos_convex.isPreconnected
+
+/-- Local radius `min (Re/2) 1` is positive on `{Re > 0}`. -/
+theorem etaPair_local_radius_pos {s0 : ℂ} (hs0 : 0 < s0.re) :
+    0 < min (s0.re / 2) 1 :=
+  lt_min (by linarith) (by norm_num)
+
+/-- On the local ball, `Re` stays `≥ Re₀/2` and the norm stays `≤ ‖s₀‖+1`. -/
+theorem etaPair_local_mem_bounds {s0 w : ℂ} (_hs0 : 0 < s0.re)
+    (hw : w ∈ Metric.ball s0 (min (s0.re / 2) 1)) :
+    s0.re / 2 ≤ w.re ∧ ‖w‖ ≤ ‖s0‖ + 1 := by
+  have hr_half : min (s0.re / 2) 1 ≤ s0.re / 2 := min_le_left _ _
+  have hr_one : min (s0.re / 2) 1 ≤ 1 := min_le_right _ _
+  have hw_norm : ‖w - s0‖ < min (s0.re / 2) 1 := by
+    rw [Metric.mem_ball, dist_eq_norm] at hw
+    exact hw
+  have habs := Complex.abs_re_le_norm (w - s0)
+  have hre_sub : (w - s0).re = w.re - s0.re := Complex.sub_re _ _
+  rw [hre_sub, abs_le] at habs
+  have hre_ge : s0.re / 2 ≤ w.re := by linarith [habs.1, hw_norm, hr_half]
+  have hnorm_le : ‖w‖ ≤ ‖s0‖ + 1 := by
+    have e : w = s0 + (w - s0) := by ring
+    have hle1 : ‖w - s0‖ ≤ 1 := le_trans (le_of_lt hw_norm) hr_one
+    calc ‖w‖ = ‖s0 + (w - s0)‖ := by conv_lhs => rw [e]
+      _ ≤ ‖s0‖ + ‖w - s0‖ := norm_add_le _ _
+      _ ≤ ‖s0‖ + 1 := by linarith
+  exact ⟨hre_ge, hnorm_le⟩
+
+/-- Local uniform summable majorant `C * (m+1)^{-σ₀-1}` with `C = ‖s₀‖+1`,
+    `σ₀ = Re₀/2` (M-test; same `rpow_inv` + `nat_add_iff` pattern as
+    `summable_etaPairTerm` / `zetaCell_majorant_summable_shift`). -/
+theorem etaPair_local_majorant_summable {s0 : ℂ} (hs0 : 0 < s0.re) :
+    Summable (fun m : ℕ => (‖s0‖ + 1) * ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1))) := by
+  have hp1 : (1 : ℝ) < s0.re / 2 + 1 := by linarith
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (s0.re / 2 + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (s0.re / 2 + 1))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1))) =
+      (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (s0.re / 2 + 1))⁻¹) := by
+    funext m
+    have eR : -(s0.re / 2) - 1 = -(s0.re / 2 + 1) := by ring
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  have hbaseS : Summable (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1))) := by
+    rw [heq]
+    exact hshift
+  exact hbaseS.mul_left _
+
+set_option maxHeartbeats 800000 in
+/-- Pointwise uniform bound on the local ball (MVT pair bound + two `rpow`
+    monotonicities; same pattern as `etaPair_bound_ball`). -/
+theorem etaPair_local_bound {s0 : ℂ} (hs0 : 0 < s0.re) (m : ℕ) (w : ℂ)
+    (hw : w ∈ Metric.ball s0 (min (s0.re / 2) 1)) :
+    ‖etaPairTerm w m‖ ≤ (‖s0‖ + 1) * ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1)) := by
+  obtain ⟨hre_ge, hnorm_le⟩ := etaPair_local_mem_bounds hs0 hw
+  have hs_pos : 0 < w.re := lt_of_lt_of_le (by linarith : (0 : ℝ) < s0.re / 2) hre_ge
+  have hle1 := norm_etaPairTerm_le w hs_pos m
+  have ha1 : (1 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    exact_mod_cast (show 1 ≤ 2 * m + 1 by omega)
+  have hm_pos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp_le : -w.re - 1 ≤ -(s0.re / 2) - 1 := by linarith
+  have hexp_nonpos : -(s0.re / 2) - 1 ≤ 0 := by linarith
+  have hstep1 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-w.re - 1))
+      ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1)) :=
+    Real.rpow_le_rpow_of_exponent_le ha1 hexp_le
+  have hstep2 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1))
+      ≤ ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1)) :=
+    Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp_nonpos
+  have hpow_le : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-w.re - 1))
+      ≤ ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1)) :=
+    le_trans hstep1 hstep2
+  have hC0 : (0 : ℝ) ≤ ‖s0‖ + 1 := add_nonneg (norm_nonneg _) (by norm_num)
+  have hpow_nn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-w.re - 1)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  calc ‖etaPairTerm w m‖ ≤ ‖w‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-w.re - 1)) := hle1
+    _ ≤ (‖s0‖ + 1) * ((((m + 1 : ℕ)) : ℝ) ^ (-(s0.re / 2) - 1)) :=
+        mul_le_mul hnorm_le hpow_le hpow_nn hC0
+
+set_option maxHeartbeats 800000 in
+/-- `G` is differentiable on each local ball (Weierstrass M-test tsum). -/
+theorem etaPair_local_diffOn {s0 : ℂ} (hs0 : 0 < s0.re) :
+    DifferentiableOn ℂ (fun s => ∑' m, etaPairTerm s m)
+      (Metric.ball s0 (min (s0.re / 2) 1)) :=
+  Complex.differentiableOn_tsum_of_summable_norm
+    (etaPair_local_majorant_summable hs0)
+    (fun m => (etaPairTerm_differentiable m).differentiableOn)
+    Metric.isOpen_ball
+    (fun m w hw => etaPair_local_bound hs0 m w hw)
+
+/-- (1) ANALYTICITY: `G(s) = ∑' pairs` is differentiable on all of `{Re > 0}`
+    (local balls give `DifferentiableAt` at each point, hence `WithinAt`). -/
+theorem differentiableOn_etaPairG_rePos :
+    DifferentiableOn ℂ (fun s => ∑' m, etaPairTerm s m) {s : ℂ | 0 < s.re} := by
+  intro x hx
+  have hx' : (0 : ℝ) < x.re := hx
+  have hrPos : 0 < min (x.re / 2) 1 := etaPair_local_radius_pos hx'
+  have hDiffBall := etaPair_local_diffOn hx'
+  have hxBall : x ∈ Metric.ball x (min (x.re / 2) 1) := by
+    rw [Metric.mem_ball, dist_self]
+    exact hrPos
+  have hAt : DifferentiableAt ℂ (fun s => ∑' m, etaPairTerm s m) x :=
+    hDiffBall.differentiableAt (Metric.isOpen_ball.mem_nhds hxBall)
+  exact hAt.differentiableWithinAt
+
+/-- (1) ANALYTICITY (analytic form): `G` is analytic on `{Re > 0}`. -/
+theorem analytic_etaPairG_rePos :
+    AnalyticOnNhd ℂ (fun s => ∑' m, etaPairTerm s m) {s : ℂ | 0 < s.re} :=
+  differentiableOn_etaPairG_rePos.analyticOnNhd rePos_isOpen
+
+/-- `etaHurwitz` is analytic on `{Re > 0}` (restriction of the entire function). -/
+theorem analytic_etaHurwitz_rePos :
+    AnalyticOnNhd ℂ etaHurwitz {s : ℂ | 0 < s.re} :=
+  analytic_etaHurwitz.mono (Set.subset_univ _)
+
+set_option maxHeartbeats 800000 in
+/-- (2) IDENTITY STEP: `G = etaHurwitz` on all of `{Re > 0}`.
+    Both sides are analytic there (above); they agree on `{Re > 1}`
+    (`etaPairLim_eq_of_one_lt_re`) which is a neighborhood of `z₀ = 3/2`,
+    so `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq` extends equality. -/
+theorem etaPairG_eq_etaHurwitz_rePos :
+    Set.EqOn (fun s => ∑' m, etaPairTerm s m) etaHurwitz {s : ℂ | 0 < s.re} := by
+  have hU : IsPreconnected {s : ℂ | 0 < s.re} := rePos_isPreconnected
+  have hz0 : ((3 / 2 : ℂ)) ∈ {s : ℂ | 0 < s.re} := by
+    show (0 : ℝ) < ((3 / 2 : ℂ)).re
+    rw [coe_three_half_eq, Complex.ofReal_re]
+    norm_num
+  refine AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq (𝕜 := ℂ)
+    analytic_etaPairG_rePos analytic_etaHurwitz_rePos hU hz0 ?_
+  have hOpen1 : IsOpen (Complex.re ⁻¹' Set.Ioi (1 : ℝ)) :=
+    Complex.continuous_re.isOpen_preimage _ isOpen_Ioi
+  have hmem : (Complex.re ⁻¹' Set.Ioi (1 : ℝ)) ∈ 𝓝 ((3 / 2 : ℂ)) := by
+    apply hOpen1.mem_nhds
+    simp only [Set.mem_preimage, Set.mem_Ioi, coe_three_half_eq, Complex.ofReal_re]
+    norm_num
+  refine eventually_of_mem hmem (fun t ht => ?_)
+  have ht1 : (1 : ℝ) < t.re := by simpa using ht
+  exact etaPairLim_eq_of_one_lt_re ht1
+
+/-- (3) GENERAL CENTER EQUALITY: pairs-tsum equals `etaHurwitz` at every
+    `s` with `0 < s.re` (covers all central-cover centers
+    `s.re ∈ {0.395, 0.3, 0.2, 0.105}`). -/
+theorem etaPairLim_eq_etaHurwitz_of_pos {s : ℂ} (hs : 0 < s.re) :
+    (∑' m, etaPairTerm s m) = etaHurwitz s :=
+  etaPairG_eq_etaHurwitz_rePos (by simpa using hs)
+
+/-- (3) R00 CORNER: pairs-tsum equals `etaHurwitz` at `zetaCellS0`. -/
+theorem etaPairLim_eq_etaHurwitz_cellS0 :
+    (∑' m, etaPairTerm zetaCellS0 m) = etaHurwitz zetaCellS0 :=
+  etaPairLim_eq_etaHurwitz_of_pos zetaCellS0_pos
+
+/-- (3) ALL CENTRAL-COVER CENTERS: explicit disjunction over the four
+    `Re`-values occurring at cell centers. -/
+theorem etaPairLim_eq_etaHurwitz_cellCenter {s : ℂ}
+    (hs : s.re = 0.395 ∨ s.re = 0.3 ∨ s.re = 0.2 ∨ s.re = 0.105) :
+    (∑' m, etaPairTerm s m) = etaHurwitz s := by
+  have hpos : 0 < s.re := by
+    rcases hs with h | h | h | h <;> rw [h] <;> norm_num
+  exact etaPairLim_eq_etaHurwitz_of_pos hpos
+
+#print axioms rePos_isOpen
+#print axioms rePos_convex
+#print axioms rePos_isPreconnected
+#print axioms etaPair_local_radius_pos
+#print axioms etaPair_local_mem_bounds
+#print axioms etaPair_local_majorant_summable
+#print axioms etaPair_local_bound
+#print axioms etaPair_local_diffOn
+#print axioms differentiableOn_etaPairG_rePos
+#print axioms analytic_etaPairG_rePos
+#print axioms analytic_etaHurwitz_rePos
+#print axioms etaPairG_eq_etaHurwitz_rePos
+#print axioms etaPairLim_eq_etaHurwitz_of_pos
+#print axioms etaPairLim_eq_etaHurwitz_cellS0
+#print axioms etaPairLim_eq_etaHurwitz_cellCenter
