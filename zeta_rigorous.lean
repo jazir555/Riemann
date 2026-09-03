@@ -4586,3 +4586,262 @@ theorem zetaFE_refl_eq_S0 :
 #print axioms zetaCellS0_ne_neg_nat
 #print axioms zetaCellS0_ne_one
 #print axioms zetaFE_refl_eq_S0
+
+/-!
+## Reflected `Azeta1` conditional closure + exact wall (`s1 = 1 - s0`, `Re = 0.605`).
+
+GOAL (brief 2026-09-03): honest lower bound `‖ζ(1-s0)‖ ≥ Azeta1`, `Azeta1 > 0`
+explicit, WITHOUT explicit 1k+ partial sums.
+
+GREP-FIRST RECORD (searches run before writing; repo + Mathlib):
+* `zetaCellS0`, `zetaRefl_*`, `zeta_lower_of_Sn_tail_factor`, `zetaFE_refl_eq_S0`,
+  `zetaFE_factor_upper_S0`, `two_cpow_norm`, `zetaCellS0_rpow_0605_le`,
+  `Real.rpow_le_rpow_of_exponent_le`, `inv_le_inv₀`, `div_le_div_of_nonneg_right`,
+  `Real.rpow_neg`, `div_le_iff₀`, `lt_div_iff₀` -- all in this file (read-only
+  reuse, patterns mirrored verbatim); no `Azeta1`/`S1refl_factor_upper` existed
+  (`Azeta1` -- 0 hits before writing).
+* Cancellation-tail material in Mathlib: ABSENT (`Kuzmin|kuzmin|van der
+  Corput|corput|exponent pair` -- 0 hits in `Mathlib/`). A partial-summation /
+  exponential-sum tail improvement would need this built from scratch (~300+
+  lines: dyadic blocks + Kuzmin-Landau + Abel summation for
+  `∑ (2m+1)^{-s} - (2m+2)^{-s}` with phase `t = 8.75`); not attempted here.
+* Lower bounds on `‖riemannZeta‖`: ABSENT (`norm (riemannZeta|...lower...` --
+  0 hits in `Mathlib/NumberTheory/LSeries/`). No Mathlib lower bound to call.
+* Base-monotone rpow EXISTS: `Real.rpow_le_rpow (h : 0 ≤ x) (h₁ : x ≤ y)
+  (h₂ : 0 ≤ z)` (`Mathlib/Analysis/SpecialFunctions/Pow/Real.lean:548`);
+  exponent-mono `Real.rpow_le_rpow_of_exponent_le` (`:615`); `mul_inv_lt_iff₀`
+  (`Mathlib/Algebra/Order/GroupWithZero/Basic.lean:1130`).
+* `zeta_of_etaPairLim_cellCenter` covers only `Re ∈ {0.395,0.3,0.2,0.105}`,
+  so `s1` (`Re = 0.605`) goes through the existing `zeta_of_etaPairLim_S1refl`
+  instance + the general feeder `zeta_lower_of_Sn_tail_factor` (same bridge).
+* Import graph: no new imports (still `Mathlib`-only).
+
+VERDICT: unconditional `Azeta1` is INFEASIBLE in one session (see numbers).
+Proved instead (all unconditional, no sorry/admit/axiom):
+* (a) factor upper at `s1`: `etaFactor_upper_S1refl` (`‖1-2^{s0}‖ ≤ 13/5`,
+  via new `zetaCellS0_rpow_0395_le`: `2^0.395 ≤ 2^0.605 ≤ 8/5`).
+* (b) exact wall biconditional: `zetaRefl_wall_threshold_iff`
+  (`r(M) < 1/3 ↔ 6000/121 < M^0.605`, since `30/0.605 = 6000/121`).
+* (c) SUFFICIENCY at `M = 1024` (`N = 2048`): `zetaRefl_M1024_rpow_ge`
+  (`1024^0.605 ≥ 1024^{3/5} = 2^6 = 64`, powers of two),
+  `zetaRefl_r_1024_le` (`r ≤ 4/15`), `zetaRefl_tail_1024_le` (`‖G-S‖ ≤ 4/15`).
+* (d) NECESSITY for `M ≤ 343`: `zetaRefl_M343_rpow_le`
+  (`343^0.605 ≤ 343^{2/3} = 7^2 = 49 ≤ 6000/121`, exact cubes),
+  `zetaRefl_wall_necessity` (`1 ≤ M ≤ 343 → r(M) ≥ 1/3`: no such `M` closes
+  with `slow = 1/3`; ≥ 344 pairs = 688 terms needed). Plus small-`M` anchor
+  `zetaRefl_r_1_ge` (`r(1) ≥ 16`: bound value `10/0.605 ≈ 16.53`, upper `≤ 17`
+  is `zetaRefl_tail_1_le`).
+* (e) CONDITIONAL closure: `zeta_S1_lower_of_S2048`
+  (`‖S_{2048}(s1)‖ ≥ 1/3 → 1/39 ≤ ‖ζ(s1)‖`, since
+  `(1/3 - 4/15)/(13/5) = 1/39`) and downstream `zeta_S0_lower_of_S1`
+  (`1/39 ≤ ‖ζ(s1)‖ → 1/2340000000 ≤ ‖ζ(s0)‖`, via `zetaFE_refl_eq_S0` +
+  `‖F‖ ≤ 6e7`; i.e. `Azeta = Azeta1/6e7`).
+
+NUMBERS (python-verified, non-rigorous scratch for the report only):
+* threshold `M^0.605 > 30/0.605 = 49.586776…`; `634^0.605 ≈ 49.5751` (fails,
+  margin 0.02%), `635^0.605 ≈ 49.6224` (works, margin 0.07%): true minimal
+  `M = 635` (`N = 1270`). Proved bracket here: `[344, 1024]`.
+* `343^0.605 ≈ 34.19` (proved upper `49` loose but sufficient);
+  `1024^0.605 ≈ 66.26` (proved lower `64`); `r(1024) ≈ 0.2494 ≤ 4/15`.
+* true `|G(s1)| ≈ 0.5627` (200k-term eta sum, tail ~1e-3), `|1-2^s0| ≈ 0.4019`,
+  `|ζ(s1)| ≈ 1.4000`: the premise `‖S_{2048}‖ ≥ 1/3` is TRUE with ~70% margin
+  (`S_{2048} ≈ G ± 1e-4`), the proved tail `4/15 ≈ 0.267` is ~2500× loose vs
+  the true tail (~1e-4) -- the whole gap is inter-pair phase cancellation the
+  triangle inequality cannot see. Any unconditional closure must capture it
+  (Kuzmin-Landau-type material, absent from Mathlib) or do rigorous complex
+  interval arithmetic (`cos`/`sin` of `8.75·log n` for `n ≤ 2048`).
+-/
+
+/-- `2^0.395 ≤ 8/5` (monotonicity + existing `0605` cap). -/
+theorem zetaCellS0_rpow_0395_le : (2 : ℝ) ^ (0.395 : ℝ) ≤ (8 / 5 : ℝ) :=
+  le_trans (Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num))
+    zetaCellS0_rpow_0605_le
+
+/-- Eta-factor upper at `s1 = 1 - s0`: `‖1 - 2^{1-s1}‖ ≤ 13/5`
+(`1 - s1 = s0`, `‖2^s0‖ = 2^0.395 ≤ 8/5`; mirrors `etaFactor_upper_S0`). -/
+theorem etaFactor_upper_S1refl :
+    ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - (1 - zetaCellS0)))‖ ≤ 13 / 5 := by
+  have hsub : ((1 : ℂ) - (1 - zetaCellS0)) = zetaCellS0 := by ring
+  rw [hsub]
+  have hY : ‖(2 : ℂ) ^ zetaCellS0‖ ≤ 8 / 5 := by
+    rw [two_cpow_norm, zetaCellS0_re]
+    exact zetaCellS0_rpow_0395_le
+  calc ‖(1 : ℂ) - (2 : ℂ) ^ zetaCellS0‖
+      ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ zetaCellS0‖ := norm_sub_le _ _
+    _ ≤ 13 / 5 := by rw [norm_one]; linarith [hY]
+
+/-- EXACT WALL (biconditional): `r(M) = 10·M^{-0.605}/0.605 < 1/3`
+iff `6000/121 < M^0.605` (`30/0.605 = 6000/121`). -/
+theorem zetaRefl_wall_threshold_iff {x : ℝ} (hx : 0 < x) :
+    (10 * ((x ^ (0.605 : ℝ))⁻¹) / (0.605 : ℝ) < (1 / 3 : ℝ)) ↔
+      ((6000 / 121 : ℝ) < x ^ (0.605 : ℝ)) := by
+  have hxp : (0 : ℝ) < x ^ (0.605 : ℝ) := Real.rpow_pos_of_pos hx _
+  have hK : (0 : ℝ) < (1 / 3 : ℝ) * 0.605 := by norm_num
+  rw [div_lt_iff₀ (by norm_num : (0 : ℝ) < 0.605), mul_inv_lt_iff₀ hxp]
+  have heq : (10 : ℝ) / ((1 / 3) * 0.605) = 6000 / 121 := by norm_num
+  rw [← heq, div_lt_iff₀ hK, mul_comm]
+
+/-- `((1024 : ℕ) : ℝ) = 2^10`. -/
+theorem zetaRefl_M1024_eq : ((((1024 : ℕ)) : ℝ)) = (2 : ℝ) ^ (10 : ℕ) := by
+  norm_num
+
+/-- `64 ≤ 1024^0.605` (`3/5 ≤ 0.605`, `(2^10)^{3/5} = 2^6`; mirrors
+`zetaCellS0_M2097152_rpow_ge`). -/
+theorem zetaRefl_M1024_rpow_ge :
+    (64 : ℝ) ≤ ((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)) := by
+  rw [zetaRefl_M1024_eq]
+  have h1 : (((2 : ℝ) ^ (10 : ℕ)) ^ (0.605 : ℝ)) =
+      (2 : ℝ) ^ (((((10 : ℕ)) : ℝ)) * (0.605 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have hexp_ge : (6 : ℝ) ≤ ((((10 : ℕ)) : ℝ)) * (0.605 : ℝ) := by norm_num
+  have h2 : (2 : ℝ) ^ (6 : ℝ) ≤ (2 : ℝ) ^ (((((10 : ℕ)) : ℝ)) * (0.605 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_ge
+  have e6 : (6 : ℝ) = ((((6 : ℕ)) : ℝ)) := by norm_num
+  have h3 : (2 : ℝ) ^ (6 : ℝ) = 64 := by
+    rw [e6, Real.rpow_natCast]
+    norm_num
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- `r(1024) = 10·1024^{-0.605}/0.605 ≤ 4/15`
+(`10/(64·0.605) = 0.258… ≤ 0.266…`; mirrors `zetaCellS0_r_2097152_le`). -/
+theorem zetaRefl_r_1024_le :
+    10 * ((((((1024 : ℕ)) : ℝ) ^ (-0.605 : ℝ))) / (0.605 : ℝ)) ≤ (4 / 15 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((1024 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := zetaRefl_M1024_rpow_ge
+  have hrw : ((((1024 : ℕ)) : ℝ) ^ (-0.605 : ℝ)) =
+      (((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ ≤ (64 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ / (0.605 : ℝ) ≤
+      (64 : ℝ)⁻¹ / (0.605 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : 10 * ((((((1024 : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ / (0.605 : ℝ)) ≤
+      10 * ((64 : ℝ)⁻¹ / (0.605 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : 10 * ((64 : ℝ)⁻¹ / (0.605 : ℝ)) ≤ (4 / 15 : ℝ) := by norm_num
+  linarith
+
+/-- Tail at `M = 1024` (`N = 2048`): `‖G - S_{2048}‖ ≤ 4/15`. -/
+theorem zetaRefl_tail_1024_le :
+    ‖(∑' m, etaPairTerm (1 - zetaCellS0) m)
+      - (∑ k ∈ Finset.range (2 * 1024), etaDirichletTerm (1 - zetaCellS0) k)‖ ≤
+      (4 / 15 : ℝ) := by
+  have hgen := zetaRefl_tail_general 1024 (by norm_num)
+  have hr := zetaRefl_r_1024_le
+  linarith
+
+/-- `((343 : ℕ) : ℝ) = 7^3`. -/
+theorem zetaRefl_M343_eq : ((((343 : ℕ)) : ℝ)) = (7 : ℝ) ^ (3 : ℕ) := by
+  norm_num
+
+/-- `343^0.605 ≤ 49` (`0.605 ≤ 2/3`, `(7^3)^{2/3} = 7^2`; exact cubes). -/
+theorem zetaRefl_M343_rpow_le :
+    ((((343 : ℕ)) : ℝ) ^ (0.605 : ℝ)) ≤ 49 := by
+  rw [zetaRefl_M343_eq]
+  have h1 : (((7 : ℝ) ^ (3 : ℕ)) ^ (0.605 : ℝ)) =
+      (7 : ℝ) ^ (((((3 : ℕ)) : ℝ)) * (0.605 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have hexp_le : ((((3 : ℕ)) : ℝ)) * (0.605 : ℝ) ≤ (2 : ℝ) := by norm_num
+  have h2 : (7 : ℝ) ^ (((((3 : ℕ)) : ℝ)) * (0.605 : ℝ)) ≤ (7 : ℝ) ^ (2 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_le
+  have e2 : (2 : ℝ) = ((((2 : ℕ)) : ℝ)) := by norm_num
+  have h3 : (7 : ℝ) ^ (2 : ℝ) = 49 := by
+    rw [e2, Real.rpow_natCast]
+    norm_num
+  linarith
+
+/-- NECESSITY: every `1 ≤ M ≤ 343` has `r(M) ≥ 1/3` (via `M^0.605 ≤ 343^0.605
+≤ 49 ≤ 6000/121` + the threshold form `10/((6000/121)·0.605) = 1/3`).
+Hence NO `M ≤ 343` closes with `slow = 1/3`: ≥ 344 pairs (688 terms) needed. -/
+theorem zetaRefl_wall_necessity (M : ℕ) (hM : 1 ≤ M) (hMle : M ≤ 343) :
+    (1 / 3 : ℝ) ≤ 10 * (((((M : ℕ)) : ℝ) ^ (-0.605 : ℝ)) / (0.605 : ℝ)) := by
+  have hMpos : (0 : ℝ) < ((((M : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 0 < M)
+  have hbase_le : ((((M : ℕ)) : ℝ)) ≤ ((((343 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr hMle
+  have hMle343 : ((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)) ≤
+      ((((343 : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_le_rpow (Nat.cast_nonneg _) hbase_le (by norm_num)
+  have h343 := zetaRefl_M343_rpow_le
+  have hM_le : ((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)) ≤ (6000 / 121 : ℝ) := by
+    have h49 : (49 : ℝ) ≤ 6000 / 121 := by norm_num
+    linarith
+  have hMpos' : (0 : ℝ) < ((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hrw : ((((M : ℕ)) : ℝ) ^ (-0.605 : ℝ)) =
+      (((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_ge : ((6000 / 121 : ℝ))⁻¹ ≤ (((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ :=
+    (inv_le_inv₀ (by norm_num) hMpos').mpr hM_le
+  have hfin : (10 : ℝ) * (((6000 / 121 : ℝ))⁻¹ / 0.605) ≤
+      10 * ((((((M : ℕ)) : ℝ) ^ (0.605 : ℝ)))⁻¹ / 0.605) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    exact div_le_div_of_nonneg_right hInv_ge (by norm_num)
+  have hval : (10 : ℝ) * (((6000 / 121 : ℝ))⁻¹ / 0.605) = 1 / 3 := by norm_num
+  linarith
+
+/-- Small-`M` anchor: `r(1) = 10/0.605 ≥ 16` (bound value `≈ 16.53`;
+upper `≤ 17` is `zetaRefl_tail_1_le`). -/
+theorem zetaRefl_r_1_ge :
+    (16 : ℝ) ≤ 10 * (((((1 : ℕ)) : ℝ) ^ (-0.605 : ℝ)) / (0.605 : ℝ)) := by
+  have h1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_cast
+  rw [h1, Real.one_rpow]
+  norm_num
+
+/-- CONDITIONAL `Azeta1`: `‖S_{2048}(s1)‖ ≥ 1/3 → 1/39 ≤ ‖ζ(s1)‖`
+(`(1/3 - 4/15)/(13/5) = 1/39`, via YOUR bridge `zeta_lower_of_Sn_tail_factor`
++ `zetaRefl_tail_1024_le` + `etaFactor_upper_S1refl`). -/
+theorem zeta_S1_lower_of_S2048 (Slarge : ℂ)
+    (hSdef : Slarge =
+      ∑ k ∈ Finset.range (2 * 1024), etaDirichletTerm (1 - zetaCellS0) k)
+    (hSlow : (1 / 3 : ℝ) ≤ ‖Slarge‖) :
+    (1 / 39 : ℝ) ≤ ‖riemannZeta (1 - zetaCellS0)‖ := by
+  have hs := zetaRefl_pos
+  have hre : (1 - zetaCellS0).re ≠ 1 := by rw [zetaRefl_re]; norm_num
+  have hTailBase := zetaRefl_tail_1024_le
+  have hTail : ‖(∑' m, etaPairTerm (1 - zetaCellS0) m) - Slarge‖ ≤
+      (4 / 15 : ℝ) := by
+    rw [hSdef]
+    exact hTailBase
+  have hFac := etaFactor_upper_S1refl
+  have h := zeta_lower_of_Sn_tail_factor hs hre (2 * 1024) Slarge hSdef
+    (1 / 3) hSlow (4 / 15) hTail (13 / 5) (by norm_num) hFac
+  have heq : (((1 / 3 : ℝ) - 4 / 15) / (13 / 5)) = 1 / 39 := by norm_num
+  rw [heq] at h
+  exact h
+
+/-- DOWNSTREAM: `1/39 ≤ ‖ζ(s1)‖ → 1/2340000000 ≤ ‖ζ(s0)‖`
+(`ζ(s1) = F(s0)·ζ(s0)` + `‖F‖ ≤ 6e7`; i.e. `Azeta = Azeta1/6e7`). -/
+theorem zeta_S0_lower_of_S1 (h1 : (1 / 39 : ℝ) ≤ ‖riemannZeta (1 - zetaCellS0)‖) :
+    ((1 / 2340000000 : ℝ)) ≤ ‖riemannZeta zetaCellS0‖ := by
+  have hFE := zetaFE_refl_eq_S0
+  have hF := zetaFE_factor_upper_S0
+  rw [hFE, norm_mul] at h1
+  have hle : ‖zetaFEFactor zetaCellS0‖ * ‖riemannZeta zetaCellS0‖ ≤
+      60000000 * ‖riemannZeta zetaCellS0‖ :=
+    mul_le_mul_of_nonneg_right hF (norm_nonneg _)
+  have heq : ((1 / 39 : ℝ)) / 60000000 = 1 / 2340000000 := by norm_num
+  rw [← heq, div_le_iff₀ (by norm_num : (0 : ℝ) < 60000000)]
+  linarith
+
+#print axioms zetaCellS0_rpow_0395_le
+#print axioms etaFactor_upper_S1refl
+#print axioms zetaRefl_wall_threshold_iff
+#print axioms zetaRefl_M1024_eq
+#print axioms zetaRefl_M1024_rpow_ge
+#print axioms zetaRefl_r_1024_le
+#print axioms zetaRefl_tail_1024_le
+#print axioms zetaRefl_M343_eq
+#print axioms zetaRefl_M343_rpow_le
+#print axioms zetaRefl_wall_necessity
+#print axioms zetaRefl_r_1_ge
+#print axioms zeta_S1_lower_of_S2048
+#print axioms zeta_S0_lower_of_S1
