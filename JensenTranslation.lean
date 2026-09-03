@@ -1,6 +1,7 @@
 import Mathlib
 import riemann_hypothesis
 import zeta_rigorous
+import central_cover_assembly
 
 set_option maxHeartbeats 2000000
 
@@ -21485,5 +21486,191 @@ theorem polya_full_conditional (H : JensenHadamardData)
 #print axioms JensenRH.hadamardData_to_genusOneData
 #print axioms JensenRH.genusOne_forward_of_hadamardData
 #print axioms JensenRH.polya_full_conditional
+
+end JensenRH
+
+namespace JensenRH
+
+/-!
+## S2b: polynomial-eval packaging + `hyperbolic_zeroFree_off_real` composition (door 1).
+
+Closes the S2b link named in `AGENT_INFRASTRUCTURE_GUIDE.md` §18b.10: from a zero
+witness `G w = 0` of the Jensen-section limit (with approximants packaged as
+polynomial eval at the disc point), transfer through the `of_zero` wrappers into a
+forced nonreal zero, then contradict hyperbolicity via
+`hyperbolic_zeroFree_off_real`. This is the Rouché-counting step that
+`schur_partial_assembly` leaves open: that assembly proves everything up to Rouché
+(eventually nonzero on `K` + scaled zeros real, from S1 + boundary stability); the
+theorems below supply the limit side (interior limit zero forces a nonreal
+approximant zero, impossible under hyperbolicity).
+
+GREP-first record (2026-09-03, verified by reading, per HARD RULES):
+- Mathlib complex Hurwitz / Rouché / winding / argument principle: ABSENT
+  (re-verified: zero hits for `windingNumber|argumentPrinciple|countZeros` in
+  `Mathlib/`; only `TendstoLocallyUniformlyOn.differentiableOn` (holomorphic limit)
+  + isolated zeros + Jensen circle-average upper bound). Hence the transfer is
+  consumed from this repo's `RoucheCount` (built from scratch in
+  `central_cover_assembly.lean`), NOT recreated: `hurwitz_zero_transfer_of_zero`
+  and `door1_nonreal_zero_forced_of_zero`, whose `hdiv : 1 ≤ divisor` premise was
+  already discharged by `divisor_ge_one_of_zero` (S2a) in favour of the directly
+  usable `hGw : G w = 0`. Import of `central_cover_assembly` is cycle-safe (it
+  imports only `Mathlib`/`riemann_hypothesis`/`rh_certificate_infra`; none imports
+  this file or `zeta_rigorous`).
+- Mathlib HAS the analyticity pieces, REUSED (not recreated):
+  `AnalyticOnNhd.eval_polynomial` (`Analysis/Analytic/Polynomial.lean`),
+  `AnalyticOnNhd.div_const` (`Analysis/Analytic/Constructions.lean`),
+  `AnalyticOnNhd.comp` (`Analysis/Analytic/Composition.lean`),
+  `analyticOnNhd_id` (`Analysis/Analytic/Linear.lean`).
+- In-file stones reused: `hyperbolic_zeroFree_off_real`,
+  `scaled_eval_hyperbolic` (same conclusion via direct scaling; the lemmas below
+  route explicitly through `hyperbolic_zeroFree_off_real` at the disc point
+  `u / n` as tasked), `jensenPoly`, `jensenEntire`.
+- Name-clash check (`scaledSection|schur_disc_poly_zero|schur_disc_no_interior|
+  schur_limit_zero_real|hyperbolic_scaledSection`): zero repo hits before writing.
+
+Proved below, APPEND-ONLY, FULL proofs, no `sorry`/`admit`/`axiom`:
+1. `scaledSection` (def): approximant `F n z = (jensenPoly n 0).eval (z / n)`.
+2. `scaledSection_analyticOnNhd`: approximant analyticity on any set (discharged
+   in-file, so it is NOT a premise of the main theorems).
+3. `scaledSection_nonreal_of_nonreal` + `hyperbolic_scaledSection_zeroFree`:
+   disc-point nonrealness transfer + hyperbolicity composition via
+   `hyperbolic_zeroFree_off_real`.
+4. `schur_disc_poly_zero_of_limit_zero`: Hurwitz packaging (limit zero forces a
+   polynomial-eval zero of approximants; consumes `hurwitz_zero_transfer_of_zero`).
+5. `schur_disc_no_interior_zero_of_hyperbolic_sections` (MAIN): interior limit zero
+   in a reals-avoiding disc is impossible under hyperbolic sections (consumes
+   `door1_nonreal_zero_forced_of_zero` + (3)).
+6. `schur_limit_zero_real_of_hyperbolic_sections`: corollary in the exact
+   `roucheZeroTransfer` reality shape (`G w = 0 → w.im = 0` on the disc).
+
+Explicit residual premises (CONDITIONAL style, cf. `R02_closed_of_factorBounds`;
+named exactly, NOT discharged — report-and-stop per protocol):
+- (S2c) `hConv`: per-disc UNIFORM convergence of scaled sections to `jensenEntire`
+  on `Metric.closedBall c R`. S1 (`scaled_tendsto_jensenEntire_of_orderBound`)
+  gives only pointwise-on-disc convergence; the uniform-on-closedBall upgrade is
+  genuinely missing (needs a Weierstrass M-test packaging over the ball).
+- (CENTER) `hGc : jensenEntire c ≠ 0`: center nonvanishing (the `G c ≠ 0` input the
+  `of_zero` wrappers require to rule out the locally-zero divisor collapse).
+- (SPHERE) `hGsph`: boundary nonvanishing on `Metric.sphere c R` (Rouché boundary
+  input; `schur_disc_boundary_of_uniform` derives approximant-side nonvanishing
+  from a limit lower bound, but the limit-side sphere hypothesis itself stays
+  explicit).
+- (LIMIT-ANALYTIC) `hG`: limit analyticity on the closed ball (needs
+  uniform-on-ball tsum theory for `jensenEntire`; same M-test gap as S2c).
+With (S2c)+(CENTER)+(SPHERE)+(LIMIT-ANALYTIC) supplied per disc, (5)+(6) close the
+door-1 backward direction at Rouché; globalizing to `∀ w, jensenEntire w = 0 →
+w.im = 0` is then a per-nonreal-`w` disc choice (each disc avoiding ℝ), needing no
+further analytic input.
+-/
+
+/-- Jensen-section approximant as a function on the disc: the S1 scaled section
+`F n z = (jensenPoly n 0).eval (z / n)`, packaged as polynomial eval at the disc
+point `z / n`. -/
+noncomputable def scaledSection (n : ℕ) (z : ℂ) : ℂ :=
+  (jensenPoly n 0).eval (z / ((n : ℕ) : ℂ))
+
+/-- The approximant is definitionally polynomial eval at the disc point. -/
+theorem scaledSection_eq_poly_eval (n : ℕ) (z : ℂ) :
+    scaledSection n z = (jensenPoly n 0).eval (z / ((n : ℕ) : ℂ)) :=
+  rfl
+
+/-- Approximant analyticity on any set (discharged in-file from Mathlib pieces, so
+it never appears as a premise below). -/
+theorem scaledSection_analyticOnNhd (n : ℕ) (s : Set ℂ) :
+    AnalyticOnNhd ℂ (scaledSection n) s := by
+  have hInner : AnalyticOnNhd ℂ (fun z : ℂ => z / ((n : ℕ) : ℂ)) s :=
+    analyticOnNhd_id.div_const
+  have hOuter : AnalyticOnNhd ℂ (fun w : ℂ => (jensenPoly n 0).eval w) Set.univ :=
+    AnalyticOnNhd.eval_polynomial (jensenPoly n 0)
+  have hComp := hOuter.comp hInner (Set.mapsTo_univ _ _)
+  have heq : ((fun w : ℂ => (jensenPoly n 0).eval w) ∘
+      (fun z : ℂ => z / ((n : ℕ) : ℂ))) = scaledSection n := rfl
+  rwa [heq] at hComp
+
+/-- Disc-point nonrealness: dividing by a positive natural preserves `im ≠ 0`. -/
+theorem scaledSection_nonreal_of_nonreal {n : ℕ} (hn : 0 < n) {u : ℂ}
+    (him : u.im ≠ 0) : (u / ((n : ℕ) : ℂ)).im ≠ 0 := by
+  rw [Complex.div_natCast_im]
+  exact div_ne_zero him (Nat.cast_ne_zero.mpr (ne_of_gt hn))
+
+/-- S2b composition: a hyperbolic section vanishes at a scaled point only if the
+point is real — via `hyperbolic_zeroFree_off_real` applied to the polynomial at
+the disc point `u / n`. -/
+theorem hyperbolic_scaledSection_zeroFree {n : ℕ} (hn : 0 < n)
+    (hH : Hyperbolic (jensenPoly n 0)) {u : ℂ}
+    (hFu : scaledSection n u = 0) : u.im = 0 := by
+  by_contra him
+  have hvim : (u / ((n : ℕ) : ℂ)).im ≠ 0 :=
+    scaledSection_nonreal_of_nonreal hn him
+  have hpoly : (jensenPoly n 0).eval (u / ((n : ℕ) : ℂ)) = 0 := hFu
+  exact hyperbolic_zeroFree_off_real hH hvim hpoly
+
+/-- S2b Hurwitz packaging (no disc-avoids-reals needed): an interior zero of the
+limit (off-center) forces a polynomial-eval zero of approximants on the closed
+ball. Consumes `RoucheCount.hurwitz_zero_transfer_of_zero`. -/
+theorem schur_disc_poly_zero_of_limit_zero
+    {c : ℂ} {R : ℝ} (hR : 0 < R)
+    (hG : AnalyticOnNhd ℂ jensenEntire (Metric.closedBall c R))
+    (hGc : jensenEntire c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, jensenEntire z ≠ 0)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖scaledSection n z - jensenEntire z‖ < ε)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hGw : jensenEntire w = 0) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∃ u ∈ Metric.closedBall c R,
+      (jensenPoly n 0).eval (u / ((n : ℕ) : ℂ)) = 0 := by
+  obtain ⟨N, hN⟩ := RoucheCount.hurwitz_zero_transfer_of_zero hR
+    (fun n => scaledSection_analyticOnNhd n _) hG hGc hGsph hw hwc hGw hConv
+  exact ⟨N, fun n hn => by
+    obtain ⟨u, hu, hFu⟩ := hN n hn
+    exact ⟨u, hu, hFu⟩⟩
+
+/-- S2b MAIN (conditional on the named per-disc premises S2c/CENTER/SPHERE/
+LIMIT-ANALYTIC above): an interior zero of the limit in a reals-avoiding disc is
+impossible when all shift-0 sections are hyperbolic. From `G w = 0`,
+`RoucheCount.door1_nonreal_zero_forced_of_zero` forces a nonreal zero of an
+approximant; `hyperbolic_scaledSection_zeroFree` forbids it. -/
+theorem schur_disc_no_interior_zero_of_hyperbolic_sections
+    (hH : ∀ d, Hyperbolic (jensenPoly d 0))
+    {c : ℂ} {R : ℝ} (hR0 : 0 < R) (hRim : R < |c.im|)
+    (hG : AnalyticOnNhd ℂ jensenEntire (Metric.closedBall c R))
+    (hGc : jensenEntire c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, jensenEntire z ≠ 0)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖scaledSection n z - jensenEntire z‖ < ε)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hGw : jensenEntire w = 0) :
+    False := by
+  by_cases hwc : w = c
+  · subst hwc
+    exact hGc hGw
+  · obtain ⟨N, hN⟩ := RoucheCount.door1_nonreal_zero_forced_of_zero hR0 hRim
+      (fun n => scaledSection_analyticOnNhd n _) hG hGc hGsph hw hwc hGw hConv
+    obtain ⟨u, _, hFu, hIm⟩ := hN (max N 1) (le_max_left N 1)
+    have hn : 0 < max N 1 := lt_of_lt_of_le one_pos (le_max_right N 1)
+    exact hIm (hyperbolic_scaledSection_zeroFree hn (hH _) hFu)
+
+/-- S2b corollary in the exact `roucheZeroTransfer` reality shape: on a
+reals-avoiding disc, every interior zero of the limit is real (in fact the MAIN
+theorem shows there are none). This is the backward-Schur conclusion that
+`schur_partial_assembly` needs past Rouché. -/
+theorem schur_limit_zero_real_of_hyperbolic_sections
+    (hH : ∀ d, Hyperbolic (jensenPoly d 0))
+    {c : ℂ} {R : ℝ} (hR0 : 0 < R) (hRim : R < |c.im|)
+    (hG : AnalyticOnNhd ℂ jensenEntire (Metric.closedBall c R))
+    (hGc : jensenEntire c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, jensenEntire z ≠ 0)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖scaledSection n z - jensenEntire z‖ < ε)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hGw : jensenEntire w = 0) :
+    w.im = 0 :=
+  False.elim
+    (schur_disc_no_interior_zero_of_hyperbolic_sections hH hR0 hRim hG hGc hGsph
+      hConv hw hGw)
+
+#print axioms JensenRH.scaledSection_analyticOnNhd
+#print axioms JensenRH.hyperbolic_scaledSection_zeroFree
+#print axioms JensenRH.schur_disc_poly_zero_of_limit_zero
+#print axioms JensenRH.schur_disc_no_interior_zero_of_hyperbolic_sections
+#print axioms JensenRH.schur_limit_zero_real_of_hyperbolic_sections
 
 end JensenRH
