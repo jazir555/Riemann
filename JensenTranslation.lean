@@ -20757,3 +20757,140 @@ theorem scaled_tendsto_jensenEntire (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r)
   exact Filter.Tendsto.congr' hEvEq hTannery
 
 end JensenRH
+
+/-!
+## Door 1 growth lemma: `taylorCoeff_summable_of_orderBound` closes S1 unconditionally.
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Cauchy estimate: `Mathlib/Analysis/Complex/Liouville.lean:44`
+  (`Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le`).
+- `deriv` iteration link: `Mathlib/Analysis/Calculus/IteratedDeriv/Defs.lean:312`
+  (`iteratedDeriv_eq_iterate`).
+- `DiffContOnCl` from entire: `Mathlib/Analysis/Calculus/DiffContOnCl.lean:42`
+  (`Differentiable.diffContOnCl`).
+- Compact sphere bound: `Mathlib/Topology/MetricSpace/ProperSpace.lean:45`
+  (`isCompact_sphere`) and `Mathlib/Analysis/Normed/Group/Bounded.lean:96-100`
+  (`IsCompact.exists_bound_of_continuousOn`).
+- Real-part bound: `Mathlib/Analysis/Complex/Norm.lean:38`
+  (`Complex.abs_re_le_norm`).
+- Exp majorant: `Mathlib/Analysis/SpecificLimits/Normed.lean:896`
+  (`Real.summable_pow_div_factorial`).
+- Entire input: `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:90`
+  (`differentiable_completedZeta₀`).
+- Coefficient link: `JensenTranslation.lean:77-78` (`taylorCoeff` def),
+  `JensenScratch.lean:380-388` (`taylorCoeff_eq`),
+  `riemann_hypothesis.lean:1328-1332` (`xiMathlib`, `xiMathlibShifted`).
+- Order API (context): `ZeroFreeRegionHadamard.lean:239` (`orderSet`),
+  `ZeroFreeRegionHadamard.lean:2313` (`orderSet_completedRiemannZeta₀`);
+  Stirling search: no extra factorial lower bound is needed. Fixed-radius
+  Cauchy suffices because the even index yields `R^(2*k)` in the denominator
+  while the S1 term has only `r^k/k!`; with `R=|r|+1`,
+  `|c_k|*r^k/k! <= |C|*(|r|/R^2)^k/k!` which is summable by the exp series
+  for every fixed `R>0`. This proves the full `∀ r` statement, hence the
+  order-`7/4` case, closing S1.
+
+Proved below, APPEND-ONLY, fully checked, without placeholders:
+1. `xiMathlibShifted_differentiable_aux`: `xiMathlibShifted` is entire.
+2. `taylorCoeff_cauchy_bound`: `|taylorCoeff k| <= |C|/R^(2*k)` from Cauchy.
+3. `taylorCoeff_summable_of_orderBound`: `∀ r, coeffGrowthSummable r`.
+4. `scaled_tendsto_jensenEntire_of_orderBound` and
+   `jensenEntire_summable_of_orderBound`: unconditional S1 corollaries.
+-/
+
+namespace JensenRH
+
+theorem xiMathlibShifted_differentiable_aux :
+    Differentiable ℂ _root_.xiMathlibShifted := by
+  unfold _root_.xiMathlibShifted _root_.xiMathlib
+  exact _root_.differentiable_completedZeta₀.comp (by fun_prop)
+
+lemma taylorCoeff_cauchy_bound (R : ℝ) (hR : 0 < R) (C : ℝ)
+    (hC : ∀ z ∈ Metric.sphere (0 : ℂ) R, ‖_root_.xiMathlibShifted z‖ ≤ C)
+    (k : ℕ) :
+    |taylorCoeff k| ≤ |C| / R ^ (2 * k) := by
+  have hFactPos : (0 : ℝ) < ((Nat.factorial (2 * k) : ℕ) : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos _)
+  have hC' : ∀ z ∈ Metric.sphere (0 : ℂ) R, ‖_root_.xiMathlibShifted z‖ ≤ |C| := by
+    intro z hz
+    exact le_trans (hC z hz) (le_abs_self C)
+  have hDCl : DiffContOnCl ℂ _root_.xiMathlibShifted (Metric.ball (0 : ℂ) R) :=
+    xiMathlibShifted_differentiable_aux.diffContOnCl
+  have hCauchy := Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le
+    (F := ℂ) (c := (0 : ℂ)) (R := R) (C := |C|) (f := _root_.xiMathlibShifted)
+    (2 * k) hR hDCl hC'
+  have hEq : (deriv^[2 * k] _root_.xiMathlibShifted (0 : ℂ)) =
+      iteratedDeriv (2 * k) _root_.xiMathlibShifted (0 : ℂ) := by
+    have h := (iteratedDeriv_eq_iterate (n := 2 * k)
+      (f := _root_.xiMathlibShifted)).symm
+    exact congrFun h (0 : ℂ)
+  have hRe : |(deriv^[2 * k] _root_.xiMathlibShifted (0 : ℂ)).re| ≤
+      ‖iteratedDeriv (2 * k) _root_.xiMathlibShifted (0 : ℂ)‖ := by
+    rw [hEq]
+    exact Complex.abs_re_le_norm _
+  have hCoeff : |taylorCoeff k| =
+      (((Nat.factorial (2 * k) : ℕ) : ℝ)⁻¹) *
+        |(deriv^[2 * k] _root_.xiMathlibShifted (0 : ℂ)).re| := by
+    unfold taylorCoeff
+    rw [abs_mul, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hFactPos))]
+  rw [hCoeff]
+  calc (((Nat.factorial (2 * k) : ℕ) : ℝ)⁻¹) *
+          |(deriv^[2 * k] _root_.xiMathlibShifted (0 : ℂ)).re|
+        ≤ (((Nat.factorial (2 * k) : ℕ) : ℝ)⁻¹) *
+          ‖iteratedDeriv (2 * k) _root_.xiMathlibShifted (0 : ℂ)‖ :=
+        mul_le_mul_of_nonneg_left hRe (inv_nonneg.mpr (le_of_lt hFactPos))
+      _ ≤ (((Nat.factorial (2 * k) : ℕ) : ℝ)⁻¹) *
+          (((Nat.factorial (2 * k) : ℕ) : ℝ) * |C| / R ^ (2 * k)) :=
+        mul_le_mul_of_nonneg_left hCauchy (inv_nonneg.mpr (le_of_lt hFactPos))
+      _ = |C| / R ^ (2 * k) := by
+        field_simp
+
+theorem taylorCoeff_summable_of_orderBound (r : ℝ) :
+    coeffGrowthSummable r := by
+  unfold coeffGrowthSummable
+  let R : ℝ := |r| + 1
+  have hR : 0 < R := by simp [R]; positivity
+  have hR2 : 0 < R ^ 2 := pow_pos hR 2
+  have hRne : R ≠ 0 := ne_of_gt hR
+  have hR2ne : R ^ 2 ≠ 0 := ne_of_gt hR2
+  obtain ⟨C, hC⟩ := (isCompact_sphere (0 : ℂ) R).exists_bound_of_continuousOn
+    (xiMathlibShifted_differentiable_aux.continuous.continuousOn)
+  have hBound : ∀ k : ℕ, |taylorCoeff k| ≤ |C| / R ^ (2 * k) :=
+    fun k => taylorCoeff_cauchy_bound R hR C hC k
+  let q : ℝ := |r| / R ^ 2
+  have hsumm : Summable (fun k : ℕ => q ^ k / (((Nat.factorial k : ℕ)) : ℝ)) :=
+    Real.summable_pow_div_factorial q
+  have hmajor : Summable (fun k : ℕ => |C| * (q ^ k / (((Nat.factorial k : ℕ)) : ℝ))) :=
+    hsumm.mul_left |C|
+  apply hmajor.of_norm_bounded
+  intro k
+  have hFactPos : (0 : ℝ) < (((Nat.factorial k : ℕ)) : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos k)
+  have hFactNe : (((Nat.factorial k : ℕ)) : ℝ) ≠ 0 := ne_of_gt hFactPos
+  rw [Real.norm_eq_abs]
+  have hAbs : |(|taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ))| =
+      |taylorCoeff k| * |r| ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by
+    rw [abs_div, abs_mul, abs_abs, abs_pow]
+    rw [abs_of_pos hFactPos]
+  rw [hAbs]
+  have hRk : R ^ (2 * k) = (R ^ 2) ^ k := by rw [pow_mul]
+  have h1 : |taylorCoeff k| * |r| ^ k / (((Nat.factorial k : ℕ)) : ℝ) ≤
+      (|C| / R ^ (2 * k)) * |r| ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by
+    gcongr
+    exact hBound k
+  calc |taylorCoeff k| * |r| ^ k / (((Nat.factorial k : ℕ)) : ℝ)
+      ≤ (|C| / R ^ (2 * k)) * |r| ^ k / (((Nat.factorial k : ℕ)) : ℝ) := h1
+    _ = |C| * (q ^ k / (((Nat.factorial k : ℕ)) : ℝ)) := by
+      simp only [q, div_pow]
+      rw [hRk]
+      field_simp
+
+theorem scaled_tendsto_jensenEntire_of_orderBound (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r) :
+    Tendsto (fun d : ℕ => (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ)))
+      atTop (nhds (jensenEntire z)) :=
+  scaled_tendsto_jensenEntire r z hz (taylorCoeff_summable_of_orderBound r)
+
+theorem jensenEntire_summable_of_orderBound (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r) :
+    Summable (fun k : ℕ => limitTerm k z) :=
+  jensenEntire_summable_of_growth r z hz (taylorCoeff_summable_of_orderBound r)
+
+end JensenRH
