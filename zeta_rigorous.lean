@@ -4211,3 +4211,155 @@ theorem zetaFE_factor_lower_S0 :
 #print axioms zetaFE_Gamma_one_sub_upper_S0
 #print axioms zetaFE_Gamma_lower_S0
 #print axioms zetaFE_factor_lower_S0
+
+/-!
+## `zetaUpper` Re>1 absolute upper (EASIEST stone for R02 `≤10` route).
+
+GOAL (READ-ONLY, `central_cover_assembly.lean:6333-6335`):
+`def R02_zeta_upper_obligation : Prop := ∀ s, 0.05 ≤ s.re → s.re ≤ 0.74 →
+-8.25 ≤ s.im → s.im ≤ -5.25 → ‖zeta s‖ ≤ 10`
+where `zeta = riemannZeta` definitionally (`riemann_hypothesis.lean:16`
+`def zeta : ℂ → ℂ := riemannZeta`; cf. `riemann_hypothesis_newsection.lean:784`
+`have hzeta_eq : zeta s = riemannZeta s := rfl`). Discharging it gives
+`R02_deriv_bound_of_zeta_upper` (`central_cover_assembly.lean:6390-6398`)
+`‖deriv xiShifted‖ ≤ 67200` (`16800 / 0.25`, from `42*1*40*10`; cf. `:6006`,
+`:6010-6014` supplier shape). This file states everything with `riemannZeta`
+(`import Mathlib` only, no new imports, avoids cycles with
+`central_cover_assembly`/`interval_arith`); `zeta` conversion is `rfl`.
+
+WHY NOT eta M-test (do NOT retry): `riemann_hypothesis_newsection.lean:618-624`
+proves `≤1012` sharp at `M=1` (`r(M)=C*M^{-σ}/σ≈180*M^{-0.05}` with `σ=0.05`,
+`C=9`) and `r≤5` needs `M≥36^{20}≈1.3e31` terms — infeasible. Unconditional
+`‖zeta‖≤1012` (`:739-743` `R02_zeta_upper_of_etaPairLim_eq`,
+`:899-901` `R02_zeta_upper_unconditional`) gives `M=6800640` (`:903-905`
+`R02_deriv_bound_unconditional`); `≤10` needs FE+convexity, not longer sums.
+
+GREP VERDICT (searches run before writing; repo + Mathlib; cite file:line):
+* Phragmen-Lindelof EXISTS (strip form, exact needed shape):
+  `Mathlib/Analysis/Complex/PhragmenLindelof.lean:275`
+  `theorem vertical_strip (hfd : DiffContOnCl ℂ f (re ⁻¹' Ioo a b)) ... → ‖f z‖ ≤ C`
+  (sub-double-exponential growth `∃ c < π/(b-a)` + boundary `≤C` → interior `≤C`).
+  Variants `:303` `eq_zero_on_vertical_strip`, `:321` `eqOn_vertical_strip`.
+* Hadamard three-lines EXISTS (strip form, exact needed shape — do NOT recreate):
+  `Mathlib/Analysis/Complex/Hadamard.lean:608`
+  `lemma norm_le_interp_of_mem_verticalClosedStrip' (hul : l < u)
+  (hz : z ∈ verticalClosedStrip l u) (hd : DiffContOnCl ℂ f (verticalStrip l u))
+  (hB : BddAbove ...) (ha : ∀ z ∈ re ⁻¹' {l}, ‖f z‖ ≤ a)
+  (hb : ∀ z ∈ re ⁻¹' {u}, ‖f z‖ ≤ b) :
+  ‖f z‖ ≤ a ^ (1 - (z.re - l)/(u - l)) * b ^ ((z.re - l)/(u - l))`.
+  Also `:589` `norm_le_interpStrip_of_mem_verticalClosedStrip`,
+  `:478` `norm_le_interp_of_mem_verticalClosedStrip₀₁'`,
+  `:464` `norm_le_interpStrip_of_mem_verticalClosedStrip₀₁`.
+  NOTE: direct `f = riemannZeta` on `[0.05,1+δ]` is BLOCKED by the pole at `s=1`
+  (`DiffContOnCl` fails there); next lemma must apply it to `(s-1)*ζ(s)` or a
+  pole-removed entire function (see residual below).
+* Maximum modulus EXISTS (generic, not zeta-specific):
+  `Mathlib/Analysis/Complex/AbsMax.lean:184`
+  `theorem norm_eqOn_closedBall_of_isMaxOn`, `:201`
+  `norm_eq_norm_of_isMaxOn_of_ball_subset`, `:212`
+  `norm_eventually_eq_of_isLocalMax`. No zeta instantiation exists.
+* Euler product for `riemannZeta` EXISTS on `1 < s.re` (no norm upper from it):
+  `Mathlib/NumberTheory/EulerProduct/DirichletLSeries.lean:57`
+  `lemma summable_riemannZetaSummand (hs : 1 < s.re)`,
+  `:89` `theorem riemannZeta_eulerProduct_hasProd (hs : 1 < s.re)`,
+  `:102` `theorem riemannZeta_eulerProduct (hs : 1 < s.re)`.
+  No `‖ζ‖ ≤ ...` upper is derived from it anywhere
+  (`rg "norm.*riemannZeta.*le|riemannZeta.*norm.*le|upper.*riemannZeta" → No files found`).
+* Dirichlet-series absolute convergence EXISTS (the tool for the stone below):
+  `Mathlib/Analysis/PSeriesComplex.lean:25`
+  `lemma Complex.summable_one_div_nat_cpow : Summable (1/(n:ℂ)^p) ↔ 1 < re p`;
+  `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:207`
+  `theorem zeta_eq_tsum_one_div_nat_cpow (hs : 1 < re s)`,
+  `:214` `theorem zeta_eq_tsum_one_div_nat_add_one_cpow (hs : 1 < re s)`;
+  `Mathlib/Analysis/Normed/Group/InfiniteSum.lean:149`
+  `theorem norm_tsum_le_tsum_norm (hf : Summable fun i => ‖f i‖)`,
+  `:120` `HasSum.norm_le_of_bounded`;
+  `Mathlib/Analysis/Normed/Module/FiniteDimension.lean:612`
+  `theorem summable_norm_iff : (Summable fun x => ‖f x‖) ↔ Summable f`
+  (used in-file as `summable_norm_iff.mpr`, cf. `eta_not_summable`);
+  `Mathlib/Analysis/SpecialFunctions/Pow/Real.lean:337`
+  `theorem norm_cpow_eq_rpow_re_of_pos (hx : 0 < x) (y : ℂ)`.
+  In-file reuse (read-only, no modification): `summable_one_div_nat_add_one_cpow`
+  and `zeta_eq_tsum_one_div_nat_add_one_cpow` bridging via `push_cast; ring`
+  (cf. `zeta_odd_tsum_eq`, `zeta_even_add_odd_tsum`).
+* Functional equation EXISTS (cos form, already mirrored as `zetaFEFactor`):
+  `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178-180`
+  `theorem riemannZeta_one_sub : riemannZeta (1 - s) = 2*(2*π)^(-s)*Gamma s*cos(π*s/2)*riemannZeta s`
+  (via `HurwitzZetaEven.lean:760` `hurwitzZetaEven_one_sub`).
+* Lindelof/convexity bound for `zeta` MISSING:
+  `rg "Lindelof|lindelof" Mathlib → only Picard-Lindelof ODE
+  (Mathlib/Analysis/ODE/PicardLindelof.lean:39 `IsPicardLindelof`, unrelated) and
+  topological Lindelof (`Weierstrass.lean:447`, unrelated);
+  `rg "convexity.*zeta|zeta.*convex|threeLines.*zeta|Lindelof.*zeta" → No files found`.
+* Direct `‖ζ‖ ≤ ζ(Re)` upper on `Re>1` MISSING (this stone closes it in tsum form):
+  `rg "norm.*riemannZeta.*le|upper.*riemannZeta" → No files found`.
+* `zeta` vs `riemannZeta`: `riemann_hypothesis.lean:16` (definitionally equal).
+* Import graph: this file `import Mathlib` only (no new imports below; avoids cycles).
+
+WHAT IS PROVED (all unconditional, no `sorry`/`admit`/`axiom`/hypotheses):
+* `zetaUpper_norm_term_eq`: `‖1/((n+1)^s)‖ = (((n+1):ℝ)^s.re)⁻¹`.
+* `zetaUpper_norm_summable`: `Summable (‖1/((n+1)^s)‖)` on `1 < s.re`
+  (via `summable_norm_iff.mpr (summable_one_div_nat_add_one_cpow hs)`).
+* `zetaUpper_riemannZeta_norm_le_tsum`: `‖riemannZeta s‖ ≤ ∑' n, (((n+1):ℝ)^s.re)⁻¹`
+  on `1 < s.re` (via `zeta_eq_tsum_one_div_nat_add_one_cpow` + `push_cast; ring`
+  bridge + `norm_tsum_le_tsum_norm`). This is `|ζ(s)| ≤ ζ(Re s)` in Real-tsum
+  form (RHS is the Real Dirichlet series for `ζ(σ)`); the `tsum eta FALSE`
+  rule is respected (Tendsto/majorant-free here — the `Re>1` zeta series IS
+  absolutely convergent, so `norm_tsum_le_tsum_norm` + `summable_norm_iff`
+  apply; no conditional `tsum` abuse).
+
+RESIDUAL (§1h: full `≤10` assembly exceeds one session — STOP after this stone):
+exact next lemma `zetaUpper_R02_of_threeLines` (NOT proved here): from (i) this
+stone + a numeric Real-tsum cap at `σ=1+δ` (e.g. `∑' (n+1)^{-1.1} ≤ B_right`),
+(ii) a left-edge bound on `Re=0.05` via FE
+(`riemannZeta_one_sub` + `zetaFEFactor`-style `‖F‖` upper/lower + `‖ζ(1-s)‖`
+upper from (i) since `1-s` has `Re∈[0.26,0.95]` — still `<1`, so one FE step
+alone does NOT reach `Re>1`; needs (iii)), and (iii) Hadamard
+`norm_le_interp_of_mem_verticalClosedStrip'` applied to the POLE-REMOVED entire
+`f(s)=(s-1)*riemannZeta s` (with `BddAbove` + `DiffContOnCl` discharged around
+`s=1`, plus Stirling Gamma upper to reach fencing-tier constants) infer
+`‖riemannZeta s‖ ≤ 10` on `0.05 ≤ Re ≤ 0.74, -8.25 ≤ Im ≤ -5.25`
+(i.e. `DerivCauchyBridge.R02_zeta_upper_obligation` up to `zeta=rfl`).
+-/
+
+/-- Norm of the `Re>1` zeta summand: `‖1/((n+1)^s)‖ = (((n+1):ℝ)^s.re)⁻¹`. -/
+theorem zetaUpper_norm_term_eq (s : ℂ) (n : ℕ) :
+    ‖(1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)‖ = ((((n + 1 : ℕ) : ℝ) ^ s.re))⁻¹ := by
+  have hpos : (0 : ℝ) < (((n + 1 : ℕ) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hbase : ((((n + 1 : ℕ) : ℂ))) = (((((n + 1 : ℕ) : ℝ)) : ℂ)) :=
+    (Complex.ofReal_natCast _).symm
+  rw [hbase, norm_div, norm_one, Complex.norm_cpow_eq_rpow_re_of_pos hpos s, one_div]
+
+/-- Absolute summability of the `Re>1` zeta series (norm form). -/
+theorem zetaUpper_norm_summable {s : ℂ} (hs : 1 < s.re) :
+    Summable (fun n : ℕ => ‖(1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)‖) :=
+  summable_norm_iff.mpr (summable_one_div_nat_add_one_cpow hs)
+
+/-- EASIEST STONE: `‖ζ(s)‖ ≤ ∑' (n+1)^{-Re s}` on `1 < s.re` (absolute convergence;
+`‖ζ(s)‖ ≤ ζ(s.re)` in Real-tsum form; right-edge input to three-lines). -/
+theorem zetaUpper_riemannZeta_norm_le_tsum {s : ℂ} (hs : 1 < s.re) :
+    ‖riemannZeta s‖ ≤ ∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ s.re))⁻¹ := by
+  have hSum := summable_one_div_nat_add_one_cpow hs
+  have hNormSum : Summable (fun n : ℕ => ‖(1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)‖) :=
+    summable_norm_iff.mpr hSum
+  have hZeq : riemannZeta s = ∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s) := by
+    have h0 := zeta_eq_tsum_one_div_nat_add_one_cpow hs
+    rw [h0]
+    apply tsum_congr
+    intro n
+    congr 1
+    congr 1
+    push_cast
+    ring
+  rw [hZeq]
+  have hle := norm_tsum_le_tsum_norm hNormSum
+  calc ‖∑' n : ℕ, (1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)‖ ≤
+        ∑' n : ℕ, ‖(1 : ℂ) / ((((n + 1 : ℕ) : ℂ)) ^ s)‖ := hle
+    _ = ∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ s.re))⁻¹ := by
+        apply tsum_congr
+        intro n
+        exact zetaUpper_norm_term_eq s n
+
+#print axioms zetaUpper_norm_term_eq
+#print axioms zetaUpper_norm_summable
+#print axioms zetaUpper_riemannZeta_norm_le_tsum
