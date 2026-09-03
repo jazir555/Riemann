@@ -5965,3 +5965,441 @@ theorem full_central_covered (hFull : FullCentralObligations)
 #print axioms full_central_covered
 
 end CentralCoverAssembly
+
+/-! ## Cauchy derivative estimate for `xiShifted` via `xiShiftedEntire` (DERIV-factor bridge)
+
+Goal: unblock the DERIV factor `‖deriv xiShifted w‖ ≤ M` uniformly on each of the
+40 `gridFine` rects.
+
+Grep-first record (verified 2026-09-03, repo + Mathlib):
+* `rg "xiShiftedEntire"` → only the strip entireness family in this file
+  (`xiShiftedEntire`, `xiShiftedEntire_differentiable`, `xiShifted_eq_entire_on_strip`,
+  `strip_isOpen`, `xiShifted_differentiableAt_of_mem_strip`,
+  `deriv_xiShifted_eq_entire_of_mem_strip`); no Cauchy/uniform-derivative
+  infrastructure for `xiShifted` exists anywhere else.
+* `rg "circleIntegral"` → only Mathlib (`CauchyIntegral.lean`, `Liouville.lean`,
+  `Schwarz.lean`, …) + docs yamls; no repo-level Cauchy material for `xiShifted`.
+* `rg "norm_deriv"` → Mathlib Schwarz (`norm_deriv_le_div_of_mapsTo_ball`) +
+  Liouville (`norm_deriv_le_of_forall_mem_sphere_norm_le`) + unrelated simple-zero
+  facts in `riemann_hypothesis.lean`; no uniform `‖deriv xiShifted‖` bounds.
+* `rg "R02Uniform|center_bound_of_component_bounds"` → `interval_arith.lean`
+  has the four-factor center bridge (`CellUniform.center_bound_of_component_bounds`)
+  + `R02Uniform` template (hypothesis-free poly `22`, pi `1/2`, Gamma `1/1e7`,
+  conditional `R02_H_of_components` modulo zeta factor + deriv bound); no deriv
+  sup discharge.
+* `rg "import.*central_cover|import.*interval_arith"` → `interval_arith` and
+  `central_cover_trusted` import this file; this file imports only `Mathlib`,
+  `riemann_hypothesis`, `rh_certificate_infra`. Hence NO new imports are added
+  below (avoids cycles); all Cauchy material used is already in `Mathlib`.
+
+Consequence: Mathlib's `Complex.norm_deriv_le_of_forall_mem_sphere_norm_le`
+(Liouville.lean:76, via `DiffContOnCl.deriv_eq_smul_circleIntegral`) suffices;
+nothing circle-integral-related is re-proved here. What is proved here:
+1. Generic pointwise Cauchy lemma for `xiShifted` from a sup bound on
+   `xiShiftedEntire` over `Metric.sphere w R` (fully proved, only explicit
+   sup-bound hypotheses).
+2. Uniform rect versions (per-`w` spheres; single-`closedBall` region via triangle).
+3. For `R02 = (-8,-5.5,0.01,0.2)` (outer tier) with radius `r = 0.25`:
+   hypothesis-free poly `≤ 42`, pi `≤ 1`, Gamma `≤ 40` on the `0.25`-disc
+   (`s`-rect `Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`), conditional entire sup
+   `≤ 16800` modulo exactly one named zeta-upper supplier, hence conditional
+   uniform `‖deriv xiShifted‖ ≤ 67200` on `R02` (first concrete `M` for any cell,
+   albeit too large for fencing — see residual).
+
+Exact supplier shapes (Agents D/E-style):
+* `DerivCauchyBridge.R02_zeta_upper_obligation` (below): `∀ s, ... → ‖zeta s‖ ≤ 10`
+  on the R02 disc `s`-rect. To be discharged by rigorous complex-`zeta` interval
+  arithmetic (Dirichlet-eta + remainder, cf. `R00ZetaEM` in `interval_arith.lean`;
+  true `|ζ| = O(1)` there, so `10` is safe). Covers cell R02 only; other 39 cells
+  need analogous `s`-rect zeta uppers (same shape, different numeric rects).
+* No other hypotheses are used: poly/pi/Gamma uppers are hypothesis-free.
+-/
+
+namespace DerivCauchyBridge
+
+/-- Generic pointwise Cauchy estimate for `xiShifted` via the entire extension.
+From a sup bound `C` for `xiShiftedEntire` on `sphere w R` (exact shape suppliers
+must discharge), `‖deriv xiShifted w‖ ≤ C / R`. Uses strip agreement at `w` only;
+the ball itself may leave the strip since the extension is entire. -/
+theorem deriv_xiShifted_le_of_entire_sphere_bound
+    (w : ℂ) (R C : ℝ) (hR : 0 < R)
+    (hw_lo : -(1 / 2 : ℝ) < w.im) (hw_hi : w.im < (1 / 2 : ℝ))
+    (hC : ∀ z ∈ Metric.sphere w R, ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ‖deriv xiShifted w‖ ≤ C / R := by
+  have hEnt : Differentiable ℂ CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable
+  have hDC : DiffContOnCl ℂ CentralCoverAssembly.xiShiftedEntire (Metric.ball w R) :=
+    hEnt.diffContOnCl
+  have hBound : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / R :=
+    Complex.norm_deriv_le_of_forall_mem_sphere_norm_le hR hDC hC
+  have hEq : deriv xiShifted w = deriv CentralCoverAssembly.xiShiftedEntire w :=
+    CentralCoverAssembly.deriv_xiShifted_eq_entire_of_mem_strip w hw_lo hw_hi
+  rw [hEq]
+  exact hBound
+
+/-- Uniform rect version from per-`w` sphere bounds: `M = C / r`. -/
+theorem uniform_deriv_of_sphere_bound
+    (Rrect : CellProofEngine.Rect2D) (r C : ℝ) (hr : 0 < r)
+    (hStrip : ∀ w, Rrect.mem w → -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ))
+    (hC : ∀ w, Rrect.mem w → ∀ z ∈ Metric.sphere w r,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ∀ w, Rrect.mem w → ‖deriv xiShifted w‖ ≤ C / r := by
+  intro w hw
+  obtain ⟨hlo, hhi⟩ := hStrip w hw
+  exact deriv_xiShifted_le_of_entire_sphere_bound w r C hr hlo hhi (hC w hw)
+
+/-- Spheres over a rect lie in the `closedBall` of the center with radius
+`radius + r` (triangle inequality via `Rect2D.norm_sub_center_le_radius`). -/
+theorem sphere_subset_closedBall_of_rect_mem
+    (Rrect : CellProofEngine.Rect2D) (r : ℝ)
+    (w : ℂ) (hw : Rrect.mem w) :
+    Metric.sphere w r ⊆ Metric.closedBall Rrect.center (Rrect.radius + r) := by
+  intro z hz
+  rw [Metric.mem_closedBall]
+  have hdist : dist z w = r := Metric.mem_sphere.mp hz
+  have hnorm_zw : ‖z - w‖ = r := by rwa [dist_eq_norm] at hdist
+  have hnorm_wc : ‖w - Rrect.center‖ ≤ Rrect.radius :=
+    CellProofEngine.Rect2D.norm_sub_center_le_radius Rrect hw
+  have heq : z - Rrect.center = (z - w) + (w - Rrect.center) := by abel
+  have hle : ‖z - Rrect.center‖ ≤ ‖z - w‖ + ‖w - Rrect.center‖ := by
+    rw [heq]
+    exact norm_add_le _ _
+  have hdist_eq : dist z Rrect.center = ‖z - Rrect.center‖ := dist_eq_norm _ _
+  rw [hdist_eq]
+  linarith
+
+/-- Uniform rect version from a single `closedBall` sup bound (supplier-friendly
+shape: one region instead of per-`w` spheres). -/
+theorem uniform_deriv_of_closedBall_bound
+    (Rrect : CellProofEngine.Rect2D) (r C : ℝ) (hr : 0 < r)
+    (hStrip : ∀ w, Rrect.mem w → -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ))
+    (hCball : ∀ z ∈ Metric.closedBall Rrect.center (Rrect.radius + r),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ∀ w, Rrect.mem w → ‖deriv xiShifted w‖ ≤ C / r := by
+  apply uniform_deriv_of_sphere_bound Rrect r C hr hStrip
+  intro w hw z hz
+  exact hCball z (sphere_subset_closedBall_of_rect_mem Rrect r w hw hz)
+
+/-! ### R02 disc geometry (`r = 0.25` stays in the strip) -/
+
+/-- `R02.mem` unpacked to numeric bounds. -/
+theorem R02_mem_bounds {w : ℂ} (hw : CentralCoverAssembly.R02.mem w) :
+    -8 ≤ w.re ∧ w.re ≤ -5.5 ∧ 0.01 ≤ w.im ∧ w.im ≤ 0.2 := by
+  obtain ⟨hx0, hx1, hy0, hy1⟩ := hw
+  have e0 : CentralCoverAssembly.R02.x0 = -8 := CentralCoverAssembly.R02_x0
+  have e1 : CentralCoverAssembly.R02.x1 = -5.5 := CentralCoverAssembly.R02_x1
+  have e2 : CentralCoverAssembly.R02.y0 = 0.01 := CentralCoverAssembly.R02_y0
+  have e3 : CentralCoverAssembly.R02.y1 = 0.2 := CentralCoverAssembly.R02_y1
+  rw [e0] at hx0
+  rw [e1] at hx1
+  rw [e2] at hy0
+  rw [e3] at hy1
+  exact ⟨hx0, hx1, hy0, hy1⟩
+
+/-- Every `R02` point lies in the open strip (hence deriv transfer applies). -/
+theorem R02_strip_of_mem {w : ℂ} (hw : CentralCoverAssembly.R02.mem w) :
+    -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+  obtain ⟨_, _, hy0, hy1⟩ := R02_mem_bounds hw
+  constructor <;> linarith
+
+/-- Real parts on the `0.25`-sphere over `R02`: `[-8.25,-5.25]`. -/
+theorem R02_sphere_re_bounds {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    -8.25 ≤ u.re ∧ u.re ≤ -5.25 := by
+  obtain ⟨hx0, hx1, _, _⟩ := R02_mem_bounds hw
+  have hdist : dist u w = (0.25 : ℝ) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.25 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(u - w).re| ≤ (0.25 : ℝ) := by
+    calc |(u - w).re| ≤ ‖u - w‖ := Complex.abs_re_le_norm _
+      _ = 0.25 := hnorm
+  have here : (u - w).re = u.re - w.re := by simp [Complex.sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+/-- Imaginary parts on the `0.25`-sphere over `R02`: `[-0.24,0.45]`. -/
+theorem R02_sphere_im_bounds {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    -0.24 ≤ u.im ∧ u.im ≤ 0.45 := by
+  obtain ⟨_, _, hy0, hy1⟩ := R02_mem_bounds hw
+  have hdist : dist u w = (0.25 : ℝ) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.25 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(u - w).im| ≤ (0.25 : ℝ) := by
+    calc |(u - w).im| ≤ ‖u - w‖ := Complex.abs_im_le_norm _
+      _ = 0.25 := hnorm
+  have heim : (u - w).im = u.im - w.im := by simp [Complex.sub_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  constructor <;> linarith
+
+/-- The `0.25`-sphere over `R02` stays strictly inside the strip
+(`[-0.24,0.45] ⊂ (-1/2,1/2)`), so `xiShifted = xiShiftedEntire` there. -/
+theorem R02_sphere_mem_strip {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    -(1 / 2 : ℝ) < u.im ∧ u.im < (1 / 2 : ℝ) := by
+  obtain ⟨hlo, hhi⟩ := R02_sphere_im_bounds hw hu
+  constructor <;> linarith
+
+/-- `s = 1/2 + I*u` coordinates for `u` on the R02 `0.25`-sphere:
+`s.re ∈ [0.05,0.74]`, `s.im ∈ [-8.25,-5.25]`. -/
+theorem R02_s_of_sphere_re_im {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ)) :
+    0.05 ≤ ((1 / 2 : ℂ) + Complex.I * u).re ∧
+    ((1 / 2 : ℂ) + Complex.I * u).re ≤ 0.74 ∧
+    -8.25 ≤ ((1 / 2 : ℂ) + Complex.I * u).im ∧
+    ((1 / 2 : ℂ) + Complex.I * u).im ≤ -5.25 := by
+  obtain ⟨hre_lo, hre_hi⟩ := R02_sphere_re_bounds hw hu
+  obtain ⟨him_lo, him_hi⟩ := R02_sphere_im_bounds hw hu
+  have hsre : ((1 / 2 : ℂ) + Complex.I * u).re = 1 / 2 - u.im := by
+    simp [Complex.add_re, Complex.mul_re]
+    ring
+  have hsim : ((1 / 2 : ℂ) + Complex.I * u).im = u.re := by
+    simp [Complex.add_im, Complex.mul_im]
+  rw [hsre, hsim]
+  refine ⟨by linarith, by linarith, hre_lo, hre_hi⟩
+
+/-! ### Four-factor upper bounds on the R02 disc (poly/pi/Gamma hypothesis-free) -/
+
+/-- Polynomial part `s*(s-1)/2` (equals `1/2*s*(s-1)` by `ring`). -/
+noncomputable def polyOf (s : ℂ) : ℂ := s * (s - 1) / 2
+
+/-- Pi-power part `π^(-s/2)`. -/
+noncomputable def piOf (s : ℂ) : ℂ := ((Real.pi : ℂ) ^ (-(s / 2)))
+
+/-- Gamma part `Γ(s/2)`. -/
+noncomputable def gammaOf (s : ℂ) : ℂ := Complex.Gamma (s / 2)
+
+/-- Top-level `xiShifted` factored via our local parts (mirrors
+`R00Enclosure.xiShifted_eq_parts` in `interval_arith.lean`, re-proved here to
+avoid an import cycle: that file imports this one). -/
+theorem xiShifted_eq_parts (z : ℂ) :
+    xiShifted z =
+      polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z) := by
+  unfold xiShifted classicalXi XiFromPrefactor classicalXiPrefactor
+    polyOf piOf gammaOf
+  ring
+
+/-- Norm version of the factorisation. -/
+theorem norm_xiShifted_eq_parts (z : ℂ) :
+    ‖xiShifted z‖ =
+      ‖polyOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+      ‖piOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+      ‖gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+      ‖zeta ((1 / 2 : ℂ) + Complex.I * z)‖ := by
+  rw [xiShifted_eq_parts z, norm_mul, norm_mul, norm_mul]
+
+/-- Hypothesis-free poly upper `‖poly‖ ≤ 42` on the R02 disc `s`-rect
+(triangle `‖z‖ ≤ |re|+|im|`; `8.99*9.2/2 = 41.354 < 42`). -/
+theorem poly_upper_R02_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖polyOf s‖ ≤ 42 := by
+  unfold polyOf
+  have hs_le : ‖s‖ ≤ 8.99 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.74 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 8.25 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 9.2 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 0.95 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 8.25 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 8.99 * 9.2 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 8.99 * 9.2 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (8.99 : ℝ) * 9.2 / 2 ≤ 42 := by norm_num
+  linarith
+
+/-- Hypothesis-free pi upper `‖π^(-s/2)‖ ≤ 1` for `0.05 ≤ s.re`
+(`‖·‖ = π^(-s.re/2)`, exponent `≤ 0`, base `π ≥ 1`). -/
+theorem pi_upper_R02_disc {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
+    ‖piOf s‖ ≤ 1 := by
+  unfold piOf
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _]
+  have h2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hneg : (-(s / 2)).re = -((s / 2).re) := Complex.neg_re _
+  have hle : (-(s / 2)).re ≤ 0 := by
+    rw [hneg, h2]
+    linarith
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  exact Real.rpow_le_one_of_one_le_of_nonpos hpi1 hle
+
+/-- Integral majorant `‖Γ z‖ ≤ Real.Gamma z.re` for `0 < z.re`
+(triangle inequality for the Euler integral; same proof as
+`R00GammaLower.norm_Gamma_le_realGamma` in `interval_arith.lean`, re-proved
+here to avoid an import cycle). -/
+theorem norm_Gamma_le_realGamma {z : ℂ} (hz : 0 < z.re) :
+    ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
+  have hC := Complex.GammaIntegral_convergent hz
+  have hR := Real.GammaIntegral_convergent hz
+  rw [Complex.Gamma_eq_integral hz, Real.Gamma_eq_integral hz]
+  unfold Complex.GammaIntegral
+  calc ‖∫ x in Set.Ioi (0 : ℝ), ((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖
+      ≤ ∫ x in Set.Ioi (0 : ℝ), ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ :=
+        MeasureTheory.norm_integral_le_integral_norm _
+    _ = ∫ x in Set.Ioi (0 : ℝ), Real.exp (-x) * x ^ (z.re - 1) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro x hx
+        have hx0 : (0 : ℝ) < x := Set.mem_Ioi.mp hx
+        show ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ = _
+        rw [norm_mul]
+        have h1 : ‖((Real.exp (-x) : ℝ) : ℂ)‖ = Real.exp (-x) :=
+          Complex.norm_of_nonneg (le_of_lt (Real.exp_pos _))
+        have h2 : ‖(x : ℂ) ^ (z - 1)‖ = x ^ ((z - 1).re) :=
+          Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+        rw [h1, h2]
+        have hexp : (z - 1).re = z.re - 1 := by simp [Complex.sub_re]
+        rw [hexp]
+
+/-- Real-Gamma upper `Real.Gamma x ≤ 40` for `x ∈ [0.025,0.37]`
+(convexity on `[1,2]` gives `Γ(x+1) ≤ 1`, then `Γ(x) = Γ(x+1)/x ≤ 1/0.025`). -/
+theorem realGamma_le_40_of_mem {x : ℝ}
+    (hx_lo : 0.025 ≤ x) (hx_hi : x ≤ 0.37) : Real.Gamma x ≤ 40 := by
+  have hx_pos : (0 : ℝ) < x := by linarith
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_lo : (1 : ℝ) ≤ x + 1 := by linarith
+  have hy_hi : x + 1 ≤ (2 : ℝ) := by linarith
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - (x + 1) := by linarith
+  have hb_nn : (0 : ℝ) ≤ (x + 1) - 1 := by linarith
+  have hab : (2 - (x + 1)) + ((x + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - (x + 1)) * 1 + ((x + 1) - 1) * 2 = x + 1 := by ring
+  rw [heq] at h
+  have hrhs : (2 - (x + 1)) * 1 + ((x + 1) - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : x ≠ 0 := ne_of_gt hx_pos
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma x ≤ 1 / x := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / x ≤ 40 := by
+    have h1 : (1 : ℝ) / x ≤ 1 / 0.025 :=
+      one_div_le_one_div_of_le (by norm_num) hx_lo
+    have h2 : (1 : ℝ) / 0.025 ≤ 40 := by norm_num
+    exact le_trans h1 h2
+  exact le_trans hfin hfrac
+
+/-- Hypothesis-free Gamma upper `‖Γ(s/2)‖ ≤ 40` on the R02 disc `s`-rect. -/
+theorem gamma_upper_R02_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74) :
+    ‖gammaOf s‖ ≤ 40 := by
+  unfold gammaOf
+  have h2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hzpos : (0 : ℝ) < (s / 2).re := by
+    rw [h2re]
+    linarith
+  have hle := norm_Gamma_le_realGamma hzpos
+  have hx_lo : (0.025 : ℝ) ≤ (s / 2).re := by
+    rw [h2re]
+    linarith
+  have hx_hi : (s / 2).re ≤ (0.37 : ℝ) := by
+    rw [h2re]
+    linarith
+  have hreal := realGamma_le_40_of_mem hx_lo hx_hi
+  linarith
+
+/-! ### Conditional R02 sup + first concrete `M` -/
+
+/-- The single remaining supplier obligation for the R02 Cauchy disc:
+uniform `‖zeta s‖ ≤ 10` on the `s`-rect `Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`
+(true `|ζ| = O(1)` there; to be discharged by rigorous complex-`zeta` interval
+arithmetic via Dirichlet-eta + remainder, cf. `R00ZetaEM` in
+`interval_arith.lean`). Covers cell R02 only. -/
+def R02_zeta_upper_obligation : Prop :=
+  ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖zeta s‖ ≤ 10
+
+/-- Conditional `xiShifted` upper on an R02 sphere point from the zeta supplier:
+`‖ξ‖ ≤ 42*1*40*10 = 16800`. -/
+theorem xiShifted_upper_of_zeta_upper_R02 {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ))
+    (hZ : R02_zeta_upper_obligation) :
+    ‖xiShifted u‖ ≤ 16800 := by
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ := R02_s_of_sphere_re_im hw hu
+  have hpoly := poly_upper_R02_disc hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := pi_upper_R02_disc hsre_lo
+  have hgam := gamma_upper_R02_disc hsre_lo hsre_hi
+  have hzeta : ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 10 :=
+    hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := norm_xiShifted_eq_parts u
+  rw [hdecomp]
+  have h1 : ‖polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖piOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 * 40 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  have h123 : ‖polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 * 40 * 10 :=
+    mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+  have hnum : (42 : ℝ) * 1 * 40 * 10 = 16800 := by norm_num
+  rw [hnum] at h123
+  exact h123
+
+/-- Transfer to the entire extension on the sphere (agrees in the strip). -/
+theorem entire_upper_of_zeta_upper_R02 {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ))
+    (hZ : R02_zeta_upper_obligation) :
+    ‖CentralCoverAssembly.xiShiftedEntire u‖ ≤ 16800 := by
+  obtain ⟨hlo, hhi⟩ := R02_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  exact xiShifted_upper_of_zeta_upper_R02 hw hu hZ
+
+/-- Uniform sup `16800` on all R02 `0.25`-spheres from the zeta supplier. -/
+theorem R02_uniform_sphere_bound (hZ : R02_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800 := by
+  intro w hw z hz
+  exact entire_upper_of_zeta_upper_R02 hw hz hZ
+
+/-- R02's first concrete derivative bound: uniform `‖deriv xiShifted‖ ≤ 67200`
+(`16800 / 0.25`) modulo exactly `R02_zeta_upper_obligation` (zeta `≤ 10` on the
+disc `s`-rect). Poly/pi/Gamma factors are hypothesis-free above. -/
+theorem R02_deriv_bound_of_zeta_upper (hZ : R02_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ 67200 := by
+  have hM := uniform_deriv_of_sphere_bound CentralCoverAssembly.R02 0.25 16800
+    (by norm_num) (fun w hw => R02_strip_of_mem hw) (R02_uniform_sphere_bound hZ)
+  intro w hw
+  have hle := hM w hw
+  have heq : (16800 : ℝ) / 0.25 = 67200 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+#print axioms deriv_xiShifted_le_of_entire_sphere_bound
+#print axioms uniform_deriv_of_sphere_bound
+#print axioms uniform_deriv_of_closedBall_bound
+#print axioms R02_deriv_bound_of_zeta_upper
+
+end DerivCauchyBridge
