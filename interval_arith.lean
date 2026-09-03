@@ -1513,3 +1513,432 @@ theorem eta_limit_and_remainder :
 
 end R00EtaConv
 
+/-!
+## Uniform Gamma lower bound for every cell center + R02 template assembly.
+
+Status: all 40 packaged cells (`R00`–`R40` in `CentralCoverAssembly`) take their
+`center_bound` (`ε + M * radius ≤ ‖xiShifted center‖`) as an explicit hypothesis
+(`RXX_leaf_obligations`). `R00Enclosure.R00_center_bound_of_component_bounds`
+reduces `R00`'s center obligation to four factor bounds (poly / pi / Gamma /
+zeta), of which poly + pi + Gamma are closed hypothesis-free (`R00Numerics`,
+`R00GammaLower`) and zeta remains conditional (`R00ZetaEM.zeta_lower_R00_of_eta`).
+
+New here (all fully proved, no `sorry`, no new axioms):
+
+1. `CellGammaUniform.gamma_lower_wide`: the joint Gammaℝ/reflection route of
+   `R00GammaLower.gamma_lower_rect` generalized from the R00 `s`-rect
+   (`Re ∈ [0.3,0.49]`, `Im ∈ [-10,-7.5]`) to the WIDE hypotheses
+   `0.01 ≤ s.re ≤ 0.49`, `|s.im| ≤ 10`, `s.im ≠ 0`. The original proof uses the
+   rect only through exactly these consequences (`(1-s/2).re ∈ [0.755,0.85]`
+   becomes `[0.755,0.995]`, still inside `[0,1]` for the convexity step;
+   `|s.im| ≤ 10` for the sine majorant; `s.im ≠ 0` for sine nonvanishing), so
+   the same constant `1/10000000` holds. Coverage: every packaged cell center
+   `z` has `s = 1/2 + I·z` with `s.re = 1/2 - z.im ∈ [0.01,0.49]`
+   (bottom row `0.395`, row1 `0.3`, row2 `0.2`, top row `0.105`) and
+   `s.im = z.re ∈ [-8.75,8.75] ∖ {0}` — i.e. this ONE lemma supplies the
+   hypothesis-free Gamma-center factor for all 40 cells.
+2. `CellUniform.pi_lower_of_re`: `1/2 ≤ ‖piPart s‖` for every `s` with
+   `s.re ≤ 1/2` (from `‖piPart s‖ = π^(-s.re/2)` and
+   `CpowInterval.pi_rpow_neg_quarter_ge_half`); covers all 40 centers.
+3. `CellUniform.center_bound_of_component_bounds`: the R00 four-factor product
+   bridge generalized to an arbitrary `Rect2D` (takes `R.radius ≤ 1.26` and
+   `0 ≤ M` as explicit premises; all 40 cells satisfy the radius bound via
+   their `RXX_radius_lt`).
+4. `R02Uniform`: full template instantiation for `R02 = (-8,-5.5,0.01,0.2)`
+   (outer tier `(ε,M) = (0.002,0.05)`): `s`-center coordinates, hypothesis-free
+   poly (`22 ≤ ‖poly‖`), pi, and Gamma enclosures, the conditional center
+   assembly `R02_center_with_poly_pi_gamma` (explicit residual: one zeta lower
+   bound + the numeric product check), and `R02_H_of_components` discharging
+   the `H`-leaf of `inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell
+   modulo exactly the two named missing enclosures (zeta factor, deriv bound).
+
+Grep-first record (prior art checked before writing):
+* `rg "center_bound_of_component_bounds|gamma_lower_wide|pi_lower_of|poly_lower_R0|deriv xiShifted"`
+  → only the R00-specific bridge exists; uniform-deriv bounds exist nowhere
+  (only per-cell hypotheses + unrelated `deriv xiShifted` facts about simple
+  zeros in `riemann_hypothesis.lean`); no `sR02`/wide/duplicated names.
+* `rg "theorem.*Gamma.*≤|Stirling|norm_Gamma" Mathlib/Analysis/SpecialFunctions/Gamma/`
+  → no formalized complex-Gamma upper/Stirling bounds (one aspirational code
+  comment in `BohrMollerup.lean`); the integral majorant
+  `R00GammaLower.norm_Gamma_le_realGamma` + convexity route used here is the
+  available tool, hence the weak-but-rigorous `1/1e7` constant (see residual).
+-/
+
+namespace CellGammaUniform
+
+/-- Uniform real-Gamma upper bound `Real.Gamma ((1 - s/2).re) ≤ 1.5` under wide
+hypotheses `0.01 ≤ s.re ≤ 0.49` (same convexity proof as
+`R00GammaLower.realGamma_one_sub_half_le`; here `x = (1-s/2).re ∈ [0.755,0.995]`,
+so `x + 1 ∈ [1.755,1.995] ⊆ [1,2]` and `1/x ≤ 1/0.755 ≤ 1.5`). -/
+theorem realGamma_one_sub_half_le_wide {s : ℂ}
+    (hre_lo : (0.01 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.49 : ℝ)) :
+    Real.Gamma ((1 - s / 2).re) ≤ 1.5 := by
+  have hre2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hx_eq : (1 - s / 2).re = 1 - s.re / 2 := by
+    rw [Complex.sub_re, Complex.one_re, hre2]
+  have hx_lo : (0.755 : ℝ) ≤ (1 - s / 2).re := by rw [hx_eq]; linarith
+  have hx_hi : (1 - s / 2).re ≤ (0.995 : ℝ) := by rw [hx_eq]; linarith
+  have hx_pos : (0 : ℝ) < (1 - s / 2).re := by linarith
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_lo : (1 : ℝ) ≤ (1 - s / 2).re + 1 := by linarith
+  have hy_hi : (1 - s / 2).re + 1 ≤ (2 : ℝ) := by linarith
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((1 - s / 2).re + 1) := by linarith
+  have hb_nn : (0 : ℝ) ≤ ((1 - s / 2).re + 1) - 1 := by linarith
+  have hab : (2 - ((1 - s / 2).re + 1)) + (((1 - s / 2).re + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - ((1 - s / 2).re + 1)) * 1 + (((1 - s / 2).re + 1) - 1) * 2
+      = (1 - s / 2).re + 1 := by ring
+  rw [heq] at h
+  have hrhs : (2 - ((1 - s / 2).re + 1)) * 1 + (((1 - s / 2).re + 1) - 1) * 1
+      = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (1 - s / 2).re ≠ 0 := ne_of_gt hx_pos
+  have hadd := Real.Gamma_add_one hne
+  have hpt : ((1 - s / 2).re + 1) = ((1 - s / 2).re) + 1 := by ring
+  rw [hpt] at hadd
+  rw [hadd] at h
+  have hfin : Real.Gamma ((1 - s / 2).re) ≤ 1 / (1 - s / 2).re := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / (1 - s / 2).re ≤ 1.5 := by
+    have h1 : (1 : ℝ) / (1 - s / 2).re ≤ 1 / 0.755 :=
+      one_div_le_one_div_of_le (by norm_num) hx_lo
+    have h2 : (1 : ℝ) / 0.755 ≤ 1.5 := by norm_num
+    exact le_trans h1 h2
+  exact le_trans hfin hfrac
+
+/-- Uniform sine majorant `‖sin(π·(s/2))‖ ≤ Real.exp 16` from `|s.im| ≤ 10`
+(same exponential estimate as `R00GammaLower.norm_sin_pi_half_le`). -/
+theorem norm_sin_pi_half_le_wide {s : ℂ} (hab : |s.im| ≤ 10) :
+    ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp 16 := by
+  set w : ℂ := (Real.pi : ℂ) * (s / 2) with hw
+  have hs2im : (s / 2).im = s.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : w.im = Real.pi * (s.im / 2) := by
+    rw [hw]
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hw_abs : |w.im| ≤ 16 := by
+    rw [hw_im, abs_mul]
+    have h1 : |Real.pi| ≤ 3.1416 := by
+      rw [abs_of_pos Real.pi_pos]; exact hpi_le
+    have h2 : |s.im / 2| ≤ 5 := by
+      rw [abs_div, abs_two]
+      have : |s.im| / 2 ≤ 5 := by linarith [hab]
+      linarith
+    calc |Real.pi| * |s.im / 2| ≤ 3.1416 * 5 :=
+        mul_le_mul h1 h2 (by positivity) (by norm_num)
+      _ ≤ 16 := by norm_num
+  have hsin_eq : Complex.sin w = (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ Real.exp 16 :=
+    Real.exp_le_exp.mpr (le_trans (le_abs_self _) hw_abs)
+  have e2 : Real.exp (-w.im) ≤ Real.exp 16 := by
+    apply Real.exp_le_exp.mpr
+    have : -w.im ≤ |w.im| := neg_le_abs _
+    exact le_trans this hw_abs
+  linarith
+
+/-- Sine is nonzero at `π·(s/2)` when `s.im ≠ 0` (same integer-multiple
+argument as `R00GammaLower.sin_pi_half_ne`). -/
+theorem sin_pi_half_ne_wide {s : ℂ} (hne : s.im ≠ 0) :
+    Complex.sin ((Real.pi : ℂ) * (s / 2)) ≠ 0 := by
+  intro hzero
+  rw [Complex.sin_eq_zero_iff] at hzero
+  obtain ⟨k, hk⟩ := hzero
+  have hpi_ne : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hs2im : (s / 2).im = s.im / 2 := by rw [Complex.div_ofNat_im]
+  have hIm_eq : ((Real.pi : ℂ) * (s / 2)).im = ((k : ℂ) * (Real.pi : ℂ)).im := by rw [hk]
+  have hL : ((Real.pi : ℂ) * (s / 2)).im = Real.pi * (s.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hR : ((k : ℂ) * (Real.pi : ℂ)).im = 0 := by
+    simp [Complex.mul_im]
+  rw [hL, hR] at hIm_eq
+  have hpi_pos := Real.pi_pos
+  have hsim : s.im / 2 = 0 := by
+    have : Real.pi * (s.im / 2) = 0 := hIm_eq
+    rcases mul_eq_zero.mp this with h | h
+    · exact absurd h (ne_of_gt hpi_pos)
+    · exact h
+  have : s.im = 0 := by linarith
+  exact hne this
+
+/-- MAIN uniform bound: `1/10000000 ≤ ‖Gamma(s/2)‖` under the wide hypotheses
+`0.01 ≤ s.re ≤ 0.49`, `|s.im| ≤ 10`, `s.im ≠ 0` — satisfied by the `s`-center
+of every one of the 40 packaged cells (see module doc above for the row table).
+Same reflection assembly as `R00GammaLower.gamma_lower_rect`. -/
+theorem gamma_lower_wide {s : ℂ}
+    (hre_lo : (0.01 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.49 : ℝ))
+    (hab : |s.im| ≤ 10) (hne : s.im ≠ 0) :
+    (1 / 10000000 : ℝ) ≤ ‖Complex.Gamma (s / 2)‖ := by
+  have hs2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have h1w_re : (0 : ℝ) < (1 - s / 2).re := by
+    rw [Complex.sub_re, Complex.one_re, hs2re]
+    linarith
+  have hG1_ne : Complex.Gamma (1 - s / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1w_re
+  have hsin_ne := sin_pi_half_ne_wide hne
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (s / 2)
+  have hnorm : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma (1 - s / 2)‖
+      = Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ := by
+    have h := congrArg (fun x : ℂ => ‖x‖) hrefl
+    simp only [norm_mul, norm_div] at h
+    have hpi_norm : ‖(Real.pi : ℂ)‖ = Real.pi := by
+      rw [Complex.norm_real]
+      exact Real.norm_of_nonneg Real.pi_pos.le
+    rw [hpi_norm] at h
+    exact h
+  have hG1_le : ‖Complex.Gamma (1 - s / 2)‖ ≤ 1.5 := by
+    calc ‖Complex.Gamma (1 - s / 2)‖ ≤ Real.Gamma ((1 - s / 2).re) :=
+          R00GammaLower.norm_Gamma_le_realGamma h1w_re
+      _ ≤ 1.5 := realGamma_one_sub_half_le_wide hre_lo hre_hi
+  have hsin_le : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp 16 :=
+    norm_sin_pi_half_le_wide hab
+  have hexp_lt : Real.exp 16 < 10000000 := R00GammaLower.exp_sixteen_lt
+  have hsin_lt : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ < 10000000 :=
+    lt_of_le_of_lt hsin_le hexp_lt
+  have hpos1 : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ :=
+    norm_pos_iff.mpr hsin_ne
+  have hpos2 : (0 : ℝ) < ‖Complex.Gamma (1 - s / 2)‖ :=
+    norm_pos_iff.mpr hG1_ne
+  have hden_pos : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖ :=
+    mul_pos hpos1 hpos2
+  have hden_le : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖
+      ≤ 10000000 * 1.5 :=
+    mul_le_mul (le_of_lt hsin_lt) hG1_le (norm_nonneg _) (by norm_num)
+  have hfrac_le : Real.pi / (10000000 * 1.5) ≤ Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖) :=
+    div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) hden_pos hden_le
+  have hnum : Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖)
+      = ‖Complex.Gamma (s / 2)‖ := by
+    have hb_ne : ‖Complex.Gamma (1 - s / 2)‖ ≠ 0 := ne_of_gt hpos2
+    have h1 : ‖Complex.Gamma (s / 2)‖
+        = (Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖) / ‖Complex.Gamma (1 - s / 2)‖ :=
+      eq_div_of_mul_eq hb_ne hnorm
+    rw [h1, div_div]
+  have hbase : (1 / 10000000 : ℝ) ≤ Real.pi / (10000000 * 1.5) := by
+    rw [div_le_div_iff₀ (by norm_num) (by norm_num)]
+    nlinarith [Real.pi_gt_three]
+  exact le_trans hbase (hfrac_le.trans_eq hnum)
+
+#print axioms CellGammaUniform.realGamma_one_sub_half_le_wide
+#print axioms CellGammaUniform.norm_sin_pi_half_le_wide
+#print axioms CellGammaUniform.sin_pi_half_ne_wide
+#print axioms CellGammaUniform.gamma_lower_wide
+
+end CellGammaUniform
+
+namespace CellUniform
+
+/-- Uniform pi-power lower bound `1/2 ≤ ‖piPart s‖` for every `s` with
+` s.re ≤ 1/2` (covers all 40 cell centers, whose `s.re ≤ 0.49`).
+Proof: `‖piPart s‖ = π^(-s.re/2) ≥ π^(-1/4) ≥ 1/2`
+(`CpowInterval.pi_rpow_neg_quarter_ge_half`). -/
+theorem pi_lower_of_re {s : ℂ} (hre : s.re ≤ (1 / 2 : ℝ)) :
+    (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart s‖ := by
+  have hnorm : ‖R00Enclosure.piPart s‖ = Real.pi ^ (-(s.re) / 2) := by
+    have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(s / 2))
+    unfold R00Enclosure.piPart
+    rw [h]
+    congr 1
+    rw [Complex.neg_re, Complex.div_ofNat_re]
+    ring
+  rw [hnorm]
+  have hexp : (-(1 / 4 : ℝ)) ≤ -(s.re) / 2 := by linarith
+  calc (1 / 2 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) :=
+        CpowInterval.pi_rpow_neg_quarter_ge_half
+    _ ≤ Real.pi ^ (-(s.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Generic four-factor center bridge for an arbitrary fencing rect: component
+lower bounds at `s = 1/2 + I·R.center` plus the numeric product check give
+`ε + M * R.radius ≤ ‖xiShifted R.center‖`. Every packaged cell satisfies
+`R.radius ≤ 1.26` via its `RXX_radius_lt`. -/
+theorem center_bound_of_component_bounds (R : CellProofEngine.Rect2D) (ε M : ℝ)
+    (hM0 : 0 ≤ M) (hrad : R.radius ≤ 1.26)
+    (Apoly Api Agam Azeta : ℝ)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hpoly : Apoly ≤ ‖R00Enclosure.polyPart ((1 / 2 : ℂ) + Complex.I * R.center)‖)
+    (hpi : Api ≤ ‖R00Enclosure.piPart ((1 / 2 : ℂ) + Complex.I * R.center)‖)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart ((1 / 2 : ℂ) + Complex.I * R.center)‖)
+    (hzeta : Azeta ≤ ‖zeta ((1 / 2 : ℂ) + Complex.I * R.center)‖)
+    (hprod : ε + M * 1.26 ≤ Apoly * Api * Agam * Azeta) :
+    ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hdecomp := R00Enclosure.norm_xiShifted_eq_parts R.center
+  have hle : Apoly * Api * Agam * Azeta ≤ ‖xiShifted R.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hgam hzeta hA0 hB0 hC0 hD0
+  have hbud : M * R.radius ≤ M * 1.26 :=
+    mul_le_mul_of_nonneg_left hrad hM0
+  linarith
+
+#print axioms CellUniform.pi_lower_of_re
+#print axioms CellUniform.center_bound_of_component_bounds
+
+end CellUniform
+
+namespace R02Uniform
+
+/-- The R02 `s`-plane center: `s = 1/2 + I·z` at `z = R02.center`. -/
+noncomputable def sR02 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center
+
+/-- `R02.center = -6.75 + 0.105·I` (from `R02_x0/x1/y0/y1`). -/
+theorem R02_center_eq :
+    CentralCoverAssembly.R02.center =
+      (((-6.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+
+/-- `Re sR02 = 0.395` (`1/2 - 0.105`, same bottom row as R00). -/
+theorem sR02_re : sR02.re = 0.395 := by
+  unfold sR02
+  rw [R02_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR02 = -6.75`. -/
+theorem sR02_im : sR02.im = -6.75 := by
+  unfold sR02
+  rw [R02_center_eq]
+  simp
+
+/-- `‖sR02‖ ≥ 6.7` (`6.7² = 44.89 < 0.395² + 6.75² = 45.718525`). -/
+theorem norm_sR02_ge : (6.7 : ℝ) ≤ ‖sR02‖ := by
+  have hsq : (6.7 : ℝ) ^ 2 ≤ ‖sR02‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR02_re, sR02_im]
+    norm_num
+  calc (6.7 : ℝ) = Real.sqrt ((6.7 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR02‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR02‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR02 - 1‖ ≥ 6.7` (`0.605² + 6.75² = 45.928525 > 44.89`). -/
+theorem norm_sR02_sub_one_ge : (6.7 : ℝ) ≤ ‖sR02 - 1‖ := by
+  have hr1 : (sR02 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR02_re]
+    norm_num
+  have hi1 : (sR02 - 1).im = -6.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR02_im]
+    norm_num
+  have hsq : (6.7 : ℝ) ^ 2 ≤ ‖sR02 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (6.7 : ℝ) = Real.sqrt ((6.7 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR02 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR02 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR02`. -/
+theorem polyPart_norm_R02 :
+    ‖R00Enclosure.polyPart sR02‖ = (1 / 2) * ‖sR02‖ * ‖sR02 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `22 ≤ ‖polyPart sR02‖`
+(`6.7·6.7/2 = 22.445 ≥ 22`). -/
+theorem poly_lower_R02 : (22 : ℝ) ≤ ‖R00Enclosure.polyPart sR02‖ := by
+  have hprod : (6.7 : ℝ) * 6.7 ≤ ‖sR02‖ * ‖sR02 - 1‖ :=
+    mul_le_mul norm_sR02_ge norm_sR02_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R02]
+  nlinarith [hprod]
+
+/-- ENCLOSURE (hypothesis-free): `1/2 ≤ ‖piPart sR02‖` (uniform pi lemma +
+`Re sR02 = 0.395 ≤ 1/2`). -/
+theorem pi_lower_R02 : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR02‖ :=
+  CellUniform.pi_lower_of_re (by rw [sR02_re]; norm_num)
+
+/-- ENCLOSURE (hypothesis-free): `1/10000000 ≤ ‖gammaPart sR02‖` (uniform Gamma
+lemma: `Re = 0.395 ∈ [0.01,0.49]`, `|Im| = 6.75 ≤ 10`, `Im ≠ 0`). -/
+theorem gamma_lower_R02 :
+    (1 / 10000000 : ℝ) ≤ ‖R00Enclosure.gammaPart sR02‖ := by
+  have hab : |sR02.im| ≤ 10 := by
+    rw [sR02_im, abs_le]
+    constructor <;> norm_num
+  have hne : sR02.im ≠ 0 := by rw [sR02_im]; norm_num
+  have h := CellGammaUniform.gamma_lower_wide
+    (s := sR02)
+    (by rw [sR02_re]; norm_num)
+    (by rw [sR02_re]; norm_num)
+    hab hne
+  have heq : R00Enclosure.gammaPart sR02 = Complex.Gamma (sR02 / 2) := rfl
+  rw [heq]
+  exact h
+
+/-- Conditional center assembly for R02 (outer tier): the three closed
+enclosures (poly `22`, pi `1/2`, Gamma `1/1e7`) are plugged into the generic
+bridge, leaving exactly the zeta factor plus the numeric product check as
+explicit premises. -/
+theorem R02_center_with_poly_pi_gamma (Azeta : ℝ)
+    (hD0 : 0 ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR02‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  have harg : sR02
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center := rfl
+  have hpoly := poly_lower_R02
+  have hpi := pi_lower_R02
+  have hgam := gamma_lower_R02
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R02 0.002 0.05 (by norm_num)
+    (le_of_lt CentralCoverAssembly.R02_radius_lt)
+    22 (1 / 2) (1 / 10000000) Azeta
+    (by norm_num) (by norm_num) (le_of_lt R00GammaLower.gamma_const_pos) hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Full chain: zeta factor + deriv bound discharge the `H`-leaf of
+`inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell
+`(-8,-5.5,0.01,0.2)`. The exact remaining enclosures are the named premises
+`hzeta` (complex zeta lower bound at `sR02 = 0.395 - 6.75·I`; needs the
+Dirichlet-eta identity + remainder estimate, cf. `R00ZetaEM`) and `hderiv`
+(uniform `‖deriv xiShifted‖ ≤ 0.05` on the rect; needs Cauchy estimates). -/
+theorem R02_H_of_components (Azeta : ℝ)
+    (hD0 : 0 ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR02‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta)
+    (hderiv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hcenter := R02_center_with_poly_pi_gamma Azeta hD0 hzeta hprod
+  have hleaf : CentralCoverAssembly.R02_leaf_obligations := ⟨hcenter, hderiv⟩
+  exact CentralCoverAssembly.R02_H_instance hleaf c hc_mem hc_eq
+
+#print axioms R02Uniform.poly_lower_R02
+#print axioms R02Uniform.pi_lower_R02
+#print axioms R02Uniform.gamma_lower_R02
+#print axioms R02Uniform.R02_center_with_poly_pi_gamma
+#print axioms R02Uniform.R02_H_of_components
+
+end R02Uniform
+
