@@ -2576,3 +2576,294 @@ theorem eta_tight_best2_width : (0.6070 : ℝ) - (0.6029 : ℝ) = 0.0041 := by n
 #print axioms eta_limit_S16_split
 #print axioms eta_half_tight_best2
 #print axioms eta_tight_best2_width
+
+/-!
+## ZETA-factor (1): general complex S_{2M} paired-tail remainder + explicit M with r ≤ 0.1
+
+Grep documentation (searches run before writing; repo + Mathlib):
+* `etaCvtFactor` — only in `interval_arith.lean` (R00ZetaEM section), no Mathlib hit; not imported here (avoids cycles), mirrored via existing `etaDirichletTerm` / `etaPairTerm` API in this file.
+* `etaPartial` / `etaTerm` / `etaPartialℂ` — this file; complex `etaDirichletTerm` / `etaPairTerm` already general in this file.
+* `zeta_half_eq` / `HasSum` / `Tendsto` eta material — this file has `eta_hasSum_imp_tendsto`, `eta_tendsto_tsum_eq_of_summable`, `etaTendsto_eq_etaHurwitz`; the `0 < ∑'` tsum form is false (proved as `eta_tsum_eq_zero`), so only `Tendsto` forms used below.
+* Tail remainder: `R00EtaConv.remainder_le` (`interval_arith.lean`, `‖S₂ - L‖ ≤ 25`, `M = 1` only) and real `etaPair_tail_upper` / `etaPair_tail_lower` / `etaPair_tail_integral`, `eta_limit_norm_sub_le` (this file, real `σ = 1 / 2` only). No general complex `S_N` tail exists — proved below.
+* Mathlib (all pre-existing, only called): `Complex.norm_cpow_eq_rpow_re_of_pos`, `Summable.of_norm_bounded`, `tsum_of_norm_bounded`, `Real.summable_nat_rpow_inv`, `summable_nat_add_iff`, `AntitoneOn.tsum_comp_add_le_integral`, `integrableOn_Ioi_rpow_of_lt`, `integral_Ioi_rpow_of_lt`, `Real.antitoneOn_rpow_Ioi_of_exponent_nonpos`.
+
+Import graph: this file imports only `Mathlib`; no new imports added below (avoids cycles with `interval_arith` / `central_cover_assembly`). The R00 center is mirrored locally as `zetaCellS0 = 0.395 - 8.75 * I` (same numerals as `R00Numerics.sR00`: `Re = 0.395`, `Im = -8.75`) without importing it.
+
+What is proved below (all unconditional, fully closed):
+* `zetaCellS0_*`: local center `Re = 0.395`, `Im = -8.75`, `0 < Re`, `‖·‖ ≤ 10`.
+* `zetaCell_*`: general complex paired-tail bound `‖L - S_{2M}‖ ≤ C * M ^ (-σ) / σ` for `0 < σ = s.re`, `‖s‖ ≤ C`, `1 ≤ M` (`M > 1` gives `N = 2 * M > 2`), via M-test plus integral test.
+* `zetaCellS0_tail_general`: instantiation at `zetaCellS0` with `C = 10`, `σ = 0.395`.
+* `zetaCellS0_r_2097152_le` plus `zetaCellS0_tail_2097152_le`: explicit `M = 2097152 = 2 ^ 21` (`N = 4194304`) gives `r ≤ 0.1` and hence `‖L - S_N‖ ≤ 0.1`.
+* `zetaCellS0_r_1048576_gt`: previous power `M = 1048576 = 2 ^ 20` gives `r > 0.1`, so `2 ^ 21` is minimal among powers of two for this `r` (global minimal `M ≈ 1.21 * 10 ^ 6` not claimed).
+-/
+
+noncomputable def zetaCellS0 : ℂ := ⟨0.395, -8.75⟩
+
+theorem zetaCellS0_re : zetaCellS0.re = 0.395 := rfl
+
+theorem zetaCellS0_im : zetaCellS0.im = -8.75 := rfl
+
+theorem zetaCellS0_pos : 0 < zetaCellS0.re := by
+  rw [zetaCellS0_re]
+  norm_num
+
+theorem zetaCellS0_norm_le : ‖zetaCellS0‖ ≤ 10 := by
+  have hsq : ‖zetaCellS0‖ ^ 2 ≤ (10 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, zetaCellS0_re, zetaCellS0_im]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+theorem zetaCell_majorant_antitone {s : ℂ} (hs : 0 < s.re) {M : ℕ} (hM : 0 < M) :
+    AntitoneOn (fun x : ℝ => x ^ (-s.re - 1)) (Set.Ici (((M : ℕ)) : ℝ)) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by linarith : -s.re - 1 ≤ 0)).mono
+  intro x hx
+  have hM0 : (0 : ℝ) < (((M : ℕ)) : ℝ) := by exact_mod_cast hM
+  simp only [Set.mem_Ici] at hx
+  simp only [Set.mem_Ioi]
+  linarith
+
+theorem zetaCell_majorant_integrable {s : ℂ} (hs : 0 < s.re) {M : ℕ} (hM : 0 < M) :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-s.re - 1)) (Set.Ioi (((M : ℕ)) : ℝ)) :=
+  integrableOn_Ioi_rpow_of_lt (by linarith : -s.re - 1 < -1) (by exact_mod_cast hM)
+
+theorem zetaCell_majorant_nonneg {s : ℂ} {M : ℕ} :
+    ∀ t ∈ Set.Ioi (((M : ℕ)) : ℝ), 0 ≤ t ^ (-s.re - 1) := by
+  intro t ht
+  exact Real.rpow_nonneg
+    (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _
+
+theorem zetaCell_tsum_tail_le {s : ℂ} (hs : 0 < s.re) {M : ℕ} (hM : 1 ≤ M) :
+    (∑' n : ℕ, ((((n + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤
+      (∫ x : ℝ in Set.Ioi (((M : ℕ)) : ℝ), x ^ (-s.re - 1)) := by
+  have hM0 : 0 < M := by omega
+  exact AntitoneOn.tsum_comp_add_le_integral M
+    (zetaCell_majorant_antitone hs hM0) (zetaCell_majorant_integrable hs hM0)
+    (zetaCell_majorant_nonneg)
+
+theorem zetaCell_integral_value {s : ℂ} (hs : 0 < s.re) {M : ℕ} (hM : 0 < M) :
+    (∫ x : ℝ in Set.Ioi (((M : ℕ)) : ℝ), x ^ (-s.re - 1)) =
+      ((((M : ℕ)) : ℝ) ^ (-s.re)) / s.re := by
+  have hM0 : (0 : ℝ) < (((M : ℕ)) : ℝ) := by exact_mod_cast hM
+  have h := integral_Ioi_rpow_of_lt (a := -s.re - 1) (by linarith : -s.re - 1 < -1) hM0
+  have e1 : (-s.re - 1) + 1 = -s.re := by ring
+  rw [e1] at h
+  rw [h]
+  rw [neg_div_neg_eq]
+
+set_option maxHeartbeats 800000 in
+theorem zetaCell_majorant_summable_shift {s : ℂ} (hs : 0 < s.re) (M : ℕ) :
+    Summable (fun m : ℕ => ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) := by
+  have hp1 : (1 : ℝ) < s.re + 1 := by linarith
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (s.re + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + (M + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) :=
+    (summable_nat_add_iff (M + 1)).mpr hbase
+  have heq : (fun m : ℕ => ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) =
+      (fun m : ℕ => ((((m + (M + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) := by
+    funext m
+    have eN : m + M + 1 = m + (M + 1) := by omega
+    rw [eN]
+    have eR : -s.re - 1 = -(s.re + 1) := by ring
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+theorem zetaCell_scaled_summable {s : ℂ} (hs : 0 < s.re) {C : ℝ} (hC0 : 0 ≤ C) (M : ℕ) :
+    Summable (fun m : ℕ => C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) :=
+  (zetaCell_majorant_summable_shift hs M).mul_left C
+
+theorem zetaCell_tail_pointwise {s : ℂ} (hs : 0 < s.re) {C : ℝ} (hC : ‖s‖ ≤ C) (M m : ℕ) :
+    ‖etaPairTerm s (m + M)‖ ≤ C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
+  have hC0 : 0 ≤ C := le_trans (norm_nonneg _) hC
+  have hle1 := norm_etaPairTerm_le s hs (m + M)
+  have hm_pos : (0 : ℝ) < ((((m + M + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + M + 1 : ℕ)) : ℝ)) ≤ ((((2 * (m + M) + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp_nonpos : -s.re - 1 ≤ 0 := by linarith
+  have hrpow_le : ((((2 * (m + M) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) ≤
+      ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+    Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp_nonpos
+  calc ‖etaPairTerm s (m + M)‖ ≤ ‖s‖ * ((((2 * (m + M) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := hle1
+    _ ≤ C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+        mul_le_mul hC hrpow_le
+          (Real.rpow_nonneg (Nat.cast_nonneg _) _) hC0
+
+theorem zetaCell_pair_tail_norm_le {s : ℂ} (hs : 0 < s.re) {C : ℝ} (hC : ‖s‖ ≤ C)
+    (hC0 : 0 ≤ C) (M : ℕ) (hM : 1 ≤ M) :
+    ‖∑' m, etaPairTerm s (m + M)‖ ≤ C * (((((M : ℕ)) : ℝ) ^ (-s.re)) / s.re) := by
+  have hM0 : 0 < M := by omega
+  have hmajor_summ := zetaCell_scaled_summable hs hC0 M
+  have hpoint := fun m => zetaCell_tail_pointwise hs hC M m
+  have htsum_le : ‖∑' m, etaPairTerm s (m + M)‖ ≤
+      ∑' m, C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+    tsum_of_norm_bounded hmajor_summ.hasSum hpoint
+  have hfactor : (∑' m, C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) =
+      C * (∑' n, ((((n + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) :=
+    Summable.tsum_mul_left C (zetaCell_majorant_summable_shift hs M)
+  have htail_le := zetaCell_tsum_tail_le hs hM
+  have hval := zetaCell_integral_value hs hM0
+  calc ‖∑' m, etaPairTerm s (m + M)‖ ≤ ∑' m, C * ((((m + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := htsum_le
+    _ = C * (∑' n, ((((n + M + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) := hfactor
+    _ ≤ C * (∫ x : ℝ in Set.Ioi (((M : ℕ)) : ℝ), x ^ (-s.re - 1)) :=
+        mul_le_mul_of_nonneg_left htail_le hC0
+    _ = C * (((((M : ℕ)) : ℝ) ^ (-s.re)) / s.re) := by rw [hval]
+
+theorem zetaCell_even_remainder_le {s : ℂ} (hs : 0 < s.re) {C : ℝ} (hC : ‖s‖ ≤ C)
+    (hC0 : 0 ≤ C) (M : ℕ) (hM : 1 ≤ M) :
+    ‖(∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k)‖ ≤
+      C * (((((M : ℕ)) : ℝ) ^ (-s.re)) / s.re) := by
+  have hsum := summable_etaPairTerm hs
+  have hsplit : (∑ m ∈ Finset.range M, etaPairTerm s m) + (∑' m, etaPairTerm s (m + M)) =
+      ∑' m, etaPairTerm s m :=
+    hsum.sum_add_tsum_nat_add M
+  have heven := etaDirichlet_even_partial s M
+  have hdiff : (∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range (2 * M), etaDirichletTerm s k) =
+      ∑' m, etaPairTerm s (m + M) := by
+    rw [heven, ← hsplit]
+    ring
+  rw [hdiff]
+  exact zetaCell_pair_tail_norm_le hs hC hC0 M hM
+
+theorem zetaCellS0_tail_general (M : ℕ) (hM : 1 ≤ M) :
+    ‖(∑' m, etaPairTerm zetaCellS0 m) -
+      (∑ k ∈ Finset.range (2 * M), etaDirichletTerm zetaCellS0 k)‖ ≤
+      10 * (((((M : ℕ)) : ℝ) ^ (-0.395 : ℝ)) / (0.395 : ℝ)) := by
+  have hs := zetaCellS0_pos
+  have hC : ‖zetaCellS0‖ ≤ 10 := zetaCellS0_norm_le
+  have h := zetaCell_even_remainder_le hs hC (by norm_num) M hM
+  have hre : zetaCellS0.re = 0.395 := zetaCellS0_re
+  rw [hre] at h
+  exact h
+
+theorem zetaCellS0_M2097152_eq : ((((2097152 : ℕ)) : ℝ)) = (2 : ℝ) ^ (21 : ℕ) := by
+  norm_num
+
+theorem zetaCellS0_M2097152_rpow_ge :
+    (256 : ℝ) ≤ ((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)) := by
+  rw [zetaCellS0_M2097152_eq]
+  have h1 : (((2 : ℝ) ^ (21 : ℕ)) ^ (0.395 : ℝ)) = (2 : ℝ) ^ (((((21 : ℕ)) : ℝ)) * (0.395 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have hexp_ge : (8 : ℝ) ≤ ((((21 : ℕ)) : ℝ)) * (0.395 : ℝ) := by norm_num
+  have h2 : (2 : ℝ) ^ (8 : ℝ) ≤ (2 : ℝ) ^ (((((21 : ℕ)) : ℝ)) * (0.395 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_ge
+  have e8 : (8 : ℝ) = ((((8 : ℕ)) : ℝ)) := by norm_num
+  have h3 : (2 : ℝ) ^ (8 : ℝ) = 256 := by
+    rw [e8, Real.rpow_natCast]
+    norm_num
+  linarith
+
+set_option maxHeartbeats 800000 in
+theorem zetaCellS0_r_2097152_le :
+    10 * ((((((2097152 : ℕ)) : ℝ) ^ (-0.395 : ℝ))) / (0.395 : ℝ)) ≤ (0.1 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((2097152 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := zetaCellS0_M2097152_rpow_ge
+  have hrw : ((((2097152 : ℕ)) : ℝ) ^ (-0.395 : ℝ)) =
+      (((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ ≤ (256 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ / (0.395 : ℝ) ≤
+      (256 : ℝ)⁻¹ / (0.395 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : 10 * ((((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ / (0.395 : ℝ)) ≤
+      10 * ((256 : ℝ)⁻¹ / (0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : 10 * ((256 : ℝ)⁻¹ / (0.395 : ℝ)) ≤ (0.1 : ℝ) := by norm_num
+  linarith
+
+theorem zetaCellS0_tail_2097152_le :
+    ‖(∑' m, etaPairTerm zetaCellS0 m) -
+      (∑ k ∈ Finset.range (2 * 2097152), etaDirichletTerm zetaCellS0 k)‖ ≤ (0.1 : ℝ) := by
+  have hgen := zetaCellS0_tail_general 2097152 (by norm_num)
+  have hr := zetaCellS0_r_2097152_le
+  linarith
+
+theorem zetaCellS0_M1048576_eq : ((((1048576 : ℕ)) : ℝ)) = (2 : ℝ) ^ (20 : ℕ) := by
+  norm_num
+
+theorem zetaCellS0_10112_pow_lt : ((1.0112 : ℝ) ^ (10 : ℕ)) < 2 := by
+  norm_num
+
+theorem zetaCellS0_rpow01_gt : (1.0112 : ℝ) < (2 : ℝ) ^ (0.1 : ℝ) := by
+  by_contra hle
+  push Not at hle
+  have hle_pow : (((2 : ℝ) ^ (0.1 : ℝ)) ^ (10 : ℕ)) ≤ ((1.0112 : ℝ) ^ (10 : ℕ)) :=
+    pow_le_pow_left₀ (Real.rpow_nonneg (by norm_num) _) hle _
+  have h2_eq : (((2 : ℝ) ^ (0.1 : ℝ)) ^ (10 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.1 : ℝ) * (((10 : ℕ)) : ℝ) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h2_eq] at hle_pow
+  have hlt := zetaCellS0_10112_pow_lt
+  linarith
+
+theorem zetaCellS0_M1048576_rpow_lt :
+    ((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ)) < (20000 : ℝ) / 79 := by
+  rw [zetaCellS0_M1048576_eq]
+  have h1 : (((2 : ℝ) ^ (20 : ℕ)) ^ (0.395 : ℝ)) =
+      (2 : ℝ) ^ (((((20 : ℕ)) : ℝ)) * (0.395 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have e_exp : ((((20 : ℕ)) : ℝ)) * (0.395 : ℝ) = 8 - (0.1 : ℝ) := by norm_num
+  rw [e_exp]
+  have hsub : (2 : ℝ) ^ (8 - (0.1 : ℝ)) = (2 : ℝ) ^ (8 : ℝ) / (2 : ℝ) ^ (0.1 : ℝ) := by
+    rw [Real.rpow_sub (by norm_num)]
+  rw [hsub]
+  have e8 : (8 : ℝ) = ((((8 : ℕ)) : ℝ)) := by norm_num
+  have h256 : (2 : ℝ) ^ (8 : ℝ) = 256 := by
+    rw [e8, Real.rpow_natCast]
+    norm_num
+  rw [h256]
+  have hgt := zetaCellS0_rpow01_gt
+  have h256_pos : (0 : ℝ) < 256 := by norm_num
+  have h01_pos : (0 : ℝ) < (1.0112 : ℝ) := by norm_num
+  have h2_pos : (0 : ℝ) < (2 : ℝ) ^ (0.1 : ℝ) := Real.rpow_pos_of_pos (by norm_num) _
+  have hInv_lt : (256 : ℝ) / ((2 : ℝ) ^ (0.1 : ℝ)) < 256 / (1.0112 : ℝ) :=
+    div_lt_div_of_pos_left h256_pos h01_pos hgt
+  have heq : (256 : ℝ) / (1.0112 : ℝ) = (20000 : ℝ) / 79 := by norm_num
+  linarith
+
+set_option maxHeartbeats 800000 in
+theorem zetaCellS0_r_1048576_gt :
+    (0.1 : ℝ) < 10 * (((((1048576 : ℕ)) : ℝ) ^ (-0.395 : ℝ)) / (0.395 : ℝ)) := by
+  have hMpos : (0 : ℝ) < ((((1048576 : ℕ)) : ℝ)) := by norm_num
+  have hBpos : (0 : ℝ) < ((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hB_lt := zetaCellS0_M1048576_rpow_lt
+  have hrw : ((((1048576 : ℕ)) : ℝ) ^ (-0.395 : ℝ)) =
+      (((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hden_pos : (0 : ℝ) < (0.395 : ℝ) * ((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ)) :=
+    mul_pos (by norm_num) hBpos
+  have h10_eq : (10 : ℝ) / ((0.395 : ℝ) * ((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ))) =
+      10 * ((((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ / (0.395 : ℝ)) := by
+    rw [div_eq_mul_inv, div_eq_mul_inv, mul_inv_rev]
+  rw [← h10_eq]
+  rw [lt_div_iff₀ hden_pos]
+  have hthr : (0.1 : ℝ) * ((0.395 : ℝ) * (20000 / 79)) = 10 := by norm_num
+  have hmul : (0.1 : ℝ) * ((0.395 : ℝ) * ((((1048576 : ℕ)) : ℝ) ^ (0.395 : ℝ))) <
+      (0.1 : ℝ) * ((0.395 : ℝ) * (20000 / 79)) := by
+    apply mul_lt_mul_of_pos_left _ (by norm_num)
+    apply mul_lt_mul_of_pos_left hB_lt (by norm_num)
+  linarith
+
+#print axioms zetaCellS0
+#print axioms zetaCellS0_re
+#print axioms zetaCellS0_pos
+#print axioms zetaCellS0_norm_le
+#print axioms zetaCell_majorant_antitone
+#print axioms zetaCell_majorant_integrable
+#print axioms zetaCell_tsum_tail_le
+#print axioms zetaCell_integral_value
+#print axioms zetaCell_majorant_summable_shift
+#print axioms zetaCell_pair_tail_norm_le
+#print axioms zetaCell_even_remainder_le
+#print axioms zetaCellS0_tail_general
+#print axioms zetaCellS0_r_2097152_le
+#print axioms zetaCellS0_tail_2097152_le
+#print axioms zetaCellS0_r_1048576_gt
