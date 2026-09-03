@@ -1336,7 +1336,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `zetaFE_factor_lower_S0` from cpow `≥1/7` + cos `≥1` (reverse-triangle sum form) + Gamma `≥1e-13`
   via complex reflection `Gamma_mul_Gamma_one_sub` (`Beta.lean:397-398` — EXISTS, no continuation
   needed) with `‖sin(πs0)‖≤2e12` + `‖Gamma(1−s0)‖≤2`. FE factor now two-sided at R00
-  (`1e-14 ≤ ‖F‖ ≤ 6e7`). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+  (`1e-14 ≤ ‖F‖ ≤ 6e7`). **Reflected pilot:** short sum `‖S₂(1−s0)‖ ≥ 1/3` CLOSED at `σ=0.605`
+  (first term dominates honestly, margin 0.05) + `zeta(1−s0) = G/(1−2^{s0})` instance +
+  `zetaFE_refl_eq_S0` (`ζ(1−s0)=F(s0)·ζ(s0)`). **Direction correction:** Mathlib gives
+  `ζ(1−s)=F(s)·ζ(s)`, so `‖ζ(s0)‖ ≥ ‖ζ(1−s0)‖/6e7` needs `F` UPPER (have it), not lower.
+  **Wall quantified:** `r(M)=10·M^{−0.605}/0.605` needs `M≥635` (`N≥1270` terms, infeasible explicit)
+  for `r<1/3` — the `hSlow` wall shifted from 4M to ~1–2k terms, not removed. Missing exactly:
+  `Azeta1>0` at `1−s0` without explicit 1k+ sums (smarter tail with cancellation, or non-pair route);
+  then `Azeta=Azeta1/6e7` is immediate. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
