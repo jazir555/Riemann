@@ -9639,3 +9639,133 @@ theorem R02_closed_of_factorBounds
   exact CentralCoverAssembly.R02_H_instance hleaf c hc_mem hc_eq
 
 #print axioms R02_closed_of_factorBounds
+
+/-! ## S2a: zero => divisor >= 1 (finite-order packaging, sorry-free)
+
+GREP-first record (2026-09-03, verified by reading, documented in-file per HARD RULES):
+- Mathlib complex Rouche / Hurwitz / winding number / argument principle / count-zeros:
+  ABSENT. `Mathlib/Analysis/Complex/LocallyUniformLimit.lean:136` gives holomorphic limit
+  only (`TendstoLocallyUniformlyOn.differentiableOn`, reused by others, not needed here);
+  `Mathlib/Analysis/Analytic/IsolatedZeros.lean:125` gives isolated zeros only;
+  `Mathlib/Analysis/Complex/JensenFormula.lean:308,376,390` gives Jensen equality plus a
+  zero-count UPPER bound only, no Rouche equality of counts. No `windingNumber`,
+  no `argumentPrinciple`, no `countZeros` anywhere in Mathlib (same verdict as the
+  `RoucheCount` header above, which was built from scratch from Jensen + sup-norm).
+- Mathlib HAS isolated-zero / finite-order material, REUSED here (not recreated):
+  `AnalyticAt.analyticOrderAt_eq_zero/ne_zero` + `analyticOrderAt_eq_zero`
+  (`Mathlib/Analysis/Analytic/Order.lean:120,129,133,137`), the clopen/connected
+  finiteness transfer `AnalyticOnNhd.analyticOrderAt_ne_top_of_isPreconnected`
+  (`Order.lean:627`, via `isClopen_setOfPred_analyticOrderAt_eq_top` at :580 and
+  `exists_analyticOrderAt_ne_top_iff_forall` at :617), `Metric.isPreconnected_closedBall`
+  (`Mathlib/Analysis/Normed/Module/Connected.lean:183`, in `namespace Metric`),
+  divisor evaluation `MeromorphicOn.AnalyticOnNhd.divisor_apply`
+  (`Mathlib/Analysis/Meromorphic/Divisor.lean:71`, full name with `MeromorphicOn.` prefix
+  since it lives in `namespace MeromorphicOn`), `ENat.map` monotonicity
+  (`ENat.monotone_map_iff` + `map_natCast_strictMono` at `Data/ENat/Basic.lean:596,607`,
+  `map_eq_top_iff` at :590), and `WithTop.untop₀_le_untop₀` / `untop₀_one` / `untop₀_coe`
+  (`Algebra/Order/WithTop/Untop0.lean:47,75,112`).
+
+What is proved here (no `sorry`, no `admit`, no `axiom`, Mathlib only + this file's own
+`RoucheCount`):
+- `RoucheCount.divisor_ge_one_of_zero`: an interior zero of an analytic limit forces
+  divisor `>= 1` at that point, provided the limit is nonzero somewhere on the same
+  closed ball (here the disc center `c`, exactly `hurwitz_zero_transfer`'s `hGc`).
+  Finite-order packaging: `G c ≠ 0` gives `orderAt c = 0 ≠ ⊤`; preconnectedness of the
+  closed ball transfers `≠ ⊤` to `w`; `G w = 0` gives `orderAt w ≠ 0`; hence
+  `1 ≤ orderAt w` as `ℕ∞`, monotonely mapped to `WithTop ℤ` and pushed through `untop₀`.
+  This rules out the `⊤ ↦ 0` divisor collapse (locally-zero case) via the `hGc` witness.
+- `RoucheCount.hurwitz_zero_transfer_of_zero` / `door1_nonreal_zero_forced_of_zero`:
+  exact-signature wrappers around the existing `hurwitz_zero_transfer` /
+  `door1_nonreal_zero_forced`, with the `hdiv : 1 ≤ divisor` hypothesis discharged by
+  the lemma above and replaced by the directly usable `hGw : G w = 0`. This is the S2a
+  link named in guide §18b.10: S2b (a later agent) can now feed a limit zero straight
+  into polynomial-eval packaging + `hyperbolic_zeroFree_off_real` composition in the
+  door-1 file, without touching divisor internals.
+-/
+
+namespace RoucheCount
+
+theorem divisor_ge_one_of_zero {c : ℂ} {R : ℝ} {G : ℂ → ℂ}
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    {w : ℂ} (hw : w ∈ Metric.closedBall c R)
+    (hGc : G c ≠ 0) (hc : c ∈ Metric.closedBall c R)
+    (hGw : G w = 0) :
+    1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w := by
+  have hGc_ord : analyticOrderAt G c ≠ ⊤ := by
+    have h0 : analyticOrderAt G c = 0 :=
+      (hG c hc).analyticOrderAt_eq_zero.mpr hGc
+    rw [h0]
+    simp
+  have hord_top : analyticOrderAt G w ≠ ⊤ :=
+    AnalyticOnNhd.analyticOrderAt_ne_top_of_isPreconnected hG
+      Metric.isPreconnected_closedBall hc hw hGc_ord
+  have hord_zero : analyticOrderAt G w ≠ 0 :=
+    (hG w hw).analyticOrderAt_ne_zero.mpr hGw
+  have hdiv_eq := MeromorphicOn.AnalyticOnNhd.divisor_apply hG hw
+  obtain ⟨k, hk⟩ := ENat.ne_top_iff_exists.mp hord_top
+  have hk0 : k ≠ 0 := by
+    intro h0
+    apply hord_zero
+    rw [← hk, h0]
+    simp
+  have hk1 : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk0
+  have hord_eq : analyticOrderAt G w = (k : ℕ∞) := hk.symm
+  have h1le_ord : (1 : ℕ∞) ≤ analyticOrderAt G w := by
+    rw [hord_eq]
+    exact_mod_cast hk1
+  have hmono : Monotone (ENat.map ((↑) : ℕ → ℤ)) := by
+    rw [ENat.monotone_map_iff]
+    intro a b hab
+    exact_mod_cast hab
+  have h1le_map : (1 : WithTop ℤ) ≤ (analyticOrderAt G w).map ((↑) : ℕ → ℤ) := by
+    have h := hmono h1le_ord
+    simpa using h
+  have hmap_ne_top : (analyticOrderAt G w).map ((↑) : ℕ → ℤ) ≠ ⊤ :=
+    ENat.map_eq_top_iff.ne.mpr hord_top
+  calc (1 : ℤ) = (1 : WithTop ℤ).untop₀ := by simp
+    _ ≤ ((analyticOrderAt G w).map ((↑) : ℕ → ℤ)).untop₀ :=
+        WithTop.untop₀_le_untop₀ hmap_ne_top h1le_map
+    _ = MeromorphicOn.divisor G (Metric.closedBall c R) w := hdiv_eq.symm
+
+theorem hurwitz_zero_transfer_of_zero {c : ℂ} {R : ℝ} (hR : 0 < R)
+    {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+    (hF : ∀ n, AnalyticOnNhd ℂ (F n) (Metric.closedBall c R))
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    (hGc : G c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, G z ≠ 0)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hGw : G w = 0)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖F n z - G z‖ < ε) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∃ u ∈ Metric.closedBall c R, F n u = 0 := by
+  have hc : c ∈ Metric.closedBall c R :=
+    Metric.mem_closedBall.mpr (by rw [dist_self]; exact hR.le)
+  have hwCB : w ∈ Metric.closedBall c R := Metric.ball_subset_closedBall hw
+  have hdiv : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w :=
+    divisor_ge_one_of_zero hG hwCB hGc hc hGw
+  exact hurwitz_zero_transfer hR hF hG hGc hGsph hw hwc hdiv hConv
+
+theorem door1_nonreal_zero_forced_of_zero {c : ℂ} {R : ℝ} (hR0 : 0 < R)
+    (hRim : R < |c.im|)
+    {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+    (hF : ∀ n, AnalyticOnNhd ℂ (F n) (Metric.closedBall c R))
+    (hG : AnalyticOnNhd ℂ G (Metric.closedBall c R))
+    (hGc : G c ≠ 0)
+    (hGsph : ∀ z ∈ Metric.sphere c R, G z ≠ 0)
+    {w : ℂ} (hw : w ∈ Metric.ball c R) (hwc : w ≠ c)
+    (hGw : G w = 0)
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ z ∈ Metric.closedBall c R,
+      ‖F n z - G z‖ < ε) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∃ u ∈ Metric.closedBall c R, (F n u = 0 ∧ u.im ≠ 0) := by
+  have hc : c ∈ Metric.closedBall c R :=
+    Metric.mem_closedBall.mpr (by rw [dist_self]; exact hR0.le)
+  have hwCB : w ∈ Metric.closedBall c R := Metric.ball_subset_closedBall hw
+  have hdiv : 1 ≤ MeromorphicOn.divisor G (Metric.closedBall c R) w :=
+    divisor_ge_one_of_zero hG hwCB hGc hc hGw
+  exact door1_nonreal_zero_forced hR0 hRim hF hG hGc hGsph hw hwc hdiv hConv
+
+end RoucheCount
+
+#print axioms RoucheCount.divisor_ge_one_of_zero
+#print axioms RoucheCount.hurwitz_zero_transfer_of_zero
+#print axioms RoucheCount.door1_nonreal_zero_forced_of_zero
