@@ -20894,3 +20894,340 @@ theorem jensenEntire_summable_of_orderBound (r : ℝ) (z : ℂ) (hz : ‖z‖ �
   jensenEntire_summable_of_growth r z hz (taylorCoeff_summable_of_orderBound r)
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## Door-1 Pólya–Schur ASSEMBLY (conditional on explicit genus-one product data).
+
+Orientation: `AGENT_INFRASTRUCTURE_GUIDE.md` §18b.10 door-1 bullet
+(`JensenTranslation.lean`, 5 sorrys at 102/108/669/682/689; Pólya–Schur criterion
++ Hurwitz S1/S2 + GORZ + `∀ k ≥ 1` residual).
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Repo `JensenTranslation.lean`: the 5 sorrys (`rh_iff_all_jensen_hyperbolic` 102-104,
+  `jensen_hyperbolic_eventually` 108-110, `all_shifts_from_zero` 669-671,
+  `rh_iff_jensen_zero` 682-684, `tail_nonvanishing_iff_jensen` 689-693); stones
+  `Hyperbolic_multiset_prod_real_linear` (20071), `hyperbolic_iterate_derivative`
+  (20090), `jensenPoly_derivative` (291), `jensenPoly_natDegree` (365),
+  `all_shifts_from_zero_of_nonvanishing` (641), `Hyperbolic_const_mul` (330),
+  `Hyperbolic_of_const_mul` (320), `Hyperbolic_mul` (342),
+  `scaled_tendsto_jensenEntire_of_orderBound` (20887),
+  `uniform_limit_boundary_stability` (20335), `hyperbolic_zeroFree_off_real` (20296),
+  `taylorCoeff_zero_ne_zero` (20005, only `k = 0`).
+- Repo `JensenScratch.lean` (READ-ONLY): `polyaTheoremHyp` (399-402, order<2 +
+  real-rooted ⇒ hyperbolic sections), `genFun_orderBound` (324, `(7/4:ℝ) ∈ orderSet`),
+  UNSCALED `sectionsConvergeHyp` (84-85, documented FALSE by prior stones — never used).
+- Mathlib: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya,
+  no complex Hurwitz/Rouché (prior stones' verdict, re-verified via
+  `Algebra/Polynomial/Derivative.lean:151` which instead gives the reusable
+  `Polynomial.iterate_derivative_C_mul`, consumed below); used here:
+  `tendsto_atTop_atTop` (`Order/Filter/AtTopBot/Basic.lean:185`),
+  `one_div_lt_one_div` (`Algebra/Order/Field/Basic.lean:98`),
+  `Metric.tendsto_nhds`, `Summable.tendsto_atTop_zero`, `Complex.ofReal_natCast`,
+  `div_mul_cancel₀`, `Complex.mul_im/ofReal_im/ofReal_re`, `sq_abs`, `mul_pos_iff`.
+- Name-clash check (`hadamardPartial|GenusOneRealRooted|roucheZeroTransfer|
+  jensenPoly_iterate_derivative|s1_tendsto_explicit|scaled_eval_hyperbolic|
+  schur_*|genusOne_`): no repo hits (only Mathlib's `Polynomial.iterate_derivative_C_mul`,
+  which is reused, not redeclared).
+
+### Sorry → stone map (which committed stones feed which sorry)
+1. `rh_iff_all_jensen_hyperbolic` (102; `RH ↔ ∀ d n, Hyperbolic (jensenPoly d n)`).
+   FORWARD (Pólya direction): `genusOne_forward` below, conditional on the explicit
+   `GenusOneRealRooted` premise — chain: `hadamardPartial_hyperbolic` (finite
+   real-rooted products via `Hyperbolic_multiset_prod_real_linear`) +
+   `hyperbolic_iterate_derivative` (iterated Gauss–Lucas) +
+   `jensenPoly_iterate_derivative` (new: `J_{d,n}` as `n`-th derivative of `J_{d+n,0}`,
+   from `jensenPoly_derivative` + Mathlib `Polynomial.iterate_derivative_C_mul`) +
+   `jensenPoly_natDegree` with the `coeff_ne` premise field +
+   `Hyperbolic_const_mul`/`Hyperbolic_of_const_mul`.
+   BACKWARD (Schur direction): `schur_partial_assembly` below proves everything UP TO
+   Rouché counting — S1 input `scaled_tendsto_jensenEntire_of_orderBound`
+   (unconditional) via `s1_tendsto_explicit`, S2 input `uniform_limit_boundary_stability`
+   plus inherited scaled hyperbolicity `scaled_eval_hyperbolic`; the exact missing
+   lemma is `roucheZeroTransfer` (named BY NAME below, NOT assumed).
+   Residual to fully discharge: genus proof (order → Hadamard genus ≤ 1 for
+   `xiMathlibShifted`; `genFun_orderBound` is Scratch-only and the transfer +
+   Hadamard factorization are absent from Mathlib) and the `section_link` derivation
+   (genus-1 Jensen-section formula), plus the RH ↔ shifted-real-rooted bridge
+   (lives in `riemann_hypothesis.lean`, out of scope).
+2. `jensen_hyperbolic_eventually` (108; GORZ 2019 asymptotics). NO stones feed it
+   (needs explicit-formula per-`d` asymptotics); out of scope — mapped, not attempted.
+3. `all_shifts_from_zero` (669; unconditional shift reduction). PARTIALLY fed:
+   `all_shifts_from_zero_of_nonvanishing` (proved conditional) and the
+   `genusOne_forward` path; unconditional discharge needs `∀ k ≥ 1, taylorCoeff k ≠ 0`
+   (only `k = 0` is closed via `taylorCoeff_zero_ne_zero`); residual `k ≥ 1` named below.
+4. `rh_iff_jensen_zero` (682; `RH ↔ ∀ d, Hyperbolic (jensenPoly d 0)`). Fed by
+   `genusOne_shiftZero_hyperbolic` (forward, conditional) + the Schur special case
+   (backward up to `roucheZeroTransfer`) + the same bridge as (1).
+5. `tail_nonvanishing_iff_jensen` (689; open leaf of `riemann_hypothesis.lean`).
+   Maps to (1) + the zero-free-rectangle engines there; out of scope — mapped here only.
+
+### Theorem inventory (every premise explicit; every implication proved end-to-end)
+- `hadamardPartial` (def) + `hadamardPartial_hyperbolic`: finite genus-0 sections.
+- `GenusOneData` (structure) + `GenusOneRealRooted : Prop` (`Nonempty` wrapper,
+  DEFINITION, zero sorrys): Hadamard
+  genus-one product form with real nodes + `genus_cert` convergence certificate +
+  `hadamard` limit identity + `zeros_real` + `coeff_ne` + `section_link`.
+- `genusOneData_nodes_tendsto`: the certificate is consumed (nodes escape to infinity).
+- `jensenPoly_iterate_derivative`: `J_{d,n}` as scaled `n`-th derivative of `J_{d+n,0}`.
+- `genusOne_shiftZero_hyperbolic`, `genusOne_forward`: the FORWARD assembly.
+- `s1_tendsto_explicit` (S1 in eps-N form), `scaled_eval_hyperbolic` (hyperbolicity
+  survives `1/d` scaling), `schur_disc_boundary_of_uniform`,
+  `schur_singleton_boundary`, `schur_partial_assembly`: the BACKWARD assembly up to Rouché.
+
+### Exact missing Rouché counting lemma (named, NOT assumed, no sorry/axiom)
+`roucheZeroTransfer (F : ℕ → Polynomial ℂ) (G : ℂ → ℂ) (w : ℂ) (R : ℝ) :
+0 < R → (∀ n, Hyperbolic (F n)) →
+(∀ ε > 0, ∃ N, ∀ n ≥ N, ∀ z ∈ Metric.sphere w R, ‖(F n).eval z - G z‖ < ε) →
+(∀ z ∈ Metric.sphere w R, G z ≠ 0) → (G w = 0 → w.im = 0)`
+(zero-count preservation inside a boundary-nonvanishing circle; approximants have no
+nonreal zeros, so neither does the limit). With it, `schur_partial_assembly` closes the
+Schur direction; without it nothing here claims the full backward implication.
+
+### Honest residual (exact missing piece each)
+- Genus proof: Hadamard factorization (order < 2 ⇒ genus ≤ 1) for `xiMathlibShifted`
+  + derivation of the `section_link` field (genus-1 Jensen-section formula).
+- Rouché counting: `roucheZeroTransfer` as stated above (another agent owns that track).
+- GORZ: `jensen_hyperbolic_eventually` (explicit-formula asymptotics; no stones).
+- `k ≥ 1`: `∀ k ≥ 1, taylorCoeff k ≠ 0` (only `k = 0` proved).
+-/
+
+/-- Finite Hadamard partial product over the first `N` real nodes
+(genus-0 building block; the finite case of the `GenusOneRealRooted.hadamard` limit). -/
+noncomputable def hadamardPartial (nodes : ℕ → ℝ) (N : ℕ) : Polynomial ℂ :=
+  (Multiset.map (fun r : ℝ => Polynomial.X - Polynomial.C ((r : ℝ) : ℂ))
+    ((Finset.range N).val.map nodes)).prod
+
+/-- Finite real-rooted partial products are hyperbolic (direct reuse of the
+genus-0 stone `Hyperbolic_multiset_prod_real_linear`). -/
+theorem hadamardPartial_hyperbolic (nodes : ℕ → ℝ) (N : ℕ) :
+    Hyperbolic (hadamardPartial nodes N) :=
+  Hyperbolic_multiset_prod_real_linear _
+
+/-- Explicit genus-one real-rooted hypothesis (a DEFINITION, zero sorrys):
+Hadamard product form for the associated Jensen entire function `jensenEntire`
+with real nodes, a genus-one convergence certificate (`Summable 1/nodes²`,
+the canonical-product genus-1 condition), the product limit identity, real-rootedness
+of the limit, everywhere-nonvanishing Taylor coefficients, and the finite-section
+link (each shift-0 Jensen section is a nonzero scalar multiple of an iterated
+derivative of a finite real-rooted partial product). The Prop wrapper
+`GenusOneRealRooted := Nonempty GenusOneData` below is the clearly-labeled
+premise of the conditional assembly theorems, never discharged silently. -/
+structure GenusOneData where
+  nodes : ℕ → ℝ
+  nodes_ne : ∀ n, nodes n ≠ 0
+  genus_cert : Summable (fun n : ℕ => (1 : ℝ) / (nodes n) ^ 2)
+  lead : ℝ
+  lead_ne : lead ≠ 0
+  slope : ℝ
+  hadamard : ∀ z : ℂ, HasProd
+    (fun n : ℕ => (1 - z / ((nodes n : ℝ) : ℂ)) * Complex.exp (z / ((nodes n : ℝ) : ℂ)))
+    (jensenEntire z / (Complex.exp ((slope : ℂ) * z) * ((lead : ℂ))))
+  zeros_real : ∀ z : ℂ, jensenEntire z = 0 → z.im = 0
+  coeff_ne : ∀ k, taylorCoeff k ≠ 0
+  section_link : ∀ D : ℕ, ∃ N m : ℕ, ∃ c : ℂ, c ≠ 0 ∧
+    m ≤ (hadamardPartial nodes N).natDegree ∧
+    jensenPoly D 0 = Polynomial.C c * Polynomial.derivative^[m] (hadamardPartial nodes N)
+
+/-- The genus-one hypothesis as an explicit `Prop` (a DEFINITION, zero sorrys):
+inhabited genus-one data. (A `structure ... : Prop` cannot project data fields in
+Lean, so the data lives in `GenusOneData` and this `Nonempty` wrapper is the `Prop`
+premise consumed by the assembly theorems.) -/
+def GenusOneRealRooted : Prop := Nonempty GenusOneData
+
+/-- The convergence certificate is consumed: genus-one nodes escape to infinity
+(`1/nodes²` summable ⇒ `1/nodes² → 0` ⇒ `nodes² → ∞` ⇒ `|nodes| → ∞`, elementarily).
+This is what lets Hadamard partials exhaust compacts in the (residual) limit picture. -/
+theorem genusOneData_nodes_tendsto (G : GenusOneData) :
+    Tendsto (fun n : ℕ => |G.nodes n|) atTop atTop := by
+  have h0 := G.genus_cert.tendsto_atTop_zero
+  rw [tendsto_atTop_atTop]
+  intro M
+  by_cases hM : M ≤ 0
+  · exact ⟨0, fun n _ => le_trans hM (abs_nonneg _)⟩
+  · have hMpos : 0 < M := lt_of_not_ge hM
+    have hpos : (0 : ℝ) < 1 / (M ^ 2 + 1) := by positivity
+    have hev := (Metric.tendsto_nhds.mp h0) _ hpos
+    rw [eventually_atTop] at hev
+    obtain ⟨N, hN⟩ := hev
+    refine ⟨N, fun n hn => ?_⟩
+    have h1 := hN n hn
+    rw [dist_eq_norm] at h1
+    rw [sub_zero, Real.norm_eq_abs] at h1
+    have hnn : (0 : ℝ) ≤ 1 / (G.nodes n) ^ 2 :=
+      div_nonneg zero_le_one (sq_nonneg _)
+    rw [abs_of_nonneg hnn] at h1
+    have hsq : (0 : ℝ) < (G.nodes n) ^ 2 := by
+      rw [pow_two]
+      exact mul_self_pos.mpr (G.nodes_ne n)
+    have hbig : M ^ 2 + 1 < (G.nodes n) ^ 2 := by
+      have hM2 : (0 : ℝ) < M ^ 2 + 1 := by positivity
+      exact (one_div_lt_one_div hsq hM2).mp h1
+    have habs : (0 : ℝ) ≤ |G.nodes n| := abs_nonneg _
+    have hsqabs : |G.nodes n| ^ 2 = (G.nodes n) ^ 2 := sq_abs _
+    have hprod : (0 : ℝ) < (|G.nodes n| - M) * (|G.nodes n| + M) := by
+      have he : (|G.nodes n| - M) * (|G.nodes n| + M)
+          = |G.nodes n| ^ 2 - M ^ 2 := by ring
+      rw [he, hsqabs]
+      linarith
+    have hsum : (0 : ℝ) < |G.nodes n| + M := by linarith
+    have hdiff : (0 : ℝ) < |G.nodes n| - M := by
+      rcases mul_pos_iff.mp hprod with ⟨h1', _⟩ | ⟨_, h2'⟩
+      · exact h1'
+      · linarith
+    linarith
+
+/-- Differentiation propagates Jensen sections (Pólya shift mechanism, pure algebra):
+`J_{d,n}` is a nonzero scalar multiple of the `n`-th derivative of `J_{d+n,0}`,
+by iterating `jensenPoly_derivative` (Mathlib supplies
+`Polynomial.iterate_derivative_C_mul` for the scalar). -/
+theorem jensenPoly_iterate_derivative (D s n : ℕ) : n ≤ D →
+    ∃ c : ℂ, c ≠ 0 ∧ Polynomial.derivative^[n] (jensenPoly D s) =
+      Polynomial.C c * jensenPoly (D - n) (s + n) := by
+  induction n generalizing D s with
+  | zero =>
+    intro hn
+    exact ⟨1, one_ne_zero, by simp⟩
+  | succ k ih =>
+    intro hn
+    obtain ⟨D', rfl⟩ : ∃ D', D = D' + 1 := ⟨D - 1, by omega⟩
+    obtain ⟨c, hc, hceq⟩ := ih D' (s + 1) (by omega)
+    refine ⟨((D' + 1 : ℕ) : ℂ) * c,
+      mul_ne_zero (Nat.cast_ne_zero.mpr (by omega)) hc, ?_⟩
+    rw [Function.iterate_succ_apply, jensenPoly_derivative D' s,
+      Polynomial.iterate_derivative_C_mul, hceq]
+    have e1 : D' + 1 - (k + 1) = D' - k := by omega
+    have e2 : s + 1 + k = s + (k + 1) := by omega
+    rw [e1, e2, Polynomial.C_mul, mul_assoc]
+
+/-- FORWARD assembly, shift-0 case: under the genus-one premise every shift-0
+Jensen section is hyperbolic (finite product stone + iterated Gauss–Lucas +
+nonzero scaling, via the `section_link` field). -/
+theorem genusOne_shiftZero_hyperbolic (hG : GenusOneRealRooted) (D : ℕ) :
+    Hyperbolic (jensenPoly D 0) := by
+  obtain ⟨G⟩ := hG
+  obtain ⟨N, m, c, hc, hdeg, hlink⟩ := G.section_link D
+  rw [hlink]
+  exact Hyperbolic_const_mul hc
+    (hyperbolic_iterate_derivative m (hadamardPartial_hyperbolic G.nodes N) hdeg)
+
+/-- FORWARD assembly (Pólya direction, conditional): a genus-one real-rooted entire
+function has all Jensen sections hyperbolic. Shift-0 hyperbolicity propagates to all
+shifts through `jensenPoly_iterate_derivative` + iterated Gauss–Lucas (full degree
+from the `coeff_ne` field via `jensenPoly_natDegree`). Feeds sorry (1)
+`rh_iff_all_jensen_hyperbolic` forward and sorry (4) `rh_iff_jensen_zero` forward. -/
+theorem genusOne_forward (hG : GenusOneRealRooted) :
+    ∀ d n, Hyperbolic (jensenPoly d n) := by
+  obtain ⟨G⟩ := hG
+  intro d n
+  obtain ⟨c, hc, hder⟩ := jensenPoly_iterate_derivative (d + n) 0 n (by omega)
+  have e1 : d + n - n = d := by omega
+  have e2 : 0 + n = n := by omega
+  rw [e1, e2] at hder
+  have hH0 := genusOne_shiftZero_hyperbolic ⟨G⟩ (d + n)
+  have hdeg : n ≤ (jensenPoly (d + n) 0).natDegree := by
+    rw [jensenPoly_natDegree G.coeff_ne (d + n) 0]
+    omega
+  have hderH := hyperbolic_iterate_derivative n hH0 hdeg
+  rw [hder] at hderH
+  exact Hyperbolic_of_const_mul c hc hderH
+
+/-- S1 in explicit eps-N form (direct application of the unconditional corrected
+limit `scaled_tendsto_jensenEntire_of_orderBound`): the scaled sections
+`J_{n,0}(z/n)` converge to `jensenEntire z` on every disc. -/
+theorem s1_tendsto_explicit (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n →
+      ‖(jensenPoly n 0).eval (z / ((n : ℕ) : ℂ)) - jensenEntire z‖ < ε := by
+  have hT := scaled_tendsto_jensenEntire_of_orderBound r z hz
+  have hM := (Metric.tendsto_nhds.mp hT) ε hε
+  rw [eventually_atTop] at hM
+  obtain ⟨N, hN⟩ := hM
+  exact ⟨N, fun n hn => by
+    have h1 := hN n hn
+    rwa [dist_eq_norm] at h1⟩
+
+/-- Hyperbolicity survives the S1 `1/d` scaling: zeros of the scaled evaluation
+`J_{d,0}(z/d)` are real (`(z/d).im = z.im/d`). -/
+theorem scaled_eval_hyperbolic {d : ℕ} (hd : 0 < d) (hH : Hyperbolic (jensenPoly d 0))
+    {z : ℂ} (hz0 : (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ)) = 0) : z.im = 0 := by
+  have hdC : ((d : ℕ) : ℂ) ≠ 0 := by exact_mod_cast (ne_of_gt hd)
+  have him := hH _ hz0
+  have hmul : (z / ((d : ℕ) : ℂ)) * ((((d : ℕ)) : ℝ) : ℂ) = z := by
+    rw [Complex.ofReal_natCast]
+    exact div_mul_cancel₀ z hdC
+  conv_lhs => rw [← hmul]
+  rw [Complex.mul_im, Complex.ofReal_im, Complex.ofReal_re, him]
+  simp
+
+/-- BACKWARD assembly, S2 boundary step on a general set (direct application of
+`uniform_limit_boundary_stability` to the S1 scaled sections): where the limit
+`jensenEntire` stays bounded away from zero, approximants are eventually nonzero. -/
+theorem schur_disc_boundary_of_uniform {K : Set ℂ}
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ w ∈ K,
+      ‖(jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) - jensenEntire w‖ < ε)
+    {m : ℝ} (hm : 0 < m) (hG : ∀ w ∈ K, m ≤ ‖jensenEntire w‖) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ w ∈ K,
+      (jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) ≠ 0 := by
+  obtain ⟨N, hN⟩ := uniform_limit_boundary_stability hConv hm hG
+  exact ⟨N, fun n hn w hw => by
+    have h1 := hN n hn w hw
+    intro h0
+    rw [h0, norm_zero] at h1
+    have h2 := div_pos hm (by norm_num : (0 : ℝ) < 2)
+    linarith⟩
+
+/-- BACKWARD assembly, singleton case (S1 feeds S2 with no uniform-upgrade gap):
+at any point where `jensenEntire` is nonzero, scaled sections are eventually nonzero.
+The disc-uniform upgrade of S1 remains residual; only the Rouché counting step
+(`roucheZeroTransfer`, named above) is missing beyond that. -/
+theorem schur_singleton_boundary (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r)
+    (hne : jensenEntire z ≠ 0) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n →
+      (jensenPoly n 0).eval (z / ((n : ℕ) : ℂ)) ≠ 0 := by
+  have hm : 0 < ‖jensenEntire z‖ := norm_pos_iff.mpr hne
+  have hG : ∀ w ∈ ({z} : Set ℂ), ‖jensenEntire z‖ ≤ ‖jensenEntire w‖ := by
+    intro w hw
+    rw [Set.mem_singleton_iff.mp hw]
+  have hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ w ∈ ({z} : Set ℂ),
+      ‖(jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) - jensenEntire w‖ < ε := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := s1_tendsto_explicit r z hz ε hε
+    exact ⟨N, fun n hn w hw => by
+      rw [Set.mem_singleton_iff.mp hw]
+      exact hN n hn⟩
+  obtain ⟨N, hN⟩ := uniform_limit_boundary_stability (K := ({z} : Set ℂ)) hConv hm hG
+  exact ⟨N, fun n hn => by
+    have h1 := hN n hn z (Set.mem_singleton z)
+    intro h0
+    rw [h0, norm_zero] at h1
+    have h2 := div_pos hm (by norm_num : (0 : ℝ) < 2)
+    linarith⟩
+
+/-- BACKWARD assembly up to Rouché (Schur direction, conditional): from hyperbolic
+shift-0 sections + uniform convergence on `K` + limit bounded away from zero on `K`,
+eventually every approximant is nonzero on `K` (S2 boundary stone) AND every scaled
+zero is real (inherited scaled hyperbolicity). This is everything short of
+`roucheZeroTransfer`: promoting "nonzero on the boundary circle + real zeros" to
+"limit zero-free inside". Feeds sorry (1) backward and sorry (4) backward. -/
+theorem schur_partial_assembly
+    (hH : ∀ d, Hyperbolic (jensenPoly d 0))
+    {K : Set ℂ}
+    (hConv : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ w ∈ K,
+      ‖(jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) - jensenEntire w‖ < ε)
+    {m : ℝ} (hm : 0 < m) (hG : ∀ w ∈ K, m ≤ ‖jensenEntire w‖) :
+    ∃ N : ℕ, ∀ n : ℕ, N ≤ n → ∀ w ∈ K,
+      (jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) ≠ 0 ∧
+      ((jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) = 0 → w.im = 0) := by
+  obtain ⟨N₀, hN₀⟩ := uniform_limit_boundary_stability hConv hm hG
+  have hpos : 0 < m / 2 := div_pos hm (by norm_num : (0 : ℝ) < 2)
+  refine ⟨N₀ + 1, fun n hn w hw => ?_⟩
+  have hn1 : N₀ ≤ n := by omega
+  have h1 := hN₀ n hn1 w hw
+  have hne : (jensenPoly n 0).eval (w / ((n : ℕ) : ℂ)) ≠ 0 := by
+    intro h0
+    rw [h0, norm_zero] at h1
+    linarith
+  exact ⟨hne, fun h0 => scaled_eval_hyperbolic (by omega) (hH n) h0⟩
+
+end JensenRH
