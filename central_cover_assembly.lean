@@ -945,6 +945,124 @@ and its would-be feeder (no new `sorryAx` beyond the legacy per-cell leaves):
    sorry-free; `#print axioms` for them shows no `sorryAx`).
 -/
 
+/-! ## Single bottom-row cell R00 (outer tier): full fencing package
+
+Cell choice: `c00 = (-10, -7.5, 0.01, 0.2)` — bottom row `y ∈ (0.01, 0.2)`.
+All `fineGridX` widths equal `2.5` (`fineGridX_width_eq`), so every bottom-row
+cell ties for narrowest; `c00` is the corner one whose `(dx, dy) = (1.25, 0.095)`
+geometry exactly matches `sample_cell_radius_bound` (`radius < 1.26`).
+Tier: outer `(ε, M) = (0.002, 0.05)` (`fine_feasible_outer`, `fine_eps_outer_pos`,
+`fine_M_outer_nonneg`).
+
+What is proved here (sorry-free): every side condition plus the full fencing
+assembly — `R00` as a `Rect2D`, strip bounds, `ε_pos`, radius `< 1.26`,
+`gridFine` membership, and the `H`-leaf of `inner_nonvanishing_of_fenced_grid_fine`
+at `c00` via `xi_rect_lower_bound_of_center_bound_strip`,
+`lowerBoundRect_of_fencingHypotheses_strip`, `zeroFreeRect_of_rect_center_bound_strip`
+— conditional on exactly the two numerical enclosures (`R00_leaf_obligations`):
+`center_bound` and `deriv_bound`. Those two need rigorous `ξ`-enclosures
+(`riemannZeta`/`Gamma` interval arithmetic at `s = 0.395 - 8.75·I`), absent from
+Mathlib (whose `riemannZeta` bounds are real-`σ > 1` only); the `zeta_rigorous.lean`
+`eta_half_pos` template is real-alternating-series only and does not transfer to
+this off-real center. NOTE: `TailProofEngine.norm_xiShifted_eq_prod_norms` does NOT
+apply here — it is about `TailProofEngine.xiShifted`, a different def from the
+top-level `xiShifted` used by this file.
+-/
+
+/-- The corner bottom-row cell `(-10, -7.5) × (0.01, 0.2)`. -/
+def R00 : CellProofEngine.Rect2D :=
+  ⟨-10, -7.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R00_x0 : R00.x0 = -10 := rfl
+theorem R00_x1 : R00.x1 = -7.5 := rfl
+theorem R00_y0 : R00.y0 = 0.01 := rfl
+theorem R00_y1 : R00.y1 = 0.2 := rfl
+
+/-- All fine x-widths are `2.5`, so `R00` ties for narrowest bottom-row cell. -/
+theorem R00_width_ties_narrowest : R00.x1 - R00.x0 = 2.5 := by
+  rw [R00_x0, R00_x1]; norm_num
+
+theorem R00_strip_lo : -(1 / 2 : ℝ) < R00.y0 := by rw [R00_y0]; norm_num
+theorem R00_strip_hi : R00.y1 < (1 / 2 : ℝ) := by rw [R00_y1]; norm_num
+
+theorem R00_dx_eq : R00.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R00_x0, R00_x1]; norm_num
+
+theorem R00_dy_eq : R00.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R00_y0, R00_y1]; norm_num
+
+theorem R00_radius_eq :
+    R00.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R00_dx_eq, R00_dy_eq]
+
+theorem R00_radius_lt : R00.radius < 1.26 := by
+  rw [R00_radius_eq]; exact sample_cell_radius_bound
+
+theorem R00_mem_gridFine :
+    ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((-10, -7.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-10, -7.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R00` (outer tier).
+`center_bound` needs `‖ξ‖` at `s = 0.395 - 8.75·I`; `deriv_bound` needs a
+uniform `‖ξ'‖` bound on the rect. Both are currently unprovable in Mathlib. -/
+def R00_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R00.radius ≤ ‖xiShifted R00.center‖) ∧
+  (∀ w, R00.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+/-- Obligations → fencing package (strip version, no `hdiff`). -/
+theorem R00_fencing_of_bounds (h : R00_leaf_obligations) :
+    CellFencingHypotheses R00 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+/-- Obligations → lower-bound rect (`lowerBoundRect_of_fencingHypotheses_strip`). -/
+noncomputable def R00_lowerBound_of_bounds (h : R00_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R00 0.002 0.05
+    R00_strip_lo R00_strip_hi (R00_fencing_of_bounds h)
+
+/-- Obligations → zero-free rect (`zeroFreeRect_of_rect_center_bound_strip`). -/
+noncomputable def R00_zeroFree_of_bounds (h : R00_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R00 0.002 fine_eps_outer_pos 0.05
+    R00_strip_lo R00_strip_hi h.2 h.1
+
+/-- Obligations → pointwise nonvanishing on `R00`
+(`xi_rect_lower_bound_of_center_bound_strip`). -/
+theorem R00_nonvanishing_of_bounds (h : R00_leaf_obligations) {z : ℂ}
+    (hx0 : R00.x0 ≤ z.re) (hx1 : z.re ≤ R00.x1)
+    (hy0 : R00.y0 ≤ z.im) (hy1 : z.im ≤ R00.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R00 0.002 0.05
+      R00_strip_lo R00_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+/-- Obligations discharge the `H`-leaf of `inner_nonvanishing_of_fenced_grid_fine`
+at `c00 = (-10, -7.5, 0.01, 0.2)`. Next cell: same statement at
+`(-7.5, -5, 0.01, 0.2)` with mid-tier `(0.05, 0.07)`. -/
+theorem R00_H_instance (h : R00_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-10, -7.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R00, 0.002, 0.05, rfl, rfl, rfl, rfl, R00_strip_lo, R00_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+#print axioms R00_H_instance
+
 end CentralCoverAssembly
 
 end

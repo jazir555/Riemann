@@ -1078,6 +1078,73 @@ theorem Gammaℝ_half_re_bounds :
     norm_num at e2
     linarith
 
+/-- Bohr–Mollerup `n = 2` lower bound at `x = 1/4`: `3.38 < Gamma(1/4)`
+(tightens `gamma_quarter_gt`; new interval `3.38 < Γ(1/4) < 3.78`, width `0.40`).
+Note: `n = 1` gives only `Γ(1/4) ≥ 16/5 = 3.2` (weaker than `3.33`), so `n = 2`
+is the first tightening approximant at `x = 1/4`. -/
+theorem gamma_quarter_gt_BM2 : (3.38 : ℝ) < Real.Gamma (1/4 : ℝ) := by
+  have hfeq : ∀ {y : ℝ}, 0 < y →
+      (Real.log ∘ Real.Gamma) (y + 1) = (Real.log ∘ Real.Gamma) y + Real.log y := by
+    intro y hy
+    simp only [Function.comp_apply]
+    rw [Real.Gamma_add_one hy.ne',
+      Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne']
+    ring
+  have hx : (0 : ℝ) < 1/4 := by norm_num
+  have hge := Real.BohrMollerup.ge_logGammaSeq Real.convexOn_log_Gamma hfeq hx
+    (show (2 : ℕ) ≠ 0 by norm_num)
+  have h1 : (Real.log ∘ Real.Gamma) (1 : ℝ) = 0 := by
+    simp [Real.Gamma_one]
+  rw [h1, zero_add] at hge
+  have hseq : Real.BohrMollerup.logGammaSeq (1/4 : ℝ) 2
+      = (5/4 : ℝ) * Real.log 2
+        - (Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)) := by
+    have f2 : Nat.factorial 2 = 2 := by decide
+    have c2 : ((2 : ℕ) : ℝ) = (2 : ℝ) := by norm_num
+    have a0 : (1/4 : ℝ) + ((0 : ℕ) : ℝ) = 1/4 := by norm_num
+    have a1 : (1/4 : ℝ) + ((1 : ℕ) : ℝ) = 5/4 := by norm_num
+    have a2 : (1/4 : ℝ) + (2 : ℝ) = 9/4 := by norm_num
+    have r2 : (2 : ℕ) = 1 + 1 := by norm_num
+    have rr : Finset.range (2 : ℕ) = Finset.range (1 + 1) := by rw [r2]
+    unfold Real.BohrMollerup.logGammaSeq
+    rw [Finset.sum_range_succ, rr, Finset.sum_range_succ, Finset.sum_range_one,
+      f2, c2, a0, a1, a2]
+    ring
+  have hpos14 : (0 : ℝ) < 1/4 := by norm_num
+  have hpos54 : (0 : ℝ) < 5/4 := by norm_num
+  have hpos94 : (0 : ℝ) < 9/4 := by norm_num
+  have hsum : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ) + Real.log (9/4 : ℝ)
+      = Real.log 45 - 6 * Real.log 2 := by
+    have m1 : Real.log (1/4 : ℝ) + Real.log (5/4 : ℝ)
+        = Real.log ((1/4 : ℝ) * (5/4)) :=
+      (Real.log_mul hpos14.ne' hpos54.ne').symm
+    have p : ((1/4 : ℝ) * (5/4)) * (9/4) = 45 / 64 := by norm_num
+    have m2 : Real.log ((1/4 : ℝ) * (5/4)) + Real.log (9/4 : ℝ)
+        = Real.log 45 - Real.log 64 := by
+      rw [← Real.log_mul (mul_ne_zero hpos14.ne' hpos54.ne') hpos94.ne', p,
+        Real.log_div (by norm_num) (by norm_num)]
+    have l64 : Real.log (64 : ℝ) = 6 * Real.log 2 := by
+      have e64 : (64 : ℝ) = 2 ^ 6 := by norm_num
+      rw [e64, Real.log_pow]
+      push_cast
+      ring
+    linarith [m1, m2, l64]
+  have hpow : (152.1 : ℝ) ^ 4 < 2 ^ 29 := by norm_num
+  have hlog4 : 4 * Real.log (152.1 : ℝ) < 29 * Real.log 2 := by
+    have h := (Real.log_lt_log_iff (by norm_num) (by positivity)).mpr hpow
+    rwa [Real.log_pow, Real.log_pow] at h
+  have e152 : Real.log (152.1 : ℝ) = Real.log (3.38 : ℝ) + Real.log 45 := by
+    have p : (152.1 : ℝ) = 3.38 * 45 := by norm_num
+    rw [p, Real.log_mul (by norm_num) (by norm_num)]
+  have hGpos : 0 < Real.Gamma (1/4 : ℝ) := Real.Gamma_pos_of_pos hx
+  rw [← Real.log_lt_log_iff (by norm_num) hGpos]
+  have hlogG : Real.log (Real.Gamma (1/4 : ℝ))
+      = (Real.log ∘ Real.Gamma) (1/4 : ℝ) := rfl
+  rw [hlogG]
+  refine lt_of_lt_of_le ?_ hge
+  rw [hseq, hsum]
+  linarith [hlog4, e152]
+
 /-! ### Remaining gap (no `sorry`; explicit hypotheses).
 
 With the unconditional pieces above plus `zeta_rigorous`
