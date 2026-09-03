@@ -1343,7 +1343,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `R02ZetaUpper`+`R02DerivBridge`+`R02Unconditional`, consuming the identity theorem):
   `‖zeta‖≤1012` on the disc (sharp at `M=1` — `r(M)≈180·M^{−0.05}` needs `M≥10^{31}` terms for `r≤5`) ⇒
   `R02_deriv_bound_unconditional` (`M=6800640`). The `≤10` obligation (hence `M≈0.05` tier) needs
-  FE+Stirling+convexity, not the eta M-test. **Update — Gamma factor fully closed for all 40 centers:**
+  FE+Stirling+convexity, not the eta M-test. **Update — existence verdicts + Euler stone:**
+  Phragmén–Lindelöf EXISTS (strip form `PhragmenLindelof.vertical_strip`) and Hadamard three-lines EXISTS
+  (`Hadamard.norm_le_interp_of_mem_verticalClosedStrip'`) — do NOT recreate. Euler absolute upper closed
+  (`zetaUpper_riemannZeta_norm_le_tsum`: `‖ζ(s)‖ ≤ ∑'(n+1)^{-σ}` on `Re>1`, tsum form). Exact next lemma
+  `zetaUpper_R02_of_threeLines` (not proved): numeric right-edge cap + FE left edge + three-lines on
+  POLE-REMOVED `f(s)=(s−1)·ζ(s)` (direct `f=ζ` blocked by the pole at `s=1` for `DiffContOnCl`). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
