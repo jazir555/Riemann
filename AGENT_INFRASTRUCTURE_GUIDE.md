@@ -1257,10 +1257,19 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
 - **Pólya–Schur criterion** (`polyaTheoremHyp`: order<2 + real-rooted ⇒ hyperbolic sections) + Hurwitz
   section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
   **First stones closed:** real-linear `Hyperbolic` blocks (`Hyperbolic_X_sub_C_real`), finite real-rooted
-  products (`Hyperbolic_multiset_prod_real_linear`), iterated Gauss–Lucas (`hyperbolic_iterate_derivative`).
+  products (`Hyperbolic_multiset_prod_real_linear`), iterated Gauss–Lucas (  `hyperbolic_iterate_derivative`).
   **Closed since:** d=2 converse `real_quadratic_discriminant_nonneg_of_hyperbolic` (real coefficients,
   contrapositive via explicit nonreal root — no sqrt API needed) + Jensen degree-2 Turán inequality
   `jensen_degree_two_ineq_of_hyperbolic` (`γ_{n+1}² ≥ γ_n·γ_{n+2}` from `Hyperbolic (jensenPoly 2 n)`).
+  **Hurwitz halves closed:** S1 scaling majorants (`choose_div_pow_le_one_div_factorial`: `C(d,k)/d^k`
+  M-test majorant) + S2 zero-free disc/boundary (`hyperbolic_zeroFree_off_real`,
+  `hyperbolic_ne_zero_of_im_near`, `uniform_limit_boundary_stability` in the scaffolding's eps-N
+  language). **Correctness finding:** the scaffolding's UNSCALED `sectionsConvergeHyp`
+  (`J_{d,0}→genFun`) is FALSE as stated (`C(d,k)~d^k/k!` diverges) — provable S1 needs `1/d` scaling
+  with a different limit function. Mathlib verdict: no complex Hurwitz/Rouché (only Hurwitz-zeta +
+  `TendstoLocallyUniformlyOn.differentiableOn` + isolated zeros). Remaining: S1 head convergence
+  (`C(d,k)/d^k→1/k!` + summable majorant + corrected limit), S2 Rouché counting (missing in Mathlib),
+  `∀ k≥1` (`Ξ''(0)` enclosures, strictly harder than `k=0`).
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
