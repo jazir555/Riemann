@@ -1276,7 +1276,12 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   (not assumed): `taylorCoeff_summable_of_orderBound` (order<2 ⇒ growth via Cauchy+Stirling) — proving
   it closes S1 unconditionally. **S1 UNCONDITIONAL CLOSED:** `taylorCoeff_summable_of_orderBound`
   proved (Cauchy at fixed `R=|r|+1`, majorant `|C|·(|r|/R²)^k/k!` — no Stirling, no per-k optimization
-  needed) + both corollaries by direct application. **S2 COUNTING CLOSED (`RoucheCount`, generic,
+  needed) + both corollaries by direct application. **ASSEMBLY CLOSED (conditional on genus):**
+  `GenusOneData` structure + `GenusOneRealRooted` Prop wrapper + `genusOne_forward` (finite products +
+  Gauss–Lucas + scaling + shift) + `schur_partial_assembly` (backward proved exactly up to Rouché) +
+  sorry→stone map for all 5 sorrys (GORZ mapped, unattempted). Rouché counting named (`roucheZeroTransfer`)
+  in doc only — now CLOSED by `RoucheCount` (see S2 note). Remaining: genus proof (Hadamard order<2 ⇒
+  genus ≤1 + `section_link`), S2a/S2b wiring, GORZ, `k≥1`. **S2 COUNTING CLOSED (`RoucheCount`, generic,
   in central_cover):** Jensen-gap counting lemma + `hurwitz_zero_transfer` (uniform convergence ⇒
   approximants inherit a zero) + `door1_nonreal_zero_forced` (disc `R<|c.im|` ⇒ forced zero nonreal).
   Built from scratch (no winding/argument-principle/count-zeros anywhere in Mathlib — verified).
