@@ -20007,3 +20007,105 @@ lemma taylorCoeff_zero_ne_zero : taylorCoeff 0 ≠ 0 := by
   exact ne_of_gt completed₀_half_pos
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## Pólya–Schur infrastructure stone (door 1): finite real-rooted products + iterated Gauss–Lucas.
+
+GREP performed before writing (2026-09-03):
+- Mathlib `Hadamard`: only `Analysis/Complex/Hadamard.lean` (three-lines theorem) plus
+  matrix Schur-product theorem; no Hadamard factorization / genus / order theory.
+- Mathlib `genus`, `HermiteBiehler` / `Poulain`, Laguerre–Pólya, Jensen polynomials:
+  no files found.
+- Mathlib `Jensen`: only Jensen's inequality (convex analysis); no Jensen polynomials.
+- Mathlib entire-function order / Weierstrass products / Cartan: no order–genus material
+  found (only the three-lines theorem above).
+- Mathlib available and used here: `Algebra/QuadraticDiscriminant.lean` (`discrim`,
+  `quadratic_eq_zero_iff`, for the future d = 2 converse residual),
+  `Analysis/Complex/Polynomial/GaussLucas.lean` (convex-hull Gauss–Lucas, distinct from
+  this file's log-derivative `derivative_hyperbolic`),
+  `Algebra/Polynomial/Derivative.lean` (`natDegree_derivative`, exact for
+  `IsAddTorsionFree ℂ`, plus `Function.iterate_succ_apply` inner form and
+  `Function.iterate_zero_apply`).
+- Repo: `HadamardBridge.lean` / `ZeroFreeRegionHadamard` / `KadiriHadamardAffine.lean`
+  hold genus-one Hadamard material for `xi` (zero counts, canonical products);
+  `JensenScratch.lean` scaffolds `polyaTheoremHyp` and Hermite–Poulain as hypotheses
+  (no unconditional Pólya–Schur criterion); `JensenTranslation.lean` holds the
+  unconditional base (`derivative_hyperbolic`, `hyperbolic_add_smul_derivative`,
+  `Hyperbolic_mul` / `Hyperbolic_const_mul`, `jensenPoly_derivative`). Hence the
+  lemmas below are new and created here.
+
+Stone proved (unconditional, no `sorry` / `axiom`):
+1. `Hyperbolic_X_sub_C_real`: real linear factors are hyperbolic
+   (genus-0 Hadamard building blocks).
+2. `Hyperbolic_multiset_prod_real_linear`: finite products thereof are hyperbolic
+   (finite real-rooted case, via `Hyperbolic_mul`).
+3. `hyperbolic_iterate_derivative`: the n-th derivative preserves hyperbolicity when
+   `n ≤ natDegree` (iterated Gauss–Lucas; the tool turning `jensenPoly_derivative`
+   iteration — `J_{d,n}` as n-th derivative of `J_{d+n,0}` — into hyperbolicity
+   propagation).
+
+How it fits Levin's textbook route: Hadamard factorization (order < 2 implies
+genus ≤ 1) writes Ξ as a limit of finite real-rooted products times `exp`;
+(1) + (2) give hyperbolicity for the finite sections, (3) propagates it through
+differentiation (the Jensen differential identity), leaving the analytic halves
+(genus bound from order, Hurwitz limit S1/S2, GORZ asymptotics,
+`∀ k ≥ 1, taylorCoeff k ≠ 0`) as the next stones in order.
+-/
+
+/-- Real linear factors are hyperbolic (genus-0 Hadamard building blocks):
+    `X - C r` for real `r` has only the real root `r`. -/
+theorem Hyperbolic_X_sub_C_real (r : ℝ) :
+    Hyperbolic (Polynomial.X - Polynomial.C ((r : ℝ) : ℂ)) := by
+  intro x hx
+  have hx' : x - ((r : ℝ) : ℂ) = 0 := by
+    simpa [Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C] using hx
+  have hxeq : x = ((r : ℝ) : ℂ) := sub_eq_zero.mp hx'
+  rw [hxeq]
+  exact Complex.ofReal_im r
+
+/-- Finite real-rooted (genus-0 Hadamard) products are hyperbolic: any multiset
+    product of real linear factors has only real roots, by induction via
+    `Hyperbolic_mul`. -/
+theorem Hyperbolic_multiset_prod_real_linear (M : Multiset ℝ) :
+    Hyperbolic ((M.map (fun r : ℝ => Polynomial.X - Polynomial.C ((r : ℝ) : ℂ))).prod) := by
+  induction M using Multiset.induction_on with
+  | empty =>
+    simp
+    intro x hx
+    rw [Polynomial.eval_one] at hx
+    exact absurd hx one_ne_zero
+  | cons a M ih =>
+    rw [Multiset.map_cons, Multiset.prod_cons]
+    exact Hyperbolic_mul (Hyperbolic_X_sub_C_real a) ih
+
+/-- Iterated Gauss–Lucas: the n-th derivative of a hyperbolic polynomial is
+    hyperbolic whenever `n ≤ natDegree` (so every intermediate derivative has
+    positive degree). Proved by induction on `n` (inner iterate form), using
+    single-step `derivative_hyperbolic` and exact `natDegree_derivative` over `ℂ`.
+    This is the differentiation-closure half of Pólya's shift reduction:
+    `J_{d,n}` is (up to a nonzero scalar) the n-th derivative of `J_{d+n,0}`
+    via `jensenPoly_derivative`. -/
+theorem hyperbolic_iterate_derivative :
+    ∀ (n : ℕ) {p : Polynomial ℂ}, Hyperbolic p → n ≤ p.natDegree →
+      Hyperbolic (Polynomial.derivative^[n] p) := by
+  intro n
+  induction n with
+  | zero =>
+    intro p hp hn
+    simpa [Function.iterate_zero_apply] using hp
+  | succ k ih =>
+    intro p hp hn
+    have hpos : 0 < p.natDegree := by omega
+    have hder : Hyperbolic (Polynomial.derivative p) :=
+      derivative_hyperbolic hp hpos
+    have hdeg : (Polynomial.derivative p).natDegree = p.natDegree - 1 := by simp
+    have hk : k ≤ (Polynomial.derivative p).natDegree := by omega
+    have hiter : Polynomial.derivative^[k + 1] p =
+        Polynomial.derivative^[k] (Polynomial.derivative p) := by
+      rw [Function.iterate_succ_apply]
+    rw [hiter]
+    exact ih hder hk
+
+end JensenRH
