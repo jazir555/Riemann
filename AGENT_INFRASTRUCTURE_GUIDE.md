@@ -1304,7 +1304,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   (`1/26` from `S_large≥1/5`, tail `≤0.1`, factor `≤13/5`). Unconditional R00 `Azeta` still open on exactly
   `hSlow : ‖S_{4194304}(s0)‖≥1/5` (4M cpow terms, infeasible — the smarter-bound wall stands). Downstream per-cell `Azeta` now needs only:
   `etaHurwitz=etaRHS` specialization (already `etaHurwitz_eq_etaRHS_compl`), `1−2^{1−s}≠0` + division to
-  `riemannZeta s0` (both closed), and numeric `S_N` + `zetaCell_even_remainder_le` instantiation. (b) any `Azeta>0` —
+  `riemannZeta s0` (both closed), and numeric `S_N` + `zetaCell_even_remainder_le` instantiation.
+  **FE route opened:** Mathlib HAS the functional equation — cos-form `riemannZeta_one_sub`
+  (`RiemannZeta.lean:178-180`, via `hurwitzZetaEven_one_sub`), factor
+  `F(s)=2·(2π)^{−s}·Gamma s·cos(πs/2)` (not classic χ). Sine two-sided at R00 closed
+  (`‖sin‖≤1e7`, `1≤‖sin‖` — first sine LOWER in repo) + `‖F(s0)‖≤6e7` (Gamma `≤3` at `0.395` via
+  convexity, cpow `≤1`, cos `≤1e7`). Lower `c≤‖F‖` residual sketched (`c≈1e-14` via cpow `≥1/7` + cos
+  `≥1` + reflection Gamma `≥1e-13` needing `‖sin(πs0)‖≤2e12`). (b) any `Azeta>0` —
   **strategic finding:** `N=4194304` makes the explicit-partial-sum lower bound infeasible (4M cpow terms),
   so the `S_N`-direct route to `Azeta` is computationally dead at the R00 corner; a smarter zeta lower
   bound is needed (functional equation / reflection to a large-`ζ` region, not longer partial sums).
