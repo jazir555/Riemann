@@ -1,6 +1,7 @@
 import riemann_hypothesis
 import zeta_rigorous
 import central_cover_assembly
+import interval_arith
 
 /-!
 # The hard-difference / mollified / Rouché door to RH
@@ -1044,3 +1045,497 @@ theorem zeta_rightEdge_B2 {s : ℂ} (hs : 2 ≤ s.re) : ‖zeta s‖ ≤ 2 := by
   rwa [heq] at h
 
 end TailZetaUpper
+
+/-!
+# Zeta upper on the R02 disc via Hadamard three-lines on pole-removed `F`
+
+GREP-FIRST RECORD (repo + Mathlib, via the grep tool, 2026-09-03; bridges FOUND, not recreated):
+* Hadamard three-lines EXISTS (exact needed shape):
+  `Mathlib/Analysis/Complex/Hadamard.lean:608`
+  `Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`
+  (with `verticalClosedStrip` at `:73`, `verticalStrip` used at `:120`/`:212`).
+* Phragmen-Lindelof vertical strip EXISTS:
+  `Mathlib/Analysis/Complex/PhragmenLindelof.lean:275`
+  `PhragmenLindelof.vertical_strip` (not used; three-lines is sharper for two caps).
+* FE EXISTS (cos form): `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178`
+  `riemannZeta_one_sub`.
+* Residue EXISTS: `.../RiemannZeta.lean:242` `riemannZeta_residue_one`.
+* Differentiability off the pole EXISTS: `:139` `differentiableAt_riemannZeta`.
+* Removable singularity EXISTS:
+  `Mathlib/Analysis/Complex/RemovableSingularity.lean:36`
+  `Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt`.
+* Update-continuity EXISTS: `Mathlib/Topology/Piecewise.lean:33`
+  `continuousAt_update_same` (root namespace).
+* Entire implies `DiffContOnCl` EXISTS:
+  `Mathlib/Analysis/Calculus/DiffContOnCl.lean:42` `Differentiable.diffContOnCl`.
+* Right edge (proved, this file): `TailZetaUpper.zeta_rightEdge_B3`
+  (`Re ≥ 3/2 → ‖zeta‖ ≤ 3`), `TailZetaUpper.zeta_rightEdge_B2` (`Re ≥ 2 → ≤ 2`).
+* Left-edge FE-factor toolkit (proved, imported `interval_arith.lean`, `namespace RowFE`):
+  `RowFE_cpow_upper` (`:30998`), `RowFE_cos_num` (`:30993`),
+  `RowFE_Gamma_upper_of` (`:31257`), `RowFE_factor_upper_of` (`:31451`),
+  `RowFEFactor` (`:30856`); `Real.exp_one_lt_d9`
+  (`Mathlib/Analysis/Complex/ExponentialBounds.lean:38`, also used at
+  `zeta_rigorous.lean:3651`); `Real.Gamma_add_one` / `Real.Gamma_one`
+  (`Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean:409` / `:415`).
+* `Complex.sq_norm` + `Complex.normSq_apply` (used at `zeta_rigorous.lean`
+  `zetaRefl_norm_le`); `le_of_pow_le_pow_left₀` + `Complex.norm_le_abs_re_add_abs_im`
+  (used in this file at `R02_cvtFactor_norm_ge` / `R02_norm_le_of_mem`).
+* Direct `f = ζ` three-lines is blocked by the pole at `s = 1` for `DiffContOnCl`
+  (verified: `differentiableAt_riemannZeta` needs `s ≠ 1`). The entire pole-removed
+  `F` below is CREATED in-file: repo-wide grep for `poleRemovedZeta` shows no such
+  definition (only this guide's prose stubs naming the obligation).
+* Stirling-sharp Gamma upper with `Im`-decay is MISSING repo-wide (only the crude
+  `‖Γ‖ ≤ Real.Gamma` comparison + row caps): the sharp whole-line left edge is the
+  documented remainder, kept as explicit numeric premises below.
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `poleRemovedZeta` (`F(s) = (s-1)·ζ(s)`, `F(1) = 1`) + `poleRemovedZeta_differentiable`
+  (removable singularity via the residue) + `DiffContOnCl` on every vertical strip.
+* `dampedPoleRemoved` (`G(s) = F(s)·exp((1/100)·(s-c)²)`, `c = -6.75·I`) + entire +
+  `DiffContOnCl`. Damping makes whole-line caps satisfiable (undamped `F` is genuinely
+  unbounded in `Im`, so undamped uniform premises would be vacuous).
+* Right edge: pointwise `‖F(s)‖ ≤ ‖s-1‖·2` on `Re ≥ 2`; window `≤ 19.5` on
+  `Re = 2`, `|Im| ≤ 8.75` (covers the R02 `Im`-range `[-8.25,-5.25]`).
+* Left edge WINDOW (proved): `‖G(z)‖ ≤ 1200000000` on `Re = -1`, `|Im| ≤ 8.75`, via FE
+  (`‖F(2-iτ)‖ ≤ 2e7` from RowFE components + `Real.Gamma 2 = 1`) times reflected
+  `‖ζ‖ ≤ 2` times `‖z-1‖ ≤ 10.75` times damping `≤ e < 2.7183`.
+* Damping lower `≥ 0.97` and `‖s-1‖ ≥ 5.25` on the R02 disc `s`-rect
+  (`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`).
+
+CONDITIONAL (explicit numeric premises, `R02_closed_of_factorBounds` style):
+* `zetaUpper_R02_of_threeLines`: whole-line caps `A` (left) + `B` (right) + `BddAbove`
+  for damped `G` on `[l,u] ⊃ [0.05,0.74]` gives pointwise
+  `‖ζ(s)‖ ≤ A^(1-t)·B^t/(5.25·0.97)` with `t = (s.re-l)/(u-l)`.
+* `zetaUpper_R02_of_threeLines_uniform`: with `0 < A`, `0 ≤ B ≤ A`, uniform `≤ A/5.0925`.
+* `zetaUpper_R02_ten_of_bounds`: with `A ≤ 50.925` (at `l = -1`, `u = 2`), `‖ζ‖ ≤ 10`
+  on the R02 rect (hence discharges `R02_zeta_upper_obligation`-shaped goals).
+
+GAP (exact, report-and-stop): `≤ 10` needs a whole-line damped left cap `A ≤ 50.925`
+(with `B ≤ A`); the honestly proved crude window cap is `1.2e9` — a `~2.4e7×` gap,
+closable only by a Stirling-sharp left edge (true growth is polynomial, so true `A`
+is `O(10²)`), NOT by extending windows. `zeta = riemannZeta` by `rfl` throughout.
+-/
+
+namespace ZetaUpperR02ThreeLines
+
+open scoped Topology
+
+/-- Damping center `c = -6.75·I` (middle of the R02 `Im`-range `[-8.25,-5.25]`). -/
+def dampCenter : ℂ := ⟨0, -6.75⟩
+
+/-- Pole-removed zeta `F(s) = (s-1)·ζ(s)` with the removable value `F(1) = 1`
+(the residue `riemannZeta_residue_one`). Proved entire below. -/
+noncomputable def poleRemovedZeta (s : ℂ) : ℂ :=
+  Function.update (fun s => (s - 1) * riemannZeta s) 1 1 s
+
+/-- Gaussian-damped pole-removed `G(s) = F(s)·exp((1/100)·(s-c)²)`. Entire; the
+Gaussian decay in `Im` makes whole-line strip caps satisfiable. -/
+noncomputable def dampedPoleRemoved (s : ℂ) : ℂ :=
+  poleRemovedZeta s * Complex.exp (((1 / 100 : ℝ) : ℂ) * (s - dampCenter) ^ 2)
+
+theorem dampCenter_re : dampCenter.re = 0 := rfl
+
+theorem dampCenter_im : dampCenter.im = -6.75 := rfl
+
+theorem poleRemovedZeta_of_ne {s : ℂ} (hs : s ≠ 1) :
+    poleRemovedZeta s = (s - 1) * riemannZeta s := by
+  show Function.update (fun s => (s - 1) * riemannZeta s) 1 1 s = _
+  exact Function.update_of_ne hs _ _
+
+theorem poleRemovedZeta_one : poleRemovedZeta 1 = 1 := by
+  show Function.update (fun s => (s - 1) * riemannZeta s) 1 1 1 = _
+  exact Function.update_self _ _ _
+
+theorem poleRemovedZeta_continuousAt_one : ContinuousAt poleRemovedZeta 1 := by
+  show ContinuousAt (Function.update (fun s => (s - 1) * riemannZeta s) 1 1) 1
+  exact continuousAt_update_same.mpr riemannZeta_residue_one
+
+theorem poleRemovedZeta_differentiableAt_off {s : ℂ} (hs : s ≠ 1) :
+    DifferentiableAt ℂ poleRemovedZeta s := by
+  have hzmem : s ∈ ({1} : Set ℂ)ᶜ := by simpa using hs
+  have hmem : ({1} : Set ℂ)ᶜ ∈ 𝓝 s :=
+    isOpen_compl_singleton.mem_nhds hzmem
+  have hEq : (fun t => (t - 1) * riemannZeta t) =ᶠ[𝓝 s] poleRemovedZeta := by
+    filter_upwards [hmem] with w hw
+    exact (poleRemovedZeta_of_ne (by simpa using hw)).symm
+  have hdiff : DifferentiableAt ℂ (fun t => (t - 1) * riemannZeta t) s :=
+    (by fun_prop : DifferentiableAt ℂ (fun t : ℂ => t - 1) s).mul
+      (differentiableAt_riemannZeta hs)
+  exact hdiff.congr_of_eventuallyEq hEq.symm
+
+theorem poleRemovedZeta_analyticAt_one : AnalyticAt ℂ poleRemovedZeta 1 := by
+  apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt _
+    poleRemovedZeta_continuousAt_one
+  filter_upwards [self_mem_nhdsWithin (a := (1 : ℂ)) (s := ({1} : Set ℂ)ᶜ)] with z hz
+  exact poleRemovedZeta_differentiableAt_off (by simpa using hz)
+
+theorem poleRemovedZeta_differentiable : Differentiable ℂ poleRemovedZeta := by
+  intro s
+  rcases eq_or_ne s 1 with rfl | hs
+  · exact poleRemovedZeta_analyticAt_one.differentiableAt
+  · exact poleRemovedZeta_differentiableAt_off hs
+
+theorem poleRemovedZeta_diffContOnCl_strip (l u : ℝ) :
+    DiffContOnCl ℂ poleRemovedZeta
+      (Complex.HadamardThreeLines.verticalStrip l u) :=
+  poleRemovedZeta_differentiable.diffContOnCl
+
+theorem dampedPoleRemoved_differentiable :
+    Differentiable ℂ dampedPoleRemoved := by
+  have hexp : Differentiable ℂ
+      (fun s : ℂ => Complex.exp (((1 / 100 : ℝ) : ℂ) * (s - dampCenter) ^ 2)) := by
+    fun_prop
+  unfold dampedPoleRemoved
+  exact poleRemovedZeta_differentiable.mul hexp
+
+theorem dampedPoleRemoved_diffContOnCl_strip (l u : ℝ) :
+    DiffContOnCl ℂ dampedPoleRemoved
+      (Complex.HadamardThreeLines.verticalStrip l u) :=
+  dampedPoleRemoved_differentiable.diffContOnCl
+
+/-- Right edge, pointwise: `‖F(s)‖ ≤ ‖s-1‖·2` on `Re ≥ 2` (TailZetaUpper B2). -/
+theorem poleRemovedZeta_rightEdge_le {s : ℂ} (hs : 2 ≤ s.re) :
+    ‖poleRemovedZeta s‖ ≤ ‖s - 1‖ * 2 := by
+  have hs1 : s ≠ 1 := by
+    intro h
+    have hre : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hZ : ‖riemannZeta s‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 hs
+    rwa [show zeta s = riemannZeta s from rfl] at h
+  rw [poleRemovedZeta_of_ne hs1, norm_mul]
+  exact mul_le_mul_of_nonneg_left hZ (norm_nonneg _)
+
+/-- Right edge, R02-window uniform: `‖F(s)‖ ≤ 19.5` on `Re = 2`, `|Im| ≤ 8.75`. -/
+theorem poleRemovedZeta_rightEdge_window {s : ℂ} (hre : s.re = 2)
+    (him : |s.im| ≤ 8.75) : ‖poleRemovedZeta s‖ ≤ 19.5 := by
+  have hle := poleRemovedZeta_rightEdge_le (by linarith [hre])
+  have hnorm : ‖s - 1‖ ≤ 9.75 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = 1 := by
+      rw [Complex.sub_re, Complex.one_re, hre]; norm_num
+    have him1 : (s - 1).im = s.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1, abs_one] at h
+    linarith
+  calc ‖poleRemovedZeta s‖ ≤ ‖s - 1‖ * 2 := hle
+    _ ≤ 9.75 * 2 := mul_le_mul_of_nonneg_right hnorm (by norm_num)
+    _ = 19.5 := by norm_num
+
+/-- `‖exp w‖ = exp (w.re)` (via `‖·‖² = normSq`, no missing-name risk). -/
+theorem norm_complex_exp (w : ℂ) : ‖Complex.exp w‖ = Real.exp w.re := by
+  have hnn1 : (0 : ℝ) ≤ ‖Complex.exp w‖ := norm_nonneg _
+  have hnn2 : (0 : ℝ) ≤ Real.exp w.re := (Real.exp_pos _).le
+  have hsq : ‖Complex.exp w‖ ^ 2 = (Real.exp w.re) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, Complex.exp_re, Complex.exp_im]
+    have htrig : Real.sin w.im ^ 2 + Real.cos w.im ^ 2 = 1 :=
+      Real.sin_sq_add_cos_sq w.im
+    linear_combination (Real.exp w.re) ^ 2 * htrig
+  have e1 := Real.sqrt_sq hnn1
+  have e2 := Real.sqrt_sq hnn2
+  rw [← e1, hsq, e2]
+
+/-- Damping lower `≥ 0.97` on the R02 disc `s`-rect
+(`Re((s-c)²) = σ²-(τ+6.75)² ≥ -2.25`, `(1/100)·` it `≥ -0.0225`). -/
+theorem damp_lower_R02 {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    (0.97 : ℝ)
+      ≤ ‖Complex.exp (((1 / 100 : ℝ) : ℂ) * (s - dampCenter) ^ 2)‖ := by
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) * (s - dampCenter) ^ 2).re
+      = (1 / 100) * (((s - dampCenter) ^ 2).re) := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hsq2 : ((s - dampCenter) ^ 2).re
+      = (s.re) ^ 2 - (s.im + 6.75) ^ 2 := by
+    have e1 : (s - dampCenter).re = s.re := by
+      rw [Complex.sub_re, dampCenter_re, sub_zero]
+    have e2 : (s - dampCenter).im = s.im + 6.75 := by
+      rw [Complex.sub_im, dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  have hT : (s.im + 6.75) ^ 2 ≤ 2.25 := by
+    have habs : |s.im + 6.75| ≤ 1.5 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have h1 : -(1.5 : ℝ) ≤ s.im + 6.75 := (abs_le.mp habs).1
+    have h2 : s.im + 6.75 ≤ 1.5 := (abs_le.mp habs).2
+    have hle := sq_le_sq' h1 h2
+    have e : (1.5 : ℝ) ^ 2 = 2.25 := by norm_num
+    rwa [e] at hle
+  have hwge : (-0.0225 : ℝ)
+      ≤ ((((1 / 100 : ℝ)) : ℂ) * (s - dampCenter) ^ 2).re := by
+    rw [hwre, hsq2]
+    have hσ : (0 : ℝ) ≤ (s.re) ^ 2 := sq_nonneg _
+    linarith
+  rw [norm_complex_exp]
+  have h1 := Real.add_one_le_exp
+    (((((1 / 100 : ℝ)) : ℂ) * (s - dampCenter) ^ 2).re)
+  linarith
+
+/-- `‖s-1‖ ≥ 5.25` on the R02 `Im`-range (`‖s-1‖² = (σ-1)²+τ² ≥ τ² ≥ 5.25²`). -/
+theorem sSubOne_norm_ge_R02 {s : ℂ} (him_hi : s.im ≤ -5.25) :
+    (5.25 : ℝ) ≤ ‖s - 1‖ := by
+  have e : ‖s - 1‖ ^ 2 = (s.re - 1) ^ 2 + s.im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im, sub_zero]
+    ring
+  have h1 : (0 : ℝ) ≤ (s.re - 1) ^ 2 := sq_nonneg _
+  have habs : (5.25 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  have hsqabs : |s.im| ^ 2 = s.im ^ 2 := sq_abs _
+  have h2 : (5.25 : ℝ) ^ 2 ≤ s.im ^ 2 := by
+    have hnn : (0 : ℝ) ≤ |s.im| := abs_nonneg _
+    have hmul := mul_le_mul habs habs (by norm_num) hnn
+    rw [← pow_two, ← pow_two] at hmul
+    rwa [hsqabs] at hmul
+  have hsq : (5.25 : ℝ) ^ 2 ≤ ‖s - 1‖ ^ 2 := by linarith [e, h1, h2]
+  exact le_of_pow_le_pow_left₀ (by norm_num) (norm_nonneg _) hsq
+
+/-- Three-lines assembly: whole-line damped caps give a pointwise zeta upper on R02.
+`A`/`B` are the left/right whole-line caps for damped `G`; `BddAbove` is the
+Stirling-growth remainder (satisfiable: Gaussian dominates any fixed exponential). -/
+theorem zetaUpper_R02_of_threeLines {l u A B : ℝ} (hlu : l < u)
+    (hcover_lo : l ≤ 0.05) (hcover_hi : 0.74 ≤ u)
+    (hBdd : BddAbove ((norm ∘ dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip l u))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {l}, ‖dampedPoleRemoved z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {u}, ‖dampedPoleRemoved z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+      / (5.25 * 0.97) := by
+  have hz : s ∈ Complex.HadamardThreeLines.verticalClosedStrip l u := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    simp only [Set.mem_preimage, Set.mem_Icc]
+    constructor <;> linarith
+  have h3 :=
+    Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'
+      hlu hz (dampedPoleRemoved_diffContOnCl_strip l u) hBdd hLeft hRight
+  have hs1 : s ≠ 1 := by
+    intro h
+    have himm : s.im = 0 := by
+      rw [h]
+      exact Complex.one_im
+    linarith
+  have hnorm : ‖dampedPoleRemoved s‖
+      = (‖s - 1‖ * ‖riemannZeta s‖)
+        * ‖Complex.exp (((1 / 100 : ℝ) : ℂ) * (s - dampCenter) ^ 2)‖ := by
+    unfold dampedPoleRemoved
+    rw [poleRemovedZeta_of_ne hs1, norm_mul, norm_mul]
+  have hge1 : (5.25 : ℝ) ≤ ‖s - 1‖ := sSubOne_norm_ge_R02 him_hi
+  have hge2 : (0.97 : ℝ)
+      ≤ ‖Complex.exp (((1 / 100 : ℝ) : ℂ) * (s - dampCenter) ^ 2)‖ :=
+    damp_lower_R02 hs_lo hs_hi him_lo him_hi
+  have hmul : 5.25 * ‖riemannZeta s‖ * 0.97 ≤ ‖dampedPoleRemoved s‖ := by
+    rw [hnorm]
+    exact mul_le_mul (mul_le_mul_of_nonneg_right hge1 (norm_nonneg _)) hge2
+      (by norm_num) (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+  have hC : 5.25 * ‖riemannZeta s‖ * 0.97
+      ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l)) :=
+    le_trans hmul h3
+  have hden : (0 : ℝ) < 5.25 * 0.97 := by norm_num
+  rw [le_div_iff₀ hden]
+  have hrr : 5.25 * ‖riemannZeta s‖ * 0.97
+      = ‖riemannZeta s‖ * (5.25 * 0.97) := by
+    ring
+  linarith [hC]
+
+/-- `zeta` alias form (`zeta = riemannZeta` by `rfl`). -/
+theorem zetaUpper_R02_of_threeLines_zeta {l u A B : ℝ} (hlu : l < u)
+    (hcover_lo : l ≤ 0.05) (hcover_hi : 0.74 ≤ u)
+    (hBdd : BddAbove ((norm ∘ dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip l u))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {l}, ‖dampedPoleRemoved z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {u}, ‖dampedPoleRemoved z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖zeta s‖ ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+      / (5.25 * 0.97) := by
+  have h : zeta s = riemannZeta s := rfl
+  rw [h]
+  exact zetaUpper_R02_of_threeLines hlu hcover_lo hcover_hi hBdd hLeft hRight
+    hs_lo hs_hi him_lo him_hi
+
+/-- Uniform version (`0 < A`, `0 ≤ B ≤ A`): interpolation `≤ A`, so `‖ζ‖ ≤ A/5.0925`. -/
+theorem zetaUpper_R02_of_threeLines_uniform {l u A B : ℝ} (hlu : l < u)
+    (hcover_lo : l ≤ 0.05) (hcover_hi : 0.74 ≤ u)
+    (hApos : 0 < A) (hBnn : 0 ≤ B) (hBA : B ≤ A)
+    (hBdd : BddAbove ((norm ∘ dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip l u))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {l}, ‖dampedPoleRemoved z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {u}, ‖dampedPoleRemoved z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ A / (5.25 * 0.97) := by
+  have hpt := zetaUpper_R02_of_threeLines hlu hcover_lo hcover_hi hBdd hLeft hRight
+    hs_lo hs_hi him_lo him_hi
+  have hul : (0 : ℝ) < u - l := sub_pos.mpr hlu
+  have ht0 : (0 : ℝ) ≤ (s.re - l) / (u - l) :=
+    div_nonneg (by linarith) hul.le
+  have hpow : A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l)) ≤ A := by
+    have h1 : B ^ ((s.re - l) / (u - l)) ≤ A ^ ((s.re - l) / (u - l)) :=
+      Real.rpow_le_rpow hBnn hBA ht0
+    have h2 : A ^ (1 - (s.re - l) / (u - l)) * A ^ ((s.re - l) / (u - l)) = A := by
+      rw [← Real.rpow_add hApos, sub_add_cancel, Real.rpow_one]
+    calc A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+        ≤ A ^ (1 - (s.re - l) / (u - l)) * A ^ ((s.re - l) / (u - l)) :=
+          mul_le_mul_of_nonneg_left h1 (Real.rpow_nonneg hApos.le _)
+      _ = A := h2
+  have hden : (0 : ℝ) < 5.25 * 0.97 := by norm_num
+  calc ‖riemannZeta s‖
+      ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+        / (5.25 * 0.97) := hpt
+    _ ≤ A / (5.25 * 0.97) := by
+      have hcancel : A / (5.25 * 0.97) * (5.25 * 0.97) = A := by
+        rw [div_eq_mul_inv, mul_assoc, inv_mul_cancel₀ (ne_of_gt hden), mul_one]
+      rw [div_le_iff₀ hden, hcancel]
+      exact hpow
+
+/-- Threshold: at `l = -1`, `u = 2`, a whole-line left cap `A ≤ 50.925`
+(with `B ≤ A`) gives `‖ζ‖ ≤ 10` on the R02 rect. -/
+theorem zetaUpper_R02_ten_of_bounds {A B : ℝ}
+    (hApos : 0 < A) (hBnn : 0 ≤ B) (hBA : B ≤ A) (hAcap : A ≤ 50.925)
+    (hBdd : BddAbove ((norm ∘ dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      ‖dampedPoleRemoved z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {(2 : ℝ)},
+      ‖dampedPoleRemoved z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 := by
+  have hU := zetaUpper_R02_of_threeLines_uniform (l := -1) (u := 2) (by norm_num)
+    (by norm_num) (by norm_num) hApos hBnn hBA hBdd hLeft hRight
+    hs_lo hs_hi him_lo him_hi
+  have hden : (5.25 : ℝ) * 0.97 = 5.0925 := by norm_num
+  rw [hden] at hU
+  have e : (50.925 : ℝ) = 10 * 5.0925 := by norm_num
+  have hA' : A ≤ 10 * 5.0925 := by rwa [e] at hAcap
+  calc ‖riemannZeta s‖ ≤ A / 5.0925 := hU
+    _ ≤ 10 := by
+        rw [div_le_iff₀ (by norm_num)]
+        linarith [hA']
+
+/-- Left edge WINDOW (proved): `‖G(z)‖ ≤ 1200000000` on `Re = -1`, `|Im| ≤ 8.75`.
+Via FE at `w = 1-z` (`Re = 2`): `‖F(w)‖ ≤ 2·1·1·1e7 = 2e7` (RowFE components with
+`Real.Gamma 2 = 1`) times reflected `‖ζ‖ ≤ 2` (B2), times `‖z-1‖ ≤ 10.75`, times
+damping `≤ e < 2.7183`: `10.75·4e7·2.7183 = 1168869000 ≤ 1.2e9`. -/
+theorem damped_leftWindow_le {z : ℂ} (hz_re : z.re = -1)
+    (him : |z.im| ≤ 8.75) :
+    ‖dampedPoleRemoved z‖ ≤ 1200000000 := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz_re]; norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz_re] at hre
+    have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz_re] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have hcp : ‖(2 * (Real.pi : ℂ)) ^ (-(1 - z))‖ ≤ 1 :=
+    RowFE.RowFE_cpow_upper (by rw [hw_re]; norm_num)
+  have hG : ‖Complex.Gamma (1 - z)‖ ≤ 1 :=
+    RowFE.RowFE_Gamma_upper_of (s := 1 - z) (v := 2) (G := 1) hw_re
+      Real.Gamma_two.le (by norm_num)
+  have hcos : ‖Complex.cos ((Real.pi : ℂ) * ((1 - z) / 2))‖ ≤ 10000000 := by
+    have himw : |((1 : ℂ) - z).im| ≤ 8.75 := by
+      rw [hw_im, abs_neg]
+      exact him
+    exact RowFE.RowFE_cos_num himw
+  have hFraw : ‖RowFE.RowFEFactor (1 - z)‖ ≤ 20000000 := by
+    have h := RowFE.RowFE_factor_upper_of hcp hG hcos (by norm_num : (0 : ℝ) ≤ 1)
+    have e : (2 : ℝ) * 1 * 1 * 10000000 = 20000000 := by norm_num
+    rwa [e] at h
+  have hZ : ‖riemannZeta z‖ ≤ 40000000 := by
+    rw [hFE', norm_mul]
+    calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+          ≤ 20000000 * 2 :=
+            mul_le_mul hFraw hZrefl (norm_nonneg _) (by norm_num)
+        _ = 40000000 := by norm_num
+  have hsub : ‖z - 1‖ ≤ 10.75 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    have hre1 : (z - 1).re = -2 := by
+      rw [Complex.sub_re, Complex.one_re, hz_re]; norm_num
+    have him1 : (z - 1).im = z.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1] at h
+    have e : |(-2 : ℝ)| = 2 := by norm_num
+    rw [e] at h
+    linarith
+  have hF : ‖poleRemovedZeta z‖ ≤ 430000000 := by
+    rw [poleRemovedZeta_of_ne hz1, norm_mul]
+    calc ‖z - 1‖ * ‖riemannZeta z‖ ≤ 10.75 * 40000000 :=
+          mul_le_mul hsub hZ (norm_nonneg _) (by norm_num)
+      _ = 430000000 := by norm_num
+  have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) * (z - dampCenter) ^ 2)‖
+      ≤ 2.7183 := by
+    have hsq2 : ((z - dampCenter) ^ 2).re = 1 - (z.im + 6.75) ^ 2 := by
+      have e1 : (z - dampCenter).re = -1 := by
+        rw [Complex.sub_re, dampCenter_re, hz_re, sub_zero]
+      have e2 : (z - dampCenter).im = z.im + 6.75 := by
+        rw [Complex.sub_im, dampCenter_im]
+        ring
+      rw [pow_two, Complex.mul_re, e1, e2]
+      ring
+    have hwre : ((((1 / 100 : ℝ)) : ℂ) * (z - dampCenter) ^ 2).re ≤ 0.01 := by
+      have hwm : ((((1 / 100 : ℝ)) : ℂ) * (z - dampCenter) ^ 2).re
+          = (1 / 100) * (((z - dampCenter) ^ 2).re) := by
+        rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+        ring
+      rw [hwm, hsq2]
+      have ht2 : (0 : ℝ) ≤ (z.im + 6.75) ^ 2 := sq_nonneg _
+      linarith
+    rw [norm_complex_exp]
+    have h1 : Real.exp ((((1 / 100 : ℝ)) : ℂ) * (z - dampCenter) ^ 2).re
+        ≤ Real.exp 1 :=
+      Real.exp_le_exp.mpr (by linarith)
+    have h2 : Real.exp (1 : ℝ) ≤ 2.7183 :=
+      le_trans (le_of_lt Real.exp_one_lt_d9) (by norm_num)
+    linarith
+  have hfin : dampedPoleRemoved z = poleRemovedZeta z
+      * Complex.exp (((1 / 100 : ℝ) : ℂ) * (z - dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖poleRemovedZeta z‖
+      * ‖Complex.exp (((1 / 100 : ℝ) : ℂ) * (z - dampCenter) ^ 2)‖
+        ≤ 430000000 * 2.7183 :=
+          mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+    _ ≤ 1200000000 := by norm_num
+
+#print axioms ZetaUpperR02ThreeLines.poleRemovedZeta_differentiable
+#print axioms ZetaUpperR02ThreeLines.zetaUpper_R02_of_threeLines
+#print axioms ZetaUpperR02ThreeLines.zetaUpper_R02_of_threeLines_uniform
+#print axioms ZetaUpperR02ThreeLines.zetaUpper_R02_ten_of_bounds
+#print axioms ZetaUpperR02ThreeLines.damped_leftWindow_le
+#print axioms ZetaUpperR02ThreeLines.poleRemovedZeta_rightEdge_window
+
+end ZetaUpperR02ThreeLines
