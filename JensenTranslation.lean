@@ -20109,3 +20109,138 @@ theorem hyperbolic_iterate_derivative :
     exact ih hder hk
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## Door-1 degree-2 `Hyperbolic` converse stone.
+
+GREP performed before writing (2026-09-03):
+- File `Hyperbolic` definition (lines 96-98): roots-based,
+  `Hyperbolic (p : Polynomial ℂ) : Prop := ∀ x : ℂ, p.eval x = 0 → x.im = 0`.
+- Forward direction in-file (line 137): `real_quadratic_hyperbolic_of_discriminant`
+  `{a b c : ℝ} (ha : a ≠ 0) (hd : b ^ 2 ≥ 4 * a * c)` proves
+  `Hyperbolic (map (C c + monomial 1 b + monomial 2 a))` by completing the square
+  (`z = 2ax + b`, `z^2 = b^2 - 4ac ≥ 0` forces `z.im = 0`, then `x = (z-b)/(2a)` real).
+- Mathlib `Algebra/QuadraticDiscriminant.lean`: `discrim`, `quadratic_eq_zero_iff`,
+  `quadratic_eq_zero_iff_discrim_eq_sq`, `discrim_le_zero`; not needed here — the
+  converse below uses a direct explicit nonreal root (no `quadratic_eq_zero_iff`,
+  no `IsAlgClosed.exists_pow_nat_eq`, no `Complex` sqrt), mirroring the forward
+  completing-square computation in reverse.
+- `Complex.I_sq : I ^ 2 = -1` (`Mathlib/Data/Complex/Basic.lean`, line 626);
+  `Real.sq_sqrt`, `div_ne_zero`, `Complex.ext` + `Complex.mul_re/mul_im/add_re/add_im/
+  ofReal_re/ofReal_im/I_re/I_im` all Mathlib (file already imports all of Mathlib).
+
+Stone proved (unconditional, no `sorry` / `axiom`), real-coefficient choice:
+1. `real_quadratic_discriminant_nonneg_of_hyperbolic`: if `a ≠ 0` and the mapped
+   real quadratic `C c + monomial 1 b + monomial 2 a` is `Hyperbolic`, then
+   `b ^ 2 ≥ 4 * a * c`. Contrapositive: when `b^2 < 4ac`, `D = 4ac - b^2 > 0`,
+   `t = Real.sqrt D ≠ 0`, and `x = ⟨-b/(2a), t/(2a)⟩` satisfies
+   `2ax + b = t·I`, hence `(2ax+b)^2 = b^2 - 4ac`, hence `4a(ax^2+bx+c) = 0`,
+   hence `p.eval x = 0`, while `x.im = t/(2a) ≠ 0` contradicts `Hyperbolic`.
+2. `jensen_degree_two_ineq_of_hyperbolic`: Jensen specialization — if
+   `taylorCoeff (n+2) ≠ 0` and `Hyperbolic (jensenPoly 2 n)`, then
+   `taylorCoeff (n+1)^2 ≥ taylorCoeff n * taylorCoeff (n+2)` (higher Turán
+   inequality, converse of `jensen_degree_two_hyperbolic_of_ineq`). Follows from
+   (1) with `a = γ_{n+2}`, `b = 2γ_{n+1}`, `c = γ_n` via the same
+   `Finset.sum_range_succ` unfolding used in the forward direction.
+-/
+
+/-- Degree-2 `Hyperbolic` converse (real coefficients): a nondegenerate real
+    quadratic with only real roots has nonnegative discriminant. -/
+theorem real_quadratic_discriminant_nonneg_of_hyperbolic {a b c : ℝ} (ha : a ≠ 0)
+    (hp : Hyperbolic (Polynomial.map (algebraMap ℝ ℂ)
+      (Polynomial.C c + Polynomial.monomial 1 b + Polynomial.monomial 2 a))) :
+    b ^ 2 ≥ 4 * a * c := by
+  by_contra hcon
+  push_neg at hcon
+  have hD : 0 < 4 * a * c - b ^ 2 := by linarith
+  set t := Real.sqrt (4 * a * c - b ^ 2) with ht_def
+  have ht2 : t ^ 2 = 4 * a * c - b ^ 2 := by
+    rw [ht_def]
+    exact Real.sq_sqrt hD.le
+  have ht_ne : t ≠ 0 := by
+    intro h0
+    rw [h0] at ht2
+    simp at ht2
+    linarith
+  have ha2 : (2 : ℝ) * a ≠ 0 := mul_ne_zero (by norm_num) ha
+  have h4aC : (4 : ℂ) * ((a : ℝ) : ℂ) ≠ 0 :=
+    mul_ne_zero (by norm_num) (by exact_mod_cast ha)
+  set x : ℂ := ⟨-b / (2 * a), t / (2 * a)⟩ with hx_def
+  have hx_re : x.re = -b / (2 * a) := by simp [hx_def]
+  have hx_im : x.im = t / (2 * a) := by simp [hx_def]
+  have hxim_ne : x.im ≠ 0 := by
+    rw [hx_im]
+    exact div_ne_zero ht_ne ha2
+  have hlin : (2 : ℂ) * ((a : ℝ) : ℂ) * x + ((b : ℝ) : ℂ) =
+      ((t : ℝ) : ℂ) * Complex.I := by
+    apply Complex.ext
+    · simp [Complex.add_re, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im, hx_re, hx_im]
+      field_simp
+      ring
+    · simp [Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im, hx_re, hx_im]
+      field_simp
+  have htC : (((t : ℝ) : ℂ) ^ 2) =
+      4 * ((a : ℝ) : ℂ) * ((c : ℝ) : ℂ) - ((b : ℝ) : ℂ) ^ 2 := by
+    have h1 : (((t : ℝ) : ℂ) ^ 2) = (((t ^ 2 : ℝ)) : ℂ) := by push_cast; ring
+    rw [h1, ht2]
+    push_cast
+    ring
+  have hsq : ((2 : ℂ) * ((a : ℝ) : ℂ) * x + ((b : ℝ) : ℂ)) ^ 2 =
+      ((b : ℝ) : ℂ) ^ 2 - 4 * ((a : ℝ) : ℂ) * ((c : ℝ) : ℂ) := by
+    rw [hlin]
+    have hI : (Complex.I : ℂ) ^ 2 = -1 := Complex.I_sq
+    have hsq0 : (((t : ℝ) : ℂ) * Complex.I) ^ 2 = -((((t : ℝ) : ℂ) ^ 2)) := by
+      calc (((t : ℝ) : ℂ) * Complex.I) ^ 2
+          = ((t : ℝ) : ℂ) ^ 2 * Complex.I ^ 2 := by ring
+        _ = -((((t : ℝ) : ℂ) ^ 2)) := by rw [hI]; ring
+    rw [hsq0, htC]
+    ring
+  have hexpand : ((2 : ℂ) * ((a : ℝ) : ℂ) * x + ((b : ℝ) : ℂ)) ^ 2 =
+      4 * ((a : ℝ) : ℂ) * (((a : ℝ) : ℂ) * x ^ 2 + ((b : ℝ) : ℂ) * x + ((c : ℝ) : ℂ)) +
+        ((b : ℝ) : ℂ) ^ 2 - 4 * ((a : ℝ) : ℂ) * ((c : ℝ) : ℂ) := by ring
+  have h4eq : 4 * ((a : ℝ) : ℂ) *
+      (((a : ℝ) : ℂ) * x ^ 2 + ((b : ℝ) : ℂ) * x + ((c : ℝ) : ℂ)) = 0 := by
+    linear_combination hsq - hexpand
+  have hmain : ((a : ℝ) : ℂ) * x ^ 2 + ((b : ℝ) : ℂ) * x + ((c : ℝ) : ℂ) = 0 := by
+    rcases mul_eq_zero.mp h4eq with h | h
+    · exact absurd h h4aC
+    · exact h
+  have heval : Polynomial.eval x (Polynomial.map (algebraMap ℝ ℂ)
+      (Polynomial.C c + Polynomial.monomial 1 b + Polynomial.monomial 2 a)) = 0 := by
+    simpa [Polynomial.eval_add, Polynomial.eval_monomial, Polynomial.map_add,
+      Polynomial.map_monomial, pow_two, add_assoc, add_comm, add_left_comm] using hmain
+  exact hxim_ne (hp x heval)
+
+/-- Jensen degree-2 converse: hyperbolicity of `J_{2,n}` implies the higher
+    Turán inequality `γ_{n+1}^2 ≥ γ_n * γ_{n+2}` (for `γ_{n+2} ≠ 0`).
+    Converse of `jensen_degree_two_hyperbolic_of_ineq`. -/
+theorem jensen_degree_two_ineq_of_hyperbolic (n : ℕ) (ha : taylorCoeff (n + 2) ≠ 0)
+    (hp : Hyperbolic (jensenPoly 2 n)) :
+    taylorCoeff (n + 1) ^ 2 ≥ taylorCoeff n * taylorCoeff (n + 2) := by
+  have hp' : Hyperbolic (Polynomial.map (algebraMap ℝ ℂ)
+      (Polynomial.C (taylorCoeff n) +
+        Polynomial.monomial 1 (2 * taylorCoeff (n + 1)) +
+        Polynomial.monomial 2 (taylorCoeff (n + 2)))) := by
+    have h := hp
+    rw [jensenPoly, Finset.sum_range_succ, Finset.sum_range_succ, Finset.range_one,
+      Finset.sum_singleton] at h
+    rw [Nat.choose_zero_right, Nat.choose_one_right, Nat.choose_self] at h
+    simp only [Nat.cast_one, one_mul] at h
+    rw [Polynomial.monomial_zero_left] at h
+    exact h
+  have hdisc := real_quadratic_discriminant_nonneg_of_hyperbolic ha hp'
+  have hexp : (2 * taylorCoeff (n + 1)) ^ 2 = 4 * (taylorCoeff (n + 1) ^ 2) := by ring
+  have hrear : (2 * taylorCoeff (n + 1)) ^ 2 ≥
+      4 * taylorCoeff (n + 2) * taylorCoeff n := hdisc
+  have h4 : 4 * (taylorCoeff (n + 1) ^ 2) ≥
+      4 * (taylorCoeff n * taylorCoeff (n + 2)) := by
+    rw [← hexp]
+    calc (2 * taylorCoeff (n + 1)) ^ 2 ≥ 4 * taylorCoeff (n + 2) * taylorCoeff n := hrear
+      _ = 4 * (taylorCoeff n * taylorCoeff (n + 2)) := by ring
+  linarith
+
+end JensenRH
