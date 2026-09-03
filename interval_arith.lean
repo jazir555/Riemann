@@ -30820,3 +30820,937 @@ theorem gamma_one_sub_half_upper_R39 :
 
 end R39GammaUpper
 
+/-!
+## Per-row two-sided FE toolkit (`RowFE`, reflected-eta factor half).
+
+Row-uniform (over `|Im| ≤ 8.75`) two-sided bounds for the Mathlib cos-form FE
+factor `F(s) = 2·(2π)^{-s}·Gamma s·cos(π·s/2)` (`riemannZeta_one_sub`), one set
+per `s`-plane row `Re ∈ {0.395, 0.3, 0.2, 0.105}` (bottom → top). Generalizes the
+R00-corner `zetaFE*` pattern of `zeta_rigorous.lean` (which cannot be imported
+here: `interval_arith` must stay importable by downstream cell files) with
+distinct `RowFE_*` names.
+
+Per-row constants (`s` universally quantified over the strip
+`s.re = ρ`, `|s.im| ≤ 8.75`):
+* (a) sine upper `‖sin(π·(s/2))‖ ≤ 10000000` — shared `RowFE_sin_half_num`
+  (`exp16` works for every row since the Im-maximum `8.75` is identical).
+* (b) Gamma upper `‖Gamma s‖ ≤ G`: `G = 3 / 4 / 5 / 10` (convexity one-liners
+  `RowFE_realGamma_*`, mirroring `0395 ≤ 3`).
+* (c) Gamma lower `1/10000000000000 ≤ ‖Gamma s‖` — shared constant via complex
+  reflection `Gamma_mul_Gamma_one_sub`, with `‖sin(π·s)‖ ≤ 2e12`
+  (`RowFE_sin_full_num`) and `‖Gamma(1-s)‖ ≤ 2`
+  (`Re(1-s) ∈ {0.605, 0.7, 0.8, 0.895}`).
+* (d) factor `1/100000000000000 ≤ ‖F(s)‖ ≤ C`:
+  `C = 60000000 / 80000000 / 100000000 / 200000000` (`2·1·G·1e7`).
+The cosine lower (needed for (d-lower)) is row-uniform via `RowFE_cos_re_le`
+(`cos(Re w) ≤ ‖cos w‖` from `Complex.cos_eq`) plus real Taylor lowers
+`0.8 / 0.88 / 0.95 / 0.98` (the corner `1 ≤ ‖cos‖` does NOT hold uniformly —
+at `Im = 0`, `‖cos‖ = cos(πρ/2) < 1`).
+-/
+
+namespace RowFE
+
+/-- Mathlib cos-form FE factor `F(s) = 2 * (2*π)^(-s) * Gamma s * cos(π*s/2)`
+(mirrors `zetaFEFactor` with a distinct name; `interval_arith` cannot import
+`zeta_rigorous`, so the factor is redefined here). -/
+noncomputable def RowFEFactor (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s *
+    Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- `Real.exp 28 < 2000000000000` via `(exp 1)^28` (mirrors `zetaFE_exp28_lt`). -/
+theorem RowFE_exp28_lt : Real.exp 28 < 2000000000000 := by
+  have h1 : Real.exp (28 : ℝ) = (Real.exp 1) ^ (28 : ℕ) := by
+    have := Real.exp_nat_mul (1 : ℝ) (28 : ℕ)
+    simpa using this.symm
+  have h2 : (Real.exp 1) ^ (28 : ℕ) < (2.7182818286 : ℝ) ^ (28 : ℕ) := by
+    apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+  have h3 : (2.7182818286 : ℝ) ^ (28 : ℕ) < 2000000000000 := by norm_num
+  rw [h1]
+  exact lt_trans h2 h3
+
+/-- Generic sine majorant: `‖sin w‖ ≤ exp B` from `|Im w| ≤ B`
+(generalizes `R00GammaLower.norm_sin_pi_half_le`). -/
+theorem RowFE_norm_sin_le {w : ℂ} {B : ℝ} (hw : |w.im| ≤ B) :
+    ‖Complex.sin w‖ ≤ Real.exp B := by
+  have hsin_eq : Complex.sin w =
+      (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+          Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ Real.exp B :=
+    Real.exp_le_exp.mpr (le_trans (le_abs_self _) hw)
+  have e2 : Real.exp (-w.im) ≤ Real.exp B := by
+    apply Real.exp_le_exp.mpr
+    have : -w.im ≤ |w.im| := neg_le_abs _
+    exact le_trans this hw
+  linarith
+
+/-- Generic cosine majorant: `‖cos w‖ ≤ exp B` from `|Im w| ≤ B`
+(generalizes `zetaFE_cos_upper_S0`). -/
+theorem RowFE_norm_cos_le {w : ℂ} {B : ℝ} (hw : |w.im| ≤ B) :
+    ‖Complex.cos w‖ ≤ Real.exp B := by
+  have hcos_eq : Complex.cos w =
+      (Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2 := by
+    unfold Complex.cos; ring
+  rw [hcos_eq]
+  have hle : ‖(Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2‖
+      ≤ (‖Complex.exp (w * Complex.I)‖ + ‖Complex.exp (-w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2‖
+        = ‖Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)‖ / 2 := by
+      simp [norm_div, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
+  have hre1 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  have hre2 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp (-w.im) ≤ Real.exp B := by
+    apply Real.exp_le_exp.mpr
+    have : -w.im ≤ |w.im| := neg_le_abs _
+    exact le_trans this hw
+  have e2 : Real.exp w.im ≤ Real.exp B :=
+    Real.exp_le_exp.mpr (le_trans (le_abs_self _) hw)
+  linarith
+
+/-- Sine-half majorant, row-uniform: `‖sin(π*(s/2))‖ ≤ exp 16` for `|Im s| ≤ 8.75`
+(`|Im| ≤ π*8.75/2 ≤ 3.1416*4.375 ≤ 16`; same `exp16` for every row). -/
+theorem RowFE_sin_half_upper {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp 16 := by
+  apply RowFE_norm_sin_le
+  have hs2im : (s / 2).im = s.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (s / 2)).im = Real.pi * (s.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  rw [hw_im, abs_mul]
+  have h1 : |Real.pi| ≤ 3.1416 := by
+    rw [abs_of_pos Real.pi_pos]; exact le_of_lt Real.pi_lt_d4
+  have h2 : |s.im / 2| ≤ 4.375 := by
+    rw [abs_div, abs_two]
+    have h3 : |s.im| / 2 ≤ 4.375 := by linarith [him]
+    linarith
+  calc |Real.pi| * |s.im / 2| ≤ 3.1416 * 4.375 :=
+        mul_le_mul h1 h2 (by positivity) (by norm_num)
+    _ ≤ 16 := by norm_num
+
+/-- Sine-half numeral cap, row-uniform: `‖sin(π*(s/2))‖ ≤ 10000000`. -/
+theorem RowFE_sin_half_num {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ 10000000 :=
+  le_trans (RowFE_sin_half_upper him) (le_of_lt R00GammaLower.exp_sixteen_lt)
+
+/-- Sine-full majorant, row-uniform: `‖sin(π*s)‖ ≤ exp 28` for `|Im s| ≤ 8.75`
+(`|Im| ≤ π*8.75 ≤ 3.1416*8.75 ≤ 28`; feeds the reflection Gamma lower). -/
+theorem RowFE_sin_full_upper {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≤ Real.exp 28 := by
+  apply RowFE_norm_sin_le
+  have hw_im : ((Real.pi : ℂ) * s).im = Real.pi * s.im := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
+  rw [hw_im, abs_mul]
+  have h1 : |Real.pi| ≤ 3.1416 := by
+    rw [abs_of_pos Real.pi_pos]; exact le_of_lt Real.pi_lt_d4
+  calc |Real.pi| * |s.im| ≤ 3.1416 * 8.75 :=
+        mul_le_mul h1 him (by positivity) (by norm_num)
+    _ ≤ 28 := by norm_num
+
+/-- Sine-full numeral cap, row-uniform: `‖sin(π*s)‖ ≤ 2000000000000`. -/
+theorem RowFE_sin_full_num {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≤ 2000000000000 :=
+  le_trans (RowFE_sin_full_upper him) (le_of_lt RowFE_exp28_lt)
+
+/-- Cosine majorant, row-uniform: `‖cos(π*(s/2))‖ ≤ exp 16` for `|Im s| ≤ 8.75`. -/
+theorem RowFE_cos_upper {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp 16 := by
+  apply RowFE_norm_cos_le
+  have hs2im : (s / 2).im = s.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (s / 2)).im = Real.pi * (s.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  rw [hw_im, abs_mul]
+  have h1 : |Real.pi| ≤ 3.1416 := by
+    rw [abs_of_pos Real.pi_pos]; exact le_of_lt Real.pi_lt_d4
+  have h2 : |s.im / 2| ≤ 4.375 := by
+    rw [abs_div, abs_two]
+    have h3 : |s.im| / 2 ≤ 4.375 := by linarith [him]
+    linarith
+  calc |Real.pi| * |s.im / 2| ≤ 3.1416 * 4.375 :=
+        mul_le_mul h1 h2 (by positivity) (by norm_num)
+    _ ≤ 16 := by norm_num
+
+/-- Cosine numeral cap, row-uniform: `‖cos(π*(s/2))‖ ≤ 10000000`. -/
+theorem RowFE_cos_num {s : ℂ} (him : |s.im| ≤ 8.75) :
+    ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ ≤ 10000000 :=
+  le_trans (RowFE_cos_upper him) (le_of_lt R00GammaLower.exp_sixteen_lt)
+
+/-- Cpow upper, uniform in `Re ≥ 0`: `‖(2π)^(-s)‖ ≤ 1` (mirrors `zetaFE_cpow_upper_S0`). -/
+theorem RowFE_cpow_upper {s : ℂ} (h0 : 0 ≤ s.re) :
+    ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ ≤ 1 := by
+  have hbase_pos : (0 : ℝ) < 2 * Real.pi := by
+    have := Real.pi_pos
+    linarith
+  have h2pi : ((2 * Real.pi : ℝ) : ℂ) = 2 * (Real.pi : ℂ) := by
+    push_cast; ring
+  have hnorm : ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ =
+      (2 * Real.pi) ^ (-(s.re)) := by
+    rw [← h2pi, Complex.norm_cpow_eq_rpow_re_of_pos hbase_pos, Complex.neg_re]
+  rw [hnorm]
+  apply Real.rpow_le_one_of_one_le_of_nonpos
+  · have hpi := Real.pi_gt_three
+    linarith
+  · linarith
+
+/-- Cpow lower, uniform in `Re ≤ 1`: `1/7 ≤ ‖(2π)^(-s)‖`
+(mirrors `zetaFE_cpow_lower_S0`). -/
+theorem RowFE_cpow_lower {s : ℂ} (h1 : s.re ≤ 1) :
+    (1 : ℝ) / 7 ≤ ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ := by
+  have hbase_pos : (0 : ℝ) < 2 * Real.pi := by
+    have := Real.pi_pos
+    linarith
+  have h2pi : ((2 * Real.pi : ℝ) : ℂ) = 2 * (Real.pi : ℂ) := by
+    push_cast; ring
+  have hnorm : ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ =
+      (2 * Real.pi) ^ (-(s.re)) := by
+    rw [← h2pi, Complex.norm_cpow_eq_rpow_re_of_pos hbase_pos, Complex.neg_re]
+  rw [hnorm]
+  have hge1 : (1 : ℝ) ≤ 2 * Real.pi := by
+    have hpi := Real.pi_gt_three
+    linarith
+  have hle7 : (2 : ℝ) * Real.pi ≤ 7 := by
+    have h := Real.pi_lt_d4
+    linarith
+  have hexp : (-1 : ℝ) ≤ -(s.re) := by linarith
+  have hmono : (2 * Real.pi) ^ (-1 : ℝ) ≤ (2 * Real.pi) ^ (-(s.re)) :=
+    Real.rpow_le_rpow_of_exponent_le hge1 hexp
+  have heq : (2 * Real.pi : ℝ) ^ (-1 : ℝ) = 1 / (2 * Real.pi) := by
+    rw [Real.rpow_neg_one, inv_eq_one_div]
+  have hinv : (1 : ℝ) / 7 ≤ 1 / (2 * Real.pi) :=
+    one_div_le_one_div_of_le hbase_pos hle7
+  calc (1 : ℝ) / 7 ≤ 1 / (2 * Real.pi) := hinv
+    _ = (2 * Real.pi) ^ (-1 : ℝ) := heq.symm
+    _ ≤ (2 * Real.pi) ^ (-(s.re)) := hmono
+
+/-- Real-Gamma cap at `0.395`: `Real.Gamma 0.395 ≤ 3`
+(convexity on `[1,2]` gives `Gamma(1.395) ≤ 1`, then `Gamma(0.395) ≤ 1/0.395 ≤ 3`;
+mirrors `zetaFE_realGamma_0395_le`). -/
+theorem RowFE_realGamma_0395_le : Real.Gamma (0.395 : ℝ) ≤ 3 := by
+  have hx_pos : (0 : ℝ) < 0.395 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.395 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.395 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.395 : ℝ) + 1)) + (((0.395 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.395 : ℝ) + 1)) * 1 + (((0.395 : ℝ) + 1) - 1) * 2 =
+      (0.395 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.395 : ℝ) + 1)) * 1 + (((0.395 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.395 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.395 : ℝ) ≤ 1 / 0.395 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.395 ≤ 3 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.3`: `Real.Gamma 0.3 ≤ 4` (`1/0.3 ≤ 4`). -/
+theorem RowFE_realGamma_030_le : Real.Gamma (0.3 : ℝ) ≤ 4 := by
+  have hx_pos : (0 : ℝ) < 0.3 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.3 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.3 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.3 : ℝ) + 1)) + (((0.3 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.3 : ℝ) + 1)) * 1 + (((0.3 : ℝ) + 1) - 1) * 2 =
+      (0.3 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.3 : ℝ) + 1)) * 1 + (((0.3 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.3 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.3 : ℝ) ≤ 1 / 0.3 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.3 ≤ 4 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.2`: `Real.Gamma 0.2 ≤ 5` (`1/0.2 = 5`). -/
+theorem RowFE_realGamma_020_le : Real.Gamma (0.2 : ℝ) ≤ 5 := by
+  have hx_pos : (0 : ℝ) < 0.2 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.2 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.2 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.2 : ℝ) + 1)) + (((0.2 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.2 : ℝ) + 1)) * 1 + (((0.2 : ℝ) + 1) - 1) * 2 =
+      (0.2 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.2 : ℝ) + 1)) * 1 + (((0.2 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.2 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.2 : ℝ) ≤ 1 / 0.2 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.2 ≤ 5 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.105`: `Real.Gamma 0.105 ≤ 10` (`1/0.105 ≤ 10`). -/
+theorem RowFE_realGamma_0105_le : Real.Gamma (0.105 : ℝ) ≤ 10 := by
+  have hx_pos : (0 : ℝ) < 0.105 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.105 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.105 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.105 : ℝ) + 1)) + (((0.105 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.105 : ℝ) + 1)) * 1 + (((0.105 : ℝ) + 1) - 1) * 2 =
+      (0.105 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.105 : ℝ) + 1)) * 1 + (((0.105 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.105 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.105 : ℝ) ≤ 1 / 0.105 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.105 ≤ 10 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.605`: `Real.Gamma 0.605 ≤ 2`
+(mirrors `zetaFE_realGamma_0605_le`). -/
+theorem RowFE_realGamma_0605_le : Real.Gamma (0.605 : ℝ) ≤ 2 := by
+  have hx_pos : (0 : ℝ) < 0.605 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.605 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.605 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.605 : ℝ) + 1)) + (((0.605 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.605 : ℝ) + 1)) * 1 + (((0.605 : ℝ) + 1) - 1) * 2 =
+      (0.605 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.605 : ℝ) + 1)) * 1 + (((0.605 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.605 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.605 : ℝ) ≤ 1 / 0.605 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.605 ≤ 2 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.7`: `Real.Gamma 0.7 ≤ 2` (`1/0.7 ≤ 2`). -/
+theorem RowFE_realGamma_070_le : Real.Gamma (0.7 : ℝ) ≤ 2 := by
+  have hx_pos : (0 : ℝ) < 0.7 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.7 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.7 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.7 : ℝ) + 1)) + (((0.7 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.7 : ℝ) + 1)) * 1 + (((0.7 : ℝ) + 1) - 1) * 2 =
+      (0.7 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.7 : ℝ) + 1)) * 1 + (((0.7 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.7 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.7 : ℝ) ≤ 1 / 0.7 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.7 ≤ 2 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.8`: `Real.Gamma 0.8 ≤ 2` (`1/0.8 = 1.25 ≤ 2`). -/
+theorem RowFE_realGamma_080_le : Real.Gamma (0.8 : ℝ) ≤ 2 := by
+  have hx_pos : (0 : ℝ) < 0.8 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.8 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.8 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.8 : ℝ) + 1)) + (((0.8 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.8 : ℝ) + 1)) * 1 + (((0.8 : ℝ) + 1) - 1) * 2 =
+      (0.8 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.8 : ℝ) + 1)) * 1 + (((0.8 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.8 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.8 : ℝ) ≤ 1 / 0.8 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.8 ≤ 2 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Real-Gamma cap at `0.895`: `Real.Gamma 0.895 ≤ 2` (`1/0.895 ≤ 2`). -/
+theorem RowFE_realGamma_0895_le : Real.Gamma (0.895 : ℝ) ≤ 2 := by
+  have hx_pos : (0 : ℝ) < 0.895 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.895 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.895 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.895 : ℝ) + 1)) + (((0.895 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.895 : ℝ) + 1)) * 1 + (((0.895 : ℝ) + 1) - 1) * 2 =
+      (0.895 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.895 : ℝ) + 1)) * 1 + (((0.895 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.895 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.895 : ℝ) ≤ 1 / 0.895 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.895 ≤ 2 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Gamma upper from a real cap
+(mirrors `zetaFE_Gamma_upper_S0`, via `R00GammaLower.norm_Gamma_le_realGamma`). -/
+theorem RowFE_Gamma_upper_of {s : ℂ} {v G : ℝ} (hre : s.re = v)
+    (hcap : Real.Gamma v ≤ G) (hv : 0 < v) : ‖Complex.Gamma s‖ ≤ G := by
+  have hre_pos : 0 < s.re := by rw [hre]; exact hv
+  have hle := R00GammaLower.norm_Gamma_le_realGamma hre_pos
+  rw [hre] at hle
+  exact le_trans hle hcap
+
+/-- Gamma upper at `1-s` from a real cap. -/
+theorem RowFE_Gamma_one_sub_upper_of {s : ℂ} {u G : ℝ} (hre1 : (1 - s).re = u)
+    (hcap : Real.Gamma u ≤ G) (hu : 0 < u) : ‖Complex.Gamma (1 - s)‖ ≤ G := by
+  have hpos : 0 < (1 - s).re := by rw [hre1]; exact hu
+  have hle := R00GammaLower.norm_Gamma_le_realGamma hpos
+  rw [hre1] at hle
+  exact le_trans hle hcap
+
+/-- Generic reflection Gamma lower: `3/(G'*2e12) ≤ ‖Gamma s‖` for `Re s = ρ ∈ (0,1)`,
+from `Gamma(s)*Gamma(1-s) = π/sin(π*s)` with `‖Gamma(1-s)‖ ≤ G'` and the uniform
+`‖sin(π*s)‖ ≤ 2e12` (generalizes `zetaFE_Gamma_lower_S0`). -/
+theorem RowFE_Gamma_lower_of {s : ℂ} {ρ G' : ℝ}
+    (hre : s.re = ρ) (him : |s.im| ≤ 8.75)
+    (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hG1_le : ‖Complex.Gamma (1 - s)‖ ≤ G') (hG' : 0 < G') :
+    3 / (G' * 2000000000000) ≤ ‖Complex.Gamma s‖ := by
+  have hre0 : 0 < s.re := by rw [hre]; exact hρ0
+  have hre1pos : 0 < (1 - s).re := by
+    rw [Complex.sub_re, Complex.one_re, hre]; linarith
+  have hG0_ne : Complex.Gamma s ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos hre0
+  have hG1_ne : Complex.Gamma (1 - s) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos hre1pos
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub s
+  have hS_le : ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≤ 2000000000000 :=
+    RowFE_sin_full_num him
+  have hprod_ne : Complex.Gamma s * Complex.Gamma (1 - s) ≠ 0 :=
+    mul_ne_zero hG0_ne hG1_ne
+  have hS_ne : Complex.sin ((Real.pi : ℂ) * s) ≠ 0 := by
+    intro hcon
+    rw [hcon, div_zero] at hrefl
+    exact hprod_ne hrefl
+  have hS_pos : 0 < ‖Complex.sin ((Real.pi : ℂ) * s)‖ :=
+    norm_pos_iff.mpr hS_ne
+  have hG0_nonneg : 0 ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  have hS_nonneg : 0 ≤ ‖Complex.sin ((Real.pi : ℂ) * s)‖ := norm_nonneg _
+  have hnorm_prod : ‖Complex.Gamma s‖ * ‖Complex.Gamma (1 - s)‖ =
+      Real.pi / ‖Complex.sin ((Real.pi : ℂ) * s)‖ := by
+    have h := congrArg (fun x : ℂ => ‖x‖) hrefl
+    simp only [norm_mul, norm_div] at h
+    have hpi_norm : ‖(Real.pi : ℂ)‖ = Real.pi := by
+      rw [Complex.norm_real]
+      exact Real.norm_of_nonneg Real.pi_pos.le
+    rw [hpi_norm] at h
+    exact h
+  have hS_ne' : ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≠ 0 :=
+    ne_of_gt hS_pos
+  have hprod_eq : ‖Complex.Gamma s‖ * ‖Complex.Gamma (1 - s)‖ *
+      ‖Complex.sin ((Real.pi : ℂ) * s)‖ = Real.pi := by
+    rw [hnorm_prod, div_mul_cancel₀ _ hS_ne']
+  have hpi_ge : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
+  have hGS_le : ‖Complex.Gamma (1 - s)‖ *
+      ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≤ G' * 2000000000000 := by
+    exact mul_le_mul hG1_le hS_le hS_nonneg (le_of_lt hG')
+  have hprod_le : ‖Complex.Gamma s‖ * ‖Complex.Gamma (1 - s)‖ *
+      ‖Complex.sin ((Real.pi : ℂ) * s)‖ ≤
+      ‖Complex.Gamma s‖ * (G' * 2000000000000) := by
+    calc ‖Complex.Gamma s‖ * ‖Complex.Gamma (1 - s)‖ *
+        ‖Complex.sin ((Real.pi : ℂ) * s)‖
+        = ‖Complex.Gamma s‖ *
+          (‖Complex.Gamma (1 - s)‖ *
+            ‖Complex.sin ((Real.pi : ℂ) * s)‖) := by ring
+      _ ≤ ‖Complex.Gamma s‖ * (G' * 2000000000000) :=
+          mul_le_mul_of_nonneg_left hGS_le hG0_nonneg
+  have hpi_le_prod : (3 : ℝ) ≤ ‖Complex.Gamma s‖ * (G' * 2000000000000) := by
+    calc (3 : ℝ) ≤ Real.pi := hpi_ge
+      _ = ‖Complex.Gamma s‖ * ‖Complex.Gamma (1 - s)‖ *
+          ‖Complex.sin ((Real.pi : ℂ) * s)‖ := hprod_eq.symm
+      _ ≤ ‖Complex.Gamma s‖ * (G' * 2000000000000) := hprod_le
+  have hdiv_le : (3 : ℝ) / (G' * 2000000000000) ≤ ‖Complex.Gamma s‖ := by
+    rw [div_le_iff₀ (mul_pos hG' (by norm_num))]
+    exact hpi_le_prod
+  exact hdiv_le
+
+/-- Cosine lower from its real part: `cos(Re w) ≤ ‖cos w‖` for `Re w ∈ [0, π/2]`,
+via `Complex.cos_eq` (`|cos w|^2 = cos^2·cosh^2 + sin^2·sinh^2 ≥ cos^2`). -/
+theorem RowFE_cos_re_le {w : ℂ} (hx0 : 0 ≤ w.re) (hx1 : w.re ≤ Real.pi / 2) :
+    Real.cos w.re ≤ ‖Complex.cos w‖ := by
+  have hexp := Complex.cos_eq w
+  have hre : (Complex.cos w).re = Real.cos w.re * Real.cosh w.im := by
+    have h := congrArg Complex.re hexp
+    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin, ← Complex.ofReal_cosh,
+      ← Complex.ofReal_sinh] at h
+    simp only [Complex.sub_re, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im, mul_zero, mul_one, zero_mul,
+      sub_zero, add_zero] at h
+    linear_combination h
+  have hcos_nn : 0 ≤ Real.cos w.re := by
+    apply Real.cos_nonneg_of_mem_Icc
+    refine ⟨?_, hx1⟩
+    have hpi := Real.pi_pos
+    linarith
+  have hcosh1 : (1 : ℝ) ≤ Real.cosh w.im := Real.one_le_cosh _
+  have hsq : ‖Complex.cos w‖ ^ 2 = Complex.normSq (Complex.cos w) :=
+    Complex.sq_norm _
+  rw [Complex.normSq_apply, hre] at hsq
+  have hc2 : (1 : ℝ) ≤ (Real.cosh w.im) ^ 2 := by
+    nlinarith [hcosh1, mul_self_nonneg (Real.cosh w.im - 1)]
+  have hcos_sq : (Real.cos w.re) ^ 2 ≤
+      (Real.cos w.re * Real.cosh w.im) * (Real.cos w.re * Real.cosh w.im) := by
+    calc (Real.cos w.re) ^ 2 = (Real.cos w.re) ^ 2 * 1 := by ring
+      _ ≤ (Real.cos w.re) ^ 2 * (Real.cosh w.im) ^ 2 :=
+          mul_le_mul_of_nonneg_left hc2 (by positivity)
+      _ = (Real.cos w.re * Real.cosh w.im) *
+            (Real.cos w.re * Real.cosh w.im) := by ring
+  have hle : (Real.cos w.re) ^ 2 ≤ ‖Complex.cos w‖ ^ 2 := by
+    rw [hsq]
+    have him2 : 0 ≤ (Complex.cos w).im * (Complex.cos w).im := mul_self_nonneg _
+    linarith [hcos_sq]
+  have habs := abs_le_of_sq_le_sq hle (norm_nonneg _)
+  rwa [abs_of_nonneg hcos_nn] at habs
+
+/-- Real cosine lower at row 0.395: `0.8 ≤ cos(π*0.395/2)`
+(`π*0.395/2 ≤ 0.621`, antitone `cos`, Taylor `1-q^2/2 ≤ cos q`). -/
+theorem RowFE_cos_real_lower_0395 : (0.8 : ℝ) ≤ Real.cos (Real.pi * 0.395 / 2) := by
+  have hpi_hi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have hx_le : Real.pi * 0.395 / 2 ≤ 0.621 := by
+    have h : Real.pi * 0.395 ≤ 3.1416 * 0.395 := by
+      apply mul_le_mul_of_nonneg_right (le_of_lt hpi_hi) (by norm_num)
+    linarith
+  have hx0 : (0 : ℝ) ≤ Real.pi * 0.395 / 2 := by
+    have hpi := Real.pi_pos
+    linarith
+  have hq_pi : (0.621 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hmono : Real.cos 0.621 ≤ Real.cos (Real.pi * 0.395 / 2) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hx0 hq_pi hx_le
+  have htaylor : (1 : ℝ) - 0.621 ^ 2 / 2 ≤ Real.cos 0.621 :=
+    Real.one_sub_sq_div_two_le_cos
+  have hnum : (0.8 : ℝ) ≤ 1 - 0.621 ^ 2 / 2 := by norm_num
+  exact le_trans hnum (le_trans htaylor hmono)
+
+/-- Real cosine lower at row 0.3: `0.88 ≤ cos(π*0.3/2)`. -/
+theorem RowFE_cos_real_lower_030 : (0.88 : ℝ) ≤ Real.cos (Real.pi * 0.3 / 2) := by
+  have hpi_hi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have hx_le : Real.pi * 0.3 / 2 ≤ 0.472 := by
+    have h : Real.pi * 0.3 ≤ 3.1416 * 0.3 := by
+      apply mul_le_mul_of_nonneg_right (le_of_lt hpi_hi) (by norm_num)
+    linarith
+  have hx0 : (0 : ℝ) ≤ Real.pi * 0.3 / 2 := by
+    have hpi := Real.pi_pos
+    linarith
+  have hq_pi : (0.472 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hmono : Real.cos 0.472 ≤ Real.cos (Real.pi * 0.3 / 2) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hx0 hq_pi hx_le
+  have htaylor : (1 : ℝ) - 0.472 ^ 2 / 2 ≤ Real.cos 0.472 :=
+    Real.one_sub_sq_div_two_le_cos
+  have hnum : (0.88 : ℝ) ≤ 1 - 0.472 ^ 2 / 2 := by norm_num
+  exact le_trans hnum (le_trans htaylor hmono)
+
+/-- Real cosine lower at row 0.2: `0.95 ≤ cos(π*0.2/2)`. -/
+theorem RowFE_cos_real_lower_020 : (0.95 : ℝ) ≤ Real.cos (Real.pi * 0.2 / 2) := by
+  have hpi_hi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have hx_le : Real.pi * 0.2 / 2 ≤ 0.315 := by
+    have h : Real.pi * 0.2 ≤ 3.1416 * 0.2 := by
+      apply mul_le_mul_of_nonneg_right (le_of_lt hpi_hi) (by norm_num)
+    linarith
+  have hx0 : (0 : ℝ) ≤ Real.pi * 0.2 / 2 := by
+    have hpi := Real.pi_pos
+    linarith
+  have hq_pi : (0.315 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hmono : Real.cos 0.315 ≤ Real.cos (Real.pi * 0.2 / 2) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hx0 hq_pi hx_le
+  have htaylor : (1 : ℝ) - 0.315 ^ 2 / 2 ≤ Real.cos 0.315 :=
+    Real.one_sub_sq_div_two_le_cos
+  have hnum : (0.95 : ℝ) ≤ 1 - 0.315 ^ 2 / 2 := by norm_num
+  exact le_trans hnum (le_trans htaylor hmono)
+
+/-- Real cosine lower at row 0.105: `0.98 ≤ cos(π*0.105/2)`. -/
+theorem RowFE_cos_real_lower_0105 : (0.98 : ℝ) ≤ Real.cos (Real.pi * 0.105 / 2) := by
+  have hpi_hi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have hx_le : Real.pi * 0.105 / 2 ≤ 0.165 := by
+    have h : Real.pi * 0.105 ≤ 3.1416 * 0.105 := by
+      apply mul_le_mul_of_nonneg_right (le_of_lt hpi_hi) (by norm_num)
+    linarith
+  have hx0 : (0 : ℝ) ≤ Real.pi * 0.105 / 2 := by
+    have hpi := Real.pi_pos
+    linarith
+  have hq_pi : (0.165 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hmono : Real.cos 0.165 ≤ Real.cos (Real.pi * 0.105 / 2) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hx0 hq_pi hx_le
+  have htaylor : (1 : ℝ) - 0.165 ^ 2 / 2 ≤ Real.cos 0.165 :=
+    Real.one_sub_sq_div_two_le_cos
+  have hnum : (0.98 : ℝ) ≤ 1 - 0.165 ^ 2 / 2 := by norm_num
+  exact le_trans hnum (le_trans htaylor hmono)
+
+/-- Factor upper assembly from component bounds
+(mirrors `zetaFE_factor_upper_S0`). -/
+theorem RowFE_factor_upper_of {s : ℂ} {G C : ℝ}
+    (hcp : ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ ≤ 1)
+    (hG : ‖Complex.Gamma s‖ ≤ G)
+    (hcos : ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ ≤ C) (hG0 : 0 ≤ G) :
+    ‖RowFEFactor s‖ ≤ 2 * 1 * G * C := by
+  have hcos' : ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ ≤ C := by
+    rw [mul_div_assoc]
+    exact hcos
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖RowFEFactor s‖ =
+      ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ *
+        ‖Complex.Gamma s‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ := by
+    unfold RowFEFactor
+    simp [norm_mul, mul_assoc]
+  have h2P : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ ≤ 2 * 1 :=
+    mul_le_mul (le_refl 2) hcp (norm_nonneg _) (by norm_num)
+  have h2PG : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ * ‖Complex.Gamma s‖ ≤ 2 * 1 * G :=
+    mul_le_mul h2P hG (norm_nonneg _) (by norm_num)
+  have hfin : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ * ‖Complex.Gamma s‖ *
+      ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ ≤ 2 * 1 * G * C :=
+    mul_le_mul h2PG hcos' (norm_nonneg _)
+      (mul_nonneg (by norm_num) hG0)
+  rw [hnorm_eq, e2]
+  exact hfin
+
+/-- Factor lower assembly from component lower bounds
+(mirrors `zetaFE_factor_lower_S0`). -/
+theorem RowFE_factor_lower_of {s : ℂ} {g c : ℝ}
+    (hcp : (1 : ℝ) / 7 ≤ ‖(2 * (Real.pi : ℂ)) ^ (-s)‖)
+    (hG : g ≤ ‖Complex.Gamma s‖)
+    (hcos : c ≤ ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖)
+    (hg : 0 ≤ g) (hc : 0 ≤ c) :
+    2 * (1 / 7 : ℝ) * g * c ≤ ‖RowFEFactor s‖ := by
+  have hcos' : c ≤ ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ := by
+    rw [mul_div_assoc]
+    exact hcos
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖RowFEFactor s‖ =
+      ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ *
+        ‖Complex.Gamma s‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ := by
+    unfold RowFEFactor
+    simp [norm_mul, mul_assoc]
+  have h2 : (0 : ℝ) ≤ 2 := by norm_num
+  have h17 : (0 : ℝ) ≤ 1 / 7 := by norm_num
+  have h2cp : (0 : ℝ) ≤ 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ :=
+    mul_nonneg h2 (le_trans h17 hcp)
+  have h2P : 2 * (1 / 7 : ℝ) ≤ 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ :=
+    mul_le_mul (le_refl 2) hcp h17 h2
+  have h2Pg : 2 * (1 / 7 : ℝ) * g ≤ 2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ * ‖Complex.Gamma s‖ :=
+    mul_le_mul h2P hG hg h2cp
+  have hfin : 2 * (1 / 7 : ℝ) * g * c ≤
+      2 * ‖(2 * (Real.pi : ℂ)) ^ (-s)‖ * ‖Complex.Gamma s‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ :=
+    mul_le_mul h2Pg hcos' hc (mul_nonneg h2cp (le_trans hg hG))
+  rw [hnorm_eq, e2]
+  exact hfin
+
+/-! ### Row 0.395 (bottom row; validates the generalization) -/
+
+/-- (b) Gamma upper at row 0.395: `‖Gamma s‖ ≤ 3`. -/
+theorem RowFE_Gamma_upper_0395 {s : ℂ} (hre : s.re = 0.395) :
+    ‖Complex.Gamma s‖ ≤ 3 :=
+  RowFE_Gamma_upper_of hre RowFE_realGamma_0395_le (by norm_num)
+
+/-- Gamma upper at `1-s`, row 0.395: `‖Gamma(1-s)‖ ≤ 2` (`Re = 0.605`). -/
+theorem RowFE_Gamma_one_sub_upper_0395 {s : ℂ} (hre : s.re = 0.395) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 2 := by
+  have hre1 : (1 - s).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, hre]; norm_num
+  exact RowFE_Gamma_one_sub_upper_of hre1 RowFE_realGamma_0605_le (by norm_num)
+
+/-- (c) Gamma lower at row 0.395: `1e-13 ≤ ‖Gamma s‖` via reflection. -/
+theorem RowFE_Gamma_lower_0395 {s : ℂ} (hre : s.re = 0.395) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 10000000000000 ≤ ‖Complex.Gamma s‖ := by
+  have h := RowFE_Gamma_lower_of hre him (by norm_num) (by norm_num)
+    (RowFE_Gamma_one_sub_upper_0395 hre) (by norm_num)
+  have hfinal : (1 : ℝ) / 10000000000000 ≤ 3 / (2 * 2000000000000) := by norm_num
+  exact le_trans hfinal h
+
+/-- Cosine lower at row 0.395: `0.8 ≤ ‖cos(π*(s/2))‖`. -/
+theorem RowFE_cos_lower_0395 {s : ℂ} (hre : s.re = 0.395) :
+    (0.8 : ℝ) ≤ ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ := by
+  have hs2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hwre : ((Real.pi : ℂ) * (s / 2)).re = Real.pi * 0.395 / 2 := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, hs2re, hre]
+    ring
+  have h0 : (0 : ℝ) ≤ ((Real.pi : ℂ) * (s / 2)).re := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have h1 : ((Real.pi : ℂ) * (s / 2)).re ≤ Real.pi / 2 := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have hle := RowFE_cos_re_le h0 h1
+  rw [hwre] at hle
+  exact le_trans RowFE_cos_real_lower_0395 hle
+
+/-- (d-upper) Factor upper at row 0.395: `‖F(s)‖ ≤ 60000000` (`2·1·3·1e7`). -/
+theorem RowFE_factor_upper_0395 {s : ℂ} (hre : s.re = 0.395) (him : |s.im| ≤ 8.75) :
+    ‖RowFEFactor s‖ ≤ 60000000 := by
+  have hcp := RowFE_cpow_upper (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_upper_0395 hre
+  have hcos := RowFE_cos_num him
+  have h := RowFE_factor_upper_of hcp hG hcos (by norm_num)
+  have heq : (2 : ℝ) * 1 * 3 * 10000000 = 60000000 := by norm_num
+  linarith [h, heq]
+
+/-- (d-lower) Factor lower at row 0.395: `1e-14 ≤ ‖F(s)‖` (`2·(1/7)·1e-13·0.8`). -/
+theorem RowFE_factor_lower_0395 {s : ℂ} (hre : s.re = 0.395) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 100000000000000 ≤ ‖RowFEFactor s‖ := by
+  have hcp := RowFE_cpow_lower (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_lower_0395 hre him
+  have hcos := RowFE_cos_lower_0395 hre
+  have h := RowFE_factor_lower_of hcp hG hcos (by norm_num) (by norm_num)
+  have hbound : (1 : ℝ) / 100000000000000
+      ≤ 2 * (1 / 7 : ℝ) * (1 / 10000000000000 : ℝ) * 0.8 := by norm_num
+  exact le_trans hbound h
+
+/-! ### Row 0.3 -/
+
+/-- (b) Gamma upper at row 0.3: `‖Gamma s‖ ≤ 4`. -/
+theorem RowFE_Gamma_upper_030 {s : ℂ} (hre : s.re = 0.3) :
+    ‖Complex.Gamma s‖ ≤ 4 :=
+  RowFE_Gamma_upper_of hre RowFE_realGamma_030_le (by norm_num)
+
+/-- Gamma upper at `1-s`, row 0.3: `‖Gamma(1-s)‖ ≤ 2` (`Re = 0.7`). -/
+theorem RowFE_Gamma_one_sub_upper_030 {s : ℂ} (hre : s.re = 0.3) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 2 := by
+  have hre1 : (1 - s).re = (0.7 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, hre]; norm_num
+  exact RowFE_Gamma_one_sub_upper_of hre1 RowFE_realGamma_070_le (by norm_num)
+
+/-- (c) Gamma lower at row 0.3: `1e-13 ≤ ‖Gamma s‖` via reflection. -/
+theorem RowFE_Gamma_lower_030 {s : ℂ} (hre : s.re = 0.3) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 10000000000000 ≤ ‖Complex.Gamma s‖ := by
+  have h := RowFE_Gamma_lower_of hre him (by norm_num) (by norm_num)
+    (RowFE_Gamma_one_sub_upper_030 hre) (by norm_num)
+  have hfinal : (1 : ℝ) / 10000000000000 ≤ 3 / (2 * 2000000000000) := by norm_num
+  exact le_trans hfinal h
+
+/-- Cosine lower at row 0.3: `0.88 ≤ ‖cos(π*(s/2))‖`. -/
+theorem RowFE_cos_lower_030 {s : ℂ} (hre : s.re = 0.3) :
+    (0.88 : ℝ) ≤ ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ := by
+  have hs2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hwre : ((Real.pi : ℂ) * (s / 2)).re = Real.pi * 0.3 / 2 := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, hs2re, hre]
+    ring
+  have h0 : (0 : ℝ) ≤ ((Real.pi : ℂ) * (s / 2)).re := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have h1 : ((Real.pi : ℂ) * (s / 2)).re ≤ Real.pi / 2 := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have hle := RowFE_cos_re_le h0 h1
+  rw [hwre] at hle
+  exact le_trans RowFE_cos_real_lower_030 hle
+
+/-- (d-upper) Factor upper at row 0.3: `‖F(s)‖ ≤ 80000000` (`2·1·4·1e7`). -/
+theorem RowFE_factor_upper_030 {s : ℂ} (hre : s.re = 0.3) (him : |s.im| ≤ 8.75) :
+    ‖RowFEFactor s‖ ≤ 80000000 := by
+  have hcp := RowFE_cpow_upper (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_upper_030 hre
+  have hcos := RowFE_cos_num him
+  have h := RowFE_factor_upper_of hcp hG hcos (by norm_num)
+  have heq : (2 : ℝ) * 1 * 4 * 10000000 = 80000000 := by norm_num
+  linarith [h, heq]
+
+/-- (d-lower) Factor lower at row 0.3: `1e-14 ≤ ‖F(s)‖` (`2·(1/7)·1e-13·0.88`). -/
+theorem RowFE_factor_lower_030 {s : ℂ} (hre : s.re = 0.3) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 100000000000000 ≤ ‖RowFEFactor s‖ := by
+  have hcp := RowFE_cpow_lower (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_lower_030 hre him
+  have hcos := RowFE_cos_lower_030 hre
+  have h := RowFE_factor_lower_of hcp hG hcos (by norm_num) (by norm_num)
+  have hbound : (1 : ℝ) / 100000000000000
+      ≤ 2 * (1 / 7 : ℝ) * (1 / 10000000000000 : ℝ) * 0.88 := by norm_num
+  exact le_trans hbound h
+
+/-! ### Row 0.2 -/
+
+/-- (b) Gamma upper at row 0.2: `‖Gamma s‖ ≤ 5`. -/
+theorem RowFE_Gamma_upper_020 {s : ℂ} (hre : s.re = 0.2) :
+    ‖Complex.Gamma s‖ ≤ 5 :=
+  RowFE_Gamma_upper_of hre RowFE_realGamma_020_le (by norm_num)
+
+/-- Gamma upper at `1-s`, row 0.2: `‖Gamma(1-s)‖ ≤ 2` (`Re = 0.8`). -/
+theorem RowFE_Gamma_one_sub_upper_020 {s : ℂ} (hre : s.re = 0.2) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 2 := by
+  have hre1 : (1 - s).re = (0.8 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, hre]; norm_num
+  exact RowFE_Gamma_one_sub_upper_of hre1 RowFE_realGamma_080_le (by norm_num)
+
+/-- (c) Gamma lower at row 0.2: `1e-13 ≤ ‖Gamma s‖` via reflection. -/
+theorem RowFE_Gamma_lower_020 {s : ℂ} (hre : s.re = 0.2) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 10000000000000 ≤ ‖Complex.Gamma s‖ := by
+  have h := RowFE_Gamma_lower_of hre him (by norm_num) (by norm_num)
+    (RowFE_Gamma_one_sub_upper_020 hre) (by norm_num)
+  have hfinal : (1 : ℝ) / 10000000000000 ≤ 3 / (2 * 2000000000000) := by norm_num
+  exact le_trans hfinal h
+
+/-- Cosine lower at row 0.2: `0.95 ≤ ‖cos(π*(s/2))‖`. -/
+theorem RowFE_cos_lower_020 {s : ℂ} (hre : s.re = 0.2) :
+    (0.95 : ℝ) ≤ ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ := by
+  have hs2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hwre : ((Real.pi : ℂ) * (s / 2)).re = Real.pi * 0.2 / 2 := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, hs2re, hre]
+    ring
+  have h0 : (0 : ℝ) ≤ ((Real.pi : ℂ) * (s / 2)).re := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have h1 : ((Real.pi : ℂ) * (s / 2)).re ≤ Real.pi / 2 := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have hle := RowFE_cos_re_le h0 h1
+  rw [hwre] at hle
+  exact le_trans RowFE_cos_real_lower_020 hle
+
+/-- (d-upper) Factor upper at row 0.2: `‖F(s)‖ ≤ 100000000` (`2·1·5·1e7`). -/
+theorem RowFE_factor_upper_020 {s : ℂ} (hre : s.re = 0.2) (him : |s.im| ≤ 8.75) :
+    ‖RowFEFactor s‖ ≤ 100000000 := by
+  have hcp := RowFE_cpow_upper (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_upper_020 hre
+  have hcos := RowFE_cos_num him
+  have h := RowFE_factor_upper_of hcp hG hcos (by norm_num)
+  have heq : (2 : ℝ) * 1 * 5 * 10000000 = 100000000 := by norm_num
+  linarith [h, heq]
+
+/-- (d-lower) Factor lower at row 0.2: `1e-14 ≤ ‖F(s)‖` (`2·(1/7)·1e-13·0.95`). -/
+theorem RowFE_factor_lower_020 {s : ℂ} (hre : s.re = 0.2) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 100000000000000 ≤ ‖RowFEFactor s‖ := by
+  have hcp := RowFE_cpow_lower (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_lower_020 hre him
+  have hcos := RowFE_cos_lower_020 hre
+  have h := RowFE_factor_lower_of hcp hG hcos (by norm_num) (by norm_num)
+  have hbound : (1 : ℝ) / 100000000000000
+      ≤ 2 * (1 / 7 : ℝ) * (1 / 10000000000000 : ℝ) * 0.95 := by norm_num
+  exact le_trans hbound h
+
+/-! ### Row 0.105 -/
+
+/-- (b) Gamma upper at row 0.105: `‖Gamma s‖ ≤ 10`. -/
+theorem RowFE_Gamma_upper_0105 {s : ℂ} (hre : s.re = 0.105) :
+    ‖Complex.Gamma s‖ ≤ 10 :=
+  RowFE_Gamma_upper_of hre RowFE_realGamma_0105_le (by norm_num)
+
+/-- Gamma upper at `1-s`, row 0.105: `‖Gamma(1-s)‖ ≤ 2` (`Re = 0.895`). -/
+theorem RowFE_Gamma_one_sub_upper_0105 {s : ℂ} (hre : s.re = 0.105) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 2 := by
+  have hre1 : (1 - s).re = (0.895 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, hre]; norm_num
+  exact RowFE_Gamma_one_sub_upper_of hre1 RowFE_realGamma_0895_le (by norm_num)
+
+/-- (c) Gamma lower at row 0.105: `1e-13 ≤ ‖Gamma s‖` via reflection. -/
+theorem RowFE_Gamma_lower_0105 {s : ℂ} (hre : s.re = 0.105) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 10000000000000 ≤ ‖Complex.Gamma s‖ := by
+  have h := RowFE_Gamma_lower_of hre him (by norm_num) (by norm_num)
+    (RowFE_Gamma_one_sub_upper_0105 hre) (by norm_num)
+  have hfinal : (1 : ℝ) / 10000000000000 ≤ 3 / (2 * 2000000000000) := by norm_num
+  exact le_trans hfinal h
+
+/-- Cosine lower at row 0.105: `0.98 ≤ ‖cos(π*(s/2))‖`. -/
+theorem RowFE_cos_lower_0105 {s : ℂ} (hre : s.re = 0.105) :
+    (0.98 : ℝ) ≤ ‖Complex.cos ((Real.pi : ℂ) * (s / 2))‖ := by
+  have hs2re : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hwre : ((Real.pi : ℂ) * (s / 2)).re = Real.pi * 0.105 / 2 := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, hs2re, hre]
+    ring
+  have h0 : (0 : ℝ) ≤ ((Real.pi : ℂ) * (s / 2)).re := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have h1 : ((Real.pi : ℂ) * (s / 2)).re ≤ Real.pi / 2 := by
+    rw [hwre]; have hpi := Real.pi_pos; linarith
+  have hle := RowFE_cos_re_le h0 h1
+  rw [hwre] at hle
+  exact le_trans RowFE_cos_real_lower_0105 hle
+
+/-- (d-upper) Factor upper at row 0.105: `‖F(s)‖ ≤ 200000000` (`2·1·10·1e7`). -/
+theorem RowFE_factor_upper_0105 {s : ℂ} (hre : s.re = 0.105) (him : |s.im| ≤ 8.75) :
+    ‖RowFEFactor s‖ ≤ 200000000 := by
+  have hcp := RowFE_cpow_upper (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_upper_0105 hre
+  have hcos := RowFE_cos_num him
+  have h := RowFE_factor_upper_of hcp hG hcos (by norm_num)
+  have heq : (2 : ℝ) * 1 * 10 * 10000000 = 200000000 := by norm_num
+  linarith [h, heq]
+
+/-- (d-lower) Factor lower at row 0.105: `1e-14 ≤ ‖F(s)‖` (`2·(1/7)·1e-13·0.98`). -/
+theorem RowFE_factor_lower_0105 {s : ℂ} (hre : s.re = 0.105) (him : |s.im| ≤ 8.75) :
+    (1 : ℝ) / 100000000000000 ≤ ‖RowFEFactor s‖ := by
+  have hcp := RowFE_cpow_lower (s := s) (by rw [hre]; norm_num)
+  have hG := RowFE_Gamma_lower_0105 hre him
+  have hcos := RowFE_cos_lower_0105 hre
+  have h := RowFE_factor_lower_of hcp hG hcos (by norm_num) (by norm_num)
+  have hbound : (1 : ℝ) / 100000000000000
+      ≤ 2 * (1 / 7 : ℝ) * (1 / 10000000000000 : ℝ) * 0.98 := by norm_num
+  exact le_trans hbound h
+
+#print axioms RowFE_Gamma_lower_0395
+#print axioms RowFE_factor_upper_0395
+#print axioms RowFE_factor_lower_0395
+#print axioms RowFE_Gamma_lower_030
+#print axioms RowFE_factor_upper_030
+#print axioms RowFE_factor_lower_030
+#print axioms RowFE_Gamma_lower_020
+#print axioms RowFE_factor_upper_020
+#print axioms RowFE_factor_lower_020
+#print axioms RowFE_Gamma_lower_0105
+#print axioms RowFE_factor_upper_0105
+#print axioms RowFE_factor_lower_0105
+
+
+end RowFE
