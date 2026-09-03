@@ -1388,8 +1388,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   Phragmén–Lindelöf EXISTS (strip form `PhragmenLindelof.vertical_strip`) and Hadamard three-lines EXISTS
   (`Hadamard.norm_le_interp_of_mem_verticalClosedStrip'`) — do NOT recreate. Euler absolute upper closed
   (`zetaUpper_riemannZeta_norm_le_tsum`: `‖ζ(s)‖ ≤ ∑'(n+1)^{-σ}` on `Re>1`, tsum form). Exact next lemma
-  `zetaUpper_R02_of_threeLines` (not proved): numeric right-edge cap + FE left edge + three-lines on
-  POLE-REMOVED `f(s)=(s−1)·ζ(s)` (direct `f=ζ` blocked by the pole at `s=1` for `DiffContOnCl`). **Update — Gamma factor fully closed for all 40 centers:**
+  `zetaUpper_R02_of_threeLines` (assembly CLOSED conditional — `ZetaUpperR02ThreeLines`): pole-removed
+  `F` proved ENTIRE (removability) + damped three-lines ⇒ `‖ζ‖≤10` from whole-line left cap `A≤50.925`
+  (divisor 5.0925). Proved window cap `1.2e9` — `~2.4e7×` gap purely in the crude cos/exp left-edge
+  majorant (windows cannot close it). Needs Stirling-sharp left edge (true `A=O(10²)`); FE+Stirling+
+  convexity material absent from Mathlib/repo. **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
