@@ -1330,7 +1330,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `zetaFE_factor_lower_S0` from cpow `≥1/7` + cos `≥1` (reverse-triangle sum form) + Gamma `≥1e-13`
   via complex reflection `Gamma_mul_Gamma_one_sub` (`Beta.lean:397-398` — EXISTS, no continuation
   needed) with `‖sin(πs0)‖≤2e12` + `‖Gamma(1−s0)‖≤2`. FE factor now two-sided at R00
-  (`1e-14 ≤ ‖F‖ ≤ 6e7`). (b) any `Azeta>0` —
+  (`1e-14 ≤ ‖F‖ ≤ 6e7`). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+  sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
+  (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
+  `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
+  short-sums half (at `1−s`) still open. (b) any `Azeta>0` —
   **strategic finding:** `N=4194304` makes the explicit-partial-sum lower bound infeasible (4M cpow terms),
   so the `S_N`-direct route to `Azeta` is computationally dead at the R00 corner; a smarter zeta lower
   bound is needed (functional equation / reflection to a large-`ζ` region, not longer partial sums).
