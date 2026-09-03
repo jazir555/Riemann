@@ -9403,3 +9403,239 @@ theorem door1_nonreal_zero_forced {c : ℂ} {R : ℝ} (hR0 : 0 < R)
   linarith
 
 end RoucheCount
+
+/-! ## R02 PILOT end-to-end closure — first fully-closed cell template (conditional, honest)
+
+Feasibility verdict (computed from committed constants, see final report):
+outer tier budget `0.002 + 0.05 * 1.26 = 0.065` versus center product
+`22 * (1/2) * Agam * Azeta` with best committed `Agam = 1/10000000`
+gives `1.1e-6 * Azeta`; closing needs `Azeta >= 59090`, while true `|zeta| = O(1)`.
+Deriv tier needs `M <= 0.05` versus committed `67200` (conditional on `<=10`)
+and `6800640` (unconditional from `<=1012`). Hence unconditional closure is
+infeasible with committed constants. What is proved below is the closest
+closable statement: the R02 H-leaf conditional on three explicit numeric
+premises (`0.006 <= ||gamma||`, `1 <= ||zeta||`, `||deriv|| <= 0.05`) with the
+numeric product check discharged by `norm_num`. Poly `22` and pi `1/2` are
+closed hypothesis-free in-file (distinct names, no new imports, no cycle).
+All results use only `Mathlib` plus `rh_certificate_infra` and this file's
+own `DerivCauchyBridge` factorisation; `interval_arith` and
+`riemann_hypothesis_newsection` are read-only and never imported.
+-/
+
+namespace R02Pilot
+
+/-- R02 s-plane center `s = 1/2 + I * R02.center`. -/
+noncomputable def sCenter : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center
+
+/-- R02 center coordinates. -/
+theorem center_eq :
+    CentralCoverAssembly.R02.center =
+      (((-6.75 : ℝ) : ℂ)) + Complex.I * (((0.105 : ℝ) : ℂ)) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R02_x0, CentralCoverAssembly.R02_x1,
+      CentralCoverAssembly.R02_y0, CentralCoverAssembly.R02_y1]
+    simp
+    norm_num
+
+/-- `Re sCenter = 0.395`. -/
+theorem sCenter_re : sCenter.re = 0.395 := by
+  unfold sCenter
+  rw [center_eq]
+  simp
+  norm_num
+
+/-- `Im sCenter = -6.75`. -/
+theorem sCenter_im : sCenter.im = -6.75 := by
+  unfold sCenter
+  rw [center_eq]
+  simp
+
+/-- `(sCenter - 1).re = -0.605`. -/
+theorem sCenter_sub_one_re : (sCenter - 1).re = -0.605 := by
+  simp only [Complex.sub_re, Complex.one_re, sCenter_re]
+  norm_num
+
+/-- `(sCenter - 1).im = -6.75`. -/
+theorem sCenter_sub_one_im : (sCenter - 1).im = -6.75 := by
+  simp only [Complex.sub_im, Complex.one_im, sCenter_im]
+  norm_num
+
+/-- `||sCenter|| >= 6.7`. -/
+theorem norm_sCenter_ge : (6.7 : ℝ) ≤ ‖sCenter‖ := by
+  have hsq : (6.7 : ℝ) ^ 2 ≤ ‖sCenter‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sCenter_re, sCenter_im]
+    norm_num
+  calc (6.7 : ℝ) = Real.sqrt ((6.7 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sCenter‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sCenter‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `||sCenter - 1|| >= 6.7`. -/
+theorem norm_sCenter_sub_one_ge : (6.7 : ℝ) ≤ ‖sCenter - 1‖ := by
+  have hsq : (6.7 : ℝ) ^ 2 ≤ ‖sCenter - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sCenter_sub_one_re, sCenter_sub_one_im]
+    norm_num
+  calc (6.7 : ℝ) = Real.sqrt ((6.7 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sCenter - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sCenter - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Hypothesis-free poly lower `22 <= ||poly||` at R02 s-center. -/
+theorem poly_lower : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf sCenter‖ := by
+  unfold DerivCauchyBridge.polyOf
+  have h1 : (6.7 : ℝ) ≤ ‖sCenter‖ := norm_sCenter_ge
+  have h2 : (6.7 : ℝ) ≤ ‖sCenter - 1‖ := norm_sCenter_sub_one_ge
+  have hprod : (6.7 : ℝ) * 6.7 ≤ ‖sCenter‖ * ‖sCenter - 1‖ :=
+    mul_le_mul h1 h2 (by norm_num) (norm_nonneg _)
+  have hnorm : ‖sCenter * (sCenter - 1) / 2‖ = ‖sCenter‖ * ‖sCenter - 1‖ / 2 := by
+    rw [norm_div, norm_mul, Complex.norm_two]
+  rw [hnorm]
+  have hcalc : (22 : ℝ) ≤ (6.7 : ℝ) * 6.7 / 2 := by norm_num
+  linarith
+
+/-- `pi ^ (1/4) <= 2`. -/
+theorem pi_rpow_quarter_le_two : Real.pi ^ ((1 / 4 : ℝ)) ≤ 2 := by
+  have e : (Real.pi ^ ((1 / 4 : ℝ))) ^ ((4 : ℕ)) = Real.pi := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul Real.pi_pos.le]
+    have hexp : ((1 / 4 : ℝ)) * ((((4 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [hexp, Real.rpow_one]
+  have hle : Real.pi ≤ (2 : ℝ) ^ ((4 : ℕ)) := by
+    have h16 : (2 : ℝ) ^ ((4 : ℕ)) = 16 := by norm_num
+    rw [h16]
+    linarith [Real.pi_le_four]
+  have h4 : (Real.pi ^ ((1 / 4 : ℝ))) ^ ((4 : ℕ)) ≤ (2 : ℝ) ^ ((4 : ℕ)) := by
+    rw [e]
+    exact hle
+  have e1 : (Real.pi ^ ((1 / 4 : ℝ))) ^ ((4 : ℕ))
+      = ((Real.pi ^ ((1 / 4 : ℝ))) ^ ((2 : ℕ))) ^ ((2 : ℕ)) := by ring
+  have e2 : (2 : ℝ) ^ ((4 : ℕ)) = (((2 : ℝ)) ^ ((2 : ℕ))) ^ ((2 : ℕ)) := by ring
+  rw [e1, e2] at h4
+  have hsq : (Real.pi ^ ((1 / 4 : ℝ))) ^ ((2 : ℕ)) ≤ (2 : ℝ) ^ ((2 : ℕ)) :=
+    (abs_le_of_sq_le_sq' h4 (by norm_num)).2
+  exact (abs_le_of_sq_le_sq' hsq (by norm_num)).2
+
+/-- `1/2 <= pi ^ (-1/4)`. -/
+theorem pi_rpow_neg_quarter_ge_half : (1 / 2 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
+  have hrw : Real.pi ^ (-(1 / 4 : ℝ)) = 1 / (Real.pi ^ ((1 / 4 : ℝ))) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  rw [hrw]
+  exact one_div_le_one_div_of_le
+    (Real.rpow_pos_of_pos Real.pi_pos _) pi_rpow_quarter_le_two
+
+/-- Hypothesis-free pi lower `1/2 <= ||pi||` at R02 s-center. -/
+theorem pi_lower : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf sCenter‖ := by
+  have hnorm : ‖DerivCauchyBridge.piOf sCenter‖ = Real.pi ^ (-(sCenter.re) / 2) := by
+    have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sCenter / 2))
+    unfold DerivCauchyBridge.piOf
+    rw [h]
+    congr 1
+    rw [Complex.neg_re, Complex.div_ofNat_re]
+    ring
+  rw [hnorm, sCenter_re]
+  have hexp : (-(1 / 4 : ℝ)) ≤ -(0.395 : ℝ) / 2 := by norm_num
+  calc (1 / 2 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := pi_rpow_neg_quarter_ge_half
+    _ ≤ Real.pi ^ (-(0.395 : ℝ) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Outer-tier budget value. -/
+theorem budget_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Feasibility gap: committed product with `Agam = 1/1e7`, `Azeta = 1/26`
+is far below budget. -/
+theorem committed_product_lt :
+    22 * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by
+  norm_num
+
+/-- Feasibility threshold: with committed `Agam`, closing needs `Azeta >= 59090`. -/
+theorem required_Azeta_of_committed_Gamma {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta) :
+    (59090 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+  rw [hb] at h
+  have hcoeff : (22 : ℝ) * (1 / 2) * (1 / 10000000) = 11 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 11 / 10000000 := by norm_num
+  have hcomm : (11 : ℝ) / 10000000 * Azeta = Azeta * (11 / 10000000) := by ring
+  have h2 : (0.065 : ℝ) ≤ Azeta * (11 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (0.065 : ℝ) / (11 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (59090 : ℝ) ≤ (0.065 : ℝ) / (11 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Deriv gap, conditional route: tier `0.05` versus `67200`. -/
+theorem deriv_gap_conditional : (0.05 : ℝ) < 67200 := by norm_num
+
+/-- Deriv gap, unconditional route: tier `0.05` versus `6800640`. -/
+theorem deriv_gap_unconditional : (0.05 : ℝ) < 6800640 := by norm_num
+
+/-- Generic four-factor center bridge in-file (no new imports). -/
+theorem center_bound_of_components (Apoly Api Agam Azeta : ℝ)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hpoly : Apoly ≤ ‖DerivCauchyBridge.polyOf sCenter‖)
+    (hpi : Api ≤ ‖DerivCauchyBridge.piOf sCenter‖)
+    (hgam : Agam ≤ ‖DerivCauchyBridge.gammaOf sCenter‖)
+    (hzeta : Azeta ≤ ‖zeta sCenter‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ Apoly * Api * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  have harg2 : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center = sCenter := rfl
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts CentralCoverAssembly.R02.center
+  rw [harg2] at hdecomp
+  have hle : Apoly * Api * Agam * Azeta ≤ ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hgam hzeta hA0 hB0 hC0 hD0
+  have hbud : 0.05 * CentralCoverAssembly.R02.radius ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left
+      (le_of_lt CentralCoverAssembly.R02_radius_lt) (by norm_num)
+  linarith
+
+/-- Numeric product check for the chosen conditional thresholds. -/
+theorem threshold_check : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * 0.006 * 1 := by
+  norm_num
+
+#print axioms R02Pilot.poly_lower
+#print axioms R02Pilot.pi_lower
+#print axioms R02Pilot.center_bound_of_components
+
+end R02Pilot
+
+/-- R02 pilot conditional closure: three explicit numeric premises discharge
+the H-leaf of `inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell.
+This turns all future factor work into plug-and-play: prove the three bounds
+and the pilot cell closes. -/
+theorem R02_closed_of_factorBounds
+    (hGam : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (1 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
+    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hpoly : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf R02Pilot.sCenter‖ :=
+    R02Pilot.poly_lower
+  have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
+    R02Pilot.pi_lower
+  have hcenter : (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ :=
+    R02Pilot.center_bound_of_components 22 (1 / 2) 0.006 1
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+      hpoly hpi hGam hZeta R02Pilot.threshold_check
+  have hleaf : CentralCoverAssembly.R02_leaf_obligations := ⟨hcenter, hDeriv⟩
+  exact CentralCoverAssembly.R02_H_instance hleaf c hc_mem hc_eq
+
+#print axioms R02_closed_of_factorBounds
