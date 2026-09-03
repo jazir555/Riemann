@@ -1270,6 +1270,11 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   `TendstoLocallyUniformlyOn.differentiableOn` + isolated zeros). Remaining: S1 head convergence
   (`C(d,k)/d^k→1/k!` + summable majorant + corrected limit), S2 Rouché counting (missing in Mathlib),
   `∀ k≥1` (`Ξ''(0)` enclosures, strictly harder than `k=0`).
+  **S1 head CLOSED (conditional):** falling-product limits (`choose_div_pow_tendsto_one_div_factorial`),
+  M-test majorant (`scaled_dominated`), corrected limit `scaled_tendsto_jensenEntire`
+  (`J_{d,0}(z/d) → jensenEntire`, conditional on `coeffGrowthSummable r`). Exact missing lemma BY NAME
+  (not assumed): `taylorCoeff_summable_of_orderBound` (order<2 ⇒ growth via Cauchy+Stirling) — proving
+  it closes S1 unconditionally.
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
