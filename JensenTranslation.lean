@@ -21674,3 +21674,86 @@ theorem schur_limit_zero_real_of_hyperbolic_sections
 #print axioms JensenRH.schur_limit_zero_real_of_hyperbolic_sections
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## AP2 bank (2026-09-03): degree-0/1 Jensen-section characterizations.
+
+Triage record (easiest-first; all five legacy targets assessed, statements untouched):
+- `rh_iff_all_jensen_hyperbolic` (:103): OPEN — both directions RH-hard (forward needs
+  the genus + real-rootedness bridge in `riemann_hypothesis.lean`, out of scope; backward
+  needs Rouché counting + the same bridge). Assemblable halves already banked
+  (`genusOne_forward`, `polya_full_conditional`,
+  `schur_limit_zero_real_of_hyperbolic_sections`).
+- `jensen_hyperbolic_eventually` (:109, GORZ): OPEN — no stones feed it (explicit-formula
+  per-`d` asymptotics); mapped, not attempted.
+- `all_shifts_from_zero` (:670): OPEN — blocked exactly on
+  `∀ k ≥ 1, taylorCoeff k ≠ 0` (only `k = 0` closed via `taylorCoeff_zero_ne_zero`);
+  the conditional version `all_shifts_from_zero_of_nonvanishing` is already banked.
+  The `iff` below pins the d=0 slice: shift-0 hyperbolicity at `d = 0` yields only
+  `γ₀ ≠ 0`, nothing for `k ≥ 1`.
+- `rh_iff_jensen_zero` (:683): OPEN — same bridges as the :103 target, at shift 0.
+- `tail_nonvanishing_iff_jensen` (:690): OPEN — needs the :103 target + the zero-free
+  rectangle engines in `riemann_hypothesis.lean`; mapped here only.
+
+GREP performed before writing (2026-09-03), cites verified by reading:
+- In-file: `jensenPoly` (92), `Hyperbolic` (97), `real_affine_hyperbolic` (116),
+  `jensenPoly_zero` (358).
+- Mathlib (reused, not recreated): `Complex.ofReal_eq_zero`, `Complex.ofReal_zero`,
+  `Complex.I_im`, `Polynomial.C_0`, `Polynomial.eval_C`, `Polynomial.monomial_zero_left`,
+  `Nat.choose_zero_right`, `Nat.choose_self`, `Finset.sum_range_succ`, `Finset.sum_range_zero`.
+- Name-clash check (`jensenPoly_one|hyperbolic_jensenPoly_zero_iff|
+  hyperbolic_jensenPoly_one_of_ne`): zero hits in `JensenTranslation.lean` before writing.
+- Consumers: no other file imports this module (no `import JensenTranslation` in the repo),
+  so no repointing is needed.
+
+Proved below, APPEND-ONLY, FULL proofs:
+1. `jensenPoly_one`: `J_{1,n}` in affine form.
+2. `hyperbolic_jensenPoly_zero_iff`: `Hyperbolic (jensenPoly 0 n) ↔ taylorCoeff n ≠ 0`
+   (the exact d=0 slice of the shift-reduction residual).
+3. `hyperbolic_jensenPoly_one_of_ne`: d=1 joint-nonvanishing criterion (feeds the d=1
+  case of the GORZ target: eventual hyperbolicity at `d = 1` follows from eventual
+  joint nonvanishing of consecutive coefficients).
+-/
+
+/-- Degree-1 Jensen section in affine form:
+    `J_{1,n} = C γₙ + monomial 1 γₙ₊₁` (both binomial coefficients are 1). -/
+theorem jensenPoly_one (n : ℕ) :
+    jensenPoly 1 n = Polynomial.map (algebraMap ℝ ℂ)
+      (Polynomial.C (taylorCoeff n) + Polynomial.monomial 1 (taylorCoeff (n + 1))) := by
+  have h00 : Nat.choose 1 0 = 1 := Nat.choose_zero_right 1
+  have h11 : Nat.choose 1 1 = 1 := Nat.choose_self 1
+  simp only [jensenPoly, show (1 : ℕ) + 1 = 2 by norm_num, Finset.sum_range_succ,
+    Finset.sum_range_zero, h00, h11, Nat.cast_one, one_mul, Nat.add_zero,
+    Polynomial.monomial_zero_left, zero_add]
+
+/-- Exact degree-0 slice: `J_{0,n}` is hyperbolic iff `γₙ ≠ 0` (constant nonzero
+    polynomials are vacuously hyperbolic; the zero polynomial has every `x` as a
+    root, e.g. `Complex.I`, whose imaginary part is nonzero). -/
+theorem hyperbolic_jensenPoly_zero_iff (n : ℕ) :
+    Hyperbolic (jensenPoly 0 n) ↔ taylorCoeff n ≠ 0 := by
+  rw [jensenPoly_zero n]
+  constructor
+  · intro h hc
+    rw [hc, Complex.ofReal_zero, Polynomial.C_0] at h
+    have hI := h Complex.I (by simp)
+    rw [Complex.I_im] at hI
+    exact one_ne_zero hI
+  · intro h x hx
+    rw [Polynomial.eval_C] at hx
+    exact absurd (Complex.ofReal_eq_zero.mp hx) h
+
+/-- Degree-1 criterion: joint nonvanishing of consecutive coefficients yields
+    hyperbolicity at `d = 1` (via `real_affine_hyperbolic`). -/
+theorem hyperbolic_jensenPoly_one_of_ne (n : ℕ)
+    (h : taylorCoeff n ≠ 0 ∨ taylorCoeff (n + 1) ≠ 0) :
+    Hyperbolic (jensenPoly 1 n) := by
+  rw [jensenPoly_one n]
+  exact real_affine_hyperbolic h
+
+#print axioms JensenRH.jensenPoly_one
+#print axioms JensenRH.hyperbolic_jensenPoly_zero_iff
+#print axioms JensenRH.hyperbolic_jensenPoly_one_of_ne
+
+end JensenRH
