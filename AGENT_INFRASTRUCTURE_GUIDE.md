@@ -1345,8 +1345,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Scaffolding closed:** 10 edge-strip cells packaged (`edgeStripCells` + coverage combinatorics),
   `EdgeS00` template (geometry `dx=1.25/dy=0.005/radius<1.26`, poly `≤56`/pi `≤1` hypothesis-free, Gamma
   `≤400` at the NEW re-value `0.005` via `Real.Gamma 1.0025 ≤ 1` one-over-x route), `CutL10`/`CutR10`
-  thin rects (`y∈(−0.49,0.49)`, radius `<0.56`) with line-membership lemmas. **Zero strip cells fully
-  closed** — full closure needs the same zeta wall as central cells (`Azeta` + tight upper).
+  thin rects (`y∈(−0.49,0.49)`, radius `<0.56`) with line-membership lemmas. **All 10/10 upper columns
+  packaged** (EdgeS01–S09 numeral-for-numeral; shared re-value maximally reused, no Gamma-chain
+  duplication). Lower mirrors blocked (no packaged upper rect for `conj_of`, `y1<1/2` fails, new `0.995`
+  Gamma chain needed). **Zero strip cells fully closed** — full closure needs the same zeta wall as
+  central cells (`Azeta` + tight upper).
 
 **Door 4 — Mollified / hard-difference (`riemann_hypothesis_newsection.lean`, 0 `sorry`s).**
 Rouché-gap chain committed; `‖M‖≤B` mollifier bounds proven. Remaining: instantiate a
