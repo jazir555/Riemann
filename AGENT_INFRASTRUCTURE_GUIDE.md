@@ -1254,6 +1254,11 @@ Bridge work committed, rigorous: Hermite–Poulain lemma, `Hyperbolic_const_mul/
 width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 tightening was needed. Remaining:
 - 5 sorries: `rh_iff_all_jensen_hyperbolic` (102), `jensen_hyperbolic_eventually` (108, GORZ asymptotics),
   `all_shifts_from_zero` (669), `rh_iff_jensen_zero` (682), `tail_nonvanishing_iff_jensen` (689).
+  **Sorry-closure triage CLOSED (honest negative):** 0/5 closable — #1/#4/#5 need the RH-bridge
+  (`riemann_hypothesis.lean`, out of scope), #3 needs `∀ k≥1, taylorCoeff k ≠ 0` (degeneracy proved real:
+  constant `J_{d+1,n}` kills Gauss–Lucas stepping), #2 GORZ has no feeding stones, #5's sides use
+  different xi's with no bridge. Banked instead: `jensenPoly_one`, `hyperbolic_jensenPoly_zero_iff`
+  (d=0 slice ⟺ `γₙ≠0`), `hyperbolic_jensenPoly_one_of_ne` (d=1 from joint nonvanishing).
 - **Pólya–Schur criterion** (`polyaTheoremHyp`: order<2 + real-rooted ⇒ hyperbolic sections) + Hurwitz
   section-convergence (S1/S2). Classical result not in Mathlib/repo — must be created.
   **First stones closed:** real-linear `Hyperbolic` blocks (`Hyperbolic_X_sub_C_real`), finite real-rooted
@@ -1323,8 +1328,14 @@ four named supplier obligations: 80 per-cell enclosures (door 3), edge strips `y
 
 **Door 3 — Thin-region / central cover. THE BOTTLENECK.**
 Count correction (verified 2026-09-03; old "39/1" was naive-substring counting `sorry-free`):
-`central_cover_assembly.lean` has **10 sorry-terms in 4 legacy declarations** (lines 14–16/43/48/103–104/136,
-deliberately untouched — consumed read-only by `central_cover_trusted.lean`, several false-as-stated);
+Legacy sorry-decls RESOLVED (verified 2026-09-03): `central_cover_assembly.lean` has **0 sorry-terms**.
+`xiShifted_differentiable` was FALSE (global; strip replacement `xiShifted_differentiableOn_strip` proved,
+consumers repointed); unary `.conj` was FALSE (binary with `hy0,hy1` proved); `centralCells` geometry 4/6
+proved, analytic 2/6 FALSE with numbers (wide-grid infeasible: `LHS>50` vs `O(1)`, lemma
+`legacy_grid_infeasible_wide_top`); full `coversUpper` FALSE (4 counterexamples) → inner triple
+(`coversUpper_inner`/`coversLower_inner`/`centralCovers_inner`) proved. `central_cover_trusted.lean`
+(not edited) holds the remaining **8 sorry-terms** (TRUSTED_float certs :24/25/27/29/39/45/64/95) + needs
+migration off unary `.conj`/global-differentiable (:66,84,122);
 `rh_residual_gap.lean` has **0**; `interval_arith.lean` has **0**. `RXX_mem_gridFine` already exists for
 R00 and R02–R40 and all 41 `H_instance`s exist (R01 correctly has none: `(-7.5,-5) ∉ fineGridX`).
 Committed (rigorous, 0 sorrys): all **40 cells** packaged (R00–R10 bottom, R11–R40 upper) with
@@ -1375,7 +1386,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     denominator bound) + AE-block phase gap (`8.75/2049`, tight to 0.02%) + smallness (`≪π/2`, 184× margin).
     Stopping honesty: linear-KL scales as `N^{+0.395}` per dyadic block (diverges where triangle converges) —
     Tier 2 needs the Abel bridge (`Finset.sum_range_by_parts`, reserved) + TV bound; Tier 3 needs
-    second-derivative/van der Corput or interval arithmetic. `S_{2048}` premise stays conditional. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    second-derivative/van der Corput or interval arithmetic. `S_{2048}` premise stays conditional.
+    **Tier-2 CLOSED (`T2_abel_eq`/`T2_block_upper`/`T2_w_TV_total`):** second-half block UPPER `≤1/5`
+    (`72×` sharper than triangle `~12.4`, margin `2/15` to `1/3`) + weight TV `≤1/25`. Stopping honesty:
+    a LOWER on `S_{2048}` needs `‖S_{1024}‖≥8/15` (true `≈0.56`, margin `0.027`) — needs rigorous
+    `cos/sin(8.75·log n)` interval arithmetic or Tier-3 second-derivative for an early-block upper. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
@@ -1402,7 +1417,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `F` proved ENTIRE (removability) + damped three-lines ⇒ `‖ζ‖≤10` from whole-line left cap `A≤50.925`
   (divisor 5.0925). Proved window cap `1.2e9` — `~2.4e7×` gap purely in the crude cos/exp left-edge
   majorant (windows cannot close it). Needs Stirling-sharp left edge (true `A=O(10²)`); FE+Stirling+
-  convexity material absent from Mathlib/repo. **Update — Gamma factor fully closed for all 40 centers:**
+     convexity material absent from Mathlib/repo. **Sharp window banked (`Door3SharpWindow`, 7500×):**
+   split cos/Gamma caps (`‖F‖≤1280` for `|Im|≤6`, `≤3120` above) ⇒ damped window `A=160000` (was `1.2e9`),
+   still `~3142×` above `50.925`. Remainder is pure separate-majorant loss (true sup `O(10)`) — needs
+   JOINT `Γ·cos` exponential cancellation (`|Γ(1+iy)|²=πy/sinh(πy)`, van der Corput class, absent). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
@@ -1411,14 +1429,23 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Conditional closure proved** (`R02_closed_of_factorBounds`): three explicit numeric premises
   (`Agam ≥ 0.006`, `Azeta ≥ 1`, `M ≤ 0.05`) ⇒ H-leaf — plug-and-play for all future factor work.
   Exact gaps: Gamma-lower `60000×` (reflection+`1e-7` infeasible in principle, needs `‖sin‖≥3e9`);
-  zeta-lower open; deriv `1.34M×` (vs 67200) / `136M×` (vs 6800640). Poly `22`, pi `1/2`,
+     zeta-lower open; deriv `1.34M×` (vs 67200) / `136M×` (vs 6800640). **Gamma-lower banked
+   (`R02GammaLower`, 20000×):** `0.002 ≤ ‖Gamma(sR02/2)‖` via reflection (true `≈0.0087`, 4.3× headroom) +
+   drop-in `gammaOf_lower_R02`; exactly `3×` short of `0.006` (needs `S·U≤523.6`, banked `1500` — deeper
+   `n≈15` shift chain + near-perfect sine required). With `Agam=0.002` the threshold needs only
+   `Azeta≥2.95` (was `≥59090`). Poly `22`, pi `1/2`,
   Gamma-upper `0.05` at R02: no gap. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. **Stirling disc-upper CLOSED (`R02GammaDisc`, 412×):**
   6-shift Im-decay floors (`D≥2648`) + convexity uniform numerator (`≤256.78`) ⇒ `‖Γ(s/2)‖≤0.097`
   on the R02 disc (true sup `~0.026`, within 3.7×) + drop-in `gammaOf_upper_disc_R02`; downstream sphere
   sup `16800→40.74`, conditional deriv `M=67200→~163`. Gamma done — deriv now needs only the zeta upper
-  (`‖ζ‖≤10` obligation). Remaining 39 cells: same shape, different `s`-rects
+  (`‖ζ‖≤10` obligation). **Rewired (`AO_R02DiscUpdate`):** `AO_R02_deriv_bound_163_of_zeta_upper`
+  (mirrors the `67200` proof with the `0.097` cap; cycle-safe obligation instead of the import) +
+  `AO_R02_closed_of_factorBounds_163` (threshold recomputed: budget `205.382` vs product `205.392`,
+  margin 0.01). Threshold shift documented: at `M=163` closure needs `Azeta≥3111` (vs `≥1` at `M=0.05`);
+  at committed `Agam` needs `≥186710909`. Honest net: center `0.066` vs budget `205.382` infeasible at
+  true `|ζ|=O(1)` — 0 cells claimed closed. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
