@@ -20345,3 +20345,415 @@ theorem uniform_limit_boundary_stability {F : ℕ → ℂ → ℂ} {G : ℂ → 
     linarith⟩
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## S1 head-convergence stone (door 1): falling-factorial limit.
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Mathlib `Data/Nat/Factorial/Basic.lean:330-348` (`descFactorial_zero/succ`,
+  `succ_descFactorial_succ`), `:457` (`descFactorial_le_pow`, used by prior
+  M-test stone), `Data/Nat/Choose/Basic.lean:288`
+  (`descFactorial_eq_factorial_mul_choose : n.descFactorial k = k ! * n.choose k`).
+- Mathlib `Analysis/SpecificLimits/Basic.lean:50-53`
+  (`tendsto_const_div_atTop_nhds_zero_nat (C : 𝕜) :
+    Tendsto (fun n : ℕ => C / n) atTop (nhds 0)`), `:44-48`
+  (`tendsto_inv_atTop_nhds_zero_nat`), `Topology/Algebra/GroupWithZero.lean:55`
+  (`Filter.Tendsto.div_const`), `Topology/Algebra/Group/Basic.lean`
+  (`Filter.Tendsto.mul`, `Filter.Tendsto.sub`, `tendsto_const_nhds`,
+  `Filter.Tendsto.congr'` with `EventuallyEq`, `eventually_ge_atTop`).
+- Mathlib `Data/Int/Cast/Basic.lean:36` (`Nat.cast_sub (h : m ≤ n) :
+  ((n - m : ℕ) : R) = n - m` for `AddGroupWithOne R`).
+- Repo `JensenTranslation.lean:308-331` (`choose_mul_factorial_le_pow`,
+  `choose_div_pow_le_one_div_factorial` M-test majorant, reused as the
+  upper-bound half; no limit was proved there), `JensenScratch.lean:54-85`
+  (`genFun`, `taylorCoeff`, `jensenPoly`, UNSCALED `sectionsConvergeHyp`
+  documented FALSE in prior stone — never asserted here).
+
+Stone proved (unconditional, no `sorry`/`axiom`), APPEND-ONLY:
+1. `nat_sub_cast_div_tendsto_one`: `(d - k)/d → 1` (real, `d : ℕ → ℝ`).
+2. `descFactorial_div_pow_tendsto_one`: `d.descFactorial k / d^k → 1`
+   (head-convergence engine, induction via `descFactorial_succ`).
+3. `choose_div_pow_tendsto_one_div_factorial`: `C(d,k)/d^k → 1/k!`
+   (via `descFactorial_eq_factorial_mul_choose` + `div_const`).
+
+How it fits S1: scaled sections `J_{d,0}(z/d) = Σ C(d,k)/d^k γ_k z^k`
+converge headwise to `Σ γ_k z^k/k!` (the associated Jensen entire function,
+not `Ξ`); (2)+(3) are the coefficientwise engine, the M-test majorant is the
+prior stone, full uniform limit is packaged next via Tannery (residual names
+below). The UNSCALED `J_{d,0} → Ξ` claim is FALSE and is not asserted.
+-/
+
+/-- Auxiliary: `((d - k : ℕ) : ℝ)/(d : ℝ) → 1` as `d → ∞` (fixed `k`). -/
+theorem nat_sub_cast_div_tendsto_one (k : ℕ) :
+    Tendsto (fun d : ℕ => (((d - k : ℕ)) : ℝ) / ((d : ℕ) : ℝ)) atTop (nhds 1) := by
+  have hkd : Tendsto (fun d : ℕ => ((k : ℕ) : ℝ) / ((d : ℕ) : ℝ)) atTop (nhds 0) :=
+    tendsto_const_div_atTop_nhds_zero_nat ((k : ℕ) : ℝ)
+  have hConst : Tendsto (fun _ : ℕ => (1 : ℝ)) atTop (nhds (1 : ℝ)) :=
+    tendsto_const_nhds
+  have h1 : Tendsto (fun d : ℕ => (1 : ℝ) - ((k : ℕ) : ℝ) / ((d : ℕ) : ℝ))
+      atTop (nhds 1) := by
+    have h := hConst.sub hkd
+    simpa using h
+  have hev : (fun d : ℕ => (((d - k : ℕ)) : ℝ) / ((d : ℕ) : ℝ)) =ᶠ[atTop]
+      (fun d : ℕ => (1 : ℝ) - ((k : ℕ) : ℝ) / ((d : ℕ) : ℝ)) := by
+    filter_upwards [eventually_ge_atTop (k + 1)] with d hd
+    have hle : k ≤ d := by omega
+    have hd0 : ((d : ℕ) : ℝ) ≠ 0 := by
+      have hpos : (0 : ℝ) < ((d : ℕ) : ℝ) := Nat.cast_pos.mpr (by omega)
+      exact ne_of_gt hpos
+    rw [Nat.cast_sub hle, sub_div, div_self hd0]
+  exact Filter.Tendsto.congr' hev.symm h1
+
+/-- S1 head engine: falling factorial over power tends to one. -/
+theorem descFactorial_div_pow_tendsto_one (k : ℕ) :
+    Tendsto (fun d : ℕ => (((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k)
+      atTop (nhds 1) := by
+  induction k with
+  | zero =>
+    have h0 : (fun d : ℕ => (((d.descFactorial 0 : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ 0)
+        = fun _ => (1 : ℝ) := by
+      funext d
+      simp [Nat.descFactorial_zero]
+    rw [h0]
+    exact tendsto_const_nhds
+  | succ k ih =>
+    have hS := nat_sub_cast_div_tendsto_one k
+    have hProd : Tendsto
+        (fun d : ℕ => ((((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k) *
+          ((((d - k : ℕ)) : ℝ) / ((d : ℕ) : ℝ)))
+        atTop (nhds (1 * 1)) :=
+      ih.mul hS
+    have h1 : Tendsto
+        (fun d : ℕ => ((((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k) *
+          ((((d - k : ℕ)) : ℝ) / ((d : ℕ) : ℝ)))
+        atTop (nhds 1) := by
+      simpa using hProd
+    have hev : (fun d : ℕ => (((d.descFactorial (k + 1) : ℕ)) : ℝ) /
+          ((d : ℕ) : ℝ) ^ (k + 1)) =ᶠ[atTop]
+        (fun d : ℕ => ((((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k) *
+          ((((d - k : ℕ)) : ℝ) / ((d : ℕ) : ℝ))) := by
+      filter_upwards [eventually_ge_atTop (k + 1)] with d hd
+      have hdPos : 0 < d := by omega
+      have hd0 : ((d : ℕ) : ℝ) ≠ 0 :=
+        ne_of_gt (Nat.cast_pos.mpr hdPos)
+      have hPk : ((d : ℕ) : ℝ) ^ k ≠ 0 := pow_ne_zero k hd0
+      have hDesc : (((d.descFactorial (k + 1) : ℕ)) : ℝ)
+          = ((((d - k : ℕ))) : ℝ) * ((((d.descFactorial k : ℕ))) : ℝ) := by
+        rw [Nat.descFactorial_succ, Nat.cast_mul]
+      have hPow : ((d : ℕ) : ℝ) ^ (k + 1) = ((d : ℕ) : ℝ) ^ k * ((d : ℕ) : ℝ) :=
+        pow_succ _ _
+      rw [hDesc, hPow]
+      field_simp
+    exact Filter.Tendsto.congr' hev.symm h1
+
+/-- S1 head corollary: `C(d,k)/d^k → 1/k!` (fixed `k`). -/
+theorem choose_div_pow_tendsto_one_div_factorial (k : ℕ) :
+    Tendsto (fun d : ℕ => (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k)
+      atTop (nhds (1 / (((Nat.factorial k : ℕ)) : ℝ))) := by
+  have hDesc := descFactorial_div_pow_tendsto_one k
+  have hFkPos : (0 : ℝ) < (((Nat.factorial k : ℕ)) : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos k)
+  have hFk : (((Nat.factorial k : ℕ)) : ℝ) ≠ 0 := ne_of_gt hFkPos
+  have hDiv : Tendsto
+      (fun d : ℕ => ((((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k) /
+        (((Nat.factorial k : ℕ)) : ℝ))
+      atTop (nhds (1 / (((Nat.factorial k : ℕ)) : ℝ))) :=
+    hDesc.div_const _
+  have hev : (fun d : ℕ => (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k)
+      =ᶠ[atTop]
+      (fun d : ℕ => ((((d.descFactorial k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k) /
+        (((Nat.factorial k : ℕ)) : ℝ)) := by
+    filter_upwards [eventually_ge_atTop 1] with d hd
+    have hdPos : 0 < d := by omega
+    have hd0 : ((d : ℕ) : ℝ) ≠ 0 := ne_of_gt (Nat.cast_pos.mpr hdPos)
+    have hPk : ((d : ℕ) : ℝ) ^ k ≠ 0 := pow_ne_zero k hd0
+    have hEq : (((d.descFactorial k : ℕ)) : ℝ)
+        = (((Nat.factorial k : ℕ)) : ℝ) * (((Nat.choose d k : ℕ)) : ℝ) := by
+      rw [Nat.descFactorial_eq_factorial_mul_choose d k, Nat.cast_mul]
+    rw [hEq]
+    field_simp
+  exact Filter.Tendsto.congr' hev.symm hDiv
+
+end JensenRH
+
+namespace JensenRH
+
+/-!
+## S1 scaled-majorant + corrected-limit packaging (door 1, continued).
+
+GREP performed before writing (2026-09-03), all cites verified by reading:
+- Coeff bounds for `taylorCoeff`/`genFun` coefficients: NONE FOUND.
+  Searched `JensenTranslation.lean` (`taylorCoeff`, `genFun`, `orderSet`,
+  `Summable`, `bound.*coeff`, `coeff.*bound` — only `taylorCoeff_zero_eq`,
+  `Gammaℝ_half_*`, no growth bounds) and `JensenScratch.lean:54-85,206-210,324`
+  (`genFun`, `taylorCoeff`, `orderBoundHyp`, `genFun_orderBound :
+  (7/4:ℝ) ∈ orderSet genFun` — order bound only, no coefficient-growth
+  corollary). Hence the summable majorant below is CONDITIONAL on an explicit
+  growth premise (permitted hypothesis), with the exact missing growth lemma
+  named as residual (no `sorry`/`axiom`/assumption of it).
+- Mathlib `Analysis/SpecificLimits/Normed.lean:896`
+  (`Real.summable_pow_div_factorial (x:ℝ) : Summable (fun n => x^n/n!)`).
+- Mathlib `Analysis/Normed/Group/Tannery.lean:40`
+  (`tendsto_tsum_of_dominated_convergence (h_sum : Summable bound)
+  (hab : ∀ k, Tendsto (f · k) 𝓕 (nhds (g k)))
+  (h_bound : ∀ᶠ n in 𝓕, ∀ k, ‖f n k‖ ≤ bound k) :
+  Tendsto (∑' k, f · k) 𝓕 (nhds (∑' k, g k))`).
+- Mathlib `Algebra/Polynomial/Eval/Degree.lean:67`
+  (`eval_eq_sum_range' (hn : p.natDegree < n) (x) :
+  p.eval x = ∑ i ∈ range n, p.coeff i * x^i`),
+  `Algebra/Polynomial/Eval/Defs.lean:577` (`eval_map`),
+  `Topology/Algebra/InfiniteSum/Basic.lean` (`tsum_eq_sum (hf : ∀ b ∉ s, f b = 0)`),
+  `Data/Nat/Choose/Basic.lean:85` (`Nat.choose_eq_zero_of_lt : n < k → choose n k = 0`),
+  `Analysis/Complex/Norm.lean:103,113` (`Complex.norm_real`, `Complex.norm_natCast`),
+  `Data/Complex/Basic.lean:346` (`Complex.ofReal_natCast`),
+  `Analysis/Complex/Basic.lean:291` (`Complex.continuous_ofReal`).
+- Repo `JensenTranslation.lean:322-331` (`choose_div_pow_le_one_div_factorial`,
+  reused), `:306-316` (`jensenPoly_coeff`), prior stone in this file
+  (`choose_div_pow_tendsto_one_div_factorial`, `descFactorial_div_pow_tendsto_one`).
+
+Stone proved (unconditional, no `sorry`/`axiom`), APPEND-ONLY:
+1. `exp_majorant_summable`: `r^k/k!` summable (universal M-test shape).
+2. `scaled_term_bound`: for `0 < d`, `‖z‖ ≤ r`,
+   `‖scaledTerm d k z‖ ≤ |γ_k|*r^k/k!` (instantiates `choose_div_pow_*`).
+3. `scaled_eval_eq_tsum`: `(jensenPoly d 0).eval (z/d) = ∑' k, scaledTerm d k z`.
+4. `scaled_head_tendsto`: `scaledTerm d k z → limitTerm k z` (via head limit).
+5. `jensenEntire_summable_of_growth` + `scaled_tendsto_jensenEntire`:
+   CONDITIONAL on the permitted premise `coeffGrowthSummable r`
+   (everything downstream proved); full corrected limit
+   `J_{d,0}(z/d) → jensenEntire z` via Tannery on the disc `‖z‖ ≤ r`.
+
+CORRECTED limit (never the false unscaled `J_{d,0} → Ξ`):
+`jensenEntire z = ∑' k, γ_k z^k/k!` (associated Jensen entire function built
+in-file from the coefficient sequence). The UNSCALED `sectionsConvergeHyp`
+(`J_{d,0} → genFun`) is FALSE (prior stone) and is not asserted in any form.
+
+Residual (named, NOT assumed, no `sorry`): `taylorCoeff_summable_of_orderBound`:
+from `JensenScratch.genFun_orderBound` (`(7/4:ℝ) ∈ orderSet genFun`, order < 2)
+derive `∀ r, coeffGrowthSummable r` via Cauchy estimates + Stirling.
+Proving it closes S1 fully; (1)-(5) above are unconditional-or-conditional as
+stated and need no further analytic input besides that named growth lemma.
+-/
+
+/-- Universal exp majorant is summable (M-test shape, no coefficients). -/
+theorem exp_majorant_summable (r : ℝ) :
+    Summable (fun k : ℕ => r ^ k / (((Nat.factorial k : ℕ)) : ℝ)) :=
+  Real.summable_pow_div_factorial r
+
+/-- Explicit coefficient-growth premise (permitted hypothesis shape).
+    Matches what `genFun_orderBound` (order < 2) must imply via Cauchy/Stirling;
+    see residual `taylorCoeff_summable_of_orderBound` (named, not proved here).
+    All lemmas conditional on this prove everything downstream of it. -/
+def coeffGrowthSummable (r : ℝ) : Prop :=
+  Summable (fun k : ℕ => |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ))
+
+/-- Scaled Jensen term: `C(d,k)·γ_k·(z/d)^k` (zero for `k > d` via `choose`). -/
+noncomputable def scaledTerm (d k : ℕ) (z : ℂ) : ℂ :=
+  (((((Nat.choose d k : ℕ)) : ℝ) * taylorCoeff k : ℝ) : ℂ) * (z / ((d : ℕ) : ℂ)) ^ k
+
+/-- Corrected-limit term: `γ_k·z^k/k!`. -/
+noncomputable def limitTerm (k : ℕ) (z : ℂ) : ℂ :=
+  ((((1 : ℝ) / (((Nat.factorial k : ℕ)) : ℝ) * taylorCoeff k : ℝ)) : ℂ) * z ^ k
+
+/-- Associated Jensen entire function (corrected S1 limit, built in-file). -/
+noncomputable def jensenEntire (z : ℂ) : ℂ :=
+  ∑' k, limitTerm k z
+
+/-- S1 M-test instantiation on the disc `‖z‖ ≤ r`. -/
+theorem scaled_term_bound (d k : ℕ) (hd : 0 < d) (z : ℂ) (r : ℝ) (hz : ‖z‖ ≤ r) :
+    ‖scaledTerm d k z‖ ≤ |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by
+  have hCnn : (0 : ℝ) ≤ (((Nat.choose d k : ℕ)) : ℝ) := Nat.cast_nonneg _
+  have hFactPos : (0 : ℝ) < (((Nat.factorial k : ℕ)) : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos k)
+  have hChooseDiv : (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k
+      ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) :=
+    choose_div_pow_le_one_div_factorial d k hd
+  have hrNonneg : 0 ≤ r := le_trans (norm_nonneg z) hz
+  have hPowLe : ‖z‖ ^ k ≤ r ^ k :=
+    pow_le_pow_left₀ (norm_nonneg z) hz k
+  have hNormEq : ‖scaledTerm d k z‖
+      = (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k
+        * |taylorCoeff k| * ‖z‖ ^ k := by
+    unfold scaledTerm
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+    have hAbs : |(((Nat.choose d k : ℕ)) : ℝ) * taylorCoeff k|
+        = (((Nat.choose d k : ℕ)) : ℝ) * |taylorCoeff k| := by
+      rw [abs_mul, abs_of_nonneg hCnn]
+    rw [hAbs, norm_pow, norm_div, Complex.norm_natCast, div_pow]
+    ring
+  rw [hNormEq]
+  have hAbsNn : 0 ≤ |taylorCoeff k| := abs_nonneg _
+  have hPowNn : 0 ≤ ‖z‖ ^ k := pow_nonneg (norm_nonneg _) _
+  have hFactNn : 0 ≤ (((Nat.factorial k : ℕ)) : ℝ) := Nat.cast_nonneg _
+  have h1 : (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k
+        * (|taylorCoeff k| * ‖z‖ ^ k)
+      ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * ‖z‖ ^ k) :=
+    mul_le_mul_of_nonneg_right hChooseDiv (mul_nonneg hAbsNn hPowNn)
+  have hMid : |taylorCoeff k| * ‖z‖ ^ k ≤ |taylorCoeff k| * r ^ k :=
+    mul_le_mul_of_nonneg_left hPowLe hAbsNn
+  have hInvNn : 0 ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) :=
+    div_nonneg zero_le_one hFactNn
+  have h2 : 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * ‖z‖ ^ k)
+      ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * r ^ k) :=
+    mul_le_mul_of_nonneg_left hMid hInvNn
+  have h3 : 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * r ^ k)
+      = |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by
+    ring
+  calc (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k
+        * |taylorCoeff k| * ‖z‖ ^ k
+      = (((Nat.choose d k : ℕ)) : ℝ) / ((d : ℕ) : ℝ) ^ k
+        * (|taylorCoeff k| * ‖z‖ ^ k) := by ring
+    _ ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * ‖z‖ ^ k) := h1
+    _ ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * r ^ k) := h2
+    _ = |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := h3
+
+/-- Scaled evaluation equals the tsum of scaled terms (finite support). -/
+theorem scaled_eval_eq_tsum (d : ℕ) (z : ℂ) :
+    (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ)) = ∑' k, scaledTerm d k z := by
+  have hDegLe : (jensenPoly d 0).natDegree ≤ d := by
+    rw [Polynomial.natDegree_le_iff_coeff_eq_zero]
+    intro m hm
+    simp [jensenPoly_coeff d 0 m, show ¬ m ≤ d by omega]
+  have hlt : (jensenPoly d 0).natDegree < d + 1 :=
+    lt_of_le_of_lt hDegLe (Nat.lt_succ_self d)
+  have hEval : (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ))
+      = ∑ k ∈ Finset.range (d + 1), (jensenPoly d 0).coeff k * (z / ((d : ℕ) : ℂ)) ^ k :=
+    Polynomial.eval_eq_sum_range' hlt _
+  have hSumEq : (∑ k ∈ Finset.range (d + 1),
+        (jensenPoly d 0).coeff k * (z / ((d : ℕ) : ℂ)) ^ k)
+      = (∑ k ∈ Finset.range (d + 1), scaledTerm d k z) := by
+    apply Finset.sum_congr rfl
+    intro k hk
+    have hkLe : k ≤ d := by
+      have hmem : k < d + 1 := Finset.mem_range.mp hk
+      omega
+    rw [jensenPoly_coeff d 0 k, if_pos hkLe, Nat.zero_add]
+    rfl
+  have hZero : ∀ k ∉ Finset.range (d + 1), scaledTerm d k z = 0 := by
+    intro k hk
+    have hNotLt : ¬ k < d + 1 := by simpa [Finset.mem_range] using hk
+    have hdk : d < k := by omega
+    have hC0 : Nat.choose d k = 0 := Nat.choose_eq_zero_of_lt hdk
+    unfold scaledTerm
+    simp [hC0]
+  have hTsum : (∑ k ∈ Finset.range (d + 1), scaledTerm d k z)
+      = ∑' k, scaledTerm d k z :=
+    (tsum_eq_sum (s := Finset.range (d + 1)) hZero).symm
+  exact hEval.trans (hSumEq.trans hTsum)
+
+/-- Head convergence at fixed `k` (uses the falling-product engine). -/
+theorem scaled_head_tendsto (k : ℕ) (z : ℂ) :
+    Tendsto (fun d : ℕ => scaledTerm d k z) atTop (nhds (limitTerm k z)) := by
+  have hCReal := choose_div_pow_tendsto_one_div_factorial k
+  have hConst : Tendsto (fun _ : ℕ => taylorCoeff k) atTop (nhds (taylorCoeff k)) :=
+    tendsto_const_nhds
+  have hCMul : Tendsto
+      (fun d : ℕ => (((Nat.choose d k : ℕ)) : ℝ) / (((d : ℕ)) : ℝ) ^ k * taylorCoeff k)
+      atTop (nhds (1 / (((Nat.factorial k : ℕ)) : ℝ) * taylorCoeff k)) :=
+    hCReal.mul hConst
+  have hCont : Continuous Complex.ofReal := Complex.continuous_ofReal
+  have hCComplex : Tendsto
+      (fun d : ℕ => Complex.ofReal ((((Nat.choose d k : ℕ)) : ℝ) / (((d : ℕ)) : ℝ) ^ k
+        * taylorCoeff k))
+      atTop (nhds (Complex.ofReal (1 / (((Nat.factorial k : ℕ)) : ℝ) * taylorCoeff k))) :=
+    (hCont.tendsto _).comp hCMul
+  have hZConst : Tendsto (fun _ : ℕ => z ^ k) atTop (nhds (z ^ k)) :=
+    tendsto_const_nhds
+  have hMulZ : Tendsto
+      (fun d : ℕ => Complex.ofReal ((((Nat.choose d k : ℕ)) : ℝ) / (((d : ℕ)) : ℝ) ^ k
+        * taylorCoeff k) * z ^ k)
+      atTop (nhds (limitTerm k z)) :=
+    hCComplex.mul hZConst
+  have hev : (fun d : ℕ => scaledTerm d k z) =ᶠ[atTop]
+      (fun d : ℕ => Complex.ofReal ((((Nat.choose d k : ℕ)) : ℝ) / (((d : ℕ)) : ℝ) ^ k
+        * taylorCoeff k) * z ^ k) := by
+    filter_upwards [eventually_ge_atTop 1] with d hd
+    have hdNe : d ≠ 0 := by omega
+    have hdCNe : ((d : ℕ) : ℂ) ≠ 0 := by exact_mod_cast hdNe
+    unfold scaledTerm
+    rw [div_pow]
+    push_cast
+    field_simp
+    try ring
+  exact Filter.Tendsto.congr' hev.symm hMulZ
+
+/-- Eventual uniform domination on the disc (head bound + zero tail). -/
+theorem scaled_dominated (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r) :
+    ∀ᶠ d : ℕ in atTop, ∀ k,
+      ‖scaledTerm d k z‖ ≤ |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by
+  filter_upwards [eventually_ge_atTop 1] with d hd k
+  by_cases hk : k ≤ d
+  · have hdPos : 0 < d := by omega
+    exact scaled_term_bound d k hdPos z r hz
+  · have hdk : d < k := by omega
+    have hC0 : Nat.choose d k = 0 := Nat.choose_eq_zero_of_lt hdk
+    have hZero : scaledTerm d k z = 0 := by
+      unfold scaledTerm
+      simp [hC0]
+    rw [hZero, norm_zero]
+    have hrNonneg : 0 ≤ r := le_trans (norm_nonneg z) hz
+    exact div_nonneg (mul_nonneg (abs_nonneg _)
+      (pow_nonneg hrNonneg _)) (Nat.cast_nonneg _)
+
+/-- The corrected S1 limit is summable under the growth premise. -/
+theorem jensenEntire_summable_of_growth (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r)
+    (hSumm : coeffGrowthSummable r) :
+    Summable (fun k : ℕ => limitTerm k z) := by
+  have hrNonneg : 0 ≤ r := le_trans (norm_nonneg z) hz
+  have hBoundSumm : Summable
+      (fun k : ℕ => |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ)) := hSumm
+  apply hBoundSumm.of_norm_bounded
+  intro k
+  have hFactPos : (0 : ℝ) < (((Nat.factorial k : ℕ)) : ℝ) :=
+    Nat.cast_pos.mpr (Nat.factorial_pos k)
+  have hFactNn : 0 ≤ (((Nat.factorial k : ℕ)) : ℝ) := le_of_lt hFactPos
+  have hInvNn : 0 ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) :=
+    div_nonneg zero_le_one hFactNn
+  have hPowLe : ‖z‖ ^ k ≤ r ^ k :=
+    pow_le_pow_left₀ (norm_nonneg z) hz k
+  have hNormEq : ‖limitTerm k z‖
+      = 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| * ‖z‖ ^ k := by
+    unfold limitTerm
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, norm_pow]
+    have hAbs : |(1 / (((Nat.factorial k : ℕ)) : ℝ) * taylorCoeff k : ℝ)|
+        = 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| := by
+      rw [abs_mul, abs_of_nonneg hInvNn]
+    rw [hAbs]
+  rw [hNormEq]
+  have hAbsNn : 0 ≤ |taylorCoeff k| := abs_nonneg _
+  have hMid : 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| * ‖z‖ ^ k
+      = 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * ‖z‖ ^ k) := by ring
+  have hEnd : 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * r ^ k)
+      = |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by ring
+  calc 1 / (((Nat.factorial k : ℕ)) : ℝ) * |taylorCoeff k| * ‖z‖ ^ k
+      = 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * ‖z‖ ^ k) := by ring
+    _ ≤ 1 / (((Nat.factorial k : ℕ)) : ℝ) * (|taylorCoeff k| * r ^ k) := by
+        apply mul_le_mul_of_nonneg_left _ hInvNn
+        exact mul_le_mul_of_nonneg_left hPowLe hAbsNn
+    _ = |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) := by ring
+
+/-- CORRECTED S1 limit identification (conditional on growth):
+    `J_{d,0}(z/d) → jensenEntire z` on `‖z‖ ≤ r` via Tannery. -/
+theorem scaled_tendsto_jensenEntire (r : ℝ) (z : ℂ) (hz : ‖z‖ ≤ r)
+    (hSumm : coeffGrowthSummable r) :
+    Tendsto (fun d : ℕ => (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ)))
+      atTop (nhds (jensenEntire z)) := by
+  have hBoundSumm : Summable
+      (fun k : ℕ => |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ)) := hSumm
+  have hHead : ∀ k, Tendsto (fun d : ℕ => scaledTerm d k z) atTop (nhds (limitTerm k z)) :=
+    fun k => scaled_head_tendsto k z
+  have hDom : ∀ᶠ d : ℕ in atTop, ∀ k,
+      ‖scaledTerm d k z‖ ≤ |taylorCoeff k| * r ^ k / (((Nat.factorial k : ℕ)) : ℝ) :=
+    scaled_dominated r z hz
+  have hTannery : Tendsto (fun d : ℕ => ∑' k, scaledTerm d k z)
+      atTop (nhds (∑' k, limitTerm k z)) :=
+    tendsto_tsum_of_dominated_convergence hBoundSumm hHead hDom
+  -- `evalFun =ᶠ tsumFun` is pointwise `scaled_eval_eq_tsum`; use `congr'`
+  -- (robust to `rw` higher-order matching) and defeq `tsumLim = jensenEntire`.
+  have hEvEq : (fun d : ℕ => ∑' k, scaledTerm d k z) =ᶠ[atTop]
+      (fun d : ℕ => (jensenPoly d 0).eval (z / ((d : ℕ) : ℂ))) :=
+    Eventually.of_forall (fun d => (scaled_eval_eq_tsum d z).symm)
+  exact Filter.Tendsto.congr' hEvEq hTannery
+
+end JensenRH
