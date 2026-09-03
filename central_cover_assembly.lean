@@ -9929,3 +9929,349 @@ end RoucheCount
 #print axioms RoucheCount.divisor_ge_one_of_zero
 #print axioms RoucheCount.hurwitz_zero_transfer_of_zero
 #print axioms RoucheCount.door1_nonreal_zero_forced_of_zero
+
+/-! ## AO door-3 closer wiring: R02 deriv bound with AH landed Gamma cap (0.097)
+
+TASK (door-3 closer wiring): re-derive the R02 deriv bound with AH's landed cap.
+Landed: `R02GammaDisc.gammaOf_upper_disc_R02` in `interval_arith.lean:32316`
+(drop-in for `DerivCauchyBridge.gammaOf`; disc factor `40 -> 0.097`,
+sphere sup `16800 -> 40.74`, deriv `67200 -> 162.96`, tier `~163`).
+
+Grep-first record (2026-09-03, verified via `default.grep`, exact names):
+* `R02_deriv_bound_of_zeta_upper|gammaOf_upper_disc_R02|gamma_upper_R02_disc` ->
+  `central_cover_assembly.lean:6308,6347,6390,6403`,
+  `interval_arith.lean:31762,32315,32316`,
+  `zeta_rigorous.lean:4224`, `riemann_hypothesis_newsection.lean:797,820,854,870`.
+* `R02_closed_of_factorBounds|threshold_check|required_Azeta|R02Pilot` ->
+  `central_cover_assembly.lean:9425,9556,9605,9618`.
+* `poly_upper_R02_disc|pi_upper_R02_disc|R02_s_of_sphere_re_im|norm_xiShifted_eq_parts|uniform_deriv_of_sphere_bound|R02_strip_of_mem|R02_sphere_mem_strip` ->
+  `central_cover_assembly.lean:6041,6100,6139,6148,6190,6200,6236`.
+* `R02_radius_lt|R02_x0|R02_strip_lo|R02_strip_hi|poly_lower|pi_lower|sCenter|center_eq` ->
+  `central_cover_assembly.lean:1273,1281,1282,1297,9428,9432,9489,9532`.
+* `gammaOf_upper_disc_R02|gamma_upper_disc_R02` in `interval_arith.lean:32105,32316`
+  (4 hyps `re lo/hi + im lo/hi`, concl `<= 0.097`; old
+  `DerivCauchyBridge.gamma_upper_R02_disc:6308` has 2 hyps, concl `<= 40`).
+* `prod_four_ge_of_ge|TailProofEngine` -> `rh_certificate_infra.lean:157,195`,
+  consumed at `central_cover_assembly.lean:9596`, `interval_arith.lean:112,139,1785`.
+
+IMPORT CYCLE NOTE: `interval_arith.lean:4` imports `central_cover_assembly`,
+so this file CANNOT import `interval_arith`. AH's landed
+`R02GammaDisc.gammaOf_upper_disc_R02` is therefore wired as an EXPLICIT
+premise `AO_gamma_upper_disc_R02_obligation` with the IDENTICAL statement
+(`∀ s, 0.05 ≤ re → re ≤ 0.74 → -8.25 ≤ im → im ≤ -5.25 → ‖gammaOf s‖ ≤ 0.097`).
+Downstream (in `interval_arith` or `riemann_hypothesis_newsection`) discharge
+`hG` by `R02GammaDisc.gammaOf_upper_disc_R02`. No `sorry`/`admit`/`axiom`,
+no hypothesis stand-ins beyond this named landed-obligation premise plus the
+pre-existing `DerivCauchyBridge.R02_zeta_upper_obligation` (`‖ζ‖ ≤ 10`).
+-/
+
+namespace AO_R02DiscUpdate
+
+/-- Gamma-upper obligation matching AH's landed
+`R02GammaDisc.gammaOf_upper_disc_R02` (`interval_arith.lean:32316`) exactly:
+identical hyps (re + im rect) and concl `≤ 0.097`.
+Stated here (not imported) to avoid the `interval_arith -> central_cover_assembly`
+import cycle; discharged downstream by the landed lemma. -/
+def AO_gamma_upper_disc_R02_obligation : Prop :=
+  ∀ s : ℂ, (0.05 : ℝ) ≤ s.re → s.re ≤ (0.74 : ℝ) →
+    (-8.25 : ℝ) ≤ s.im → s.im ≤ (-5.25 : ℝ) →
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.097 : ℝ)
+
+/-- Disc factor product: `42 * 1 * 0.097 * 10 = 40.74` (was `42*1*40*10=16800`). -/
+theorem AO_sphere_sup_eq : (42 : ℝ) * 1 * 0.097 * 10 = 40.74 := by
+  norm_num
+
+/-- Cauchy `M`: `40.74 / 0.25 = 162.96` (was `16800/0.25=67200`; tier `~163`). -/
+theorem AO_M_eq : (40.74 : ℝ) / 0.25 = 162.96 := by
+  norm_num
+
+/-- 412x improvement on the sphere sup (`40.74 < 16800`). -/
+theorem AO_sphere_improvement : (40.74 : ℝ) < 16800 := by
+  norm_num
+
+/-- 412x improvement on the deriv bound (`162.96 < 67200`). -/
+theorem AO_deriv_improvement : (162.96 : ℝ) < 67200 := by
+  norm_num
+
+/-- Ceil tier `163` covers the exact `162.96`. -/
+theorem AO_M_le_163 : (162.96 : ℝ) ≤ 163 := by
+  norm_num
+
+/-- Updated conditional `xiShifted` upper on an R02 sphere point:
+`‖ξ‖ ≤ 42*1*0.097*10 = 40.74` (mirrors
+`DerivCauchyBridge.xiShifted_upper_of_zeta_upper_R02:6339`, same zeta premise
+plus the landed gamma premise). -/
+theorem AO_xiShifted_upper_of_zeta_upper_R02 {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ))
+    (hG : AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ‖xiShifted u‖ ≤ 40.74 := by
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    DerivCauchyBridge.R02_s_of_sphere_re_im hw hu
+  have hpoly :=
+    DerivCauchyBridge.poly_upper_R02_disc hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := DerivCauchyBridge.pi_upper_R02_disc hsre_lo
+  have hgam : ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 0.097 :=
+    hG _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hzeta : ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 10 :=
+    hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 * 0.097 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  have h123 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 42 * 1 * 0.097 * 10 :=
+    mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+  have hnum : (42 : ℝ) * 1 * 0.097 * 10 = 40.74 := by norm_num
+  rw [hnum] at h123
+  exact h123
+
+/-- Transfer to the entire extension on the sphere (agrees in the strip). -/
+theorem AO_entire_upper_of_zeta_upper_R02 {w u : ℂ}
+    (hw : CentralCoverAssembly.R02.mem w)
+    (hu : u ∈ Metric.sphere w (0.25 : ℝ))
+    (hG : AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ‖CentralCoverAssembly.xiShiftedEntire u‖ ≤ 40.74 := by
+  obtain ⟨hlo, hhi⟩ := DerivCauchyBridge.R02_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  exact AO_xiShifted_upper_of_zeta_upper_R02 hw hu hG hZ
+
+/-- Uniform sup `40.74` on all R02 `0.25`-spheres (was `16800`). -/
+theorem AO_R02_uniform_sphere_bound
+    (hG : AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 40.74 := by
+  intro w hw z hz
+  exact AO_entire_upper_of_zeta_upper_R02 hw hz hG hZ
+
+/-- R02 updated conditional derivative bound: uniform `‖deriv xiShifted‖ ≤ 162.96`
+(`40.74 / 0.25`) modulo exactly `R02_zeta_upper_obligation` (zeta `≤ 10`) plus
+the landed gamma obligation (`≤ 0.097`). Mirrors
+`DerivCauchyBridge.R02_deriv_bound_of_zeta_upper:6390` (`16800/0.25=67200`). -/
+theorem AO_R02_deriv_bound_of_zeta_upper
+    (hG : AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (162.96 : ℝ) := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R02 0.25 40.74
+    (by norm_num) (fun w hw => DerivCauchyBridge.R02_strip_of_mem hw)
+    (AO_R02_uniform_sphere_bound hG hZ)
+  intro w hw
+  have hle := hM w hw
+  have heq : (40.74 : ℝ) / 0.25 = 162.96 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Ceil-tier corollary `M = 163` (integer tier for threshold arithmetic). -/
+theorem AO_R02_deriv_bound_163_of_zeta_upper
+    (hG : AO_gamma_upper_disc_R02_obligation)
+    (hZ : DerivCauchyBridge.R02_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ) := by
+  intro w hw
+  have hle := AO_R02_deriv_bound_of_zeta_upper hG hZ w hw
+  linarith
+
+/-- Updated budget value with `M = 163`: `0.002 + 163 * 1.26 = 205.382`
+(was `0.002 + 0.05 * 1.26 = 0.065`). -/
+theorem AO_budget_163_eq : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by
+  norm_num
+
+/-- Updated product value: `22 * (1/2) * 0.006 * 3112 = 205.392`. -/
+theorem AO_product_163_eq : (22 : ℝ) * (1 / 2) * 0.006 * 3112 = 205.392 := by
+  norm_num
+
+/-- Updated numeric product check for the `M = 163` conditional thresholds:
+`0.002 + 163 * 1.26 ≤ 22 * (1/2) * 0.006 * 3112`
+(`205.382 ≤ 205.392`, margin `0.01`; mirrors `R02Pilot.threshold_check:9605`
+`0.002+0.05*1.26 ≤ 22*(1/2)*0.006*1`). -/
+theorem AO_threshold_check_163 :
+    (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.006 * 3112 := by
+  norm_num
+
+/-- Updated feasibility threshold with `M = 163`, conditional `Agam = 0.006`:
+closing needs `Azeta ≥ 3111` (floor; sufficient integer `3112` by
+`AO_threshold_check_163`). Mirrors
+`R02Pilot.required_Azeta_of_committed_Gamma:9556` shape with exact numbers. -/
+theorem AO_required_Azeta_of_Agam_163 {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.006 * Azeta) :
+    (3111 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by norm_num
+  rw [hb] at h
+  have hcoeff : (22 : ℝ) * (1 / 2) * 0.006 = 0.066 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 0.066 := by norm_num
+  have hcomm : (0.066 : ℝ) * Azeta = Azeta * 0.066 := by ring
+  have h2 : (205.382 : ℝ) ≤ Azeta * 0.066 := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (205.382 : ℝ) / 0.066 ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (3111 : ℝ) ≤ (205.382 : ℝ) / 0.066 := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Committed-product gap with `M = 163`: `22*(1/2)*(1/1e7)*(1/26) ≪ 205.382`
+(mirrors `R02Pilot.committed_product_lt`). -/
+theorem AO_committed_product_lt_163 :
+    22 * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 163 * 1.26 := by
+  norm_num
+
+/-- Updated feasibility threshold with `M = 163`, committed `Agam = 1/1e7`:
+closing needs `Azeta ≥ 186710909` (floor of `205.382/(11/1e7) = 186710909.09…`;
+mirrors `R02Pilot.required_Azeta_of_committed_Gamma` `59090` for `M = 0.05`). -/
+theorem AO_required_Azeta_of_committed_Gamma_163 {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta) :
+    (186710909 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by norm_num
+  rw [hb] at h
+  have hcoeff : (22 : ℝ) * (1 / 2) * (1 / 10000000) = 11 / 10000000 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 11 / 10000000 := by norm_num
+  have hcomm : (11 : ℝ) / 10000000 * Azeta = Azeta * (11 / 10000000) := by ring
+  have h2 : (205.382 : ℝ) ≤ Azeta * (11 / 10000000) := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (205.382 : ℝ) / (11 / 10000000) ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (186710909 : ℝ) ≤ (205.382 : ℝ) / (11 / 10000000) := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Updated center bound with `M = 163`: from `Agam ≥ 0.006`, `Azeta ≥ 3112`
+gives `0.002 + 163 * radius ≤ ‖ξ(center)‖` (mirrors
+`R02Pilot.center_bound_of_components:9582`, which fixes `M = 0.05`). -/
+theorem AO_center_bound_163_of_components
+    (hGam : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (3112 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖) :
+    (0.002 : ℝ) + 163 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  have hpoly : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf R02Pilot.sCenter‖ :=
+    R02Pilot.poly_lower
+  have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
+    R02Pilot.pi_lower
+  have harg2 : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center =
+      R02Pilot.sCenter := rfl
+  have hdecomp :=
+    DerivCauchyBridge.norm_xiShifted_eq_parts CentralCoverAssembly.R02.center
+  rw [harg2] at hdecomp
+  have hle : 22 * (1 / 2) * 0.006 * 3112 ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hGam hZeta
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have hbud : 163 * CentralCoverAssembly.R02.radius ≤ 163 * 1.26 :=
+    mul_le_mul_of_nonneg_left
+      (le_of_lt CentralCoverAssembly.R02_radius_lt) (by norm_num)
+  have hthresh : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.006 * 3112 :=
+    AO_threshold_check_163
+  linarith
+
+/-- R02 updated conditional closure with `M = 163`: three explicit numeric
+premises discharge the H-leaf shape of
+`inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell
+`(-8,-5.5,0.01,0.2)` with `ε = 0.002`, `M = 163`.
+Mirrors `R02_closed_of_factorBounds:9618`
+(`Agam ≥ 0.006`, `Azeta ≥ 1`, `M ≤ 0.05`); the new `M` forces
+`Azeta ≥ 3112` (sufficient by `AO_threshold_check_163`). -/
+theorem AO_R02_closed_of_factorBounds_163
+    (hGam : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (3112 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
+    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ))
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hcenter : (0.002 : ℝ) + 163 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ :=
+    AO_center_bound_163_of_components hGam hZeta
+  subst hc_eq
+  exact ⟨CentralCoverAssembly.R02, 0.002, 163, rfl, rfl, rfl, rfl,
+    CentralCoverAssembly.R02_strip_lo, CentralCoverAssembly.R02_strip_hi,
+    (by norm_num), hDeriv, hcenter⟩
+
+/-! ### AO residual premise inventory (who owns what for the R02 H-leaf)
+
+With the landed Gamma cap (`0.097`, `M = 162.96`, tier `163`):
+
+* DERIV `M` (this agent, AO, CLOSED conditional):
+  `AO_R02_deriv_bound_of_zeta_upper` / `AO_R02_deriv_bound_163_of_zeta_upper`:
+  `‖deriv xiShifted‖ ≤ 162.96` (`≤ 163` ceil) on R02, conditional on
+  (i) `DerivCauchyBridge.R02_zeta_upper_obligation` (`‖ζ‖ ≤ 10` on the disc
+  `s`-rect `Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`) and
+  (ii) `AO_gamma_upper_disc_R02_obligation` (`‖gammaOf‖ ≤ 0.097`, discharged
+  downstream by landed `R02GammaDisc.gammaOf_upper_disc_R02`,
+  `interval_arith.lean:32316`; true sup `~0.026`, within `3.7x`).
+  Old tier `M = 67200` (`16800/0.25`); unconditional `M = 6800640`
+  (`‖ζ‖ ≤ 1012` via identity theorem, `riemann_hypothesis_newsection.lean`)
+  untouched.
+
+* ZETA UPPER `‖ζ‖ ≤ 10` (sibling zeta-upper agent OWNS; NOT closed here):
+  needs whole-line damped left cap `A ≤ 50.925` (`ZetaUpperR02ThreeLines`,
+  `riemann_hypothesis_newsection.lean:1105-1116`); honestly proved crude window
+  cap `1.2e9`, gap `~2.4e7x` purely in the cos/exp left-edge majorant.
+  Needs Stirling-sharp left edge (true `A = O(10²)`); FE+Stirling+convexity
+  material absent from Mathlib/repo. The `≤ 10` obligation (hence the `M ≈ 163`
+  tier, NOT the `M ≈ 0.05` fencing tier) needs FE+Stirling+convexity, not the
+  eta M-test (`r(M) ≈ 180·M^{-0.05}` needs `M ≥ 10^{31}` terms for `r ≤ 5`).
+
+* AGAM `≥ 0.006` at `R02Pilot.sCenter` (`s = 0.395 - 6.75·I`) (sibling
+  Gamma-lower agent OWNS; NOT closed here): committed hypothesis-free lower
+  is `1/1e7` (`CellGammaUniform`); gap `60000x` (reflection + `1e-7`
+  infeasible in principle, needs `‖sin‖ ≥ 3e9`).
+
+* AZETA `≥ 3112` at `R02Pilot.sCenter` for the `M = 163` closure
+  (`≥ 3111` necessary by `AO_required_Azeta_of_Agam_163`; `3112` sufficient by
+  `AO_threshold_check_163`; old `M = 0.05` closure needed only `≥ 1` by
+  `R02Pilot.threshold_check`). With committed `Agam = 1/1e7` the `M = 163`
+  closure needs `≥ 186710909` by
+  `AO_required_Azeta_of_committed_Gamma_163` (was `≥ 59090` for `M = 0.05`).
+  Sibling zeta-lower agent OWNS: conditional `Azeta1 = 1/39` at `1-s0` from
+  `‖S_{2048}‖ ≥ 1/3` (`zeta_S1_lower_of_S2048`, margin `~70%`) ⇒ downstream
+  `Azeta = 1/2340000000` (`zeta_S0_lower_of_S1`); `S_{2048}` premise stays
+  conditional (KL Tier-1 closed, Tier-2 Abel bridge + Tier-3 van der Corput
+  or interval arithmetic still open; tail `r(1) ≥ 16` vs `1/3` proves no
+  small-M triangle closure exists).
+
+* THRESHOLD (`M = 163`): `AO_threshold_check_163`
+  (`205.382 ≤ 205.392`), `AO_budget_163_eq`, `AO_product_163_eq`,
+  `AO_center_bound_163_of_components`,
+  `AO_R02_closed_of_factorBounds_163` (`ε = 0.002`, `M = 163`,
+  `Apoly = 22`, `Api = 1/2`, `Agam = 0.006`, `Azeta = 3112`,
+  `radius < 1.26`). Even with zeta-upper closed, the center product
+  `22*0.5*0.006*1 = 0.066` vs budget `205.382` is infeasible at realistic
+  `|ζ| = O(1)` — the honest wall stands; no cells claimed closed.
+-/
+
+end AO_R02DiscUpdate
+
+#print axioms AO_R02DiscUpdate.AO_sphere_sup_eq
+#print axioms AO_R02DiscUpdate.AO_M_eq
+#print axioms AO_R02DiscUpdate.AO_xiShifted_upper_of_zeta_upper_R02
+#print axioms AO_R02DiscUpdate.AO_entire_upper_of_zeta_upper_R02
+#print axioms AO_R02DiscUpdate.AO_R02_uniform_sphere_bound
+#print axioms AO_R02DiscUpdate.AO_R02_deriv_bound_of_zeta_upper
+#print axioms AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper
+#print axioms AO_R02DiscUpdate.AO_threshold_check_163
+#print axioms AO_R02DiscUpdate.AO_required_Azeta_of_Agam_163
+#print axioms AO_R02DiscUpdate.AO_required_Azeta_of_committed_Gamma_163
+#print axioms AO_R02DiscUpdate.AO_center_bound_163_of_components
+#print axioms AO_R02DiscUpdate.AO_R02_closed_of_factorBounds_163
