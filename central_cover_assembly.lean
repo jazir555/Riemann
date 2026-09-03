@@ -1216,3 +1216,4752 @@ theorem R00_close_of_gap (h : R00_gap) {z : ℂ}
 #print axioms R00_close_of_gap
 
 end CentralCoverAssembly
+
+/-! ## Bottom-row completion R02–R10 + boundary strip + `bottom_row_covered`
+(EXPANDED scope, sorry-free).
+
+What is proved here (no `sorry`, no `axiom`, no new trusted hypotheses):
+
+1. Full R00-style fencing packages for the 9 remaining `gridFine` bottom-row
+   cells (`y ∈ (0.01, 0.2)`, every `fineGridX` column):
+   `R02 = (-8,-5.5)`, `R03 = (-6,-3.5)`, `R04 = (-4,-1.5)`,
+   `R05 = (-2,0.5)`, `R06 = (0,2.5)`, `R07 = (2,4.5)`, `R08 = (4,6.5)`,
+   `R09 = (6,8.5)`, `R10 = (7.5,10)` (all `× (0.01,0.2)`).
+   Each has: `Rect2D` def, `x0/x1/y0/y1`, strip bounds, `dx/dy/radius_eq`,
+   `radius_lt` (< 1.26 via `sample_cell_radius_bound`), `mem_gridFine`,
+   `leaf_obligations` (center + deriv, taken as explicit hypotheses exactly
+   as `R00`/`R01` do — NOT proved here), `fencing_of_bounds`,
+   `lowerBound/zeroFree/nonvanishing_of_bounds`, `H_instance` (gridFine form
+   with `hc_mem` + `hc_eq`, matching `R00_H_instance`).
+   Tiers mirror the in-file feasibility pattern (`fine_feasible_*`):
+   outer `(0.002,0.05)` for `|center|>6` (`R02,R09,R10` + existing `R00`);
+   mid `(0.05,0.07)` for `2.5<|center|<6` (`R03,R04,R07,R08`);
+   inner `(0.15,0.06)` for `|center|<2.5` (`R05,R06`).
+   All `dx = 1.25`, `dy = 0.095`, so every radius is the same
+   `√(1.25²+0.095²) < 1.26`.
+2. Boundary strip `(0,0.01]` via the designated feeder
+   `BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base`
+   applied to the globally differentiable entire extension
+   `xiShiftedEntire` (which agrees with `xiShifted` on the strip via
+   `xiShifted_eq_entire_on_strip`), then transferred back. The per-`x`
+   base lower bound + vertical deriv bound + margin `0.01 < ε₀/M₁` are
+   taken as explicit hypotheses (`StripBaseBounds`, `BottomStripObligations`),
+   exactly like the per-cell leaves. Only the nonzero-base feeder is used
+   (it needs just `Differentiable`, which `xiShiftedEntire_differentiable`
+   supplies); the simple-zero feeder would need `Differentiable (deriv _)`,
+   which is not available for the entire extension, so it is not used.
+3. Combined `bottom_row_covered`: every `z` with `-10 < Re < 10`,
+   `0 < Im ≤ 0.2` is either strip-range (`Im ≤ 0.01`, closed by the strip
+   lemma) or lies closed in one of the 10 bottom-row cells (closed by the
+   corresponding `RXX_nonvanishing_of_bounds`). Both a pure combinatorial
+   disjunction (`bottom_row_either`) and the conditional nonvanishing
+   assembly (`bottom_row_covered`) are proved, plus `bottomRow_H_of_obligations`
+   discharging the `H`-leaf of `inner_nonvanishing_of_fenced_grid_fine` over
+   `bottomRowCells`.
+-/
+
+namespace CentralCoverAssembly
+
+open CellProofEngine
+
+/-! ### R02 = (-8,-5.5,0.01,0.2), outer tier `(0.002,0.05)` -/
+
+/-- Bottom-row cell `(-8,-5.5) × (0.01,0.2)` (center `-6.75`, outer tier). -/
+def R02 : CellProofEngine.Rect2D :=
+  ⟨-8, -5.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R02_x0 : R02.x0 = -8 := rfl
+theorem R02_x1 : R02.x1 = -5.5 := rfl
+theorem R02_y0 : R02.y0 = 0.01 := rfl
+theorem R02_y1 : R02.y1 = 0.2 := rfl
+
+theorem R02_width_eq : R02.x1 - R02.x0 = 2.5 := by
+  rw [R02_x0, R02_x1]; norm_num
+
+theorem R02_strip_lo : -(1 / 2 : ℝ) < R02.y0 := by rw [R02_y0]; norm_num
+theorem R02_strip_hi : R02.y1 < (1 / 2 : ℝ) := by rw [R02_y1]; norm_num
+
+theorem R02_dx_eq : R02.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R02_x0, R02_x1]; norm_num
+
+theorem R02_dy_eq : R02.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R02_y0, R02_y1]; norm_num
+
+theorem R02_radius_eq :
+    R02.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R02_dx_eq, R02_dy_eq]
+
+theorem R02_radius_lt : R02.radius < 1.26 := by
+  rw [R02_radius_eq]; exact sample_cell_radius_bound
+
+theorem R02_mem_gridFine :
+    ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((-8, -5.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-8, -5.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R02` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R02_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R02.radius ≤ ‖xiShifted R02.center‖) ∧
+  (∀ w, R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R02_fencing_of_bounds (h : R02_leaf_obligations) :
+    CellFencingHypotheses R02 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R02_lowerBound_of_bounds (h : R02_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R02 0.002 0.05
+    R02_strip_lo R02_strip_hi (R02_fencing_of_bounds h)
+
+noncomputable def R02_zeroFree_of_bounds (h : R02_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R02 0.002 fine_eps_outer_pos 0.05
+    R02_strip_lo R02_strip_hi h.2 h.1
+
+theorem R02_nonvanishing_of_bounds (h : R02_leaf_obligations) {z : ℂ}
+    (hx0 : R02.x0 ≤ z.re) (hx1 : z.re ≤ R02.x1)
+    (hy0 : R02.y0 ≤ z.im) (hy1 : z.im ≤ R02.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R02 0.002 0.05
+      R02_strip_lo R02_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R02_H_instance (h : R02_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R02, 0.002, 0.05, rfl, rfl, rfl, rfl, R02_strip_lo, R02_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+#print axioms R02_H_instance
+
+/-! ### R03 = (-6,-3.5,0.01,0.2), mid tier `(0.05,0.07)` -/
+
+/-- Bottom-row cell `(-6,-3.5) × (0.01,0.2)` (center `-4.75`, mid tier). -/
+def R03 : CellProofEngine.Rect2D :=
+  ⟨-6, -3.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R03_x0 : R03.x0 = -6 := rfl
+theorem R03_x1 : R03.x1 = -3.5 := rfl
+theorem R03_y0 : R03.y0 = 0.01 := rfl
+theorem R03_y1 : R03.y1 = 0.2 := rfl
+
+theorem R03_width_eq : R03.x1 - R03.x0 = 2.5 := by
+  rw [R03_x0, R03_x1]; norm_num
+
+theorem R03_strip_lo : -(1 / 2 : ℝ) < R03.y0 := by rw [R03_y0]; norm_num
+theorem R03_strip_hi : R03.y1 < (1 / 2 : ℝ) := by rw [R03_y1]; norm_num
+
+theorem R03_dx_eq : R03.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R03_x0, R03_x1]; norm_num
+
+theorem R03_dy_eq : R03.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R03_y0, R03_y1]; norm_num
+
+theorem R03_radius_eq :
+    R03.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R03_dx_eq, R03_dy_eq]
+
+theorem R03_radius_lt : R03.radius < 1.26 := by
+  rw [R03_radius_eq]; exact sample_cell_radius_bound
+
+theorem R03_mem_gridFine :
+    ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((-6, -3.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-6, -3.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R03` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R03_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R03.radius ≤ ‖xiShifted R03.center‖) ∧
+  (∀ w, R03.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R03_fencing_of_bounds (h : R03_leaf_obligations) :
+    CellFencingHypotheses R03 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R03_lowerBound_of_bounds (h : R03_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R03 0.05 0.07
+    R03_strip_lo R03_strip_hi (R03_fencing_of_bounds h)
+
+noncomputable def R03_zeroFree_of_bounds (h : R03_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R03 0.05 fine_eps_mid_pos 0.07
+    R03_strip_lo R03_strip_hi h.2 h.1
+
+theorem R03_nonvanishing_of_bounds (h : R03_leaf_obligations) {z : ℂ}
+    (hx0 : R03.x0 ≤ z.re) (hx1 : z.re ≤ R03.x1)
+    (hy0 : R03.y0 ≤ z.im) (hy1 : z.im ≤ R03.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R03 0.05 0.07
+      R03_strip_lo R03_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R03_H_instance (h : R03_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-6, -3.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R03, 0.05, 0.07, rfl, rfl, rfl, rfl, R03_strip_lo, R03_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+#print axioms R03_H_instance
+
+/-! ### R04 = (-4,-1.5,0.01,0.2), mid tier `(0.05,0.07)` -/
+
+/-- Bottom-row cell `(-4,-1.5) × (0.01,0.2)` (center `-2.75`, mid tier). -/
+def R04 : CellProofEngine.Rect2D :=
+  ⟨-4, -1.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R04_x0 : R04.x0 = -4 := rfl
+theorem R04_x1 : R04.x1 = -1.5 := rfl
+theorem R04_y0 : R04.y0 = 0.01 := rfl
+theorem R04_y1 : R04.y1 = 0.2 := rfl
+
+theorem R04_width_eq : R04.x1 - R04.x0 = 2.5 := by
+  rw [R04_x0, R04_x1]; norm_num
+
+theorem R04_strip_lo : -(1 / 2 : ℝ) < R04.y0 := by rw [R04_y0]; norm_num
+theorem R04_strip_hi : R04.y1 < (1 / 2 : ℝ) := by rw [R04_y1]; norm_num
+
+theorem R04_dx_eq : R04.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R04_x0, R04_x1]; norm_num
+
+theorem R04_dy_eq : R04.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R04_y0, R04_y1]; norm_num
+
+theorem R04_radius_eq :
+    R04.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R04_dx_eq, R04_dy_eq]
+
+theorem R04_radius_lt : R04.radius < 1.26 := by
+  rw [R04_radius_eq]; exact sample_cell_radius_bound
+
+theorem R04_mem_gridFine :
+    ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((-4, -1.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-4, -1.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R04` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R04_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R04.radius ≤ ‖xiShifted R04.center‖) ∧
+  (∀ w, R04.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R04_fencing_of_bounds (h : R04_leaf_obligations) :
+    CellFencingHypotheses R04 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R04_lowerBound_of_bounds (h : R04_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R04 0.05 0.07
+    R04_strip_lo R04_strip_hi (R04_fencing_of_bounds h)
+
+noncomputable def R04_zeroFree_of_bounds (h : R04_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R04 0.05 fine_eps_mid_pos 0.07
+    R04_strip_lo R04_strip_hi h.2 h.1
+
+theorem R04_nonvanishing_of_bounds (h : R04_leaf_obligations) {z : ℂ}
+    (hx0 : R04.x0 ≤ z.re) (hx1 : z.re ≤ R04.x1)
+    (hy0 : R04.y0 ≤ z.im) (hy1 : z.im ≤ R04.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R04 0.05 0.07
+      R04_strip_lo R04_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R04_H_instance (h : R04_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-4, -1.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R04, 0.05, 0.07, rfl, rfl, rfl, rfl, R04_strip_lo, R04_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+#print axioms R04_H_instance
+
+/-! ### R05 = (-2,0.5,0.01,0.2), inner tier `(0.15,0.06)` -/
+
+/-- Bottom-row cell `(-2,0.5) × (0.01,0.2)` (center `-0.75`, inner tier). -/
+def R05 : CellProofEngine.Rect2D :=
+  ⟨-2, 0.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R05_x0 : R05.x0 = -2 := rfl
+theorem R05_x1 : R05.x1 = 0.5 := rfl
+theorem R05_y0 : R05.y0 = 0.01 := rfl
+theorem R05_y1 : R05.y1 = 0.2 := rfl
+
+theorem R05_width_eq : R05.x1 - R05.x0 = 2.5 := by
+  rw [R05_x0, R05_x1]; norm_num
+
+theorem R05_strip_lo : -(1 / 2 : ℝ) < R05.y0 := by rw [R05_y0]; norm_num
+theorem R05_strip_hi : R05.y1 < (1 / 2 : ℝ) := by rw [R05_y1]; norm_num
+
+theorem R05_dx_eq : R05.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R05_x0, R05_x1]; norm_num
+
+theorem R05_dy_eq : R05.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R05_y0, R05_y1]; norm_num
+
+theorem R05_radius_eq :
+    R05.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R05_dx_eq, R05_dy_eq]
+
+theorem R05_radius_lt : R05.radius < 1.26 := by
+  rw [R05_radius_eq]; exact sample_cell_radius_bound
+
+theorem R05_mem_gridFine :
+    ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((-2, 0.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-2, 0.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R05` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R05_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R05.radius ≤ ‖xiShifted R05.center‖) ∧
+  (∀ w, R05.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R05_fencing_of_bounds (h : R05_leaf_obligations) :
+    CellFencingHypotheses R05 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R05_lowerBound_of_bounds (h : R05_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R05 0.15 0.06
+    R05_strip_lo R05_strip_hi (R05_fencing_of_bounds h)
+
+noncomputable def R05_zeroFree_of_bounds (h : R05_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R05 0.15 fine_eps_inner_pos 0.06
+    R05_strip_lo R05_strip_hi h.2 h.1
+
+theorem R05_nonvanishing_of_bounds (h : R05_leaf_obligations) {z : ℂ}
+    (hx0 : R05.x0 ≤ z.re) (hx1 : z.re ≤ R05.x1)
+    (hy0 : R05.y0 ≤ z.im) (hy1 : z.im ≤ R05.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R05 0.15 0.06
+      R05_strip_lo R05_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R05_H_instance (h : R05_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-2, 0.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R05, 0.15, 0.06, rfl, rfl, rfl, rfl, R05_strip_lo, R05_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+#print axioms R05_H_instance
+
+/-! ### R06 = (0,2.5,0.01,0.2), inner tier `(0.15,0.06)` -/
+
+/-- Bottom-row cell `(0,2.5) × (0.01,0.2)` (center `1.25`, inner tier). -/
+def R06 : CellProofEngine.Rect2D :=
+  ⟨0, 2.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R06_x0 : R06.x0 = 0 := rfl
+theorem R06_x1 : R06.x1 = 2.5 := rfl
+theorem R06_y0 : R06.y0 = 0.01 := rfl
+theorem R06_y1 : R06.y1 = 0.2 := rfl
+
+theorem R06_width_eq : R06.x1 - R06.x0 = 2.5 := by
+  rw [R06_x0, R06_x1]; norm_num
+
+theorem R06_strip_lo : -(1 / 2 : ℝ) < R06.y0 := by rw [R06_y0]; norm_num
+theorem R06_strip_hi : R06.y1 < (1 / 2 : ℝ) := by rw [R06_y1]; norm_num
+
+theorem R06_dx_eq : R06.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R06_x0, R06_x1]; norm_num
+
+theorem R06_dy_eq : R06.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R06_y0, R06_y1]; norm_num
+
+theorem R06_radius_eq :
+    R06.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R06_dx_eq, R06_dy_eq]
+
+theorem R06_radius_lt : R06.radius < 1.26 := by
+  rw [R06_radius_eq]; exact sample_cell_radius_bound
+
+theorem R06_mem_gridFine :
+    ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((0, 2.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(0, 2.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R06` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R06_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R06.radius ≤ ‖xiShifted R06.center‖) ∧
+  (∀ w, R06.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R06_fencing_of_bounds (h : R06_leaf_obligations) :
+    CellFencingHypotheses R06 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R06_lowerBound_of_bounds (h : R06_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R06 0.15 0.06
+    R06_strip_lo R06_strip_hi (R06_fencing_of_bounds h)
+
+noncomputable def R06_zeroFree_of_bounds (h : R06_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R06 0.15 fine_eps_inner_pos 0.06
+    R06_strip_lo R06_strip_hi h.2 h.1
+
+theorem R06_nonvanishing_of_bounds (h : R06_leaf_obligations) {z : ℂ}
+    (hx0 : R06.x0 ≤ z.re) (hx1 : z.re ≤ R06.x1)
+    (hy0 : R06.y0 ≤ z.im) (hy1 : z.im ≤ R06.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R06 0.15 0.06
+      R06_strip_lo R06_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R06_H_instance (h : R06_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (0, 2.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R06, 0.15, 0.06, rfl, rfl, rfl, rfl, R06_strip_lo, R06_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+#print axioms R06_H_instance
+
+/-! ### R07 = (2,4.5,0.01,0.2), mid tier `(0.05,0.07)` -/
+
+/-- Bottom-row cell `(2,4.5) × (0.01,0.2)` (center `3.25`, mid tier). -/
+def R07 : CellProofEngine.Rect2D :=
+  ⟨2, 4.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R07_x0 : R07.x0 = 2 := rfl
+theorem R07_x1 : R07.x1 = 4.5 := rfl
+theorem R07_y0 : R07.y0 = 0.01 := rfl
+theorem R07_y1 : R07.y1 = 0.2 := rfl
+
+theorem R07_width_eq : R07.x1 - R07.x0 = 2.5 := by
+  rw [R07_x0, R07_x1]; norm_num
+
+theorem R07_strip_lo : -(1 / 2 : ℝ) < R07.y0 := by rw [R07_y0]; norm_num
+theorem R07_strip_hi : R07.y1 < (1 / 2 : ℝ) := by rw [R07_y1]; norm_num
+
+theorem R07_dx_eq : R07.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R07_x0, R07_x1]; norm_num
+
+theorem R07_dy_eq : R07.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R07_y0, R07_y1]; norm_num
+
+theorem R07_radius_eq :
+    R07.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R07_dx_eq, R07_dy_eq]
+
+theorem R07_radius_lt : R07.radius < 1.26 := by
+  rw [R07_radius_eq]; exact sample_cell_radius_bound
+
+theorem R07_mem_gridFine :
+    ((2, 4.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((2, 4.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(2, 4.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R07` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R07_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R07.radius ≤ ‖xiShifted R07.center‖) ∧
+  (∀ w, R07.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R07_fencing_of_bounds (h : R07_leaf_obligations) :
+    CellFencingHypotheses R07 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R07_lowerBound_of_bounds (h : R07_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R07 0.05 0.07
+    R07_strip_lo R07_strip_hi (R07_fencing_of_bounds h)
+
+noncomputable def R07_zeroFree_of_bounds (h : R07_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R07 0.05 fine_eps_mid_pos 0.07
+    R07_strip_lo R07_strip_hi h.2 h.1
+
+theorem R07_nonvanishing_of_bounds (h : R07_leaf_obligations) {z : ℂ}
+    (hx0 : R07.x0 ≤ z.re) (hx1 : z.re ≤ R07.x1)
+    (hy0 : R07.y0 ≤ z.im) (hy1 : z.im ≤ R07.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R07 0.05 0.07
+      R07_strip_lo R07_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R07_H_instance (h : R07_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (2, 4.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R07, 0.05, 0.07, rfl, rfl, rfl, rfl, R07_strip_lo, R07_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+#print axioms R07_H_instance
+
+/-! ### R08 = (4,6.5,0.01,0.2), mid tier `(0.05,0.07)` -/
+
+/-- Bottom-row cell `(4,6.5) × (0.01,0.2)` (center `5.25`, mid tier). -/
+def R08 : CellProofEngine.Rect2D :=
+  ⟨4, 6.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R08_x0 : R08.x0 = 4 := rfl
+theorem R08_x1 : R08.x1 = 6.5 := rfl
+theorem R08_y0 : R08.y0 = 0.01 := rfl
+theorem R08_y1 : R08.y1 = 0.2 := rfl
+
+theorem R08_width_eq : R08.x1 - R08.x0 = 2.5 := by
+  rw [R08_x0, R08_x1]; norm_num
+
+theorem R08_strip_lo : -(1 / 2 : ℝ) < R08.y0 := by rw [R08_y0]; norm_num
+theorem R08_strip_hi : R08.y1 < (1 / 2 : ℝ) := by rw [R08_y1]; norm_num
+
+theorem R08_dx_eq : R08.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R08_x0, R08_x1]; norm_num
+
+theorem R08_dy_eq : R08.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R08_y0, R08_y1]; norm_num
+
+theorem R08_radius_eq :
+    R08.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R08_dx_eq, R08_dy_eq]
+
+theorem R08_radius_lt : R08.radius < 1.26 := by
+  rw [R08_radius_eq]; exact sample_cell_radius_bound
+
+theorem R08_mem_gridFine :
+    ((4, 6.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((4, 6.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(4, 6.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R08` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R08_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R08.radius ≤ ‖xiShifted R08.center‖) ∧
+  (∀ w, R08.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R08_fencing_of_bounds (h : R08_leaf_obligations) :
+    CellFencingHypotheses R08 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R08_lowerBound_of_bounds (h : R08_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R08 0.05 0.07
+    R08_strip_lo R08_strip_hi (R08_fencing_of_bounds h)
+
+noncomputable def R08_zeroFree_of_bounds (h : R08_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R08 0.05 fine_eps_mid_pos 0.07
+    R08_strip_lo R08_strip_hi h.2 h.1
+
+theorem R08_nonvanishing_of_bounds (h : R08_leaf_obligations) {z : ℂ}
+    (hx0 : R08.x0 ≤ z.re) (hx1 : z.re ≤ R08.x1)
+    (hy0 : R08.y0 ≤ z.im) (hy1 : z.im ≤ R08.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R08 0.05 0.07
+      R08_strip_lo R08_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R08_H_instance (h : R08_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R08, 0.05, 0.07, rfl, rfl, rfl, rfl, R08_strip_lo, R08_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+#print axioms R08_H_instance
+
+/-! ### R09 = (6,8.5,0.01,0.2), outer tier `(0.002,0.05)` -/
+
+/-- Bottom-row cell `(6,8.5) × (0.01,0.2)` (center `7.25`, outer tier). -/
+def R09 : CellProofEngine.Rect2D :=
+  ⟨6, 8.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R09_x0 : R09.x0 = 6 := rfl
+theorem R09_x1 : R09.x1 = 8.5 := rfl
+theorem R09_y0 : R09.y0 = 0.01 := rfl
+theorem R09_y1 : R09.y1 = 0.2 := rfl
+
+theorem R09_width_eq : R09.x1 - R09.x0 = 2.5 := by
+  rw [R09_x0, R09_x1]; norm_num
+
+theorem R09_strip_lo : -(1 / 2 : ℝ) < R09.y0 := by rw [R09_y0]; norm_num
+theorem R09_strip_hi : R09.y1 < (1 / 2 : ℝ) := by rw [R09_y1]; norm_num
+
+theorem R09_dx_eq : R09.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R09_x0, R09_x1]; norm_num
+
+theorem R09_dy_eq : R09.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R09_y0, R09_y1]; norm_num
+
+theorem R09_radius_eq :
+    R09.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R09_dx_eq, R09_dy_eq]
+
+theorem R09_radius_lt : R09.radius < 1.26 := by
+  rw [R09_radius_eq]; exact sample_cell_radius_bound
+
+theorem R09_mem_gridFine :
+    ((6, 8.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((6, 8.5) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(6, 8.5), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R09` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R09_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R09.radius ≤ ‖xiShifted R09.center‖) ∧
+  (∀ w, R09.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R09_fencing_of_bounds (h : R09_leaf_obligations) :
+    CellFencingHypotheses R09 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R09_lowerBound_of_bounds (h : R09_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R09 0.002 0.05
+    R09_strip_lo R09_strip_hi (R09_fencing_of_bounds h)
+
+noncomputable def R09_zeroFree_of_bounds (h : R09_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R09 0.002 fine_eps_outer_pos 0.05
+    R09_strip_lo R09_strip_hi h.2 h.1
+
+theorem R09_nonvanishing_of_bounds (h : R09_leaf_obligations) {z : ℂ}
+    (hx0 : R09.x0 ≤ z.re) (hx1 : z.re ≤ R09.x1)
+    (hy0 : R09.y0 ≤ z.im) (hy1 : z.im ≤ R09.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R09 0.002 0.05
+      R09_strip_lo R09_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R09_H_instance (h : R09_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (6, 8.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R09, 0.002, 0.05, rfl, rfl, rfl, rfl, R09_strip_lo, R09_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+#print axioms R09_H_instance
+
+/-! ### R10 = (7.5,10,0.01,0.2), outer tier `(0.002,0.05)` -/
+
+/-- Bottom-row cell `(7.5,10) × (0.01,0.2)` (center `8.75`, outer tier). -/
+def R10 : CellProofEngine.Rect2D :=
+  ⟨7.5, 10, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R10_x0 : R10.x0 = 7.5 := rfl
+theorem R10_x1 : R10.x1 = 10 := rfl
+theorem R10_y0 : R10.y0 = 0.01 := rfl
+theorem R10_y1 : R10.y1 = 0.2 := rfl
+
+theorem R10_width_eq : R10.x1 - R10.x0 = 2.5 := by
+  rw [R10_x0, R10_x1]; norm_num
+
+theorem R10_strip_lo : -(1 / 2 : ℝ) < R10.y0 := by rw [R10_y0]; norm_num
+theorem R10_strip_hi : R10.y1 < (1 / 2 : ℝ) := by rw [R10_y1]; norm_num
+
+theorem R10_dx_eq : R10.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R10_x0, R10_x1]; norm_num
+
+theorem R10_dy_eq : R10.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R10_y0, R10_y1]; norm_num
+
+theorem R10_radius_eq :
+    R10.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R10_dx_eq, R10_dy_eq]
+
+theorem R10_radius_lt : R10.radius < 1.26 := by
+  rw [R10_radius_eq]; exact sample_cell_radius_bound
+
+theorem R10_mem_gridFine :
+    ((7.5, 10, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : ((7.5, 10) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : ((0.01, 0.2) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(7.5, 10), hX, List.mem_map.mpr ⟨(0.01, 0.2), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R10` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R10_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R10.radius ≤ ‖xiShifted R10.center‖) ∧
+  (∀ w, R10.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R10_fencing_of_bounds (h : R10_leaf_obligations) :
+    CellFencingHypotheses R10 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R10_lowerBound_of_bounds (h : R10_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R10 0.002 0.05
+    R10_strip_lo R10_strip_hi (R10_fencing_of_bounds h)
+
+noncomputable def R10_zeroFree_of_bounds (h : R10_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R10 0.002 fine_eps_outer_pos 0.05
+    R10_strip_lo R10_strip_hi h.2 h.1
+
+theorem R10_nonvanishing_of_bounds (h : R10_leaf_obligations) {z : ℂ}
+    (hx0 : R10.x0 ≤ z.re) (hx1 : z.re ≤ R10.x1)
+    (hy0 : R10.y0 ≤ z.im) (hy1 : z.im ≤ R10.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R10 0.002 0.05
+      R10_strip_lo R10_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R10_H_instance (h : R10_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (7.5, 10, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R10, 0.002, 0.05, rfl, rfl, rfl, rfl, R10_strip_lo, R10_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+#print axioms R10_H_instance
+
+/-! ### Boundary strip `(0,0.01]` via the designated nonzero-base feeder -/
+
+/-- Per-`x` strip obligations for the designated feeder
+`BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base` applied to
+the entire extension: base lower bound at `(x:ℂ)`, vertical deriv bound on
+`Icc 0 0.02`, and the margin `0.01 < ε₀/M₁` so the whole `(0,0.01]` is fenced.
+Taken as explicit hypotheses, exactly like the per-cell leaves. -/
+def StripBaseBounds (x : ℝ) (ε0 M1 : ℝ) : Prop :=
+  0 < ε0 ∧ 0 < M1 ∧
+  ε0 ≤ ‖xiShiftedEntire (x : ℂ)‖ ∧
+  (∀ y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ),
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ M1) ∧
+  (0.01 : ℝ) < ε0 / M1
+
+/-- Global strip obligations over the whole bottom-row footprint. -/
+def BottomStripObligations : Prop :=
+  ∀ x : ℝ, -10 < x → x < 10 → ∃ ε0 M1 : ℝ, StripBaseBounds x ε0 M1
+
+/-- Pointwise strip fencing: obligations at `x = z.re` give `xiShifted z ≠ 0`
+for `0 < Im ≤ 0.01`, via the nonzero-base feeder on `xiShiftedEntire` plus
+strip agreement `xiShifted_eq_entire_on_strip`. -/
+theorem strip_nonvanishing_of_base_bounds {x : ℝ} {ε0 M1 : ℝ}
+    (hb : StripBaseBounds x ε0 M1)
+    {z : ℂ} (hz_re : z.re = x) (hy_pos : 0 < z.im) (hy_le : z.im ≤ 0.01) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨hε0, hM1, hbase, hderiv, hmargin⟩ := hb
+  have hy_eta : z.im < (0.02 : ℝ) := by linarith
+  have hy_margin : z.im < ε0 / M1 := lt_of_le_of_lt hy_le hmargin
+  have hz_eq : z = (x : ℂ) + Complex.I * ((z.im : ℝ) : ℂ) := by
+    have h := Complex.re_add_im z
+    rw [hz_re] at h
+    have hcomm : Complex.I * ((z.im : ℝ) : ℂ) = ((z.im : ℝ) : ℂ) * Complex.I := by
+      ring
+    rw [hcomm]
+    exact h.symm
+  have hEnt_base : xiShiftedEntire ((x : ℂ) + Complex.I * ((z.im : ℝ) : ℂ)) ≠ 0 :=
+    BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base
+      xiShiftedEntire xiShiftedEntire_differentiable x ε0 M1 0.02
+      hε0 hM1 (by norm_num) hbase hderiv z.im hy_pos hy_eta hy_margin
+  have hEnt_z : xiShiftedEntire z ≠ 0 := by
+    rwa [← hz_eq] at hEnt_base
+  have hStripLo : -(1 / 2 : ℝ) < z.im := by linarith
+  have hStripHi : z.im < (1 / 2 : ℝ) := by linarith
+  have hAgree : xiShifted z = xiShiftedEntire z :=
+    xiShifted_eq_entire_on_strip z hStripLo hStripHi
+  rw [hAgree]
+  exact hEnt_z
+
+/-- Strip assembly over `-10 < Re < 10`: obligations supply the per-`x` bounds. -/
+theorem bottom_strip_covered (hStrip : BottomStripObligations) {z : ℂ}
+    (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_pos : 0 < z.im) (hy_le : z.im ≤ 0.01) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨ε0, M1, hb⟩ := hStrip z.re hx_lo hx_hi
+  exact strip_nonvanishing_of_base_bounds hb rfl hy_pos hy_le
+
+#print axioms bottom_strip_covered
+
+/-! ### Bottom-row list, combinatorial either/or, and combined cover -/
+
+/-- The 10 `gridFine` bottom-row cells `y ∈ (0.01,0.2)`. -/
+def bottomRowCells : List (ℝ × ℝ × ℝ × ℝ) :=
+  [(-10, -7.5, 0.01, 0.2), (-8, -5.5, 0.01, 0.2), (-6, -3.5, 0.01, 0.2),
+   (-4, -1.5, 0.01, 0.2), (-2, 0.5, 0.01, 0.2), (0, 2.5, 0.01, 0.2),
+   (2, 4.5, 0.01, 0.2), (4, 6.5, 0.01, 0.2), (6, 8.5, 0.01, 0.2),
+   (7.5, 10, 0.01, 0.2)]
+
+/-- Every bottom-row cell lies in `gridFine`. -/
+theorem bottomRow_mem_gridFine_of_mem {c : ℝ × ℝ × ℝ × ℝ}
+    (hc : c ∈ bottomRowCells) : c ∈ gridFine := by
+  unfold bottomRowCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact R00_mem_gridFine
+  · exact R02_mem_gridFine
+  · exact R03_mem_gridFine
+  · exact R04_mem_gridFine
+  · exact R05_mem_gridFine
+  · exact R06_mem_gridFine
+  · exact R07_mem_gridFine
+  · exact R08_mem_gridFine
+  · exact R09_mem_gridFine
+  · exact R10_mem_gridFine
+
+/-- Pure combinatorics: every `(x,y)` with `-10 < x < 10`, `0 < y ≤ 0.2` is
+either strip-range (`y ≤ 0.01`) or lies closed in some bottom-row cell. The
+`x`-branching mirrors `fineGridX_covers` thresholds, so each branch's closed
+`x`-bounds follow by `linarith`. -/
+theorem bottom_row_either {x y : ℝ}
+    (hx_lo : -10 < x) (hx_hi : x < 10)
+    (hy_pos : 0 < y) (hy_le : y ≤ 0.2) :
+    y ≤ 0.01 ∨
+    ∃ c ∈ bottomRowCells,
+      c.1 ≤ x ∧ x ≤ c.2.1 ∧ c.2.2.1 ≤ y ∧ y ≤ c.2.2.2 := by
+  by_cases h : y ≤ 0.01
+  · exact Or.inl h
+  · right
+    push_neg at h
+    have hy0 : (0.01 : ℝ) ≤ y := le_of_lt h
+    by_cases h1 : x < -7.5
+    · exact ⟨(-10, -7.5, 0.01, 0.2), by simp [bottomRowCells],
+        by show (-10 : ℝ) ≤ x; linarith, by show x ≤ (-7.5 : ℝ); exact le_of_lt h1,
+        hy0, hy_le⟩
+    · push_neg at h1
+      by_cases h2 : x < -5.5
+      · exact ⟨(-8, -5.5, 0.01, 0.2), by simp [bottomRowCells],
+          by show (-8 : ℝ) ≤ x; linarith, by show x ≤ (-5.5 : ℝ); exact le_of_lt h2,
+          hy0, hy_le⟩
+      · push_neg at h2
+        by_cases h3 : x < -3.5
+        · exact ⟨(-6, -3.5, 0.01, 0.2), by simp [bottomRowCells],
+            by show (-6 : ℝ) ≤ x; linarith, by show x ≤ (-3.5 : ℝ); exact le_of_lt h3,
+            hy0, hy_le⟩
+        · push_neg at h3
+          by_cases h4 : x < -1.5
+          · exact ⟨(-4, -1.5, 0.01, 0.2), by simp [bottomRowCells],
+              by show (-4 : ℝ) ≤ x; linarith, by show x ≤ (-1.5 : ℝ); exact le_of_lt h4,
+              hy0, hy_le⟩
+          · push_neg at h4
+            by_cases h5 : x < 0.5
+            · exact ⟨(-2, 0.5, 0.01, 0.2), by simp [bottomRowCells],
+                by show (-2 : ℝ) ≤ x; linarith, by show x ≤ (0.5 : ℝ); exact le_of_lt h5,
+                hy0, hy_le⟩
+            · push_neg at h5
+              by_cases h6 : x < 2.5
+              · exact ⟨(0, 2.5, 0.01, 0.2), by simp [bottomRowCells],
+                  by show (0 : ℝ) ≤ x; linarith, by show x ≤ (2.5 : ℝ); exact le_of_lt h6,
+                  hy0, hy_le⟩
+              · push_neg at h6
+                by_cases h7 : x < 4.5
+                · exact ⟨(2, 4.5, 0.01, 0.2), by simp [bottomRowCells],
+                    by show (2 : ℝ) ≤ x; linarith, by show x ≤ (4.5 : ℝ); exact le_of_lt h7,
+                    hy0, hy_le⟩
+                · push_neg at h7
+                  by_cases h8 : x < 6.5
+                  · exact ⟨(4, 6.5, 0.01, 0.2), by simp [bottomRowCells],
+                      by show (4 : ℝ) ≤ x; linarith, by show x ≤ (6.5 : ℝ); exact le_of_lt h8,
+                      hy0, hy_le⟩
+                  · push_neg at h8
+                    by_cases h9 : x < 8.5
+                    · exact ⟨(6, 8.5, 0.01, 0.2), by simp [bottomRowCells],
+                        by show (6 : ℝ) ≤ x; linarith, by show x ≤ (8.5 : ℝ); exact le_of_lt h9,
+                        hy0, hy_le⟩
+                    · push_neg at h9
+                      exact ⟨(7.5, 10, 0.01, 0.2), by simp [bottomRowCells],
+                        by show (7.5 : ℝ) ≤ x; linarith,
+                        by show x ≤ (10 : ℝ); exact le_of_lt hx_hi,
+                        hy0, hy_le⟩
+
+/-- Joint per-cell obligations for the 10 `gridFine` bottom-row cells. -/
+def BottomRowObligations : Prop :=
+  R00_leaf_obligations ∧ R02_leaf_obligations ∧ R03_leaf_obligations ∧
+  R04_leaf_obligations ∧ R05_leaf_obligations ∧ R06_leaf_obligations ∧
+  R07_leaf_obligations ∧ R08_leaf_obligations ∧ R09_leaf_obligations ∧
+  R10_leaf_obligations
+
+/-- The 10 bottom-row `H`-leaves of `inner_nonvanishing_of_fenced_grid_fine`
+follow jointly from `BottomRowObligations`. -/
+theorem bottomRow_H_of_obligations (hCells : BottomRowObligations) :
+    ∀ c ∈ bottomRowCells, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  intro c hc
+  unfold bottomRowCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · obtain ⟨h00, _, _, _, _, _, _, _, _, _⟩ := hCells
+    exact R00_H_instance h00 _ R00_mem_gridFine rfl
+  · obtain ⟨_, h02, _, _, _, _, _, _, _, _⟩ := hCells
+    exact R02_H_instance h02 _ R02_mem_gridFine rfl
+  · obtain ⟨_, _, h03, _, _, _, _, _, _, _⟩ := hCells
+    exact R03_H_instance h03 _ R03_mem_gridFine rfl
+  · obtain ⟨_, _, _, h04, _, _, _, _, _, _⟩ := hCells
+    exact R04_H_instance h04 _ R04_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, h05, _, _, _, _, _⟩ := hCells
+    exact R05_H_instance h05 _ R05_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, h06, _, _, _, _⟩ := hCells
+    exact R06_H_instance h06 _ R06_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, h07, _, _, _⟩ := hCells
+    exact R07_H_instance h07 _ R07_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, h08, _, _⟩ := hCells
+    exact R08_H_instance h08 _ R08_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, h09, _⟩ := hCells
+    exact R09_H_instance h09 _ R09_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, _, h10⟩ := hCells
+    exact R10_H_instance h10 _ R10_mem_gridFine rfl
+
+/-- Combined bottom-row cover: every `z` with `-10 < Re < 10`, `0 < Im ≤ 0.2`
+is nonvanishing — via the strip lemma at `Im ≤ 0.01`, else via the closed
+bottom-row cell containing it. The `either/or` is `bottom_row_either`; each
+branch closes by the matching `RXX_nonvanishing_of_bounds`. -/
+theorem bottom_row_covered (hCells : BottomRowObligations)
+    (hStrip : BottomStripObligations)
+    {z : ℂ} (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_pos : 0 < z.im) (hy_le : z.im ≤ 0.2) :
+    xiShifted z ≠ 0 := by
+  by_cases hS : z.im ≤ 0.01
+  · exact bottom_strip_covered hStrip hx_lo hx_hi hy_pos hS
+  · push_neg at hS
+    obtain ⟨h00, h02, h03, h04, h05, h06, h07, h08, h09, h10⟩ := hCells
+    have hy0 : (0.01 : ℝ) ≤ z.im := le_of_lt hS
+    by_cases h1 : z.re < -7.5
+    · exact R00_nonvanishing_of_bounds h00
+        (by rw [R00_x0]; linarith) (by rw [R00_x1]; exact le_of_lt h1)
+        (by rw [R00_y0]; exact hy0) (by rw [R00_y1]; exact hy_le)
+    · push_neg at h1
+      by_cases h2 : z.re < -5.5
+      · exact R02_nonvanishing_of_bounds h02
+          (by rw [R02_x0]; linarith) (by rw [R02_x1]; exact le_of_lt h2)
+          (by rw [R02_y0]; exact hy0) (by rw [R02_y1]; exact hy_le)
+      · push_neg at h2
+        by_cases h3 : z.re < -3.5
+        · exact R03_nonvanishing_of_bounds h03
+            (by rw [R03_x0]; linarith) (by rw [R03_x1]; exact le_of_lt h3)
+            (by rw [R03_y0]; exact hy0) (by rw [R03_y1]; exact hy_le)
+        · push_neg at h3
+          by_cases h4 : z.re < -1.5
+          · exact R04_nonvanishing_of_bounds h04
+              (by rw [R04_x0]; linarith) (by rw [R04_x1]; exact le_of_lt h4)
+              (by rw [R04_y0]; exact hy0) (by rw [R04_y1]; exact hy_le)
+          · push_neg at h4
+            by_cases h5 : z.re < 0.5
+            · exact R05_nonvanishing_of_bounds h05
+                (by rw [R05_x0]; linarith) (by rw [R05_x1]; exact le_of_lt h5)
+                (by rw [R05_y0]; exact hy0) (by rw [R05_y1]; exact hy_le)
+            · push_neg at h5
+              by_cases h6 : z.re < 2.5
+              · exact R06_nonvanishing_of_bounds h06
+                  (by rw [R06_x0]; linarith) (by rw [R06_x1]; exact le_of_lt h6)
+                  (by rw [R06_y0]; exact hy0) (by rw [R06_y1]; exact hy_le)
+              · push_neg at h6
+                by_cases h7 : z.re < 4.5
+                · exact R07_nonvanishing_of_bounds h07
+                    (by rw [R07_x0]; linarith) (by rw [R07_x1]; exact le_of_lt h7)
+                    (by rw [R07_y0]; exact hy0) (by rw [R07_y1]; exact hy_le)
+                · push_neg at h7
+                  by_cases h8 : z.re < 6.5
+                  · exact R08_nonvanishing_of_bounds h08
+                      (by rw [R08_x0]; linarith) (by rw [R08_x1]; exact le_of_lt h8)
+                      (by rw [R08_y0]; exact hy0) (by rw [R08_y1]; exact hy_le)
+                  · push_neg at h8
+                    by_cases h9 : z.re < 8.5
+                    · exact R09_nonvanishing_of_bounds h09
+                        (by rw [R09_x0]; linarith) (by rw [R09_x1]; exact le_of_lt h9)
+                        (by rw [R09_y0]; exact hy0) (by rw [R09_y1]; exact hy_le)
+                    · push_neg at h9
+                      exact R10_nonvanishing_of_bounds h10
+                        (by rw [R10_x0]; linarith)
+                        (by rw [R10_x1]; exact le_of_lt hx_hi)
+                        (by rw [R10_y0]; exact hy0) (by rw [R10_y1]; exact hy_le)
+
+#print axioms bottom_row_either
+#print axioms bottom_row_covered
+#print axioms bottomRow_H_of_obligations
+#print axioms strip_nonvanishing_of_base_bounds
+
+end CentralCoverAssembly
+
+namespace CentralCoverAssembly
+
+open CellProofEngine
+
+/-! ## Upper-row completion R11--R40 + `full_central_covered` (EXPANDED scope)
+
+Prior sessions packaged the 10 bottom-row `gridFine` cells `y \in (0.01,0.2)`
+(`R00`, `R02`--`R10`) plus the boundary strip `(0,0.01]` into `bottom_row_covered`.
+This block replicates the same `RXX` fencing pattern at scale for ALL upper-row
+cells `y \in (0.1,0.49)` (the remaining 30 cells of `gridFine`: 10 `x`-columns
+× 3 `y`-rows `(0.1,0.3)`, `(0.2,0.4)`, `(0.3,0.49)`), using the tier bounds
+already in-file (`fine_eps_outer/mid/inner_pos`, `fine_M_outer/mid/nonneg`).
+The two numerical enclosures per cell (`center_bound`, `deriv_bound`) are taken
+as explicit per-cell hypotheses exactly as `R00_leaf_obligations` does (known
+gap: needs zeta/Gamma/cpow interval arithmetic absent from Mathlib). No `sorry`,
+no `admit`, no `axiom`. Endpoints `±10`, `[0.49,1/2)`, and the real axis are
+untouched (separate tasks).
+-/
+
+/-- Radius bound for upper-row geometry `(dx, dy) = (1.25, 0.1)`:
+`√(1.25²+0.1²) < 1.26`. Pure `Real` arithmetic. -/
+theorem sample_cell_radius_01_bound :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) < 1.26 := by
+  have hlt : (1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2 < (1.26 : ℝ) ^ 2 := by norm_num
+  have h := Real.sqrt_lt_sqrt (by positivity) hlt
+  rwa [Real.sqrt_sq (by norm_num)] at h
+
+/-! ### Upper row1 `y = (0.1,0.3)`, `dy = 0.1` (10 cells) -/
+
+/-! ### R11 = (-10, -7.5, 0.1, 0.3), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-10,-7.5) × (0.1,0.3)` (outer tier). -/
+def R11 : CellProofEngine.Rect2D :=
+  ⟨-10, -7.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R11_x0 : R11.x0 = -10 := rfl
+theorem R11_x1 : R11.x1 = -7.5 := rfl
+theorem R11_y0 : R11.y0 = 0.1 := rfl
+theorem R11_y1 : R11.y1 = 0.3 := rfl
+
+theorem R11_width_eq : R11.x1 - R11.x0 = 2.5 := by
+  rw [R11_x0, R11_x1]; norm_num
+
+theorem R11_strip_lo : -(1 / 2 : ℝ) < R11.y0 := by rw [R11_y0]; norm_num
+theorem R11_strip_hi : R11.y1 < (1 / 2 : ℝ) := by rw [R11_y1]; norm_num
+
+theorem R11_dx_eq : R11.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R11_x0, R11_x1]; norm_num
+
+theorem R11_dy_eq : R11.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R11_y0, R11_y1]; norm_num
+
+theorem R11_radius_eq :
+    R11.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R11_dx_eq, R11_dy_eq]
+
+theorem R11_radius_lt : R11.radius < 1.26 := by
+  rw [R11_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R11_mem_gridFine :
+    ((-10, -7.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-10, -7.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-10, -7.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R11` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R11_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R11.radius ≤ ‖xiShifted R11.center‖) ∧
+  (∀ w, R11.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R11_fencing_of_bounds (h : R11_leaf_obligations) :
+    CellFencingHypotheses R11 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R11_lowerBound_of_bounds (h : R11_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R11 0.002 0.05
+    R11_strip_lo R11_strip_hi (R11_fencing_of_bounds h)
+
+noncomputable def R11_zeroFree_of_bounds (h : R11_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R11 0.002 fine_eps_outer_pos 0.05
+    R11_strip_lo R11_strip_hi h.2 h.1
+
+theorem R11_nonvanishing_of_bounds (h : R11_leaf_obligations) {z : ℂ}
+    (hx0 : R11.x0 ≤ z.re) (hx1 : z.re ≤ R11.x1)
+    (hy0 : R11.y0 ≤ z.im) (hy1 : z.im ≤ R11.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R11 0.002 0.05
+      R11_strip_lo R11_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R11_H_instance (h : R11_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-10, -7.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R11, 0.002, 0.05, rfl, rfl, rfl, rfl, R11_strip_lo, R11_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R12 = (-8, -5.5, 0.1, 0.3), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-8,-5.5) × (0.1,0.3)` (outer tier). -/
+def R12 : CellProofEngine.Rect2D :=
+  ⟨-8, -5.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R12_x0 : R12.x0 = -8 := rfl
+theorem R12_x1 : R12.x1 = -5.5 := rfl
+theorem R12_y0 : R12.y0 = 0.1 := rfl
+theorem R12_y1 : R12.y1 = 0.3 := rfl
+
+theorem R12_width_eq : R12.x1 - R12.x0 = 2.5 := by
+  rw [R12_x0, R12_x1]; norm_num
+
+theorem R12_strip_lo : -(1 / 2 : ℝ) < R12.y0 := by rw [R12_y0]; norm_num
+theorem R12_strip_hi : R12.y1 < (1 / 2 : ℝ) := by rw [R12_y1]; norm_num
+
+theorem R12_dx_eq : R12.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R12_x0, R12_x1]; norm_num
+
+theorem R12_dy_eq : R12.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R12_y0, R12_y1]; norm_num
+
+theorem R12_radius_eq :
+    R12.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R12_dx_eq, R12_dy_eq]
+
+theorem R12_radius_lt : R12.radius < 1.26 := by
+  rw [R12_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R12_mem_gridFine :
+    ((-8, -5.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-8, -5.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-8, -5.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R12` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R12_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R12.radius ≤ ‖xiShifted R12.center‖) ∧
+  (∀ w, R12.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R12_fencing_of_bounds (h : R12_leaf_obligations) :
+    CellFencingHypotheses R12 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R12_lowerBound_of_bounds (h : R12_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R12 0.002 0.05
+    R12_strip_lo R12_strip_hi (R12_fencing_of_bounds h)
+
+noncomputable def R12_zeroFree_of_bounds (h : R12_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R12 0.002 fine_eps_outer_pos 0.05
+    R12_strip_lo R12_strip_hi h.2 h.1
+
+theorem R12_nonvanishing_of_bounds (h : R12_leaf_obligations) {z : ℂ}
+    (hx0 : R12.x0 ≤ z.re) (hx1 : z.re ≤ R12.x1)
+    (hy0 : R12.y0 ≤ z.im) (hy1 : z.im ≤ R12.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R12 0.002 0.05
+      R12_strip_lo R12_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R12_H_instance (h : R12_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-8, -5.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R12, 0.002, 0.05, rfl, rfl, rfl, rfl, R12_strip_lo, R12_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R13 = (-6, -3.5, 0.1, 0.3), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-6,-3.5) × (0.1,0.3)` (mid tier). -/
+def R13 : CellProofEngine.Rect2D :=
+  ⟨-6, -3.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R13_x0 : R13.x0 = -6 := rfl
+theorem R13_x1 : R13.x1 = -3.5 := rfl
+theorem R13_y0 : R13.y0 = 0.1 := rfl
+theorem R13_y1 : R13.y1 = 0.3 := rfl
+
+theorem R13_width_eq : R13.x1 - R13.x0 = 2.5 := by
+  rw [R13_x0, R13_x1]; norm_num
+
+theorem R13_strip_lo : -(1 / 2 : ℝ) < R13.y0 := by rw [R13_y0]; norm_num
+theorem R13_strip_hi : R13.y1 < (1 / 2 : ℝ) := by rw [R13_y1]; norm_num
+
+theorem R13_dx_eq : R13.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R13_x0, R13_x1]; norm_num
+
+theorem R13_dy_eq : R13.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R13_y0, R13_y1]; norm_num
+
+theorem R13_radius_eq :
+    R13.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R13_dx_eq, R13_dy_eq]
+
+theorem R13_radius_lt : R13.radius < 1.26 := by
+  rw [R13_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R13_mem_gridFine :
+    ((-6, -3.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-6, -3.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-6, -3.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R13` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R13_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R13.radius ≤ ‖xiShifted R13.center‖) ∧
+  (∀ w, R13.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R13_fencing_of_bounds (h : R13_leaf_obligations) :
+    CellFencingHypotheses R13 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R13_lowerBound_of_bounds (h : R13_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R13 0.05 0.07
+    R13_strip_lo R13_strip_hi (R13_fencing_of_bounds h)
+
+noncomputable def R13_zeroFree_of_bounds (h : R13_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R13 0.05 fine_eps_mid_pos 0.07
+    R13_strip_lo R13_strip_hi h.2 h.1
+
+theorem R13_nonvanishing_of_bounds (h : R13_leaf_obligations) {z : ℂ}
+    (hx0 : R13.x0 ≤ z.re) (hx1 : z.re ≤ R13.x1)
+    (hy0 : R13.y0 ≤ z.im) (hy1 : z.im ≤ R13.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R13 0.05 0.07
+      R13_strip_lo R13_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R13_H_instance (h : R13_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-6, -3.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R13, 0.05, 0.07, rfl, rfl, rfl, rfl, R13_strip_lo, R13_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R14 = (-4, -1.5, 0.1, 0.3), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-4,-1.5) × (0.1,0.3)` (mid tier). -/
+def R14 : CellProofEngine.Rect2D :=
+  ⟨-4, -1.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R14_x0 : R14.x0 = -4 := rfl
+theorem R14_x1 : R14.x1 = -1.5 := rfl
+theorem R14_y0 : R14.y0 = 0.1 := rfl
+theorem R14_y1 : R14.y1 = 0.3 := rfl
+
+theorem R14_width_eq : R14.x1 - R14.x0 = 2.5 := by
+  rw [R14_x0, R14_x1]; norm_num
+
+theorem R14_strip_lo : -(1 / 2 : ℝ) < R14.y0 := by rw [R14_y0]; norm_num
+theorem R14_strip_hi : R14.y1 < (1 / 2 : ℝ) := by rw [R14_y1]; norm_num
+
+theorem R14_dx_eq : R14.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R14_x0, R14_x1]; norm_num
+
+theorem R14_dy_eq : R14.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R14_y0, R14_y1]; norm_num
+
+theorem R14_radius_eq :
+    R14.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R14_dx_eq, R14_dy_eq]
+
+theorem R14_radius_lt : R14.radius < 1.26 := by
+  rw [R14_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R14_mem_gridFine :
+    ((-4, -1.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-4, -1.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-4, -1.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R14` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R14_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R14.radius ≤ ‖xiShifted R14.center‖) ∧
+  (∀ w, R14.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R14_fencing_of_bounds (h : R14_leaf_obligations) :
+    CellFencingHypotheses R14 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R14_lowerBound_of_bounds (h : R14_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R14 0.05 0.07
+    R14_strip_lo R14_strip_hi (R14_fencing_of_bounds h)
+
+noncomputable def R14_zeroFree_of_bounds (h : R14_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R14 0.05 fine_eps_mid_pos 0.07
+    R14_strip_lo R14_strip_hi h.2 h.1
+
+theorem R14_nonvanishing_of_bounds (h : R14_leaf_obligations) {z : ℂ}
+    (hx0 : R14.x0 ≤ z.re) (hx1 : z.re ≤ R14.x1)
+    (hy0 : R14.y0 ≤ z.im) (hy1 : z.im ≤ R14.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R14 0.05 0.07
+      R14_strip_lo R14_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R14_H_instance (h : R14_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-4, -1.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R14, 0.05, 0.07, rfl, rfl, rfl, rfl, R14_strip_lo, R14_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R15 = (-2, 0.5, 0.1, 0.3), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(-2,0.5) × (0.1,0.3)` (inner tier). -/
+def R15 : CellProofEngine.Rect2D :=
+  ⟨-2, 0.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R15_x0 : R15.x0 = -2 := rfl
+theorem R15_x1 : R15.x1 = 0.5 := rfl
+theorem R15_y0 : R15.y0 = 0.1 := rfl
+theorem R15_y1 : R15.y1 = 0.3 := rfl
+
+theorem R15_width_eq : R15.x1 - R15.x0 = 2.5 := by
+  rw [R15_x0, R15_x1]; norm_num
+
+theorem R15_strip_lo : -(1 / 2 : ℝ) < R15.y0 := by rw [R15_y0]; norm_num
+theorem R15_strip_hi : R15.y1 < (1 / 2 : ℝ) := by rw [R15_y1]; norm_num
+
+theorem R15_dx_eq : R15.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R15_x0, R15_x1]; norm_num
+
+theorem R15_dy_eq : R15.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R15_y0, R15_y1]; norm_num
+
+theorem R15_radius_eq :
+    R15.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R15_dx_eq, R15_dy_eq]
+
+theorem R15_radius_lt : R15.radius < 1.26 := by
+  rw [R15_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R15_mem_gridFine :
+    ((-2, 0.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-2, 0.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-2, 0.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R15` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R15_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R15.radius ≤ ‖xiShifted R15.center‖) ∧
+  (∀ w, R15.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R15_fencing_of_bounds (h : R15_leaf_obligations) :
+    CellFencingHypotheses R15 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R15_lowerBound_of_bounds (h : R15_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R15 0.15 0.06
+    R15_strip_lo R15_strip_hi (R15_fencing_of_bounds h)
+
+noncomputable def R15_zeroFree_of_bounds (h : R15_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R15 0.15 fine_eps_inner_pos 0.06
+    R15_strip_lo R15_strip_hi h.2 h.1
+
+theorem R15_nonvanishing_of_bounds (h : R15_leaf_obligations) {z : ℂ}
+    (hx0 : R15.x0 ≤ z.re) (hx1 : z.re ≤ R15.x1)
+    (hy0 : R15.y0 ≤ z.im) (hy1 : z.im ≤ R15.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R15 0.15 0.06
+      R15_strip_lo R15_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R15_H_instance (h : R15_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-2, 0.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R15, 0.15, 0.06, rfl, rfl, rfl, rfl, R15_strip_lo, R15_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R16 = (0, 2.5, 0.1, 0.3), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(0,2.5) × (0.1,0.3)` (inner tier). -/
+def R16 : CellProofEngine.Rect2D :=
+  ⟨0, 2.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R16_x0 : R16.x0 = 0 := rfl
+theorem R16_x1 : R16.x1 = 2.5 := rfl
+theorem R16_y0 : R16.y0 = 0.1 := rfl
+theorem R16_y1 : R16.y1 = 0.3 := rfl
+
+theorem R16_width_eq : R16.x1 - R16.x0 = 2.5 := by
+  rw [R16_x0, R16_x1]; norm_num
+
+theorem R16_strip_lo : -(1 / 2 : ℝ) < R16.y0 := by rw [R16_y0]; norm_num
+theorem R16_strip_hi : R16.y1 < (1 / 2 : ℝ) := by rw [R16_y1]; norm_num
+
+theorem R16_dx_eq : R16.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R16_x0, R16_x1]; norm_num
+
+theorem R16_dy_eq : R16.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R16_y0, R16_y1]; norm_num
+
+theorem R16_radius_eq :
+    R16.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R16_dx_eq, R16_dy_eq]
+
+theorem R16_radius_lt : R16.radius < 1.26 := by
+  rw [R16_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R16_mem_gridFine :
+    ((0, 2.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((0, 2.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(0, 2.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R16` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R16_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R16.radius ≤ ‖xiShifted R16.center‖) ∧
+  (∀ w, R16.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R16_fencing_of_bounds (h : R16_leaf_obligations) :
+    CellFencingHypotheses R16 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R16_lowerBound_of_bounds (h : R16_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R16 0.15 0.06
+    R16_strip_lo R16_strip_hi (R16_fencing_of_bounds h)
+
+noncomputable def R16_zeroFree_of_bounds (h : R16_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R16 0.15 fine_eps_inner_pos 0.06
+    R16_strip_lo R16_strip_hi h.2 h.1
+
+theorem R16_nonvanishing_of_bounds (h : R16_leaf_obligations) {z : ℂ}
+    (hx0 : R16.x0 ≤ z.re) (hx1 : z.re ≤ R16.x1)
+    (hy0 : R16.y0 ≤ z.im) (hy1 : z.im ≤ R16.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R16 0.15 0.06
+      R16_strip_lo R16_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R16_H_instance (h : R16_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (0, 2.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R16, 0.15, 0.06, rfl, rfl, rfl, rfl, R16_strip_lo, R16_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R17 = (2, 4.5, 0.1, 0.3), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(2,4.5) × (0.1,0.3)` (mid tier). -/
+def R17 : CellProofEngine.Rect2D :=
+  ⟨2, 4.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R17_x0 : R17.x0 = 2 := rfl
+theorem R17_x1 : R17.x1 = 4.5 := rfl
+theorem R17_y0 : R17.y0 = 0.1 := rfl
+theorem R17_y1 : R17.y1 = 0.3 := rfl
+
+theorem R17_width_eq : R17.x1 - R17.x0 = 2.5 := by
+  rw [R17_x0, R17_x1]; norm_num
+
+theorem R17_strip_lo : -(1 / 2 : ℝ) < R17.y0 := by rw [R17_y0]; norm_num
+theorem R17_strip_hi : R17.y1 < (1 / 2 : ℝ) := by rw [R17_y1]; norm_num
+
+theorem R17_dx_eq : R17.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R17_x0, R17_x1]; norm_num
+
+theorem R17_dy_eq : R17.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R17_y0, R17_y1]; norm_num
+
+theorem R17_radius_eq :
+    R17.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R17_dx_eq, R17_dy_eq]
+
+theorem R17_radius_lt : R17.radius < 1.26 := by
+  rw [R17_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R17_mem_gridFine :
+    ((2, 4.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((2, 4.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(2, 4.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R17` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R17_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R17.radius ≤ ‖xiShifted R17.center‖) ∧
+  (∀ w, R17.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R17_fencing_of_bounds (h : R17_leaf_obligations) :
+    CellFencingHypotheses R17 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R17_lowerBound_of_bounds (h : R17_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R17 0.05 0.07
+    R17_strip_lo R17_strip_hi (R17_fencing_of_bounds h)
+
+noncomputable def R17_zeroFree_of_bounds (h : R17_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R17 0.05 fine_eps_mid_pos 0.07
+    R17_strip_lo R17_strip_hi h.2 h.1
+
+theorem R17_nonvanishing_of_bounds (h : R17_leaf_obligations) {z : ℂ}
+    (hx0 : R17.x0 ≤ z.re) (hx1 : z.re ≤ R17.x1)
+    (hy0 : R17.y0 ≤ z.im) (hy1 : z.im ≤ R17.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R17 0.05 0.07
+      R17_strip_lo R17_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R17_H_instance (h : R17_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (2, 4.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R17, 0.05, 0.07, rfl, rfl, rfl, rfl, R17_strip_lo, R17_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R18 = (4, 6.5, 0.1, 0.3), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(4,6.5) × (0.1,0.3)` (mid tier). -/
+def R18 : CellProofEngine.Rect2D :=
+  ⟨4, 6.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R18_x0 : R18.x0 = 4 := rfl
+theorem R18_x1 : R18.x1 = 6.5 := rfl
+theorem R18_y0 : R18.y0 = 0.1 := rfl
+theorem R18_y1 : R18.y1 = 0.3 := rfl
+
+theorem R18_width_eq : R18.x1 - R18.x0 = 2.5 := by
+  rw [R18_x0, R18_x1]; norm_num
+
+theorem R18_strip_lo : -(1 / 2 : ℝ) < R18.y0 := by rw [R18_y0]; norm_num
+theorem R18_strip_hi : R18.y1 < (1 / 2 : ℝ) := by rw [R18_y1]; norm_num
+
+theorem R18_dx_eq : R18.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R18_x0, R18_x1]; norm_num
+
+theorem R18_dy_eq : R18.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R18_y0, R18_y1]; norm_num
+
+theorem R18_radius_eq :
+    R18.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R18_dx_eq, R18_dy_eq]
+
+theorem R18_radius_lt : R18.radius < 1.26 := by
+  rw [R18_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R18_mem_gridFine :
+    ((4, 6.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((4, 6.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(4, 6.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R18` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R18_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R18.radius ≤ ‖xiShifted R18.center‖) ∧
+  (∀ w, R18.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R18_fencing_of_bounds (h : R18_leaf_obligations) :
+    CellFencingHypotheses R18 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R18_lowerBound_of_bounds (h : R18_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R18 0.05 0.07
+    R18_strip_lo R18_strip_hi (R18_fencing_of_bounds h)
+
+noncomputable def R18_zeroFree_of_bounds (h : R18_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R18 0.05 fine_eps_mid_pos 0.07
+    R18_strip_lo R18_strip_hi h.2 h.1
+
+theorem R18_nonvanishing_of_bounds (h : R18_leaf_obligations) {z : ℂ}
+    (hx0 : R18.x0 ≤ z.re) (hx1 : z.re ≤ R18.x1)
+    (hy0 : R18.y0 ≤ z.im) (hy1 : z.im ≤ R18.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R18 0.05 0.07
+      R18_strip_lo R18_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R18_H_instance (h : R18_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R18, 0.05, 0.07, rfl, rfl, rfl, rfl, R18_strip_lo, R18_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R19 = (6, 8.5, 0.1, 0.3), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(6,8.5) × (0.1,0.3)` (outer tier). -/
+def R19 : CellProofEngine.Rect2D :=
+  ⟨6, 8.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R19_x0 : R19.x0 = 6 := rfl
+theorem R19_x1 : R19.x1 = 8.5 := rfl
+theorem R19_y0 : R19.y0 = 0.1 := rfl
+theorem R19_y1 : R19.y1 = 0.3 := rfl
+
+theorem R19_width_eq : R19.x1 - R19.x0 = 2.5 := by
+  rw [R19_x0, R19_x1]; norm_num
+
+theorem R19_strip_lo : -(1 / 2 : ℝ) < R19.y0 := by rw [R19_y0]; norm_num
+theorem R19_strip_hi : R19.y1 < (1 / 2 : ℝ) := by rw [R19_y1]; norm_num
+
+theorem R19_dx_eq : R19.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R19_x0, R19_x1]; norm_num
+
+theorem R19_dy_eq : R19.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R19_y0, R19_y1]; norm_num
+
+theorem R19_radius_eq :
+    R19.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R19_dx_eq, R19_dy_eq]
+
+theorem R19_radius_lt : R19.radius < 1.26 := by
+  rw [R19_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R19_mem_gridFine :
+    ((6, 8.5, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((6, 8.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(6, 8.5), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R19` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R19_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R19.radius ≤ ‖xiShifted R19.center‖) ∧
+  (∀ w, R19.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R19_fencing_of_bounds (h : R19_leaf_obligations) :
+    CellFencingHypotheses R19 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R19_lowerBound_of_bounds (h : R19_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R19 0.002 0.05
+    R19_strip_lo R19_strip_hi (R19_fencing_of_bounds h)
+
+noncomputable def R19_zeroFree_of_bounds (h : R19_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R19 0.002 fine_eps_outer_pos 0.05
+    R19_strip_lo R19_strip_hi h.2 h.1
+
+theorem R19_nonvanishing_of_bounds (h : R19_leaf_obligations) {z : ℂ}
+    (hx0 : R19.x0 ≤ z.re) (hx1 : z.re ≤ R19.x1)
+    (hy0 : R19.y0 ≤ z.im) (hy1 : z.im ≤ R19.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R19 0.002 0.05
+      R19_strip_lo R19_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R19_H_instance (h : R19_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (6, 8.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R19, 0.002, 0.05, rfl, rfl, rfl, rfl, R19_strip_lo, R19_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R20 = (7.5, 10, 0.1, 0.3), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(7.5,10) × (0.1,0.3)` (outer tier). -/
+def R20 : CellProofEngine.Rect2D :=
+  ⟨7.5, 10, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R20_x0 : R20.x0 = 7.5 := rfl
+theorem R20_x1 : R20.x1 = 10 := rfl
+theorem R20_y0 : R20.y0 = 0.1 := rfl
+theorem R20_y1 : R20.y1 = 0.3 := rfl
+
+theorem R20_width_eq : R20.x1 - R20.x0 = 2.5 := by
+  rw [R20_x0, R20_x1]; norm_num
+
+theorem R20_strip_lo : -(1 / 2 : ℝ) < R20.y0 := by rw [R20_y0]; norm_num
+theorem R20_strip_hi : R20.y1 < (1 / 2 : ℝ) := by rw [R20_y1]; norm_num
+
+theorem R20_dx_eq : R20.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R20_x0, R20_x1]; norm_num
+
+theorem R20_dy_eq : R20.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R20_y0, R20_y1]; norm_num
+
+theorem R20_radius_eq :
+    R20.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R20_dx_eq, R20_dy_eq]
+
+theorem R20_radius_lt : R20.radius < 1.26 := by
+  rw [R20_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R20_mem_gridFine :
+    ((7.5, 10, 0.1, 0.3) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((7.5, 10)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.1, 0.3)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(7.5, 10), hX, List.mem_map.mpr ⟨(0.1, 0.3), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R20` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R20_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R20.radius ≤ ‖xiShifted R20.center‖) ∧
+  (∀ w, R20.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R20_fencing_of_bounds (h : R20_leaf_obligations) :
+    CellFencingHypotheses R20 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R20_lowerBound_of_bounds (h : R20_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R20 0.002 0.05
+    R20_strip_lo R20_strip_hi (R20_fencing_of_bounds h)
+
+noncomputable def R20_zeroFree_of_bounds (h : R20_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R20 0.002 fine_eps_outer_pos 0.05
+    R20_strip_lo R20_strip_hi h.2 h.1
+
+theorem R20_nonvanishing_of_bounds (h : R20_leaf_obligations) {z : ℂ}
+    (hx0 : R20.x0 ≤ z.re) (hx1 : z.re ≤ R20.x1)
+    (hy0 : R20.y0 ≤ z.im) (hy1 : z.im ≤ R20.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R20 0.002 0.05
+      R20_strip_lo R20_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R20_H_instance (h : R20_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (7.5, 10, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R20, 0.002, 0.05, rfl, rfl, rfl, rfl, R20_strip_lo, R20_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### Upper row2 `y = (0.2,0.4)`, `dy = 0.1` (10 cells) -/
+
+/-! ### R21 = (-10, -7.5, 0.2, 0.4), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-10,-7.5) × (0.2,0.4)` (outer tier). -/
+def R21 : CellProofEngine.Rect2D :=
+  ⟨-10, -7.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R21_x0 : R21.x0 = -10 := rfl
+theorem R21_x1 : R21.x1 = -7.5 := rfl
+theorem R21_y0 : R21.y0 = 0.2 := rfl
+theorem R21_y1 : R21.y1 = 0.4 := rfl
+
+theorem R21_width_eq : R21.x1 - R21.x0 = 2.5 := by
+  rw [R21_x0, R21_x1]; norm_num
+
+theorem R21_strip_lo : -(1 / 2 : ℝ) < R21.y0 := by rw [R21_y0]; norm_num
+theorem R21_strip_hi : R21.y1 < (1 / 2 : ℝ) := by rw [R21_y1]; norm_num
+
+theorem R21_dx_eq : R21.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R21_x0, R21_x1]; norm_num
+
+theorem R21_dy_eq : R21.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R21_y0, R21_y1]; norm_num
+
+theorem R21_radius_eq :
+    R21.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R21_dx_eq, R21_dy_eq]
+
+theorem R21_radius_lt : R21.radius < 1.26 := by
+  rw [R21_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R21_mem_gridFine :
+    ((-10, -7.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-10, -7.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-10, -7.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R21` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R21_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R21.radius ≤ ‖xiShifted R21.center‖) ∧
+  (∀ w, R21.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R21_fencing_of_bounds (h : R21_leaf_obligations) :
+    CellFencingHypotheses R21 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R21_lowerBound_of_bounds (h : R21_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R21 0.002 0.05
+    R21_strip_lo R21_strip_hi (R21_fencing_of_bounds h)
+
+noncomputable def R21_zeroFree_of_bounds (h : R21_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R21 0.002 fine_eps_outer_pos 0.05
+    R21_strip_lo R21_strip_hi h.2 h.1
+
+theorem R21_nonvanishing_of_bounds (h : R21_leaf_obligations) {z : ℂ}
+    (hx0 : R21.x0 ≤ z.re) (hx1 : z.re ≤ R21.x1)
+    (hy0 : R21.y0 ≤ z.im) (hy1 : z.im ≤ R21.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R21 0.002 0.05
+      R21_strip_lo R21_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R21_H_instance (h : R21_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-10, -7.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R21, 0.002, 0.05, rfl, rfl, rfl, rfl, R21_strip_lo, R21_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R22 = (-8, -5.5, 0.2, 0.4), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-8,-5.5) × (0.2,0.4)` (outer tier). -/
+def R22 : CellProofEngine.Rect2D :=
+  ⟨-8, -5.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R22_x0 : R22.x0 = -8 := rfl
+theorem R22_x1 : R22.x1 = -5.5 := rfl
+theorem R22_y0 : R22.y0 = 0.2 := rfl
+theorem R22_y1 : R22.y1 = 0.4 := rfl
+
+theorem R22_width_eq : R22.x1 - R22.x0 = 2.5 := by
+  rw [R22_x0, R22_x1]; norm_num
+
+theorem R22_strip_lo : -(1 / 2 : ℝ) < R22.y0 := by rw [R22_y0]; norm_num
+theorem R22_strip_hi : R22.y1 < (1 / 2 : ℝ) := by rw [R22_y1]; norm_num
+
+theorem R22_dx_eq : R22.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R22_x0, R22_x1]; norm_num
+
+theorem R22_dy_eq : R22.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R22_y0, R22_y1]; norm_num
+
+theorem R22_radius_eq :
+    R22.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R22_dx_eq, R22_dy_eq]
+
+theorem R22_radius_lt : R22.radius < 1.26 := by
+  rw [R22_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R22_mem_gridFine :
+    ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-8, -5.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-8, -5.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R22` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R22_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R22.radius ≤ ‖xiShifted R22.center‖) ∧
+  (∀ w, R22.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R22_fencing_of_bounds (h : R22_leaf_obligations) :
+    CellFencingHypotheses R22 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R22_lowerBound_of_bounds (h : R22_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R22 0.002 0.05
+    R22_strip_lo R22_strip_hi (R22_fencing_of_bounds h)
+
+noncomputable def R22_zeroFree_of_bounds (h : R22_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R22 0.002 fine_eps_outer_pos 0.05
+    R22_strip_lo R22_strip_hi h.2 h.1
+
+theorem R22_nonvanishing_of_bounds (h : R22_leaf_obligations) {z : ℂ}
+    (hx0 : R22.x0 ≤ z.re) (hx1 : z.re ≤ R22.x1)
+    (hy0 : R22.y0 ≤ z.im) (hy1 : z.im ≤ R22.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R22 0.002 0.05
+      R22_strip_lo R22_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R22_H_instance (h : R22_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-8, -5.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R22, 0.002, 0.05, rfl, rfl, rfl, rfl, R22_strip_lo, R22_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R23 = (-6, -3.5, 0.2, 0.4), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-6,-3.5) × (0.2,0.4)` (mid tier). -/
+def R23 : CellProofEngine.Rect2D :=
+  ⟨-6, -3.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R23_x0 : R23.x0 = -6 := rfl
+theorem R23_x1 : R23.x1 = -3.5 := rfl
+theorem R23_y0 : R23.y0 = 0.2 := rfl
+theorem R23_y1 : R23.y1 = 0.4 := rfl
+
+theorem R23_width_eq : R23.x1 - R23.x0 = 2.5 := by
+  rw [R23_x0, R23_x1]; norm_num
+
+theorem R23_strip_lo : -(1 / 2 : ℝ) < R23.y0 := by rw [R23_y0]; norm_num
+theorem R23_strip_hi : R23.y1 < (1 / 2 : ℝ) := by rw [R23_y1]; norm_num
+
+theorem R23_dx_eq : R23.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R23_x0, R23_x1]; norm_num
+
+theorem R23_dy_eq : R23.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R23_y0, R23_y1]; norm_num
+
+theorem R23_radius_eq :
+    R23.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R23_dx_eq, R23_dy_eq]
+
+theorem R23_radius_lt : R23.radius < 1.26 := by
+  rw [R23_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R23_mem_gridFine :
+    ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-6, -3.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-6, -3.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R23` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R23_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R23.radius ≤ ‖xiShifted R23.center‖) ∧
+  (∀ w, R23.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R23_fencing_of_bounds (h : R23_leaf_obligations) :
+    CellFencingHypotheses R23 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R23_lowerBound_of_bounds (h : R23_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R23 0.05 0.07
+    R23_strip_lo R23_strip_hi (R23_fencing_of_bounds h)
+
+noncomputable def R23_zeroFree_of_bounds (h : R23_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R23 0.05 fine_eps_mid_pos 0.07
+    R23_strip_lo R23_strip_hi h.2 h.1
+
+theorem R23_nonvanishing_of_bounds (h : R23_leaf_obligations) {z : ℂ}
+    (hx0 : R23.x0 ≤ z.re) (hx1 : z.re ≤ R23.x1)
+    (hy0 : R23.y0 ≤ z.im) (hy1 : z.im ≤ R23.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R23 0.05 0.07
+      R23_strip_lo R23_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R23_H_instance (h : R23_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-6, -3.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R23, 0.05, 0.07, rfl, rfl, rfl, rfl, R23_strip_lo, R23_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R24 = (-4, -1.5, 0.2, 0.4), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-4,-1.5) × (0.2,0.4)` (mid tier). -/
+def R24 : CellProofEngine.Rect2D :=
+  ⟨-4, -1.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R24_x0 : R24.x0 = -4 := rfl
+theorem R24_x1 : R24.x1 = -1.5 := rfl
+theorem R24_y0 : R24.y0 = 0.2 := rfl
+theorem R24_y1 : R24.y1 = 0.4 := rfl
+
+theorem R24_width_eq : R24.x1 - R24.x0 = 2.5 := by
+  rw [R24_x0, R24_x1]; norm_num
+
+theorem R24_strip_lo : -(1 / 2 : ℝ) < R24.y0 := by rw [R24_y0]; norm_num
+theorem R24_strip_hi : R24.y1 < (1 / 2 : ℝ) := by rw [R24_y1]; norm_num
+
+theorem R24_dx_eq : R24.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R24_x0, R24_x1]; norm_num
+
+theorem R24_dy_eq : R24.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R24_y0, R24_y1]; norm_num
+
+theorem R24_radius_eq :
+    R24.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R24_dx_eq, R24_dy_eq]
+
+theorem R24_radius_lt : R24.radius < 1.26 := by
+  rw [R24_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R24_mem_gridFine :
+    ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-4, -1.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-4, -1.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R24` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R24_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R24.radius ≤ ‖xiShifted R24.center‖) ∧
+  (∀ w, R24.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R24_fencing_of_bounds (h : R24_leaf_obligations) :
+    CellFencingHypotheses R24 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R24_lowerBound_of_bounds (h : R24_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R24 0.05 0.07
+    R24_strip_lo R24_strip_hi (R24_fencing_of_bounds h)
+
+noncomputable def R24_zeroFree_of_bounds (h : R24_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R24 0.05 fine_eps_mid_pos 0.07
+    R24_strip_lo R24_strip_hi h.2 h.1
+
+theorem R24_nonvanishing_of_bounds (h : R24_leaf_obligations) {z : ℂ}
+    (hx0 : R24.x0 ≤ z.re) (hx1 : z.re ≤ R24.x1)
+    (hy0 : R24.y0 ≤ z.im) (hy1 : z.im ≤ R24.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R24 0.05 0.07
+      R24_strip_lo R24_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R24_H_instance (h : R24_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-4, -1.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R24, 0.05, 0.07, rfl, rfl, rfl, rfl, R24_strip_lo, R24_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R25 = (-2, 0.5, 0.2, 0.4), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(-2,0.5) × (0.2,0.4)` (inner tier). -/
+def R25 : CellProofEngine.Rect2D :=
+  ⟨-2, 0.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R25_x0 : R25.x0 = -2 := rfl
+theorem R25_x1 : R25.x1 = 0.5 := rfl
+theorem R25_y0 : R25.y0 = 0.2 := rfl
+theorem R25_y1 : R25.y1 = 0.4 := rfl
+
+theorem R25_width_eq : R25.x1 - R25.x0 = 2.5 := by
+  rw [R25_x0, R25_x1]; norm_num
+
+theorem R25_strip_lo : -(1 / 2 : ℝ) < R25.y0 := by rw [R25_y0]; norm_num
+theorem R25_strip_hi : R25.y1 < (1 / 2 : ℝ) := by rw [R25_y1]; norm_num
+
+theorem R25_dx_eq : R25.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R25_x0, R25_x1]; norm_num
+
+theorem R25_dy_eq : R25.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R25_y0, R25_y1]; norm_num
+
+theorem R25_radius_eq :
+    R25.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R25_dx_eq, R25_dy_eq]
+
+theorem R25_radius_lt : R25.radius < 1.26 := by
+  rw [R25_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R25_mem_gridFine :
+    ((-2, 0.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-2, 0.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-2, 0.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R25` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R25_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R25.radius ≤ ‖xiShifted R25.center‖) ∧
+  (∀ w, R25.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R25_fencing_of_bounds (h : R25_leaf_obligations) :
+    CellFencingHypotheses R25 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R25_lowerBound_of_bounds (h : R25_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R25 0.15 0.06
+    R25_strip_lo R25_strip_hi (R25_fencing_of_bounds h)
+
+noncomputable def R25_zeroFree_of_bounds (h : R25_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R25 0.15 fine_eps_inner_pos 0.06
+    R25_strip_lo R25_strip_hi h.2 h.1
+
+theorem R25_nonvanishing_of_bounds (h : R25_leaf_obligations) {z : ℂ}
+    (hx0 : R25.x0 ≤ z.re) (hx1 : z.re ≤ R25.x1)
+    (hy0 : R25.y0 ≤ z.im) (hy1 : z.im ≤ R25.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R25 0.15 0.06
+      R25_strip_lo R25_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R25_H_instance (h : R25_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-2, 0.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R25, 0.15, 0.06, rfl, rfl, rfl, rfl, R25_strip_lo, R25_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R26 = (0, 2.5, 0.2, 0.4), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(0,2.5) × (0.2,0.4)` (inner tier). -/
+def R26 : CellProofEngine.Rect2D :=
+  ⟨0, 2.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R26_x0 : R26.x0 = 0 := rfl
+theorem R26_x1 : R26.x1 = 2.5 := rfl
+theorem R26_y0 : R26.y0 = 0.2 := rfl
+theorem R26_y1 : R26.y1 = 0.4 := rfl
+
+theorem R26_width_eq : R26.x1 - R26.x0 = 2.5 := by
+  rw [R26_x0, R26_x1]; norm_num
+
+theorem R26_strip_lo : -(1 / 2 : ℝ) < R26.y0 := by rw [R26_y0]; norm_num
+theorem R26_strip_hi : R26.y1 < (1 / 2 : ℝ) := by rw [R26_y1]; norm_num
+
+theorem R26_dx_eq : R26.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R26_x0, R26_x1]; norm_num
+
+theorem R26_dy_eq : R26.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R26_y0, R26_y1]; norm_num
+
+theorem R26_radius_eq :
+    R26.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R26_dx_eq, R26_dy_eq]
+
+theorem R26_radius_lt : R26.radius < 1.26 := by
+  rw [R26_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R26_mem_gridFine :
+    ((0, 2.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((0, 2.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(0, 2.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R26` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R26_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R26.radius ≤ ‖xiShifted R26.center‖) ∧
+  (∀ w, R26.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R26_fencing_of_bounds (h : R26_leaf_obligations) :
+    CellFencingHypotheses R26 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R26_lowerBound_of_bounds (h : R26_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R26 0.15 0.06
+    R26_strip_lo R26_strip_hi (R26_fencing_of_bounds h)
+
+noncomputable def R26_zeroFree_of_bounds (h : R26_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R26 0.15 fine_eps_inner_pos 0.06
+    R26_strip_lo R26_strip_hi h.2 h.1
+
+theorem R26_nonvanishing_of_bounds (h : R26_leaf_obligations) {z : ℂ}
+    (hx0 : R26.x0 ≤ z.re) (hx1 : z.re ≤ R26.x1)
+    (hy0 : R26.y0 ≤ z.im) (hy1 : z.im ≤ R26.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R26 0.15 0.06
+      R26_strip_lo R26_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R26_H_instance (h : R26_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (0, 2.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R26, 0.15, 0.06, rfl, rfl, rfl, rfl, R26_strip_lo, R26_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R27 = (2, 4.5, 0.2, 0.4), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(2,4.5) × (0.2,0.4)` (mid tier). -/
+def R27 : CellProofEngine.Rect2D :=
+  ⟨2, 4.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R27_x0 : R27.x0 = 2 := rfl
+theorem R27_x1 : R27.x1 = 4.5 := rfl
+theorem R27_y0 : R27.y0 = 0.2 := rfl
+theorem R27_y1 : R27.y1 = 0.4 := rfl
+
+theorem R27_width_eq : R27.x1 - R27.x0 = 2.5 := by
+  rw [R27_x0, R27_x1]; norm_num
+
+theorem R27_strip_lo : -(1 / 2 : ℝ) < R27.y0 := by rw [R27_y0]; norm_num
+theorem R27_strip_hi : R27.y1 < (1 / 2 : ℝ) := by rw [R27_y1]; norm_num
+
+theorem R27_dx_eq : R27.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R27_x0, R27_x1]; norm_num
+
+theorem R27_dy_eq : R27.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R27_y0, R27_y1]; norm_num
+
+theorem R27_radius_eq :
+    R27.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R27_dx_eq, R27_dy_eq]
+
+theorem R27_radius_lt : R27.radius < 1.26 := by
+  rw [R27_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R27_mem_gridFine :
+    ((2, 4.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((2, 4.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(2, 4.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R27` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R27_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R27.radius ≤ ‖xiShifted R27.center‖) ∧
+  (∀ w, R27.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R27_fencing_of_bounds (h : R27_leaf_obligations) :
+    CellFencingHypotheses R27 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R27_lowerBound_of_bounds (h : R27_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R27 0.05 0.07
+    R27_strip_lo R27_strip_hi (R27_fencing_of_bounds h)
+
+noncomputable def R27_zeroFree_of_bounds (h : R27_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R27 0.05 fine_eps_mid_pos 0.07
+    R27_strip_lo R27_strip_hi h.2 h.1
+
+theorem R27_nonvanishing_of_bounds (h : R27_leaf_obligations) {z : ℂ}
+    (hx0 : R27.x0 ≤ z.re) (hx1 : z.re ≤ R27.x1)
+    (hy0 : R27.y0 ≤ z.im) (hy1 : z.im ≤ R27.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R27 0.05 0.07
+      R27_strip_lo R27_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R27_H_instance (h : R27_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (2, 4.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R27, 0.05, 0.07, rfl, rfl, rfl, rfl, R27_strip_lo, R27_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R28 = (4, 6.5, 0.2, 0.4), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(4,6.5) × (0.2,0.4)` (mid tier). -/
+def R28 : CellProofEngine.Rect2D :=
+  ⟨4, 6.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R28_x0 : R28.x0 = 4 := rfl
+theorem R28_x1 : R28.x1 = 6.5 := rfl
+theorem R28_y0 : R28.y0 = 0.2 := rfl
+theorem R28_y1 : R28.y1 = 0.4 := rfl
+
+theorem R28_width_eq : R28.x1 - R28.x0 = 2.5 := by
+  rw [R28_x0, R28_x1]; norm_num
+
+theorem R28_strip_lo : -(1 / 2 : ℝ) < R28.y0 := by rw [R28_y0]; norm_num
+theorem R28_strip_hi : R28.y1 < (1 / 2 : ℝ) := by rw [R28_y1]; norm_num
+
+theorem R28_dx_eq : R28.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R28_x0, R28_x1]; norm_num
+
+theorem R28_dy_eq : R28.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R28_y0, R28_y1]; norm_num
+
+theorem R28_radius_eq :
+    R28.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R28_dx_eq, R28_dy_eq]
+
+theorem R28_radius_lt : R28.radius < 1.26 := by
+  rw [R28_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R28_mem_gridFine :
+    ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((4, 6.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(4, 6.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R28` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R28_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R28.radius ≤ ‖xiShifted R28.center‖) ∧
+  (∀ w, R28.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R28_fencing_of_bounds (h : R28_leaf_obligations) :
+    CellFencingHypotheses R28 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R28_lowerBound_of_bounds (h : R28_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R28 0.05 0.07
+    R28_strip_lo R28_strip_hi (R28_fencing_of_bounds h)
+
+noncomputable def R28_zeroFree_of_bounds (h : R28_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R28 0.05 fine_eps_mid_pos 0.07
+    R28_strip_lo R28_strip_hi h.2 h.1
+
+theorem R28_nonvanishing_of_bounds (h : R28_leaf_obligations) {z : ℂ}
+    (hx0 : R28.x0 ≤ z.re) (hx1 : z.re ≤ R28.x1)
+    (hy0 : R28.y0 ≤ z.im) (hy1 : z.im ≤ R28.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R28 0.05 0.07
+      R28_strip_lo R28_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R28_H_instance (h : R28_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R28, 0.05, 0.07, rfl, rfl, rfl, rfl, R28_strip_lo, R28_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R29 = (6, 8.5, 0.2, 0.4), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(6,8.5) × (0.2,0.4)` (outer tier). -/
+def R29 : CellProofEngine.Rect2D :=
+  ⟨6, 8.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R29_x0 : R29.x0 = 6 := rfl
+theorem R29_x1 : R29.x1 = 8.5 := rfl
+theorem R29_y0 : R29.y0 = 0.2 := rfl
+theorem R29_y1 : R29.y1 = 0.4 := rfl
+
+theorem R29_width_eq : R29.x1 - R29.x0 = 2.5 := by
+  rw [R29_x0, R29_x1]; norm_num
+
+theorem R29_strip_lo : -(1 / 2 : ℝ) < R29.y0 := by rw [R29_y0]; norm_num
+theorem R29_strip_hi : R29.y1 < (1 / 2 : ℝ) := by rw [R29_y1]; norm_num
+
+theorem R29_dx_eq : R29.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R29_x0, R29_x1]; norm_num
+
+theorem R29_dy_eq : R29.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R29_y0, R29_y1]; norm_num
+
+theorem R29_radius_eq :
+    R29.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R29_dx_eq, R29_dy_eq]
+
+theorem R29_radius_lt : R29.radius < 1.26 := by
+  rw [R29_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R29_mem_gridFine :
+    ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((6, 8.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(6, 8.5), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R29` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R29_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R29.radius ≤ ‖xiShifted R29.center‖) ∧
+  (∀ w, R29.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R29_fencing_of_bounds (h : R29_leaf_obligations) :
+    CellFencingHypotheses R29 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R29_lowerBound_of_bounds (h : R29_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R29 0.002 0.05
+    R29_strip_lo R29_strip_hi (R29_fencing_of_bounds h)
+
+noncomputable def R29_zeroFree_of_bounds (h : R29_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R29 0.002 fine_eps_outer_pos 0.05
+    R29_strip_lo R29_strip_hi h.2 h.1
+
+theorem R29_nonvanishing_of_bounds (h : R29_leaf_obligations) {z : ℂ}
+    (hx0 : R29.x0 ≤ z.re) (hx1 : z.re ≤ R29.x1)
+    (hy0 : R29.y0 ≤ z.im) (hy1 : z.im ≤ R29.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R29 0.002 0.05
+      R29_strip_lo R29_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R29_H_instance (h : R29_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (6, 8.5, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R29, 0.002, 0.05, rfl, rfl, rfl, rfl, R29_strip_lo, R29_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R30 = (7.5, 10, 0.2, 0.4), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(7.5,10) × (0.2,0.4)` (outer tier). -/
+def R30 : CellProofEngine.Rect2D :=
+  ⟨7.5, 10, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R30_x0 : R30.x0 = 7.5 := rfl
+theorem R30_x1 : R30.x1 = 10 := rfl
+theorem R30_y0 : R30.y0 = 0.2 := rfl
+theorem R30_y1 : R30.y1 = 0.4 := rfl
+
+theorem R30_width_eq : R30.x1 - R30.x0 = 2.5 := by
+  rw [R30_x0, R30_x1]; norm_num
+
+theorem R30_strip_lo : -(1 / 2 : ℝ) < R30.y0 := by rw [R30_y0]; norm_num
+theorem R30_strip_hi : R30.y1 < (1 / 2 : ℝ) := by rw [R30_y1]; norm_num
+
+theorem R30_dx_eq : R30.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R30_x0, R30_x1]; norm_num
+
+theorem R30_dy_eq : R30.dy = 0.1 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R30_y0, R30_y1]; norm_num
+
+theorem R30_radius_eq :
+    R30.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.1 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R30_dx_eq, R30_dy_eq]
+
+theorem R30_radius_lt : R30.radius < 1.26 := by
+  rw [R30_radius_eq]; exact sample_cell_radius_01_bound
+
+theorem R30_mem_gridFine :
+    ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((7.5, 10)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.2, 0.4)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(7.5, 10), hX, List.mem_map.mpr ⟨(0.2, 0.4), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R30` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R30_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R30.radius ≤ ‖xiShifted R30.center‖) ∧
+  (∀ w, R30.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R30_fencing_of_bounds (h : R30_leaf_obligations) :
+    CellFencingHypotheses R30 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R30_lowerBound_of_bounds (h : R30_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R30 0.002 0.05
+    R30_strip_lo R30_strip_hi (R30_fencing_of_bounds h)
+
+noncomputable def R30_zeroFree_of_bounds (h : R30_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R30 0.002 fine_eps_outer_pos 0.05
+    R30_strip_lo R30_strip_hi h.2 h.1
+
+theorem R30_nonvanishing_of_bounds (h : R30_leaf_obligations) {z : ℂ}
+    (hx0 : R30.x0 ≤ z.re) (hx1 : z.re ≤ R30.x1)
+    (hy0 : R30.y0 ≤ z.im) (hy1 : z.im ≤ R30.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R30 0.002 0.05
+      R30_strip_lo R30_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R30_H_instance (h : R30_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (7.5, 10, 0.2, 0.4)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R30, 0.002, 0.05, rfl, rfl, rfl, rfl, R30_strip_lo, R30_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### Upper top `y = (0.3,0.49)`, `dy = 0.095` (10 cells) -/
+
+/-! ### R31 = (-10, -7.5, 0.3, 0.49), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-10,-7.5) × (0.3,0.49)` (outer tier). -/
+def R31 : CellProofEngine.Rect2D :=
+  ⟨-10, -7.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R31_x0 : R31.x0 = -10 := rfl
+theorem R31_x1 : R31.x1 = -7.5 := rfl
+theorem R31_y0 : R31.y0 = 0.3 := rfl
+theorem R31_y1 : R31.y1 = 0.49 := rfl
+
+theorem R31_width_eq : R31.x1 - R31.x0 = 2.5 := by
+  rw [R31_x0, R31_x1]; norm_num
+
+theorem R31_strip_lo : -(1 / 2 : ℝ) < R31.y0 := by rw [R31_y0]; norm_num
+theorem R31_strip_hi : R31.y1 < (1 / 2 : ℝ) := by rw [R31_y1]; norm_num
+
+theorem R31_dx_eq : R31.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R31_x0, R31_x1]; norm_num
+
+theorem R31_dy_eq : R31.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R31_y0, R31_y1]; norm_num
+
+theorem R31_radius_eq :
+    R31.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R31_dx_eq, R31_dy_eq]
+
+theorem R31_radius_lt : R31.radius < 1.26 := by
+  rw [R31_radius_eq]; exact sample_cell_radius_bound
+
+theorem R31_mem_gridFine :
+    ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-10, -7.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-10, -7.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R31` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R31_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R31.radius ≤ ‖xiShifted R31.center‖) ∧
+  (∀ w, R31.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R31_fencing_of_bounds (h : R31_leaf_obligations) :
+    CellFencingHypotheses R31 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R31_lowerBound_of_bounds (h : R31_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R31 0.002 0.05
+    R31_strip_lo R31_strip_hi (R31_fencing_of_bounds h)
+
+noncomputable def R31_zeroFree_of_bounds (h : R31_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R31 0.002 fine_eps_outer_pos 0.05
+    R31_strip_lo R31_strip_hi h.2 h.1
+
+theorem R31_nonvanishing_of_bounds (h : R31_leaf_obligations) {z : ℂ}
+    (hx0 : R31.x0 ≤ z.re) (hx1 : z.re ≤ R31.x1)
+    (hy0 : R31.y0 ≤ z.im) (hy1 : z.im ≤ R31.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R31 0.002 0.05
+      R31_strip_lo R31_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R31_H_instance (h : R31_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-10, -7.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R31, 0.002, 0.05, rfl, rfl, rfl, rfl, R31_strip_lo, R31_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R32 = (-8, -5.5, 0.3, 0.49), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(-8,-5.5) × (0.3,0.49)` (outer tier). -/
+def R32 : CellProofEngine.Rect2D :=
+  ⟨-8, -5.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R32_x0 : R32.x0 = -8 := rfl
+theorem R32_x1 : R32.x1 = -5.5 := rfl
+theorem R32_y0 : R32.y0 = 0.3 := rfl
+theorem R32_y1 : R32.y1 = 0.49 := rfl
+
+theorem R32_width_eq : R32.x1 - R32.x0 = 2.5 := by
+  rw [R32_x0, R32_x1]; norm_num
+
+theorem R32_strip_lo : -(1 / 2 : ℝ) < R32.y0 := by rw [R32_y0]; norm_num
+theorem R32_strip_hi : R32.y1 < (1 / 2 : ℝ) := by rw [R32_y1]; norm_num
+
+theorem R32_dx_eq : R32.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R32_x0, R32_x1]; norm_num
+
+theorem R32_dy_eq : R32.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R32_y0, R32_y1]; norm_num
+
+theorem R32_radius_eq :
+    R32.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R32_dx_eq, R32_dy_eq]
+
+theorem R32_radius_lt : R32.radius < 1.26 := by
+  rw [R32_radius_eq]; exact sample_cell_radius_bound
+
+theorem R32_mem_gridFine :
+    ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-8, -5.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-8, -5.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R32` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R32_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R32.radius ≤ ‖xiShifted R32.center‖) ∧
+  (∀ w, R32.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R32_fencing_of_bounds (h : R32_leaf_obligations) :
+    CellFencingHypotheses R32 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R32_lowerBound_of_bounds (h : R32_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R32 0.002 0.05
+    R32_strip_lo R32_strip_hi (R32_fencing_of_bounds h)
+
+noncomputable def R32_zeroFree_of_bounds (h : R32_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R32 0.002 fine_eps_outer_pos 0.05
+    R32_strip_lo R32_strip_hi h.2 h.1
+
+theorem R32_nonvanishing_of_bounds (h : R32_leaf_obligations) {z : ℂ}
+    (hx0 : R32.x0 ≤ z.re) (hx1 : z.re ≤ R32.x1)
+    (hy0 : R32.y0 ≤ z.im) (hy1 : z.im ≤ R32.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R32 0.002 0.05
+      R32_strip_lo R32_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R32_H_instance (h : R32_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-8, -5.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R32, 0.002, 0.05, rfl, rfl, rfl, rfl, R32_strip_lo, R32_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R33 = (-6, -3.5, 0.3, 0.49), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-6,-3.5) × (0.3,0.49)` (mid tier). -/
+def R33 : CellProofEngine.Rect2D :=
+  ⟨-6, -3.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R33_x0 : R33.x0 = -6 := rfl
+theorem R33_x1 : R33.x1 = -3.5 := rfl
+theorem R33_y0 : R33.y0 = 0.3 := rfl
+theorem R33_y1 : R33.y1 = 0.49 := rfl
+
+theorem R33_width_eq : R33.x1 - R33.x0 = 2.5 := by
+  rw [R33_x0, R33_x1]; norm_num
+
+theorem R33_strip_lo : -(1 / 2 : ℝ) < R33.y0 := by rw [R33_y0]; norm_num
+theorem R33_strip_hi : R33.y1 < (1 / 2 : ℝ) := by rw [R33_y1]; norm_num
+
+theorem R33_dx_eq : R33.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R33_x0, R33_x1]; norm_num
+
+theorem R33_dy_eq : R33.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R33_y0, R33_y1]; norm_num
+
+theorem R33_radius_eq :
+    R33.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R33_dx_eq, R33_dy_eq]
+
+theorem R33_radius_lt : R33.radius < 1.26 := by
+  rw [R33_radius_eq]; exact sample_cell_radius_bound
+
+theorem R33_mem_gridFine :
+    ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-6, -3.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-6, -3.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R33` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R33_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R33.radius ≤ ‖xiShifted R33.center‖) ∧
+  (∀ w, R33.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R33_fencing_of_bounds (h : R33_leaf_obligations) :
+    CellFencingHypotheses R33 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R33_lowerBound_of_bounds (h : R33_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R33 0.05 0.07
+    R33_strip_lo R33_strip_hi (R33_fencing_of_bounds h)
+
+noncomputable def R33_zeroFree_of_bounds (h : R33_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R33 0.05 fine_eps_mid_pos 0.07
+    R33_strip_lo R33_strip_hi h.2 h.1
+
+theorem R33_nonvanishing_of_bounds (h : R33_leaf_obligations) {z : ℂ}
+    (hx0 : R33.x0 ≤ z.re) (hx1 : z.re ≤ R33.x1)
+    (hy0 : R33.y0 ≤ z.im) (hy1 : z.im ≤ R33.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R33 0.05 0.07
+      R33_strip_lo R33_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R33_H_instance (h : R33_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-6, -3.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R33, 0.05, 0.07, rfl, rfl, rfl, rfl, R33_strip_lo, R33_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R34 = (-4, -1.5, 0.3, 0.49), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(-4,-1.5) × (0.3,0.49)` (mid tier). -/
+def R34 : CellProofEngine.Rect2D :=
+  ⟨-4, -1.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R34_x0 : R34.x0 = -4 := rfl
+theorem R34_x1 : R34.x1 = -1.5 := rfl
+theorem R34_y0 : R34.y0 = 0.3 := rfl
+theorem R34_y1 : R34.y1 = 0.49 := rfl
+
+theorem R34_width_eq : R34.x1 - R34.x0 = 2.5 := by
+  rw [R34_x0, R34_x1]; norm_num
+
+theorem R34_strip_lo : -(1 / 2 : ℝ) < R34.y0 := by rw [R34_y0]; norm_num
+theorem R34_strip_hi : R34.y1 < (1 / 2 : ℝ) := by rw [R34_y1]; norm_num
+
+theorem R34_dx_eq : R34.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R34_x0, R34_x1]; norm_num
+
+theorem R34_dy_eq : R34.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R34_y0, R34_y1]; norm_num
+
+theorem R34_radius_eq :
+    R34.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R34_dx_eq, R34_dy_eq]
+
+theorem R34_radius_lt : R34.radius < 1.26 := by
+  rw [R34_radius_eq]; exact sample_cell_radius_bound
+
+theorem R34_mem_gridFine :
+    ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-4, -1.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-4, -1.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R34` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R34_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R34.radius ≤ ‖xiShifted R34.center‖) ∧
+  (∀ w, R34.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R34_fencing_of_bounds (h : R34_leaf_obligations) :
+    CellFencingHypotheses R34 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R34_lowerBound_of_bounds (h : R34_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R34 0.05 0.07
+    R34_strip_lo R34_strip_hi (R34_fencing_of_bounds h)
+
+noncomputable def R34_zeroFree_of_bounds (h : R34_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R34 0.05 fine_eps_mid_pos 0.07
+    R34_strip_lo R34_strip_hi h.2 h.1
+
+theorem R34_nonvanishing_of_bounds (h : R34_leaf_obligations) {z : ℂ}
+    (hx0 : R34.x0 ≤ z.re) (hx1 : z.re ≤ R34.x1)
+    (hy0 : R34.y0 ≤ z.im) (hy1 : z.im ≤ R34.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R34 0.05 0.07
+      R34_strip_lo R34_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R34_H_instance (h : R34_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-4, -1.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R34, 0.05, 0.07, rfl, rfl, rfl, rfl, R34_strip_lo, R34_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R35 = (-2, 0.5, 0.3, 0.49), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(-2,0.5) × (0.3,0.49)` (inner tier). -/
+def R35 : CellProofEngine.Rect2D :=
+  ⟨-2, 0.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R35_x0 : R35.x0 = -2 := rfl
+theorem R35_x1 : R35.x1 = 0.5 := rfl
+theorem R35_y0 : R35.y0 = 0.3 := rfl
+theorem R35_y1 : R35.y1 = 0.49 := rfl
+
+theorem R35_width_eq : R35.x1 - R35.x0 = 2.5 := by
+  rw [R35_x0, R35_x1]; norm_num
+
+theorem R35_strip_lo : -(1 / 2 : ℝ) < R35.y0 := by rw [R35_y0]; norm_num
+theorem R35_strip_hi : R35.y1 < (1 / 2 : ℝ) := by rw [R35_y1]; norm_num
+
+theorem R35_dx_eq : R35.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R35_x0, R35_x1]; norm_num
+
+theorem R35_dy_eq : R35.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R35_y0, R35_y1]; norm_num
+
+theorem R35_radius_eq :
+    R35.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R35_dx_eq, R35_dy_eq]
+
+theorem R35_radius_lt : R35.radius < 1.26 := by
+  rw [R35_radius_eq]; exact sample_cell_radius_bound
+
+theorem R35_mem_gridFine :
+    ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((-2, 0.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(-2, 0.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R35` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R35_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R35.radius ≤ ‖xiShifted R35.center‖) ∧
+  (∀ w, R35.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R35_fencing_of_bounds (h : R35_leaf_obligations) :
+    CellFencingHypotheses R35 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R35_lowerBound_of_bounds (h : R35_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R35 0.15 0.06
+    R35_strip_lo R35_strip_hi (R35_fencing_of_bounds h)
+
+noncomputable def R35_zeroFree_of_bounds (h : R35_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R35 0.15 fine_eps_inner_pos 0.06
+    R35_strip_lo R35_strip_hi h.2 h.1
+
+theorem R35_nonvanishing_of_bounds (h : R35_leaf_obligations) {z : ℂ}
+    (hx0 : R35.x0 ≤ z.re) (hx1 : z.re ≤ R35.x1)
+    (hy0 : R35.y0 ≤ z.im) (hy1 : z.im ≤ R35.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R35 0.15 0.06
+      R35_strip_lo R35_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R35_H_instance (h : R35_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-2, 0.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R35, 0.15, 0.06, rfl, rfl, rfl, rfl, R35_strip_lo, R35_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R36 = (0, 2.5, 0.3, 0.49), inner tier `(0.15,0.06)` -/
+
+/-- Upper-row cell `(0,2.5) × (0.3,0.49)` (inner tier). -/
+def R36 : CellProofEngine.Rect2D :=
+  ⟨0, 2.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R36_x0 : R36.x0 = 0 := rfl
+theorem R36_x1 : R36.x1 = 2.5 := rfl
+theorem R36_y0 : R36.y0 = 0.3 := rfl
+theorem R36_y1 : R36.y1 = 0.49 := rfl
+
+theorem R36_width_eq : R36.x1 - R36.x0 = 2.5 := by
+  rw [R36_x0, R36_x1]; norm_num
+
+theorem R36_strip_lo : -(1 / 2 : ℝ) < R36.y0 := by rw [R36_y0]; norm_num
+theorem R36_strip_hi : R36.y1 < (1 / 2 : ℝ) := by rw [R36_y1]; norm_num
+
+theorem R36_dx_eq : R36.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R36_x0, R36_x1]; norm_num
+
+theorem R36_dy_eq : R36.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R36_y0, R36_y1]; norm_num
+
+theorem R36_radius_eq :
+    R36.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R36_dx_eq, R36_dy_eq]
+
+theorem R36_radius_lt : R36.radius < 1.26 := by
+  rw [R36_radius_eq]; exact sample_cell_radius_bound
+
+theorem R36_mem_gridFine :
+    ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((0, 2.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(0, 2.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R36` (inner tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R36_leaf_obligations : Prop :=
+  ((0.15 : ℝ) + 0.06 * R36.radius ≤ ‖xiShifted R36.center‖) ∧
+  (∀ w, R36.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ))
+
+theorem R36_fencing_of_bounds (h : R36_leaf_obligations) :
+    CellFencingHypotheses R36 0.15 0.06 :=
+  ⟨fine_eps_inner_pos, h.2, h.1⟩
+
+noncomputable def R36_lowerBound_of_bounds (h : R36_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R36 0.15 0.06
+    R36_strip_lo R36_strip_hi (R36_fencing_of_bounds h)
+
+noncomputable def R36_zeroFree_of_bounds (h : R36_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R36 0.15 fine_eps_inner_pos 0.06
+    R36_strip_lo R36_strip_hi h.2 h.1
+
+theorem R36_nonvanishing_of_bounds (h : R36_leaf_obligations) {z : ℂ}
+    (hx0 : R36.x0 ≤ z.re) (hx1 : z.re ≤ R36.x1)
+    (hy0 : R36.y0 ≤ z.im) (hy1 : z.im ≤ R36.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.15 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R36 0.15 0.06
+      R36_strip_lo R36_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_inner_pos) hle
+
+theorem R36_H_instance (h : R36_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (0, 2.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R36, 0.15, 0.06, rfl, rfl, rfl, rfl, R36_strip_lo, R36_strip_hi,
+    fine_eps_inner_pos, h.2, h.1⟩
+
+/-! ### R37 = (2, 4.5, 0.3, 0.49), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(2,4.5) × (0.3,0.49)` (mid tier). -/
+def R37 : CellProofEngine.Rect2D :=
+  ⟨2, 4.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R37_x0 : R37.x0 = 2 := rfl
+theorem R37_x1 : R37.x1 = 4.5 := rfl
+theorem R37_y0 : R37.y0 = 0.3 := rfl
+theorem R37_y1 : R37.y1 = 0.49 := rfl
+
+theorem R37_width_eq : R37.x1 - R37.x0 = 2.5 := by
+  rw [R37_x0, R37_x1]; norm_num
+
+theorem R37_strip_lo : -(1 / 2 : ℝ) < R37.y0 := by rw [R37_y0]; norm_num
+theorem R37_strip_hi : R37.y1 < (1 / 2 : ℝ) := by rw [R37_y1]; norm_num
+
+theorem R37_dx_eq : R37.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R37_x0, R37_x1]; norm_num
+
+theorem R37_dy_eq : R37.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R37_y0, R37_y1]; norm_num
+
+theorem R37_radius_eq :
+    R37.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R37_dx_eq, R37_dy_eq]
+
+theorem R37_radius_lt : R37.radius < 1.26 := by
+  rw [R37_radius_eq]; exact sample_cell_radius_bound
+
+theorem R37_mem_gridFine :
+    ((2, 4.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((2, 4.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(2, 4.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R37` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R37_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R37.radius ≤ ‖xiShifted R37.center‖) ∧
+  (∀ w, R37.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R37_fencing_of_bounds (h : R37_leaf_obligations) :
+    CellFencingHypotheses R37 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R37_lowerBound_of_bounds (h : R37_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R37 0.05 0.07
+    R37_strip_lo R37_strip_hi (R37_fencing_of_bounds h)
+
+noncomputable def R37_zeroFree_of_bounds (h : R37_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R37 0.05 fine_eps_mid_pos 0.07
+    R37_strip_lo R37_strip_hi h.2 h.1
+
+theorem R37_nonvanishing_of_bounds (h : R37_leaf_obligations) {z : ℂ}
+    (hx0 : R37.x0 ≤ z.re) (hx1 : z.re ≤ R37.x1)
+    (hy0 : R37.y0 ≤ z.im) (hy1 : z.im ≤ R37.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R37 0.05 0.07
+      R37_strip_lo R37_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R37_H_instance (h : R37_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (2, 4.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R37, 0.05, 0.07, rfl, rfl, rfl, rfl, R37_strip_lo, R37_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R38 = (4, 6.5, 0.3, 0.49), mid tier `(0.05,0.07)` -/
+
+/-- Upper-row cell `(4,6.5) × (0.3,0.49)` (mid tier). -/
+def R38 : CellProofEngine.Rect2D :=
+  ⟨4, 6.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R38_x0 : R38.x0 = 4 := rfl
+theorem R38_x1 : R38.x1 = 6.5 := rfl
+theorem R38_y0 : R38.y0 = 0.3 := rfl
+theorem R38_y1 : R38.y1 = 0.49 := rfl
+
+theorem R38_width_eq : R38.x1 - R38.x0 = 2.5 := by
+  rw [R38_x0, R38_x1]; norm_num
+
+theorem R38_strip_lo : -(1 / 2 : ℝ) < R38.y0 := by rw [R38_y0]; norm_num
+theorem R38_strip_hi : R38.y1 < (1 / 2 : ℝ) := by rw [R38_y1]; norm_num
+
+theorem R38_dx_eq : R38.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R38_x0, R38_x1]; norm_num
+
+theorem R38_dy_eq : R38.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R38_y0, R38_y1]; norm_num
+
+theorem R38_radius_eq :
+    R38.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R38_dx_eq, R38_dy_eq]
+
+theorem R38_radius_lt : R38.radius < 1.26 := by
+  rw [R38_radius_eq]; exact sample_cell_radius_bound
+
+theorem R38_mem_gridFine :
+    ((4, 6.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((4, 6.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(4, 6.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R38` (mid tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R38_leaf_obligations : Prop :=
+  ((0.05 : ℝ) + 0.07 * R38.radius ≤ ‖xiShifted R38.center‖) ∧
+  (∀ w, R38.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
+
+theorem R38_fencing_of_bounds (h : R38_leaf_obligations) :
+    CellFencingHypotheses R38 0.05 0.07 :=
+  ⟨fine_eps_mid_pos, h.2, h.1⟩
+
+noncomputable def R38_lowerBound_of_bounds (h : R38_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R38 0.05 0.07
+    R38_strip_lo R38_strip_hi (R38_fencing_of_bounds h)
+
+noncomputable def R38_zeroFree_of_bounds (h : R38_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R38 0.05 fine_eps_mid_pos 0.07
+    R38_strip_lo R38_strip_hi h.2 h.1
+
+theorem R38_nonvanishing_of_bounds (h : R38_leaf_obligations) {z : ℂ}
+    (hx0 : R38.x0 ≤ z.re) (hx1 : z.re ≤ R38.x1)
+    (hy0 : R38.y0 ≤ z.im) (hy1 : z.im ≤ R38.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.05 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R38 0.05 0.07
+      R38_strip_lo R38_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_mid_pos) hle
+
+theorem R38_H_instance (h : R38_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R38, 0.05, 0.07, rfl, rfl, rfl, rfl, R38_strip_lo, R38_strip_hi,
+    fine_eps_mid_pos, h.2, h.1⟩
+
+/-! ### R39 = (6, 8.5, 0.3, 0.49), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(6,8.5) × (0.3,0.49)` (outer tier). -/
+def R39 : CellProofEngine.Rect2D :=
+  ⟨6, 8.5, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R39_x0 : R39.x0 = 6 := rfl
+theorem R39_x1 : R39.x1 = 8.5 := rfl
+theorem R39_y0 : R39.y0 = 0.3 := rfl
+theorem R39_y1 : R39.y1 = 0.49 := rfl
+
+theorem R39_width_eq : R39.x1 - R39.x0 = 2.5 := by
+  rw [R39_x0, R39_x1]; norm_num
+
+theorem R39_strip_lo : -(1 / 2 : ℝ) < R39.y0 := by rw [R39_y0]; norm_num
+theorem R39_strip_hi : R39.y1 < (1 / 2 : ℝ) := by rw [R39_y1]; norm_num
+
+theorem R39_dx_eq : R39.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R39_x0, R39_x1]; norm_num
+
+theorem R39_dy_eq : R39.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R39_y0, R39_y1]; norm_num
+
+theorem R39_radius_eq :
+    R39.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R39_dx_eq, R39_dy_eq]
+
+theorem R39_radius_lt : R39.radius < 1.26 := by
+  rw [R39_radius_eq]; exact sample_cell_radius_bound
+
+theorem R39_mem_gridFine :
+    ((6, 8.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((6, 8.5)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(6, 8.5), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R39` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R39_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R39.radius ≤ ‖xiShifted R39.center‖) ∧
+  (∀ w, R39.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R39_fencing_of_bounds (h : R39_leaf_obligations) :
+    CellFencingHypotheses R39 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R39_lowerBound_of_bounds (h : R39_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R39 0.002 0.05
+    R39_strip_lo R39_strip_hi (R39_fencing_of_bounds h)
+
+noncomputable def R39_zeroFree_of_bounds (h : R39_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R39 0.002 fine_eps_outer_pos 0.05
+    R39_strip_lo R39_strip_hi h.2 h.1
+
+theorem R39_nonvanishing_of_bounds (h : R39_leaf_obligations) {z : ℂ}
+    (hx0 : R39.x0 ≤ z.re) (hx1 : z.re ≤ R39.x1)
+    (hy0 : R39.y0 ≤ z.im) (hy1 : z.im ≤ R39.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R39 0.002 0.05
+      R39_strip_lo R39_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R39_H_instance (h : R39_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (6, 8.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R39, 0.002, 0.05, rfl, rfl, rfl, rfl, R39_strip_lo, R39_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+/-! ### R40 = (7.5, 10, 0.3, 0.49), outer tier `(0.002,0.05)` -/
+
+/-- Upper-row cell `(7.5,10) × (0.3,0.49)` (outer tier). -/
+def R40 : CellProofEngine.Rect2D :=
+  ⟨7.5, 10, 0.3, 0.49, by norm_num, by norm_num⟩
+
+theorem R40_x0 : R40.x0 = 7.5 := rfl
+theorem R40_x1 : R40.x1 = 10 := rfl
+theorem R40_y0 : R40.y0 = 0.3 := rfl
+theorem R40_y1 : R40.y1 = 0.49 := rfl
+
+theorem R40_width_eq : R40.x1 - R40.x0 = 2.5 := by
+  rw [R40_x0, R40_x1]; norm_num
+
+theorem R40_strip_lo : -(1 / 2 : ℝ) < R40.y0 := by rw [R40_y0]; norm_num
+theorem R40_strip_hi : R40.y1 < (1 / 2 : ℝ) := by rw [R40_y1]; norm_num
+
+theorem R40_dx_eq : R40.dx = 1.25 := by
+  unfold CellProofEngine.Rect2D.dx
+  rw [R40_x0, R40_x1]; norm_num
+
+theorem R40_dy_eq : R40.dy = 0.095 := by
+  unfold CellProofEngine.Rect2D.dy
+  rw [R40_y0, R40_y1]; norm_num
+
+theorem R40_radius_eq :
+    R40.radius = Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) := by
+  unfold CellProofEngine.Rect2D.radius
+  rw [R40_dx_eq, R40_dy_eq]
+
+theorem R40_radius_lt : R40.radius < 1.26 := by
+  rw [R40_radius_eq]; exact sample_cell_radius_bound
+
+theorem R40_mem_gridFine :
+    ((7.5, 10, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ) ∈ gridFine := by
+  have hX : (((7.5, 10)) : ℝ × ℝ) ∈ fineGridX := by simp [fineGridX]
+  have hY : (((0.3, 0.49)) : ℝ × ℝ) ∈ innerGridY := by simp [innerGridY]
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨(7.5, 10), hX, List.mem_map.mpr ⟨(0.3, 0.49), hY, rfl⟩⟩
+
+/-- The two remaining numerical enclosures for `R40` (outer tier), as explicit
+hypotheses exactly as `R00_leaf_obligations` does. -/
+def R40_leaf_obligations : Prop :=
+  ((0.002 : ℝ) + 0.05 * R40.radius ≤ ‖xiShifted R40.center‖) ∧
+  (∀ w, R40.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+
+theorem R40_fencing_of_bounds (h : R40_leaf_obligations) :
+    CellFencingHypotheses R40 0.002 0.05 :=
+  ⟨fine_eps_outer_pos, h.2, h.1⟩
+
+noncomputable def R40_lowerBound_of_bounds (h : R40_leaf_obligations) :
+    XiLocalLowerBoundRect :=
+  lowerBoundRect_of_fencingHypotheses_strip R40 0.002 0.05
+    R40_strip_lo R40_strip_hi (R40_fencing_of_bounds h)
+
+noncomputable def R40_zeroFree_of_bounds (h : R40_leaf_obligations) :
+    XiLocalZeroFreeRect :=
+  zeroFreeRect_of_rect_center_bound_strip R40 0.002 fine_eps_outer_pos 0.05
+    R40_strip_lo R40_strip_hi h.2 h.1
+
+theorem R40_nonvanishing_of_bounds (h : R40_leaf_obligations) {z : ℂ}
+    (hx0 : R40.x0 ≤ z.re) (hx1 : z.re ≤ R40.x1)
+    (hy0 : R40.y0 ≤ z.im) (hy1 : z.im ≤ R40.y1) :
+    xiShifted z ≠ 0 := by
+  have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R40 0.002 0.05
+      R40_strip_lo R40_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt fine_eps_outer_pos) hle
+
+theorem R40_H_instance (h : R40_leaf_obligations)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (7.5, 10, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨R40, 0.002, 0.05, rfl, rfl, rfl, rfl, R40_strip_lo, R40_strip_hi,
+    fine_eps_outer_pos, h.2, h.1⟩
+
+end CentralCoverAssembly
+
+
+namespace CentralCoverAssembly
+
+open CellProofEngine
+
+/-! ## Upper-row lists, joint obligations, and row covers (R11--R40)
+
+`midRow1Cells` (`y=(0.1,0.3)`), `midRow2Cells` (`y=(0.2,0.4)`), `topRowCells`
+(`y=(0.3,0.49)`): the 30 upper `gridFine` cells. Joint obligations mirror
+`BottomRowObligations`; row covers mirror `bottom_row_covered` via closed
+`x`-branching (thresholds from `fineGridX_covers`) plus the row's closed
+`y`-bounds. Numerical enclosures remain explicit hypotheses.
+-/
+
+/-- The 10 `gridFine` cells with `y in (0.1,0.3)`. -/
+def midRow1Cells : List (ℝ × ℝ × ℝ × ℝ) :=
+  [
+    (-10, -7.5, 0.1, 0.3),
+    (-8, -5.5, 0.1, 0.3),
+    (-6, -3.5, 0.1, 0.3),
+    (-4, -1.5, 0.1, 0.3),
+    (-2, 0.5, 0.1, 0.3),
+    (0, 2.5, 0.1, 0.3),
+    (2, 4.5, 0.1, 0.3),
+    (4, 6.5, 0.1, 0.3),
+    (6, 8.5, 0.1, 0.3),
+    (7.5, 10, 0.1, 0.3)]
+
+/-- The 10 `gridFine` cells with `y in (0.2,0.4)`. -/
+def midRow2Cells : List (ℝ × ℝ × ℝ × ℝ) :=
+  [
+    (-10, -7.5, 0.2, 0.4),
+    (-8, -5.5, 0.2, 0.4),
+    (-6, -3.5, 0.2, 0.4),
+    (-4, -1.5, 0.2, 0.4),
+    (-2, 0.5, 0.2, 0.4),
+    (0, 2.5, 0.2, 0.4),
+    (2, 4.5, 0.2, 0.4),
+    (4, 6.5, 0.2, 0.4),
+    (6, 8.5, 0.2, 0.4),
+    (7.5, 10, 0.2, 0.4)]
+
+/-- The 10 `gridFine` cells with `y in (0.3,0.49)`. -/
+def topRowCells : List (ℝ × ℝ × ℝ × ℝ) :=
+  [
+    (-10, -7.5, 0.3, 0.49),
+    (-8, -5.5, 0.3, 0.49),
+    (-6, -3.5, 0.3, 0.49),
+    (-4, -1.5, 0.3, 0.49),
+    (-2, 0.5, 0.3, 0.49),
+    (0, 2.5, 0.3, 0.49),
+    (2, 4.5, 0.3, 0.49),
+    (4, 6.5, 0.3, 0.49),
+    (6, 8.5, 0.3, 0.49),
+    (7.5, 10, 0.3, 0.49)]
+
+/-- All 40 `gridFine` upper cells (bottom 10 + upper 30). -/
+def allCentralCells : List (ℝ × ℝ × ℝ × ℝ) :=
+  bottomRowCells ++ midRow1Cells ++ midRow2Cells ++ topRowCells
+
+/-- Every mid-row-1 cell lies in `gridFine`. -/
+theorem midRow1_mem_gridFine_of_mem {c : ℝ × ℝ × ℝ × ℝ}
+    (hc : c ∈ midRow1Cells) : c ∈ gridFine := by
+  unfold midRow1Cells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact R11_mem_gridFine
+  · exact R12_mem_gridFine
+  · exact R13_mem_gridFine
+  · exact R14_mem_gridFine
+  · exact R15_mem_gridFine
+  · exact R16_mem_gridFine
+  · exact R17_mem_gridFine
+  · exact R18_mem_gridFine
+  · exact R19_mem_gridFine
+  · exact R20_mem_gridFine
+
+/-- Every mid-row-2 cell lies in `gridFine`. -/
+theorem midRow2_mem_gridFine_of_mem {c : ℝ × ℝ × ℝ × ℝ}
+    (hc : c ∈ midRow2Cells) : c ∈ gridFine := by
+  unfold midRow2Cells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact R21_mem_gridFine
+  · exact R22_mem_gridFine
+  · exact R23_mem_gridFine
+  · exact R24_mem_gridFine
+  · exact R25_mem_gridFine
+  · exact R26_mem_gridFine
+  · exact R27_mem_gridFine
+  · exact R28_mem_gridFine
+  · exact R29_mem_gridFine
+  · exact R30_mem_gridFine
+
+/-- Every top-row cell lies in `gridFine`. -/
+theorem topRow_mem_gridFine_of_mem {c : ℝ × ℝ × ℝ × ℝ}
+    (hc : c ∈ topRowCells) : c ∈ gridFine := by
+  unfold topRowCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact R31_mem_gridFine
+  · exact R32_mem_gridFine
+  · exact R33_mem_gridFine
+  · exact R34_mem_gridFine
+  · exact R35_mem_gridFine
+  · exact R36_mem_gridFine
+  · exact R37_mem_gridFine
+  · exact R38_mem_gridFine
+  · exact R39_mem_gridFine
+  · exact R40_mem_gridFine
+
+/-- Every cell of `allCentralCells` lies in `gridFine`. -/
+theorem allCentral_mem_gridFine_of_mem {c : ℝ × ℝ × ℝ × ℝ}
+    (hc : c ∈ allCentralCells) : c ∈ gridFine := by
+  unfold allCentralCells at hc
+  simp at hc
+  rcases hc with h | h | h | h
+  · exact bottomRow_mem_gridFine_of_mem h
+  · exact midRow1_mem_gridFine_of_mem h
+  · exact midRow2_mem_gridFine_of_mem h
+  · exact topRow_mem_gridFine_of_mem h
+
+/-- Joint obligations for mid-row 1 (`R11`--`R20`). -/
+def MidRow1Obligations : Prop :=
+  R11_leaf_obligations ∧ R12_leaf_obligations ∧ R13_leaf_obligations ∧
+  R14_leaf_obligations ∧ R15_leaf_obligations ∧ R16_leaf_obligations ∧
+  R17_leaf_obligations ∧ R18_leaf_obligations ∧ R19_leaf_obligations ∧
+  R20_leaf_obligations
+
+/-- Joint obligations for mid-row 2 (`R21`--`R30`). -/
+def MidRow2Obligations : Prop :=
+  R21_leaf_obligations ∧ R22_leaf_obligations ∧ R23_leaf_obligations ∧
+  R24_leaf_obligations ∧ R25_leaf_obligations ∧ R26_leaf_obligations ∧
+  R27_leaf_obligations ∧ R28_leaf_obligations ∧ R29_leaf_obligations ∧
+  R30_leaf_obligations
+
+/-- Joint obligations for the top row (`R31`--`R40`). -/
+def TopRowObligations : Prop :=
+  R31_leaf_obligations ∧ R32_leaf_obligations ∧ R33_leaf_obligations ∧
+  R34_leaf_obligations ∧ R35_leaf_obligations ∧ R36_leaf_obligations ∧
+  R37_leaf_obligations ∧ R38_leaf_obligations ∧ R39_leaf_obligations ∧
+  R40_leaf_obligations
+
+/-- Joint obligations for all 30 upper cells. -/
+def UpperRowsObligations : Prop :=
+  MidRow1Obligations ∧ MidRow2Obligations ∧ TopRowObligations
+
+/-- Joint obligations for all 40 `gridFine` upper cells (bottom 10 + upper 30). -/
+def FullCentralObligations : Prop :=
+  BottomRowObligations ∧ UpperRowsObligations
+
+/-- The 10 mid-row-1 `H`-leaves follow jointly from `MidRow1Obligations`. -/
+theorem midRow1_H_of_obligations (hMid1 : MidRow1Obligations) :
+    ∀ c ∈ midRow1Cells, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  intro c hc
+  unfold midRow1Cells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · obtain ⟨h11, _, _, _, _, _, _, _, _, _⟩ := hMid1
+    exact R11_H_instance h11 _ R11_mem_gridFine rfl
+  · obtain ⟨_, h12, _, _, _, _, _, _, _, _⟩ := hMid1
+    exact R12_H_instance h12 _ R12_mem_gridFine rfl
+  · obtain ⟨_, _, h13, _, _, _, _, _, _, _⟩ := hMid1
+    exact R13_H_instance h13 _ R13_mem_gridFine rfl
+  · obtain ⟨_, _, _, h14, _, _, _, _, _, _⟩ := hMid1
+    exact R14_H_instance h14 _ R14_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, h15, _, _, _, _, _⟩ := hMid1
+    exact R15_H_instance h15 _ R15_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, h16, _, _, _, _⟩ := hMid1
+    exact R16_H_instance h16 _ R16_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, h17, _, _, _⟩ := hMid1
+    exact R17_H_instance h17 _ R17_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, h18, _, _⟩ := hMid1
+    exact R18_H_instance h18 _ R18_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, h19, _⟩ := hMid1
+    exact R19_H_instance h19 _ R19_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, _, h20⟩ := hMid1
+    exact R20_H_instance h20 _ R20_mem_gridFine rfl
+
+/-- The 10 mid-row-2 `H`-leaves follow jointly from `MidRow2Obligations`. -/
+theorem midRow2_H_of_obligations (hMid2 : MidRow2Obligations) :
+    ∀ c ∈ midRow2Cells, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  intro c hc
+  unfold midRow2Cells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · obtain ⟨h21, _, _, _, _, _, _, _, _, _⟩ := hMid2
+    exact R21_H_instance h21 _ R21_mem_gridFine rfl
+  · obtain ⟨_, h22, _, _, _, _, _, _, _, _⟩ := hMid2
+    exact R22_H_instance h22 _ R22_mem_gridFine rfl
+  · obtain ⟨_, _, h23, _, _, _, _, _, _, _⟩ := hMid2
+    exact R23_H_instance h23 _ R23_mem_gridFine rfl
+  · obtain ⟨_, _, _, h24, _, _, _, _, _, _⟩ := hMid2
+    exact R24_H_instance h24 _ R24_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, h25, _, _, _, _, _⟩ := hMid2
+    exact R25_H_instance h25 _ R25_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, h26, _, _, _, _⟩ := hMid2
+    exact R26_H_instance h26 _ R26_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, h27, _, _, _⟩ := hMid2
+    exact R27_H_instance h27 _ R27_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, h28, _, _⟩ := hMid2
+    exact R28_H_instance h28 _ R28_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, h29, _⟩ := hMid2
+    exact R29_H_instance h29 _ R29_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, _, h30⟩ := hMid2
+    exact R30_H_instance h30 _ R30_mem_gridFine rfl
+
+/-- The 10 top-row `H`-leaves follow jointly from `TopRowObligations`. -/
+theorem topRow_H_of_obligations (hTop : TopRowObligations) :
+    ∀ c ∈ topRowCells, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  intro c hc
+  unfold topRowCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · obtain ⟨h31, _, _, _, _, _, _, _, _, _⟩ := hTop
+    exact R31_H_instance h31 _ R31_mem_gridFine rfl
+  · obtain ⟨_, h32, _, _, _, _, _, _, _, _⟩ := hTop
+    exact R32_H_instance h32 _ R32_mem_gridFine rfl
+  · obtain ⟨_, _, h33, _, _, _, _, _, _, _⟩ := hTop
+    exact R33_H_instance h33 _ R33_mem_gridFine rfl
+  · obtain ⟨_, _, _, h34, _, _, _, _, _, _⟩ := hTop
+    exact R34_H_instance h34 _ R34_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, h35, _, _, _, _, _⟩ := hTop
+    exact R35_H_instance h35 _ R35_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, h36, _, _, _, _⟩ := hTop
+    exact R36_H_instance h36 _ R36_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, h37, _, _, _⟩ := hTop
+    exact R37_H_instance h37 _ R37_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, h38, _, _⟩ := hTop
+    exact R38_H_instance h38 _ R38_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, h39, _⟩ := hTop
+    exact R39_H_instance h39 _ R39_mem_gridFine rfl
+  · obtain ⟨_, _, _, _, _, _, _, _, _, h40⟩ := hTop
+    exact R40_H_instance h40 _ R40_mem_gridFine rfl
+
+/-- All 40 `H`-leaves follow jointly from `FullCentralObligations`. -/
+theorem allCentral_H_of_obligations (hFull : FullCentralObligations) :
+    ∀ c ∈ allCentralCells, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  obtain ⟨hBot, hUp⟩ := hFull
+  obtain ⟨hMid1, hMid2, hTop⟩ := hUp
+  intro c hc
+  unfold allCentralCells at hc
+  simp at hc
+  rcases hc with h | h | h | h
+  · exact bottomRow_H_of_obligations hBot c h
+  · exact midRow1_H_of_obligations hMid1 c h
+  · exact midRow2_H_of_obligations hMid2 c h
+  · exact topRow_H_of_obligations hTop c h
+
+end CentralCoverAssembly
+
+
+namespace CentralCoverAssembly
+
+open CellProofEngine
+
+/-! ## Row covers + combined upper cover (positive side)
+
+Each row cover proves pointwise nonvanishing on its closed `y`-strip via the
+row's 10 closed `x`-branches (thresholds from `fineGridX_covers`, mirroring
+`bottom_row_covered`). `central_upper_covered` combines `bottom_row_covered`
+(`0 < Im ≤ 0.2`, strip included) with the three upper rows to cover
+`0 < Im ≤ 0.49`: every such `z` is either strip-handled or lies closed in
+some packaged upper/bottom cell.
+-/
+
+/-- Row cover `y \in [0.1,0.3]`: every `z` with `-10 < Re < 10`, `0.1 ≤ Im ≤ 0.3` is nonvanishing, via closed `x`-branching. -/
+theorem row1_covered (hRow : MidRow1Obligations) {z : ℂ}
+    (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_lo : (0.1 : ℝ) ≤ z.im) (hy_hi : z.im ≤ (0.3 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨h11,h12,h13,h14,h15,h16,h17,h18,h19,h20⟩ := hRow
+  by_cases h1 : z.re < -7.5
+  · exact R11_nonvanishing_of_bounds h11
+        (by rw [R11_x0]; linarith) (by rw [R11_x1]; exact le_of_lt h1)
+        (by rw [R11_y0]; exact hy_lo) (by rw [R11_y1]; exact hy_hi)
+  · push_neg at h1
+    by_cases h2 : z.re < -5.5
+    · exact R12_nonvanishing_of_bounds h12
+          (by rw [R12_x0]; linarith) (by rw [R12_x1]; exact le_of_lt h2)
+          (by rw [R12_y0]; exact hy_lo) (by rw [R12_y1]; exact hy_hi)
+    · push_neg at h2
+      by_cases h3 : z.re < -3.5
+      · exact R13_nonvanishing_of_bounds h13
+            (by rw [R13_x0]; linarith) (by rw [R13_x1]; exact le_of_lt h3)
+            (by rw [R13_y0]; exact hy_lo) (by rw [R13_y1]; exact hy_hi)
+      · push_neg at h3
+        by_cases h4 : z.re < -1.5
+        · exact R14_nonvanishing_of_bounds h14
+              (by rw [R14_x0]; linarith) (by rw [R14_x1]; exact le_of_lt h4)
+              (by rw [R14_y0]; exact hy_lo) (by rw [R14_y1]; exact hy_hi)
+        · push_neg at h4
+          by_cases h5 : z.re < 0.5
+          · exact R15_nonvanishing_of_bounds h15
+                (by rw [R15_x0]; linarith) (by rw [R15_x1]; exact le_of_lt h5)
+                (by rw [R15_y0]; exact hy_lo) (by rw [R15_y1]; exact hy_hi)
+          · push_neg at h5
+            by_cases h6 : z.re < 2.5
+            · exact R16_nonvanishing_of_bounds h16
+                  (by rw [R16_x0]; linarith) (by rw [R16_x1]; exact le_of_lt h6)
+                  (by rw [R16_y0]; exact hy_lo) (by rw [R16_y1]; exact hy_hi)
+            · push_neg at h6
+              by_cases h7 : z.re < 4.5
+              · exact R17_nonvanishing_of_bounds h17
+                    (by rw [R17_x0]; linarith) (by rw [R17_x1]; exact le_of_lt h7)
+                    (by rw [R17_y0]; exact hy_lo) (by rw [R17_y1]; exact hy_hi)
+              · push_neg at h7
+                by_cases h8 : z.re < 6.5
+                · exact R18_nonvanishing_of_bounds h18
+                      (by rw [R18_x0]; linarith) (by rw [R18_x1]; exact le_of_lt h8)
+                      (by rw [R18_y0]; exact hy_lo) (by rw [R18_y1]; exact hy_hi)
+                · push_neg at h8
+                  by_cases h9 : z.re < 8.5
+                  · exact R19_nonvanishing_of_bounds h19
+                        (by rw [R19_x0]; linarith) (by rw [R19_x1]; exact le_of_lt h9)
+                        (by rw [R19_y0]; exact hy_lo) (by rw [R19_y1]; exact hy_hi)
+                  · push_neg at h9
+                    exact R20_nonvanishing_of_bounds h20
+                          (by rw [R20_x0]; linarith)
+                          (by rw [R20_x1]; exact le_of_lt hx_hi)
+                          (by rw [R20_y0]; exact hy_lo) (by rw [R20_y1]; exact hy_hi)
+
+
+/-- Row cover `y \in [0.2,0.4]`: every `z` with `-10 < Re < 10`, `0.2 ≤ Im ≤ 0.4` is nonvanishing, via closed `x`-branching. -/
+theorem row2_covered (hRow : MidRow2Obligations) {z : ℂ}
+    (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_lo : (0.2 : ℝ) ≤ z.im) (hy_hi : z.im ≤ (0.4 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨h21,h22,h23,h24,h25,h26,h27,h28,h29,h30⟩ := hRow
+  by_cases h1 : z.re < -7.5
+  · exact R21_nonvanishing_of_bounds h21
+        (by rw [R21_x0]; linarith) (by rw [R21_x1]; exact le_of_lt h1)
+        (by rw [R21_y0]; exact hy_lo) (by rw [R21_y1]; exact hy_hi)
+  · push_neg at h1
+    by_cases h2 : z.re < -5.5
+    · exact R22_nonvanishing_of_bounds h22
+          (by rw [R22_x0]; linarith) (by rw [R22_x1]; exact le_of_lt h2)
+          (by rw [R22_y0]; exact hy_lo) (by rw [R22_y1]; exact hy_hi)
+    · push_neg at h2
+      by_cases h3 : z.re < -3.5
+      · exact R23_nonvanishing_of_bounds h23
+            (by rw [R23_x0]; linarith) (by rw [R23_x1]; exact le_of_lt h3)
+            (by rw [R23_y0]; exact hy_lo) (by rw [R23_y1]; exact hy_hi)
+      · push_neg at h3
+        by_cases h4 : z.re < -1.5
+        · exact R24_nonvanishing_of_bounds h24
+              (by rw [R24_x0]; linarith) (by rw [R24_x1]; exact le_of_lt h4)
+              (by rw [R24_y0]; exact hy_lo) (by rw [R24_y1]; exact hy_hi)
+        · push_neg at h4
+          by_cases h5 : z.re < 0.5
+          · exact R25_nonvanishing_of_bounds h25
+                (by rw [R25_x0]; linarith) (by rw [R25_x1]; exact le_of_lt h5)
+                (by rw [R25_y0]; exact hy_lo) (by rw [R25_y1]; exact hy_hi)
+          · push_neg at h5
+            by_cases h6 : z.re < 2.5
+            · exact R26_nonvanishing_of_bounds h26
+                  (by rw [R26_x0]; linarith) (by rw [R26_x1]; exact le_of_lt h6)
+                  (by rw [R26_y0]; exact hy_lo) (by rw [R26_y1]; exact hy_hi)
+            · push_neg at h6
+              by_cases h7 : z.re < 4.5
+              · exact R27_nonvanishing_of_bounds h27
+                    (by rw [R27_x0]; linarith) (by rw [R27_x1]; exact le_of_lt h7)
+                    (by rw [R27_y0]; exact hy_lo) (by rw [R27_y1]; exact hy_hi)
+              · push_neg at h7
+                by_cases h8 : z.re < 6.5
+                · exact R28_nonvanishing_of_bounds h28
+                      (by rw [R28_x0]; linarith) (by rw [R28_x1]; exact le_of_lt h8)
+                      (by rw [R28_y0]; exact hy_lo) (by rw [R28_y1]; exact hy_hi)
+                · push_neg at h8
+                  by_cases h9 : z.re < 8.5
+                  · exact R29_nonvanishing_of_bounds h29
+                        (by rw [R29_x0]; linarith) (by rw [R29_x1]; exact le_of_lt h9)
+                        (by rw [R29_y0]; exact hy_lo) (by rw [R29_y1]; exact hy_hi)
+                  · push_neg at h9
+                    exact R30_nonvanishing_of_bounds h30
+                          (by rw [R30_x0]; linarith)
+                          (by rw [R30_x1]; exact le_of_lt hx_hi)
+                          (by rw [R30_y0]; exact hy_lo) (by rw [R30_y1]; exact hy_hi)
+
+
+/-- Row cover `y \in [0.3,0.49]`: every `z` with `-10 < Re < 10`, `0.3 ≤ Im ≤ 0.49` is nonvanishing, via closed `x`-branching. -/
+theorem top_covered (hRow : TopRowObligations) {z : ℂ}
+    (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_lo : (0.3 : ℝ) ≤ z.im) (hy_hi : z.im ≤ (0.49 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨h31,h32,h33,h34,h35,h36,h37,h38,h39,h40⟩ := hRow
+  by_cases h1 : z.re < -7.5
+  · exact R31_nonvanishing_of_bounds h31
+        (by rw [R31_x0]; linarith) (by rw [R31_x1]; exact le_of_lt h1)
+        (by rw [R31_y0]; exact hy_lo) (by rw [R31_y1]; exact hy_hi)
+  · push_neg at h1
+    by_cases h2 : z.re < -5.5
+    · exact R32_nonvanishing_of_bounds h32
+          (by rw [R32_x0]; linarith) (by rw [R32_x1]; exact le_of_lt h2)
+          (by rw [R32_y0]; exact hy_lo) (by rw [R32_y1]; exact hy_hi)
+    · push_neg at h2
+      by_cases h3 : z.re < -3.5
+      · exact R33_nonvanishing_of_bounds h33
+            (by rw [R33_x0]; linarith) (by rw [R33_x1]; exact le_of_lt h3)
+            (by rw [R33_y0]; exact hy_lo) (by rw [R33_y1]; exact hy_hi)
+      · push_neg at h3
+        by_cases h4 : z.re < -1.5
+        · exact R34_nonvanishing_of_bounds h34
+              (by rw [R34_x0]; linarith) (by rw [R34_x1]; exact le_of_lt h4)
+              (by rw [R34_y0]; exact hy_lo) (by rw [R34_y1]; exact hy_hi)
+        · push_neg at h4
+          by_cases h5 : z.re < 0.5
+          · exact R35_nonvanishing_of_bounds h35
+                (by rw [R35_x0]; linarith) (by rw [R35_x1]; exact le_of_lt h5)
+                (by rw [R35_y0]; exact hy_lo) (by rw [R35_y1]; exact hy_hi)
+          · push_neg at h5
+            by_cases h6 : z.re < 2.5
+            · exact R36_nonvanishing_of_bounds h36
+                  (by rw [R36_x0]; linarith) (by rw [R36_x1]; exact le_of_lt h6)
+                  (by rw [R36_y0]; exact hy_lo) (by rw [R36_y1]; exact hy_hi)
+            · push_neg at h6
+              by_cases h7 : z.re < 4.5
+              · exact R37_nonvanishing_of_bounds h37
+                    (by rw [R37_x0]; linarith) (by rw [R37_x1]; exact le_of_lt h7)
+                    (by rw [R37_y0]; exact hy_lo) (by rw [R37_y1]; exact hy_hi)
+              · push_neg at h7
+                by_cases h8 : z.re < 6.5
+                · exact R38_nonvanishing_of_bounds h38
+                      (by rw [R38_x0]; linarith) (by rw [R38_x1]; exact le_of_lt h8)
+                      (by rw [R38_y0]; exact hy_lo) (by rw [R38_y1]; exact hy_hi)
+                · push_neg at h8
+                  by_cases h9 : z.re < 8.5
+                  · exact R39_nonvanishing_of_bounds h39
+                        (by rw [R39_x0]; linarith) (by rw [R39_x1]; exact le_of_lt h9)
+                        (by rw [R39_y0]; exact hy_lo) (by rw [R39_y1]; exact hy_hi)
+                  · push_neg at h9
+                    exact R40_nonvanishing_of_bounds h40
+                          (by rw [R40_x0]; linarith)
+                          (by rw [R40_x1]; exact le_of_lt hx_hi)
+                          (by rw [R40_y0]; exact hy_lo) (by rw [R40_y1]; exact hy_hi)
+
+
+/-- Combined positive-side cover: every `z` with `-10 < Re < 10`,
+`0 < Im ≤ 0.49` is nonvanishing — via `bottom_row_covered` at `Im ≤ 0.2`
+(strip-or-bottom-cell), else via the closed row cell containing it. -/
+theorem central_upper_covered (hFull : FullCentralObligations)
+    (hStrip : BottomStripObligations)
+    {z : ℂ} (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_pos : 0 < z.im) (hy_le : z.im ≤ 0.49) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨hBot, hUp⟩ := hFull
+  obtain ⟨hMid1, hMid2, hTop⟩ := hUp
+  by_cases hY2 : z.im ≤ 0.2
+  · exact bottom_row_covered hBot hStrip hx_lo hx_hi hy_pos hY2
+  · push_neg at hY2
+    by_cases hY3 : z.im ≤ 0.3
+    · have hy_lo1 : (0.1 : ℝ) ≤ z.im := by linarith
+      exact row1_covered hMid1 hx_lo hx_hi hy_lo1 hY3
+    · push_neg at hY3
+      by_cases hY4 : z.im ≤ 0.4
+      · have hy_lo2 : (0.2 : ℝ) ≤ z.im := by linarith
+        exact row2_covered hMid2 hx_lo hx_hi hy_lo2 hY4
+      · push_neg at hY4
+        have hy_lo3 : (0.3 : ℝ) ≤ z.im := by linarith
+        exact top_covered hTop hx_lo hx_hi hy_lo3 hy_le
+
+/-! ## Lower-half transfers via `conj_of` (all 41 packaged cells)
+
+Every packaged upper cell (bottom 11 incl. off-grid `R01` + upper 30) is
+mirrored to the lower half by the committed sorry-free
+`XiLocalZeroFreeRect.conj_of` / `XiLocalLowerBoundRect.conj_of` with explicit
+`0 < y0` (`by rw [RXX_y0]; norm_num`, since `y0 ≥ 0.01`) and `y1 < 1/2`
+(`by rw [RXX_y1]; norm_num`, since `y1 ≤ 0.49`) side conditions. The
+mirrored rects are zero-free by conjugate symmetry
+(`classicalXi_symmetry.conj_symm`); closed lower nonvanishing below follows via
+`star` + `central_upper_covered` (equivalent, covering boundary points that the
+strict `no_zero` fields exclude).
+-/
+
+noncomputable def R00_conjZF_of_bounds (h : R00_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R00_zeroFree_of_bounds h)
+    (by have e : (R00_zeroFree_of_bounds h).y0 = R00.y0 := rfl
+        rw [e, R00_y0]; norm_num)
+    (by have e : (R00_zeroFree_of_bounds h).y1 = R00.y1 := rfl
+        rw [e, R00_y1]; norm_num)
+
+noncomputable def R00_conjLB_of_bounds (h : R00_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R00_lowerBound_of_bounds h)
+    (by have e : (R00_lowerBound_of_bounds h).y0 = R00.y0 := rfl
+        rw [e, R00_y0]; norm_num)
+    (by have e : (R00_lowerBound_of_bounds h).y1 = R00.y1 := rfl
+        rw [e, R00_y1]; norm_num)
+
+noncomputable def R01_conjZF_of_bounds (h : R01_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R01_zeroFree_of_bounds h)
+    (by have e : (R01_zeroFree_of_bounds h).y0 = R01.y0 := rfl
+        rw [e, R01_y0]; norm_num)
+    (by have e : (R01_zeroFree_of_bounds h).y1 = R01.y1 := rfl
+        rw [e, R01_y1]; norm_num)
+
+noncomputable def R01_conjLB_of_bounds (h : R01_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R01_lowerBound_of_bounds h)
+    (by have e : (R01_lowerBound_of_bounds h).y0 = R01.y0 := rfl
+        rw [e, R01_y0]; norm_num)
+    (by have e : (R01_lowerBound_of_bounds h).y1 = R01.y1 := rfl
+        rw [e, R01_y1]; norm_num)
+
+noncomputable def R02_conjZF_of_bounds (h : R02_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R02_zeroFree_of_bounds h)
+    (by have e : (R02_zeroFree_of_bounds h).y0 = R02.y0 := rfl
+        rw [e, R02_y0]; norm_num)
+    (by have e : (R02_zeroFree_of_bounds h).y1 = R02.y1 := rfl
+        rw [e, R02_y1]; norm_num)
+
+noncomputable def R02_conjLB_of_bounds (h : R02_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R02_lowerBound_of_bounds h)
+    (by have e : (R02_lowerBound_of_bounds h).y0 = R02.y0 := rfl
+        rw [e, R02_y0]; norm_num)
+    (by have e : (R02_lowerBound_of_bounds h).y1 = R02.y1 := rfl
+        rw [e, R02_y1]; norm_num)
+
+noncomputable def R03_conjZF_of_bounds (h : R03_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R03_zeroFree_of_bounds h)
+    (by have e : (R03_zeroFree_of_bounds h).y0 = R03.y0 := rfl
+        rw [e, R03_y0]; norm_num)
+    (by have e : (R03_zeroFree_of_bounds h).y1 = R03.y1 := rfl
+        rw [e, R03_y1]; norm_num)
+
+noncomputable def R03_conjLB_of_bounds (h : R03_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R03_lowerBound_of_bounds h)
+    (by have e : (R03_lowerBound_of_bounds h).y0 = R03.y0 := rfl
+        rw [e, R03_y0]; norm_num)
+    (by have e : (R03_lowerBound_of_bounds h).y1 = R03.y1 := rfl
+        rw [e, R03_y1]; norm_num)
+
+noncomputable def R04_conjZF_of_bounds (h : R04_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R04_zeroFree_of_bounds h)
+    (by have e : (R04_zeroFree_of_bounds h).y0 = R04.y0 := rfl
+        rw [e, R04_y0]; norm_num)
+    (by have e : (R04_zeroFree_of_bounds h).y1 = R04.y1 := rfl
+        rw [e, R04_y1]; norm_num)
+
+noncomputable def R04_conjLB_of_bounds (h : R04_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R04_lowerBound_of_bounds h)
+    (by have e : (R04_lowerBound_of_bounds h).y0 = R04.y0 := rfl
+        rw [e, R04_y0]; norm_num)
+    (by have e : (R04_lowerBound_of_bounds h).y1 = R04.y1 := rfl
+        rw [e, R04_y1]; norm_num)
+
+noncomputable def R05_conjZF_of_bounds (h : R05_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R05_zeroFree_of_bounds h)
+    (by have e : (R05_zeroFree_of_bounds h).y0 = R05.y0 := rfl
+        rw [e, R05_y0]; norm_num)
+    (by have e : (R05_zeroFree_of_bounds h).y1 = R05.y1 := rfl
+        rw [e, R05_y1]; norm_num)
+
+noncomputable def R05_conjLB_of_bounds (h : R05_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R05_lowerBound_of_bounds h)
+    (by have e : (R05_lowerBound_of_bounds h).y0 = R05.y0 := rfl
+        rw [e, R05_y0]; norm_num)
+    (by have e : (R05_lowerBound_of_bounds h).y1 = R05.y1 := rfl
+        rw [e, R05_y1]; norm_num)
+
+noncomputable def R06_conjZF_of_bounds (h : R06_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R06_zeroFree_of_bounds h)
+    (by have e : (R06_zeroFree_of_bounds h).y0 = R06.y0 := rfl
+        rw [e, R06_y0]; norm_num)
+    (by have e : (R06_zeroFree_of_bounds h).y1 = R06.y1 := rfl
+        rw [e, R06_y1]; norm_num)
+
+noncomputable def R06_conjLB_of_bounds (h : R06_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R06_lowerBound_of_bounds h)
+    (by have e : (R06_lowerBound_of_bounds h).y0 = R06.y0 := rfl
+        rw [e, R06_y0]; norm_num)
+    (by have e : (R06_lowerBound_of_bounds h).y1 = R06.y1 := rfl
+        rw [e, R06_y1]; norm_num)
+
+noncomputable def R07_conjZF_of_bounds (h : R07_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R07_zeroFree_of_bounds h)
+    (by have e : (R07_zeroFree_of_bounds h).y0 = R07.y0 := rfl
+        rw [e, R07_y0]; norm_num)
+    (by have e : (R07_zeroFree_of_bounds h).y1 = R07.y1 := rfl
+        rw [e, R07_y1]; norm_num)
+
+noncomputable def R07_conjLB_of_bounds (h : R07_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R07_lowerBound_of_bounds h)
+    (by have e : (R07_lowerBound_of_bounds h).y0 = R07.y0 := rfl
+        rw [e, R07_y0]; norm_num)
+    (by have e : (R07_lowerBound_of_bounds h).y1 = R07.y1 := rfl
+        rw [e, R07_y1]; norm_num)
+
+noncomputable def R08_conjZF_of_bounds (h : R08_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R08_zeroFree_of_bounds h)
+    (by have e : (R08_zeroFree_of_bounds h).y0 = R08.y0 := rfl
+        rw [e, R08_y0]; norm_num)
+    (by have e : (R08_zeroFree_of_bounds h).y1 = R08.y1 := rfl
+        rw [e, R08_y1]; norm_num)
+
+noncomputable def R08_conjLB_of_bounds (h : R08_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R08_lowerBound_of_bounds h)
+    (by have e : (R08_lowerBound_of_bounds h).y0 = R08.y0 := rfl
+        rw [e, R08_y0]; norm_num)
+    (by have e : (R08_lowerBound_of_bounds h).y1 = R08.y1 := rfl
+        rw [e, R08_y1]; norm_num)
+
+noncomputable def R09_conjZF_of_bounds (h : R09_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R09_zeroFree_of_bounds h)
+    (by have e : (R09_zeroFree_of_bounds h).y0 = R09.y0 := rfl
+        rw [e, R09_y0]; norm_num)
+    (by have e : (R09_zeroFree_of_bounds h).y1 = R09.y1 := rfl
+        rw [e, R09_y1]; norm_num)
+
+noncomputable def R09_conjLB_of_bounds (h : R09_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R09_lowerBound_of_bounds h)
+    (by have e : (R09_lowerBound_of_bounds h).y0 = R09.y0 := rfl
+        rw [e, R09_y0]; norm_num)
+    (by have e : (R09_lowerBound_of_bounds h).y1 = R09.y1 := rfl
+        rw [e, R09_y1]; norm_num)
+
+noncomputable def R10_conjZF_of_bounds (h : R10_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R10_zeroFree_of_bounds h)
+    (by have e : (R10_zeroFree_of_bounds h).y0 = R10.y0 := rfl
+        rw [e, R10_y0]; norm_num)
+    (by have e : (R10_zeroFree_of_bounds h).y1 = R10.y1 := rfl
+        rw [e, R10_y1]; norm_num)
+
+noncomputable def R10_conjLB_of_bounds (h : R10_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R10_lowerBound_of_bounds h)
+    (by have e : (R10_lowerBound_of_bounds h).y0 = R10.y0 := rfl
+        rw [e, R10_y0]; norm_num)
+    (by have e : (R10_lowerBound_of_bounds h).y1 = R10.y1 := rfl
+        rw [e, R10_y1]; norm_num)
+
+noncomputable def R11_conjZF_of_bounds (h : R11_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R11_zeroFree_of_bounds h)
+    (by have e : (R11_zeroFree_of_bounds h).y0 = R11.y0 := rfl
+        rw [e, R11_y0]; norm_num)
+    (by have e : (R11_zeroFree_of_bounds h).y1 = R11.y1 := rfl
+        rw [e, R11_y1]; norm_num)
+
+noncomputable def R11_conjLB_of_bounds (h : R11_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R11_lowerBound_of_bounds h)
+    (by have e : (R11_lowerBound_of_bounds h).y0 = R11.y0 := rfl
+        rw [e, R11_y0]; norm_num)
+    (by have e : (R11_lowerBound_of_bounds h).y1 = R11.y1 := rfl
+        rw [e, R11_y1]; norm_num)
+
+noncomputable def R12_conjZF_of_bounds (h : R12_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R12_zeroFree_of_bounds h)
+    (by have e : (R12_zeroFree_of_bounds h).y0 = R12.y0 := rfl
+        rw [e, R12_y0]; norm_num)
+    (by have e : (R12_zeroFree_of_bounds h).y1 = R12.y1 := rfl
+        rw [e, R12_y1]; norm_num)
+
+noncomputable def R12_conjLB_of_bounds (h : R12_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R12_lowerBound_of_bounds h)
+    (by have e : (R12_lowerBound_of_bounds h).y0 = R12.y0 := rfl
+        rw [e, R12_y0]; norm_num)
+    (by have e : (R12_lowerBound_of_bounds h).y1 = R12.y1 := rfl
+        rw [e, R12_y1]; norm_num)
+
+noncomputable def R13_conjZF_of_bounds (h : R13_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R13_zeroFree_of_bounds h)
+    (by have e : (R13_zeroFree_of_bounds h).y0 = R13.y0 := rfl
+        rw [e, R13_y0]; norm_num)
+    (by have e : (R13_zeroFree_of_bounds h).y1 = R13.y1 := rfl
+        rw [e, R13_y1]; norm_num)
+
+noncomputable def R13_conjLB_of_bounds (h : R13_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R13_lowerBound_of_bounds h)
+    (by have e : (R13_lowerBound_of_bounds h).y0 = R13.y0 := rfl
+        rw [e, R13_y0]; norm_num)
+    (by have e : (R13_lowerBound_of_bounds h).y1 = R13.y1 := rfl
+        rw [e, R13_y1]; norm_num)
+
+noncomputable def R14_conjZF_of_bounds (h : R14_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R14_zeroFree_of_bounds h)
+    (by have e : (R14_zeroFree_of_bounds h).y0 = R14.y0 := rfl
+        rw [e, R14_y0]; norm_num)
+    (by have e : (R14_zeroFree_of_bounds h).y1 = R14.y1 := rfl
+        rw [e, R14_y1]; norm_num)
+
+noncomputable def R14_conjLB_of_bounds (h : R14_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R14_lowerBound_of_bounds h)
+    (by have e : (R14_lowerBound_of_bounds h).y0 = R14.y0 := rfl
+        rw [e, R14_y0]; norm_num)
+    (by have e : (R14_lowerBound_of_bounds h).y1 = R14.y1 := rfl
+        rw [e, R14_y1]; norm_num)
+
+noncomputable def R15_conjZF_of_bounds (h : R15_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R15_zeroFree_of_bounds h)
+    (by have e : (R15_zeroFree_of_bounds h).y0 = R15.y0 := rfl
+        rw [e, R15_y0]; norm_num)
+    (by have e : (R15_zeroFree_of_bounds h).y1 = R15.y1 := rfl
+        rw [e, R15_y1]; norm_num)
+
+noncomputable def R15_conjLB_of_bounds (h : R15_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R15_lowerBound_of_bounds h)
+    (by have e : (R15_lowerBound_of_bounds h).y0 = R15.y0 := rfl
+        rw [e, R15_y0]; norm_num)
+    (by have e : (R15_lowerBound_of_bounds h).y1 = R15.y1 := rfl
+        rw [e, R15_y1]; norm_num)
+
+noncomputable def R16_conjZF_of_bounds (h : R16_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R16_zeroFree_of_bounds h)
+    (by have e : (R16_zeroFree_of_bounds h).y0 = R16.y0 := rfl
+        rw [e, R16_y0]; norm_num)
+    (by have e : (R16_zeroFree_of_bounds h).y1 = R16.y1 := rfl
+        rw [e, R16_y1]; norm_num)
+
+noncomputable def R16_conjLB_of_bounds (h : R16_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R16_lowerBound_of_bounds h)
+    (by have e : (R16_lowerBound_of_bounds h).y0 = R16.y0 := rfl
+        rw [e, R16_y0]; norm_num)
+    (by have e : (R16_lowerBound_of_bounds h).y1 = R16.y1 := rfl
+        rw [e, R16_y1]; norm_num)
+
+noncomputable def R17_conjZF_of_bounds (h : R17_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R17_zeroFree_of_bounds h)
+    (by have e : (R17_zeroFree_of_bounds h).y0 = R17.y0 := rfl
+        rw [e, R17_y0]; norm_num)
+    (by have e : (R17_zeroFree_of_bounds h).y1 = R17.y1 := rfl
+        rw [e, R17_y1]; norm_num)
+
+noncomputable def R17_conjLB_of_bounds (h : R17_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R17_lowerBound_of_bounds h)
+    (by have e : (R17_lowerBound_of_bounds h).y0 = R17.y0 := rfl
+        rw [e, R17_y0]; norm_num)
+    (by have e : (R17_lowerBound_of_bounds h).y1 = R17.y1 := rfl
+        rw [e, R17_y1]; norm_num)
+
+noncomputable def R18_conjZF_of_bounds (h : R18_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R18_zeroFree_of_bounds h)
+    (by have e : (R18_zeroFree_of_bounds h).y0 = R18.y0 := rfl
+        rw [e, R18_y0]; norm_num)
+    (by have e : (R18_zeroFree_of_bounds h).y1 = R18.y1 := rfl
+        rw [e, R18_y1]; norm_num)
+
+noncomputable def R18_conjLB_of_bounds (h : R18_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R18_lowerBound_of_bounds h)
+    (by have e : (R18_lowerBound_of_bounds h).y0 = R18.y0 := rfl
+        rw [e, R18_y0]; norm_num)
+    (by have e : (R18_lowerBound_of_bounds h).y1 = R18.y1 := rfl
+        rw [e, R18_y1]; norm_num)
+
+noncomputable def R19_conjZF_of_bounds (h : R19_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R19_zeroFree_of_bounds h)
+    (by have e : (R19_zeroFree_of_bounds h).y0 = R19.y0 := rfl
+        rw [e, R19_y0]; norm_num)
+    (by have e : (R19_zeroFree_of_bounds h).y1 = R19.y1 := rfl
+        rw [e, R19_y1]; norm_num)
+
+noncomputable def R19_conjLB_of_bounds (h : R19_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R19_lowerBound_of_bounds h)
+    (by have e : (R19_lowerBound_of_bounds h).y0 = R19.y0 := rfl
+        rw [e, R19_y0]; norm_num)
+    (by have e : (R19_lowerBound_of_bounds h).y1 = R19.y1 := rfl
+        rw [e, R19_y1]; norm_num)
+
+noncomputable def R20_conjZF_of_bounds (h : R20_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R20_zeroFree_of_bounds h)
+    (by have e : (R20_zeroFree_of_bounds h).y0 = R20.y0 := rfl
+        rw [e, R20_y0]; norm_num)
+    (by have e : (R20_zeroFree_of_bounds h).y1 = R20.y1 := rfl
+        rw [e, R20_y1]; norm_num)
+
+noncomputable def R20_conjLB_of_bounds (h : R20_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R20_lowerBound_of_bounds h)
+    (by have e : (R20_lowerBound_of_bounds h).y0 = R20.y0 := rfl
+        rw [e, R20_y0]; norm_num)
+    (by have e : (R20_lowerBound_of_bounds h).y1 = R20.y1 := rfl
+        rw [e, R20_y1]; norm_num)
+
+noncomputable def R21_conjZF_of_bounds (h : R21_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R21_zeroFree_of_bounds h)
+    (by have e : (R21_zeroFree_of_bounds h).y0 = R21.y0 := rfl
+        rw [e, R21_y0]; norm_num)
+    (by have e : (R21_zeroFree_of_bounds h).y1 = R21.y1 := rfl
+        rw [e, R21_y1]; norm_num)
+
+noncomputable def R21_conjLB_of_bounds (h : R21_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R21_lowerBound_of_bounds h)
+    (by have e : (R21_lowerBound_of_bounds h).y0 = R21.y0 := rfl
+        rw [e, R21_y0]; norm_num)
+    (by have e : (R21_lowerBound_of_bounds h).y1 = R21.y1 := rfl
+        rw [e, R21_y1]; norm_num)
+
+noncomputable def R22_conjZF_of_bounds (h : R22_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R22_zeroFree_of_bounds h)
+    (by have e : (R22_zeroFree_of_bounds h).y0 = R22.y0 := rfl
+        rw [e, R22_y0]; norm_num)
+    (by have e : (R22_zeroFree_of_bounds h).y1 = R22.y1 := rfl
+        rw [e, R22_y1]; norm_num)
+
+noncomputable def R22_conjLB_of_bounds (h : R22_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R22_lowerBound_of_bounds h)
+    (by have e : (R22_lowerBound_of_bounds h).y0 = R22.y0 := rfl
+        rw [e, R22_y0]; norm_num)
+    (by have e : (R22_lowerBound_of_bounds h).y1 = R22.y1 := rfl
+        rw [e, R22_y1]; norm_num)
+
+noncomputable def R23_conjZF_of_bounds (h : R23_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R23_zeroFree_of_bounds h)
+    (by have e : (R23_zeroFree_of_bounds h).y0 = R23.y0 := rfl
+        rw [e, R23_y0]; norm_num)
+    (by have e : (R23_zeroFree_of_bounds h).y1 = R23.y1 := rfl
+        rw [e, R23_y1]; norm_num)
+
+noncomputable def R23_conjLB_of_bounds (h : R23_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R23_lowerBound_of_bounds h)
+    (by have e : (R23_lowerBound_of_bounds h).y0 = R23.y0 := rfl
+        rw [e, R23_y0]; norm_num)
+    (by have e : (R23_lowerBound_of_bounds h).y1 = R23.y1 := rfl
+        rw [e, R23_y1]; norm_num)
+
+noncomputable def R24_conjZF_of_bounds (h : R24_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R24_zeroFree_of_bounds h)
+    (by have e : (R24_zeroFree_of_bounds h).y0 = R24.y0 := rfl
+        rw [e, R24_y0]; norm_num)
+    (by have e : (R24_zeroFree_of_bounds h).y1 = R24.y1 := rfl
+        rw [e, R24_y1]; norm_num)
+
+noncomputable def R24_conjLB_of_bounds (h : R24_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R24_lowerBound_of_bounds h)
+    (by have e : (R24_lowerBound_of_bounds h).y0 = R24.y0 := rfl
+        rw [e, R24_y0]; norm_num)
+    (by have e : (R24_lowerBound_of_bounds h).y1 = R24.y1 := rfl
+        rw [e, R24_y1]; norm_num)
+
+noncomputable def R25_conjZF_of_bounds (h : R25_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R25_zeroFree_of_bounds h)
+    (by have e : (R25_zeroFree_of_bounds h).y0 = R25.y0 := rfl
+        rw [e, R25_y0]; norm_num)
+    (by have e : (R25_zeroFree_of_bounds h).y1 = R25.y1 := rfl
+        rw [e, R25_y1]; norm_num)
+
+noncomputable def R25_conjLB_of_bounds (h : R25_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R25_lowerBound_of_bounds h)
+    (by have e : (R25_lowerBound_of_bounds h).y0 = R25.y0 := rfl
+        rw [e, R25_y0]; norm_num)
+    (by have e : (R25_lowerBound_of_bounds h).y1 = R25.y1 := rfl
+        rw [e, R25_y1]; norm_num)
+
+noncomputable def R26_conjZF_of_bounds (h : R26_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R26_zeroFree_of_bounds h)
+    (by have e : (R26_zeroFree_of_bounds h).y0 = R26.y0 := rfl
+        rw [e, R26_y0]; norm_num)
+    (by have e : (R26_zeroFree_of_bounds h).y1 = R26.y1 := rfl
+        rw [e, R26_y1]; norm_num)
+
+noncomputable def R26_conjLB_of_bounds (h : R26_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R26_lowerBound_of_bounds h)
+    (by have e : (R26_lowerBound_of_bounds h).y0 = R26.y0 := rfl
+        rw [e, R26_y0]; norm_num)
+    (by have e : (R26_lowerBound_of_bounds h).y1 = R26.y1 := rfl
+        rw [e, R26_y1]; norm_num)
+
+noncomputable def R27_conjZF_of_bounds (h : R27_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R27_zeroFree_of_bounds h)
+    (by have e : (R27_zeroFree_of_bounds h).y0 = R27.y0 := rfl
+        rw [e, R27_y0]; norm_num)
+    (by have e : (R27_zeroFree_of_bounds h).y1 = R27.y1 := rfl
+        rw [e, R27_y1]; norm_num)
+
+noncomputable def R27_conjLB_of_bounds (h : R27_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R27_lowerBound_of_bounds h)
+    (by have e : (R27_lowerBound_of_bounds h).y0 = R27.y0 := rfl
+        rw [e, R27_y0]; norm_num)
+    (by have e : (R27_lowerBound_of_bounds h).y1 = R27.y1 := rfl
+        rw [e, R27_y1]; norm_num)
+
+noncomputable def R28_conjZF_of_bounds (h : R28_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R28_zeroFree_of_bounds h)
+    (by have e : (R28_zeroFree_of_bounds h).y0 = R28.y0 := rfl
+        rw [e, R28_y0]; norm_num)
+    (by have e : (R28_zeroFree_of_bounds h).y1 = R28.y1 := rfl
+        rw [e, R28_y1]; norm_num)
+
+noncomputable def R28_conjLB_of_bounds (h : R28_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R28_lowerBound_of_bounds h)
+    (by have e : (R28_lowerBound_of_bounds h).y0 = R28.y0 := rfl
+        rw [e, R28_y0]; norm_num)
+    (by have e : (R28_lowerBound_of_bounds h).y1 = R28.y1 := rfl
+        rw [e, R28_y1]; norm_num)
+
+noncomputable def R29_conjZF_of_bounds (h : R29_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R29_zeroFree_of_bounds h)
+    (by have e : (R29_zeroFree_of_bounds h).y0 = R29.y0 := rfl
+        rw [e, R29_y0]; norm_num)
+    (by have e : (R29_zeroFree_of_bounds h).y1 = R29.y1 := rfl
+        rw [e, R29_y1]; norm_num)
+
+noncomputable def R29_conjLB_of_bounds (h : R29_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R29_lowerBound_of_bounds h)
+    (by have e : (R29_lowerBound_of_bounds h).y0 = R29.y0 := rfl
+        rw [e, R29_y0]; norm_num)
+    (by have e : (R29_lowerBound_of_bounds h).y1 = R29.y1 := rfl
+        rw [e, R29_y1]; norm_num)
+
+noncomputable def R30_conjZF_of_bounds (h : R30_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R30_zeroFree_of_bounds h)
+    (by have e : (R30_zeroFree_of_bounds h).y0 = R30.y0 := rfl
+        rw [e, R30_y0]; norm_num)
+    (by have e : (R30_zeroFree_of_bounds h).y1 = R30.y1 := rfl
+        rw [e, R30_y1]; norm_num)
+
+noncomputable def R30_conjLB_of_bounds (h : R30_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R30_lowerBound_of_bounds h)
+    (by have e : (R30_lowerBound_of_bounds h).y0 = R30.y0 := rfl
+        rw [e, R30_y0]; norm_num)
+    (by have e : (R30_lowerBound_of_bounds h).y1 = R30.y1 := rfl
+        rw [e, R30_y1]; norm_num)
+
+noncomputable def R31_conjZF_of_bounds (h : R31_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R31_zeroFree_of_bounds h)
+    (by have e : (R31_zeroFree_of_bounds h).y0 = R31.y0 := rfl
+        rw [e, R31_y0]; norm_num)
+    (by have e : (R31_zeroFree_of_bounds h).y1 = R31.y1 := rfl
+        rw [e, R31_y1]; norm_num)
+
+noncomputable def R31_conjLB_of_bounds (h : R31_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R31_lowerBound_of_bounds h)
+    (by have e : (R31_lowerBound_of_bounds h).y0 = R31.y0 := rfl
+        rw [e, R31_y0]; norm_num)
+    (by have e : (R31_lowerBound_of_bounds h).y1 = R31.y1 := rfl
+        rw [e, R31_y1]; norm_num)
+
+noncomputable def R32_conjZF_of_bounds (h : R32_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R32_zeroFree_of_bounds h)
+    (by have e : (R32_zeroFree_of_bounds h).y0 = R32.y0 := rfl
+        rw [e, R32_y0]; norm_num)
+    (by have e : (R32_zeroFree_of_bounds h).y1 = R32.y1 := rfl
+        rw [e, R32_y1]; norm_num)
+
+noncomputable def R32_conjLB_of_bounds (h : R32_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R32_lowerBound_of_bounds h)
+    (by have e : (R32_lowerBound_of_bounds h).y0 = R32.y0 := rfl
+        rw [e, R32_y0]; norm_num)
+    (by have e : (R32_lowerBound_of_bounds h).y1 = R32.y1 := rfl
+        rw [e, R32_y1]; norm_num)
+
+noncomputable def R33_conjZF_of_bounds (h : R33_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R33_zeroFree_of_bounds h)
+    (by have e : (R33_zeroFree_of_bounds h).y0 = R33.y0 := rfl
+        rw [e, R33_y0]; norm_num)
+    (by have e : (R33_zeroFree_of_bounds h).y1 = R33.y1 := rfl
+        rw [e, R33_y1]; norm_num)
+
+noncomputable def R33_conjLB_of_bounds (h : R33_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R33_lowerBound_of_bounds h)
+    (by have e : (R33_lowerBound_of_bounds h).y0 = R33.y0 := rfl
+        rw [e, R33_y0]; norm_num)
+    (by have e : (R33_lowerBound_of_bounds h).y1 = R33.y1 := rfl
+        rw [e, R33_y1]; norm_num)
+
+noncomputable def R34_conjZF_of_bounds (h : R34_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R34_zeroFree_of_bounds h)
+    (by have e : (R34_zeroFree_of_bounds h).y0 = R34.y0 := rfl
+        rw [e, R34_y0]; norm_num)
+    (by have e : (R34_zeroFree_of_bounds h).y1 = R34.y1 := rfl
+        rw [e, R34_y1]; norm_num)
+
+noncomputable def R34_conjLB_of_bounds (h : R34_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R34_lowerBound_of_bounds h)
+    (by have e : (R34_lowerBound_of_bounds h).y0 = R34.y0 := rfl
+        rw [e, R34_y0]; norm_num)
+    (by have e : (R34_lowerBound_of_bounds h).y1 = R34.y1 := rfl
+        rw [e, R34_y1]; norm_num)
+
+noncomputable def R35_conjZF_of_bounds (h : R35_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R35_zeroFree_of_bounds h)
+    (by have e : (R35_zeroFree_of_bounds h).y0 = R35.y0 := rfl
+        rw [e, R35_y0]; norm_num)
+    (by have e : (R35_zeroFree_of_bounds h).y1 = R35.y1 := rfl
+        rw [e, R35_y1]; norm_num)
+
+noncomputable def R35_conjLB_of_bounds (h : R35_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R35_lowerBound_of_bounds h)
+    (by have e : (R35_lowerBound_of_bounds h).y0 = R35.y0 := rfl
+        rw [e, R35_y0]; norm_num)
+    (by have e : (R35_lowerBound_of_bounds h).y1 = R35.y1 := rfl
+        rw [e, R35_y1]; norm_num)
+
+noncomputable def R36_conjZF_of_bounds (h : R36_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R36_zeroFree_of_bounds h)
+    (by have e : (R36_zeroFree_of_bounds h).y0 = R36.y0 := rfl
+        rw [e, R36_y0]; norm_num)
+    (by have e : (R36_zeroFree_of_bounds h).y1 = R36.y1 := rfl
+        rw [e, R36_y1]; norm_num)
+
+noncomputable def R36_conjLB_of_bounds (h : R36_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R36_lowerBound_of_bounds h)
+    (by have e : (R36_lowerBound_of_bounds h).y0 = R36.y0 := rfl
+        rw [e, R36_y0]; norm_num)
+    (by have e : (R36_lowerBound_of_bounds h).y1 = R36.y1 := rfl
+        rw [e, R36_y1]; norm_num)
+
+noncomputable def R37_conjZF_of_bounds (h : R37_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R37_zeroFree_of_bounds h)
+    (by have e : (R37_zeroFree_of_bounds h).y0 = R37.y0 := rfl
+        rw [e, R37_y0]; norm_num)
+    (by have e : (R37_zeroFree_of_bounds h).y1 = R37.y1 := rfl
+        rw [e, R37_y1]; norm_num)
+
+noncomputable def R37_conjLB_of_bounds (h : R37_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R37_lowerBound_of_bounds h)
+    (by have e : (R37_lowerBound_of_bounds h).y0 = R37.y0 := rfl
+        rw [e, R37_y0]; norm_num)
+    (by have e : (R37_lowerBound_of_bounds h).y1 = R37.y1 := rfl
+        rw [e, R37_y1]; norm_num)
+
+noncomputable def R38_conjZF_of_bounds (h : R38_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R38_zeroFree_of_bounds h)
+    (by have e : (R38_zeroFree_of_bounds h).y0 = R38.y0 := rfl
+        rw [e, R38_y0]; norm_num)
+    (by have e : (R38_zeroFree_of_bounds h).y1 = R38.y1 := rfl
+        rw [e, R38_y1]; norm_num)
+
+noncomputable def R38_conjLB_of_bounds (h : R38_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R38_lowerBound_of_bounds h)
+    (by have e : (R38_lowerBound_of_bounds h).y0 = R38.y0 := rfl
+        rw [e, R38_y0]; norm_num)
+    (by have e : (R38_lowerBound_of_bounds h).y1 = R38.y1 := rfl
+        rw [e, R38_y1]; norm_num)
+
+noncomputable def R39_conjZF_of_bounds (h : R39_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R39_zeroFree_of_bounds h)
+    (by have e : (R39_zeroFree_of_bounds h).y0 = R39.y0 := rfl
+        rw [e, R39_y0]; norm_num)
+    (by have e : (R39_zeroFree_of_bounds h).y1 = R39.y1 := rfl
+        rw [e, R39_y1]; norm_num)
+
+noncomputable def R39_conjLB_of_bounds (h : R39_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R39_lowerBound_of_bounds h)
+    (by have e : (R39_lowerBound_of_bounds h).y0 = R39.y0 := rfl
+        rw [e, R39_y0]; norm_num)
+    (by have e : (R39_lowerBound_of_bounds h).y1 = R39.y1 := rfl
+        rw [e, R39_y1]; norm_num)
+
+noncomputable def R40_conjZF_of_bounds (h : R40_leaf_obligations) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect.conj_of (R40_zeroFree_of_bounds h)
+    (by have e : (R40_zeroFree_of_bounds h).y0 = R40.y0 := rfl
+        rw [e, R40_y0]; norm_num)
+    (by have e : (R40_zeroFree_of_bounds h).y1 = R40.y1 := rfl
+        rw [e, R40_y1]; norm_num)
+
+noncomputable def R40_conjLB_of_bounds (h : R40_leaf_obligations) : XiLocalLowerBoundRect :=
+  XiLocalLowerBoundRect.conj_of (R40_lowerBound_of_bounds h)
+    (by have e : (R40_lowerBound_of_bounds h).y0 = R40.y0 := rfl
+        rw [e, R40_y0]; norm_num)
+    (by have e : (R40_lowerBound_of_bounds h).y1 = R40.y1 := rfl
+        rw [e, R40_y1]; norm_num)
+
+/-- Lower-half cover: every `z` with `-10 < Re < 10`, `-0.49 ≤ Im < 0`
+is nonvanishing, via `star z` + `central_upper_covered` + conjugate symmetry.
+This is the closed lower counterpart of the upper cell/strip either/or:
+`star z` lies either in the boundary strip or in a closed packaged upper cell,
+hence `z` lies in the conjugated lower cell or the mirrored strip. -/
+theorem central_lower_covered (hFull : FullCentralObligations)
+    (hStrip : BottomStripObligations)
+    {z : ℂ} (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy_ge : -0.49 ≤ z.im) (hy_neg : z.im < 0) :
+    xiShifted z ≠ 0 := by
+  have hstar_re : (star z).re = z.re := by simp [conj_re]
+  have hstar_im : (star z).im = -z.im := by simp [conj_im]
+  have hstar_lo : -10 < (star z).re := by rw [hstar_re]; exact hx_lo
+  have hstar_hi : (star z).re < 10 := by rw [hstar_re]; exact hx_hi
+  have hstar_pos : 0 < (star z).im := by rw [hstar_im]; linarith
+  have hstar_le : (star z).im ≤ 0.49 := by rw [hstar_im]; linarith
+  have h_nz_star : xiShifted (star z) ≠ 0 :=
+    central_upper_covered hFull hStrip hstar_lo hstar_hi hstar_pos hstar_le
+  have h_im_lt : z.im < 1 / 2 := by linarith
+  have h_im_gt : -1 / 2 < z.im := by linarith
+  have hsym := classicalXi_symmetry.conj_symm z h_im_gt h_im_lt
+  intro hzero
+  have h2 : star (xiShifted z) = 0 := by simp [hzero]
+  have h3 : xiShifted (star z) = 0 := by rw [hsym]; exact h2
+  exact h_nz_star h3
+
+/-- Combined central cover (both halves): every `z` with `-10 < Re < 10` and
+`Im ∈ (0,0.49] ∪ [-0.49,0)` is nonvanishing. Positive side is
+strip-or-closed-upper-cell (`central_upper_covered`); negative side is the
+conjugated mirror (`central_lower_covered` via `conj_of` transfers).
+Endpoints `±10`, `[0.49,1/2)`, and the real axis are excluded (separate tasks). -/
+theorem full_central_covered (hFull : FullCentralObligations)
+    (hStrip : BottomStripObligations)
+    {z : ℂ} (hx_lo : -10 < z.re) (hx_hi : z.re < 10)
+    (hy : (0 < z.im ∧ z.im ≤ 0.49) ∨ (-0.49 ≤ z.im ∧ z.im < 0)) :
+    xiShifted z ≠ 0 := by
+  rcases hy with ⟨hpos, hle⟩ | ⟨hge, hneg⟩
+  · exact central_upper_covered hFull hStrip hx_lo hx_hi hpos hle
+  · exact central_lower_covered hFull hStrip hx_lo hx_hi hge hneg
+
+#print axioms row1_covered
+#print axioms row2_covered
+#print axioms top_covered
+#print axioms central_upper_covered
+#print axioms central_lower_covered
+#print axioms full_central_covered
+
+end CentralCoverAssembly

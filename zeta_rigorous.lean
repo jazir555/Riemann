@@ -1180,3 +1180,1399 @@ theorem zeta_half_value :
 #print axioms etaTendsto_eq_etaHurwitz
 #print axioms zeta_half_value
 #print axioms etaPairLim_half
+
+/-!
+## Higher eta partial-sum bounds `S₄–S₉` (tightening `L`).
+
+The committed `eta_half_two_sided_tight` gives `S₂ ≤ L ≤ S₃` (width
+`S₃ - S₂ = 1/√3 ≈ 0.578`). Here we push the same alternating-series API to
+higher even/odd partial sums: generic even-lower / odd-upper bounds
+(`eta_half_ge_even`, `eta_half_le_odd`, via
+`Antitone.alternating_series_le_tendsto` /
+`Antitone.tendsto_le_alternating_series`), exact `√`-forms for `S₄–S₉`
+(each closed by `simp` + `ring_nf`, same pattern as `S₂`/`S₃`),
+monotonicity comparisons (`S₂ ≤ S₄ ≤ S₆ ≤ S₈ ≤ L ≤ S₉ ≤ S₇ ≤ S₅ ≤ S₃`,
+each via `Real.sqrt_le_sqrt` + `one_div_le_one_div_of_le`), and rigorous
+numeric widths (`S₉ - S₈ = 1/3`, `S₇ - S₆ = 1/√7 < 0.38`,
+`S₅ - S₄ = 1/√5 < 0.45`).
+
+Only the `Tendsto` form is used (the `∑'` tsum form is `0`).
+-/
+
+/-- `√4 = 2` (for `S₄` onward). -/
+theorem sqrt_four_eq : Real.sqrt (4 : ℝ) = 2 := by
+  rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+
+/-- `√9 = 3` (for `S₉`). -/
+theorem sqrt_nine_eq : Real.sqrt (9 : ℝ) = 3 := by
+  rw [show (9 : ℝ) = 3 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+
+/-- Exact `S₂` (standalone; proved inline in `eta_half_pos`). -/
+theorem etaPartial_two_eq : etaPartial 2 = 1 - 1 / Real.sqrt 2 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₄ = 1 - 1/√2 + 1/√3 - 1/2`. -/
+theorem etaPartial_four_eq :
+    etaPartial 4 = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₅`. -/
+theorem etaPartial_five_eq :
+    etaPartial 5
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₆`. -/
+theorem etaPartial_six_eq :
+    etaPartial 6
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5
+        - 1 / Real.sqrt 6 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₇`. -/
+theorem etaPartial_seven_eq :
+    etaPartial 7
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5
+        - 1 / Real.sqrt 6 + 1 / Real.sqrt 7 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₈`. -/
+theorem etaPartial_eight_eq :
+    etaPartial 8
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5
+        - 1 / Real.sqrt 6 + 1 / Real.sqrt 7 - 1 / Real.sqrt 8 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Exact `S₉` (using `√9 = 3`). -/
+theorem etaPartial_nine_eq :
+    etaPartial 9
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5
+        - 1 / Real.sqrt 6 + 1 / Real.sqrt 7 - 1 / Real.sqrt 8 + 1 / 3 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- LOWER BOUND (general even): every eta limit `L` satisfies `S_{2N} ≤ L`. -/
+theorem eta_half_ge_even (L : ℝ) (N : ℕ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : etaPartial (2 * N) ≤ L := by
+  let f : ℕ → ℝ := fun k => 1 / sqrt (k + 1 : ℝ)
+  have h_anti : Antitone f := eta_terms_antitone
+  have h_fun_eq : (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) =
+      (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext n
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [f]
+    push_cast
+    ring
+  have hL' : Tendsto (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) atTop (𝓝 L) := by
+    rw [h_fun_eq]
+    exact hL
+  have h_raw : Finset.sum (Finset.range (2 * N)) (fun i => (-1 : ℝ) ^ i * f i) ≤ L :=
+    Antitone.alternating_series_le_tendsto hL' h_anti N
+  have h_eq : Finset.sum (Finset.range (2 * N)) (fun i => (-1 : ℝ) ^ i * f i)
+      = etaPartial (2 * N) := congrFun h_fun_eq (2 * N)
+  linarith
+
+/-- UPPER BOUND (general odd): every eta limit `L` satisfies `L ≤ S_{2N+1}`. -/
+theorem eta_half_le_odd (L : ℝ) (N : ℕ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ etaPartial (2 * N + 1) := by
+  let f : ℕ → ℝ := fun k => 1 / sqrt (k + 1 : ℝ)
+  have h_anti : Antitone f := eta_terms_antitone
+  have h_fun_eq : (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) =
+      (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext n
+    apply Finset.sum_congr rfl
+    intro k _
+    simp only [f]
+    push_cast
+    ring
+  have hL' : Tendsto (fun n => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * f i) atTop (𝓝 L) := by
+    rw [h_fun_eq]
+    exact hL
+  have h_up := Antitone.tendsto_le_alternating_series hL' h_anti N
+  have h_eq : (∑ i ∈ Finset.range (2 * N + 1), (-1 : ℝ) ^ i * f i)
+      = etaPartial (2 * N + 1) := congrFun h_fun_eq (2 * N + 1)
+  rw [h_eq] at h_up
+  exact h_up
+
+/-- `S₄ ≤ L` (even lower, `N = 2`). -/
+theorem eta_half_ge_S4 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : etaPartial 4 ≤ L := by
+  have h := eta_half_ge_even L 2 hL
+  have h44 : (2 * 2 : ℕ) = 4 := rfl
+  rwa [h44] at h
+
+/-- `L ≤ S₅` (odd upper, `N = 2`). -/
+theorem eta_half_le_S5 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ etaPartial 5 := by
+  have h := eta_half_le_odd L 2 hL
+  have h55 : (2 * 2 + 1 : ℕ) = 5 := rfl
+  rwa [h55] at h
+
+/-- `S₆ ≤ L` (even lower, `N = 3`). -/
+theorem eta_half_ge_S6 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : etaPartial 6 ≤ L := by
+  have h := eta_half_ge_even L 3 hL
+  have h66 : (2 * 3 : ℕ) = 6 := rfl
+  rwa [h66] at h
+
+/-- `L ≤ S₇` (odd upper, `N = 3`). -/
+theorem eta_half_le_S7 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ etaPartial 7 := by
+  have h := eta_half_le_odd L 3 hL
+  have h77 : (2 * 3 + 1 : ℕ) = 7 := rfl
+  rwa [h77] at h
+
+/-- `S₈ ≤ L` (even lower, `N = 4`). -/
+theorem eta_half_ge_S8 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : etaPartial 8 ≤ L := by
+  have h := eta_half_ge_even L 4 hL
+  have h88 : (2 * 4 : ℕ) = 8 := rfl
+  rwa [h88] at h
+
+/-- `L ≤ S₉` (odd upper, `N = 4`). -/
+theorem eta_half_le_S9 (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) : L ≤ etaPartial 9 := by
+  have h := eta_half_le_odd L 4 hL
+  have h99 : (2 * 4 + 1 : ℕ) = 9 := rfl
+  rwa [h99] at h
+
+/-- `S₂ ≤ S₄` (since `1/√3 ≥ 1/2`, i.e. `√3 ≤ 2`). -/
+theorem etaPartial_two_le_four : etaPartial 2 ≤ etaPartial 4 := by
+  rw [etaPartial_two_eq, etaPartial_four_eq]
+  have h32 : Real.sqrt 3 ≤ 2 := by
+    calc Real.sqrt 3 ≤ Real.sqrt 4 := Real.sqrt_le_sqrt (by norm_num)
+      _ = 2 := sqrt_four_eq
+  have hpos : (0 : ℝ) < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
+  linarith [one_div_le_one_div_of_le hpos h32]
+
+/-- `S₅ ≤ S₃` (since `1/√5 ≤ 1/2`, i.e. `2 ≤ √5`). -/
+theorem etaPartial_five_le_three : etaPartial 5 ≤ etaPartial 3 := by
+  rw [etaPartial_five_eq, etaPartial_three_eq]
+  have h25 : (2 : ℝ) ≤ Real.sqrt 5 := by
+    calc (2 : ℝ) = Real.sqrt 4 := sqrt_four_eq.symm
+      _ ≤ Real.sqrt 5 := Real.sqrt_le_sqrt (by norm_num)
+  have hle : (1 : ℝ) / Real.sqrt 5 ≤ 1 / 2 :=
+    one_div_le_one_div_of_le (by norm_num) h25
+  linarith
+
+/-- `S₄ ≤ S₆` (since `1/√5 ≥ 1/√6`, i.e. `√5 ≤ √6`). -/
+theorem etaPartial_four_le_six : etaPartial 4 ≤ etaPartial 6 := by
+  rw [etaPartial_four_eq, etaPartial_six_eq]
+  have h56 : Real.sqrt 5 ≤ Real.sqrt 6 := Real.sqrt_le_sqrt (by norm_num)
+  have hpos : (0 : ℝ) < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num)
+  have hle : (1 : ℝ) / Real.sqrt 6 ≤ 1 / Real.sqrt 5 :=
+    one_div_le_one_div_of_le hpos h56
+  linarith
+
+/-- `S₇ ≤ S₅` (since `1/√7 ≤ 1/√6`, i.e. `√6 ≤ √7`). -/
+theorem etaPartial_seven_le_five : etaPartial 7 ≤ etaPartial 5 := by
+  rw [etaPartial_seven_eq, etaPartial_five_eq]
+  have h67 : Real.sqrt 6 ≤ Real.sqrt 7 := Real.sqrt_le_sqrt (by norm_num)
+  have hpos : (0 : ℝ) < Real.sqrt 6 := Real.sqrt_pos.mpr (by norm_num)
+  have hle : (1 : ℝ) / Real.sqrt 7 ≤ 1 / Real.sqrt 6 :=
+    one_div_le_one_div_of_le hpos h67
+  linarith
+
+/-- `S₆ ≤ S₈` (since `1/√7 ≥ 1/√8`, i.e. `√7 ≤ √8`). -/
+theorem etaPartial_six_le_eight : etaPartial 6 ≤ etaPartial 8 := by
+  rw [etaPartial_six_eq, etaPartial_eight_eq]
+  have h78 : Real.sqrt 7 ≤ Real.sqrt 8 := Real.sqrt_le_sqrt (by norm_num)
+  have hpos : (0 : ℝ) < Real.sqrt 7 := Real.sqrt_pos.mpr (by norm_num)
+  have hle : (1 : ℝ) / Real.sqrt 8 ≤ 1 / Real.sqrt 7 :=
+    one_div_le_one_div_of_le hpos h78
+  linarith
+
+/-- `S₉ ≤ S₇` (since `1/3 ≤ 1/√8`, i.e. `√8 ≤ 3`). -/
+theorem etaPartial_nine_le_seven : etaPartial 9 ≤ etaPartial 7 := by
+  rw [etaPartial_nine_eq, etaPartial_seven_eq]
+  have h89 : Real.sqrt 8 ≤ 3 := by
+    calc Real.sqrt 8 ≤ Real.sqrt 9 := Real.sqrt_le_sqrt (by norm_num)
+      _ = 3 := sqrt_nine_eq
+  have hpos : (0 : ℝ) < Real.sqrt 8 := Real.sqrt_pos.mpr (by norm_num)
+  linarith [one_div_le_one_div_of_le hpos h89]
+
+/-- Full tightening chain `S₂ ≤ S₄ ≤ S₆ ≤ S₈`, `S₉ ≤ S₇ ≤ S₅ ≤ S₃`. -/
+theorem eta_half_tight_chain :
+    etaPartial 2 ≤ etaPartial 4 ∧ etaPartial 4 ≤ etaPartial 6 ∧
+    etaPartial 6 ≤ etaPartial 8 ∧ etaPartial 9 ≤ etaPartial 7 ∧
+    etaPartial 7 ≤ etaPartial 5 ∧ etaPartial 5 ≤ etaPartial 3 :=
+  ⟨etaPartial_two_le_four, etaPartial_four_le_six, etaPartial_six_le_eight,
+    etaPartial_nine_le_seven, etaPartial_seven_le_five, etaPartial_five_le_three⟩
+
+/-- TWO-SIDED `S₄/S₅` interval. -/
+theorem eta_half_two_sided_S4_S5 :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ etaPartial 4 ≤ L ∧ L ≤ etaPartial 5 ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, hL, eta_half_ge_S4 L hL, eta_half_le_S5 L hL, hpos⟩
+
+/-- TWO-SIDED `S₆/S₇` interval. -/
+theorem eta_half_two_sided_S6_S7 :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ etaPartial 6 ≤ L ∧ L ≤ etaPartial 7 ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, hL, eta_half_ge_S6 L hL, eta_half_le_S7 L hL, hpos⟩
+
+/-- TWO-SIDED `S₈/S₉` interval (tightest in this file). -/
+theorem eta_half_two_sided_S8_S9 :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ etaPartial 8 ≤ L ∧ L ≤ etaPartial 9 ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  exact ⟨L, hL, eta_half_ge_S8 L hL, eta_half_le_S9 L hL, hpos⟩
+
+/-- Width `S₅ - S₄ = 1/√5`. -/
+theorem etaPartial_five_sub_four :
+    etaPartial 5 - etaPartial 4 = 1 / Real.sqrt 5 := by
+  rw [etaPartial_five_eq, etaPartial_four_eq]
+  ring
+
+/-- Width `S₇ - S₆ = 1/√7`. -/
+theorem etaPartial_seven_sub_six :
+    etaPartial 7 - etaPartial 6 = 1 / Real.sqrt 7 := by
+  rw [etaPartial_seven_eq, etaPartial_six_eq]
+  ring
+
+/-- Width `S₉ - S₈ = 1/3`. -/
+theorem etaPartial_nine_sub_eight :
+    etaPartial 9 - etaPartial 8 = 1 / 3 := by
+  rw [etaPartial_nine_eq, etaPartial_eight_eq]
+  ring
+
+/-- Numeric width `S₅ - S₄ < 0.45` (`√5 > 2.23` since `2.23² = 4.9729 < 5`). -/
+theorem etaWidth_S4_S5_lt : etaPartial 5 - etaPartial 4 < 0.45 := by
+  rw [etaPartial_five_sub_four]
+  have h5 : (2.23 : ℝ) < Real.sqrt 5 := by
+    calc (2.23 : ℝ) = Real.sqrt (2.23 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 5 := Real.sqrt_lt_sqrt (by positivity) (by norm_num)
+  have hle : 1 / Real.sqrt 5 ≤ 1 / 2.23 :=
+    one_div_le_one_div_of_le (by norm_num) (le_of_lt h5)
+  calc (1 : ℝ) / Real.sqrt 5 ≤ 1 / 2.23 := hle
+    _ < 0.45 := by norm_num
+
+/-- Numeric width `S₇ - S₆ < 0.38` (`√7 > 2.64` since `2.64² = 6.9696 < 7`). -/
+theorem etaWidth_S6_S7_lt : etaPartial 7 - etaPartial 6 < 0.38 := by
+  rw [etaPartial_seven_sub_six]
+  have h7 : (2.64 : ℝ) < Real.sqrt 7 := by
+    calc (2.64 : ℝ) = Real.sqrt (2.64 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 7 := Real.sqrt_lt_sqrt (by positivity) (by norm_num)
+  have hle : 1 / Real.sqrt 7 ≤ 1 / 2.64 :=
+    one_div_le_one_div_of_le (by norm_num) (le_of_lt h7)
+  calc (1 : ℝ) / Real.sqrt 7 ≤ 1 / 2.64 := hle
+    _ < 0.38 := by norm_num
+
+/-- Numeric width `S₉ - S₈ = 1/3 < 0.334`. -/
+theorem etaWidth_S8_S9_lt : etaPartial 9 - etaPartial 8 < 0.334 := by
+  rw [etaPartial_nine_sub_eight]
+  norm_num
+
+#print axioms sqrt_four_eq
+#print axioms etaPartial_four_eq
+#print axioms eta_half_ge_even
+#print axioms eta_half_le_odd
+#print axioms eta_half_ge_S4
+#print axioms eta_half_le_S5
+#print axioms eta_half_two_sided_S4_S5
+#print axioms eta_half_two_sided_S6_S7
+#print axioms eta_half_two_sided_S8_S9
+#print axioms eta_half_tight_chain
+#print axioms etaWidth_S4_S5_lt
+#print axioms etaWidth_S6_S7_lt
+#print axioms etaWidth_S8_S9_lt
+
+/-!
+## Euler–Maclaurin / integral-remainder tightening of `L` (width `0.012 ≤ 0.05`).
+
+PREVIOUS STATE: `S₈ ≤ L ≤ S₉` with width `S₉ - S₈ = 1/3 ≈ 0.333`
+(`eta_half_two_sided_S8_S9`, `etaPartial_nine_sub_eight`). Pushing explicit
+partial sums further needs `n ≈ 28000` for `±0.003` (infeasible: one rigorous
+`√`-enclosure per term). This section builds the NEXT method: pair the series
+(`d_m = a_{2m} - a_{2m+1} ≥ 0`), identify `L = S_{2M} + T_M` with
+`T_M = ∑'_{m} d_{m+M}`, and bound `T_M` from BOTH sides.
+
+MATHLIB GREPS USED (all pre-existing, only called — no duplication):
+* integral test: `AntetoneOn.tsum_comp_add_le_integral`
+  (`Mathlib/Analysis/SumIntegralComparisons.lean:221`), same pattern as
+  `interval_arith.lean`'s `R00EtaConv.majorant_tsum_tail_le` (read-only reuse);
+* `integrableOn_Ioi_rpow_of_lt`, `integral_Ioi_rpow_of_lt`
+  (`Mathlib/Analysis/SpecialFunctions/ImproperIntegrals.lean:130,172`);
+* `Real.antitoneOn_rpow_Ioi_of_exponent_nonpos`
+  (`Mathlib/Analysis/SpecialFunctions/Pow/Real.lean:623`);
+* alternating-remainder API: `alternating_series_error_bound`
+  (`Mathlib/Analysis/SpecificLimits/Normed.lean:856`) needs `Summable`
+  (hence is inapplicable here — the eta series is NOT summable,
+  `eta_not_summable`); only the even/odd partial-sum bounds
+  (`Antitone.alternating_series_le_tendsto`,
+  `Antitone.tendsto_le_alternating_series`) apply, and those saturate at
+  width `a_N`. The paired series IS summable (`O(m^{-3/2})`), so both the
+  integral test and the convexity telescoping below apply to it.
+
+MACHINERY (general `M ≥ 1`):
+1. `etaPairR` (real pairs) + `etaPairR_upper`: `d_m ≤ (1/2)·(2m+1)^{-3/2}`
+   via the exact formula `1/√a - 1/√(a+1) = 1/((√a+√(a+1))·√a·√(a+1))`
+   (`invSqrt_pair_eq`), the real analogue of the `R00EtaConv.norm_etaPair_le`
+   MVT bound (here elementary — no complex MVT needed);
+2. `eta_tail_integral_bound` (`etaPair_tail_integral`): `T_M ≤ 1/√M`
+   (explicit `C = 1` in `C/√M`, i.e. `C = √2` in `C/√N` with `N = 2M`) via
+   `AntetoneOn.tsum_comp_add_le_integral` on `x^{-3/2}` — the required
+   integral-comparison tail bound of the form `‖L - S_N‖ ≤ C/√N`
+   (`eta_limit_norm_sub_le`);
+3. SHARPER two-sided convexity telescoping (`sqrt_convex_step`: `1/√x` is
+   discretely convex, `1/√a + 1/√(a+2) ≥ 2/√(a+1)`): gaps
+   `g_j = 1/√j - 1/√(j+1)` decrease, so
+   `1/(2√(2M+1)) ≤ T_M ≤ 1/(2√(2M))` (`etaPair_tail_lower/upper`).
+   This is the discrete Euler–Maclaurin idea at order 0 and is asymptotically
+   sharp (both constants are best possible).
+
+APPLICATION (`M = 4`, i.e. `N = 8`): rigorous `√`-enclosures give
+`S₈ ∈ [0.4328, 0.4344]`; tail `T₄ ∈ [1/6, 0.177]`; hence
+`L ∈ [0.5994, 0.6114]` (`eta_half_tight_best`), width `0.012 ≤ 0.05`
+— a 27× improvement over `1/3`. Only the `Tendsto` form is used.
+-/
+
+/-- Real paired eta increment `d_m = 1/√(2m+1) - 1/√(2m+2)` (all terms `≥ 0`). -/
+noncomputable def etaPairR (m : ℕ) : ℝ :=
+  1 / Real.sqrt (((2 * m + 1 : ℕ)) : ℝ) - 1 / Real.sqrt (((2 * m + 2 : ℕ)) : ℝ)
+
+/-- Inverse-sqrt helper `f(j) = 1/√j`. -/
+noncomputable def etaInvSqrt (j : ℕ) : ℝ := 1 / Real.sqrt ((j : ℝ))
+
+/-- Gap helper `g_j = f(j) - f(j+1)`. -/
+noncomputable def etaGap (j : ℕ) : ℝ := etaInvSqrt j - etaInvSqrt (j + 1)
+
+/-- Discrete convexity of `x ↦ 1/√x`: for `1 ≤ a`,
+    `1/√a + 1/√(a+2) ≥ 2/√(a+1)`.
+    Proof: it suffices `√(a+1)·(√a+√(a+2)) ≥ 2·√a·√(a+2)` (then clear
+    denominators); the squared difference is
+    `2·((b-t)·(b+2t)) ≥ 0` with `b = a+1`, `t = √a·√(a+2) = √(a(a+2)) ≤ b`. -/
+theorem sqrt_convex_step {a : ℝ} (ha : 1 ≤ a) :
+    2 / Real.sqrt (a + 1) ≤ 1 / Real.sqrt a + 1 / Real.sqrt (a + 2) := by
+  have ha0 : (0 : ℝ) < a := by linarith
+  have hb0 : (0 : ℝ) < a + 1 := by linarith
+  have hc0 : (0 : ℝ) < a + 2 := by linarith
+  have hsa : (0 : ℝ) < Real.sqrt a := Real.sqrt_pos.mpr ha0
+  have hsb : (0 : ℝ) < Real.sqrt (a + 1) := Real.sqrt_pos.mpr hb0
+  have hsc : (0 : ℝ) < Real.sqrt (a + 2) := Real.sqrt_pos.mpr hc0
+  have hmul : Real.sqrt a * Real.sqrt (a + 2) = Real.sqrt (a * (a + 2)) :=
+    (Real.sqrt_mul (le_of_lt ha0) _).symm
+  have hle : Real.sqrt (a * (a + 2)) ≤ a + 1 := by
+    calc Real.sqrt (a * (a + 2)) ≤ Real.sqrt ((a + 1) ^ 2) :=
+          Real.sqrt_le_sqrt (by nlinarith)
+      _ = a + 1 := Real.sqrt_sq (by linarith)
+  have hsq : (2 * Real.sqrt a * Real.sqrt (a + 2)) ^ 2
+      ≤ (Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))) ^ 2 := by
+    have e : (Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))) ^ 2
+          - (2 * Real.sqrt a * Real.sqrt (a + 2)) ^ 2
+        = 2 * (((a + 1) - Real.sqrt a * Real.sqrt (a + 2))
+          * ((a + 1) + 2 * (Real.sqrt a * Real.sqrt (a + 2)))) := by
+      rw [mul_pow, Real.sq_sqrt (le_of_lt hb0)]
+      have e13 : (Real.sqrt a + Real.sqrt (a + 2)) ^ 2
+          = (a + (a + 2)) + 2 * (Real.sqrt a * Real.sqrt (a + 2)) := by
+        have r : (Real.sqrt a + Real.sqrt (a + 2)) ^ 2
+            = (Real.sqrt a) ^ 2 + 2 * (Real.sqrt a * Real.sqrt (a + 2))
+              + (Real.sqrt (a + 2)) ^ 2 := by ring
+        rw [r, Real.sq_sqrt (le_of_lt ha0), Real.sq_sqrt (le_of_lt hc0)]
+        ring
+      rw [e13]
+      ring
+    have hnn : (0 : ℝ) ≤ (Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))) ^ 2
+          - (2 * Real.sqrt a * Real.sqrt (a + 2)) ^ 2 := by
+      rw [e]
+      have ht0 : (0 : ℝ) ≤ Real.sqrt a * Real.sqrt (a + 2) :=
+        mul_nonneg (le_of_lt hsa) (le_of_lt hsc)
+      have hbt : Real.sqrt a * Real.sqrt (a + 2) ≤ a + 1 := by
+        rw [hmul]; exact hle
+      exact mul_nonneg (by norm_num) (mul_nonneg (by linarith) (by linarith))
+    linarith
+  have hnum : 2 * Real.sqrt a * Real.sqrt (a + 2)
+      ≤ Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2)) := by
+    have hX : (0 : ℝ) ≤ 2 * Real.sqrt a * Real.sqrt (a + 2) :=
+      mul_nonneg (mul_nonneg (by norm_num) (le_of_lt hsa)) (le_of_lt hsc)
+    have hY : (0 : ℝ) ≤ Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2)) :=
+      mul_nonneg (le_of_lt hsb) (add_nonneg (le_of_lt hsa) (le_of_lt hsc))
+    have eX : 2 * Real.sqrt a * Real.sqrt (a + 2)
+        = Real.sqrt ((2 * Real.sqrt a * Real.sqrt (a + 2)) ^ 2) :=
+      (Real.sqrt_sq hX).symm
+    have eY : Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))
+        = Real.sqrt ((Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))) ^ 2) :=
+      (Real.sqrt_sq hY).symm
+    rw [eX, eY]
+    exact Real.sqrt_le_sqrt hsq
+  have hden : (0 : ℝ) < Real.sqrt a * Real.sqrt (a + 2) * Real.sqrt (a + 1) :=
+    mul_pos (mul_pos hsa hsc) hsb
+  have ha' : Real.sqrt a ≠ 0 := ne_of_gt hsa
+  have hb' : Real.sqrt (a + 1) ≠ 0 := ne_of_gt hsb
+  have hc' : Real.sqrt (a + 2) ≠ 0 := ne_of_gt hsc
+  have hclear : 1 / Real.sqrt a + 1 / Real.sqrt (a + 2) - 2 / Real.sqrt (a + 1)
+      = (Real.sqrt (a + 1) * (Real.sqrt a + Real.sqrt (a + 2))
+        - 2 * Real.sqrt a * Real.sqrt (a + 2))
+        / (Real.sqrt a * Real.sqrt (a + 2) * Real.sqrt (a + 1)) := by
+    field_simp
+    ring
+  have hnn2 : (0 : ℝ) ≤ 1 / Real.sqrt a + 1 / Real.sqrt (a + 2)
+      - 2 / Real.sqrt (a + 1) := by
+    rw [hclear]
+    exact div_nonneg (by linarith) (le_of_lt hden)
+  linarith
+
+/-- Gap decrease from convexity: `g(a) ≥ g(a+1)` for `1 ≤ a`. -/
+theorem invSqrt_gap_anti {a : ℝ} (ha : 1 ≤ a) :
+    1 / Real.sqrt (a + 1) - 1 / Real.sqrt (a + 2)
+      ≤ 1 / Real.sqrt a - 1 / Real.sqrt (a + 1) := by
+  have h := sqrt_convex_step ha
+  have e : (2 : ℝ) / Real.sqrt (a + 1)
+      = 1 / Real.sqrt (a + 1) + 1 / Real.sqrt (a + 1) := by ring
+  rw [e] at h
+  linarith
+
+/-- `etaInvSqrt` is nonnegative. -/
+theorem etaInvSqrt_nonneg (j : ℕ) : 0 ≤ etaInvSqrt j := by
+  simp only [etaInvSqrt]
+  exact one_div_nonneg.mpr (Real.sqrt_nonneg _)
+
+/-- Gaps are nonnegative for `j ≥ 1`. -/
+theorem etaGap_nonneg {j : ℕ} (hj : 1 ≤ j) : 0 ≤ etaGap j := by
+  have ha : (1 : ℝ) ≤ ((((j : ℕ)) : ℝ)) := by exact_mod_cast hj
+  have ha0 : (0 : ℝ) < ((((j : ℕ)) : ℝ)) := by linarith
+  have e1 : ((((j + 1 : ℕ)) : ℝ)) = ((((j : ℕ)) : ℝ)) + 1 := by push_cast; ring
+  have hle : Real.sqrt ((((j : ℕ)) : ℝ)) ≤ Real.sqrt ((((j + 1 : ℕ)) : ℝ)) := by
+    apply Real.sqrt_le_sqrt
+    rw [e1]
+    linarith
+  have h := one_div_le_one_div_of_le (Real.sqrt_pos.mpr ha0) hle
+  simp only [etaGap, etaInvSqrt]
+  linarith
+
+/-- Gaps decrease: `g_{j+1} ≤ g_j` for `j ≥ 1`. -/
+theorem etaGap_anti {j : ℕ} (hj : 1 ≤ j) : etaGap (j + 1) ≤ etaGap j := by
+  have ha : (1 : ℝ) ≤ ((((j : ℕ)) : ℝ)) := by exact_mod_cast hj
+  have e1 : ((((j + 1 : ℕ)) : ℝ)) = ((((j : ℕ)) : ℝ)) + 1 := by push_cast; ring
+  have e2 : ((((j + 1 + 1 : ℕ)) : ℝ)) = ((((j : ℕ)) : ℝ)) + 2 := by push_cast; ring
+  have h := invSqrt_gap_anti ha
+  simp only [etaGap, etaInvSqrt, e1, e2]
+  linarith
+
+/-- Real pairs are nonnegative. -/
+theorem etaPairR_nonneg (m : ℕ) : 0 ≤ etaPairR m := by
+  simp only [etaPairR]
+  have ha : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hab : ((((2 * m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have h := one_div_le_one_div_of_le (Real.sqrt_pos.mpr ha)
+    (Real.sqrt_le_sqrt hab)
+  linarith
+
+/-- A real pair is the gap at the even index: `d_m = g_{2m+1}`. -/
+theorem etaPairR_eq_gap (m : ℕ) : etaPairR m = etaGap (2 * m + 1) := by
+  have e : 2 * m + 1 + 1 = 2 * m + 2 := by omega
+  simp only [etaPairR, etaGap, etaInvSqrt, e]
+
+/-- Exact pair formula: `1/√a - 1/√b = 1/((√a+√b)·√a·√b)` for `b = a+1`. -/
+theorem invSqrt_pair_eq {a b : ℝ} (ha : 0 < a) (hb : b = a + 1) :
+    1 / Real.sqrt a - 1 / Real.sqrt b
+      = 1 / ((Real.sqrt a + Real.sqrt b) * (Real.sqrt a * Real.sqrt b)) := by
+  have hb0 : (0 : ℝ) < b := by linarith
+  have hsa : Real.sqrt a ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr ha)
+  have hsb : Real.sqrt b ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr hb0)
+  have hsq : (Real.sqrt b - Real.sqrt a) * (Real.sqrt a + Real.sqrt b) = 1 := by
+    have e : (Real.sqrt b - Real.sqrt a) * (Real.sqrt a + Real.sqrt b)
+        = (Real.sqrt b) ^ 2 - (Real.sqrt a) ^ 2 := by ring
+    rw [e, Real.sq_sqrt (le_of_lt hb0), Real.sq_sqrt (le_of_lt ha), hb]
+    ring
+  have hD : (Real.sqrt a + Real.sqrt b) * (Real.sqrt a * Real.sqrt b) ≠ 0 := by
+    apply ne_of_gt
+    exact mul_pos (add_pos (Real.sqrt_pos.mpr ha) (Real.sqrt_pos.mpr hb0))
+      (mul_pos (Real.sqrt_pos.mpr ha) (Real.sqrt_pos.mpr hb0))
+  rw [eq_div_iff hD]
+  have e2 : (1 / Real.sqrt a - 1 / Real.sqrt b)
+        * ((Real.sqrt a + Real.sqrt b) * (Real.sqrt a * Real.sqrt b))
+      = (Real.sqrt b - Real.sqrt a) * (Real.sqrt a + Real.sqrt b) := by
+    field_simp
+  rw [e2]
+  exact hsq
+
+/-- M-test majorant for real pairs: `d_m ≤ (1/2)·(2m+1)^{-3/2}`
+    (real analogue of `R00EtaConv.norm_etaPair_le`, proved elementarily). -/
+theorem etaPairR_upper (m : ℕ) :
+    etaPairR m ≤ (1 / 2 : ℝ) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) := by
+  have ha : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hb : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hb_eq : ((((2 * m + 2 : ℕ)) : ℝ)) = ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by
+    have e : 2 * m + 1 + 1 = 2 * m + 2 := by omega
+    calc ((((2 * m + 2 : ℕ)) : ℝ)) = ((((2 * m + 1 + 1 : ℕ)) : ℝ)) := by rw [e]
+      _ = ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by rw [Nat.cast_add, Nat.cast_one]
+  have hform : 1 / Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        - 1 / Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ))
+      = 1 / ((Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        + Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)))
+        * (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          * Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)))) :=
+    invSqrt_pair_eq ha hb_eq
+  have hsqrt_le : Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+      ≤ Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    apply Real.sqrt_le_sqrt
+    exact Nat.cast_le.mpr (by omega)
+  have hsum_ge : 2 * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+      ≤ Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        + Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)) := by linarith
+  have hrpow : ((((2 * m + 1 : ℕ)) : ℝ)) * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+      = ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ) := by
+    have h1 : ((((2 * m + 1 : ℕ)) : ℝ)) ^ (1 : ℝ)
+          * ((((2 * m + 1 : ℕ)) : ℝ)) ^ ((1 / 2 : ℝ))
+        = ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ) := by
+      rw [← Real.rpow_add ha]
+      congr 1
+      norm_num
+    have h2 : ((((2 * m + 1 : ℕ)) : ℝ)) * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        = ((((2 * m + 1 : ℕ)) : ℝ)) ^ (1 : ℝ)
+          * ((((2 * m + 1 : ℕ)) : ℝ)) ^ ((1 / 2 : ℝ)) := by
+      rw [Real.rpow_one, Real.sqrt_eq_rpow]
+    rw [h2]
+    exact h1
+  have hden_ge : 2 * ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ)
+      ≤ (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        + Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)))
+        * (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          * Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ))) := by
+    have hA := hsum_ge
+    have hB : Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        ≤ Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          * Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)) :=
+      mul_le_mul_of_nonneg_left hsqrt_le (Real.sqrt_nonneg _)
+    have hC : (2 : ℝ) * ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ)
+        = (2 * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ)))
+          * (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+            * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))) := by
+      have hsq1 : Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+            * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          = ((((2 * m + 1 : ℕ)) : ℝ)) := by
+        rw [← Real.sqrt_mul (le_of_lt ha)]
+        have e : ((((2 * m + 1 : ℕ)) : ℝ)) * ((((2 * m + 1 : ℕ)) : ℝ))
+            = ((((2 * m + 1 : ℕ)) : ℝ)) ^ 2 := by ring
+        rw [e, Real.sqrt_sq (le_of_lt ha)]
+      have hrw : ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ)
+          = Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+            * (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+              * Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))) := by
+        rw [← hrpow, hsq1]
+        ring
+      rw [hrw]
+      ring
+    rw [hC]
+    exact mul_le_mul hA hB
+      (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
+      (add_nonneg (le_of_lt (Real.sqrt_pos.mpr ha))
+        (le_of_lt (Real.sqrt_pos.mpr hb)))
+  have h2pos : (0 : ℝ) < 2 * ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ) := by
+    apply mul_pos (by norm_num)
+    exact Real.rpow_pos_of_pos ha _
+  have hexp : ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-3 / 2 : ℝ)
+      = (((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ))⁻¹ := by
+    have eR : (-3 / 2 : ℝ) = -((3 / 2 : ℝ)) := by norm_num
+    rw [eR]
+    exact Real.rpow_neg (le_of_lt ha) _
+  have e3 : (1 : ℝ) / (2 * ((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ))
+      = (1 / 2) * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (3 / 2 : ℝ))⁻¹ := by
+    rw [one_div, mul_inv, one_div]
+  have hmain : 1 / ((Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+        + Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ)))
+        * (Real.sqrt ((((2 * m + 1 : ℕ)) : ℝ))
+          * Real.sqrt ((((2 * m + 2 : ℕ)) : ℝ))))
+      ≤ (1 / 2) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) := by
+    rw [hexp, ← e3]
+    exact one_div_le_one_div_of_le h2pos hden_ge
+  simp only [etaPairR]
+  rw [hform]
+  exact hmain
+
+/-- The real paired series is summable (M-test vs `p = 3/2 > 1`). -/
+theorem summable_etaPairR : Summable etaPairR := by
+  have hp : (1 : ℝ) < 3 / 2 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (3 / 2 : ℝ)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp
+  have hbaseS : Summable (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) := by
+    have heq : (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)))
+        = (fun m : ℕ => ((((m + 1 : ℕ)) : ℝ) ^ (3 / 2 : ℝ))⁻¹) := by
+      funext m
+      have eR : (-3 / 2 : ℝ) = -((3 / 2 : ℝ)) := by norm_num
+      rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+    rw [heq]
+    exact (summable_nat_add_iff 1).mpr hbase
+  have hC : Summable
+      (fun m : ℕ => (1 / 2 : ℝ) * ((((m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) :=
+    hbaseS.mul_left _
+  refine Summable.of_nonneg_of_le (fun m => etaPairR_nonneg m) (fun m => ?_) hC
+  have h1 := etaPairR_upper m
+  have hm : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hpos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hr : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))
+      ≤ ((((m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_nonpos hpos hm (by norm_num)
+  calc etaPairR m ≤ (1 / 2) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) := h1
+    _ ≤ (1 / 2) * ((((m + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hr (by norm_num)
+
+/-- Complex pairs at `s = 1/2` are the real pairs coerced
+    (reuses `etaDirichletTerm_half_eq`, `etaDirichlet_even_partial`). -/
+theorem etaPairTerm_half_eq (m : ℕ) :
+    etaPairTerm (1 / 2 : ℂ) m = ((etaPairR m : ℝ) : ℂ) := by
+  show etaDirichletTerm (1 / 2 : ℂ) (2 * m) + etaDirichletTerm (1 / 2 : ℂ) (2 * m + 1) = _
+  rw [etaDirichletTerm_half_eq, etaDirichletTerm_half_eq]
+  have e1 : (((-1 : ℤ) ^ (2 * m) : ℝ)) = 1 := by
+    have h2 : (((-1 : ℤ) ^ (2 * m) : ℝ)) = (-1 : ℝ) ^ (2 * m) := by push_cast; ring
+    rw [h2]
+    exact Even.neg_one_pow ⟨m, by ring⟩
+  have e2 : (((-1 : ℤ) ^ (2 * m + 1) : ℝ)) = -1 := by
+    have h2 : (((-1 : ℤ) ^ (2 * m + 1) : ℝ)) = (-1 : ℝ) ^ (2 * m + 1) := by
+      push_cast; ring
+    rw [h2]
+    exact Odd.neg_one_pow ⟨m, rfl⟩
+  have ec1 : ((((2 * m : ℕ)) : ℝ) + 1) = ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    push_cast; ring
+  have ec2 : ((((2 * m + 1 : ℕ)) : ℝ) + 1) = ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    push_cast; ring
+  have hR : etaTerm (2 * m) + etaTerm (2 * m + 1) = etaPairR m := by
+    simp only [etaTerm, etaPairR, e1, e2, ec1, ec2]
+    ring
+  simp only [etaTermℂ, ← Complex.ofReal_add, hR]
+
+/-- Even real partials are sums of real pairs (via the complex transfer). -/
+theorem etaPartial_even_eq (M : ℕ) :
+    etaPartial (2 * M) = ∑ m ∈ Finset.range M, etaPairR m := by
+  have h := etaDirichlet_even_partial (1 / 2 : ℂ) M
+  have hLHS : (∑ k ∈ Finset.range (2 * M), etaDirichletTerm (1 / 2 : ℂ) k)
+      = etaPartialℂ (2 * M) :=
+    Finset.sum_congr rfl (fun k _ => etaDirichletTerm_half_eq k)
+  have hRHS : (∑ m ∈ Finset.range M, etaPairTerm (1 / 2 : ℂ) m)
+      = ((((∑ m ∈ Finset.range M, etaPairR m : ℝ))) : ℂ) := by
+    rw [Complex.ofReal_sum]
+    exact Finset.sum_congr rfl (fun m _ => etaPairTerm_half_eq m)
+  rw [hLHS, hRHS, etaPartialℂ_eq_coe] at h
+  exact Complex.ofReal_injective h
+
+/-- Every `Tendsto` eta limit equals the real pair tsum. -/
+theorem eta_limit_eq_pair_tsum (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) :
+    L = ∑' m, etaPairR m := by
+  have heq : (fun M : ℕ => etaPartial (2 * M))
+      = (fun M : ℕ => ∑ i ∈ Finset.range (2 * M),
+        ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ)) := by
+    funext M
+    simp only [etaPartial]
+  have hev : Tendsto (fun M : ℕ => etaPartial (2 * M)) atTop (𝓝 L) := by
+    rw [heq]
+    exact hL.comp tendsto_two_mul_atTop
+  have hpair : Tendsto (fun M : ℕ => ∑ m ∈ Finset.range M, etaPairR m)
+      atTop (𝓝 (∑' m, etaPairR m)) :=
+    summable_etaPairR.hasSum.tendsto_sum_nat
+  have hsame : (fun M : ℕ => ∑ m ∈ Finset.range M, etaPairR m)
+      = (fun M : ℕ => etaPartial (2 * M)) := by
+    funext M
+    exact (etaPartial_even_eq M).symm
+  rw [hsame] at hpair
+  exact tendsto_nhds_unique hev hpair
+
+/-- Split: `L = S_{2M} + T_M` with `T_M = ∑'_{m} d_{m+M}`. -/
+theorem eta_limit_split (L : ℝ) (M : ℕ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) :
+    L = etaPartial (2 * M) + ∑' m, etaPairR (m + M) := by
+  have hLtsum := eta_limit_eq_pair_tsum L hL
+  have hsplit : (∑ m ∈ Finset.range M, etaPairR m) + (∑' m, etaPairR (m + M))
+      = ∑' m, etaPairR m :=
+    summable_etaPairR.sum_add_tsum_nat_add M
+  have h3 : ∑ m ∈ Finset.range M, etaPairR m = etaPartial (2 * M) :=
+    (etaPartial_even_eq M).symm
+  linarith
+
+/-- Upper telescope: consecutive gap-pairs telescope to `f(2M) - f(2M+2K)`. -/
+theorem pairBlock_upper_telescope (M K : ℕ) :
+    ∑ m ∈ Finset.range K, (etaGap (2 * (m + M)) + etaGap (2 * (m + M) + 1))
+      = etaInvSqrt (2 * M) - etaInvSqrt (2 * M + 2 * K) := by
+  induction K with
+  | zero =>
+    simp only [Finset.sum_range_zero]
+    have e : 2 * M + 2 * 0 = 2 * M := by ring
+    rw [e, sub_self]
+  | succ K ih =>
+    rw [Finset.sum_range_succ, ih]
+    simp only [etaGap]
+    have eA : 2 * (K + M) = 2 * M + 2 * K := by ring
+    have eB : 2 * (K + M) + 1 = 2 * M + 2 * K + 1 := by ring
+    have eC : 2 * (K + M) + 1 + 1 = 2 * M + 2 * K + 2 := by ring
+    have eD : 2 * M + 2 * (K + 1) = 2 * M + 2 * K + 2 := by ring
+    rw [eC, eB, eA, eD]
+    ring
+
+/-- Lower telescope: shifted gap-pairs telescope to `f(2M+1) - f(2M+2K+1)`. -/
+theorem pairBlock_lower_telescope (M K : ℕ) :
+    ∑ m ∈ Finset.range K, (etaGap (2 * (m + M) + 1) + etaGap (2 * (m + M) + 2))
+      = etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1) := by
+  induction K with
+  | zero =>
+    simp only [Finset.sum_range_zero]
+    have e : 2 * M + 2 * 0 + 1 = 2 * M + 1 := by ring
+    rw [e, sub_self]
+  | succ K ih =>
+    rw [Finset.sum_range_succ, ih]
+    simp only [etaGap]
+    have eX : 2 * (K + M) = 2 * M + 2 * K := by ring
+    have s1 : (2 * M + 2 * K) + 1 + 1 = 2 * M + 2 * K + 2 := by ring
+    have s2 : (2 * M + 2 * K) + 2 + 1 = 2 * M + 2 * K + 3 := by ring
+    have eE : 2 * M + 2 * (K + 1) + 1 = 2 * M + 2 * K + 3 := by ring
+    rw [eX, s1, s2, eE]
+    ring
+
+/-- UPPER pair-tail bound (convexity telescoping): `T_M ≤ 1/(2√(2M))`.
+    Asymptotically sharp. From `d_m = g_{2m+1} ≤ g_{2m}` the finite tail
+    satisfies `2·Σ ≤ f(2M) - f(2M+2K) ≤ f(2M)`; pass to the limit. -/
+theorem etaPair_tail_upper {M : ℕ} (hM : 1 ≤ M) :
+    ∑' m, etaPairR (m + M) ≤ etaInvSqrt (2 * M) / 2 := by
+  have hshift : Summable (fun m => etaPairR (m + M)) :=
+    (summable_nat_add_iff M).mpr summable_etaPairR
+  have hfin : ∀ K : ℕ, ∑ m ∈ Finset.range K, etaPairR (m + M)
+      ≤ etaInvSqrt (2 * M) / 2 := by
+    intro K
+    have hterm : ∀ m : ℕ, 2 * etaPairR (m + M)
+        ≤ etaGap (2 * (m + M)) + etaGap (2 * (m + M) + 1) := by
+      intro m
+      have hg : etaGap (2 * (m + M) + 1) ≤ etaGap (2 * (m + M)) :=
+        etaGap_anti (show 1 ≤ 2 * (m + M) by omega)
+      have hrel : etaPairR (m + M) = etaGap (2 * (m + M) + 1) :=
+        etaPairR_eq_gap (m + M)
+      linarith
+    have hsum : ∑ m ∈ Finset.range K, (2 * etaPairR (m + M))
+        ≤ ∑ m ∈ Finset.range K, (etaGap (2 * (m + M)) + etaGap (2 * (m + M) + 1)) :=
+      Finset.sum_le_sum (fun m _ => hterm m)
+    have h3 : ∑ m ∈ Finset.range K, (etaGap (2 * (m + M)) + etaGap (2 * (m + M) + 1))
+        = etaInvSqrt (2 * M) - etaInvSqrt (2 * M + 2 * K) :=
+      pairBlock_upper_telescope M K
+    have h2 : 2 * (∑ m ∈ Finset.range K, etaPairR (m + M))
+        = ∑ m ∈ Finset.range K, (2 * etaPairR (m + M)) := by
+      rw [Finset.mul_sum]
+    have hFnn : (0 : ℝ) ≤ etaInvSqrt (2 * M + 2 * K) := etaInvSqrt_nonneg _
+    linarith
+  have hlim : Tendsto (fun K => ∑ m ∈ Finset.range K, etaPairR (m + M))
+      atTop (𝓝 (∑' m, etaPairR (m + M))) :=
+    hshift.hasSum.tendsto_sum_nat
+  exact le_of_tendsto hlim (Eventually.of_forall hfin)
+
+/-- LOWER pair-tail bound (convexity telescoping): `1/(2√(2M+1)) ≤ T_M`.
+    From `d_m ≥ (g_{2m+1}+g_{2m+2})/2` the finite tail satisfies
+    `Σ ≥ (f(2M+1) - f(2M+2K+1))/2`; the subtrahend tends to `0`. -/
+theorem etaPair_tail_lower {M : ℕ} (hM : 1 ≤ M) :
+    etaInvSqrt (2 * M + 1) / 2 ≤ ∑' m, etaPairR (m + M) := by
+  have hshift : Summable (fun m => etaPairR (m + M)) :=
+    (summable_nat_add_iff M).mpr summable_etaPairR
+  have hfin : ∀ K : ℕ, (etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1)) / 2
+      ≤ ∑ m ∈ Finset.range K, etaPairR (m + M) := by
+    intro K
+    have hterm : ∀ m : ℕ, (etaGap (2 * (m + M) + 1) + etaGap (2 * (m + M) + 2))
+        ≤ 2 * etaPairR (m + M) := by
+      intro m
+      have hg : etaGap (2 * (m + M) + 2) ≤ etaGap (2 * (m + M) + 1) :=
+        etaGap_anti (show 1 ≤ 2 * (m + M) + 1 by omega)
+      have hrel : etaPairR (m + M) = etaGap (2 * (m + M) + 1) :=
+        etaPairR_eq_gap (m + M)
+      linarith
+    have hsum : ∑ m ∈ Finset.range K,
+          (etaGap (2 * (m + M) + 1) + etaGap (2 * (m + M) + 2))
+        ≤ ∑ m ∈ Finset.range K, (2 * etaPairR (m + M)) :=
+      Finset.sum_le_sum (fun m _ => hterm m)
+    have h3 : ∑ m ∈ Finset.range K,
+          (etaGap (2 * (m + M) + 1) + etaGap (2 * (m + M) + 2))
+        = etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1) :=
+      pairBlock_lower_telescope M K
+    have h2 : 2 * (∑ m ∈ Finset.range K, etaPairR (m + M))
+        = ∑ m ∈ Finset.range K, (2 * etaPairR (m + M)) := by
+      rw [Finset.mul_sum]
+    linarith
+  have hzero : Tendsto (fun K : ℕ => etaInvSqrt (2 * M + 2 * K + 1)) atTop (𝓝 0) := by
+    have heq : (fun K : ℕ => etaInvSqrt (2 * M + 2 * K + 1))
+        = (fun K : ℕ => 1 / Real.sqrt ((((2 * (M + K) : ℕ)) : ℝ) + 1)) := by
+      funext K
+      simp only [etaInvSqrt]
+      congr 1
+      congr 1
+      have eN : 2 * M + 2 * K + 1 = 2 * (M + K) + 1 := by ring
+      rw [eN]
+      push_cast
+      ring
+    rw [heq]
+    have hmap : Tendsto (fun K : ℕ => 2 * (M + K)) atTop atTop := by
+      apply Filter.tendsto_atTop_mono (fun K => show K ≤ 2 * (M + K) by omega)
+      exact Filter.tendsto_id
+    have hcomp := eta_terms_tendsto_zero.comp hmap
+    simpa [Function.comp_def] using hcomp
+  have hclim : Tendsto
+      (fun K : ℕ => (etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1)) / 2)
+      atTop (𝓝 (etaInvSqrt (2 * M + 1) / 2)) := by
+    have h1 : Tendsto (fun K : ℕ => etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1))
+        atTop (𝓝 (etaInvSqrt (2 * M + 1) - 0)) :=
+      tendsto_const_nhds.sub hzero
+    have h2 := h1.div_const (2 : ℝ)
+    simpa using h2
+  have hTall : ∀ K : ℕ, (etaInvSqrt (2 * M + 1) - etaInvSqrt (2 * M + 2 * K + 1)) / 2
+      ≤ ∑' m, etaPairR (m + M) := by
+    intro K
+    have hPK := hfin K
+    have hPT : ∑ m ∈ Finset.range K, etaPairR (m + M) ≤ ∑' m, etaPairR (m + M) :=
+      Summable.sum_le_tsum (Finset.range K) (fun m _ => etaPairR_nonneg _) hshift
+    linarith
+  exact le_of_tendsto hclim (Eventually.of_forall hTall)
+
+/-- Majorant `x^{-3/2}` antitone on `Ici M` (`1 ≤ M`)
+    (mirrors `R00EtaConv.majorant_antitone`). -/
+theorem etaMajorant_antitone {M : ℕ} (hM : 1 ≤ M) :
+    AntitoneOn (fun x : ℝ => x ^ (-3 / 2 : ℝ)) (Set.Ici ((((M : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num)).mono
+  intro x hx
+  have hM0 : (0 : ℝ) < ((((M : ℕ)) : ℝ)) := by exact_mod_cast (by omega : 0 < M)
+  simp only [Set.mem_Ici] at hx
+  simp only [Set.mem_Ioi]
+  linarith
+
+/-- Majorant integrable on `Ioi M`. -/
+theorem etaMajorant_integrable {M : ℕ} (hM : 1 ≤ M) :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-3 / 2 : ℝ))
+      (Set.Ioi ((((M : ℕ)) : ℝ))) :=
+  integrableOn_Ioi_rpow_of_lt (by norm_num)
+    (by exact_mod_cast (by omega : 0 < M))
+
+/-- Majorant nonnegative on `Ioi M`. -/
+theorem etaMajorant_nonneg {M : ℕ} :
+    ∀ t ∈ Set.Ioi ((((M : ℕ)) : ℝ)), (0 : ℝ) ≤ t ^ (-3 / 2 : ℝ) := by
+  intro t ht
+  exact Real.rpow_nonneg
+    (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _
+
+/-- Integral value `∫_{M}^{∞} x^{-3/2} = 2/√M` (mirrors
+    `R00EtaConv.majorant_integral_le`, here exact). -/
+theorem etaMajorant_integral {M : ℕ} (hM : 1 ≤ M) :
+    (∫ x : ℝ in Set.Ioi ((((M : ℕ)) : ℝ)), x ^ (-3 / 2 : ℝ))
+      = 2 / Real.sqrt ((((M : ℕ)) : ℝ)) := by
+  have hM0 : (0 : ℝ) < ((((M : ℕ)) : ℝ)) := by exact_mod_cast (by omega : 0 < M)
+  have h := integral_Ioi_rpow_of_lt (a := (-3 / 2 : ℝ)) (by norm_num)
+    (c := ((((M : ℕ)) : ℝ))) hM0
+  rw [h]
+  have e : (-3 / 2 : ℝ) + 1 = -(1 / 2 : ℝ) := by norm_num
+  rw [e]
+  have hMne : Real.sqrt ((((M : ℕ)) : ℝ)) ≠ 0 :=
+    ne_of_gt (Real.sqrt_pos.mpr hM0)
+  have er : ((((M : ℕ)) : ℝ)) ^ (-(1 / 2 : ℝ)) = (Real.sqrt ((((M : ℕ)) : ℝ)))⁻¹ := by
+    rw [Real.rpow_neg (Nat.cast_nonneg _), ← Real.sqrt_eq_rpow]
+  rw [er]
+  field_simp
+
+/-- INTEGRAL pair-tail bound: `T_M ≤ 1/√M` (explicit `C = 1`), via
+    `AntetoneOn.tsum_comp_add_le_integral` — the required bound of the form
+    `‖L - S_N‖ ≤ C/√N` (here `N = 2M`, so `C = √2` in `C/√N`). -/
+theorem etaPair_tail_integral {M : ℕ} (hM : 1 ≤ M) :
+    ∑' m, etaPairR (m + M) ≤ 1 / Real.sqrt ((((M : ℕ)) : ℝ)) := by
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (3 / 2 : ℝ)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr (by norm_num)
+  have hshift : Summable (fun m => etaPairR (m + M)) :=
+    (summable_nat_add_iff M).mpr summable_etaPairR
+  have hbaseS : Summable (fun m : ℕ => ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) := by
+    have heq : (fun m : ℕ => ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)))
+        = (fun m : ℕ => ((((m + (M + 1) : ℕ)) : ℝ) ^ (3 / 2 : ℝ))⁻¹) := by
+      funext m
+      have eN : m + M + 1 = m + (M + 1) := by omega
+      rw [eN]
+      have eR : (-3 / 2 : ℝ) = -((3 / 2 : ℝ)) := by norm_num
+      rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+    rw [heq]
+    exact (summable_nat_add_iff (f := fun n : ℕ => ((((n : ℝ)) ^ (3 / 2 : ℝ)))⁻¹)
+      (M + 1)).mpr hbase
+  have hC : Summable
+      (fun m : ℕ => (1 / 2 : ℝ) * ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) :=
+    hbaseS.mul_left _
+  have hpt : ∀ m : ℕ, etaPairR (m + M)
+      ≤ (1 / 2 : ℝ) * ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) := by
+    intro m
+    have h1 := etaPairR_upper (m + M)
+    have hle : ((((m + M + 1 : ℕ)) : ℝ)) ≤ ((((2 * (m + M) + 1 : ℕ)) : ℝ)) := by
+      apply Nat.cast_le.mpr
+      omega
+    have hpos : (0 : ℝ) < ((((m + M + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+    have hr : ((((2 * (m + M) + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))
+        ≤ ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) :=
+      Real.rpow_le_rpow_of_nonpos hpos hle (by norm_num)
+    calc etaPairR (m + M)
+        ≤ (1 / 2) * ((((2 * (m + M) + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) := h1
+      _ ≤ (1 / 2) * ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hr (by norm_num)
+  have hle_tsum : (∑' m, etaPairR (m + M))
+      ≤ (∑' m, (1 / 2 : ℝ) * ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) :=
+    hshift.tsum_le_tsum hpt hC
+  have hfactor : (∑' m, (1 / 2 : ℝ) * ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)))
+      = (1 / 2) * (∑' m, ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ))) :=
+    Summable.tsum_mul_left _ hbaseS
+  have hint : (∑' n : ℕ, ((((n + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)))
+      ≤ (∫ x : ℝ in Set.Ioi ((((M : ℕ)) : ℝ)), x ^ (-3 / 2 : ℝ)) :=
+    AntitoneOn.tsum_comp_add_le_integral (N := M) (f := fun x : ℝ => x ^ (-3 / 2 : ℝ))
+      (etaMajorant_antitone hM) (etaMajorant_integrable hM) (etaMajorant_nonneg)
+  rw [hfactor] at hle_tsum
+  have hval := etaMajorant_integral hM
+  rw [hval] at hint
+  have ehalf : (1 / 2 : ℝ) * (2 / Real.sqrt ((((M : ℕ)) : ℝ)))
+      = 1 / Real.sqrt ((((M : ℕ)) : ℝ)) := by ring
+  have h2 : (1 / 2 : ℝ) * (∑' m, ((((m + M + 1 : ℕ)) : ℝ) ^ (-3 / 2 : ℝ)))
+      ≤ (1 / 2) * (2 / Real.sqrt ((((M : ℕ)) : ℝ))) :=
+    mul_le_mul_of_nonneg_left hint (by norm_num)
+  rw [ehalf] at h2
+  exact hle_tsum.trans h2
+
+/-- Packaged integral remainder: `‖L - S_{2M}‖ ≤ 1/√M` (`M ≥ 1`). -/
+theorem eta_limit_norm_sub_le {M : ℕ} (hM : 1 ≤ M) (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) :
+    ‖L - etaPartial (2 * M)‖ ≤ 1 / Real.sqrt ((((M : ℕ)) : ℝ)) := by
+  have hsplit := eta_limit_split L M hL
+  have hT := etaPair_tail_integral hM
+  have hTnn : (0 : ℝ) ≤ ∑' m, etaPairR (m + M) :=
+    tsum_nonneg (fun m => etaPairR_nonneg _)
+  have e : L - etaPartial (2 * M) = ∑' m, etaPairR (m + M) := by linarith
+  rw [e, Real.norm_eq_abs, abs_of_nonneg hTnn]
+  exact hT
+
+/-- Rigorous `√2` enclosure (3 decimals). -/
+theorem sqrt2_bounds : (1.414 : ℝ) < Real.sqrt 2 ∧ Real.sqrt 2 < 1.415 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.414 : ℝ) = Real.sqrt (1.414 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 2 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 2 < Real.sqrt (1.415 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.415 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√3` enclosure. -/
+theorem sqrt3_bounds : (1.732 : ℝ) < Real.sqrt 3 ∧ Real.sqrt 3 < 1.733 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.732 : ℝ) = Real.sqrt (1.732 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 3 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 3 < Real.sqrt (1.733 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.733 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√5` enclosure. -/
+theorem sqrt5_bounds : (2.236 : ℝ) < Real.sqrt 5 ∧ Real.sqrt 5 < 2.237 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.236 : ℝ) = Real.sqrt (2.236 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 5 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 5 < Real.sqrt (2.237 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.237 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√6` enclosure. -/
+theorem sqrt6_bounds : (2.449 : ℝ) < Real.sqrt 6 ∧ Real.sqrt 6 < 2.450 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.449 : ℝ) = Real.sqrt (2.449 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 6 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 6 < Real.sqrt (2.450 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.450 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√7` enclosure. -/
+theorem sqrt7_bounds : (2.645 : ℝ) < Real.sqrt 7 ∧ Real.sqrt 7 < 2.646 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.645 : ℝ) = Real.sqrt (2.645 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 7 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 7 < Real.sqrt (2.646 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.646 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√8` enclosure. -/
+theorem sqrt8_bounds : (2.828 : ℝ) < Real.sqrt 8 ∧ Real.sqrt 8 < 2.829 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.828 : ℝ) = Real.sqrt (2.828 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 8 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 8 < Real.sqrt (2.829 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.829 := Real.sqrt_sq (by norm_num)
+
+/-- Explicit lower enclosure `0.4328 ≤ S₈`. -/
+theorem etaPartial_eight_lo : (0.4328 : ℝ) ≤ etaPartial 8 := by
+  rw [etaPartial_eight_eq]
+  have t2 : 1 / Real.sqrt 2 ≤ 1 / 1.414 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt2_bounds.1.le
+  have t3 : 1 / 1.733 ≤ 1 / Real.sqrt 3 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt3_bounds.2.le
+  have t5 : 1 / 2.237 ≤ 1 / Real.sqrt 5 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt5_bounds.2.le
+  have t6 : 1 / Real.sqrt 6 ≤ 1 / 2.449 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt6_bounds.1.le
+  have t7 : 1 / 2.646 ≤ 1 / Real.sqrt 7 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt7_bounds.2.le
+  have t8 : 1 / Real.sqrt 8 ≤ 1 / 2.828 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt8_bounds.1.le
+  have h4 : (1 : ℝ) / Real.sqrt 4 = 1 / 2 := by
+    rw [sqrt_four_eq]
+  have num : (0.4328 : ℝ)
+      ≤ 1 - 1 / 1.414 + 1 / 1.733 - 1 / 2 + 1 / 2.237 - 1 / 2.449 + 1 / 2.646
+        - 1 / 2.828 := by
+    norm_num
+  linarith
+
+/-- Explicit upper enclosure `S₈ ≤ 0.4344`. -/
+theorem etaPartial_eight_hi : etaPartial 8 ≤ (0.4344 : ℝ) := by
+  rw [etaPartial_eight_eq]
+  have t2 : 1 / 1.415 ≤ 1 / Real.sqrt 2 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt2_bounds.2.le
+  have t3 : 1 / Real.sqrt 3 ≤ 1 / 1.732 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt3_bounds.1.le
+  have t5 : 1 / Real.sqrt 5 ≤ 1 / 2.236 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt5_bounds.1.le
+  have t6 : 1 / 2.450 ≤ 1 / Real.sqrt 6 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt6_bounds.2.le
+  have t7 : 1 / Real.sqrt 7 ≤ 1 / 2.645 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt7_bounds.1.le
+  have t8 : 1 / 2.829 ≤ 1 / Real.sqrt 8 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt8_bounds.2.le
+  have h4 : (1 : ℝ) / Real.sqrt 4 = 1 / 2 := by
+    rw [sqrt_four_eq]
+  have num : 1 - 1 / 1.415 + 1 / 1.732 - 1 / 2 + 1 / 2.236 - 1 / 2.450 + 1 / 2.645
+        - 1 / 2.829 ≤ (0.4344 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Tail lower bound at `M = 4`: `T₄ ≥ 1/6` (since `f(9)/2 = 1/6`). -/
+theorem etaPair_tail4_lower : (1 / 6 : ℝ) ≤ ∑' m, etaPairR (m + 4) := by
+  have h := etaPair_tail_lower (M := 4) (by norm_num)
+  have e : etaInvSqrt (2 * 4 + 1) = 1 / 3 := by
+    have e9 : ((((2 * 4 + 1 : ℕ)) : ℝ)) = (9 : ℝ) := by norm_num
+    show 1 / Real.sqrt ((((2 * 4 + 1 : ℕ)) : ℝ)) = 1 / 3
+    rw [e9, sqrt_nine_eq]
+  rw [e] at h
+  linarith
+
+/-- Tail upper bound at `M = 4`: `T₄ ≤ 0.177` (since `1/(2√8) ≤ 1/5.656`). -/
+theorem etaPair_tail4_upper : (∑' m, etaPairR (m + 4)) ≤ (0.177 : ℝ) := by
+  have h := etaPair_tail_upper (M := 4) (by norm_num)
+  have e : etaInvSqrt (2 * 4) = 1 / Real.sqrt 8 := by
+    have e8 : ((((2 * 4 : ℕ)) : ℝ)) = (8 : ℝ) := by norm_num
+    show 1 / Real.sqrt ((((2 * 4 : ℕ)) : ℝ)) = 1 / Real.sqrt 8
+    rw [e8]
+  rw [e] at h
+  have t8 : 1 / Real.sqrt 8 ≤ 1 / 2.828 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt8_bounds.1.le
+  have num : (1 / 2.828 : ℝ) / 2 ≤ 0.177 := by norm_num
+  linarith
+
+/-- `L = S₈ + T₄` for every `Tendsto` eta limit. -/
+theorem eta_limit_S8_split (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) :
+    L = etaPartial 8 + ∑' m, etaPairR (m + 4) := by
+  have h := eta_limit_split L 4 hL
+  have e : (2 * 4 : ℕ) = 8 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- BEST two-sided eta interval: `L ∈ [0.5994, 0.6114]` (width `0.012`).
+    Downstream-ready feeder for the `Λ₀(1/2)` separation. -/
+theorem eta_half_tight_best :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ (0.5994 : ℝ) ≤ L ∧ L ≤ (0.6114 : ℝ) ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  refine ⟨L, hL, ?_, ?_, hpos⟩
+  · have hS := eta_limit_S8_split L hL
+    have hlo := etaPartial_eight_lo
+    have ht := etaPair_tail4_lower
+    linarith
+  · have hS := eta_limit_S8_split L hL
+    have hhi := etaPartial_eight_hi
+    have ht := etaPair_tail4_upper
+    linarith
+
+/-- Exact width of the best interval: `0.012 ≤ 0.05`. -/
+theorem eta_tight_best_width : (0.6114 : ℝ) - (0.5994 : ℝ) = 0.012 := by norm_num
+
+#print axioms sqrt_convex_step
+#print axioms etaPairR_upper
+#print axioms summable_etaPairR
+#print axioms etaPartial_even_eq
+#print axioms eta_limit_eq_pair_tsum
+#print axioms etaPair_tail_upper
+#print axioms etaPair_tail_lower
+#print axioms etaPair_tail_integral
+#print axioms eta_limit_norm_sub_le
+#print axioms eta_half_tight_best
+#print axioms eta_tight_best_width
+
+/-!
+## M = 8 telescoping tightening: `L ∈ [0.6029, 0.6070]` (width `0.0041 ≤ 0.006`).
+
+Pushes the sharp convexity telescoping `1/(2√(2M+1)) ≤ T_M ≤ 1/(2√(2M))`
+(`etaPair_tail_lower/upper`) from `M = 4` to `M = 8` (i.e. `N = 16`).
+`2M = 16` is a perfect square, so the UPPER tail is EXACT (`1/8`);
+the LOWER tail needs only a `√17` upper enclosure.
+`S₁₆` needs `√`-enclosures up to `√17` (exact squares `1,4,9,16` free).
+Reuses the committed `√2..√8` 3-decimal pattern with 4-decimal (or better)
+enclosures proved by exact square comparisons (`norm_num`), same as
+`sqrt2_bounds..sqrt8_bounds`. Only the `Tendsto` form is used.
+Gives `±0.00205`, beating the downstream `±0.003` (width `0.006`) need.
+The integral bound (`etaPair_tail_integral`, `T₈ ≤ 1/√8 ≈ 0.354`) is far
+weaker here and is NOT used for the final interval (recorded only for comparison).
+-/
+
+/-- `√16 = 4` (exact; makes the `M = 8` upper tail exact). -/
+theorem sqrt_sixteen_eq : Real.sqrt (16 : ℝ) = 4 := by
+  rw [show (16 : ℝ) = 4 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+
+/-- Rigorous `√2` enclosure (4 decimals, tighter, new name — old lemma untouched). -/
+theorem sqrt2_bounds4 : (1.4142 : ℝ) < Real.sqrt 2 ∧ Real.sqrt 2 < 1.4143 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.4142 : ℝ) = Real.sqrt (1.4142 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 2 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 2 < Real.sqrt (1.4143 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.4143 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√3` enclosure (4 decimals). -/
+theorem sqrt3_bounds4 : (1.7320 : ℝ) < Real.sqrt 3 ∧ Real.sqrt 3 < 1.7321 := by
+  refine ⟨?_, ?_⟩
+  · calc (1.7320 : ℝ) = Real.sqrt (1.7320 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 3 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 3 < Real.sqrt (1.7321 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 1.7321 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√5` enclosure (4 decimals). -/
+theorem sqrt5_bounds4 : (2.2360 : ℝ) < Real.sqrt 5 ∧ Real.sqrt 5 < 2.2361 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.2360 : ℝ) = Real.sqrt (2.2360 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 5 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 5 < Real.sqrt (2.2361 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.2361 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√6` enclosure (4 decimals). -/
+theorem sqrt6_bounds4 : (2.4494 : ℝ) < Real.sqrt 6 ∧ Real.sqrt 6 < 2.4495 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.4494 : ℝ) = Real.sqrt (2.4494 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 6 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 6 < Real.sqrt (2.4495 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.4495 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√7` enclosure (4 decimals). -/
+theorem sqrt7_bounds4 : (2.6457 : ℝ) < Real.sqrt 7 ∧ Real.sqrt 7 < 2.6458 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.6457 : ℝ) = Real.sqrt (2.6457 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 7 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 7 < Real.sqrt (2.6458 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.6458 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√8` enclosure (4 decimals). -/
+theorem sqrt8_bounds4 : (2.8284 : ℝ) < Real.sqrt 8 ∧ Real.sqrt 8 < 2.8285 := by
+  refine ⟨?_, ?_⟩
+  · calc (2.8284 : ℝ) = Real.sqrt (2.8284 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 8 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 8 < Real.sqrt (2.8285 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 2.8285 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√10` enclosure (4 decimals). -/
+theorem sqrt10_bounds : (3.1622 : ℝ) < Real.sqrt 10 ∧ Real.sqrt 10 < 3.1623 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.1622 : ℝ) = Real.sqrt (3.1622 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 10 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 10 < Real.sqrt (3.1623 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.1623 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√11` enclosure (4 decimals). -/
+theorem sqrt11_bounds : (3.3166 : ℝ) < Real.sqrt 11 ∧ Real.sqrt 11 < 3.3167 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.3166 : ℝ) = Real.sqrt (3.3166 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 11 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 11 < Real.sqrt (3.3167 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.3167 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√12` enclosure (4 decimals). -/
+theorem sqrt12_bounds : (3.4641 : ℝ) < Real.sqrt 12 ∧ Real.sqrt 12 < 3.4642 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.4641 : ℝ) = Real.sqrt (3.4641 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 12 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 12 < Real.sqrt (3.4642 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.4642 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√13` enclosure (4 decimals). -/
+theorem sqrt13_bounds : (3.6055 : ℝ) < Real.sqrt 13 ∧ Real.sqrt 13 < 3.6056 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.6055 : ℝ) = Real.sqrt (3.6055 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 13 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 13 < Real.sqrt (3.6056 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.6056 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√14` enclosure (4 decimals). -/
+theorem sqrt14_bounds : (3.7416 : ℝ) < Real.sqrt 14 ∧ Real.sqrt 14 < 3.7417 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.7416 : ℝ) = Real.sqrt (3.7416 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 14 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 14 < Real.sqrt (3.7417 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.7417 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√15` enclosure (4 decimals). -/
+theorem sqrt15_bounds : (3.8729 : ℝ) < Real.sqrt 15 ∧ Real.sqrt 15 < 3.8730 := by
+  refine ⟨?_, ?_⟩
+  · calc (3.8729 : ℝ) = Real.sqrt (3.8729 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 15 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 15 < Real.sqrt (3.8730 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 3.8730 := Real.sqrt_sq (by norm_num)
+
+/-- Rigorous `√17` enclosure (4 decimals; only the upper bound feeds the `M = 8` tail). -/
+theorem sqrt17_bounds : (4.1231 : ℝ) < Real.sqrt 17 ∧ Real.sqrt 17 < 4.1232 := by
+  refine ⟨?_, ?_⟩
+  · calc (4.1231 : ℝ) = Real.sqrt (4.1231 ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+      _ < Real.sqrt 17 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  · calc Real.sqrt 17 < Real.sqrt (4.1232 ^ 2) := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+      _ = 4.1232 := Real.sqrt_sq (by norm_num)
+
+/-- Exact `S₁₆` (squares `4, 9, 16` written as `1/2, 1/3, 1/4`). -/
+theorem etaPartial_sixteen_eq :
+    etaPartial 16
+      = 1 - 1 / Real.sqrt 2 + 1 / Real.sqrt 3 - 1 / 2 + 1 / Real.sqrt 5
+        - 1 / Real.sqrt 6 + 1 / Real.sqrt 7 - 1 / Real.sqrt 8 + 1 / 3
+        - 1 / Real.sqrt 10 + 1 / Real.sqrt 11 - 1 / Real.sqrt 12
+        + 1 / Real.sqrt 13 - 1 / Real.sqrt 14 + 1 / Real.sqrt 15 - 1 / 4 := by
+  simp [etaPartial, Finset.sum_range_succ, Real.sqrt_one]
+  ring_nf
+
+/-- Explicit lower enclosure `0.4817 ≤ S₁₆` (4-decimal `√`-bounds). -/
+theorem etaPartial_sixteen_lo : (0.4817 : ℝ) ≤ etaPartial 16 := by
+  rw [etaPartial_sixteen_eq]
+  have t2 : 1 / Real.sqrt 2 ≤ 1 / 1.4142 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt2_bounds4.1.le
+  have t3 : 1 / 1.7321 ≤ 1 / Real.sqrt 3 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt3_bounds4.2.le
+  have t5 : 1 / 2.2361 ≤ 1 / Real.sqrt 5 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt5_bounds4.2.le
+  have t6 : 1 / Real.sqrt 6 ≤ 1 / 2.4494 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt6_bounds4.1.le
+  have t7 : 1 / 2.6458 ≤ 1 / Real.sqrt 7 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt7_bounds4.2.le
+  have t8 : 1 / Real.sqrt 8 ≤ 1 / 2.8284 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt8_bounds4.1.le
+  have t10 : 1 / Real.sqrt 10 ≤ 1 / 3.1622 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt10_bounds.1.le
+  have t11 : 1 / 3.3167 ≤ 1 / Real.sqrt 11 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt11_bounds.2.le
+  have t12 : 1 / Real.sqrt 12 ≤ 1 / 3.4641 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt12_bounds.1.le
+  have t13 : 1 / 3.6056 ≤ 1 / Real.sqrt 13 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt13_bounds.2.le
+  have t14 : 1 / Real.sqrt 14 ≤ 1 / 3.7416 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt14_bounds.1.le
+  have t15 : 1 / 3.8730 ≤ 1 / Real.sqrt 15 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt15_bounds.2.le
+  have num : (0.4817 : ℝ)
+      ≤ 1 - 1 / 1.4142 + 1 / 1.7321 - 1 / 2 + 1 / 2.2361 - 1 / 2.4494
+        + 1 / 2.6458 - 1 / 2.8284 + 1 / 3 - 1 / 3.1622 + 1 / 3.3167
+        - 1 / 3.4641 + 1 / 3.6056 - 1 / 3.7416 + 1 / 3.8730 - 1 / 4 := by
+    norm_num
+  linarith
+
+/-- Explicit upper enclosure `S₁₆ ≤ 0.4820`. -/
+theorem etaPartial_sixteen_hi : etaPartial 16 ≤ (0.4820 : ℝ) := by
+  rw [etaPartial_sixteen_eq]
+  have t2 : 1 / 1.4143 ≤ 1 / Real.sqrt 2 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt2_bounds4.2.le
+  have t3 : 1 / Real.sqrt 3 ≤ 1 / 1.7320 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt3_bounds4.1.le
+  have t5 : 1 / Real.sqrt 5 ≤ 1 / 2.2360 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt5_bounds4.1.le
+  have t6 : 1 / 2.4495 ≤ 1 / Real.sqrt 6 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt6_bounds4.2.le
+  have t7 : 1 / Real.sqrt 7 ≤ 1 / 2.6457 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt7_bounds4.1.le
+  have t8 : 1 / 2.8285 ≤ 1 / Real.sqrt 8 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt8_bounds4.2.le
+  have t10 : 1 / 3.1623 ≤ 1 / Real.sqrt 10 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt10_bounds.2.le
+  have t11 : 1 / Real.sqrt 11 ≤ 1 / 3.3166 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt11_bounds.1.le
+  have t12 : 1 / 3.4642 ≤ 1 / Real.sqrt 12 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt12_bounds.2.le
+  have t13 : 1 / Real.sqrt 13 ≤ 1 / 3.6055 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt13_bounds.1.le
+  have t14 : 1 / 3.7417 ≤ 1 / Real.sqrt 14 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt14_bounds.2.le
+  have t15 : 1 / Real.sqrt 15 ≤ 1 / 3.8729 :=
+    one_div_le_one_div_of_le (by norm_num) sqrt15_bounds.1.le
+  have num : 1 - 1 / 1.4143 + 1 / 1.7320 - 1 / 2 + 1 / 2.2360 - 1 / 2.4495
+        + 1 / 2.6457 - 1 / 2.8285 + 1 / 3 - 1 / 3.1623 + 1 / 3.3166
+        - 1 / 3.4642 + 1 / 3.6055 - 1 / 3.7417 + 1 / 3.8729 - 1 / 4
+        ≤ (0.4820 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Tail lower bound at `M = 8`: `T₈ ≥ 0.1212` (since `f(17)/2 ≥ 1/(2·4.1232)`). -/
+theorem etaPair_tail8_lower : (0.1212 : ℝ) ≤ ∑' m, etaPairR (m + 8) := by
+  have h := etaPair_tail_lower (M := 8) (by norm_num)
+  have e : etaInvSqrt (2 * 8 + 1) = 1 / Real.sqrt 17 := by
+    have e17 : ((((2 * 8 + 1 : ℕ)) : ℝ)) = (17 : ℝ) := by norm_num
+    show 1 / Real.sqrt ((((2 * 8 + 1 : ℕ)) : ℝ)) = 1 / Real.sqrt 17
+    rw [e17]
+  rw [e] at h
+  have t17 : 1 / 4.1232 ≤ 1 / Real.sqrt 17 :=
+    one_div_le_one_div_of_le (Real.sqrt_pos.mpr (by norm_num)) sqrt17_bounds.2.le
+  have num : (0.1212 : ℝ) ≤ (1 / 4.1232) / 2 := by norm_num
+  linarith
+
+/-- Tail upper bound at `M = 8`: `T₈ ≤ 0.125` (exact, since `√16 = 4`). -/
+theorem etaPair_tail8_upper : (∑' m, etaPairR (m + 8)) ≤ (0.125 : ℝ) := by
+  have h := etaPair_tail_upper (M := 8) (by norm_num)
+  have e : etaInvSqrt (2 * 8) = 1 / 4 := by
+    have e16 : ((((2 * 8 : ℕ)) : ℝ)) = (16 : ℝ) := by norm_num
+    show 1 / Real.sqrt ((((2 * 8 : ℕ)) : ℝ)) = 1 / 4
+    rw [e16, sqrt_sixteen_eq]
+  rw [e] at h
+  have num : ((1 : ℝ) / 4) / 2 ≤ 0.125 := by norm_num
+  linarith
+
+/-- `L = S₁₆ + T₈` for every `Tendsto` eta limit. -/
+theorem eta_limit_S16_split (L : ℝ)
+    (hL : Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L)) :
+    L = etaPartial 16 + ∑' m, etaPairR (m + 8) := by
+  have h := eta_limit_split L 8 hL
+  have e : (2 * 8 : ℕ) = 16 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- BEST2 two-sided eta interval: `L ∈ [0.6029, 0.6070]` (width `0.0041 ≤ 0.006`).
+    Downstream-ready feeder for the `Λ₀(1/2)` separation (`±0.003`). -/
+theorem eta_half_tight_best2 :
+    ∃ L : ℝ, Tendsto (fun n => ∑ i ∈ Finset.range n, ((-1 : ℤ) ^ i : ℝ) / sqrt (i + 1 : ℝ))
+      atTop (𝓝 L) ∧ (0.6029 : ℝ) ≤ L ∧ L ≤ (0.6070 : ℝ) ∧ 0 < L := by
+  obtain ⟨L, hL, hpos⟩ := eta_half_pos
+  refine ⟨L, hL, ?_, ?_, hpos⟩
+  · have hS := eta_limit_S16_split L hL
+    have hlo := etaPartial_sixteen_lo
+    have ht := etaPair_tail8_lower
+    linarith
+  · have hS := eta_limit_S16_split L hL
+    have hhi := etaPartial_sixteen_hi
+    have ht := etaPair_tail8_upper
+    linarith
+
+/-- Exact width of the `best2` interval: `0.0041 ≤ 0.006` (`±0.00205`). -/
+theorem eta_tight_best2_width : (0.6070 : ℝ) - (0.6029 : ℝ) = 0.0041 := by norm_num
+
+#print axioms sqrt_sixteen_eq
+#print axioms sqrt10_bounds
+#print axioms sqrt17_bounds
+#print axioms etaPartial_sixteen_eq
+#print axioms etaPartial_sixteen_lo
+#print axioms etaPartial_sixteen_hi
+#print axioms etaPair_tail8_lower
+#print axioms etaPair_tail8_upper
+#print axioms eta_limit_S16_split
+#print axioms eta_half_tight_best2
+#print axioms eta_tight_best2_width
