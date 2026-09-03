@@ -1312,7 +1312,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `R02ZetaUpper`+`R02DerivBridge`+`R02Unconditional`, consuming the identity theorem):
   `‖zeta‖≤1012` on the disc (sharp at `M=1` — `r(M)≈180·M^{−0.05}` needs `M≥10^{31}` terms for `r≤5`) ⇒
   `R02_deriv_bound_unconditional` (`M=6800640`). The `≤10` obligation (hence `M≈0.05` tier) needs
-  FE+Stirling+convexity, not the eta M-test. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
+  FE+Stirling+convexity, not the eta M-test. **Update — Gamma factor fully closed for all 40 centers:**
+  32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
+  numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
+  bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
+  and the deriv `M` at fencing tier. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
@@ -1326,9 +1330,8 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `‖sin‖≥3.1e9`).   **Update — 8/8 outer-tier cells `≤0.01` closed:** R11/R10/R20 (n=12, reusing the `12.85` chain or R00's)
   + R21/R30 (row 2, `re=0.9`, n=14, `N≤6.95e10/D≥7e12`) + R31/R40 (row 3, `re=0.9475`, n=15,
   `N≤1.16e12/D≥1.2e14`) — the brief's "n=12 for all outer-tier" was mathematically impossible (true n=12
-  ratios `0.01038/0.01091` rows 2/3), resolved by deeper shifts. Remaining: **32 inner centers**
-  (no bound yet; the 4 numerator chains are reusable as-is; expected n=12 caps `~0.035/0.11/0.27–0.37/0.8–1.1`
-  from center outward).
+  ratios `0.01038/0.01091` rows 2/3), resolved by deeper shifts. **All 40/40 centers now capped**
+  (32 inner closed after, same template). No Gamma work remains.
 - **Residual strips**: x=±10, y∈[0.49,1/2), the real axis (BoundaryProofEngine). The `(0,0.01]` bottom strip
   IS packaged conditionally (`BottomStripObligations` + `bottom_strip_covered`); global
   `xiShifted_differentiable` is false-as-stated (strip-version entireness proved — use that).
