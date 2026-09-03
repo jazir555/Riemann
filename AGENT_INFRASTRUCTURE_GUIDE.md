@@ -1274,7 +1274,9 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   M-test majorant (`scaled_dominated`), corrected limit `scaled_tendsto_jensenEntire`
   (`J_{d,0}(z/d) → jensenEntire`, conditional on `coeffGrowthSummable r`). Exact missing lemma BY NAME
   (not assumed): `taylorCoeff_summable_of_orderBound` (order<2 ⇒ growth via Cauchy+Stirling) — proving
-  it closes S1 unconditionally.
+  it closes S1 unconditionally. **S1 UNCONDITIONAL CLOSED:** `taylorCoeff_summable_of_orderBound`
+  proved (Cauchy at fixed `R=|r|+1`, majorant `|C|·(|r|/R²)^k/k!` — no Stirling, no per-k optimization
+  needed) + both corollaries by direct application.
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
