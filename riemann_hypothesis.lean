@@ -12117,3 +12117,185 @@ theorem hardDifference_imag_axis_nonvanishing_unconditional (y : ℝ) (hyne : y 
     1 / ((Complex.I * (y : ℂ)) ^ 2 + (1 / 4 : ℂ)) -
       completedRiemannZeta₀ (shiftedS (Complex.I * (y : ℂ))) ≠ 0 :=
   hardDifferenceNonzero_on_imaginary_axis zetaRealNonzeroInCritical_holds y hyne hgt hlt
+
+/-!
+# Door 2 capstone: X=10 cover+tail assembly with explicit residuals
+
+`CentralCoverAssembly.full_central_covered` (`central_cover_assembly.lean`)
+packages exactly the main band `(-10, 10) × ((0, 0.49] ∪ [-0.49, 0))`
+(upper cells R00–R40 + boundary strip `(0, 0.01]` + `conj_of` lower-half
+transfer). It does NOT cover the edge strips `0.49 ≤ |Im| < 1/2`, the cutoff
+lines `Re = ±10`, or the tail `|Re| > 10` (mollified-Rouché bridge in
+`riemann_hypothesis_newsection.lean` / `cross_door_synthesis.lean`; note the
+tail-range `zeta_cert_data` covers only `Im ∈ [10, 12]` and is never cited
+as central cover).
+
+This section states each piece as an explicit hypothesis in this file's own
+types — no import of `central_cover_assembly` (that file imports this one,
+so the feeder direction is outward: a future proof of these `Prop`s from
+`FullCentralObligations` / `BottomStripObligations` lands there or in a new
+downstream file). The assembly main-band + edge-strips + tail + cutoff-lines
+→ `XiOffRealPointwiseNonvanishing` is proved with no `sorry`/`axiom`, and the
+canned `rh_from_mainBand10_edgeStrips10_tail10_cutoff` derives
+`RiemannHypothesisProp`. Compatibility feeders show the pre-existing generic
+`XiCentralZeroFreeCover 10` already implies every central/cutoff hypothesis
+below (it is closed, `-10 ≤ Re ≤ 10`, hence strictly stronger than needed).
+-/
+
+/-- Main-band nonvanishing at cutoff 10: exactly the conclusion packaged by
+    `CentralCoverAssembly.full_central_covered`. Future feeder: prove this
+    from `FullCentralObligations` + `BottomStripObligations` (the 80 per-cell
+    numerical enclosures — the §18b.10 residual). -/
+def XiCentralMainBand10 : Prop :=
+  ∀ z : ℂ, -(10 : ℝ) < z.re → z.re < 10 →
+    ((0 < z.im ∧ z.im ≤ 0.49) ∨ (-0.49 ≤ z.im ∧ z.im < 0)) →
+    xiShifted z ≠ 0
+
+/-- Residual edge strips at cutoff 10: `0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`.
+    Open per `AGENT_INFRASTRUCTURE_GUIDE.md` §18b.10 (the `y ∈ [0.49, 1/2)`
+    residual). -/
+def XiCentralEdgeStrips10 : Prop :=
+  ∀ z : ℂ, -(10 : ℝ) < z.re → z.re < 10 →
+    -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
+    (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0
+
+/-- Cutoff lines `Re = ±10` (off real axis). Neither the strict central band
+    (`-10 < Re < 10`) nor the strict tail (`10 < Re ∨ Re < -10`) covers them;
+    each line is a 1-cell interval-arithmetic task. -/
+def XiCutoffLines10 : Prop :=
+  ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+    -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
+    xiShifted z ≠ 0
+
+/-- Full open central rectangle at cutoff 10 (off real axis). -/
+def XiCentralRect10 : Prop :=
+  ∀ z : ℂ, -(10 : ℝ) < z.re → z.re < 10 →
+    -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
+    xiShifted z ≠ 0
+
+/-- Strip bounds and off-axis fact packaged for one main-band point. -/
+private theorem mainBand10_im_bounds {z : ℂ}
+    (hy : (0 < z.im ∧ z.im ≤ 0.49) ∨ (-0.49 ≤ z.im ∧ z.im < 0)) :
+    -(1 : ℝ) / 2 < z.im ∧ z.im < (1 : ℝ) / 2 ∧ z.im ≠ 0 := by
+  rcases hy with ⟨hpos, hle⟩ | ⟨hge, hneg⟩
+  · exact ⟨by linarith, by linarith, ne_of_gt hpos⟩
+  · exact ⟨by linarith, by linarith, ne_of_lt hneg⟩
+
+/-- Main band + edge strips give the full central rectangle (trichotomy on
+    the sign of `Im`, then on the `0.49` threshold). -/
+theorem xiCentralRect10_of_mainBand_and_edgeStrips
+    (Hmain : XiCentralMainBand10) (Hedge : XiCentralEdgeStrips10) :
+    XiCentralRect10 := by
+  intro z hx_lo hx_hi hgt hlt hne
+  by_cases hpos : 0 < z.im
+  · by_cases hle : z.im ≤ 0.49
+    · exact Hmain z hx_lo hx_hi (Or.inl ⟨hpos, hle⟩)
+    · push_neg at hle
+      exact Hedge z hx_lo hx_hi hgt hlt hne (Or.inl (le_of_lt hle))
+  · push_neg at hpos
+    have hneg : z.im < 0 := lt_of_le_of_ne hpos hne
+    by_cases hge : -0.49 ≤ z.im
+    · exact Hmain z hx_lo hx_hi (Or.inr ⟨hge, hneg⟩)
+    · push_neg at hge
+      exact Hedge z hx_lo hx_hi hgt hlt hne (Or.inr (le_of_lt hge))
+
+/-- Central rectangle + two-sided tail + cutoff lines give off-real-axis
+    nonvanishing everywhere (four-way split on `Re` vs `±10`). -/
+theorem xiOffRealPointwiseNonvanishing_of_rect10_tail10_cutoff
+    (Hrect : XiCentralRect10)
+    (Htail : XiTailPointwiseNonvanishingForX (10 : ℝ))
+    (Hcut : XiCutoffLines10) :
+    XiOffRealPointwiseNonvanishing := by
+  intro z hgt hlt hne
+  by_cases hright : (10 : ℝ) < z.re
+  · exact Htail.right_nonvanishing z hright hgt hlt hne
+  · push_neg at hright
+    by_cases hleft : z.re < (-10 : ℝ)
+    · exact Htail.left_nonvanishing z hleft hgt hlt hne
+    · push_neg at hleft
+      by_cases h10 : z.re = (10 : ℝ)
+      · exact Hcut z (Or.inl h10) hgt hlt hne
+      · by_cases hm10 : z.re = (-10 : ℝ)
+        · exact Hcut z (Or.inr hm10) hgt hlt hne
+        · have hx_lo : -(10 : ℝ) < z.re :=
+            lt_of_le_of_ne hleft (Ne.symm hm10)
+          have hx_hi : z.re < (10 : ℝ) := lt_of_le_of_ne hright h10
+          exact Hrect z hx_lo hx_hi hgt hlt hne
+
+/-- Canned RH from the full central rectangle + tail + cutoff lines. -/
+theorem rh_from_rect10_tail10_cutoff
+    (Hrect : XiCentralRect10)
+    (Htail : XiTailPointwiseNonvanishingForX (10 : ℝ))
+    (Hcut : XiCutoffLines10) :
+    RiemannHypothesisProp :=
+  rh_from_off_real_pointwise_nonvanishing
+    (xiOffRealPointwiseNonvanishing_of_rect10_tail10_cutoff Hrect Htail Hcut)
+
+/-- Master canned theorem: main band + edge strips + tail + cutoff lines
+    imply RH. Feeders: `Hmain` ← `CentralCoverAssembly.full_central_covered`;
+    `Htail` ← `tailPointwise10_of_absTail` applied to
+    `CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`. -/
+theorem rh_from_mainBand10_edgeStrips10_tail10_cutoff
+    (Hmain : XiCentralMainBand10)
+    (Hedge : XiCentralEdgeStrips10)
+    (Htail : XiTailPointwiseNonvanishingForX (10 : ℝ))
+    (Hcut : XiCutoffLines10) :
+    RiemannHypothesisProp :=
+  rh_from_rect10_tail10_cutoff
+    (xiCentralRect10_of_mainBand_and_edgeStrips Hmain Hedge) Htail Hcut
+
+/-- Tail adapter: an absolute-value tail bound (exactly the conclusion shape
+    of `CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`)
+    gives the two-sided pointwise tail certificate consumed above. -/
+theorem tailPointwise10_of_absTail
+    (H : ∀ z : ℂ, (10 : ℝ) < |z.re| → -(1 : ℝ) / 2 < z.im →
+      z.im < (1 : ℝ) / 2 → z.im ≠ 0 → xiShifted z ≠ 0) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) where
+  right_nonvanishing := by
+    intro z hright hgt hlt hne
+    exact H z (by rw [abs_of_pos (by linarith : (0 : ℝ) < z.re)]; exact hright)
+      hgt hlt hne
+  left_nonvanishing := by
+    intro z hleft hgt hlt hne
+    have habs : (10 : ℝ) < |z.re| := by
+      rw [abs_of_neg (by linarith : z.re < 0)]
+      linarith
+    exact H z habs hgt hlt hne
+
+/-- The pre-existing generic cover at `X = 10` already implies the main band
+    (it covers `-10 ≤ Re ≤ 10` closed, hence the strict band). -/
+theorem xiCentralMainBand10_of_zeroFreeCover
+    (C : XiCentralZeroFreeCover (10 : ℝ)) : XiCentralMainBand10 := by
+  intro z hx_lo hx_hi hy
+  obtain ⟨hgt, hlt, hne⟩ := mainBand10_im_bounds hy
+  rcases C.covers z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne with
+    ⟨R, _, hx0, hx1, hy0, hy1⟩
+  exact R.no_zero z hx0 hx1 hy0 hy1
+
+/-- The pre-existing generic cover at `X = 10` implies the full central
+    rectangle. -/
+theorem xiCentralRect10_of_zeroFreeCover
+    (C : XiCentralZeroFreeCover (10 : ℝ)) : XiCentralRect10 := by
+  intro z hx_lo hx_hi hgt hlt hne
+  rcases C.covers z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne with
+    ⟨R, _, hx0, hx1, hy0, hy1⟩
+  exact R.no_zero z hx0 hx1 hy0 hy1
+
+/-- The pre-existing generic cover at `X = 10` already covers the cutoff
+    lines (closed `-10 ≤ Re ≤ 10` includes `Re = ±10`). -/
+theorem xiCutoffLines10_of_zeroFreeCover
+    (C : XiCentralZeroFreeCover (10 : ℝ)) : XiCutoffLines10 := by
+  intro z heq hgt hlt hne
+  have hge : -(10 : ℝ) ≤ z.re := by rcases heq with h | h <;> linarith
+  have hle : z.re ≤ (10 : ℝ) := by rcases heq with h | h <;> linarith
+  rcases C.covers z hge hle hgt hlt hne with ⟨R, _, hx0, hx1, hy0, hy1⟩
+  exact R.no_zero z hx0 hx1 hy0 hy1
+
+/-- The pre-existing closed central-pointwise certificate at `X = 10`
+    implies the main band. -/
+theorem xiCentralMainBand10_of_centralPointwise
+    (C : XiCentralPointwiseNonvanishingForX (10 : ℝ)) :
+    XiCentralMainBand10 := by
+  intro z hx_lo hx_hi hy
+  obtain ⟨hgt, hlt, hne⟩ := mainBand10_im_bounds hy
+  exact C.central_nonvanishing z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne
