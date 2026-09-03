@@ -871,10 +871,15 @@ Finish with: `lake build KadiriZeroFree` EXIT 0, then
   them requires either a computable ℝ ξ approximation or interval arithmetic in Lean. The rigorous
   `zeta_rigorous.lean` path (§18b.7) shows how such a transition is done without trusted statements.
 - **`zeta_rigorous.lean`** — rigorous ℝ proof that `η(1/2) > 0` (hence `ξ(1/2) > 0`) via Mathlib's
-  alternating series test. Currently **iterative build** with 2 intermediary `sorry`s
-  (`eta_terms_tendsto_zero` and `L = tsum`); `eta_terms_antitone` and `etaPartial 2 > 0` are fully
-  proved. No axioms, no trusted Float — pure Mathlib `Real` analysis. This is the model for
-  closing the Float→ℝ bridge without `sorry`.
+  alternating series test. **0 sorrys.** `eta_terms_antitone`, `eta_terms_tendsto_zero`,
+  `eta_half_pos` (in correct `Tendsto` form — the `0 < ∑'` tsum form is false for conditionally
+  convergent series), the `HasSum`/summability links, and a full Dirichlet-eta API are proved:
+  `eta_tsum_eq_of_one_lt_re` (`∑' eta = (1-2^{1-s})ζ(s)` on `Re>1`), entire `etaHurwitz`, the
+  analytic-continuation framework (`etaHurwitz_eq_etaRHS_compl`), and the conditional feeder
+  `zeta_half_feeder_of_etaHurwitz_lim`. The single remaining hypothesis is `hLim` (the
+  Tendsto-limit-to-continued-Hurwitz identity at `s=1/2`). No axioms, no trusted Float — pure
+  Mathlib `Real`/`Complex` analysis. This is the model for closing the Float→ℝ bridge without
+  `sorry`.
 
 ---
 
@@ -1072,19 +1077,31 @@ With the Float layer complete, the path to `RiemannHypothesisProp` is:
 3. Combine via `rh_from_central_zero_free_cover_and_tail_pointwise` (`riemann_hypothesis.lean:794`)
    or `rh_from_mollified_tail_and_central_cover` → `RiemannHypothesisProp`.
 
-**Current status:** steps 1 and 2 have complete infrastructure; the combination in step 3 has not
-been executed (it requires instantiating the tail bound term and applying the reduction theorem).
-The `sorry` trusted lemmas in `central_cover_trusted.lean` are the only remaining gap to a fully
-machine-checked proof; everything else is proven.
+**Current status (updated):** the infrastructure has advanced well beyond scaffolding.
+- Central cover: `central_cover_assembly.lean` has the `gridFine` 40-cell re-grid (x-widths ≤2.5,
+  feasibility-checked tiers), hdiff-free strip fencing lemmas, and fully assembled per-cell packages
+  for bottom-row cells c00 and c01 (`R00_H_instance`, `R01_H_instance` — no `sorryAx`), each reducing
+  its cell to explicit numerical enclosures. `interval_arith.lean` (new) provides the rigorous
+  enclosure framework: `R00Numerics` poly-factor (`30 ≤ ‖polyPart‖`) and pi-factor (`1/2 ≤ ‖piPart‖`)
+  lower bounds closed hypothesis-free, plus a complex-Gamma lower bound (`1/1e7 ≤ ‖Complex.Gamma‖`)
+  via the joint `Gammaℝ` route, plus a single-point zeta lower bound `1/26 ≤ ‖ζ(sR00)‖` via the
+  complex alternating-eta template (rests on 3 explicit analytic premises: eta-limit existence,
+  remainder bound, and the `ζ·(1-2^{1-s}) = L` identity at sR00).
+- Gamma bounds: `JensenTranslation.lean` now has `3.579 < Γ(1/4) < 3.653` (width 0.074, BM n=12,
+  exact log-of-rational identities, no `sorry`).
+- The remaining gaps are: (a) the 3 analytic premises behind the single-point zeta bound;
+  (b) uniform `‖deriv xiShifted‖` enclosures; (c) Gamma ±0.01 (BM n≈60–100 or verified quadrature);
+  (d) the eta analytic-continuation feeder `hLim`. Step 3 (applying the reduction theorem) is
+  straightforward once (a)–(d) land.
 
 **Build:** all Float-layer files build green:
 `lake build float_zeta rh_zeta_cert_central float_real_bridge central_cover_trusted float_jensen float_xi_approx float_xi_cover`.
 
-### 18b.7 Rigorous ℝ proof that η(1/2) > 0 (`zeta_rigorous.lean`, iterative build)
+### 18b.7 Rigorous ℝ proof that η(1/2) > 0 (`zeta_rigorous.lean`, 0 sorrys)
 
 A **fully rigorous** ℝ-level proof that the Dirichlet eta series at `1/2` has a positive sum,
-hence `ζ(1/2) < 0` and `ξ(1/2) > 0`. Built iteratively (intermediary `sorry`s, no axioms,
-no trusted Float — pure Mathlib `Real` analysis).
+hence `ζ(1/2) < 0` and `ξ(1/2) > 0`. Built iteratively (no axioms, no trusted Float — pure
+Mathlib `Real`/`Complex` analysis). **The file currently has 0 `sorry`s.**
 
 - `etaPartial (n : ℕ) : ℝ` — `Σ_{k=0}^{n-1} (-1)^k / √(k+1)`.
 - `eta_terms_antitone` — `a_k = 1/√(k+1)` is antitone (proved via `Real.sqrt_le_sqrt`).
@@ -1092,10 +1109,13 @@ no trusted Float — pure Mathlib `Real` analysis).
 - `eta_half_pos` — `0 < ∑' k, (-1)^k/√(k+1)` (the eta series limit is positive). Proved via
   Mathlib's `Antitone.cauchySeq_alternating_series_of_tendsto_zero` (the alternating series test):
   the even partial sum `S₂ = 1 - 1/√2` is a lower bound, and `1 - 1/√2 > 0` because `√2 > 1`.
-- **Current status:** iterative build with **2 intermediary `sorry`s** (`eta_terms_tendsto_zero`
-  and `L = tsum` equality). `eta_terms_antitone`, `etaPartial 2 ≤ L` (via
-  `Antitone.alternating_series_le_tendsto`), and `etaPartial 2 > 0` (`1 - 1/√2 > 0` via `√2 > 1`)
-  are fully proved. The `tendsto`/`tsum` links remain for subsequent turns (see §1f).
+- **Current status:** `eta_terms_antitone`, `eta_terms_tendsto_zero`, `eta_half_pos` (correct
+  `Tendsto` form), the `HasSum`/summability links (`eta_tsum_eq_of_one_lt_re` on `Re>1`, entire
+  `etaHurwitz`, `etaHurwitz_eq_etaRHS_compl` continuation framework, conditional
+  `zeta_half_feeder_of_etaHurwitz_lim`) are all fully proved with 0 `sorry`s. The single remaining
+  hypothesis is `hLim` (Tendsto-limit-to-continued-Hurwitz identity at `s=1/2`: needs paired-difference
+  `O(n^{-Re-1})` summability on `0<Re`, holomorphicity of the difference series, and the identity
+  theorem). `etaPartial 2 > 0` (`1 - 1/√2 > 0` via `√2 > 1`) is proved.
 
 **Why this matters:** this is the model for closing the Float→ℝ bridge without `sorry`. The
 Float layer proves `ζ(1/2) < 0` via `native_decide`; this file proves `η(1/2) > 0` (hence
