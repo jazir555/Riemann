@@ -1283,10 +1283,17 @@ fencing/strip/H-instances; boundary strip `(0,0.01]`; lower half via `conj_of`; 
 `1/10000000 ≤ ‖Gamma (s/2)‖` for all 40 centers), `CellUniform` (`pi_lower_of_re`, generic four-factor
 `center_bound_of_component_bounds`), `R02Uniform` (R02 copy-paste template: hypothesis-free poly 22,
 pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures). Remaining:
-- **Zeta factor (all 40 cells):** `‖zeta s_center‖ ≥ Azeta`. Missing: (a) eta–zeta identity
-  `zeta s * etaCvtFactor s = L` at `Re<1` (complex analytic continuation; Mathlib has only real `Re>1` ζ
-  material); (b) explicit remainder with usable radius — `≤25` exists but the S₂-route is numerically dead
-  (`|S₂−η|≈0.96`, need `≲0.1`); needs `S_N`, `N>2`, generalizing the paired M-test tail bound.
+- **Zeta factor (all 40 cells):** `‖zeta s_center‖ ≥ Azeta`. **Partially closed (`3326e96b`,
+  `lake build zeta_rigorous` green, axioms clean):** general paired-tail remainder
+  `zetaCell_even_remainder_le`, `r(M) = C·M^{−σ}/σ`, instantiated at the R00 corner
+  (`C=10`, `σ=0.395`) with power-of-two-minimal `N = 4194304` giving `r ≈ 0.081 ≤ 0.1`
+  (`zetaCellS0_tail_2097152_le`; `2^20` gives `r≈0.106>0.1`, so `2^21` minimal among `2^k`).
+  Still missing: (a) `∑' pairs(s0) = etaHurwitz(s0)` at cell centers — existing pair-limit lemmas cover only
+  `Re>1` / `s=1/2`; needs `G(s)=∑' pairs` analytic on `{Re>0}` + identity theorem (note
+  `etaHurwitz_eq_etaRHS_compl` already gives `etaHurwitz=(1−2^{1−s})ζ(s)` on `{1}ᶜ`); (b) any `Azeta>0` —
+  **strategic finding:** `N=4194304` makes the explicit-partial-sum lower bound infeasible (4M cpow terms),
+  so the `S_N`-direct route to `Azeta` is computationally dead at the R00 corner; a smarter zeta lower
+  bound is needed (functional equation / reflection to a large-`ζ` region, not longer partial sums).
 - **Deriv factor (all 40 cells):** uniform `‖deriv xiShifted w‖ ≤ M`. Missing entirely — no
   Cauchy/uniform-derivative infrastructure for `xiShifted` exists; needs a Cauchy estimate via
   `xiShiftedEntire`.
