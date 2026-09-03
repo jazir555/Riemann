@@ -1376,7 +1376,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
-  and the deriv `M` at fencing tier. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
+  and the deriv `M` at fencing tier. **R02 PILOT VERDICT: unconditional closure INFEASIBLE with
+  committed constants** (`22·0.5·1e-7·(1/26) = 4.2e-8 ≪ 0.065`; closing needs `Azeta ≥ 59090`).
+  **Conditional closure proved** (`R02_closed_of_factorBounds`): three explicit numeric premises
+  (`Agam ≥ 0.006`, `Azeta ≥ 1`, `M ≤ 0.05`) ⇒ H-leaf — plug-and-play for all future factor work.
+  Exact gaps: Gamma-lower `60000×` (reflection+`1e-7` infeasible in principle, needs `‖sin‖≥3e9`);
+  zeta-lower open; deriv `1.34M×` (vs 67200) / `136M×` (vs 6800640). Poly `22`, pi `1/2`,
+  Gamma-upper `0.05` at R02: no gap. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
