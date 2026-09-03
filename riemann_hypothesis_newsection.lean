@@ -905,3 +905,142 @@ theorem R02_deriv_bound_unconditional : ∀ w,
   R02DerivBridge.R02_deriv_bound_of_etaPairLim_eq R02_hCont_of_pos
 
 end R02Unconditional
+
+/-!
+# Tail zeta upper on `Re ≥ 1 + δ` — Im-uniform right edge (stone 1 of door-4 feeder)
+
+GREP VERDICT (searches run before writing; repo + Mathlib; cite file:line):
+* Phragmen-Lindelof vertical strip EXISTS (exact needed shape, do NOT recreate):
+  `Mathlib/Analysis/Complex/PhragmenLindelof.lean:275`
+  `theorem vertical_strip (hfd : DiffContOnCl ℂ f (re ⁻¹' Ioo a b)) ... → ‖f z‖ ≤ C`.
+* Hadamard three-lines EXISTS (exact needed shape, do NOT recreate):
+  `Mathlib/Analysis/Complex/Hadamard.lean:608`
+  `lemma norm_le_interp_of_mem_verticalClosedStrip' (hul : l < u) ... → ‖f z‖ ≤ a ^ ... * b ^ ...`.
+* Maximum modulus EXISTS (generic, no zeta instantiation):
+  `Mathlib/Analysis/Complex/AbsMax.lean:184` `norm_eqOn_closedBall_of_isMaxOn`,
+  `:204` `norm_eq_norm_of_isMaxOn_of_ball_subset`, `:212` `norm_eventually_eq_of_isLocalMax`.
+* Euler product on `1 < s.re` EXISTS (no norm upper derived from it):
+  `Mathlib/NumberTheory/EulerProduct/DirichletLSeries.lean:57` `summable_riemannZetaSummand`,
+  `:89` `riemannZeta_eulerProduct_hasProd`, `:102` `riemannZeta_eulerProduct`.
+* Dirichlet-series absolute convergence EXISTS (tool for this stone):
+  `Mathlib/Analysis/PSeriesComplex.lean:25` `Complex.summable_one_div_nat_cpow`,
+  `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:207` `zeta_eq_tsum_one_div_nat_cpow`,
+  `:214` `zeta_eq_tsum_one_div_nat_add_one_cpow`,
+  `Mathlib/Analysis/PSeries.lean:311` `Real.summable_nat_rpow`.
+* Functional equation EXISTS (cos form, for later assembly, not used here):
+  `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178` `riemannZeta_one_sub`.
+* Concurrent right-edge tsum bound REUSED read-only (not copied):
+  `zeta_rigorous.lean:4340` `zetaUpper_riemannZeta_norm_le_tsum :
+  ‖riemannZeta s‖ ≤ ∑' n, ((((n+1 : ℕ) : ℝ) ^ s.re))⁻¹` on `1 < s.re`
+  (via `zeta_eq_tsum_one_div_nat_add_one_cpow` + `norm_tsum_le_tsum_norm`; valid:
+  `Re > 1` zeta series IS absolutely convergent, so the tsum-majorant rule applies;
+  no `0 < ∑'` conditional-tsum abuse).
+* Concurrent real-axis cap REUSED read-only (transitively visible, not copied):
+  `ZeroFreeRegionProof.lean:154` `ZeroFreeRegion.tsum_nat_rpow_neg_le`,
+  `:201` `ZeroFreeRegion.norm_riemannZeta_ofReal`,
+  `:207` `ZeroFreeRegion.norm_riemannZeta_ofReal_le :
+  ‖riemannZeta (σ : ℂ)‖ ≤ 1 + 1 / (σ - 1)` on `1 < σ`
+  (visible via `riemann_hypothesis → ZeroFreeRegion → ZeroFreeRegionProof`;
+  `central_cover_assembly → riemann_hypothesis`; no new import, acyclic preserved).
+* Direct `‖ζ(s)‖ ≤ ζ(Re s)` upper MISSING as a named lemma (this stone closes it
+  in `‖·‖ ≤ ‖·‖` form); Lindelof/convexity zeta bound MISSING (residual).
+
+WHAT IS PROVED (all unconditional, no `sorry`/`admit`/`axiom`/hypotheses):
+* `TailZetaUpper.real_shift_tsum_eq`: `∑' (n+1)^{-σ} = ∑' n^{-σ}` on `1 < σ`
+  (zero-term `Real.zero_rpow` + `Summable.tsum_eq_zero_add` + `Real.rpow_neg`).
+* `TailZetaUpper.riemannZeta_norm_le_real_norm`: `‖riemannZeta s‖ ≤ ‖riemannZeta (s.re : ℂ)‖`
+  on `1 < s.re` (E's tsum bound + shift equality + real-axis identity).
+  Im-uniformity is FREE: RHS depends only on `s.re`, majorant independent of `s.im`.
+* `TailZetaUpper.riemannZeta_norm_le_const_of_re_ge` / `zeta_norm_le_const_of_re_ge`:
+  `‖·‖ ≤ 1 + 1 / δ` on `1 + δ ≤ Re` for any `δ > 0` (monotone `one_div_le_one_div_of_le`
+  from the real-axis cap). `zeta = riemannZeta` definitionally (`rfl`).
+* `TailZetaUpper.zeta_rightEdge_B3` (`Re ≥ 3/2 → ‖zeta‖ ≤ 3`, `δ = 1/2`):
+  `TailZetaUpper.zeta_rightEdge_B2` (`Re ≥ 2 → ‖zeta‖ ≤ 2`, `δ = 1`).
+  Strip shape: right edge `Re ≥ 1 + δ`, `T = 0` (all `Im`, no `|Im| ≥ T` needed);
+  constants `B = 1 + 1 / δ` (`B = 3`, `B = 2` in the instances).
+
+RESIDUAL (§1h: assembly exceeds one session — STOP after this stone):
+exact next lemma `TailZetaUpper_threeLines_FE_assembly` (NOT proved here): from
+(i) this stone at `Re = 1 + δ`, (ii) a left-edge bound on `Re = 1 - δ'` via FE
+`riemannZeta_one_sub` (needs `‖F‖` upper/lower + Stirling Gamma upper), and
+(iii) Hadamard `norm_le_interp_of_mem_verticalClosedStrip'` applied to the
+POLE-REMOVED entire `f s = (s - 1) * riemannZeta s` (with `BddAbove` +
+`DiffContOnCl` discharged around `s = 1`), infer Im-uniform `‖zeta‖ ≤ B`
+on the tail strip `0 < Re < 1 / 2`, `|Im| ≥ T` for explicit `B`, `T`
+(the `MollifiedRoucheLeaf`-gap feeder input `‖ζ·M - 1‖ ≤ 1 - δ` needs this `B`).
+-/
+
+namespace TailZetaUpper
+
+open scoped BigOperators
+
+/-- Shifted vs unshifted Real `p`-series agree on `1 < σ` (zero term vanishes). -/
+theorem real_shift_tsum_eq {σ : ℝ} (hσ : 1 < σ) :
+    (∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ σ))⁻¹) = (∑' n : ℕ, (n : ℝ) ^ (-σ)) := by
+  have hne : (-σ) ≠ 0 := by linarith
+  have hsumm : Summable (fun n : ℕ => (n : ℝ) ^ (-σ)) :=
+    Real.summable_nat_rpow.mpr (by linarith : -σ < -1)
+  have h0real : ((0 : ℝ) ^ (-σ)) = 0 :=
+    Real.zero_rpow hne
+  have hterm : ∀ n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ σ))⁻¹ = (((n : ℝ) + 1) ^ (-σ)) := by
+    intro n
+    have hcast : ((((n + 1 : ℕ) : ℝ)) = ((n : ℝ) + 1)) := by push_cast; ring
+    rw [hcast]
+    exact (Real.rpow_neg (by positivity) _).symm
+  have hshift : (∑' n : ℕ, (n : ℝ) ^ (-σ)) =
+      (∑' n : ℕ, (((n : ℝ) + 1) ^ (-σ))) := by
+    have h := hsumm.tsum_eq_zero_add
+    simpa [h0real] using h
+  calc (∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ σ))⁻¹)
+      = (∑' n : ℕ, (((n : ℝ) + 1) ^ (-σ))) := tsum_congr hterm
+    _ = (∑' n : ℕ, (n : ℝ) ^ (-σ)) := hshift.symm
+
+/-- Im-uniform domination on `Re > 1`: `‖ζ(s)‖ ≤ ‖ζ(Re s)‖` (RHS `Im`-free). -/
+theorem riemannZeta_norm_le_real_norm {s : ℂ} (hs : 1 < s.re) :
+    ‖riemannZeta s‖ ≤ ‖riemannZeta (s.re : ℂ)‖ := by
+  have hE := zetaUpper_riemannZeta_norm_le_tsum hs
+  have hshift := real_shift_tsum_eq (σ := s.re) hs
+  have hReal := ZeroFreeRegion.norm_riemannZeta_ofReal (σ := s.re) hs
+  calc ‖riemannZeta s‖
+      ≤ (∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ s.re))⁻¹) := hE
+    _ = (∑' n : ℕ, (n : ℝ) ^ (-s.re)) := hshift
+    _ = ‖riemannZeta (s.re : ℂ)‖ := hReal.symm
+
+/-- Explicit Im-uniform cap `1 + 1 / δ` on `1 + δ ≤ Re` (any `δ > 0`). -/
+theorem riemannZeta_norm_le_const_of_re_ge {δ : ℝ} (hδ : 0 < δ) {s : ℂ}
+    (hs : 1 + δ ≤ s.re) : ‖riemannZeta s‖ ≤ 1 + 1 / δ := by
+  have h1 : 1 < s.re := by linarith
+  have hle1 : ‖riemannZeta s‖ ≤ ‖riemannZeta (s.re : ℂ)‖ :=
+    riemannZeta_norm_le_real_norm h1
+  have hle2 : ‖riemannZeta (s.re : ℂ)‖ ≤ 1 + 1 / (s.re - 1) :=
+    ZeroFreeRegion.norm_riemannZeta_ofReal_le (σ := s.re) (by linarith : 1 < s.re)
+  have hle3 : 1 + 1 / (s.re - 1) ≤ 1 + 1 / δ := by
+    have hdiv : 1 / (s.re - 1) ≤ 1 / δ :=
+      one_div_le_one_div_of_le hδ (by linarith : δ ≤ s.re - 1)
+    linarith
+  exact le_trans (le_trans hle1 hle2) hle3
+
+/-- `zeta` alias form of the Im-uniform cap (definitionally `rfl`). -/
+theorem zeta_norm_le_const_of_re_ge {δ : ℝ} (hδ : 0 < δ) {s : ℂ}
+    (hs : 1 + δ ≤ s.re) : ‖zeta s‖ ≤ 1 + 1 / δ := by
+  have h : zeta s = riemannZeta s := rfl
+  rw [h]
+  exact riemannZeta_norm_le_const_of_re_ge hδ hs
+
+/-- Right edge `Re ≥ 3 / 2` with `B = 3` (`δ = 1 / 2`), Im-uniform. -/
+theorem zeta_rightEdge_B3 {s : ℂ} (hs : 3 / 2 ≤ s.re) : ‖zeta s‖ ≤ 3 := by
+  have hδ : (0 : ℝ) < 1 / 2 := by norm_num
+  have hs' : (1 : ℝ) + 1 / 2 ≤ s.re := by linarith
+  have h := zeta_norm_le_const_of_re_ge hδ hs'
+  have heq : (1 : ℝ) + 1 / (1 / 2 : ℝ) = 3 := by norm_num
+  rwa [heq] at h
+
+/-- Right edge `Re ≥ 2` with `B = 2` (`δ = 1`), Im-uniform. -/
+theorem zeta_rightEdge_B2 {s : ℂ} (hs : 2 ≤ s.re) : ‖zeta s‖ ≤ 2 := by
+  have hδ : (0 : ℝ) < 1 := by norm_num
+  have hs' : (1 : ℝ) + 1 ≤ s.re := by linarith
+  have h := zeta_norm_le_const_of_re_ge hδ hs'
+  have heq : (1 : ℝ) + 1 / (1 : ℝ) = 2 := by norm_num
+  rwa [heq] at h
+
+end TailZetaUpper
