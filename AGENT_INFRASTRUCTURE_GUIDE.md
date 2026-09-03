@@ -1276,7 +1276,13 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   (not assumed): `taylorCoeff_summable_of_orderBound` (order<2 ⇒ growth via Cauchy+Stirling) — proving
   it closes S1 unconditionally. **S1 UNCONDITIONAL CLOSED:** `taylorCoeff_summable_of_orderBound`
   proved (Cauchy at fixed `R=|r|+1`, majorant `|C|·(|r|/R²)^k/k!` — no Stirling, no per-k optimization
-  needed) + both corollaries by direct application.
+  needed) + both corollaries by direct application. **S2 COUNTING CLOSED (`RoucheCount`, generic,
+  in central_cover):** Jensen-gap counting lemma + `hurwitz_zero_transfer` (uniform convergence ⇒
+  approximants inherit a zero) + `door1_nonreal_zero_forced` (disc `R<|c.im|` ⇒ forced zero nonreal).
+  Built from scratch (no winding/argument-principle/count-zeros anywhere in Mathlib — verified).
+  Remaining S2 links: (S2a) zero ⇒ divisor `≥1` (needs finite-order packaging from isolated zeros);
+  (S2b) polynomial-eval packaging + `hyperbolic_zeroFree_off_real` composition in door-1 file;
+  (S2c) per-disc convergence + center-nonzero from S1 machinery.
   Mathlib grep verdict: no Hadamard factorization/genus/order, no Hermite–Biehler/Laguerre–Pólya (only
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
