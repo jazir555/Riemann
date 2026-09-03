@@ -3510,3 +3510,372 @@ theorem zeta_S0_lower_of_Slarge (Slarge : ℂ)
 #print axioms zetaCellS0_tail_1_le
 #print axioms zeta_lower_of_Sn_tail_factor
 #print axioms zeta_S0_lower_of_Slarge
+
+/-!
+## FE-FACTOR bounds at the R00 corner (STONES 1 / 1b / 2).
+
+Grep-first record (searches run before writing; repo + Mathlib):
+
+* STONE 1 (Mathlib FE — FOUND):
+  - `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178-180`
+    `theorem riemannZeta_one_sub {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n) (hs' : s ≠ 1) :`
+    `riemannZeta (1 - s) = 2 * (2 * π) ^ (-s) * Gamma s * cos (π * s / 2) * riemannZeta s`
+    (here `Gamma = Complex.Gamma`, `cos = Complex.cos`, `π = (Real.pi : ℂ)`;
+    file has `open Complex`). Underlying:
+    `Mathlib/NumberTheory/LSeries/HurwitzZetaEven.lean:760-762`
+    `hurwitzZetaEven_one_sub` (same cos-factor shape), plus completed forms
+    `completedRiemannZeta_one_sub` (RiemannZeta.lean:106) and
+    `completedRiemannZeta₀_one_sub` (RiemannZeta.lean:100).
+  - Factor form: Mathlib does NOT use the classic
+    `χ(s) = 2^s * π^(s-1) * sin(π*s/2) * Gamma(1-s)`; the available tool is the
+    cos-form `F(s) = 2 * (2*π)^(-s) * Gamma s * cos(π*s/2)` above
+    (equivalent via `s ↔ 1-s`). `zetaFEFactor` below is exactly this `F`.
+* STONE 1b / 2 pattern (mirrored, distinct `zetaFE*` names):
+  - `interval_arith.lean:CellGammaUniform.norm_sin_pi_half_le_wide` (sine majorant
+    `‖sin‖ ≤ exp 16` from `|s.im| ≤ 10`) and `R00GammaLower.norm_sin_pi_half_le`
+    (same), `R00GammaLower.exp_sixteen_lt` (`exp 16 < 1e7` via `(exp 1)^16`),
+    `R00GammaLower.norm_Gamma_le_realGamma` (integral majorant
+    `‖Gamma z‖ ≤ Real.Gamma z.re` for `0 < z.re`), `R00GammaLower.realGamma_one_sub_half_le`
+    / `CellGammaUniform.realGamma_one_sub_half_le_wide` (convexity on `[1,2]`
+    giving `Gamma(x+1) ≤ 1` then `Gamma(x) ≤ 1/x`). Cos upper reuses the same
+    exponential estimate via `Complex.two_cos` (mirrors `two_sin` used for sine).
+  - Sine LOWER (`1 ≤ ‖sin‖`) is new here (no sine lower exists in repo:
+    `rg "sin_pi|norm_sin"` in `interval_arith.lean` shows only the UPPER and
+    `sin_pi_half_ne_wide` nonvanishing): reverse-triangle on the exp difference
+    plus `Real.add_one_le_exp` (`exp t ≥ t+1`), so no rpow lower bound is needed.
+* Import check (acyclicity; mirror instead of import):
+  - `rg ^import zeta_rigorous.lean` → `import Mathlib` only.
+  - `rg ^import interval_arith.lean` → `Mathlib`, `riemann_hypothesis`,
+    `rh_certificate_infra`, `central_cover_assembly` (NOT `zeta_rigorous`).
+  - Transitive deps of `interval_arith` (`central_cover_assembly`,
+    `riemann_hypothesis`, `rh_certificate_infra`, `TestAnalytic`,
+    `ZeroFreeRegion*`) contain no `import zeta_rigorous`
+    (`rg ^import` on each; only `JensenTranslation` / `riemann_hypothesis_newsection`
+    import `zeta_rigorous`, neither is a dep of `interval_arith`). Hence
+    `zeta_rigorous → interval_arith` would be DAG-safe in principle, but it would
+    pull ~30k (`interval_arith`) + ~310k (`central_cover_assembly`) lines into this
+    leaf module; per the brief's allowance the minimal Gamma/sine/cos material is
+    mirrored below with distinct names (no new import, still `Mathlib`-only).
+
+What is proved below (all unconditional, fully closed, `zetaCellS0 = ⟨0.395,-8.75⟩`):
+* `zetaFEFactor`: Mathlib cos-form FE factor `F(s)`.
+* `zetaFEw0_im`, `zetaFE_abs_im_le16`: `Im(π*s0/2) = π*(-4.375)`, `|·| ≤ 16`.
+* `zetaFE_sin_upper_S0` (`‖sin‖ ≤ exp 16`), `zetaFE_exp16_lt` (`exp 16 < 1e7`),
+  `zetaFE_sin_upper_num_S0` (`‖sin‖ ≤ 1e7`, STONE 1b UPPER with `C = 1e7`).
+* `zetaFE_sin_lower_S0` (`1 ≤ ‖sin‖`, STONE 1b LOWER with `c = 1`).
+* `zetaFE_norm_Gamma_le_realGamma` (integral majorant, mirrored),
+  `zetaFE_realGamma_0395_le` (`Real.Gamma 0.395 ≤ 3` via convexity),
+  `zetaFE_Gamma_upper_S0` (`‖Gamma s0‖ ≤ 3`).
+* `zetaFE_cpow_upper_S0` (`‖(2*π)^(-s0)‖ ≤ 1` via `rpow_le_one_of_one_le_of_nonpos`).
+* `zetaFE_cos_upper_S0` (`‖cos‖ ≤ exp 16`), `zetaFE_cos_upper_num_S0` (`≤ 1e7`).
+* `zetaFE_factor_upper_S0` (`‖F(s0)‖ ≤ 60000000`, STONE 2 UPPER with `C = 6e7`).
+-/
+
+/-- Mathlib cos-form FE factor `F(s) = 2 * (2*π)^(-s) * Gamma s * cos(π*s/2)`
+(`riemannZeta_one_sub`, `Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178`). -/
+noncomputable def zetaFEFactor (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s *
+    Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- `Im(π*s0/2) = π*(-4.375)` (`(s0/2).im = -8.75/2`). -/
+theorem zetaFEw0_im :
+    ((Real.pi : ℂ) * (zetaCellS0 / 2)).im = Real.pi * (-4.375) := by
+  have hs2im : (zetaCellS0 / 2).im = (-4.375 : ℝ) := by
+    rw [Complex.div_ofNat_im, zetaCellS0_im]
+    norm_num
+  simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+
+/-- `|Im(π*s0/2)| ≤ 16` (`4.375*π ≤ 3.1416*5 ≤ 16`). -/
+theorem zetaFE_abs_im_le16 :
+    |((Real.pi : ℂ) * (zetaCellS0 / 2)).im| ≤ 16 := by
+  rw [zetaFEw0_im, abs_mul]
+  have h1 : |Real.pi| ≤ 3.1416 := by
+    rw [abs_of_pos Real.pi_pos]
+    exact le_of_lt Real.pi_lt_d4
+  have h2 : |(-4.375 : ℝ)| ≤ 5 := by norm_num
+  calc |Real.pi| * |(-4.375 : ℝ)| ≤ 3.1416 * 5 :=
+        mul_le_mul h1 h2 (by positivity) (by norm_num)
+    _ ≤ 16 := by norm_num
+
+/-- Sine majorant at `s0`: `‖sin(π*s0/2)‖ ≤ exp 16`
+(mirrors `CellGammaUniform.norm_sin_pi_half_le_wide` at the corner). -/
+theorem zetaFE_sin_upper_S0 :
+    ‖Complex.sin ((Real.pi : ℂ) * (zetaCellS0 / 2))‖ ≤ Real.exp 16 := by
+  set w : ℂ := (Real.pi : ℂ) * (zetaCellS0 / 2) with hw
+  have hw_im_eq : w.im = Real.pi * (-4.375) := by
+    rw [hw, zetaFEw0_im]
+  have hw_abs : |w.im| ≤ 16 := by
+    rw [hw_im_eq]
+    have h1 : |Real.pi| ≤ 3.1416 := by
+      rw [abs_of_pos Real.pi_pos]
+      exact le_of_lt Real.pi_lt_d4
+    have h2 : |(-4.375 : ℝ)| ≤ 5 := by norm_num
+    calc |Real.pi * (-4.375 : ℝ)| = |Real.pi| * |(-4.375 : ℝ)| := abs_mul _ _
+      _ ≤ 3.1416 * 5 :=
+          mul_le_mul h1 h2 (by positivity) (by norm_num)
+      _ ≤ 16 := by norm_num
+  have hsin_eq : Complex.sin w =
+      (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+          Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ Real.exp 16 :=
+    Real.exp_le_exp.mpr (le_trans (le_abs_self _) hw_abs)
+  have e2 : Real.exp (-w.im) ≤ Real.exp 16 := by
+    apply Real.exp_le_exp.mpr
+    have : -w.im ≤ |w.im| := neg_le_abs _
+    exact le_trans this hw_abs
+  linarith
+
+/-- `Real.exp 16 < 10000000` via `(exp 1)^16` (mirrors `R00GammaLower.exp_sixteen_lt`). -/
+theorem zetaFE_exp16_lt : Real.exp 16 < 10000000 := by
+  have h1 : Real.exp (16 : ℝ) = (Real.exp 1) ^ (16 : ℕ) := by
+    have := Real.exp_nat_mul (1 : ℝ) (16 : ℕ)
+    simpa using this.symm
+  have h2 : (Real.exp 1) ^ (16 : ℕ) < (2.7182818286 : ℝ) ^ (16 : ℕ) := by
+    apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+  have h3 : (2.7182818286 : ℝ) ^ (16 : ℕ) < 10000000 := by norm_num
+  rw [h1]
+  exact lt_trans h2 h3
+
+/-- STONE 1b UPPER: `‖sin(π*s0/2)‖ ≤ 10000000` (`C = 1e7`). -/
+theorem zetaFE_sin_upper_num_S0 :
+    ‖Complex.sin ((Real.pi : ℂ) * (zetaCellS0 / 2))‖ ≤ 10000000 :=
+  le_trans zetaFE_sin_upper_S0 (le_of_lt zetaFE_exp16_lt)
+
+/-- STONE 1b LOWER: `1 ≤ ‖sin(π*s0/2)‖` (`c = 1`, reverse-triangle + `exp t ≥ t+1`). -/
+theorem zetaFE_sin_lower_S0 :
+    (1 : ℝ) ≤ ‖Complex.sin ((Real.pi : ℂ) * (zetaCellS0 / 2))‖ := by
+  set w : ℂ := (Real.pi : ℂ) * (zetaCellS0 / 2) with hw
+  have hw_im_eq : w.im = Real.pi * (-4.375) := by
+    rw [hw, zetaFEw0_im]
+  have hw_le : w.im ≤ (-13.125 : ℝ) := by
+    rw [hw_im_eq]
+    have heq : Real.pi * (-4.375 : ℝ) = -(4.375 * Real.pi) := by ring
+    rw [heq]
+    have hmul : (13.125 : ℝ) ≤ 4.375 * Real.pi := by
+      have hpi3 := Real.pi_gt_three
+      have hpos : (0 : ℝ) < 4.375 := by norm_num
+      have h := mul_lt_mul_of_pos_left hpi3 hpos
+      have heq2 : (4.375 : ℝ) * 3 = 13.125 := by norm_num
+      linarith
+    linarith
+  have hsin_eq : Complex.sin w =
+      (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2 := by
+    unfold Complex.sin; ring
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hsin_norm : ‖Complex.sin w‖ =
+      ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+    rw [hsin_eq]
+    simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  have hnorm1 : ‖Complex.exp (-w * Complex.I)‖ = Real.exp w.im := by
+    rw [Complex.norm_exp, hre1]
+  have hnorm2 : ‖Complex.exp (w * Complex.I)‖ = Real.exp (-w.im) := by
+    rw [Complex.norm_exp, hre2]
+  have hrev : ‖Complex.exp (w * Complex.I)‖ - ‖Complex.exp (-w * Complex.I)‖ ≤
+      ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ := by
+    have h := norm_sub_norm_le (Complex.exp (w * Complex.I))
+      (Complex.exp (-w * Complex.I))
+    rwa [norm_sub_rev] at h
+  have hexp_small : Real.exp w.im ≤ 1 := by
+    have h0 : w.im ≤ 0 := by linarith
+    calc Real.exp w.im ≤ Real.exp 0 := Real.exp_le_exp.mpr h0
+      _ = 1 := Real.exp_zero
+  have hexp_big : (14.125 : ℝ) ≤ Real.exp (-w.im) := by
+    have hge : (13.125 : ℝ) ≤ -w.im := by linarith
+    have h1 : (-w.im) + 1 ≤ Real.exp (-w.im) := Real.add_one_le_exp _
+    linarith
+  have hlow : (13.125 : ℝ) ≤
+      ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ := by
+    rw [← hnorm2] at hexp_big
+    rw [← hnorm1] at hexp_small
+    linarith [hrev, hexp_big, hexp_small]
+  rw [hsin_norm]
+  linarith
+
+/-- Integral majorant (mirrors `R00GammaLower.norm_Gamma_le_realGamma`):
+`‖Gamma z‖ ≤ Real.Gamma z.re` for `0 < z.re`. -/
+theorem zetaFE_norm_Gamma_le_realGamma {z : ℂ} (hz : 0 < z.re) :
+    ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
+  have hC := Complex.GammaIntegral_convergent hz
+  have hR := Real.GammaIntegral_convergent hz
+  rw [Complex.Gamma_eq_integral hz, Real.Gamma_eq_integral hz]
+  unfold Complex.GammaIntegral
+  calc ‖∫ x in Set.Ioi (0 : ℝ), ((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖
+      ≤ ∫ x in Set.Ioi (0 : ℝ), ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ :=
+        MeasureTheory.norm_integral_le_integral_norm _
+    _ = ∫ x in Set.Ioi (0 : ℝ), Real.exp (-x) * x ^ (z.re - 1) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro x hx
+        have hx0 : (0 : ℝ) < x := Set.mem_Ioi.mp hx
+        show ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ = _
+        rw [norm_mul]
+        have h1 : ‖((Real.exp (-x) : ℝ) : ℂ)‖ = Real.exp (-x) :=
+          Complex.norm_of_nonneg (le_of_lt (Real.exp_pos _))
+        have h2 : ‖(x : ℂ) ^ (z - 1)‖ = x ^ ((z - 1).re) :=
+          Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+        rw [h1, h2]
+        have hexp : (z - 1).re = z.re - 1 := by simp [Complex.sub_re]
+        rw [hexp]
+
+/-- Real-Gamma cap at `0.395`: `Real.Gamma 0.395 ≤ 3`
+(convexity on `[1,2]` gives `Gamma(1.395) ≤ 1`, then `Gamma(0.395) ≤ 1/0.395 ≤ 3`). -/
+theorem zetaFE_realGamma_0395_le : Real.Gamma (0.395 : ℝ) ≤ 3 := by
+  have hx_pos : (0 : ℝ) < 0.395 := by norm_num
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - ((0.395 : ℝ) + 1) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ ((0.395 : ℝ) + 1) - 1 := by norm_num
+  have hab : ((2 : ℝ) - ((0.395 : ℝ) + 1)) + (((0.395 : ℝ) + 1) - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : ((2 : ℝ) - ((0.395 : ℝ) + 1)) * 1 + (((0.395 : ℝ) + 1) - 1) * 2 =
+      (0.395 : ℝ) + 1 := by ring
+  rw [heq] at h
+  have hrhs : ((2 : ℝ) - ((0.395 : ℝ) + 1)) * 1 + (((0.395 : ℝ) + 1) - 1) * 1 =
+      (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hne : (0.395 : ℝ) ≠ 0 := by norm_num
+  have hadd := Real.Gamma_add_one hne
+  rw [hadd] at h
+  have hfin : Real.Gamma (0.395 : ℝ) ≤ 1 / 0.395 := by
+    rw [le_div_iff₀ hx_pos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / 0.395 ≤ 3 := by norm_num
+  exact le_trans hfin hfrac
+
+/-- Gamma upper at `s0`: `‖Gamma s0‖ ≤ 3`. -/
+theorem zetaFE_Gamma_upper_S0 : ‖Complex.Gamma zetaCellS0‖ ≤ 3 := by
+  have hre : 0 < zetaCellS0.re := zetaCellS0_pos
+  have hle := zetaFE_norm_Gamma_le_realGamma hre
+  rw [zetaCellS0_re] at hle
+  exact le_trans hle zetaFE_realGamma_0395_le
+
+/-- Cpow upper at `s0`: `‖(2*π)^(-s0)‖ ≤ 1` (`(2π)^(-0.395) ≤ 1`). -/
+theorem zetaFE_cpow_upper_S0 :
+    ‖(2 * (Real.pi : ℂ)) ^ (-zetaCellS0)‖ ≤ 1 := by
+  have hbase_pos : (0 : ℝ) < 2 * Real.pi := by
+    have := Real.pi_pos
+    linarith
+  have h2pi : ((2 * Real.pi : ℝ) : ℂ) = 2 * (Real.pi : ℂ) := by
+    push_cast; ring
+  have hnorm : ‖(2 * (Real.pi : ℂ)) ^ (-zetaCellS0)‖ =
+      (2 * Real.pi) ^ (-(zetaCellS0.re)) := by
+    rw [← h2pi, Complex.norm_cpow_eq_rpow_re_of_pos hbase_pos, Complex.neg_re]
+  rw [hnorm, zetaCellS0_re]
+  apply Real.rpow_le_one_of_one_le_of_nonpos
+  · have hpi := Real.pi_gt_three
+    linarith
+  · norm_num
+
+/-- Cosine majorant at `s0`: `‖cos(π*s0/2)‖ ≤ exp 16` (same estimate via `two_cos`). -/
+theorem zetaFE_cos_upper_S0 :
+    ‖Complex.cos ((Real.pi : ℂ) * (zetaCellS0 / 2))‖ ≤ Real.exp 16 := by
+  set w : ℂ := (Real.pi : ℂ) * (zetaCellS0 / 2) with hw
+  have hw_im_eq : w.im = Real.pi * (-4.375) := by
+    rw [hw, zetaFEw0_im]
+  have hw_abs : |w.im| ≤ 16 := by
+    rw [hw_im_eq]
+    have h1 : |Real.pi| ≤ 3.1416 := by
+      rw [abs_of_pos Real.pi_pos]
+      exact le_of_lt Real.pi_lt_d4
+    have h2 : |(-4.375 : ℝ)| ≤ 5 := by norm_num
+    calc |Real.pi * (-4.375 : ℝ)| = |Real.pi| * |(-4.375 : ℝ)| := abs_mul _ _
+      _ ≤ 3.1416 * 5 :=
+          mul_le_mul h1 h2 (by positivity) (by norm_num)
+      _ ≤ 16 := by norm_num
+  have hcos_eq : Complex.cos w =
+      (Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2 := by
+    unfold Complex.cos; ring
+  rw [hcos_eq]
+  have hle : ‖(Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2‖
+      ≤ (‖Complex.exp (w * Complex.I)‖ + ‖Complex.exp (-w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)) / 2‖
+        = ‖Complex.exp (w * Complex.I) + Complex.exp (-w * Complex.I)‖ / 2 := by
+      simp [norm_div, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
+  have hre1 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  have hre2 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp (-w.im) ≤ Real.exp 16 := by
+    apply Real.exp_le_exp.mpr
+    have : -w.im ≤ |w.im| := neg_le_abs _
+    exact le_trans this hw_abs
+  have e2 : Real.exp w.im ≤ Real.exp 16 :=
+    Real.exp_le_exp.mpr (le_trans (le_abs_self _) hw_abs)
+  linarith
+
+/-- Cosine numeral cap: `‖cos(π*s0/2)‖ ≤ 10000000`. -/
+theorem zetaFE_cos_upper_num_S0 :
+    ‖Complex.cos ((Real.pi : ℂ) * (zetaCellS0 / 2))‖ ≤ 10000000 :=
+  le_trans zetaFE_cos_upper_S0 (le_of_lt zetaFE_exp16_lt)
+
+/-- STONE 2 UPPER: `‖F(s0)‖ ≤ 60000000` (`2 * 1 * 3 * 1e7`). -/
+theorem zetaFE_factor_upper_S0 : ‖zetaFEFactor zetaCellS0‖ ≤ 60000000 := by
+  have hcos : ‖Complex.cos ((Real.pi : ℂ) * zetaCellS0 / 2)‖ ≤ 10000000 := by
+    rw [mul_div_assoc]
+    exact zetaFE_cos_upper_num_S0
+  have hG := zetaFE_Gamma_upper_S0
+  have hcp := zetaFE_cpow_upper_S0
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖zetaFEFactor zetaCellS0‖ =
+      ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-zetaCellS0)‖ *
+        ‖Complex.Gamma zetaCellS0‖ *
+        ‖Complex.cos ((Real.pi : ℂ) * zetaCellS0 / 2)‖ := by
+    unfold zetaFEFactor
+    simp [norm_mul, mul_assoc]
+  rw [hnorm_eq, e2]
+  have hprod : 2 * ‖(2 * (Real.pi : ℂ)) ^ (-zetaCellS0)‖ *
+      ‖Complex.Gamma zetaCellS0‖ *
+      ‖Complex.cos ((Real.pi : ℂ) * zetaCellS0 / 2)‖ ≤
+      2 * 1 * 3 * 10000000 := by
+    apply mul_le_mul
+    · apply mul_le_mul
+      · apply mul_le_mul (le_refl 2) hcp (norm_nonneg _) (by norm_num)
+      · exact hG
+      · exact norm_nonneg _
+      · norm_num
+    · exact hcos
+    · exact norm_nonneg _
+    · norm_num
+  have heq : (2 : ℝ) * 1 * 3 * 10000000 = 60000000 := by norm_num
+  linarith [hprod, heq]
+
+#print axioms zetaFEFactor
+#print axioms zetaFEw0_im
+#print axioms zetaFE_abs_im_le16
+#print axioms zetaFE_sin_upper_S0
+#print axioms zetaFE_exp16_lt
+#print axioms zetaFE_sin_upper_num_S0
+#print axioms zetaFE_sin_lower_S0
+#print axioms zetaFE_norm_Gamma_le_realGamma
+#print axioms zetaFE_realGamma_0395_le
+#print axioms zetaFE_Gamma_upper_S0
+#print axioms zetaFE_cpow_upper_S0
+#print axioms zetaFE_cos_upper_S0
+#print axioms zetaFE_cos_upper_num_S0
+#print axioms zetaFE_factor_upper_S0
