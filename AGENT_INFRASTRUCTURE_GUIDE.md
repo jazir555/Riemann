@@ -1408,8 +1408,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     BLOCKED on missing `log_seven/eleven/thirteen` d9 bounds (create in-file); composites 8/9/10/12/14/15/16
     factor through 2/3/5 bridges. **Prime logs CLOSED (`log_seven/eleven/thirteen_near_10` + d9 pairs,
     mirror of `log_five_d9` method):** θ₇/θ₁₁/θ₁₃ unlocked for the K=16 push. **Prime stacks CLOSED
-    (`D3_S7_re_lower` et al.):** θ₇/θ₁₁/θ₁₃ full enclosures green (Re-route negative as predicted —
-    per-term technology banked). Composites 8/9/10/12/14/15/16 tasked (log-bridge follower). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    (`D3_S7_re_lower` et al.):** θ₇/θ₁₁/θ₁₃ full enclosures green     (Re-route negative as predicted —
+    per-term technology banked). Composites 8/9/10/12/14/15/16 tasked (log-bridge follower).
+    **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
+    green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
