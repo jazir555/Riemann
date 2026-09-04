@@ -1406,7 +1406,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Middle upper CLOSED-first (`MID_mid_block_upper`):** `≤5/3` via pairs+MVT+telescoping (beats triangle
     `≈31.5`; even perfect constants give `≈1.2` — Tier-3 vdC MANDATORY, tasked). **A-process identity
     CLOSED (`vdC_A_shift_identity_doubleSum` + `vdC_autocorr`):** pure Finset algebra green; linear-test
-    plug-in tasked. **Windowed `hBdd`
+    plug-in tasked. **Linear plug-in CLOSED-honest (`CB_*`):** differenced gap + one diagonal + shift sums;
+    BS pairing (`≤1`) beats proxy (`≤8` norm scale) — true nonlinear Tier-3 still open. **Off-window joint
+    poly CLOSED (`CA2TailJoint`):** squared + FE-mirror norm-quadratic tail bounds green; hTail composition
+    (Gaussian-vs-poly crossover) tasked. **Windowed `hBdd`
     CLOSED-conditional (`BUWindowed`):** punctured windowed GammaR lower `≥1e-9` + window `BddAbove`
     unconditionally; full-strip `hBdd` conditional on tail-`T`, P1 on tail-`T`+`hTail` (both tasked).
     **Tail assembly CLOSED (`BZTailEnvelope`):** tail Gamma-lower + tail F-envelope + both negative-`τ`
