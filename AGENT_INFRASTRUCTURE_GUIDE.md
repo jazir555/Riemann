@@ -1520,7 +1520,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     5.23`, beats `14.82` budget and triangle) — BUT the DZ1_/DZ1b_ first generations carry 10
     elaboration errors (rewrite-pattern, `le_or_lt`/`div_le_div_right`/`add_sub_cancel'` unknown
     ids, no-goals, type mismatches) with synthetic `sorryAx` dependents (coordinator-verified;
-    no literal `sorry` text). NOT committed. Repair tasked (DR: fix-or-excise, keep DZ1c deps).
+    no literal `sorry` text). **REPAIRED (`bee650c8`, DR fixed 13 errors in place, nothing excised,
+    coordinator-verified green 8693 jobs, zero errors + zero `sorryAx`, all 30 DZ axioms clean):**
+    Pi-add → `.const_add`/`.const_sub`, `by_cases`/`push_neg` for `le_or_lt`, bare `gcongr`, `abel` +
+    rewrite-at-hypothesis. Triplicate `DZ1_main`/`DZ1b_main`/`DZ1c_main` all `≤ 13.85 < 16`.
+    Next: amplitude-weighted per-16-block premise via Abel partial summation (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
@@ -1677,14 +1681,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    `≤ 68.85` vs true max `228`; deeper shifts floor at `≈ 0.090`; splits/corner-dominated; reflection
    exact) — needs Stirling-with-explicit-remainder (`‖Γ(z+6)‖ ≤ 68.85` at `Re ∈ [6.025,6.37]`,
    `|Im| ∈ [2.625,4.125]`; true `≈ 14`, 4.9× slack, feasible in principle; tasked). **One-step
-   Im-decay cut banked, VERIFICATION PENDING (`Door3GammaCut87`, DQ, UNCOMMITTED):** `‖w‖ ≥ 6.57`
+   Im-decay cut (`Door3GammaCut87`, DQ, **`7174a6b2`**, coordinator real-build green 8702 jobs,
+   zero errors + zero `sorryAx` — probe-only status lifted):** `‖w‖ ≥ 6.57`
    one-step recurrence ⇒ **`G = 0.087`, `M = 107.9496`** (ceil 108, `Azeta ≥ 6183/6186`; step
-   `111 → 108`) — verified ONLY via isolated probe with stubs (real module build never reached
-   newsection: zeta dependency broken by DP errors). CORRECTION (DQ-verified): tasked `68.85`
+   `111 → 108`) — real module build green after DR repaired zeta. CORRECTION (DQ-verified): tasked `68.85`
    numerator is FALSE — true `‖Γ(w)‖ ≈ 131` at top edge (`6.37`, `2.625`), bottom edge `≈ 68`
    (zero margin); prompt's `true ≈ 14` was the invalid large-y asymptote. `M = 32.2608` route now:
-   exact infinite-product decay or matched-x monotonicity, per DQ residual (tasked after zeta
-   green). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   exact infinite-product decay or matched-x monotonicity, per DQ residual (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
