@@ -5147,6 +5147,86 @@ Opens stay EXPLICIT: tail-`T` (`9 < |Im|` strip bound), BH2 `hTail` (`≤ 36` le
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+BV2 tail (door-3 tail-`T`, outer envelope only): Gaussian-domination numeral for BN's
+outer-thirds envelope (`‖F‖ ≤ 18·exp((1+π/2)|Im|)`).
+
+Ownership: Agent BV2 tail append (append-only after the BU verdict block; nothing above
+touched; no new imports).
+
+What is proved here (full proof, no `sorry`/`admit`/`axiom`):
+* `outer_gauss_le` — for `u ≥ 9`,
+  `18·exp((1+π/2)·u)·exp(-((u+6.75)²)/100) ≤ 18·exp(165.225316)`.
+  Proof: completing the square (`-u²/100 + K·u = 25·K² - (u-50·K)²/100 ≤ 25·K²`
+  with `K = 1+π/2`), `(u+6.75)² ≥ u²` for `u ≥ 0` (the `+6.75` shift only helps),
+  `K ≤ 2.5708` from `π ≤ 3.1416` (`Real.pi_lt_d4`), `25·2.5708² = 165.225316`
+  by `norm_num`, then `Real.exp_le_exp` + `Real.exp_add`. Pure real analysis;
+  feeds tail-`T` directly (outer-thirds `‖G‖` cap up to the `σ² ≤ 4` damping factor,
+  i.e. an extra `exp(0.04)`; `u` plays the role of `|τ|`).
+
+Grep record (verified by grep before writing):
+* `BV2OuterTail` + `outer_gauss_le` + `165.225316`: absent repo-wide (checked).
+* `BNStripThirds.F_outerThirds_le` — this file `:4286` (the fed envelope).
+* `BUWindowed.hBdd_of_window_and_tail` — this file `:5081` (tail-`T` consumer).
+* `Real.pi_lt_d4`, `Real.exp_le_exp`, `Real.exp_add` — Mathlib (used in-file).
+-/
+
+namespace BV2OuterTail
+
+/-- Gaussian domination for BN's outer envelope: explicit tail constant
+`T = 18·exp(165.225316)` (uniform for all `u ≥ 9`; in fact for all `u ≥ 0`). -/
+theorem outer_gauss_le {u : ℝ} (hu : 9 ≤ u) :
+    18 * Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u + 6.75) ^ 2) / 100)) ≤
+      18 * Real.exp 165.225316 := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hKnn : (0 : ℝ) ≤ 1 + Real.pi / 2 := by
+    have hpi : (0 : ℝ) < Real.pi := Real.pi_pos
+    linarith
+  have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hKle : 1 + Real.pi / 2 ≤ (2.5708 : ℝ) := by linarith
+  have hKsq : 25 * (1 + Real.pi / 2) ^ 2 ≤ (165.225316 : ℝ) := by
+    have hnn1 : (0 : ℝ) ≤ 2.5708 - (1 + Real.pi / 2) := by linarith
+    have hnn2 : (0 : ℝ) ≤ 2.5708 + (1 + Real.pi / 2) := by linarith
+    have hprod : (0 : ℝ) ≤ (2.5708 - (1 + Real.pi / 2)) * (2.5708 + (1 + Real.pi / 2)) :=
+      mul_nonneg hnn1 hnn2
+    have hsq2 : (2.5708 : ℝ) ^ 2 = 6.60901264 := by norm_num
+    nlinarith [hprod, hsq2]
+  have hshift : u ^ 2 ≤ (u + 6.75) ^ 2 := by
+    have e : (u + 6.75) ^ 2 = u ^ 2 + 13.5 * u + 45.5625 := by ring
+    linarith [hu0]
+  have hquad : (1 + Real.pi / 2) * u - (u + 6.75) ^ 2 / 100
+      ≤ 25 * (1 + Real.pi / 2) ^ 2 := by
+    have hsqnn : (0 : ℝ) ≤ (u - 50 * (1 + Real.pi / 2)) ^ 2 := sq_nonneg _
+    have hcs : (1 + Real.pi / 2) * u - u ^ 2 / 100
+        = 25 * (1 + Real.pi / 2) ^ 2 - (u - 50 * (1 + Real.pi / 2)) ^ 2 / 100 := by
+      ring
+    linarith [hsqnn, hshift, hcs]
+  have hexp_arg : (1 + Real.pi / 2) * u + (-(((u + 6.75) ^ 2) / 100))
+      ≤ (165.225316 : ℝ) := by
+    linarith [hquad, hKsq]
+  have hexp : Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u + 6.75) ^ 2) / 100))
+      ≤ Real.exp 165.225316 := by
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr hexp_arg
+  calc 18 * Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u + 6.75) ^ 2) / 100))
+      = 18 * (Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u + 6.75) ^ 2) / 100))) := by
+        ring
+    _ ≤ 18 * Real.exp 165.225316 :=
+        mul_le_mul_of_nonneg_left hexp (by norm_num)
+
+#print axioms BV2OuterTail.outer_gauss_le
+
+end BV2OuterTail
+
+/-!
+BV2 VERDICT + RESIDUAL (report-and-stop): the Gaussian-domination numeral for BN's outer
+envelope is GREEN (`outer_gauss_le`, explicit `T = 18·exp(165.225316)`).
+Outer-thirds tail-`T` contribution now needs only the `σ² ≤ 4` damping factor
+(`exp((σ²-(u+6.75)²)/100) ≤ exp(0.04)·exp(-((u+6.75)²)/100)`, i.e. outer `‖G‖ ≤ T·exp(0.04)`
+for `9 < |Im|` off the middle third). NOT attempted per brief (report-and-stop):
+exp-3/2 middle case, `hTail`, P1. No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
