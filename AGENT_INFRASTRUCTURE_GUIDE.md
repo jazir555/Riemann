@@ -1510,6 +1510,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     fully proved). HONEST GAP: banked piece uses synthetic phase; true `8.75·log` curvature `≈0.034`
     at n=16 makes H=2 k=2 vacuous there, and BS baseline `5/3` averages `≈0.0265`/piece → 13.9× short
     of middle `≤ 0.12`. Next: one TRUE-phase diagonal bound on `[16,32)` beating triangle 15 (tasked).
+    **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
+    (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
+    read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
+    `Re(diag) ≤ 14.9 < 15`** + `DZ_piece_DV_feed` closing the `DV_A_H2` loop read-only. HONEST:
+    DV feed vacuous (`2·16+2·14.9 = 61.8 →` per-piece `≤ 16.73`, needs `B < 12.125`); H=2 cannot beat
+    a coherent positive-Re diagonal at any H. Next: k=1 direct on `[16,32)` (linearize at `n=8`,
+    slope `8.75/24`, target `≤ 14.82 < 16`; tasked).
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
     in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
     build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
@@ -1650,7 +1657,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    DM-verification build transiently failed inside the zeta dependency (sibling DK mid-edit, still
    in flight) — cleared on retry, DM block itself green. Remaining R02 H-leaf is center-product
    premises (`Agam`/`Azeta` at `R02Pilot.sCenter`); next: disc-Gamma `0.026` cap (`→ M = 32.2608`)
-   or zeta below `7.46` (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   or zeta below `7.46` (tasked). **Gamma lane (`Door3GammaCut89`, DN, `c5047970`, green 8702
+   jobs, axioms clean):** tighter convexity base (`Γ(1.37) ≤ 0.9159`, `Γ(6.37) ≤ 235.19` was `256.78`)
+   ⇒ **unconditional `G = 0.089`, `M = 110.4312`** (ceil 111, `Azeta ≥ 6325/6358`; step `121 → 111`) +
+   single-gap conditional `G = 0.026 → M = 32.2608` (`Azeta ≥ 1848`). `(G,Z,M,Azeta) = (0.089, 7.5,
+   110.4312, 6325)`. HONEST AUDIT (in tail): `0.026` fits no convexity+shift route (needs numerator
+   `≤ 68.85` vs true max `228`; deeper shifts floor at `≈ 0.090`; splits/corner-dominated; reflection
+   exact) — needs Stirling-with-explicit-remainder (`‖Γ(z+6)‖ ≤ 68.85` at `Re ∈ [6.025,6.37]`,
+   `|Im| ∈ [2.625,4.125]`; true `≈ 14`, 4.9× slack, feasible in principle; tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
