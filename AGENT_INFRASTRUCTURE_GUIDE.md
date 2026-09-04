@@ -1404,9 +1404,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `Re S₄≈-0.54<0`, so the Re-sum route NEVER reaches `8/15` (proved `D3_S4_cannot_reach_8_15`); the
     durable asset is per-term technology for x=3,4. Next per K-table: θ₅–θ₁₆ toward K=16 + middle upper.
     **Middle upper CLOSED-first (`MID_mid_block_upper`):** `≤5/3` via pairs+MVT+telescoping (beats triangle
-    `≈31.5`; even perfect constants give `≈1.2` — Tier-3 vdC MANDATORY, tasked). **Windowed `hBdd`
+    `≈31.5`; even perfect constants give `≈1.2` — Tier-3 vdC MANDATORY, tasked). **A-process identity
+    CLOSED (`vdC_A_shift_identity_doubleSum` + `vdC_autocorr`):** pure Finset algebra green; linear-test
+    plug-in tasked. **Windowed `hBdd`
     CLOSED-conditional (`BUWindowed`):** punctured windowed GammaR lower `≥1e-9` + window `BddAbove`
     unconditionally; full-strip `hBdd` conditional on tail-`T`, P1 on tail-`T`+`hTail` (both tasked).
+    **Tail assembly CLOSED (`BZTailEnvelope`):** tail Gamma-lower + tail F-envelope + both negative-`τ`
+    numerals ⇒ tail-`T` ⇒ **`hBdd` UNCONDITIONAL**; **P1 conditional on `hTail` ONLY** (Stirling-sharp
+    tail joint bound tasked).
     **x=5,6 banked (`D3_S6_re_lower` et al.):** prime pattern (`log_five_d9`) + composite bridge (`log 6 =
     log 2 + log 3`) — but true `Re S₆<0`, Re-route dead again (`D3_S6_cannot_reach_8_15`). Next: θ₇–θ₁₆
     BLOCKED on missing `log_seven/eleven/thirteen` d9 bounds (create in-file); composites 8/9/10/12/14/15/16
