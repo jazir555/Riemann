@@ -5985,6 +5985,203 @@ BH2 `hTail` (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`); hence P1 stays condi
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# CA2 tail (door-3 tier-1 minimum): off-window joint `Γ·cos` polynomial bound.
+
+GOAL (brief tier 1, minimum viable): extend AR's on-window joint composition
+(`Door3JointGammaCos.joint_Gamma_cos_le`, `|Im| ≤ 8.75 ⟹ ‖Γ·cos‖ ≤ 34`) OFF-window
+to an honest `‖Γ·cos‖ ≤ POLY(|τ|)`-class bound for `8.75 < |Im|`.
+
+METHOD: replay AR's EXACT identities (valid at ALL `Im`, grep-verified below) and
+stop before AR's window numeral caps (`1+a² ≤ 77.5625`, `t+1 ≤ 3.1416·8.75/2+1`):
+* `Door3JointGammaCos.Gamma_Re2_normSq`: `‖Γ(w)‖² = (1+y²)·πy/sinh(πy)` (`Re w = 2`);
+* `Door3JointGammaCos.cos_Re2_norm`: `‖cos(πw/2)‖ = cosh(πy/2)`;
+* `Door3JointGammaCos.t_mul_coth_le`: `t·coth t ≤ t+1`.
+With `sinh πa = 2·sinh(πa/2)·cosh(πa/2)` this collapses to
+`‖Γ·cos‖² ≤ (1+a²)·(πa/2+1)` (`a = |Im|`, squared-cubic ≈ `(π/2)·a³`) and, by AM-GM
+(`AB ≤ ((A+B)/2)²` + `Real.sqrt_le_sqrt`), to the norm-quadratic
+`‖Γ·cos‖ ≤ ((1+a²)+(πa/2+1))/2` (≈ `a²/2`). Both are POLY-class (polynomial
+preferred per brief). The `Re = -1` wrappers restate this at `w = 1-z` (the FE
+mirror used by `BH2TailWindow`/hTail assembly), so this plugs directly into the
+tail `F`-envelope work.
+
+BZ `S`/`U` ROUTE (grep record): `BZTailEnvelope.GammaR_tail_lower` gives
+`3/(16·exp(2|Im|)) ≤ ‖Gammaℝ s‖` (a LOWER via `BTStripGamma.sin_pi_half_strip_upper`
+`S = exp(2|Im|)` + `gamma_one_sub_half_strip_upper` `U = 4`); it bounds `Gammaℝ`
+from BELOW on the middle third and hence cannot supply the UPPER joint bound
+needed here. It was considered and honestly NOT used: the exact AR identities
+already give a sharper (polynomial, not exponential) upper at all `Im`.
+
+DAMPING (grep record): `BH2TailWindow.damp_left_tail_le_one` gives damping `≤ 1`
+on this exact tail (`Re = -1`, `8.75 ≤ |Im|`). Full hTail composition
+(`‖G‖ ≤ 36` via Gaussian decay beating the polynomial above) is NOT attempted
+per brief — report-and-stop after tier 1.
+Grep stems checked in-file: `Gamma_one_add_im_normSq`, `t_mul_coth_le`,
+`GammaR_tail_lower`, `damp_left_tail_le_one`, `P1_R02_of_hTail`.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
+namespace CA2TailJoint
+
+/-- Squared off-window joint bound on `Re = 2`: `‖Γ·cos‖² ≤ (1+a²)·(πa/2+1)`
+with `a = |Im|`, for every nonzero `Im` (no window cap). Proof replays AR's
+`sinh`-doubling collapse (`hsinh2`/`hstep`) and `t_mul_coth_le`. -/
+theorem joint_sq_tail {w : ℂ} (hw : w.re = 2) (hy : w.im ≠ 0) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+      ≤ (1 + |w.im| ^ 2) * (Real.pi * |w.im| / 2 + 1) := by
+  have hG := Door3JointGammaCos.Gamma_Re2_normSq hw hy
+  have hC := Door3JointGammaCos.cos_Re2_norm hw
+  have ha_pos : 0 < |w.im| := abs_pos.mpr hy
+  have hpi : 0 < Real.pi := Real.pi_pos
+  have hthal_pos : 0 < Real.pi * |w.im| / 2 := by
+    have h2 := mul_pos (mul_pos hpi ha_pos) (show (0 : ℝ) < 1 / 2 by norm_num)
+    linarith
+  have hsinh_half_pos : 0 < Real.sinh (Real.pi * |w.im| / 2) :=
+    Real.sinh_pos_iff.mpr hthal_pos
+  have hcosh_pos : 0 < Real.cosh (Real.pi * |w.im| / 2) := Real.cosh_pos _
+  have hsymm : Real.pi * w.im / Real.sinh (Real.pi * w.im)
+      = Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hy
+      rw [abs_of_neg hyneg, show Real.pi * -w.im = -(Real.pi * w.im) by ring,
+        Real.sinh_neg, neg_div_neg_eq]
+    · rw [abs_of_nonneg hynonneg]
+  have heven : Real.cosh (Real.pi * w.im / 2)
+      = Real.cosh (Real.pi * |w.im| / 2) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hy
+      rw [abs_of_neg hyneg,
+        show Real.pi * -w.im / 2 = -(Real.pi * w.im / 2) by ring, Real.cosh_neg]
+    · rw [abs_of_nonneg hynonneg]
+  have hsinh2 : Real.sinh (Real.pi * |w.im|)
+      = 2 * Real.sinh (Real.pi * |w.im| / 2)
+        * Real.cosh (Real.pi * |w.im| / 2) := by
+    have hdouble : Real.pi * |w.im| = 2 * (Real.pi * |w.im| / 2) := by ring
+    conv_lhs => rw [hdouble]
+    rw [Real.sinh_two_mul]
+  have hsinh_half_ne : Real.sinh (Real.pi * |w.im| / 2) ≠ 0 :=
+    ne_of_gt hsinh_half_pos
+  have hcosh_ne : Real.cosh (Real.pi * |w.im| / 2) ≠ 0 := ne_of_gt hcosh_pos
+  have hden_ne : 2 * Real.sinh (Real.pi * |w.im| / 2)
+      * Real.cosh (Real.pi * |w.im| / 2) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero two_ne_zero hsinh_half_ne) hcosh_ne
+  have hstep : (1 + |w.im| ^ 2)
+          * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|))
+          * (Real.cosh (Real.pi * |w.im| / 2)) ^ 2
+      = (1 + |w.im| ^ 2)
+        * ((Real.pi * |w.im| / 2)
+          * (Real.cosh (Real.pi * |w.im| / 2)
+            / Real.sinh (Real.pi * |w.im| / 2))) := by
+    rw [hsinh2]
+    field_simp
+  have hcoth := Door3JointGammaCos.t_mul_coth_le hthal_pos
+  have hnonneg : (0 : ℝ) ≤ 1 + |w.im| ^ 2 := by positivity
+  have e1 : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+      = ‖Complex.Gamma w‖ ^ 2 * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2 := by
+    rw [norm_mul, mul_pow]
+  rw [e1, hG, hC, hsymm, heven, ← sq_abs w.im, hstep]
+  exact mul_le_mul_of_nonneg_left hcoth hnonneg
+
+/-- Norm-quadratic off-window joint bound via AM-GM (`AB ≤ ((A+B)/2)²` then
+`Real.sqrt_le_sqrt`/`Real.sqrt_sq`, mirroring AR's sqrt close). -/
+theorem joint_poly_tail {w : ℂ} (hw : w.re = 2) (hy : w.im ≠ 0) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ ((1 + |w.im| ^ 2) + (Real.pi * |w.im| / 2 + 1)) / 2 := by
+  have hsq := joint_sq_tail hw hy
+  have hBnn : (0 : ℝ) ≤ Real.pi * |w.im| / 2 + 1 := by
+    have h1 : (0 : ℝ) ≤ Real.pi * |w.im| / 2 := by
+      have hmul := mul_nonneg Real.pi_pos.le (abs_nonneg w.im)
+      linarith
+    linarith
+  have hmid : (0 : ℝ) ≤ ((1 + |w.im| ^ 2) + (Real.pi * |w.im| / 2 + 1)) / 2 := by
+    have hA : (0 : ℝ) ≤ 1 + |w.im| ^ 2 := by positivity
+    linarith
+  have hamgm : (1 + |w.im| ^ 2) * (Real.pi * |w.im| / 2 + 1)
+      ≤ (((1 + |w.im| ^ 2) + (Real.pi * |w.im| / 2 + 1)) / 2) ^ 2 := by
+    have h := sq_nonneg ((1 + |w.im| ^ 2) - (Real.pi * |w.im| / 2 + 1))
+    nlinarith
+  have hle : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+      ≤ ((((1 + |w.im| ^ 2) + (Real.pi * |w.im| / 2 + 1)) / 2)) ^ 2 :=
+    le_trans hsq hamgm
+  have hle2 := Real.sqrt_le_sqrt hle
+  rw [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hmid] at hle2
+  exact hle2
+
+/-- Fully-numeric off-window joint bound (`π ≤ 3.1416` via `Real.pi_lt_d4`,
+same numeral as AR's window cap). -/
+theorem joint_poly_tail_numeric {w : ℂ} (hw : w.re = 2) (hy : w.im ≠ 0) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ ((1 + |w.im| ^ 2) + (3.1416 * |w.im| / 2 + 1)) / 2 := by
+  have h := joint_poly_tail hw hy
+  have hpile : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hmono : Real.pi * |w.im| / 2 + 1 ≤ 3.1416 * |w.im| / 2 + 1 := by
+    have h1 : Real.pi * |w.im| ≤ 3.1416 * |w.im| :=
+      mul_le_mul_of_nonneg_right hpile (abs_nonneg _)
+    linarith
+  linarith
+
+/-- Squared joint bound at the FE mirror `w = 1 - z` for `z` on the hTail line
+(`Re = -1`, `8.75 < |Im|`): same polynomial in `|z.im|`. -/
+theorem joint_sq_of_Re_neg1 {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖Complex.Gamma (1 - z) * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖ ^ 2
+      ≤ (1 + |z.im| ^ 2) * (Real.pi * |z.im| / 2 + 1) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hy : ((1 : ℂ) - z).im ≠ 0 := by
+    rw [hw_im]
+    exact neg_ne_zero.mpr hne
+  have h := joint_sq_tail hw_re hy
+  rwa [hw_im, abs_neg] at h
+
+/-- Norm-quadratic joint bound at the FE mirror `w = 1 - z` on the hTail line. -/
+theorem joint_poly_of_Re_neg1 {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖Complex.Gamma (1 - z) * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖
+      ≤ ((1 + |z.im| ^ 2) + (Real.pi * |z.im| / 2 + 1)) / 2 := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hy : ((1 : ℂ) - z).im ≠ 0 := by
+    rw [hw_im]
+    exact neg_ne_zero.mpr hne
+  have h := joint_poly_tail hw_re hy
+  rwa [hw_im, abs_neg] at h
+
+#print axioms CA2TailJoint.joint_sq_tail
+#print axioms CA2TailJoint.joint_poly_tail
+#print axioms CA2TailJoint.joint_poly_tail_numeric
+#print axioms CA2TailJoint.joint_sq_of_Re_neg1
+#print axioms CA2TailJoint.joint_poly_of_Re_neg1
+
+end CA2TailJoint
+
+/-!
+CA2 VERDICT + RESIDUAL (report-and-stop): tier-1 minimum GREEN.
+(1) `CA2TailJoint.joint_sq_tail`: off-window squared joint bound
+`‖Γ·cos‖² ≤ (1+a²)·(πa/2+1)`, all `Im ≠ 0` on `Re = 2` (squared-cubic POLY-class).
+(2) `CA2TailJoint.joint_poly_tail[_numeric]`: norm-quadratic POLY-class bound
+`‖Γ·cos‖ ≤ ((1+a²)+(πa/2+1))/2` (numeric: `π → 3.1416`).
+(3) `CA2TailJoint.joint_sq_of_Re_neg1` / `joint_poly_of_Re_neg1`: same bounds at
+the FE mirror `w = 1-z` on the hTail line (`Re = -1`, `8.75 < |Im|`), directly
+pluggable into the tail `F`-envelope.
+NOT attempted per brief: hTail composition (`‖G‖ ≤ 36` needs Gaussian decay vs
+the polynomial above) and P1. Residual stays: BH2 `hTail` + strip `hBdd`-class
+inputs (already mapped by BZ/BH2; `P1_R02_of_hTail` consumes `hTail` only).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
