@@ -1464,6 +1464,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     septic `S(0.871)≈0.76497`, gap `0.0020` vs true `≈-0.76600`) ⇒
     **`‖S₁₆‖ ≥ 500629219/2695350000 ≈ 0.1857`** (1.085×, gain `0.01452`). Next: sin θ₁₃ still on the wide
     `pi_d2`-era box — needs CU-style delta tightening + quintic re-sharpening to feed term12 (tasked).
+    **sin θ₁₃ CLOSED (`D3_S16_norm_ge_CX`, `39faac0c`, green, axioms clean):** no pivot needed — slack was in
+    the phase endpoint, not Taylor (`Q(0.464)` exact to `~9e-7`): tight-π `δ₁₃∈[3.5934,3.595]` w `0.061→0.0016`
+    (38×) ⇒ endpoint `0.464→0.4535` ⇒ sin `≥-0.439` (was `-0.448`; gap `0.0021` vs true `≈-0.43691`, 5.3×
+    tighter) ⇒ term12 `≤4829/50000` ⇒ **`‖S₁₆‖ ≥ 505966012/2695350000 ≈ 0.1877`** (1.0107×, gain `0.00198`).
+    Next: x=13 amp `11/50` vs true `≈0.21190` (slack `0.008`, large-denominator clearing, tasked); x=16 amp
+    slack `~0.01`; micro-levers (`-0.439→-0.4382`, `pi_d20`-era δ₁₃); term14 trivial-bound tightening.
     **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
