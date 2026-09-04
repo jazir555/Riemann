@@ -15295,5 +15295,185 @@ theorem D3_S16_norm_ge_CL3 :
 #print axioms D3_S16_im_abs_ge_CL3
 #print axioms D3_S16_norm_ge_CL3
 
+/-! ## Door-3 `S_16` margin round 2 tier 4 (Agent CN 2026-09-04): term-6 honest
+Taylor lower (kill the trivial `sin ≥ -1` — the named biggest lever).
+
+GREP-FIRST RECORD (run before writing; `rg` in `zeta_rigorous.lean` + Mathlib):
+* `D3_delta_seven_mem` (`θ₇ - 4π ∈ [4.426, 4.467]`) — EXISTS, called.
+* `D3_sin_theta_seven_mem` (`sin θ₇ ∈ [-1, -0.88]`; the LOWER `-1` is the TRIVIAL
+  `sin_mem_Icc` bound — the looseness; true `sin θ₇ ≈ -0.97`) — EXISTS, shape
+  reference only (periodicity skeleton + `y = θ₇ - 5π ∈ [1.276, 1.327]` reused
+  numeral-for-numeral).
+* `D3_term6_im_hi` (`≤ 1/3`; even `k = 6`, so `Im = -(amp·sin)`) — EXISTS,
+  mirrored with the sharp lower.
+* `CG_sin_le_quintic` (quintic sin upper on `x ≥ 0`) + `Real.monotoneOn_sin` —
+  EXIST, called (CJ-1S k=9 pattern; naive per-monomial transfer on
+  `y ∈ [1.276, 1.327]` overshoots — `1.327 - 1.276³/6 + 1.327⁵/120 ≈ 1.015 > 1`,
+  useless — so monotonicity transfer instead: `y ∈ [1.276, 1.327] ⊆ [-π/2, π/2]`,
+  hence `sin y ≤ sin 1.327`, and the exact quintic `Q(1.327) ≈ 0.97183 ≤ 0.972`).
+* `D3_amp_seven_upper` (`≤ 1/3`), `D3_amp_nonneg`, `D3_eta_im`, `D3_sum_im_eq`,
+  `D3_term0_im`, `D3_S16_im_upper_CL3` — EXIST, called.
+* New names below — 0 hits before writing (verified absent via `rg "_CN"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `∑'`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (CN-1S) `D3_sin_theta_seven_lo_CN`: `-0.972 ≤ sin θ₇` (was `-1`).
+* (CN-1T) `D3_term6_im_hi_CN`: term-6 `Im ≤ 81/250 = 0.324` (was `1/3`).
+* (CN-1A) `D3_S16_im_upper_CN`: `Im S_16 ≤ -133907/1050000 ≈ -0.127531`.
+* (CN-1V) Verdicts: `|Im S_16| ≥ 133907/1050000`,
+  `‖S_16‖ ≥ 133907/1050000 ≈ 0.12753` (≈ 1.078× the CL3 `41369/350000`).
+
+NUMBERS: `Q(1.327) = 1.327 - 1.327³/6 + 1.327⁵/120 = 0.97183167… ≤ 0.972`;
+`(1/3)·0.972 = 81/250`;
+new sum `= -41369/350000 - 1/3 + 81/250 = -133907/1050000`.
+Honest throughout (true `Im S_16 ≈ -0.51` is the ceiling).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (CN-1S) Honest sine lower `-0.972 ≤ sin θ₇` (was the trivial `-1` in
+    `D3_sin_theta_seven_mem`). Monotonicity transfer: `y = θ₇ - 5π ∈
+    [1.276, 1.327] ⊆ [-π/2, π/2]`, so `sin y ≤ sin 1.327`
+    (`Real.monotoneOn_sin`); the exact quintic (CG-T2) at the endpoint gives
+    `sin 1.327 ≤ 0.972`; hence `sin θ₇ = -sin y ≥ -0.972`. -/
+theorem D3_sin_theta_seven_lo_CN : (-0.972 : ℝ) ≤ Real.sin (D3_phase 6) := by
+  have hmem := D3_delta_seven_mem
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  set y := D3_phase 6 - 4 * Real.pi - Real.pi with hy_def
+  have hy_lo : (1.276 : ℝ) ≤ y := by rw [hy_def]; linarith [hmem.1, hpi_hi]
+  have hy_hi : y ≤ (1.327 : ℝ) := by rw [hy_def]; linarith [hmem.2, hpi_lo]
+  have hper1 : Real.sin (D3_phase 6 - 2 * Real.pi) = Real.sin (D3_phase 6) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 6 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 6 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 6 - 4 * Real.pi) = Real.sin (D3_phase 6) := by
+    have e : (D3_phase 6 - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 6 - 4 * Real.pi := by ring
+    rw [e] at hper2
+    exact hper2.trans hper1
+  have hdecomp : D3_phase 6 - 4 * Real.pi = y + Real.pi := by
+    rw [hy_def]; ring
+  have h1s : Real.sin (D3_phase 6 - 4 * Real.pi) = -Real.sin y := by
+    rw [hdecomp, Real.sin_add_pi]
+  have hsin_eq : Real.sin (D3_phase 6) = -Real.sin y := by
+    rw [← hper, h1s]
+  have hy_mem : y ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hy_lo, hpi_hi]
+    · linarith [hy_hi, hpi_lo]
+  have hhi_mem : (1.327 : ℝ) ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hpi_hi]
+    · linarith [hpi_lo]
+  have hmono : Real.sin y ≤ Real.sin 1.327 :=
+    Real.monotoneOn_sin hy_mem hhi_mem hy_hi
+  have hQ := CG_sin_le_quintic (show (0 : ℝ) ≤ 1.327 by norm_num)
+  have hnum : (1.327 : ℝ) - (1.327 : ℝ) ^ 3 / 6 + (1.327 : ℝ) ^ 5 / 120 ≤
+      0.972 := by
+    norm_num
+  have hend : Real.sin (1.327 : ℝ) ≤ 0.972 := le_trans hQ hnum
+  rw [hsin_eq]
+  linarith [hmono, hend]
+
+/-- (CN-1T) Sharpened sixth-term imaginary-part upper `≤ 81/250 = 0.324`
+    (was `1/3`; mirror of `D3_term6_im_hi` with (CN-1S) in place of the trivial
+    `sin ≥ -1`; interval: `amp ≤ 1/3`, `sin ≥ -0.972`;
+    even `k = 6`, so `Im = -(amp·sin)`). -/
+theorem D3_term6_im_hi_CN :
+    (etaDirichletTerm (1 - zetaCellS0) 6).im ≤ (81 / 250 : ℝ) := by
+  rw [D3_eta_im]
+  have ha := D3_amp_seven_upper
+  have hann : (0 : ℝ) ≤ D3_amp 6 := D3_amp_nonneg 6
+  have hs := D3_sin_theta_seven_lo_CN
+  have hpow6 : ((-1 : ℝ) ^ (6 : ℕ)) = 1 := by norm_num
+  rw [hpow6, one_mul]
+  have h1 : D3_amp 6 * (-0.972) ≤ D3_amp 6 * Real.sin (D3_phase 6) :=
+    mul_le_mul_of_nonneg_left hs hann
+  have h2 : D3_amp 6 * (0.972 : ℝ) ≤ (1 / 3) * 0.972 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have hnum : (81 / 250 : ℝ) = -((1 / 3) * (-0.972)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 6 * (-0.972) = -(D3_amp 6 * 0.972) := by ring
+  have e2 : (1 / 3 : ℝ) * (-0.972) = -((1 / 3) * 0.972) := by ring
+  linarith [h1, h2, e1, e2]
+
+set_option maxHeartbeats 800000 in
+/-- (CN-1A) Sharpened `Im S_16 ≤ -133907/1050000`: the (CL-3C) assembly with
+    exactly one term swapped (`D3_term6_im_hi_CN` for `D3_term6_im_hi`);
+    `-41369/350000 - 1/3 + 81/250 = -133907/1050000`. -/
+theorem D3_S16_im_upper_CN :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤
+      (-133907 / 1050000 : ℝ) := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_hi
+  have h2 := D3_term2_im_hi
+  have h3 := D3_term3_im_hi
+  have h4 := D3_term4_im_hi_sharp
+  have h5 := D3_term5_im_hi
+  have h6 := D3_term6_im_hi_CN
+  have h7 := D3_term7_im_hi
+  have h8 := D3_term8_im_hi
+  have h9 := D3_term9_im_hi_sharp
+  have h10 := D3_term10_im_hi
+  have h11 := D3_term11_im_hi_sharp
+  have h12 := D3_term12_im_hi_CL3
+  have h13 := D3_term13_im_hi_CL
+  have h14 := D3_term14_im_hi_CL
+  have h15 := D3_term15_im_hi_CL
+  linarith
+
+/-- (CN-1V) Sign verdict: the tier-4 `Im S_16` upper is negative. -/
+theorem D3_S16_im_upper_CN_neg : (-133907 / 1050000 : ℝ) < 0 := by norm_num
+
+/-- (CN-1V) `|Im S_16| ≥ 133907/1050000` from the negative upper. -/
+theorem D3_S16_im_abs_ge_CN :
+    (133907 / 1050000 : ℝ) ≤
+      |(∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im| := by
+  have h := D3_S16_im_upper_CN
+  have h0 : (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤ 0 := by
+    linarith
+  rw [abs_of_nonpos h0]
+  linarith
+
+/-- (CN-1V) `‖S_16‖ ≥ 133907/1050000`: door-3 round-2 tier-4 margin
+    (positive lower on the partial-sum norm from the `Im` channel). -/
+theorem D3_S16_norm_ge_CN :
+    (133907 / 1050000 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  exact le_trans D3_S16_im_abs_ge_CN (Complex.abs_im_le_norm _)
+
+#print axioms D3_sin_theta_seven_lo_CN
+#print axioms D3_term6_im_hi_CN
+#print axioms D3_S16_im_upper_CN
+#print axioms D3_S16_im_upper_CN_neg
+#print axioms D3_S16_im_abs_ge_CN
+#print axioms D3_S16_norm_ge_CN
+
 
 
