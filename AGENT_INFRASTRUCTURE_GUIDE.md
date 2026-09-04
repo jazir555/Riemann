@@ -1464,7 +1464,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
   Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Tail numerals landing
   (`BV2OuterTail`):** outer-envelope Gaussian domination `T=18·exp(165.23)` green; middle exp-3/2
-  numeral (Young `u^{3/2}` bound + completing square) tasked, then tail-`T` assembly. **xi-bridge banked (`BLMiddleEnvelope`,
+  numeral (Young `u^{3/2}` bound + completing square) tasked, then tail-`T` assembly.
+  **Middle numeral CLOSED (`BXMiddleTail`):** Young SOS (`K·t³ ≤ t⁴/200+10⁶K⁴`) + `middle_gauss_le`
+  green. Correction: BP2/BU `C,K` are EXISTENTIAL — `T` is a function of envelope constants; still
+  needs tail `F`-envelope (Gamma-lower on tail) + negative-`τ` companion numeral, then tail-`T`. **xi-bridge banked (`BLMiddleEnvelope`,
   Hadamard import added cycle-free):** unconditional `xi→F` transfer with explicit denominators +
   `hBdd`/P1 conditional on `StripEnvelope` R1 only. Residual: (R1) strip `Gammaℝ` lower via reflection
   (right closable via Euler, left via FE, middle missing) + (R2) Stirling-sharp tail bound (crude
