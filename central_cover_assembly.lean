@@ -10558,3 +10558,329 @@ end AU_R02_Agam002_M163
 #print axioms AU_R02_Agam002_M163.AU_center_bound_163_002_of_components
 #print axioms AU_R02_Agam002_M163.AU_R02_closed_of_factorBounds_163_002
 #print axioms AU_R02_Agam002_M163.AU_R02_closed_wired_163_002
+
+/-! ## AX per-cell parametric closure template (door-wide rollout, R02 v2 generalized)
+
+GREP-first record (2026-09-03/04, verified by scans before writing; exact names):
+* `R02_closed_of_factorBounds` -> `central_cover_assembly.lean:9778`
+  (`Agam >= 0.006`, `Azeta >= 1`, `M <= 0.05` v1 pilot).
+* `AO_R02_deriv_bound_163_of_zeta_upper` -> `:10078` (ceil `M = 163` tier);
+  `AO_R02_closed_of_factorBounds_163` -> `:10192`
+  (`Agam >= 0.006`, `Azeta >= 3112`, `M = 163`; budget `205.382` vs `205.392`).
+* `AU_R02_closed_of_factorBounds_163_002` -> `:10443`
+  (`Agam >= 0.002`, `Azeta >= 9336`, `M = 163` v2 era);
+  `AU_R02_closed_wired_163_002` -> `:10502` (fully-wired H-leaf + P1-P4 table).
+* `DerivCauchyBridge.norm_xiShifted_eq_parts` -> `:6350`;
+  `TailProofEngine.prod_four_ge_of_ge` -> `rh_certificate_infra.lean:195`;
+  `DerivCauchyBridge.polyOf/piOf/gammaOf` -> `:6328/:6331/:6334`.
+* `R02Pilot.sCenter` -> `:9588` (`s = 0.395 - 6.75*I`);
+  `R02Pilot.poly_lower` -> `:9649` (`22 <= ||polyOf sCenter||`);
+  `R02Pilot.pi_lower` -> `:9692` (`1/2 <= ||piOf sCenter||`);
+  `AU_threshold_check_163_002`
+  (`0.002+163*1.26 <= 22*(1/2)*0.002*9336`, margin `0.01`) -> `:10475`.
+* `CentralCoverAssembly.R02` -> `:1430` (`(-8,-5.5,0.01,0.2)`);
+  `R02_radius_lt` (`< 1.26`) -> `:1457`; `R02_mem_gridFine` -> `:1460`;
+  `R02_strip_lo/hi` -> `:1441/:1442`; `R02_H_instance` -> `:1499`;
+  `gridFine` (40 cells) -> `:1002`;
+  `inner_nonvanishing_of_fenced_grid_fine` -> `:1047`.
+* `CellUniform.pi_lower_of_re` (`1/2`, any `Re <= 1/2`) -> `interval_arith.lean:1752`;
+  `CellUniform.center_bound_of_component_bounds` (generic `R`, `radCap 1.26`
+  template over `R00Enclosure` parts) -> `:1772` (shape mirrored here over
+  `DerivCauchyBridge` parts to avoid the `interval_arith -> central_cover_assembly`
+  import cycle; cf. AO `:9957-9965`, AU `:10336-10346` notes).
+* `CellGammaUniform.gamma_lower_wide` (`1/1e7`, `Re in [0.01,0.49]`,
+  `|Im| <= 10`, `Im != 0`) -> `interval_arith.lean:1686`;
+  `R02GammaLower.gammaOf_lower_R02` (`0.002` at `R02Pilot.sCenter`) -> `:32566`;
+  `R02GammaDisc.gammaOf_upper_disc_R02` (`<= 0.097`, `Re in [0.05,0.74]`,
+  `Im in [-8.25,-5.25]`) -> `:32316`.
+* `R00Numerics.poly_lower_R00` (`30`) -> `interval_arith.lean:304`;
+  `R00Numerics.pi_lower_R00` (`1/2`) -> `:322`;
+  `R02Uniform.poly_lower_R02` (`22`) -> `:1864`;
+  `R02Uniform.pi_lower_R02` (`1/2`) -> `:1872`.
+* `RowFE` per-row (`|Im| <= 8.75`): Gamma uppers `3/4/5/10`
+  (`RowFE_realGamma_0395/030/020/0105_le` -> `:31047/:31073/:31099/:31125`);
+  factor uppers `6e7/8e7/1e8/2e8`
+  (`RowFE_factor_upper_0395/030/020/0105` -> `:31548/:31606/:31664/:31722`);
+  factor lowers `1e-14` all rows
+  (`RowFE_factor_lower_0395/030/020/0105` -> `:31558/:31616/:31674/:31732`);
+  cos lowers `0.8/0.88/0.95/0.98`
+  (`RowFE_cos_real_lower_0395/030/020/0105` -> `:31378/:31396/:31414/:31432`).
+* Central rects/radii/leaf-tiers (`central_cover_assembly.lean`):
+  bottom row R00-R10 defs `:1133/:1252/:1430/:1516/:1602/:1688/:1774/:1860`
+  `/:1946/:2032/:2118`, leaves `:1175/:1288/:1470/:1556/:1642/:1728/:1814/:1900`
+  `/:1986/:2072/:2158` (outer `(0.002,0.05)`, mid `(0.05,0.07)`,
+  inner `(0.15,0.06)`); row1 R11-R20 defs
+  `:2493/:2577/:2661/:2745/:2829/:2913/:2997/:3081/:3165/:3249`;
+  row2 R21-R30 `:3335/:3419/:3503/:3587/:3671/:3755/:3839/:3923/:4007/:4091`;
+  row3 R31-R40 `:4177/:4261/:4345/:4429/:4513/:4597/:4681/:4765/:4849/:4933`;
+  `RXX_mem_gridFine` for R00 and R02-R40, e.g. `:1164/:1460/:1546/:1632`
+  through `:4963` (R01 has none: `(-7.5,-5) ∉ fineGridX`,
+  membership-free H-leaf, see `:1244-1248`).
+* Strips (`central_cover_assembly.lean`): `edgeStripCells` (10 uppers
+  `y=(0.49,0.5)`) -> `:6584`; EdgeS00 geometry/poly-56/Gamma-400
+  -> `:6663/:6679/:6699/:6810`; EdgeS01-09 poly-56
+  -> `:7013/:7129/:7245/:7361/:7477/:7593/:7709/:7825/:7941`;
+  lower mirrors EdgeS00_Lower onward plus generic poly-56 -> `:8203+/:8167`;
+  shrunk `(0.49,0.499)` pair -> `:8306/:8321`;
+  `CutL10/CutR10` geometry (`dx=0.25/dy=0.49/radius<0.56`)
+  -> `:6826/:6830/:6876/:6879`.
+
+IMPORT CYCLE NOTE (as AO/AU): `interval_arith.lean:4` imports
+`central_cover_assembly`, so this file CANNOT import `interval_arith`.
+All per-cell factor numbers beyond R02 stay EXPLICIT premises below
+(nothing unlanded becomes a theorem); R02's `poly_lower`/`pi_lower` are
+in-file (`R02Pilot`), its `163` threshold is reused from AU's landed check.
+Full proofs only; no hidden obligations beyond named landed-obligation premises.
+-/
+
+namespace AX_CellTemplate
+
+/-- Per-cell parametric center bridge (mirrors AU's
+`AU_center_bound_163_002_of_components`, generalized over the rect `R`,
+its `s`-plane center `sC`, all four factor floors, `M`, and the radius cap
+`radCap`): four-factor bridge via
+`DerivCauchyBridge.norm_xiShifted_eq_parts` +
+`TailProofEngine.prod_four_ge_of_ge`, then `M * radius <= M * radCap`
+monotonicity into the budget. -/
+theorem center_bound_of_factorBounds
+    (R : CellProofEngine.Rect2D)
+    (sC : ℂ) (hsC : (1 / 2 : ℂ) + Complex.I * R.center = sC)
+    (Apoly Api Agam Azeta ε M radCap : ℝ)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hM0 : 0 ≤ M)
+    (hpoly : Apoly ≤ ‖DerivCauchyBridge.polyOf sC‖)
+    (hpi : Api ≤ ‖DerivCauchyBridge.piOf sC‖)
+    (hGam : Agam ≤ ‖DerivCauchyBridge.gammaOf sC‖)
+    (hZeta : Azeta ≤ ‖zeta sC‖)
+    (hRad : R.radius ≤ radCap)
+    (hThresh : ε + M * radCap ≤ Apoly * Api * Agam * Azeta) :
+    ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts R.center
+  rw [hsC] at hdecomp
+  have hle : Apoly * Api * Agam * Azeta ≤ ‖xiShifted R.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hGam hZeta hA0 hB0 hC0 hD0
+  have hbud : M * R.radius ≤ M * radCap :=
+    mul_le_mul_of_nonneg_left hRad hM0
+  linarith
+
+/-- Per-cell parametric closure template (generalizes AU's
+`AU_R02_closed_of_factorBounds_163_002` to a generic cell): explicit numeric
+premises (poly/pi/Gamma/zeta floors, deriv cap `M`, radius cap + budget
+inequality) discharge the H-leaf shape of
+`inner_nonvanishing_of_fenced_grid_fine` at the cell's `gridFine` tuple.
+The `gridFine`-membership and coordinate premises keep the fencing link;
+analytic content is entirely in the factor floors + `hThresh`. -/
+theorem CellClosed_of_factorBounds
+    (R : CellProofEngine.Rect2D)
+    (sC : ℂ) (hsC : (1 / 2 : ℂ) + Complex.I * R.center = sC)
+    (Apoly Api Agam Azeta ε M radCap : ℝ)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hM0 : 0 ≤ M)
+    (hpoly : Apoly ≤ ‖DerivCauchyBridge.polyOf sC‖)
+    (hpi : Api ≤ ‖DerivCauchyBridge.piOf sC‖)
+    (hGam : Agam ≤ ‖DerivCauchyBridge.gammaOf sC‖)
+    (hZeta : Azeta ≤ ‖zeta sC‖)
+    (hDeriv : ∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M)
+    (hRad : R.radius ≤ radCap)
+    (hThresh : ε + M * radCap ≤ Apoly * Api * Agam * Azeta)
+    (hStripLo : -(1 / 2 : ℝ) < R.y0) (hStripHi : R.y1 < (1 / 2 : ℝ))
+    (hEps : 0 < ε)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hx0 : R.x0 = c.1) (hx1 : R.x1 = c.2.1)
+    (hy0 : R.y0 = c.2.2.1) (hy1 : R.y1 = c.2.2.2) :
+    ∃ (Rw : CellProofEngine.Rect2D) (εw Mw : ℝ),
+      Rw.x0 = c.1 ∧ Rw.x1 = c.2.1 ∧ Rw.y0 = c.2.2.1 ∧ Rw.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < Rw.y0 ∧ Rw.y1 < (1 / 2 : ℝ) ∧
+      0 < εw ∧ (∀ w, Rw.mem w → ‖deriv xiShifted w‖ ≤ Mw) ∧
+      εw + Mw * Rw.radius ≤ ‖xiShifted Rw.center‖ := by
+  have hcenter : ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+    center_bound_of_factorBounds R sC hsC Apoly Api Agam Azeta ε M radCap
+      hA0 hB0 hC0 hD0 hM0 hpoly hpi hGam hZeta hRad hThresh
+  exact ⟨R, ε, M, hx0, hx1, hy0, hy1, hStripLo, hStripHi, hEps, hDeriv, hcenter⟩
+
+/-- R02 corollary: the template recovers AU's v2 numbers exactly
+(`Apoly = 22`, `Api = 1/2`, `Agam = 0.002`, `Azeta = 9336`,
+`ε = 0.002`, `M = 163`, `radCap = 1.26`; budget `205.382` vs product
+`205.392`, margin `0.01`). This proves the template matches the pilot:
+same premises as `AU_R02_closed_of_factorBounds_163_002` give the same H-leaf,
+with `poly_lower`/`pi_lower` from `R02Pilot` and the threshold from AU. -/
+theorem R02_recovers_AU_163_002
+    (hGam : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (9336 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
+    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ))
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hsC : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center =
+      R02Pilot.sCenter := rfl
+  have hpoly : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf R02Pilot.sCenter‖ :=
+    R02Pilot.poly_lower
+  have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
+    R02Pilot.pi_lower
+  have hRad : CentralCoverAssembly.R02.radius ≤ (1.26 : ℝ) :=
+    le_of_lt CentralCoverAssembly.R02_radius_lt
+  have hThresh : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 9336 :=
+    AU_R02_Agam002_M163.AU_threshold_check_163_002
+  subst hc_eq
+  exact CellClosed_of_factorBounds
+    CentralCoverAssembly.R02 R02Pilot.sCenter hsC
+    22 (1 / 2) 0.002 9336 0.002 163 1.26
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    hpoly hpi hGam hZeta hDeriv hRad hThresh
+    CentralCoverAssembly.R02_strip_lo CentralCoverAssembly.R02_strip_hi (by norm_num)
+    _ hc_mem rfl rfl rfl rfl
+
+/-! ### AX rollout premise tiers (proved doc-string; nothing unlanded is a theorem)
+
+How to read each row: instantiate `CellClosed_of_factorBounds` with the
+cell's `R` / `sC = 1/2 + I * R.center`, the quoted `Apoly/Api/Agam/Azeta`
+floors, the leaf-tier `(eps, M)` of that cell's `RXX_leaf_obligations`,
+`radCap` from its `radius_lt`, and `hThresh : eps + M * radCap <= product`.
+Required `Azeta` floor in closed form:
+`Azeta >= (eps + M * radCap) / (Apoly * Api * Agam)`
+(needs `Apoly * Api * Agam > 0`; all quoted floors are positive).
+`hDeriv : ||deriv xiShifted|| <= M` on `R.mem` stays a premise everywhere
+(discharged downstream per cell by the Cauchy sphere/closed-ball bridge from
+a zeta-upper + Gamma-upper on that cell's disc `s`-rect, exactly as
+`AO_R02_deriv_bound_163_of_zeta_upper` does for R02).
+
+* GROUP G0 (pilot, CLOSED conditional, theorem above): R02
+  `(-8,-5.5,0.01,0.2)` (`R02 :1430`, `R02_mem_gridFine :1460`,
+  `R02_leaf_obligations (0.002,0.05) :1470`, `radius < 1.26 :1457`):
+  `Apoly = 22` (`R02Pilot.poly_lower :9649`, also `R02Uniform :1864`),
+  `Api = 1/2` (`R02Pilot.pi_lower :9692`, uniform `:1752`),
+  `Agam = 0.002` (`R02GammaLower.gammaOf_lower_R02 :32566`),
+  `Azeta = 9336` (premise; `>= 9335` necessary by
+  `AU_required_Azeta_of_Agam002_163`, sufficient by
+  `AU_threshold_check_163_002 :10475`); `M = 163` via
+  `AO_R02_deriv_bound_163_of_zeta_upper :10078` from zeta-upper `<= 10`
+  (`R02_zeta_upper_obligation`, OPEN) + Gamma-upper `<= 0.097`
+  (`AO_gamma_upper_disc_R02_obligation`, landed `:32316`).
+  Check: budget `0.002 + 163 * 1.26 = 205.382` (`AU_budget_163_eq`),
+  product `22 * (1/2) * 0.002 * 9336 = 205.392`
+  (`AU_product_163_002_eq`), margin `0.01`.
+
+* GROUP G1 (bottom row `y = (0.01,0.2)`, `ymid = 0.105`, `s.Re = 0.395`,
+  `radCap = 1.26`, `radius < 1.26` same shape as `:1457`):
+  - G1-outer R00 `(-10,-7.5)` (`:1133`, mem `:1164`, leaf `(0.002,0.05) :1175`),
+    R09 `(6,8.5)` (`:2032`, mem `:2062`, leaf `(0.002,0.05) :2072`),
+    R10 `(7.5,10)` (`:2118`, mem `:2148`, leaf `(0.002,0.05) :2158`):
+    `Apoly` premise per center (R00 landed `30` at `sR00`, `:304`;
+    others unlanded, keep symbolic), `Api = 1/2` uniform (`:1752`,
+    R00 landed `:322`), `Agam` premise (uniform `1/1e7` via `:1686`;
+    R02-tier `0.002` NOT transferable off-center), `Azeta` premise with
+    tier `Azeta >= (eps + M * 1.26) / (Apoly * 0.5 * Agam)`;
+    at fencing tier `(0.002,0.05)` this is `(0.065)/(Apoly*0.5*Agam)`.
+  - G1-mid R03 `(-6,-3.5)` (`:1516`, mem `:1546`, leaf `(0.05,0.07) :1556`),
+    R04 `(-4,-1.5)` (`:1602`, mem `:1632`, leaf `:1642`),
+    R07 `(2,4.5)` (`:1860`, mem `:1890`, leaf `:1900`),
+    R08 `(4,6.5)` (`:1946`, mem `:1976`, leaf `:1986`),
+    plus R01 `(-7.5,-5)` (`:1252`, leaf `(0.05,0.07) :1288`,
+    MEMBERSHIP-FREE: `(-7.5,-5) ∉ fineGridX`, see `:1244-1248`;
+    instantiate the template with its own membership premise adapted,
+    coordinates unchanged): tier
+    `Azeta >= (0.05 + 0.07 * 1.26) / (Apoly * 0.5 * Agam)`
+    `= 0.1382 / (Apoly * 0.5 * Agam)`.
+  - G1-inner R05 `(-2,0.5)` (`:1688`, mem `:1718`, leaf `(0.15,0.06) :1728`),
+    R06 `(0,2.5)` (`:1774`, mem `:1804`, leaf `:1814`): tier
+    `Azeta >= (0.15 + 0.06 * 1.26) / (Apoly * 0.5 * Agam)`
+    `= 0.2256 / (Apoly * 0.5 * Agam)`.
+  - G1 Gamma-upper (deriv side): R02 disc cap `0.097` (`:32316`,
+    `Re in [0.05,0.74]`, `Im in [-8.25,-5.25]`) is R02-only; other G1 discs
+    keep per-disc Gamma-upper premises (landed center caps `<= 0.01` group,
+    e.g. `R02GammaUpper :8811`, `R03GammaUpper`, `R10GammaUpper :4064`;
+    `RowFE` row-`0.395` toolkit: `G = 3` (`:31047`), factor `<= 6e7`
+    (`:31548`), factor lower `1e-14` (`:31558`), cos lower `0.8` (`:31378`)).
+
+* GROUP G2 (row1 `y = (0.1,0.3)`, `ymid = 0.2`, `s.Re = 0.3`,
+  `radCap = 1.26`, `dx = 1.25/dy = 0.1`): R11 `(-10,-7.5)` (`:2493`,
+  mem `:2523`, leaf `(0.002,0.05) :2533`), R12 `(-8,-5.5)` (`:2577`, `:2607`),
+  R13 `(-6,-3.5)` mid (`:2661`, `:2691`), R14 `(-4,-1.5)` mid (`:2745`,
+  `:2775`), R15 `(-2,0.5)` inner (`:2829`, `:2859`), R16 `(0,2.5)` inner
+  (`:2913`, `:2943`), R17 `(2,4.5)` mid (`:2997`, `:3027`), R18 `(4,6.5)`
+  mid (`:3081`, `:3111`), R19 `(6,8.5)` outer (`:3165`, `:3195`), R20
+  `(7.5,10)` outer (`:3249`, `:3279`). `Apoly` premise per center
+  (unlanded; keep symbolic), `Api = 1/2` uniform (`:1752` applies since
+  `0.3 <= 1/2`), `Agam` premise (uniform `1/1e7` `:1686`), `Azeta` premise
+  with the same three tier formulas as G1 (outer/mid/inner `(eps,M)` are
+  identical). `RowFE` row-`0.3` toolkit: `G = 4` (`:31073`), factor
+  `<= 8e7` (`:31606`), lower `1e-14` (`:31616`), cos `0.88` (`:31396`).
+
+* GROUP G3 (row2 `y = (0.2,0.4)`, `ymid = 0.3`, `s.Re = 0.2`,
+  `radCap = 1.26`): R21 `(-10,-7.5)` (`:3335`, mem `:3365`), R22 `(-8,-5.5)`
+  (`:3419`, `:3449`), R23 `(-6,-3.5)` mid (`:3503`, `:3533`), R24 `(-4,-1.5)`
+  mid (`:3587`, `:3617`), R25 `(-2,0.5)` inner (`:3671`, `:3701`), R26
+  `(0,2.5)` inner (`:3755`, `:3785`), R27 `(2,4.5)` mid (`:3839`, `:3869`),
+  R28 `(4,6.5)` mid (`:3923`, `:3953`), R29 `(6,8.5)` outer (`:4007`,
+  `:4037`), R30 `(7.5,10)` outer (`:4091`, `:4121`). Same tier formulas;
+  `Api = 1/2` uniform (`0.2 <= 1/2`); `RowFE` row-`0.2`: `G = 5`
+  (`:31099`), factor `<= 1e8` (`:31664`), lower `1e-14` (`:31674`), cos
+  `0.95` (`:31414`).
+
+* GROUP G4 (row3 `y = (0.3,0.49)`, `ymid = 0.395`, `s.Re = 0.105`,
+  `radCap = 1.26`): R31 `(-10,-7.5)` (`:4177`, mem `:4207`), R32 `(-8,-5.5)`
+  (`:4261`, `:4291`), R33 `(-6,-3.5)` mid (`:4345`, `:4375`), R34 `(-4,-1.5)`
+  mid (`:4429`, `:4459`), R35 `(-2,0.5)` inner (`:4513`, `:4543`), R36
+  `(0,2.5)` inner (`:4597`, `:4637`), R37 `(2,4.5)` mid (`:4681`, `:4711`),
+  R38 `(4,6.5)` mid (`:4765`, `:4795`), R39 `(6,8.5)` outer (`:4849`,
+  `:4879`), R40 `(7.5,10)` outer (`:4933`, mem `:4963`). Same tier
+  formulas; `Api = 1/2` uniform (`0.105 <= 1/2`); `RowFE` row-`0.105`:
+  `G = 10` (`:31125`), factor `<= 2e8` (`:31722`), lower `1e-14`
+  (`:31732`), cos `0.98` (`:31432`). DERIV CAVEAT (upper rows): the `0.25`
+  sphere exits the strip (`0.49 + 0.25 > 0.5`), so the deriv premise must
+  use `r < 0.01` spheres or the closed-ball bridge
+  (`uniform_deriv_of_closedBall_bound`); keep `M` a premise with that
+  side condition documented, do not reuse the `0.25`-sphere numbers here.
+
+* GROUP G5 (edge strips UPPER, 10 cells, `y = (0.49,0.5)`, `ymid = 0.495`,
+  `s.Re = 0.005`, `dx = 1.25/dy = 0.005`, `radius < 1.26`
+  e.g. `EdgeS00_radius_lt :6691`): EdgeS00 `(-10,-7.5)` (`:6663`) through
+  EdgeS09 `(7.5,10)` (`:7912`); list membership in `edgeStripCells :6584`.
+  Landed hypothesis-free factors: poly `<= 56` per column
+  (`:6699/:7013/:7129/:7245/:7361/:7477/:7593/:7709/:7825/:7941`),
+  pi `<= 1`, Gamma `<= 400` at center (`s/2` has `Re = 0.0025`, `:6810`).
+  Center/deriv premises per cell: `Azeta` lower at `s = 0.005 + x_c*I`
+  plus the strip `M`; tier formula with `radCap = 1.26` and the strip
+  `(eps, M)` (reuse the column's central `(eps, M)` or keep symbolic).
+  STRIP CAVEAT: `y1 = 0.5` is NOT `< 1/2` (`EdgeS00_touches_top :6697`
+  pattern holds for all 10 uppers), so the H-leaf strip hypothesis must
+  use the shrunk pair (`EdgeS00_ShrunkUpper/Lower :8306/:8321`,
+  `y1 = 0.499`, explicit gaps `[0.499,0.5)`/`(-0.5,-0.499]`); keep the
+  shrunk coordinates as premises.
+
+* GROUP G6 (edge strips LOWER mirrors, 10 cells, `y = (-0.5,-0.49)`,
+  `s.Re = 0.995`, same `dx/dy/radius` e.g. `:8219-8224`): EdgeS00_Lower
+  (`:8203`) through EdgeS09_Lower (`:9075`). Landed: generic poly `<= 56`
+  (`Re in [0.99,1.0]`, `:8167`; per-column e.g. `:8263`), Gamma `<= 2` at
+  `re 0.995` + `<= 3` at `0.4975` (center-independent chains). Per-cell
+  `Azeta` at `s = 0.995 + x_c*I` (e.g. `0.995 - 8.75*I` for S00) plus `M`
+  stay premises with `radCap = 1.26`.
+
+* GROUP G7 (cutoff lines, 2 thin rects): CutL10
+  `(-10.25,-9.75,-0.49,0.49)` (`:6826`, `dx = 0.25/dy = 0.49`,
+  `radius < 0.56 :6876`, strip `:6882-6883`, line membership `:6898`) and
+  CutR10 (`:6830`, `:6879`, `:6884-6885`, `:6888`); covering
+  `cutoffLines_either :6911`. Per-rect center + deriv need the same two
+  zeta enclosures on vertical `s`-rects (`Re in [0.01,0.99]`, `Im = +-10`,
+  true `O(1)`); tier formula with `radCap = 0.56`.
+  Lines with `0.49 <= |Im| < 1/2` additionally need the strip cells above.
+
+Residual honesty (unchanged from AU): at realistic `|zeta| = O(1)` every
+group's product `Apoly * 0.5 * Agam * 1` is orders of magnitude below its
+`eps + M * radCap` once `M` is at wired tier (`163`); 0 cells claimed
+closed. Closing any cell = landing its `Azeta` (zeta-lower agent) +
+  its zeta-upper/Gamma-upper `M` (zeta-upper agent) and feeding this template.
+-/
+
+end AX_CellTemplate
+
+#print axioms AX_CellTemplate.center_bound_of_factorBounds
+#print axioms AX_CellTemplate.CellClosed_of_factorBounds
+#print axioms AX_CellTemplate.R02_recovers_AU_163_002
