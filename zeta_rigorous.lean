@@ -11258,6 +11258,363 @@ theorem D3_S16_cannot_reach_8_15 (U : ℝ) (hU : 0 ≤ U) :
 #print axioms D3_S1024_of_S16
 #print axioms D3_S16_cannot_reach_8_15
 
+/-!
+## Middle-block `[16,1024)` upper via pair-MVT telescoping (door-3 K=16 premise).
+
+TASK (brief 2026-09-04, Agent BS): the middle-block UPPER feeding
+`D3_S1024_of_S16` (`hU : ‖∑ k ∈ Finset.Ico 16 1024, ...‖ ≤ U`).
+Numerics (python3, `s1 = 1 - s0 = 0.605 + 8.75i`, checked 2026-09-04):
+true middle `≈ 0.095`, true `‖S_16‖ ≈ 0.652`, true `‖S_1024‖ ≈ 0.565`;
+`0.652 - 0.095 = 0.557 ≥ 8/15 ≈ 0.533` with margin `≈ 0.024`
+(the K-table "K=16 first feasible" record). Triangle on middle `≈ 31.47`,
+pair-triangle `≈ 1.216`, dyadic phase spread `8.75 * log 2 ≈ 6.065`.
+
+GREP-FIRST RECORD (searches run before writing):
+* `Ico 16 1024` in `zeta_rigorous.lean` -- exactly 1 hit (the `hU`
+  hypothesis of `D3_S1024_of_S16`, :11231): NO middle-block upper is proved
+  anywhere in-file. Triangle (`≈ 31.5`) and Abel+MVT (`≈ 8.6`) are brief
+  estimates, not proved bounds.
+* Route (1) honest quantification: dyadic phase spread `8.75 * log 2 ≈ 6.07`
+  is a FULL circle (`2π ≈ 6.28`), so block terms share NO phase coherence
+  and interval-triangle per-block bounds sum back to the whole-triangle
+  `≈ 31.5`. Route (1) stalls there (nothing to exploit; nothing proved).
+  What IS banked below is the finest block-interval upper: pairs (blocks
+  of 2) with first-order (MVT) coherence + telescoping summation.
+* Iteration to second order by plain pairing is IMPOSSIBLE: pair sums form
+  a plain (non-alternating) sum, so "pairs of pairs" give sums, not
+  differences. Reaching `≤ 0.12` needs Tier-3 van der Corput (absent from
+  Mathlib/repo per the KL-section grep record at :4858-4866 + §18b.10) --
+  specified as residual, not attempted here.
+* `Finset.sum_Ico_eq_sum_range` -- ABSENT from Mathlib (rg finds no such
+  declaration; only `Finset.prod_Ico_succ_top` in
+  `Mathlib/Algebra/BigOperators/Intervals.lean:51`, whose additive version
+  `Finset.sum_Ico_succ_top` is consumed below). Hence `MID_sum_Ico_shift`
+  is created in-file by induction.
+* Consumed Mathlib/file lemmas (every name verified by grep/read before use):
+  `T2_AE_f` (:5317), `T2_AE_eta_eq` (:5321), `T2_cpow_diff_le` (:5371, the
+  general complex-cpow MVT), `zetaRefl_norm_le` (:4425, `‖s1‖ ≤ 10`),
+  `zetaCellS0_re` (:2602), `zetaRefl_rpow_0605_ge` (:4434, rpow-atom PATTERN),
+  `exists_deriv_eq_slope` (`Mathlib/.../Deriv/MeanValue.lean:152`,
+  takes `DifferentiableOn`), `Real.deriv_rpow_const` (unconditional,
+  `Pow/Deriv.lean:457`), `Real.hasDerivAt_rpow_const` (`Pow/Deriv.lean:444`),
+  `Real.continuousAt_rpow_const` (`Pow/Continuity.lean:216`),
+  `Real.rpow_le_rpow_of_nonpos` (`Pow/Real.lean:563`, strict `0 < x`),
+  `Real.rpow_le_rpow_of_exponent_le` (`Pow/Real.lean:615`), `Real.rpow_neg`,
+  `Real.rpow_mul`, `Real.rpow_natCast`, `Real.rpow_nonneg`,
+  `Real.rpow_pos_of_pos`, `le_of_pow_le_pow_left₀`, `inv_le_inv₀`,
+  `le_div_iff₀`, `continuousOn_of_forall_continuousAt`,
+  `Finset.sum_Ico_succ_top`, `Finset.sum_range_succ`, `Finset.mul_sum`,
+  `Finset.sum_le_sum`, `norm_sum_le`, `eq_div_iff`.
+
+PROVED (all unconditional, no `sorry`/`admit`/`axiom`):
+* (MID-a) `MID_neg_one_16`, `MID_neg_one_shift`.
+* (MID-b) `MID_sum_Ico_shift` (Ico-to-range shift).
+* (MID-c) `MID_pair_identity` (alternating sum = pair differences).
+* (MID-d) `MID_step_le` (general-`k` pair-MVT, weight kept symbolic).
+* (MID-e) `MID_rpow15_ge` (`5 ≤ 15 ^ 0.605` via `3125 ≤ 3375`).
+* (MID-f) `MID_drop_ge` (real-MVT telescoping drop).
+* (MID-g) `MID_telescope` (two-step telescope).
+* (MID-h) `MID_sum_le` (pair-weight sum `≤ (1/5)/1.21`).
+* (MID-i) HEADLINE `MID_mid_block_upper` (middle `≤ 5/3`).
+
+RESIDUAL (quantified): `5/3 ≈ 1.667` vs needed `≤ 0.12`-class is a factor
+`≈ 14×` (true middle `≈ 0.095`; true pair-triangle `≈ 1.216`, so the
+telescope constant costs only `≈ 1.36×` -- the rest is the pair-MVT
+constant `‖s1‖ ≤ 10`). Tier-3 vdC (or rigorous complex interval
+arithmetic) is needed to close the remaining gap. K=16 verdict: BLOCKED
+(see final report; composition would give `-513/120 - 5/3 < 0`, vacuous,
+so it is NOT banked -- `D3_S16_cannot_reach_8_15` already proves no `U ≥ 0`
+can compose with the Re-route head lower).
+-/
+
+/-- (MID-a) `(-1)^16 = 1` (no parity API needed: `16 = 2·8`). -/
+theorem MID_neg_one_16 : (-1 : ℂ) ^ (16 : ℕ) = 1 := by
+  have h16 : (16 : ℕ) = 2 * 8 := by norm_num
+  rw [h16, pow_mul]
+  have h2 : (-1 : ℂ) ^ 2 = 1 := by norm_num
+  rw [h2, one_pow]
+
+/-- (MID-a) Shifted alternating terms agree (`16` even). -/
+theorem MID_neg_one_shift (j : ℕ) : (-1 : ℂ) ^ (16 + j) = (-1 : ℂ) ^ j := by
+  rw [pow_add, MID_neg_one_16, one_mul]
+
+/-- (MID-b) Ico-to-range shift (Mathlib has no `sum_Ico_eq_sum_range`). -/
+theorem MID_sum_Ico_shift (f : ℕ → ℂ) (M N : ℕ) :
+    ∑ k ∈ Finset.Ico M (M + N), f k = ∑ j ∈ Finset.range N, f (M + j) := by
+  induction N generalizing M with
+  | zero => simp
+  | succ N ih =>
+    have e : M + (N + 1) = (M + N) + 1 := by ring
+    rw [e, Finset.sum_Ico_succ_top (Nat.le_add_right M N) f, ih,
+      Finset.sum_range_succ]
+
+/-- (MID-c) Alternating range sum = sum of consecutive pair differences. -/
+theorem MID_pair_identity (M : ℕ) (v : ℕ → ℂ) :
+    ∑ j ∈ Finset.range (2 * M), (-1 : ℂ) ^ j * v j =
+    ∑ m ∈ Finset.range M, (v (2 * m) - v (2 * m + 1)) := by
+  induction M with
+  | zero => simp
+  | succ M ih =>
+    have e : 2 * (M + 1) = (2 * M + 1) + 1 := by ring
+    rw [e, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, ih]
+    have e1 : (-1 : ℂ) ^ (2 * M) = 1 := by
+      rw [pow_mul]
+      have h2 : (-1 : ℂ) ^ 2 = 1 := by norm_num
+      rw [h2, one_pow]
+    have e2 : (-1 : ℂ) ^ (2 * M + 1) = -1 := by
+      rw [pow_succ, e1, one_mul]
+    rw [e1, e2, one_mul, neg_one_mul]
+    ring
+
+set_option maxHeartbeats 800000 in
+/-- (MID-d) General-`k` pair-MVT step (mirrors `T2_AE_f_diff_le`, but keeps
+the `1/(k+1)` weight symbolic instead of weakening to `1/1024`). -/
+theorem MID_step_le (k : ℕ) :
+    ‖T2_AE_f k - T2_AE_f (k + 1)‖ ≤ 10 * ((((k : ℝ) + 1 : ℝ)) ^ (-1.605 : ℝ)) := by
+  have hC : ‖1 - zetaCellS0‖ ≤ 10 := zetaRefl_norm_le
+  have ha_pos : (0 : ℝ) < (k : ℝ) + 1 := by
+    have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg _
+    linarith
+  have e_next : ((((k + 1 : ℕ) : ℝ) + 1 : ℝ)) = ((k : ℝ) + 1 + 1 : ℝ) := by
+    push_cast
+    ring
+  have e_base : T2_AE_f k - T2_AE_f (k + 1)
+      = (((((k : ℝ) + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0)))
+        - ((((k : ℝ) + 1 + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0)) := by
+    unfold T2_AE_f
+    rw [e_next]
+  rw [e_base, norm_sub_rev]
+  have a_eq : ((k : ℝ) + 1 + 1 : ℝ) = ((k : ℝ) + 1 : ℝ) + 1 := by ring
+  rw [a_eq]
+  have hMVT := T2_cpow_diff_le ((k : ℝ) + 1) (((k : ℝ) + 1) + 1) ha_pos rfl
+  have hre : (-(1 - zetaCellS0).re - 1 : ℝ) = (-1.605 : ℝ) := by
+    rw [zetaRefl_re]
+    norm_num
+  rw [hre] at hMVT
+  have hnn : (0 : ℝ) ≤ ((((k : ℝ) + 1 : ℝ)) ^ (-1.605 : ℝ)) :=
+    Real.rpow_nonneg (le_of_lt ha_pos) _
+  calc ‖(((((k : ℝ) + 1 : ℝ) + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0)) -
+        ((((k : ℝ) + 1 : ℝ)) : ℂ) ^ (-(1 - zetaCellS0))‖
+      ≤ ‖1 - zetaCellS0‖ * ((((k : ℝ) + 1 : ℝ)) ^ (-1.605 : ℝ)) := hMVT
+    _ ≤ 10 * ((((k : ℝ) + 1 : ℝ)) ^ (-1.605 : ℝ)) :=
+        mul_le_mul_of_nonneg_right hC hnn
+
+/-- (MID-e) Numeral rpow atom `5 ≤ 15^0.605`
+(cleared: `5^5 = 3125 ≤ 3375 = 15^3`, since `3/5 ≤ 0.605`;
+mirrors `zetaRefl_rpow_0605_ge`). -/
+theorem MID_rpow15_ge : (5 : ℝ) ≤ (15 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((5 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((15 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((15 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (15 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 15)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 15 3
+    rw [e]
+    norm_num
+  have hstep : (5 : ℝ) ≤ (15 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (5 : ℝ) ≤ (15 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (15 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+set_option maxHeartbeats 800000 in
+/-- (MID-f) Real-MVT telescoping drop at pair `m`: the length-2 drop of
+`x ↦ x^(-0.605)` dominates `1.21 * (17+2m)^(-1.605)`. -/
+theorem MID_drop_ge (m : ℕ) :
+    (1.21 : ℝ) * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+      ≤ (((((15 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+        - (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := by
+  have ha_pos : (0 : ℝ) < ((((15 + 2 * m : ℕ)) : ℝ)) := by
+    have h : (0 : ℕ) < 15 + 2 * m := by omega
+    exact_mod_cast h
+  have hab : ((((15 + 2 * m : ℕ)) : ℝ)) < ((((17 + 2 * m : ℕ)) : ℝ)) := by
+    have h : 15 + 2 * m < 17 + 2 * m := by omega
+    exact_mod_cast h
+  have hab2 : ((((17 + 2 * m : ℕ)) : ℝ)) = ((((15 + 2 * m : ℕ)) : ℝ)) + 2 := by
+    push_cast
+    ring
+  have hfc : ContinuousOn (fun x : ℝ => x ^ (-0.605 : ℝ))
+      (Set.Icc ((((15 + 2 * m : ℕ)) : ℝ)) ((((17 + 2 * m : ℕ)) : ℝ))) := by
+    apply continuousOn_of_forall_continuousAt
+    intro x hx
+    have hax : ((((15 + 2 * m : ℕ)) : ℝ)) ≤ x := (Set.mem_Icc.mp hx).1
+    have hxpos : (0 : ℝ) < x := lt_of_lt_of_le ha_pos hax
+    exact Real.continuousAt_rpow_const x (-0.605 : ℝ) (Or.inl (ne_of_gt hxpos))
+  have hfd : DifferentiableOn ℝ (fun x : ℝ => x ^ (-0.605 : ℝ))
+      (Set.Ioo ((((15 + 2 * m : ℕ)) : ℝ)) ((((17 + 2 * m : ℕ)) : ℝ))) := by
+    intro x hx
+    have hxpos : (0 : ℝ) < x :=
+      lt_of_lt_of_le ha_pos (le_of_lt (Set.mem_Ioo.mp hx).1)
+    exact (Real.hasDerivAt_rpow_const
+      (Or.inl (ne_of_gt hxpos))).differentiableAt.differentiableWithinAt
+  obtain ⟨c, hcmem, hc⟩ := exists_deriv_eq_slope
+    (fun x : ℝ => x ^ (-0.605 : ℝ)) hab hfc hfd
+  have hderiv : deriv (fun x : ℝ => x ^ (-0.605 : ℝ)) c
+      = (-0.605 : ℝ) * c ^ (-1.605 : ℝ) := by
+    have e : (-0.605 : ℝ) - 1 = -1.605 := by norm_num
+    rw [Real.deriv_rpow_const, e]
+  have hmem := Set.mem_Ioo.mp hcmem
+  have hc0 : (0 : ℝ) < c := lt_of_lt_of_le ha_pos (le_of_lt hmem.1)
+  have hcb : c ≤ ((((17 + 2 * m : ℕ)) : ℝ)) := le_of_lt hmem.2
+  have hmono : (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ)) ≤ c ^ (-1.605 : ℝ) :=
+    Real.rpow_le_rpow_of_nonpos hc0 hcb (by norm_num)
+  have hne : ((((17 + 2 * m : ℕ)) : ℝ)) - ((((15 + 2 * m : ℕ)) : ℝ)) ≠ 0 := by
+    have e : ((((17 + 2 * m : ℕ)) : ℝ)) - ((((15 + 2 * m : ℕ)) : ℝ)) = 2 := by
+      rw [hab2]
+      ring
+    rw [e]
+    norm_num
+  have h2 : ((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)
+        - ((((15 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)
+      = deriv (fun x : ℝ => x ^ (-0.605 : ℝ)) c
+        * (((((17 + 2 * m : ℕ)) : ℝ)) - ((((15 + 2 * m : ℕ)) : ℝ))) := by
+    exact ((eq_div_iff hne).mp hc).symm
+  rw [hderiv] at h2
+  have hval : (((((15 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+        - ((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)
+      = (1.21 : ℝ) * c ^ (-1.605 : ℝ) := by
+    rw [hab2] at h2 ⊢
+    rw [show ((((15 + 2 * m : ℕ)) : ℝ)) + 2 - ((((15 + 2 * m : ℕ)) : ℝ)) = 2
+      by ring] at h2
+    have e121 : (-0.605 : ℝ) * c ^ (-1.605 : ℝ) * 2
+        = -((1.21 : ℝ) * c ^ (-1.605 : ℝ)) := by ring
+    rw [e121] at h2
+    linarith
+  calc (1.21 : ℝ) * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+      ≤ 1.21 * c ^ (-1.605 : ℝ) :=
+        mul_le_mul_of_nonneg_left hmono (by norm_num)
+    _ = (((((15 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+        - (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := hval.symm
+
+/-- (MID-g) Two-step telescope identity. -/
+theorem MID_telescope (M : ℕ) (g : ℕ → ℝ) :
+    ∑ m ∈ Finset.range M, (g (2 * m) - g (2 * m + 2)) = g 0 - g (2 * M) := by
+  induction M with
+  | zero => simp
+  | succ M ih =>
+    rw [Finset.sum_range_succ, ih]
+    have e : 2 * (M + 1) = 2 * M + 2 := by ring
+    rw [e]
+    ring
+
+set_option maxHeartbeats 800000 in
+/-- (MID-h) Telescoped pair-weight sum `≤ (1/5)/1.21`. -/
+theorem MID_sum_le :
+    ∑ m ∈ Finset.range 504, (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+      ≤ (1 / 5) / 1.21 := by
+  have hdrop : ∀ m ∈ Finset.range 504,
+      (1.21 : ℝ) * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+      ≤ (((((15 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+        - (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) :=
+    fun m _ => MID_drop_ge m
+  have hsum := Finset.sum_le_sum hdrop
+  rw [← Finset.mul_sum] at hsum
+  have htele := MID_telescope 504
+    (fun j : ℕ => (((((15 + j : ℕ)) : ℝ)) ^ (-0.605 : ℝ)))
+  -- (no c1: the `g (2*m)` conversion elaborates to an identity, so simp would ignore it)
+  have c2 : ∀ m : ℕ, (fun j : ℕ => (((((15 + j : ℕ)) : ℝ)) ^ (-0.605 : ℝ))) (2 * m + 2)
+      = (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := by
+    intro m
+    show (((((15 + (2 * m + 2) : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+      = (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+    have e : (15 + (2 * m + 2) : ℕ) = 17 + 2 * m := by omega
+    rw [e]
+  simp only [c2] at htele
+  have c3 : (((((15 + 0 : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+      = (((((15 : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := by
+    have e : (15 + 0 : ℕ) = 15 := by omega
+    rw [e]
+  have c4 : (((((15 + 2 * 504 : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+      = (((((1023 : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := by
+    have e : (15 + 2 * 504 : ℕ) = 1023 := by norm_num
+    rw [e]
+  rw [c3, c4] at htele
+  have hhead : (((((15 : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) ≤ 1 / 5 := by
+    have h15 : (5 : ℝ) ≤ (15 : ℝ) ^ (0.605 : ℝ) := MID_rpow15_ge
+    have ecast : ((((15 : ℕ)) : ℝ)) = (15 : ℝ) := by norm_num
+    rw [ecast]
+    have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 15)]
+    have heq : (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ := by norm_num
+    rw [heq]
+    exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _)
+      (by norm_num)).mpr h15
+  have htail_nn : (0 : ℝ) ≤ (((((1023 : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hfin : (1.21 : ℝ)
+        * ∑ m ∈ Finset.range 504, (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+      ≤ 1 / 5 := by
+    calc (1.21 : ℝ)
+          * ∑ m ∈ Finset.range 504, (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))
+        ≤ (((((15 : ℕ)) : ℝ)) ^ (-0.605 : ℝ))
+          - (((((1023 : ℕ)) : ℝ)) ^ (-0.605 : ℝ)) := by
+          rw [← htele]
+          exact hsum
+      _ ≤ 1 / 5 := by linarith [hhead, htail_nn]
+  have hpos : (0 : ℝ) < 1.21 := by norm_num
+  have hfin2 : (∑ m ∈ Finset.range 504,
+      (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))) * 1.21 ≤ 1 / 5 := by
+    rw [mul_comm]
+    exact hfin
+  exact (le_div_iff₀ hpos).mpr hfin2
+
+set_option maxHeartbeats 800000 in
+/-- (MID-i) HEADLINE middle-block `[16,1024)` upper `≤ 5/3`
+(`10 * ((1/5)/1.21) = 200/121 ≤ 5/3`). -/
+theorem MID_mid_block_upper :
+    ‖∑ k ∈ Finset.Ico 16 1024, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 5 / 3 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 1024, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ j ∈ Finset.range 1008, etaDirichletTerm (1 - zetaCellS0) (16 + j) := by
+    have h := MID_sum_Ico_shift (etaDirichletTerm (1 - zetaCellS0)) 16 1008
+    rwa [show (16 + 1008 : ℕ) = 1024 by norm_num] at h
+  rw [hIco]
+  have heta : ∀ j : ℕ, etaDirichletTerm (1 - zetaCellS0) (16 + j)
+      = (-1 : ℂ) ^ j * T2_AE_f (16 + j) := by
+    intro j
+    rw [T2_AE_eta_eq, MID_neg_one_shift, mul_comm]
+  have hsum : (∑ j ∈ Finset.range 1008, etaDirichletTerm (1 - zetaCellS0) (16 + j))
+      = ∑ j ∈ Finset.range 1008, (-1 : ℂ) ^ j * T2_AE_f (16 + j) :=
+    Finset.sum_congr rfl (fun j _ => heta j)
+  rw [hsum, show (1008 : ℕ) = 2 * 504 by norm_num, MID_pair_identity]
+  calc ‖∑ m ∈ Finset.range 504,
+        (T2_AE_f (16 + 2 * m) - T2_AE_f (16 + (2 * m + 1)))‖
+      ≤ ∑ m ∈ Finset.range 504,
+        ‖T2_AE_f (16 + 2 * m) - T2_AE_f (16 + (2 * m + 1))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ m ∈ Finset.range 504,
+        (10 * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))) := by
+        apply Finset.sum_le_sum
+        intro m _
+        have e1 : 16 + (2 * m + 1) = (16 + 2 * m) + 1 := by omega
+        rw [e1]
+        have hstep := MID_step_le (16 + 2 * m)
+        have e2 : ((((16 + 2 * m : ℕ)) : ℝ)) + 1 = ((((17 + 2 * m : ℕ)) : ℝ)) := by
+          push_cast
+          ring
+        rw [e2] at hstep
+        exact hstep
+    _ = 10 * ∑ m ∈ Finset.range 504,
+        (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ)) := by
+        rw [Finset.mul_sum]
+    _ ≤ 10 * ((1 / 5) / 1.21) :=
+        mul_le_mul_of_nonneg_left MID_sum_le (by norm_num)
+    _ ≤ 5 / 3 := by norm_num
+
+#print axioms MID_neg_one_16
+#print axioms MID_neg_one_shift
+#print axioms MID_sum_Ico_shift
+#print axioms MID_pair_identity
+#print axioms MID_step_le
+#print axioms MID_rpow15_ge
+#print axioms MID_drop_ge
+#print axioms MID_telescope
+#print axioms MID_sum_le
+#print axioms MID_mid_block_upper
+
+
 
 
 
