@@ -11234,3 +11234,534 @@ class, absent); (ii) pointwise `|ζ(2+iy)|` cancellation on the FE mirror
 (CQ), `[10, 10.5]` (here), `[21, ∞)` (CT): remainder `(10.5, 21)`.
 -/
 
+/-!
+# CZ tail (door-3 P1/hTail track, exact-joint hump bridge): joint `1.26` + `[10.5, 10.6]` slice.
+
+Ownership: Agent CZ tail append (append-only after the CW verdict block; nothing above
+touched; no new imports; `zeta_rigorous.lean` untouched).
+
+ZETA-23 VERDICT (numerical check FIRST, per brief §3 — Stirling route DEAD, pivot to lever (i)):
+* Read `zeta-23-lean/Zeta23/GammaFacts/StirlingVert.lean`: `digamma_stirling` (:483)
+  `‖ψ(w) − log w + 1/(2w)‖ ≤ 3/(Im w)²` for `Re w > 0`, `|Im w| ≥ 1/2`;
+  `re_digamma_stirling` (:550), `re_digamma_stirling'` (:588)
+  (`|Re ψ(a+it) − log|t|| ≤ 5/t²`, `0 < a ≤ 1`). Read `IntMu.lean` (the
+  integrate-the-asymptotic pattern yields the H-μ fields `∫μ`, `∫μ²` — not `|Γ|`
+  uppers) and `Hypotheses.lean` `GammaFacts` (:125–138) + `GammaFacts/Complete.lean`
+  (`gammaFacts`, via `mu_stirling`).
+* Mapping correction: our hump Γ-factor sits at `Re w = 2` (FE mirror `w = 1 − z`),
+  so StirlingVert's `Re w > 0` holds DIRECTLY — no reflection needed. It still cannot
+  help, for two independent reasons:
+  (a) CEILING (Python, exact decimals): any `|Γ(2+it)| ≤ C·t^{3/2}·e^{−πt/2}` has
+      optimal `C = √(2π) ≈ 2.50663`, i.e. at most `2.53/2.50663 = 1.0093×` over the
+      banked `C = 2.53` — vs `1.34×` needed (`48.1` vs `36`). A formalized
+      integrated-asymptotic bound carries explicit `O(1/t²)` errors on top
+      (`5/t² ≈ 0.045` in log-scale at `t = 10.5`, a further `~1.046×` loss), hence
+      does strictly worse than (b).
+  (b) DOMINANCE: `Door3JointGammaCos.Gamma_Re2_normSq` already holds
+      `‖Γ(w)‖² = (1+y²)·πy/sinh(πy)` EXACTLY (reflection + `Gamma_conj` + recurrence —
+      the same mathematics any StirlingVert integration would reprove, lossily).
+* Hence NO new import (narrowest sufficient import = none; this also avoids a
+  first-time Zeta23 dep-build inside the workspace build) and the pivot to CW lever
+  (i), the exact `‖Γ·cos‖` joint.
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `CZ_coth_hump_le` — tight `cosh t/sinh t ≤ 1.001` for `t ≥ 15.75`
+  (`E = exp t ≥ 2.7^15 ≥ 2824`, so `E² ≥ 7974976 ≥ 2001`).
+* `CZ_joint_hump_le` — THE BRIDGE (lever (i), exact joint capped):
+  `‖Γ w * cos(πw/2)‖ ≤ 1.26·√(|Im w|³)` on `Re w = 2`, `10.5 ≤ |Im w|`
+  (was `1.2653`; true ratio `≤ 1.25899` at `10.5`, decreasing in `|Im|`).
+  Skeleton = `joint_Gamma_cos_le` with hump caps.
+* `CZ_RowFE_hump_le` / `CZ_zeta_hump_le` / `CZ_F_hump_le` — recomposed caps with
+  `1.26/19.5` (reusing `CW_HumpTight.cpow_sharp_Re2_39`, `CKT3Zeta165`,
+  `CKT2SubSqrt`), shaped toward `CP_Sharp201.hTail_of_sharp201_sup`'s premise.
+* `CZ_Bhump_nonneg` / `CZ_Bhump_mono` + `CZ_B106_le` (`≤ 39.72`) + `CZ_damp105_le`
+  (`≤ 0.885`) + `CZ_neg_cap_hump_105_106` (`0.885 × 39.72 = 35.16 ≤ 36`) +
+  MAIN `CZ_G_hump_105_106_le` (`hTail`-shaped `‖G‖ ≤ 36` on `[10.5, 10.6]`,
+  both signs; pos via `damp_pos_01 ≤ 0.1`).
+
+Grep record (verified by `rg -n` before writing; all reused, none reimplemented):
+* `Door3JointGammaCos.Gamma_Re2_normSq` (`:2831`), `.cos_Re2_norm` (`:2796`),
+  `.joint_Gamma_cos_le` (`:2868`, mirrored skeleton), `Real.sinh_two_mul`;
+  `t_mul_coth_le` is window-only (gives `t+1`, useless on hump) — NOT reused.
+* `CW_HumpTight.cpow_sharp_Re2_39` (`:10813`), `.joint_Stirling_hump_le` (`:10907`,
+  SUPERSEDED here: `1.2653 → 1.26`), `.RowFE/zeta/F_Stirling_hump_le`
+  (`:10952/:10981/:11035`, same supersede), `.Bhump_nonneg/mono` (`:11050/:11061`,
+  same-constant mirrors), `.B105_le/damp10_le/neg_cap/G_hump_10_105_le`
+  (`:11082/:11108/:11118/:11136`, endpoint patterns mirrored).
+* `CQ_CompactHump.dampNeg_mono` (`:9328`), `BF2TailCaps.exp_neg_le_inv` (`:3399`),
+  `CIJointStirling.damp_pos_01` (`:7431`), `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`),
+  `CKT3Zeta165.zeta_rightEdge_B165`, `CKT2SubSqrt.sub_sqrt_le`, `RowFE.RowFEFactor`,
+  `ZetaUpperR02ThreeLines.*` — all REUSED directly.
+* Zeta23 names cited from reads (NOT imported; no terms referenced):
+  `Zeta23.StirlingVert.digamma_stirling/re_digamma_stirling[_']`,
+  `Zeta23.MuInts.int_mu_of_stirling`, `Zeta23.GammaFacts` (`stirling` field),
+  `Zeta23.gammaFacts`.
+-/
+
+namespace CZ_JointHump
+
+/-- Tight `cosh/sinh ≤ 1.001` for `t ≥ 15.75` (hump: `πa/2 ≥ 15.75` when `a ≥ 10.5`).
+With `E = exp t ≥ exp 15 = (exp 1)^15 ≥ 2.7^15 ≥ 2824`, `E² ≥ 7974976 ≥ 2001`,
+so `(E + E⁻¹) ≤ 1.001·(E − E⁻¹)`. -/
+theorem CZ_coth_hump_le {t : ℝ} (ht : 15.75 ≤ t) :
+    Real.cosh t / Real.sinh t ≤ 1.001 := by
+  have hexp1 : (2.7 : ℝ) < Real.exp 1 := by linarith [Real.exp_one_gt_d9]
+  have h2824 : (2824 : ℝ) ≤ (2.7 : ℝ) ^ (15 : ℕ) := by norm_num
+  have hE15 : (2.7 : ℝ) ^ (15 : ℕ) ≤ Real.exp (15 : ℝ) := by
+    have h := Real.exp_nat_mul (1 : ℝ) (15 : ℕ)
+    rw [show ((15 : ℕ) : ℝ) * 1 = 15 by norm_num] at h
+    have hpow : (2.7 : ℝ) ^ (15 : ℕ) ≤ (Real.exp 1) ^ (15 : ℕ) :=
+      pow_le_pow_left₀ (by norm_num) hexp1.le 15
+    rw [← h] at hpow
+    exact hpow
+  have h15t : Real.exp (15 : ℝ) ≤ Real.exp t := Real.exp_le_exp.mpr (by linarith)
+  have hE : (2824 : ℝ) ≤ Real.exp t := le_trans (le_trans h2824 hE15) h15t
+  have hEpos : (0 : ℝ) < Real.exp t := Real.exp_pos t
+  have hEE : Real.exp t * (Real.exp t)⁻¹ = 1 := mul_inv_cancel₀ hEpos.ne'
+  have h1E : (1 : ℝ) ≤ Real.exp t := by linarith
+  have hu1 : (Real.exp t)⁻¹ ≤ 1 := by
+    calc (Real.exp t)⁻¹ = 1 / Real.exp t := inv_eq_one_div _
+      _ ≤ 1 / 1 := one_div_le_one_div_of_le (by norm_num) h1E
+      _ = 1 := one_div_one
+  have hEsub : (0 : ℝ) < Real.exp t - (Real.exp t)⁻¹ := by linarith
+  have hE2 : (2001 : ℝ) ≤ (Real.exp t) ^ 2 := by
+    have hsq : (2824 : ℝ) ^ 2 ≤ (Real.exp t) ^ 2 :=
+      pow_le_pow_left₀ (by norm_num) hE 2
+    norm_num at hsq
+    linarith
+  have h3 : (2001 : ℝ) * (Real.exp t)⁻¹ ≤ Real.exp t := by
+    have e1 : Real.exp t * (2001 * (Real.exp t)⁻¹) = 2001 := by
+      have er : Real.exp t * (2001 * (Real.exp t)⁻¹)
+          = 2001 * (Real.exp t * (Real.exp t)⁻¹) := by ring
+      rw [er, hEE, mul_one]
+    have hsq2 : (Real.exp t) ^ 2 = Real.exp t * Real.exp t := pow_two _
+    have e2 : Real.exp t * (2001 * (Real.exp t)⁻¹)
+        ≤ Real.exp t * Real.exp t := by
+      rw [e1, ← hsq2]
+      exact hE2
+    exact le_of_mul_le_mul_left e2 hEpos
+  have key : Real.exp t + (Real.exp t)⁻¹
+      ≤ 1.001 * (Real.exp t - (Real.exp t)⁻¹) := by
+    linarith
+  have hcosh : Real.cosh t = (Real.exp t + (Real.exp t)⁻¹) / 2 := by
+    rw [Real.cosh_eq, Real.exp_neg]
+  have hsinh : Real.sinh t = (Real.exp t - (Real.exp t)⁻¹) / 2 := by
+    rw [Real.sinh_eq, Real.exp_neg]
+  rw [hcosh, hsinh,
+    div_le_iff₀ (show (0 : ℝ) < (Real.exp t - (Real.exp t)⁻¹) / 2 by linarith)]
+  linarith
+
+/-- Lever-(i) EXACT joint, capped: on `Re w = 2`, `10.5 ≤ |Im w|`,
+`‖Γ w * cos(πw/2)‖ ≤ 1.26·√(|Im w|³)` (was `1.2653`; true ratio `≤ 1.25899`
+at `10.5`, decreasing in `|Im|`). Proof = `joint_Gamma_cos_le` skeleton with
+hump caps: `‖Γ·cos‖² = (1+a²)·((πa/2)·(cosh/sinh)) ≤ (1+a²)·(a·1.5723708)`
+`≤ 1.5876·a³ = (1.26·√(a³))²`. -/
+theorem CZ_joint_hump_le {w : ℂ} (hw : w.re = 2)
+    (htail : (10.5 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 1.26 * Real.sqrt (|w.im| ^ 3) := by
+  have hyne : w.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hG := Door3JointGammaCos.Gamma_Re2_normSq hw hyne
+  have hC := Door3JointGammaCos.cos_Re2_norm hw
+  have ha_pos : 0 < |w.im| := abs_pos.mpr hyne
+  have hpi : 0 < Real.pi := lt_trans (by norm_num) Real.pi_gt_three
+  have hthal_pos : 0 < Real.pi * |w.im| / 2 := by
+    have h2 := mul_pos (mul_pos hpi ha_pos) (show (0 : ℝ) < 1 / 2 by norm_num)
+    linarith
+  have hsinh_half_pos : 0 < Real.sinh (Real.pi * |w.im| / 2) :=
+    Real.sinh_pos_iff.mpr hthal_pos
+  have hcosh_pos : 0 < Real.cosh (Real.pi * |w.im| / 2) := Real.cosh_pos _
+  have hsymm : Real.pi * w.im / Real.sinh (Real.pi * w.im)
+      = Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg, show Real.pi * -w.im = -(Real.pi * w.im) by ring,
+        Real.sinh_neg, neg_div_neg_eq]
+    · rw [abs_of_nonneg hynonneg]
+  have heven : Real.cosh (Real.pi * w.im / 2)
+      = Real.cosh (Real.pi * |w.im| / 2) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg,
+        show Real.pi * -w.im / 2 = -(Real.pi * w.im / 2) by ring, Real.cosh_neg]
+    · rw [abs_of_nonneg hynonneg]
+  have hsinh2 : Real.sinh (Real.pi * |w.im|)
+      = 2 * Real.sinh (Real.pi * |w.im| / 2)
+        * Real.cosh (Real.pi * |w.im| / 2) := by
+    have hdouble : Real.pi * |w.im| = 2 * (Real.pi * |w.im| / 2) := by ring
+    conv_lhs => rw [hdouble]
+    rw [Real.sinh_two_mul]
+  have hsinh_half_ne : Real.sinh (Real.pi * |w.im| / 2) ≠ 0 :=
+    ne_of_gt hsinh_half_pos
+  have hcosh_ne : Real.cosh (Real.pi * |w.im| / 2) ≠ 0 := ne_of_gt hcosh_pos
+  have hden_ne : 2 * Real.sinh (Real.pi * |w.im| / 2)
+      * Real.cosh (Real.pi * |w.im| / 2) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero two_ne_zero hsinh_half_ne) hcosh_ne
+  have hstep : (1 + |w.im| ^ 2)
+          * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|))
+          * (Real.cosh (Real.pi * |w.im| / 2)) ^ 2
+      = (1 + |w.im| ^ 2)
+        * ((Real.pi * |w.im| / 2)
+          * (Real.cosh (Real.pi * |w.im| / 2)
+            / Real.sinh (Real.pi * |w.im| / 2))) := by
+    rw [hsinh2]
+    field_simp
+  have hpi3 : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
+  have h1575 : (15.75 : ℝ) ≤ Real.pi * |w.im| / 2 := by
+    have h1 : 3 * 10.5 ≤ Real.pi * |w.im| :=
+      mul_le_mul hpi3 htail (by norm_num) (le_of_lt hpi)
+    linarith
+  have hcoth := CZ_coth_hump_le h1575
+  have hpile : Real.pi / 2 ≤ 1.5708 := by
+    have h := Real.pi_lt_d4
+    linarith
+  have hmid : (Real.pi * |w.im| / 2)
+        * (Real.cosh (Real.pi * |w.im| / 2) / Real.sinh (Real.pi * |w.im| / 2))
+      ≤ |w.im| * 1.5723708 := by
+    have e1 : (Real.pi * |w.im| / 2)
+          * (Real.cosh (Real.pi * |w.im| / 2) / Real.sinh (Real.pi * |w.im| / 2))
+        ≤ (Real.pi * |w.im| / 2) * 1.001 :=
+      mul_le_mul_of_nonneg_left hcoth (le_of_lt hthal_pos)
+    have e2 : (Real.pi / 2) * 1.001 ≤ 1.5723708 := by
+      have hmul := mul_le_mul hpile (le_refl (1.001 : ℝ)) (by norm_num) (by norm_num)
+      refine le_trans hmul (by norm_num)
+    have e3 : (Real.pi * |w.im| / 2) * 1.001 ≤ |w.im| * 1.5723708 := by
+      have e : (Real.pi * |w.im| / 2) * 1.001
+          = |w.im| * ((Real.pi / 2) * 1.001) := by ring
+      rw [e]
+      exact mul_le_mul_of_nonneg_left e2 (abs_nonneg _)
+    exact le_trans e1 e3
+  have ha2 : (10.5 : ℝ) ^ 2 ≤ |w.im| ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) htail 2
+  have hcap : (1 + |w.im| ^ 2) * (|w.im| * 1.5723708)
+      ≤ 1.5876 * |w.im| ^ 3 := by
+    have hMK : (1.5723708 : ℝ) ≤ (1.5876 - 1.5723708) * |w.im| ^ 2 := by
+      have hmul := mul_le_mul_of_nonneg_left ha2
+        (show (0 : ℝ) ≤ 1.5876 - 1.5723708 by norm_num)
+      linarith [hmul]
+    have hMKa : |w.im| * 1.5723708
+        ≤ (1.5876 - 1.5723708) * |w.im| ^ 2 * |w.im| := by
+      have hmul2 := mul_le_mul_of_nonneg_right hMK (abs_nonneg w.im)
+      linarith [hmul2]
+    have e : (1 + |w.im| ^ 2) * (|w.im| * 1.5723708)
+        = |w.im| * 1.5723708 + (|w.im| ^ 2 * |w.im|) * 1.5723708 := by ring
+    have e2 : (1.5876 : ℝ) * |w.im| ^ 3
+        = (1.5876 - 1.5723708) * |w.im| ^ 2 * |w.im|
+          + (|w.im| ^ 2 * |w.im|) * 1.5723708 := by ring
+    rw [e, e2]
+    linarith [hMKa]
+  have h126 : (1.26 : ℝ) ^ 2 = 1.5876 := by norm_num
+  have hRHS_sq : (1.26 * Real.sqrt (|w.im| ^ 3)) ^ 2
+      = 1.5876 * |w.im| ^ 3 := by
+    have hsq3 : (Real.sqrt (|w.im| ^ 3)) ^ 2 = |w.im| ^ 3 :=
+      Real.sq_sqrt (pow_nonneg (abs_nonneg _) 3)
+    have eR : (1.26 * Real.sqrt (|w.im| ^ 3)) ^ 2
+        = (1.26 ^ 2) * ((Real.sqrt (|w.im| ^ 3)) ^ 2) := by ring
+    rw [eR, hsq3, h126]
+  have hle2 : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+      ≤ (1.26 * Real.sqrt (|w.im| ^ 3)) ^ 2 := by
+    have e1 : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+        = ‖Complex.Gamma w‖ ^ 2 * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2 := by
+      rw [norm_mul, mul_pow]
+    rw [hRHS_sq, e1, hG, hC, hsymm, heven, ← sq_abs w.im, hstep]
+    exact le_trans (mul_le_mul_of_nonneg_left hmid
+      (by linarith [sq_nonneg (|w.im|)])) hcap
+  have hle := Real.sqrt_le_sqrt hle2
+  rw [Real.sqrt_sq (norm_nonneg _),
+    Real.sqrt_sq (show (0 : ℝ) ≤ 1.26 * Real.sqrt (|w.im| ^ 3) from
+      mul_nonneg (by norm_num) (Real.sqrt_nonneg _))] at hle
+  exact hle
+
+/-- CZ FE-factor cap: `‖RowFEFactor w‖ ≤ (1.26/19.5)·√(|y|³)` on `Re = 2`,
+`10.5 ≤ |y|`. Mirrors `CW_HumpTight.RowFE_Stirling_hump_le` (`1.2653 → 1.26`). -/
+theorem CZ_RowFE_hump_le {w : ℂ} (hw : w.re = 2)
+    (htail : (10.5 : ℝ) ≤ |w.im|) :
+    ‖RowFE.RowFEFactor w‖ ≤ (1.26 / 19.5) * Real.sqrt (|w.im| ^ 3) := by
+  have hcpow := CW_HumpTight.cpow_sharp_Re2_39 hw
+  have hjoint := CZ_joint_hump_le hw htail
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  have hgc : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      = ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ :=
+    (norm_mul _ _).symm
+  rw [hnorm_eq, h2norm, hgc]
+  have h1 : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 39) :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  calc (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ (2 * (1 / 39)) * (1.26 * Real.sqrt (|w.im| ^ 3)) :=
+        mul_le_mul h1 hjoint (norm_nonneg _) (by norm_num)
+    _ = (1.26 / 19.5) * Real.sqrt (|w.im| ^ 3) := by ring
+
+/-- CZ zeta cap on the hTail line: `‖ζ z‖ ≤ 1.65·((1.26/19.5)·S)`
+(reflected `1.65` unchanged). Mirrors `CW_HumpTight.zeta_Stirling_hump_le`. -/
+theorem CZ_zeta_hump_le {z : ℂ} (hz : z.re = -1) (htail : (10.5 : ℝ) ≤ |z.im|) :
+    ‖riemannZeta z‖ ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz] at hre
+    have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z =
+      RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 1.65 := by
+    have h := CKT3Zeta165.zeta_rightEdge_B165 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have htail_le : (10.5 : ℝ) ≤ |((1 : ℂ) - z).im| := by
+    rw [hw_im, abs_neg]
+    exact htail
+  have hFactor := CZ_RowFE_hump_le hw_re htail_le
+  rw [hw_im, abs_neg] at hFactor
+  have hXnn : (0 : ℝ) ≤ (1.26 / 19.5) * Real.sqrt (|z.im| ^ 3) := by
+    exact mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)) * 1.65 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) hXnn
+    _ = 1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)) := by ring
+
+/-- CZ pole-removed cap (sqrt `(z-1)` × CZ zeta). Mirrors
+`CW_HumpTight.F_Stirling_hump_le`. -/
+theorem CZ_F_hump_le {z : ℂ} (hz : z.re = -1) (htail : (10.5 : ℝ) ≤ |z.im|) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+      ≤ Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hsub := CKT2SubSqrt.sub_sqrt_le hz
+  have hZ := CZ_zeta_hump_le hz htail
+  have hb_nn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2) := Real.sqrt_nonneg _
+  rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+  exact mul_le_mul hsub hZ (norm_nonneg _) hb_nn
+
+/-- Nonnegativity of the CZ `Bhump(a)` (constant `1.26/19.5`). -/
+theorem CZ_Bhump_nonneg {a : ℝ} :
+    (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := by
+  have hS : (0 : ℝ) ≤ Real.sqrt (a ^ 3) := Real.sqrt_nonneg _
+  have g1 : (0 : ℝ) ≤ (1.26 / 19.5) * Real.sqrt (a ^ 3) :=
+    mul_nonneg (by norm_num) hS
+  have g2 : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)) :=
+    mul_nonneg (by norm_num) g1
+  exact mul_nonneg (Real.sqrt_nonneg _) g2
+
+/-- Monotonicity of the CZ `Bhump(a)` on `0 ≤ a`. Mirrors `CW_HumpTight.Bhump_mono`. -/
+theorem CZ_Bhump_mono {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) :
+    Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) ≤
+      Real.sqrt (4 + b ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (b ^ 3))) := by
+  have hsq : a ^ 2 ≤ b ^ 2 := pow_le_pow_left₀ ha hab 2
+  have hcb : a ^ 3 ≤ b ^ 3 := pow_le_pow_left₀ ha hab 3
+  have s1 : Real.sqrt (4 + a ^ 2) ≤ Real.sqrt (4 + b ^ 2) :=
+    Real.sqrt_le_sqrt (by linarith)
+  have s2 : Real.sqrt (a ^ 3) ≤ Real.sqrt (b ^ 3) := Real.sqrt_le_sqrt hcb
+  have h1 : (1.26 / 19.5) * Real.sqrt (a ^ 3) ≤ (1.26 / 19.5) * Real.sqrt (b ^ 3) :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt (b ^ 3)) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)) := by
+    have hS : (0 : ℝ) ≤ Real.sqrt (a ^ 3) := Real.sqrt_nonneg _
+    have g1 : (0 : ℝ) ≤ (1.26 / 19.5) * Real.sqrt (a ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    exact mul_nonneg (by norm_num) g1
+  exact mul_le_mul s1 h2 hc (Real.sqrt_nonneg _)
+
+/-- `CZ_Bhump(10.6) ≤ 39.72` (`√116.36 ≤ 10.79`, `√1191.016 ≤ 34.52`). -/
+theorem CZ_B106_le :
+    Real.sqrt (4 + (10.6 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((10.6 : ℝ) ^ 3))) ≤ 39.72 := by
+  have s1 : Real.sqrt (4 + (10.6 : ℝ) ^ 2) ≤ 10.79 := by
+    have hle : 4 + (10.6 : ℝ) ^ 2 ≤ (10.79 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 10.79)] at h
+  have s2 : Real.sqrt ((10.6 : ℝ) ^ 3) ≤ 34.52 := by
+    have hle : (10.6 : ℝ) ^ 3 ≤ (34.52 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 34.52)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((10.6 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 34.52 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((10.6 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 34.52) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((10.6 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (10.6 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((10.6 : ℝ) ^ 3)))
+      ≤ 10.79 * (1.65 * ((1.26 / 19.5) * 34.52)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 39.72 := by norm_num
+
+/-- Neg damping at `10.5`: `exp((1-(10.5-6.75)²)/100) = exp(-0.130625) ≤ 0.885`
+(via `BF2TailCaps.exp_neg_le_inv`: `1/1.130625 ≤ 0.885`). -/
+theorem CZ_damp105_le :
+    Real.exp ((1 - ((10.5 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.885 := by
+  have e : (1 - ((10.5 : ℝ) - 6.75) ^ 2) / 100 = -0.130625 := by norm_num
+  rw [e]
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.130625 by norm_num)
+  have hle : (1 : ℝ) / (1 + 0.130625) ≤ 0.885 := by norm_num
+  exact le_trans h hle
+
+/-- CZ neg envelope `≤ 36` on `[10.5, 10.6]` (`0.885 × 39.72 = 35.16`).
+Mirrors `CW_HumpTight.neg_cap_hump_10_105`. -/
+theorem CZ_neg_cap_hump_105_106 {a : ℝ} (hlo : 10.5 ≤ a) (hhi : a ≤ 10.6) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.885 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 10.5 by norm_num) hlo)
+      CZ_damp105_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 39.72 :=
+    le_trans (CZ_Bhump_mono ha0 hhi) CZ_B106_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.885 * 39.72 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- MAIN (`hTail`-shaped on `[10.5, 10.6]`): actual `‖G z‖ ≤ 36` for `Re z = -1`,
+`10.5 ≤ |Im z| ≤ 10.6`. Extends CW `[10, 10.5]`; composes with CQ `[8.75, 10]`
+and CT `[21, ∞)`. Mirrors `CW_HumpTight.G_hump_10_105_le`. -/
+theorem CZ_G_hump_105_106_le {z : ℂ} (hz : z.re = -1)
+    (hlo : (10.5 : ℝ) ≤ |z.im|) (hhi : |z.im| ≤ 10.6) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+  have hB : Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) ≤ 39.72 :=
+    le_trans (CZ_Bhump_mono ha0 hhi) CZ_B106_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) := CZ_Bhump_nonneg
+  have hF := CZ_F_hump_le hz hlo
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  rcases le_total 0 z.im with hnn | hneg
+  · have habs : |z.im| = z.im := abs_of_nonneg hnn
+    have hpos : 8.75 < z.im := by
+      rw [← habs]
+      linarith
+    have hdamp := CIJointStirling.damp_pos_01 hz hpos
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+        ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+        ≤ (Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) * 0.1 :=
+          mul_le_mul hF hdamp (norm_nonneg _) hBnn
+      _ = (0.1 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+          ring
+      _ ≤ (0.1 : ℝ) * 39.72 := mul_le_mul_of_nonneg_left hB (by norm_num)
+      _ ≤ 36 := by norm_num
+  · have habs : |z.im| = -z.im := abs_of_nonpos hneg
+    have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by
+      rw [habs]
+      ring
+    have hd : Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) ≤ 0.885 :=
+      le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 10.5 by norm_num) hlo)
+        CZ_damp105_le
+    have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.885 := by
+      rw [CF_SharpDamp.damp_norm_eq_neg1 hz, hsq]
+      exact hd
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+        ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+        ≤ (Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) * 0.885 :=
+          mul_le_mul hF hdamp (norm_nonneg _) hBnn
+      _ = (0.885 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+          ring
+      _ ≤ (0.885 : ℝ) * 39.72 := mul_le_mul_of_nonneg_left hB (by norm_num)
+      _ ≤ 36 := by norm_num
+
+#print axioms CZ_JointHump.CZ_coth_hump_le
+#print axioms CZ_JointHump.CZ_joint_hump_le
+#print axioms CZ_JointHump.CZ_RowFE_hump_le
+#print axioms CZ_JointHump.CZ_zeta_hump_le
+#print axioms CZ_JointHump.CZ_F_hump_le
+#print axioms CZ_JointHump.CZ_Bhump_nonneg
+#print axioms CZ_JointHump.CZ_Bhump_mono
+#print axioms CZ_JointHump.CZ_B106_le
+#print axioms CZ_JointHump.CZ_damp105_le
+#print axioms CZ_JointHump.CZ_neg_cap_hump_105_106
+#print axioms CZ_JointHump.CZ_G_hump_105_106_le
+
+end CZ_JointHump
+
+/-!
+CZ VERDICT + RESIDUAL (report-and-stop): ONE bridge banked (exact joint `1.26` +
+`[10.5, 10.6]` slice), hump core stays structural. No `sorry`/`admit`/`axiom`.
+
+(1) BRIDGE CLOSED (`CZ_JointHump`, 11 theorems, full proofs pending build):
+`CZ_coth_hump_le` (`cosh/sinh ≤ 1.001`) ⇒ `CZ_joint_hump_le` (lever-(i) exact
+joint `‖Γ·cos‖ ≤ 1.26·√(a³)` on `Re = 2`, `a ≥ 10.5`; was `1.2653`, gain `1.0042×`;
+true ratio `1.25899`, margin `0.001`) + `CZ_RowFE/zeta/F_hump_le` recomposition
+(`1.26/19.5`) + `CZ_neg_cap_hump_105_106` (`0.885 × 39.72 = 35.16`) + MAIN
+`CZ_G_hump_105_106_le` (`hTail`-shaped `‖G‖ ≤ 36` on `[10.5, 10.6]`, both signs;
+pos via `damp_pos_01 ≤ 0.1`: `0.1 × 39.72 = 3.98`). This PERMANENTLY removes the
+`2.01`-sinh slack and the `E·C`-separation slack on the hump (exact identity now
+caps the joint); the `1.2653` chain is superseded wherever `a ≥ 10.5`.
+
+(2) HUMP VALUES (CZ envelope `damp·B_CZ` vs 36): `36.67/41.34/44.92/47.16/47.93/
+47.23/45.18/42.01/38.00/33.45` at `a = 11..20` (peak `47.93` at `a ~ 15`, was
+`48.13`; `1.0042×` gain as predicted). `[10.5, 10.6]` CLOSED here (`35.16`,
+margin `0.84`); contiguous with CW `[10, 10.5]` and CQ `[8.75, 10]`.
+
+(3) RESIDUAL (exact): hump core `(10.6, 21)` (CZ peak `47.93 ≈ 1.331×` over 36).
+Deeper-lever audit (Python, external numerals, not Lean claims): (i) exact joint is
+now BANKED (`1.0042×`, no further headroom — true ratio `≤ 1.25899` vs `1.26`);
+(ii) zeta tier: measured `|ζ(2+18i)| ≈ 1.357`, so no uniform cap below `~1.36`
+exists on the hump — at most `1.65/1.357 ≈ 1.216×`; (iii) cpow `1/39` vs true
+`1/39.48` (`1.012×`). Combined dream-uniform ceiling: `1.0042 × 1.216 × 1.012 ≈
+1.236×` vs `1.331×` needed (peak would sit at `~38.8 > 36`) — the uniform-constant
+route is now PROVED exhausted in principle, not just in practice. The remaining
+route is structural: lever (iii), recentered damping + re-proved threshold assembly.
+`CP_Sharp201.hTail_of_sharp201_sup` now needs `[8.75, 21)` minus `[8.75, 10]` (CQ),
+`[10, 10.5]` (CW), `[10.5, 10.6]` (here), `[21, ∞)` (CT): remainder `(10.6, 21)`.
+-/
+
