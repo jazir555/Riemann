@@ -1448,7 +1448,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `z∈[0.998,1.069]`, margin `0.000386`) ⇒ term10 `≤-14/75≈-0.186667` ⇒
     **`‖S₁₆‖ ≥ 492021/3150000 ≈ 0.1562`** (1.076×, gain `0.01111`; true `≈-0.51` ceiling). Taylor levers now
     EXHAUSTED on the early block — residual is the hard set: x=12/x=16 tighter log phase or
-    large-denominator amp clearing (tasked). **Stirling Gamma tail
+    large-denominator amp clearing (tasked). **Amp clearings CLOSED (`D3_S16_norm_ge_CS`, `4feab758`, green,
+    axioms clean):** higher-power integer clearing both ends — `D3_amp 11 ≤ 34/151` (`151^5 ≤ 12^3·34^5`,
+    margin `0.012%`) ⇒ term11 `≤2601/37750`; `3/17 ≤ D3_amp 15` (`17^8 ≥ 16^5·3^8`, margin `1.4%`) ⇒
+    term15 `≤-2271/17000` ⇒ **`‖S₁₆‖ ≥ 461492569/2695350000 ≈ 0.1712`** (1.096×, gain `0.01502`). Phase-box
+    levers honestly NO-HEADROOM (`θ₁₂` box `0.001` vs `δ₁₂` `0.061`, 6π-dominated; `θ₁₆` vs `8π` `0.08`) —
+    both need Machin-class tighter `π` (tasked). x=12 amp slack now `0.0028` (near-exhausted at 3/5-exponent).
+    **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
