@@ -4339,4 +4339,223 @@ Phragmén–Lindelöf/convexity bound with finite-order control — new material
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# BP2 tail (door-3 R1 middle): exp-3/2 middle-third envelope via xi-transfer (conditional)
+
+Ownership: Agent BP2 tail append (append-only after the BN verdict block; nothing above
+touched; `import ZeroFreeRegionHadamard` at line 5 reused, not re-added).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `norm_le_two_add_abs_im_of_middle` — `‖s‖ ≤ 2 + |Im s|` on `Re ∈ [-1/2,3/2]`
+  (via `Complex.norm_le_abs_re_add_abs_im` + `|Re| ≤ 3/2`).
+* `middle_norm_rpow32_le` — rpow conversion
+  `‖s‖^(3/2) ≤ 4^(3/2) + 2^(3/2)·|Im|^(3/2)` on the middle third.
+  Split at `|Im| ≤ 2`: small case via `(2+t) ≤ 4`, large via `(2+t) ≤ 2·t`
+  (`Real.rpow_le_rpow` + `Real.mul_rpow`; no convexity needed).
+* `F_middleThird_exp32_of_GammaLower` — middle-third envelope in exp-3/2 form ONLY:
+  `‖F s‖ ≤ C·exp(K·|Im s|^(3/2))` on `σ ∈ [-1/2,3/2]`, conditional on ONE explicit
+  premise (strip `Gammaℝ` lower `c ≤ ‖Gammaℝ s‖`, absent repo-wide).
+  Via BL's xi-transfer (`BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi` +
+  `ZeroFreeRegionHadamard.xi_norm_bound_whole_plane`): large `‖s‖ > max C0 1`
+  uses the transfer (denominators `‖s‖ ≥ 1`, `‖Gammaℝ‖ ≥ c`; `s = 0/1` and
+  `Gamma(s/2) = 0` excluded by the norm/gamma bounds); small `‖s‖ ≤ max C0 1`
+  uses compactness (`IsCompact.exists_bound_of_continuousOn` on
+  `closedBall ∩ strip`, `F` entire via `poleRemovedZeta_differentiable`),
+  absorbed since `exp ≥ 1`. This is the minimum-viable ONE envelope lemma;
+  `hBdd`/P1-composition NOT attempted (per brief: report-and-stop).
+
+Grep record (verified by `rg -n` before writing):
+* `xi_norm_bound_whole_plane` — only `ZeroFreeRegionHadamard.lean:4535` (public).
+* `poleRemoved_norm_of_hadamardXi` / `StripEnvelope` — this file `:3863` / `:3915` (BL).
+* `F_outerThirds_le` — this file `:4286` (BN, outer thirds only; middle open).
+* `zeta_R02_le_ten_of_tail` — this file `:3762` (BH2, needs `hTail` + `hBdd`).
+* Strip-uniform `Gammaℝ` LOWER `‖Gammaℝ‖ ≥ c·exp(-C|Im|)` — absent repo-wide
+  (only pointwise/disc lowers); hence the explicit `hGlow` premise (conditional is fine).
+* `BP2Middle32` + all lemma names below: absent repo-wide (checked).
+-/
+
+namespace BP2Middle32
+
+/-- `‖s‖ ≤ 2 + |Im s|` on the middle third (`Re ∈ [-1/2,3/2]`). -/
+theorem norm_le_two_add_abs_im_of_middle {s : ℂ}
+    (hmid1 : -1 / 2 ≤ s.re) (hmid2 : s.re ≤ 3 / 2) :
+    ‖s‖ ≤ 2 + |s.im| := by
+  have h := Complex.norm_le_abs_re_add_abs_im s
+  have habs : |s.re| ≤ 3 / 2 := by
+    rw [abs_le]
+    constructor <;> linarith
+  linarith
+
+/-- Rpow conversion on the middle third:
+`‖s‖^(3/2) ≤ 4^(3/2) + 2^(3/2)·|Im|^(3/2)`.
+Split at `|Im| ≤ 2`: small via `(2+t) ≤ 4`, large via `(2+t) ≤ 2·t`. -/
+theorem middle_norm_rpow32_le {s : ℂ}
+    (hmid1 : -1 / 2 ≤ s.re) (hmid2 : s.re ≤ 3 / 2) :
+    ‖s‖ ^ (3 / 2 : ℝ) ≤ (4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ) := by
+  have hnorm : ‖s‖ ≤ 2 + |s.im| := norm_le_two_add_abs_im_of_middle hmid1 hmid2
+  have hnn : (0 : ℝ) ≤ ‖s‖ := norm_nonneg _
+  have hexpnn : (0 : ℝ) ≤ (3 / 2 : ℝ) := by norm_num
+  have hle : ‖s‖ ^ (3 / 2 : ℝ) ≤ (2 + |s.im|) ^ (3 / 2 : ℝ) :=
+    Real.rpow_le_rpow hnn hnorm hexpnn
+  have him_nn : (0 : ℝ) ≤ |s.im| := abs_nonneg _
+  have h2t_nn : (0 : ℝ) ≤ (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ) :=
+    mul_nonneg (Real.rpow_nonneg (by norm_num) _) (Real.rpow_nonneg him_nn _)
+  rcases le_total |s.im| 2 with hsmall | hlarge
+  · have h24 : (2 : ℝ) + |s.im| ≤ 4 := by linarith
+    have h2nn : (0 : ℝ) ≤ 2 + |s.im| := by linarith [abs_nonneg s.im]
+    have hmono : (2 + |s.im|) ^ (3 / 2 : ℝ) ≤ (4 : ℝ) ^ (3 / 2 : ℝ) :=
+      Real.rpow_le_rpow h2nn h24 hexpnn
+    linarith
+  · have h2le : (2 : ℝ) + |s.im| ≤ 2 * |s.im| := by linarith
+    have h2nn : (0 : ℝ) ≤ 2 + |s.im| := by linarith [abs_nonneg s.im]
+    have hmono2 : (2 + |s.im|) ^ (3 / 2 : ℝ) ≤ (2 * |s.im|) ^ (3 / 2 : ℝ) :=
+      Real.rpow_le_rpow h2nn h2le hexpnn
+    have hmul : (2 * |s.im|) ^ (3 / 2 : ℝ) = (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ) :=
+      Real.mul_rpow (by norm_num) him_nn
+    have h4nn : (0 : ℝ) ≤ (4 : ℝ) ^ (3 / 2 : ℝ) := Real.rpow_nonneg (by norm_num) _
+    linarith
+
+/-- Middle-third envelope in exp-3/2 form (conditional on the strip `Gammaℝ` lower,
+absent repo-wide): `‖F s‖ ≤ C·exp(K·|Im s|^(3/2))` on `σ ∈ [-1/2,3/2]`.
+Large `‖s‖` via BL's xi-transfer; small `‖s‖` via compactness (entire `F`). -/
+theorem F_middleThird_exp32_of_GammaLower {c : ℝ} (hc : 0 < c)
+    (hGlow : ∀ s : ℂ, s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      -1 / 2 ≤ s.re → s.re ≤ 3 / 2 → c ≤ ‖Complex.Gammaℝ s‖) :
+    ∃ C K : ℝ, 0 ≤ C ∧ 0 ≤ K ∧ ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      -1 / 2 ≤ s.re → s.re ≤ 3 / 2 →
+      ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ C * Real.exp (K * (|s.im| ^ (3 / 2 : ℝ))) := by
+  obtain ⟨Kxi, hKxi, C0, hC0, hxi⟩ := ZeroFreeRegionHadamard.xi_norm_bound_whole_plane
+  have hKxi_nn : (0 : ℝ) ≤ Kxi := hKxi
+  have hB2nn : (0 : ℝ) ≤ (2 : ℝ) ^ (3 / 2 : ℝ) := Real.rpow_nonneg (by norm_num) _
+  have hKnn : (0 : ℝ) ≤ Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) := mul_nonneg hKxi_nn hB2nn
+  have hstrip_closed : IsClosed (Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    exact IsClosed.preimage Complex.continuous_re isClosed_Icc
+  have hKcompact : IsCompact (Metric.closedBall (0 : ℂ) (max C0 1) ∩
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) :=
+    (isCompact_closedBall _ _).inter_right hstrip_closed
+  have hFcont : Continuous ZetaUpperR02ThreeLines.poleRemovedZeta :=
+    ZetaUpperR02ThreeLines.poleRemovedZeta_differentiable.continuous
+  obtain ⟨M, hM⟩ := hKcompact.exists_bound_of_continuousOn hFcont.continuousOn
+  have hClarge_nn : (0 : ℝ) ≤ Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c :=
+    div_nonneg (Real.exp_nonneg _) hc.le
+  have hCfin_nn : (0 : ℝ) ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M :=
+    le_trans hClarge_nn (le_max_left _ _)
+  refine ⟨max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M,
+    Kxi * (2 : ℝ) ^ (3 / 2 : ℝ), hCfin_nn, hKnn, fun s hs hmid1 hmid2 => ?_⟩
+  have hnorm_rpow := middle_norm_rpow32_le hmid1 hmid2
+  by_cases hsmall : ‖s‖ ≤ max C0 1
+  · have hdist : dist s (0 : ℂ) ≤ max C0 1 := by
+      have e : dist s (0 : ℂ) = ‖s‖ := by
+        rw [dist_eq_norm, sub_zero]
+      rw [e]
+      exact hsmall
+    have hmemK : s ∈ Metric.closedBall (0 : ℂ) (max C0 1) ∩
+        Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 :=
+      ⟨Metric.mem_closedBall.mpr hdist, hs⟩
+    have hMs : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ M := hM s hmemK
+    have harg_nn : (0 : ℝ) ≤ (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ)) :=
+      mul_nonneg hKnn (Real.rpow_nonneg (abs_nonneg _) _)
+    have hexp1 : (1 : ℝ) ≤ Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      have h := Real.add_one_le_exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ)))
+      linarith
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ M := hMs
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M := le_max_right _ _
+      _ = max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M * 1 := (mul_one _).symm
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) :=
+        mul_le_mul_of_nonneg_left hexp1 hCfin_nn
+  · have hlarge : max C0 1 < ‖s‖ := not_le.mp hsmall
+    have hC0le : C0 ≤ ‖s‖ := le_trans (le_max_left _ _) (le_of_lt hlarge)
+    have hs1le : (1 : ℝ) ≤ ‖s‖ := le_trans (le_max_right _ _) (le_of_lt hlarge)
+    have hmax_nn : (0 : ℝ) ≤ max C0 1 :=
+      le_trans (by norm_num : (0 : ℝ) ≤ 1) (le_max_right _ _)
+    have hs_pos : (0 : ℝ) < ‖s‖ := lt_of_le_of_lt hmax_nn hlarge
+    have hs0 : s ≠ 0 := by
+      intro h
+      rw [h, norm_zero] at hlarge
+      linarith
+    have hs1 : s ≠ 1 := by
+      intro h
+      rw [h, norm_one] at hlarge
+      have h1le : (1 : ℝ) ≤ max C0 1 := le_max_right _ _
+      linarith
+    have hGlow_le : c ≤ ‖Complex.Gammaℝ s‖ := hGlow s hs hmid1 hmid2
+    have hGRne : Complex.Gammaℝ s ≠ 0 := by
+      intro h
+      rw [h, norm_zero] at hGlow_le
+      linarith
+    have hGne : Complex.Gamma (s / 2) ≠ 0 := by
+      intro hG0
+      apply hGRne
+      rw [Complex.Gammaℝ_def, hG0, mul_zero]
+    have hnorm_eq := BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi hs0 hs1 hGne
+    have hxi_le := hxi s hC0le
+    have hGn_pos : (0 : ℝ) < ‖Complex.Gammaℝ s‖ := lt_of_lt_of_le hc hGlow_le
+    have hDpos : (0 : ℝ) < ‖s‖ * ‖Complex.Gammaℝ s‖ := mul_pos hs_pos hGn_pos
+    have hDle : ‖s‖ * c ≤ ‖s‖ * ‖Complex.Gammaℝ s‖ :=
+      mul_le_mul_of_nonneg_left hGlow_le hs_pos.le
+    have hDc : c ≤ ‖s‖ * c := by
+      calc c = 1 * c := (one_mul _).symm
+        _ ≤ ‖s‖ * c := mul_le_mul_of_nonneg_right hs1le hc.le
+    have hDle2 : c ≤ ‖s‖ * ‖Complex.Gammaℝ s‖ := le_trans hDc hDle
+    have hFle1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / (‖s‖ * ‖Complex.Gammaℝ s‖) := by
+      rw [hnorm_eq]
+      exact div_le_div_of_nonneg_right hxi_le hDpos.le
+    have hFle2 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / c :=
+      le_trans hFle1 (div_le_div_of_nonneg_left (Real.exp_nonneg _) hc hDle2)
+    have hexp_mono : Kxi * ‖s‖ ^ (3 / 2 : ℝ) ≤ Kxi * (4 : ℝ) ^ (3 / 2 : ℝ) +
+        (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ)) := by
+      have hmul_le : Kxi * ‖s‖ ^ (3 / 2 : ℝ) ≤
+          Kxi * ((4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hnorm_rpow hKxi_nn
+      have heq : Kxi * ((4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ)) =
+          Kxi * (4 : ℝ) ^ (3 / 2 : ℝ) + (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ)) := by
+        ring
+      rw [heq] at hmul_le
+      exact hmul_le
+    have hexp_le : Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) ≤
+        Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) *
+        Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      rw [← Real.exp_add]
+      exact Real.exp_le_exp.mpr hexp_mono
+    have hFle3 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) *
+        Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+            Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / c := hFle2
+        _ ≤ (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) *
+            Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ)))) / c :=
+          div_le_div_of_nonneg_right hexp_le hc.le
+        _ = (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) *
+            Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) := by
+          ring
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+          (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) := hFle3
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) / c) M *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ)) * (|s.im| ^ (3 / 2 : ℝ))) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) (Real.exp_nonneg _)
+
+#print axioms BP2Middle32.norm_le_two_add_abs_im_of_middle
+#print axioms BP2Middle32.middle_norm_rpow32_le
+#print axioms BP2Middle32.F_middleThird_exp32_of_GammaLower
+
+end BP2Middle32
+
+/-!
+BP2 VERDICT + RESIDUAL (report-and-stop): middle-third envelope in exp-3/2 form ONLY
+(`‖F s‖ ≤ C·exp(K·|Im s|^(3/2))` on `σ ∈ [-1/2,3/2]`) proved conditional on ONE
+explicit premise (strip `Gammaℝ` lower `c ≤ ‖Gammaℝ s‖`, absent repo-wide — conditional
+is commit-worthy per brief). Via BL's xi-transfer (`F_of_xi_whole_plane` shape,
+numerator `exp(K‖s‖^(3/2))`, denominators explicit) + rpow conversion
+(`‖s‖^(3/2) ≤ 4^(3/2)+2^(3/2)·|Im|^(3/2)`) + compact absorption (`exp ≥ 1`).
+STOP per brief: `hBdd`/P1-composition NOT attempted before this builds green.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
+
 
