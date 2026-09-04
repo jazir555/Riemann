@@ -10275,3 +10275,286 @@ end AO_R02DiscUpdate
 #print axioms AO_R02DiscUpdate.AO_required_Azeta_of_committed_Gamma_163
 #print axioms AO_R02DiscUpdate.AO_center_bound_163_of_components
 #print axioms AO_R02DiscUpdate.AO_R02_closed_of_factorBounds_163
+
+/-! ## AU door-3 closer wiring v2: R02 closure threshold in `Agam = 0.002` era (`M = 163`)
+
+TASK (door-3 closer wiring v2): re-derive the R02 closure threshold in the
+`Agam = 0.002` era (AN landed `R02GammaLower.gammaOf_lower_R02`;
+AO's v1 used `Agam = 0.006` / `M = 163` / required-`Azeta >= 3111`).
+
+Recomputed numbers (honest, exact):
+* Budget `M = 163`: `0.002 + 163 * 1.26 = 205.382` (`AU_budget_163_eq`,
+  mirrors `AO_R02DiscUpdate.AO_budget_163_eq`).
+* Coefficient `Agam = 0.002`: `22 * (1/2) * 0.002 = 0.022`.
+* Ratio: `205.382 / 0.022 = 9335.5454...` (so necessary floor `9335`,
+  sufficient integer `9336` with product `205.392`, margin `0.01`).
+* Product: `22 * (1/2) * 0.002 * 9336 = 205.392` (`AU_product_163_002_eq`,
+  mirrors `AO_product_163_eq` `22*(1/2)*0.006*3112 = 205.392`; exactly `3x`
+  the `Azeta` since `0.006 / 0.002 = 3`, i.e. `3112 * 3 = 9336`).
+* Threshold check: `0.002 + 163 * 1.26 <= 22*(1/2)*0.002*9336`
+  (`205.382 <= 205.392`, `AU_threshold_check_163_002`,
+  mirrors `AO_threshold_check_163`).
+* Necessity: `Azeta >= 9335` (`AU_required_Azeta_of_Agam002_163`,
+  mirrors `AO_required_Azeta_of_Agam_163` `>= 3111`).
+* Old AN tier at `M = 0.05`: `0.065 / 0.022 = 2.9545...`, necessary `2.95`
+  (`R02GammaLower.required_Azeta_of_this_Gamma`), sufficient `3`
+  (`0.022 * 3 = 0.066 >= 0.065`). The `M = 163` budget is `3160x` larger
+  (`205.382 / 0.065`), so the `Azeta` tier scales from `~3` to `~9336`.
+
+Grep-first record (2026-09-04, verified via `rg -n`, exact names):
+* `theorem gammaOf_lower_R02` -> `interval_arith.lean:32566`
+  (`(0.002:Real) <= ||DerivCauchyBridge.gammaOf R02Pilot.sCenter||`).
+* `def AO_gamma_upper_disc_R02_obligation` -> `central_cover_assembly.lean:9975`
+  (`forall s, 0.05 <= re -> re <= 0.74 -> -8.25 <= im -> im <= -5.25 ->`
+  `||gammaOf s|| <= 0.097`; landed `R02GammaDisc.gammaOf_upper_disc_R02`
+  at `interval_arith.lean:32316`).
+* `theorem AO_R02_deriv_bound_163_of_zeta_upper` -> `central_cover_assembly.lean:10078`
+  (`M = 163` from `AO_gamma_upper` + `R02_zeta_upper_obligation`).
+* `def R02_zeta_upper_obligation` -> `central_cover_assembly.lean:6493`
+  (`forall s, ... -> ||zeta s|| <= 10` on the R02 disc `s`-rect).
+* `noncomputable def gammaOf` -> `central_cover_assembly.lean:6334`
+  (`Complex.Gamma (s / 2)`).
+* `noncomputable def sCenter` (`R02Pilot`) -> `central_cover_assembly.lean:9588`
+  (`(1/2:Complex) + I * R02.center`).
+* `theorem R02_H_instance` -> `central_cover_assembly.lean:1499`
+  (consumes `R02_leaf_obligations` at `:1470`).
+* `theorem R02_radius_lt` -> `central_cover_assembly.lean:1457`
+  (`R02.radius < 1.26`).
+* `theorem prod_four_ge_of_ge` -> `rh_certificate_infra.lean:195`
+  (four-factor lower bridge, consumed at `:9596` pattern).
+* `theorem AO_threshold_check_163` -> `central_cover_assembly.lean:10099`
+  (`205.382 <= 205.392` at `Agam = 0.006`).
+* `theorem AO_required_Azeta_of_Agam_163` -> `central_cover_assembly.lean:10107`
+  (`>= 3111` necessary).
+* `theorem AO_center_bound_163_of_components` -> `central_cover_assembly.lean:10157`.
+* `theorem AO_R02_closed_of_factorBounds_163` -> `central_cover_assembly.lean:10192`.
+* `theorem R02_closed_of_factorBounds` -> `central_cover_assembly.lean:9778`
+  (`Agam >= 0.006`, `Azeta >= 1`, `M <= 0.05` v1).
+* `theorem required_Azeta_of_this_Gamma` (`R02GammaLower`) -> `interval_arith.lean:32582`
+  (`>= 2.95` at `M = 0.05`, `Agam = 0.002`).
+
+IMPORT CYCLE NOTE: `interval_arith.lean:4` imports `central_cover_assembly`,
+so this file CANNOT import `interval_arith`. AN's landed
+`R02GammaLower.gammaOf_lower_R02` is therefore mirrored as the EXPLICIT
+premise `AU_gamma_lower_R02_obligation` with the IDENTICAL statement
+(`(0.002:Real) <= ||DerivCauchyBridge.gammaOf R02Pilot.sCenter||`),
+exactly like AO's `AO_gamma_upper_disc_R02_obligation` pattern.
+Downstream (in `interval_arith` or `riemann_hypothesis_newsection`) discharge
+`hGam` by `R02GammaLower.gammaOf_lower_R02`. No `sorry`/`admit`/`axiom`,
+no hypothesis stand-ins beyond named landed-obligation premises plus the
+pre-existing `DerivCauchyBridge.R02_zeta_upper_obligation` (`||zeta|| <= 10`)
+and AO's `AO_gamma_upper_disc_R02_obligation` (for `M <= 163`).
+-/
+
+namespace AU_R02_Agam002_M163
+
+/-- Gamma-lower obligation matching AN's landed
+`R02GammaLower.gammaOf_lower_R02` (`interval_arith.lean:32566`) exactly:
+identical concl `0.002 <= ||gammaOf sCenter||`.
+Stated here (not imported) to avoid the `interval_arith -> central_cover_assembly`
+import cycle; discharged downstream by the landed lemma. -/
+def AU_gamma_lower_R02_obligation : Prop :=
+  (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖
+
+/-- Updated budget value with `M = 163`: `0.002 + 163 * 1.26 = 205.382`
+(mirrors `AO_R02DiscUpdate.AO_budget_163_eq`; budget is `M`-only, unchanged
+by the `Agam = 0.002` era). -/
+theorem AU_budget_163_eq : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by
+  norm_num
+
+/-- Updated product value at `Agam = 0.002`: `22 * (1/2) * 0.002 * 9336 = 205.392`
+(mirrors `AO_product_163_eq` `22*(1/2)*0.006*3112 = 205.392`; `9336 = 3112 * 3`
+since `0.006 / 0.002 = 3`). -/
+theorem AU_product_163_002_eq : (22 : ℝ) * (1 / 2) * 0.002 * 9336 = 205.392 := by
+  norm_num
+
+/-- Updated numeric product check for the `Agam = 0.002`, `M = 163` thresholds:
+`0.002 + 163 * 1.26 <= 22 * (1/2) * 0.002 * 9336`
+(`205.382 <= 205.392`, margin `0.01`; mirrors `AO_threshold_check_163`
+`0.002+163*1.26 <= 22*(1/2)*0.006*3112`). -/
+theorem AU_threshold_check_163_002 :
+    (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 9336 := by
+  norm_num
+
+/-- Updated feasibility threshold with `M = 163`, `Agam = 0.002` era:
+closing needs `Azeta >= 9335` (floor of `205.382 / 0.022 = 9335.5454...`;
+sufficient integer `9336` by `AU_threshold_check_163_002`). Mirrors
+`AO_required_Azeta_of_Agam_163` (`>= 3111` at `Agam = 0.006`) and
+`R02GammaLower.required_Azeta_of_this_Gamma` (`>= 2.95` at `M = 0.05`)
+shapes with exact numbers. -/
+theorem AU_required_Azeta_of_Agam002_163 {Azeta : ℝ}
+    (h : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.002 * Azeta) :
+    (9335 : ℝ) ≤ Azeta := by
+  have hb : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by norm_num
+  rw [hb] at h
+  have hcoeff : (22 : ℝ) * (1 / 2) * 0.002 = 0.022 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 0.022 := by norm_num
+  have hcomm : (0.022 : ℝ) * Azeta = Azeta * 0.022 := by ring
+  have h2 : (205.382 : ℝ) ≤ Azeta * 0.022 := by
+    rw [← hcomm]
+    exact h
+  have hdiv : (205.382 : ℝ) / 0.022 ≤ Azeta :=
+    (div_le_iff₀ hpos).mpr h2
+  have hnum : (9335 : ℝ) ≤ (205.382 : ℝ) / 0.022 := by
+    rw [le_div_iff₀ hpos]
+    norm_num
+  exact le_trans hnum hdiv
+
+/-- Updated center bound with `M = 163`, `Agam = 0.002`: from `Agam >= 0.002`,
+`Azeta >= 9336` gives `0.002 + 163 * radius <= ||xi(center)||` (mirrors
+`AO_R02DiscUpdate.AO_center_bound_163_of_components`, which fixes
+`Agam = 0.006`, `Azeta = 3112`). -/
+theorem AU_center_bound_163_002_of_components
+    (hGam : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (9336 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖) :
+    (0.002 : ℝ) + 163 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  have hpoly : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf R02Pilot.sCenter‖ :=
+    R02Pilot.poly_lower
+  have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
+    R02Pilot.pi_lower
+  have harg2 : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center =
+      R02Pilot.sCenter := rfl
+  have hdecomp :=
+    DerivCauchyBridge.norm_xiShifted_eq_parts CentralCoverAssembly.R02.center
+  rw [harg2] at hdecomp
+  have hle : 22 * (1 / 2) * 0.002 * 9336 ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hGam hZeta
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have hbud : 163 * CentralCoverAssembly.R02.radius ≤ 163 * 1.26 :=
+    mul_le_mul_of_nonneg_left
+      (le_of_lt CentralCoverAssembly.R02_radius_lt) (by norm_num)
+  have hthresh : (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 9336 :=
+    AU_threshold_check_163_002
+  linarith
+
+/-- R02 conditional closure in the `Agam = 0.002`, `M = 163` era: three explicit
+numeric premises discharge the H-leaf shape of
+`inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell
+`(-8,-5.5,0.01,0.2)` with `eps = 0.002`, `M = 163`.
+Mirrors `AO_R02DiscUpdate.AO_R02_closed_of_factorBounds_163`
+(`Agam >= 0.006`, `Azeta >= 3112`, `M <= 163`); the weaker `Agam` forces
+`Azeta >= 9336` (sufficient by `AU_threshold_check_163_002`). -/
+theorem AU_R02_closed_of_factorBounds_163_002
+    (hGam : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (9336 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
+    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ))
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hcenter : (0.002 : ℝ) + 163 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ :=
+    AU_center_bound_163_002_of_components hGam hZeta
+  subst hc_eq
+  exact ⟨CentralCoverAssembly.R02, 0.002, 163, rfl, rfl, rfl, rfl,
+    CentralCoverAssembly.R02_strip_lo, CentralCoverAssembly.R02_strip_hi,
+    (by norm_num), hDeriv, hcenter⟩
+
+/-- Fully-wired R02 conditional closure in the `Agam = 0.002`, `M = 163` era.
+
+PREMISE / OWNER / STATUS TABLE (each premise, who owns it, landed-vs-open,
+exact numeric tier):
+* (P1) ZETA-UPPER `DerivCauchyBridge.R02_zeta_upper_obligation`
+  (`||zeta s|| <= 10` on the disc `s`-rect `Re in [0.05,0.74]`,
+  `Im in [-8.25,-5.25]`) -- sibling zeta-upper agent OWNS -- OPEN
+  (needs FE+Stirling+convexity; crude window `1.2e9` vs needed `50.925`).
+* (P2) GAMMA-UPPER `AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation`
+  (`||gammaOf s|| <= 0.097` on the same rect) -- AH OWNS, LANDED
+  (`R02GammaDisc.gammaOf_upper_disc_R02`, `interval_arith.lean:32316`;
+  true sup `~0.026`, within `3.7x`) -- stays an explicit premise here
+  (import cycle `interval_arith -> central_cover_assembly`).
+  P1+P2 together give `M <= 163` via
+  `AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper`
+  (`40.74 / 0.25 = 162.96`, ceil `163`; old `67200`, unconditional `6800640`).
+* (P3) GAMMA-LOWER `AU_gamma_lower_R02_obligation`
+  (`0.002 <= ||gammaOf R02Pilot.sCenter||` at `s = 0.395 - 6.75*I`) --
+  AN OWNS, LANDED (`R02GammaLower.gammaOf_lower_R02`,
+  `interval_arith.lean:32566`; `20000x` over uniform `1/1e7`, `3x` short of
+  `0.006`; true `~0.0087`, headroom `4.3x`) -- stays an explicit premise here
+  (same import cycle; mirrors AO's obligation pattern, never by import).
+* (P4) ZETA-LOWER `(9336:Real) <= ||zeta R02Pilot.sCenter||` --
+  sibling zeta-lower agent OWNS -- OPEN (true `|zeta| = O(1)` vs need `9336`;
+  `>= 9335` necessary by `AU_required_Azeta_of_Agam002_163`, `9336` sufficient
+  by `AU_threshold_check_163_002`; old `M = 0.05` tier needed only `>= 2.95`
+  necessary / `3` sufficient; AO v1 at `Agam = 0.006` needed `>= 3111` / `3112`;
+  committed `Agam = 1/1e7` at `M = 163` would need `>= 186710909`).
+* (HYPS) POLY `22 <= ||polyOf sCenter||` (`R02Pilot.poly_lower`) and
+  PI `1/2 <= ||piOf sCenter||` (`R02Pilot.pi_lower`) -- CLOSED hypothesis-free
+  in-file -- no premise.
+* (LEAF) `R02_H_instance` wiring (`CentralCoverAssembly.R02_leaf_obligations`
+  at `:1470`, `R02_radius_lt` `< 1.26` at `:1457`, `gridFine` cell
+  `(-8,-5.5,0.01,0.2)`) -- CLOSED in-file -- mirrors
+  `R02_closed_of_factorBounds` / `AO_R02_closed_of_factorBounds_163` exactly.
+* HONEST NET: center product `22*0.5*0.002*9336 = 205.392` vs budget `205.382`
+  closes conditionally (margin `0.01`), but at realistic `|zeta| = O(1)` the
+  product `22*0.5*0.002*1 = 0.022 << 205.382` is infeasible -- 0 cells claimed
+  closed; remaining 39 cells: same shape, different `s`-rects.
+-/
+theorem AU_R02_closed_wired_163_002
+    (hG_up : AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation)
+    (hZ_up : DerivCauchyBridge.R02_zeta_upper_obligation)
+    (hGam : AU_gamma_lower_R02_obligation)
+    (hZeta : (9336 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hGam' : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖ :=
+    hGam
+  have hDeriv : ∀ w, CentralCoverAssembly.R02.mem w →
+      ‖deriv xiShifted w‖ ≤ (163 : ℝ) :=
+    AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper hG_up hZ_up
+  exact AU_R02_closed_of_factorBounds_163_002 hGam' hZeta hDeriv c hc_mem hc_eq
+
+/-! ### AU residual premise inventory (who owns what for the R02 H-leaf, `Agam = 0.002` era)
+
+* DERIV `M = 163` (AO, CLOSED conditional, reused here):
+  `AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper`
+  (`162.96`, ceil `163`) from `R02_zeta_upper_obligation` (`<= 10`) +
+  `AO_gamma_upper_disc_R02_obligation` (`<= 0.097`, landed `32316`).
+* ZETA-UPPER `||zeta|| <= 10` (sibling OWNS; OPEN): needs `A <= 50.925`
+  damped three-lines left cap; crude `1.2e9` banked, gap `~2.4e7x` in
+  cos/exp majorant; needs Stirling-sharp left edge (FE+Stirling+convexity
+  absent); eta M-test needs `M >= 1e31` terms (`r(M) ~= 180*M^-0.05`).
+* AGAM `>= 0.002` at `R02Pilot.sCenter` (AN OWNS; LANDED `32566` as
+  `R02GammaLower.gammaOf_lower_R02`; mirrored here as
+  `AU_gamma_lower_R02_obligation` for cycle safety; `20000x` over `1/1e7`,
+  `3x` short of `0.006`; true `~0.0087`).
+* AZETA `>= 9336` at `R02Pilot.sCenter` for `M = 163` closure
+  (`>= 9335` necessary by `AU_required_Azeta_of_Agam002_163`; `9336` sufficient
+  by `AU_threshold_check_163_002`; old `M = 0.05` needed `>= 2.95` / `3`;
+  AO v1 at `0.006` needed `>= 3111` / `3112`; committed `1/1e7` at `M = 163`
+  would need `>= 186710909`). Sibling zeta-lower OWNS (conditional `1/39`
+  at `1-s0` from `||S_2048|| >= 1/3` => `1/2340000000` downstream;
+  `S_2048` stays conditional; no small-`M` triangle closure exists).
+* THRESHOLD (`Agam = 0.002`, `M = 163`): `AU_budget_163_eq` (`205.382`),
+  `AU_product_163_002_eq` (`205.392`), `AU_threshold_check_163_002`
+  (`205.382 <= 205.392`), `AU_center_bound_163_002_of_components`,
+  `AU_R02_closed_of_factorBounds_163_002` + wired
+  `AU_R02_closed_wired_163_002` (`eps = 0.002`, `M = 163`, `Apoly = 22`,
+  `Api = 1/2`, `Agam = 0.002`, `Azeta = 9336`, `radius < 1.26`).
+  Honest net: `0.022 << 205.382` at realistic `|zeta|` -- infeasible in
+  practice; 0 cells claimed closed.
+-/
+
+end AU_R02_Agam002_M163
+
+#print axioms AU_R02_Agam002_M163.AU_budget_163_eq
+#print axioms AU_R02_Agam002_M163.AU_product_163_002_eq
+#print axioms AU_R02_Agam002_M163.AU_threshold_check_163_002
+#print axioms AU_R02_Agam002_M163.AU_required_Azeta_of_Agam002_163
+#print axioms AU_R02_Agam002_M163.AU_center_bound_163_002_of_components
+#print axioms AU_R02_Agam002_M163.AU_R02_closed_of_factorBounds_163_002
+#print axioms AU_R02_Agam002_M163.AU_R02_closed_wired_163_002
