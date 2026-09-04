@@ -6522,3 +6522,366 @@ No `sorry`/`admit`/`axiom` in this tail.
 
 
 
+/-!
+# CF tail (door-3 hTail SHARP Gaussian damping composition -- report-and-stop)
+
+Ownership: Agent CF tail append (append-only after the CC verdict block; nothing above
+touched; no new imports).
+
+GOAL (door-3 hTail, minimum viable = ONE sharpener green): re-run CC's composition with
+the HONEST Gaussian damping `‖damp z‖ = Real.exp ((1-(τ+6.75)^2)/100)` on `Re = -1`
+(not `≤ 1`): `‖G z‖ ≤ B_sharp(τ)` where `B_sharp(τ) = exp((1-(τ+6.75)^2)/100)*B(|τ|)`
+and `B` is CC's cubic joint majorant. Honest edge numerals via `norm_num`.
+
+SIGN SPLIT (honest -- the Gaussian is centered at `τ = -6.75`, NOT at `0`):
+* positive side (`τ > 8.75`): damping at edge `= exp(-2.3925)` (true `≈ 0.0914`), proved
+  `≤ 0.1`; sharp edge `≤ 198.46005` (gap `162.46005`, between `5x` and `6x` over 36).
+* negative side (`τ < -8.75`): damping at edge `= exp(-0.03)` (true `≈ 0.9704`), proved
+  `≤ 0.971`; sharp edge `≤ 1927.0470855` (gap `1891.0470855`, between `53x` and `54x`
+  over 36) -- barely better than CC's `1984.6005`, because the Gaussian center sits
+  near the negative tail.
+A single `B_sharp(|Im|)` carrying the `0.09` factor uniformly would be FALSE on the
+negative side, so it is NOT stated; the exact-factor `G_le_sharp` holds on both sides
+and the numerals are proved per side.
+
+GREP-FIRST RECORD (verified by `rg -n` before writing):
+* `CC_hTailGap.F_le` (this file, `:6363`): `‖F z‖ ≤ (2+|Im|)*(2*X(|Im|))` on `Re = -1`,
+  `8.75 < |Im|` -- USED (feeds `G_le_sharp`; CC's cubic joint bound is re-run as-is,
+  never rebuilt).
+* `CC_hTailGap.bound_at_875` / `bound_mono` (this file, `:6415`/`:6434`):
+  `B(8.75) = 1984.6005`, `B` increasing -- USED (edge numerals are `0.1*B(8.75)` and
+  `0.971*B(8.75)` multiples; `bound_mono` feeds the packaging theorem).
+* `BH2TailWindow.damp_re_general` (this file, `:3623`): damping real part
+  `(σ^2-(τ+6.75)^2)/100` -- USED (feeds `damp_norm_eq_neg1`).
+* `ZetaUpperR02ThreeLines.norm_complex_exp` (this file, `:1227`):
+  `‖exp w‖ = exp (w.re)` -- USED (feeds `damp_norm_eq_neg1`).
+* `ZetaUpperR02ThreeLines.dampedPoleRemoved` (this file, `:1134`):
+  `G = F * damp` by `rfl` (per CC's `hfin`) -- USED (feeds `G_le_sharp`).
+* `BF2TailCaps.exp_neg_le_inv` (this file, `:3399`): `exp(-t) ≤ 1/(1+t)` -- USED, but
+  ONLY for the negative side (`exp(-0.03) ≤ 0.971`); on the positive side `1/(1+t)`
+  gives only `≤ 0.295` (edge `≤ 585`), so the sharp `≤ 0.1` is built from
+  `exp_one_gt_d9` instead (see next).
+* `Real.exp_one_gt_d9` (`Mathlib/Analysis/Complex/ExponentialBounds.lean:35`):
+  `2.7182818283 < Real.exp 1` -- USED (lower-bounds `exp 2.3925 ≥ 10`, hence the sharp
+  positive-side `exp(-2.3925) ≤ 0.1`; created in-file as `exp_neg23925_le` since no
+  such numeral exists repo-wide).
+* `sq_le_sq'` (`Mathlib/Algebra/Order/Ring/Abs.lean:122`, used at `:1264`):
+  two-sided square monotonicity -- USED (feeds `damp_mono_pos`).
+* `CA2TailJoint.joint_poly_tail_numeric`, `BH2TailWindow.damp_left_tail_le_one`,
+  `BZTailEnvelope.P1_R02_of_hTail` -- CITED (CC's inputs / downstream consumer; the
+  `≤ 1` damping is SUPERSEDED here by the exact norm, never used).
+
+WHAT IS PROVED (all full proofs, no `sorry`/`admit`/`axiom`):
+* `damp_norm_eq_neg1`: exact damping norm `= exp((1-(τ+6.75)^2)/100)` on `Re = -1`.
+* `G_le_sharp` (MAIN pointwise, both signs):
+  `‖G z‖ ≤ exp((1-(τ+6.75)^2)/100) * B(|τ|)`.
+* `damp_pos_le` + `exp_neg23925_le` (`exp(-2.3925) ≤ 0.1` via
+  `exp 2.3925 = exp(1)^2*exp(0.3925) ≥ 2.7182818283^2*1.3925 ≥ 10`) + `G_le_sharp_pos`
+  (MAIN positive-side): `‖G z‖ ≤ 0.1 * B(|Im|)` for `8.75 < τ`.
+* `damp_mono_pos`: the Gaussian factor is decreasing for `τ ≥ 8.75`.
+* `sharp_pos_edge`: `0.1*B(8.75) = 198.46005` (`norm_num`); `sharp_pos_gap`:
+  `198.46005-36 = 162.46005`; `edge_gt_180` / `edge_lt_216` (`5x`-`6x` bracket).
+* `damp_neg_le` + `exp_neg003_le` (`exp(-0.03) ≤ 0.971` via `exp_neg_le_inv`) +
+  `G_le_sharp_neg`: `‖G z‖ ≤ 0.971 * B(|Im|)` for `τ < -8.75`.
+* `sharp_neg_edge`: `0.971*B(8.75) = 1927.0470855` (`norm_num`); `sharp_neg_gap`:
+  `1927.0470855-36 = 1891.0470855`; `edge_gt_1908` / `edge_lt_1944`
+  (`53x`-`54x` bracket).
+* `sharpest_sharp_cap_gap_pos` (packaging, mirrors CC's `sharpest_cap_gap`).
+-/
+
+namespace CF_SharpDamp
+
+/-- Exact damping norm on `Re = -1`: `‖damp z‖ = exp((1-(τ+6.75)^2)/100)`. -/
+theorem damp_norm_eq_neg1 {z : ℂ} (hz : z.re = -1) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) := by
+  have e : ((-1 : ℝ)) ^ 2 = 1 := by norm_num
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp, BH2TailWindow.damp_re_general, hz, e]
+
+/-- MAIN pointwise sharp composition (both signs):
+`‖G z‖ ≤ exp((1-(τ+6.75)^2)/100) * B(|τ|)` with CC's cubic `B`. -/
+theorem G_le_sharp {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := by
+  have hF := CC_hTailGap.F_le hz htail
+  have hdamp := damp_norm_eq_neg1 hz
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 100)
+      ≤ ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := by
+        ring
+
+/-- Positive-side damping cap: `‖damp‖ ≤ exp(-2.3925)` for `8.75 < τ` on `Re = -1`
+(`(τ+6.75)^2 ≥ 15.5^2 = 240.25`, so `Re ≤ (1-240.25)/100 = -2.3925`). -/
+theorem damp_pos_le {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ Real.exp (-2.3925) := by
+  rw [damp_norm_eq_neg1 hz]
+  apply Real.exp_le_exp.mpr
+  have h15 : (15.5 : ℝ) ≤ z.im + 6.75 := by linarith
+  have hsq : (240.25 : ℝ) ≤ (z.im + 6.75) ^ 2 := by
+    have hnn1 : (0 : ℝ) ≤ z.im + 6.75 - 15.5 := by linarith
+    have hnn2 : (0 : ℝ) ≤ z.im + 6.75 + 15.5 := by linarith
+    have hprod : (0 : ℝ) ≤ (z.im + 6.75 - 15.5) * (z.im + 6.75 + 15.5) :=
+      mul_nonneg hnn1 hnn2
+    have e : (z.im + 6.75 - 15.5) * (z.im + 6.75 + 15.5)
+        = (z.im + 6.75) ^ 2 - 240.25 := by ring
+    linarith
+  linarith
+
+/-- Sharp positive-edge exponential: `exp(-2.3925) ≤ 0.1`
+(`exp 2.3925 = exp(1)^2*exp(0.3925) ≥ 2.7182818283^2*1.3925 ≥ 10`). -/
+theorem exp_neg23925_le : Real.exp (-2.3925 : ℝ) ≤ 0.1 := by
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have e2 : (1.3925 : ℝ) ≤ Real.exp 0.3925 := by
+    have h := Real.add_one_le_exp (0.3925 : ℝ)
+    linarith
+  have h2 : (1 : ℝ) + 1 + 0.3925 = 2.3925 := by norm_num
+  have h3 : Real.exp ((1 : ℝ) + 1 + 0.3925)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.3925 := by
+    rw [Real.exp_add, Real.exp_add]
+  have esplit : Real.exp (2.3925 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.3925 := by
+    rw [h2] at h3
+    exact h3
+  have hnum : (10 : ℝ) ≤ 2.7182818283 * 2.7182818283 * 1.3925 := by norm_num
+  have hinner : 2.7182818283 * 2.7182818283 ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (Real.exp_pos _).le
+  have g1 : 2.7182818283 * 2.7182818283 * 1.3925
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 0.3925 :=
+    mul_le_mul hinner e2 (by norm_num)
+      (mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le)
+  have h10 : (10 : ℝ) ≤ Real.exp 2.3925 := by
+    rw [esplit]
+    exact le_trans hnum g1
+  have e : Real.exp (-2.3925 : ℝ) * Real.exp 2.3925 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-2.3925 : ℝ) * 10 ≤ 1 :=
+    calc Real.exp (-2.3925) * 10 ≤ Real.exp (-2.3925) * Real.exp 2.3925 :=
+          mul_le_mul_of_nonneg_left h10 (Real.exp_pos _).le
+      _ = 1 := e
+  have hle : Real.exp (-2.3925 : ℝ) ≤ 1 / 10 := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 10)]
+    exact hmul
+  calc Real.exp (-2.3925 : ℝ) ≤ 1 / 10 := hle
+    _ = 0.1 := by norm_num
+
+/-- MAIN positive-side sharp cap: `‖G z‖ ≤ 0.1 * B(|Im|)` for `8.75 < τ`. -/
+theorem G_le_sharp_pos {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      (0.1 : ℝ) * ((2 + |z.im|) *
+        (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := by
+  have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; exact hpos
+  have hG := G_le_sharp hz htail
+  have hde : Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) ≤ Real.exp (-2.3925) := by
+    have h := damp_pos_le hz hpos
+    rw [damp_norm_eq_neg1 hz] at h
+    exact h
+  have hexp : Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) ≤ 0.1 :=
+    le_trans hde exp_neg23925_le
+  have hBnn : (0 : ℝ) ≤
+      (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have h1 : (0 : ℝ) ≤ |z.im| ^ 2 := sq_nonneg _
+    have hmul : (0 : ℝ) ≤ 3.1416 * |z.im| := mul_nonneg (by norm_num) ha
+    have h2 : (0 : ℝ) ≤ 3.1416 * |z.im| / 2 := by linarith
+    have hX : (0 : ℝ) ≤ (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by linarith
+    have h2X : (0 : ℝ) ≤ 2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) := by
+      linarith
+    have hb : (0 : ℝ) ≤ 2 + |z.im| := by linarith
+    exact mul_nonneg hb h2X
+  calc ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := hG
+    _ ≤ (0.1 : ℝ) * ((2 + |z.im|) *
+        (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) :=
+        mul_le_mul_of_nonneg_right hexp hBnn
+
+/-- Gaussian factor decreasing on the positive tail (`τ ≥ 8.75`). -/
+theorem damp_mono_pos {a b : ℝ} (ha : 8.75 ≤ a) (hab : a ≤ b) :
+    Real.exp ((1 - (b + 6.75) ^ 2) / 100)
+      ≤ Real.exp ((1 - (a + 6.75) ^ 2) / 100) := by
+  apply Real.exp_le_exp.mpr
+  have h1 : -(b + 6.75) ≤ a + 6.75 := by linarith
+  have h2 : a + 6.75 ≤ b + 6.75 := by linarith
+  have hsq : (a + 6.75) ^ 2 ≤ (b + 6.75) ^ 2 := sq_le_sq' h1 h2
+  linarith
+
+/-- Sharp positive edge numeral: `0.1 * B(8.75) = 198.46005` (`norm_num`). -/
+theorem sharp_pos_edge :
+    (0.1 : ℝ) * ((2 + (8.75 : ℝ)) *
+      (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))) = 198.46005 := by
+  norm_num
+
+/-- Sharp positive gap numeral: `198.46005 - 36 = 162.46005` (`norm_num`). -/
+theorem sharp_pos_gap : (198.46005 : ℝ) - 36 = 162.46005 := by norm_num
+
+/-- `5x` bracket below: `180 < 198.46005` (edge is MORE than `5x` over 36). -/
+theorem edge_gt_180 : (180 : ℝ) < 198.46005 := by norm_num
+
+/-- `6x` bracket above: `198.46005 < 216` (edge is LESS than `6x` over 36). -/
+theorem edge_lt_216 : (198.46005 : ℝ) < 216 := by norm_num
+
+/-- Negative-side damping cap: `‖damp‖ ≤ exp(-0.03)` for `τ < -8.75` on `Re = -1`
+(`(τ+6.75)^2 ≥ (-2)^2 = 4`, so `Re ≤ (1-4)/100 = -0.03`). -/
+theorem damp_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ Real.exp (-0.03) := by
+  rw [damp_norm_eq_neg1 hz]
+  apply Real.exp_le_exp.mpr
+  have h2le : z.im + 6.75 ≤ (-2 : ℝ) := by linarith
+  have hsq : (4 : ℝ) ≤ (z.im + 6.75) ^ 2 := by
+    have hnn1 : (0 : ℝ) ≤ -(z.im + 6.75 + 2) := by linarith
+    have hnn2 : (0 : ℝ) ≤ -(z.im + 6.75 - 2) := by linarith
+    have hprod : (0 : ℝ) ≤ (-(z.im + 6.75 + 2)) * (-(z.im + 6.75 - 2)) :=
+      mul_nonneg hnn1 hnn2
+    have e : (-(z.im + 6.75 + 2)) * (-(z.im + 6.75 - 2))
+        = (z.im + 6.75) ^ 2 - 4 := by ring
+    linarith
+  linarith
+
+/-- Negative-edge exponential: `exp(-0.03) ≤ 0.971` (via `exp_neg_le_inv`). -/
+theorem exp_neg003_le : Real.exp (-0.03 : ℝ) ≤ 0.971 := by
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.03 by norm_num)
+  calc Real.exp (-0.03 : ℝ) ≤ 1 / (1 + 0.03) := h
+    _ ≤ 0.971 := by norm_num
+
+/-- MAIN negative-side sharp cap: `‖G z‖ ≤ 0.971 * B(|Im|)` for `τ < -8.75`. -/
+theorem G_le_sharp_neg {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      (0.971 : ℝ) * ((2 + |z.im|) *
+        (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; linarith
+  have hG := G_le_sharp hz htail
+  have hde : Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) ≤ Real.exp (-0.03) := by
+    have h := damp_neg_le hz hneg
+    rw [damp_norm_eq_neg1 hz] at h
+    exact h
+  have hexp : Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) ≤ 0.971 :=
+    le_trans hde exp_neg003_le
+  have hBnn : (0 : ℝ) ≤
+      (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have h1 : (0 : ℝ) ≤ |z.im| ^ 2 := sq_nonneg _
+    have hmul : (0 : ℝ) ≤ 3.1416 * |z.im| := mul_nonneg (by norm_num) ha
+    have h2 : (0 : ℝ) ≤ 3.1416 * |z.im| / 2 := by linarith
+    have hX : (0 : ℝ) ≤ (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by linarith
+    have h2X : (0 : ℝ) ≤ 2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) := by
+      linarith
+    have hb : (0 : ℝ) ≤ 2 + |z.im| := by linarith
+    exact mul_nonneg hb h2X
+  calc ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := hG
+    _ ≤ (0.971 : ℝ) * ((2 + |z.im|) *
+        (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) :=
+        mul_le_mul_of_nonneg_right hexp hBnn
+
+/-- Sharp negative edge numeral: `0.971 * B(8.75) = 1927.0470855` (`norm_num`). -/
+theorem sharp_neg_edge :
+    (0.971 : ℝ) * ((2 + (8.75 : ℝ)) *
+      (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))) = 1927.0470855 := by
+  norm_num
+
+/-- Sharp negative gap numeral: `1927.0470855 - 36 = 1891.0470855` (`norm_num`). -/
+theorem sharp_neg_gap : (1927.0470855 : ℝ) - 36 = 1891.0470855 := by norm_num
+
+/-- `53x` bracket below: `1908 < 1927.0470855` (edge is MORE than `53x` over 36). -/
+theorem edge_gt_1908 : (1908 : ℝ) < 1927.0470855 := by norm_num
+
+/-- `54x` bracket above: `1927.0470855 < 1944` (edge is LESS than `54x` over 36). -/
+theorem edge_lt_1944 : (1927.0470855 : ℝ) < 1944 := by norm_num
+
+/-- SHARPEST positive-side cap+gap package: pointwise `0.1*B(|Im|)`, edge `198.46005`,
+still above 36 (mirrors CC's `sharpest_cap_gap`). -/
+theorem sharpest_sharp_cap_gap_pos {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+        (0.1 : ℝ) * ((2 + |z.im|) *
+          (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))))
+      ∧ (0.1 : ℝ) * ((2 + (8.75 : ℝ)) *
+          (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))) = 198.46005
+      ∧ (36 : ℝ) < (0.1 : ℝ) * ((2 + |z.im|) *
+          (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) := by
+  have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+  have hmono := CC_hTailGap.bound_mono (show 8.75 ≤ |z.im| by rw [habs]; exact le_of_lt hpos)
+  have he := sharp_pos_edge
+  have hle : (0.1 : ℝ) * ((2 + (8.75 : ℝ)) *
+      (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1))))
+      ≤ (0.1 : ℝ) * ((2 + |z.im|) *
+        (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) :=
+    mul_le_mul_of_nonneg_left hmono (by norm_num)
+  refine ⟨G_le_sharp_pos hz hpos, he, ?_⟩
+  have h36 : (36 : ℝ) < 198.46005 := by norm_num
+  linarith
+
+#print axioms CF_SharpDamp.damp_norm_eq_neg1
+#print axioms CF_SharpDamp.G_le_sharp
+#print axioms CF_SharpDamp.damp_pos_le
+#print axioms CF_SharpDamp.exp_neg23925_le
+#print axioms CF_SharpDamp.G_le_sharp_pos
+#print axioms CF_SharpDamp.damp_mono_pos
+#print axioms CF_SharpDamp.sharp_pos_edge
+#print axioms CF_SharpDamp.sharp_pos_gap
+#print axioms CF_SharpDamp.edge_gt_180
+#print axioms CF_SharpDamp.edge_lt_216
+#print axioms CF_SharpDamp.damp_neg_le
+#print axioms CF_SharpDamp.exp_neg003_le
+#print axioms CF_SharpDamp.G_le_sharp_neg
+#print axioms CF_SharpDamp.sharp_neg_edge
+#print axioms CF_SharpDamp.sharp_neg_gap
+#print axioms CF_SharpDamp.edge_gt_1908
+#print axioms CF_SharpDamp.edge_lt_1944
+#print axioms CF_SharpDamp.sharpest_sharp_cap_gap_pos
+
+end CF_SharpDamp
+
+/-!
+CF VERDICT + RESIDUAL (report-and-stop): door-3 hTail SHARP-DAMPING SHARPENER GREEN,
+hTail itself still OPEN. No closure claimed.
+(1) Positive side CLOSED at the sharpener level: the honest Gaussian
+`‖damp‖ = exp((1-(τ+6.75)^2)/100)` (`damp_norm_eq_neg1`, FULL proof) times CC's cubic
+gives `‖G z‖ ≤ 0.1*B(|Im|)` (`G_le_sharp_pos`, FULL proof; `exp(-2.3925) ≤ 0.1` via
+`exp 2.3925 ≥ 10`, itself FULL proof from `Real.exp_one_gt_d9`). At the window edge
+`0.1*B(8.75) = 198.46005` (`sharp_pos_edge`, `norm_num`; true value `≈ 181.4` by
+external arithmetic, so the damping-bound slack is only `~9%` -- the remainder sits in
+the cubic `F` majorant, not in the damping estimate). Gap `198.46005-36 = 162.46005`
+(`sharp_pos_gap`); edge is between `5x` and `6x` over 36 (`edge_gt_180`,
+`edge_lt_216`). Gain over CC: `1984.6005 → 198.46005` (`~10x` from the damping alone).
+The Gaussian factor is proved decreasing for `τ ≥ 8.75` (`damp_mono_pos`).
+(2) Negative side HONEST NEGATIVE at the sharpener level: `‖G z‖ ≤ 0.971*B(|Im|)`
+(`G_le_sharp_neg`, FULL proof); edge `0.971*B(8.75) = 1927.0470855`
+(`sharp_neg_edge`), gap `1891.0470855`, between `53x` and `54x` over 36. The Gaussian
+center `τ = -6.75` sits near this tail, so honest damping gives almost nothing there.
+(3) P1 NOT fired: `BZTailEnvelope.P1_R02_of_hTail` stays conditional on the unclosed
+`hTail` (`≤ 36`); `DerivCauchyBridge.R02_zeta_upper_obligation` stays open.
+EXACT REMAINING GAP + WHAT CLOSES IT (estimates, not theorems -- STOP per brief):
+* Positive side needs `5.5x` (`198.46 → 36`). A Stirling-sharp `F`-bound alone
+  (true `~|τ|^2.5`; at edge `8.75^2.5 ≈ 226.5`): with honest constant `~3` that gives
+  `≈ 3*226.5*0.09 ≈ 61` at edge (gap `≈ 25`, `1.7x` over) -- STILL SHORT. Closing
+  needs the joint `Γ·cos` Gaussian analysis on the `Re = 2` mirror (CC's named
+  true gap-closer; must cut the joint constant from `~92` to `~30` at the edge), or a
+  Stirling constant `C ≤ 1.76` (`1.76*226.5*0.09 ≈ 35.9`).
+* Negative side needs `53.5x` (`1927.05 → 36`): the `2.5`-power gives only `~3x`, so
+  the joint `Γ·cos` analysis must supply the remaining `~18x` there -- it is the
+  load-bearing piece on this side (a recentered damping is out of scope: it would move
+  every windowed cap).
+* The exact-factor `B_sharp(τ) = exp((1-(τ+6.75)^2)/100)*B(|τ|)` DOES decay
+  super-exponentially on the positive side (external estimate: crosses 36 near
+  `τ ≈ 17-18`) -- NOT proved here (needs tight large-`|t|` exp bounds beyond
+  `1/(1+t)`, absent repo-wide) and NOT claimed.
+hTail verdict: SHARPENER GREEN (`198.46005` pos / `1927.0470855` neg vs CC `1984.6005`).
+P1 verdict: CONDITIONAL (needs `hTail` at 36, not met).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
