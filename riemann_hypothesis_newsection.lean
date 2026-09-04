@@ -13344,5 +13344,597 @@ the true damping minimum `≈ 0.92287`, hence unprovable; banked `4.824`/`48.24`
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# DG gap transfers (door-3 P1 parallel track): `hGapLo` + `hGapHi` + `hTailT`.
+
+Ownership: Agent DG append (append-only after the DF verdict block; nothing above
+touched; no new imports; LF endings).
+
+GOAL (brief door-3 P1 track): DF's `GP_P1_of_gaps_and_tailT` (`:13279`) closes
+parallel P1 `‖ζ‖ ≤ 10` on R02 conditional on three named hyps. This block proves
+all three by mechanical transfer, then fires the UNCONDITIONAL corollary.
+
+(a) `hGapLo` (`‖G_P‖ ≤ 36`, `Re = -1`, `8.75 < |Im| < 10.6`): three `/100` caps
+transferred via ONE damping-comparison lemma (`exp28_le_exp100_of_nonpos`:
+both exponents `≤ 0` there, so the `/28` damping is STRONGER):
+- `[8.75,10]`: `CQ_CompactHump.neg_cap_875_10` / `pos_cap_875_10` (`:9442`/`:9451`)
+  with the 2.01 `F` (`CM_Sinh201Recomp.F_Stirling_201_le`);
+- `[10,10.5]`: `CW_HumpTight.neg_cap_hump_10_105` (`:11118`, neg) + `0.1`-route
+  (pos, via `dampP_pos_le_01`) with the hump `F` (`CW_HumpTight.F_Stirling_hump_le`);
+- `[10.5,10.6]`: `CZ_JointHump.CZ_neg_cap_hump_105_106` (`:11647`, neg) +
+  `0.1`-route (pos) with the CZ `F` (`CZ_JointHump.CZ_F_hump_le`).
+The `F`-part (`poleRemovedZeta`) is IDENTICAL on both tracks; only the damping
+differs, so `‖G_P‖ = F·dampP ≤ F·damp ≤ 36`.
+(b) `hGapHi` (`21 < |Im|`): `CT_LargeA.neg_cap_21_inf` / `pos_cap_21_inf`
+(`:10597`/`:10615`) the same way (the 2.01 `F` is valid for all `8.75 < |Im|`).
+(c) `hTailT` (strip tail `∃ T`, `9 < |Im|`): BZ mirror at `/28` WITHOUT
+re-proving numerals — pointwise `‖G_P s‖ ≤ 1.16·‖G s‖` on the strip
+(`-X/28 ≤ -X/100` Gaussian domination + `σ² ≤ 4` cap `exp(1/7) ≤ 1.16` +
+`exp(σ²/100) ≥ 1` absorption), then reuse `BZTailEnvelope.G_tail_bdd` (`:5774`)
+with `T_P = 1.16·T`.
+Then `P1_R02_unconditional`: parallel P1 with NO premises.
+
+Grep record (verified by `rg -n` before writing):
+* `DF_ParallelP1.GP_P1_of_gaps_and_tailT` (`:13279`), `GP_hTailP_of_gaps`
+  (`:13044`), `GP_hBdd_of_tailT` (`:13100`), `exp_inv7_le_116` (`:12847`).
+* `CQ_CompactHump.neg_cap_875_10` (`:9442`), `pos_cap_875_10` (`:9451`),
+  `B201_nonneg` (`:9296`).
+* `CW_HumpTight.G_hump_10_105_le` (`:11136`), `neg_cap_hump_10_105` (`:11118`),
+  `F_Stirling_hump_le` (`:11035`), `Bhump_nonneg` (`:11050`), `Bhump_mono`
+  (`:11061`), `B105_le` (`:11082`).
+* `CZ_JointHump.CZ_G_hump_105_106_le` (`:11667`),
+  `CZ_neg_cap_hump_105_106` (`:11647`), `CZ_F_hump_le` (`:11564`),
+  `CZ_Bhump_nonneg` (`:11579`), `CZ_Bhump_mono` (`:11590`), `CZ_B106_le`
+  (`:11611`).
+* `CT_LargeA.neg_cap_21_inf` (`:10597`), `pos_cap_21_inf` (`:10615`).
+* `DD_RecenterDamp.dampP_norm_eq_neg1` (`:11859`), `dampP_re_general` (`:11836`),
+  `dampedPoleRemovedP` (`:11830`).
+* `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`).
+* `CM_Sinh201Recomp.F_Stirling_201_le` (`:8893`).
+* `CIJointStirling.damp_pos_01` (`:7431`).
+* `BZTailEnvelope.G_tail_bdd` (`:5774`).
+* `ZetaUpperR02ThreeLines.norm_complex_exp` (`:1227`),
+  `BH2TailWindow.damp_re_general` (`:3623`).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `exp28_le_exp100_of_nonpos` (comparison, proved once) + `Xpos_nonpos` /
+  `Xneg_nonpos` (exponent-nonpositivity feeders).
+* `GP_sharp_201_le` / `_pos_le` / `_neg_le` (parallel sharp composition, 2.01 `F`).
+* `GP_sharp_hump_le` / `_neg_le`, `GP_sharp_CZ_le` / `_neg_le` (hump / CZ `F`).
+* `dampP_pos_le_01` (`‖dampP‖ ≤ 0.1` for `8.75 < τ`).
+* `hGapLo_para` (a), `hGapHi_para` (b).
+* `GP_le_116_mul_G` + `hTailT_para` (c).
+* `P1_R02_unconditional` (parallel P1, NO premises).
+-/
+
+namespace DG_GapTransfer
+
+/-- Comparison (`/28` damping STRONGER when the numerator is `≤ 0`):
+`exp(X/28) ≤ exp(X/100)`. Proved once, applied in (a) thrice + (b) + (c). -/
+theorem exp28_le_exp100_of_nonpos {X : ℝ} (hX : X ≤ 0) :
+    Real.exp (X / 28) ≤ Real.exp (X / 100) := by
+  have h72 : (0 : ℝ) ≤ -(72 * X) :=
+    neg_nonneg.mpr (mul_nonpos_of_nonneg_of_nonpos (by norm_num) hX)
+  have hle : X / 28 ≤ X / 100 := by
+    have e : X / 100 - X / 28 = -(72 * X) / 2800 := by ring
+    have hnn : (0 : ℝ) ≤ -(72 * X) / 2800 := div_nonneg h72 (by norm_num)
+    linarith
+  exact Real.exp_le_exp.mpr hle
+
+/-- `1-(a+6.75)² ≤ 0` for `0 ≤ a` (pos-side exponent feed). -/
+theorem Xpos_nonpos {a : ℝ} (ha : 0 ≤ a) : (1 - (a + 6.75) ^ 2) ≤ 0 := by
+  have h1 : (1 : ℝ) ≤ a + 6.75 := by linarith
+  have hsq : (1 : ℝ) ≤ (a + 6.75) ^ 2 := by
+    calc (1 : ℝ) = (1 : ℝ) ^ 2 := by norm_num
+      _ ≤ (a + 6.75) ^ 2 := pow_le_pow_left₀ (by norm_num) h1 2
+  linarith
+
+/-- `1-(a-6.75)² ≤ 0` for `8.75 ≤ a` (neg-side exponent feed). -/
+theorem Xneg_nonpos {a : ℝ} (ha : 8.75 ≤ a) : (1 - (a - 6.75) ^ 2) ≤ 0 := by
+  have h1 : (2 : ℝ) ≤ a - 6.75 := by linarith
+  have hsq : (2 : ℝ) ^ 2 ≤ (a - 6.75) ^ 2 := pow_le_pow_left₀ (by norm_num) h1 2
+  norm_num at hsq
+  linarith
+
+/-- Parallel sharp composition with the 2.01 `F` (both signs):
+`‖G_P z‖ ≤ exp((1-(τ+6.75)²)/28)·B201(|τ|)` on `Re = -1`, `8.75 < |Im|`.
+Mirrors `CP_Sharp201.G_sharp_201_le` with the `1/28` damping. -/
+theorem GP_sharp_201_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have hF := CM_Sinh201Recomp.F_Stirling_201_le hz htail
+  have hdamp := DD_RecenterDamp.dampP_norm_eq_neg1 hz
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) :=
+    CQ_CompactHump.B201_nonneg
+  have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28)
+      ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Parallel positive-`τ` sharp form with `(|a|+6.75)²` (2.01 `F`). -/
+theorem GP_sharp_201_pos_le {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; exact hpos
+  have h := GP_sharp_201_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| + 6.75) ^ 2 := by rw [habs]
+  rw [hsq] at h
+  exact h
+
+/-- Parallel negative-`τ` sharp form with `(|a|-6.75)²` (2.01 `F`). -/
+theorem GP_sharp_201_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; linarith
+  have h := GP_sharp_201_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by rw [habs]; ring
+  rw [hsq] at h
+  exact h
+
+/-- Parallel sharp composition with the hump `F` (both signs).
+Mirrors `GP_sharp_201_le` with `CW_HumpTight.F_Stirling_hump_le`. -/
+theorem GP_sharp_hump_le {z : ℂ} (hz : z.re = -1) (h10 : (10 : ℝ) ≤ |z.im|) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have hF := CW_HumpTight.F_Stirling_hump_le hz h10
+  have hdamp := DD_RecenterDamp.dampP_norm_eq_neg1 hz
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+    CW_HumpTight.Bhump_nonneg
+  have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28)
+      ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Parallel negative-`τ` sharp form with the hump `F`. -/
+theorem GP_sharp_hump_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75)
+    (h10 : (10 : ℝ) ≤ |z.im|) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have h := GP_sharp_hump_le hz h10
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by rw [habs]; ring
+  rw [hsq] at h
+  exact h
+
+/-- Parallel sharp composition with the CZ `F` (both signs).
+Mirrors `GP_sharp_201_le` with `CZ_JointHump.CZ_F_hump_le`. -/
+theorem GP_sharp_CZ_le {z : ℂ} (hz : z.re = -1) (h105 : (10.5 : ℝ) ≤ |z.im|) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have hF := CZ_JointHump.CZ_F_hump_le hz h105
+  have hdamp := DD_RecenterDamp.dampP_norm_eq_neg1 hz
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+    CZ_JointHump.CZ_Bhump_nonneg
+  have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28)
+      ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Parallel negative-`τ` sharp form with the CZ `F`. -/
+theorem GP_sharp_CZ_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75)
+    (h105 : (10.5 : ℝ) ≤ |z.im|) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have h := GP_sharp_CZ_le hz h105
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by rw [habs]; ring
+  rw [hsq] at h
+  exact h
+
+/-- Parallel damping `≤ 0.1` on the positive tail (`8.75 < τ`, `Re = -1`):
+`/28` is stronger than `/100`, and `/100 ≤ 0.1` is `CIJointStirling.damp_pos_01`. -/
+theorem dampP_pos_le_01 {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.1 := by
+  rw [DD_RecenterDamp.dampP_norm_eq_neg1 hz]
+  have hX : (1 - (z.im + 6.75) ^ 2) ≤ 0 := by
+    have h1 : (1 : ℝ) ≤ z.im + 6.75 := by linarith
+    have hsq : (1 : ℝ) ≤ (z.im + 6.75) ^ 2 := by
+      calc (1 : ℝ) = (1 : ℝ) ^ 2 := by norm_num
+        _ ≤ (z.im + 6.75) ^ 2 := pow_le_pow_left₀ (by norm_num) h1 2
+    linarith
+  have hcmp := exp28_le_exp100_of_nonpos hX
+  have h100 : Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) ≤ 0.1 := by
+    have h := CIJointStirling.damp_pos_01 hz hpos
+    rwa [CF_SharpDamp.damp_norm_eq_neg1 hz] at h
+  exact le_trans hcmp h100
+
+/-- (a) `hGapLo`: `‖G_P‖ ≤ 36` on `Re = -1`, `8.75 < |Im| < 10.6`.
+Three-way split `[8.75,10]` (CQ) / `[10,10.5]` (CW) / `[10.5,10.6]` (CZ). -/
+theorem hGapLo_para : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+    8.75 < |z.im| → |z.im| < 10.6 →
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 := by
+  intro z hz htail h106
+  have hz_re : z.re = -1 := by simpa using hz
+  have ha0 : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+  rcases le_total |z.im| 10 with h10 | h10
+  · -- Piece A: `[8.75, 10]` via CQ.
+    rcases le_total 0 z.im with hnn | hneg
+    · -- Pos: `exp28 ≤ exp100` + `CQ pos_cap_875_10`.
+      have habs : |z.im| = z.im := abs_of_nonneg hnn
+      have hpos : 8.75 < z.im := by rw [← habs]; exact htail
+      have hsharp := GP_sharp_201_pos_le hz_re hpos
+      have hX := Xpos_nonpos ha0
+      have hcmp := exp28_le_exp100_of_nonpos hX
+      have hcap := CQ_CompactHump.pos_cap_875_10 (le_of_lt htail) h10
+      have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) :=
+        CQ_CompactHump.B201_nonneg
+      calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+          ≤ Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 28) *
+            (Real.sqrt (4 + |z.im| ^ 2) *
+              (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+        _ ≤ Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 100) *
+            (Real.sqrt (4 + |z.im| ^ 2) *
+              (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) :=
+            mul_le_mul_of_nonneg_right hcmp hBnn
+        _ ≤ 36 := hcap
+    · -- Neg: `exp28 ≤ exp100` + `CQ neg_cap_875_10`.
+      have habs : |z.im| = -z.im := abs_of_nonpos hneg
+      have hlt : z.im < -8.75 := by
+        have h1 : 8.75 < -z.im := by rw [← habs]; exact htail
+        linarith
+      have hsharp := GP_sharp_201_neg_le hz_re hlt
+      have hX := Xneg_nonpos (le_of_lt htail)
+      have hcmp := exp28_le_exp100_of_nonpos hX
+      have hcap := CQ_CompactHump.neg_cap_875_10 (le_of_lt htail) h10
+      have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) :=
+        CQ_CompactHump.B201_nonneg
+      calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+          ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+            (Real.sqrt (4 + |z.im| ^ 2) *
+              (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+        _ ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) *
+            (Real.sqrt (4 + |z.im| ^ 2) *
+              (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) :=
+            mul_le_mul_of_nonneg_right hcmp hBnn
+        _ ≤ 36 := hcap
+  · rcases le_total |z.im| 10.5 with h105 | h105
+    · -- Piece B: `[10, 10.5]` via CW.
+      rcases le_total 0 z.im with hnn | hneg
+      · -- Pos via `dampP_pos_le_01 ≤ 0.1` (`0.1 × 38.96 = 3.90`).
+        have habs : |z.im| = z.im := abs_of_nonneg hnn
+        have hpos : 8.75 < z.im := by rw [← habs]; linarith
+        have hF := CW_HumpTight.F_Stirling_hump_le hz_re h10
+        have hdamp := dampP_pos_le_01 hz_re hpos
+        have hB : Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3))) ≤ 38.96 :=
+          le_trans (CW_HumpTight.Bhump_mono ha0 h105) CW_HumpTight.B105_le
+        have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+          CW_HumpTight.Bhump_nonneg
+        have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+            ZetaUpperR02ThreeLines.poleRemovedZeta z *
+              Complex.exp (((1 / 28 : ℝ) : ℂ) *
+                (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+        rw [hfin, norm_mul]
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+            ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+              (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+            ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) * 0.1 :=
+              mul_le_mul hF hdamp (norm_nonneg _) hBnn
+          _ = (0.1 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+              ring
+          _ ≤ (0.1 : ℝ) * 38.96 := mul_le_mul_of_nonneg_left hB (by norm_num)
+          _ ≤ 36 := by norm_num
+      · -- Neg via `CW neg_cap_hump_10_105` (`0.913 × 38.96` at `/100`).
+        have habs : |z.im| = -z.im := abs_of_nonpos hneg
+        have hlt : z.im < -8.75 := by
+          have h1 : 8.75 < -z.im := by rw [← habs]; linarith
+          linarith
+        have hsharp := GP_sharp_hump_neg_le hz_re hlt h10
+        have hX := Xneg_nonpos (le_of_lt htail)
+        have hcmp := exp28_le_exp100_of_nonpos hX
+        have hcap := CW_HumpTight.neg_cap_hump_10_105 h10 h105
+        have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+          CW_HumpTight.Bhump_nonneg
+        calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+            ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+              (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+          _ ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) *
+              (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.2653 / 19.5) * Real.sqrt (|z.im| ^ 3)))) :=
+              mul_le_mul_of_nonneg_right hcmp hBnn
+          _ ≤ 36 := hcap
+    · -- Piece C: `[10.5, 10.6]` via CZ.
+      have hhi : |z.im| ≤ 10.6 := le_of_lt h106
+      rcases le_total 0 z.im with hnn | hneg
+      · -- Pos via `dampP_pos_le_01 ≤ 0.1` (`0.1 × 39.72 = 3.98`).
+        have habs : |z.im| = z.im := abs_of_nonneg hnn
+        have hpos : 8.75 < z.im := by rw [← habs]; linarith
+        have hF := CZ_JointHump.CZ_F_hump_le hz_re h105
+        have hdamp := dampP_pos_le_01 hz_re hpos
+        have hB : Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) ≤ 39.72 :=
+          le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) CZ_JointHump.CZ_B106_le
+        have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+          CZ_JointHump.CZ_Bhump_nonneg
+        have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+            ZetaUpperR02ThreeLines.poleRemovedZeta z *
+              Complex.exp (((1 / 28 : ℝ) : ℂ) *
+                (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+        rw [hfin, norm_mul]
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+            ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+              (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+            ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) * 0.1 :=
+              mul_le_mul hF hdamp (norm_nonneg _) hBnn
+          _ = (0.1 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+              ring
+          _ ≤ (0.1 : ℝ) * 39.72 := mul_le_mul_of_nonneg_left hB (by norm_num)
+          _ ≤ 36 := by norm_num
+      · -- Neg via `CZ neg_cap_hump_105_106` (`0.885 × 39.72` at `/100`).
+        have habs : |z.im| = -z.im := abs_of_nonpos hneg
+        have hlt : z.im < -8.75 := by
+          have h1 : 8.75 < -z.im := by rw [← habs]; linarith
+          linarith
+        have hsharp := GP_sharp_CZ_neg_le hz_re hlt h105
+        have hX := Xneg_nonpos (le_of_lt htail)
+        have hcmp := exp28_le_exp100_of_nonpos hX
+        have hcap := CZ_JointHump.CZ_neg_cap_hump_105_106 h105 hhi
+        have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+            * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+          CZ_JointHump.CZ_Bhump_nonneg
+        calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+            ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+              (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+          _ ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) *
+              (Real.sqrt (4 + |z.im| ^ 2) *
+                (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) :=
+              mul_le_mul_of_nonneg_right hcmp hBnn
+          _ ≤ 36 := hcap
+
+/-- (b) `hGapHi`: `‖G_P‖ ≤ 36` on `Re = -1`, `21 < |Im|`, via CT
+(the 2.01 `F` is valid for all `8.75 < |Im|`). -/
+theorem hGapHi_para : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+    21 < |z.im| →
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 := by
+  intro z hz h21
+  have hz_re : z.re = -1 := by simpa using hz
+  have ha0 : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+  have htail : 8.75 < |z.im| := by linarith
+  have h21le : (21 : ℝ) ≤ |z.im| := le_of_lt h21
+  rcases le_total 0 z.im with hnn | hneg
+  · -- Pos: `exp28 ≤ exp100` + `CT pos_cap_21_inf`.
+    have habs : |z.im| = z.im := abs_of_nonneg hnn
+    have hpos : 8.75 < z.im := by rw [← habs]; exact htail
+    have hsharp := GP_sharp_201_pos_le hz_re hpos
+    have hX := Xpos_nonpos ha0
+    have hcmp := exp28_le_exp100_of_nonpos hX
+    have hcap := CT_LargeA.pos_cap_21_inf h21le
+    have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) :=
+      CQ_CompactHump.B201_nonneg
+    calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+        ≤ Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 28) *
+          (Real.sqrt (4 + |z.im| ^ 2) *
+            (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+      _ ≤ Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 100) *
+          (Real.sqrt (4 + |z.im| ^ 2) *
+            (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) :=
+          mul_le_mul_of_nonneg_right hcmp hBnn
+      _ ≤ 36 := hcap
+  · -- Neg: `exp28 ≤ exp100` + `CT neg_cap_21_inf`.
+    have habs : |z.im| = -z.im := abs_of_nonpos hneg
+    have hlt : z.im < -8.75 := by
+      have h1 : 8.75 < -z.im := by rw [← habs]; exact htail
+      linarith
+    have hsharp := GP_sharp_201_neg_le hz_re hlt
+    have hX := Xneg_nonpos (le_of_lt htail)
+    have hcmp := exp28_le_exp100_of_nonpos hX
+    have hcap := CT_LargeA.neg_cap_21_inf h21le
+    have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) :=
+      CQ_CompactHump.B201_nonneg
+    calc ‖DD_RecenterDamp.dampedPoleRemovedP z‖
+        ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+          (Real.sqrt (4 + |z.im| ^ 2) *
+            (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := hsharp
+      _ ≤ Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) *
+          (Real.sqrt (4 + |z.im| ^ 2) *
+            (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) :=
+            mul_le_mul_of_nonneg_right hcmp hBnn
+      _ ≤ 36 := hcap
+
+/-- (c-key) Pointwise `/28`-vs-`/100` domination on the whole strip:
+`‖G_P s‖ ≤ 1.16·‖G s‖`. The Gaussian part dominates (`-X/28 ≤ -X/100`);
+`σ² ≤ 4` is capped by `exp(1/7) ≤ 1.16`; the leftover `exp(σ²/100) ≥ 1`
+is absorbed. -/
+theorem GP_le_116_mul_G {s : ℂ}
+    (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤
+      1.16 * ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖ := by
+  have hmem : (-1 : ℝ) ≤ s.re ∧ s.re ≤ 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip at hs
+    simp only [Set.mem_preimage, Set.mem_Icc] at hs
+    exact hs
+  obtain ⟨hlo, hhi⟩ := hmem
+  have hFnn : (0 : ℝ) ≤ ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ :=
+    norm_nonneg _
+  have hσ : s.re ^ 2 ≤ 4 := by
+    have e1 : (0 : ℝ) ≤ s.re + 1 := by linarith
+    have e2 : (0 : ℝ) ≤ 2 - s.re := by linarith
+    nlinarith [mul_nonneg e1 e2]
+  have hGP : DD_RecenterDamp.dampedPoleRemovedP s =
+      ZetaUpperR02ThreeLines.poleRemovedZeta s *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  have hG : ZetaUpperR02ThreeLines.dampedPoleRemoved s =
+      ZetaUpperR02ThreeLines.poleRemovedZeta s *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  have hdampP_eq : ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp (s.re ^ 2 / 28) * Real.exp (-(((s.im + 6.75) ^ 2) / 28)) := by
+    rw [ZetaUpperR02ThreeLines.norm_complex_exp, DD_RecenterDamp.dampP_re_general,
+      ← Real.exp_add]
+    congr 1
+    ring
+  have hdampO_eq : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp (s.re ^ 2 / 100) * Real.exp (-(((s.im + 6.75) ^ 2) / 100)) := by
+    rw [ZetaUpperR02ThreeLines.norm_complex_exp, BH2TailWindow.damp_re_general,
+      ← Real.exp_add]
+    congr 1
+    ring
+  have hσ28 : Real.exp (s.re ^ 2 / 28) ≤ 1.16 := by
+    have e : s.re ^ 2 / 28 ≤ 1 / 7 := by linarith
+    calc Real.exp (s.re ^ 2 / 28) ≤ Real.exp ((1 : ℝ) / 7) := Real.exp_le_exp.mpr e
+      _ ≤ 1.16 := DF_ParallelP1.exp_inv7_le_116
+  have hτ : Real.exp (-(((s.im + 6.75) ^ 2) / 28))
+      ≤ Real.exp (-(((s.im + 6.75) ^ 2) / 100)) := by
+    have e1 : -(((s.im + 6.75) ^ 2) / 28) = (-((s.im + 6.75) ^ 2)) / 28 := by ring
+    have e2 : -(((s.im + 6.75) ^ 2) / 100) = (-((s.im + 6.75) ^ 2)) / 100 := by
+      ring
+    rw [e1, e2]
+    exact exp28_le_exp100_of_nonpos (neg_nonpos.mpr (sq_nonneg _))
+  have hnn100 : (0 : ℝ) ≤ s.re ^ 2 / 100 := div_nonneg (sq_nonneg _) (by norm_num)
+  have hσ100 : (1 : ℝ) ≤ Real.exp (s.re ^ 2 / 100) := by
+    have h := Real.add_one_le_exp (s.re ^ 2 / 100)
+    linarith
+  have step1 : Real.exp (s.re ^ 2 / 28) * Real.exp (-(((s.im + 6.75) ^ 2) / 28))
+      ≤ 1.16 * Real.exp (-(((s.im + 6.75) ^ 2) / 100)) :=
+    mul_le_mul hσ28 hτ (Real.exp_nonneg _) (by norm_num)
+  have hEτ : Real.exp (-(((s.im + 6.75) ^ 2) / 100))
+      ≤ Real.exp (s.re ^ 2 / 100) * Real.exp (-(((s.im + 6.75) ^ 2) / 100)) :=
+    le_mul_of_one_le_left (Real.exp_nonneg _) hσ100
+  have hFτ : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        Real.exp (-(((s.im + 6.75) ^ 2) / 100))
+      ≤ ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((s.im + 6.75) ^ 2) / 100))) :=
+    mul_le_mul_of_nonneg_left hEτ hFnn
+  rw [hGP, hG, norm_mul, norm_mul, hdampP_eq, hdampO_eq]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        (Real.exp (s.re ^ 2 / 28) * Real.exp (-(((s.im + 6.75) ^ 2) / 28)))
+      ≤ ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        (1.16 * Real.exp (-(((s.im + 6.75) ^ 2) / 100))) :=
+        mul_le_mul_of_nonneg_left step1 hFnn
+    _ = 1.16 * (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        Real.exp (-(((s.im + 6.75) ^ 2) / 100))) := by ring
+    _ ≤ 1.16 * (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+        (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((s.im + 6.75) ^ 2) / 100)))) :=
+        mul_le_mul_of_nonneg_left hFτ (by norm_num)
+
+/-- (c) `hTailT`: strip tail bound for `G_P` (`9 < |Im|`), via BZ + `1.16`. -/
+theorem hTailT_para : ∃ T : ℝ, ∀ s : ℂ,
+    s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+    9 < |s.im| → ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ T := by
+  obtain ⟨T, hT⟩ := BZTailEnvelope.G_tail_bdd
+  refine ⟨1.16 * T, fun s hs htail => ?_⟩
+  have hle := GP_le_116_mul_G hs
+  have hG := hT s hs htail
+  calc ‖DD_RecenterDamp.dampedPoleRemovedP s‖
+      ≤ 1.16 * ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖ := hle
+    _ ≤ 1.16 * T := mul_le_mul_of_nonneg_left hG (by norm_num)
+
+/-- UNCONDITIONAL parallel P1: `‖ζ‖ ≤ 10` on the R02 rect — NO premises.
+Fires `DF_ParallelP1.GP_P1_of_gaps_and_tailT` with all three transfers. -/
+theorem P1_R02_unconditional {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  DF_ParallelP1.GP_P1_of_gaps_and_tailT hGapLo_para hGapHi_para hTailT_para
+    hs_lo hs_hi him_lo him_hi
+
+#print axioms DG_GapTransfer.exp28_le_exp100_of_nonpos
+#print axioms DG_GapTransfer.Xpos_nonpos
+#print axioms DG_GapTransfer.Xneg_nonpos
+#print axioms DG_GapTransfer.GP_sharp_201_le
+#print axioms DG_GapTransfer.GP_sharp_201_pos_le
+#print axioms DG_GapTransfer.GP_sharp_201_neg_le
+#print axioms DG_GapTransfer.GP_sharp_hump_le
+#print axioms DG_GapTransfer.GP_sharp_hump_neg_le
+#print axioms DG_GapTransfer.GP_sharp_CZ_le
+#print axioms DG_GapTransfer.GP_sharp_CZ_neg_le
+#print axioms DG_GapTransfer.dampP_pos_le_01
+#print axioms DG_GapTransfer.hGapLo_para
+#print axioms DG_GapTransfer.hGapHi_para
+#print axioms DG_GapTransfer.GP_le_116_mul_G
+#print axioms DG_GapTransfer.hTailT_para
+#print axioms DG_GapTransfer.P1_R02_unconditional
+
+end DG_GapTransfer
+
+/-!
+DG VERDICT + RESIDUAL (report-and-stop): parallel-track gap transfers banked,
+unconditional parallel P1 FIRED (pending build).
+
+(1) BRIDGES (this tail, full proofs, no `sorry`/`admit`/`axiom`):
+(a) `hGapLo_para` — three `/100` caps transferred via ONE comparison
+(`exp28_le_exp100_of_nonpos`): CQ `[8.75,10]` both signs, CW `[10,10.5]`
+(neg cap + pos `0.1`-route), CZ `[10.5,10.6]` (neg cap + pos `0.1`-route).
+(b) `hGapHi_para` — CT `[21,∞)` both signs, same comparison.
+(c) `hTailT_para` — BZ `G_tail_bdd` mirror at `/28` via pointwise
+`GP_le_116_mul_G` (`‖G_P‖ ≤ 1.16·‖G‖` on the strip), `T_P = 1.16·T`.
+(d) `P1_R02_unconditional` — `GP_P1_of_gaps_and_tailT` fired with (a)+(b)+(c):
+parallel P1 `‖ζ‖ ≤ 10` on R02 with NO premises.
+(2) RESIDUAL: build verification (`lake build riemann_hypothesis_newsection`
+under `.lake_build_lock`) + `#print axioms` inspection. If green with exactly
+`[propext, Classical.choice, Quot.sound]` throughout, parallel P1 is CLOSED
+unconditionally and the door-3 P1 track reduces to downstream consumers
+(`R02_zeta_upper_obligation` discharge via the parallel P1).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
