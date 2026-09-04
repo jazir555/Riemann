@@ -12654,5 +12654,695 @@ hump itself (closed here), only as alternative P1 routes.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# DF tail (door-3 P1 parallel track, V=28 threshold assembly): `G_P` entire/caps/`BddAbove`
++ re-proved threshold at divisor `4.824`/threshold `48.24` + conditional parallel P1.
+
+Ownership: Agent DF tail append (append-only after the DD verdict block; nothing above
+touched; no new imports; never touches `zeta_rigorous.lean`).
+
+GREP-FIRST RECORD (verified by `rg -n` before writing):
+* `ZetaUpperR02ThreeLines` (`:1120`): `dampCenter` (`:1125`), `poleRemovedZeta`
+  (`:1129`), `dampedPoleRemoved` (`:1134`), `poleRemovedZeta_of_ne` (`:1141`),
+  `poleRemovedZeta_differentiable` (`:1173`), `poleRemovedZeta_diffContOnCl_strip`
+  (`:1179`), `dampedPoleRemoved_differentiable` (`:1184`),
+  `dampedPoleRemoved_diffContOnCl_strip` (`:1192`), `norm_complex_exp` (`:1227`),
+  `sSubOne_norm_ge_R02` (`:1278`), `zetaUpper_R02_of_threeLines` (`:1300`),
+  `zetaUpper_R02_of_threeLines_uniform` (`:1363`), `zetaUpper_R02_ten_of_bounds`
+  (`:1399`, divisor `5.0925 = 5.25*0.97`, threshold `50.925 = 10*5.0925`).
+* `BH2TailWindow` (`:3619`): `damp_re_general` (`:3623`), `damped_left_whole_36_of_tail`
+  (`:3722`), `damped_windowed_interp_36` (`:3737`), `zeta_R02_le_ten_of_tail` (`:3762`,
+  `A = B = 36`, margin `14.925`).
+* `BZTailEnvelope` (`:5421`): `G_tail_bdd` (`:5774`), `hBdd_unconditional` (`:5941`),
+  `P1_R02_of_hTail` (`:5948`, old-`G` consumer, cannot fire on `G_P`).
+* `DD_RecenterDamp` (`:11826`): `dampedPoleRemovedP` (`:11830`, `/28`, same center),
+  `dampP_re_general` (`:11836`), `dampP_norm_eq_neg1` (`:11859`),
+  `DD_hTail_core` (`:12575`, `‖G_P‖ ≤ 36` on `Re = -1`, `10.6 ≤ |Im| ≤ 21`).
+* Reused (not recreated): `Door3SharpWindow.sub_upper_window` (`:2077`),
+  `Door3JointGammaCos.factor_joint_le` (`:2965`), `BF2TailCaps.exp_neg_le_inv`
+  (`:3399`), `TailZetaUpper.zeta_rightEdge_B2` (`:1040`),
+  `Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`.
+
+DIVISOR HONESTY (§1h, verified once, not spun): DD's report (`:12643`) documents
+divisor `4.845`/threshold `48.45`, i.e. damp lower `0.923`. The TRUE minimum of the
+`/28` damping on the R02 rect is `exp(-2.2475/28) ≈ 0.92287 < 0.923`, so `≥ 0.923`
+is FALSE as stated and `4.845` needs `0.922857 ≤ true-min` (margin `1.2e-5`,
+unprovable with the repo's linear `add_one_le_exp` tier; no quadratic exp-lower
+exists in Mathlib/repo). This tail banks the honest linear tier instead:
+damp lower `0.919` (`1-2.2475/28 ≈ 0.91973`), divisor `4.824 ≤ 5.25*0.919`,
+threshold `48.24`. `A = B = 36` still fires (margin `12.24`); the P1 conclusion is
+substantively identical.
+
+What is proved here (full proofs, no `sorry`/`admit`/`axiom`):
+* (i) `GP_differentiable` + `GP_diffContOnCl_strip` (mirror `:1184-1195` at `/28`).
+* (ii) `exp_inv28_le_105` + `dampP_window_le` + `GP_left_window_36` (left `A = 36`
+  in-window, `34*1.05 = 35.7`); `exp_inv7_le_116` + `dampP_Re2_re` +
+  `dampP_Re2_split` + `right_sup_aux_28` + `GP_right_whole_36` (right `B = 36`
+  whole-line, `2*1.16*9 = 20.88`); `GP_left_whole_36_of_tailP` +
+  `GP_windowed_interp_36` (BH2 mirror, conditional on `hTailP` + `hBddP`);
+  `GP_hTailP_of_gaps` (DD band citation: `10.6-21` discharged, gaps explicit).
+* (iii) `GP_continuous` + `GP_window_bdd` (window `BddAbove` via compactness —
+  strictly easier than BZ's envelope route, honestly so) + `GP_hBdd_of_tailT`
+  (full-strip `BddAbove` conditional on the explicit strip tail bound `hTailT`).
+* (iv) `dampP_lower_R02` (`≥ 0.919`) + `GP_threeLines` + `GP_uniform` +
+  `GP_ten_of_bounds` (threshold at `48.24`) + `GP_P1_of_gaps_and_tailT`
+  (parallel P1 `‖ζ‖ ≤ 10` on R02, conditional on `hGapLo` + `hGapHi` + `hTailT`).
+-/
+
+namespace DF_ParallelP1
+
+open scoped Topology
+
+/-- (i) `G_P` is entire (mirror of `dampedPoleRemoved_differentiable` at `/28`). -/
+theorem GP_differentiable : Differentiable ℂ DD_RecenterDamp.dampedPoleRemovedP := by
+  have hexp : Differentiable ℂ
+      (fun s : ℂ => Complex.exp (((1 / 28 : ℝ) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)) := by
+    fun_prop
+  unfold DD_RecenterDamp.dampedPoleRemovedP
+  exact ZetaUpperR02ThreeLines.poleRemovedZeta_differentiable.mul hexp
+
+/-- (i) `G_P` is `DiffContOnCl` on every closed strip (mirror, `:1192-1195`). -/
+theorem GP_diffContOnCl_strip (l u : ℝ) :
+    DiffContOnCl ℂ DD_RecenterDamp.dampedPoleRemovedP
+      (Complex.HadamardThreeLines.verticalStrip l u) :=
+  GP_differentiable.diffContOnCl
+
+/-- `exp(1/28) ≤ 1.05` (`(exp(1/28))^28 = exp 1 < 2.7183 ≤ 1.05^28`). -/
+theorem exp_inv28_le_105 : Real.exp ((1 : ℝ) / 28) ≤ 1.05 := by
+  have hE28 : (Real.exp ((1 : ℝ) / 28)) ^ (28 : ℕ) = Real.exp 1 := by
+    have h := Real.exp_nat_mul ((1 : ℝ) / 28) (28 : ℕ)
+    have h28 : ((28 : ℕ) : ℝ) * ((1 : ℝ) / 28) = 1 := by norm_num
+    rw [h28] at h
+    exact h.symm
+  have hbern : (2.7182818286 : ℝ) ≤ (1.05 : ℝ) ^ (28 : ℕ) := by norm_num
+  have hlt : Real.exp (1 : ℝ) < 2.7182818286 := Real.exp_one_lt_d9
+  have hle : (Real.exp ((1 : ℝ) / 28)) ^ (28 : ℕ) ≤ (1.05 : ℝ) ^ (28 : ℕ) := by
+    rw [hE28]
+    linarith [hlt, hbern]
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- Parallel damping `≤ 1.05` on the left window (`Re = -1`, `|Im| ≤ 8.75`):
+`Re = (1-(τ+6.75)²)/28 ≤ 1/28`. -/
+theorem dampP_window_le {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1.05 := by
+  have hsq2 : ((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 1 - (z.im + 6.75) ^ 2 := by
+    have e1 : (z - ZetaUpperR02ThreeLines.dampCenter).re = -1 := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, hz_re, sub_zero]
+    have e2 : (z - ZetaUpperR02ThreeLines.dampCenter).im = z.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  have hwre : ((((1 / 28 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ (1 : ℝ) / 28 := by
+    have hwm : ((((1 / 28 : ℝ)) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+        = (1 / 28) * ((((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+      rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [hwm, hsq2]
+    have ht2 : (0 : ℝ) ≤ (z.im + 6.75) ^ 2 := sq_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  have hexp : Real.exp ((((1 / 28 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp ((1 : ℝ) / 28) := Real.exp_le_exp_of_le hwre
+  linarith [hexp, exp_inv28_le_105]
+
+/-- (ii-a) Parallel left-window cap: `‖G_P z‖ ≤ 36` on `Re = -1`, `|Im| ≤ 8.75`
+(`34·1.05 = 35.7 ≤ 36`; the `F`-part is identical to `damped_joint_window`). -/
+theorem GP_left_window_36 {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz_re]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz_re] at hre
+    have hnn : (0 : ℝ) ≤ (((n : ℕ)) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz_re] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have himw875 : |((1 : ℂ) - z).im| ≤ 8.75 := by
+    rw [hw_im, abs_neg]
+    exact him
+  have hsub : ‖z - 1‖ ≤ 9 := Door3SharpWindow.sub_upper_window hz_re him
+  have hdamp := dampP_window_le hz_re him
+  have hFactor : ‖RowFE.RowFEFactor (1 - z)‖ ≤ 17 / 9 :=
+    Door3JointGammaCos.factor_joint_le hw_re himw875
+  have hZ : ‖riemannZeta z‖ ≤ 34 / 9 := by
+    rw [hFE', norm_mul]
+    calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖ ≤ (17 / 9) * 2 :=
+          mul_le_mul hFactor hZrefl (norm_nonneg _) (by norm_num)
+      _ = 34 / 9 := by norm_num
+  have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ ≤ 34 := by
+    rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+    calc ‖z - 1‖ * ‖riemannZeta z‖ ≤ 9 * (34 / 9) :=
+          mul_le_mul hsub hZ (norm_nonneg _) (by norm_num)
+      _ = 34 := by norm_num
+  have hfin : DD_RecenterDamp.dampedPoleRemovedP z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+        ≤ 34 * 1.05 :=
+          mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- `exp(1/7) ≤ 1.16` (`(exp(1/7))^7 = exp 1 < 2.7183 ≤ 1.16^7`). -/
+theorem exp_inv7_le_116 : Real.exp ((1 : ℝ) / 7) ≤ 1.16 := by
+  have hE7 : (Real.exp ((1 : ℝ) / 7)) ^ (7 : ℕ) = Real.exp 1 := by
+    have h := Real.exp_nat_mul ((1 : ℝ) / 7) (7 : ℕ)
+    have h7 : ((7 : ℕ) : ℝ) * ((1 : ℝ) / 7) = 1 := by norm_num
+    rw [h7] at h
+    exact h.symm
+  have hbern : (2.7182818286 : ℝ) ≤ (1.16 : ℝ) ^ (7 : ℕ) := by norm_num
+  have hlt : Real.exp (1 : ℝ) < 2.7182818286 := Real.exp_one_lt_d9
+  have hle : (Real.exp ((1 : ℝ) / 7)) ^ (7 : ℕ) ≤ (1.16 : ℝ) ^ (7 : ℕ) := by
+    rw [hE7]
+    linarith [hlt, hbern]
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- Damping real part for `G_P` on `Re = 2`:
+`Re((1/28)(s-c)²) = 1/7 - (Im+6.75)²/28` (mirror of `damp_Re2_re`). -/
+theorem dampP_Re2_re {s : ℂ} (hs_re : s.re = 2) :
+    ((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 1 / 7 - (s.im + 6.75) ^ 2 / 28 := by
+  have hwre : ((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (1 / 28) * ((((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hsq2 : ((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (s.re) ^ 2 - (s.im + 6.75) ^ 2 := by
+    have e1 : (s - ZetaUpperR02ThreeLines.dampCenter).re = s.re := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, sub_zero]
+    have e2 : (s - ZetaUpperR02ThreeLines.dampCenter).im = s.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  rw [hwre, hsq2, hs_re]
+  ring
+
+/-- Damping split for `G_P` on `Re = 2` (mirror of `damp_Re2_split`). -/
+theorem dampP_Re2_split {s : ℂ} (hs_re : s.re = 2) :
+    ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28)) := by
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp, dampP_Re2_re hs_re,
+    ← Real.exp_add]
+  congr 1
+
+/-- Polynomial-times-Gaussian sup for the `/28` right edge:
+`(7.75+r)·28/(28+r²) ≤ 9` for `r ≥ 0`
+(i.e. `9r²-28r+35 ≥ 0`, via `(3r-5)² ≥ 0` plus `2r+10 ≥ 0`). -/
+theorem right_sup_aux_28 {r : ℝ} (_hr : 0 ≤ r) :
+    (7.75 + r) * 28 / (28 + r ^ 2) ≤ 9 := by
+  have hden : (0 : ℝ) < 28 + r ^ 2 := by
+    have h := sq_nonneg r
+    linarith
+  rw [div_le_iff₀ hden]
+  nlinarith [sq_nonneg (3 * r - 5), _hr, sq_nonneg r]
+
+/-- (ii-b) Parallel whole-line right cap: `‖G_P s‖ ≤ 36` on `Re = 2`
+(`2·1.16·9 = 20.88 ≤ 36`; mirror of `damped_right_whole_36`). -/
+theorem GP_right_whole_36 {s : ℂ}
+    (hs : s ∈ Set.preimage Complex.re {(2 : ℝ)}) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ 36 := by
+  have hs_re : s.re = 2 := by simpa using hs
+  have hs1 : s ≠ 1 := by
+    intro h
+    have hre : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hZ : ‖riemannZeta s‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := s) (by linarith [hs_re])
+    rwa [show zeta s = riemannZeta s from rfl] at h
+  have hsub : ‖s - 1‖ ≤ 1 + |s.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = 1 := by
+      rw [Complex.sub_re, Complex.one_re, hs_re]
+      norm_num
+    have him1 : (s - 1).im = s.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1, abs_one] at h
+    linarith
+  have htri : |s.im| ≤ |s.im + 6.75| + 6.75 := by
+    rw [abs_le]
+    constructor
+    · have h1 := neg_abs_le (s.im + 6.75)
+      linarith
+    · have h2 := le_abs_self (s.im + 6.75)
+      linarith
+  have hpos_e : (0 : ℝ) ≤ Real.exp (-((s.im + 6.75) ^ 2 / 28)) :=
+    (Real.exp_pos _).le
+  have hnn_1t : (0 : ℝ) ≤ 1 + |s.im| := by
+    have hnn := abs_nonneg s.im
+    linarith
+  have hsup : (1 + |s.im|) *
+      (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28))) ≤ 10.44 := by
+    have h1 : (1 : ℝ) + |s.im| ≤ 7.75 + |s.im + 6.75| := by linarith
+    have hnn_7v : (0 : ℝ) ≤ 7.75 + |s.im + 6.75| := by
+      have hnn := abs_nonneg (s.im + 6.75)
+      linarith
+    have h2 : Real.exp (-((s.im + 6.75) ^ 2 / 28))
+        ≤ 28 / (28 + (s.im + 6.75) ^ 2) := by
+      have h := BF2TailCaps.exp_neg_le_inv
+        (show (0 : ℝ) ≤ (s.im + 6.75) ^ 2 / 28 from
+          div_nonneg (sq_nonneg _) (by norm_num))
+      have ee : (1 : ℝ) / (1 + (s.im + 6.75) ^ 2 / 28)
+          = 28 / (28 + (s.im + 6.75) ^ 2) := by
+        have h1e : (1 : ℝ) + (s.im + 6.75) ^ 2 / 28
+            = (28 + (s.im + 6.75) ^ 2) / 28 := by ring
+        rw [h1e, one_div_div]
+      rwa [ee] at h
+    have h3 : ((7.75 + |s.im + 6.75|) * 28) / (28 + (s.im + 6.75) ^ 2)
+        ≤ 9 := by
+      have h := right_sup_aux_28 (abs_nonneg (s.im + 6.75))
+      rwa [sq_abs] at h
+    calc (1 + |s.im|) *
+          (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28)))
+        = Real.exp ((1 : ℝ) / 7) * ((1 + |s.im|) *
+            Real.exp (-((s.im + 6.75) ^ 2 / 28))) := by ring
+      _ ≤ 1.16 * ((7.75 + |s.im + 6.75|) *
+            (28 / (28 + (s.im + 6.75) ^ 2))) := by
+          apply mul_le_mul _ _ _ _
+          · exact exp_inv7_le_116
+          · exact mul_le_mul h1 h2 hpos_e hnn_7v
+          · exact mul_nonneg hnn_1t hpos_e
+          · norm_num
+      _ = 1.16 * (((7.75 + |s.im + 6.75|) * 28) / (28 + (s.im + 6.75) ^ 2)) := by
+          rw [mul_div_assoc]
+      _ ≤ 1.16 * 9 := mul_le_mul_of_nonneg_left h3 (by norm_num)
+      _ = 10.44 := by norm_num
+  have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ (1 + |s.im|) * 2 := by
+    have h1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ ‖s - 1‖ * 2 := by
+      rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hs1, norm_mul]
+      exact mul_le_mul_of_nonneg_left hZ (norm_nonneg _)
+    exact le_trans h1 (mul_le_mul_of_nonneg_right hsub (by norm_num))
+  have hsplit := dampP_Re2_split hs_re
+  have hfin : DD_RecenterDamp.dampedPoleRemovedP s =
+      ZetaUpperR02ThreeLines.poleRemovedZeta s *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hsplit]
+  have hnn_d : (0 : ℝ) ≤ Real.exp ((1 : ℝ) / 7) *
+      Real.exp (-((s.im + 6.75) ^ 2 / 28)) :=
+    mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le
+  have e1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+      (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28)))
+      ≤ ((1 + |s.im|) * 2) *
+        (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28))) :=
+    mul_le_mul_of_nonneg_right hF hnn_d
+  have e2 : ((1 + |s.im|) * 2) *
+      (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28))) ≤ 36 := by
+    have ee : ((1 + |s.im|) * 2) *
+        (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28)))
+        = 2 * ((1 + |s.im|) *
+          (Real.exp ((1 : ℝ) / 7) * Real.exp (-((s.im + 6.75) ^ 2 / 28)))) := by
+      ring
+    rw [ee]
+    linarith [hsup]
+  linarith [e1, e2]
+
+/-- (ii-c) Parallel left-whole cap from window + explicit tail hypothesis
+(mirror of `BH2TailWindow.damped_left_whole_36_of_tail`). -/
+theorem GP_left_whole_36_of_tailP
+    (hTailP : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36) :
+    ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 := by
+  intro z hz
+  have hz_re : z.re = -1 := by simpa using hz
+  by_cases h : |z.im| ≤ 8.75
+  · exact GP_left_window_36 hz_re h
+  · push_neg at h
+    exact hTailP z hz h
+
+/-- (ii-main) Parallel windowed-strip interpolation: `‖G_P s‖ ≤ 36` on `[-1,2]`
+from the tail hypothesis + `BddAbove` (mirror of `damped_windowed_interp_36`). -/
+theorem GP_windowed_interp_36
+    (hTailP : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36)
+    (hBddP : BddAbove ((norm ∘ DD_RecenterDamp.dampedPoleRemovedP) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2))
+    {s : ℂ} (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) :
+    ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ 36 := by
+  have hLeft := GP_left_whole_36_of_tailP hTailP
+  have hRight : ∀ z ∈ Set.preimage Complex.re ({(2 : ℝ)} : Set ℝ),
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 :=
+    fun z hz => GP_right_whole_36 hz
+  have h3 := Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'
+    (f := DD_RecenterDamp.dampedPoleRemovedP) (a := 36) (b := 36)
+    (l := -1) (u := 2) (by norm_num) hs
+    (GP_diffContOnCl_strip (-1) 2) hBddP
+    hLeft hRight
+  have h36 : (0 : ℝ) < 36 := by norm_num
+  have hpow : (36 : ℝ) ^ (1 - (s.re - -1) / (2 - -1)) *
+      (36 : ℝ) ^ ((s.re - -1) / (2 - -1)) = 36 := by
+    rw [← Real.rpow_add h36, sub_add_cancel, Real.rpow_one]
+  rw [hpow] at h3
+  exact h3
+
+/-- DD's core discharges `hTailP` on the band `10.6 ≤ |Im| ≤ 21`, leaving the
+gaps `(8.75, 10.6)` and `(21, ∞)` as the explicit residual. -/
+theorem GP_hTailP_of_gaps
+    (hGapLo : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      8.75 < |z.im| → |z.im| < 10.6 →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36)
+    (hGapHi : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      21 < |z.im| →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36) :
+    ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36 := by
+  intro z hz htail
+  have hz_re : z.re = -1 := by simpa using hz
+  rcases lt_or_ge |z.im| 10.6 with h106 | h106
+  · exact hGapLo z hz htail h106
+  · by_cases h21 : |z.im| ≤ 21
+    · exact DD_RecenterDamp.DD_hTail_core hz_re h106 h21
+    · have h21' : 21 < |z.im| := lt_of_not_ge h21
+      exact hGapHi z hz h21'
+
+/-- (iii) `G_P` is continuous. -/
+theorem GP_continuous : Continuous DD_RecenterDamp.dampedPoleRemovedP :=
+  GP_differentiable.continuous
+
+/-- (iii-window) Uniform bound for `G_P` on the compact window
+(`[-1,2]`, `|Im| ≤ 9`) via compactness — no envelope needed. -/
+theorem GP_window_bdd :
+    ∃ M : ℝ, ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      |s.im| ≤ 9 → ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ M := by
+  have hstrip_closed : IsClosed (Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    exact IsClosed.preimage Complex.continuous_re isClosed_Icc
+  have him_closed : IsClosed {s : ℂ | |s.im| ≤ 9} :=
+    IsClosed.preimage Complex.continuous_im.abs isClosed_Iic
+  have hKcompact : IsCompact (Metric.closedBall (0 : ℂ) 11 ∩
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 ∩ {s : ℂ | |s.im| ≤ 9}) :=
+    ((isCompact_closedBall _ _).inter_right hstrip_closed).inter_right him_closed
+  obtain ⟨M, hM⟩ := hKcompact.exists_bound_of_continuousOn GP_continuous.continuousOn
+  refine ⟨M, fun s hs him => ?_⟩
+  have hmemK : s ∈ Metric.closedBall (0 : ℂ) 11 ∩
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 ∩ {s : ℂ | |s.im| ≤ 9} := by
+    have hball : s ∈ Metric.closedBall (0 : ℂ) (11 : ℝ) := by
+      rw [Metric.mem_closedBall, dist_zero_right]
+      have hle := Complex.norm_le_abs_re_add_abs_im s
+      have hmem : s.re ∈ Set.Icc (-1 : ℝ) 2 := by
+        have hss : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 := hs
+        unfold Complex.HadamardThreeLines.verticalClosedStrip at hss
+        simpa using hss
+      have hre : |s.re| ≤ 2 := by
+        rw [abs_le]
+        exact ⟨by linarith [hmem.1], by linarith [hmem.2]⟩
+      linarith
+    exact ⟨⟨hball, hs⟩, him⟩
+  exact hM s hmemK
+
+/-- (iii-assembly) Full-strip `BddAbove` for `G_P` from the explicit strip tail
+bound (mirror of `BUWindowed.hBdd_of_window_and_tail`). -/
+theorem GP_hBdd_of_tailT
+    (hTailT : ∃ T : ℝ, ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      9 < |s.im| → ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ T) :
+    BddAbove ((norm ∘ DD_RecenterDamp.dampedPoleRemovedP) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) := by
+  obtain ⟨T, hT⟩ := hTailT
+  obtain ⟨W, hW⟩ := GP_window_bdd
+  refine ⟨max W T, ?_⟩
+  intro y hy
+  obtain ⟨s, hs, rfl⟩ := hy
+  simp only [Function.comp_apply]
+  by_cases hwin : |s.im| ≤ 9
+  · have hle : ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ W := hW s hs hwin
+    exact le_trans hle (le_max_left _ _)
+  · push_neg at hwin
+    have hle := hT s hs hwin
+    exact le_trans hle (le_max_right _ _)
+
+/-- (iv-a) Parallel damping lower `≥ 0.919` on the R02 rect
+(`Re = (σ²-(τ+6.75)²)/28 ≥ -2.2475/28` via `σ² ≥ 0.0025`, `(τ+6.75)² ≤ 2.25`;
+then `exp ≥ 1+·`). -/
+theorem dampP_lower_R02 {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    (0.919 : ℝ)
+      ≤ ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ := by
+  have hwre : ((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = ((s.re) ^ 2 - (s.im + 6.75) ^ 2) / 28 :=
+    DD_RecenterDamp.dampP_re_general
+  have hsq : (s.im + 6.75) ^ 2 ≤ 2.25 := by
+    have habs : |s.im + 6.75| ≤ 1.5 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have h1 : -(1.5 : ℝ) ≤ s.im + 6.75 := (abs_le.mp habs).1
+    have h2 : s.im + 6.75 ≤ 1.5 := (abs_le.mp habs).2
+    have hle := sq_le_sq' h1 h2
+    have e : (1.5 : ℝ) ^ 2 = 2.25 := by norm_num
+    rwa [e] at hle
+  have hsig : (0.0025 : ℝ) ≤ (s.re) ^ 2 := by
+    have h : (0.05 : ℝ) ^ 2 ≤ (s.re) ^ 2 :=
+      pow_le_pow_left₀ (by norm_num) hs_lo 2
+    have e : (0.05 : ℝ) ^ 2 = 0.0025 := by norm_num
+    rwa [e] at h
+  have hwge : (-2.2475 / 28 : ℝ)
+      ≤ ((((1 / 28 : ℝ)) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re := by
+    rw [hwre]
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  have h1 := Real.add_one_le_exp
+    (((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)
+  have h19 : (0.919 : ℝ) ≤ 1 + (-2.2475 / 28 : ℝ) := by norm_num
+  linarith
+
+/-- (iv-b) Parallel three-lines assembly (mirror of `zetaUpper_R02_of_threeLines`;
+divisor `5.25·0.919`, stated via `4.82475` below). -/
+theorem GP_threeLines {l u A B : ℝ} (hlu : l < u)
+    (hcover_lo : l ≤ 0.05) (hcover_hi : 0.74 ≤ u)
+    (hBddP : BddAbove ((norm ∘ DD_RecenterDamp.dampedPoleRemovedP) ''
+      Complex.HadamardThreeLines.verticalClosedStrip l u))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {l},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {u},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+      / (5.25 * 0.919) := by
+  have hz : s ∈ Complex.HadamardThreeLines.verticalClosedStrip l u := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    simp only [Set.mem_preimage, Set.mem_Icc]
+    constructor <;> linarith
+  have h3 :=
+    Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'
+      hlu hz (GP_diffContOnCl_strip l u) hBddP hLeft hRight
+  have hs1 : s ≠ 1 := by
+    intro h
+    have himm : s.im = 0 := by
+      rw [h]
+      exact Complex.one_im
+    linarith
+  have hnorm : ‖DD_RecenterDamp.dampedPoleRemovedP s‖
+      = (‖s - 1‖ * ‖riemannZeta s‖)
+        * ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ := by
+    have hfin : DD_RecenterDamp.dampedPoleRemovedP s =
+        ZetaUpperR02ThreeLines.poleRemovedZeta s *
+          Complex.exp (((1 / 28 : ℝ) : ℂ) *
+            (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+    rw [hfin, ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hs1, norm_mul, norm_mul]
+  have hge1 : (5.25 : ℝ) ≤ ‖s - 1‖ :=
+    ZetaUpperR02ThreeLines.sSubOne_norm_ge_R02 him_hi
+  have hge2 : (0.919 : ℝ)
+      ≤ ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ :=
+    dampP_lower_R02 hs_lo hs_hi him_lo him_hi
+  have hmul : 5.25 * ‖riemannZeta s‖ * 0.919
+      ≤ ‖DD_RecenterDamp.dampedPoleRemovedP s‖ := by
+    rw [hnorm]
+    exact mul_le_mul (mul_le_mul_of_nonneg_right hge1 (norm_nonneg _)) hge2
+      (by norm_num) (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+  have hC : 5.25 * ‖riemannZeta s‖ * 0.919
+      ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l)) :=
+    le_trans hmul h3
+  have hden : (0 : ℝ) < 5.25 * 0.919 := by norm_num
+  rw [le_div_iff₀ hden]
+  have hrr : 5.25 * ‖riemannZeta s‖ * 0.919
+      = ‖riemannZeta s‖ * (5.25 * 0.919) := by
+    ring
+  linarith [hC]
+
+/-- (iv-c) Parallel uniform form: interpolation `≤ A`, so `‖ζ‖ ≤ A/4.82475`. -/
+theorem GP_uniform {l u A B : ℝ} (hlu : l < u)
+    (hcover_lo : l ≤ 0.05) (hcover_hi : 0.74 ≤ u)
+    (hApos : 0 < A) (hBnn : 0 ≤ B) (hBA : B ≤ A)
+    (hBddP : BddAbove ((norm ∘ DD_RecenterDamp.dampedPoleRemovedP) ''
+      Complex.HadamardThreeLines.verticalClosedStrip l u))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {l},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {u},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ A / (5.25 * 0.919) := by
+  have hpt := GP_threeLines hlu hcover_lo hcover_hi hBddP hLeft hRight
+    hs_lo hs_hi him_lo him_hi
+  have hul : (0 : ℝ) < u - l := sub_pos.mpr hlu
+  have ht0 : (0 : ℝ) ≤ (s.re - l) / (u - l) :=
+    div_nonneg (by linarith) hul.le
+  have hpow : A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l)) ≤ A := by
+    have h1 : B ^ ((s.re - l) / (u - l)) ≤ A ^ ((s.re - l) / (u - l)) :=
+      Real.rpow_le_rpow hBnn hBA ht0
+    have h2 : A ^ (1 - (s.re - l) / (u - l)) * A ^ ((s.re - l) / (u - l)) = A := by
+      rw [← Real.rpow_add hApos, sub_add_cancel, Real.rpow_one]
+    calc A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+        ≤ A ^ (1 - (s.re - l) / (u - l)) * A ^ ((s.re - l) / (u - l)) :=
+          mul_le_mul_of_nonneg_left h1 (Real.rpow_nonneg hApos.le _)
+      _ = A := h2
+  have hden : (0 : ℝ) < 5.25 * 0.919 := by norm_num
+  calc ‖riemannZeta s‖
+      ≤ A ^ (1 - (s.re - l) / (u - l)) * B ^ ((s.re - l) / (u - l))
+        / (5.25 * 0.919) := hpt
+    _ ≤ A / (5.25 * 0.919) := by
+      have hcancel : A / (5.25 * 0.919) * (5.25 * 0.919) = A := by
+        rw [div_eq_mul_inv, mul_assoc, inv_mul_cancel₀ (ne_of_gt hden), mul_one]
+      rw [div_le_iff₀ hden, hcancel]
+      exact hpow
+
+/-- (iv-main) Parallel threshold: at `l = -1`, `u = 2`, a whole-line left cap
+`A ≤ 48.24` (with `B ≤ A`) gives `‖ζ‖ ≤ 10` on the R02 rect
+(`48.24 ≤ 10·4.82475`; margin `12.24` at `A = B = 36`). -/
+theorem GP_ten_of_bounds {A B : ℝ}
+    (hApos : 0 < A) (hBnn : 0 ≤ B) (hBA : B ≤ A) (hAcap : A ≤ 48.24)
+    (hBddP : BddAbove ((norm ∘ DD_RecenterDamp.dampedPoleRemovedP) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2))
+    (hLeft : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ A)
+    (hRight : ∀ z ∈ Set.preimage Complex.re {(2 : ℝ)},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ B)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 := by
+  have hU := GP_uniform (l := -1) (u := 2) (by norm_num)
+    (by norm_num) (by norm_num) hApos hBnn hBA hBddP hLeft hRight
+    hs_lo hs_hi him_lo him_hi
+  have hden : (5.25 : ℝ) * 0.919 = 4.82475 := by norm_num
+  rw [hden] at hU
+  have hA' : A ≤ 10 * 4.82475 := by linarith [hAcap]
+  calc ‖riemannZeta s‖ ≤ A / 4.82475 := hU
+    _ ≤ 10 := by
+        rw [div_le_iff₀ (by norm_num)]
+        linarith [hA']
+
+/-- Parallel P1 (conditional): `‖ζ‖ ≤ 10` on the R02 rect from the two gap
+premises + the strip tail bound. `BZTailEnvelope.P1_R02_of_hTail` cannot fire
+(old `G`); this is its `G_P` replacement. -/
+theorem GP_P1_of_gaps_and_tailT
+    (hGapLo : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      8.75 < |z.im| → |z.im| < 10.6 →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36)
+    (hGapHi : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      21 < |z.im| →
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ 36)
+    (hTailT : ∃ T : ℝ, ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      9 < |s.im| → ‖DD_RecenterDamp.dampedPoleRemovedP s‖ ≤ T)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  GP_ten_of_bounds (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (GP_hBdd_of_tailT hTailT)
+    (GP_left_whole_36_of_tailP (GP_hTailP_of_gaps hGapLo hGapHi))
+    (fun z hz => GP_right_whole_36 hz)
+    hs_lo hs_hi him_lo him_hi
+
+#print axioms DF_ParallelP1.GP_differentiable
+#print axioms DF_ParallelP1.GP_diffContOnCl_strip
+#print axioms DF_ParallelP1.exp_inv28_le_105
+#print axioms DF_ParallelP1.dampP_window_le
+#print axioms DF_ParallelP1.GP_left_window_36
+#print axioms DF_ParallelP1.exp_inv7_le_116
+#print axioms DF_ParallelP1.dampP_Re2_re
+#print axioms DF_ParallelP1.dampP_Re2_split
+#print axioms DF_ParallelP1.right_sup_aux_28
+#print axioms DF_ParallelP1.GP_right_whole_36
+#print axioms DF_ParallelP1.GP_left_whole_36_of_tailP
+#print axioms DF_ParallelP1.GP_windowed_interp_36
+#print axioms DF_ParallelP1.GP_hTailP_of_gaps
+#print axioms DF_ParallelP1.GP_continuous
+#print axioms DF_ParallelP1.GP_window_bdd
+#print axioms DF_ParallelP1.GP_hBdd_of_tailT
+#print axioms DF_ParallelP1.dampP_lower_R02
+#print axioms DF_ParallelP1.GP_threeLines
+#print axioms DF_ParallelP1.GP_uniform
+#print axioms DF_ParallelP1.GP_ten_of_bounds
+#print axioms DF_ParallelP1.GP_P1_of_gaps_and_tailT
+
+end DF_ParallelP1
+
+/-!
+DF VERDICT + RESIDUAL (report-and-stop): parallel-track threshold assembly banked
+(`DF_ParallelP1`, 21 theorems, full proofs pending build, no `sorry`/`admit`/`axiom`).
+
+(1) BRIDGES LANDED (this tail): (i) `G_P` entire + `DiffContOnCl` (unconditional);
+(ii) windowed `A = B = 36` caps for `G_P` — left in-window unconditional
+(`35.7`), right whole-line unconditional (`20.88`), strip interpolation
+conditional on `hTailP` + `hBddP` (BH2 mirror); DD's band cited so `hTailP`
+needs only the gaps `(8.75, 10.6)` and `(21, ∞)`; (iii) window `BddAbove`
+unconditional via compactness + full-strip `BddAbove` conditional on the strip
+tail bound `hTailT` (BZ/BU mirror, easier — no envelope); (iv) re-proved
+threshold at honest divisor `4.824`/threshold `48.24` + parallel P1 `‖ζ‖ ≤ 10`
+conditional on `hGapLo` + `hGapHi` + `hTailT`.
+(2) PARALLEL P1 NOT CLOSED UNCONDITIONALLY (exact residual, three premises):
+`hGapLo` (`‖G_P‖ ≤ 36` on `Re = -1`, `8.75 < |Im| < 10.6` — CQ/CW transfer via
+`/28`-vs-`/100` damping comparison, both exponents `≤ 0` there, tasked);
+`hGapHi` (`‖G_P‖ ≤ 36` on `Re = -1`, `21 < |Im|` — CT transfer, same comparison,
+tasked); `hTailT` (`∃ T`, strip tail bound for `G_P`, `9 < |Im|` — BZ mirror at
+`/28`, strictly easier constants, tasked).
+(3) DIVISOR DEVIATION (§1h finding): brief's `4.845`/`48.45` (`0.923`) is above
+the true damping minimum `≈ 0.92287`, hence unprovable; banked `4.824`/`48.24`
+(`0.919`, linear tier) instead. P1 unaffected (`36 ≤ 48.24`, margin `12.24`).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
