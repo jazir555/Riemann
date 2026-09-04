@@ -11765,3 +11765,894 @@ route is structural: lever (iii), recentered damping + re-proved threshold assem
 `[10, 10.5]` (CW), `[10.5, 10.6]` (here), `[21, ∞)` (CT): remainder `(10.6, 21)`.
 -/
 
+/-!
+# DD tail (door-3 P1 PARALLEL track, variance-narrowed damping): `(10.6, 21)` band.
+
+Ownership: Agent DD tail append (append-only after the CZ verdict block; nothing above
+touched; no new imports; `zeta_rigorous.lean` untouched).
+
+THRESHOLD ASSEMBLY ANATOMY (grep record, verified before writing):
+* `ZetaUpperR02ThreeLines.dampCenter` (`:1125`, `⟨0,-6.75⟩`) + `dampedPoleRemoved`
+  (`:1134-1135`, `G = F·exp((1/100)(s-c)²)`) + `dampCenter_re/im` (`:1137-1139`).
+* Threshold `zetaUpper_R02_ten_of_bounds` (`:1399-1420`): `A ≤ 50.925` (with `B ≤ A`)
+  ⇒ `‖ζ‖ ≤ 10` on R02 via divisor `5.0925 = 5.25·0.97` (`:1413-1416`,
+  `50.925 = 10·5.0925`).
+* `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`, exact norm `exp((1-(τ+6.75)²)/100)` on
+  `Re = -1`) + `damp_mono_pos` (`:6712`, pos-side decrease) + pos cap `0.1`
+  (`exp_neg23925_le` `:6644`, `G_le_sharp_pos` `:6680`) vs neg cap `0.971`
+  (`exp_neg003_le` `:6755`, `G_le_sharp_neg` `:6761`): asymmetry is `(τ+6.75)²`
+  (`15.5² = 240.25` pos vs `(-2)² = 4` neg at `|τ| = 8.75`).
+* `BH2TailWindow`: `damp_re_general` (`:3623`), `damp_left_tail_le_one` (`:3645`),
+  `damped_left_whole_36_of_tail` (`:3722`), `damped_windowed_interp_36` (`:3737`,
+  `36^(1-t)·36^t = 36`), `zeta_R02_le_ten_of_tail` (`:3762`, `A = B = 36 ≤ 50.925`,
+  margin `14.925`).
+* `BZTailEnvelope.P1_R02_of_hTail` (`:5948`, `hTail` sole premise; `hBdd`
+  unconditional `:5941`) + `CP_Sharp201.hTail_of_sharp201_sup` (`:9160-9166`,
+  sup hyps ⇒ `hTail`) + `P1_R02_of_sharp201_sup` (`:9184`, sup hyps ⇒ P1).
+* `CZ_JointHump.CZ_F_hump_le` (`:11564`, `‖F‖ ≤ Bhump(|τ|)` for `|τ| ≥ 10.5`,
+  `1.26/19.5` constants) + `CZ_Bhump_mono` (`:11590`) + `CZ_Bhump_nonneg`
+  (`:11579`) — REUSED directly (damping-independent `F` side).
+* `BF2TailCaps.exp_neg_le_inv` (`:3399`, `exp(-t) ≤ 1/(1+t)`) — REUSED (only
+  repo-standard exp-upper; its linearity forces the variance pick below).
+
+PARALLEL-TRACK PICK (Python-quantified FIRST, external numerals, not Lean claims):
+CZ envelope on `(10.6,21)` peaks `47.93` (`1.331×` over 36; need `≥ 1.34×` at peak).
+Candidates for the new (entire) damping `exp((σ²-(τ-c)²)/V)`:
+* center-shift `c = 0`, `V = 100`: peak `13.10` — best hump margin, but R02 divisor
+  `5.0925 → ~2.63` (threshold `50.925 → ~26.3`, halves the budget).
+* variance-narrow `c = -6.75`, `V = 50`: TRUE peak `31.70` — but UNPROVABLE with the
+  linear exp-upper (`1/(1+t)·B(a) > 36` near `a ≈ 12.5` even at zero width).
+* variance-narrow `c = -6.75`, `V = 28`: TRUE peak `≈ 30.1`, worst CLAIMED piece
+  `33.83` (margin `2.18`); R02 divisor `5.0925 → 4.845` (damp lower
+  `exp(-2.2475/28) ≈ 0.923`, threshold `50.925 → 48.45`, a `4.8%` tightening);
+  gain at old peak `47.93/8.54 ≈ 5.6×`. CHOSEN: threshold-compatible (same center,
+  so `dampCenter` and all window/zero-crossing lemmas keep their statements; only
+  `/100 → /28` in the parallel def below).
+Asymmetric piecewise damping NOT used (breaks entireness needed by three-lines).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `dampedPoleRemovedP` (parallel def, `1/28` variance, SAME center; old track untouched)
+  + `dampP_re_general` + `dampP_norm_eq_neg1` (CF-skeleton exact norm identity).
+* `dampPNeg_mono` (neg-side antitonicity) + eleven `DD_B*_le` (`Bhump` numerals
+  `43.55–216.52`) + eleven `DD_damp*_le` (new-damping numerals via `exp_neg_le_inv`)
+  + eleven `DD_neg_cap_*` (neg envelope `≤ 36` per unit).
+* `DD_G_sharp_le`/`_pos_le`/`_neg_le` (pointwise composition, CP mirror).
+* `DD_supNeg`/`DD_supPos` (cap tables as sup premises) + `DD_dampP_pos_le`.
+* `DD_hTail_of_sup` (EXPLICIT conditional: new-sup-hyps ⇒ `‖G_P‖ ≤ 36` on the band)
+  + `DD_hTail_core` (unconditional band composition).
+All numerals Fraction-preverified (exact rational checks) before writing.
+-/
+
+namespace DD_RecenterDamp
+
+/-- Parallel-track damped pole-removed (`1/28` variance, SAME center `-6.75·I`).
+Old `-6.75`/`1/100` track untouched. -/
+noncomputable def dampedPoleRemovedP (s : ℂ) : ℂ :=
+  ZetaUpperR02ThreeLines.poleRemovedZeta s * Complex.exp (((1 / 28 : ℝ) : ℂ) *
+    (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)
+
+/-- Damping real part for the parallel track:
+`Re((1/28)(s-c)²) = (σ²-(τ+6.75)²)/28`. Mirrors `BH2TailWindow.damp_re_general`. -/
+theorem dampP_re_general {s : ℂ} :
+    ((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = ((s.re) ^ 2 - (s.im + 6.75) ^ 2) / 28 := by
+  have hwre : ((((1 / 28 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (1 / 28) * ((((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hsq2 : ((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (s.re) ^ 2 - (s.im + 6.75) ^ 2 := by
+    have e1 : (s - ZetaUpperR02ThreeLines.dampCenter).re = s.re := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, sub_zero]
+    have e2 : (s - ZetaUpperR02ThreeLines.dampCenter).im = s.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  rw [hwre, hsq2]
+  ring
+
+/-- Exact parallel-damping norm on `Re = -1`:
+`‖dampP z‖ = exp((1-(τ+6.75)²)/28)`. Mirrors `CF_SharpDamp.damp_norm_eq_neg1`. -/
+theorem dampP_norm_eq_neg1 {z : ℂ} (hz : z.re = -1) :
+    ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) := by
+  have e : ((-1 : ℝ)) ^ 2 = 1 := by norm_num
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp, dampP_re_general, hz, e]
+
+/-- Parallel neg damping antitone for `a ≥ 6.75`. Mirrors `CQ_CompactHump.dampNeg_mono`. -/
+theorem dampPNeg_mono {a b : ℝ} (ha : 6.75 ≤ a) (hab : a ≤ b) :
+    Real.exp ((1 - (b - 6.75) ^ 2) / 28)
+      ≤ Real.exp ((1 - (a - 6.75) ^ 2) / 28) := by
+  apply Real.exp_le_exp.mpr
+  have h1 : -(b - 6.75) ≤ a - 6.75 := by linarith
+  have h2 : a - 6.75 ≤ b - 6.75 := by linarith
+  have hsq : (a - 6.75) ^ 2 ≤ (b - 6.75) ^ 2 := sq_le_sq' h1 h2
+  linarith
+
+/-- `DD_Bhump(11) ≤ 43.55` (`√125 ≤ 11.19`, `√1331 ≤ 36.49`). -/
+theorem DD_B11_le :
+    Real.sqrt (4 + (11 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((11 : ℝ) ^ 3))) ≤ 43.55 := by
+  have s1 : Real.sqrt (4 + (11 : ℝ) ^ 2) ≤ 11.19 := by
+    have hle : 4 + (11 : ℝ) ^ 2 ≤ (11.19 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 11.19)] at h
+  have s2 : Real.sqrt ((11 : ℝ) ^ 3) ≤ 36.49 := by
+    have hle : (11 : ℝ) ^ 3 ≤ (36.49 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 36.49)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((11 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 36.49 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((11 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 36.49) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((11 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (11 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((11 : ℝ) ^ 3)))
+      ≤ 11.19 * (1.65 * ((1.26 / 19.5) * 36.49)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 43.55 := by norm_num
+
+/-- `DD_Bhump(12) ≤ 53.97` (`√148 ≤ 12.17`, `√1728 ≤ 41.58`). -/
+theorem DD_B12_le :
+    Real.sqrt (4 + (12 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((12 : ℝ) ^ 3))) ≤ 53.97 := by
+  have s1 : Real.sqrt (4 + (12 : ℝ) ^ 2) ≤ 12.17 := by
+    have hle : 4 + (12 : ℝ) ^ 2 ≤ (12.17 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 12.17)] at h
+  have s2 : Real.sqrt ((12 : ℝ) ^ 3) ≤ 41.58 := by
+    have hle : (12 : ℝ) ^ 3 ≤ (41.58 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 41.58)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((12 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 41.58 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((12 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 41.58) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((12 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (12 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((12 : ℝ) ^ 3)))
+      ≤ 12.17 * (1.65 * ((1.26 / 19.5) * 41.58)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 53.97 := by norm_num
+
+/-- `DD_Bhump(13) ≤ 65.80` (`√173 ≤ 13.16`, `√2197 ≤ 46.88`). -/
+theorem DD_B13_le :
+    Real.sqrt (4 + (13 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((13 : ℝ) ^ 3))) ≤ 65.80 := by
+  have s1 : Real.sqrt (4 + (13 : ℝ) ^ 2) ≤ 13.16 := by
+    have hle : 4 + (13 : ℝ) ^ 2 ≤ (13.16 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 13.16)] at h
+  have s2 : Real.sqrt ((13 : ℝ) ^ 3) ≤ 46.88 := by
+    have hle : (13 : ℝ) ^ 3 ≤ (46.88 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 46.88)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((13 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 46.88 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((13 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 46.88) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((13 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (13 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((13 : ℝ) ^ 3)))
+      ≤ 13.16 * (1.65 * ((1.26 / 19.5) * 46.88)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 65.80 := by norm_num
+
+/-- `DD_Bhump(14) ≤ 79.06` (`√200 ≤ 14.15`, `√2744 ≤ 52.39`). -/
+theorem DD_B14_le :
+    Real.sqrt (4 + (14 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((14 : ℝ) ^ 3))) ≤ 79.06 := by
+  have s1 : Real.sqrt (4 + (14 : ℝ) ^ 2) ≤ 14.15 := by
+    have hle : 4 + (14 : ℝ) ^ 2 ≤ (14.15 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 14.15)] at h
+  have s2 : Real.sqrt ((14 : ℝ) ^ 3) ≤ 52.39 := by
+    have hle : (14 : ℝ) ^ 3 ≤ (52.39 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 52.39)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((14 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 52.39 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((14 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 52.39) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((14 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (14 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((14 : ℝ) ^ 3)))
+      ≤ 14.15 * (1.65 * ((1.26 / 19.5) * 52.39)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 79.06 := by norm_num
+
+/-- `DD_Bhump(15) ≤ 93.80` (`√229 ≤ 15.14`, `√3375 ≤ 58.10`). -/
+theorem DD_B15_le :
+    Real.sqrt (4 + (15 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((15 : ℝ) ^ 3))) ≤ 93.80 := by
+  have s1 : Real.sqrt (4 + (15 : ℝ) ^ 2) ≤ 15.14 := by
+    have hle : 4 + (15 : ℝ) ^ 2 ≤ (15.14 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 15.14)] at h
+  have s2 : Real.sqrt ((15 : ℝ) ^ 3) ≤ 58.10 := by
+    have hle : (15 : ℝ) ^ 3 ≤ (58.10 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 58.10)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((15 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 58.10 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((15 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 58.10) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((15 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (15 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((15 : ℝ) ^ 3)))
+      ≤ 15.14 * (1.65 * ((1.26 / 19.5) * 58.10)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 93.80 := by norm_num
+
+/-- `DD_Bhump(16) ≤ 110.10` (`√260 ≤ 16.13`, `√4096 ≤ 64.01`). -/
+theorem DD_B16_le :
+    Real.sqrt (4 + (16 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((16 : ℝ) ^ 3))) ≤ 110.10 := by
+  have s1 : Real.sqrt (4 + (16 : ℝ) ^ 2) ≤ 16.13 := by
+    have hle : 4 + (16 : ℝ) ^ 2 ≤ (16.13 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 16.13)] at h
+  have s2 : Real.sqrt ((16 : ℝ) ^ 3) ≤ 64.01 := by
+    have hle : (16 : ℝ) ^ 3 ≤ (64.01 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 64.01)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((16 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 64.01 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((16 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 64.01) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((16 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (16 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((16 : ℝ) ^ 3)))
+      ≤ 16.13 * (1.65 * ((1.26 / 19.5) * 64.01)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 110.10 := by norm_num
+
+/-- `DD_Bhump(17) ≤ 128.07` (`√293 ≤ 17.13`, `√4913 ≤ 70.12`). -/
+theorem DD_B17_le :
+    Real.sqrt (4 + (17 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((17 : ℝ) ^ 3))) ≤ 128.07 := by
+  have s1 : Real.sqrt (4 + (17 : ℝ) ^ 2) ≤ 17.13 := by
+    have hle : 4 + (17 : ℝ) ^ 2 ≤ (17.13 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 17.13)] at h
+  have s2 : Real.sqrt ((17 : ℝ) ^ 3) ≤ 70.12 := by
+    have hle : (17 : ℝ) ^ 3 ≤ (70.12 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 70.12)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((17 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 70.12 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((17 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 70.12) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((17 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (17 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((17 : ℝ) ^ 3)))
+      ≤ 17.13 * (1.65 * ((1.26 / 19.5) * 70.12)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 128.07 := by norm_num
+
+/-- `DD_Bhump(18) ≤ 147.58` (`√328 ≤ 18.12`, `√5832 ≤ 76.38`). -/
+theorem DD_B18_le :
+    Real.sqrt (4 + (18 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((18 : ℝ) ^ 3))) ≤ 147.58 := by
+  have s1 : Real.sqrt (4 + (18 : ℝ) ^ 2) ≤ 18.12 := by
+    have hle : 4 + (18 : ℝ) ^ 2 ≤ (18.12 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 18.12)] at h
+  have s2 : Real.sqrt ((18 : ℝ) ^ 3) ≤ 76.38 := by
+    have hle : (18 : ℝ) ^ 3 ≤ (76.38 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 76.38)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((18 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 76.38 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((18 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 76.38) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((18 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (18 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((18 : ℝ) ^ 3)))
+      ≤ 18.12 * (1.65 * ((1.26 / 19.5) * 76.38)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 147.58 := by norm_num
+
+/-- `DD_Bhump(19) ≤ 168.80` (`√365 ≤ 19.11`, `√6859 ≤ 82.82`). -/
+theorem DD_B19_le :
+    Real.sqrt (4 + (19 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((19 : ℝ) ^ 3))) ≤ 168.80 := by
+  have s1 : Real.sqrt (4 + (19 : ℝ) ^ 2) ≤ 19.11 := by
+    have hle : 4 + (19 : ℝ) ^ 2 ≤ (19.11 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 19.11)] at h
+  have s2 : Real.sqrt ((19 : ℝ) ^ 3) ≤ 82.82 := by
+    have hle : (19 : ℝ) ^ 3 ≤ (82.82 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 82.82)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((19 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 82.82 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((19 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 82.82) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((19 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (19 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((19 : ℝ) ^ 3)))
+      ≤ 19.11 * (1.65 * ((1.26 / 19.5) * 82.82)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 168.80 := by norm_num
+
+/-- `DD_Bhump(20) ≤ 191.80` (`√404 ≤ 20.11`, `√8000 ≤ 89.45`). -/
+theorem DD_B20_le :
+    Real.sqrt (4 + (20 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((20 : ℝ) ^ 3))) ≤ 191.80 := by
+  have s1 : Real.sqrt (4 + (20 : ℝ) ^ 2) ≤ 20.11 := by
+    have hle : 4 + (20 : ℝ) ^ 2 ≤ (20.11 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 20.11)] at h
+  have s2 : Real.sqrt ((20 : ℝ) ^ 3) ≤ 89.45 := by
+    have hle : (20 : ℝ) ^ 3 ≤ (89.45 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 89.45)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((20 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 89.45 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((20 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 89.45) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((20 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (20 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((20 : ℝ) ^ 3)))
+      ≤ 20.11 * (1.65 * ((1.26 / 19.5) * 89.45)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 191.80 := by norm_num
+
+/-- `DD_Bhump(21) ≤ 216.52` (`√445 ≤ 21.10`, `√9261 ≤ 96.24`). -/
+theorem DD_B21_le :
+    Real.sqrt (4 + (21 : ℝ) ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt ((21 : ℝ) ^ 3))) ≤ 216.52 := by
+  have s1 : Real.sqrt (4 + (21 : ℝ) ^ 2) ≤ 21.10 := by
+    have hle : 4 + (21 : ℝ) ^ 2 ≤ (21.10 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 21.10)] at h
+  have s2 : Real.sqrt ((21 : ℝ) ^ 3) ≤ 96.24 := by
+    have hle : (21 : ℝ) ^ 3 ≤ (96.24 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 96.24)] at h
+  have h1 : (1.26 / 19.5) * Real.sqrt ((21 : ℝ) ^ 3) ≤ (1.26 / 19.5) * 96.24 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.26 / 19.5) * Real.sqrt ((21 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.26 / 19.5) * 96.24) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.26 / 19.5) * Real.sqrt ((21 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (21 : ℝ) ^ 2) *
+        (1.65 * ((1.26 / 19.5) * Real.sqrt ((21 : ℝ) ^ 3)))
+      ≤ 21.10 * (1.65 * ((1.26 / 19.5) * 96.24)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 216.52 := by norm_num
+
+/-- Parallel neg damping at `10.6`: `exp((1-3.85²)/28) ≤ 0.67`
+(via `BF2TailCaps.exp_neg_le_inv`). -/
+theorem DD_damp106_le :
+    Real.exp ((1 - ((10.6 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.67 := by
+  have e : (1 - ((10.6 : ℝ) - 6.75) ^ 2) / 28 ≤ -0.4936 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.4936 by norm_num)
+  have hle : (1 : ℝ) / (1 + 0.4936) ≤ 0.67 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `11`: `exp((1-4.25²)/28) ≤ 0.622`. -/
+theorem DD_damp11_le :
+    Real.exp ((1 - ((11 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.622 := by
+  have e : (1 - ((11 : ℝ) - 6.75) ^ 2) / 28 ≤ -0.6093 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.6093 by norm_num)
+  have hle : (1 : ℝ) / (1 + 0.6093) ≤ 0.622 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `12`: `exp((1-5.25²)/28) ≤ 0.514`. -/
+theorem DD_damp12_le :
+    Real.exp ((1 - ((12 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.514 := by
+  have e : (1 - ((12 : ℝ) - 6.75) ^ 2) / 28 ≤ -0.9486 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.9486 by norm_num)
+  have hle : (1 : ℝ) / (1 + 0.9486) ≤ 0.514 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `13`: `exp((1-6.25²)/28) ≤ 0.425`. -/
+theorem DD_damp13_le :
+    Real.exp ((1 - ((13 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.425 := by
+  have e : (1 - ((13 : ℝ) - 6.75) ^ 2) / 28 ≤ -1.3593 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 1.3593 by norm_num)
+  have hle : (1 : ℝ) / (1 + 1.3593) ≤ 0.425 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `14`: `exp((1-7.25²)/28) ≤ 0.353`. -/
+theorem DD_damp14_le :
+    Real.exp ((1 - ((14 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.353 := by
+  have e : (1 - ((14 : ℝ) - 6.75) ^ 2) / 28 ≤ -1.8415 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 1.8415 by norm_num)
+  have hle : (1 : ℝ) / (1 + 1.8415) ≤ 0.353 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `15`: `exp((1-8.25²)/28) ≤ 0.295`. -/
+theorem DD_damp15_le :
+    Real.exp ((1 - ((15 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.295 := by
+  have e : (1 - ((15 : ℝ) - 6.75) ^ 2) / 28 ≤ -2.3950 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 2.3950 by norm_num)
+  have hle : (1 : ℝ) / (1 + 2.3950) ≤ 0.295 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `16`: `exp((1-9.25²)/28) ≤ 0.25`. -/
+theorem DD_damp16_le :
+    Real.exp ((1 - ((16 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.25 := by
+  have e : (1 - ((16 : ℝ) - 6.75) ^ 2) / 28 ≤ -3.0200 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 3.0200 by norm_num)
+  have hle : (1 : ℝ) / (1 + 3.0200) ≤ 0.25 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `17`: `exp((1-10.25²)/28) ≤ 0.213`. -/
+theorem DD_damp17_le :
+    Real.exp ((1 - ((17 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.213 := by
+  have e : (1 - ((17 : ℝ) - 6.75) ^ 2) / 28 ≤ -3.7165 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 3.7165 by norm_num)
+  have hle : (1 : ℝ) / (1 + 3.7165) ≤ 0.213 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `18`: `exp((1-11.25²)/28) ≤ 0.183`. -/
+theorem DD_damp18_le :
+    Real.exp ((1 - ((18 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.183 := by
+  have e : (1 - ((18 : ℝ) - 6.75) ^ 2) / 28 ≤ -4.4843 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 4.4843 by norm_num)
+  have hle : (1 : ℝ) / (1 + 4.4843) ≤ 0.183 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `19`: `exp((1-12.25²)/28) ≤ 0.159`. -/
+theorem DD_damp19_le :
+    Real.exp ((1 - ((19 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.159 := by
+  have e : (1 - ((19 : ℝ) - 6.75) ^ 2) / 28 ≤ -5.3236 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 5.3236 by norm_num)
+  have hle : (1 : ℝ) / (1 + 5.3236) ≤ 0.159 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg damping at `20`: `exp((1-13.25²)/28) ≤ 0.139`. -/
+theorem DD_damp20_le :
+    Real.exp ((1 - ((20 : ℝ) - 6.75) ^ 2) / 28) ≤ 0.139 := by
+  have e : (1 - ((20 : ℝ) - 6.75) ^ 2) / 28 ≤ -6.2343 := by norm_num
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 6.2343 by norm_num)
+  have hle : (1 : ℝ) / (1 + 6.2343) ≤ 0.139 := by norm_num
+  exact le_trans (le_trans (Real.exp_le_exp.mpr e) h) hle
+
+/-- Parallel neg envelope `≤ 36` on `[10.6, 11]` (`0.67 × 43.55 = 29.18`). -/
+theorem DD_neg_cap_106_11 {a : ℝ} (hlo : 10.6 ≤ a) (hhi : a ≤ 11) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.67 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 10.6 by norm_num) hlo) DD_damp106_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 43.55 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B11_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.67 * 43.55 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[11, 12]` (`0.622 × 53.97 = 33.57`). -/
+theorem DD_neg_cap_11_12 {a : ℝ} (hlo : 11 ≤ a) (hhi : a ≤ 12) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.622 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 11 by norm_num) hlo) DD_damp11_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 53.97 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B12_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.622 * 53.97 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[12, 13]` (`0.514 × 65.80 = 33.83`). -/
+theorem DD_neg_cap_12_13 {a : ℝ} (hlo : 12 ≤ a) (hhi : a ≤ 13) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.514 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 12 by norm_num) hlo) DD_damp12_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 65.80 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B13_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.514 * 65.80 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[13, 14]` (`0.425 × 79.06 = 33.61`). -/
+theorem DD_neg_cap_13_14 {a : ℝ} (hlo : 13 ≤ a) (hhi : a ≤ 14) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.425 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 13 by norm_num) hlo) DD_damp13_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 79.06 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B14_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.425 * 79.06 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[14, 15]` (`0.353 × 93.80 = 33.12`). -/
+theorem DD_neg_cap_14_15 {a : ℝ} (hlo : 14 ≤ a) (hhi : a ≤ 15) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.353 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 14 by norm_num) hlo) DD_damp14_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 93.80 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B15_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.353 * 93.80 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[15, 16]` (`0.295 × 110.10 = 32.48`). -/
+theorem DD_neg_cap_15_16 {a : ℝ} (hlo : 15 ≤ a) (hhi : a ≤ 16) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.295 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 15 by norm_num) hlo) DD_damp15_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 110.10 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B16_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.295 * 110.10 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[16, 17]` (`0.25 × 128.07 = 32.02`). -/
+theorem DD_neg_cap_16_17 {a : ℝ} (hlo : 16 ≤ a) (hhi : a ≤ 17) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.25 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 16 by norm_num) hlo) DD_damp16_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 128.07 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B17_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.25 * 128.07 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[17, 18]` (`0.213 × 147.58 = 31.44`). -/
+theorem DD_neg_cap_17_18 {a : ℝ} (hlo : 17 ≤ a) (hhi : a ≤ 18) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.213 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 17 by norm_num) hlo) DD_damp17_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 147.58 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B18_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.213 * 147.58 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[18, 19]` (`0.183 × 168.80 = 30.90`). -/
+theorem DD_neg_cap_18_19 {a : ℝ} (hlo : 18 ≤ a) (hhi : a ≤ 19) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.183 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 18 by norm_num) hlo) DD_damp18_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 168.80 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B19_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.183 * 168.80 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[19, 20]` (`0.159 × 191.80 = 30.50`). -/
+theorem DD_neg_cap_19_20 {a : ℝ} (hlo : 19 ≤ a) (hhi : a ≤ 20) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.159 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 19 by norm_num) hlo) DD_damp19_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 191.80 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B20_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.159 * 191.80 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel neg envelope `≤ 36` on `[20, 21]` (`0.139 × 216.52 = 30.10`). -/
+theorem DD_neg_cap_20_21 {a : ℝ} (hlo : 20 ≤ a) (hhi : a ≤ 21) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 28) ≤ 0.139 :=
+    le_trans (dampPNeg_mono (show (6.75 : ℝ) ≤ 20 by norm_num) hlo) DD_damp20_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 216.52 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B21_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.139 * 216.52 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Parallel sharp composition, both signs:
+`‖G_P z‖ ≤ exp((1-(τ+6.75)²)/28)·Bhump(|τ|)` on `Re = -1`, `10.5 ≤ |Im|`.
+Mirrors `CP_Sharp201.G_sharp_201_le` with the `1/28` damping + CZ `F`. -/
+theorem DD_G_sharp_le {z : ℂ} (hz : z.re = -1) (htail : (10.5 : ℝ) ≤ |z.im|) :
+    ‖dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have hF := CZ_JointHump.CZ_F_hump_le hz htail
+  have hdamp := dampP_norm_eq_neg1 hz
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3))) :=
+    CZ_JointHump.CZ_Bhump_nonneg
+  have hfin : dampedPoleRemovedP z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 28 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 28)
+      ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Parallel positive-`τ` sharp form with `(|a|+6.75)²`. -/
+theorem DD_G_sharp_pos_le {z : ℂ} (hz : z.re = -1)
+    (hnn : 0 ≤ z.im) (hlo : (10.6 : ℝ) ≤ |z.im|) :
+    ‖dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = z.im := abs_of_nonneg hnn
+  have htail : (10.5 : ℝ) ≤ |z.im| := by linarith
+  have h := DD_G_sharp_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| + 6.75) ^ 2 := by rw [habs]
+  rw [hsq] at h
+  exact h
+
+/-- Parallel negative-`τ` sharp form with `(|a|-6.75)²`. -/
+theorem DD_G_sharp_neg_le {z : ℂ} (hz : z.re = -1)
+    (hneg : z.im ≤ 0) (hlo : (10.6 : ℝ) ≤ |z.im|) :
+    ‖dampedPoleRemovedP z‖ ≤
+      Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.26 / 19.5) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_nonpos hneg
+  have htail : (10.5 : ℝ) ≤ |z.im| := by linarith
+  have h := DD_G_sharp_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by rw [habs]; ring
+  rw [hsq] at h
+  exact h
+
+/-- Parallel neg sup premise on `[10.6, 21]`: eleven-unit case split. -/
+theorem DD_supNeg {a : ℝ} (hlo : (10.6 : ℝ) ≤ a) (hhi : a ≤ 21) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  rcases le_total a 11 with h | h
+  · exact DD_neg_cap_106_11 hlo h
+  · rcases le_total a 12 with h2 | h2
+    · exact DD_neg_cap_11_12 h h2
+    · rcases le_total a 13 with h3 | h3
+      · exact DD_neg_cap_12_13 h2 h3
+      · rcases le_total a 14 with h4 | h4
+        · exact DD_neg_cap_13_14 h3 h4
+        · rcases le_total a 15 with h5 | h5
+          · exact DD_neg_cap_14_15 h4 h5
+          · rcases le_total a 16 with h6 | h6
+            · exact DD_neg_cap_15_16 h5 h6
+            · rcases le_total a 17 with h7 | h7
+              · exact DD_neg_cap_16_17 h6 h7
+              · rcases le_total a 18 with h8 | h8
+                · exact DD_neg_cap_17_18 h7 h8
+                · rcases le_total a 19 with h9 | h9
+                  · exact DD_neg_cap_18_19 h8 h9
+                  · rcases le_total a 20 with h10 | h10
+                    · exact DD_neg_cap_19_20 h9 h10
+                    · exact DD_neg_cap_20_21 h10 hhi
+
+/-- Parallel damping on the pos band: `‖dampP‖ ≤ 0.086` for `τ ≥ 10.6` on `Re = -1`
+(`(τ+6.75)² ≥ 17.35² = 301.0225`, exponent `≤ -10.715`). -/
+theorem DD_dampP_pos_le {z : ℂ} (hz : z.re = -1) (hpos : (10.6 : ℝ) ≤ z.im) :
+    ‖Complex.exp (((1 / 28 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.086 := by
+  rw [dampP_norm_eq_neg1 hz]
+  have hsq : (17.35 : ℝ) ^ 2 ≤ (z.im + 6.75) ^ 2 :=
+    sq_le_sq' (by linarith) (by linarith)
+  have h301 : (17.35 : ℝ) ^ 2 = 301.0225 := by norm_num
+  have e : (1 - (z.im + 6.75) ^ 2) / 28 ≤ -10.715 := by linarith
+  calc Real.exp ((1 - (z.im + 6.75) ^ 2) / 28)
+      ≤ Real.exp (-10.715) := Real.exp_le_exp.mpr e
+    _ ≤ 0.086 := by
+        have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 10.715 by norm_num)
+        have hle : (1 : ℝ) / (1 + 10.715) ≤ 0.086 := by norm_num
+        exact le_trans h hle
+
+/-- Parallel pos sup premise on `[10.6, 21]` (`0.086 × 216.52 = 18.62`). -/
+theorem DD_supPos {a : ℝ} (hlo : (10.6 : ℝ) ≤ a) (hhi : a ≤ 21) :
+    Real.exp ((1 - (a + 6.75) ^ 2) / 28) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a + 6.75) ^ 2) / 28) ≤ 0.086 := by
+    have hsq : (17.35 : ℝ) ^ 2 ≤ (a + 6.75) ^ 2 :=
+      sq_le_sq' (by linarith) (by linarith)
+    have h301 : (17.35 : ℝ) ^ 2 = 301.0225 := by norm_num
+    have e : (1 - (a + 6.75) ^ 2) / 28 ≤ -10.715 := by linarith
+    calc Real.exp ((1 - (a + 6.75) ^ 2) / 28)
+        ≤ Real.exp (-10.715) := Real.exp_le_exp.mpr e
+      _ ≤ 0.086 := by
+          have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 10.715 by norm_num)
+          have hle : (1 : ℝ) / (1 + 10.715) ≤ 0.086 := by norm_num
+          exact le_trans h hle
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))
+      ≤ 216.52 :=
+    le_trans (CZ_JointHump.CZ_Bhump_mono ha0 hhi) DD_B21_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))) := CZ_JointHump.CZ_Bhump_nonneg
+  calc Real.exp ((1 - (a + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3))))
+      ≤ 0.086 * 216.52 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- EXPLICIT conditional (parallel-track bridge): new-sup-hyps ⇒ `‖G_P‖ ≤ 36`
+on `Re = -1`, `10.6 ≤ |Im| ≤ 21`. Mirrors `CP_Sharp201.hTail_of_sharp201_sup`. -/
+theorem DD_hTail_of_sup
+    (hSupPos : ∀ a : ℝ, 10.6 ≤ a → a ≤ 21 →
+      Real.exp ((1 - (a + 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36)
+    (hSupNeg : ∀ a : ℝ, 10.6 ≤ a → a ≤ 21 →
+      Real.exp ((1 - (a - 6.75) ^ 2) / 28) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.26 / 19.5) * Real.sqrt (a ^ 3)))) ≤ 36)
+    {z : ℂ} (hz : z.re = -1)
+    (hlo : (10.6 : ℝ) ≤ |z.im|) (hhi : |z.im| ≤ 21) :
+    ‖dampedPoleRemovedP z‖ ≤ 36 := by
+  rcases le_total 0 z.im with hnn | hneg
+  · have habs : |z.im| = z.im := abs_of_nonneg hnn
+    have h := DD_G_sharp_pos_le hz hnn hlo
+    exact le_trans h (hSupPos _ hlo hhi)
+  · have habs : |z.im| = -z.im := abs_of_nonpos hneg
+    have h := DD_G_sharp_neg_le hz hneg hlo
+    exact le_trans h (hSupNeg _ hlo hhi)
+
+/-- MAIN band composition: `‖G_P‖ ≤ 36` on `Re = -1`, `10.6 ≤ |Im| ≤ 21`
+(sup premises discharged by the cap tables above). -/
+theorem DD_hTail_core {z : ℂ} (hz : z.re = -1)
+    (hlo : (10.6 : ℝ) ≤ |z.im|) (hhi : |z.im| ≤ 21) :
+    ‖dampedPoleRemovedP z‖ ≤ 36 :=
+  DD_hTail_of_sup (fun _ ha1 ha2 => DD_supPos ha1 ha2)
+    (fun _ ha1 ha2 => DD_supNeg ha1 ha2) hz hlo hhi
+
+#print axioms DD_RecenterDamp.dampP_re_general
+#print axioms DD_RecenterDamp.dampP_norm_eq_neg1
+#print axioms DD_RecenterDamp.dampPNeg_mono
+#print axioms DD_RecenterDamp.DD_B11_le
+#print axioms DD_RecenterDamp.DD_B12_le
+#print axioms DD_RecenterDamp.DD_B13_le
+#print axioms DD_RecenterDamp.DD_B14_le
+#print axioms DD_RecenterDamp.DD_B15_le
+#print axioms DD_RecenterDamp.DD_B16_le
+#print axioms DD_RecenterDamp.DD_B17_le
+#print axioms DD_RecenterDamp.DD_B18_le
+#print axioms DD_RecenterDamp.DD_B19_le
+#print axioms DD_RecenterDamp.DD_B20_le
+#print axioms DD_RecenterDamp.DD_B21_le
+#print axioms DD_RecenterDamp.DD_damp106_le
+#print axioms DD_RecenterDamp.DD_damp11_le
+#print axioms DD_RecenterDamp.DD_damp12_le
+#print axioms DD_RecenterDamp.DD_damp13_le
+#print axioms DD_RecenterDamp.DD_damp14_le
+#print axioms DD_RecenterDamp.DD_damp15_le
+#print axioms DD_RecenterDamp.DD_damp16_le
+#print axioms DD_RecenterDamp.DD_damp17_le
+#print axioms DD_RecenterDamp.DD_damp18_le
+#print axioms DD_RecenterDamp.DD_damp19_le
+#print axioms DD_RecenterDamp.DD_damp20_le
+#print axioms DD_RecenterDamp.DD_neg_cap_106_11
+#print axioms DD_RecenterDamp.DD_neg_cap_11_12
+#print axioms DD_RecenterDamp.DD_neg_cap_12_13
+#print axioms DD_RecenterDamp.DD_neg_cap_13_14
+#print axioms DD_RecenterDamp.DD_neg_cap_14_15
+#print axioms DD_RecenterDamp.DD_neg_cap_15_16
+#print axioms DD_RecenterDamp.DD_neg_cap_16_17
+#print axioms DD_RecenterDamp.DD_neg_cap_17_18
+#print axioms DD_RecenterDamp.DD_neg_cap_18_19
+#print axioms DD_RecenterDamp.DD_neg_cap_19_20
+#print axioms DD_RecenterDamp.DD_neg_cap_20_21
+#print axioms DD_RecenterDamp.DD_G_sharp_le
+#print axioms DD_RecenterDamp.DD_G_sharp_pos_le
+#print axioms DD_RecenterDamp.DD_G_sharp_neg_le
+#print axioms DD_RecenterDamp.DD_supNeg
+#print axioms DD_RecenterDamp.DD_dampP_pos_le
+#print axioms DD_RecenterDamp.DD_supPos
+#print axioms DD_RecenterDamp.DD_hTail_of_sup
+#print axioms DD_RecenterDamp.DD_hTail_core
+
+end DD_RecenterDamp
+
+/-!
+DD VERDICT + RESIDUAL (report-and-stop): ONE parallel-track bridge banked
+(`DD_RecenterDamp`, 44 theorems, full proofs pending build, no `sorry`/`admit`/`axiom`).
+
+(1) BRIDGE CLOSED: `dampP_norm_eq_neg1` (CF-skeleton exact norm identity for the
+`1/28` damping) + neg-side cap table (eleven `DD_B*` × eleven `DD_damp*` ⇒ eleven
+`DD_neg_cap_*`, worst claimed `33.83` on `[12,13]`, margin `2.18`; TRUE V28 peak
+`≈ 30.1`) + `DD_G_sharp_le` trio (CP-mirror composition with CZ `F`) +
+`DD_hTail_of_sup` (explicit conditional: new-sup-hyps ⇒ `‖G_P‖ ≤ 36` on
+`Re = -1`, `10.6 ≤ |Im| ≤ 21`) + `DD_hTail_core` (unconditional band composition).
+Recentered envelope goes under 36 across the whole core: YES (`5.6×` gain at the
+old peak `47.93 → 8.54`; the `1.34×` bar is cleared everywhere).
+
+(2) PARALLEL THRESHOLD NOT FIRED (exact residual): `DD_hTail_core` is about the NEW
+`G_P`, so `BZTailEnvelope.P1_R02_of_hTail` (old-`G` consumer) cannot fire. The
+re-proved threshold assembly needs, with divisor `5.25·0.923 ≈ 4.845` (damp lower
+`exp(-2.2475/28) ≈ 0.923` on the R02 rect) and threshold `A ≤ 48.45` (was `50.925`):
+(i) `dampedPoleRemovedP` entire + `DiffContOnCl` (same proof as `:1184-1195` with
+`/28`); (ii) windowed caps for `G_P` (`A = 36` left in-window via recomputation,
+`B = 36` right — both numerical, same skeletons); (iii) `BddAbove` for `G_P`
+(BZ shape, Gaussian domination — strictly easier at `/28`); (iv) threshold
+`zetaUpper_R02_ten_of_bounds` re-proof at divisor `4.845` (lines `:1413-1416`
+with `5.0925 → 4.845`, `50.925 → 48.45`). Then P1 `‖ζ‖ ≤ 10` fires on the R02 rect
+from `DD_hTail_core` + window caps. Companion lever if the re-proof stalls:
+pointwise-`ζ` cancellation or exact-joint+phase (per brief) — NOT needed for the
+hump itself (closed here), only as alternative P1 routes.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
+
+
