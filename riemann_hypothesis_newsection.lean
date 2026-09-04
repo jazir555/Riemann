@@ -14640,6 +14640,628 @@ sharpening). Current tier alone still needs `Azeta ≥ 6894` at the center.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# Door-3 R02 disc-Gamma cut: `G = 0.097 → 0.089` (tighter convexity base) + `M = 110.4312`
+
+Ownership: gamma-cut append (append-only after the zeta-cut verdict block;
+nothing above touched; no new imports; LF endings).
+
+RESULT (this tail, full proofs, no `sorry`/`admit`/`axiom`): the tasked
+`G = 0.026` bridge does NOT fit any convexity+shift route (obstruction
+audited below — recorded honestly, not retried). The best concrete `G`
+that DOES fit is banked: `‖gammaOf‖ ≤ 0.089` on the R02 disc `s`-rect
+(`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`), via the landed 6-shift
+Im-decay-denominator template (`R02GammaDisc`, reused read-only: floors
+`2.62/2.81/3.31/4.0/4.8/5.66`, product `D ≥ 2648`) with a tightened
+convexity base `Real.Gamma 1.37 ≤ 0.9159` (was `≤ 1` via the `(1,1)-(2,1)`
+chord; now via the `(1,1)-(1.5,0.8863)` chord with
+`Real.Gamma 1.5 = √π/2 ≤ 0.8863`). Numerator `256.78 → 235.19`
+(`1.092×`); ratio `235.19/2648 = 0.08881… ≤ 0.089` (`1.09×` under landed
+`0.097`). Fired with the cut `Z = 7.5` (`Door3ZetaCut75.R02_zeta_upper_75`)
+through `Door3MReductionScout.deriv_bound_of_gammaZ_upper`:
+sphere `27.6078`, deriv `M = 110.4312` (ceil `111`).
+
+Grep record (`grep`, verified before writing):
+* `theorem disc_shift_floor_z|disc_shift_floor1..5` -> `interval_arith.lean`
+  (`R02GammaDisc`, denominator floors reused read-only, NOT recopied).
+* `theorem realGamma_6025_le` -> `interval_arith.lean` (`R02GammaDisc`,
+  bottom chain `≤ 127`, reused read-only).
+* `theorem realGamma_137_le_one` -> `interval_arith.lean` (`R02GammaDisc`,
+  base `Γ(1.37) ≤ 1`, SUPERSEDED here by `≤ 0.9159`, same chord shape).
+* `theorem Real.Gamma_one_half_eq` ->
+  `Mathlib/Analysis/SpecialFunctions/Gaussian/GaussianIntegral.lean:324`
+  (`Real.Gamma (1/2) = √π`, reused for the `1.5` anchor).
+* `theorem pi_lt_d20` -> `Mathlib/Analysis/Real/Pi/Bounds.lean:206`
+  (`π < 3.14159265358979323847`, reused for `√π ≤ 1.7725`).
+* `theorem R02_zeta_upper_75` -> this file (`Door3ZetaCut75`, `Z = 7.5`).
+* `theorem deriv_bound_of_gammaZ_upper|sphere_bound_of_gammaZ_upper` ->
+  this file (scout tail, `M(G,Z) = 41.36*1*G*Z/0.25`).
+* `theorem deriv_430144_of_gamma0026` -> this file (scout tail, prior
+  single-gap conditional at `Z = 10` giving `M = 43.0144`; updated here
+  to `Z = 7.5` giving `M = 32.2608`).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `realGamma_15_le` — `Real.Gamma 1.5 ≤ 0.8863` (half-integer anchor).
+* `realGamma_137_le_improved` — `Real.Gamma 1.37 ≤ 0.9159` (tighter base).
+* `realGamma_637_le_improved` — `Real.Gamma 6.37 ≤ 235.19` (top chain).
+* `realGamma_uniform_6025_637_improved` — uniform numerator `≤ 235.19`.
+* `gamma_upper_disc_R02_tight` — `‖Complex.Gamma (s/2)‖ ≤ 0.089`.
+* `gammaOf_upper_disc_R02_tight` — drop-in for `DerivCauchyBridge.gammaOf`.
+* `sphere_sup_89_eq` / `deriv_M_89_eq` — numerified equations.
+* `sphere_276078_unconditional` — sphere sup `27.6078`.
+* `deriv_1104312_unconditional` / `deriv_111_unconditional` — `M = 110.4312`,
+  ceil `111`.
+* `table_1104312_lower` / `threshold_check_1104312_6325` — `Azeta ≥ 6324/6325`.
+* `table_111_lower` / `threshold_check_111_6358` — `Azeta ≥ 6357/6358`.
+* `deriv_M_26_75_eq` / `deriv_322608_of_gamma0026` — single-gap conditional:
+  `G = 0.026` (sole premise) + `Z = 7.5` gives `M = 32.2608`.
+* `table_322608_lower` / `threshold_check_322608_1848` — conditional
+  `Azeta ≥ 1847/1848`.
+
+WHY 0.026 (AND 0.05/0.04) DO NOT FIT — honest obstruction audit (no retry):
+* Same-template arithmetic: the formal ratio is `N/D` with `D ≥ 2648`
+  (floors tight: `2.62² = 6.8644` vs `6.89125`, slack `0.027` — per the
+  `R02GammaDisc` docstring analysis, NOT retried). `0.026` needs
+  `N ≤ 0.026*2648 = 68.85`; but the TRUE `max Real.Gamma` on the window
+  `[6.025,6.37]` is `Γ(6.37) ≈ 228 > 68.85` — no real-numerator uniform
+  cap can fit, however tight the convexity. Same audit kills `0.05`
+  (needs `N ≤ 132.4 < 228`) and `0.04` (needs `N ≤ 105.9 < 228`).
+* Deeper shifts do NOT help the direct point: honest ratios `N(n)/D(n)`
+  (`N` = top product `∏(j+0.37)`, `D` = exact `∏√((0.025+k)²+2.625²)`)
+  are `n=6 → 0.0960`, `n=7 → 0.0930`, `n=8 → 0.0914`, `n=9 → 0.0906`,
+  `n=10 → 0.0903` (minimum), then worsen (`n=15 → 0.0924`,
+  `n=21 → 0.0971`): the numerator majorant outgrows the `b²`-boost to
+  `D` as `k` grows. Floor over all `n` is `≈ 0.090`.
+* Re/Im subdivision does NOT beat the worst corner: every sub-rect
+  touching `(Re,|Im|) = (0.025,2.625)` keeps `D ≈ 2648`, while any
+  sub-rect touching the top edge `s.re = 0.74` keeps `N ≈ 228+`.
+* Reflection (`‖Γ(z)‖ = π/(‖sin πz‖·‖Γ(1-z)‖)`) is exact, so an upper
+  `≤ 0.026` needs sine-lower × Gamma-lower `≥ π/0.026 = 120.8 =
+  (true product)` — feasible only with near-zero-slack bounds on BOTH
+  factors (a Gamma-lower with Im-decay at `1-z`, plus a sine-lower
+  within `~4%` of true `1900`); beyond one turn.
+* The remaining looseness is entirely the numerator majorant discarding
+  Im-decay (`‖Γ(6.2+3i)‖ ≈ 14` vs `Real.Gamma 6.2 ≈ 169`, `∼12×`);
+  recovering it needs Stirling-with-remainder or equivalent — the exact
+  next-agent task below.
+-/
+
+namespace Door3GammaCut89
+
+/-- Half-integer anchor: `Real.Gamma 1.5 ≤ 0.8863`
+(`Γ(1.5) = Γ(0.5)/2 = √π/2`, `√π ≤ 1.7725` since
+`π < 3.1415926536 < 1.7725² = 3.14175625`). -/
+theorem realGamma_15_le : Real.Gamma 1.5 ≤ 0.8863 := by
+  have h15 : Real.Gamma (0.5 + 1) = 0.5 * Real.Gamma 0.5 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (0.5 : ℝ) + 1 = 1.5 := by norm_num
+  rw [heq] at h15
+  have hhalf : Real.Gamma (0.5 : ℝ) = Real.sqrt Real.pi := by
+    have h05 : (0.5 : ℝ) = 1 / 2 := by norm_num
+    rw [h05]
+    exact Real.Gamma_one_half_eq
+  have hsqrt : Real.sqrt Real.pi ≤ 1.7725 := by
+    have hpi := Real.pi_lt_d20
+    have hsq : (1.7725 : ℝ) ^ 2 = 3.14175625 := by norm_num
+    have hle : Real.pi ≤ (1.7725 : ℝ) ^ 2 := by linarith
+    calc Real.sqrt Real.pi ≤ Real.sqrt ((1.7725 : ℝ) ^ 2) := Real.sqrt_le_sqrt hle
+      _ = 1.7725 := Real.sqrt_sq (by norm_num)
+  have hmul : (0.5 : ℝ) * Real.sqrt Real.pi ≤ 0.5 * 1.7725 :=
+    mul_le_mul_of_nonneg_left hsqrt (by norm_num)
+  rw [h15, hhalf]
+  linarith
+
+/-- Tighter convexity base: `Real.Gamma 1.37 ≤ 0.9159`
+(`1.37 = 0.26·1 + 0.74·1.5`, chord `0.26·1 + 0.74·0.8863 = 0.915862…`;
+was `≤ 1` via the `(1,1)-(2,1)` chord). -/
+theorem realGamma_137_le_improved : Real.Gamma 1.37 ≤ 0.9159 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h15 : (1.5 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.26 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.74 := by norm_num
+  have hab : (0.26 : ℝ) + 0.74 = 1 := by norm_num
+  have h := hconv.2 h1 h15 ha hb hab
+  simp only [smul_eq_mul] at h
+  have heq : (0.26 : ℝ) * 1 + 0.74 * 1.5 = 1.37 := by norm_num
+  rw [heq] at h
+  have hcap : (0.26 : ℝ) * 1 + 0.74 * 0.8863 ≤ 0.9159 := by norm_num
+  have hle : (0.26 : ℝ) * Real.Gamma 1 + 0.74 * Real.Gamma 1.5
+      ≤ 0.26 * 1 + 0.74 * 0.8863 := by
+    have f1 : (0.26 : ℝ) * Real.Gamma 1 ≤ 0.26 * 1 := by rw [Real.Gamma_one]
+    have f2 : (0.74 : ℝ) * Real.Gamma 1.5 ≤ 0.74 * 0.8863 :=
+      mul_le_mul_of_nonneg_left realGamma_15_le (by norm_num)
+    linarith
+  linarith
+
+/-- Numerator endpoint chain (top, tightened): `Real.Gamma 6.37 ≤ 235.19`
+(`1.37·2.37·3.37·4.37·5.37·0.9159 = 235.181… ≤ 235.19`; was `256.78`). -/
+theorem realGamma_637_le_improved : Real.Gamma 6.37 ≤ 235.19 := by
+  have g1 : Real.Gamma 2.37 ≤ 1.37 * 0.9159 := by
+    have h : Real.Gamma (1.37 + 1) = 1.37 * Real.Gamma 1.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.37 : ℝ) + 1 = 2.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    exact mul_le_mul_of_nonneg_left realGamma_137_le_improved (by norm_num)
+  have g2 : Real.Gamma 3.37 ≤ 1.37 * 2.37 * 0.9159 := by
+    have h : Real.Gamma (2.37 + 1) = 2.37 * Real.Gamma 2.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.37 : ℝ) + 1 = 3.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (2.37 : ℝ) * Real.Gamma 2.37 ≤ 2.37 * (1.37 * 0.9159) :=
+          mul_le_mul_of_nonneg_left g1 (by norm_num)
+      _ = 1.37 * 2.37 * 0.9159 := by ring
+  have g3 : Real.Gamma 4.37 ≤ 1.37 * 2.37 * 3.37 * 0.9159 := by
+    have h : Real.Gamma (3.37 + 1) = 3.37 * Real.Gamma 3.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.37 : ℝ) + 1 = 4.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 3.37 * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.37 : ℝ) * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 0.9159 := by ring
+  have g4 : Real.Gamma 5.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by
+    have h : Real.Gamma (4.37 + 1) = 4.37 * Real.Gamma 4.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.37 : ℝ) + 1 = 5.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 4.37 * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.37 : ℝ) * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by ring
+  have g5 : Real.Gamma 6.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by
+    have h : Real.Gamma (5.37 + 1) = 5.37 * Real.Gamma 5.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.37 : ℝ) + 1 = 6.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 5.37 * Real.Gamma 5.37
+        ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.37 : ℝ) * Real.Gamma 5.37
+          ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by ring
+  have hfin : (1.37 : ℝ) * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 ≤ 235.19 := by norm_num
+  exact le_trans g5 hfin
+
+/-- Uniform numerator (tightened): `Real.Gamma x ≤ 235.19` for
+`x ∈ [6.025, 6.37]` (convexity between the reused bottom chain `≤ 127`
+and the tightened top chain `≤ 235.19`). -/
+theorem realGamma_uniform_6025_637_improved {x : ℝ} (hlo : (6.025 : ℝ) ≤ x)
+    (hhi : x ≤ (6.37 : ℝ)) : Real.Gamma x ≤ 235.19 := by
+  set w1 : ℝ := (6.37 - x) / 0.345 with hw1
+  set w2 : ℝ := (x - 6.025) / 0.345 with hw2
+  have hw1nn : (0 : ℝ) ≤ w1 := div_nonneg (by linarith) (by norm_num)
+  have hw2nn : (0 : ℝ) ≤ w2 := div_nonneg (by linarith) (by norm_num)
+  have hnum : (6.37 - x) + (x - 6.025) = (0.345 : ℝ) := by ring
+  have hne : (0.345 : ℝ) ≠ 0 := by norm_num
+  have hsum : w1 + w2 = 1 := by
+    rw [hw1, hw2, ← add_div, hnum]
+    exact div_self hne
+  have hcombo : w1 * 6.025 + w2 * 6.37 = x := by
+    rw [hw1, hw2]
+    field_simp
+    ring
+  have hconv := Real.convexOn_Gamma
+  have hm1 : (6.025 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hm2 : (6.37 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 hm1 hm2 hw1nn hw2nn hsum
+  simp only [smul_eq_mul] at h
+  rw [hcombo] at h
+  have e1 : Real.Gamma 6.025 ≤ 235.19 :=
+    le_trans R02GammaDisc.realGamma_6025_le (by norm_num)
+  have e2 : Real.Gamma 6.37 ≤ 235.19 :=
+    le_trans realGamma_637_le_improved (le_refl _)
+  have f1 : w1 * Real.Gamma 6.025 ≤ w1 * 235.19 :=
+    mul_le_mul_of_nonneg_left e1 hw1nn
+  have f2 : w2 * Real.Gamma 6.37 ≤ w2 * 235.19 :=
+    mul_le_mul_of_nonneg_left e2 hw2nn
+  have hfin : w1 * 235.19 + w2 * 235.19 ≤ 235.19 := by
+    have he : w1 * 235.19 + w2 * 235.19 = (w1 + w2) * 235.19 := by ring
+    rw [he, hsum, one_mul]
+  exact le_trans h (le_trans (add_le_add f1 f2) hfin)
+
+/-- MAIN tightened disc-sup Gamma upper: `‖Complex.Gamma (s / 2)‖ ≤ 0.089`
+on the R02 disc `s`-rect. Same 6-shift chain as
+`R02GammaDisc.gamma_upper_disc_R02` (reused floors, `D ≥ 2648`), tightened
+numerator `≤ 235.19`: `235.19 / 2648 = 0.08881… ≤ 0.089`. -/
+theorem gamma_upper_disc_R02_tight {s : ℂ}
+    (hre_lo : (0.05 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.74 : ℝ))
+    (him_lo : (-8.25 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.25 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 0.089 := by
+  set z : ℂ := s / 2 with hz
+  have hzre : z.re = s.re / 2 := by
+    rw [hz, Complex.div_ofNat_re]
+  have hzim : z.im = s.im / 2 := by
+    rw [hz, Complex.div_ofNat_im]
+  have hzre_lo : (0.025 : ℝ) ≤ z.re := by rw [hzre]; linarith
+  have hzre_hi : z.re ≤ (0.37 : ℝ) := by rw [hzre]; linarith
+  have hzim_lo : z.im ≤ (-2.625 : ℝ) := by rw [hzim]; linarith
+  have habs : (2.625 : ℝ) ≤ |z.im| := by
+    have hneg : z.im < 0 := by linarith
+    rw [abs_of_neg hneg]
+    linarith
+  have hnez : z ≠ 0 := by
+    intro hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hre
+    linarith [hzre_lo]
+  have hne : ∀ k : ℕ, k ≤ 5 → z + (k : ℂ) ≠ 0 := by
+    intro k _ hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.add_re, Complex.natCast_re, Complex.zero_re] at hre
+    have hknn : (0 : ℝ) ≤ ((k : ℕ) : ℝ) := Nat.cast_nonneg k
+    linarith
+  have e0 : Complex.Gamma (z + ((1 : ℕ) : ℂ))
+      = z * Complex.Gamma z := by
+    have c1 : ((1 : ℕ) : ℂ) = 1 := by norm_num
+    rw [c1]
+    exact Complex.Gamma_add_one _ hnez
+  have e1 : Complex.Gamma (z + ((2 : ℕ) : ℂ))
+      = (z + ((1 : ℕ) : ℂ)) * Complex.Gamma (z + ((1 : ℕ) : ℂ)) := by
+    have h : z + ((2 : ℕ) : ℂ) = ((z + ((1 : ℕ) : ℂ)) + 1) := by
+      have c2 : ((2 : ℕ) : ℂ) = 2 := by norm_num
+      have c1 : ((1 : ℕ) : ℂ) = 1 := by norm_num
+      rw [c2, c1]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 1 (by norm_num))
+  have e2 : Complex.Gamma (z + ((3 : ℕ) : ℂ))
+      = (z + ((2 : ℕ) : ℂ)) * Complex.Gamma (z + ((2 : ℕ) : ℂ)) := by
+    have h : z + ((3 : ℕ) : ℂ) = ((z + ((2 : ℕ) : ℂ)) + 1) := by
+      have c3 : ((3 : ℕ) : ℂ) = 3 := by norm_num
+      have c2 : ((2 : ℕ) : ℂ) = 2 := by norm_num
+      rw [c3, c2]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 2 (by norm_num))
+  have e3 : Complex.Gamma (z + ((4 : ℕ) : ℂ))
+      = (z + ((3 : ℕ) : ℂ)) * Complex.Gamma (z + ((3 : ℕ) : ℂ)) := by
+    have h : z + ((4 : ℕ) : ℂ) = ((z + ((3 : ℕ) : ℂ)) + 1) := by
+      have c4 : ((4 : ℕ) : ℂ) = 4 := by norm_num
+      have c3 : ((3 : ℕ) : ℂ) = 3 := by norm_num
+      rw [c4, c3]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 3 (by norm_num))
+  have e4 : Complex.Gamma (z + ((5 : ℕ) : ℂ))
+      = (z + ((4 : ℕ) : ℂ)) * Complex.Gamma (z + ((4 : ℕ) : ℂ)) := by
+    have h : z + ((5 : ℕ) : ℂ) = ((z + ((4 : ℕ) : ℂ)) + 1) := by
+      have c5 : ((5 : ℕ) : ℂ) = 5 := by norm_num
+      have c4 : ((4 : ℕ) : ℂ) = 4 := by norm_num
+      rw [c5, c4]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 4 (by norm_num))
+  have e5 : Complex.Gamma (z + ((6 : ℕ) : ℂ))
+      = (z + ((5 : ℕ) : ℂ)) * Complex.Gamma (z + ((5 : ℕ) : ℂ)) := by
+    have h : z + ((6 : ℕ) : ℂ) = ((z + ((5 : ℕ) : ℂ)) + 1) := by
+      have c6 : ((6 : ℕ) : ℂ) = 6 := by norm_num
+      have c5 : ((5 : ℕ) : ℂ) = 5 := by norm_num
+      rw [c6, c5]
+      ring
+    rw [h]
+    exact Complex.Gamma_add_one _ (hne 5 (by norm_num))
+  have n0 : ‖Complex.Gamma (z + ((1 : ℕ) : ℂ))‖
+      = ‖z‖ * ‖Complex.Gamma z‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (z + ((2 : ℕ) : ℂ))‖
+      = ‖z + ((1 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((1 : ℕ) : ℂ))‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (z + ((3 : ℕ) : ℂ))‖
+      = ‖z + ((2 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((2 : ℕ) : ℂ))‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (z + ((4 : ℕ) : ℂ))‖
+      = ‖z + ((3 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((3 : ℕ) : ℂ))‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (z + ((5 : ℕ) : ℂ))‖
+      = ‖z + ((4 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((4 : ℕ) : ℂ))‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+      = ‖z + ((5 : ℕ) : ℂ)‖ * ‖Complex.Gamma (z + ((5 : ℕ) : ℂ))‖ := by
+    rw [e5, norm_mul]
+  have hprod : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+      = ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖
+        * (‖z‖ * ‖Complex.Gamma z‖))))) := by
+    rw [n5, n4, n3, n2, n1, n0]
+  have fz := R02GammaDisc.disc_shift_floor_z hzre_lo habs
+  have f1 := R02GammaDisc.disc_shift_floor1 hzre_lo habs
+  have f2 := R02GammaDisc.disc_shift_floor2 hzre_lo habs
+  have f3 := R02GammaDisc.disc_shift_floor3 hzre_lo habs
+  have f4 := R02GammaDisc.disc_shift_floor4 hzre_lo habs
+  have f5 := R02GammaDisc.disc_shift_floor5 hzre_lo habs
+  have q1 : (2.81 : ℝ) * 2.62 ≤ ‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖ :=
+    mul_le_mul f1 fz (by norm_num) (norm_nonneg _)
+  have q2 : (3.31 : ℝ) * (2.81 * 2.62)
+      ≤ ‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖) :=
+    mul_le_mul f2 q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.0 : ℝ) * (3.31 * (2.81 * 2.62))
+      ≤ ‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)) :=
+    mul_le_mul f3 q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.8 : ℝ) * (4.0 * (3.31 * (2.81 * 2.62)))
+      ≤ ‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))) :=
+    mul_le_mul f4 q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.66 : ℝ) * (4.8 * (4.0 * (3.31 * (2.81 * 2.62))))
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    mul_le_mul f5 q4 (by positivity) (norm_nonneg _)
+  have hDlo : (2648 : ℝ)
+      ≤ 5.66 * (4.8 * (4.0 * (3.31 * (2.81 * 2.62)))) := by
+    norm_num
+  have hD_ge : (2648 : ℝ)
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    le_trans hDlo q5
+  have hD_pos : (0 : ℝ)
+      < ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  have eR6 : ((6 : ℕ) : ℝ) = 6 := by norm_num
+  have hz6re : (z + ((6 : ℕ) : ℂ)).re = z.re + 6 := by
+    rw [Complex.add_re, Complex.natCast_re, eR6]
+  have hx_lo : (6.025 : ℝ) ≤ (z + ((6 : ℕ) : ℂ)).re := by
+    rw [hz6re]; linarith [hzre_lo]
+  have hx_hi : (z + ((6 : ℕ) : ℂ)).re ≤ (6.37 : ℝ) := by
+    rw [hz6re]; linarith [hzre_hi]
+  have hGN_re : (0 : ℝ) < (z + ((6 : ℕ) : ℂ)).re := by linarith
+  have hGN_le : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ ≤ 235.19 := by
+    have h1 : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖
+        ≤ Real.Gamma ((z + ((6 : ℕ) : ℂ)).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    exact le_trans h1 (realGamma_uniform_6025_637_improved hx_lo hx_hi)
+  have hD_mul : (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        * ‖Complex.Gamma z‖
+      = ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        * ‖Complex.Gamma z‖ ≤ 235.19 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma z‖
+        * (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+        ≤ 235.19 := by
+    calc ‖Complex.Gamma z‖ * _
+          = _ * ‖Complex.Gamma z‖ := mul_comm _ _
+      _ ≤ 235.19 := hle
+  have hdiv : ‖Complex.Gamma z‖
+      ≤ 235.19 / (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))))) :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (235.19 : ℝ)
+      ≤ 0.089 * (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))))) := by
+    calc (235.19 : ℝ) ≤ 0.089 * 2648 := by norm_num
+      _ ≤ 0.089 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 235.19 / (‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖
+        * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))))
+      ≤ 0.089 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+/-- Drop-in for the deriv-`M` wall: identical hypotheses to
+`R02GammaDisc.gammaOf_upper_disc_R02` (`≤ 0.097`), conclusion `≤ 0.089`. -/
+theorem gammaOf_upper_disc_R02_tight {s : ℂ}
+    (hre_lo : (0.05 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.74 : ℝ))
+    (him_lo : (-8.25 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.25 : ℝ)) :
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ 0.089 := by
+  show ‖Complex.Gamma (s / 2)‖ ≤ 0.089
+  exact gamma_upper_disc_R02_tight hre_lo hre_hi him_lo him_hi
+
+/-- Sphere equation at the gamma-cut tier: `41.36 * 1 * 0.089 * 7.5 = 27.6078`
+(was `41.36 * 1 * 0.097 * 7.5 = 30.0894`). -/
+theorem sphere_sup_89_eq : (41.36 : ℝ) * 1 * 0.089 * 7.5 = 27.6078 := by
+  norm_num
+
+/-- Cauchy equation at the gamma-cut tier: `27.6078 / 0.25 = 110.4312`. -/
+theorem deriv_M_89_eq : (27.6078 : ℝ) / 0.25 = 110.4312 := by
+  norm_num
+
+/-- Unconditional sphere sup `27.6078` on all R02 `0.25`-spheres
+(from the cut `Z = 7.5` + tightened `G = 0.089` + sharper poly). -/
+theorem sphere_276078_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (27.6078 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.089 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      gammaOf_upper_disc_R02_tight hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3ZetaCut75.R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hS := Door3MReductionScout.sphere_bound_of_gammaZ_upper
+    (G := (0.089 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw u hu
+  have hle := hS w hw u hu
+  have heq : (41.36 : ℝ) * 1 * 0.089 * 7.5 = 27.6078 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Unconditional R02 deriv bound `M = 110.4312` (`27.6078 / 0.25`):
+new unconditional tier (`121 → 111`). -/
+theorem deriv_1104312_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (110.4312 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.089 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      gammaOf_upper_disc_R02_tight hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3ZetaCut75.R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hD := Door3MReductionScout.deriv_bound_of_gammaZ_upper
+    (G := (0.089 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (41.36 : ℝ) * 1 * 0.089 * 7.5 / 0.25 = 110.4312 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Ceil tier `M = 111` covers the exact `110.4312`. -/
+theorem deriv_111_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (111 : ℝ) := by
+  intro w hw
+  have hle := deriv_1104312_unconditional w hw
+  linarith
+
+/-- Required-`Azeta` lower (necessary) floor at the gamma-cut tier:
+`M = 110.4312 → ≥ 6324` (via `le_div_iff₀`). -/
+theorem table_1104312_lower :
+    (6324 : ℝ) ≤ ((0.002 : ℝ) + 110.4312 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at the gamma-cut tier:
+`M = 110.4312` needs `Azeta = 6325`. -/
+theorem threshold_check_1104312_6325 :
+    (0.002 : ℝ) + 110.4312 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 6325 := by
+  norm_num
+
+/-- Required-`Azeta` lower (necessary) floor at the ceil tier:
+`M = 111 → ≥ 6357` (via `le_div_iff₀`). -/
+theorem table_111_lower :
+    (6357 : ℝ) ≤ ((0.002 : ℝ) + 111 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at the ceil tier:
+`M = 111` needs `Azeta = 6358`. -/
+theorem threshold_check_111_6358 :
+    (0.002 : ℝ) + 111 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 6358 := by
+  norm_num
+
+/-- Conditional equation at the Stirling target with the cut zeta:
+`41.36 * 1 * 0.026 * 7.5 / 0.25 = 32.2608` (was `43.0144` at `Z = 10`). -/
+theorem deriv_M_26_75_eq :
+    (41.36 : ℝ) * 1 * 0.026 * 7.5 / 0.25 = 32.2608 := by
+  norm_num
+
+/-- Single-gap Gamma conditional (fully quantified): the disc Gamma cap
+`G = 0.026` (sole premise — the exact next-agent target) plus the cut
+zeta cap `Z = 7.5` gives `M = 32.2608` on R02. Updates
+`deriv_430144_of_gamma0026` (`Z = 10 → 7.5`). -/
+theorem deriv_322608_of_gamma0026
+    (hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.026 : ℝ)) :
+    ∀ w, CentralCoverAssembly.R02.mem w →
+      ‖deriv xiShifted w‖ ≤ (32.2608 : ℝ) := by
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3ZetaCut75.R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hD := Door3MReductionScout.deriv_bound_of_gammaZ_upper
+    (G := (0.026 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (41.36 : ℝ) * 1 * 0.026 * 7.5 / 0.25 = 32.2608 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Required-`Azeta` lower (necessary) floor at the conditional tier:
+`M = 32.2608 → ≥ 1847` (via `le_div_iff₀`). -/
+theorem table_322608_lower :
+    (1847 : ℝ) ≤ ((0.002 : ℝ) + 32.2608 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at the conditional tier:
+`M = 32.2608` needs `Azeta = 1848`. -/
+theorem threshold_check_322608_1848 :
+    (0.002 : ℝ) + 32.2608 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 1848 := by
+  norm_num
+
+#print axioms Door3GammaCut89.realGamma_15_le
+#print axioms Door3GammaCut89.realGamma_137_le_improved
+#print axioms Door3GammaCut89.realGamma_637_le_improved
+#print axioms Door3GammaCut89.realGamma_uniform_6025_637_improved
+#print axioms Door3GammaCut89.gamma_upper_disc_R02_tight
+#print axioms Door3GammaCut89.gammaOf_upper_disc_R02_tight
+#print axioms Door3GammaCut89.sphere_sup_89_eq
+#print axioms Door3GammaCut89.deriv_M_89_eq
+#print axioms Door3GammaCut89.sphere_276078_unconditional
+#print axioms Door3GammaCut89.deriv_1104312_unconditional
+#print axioms Door3GammaCut89.deriv_111_unconditional
+#print axioms Door3GammaCut89.table_1104312_lower
+#print axioms Door3GammaCut89.threshold_check_1104312_6325
+#print axioms Door3GammaCut89.table_111_lower
+#print axioms Door3GammaCut89.threshold_check_111_6358
+#print axioms Door3GammaCut89.deriv_M_26_75_eq
+#print axioms Door3GammaCut89.deriv_322608_of_gamma0026
+#print axioms Door3GammaCut89.table_322608_lower
+#print axioms Door3GammaCut89.threshold_check_322608_1848
+
+end Door3GammaCut89
+
+/-!
+Door-3 gamma-cut VERDICT + RESIDUAL (report-and-stop).
+
+(1) BRIDGE (this tail, full proof, no `sorry`/`admit`/`axiom`): best-fit
+unconditional `G = 0.089` (`R02GammaDisc` 6-shift floors reused read-only,
+`D ≥ 2648`; numerator `256.78 → 235.19` via the tightened convexity base
+`Γ(1.37) ≤ 0.9159` anchored at `Γ(1.5) = √π/2 ≤ 0.8863`). The tasked
+`0.026` (and `0.05`/`0.04`) provably do NOT fit any convexity+shift route:
+need `N ≤ 68.85` (`132.4`/`105.9`) vs true `max Real.Gamma = 228` on the
+window; deeper shifts floor at `≈ 0.090` (`n = 10` minimum); subdivision
+cannot beat the worst corner; reflection is exact so needs near-perfect
+bounds on both factors. Single-gap conditional `deriv_322608_of_gamma0026`
+banks the rest: `G = 0.026 → M = 32.2608` (with `Z = 7.5`).
+(2) NUMBERS: `(G, Z, M, Azeta) = (0.089, 7.5, 110.4312, 6325)`
+(ceil tier `(0.089, 7.5, 111, 6358)`); conditional tier
+`(0.026, 7.5, 32.2608, 1848)`. Unconditional step `121 → 111`
+(`8.3%` cut on `M`, `30.0894 → 27.6078` on the sphere); 0 cells closed.
+(3) RESIDUAL + NEXT TASK: build verification + axioms below; next agent owns
+the single gap `‖gammaOf‖ ≤ 0.026` on the R02 rect — the ONLY missing input
+to `M = 32.2608`. Route: Stirling-with-explicit-remainder (or equivalent
+Im-decay upper) for `‖Γ(z+6)‖` at `Re ∈ [6.025,6.37]`, `|Im| ∈ [2.625,4.125]`,
+target `≤ 68.85` (true value `≈ 14`, so `4.9×` slack — feasible in
+principle, unlike the exhausted convexity routes). Do NOT retry: 6-shift
+floors (tight), deeper shifts (floor `0.090`), Re/Im splits (worst-corner
+dominated), IBP-at-`x≈6` (loses: `y ≪ x`), direct-point IBP (singularity at
+`x < 1`), reflection-uppers (exactness trap). Current tier alone still
+needs `Azeta ≥ 6325` at the center.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
