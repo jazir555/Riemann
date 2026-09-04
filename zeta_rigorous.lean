@@ -18339,3 +18339,390 @@ theorem D3_S16_norm_ge_DI :
 #print axioms D3_S16_im_upper_DI_neg
 #print axioms D3_S16_im_abs_ge_DI
 #print axioms D3_S16_norm_ge_DI
+
+/-!
+## Door-3 zeta-lane Tier-3 vdC narrow bridge (DV tail, append-only).
+
+TASK (door-3 middle-upper track, report-and-stop): ONE narrow van-der-Corput block
+toward the middle `[16,1024)` upper `≤ 0.12`. Minimum viable = ONE proved bridge +
+residual; empty report = failure.
+
+GREP-FIRST RECORD (run before writing; `rg -n` in `zeta_rigorous.lean`):
+* Tier-1 KL: `KL_linear_firstDerivTest` (`:4954`, `‖∑ e^{inθ}‖ ≤ π/|θ|`),
+  `KL_log_gap_ge` (`:4978`); Tier-2 Abel `T2_abel_eq` (`:5177`, cited by vdC doc).
+* A-process identity: `vdC_autocorr` (`:11640`), `vdC_A_shift_identity_doubleSum`
+  (`:11646`, norm-sq double-sum expansion whose diagonals are `vdC_autocorr`).
+* CB plug-in: `CB_diag_linear_bound` (`:11895`, general `h`-diagonal via KL),
+  `CB_diag_h1_N15` (`:11935`, `≤ 6.2`), `CB_vdC_budget_H2_le` (`:12052`, `≤ 54`),
+  `CB_compare_BS_vdC` (`:12165`, `54 < 62`); CB verdict: its budgets are standalone
+  majorants — the A-process INEQUALITY linking `‖S‖` to diagonal budgets was open.
+* Middle baseline: `MID_mid_block_upper` (`:11568`, `≤ 5/3` via BS pairing).
+* Large-sieve shape DEAD: `DB_shape_floor` (`:17507`), `DB_MV_cannot_reach_012`
+  (`:17535`); head lower `D3_S16_norm_ge_DI` (`:18331`, `≥ 755971293966729191/…`).
+* New names below — 0 hits before writing (verified absent via `rg "DV_"`).
+* Reuse is read-only: nothing above is redefined; `KL_linear_firstDerivTest` is
+  applied as the inner engine; `vdC_autocorr` is referenced (see `DV_diagN` note).
+
+WHAT IS PROVED (all unconditional unless marked PREMISE; FULL proofs, no
+`sorry`/`admit`/`axiom`):
+* (DV-a) `DV_quad_unit`: unit modulus of the quadratic-phase model piece.
+* (DV-b) `DV_quad_autocorr`: Weyl differencing — the `h`-shifted autocorrelation
+  of `exp(i(an^2+bn))` is linear-phase of slope `2ah` (exact exponent identity).
+* (DV-c) `DV_quad_diag_factor`: diagonal sum = constant phase × KL-shaped sum.
+* (DV-d) `DV_quad_diag_KL`: Tier-1 KL on the differenced diagonal (`≤ π/|2ah|`).
+* (DV-e) `DV_cs_norm_sq`: complex Cauchy–Schwarz `‖∑v‖^2 ≤ N·∑‖v‖^2`.
+* (DV-f) `DV_norm_add_sq_star`: `‖a+b‖^2 = ‖a‖^2+‖b‖^2+2·Re(a·star b)`.
+* (DV-h) `DV_shift2_identity`: `2S = ∑(vₙ+vₙ₊₁) + (v₀-v_N)` (pure algebra).
+* (DV-i) `DV_shift2_sqsum`: exact diagonal budget
+  `∑‖vₙ+vₙ₊₁‖^2 = 2N + 2·Re(DV_diagN)`.
+* (DV-j) `DV_A_H2`: van der Corput A-process inequality at H=2 —
+  `‖S‖ ≤ (√(N·(2N+2·Re D)) + 2)/2`. This proves the inequality SHAPE whose
+  absence kept the CB budgets as standalone majorants (the linear-proxy →
+  true-autocorrelation identification itself stays open; see residual).
+* (DV-k) `DV_quad_H2_N16`: HEADLINE unconditional vdC estimate on ONE 16-term
+  quadratic-phase piece (`a = 0.7, b = 0`): `‖S‖ ≤ 13.1 < 16` (18% over triangle).
+* (DV-m) `DV_mid_conditional_012` [CONDITIONAL, premises = pure Props]: 63
+  per-16-block bounds `≤ 12/6300` imply the middle `≤ 0.12` (triangle assembly).
+* (DV-n) `DV_gap_012`: verdict numerals.
+
+NUMBERS: `θ = 2·0.7·1 = 1.4 ≤ π/2` (via `2.8 ≤ 3 < π`); KL `≤ π/1.4 ≤
+3.1416/1.4 = 2.244`; budget `B = 16·(32+2·2.244) = 583.808`; `√B ≤ 24.17`
+(`24.17^2 = 584.1889`); `(24.17+2)/2 = 13.085 ≤ 13.1`.
+-/
+
+/-- (DV-0) Quadratic-phase model exponential piece (unit modulus by construction). -/
+noncomputable def DV_quad (a b : ℝ) : ℕ → ℂ :=
+  fun n => Complex.exp (((a * (n : ℝ) ^ 2 + b * (n : ℝ) : ℝ) : ℂ) * Complex.I)
+
+/-- (DV-a) Unit modulus of the model piece. -/
+theorem DV_quad_unit (a b : ℝ) (n : ℕ) : ‖DV_quad a b n‖ = 1 := by
+  unfold DV_quad
+  exact Complex.norm_exp_ofReal_mul_I _
+
+set_option maxHeartbeats 800000 in
+/-- (DV-b) Weyl differencing: the `h`-shifted autocorrelation of `exp(i(an^2+bn))`
+is linear-phase of slope `2ah` (exact exponent identity:
+`a(n+h)^2+b(n+h) - (an^2+bn) = 2ah·n + (ah^2+bh)`). -/
+theorem DV_quad_autocorr (a b : ℝ) (h n : ℕ) :
+    DV_quad a b (n + h) * star (DV_quad a b n)
+      = Complex.exp (((2 * a * (h : ℝ) * (n : ℝ)
+        + (a * (h : ℝ) ^ 2 + b * (h : ℝ)) : ℝ) : ℂ) * Complex.I) := by
+  rw [Complex.star_def]
+  unfold DV_quad
+  rw [← Complex.exp_conj, ← Complex.exp_add]
+  congr 1
+  apply Complex.ext
+  · simp only [Complex.add_re, Complex.mul_re, Complex.conj_re,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im, Nat.cast_add]
+    ring
+  · simp only [Complex.add_im, Complex.mul_im, Complex.conj_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
+      Nat.cast_add]
+    ring
+
+/-- (DV-c) Diagonal sum factors into a constant phase times a KL-shaped linear sum
+(inner sum matches `KL_linear_firstDerivTest` with `θ = 2ah` syntactically). -/
+theorem DV_quad_diag_factor (a b : ℝ) (h M : ℕ) :
+    (∑ n ∈ Finset.range M, DV_quad a b (n + h) * star (DV_quad a b n))
+      = Complex.exp ((((a * (h : ℝ) ^ 2 + b * (h : ℝ)) : ℝ) : ℂ) * Complex.I)
+        * ∑ n ∈ Finset.range M,
+          Complex.exp ((n : ℂ) * ((((2 * a * (h : ℝ)) : ℝ)) : ℂ) * Complex.I) := by
+  have hterm : ∀ n : ℕ, DV_quad a b (n + h) * star (DV_quad a b n)
+      = Complex.exp ((((a * (h : ℝ) ^ 2 + b * (h : ℝ)) : ℝ) : ℂ) * Complex.I)
+        * Complex.exp ((n : ℂ) * ((((2 * a * (h : ℝ)) : ℝ)) : ℂ) * Complex.I) := by
+    intro n
+    rw [DV_quad_autocorr]
+    rw [← Complex.exp_add]
+    congr 1
+    push_cast
+    ring
+  have hsum : (∑ n ∈ Finset.range M, DV_quad a b (n + h) * star (DV_quad a b n))
+      = ∑ n ∈ Finset.range M, (Complex.exp ((((a * (h : ℝ) ^ 2 + b * (h : ℝ)) : ℝ) : ℂ)
+        * Complex.I) * Complex.exp ((n : ℂ) * ((((2 * a * (h : ℝ)) : ℝ)) : ℂ)
+        * Complex.I)) :=
+    Finset.sum_congr rfl (fun n _ => hterm n)
+  rw [hsum, Finset.mul_sum]
+
+/-- (DV-d) Tier-1 KL first-derivative test on the differenced diagonal
+(read-only reuse of `KL_linear_firstDerivTest`): `≤ π/|2ah|`. -/
+theorem DV_quad_diag_KL (a b : ℝ) (h M : ℕ) (hh : h ≠ 0) (ha : a ≠ 0)
+    (hsmall : |2 * a * (h : ℝ)| ≤ Real.pi / 2) :
+    ‖∑ n ∈ Finset.range M, DV_quad a b (n + h) * star (DV_quad a b n)‖
+      ≤ Real.pi / |2 * a * (h : ℝ)| := by
+  have hth : (2 * a * (h : ℝ)) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (by norm_num) ha) (Nat.cast_ne_zero.mpr hh)
+  have hKL := KL_linear_firstDerivTest (2 * a * (h : ℝ)) hth hsmall M
+  have hfactor := DV_quad_diag_factor a b h M
+  have hnormc : ‖Complex.exp ((((a * (h : ℝ) ^ 2 + b * (h : ℝ)) : ℝ) : ℂ)
+      * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  rw [hfactor, norm_mul, hnormc, one_mul]
+  exact hKL
+
+/-- (DV-e) Complex Cauchy–Schwarz norm-square bound
+(`‖∑v‖ ≤ ∑‖v‖` + real `Finset.sum_mul_sq_le_sq_mul_sq` with `g = 1`). -/
+theorem DV_cs_norm_sq (v : ℕ → ℂ) (N : ℕ) :
+    ‖∑ n ∈ Finset.range N, v n‖ ^ 2
+      ≤ (N : ℝ) * ∑ n ∈ Finset.range N, ‖v n‖ ^ 2 := by
+  have h1 : ‖∑ n ∈ Finset.range N, v n‖ ≤ ∑ n ∈ Finset.range N, ‖v n‖ :=
+    norm_sum_le _ _
+  have h2 : ((∑ n ∈ Finset.range N, ‖v n‖ * 1) ^ 2
+      ≤ (∑ n ∈ Finset.range N, ‖v n‖ ^ 2) * (∑ _n ∈ Finset.range N, (1 : ℝ) ^ 2)) :=
+    Finset.sum_mul_sq_le_sq_mul_sq _ _ _
+  have e1 : (∑ n ∈ Finset.range N, ‖v n‖ * 1) = ∑ n ∈ Finset.range N, ‖v n‖ := by
+    simp
+  have e2 : (∑ _n ∈ Finset.range N, (1 : ℝ) ^ 2) = (N : ℝ) := by
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    norm_num
+  rw [e1, e2] at h2
+  have h3 : ‖∑ n ∈ Finset.range N, v n‖ ^ 2
+      ≤ (∑ n ∈ Finset.range N, ‖v n‖) ^ 2 := by
+    simp only [pow_two]
+    exact mul_self_le_mul_self (norm_nonneg _) h1
+  calc ‖∑ n ∈ Finset.range N, v n‖ ^ 2 ≤ (∑ n ∈ Finset.range N, ‖v n‖) ^ 2 := h3
+    _ ≤ (N : ℝ) * ∑ n ∈ Finset.range N, ‖v n‖ ^ 2 := by linear_combination h2
+
+/-- (DV-f) Pointwise shifted-square identity exposing the autocorrelation
+(`normSq` components + `(a·star b).re = a.re·b.re + a.im·b.im`). -/
+theorem DV_norm_add_sq_star (a b : ℂ) :
+    ‖a + b‖ ^ 2 = ‖a‖ ^ 2 + ‖b‖ ^ 2 + 2 * (a * star b).re := by
+  have e1 : ‖a + b‖ ^ 2
+      = (a.re + b.re) * (a.re + b.re) + (a.im + b.im) * (a.im + b.im) := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, Complex.add_re,
+      Complex.add_im]
+  have e2 : ‖a‖ ^ 2 = a.re * a.re + a.im * a.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have e3 : ‖b‖ ^ 2 = b.re * b.re + b.im * b.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have e4 : (a * star b).re = a.re * b.re + a.im * b.im := by
+    rw [Complex.star_def, Complex.mul_re, Complex.conj_re, Complex.conj_im]
+    ring
+  rw [e1, e2, e3, e4]
+  ring
+
+/-- (DV-g) Length-N diagonal. NOTE vs landed `vdC_autocorr v N 1` (which sums over
+`range (N - 1)`): this sums over `range N`, i.e. it appends the single boundary
+pair `v N * star (v (N-1))` (norm `≤ 1` under `hunit`). The exact budget below
+needs the length-N form; the two agree up to that explicit boundary term. -/
+noncomputable def DV_diagN (v : ℕ → ℂ) (N : ℕ) : ℂ :=
+  ∑ n ∈ Finset.range N, v (n + 1) * star (v n)
+
+/-- (DV-h) H=2 shift identity: doubling the sum by adjacent pairing
+(pure `Finset.sum_range` induction, no analysis). -/
+theorem DV_shift2_identity (v : ℕ → ℂ) (N : ℕ) :
+    (∑ n ∈ Finset.range N, (v n + v (n + 1)))
+      = 2 * (∑ n ∈ Finset.range N, v n) - v 0 + v N := by
+  induction N with
+  | zero =>
+    simp only [Finset.sum_range_zero]
+    ring
+  | succ N ih =>
+    simp only [Finset.sum_range_succ]
+    rw [ih]
+    ring
+
+/-- (DV-i) Shifted square-sum budget: exact diagonal decomposition
+(`∑‖vₙ+vₙ₊₁‖^2 = 2N + 2·Re(DV_diagN)` under unit modulus). -/
+theorem DV_shift2_sqsum (v : ℕ → ℂ) (N : ℕ) (hunit : ∀ n, ‖v n‖ = 1) :
+    ∑ n ∈ Finset.range N, ‖v n + v (n + 1)‖ ^ 2
+      = 2 * (N : ℝ) + 2 * (DV_diagN v N).re := by
+  have hpt : ∀ n : ℕ, ‖v n + v (n + 1)‖ ^ 2
+      = 2 + 2 * (v (n + 1) * star (v n)).re := by
+    intro n
+    rw [add_comm (v n) (v (n + 1)), DV_norm_add_sq_star, hunit (n + 1), hunit n]
+    ring
+  have hsum : (∑ n ∈ Finset.range N, ‖v n + v (n + 1)‖ ^ 2)
+      = ∑ n ∈ Finset.range N, (2 + 2 * (v (n + 1) * star (v n)).re) :=
+    Finset.sum_congr rfl (fun n _ => hpt n)
+  have eD : DV_diagN v N = ∑ n ∈ Finset.range N, v (n + 1) * star (v n) := rfl
+  have e1 : (∑ _n ∈ Finset.range N, (2 : ℝ)) = 2 * (N : ℝ) := by
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    ring
+  have e2 : (∑ n ∈ Finset.range N, 2 * (v (n + 1) * star (v n)).re)
+      = 2 * (DV_diagN v N).re := by
+    rw [← Finset.mul_sum, eD, Complex.re_sum]
+  rw [hsum, Finset.sum_add_distrib, e1, e2]
+
+/-- (DV-j) Van der Corput A-process inequality at H=2 (headline machinery):
+`‖S‖ ≤ (√(N·(2N+2·Re D)) + 2)/2` for unit-modulus `v`, from the shift identity
+(DV-h) + Cauchy–Schwarz (DV-e) + the exact diagonal budget (DV-i). -/
+theorem DV_A_H2 (v : ℕ → ℂ) (N : ℕ) (hunit : ∀ n, ‖v n‖ = 1) :
+    ‖∑ n ∈ Finset.range N, v n‖
+      ≤ (Real.sqrt ((N : ℝ) * (2 * (N : ℝ) + 2 * (DV_diagN v N).re)) + 2) / 2 := by
+  have hshift := DV_shift2_identity v N
+  have h2S : 2 * (∑ n ∈ Finset.range N, v n)
+      = (∑ n ∈ Finset.range N, (v n + v (n + 1))) + (v 0 - v N) := by
+    rw [hshift]
+    ring
+  have hnorm2 : ‖(2 : ℂ)‖ = 2 := by
+    have h : (((2 : ℝ)) : ℂ) = 2 := by simp
+    rw [← h, Complex.norm_real, Real.norm_eq_abs]
+    norm_num
+  have h2norm : ‖2 * (∑ n ∈ Finset.range N, v n)‖
+      = 2 * ‖∑ n ∈ Finset.range N, v n‖ := by
+    rw [norm_mul, hnorm2]
+  have htri : ‖2 * (∑ n ∈ Finset.range N, v n)‖
+      ≤ ‖∑ n ∈ Finset.range N, (v n + v (n + 1))‖ + 2 := by
+    rw [h2S]
+    have h := norm_add_le (∑ n ∈ Finset.range N, (v n + v (n + 1))) (v 0 - v N)
+    have hsub : ‖v 0 - v N‖ ≤ 1 + 1 := by
+      have h0 := norm_sub_le (v 0) (v N)
+      rw [hunit 0, hunit N] at h0
+      exact h0
+    linarith
+  have hcs : ‖∑ n ∈ Finset.range N, (v n + v (n + 1))‖ ^ 2
+      ≤ (N : ℝ) * ∑ n ∈ Finset.range N, ‖v n + v (n + 1)‖ ^ 2 :=
+    DV_cs_norm_sq _ N
+  have hsq := DV_shift2_sqsum v N hunit
+  have hle : ‖∑ n ∈ Finset.range N, (v n + v (n + 1))‖
+      ≤ Real.sqrt ((N : ℝ) * (2 * (N : ℝ) + 2 * (DV_diagN v N).re)) := by
+    rw [hsq] at hcs
+    have h2 := Real.sqrt_le_sqrt hcs
+    rwa [Real.sqrt_sq (norm_nonneg _)] at h2
+  rw [h2norm] at htri
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DV-k) HEADLINE unconditional vdC estimate: second-derivative (k=2) A-process
+bound on ONE 16-term quadratic-phase piece (`a = 0.7, b = 0`), all constants
+concrete. `θ = 1.4 ≤ π/2`; KL diagonal `≤ π/1.4 ≤ 2.244`; budget
+`B = 16·(32+2·2.244) = 583.808`; `√B ≤ 24.17`; `(24.17+2)/2 = 13.085 ≤ 13.1`.
+Since `13.1 < 16`, this is genuine (18%) van der Corput savings over the
+triangle bound on this piece. -/
+theorem DV_quad_H2_N16 :
+    ‖∑ n ∈ Finset.range 16, DV_quad 0.7 0 n‖ ≤ 13.1 := by
+  have hsmall : |2 * (0.7 : ℝ) * (((1 : ℕ)) : ℝ)| ≤ Real.pi / 2 := by
+    rw [Nat.cast_one, mul_one, show (2 * 0.7 : ℝ) = 1.4 by norm_num,
+      abs_of_pos (by norm_num : (0 : ℝ) < 1.4)]
+    have h3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    linarith
+  have hD := DV_quad_diag_KL 0.7 0 1 16 (by norm_num) (by norm_num) hsmall
+  have habs : |2 * (0.7 : ℝ) * (((1 : ℕ)) : ℝ)| = 1.4 := by
+    rw [Nat.cast_one, mul_one, show (2 * 0.7 : ℝ) = 1.4 by norm_num]
+    exact abs_of_pos (by norm_num)
+  have hdiv : Real.pi / |2 * (0.7 : ℝ) * (((1 : ℕ)) : ℝ)| ≤ 3.1416 / 1.4 := by
+    rw [habs]
+    have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hpos : (0 : ℝ) < 1.4 := by norm_num
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hpi (le_of_lt (inv_pos.mpr hpos))
+  have hre : (∑ n ∈ Finset.range 16,
+      DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n)).re ≤ 3.1416 / 1.4 :=
+    le_trans (Complex.re_le_norm _) (le_trans hD hdiv)
+  have hA := DV_A_H2 (DV_quad 0.7 0) 16 (DV_quad_unit 0.7 0)
+  have eN : (((16 : ℕ)) : ℝ) = (16 : ℝ) := by norm_num
+  have eD : DV_diagN (DV_quad 0.7 0) 16
+      = ∑ n ∈ Finset.range 16, DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n) := rfl
+  rw [eN, eD] at hA
+  have hB : (16 : ℝ) * (2 * 16 + 2 * (∑ n ∈ Finset.range 16,
+      DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n)).re) ≤ 583.808 := by
+    have h1 : (2 : ℝ) * 16 + 2 * (∑ n ∈ Finset.range 16,
+        DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n)).re
+        ≤ 2 * 16 + 2 * (3.1416 / 1.4) := by
+      linarith [hre]
+    have h2 := mul_le_mul_of_nonneg_left h1 (show (0 : ℝ) ≤ 16 by norm_num)
+    have h3 : (16 : ℝ) * (2 * 16 + 2 * (3.1416 / 1.4)) ≤ 583.808 := by norm_num
+    exact le_trans h2 h3
+  have hsqrt : Real.sqrt ((16 : ℝ) * (2 * 16 + 2 * (∑ n ∈ Finset.range 16,
+      DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n)).re)) ≤ 24.17 := by
+    have h := Real.sqrt_le_sqrt hB
+    have e : Real.sqrt (583.808 : ℝ) ≤ 24.17 := by
+      have hle : (583.808 : ℝ) ≤ 24.17 ^ 2 := by norm_num
+      have h2 := Real.sqrt_le_sqrt hle
+      rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 24.17)] at h2
+    exact le_trans h e
+  have hfin : (Real.sqrt ((16 : ℝ) * (2 * 16 + 2 * (∑ n ∈ Finset.range 16,
+      DV_quad 0.7 0 (n + 1) * star (DV_quad 0.7 0 n)).re)) + 2) / 2 ≤ 13.1 := by
+    linarith [hsqrt]
+  exact le_trans hA hfin
+
+/-- (DV-l) Range-block partition into 16-term pieces (assembly for the
+conditional; pure `Finset` induction via `Finset.sum_range_add`). -/
+theorem DV_range16_split (g : ℕ → ℂ) (J : ℕ) :
+    ∑ i ∈ Finset.range (J * 16), g i
+      = ∑ j ∈ Finset.range J, ∑ n ∈ Finset.range 16, g (j * 16 + n) := by
+  induction J with
+  | zero => simp
+  | succ J ih =>
+    have e : (J + 1) * 16 = J * 16 + 16 := by ring
+    conv_rhs => rw [Finset.sum_range_succ]
+    rw [e, Finset.sum_range_add, ih]
+
+/-- (DV-m) CONDITIONAL middle-block upper `≤ 0.12` (explicit conditional banked
+since the single unconditional piece cannot reach it alone): 63 per-16-block
+bounds `≤ 12/6300` (pure-Prop premises) imply
+`‖∑_{k ∈ [16,1024)} η_k‖ ≤ 0.12` by triangle assembly
+(`63 · (12/6300) = 0.12` exactly). The premises name the EXACT gap (see the
+tail doc below for the numbers). -/
+theorem DV_mid_conditional_012
+    (hpiece : ∀ j : ℕ, j < 63
+      → ‖∑ n ∈ Finset.range 16,
+        etaDirichletTerm (1 - zetaCellS0) (16 + (j * 16 + n))‖ ≤ 12 / 6300) :
+    ‖∑ k ∈ Finset.Ico 16 1024, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.12 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 1024, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ i ∈ Finset.range 1008, etaDirichletTerm (1 - zetaCellS0) (16 + i) := by
+    have h := Finset.sum_Ico_eq_sum_range (etaDirichletTerm (1 - zetaCellS0)) 16 1024
+    rwa [show (1024 - 16 : ℕ) = 1008 by norm_num] at h
+  have hsplit : (∑ i ∈ Finset.range (63 * 16),
+        etaDirichletTerm (1 - zetaCellS0) (16 + i))
+      = ∑ j ∈ Finset.range 63, ∑ n ∈ Finset.range 16,
+        etaDirichletTerm (1 - zetaCellS0) (16 + (j * 16 + n)) :=
+    DV_range16_split _ 63
+  rw [hIco, show (1008 : ℕ) = 63 * 16 by norm_num, hsplit]
+  calc ‖∑ j ∈ Finset.range 63, ∑ n ∈ Finset.range 16,
+        etaDirichletTerm (1 - zetaCellS0) (16 + (j * 16 + n))‖
+      ≤ ∑ j ∈ Finset.range 63, ‖∑ n ∈ Finset.range 16,
+        etaDirichletTerm (1 - zetaCellS0) (16 + (j * 16 + n))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ _j ∈ Finset.range 63, ((12 / 6300 : ℝ)) :=
+        Finset.sum_le_sum (fun j hj => hpiece j (Finset.mem_range.mp hj))
+    _ = 0.12 := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        norm_num
+
+/-- (DV-n) Gap verdict numerals: `0.12` vs the landed BS baseline `5/3`; the
+banked vdC piece `13.1 < 16`; the conditional's exact assembly arithmetic. -/
+theorem DV_gap_012 :
+    (0.12 : ℝ) < 5 / 3 ∧ (13.1 : ℝ) < 16 ∧ (63 : ℝ) * (12 / 6300) = 0.12 := by
+  refine ⟨?_, ?_, ?_⟩ <;> norm_num
+
+/-!
+RESIDUAL / EXACT GAP (DV report-and-stop): the single unconditional piece alone
+CANNOT reach the middle `≤ 0.12`, so (DV-m) banks it as an explicit conditional.
+Per-16-block need: `12/6300 ≈ 0.0019`. Landed BS baseline (`MID_mid_block_upper`,
+`≤ 5/3` total) averages `≈ 0.0265`/piece — shortfall `13.9×` on the total. The
+banked H=2 k=2 piece saves 18% on unit-modulus models (amplitude-weighted on the
+first middle piece `≈ 13.1 · 16^{-0.605} ≈ 2.5` vs need `0.0019`, i.e. ~1300×
+short per piece): it is a MACHINERY bridge (the proved A-process inequality +
+Tier-1 KL differencing chain), NOT a quantitative step. Honest scope note:
+`DV_quad_H2_N16` uses a SYNTHETIC quadratic phase (`a = 0.7`); zeta's true phase
+`8.75·log n` has curvature `|φ''| = 8.75/n^2 ≈ 0.034` at `n = 16`, where H=2 k=2
+is vacuous (KL gives `π/0.034 ≈ 92 > 15`) — the log-vs-quadratic modeling error
+is carried abstractly by the conditional's premises, as is the linear-proxy →
+true-autocorrelation identification left open by CB.
+
+EXACT NEXT-AGENT TASK: prove ONE true-phase diagonal bound on `[16,32)` —
+`Re(∑_{n<16} exp(i(φ(n+1)-φ(n)))) ≤ B` with `φ(m) = 8.75·log(16+m)` and an
+explicit `B < 15`, via `KL_linear_firstDerivTest` plus an explicit
+log-vs-linear error term (`‖exp(iε)-1‖ ≤ |ε|`-shape, all constants concrete,
+created in-file); then feed it through `DV_A_H2` (read-only). Success = a
+proved per-piece diagonal bound beating the triangle `15` on the TRUE phase
+with `#print axioms` exactly `[propext, Classical.choice, Quot.sound]`;
+report-and-stop with the new residual.
+-/
+
+#print axioms DV_quad
+#print axioms DV_diagN
+#print axioms DV_quad_unit
+#print axioms DV_quad_autocorr
+#print axioms DV_quad_diag_factor
+#print axioms DV_quad_diag_KL
+#print axioms DV_cs_norm_sq
+#print axioms DV_norm_add_sq_star
+#print axioms DV_shift2_identity
+#print axioms DV_shift2_sqsum
+#print axioms DV_A_H2
+#print axioms DV_quad_H2_N16
+#print axioms DV_range16_split
+#print axioms DV_mid_conditional_012
+#print axioms DV_gap_012
