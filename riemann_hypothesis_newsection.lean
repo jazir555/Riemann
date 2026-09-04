@@ -8420,3 +8420,617 @@ RESIDUAL (all honest): `1.65` is the floor for triangle/Euler zeta caps on `Re =
 recomposition would be the next squeeze (not attempted: out of brief scope).
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+CM DOOR-3 NEG SQUEEZE, STEP 1 (`CM_Sinh201`): `sinh t ≥ exp(t)/2.01` tail lemma — GREEN/STOP.
+
+GREP RECORD (verified before writing; `2.01`-sinh material absent repo-wide):
+* `sinh_ge_exp_div_four` (`CH2GammaTail`, this file `:6932`): only sinh-decay extractor
+  in repo (`exp t / 4 ≤ sinh t` for `1/2 ≤ t`); the `4` is what CK's T1–T3 chain reuses.
+* `2.01`/`div_201`/`sinh_ge_exp_div_201`: zero hits in every `.lean` file (the only `2.01`
+  hits are unrelated interval-arithmetic bounds in `central_cover_assembly.lean`).
+* `t·coth` (`Door3JointGammaCos.t_mul_coth_le`, this file `:2756`): window analogue, not a
+  tail lemma — not reused here.
+* Pi/exp numeral feeders used below (all Mathlib, axiom-clean rational-approximation
+  proofs): `Real.exp_one_gt_d9` (`2.7182818283 < exp 1`, `ExponentialBounds.lean:35`),
+  `Real.pi_gt_d2` (`3.14 < π`, `Real/Pi/Bounds.lean:159`), `Real.pi_gt_three`,
+  `Real.exp_nat_mul`, `Real.sinh_eq`, `Real.exp_le_exp` — each already consumed by
+  committed green sections of this file (CH2/CI/CKT1), so no new dependency class.
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `sinh_ge_exp_div_201`: `exp t / 2.01 ≤ sinh t` for `13.7 ≤ t`. Route (mirror of
+  `sinh_ge_exp_div_four`): `201 ≤ exp(2t)` via `exp(2t) ≥ exp 6 = (exp 1)^6 ≥ 2.7^6 =
+  387.420489 ≥ 201` (`Real.exp_le_exp` + `Real.exp_nat_mul` at `n = 6` +
+  `Real.exp_one_gt_d9` + `norm_num`), hence `exp(-t) ≤ exp(t)/201` (multiply by
+  `exp(-t)`, `exp(-t)·exp(t) = 1`), then `sinh t = (exp t - exp(-t))/2 ≥ exp(t)/2.01`
+  (`Real.sinh_eq` + `linarith`: `1 - 2/2.01 = 1/201` exactly).
+* `pi_half_tail_ge`: the relevant `t`-range fact — for `8.75 ≤ |y|`,
+  `13.7 ≤ π·|y|/2` (via `3.14 ≤ π`: `3.14·8.75/2 = 13.7375 ≥ 13.7`, `norm_num`-checked).
+* `sinh_pi_half_ge`: half-argument corollary `exp(π·|y|/2)/2.01 ≤ sinh(π·|y|/2)` — the
+  exact form a joint-chain recomposition consumes at `t = π·|y|/2`.
+* `sinh_pi_full_ge`: full-argument corollary `exp(π·|y|)/2.01 ≤ sinh(π·|y|)` — the exact
+  form a CH2-mirror Gamma-tail recomposition consumes (replaces `sinh_ge_exp_div_four`
+  at `t = π·|y| ≥ 27.475 ≥ 13.7`).
+
+NUMERALS (all `norm_num`-checked in-file): `2.7^6 = 387.420489 ≥ 201`;
+`3.14·8.75 = 27.475`, `/2 = 13.7375 ≥ 13.7`; `3·8.75 = 26.25 ≥ 13.7` (full argument).
+-/
+
+namespace CM_Sinh201
+
+/-- Tail sinh lower bound with tight constant: `exp t / 2.01 ≤ sinh t` for `13.7 ≤ t`.
+Mirror of `CH2GammaTail.sinh_ge_exp_div_four` (which proves `/4` for `1/2 ≤ t`);
+the tighter constant comes from `201 ≤ exp(2t)` instead of `2 ≤ exp(2t)`. -/
+theorem sinh_ge_exp_div_201 {t : ℝ} (ht : 13.7 ≤ t) :
+    Real.exp t / 2.01 ≤ Real.sinh t := by
+  have hEpos : 0 < Real.exp t := Real.exp_pos t
+  have hEmpos : 0 < Real.exp (-t) := Real.exp_pos _
+  have h6 : (6 : ℝ) ≤ 2 * t := by linarith
+  have hmono : Real.exp 6 ≤ Real.exp (2 * t) := Real.exp_le_exp.mpr h6
+  have hexp6 : Real.exp (6 : ℝ) = (Real.exp 1) ^ (6 : ℕ) := by
+    have h := Real.exp_nat_mul (1 : ℝ) (6 : ℕ)
+    have h61 : ((6 : ℕ) : ℝ) * 1 = 6 := by norm_num
+    rw [h61] at h
+    exact h
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h27 : (2.7 : ℝ) < Real.exp 1 := by linarith
+  have h27pow : (2.7 : ℝ) ^ (6 : ℕ) ≤ (Real.exp 1) ^ (6 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) h27.le 6
+  have h201 : (201 : ℝ) ≤ (2.7 : ℝ) ^ (6 : ℕ) := by norm_num
+  have hE6_le : (Real.exp 1) ^ (6 : ℕ) ≤ Real.exp (2 * t) := by
+    rw [← hexp6]
+    exact hmono
+  have h201_le : (201 : ℝ) ≤ Real.exp (2 * t) :=
+    le_trans (le_trans h201 h27pow) hE6_le
+  have h2t_eq : (2 : ℝ) * t = t + t := by ring
+  have hExp2 : Real.exp (2 * t) = Real.exp t * Real.exp t := by
+    rw [h2t_eq, Real.exp_add]
+  have hEt201 : (201 : ℝ) ≤ Real.exp t * Real.exp t := by
+    rw [← hExp2]
+    exact h201_le
+  have hEm : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hEm_le : Real.exp (-t) ≤ Real.exp t / 201 := by
+    have hmul := mul_le_mul_of_nonneg_right hEt201 (le_of_lt hEmpos)
+    have e : (Real.exp t * Real.exp t) * Real.exp (-t) = Real.exp t := by
+      rw [mul_assoc, mul_comm (Real.exp t) (Real.exp (-t)), hEm, mul_one]
+    linarith
+  have hsinh_eq : Real.sinh t = (Real.exp t - Real.exp (-t)) / 2 :=
+    Real.sinh_eq t
+  have h201pos : (0 : ℝ) < 201 := by norm_num
+  have h201le : Real.exp (-t) * 201 ≤ Real.exp t :=
+    (le_div_iff₀ h201pos).mp hEm_le
+  rw [hsinh_eq, div_le_iff₀ (by norm_num : (0 : ℝ) < 2.01)]
+  nlinarith [h201le, hEpos, hEmpos]
+
+/-- `t`-range fact for the neg-tail joint chain: `t = π·|y|/2 ≥ 13.7` when `|y| ≥ 8.75`.
+Needs `π ≥ 3.14` (`Real.pi_gt_d2`; `π > 3` alone gives only `13.125`). -/
+theorem pi_half_tail_ge {y : ℝ} (hy : 8.75 ≤ |y|) :
+    13.7 ≤ Real.pi * |y| / 2 := by
+  have hpi : (3.14 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_d2
+  have ha_nn : (0 : ℝ) ≤ |y| := abs_nonneg _
+  have hpi_nn : (0 : ℝ) ≤ Real.pi :=
+    le_of_lt (lt_trans (by norm_num) Real.pi_gt_three)
+  have hmul : (3.14 : ℝ) * 8.75 ≤ Real.pi * |y| :=
+    mul_le_mul hpi hy (by norm_num) hpi_nn
+  have hval : (3.14 : ℝ) * 8.75 = 27.475 := by norm_num
+  linarith
+
+/-- Half-argument corollary: `exp(π·|y|/2)/2.01 ≤ sinh(π·|y|/2)` for `|y| ≥ 8.75`. -/
+theorem sinh_pi_half_ge {y : ℝ} (hy : 8.75 ≤ |y|) :
+    Real.exp (Real.pi * |y| / 2) / 2.01 ≤ Real.sinh (Real.pi * |y| / 2) :=
+  sinh_ge_exp_div_201 (pi_half_tail_ge hy)
+
+/-- Full-argument corollary: `exp(π·|y|)/2.01 ≤ sinh(π·|y|)` for `|y| ≥ 8.75`
+(drop-in replacement for `CH2GammaTail.sinh_ge_exp_div_four` in a Gamma-tail
+recomposition: `π·|y| ≥ 3·8.75 = 26.25 ≥ 13.7`). -/
+theorem sinh_pi_full_ge {y : ℝ} (hy : 8.75 ≤ |y|) :
+    Real.exp (Real.pi * |y|) / 2.01 ≤ Real.sinh (Real.pi * |y|) := by
+  apply sinh_ge_exp_div_201
+  have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have ha_nn : (0 : ℝ) ≤ |y| := abs_nonneg _
+  have hpi_nn : (0 : ℝ) ≤ Real.pi :=
+    le_of_lt (lt_trans (by norm_num) hpi)
+  have hmul : (3 : ℝ) * 8.75 ≤ Real.pi * |y| :=
+    mul_le_mul (le_of_lt hpi) hy (by norm_num) hpi_nn
+  have hval : (3 : ℝ) * 8.75 = 26.25 := by norm_num
+  linarith
+
+#print axioms CM_Sinh201.sinh_ge_exp_div_201
+#print axioms CM_Sinh201.pi_half_tail_ge
+#print axioms CM_Sinh201.sinh_pi_half_ge
+#print axioms CM_Sinh201.sinh_pi_full_ge
+
+end CM_Sinh201
+
+/-!
+CM VERDICT + RESIDUAL (report-and-stop): STEP 1 GREEN (this alone is commit-worthy per
+brief — STOP here, no recomposition attempted in this tail).
+
+(1) `sinh t ≥ exp(t)/2.01` tail lemma CLOSED (`CM_Sinh201.sinh_ge_exp_div_201`,
+`13.7 ≤ t`) + `t`-range fact (`pi_half_tail_ge`: `π·|y|/2 ≥ 13.7` for `|y| ≥ 8.75`) +
+both use-site corollaries (`sinh_pi_half_ge` for the joint chain, `sinh_pi_full_ge` as a
+drop-in for `sinh_ge_exp_div_four` in a CH2-mirror Gamma recomposition). All numerals
+`norm_num`-checked (`2.7^6 = 387.420489 ≥ 201`; `3.14·8.75/2 = 13.7375 ≥ 13.7`).
+
+(2) Recomposition with `2.01` replacing `4` NOT attempted (per brief: only if step 1 fits
+and is green — the green verdict is for the BUILD to confirm; the honest recomputed
+numerals for a follow-up are pre-computed here, not claimed): replacing `4` by `2.01`
+in `Gamma_Re2_tail_sq` changes the coeff numeral to `(1241/1225)·(2.01·π) ≤ 6.4`
+(`≈ 6.397` with `π ≤ 3.1416`), i.e. `C² = 6.4`, `C = 2.53` (`2.53² = 6.4009`),
+joint `2.53·0.51 = 1.2903`, edge `0.971·(8.98·(1.65·((1.2903/18)·25.9))) ≈ 26.7 ≤ 36`
+(projected CLOSE — to be proved, not asserted).
+
+(3) Neg-half `hTail` NOT composed (per brief: only if (2) closes at `≤ 36` — (2) is not
+in this tail). Pos edge already green at every tier (CI + CK T1–T3). What remains for
+full `hTail`/P1 after a future (2): the tail-SUP argument (edge values are the
+majorant's MINIMUM on the tail since both factors grow in `a`; `‖G‖ ≤ 36` off-window
+needs the full `BZTailEnvelope` tail-sup assembly, not just the edge numeral) —
+`BZTailEnvelope.P1_R02_of_hTail` stays CONDITIONAL; `R02_zeta_upper_obligation` open.
+Neg edge recomputed vs 36: NOT recomputed here (no recomposition) — last committed
+honest value stays `38.1 > 36` (gap `2.1`, `~1.06×` over, `CKT3Zeta165.neg_edge_165_gt_36`).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
+/-!
+CM DOOR-3 NEG SQUEEZE, STEP 2 (`CM_Sinh201Recomp`): recomposition with `2.01`
+replacing `4` — GREEN, neg edge CLOSES at the edge numeral.
+
+SCOPE: step 1 (`CM_Sinh201`, this file, green) closed the `sinh ≥ exp/2.01` tail lemma;
+this block mirrors CK's T1–T3 numeral pipeline with the new constant, recomputing every
+dependent numeral honestly. Reuses (not re-proves): `Door3JointGammaCos.Gamma_Re2_normSq`
++ `cos_Re2_norm`, `Door3SharpWindow.cpow_sharp_Re2`, `CIJointStirling.exp_neg_pi_tail_le`
++ `exp_cosh_joint_eq` + `damp_pos_01`/`damp_neg_0971`, `CKT2SubSqrt.sub_sqrt_le`
+(+ its edge numeral `sqrt_80p5625_le`), `CKT3Zeta165.zeta_rightEdge_B165` (`B = 1.65`
+reflected cap), `ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne`, `riemannZeta_one_sub`.
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `Gamma_Re2_tail_sq_201`: `‖Γ w‖² ≤ 6.4009·|y|³·e^{-π|y|}` (`Re w = 2`, `8.75 ≤ |y|`).
+  Verbatim re-derivation of `CKT1Stirling36.Gamma_Re2_tail_sq_36`; ONLY changes: the
+  decay extractor is `CM_Sinh201.sinh_ge_exp_div_201` (at `t = π|y| ≥ 26.25 ≥ 13.7`)
+  so the `S`-factor is `2.01·π` (was `4·π`), and the coeff numeral is
+  `(1241/1225)·(2.01·π) ≤ 6.4009` (`≈ 6.3971` with `π ≤ 3.1416`; was `≤ 12.96`).
+  Honest factor on the square: `12.96/6.4009 ≈ 2.02× ≈ 4/2.01` (the full `~2×`
+  sinh squeeze CK's residual named).
+* `Gamma_Re2_tail_upper_201`: `‖Γ w‖ ≤ 2.53·√(|y|³)·e^{-π|y|/2}` (`2.53² = 6.4009`).
+* `joint_Stirling_201_le`: `‖Γ·cos‖ ≤ 1.2903·√(|y|³)` (`2.53·0.51 = 1.2903`; the joint
+  `exp(-c)·cosh(c) ≤ 0.51` factor is unchanged).
+* `RowFE_Stirling_201_le` (`(1.2903/18)·√`), `zeta_Stirling_201_le`
+  (`1.65·((1.2903/18)·√)`, reflected cap via `zeta_rightEdge_B165`),
+  `F_Stirling_201_le` (sqrt-`(z-1)` × zeta, via `CKT2SubSqrt.sub_sqrt_le`),
+  `G_pos_201_le` / `G_neg_201_le` (damping `0.1` / `0.971`).
+* Edge numerals: pos `0.1·B(8.75) ≤ 2.76` (`< 36`); neg `0.971·B(8.75) ≤ 26.8`
+  (`< 36` — CLOSES; was `38.1 > 36`). Honest factor `38.1/26.8 ≈ 1.42×`
+  (joint-with-`1.65` rescaling: `(2·1.836)/(1.65·1.2903) ≈ 1.72×` on the zeta leg,
+  net of the unchanged `8.98`/`0.971` factors — see verdict).
+-/
+
+namespace CM_Sinh201Recomp
+
+/-- Squared Gamma tail with `2.01`-squeeze: `‖Γ w‖² ≤ 6.4009·|y|³·e^{-π|y|}`
+for `Re w = 2`, `8.75 ≤ |y|`. Mirrors `CKT1Stirling36.Gamma_Re2_tail_sq_36`. -/
+theorem Gamma_Re2_tail_sq_201 {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w‖ ^ 2
+      ≤ 6.4009 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := by
+  have hyne : w.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hG := Door3JointGammaCos.Gamma_Re2_normSq hw hyne
+  have hsq : w.im ^ 2 = |w.im| ^ 2 := (sq_abs _).symm
+  have hsymm : Real.pi * w.im / Real.sinh (Real.pi * w.im)
+      = Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg, show Real.pi * -w.im = -(Real.pi * w.im) by ring,
+        Real.sinh_neg, neg_div_neg_eq]
+    · rw [abs_of_nonneg hynonneg]
+  have hG2 : ‖Complex.Gamma w‖ ^ 2
+      = (1 + |w.im| ^ 2) * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)) := by
+    rw [hsq, hsymm] at hG
+    exact hG
+  have ha_pos : 0 < |w.im| := lt_of_lt_of_le (by norm_num) htail
+  have hpi : 0 < Real.pi := by linarith [Real.pi_gt_three]
+  have ha_nonneg : 0 ≤ |w.im| := le_of_lt ha_pos
+  have hpi_nonneg : 0 ≤ Real.pi := le_of_lt hpi
+  have hpa_nonneg : 0 ≤ Real.pi * |w.im| := mul_nonneg hpi_nonneg ha_nonneg
+  have ht_137 : (13.7 : ℝ) ≤ Real.pi * |w.im| := by
+    have h3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    have hmul := mul_le_mul_of_nonneg_right (le_of_lt h3) ha_nonneg
+    have h3y : (3 : ℝ) * 8.75 ≤ 3 * |w.im| :=
+      mul_le_mul_of_nonneg_left htail (by norm_num)
+    have h326 : (3 : ℝ) * 8.75 = 26.25 := by norm_num
+    linarith
+  have hsinh_pos : 0 < Real.sinh (Real.pi * |w.im|) :=
+    Real.sinh_pos_iff.mpr (by linarith)
+  have hexp_pos : 0 < Real.exp (Real.pi * |w.im|) := Real.exp_pos _
+  have hsinh_lower : Real.exp (Real.pi * |w.im|) / 2.01
+      ≤ Real.sinh (Real.pi * |w.im|) :=
+    CM_Sinh201.sinh_ge_exp_div_201 ht_137
+  have hExp201 : Real.exp (Real.pi * |w.im|)
+      ≤ 2.01 * Real.sinh (Real.pi * |w.im|) := by
+    have h := (div_le_iff₀ (show (0 : ℝ) < 2.01 by norm_num)).mp hsinh_lower
+    linarith [h]
+  have hS_nonneg : 0 ≤ Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) :=
+    div_nonneg hpa_nonneg (le_of_lt hsinh_pos)
+  have hS_le : Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)
+      ≤ 2.01 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|)) := by
+    rw [Real.exp_neg]
+    have hcross : Real.pi * |w.im| * Real.exp (Real.pi * |w.im|)
+        ≤ 2.01 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|) := by
+      have hnn := mul_nonneg hpa_nonneg (sub_nonneg.mpr hExp201)
+      nlinarith [hnn]
+    have hgoal : Real.pi * |w.im|
+        ≤ (2.01 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|))
+          / Real.exp (Real.pi * |w.im|) :=
+      (le_div_iff₀ hexp_pos).mpr hcross
+    rw [div_eq_mul_inv] at hgoal
+    have e : (2.01 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|))
+          * (Real.exp (Real.pi * |w.im|))⁻¹
+        = 2.01 * Real.pi * |w.im| * (Real.exp (Real.pi * |w.im|))⁻¹
+          * Real.sinh (Real.pi * |w.im|) := by ring
+    rw [e] at hgoal
+    exact (div_le_iff₀ hsinh_pos).mpr hgoal
+  have hsq_ge : (8.75 : ℝ) ^ 2 ≤ |w.im| ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) htail 2
+  have h875sq : (8.75 : ℝ) ^ 2 = 76.5625 := by norm_num
+  have h76 : (76.5625 : ℝ) ≤ |w.im| ^ 2 := by linarith
+  have hpoly : 1 + |w.im| ^ 2 ≤ (1241 / 1225 : ℝ) * |w.im| ^ 2 := by
+    have hmul := mul_le_mul_of_nonneg_left h76 (show (0 : ℝ) ≤ 16 / 1225 by norm_num)
+    have h16 : (16 / 1225 : ℝ) * 76.5625 = 1 := by norm_num
+    have h1le : (1 : ℝ) ≤ (16 / 1225) * |w.im| ^ 2 := by linarith
+    have hsplit : (1241 / 1225 : ℝ) * |w.im| ^ 2
+        = |w.im| ^ 2 + (16 / 1225) * |w.im| ^ 2 := by ring
+    linarith
+  have hcoeff : (1241 / 1225 : ℝ) * (2.01 * Real.pi) ≤ 6.4009 := by
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hmul := mul_le_mul_of_nonneg_left hpi_le
+      (show (0 : ℝ) ≤ (1241 / 1225) * 2.01 by norm_num)
+    have hnum : ((1241 / 1225 : ℝ) * 2.01) * 3.1416 ≤ 6.4009 := by norm_num
+    have hbridge : (1241 / 1225 : ℝ) * (2.01 * Real.pi)
+        = ((1241 / 1225) * 2.01) * Real.pi := by ring
+    rw [hbridge]
+    linarith
+  have hpolyRHS_nonneg : 0 ≤ (1241 / 1225 : ℝ) * |w.im| ^ 2 :=
+    mul_nonneg (by norm_num) (sq_nonneg _)
+  have hRHS_exp_nonneg : 0 ≤ Real.exp (-(Real.pi * |w.im|)) :=
+    le_of_lt (Real.exp_pos _)
+  have ha3_nonneg : 0 ≤ |w.im| ^ 3 := pow_nonneg ha_nonneg 3
+  have hbound1 : (1 + |w.im| ^ 2)
+        * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|))
+      ≤ ((1241 / 1225) * |w.im| ^ 2)
+        * (2.01 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|))) :=
+    mul_le_mul hpoly hS_le hS_nonneg hpolyRHS_nonneg
+  have hEq : ((1241 / 1225) * |w.im| ^ 2)
+        * (2.01 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|)))
+      = ((1241 / 1225) * (2.01 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|)) := by
+    ring
+  have hbound2 : ((1241 / 1225) * (2.01 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|))
+      ≤ 6.4009 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) :=
+    mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right hcoeff ha3_nonneg) hRHS_exp_nonneg
+  calc ‖Complex.Gamma w‖ ^ 2
+      = (1 + |w.im| ^ 2) * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)) := hG2
+    _ ≤ ((1241 / 1225) * |w.im| ^ 2)
+        * (2.01 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|))) := hbound1
+    _ = ((1241 / 1225) * (2.01 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|)) := hEq
+    _ ≤ 6.4009 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := hbound2
+
+/-- Un-squared Gamma tail with `C = 2.53` (`2.53² = 6.4009`):
+`‖Γ w‖ ≤ 2.53·√(|y|³)·e^{-π|y|/2}` for `Re w = 2`, `8.75 ≤ |y|`. -/
+theorem Gamma_Re2_tail_upper_201 {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w‖
+      ≤ 2.53 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2)) := by
+  have hsq := Gamma_Re2_tail_sq_201 hw htail
+  have ha_nonneg : 0 ≤ |w.im| := abs_nonneg _
+  have ha3_nonneg : 0 ≤ |w.im| ^ 3 := pow_nonneg ha_nonneg 3
+  have hsqrt_nonneg : 0 ≤ Real.sqrt (|w.im| ^ 3) := Real.sqrt_nonneg _
+  have hexp_nonneg : 0 ≤ Real.exp (-(Real.pi * |w.im| / 2)) :=
+    le_of_lt (Real.exp_pos _)
+  have hRHS_nonneg : 0 ≤ 2.53 * Real.sqrt (|w.im| ^ 3)
+      * Real.exp (-(Real.pi * |w.im| / 2)) :=
+    mul_nonneg (mul_nonneg (by norm_num) hsqrt_nonneg) hexp_nonneg
+  have hsqrt_sq : (Real.sqrt (|w.im| ^ 3)) ^ 2 = |w.im| ^ 3 :=
+    Real.sq_sqrt ha3_nonneg
+  have hexp_sq : (Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+      = Real.exp (-(Real.pi * |w.im|)) := by
+    have e : (-(Real.pi * |w.im| / 2)) + (-(Real.pi * |w.im| / 2))
+        = -(Real.pi * |w.im|) := by ring
+    calc (Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+        = Real.exp (-(Real.pi * |w.im| / 2))
+          * Real.exp (-(Real.pi * |w.im| / 2)) := by ring
+      _ = Real.exp ((-(Real.pi * |w.im| / 2)) + (-(Real.pi * |w.im| / 2))) := by
+          rw [← Real.exp_add]
+      _ = Real.exp (-(Real.pi * |w.im|)) := by rw [e]
+  have hRHS_sq : (2.53 * Real.sqrt (|w.im| ^ 3)
+        * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+      = 6.4009 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := by
+    have e : (2.53 * Real.sqrt (|w.im| ^ 3)
+          * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+        = 6.4009 * ((Real.sqrt (|w.im| ^ 3)) ^ 2)
+          * ((Real.exp (-(Real.pi * |w.im| / 2))) ^ 2) := by
+      ring
+    rw [e, hsqrt_sq, hexp_sq]
+  have hle2 : ‖Complex.Gamma w‖ ^ 2
+      ≤ (2.53 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2 := by
+    rw [hRHS_sq]
+    exact hsq
+  have hle_sqrt := Real.sqrt_le_sqrt hle2
+  rw [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hRHS_nonneg] at hle_sqrt
+  exact hle_sqrt
+
+/-- Joint Stirling bound with `C = 2.53`: on `Re w = 2`, `8.75 ≤ |y|`,
+`‖Γ w * cos(πw/2)‖ ≤ 1.2903·√(|y|³)` (`2.53·0.51 = 1.2903`). Mirrors
+`CKT1Stirling36.joint_Stirling_36_le`. -/
+theorem joint_Stirling_201_le {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 1.2903 * Real.sqrt (|w.im| ^ 3) := by
+  have hyne : w.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hG := Gamma_Re2_tail_upper_201 hw htail
+  have hCeq := Door3JointGammaCos.cos_Re2_norm hw
+  have heven : Real.cosh (Real.pi * w.im / 2)
+      = Real.cosh (Real.pi * |w.im| / 2) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg,
+        show Real.pi * -w.im / 2 = -(Real.pi * w.im / 2) by ring, Real.cosh_neg]
+    · rw [abs_of_nonneg hynonneg]
+  have hExpLe := CIJointStirling.exp_neg_pi_tail_le (a := w.im) htail
+  have hECle : Real.exp (-(Real.pi * |w.im| / 2)) * Real.cosh (Real.pi * |w.im| / 2)
+      ≤ 0.51 := by
+    rw [CIJointStirling.exp_cosh_joint_eq]
+    linarith [hExpLe]
+  have hSnn : (0 : ℝ) ≤ Real.sqrt (|w.im| ^ 3) := Real.sqrt_nonneg _
+  have hCnn : (0 : ℝ) ≤ Real.cosh (Real.pi * |w.im| / 2) :=
+    le_of_lt (Real.cosh_pos _)
+  have h253Snn : (0 : ℝ) ≤ 2.53 * Real.sqrt (|w.im| ^ 3) :=
+    mul_nonneg (by norm_num) hSnn
+  rw [norm_mul, hCeq, heven]
+  calc ‖Complex.Gamma w‖ * Real.cosh (Real.pi * |w.im| / 2)
+      ≤ (2.53 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2)))
+        * Real.cosh (Real.pi * |w.im| / 2) :=
+        mul_le_mul_of_nonneg_right hG hCnn
+    _ = 2.53 * Real.sqrt (|w.im| ^ 3)
+        * (Real.exp (-(Real.pi * |w.im| / 2)) * Real.cosh (Real.pi * |w.im| / 2)) := by
+        ring
+    _ ≤ 2.53 * Real.sqrt (|w.im| ^ 3) * 0.51 :=
+        mul_le_mul_of_nonneg_left hECle h253Snn
+    _ = 1.2903 * Real.sqrt (|w.im| ^ 3) := by ring
+
+/-- FE-factor cap: `‖RowFEFactor w‖ ≤ (1.2903/18)·√(|y|³)`. -/
+theorem RowFE_Stirling_201_le {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖RowFE.RowFEFactor w‖ ≤ (1.2903 / 18) * Real.sqrt (|w.im| ^ 3) := by
+  have hcpow := Door3SharpWindow.cpow_sharp_Re2 hw
+  have hjoint := joint_Stirling_201_le hw htail
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  have hgc : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      = ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ :=
+    (norm_mul _ _).symm
+  rw [hnorm_eq, h2norm, hgc]
+  have h1 : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36) :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  calc (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ (2 * (1 / 36)) * (1.2903 * Real.sqrt (|w.im| ^ 3)) :=
+        mul_le_mul h1 hjoint (norm_nonneg _) (by norm_num)
+    _ = (1.2903 / 18) * Real.sqrt (|w.im| ^ 3) := by ring
+
+/-- Zeta cap on the hTail line: `‖ζ z‖ ≤ 1.65·((1.2903/18)·S(|y|))`
+(reflected cap `1.65` via `CKT3Zeta165.zeta_rightEdge_B165`). -/
+theorem zeta_Stirling_201_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖riemannZeta z‖ ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz] at hre
+    have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z =
+      RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 1.65 := by
+    have h := CKT3Zeta165.zeta_rightEdge_B165 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have htail_le : (8.75 : ℝ) ≤ |((1 : ℂ) - z).im| := by
+    rw [hw_im, abs_neg]
+    exact le_of_lt htail
+  have hFactor := RowFE_Stirling_201_le hw_re htail_le
+  rw [hw_im, abs_neg] at hFactor
+  have hXnn : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (|z.im| ^ 3) := by
+    exact mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) * 1.65 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) hXnn
+    _ = 1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) := by ring
+
+/-- Pole-removed cap (sqrt `(z-1)` × zeta, via `CKT2SubSqrt.sub_sqrt_le`). -/
+theorem F_Stirling_201_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+      ≤ Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hsub := CKT2SubSqrt.sub_sqrt_le hz
+  have hZ := zeta_Stirling_201_le hz htail
+  have hb_nn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2) := Real.sqrt_nonneg _
+  rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+  exact mul_le_mul hsub hZ (norm_nonneg _) hb_nn
+
+/-- Positive-side pointwise composition. -/
+theorem G_pos_201_le {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ (0.1 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have htail : 8.75 < |z.im| := by
+    have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+    rw [habs]
+    exact hpos
+  have hF := F_Stirling_201_le hz htail
+  have hdamp := CIJointStirling.damp_pos_01 hz hpos
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+    have hS : (0 : ℝ) ≤ Real.sqrt (|z.im| ^ 3) := Real.sqrt_nonneg _
+    have h1 : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (|z.im| ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    have h2 : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+      linarith [h1]
+    exact mul_nonneg (Real.sqrt_nonneg _) h2
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ (Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) * 0.1 :=
+        mul_le_mul hF hdamp (norm_nonneg _) hBnn
+    _ = (0.1 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Negative-side pointwise composition (neg-half `hTail` pointwise form). -/
+theorem G_neg_201_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ (0.971 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+        * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; linarith
+  have hF := F_Stirling_201_le hz htail
+  have hdamp := CIJointStirling.damp_neg_0971 hz hneg
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+    have hS : (0 : ℝ) ≤ Real.sqrt (|z.im| ^ 3) := Real.sqrt_nonneg _
+    have h1 : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (|z.im| ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    have h2 : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+      linarith [h1]
+    exact mul_nonneg (Real.sqrt_nonneg _) h2
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ (Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) * 0.971 :=
+        mul_le_mul hF hdamp (norm_nonneg _) hBnn
+    _ = (0.971 : ℝ) * (Real.sqrt (4 + |z.im| ^ 2)
+          * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Positive edge numeral: `0.1·B(8.75) ≤ 2.76`. -/
+theorem pos_edge_201_le :
+    (0.1 : ℝ) * (8.98 * (1.65 * ((1.2903 / 18) * 25.9))) ≤ 2.76 := by
+  norm_num
+
+/-- Positive edge stays closed. -/
+theorem pos_edge_201_lt_36 :
+    (0.1 : ℝ) * (8.98 * (1.65 * ((1.2903 / 18) * 25.9))) < 36 := by
+  norm_num
+
+/-- Recomputed negative edge numeral: `0.971·B(8.75) ≤ 26.8`
+(was `38.1`; honest factor `38.1/26.8 ≈ 1.42×`). -/
+theorem neg_edge_201_le :
+    (0.971 : ℝ) * (8.98 * (1.65 * ((1.2903 / 18) * 25.9))) ≤ 26.8 := by
+  norm_num
+
+/-- Negative edge CLOSES: `0.971·B(8.75) < 36` (value `≈ 26.71`, margin `≈ 9.29`). -/
+theorem neg_edge_201_lt_36 :
+    (0.971 : ℝ) * (8.98 * (1.65 * ((1.2903 / 18) * 25.9))) < 36 := by
+  norm_num
+
+#print axioms CM_Sinh201Recomp.Gamma_Re2_tail_sq_201
+#print axioms CM_Sinh201Recomp.Gamma_Re2_tail_upper_201
+#print axioms CM_Sinh201Recomp.joint_Stirling_201_le
+#print axioms CM_Sinh201Recomp.RowFE_Stirling_201_le
+#print axioms CM_Sinh201Recomp.zeta_Stirling_201_le
+#print axioms CM_Sinh201Recomp.F_Stirling_201_le
+#print axioms CM_Sinh201Recomp.G_pos_201_le
+#print axioms CM_Sinh201Recomp.G_neg_201_le
+#print axioms CM_Sinh201Recomp.pos_edge_201_le
+#print axioms CM_Sinh201Recomp.pos_edge_201_lt_36
+#print axioms CM_Sinh201Recomp.neg_edge_201_le
+#print axioms CM_Sinh201Recomp.neg_edge_201_lt_36
+
+end CM_Sinh201Recomp
+
+/-!
+CM VERDICT + RESIDUAL (report-and-stop): STEP 2 GREEN (build to confirm), neg edge
+CLOSES at the edge numeral; neg-half `hTail` composed in pointwise form; full `hTail`
+still needs the tail-sup argument — NOT claimed.
+
+(2) Recomposition CLOSED (`CM_Sinh201Recomp`, 12 theorems): `Gamma_Re2_tail_sq_201`
+(`C² = 6.4009`) + `Gamma_Re2_tail_upper_201` (`C = 2.53`) + `joint_Stirling_201_le`
+(`1.2903 = 2.53·0.51`) + `RowFE/zeta/F/G` chain (reusing CKT2 sqrt-`(z-1)`, CKT3 `1.65`,
+CI damping) + edge numerals. Recomputed neg edge `≤ 26.8`, `< 36`
+(`neg_edge_201_le`, `neg_edge_201_lt_36`, value `≈ 26.71`, margin `≈ 9.29`). Honest
+factor vs CK tier-3: `38.1/26.8 ≈ 1.42×`; Bücher check on the zeta leg:
+`(2·1.836)/(1.65·1.2903) = 3.672/2.129 ≈ 1.72×` gain from the sinh squeeze net of the
+unchanged `8.98` (`(z-1)` sqrt), `1.65` (Basel), `0.971` (damping) factors. Pos
+`≤ 2.76 < 36` (was `3.92`).
+
+(3) Neg-half `hTail` verdict: COMPOSED in pointwise form (`G_neg_201_le`: `‖G z‖ ≤
+0.971·B(|Im z|)` for `Re z = -1`, `Im z < -8.75`) with the edge numeral verified
+`< 36` (`neg_edge_201_lt_36`). Pos edge already green at every tier (CI + CK T1–T3 +
+here). What remains for FULL `hTail`/P1: the tail-SUP argument — `B(a) =
+√(4+a²)·(1.65·((1.2903/18)·√(a³)))` GROWS in `a` (both factors), so the edge value
+`≈ 26.71` is the majorant's MINIMUM on the tail, not a uniform `≤ 36` cap off-window
+(`B` crosses `36` at finite `a`); the uniform bound needs the `BZTailEnvelope`
+tail-sup assembly (Gaussian damping domination at large `|τ|` + windowed caps).
+Hence `BZTailEnvelope.P1_R02_of_hTail` stays CONDITIONAL; `R02_zeta_upper_obligation`
+stays open. No `hTail`-uniform/HALF-sup composition is claimed here.
+Neg edge recomputed vs 36: `26.8 ≤ 36` green (`< 36` by `neg_edge_201_lt_36`).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
