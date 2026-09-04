@@ -1313,6 +1313,10 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
 - **`∀ k≥1, taylorCoeff k ≠ 0`** (`Ξ^{(2k)}(0)` alternating series per `k`) still open — only `k=0` closed.
+  **k=1 conditional bridge banked (uncommitted, 5 errors in repair):** deriv-API chain + `taylorCoeff_one_eq_k1`
+  + `second_ne_zero_k1 ⇒ taylorCoeff 1 ≠ 0` + exact `P''=32`. Wall numerified: `F''≈0.000495`, needs
+  enclosure ±0.00049 — but O(50) summands at ~2ppm each infeasible at BM40 `~1e-3`; needs four `~1e-4`
+  derivative-bound lemmas (eta-derivative series + digamma/trigamma at 1/4, absent).
 
 **Door 2 — Xi-critical (`riemann_hypothesis.lean:34`, `axiom RiemannHypothesisProp_apply`).**
 `rh_iff_xi_off_real_pointwise_nonvanishing_mathlib` / `hardDifferenceNonzero_iff_RH` chain proven.
@@ -1333,9 +1337,11 @@ Legacy sorry-decls RESOLVED (verified 2026-09-03): `central_cover_assembly.lean`
 consumers repointed); unary `.conj` was FALSE (binary with `hy0,hy1` proved); `centralCells` geometry 4/6
 proved, analytic 2/6 FALSE with numbers (wide-grid infeasible: `LHS>50` vs `O(1)`, lemma
 `legacy_grid_infeasible_wide_top`); full `coversUpper` FALSE (4 counterexamples) → inner triple
-(`coversUpper_inner`/`coversLower_inner`/`centralCovers_inner`) proved. `central_cover_trusted.lean`
-(not edited) holds the remaining **8 sorry-terms** (TRUSTED_float certs :24/25/27/29/39/45/64/95) + needs
-migration off unary `.conj`/global-differentiable (:66,84,122);
+(`coversUpper_inner`/`coversLower_inner`/`centralCovers_inner`) proved. **Trusted migration CLOSED:**
+`central_cover_trusted.lean` repointed off removed names (strip differentiability + binary `.conj` with
+`hy0,hy1` from bridged bounds) + 4/4 Float-order sorrys proved (`native_decide` toRatParts pattern —
+carries standard native_decide aux axioms, no sorryAx); remaining **4 sorry-terms** (mpmath-margin
+center/deriv bounds, Float/ℝ agreement, grid coverage :575/581/601/645, all honestly blocked);
 `rh_residual_gap.lean` has **0**; `interval_arith.lean` has **0**. `RXX_mem_gridFine` already exists for
 R00 and R02–R40 and all 41 `H_instance`s exist (R01 correctly has none: `(-7.5,-5) ∉ fineGridX`).
 Committed (rigorous, 0 sorrys): all **40 cells** packaged (R00–R10 bottom, R11–R40 upper) with
@@ -1390,7 +1396,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Tier-2 CLOSED (`T2_abel_eq`/`T2_block_upper`/`T2_w_TV_total`):** second-half block UPPER `≤1/5`
     (`72×` sharper than triangle `~12.4`, margin `2/15` to `1/3`) + weight TV `≤1/25`. Stopping honesty:
     a LOWER on `S_{2048}` needs `‖S_{1024}‖≥8/15` (true `≈0.56`, margin `0.027`) — needs rigorous
-    `cos/sin(8.75·log n)` interval arithmetic or Tier-3 second-derivative for an early-block upper. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    `cos/sin(8.75·log n)` interval arithmetic or Tier-3 second-derivative for an early-block upper.
+    **D3 interval framework CLOSED (`D3_block_norm_ge_sum_lo` + `D3_S1024_of_S1` + `D3_S2_norm_ge`):**
+    per-term cpow enclosures (`θ₂∈[6.065,6.066]`, `cos θ₂≥0.97`, `2^{-0.605}∈[5/8,2/3]`) ⇒ `S_1`, `S_2≥1/3`
+    green. Exact K-table (true): K=4 dead, K=8 fails by 0.019, **K=16 first feasible** (margin 0.024). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
@@ -1433,7 +1442,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    (`R02GammaLower`, 20000×):** `0.002 ≤ ‖Gamma(sR02/2)‖` via reflection (true `≈0.0087`, 4.3× headroom) +
    drop-in `gammaOf_lower_R02`; exactly `3×` short of `0.006` (needs `S·U≤523.6`, banked `1500` — deeper
    `n≈15` shift chain + near-perfect sine required). With `Agam=0.002` the threshold needs only
-   `Azeta≥2.95` (was `≥59090`). Poly `22`, pi `1/2`,
+   `Azeta≥2.95` (was `≥59090`). **Deeper shift banked (`R02GammaUpperDeep`, n=21):** reflected upper
+   `U: 0.05→0.026` (1.93×; brief's `n≈15` yields only `≈0.028`) ⇒ `S·U=780` → `π/780≈0.00403`, `1.5×`
+   short. Tier-2 sine (`S≈20067`) would give `521.7≤523.6` — closes in principle. Poly `22`, pi `1/2`,
   Gamma-upper `0.05` at R02: no gap. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. **Stirling disc-upper CLOSED (`R02GammaDisc`, 412×):**
@@ -1448,7 +1459,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   true `|ζ|=O(1)` — 0 cells claimed closed. **Rewiring v2 (`AU_R02_Agam002_M163`, `Agam=0.002`
   era):** budget `205.382` vs product `205.392` (margin 0.01) ⇒ closure needs `Azeta≥9336` at `M=163`
   (`9336=3112·3`, necessary `9335`); fully-wired H-leaf with premise/owner/status table as doc-string
-  (P1 zeta-upper OPEN, P2 Gamma-upper LANDED, P3 Gamma-lower LANDED, P4 zeta-lower OPEN, poly/pi/leaf CLOSED). Remaining 39 cells: same shape, different `s`-rects
+  (P1 zeta-upper OPEN, P2 Gamma-upper LANDED, P3 Gamma-lower LANDED, P4 zeta-lower OPEN, poly/pi/leaf CLOSED).
+  **Rollout template CLOSED (`AX_CellTemplate`):** `CellClosed_of_factorBounds` (generic cell ⇒ H-leaf from
+  explicit numeric premises) + R02 recovery of AU v2 as corollary + tier table for all 39 cells + 20
+  strip cells (`Azeta ≥ (eps+M·radCap)/(Apoly·Api·Agam)` per group; G4 needs small-r deriv packaging). Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
