@@ -1425,7 +1425,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Im-route opened (`D3_S16_im_lower` et al.):** per-term Im lowers x=1..16 green, but sum WEAK
     (`≥-1.138`, true `≈-0.51`) — needs Im-UPPER assembly (`Im S₁₆ ≤ -c`, tasked). **Im-uppers CLOSED
     (`D3_S16_im_upper` et al.):** bracket `[-1.138, +0.173]` STRADDLES 0 (true `-0.51` inside) — no
-    positive lower; needs `0.68` total sin-sharpening (higher-order Taylor, tasked).
+    positive lower; needs `0.68` total sin-sharpening (higher-order Taylor, tasked). **SIGN CLOSED
+    (`D3_S16_norm_ge_sharp`):** quintic sharpening at k=11 (`0.25→0.0765`) ⇒ **`‖S₁₆‖ ≥ 29/42000`**
+    — FIRST positive `‖S‖` lower (razor-thin; k=9/k=4/amp widening tasked). **Stirling Gamma tail
+    CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
     **x=10 CLOSED (`D3_S10_re_lower` et al.):** `log 10 = log 2 + log 5` bridge green
