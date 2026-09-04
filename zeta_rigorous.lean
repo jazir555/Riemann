@@ -18989,3 +18989,1236 @@ nontrivial bound. Success = full proofs, `#print axioms` exactly
 #print axioms DZ_diagN_eq
 #print axioms DZ_piece_unit
 #print axioms DZ_piece_DV_feed
+
+/-!
+Door-3 middle-upper k=1 DIRECT on [16,32) (zeta lane, DZ1 tail, append-only).
+
+GREP-FIRST RECORD (run before writing):
+* `CG_sin_le_quintic` / `CG_cos_le_quartic` -- FOUND at zeta_rigorous.lean:13360/13416
+  (Taylor monotone engines `monotoneOn_of_deriv_nonneg (convex_Ici 0)` mirrored below).
+* `KL_linear_firstDerivTest` -- FOUND at 4954 (headline `||sum exp(i n th)|| <= pi/|th|`).
+* `KL_log_gap_ge` -- FOUND at 4978 (used by DZ-a; NOT needed for k=1 linearization,
+  which uses `Real.log_le_sub_one_of_pos` + explicit remainder below).
+* `DV_range16_split` -- FOUND at 18641 (read-only; not needed here: single 16-block).
+
+WHAT IS PROVED (unconditional; FULL proofs, no `sorry`/`admit`/`axiom`):
+* (DZ1-a) `DZ1_log_F_nonneg` / `DZ1_log_H_nonneg`: `log(1+t)-t+t^2 >= 0` on
+  `[0,1/2]` and `log(1-t)+t+t^2 >= 0` on `[0,1/2]` (CG-mirror monotone engines).
+* (DZ1-b) `DZ1_log_sub_le_sq`: `|log(1+x)-x| <= x^2` on `|x| <= 1/3`.
+* (DZ1-c) `DZ1_exp_im_norm_le`: `||exp(i e)-1|| <= |e|` via
+  `Real.one_sub_sq_div_two_le_cos` + `Complex.sq_norm`/`normSq_apply` +
+  `abs_le_of_sq_le_sq'`.
+* (DZ1-d) `DZ1_phi_eq`: `ZPhi n = DZ1_A + n*DZ1_theta + DZ1_eps n` on `n < 16`
+  (`24*(1+(n-8)/24) = 16+n` + `Real.log_mul`).
+* (DZ1-e) `DZ1_sum_sq`: `sum_{n<16} (DZ1_x n)^2 = 344/576` (explicit
+  `Finset.sum_range_succ x16` + `norm_num`; `sum_{k=-8..7} k^2 = 344`).
+* (DZ1-f) `DZ1_eps_sum_le`: `sum |eps| <= 8.75*(344/576)`.
+* (DZ1-g) `DZ1_linear_le`: `||sum_{n<16} exp(i n th)|| <= 8.62`
+  (`KL_linear_firstDerivTest` + `Real.pi_lt_d4`: `24*3.1416/8.75 <= 8.62`).
+* (DZ1-h) HEADLINE `DZ1_main`: `||sum_{n<16} ZPiece n|| <= 13.85 < 16`
+  (`8.62 + 5.23 = 13.85`; `8.75*344/576 = 5.2256.. <= 5.23`).
+
+NUMBERS: `th = 8.75/24 ~= 0.36458`; `pi/|th| = 24*pi/8.75 <= 8.62`;
+`sum x_n^2 = 344/576 ~= 0.59722`; `sum |eps| <= 8.75*344/576 = 3010/576
+~= 5.22569 <= 5.23`; total `8.62+5.23 = 13.85 < 14.82 (budget) < 16`.
+Beats triangle `16` on the TRUE phase `8.75*log(16+n)` with zero modeling error.
+-/
+
+noncomputable def DZ1_theta : ℝ := 8.75 / 24
+
+noncomputable def DZ1_A : ℝ := 8.75 * Real.log 24 - 8 * (8.75 / 24)
+
+noncomputable def DZ1_x (n : ℕ) : ℝ := (((n : ℝ) - 8) / 24)
+
+noncomputable def DZ1_eps (n : ℕ) : ℝ :=
+  8.75 * (Real.log (1 + DZ1_x n) - DZ1_x n)
+
+/-- (DZ1-a) `log(1+t)-t+t^2 >= 0` on `[0,1/2]` (CG-mirror: `F(0)=0`,
+`F'(t) = (1+t)^{-1}-1+2t = t(1+2t)/(1+t) >= 0`). -/
+theorem DZ1_log_F_nonneg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1 / 2) :
+    0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) + t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+        ((1 + t)⁻¹ - 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) + u) 1 t :=
+      (hasDerivAt_id t).const_add (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 + u)) ((1 + t)⁻¹) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) + u))
+          = (fun u : ℝ => Real.log (1 + u)) := rfl
+      have e2 : (1 + t)⁻¹ * 1 = (1 + t)⁻¹ := mul_one _
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact (hlog.sub (hasDerivAt_id t)).add hpow
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) + u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.1])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) + u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.add continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 + u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.sub continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt (by linarith [ht.1])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have hpos : (0:ℝ) < 1 + t := by linarith
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : ((1 + t)⁻¹ - 1 + 2 * t) = t * (1 + 2 * t) / (1 + t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hxmem : x ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hx0, hx1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0x := hmono h0mem hxmem hx0
+  have hf0 : (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0x
+  linarith
+
+/-- (DZ1-a) `log(1-t)+t+t^2 >= 0` on `[0,1/2]` (CG-mirror: `H(0)=0`,
+`H'(t) = -(1-t)^{-1}+1+2t = t(1-2t)/(1-t) >= 0`). -/
+theorem DZ1_log_H_nonneg {y : ℝ} (hy0 : 0 ≤ y) (hy1 : y ≤ 1 / 2) :
+    0 ≤ Real.log (1 - y) + y + y ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) - t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+        (-((1 - t)⁻¹) + 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) - u) (-1) t :=
+      (hasDerivAt_id t).const_sub (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 - u)) (-((1 - t)⁻¹)) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) - u))
+          = (fun u : ℝ => Real.log (1 - u)) := rfl
+      have e2 : (1 - t)⁻¹ * (-1) = -((1 - t)⁻¹) := by ring
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact ((hlog.add (hasDerivAt_id t)).add hpow)
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) - u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.2])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) - u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.sub continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 - u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.add continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt (by linarith [ht.2])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have ht2 : t ≤ 1 / 2 := le_of_lt ht.2
+    have hpos : (0:ℝ) < 1 - t := by linarith
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : (-((1 - t)⁻¹) + 1 + 2 * t) = t * (1 - 2 * t) / (1 - t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hymem : y ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hy0, hy1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0y := hmono h0mem hymem hy0
+  have hf0 : (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0y
+  linarith
+
+/-- (DZ1-b) Log linearization error: `|log(1+x)-x| <= x^2` on `|x| <= 1/3`
+(upper from `Real.log_le_sub_one_of_pos`; lower from (DZ1-a) split at `0`). -/
+theorem DZ1_log_sub_le_sq {x : ℝ} (hx : |x| ≤ 1 / 3) :
+    |Real.log (1 + x) - x| ≤ x ^ 2 := by
+  have hxlo : -(1 / 3:ℝ) ≤ x := (abs_le.mp hx).1
+  have hxhi : x ≤ 1 / 3 := (abs_le.mp hx).2
+  have hpos : (0:ℝ) < 1 + x := by linarith
+  have hup : Real.log (1 + x) ≤ x := by
+    have h := Real.log_le_sub_one_of_pos hpos
+    linarith
+  rw [abs_le]
+  constructor
+  · have hlow : 0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+      by_cases hx0 : 0 ≤ x
+      · have hx12 : x ≤ 1 / 2 := by linarith
+        have h := DZ1_log_F_nonneg hx0 hx12
+        linarith
+      · push_neg at hx0
+        set y := -x with hy
+        have hy0 : (0:ℝ) ≤ y := by linarith
+        have hy12 : y ≤ 1 / 2 := by linarith
+        have h := DZ1_log_H_nonneg hy0 hy12
+        have earg : (1:ℝ) - y = 1 + x := by rw [hy]; ring
+        rw [earg] at h
+        have hsq : y ^ 2 = x ^ 2 := by rw [hy]; ring
+        rw [hsq] at h
+        have hyx : y = -x := hy
+        linarith
+    linarith
+  · have hsq : (0:ℝ) ≤ x ^ 2 := sq_nonneg x
+    linarith
+
+/-- (DZ1-c) Imaginary-exponential Lipschitz with constant 1:
+`||exp(i e)-1|| <= |e|` (via `1-e^2/2 <= cos e`). -/
+theorem DZ1_exp_im_norm_le (e : ℝ) :
+    ‖Complex.exp ((e:ℂ) * Complex.I) - 1‖ ≤ |e| := by
+  have hre : (Complex.exp ((e:ℂ) * Complex.I) - 1).re = Real.cos e - 1 := by
+    rw [Complex.sub_re, Complex.exp_ofReal_mul_I_re, Complex.one_re]
+  have him : (Complex.exp ((e:ℂ) * Complex.I) - 1).im = Real.sin e := by
+    rw [Complex.sub_im, Complex.exp_ofReal_mul_I_im, Complex.one_im, sub_zero]
+  have hsq : ‖Complex.exp ((e:ℂ) * Complex.I) - 1‖ ^ 2
+      = (Real.cos e - 1) ^ 2 + (Real.sin e) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    ring
+  have htrig : (Real.cos e - 1) ^ 2 + (Real.sin e) ^ 2
+      = 2 - 2 * Real.cos e := by
+    have h := Real.sin_sq_add_cos_sq e
+    ring_nf at h ⊢
+    linarith
+  have hcos : 1 - e ^ 2 / 2 ≤ Real.cos e := Real.one_sub_sq_div_two_le_cos
+  have hpow : ‖Complex.exp ((e:ℂ) * Complex.I) - 1‖ ^ 2 ≤ |e| ^ 2 := by
+    rw [hsq, htrig, sq_abs]
+    linarith
+  exact (abs_le_of_sq_le_sq' hpow (abs_nonneg _)).2
+
+/-- (DZ1-theta) Slope `th = 8.75/24` is nonzero with `|th| <= pi/2`. -/
+theorem DZ1_theta_props :
+    DZ1_theta ≠ 0 ∧ |DZ1_theta| ≤ Real.pi / 2 ∧ 0 < DZ1_theta
+      ∧ |DZ1_theta| = DZ1_theta := by
+  unfold DZ1_theta
+  have hpi : (3:ℝ) < Real.pi := Real.pi_gt_three
+  have hpos : (0:ℝ) < 8.75 / 24 := by norm_num
+  refine ⟨by norm_num, ?_, hpos, ?_⟩
+  · rw [abs_of_pos hpos]
+    linarith
+  · rw [abs_of_pos hpos]
+
+/-- (DZ1-x) Linearization coordinate stays in `[-1/3,1/3]` on `n < 16`. -/
+theorem DZ1_x_mem {n : ℕ} (hn : n < 16) :
+    |DZ1_x n| ≤ 1 / 3 ∧ (0:ℝ) < 1 + DZ1_x n := by
+  unfold DZ1_x
+  have hnR : (n:ℝ) < 16 := by exact_mod_cast hn
+  have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+  constructor
+  · rw [abs_le]
+    constructor <;> linarith
+  · linarith
+
+/-- (DZ1-eps) Pointwise linearization error. -/
+theorem DZ1_eps_le {n : ℕ} (hn : n < 16) :
+    |DZ1_eps n| ≤ 8.75 * (DZ1_x n) ^ 2 := by
+  have hx := (DZ1_x_mem hn).1
+  have h := DZ1_log_sub_le_sq hx
+  unfold DZ1_eps
+  rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 8.75)]
+  exact mul_le_mul_of_nonneg_left h (by norm_num)
+
+/-- (DZ1-d) Phase decomposition `phi_n = A + n*th + eps_n` on `n < 16`. -/
+theorem DZ1_phi_eq (n : ℕ) (hn : n < 16) :
+    ZPhi n = DZ1_A + (n:ℝ) * DZ1_theta + DZ1_eps n := by
+  have hxpos : (0:ℝ) < 1 + DZ1_x n := (DZ1_x_mem hn).2
+  have hxeq : DZ1_x n = (((n:ℝ) - 8) / 24) := rfl
+  have harg : (16:ℝ) + (n:ℝ) = 24 * (1 + (((n:ℝ) - 8) / 24)) := by ring
+  have hlog : Real.log (16 + (n:ℝ))
+      = Real.log 24 + Real.log (1 + (((n:ℝ) - 8) / 24)) := by
+    rw [harg, Real.log_mul (by norm_num : (24:ℝ) ≠ 0)
+      (ne_of_gt (by rw [hxeq] at hxpos; linarith : (0:ℝ) < 1 + (((n:ℝ) - 8) / 24)))]
+  unfold ZPhi DZ1_A DZ1_theta DZ1_eps DZ1_x
+  rw [hlog]
+  ring
+
+set_option maxHeartbeats 800000 in
+/-- (DZ1-e) Error-coordinate square sum `= 344/576`
+(`sum_{k=-8..7} k^2 = 344`). -/
+theorem DZ1_sum_sq :
+    (∑ n ∈ Finset.range 16, (DZ1_x n) ^ 2) = 344 / 576 := by
+  simp only [DZ1_x]
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  norm_num
+
+/-- (DZ1-f) Total linearization error `sum |eps| <= 8.75*(344/576)`. -/
+theorem DZ1_eps_sum_le :
+    (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 8.75 * (344 / 576) := by
+  have h1 : (∑ n ∈ Finset.range 16, |DZ1_eps n|)
+      ≤ ∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2) := by
+    apply Finset.sum_le_sum
+    intro n hn
+    exact DZ1_eps_le (Finset.mem_range.mp hn)
+  have h2 : (∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2))
+      = 8.75 * (∑ n ∈ Finset.range 16, (DZ1_x n) ^ 2) := by
+    rw [Finset.mul_sum]
+  rw [h2, DZ1_sum_sq] at h1
+  exact h1
+
+/-- (DZ1-g) Linearized 16-sum via read-only `KL_linear_firstDerivTest`:
+`||sum_{n<16} exp(i n th)|| <= 8.62`. -/
+theorem DZ1_linear_le :
+    ‖∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ ≤ 8.62 := by
+  have hKL := KL_linear_firstDerivTest DZ1_theta
+    DZ1_theta_props.1 DZ1_theta_props.2.1 16
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hth : |DZ1_theta| = 8.75 / 24 := by
+    unfold DZ1_theta
+    rw [abs_of_pos (by norm_num : (0:ℝ) < 8.75 / 24)]
+  rw [hth] at hKL
+  have heq : Real.pi / (8.75 / 24) = 24 * Real.pi / 8.75 := by
+    rw [div_div_eq_mul_div, mul_comm]
+  rw [heq] at hKL
+  have hbound : 24 * Real.pi / 8.75 ≤ 8.62 := by
+    have h3 : (24:ℝ) * 3.1416 / 8.75 ≤ 8.62 := by norm_num
+    have h2 : 24 * Real.pi / 8.75 ≤ 24 * 3.1416 / 8.75 := by
+      gcongr
+    linarith
+  exact le_trans hKL hbound
+
+set_option maxHeartbeats 800000 in
+/-- (DZ1-h) HEADLINE k=1 direct TRUE-phase bound on `[16,32)`:
+`||sum_{n<16} ZPiece n|| <= 13.85 < 16` (linear `8.62` + error `5.23`). -/
+theorem DZ1_main :
+    ‖∑ n ∈ Finset.range 16, ZPiece n‖ ≤ 13.85 := by
+  have hunit : ∀ n : ℕ,
+      ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ = 1 := by
+    intro n
+    have e : ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        = ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I := by
+      push_cast
+      ring
+    rw [e]
+    exact Complex.norm_exp_ofReal_mul_I _
+  have hterm : ∀ n ∈ Finset.range 16, ZPiece n
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)) := by
+    intro n hn
+    have hmem : n < 16 := Finset.mem_range.mp hn
+    have hphi := DZ1_phi_eq n hmem
+    have h1 : ((ZPhi n : ℝ):ℂ)
+        = (DZ1_A:ℂ) + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ)
+          + ((DZ1_eps n:ℝ):ℂ) := by
+      have e : ((ZPhi n : ℝ):ℂ)
+          = (((DZ1_A + (n:ℝ) * DZ1_theta + DZ1_eps n : ℝ)):ℂ) := by
+        rw [hphi]
+      rw [e]
+      push_cast
+      ring
+    have eexp : ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I
+        = ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I) := by
+      push_cast
+      ring
+    have ecast : ((ZPhi n : ℝ):ℂ) * Complex.I
+        = ((DZ1_A:ℂ) * Complex.I + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I)
+          + ((DZ1_eps n:ℝ):ℂ) * Complex.I := by
+      rw [h1]
+      ring
+    unfold ZPiece
+    rw [ecast, Complex.exp_add, Complex.exp_add, eexp]
+    ring
+  have hsum : (∑ n ∈ Finset.range 16, ZPiece n)
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun n hn => hterm n hn)
+  have hnormA : ‖Complex.exp ((DZ1_A:ℂ) * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  have hnormEq : ‖∑ n ∈ Finset.range 16, ZPiece n‖
+      = ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ := by
+    rw [hsum, norm_mul, hnormA, one_mul]
+  rw [hnormEq]
+  have hsplit : (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+      - (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      = ∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)) := by
+    rw [← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro n _
+    ring
+  have eTS : (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+        + ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+      = (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    abel
+  have htri : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖
+      ≤ ‖∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+        + ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ := by
+    have h := norm_add_le (∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+    rw [eTS] at h
+    exact h
+  have hdiff_le : ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+      ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+    rw [hsplit]
+    calc ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1))‖
+        ≤ ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)‖ :=
+          norm_sum_le _ _
+      _ = ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1‖ := by
+          apply Finset.sum_congr rfl
+          intro n _
+          rw [norm_mul, hunit n, one_mul]
+      _ ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+          apply Finset.sum_le_sum
+          intro n _
+          exact DZ1_exp_im_norm_le _
+  have hlin := DZ1_linear_le
+  have herr5 : (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 5.23 := by
+    have h := DZ1_eps_sum_le
+    have hb : (8.75:ℝ) * (344 / 576) ≤ 5.23 := by norm_num
+    linarith
+  have htot : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ ≤ 8.62 + 5.23 := by
+    exact le_trans htri (add_le_add hlin hdiff_le |>.trans
+      (by linarith [herr5]))
+  have hfin : (8.62:ℝ) + 5.23 = 13.85 := by norm_num
+  linarith
+
+/-!
+RESIDUAL (DZ1 report-and-stop): ONE proved k=1 bridge banked — TRUE-phase
+`||sum_{n<16} ZPiece n|| <= 13.85 < 16` (`DZ1_main`), via linearization about
+`n = 8` (`th = 8.75/24`) + in-file `|log(1+x)-x| <= x^2` (CG-mirror) +
+in-file `||exp(i e)-1|| <= |e|` + read-only `KL_linear_firstDerivTest`.
+Method: full 16-block single application (no per-8 split needed: `13.85`
+already beats the `14.82` budget and the triangle `16`). Best concrete bound
+that fits: `13.85` (`8.62` linear + `5.23` error).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ1/DZ tail, do NOT
+touch `riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): convert `DZ1_main`
+(unit-modulus `13.85`) into ONE amplitude-weighted per-16-block premise
+`<= 12/6300 ~= 0.0019` for `DV_mid_conditional_012` on the FIRST middle piece
+`[16,32)` (`etaDirichletTerm (1-zetaCellS0)` weights `~= 16^{-0.605} ~= 0.19`;
+naive `13.85*0.19 ~= 2.6` is still `~1300x` short): prove in-file the weight
+variation + partial-summation (Abel `Finset.sum_range_by_parts`, read-only)
+bridge `||sum_{n<16} w_n e^{i phi_n}|| <= (max w)*13.85 + TV(w)*13.85`-shape
+with EXPLICIT `w_n = (16+n)^{-0.605}` envelope (`Real.rpow` bounds in-file),
+or bank a per-8 refinement of DZ1 (two k=1 applications) if it lowers `13.85`.
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ1_theta
+#print axioms DZ1_A
+#print axioms DZ1_x
+#print axioms DZ1_eps
+#print axioms DZ1_log_F_nonneg
+#print axioms DZ1_log_H_nonneg
+#print axioms DZ1_log_sub_le_sq
+#print axioms DZ1_exp_im_norm_le
+#print axioms DZ1_theta_props
+#print axioms DZ1_x_mem
+#print axioms DZ1_eps_le
+#print axioms DZ1_phi_eq
+#print axioms DZ1_sum_sq
+#print axioms DZ1_eps_sum_le
+#print axioms DZ1_linear_le
+#print axioms DZ1_main
+
+/-!
+DZ1b patch (append-only): clean re-proofs of the DZ1 k=1 bridge with fixed
+tactic names. The DZ1_* versions above carry `sorryAx` from 9 fixable tactic
+errors (`HasDerivAt` Pi-add rewrite pattern, `-(1/3)` parse, `le_or_lt`,
+`div_le_div_right`, `add_sub_cancel'`, `ring`-after-`field_simp`, `rw`-everywhere
+`htri`); the mathematics is unchanged. This block reuses the CLEAN DZ1
+lemmas read-only (`DZ1_exp_im_norm_le`, `DZ1_theta_props`, `DZ1_x_mem`,
+`DZ1_phi_eq`, `DZ1_sum_sq`) and banks headline `DZ1b_main <= 13.85`.
+-/
+
+/-- (DZ1b-a) `log(1+t)-t+t^2 >= 0` on `[0,1/2]` (fixed `simpa` for Pi-add). -/
+theorem DZ1b_log_F_nonneg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1 / 2) :
+    0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) + t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+        ((1 + t)⁻¹ - 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) + u) 1 t :=
+      (hasDerivAt_id t).const_add (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 + u)) ((1 + t)⁻¹) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) + u))
+          = (fun u : ℝ => Real.log (1 + u)) := rfl
+      have e2 : (1 + t)⁻¹ * 1 = (1 + t)⁻¹ := mul_one _
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact (hlog.sub (hasDerivAt_id t)).add hpow
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) + u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.1])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) + u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.add continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 + u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.sub continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt (by linarith [ht.1])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have hpos : (0:ℝ) < 1 + t := by linarith
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : ((1 + t)⁻¹ - 1 + 2 * t) = t * (1 + 2 * t) / (1 + t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hxmem : x ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hx0, hx1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0x := hmono h0mem hxmem hx0
+  have hf0 : (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0x
+  linarith
+
+/-- (DZ1b-a) `log(1-t)+t+t^2 >= 0` on `[0,1/2]` (fixed `simpa` for Pi-sub). -/
+theorem DZ1b_log_H_nonneg {y : ℝ} (hy0 : 0 ≤ y) (hy1 : y ≤ 1 / 2) :
+    0 ≤ Real.log (1 - y) + y + y ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) - t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+        (-((1 - t)⁻¹) + 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) - u) (-1) t :=
+      (hasDerivAt_id t).const_sub (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 - u)) (-((1 - t)⁻¹)) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) - u))
+          = (fun u : ℝ => Real.log (1 - u)) := rfl
+      have e2 : (1 - t)⁻¹ * (-1) = -((1 - t)⁻¹) := by ring
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact ((hlog.add (hasDerivAt_id t)).add hpow)
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) - u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.2])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) - u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.sub continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 - u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.add continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt (by linarith [ht.2])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have ht2 : t ≤ 1 / 2 := le_of_lt ht.2
+    have hpos : (0:ℝ) < 1 - t := by linarith
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : (-((1 - t)⁻¹) + 1 + 2 * t) = t * (1 - 2 * t) / (1 - t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hymem : y ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hy0, hy1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0y := hmono h0mem hymem hy0
+  have hf0 : (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0y
+  linarith
+
+/-- (DZ1b-b) Log error `|log(1+x)-x| <= x^2` (fixed `-(1/3)` parse + `by_cases`). -/
+theorem DZ1b_log_sub_le_sq {x : ℝ} (hx : |x| ≤ 1 / 3) :
+    |Real.log (1 + x) - x| ≤ x ^ 2 := by
+  have hxlo : -(1 / 3:ℝ) ≤ x := (abs_le.mp hx).1
+  have hxhi : x ≤ 1 / 3 := (abs_le.mp hx).2
+  have hpos : (0:ℝ) < 1 + x := by linarith
+  have hup : Real.log (1 + x) ≤ x := by
+    have h := Real.log_le_sub_one_of_pos hpos
+    linarith
+  rw [abs_le]
+  constructor
+  · have hlow : 0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+      by_cases hx0 : 0 ≤ x
+      · have hx12 : x ≤ 1 / 2 := by linarith
+        have h := DZ1b_log_F_nonneg hx0 hx12
+        linarith
+      · push_neg at hx0
+        set y := -x with hy
+        have hy0 : (0:ℝ) ≤ y := by linarith
+        have hy12 : y ≤ 1 / 2 := by linarith
+        have h := DZ1b_log_H_nonneg hy0 hy12
+        have earg : (1:ℝ) - y = 1 + x := by rw [hy]; ring
+        rw [earg] at h
+        have hsq : y ^ 2 = x ^ 2 := by rw [hy]; ring
+        rw [hsq] at h
+        have hyx : y = -x := hy
+        linarith
+    linarith
+  · have hsq : (0:ℝ) ≤ x ^ 2 := sq_nonneg x
+    linarith
+
+/-- (DZ1b-eps) Pointwise error via clean (DZ1b-b). -/
+theorem DZ1b_eps_le {n : ℕ} (hn : n < 16) :
+    |DZ1_eps n| ≤ 8.75 * (DZ1_x n) ^ 2 := by
+  have hx := (DZ1_x_mem hn).1
+  have h := DZ1b_log_sub_le_sq hx
+  unfold DZ1_eps
+  rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 8.75)]
+  exact mul_le_mul_of_nonneg_left h (by norm_num)
+
+/-- (DZ1b-f) Total error (same assembly; clean input). -/
+theorem DZ1b_eps_sum_le :
+    (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 8.75 * (344 / 576) := by
+  have h1 : (∑ n ∈ Finset.range 16, |DZ1_eps n|)
+      ≤ ∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2) := by
+    apply Finset.sum_le_sum
+    intro n hn
+    exact DZ1b_eps_le (Finset.mem_range.mp hn)
+  have h2 : (∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2))
+      = 8.75 * (∑ n ∈ Finset.range 16, (DZ1_x n) ^ 2) := by
+    rw [Finset.mul_sum]
+  rw [h2, DZ1_sum_sq] at h1
+  exact h1
+
+/-- (DZ1b-g) Linearized sum `<= 8.62` (fixed `div_div_eq_mul_div` + `gcongr`). -/
+theorem DZ1b_linear_le :
+    ‖∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ ≤ 8.62 := by
+  have hKL := KL_linear_firstDerivTest DZ1_theta
+    DZ1_theta_props.1 DZ1_theta_props.2.1 16
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hth : |DZ1_theta| = 8.75 / 24 := by
+    unfold DZ1_theta
+    rw [abs_of_pos (by norm_num : (0:ℝ) < 8.75 / 24)]
+  rw [hth] at hKL
+  have heq : Real.pi / (8.75 / 24) = 24 * Real.pi / 8.75 := by
+    rw [div_div_eq_mul_div, mul_comm]
+  rw [heq] at hKL
+  have hbound : 24 * Real.pi / 8.75 ≤ 8.62 := by
+    have h3 : (24:ℝ) * 3.1416 / 8.75 ≤ 8.62 := by norm_num
+    have h2 : 24 * Real.pi / 8.75 ≤ 24 * 3.1416 / 8.75 := by
+      gcongr
+    linarith
+  exact le_trans hKL hbound
+
+set_option maxHeartbeats 800000 in
+/-- (DZ1b-h) HEADLINE k=1 direct TRUE-phase bound on `[16,32)`:
+`||sum_{n<16} ZPiece n|| <= 13.85 < 16` (fixed `abel` eTS + one-sided `rw`). -/
+theorem DZ1b_main :
+    ‖∑ n ∈ Finset.range 16, ZPiece n‖ ≤ 13.85 := by
+  have hunit : ∀ n : ℕ,
+      ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ = 1 := by
+    intro n
+    have e : ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        = ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I := by
+      push_cast
+      ring
+    rw [e]
+    exact Complex.norm_exp_ofReal_mul_I _
+  have hterm : ∀ n ∈ Finset.range 16, ZPiece n
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)) := by
+    intro n hn
+    have hmem : n < 16 := Finset.mem_range.mp hn
+    have hphi := DZ1_phi_eq n hmem
+    have h1 : ((ZPhi n : ℝ):ℂ)
+        = (DZ1_A:ℂ) + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ)
+          + ((DZ1_eps n:ℝ):ℂ) := by
+      have e : ((ZPhi n : ℝ):ℂ)
+          = (((DZ1_A + (n:ℝ) * DZ1_theta + DZ1_eps n : ℝ)):ℂ) := by
+        rw [hphi]
+      rw [e]
+      push_cast
+      ring
+    have eexp : ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I
+        = ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I) := by
+      push_cast
+      ring
+    have ecast : ((ZPhi n : ℝ):ℂ) * Complex.I
+        = ((DZ1_A:ℂ) * Complex.I + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I)
+          + ((DZ1_eps n:ℝ):ℂ) * Complex.I := by
+      rw [h1]
+      ring
+    unfold ZPiece
+    rw [ecast, Complex.exp_add, Complex.exp_add, eexp]
+    ring
+  have hsum : (∑ n ∈ Finset.range 16, ZPiece n)
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun n hn => hterm n hn)
+  have hnormA : ‖Complex.exp ((DZ1_A:ℂ) * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  have hnormEq : ‖∑ n ∈ Finset.range 16, ZPiece n‖
+      = ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ := by
+    rw [hsum, norm_mul, hnormA, one_mul]
+  rw [hnormEq]
+  have hsplit : (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+      - (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      = ∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)) := by
+    rw [← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro n _
+    ring
+  have eTS : (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+        + ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+      = (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    abel
+  have htri : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖
+      ≤ ‖∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+        + ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ := by
+    have h := norm_add_le (∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+    rw [eTS] at h
+    exact h
+  have hdiff_le : ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+      ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+    rw [hsplit]
+    calc ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1))‖
+        ≤ ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)‖ :=
+          norm_sum_le _ _
+      _ = ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1‖ := by
+          apply Finset.sum_congr rfl
+          intro n _
+          rw [norm_mul, hunit n, one_mul]
+      _ ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+          apply Finset.sum_le_sum
+          intro n _
+          exact DZ1_exp_im_norm_le _
+  have hlin := DZ1b_linear_le
+  have herr5 : (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 5.23 := by
+    have h := DZ1b_eps_sum_le
+    have hb : (8.75:ℝ) * (344 / 576) ≤ 5.23 := by norm_num
+    linarith
+  have htot : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ ≤ 8.62 + 5.23 := by
+    have hle : ‖∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+          + ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+            - (∑ n ∈ Finset.range 16,
+              Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+        ≤ 8.62 + 5.23 := by
+      have h2 : ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+              - (∑ n ∈ Finset.range 16,
+                Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ ≤ 5.23 :=
+        le_trans hdiff_le herr5
+      exact add_le_add hlin h2
+    exact le_trans htri hle
+  have hfin : (8.62:ℝ) + 5.23 = 13.85 := by norm_num
+  linarith
+
+/-!
+RESIDUAL (DZ1b report-and-stop): ONE proved k=1 bridge banked clean —
+TRUE-phase `||sum_{n<16} ZPiece n|| <= 13.85 < 16` (`DZ1b_main`), single
+full-16-block application (no per-8 split needed: `13.85` beats the `14.82`
+budget and the triangle `16`). The DZ1_* block above is SUPERSEDED (carries
+`sorryAx` from tactic-name drift); DZ1b_* reuses only the CLEAN DZ1 lemmas
+(`DZ1_exp_im_norm_le`, `DZ1_theta_props`, `DZ1_x_mem`, `DZ1_phi_eq`,
+`DZ1_sum_sq`) plus fixed re-proofs.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ1b tail, do NOT
+touch `riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): convert `DZ1b_main`
+(unit-modulus `13.85`) into ONE amplitude-weighted per-16-block premise
+`<= 12/6300 ~= 0.0019` for `DV_mid_conditional_012` on the FIRST middle piece
+`[16,32)` (`etaDirichletTerm (1-zetaCellS0)` weights `~= 16^{-0.605} ~= 0.19`;
+naive `13.85*0.19 ~= 2.6` is still `~1300x` short): prove in-file the weight
+variation + partial-summation (Abel `Finset.sum_range_by_parts`, read-only)
+bridge `||sum_{n<16} w_n e^{i phi_n}|| <= (max w)*13.85 + TV(w)*13.85`-shape
+with EXPLICIT `w_n = (16+n)^{-0.605}` envelope (`Real.rpow` bounds in-file),
+or bank a per-8 refinement of DZ1b (two k=1 applications) if it lowers
+`13.85`. Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ1b_log_F_nonneg
+#print axioms DZ1b_log_H_nonneg
+#print axioms DZ1b_log_sub_le_sq
+#print axioms DZ1b_eps_le
+#print axioms DZ1b_eps_sum_le
+#print axioms DZ1b_linear_le
+#print axioms DZ1b_main
+
+/-!
+DZ1c patch (append-only): clean re-proofs with direct `const_add`/`const_sub`
+inner derivatives (no Pi-add `simpa`) and bare-`gcongr` division step.
+Reuses CLEAN `DZ1_exp_im_norm_le`, `DZ1_theta_props`, `DZ1_x_mem`,
+`DZ1_phi_eq`, `DZ1_sum_sq` read-only; banks headline `DZ1c_main <= 13.85`.
+-/
+
+/-- (DZ1c-a) `log(1+t)-t+t^2 >= 0` on `[0,1/2]`. -/
+theorem DZ1c_log_F_nonneg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1 / 2) :
+    0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) + t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+        ((1 + t)⁻¹ - 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) + u) 1 t :=
+      (hasDerivAt_id t).const_add (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 + u)) ((1 + t)⁻¹) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) + u))
+          = (fun u : ℝ => Real.log (1 + u)) := rfl
+      have e2 : (1 + t)⁻¹ * 1 = (1 + t)⁻¹ := mul_one _
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact (hlog.sub (hasDerivAt_id t)).add hpow
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) + u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.1])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) + u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.add continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 + u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.sub continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 + u) - u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt (by linarith [ht.1])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have hpos : (0:ℝ) < 1 + t := by linarith
+    have hne : (1:ℝ) + t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : ((1 + t)⁻¹ - 1 + 2 * t) = t * (1 + 2 * t) / (1 + t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hxmem : x ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hx0, hx1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0x := hmono h0mem hxmem hx0
+  have hf0 : (fun u : ℝ => Real.log (1 + u) - u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0x
+  linarith
+
+/-- (DZ1c-a) `log(1-t)+t+t^2 >= 0` on `[0,1/2]`. -/
+theorem DZ1c_log_H_nonneg {y : ℝ} (hy0 : 0 ≤ y) (hy1 : y ≤ 1 / 2) :
+    0 ≤ Real.log (1 - y) + y + y ^ 2 := by
+  have key : ∀ t : ℝ, (1:ℝ) - t ≠ 0 →
+      HasDerivAt (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+        (-((1 - t)⁻¹) + 1 + 2 * t) t := by
+    intro t hne
+    have hinner : HasDerivAt (fun u : ℝ => (1:ℝ) - u) (-1) t :=
+      (hasDerivAt_id t).const_sub (1:ℝ)
+    have hlog : HasDerivAt (fun u : ℝ => Real.log (1 - u)) (-((1 - t)⁻¹)) t := by
+      have h := (Real.hasDerivAt_log hne).comp t hinner
+      have e1 : (Real.log ∘ (fun u : ℝ => (1:ℝ) - u))
+          = (fun u : ℝ => Real.log (1 - u)) := rfl
+      have e2 : (1 - t)⁻¹ * (-1) = -((1 - t)⁻¹) := by ring
+      rwa [e1, e2] at h
+    have hpow : HasDerivAt (fun u : ℝ => u ^ 2) (2 * t) t := by
+      have h := hasDerivAt_pow 2 t
+      have e : ((2:ℕ):ℝ) * t ^ (2 - 1) = 2 * t := by
+        rw [show (2 - 1:ℕ) = 1 by decide, pow_one]
+        push_cast
+        ring
+      rwa [e] at h
+    exact ((hlog.add (hasDerivAt_id t)).add hpow)
+  have h1ne : ∀ u ∈ Set.Icc (0:ℝ) (1/2:ℝ), (1:ℝ) - u ≠ 0 := by
+    intro u hu
+    exact ne_of_gt (by linarith [hu.2])
+  have hcont : ContinuousOn (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (Set.Icc 0 (1/2:ℝ)) := by
+    have hbase : ContinuousOn (fun u : ℝ => (1:ℝ) - u) (Set.Icc 0 (1/2:ℝ)) :=
+      (continuous_const.sub continuous_id).continuousOn
+    have hlogC : ContinuousOn (fun u : ℝ => Real.log (1 - u))
+        (Set.Icc 0 (1/2:ℝ)) :=
+      hbase.log (fun u hu => h1ne u hu)
+    exact (hlogC.add continuousOn_id).add (continuous_pow 2).continuousOn
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => Real.log (1 - u) + u + u ^ 2)
+      (interior (Set.Icc 0 (1/2:ℝ))) := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt (by linarith [ht.2])
+    exact (key t hne).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Icc (0:ℝ) (1/2:ℝ)),
+      0 ≤ deriv (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) t := by
+    intro t ht
+    rw [interior_Icc] at ht
+    have ht0 : (0:ℝ) ≤ t := le_of_lt ht.1
+    have ht2 : t ≤ 1 / 2 := le_of_lt ht.2
+    have hpos : (0:ℝ) < 1 - t := by linarith
+    have hne : (1:ℝ) - t ≠ 0 := ne_of_gt hpos
+    rw [(key t hne).deriv]
+    have e : (-((1 - t)⁻¹) + 1 + 2 * t) = t * (1 - 2 * t) / (1 - t) := by
+      field_simp
+      ring
+    rw [e]
+    exact div_nonneg (mul_nonneg ht0 (by linarith)) (le_of_lt hpos)
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Icc 0 (1/2:ℝ)) hcont hdiff hnn
+  have hymem : y ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨hy0, hy1⟩
+  have h0mem : (0:ℝ) ∈ Set.Icc (0:ℝ) (1/2:ℝ) := ⟨le_rfl, by norm_num⟩
+  have h0y := hmono h0mem hymem hy0
+  have hf0 : (fun u : ℝ => Real.log (1 - u) + u + u ^ 2) 0 = 0 := by
+    simp [Real.log_one]
+  rw [hf0] at h0y
+  linarith
+
+/-- (DZ1c-b) Log error `|log(1+x)-x| <= x^2` on `|x| <= 1/3`. -/
+theorem DZ1c_log_sub_le_sq {x : ℝ} (hx : |x| ≤ 1 / 3) :
+    |Real.log (1 + x) - x| ≤ x ^ 2 := by
+  have hxlo : -(1 / 3:ℝ) ≤ x := (abs_le.mp hx).1
+  have hxhi : x ≤ 1 / 3 := (abs_le.mp hx).2
+  have hpos : (0:ℝ) < 1 + x := by linarith
+  have hup : Real.log (1 + x) ≤ x := by
+    have h := Real.log_le_sub_one_of_pos hpos
+    linarith
+  rw [abs_le]
+  constructor
+  · have hlow : 0 ≤ Real.log (1 + x) - x + x ^ 2 := by
+      by_cases hx0 : 0 ≤ x
+      · have hx12 : x ≤ 1 / 2 := by linarith
+        have h := DZ1c_log_F_nonneg hx0 hx12
+        linarith
+      · push_neg at hx0
+        set y := -x with hy
+        have hy0 : (0:ℝ) ≤ y := by linarith
+        have hy12 : y ≤ 1 / 2 := by linarith
+        have h := DZ1c_log_H_nonneg hy0 hy12
+        have earg : (1:ℝ) - y = 1 + x := by rw [hy]; ring
+        rw [earg] at h
+        have hsq : y ^ 2 = x ^ 2 := by rw [hy]; ring
+        rw [hsq] at h
+        have hyx : y = -x := hy
+        linarith
+    linarith
+  · have hsq : (0:ℝ) ≤ x ^ 2 := sq_nonneg x
+    linarith
+
+/-- (DZ1c-eps) Pointwise error via clean (DZ1c-b). -/
+theorem DZ1c_eps_le {n : ℕ} (hn : n < 16) :
+    |DZ1_eps n| ≤ 8.75 * (DZ1_x n) ^ 2 := by
+  have hx := (DZ1_x_mem hn).1
+  have h := DZ1c_log_sub_le_sq hx
+  unfold DZ1_eps
+  rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 8.75)]
+  exact mul_le_mul_of_nonneg_left h (by norm_num)
+
+/-- (DZ1c-f) Total error. -/
+theorem DZ1c_eps_sum_le :
+    (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 8.75 * (344 / 576) := by
+  have h1 : (∑ n ∈ Finset.range 16, |DZ1_eps n|)
+      ≤ ∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2) := by
+    apply Finset.sum_le_sum
+    intro n hn
+    exact DZ1c_eps_le (Finset.mem_range.mp hn)
+  have h2 : (∑ n ∈ Finset.range 16, (8.75 * (DZ1_x n) ^ 2))
+      = 8.75 * (∑ n ∈ Finset.range 16, (DZ1_x n) ^ 2) := by
+    rw [Finset.mul_sum]
+  rw [h2, DZ1_sum_sq] at h1
+  exact h1
+
+/-- (DZ1c-g) Linearized sum `<= 8.62` (bare `gcongr` closes with `hpi`). -/
+theorem DZ1c_linear_le :
+    ‖∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ ≤ 8.62 := by
+  have hKL := KL_linear_firstDerivTest DZ1_theta
+    DZ1_theta_props.1 DZ1_theta_props.2.1 16
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hth : |DZ1_theta| = 8.75 / 24 := by
+    unfold DZ1_theta
+    rw [abs_of_pos (by norm_num : (0:ℝ) < 8.75 / 24)]
+  rw [hth] at hKL
+  have heq : Real.pi / (8.75 / 24) = 24 * Real.pi / 8.75 := by
+    rw [div_div_eq_mul_div, mul_comm]
+  rw [heq] at hKL
+  have hbound : 24 * Real.pi / 8.75 ≤ 8.62 := by
+    have h3 : (24:ℝ) * 3.1416 / 8.75 ≤ 8.62 := by norm_num
+    have h2 : 24 * Real.pi / 8.75 ≤ 24 * 3.1416 / 8.75 := by
+      gcongr
+    linarith
+  exact le_trans hKL hbound
+
+set_option maxHeartbeats 800000 in
+/-- (DZ1c-h) HEADLINE k=1 direct TRUE-phase bound on `[16,32)`:
+`||sum_{n<16} ZPiece n|| <= 13.85 < 16`. -/
+theorem DZ1c_main :
+    ‖∑ n ∈ Finset.range 16, ZPiece n‖ ≤ 13.85 := by
+  have hunit : ∀ n : ℕ,
+      ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ = 1 := by
+    intro n
+    have e : ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        = ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I := by
+      push_cast
+      ring
+    rw [e]
+    exact Complex.norm_exp_ofReal_mul_I _
+  have hterm : ∀ n ∈ Finset.range 16, ZPiece n
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)) := by
+    intro n hn
+    have hmem : n < 16 := Finset.mem_range.mp hn
+    have hphi := DZ1_phi_eq n hmem
+    have h1 : ((ZPhi n : ℝ):ℂ)
+        = (DZ1_A:ℂ) + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ)
+          + ((DZ1_eps n:ℝ):ℂ) := by
+      have e : ((ZPhi n : ℝ):ℂ)
+          = (((DZ1_A + (n:ℝ) * DZ1_theta + DZ1_eps n : ℝ)):ℂ) := by
+        rw [hphi]
+      rw [e]
+      push_cast
+      ring
+    have eexp : ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I
+        = ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I) := by
+      push_cast
+      ring
+    have ecast : ((ZPhi n : ℝ):ℂ) * Complex.I
+        = ((DZ1_A:ℂ) * Complex.I + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I)
+          + ((DZ1_eps n:ℝ):ℂ) * Complex.I := by
+      rw [h1]
+      ring
+    unfold ZPiece
+    rw [ecast, Complex.exp_add, Complex.exp_add, eexp]
+    ring
+  have hsum : (∑ n ∈ Finset.range 16, ZPiece n)
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun n hn => hterm n hn)
+  have hnormA : ‖Complex.exp ((DZ1_A:ℂ) * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  have hnormEq : ‖∑ n ∈ Finset.range 16, ZPiece n‖
+      = ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ := by
+    rw [hsum, norm_mul, hnormA, one_mul]
+  rw [hnormEq]
+  have hsplit : (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+      - (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      = ∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)) := by
+    rw [← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro n _
+    ring
+  have eTS : (∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+        + ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+      = (∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    abel
+  have htri : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖
+      ≤ ‖∑ n ∈ Finset.range 16,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+        + ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range 16,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ := by
+    have h := norm_add_le (∑ n ∈ Finset.range 16,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      ((∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+    rw [eTS] at h
+    exact h
+  have hdiff_le : ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+      ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+    rw [hsplit]
+    calc ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1))‖
+        ≤ ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)‖ :=
+          norm_sum_le _ _
+      _ = ∑ n ∈ Finset.range 16,
+          ‖Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1‖ := by
+          apply Finset.sum_congr rfl
+          intro n _
+          rw [norm_mul, hunit n, one_mul]
+      _ ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| := by
+          apply Finset.sum_le_sum
+          intro n _
+          exact DZ1_exp_im_norm_le _
+  have hlin := DZ1c_linear_le
+  have herr5 : (∑ n ∈ Finset.range 16, |DZ1_eps n|) ≤ 5.23 := by
+    have h := DZ1c_eps_sum_le
+    have hb : (8.75:ℝ) * (344 / 576) ≤ 5.23 := by norm_num
+    linarith
+  have htot : ‖∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ ≤ 8.62 + 5.23 := by
+    have hle : ‖∑ n ∈ Finset.range 16,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+          + ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+            - (∑ n ∈ Finset.range 16,
+              Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+        ≤ 8.62 + 5.23 := by
+      have h2 : ‖(∑ n ∈ Finset.range 16, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+              - (∑ n ∈ Finset.range 16,
+                Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ ≤ 5.23 :=
+        le_trans hdiff_le herr5
+      exact add_le_add hlin h2
+    exact le_trans htri hle
+  have hfin : (8.62:ℝ) + 5.23 = 13.85 := by norm_num
+  linarith
+
+/-!
+RESIDUAL (DZ1c report-and-stop): ONE proved k=1 bridge banked clean —
+TRUE-phase `||sum_{n<16} ZPiece n|| <= 13.85 < 16` (`DZ1c_main`), single
+full-16-block application (no per-8 split needed: `13.85` beats the `14.82`
+budget and the triangle `16`). DZ1_*/DZ1b_* blocks above are SUPERSEDED.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ1c tail, do NOT
+touch `riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): convert `DZ1c_main`
+(unit-modulus `13.85`) into ONE amplitude-weighted per-16-block premise
+`<= 12/6300 ~= 0.0019` for `DV_mid_conditional_012` on the FIRST middle piece
+`[16,32)` (`etaDirichletTerm (1-zetaCellS0)` weights `~= 16^{-0.605} ~= 0.19`;
+naive `13.85*0.19 ~= 2.6` is still `~1300x` short): prove in-file the weight
+variation + partial-summation (Abel `Finset.sum_range_by_parts`, read-only)
+bridge `||sum_{n<16} w_n e^{i phi_n}|| <= (max w)*13.85 + TV(w)*13.85`-shape
+with EXPLICIT `w_n = (16+n)^{-0.605}` envelope (`Real.rpow` bounds in-file),
+or bank a per-8 refinement of DZ1c (two k=1 applications) if it lowers
+`13.85`. Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ1c_log_F_nonneg
+#print axioms DZ1c_log_H_nonneg
+#print axioms DZ1c_log_sub_le_sq
+#print axioms DZ1c_eps_le
+#print axioms DZ1c_eps_sum_le
+#print axioms DZ1c_linear_le
+#print axioms DZ1c_main
