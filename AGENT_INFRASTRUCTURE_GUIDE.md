@@ -1515,6 +1515,18 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
     `Re(diag) ≤ 14.9 < 15`** + `DZ_piece_DV_feed` closing the `DV_A_H2` loop read-only. HONEST:
     DV feed vacuous (`2·16+2·14.9 = 61.8 →` per-piece `≤ 16.73`, needs `B < 12.125`); H=2 cannot beat
+    a coherent positive-Re diagonal at any H. **k=1 direct banked, REPAIR PENDING (`DZ1c_main`,
+    DP, UNCOMMITTED):** linearization at `n=8` (`θ = 8.75/24`) ⇒ **`‖∑ ZPiece‖ ≤ 13.85`** (`8.62 +
+    5.23`, beats `14.82` budget and triangle) — BUT the DZ1_/DZ1b_ first generations carry 10
+    elaboration errors (rewrite-pattern, `le_or_lt`/`div_le_div_right`/`add_sub_cancel'` unknown
+    ids, no-goals, type mismatches) with synthetic `sorryAx` dependents (coordinator-verified;
+    no literal `sorry` text). NOT committed. Repair tasked (DR: fix-or-excise, keep DZ1c deps).
+    **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
+    **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
+    (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
+    read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
+    `Re(diag) ≤ 14.9 < 15`** + `DZ_piece_DV_feed` closing the `DV_A_H2` loop read-only. HONEST:
+    DV feed vacuous (`2·16+2·14.9 = 61.8 →` per-piece `≤ 16.73`, needs `B < 12.125`); H=2 cannot beat
     a coherent positive-Re diagonal at any H. Next: k=1 direct on `[16,32)` (linearize at `n=8`,
     slope `8.75/24`, target `≤ 14.82 < 16`; tasked).
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
@@ -1664,7 +1676,15 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    110.4312, 6325)`. HONEST AUDIT (in tail): `0.026` fits no convexity+shift route (needs numerator
    `≤ 68.85` vs true max `228`; deeper shifts floor at `≈ 0.090`; splits/corner-dominated; reflection
    exact) — needs Stirling-with-explicit-remainder (`‖Γ(z+6)‖ ≤ 68.85` at `Re ∈ [6.025,6.37]`,
-   `|Im| ∈ [2.625,4.125]`; true `≈ 14`, 4.9× slack, feasible in principle; tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   `|Im| ∈ [2.625,4.125]`; true `≈ 14`, 4.9× slack, feasible in principle; tasked). **One-step
+   Im-decay cut banked, VERIFICATION PENDING (`Door3GammaCut87`, DQ, UNCOMMITTED):** `‖w‖ ≥ 6.57`
+   one-step recurrence ⇒ **`G = 0.087`, `M = 107.9496`** (ceil 108, `Azeta ≥ 6183/6186`; step
+   `111 → 108`) — verified ONLY via isolated probe with stubs (real module build never reached
+   newsection: zeta dependency broken by DP errors). CORRECTION (DQ-verified): tasked `68.85`
+   numerator is FALSE — true `‖Γ(w)‖ ≈ 131` at top edge (`6.37`, `2.625`), bottom edge `≈ 68`
+   (zero margin); prompt's `true ≈ 14` was the invalid large-y asymptote. `M = 32.2608` route now:
+   exact infinite-product decay or matched-x monotonicity, per DQ residual (tasked after zeta
+   green). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
