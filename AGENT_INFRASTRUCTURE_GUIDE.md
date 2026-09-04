@@ -1583,7 +1583,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    `5/t²` log-error (`~1.046×` loss at 10.5) — no import taken, zero dep-build. **Uniform-constant route
    now exhausted IN PRINCIPLE** (dream ceiling `1.236×` < `1.331×` needed; peak would sit `~38.8`).
    `hTail` needs **`(10.6,21)`** (peak `47.93`). ONLY structural route left: (iii) recentered damping +
-   re-proved threshold assembly (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   re-proved threshold assembly (tasked). **Parallel track CLOSED (`DD_RecenterDamp`, `b7b24104`, green,
+   axioms clean):** V=28 same-center pick (true peak `≈30.1`; center-shift c=0 kills the R02 divisor;
+   V=50 unprovable with repo exp-uppers) — parallel `dampedPoleRemovedP` (old track untouched), 11+11
+   caps ⇒ worst claimed `33.83` (margin 2.18; `5.6×` at old peak) ⇒ **`DD_hTail_core`: `‖G_P‖≤36` on
+   `Re=−1`, `10.6≤|Im|≤21` UNCONDITIONAL band composition**. Threshold CANNOT fire yet (`G_P` ≠ `G`):
+   residual is the re-proved assembly at divisor `4.845`/threshold `48.45` (`4.8%` tighter) — (i) `G_P`
+   entire+`DiffContOnCl`, (ii) windowed `A=B=36` caps for `G_P`, (iii) `BddAbove` (easier at /28),
+   (iv) `zetaUpper_R02_ten_of_bounds` re-proof (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
