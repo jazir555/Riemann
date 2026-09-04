@@ -20488,3 +20488,126 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ2_weighted_le_four
 #print axioms DZ2_weighted_conditional_1385
 #print axioms DZ2_gap_012
+
+/-!
+Door-3 middle-upper Abel head-weight tightening (DZ2-b2, append-only DZ2 tail).
+
+BRIDGE (i) banked at the best constant that fits the `16^3 >= 5^5` shape:
+`w_0 = 16^(-0.605) <= 1/5 = 0.2` (NOT `0.19`: `0.19` would need
+`16^0.605 >= 5.263... = 1/0.19`, while `0.6 <= 0.605` + `16^0.6 >= 5`
+gives only `>= 5`, i.e. `<= 0.2`; the leftover `16^0.005 ~= 1.014`
+cannot cover `5.263/5 = 1.0526`, so `0.19` does NOT follow from this
+integer shape alone — `0.2` is the sharp bankable constant here).
+
+Consequences (via read-only `DZ2_weighted_le_of_cap`):
+* unconditional `||sum w*ZPiece|| <= 0.2*16 = 3.2` (was `4`; saves 20%);
+* conditional (full `13.85` prefix caps) `<= 0.2*13.85 = 2.77`
+  (was `3.4625`; saves 20%);
+* gaps vs `12/6300 ~= 0.0019048`: `1680x` / `1454.25x`
+  (was `2100x` / `1817.8125x`).
+-/
+
+/-- (DZ2-b2) Tighter head weight `w_0 ≤ 1/5` via `3/5 ≤ 0.605` + `16^3 ≥ 5^5`.
+Mirrors `zetaCellS0_rpow_0395_ge` (`le_of_pow_le_pow_left₀` clearing, `5^5=3125 ≤ 4096=16^3`). -/
+theorem DZ2w0_le_fifth : DZ2w 0 ≤ 1 / 5 := by
+  have e0 : DZ2w 0 = Real.rpow (16 : ℝ) (-(0.605 : ℝ)) := by
+    unfold DZ2w
+    simp only [Nat.cast_zero, add_zero]
+  have h16pos : (0 : ℝ) < 16 := by norm_num
+  have h5le : (5 : ℝ) ≤ Real.rpow (16 : ℝ) (0.605 : ℝ) := by
+    have hpow : ((5 : ℝ)) ^ ((5 : ℕ))
+        ≤ ((((16 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+      have e : ((((16 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+          = (16 : ℝ) ^ ((3 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 16)]
+        rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+        rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+        exact Real.rpow_natCast 16 3
+      rw [e]
+      norm_num
+    have hstep : (5 : ℝ) ≤ (16 : ℝ) ^ ((3 / 5 : ℝ)) :=
+      le_of_pow_le_pow_left₀ (by norm_num)
+        (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+    calc (5 : ℝ) ≤ (16 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+      _ ≤ (16 : ℝ) ^ (0.605 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos605 : (0 : ℝ) < Real.rpow (16 : ℝ) (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos h16pos _
+  have hneg : Real.rpow (16 : ℝ) (-(0.605 : ℝ))
+      = (Real.rpow (16 : ℝ) (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (le_of_lt h16pos) _
+  have hinv : (Real.rpow (16 : ℝ) (0.605 : ℝ))⁻¹ ≤ ((5 : ℝ))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact h5le
+  have h15 : ((5 : ℝ))⁻¹ = 1 / 5 := by norm_num
+  rw [h15] at hinv
+  rw [e0, hneg]
+  exact hinv
+
+/-- (DZ2-c2) Tightened total-variation bound `TV ≤ 1/5`. -/
+theorem DZ2_TV_le_fifth :
+    ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖ ≤ 1 / 5 := by
+  rw [DZ2_TV_eq]
+  have hw0 := DZ2w0_le_fifth
+  have hpos15 : 0 ≤ DZ2w 15 := le_of_lt (DZ2w_pos 15)
+  linarith
+
+/-- (DZ2-f2) HEADLINE tightened unconditional `[16,32)` bound `≤ 3.2`. -/
+theorem DZ2_weighted_le_three_two :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ 3.2 := by
+  have h := DZ2_weighted_le_of_cap 16 DZ2_prefix16_le (by norm_num)
+  have hw := DZ2w0_le_fifth
+  have hle : DZ2w 0 * 16 ≤ (1 / 5) * 16 :=
+    mul_le_mul_of_nonneg_right hw (by norm_num)
+  have e : ((1 / 5 : ℝ)) * 16 = 3.2 := by norm_num
+  linarith
+
+/-- (DZ2-g2) CONDITIONAL tightened 13.85-shape `≤ 2.77`. -/
+theorem DZ2_weighted_conditional_277
+    (hB : ∀ k, k ≤ 16 → ‖∑ j ∈ Finset.range k, ZPiece j‖ ≤ 13.85) :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ 2.77 := by
+  have h := DZ2_weighted_le_of_cap 13.85 hB (by norm_num)
+  have hw := DZ2w0_le_fifth
+  have hle : DZ2w 0 * 13.85 ≤ (1 / 5) * 13.85 :=
+    mul_le_mul_of_nonneg_right hw (by norm_num)
+  have e : ((1 / 5 : ℝ)) * 13.85 = 2.77 := by norm_num
+  linarith
+
+/-- (DZ2-h2) Tightened gap verdict numerals vs `12/6300`. -/
+theorem DZ2_gap_012_tight :
+    (3.2 : ℝ) / (12 / 6300) = 1680 ∧ (2.77 : ℝ) / (12 / 6300) = 1454.25
+      ∧ (12 / 6300 : ℝ) < 3.2 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ2-b2 report-and-stop): ONE proved bridge banked — tighter head
+weight `DZ2w0_le_fifth : w_0 ≤ 1/5` via `3/5 ≤ 0.605` + cleared integer
+`5^5 = 3125 ≤ 4096 = 16^3` (`le_of_pow_le_pow_left₀`), hence
+`DZ2_weighted_le_three_two : ≤ 3.2` unconditional and
+`DZ2_weighted_conditional_277 : ≤ 2.77` under full `13.85` prefix caps,
+plus `DZ2_TV_le_fifth : TV ≤ 1/5` and `DZ2_gap_012_tight`
+(`1680x` / `1454.25x` over `12/6300 ≈ 0.0019048`).
+`0.19` (`3.04` / `2.6315`) does NOT follow from the `16^3 ≥ 5^5` shape:
+it would need `16^0.605 ≥ 5.263`, i.e. an extra `×1.0526` beyond `5`,
+while `16^0.005 ≈ 1.014` — quantified shortfall `≈ 0.038` in the base.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2 tail after
+`DZ2_gap_012_tight`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (ii) per-prefix `13.85` caps for `k = 14,15`
+(generalize `DZ1c_main` to `∀ k ≤ 16`: `KL_linear_firstDerivTest` gives the
+same `8.62` for every `k` since `π/|θ|` is length-independent, plus
+`∑_{n<k}|eps_n| ≤ ∑_{n<16}|eps_n| ≤ 5.23` by nonnegativity — needs per-`k`
+`DZ1_phi_eq`/`DZ1c_eps_le` re-application read-only, not triangle), or
+(iii) TRUE eta-term identification on `[16,32)` connecting `DZ2f·ZPiece`
+to `etaDirichletTerm (1-zetaCellS0)` (explicit `(-1)^k`, `(k+1)^s` norm,
+and `16+n` vs `17+n` off-by-one, all constants concrete, created in-file).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ2w0_le_fifth
+#print axioms DZ2_TV_le_fifth
+#print axioms DZ2_weighted_le_three_two
+#print axioms DZ2_weighted_conditional_277
+#print axioms DZ2_gap_012_tight
