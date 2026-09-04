@@ -1414,7 +1414,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
     **x=10 CLOSED (`D3_S10_re_lower` et al.):** `log 10 = log 2 + log 5` bridge green
     (`S_10 ≥ −69/24`). x=12 tasked next. **x=12 CLOSED (`D3_S12_re_lower` et al.):** `log 12 =
-    2·log 2 + log 3` bridge green (`S_12 ≥ −81/24`). 14/15/16 tasked (all prime d9 bounds exist). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    2·log 2 + log 3` bridge green (`S_12 ≥ −81/24`). 14/15/16 tasked (all prime d9 bounds exist).
+    **x=14/15/16 CLOSED (`D3_S16_re_lower` et al.):** early-block per-term technology COMPLETE for
+    x=1..16. Residual: middle `[16,1024)` upper (≤0.12 class; triangle ≈35/Abel ≈8.6 too loose) tasked. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
