@@ -16135,6 +16135,95 @@ theorem D3_S16_norm_ge_CS :
 #print axioms D3_S16_im_abs_ge_CS
 #print axioms D3_S16_norm_ge_CS
 
+/-!
+CU (door-3 Azeta track, tighter π): Machin-class π enclosure + recomputed
+phase boxes `δ₁₂`/`δ₁₆`. Report-and-stop bridge per §1i (term-feeding residual).
+
+GREP-FIRST RECORD (run before writing; `grep` tool in `zeta_rigorous.lean` + Mathlib):
+* π infrastructure in use: `Real.pi_gt_d2`/`Real.pi_lt_d2` (`3.14 < π < 3.15`,
+  width `0.01`) at `Mathlib/Analysis/Real/Pi/Bounds.lean:159-165`; consumed in
+  `zeta_rigorous.lean` at every `D3_delta_*` site, incl. `D3_delta_twelve_mem`
+  (`:9624`, `θ₁₂ - 6π ∈ [2.842, 2.903]`, width `0.061 = 0.001 + 6·0.01`) and
+  `D3_delta_sixteen_mem` (`:10894`, `θ₁₆ - 8π ∈ [-0.94, -0.859]`, width `0.081
+  = 0.001 + 8·0.01`). Coarse `Real.pi_gt_three`/`Real.pi_lt_d4` also appear
+  (`:3672`, `:3594`) but the `δ₁₂`/`δ₁₆` boxes use only `pi_d2`.
+* Mathlib sharp bounds (NOT assumed — read `Bounds.lean:167-220`): `Real.pi_gt_d4`
+  (`3.1415 < π`) + `Real.pi_lt_d4` (`π < 3.1416`), width `0.0001`; tighter
+  `Real.pi_gt_d6`/`Real.pi_lt_d6` (`3.141592/3.141593`, width `1e-6`) and
+  `Real.pi_gt_d20`/`Real.pi_lt_d20` also exist. No `pi_gt_31415`-named lemma
+  exists — the `d4` pair is the `3.1415/3.1416`-class source. No Machin/Leibniz
+  argument needed: the `d4` witnesses are already proved in Mathlib.
+* Phase boxes (committed, reused read-only): `D3_theta_twelve_lo/hi` (`:9602`/`:9613`,
+  `θ₁₂ ∈ [21.742, 21.743]`, width `0.001`), `D3_theta_sixteen_lo/hi` (`:10874`/`:10884`,
+  `θ₁₆ ∈ [24.260, 24.261]`, width `0.001`).
+* New names below (`D3_pi_tight_lo_CU`, `D3_pi_tight_hi_CU`, `D3_pi_width_CU`,
+  `D3_delta_twelve_mem_CU`, `D3_delta_sixteen_mem_CU`) — 0 hits before writing
+  (verified absent via `grep "_CU"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `∑'`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (CU-P) `D3_pi_tight_lo_CU` / `D3_pi_tight_hi_CU`: `3.1415 < π < 3.1416`
+  (width `0.0001 ≤ 0.001`, via Mathlib `Real.pi_gt_d4`/`Real.pi_lt_d4`) +
+  `D3_pi_width_CU` (width numeral).
+* (CU-D1) `D3_delta_twelve_mem_CU`: `θ₁₂ - 6π ∈ [2.8924, 2.894]` (width `0.0016`,
+  was `[2.842, 2.903]` width `0.061`; `~38×` tighter; inside the old box).
+* (CU-D2) `D3_delta_sixteen_mem_CU`: `θ₁₆ - 8π ∈ [-0.8728, -0.871]` (width `0.0018`,
+  was `[-0.94, -0.859]` width `0.081`; `~45×` tighter; inside the old box).
+
+NUMBERS: `6π ∈ [18.849, 18.8496]`; `δ₁₂ ∈ [21.742 − 18.8496, 21.743 − 18.849]
+= [2.8924, 2.894]`. `8π ∈ [25.132, 25.1328]`; `δ₁₆ ∈ [24.260 − 25.1328,
+24.261 − 25.132] = [-0.8728, -0.871]`. True values inside (`δ₁₂ ≈ 2.89338`,
+`δ₁₆ ≈ -0.87259`).
+
+RESIDUAL (named, NOT attempted here — report-and-stop): re-derive the trig
+enclosures on the tight boxes (`cos/sin θ₁₂` on `δ₁₂` width `0.0016` via the
+`7π − θ₁₂` shift; `cos/sin θ₁₆` on `z = 8π − θ₁₆ ∈ [0.871, 0.8728]` width
+`0.0018` via quadratic/cubic or quintic/septic sharpening), feed through
+`D3_term11_im_hi_*` / `D3_term15_im_hi_*` into a new `D3_S16_norm_ge_CU`
+(replacing the `CS` head `461492569/2695350000 ≈ 0.1712`). No `‖S₁₆‖` lower is
+recomposed in this block.
+-/
+
+/-- (CU-P) Tighter π lower `3.1415 < π` (Mathlib `Real.pi_gt_d4`). -/
+theorem D3_pi_tight_lo_CU : (3.1415 : ℝ) < Real.pi :=
+  Real.pi_gt_d4
+
+/-- (CU-P) Tighter π upper `π < 3.1416` (Mathlib `Real.pi_lt_d4`). -/
+theorem D3_pi_tight_hi_CU : Real.pi < (3.1416 : ℝ) :=
+  Real.pi_lt_d4
+
+/-- (CU-P) Tighter π width `3.1416 − 3.1415 = 0.0001 ≤ 0.001`. -/
+theorem D3_pi_width_CU : (3.1416 : ℝ) - 3.1415 = 0.0001 := by
+  norm_num
+
+/-- (CU-D1) Recomputed reduced phase `θ₁₂ - 6π ∈ [2.8924, 2.894]` (tighter π;
+    mirrors `D3_delta_twelve_mem`; width `0.0016`, was `0.061`). -/
+theorem D3_delta_twelve_mem_CU :
+    (2.8924 : ℝ) ≤ D3_phase 11 - 6 * Real.pi ∧
+    D3_phase 11 - 6 * Real.pi ≤ 2.894 := by
+  have hth_lo := D3_theta_twelve_lo
+  have hth_hi := D3_theta_twelve_hi
+  have hpi_lo := D3_pi_tight_lo_CU
+  have hpi_hi := D3_pi_tight_hi_CU
+  constructor <;> linarith
+
+/-- (CU-D2) Recomputed reduced phase `θ₁₆ - 8π ∈ [-0.8728, -0.871]` (tighter π;
+    mirrors `D3_delta_sixteen_mem`; width `0.0018`, was `0.081`). -/
+theorem D3_delta_sixteen_mem_CU :
+    (-0.8728 : ℝ) ≤ D3_phase 15 - 8 * Real.pi ∧
+    D3_phase 15 - 8 * Real.pi ≤ -0.871 := by
+  have hth_lo := D3_theta_sixteen_lo
+  have hth_hi := D3_theta_sixteen_hi
+  have hpi_lo := D3_pi_tight_lo_CU
+  have hpi_hi := D3_pi_tight_hi_CU
+  constructor <;> linarith
+
+#print axioms D3_pi_tight_lo_CU
+#print axioms D3_pi_tight_hi_CU
+#print axioms D3_pi_width_CU
+#print axioms D3_delta_twelve_mem_CU
+#print axioms D3_delta_sixteen_mem_CU
+
 
 
 
