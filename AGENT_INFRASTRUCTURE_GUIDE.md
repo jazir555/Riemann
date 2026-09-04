@@ -1313,7 +1313,7 @@ width 0.00016), margin `≈0.00013` giving `Λ₀(1/2) > 0`. No Gamma n=50–60 
   three-lines Hadamard + Gauss–Lucas convex-hull form, both reused). Next: d=2 converse (`b²≥4ac`),
   genus-from-order + genus-1 Jensen-section formula, Hurwitz S1/S2.
 - **`∀ k≥1, taylorCoeff k ≠ 0`** (`Ξ^{(2k)}(0)` alternating series per `k`) still open — only `k=0` closed.
-  **k=1 conditional bridge banked (uncommitted, 5 errors in repair):** deriv-API chain + `taylorCoeff_one_eq_k1`
+  **k=1 conditional bridge COMMITTED (AW stones + AW2 5-error repair, green):** deriv-API chain + `taylorCoeff_one_eq_k1`
   + `second_ne_zero_k1 ⇒ taylorCoeff 1 ≠ 0` + exact `P''=32`. Wall numerified: `F''≈0.000495`, needs
   enclosure ±0.00049 — but O(50) summands at ~2ppm each infeasible at BM40 `~1e-3`; needs four `~1e-4`
   derivative-bound lemmas (eta-derivative series + digamma/trigamma at 1/4, absent).
@@ -1406,7 +1406,8 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **x=5,6 banked (`D3_S6_re_lower` et al.):** prime pattern (`log_five_d9`) + composite bridge (`log 6 =
     log 2 + log 3`) — but true `Re S₆<0`, Re-route dead again (`D3_S6_cannot_reach_8_15`). Next: θ₇–θ₁₆
     BLOCKED on missing `log_seven/eleven/thirteen` d9 bounds (create in-file); composites 8/9/10/12/14/15/16
-    factor through 2/3/5 bridges. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    factor through 2/3/5 bridges. **Prime logs CLOSED (`log_seven/eleven/thirteen_near_10` + d9 pairs,
+    mirror of `log_five_d9` method):** θ₇/θ₁₁/θ₁₃ unlocked for the K=16 push. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
