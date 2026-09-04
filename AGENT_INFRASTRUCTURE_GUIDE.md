@@ -1445,7 +1445,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   `AO_R02_closed_of_factorBounds_163` (threshold recomputed: budget `205.382` vs product `205.392`,
   margin 0.01). Threshold shift documented: at `M=163` closure needs `Azeta≥3111` (vs `≥1` at `M=0.05`);
   at committed `Agam` needs `≥186710909`. Honest net: center `0.066` vs budget `205.382` infeasible at
-  true `|ζ|=O(1)` — 0 cells claimed closed. Remaining 39 cells: same shape, different `s`-rects
+  true `|ζ|=O(1)` — 0 cells claimed closed. **Rewiring v2 (`AU_R02_Agam002_M163`, `Agam=0.002`
+  era):** budget `205.382` vs product `205.392` (margin 0.01) ⇒ closure needs `Azeta≥9336` at `M=163`
+  (`9336=3112·3`, necessary `9335`); fully-wired H-leaf with premise/owner/status table as doc-string
+  (P1 zeta-upper OPEN, P2 Gamma-upper LANDED, P3 Gamma-lower LANDED, P4 zeta-lower OPEN, poly/pi/leaf CLOSED). Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
