@@ -1479,7 +1479,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   Poly column done for the whole bottom row; remaining per-cell blockers unchanged (`Azeta`, `M`).
   **R31 small-r packaging CLOSED (`BB_Row3SmallR`):** `r=0.008` admissible (`0.498<0.5`; `r=0.25` provably
   exits) + `C=5600` + **`M=700000`** + R31 through the template (conditional on sup/center premises;
-  threshold at M=700000 infeasible at `O(1)` — same wall). R32–R40: copy template, recompute numerals. Remaining 39 cells: same shape, different `s`-rects
+  threshold at M=700000 infeasible at `O(1)` — same wall). R32–R40: copy template, recompute numerals.
+  **R32 CLOSED-packaged (`BD_R32SmallR` + shared `BD_Row3Shared`):** pi-upper + Gamma-mirror shared once;
+  R32 (`-8,-5.5`, outer) through the template (r=0.008/C=5600/M=700000). R33–R40 mapped with numerals
+  (mid/inner thresholds 882000.05/882000.15) — copy agent tasked. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
