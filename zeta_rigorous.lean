@@ -17556,6 +17556,389 @@ theorem DB_MV_cannot_reach_012 :
 #print axioms DB_honest_number
 #print axioms DB_MV_cannot_reach_012
 
+/-!
+## Door-3 Azeta track, DE2 micro-levers: `pi_d20`-era δ₁₃ + term14 tightening.
+
+GOAL (door-3 Azeta track): bank the two DA-named residual micro-levers into a new
+`‖S₁₆‖` lower `D3_S16_norm_ge_DE2`, via single-swap feed through the DA assembly.
+Report-and-stop bridge per §1i (minimum viable = ONE proved bridge + residual).
+
+GREP-FIRST RECORD (run before writing; `rg -n` in `zeta_rigorous.lean` + Mathlib tree):
+* Term14 feeders (committed, shape reference): `D3_term14_im_hi_CL` (`:14446`,
+  `≤ 499/2500 = (1/5)·0.998`; consumes `D3_amp_fifteen_upper` (`:10571`,
+  `D3_amp 14 ≤ 1/5` via `15^{3/5} ≥ 5`, `5^5=3125 ≤ 3375=15^3`) +
+  `D3_sin_theta_fifteen_lo_CL` (`:14399`, `-0.998 ≤ sin θ₁₅` via cos-shift
+  quartic on `u ∈ [0.07,0.146]`)); base `D3_term14_im_hi` (`:13106`, `≤ 1/5`).
+* DA assembly (mirrored, NOT called): `D3_S16_im_upper_DA` (`:17177`,
+  `≤ -6172832357/32439330000`) → `D3_S16_norm_ge_DA` (`:17238`,
+  `≥ 6172832357/32439330000 ≈ 0.19029`); DA sin13 `D3_sin_theta_thirteen_lo_DA`
+  (`:17076`, `-0.4382`, reuses `D3_delta_thirteen_mem_CX` (`:16605`)).
+* Term12 feeder reused read-only: `D3_amp_thirteen_upper_CY` (`:16830`,
+  `D3_amp 12 ≤ 20/93`); theta bounds reused read-only: `D3_theta_thirteen_lo/hi`
+  (`:8258/:8266`, `θ₁₃ ∈ [22.443,22.444]`), `D3_theta_fifteen_lo/hi`
+  (`:10442/:10453`, `θ₁₅ ∈ [23.695,23.696]`).
+* Mathlib `Real.pi_gt_d20`/`Real.pi_lt_d20`: VERIFIED EXIST by grep
+  (`Mathlib/Analysis/Real/Pi/Bounds.lean:190/206`:
+  `3.14159265358979323846 < π`, `π < 3.14159265358979323847`, same `Real`
+  namespace as the consumed `pi_gt_d4`/`pi_lt_d4`). Width `1e-20`.
+* Taylor engines (called): `CG_sin_le_quintic` (`:13416`), `CG_cos_le_quartic`
+  (`:13364`); monotonicity `Real.monotoneOn_sin` (CX/DA pattern).
+* New names below — 0 hits before writing (verified absent via `rg "_DE2"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `∑'`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (DE2-P) `D3_pi_d20_lo_DE2` / `D3_pi_d20_hi_DE2`: `pi_d20` wrappers direct from
+  Mathlib (width `1e-20`).
+* (DE2-D13) `D3_delta_thirteen_mem_DE2`: `θ₁₃ − 6π ∈ [3.593444, 3.594445]`
+  (was CX `[3.5934,3.595]` width `0.0016`; now width `0.001001`,
+  theta-dominated: `6π` width `6e-20`; true `≈ 3.593751` inside).
+* (DE2-S13) `D3_sin_theta_thirteen_lo_DE2`: `-0.4376 ≤ sin θ₁₃` (was DA
+  `-0.4382`; same-CX-box quintic at tighter endpoint `0.45286`:
+  `Q(0.45286) ≈ 0.43753980 ≤ 0.4376`, margin `0.00006`; true `≈ -0.436908`,
+  gap `0.0007`, was `0.0014`; SUBSUMES (DA-S)).
+* (DE2-T12) `D3_term12_im_hi_DE2`: term-12 `Im ≤ 1094/11625 ≈ 0.0941075`
+  (was DA `2191/23250 ≈ 0.0942366`; mirror of DA-T12 with (DE2-S13);
+  interval: `amp ≤ 20/93`, `sin ≥ -0.4376`; even `k = 12`).
+* (DE2-D15) `D3_delta_fifteen_mem_DE2`: `θ₁₅ − 6π ∈ [4.845444, 4.846445]`
+  (was `[4.795,4.856]` width `0.061`; now width `0.001001`; true `≈ 4.845883`
+  inside).
+* (DE2-S15) `D3_sin_theta_fifteen_lo_DE2`: `-0.9912 ≤ sin θ₁₅` (was CL `-0.998`;
+  tight-box cos-shift: `y ∈ [1.703851,1.704853]`, `u = y − π/2 ∈
+  [0.133054,0.134057]`, quartic `1 − u²/2 + u⁴/24 ≤ 0.99116178 ≤ 0.9912`,
+  margin `0.000038`; true `≈ -0.99110285`, gap `0.000097`, was `0.0069`).
+* (DE2-A15) `D3_amp_fifteen_upper_DE2`: `D3_amp 14 ≤ 245/1244 ≈ 0.1969453`
+  (was `1/5 = 0.2`; via `15^{3/5} ≥ 1244/245`, cleared:
+  `1244^5 = 2979215383092224 ≤ 2979231141796875 = 3375·245^5 = 15^3·245^5`,
+  margin `0.00066%`, 16-digit; true `≈ 0.19429642`; `3/5`-floor `≈ 0.19694513`
+  so `~0.00265` is the `3/5` structural residual).
+* (DE2-T14) `D3_term14_im_hi_DE2`: term-14 `Im ≤ 60711/311000 ≈ 0.1952122`
+  (was CL `499/2500 = 0.1996`; mirror of CL-1T with (DE2-A15)+(DE2-S15);
+  interval: `amp ≤ 245/1244`, `sin ≥ -0.9912`; even `k = 14`;
+  true `≈ 0.1925677`, slack `0.00264` now all in amp).
+* (DE2-C) `D3_S16_im_upper_DE2`: `Im S_16 ≤ -393063866333/2017726326000
+  ≈ -0.1948053` (the DA assembly with exactly two terms swapped:
+  `D3_term12_im_hi_DE2` for `D3_term12_im_hi_DA`,
+  `D3_term14_im_hi_DE2` for `D3_term14_im_hi_CL`).
+* (DE2-V) Verdicts: `|Im S_16| ≥ 393063866333/2017726326000`,
+  `‖S_16‖ ≥ 393063866333/2017726326000 ≈ 0.19481` (`1.0237×` the DA `0.19029`,
+  honest gain `0.00452`; true `Im S_16 ≈ -0.51` remains the ceiling).
+
+NUMBERS: `(20/93)·0.4376 = 1094/11625`; `(245/1244)·0.9912 = 60711/311000`;
+new sum `= -6172832357/32439330000 − 2191/23250 − 499/2500 + 1094/11625
++ 60711/311000 = -393063866333/2017726326000`. Honest throughout
+(true term-12 `≈ +0.09257` vs bound `+0.09411`; true term-14 `≈ +0.19257`
+vs bound `+0.19521`).
+
+RESIDUAL (named, NOT attempted here — report-and-stop): term12 amp `20/93`
+slack `~0.0032` now dominates term12 (needs large-denominator `3/5` clearing
+toward floor `≈ 0.21190`); term14 amp `3/5`-floor residual `~0.00265`
+(exact-`0.605` clearing needs `~200`-power integers, infeasible); x=16 amp
+`5/8` route near-exhausted; middle `[16,1024)` upper (Tier-3 vdC tasked).
+-/
+
+/-- (DE2-P) `pi_d20` lower `3.14159265358979323846 < π` (Mathlib `Real.pi_gt_d20`,
+    verified by grep at `Mathlib/Analysis/Real/Pi/Bounds.lean:190`). -/
+theorem D3_pi_d20_lo_DE2 : (3.14159265358979323846 : ℝ) < Real.pi :=
+  Real.pi_gt_d20
+
+/-- (DE2-P) `pi_d20` upper `π < 3.14159265358979323847` (Mathlib `Real.pi_lt_d20`,
+    verified by grep at `Mathlib/Analysis/Real/Pi/Bounds.lean:206`). -/
+theorem D3_pi_d20_hi_DE2 : Real.pi < (3.14159265358979323847 : ℝ) :=
+  Real.pi_lt_d20
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-D13) Recomputed reduced phase `θ₁₃ − 6π ∈ [3.593444, 3.594445]`
+    (`pi_d20`-era; mirrors `D3_delta_thirteen_mem_CX`; width `0.001001`, was
+    `0.0016`; theta-dominated; true `≈ 3.593751` inside). -/
+theorem D3_delta_thirteen_mem_DE2 :
+    (3.593444 : ℝ) ≤ D3_phase 12 - 6 * Real.pi ∧
+    D3_phase 12 - 6 * Real.pi ≤ 3.594445 := by
+  have hth_lo := D3_theta_thirteen_lo
+  have hth_hi := D3_theta_thirteen_hi
+  have hpi_lo := D3_pi_d20_lo_DE2
+  have hpi_hi := D3_pi_d20_hi_DE2
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-S13) Sharpened sine lower `-0.4376 ≤ sin θ₁₃` (was `-0.4382` in
+    `D3_sin_theta_thirteen_lo_DA`; subsumes (DA-S)). Tight-box monotonicity
+    transfer: `y = θ₁₃ − 7π ∈ [0.45185, 0.45286] ⊆ [-π/2, π/2]`, so
+    `sin y ≤ sin 0.45286` (`Real.monotoneOn_sin`); the exact quintic (CG-T2)
+    at the endpoint gives `sin 0.45286 ≤ Q(0.45286) ≈ 0.43753980 ≤ 0.4376`;
+    hence `sin θ₁₃ = -sin y ≥ -0.4376`. -/
+theorem D3_sin_theta_thirteen_lo_DE2 : (-0.4376 : ℝ) ≤ Real.sin (D3_phase 12) := by
+  have hmem := D3_delta_thirteen_mem_DE2
+  have hpi_lo := D3_pi_d20_lo_DE2
+  have hpi_hi := D3_pi_d20_hi_DE2
+  set y := D3_phase 12 - 6 * Real.pi - Real.pi with hy_def
+  have hy_lo : (0.45185 : ℝ) ≤ y := by rw [hy_def]; linarith [hmem.1, hpi_hi]
+  have hy_hi : y ≤ (0.45286 : ℝ) := by rw [hy_def]; linarith [hmem.2, hpi_lo]
+  have hper1 : Real.sin (D3_phase 12 - 2 * Real.pi) = Real.sin (D3_phase 12) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 12 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 12 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper3 : Real.sin (((D3_phase 12 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin ((D3_phase 12 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 12 - 6 * Real.pi) = Real.sin (D3_phase 12) := by
+    have e : ((D3_phase 12 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 12 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 12 - 6 * Real.pi = y + Real.pi := by
+    rw [hy_def]; ring
+  have h1s : Real.sin (D3_phase 12 - 6 * Real.pi) = -Real.sin y := by
+    rw [hdecomp, Real.sin_add_pi]
+  have hsin_eq : Real.sin (D3_phase 12) = -Real.sin y := by
+    rw [← hper, h1s]
+  have hy_mem : y ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hy_lo, hpi_hi]
+    · linarith [hy_hi, hpi_lo]
+  have hhi_mem : (0.45286 : ℝ) ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hpi_hi]
+    · linarith [hpi_lo]
+  have hmono : Real.sin y ≤ Real.sin 0.45286 :=
+    Real.monotoneOn_sin hy_mem hhi_mem hy_hi
+  have hQ := CG_sin_le_quintic (show (0 : ℝ) ≤ 0.45286 by norm_num)
+  have hnum : (0.45286 : ℝ) - (0.45286 : ℝ) ^ 3 / 6 + (0.45286 : ℝ) ^ 5 / 120 ≤
+      0.4376 := by
+    norm_num
+  have hend : Real.sin (0.45286 : ℝ) ≤ 0.4376 := le_trans hQ hnum
+  have hy_ub : Real.sin y ≤ (0.4376 : ℝ) := le_trans hmono hend
+  rw [hsin_eq]
+  linarith [hy_ub]
+
+/-- (DE2-T12) Sharpened twelfth-term imaginary-part upper `≤ 1094/11625`
+    (was `2191/23250`; mirror of `D3_term12_im_hi_DA` with (DE2-S13) in place of
+    `D3_sin_theta_thirteen_lo_DA`; interval: `amp ≤ 20/93`, `sin ≥ -0.4376`;
+    even `k = 12`, so `Im = -(amp·sin)`). -/
+theorem D3_term12_im_hi_DE2 :
+    (etaDirichletTerm (1 - zetaCellS0) 12).im ≤ (1094 / 11625 : ℝ) := by
+  rw [D3_eta_im]
+  have ha := D3_amp_thirteen_upper_CY
+  have hann : (0 : ℝ) ≤ D3_amp 12 := D3_amp_nonneg 12
+  have hs := D3_sin_theta_thirteen_lo_DE2
+  have hpow12 : ((-1 : ℝ) ^ (12 : ℕ)) = 1 := by norm_num
+  rw [hpow12, one_mul]
+  have h1 : D3_amp 12 * (-0.4376) ≤ D3_amp 12 * Real.sin (D3_phase 12) :=
+    mul_le_mul_of_nonneg_left hs hann
+  have h2 : D3_amp 12 * (0.4376 : ℝ) ≤ (20 / 93) * 0.4376 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have hnum : (1094 / 11625 : ℝ) = -((20 / 93) * (-0.4376)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 12 * (-0.4376) = -(D3_amp 12 * 0.4376) := by ring
+  have e2 : (20 / 93 : ℝ) * (-0.4376) = -((20 / 93) * 0.4376) := by ring
+  linarith [h1, h2, e1, e2]
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-D15) Recomputed reduced phase `θ₁₅ − 6π ∈ [4.845444, 4.846445]`
+    (`pi_d20`-era; mirrors `D3_delta_fifteen_mem`; width `0.001001`, was
+    `0.061`; true `≈ 4.845883` inside). -/
+theorem D3_delta_fifteen_mem_DE2 :
+    (4.845444 : ℝ) ≤ D3_phase 14 - 6 * Real.pi ∧
+    D3_phase 14 - 6 * Real.pi ≤ 4.846445 := by
+  have hth_lo := D3_theta_fifteen_lo
+  have hth_hi := D3_theta_fifteen_hi
+  have hpi_lo := D3_pi_d20_lo_DE2
+  have hpi_hi := D3_pi_d20_hi_DE2
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-S15) Honest sine lower `-0.9912 ≤ sin θ₁₅` (was the CL `-0.998`).
+    Tight-box `cos`-shift: `y = θ₁₅ − 7π ∈ [1.703851, 1.704853]`, so with
+    `u = y − π/2 ∈ [0.133054, 0.134057]`,
+    `sin y = sin (π/2 + u) = cos u ≤ 1 − u²/2 + u⁴/24 ≤ 0.9912`
+    (quartic (CG-T1) + per-monomial endpoint bounds); hence
+    `sin θ₁₅ = -sin y ≥ -0.9912`. -/
+theorem D3_sin_theta_fifteen_lo_DE2 : (-0.9912 : ℝ) ≤ Real.sin (D3_phase 14) := by
+  have hmem := D3_delta_fifteen_mem_DE2
+  have hpi_lo := D3_pi_d20_lo_DE2
+  have hpi_hi := D3_pi_d20_hi_DE2
+  set y := D3_phase 14 - 6 * Real.pi - Real.pi with hy_def
+  have hy_lo : (1.703851 : ℝ) ≤ y := by rw [hy_def]; linarith [hmem.1, hpi_hi]
+  have hy_hi : y ≤ (1.704853 : ℝ) := by rw [hy_def]; linarith [hmem.2, hpi_lo]
+  set u := y - Real.pi / 2 with hu_def
+  have hu_lo : (0.133054 : ℝ) ≤ u := by rw [hu_def]; linarith [hy_lo, hpi_hi]
+  have hu_hi : u ≤ (0.134057 : ℝ) := by rw [hu_def]; linarith [hy_hi, hpi_lo]
+  have hu_nn : (0 : ℝ) ≤ u := by linarith [hu_lo]
+  have hQ := CG_cos_le_quartic hu_nn
+  have hs2 : (0.133054 : ℝ) ^ 2 ≤ u ^ 2 := pow_le_pow_left₀ (by norm_num) hu_lo 2
+  have hs4 : u ^ 4 ≤ (0.134057 : ℝ) ^ 4 := pow_le_pow_left₀ hu_nn hu_hi 4
+  have hnum : (1 : ℝ) - (0.133054 : ℝ) ^ 2 / 2 + (0.134057 : ℝ) ^ 4 / 24 ≤ 0.9912 := by
+    norm_num
+  have hcos : Real.cos u ≤ (0.9912 : ℝ) := by linarith [hQ, hs2, hs4, hnum]
+  have hshift : Real.sin y = Real.cos u := by
+    have e : y = Real.pi / 2 + u := by rw [hu_def]; ring
+    rw [e, Real.sin_add, Real.sin_pi_div_two, Real.cos_pi_div_two, one_mul,
+      zero_mul, add_zero]
+  have hper1 : Real.sin (D3_phase 14 - 2 * Real.pi) = Real.sin (D3_phase 14) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 14 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 14 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper3 : Real.sin (((D3_phase 14 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin ((D3_phase 14 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 14 - 6 * Real.pi) = Real.sin (D3_phase 14) := by
+    have e : ((D3_phase 14 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 14 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 14 - 6 * Real.pi = y + Real.pi := by
+    rw [hy_def]; ring
+  have h1s : Real.sin (D3_phase 14 - 6 * Real.pi) = -Real.sin y := by
+    rw [hdecomp, Real.sin_add_pi]
+  have hsin_eq : Real.sin (D3_phase 14) = -Real.sin y := by
+    rw [← hper, h1s]
+  rw [hsin_eq, hshift]
+  linarith [hcos]
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-A15) Amplitude upper `D3_amp 14 ≤ 245/1244` (was `1/5`; via
+    `15^{3/5} ≥ 1244/245`, cleared: `1244^5 = 2979215383092224 ≤
+    2979231141796875 = 3375·245^5 = 15^3·245^5`, since `3/5 ≤ 0.605`; mirrors
+    `D3_amp_fifteen_upper` with `c = 1244/245` in place of `5`). -/
+theorem D3_amp_fifteen_upper_DE2 : D3_amp 14 ≤ 245 / 1244 := by
+  unfold D3_amp
+  have hcast : ((((14 : ℕ)) : ℝ) + 1 : ℝ) = 15 := by norm_num
+  rw [hcast]
+  have h35 : (3 / 5 : ℝ) ≤ (0.605 : ℝ) := by norm_num
+  have hmono : (15 : ℝ) ^ ((3 / 5 : ℝ)) ≤ (15 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) h35
+  have hpow : (((1244 / 245 : ℝ))) ^ ((5 : ℕ))
+      ≤ ((((15 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((15 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (15 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 15)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 15 3
+    rw [e]
+    norm_num
+  have hstep : (1244 / 245 : ℝ) ≤ (15 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  have h15ge : (1244 / 245 : ℝ) ≤ (15 : ℝ) ^ (0.605 : ℝ) := le_trans hstep hmono
+  have hpos : (0 : ℝ) < (15 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 15)]
+  have heq : (245 / 1244 : ℝ) = ((1244 / 245 : ℝ))⁻¹ := by norm_num
+  rw [heq]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr h15ge
+
+/-- (DE2-T14) Fourteenth-term imaginary-part upper `≤ 60711/311000`
+    (was `499/2500`; mirror of `D3_term14_im_hi_CL` with (DE2-A15) in place of
+    `D3_amp_fifteen_upper` and (DE2-S15) in place of
+    `D3_sin_theta_fifteen_lo_CL`; interval: `amp ≤ 245/1244`,
+    `sin ≥ -0.9912`; even `k = 14`, so `Im = -(amp·sin)`). -/
+theorem D3_term14_im_hi_DE2 :
+    (etaDirichletTerm (1 - zetaCellS0) 14).im ≤ (60711 / 311000 : ℝ) := by
+  rw [D3_eta_im]
+  have ha := D3_amp_fifteen_upper_DE2
+  have hann : (0 : ℝ) ≤ D3_amp 14 := D3_amp_nonneg 14
+  have hs := D3_sin_theta_fifteen_lo_DE2
+  have hpow14 : ((-1 : ℝ) ^ (14 : ℕ)) = 1 := by norm_num
+  rw [hpow14, one_mul]
+  have h1 : D3_amp 14 * (-0.9912) ≤ D3_amp 14 * Real.sin (D3_phase 14) :=
+    mul_le_mul_of_nonneg_left hs hann
+  have h2 : D3_amp 14 * (0.9912 : ℝ) ≤ (245 / 1244) * 0.9912 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have hnum : (60711 / 311000 : ℝ) = -((245 / 1244) * (-0.9912)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 14 * (-0.9912) = -(D3_amp 14 * 0.9912) := by ring
+  have e2 : (245 / 1244 : ℝ) * (-0.9912) = -((245 / 1244) * 0.9912) := by ring
+  linarith [h1, h2, e1, e2]
+
+set_option maxHeartbeats 800000 in
+/-- (DE2-C) Sharpened `Im S_16 ≤ -393063866333/2017726326000`: the (DA) assembly
+    with exactly two terms swapped (`D3_term12_im_hi_DE2` for
+    `D3_term12_im_hi_DA`, `D3_term14_im_hi_DE2` for `D3_term14_im_hi_CL`);
+    `-6172832357/32439330000 − 2191/23250 − 499/2500 + 1094/11625
+    + 60711/311000 = -393063866333/2017726326000`. -/
+theorem D3_S16_im_upper_DE2 :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤
+      (-393063866333 / 2017726326000 : ℝ) := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_hi
+  have h2 := D3_term2_im_hi
+  have h3 := D3_term3_im_hi
+  have h4 := D3_term4_im_hi_sharp
+  have h5 := D3_term5_im_hi
+  have h6 := D3_term6_im_hi_CN
+  have h7 := D3_term7_im_hi
+  have h8 := D3_term8_im_hi
+  have h9 := D3_term9_im_hi_sharp
+  have h10 := D3_term10_im_hi_CR
+  have h11 := D3_term11_im_hi_CV
+  have h12 := D3_term12_im_hi_DE2
+  have h13 := D3_term13_im_hi_CL
+  have h14 := D3_term14_im_hi_DE2
+  have h15 := D3_term15_im_hi_DA
+  linarith
+
+/-- (DE2-V) Sign verdict: the DE2 `Im S_16` upper is negative. -/
+theorem D3_S16_im_upper_DE2_neg : (-393063866333 / 2017726326000 : ℝ) < 0 := by norm_num
+
+/-- (DE2-V) `|Im S_16| ≥ 393063866333/2017726326000` from the negative upper. -/
+theorem D3_S16_im_abs_ge_DE2 :
+    (393063866333 / 2017726326000 : ℝ) ≤
+      |(∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im| := by
+  have h := D3_S16_im_upper_DE2
+  have h0 : (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤ 0 := by
+    linarith
+  rw [abs_of_nonpos h0]
+  linarith
+
+/-- (DE2-V) `‖S_16‖ ≥ 393063866333/2017726326000`: door-3 Azeta-track DE2 margin
+    (positive lower on the partial-sum norm from the `Im` channel). -/
+theorem D3_S16_norm_ge_DE2 :
+    (393063866333 / 2017726326000 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  exact le_trans D3_S16_im_abs_ge_DE2 (Complex.abs_im_le_norm _)
+
+#print axioms D3_pi_d20_lo_DE2
+#print axioms D3_pi_d20_hi_DE2
+#print axioms D3_delta_thirteen_mem_DE2
+#print axioms D3_sin_theta_thirteen_lo_DE2
+#print axioms D3_term12_im_hi_DE2
+#print axioms D3_delta_fifteen_mem_DE2
+#print axioms D3_sin_theta_fifteen_lo_DE2
+#print axioms D3_amp_fifteen_upper_DE2
+#print axioms D3_term14_im_hi_DE2
+#print axioms D3_S16_im_upper_DE2
+#print axioms D3_S16_im_upper_DE2_neg
+#print axioms D3_S16_im_abs_ge_DE2
+#print axioms D3_S16_norm_ge_DE2
+
 
 
 
