@@ -1529,8 +1529,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `w_n = (16+n)^{-0.605}`, `w0 ≤ 1/4`, `TV ≤ 1/4` + `DZ2_weighted_le_of_cap` (via read-only
     `T2_abel_norm`) ⇒ **unconditional `‖∑w·ZPiece‖ ≤ 4`**, conditional `≤ 3.4625` (under `13.85`
     prefix caps; k=14,15 caps open). HONEST: monotone weights give no extra savings (`w0·B`
-    telescope); need `0.0019`/block → still 2100×/1818× short. Next: `w0 ≤ 0.19` tightening,
-    per-k `13.85` caps (k=14,15), or eta-identification (tasked).
+    telescope); need `0.0019`/block → still 2100×/1818× short. **Head-weight tightened
+    (`DZ2w0_le_fifth`, DU, `7748091a`, green 8693 jobs, axioms clean):** `w0 ≤ 1/5` via `3/5 ≤
+    0.605` + `5^5 = 3125 ≤ 4096 = 16^3` (`0.19` provably out of this shape's reach — needs
+    `16^0.605 ≥ 5.263` vs shape's `≥ 5`) ⇒ **unconditional `≤ 3.2`**, conditional `≤ 2.77`
+    (−20%; now 1680×/1454× short). Next: per-k `13.85` caps (k=14,15) or eta-identification (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
