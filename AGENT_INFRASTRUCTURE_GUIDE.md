@@ -1436,7 +1436,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (CJ-1S monotonicity mirror: `y=θ₇−5π∈[1.276,1.327]`, quintic endpoint `Q(1.327)≈0.97183`; naive per-monomial
     transfer overshoots `≈1.015>1`, documented in-block) ⇒ term6 Im `≤81/250=0.324` (was `1/3`) ⇒
     **`‖S₁₆‖ ≥ 133907/1050000 ≈ 0.1275`** (1.079×, honest gain `0.00933`; true `Im S₁₆≈-0.51` remains ceiling).
-    Residual tier 2 (k=11 amp tightening + k=12/16 sin-uppers) needs fresh scoping, tasked. **Stirling Gamma tail
+    Residual tier 2 (k=11 amp tightening + k=12/16 sin-uppers) needs fresh scoping, tasked. **Tier-2 scoped
+    CLOSED (`D3_S16_norm_ge_CO`, `4fa9a9ad`, green, axioms clean):** fresh slack audit — k=11 amp lower HAS
+    slack (`1/5` vs true `0.2344`), k=12 amp/sin + k=13/k=16 sins honestly NO-SLACK via in-file Taylor alone
+    (phase-limited: quintic/septic already near-exact, `12^{3/5}≈4.44`/`16^{5/8}≈5.657` razor-thin) — banked
+    `2/9 ≤ D3_amp 10` (`9^8=43046721 ≥ 11^5·2^8`, margin 4.4%) ⇒ term10 `≤-79/450` ⇒
+    **`‖S₁₆‖ ≥ 457021/3150000 ≈ 0.1451`** (1.138×, gain `0.01756`). Next: x=11 sin-lower septic (`0.79→0.84`,
+    expected sum `→≈-0.156`, tasked); x=12/x=16 need tighter log phase or large-denominator clearing.
+    **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
@@ -1494,7 +1501,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    (honest `38.1/26.8≈1.42×`; margin `≈9.3`; pos edge `≤2.76<36`). POINTWISE form only
    (`G_neg_201_le`: `‖G z‖ ≤ 0.971·B(|Im z|)` at `Re z=−1`); `B(a)` GROWS in `a` so the edge value is the
    majorant's minimum, not a tail sup (`B` crosses 36 at finite `a`) — uniform `hTail`/P1 still open on the
-   `BZTailEnvelope` tail-sup assembly (Gaussian domination + windowed caps, tasked). **Joint composition CLOSED
+   `BZTailEnvelope` tail-sup assembly (Gaussian domination + windowed caps, tasked). **Sharp envelope CLOSED
+   (`CP_Sharp201`, `3257c11e`, green, axioms clean):** growing `0.971·B(a)` upgraded to DECAYING sharp
+   envelope `‖G‖≤exp((1−(|a|∓6.75)²)/100)·B(|a|)` both signs (CF `G_le_sharp` skeleton on the 2.01 chain) +
+   negative-`τ` companion + explicit conditionals `hTail_of_sharp201_sup` / `P1_R02_of_sharp201_sup` (sup hyps
+   ⇒ `hTail` ⇒ P1 `‖ζ‖≤10` via `BZTailEnvelope.P1_R02_of_hTail`). OPEN: `hSupNeg` FALSE as stated — neg sharp
+   hump `≈45.86/53.18/46.61/37.11` at `a=12/15/18/20` (peak `≈53.2`, `1.48×` over; pos side green `≈2.51`
+   decaying). Needs tighter `C<2.53`/zeta tier, narrower variance, or compact-hump `[11,21]` caps +
+   large-`a` domination (tasked); conditionals fire immediately once sup hyps land. **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
