@@ -1532,8 +1532,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     telescope); need `0.0019`/block → still 2100×/1818× short. **Head-weight tightened
     (`DZ2w0_le_fifth`, DU, `7748091a`, green 8693 jobs, axioms clean):** `w0 ≤ 1/5` via `3/5 ≤
     0.605` + `5^5 = 3125 ≤ 4096 = 16^3` (`0.19` provably out of this shape's reach — needs
-    `16^0.605 ≥ 5.263` vs shape's `≥ 5`) ⇒ **unconditional `≤ 3.2`**, conditional `≤ 2.77`
-    (−20%; now 1680×/1454× short). Next: per-k `13.85` caps (k=14,15) or eta-identification (tasked).
+    `16^0.605 ≥ 5.263` vs shape's `≥ 5`)     ⇒ **unconditional `≤ 3.2`**, conditional `≤ 2.77`
+    (−20%; now 1680×/1454× short). **Per-k caps (`DZ2_prefix1385_le`, DV, `27ba18a4`, green 8693
+    jobs, axioms clean):** `13.85` for ALL prefixes `k ≤ 16` (KL length-independent `8.62` +
+    subset-monotone error) ⇒ **`2.77` promoted to UNCONDITIONAL**. Still 1454× short of
+    `0.0019`/block. Next: TRUE eta-term identification on `[16,32)` (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
