@@ -1470,6 +1470,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     tighter) ⇒ term12 `≤4829/50000` ⇒ **`‖S₁₆‖ ≥ 505966012/2695350000 ≈ 0.1877`** (1.0107×, gain `0.00198`).
     Next: x=13 amp `11/50` vs true `≈0.21190` (slack `0.008`, large-denominator clearing, tasked); x=16 amp
     slack `~0.01`; micro-levers (`-0.439→-0.4382`, `pi_d20`-era δ₁₃); term14 trivial-bound tightening.
+    **x=13 amp cleared (`D3_S16_norm_ge_CY`, `d796a4a8`, green, axioms clean):** `D3_amp 12 ≤ 20/93`
+    (`(93/20)^5≤13^3`, margin `1.05%`; `3/5`-floor `≈0.21461` so `~0.0027` residual structural) ⇒ term12
+    `≤439/4650≈0.09441` ⇒ **`‖S₁₆‖ ≥ 3173275873/16711170000 ≈ 0.1899`** (1.0116×). x=16 lower untouched
+    (only LOWER feeds term15; `5/8`-route near-exhausted, needs exact-`0.605`/large-denominator). Next:
+    x=16 amp lower micro-gain, `-0.439→-0.4382`, `pi_d20` δ₁₃, term14 trivial-bound (tasked).
     **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
@@ -1548,6 +1553,23 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    proved (cruder tail cap banked, honest). `hTail_of_sharp201_sup` now needs ONLY `[8.75,21)`: `[8.75,10]`
    closed (CQ), `[21,∞)` closed (CT) — remaining hump **`[10,21)`** is STRUCTURAL (true `40.68–53.18`,
    peak `≈53.2`; constant-tightening dead; needs restructured `F` majorant or narrower variance, tasked).
+   **Hump restructured (`CW_HumpTight`, `898e943d`, green, axioms clean):** factor audit @a=15 (need 1.48×):
+   damp EXACT, `√(4+a²)` EXACT, zeta-1.65 1.003× (dead), C=2.53 1.009×, E·C 1.02×, **cpow 1/36 loosest
+   (true `1/(4π²)≤1/39.44` → 1.096×)**; uniform total `≈1.13×` — peak unclosable by constants (re-verified).
+   Banked `‖(2π)^{-w}‖≤1/39` + `E·C≤0.5001` + `‖Γ·cos‖≤1.2653√` (was 1.2903) ⇒ envelope peak `53.2→48.1`
+   ⇒ **closed `[10,10.5]`** (35.57, margin 0.43; old constants give 39.29 there — restructuring
+   load-bearing). Damping recenter FORCED to −6.75 for this track (parallel assembly needed to move it).
+   `hTail` now needs ONLY **`(10.5,21)`** (peak `~48.1`, `1.34×` over). Ordered deeper levers: (i) exact
+   `‖Γ·cos‖` joint (`(1+a²)·πa/2·coth(πa/2)` + zeta phase); (ii) pointwise `|ζ(2+iy)|` cancellation
+   (~1.4×, KL/vdC or interval); (iii) recentered-damping parallel track. **NEW AMMO — zeta-23-lean:**
+   workspace already imports it (`lakefile` globs `Zeta23.*` via `zeta-23-lean/` symlink, rc1 oleans built
+   8/28–9/1, `Zeta23Probe.lean` green EXITCODE:0) — agents may `import` directly, no setup. For the hump:
+   `Zeta23.GammaFacts.StirlingVert.re_digamma_stirling[_']` (explicit-constant Re Γ′/Γ on vertical lines;
+   integrate à la `IntMu` to sharp |Γ| uppers replacing the C=2.53/sinh chain; needs Re>0 — reflect rest).
+   For Tier-3/middle: `Zeta23.MV.Final.mv_hilbert` (ready-made MV Hilbert, C=26 via `MVDiag 13`) as
+   large-sieve input (bridge frequencies `λ_r=8.75·log n`). NOT useful: Weil EF/RvM/Chebyshev/headline 2/3
+   (zero statistics/density ≠ pointwise bounds/RH — no door transfer). Hump agent tasked with the
+   Stirling route.
    **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
