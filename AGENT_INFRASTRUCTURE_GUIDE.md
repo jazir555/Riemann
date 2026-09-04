@@ -1561,15 +1561,19 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    load-bearing). Damping recenter FORCED to −6.75 for this track (parallel assembly needed to move it).
    `hTail` now needs ONLY **`(10.5,21)`** (peak `~48.1`, `1.34×` over). Ordered deeper levers: (i) exact
    `‖Γ·cos‖` joint (`(1+a²)·πa/2·coth(πa/2)` + zeta phase); (ii) pointwise `|ζ(2+iy)|` cancellation
-   (~1.4×, KL/vdC or interval); (iii) recentered-damping parallel track. **NEW AMMO — zeta-23-lean:**
-   workspace already imports it (`lakefile` globs `Zeta23.*` via `zeta-23-lean/` symlink, rc1 oleans built
-   8/28–9/1, `Zeta23Probe.lean` green EXITCODE:0) — agents may `import` directly, no setup. For the hump:
-   `Zeta23.GammaFacts.StirlingVert.re_digamma_stirling[_']` (explicit-constant Re Γ′/Γ on vertical lines;
-   integrate à la `IntMu` to sharp |Γ| uppers replacing the C=2.53/sinh chain; needs Re>0 — reflect rest).
-   For Tier-3/middle: `Zeta23.MV.Final.mv_hilbert` (ready-made MV Hilbert, C=26 via `MVDiag 13`) as
-   large-sieve input (bridge frequencies `λ_r=8.75·log n`). NOT useful: Weil EF/RvM/Chebyshev/headline 2/3
-   (zero statistics/density ≠ pointwise bounds/RH — no door transfer). Hump agent tasked with the
-   Stirling route.
+   (~1.4×, KL/vdC or interval); (iii) recentered-damping parallel track. **NEW AMMO — zeta-23-lean
+   (door-3 verdict):** workspace already imports it (`lakefile` globs `Zeta23.*` via `zeta-23-lean/`
+   symlink, rc1 oleans built 8/28–9/1, `Zeta23Probe.lean` green EXITCODE:0) — agents may `import`
+   directly, no setup. DOOR-3-USEFUL: (i) hump: `Zeta23.GammaFacts.StirlingVert.re_digamma_stirling[_']`
+   (explicit-constant Re Γ′/Γ on vertical lines; integrate à la `IntMu` to sharp |Γ| uppers replacing the
+   C=2.53/sinh chain; needs Re>0 — reflect rest; tasked to CZ). (ii) middle `[16,1024)` / Tier-3:
+   `Zeta23.MV.Final.mv_hilbert` (ready-made MV Hilbert, C=26 via `MVDiag 13`) as large-sieve input —
+   bridge frequencies `λ_r=8.75·log n`; task AFTER DA reports (same-file lane). DOOR-3-MARGINAL:
+   `RvM.ZetaGrowth` linear bounds + `ZetaUpperBnd` (`‖ζ‖≤C·log|t|` near σ=1) — windows are bounded
+   (numerals win) and damping dominates at ∞; ζ-1.65 already near-exact. DOOR-3-NONE: σ>1 lowers
+   (`ZetaLowerBound3`/`ZetaLowerBnd`/`ZetaInvBnd` — no cell has Re>1), `ZetaZeroFree` (needs covers, not
+   subregions), EF/Backlund/Chebyshev/XiPrime/Poisson/PairCeiling/headline-2/3 (statistics/density ≠
+   pointwise bounds; no door transfer).
    **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
