@@ -1402,7 +1402,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     green. Exact K-table (true): K=4 dead, K=8 fails by 0.019, **K=16 first feasible** (margin 0.024).
     **S_4 enclosures banked (`D3_S4_re_lower` et al.):** θ₃/θ₄ + per-term bounds in the S₂ shape — but true
     `Re S₄≈-0.54<0`, so the Re-sum route NEVER reaches `8/15` (proved `D3_S4_cannot_reach_8_15`); the
-    durable asset is per-term technology for x=3,4. Next per K-table: θ₅–θ₁₆ toward K=16 + middle upper. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    durable asset is per-term technology for x=3,4. Next per K-table: θ₅–θ₁₆ toward K=16 + middle upper.
+    **x=5,6 banked (`D3_S6_re_lower` et al.):** prime pattern (`log_five_d9`) + composite bridge (`log 6 =
+    log 2 + log 3`) — but true `Re S₆<0`, Re-route dead again (`D3_S6_cannot_reach_8_15`). Next: θ₇–θ₁₆
+    BLOCKED on missing `log_seven/eleven/thirteen` d9 bounds (create in-file); composites 8/9/10/12/14/15/16
+    factor through 2/3/5 bridges. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
@@ -1436,7 +1440,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    **Joint cancellation CLOSED (`Door3JointGammaCos`):** `‖Γ(1+iy)‖²=πy/sinh(πy)` from scratch (reflection
    + `Gamma_conj`) ⇒ joint `‖Γ·cos‖≤34` on `Re=2` (true `≈32.6`, 4% headroom; **1647×** gain) ⇒ damped
    window **`A=36 ≤ 50.925`** (margin 14.925; **4444×** over `160000`). **P1's left-cap premise MET** —
-   AD's `zetaUpper_R02_ten_of_bounds` can now fire (wiring = compose `A=36` in). **Update — Gamma factor fully closed for all 40 centers:**
+   AD's `zetaUpper_R02_ten_of_bounds` can now fire (wiring = compose `A=36` in).
+  **Wiring verdict (`BF2TailCaps`):** whole-line CONSTANT `A≤50.925` does NOT fit (off-window truth is
+  exponential, worst ~e^72; sharp truth `O(10)` needs all-`Im` joint cancel, absent) — right piece `B=36`
+  met whole-line; growth-variant left cap green. **Next: windowed-strip three-lines** (R02 disc has
+  `|Im|≤8.25 < 8.75` — AR's windowed `A=36` suffices a windowed assembly; no whole-line cap needed). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
