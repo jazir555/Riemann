@@ -1503,6 +1503,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     NOTE: DJ named its theorems `_DI` (no file collision — true DI worked newsection); kept as-is.
     Term12 + term14 amp routes now BOTH essentially exhausted — no further denominator searches.
     Next: Tier-3 vdC narrow scope toward middle upper (tasked); true `Im S₁₆ ≈ −0.51` remains the ceiling.
+    **vdC A-process machinery banked (`DV_*`, DK, `39d691a3`, green 8693 jobs, axioms clean):**
+    `DV_A_H2` (H=2 Weyl-differencing inequality reusing Tier-1 KL read-only) + headline
+    `DV_quad_H2_N16` (16-term quadratic-phase piece `‖S‖ ≤ 13.1 < 16`, genuine 18% savings over
+    triangle) + `DV_mid_conditional_012` (63 per-16-block premises `≤ 12/6300`, pure Props, assembly
+    fully proved). HONEST GAP: banked piece uses synthetic phase; true `8.75·log` curvature `≈0.034`
+    at n=16 makes H=2 k=2 vacuous there, and BS baseline `5/3` averages `≈0.0265`/piece → 13.9× short
+    of middle `≤ 0.12`. Next: one TRUE-phase diagonal bound on `[16,32)` beating triangle 15 (tasked).
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
     in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
     build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
