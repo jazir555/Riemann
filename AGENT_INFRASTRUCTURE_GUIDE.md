@@ -1431,8 +1431,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   majorant (windows cannot close it). Needs Stirling-sharp left edge (true `A=O(10²)`); FE+Stirling+
      convexity material absent from Mathlib/repo. **Sharp window banked (`Door3SharpWindow`, 7500×):**
    split cos/Gamma caps (`‖F‖≤1280` for `|Im|≤6`, `≤3120` above) ⇒ damped window `A=160000` (was `1.2e9`),
-   still `~3142×` above `50.925`. Remainder is pure separate-majorant loss (true sup `O(10)`) — needs
-   JOINT `Γ·cos` exponential cancellation (`|Γ(1+iy)|²=πy/sinh(πy)`, van der Corput class, absent). **Update — Gamma factor fully closed for all 40 centers:**
+   still `~3142×` above `50.925`.    Remainder is pure separate-majorant loss (true sup `O(10)`) — needs
+   JOINT `Γ·cos` exponential cancellation (`|Γ(1+iy)|²=πy/sinh(πy)`, van der Corput class, absent).
+   **Joint cancellation CLOSED (`Door3JointGammaCos`):** `‖Γ(1+iy)‖²=πy/sinh(πy)` from scratch (reflection
+   + `Gamma_conj`) ⇒ joint `‖Γ·cos‖≤34` on `Re=2` (true `≈32.6`, 4% headroom; **1647×** gain) ⇒ damped
+   window **`A=36 ≤ 50.925`** (margin 14.925; **4444×** over `160000`). **P1's left-cap premise MET** —
+   AD's `zetaUpper_R02_ten_of_bounds` can now fire (wiring = compose `A=36` in). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
