@@ -1478,10 +1478,17 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Micro-levers CLOSED (`D3_S16_norm_ge_DA`, `64e18b02`, green, axioms clean):** `35/198 ≤ D3_amp 15`
     (`198^8≥16^5·35^8`, margin `0.0408%`, 19-digit VERIFIED REAL; `5/8`-floor `≈0.17677` so `~0.0098`
     structural; exact-`0.605` needs `~1e145` ints, infeasible) + sin θ₁₃ `≥-0.4382` (same CX box, margin
-    `0.000085`) ⇒ **`‖S₁₆‖ ≥ 6172832357/32439330000 ≈ 0.1903`** (1.00210×, gain `0.000399`). Early block
+    `0.000085`) ⇒ **`‖S₁₆‖ ≥ 6172832357/32439330000 ≈ 0.1903`** (1.00210×, gain `0.000399`).     Early block
     now in micro-gains — remaining: `pi_d20` δ₁₃ (`~0.00012`), term14 (`499/2500`, largest micro-pool
     `~0.007`, needs fresh scoping). Next macro-lever: MIDDLE `[16,1024)` upper via
     `Zeta23.MV.Final.mv_hilbert` large-sieve bridge (tasked — fires the queued Zeta23 lever).
+    **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
+    in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
+    build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
+    in-file `KL_log_gap_ge`) ⇒ **shape-floor PROVED: no constant reaches `0.12`** (`DB_MV_cannot_reach_012`;
+    C=26 gives `≥533/7≈76`, even ideal C=1 gives `≥41/14≈2.93`, `24×` over). Do NOT sharpen sieve
+    constants. Remaining middle routes: mean→pointwise conversion (MV mean-value thm absent — big
+    machinery) or **Tier-3 vdC second-derivative early-block upper** (tasked).
     **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
