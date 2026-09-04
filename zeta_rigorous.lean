@@ -12183,3 +12183,558 @@ theorem CB_compare_BS_vdC : (80 : ℝ) / 85 ≤ 1 ∧ (54 : ℝ) < 62 := by
 #print axioms CB_BS_16_32
 #print axioms CB_compare_BS_vdC
 
+/-!
+## Door-3 `S_16` imaginary-part route (D3, tier 1): per-term Im lowers + `Im S_16` sum.
+
+GOAL (door-3 2D head-lower, Agent CD 2026-09-04): a POSITIVE `‖S_16‖` lower via the
+Im route (`‖S_16‖ ≥ |Im S_16|`). Every `S_K` Re-sum route is DEAD (all
+`cannot_reach_8_15` proved — Re-sums stay negative), so mirror the `D3_sum_re_eq`-shaped
+block lemmas for Im and assemble per-term Im bounds through `D3_eta_im`-shapes,
+reusing ALL committed phase/cos/sin/amp intervals for x = 1..16 (no new phase work).
+
+GREP-FIRST RECORD (run before writing; `rg` in `zeta_rigorous.lean`):
+* `D3_eta_im` (:6003), `D3_sum_re_eq` (:6016), `D3_block_norm_ge_sum_lo` (:6023) —
+  EXIST, called. `Complex.abs_im_le_norm` (Mathlib, used at :4947) — EXISTS, called.
+* `D3_sum_im_eq`, `D3_block_norm_ge_sum_lo_im`, `D3_term0_im`, `D3_term*_im_lo`,
+  `D3_S16_im_*` — 0 hits before writing (verified absent via
+  `rg -n "D3_sum_im_eq|D3_block_norm_ge_sum_lo_im|term.*_im_lo|S16_im"`).
+* All phase (`D3_phase_*_eq`), sin (`D3_sin_theta_*_mem`), amp (`D3_amp_*_upper/lower`,
+  `D3_amp_one`, `D3_amp_nonneg`) intervals for x = 1..16 — EXIST, called below.
+* NOTE (eta `∑'` tsum form with `0 <` is FALSE): pair-absolute/Tendsto forms only —
+  this block uses `Finset.range` sums exclusively.
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (F2-Im) `D3_sum_im_eq` (mirror of `D3_sum_re_eq`) + `D3_block_norm_ge_sum_lo_im`
+  (mirror of `D3_block_norm_ge_sum_lo`, via `Complex.abs_im_le_norm`).
+* (C-Im) `D3_term0_im` (`Im = 0` exact) + `D3_term1_im_lo` .. `D3_term15_im_lo`
+  (per-term Im lowers for x = 1..16, i.e. k = 0..15, through `D3_eta_im`;
+  even k use `Im = -(amp·sin)`, odd k use `Im = amp·sin`).
+* (C-Im) `D3_S16_im_lower` (`Im S_16 ≥ -17921/15750`) + `D3_S16_im_lo` def/sum/valid
+  + `D3_S16_im_norm_ge` (`‖S_16‖ ≥ -17921/15750`, trivially-true, mirrors
+  `D3_S16_norm_ge`) + `D3_S16_im_lower_neg` (the bound is `< 0`: honest weakness).
+
+NUMBERS (exact, proved in-file; python scratch only for the report):
+* Per-term Im lowers: k=0: `0`; k=1: `-4/25`; k=2: `1/14`; k=3: `-47/225`;
+  k=4: `-2/5`; k=5: `3/500`; k=6: `11/50`; k=7: `-71/300`; k=8: `-13/100`;
+  k=9: `87/500`; k=10: `-1/4`; k=11: `23/600`; k=12: `37/600`; k=13: `-1/4`;
+  k=14: `4/35`; k=15: `-47/250`. Sum `L = -17921/15750 ≈ -1.13784`
+  (true `Im S_16 ≈ -0.51083`, cf. BS suggestion `S_16 ≈ -0.406 - 0.511i`,
+  so the lower is sound but loose by `≈ 0.627`).
+* Since `L < 0`, NO positive `|Im S_16| ≥ c` follows from the lower alone; hence no
+  positive `‖S_16‖ ≥ c` via this route yet. REPORTED, not spun (see RESIDUAL).
+
+RESIDUAL (exact, quantified — report-and-stop, no spin):
+* `|Im S_16| ≥ c > 0` needs a per-term Im UPPER assembly (`Im S_16 ≤ -c`, since the
+  true sum is negative `≈ -0.51`) through the same `D3_eta_im`-shapes — NOT attempted
+  here (this block banks LOWERS only, per the tier-1 minimum).
+* K=16 middle `[16,1024)` upper (`≤ 0.12` class) — separate track, NOT attempted here.
+-/
+
+/-- (F2-Im) Imaginary part of a `Finset.range` sum (mirror of `D3_sum_re_eq`). -/
+theorem D3_sum_im_eq (N : ℕ) (f : ℕ → ℂ) :
+    (∑ k ∈ Finset.range N, f k).im = ∑ k ∈ Finset.range N, (f k).im := by
+  induction N with
+  | zero => simp
+  | succ n ih => rw [Finset.sum_range_succ, Finset.sum_range_succ, Complex.add_im, ih]
+
+/-- (F2-Im) Block-sum LOWER from per-term imaginary-part lowers
+    (mirror of `D3_block_norm_ge_sum_lo`, via `Complex.abs_im_le_norm`). -/
+theorem D3_block_norm_ge_sum_lo_im (N : ℕ) (lo : ℕ → ℝ)
+    (hlo : ∀ k, k < N → lo k ≤ (etaDirichletTerm (1 - zetaCellS0) k).im) :
+    ∑ k ∈ Finset.range N, lo k ≤
+      ‖∑ k ∈ Finset.range N, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  have hsum_le : ∑ k ∈ Finset.range N, lo k ≤
+      (∑ k ∈ Finset.range N, etaDirichletTerm (1 - zetaCellS0) k).im := by
+    rw [D3_sum_im_eq]
+    exact Finset.sum_le_sum (fun k hk => hlo k (Finset.mem_range.mp hk))
+  calc ∑ k ∈ Finset.range N, lo k
+      ≤ (∑ k ∈ Finset.range N, etaDirichletTerm (1 - zetaCellS0) k).im := hsum_le
+    _ ≤ |(∑ k ∈ Finset.range N, etaDirichletTerm (1 - zetaCellS0) k).im| :=
+        le_abs_self _
+    _ ≤ ‖∑ k ∈ Finset.range N, etaDirichletTerm (1 - zetaCellS0) k‖ :=
+        Complex.abs_im_le_norm _
+
+/-- (C-Im) `k = 0` term imaginary part is `0`. -/
+theorem D3_term0_im : (etaDirichletTerm (1 - zetaCellS0) 0).im = 0 := by
+  rw [D3_eta_im, D3_phase_zero, D3_amp_one, Real.sin_zero]
+  norm_num
+
+/-- (C-Im) First-term imaginary-part lower `≥ -4/25`
+    (interval: `amp ≤ 2/3`, `sin ≥ -0.24`; odd `k = 1`, so `Im = amp·sin`). -/
+theorem D3_term1_im_lo :
+    (-4 / 25 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 1).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_two_upper
+  have hann : (0 : ℝ) ≤ D3_amp 1 := D3_amp_nonneg 1
+  have hs := D3_sin_theta_two_mem
+  have hpow1 : ((-1 : ℝ) ^ (1 : ℕ)) = -1 := pow_one _
+  rw [hpow1]
+  have h1 : D3_amp 1 * (-0.24) ≤ D3_amp 1 * Real.sin (D3_phase 1) :=
+    mul_le_mul_of_nonneg_left hs.1 hann
+  have h2 : D3_amp 1 * (0.24 : ℝ) ≤ (2 / 3) * 0.24 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 1 * Real.sin (D3_phase 1))) =
+      D3_amp 1 * Real.sin (D3_phase 1) := by ring
+  rw [e]
+  have hnum : (-4 / 25 : ℝ) = (2 / 3) * (-0.24) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 1 * (-0.24) = -(D3_amp 1 * 0.24) := by ring
+  have e2 : (2 / 3 : ℝ) * (-0.24) = -((2 / 3) * 0.24) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Second-term imaginary-part lower `≥ 1/14`
+    (interval: `amp ≥ 10/21`, `sin ≤ -0.15`; even `k = 2`, so `Im = -(amp·sin)`). -/
+theorem D3_term2_im_lo :
+    (1 / 14 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 2).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_three_lower
+  have hann : (0 : ℝ) ≤ D3_amp 2 := D3_amp_nonneg 2
+  have hs := D3_sin_theta_three_mem
+  have hpow2 : ((-1 : ℝ) ^ (2 : ℕ)) = 1 := by norm_num [pow_two]
+  rw [hpow2, one_mul]
+  have h1 : D3_amp 2 * Real.sin (D3_phase 2) ≤ D3_amp 2 * (-0.15) :=
+    mul_le_mul_of_nonneg_left hs.2 hann
+  have h2 : (10 / 21 : ℝ) * (0.15 : ℝ) ≤ D3_amp 2 * 0.15 :=
+    mul_le_mul_of_nonneg_right ha_lo (by norm_num)
+  have hnum : (1 / 14 : ℝ) = -((10 / 21) * (-0.15)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 2 * (-0.15) = -(D3_amp 2 * 0.15) := by ring
+  have e2 : (10 / 21 : ℝ) * (-0.15) = -((10 / 21) * 0.15) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Third-term imaginary-part lower `≥ -47/225`
+    (interval: `amp ≤ 4/9`, `sin ≥ -0.47`; odd `k = 3`, so `Im = amp·sin`). -/
+theorem D3_term3_im_lo :
+    (-47 / 225 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 3).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_four_upper
+  have hann : (0 : ℝ) ≤ D3_amp 3 := D3_amp_nonneg 3
+  have hs := D3_sin_theta_four_mem
+  have hpow3 : ((-1 : ℝ) ^ (3 : ℕ)) = -1 := by norm_num
+  rw [hpow3]
+  have h1 : D3_amp 3 * (-0.47) ≤ D3_amp 3 * Real.sin (D3_phase 3) :=
+    mul_le_mul_of_nonneg_left hs.1 hann
+  have h2 : D3_amp 3 * (0.47 : ℝ) ≤ (4 / 9) * 0.47 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 3 * Real.sin (D3_phase 3))) =
+      D3_amp 3 * Real.sin (D3_phase 3) := by ring
+  rw [e]
+  have hnum : (-47 / 225 : ℝ) = (4 / 9) * (-0.47) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 3 * (-0.47) = -(D3_amp 3 * 0.47) := by ring
+  have e2 : (4 / 9 : ℝ) * (-0.47) = -((4 / 9) * 0.47) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Fourth-term imaginary-part lower `≥ -2/5`
+    (interval: `amp ≤ 2/5`, `sin ≤ 1`; even `k = 4`, so `Im = -(amp·sin)`). -/
+theorem D3_term4_im_lo :
+    (-2 / 5 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 4).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_five_upper
+  have hs := D3_sin_theta_five_mem
+  have hs_nn : (0 : ℝ) ≤ Real.sin (D3_phase 4) := by linarith [hs.1]
+  have hpow4 : ((-1 : ℝ) ^ (4 : ℕ)) = 1 := by norm_num
+  rw [hpow4, one_mul]
+  have h : D3_amp 4 * Real.sin (D3_phase 4) ≤ (2 / 5) * 1 :=
+    mul_le_mul ha hs.2 hs_nn (by norm_num)
+  have hnum : (-2 / 5 : ℝ) = -((2 / 5) * 1) := by norm_num
+  rw [hnum]
+  linarith [h]
+
+/-- (C-Im) Fifth-term imaginary-part lower `≥ 3/500`
+    (interval: `amp ≥ 3/10`, `sin ≥ 0.02`; odd `k = 5`, so `Im = amp·sin`). -/
+theorem D3_term5_im_lo :
+    (3 / 500 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 5).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_six_lower
+  have hann : (0 : ℝ) ≤ D3_amp 5 := D3_amp_nonneg 5
+  have hs := D3_sin_theta_six_mem
+  have hpow5 : ((-1 : ℝ) ^ (5 : ℕ)) = -1 := by norm_num
+  rw [hpow5]
+  have h : (3 / 10) * (0.02 : ℝ) ≤ D3_amp 5 * Real.sin (D3_phase 5) :=
+    mul_le_mul ha_lo hs.1 (by norm_num) hann
+  have e : (-1 : ℝ) * (-(D3_amp 5 * Real.sin (D3_phase 5))) =
+      D3_amp 5 * Real.sin (D3_phase 5) := by ring
+  rw [e]
+  have hnum : (3 / 500 : ℝ) = (3 / 10) * 0.02 := by norm_num
+  rw [hnum]
+  exact h
+
+/-- (C-Im) Sixth-term imaginary-part lower `≥ 11/50`
+    (interval: `amp ≥ 1/4`, `sin ≤ -0.88`; even `k = 6`, so `Im = -(amp·sin)`). -/
+theorem D3_term6_im_lo :
+    (11 / 50 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 6).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_seven_lower
+  have hann : (0 : ℝ) ≤ D3_amp 6 := D3_amp_nonneg 6
+  have hs := D3_sin_theta_seven_mem
+  have hpow6 : ((-1 : ℝ) ^ (6 : ℕ)) = 1 := by norm_num
+  rw [hpow6, one_mul]
+  have h1 : D3_amp 6 * Real.sin (D3_phase 6) ≤ D3_amp 6 * (-0.88) :=
+    mul_le_mul_of_nonneg_left hs.2 hann
+  have h2 : (1 / 4 : ℝ) * (0.88 : ℝ) ≤ D3_amp 6 * 0.88 :=
+    mul_le_mul_of_nonneg_right ha_lo (by norm_num)
+  have hnum : (11 / 50 : ℝ) = -((1 / 4) * (-0.88)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 6 * (-0.88) = -(D3_amp 6 * 0.88) := by ring
+  have e2 : (1 / 4 : ℝ) * (-0.88) = -((1 / 4) * 0.88) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Seventh-term imaginary-part lower `≥ -71/300`
+    (interval: `amp ≤ 1/3`, `sin ≥ -0.71`; odd `k = 7`, so `Im = amp·sin`). -/
+theorem D3_term7_im_lo :
+    (-71 / 300 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 7).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_eight_upper
+  have hann : (0 : ℝ) ≤ D3_amp 7 := D3_amp_nonneg 7
+  have hs := D3_sin_theta_eight_mem
+  have hpow7 : ((-1 : ℝ) ^ (7 : ℕ)) = -1 := by norm_num
+  rw [hpow7]
+  have h1 : D3_amp 7 * (-0.71) ≤ D3_amp 7 * Real.sin (D3_phase 7) :=
+    mul_le_mul_of_nonneg_left hs.1 hann
+  have h2 : D3_amp 7 * (0.71 : ℝ) ≤ (1 / 3) * 0.71 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 7 * Real.sin (D3_phase 7))) =
+      D3_amp 7 * Real.sin (D3_phase 7) := by ring
+  rw [e]
+  have hnum : (-71 / 300 : ℝ) = (1 / 3) * (-0.71) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 7 * (-0.71) = -(D3_amp 7 * 0.71) := by ring
+  have e2 : (1 / 3 : ℝ) * (-0.71) = -((1 / 3) * 0.71) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Eighth-term imaginary-part lower `≥ -13/100`
+    (interval: `amp ≤ 1/3`, `sin ≤ 0.39`; even `k = 8`, so `Im = -(amp·sin)`). -/
+theorem D3_term8_im_lo :
+    (-13 / 100 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 8).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_nine_upper
+  have hs := D3_sin_theta_nine_mem
+  have hs_nn : (0 : ℝ) ≤ Real.sin (D3_phase 8) := by linarith [hs.1]
+  have hpow8 : ((-1 : ℝ) ^ (8 : ℕ)) = 1 := by norm_num
+  rw [hpow8, one_mul]
+  have h : D3_amp 8 * Real.sin (D3_phase 8) ≤ (1 / 3) * 0.39 :=
+    mul_le_mul ha hs.2 hs_nn (by norm_num)
+  have hnum : (-13 / 100 : ℝ) = -((1 / 3) * 0.39) := by norm_num
+  rw [hnum]
+  linarith [h]
+
+/-- (C-Im) Ninth-term imaginary-part lower `≥ 87/500`
+    (interval: `amp ≥ 1/5`, `sin ≥ 0.87`; odd `k = 9`, so `Im = amp·sin`). -/
+theorem D3_term9_im_lo :
+    (87 / 500 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 9).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_ten_lower
+  have hann : (0 : ℝ) ≤ D3_amp 9 := D3_amp_nonneg 9
+  have hs := D3_sin_theta_ten_mem
+  have hpow9 : ((-1 : ℝ) ^ (9 : ℕ)) = -1 := by norm_num
+  rw [hpow9]
+  have h : (1 / 5) * (0.87 : ℝ) ≤ D3_amp 9 * Real.sin (D3_phase 9) :=
+    mul_le_mul ha_lo hs.1 (by norm_num) hann
+  have e : (-1 : ℝ) * (-(D3_amp 9 * Real.sin (D3_phase 9))) =
+      D3_amp 9 * Real.sin (D3_phase 9) := by ring
+  rw [e]
+  have hnum : (87 / 500 : ℝ) = (1 / 5) * 0.87 := by norm_num
+  rw [hnum]
+  exact h
+
+/-- (C-Im) Tenth-term imaginary-part lower `≥ -1/4`
+    (interval: `amp ≤ 1/4`, `sin ≤ 1`; even `k = 10`, so `Im = -(amp·sin)`). -/
+theorem D3_term10_im_lo :
+    (-1 / 4 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 10).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_eleven_upper
+  have hs := D3_sin_theta_eleven_mem
+  have hs_nn : (0 : ℝ) ≤ Real.sin (D3_phase 10) := by linarith [hs.1]
+  have hpow10 : ((-1 : ℝ) ^ (10 : ℕ)) = 1 := by norm_num
+  rw [hpow10, one_mul]
+  have h : D3_amp 10 * Real.sin (D3_phase 10) ≤ (1 / 4) * 1 :=
+    mul_le_mul ha hs.2 hs_nn (by norm_num)
+  have hnum : (-1 / 4 : ℝ) = -((1 / 4) * 1) := by norm_num
+  rw [hnum]
+  linarith [h]
+
+/-- (C-Im) Eleventh-term imaginary-part lower `≥ 23/600`
+    (interval: `amp ≥ 1/6`, `sin ≥ 0.23`; odd `k = 11`, so `Im = amp·sin`). -/
+theorem D3_term11_im_lo :
+    (23 / 600 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 11).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_twelve_lower
+  have hann : (0 : ℝ) ≤ D3_amp 11 := D3_amp_nonneg 11
+  have hs := D3_sin_theta_twelve_mem
+  have hpow11 : ((-1 : ℝ) ^ (11 : ℕ)) = -1 := by norm_num
+  rw [hpow11]
+  have h : (1 / 6) * (0.23 : ℝ) ≤ D3_amp 11 * Real.sin (D3_phase 11) :=
+    mul_le_mul ha_lo hs.1 (by norm_num) hann
+  have e : (-1 : ℝ) * (-(D3_amp 11 * Real.sin (D3_phase 11))) =
+      D3_amp 11 * Real.sin (D3_phase 11) := by ring
+  rw [e]
+  have hnum : (23 / 600 : ℝ) = (1 / 6) * 0.23 := by norm_num
+  rw [hnum]
+  exact h
+
+/-- (C-Im) Twelfth-term imaginary-part lower `≥ 37/600`
+    (interval: `amp ≥ 1/6`, `sin ≤ -0.37`; even `k = 12`, so `Im = -(amp·sin)`). -/
+theorem D3_term12_im_lo :
+    (37 / 600 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 12).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_thirteen_lower
+  have hann : (0 : ℝ) ≤ D3_amp 12 := D3_amp_nonneg 12
+  have hs := D3_sin_theta_thirteen_mem
+  have hpow12 : ((-1 : ℝ) ^ (12 : ℕ)) = 1 := by norm_num
+  rw [hpow12, one_mul]
+  have h1 : D3_amp 12 * Real.sin (D3_phase 12) ≤ D3_amp 12 * (-0.37) :=
+    mul_le_mul_of_nonneg_left hs.2 hann
+  have h2 : (1 / 6 : ℝ) * (0.37 : ℝ) ≤ D3_amp 12 * 0.37 :=
+    mul_le_mul_of_nonneg_right ha_lo (by norm_num)
+  have hnum : (37 / 600 : ℝ) = -((1 / 6) * (-0.37)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 12 * (-0.37) = -(D3_amp 12 * 0.37) := by ring
+  have e2 : (1 / 6 : ℝ) * (-0.37) = -((1 / 6) * 0.37) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Thirteenth-term imaginary-part lower `≥ -1/4`
+    (interval: `amp ≤ 1/4`, `sin ≥ -1`; odd `k = 13`, so `Im = amp·sin`). -/
+theorem D3_term13_im_lo :
+    (-1 / 4 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 13).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_fourteen_upper
+  have hann : (0 : ℝ) ≤ D3_amp 13 := D3_amp_nonneg 13
+  have hs := D3_sin_theta_fourteen_mem
+  have hpow13 : ((-1 : ℝ) ^ (13 : ℕ)) = -1 := by norm_num
+  rw [hpow13]
+  have h1 : D3_amp 13 * (-1) ≤ D3_amp 13 * Real.sin (D3_phase 13) :=
+    mul_le_mul_of_nonneg_left hs.1 hann
+  have h2 : D3_amp 13 * (1 : ℝ) ≤ (1 / 4) * 1 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 13 * Real.sin (D3_phase 13))) =
+      D3_amp 13 * Real.sin (D3_phase 13) := by ring
+  rw [e]
+  have hnum : (-1 / 4 : ℝ) = (1 / 4) * (-1) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 13 * (-1) = -(D3_amp 13 * 1) := by ring
+  have e2 : (1 / 4 : ℝ) * (-1) = -((1 / 4) * 1) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Fourteenth-term imaginary-part lower `≥ 4/35`
+    (interval: `amp ≥ 1/7`, `sin ≤ -0.80`; even `k = 14`, so `Im = -(amp·sin)`). -/
+theorem D3_term14_im_lo :
+    (4 / 35 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 14).im := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_fifteen_lower
+  have hann : (0 : ℝ) ≤ D3_amp 14 := D3_amp_nonneg 14
+  have hs := D3_sin_theta_fifteen_mem
+  have hpow14 : ((-1 : ℝ) ^ (14 : ℕ)) = 1 := by norm_num
+  rw [hpow14, one_mul]
+  have h1 : D3_amp 14 * Real.sin (D3_phase 14) ≤ D3_amp 14 * (-0.80) :=
+    mul_le_mul_of_nonneg_left hs.2 hann
+  have h2 : (1 / 7 : ℝ) * (0.80 : ℝ) ≤ D3_amp 14 * 0.80 :=
+    mul_le_mul_of_nonneg_right ha_lo (by norm_num)
+  have hnum : (4 / 35 : ℝ) = -((1 / 7) * (-0.80)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 14 * (-0.80) = -(D3_amp 14 * 0.80) := by ring
+  have e2 : (1 / 7 : ℝ) * (-0.80) = -((1 / 7) * 0.80) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) Fifteenth-term imaginary-part lower `≥ -47/250`
+    (interval: `amp ≤ 1/5`, `sin ≥ -0.94`; odd `k = 15`, so `Im = amp·sin`). -/
+theorem D3_term15_im_lo :
+    (-47 / 250 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+  rw [D3_eta_im]
+  have ha := D3_amp_sixteen_upper
+  have hann : (0 : ℝ) ≤ D3_amp 15 := D3_amp_nonneg 15
+  have hs := D3_sin_theta_sixteen_mem
+  have hpow14 : ((-1 : ℝ) ^ (14 : ℕ)) = 1 := by norm_num
+  have hpow15 : ((-1 : ℝ) ^ (15 : ℕ)) = -1 := by
+    have e1514 : (15 : ℕ) = 14 + 1 := rfl
+    rw [e1514, pow_add, hpow14, pow_one, one_mul]
+  rw [hpow15]
+  have h1 : D3_amp 15 * (-0.94) ≤ D3_amp 15 * Real.sin (D3_phase 15) :=
+    mul_le_mul_of_nonneg_left hs.1 hann
+  have h2 : D3_amp 15 * (0.94 : ℝ) ≤ (1 / 5) * 0.94 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 15 * Real.sin (D3_phase 15))) =
+      D3_amp 15 * Real.sin (D3_phase 15) := by ring
+  rw [e]
+  have hnum : (-47 / 250 : ℝ) = (1 / 5) * (-0.94) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 15 * (-0.94) = -(D3_amp 15 * 0.94) := by ring
+  have e2 : (1 / 5 : ℝ) * (-0.94) = -((1 / 5) * 0.94) := by ring
+  linarith [h1, h2, e1, e2]
+
+/-- (C-Im) `Im S_16 ≥ -17921/15750` via the interval framework. -/
+theorem D3_S16_im_lower :
+    (-17921 / 15750 : ℝ) ≤
+      (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_lo
+  have h2 := D3_term2_im_lo
+  have h3 := D3_term3_im_lo
+  have h4 := D3_term4_im_lo
+  have h5 := D3_term5_im_lo
+  have h6 := D3_term6_im_lo
+  have h7 := D3_term7_im_lo
+  have h8 := D3_term8_im_lo
+  have h9 := D3_term9_im_lo
+  have h10 := D3_term10_im_lo
+  have h11 := D3_term11_im_lo
+  have h12 := D3_term12_im_lo
+  have h13 := D3_term13_im_lo
+  have h14 := D3_term14_im_lo
+  have h15 := D3_term15_im_lo
+  linarith
+
+/-- (F2-Im) Explicit per-term Im lowers for `S_16` (sums to `-17921/15750`). -/
+def D3_S16_im_lo : ℕ → ℝ := fun k =>
+  if k = 0 then 0 else if k = 1 then -4 / 25 else if k = 2 then 1 / 14
+    else if k = 3 then -47 / 225 else if k = 4 then -2 / 5
+      else if k = 5 then 3 / 500 else if k = 6 then 11 / 50
+        else if k = 7 then -71 / 300 else if k = 8 then -13 / 100
+          else if k = 9 then 87 / 500 else if k = 10 then -1 / 4
+            else if k = 11 then 23 / 600 else if k = 12 then 37 / 600
+              else if k = 13 then -1 / 4 else if k = 14 then 4 / 35 else -47 / 250
+
+/-- (F2-Im) The `S_16` Im-lo-sum is `-17921/15750`. -/
+theorem D3_S16_im_lo_sum :
+    ∑ k ∈ Finset.range 16, D3_S16_im_lo k = (-17921 / 15750 : ℝ) := by
+  have v0 : D3_S16_im_lo 0 = (0 : ℝ) := by simp [D3_S16_im_lo]
+  have v1 : D3_S16_im_lo 1 = (-4 / 25 : ℝ) := by simp [D3_S16_im_lo]
+  have v2 : D3_S16_im_lo 2 = (1 / 14 : ℝ) := by simp [D3_S16_im_lo]
+  have v3 : D3_S16_im_lo 3 = (-47 / 225 : ℝ) := by simp [D3_S16_im_lo]
+  have v4 : D3_S16_im_lo 4 = (-2 / 5 : ℝ) := by simp [D3_S16_im_lo]
+  have v5 : D3_S16_im_lo 5 = (3 / 500 : ℝ) := by simp [D3_S16_im_lo]
+  have v6 : D3_S16_im_lo 6 = (11 / 50 : ℝ) := by simp [D3_S16_im_lo]
+  have v7 : D3_S16_im_lo 7 = (-71 / 300 : ℝ) := by simp [D3_S16_im_lo]
+  have v8 : D3_S16_im_lo 8 = (-13 / 100 : ℝ) := by simp [D3_S16_im_lo]
+  have v9 : D3_S16_im_lo 9 = (87 / 500 : ℝ) := by simp [D3_S16_im_lo]
+  have v10 : D3_S16_im_lo 10 = (-1 / 4 : ℝ) := by simp [D3_S16_im_lo]
+  have v11 : D3_S16_im_lo 11 = (23 / 600 : ℝ) := by simp [D3_S16_im_lo]
+  have v12 : D3_S16_im_lo 12 = (37 / 600 : ℝ) := by simp [D3_S16_im_lo]
+  have v13 : D3_S16_im_lo 13 = (-1 / 4 : ℝ) := by simp [D3_S16_im_lo]
+  have v14 : D3_S16_im_lo 14 = (4 / 35 : ℝ) := by simp [D3_S16_im_lo]
+  have v15 : D3_S16_im_lo 15 = (-47 / 250 : ℝ) := by simp [D3_S16_im_lo]
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ,
+    Finset.sum_range_zero, zero_add,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15]
+  norm_num
+
+/-- (F2-Im) The `S_16` Im-lo-values bound the term imaginary parts below. -/
+theorem D3_S16_im_lo_valid (k : ℕ) (hk : k < 16) :
+    D3_S16_im_lo k ≤ (etaDirichletTerm (1 - zetaCellS0) k).im := by
+  have v0 : D3_S16_im_lo 0 = (0 : ℝ) := by simp [D3_S16_im_lo]
+  have v1 : D3_S16_im_lo 1 = (-4 / 25 : ℝ) := by simp [D3_S16_im_lo]
+  have v2 : D3_S16_im_lo 2 = (1 / 14 : ℝ) := by simp [D3_S16_im_lo]
+  have v3 : D3_S16_im_lo 3 = (-47 / 225 : ℝ) := by simp [D3_S16_im_lo]
+  have v4 : D3_S16_im_lo 4 = (-2 / 5 : ℝ) := by simp [D3_S16_im_lo]
+  have v5 : D3_S16_im_lo 5 = (3 / 500 : ℝ) := by simp [D3_S16_im_lo]
+  have v6 : D3_S16_im_lo 6 = (11 / 50 : ℝ) := by simp [D3_S16_im_lo]
+  have v7 : D3_S16_im_lo 7 = (-71 / 300 : ℝ) := by simp [D3_S16_im_lo]
+  have v8 : D3_S16_im_lo 8 = (-13 / 100 : ℝ) := by simp [D3_S16_im_lo]
+  have v9 : D3_S16_im_lo 9 = (87 / 500 : ℝ) := by simp [D3_S16_im_lo]
+  have v10 : D3_S16_im_lo 10 = (-1 / 4 : ℝ) := by simp [D3_S16_im_lo]
+  have v11 : D3_S16_im_lo 11 = (23 / 600 : ℝ) := by simp [D3_S16_im_lo]
+  have v12 : D3_S16_im_lo 12 = (37 / 600 : ℝ) := by simp [D3_S16_im_lo]
+  have v13 : D3_S16_im_lo 13 = (-1 / 4 : ℝ) := by simp [D3_S16_im_lo]
+  have v14 : D3_S16_im_lo 14 = (4 / 35 : ℝ) := by simp [D3_S16_im_lo]
+  have v15 : D3_S16_im_lo 15 = (-47 / 250 : ℝ) := by simp [D3_S16_im_lo]
+  interval_cases k
+  · rw [v0, D3_term0_im]
+  · rw [v1]
+    exact D3_term1_im_lo
+  · rw [v2]
+    exact D3_term2_im_lo
+  · rw [v3]
+    exact D3_term3_im_lo
+  · rw [v4]
+    exact D3_term4_im_lo
+  · rw [v5]
+    exact D3_term5_im_lo
+  · rw [v6]
+    exact D3_term6_im_lo
+  · rw [v7]
+    exact D3_term7_im_lo
+  · rw [v8]
+    exact D3_term8_im_lo
+  · rw [v9]
+    exact D3_term9_im_lo
+  · rw [v10]
+    exact D3_term10_im_lo
+  · rw [v11]
+    exact D3_term11_im_lo
+  · rw [v12]
+    exact D3_term12_im_lo
+  · rw [v13]
+    exact D3_term13_im_lo
+  · rw [v14]
+    exact D3_term14_im_lo
+  · rw [v15]
+    exact D3_term15_im_lo
+
+/-- (F2-Im) `S_16` norm lower `≥ -17921/15750` through `D3_block_norm_ge_sum_lo_im`
+    (trivially-true: the bound is negative; mirrors `D3_S16_norm_ge`). -/
+theorem D3_S16_im_norm_ge :
+    (-17921 / 15750 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  have h := D3_block_norm_ge_sum_lo_im 16 D3_S16_im_lo D3_S16_im_lo_valid
+  rw [D3_S16_im_lo_sum] at h
+  exact h
+
+/-- (P-Im) Honest weakness: the assembled Im lower is negative, so no positive
+    `|Im S_16|` (hence no positive `‖S_16‖`) lower follows from it. -/
+theorem D3_S16_im_lower_neg : (-17921 / 15750 : ℝ) < 0 := by norm_num
+
+#print axioms D3_sum_im_eq
+#print axioms D3_block_norm_ge_sum_lo_im
+#print axioms D3_term0_im
+#print axioms D3_term1_im_lo
+#print axioms D3_term2_im_lo
+#print axioms D3_term3_im_lo
+#print axioms D3_term4_im_lo
+#print axioms D3_term5_im_lo
+#print axioms D3_term6_im_lo
+#print axioms D3_term7_im_lo
+#print axioms D3_term8_im_lo
+#print axioms D3_term9_im_lo
+#print axioms D3_term10_im_lo
+#print axioms D3_term11_im_lo
+#print axioms D3_term12_im_lo
+#print axioms D3_term13_im_lo
+#print axioms D3_term14_im_lo
+#print axioms D3_term15_im_lo
+#print axioms D3_S16_im_lower
+#print axioms D3_S16_im_lo_sum
+#print axioms D3_S16_im_lo_valid
+#print axioms D3_S16_im_norm_ge
+#print axioms D3_S16_im_lower_neg
+
+
