@@ -9034,3 +9034,207 @@ stays open. No `hTail`-uniform/HALF-sup composition is claimed here.
 Neg edge recomputed vs 36: `26.8 ≤ 36` green (`< 36` by `neg_edge_201_lt_36`).
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+# CP tail (door-3 P1/hTail track, uniform tail-sup bridge): sharp 2.01 Gaussian composition
+
+Ownership: Agent CP tail append (append-only after the CM verdict block; nothing above
+touched; no new imports).
+
+GOAL (brief §18b.10 door-3 P1/hTail track, minimum viable = ONE proved bridge + residual):
+`CM_Sinh201Recomp` closed the neg edge numeral POINTWISE (`G_neg_201_le`:
+`‖G z‖ ≤ 0.971·B(|Im z|)` at `Re z = -1`, edge `≤ 26.8 < 36`) but `B(a)` GROWS in `a`,
+so the edge value is the majorant's minimum, not a tail sup. The uniform bound needs
+the tail-sup assembly: Gaussian domination + windowed caps. This block banks the sharp
+upgrade: the SAME 2.01 `F`-envelope with the TRUE Gaussian damping factor
+`exp((1-(τ+6.75)²)/100)` kept explicit (CF pattern), plus the `hTail`/P1 conditionals
+that fire once the sharp sup premise closes.
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `G_sharp_201_le` — sharp 2.01 composition, both signs:
+  `‖G z‖ ≤ exp((1-(z.im+6.75)²)/100)·B(|z.im|)` on `Re = -1`, `8.75 < |Im|`,
+  where `B(a) = √(4+a²)·(1.65·((1.2903/18)·√(a³)))`.
+  Reuses `CM_Sinh201Recomp.F_Stirling_201_le` + `CF_SharpDamp.damp_norm_eq_neg1`
+  (exact damping norm), same `calc` skeleton as `CF_SharpDamp.G_le_sharp`.
+* `G_sharp_201_pos_le` — positive-`τ` form with `(|a|+6.75)²`
+  (`|z.im| = z.im` rewrite).
+* `G_sharp_201_neg_le` — negative-`τ` companion numeral with `(|a|-6.75)²`
+  (`|z.im| = -z.im`, `(z.im+6.75)² = (|z.im|-6.75)²` by `ring`).
+  This is the missing negative-`τ` companion FOR THE 2.01 CHAIN
+  (BZ's `middle_gauss_neg_le`/`outer_gauss_neg_le` cover BN/BX envelopes only).
+* `hTail_of_sharp201_sup` — EXPLICIT conditional: two sharp-sup premises
+  (`∀ a ≥ 8.75`, pos/neg sharp envelopes `≤ 36`) ⇒ BH2 `hTail`
+  (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`). Premises are explicit Prop hypotheses.
+* `P1_R02_of_sharp201_sup` — EXPLICIT conditional: same two premises ⇒ P1
+  (`‖ζ‖ ≤ 10` on the R02 rect) via `BZTailEnvelope.P1_R02_of_hTail`.
+
+Grep record (verified by `rg -n` before writing):
+* `BZTailEnvelope.GammaR_tail_lower` — this file `:5448` (tail Gamma-lower, NOT reused:
+  it bounds `Gammaℝ` from BELOW for the xi-transfer route; the 2.01 chain needs the
+  Gamma UPPER, already inside `F_Stirling_201_le`).
+* `BZTailEnvelope.F_middle_tail_exp32` — this file `:5557` (existential `C,K` tail
+  `F`-envelope via xi-transfer; NOT reused: this block uses the EXPLICIT 2.01
+  `F`-envelope `F_Stirling_201_le` instead).
+* `BZTailEnvelope.middle_gauss_neg_le` (`:5698`) / `outer_gauss_neg_le` (`:5730`) —
+  negative-`τ` numerals for BN/BX envelopes; CITED as pattern, not reused
+  (different envelope).
+* `BZTailEnvelope.G_tail_bdd` (`:5774`) / `hBdd_unconditional` (`:5941`) — tail-`T`/`hBdd`
+  already closed; CITED (P1 consumer needs only `hTail` now).
+* `BZTailEnvelope.P1_R02_of_hTail` (`:5948`) — REUSED as the P1 consumer.
+* `BV2OuterTail.outer_gauss_le` (`:5178`) / `BXMiddleTail.middle_gauss_le` (`:5317`) —
+  positive-`τ` Gaussian numerals; CITED as pattern (shift `(u+6.75)²` vs `(u-6.75)²`).
+* `CM_Sinh201Recomp.joint_Stirling_201_le` (`:8770`) — REUSED indirectly via
+  `F_Stirling_201_le` (joint `1.2903 = 2.53·0.51` inside the chain).
+* `CM_Sinh201Recomp.zeta_Stirling_201_le` (`:8839`) — REUSED indirectly via
+  `F_Stirling_201_le` (reflected `1.65` cap inside the chain).
+* `CM_Sinh201Recomp.F_Stirling_201_le` (`:8893`) — REUSED directly.
+* `CM_Sinh201Recomp.G_neg_201_le` (`:8942`) / `G_pos_201_le` (`:8908`) —
+  constant-damping pointwise forms; SUPERSEDED in sharp form here (same `B`, true damping).
+* `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`) — REUSED directly (exact damping norm).
+* `CF_SharpDamp.G_le_sharp` (`:6604`) — mirrored proof skeleton.
+* `DerivCauchyBridge.R02_zeta_upper_obligation` — downstream of P1, stays open (see verdict).
+-/
+
+namespace CP_Sharp201
+
+/-- Sharp 2.01 composition, both signs: `‖G z‖ ≤ exp((1-(τ+6.75)²)/100)·B(|τ|)`
+on `Re = -1`, `8.75 < |Im|`. Mirrors `CF_SharpDamp.G_le_sharp` with the 2.01 `F`. -/
+theorem G_sharp_201_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have hF := CM_Sinh201Recomp.F_Stirling_201_le hz htail
+  have hdamp := CF_SharpDamp.damp_norm_eq_neg1 hz
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + |z.im| ^ 2)
+      * (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+    have hS : (0 : ℝ) ≤ Real.sqrt (|z.im| ^ 3) := Real.sqrt_nonneg _
+    have h1 : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (|z.im| ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    have h2 : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+      linarith [h1]
+    exact mul_nonneg (Real.sqrt_nonneg _) h2
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      Real.exp ((1 - (z.im + 6.75) ^ 2) / 100)
+      ≤ (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) *
+        Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_pos _).le
+    _ = Real.exp ((1 - (z.im + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Positive-`τ` sharp form with `(|a|+6.75)²`. -/
+theorem G_sharp_201_pos_le {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      Real.exp ((1 - (|z.im| + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; exact hpos
+  have h := G_sharp_201_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| + 6.75) ^ 2 := by rw [habs]
+  rw [hsq] at h
+  exact h
+
+/-- Negative-`τ` companion numeral for the 2.01 chain with `(|a|-6.75)²`. -/
+theorem G_sharp_201_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      Real.exp ((1 - (|z.im| - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + |z.im| ^ 2) *
+          (1.65 * ((1.2903 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; linarith
+  have h := G_sharp_201_le hz htail
+  have hsq : (z.im + 6.75) ^ 2 = (|z.im| - 6.75) ^ 2 := by rw [habs]; ring
+  rw [hsq] at h
+  exact h
+
+/-- EXPLICIT conditional: sharp-sup premises ⇒ BH2 `hTail` (`‖G‖ ≤ 36`). -/
+theorem hTail_of_sharp201_sup
+    (hSupPos : ∀ a : ℝ, 8.75 ≤ a →
+      Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36)
+    (hSupNeg : ∀ a : ℝ, 8.75 ≤ a →
+      Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36) :
+    ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 := by
+  intro z hz htail
+  have hzre : z.re = -1 := by simpa using hz
+  rcases le_total 0 z.im with hnn | hneg
+  · have habs : |z.im| = z.im := abs_of_nonneg hnn
+    have hpos : 8.75 < z.im := by rw [← habs]; exact htail
+    have h := G_sharp_201_pos_le hzre hpos
+    exact le_trans h (hSupPos _ (le_of_lt htail))
+  · have habs : |z.im| = -z.im := abs_of_nonpos hneg
+    have hlt : z.im < -8.75 := by
+      have h1 : 8.75 < -z.im := by rw [← habs]; exact htail
+      linarith
+    have h := G_sharp_201_neg_le hzre hlt
+    exact le_trans h (hSupNeg _ (le_of_lt htail))
+
+/-- EXPLICIT conditional: sharp-sup premises ⇒ P1 (`‖ζ‖ ≤ 10` on the R02 rect). -/
+theorem P1_R02_of_sharp201_sup
+    (hSupPos : ∀ a : ℝ, 8.75 ≤ a →
+      Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36)
+    (hSupNeg : ∀ a : ℝ, 8.75 ≤ a →
+      Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  BZTailEnvelope.P1_R02_of_hTail
+    (hTail_of_sharp201_sup hSupPos hSupNeg) hs_lo hs_hi him_lo him_hi
+
+#print axioms CP_Sharp201.G_sharp_201_le
+#print axioms CP_Sharp201.G_sharp_201_pos_le
+#print axioms CP_Sharp201.G_sharp_201_neg_le
+#print axioms CP_Sharp201.hTail_of_sharp201_sup
+#print axioms CP_Sharp201.P1_R02_of_sharp201_sup
+
+end CP_Sharp201
+
+/-!
+CP VERDICT + RESIDUAL (report-and-stop): sharp 2.01 Gaussian bridge GREEN, uniform sup OPEN.
+
+(1) BRIDGE CLOSED (`CP_Sharp201`, 5 theorems, full proofs, no `sorry`/`admit`/`axiom`):
+`G_sharp_201_le` (both-sign sharp composition `‖G‖ ≤ exp((1-(τ+6.75)²)/100)·B(|τ|)`
+with `B(a) = √(4+a²)·(1.65·((1.2903/18)·√(a³)))`, reusing `F_Stirling_201_le` +
+`damp_norm_eq_neg1`) + `G_sharp_201_pos_le`/`G_sharp_201_neg_le` (rewrites to
+`(|a|+6.75)²` / `(|a|-6.75)²`; the neg form is the 2.01-chain negative-`τ` companion
+numeral BZ's `middle_gauss_neg_le`/`outer_gauss_neg_le` do not cover) +
+`hTail_of_sharp201_sup` (explicit `hSupPos`/`hSupNeg` ⇒ BH2 `hTail`) +
+`P1_R02_of_sharp201_sup` (same premises ⇒ P1 `‖ζ‖ ≤ 10` on R02 via
+`BZTailEnvelope.P1_R02_of_hTail`). This upgrades CM's growing pointwise majorant
+`0.971·B(a)` to the DECAYING envelope the tail-sup assembly needs.
+
+(2) `hTail`/P1 VERDICTS: `hTail` (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`) does NOT
+follow yet: it needs the two sharp-sup premises `hSupPos`/`hSupNeg` (uniform `≤ 36`
+for the sharp envelopes), which are NOT proved here. Hence `P1_R02_of_sharp201_sup`
+stays CONDITIONAL on `hSupPos`/`hSupNeg`; `BZTailEnvelope.P1_R02_of_hTail` stays
+CONDITIONAL on `hTail`; `DerivCauchyBridge.R02_zeta_upper_obligation` stays open.
+
+(3) HONEST BLOCKER (external numeral computation, not a Lean claim): the pos sharp
+envelope is green at edge (`≈ 2.51 ≤ 36`) and decays (true values `2.33/1.80/0.93`
+at `a = 10/12/15`); the NEG sharp envelope meets 36 at edge (`≈ 26.67`, margin
+`≈ 9.33`) and at `a = 10` (`≈ 34.66`, margin `≈ 1.34`) but EXCEEDS 36 on the
+intermediate hump (`≈ 45.86/53.18/46.61/37.11` at `a = 12/15/18/20`, peak `≈ 53.2`
+at `a ≈ 15`, `~1.48×` over) before decaying (`≈ 13.40/2.65` at `a = 25/30`).
+So `hSupNeg` is FALSE as stated for the 2.01 `B` with variance-100 damping — no
+proof of it exists; the hump needs a Stirling-sharp tail joint bound (tighter `C`
+below `2.53`, sqrt-form `(z-1)`, or zeta tier below `1.65`), a narrower damping
+variance, or windowed caps on the compact hump `[11, 21]` plus Gaussian domination
+beyond (the `BZTailEnvelope` tail-sup shape: `G_tail_bdd` already gives tail-`T`,
+`hBdd` unconditional). Next residual: close the hump (compact `[8.75, 24]` sup +
+large-`a` domination) or tighten the 2.01 chain; then `hTail_of_sharp201_sup` and
+`P1_R02_of_sharp201_sup` fire immediately.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
