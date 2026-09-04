@@ -11620,3 +11620,47 @@ theorem MID_mid_block_upper :
 
 
 
+
+/-- (vdC-A) A-process shift identity, double-sum form (pure `Finset.sum_range` algebra).
+
+For `v : ℕ → ℂ`, the norm-sq of the sum equals the real part of the double sum.
+The `h`-th diagonal of that double sum is the differenced autocorrelation
+`vdC_autocorr v N h = ∑_{n<N-h} v (n+h) * star (v n)`,
+which is the shape a follower feeds into AK2's `KL_linear_firstDerivTest`
+(applied to the differenced phase) via AM's `T2_abel_eq` (`Finset.sum_range_by_parts`)
+and BS's `MID_mid_block_upper` Tier-3 slot. No exponentials, no phase, no curvature,
+no `∑'` tsum here -- `Finset.sum_range` algebra only. Grep record:
+`KL_linear_firstDerivTest` at 4953, `T2_abel_eq` at 5177, `MID_mid_block_upper` at 11567;
+no `vdC`/`autocorr`/`doubleSum` names exist (verified); `Complex.normSq_eq_norm_sq` at
+`Mathlib/Analysis/Complex/Norm.lean:147`, `Complex.mul_conj` at
+`Mathlib/Data/Complex/Basic.lean:585`, `star_sum` at
+`Mathlib/Algebra/Star/BigOperators.lean:27`, `Finset.sum_mul_sum` at
+`Mathlib/Algebra/BigOperators/Ring/Finset.lean:62`. -/
+def vdC_autocorr (v : ℕ → ℂ) (N h : ℕ) : ℂ :=
+  ∑ n ∈ Finset.range (N - h), v (n + h) * star (v n)
+
+/-- (vdC-A) Weyl-van der Corput A-process SHIFT IDENTITY (double-sum expansion):
+`‖∑_{n<N} v n‖²` as the real part of the double sum. The `h`-diagonal is
+`vdC_autocorr`. -/
+theorem vdC_A_shift_identity_doubleSum (v : ℕ → ℂ) (N : ℕ) :
+    ‖∑ n ∈ Finset.range N, v n‖ ^ 2
+      = (∑ n ∈ Finset.range N, ∑ m ∈ Finset.range N, v n * star (v m)).re := by
+  have hstar : star (∑ n ∈ Finset.range N, v n)
+      = ∑ m ∈ Finset.range N, star (v m) :=
+    star_sum _ _
+  have hmul : (∑ n ∈ Finset.range N, v n) * star (∑ n ∈ Finset.range N, v n)
+      = ∑ n ∈ Finset.range N, ∑ m ∈ Finset.range N, v n * star (v m) := by
+    rw [hstar]
+    exact Finset.sum_mul_sum _ _ _ _
+  have hnorm : (∑ n ∈ Finset.range N, v n) * star (∑ n ∈ Finset.range N, v n)
+      = ((‖∑ n ∈ Finset.range N, v n‖ ^ 2 : ℝ) : ℂ) := by
+    have h1 := Complex.mul_conj (∑ n ∈ Finset.range N, v n)
+    rw [Complex.normSq_eq_norm_sq, starRingEnd_apply] at h1
+    exact h1
+  have hre : ((∑ n ∈ Finset.range N, v n) * star (∑ n ∈ Finset.range N, v n)).re
+      = ‖∑ n ∈ Finset.range N, v n‖ ^ 2 := by
+    rw [hnorm, Complex.ofReal_re]
+  rw [← hre, hmul]
+
+#print axioms vdC_autocorr
+#print axioms vdC_A_shift_identity_doubleSum
