@@ -1431,7 +1431,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`D3_S16_norm_ge_sharp9413`):** k=9 monotonicity + k=4 septic + amp `5/8`-exponents ⇒
     **`‖S₁₆‖ ≥ 1159/14000 ≈ 0.0828`**. Leftover: sin k=12–16 coarse + amp k=12/14 (round 2 tasked).
     **Round 2 CLOSED (`D3_S16_norm_ge_CL3`):** term14 + k=13/15/12 sintics + amp 11.7%-margin ⇒
-    **`‖S₁₆‖ ≥ 41369/350000 ≈ 0.1182`** (1.43×). Biggest lever next: term6 trivial `sin≥-1` (tasked). **Stirling Gamma tail
+    **`‖S₁₆‖ ≥ 41369/350000 ≈ 0.1182`** (1.43×). Biggest lever next: term6 trivial `sin≥-1` (tasked). **Term6 lever
+    CLOSED (`D3_S16_norm_ge_CN`, `b41d1ec1`, green, axioms clean):** honest Taylor lower `sin θ₇ ≥ -0.972`
+    (CJ-1S monotonicity mirror: `y=θ₇−5π∈[1.276,1.327]`, quintic endpoint `Q(1.327)≈0.97183`; naive per-monomial
+    transfer overshoots `≈1.015>1`, documented in-block) ⇒ term6 Im `≤81/250=0.324` (was `1/3`) ⇒
+    **`‖S₁₆‖ ≥ 133907/1050000 ≈ 0.1275`** (1.079×, honest gain `0.00933`; true `Im S₁₆≈-0.51` remains ceiling).
+    Residual tier 2 (k=11 amp tightening + k=12/16 sin-uppers) needs fresh scoping, tasked. **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
@@ -1478,12 +1483,18 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   exponential, worst ~e^72; sharp truth `O(10)` needs all-`Im` joint cancel, absent) — right piece `B=36`
   met whole-line; growth-variant left cap green. **Next: windowed-strip three-lines** (R02 disc has
   `|Im|≤8.25 < 8.75` — AR's windowed `A=36` suffices a windowed assembly; no whole-line cap needed).
-  **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
-  `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
-  (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
-  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Neg tiers CLOSED (`CKT1/2/3`):**
-  edge `61.3 → 38.1` (1.61×; 1.058× over 36). Next squeeze tasked: `sinh ≥ exp/2.01` tail lemma
-  (~2×, dominates remainder) + recomposition. **Joint composition CLOSED
+   **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
+   `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
+   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
+   Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Neg tiers CLOSED (`CKT1/2/3`):**
+   edge `61.3 → 38.1` (1.61×; 1.058× over 36). Next squeeze tasked: `sinh ≥ exp/2.01` tail lemma
+   (~2×, dominates remainder) + recomposition. **Neg squeeze CLOSED (`CM_Sinh201` + `CM_Sinh201Recomp`,
+   `a4be1787`, green, axioms clean):** `sinh t ≥ exp(t)/2.01` for `t≥13.7` (via `exp 6 ≥ 2.7^6 = 387.42 ≥ 201`)
+   ⇒ `C=2.53` (`2.53²=6.4009`) ⇒ joint `1.2903=2.53·0.51` ⇒ **neg edge `≤26.8<36` CLOSED at the edge numeral**
+   (honest `38.1/26.8≈1.42×`; margin `≈9.3`; pos edge `≤2.76<36`). POINTWISE form only
+   (`G_neg_201_le`: `‖G z‖ ≤ 0.971·B(|Im z|)` at `Re z=−1`); `B(a)` GROWS in `a` so the edge value is the
+   majorant's minimum, not a tail sup (`B` crosses 36 at finite `a`) — uniform `hTail`/P1 still open on the
+   `BZTailEnvelope` tail-sup assembly (Gaussian domination + windowed caps, tasked). **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
