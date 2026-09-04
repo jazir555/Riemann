@@ -7132,3 +7132,442 @@ builds green — it is commit-worthy). Downstream hTail/P1 wiring (joint `Γ·co
 Gaussian analysis, top-edge 5.5x / negative-edge ~18x) is NOT claimed here.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+# CI joint Stirling tail (door-3 joint composition, append-only)
+
+Ownership: Agent CI tail append (append-only after CH2 verdict block; nothing above touched; no new imports).
+
+GOAL (door-3 joint composition, brief): compose cosine JOINTLY with CH2's Stirling tail
+(keep `Gamma * cos` together so `exp(-pi|y|/2)` decay meets `cosh` growth inside one estimate;
+do NOT use a separate `cosh` majorant). Prove `||Gamma * cos|| <= JOINT(|y|)` polynomial-class
+on the tail both signs with SHARPEST honest constants from `C = 4`, then honest edge numbers
+`||G||` per side (CH2-Gamma x joint-cos x sharp damping via sharp `cpow 1/36`), then `hTail`
+iff edge `<= 36` else exact gap. Minimum viable in order: (1) joint green; (2) edge honest;
+(3) hTail/P1 iff (2) closes. Report-and-stop.
+
+GREP-FIRST RECORD (verified by grep tool on this file before writing; nothing reimplemented):
+* `CH2GammaTail.Gamma_Re2_tail_upper` (`Gamma_Re2_tail_upper`, `||Gamma w|| <= 4*sqrt(|y|^3)*exp(-pi|y|/2)`,
+  `Re w = 2`, `8.75 <= |y|`) -- USED (feeds `joint_Stirling_le`).
+* `Door3JointGammaCos.cos_Re2_norm` (`||cos(pi*w/2)|| = cosh(pi*w.im/2)`, `Re w = 2`) -- USED
+  (exact cos norm; evenness `cosh_neg` bridges `w.im` to `|w.im|` in-file, no separate majorant).
+* `Door3JointGammaCos.Gamma_Re2_normSq` / `t_mul_coth_le` / `Gamma_one_add_im_normSq` -- CITED
+  (AR identities; CH2 already consumes `Gamma_Re2_normSq`; `t_mul_coth_le` NOT used here since
+  CH2's `sinh_ge_exp_div_four` supplies decay; CA2's `joint_poly_tail_numeric` (`46.15` at edge)
+  is SHARPER at edge than CH2-route (`~52.8`) and is cited as comparison, not reused).
+* `Door3SharpWindow.cpow_sharp_Re2` (`||(2*pi)^(-w)|| <= 1/36`, `Re w = 2`) -- USED
+  (sharp cpow; `RowFE_cpow_upper` (`<= 1`) honestly NOT used: `36x` too loose).
+* `CC_hTailGap.sub_le` (`||z-1|| <= 2+|y|`, `Re = -1`) -- USED.
+* `TailZetaUpper.zeta_rightEdge_B2` (`||zeta|| <= 2`, `Re >= 2`) -- USED (reflected zeta).
+* `CF_SharpDamp.damp_pos_le` + `exp_neg23925_le` (`||damp|| <= 0.1` pos) /
+  `damp_neg_le` + `exp_neg003_le` (`<= 0.971` neg) -- USED (sharp damping per side).
+* `BZTailEnvelope.GammaR_tail_lower` (tail Gamma-LOWER via reflection) -- CONSIDERED honestly NOT USED
+  (lower cannot supply UPPER joint bound; same verdict as CA2/CC).
+* `BZTailEnvelope.P1_R02_of_hTail` (P1 `||zeta|| <= 10` on R02 with `hTail` SOLE premise) -- CITED
+  but NOT FIRED (fires ONLY if `hTail` closes at `36`; neg side does not -- see verdict).
+* Absent hence CREATED here: `CIJointStirling`, `exp_cosh_joint_eq`, `exp_neg_pi_tail_le`,
+  `joint_Stirling_le`, `sqrt_edge_le`, `joint_edge_le`, `RowFE_Stirling_le`, `zeta_Stirling_le`,
+  `F_Stirling_le`, `damp_pos_01`, `damp_neg_0971`, `G_pos_le`, `G_neg_le`, edge numerals.
+
+WHAT IS PROVED (all full proofs, no `sorry`/`admit`/`axiom`):
+* `exp_cosh_joint_eq`: `exp(-pi|a|/2)*cosh(pi|a|/2) = (1+exp(-pi|a|))/2` (via `Real.cosh_eq`).
+* `exp_neg_pi_tail_le`: `exp(-pi|a|) <= 0.02` for `8.75 <= |a|` (via `pi > 3`, `pi|a| >= 26.25 >= 4`,
+  `(exp 1)^4 >= 2.7^4 >= 50`, `exp(pi|a|) >= 50`, `exp(-c)*exp(c) = 1`).
+* `joint_Stirling_le` (MAIN tier-1): on `Re w = 2`, `8.75 <= |y|`,
+  `||Gamma w * cos(pi*w/2)|| <= 2.04*sqrt(|y|^3)` (CH2 `4*S*E` times `cosh`, `E*C = (1+e)/2 <= 0.51`,
+  `4*0.51 = 2.04`; both signs via `|y|`; NO separate `cosh` majorant).
+* `sqrt_edge_le`: `sqrt(8.75^3) <= 25.9` (`669.921875 <= 670.81 = 25.9^2`).
+* `joint_edge_le`: `2.04*sqrt(8.75^3) <= 52.84` (joint constant at edge `92.30 -> 52.84`;
+  target `~30` is BELOW true `~32.4` hence honestly unreachable from `C = 4`; CA2 `46.15` stays
+  sharper at edge; CH2 wins asymptotically `a^{3/2}` vs `a^2`).
+* `RowFE_Stirling_le`: `||RowFEFactor w|| <= (2.04/18)*sqrt(|y|^3)` (`2*(1/36)*joint`).
+* `zeta_Stirling_le` / `F_Stirling_le`: FE `zeta_one_sub` + reflected `<= 2` + `(z-1)` triangle.
+* `damp_pos_01` / `damp_neg_0971`: `||damp|| <= 0.1` pos (`8.75 < y`), `<= 0.971` neg (`y < -8.75`).
+* `G_pos_le` / `G_neg_le` (MAIN tier-2 pointwise): `||G|| <= 0.1*(2+|y|)*(2*((2.04/18)*S))` pos,
+  `<= 0.971*(...)` neg.
+* Edge numerals (pure `norm_num`): pos `0.1*B(8.75) <= 6.32 < 36` (closes AT EDGE);
+  neg `36 < 0.971*B(8.75)`, `<= 61.3` (gap `~25.28`, `~1.70x` over).
+No `hTail`/`P1` claimed (neg edge `61.3 > 36`; even pos edge is minimum of growing majorant,
+full tail needs decaying Gaussian sup analysis absent repo-wide -- see verdict).
+-/
+
+namespace CIJointStirling
+
+/-- Joint exponential-cancellation identity: `exp(-c)*cosh(c) = (1+exp(-2c))/2`
+with `c = pi*|a|/2`, so `2c = pi*|a|`. Via `Real.cosh_eq`. -/
+theorem exp_cosh_joint_eq {a : ℝ} :
+    Real.exp (-(Real.pi * |a| / 2)) * Real.cosh (Real.pi * |a| / 2)
+      = (1 + Real.exp (-(Real.pi * |a|))) / 2 := by
+  have hcosh : Real.cosh (Real.pi * |a| / 2)
+      = (Real.exp (Real.pi * |a| / 2) + Real.exp (-(Real.pi * |a| / 2))) / 2 := by
+    rw [Real.cosh_eq]
+  rw [hcosh]
+  have h1 : Real.exp (-(Real.pi * |a| / 2))
+        * ((Real.exp (Real.pi * |a| / 2) + Real.exp (-(Real.pi * |a| / 2))) / 2)
+      = (Real.exp (-(Real.pi * |a| / 2)) * Real.exp (Real.pi * |a| / 2)
+        + Real.exp (-(Real.pi * |a| / 2)) * Real.exp (-(Real.pi * |a| / 2))) / 2 := by
+    ring
+  rw [h1]
+  have h2 : Real.exp (-(Real.pi * |a| / 2)) * Real.exp (Real.pi * |a| / 2) = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have h3 : Real.exp (-(Real.pi * |a| / 2)) * Real.exp (-(Real.pi * |a| / 2))
+      = Real.exp (-(Real.pi * |a|)) := by
+    have e : (-(Real.pi * |a| / 2)) + (-(Real.pi * |a| / 2)) = -(Real.pi * |a|) := by
+      ring
+    rw [← Real.exp_add, e]
+  rw [h2, h3]
+
+/-- Tail exponential is tiny: `exp(-pi|a|) <= 0.02` for `8.75 <= |a|`.
+Proof: `pi|a| >= 3*8.75 = 26.25 >= 4`; `(exp 1)^4 >= 2.7^4 >= 50` so `exp(pi|a|) >= 50`;
+then `exp(-c) = 1/exp(c) <= 1/50 = 0.02`. -/
+theorem exp_neg_pi_tail_le {a : ℝ} (ha : (8.75 : ℝ) ≤ |a|) :
+    Real.exp (-(Real.pi * |a|)) ≤ 0.02 := by
+  have hpi3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have ha_nn : (0 : ℝ) ≤ |a| := abs_nonneg _
+  have hpi_nn : (0 : ℝ) ≤ Real.pi := le_of_lt (lt_trans (by norm_num) hpi3)
+  have hpi_le : (3 : ℝ) ≤ Real.pi := le_of_lt hpi3
+  have hmul : (3 : ℝ) * 8.75 ≤ Real.pi * |a| :=
+    mul_le_mul hpi_le ha (by norm_num) hpi_nn
+  have h326 : (3 : ℝ) * 8.75 = 26.25 := by norm_num
+  have h26 : (26.25 : ℝ) ≤ Real.pi * |a| := by linarith
+  have h4 : (4 : ℝ) ≤ Real.pi * |a| := by linarith
+  have e1_lt : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h27_lt : (2.7 : ℝ) < Real.exp 1 := by
+    have h270 : (2.7 : ℝ) < 2.7182818283 := by norm_num
+    linarith
+  have h27pow : (2.7 : ℝ) ^ (4 : ℕ) ≤ (Real.exp 1) ^ (4 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) h27_lt.le 4
+  have hexp4_eq : Real.exp (4 : ℝ) = (Real.exp 1) ^ (4 : ℕ) := by
+    have h := Real.exp_nat_mul (1 : ℝ) (4 : ℕ)
+    have h41 : ((4 : ℕ) : ℝ) * 1 = 4 := by norm_num
+    rw [h41] at h
+    exact h
+  have hmono : Real.exp (4 : ℝ) ≤ Real.exp (Real.pi * |a|) :=
+    Real.exp_le_exp.mpr h4
+  have h50_le_27 : (50 : ℝ) ≤ (2.7 : ℝ) ^ (4 : ℕ) := by norm_num
+  have h50 : (50 : ℝ) ≤ Real.exp (Real.pi * |a|) := by
+    rw [hexp4_eq] at hmono
+    linarith [h50_le_27, h27pow, hmono]
+  have hEmpos : (0 : ℝ) < Real.exp (-(Real.pi * |a|)) := Real.exp_pos _
+  have hE1 : Real.exp (-(Real.pi * |a|)) * Real.exp (Real.pi * |a|) = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul_le : Real.exp (-(Real.pi * |a|)) * 50 ≤ 1 := by
+    calc Real.exp (-(Real.pi * |a|)) * 50
+        ≤ Real.exp (-(Real.pi * |a|)) * Real.exp (Real.pi * |a|) :=
+          mul_le_mul_of_nonneg_left h50 (le_of_lt hEmpos)
+      _ = 1 := hE1
+  have hle : Real.exp (-(Real.pi * |a|)) ≤ 1 / 50 := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 50)]
+    exact hmul_le
+  have heq : (1 : ℝ) / 50 = 0.02 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- MAIN tier-1 joint Stirling bound (both signs via `|y|`): on `Re w = 2`, `8.75 <= |y|`,
+`||Gamma w * cos(pi*w/2)|| <= 2.04*sqrt(|y|^3)`. Keeps `Gamma*cos` together:
+`4*S*E*C = 4*S*(E*C)`, `E*C = (1+e)/2 <= 0.51`, `4*0.51 = 2.04`. No separate `cosh` majorant. -/
+theorem joint_Stirling_le {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 2.04 * Real.sqrt (|w.im| ^ 3) := by
+  have hyne : w.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hG := CH2GammaTail.Gamma_Re2_tail_upper hw htail
+  have hCeq := Door3JointGammaCos.cos_Re2_norm hw
+  have heven : Real.cosh (Real.pi * w.im / 2)
+      = Real.cosh (Real.pi * |w.im| / 2) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg,
+        show Real.pi * -w.im / 2 = -(Real.pi * w.im / 2) by ring, Real.cosh_neg]
+    · rw [abs_of_nonneg hynonneg]
+  have hExpLe := exp_neg_pi_tail_le (a := w.im) htail
+  have hECle : Real.exp (-(Real.pi * |w.im| / 2)) * Real.cosh (Real.pi * |w.im| / 2)
+      ≤ 0.51 := by
+    rw [exp_cosh_joint_eq]
+    linarith [hExpLe]
+  have hSnn : (0 : ℝ) ≤ Real.sqrt (|w.im| ^ 3) := Real.sqrt_nonneg _
+  have hCnn : (0 : ℝ) ≤ Real.cosh (Real.pi * |w.im| / 2) :=
+    le_of_lt (Real.cosh_pos _)
+  have h4Snn : (0 : ℝ) ≤ 4 * Real.sqrt (|w.im| ^ 3) :=
+    mul_nonneg (by norm_num) hSnn
+  rw [norm_mul, hCeq, heven]
+  calc ‖Complex.Gamma w‖ * Real.cosh (Real.pi * |w.im| / 2)
+      ≤ (4 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2)))
+        * Real.cosh (Real.pi * |w.im| / 2) :=
+        mul_le_mul_of_nonneg_right hG hCnn
+    _ = 4 * Real.sqrt (|w.im| ^ 3)
+        * (Real.exp (-(Real.pi * |w.im| / 2)) * Real.cosh (Real.pi * |w.im| / 2)) := by
+        ring
+    _ ≤ 4 * Real.sqrt (|w.im| ^ 3) * 0.51 :=
+        mul_le_mul_of_nonneg_left hECle h4Snn
+    _ = 2.04 * Real.sqrt (|w.im| ^ 3) := by ring
+
+/-- Edge sqrt numeral: `sqrt(8.75^3) <= 25.9` (`8.75^3 = 669.921875 <= 670.81 = 25.9^2`). -/
+theorem sqrt_edge_le : Real.sqrt ((8.75 : ℝ) ^ 3) ≤ 25.9 := by
+  have h1 : (8.75 : ℝ) ^ 3 = 669.921875 := by norm_num
+  have h2 : (25.9 : ℝ) ^ 2 = 670.81 := by norm_num
+  have hle : (8.75 : ℝ) ^ 3 ≤ (25.9 : ℝ) ^ 2 := by
+    rw [h1, h2]
+    norm_num
+  have h := Real.sqrt_le_sqrt hle
+  rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 25.9)] at h
+
+/-- Joint constant at edge: `2.04*sqrt(8.75^3) <= 52.84` (`2.04*25.9 = 52.836`).
+CC `X = 92.307` (`(1+a^2)+(pi*a/2+1)`) `-> 52.84` here (`1.75x` gain from joint cancellation;
+target `~30` is BELOW true `~32.4` hence unreachable from `C = 4`; CA2 `46.15` stays sharper
+at edge, CH2 wins asymptotically `a^{3/2}` vs `a^2`). -/
+theorem joint_edge_le :
+    2.04 * Real.sqrt ((8.75 : ℝ) ^ 3) ≤ 52.84 := by
+  have h := sqrt_edge_le
+  have h1 : 2.04 * Real.sqrt ((8.75 : ℝ) ^ 3) ≤ 2.04 * 25.9 :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have h2 : (2.04 : ℝ) * 25.9 = 52.836 := by norm_num
+  linarith
+
+/-- FE-factor Stirling cap via sharp `cpow 1/36`: `||RowFEFactor w|| <= (2.04/18)*sqrt(|y|^3)`
+(`2*(1/36)*joint`). Mirrors `Door3JointGammaCos.factor_joint_le` norm equation. -/
+theorem RowFE_Stirling_le {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖RowFE.RowFEFactor w‖ ≤ (2.04 / 18) * Real.sqrt (|w.im| ^ 3) := by
+  have hcpow := Door3SharpWindow.cpow_sharp_Re2 hw
+  have hjoint := joint_Stirling_le hw htail
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  have hgc : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      = ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ :=
+    (norm_mul _ _).symm
+  rw [hnorm_eq, h2norm, hgc]
+  have h1 : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36) :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  calc (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ (2 * (1 / 36)) * (2.04 * Real.sqrt (|w.im| ^ 3)) :=
+        mul_le_mul h1 hjoint (norm_nonneg _) (by norm_num)
+    _ = (2.04 / 18) * Real.sqrt (|w.im| ^ 3) := by ring
+
+/-- Zeta cap on the hTail line via FE: `||zeta z|| <= 2*((2.04/18)*S(|y|))`.
+Mirrors `CC_hTailGap.zeta_le` with Stirling `RowFE` + reflected `<= 2`. -/
+theorem zeta_Stirling_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖riemannZeta z‖ ≤ 2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz] at hre
+    have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z =
+      RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have htail_le : (8.75 : ℝ) ≤ |((1 : ℂ) - z).im| := by
+    rw [hw_im, abs_neg]
+    exact le_of_lt htail
+  have hFactor := RowFE_Stirling_le hw_re htail_le
+  rw [hw_im, abs_neg] at hFactor
+  have hXnn : (0 : ℝ) ≤ (2.04 / 18) * Real.sqrt (|z.im| ^ 3) := by
+    exact mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)) * 2 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) hXnn
+    _ = 2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)) := by ring
+
+/-- Pole-removed cap: `||F z|| <= (2+|y|)*(2*((2.04/18)*S))`. Mirrors `CC_hTailGap.F_le`. -/
+theorem F_Stirling_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+      ≤ (2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hsub := CC_hTailGap.sub_le hz
+  have hZ := zeta_Stirling_le hz htail
+  have hb_nn : (0 : ℝ) ≤ 2 + |z.im| := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+  exact mul_le_mul hsub hZ (norm_nonneg _) hb_nn
+
+/-- Damping `<= 0.1` on the positive tail (`8.75 < y`, `Re = -1`). Via CF sharp pair. -/
+theorem damp_pos_01 {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.1 := by
+  exact le_trans (CF_SharpDamp.damp_pos_le hz hpos) CF_SharpDamp.exp_neg23925_le
+
+/-- Damping `<= 0.971` on the negative tail (`y < -8.75`, `Re = -1`). Via CF sharp pair. -/
+theorem damp_neg_0971 {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.971 := by
+  exact le_trans (CF_SharpDamp.damp_neg_le hz hneg) CF_SharpDamp.exp_neg003_le
+
+/-- MAIN positive-side pointwise Stirling composition:
+`||G z|| <= 0.1*(2+|y|)*(2*((2.04/18)*S))` for `8.75 < y`. -/
+theorem G_pos_le {z : ℂ} (hz : z.re = -1) (hpos : 8.75 < z.im) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ (0.1 : ℝ) * ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have htail : 8.75 < |z.im| := by
+    have habs : |z.im| = z.im := abs_of_nonneg (by linarith)
+    rw [habs]
+    exact hpos
+  have hF := F_Stirling_le hz htail
+  have hdamp := damp_pos_01 hz hpos
+  have hBnn : (0 : ℝ) ≤
+      (2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have hS : (0 : ℝ) ≤ Real.sqrt (|z.im| ^ 3) := Real.sqrt_nonneg _
+    have h1 : (0 : ℝ) ≤ (2.04 / 18) * Real.sqrt (|z.im| ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    have h2 : (0 : ℝ) ≤ 2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+      linarith [h1]
+    have hb : (0 : ℝ) ≤ 2 + |z.im| := by linarith
+    exact mul_nonneg hb h2
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) * 0.1 :=
+        mul_le_mul hF hdamp (norm_nonneg _) hBnn
+    _ = (0.1 : ℝ) * ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- MAIN negative-side pointwise Stirling composition:
+`||G z|| <= 0.971*(2+|y|)*(2*((2.04/18)*S))` for `y < -8.75`. -/
+theorem G_neg_le {z : ℂ} (hz : z.re = -1) (hneg : z.im < -8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ (0.971 : ℝ) * ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+  have habs : |z.im| = -z.im := abs_of_neg (by linarith)
+  have htail : 8.75 < |z.im| := by rw [habs]; linarith
+  have hF := F_Stirling_le hz htail
+  have hdamp := damp_neg_0971 hz hneg
+  have hBnn : (0 : ℝ) ≤
+      (2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3))) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have hS : (0 : ℝ) ≤ Real.sqrt (|z.im| ^ 3) := Real.sqrt_nonneg _
+    have h1 : (0 : ℝ) ≤ (2.04 / 18) * Real.sqrt (|z.im| ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    have h2 : (0 : ℝ) ≤ 2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)) := by
+      linarith [h1]
+    have hb : (0 : ℝ) ≤ 2 + |z.im| := by linarith
+    exact mul_nonneg hb h2
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) * 0.971 :=
+        mul_le_mul hF hdamp (norm_nonneg _) hBnn
+    _ = (0.971 : ℝ) * ((2 + |z.im|) * (2 * ((2.04 / 18) * Real.sqrt (|z.im| ^ 3)))) := by
+        ring
+
+/-- Positive edge numeral: `0.1*B(8.75) <= 6.32` (`B(a) = (2+a)*(2*((2.04/18)*25.9))`). -/
+theorem pos_edge_le :
+    (0.1 : ℝ) * ((2 + 8.75) * (2 * ((2.04 / 18) * 25.9))) ≤ 6.32 := by
+  norm_num
+
+/-- Positive edge closes: `0.1*B(8.75) < 36`. -/
+theorem pos_edge_lt_36 :
+    (0.1 : ℝ) * ((2 + 8.75) * (2 * ((2.04 / 18) * 25.9))) < 36 := by
+  norm_num
+
+/-- Negative edge numeral: `0.971*B(8.75) <= 61.3`. -/
+theorem neg_edge_le :
+    (0.971 : ℝ) * ((2 + 8.75) * (2 * ((2.04 / 18) * 25.9))) ≤ 61.3 := by
+  norm_num
+
+/-- Negative edge exceeds: `36 < 0.971*B(8.75)` (gap `~25.28`, `~1.70x` over). -/
+theorem neg_edge_gt_36 :
+    (36 : ℝ) < (0.971 : ℝ) * ((2 + 8.75) * (2 * ((2.04 / 18) * 25.9))) := by
+  norm_num
+
+#print axioms CIJointStirling.exp_cosh_joint_eq
+#print axioms CIJointStirling.exp_neg_pi_tail_le
+#print axioms CIJointStirling.joint_Stirling_le
+#print axioms CIJointStirling.sqrt_edge_le
+#print axioms CIJointStirling.joint_edge_le
+#print axioms CIJointStirling.RowFE_Stirling_le
+#print axioms CIJointStirling.zeta_Stirling_le
+#print axioms CIJointStirling.F_Stirling_le
+#print axioms CIJointStirling.damp_pos_01
+#print axioms CIJointStirling.damp_neg_0971
+#print axioms CIJointStirling.G_pos_le
+#print axioms CIJointStirling.G_neg_le
+#print axioms CIJointStirling.pos_edge_le
+#print axioms CIJointStirling.pos_edge_lt_36
+#print axioms CIJointStirling.neg_edge_le
+#print axioms CIJointStirling.neg_edge_gt_36
+
+end CIJointStirling
+
+/-!
+CI VERDICT + RESIDUAL (report-and-stop): door-3 JOINT Stirling composition GREEN at tier-1/2,
+`hTail`/`P1` NOT closed (honest negative on neg side + growth wall on pos tail).
+
+(1) JOINT GREEN (`CIJointStirling.joint_Stirling_le`): `||Gamma*cos|| <= 2.04*sqrt(|y|^3)`
+(`Re = 2`, `8.75 <= |y|`, both signs via `|y|`), joint `exp(-c)*cosh(c) = (1+e^{-2c})/2 <= 0.51`
+inside ONE estimate (no separate `cosh` majorant). Edge `2.04*sqrt(8.75^3) <= 52.84`
+(`joint_edge_le`; `sqrt_edge_le` `25.9`). Vs CC `X = 92.307`: `92.30 -> 52.84` (`1.75x` gain).
+Target `~30` is BELOW true `~32.4` (`sqrt(pi/2)*8.75^{3/2}`) hence honestly unreachable from
+`C = 4` (needs `C <= 2.32 < 2.506` true); CA2 `46.15` stays sharper AT EDGE (`t*coth` tight vs
+`sinh >= exp/4` `2x` loss); CH2 wins asymptotically (`a^{3/2}` vs `a^2`).
+
+(2) EDGE NUMBERS HONEST (CH2-Gamma x joint-cos x sharp `cpow 1/36` x sharp damping):
+pos `0.1*B(8.75) <= 6.32 < 36` (`pos_edge_le`, `pos_edge_lt_36`; `B = (2+a)*(2*((2.04/18)*25.9))`);
+neg `36 < 0.971*B(8.75)`, `<= 61.3` (`neg_edge_gt_36`, `neg_edge_le`; gap `~25.28`, `~1.70x` over).
+Gains over CF (`198.46` pos / `1927.04` neg): `~31x` each, purely from sharp `cpow 1/36`
+(`36x`) offset by joint `51` vs `46` looseness (`1.13x` loss). `G_pos_le` / `G_neg_le` are the
+pointwise compositions (`F_Stirling_le` + `damp_pos_01` / `damp_neg_0971`).
+
+(3) `hTail`/`P1` VERDICTS: `hTail` (`||G|| <= 36` on `Re = -1`, `8.75 < |Im|`) does NOT follow:
+neg edge `61.3 > 36` already blocks uniform closure; pos edge `6.32 <= 36` is MINIMUM of the
+growing `1*poly` majorant (`(2+a)*sqrt(a^3)` increasing), not a tail sup -- full pos tail needs
+decaying Gaussian sup (`exp((1-(t+6.75)^2)/100)*poly`, crosses `~17-18` externally, needs tight
+large-`|t|` exp bounds absent repo-wide, NOT proved here). Hence `BZTailEnvelope.P1_R02_of_hTail`
+stays CONDITIONAL (sole premise `hTail` unclosed); `R02_zeta_upper_obligation` stays open.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
