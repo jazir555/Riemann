@@ -13304,4 +13304,314 @@ theorem D3_S16_im_upper_pos : (0 : ℝ) < 3629 / 21000 := by norm_num
 #print axioms D3_S16_im_hi_valid
 #print axioms D3_S16_im_upper_pos
 
+/-! ## Door-3 `S_16` Im-upper sharpening tier 1 (Agent CG 2026-09-04): quintic
+Taylor upper closes the sign.
+
+GREP-FIRST RECORD (run before writing):
+* `Mathlib/.../Trigonometric/Bounds.lean`: highest sin/cos polynomial bounds are
+  LINEAR `Real.sin_le` (`sin x ≤ x`, :54), CUBIC `Real.sin_ge_sub_cube`
+  (`x - x³/6 ≤ sin x`, :163), QUADRATIC `Real.one_sub_sq_div_two_le_cos`
+  (`1 - x²/2 ≤ cos x`, :123). NO quartic/quintic/septic bound exists anywhere in
+  Mathlib (verified via `rg "120|5040" Trigonometric/` — 0 hits). Hence the two
+  Taylor lemmas below are CREATED in-file (nothing redefined).
+* Mathlib Taylor-remainder material (`Analysis/Calculus/Taylor.lean`:
+  `taylor_mean_remainder_lagrange`, :330) EXISTS but is uneconomical here: it
+  needs `ContDiff` + iterated-derivative bookkeeping plus bounding the remainder
+  at an unknown intermediate point. The derivative-bootstrap below proves the
+  needed CONCRETE polynomial bounds directly from the committed floors, so it is
+  the minimal rigorous remainder for this task (documented choice, not a gap).
+* Monotonicity engine EXISTS: `monotoneOn_of_deriv_nonneg`
+  (`Analysis/Calculus/Deriv/MeanValue.lean:410`) — called, not recreated.
+* Reduction facts called (all committed): `D3_delta_twelve_mem` (:9624,
+  `θ₁₂ - 6π ∈ [2.842, 2.903]`), `D3_sin_theta_twelve_mem` (`sin θ₁₂ ∈ [0.23,1]`,
+  upper endpoint `1` is the TRIVIAL `sin_mem_Icc` bound — the looseness),
+  `D3_amp_twelve_upper` (`≤ 1/4`), `D3_eta_im`, `D3_sum_im_eq`, `D3_term0_im`,
+  `D3_term*_im_hi` (all except k=11 reused verbatim in the assembly).
+* New names below (`CG_cos_le_quartic`, `CG_sin_le_quintic`,
+  `D3_sin_theta_twelve_hi_sharp`, `D3_term11_im_hi_sharp`,
+  `D3_S16_im_upper_sharp`, `D3_S16_im_upper_sharp_neg`, `D3_S16_im_abs_ge_sharp`,
+  `D3_S16_norm_ge_sharp`) — 0 hits before writing (verified absent via
+  `rg "CG_sin|CG_cos|_sharp"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `∑'`).
+
+LOOSENESS TABLE (proved upper vs true `Im`, python scratch for this report only;
+true `Im S_16 ≈ -0.51083`, proved `U = 3629/21000 ≈ 0.17281`, total gap `0.68364`):
+* k=11 (x=12): proved `1/4 = 0.25`, true `≈ 0.054633`, gap `0.195367` — RANK 1,
+  driven by the trivial `sin ≤ 1` (true `sin θ₁₂ ≈ 0.245674`). Sharpened here.
+* k=9 (x=10): gap `0.094198` (also trivial `sin ≤ 1`, but quintic at `w ≈ 1.3`
+  overshoots `1`, so it needs a monotonicity argument — tasked next, NOT here).
+* k=4 (x=5): gap `0.080450` (needs SEPTIC lower — tasked next, NOT here).
+* All other terms: gap `≤ 0.046` each (amp-interval dominated — follow-up task).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (CG-T1) `CG_cos_le_quartic`: `cos x ≤ 1 - x²/2 + x⁴/24` (`x ≥ 0`).
+* (CG-T2) `CG_sin_le_quintic`: `sin x ≤ x - x³/6 + x⁵/120` (`x ≥ 0`).
+* (CG-S) `D3_sin_theta_twelve_hi_sharp`: `sin θ₁₂ ≤ 0.306` (was `1`).
+* (CG-T) `D3_term11_im_hi_sharp`: term-11 `Im ≤ 153/2000 = 0.0765` (was `1/4`).
+* (CG-A) `D3_S16_im_upper_sharp`: `Im S_16 ≤ -29/42000 ≈ -0.00069 < 0`.
+* (CG-V) Sign verdict + `|Im S_16| ≥ 29/42000` + `‖S_16‖ ≥ 29/42000`.
+
+NUMBERS: `Qmix = 0.308 - 0.237³/6 + 0.308⁵/120 = 0.30580442… ≤ 0.306`;
+new sum `= 3629/21000 - 1/4 + 153/2000 = -29/42000`. Margin is razor-thin
+(`≈ -0.00069`) but HONESTLY negative — sign closes at tier 1.
+-/
+
+/-- (CG-T1) Quartic Taylor upper for `cos` on `[0,∞)`.
+    Bootstrap over the committed cubic floor: `g(t) = 1 - t²/2 + t⁴/24 - cos t`
+    has `g(0) = 0` and `g'(t) = sin t - (t - t³/6) ≥ 0` on `t ≥ 0`
+    (by `Real.sin_ge_sub_cube`), so `g` is monotone on `Ici 0`. -/
+theorem CG_cos_le_quartic {x : ℝ} (hx : 0 ≤ x) :
+    Real.cos x ≤ 1 - x ^ 2 / 2 + x ^ 4 / 24 := by
+  have key : ∀ t : ℝ, HasDerivAt (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u)
+      (-t + t ^ 3 / 6 + Real.sin t) t := by
+    intro t
+    have h2 : HasDerivAt (fun u : ℝ => u ^ 2 / 2) t t := by
+      have h := (hasDerivAt_pow 2 t).div_const (2 : ℝ)
+      have e : ((2 : ℕ) : ℝ) * t ^ (2 - 1) / 2 = t := by
+        rw [show (2 - 1 : ℕ) = 1 by decide, pow_one]
+        ring
+      rwa [e] at h
+    have h4 : HasDerivAt (fun u : ℝ => u ^ 4 / 24) (t ^ 3 / 6) t := by
+      have h := (hasDerivAt_pow 4 t).div_const (24 : ℝ)
+      have e : ((4 : ℕ) : ℝ) * t ^ (4 - 1) / 24 = t ^ 3 / 6 := by
+        rw [show (4 - 1 : ℕ) = 3 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have hcos : HasDerivAt (fun u : ℝ => Real.cos u) (-Real.sin t) t :=
+      Real.hasDerivAt_cos t
+    have hbase : HasDerivAt (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u)
+        (0 - t + t ^ 3 / 6 - -Real.sin t) t :=
+      ((hasDerivAt_const t (1 : ℝ)).sub h2).add h4
+        |>.sub hcos
+    have e : (0 : ℝ) - t + t ^ 3 / 6 - -Real.sin t = -t + t ^ 3 / 6 + Real.sin t := by
+      ring
+    rwa [e] at hbase
+  have hcont : ContinuousOn (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u)
+      (Set.Ici 0) := by
+    fun_prop
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u)
+      (interior (Set.Ici 0)) :=
+    fun t _ => (key t).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Ici (0 : ℝ)),
+      0 ≤ deriv (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u) t := by
+    intro t ht
+    rw [interior_Ici] at ht
+    have ht0 : (0 : ℝ) ≤ t := le_of_lt (Set.mem_Ioi.mp ht)
+    rw [(key t).deriv]
+    have hcs := Real.sin_ge_sub_cube ht0
+    linarith
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hnn
+  have h0x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  have hf0 : (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - Real.cos u) 0 = 0 := by
+    norm_num [Real.cos_zero]
+  rw [hf0] at h0x
+  linarith
+
+/-- (CG-T2) Quintic Taylor upper for `sin` on `[0,∞)`.
+    Bootstrap over (CG-T1): `f(t) = t - t³/6 + t⁵/120 - sin t` has `f(0) = 0`
+    and `f'(t) = (1 - t²/2 + t⁴/24) - cos t ≥ 0` on `t ≥ 0`, so `f` is
+    monotone on `Ici 0`. -/
+theorem CG_sin_le_quintic {x : ℝ} (hx : 0 ≤ x) :
+    Real.sin x ≤ x - x ^ 3 / 6 + x ^ 5 / 120 := by
+  have key : ∀ t : ℝ, HasDerivAt (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u)
+      (1 - t ^ 2 / 2 + t ^ 4 / 24 - Real.cos t) t := by
+    intro t
+    have h3 : HasDerivAt (fun u : ℝ => u ^ 3 / 6) (t ^ 2 / 2) t := by
+      have h := (hasDerivAt_pow 3 t).div_const (6 : ℝ)
+      have e : ((3 : ℕ) : ℝ) * t ^ (3 - 1) / 6 = t ^ 2 / 2 := by
+        rw [show (3 - 1 : ℕ) = 2 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have h5 : HasDerivAt (fun u : ℝ => u ^ 5 / 120) (t ^ 4 / 24) t := by
+      have h := (hasDerivAt_pow 5 t).div_const (120 : ℝ)
+      have e : ((5 : ℕ) : ℝ) * t ^ (5 - 1) / 120 = t ^ 4 / 24 := by
+        rw [show (5 - 1 : ℕ) = 4 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have hsin : HasDerivAt (fun u : ℝ => Real.sin u) (Real.cos t) t :=
+      Real.hasDerivAt_sin t
+    have hid : HasDerivAt (fun u : ℝ => u) 1 t := hasDerivAt_id t
+    have hbase : HasDerivAt (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u)
+        (1 - t ^ 2 / 2 + t ^ 4 / 24 - Real.cos t) t :=
+      ((hid.sub h3).add h5).sub hsin
+    exact hbase
+  have hcont : ContinuousOn (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u)
+      (Set.Ici 0) := by
+    fun_prop
+  have hdiff : DifferentiableOn ℝ (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u)
+      (interior (Set.Ici 0)) :=
+    fun t _ => (key t).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Ici (0 : ℝ)),
+      0 ≤ deriv (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u) t := by
+    intro t ht
+    rw [interior_Ici] at ht
+    have ht0 : (0 : ℝ) ≤ t := le_of_lt (Set.mem_Ioi.mp ht)
+    rw [(key t).deriv]
+    have hcq := CG_cos_le_quartic ht0
+    linarith
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hnn
+  have h0x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  have hf0 : (fun u : ℝ => u - u ^ 3 / 6 + u ^ 5 / 120 - Real.sin u) 0 = 0 := by
+    norm_num [Real.sin_zero]
+  rw [hf0] at h0x
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (CG-S) Sharpened sine upper `sin θ₁₂ ≤ 0.306` (was the trivial `1` in
+    `D3_sin_theta_twelve_mem`). Same reduction (`-y = 7π - θ₁₂ - 6π + 6π…`,
+    i.e. `-y ∈ [0.237, 0.308]` with `sin θ₁₂ = sin (-y)`), but the trivial
+    `sin_mem_Icc` upper is replaced by the quintic (CG-T2) with per-monomial
+    endpoint bounds (no monotonicity of the Taylor polynomial needed). -/
+theorem D3_sin_theta_twelve_hi_sharp : Real.sin (D3_phase 11) ≤ (0.306 : ℝ) := by
+  have hmem := D3_delta_twelve_mem
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  set y := D3_phase 11 - 6 * Real.pi - Real.pi with hy_def
+  have hy_lo : (-0.308 : ℝ) ≤ y := by rw [hy_def]; linarith [hmem.1, hpi_hi]
+  have hy_hi : y ≤ (-0.237 : ℝ) := by rw [hy_def]; linarith [hmem.2, hpi_lo]
+  have hz_lo : (0.237 : ℝ) ≤ -y := by linarith [hy_hi]
+  have hz_hi : -y ≤ (0.308 : ℝ) := by linarith [hy_lo]
+  have hz_nn : (0 : ℝ) ≤ -y := by linarith [hz_lo]
+  have hQ := CG_sin_le_quintic hz_nn
+  have hc3 : (0.237 : ℝ) ^ 3 ≤ (-y) ^ 3 :=
+    pow_le_pow_left₀ (by norm_num) hz_lo 3
+  have hc5 : (-y) ^ 5 ≤ (0.308 : ℝ) ^ 5 := pow_le_pow_left₀ hz_nn hz_hi 5
+  have hnum : (-y) - (-y) ^ 3 / 6 + (-y) ^ 5 / 120 ≤ (0.306 : ℝ) := by
+    have h1 : (-y) - (-y) ^ 3 / 6 + (-y) ^ 5 / 120 ≤
+        0.308 - (0.237 : ℝ) ^ 3 / 6 + (0.308 : ℝ) ^ 5 / 120 := by
+      linarith [hz_hi, hc3, hc5]
+    have h2 : (0.308 : ℝ) - (0.237 : ℝ) ^ 3 / 6 + (0.308 : ℝ) ^ 5 / 120 ≤ 0.306 := by
+      norm_num
+    linarith
+  have hhi : Real.sin (-y) ≤ (0.306 : ℝ) := le_trans hQ hnum
+  have hper1 : Real.sin (D3_phase 11 - 2 * Real.pi) = Real.sin (D3_phase 11) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 11 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 11 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper3 : Real.sin (((D3_phase 11 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin ((D3_phase 11 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 11 - 6 * Real.pi) = Real.sin (D3_phase 11) := by
+    have e : ((D3_phase 11 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 11 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 11 - 6 * Real.pi = y + Real.pi := by
+    rw [hy_def]; ring
+  have h1s : Real.sin (D3_phase 11 - 6 * Real.pi) = -Real.sin y := by
+    rw [hdecomp, Real.sin_add_pi]
+  have hnegy : Real.sin y = -Real.sin (-y) := by
+    have h := Real.sin_neg y
+    linarith [h]
+  have hsin_eq : Real.sin (D3_phase 11) = Real.sin (-y) := by
+    rw [← hper, h1s, hnegy, neg_neg]
+  rw [hsin_eq]
+  exact hhi
+
+/-- (CG-T) Sharpened eleventh-term imaginary-part upper `≤ 153/2000 = 0.0765`
+    (was `1/4`; mirror of `D3_term11_im_hi` with (CG-S) in place of the trivial
+    `sin ≤ 1`; interval: `amp ≤ 1/4`, `sin ≤ 0.306`; odd `k = 11`). -/
+theorem D3_term11_im_hi_sharp :
+    (etaDirichletTerm (1 - zetaCellS0) 11).im ≤ (153 / 2000 : ℝ) := by
+  rw [D3_eta_im]
+  have ha := D3_amp_twelve_upper
+  have hs := D3_sin_theta_twelve_mem
+  have hhi := D3_sin_theta_twelve_hi_sharp
+  have hs_nn : (0 : ℝ) ≤ Real.sin (D3_phase 11) := by linarith [hs.1]
+  have hpow11 : ((-1 : ℝ) ^ (11 : ℕ)) = -1 := by norm_num
+  rw [hpow11]
+  have h : D3_amp 11 * Real.sin (D3_phase 11) ≤ (1 / 4) * 0.306 :=
+    mul_le_mul ha hhi hs_nn (by norm_num)
+  have e : (-1 : ℝ) * (-(D3_amp 11 * Real.sin (D3_phase 11))) =
+      D3_amp 11 * Real.sin (D3_phase 11) := by ring
+  rw [e]
+  have hnum : (153 / 2000 : ℝ) = (1 / 4) * 0.306 := by norm_num
+  rw [hnum]
+  exact h
+
+set_option maxHeartbeats 800000 in
+/-- (CG-A) Sharpened `Im S_16 ≤ -29/42000`: CE's assembly with exactly one
+    term swapped (`D3_term11_im_hi_sharp` for `D3_term11_im_hi`); all other
+    per-term bounds are the committed ones. The sum crosses zero:
+    `3629/21000 - 1/4 + 153/2000 = -29/42000`. -/
+theorem D3_S16_im_upper_sharp :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤
+      (-29 / 42000 : ℝ) := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_hi
+  have h2 := D3_term2_im_hi
+  have h3 := D3_term3_im_hi
+  have h4 := D3_term4_im_hi
+  have h5 := D3_term5_im_hi
+  have h6 := D3_term6_im_hi
+  have h7 := D3_term7_im_hi
+  have h8 := D3_term8_im_hi
+  have h9 := D3_term9_im_hi
+  have h10 := D3_term10_im_hi
+  have h11 := D3_term11_im_hi_sharp
+  have h12 := D3_term12_im_hi
+  have h13 := D3_term13_im_hi
+  have h14 := D3_term14_im_hi
+  have h15 := D3_term15_im_hi
+  linarith
+
+/-- (CG-V) Sign verdict: the sharpened `Im S_16` upper is strictly negative. -/
+theorem D3_S16_im_upper_sharp_neg : (-29 / 42000 : ℝ) < 0 := by norm_num
+
+/-- (CG-V) `|Im S_16| ≥ 29/42000` from the negative upper. -/
+theorem D3_S16_im_abs_ge_sharp :
+    (29 / 42000 : ℝ) ≤
+      |(∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im| := by
+  have h := D3_S16_im_upper_sharp
+  have h0 : (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤ 0 := by
+    linarith
+  rw [abs_of_nonpos h0]
+  linarith
+
+/-- (CG-V) `‖S_16‖ ≥ 29/42000`: door-3 early-block sign closure (positive lower
+    on the partial-sum norm from the `Im` channel). -/
+theorem D3_S16_norm_ge_sharp :
+    (29 / 42000 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  exact le_trans D3_S16_im_abs_ge_sharp (Complex.abs_im_le_norm _)
+
+#print axioms CG_cos_le_quartic
+#print axioms CG_sin_le_quintic
+#print axioms D3_sin_theta_twelve_hi_sharp
+#print axioms D3_term11_im_hi_sharp
+#print axioms D3_S16_im_upper_sharp
+#print axioms D3_S16_im_upper_sharp_neg
+#print axioms D3_S16_im_abs_ge_sharp
+#print axioms D3_S16_norm_ge_sharp
+
+
 
