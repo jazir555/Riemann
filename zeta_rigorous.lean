@@ -7515,5 +7515,154 @@ theorem D3_S6_cannot_reach_8_15 (U : ℝ) (hU : 0 ≤ U) :
 #print axioms D3_S1024_of_S6
 #print axioms D3_S6_cannot_reach_8_15
 
+/-!
+
+## Door-3 prime-log d9 block (D3, tier 1): `log 7/11/13` enclosures (±1e-10).
+
+GOAL (door-3 K=16 premise; minimum viable prime-log unlocks in order 7, 11, 13):
+rigorous d9-grade `Real.log` enclosures for 7, 11, 13, both directions, ~1e-9 tight
+like the committed `Real.log_five_gt/lt_d9` — in the exact shape BE's template consumes
+(`log_X_gt_d9` / `log_X_lt_d9` names, here `Real.log_seven/eleven/thirteen_gt/lt_d9`;
+the follower writes `D3_theta_seven_lo/hi` exactly like `D3_theta_five_lo/hi`).
+Bounds only — no θ-phases here. Pair-absolute/Tendsto forms only; no `∑'`-with-`0 <`
+(this block uses no `∑'` at all; the only sums are `Finset.range`).
+
+GREP-FIRST RECORD (run before writing; method mirrored numeral-for-numeral):
+* `Real.log_five_near_10` (`|log 5 - 160943791243/100000000000| ≤ 1/10^10`),
+  `Real.log_five_gt_d9` (`1.6094379123 < log 5`), `Real.log_five_lt_d9`
+  (`log 5 < 1.6094379126`) — `Mathlib/Analysis/Complex/ExponentialBounds.lean:109-125`,
+  namespace `Real`. EXIST; proof shape copied exactly (`suffices` tail-split,
+  `norm_num1 at *` + `assumption` (`log 7`), `Real.abs_log_sub_add_sum_range_le` at
+  `x = (p-1)/p`, rewrite chain `1 - x = 1/p`, `Real.log_inv`, `abs_sub_le` split,
+  `norm_num [Finset.sum_range_succ]`; `Finset.`/`Real.` qualified because this file
+  does not `open Finset` and sits outside `namespace Real`).
+  Adaptations for the 285/340-term sums (`11`, `13`): the split is closed by the
+  `ring` identity `X + (C - X) = C` with an explicit `: ℝ` ascription (`norm_num1`
+  evaluates the 150-digit `(6/7)^176` tail but leaves the 300/380-digit tails
+  symbolic, so `assumption` misses; the bare `have` elaborated at `ℕ`), and
+  `set_option exponentiation.threshold 1024 in` (default 256 refuses to evaluate
+  `(10/11)^286`/`(12/13)^341`, which stalled the exact-sum combination) plus raised
+  `maxHeartbeats`, both preceding the docstring (`log 7` needs neither; a split
+  `simp only` unfold instead hits `maxRecDepth`).
+* `Real.log_two/three_near_10|gt_d9|lt_d9` — same file `:71-105`. EXIST (untouched).
+* `log_seven|log_eleven|log_thirteen` — ABSENT in `Mathlib/` (0 hits; only
+  `log_two/three/five` d9 enclosures exist) and ABSENT in `zeta_rigorous.lean`
+  (0 hits outside doc prose); hence created in-file below. No Mathlib edit.
+* In-file consumers waiting: `D3_theta_five_lo/hi` (the template),
+  `D3_log_six_eq` (composite bridge via `Real.log_mul`). Nothing redefined.
+
+NUMBERS (proved below; true values `math.log` python scratch for this report only):
+* `log 7 ∈ (1.9459101489, 1.9459101492)` (true `≈ 1.9459101490553`); width `3e-10`;
+  slacks lower `≈1.55e-10`, upper `≈1.45e-10`.
+  (`x = 6/7`, `n = 175`, tail `(6/7)^176/7⁻¹ ≈ 1.16e-11`,
+  `|S - approx| ≈ 4.8e-12`; total `≈1.63e-11 ≤ 1e-10`, margin `≈6×`.)
+* `log 11 ∈ (2.3978952726, 2.3978952730)` (true `≈ 2.3978952727984`); width `4e-10`;
+  slacks lower `≈1.98e-10`, upper `≈2.02e-10`.
+  (`x = 10/11`, `n = 285`, tail `(10/11)^286/11⁻¹ ≈ 1.60e-11`,
+  `|S - approx| ≈ 1.7e-12`; total `≈1.77e-11 ≤ 1e-10`, margin `≈5×`.)
+  (One extra ulp of width: the true-rounded approx `239789527280/1e11` sits exactly
+  on the `1e-10` grid, so strict 10dp bounds need the wider pair; still ~1e-9 grade.)
+* `log 13 ∈ (2.5649493573, 2.5649493576)` (true `≈ 2.5649493574615`); width `3e-10`;
+  slacks lower `≈1.62e-10`, upper `≈1.38e-10`.
+  (`x = 12/13`, `n = 340`, tail `(12/13)^341/13⁻¹ ≈ 1.82e-11`,
+  `|S - approx| ≈ 1.5e-12`; total `≈1.97e-11 ≤ 1e-10`, margin `≈5×`.)
+
+RESIDUAL (report-and-stop): θ₇ unlocks immediately — follower proves
+`D3_theta_seven_lo/hi` (`θ₇ = 8.75·log 7 ∈ [17.026, 17.027]`, true `≈ 17.0267138`)
+from `Real.log_seven_gt/lt_d9` exactly like `D3_theta_five_lo/hi`; then θ₁₁, θ₁₃.
+Composites 8/9/10/12/14/15/16 factor through the log 2/3/5 bridges (no new logs).
+-/
+
+/-- (C) `log 7` near-10 enclosure (mirrors `Real.log_five_near_10`
+    numeral-for-numeral: `x = 6/7`, `n = 175`). -/
+theorem Real.log_seven_near_10 :
+    |Real.log 7 - 194591014906 / 100000000000| ≤ 1 / 10 ^ 10 := by
+  suffices |Real.log 7 - 194591014906 / 100000000000| ≤
+      (6 / 7) ^ 176 / 7⁻¹ + (1 / 10 ^ 10 - (6 / 7) ^ 176 / 7⁻¹) by
+    norm_num1 at *
+    assumption
+  have t : |6 / 7| = (6 : ℝ) / 7 := by norm_num
+  have z := Real.abs_log_sub_add_sum_range_le (x := (6 / 7 : ℝ)) (by norm_num) 175
+  rw [t, show (1 - (6 : ℝ) / 7) = (1 / 7 : ℝ) by norm_num, one_div (7 : ℝ),
+    Real.log_inv, ← sub_eq_add_neg, _root_.abs_sub_comm] at z
+  apply le_trans (_root_.abs_sub_le _ _ _) (add_le_add z _)
+  norm_num [Finset.sum_range_succ]
+
+/-- (C) `log 7` lower d9 bound (mirrors `Real.log_two/three/five_gt_d9`). -/
+theorem Real.log_seven_gt_d9 : 1.9459101489 < Real.log 7 :=
+  lt_of_lt_of_le (by norm_num1)
+    (sub_le_comm.1 (abs_sub_le_iff.1 Real.log_seven_near_10).2)
+
+/-- (C) `log 7` upper d9 bound (mirrors `Real.log_two/three/five_lt_d9`). -/
+theorem Real.log_seven_lt_d9 : Real.log 7 < 1.9459101492 :=
+  lt_of_le_of_lt (sub_le_iff_le_add.1 (abs_sub_le_iff.1 Real.log_seven_near_10).1)
+    (by norm_num)
+
+set_option exponentiation.threshold 1024 in
+set_option maxHeartbeats 2000000 in
+/-- (C) `log 11` near-10 enclosure (mirrors `Real.log_five_near_10`
+    numeral-for-numeral: `x = 10/11`, `n = 285`). -/
+theorem Real.log_eleven_near_10 :
+    |Real.log 11 - 239789527280 / 100000000000| ≤ 1 / 10 ^ 10 := by
+  suffices h : |Real.log 11 - 239789527280 / 100000000000| ≤
+      (10 / 11) ^ 286 / 11⁻¹ + (1 / 10 ^ 10 - (10 / 11) ^ 286 / 11⁻¹) by
+    have heq : ((10 / 11) ^ 286 / 11⁻¹ + (1 / 10 ^ 10 - (10 / 11) ^ 286 / 11⁻¹) : ℝ)
+        = 1 / 10 ^ 10 := by ring
+    rwa [heq] at h
+  have t : |10 / 11| = (10 : ℝ) / 11 := by norm_num
+  have z := Real.abs_log_sub_add_sum_range_le (x := (10 / 11 : ℝ)) (by norm_num) 285
+  rw [t, show (1 - (10 : ℝ) / 11) = (1 / 11 : ℝ) by norm_num, one_div (11 : ℝ),
+    Real.log_inv, ← sub_eq_add_neg, _root_.abs_sub_comm] at z
+  apply le_trans (_root_.abs_sub_le _ _ _) (add_le_add z _)
+  norm_num [Finset.sum_range_succ]
+
+/-- (C) `log 11` lower d9 bound (mirrors `Real.log_two/three/five_gt_d9`). -/
+theorem Real.log_eleven_gt_d9 : 2.3978952726 < Real.log 11 :=
+  lt_of_lt_of_le (by norm_num1)
+    (sub_le_comm.1 (abs_sub_le_iff.1 Real.log_eleven_near_10).2)
+
+/-- (C) `log 11` upper d9 bound (mirrors `Real.log_two/three/five_lt_d9`). -/
+theorem Real.log_eleven_lt_d9 : Real.log 11 < 2.3978952730 :=
+  lt_of_le_of_lt (sub_le_iff_le_add.1 (abs_sub_le_iff.1 Real.log_eleven_near_10).1)
+    (by norm_num)
+
+set_option exponentiation.threshold 1024 in
+set_option maxHeartbeats 2000000 in
+/-- (C) `log 13` near-10 enclosure (mirrors `Real.log_five_near_10`
+    numeral-for-numeral: `x = 12/13`, `n = 340`). -/
+theorem Real.log_thirteen_near_10 :
+    |Real.log 13 - 256494935746 / 100000000000| ≤ 1 / 10 ^ 10 := by
+  suffices h : |Real.log 13 - 256494935746 / 100000000000| ≤
+      (12 / 13) ^ 341 / 13⁻¹ + (1 / 10 ^ 10 - (12 / 13) ^ 341 / 13⁻¹) by
+    have heq : ((12 / 13) ^ 341 / 13⁻¹ + (1 / 10 ^ 10 - (12 / 13) ^ 341 / 13⁻¹) : ℝ)
+        = 1 / 10 ^ 10 := by ring
+    rwa [heq] at h
+  have t : |12 / 13| = (12 : ℝ) / 13 := by norm_num
+  have z := Real.abs_log_sub_add_sum_range_le (x := (12 / 13 : ℝ)) (by norm_num) 340
+  rw [t, show (1 - (12 : ℝ) / 13) = (1 / 13 : ℝ) by norm_num, one_div (13 : ℝ),
+    Real.log_inv, ← sub_eq_add_neg, _root_.abs_sub_comm] at z
+  apply le_trans (_root_.abs_sub_le _ _ _) (add_le_add z _)
+  norm_num [Finset.sum_range_succ]
+
+/-- (C) `log 13` lower d9 bound (mirrors `Real.log_two/three/five_gt_d9`). -/
+theorem Real.log_thirteen_gt_d9 : 2.5649493573 < Real.log 13 :=
+  lt_of_lt_of_le (by norm_num1)
+    (sub_le_comm.1 (abs_sub_le_iff.1 Real.log_thirteen_near_10).2)
+
+/-- (C) `log 13` upper d9 bound (mirrors `Real.log_two/three/five_lt_d9`). -/
+theorem Real.log_thirteen_lt_d9 : Real.log 13 < 2.5649493576 :=
+  lt_of_le_of_lt (sub_le_iff_le_add.1 (abs_sub_le_iff.1 Real.log_thirteen_near_10).1)
+    (by norm_num)
+
+#print axioms Real.log_seven_near_10
+#print axioms Real.log_seven_gt_d9
+#print axioms Real.log_seven_lt_d9
+#print axioms Real.log_eleven_near_10
+#print axioms Real.log_eleven_gt_d9
+#print axioms Real.log_eleven_lt_d9
+#print axioms Real.log_thirteen_near_10
+#print axioms Real.log_thirteen_gt_d9
+#print axioms Real.log_thirteen_lt_d9
+
 
 
