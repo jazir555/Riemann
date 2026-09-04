@@ -1590,7 +1590,17 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    `Re=−1`, `10.6≤|Im|≤21` UNCONDITIONAL band composition**. Threshold CANNOT fire yet (`G_P` ≠ `G`):
    residual is the re-proved assembly at divisor `4.845`/threshold `48.45` (`4.8%` tighter) — (i) `G_P`
    entire+`DiffContOnCl`, (ii) windowed `A=B=36` caps for `G_P`, (iii) `BddAbove` (easier at /28),
-   (iv) `zetaUpper_R02_ten_of_bounds` re-proof (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   (iv) `zetaUpper_R02_ten_of_bounds` re-proof (tasked). **Parallel assembly CLOSED (`DF_ParallelP1`,
+   `27aa12eb`, green, axioms clean):** (i) `G_P` differentiable + strip-continuous (unconditional);
+   (ii) left-window `35.7` + right-whole `20.88` (unconditional) + windowed interp (conditional);
+   (iii) compact window-bdd + full-strip conditional on `hTailT`; (iv) re-proof at HONEST divisor
+   **4.824**/threshold **48.24** (brief's `4.845` above true damping minimum `≈0.92287`, proved FALSE —
+   `0.919` banked; P1 unaffected, margin `12.24`) ⇒ **`GP_P1_of_gaps_and_tailT`: P1 `‖ζ‖≤10` on R02
+   conditional on THREE named hyps only**: `hGapLo` (`‖G_P‖≤36`, `Re=−1`, `8.75<|Im|<10.6`), `hGapHi`
+   (`21<|Im|`), `hTailT` (strip tail, `9<|Im|`). Next (all mechanical transfers, tasked): `hGapLo` via
+   CQ/CW + `/28`-vs-`/100` damping comparison (both exponents `≤0` there), `hGapHi` via CT transfer,
+   `hTailT` via BZ mirror at `/28` (strictly easier constants) — then parallel P1 closes with NO
+   premises. **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
