@@ -18726,3 +18726,266 @@ report-and-stop with the new residual.
 #print axioms DV_range16_split
 #print axioms DV_mid_conditional_012
 #print axioms DV_gap_012
+
+/-!
+## Door-3 zeta-lane TRUE-phase diagonal (DZ tail, append-only).
+
+TASK (door-3 middle-upper, report-and-stop): ONE true-phase diagonal bound on `[16,32)`.
+GREP-FIRST RECORD (`rg -n` in `zeta_rigorous.lean`, run before writing):
+* `DV_A_H2` (:18549), `DV_quad_H2_N16` (:18592), `KL_linear_firstDerivTest`
+  (:4954), `CG_cos_le_quartic` (:13364).
+* New names `DZ_*`: 0 hits before writing.
+* Reuse is read-only: Tier-1 `KL_log_gap_ge` (:4978) for the log-increment lower
+  bound, `CG_cos_le_quartic` for the pointwise cosine majorant, `DV_A_H2` for the
+  feed. Nothing above is redefined.
+
+WHAT IS PROVED (unconditional; FULL proofs, no `sorry`/`admit`/`axiom`):
+* (DZ-a) `DZ_delta_lower`: `8.75/(17+n) ≤ ZDelta n` via `KL_log_gap_ge (16+n)`.
+* (DZ-b) `DZ_delta_le_one`: `ZDelta n ≤ 1` via `log(1+t) ≤ t`.
+* (DZ-c) `DZ_cos_le_of_ge`: the quartic majorant decreases on `[0,1]`
+  (certificate `f(L)-f(x) = (x^2-L^2)(12-(x^2+L^2))/24 ≥ 0`), so
+  `cos x ≤ 1-L^2/2+L^4/24` for `0 ≤ L ≤ x ≤ 1`.
+* (DZ-d) `DZ_diag_Re_le` [HEADLINE bridge]: `Re(∑_{n<16} exp(i·δₙ)) ≤ 14.9 < 15`
+  with `δₙ = 8.75·(log(17+n)-log(16+n))`; the majorant sum is the rational
+  `14.87414… ≤ 14.9`. Beats the triangle `16` and the `< 15` bar.
+* (DZ-e) `DZ_piece_DV_feed`: `DV_A_H2` on the true-phase piece gives `≤ 16.73`
+  — HONESTLY VACUOUS vs triangle `16` (H=2 needs `Re D < 12.125` for savings;
+  banked `14.9` does not clear it). The bridge value is the TRUE-phase input
+  itself (replaces the synthetic `DV_quad` diagonal); the quantitative next
+  step is k=1 direct (see residual).
+
+NUMBERS: `Lₙ = 8.75/(17+n)`; `∑_{n<16}(1-Lₙ^2/2+Lₙ^4/24) = 14.87414… ≤ 14.9`;
+feed: `2·16+2·14.9 = 61.8`, `16·61.8 = 988.8`, `√988.8 ≤ 31.45`
+(`31.45^2 = 989.1025`), `(31.45+2)/2 = 16.725 ≤ 16.73`. H=2 savings
+threshold: `2√(32+2B)+1 < 16` iff `B < 12.125`.
+-/
+
+/-- (DZ-0) True zeta phase on the `[16,32)` block: `φ(m) = 8.75·log m`,
+reindexed as `ZPhi n = 8.75·log(16+n)` for `n < 16`. -/
+noncomputable def ZPhi (n : ℕ) : ℝ := 8.75 * Real.log (16 + (n : ℝ))
+
+/-- (DZ-0) True-phase successive increment `δₙ = φ(n+1) - φ(n)`. -/
+noncomputable def ZDelta (n : ℕ) : ℝ := ZPhi (n + 1) - ZPhi n
+
+/-- (DZ-0) True-phase unit-modulus piece on the block. -/
+noncomputable def ZPiece : ℕ → ℂ :=
+  fun n => Complex.exp ((ZPhi n : ℂ) * Complex.I)
+
+/-- (DZ-0) True-phase H=1 autocorrelation sum (the diagonal whose real part
+`DV_A_H2` consumes). -/
+noncomputable def ZDiag16 : ℂ :=
+  ∑ n ∈ Finset.range 16, Complex.exp ((ZDelta n : ℂ) * Complex.I)
+
+/-- (DZ-a) Increment lower bound `8.75/(17+n) ≤ δₙ` (read-only reuse of
+Tier-1 `KL_log_gap_ge` at `16+n`: `log(1+1/m) ≥ 1/(m+1)`). -/
+theorem DZ_delta_lower (n : ℕ) : 8.75 / (17 + (n : ℝ)) ≤ ZDelta n := by
+  have h1 : 1 ≤ 16 + n := by omega
+  have hgap := KL_log_gap_ge (16 + n) h1
+  rw [Nat.cast_add, Nat.cast_ofNat] at hgap
+  have h2 := mul_le_mul_of_nonneg_left hgap (show (0 : ℝ) ≤ 8.75 by norm_num)
+  have eA : (16 : ℝ) + (((n + 1 : ℕ)) : ℝ) = 16 + (n : ℝ) + 1 := by
+    rw [Nat.cast_add, Nat.cast_one]
+    ring
+  have eL : (8.75 : ℝ) / (17 + (n : ℝ)) = 8.75 * (1 / (16 + (n : ℝ) + 1)) := by
+    rw [show (17 : ℝ) + (n : ℝ) = 16 + (n : ℝ) + 1 by ring]
+    ring
+  have eR : 8.75 * Real.log (16 + (n : ℝ) + 1) - 8.75 * Real.log (16 + (n : ℝ))
+      = 8.75 * (Real.log (16 + (n : ℝ) + 1) - Real.log (16 + (n : ℝ))) := by
+    ring
+  unfold ZDelta ZPhi
+  rw [eA, eL, eR]
+  exact h2
+
+/-- (DZ-b) Increment upper bound `δₙ ≤ 1` via `log(1+t) ≤ t`
+(`Real.log_le_sub_one_of_pos`), so the quartic majorant below is monotone. -/
+theorem DZ_delta_le_one (n : ℕ) : ZDelta n ≤ 1 := by
+  have hn : (0 : ℝ) ≤ (n : ℝ) := by positivity
+  have hm : (0 : ℝ) < 16 + (n : ℝ) := by linarith
+  have hmne : (16 + (n : ℝ)) ≠ 0 := ne_of_gt hm
+  have hinv : (0 : ℝ) < 1 + 1 / (16 + (n : ℝ)) := by
+    have hpos : (0 : ℝ) < 1 / (16 + (n : ℝ)) := by positivity
+    linarith
+  have hlog_le : Real.log (1 + 1 / (16 + (n : ℝ))) ≤ 1 / (16 + (n : ℝ)) := by
+    have h := Real.log_le_sub_one_of_pos hinv
+    linarith
+  have hsplit : Real.log (17 + (n : ℝ)) - Real.log (16 + (n : ℝ))
+      = Real.log (1 + 1 / (16 + (n : ℝ))) := by
+    have h1 : (17 : ℝ) + (n : ℝ) = (16 + (n : ℝ)) * (1 + 1 / (16 + (n : ℝ))) := by
+      rw [mul_add, mul_one, mul_one_div_cancel hmne]
+      ring
+    rw [h1, Real.log_mul (ne_of_gt hm) (ne_of_gt hinv), add_sub_cancel_left]
+  have hstep := mul_le_mul_of_nonneg_left hlog_le (show (0 : ℝ) ≤ 8.75 by norm_num)
+  have hone : (8.75 : ℝ) * (1 / (16 + (n : ℝ))) ≤ 1 := by
+    have hle : (1 : ℝ) / (16 + (n : ℝ)) ≤ 1 / 16 :=
+      one_div_le_one_div_of_le (by norm_num) (by linarith)
+    have h2 := mul_le_mul_of_nonneg_left hle (show (0 : ℝ) ≤ 8.75 by norm_num)
+    have h3 : (8.75 : ℝ) * (1 / 16) ≤ 1 := by norm_num
+    linarith
+  have eA : (16 : ℝ) + (((n + 1 : ℕ)) : ℝ) = 17 + (n : ℝ) := by
+    rw [Nat.cast_add, Nat.cast_one]
+    ring
+  have eR : 8.75 * Real.log (17 + (n : ℝ)) - 8.75 * Real.log (16 + (n : ℝ))
+      = 8.75 * (Real.log (17 + (n : ℝ)) - Real.log (16 + (n : ℝ))) := by
+    ring
+  unfold ZDelta ZPhi
+  rw [eA, eR, hsplit]
+  exact le_trans hstep hone
+
+/-- (DZ-c) The quartic cosine majorant decreases on `[0,1]`: for
+`0 ≤ L ≤ x ≤ 1`, `cos x ≤ 1 - L^2/2 + L^4/24` (certificate
+`f(L) - f(x) = (x^2-L^2)(12-(x^2+L^2))/24 ≥ 0`). -/
+theorem DZ_cos_le_of_ge {x L : ℝ} (hL0 : 0 ≤ L) (hLx : L ≤ x) (hx1 : x ≤ 1) :
+    Real.cos x ≤ 1 - L ^ 2 / 2 + L ^ 4 / 24 := by
+  have hx0 : (0 : ℝ) ≤ x := le_trans hL0 hLx
+  have hL1 : L ≤ 1 := le_trans hLx hx1
+  have hcq := CG_cos_le_quartic hx0
+  have hx2 : x ^ 2 ≤ 1 := by
+    nlinarith [mul_nonneg hx0 (show (0 : ℝ) ≤ 1 - x by linarith)]
+  have hL2 : L ^ 2 ≤ 1 := by
+    nlinarith [mul_nonneg hL0 (show (0 : ℝ) ≤ 1 - L by linarith)]
+  have hdiff : (0 : ℝ) ≤ x ^ 2 - L ^ 2 := by
+    have h1 := mul_nonneg (sub_nonneg.mpr hLx) (add_nonneg hL0 hx0)
+    nlinarith [h1]
+  have hprod : (0 : ℝ) ≤ (x ^ 2 - L ^ 2) * (12 - (x ^ 2 + L ^ 2)) :=
+    mul_nonneg hdiff (by linarith)
+  have eident : (1 - L ^ 2 / 2 + L ^ 4 / 24) - (1 - x ^ 2 / 2 + x ^ 4 / 24)
+      = (x ^ 2 - L ^ 2) * (12 - (x ^ 2 + L ^ 2)) / 24 := by
+    ring
+  linarith
+
+/-- (DZ-d) Pointwise true-phase cosine bound via (DZ-a,b,c). -/
+theorem DZ_cos_le (n : ℕ) :
+    Real.cos (ZDelta n)
+      ≤ 1 - (8.75 / (17 + (n : ℝ))) ^ 2 / 2
+        + (8.75 / (17 + (n : ℝ))) ^ 4 / 24 := by
+  have hL0 : (0 : ℝ) ≤ 8.75 / (17 + (n : ℝ)) :=
+    div_nonneg (by norm_num) (by positivity)
+  exact DZ_cos_le_of_ge hL0 (DZ_delta_lower n) (DZ_delta_le_one n)
+
+set_option maxHeartbeats 800000 in
+/-- (DZ-d) HEADLINE true-phase diagonal bound on `[16,32)`:
+`Re(∑_{n<16} exp(i·δₙ)) ≤ 14.9 < 15`, beating the triangle `16`. -/
+theorem DZ_diag_Re_le : ZDiag16.re ≤ 14.9 := by
+  have ere : ZDiag16.re = ∑ n ∈ Finset.range 16, Real.cos (ZDelta n) := by
+    unfold ZDiag16
+    rw [Complex.re_sum]
+    refine Finset.sum_congr rfl (fun n _ => ?_)
+    rw [Complex.exp_ofReal_mul_I_re]
+  rw [ere]
+  have hterm : ∀ n ∈ Finset.range 16,
+      Real.cos (ZDelta n)
+        ≤ 1 - (8.75 / (17 + (n : ℝ))) ^ 2 / 2
+          + (8.75 / (17 + (n : ℝ))) ^ 4 / 24 :=
+    fun n _ => DZ_cos_le n
+  have hsum := Finset.sum_le_sum hterm
+  have hnum : (∑ n ∈ Finset.range 16,
+      (1 - (8.75 / (17 + (n : ℝ))) ^ 2 / 2
+        + (8.75 / (17 + (n : ℝ))) ^ 4 / 24)) ≤ 14.9 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+    norm_num
+  linarith
+
+/-- (DZ-e) Weyl identification for the true phase: the `h = 1` autocorrelation
+is the diagonal exponential (mirror of `DV_quad_autocorr` with the exact
+telescoping exponent `φ(n+1) - φ(n)`). -/
+theorem DZ_piece_autocorr (n : ℕ) :
+    ZPiece (n + 1) * star (ZPiece n)
+      = Complex.exp ((ZDelta n : ℂ) * Complex.I) := by
+  rw [Complex.star_def]
+  unfold ZPiece ZDelta
+  rw [← Complex.exp_conj, ← Complex.exp_add]
+  congr 1
+  apply Complex.ext
+  · simp only [Complex.add_re, Complex.mul_re, Complex.conj_re,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    ring
+  · simp only [Complex.add_im, Complex.mul_im, Complex.conj_im,
+      Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    ring
+
+/-- (DZ-e) Diagonal identification with the landed `DV_diagN` length-N form. -/
+theorem DZ_diagN_eq : DV_diagN ZPiece 16 = ZDiag16 := by
+  unfold DV_diagN ZDiag16
+  exact Finset.sum_congr rfl (fun n _ => DZ_piece_autocorr n)
+
+/-- (DZ-e) Unit modulus of the true-phase piece. -/
+theorem DZ_piece_unit (n : ℕ) : ‖ZPiece n‖ = 1 := by
+  unfold ZPiece
+  exact Complex.norm_exp_ofReal_mul_I _
+
+set_option maxHeartbeats 800000 in
+/-- (DZ-e) `DV_A_H2` feed on the TRUE phase: `‖S‖ ≤ 16.73`. HONESTLY VACUOUS
+vs triangle `16` (the banked diagonal `14.9` does not clear the H=2 savings
+threshold `B < 12.125`); banked to close the loop read-only through the
+landed A-process inequality. -/
+theorem DZ_piece_DV_feed :
+    ‖∑ n ∈ Finset.range 16, ZPiece n‖ ≤ 16.73 := by
+  have hA := DV_A_H2 ZPiece 16 DZ_piece_unit
+  rw [DZ_diagN_eq] at hA
+  have eN : ((((16 : ℕ))) : ℝ) = (16 : ℝ) := by norm_num
+  rw [eN] at hA
+  have hB : (16 : ℝ) * (2 * 16 + 2 * ZDiag16.re) ≤ 988.8 := by
+    have h1 : (2 : ℝ) * 16 + 2 * ZDiag16.re ≤ 2 * 16 + 2 * 14.9 := by
+      linarith [DZ_diag_Re_le]
+    have h2 := mul_le_mul_of_nonneg_left h1 (show (0 : ℝ) ≤ 16 by norm_num)
+    have h3 : (16 : ℝ) * (2 * 16 + 2 * 14.9) ≤ 988.8 := by norm_num
+    exact le_trans h2 h3
+  have hsqrt : Real.sqrt ((16 : ℝ) * (2 * 16 + 2 * ZDiag16.re)) ≤ 31.45 := by
+    have h := Real.sqrt_le_sqrt hB
+    have e : Real.sqrt (988.8 : ℝ) ≤ 31.45 := by
+      have hle : (988.8 : ℝ) ≤ 31.45 ^ 2 := by norm_num
+      have h2 := Real.sqrt_le_sqrt hle
+      rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 31.45)] at h2
+    exact le_trans h e
+  have hfin : (Real.sqrt ((16 : ℝ) * (2 * 16 + 2 * ZDiag16.re)) + 2) / 2
+      ≤ 16.73 := by
+    linarith
+  exact le_trans hA hfin
+
+/-!
+RESIDUAL (DZ report-and-stop): the literal ONE bridge is banked — a TRUE-phase
+diagonal `14.9 < 15` beating the triangle `16` (`DZ_diag_Re_le`), built from
+Tier-1 KL read-only (`KL_log_gap_ge`) plus the quartic cosine majorant, with
+zero modeling error (true `8.75·log` increments, no synthetic quadratic).
+The `DV_A_H2` loop is closed read-only (`DZ_piece_DV_feed`), but its value
+`16.73` is HONESTLY VACUOUS vs triangle `16`: at H=2 a coherent
+(positive-Re) diagonal needs `B < 12.125` for savings, and no H helps while
+all small-shift autocorrelations sit near `+N` — differencing cannot beat
+coherence. Gap vs the conditional premise: per-16-block need is `12/6300 ≈
+0.0019` amplitude-weighted; BS baseline `5/3` averages `≈ 0.0265`/piece
+(`13.9×` short on the total); the DZ diagonal is a unit-modulus MACHINERY
+input (replaces the synthetic-`a = 0.7` diagonal), not yet a per-piece
+amplitude bound.
+
+EXACT NEXT-AGENT TASK (k=1 direct on the `[16,32)` block, append-only DZ tail,
+reuse `KL_linear_firstDerivTest` + `DV_range16_split` read-only): linearize
+`8.75·log(16+n)` about `n = 8` with slope `θ = 8.75/24` (`|θ| ≤ π/2`,
+`θ ≠ 0`); write `φₙ = A + nθ + εₙ` with `xₙ = (n-8)/24 ∈ [-1/3, 1/3]` and
+`εₙ = 8.75·(log(1+xₙ)-xₙ)`; prove in-file `|log(1+x)-x| ≤ x²` there (both
+sides from `Real.log_le_sub_one_of_pos`), so `∑|εₙ| ≤ 8.75·408/576 ≈ 6.2`;
+prove in-file `‖exp(iε)-1‖ ≤ |ε|`; then
+`‖∑_{n<16} exp(iφₙ)‖ ≤ π/|θ| + ∑|εₙ| ≤ 8.62 + 6.2 = 14.82 < 16`
+(`π/θ = 24π/8.75 ≤ 8.62` via `Real.pi_lt_d4`), a TRUE-phase per-piece
+nontrivial bound. Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with the residual.
+-/
+
+#print axioms ZPhi
+#print axioms ZDelta
+#print axioms ZPiece
+#print axioms ZDiag16
+#print axioms DZ_delta_lower
+#print axioms DZ_delta_le_one
+#print axioms DZ_cos_le_of_ge
+#print axioms DZ_cos_le
+#print axioms DZ_diag_Re_le
+#print axioms DZ_piece_autocorr
+#print axioms DZ_diagN_eq
+#print axioms DZ_piece_unit
+#print axioms DZ_piece_DV_feed
