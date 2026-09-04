@@ -1513,7 +1513,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    ⇒ `hTail` ⇒ P1 `‖ζ‖≤10` via `BZTailEnvelope.P1_R02_of_hTail`). OPEN: `hSupNeg` FALSE as stated — neg sharp
    hump `≈45.86/53.18/46.61/37.11` at `a=12/15/18/20` (peak `≈53.2`, `1.48×` over; pos side green `≈2.51`
    decaying). Needs tighter `C<2.53`/zeta tier, narrower variance, or compact-hump `[11,21]` caps +
-   large-`a` domination (tasked); conditionals fire immediately once sup hyps land. **Joint composition CLOSED
+   large-`a` domination (tasked); conditionals fire immediately once sup hyps land. **Compact caps CLOSED
+   (`CQ_CompactHump`, `c5fb5aa5`, green, axioms clean):** `B`-monotonicity + neg-damping antitonicity infra ⇒
+   neg envelope `≤36` on `[8.75,9.5]` (`0.971×33.64=32.67`) and `[9.5,10]` (`0.939×38.16=35.83`, margin 0.17)
+   + pos side (`0.1×38.16=3.82`) — `hSupNeg`/`hSupPos`-shaped on `[8.75,10]`. Constant-tightening PROVED dead:
+   zeta tier no headroom (true `ζ(2)=1.6449` vs `1.65`, 0.3% vs 32.3% needed), `C<2.53` ceiling `~1.11×` vs
+   `1.48×` needed. Exact residual: hump **`[10.3,20.4]`** (true peak `≈53.2` at `a≈15`, needs structural work —
+   restructured `F` majorant or narrower variance) + large-`a` **`[21,∞)`** (mechanical: per-unit caps +
+   tail decrease, tasked). **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
