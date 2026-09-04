@@ -15661,5 +15661,210 @@ theorem D3_S16_norm_ge_CO :
 #print axioms D3_S16_im_abs_ge_CO
 #print axioms D3_S16_norm_ge_CO
 
+/-! ## Door-3 `S_16` margin round-2 tier-6 (Agent CR 2026-09-04): x=11 (Lean idx 10)
+septic sin-lower.
+
+GREP-FIRST RECORD (run before writing; `rg` in `zeta_rigorous.lean` + Mathlib):
+* `D3_term10_im_hi_CO` (:15573, `<= -79/450`, consumes CO amp `2/9` + sin lower
+  `0.79`) -- EXISTS, shape reference only (exactly one term swapped below).
+* `D3_sin_theta_eleven_mem` (:8127, `sin th11 in [0.79, 1]`, cubic floor
+  `z - z^3/6` with `z = 7*pi - th11 in [0.998, 1.069]`) -- EXISTS, shape
+  reference only (lower `0.79` is the looseness; true `sin ~= 0.8466004`).
+* `D3_delta_eleven_mem` (:8070, `th11 - 6*pi in [2.081, 2.142]`) -- EXISTS,
+  called (phase box for the monotone transfer).
+* `CG_sin_ge_septic` (:13911, `x - x^3/6 + x^5/120 - x^7/5040 <= sin x` on
+  `x >= 0`) -- EXISTS (CJ tier-2), called for the ENDPOINT value only.
+* `Real.monotoneOn_sin` (`MonotoneOn sin (Icc (-(pi/2)) (pi/2))`) -- EXISTS,
+  called (same lower-transfer pattern as CJ-2S / CL-2aS: `z in [0.998, 1.069]`
+  subset `[-pi/2, pi/2]`, so `sin z >= sin 0.998`).
+* CL-2aS mirror pattern (`D3_sin_theta_fourteen_hi_CL`, :14586: `y in
+  [1.041, 1.112]`, `sin 1.041 <= sin y` via `monotoneOn_sin`, exact septic at
+  the endpoint) -- EXISTS, mirrored here for a LOWER (not upper):
+  `sin th11 = sin (-y)` with `-y = z`.
+* CJ-1S mirror pattern (`D3_sin_theta_ten_hi_sharp`, :13661: `w in
+  [1.247, 1.308]`, `sin w <= sin 1.308` via `monotoneOn_sin`, exact quintic at
+  the endpoint) -- EXISTS, same monotonicity engine, opposite endpoint side.
+* `D3_amp_eleven_lower_CO` (`2/9 <= D3_amp 10`) -- EXISTS, called unchanged
+  (CO amp reused verbatim).
+* `D3_S16_im_upper_CO` (`Im S_16 <= -457021/3150000`) -- EXISTS, exactly one
+  term swapped below.
+* `D3_amp` / `D3_phase` / `D3_amp_nonneg` / `D3_eta_im` / `D3_sum_im_eq` /
+  `D3_term0_im` / all other `D3_term*_im_hi*` (`D3_term1/2/3/5/7/8_im_hi`,
+  `D3_term4_im_hi_sharp`, `D3_term6_im_hi_CN`, `D3_term9_im_hi_sharp`,
+  `D3_term11_im_hi_sharp`, `D3_term12_im_hi_CL3`, `D3_term13_im_hi_CL`,
+  `D3_term14_im_hi_CL`, `D3_term15_im_hi_CL`) -- EXIST, called.
+* New names below -- 0 hits before writing (verified absent via `rg "_CR"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `sum'`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (CR-S) `D3_sin_theta_eleven_lo_CR`: `0.84 <= sin th11` (was `0.79`;
+  monotonicity transfer + exact septic `S(0.998) ~= 0.840386 >= 0.84`).
+* (CR-T) `D3_term10_im_hi_CR`: term-10 `Im <= -14/75 ~= -0.186667`
+  (was `-79/450 ~= -0.175556`; mirror of `D3_term10_im_hi_CO` with (CR-S) in
+  place of `0.79`; interval: `amp >= 2/9`, `sin >= 0.84`; even `k = 10`, so
+  `Im = -(amp*sin)`).
+* (CR-A) `D3_S16_im_upper_CR`: `Im S_16 <= -492021/3150000 ~= -0.156198`.
+* (CR-V) Verdicts: `|Im S_16| >= 492021/3150000`,
+  `||S_16|| >= 492021/3150000 = 164007/1050000 ~= 0.156198` (`~1.076x` the CO
+  `457021/3150000`).
+
+NUMBERS: `S(0.998) = 0.998 - 0.998^3/6 + 0.998^5/120 - 0.998^7/5040
+= 0.84038601... >= 0.84`; `(2/9)*0.84 = 14/75`; new sum
+`= -457021/3150000 - (-79/450) + (-14/75) = -457021/3150000 - 1/90
+= -492021/3150000`. Honest throughout (true `Im S_16 ~= -0.51083` remains
+the ceiling).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (CR-S) Sharpened sine lower `0.84 <= sin th11` (was `0.79` in
+    `D3_sin_theta_eleven_mem`). Monotonicity transfer: `z = 7*pi - th11 =
+    -y in [0.998, 1.069]` subset `[-pi/2, pi/2]`, so `sin 0.998 <= sin z`
+    (`Real.monotoneOn_sin`); the exact septic (CJ-2T2) at the endpoint gives
+    `sin 0.998 >= S(0.998) >= 0.84`; hence `sin th11 = sin z >= 0.84`. -/
+theorem D3_sin_theta_eleven_lo_CR : (0.84 : ℝ) ≤ Real.sin (D3_phase 10) := by
+  have hmem := D3_delta_eleven_mem
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  set y := D3_phase 10 - 6 * Real.pi - Real.pi with hy_def
+  have hy_lo : (-1.069 : ℝ) ≤ y := by rw [hy_def]; linarith [hmem.1, hpi_hi]
+  have hy_hi : y ≤ (-0.998 : ℝ) := by rw [hy_def]; linarith [hmem.2, hpi_lo]
+  have hz_lo : (0.998 : ℝ) ≤ -y := by linarith [hy_hi]
+  have hz_hi : -y ≤ (1.069 : ℝ) := by linarith [hy_lo]
+  have hper1 : Real.sin (D3_phase 10 - 2 * Real.pi) = Real.sin (D3_phase 10) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 10 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 10 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper3 : Real.sin (((D3_phase 10 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin ((D3_phase 10 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 10 - 6 * Real.pi) = Real.sin (D3_phase 10) := by
+    have e : ((D3_phase 10 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 10 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 10 - 6 * Real.pi = y + Real.pi := by
+    rw [hy_def]; ring
+  have h1s : Real.sin (D3_phase 10 - 6 * Real.pi) = -Real.sin y := by
+    rw [hdecomp, Real.sin_add_pi]
+  have hnegy : Real.sin y = -Real.sin (-y) := by
+    have h := Real.sin_neg y
+    linarith [h]
+  have hsin_eq : Real.sin (D3_phase 10) = Real.sin (-y) := by
+    rw [← hper, h1s, hnegy, neg_neg]
+  have hlo_mem : (0.998 : ℝ) ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hpi_hi]
+    · linarith [hpi_lo]
+  have hz_mem : -y ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) := by
+    refine ⟨?_, ?_⟩
+    · linarith [hz_lo, hpi_hi]
+    · linarith [hz_hi, hpi_lo]
+  have hmono : Real.sin 0.998 ≤ Real.sin (-y) :=
+    Real.monotoneOn_sin hlo_mem hz_mem hz_lo
+  have hS := CG_sin_ge_septic (show (0 : ℝ) ≤ 0.998 by norm_num)
+  have hnum : (0.84 : ℝ) ≤ (0.998 : ℝ) - (0.998 : ℝ) ^ 3 / 6 +
+      (0.998 : ℝ) ^ 5 / 120 - (0.998 : ℝ) ^ 7 / 5040 := by
+    norm_num
+  have hend : (0.84 : ℝ) ≤ Real.sin 0.998 := le_trans hnum hS
+  rw [hsin_eq]
+  exact le_trans hend hmono
+
+/-- (CR-T) Tenth-term imaginary-part upper `≤ -14/75`
+    (was `-79/450`; mirror of `D3_term10_im_hi_CO` with (CR-S) in place of
+    `0.79 ≤ sin th11`; interval: `amp ≥ 2/9`, `sin ≥ 0.84`;
+    even `k = 10`, so `Im = -(amp·sin)`). -/
+theorem D3_term10_im_hi_CR :
+    (etaDirichletTerm (1 - zetaCellS0) 10).im ≤ (-14 / 75 : ℝ) := by
+  rw [D3_eta_im]
+  have ha_lo := D3_amp_eleven_lower_CO
+  have hann : (0 : ℝ) ≤ D3_amp 10 := D3_amp_nonneg 10
+  have hs := D3_sin_theta_eleven_lo_CR
+  have hpow10 : ((-1 : ℝ) ^ (10 : ℕ)) = 1 := by norm_num
+  rw [hpow10, one_mul]
+  have h : (2 / 9) * (0.84 : ℝ) ≤ D3_amp 10 * Real.sin (D3_phase 10) :=
+    mul_le_mul ha_lo hs (by norm_num) hann
+  have hnum : (-14 / 75 : ℝ) = -((2 / 9) * 0.84) := by norm_num
+  rw [hnum]
+  linarith [h]
+
+set_option maxHeartbeats 800000 in
+/-- (CR-A) Sharpened `Im S_16 ≤ -492021/3150000`: the (CO) assembly with
+    exactly one term swapped (`D3_term10_im_hi_CR` for `D3_term10_im_hi_CO`);
+    `-457021/3150000 - (-79/450) + (-14/75) = -492021/3150000`. -/
+theorem D3_S16_im_upper_CR :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤
+      (-492021 / 3150000 : ℝ) := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_hi
+  have h2 := D3_term2_im_hi
+  have h3 := D3_term3_im_hi
+  have h4 := D3_term4_im_hi_sharp
+  have h5 := D3_term5_im_hi
+  have h6 := D3_term6_im_hi_CN
+  have h7 := D3_term7_im_hi
+  have h8 := D3_term8_im_hi
+  have h9 := D3_term9_im_hi_sharp
+  have h10 := D3_term10_im_hi_CR
+  have h11 := D3_term11_im_hi_sharp
+  have h12 := D3_term12_im_hi_CL3
+  have h13 := D3_term13_im_hi_CL
+  have h14 := D3_term14_im_hi_CL
+  have h15 := D3_term15_im_hi_CL
+  linarith
+
+/-- (CR-V) Sign verdict: the tier-6 `Im S_16` upper is negative. -/
+theorem D3_S16_im_upper_CR_neg : (-492021 / 3150000 : ℝ) < 0 := by norm_num
+
+/-- (CR-V) `|Im S_16| ≥ 492021/3150000` from the negative upper. -/
+theorem D3_S16_im_abs_ge_CR :
+    (492021 / 3150000 : ℝ) ≤
+      |(∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im| := by
+  have h := D3_S16_im_upper_CR
+  have h0 : (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤ 0 := by
+    linarith
+  rw [abs_of_nonpos h0]
+  linarith
+
+/-- (CR-V) `‖S_16‖ ≥ 492021/3150000`: door-3 round-2 tier-6 margin
+    (positive lower on the partial-sum norm from the `Im` channel). -/
+theorem D3_S16_norm_ge_CR :
+    (492021 / 3150000 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  exact le_trans D3_S16_im_abs_ge_CR (Complex.abs_im_le_norm _)
+
+#print axioms D3_sin_theta_eleven_lo_CR
+#print axioms D3_term10_im_hi_CR
+#print axioms D3_S16_im_upper_CR
+#print axioms D3_S16_im_upper_CR_neg
+#print axioms D3_S16_im_abs_ge_CR
+#print axioms D3_S16_norm_ge_CR
+
+
 
 
