@@ -1462,7 +1462,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
   `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
-  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **xi-bridge banked (`BLMiddleEnvelope`,
+  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Tail numerals landing
+  (`BV2OuterTail`):** outer-envelope Gaussian domination `T=18·exp(165.23)` green; middle exp-3/2
+  numeral (Young `u^{3/2}` bound + completing square) tasked, then tail-`T` assembly. **xi-bridge banked (`BLMiddleEnvelope`,
   Hadamard import added cycle-free):** unconditional `xi→F` transfer with explicit denominators +
   `hBdd`/P1 conditional on `StripEnvelope` R1 only. Residual: (R1) strip `Gammaℝ` lower via reflection
   (right closable via Euler, left via FE, middle missing) + (R2) Stirling-sharp tail bound (crude
