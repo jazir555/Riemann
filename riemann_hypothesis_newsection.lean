@@ -3122,4 +3122,448 @@ theorem damped_joint_window {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75
 
 end Door3JointGammaCos
 
+/-!
+# BF2 tail caps: AR window-36 to whole-line shapes (door-3/door-4 feeder, append-only)
+
+GREP-FIRST RECORD (repo + Mathlib, via `rg`, 2026-09-04; everything below reuses,
+nothing recreates):
+* AD assembly + threshold: `ZetaUpperR02ThreeLines.zetaUpper_R02_ten_of_bounds`
+  (`riemann_hypothesis_newsection.lean:1398`: whole-line `A ≤ 50.925` at `l = -1`,
+  `B ≤ A` at `u = 2`, plus `BddAbove` ⇒ `‖ζ‖ ≤ 10` on the R02 rect).
+* AJ assembly family: `TailZetaUpper_threeLines_FE_assembly` (`:1677`, whole-line
+  constant caps + `BddAbove` ⇒ pointwise bound), `..._uniformExp` (`:1756`),
+  `..._threshold_50p925` (`:1809`, fires only from whole-line `A ≤ 50.925`).
+* AR window cap: `Door3JointGammaCos.damped_joint_window` (`:3043`:
+  `‖G‖ ≤ 36` on `Re = -1`, `|Im| ≤ 8.75`, with `G = dampedPoleRemoved`).
+* Right `ζ` edge, Im-uniform and whole-line: `TailZetaUpper.zeta_rightEdge_B2`
+  (`:1040`, `Re ≥ 2 → ‖zeta‖ ≤ 2`).
+* Sharp cpow `≤ 1/36` on `Re = 2` (hypothesis is only `Re`, hence whole-line):
+  `Door3SharpWindow.cpow_sharp_Re2` (`:1972`); Gamma `≤ 1` on `Re = 2`:
+  `Door3SharpWindow.gamma_uniform_Re2` (`:2256`).
+* Generic cos majorant: `RowFE.RowFE_norm_cos_le` (`interval_arith.lean:30905`,
+  `‖cos w‖ ≤ exp B` from `|Im w| ≤ B`).
+* FE cos form: `riemannZeta_one_sub`; Mathlib:
+  `Complex.norm_le_abs_re_add_abs_im`, `Real.exp_nat_mul`, `Real.exp_one_lt_d9`,
+  `Real.add_one_le_exp`, `Real.exp_add`, `Complex.div_ofNat_im`,
+  `le_of_pow_le_pow_left₀`, `le_div_iff₀`, `one_div_div`.
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `damped_left_window_preimage`: AR's `36` restated in the exact preimage binder
+  shape the assemblies consume
+  (`∀ z ∈ preimage re {-1}, |Im| ≤ 8.75 → ‖G‖ ≤ 36`).
+* `cos_FE_generic`, `damp_left_whole_le`, `factor_left_whole_le`,
+  `zeta_Re_neg1_whole_le`: whole-line ingredients on `Re = -1`
+  (cos `≤ exp(π|Im|/2)`, damping `≤ 1.02`, FE factor `≤ (1/18)·exp(π|Im|/2)`).
+* `damped_left_whole_growth` (TIER-1 MAIN): whole-line
+  `‖G(z)‖ ≤ (2 + |Im z|) · ((1/9) · 1.02 · exp(π|Im z|/2))` on `Re = -1`,
+  the satisfiable whole-line variant with explicit `|Im|` growth.
+* `damped_right_whole_36` (TIER-2 right piece): whole-line `‖G(s)‖ ≤ 36` on
+  `Re = 2` in the exact `hRight` shape (`B = 36 ≤ A = 36`), via `B₂`, the triangle
+  bound `‖s-1‖ ≤ 1 + |Im|`, `exp(0.04) ≤ 1.05`, `exp(-t) ≤ 1/(1+t)`, and the
+  polynomial-times-Gaussian sup `(7.75+r)·100/(100+r²) ≤ 11`
+  (i.e. `11r²-100r+325 ≥ 0`, discriminant `10000 - 14300 < 0`).
+
+P1 VERDICT + RESIDUAL (report-and-stop): whole-line CONSTANT `A ≤ 50.925` on
+`Re = -1` does NOT fit — the crude-majorant truth there is exponential
+(`cosh(π|Im|/2)` versus Gaussian damping, worst around `|Im| ≈ 85`), while the
+sharp truth `O(10)` needs the joint `Γ·cos` identity for ALL `Im` plus Stirling
+(both absent repo-wide). Hence AD's `..._ten_of_bounds` (and AJ's
+`..._threshold_50p925`) do NOT fire from this tail; `BddAbove` on `[-1,2]` stays
+an explicit premise everywhere (needs strip `ζ`-growth, likewise absent); the
+composed R02 `‖ζ‖ ≤ 10` stays OPEN. What now fits exactly: `hRight` with
+`B = 36` (this tail) + windowed `hLeft` with `A = 36` (AR) + the whole-line
+growth `hLeft`-variant (this tail).
+-/
+
+namespace BF2TailCaps
+
+/-- AR's window cap in the exact preimage binder shape the assemblies consume. -/
+theorem damped_left_window_preimage {z : ℂ}
+    (hz : z ∈ Set.preimage Complex.re {(-1 : ℝ)}) (him : |z.im| ≤ 8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 := by
+  have hz_re : z.re = -1 := by simpa using hz
+  exact Door3JointGammaCos.damped_joint_window hz_re him
+
+/-- Generic FE-cos bound: `‖cos(πw/2)‖ ≤ exp(π|Im w|/2)` for ALL `Im`
+(via `RowFE_norm_cos_le`; no window hypothesis). -/
+theorem cos_FE_generic {w : ℂ} :
+    ‖Complex.cos ((Real.pi : ℂ) * (w / 2))‖ ≤ Real.exp (Real.pi * |w.im| / 2) := by
+  have hs2im : (w / 2).im = w.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (w / 2)).im = Real.pi * (w.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hB : |(((Real.pi : ℂ) * (w / 2)).im)| ≤ Real.pi * |w.im| / 2 := by
+    rw [hw_im]
+    have h1 : |Real.pi * (w.im / 2)| = Real.pi * |w.im| / 2 := by
+      rw [abs_mul, abs_of_pos Real.pi_pos, abs_div, abs_two]
+      ring
+    exact le_of_eq h1
+  exact RowFE.RowFE_norm_cos_le hB
+
+/-- Whole-line damping `≤ 1.02` on `Re = -1`: `(1-u²)/100 ≤ 0.01` for every `u`
+(AR's `damp_sharp_window` proof minus the window hypothesis). -/
+theorem damp_left_whole_le {z : ℂ} (hz_re : z.re = -1) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1.02 := by
+  have hsq2 : ((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 1 - (z.im + 6.75) ^ 2 := by
+    have e1 : (z - ZetaUpperR02ThreeLines.dampCenter).re = -1 := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, hz_re, sub_zero]
+    have e2 : (z - ZetaUpperR02ThreeLines.dampCenter).im = z.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ 0.01 := by
+    have hwm : ((((1 / 100 : ℝ)) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+        = (1 / 100) * ((((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+      rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [hwm, hsq2]
+    have ht2 : (0 : ℝ) ≤ (z.im + 6.75) ^ 2 := sq_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  have hexp : Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp 0.01 := Real.exp_le_exp_of_le hwre
+  have h102 : Real.exp (0.01 : ℝ) ≤ 1.02 := by
+    have hE100 : (Real.exp (0.01 : ℝ)) ^ 100 = Real.exp 1 := by
+      have h := Real.exp_nat_mul (0.01 : ℝ) (100 : ℕ)
+      have h100 : ((100 : ℕ) : ℝ) * 0.01 = 1 := by norm_num
+      rw [h100] at h
+      exact h.symm
+    have hbern : (3 : ℝ) ≤ (1.02 : ℝ) ^ (100 : ℕ) := by
+      have hb := one_add_mul_le_pow (show (-2 : ℝ) ≤ (0.02 : ℝ) by norm_num)
+        (100 : ℕ)
+      rw [show ((100 : ℕ) : ℝ) * (0.02 : ℝ) = 2 by norm_num,
+        show (1 : ℝ) + 0.02 = 1.02 by norm_num,
+        show (1 : ℝ) + 2 = 3 by norm_num] at hb
+      exact hb
+    have hlt : Real.exp (1 : ℝ) < 2.7182818286 := Real.exp_one_lt_d9
+    have hle : (Real.exp (0.01 : ℝ)) ^ 100 ≤ (1.02 : ℝ) ^ (100 : ℕ) := by
+      rw [hE100]
+      linarith [hlt, hbern]
+    exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+  linarith [hexp, h102]
+
+/-- Whole-line FE factor on `Re = 2`: `‖RowFEFactor w‖ ≤ (1/18)·exp(π|Im w|/2)`
+(manual norm equation as in `factor_joint_le`, with the sharp whole-line cpow
+`1/36`, uniform Gamma `≤ 1`, and the generic cos). -/
+theorem factor_left_whole_le {w : ℂ} (hw : w.re = 2) :
+    ‖RowFE.RowFEFactor w‖ ≤ (1 / 18) * Real.exp (Real.pi * |w.im| / 2) := by
+  have hcpow := Door3SharpWindow.cpow_sharp_Re2 hw
+  have hG : ‖Complex.Gamma w‖ ≤ 1 := Door3SharpWindow.gamma_uniform_Re2 hw
+  have hcos : ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ Real.exp (Real.pi * |w.im| / 2) := by
+    have e : (Real.pi : ℂ) * w / 2 = (Real.pi : ℂ) * (w / 2) :=
+      mul_div_assoc _ _ _
+    rw [e]
+    exact cos_FE_generic
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  rw [hnorm_eq, h2norm]
+  have hA : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36) :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  have hB : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 1 * Real.exp (Real.pi * |w.im| / 2) :=
+    mul_le_mul hG hcos (norm_nonneg _) (by norm_num)
+  calc (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖)
+      ≤ (2 * (1 / 36)) * (1 * Real.exp (Real.pi * |w.im| / 2)) :=
+        mul_le_mul hA hB (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
+    _ = (1 / 18) * Real.exp (Real.pi * |w.im| / 2) := by ring
+
+/-- Whole-line `ζ` on `Re = -1` via FE reflection to `Re = 2` (where `B₂` is
+Im-uniform): `‖ζ(z)‖ ≤ (1/9)·exp(π|Im z|/2)`. -/
+theorem zeta_Re_neg1_whole_le {z : ℂ} (hz_re : z.re = -1) :
+    ‖riemannZeta z‖ ≤ (1 / 9) * Real.exp (Real.pi * |z.im| / 2) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz_re]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz_re] at hre
+    have hnn : (0 : ℝ) ≤ (((n : ℕ)) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz_re] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have him_eq : |((1 : ℂ) - z).im| = |z.im| := by
+    rw [hw_im, abs_neg]
+  have hFactor : ‖RowFE.RowFEFactor (1 - z)‖
+      ≤ (1 / 18) * Real.exp (Real.pi * |z.im| / 2) := by
+    have h := factor_left_whole_le (w := 1 - z) hw_re
+    rwa [him_eq] at h
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ ((1 / 18) * Real.exp (Real.pi * |z.im| / 2)) * 2 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) (by positivity)
+    _ = (1 / 9) * Real.exp (Real.pi * |z.im| / 2) := by ring
+
+/-- TIER-1 MAIN: whole-line damped left cap with explicit `|Im|` growth. -/
+theorem damped_left_whole_growth {z : ℂ} (hz_re : z.re = -1) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖
+      ≤ (2 + |z.im|) * ((1 / 9) * 1.02 * Real.exp (Real.pi * |z.im| / 2)) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hsub : ‖z - 1‖ ≤ 2 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    have hre1 : (z - 1).re = -2 := by
+      rw [Complex.sub_re, Complex.one_re, hz_re]
+      norm_num
+    have him1 : (z - 1).im = z.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    have e : |(-2 : ℝ)| = 2 := by norm_num
+    rw [hre1, him1, e] at h
+    linarith
+  have hZ := zeta_Re_neg1_whole_le hz_re
+  have hdamp := damp_left_whole_le hz_re
+  have hnn_e : (0 : ℝ) ≤ (1 / 9) * Real.exp (Real.pi * |z.im| / 2) :=
+    mul_nonneg (by norm_num) (Real.exp_pos _).le
+  have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+      ≤ (2 + |z.im|) * ((1 / 9) * Real.exp (Real.pi * |z.im| / 2)) := by
+    have h1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+        ≤ ‖z - 1‖ * ((1 / 9) * Real.exp (Real.pi * |z.im| / 2)) := by
+      rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+      exact mul_le_mul_of_nonneg_left hZ (norm_nonneg _)
+    exact le_trans h1
+      (mul_le_mul_of_nonneg_right hsub hnn_e)
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ ((2 + |z.im|) * ((1 / 9) * Real.exp (Real.pi * |z.im| / 2))) * 1.02 :=
+        mul_le_mul hF hdamp (norm_nonneg _)
+          (mul_nonneg (by have hnn := abs_nonneg z.im; linarith) hnn_e)
+    _ = (2 + |z.im|) * ((1 / 9) * 1.02 * Real.exp (Real.pi * |z.im| / 2)) := by
+        ring
+
+/-- `exp(0.04) ≤ 1.05` (`(exp 0.04)^25 = exp 1 < 2.7183 < 3 ≤ 1.05^25`). -/
+theorem exp_004_le_105 : Real.exp (0.04 : ℝ) ≤ 1.05 := by
+  have hE25 : (Real.exp (0.04 : ℝ)) ^ (25 : ℕ) = Real.exp 1 := by
+    have h := Real.exp_nat_mul (0.04 : ℝ) (25 : ℕ)
+    have h25 : ((25 : ℕ) : ℝ) * 0.04 = 1 := by norm_num
+    rw [h25] at h
+    exact h.symm
+  have hbern : (3 : ℝ) ≤ (1.05 : ℝ) ^ (25 : ℕ) := by norm_num
+  have hlt : Real.exp (1 : ℝ) < 2.7182818286 := Real.exp_one_lt_d9
+  have hle : (Real.exp (0.04 : ℝ)) ^ (25 : ℕ) ≤ (1.05 : ℝ) ^ (25 : ℕ) := by
+    rw [hE25]
+    linarith [hlt, hbern]
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `exp(-t) ≤ 1/(1+t)` for `t ≥ 0` (from `1+t ≤ exp t`). -/
+theorem exp_neg_le_inv {t : ℝ} (ht : 0 ≤ t) :
+    Real.exp (-t) ≤ 1 / (1 + t) := by
+  have h1 : (1 : ℝ) + t ≤ Real.exp t := by linarith [Real.add_one_le_exp t]
+  have hpos : (0 : ℝ) < 1 + t := by linarith
+  have e : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-t) * (1 + t) ≤ 1 := by
+    calc Real.exp (-t) * (1 + t) ≤ Real.exp (-t) * Real.exp t :=
+          mul_le_mul_of_nonneg_left h1 (Real.exp_pos _).le
+      _ = 1 := e
+  rw [le_div_iff₀ hpos]
+  exact hmul
+
+/-- Polynomial-times-Gaussian sup for the right edge:
+`(7.75+r)·100/(100+r²) ≤ 11` for `r ≥ 0`
+(i.e. `11r²-100r+325 ≥ 0`, discriminant `10000 - 14300 < 0`). -/
+theorem right_sup_aux {r : ℝ} (_hr : 0 ≤ r) :
+    (7.75 + r) * 100 / (100 + r ^ 2) ≤ 11 := by
+  have hden : (0 : ℝ) < 100 + r ^ 2 := by
+    have h := sq_nonneg r
+    linarith
+  rw [div_le_iff₀ hden]
+  nlinarith [sq_nonneg (11 * r - 50)]
+
+/-- Damping real part on `Re = 2`:
+`Re((1/100)(s-c)²) = 0.04 - (Im+6.75)²/100`. -/
+theorem damp_Re2_re {s : ℂ} (hs_re : s.re = 2) :
+    ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 0.04 - (s.im + 6.75) ^ 2 / 100 := by
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (1 / 100) * ((((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hsq2 : ((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (s.re) ^ 2 - (s.im + 6.75) ^ 2 := by
+    have e1 : (s - ZetaUpperR02ThreeLines.dampCenter).re = s.re := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, sub_zero]
+    have e2 : (s - ZetaUpperR02ThreeLines.dampCenter).im = s.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  rw [hwre, hsq2, hs_re]
+  ring
+
+/-- Damping split on `Re = 2` (keeps the Gaussian decay explicit). -/
+theorem damp_Re2_split {s : ℂ} (hs_re : s.re = 2) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100)) := by
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp, damp_Re2_re hs_re,
+    ← Real.exp_add]
+  congr 1
+
+/-- TIER-2 right piece: whole-line `‖G(s)‖ ≤ 36` on `Re = 2`, in the exact
+`hRight` preimage shape (`B = 36 ≤ A = 36` for the uniform assembly). -/
+theorem damped_right_whole_36 {s : ℂ}
+    (hs : s ∈ Set.preimage Complex.re {(2 : ℝ)}) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖ ≤ 36 := by
+  have hs_re : s.re = 2 := by simpa using hs
+  have hs1 : s ≠ 1 := by
+    intro h
+    have hre : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hZ : ‖riemannZeta s‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := s) (by linarith [hs_re])
+    rwa [show zeta s = riemannZeta s from rfl] at h
+  have hsub : ‖s - 1‖ ≤ 1 + |s.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = 1 := by
+      rw [Complex.sub_re, Complex.one_re, hs_re]
+      norm_num
+    have him1 : (s - 1).im = s.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1, abs_one] at h
+    linarith
+  have htri : |s.im| ≤ |s.im + 6.75| + 6.75 := by
+    rw [abs_le]
+    constructor
+    · have h1 := neg_abs_le (s.im + 6.75)
+      linarith
+    · have h2 := le_abs_self (s.im + 6.75)
+      linarith
+  have hpos_e : (0 : ℝ) ≤ Real.exp (-((s.im + 6.75) ^ 2 / 100)) :=
+    (Real.exp_pos _).le
+  have hnn_1t : (0 : ℝ) ≤ 1 + |s.im| := by
+    have hnn := abs_nonneg s.im
+    linarith
+  have hsup : (1 + |s.im|) *
+      (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100))) ≤ 11.55 := by
+    have h1 : (1 : ℝ) + |s.im| ≤ 7.75 + |s.im + 6.75| := by linarith
+    have hnn_7v : (0 : ℝ) ≤ 7.75 + |s.im + 6.75| := by
+      have hnn := abs_nonneg (s.im + 6.75)
+      linarith
+    have h2 : Real.exp (-((s.im + 6.75) ^ 2 / 100))
+        ≤ 100 / (100 + (s.im + 6.75) ^ 2) := by
+      have h := exp_neg_le_inv
+        (show (0 : ℝ) ≤ (s.im + 6.75) ^ 2 / 100 from
+          div_nonneg (sq_nonneg _) (by norm_num))
+      have ee : (1 : ℝ) / (1 + (s.im + 6.75) ^ 2 / 100)
+          = 100 / (100 + (s.im + 6.75) ^ 2) := by
+        have h1e : (1 : ℝ) + (s.im + 6.75) ^ 2 / 100
+            = (100 + (s.im + 6.75) ^ 2) / 100 := by ring
+        rw [h1e, one_div_div]
+      rwa [ee] at h
+    have h3 : ((7.75 + |s.im + 6.75|) * 100) / (100 + (s.im + 6.75) ^ 2)
+        ≤ 11 := by
+      have h := right_sup_aux (abs_nonneg (s.im + 6.75))
+      rwa [sq_abs] at h
+    calc (1 + |s.im|) *
+          (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100)))
+        = Real.exp (0.04 : ℝ) * ((1 + |s.im|) *
+            Real.exp (-((s.im + 6.75) ^ 2 / 100))) := by ring
+      _ ≤ 1.05 * ((7.75 + |s.im + 6.75|) *
+            (100 / (100 + (s.im + 6.75) ^ 2))) := by
+          apply mul_le_mul _ _ _ _
+          · exact exp_004_le_105
+          · exact mul_le_mul h1 h2 hpos_e hnn_7v
+          · exact mul_nonneg hnn_1t hpos_e
+          · norm_num
+      _ = 1.05 * (((7.75 + |s.im + 6.75|) * 100) / (100 + (s.im + 6.75) ^ 2)) := by
+          rw [mul_div_assoc]
+      _ ≤ 1.05 * 11 := mul_le_mul_of_nonneg_left h3 (by norm_num)
+      _ = 11.55 := by norm_num
+  have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ (1 + |s.im|) * 2 := by
+    have h1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ ‖s - 1‖ * 2 := by
+      rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hs1, norm_mul]
+      exact mul_le_mul_of_nonneg_left hZ (norm_nonneg _)
+    exact le_trans h1 (mul_le_mul_of_nonneg_right hsub (by norm_num))
+  have hsplit := damp_Re2_split hs_re
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved s =
+      ZetaUpperR02ThreeLines.poleRemovedZeta s *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul, hsplit]
+  have hnn_d : (0 : ℝ) ≤ Real.exp (0.04 : ℝ) *
+      Real.exp (-((s.im + 6.75) ^ 2 / 100)) :=
+    mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le
+  have e1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+      (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100)))
+      ≤ ((1 + |s.im|) * 2) *
+        (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100))) :=
+    mul_le_mul_of_nonneg_right hF hnn_d
+  have e2 : ((1 + |s.im|) * 2) *
+      (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100))) ≤ 36 := by
+    have ee : ((1 + |s.im|) * 2) *
+        (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100)))
+        = 2 * ((1 + |s.im|) *
+          (Real.exp (0.04 : ℝ) * Real.exp (-((s.im + 6.75) ^ 2 / 100)))) := by
+      ring
+    rw [ee]
+    linarith [hsup]
+  linarith [e1, e2]
+
+#print axioms BF2TailCaps.damped_left_window_preimage
+#print axioms BF2TailCaps.cos_FE_generic
+#print axioms BF2TailCaps.damp_left_whole_le
+#print axioms BF2TailCaps.factor_left_whole_le
+#print axioms BF2TailCaps.zeta_Re_neg1_whole_le
+#print axioms BF2TailCaps.damped_left_whole_growth
+#print axioms BF2TailCaps.exp_004_le_105
+#print axioms BF2TailCaps.exp_neg_le_inv
+#print axioms BF2TailCaps.right_sup_aux
+#print axioms BF2TailCaps.damp_Re2_re
+#print axioms BF2TailCaps.damp_Re2_split
+#print axioms BF2TailCaps.damped_right_whole_36
+
+end BF2TailCaps
+
 
