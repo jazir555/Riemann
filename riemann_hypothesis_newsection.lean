@@ -6182,6 +6182,342 @@ inputs (already mapped by BZ/BH2; `P1_R02_of_hTail` consumes `hTail` only).
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# CC tail (door-3 hTail composition, honest cap + gap -- report-and-stop)
+
+Ownership: Agent CC tail append (append-only after the CA2 verdict block; nothing above
+touched; no new imports).
+
+GOAL (door-3 hTail composition): on `Re = -1`, `8.75 < |Im|`, bound
+`‖G‖ = ‖damp‖ * ‖F‖ ≤ 1 * (joint-poly via CA2 + FE) ≤ 36` with `norm_num`-checked
+crossover numerals (if the joint bound exceeds 36 at 8.75, find the crossover `|Im|*`
+where it dips below and bridge `[8.75, *]` with AR window monotonicity; if NO crossover
+exists below a sane bound, prove the SHARPEST honest cap and quantify the gap to 36).
+
+GREP-FIRST RECORD (verified by `rg -n` on this file + `interval_arith.lean` before writing):
+* `CA2TailJoint.joint_poly_tail_numeric` (this file, CA2): norm-quadratic joint bound
+  `‖Gamma w * cos(pi*w/2)‖ ≤ ((1+|w.im|^2)+(3.1416*|w.im|/2+1))/2` on `Re = 2`,
+  `w.im ≠ 0` -- USED (feeds `factor_le` below).
+* `CA2TailJoint.joint_poly_of_Re_neg1` (this file, CA2): same bound restated at the FE
+  mirror `w = 1-z` on the hTail line -- CITED (conceptual link; the numeric version above
+  is what carries numerals).
+* `BH2TailWindow.damp_left_tail_le_one` (this file, BH2): damping `≤ 1` on
+  `Re = -1`, `8.75 ≤ |Im|` -- USED (feeds `G_le` below).
+* `BZTailEnvelope.GammaR_tail_lower` (this file, BZ): tail Gamma-lower
+  `3/(16*exp(2|Im|)) ≤ ‖GammaR s‖` on the middle third -- CONSIDERED and honestly NOT
+  USED for the UPPER joint bound (it is a LOWER via reflection `S = exp(2|Im|)`,
+  `U = 4`; it bounds `GammaR` from BELOW and hence cannot supply the UPPER needed here;
+  same verdict as CA2's own BZ-route note).
+* `BV2OuterTail.outer_gauss_le` (`T = 18*exp(165.225316)`) + `BXMiddleTail.middle_gauss_le`
+  / `young_rpow32` (Young `K*u^(3/2) ≤ u^2/200+10^6*K^4`): Gaussian-domination numerals for
+  exp-linear / exp-3/2 strip envelopes with the `(u+6.75)^2` (nonnegative-`τ`) form --
+  CONSIDERED and honestly NOT USED here (they dominate strip tail-`T` envelopes for
+  `hBdd`, not the `Re = -1` FE poly route; the hTail line needs both signs and the FE
+  `Gamma*cos` poly, not an `exp(K*|Im|^(3/2))` envelope).
+* `BZTailEnvelope.P1_R02_of_hTail` (this file, BZ): P1 `‖zeta‖ ≤ 10` on R02 with `hTail`
+  (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`) as the SOLE premise -- CITED but NOT FIRED
+  (fires ONLY if hTail closes at 36; it does not -- see cap/gap below).
+* `DerivCauchyBridge.R02_zeta_upper_obligation` -- NOT discharged (needs P1, which needs
+  hTail at 36).
+
+WHAT IS PROVED (all full proofs, no `sorry`/`admit`/`axiom`):
+* `sub_le`: `‖z-1‖ ≤ 2+|z.im|` on `Re = -1` (triangle via `norm_le_abs_re_add_abs_im`).
+* `factor_le`: `‖RowFEFactor (1-z)‖ ≤ X(|z.im|)` with
+  `X(a) = (1+a^2)+(3.1416*a/2+1)` (cpow `≤ 1` via `RowFE_cpow_upper` + CA2 numeric joint
+  bound, `2*(X/2) = X` by `ring`).
+* `zeta_le`: `‖riemannZeta z‖ ≤ 2*X(|z.im|)` (FE `riemannZeta_one_sub` at `1-z` +
+  reflected `‖zeta‖ ≤ 2` via `TailZetaUpper.zeta_rightEdge_B2`).
+* `F_le`: `‖poleRemovedZeta z‖ ≤ (2+|z.im|)*(2*X(|z.im|))` (`(z-1)*zeta`).
+* `G_le` (MAIN pointwise): `‖dampedPoleRemoved z‖ ≤ (2+|z.im|)*(2*X(|z.im|))`
+  (damping `≤ 1` via `BH2TailWindow.damp_left_tail_le_one`).
+* `bound_at_875`: `B(8.75) = 1984.6005` (`norm_num`; `B(a) = (2+a)*(2*X(a))`).
+* `gap_at_875`: `B(8.75)-36 = 1948.6005` (`norm_num`).
+* `bound_mono`: `B(8.75) ≤ B(a)` for `8.75 ≤ a` (both factors increasing;
+  `a^2-8.75^2 = (a-8.75)*(a+8.75) ≥ 0` + linear `3.1416*(a-8.75)/2 ≥ 0` +
+  `mul_le_mul`).
+* `no_crossover`: `36 < B(|z.im|)` for every `8.75 < |z.im|` (hence the `1*poly`
+  majorant NEVER dips below 36 on the tail -- NO crossover exists at any sane bound;
+  the infimum on the tail is `B(8.75) = 1984.6005`).
+* `sharpest_cap_gap` (MAIN cap+gap): packages `G_le` + `bound_at_875` + `bound_mono` +
+  `no_crossover` -- the SHARPEST honest cap from the landed `damp ≤ 1` + CA2-poly
+  pieces is the pointwise `B(|Im|)` with minimum `1984.6005`, gap `1948.6005`
+  (`~55x` over 36). hTail (`≤ 36`) does NOT follow from this majorant; P1
+  (`P1_R02_of_hTail`) and `R02_zeta_upper_obligation` are therefore NOT fired
+  (report-and-stop per brief).
+-/
+
+namespace CC_hTailGap
+
+/-- `‖z-1‖ ≤ 2+|z.im|` on `Re = -1` (triangle). -/
+theorem sub_le {z : ℂ} (hz : z.re = -1) : ‖z - 1‖ ≤ 2 + |z.im| := by
+  have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+  have hre1 : (z - 1).re = -2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have him1 : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  rw [hre1, him1] at h
+  have eabs : |(-2 : ℝ)| = 2 := by norm_num
+  rw [eabs] at h
+  exact h
+
+/-- FE-factor joint cap on the hTail mirror: `‖RowFEFactor (1-z)‖ ≤ X(|z.im|)`. -/
+theorem factor_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖RowFE.RowFEFactor (1 - z)‖ ≤
+      (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hne : z.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hy : ((1 : ℂ) - z).im ≠ 0 := by
+    rw [hw_im]
+    exact neg_ne_zero.mpr hne
+  have hcp : ‖(2 * (Real.pi : ℂ)) ^ (-(1 - z))‖ ≤ 1 :=
+    RowFE.RowFE_cpow_upper (by rw [hw_re]; norm_num)
+  have hjoint : ‖Complex.Gamma (1 - z) *
+      Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖ ≤
+      ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) / 2 := by
+    have h := CA2TailJoint.joint_poly_tail_numeric hw_re hy
+    rwa [hw_im, abs_neg] at h
+  have eRow : RowFE.RowFEFactor (1 - z) =
+      (2 : ℂ) * (((2 * (Real.pi : ℂ)) ^ (-(1 - z))) *
+        (Complex.Gamma (1 - z) *
+          Complex.cos ((Real.pi : ℂ) * (1 - z) / 2))) := by
+    unfold RowFE.RowFEFactor
+    ring
+  have e2 : ‖(2 : ℂ)‖ = 2 := by simp
+  have hnorm_eq : ‖RowFE.RowFEFactor (1 - z)‖ =
+      2 * (‖(2 * (Real.pi : ℂ)) ^ (-(1 - z))‖ *
+        ‖Complex.Gamma (1 - z) *
+          Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖) := by
+    rw [eRow, norm_mul, e2, norm_mul]
+  have hprod : ‖(2 * (Real.pi : ℂ)) ^ (-(1 - z))‖ *
+      ‖Complex.Gamma (1 - z) *
+        Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖ ≤
+      1 * ((((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) / 2)) :=
+    mul_le_mul hcp hjoint (norm_nonneg _) (by norm_num)
+  calc ‖RowFE.RowFEFactor (1 - z)‖
+      = 2 * (‖(2 * (Real.pi : ℂ)) ^ (-(1 - z))‖ *
+        ‖Complex.Gamma (1 - z) *
+          Complex.cos ((Real.pi : ℂ) * (1 - z) / 2)‖) := hnorm_eq
+    _ ≤ 2 * (1 * ((((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) / 2))) :=
+        mul_le_mul_of_nonneg_left hprod (by norm_num)
+    _ = (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by ring
+
+/-- Zeta cap on the hTail line via FE: `‖zeta z‖ ≤ 2*X(|z.im|)`. -/
+theorem zeta_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖riemannZeta z‖ ≤
+      2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) := by
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz]
+    norm_num
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz] at hre
+    have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z =
+      RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have hFactor := factor_le hz htail
+  have hXnn : (0 : ℝ) ≤ (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have h1 : (0 : ℝ) ≤ |z.im| ^ 2 := sq_nonneg _
+    have hmul : (0 : ℝ) ≤ 3.1416 * |z.im| :=
+      mul_nonneg (by norm_num) ha
+    have h2 : (0 : ℝ) ≤ 3.1416 * |z.im| / 2 := by linarith
+    linarith
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) * 2 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) hXnn
+    _ = 2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) := by ring
+
+/-- Pole-removed cap on the hTail line: `‖F z‖ ≤ (2+|Im|)*(2*X(|Im|))`. -/
+theorem F_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ ≤
+      (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hsub := sub_le hz
+  have hZ := zeta_le hz htail
+  have hb_nn : (0 : ℝ) ≤ 2 + |z.im| := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+  calc ‖z - 1‖ * ‖riemannZeta z‖
+      ≤ (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) :=
+        mul_le_mul hsub hZ (norm_nonneg _) hb_nn
+
+/-- MAIN pointwise hTail majorant: `‖G z‖ ≤ (2+|Im|)*(2*X(|Im|))` via damping `≤ 1`. -/
+theorem G_le {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+      (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+  have hF := F_le hz htail
+  have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1 :=
+    BH2TailWindow.damp_left_tail_le_one hz (le_of_lt htail)
+  have hBnn : (0 : ℝ) ≤
+      (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+    have ha : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    have h1 : (0 : ℝ) ≤ |z.im| ^ 2 := sq_nonneg _
+    have hmul : (0 : ℝ) ≤ 3.1416 * |z.im| :=
+      mul_nonneg (by norm_num) ha
+    have h2 : (0 : ℝ) ≤ 3.1416 * |z.im| / 2 := by linarith
+    have hX : (0 : ℝ) ≤ (1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1) := by
+      linarith
+    have h2X : (0 : ℝ) ≤ 2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)) := by
+      linarith
+    have hb : (0 : ℝ) ≤ 2 + |z.im| := by linarith
+    exact mul_nonneg hb h2X
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      ≤ ((2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))) * 1 :=
+        mul_le_mul hF hdamp (norm_nonneg _) hBnn
+    _ = (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+        rw [mul_one]
+
+/-- Numeral at the window edge: `B(8.75) = 1984.6005` (`norm_num`). -/
+theorem bound_at_875 :
+    (2 + (8.75 : ℝ)) * (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))
+      = 1984.6005 := by
+  norm_num
+
+/-- Gap at the window edge: `B(8.75)-36 = 1948.6005` (`norm_num`). -/
+theorem gap_at_875 :
+    (2 + (8.75 : ℝ)) * (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))
+      - 36 = 1948.6005 := by
+  norm_num
+
+/-- Edge exceeds 36: `36 < B(8.75)` (`norm_num` via `bound_at_875`). -/
+theorem bound_gt_36 :
+    (36 : ℝ) < (2 + (8.75 : ℝ)) *
+      (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1))) := by
+  have hEq := bound_at_875
+  linarith
+
+/-- Monotonicity: `B(8.75) ≤ B(a)` for `8.75 ≤ a` (both factors increasing). -/
+theorem bound_mono {a : ℝ} (ha : 8.75 ≤ a) :
+    (2 + (8.75 : ℝ)) * (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))
+      ≤ (2 + a) * (2 * ((1 + a ^ 2) + (3.1416 * a / 2 + 1))) := by
+  have h1 : (2 + (8.75 : ℝ)) ≤ 2 + a := by linarith
+  have hsq : (8.75 : ℝ) ^ 2 ≤ a ^ 2 := by
+    have hsub_nn : (0 : ℝ) ≤ a - 8.75 := by linarith
+    have hadd_nn : (0 : ℝ) ≤ a + 8.75 := by linarith
+    have hprod_nn : (0 : ℝ) ≤ (a - 8.75) * (a + 8.75) :=
+      mul_nonneg hsub_nn hadd_nn
+    have e : (a - 8.75) * (a + 8.75) = a ^ 2 - 8.75 ^ 2 := by ring
+    linarith
+  have hX : (1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)
+      ≤ (1 + a ^ 2) + (3.1416 * a / 2 + 1) := by
+    have hmul : 3.1416 * 8.75 ≤ 3.1416 * a :=
+      mul_le_mul_of_nonneg_left ha (by norm_num)
+    have hlin : 3.1416 * (8.75 : ℝ) / 2 ≤ 3.1416 * a / 2 := by linarith
+    linarith [hsq, hlin]
+  have h2X : 2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1))
+      ≤ 2 * ((1 + a ^ 2) + (3.1416 * a / 2 + 1)) := by linarith [hX]
+  have hXnn : (0 : ℝ) ≤
+      2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)) := by norm_num
+  have hb_nn : (0 : ℝ) ≤ 2 + a := by linarith
+  exact mul_le_mul h1 h2X hXnn hb_nn
+
+/-- NO crossover: the `1*poly` majorant exceeds 36 everywhere on the tail. -/
+theorem no_crossover {z : ℂ} (htail : 8.75 < |z.im|) :
+    (36 : ℝ) < (2 + |z.im|) *
+      (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+  have ha : 8.75 ≤ |z.im| := le_of_lt htail
+  have hmono := bound_mono ha
+  have hgt := bound_gt_36
+  linarith
+
+/-- SHARPEST honest cap+gap: pointwise `B(|Im|)` with minimum `1984.6005`, gap `1948.6005`. -/
+theorem sharpest_cap_gap {z : ℂ} (hz : z.re = -1) (htail : 8.75 < |z.im|) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤
+        (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))
+      ∧ (2 + (8.75 : ℝ)) *
+          (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1))) = 1984.6005
+      ∧ (2 + (8.75 : ℝ)) *
+          (2 * ((1 + (8.75 : ℝ) ^ 2) + (3.1416 * (8.75 : ℝ) / 2 + 1)))
+          ≤ (2 + |z.im|) * (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1)))
+      ∧ (36 : ℝ) < (2 + |z.im|) *
+          (2 * ((1 + |z.im| ^ 2) + (3.1416 * |z.im| / 2 + 1))) := by
+  exact ⟨G_le hz htail, bound_at_875, bound_mono (le_of_lt htail), no_crossover htail⟩
+
+#print axioms CC_hTailGap.sub_le
+#print axioms CC_hTailGap.factor_le
+#print axioms CC_hTailGap.zeta_le
+#print axioms CC_hTailGap.F_le
+#print axioms CC_hTailGap.G_le
+#print axioms CC_hTailGap.bound_at_875
+#print axioms CC_hTailGap.gap_at_875
+#print axioms CC_hTailGap.bound_gt_36
+#print axioms CC_hTailGap.bound_mono
+#print axioms CC_hTailGap.no_crossover
+#print axioms CC_hTailGap.sharpest_cap_gap
+
+end CC_hTailGap
+
+/-!
+CC VERDICT + RESIDUAL (report-and-stop): door-3 hTail composition HONEST NEGATIVE.
+(1) hTail NOT CLOSED at 36: the landed `damp ≤ 1` (BH2) + CA2-poly (FE `Gamma*cos`)
+majorant gives the pointwise cap `‖G(z)‖ ≤ B(|z.im|)` with
+`B(a) = (2+a)*(2*((1+a^2)+(3.1416*a/2+1)))` (`CC_hTailGap.G_le`, FULL proof, no sorry).
+At the window edge `B(8.75) = 1984.6005` (`bound_at_875`, `norm_num`), gap
+`B(8.75)-36 = 1948.6005` (`gap_at_875`, `norm_num`; `~55x` over 36). `B` is increasing
+for `a ≥ 8.75` (`bound_mono`), so `36 < B(|z.im|)` for EVERY `8.75 < |z.im|`
+(`no_crossover`) -- NO crossover `|Im|*` exists at ANY sane bound for this majorant
+(the cubic `~2*a^3` grows; damping `≤ 1` cannot beat it). Hence the `[8.75, *]` bridge
+with AR's windowed cap (`Door3JointGammaCos.damped_joint_window`, `‖G‖ ≤ 36` for
+`|Im| ≤ 8.75`) by explicit monotonicity is VACUOUS (nothing to bridge to -- the tail
+majorant never reaches 36). The SHARPEST honest cap from these pieces is `B(|Im|)`
+itself (`sharpest_cap_gap`); true `‖G‖` with sharp Gaussian damping DOES eventually
+decay, but that needs Stirling-sharp `Γ·cos` + Gaussian joint analysis (absent
+repo-wide) and is NOT claimed here.
+(2) P1 NOT fired (per brief, ONLY if (1) closes at 36): `BZTailEnvelope.P1_R02_of_hTail`
+(`hTail` sole premise ⇒ P1 `‖zeta‖ ≤ 10` on R02) stays conditional on the unclosed
+`hTail`; `DerivCauchyBridge.R02_zeta_upper_obligation` stays open for the same reason.
+hTail verdict: CAP + GAP (`B(8.75) = 1984.6005`, gap `1948.6005`, no crossover).
+P1 verdict: CONDITIONAL (needs `hTail` at 36, not met).
+Residual: `hTail` (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`) needs Stirling-sharp tail
+`F`-bound (true `‖F‖ ~ |τ|^2.5` vs proved `~2*|τ|^3`; sharp Gaussian vs `≤ 1` damping);
+then `P1_R02_of_hTail` fires immediately.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
