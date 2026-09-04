@@ -4026,4 +4026,317 @@ there, so the crude `exp(O(|τ|^1.5))` envelope genuinely cannot close it at
 threshold `8.75`). No other opens; no `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# BN tail (door-3 R1): outer thirds of `StripEnvelope` (right via Euler, left via FE)
+
+Ownership: Agent BN tail append (append-only after the BL verdict block; nothing above
+touched; `import ZeroFreeRegionHadamard` at line 5 reused, not re-added).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `F_rightThird_le` — right third (`σ ∈ [3/2,2]`) of `StripEnvelope`:
+  `‖F s‖ ≤ 3 * exp |Im s|`, via `F = (s-1)·ζ` (`poleRemovedZeta_of_ne`) and Euler
+  `TailZetaUpper.zeta_rightEdge_B3` (`‖ζ‖ ≤ 3`), plus `1 + |τ| ≤ exp |τ|`.
+* `realGamma_le_one_of_mem_32` — `Real.Gamma x ≤ 1` on `[3/2,2]` by the
+  `Real.convexOn_Gamma` secant (mirrors `RowFE_realGamma_0895_le`).
+* `cpow_two_pi_neg_le_one_of_re_ge` — crude `‖(2π)^{-w}‖ ≤ 1` for `3/2 ≤ Re w`
+  (no numeral cap needed: `StripEnvelope` only needs exp shape).
+* `gamma_upper_of_mem_32` — `‖Γ w‖ ≤ 1` for `Re w ∈ [3/2,2]`
+  (generalizes `Door3SharpWindow.gamma_uniform_Re2` from the line `Re = 2`).
+* `factor_upper_of_mem_32` — `‖RowFEFactor w‖ ≤ 2 * exp (π|Im w|/2)` on the range
+  (mirrors `BF2TailCaps.factor_left_whole_le` with range caps).
+* `zeta_leftThird_le` — `‖ζ z‖ ≤ 6 * exp (π|Im z|/2)` for `Re z ∈ [-1,-1/2]`,
+  via Mathlib `riemannZeta_one_sub` reflection to `Re(1-z) ∈ [3/2,2]`
+  (generalizes `BF2TailCaps.zeta_Re_neg1_whole_le` from `Re = -1`; Euler side B3).
+* `F_leftThird_le` — left third of `StripEnvelope`:
+  `‖F z‖ ≤ 18 * exp ((1 + π/2) * |Im z|)`.
+* `F_outerThirds_le` — uniform outer-thirds corollary (feeds R1 directly):
+  `(Re ≤ -1/2 ∨ 3/2 ≤ Re) → ‖F s‖ ≤ 18 * exp ((1+π/2) * |Im s|)`.
+
+Grep record (verified by `rg -n` before writing):
+* `zeta_rightEdge_B3` — only this file `:1033` (B2 at `:1041`).
+* `poleRemovedZeta_of_ne` — this file `:1141`.
+* `Complex.norm_le_abs_re_add_abs_im` — Mathlib; used in-file at `:3349`.
+* `Real.add_one_le_exp`, `Real.exp_le_exp`, `Real.exp_add` — Mathlib.
+* `riemannZeta_one_sub` — Mathlib; FE assembly copied from `:3313`-`:3324`.
+* `RowFEFactor` (`interval_arith.lean:30856`), `RowFE_norm_cos_le` (`:30905`),
+  `R00GammaLower.norm_Gamma_le_realGamma` (`:541`, public),
+  `RowFE_Gamma_upper_of` (`:31257`, exact-`Re` only — hence the range version here).
+* `Real.convexOn_Gamma` — Mathlib; secant pattern mirrors `:31232`-`:31253`.
+* `Complex.norm_cpow_eq_rpow_re_of_pos` — Mathlib; cpow pattern mirrors `:1982`.
+* `Real.rpow_le_rpow_of_exponent_le` — Mathlib.
+* `BNStripThirds` + all lemma names below: absent repo-wide (checked).
+-/
+
+namespace BNStripThirds
+
+/-- Right third of `StripEnvelope` (`σ ∈ [3/2,2]`): Euler `B = 3` direct. -/
+theorem F_rightThird_le {s : ℂ}
+    (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2)
+    (hlo : 3 / 2 ≤ s.re) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ 3 * Real.exp |s.im| := by
+  have hmem : (-1 : ℝ) ≤ s.re ∧ s.re ≤ 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip at hs
+    simp only [Set.mem_preimage, Set.mem_Icc] at hs
+    exact hs
+  have hs1 : s ≠ 1 := by
+    intro h
+    have hre : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hF := ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hs1
+  have hZ : ‖riemannZeta s‖ ≤ 3 := by
+    have h := TailZetaUpper.zeta_rightEdge_B3 (s := s) hlo
+    rwa [show zeta s = riemannZeta s from rfl] at h
+  have hsub : ‖s - 1‖ ≤ 1 + |s.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by
+      rw [Complex.sub_re, Complex.one_re]
+    have him1 : (s - 1).im = s.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1] at h
+    have habs : |s.re - 1| ≤ 1 := by
+      rw [abs_le]
+      constructor <;> linarith [hmem.2, hlo]
+    linarith
+  have hexp : (1 : ℝ) + |s.im| ≤ Real.exp |s.im| := by
+    have h := Real.add_one_le_exp |s.im|
+    linarith
+  rw [hF, norm_mul]
+  calc ‖s - 1‖ * ‖riemannZeta s‖ ≤ (1 + |s.im|) * 3 :=
+        mul_le_mul hsub hZ (norm_nonneg _) (by linarith [abs_nonneg s.im])
+    _ ≤ Real.exp |s.im| * 3 :=
+        mul_le_mul_of_nonneg_right hexp (by norm_num)
+    _ = 3 * Real.exp |s.im| := by ring
+
+/-- Real-Gamma secant cap: `Real.Gamma x ≤ 1` for `x ∈ [3/2,2]`
+(convexity on `[1,2]` with `Gamma 1 = Gamma 2 = 1`). -/
+theorem realGamma_le_one_of_mem_32 {x : ℝ} (hx1 : 3 / 2 ≤ x) (hx2 : x ≤ 2) :
+    Real.Gamma x ≤ 1 := by
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - x := by linarith
+  have hb_nn : (0 : ℝ) ≤ x - 1 := by linarith
+  have hab : (2 - x) + (x - 1) = 1 := by ring
+  have h := hconv.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - x) * 1 + (x - 1) * 2 = x := by ring
+  rw [heq] at h
+  have hrhs : (2 - x) * 1 + (x - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  exact h
+
+/-- Crude whole-range cpow cap: `‖(2π)^{-w}‖ ≤ 1` for `3/2 ≤ Re w`. -/
+theorem cpow_two_pi_neg_le_one_of_re_ge {w : ℂ} (hw : 3 / 2 ≤ w.re) :
+    ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 1 := by
+  have hbase_pos : (0 : ℝ) < 2 * Real.pi := by
+    have h := Real.pi_pos
+    linarith
+  have h2pi : ((2 * Real.pi : ℝ) : ℂ) = 2 * (Real.pi : ℂ) := by
+    push_cast
+    ring
+  have hnorm : ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ = (2 * Real.pi) ^ (-(w.re)) := by
+    rw [← h2pi, Complex.norm_cpow_eq_rpow_re_of_pos hbase_pos, Complex.neg_re]
+  rw [hnorm]
+  have hbase1 : (1 : ℝ) ≤ 2 * Real.pi := by
+    have h := Real.pi_gt_three
+    linarith
+  have hle : (2 * Real.pi) ^ (-(w.re)) ≤ (2 * Real.pi) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hbase1 (by linarith)
+  rwa [Real.rpow_zero] at hle
+
+/-- Range Gamma upper: `‖Γ w‖ ≤ 1` for `Re w ∈ [3/2,2]`
+(generalizes `Door3SharpWindow.gamma_uniform_Re2`). -/
+theorem gamma_upper_of_mem_32 {w : ℂ} (hw1 : 3 / 2 ≤ w.re) (hw2 : w.re ≤ 2) :
+    ‖Complex.Gamma w‖ ≤ 1 :=
+  le_trans (R00GammaLower.norm_Gamma_le_realGamma (by linarith))
+    (realGamma_le_one_of_mem_32 hw1 hw2)
+
+/-- Range FE-factor upper on `Re ∈ [3/2,2]`
+(mirrors `BF2TailCaps.factor_left_whole_le`). -/
+theorem factor_upper_of_mem_32 {w : ℂ} (hw1 : 3 / 2 ≤ w.re) (hw2 : w.re ≤ 2) :
+    ‖RowFE.RowFEFactor w‖ ≤ 2 * Real.exp (Real.pi * |w.im| / 2) := by
+  have hcpow : ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 1 :=
+    cpow_two_pi_neg_le_one_of_re_ge hw1
+  have hG : ‖Complex.Gamma w‖ ≤ 1 := gamma_upper_of_mem_32 hw1 hw2
+  have hcos : ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ Real.exp (Real.pi * |w.im| / 2) := by
+    have e : (Real.pi : ℂ) * w / 2 = (Real.pi : ℂ) * (w / 2) :=
+      mul_div_assoc _ _ _
+    rw [e]
+    exact BF2TailCaps.cos_FE_generic
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  rw [hnorm_eq, h2norm]
+  have hA : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  have hB : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      ≤ 1 * Real.exp (Real.pi * |w.im| / 2) :=
+    mul_le_mul hG hcos (norm_nonneg _) (by norm_num)
+  calc (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖)
+      ≤ (2 * 1) * (1 * Real.exp (Real.pi * |w.im| / 2)) :=
+        mul_le_mul hA hB (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
+    _ = 2 * Real.exp (Real.pi * |w.im| / 2) := by ring
+
+/-- Left-third zeta cap via FE reflection to `Re ∈ [3/2,2]`
+(generalizes `BF2TailCaps.zeta_Re_neg1_whole_le` from the line `Re = -1`). -/
+theorem zeta_leftThird_le {z : ℂ} (hz1 : -1 ≤ z.re) (hz2 : z.re ≤ -1 / 2) :
+    ‖riemannZeta z‖ ≤ 6 * Real.exp (Real.pi * |z.im| / 2) := by
+  have hz_lo : (3 : ℝ) / 2 ≤ ((1 : ℂ) - z).re := by
+    rw [Complex.sub_re, Complex.one_re]
+    linarith
+  have hz_hi : ((1 : ℂ) - z).re ≤ 2 := by
+    rw [Complex.sub_re, Complex.one_re]
+    linarith
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    have hnn : (0 : ℝ) ≤ (((n : ℕ)) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    linarith
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 3 := by
+    have h := TailZetaUpper.zeta_rightEdge_B3 (s := 1 - z) hz_lo
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have him_eq : |((1 : ℂ) - z).im| = |z.im| := by
+    rw [hw_im, abs_neg]
+  have hFactor : ‖RowFE.RowFEFactor (1 - z)‖
+      ≤ 2 * Real.exp (Real.pi * |z.im| / 2) := by
+    have h := factor_upper_of_mem_32 (w := 1 - z) hz_lo hz_hi
+    rwa [him_eq] at h
+  rw [hFE', norm_mul]
+  calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖
+      ≤ (2 * Real.exp (Real.pi * |z.im| / 2)) * 3 :=
+        mul_le_mul hFactor hZrefl (norm_nonneg _) (by positivity)
+    _ = 6 * Real.exp (Real.pi * |z.im| / 2) := by ring
+
+/-- Left third of `StripEnvelope` (`σ ∈ [-1,-1/2]`). -/
+theorem F_leftThird_le {z : ℂ}
+    (hs : z ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2)
+    (hz2 : z.re ≤ -1 / 2) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖
+      ≤ 18 * Real.exp ((1 + Real.pi / 2) * |z.im|) := by
+  have hmem : (-1 : ℝ) ≤ z.re ∧ z.re ≤ 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip at hs
+    simp only [Set.mem_preimage, Set.mem_Icc] at hs
+    exact hs
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hF := ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1
+  have hZ := zeta_leftThird_le hmem.1 hz2
+  have hsub : ‖z - 1‖ ≤ 2 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    have hre1 : (z - 1).re = z.re - 1 := by
+      rw [Complex.sub_re, Complex.one_re]
+    have him1 : (z - 1).im = z.im := by
+      rw [Complex.sub_im, Complex.one_im, sub_zero]
+    rw [hre1, him1] at h
+    have habs : |z.re - 1| ≤ 2 := by
+      rw [abs_le]
+      constructor <;> linarith [hmem.1, hz2]
+    linarith
+  have h23 : (2 : ℝ) + |z.im| ≤ 3 * Real.exp |z.im| := by
+    have hexp : |z.im| + 1 ≤ Real.exp |z.im| := Real.add_one_le_exp _
+    have hnn : (0 : ℝ) ≤ |z.im| := abs_nonneg _
+    linarith
+  have hsub3 : ‖z - 1‖ ≤ 3 * Real.exp |z.im| := le_trans hsub h23
+  have hexpK : Real.exp |z.im| * Real.exp (Real.pi * |z.im| / 2)
+      = Real.exp ((1 + Real.pi / 2) * |z.im|) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [hF, norm_mul]
+  calc ‖z - 1‖ * ‖riemannZeta z‖
+        ≤ (3 * Real.exp |z.im|) * (6 * Real.exp (Real.pi * |z.im| / 2)) :=
+        mul_le_mul hsub3 hZ (norm_nonneg _) (by positivity)
+    _ = 18 * (Real.exp |z.im| * Real.exp (Real.pi * |z.im| / 2)) := by ring
+    _ = 18 * Real.exp ((1 + Real.pi / 2) * |z.im|) := by rw [hexpK]
+
+/-- Uniform outer-thirds corollary: the two proved thirds at one constant pair
+(`C = 18`, `K = 1 + π/2`), directly feeding R1 off the middle third. -/
+theorem F_outerThirds_le {s : ℂ}
+    (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2)
+    (ho : s.re ≤ -1 / 2 ∨ 3 / 2 ≤ s.re) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+      ≤ 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) := by
+  rcases ho with h | h
+  · exact F_leftThird_le hs h
+  · have hR := F_rightThird_le hs h
+    have h3 : (3 : ℝ) ≤ 18 * Real.exp ((Real.pi / 2) * |s.im|) := by
+      have he : (1 : ℝ) ≤ Real.exp ((Real.pi / 2) * |s.im|) := by
+        have hexp := Real.add_one_le_exp ((Real.pi / 2) * |s.im|)
+        have hnn : (0 : ℝ) ≤ (Real.pi / 2) * |s.im| := by positivity
+        linarith
+      linarith
+    have hmono : Real.exp |s.im| ≤ Real.exp ((1 + Real.pi / 2) * |s.im|) := by
+      apply Real.exp_le_exp.mpr
+      have hnn : (0 : ℝ) ≤ |s.im| := abs_nonneg _
+      have hpi : (0 : ℝ) ≤ Real.pi / 2 * |s.im| := by positivity
+      linarith
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ 3 * Real.exp |s.im| := hR
+      _ ≤ (18 * Real.exp ((Real.pi / 2) * |s.im|)) * Real.exp |s.im| :=
+        mul_le_mul_of_nonneg_right h3 (Real.exp_nonneg _)
+      _ = 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) := by
+        have heq : Real.exp ((Real.pi / 2) * |s.im|) * Real.exp |s.im|
+            = Real.exp ((1 + Real.pi / 2) * |s.im|) := by
+          rw [← Real.exp_add]
+          congr 1
+          ring
+        rw [mul_assoc, heq]
+
+#print axioms BNStripThirds.F_rightThird_le
+#print axioms BNStripThirds.realGamma_le_one_of_mem_32
+#print axioms BNStripThirds.cpow_two_pi_neg_le_one_of_re_ge
+#print axioms BNStripThirds.gamma_upper_of_mem_32
+#print axioms BNStripThirds.factor_upper_of_mem_32
+#print axioms BNStripThirds.zeta_leftThird_le
+#print axioms BNStripThirds.F_leftThird_le
+#print axioms BNStripThirds.F_outerThirds_le
+
+end BNStripThirds
+
+/-!
+BN VERDICT + RESIDUAL (report-and-stop): outer thirds (`Re ∈ [-1,-1/2] ∪ [3/2,2]`)
+of `BLMiddleEnvelope.StripEnvelope` proved with exp-linear shape
+(`3·exp|τ|` right, `18·exp((1+π/2)|τ|)` uniform). Middle third
+(`σ ∈ [-1/2,3/2]`) OPEN — no committed route; two verified dead ends:
+(a) the `xi`-transfer (`F_of_xi_whole_plane`): numerator `exp (K|s|^{3/2})`
+divided by any `c·exp(-C|τ|)` Gamma lower stays `exp (O(|τ|^{1.5}))`, which no
+constants fit into `C·exp(K|τ|)` — so a strip `Gammaℝ` lower cannot discharge
+R1 that way (that subtask is true but useless for R1, hence not attempted);
+(b) three-lines (`norm_le_interp_of_mem_verticalClosedStrip'`) needs interior
+`BddAbove`, i.e. `StripEnvelope` itself (circular). Closing the middle needs a
+Phragmén–Lindelöf/convexity bound with finite-order control — new material.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
