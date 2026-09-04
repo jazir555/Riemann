@@ -32602,3 +32602,769 @@ theorem required_Azeta_of_this_Gamma {Azeta : ℝ}
 #print axioms R02GammaLower.gammaOf_lower_R02
 
 end R02GammaLower
+
+namespace R02GammaUpperDeep
+
+/-! ## Deeper reflected shift-chain UPPER at the R02 reflected point (`‖Γ(1-sR02/2)‖ ≤ 0.026`)
+
+**Goal (tier 1 of the 0.002 → 0.006 close).** AN banked `gamma_lower_R02_center`:
+`0.002 ≤ ‖Γ(sR02/2)‖` via reflection `π/(S·U)` with sine cap `S = 30000`
+(`R02GammaLower.sin_upper_R02`) and reflected upper `U = 0.05`
+(`R02GammaUpper.gamma_one_sub_half_upper_R02`, 12-shift chain, numerator
+`Re = 12.8025`). Banked `S·U = 1500`; `0.006` needs `S·U ≤ 523.6`. With `U = 0.05`
+fixed, even a perfect sine (`S = 20067`) gives `1003 > 523` — infeasible in principle
+on this `U` (AN verdict, `R02GammaLower` docstring).
+
+**Result here.** `gamma_one_sub_half_upper_R02_deep`: `‖Γ(1 - sR02/2)‖ ≤ 0.026`,
+a `1.93×` tightening of the reflected upper, by extending the SAME shift-floor +
+convexity template from 12 to 21 shifts (numerator `Re = 21.8025`, denominator floors
+`k = 0..20`). New product ratio `N/D = 2.9932e19/1.1708e21 ≈ 0.025565` (exact, see
+numerals below); capped at `0.026` with `1.7%` slack. With `S = 30000` this gives
+`S·U = 780 < 1500` (π/780 ≈ 0.00403, still `1.5×` short of `0.006`); with a
+near-perfect sine (`S ≈ 20067`) it gives `S·U ≈ 521.7 ≤ 523.6` — tier (2)+(3) unlocked
+in principle. Tiers (2)/(3) are NOT attempted here (report-and-stop).
+
+**Why deeper shifts tighten.** The dominant looseness is the numerator majorant
+`‖Γ(z+n)‖ ≤ Real.Gamma (Re (z+n))`, which discards Im-decay
+(`∼1.57×` loose at `n = 12`, `∼1.33×` at `n = 19`, `→ 1` as `n → ∞`).
+Measured honest ratios (exact decimal arithmetic, 2-decimal reused floors `0..11`,
+3-decimal new floors): `n = 15 → 0.0280`, `n = 18 → 0.02669`, `n = 19 → 0.02627`,
+`n = 20 → 0.02590`, `n = 21 → 0.025565`. So `n ≈ 15` (brief estimate) honestly
+yields only `≈ 0.028–0.029`; `U ≤ 0.026` needs `n ≥ 20`. This block banks `n = 21`.
+
+**Grep-first record (2026-09-04, verified via `rg -n`, exact names).**
+* `R02GammaUpperDeep`: ABSENT (zero hits repo-wide); no clash with `R02GammaUpper` /
+  `R02GammaDisc` / `R02GammaLower` / `R02Uniform` / `R02Pilot`.
+* `realGamma_138025_le` .. `realGamma_218025_num`: ABSENT; `CellGammaUpper` chain stops
+  at `realGamma_128025_le` (`interval_arith.lean:2183`), REUSED as the base below.
+* Floors `k = 0..11` + nonvanishing REUSED from `R02GammaUpper` (`norm_zUpR02_{0..11}_ge`,
+  `zUpR02_ne0`, `zUpR02_add{1..11}_ne0`); only `k = 12..20` created here (`zUpR02D_*`).
+* Numerator majorant REUSED: `R00GammaLower.norm_Gamma_le_realGamma` (`:541`).
+* Mathlib: `Complex.Gamma_add_one` / `Real.Gamma_add_one` (same call shapes as committed).
+-/
+
+/-- `Real.Gamma 13.8025 ≤ 1.8025*…*12.8025` (two-step unfold from the
+product-form `CellGammaUpper.realGamma_118025_le`; the numeral cap
+`CellGammaUpper.realGamma_128025_le` is product-opaque). -/
+theorem realGamma_138025_le :
+    Real.Gamma 13.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 := by
+  have h1 : Real.Gamma (12.8025 + 1) = 12.8025 * Real.Gamma 12.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have h2 : Real.Gamma (11.8025 + 1) = 11.8025 * Real.Gamma 11.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq1 : (12.8025 : ℝ) + 1 = 13.8025 := by norm_num
+  have heq2 : (11.8025 : ℝ) + 1 = 12.8025 := by norm_num
+  rw [heq1] at h1
+  rw [heq2] at h2
+  rw [h1, h2]
+  have hle : 12.8025 * (11.8025 * Real.Gamma 11.8025)
+      ≤ 12.8025 * (11.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025)) :=
+    mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_left CellGammaUpper.realGamma_118025_le (by norm_num)) (by norm_num)
+  calc (12.8025 : ℝ) * (11.8025 * Real.Gamma 11.8025)
+        ≤ 12.8025 * (11.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025)) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 := by ring
+
+/-- `Real.Gamma 14.8025 ≤ 1.8025*…*13.8025`. -/
+theorem realGamma_148025_le :
+    Real.Gamma 14.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 := by
+  have h : Real.Gamma (13.8025 + 1) = 13.8025 * Real.Gamma 13.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (13.8025 : ℝ) + 1 = 14.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 13.8025 * Real.Gamma 13.8025
+      ≤ 13.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_138025_le (by norm_num)
+  calc (13.8025 : ℝ) * Real.Gamma 13.8025
+        ≤ 13.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 := by ring
+
+/-- `Real.Gamma 15.8025 ≤ 1.8025*…*14.8025`. -/
+theorem realGamma_158025_le :
+    Real.Gamma 15.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 := by
+  have h : Real.Gamma (14.8025 + 1) = 14.8025 * Real.Gamma 14.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (14.8025 : ℝ) + 1 = 15.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 14.8025 * Real.Gamma 14.8025
+      ≤ 14.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_148025_le (by norm_num)
+  calc (14.8025 : ℝ) * Real.Gamma 14.8025
+        ≤ 14.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 := by ring
+
+/-- `Real.Gamma 16.8025 ≤ 1.8025*…*15.8025`. -/
+theorem realGamma_168025_le :
+    Real.Gamma 16.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 := by
+  have h : Real.Gamma (15.8025 + 1) = 15.8025 * Real.Gamma 15.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (15.8025 : ℝ) + 1 = 16.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 15.8025 * Real.Gamma 15.8025
+      ≤ 15.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_158025_le (by norm_num)
+  calc (15.8025 : ℝ) * Real.Gamma 15.8025
+        ≤ 15.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 := by ring
+
+/-- `Real.Gamma 17.8025 ≤ 1.8025*…*16.8025`. -/
+theorem realGamma_178025_le :
+    Real.Gamma 17.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 := by
+  have h : Real.Gamma (16.8025 + 1) = 16.8025 * Real.Gamma 16.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (16.8025 : ℝ) + 1 = 17.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 16.8025 * Real.Gamma 16.8025
+      ≤ 16.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_168025_le (by norm_num)
+  calc (16.8025 : ℝ) * Real.Gamma 16.8025
+        ≤ 16.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 := by ring
+
+/-- `Real.Gamma 18.8025 ≤ 1.8025*…*17.8025`. -/
+theorem realGamma_188025_le :
+    Real.Gamma 18.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 := by
+  have h : Real.Gamma (17.8025 + 1) = 17.8025 * Real.Gamma 17.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (17.8025 : ℝ) + 1 = 18.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 17.8025 * Real.Gamma 17.8025
+      ≤ 17.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_178025_le (by norm_num)
+  calc (17.8025 : ℝ) * Real.Gamma 17.8025
+        ≤ 17.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 := by ring
+
+/-- `Real.Gamma 19.8025 ≤ 1.8025*…*18.8025`. -/
+theorem realGamma_198025_le :
+    Real.Gamma 19.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 := by
+  have h : Real.Gamma (18.8025 + 1) = 18.8025 * Real.Gamma 18.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (18.8025 : ℝ) + 1 = 19.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 18.8025 * Real.Gamma 18.8025
+      ≤ 18.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_188025_le (by norm_num)
+  calc (18.8025 : ℝ) * Real.Gamma 18.8025
+        ≤ 18.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 := by ring
+
+/-- `Real.Gamma 20.8025 ≤ 1.8025*…*19.8025`. -/
+theorem realGamma_208025_le :
+    Real.Gamma 20.8025
+      ≤ 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 * 19.8025 := by
+  have h : Real.Gamma (19.8025 + 1) = 19.8025 * Real.Gamma 19.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (19.8025 : ℝ) + 1 = 20.8025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : 19.8025 * Real.Gamma 19.8025
+      ≤ 19.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_198025_le (by norm_num)
+  calc (19.8025 : ℝ) * Real.Gamma 19.8025
+        ≤ 19.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025) := hle
+    _ = 1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 * 19.8025 := by ring
+
+/-- `Real.Gamma 21.8025 ≤ 30100000000000000000` (numerator cap; exact product ≈ 2.9932e19). -/
+theorem realGamma_218025_num : Real.Gamma 21.8025 ≤ 30100000000000000000 := by
+  have h : Real.Gamma (20.8025 + 1) = 20.8025 * Real.Gamma 20.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (20.8025 : ℝ) + 1 = 21.8025 := by norm_num
+  rw [heq] at h
+  rw [h] at ⊢
+  have hle : 20.8025 * Real.Gamma 20.8025
+      ≤ 20.8025 * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 * 19.8025) :=
+    mul_le_mul_of_nonneg_left realGamma_208025_le (by norm_num)
+  have hprod : (20.8025 : ℝ) * (1.8025 * 2.8025 * 3.8025 * 4.8025 * 5.8025 * 6.8025 * 7.8025 * 8.8025 * 9.8025 * 10.8025 * 11.8025 * 12.8025 * 13.8025 * 14.8025 * 15.8025 * 16.8025 * 17.8025 * 18.8025 * 19.8025) ≤ 30100000000000000000 := by
+    norm_num
+  exact le_trans hle hprod
+
+/-- Denominator floor `c12 = 13.239 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 12‖`. -/
+theorem norm_zUpR02D_12_ge :
+    (13.239 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 12‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 12).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (13.239 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 12‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (13.239 : ℝ) = Real.sqrt ((13.239 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 12‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 12‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c13 = 14.209 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 13‖`. -/
+theorem norm_zUpR02D_13_ge :
+    (14.209 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 13‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 13).re = 13.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 13).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (14.209 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 13‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (14.209 : ℝ) = Real.sqrt ((14.209 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 13‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 13‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c14 = 15.182 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 14‖`. -/
+theorem norm_zUpR02D_14_ge :
+    (15.182 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 14‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 14).re = 14.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 14).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (15.182 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 14‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (15.182 : ℝ) = Real.sqrt ((15.182 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 14‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 14‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c15 = 16.158 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 15‖`. -/
+theorem norm_zUpR02D_15_ge :
+    (16.158 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 15‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 15).re = 15.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 15).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (16.158 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 15‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (16.158 : ℝ) = Real.sqrt ((16.158 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 15‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 15‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c16 = 17.138 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 16‖`. -/
+theorem norm_zUpR02D_16_ge :
+    (17.138 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 16‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 16).re = 16.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 16).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (17.138 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 16‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (17.138 : ℝ) = Real.sqrt ((17.138 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 16‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 16‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c17 = 18.119 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 17‖`. -/
+theorem norm_zUpR02D_17_ge :
+    (18.119 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 17‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 17).re = 17.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 17).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (18.119 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 17‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (18.119 : ℝ) = Real.sqrt ((18.119 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 17‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 17‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c18 = 19.103 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 18‖`. -/
+theorem norm_zUpR02D_18_ge :
+    (19.103 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 18‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 18).re = 18.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 18).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (19.103 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 18‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (19.103 : ℝ) = Real.sqrt ((19.103 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 18‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 18‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c19 = 20.088 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 19‖`. -/
+theorem norm_zUpR02D_19_ge :
+    (20.088 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 19‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 19).re = 19.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 19).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (20.088 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 19‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (20.088 : ℝ) = Real.sqrt ((20.088 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 19‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 19‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Denominator floor `c20 = 21.074 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 20‖`. -/
+theorem norm_zUpR02D_20_ge :
+    (21.074 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 20‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 20).re = 20.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have him : (1 - R02GammaUpper.sR02 / 2 + 20).im = 3.375 := by
+    simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+    norm_num
+  have hsq : (21.074 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 20‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (21.074 : ℝ) = Real.sqrt ((21.074 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 20‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 20‖ := Real.sqrt_sq (norm_nonneg _)
+
+theorem zUpR02D_add12_ne0 : (1 - R02GammaUpper.sR02 / 2 + 12) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 12).re = 12.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add13_ne0 : (1 - R02GammaUpper.sR02 / 2 + 13) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 13).re = 13.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add14_ne0 : (1 - R02GammaUpper.sR02 / 2 + 14) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 14).re = 14.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add15_ne0 : (1 - R02GammaUpper.sR02 / 2 + 15) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 15).re = 15.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add16_ne0 : (1 - R02GammaUpper.sR02 / 2 + 16) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 16).re = 16.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add17_ne0 : (1 - R02GammaUpper.sR02 / 2 + 17) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 17).re = 17.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add18_ne0 : (1 - R02GammaUpper.sR02 / 2 + 18) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 18).re = 18.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add19_ne0 : (1 - R02GammaUpper.sR02 / 2 + 19) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 19).re = 19.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+theorem zUpR02D_add20_ne0 : (1 - R02GammaUpper.sR02 / 2 + 20) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 20).re = 20.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- MAIN deeper UPPER: `‖Complex.Gamma (1 - sR02/2)‖ ≤ 0.026` (21-shift chain). -/
+theorem gamma_one_sub_half_upper_R02_deep :
+    ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≤ 0.026 := by
+  -- Shift chain `Gamma(z+21) = (z+20)..z*Gamma(z)`.
+  have e0 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 1)
+      = (1 - R02GammaUpper.sR02 / 2) * Complex.Gamma (1 - R02GammaUpper.sR02 / 2) :=
+    Complex.Gamma_add_one _ R02GammaUpper.zUpR02_ne0
+  have e1 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 2)
+      = (1 - R02GammaUpper.sR02 / 2 + 1)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 1) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 2)
+        = ((1 - R02GammaUpper.sR02 / 2 + 1) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add1_ne0
+  have e2 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 3)
+      = (1 - R02GammaUpper.sR02 / 2 + 2)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 2) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 3)
+        = ((1 - R02GammaUpper.sR02 / 2 + 2) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add2_ne0
+  have e3 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 4)
+      = (1 - R02GammaUpper.sR02 / 2 + 3)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 3) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 4)
+        = ((1 - R02GammaUpper.sR02 / 2 + 3) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add3_ne0
+  have e4 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 5)
+      = (1 - R02GammaUpper.sR02 / 2 + 4)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 4) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 5)
+        = ((1 - R02GammaUpper.sR02 / 2 + 4) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add4_ne0
+  have e5 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 6)
+      = (1 - R02GammaUpper.sR02 / 2 + 5)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 5) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 6)
+        = ((1 - R02GammaUpper.sR02 / 2 + 5) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add5_ne0
+  have e6 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 7)
+      = (1 - R02GammaUpper.sR02 / 2 + 6)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 6) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 7)
+        = ((1 - R02GammaUpper.sR02 / 2 + 6) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add6_ne0
+  have e7 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 8)
+      = (1 - R02GammaUpper.sR02 / 2 + 7)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 7) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 8)
+        = ((1 - R02GammaUpper.sR02 / 2 + 7) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add7_ne0
+  have e8 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 9)
+      = (1 - R02GammaUpper.sR02 / 2 + 8)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 8) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 9)
+        = ((1 - R02GammaUpper.sR02 / 2 + 8) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add8_ne0
+  have e9 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 10)
+      = (1 - R02GammaUpper.sR02 / 2 + 9)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 9) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 10)
+        = ((1 - R02GammaUpper.sR02 / 2 + 9) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add9_ne0
+  have e10 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 11)
+      = (1 - R02GammaUpper.sR02 / 2 + 10)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 10) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 11)
+        = ((1 - R02GammaUpper.sR02 / 2 + 10) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add10_ne0
+  have e11 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 12)
+      = (1 - R02GammaUpper.sR02 / 2 + 11)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 11) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 12)
+        = ((1 - R02GammaUpper.sR02 / 2 + 11) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ R02GammaUpper.zUpR02_add11_ne0
+  have e12 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 13)
+      = (1 - R02GammaUpper.sR02 / 2 + 12)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 12) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 13)
+        = ((1 - R02GammaUpper.sR02 / 2 + 12) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add12_ne0
+  have e13 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 14)
+      = (1 - R02GammaUpper.sR02 / 2 + 13)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 13) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 14)
+        = ((1 - R02GammaUpper.sR02 / 2 + 13) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add13_ne0
+  have e14 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 15)
+      = (1 - R02GammaUpper.sR02 / 2 + 14)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 14) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 15)
+        = ((1 - R02GammaUpper.sR02 / 2 + 14) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add14_ne0
+  have e15 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 16)
+      = (1 - R02GammaUpper.sR02 / 2 + 15)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 15) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 16)
+        = ((1 - R02GammaUpper.sR02 / 2 + 15) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add15_ne0
+  have e16 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 17)
+      = (1 - R02GammaUpper.sR02 / 2 + 16)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 16) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 17)
+        = ((1 - R02GammaUpper.sR02 / 2 + 16) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add16_ne0
+  have e17 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 18)
+      = (1 - R02GammaUpper.sR02 / 2 + 17)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 17) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 18)
+        = ((1 - R02GammaUpper.sR02 / 2 + 17) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add17_ne0
+  have e18 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 19)
+      = (1 - R02GammaUpper.sR02 / 2 + 18)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 18) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 19)
+        = ((1 - R02GammaUpper.sR02 / 2 + 18) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add18_ne0
+  have e19 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 20)
+      = (1 - R02GammaUpper.sR02 / 2 + 19)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 19) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 20)
+        = ((1 - R02GammaUpper.sR02 / 2 + 19) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add19_ne0
+  have e20 : Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)
+      = (1 - R02GammaUpper.sR02 / 2 + 20)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 20) := by
+    have h : (1 - R02GammaUpper.sR02 / 2 + 21)
+        = ((1 - R02GammaUpper.sR02 / 2 + 20) + 1) := by ring
+    rw [h]
+    exact Complex.Gamma_add_one _ zUpR02D_add20_ne0
+  have n0 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 1)‖
+      = ‖1 - R02GammaUpper.sR02 / 2‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ := by
+    rw [e0, norm_mul]
+  have n1 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 2)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 1‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 1)‖ := by
+    rw [e1, norm_mul]
+  have n2 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 3)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 2‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 2)‖ := by
+    rw [e2, norm_mul]
+  have n3 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 4)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 3‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 3)‖ := by
+    rw [e3, norm_mul]
+  have n4 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 5)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 4‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 4)‖ := by
+    rw [e4, norm_mul]
+  have n5 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 6)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 5‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 5)‖ := by
+    rw [e5, norm_mul]
+  have n6 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 7)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 6‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 6)‖ := by
+    rw [e6, norm_mul]
+  have n7 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 8)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 7‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 7)‖ := by
+    rw [e7, norm_mul]
+  have n8 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 9)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 8‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 8)‖ := by
+    rw [e8, norm_mul]
+  have n9 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 10)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 9‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 9)‖ := by
+    rw [e9, norm_mul]
+  have n10 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 11)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 10‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 10)‖ := by
+    rw [e10, norm_mul]
+  have n11 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 12)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 11‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 11)‖ := by
+    rw [e11, norm_mul]
+  have n12 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 13)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 12‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 12)‖ := by
+    rw [e12, norm_mul]
+  have n13 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 14)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 13‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 13)‖ := by
+    rw [e13, norm_mul]
+  have n14 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 15)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 14‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 14)‖ := by
+    rw [e14, norm_mul]
+  have n15 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 16)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 15‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 15)‖ := by
+    rw [e15, norm_mul]
+  have n16 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 17)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 16‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 16)‖ := by
+    rw [e16, norm_mul]
+  have n17 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 18)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 17‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 17)‖ := by
+    rw [e17, norm_mul]
+  have n18 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 19)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 18‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 18)‖ := by
+    rw [e18, norm_mul]
+  have n19 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 20)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 19‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 19)‖ := by
+    rw [e19, norm_mul]
+  have n20 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 20‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 20)‖ := by
+    rw [e20, norm_mul]
+  have hprod : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)‖
+      = ‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖ * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖)))))))))))))))))))) := by
+    rw [n20, n19, n18, n17, n16, n15, n14, n13, n12, n11, n10, n9, n8, n7, n6, n5, n4, n3, n2, n1, n0]
+  -- Denominator product lower bound.
+  have q1 : (3.82 : ℝ) * 3.46
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 1‖ * ‖1 - R02GammaUpper.sR02 / 2‖ :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_1_ge R02GammaUpper.norm_zUpR02_0_ge (by norm_num) (norm_nonneg _)
+  have q2 : (4.38 : ℝ) * ((3.82 : ℝ) * 3.46)
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_2_ge q1 (by positivity) (norm_nonneg _)
+  have q3 : (5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_3_ge q2 (by positivity) (norm_nonneg _)
+  have q4 : (5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_4_ge q3 (by positivity) (norm_nonneg _)
+  have q5 : (6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_5_ge q4 (by positivity) (norm_nonneg _)
+  have q6 : (7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_6_ge q5 (by positivity) (norm_nonneg _)
+  have q7 : (8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_7_ge q6 (by positivity) (norm_nonneg _)
+  have q8 : (9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_8_ge q7 (by positivity) (norm_nonneg _)
+  have q9 : (10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_9_ge q8 (by positivity) (norm_nonneg _)
+  have q10 : (11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_10_ge q9 (by positivity) (norm_nonneg _)
+  have q11 : (12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))) :=
+    mul_le_mul R02GammaUpper.norm_zUpR02_11_ge q10 (by positivity) (norm_nonneg _)
+  have q12 : (13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))) :=
+    mul_le_mul norm_zUpR02D_12_ge q11 (by positivity) (norm_nonneg _)
+  have q13 : (14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))))) :=
+    mul_le_mul norm_zUpR02D_13_ge q12 (by positivity) (norm_nonneg _)
+  have q14 : (15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))) :=
+    mul_le_mul norm_zUpR02D_14_ge q13 (by positivity) (norm_nonneg _)
+  have q15 : (16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_15_ge q14 (by positivity) (norm_nonneg _)
+  have q16 : (17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_16_ge q15 (by positivity) (norm_nonneg _)
+  have q17 : (18.119 : ℝ) * ((17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_17_ge q16 (by positivity) (norm_nonneg _)
+  have q18 : (19.103 : ℝ) * ((18.119 : ℝ) * ((17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_18_ge q17 (by positivity) (norm_nonneg _)
+  have q19 : (20.088 : ℝ) * ((19.103 : ℝ) * ((18.119 : ℝ) * ((17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_19_ge q18 (by positivity) (norm_nonneg _)
+  have q20 : (21.074 : ℝ) * ((20.088 : ℝ) * ((19.103 : ℝ) * ((18.119 : ℝ) * ((17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46)))))))))))))))))))
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))) :=
+    mul_le_mul norm_zUpR02D_20_ge q19 (by positivity) (norm_nonneg _)
+  have hDlo : (1170000000000000000000 : ℝ)
+      ≤ (21.074 : ℝ) * ((20.088 : ℝ) * ((19.103 : ℝ) * ((18.119 : ℝ) * ((17.138 : ℝ) * ((16.158 : ℝ) * ((15.182 : ℝ) * ((14.209 : ℝ) * ((13.239 : ℝ) * ((12.27 : ℝ) * ((11.31 : ℝ) * ((10.36 : ℝ) * ((9.42 : ℝ) * ((8.5 : ℝ) * ((7.59 : ℝ) * ((6.71 : ℝ) * ((5.86 : ℝ) * ((5.08 : ℝ) * ((4.38 : ℝ) * ((3.82 : ℝ) * 3.46))))))))))))))))))) := by
+    norm_num
+  have hD_ge : (1170000000000000000000 : ℝ)
+      ≤ ‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))) :=
+    le_trans hDlo q20
+  have hD_pos : (0 : ℝ)
+      < ‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))) :=
+    lt_of_lt_of_le (by norm_num) hD_ge
+  -- Numerator: `‖Complex.Gamma (z+21)‖ ≤ Real.Gamma(21.8025) ≤ 30100000000000000000`.
+  have hre21 : (1 - R02GammaUpper.sR02 / 2 + 21).re = 21.8025 := by
+    simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+    norm_num
+  have hGN_re : (0 : ℝ) < (1 - R02GammaUpper.sR02 / 2 + 21).re := by
+    rw [hre21]
+    norm_num
+  have hGN_le : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)‖ ≤ 30100000000000000000 := by
+    have h1 : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)‖
+        ≤ Real.Gamma ((1 - R02GammaUpper.sR02 / 2 + 21).re) :=
+      R00GammaLower.norm_Gamma_le_realGamma hGN_re
+    have hreNb : ((1 - R02GammaUpper.sR02 / 2 + 21).re) = 21.8025 := hre21
+    rw [hreNb] at h1
+    exact le_trans h1 realGamma_218025_num
+  -- Combine.
+  have hD_mul : (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))))
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      = ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21)‖ := by
+    rw [hprod]
+    ring
+  have hle : (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))))
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≤ 30100000000000000000 := by
+    rw [hD_mul]
+    exact hGN_le
+  have hmul_comm : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+        * (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))))
+        ≤ 30100000000000000000 := by
+    calc ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ * _
+          = _ * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ := mul_comm _ _
+      _ ≤ 30100000000000000000 := hle
+  have hdiv : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      ≤ 30100000000000000000 / (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))))
+        :=
+    (le_div_iff₀ hD_pos).mpr hmul_comm
+  have hcap : (30100000000000000000 : ℝ)
+      ≤ 0.026 * (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖))))))))))))))))))))) := by
+    calc (30100000000000000000 : ℝ) ≤ 0.026 * 1170000000000000000000 := by norm_num
+      _ ≤ 0.026 * _ :=
+          mul_le_mul_of_nonneg_left hD_ge (by norm_num)
+  have hfinal : 30100000000000000000 / (‖1 - R02GammaUpper.sR02 / 2 + 20‖ * (‖1 - R02GammaUpper.sR02 / 2 + 19‖ * (‖1 - R02GammaUpper.sR02 / 2 + 18‖ * (‖1 - R02GammaUpper.sR02 / 2 + 17‖ * (‖1 - R02GammaUpper.sR02 / 2 + 16‖ * (‖1 - R02GammaUpper.sR02 / 2 + 15‖ * (‖1 - R02GammaUpper.sR02 / 2 + 14‖ * (‖1 - R02GammaUpper.sR02 / 2 + 13‖ * (‖1 - R02GammaUpper.sR02 / 2 + 12‖ * (‖1 - R02GammaUpper.sR02 / 2 + 11‖ * (‖1 - R02GammaUpper.sR02 / 2 + 10‖ * (‖1 - R02GammaUpper.sR02 / 2 + 9‖ * (‖1 - R02GammaUpper.sR02 / 2 + 8‖ * (‖1 - R02GammaUpper.sR02 / 2 + 7‖ * (‖1 - R02GammaUpper.sR02 / 2 + 6‖ * (‖1 - R02GammaUpper.sR02 / 2 + 5‖ * (‖1 - R02GammaUpper.sR02 / 2 + 4‖ * (‖1 - R02GammaUpper.sR02 / 2 + 3‖ * (‖1 - R02GammaUpper.sR02 / 2 + 2‖ * (‖1 - R02GammaUpper.sR02 / 2 + 1‖ * (‖1 - R02GammaUpper.sR02 / 2‖)))))))))))))))))))))
+      ≤ 0.026 :=
+    (div_le_iff₀ hD_pos).mpr hcap
+  exact le_trans hdiv hfinal
+
+#print axioms R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep
+
+end R02GammaUpperDeep
