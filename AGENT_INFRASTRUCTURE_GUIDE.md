@@ -1524,7 +1524,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     coordinator-verified green 8693 jobs, zero errors + zero `sorryAx`, all 30 DZ axioms clean):**
     Pi-add → `.const_add`/`.const_sub`, `by_cases`/`push_neg` for `le_or_lt`, bare `gcongr`, `abel` +
     rewrite-at-hypothesis. Triplicate `DZ1_main`/`DZ1b_main`/`DZ1c_main` all `≤ 13.85 < 16`.
-    Next: amplitude-weighted per-16-block premise via Abel partial summation (tasked).
+    Next: amplitude-weighted per-16-block premise via Abel partial summation (tasked). **Abel
+    weight machinery banked (`DZ2_*`, DS, `3545c124`, green 8693 jobs, axioms clean):**
+    `w_n = (16+n)^{-0.605}`, `w0 ≤ 1/4`, `TV ≤ 1/4` + `DZ2_weighted_le_of_cap` (via read-only
+    `T2_abel_norm`) ⇒ **unconditional `‖∑w·ZPiece‖ ≤ 4`**, conditional `≤ 3.4625` (under `13.85`
+    prefix caps; k=14,15 caps open). HONEST: monotone weights give no extra savings (`w0·B`
+    telescope); need `0.0019`/block → still 2100×/1818× short. Next: `w0 ≤ 0.19` tightening,
+    per-k `13.85` caps (k=14,15), or eta-identification (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
