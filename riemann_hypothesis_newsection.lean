@@ -6885,3 +6885,250 @@ hTail verdict: SHARPENER GREEN (`198.46005` pos / `1927.0470855` neg vs CC `1984
 P1 verdict: CONDITIONAL (needs `hTail` at 36, not met).
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+# CH2 Gamma-tail upper (door-3 hTail/P1 feeder, append-only)
+
+GREPS FIRST (verified 2026-09-04, via `rg` in-file; nothing reimplemented):
+* AR joint identity: `Door3JointGammaCos.Gamma_one_add_im_normSq`
+  (`‖Γ(1+iy)‖² = πy/sinh(πy)`, `:2690`) + `Door3JointGammaCos.t_mul_coth_le`
+  (`t·coth t ≤ t+1`, `:2756`) + `Door3JointGammaCos.Gamma_Re2_normSq`
+  (`‖Γ(w)‖² = (1+y²)·πy/sinh(πy)` on `Re = 2`, `:2831`).
+* CF sharp damping: `CF_SharpDamp.sharp_pos_edge` (`0.1*B(8.75) = 198.46005`)
+  + `CF_SharpDamp.sharp_neg_edge` (`0.971*B(8.75) = 1927.0470855`); joint
+  analysis load-bearing (top needs 5.5x, negative needs ~18x).
+* BZ tail reflection: `BZTailEnvelope.GammaR_tail_lower` (tail Gamma-lower via
+  `Complex.Gamma_mul_Gamma_one_sub`, reflection numerals).
+* Absent hence created here: `CH2GammaTail`, `Gamma_Re2_tail`, `sinh_ge_exp`
+  return zero hits (checked via `rg` before writing).
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `sinh_ge_exp_div_four`: `exp t / 4 ≤ sinh t` for `1/2 ≤ t` (from-scratch via
+  `Real.add_one_le_exp` at `2t`: `2 ≤ exp(2t)`, hence `exp(-t) ≤ exp(t)/2`).
+* `Gamma_Re2_tail_sq` (MAIN, squared form): on `Re w = 2`, `8.75 ≤ |Im w|`,
+  `‖Γ w‖² ≤ 16·|Im w|³·exp(-π·|Im w|)` — i.e. `C² = 16`.
+  Via AR's exact `Gamma_Re2_normSq` + symmetrization `y → |y|` (mirror of AR's
+  `hsymm`), the tail sinh lower bound above (decay extraction in place of AR's
+  window `t·coth` cap), the tail poly numeral `1+|y|² ≤ (1241/1225)·|y|²`
+  (from `|y|² ≥ 8.75² = 76.5625`; `1241/1225 = 77.5625/76.5625`), and the coeff
+  numeral `(1241/1225)·(4π) ≤ 16` (via `π ≤ 3.1416`).
+* `Gamma_Re2_tail_upper` (unsquared, EXPLICIT `C = 4`):
+  `‖Γ w‖ ≤ 4·√(|Im w|³)·exp(-π·|Im w|/2)` on the same tail, by taking square
+  roots (`Real.sqrt_le_sqrt` + `Real.sq_sqrt` + `exp(x/2)² = exp(x)`).
+  Since `√(|y|³) = |y|^{3/2}`, this is exactly
+  `‖Γ(2+iy)‖ ≤ C·|y|^{3/2}·e^{-π|y|/2}` with `C = 4`.
+
+EXPLICIT C ACHIEVED: `C = 4` (squared `C² = 16`). True constant near edge:
+`‖Γ‖²/(|y|³·e^{-π|y|}) ≈ 4π·1.013 ≈ 12.73`, so `C = 4` has ~25% headroom;
+`C = 3.6` (`3.6² = 12.96`) would also hold but `4` keeps numerals `norm_num`-clean.
+-/
+
+namespace CH2GammaTail
+
+/-- From-scratch tail decay extractor: `exp t / 4 ≤ sinh t` for `1/2 ≤ t`.
+Proof: `exp(2t) ≥ 1+2t ≥ 2` (`Real.add_one_le_exp`), so
+`2·exp(-t) ≤ exp(2t)·exp(-t) = exp(t)`, i.e. `exp(-t) ≤ exp(t)/2`;
+then `sinh t = (exp t - exp(-t))/2 ≥ (exp t)/4`. -/
+theorem sinh_ge_exp_div_four {t : ℝ} (ht : 1 / 2 ≤ t) :
+    Real.exp t / 4 ≤ Real.sinh t := by
+  have hEpos : 0 < Real.exp t := Real.exp_pos t
+  have hEmpos : 0 < Real.exp (-t) := Real.exp_pos _
+  have h2t : (2 : ℝ) ≤ Real.exp (2 * t) := by
+    have h := Real.add_one_le_exp (2 * t)
+    linarith
+  have h2t_eq : (2 : ℝ) * t = t + t := by ring
+  have hExp2 : Real.exp (2 * t) = Real.exp t * Real.exp t := by
+    rw [h2t_eq, Real.exp_add]
+  have hEt2 : (2 : ℝ) ≤ Real.exp t * Real.exp t := by
+    rw [← hExp2]
+    exact h2t
+  have hEm : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hEm_le : Real.exp (-t) ≤ Real.exp t / 2 := by
+    have hmul := mul_le_mul_of_nonneg_right hEt2 (le_of_lt hEmpos)
+    have e : (Real.exp t * Real.exp t) * Real.exp (-t) = Real.exp t := by
+      rw [mul_assoc, mul_comm (Real.exp t) (Real.exp (-t)), hEm, mul_one]
+    linarith
+  have hsinh_eq : Real.sinh t = (Real.exp t - Real.exp (-t)) / 2 :=
+    Real.sinh_eq t
+  linarith
+
+/-- Squared Stirling-sharp Gamma tail upper on `Re = 2`: `‖Γ w‖² ≤ 16·|y|³·e^{-π|y|}`
+for `8.75 ≤ |y|`. Mirrors AR's `Gamma_Re2_normSq` proof shape (symmetrization +
+`sinh`-denominator handling), extended off-window with tail numerals instead of
+window caps (`t_mul_coth_le` is replaced by `sinh_ge_exp_div_four`). -/
+theorem Gamma_Re2_tail_sq {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w‖ ^ 2
+      ≤ 16 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := by
+  have hyne : w.im ≠ 0 := by
+    intro h0
+    rw [h0, abs_zero] at htail
+    norm_num at htail
+  have hG := Door3JointGammaCos.Gamma_Re2_normSq hw hyne
+  have hsq : w.im ^ 2 = |w.im| ^ 2 := (sq_abs _).symm
+  have hsymm : Real.pi * w.im / Real.sinh (Real.pi * w.im)
+      = Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) := by
+    rcases le_total w.im 0 with hynonpos | hynonneg
+    · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+      rw [abs_of_neg hyneg, show Real.pi * -w.im = -(Real.pi * w.im) by ring,
+        Real.sinh_neg, neg_div_neg_eq]
+    · rw [abs_of_nonneg hynonneg]
+  have hG2 : ‖Complex.Gamma w‖ ^ 2
+      = (1 + |w.im| ^ 2) * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)) := by
+    rw [hsq, hsymm] at hG
+    exact hG
+  have ha_pos : 0 < |w.im| := lt_of_lt_of_le (by norm_num) htail
+  have hpi : 0 < Real.pi := by linarith [Real.pi_gt_three]
+  have ha_nonneg : 0 ≤ |w.im| := le_of_lt ha_pos
+  have hpi_nonneg : 0 ≤ Real.pi := le_of_lt hpi
+  have hpa_nonneg : 0 ≤ Real.pi * |w.im| := mul_nonneg hpi_nonneg ha_nonneg
+  have ht_half : (1 : ℝ) / 2 ≤ Real.pi * |w.im| := by
+    have h3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    have hmul := mul_le_mul_of_nonneg_right (le_of_lt h3) ha_nonneg
+    have h3y : (3 : ℝ) * 8.75 ≤ 3 * |w.im| :=
+      mul_le_mul_of_nonneg_left htail (by norm_num)
+    have h326 : (3 : ℝ) * 8.75 = 26.25 := by norm_num
+    linarith
+  have hsinh_pos : 0 < Real.sinh (Real.pi * |w.im|) :=
+    Real.sinh_pos_iff.mpr (by linarith)
+  have hexp_pos : 0 < Real.exp (Real.pi * |w.im|) := Real.exp_pos _
+  have hsinh_lower : Real.exp (Real.pi * |w.im|) / 4
+      ≤ Real.sinh (Real.pi * |w.im|) :=
+    sinh_ge_exp_div_four ht_half
+  have hExp4 : Real.exp (Real.pi * |w.im|)
+      ≤ 4 * Real.sinh (Real.pi * |w.im|) := by
+    linarith
+  have hS_nonneg : 0 ≤ Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) :=
+    div_nonneg hpa_nonneg (le_of_lt hsinh_pos)
+  have hS_le : Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)
+      ≤ 4 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|)) := by
+    rw [Real.exp_neg]
+    have hcross : Real.pi * |w.im| * Real.exp (Real.pi * |w.im|)
+        ≤ 4 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|) := by
+      have hnn := mul_nonneg hpa_nonneg (sub_nonneg.mpr hExp4)
+      nlinarith [hnn]
+    have hgoal : Real.pi * |w.im|
+        ≤ (4 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|))
+          / Real.exp (Real.pi * |w.im|) :=
+      (le_div_iff₀ hexp_pos).mpr hcross
+    rw [div_eq_mul_inv] at hgoal
+    have e : (4 * Real.pi * |w.im| * Real.sinh (Real.pi * |w.im|))
+          * (Real.exp (Real.pi * |w.im|))⁻¹
+        = 4 * Real.pi * |w.im| * (Real.exp (Real.pi * |w.im|))⁻¹
+          * Real.sinh (Real.pi * |w.im|) := by ring
+    rw [e] at hgoal
+    exact (div_le_iff₀ hsinh_pos).mpr hgoal
+  have hsq_ge : (8.75 : ℝ) ^ 2 ≤ |w.im| ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) htail 2
+  have h875sq : (8.75 : ℝ) ^ 2 = 76.5625 := by norm_num
+  have h76 : (76.5625 : ℝ) ≤ |w.im| ^ 2 := by linarith
+  have hpoly : 1 + |w.im| ^ 2 ≤ (1241 / 1225 : ℝ) * |w.im| ^ 2 := by
+    have hmul := mul_le_mul_of_nonneg_left h76 (show (0 : ℝ) ≤ 16 / 1225 by norm_num)
+    have h16 : (16 / 1225 : ℝ) * 76.5625 = 1 := by norm_num
+    have h1le : (1 : ℝ) ≤ (16 / 1225) * |w.im| ^ 2 := by linarith
+    have hsplit : (1241 / 1225 : ℝ) * |w.im| ^ 2
+        = |w.im| ^ 2 + (16 / 1225) * |w.im| ^ 2 := by ring
+    linarith
+  have hcoeff : (1241 / 1225 : ℝ) * (4 * Real.pi) ≤ 16 := by
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hmul := mul_le_mul_of_nonneg_left hpi_le
+      (show (0 : ℝ) ≤ (1241 / 1225) * 4 by norm_num)
+    have hnum : ((1241 / 1225 : ℝ) * 4) * 3.1416 ≤ 16 := by norm_num
+    have hbridge : (1241 / 1225 : ℝ) * (4 * Real.pi)
+        = ((1241 / 1225) * 4) * Real.pi := by ring
+    rw [hbridge]
+    linarith
+  have hpolyRHS_nonneg : 0 ≤ (1241 / 1225 : ℝ) * |w.im| ^ 2 :=
+    mul_nonneg (by norm_num) (sq_nonneg _)
+  have hRHS_exp_nonneg : 0 ≤ Real.exp (-(Real.pi * |w.im|)) :=
+    le_of_lt (Real.exp_pos _)
+  have ha3_nonneg : 0 ≤ |w.im| ^ 3 := pow_nonneg ha_nonneg 3
+  have hbound1 : (1 + |w.im| ^ 2)
+        * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|))
+      ≤ ((1241 / 1225) * |w.im| ^ 2)
+        * (4 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|))) :=
+    mul_le_mul hpoly hS_le hS_nonneg hpolyRHS_nonneg
+  have hEq : ((1241 / 1225) * |w.im| ^ 2)
+        * (4 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|)))
+      = ((1241 / 1225) * (4 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|)) := by
+    ring
+  have hbound2 : ((1241 / 1225) * (4 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|))
+      ≤ 16 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) :=
+    mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right hcoeff ha3_nonneg) hRHS_exp_nonneg
+  calc ‖Complex.Gamma w‖ ^ 2
+      = (1 + |w.im| ^ 2) * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|)) := hG2
+    _ ≤ ((1241 / 1225) * |w.im| ^ 2)
+        * (4 * Real.pi * |w.im| * Real.exp (-(Real.pi * |w.im|))) := hbound1
+    _ = ((1241 / 1225) * (4 * Real.pi)) * |w.im| ^ 3
+        * Real.exp (-(Real.pi * |w.im|)) := hEq
+    _ ≤ 16 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := hbound2
+
+/-- Un-squared Stirling-sharp Gamma tail upper with EXPLICIT `C = 4`:
+`‖Γ w‖ ≤ 4·√(|y|³)·e^{-π|y|/2}` for `Re w = 2`, `8.75 ≤ |y|`.
+Since `√(|y|³) = |y|^{3/2}`, this is exactly the brief's
+`‖Γ(2+iy)‖ ≤ C·|y|^{3/2}·e^{-π|y|/2}` with `C = 4`. -/
+theorem Gamma_Re2_tail_upper {w : ℂ} (hw : w.re = 2)
+    (htail : (8.75 : ℝ) ≤ |w.im|) :
+    ‖Complex.Gamma w‖
+      ≤ 4 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2)) := by
+  have hsq := Gamma_Re2_tail_sq hw htail
+  have ha_nonneg : 0 ≤ |w.im| := abs_nonneg _
+  have ha3_nonneg : 0 ≤ |w.im| ^ 3 := pow_nonneg ha_nonneg 3
+  have hsqrt_nonneg : 0 ≤ Real.sqrt (|w.im| ^ 3) := Real.sqrt_nonneg _
+  have hexp_nonneg : 0 ≤ Real.exp (-(Real.pi * |w.im| / 2)) :=
+    le_of_lt (Real.exp_pos _)
+  have hRHS_nonneg : 0 ≤ 4 * Real.sqrt (|w.im| ^ 3)
+      * Real.exp (-(Real.pi * |w.im| / 2)) :=
+    mul_nonneg (mul_nonneg (by norm_num) hsqrt_nonneg) hexp_nonneg
+  have hsqrt_sq : (Real.sqrt (|w.im| ^ 3)) ^ 2 = |w.im| ^ 3 :=
+    Real.sq_sqrt ha3_nonneg
+  have hexp_sq : (Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+      = Real.exp (-(Real.pi * |w.im|)) := by
+    have e : (-(Real.pi * |w.im| / 2)) + (-(Real.pi * |w.im| / 2))
+        = -(Real.pi * |w.im|) := by ring
+    calc (Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+        = Real.exp (-(Real.pi * |w.im| / 2))
+          * Real.exp (-(Real.pi * |w.im| / 2)) := by ring
+      _ = Real.exp ((-(Real.pi * |w.im| / 2)) + (-(Real.pi * |w.im| / 2))) := by
+          rw [← Real.exp_add]
+      _ = Real.exp (-(Real.pi * |w.im|)) := by rw [e]
+  have hRHS_sq : (4 * Real.sqrt (|w.im| ^ 3)
+        * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+      = 16 * |w.im| ^ 3 * Real.exp (-(Real.pi * |w.im|)) := by
+    have e : (4 * Real.sqrt (|w.im| ^ 3)
+          * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2
+        = 16 * ((Real.sqrt (|w.im| ^ 3)) ^ 2)
+          * ((Real.exp (-(Real.pi * |w.im| / 2))) ^ 2) := by
+      ring
+    rw [e, hsqrt_sq, hexp_sq]
+  have hle2 : ‖Complex.Gamma w‖ ^ 2
+      ≤ (4 * Real.sqrt (|w.im| ^ 3) * Real.exp (-(Real.pi * |w.im| / 2))) ^ 2 := by
+    rw [hRHS_sq]
+    exact hsq
+  have hle_sqrt := Real.sqrt_le_sqrt hle2
+  rw [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hRHS_nonneg] at hle_sqrt
+  exact hle_sqrt
+
+#print axioms CH2GammaTail.sinh_ge_exp_div_four
+#print axioms CH2GammaTail.Gamma_Re2_tail_sq
+#print axioms CH2GammaTail.Gamma_Re2_tail_upper
+
+end CH2GammaTail
+
+/-!
+CH2 VERDICT + RESIDUAL (report-and-stop): ONE Gamma-tail upper GREEN, stop per brief.
+EXPLICIT C ACHIEVED: `C = 4` (`C² = 16`) in
+`‖Γ w‖ ≤ 4·√(|Im w|³)·e^{-π|Im w|/2}` (`Re w = 2`, `8.75 ≤ |Im w|`),
+squared form `‖Γ w‖² ≤ 16·|Im w|³·e^{-π|Im w|}`.
+Route: AR reflection identity (`Gamma_Re2_normSq`) + `t·coth`-style decay
+extraction (`sinh_ge_exp_div_four`, the tail analogue of `t_mul_coth_le`) +
+explicit tail numerals (`1+|y|² ≤ (1241/1225)|y|²`, `(1241/1225)(4π) ≤ 16`).
+No cosine-joint composition / edge numbers attempted (per brief: STOP after this
+builds green — it is commit-worthy). Downstream hTail/P1 wiring (joint `Γ·cos`
+Gaussian analysis, top-edge 5.5x / negative-edge ~18x) is NOT claimed here.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
