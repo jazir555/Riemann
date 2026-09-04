@@ -2,6 +2,7 @@ import riemann_hypothesis
 import zeta_rigorous
 import central_cover_assembly
 import interval_arith
+import ZeroFreeRegionHadamard
 
 /-!
 # The hard-difference / mollified / Rouché door to RH
@@ -3791,6 +3792,238 @@ EXACT residual (numbers): (i) `hTail`: `‖G‖ ≤ 36` on `Re = -1`, `8.75 < |I
 the crude-majorant whole-line truth there is exponential, so this is NOT closable
 by majorants — same wall as BF2's report); (ii) `hBdd`: `BddAbove` of `‖G‖` on
 `[-1,2]` (needs strip `ζ`-growth, absent repo-wide). No other opens.
+-/
+
+/-!
+# BL tail (door-3 P1): Hadamard-`xi` → pole-removed-`F` bridge + conditional P1 assembly
+
+Ownership: Agent BL tail append (import `ZeroFreeRegionHadamard` added at top-of-file;
+everything else below is append-only).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `hadamardXi_eq_s_mul_GammaR_mul_poleRemoved`: unconditional algebraic bridge
+  `ZeroFreeRegionHadamard.xi s = s * Complex.Gammaℝ s * F s` for `s ≠ 0, 1`
+  (mirrors `xiShifted_eq_completed` / `classicalXi_eq_completed_add_half` in
+  `riemann_hypothesis.lean`, and the `field_simp`+`ring` computation in
+  `ZeroFreeRegionHadamard.lean` around `:2479`).
+* `poleRemoved_norm_of_hadamardXi`: norm form
+  `‖F s‖ = ‖xi s‖ / (‖s‖ * ‖Gammaℝ s‖)`.
+* `F_of_xi_whole_plane`: the public whole-plane bound
+  `ZeroFreeRegionHadamard.xi_norm_bound_whole_plane` (`:4535`) transferred to `F`,
+  with the `s * Gammaℝ` denominators kept explicit.
+* `StripEnvelope`: the exact residual envelope hypothesis R1
+  (`∃ C K, ∀ s ∈ [-1,2], ‖F s‖ ≤ C * exp (K * |Im s|)`).
+* `hBdd_of_stripEnvelope`: R1 ⇒ `BddAbove ‖G‖` on `[-1,2]` (Gaussian damping
+  dominates any fixed exponential; completing-the-square cap
+  `C * exp (25 * (K + 0.135)^2 + 0.04)`).
+* `P1_R02_of_envelope_and_tail` + `R02_obligation_of_envelope_and_tail`:
+  R1 + R2 (`hTail`) ⇒ `‖ζ‖ ≤ 10` on the R02 rect, discharging
+  `DerivCauchyBridge.R02_zeta_upper_obligation` (rects match exactly).
+
+Grep record (verified before writing; `rg -n` on this file + repo):
+* `xi_norm_bound_whole_plane` — only `ZeroFreeRegionHadamard.lean:4535` (public;
+  the `xi_bound_re_gt_one` at `:1522` is `private`, not usable here).
+* `xiShifted_eq_completed` — only `riemann_hypothesis.lean:1961` (door-3 shifted xi,
+  a different function from Hadamard `xi`); mirrored, not reused.
+* Strip-uniform `Gammaℝ`/`Gamma` LOWER of shape `‖Γ‖ ≥ c * exp (-C|Im|)` — absent
+  repo-wide (only pointwise/disc lowers: `CellGammaUniform`, `R02GammaLower`;
+  only uppers on strips). Hence R1 stays an explicit hypothesis.
+* Numerical crossover (why the crude `xi` envelope cannot yield R2 at threshold
+  `8.75`): the `xi`-derived `F` envelope has shape `exp (O(|τ|^1.5))`, while the
+  Gaussian damping is `exp (-(τ+6.75)^2/100)`; `τ^2/100` dominates `K|τ|^1.5` only
+  for `|τ| ≳ (100K)^2`, so the interpolant on `[8.75, T]` is astronomically above
+  `36`. R2 needs a Stirling-sharp *polynomial* `F`-bound (true `‖F‖ ~ |τ|^2.5`
+  on `Re = -1`), which is residual R2 below — same wall as the BH2/BF2 reports.
+-/
+
+namespace BLMiddleEnvelope
+
+/-- Algebraic bridge (unconditional): Hadamard `xi` factors as
+`s * Gammaℝ s * F s` where `F` is pole-removed zeta. This is the
+`xi`/`completedRiemannZeta₀` ↔ `F` bridge, mirroring `xiShifted_eq_completed`. -/
+theorem hadamardXi_eq_s_mul_GammaR_mul_poleRemoved {s : ℂ} (hs0 : s ≠ 0)
+    (hs1 : s ≠ 1) (hΓ : Complex.Gamma (s / 2) ≠ 0) :
+    ZeroFreeRegionHadamard.xi s
+      = s * Complex.Gammaℝ s * ZetaUpperR02ThreeLines.poleRemovedZeta s := by
+  have hpi0 : ((Real.pi : ℂ)) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hpi : ((Real.pi : ℂ)) ^ (-s / 2) ≠ 0 :=
+    Complex.cpow_ne_zero_iff.mpr (Or.inl hpi0)
+  have h1z : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
+  have hden : (Real.pi : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) ≠ 0 :=
+    mul_ne_zero hpi hΓ
+  have hGR : Complex.Gammaℝ s = (Real.pi : ℂ) ^ (-s / 2) * Complex.Gamma (s / 2) :=
+    Complex.Gammaℝ_def s
+  unfold ZeroFreeRegionHadamard.xi
+  rw [hGR, ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hs1,
+    riemannZeta_eq_completedRiemannZeta₀ hs0]
+  field_simp
+  ring
+
+/-- Norm form of the bridge (unconditional). -/
+theorem poleRemoved_norm_of_hadamardXi {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1)
+    (hΓ : Complex.Gamma (s / 2) ≠ 0) :
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+      = ‖ZeroFreeRegionHadamard.xi s‖ / (‖s‖ * ‖Complex.Gammaℝ s‖) := by
+  have hbe := hadamardXi_eq_s_mul_GammaR_mul_poleRemoved hs0 hs1 hΓ
+  have hpi0 : ((Real.pi : ℂ)) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hpi : ((Real.pi : ℂ)) ^ (-s / 2) ≠ 0 :=
+    Complex.cpow_ne_zero_iff.mpr (Or.inl hpi0)
+  have hGn : ‖Complex.Gammaℝ s‖ ≠ 0 := by
+    have hne : Complex.Gammaℝ s ≠ 0 := by
+      rw [Complex.Gammaℝ_def]
+      exact mul_ne_zero hpi hΓ
+    exact norm_ne_zero_iff.mpr hne
+  have hsn : ‖s‖ ≠ 0 := norm_ne_zero_iff.mpr hs0
+  have hdenR : ‖s‖ * ‖Complex.Gammaℝ s‖ ≠ 0 := mul_ne_zero hsn hGn
+  have hnorm : ‖ZeroFreeRegionHadamard.xi s‖
+      = ‖s‖ * ‖Complex.Gammaℝ s‖ * ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ := by
+    rw [hbe, norm_mul, norm_mul]
+  rw [hnorm, eq_div_iff hdenR]
+  ring
+
+/-- Whole-plane `xi` bound transferred to `F` (unconditional; the `s * Gammaℝ`
+denominators stay explicit — bounding them below on the strip is residual R1). -/
+theorem F_of_xi_whole_plane {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1)
+    (hΓ : Complex.Gamma (s / 2) ≠ 0) :
+    ∃ K : ℝ, ∃ C₀ : ℝ, (C₀ ≤ ‖s‖ →
+      ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+        ≤ Real.exp (K * ‖s‖ ^ (3 / 2 : ℝ)) / (‖s‖ * ‖Complex.Gammaℝ s‖)) := by
+  obtain ⟨K, -, C₀, -, hxi⟩ := ZeroFreeRegionHadamard.xi_norm_bound_whole_plane
+  exact ⟨K, C₀, fun hbig => by
+    have hnorm := poleRemoved_norm_of_hadamardXi hs0 hs1 hΓ
+    have hle := hxi s hbig
+    have hpi0 : ((Real.pi : ℂ)) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+    have hpi : ((Real.pi : ℂ)) ^ (-s / 2) ≠ 0 :=
+      Complex.cpow_ne_zero_iff.mpr (Or.inl hpi0)
+    have hD : 0 < ‖s‖ * ‖Complex.Gammaℝ s‖ := by
+      have hGn : ‖Complex.Gammaℝ s‖ ≠ 0 := by
+        have hne : Complex.Gammaℝ s ≠ 0 := by
+          rw [Complex.Gammaℝ_def]
+          exact mul_ne_zero hpi hΓ
+        exact norm_ne_zero_iff.mpr hne
+      have hGpos : 0 < ‖Complex.Gammaℝ s‖ :=
+        lt_of_le_of_ne (norm_nonneg _) (Ne.symm hGn)
+      exact mul_pos (norm_pos_iff.mpr hs0) hGpos
+    rw [hnorm]
+    exact div_le_div_of_nonneg_right hle hD.le⟩
+
+/-- Residual R1 (explicit): strip-exponential envelope for pole-removed `F` on
+`[-1,2]`. Right third (`σ ∈ [1.5,2]`) follows from Euler `B = 3`
+(`TailZetaUpper.zeta_rightEdge_B3`); left third (`σ ∈ [-1,-0.5]`) via FE
+reflection generalizing `BF2TailCaps.zeta_Re_neg1_whole_le`; middle
+(`σ ∈ [-0.5,1.5]`) needs the `Gammaℝ` lower via reflection (absent repo-wide). -/
+def StripEnvelope : Prop :=
+  ∃ C K : ℝ, ∀ s : ℂ, s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+    ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ C * Real.exp (K * |s.im|)
+
+/-- `hBdd` from the envelope (conditional on R1): Gaussian damping dominates any
+fixed exponential. Completing the square:
+`K|τ| + (σ² - (τ+6.75)²)/100 ≤ 25(K+0.135)² + 0.04` on `σ ∈ [-1,2]`. -/
+theorem hBdd_of_stripEnvelope (hEnv : StripEnvelope) :
+    BddAbove ((norm ∘ ZetaUpperR02ThreeLines.dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) := by
+  obtain ⟨C, K, hCK⟩ := hEnv
+  have h0mem : (0 : ℂ) ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    simp only [Set.mem_preimage, Set.mem_Icc]
+    constructor
+    · simp only [Complex.zero_re]; norm_num
+    · simp only [Complex.zero_re]; norm_num
+  have hC : 0 ≤ C := by
+    have h := hCK 0 h0mem
+    have hnn : 0 ≤ C * Real.exp (K * |(0 : ℂ).im|) := le_trans (norm_nonneg _) h
+    exact nonneg_of_mul_nonneg_left hnn (Real.exp_pos _)
+  refine ⟨C * Real.exp (25 * (K + 0.135) ^ 2 + 0.04), ?_⟩
+  intro y hy
+  obtain ⟨s, hs, rfl⟩ := hy
+  simp only [Function.comp_apply]
+  have hmem : (-1 : ℝ) ≤ s.re ∧ s.re ≤ 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip at hs
+    simp only [Set.mem_preimage, Set.mem_Icc] at hs
+    exact hs
+  obtain ⟨hlo, hhi⟩ := hmem
+  have hF := hCK s hs
+  have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ)
+      * (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp ((s.re ^ 2 - (s.im + 6.75) ^ 2) / 100) := by
+    rw [ZetaUpperR02ThreeLines.norm_complex_exp, BH2TailWindow.damp_re_general]
+  have hG : ZetaUpperR02ThreeLines.dampedPoleRemoved s
+      = ZetaUpperR02ThreeLines.poleRemovedZeta s * Complex.exp (((1 / 100 : ℝ) : ℂ)
+        * (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  have hnorm : ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖
+      = ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+        * ‖Complex.exp (((1 / 100 : ℝ) : ℂ)
+          * (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ := by
+    rw [hG, norm_mul]
+  have hσ : s.re ^ 2 ≤ 4 := by
+    have e1 : (0 : ℝ) ≤ s.re + 1 := by linarith
+    have e2 : (0 : ℝ) ≤ 2 - s.re := by linarith
+    nlinarith [mul_nonneg e1 e2]
+  have hquad : K * |s.im| + (s.re ^ 2 - (s.im + 6.75) ^ 2) / 100
+      ≤ 25 * (K + 0.135) ^ 2 + 0.04 := by
+    have hcap : (0 : ℝ) ≤ 0.495625 - s.re ^ 2 / 100 := by linarith
+    rcases le_total 0 s.im with ht | ht
+    · rw [abs_of_nonneg ht]
+      nlinarith [sq_nonneg (s.im / 10 - 5 * (K + 0.135)), hcap, ht]
+    · rw [abs_of_nonpos ht]
+      nlinarith [sq_nonneg ((-s.im) / 10 - 5 * (K + 0.135)), hcap, ht]
+  have hexp_le : Real.exp (K * |s.im|)
+      * Real.exp ((s.re ^ 2 - (s.im + 6.75) ^ 2) / 100)
+      ≤ Real.exp (25 * (K + 0.135) ^ 2 + 0.04) := by
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr hquad
+  rw [hnorm, hdamp]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+        * Real.exp ((s.re ^ 2 - (s.im + 6.75) ^ 2) / 100)
+      ≤ (C * Real.exp (K * |s.im|))
+        * Real.exp ((s.re ^ 2 - (s.im + 6.75) ^ 2) / 100) :=
+        mul_le_mul hF (le_refl _) (Real.exp_nonneg _)
+          (mul_nonneg hC (Real.exp_nonneg _))
+    _ = C * (Real.exp (K * |s.im|)
+        * Real.exp ((s.re ^ 2 - (s.im + 6.75) ^ 2) / 100)) := by ring
+    _ ≤ C * Real.exp (25 * (K + 0.135) ^ 2 + 0.04) :=
+        mul_le_mul_of_nonneg_left hexp_le hC
+
+/-- Door-3 P1 conditional main (R1 + R2): envelope + left-tail cap ⇒
+`‖ζ‖ ≤ 10` on the R02 disc `s`-rect. -/
+theorem P1_R02_of_envelope_and_tail (hEnv : StripEnvelope)
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  BH2TailWindow.zeta_R02_le_ten_of_tail hTail (hBdd_of_stripEnvelope hEnv)
+    hs_lo hs_hi him_lo him_hi
+
+/-- Discharge of `DerivCauchyBridge.R02_zeta_upper_obligation` (conditional on
+R1 + R2; rects match exactly, `zeta = riemannZeta` by `rfl`). -/
+theorem R02_obligation_of_envelope_and_tail (hEnv : StripEnvelope)
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36) :
+    DerivCauchyBridge.R02_zeta_upper_obligation := by
+  intro s hs_lo hs_hi him_lo him_hi
+  have h : zeta s = riemannZeta s := rfl
+  rw [h]
+  exact P1_R02_of_envelope_and_tail hEnv hTail hs_lo hs_hi him_lo him_hi
+
+#print axioms BLMiddleEnvelope.hadamardXi_eq_s_mul_GammaR_mul_poleRemoved
+#print axioms BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi
+#print axioms BLMiddleEnvelope.F_of_xi_whole_plane
+#print axioms BLMiddleEnvelope.hBdd_of_stripEnvelope
+#print axioms BLMiddleEnvelope.P1_R02_of_envelope_and_tail
+#print axioms BLMiddleEnvelope.R02_obligation_of_envelope_and_tail
+
+end BLMiddleEnvelope
+
+/-!
+BL P1 VERDICT + RESIDUAL (report-and-stop): unconditional bridge `xi = s·Gammaℝ·F`
++ `xi`-to-`F` transfer banked; `hBdd` and the full P1 compose proved conditional.
+EXACT residual (numbers): (R1) `BLMiddleEnvelope.StripEnvelope`
+(`∃ C K, ∀ s ∈ [-1,2], ‖F s‖ ≤ C·exp(K·|Im s|)`) — needs the strip `Gammaℝ` lower
+(reflection route; absent repo-wide); (R2) `hTail` (`‖G‖ ≤ 36` on `Re = -1`,
+`8.75 < |Im|`) — needs a Stirling-sharp `F`-polynomial bound (true `‖F‖~|τ|^2.5`
+there, so the crude `exp(O(|τ|^1.5))` envelope genuinely cannot close it at
+threshold `8.75`). No other opens; no `sorry`/`admit`/`axiom` in this tail.
 -/
 
 
