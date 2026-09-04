@@ -9171,5 +9171,379 @@ theorem D3_S9_cannot_reach_8_15 (U : ℝ) (hU : 0 ≤ U) :
 #print axioms D3_S1024_of_S9
 #print axioms D3_S9_cannot_reach_8_15
 
+/- BO2 x=10 composite stack (`log 10 = log 2 + log 5`), append-only tail.
+GREP RECORD (all verified before writing):
+* `Real.log_two_gt_d9`/`lt_d9` (`0.6931471803 < log 2 < 0.6931471808`),
+  `Real.log_five_gt_d9` (`1.6094379123 < log 5`) / `Real.log_five_lt_d9`
+  (`log 5 < 1.6094379126`) — all in
+  `Mathlib/Analysis/Complex/ExponentialBounds.lean`; `Real.log_mul`,
+  `Real.cos_sub_two_pi`/`Real.sin_sub_two_pi`, `Real.cos_add_pi` NOT needed
+  here (delta positive), `Real.one_sub_sq_div_two_le_cos`,
+  `Real.sin_ge_sub_cube`, `Real.sin_le`, `Real.pi_gt_d2`/`Real.pi_lt_d2`
+  (`3.14 < π < 3.15`), `Real.cos_mem_Icc`/`Real.sin_mem_Icc`,
+  `Real.rpow_le_rpow_of_exponent_le`, `le_of_pow_le_pow_left₀`,
+  `Real.rpow_neg`, `inv_le_inv₀`, `pow_le_pow_left₀` — all EXIST (Mathlib).
+* `D3_phase`/`D3_amp` defs (`:5910`/`:5913`), `D3_eta_re` (`:5990`),
+  `D3_sum_re_eq` (`:6016`), `D3_block_norm_ge_sum_lo` (`:6023`),
+  `D3_S1024_split_lower` (`:6039`), `D3_amp_nonneg`, `D3_term0_re`,
+  `D3_term1..8_re_lo` — all EXIST and are called.
+* BM2's x=8,9 composite stacks (`D3_log_eight_eq` via `2*4` + `Real.log_four_eq`,
+  `D3_log_nine_eq` via `3*3`, `D3_phase_seven_eq`/`D3_phase_eight_eq`,
+  `D3_theta_eight/nine_lo/hi`, `D3_delta_eight/nine_mem` (`6π` shape),
+  `D3_cos/sin_theta_eight/nine_*` (triple-periodicity), `D3_amp_eight/nine_*`
+  (`3/5` + `2/3` cleared-power shape), `D3_term7/8_re_lo`,
+  `D3_S8/S9_re_lower`, `D3_S8/S9_lo(_sum/_valid)`, `D3_S8/S9_norm_ge`,
+  `D3_S1024_of_S8/S9`, `D3_S8/S9_cannot_reach_8_15`) — mirrored EXACTLY.
+* BE's `D3_log_six_eq` (`log 6 = log 2 + log 3` via `rw [h, Real.log_mul ...]`)
+  is the direct template for `D3_log_ten_eq` below.
+* All `D3_*ten*`, `D3_phase_nine_eq`, `D3_term9_*`, `D3_S10_*` names below are new
+  (verified absent). Pair-absolute/Tendsto forms only — no eta `∑'`
+  tsum `0 <` form used.
+STOP status: this block ends at x = 10 as tasked (12/14/15/16 not
+attempted). Running margins: `S_10 ≥ -69/24`; the Re-route
+still cannot reach `8/15` (`D3_S10_cannot_reach_8_15`) — residual is the
+middle-block `[16,1024)` UPPER, unchanged.
+-/
+
+/-- (C) Composite log bridge `log 10 = log 2 + log 5` (new in-file; BE's
+    `D3_log_six_eq` pattern: `rw [h, Real.log_mul ...]`). -/
+theorem D3_log_ten_eq : Real.log 10 = Real.log 2 + Real.log 5 := by
+  have h10 : (10 : ℝ) = 2 * 5 := by norm_num
+  rw [h10, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (C) `D3_phase 9 = 8.75·(log 2 + log 5)` (composite pattern via `D3_log_ten_eq`,
+    mirrors `D3_phase_five_eq`). -/
+theorem D3_phase_nine_eq : D3_phase 9 = 8.75 * (Real.log 2 + Real.log 5) := by
+  unfold D3_phase
+  have h : ((((9 : ℕ)) : ℝ) + 1 : ℝ) = 10 := by norm_num
+  rw [h, D3_log_ten_eq]
+
+/-- (C) Phase lower `20.147 ≤ θ₁₀` (via `D3_log_ten_eq` + `log_two/five_gt_d9`,
+    mirrors `D3_theta_six_lo`). -/
+theorem D3_theta_ten_lo : 20.147 ≤ D3_phase 9 := by
+  rw [D3_phase_nine_eq]
+  have h2 := Real.log_two_gt_d9
+  have h5 := Real.log_five_gt_d9
+  have hsum : (2.3025850926 : ℝ) < Real.log 2 + Real.log 5 := by linarith
+  have hmul := mul_lt_mul_of_pos_left hsum (by norm_num : (0 : ℝ) < 8.75)
+  have hnum : (20.147 : ℝ) ≤ 8.75 * 2.3025850926 := by norm_num
+  linarith
+
+/-- (C) Phase upper `θ₁₀ ≤ 20.148` (via `D3_log_ten_eq` + `log_two/five_lt_d9`,
+    mirrors `D3_theta_six_hi`). -/
+theorem D3_theta_ten_hi : D3_phase 9 ≤ 20.148 := by
+  rw [D3_phase_nine_eq]
+  have h2 := Real.log_two_lt_d9
+  have h5 := Real.log_five_lt_d9
+  have hsum : Real.log 2 + Real.log 5 < (2.3025850934 : ℝ) := by linarith
+  have hmul := mul_lt_mul_of_pos_left hsum (by norm_num : (0 : ℝ) < 8.75)
+  have hnum : 8.75 * 2.3025850934 ≤ (20.148 : ℝ) := by norm_num
+  linarith
+
+/-- (C) Reduced phase `θ₁₀ - 6π ∈ [1.247, 1.308]` (from `pi_d2`,
+    mirrors `D3_delta_nine_mem`'s `6π` shape). -/
+theorem D3_delta_ten_mem :
+    (1.247 : ℝ) ≤ D3_phase 9 - 6 * Real.pi ∧
+    D3_phase 9 - 6 * Real.pi ≤ 1.308 := by
+  have hth_lo := D3_theta_ten_lo
+  have hth_hi := D3_theta_ten_hi
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (C) Cosine lower `0.14 ≤ cos θ₁₀` (triple-periodicity + quadratic
+    `1 - w²/2`, `w = θ₁₀ - 6π ∈ [1.247, 1.308]`). -/
+theorem D3_cos_theta_ten_lower : 0.14 ≤ Real.cos (D3_phase 9) := by
+  have hmem := D3_delta_ten_mem
+  set w := D3_phase 9 - 6 * Real.pi with hw_def
+  have hw_lo : (1.247 : ℝ) ≤ w := by rw [hw_def]; linarith [hmem.1]
+  have hw_hi : w ≤ (1.308 : ℝ) := by rw [hw_def]; linarith [hmem.2]
+  have hw_nn : (0 : ℝ) ≤ w := by linarith [hw_lo]
+  have hsq : w ^ 2 ≤ (1.308 : ℝ) ^ 2 := pow_le_pow_left₀ hw_nn hw_hi 2
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := w)
+  have hnum : (0.14 : ℝ) ≤ 1 - (1.308 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosw : (0.14 : ℝ) ≤ Real.cos w := by
+    have hle : 1 - (1.308 : ℝ) ^ 2 / 2 ≤ 1 - w ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper1 : Real.cos (D3_phase 9 - 2 * Real.pi) = Real.cos (D3_phase 9) :=
+    Real.cos_sub_two_pi _
+  have hper2 : Real.cos ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos (D3_phase 9 - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have hper3 :
+      Real.cos (((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have hper : Real.cos (D3_phase 9 - 6 * Real.pi) = Real.cos (D3_phase 9) := by
+    have e : ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 9 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 9 - 6 * Real.pi = w := hw_def.symm
+  have hcos_eq : Real.cos (D3_phase 9) = Real.cos w := by
+    rw [← hper, hdecomp]
+  linarith [hcos_eq, hcosw]
+
+/-- (C) Trivial cosine upper `cos θ₁₀ ≤ 1` (mirrors `D3_cos_theta_nine_le_one`;
+    the odd-`k` term lower needs only this). -/
+theorem D3_cos_theta_ten_le_one : Real.cos (D3_phase 9) ≤ 1 :=
+  (Real.cos_mem_Icc _).2
+
+set_option maxHeartbeats 800000 in
+/-- (C) Sine enclosure `sin θ₁₀ ∈ [0.87, 1]` (triple-periodicity +
+    cubic/linear, `w = θ₁₀ - 6π ∈ [1.247, 1.308]`). -/
+theorem D3_sin_theta_ten_mem :
+    0.87 ≤ Real.sin (D3_phase 9) ∧ Real.sin (D3_phase 9) ≤ 1 := by
+  have hmem := D3_delta_ten_mem
+  set w := D3_phase 9 - 6 * Real.pi with hw_def
+  have hw_lo : (1.247 : ℝ) ≤ w := by rw [hw_def]; linarith [hmem.1]
+  have hw_hi : w ≤ (1.308 : ℝ) := by rw [hw_def]; linarith [hmem.2]
+  have hw_nn : (0 : ℝ) ≤ w := by linarith [hw_lo]
+  have hsin_lo := Real.sin_ge_sub_cube hw_nn
+  have hcube : w ^ 3 ≤ (1.308 : ℝ) ^ 3 := pow_le_pow_left₀ hw_nn hw_hi 3
+  have hnum : (0.87 : ℝ) ≤ 1.247 - (1.308 : ℝ) ^ 3 / 6 := by norm_num
+  have hlo : (0.87 : ℝ) ≤ Real.sin w := by
+    have h1 : (1.247 : ℝ) - (1.308 : ℝ) ^ 3 / 6 ≤
+        w - w ^ 3 / 6 := by linarith [hw_lo, hcube]
+    linarith [hsin_lo, h1, hnum]
+  have hhi : Real.sin w ≤ 1 := (Real.sin_mem_Icc _).2
+  have hper1 : Real.sin (D3_phase 9 - 2 * Real.pi) = Real.sin (D3_phase 9) :=
+    Real.sin_sub_two_pi _
+  have hper2 : Real.sin ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (D3_phase 9 - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper3 :
+      Real.sin (((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper : Real.sin (D3_phase 9 - 6 * Real.pi) = Real.sin (D3_phase 9) := by
+    have e : ((D3_phase 9 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi =
+        D3_phase 9 - 6 * Real.pi := by ring
+    rw [e] at hper3
+    exact hper3.trans (hper2.trans hper1)
+  have hdecomp : D3_phase 9 - 6 * Real.pi = w := hw_def.symm
+  have hsin_eq : Real.sin (D3_phase 9) = Real.sin w := by
+    rw [← hper, hdecomp]
+  rw [hsin_eq]
+  exact ⟨hlo, hhi⟩
+
+set_option maxHeartbeats 800000 in
+/-- (C) Amplitude upper `D3_amp 9 ≤ 1/3` (via `10^{3/5} ≥ 3`,
+    cleared: `3^5 = 243 ≤ 1000 = 10^3`, since `3/5 ≤ 0.605`). -/
+theorem D3_amp_ten_upper : D3_amp 9 ≤ 1 / 3 := by
+  unfold D3_amp
+  have hcast : ((((9 : ℕ)) : ℝ) + 1 : ℝ) = 10 := by norm_num
+  rw [hcast]
+  have h35 : (3 / 5 : ℝ) ≤ (0.605 : ℝ) := by norm_num
+  have hmono : (10 : ℝ) ^ ((3 / 5 : ℝ)) ≤ (10 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) h35
+  have hpow : ((3 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((10 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((10 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (10 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 10)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 10 3
+    rw [e]
+    norm_num
+  have hstep : (3 : ℝ) ≤ (10 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  have h10ge : (3 : ℝ) ≤ (10 : ℝ) ^ (0.605 : ℝ) := le_trans hstep hmono
+  have hpos : (0 : ℝ) < (10 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 10)]
+  have heq : (1 / 3 : ℝ) = ((3 : ℝ))⁻¹ := by norm_num
+  rw [heq]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr h10ge
+
+set_option maxHeartbeats 800000 in
+/-- (C) Amplitude lower `1/5 ≤ D3_amp 9` (via `10^{2/3} ≤ 5`,
+    cleared: `10^2 = 100 ≤ 125 = 5^3`, since `0.605 ≤ 2/3`). -/
+theorem D3_amp_ten_lower : 1 / 5 ≤ D3_amp 9 := by
+  unfold D3_amp
+  have hcast : ((((9 : ℕ)) : ℝ) + 1 : ℝ) = 10 := by norm_num
+  rw [hcast]
+  have h65 : (0.605 : ℝ) ≤ 2 / 3 := by norm_num
+  have hmono : (10 : ℝ) ^ (0.605 : ℝ) ≤ (10 : ℝ) ^ ((2 / 3 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) h65
+  have hpow : ((((10 : ℝ) ^ ((2 / 3 : ℝ)))) ^ ((3 : ℕ)) : ℝ)
+      ≤ (((5 : ℝ)) ^ ((3 : ℕ))) := by
+    have e : ((((10 : ℝ) ^ ((2 / 3 : ℝ)))) ^ ((3 : ℕ)) : ℝ)
+        = (10 : ℝ) ^ ((2 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 10)]
+      rw [show (2 / 3 : ℝ) * (((3 : ℕ)) : ℝ) = (2 : ℝ) by norm_num]
+      rw [show (2 : ℝ) = (((2 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 10 2
+    rw [e]
+    norm_num
+  have hstep : (10 : ℝ) ^ ((2 / 3 : ℝ)) ≤ 5 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  have h10le : (10 : ℝ) ^ (0.605 : ℝ) ≤ 5 := le_trans hmono hstep
+  have hpos : (0 : ℝ) < (10 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 10)]
+  have heq : (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ := by norm_num
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 5) hpos).mpr h10le
+
+/-- (C) Tenth-term real-part lower `≥ -1/3` (interval: `amp ≤ 1/3`,
+    `cos ≤ 1`; odd `k = 9`, mirrors `D3_term7_re_lo`). -/
+theorem D3_term9_re_lo :
+    (-1 / 3 : ℝ) ≤ (etaDirichletTerm (1 - zetaCellS0) 9).re := by
+  rw [D3_eta_re]
+  have hamp := D3_amp_ten_upper
+  have hcos_le : Real.cos (D3_phase 9) ≤ 1 := (Real.cos_mem_Icc _).2
+  have hamp_nn : (0 : ℝ) ≤ D3_amp 9 := D3_amp_nonneg 9
+  have hprod : D3_amp 9 * Real.cos (D3_phase 9) ≤ 1 / 3 := by
+    have h1 : D3_amp 9 * Real.cos (D3_phase 9) ≤ D3_amp 9 * 1 :=
+      mul_le_mul_of_nonneg_left hcos_le hamp_nn
+    linarith [h1, hamp]
+  have hpow8 : ((-1 : ℝ) ^ (8 : ℕ)) = 1 := by norm_num
+  have hpow9 : ((-1 : ℝ) ^ (9 : ℕ)) = -1 := by
+    have e91 : (9 : ℕ) = 8 + 1 := rfl
+    rw [e91, pow_add, hpow8, pow_one, one_mul]
+  rw [hpow9]
+  linarith [hprod]
+
+/-- (C) `S_10` real-part lower `≥ -69/24` via the interval framework
+    (`-61/24 - 1/3`, à la `D3_S9_re_lower`). -/
+theorem D3_S10_re_lower :
+    (-69 / 24 : ℝ) ≤
+      (∑ k ∈ Finset.range 10, etaDirichletTerm (1 - zetaCellS0) k).re := by
+  rw [D3_sum_re_eq]
+  have h10 : (∑ k ∈ Finset.range 10, (etaDirichletTerm (1 - zetaCellS0) k).re) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).re +
+      (etaDirichletTerm (1 - zetaCellS0) 1).re +
+      (etaDirichletTerm (1 - zetaCellS0) 2).re +
+      (etaDirichletTerm (1 - zetaCellS0) 3).re +
+      (etaDirichletTerm (1 - zetaCellS0) 4).re +
+      (etaDirichletTerm (1 - zetaCellS0) 5).re +
+      (etaDirichletTerm (1 - zetaCellS0) 6).re +
+      (etaDirichletTerm (1 - zetaCellS0) 7).re +
+      (etaDirichletTerm (1 - zetaCellS0) 8).re +
+      (etaDirichletTerm (1 - zetaCellS0) 9).re := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h10, D3_term0_re]
+  have h1 := D3_term1_re_lo
+  have h2 := D3_term2_re_lo
+  have h3 := D3_term3_re_lo
+  have h4 := D3_term4_re_lo
+  have h5 := D3_term5_re_lo
+  have h6 := D3_term6_re_lo
+  have h7 := D3_term7_re_lo
+  have h8 := D3_term8_re_lo
+  have h9 := D3_term9_re_lo
+  linarith
+
+/-- (F2) Explicit per-term Re lowers for `S_10` (sums to `-69/24`). -/
+def D3_S10_lo : ℕ → ℝ := fun k =>
+  if k = 0 then 1 else if k = 1 then -2 / 3 else if k = 2 then -3 / 5
+    else if k = 3 then -1 / 2 else if k = 4 then -2 / 5
+      else if k = 5 then -3 / 8 else if k = 6 then -1 / 3
+        else if k = 7 then -1 / 3 else if k = 8 then -1 / 3 else -1 / 3
+
+/-- (F2) The `S_10` lo-sum is `-69/24`. -/
+theorem D3_S10_lo_sum : ∑ k ∈ Finset.range 10, D3_S10_lo k = (-69 / 24 : ℝ) := by
+  have v0 : D3_S10_lo 0 = (1 : ℝ) := by simp [D3_S10_lo]
+  have v1 : D3_S10_lo 1 = (-2 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v2 : D3_S10_lo 2 = (-3 / 5 : ℝ) := by simp [D3_S10_lo]
+  have v3 : D3_S10_lo 3 = (-1 / 2 : ℝ) := by simp [D3_S10_lo]
+  have v4 : D3_S10_lo 4 = (-2 / 5 : ℝ) := by simp [D3_S10_lo]
+  have v5 : D3_S10_lo 5 = (-3 / 8 : ℝ) := by simp [D3_S10_lo]
+  have v6 : D3_S10_lo 6 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v7 : D3_S10_lo 7 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v8 : D3_S10_lo 8 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v9 : D3_S10_lo 9 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_succ,
+    Finset.sum_range_zero, zero_add,
+    v0, v1, v2, v3, v4, v5, v6, v7, v8, v9]
+  norm_num
+
+/-- (F2) The `S_10` lo-values bound the term real parts below. -/
+theorem D3_S10_lo_valid (k : ℕ) (hk : k < 10) :
+    D3_S10_lo k ≤ (etaDirichletTerm (1 - zetaCellS0) k).re := by
+  have v0 : D3_S10_lo 0 = (1 : ℝ) := by simp [D3_S10_lo]
+  have v1 : D3_S10_lo 1 = (-2 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v2 : D3_S10_lo 2 = (-3 / 5 : ℝ) := by simp [D3_S10_lo]
+  have v3 : D3_S10_lo 3 = (-1 / 2 : ℝ) := by simp [D3_S10_lo]
+  have v4 : D3_S10_lo 4 = (-2 / 5 : ℝ) := by simp [D3_S10_lo]
+  have v5 : D3_S10_lo 5 = (-3 / 8 : ℝ) := by simp [D3_S10_lo]
+  have v6 : D3_S10_lo 6 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v7 : D3_S10_lo 7 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v8 : D3_S10_lo 8 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  have v9 : D3_S10_lo 9 = (-1 / 3 : ℝ) := by simp [D3_S10_lo]
+  interval_cases k
+  · rw [v0, D3_term0_re]
+  · rw [v1]
+    exact D3_term1_re_lo
+  · rw [v2]
+    exact D3_term2_re_lo
+  · rw [v3]
+    exact D3_term3_re_lo
+  · rw [v4]
+    exact D3_term4_re_lo
+  · rw [v5]
+    exact D3_term5_re_lo
+  · rw [v6]
+    exact D3_term6_re_lo
+  · rw [v7]
+    exact D3_term7_re_lo
+  · rw [v8]
+    exact D3_term8_re_lo
+  · rw [v9]
+    exact D3_term9_re_lo
+
+/-- (F2) `S_10` norm lower `≥ -69/24` through `D3_block_norm_ge_sum_lo`. -/
+theorem D3_S10_norm_ge :
+    (-69 / 24 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 10, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  have h := D3_block_norm_ge_sum_lo 10 D3_S10_lo D3_S10_lo_valid
+  rw [D3_S10_lo_sum] at h
+  exact h
+
+/-- (P) `S_{1024}` conditional from the `S_10` interval lower. -/
+theorem D3_S1024_of_S10 (U : ℝ)
+    (hU : ‖∑ k ∈ Finset.Ico 10 1024, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ U) :
+    (-69 / 24 - U : ℝ) ≤
+      ‖∑ k ∈ Finset.range 1024, etaDirichletTerm (1 - zetaCellS0) k‖ :=
+  D3_S1024_split_lower 10 (by norm_num) (-69 / 24) U D3_S10_norm_ge hU
+
+/-- (P) The `S_10` Re-route CANNOT reach `8/15` via splitting
+    (needs `U ≤ -69/24 - 8/15 < 0`). -/
+theorem D3_S10_cannot_reach_8_15 (U : ℝ) (hU : 0 ≤ U) :
+    (-69 / 24 - U : ℝ) < 8 / 15 := by
+  have h : (-69 / 24 : ℝ) < 8 / 15 := by norm_num
+  linarith
+
+#print axioms D3_log_ten_eq
+#print axioms D3_phase_nine_eq
+#print axioms D3_theta_ten_lo
+#print axioms D3_theta_ten_hi
+#print axioms D3_delta_ten_mem
+#print axioms D3_cos_theta_ten_lower
+#print axioms D3_cos_theta_ten_le_one
+#print axioms D3_sin_theta_ten_mem
+#print axioms D3_amp_ten_upper
+#print axioms D3_amp_ten_lower
+#print axioms D3_term9_re_lo
+#print axioms D3_S10_re_lower
+#print axioms D3_S10_lo_sum
+#print axioms D3_S10_lo_valid
+#print axioms D3_S10_norm_ge
+#print axioms D3_S1024_of_S10
+#print axioms D3_S10_cannot_reach_8_15
+
 
 
