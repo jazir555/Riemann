@@ -3566,4 +3566,231 @@ theorem damped_right_whole_36 {s : ℂ}
 
 end BF2TailCaps
 
+/-!
+# BH2 tail: windowed-strip three-lines interpolation for damped `G` (door-3/door-4 feeder, append-only)
+
+GREP-FIRST RECORD (repo + Mathlib, via grep, 2026-09-04; everything below reuses,
+nothing recreates):
+* Windowed left cap `A = 36`: `Door3JointGammaCos.damped_joint_window`
+  (`riemann_hypothesis_newsection.lean:3043`: `‖G‖ ≤ 36` on `Re = -1`, `|Im| ≤ 8.75`).
+* Whole-line right cap `B = 36`: `BF2TailCaps.damped_right_whole_36` (`:3456`:
+  `‖G‖ ≤ 36` on `Re = 2`; reused here both whole-line and in windowed restriction).
+* Whole-strip three-lines EXISTS: `Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`
+  (`Mathlib/Analysis/Complex/Hadamard.lean:608`; whole-strip-only, so the windowed
+  variant below feeds it via one explicit tail hypothesis).
+* Pole-removed entire `F` EXISTS: `ZetaUpperR02ThreeLines.poleRemovedZeta_differentiable`
+  (`:1172`; reused via `dampedPoleRemoved_diffContOnCl_strip` (`:1191`)).
+* Threshold EXISTS: `ZetaUpperR02ThreeLines.zetaUpper_R02_ten_of_bounds` (`:1398`:
+  whole-line `A ≤ 50.925` at `l = -1`, `B ≤ A` at `u = 2`, plus `BddAbove` ⇒ `‖ζ‖ ≤ 10`
+  on the R02 rect).
+* Damping norm identity EXISTS: `ZetaUpperR02ThreeLines.norm_complex_exp` (`:1226`).
+* Tail majorant EXISTS: `BF2TailCaps.exp_neg_le_inv` (`:3398`: `exp(-t) ≤ 1/(1+t)`).
+* R02 disc `s`-rect `Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]` sits strictly INSIDE the
+  window (`max |Im| = 8.25 < 8.75 < 9`).
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* `damp_re_general`: damping real part `(σ²-(τ+6.75)²)/100` for general `s`.
+* `damp_left_tail_le_one`: damping `≤ 1` on the left tail (`Re = -1`, `8.75 ≤ |Im|`;
+  `(1-(τ+6.75)²)/100 ≤ -0.03 ≤ 0` since `(τ+6.75)² ≥ 4` there).
+* `damp_top_edge_le`: damping `≤ 0.3` on the top window edge (`Im = 9`, `Re ∈ [-1,2]`;
+  `(σ²-15.75²)/100 ≤ -2.440625`, so `exp ≤ 1/3.440625 ≤ 0.3`) — the quantified
+  Gaussian edge-suppression (leakage) bound at `|Im| = 9`.
+* `damp_bottom_edge_le_one`: damping `≤ 1` on the bottom window edge
+  (`Im = -9`, `Re ∈ [-1,2]`; `(σ²-2.25²)/100 ≤ -0.010625 ≤ 0`).
+* `damped_left_whole_36_of_tail` (TIER-1 assembly): AR window (`A = 36`) + explicit
+  tail (`‖G‖ ≤ 36` outside the window) = whole-line left cap `36` on `Re = -1`.
+* `damped_windowed_interp_36` (TIER-1 MAIN, commit-worthy alone): windowed-strip
+  interpolation — `‖G s‖ ≤ 36` on the whole closed strip `[-1,2]` from the two
+  windowed caps (`A = 36` left via AR + tail, `B = 36` right via BF2) + `BddAbove`
+  (`36^(1-t)·36^t = 36` by `Real.rpow_add`).
+* `zeta_R02_le_ten_of_tail` (TIER-2 P1): `‖ζ s‖ ≤ 10` on the R02 disc `s`-rect
+  (`A = B = 36 ≤ 50.925`, margin `14.925`).
+
+OPENS (explicit hypotheses, never `sorry`):
+* `hTail`: `‖G‖ ≤ 36` on the left tail (`Re = -1`, `8.75 < |Im|`). TRUE (damping is
+  `≤ 1` there by `damp_left_tail_le_one` and decays Gaussianly further out, dominating
+  any fixed Stirling-scale polynomial growth of `F`) but unproved here: closing needs
+  a strip polynomial bound on `F` (Stirling / FE-Phragmén, absent repo-wide).
+* `hBdd`: `BddAbove` of `‖G‖` on the closed strip `[-1,2]` (strip `ζ`-growth, likewise
+  absent repo-wide; satisfiable since the Gaussian dominates any fixed exponential).
+-/
+
+namespace BH2TailWindow
+
+/-- Damping real part for general `s`:
+`Re((1/100)(s-c)²) = (σ²-(τ+6.75)²)/100`. -/
+theorem damp_re_general {s : ℂ} :
+    ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = ((s.re) ^ 2 - (s.im + 6.75) ^ 2) / 100 := by
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (1 / 100) * ((((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hsq2 : ((s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = (s.re) ^ 2 - (s.im + 6.75) ^ 2 := by
+    have e1 : (s - ZetaUpperR02ThreeLines.dampCenter).re = s.re := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, sub_zero]
+    have e2 : (s - ZetaUpperR02ThreeLines.dampCenter).im = s.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  rw [hwre, hsq2]
+  ring
+
+/-- Damping `≤ 1` on the left tail (`Re = -1`, `8.75 ≤ |Im|`). -/
+theorem damp_left_tail_le_one {z : ℂ} (hz_re : z.re = -1) (htail : 8.75 ≤ |z.im|) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1 := by
+  have h2 := damp_re_general (s := z)
+  have hsq : (4 : ℝ) ≤ (z.im + 6.75) ^ 2 := by
+    rcases le_or_gt 0 z.im with hnn | hneg
+    · have habs : |z.im| = z.im := abs_of_nonneg hnn
+      rw [habs] at htail
+      have h15 : (15.5 : ℝ) ≤ z.im + 6.75 := by linarith
+      nlinarith [mul_nonneg (show (0 : ℝ) ≤ z.im + 6.75 - 15.5 by linarith)
+        (show (0 : ℝ) ≤ z.im + 6.75 + 15.5 by linarith)]
+    · have habs : |z.im| = -z.im := abs_of_neg hneg
+      rw [habs] at htail
+      have h2le : z.im + 6.75 ≤ (-2 : ℝ) := by linarith
+      nlinarith [mul_nonneg (show (0 : ℝ) ≤ -(z.im + 6.75 + 2) by linarith)
+        (show (0 : ℝ) ≤ -(z.im + 6.75 - 2) by linarith)]
+  have hsq2 : (z.re) ^ 2 = 1 := by
+    rw [hz_re]
+    norm_num
+  have hre0 : ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ 0 := by
+    rw [h2, hsq2]
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  calc Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp 0 := Real.exp_le_exp.mpr hre0
+    _ = 1 := Real.exp_zero
+
+/-- Damping `≤ 0.3` on the top window edge (`Im = 9`, `Re ∈ [-1,2]`): the quantified
+Gaussian edge-suppression at `|Im| = 9`. -/
+theorem damp_top_edge_le {s : ℂ} (hlo : -1 ≤ s.re) (hhi : s.re ≤ 2) (him : s.im = 9) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 0.3 := by
+  have h2 := damp_re_general (s := s)
+  have hσ : (s.re) ^ 2 ≤ 4 := by
+    nlinarith [mul_nonneg (show (0 : ℝ) ≤ 2 - s.re by linarith)
+      (show (0 : ℝ) ≤ s.re + 2 by linarith)]
+  rw [him] at h2
+  have e1575 : ((9 : ℝ) + 6.75) ^ 2 = 248.0625 := by norm_num
+  rw [e1575] at h2
+  have hre : ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ -2.440625 := by
+    rw [h2]
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  calc Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp (-2.440625) := Real.exp_le_exp.mpr hre
+    _ ≤ 1 / (1 + 2.440625) :=
+        BF2TailCaps.exp_neg_le_inv (by norm_num)
+    _ ≤ 0.3 := by norm_num
+
+/-- Damping `≤ 1` on the bottom window edge (`Im = -9`, `Re ∈ [-1,2]`). -/
+theorem damp_bottom_edge_le_one {s : ℂ} (hlo : -1 ≤ s.re) (hhi : s.re ≤ 2)
+    (him : s.im = -9) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1 := by
+  have h2 := damp_re_general (s := s)
+  have hσ : (s.re) ^ 2 ≤ 4 := by
+    nlinarith [mul_nonneg (show (0 : ℝ) ≤ 2 - s.re by linarith)
+      (show (0 : ℝ) ≤ s.re + 2 by linarith)]
+  rw [him] at h2
+  have e225 : ((-9 : ℝ) + 6.75) ^ 2 = 5.0625 := by norm_num
+  rw [e225] at h2
+  have hre : ((((1 / 100 : ℝ)) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ 0 := by
+    rw [h2]
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  calc Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+        (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp 0 := Real.exp_le_exp.mpr hre
+    _ = 1 := Real.exp_zero
+
+/-- TIER-1 assembly: AR's window cap (`A = 36`) + the explicit tail hypothesis =
+whole-line left cap `36` on `Re = -1`. -/
+theorem damped_left_whole_36_of_tail
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36) :
+    ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)},
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 := by
+  intro z hz
+  have hz_re : z.re = -1 := by simpa using hz
+  by_cases h : |z.im| ≤ 8.75
+  · exact Door3JointGammaCos.damped_joint_window hz_re h
+  · push_neg at h
+    exact hTail z hz h
+
+/-- TIER-1 MAIN (windowed-strip three-lines interpolation): from the two windowed
+caps (`A = 36` left via AR + tail, `B = 36` right via BF2) + `BddAbove`,
+`‖G s‖ ≤ 36` on the whole closed strip `[-1,2]`. -/
+theorem damped_windowed_interp_36
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36)
+    (hBdd : BddAbove ((norm ∘ ZetaUpperR02ThreeLines.dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2))
+    {s : ℂ} (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖ ≤ 36 := by
+  have hLeft := damped_left_whole_36_of_tail hTail
+  have hRight : ∀ z ∈ Set.preimage Complex.re ({(2 : ℝ)} : Set ℝ),
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 :=
+    fun z hz => BF2TailCaps.damped_right_whole_36 hz
+  have h3 := Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'
+    (f := ZetaUpperR02ThreeLines.dampedPoleRemoved) (a := 36) (b := 36)
+    (l := -1) (u := 2) (by norm_num) hs
+    (ZetaUpperR02ThreeLines.dampedPoleRemoved_diffContOnCl_strip (-1) 2) hBdd
+    hLeft hRight
+  have h36 : (0 : ℝ) < 36 := by norm_num
+  have hpow : (36 : ℝ) ^ (1 - (s.re - -1) / (2 - -1)) *
+      (36 : ℝ) ^ ((s.re - -1) / (2 - -1)) = 36 := by
+    rw [← Real.rpow_add h36, sub_add_cancel, Real.rpow_one]
+  rw [hpow] at h3
+  exact h3
+
+/-- TIER-2 P1: `‖ζ s‖ ≤ 10` on the R02 disc `s`-rect, from the explicit tail +
+`BddAbove` (via `zetaUpper_R02_ten_of_bounds` at `A = B = 36 ≤ 50.925`). -/
+theorem zeta_R02_le_ten_of_tail
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36)
+    (hBdd : BddAbove ((norm ∘ ZetaUpperR02ThreeLines.dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2))
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  ZetaUpperR02ThreeLines.zetaUpper_R02_ten_of_bounds (A := 36) (B := 36)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num) hBdd
+    (damped_left_whole_36_of_tail hTail) (fun z hz => BF2TailCaps.damped_right_whole_36 hz)
+    hs_lo hs_hi him_lo him_hi
+
+#print axioms BH2TailWindow.damp_re_general
+#print axioms BH2TailWindow.damp_left_tail_le_one
+#print axioms BH2TailWindow.damp_top_edge_le
+#print axioms BH2TailWindow.damp_bottom_edge_le_one
+#print axioms BH2TailWindow.damped_left_whole_36_of_tail
+#print axioms BH2TailWindow.damped_windowed_interp_36
+#print axioms BH2TailWindow.zeta_R02_le_ten_of_tail
+
+end BH2TailWindow
+
+/-!
+BH2 P1 VERDICT + RESIDUAL (report-and-stop): TIER-1 green gives the windowed-strip
+interpolation `‖G‖ ≤ 36` on `[-1,2]` from AR (`A = 36` in-window) + BF2 (`B = 36`
+right) + two explicit opens; TIER-2 fires the existing threshold to conclude
+`‖ζ‖ ≤ 10` on the R02 disc `s`-rect (`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`).
+EXACT residual (numbers): (i) `hTail`: `‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`
+(needs a Stirling-scale `F`-polynomial bound × the `≤ 1` damping proved above;
+the crude-majorant whole-line truth there is exponential, so this is NOT closable
+by majorants — same wall as BF2's report); (ii) `hBdd`: `BddAbove` of `‖G‖` on
+`[-1,2]` (needs strip `ζ`-growth, absent repo-wide). No other opens.
+-/
+
 
