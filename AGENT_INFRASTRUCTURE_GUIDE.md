@@ -1472,7 +1472,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   Relaxation tasked: exp-3/2 middle via xi + Gaussian domination ⇒ `hBdd` (damping beats any 1.5-power).
   **Middle envelope CLOSED-conditional (`BP2Middle32`):** `‖F‖ ≤ C·exp(K·|Im|^{3/2})` on the middle third
   (`‖s‖^{3/2}` split at `|Im|=2`) conditional on ONE explicit `hGlow` (strip `Gammaℝ` lower — no strip
-  lower exists repo-wide). Residual R-Gamma tasked (reflection `π/(S·U)` strip-uniform pieces). **Update — Gamma factor fully closed for all 40 centers:**
+  lower exists repo-wide).   Residual R-Gamma tasked (reflection `π/(S·U)` strip-uniform pieces). **R-Gamma verdict
+  (`BTStripGamma`):** strip sine-upper + reflected `U=4` green, but uniform-`hGlow` PROVED IMPOSSIBLE
+  in-file (`Gammaℝ 0 = 0`). Path: windowed `|Im|≤9` lower (explicit min `~2e-8`-tier) + damping-domination
+  outside ⇒ `hBdd` (tasked). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
