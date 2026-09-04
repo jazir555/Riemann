@@ -1451,7 +1451,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
   `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
-  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Middle-envelope gap mapped (BJ2, honest
+  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **xi-bridge banked (`BLMiddleEnvelope`,
+  Hadamard import added cycle-free):** unconditional `xi→F` transfer with explicit denominators +
+  `hBdd`/P1 conditional on `StripEnvelope` R1 only. Residual: (R1) strip `Gammaℝ` lower via reflection
+  (right closable via Euler, left via FE, middle missing) + (R2) Stirling-sharp tail bound (crude
+  `exp(O(|τ|^1.5))` genuinely cannot close at 8.75 — needs true `O(|τ|^2.5)`). **Middle-envelope gap mapped (BJ2, honest
   zero-write):** right `σ∈[1.5,2]` + left `σ∈[-1,-0.5]` envelopes DONE in-file; middle `σ∈[-0.5,1.5]`
   has NO envelope (Euler blows up, eta denominator zeros, FE no gain, log-bound absent). **Unblock
   found:** `ZeroFreeRegionHadamard.xi_norm_bound_whole_plane` (`‖xi‖≤exp(K‖z‖^{3/2})`) EXISTS and that
