@@ -5227,6 +5227,137 @@ for `9 < |Im|` off the middle third). NOT attempted per brief (report-and-stop):
 exp-3/2 middle case, `hTail`, P1. No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# BX tail (door-3 tail-`T`, middle exp-3/2 numeral): Young `u^{3/2}` bound + Gaussian domination
+
+Ownership: Agent BX tail append (append-only after the BV2 verdict block; nothing above
+touched; no new imports).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `young_pow3_le` — Young-type bound `K·t³ ≤ t⁴/200 + 1000000·K⁴` for `0 ≤ K`, `0 ≤ t`,
+  proved directly by squaring (sum-of-squares certificate over `(t-200·K)²`, `(t²-20000·K²)²`;
+  the identity `t⁴/200 + 10⁶K⁴ - K·t³ = t²(t-200K)²/400 + (t²-20000K²)²/400` is `ring`).
+* `rpow32_eq_cube_sqrt` — `u^(3/2:ℝ) = (Real.sqrt u)³` for `0 < u`
+  (`Real.rpow_add` + `Real.rpow_one` + `← Real.sqrt_eq_rpow` + `Real.sq_sqrt`).
+* `young_rpow32` — `K·u^(3/2) ≤ u²/200 + 1000000·K⁴` for `0 ≤ K`, `0 ≤ u`
+  (zero case via `Real.zero_rpow`; positive case via `t = Real.sqrt u`, `(√u)⁴ = u²`).
+* `middle_gauss_le` — MAIN numeral mirroring `BV2OuterTail.outer_gauss_le` EXACTLY
+  (shift `u² ≤ (u+6.75)²`, `Real.exp_le_exp` + `← Real.exp_add`, same `calc` skeleton):
+  for `u ≥ 9`, `0 ≤ C`, `0 ≤ K`,
+  `C·exp(K·u^{3/2})·exp(-((u+6.75)²)/100) ≤ C·exp(1000000·K⁴)`.
+  So the middle tail-`T` contribution is `T = C·exp(10⁶·K⁴)` — explicit in the envelope
+  constants `C,K` (the Gaussian absorbs `K·u^{3/2}` leaving room `-u²/200 ≤ 0`).
+
+Grep record (verified by `rg -n` before writing):
+* `Real.young_inequality` / `young_inequality_of_nonneg` — EXIST in
+  `Mathlib/Analysis/MeanInequalities.lean:500,507` (needs `HolderConjugate` side
+  conditions + rpow plumbing); per brief the concrete instance is proved directly by
+  squaring instead (zero side-condition risk).
+* `inner_le_Lp_mul_Lq` — EXISTS (`Mathlib/Analysis/MeanInequalities.lean:615`,
+  Finset-Hölder); not used (direct SOS is shorter).
+* `Real.sqrt_eq_rpow` (`Mathlib/.../Pow/Real.lean:984`), `Real.rpow_add` (`:207`),
+  `Real.rpow_one` (`:148`), `Real.zero_rpow` (`:128`),
+  `Real.sq_sqrt` (`Mathlib/Analysis/Real/Sqrt.lean:178`) — all verified.
+* `BV2OuterTail.outer_gauss_le` — this file `:5178` (mirrored pattern).
+* `BP2Middle32.F_middleThird_exp32_of_GammaLower` — this file `:4421`: its `C,K` are
+  EXISTENTIAL (`Kxi` from `xi_norm_bound_whole_plane`, `M` from compactness) — NO
+  explicit `C,K` numerals exist in-file (`Cmid|Kmid` absent repo-wide; `Kxi` occurs only
+  as an obtained variable `:4428-:4541`, `:4823+`). So `T` is explicit as a FUNCTION
+  `C·exp(10⁶K⁴)` of the envelope constants (cf. guide §1h: verified once, reported here,
+  not spun). Instantiation awaits a middle envelope ON THE TAIL (see residual).
+* `BUWindowed.hBdd_of_window_and_tail` — this file `:5081` (tail-`T` consumer).
+* `BXMiddleTail` + all lemma names below: absent repo-wide (checked).
+-/
+
+namespace BXMiddleTail
+
+/-- Young-type bound `K·t³ ≤ t⁴/200 + 1000000·K⁴` (direct sum-of-squares, no Hölder). -/
+theorem young_pow3_le {K t : ℝ} (_hK : 0 ≤ K) (_ht : 0 ≤ t) :
+    K * t ^ 3 ≤ t ^ 4 / 200 + 1000000 * K ^ 4 := by
+  have w1 : (0 : ℝ) ≤ t ^ 2 * (t - 200 * K) ^ 2 :=
+    mul_nonneg (sq_nonneg t) (sq_nonneg _)
+  have w2 : (0 : ℝ) ≤ (t ^ 2 - 20000 * K ^ 2) ^ 2 := sq_nonneg _
+  have key : t ^ 4 / 200 + 1000000 * K ^ 4 - K * t ^ 3
+      = (t ^ 2 * (t - 200 * K) ^ 2) / 400 + ((t ^ 2 - 20000 * K ^ 2) ^ 2) / 400 := by
+    ring
+  have hnn : (0 : ℝ) ≤ (t ^ 2 * (t - 200 * K) ^ 2) / 400
+      + ((t ^ 2 - 20000 * K ^ 2) ^ 2) / 400 :=
+    add_nonneg (div_nonneg w1 (by norm_num)) (div_nonneg w2 (by norm_num))
+  linarith
+
+/-- `u^(3/2:ℝ) = (Real.sqrt u)³` for `0 < u`. -/
+theorem rpow32_eq_cube_sqrt {u : ℝ} (hu : 0 < u) :
+    u ^ (3 / 2 : ℝ) = (Real.sqrt u) ^ 3 := by
+  have e : (3 / 2 : ℝ) = 1 + 1 / 2 := by norm_num
+  rw [e, Real.rpow_add hu, Real.rpow_one, ← Real.sqrt_eq_rpow]
+  have hsq := Real.sq_sqrt hu.le
+  have h3 : (Real.sqrt u) ^ 3 = (Real.sqrt u) ^ 2 * Real.sqrt u := by ring
+  rw [h3, hsq]
+
+/-- Rpow Young bound: `K·u^(3/2) ≤ u²/200 + 1000000·K⁴`. -/
+theorem young_rpow32 {K u : ℝ} (hK : 0 ≤ K) (hu : 0 ≤ u) :
+    K * u ^ (3 / 2 : ℝ) ≤ u ^ 2 / 200 + 1000000 * K ^ 4 := by
+  rcases eq_or_lt_of_le hu with h0 | hu0
+  · subst h0
+    rw [Real.zero_rpow (by norm_num : (3 / 2 : ℝ) ≠ 0), mul_zero]
+    have h1 : (0 : ℝ) ≤ (0 : ℝ) ^ 2 / 200 := by positivity
+    have h2 : (0 : ℝ) ≤ 1000000 * K ^ 4 := by positivity
+    linarith
+  · have ht_nn : (0 : ℝ) ≤ Real.sqrt u := Real.sqrt_nonneg u
+    have hy := young_pow3_le hK ht_nn
+    rw [← rpow32_eq_cube_sqrt hu0] at hy
+    have h4 : (Real.sqrt u) ^ 4 = u ^ 2 := by
+      have h4a : (Real.sqrt u) ^ 4 = ((Real.sqrt u) ^ 2) ^ 2 := by ring
+      rw [h4a, Real.sq_sqrt hu]
+    rw [h4] at hy
+    exact hy
+
+/-- Gaussian domination for the exp-3/2 middle envelope: explicit tail constant
+`T = C·exp(1000000·K⁴)` (uniform for all `u ≥ 9`; in fact for all `u ≥ 0`). -/
+theorem middle_gauss_le {u C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K) (hu : 9 ≤ u) :
+    C * Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u + 6.75) ^ 2) / 100)) ≤
+      C * Real.exp (1000000 * K ^ 4) := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hyoung : K * u ^ (3 / 2 : ℝ) ≤ u ^ 2 / 200 + 1000000 * K ^ 4 :=
+    young_rpow32 hK hu0
+  have hshift : u ^ 2 ≤ (u + 6.75) ^ 2 := by
+    have e : (u + 6.75) ^ 2 = u ^ 2 + 13.5 * u + 45.5625 := by ring
+    linarith [hu0]
+  have hquad : K * u ^ (3 / 2 : ℝ) - (u + 6.75) ^ 2 / 100 ≤ 1000000 * K ^ 4 := by
+    have hnn2 : (0 : ℝ) ≤ (u + 6.75) ^ 2 := sq_nonneg _
+    linarith [hyoung, hshift, hnn2]
+  have hexp_arg : K * u ^ (3 / 2 : ℝ) + (-(((u + 6.75) ^ 2) / 100))
+      ≤ 1000000 * K ^ 4 := by
+    linarith [hquad]
+  have hexp : Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u + 6.75) ^ 2) / 100))
+      ≤ Real.exp (1000000 * K ^ 4) := by
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr hexp_arg
+  calc C * Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u + 6.75) ^ 2) / 100))
+      = C * (Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u + 6.75) ^ 2) / 100))) := by
+        ring
+    _ ≤ C * Real.exp (1000000 * K ^ 4) :=
+        mul_le_mul_of_nonneg_left hexp hC
+
+#print axioms BXMiddleTail.young_pow3_le
+#print axioms BXMiddleTail.rpow32_eq_cube_sqrt
+#print axioms BXMiddleTail.young_rpow32
+#print axioms BXMiddleTail.middle_gauss_le
+
+end BXMiddleTail
+
+/-!
+BX VERDICT + RESIDUAL (report-and-stop): the exp-3/2 middle-tail numeral is proved
+(`middle_gauss_le`, explicit `T = C·exp(1000000·K⁴)` as a function of the envelope
+constants; `u^{3/2} ≤ u²/200 + 10⁶K⁴` Young lemma via direct SOS, no Hölder import).
+NOT attempted per brief (report-and-stop): tail-`T` assembly — blocked on (i) a middle
+`F`-envelope ON THE TAIL (`σ ∈ [-1/2,3/2]`, `9 < |Im|`; BP2's is conditional on an
+absent strip-uniform `Gammaℝ` lower, BU's windowed envelope stops at `|Im| ≤ 9`);
+(ii) the negative-`τ` companion numeral (`(u-6.75)²` form for `τ < -9`, same SOS template
+with `N = 3200` giving `C·exp(16384000000·K⁴)`); (iii) `hTail`, P1 downstream of BU.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
