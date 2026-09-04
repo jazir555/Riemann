@@ -2630,3 +2630,496 @@ theorem damped_window_sharp {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75
 
 end Door3SharpWindow
 
+/-
+JOINT `Γ·cos` EXPONENTIAL CANCELLATION (door-3 closure premise).
+
+AL quantified the wall exactly: separate majorants lose `~1750×`
+(`0.028·2e6 = 56000` vs true joint `≈ 32` at the edge) plus damp `2.7×`;
+polynomial 6-shift floors (`1/|y|⁶`) vs `cosh(π|y|/2)` growth can NEVER close
+the remaining `~3142×` to `50.925`. This section proves the joint identity
+route, closing the premise.
+
+WHAT IS PROVED (unconditional, no `sorry`/`admit`/`axiom`/stand-ins):
+* Tier 1 `Gamma_one_add_im_normSq`: `‖Γ(1+iy)‖² = πy/sinh(πy)` for `y ≠ 0`.
+* Tier 2 `joint_Gamma_cos_le`: `‖Γ(w)·cos(πw/2)‖ ≤ 34` on `Re = 2`,
+  `|Im| ≤ 8.75` (true sup `≈ 32.6` at the edge; `4%` headroom, rigorous).
+  Hence `0.028·2e6 = 56000` drops to `34`, a `1647×` joint-cancellation gain.
+* Tier 3 `factor_joint_le`: `‖RowFEFactor w‖ ≤ 17/9` (`2·(1/36)·34`).
+* Tier 3 `damp_sharp_window`: damping `≤ 1.02` (was `2.7183`; true sup
+  `≈ 1.01`) via `exp(0.01) ≤ 1.02` from `exp(1) < 2.7183 < 3 ≤ 1.02^100`
+  (Bernoulli `one_add_mul_le_pow` + 100th-root `le_of_pow_le_pow_left₀`).
+* Tier 3 `damped_joint_window` (MAIN): `‖G(z)‖ ≤ 36` on `Re = -1`,
+  `|Im| ≤ 8.75` (`34·1.02 = 34.68 ≤ 36`), i.e. `160000 → 36` (`4444×`)
+  and `36 ≤ 50.925`, meeting AD's `ZetaUpperR02ThreeLines` threshold
+  (`zetaUpper_R02_ten_of_bounds`) with margin `14.925`.
+
+REUSE (nothing reimplemented):
+* Mathlib: `Complex.Gamma_add_one` (`Gamma/Basic.lean:311`),
+  `Complex.Gamma_conj` (`Basic.lean:355`),
+  `Complex.Gamma_mul_Gamma_one_sub` (reflection, `Beta.lean:398`),
+  `Complex.sin_mul_I`/`cos_mul_I`, `Complex.ofReal_sinh`/`ofReal_cosh`,
+  `Complex.cos_add`/`cos_pi`/`sin_pi`, `Real.sinh_two_mul`,
+  `Real.sinh_ne_zero`/`sinh_pos_iff`, `Real.cosh_pos`/`cosh_neg`/`sinh_neg`,
+  `Real.add_one_le_exp`, `Real.exp_nat_mul`, `Real.exp_le_exp_of_le`,
+  `Real.exp_one_lt_d9`, `Real.pi_gt_three`/`pi_lt_d4`/`pi_ne_zero`,
+  `one_add_mul_le_pow`, `le_of_pow_le_pow_left₀`, `Complex.norm_conj`,
+  `Complex.norm_real`, `Complex.sq_norm`, `Complex.normSq_apply`.
+* In-file: `Door3SharpWindow.cpow_sharp_Re2` (`1/36`),
+  `Door3SharpWindow.sub_upper_window` (`‖z-1‖ ≤ 9`),
+  `TailZetaUpper.zeta_rightEdge_B2` (`‖ζ‖ ≤ 2` on `Re = 2`),
+  `ZetaUpperR02ThreeLines` (`dampCenter`, `norm_complex_exp`,
+  `poleRemovedZeta_of_ne`, `dampedPoleRemoved`), `RowFE.RowFEFactor`,
+  `riemannZeta_one_sub` (cos-form FE).
+* GREP RECORD (verified absent, hence created here): `normSq.*Gamma`,
+  `Gamma_one_add_im`, `joint_Gamma`, `damped_joint`, `factor_joint`,
+  `damp_sharp`, `cos_Re2`, `Gamma_Re2`, `t_mul_coth` return zero hits
+  repo-wide; `im_decay`/`Gamma.*exp.*Im`/`norm_Gamma.*im` return only doc
+  comments documenting the absence (no lemmas).
+-/
+
+namespace Door3JointGammaCos
+
+open scoped ComplexConjugate
+
+/-- Tier-1 identity: `‖Γ(1 + y·I)‖² = π·y / sinh(π·y)` for real `y ≠ 0`.
+Via `Γ(1+iy) = iy·Γ(iy)` (`Gamma_add_one`), complex reflection
+`Γ(iy)·Γ(1-iy) = π/sin(πiy)` (`Gamma_mul_Gamma_one_sub`),
+`conj Γ(1+iy) = Γ(1-iy)` (`Gamma_conj`), and
+`sin(πiy) = sinh(πy)·I` (`sin_mul_I` + `ofReal_sinh`). -/
+theorem Gamma_one_add_im_normSq {y : ℝ} (hy : y ≠ 0) :
+    ‖Complex.Gamma (1 + (y : ℂ) * Complex.I)‖ ^ 2
+      = Real.pi * y / Real.sinh (Real.pi * y) := by
+  set u : ℂ := (y : ℂ) * Complex.I with hu_def
+  have hyC : ((y : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hy
+  have hu_ne : u ≠ 0 := mul_ne_zero hyC Complex.I_ne_zero
+  have hG1 : Complex.Gamma (1 + u) = u * Complex.Gamma u := by
+    have h : (1 : ℂ) + u = u + 1 := add_comm _ _
+    rw [h]
+    exact Complex.Gamma_add_one u hu_ne
+  have hrefl : Complex.Gamma u * Complex.Gamma (1 - u)
+      = (Real.pi : ℂ) / Complex.sin ((Real.pi : ℂ) * u) :=
+    Complex.Gamma_mul_Gamma_one_sub u
+  have hconj_eq : conj (1 + u) = 1 - u := by
+    rw [Complex.ext_iff]
+    constructor
+    · simp only [Complex.conj_re, Complex.add_re, Complex.sub_re, Complex.one_re,
+        hu_def, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im]
+      ring
+    · simp only [Complex.conj_im, Complex.add_im, Complex.sub_im, Complex.one_im,
+        hu_def, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im]
+      ring
+  have hGconj : conj (Complex.Gamma (1 + u)) = Complex.Gamma (1 - u) := by
+    rw [← Complex.Gamma_conj, hconj_eq]
+  have hsin_eq : Complex.sin ((Real.pi : ℂ) * u)
+      = ((Real.sinh (Real.pi * y) : ℝ) : ℂ) * Complex.I := by
+    have e : (Real.pi : ℂ) * u = ((Real.pi * y : ℝ) : ℂ) * Complex.I := by
+      rw [hu_def]
+      push_cast
+      ring
+    rw [e, Complex.sin_mul_I, ← Complex.ofReal_sinh]
+  have hpy_ne : Real.pi * y ≠ 0 := mul_ne_zero Real.pi_ne_zero hy
+  have hsinh_ne : Real.sinh (Real.pi * y) ≠ 0 := Real.sinh_ne_zero.mpr hpy_ne
+  have hsinhC_ne : ((Real.sinh (Real.pi * y) : ℝ) : ℂ) ≠ 0 := by
+    exact_mod_cast hsinh_ne
+  have hden_ne : ((Real.sinh (Real.pi * y) : ℝ) : ℂ) * Complex.I ≠ 0 :=
+    mul_ne_zero hsinhC_ne Complex.I_ne_zero
+  have hprod : Complex.Gamma (1 + u) * Complex.Gamma (1 - u)
+      = ((Real.pi * y / Real.sinh (Real.pi * y) : ℝ) : ℂ) := by
+    rw [hG1, mul_assoc, hrefl, hsin_eq, hu_def, Complex.ofReal_div,
+      Complex.ofReal_mul, ← mul_div_assoc, div_eq_div_iff hden_ne hsinhC_ne]
+    ring
+  have hpos : 0 < Real.pi * y / Real.sinh (Real.pi * y) := by
+    have hpi : 0 < Real.pi := lt_trans (by norm_num) Real.pi_gt_three
+    rcases lt_or_gt_of_ne hy with hyneg | hypos
+    · refine div_pos_of_neg_of_neg (mul_neg_of_pos_of_neg hpi hyneg) ?_
+      have h3 : 0 < Real.sinh (-(Real.pi * y)) :=
+        Real.sinh_pos_iff.mpr (by linarith [mul_neg_of_pos_of_neg hpi hyneg])
+      rw [Real.sinh_neg] at h3
+      linarith
+    · exact div_pos (mul_pos hpi hypos) (Real.sinh_pos_iff.mpr (mul_pos hpi hypos))
+  have hzc : Complex.Gamma (1 + u) * conj (Complex.Gamma (1 + u))
+      = ((Real.pi * y / Real.sinh (Real.pi * y) : ℝ) : ℂ) := by
+    rw [hGconj]
+    exact hprod
+  have enorm : ‖Complex.Gamma (1 + u)‖ ^ 2
+      = ‖Complex.Gamma (1 + u) * conj (Complex.Gamma (1 + u))‖ := by
+    rw [norm_mul, Complex.norm_conj, pow_two]
+  rw [enorm, hzc, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hpos]
+
+/-- From-scratch `t·coth` bound: `t·(cosh t/sinh t) ≤ t + 1` for `t > 0`.
+Proof: with `E = exp t`, `cosh/sinh = (E²+1)/(E²-1)` (via `cosh_eq`,
+`sinh_eq`, `exp_neg` and `E·E⁻¹ = 1`), so the claim is
+`t·(E²+1) ≤ (t+1)·(E²-1)`, i.e. `2t+1 ≤ E²`, which is `add_one_le_exp`. -/
+theorem t_mul_coth_le {t : ℝ} (ht : 0 < t) :
+    t * (Real.cosh t / Real.sinh t) ≤ t + 1 := by
+  have hsinh_pos : 0 < Real.sinh t := Real.sinh_pos_iff.mpr ht
+  have hEpos : 0 < Real.exp t := Real.exp_pos t
+  have hEne : Real.exp t ≠ 0 := ne_of_gt hEpos
+  have hEE : Real.exp t * (Real.exp t)⁻¹ = 1 := mul_inv_cancel₀ hEne
+  have hEneg : Real.exp (-t) = (Real.exp t)⁻¹ := Real.exp_neg t
+  have hE2 : (1 : ℝ) + 2 * t ≤ (Real.exp t) ^ 2 := by
+    have h := Real.add_one_le_exp (2 * t)
+    have e : Real.exp (2 * t) = (Real.exp t) ^ 2 := by
+      have h2 : (2 : ℝ) * t = t + t := by ring
+      rw [h2, Real.exp_add, sq]
+    linarith
+  have hmul1 : (Real.exp t + (Real.exp t)⁻¹) * Real.exp t
+      = (Real.exp t) ^ 2 + 1 := by
+    linear_combination hEE
+  have hmul2 : (Real.exp t - (Real.exp t)⁻¹) * Real.exp t
+      = (Real.exp t) ^ 2 - 1 := by
+    linear_combination -hEE
+  have hkey2 : t * (Real.exp t + (Real.exp t)⁻¹)
+      ≤ (t + 1) * (Real.exp t - (Real.exp t)⁻¹) := by
+    have g : (t * (Real.exp t + (Real.exp t)⁻¹)) * Real.exp t
+        ≤ ((t + 1) * (Real.exp t - (Real.exp t)⁻¹)) * Real.exp t := by
+      rw [mul_assoc, hmul1, mul_assoc, hmul2]
+      nlinarith [hE2]
+    exact le_of_mul_le_mul_right g hEpos
+  have hcosh_eq : Real.cosh t = (Real.exp t + (Real.exp t)⁻¹) / 2 := by
+    rw [Real.cosh_eq, hEneg]
+  have hsinh_eq : Real.sinh t = (Real.exp t - (Real.exp t)⁻¹) / 2 := by
+    rw [Real.sinh_eq, hEneg]
+  have key : t * ((Real.exp t + (Real.exp t)⁻¹) / 2)
+      ≤ (t + 1) * ((Real.exp t - (Real.exp t)⁻¹) / 2) := by
+    linarith [hkey2]
+  rw [hcosh_eq, hsinh_eq, ← mul_div_assoc, ← hsinh_eq, div_le_iff₀ hsinh_pos,
+    hsinh_eq]
+  exact key
+
+/-- Exact cos norm on the `Re = 2` line: `‖cos(πw/2)‖ = cosh(π·Im w/2)`.
+Since `πw/2 = π + (πy/2)·I`, `cos` negates (`cos_add`/`cos_pi`/`sin_pi`)
+and `cos(t·I) = cosh t` (`cos_mul_I` + `ofReal_cosh`). -/
+theorem cos_Re2_norm {w : ℂ} (hw : w.re = 2) :
+    ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ = Real.cosh (Real.pi * w.im / 2) := by
+  have h2c : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+  have hre : ((Real.pi : ℂ) * w / 2).re = Real.pi := by
+    rw [← h2c, Complex.div_natCast_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.ofReal_im, hw]
+    ring
+  have him : ((Real.pi : ℂ) * w / 2).im = Real.pi * w.im / 2 := by
+    rw [← h2c, Complex.div_natCast_im, Complex.mul_im, Complex.ofReal_re,
+      Complex.ofReal_im]
+    ring
+  have harg : (Real.pi : ℂ) * w / 2
+      = (Real.pi : ℂ) + ((Real.pi * w.im / 2 : ℝ) : ℂ) * Complex.I := by
+    apply Complex.ext
+    · rw [hre]
+      simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im]
+      ring
+    · rw [him]
+      simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im]
+      ring
+  have hcosv : Complex.cos (((Real.pi * w.im / 2 : ℝ) : ℂ) * Complex.I)
+      = ((Real.cosh (Real.pi * w.im / 2) : ℝ) : ℂ) := by
+    rw [Complex.cos_mul_I, Complex.ofReal_cosh]
+  rw [harg, Complex.cos_add, Complex.cos_pi, Complex.sin_pi]
+  have hneg : (-1 : ℂ) * Complex.cos (((Real.pi * w.im / 2 : ℝ) : ℂ) * Complex.I)
+      - 0 * Complex.sin (((Real.pi * w.im / 2 : ℝ) : ℂ) * Complex.I)
+      = -Complex.cos (((Real.pi * w.im / 2 : ℝ) : ℂ) * Complex.I) := by ring
+  rw [hneg, hcosv, norm_neg, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (Real.cosh_pos _)]
+
+/-- Gamma norm on the `Re = 2` line: `‖Γ(w)‖² = (1+y²)·πy/sinh(πy)` for
+`w.im = y ≠ 0`. Via `Γ(w) = (1+iy)·Γ(1+iy)` (`Gamma_add_one` at `1+iy ≠ 0`)
+times Tier 1, with `‖1+iy‖² = 1+y²` (`sq_norm` + `normSq_apply`). -/
+theorem Gamma_Re2_normSq {w : ℂ} (hw : w.re = 2) (hy : w.im ≠ 0) :
+    ‖Complex.Gamma w‖ ^ 2
+      = (1 + w.im ^ 2) * (Real.pi * w.im / Real.sinh (Real.pi * w.im)) := by
+  have hw_eq : w = (1 + ((w.im : ℝ) : ℂ) * Complex.I) + 1 := by
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      rw [hw]
+      ring
+    · simp only [Complex.add_im, Complex.one_im, Complex.mul_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      ring
+  have hs_ne : (1 + ((w.im : ℝ) : ℂ) * Complex.I) ≠ 0 := by
+    intro h
+    have hre0 := congrArg Complex.re h
+    simp only [Complex.add_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im, Complex.zero_re] at hre0
+    norm_num at hre0
+  have hnorm_s : ‖(1 + ((w.im : ℝ) : ℂ) * Complex.I)‖ ^ 2 = 1 + w.im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    simp only [Complex.add_re, Complex.one_re, Complex.mul_re, Complex.add_im,
+      Complex.one_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.I_re, Complex.I_im]
+    ring
+  have hG : Complex.Gamma w
+      = (1 + ((w.im : ℝ) : ℂ) * Complex.I)
+        * Complex.Gamma (1 + ((w.im : ℝ) : ℂ) * Complex.I) := by
+    conv_lhs => rw [hw_eq]
+    exact Complex.Gamma_add_one _ hs_ne
+  rw [hG, norm_mul, mul_pow, hnorm_s, Gamma_one_add_im_normSq hy]
+
+/-- Tier-2 JOINT cap: `‖Γ(w)·cos(πw/2)‖ ≤ 34` on `Re = 2`, `|Im| ≤ 8.75`.
+The `y = 0` case is direct (`Γ(2) = 1`, `cos π = -1`). For `y ≠ 0`,
+`‖Γ·cos‖² = (1+a²)·(πa/sinh πa)·cosh²(πa/2)` with `a = |y|`, and
+`sinh πa = 2·sinh(πa/2)·cosh(πa/2)` (`sinh_two_mul`) collapses this to
+`(1+a²)·(t·coth t) ≤ (1+a²)·(t+1)` (`t_mul_coth_le`), bounded by
+`77.5625·(3.1416·8.75/2+1) = 1143.62… ≤ 34²`. -/
+theorem joint_Gamma_cos_le {w : ℂ} (hw : w.re = 2) (him : |w.im| ≤ 8.75) :
+    ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ≤ 34 := by
+  by_cases hy0 : w.im = 0
+  · have hw2 : w = ((2 : ℝ) : ℂ) := by
+      apply Complex.ext
+      · rw [hw, Complex.ofReal_re]
+      · rw [hy0, Complex.ofReal_im]
+    have hG2 : Complex.Gamma ((2 : ℝ) : ℂ) = 1 := by
+      have e : ((2 : ℝ) : ℂ) = (1 : ℂ) + 1 := by
+        exact_mod_cast (by norm_num : (2 : ℝ) = 1 + 1)
+      rw [e, Complex.Gamma_add_one _ one_ne_zero, Complex.Gamma_one, mul_one]
+    have hcos : Complex.cos ((Real.pi : ℂ) * ((2 : ℝ) : ℂ) / 2) = -1 := by
+      have e : (Real.pi : ℂ) * ((2 : ℝ) : ℂ) / 2 = (Real.pi : ℂ) := by
+        push_cast
+        ring
+      rw [e, Complex.cos_pi]
+    rw [hw2, hG2, hcos, one_mul, norm_neg, norm_one]
+    norm_num
+  · have hyne : w.im ≠ 0 := hy0
+    have hG := Gamma_Re2_normSq hw hyne
+    have hC := cos_Re2_norm hw
+    have ha_pos : 0 < |w.im| := abs_pos.mpr hyne
+    have hpi : 0 < Real.pi := lt_trans (by norm_num) Real.pi_gt_three
+    have hthal_pos : 0 < Real.pi * |w.im| / 2 := by
+      have h2 := mul_pos (mul_pos hpi ha_pos) (show (0 : ℝ) < 1 / 2 by norm_num)
+      linarith
+    have hsinh_half_pos : 0 < Real.sinh (Real.pi * |w.im| / 2) :=
+      Real.sinh_pos_iff.mpr hthal_pos
+    have hcosh_pos : 0 < Real.cosh (Real.pi * |w.im| / 2) := Real.cosh_pos _
+    have hsymm : Real.pi * w.im / Real.sinh (Real.pi * w.im)
+        = Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|) := by
+      rcases le_total w.im 0 with hynonpos | hynonneg
+      · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+        rw [abs_of_neg hyneg, show Real.pi * -w.im = -(Real.pi * w.im) by ring,
+          Real.sinh_neg, neg_div_neg_eq]
+      · rw [abs_of_nonneg hynonneg]
+    have heven : Real.cosh (Real.pi * w.im / 2)
+        = Real.cosh (Real.pi * |w.im| / 2) := by
+      rcases le_total w.im 0 with hynonpos | hynonneg
+      · have hyneg : w.im < 0 := lt_of_le_of_ne hynonpos hyne
+        rw [abs_of_neg hyneg,
+          show Real.pi * -w.im / 2 = -(Real.pi * w.im / 2) by ring, Real.cosh_neg]
+      · rw [abs_of_nonneg hynonneg]
+    have hsinh2 : Real.sinh (Real.pi * |w.im|)
+        = 2 * Real.sinh (Real.pi * |w.im| / 2)
+          * Real.cosh (Real.pi * |w.im| / 2) := by
+      have hdouble : Real.pi * |w.im| = 2 * (Real.pi * |w.im| / 2) := by ring
+      conv_lhs => rw [hdouble]
+      rw [Real.sinh_two_mul]
+    have hsinh_half_ne : Real.sinh (Real.pi * |w.im| / 2) ≠ 0 :=
+      ne_of_gt hsinh_half_pos
+    have hcosh_ne : Real.cosh (Real.pi * |w.im| / 2) ≠ 0 := ne_of_gt hcosh_pos
+    have hden_ne : 2 * Real.sinh (Real.pi * |w.im| / 2)
+        * Real.cosh (Real.pi * |w.im| / 2) ≠ 0 :=
+      mul_ne_zero (mul_ne_zero two_ne_zero hsinh_half_ne) hcosh_ne
+    have hstep : (1 + |w.im| ^ 2)
+            * (Real.pi * |w.im| / Real.sinh (Real.pi * |w.im|))
+            * (Real.cosh (Real.pi * |w.im| / 2)) ^ 2
+        = (1 + |w.im| ^ 2)
+          * ((Real.pi * |w.im| / 2)
+            * (Real.cosh (Real.pi * |w.im| / 2)
+              / Real.sinh (Real.pi * |w.im| / 2))) := by
+      rw [hsinh2]
+      field_simp
+    have h1a2 : (1 : ℝ) + |w.im| ^ 2 ≤ 77.5625 := by
+      have h1 : |w.im| ^ 2 ≤ (8.75 : ℝ) ^ 2 :=
+        pow_le_pow_left₀ (abs_nonneg _) him 2
+      have h2 : (8.75 : ℝ) ^ 2 = 76.5625 := by norm_num
+      rw [h2] at h1
+      linarith
+    have ht1 : Real.pi * |w.im| / 2 + 1 ≤ 3.1416 * 8.75 / 2 + 1 := by
+      have hpile : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+      have h1 : Real.pi * |w.im| ≤ 3.1416 * 8.75 :=
+        mul_le_mul hpile him (abs_nonneg _) (by norm_num)
+      linarith
+    have hcoth := t_mul_coth_le hthal_pos
+    have hnonneg : (0 : ℝ) ≤ 1 + |w.im| ^ 2 := by positivity
+    have hnn1 : (0 : ℝ) ≤ Real.pi * |w.im| / 2 + 1 := by linarith [hthal_pos]
+    have hnn2 : (0 : ℝ) ≤ 77.5625 := by norm_num
+    have hfinal : (77.5625 : ℝ) * (3.1416 * 8.75 / 2 + 1) ≤ 34 ^ 2 := by norm_num
+    have hsq : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+        ≤ 34 ^ 2 := by
+      have e1 : ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2
+          = ‖Complex.Gamma w‖ ^ 2 * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖ ^ 2 := by
+        rw [norm_mul, mul_pow]
+      rw [e1, hG, hC, hsymm, heven, ← sq_abs w.im, hstep]
+      exact le_trans (le_trans (mul_le_mul_of_nonneg_left hcoth hnonneg)
+        (mul_le_mul h1a2 ht1 hnn1 hnn2)) hfinal
+    have hle := Real.sqrt_le_sqrt hsq
+    rw [Real.sqrt_sq (norm_nonneg _),
+      Real.sqrt_sq (show (0 : ℝ) ≤ (34 : ℝ) by norm_num)] at hle
+    exact hle
+
+/-- Tier-3 FE-factor cap via the joint bound:
+`‖RowFEFactor w‖ = 2·‖(2π)^{-w}‖·‖Γ·cos‖ ≤ 2·(1/36)·34 = 17/9`.
+Uses `Door3SharpWindow.cpow_sharp_Re2`; the `1280`/`3120` separate caps are
+superseded here (that is the joint-cancellation gain). -/
+theorem factor_joint_le {w : ℂ} (hw : w.re = 2) (him : |w.im| ≤ 8.75) :
+    ‖RowFE.RowFEFactor w‖ ≤ 17 / 9 := by
+  have hcpow := Door3SharpWindow.cpow_sharp_Re2 hw
+  have hjoint := joint_Gamma_cos_le hw him
+  have h2norm : ‖(2 : ℂ)‖ = 2 := by
+    have e : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_num
+    rw [← e, RCLike.norm_natCast]
+    norm_num
+  have hnorm_eq : ‖RowFE.RowFEFactor w‖
+      = ‖(2 : ℂ)‖ * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖
+        * (‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖) := by
+    unfold RowFE.RowFEFactor
+    rw [norm_mul, norm_mul, norm_mul]
+    ring
+  have hgc : ‖Complex.Gamma w‖ * ‖Complex.cos ((Real.pi : ℂ) * w / 2)‖
+      = ‖Complex.Gamma w * Complex.cos ((Real.pi : ℂ) * w / 2)‖ :=
+    (norm_mul _ _).symm
+  rw [hnorm_eq, h2norm, hgc]
+  have h1 : (2 : ℝ) * ‖(2 * (Real.pi : ℂ)) ^ (-w)‖ ≤ 2 * (1 / 36) :=
+    mul_le_mul_of_nonneg_left hcpow (by norm_num)
+  exact le_trans
+    (mul_le_mul h1 hjoint (norm_nonneg _) (by norm_num)) (by norm_num)
+
+/-- Tier-3 sharp damping: `‖damp‖ ≤ 1.02` on the window (was `2.7183`).
+`Re((s-c)²)/100 ≤ 0.01` as in `Door3SharpWindow.damp_upper_window`, then
+`exp(0.01) ≤ 1.02`: `(exp 0.01)^100 = exp 1 < 2.7183 < 3 ≤ 1.02^100`
+(Bernoulli) and take 100th roots. -/
+theorem damp_sharp_window {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1.02 := by
+  have hsq2 : ((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      = 1 - (z.im + 6.75) ^ 2 := by
+    have e1 : (z - ZetaUpperR02ThreeLines.dampCenter).re = -1 := by
+      rw [Complex.sub_re, ZetaUpperR02ThreeLines.dampCenter_re, hz_re, sub_zero]
+    have e2 : (z - ZetaUpperR02ThreeLines.dampCenter).im = z.im + 6.75 := by
+      rw [Complex.sub_im, ZetaUpperR02ThreeLines.dampCenter_im]
+      ring
+    rw [pow_two, Complex.mul_re, e1, e2]
+    ring
+  have hwre : ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re ≤ 0.01 := by
+    have hwm : ((((1 / 100 : ℝ)) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+        = (1 / 100) * ((((z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re)) := by
+      rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [hwm, hsq2]
+    have ht2 : (0 : ℝ) ≤ (z.im + 6.75) ^ 2 := sq_nonneg _
+    linarith
+  rw [ZetaUpperR02ThreeLines.norm_complex_exp]
+  have hexp : Real.exp ((((1 / 100 : ℝ)) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2).re
+      ≤ Real.exp 0.01 := Real.exp_le_exp_of_le hwre
+  have h102 : Real.exp (0.01 : ℝ) ≤ 1.02 := by
+    have hE100 : (Real.exp (0.01 : ℝ)) ^ 100 = Real.exp 1 := by
+      have h := Real.exp_nat_mul (0.01 : ℝ) (100 : ℕ)
+      have h100 : ((100 : ℕ) : ℝ) * 0.01 = 1 := by norm_num
+      rw [h100] at h
+      exact h.symm
+    have hbern : (3 : ℝ) ≤ (1.02 : ℝ) ^ (100 : ℕ) := by
+      have hb := one_add_mul_le_pow (show (-2 : ℝ) ≤ (0.02 : ℝ) by norm_num)
+        (100 : ℕ)
+      rw [show ((100 : ℕ) : ℝ) * (0.02 : ℝ) = 2 by norm_num,
+        show (1 : ℝ) + 0.02 = 1.02 by norm_num,
+        show (1 : ℝ) + 2 = 3 by norm_num] at hb
+      exact hb
+    have hlt : Real.exp (1 : ℝ) < 2.7182818286 := Real.exp_one_lt_d9
+    have hle : (Real.exp (0.01 : ℝ)) ^ 100 ≤ (1.02 : ℝ) ^ (100 : ℕ) := by
+      rw [hE100]
+      linarith [hlt, hbern]
+    exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+  linarith [hexp, h102]
+
+/-- Tier-3 MAIN composed damped cap: `‖G(z)‖ ≤ 36` on `Re = -1`,
+`|Im| ≤ 8.75` (`34·1.02 = 34.68 ≤ 36`). FE assembly mirrors
+`Door3SharpWindow.damped_window_sharp` (single joint branch, no `|y| ≶ 6`
+split): `‖ζ(z)‖ ≤ (17/9)·2 = 34/9`, `‖F‖ ≤ 9·(34/9) = 34`,
+`‖G‖ ≤ 34·1.02 ≤ 36 ≤ 50.925`, meeting AD's
+`ZetaUpperR02ThreeLines` threshold (`zetaUpper_R02_ten_of_bounds`). -/
+theorem damped_joint_window {z : ℂ} (hz_re : z.re = -1) (him : |z.im| ≤ 8.75) :
+    ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36 := by
+  have hz1 : z ≠ 1 := by
+    intro h
+    have hre : z.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hw_re : ((1 : ℂ) - z).re = 2 := by
+    rw [Complex.sub_re, Complex.one_re, hz_re]
+    norm_num
+  have hw_im : ((1 : ℂ) - z).im = -z.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have hs_neg : ∀ n : ℕ, (1 - z) ≠ -((n : ℂ)) := by
+    intro n h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re, Complex.neg_re,
+      Complex.natCast_re] at hre
+    rw [hz_re] at hre
+    have hnn : (0 : ℝ) ≤ (((n : ℕ)) : ℝ) := Nat.cast_nonneg n
+    linarith
+  have hs1' : (1 - z) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.sub_re, Complex.one_re] at hre
+    rw [hz_re] at hre
+    norm_num at hre
+  have hFE' : riemannZeta z
+      = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+    have hFE := riemannZeta_one_sub (s := 1 - z) hs_neg hs1'
+    have h1sub : (1 : ℂ) - (1 - z) = z := by ring
+    rw [h1sub] at hFE
+    have h2 : (2 * (2 * (Real.pi : ℂ)) ^ (-(1 - z)) * Complex.Gamma (1 - z)
+        * Complex.cos ((Real.pi : ℂ) * (1 - z) / 2) * riemannZeta (1 - z))
+        = RowFE.RowFEFactor (1 - z) * riemannZeta (1 - z) := by
+      unfold RowFE.RowFEFactor
+      ring
+    rw [← h2]
+    exact hFE
+  have hZrefl : ‖riemannZeta (1 - z)‖ ≤ 2 := by
+    have h := TailZetaUpper.zeta_rightEdge_B2 (s := 1 - z) (by linarith [hw_re])
+    rwa [show zeta (1 - z) = riemannZeta (1 - z) from rfl] at h
+  have himw875 : |((1 : ℂ) - z).im| ≤ 8.75 := by
+    rw [hw_im, abs_neg]
+    exact him
+  have hsub : ‖z - 1‖ ≤ 9 := Door3SharpWindow.sub_upper_window hz_re him
+  have hdamp : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ ≤ 1.02 :=
+    damp_sharp_window hz_re him
+  have hFactor : ‖RowFE.RowFEFactor (1 - z)‖ ≤ 17 / 9 :=
+    factor_joint_le hw_re himw875
+  have hZ : ‖riemannZeta z‖ ≤ 34 / 9 := by
+    rw [hFE', norm_mul]
+    calc ‖RowFE.RowFEFactor (1 - z)‖ * ‖riemannZeta (1 - z)‖ ≤ (17 / 9) * 2 :=
+          mul_le_mul hFactor hZrefl (norm_nonneg _) (by norm_num)
+      _ = 34 / 9 := by norm_num
+  have hF : ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ ≤ 34 := by
+    rw [ZetaUpperR02ThreeLines.poleRemovedZeta_of_ne hz1, norm_mul]
+    calc ‖z - 1‖ * ‖riemannZeta z‖ ≤ 9 * (34 / 9) :=
+          mul_le_mul hsub hZ (norm_nonneg _) (by norm_num)
+      _ = 34 := by norm_num
+  have hfin : ZetaUpperR02ThreeLines.dampedPoleRemoved z =
+      ZetaUpperR02ThreeLines.poleRemovedZeta z *
+        Complex.exp (((1 / 100 : ℝ) : ℂ) *
+          (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  rw [hfin, norm_mul]
+  calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta z‖ *
+      ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+        (z - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+        ≤ 34 * 1.02 :=
+          mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+    _ ≤ 36 := by norm_num
+
+#print axioms Door3JointGammaCos.Gamma_one_add_im_normSq
+#print axioms Door3JointGammaCos.t_mul_coth_le
+#print axioms Door3JointGammaCos.cos_Re2_norm
+#print axioms Door3JointGammaCos.Gamma_Re2_normSq
+#print axioms Door3JointGammaCos.joint_Gamma_cos_le
+#print axioms Door3JointGammaCos.factor_joint_le
+#print axioms Door3JointGammaCos.damp_sharp_window
+#print axioms Door3JointGammaCos.damped_joint_window
+
+end Door3JointGammaCos
+
+
