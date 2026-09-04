@@ -1496,7 +1496,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     0.19500`** (1.00102×, gain `0.000198`). NOTE: block landed with a Lean placement bug (60-line `/--`
     docstring before `set_option … in` — rejected); coordinator 1-char micro-fix (`/--`→`/-`, comment
     syntax only, disclosed in commit). DH's report never arrived (session lost post-write) — verified
-    from diff per protocol. Next: term14-amp larger-`q` clearing (tasked); middle Tier-3 vdC still open.
+    from diff per protocol. **Term14-amp larger-`q` cleared (`D3_S16_norm_ge_DI`, DJ, `27bf775f`, green
+    8693 jobs, axioms clean):** exhaustive `q≤200000` scan winner `q=135063, p=26600` ⇒
+    `D3_amp 14 ≤ 26600/135063` (only `3.9e-11` above `3/5`-floor) ⇒ **`‖S₁₆‖ ≥
+    755971293966729191/3876712417843650000 ≈ 0.19500319`** (honest gain `~2.06e-07`, `1.00000106×`).
+    NOTE: DJ named its theorems `_DI` (no file collision — true DI worked newsection); kept as-is.
+    Term12 + term14 amp routes now BOTH essentially exhausted — no further denominator searches.
+    Next: Tier-3 vdC narrow scope toward middle upper (tasked); true `Im S₁₆ ≈ −0.51` remains the ceiling.
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
     in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
     build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
@@ -1621,7 +1627,15 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    (c) `hTailT` (BZ mirror via strip-wide `‖G_P‖≤1.16·‖G‖`, `T_P=1.16·T`) ⇒ **`P1_R02_unconditional`:
    `‖ζ‖≤10` on R02 with premises = pure cell membership ONLY** (fired `GP_P1_of_gaps_and_tailT`).
    **P1 TRACK DONE — `R02_zeta_upper_obligation` now dischargeable** (plug into `DerivCauchyBridge` /
-   AO rewiring, tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   AO rewiring, tasked). **DISCHARGED (`Door3DownstreamDischarge`, DI, `e2c043ea`, green 8702 jobs,
+   axioms clean):** `R02_zeta_upper_discharged` (from `P1_R02_unconditional` via `zeta = riemannZeta`
+   defeq) + `AO_gamma_upper_discharged` (from landed `R02GammaDisc.gammaOf_upper_disc_R02`) ⇒
+   **UNCONDITIONAL `‖deriv xiShifted‖ ≤ 67200` on R02** (and `≤ 162.96`, ceil **`M = 163`** with the
+   `0.097` Gamma cap). Zeta-upper + deriv wall CLOSED with zero premises. Remaining R02 H-leaf is
+   center-product premises owned by siblings (`Agam`/`Azeta` thresholds at `R02Pilot.sCenter` —
+   `Azeta ≥ 9336` at `M = 163`, infeasible at true `|ζ| = O(1)`; honest net still 0 cells closed —
+   closing a cell needs M driven down via Stirling-sharp Gamma-upper + tighter zeta-upper, tasked
+   as scout). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
