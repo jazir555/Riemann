@@ -1475,6 +1475,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `≤439/4650≈0.09441` ⇒ **`‖S₁₆‖ ≥ 3173275873/16711170000 ≈ 0.1899`** (1.0116×). x=16 lower untouched
     (only LOWER feeds term15; `5/8`-route near-exhausted, needs exact-`0.605`/large-denominator). Next:
     x=16 amp lower micro-gain, `-0.439→-0.4382`, `pi_d20` δ₁₃, term14 trivial-bound (tasked).
+    **Micro-levers CLOSED (`D3_S16_norm_ge_DA`, `64e18b02`, green, axioms clean):** `35/198 ≤ D3_amp 15`
+    (`198^8≥16^5·35^8`, margin `0.0408%`, 19-digit VERIFIED REAL; `5/8`-floor `≈0.17677` so `~0.0098`
+    structural; exact-`0.605` needs `~1e145` ints, infeasible) + sin θ₁₃ `≥-0.4382` (same CX box, margin
+    `0.000085`) ⇒ **`‖S₁₆‖ ≥ 6172832357/32439330000 ≈ 0.1903`** (1.00210×, gain `0.000399`). Early block
+    now in micro-gains — remaining: `pi_d20` δ₁₃ (`~0.00012`), term14 (`499/2500`, largest micro-pool
+    `~0.007`, needs fresh scoping). Next macro-lever: MIDDLE `[16,1024)` upper via
+    `Zeta23.MV.Final.mv_hilbert` large-sieve bridge (tasked — fires the queued Zeta23 lever).
     **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
