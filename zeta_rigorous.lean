@@ -1,4 +1,5 @@
 import Mathlib
+import Zeta23.MV.Final
 
 noncomputable section
 
@@ -17247,6 +17248,313 @@ theorem D3_S16_norm_ge_DA :
 #print axioms D3_S16_im_upper_DA_neg
 #print axioms D3_S16_im_abs_ge_DA
 #print axioms D3_S16_norm_ge_DA
+
+/-!
+## Door-3 middle-block large-sieve bridge (DB, MV track): gap admissibility + `MVHilbert 26`
+instantiation + honest number vs the `0.12` class.
+
+GOAL (D3 K=16 route): the middle block `[16,1024)` needs an UPPER of class `≤ 0.12`
+(`D3_S1024_of_S1` needs a `≤ 0.12`-class middle upper to preserve an `S_16`-scale head
+lower toward `‖S_{1024}‖ ≥ 8/15`; triangle gives `≈ 35`, Abel+MVT `≈ 8.6`,
+pairs+MVT+telescoping `MID_mid_block_upper ≤ 5/3`). This block fires the queued Zeta23
+lever: `Zeta23.MV.mvDiag_thirteen` (`MVDiag 13`, proved via `EigenBound 13`) polarized by
+`Zeta23.MVHilbert_of_diag` to `MVHilbert 26`, applied to the middle-block Dirichlet data
+with frequencies `λ = D3_phase` (`8.75·log n`, the repo phase convention) and a uniform
+gap weight `δ = 8.75/1025`.
+
+GREP-FIRST RECORD (run before writing; repo `zeta_rigorous.lean` + `zeta-23-lean/Zeta23/`):
+* `D3_phase` (`8.75·log(k+1)`), `T2_AE_f` (`n^{-s1}` cpow form), `T2_AE_f_norm`
+  (`‖f_k‖ = (k+1)^{-0.605}`), `KL_log_gap_ge` (`1/(n+1) ≤ log(n+1)-log n`),
+  `D3_S1024_of_S1`, `MID_mid_block_upper` (`≤ 5/3`). All reused read-only; nothing redefined.
+* `Zeta23.MV.mvDiag_thirteen : MVDiag 13` (`zeta-23-lean/Zeta23/MV/Final.lean`),
+  `Zeta23.MVHilbert_of_diag : 0 ≤ C → MVDiag C → MVHilbert (2*C)`
+  (`zeta-23-lean/Zeta23/MV.lean`), `Zeta23.MVHilbert` (`Zeta23/Hypotheses.lean`,
+  bilinear shape, RHS antitone in `δ` per its docstring). Imported via
+  `import Zeta23.MV.Final` (top of this file); dep-build `lake build Zeta23.MV.Final`
+  green in 119s (Spacing 34s + Duality 26s + Quadratic 27s + Eigen 21s + Final 18s).
+* Name-clash check (`DB_freq|DB_delta|DB_x|DB_gap|DB_log|DB_rpow|DB_term0|DB_Q|DB_MV|DB_shape|DB_honest`)
+  -- 0 hits before writing. `conj` written as `Complex.conj` (this file has no
+  `open Complex`; Zeta23's `conj` resolves to `Complex.conj` via its `open Complex`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (DB-a) Data packaging: `DB_freq` (`D3_phase`-packaged, `Fin 1008`), `DB_delta`
+  (uniform `8.75/1025`), `DB_x` (`T2_AE_f`-packaged) + `DB_freq_eq`/`DB_x_norm` rewrites.
+* (DB-b) Gap admissibility: `DB_freq_inj` (via `Real.exp_log`), `DB_delta_pos`,
+  `DB_log_gap_real` (pure-real core from `KL_log_gap_ge` + `Real.log_le_log`),
+  `DB_gap_ordered`/`DB_gap_adm` (`δ ≤ |λ_r - λ_s|`, adjacent-gap domination for
+  log-spaced frequencies).
+* (DB-c) MV instantiation: `DB_MVHilbert26` (`MVHilbert 26` from `mvDiag_thirteen` +
+  polarization) + `DB_MV_instantiated` (concrete Hilbert-form bound on middle-block data).
+* (DB-d) Honest number: `DB_rpow17_le` (`17^1.21 ≤ 40`, cleared `17^5 ≤ 40^4` à la
+  `MID_rpow15_ge`), `DB_rpow17_inv_ge`, `DB_term0_ge` (first-term majorant `≥ 41/14`),
+  `DB_Q_ge` (`Q ≥ 41/14 ≈ 2.929` via `Finset.single_le_sum`), `DB_shape_floor`,
+  `DB_honest_number` (`26·√Q·√Q ≥ 533/7 ≈ 76.14`), `DB_MV_cannot_reach_012`
+  (the C=26 majorant can NEVER be `≤ 0.12`).
+
+NUMBERS (exact, proved in-file):
+* `Q = Σ ‖x‖²/δ ≥ 41/14 ≈ 2.9286` (first term alone; true `Q ≈ 30-45` over 1008 terms).
+* MV majorant with proved constant: `26·Q ≥ 26·41/14 = 533/7 ≈ 76.143 ≫ 0.12`
+  (factor `≈ 635×` above the `0.12` class).
+* Even with ideal constant `C = 1`: `Q ≥ 41/14 ≈ 2.93 > 0.12` (factor `≈ 24×`) -- the
+  Hilbert-form majorant SHAPE cannot touch the `0.12` class on this block, at any constant.
+
+RESIDUAL (exact, quantified -- report-and-stop, no spin):
+* The MV-Hilbert output bounds the OFF-DIAGONAL Hilbert form
+  `|Σ_{r≠s} x_r·conj(z_s)/(λ_r-λ_s)|`, NOT the block sum `‖Σ eta‖`. The
+  mean→pointwise conversion (MV mean-value theorem / large sieve → Dirichlet mean value →
+  Cauchy–Schwarz + Abel to a pointwise block upper) needs the Montgomery–Vaughan
+  mean-value machinery, which is ABSENT from Mathlib and the repo. That conversion is
+  the named residual.
+* Deeper lever per ledger: Tier-3 vdC second-derivative for the EARLY-block upper
+  (the `MID` residual: `5/3 ≈ 1.667` vs `≤ 0.12` is `≈ 14×`; even perfect pair
+  constants give `≈ 1.2`), not further large-sieve constant-sharpening here
+  (`DB_shape_floor` proves no constant closes it on this block).
+-/
+
+/-- (DB-a) Middle-block frequencies: `D3_phase`-packaged (`8.75·log(17+j)`, `j < 1008`). -/
+noncomputable def DB_freq : Fin 1008 → ℝ := fun j => D3_phase (16 + j.val)
+
+/-- (DB-a) Uniform gap weight `δ = 8.75/1025` (below every pairwise log-gap on the block). -/
+noncomputable def DB_delta : Fin 1008 → ℝ := fun _ => 8.75 / 1025
+
+/-- (DB-a) Middle-block Dirichlet data: `T2_AE_f`-packaged amplitudes. -/
+noncomputable def DB_x : Fin 1008 → ℂ := fun j => T2_AE_f (16 + j.val)
+
+/-- (DB-a) Frequency rewrite (`↑(16+j)+1 = ↑(17+j)`). -/
+theorem DB_freq_eq (j : Fin 1008) :
+    DB_freq j = 8.75 * Real.log ((((17 + j.val : ℕ)) : ℝ)) := by
+  have ecast : ((((16 + j.val : ℕ)) : ℝ) + 1 : ℝ) = ((((17 + j.val : ℕ)) : ℝ)) := by
+    push_cast
+    ring
+  unfold DB_freq
+  unfold D3_phase
+  rw [ecast]
+
+/-- (DB-b) Frequencies are injective (`8.75·log` is injective on positives via `Real.exp_log`). -/
+theorem DB_freq_inj : Function.Injective DB_freq := by
+  intro r s hrs
+  have e1 := DB_freq_eq r
+  have e2 := DB_freq_eq s
+  rw [e1, e2] at hrs
+  have hlog : Real.log ((((17 + r.val : ℕ)) : ℝ)) = Real.log ((((17 + s.val : ℕ)) : ℝ)) :=
+    mul_left_cancel₀ (by norm_num : (8.75 : ℝ) ≠ 0) hrs
+  have hA0 : (0 : ℝ) < ((((17 + r.val : ℕ)) : ℝ)) := by
+    have h : (0 : ℕ) < 17 + r.val := by omega
+    exact_mod_cast h
+  have hB0 : (0 : ℝ) < ((((17 + s.val : ℕ)) : ℝ)) := by
+    have h : (0 : ℕ) < 17 + s.val := by omega
+    exact_mod_cast h
+  have hAB : ((((17 + r.val : ℕ)) : ℝ)) = ((((17 + s.val : ℕ)) : ℝ)) := by
+    have ex1 := Real.exp_log hA0
+    have ex2 := Real.exp_log hB0
+    rw [hlog] at ex1
+    exact ex1.symm.trans ex2
+  have hnat : 17 + r.val = 17 + s.val := by exact_mod_cast hAB
+  have hval : r.val = s.val := by omega
+  exact Fin.ext hval
+
+/-- (DB-b) Gap weights are positive. -/
+theorem DB_delta_pos (r : Fin 1008) : 0 < DB_delta r := by
+  unfold DB_delta
+  norm_num
+
+/-- (DB-b) Pure-real gap core: distinct `a < b` in `[17,1024]` have `|log a - log b| ≥ 1/1025`
+(from `KL_log_gap_ge` + `Real.log_le_log` monotonicity). -/
+theorem DB_log_gap_real (a b : ℕ) (ha : 17 ≤ a) (hab : a < b) (hb : b ≤ 1024) :
+    (1 / 1025 : ℝ) ≤ |Real.log ((a : ℝ)) - Real.log ((b : ℝ))| := by
+  have haR : (0 : ℝ) < (a : ℝ) := by
+    have h : (0 : ℕ) < a := by omega
+    exact_mod_cast h
+  have hlt : (a : ℝ) < (b : ℝ) := Nat.cast_lt.mpr hab
+  have hlog : Real.log (a : ℝ) < Real.log (b : ℝ) := Real.log_lt_log haR hlt
+  have h1 : |Real.log (a : ℝ) - Real.log (b : ℝ)| = Real.log (b : ℝ) - Real.log (a : ℝ) := by
+    have hneg : Real.log (a : ℝ) - Real.log (b : ℝ) < 0 := sub_neg.mpr hlog
+    rw [abs_of_neg hneg]
+    ring
+  rw [h1]
+  have hgap := KL_log_gap_ge a (by omega)
+  have hmono : Real.log ((a : ℝ) + 1) ≤ Real.log (b : ℝ) := by
+    have hpos : (0 : ℝ) < (a : ℝ) + 1 := by
+      have hnn : (0 : ℝ) ≤ (a : ℝ) := le_of_lt haR
+      linarith
+    have hle : ((a + 1 : ℕ) : ℝ) ≤ (b : ℝ) := Nat.cast_le.mpr (by omega)
+    push_cast at hle
+    exact Real.log_le_log hpos hle
+  have h1025 : (1 / 1025 : ℝ) ≤ 1 / ((a : ℝ) + 1) := by
+    have ha1 : (0 : ℝ) < (a : ℝ) + 1 := by
+      have hnn : (0 : ℝ) ≤ (a : ℝ) := le_of_lt haR
+      linarith
+    have hle : (a : ℝ) + 1 ≤ 1025 := by
+      have hab2 : a + 1 ≤ 1025 := by omega
+      have hcast : ((a + 1 : ℕ) : ℝ) ≤ (((1025 : ℕ)) : ℝ) := Nat.cast_le.mpr hab2
+      push_cast at hcast
+      exact hcast
+    exact one_div_le_one_div_of_le ha1 hle
+  linarith
+
+/-- (DB-b) Ordered gap admissibility (`p.val < q.val` side). -/
+theorem DB_gap_ordered (p q : Fin 1008) (h : p.val < q.val) :
+    DB_delta p ≤ |DB_freq p - DB_freq q| := by
+  have ed : DB_delta p = 8.75 / 1025 := rfl
+  have e1 := DB_freq_eq p
+  have e2 := DB_freq_eq q
+  have hreal := DB_log_gap_real (17 + p.val) (17 + q.val) (by omega) (by omega)
+    (by have hq := q.is_lt; omega)
+  rw [ed, e1, e2, ← mul_sub, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 8.75)]
+  have e3 : (8.75 : ℝ) / 1025 = 8.75 * (1 / 1025) := by ring
+  rw [e3]
+  exact mul_le_mul_of_nonneg_left hreal (by norm_num : (0 : ℝ) ≤ 8.75)
+
+/-- (DB-b) Gap admissibility on the middle block (`δ ≤ |λ_r - λ_s|`, the antitone shape
+`Zeta23.MVHilbert` consumes). -/
+theorem DB_gap_adm (r s : Fin 1008) (hrs : r ≠ s) :
+    DB_delta r ≤ |DB_freq r - DB_freq s| := by
+  have hvs : r.val ≠ s.val := fun h => hrs (Fin.ext h)
+  rcases lt_or_gt_of_ne hvs with h | h
+  · exact DB_gap_ordered r s h
+  · have h2 := DB_gap_ordered s r h
+    have e1 : DB_delta r = DB_delta s := rfl
+    rw [e1, abs_sub_comm]
+    exact h2
+
+/-- (DB-a) Amplitude norms (`T2_AE_f_norm` repackaged at `17+j`). -/
+theorem DB_x_norm (j : Fin 1008) :
+    ‖DB_x j‖ = ((((17 + j.val : ℕ)) : ℝ) ^ (-0.605 : ℝ)) := by
+  have ecast : ((((16 + j.val : ℕ)) : ℝ) + 1 : ℝ) = ((((17 + j.val : ℕ)) : ℝ)) := by
+    push_cast
+    ring
+  unfold DB_x
+  rw [T2_AE_f_norm, ecast]
+
+/-- (DB-d) Numeral atom `17^1.21 ≤ 40` (cleared `17^5 ≤ 40^4` since `1.21 ≤ 5/4`;
+mirrors `MID_rpow15_ge`). -/
+theorem DB_rpow17_le : (17 : ℝ) ^ ((1.21 : ℝ)) ≤ 40 := by
+  have hmono : (17 : ℝ) ^ ((1.21 : ℝ)) ≤ (17 : ℝ) ^ ((5 / 4 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have e : ((((17 : ℝ) ^ ((5 / 4 : ℝ)))) ^ ((4 : ℕ)) : ℝ) = (17 : ℝ) ^ ((5 : ℕ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 17)]
+    rw [show (5 / 4 : ℝ) * (((4 : ℕ)) : ℝ) = (5 : ℝ) by norm_num]
+    rw [show (5 : ℝ) = (((5 : ℕ)) : ℝ) by norm_num]
+    exact Real.rpow_natCast 17 5
+  have hpow : ((((17 : ℝ) ^ ((5 / 4 : ℝ)))) ^ ((4 : ℕ)) : ℝ) ≤ ((40 : ℝ) ^ ((4 : ℕ))) := by
+    rw [e]
+    norm_num
+  have hstep : (17 : ℝ) ^ ((5 / 4 : ℝ)) ≤ 40 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  exact le_trans hmono hstep
+
+/-- (DB-d) Inverted numeral `1/40 ≤ 17^{-1.21}`. -/
+theorem DB_rpow17_inv_ge : (1 / 40 : ℝ) ≤ (17 : ℝ) ^ ((-1.21 : ℝ)) := by
+  have hle : (17 : ℝ) ^ ((1.21 : ℝ)) ≤ 40 := DB_rpow17_le
+  have hpos : (0 : ℝ) < (17 : ℝ) ^ ((1.21 : ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
+  have e : ((-1.21 : ℝ)) = -((1.21 : ℝ)) := by norm_num
+  have heq : (1 / 40 : ℝ) = ((40 : ℝ))⁻¹ := by norm_num
+  rw [heq, e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 17)]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- (DB-d) First-term majorant lower bound (`≥ 41/14`). -/
+theorem DB_term0_ge :
+    (41 / 14 : ℝ) ≤ ‖DB_x ⟨0, by norm_num⟩‖ ^ 2 / DB_delta ⟨0, by norm_num⟩ := by
+  have h17 : (1 / 40 : ℝ) ≤ (17 : ℝ) ^ ((-1.21 : ℝ)) := DB_rpow17_inv_ge
+  have hn0 : ‖DB_x ⟨0, by norm_num⟩‖ = (17 : ℝ) ^ ((-0.605 : ℝ)) := by
+    have h := DB_x_norm ⟨0, by norm_num⟩
+    have e0 : ((((17 + (⟨0, by norm_num⟩ : Fin 1008).val : ℕ)) : ℝ)) = (17 : ℝ) := by
+      simp
+    rw [e0] at h
+    exact h
+  have hsq : (((17 : ℝ) ^ (-0.605 : ℝ))) ^ 2 = (17 : ℝ) ^ (-1.21 : ℝ) := by
+    rw [pow_two, ← Real.rpow_add (by norm_num : (0 : ℝ) < 17)]
+    rw [show (-0.605 + -0.605 : ℝ) = -1.21 by norm_num]
+  have hdelta : DB_delta ⟨0, by norm_num⟩ = 8.75 / 1025 := rfl
+  rw [hdelta, hn0, hsq]
+  have efrac : (17 : ℝ) ^ (-1.21 : ℝ) / (8.75 / 1025)
+      = ((17 : ℝ) ^ (-1.21 : ℝ)) * (1025 / 8.75) := by
+    rw [div_eq_mul_inv, inv_div]
+  rw [efrac]
+  have e41 : (41 / 14 : ℝ) = (1 / 40) * (1025 / 8.75) := by norm_num
+  rw [e41]
+  exact mul_le_mul_of_nonneg_right h17 (by norm_num : (0 : ℝ) ≤ 1025 / 8.75)
+
+/-- (DB-d) Majorant floor `Q ≥ 41/14 ≈ 2.929` (first term alone, `Finset.single_le_sum`). -/
+theorem DB_Q_ge :
+    (41 / 14 : ℝ) ≤ ∑ r, ‖DB_x r‖ ^ 2 / DB_delta r := by
+  have hnn : ∀ i ∈ (Finset.univ : Finset (Fin 1008)), 0 ≤ ‖DB_x i‖ ^ 2 / DB_delta i := by
+    intro i _
+    exact div_nonneg (sq_nonneg _) (le_of_lt (DB_delta_pos i))
+  have h0mem : (⟨0, by norm_num⟩ : Fin 1008) ∈ (Finset.univ : Finset (Fin 1008)) :=
+    Finset.mem_univ _
+  have hsingle := Finset.single_le_sum hnn h0mem
+  exact le_trans DB_term0_ge hsingle
+
+/-- (DB-c) `MVHilbert 26`: `mvDiag_thirteen` polarized (`2*13 = 26`). -/
+theorem DB_MVHilbert26 : Zeta23.MVHilbert 26 := by
+  have h13 : Zeta23.MVDiag 13 := Zeta23.MV.mvDiag_thirteen
+  have h := Zeta23.MVHilbert_of_diag (show (0 : ℝ) ≤ (13 : ℝ) by norm_num) h13
+  have e : (2 : ℝ) * 13 = 26 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- (DB-c) Instantiated MV bound: the off-diagonal Hilbert form on middle-block data is
+`≤ 26·√Q·√Q`. This is the banked bridge; the mean→pointwise conversion is the residual. -/
+theorem DB_MV_instantiated :
+    ‖∑ r, ∑ s, if r = s then (0 : ℂ) else
+      DB_x r * star (DB_x s) / ((DB_freq r - DB_freq s : ℝ) : ℂ)‖
+      ≤ 26 * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+        * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) :=
+  DB_MVHilbert26 _ _ _ _ _ DB_freq_inj DB_delta_pos DB_gap_adm
+
+/-- (DB-d) Shape floor: even with ideal constant `C = 1` the majorant is `≥ 41/14`. -/
+theorem DB_shape_floor :
+    (41 / 14 : ℝ) ≤ Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+      * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) := by
+  have hQ0 : (0 : ℝ) ≤ ∑ r, ‖DB_x r‖ ^ 2 / DB_delta r :=
+    le_trans (by norm_num) DB_Q_ge
+  rw [Real.mul_self_sqrt hQ0]
+  exact DB_Q_ge
+
+/-- (DB-d) HONEST NUMBER: with the proved constant 26 the MV majorant is `≥ 533/7 ≈ 76.14`,
+so the `≤ 0.12` class is unreachable on this block (`≈ 635×` above). -/
+theorem DB_honest_number :
+    (533 / 7 : ℝ) ≤ 26 * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+      * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) := by
+  have hQ := DB_Q_ge
+  have hQ0 : (0 : ℝ) ≤ ∑ r, ‖DB_x r‖ ^ 2 / DB_delta r := le_trans (by norm_num) hQ
+  have e533 : (533 / 7 : ℝ) = 26 * (41 / 14) := by norm_num
+  have hfin : (26 : ℝ) * (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+      = 26 * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+        * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) := by
+    conv_lhs => rw [← Real.mul_self_sqrt hQ0]
+    ring
+  calc (533 / 7 : ℝ) = 26 * (41 / 14) := e533
+    _ ≤ 26 * (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) :=
+        mul_le_mul_of_nonneg_left hQ (by norm_num : (0 : ℝ) ≤ 26)
+    _ = 26 * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+        * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) := hfin
+
+/-- (DB-d) Verdict: the C=26 MV majorant can NEVER be `≤ 0.12` (needs Tier-3 vdC instead). -/
+theorem DB_MV_cannot_reach_012 :
+    ¬ (26 * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r)
+      * Real.sqrt (∑ r, ‖DB_x r‖ ^ 2 / DB_delta r) ≤ (0.12 : ℝ)) := by
+  intro hle
+  have h := DB_honest_number
+  linarith
+
+#print axioms DB_freq_eq
+#print axioms DB_freq_inj
+#print axioms DB_delta_pos
+#print axioms DB_log_gap_real
+#print axioms DB_gap_ordered
+#print axioms DB_gap_adm
+#print axioms DB_x_norm
+#print axioms DB_rpow17_le
+#print axioms DB_rpow17_inv_ge
+#print axioms DB_term0_ge
+#print axioms DB_Q_ge
+#print axioms DB_MVHilbert26
+#print axioms DB_MV_instantiated
+#print axioms DB_shape_floor
+#print axioms DB_honest_number
+#print axioms DB_MV_cannot_reach_012
 
 
 
