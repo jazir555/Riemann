@@ -9515,3 +9515,1182 @@ fixed by `G`'s definition — or restructured `F` majorant).
 log-derivative decrease lemma). `hTail`/P1 do NOT follow yet:
 `CP_Sharp201.hTail_of_sharp201_sup` still needs full `[8.75, ∞)` sups.
 -/
+
+/-!
+# CT tail (door-3 P1/hTail track, large-a domination): `[21, Infinity)` neg+pos `<= 36`.
+
+Ownership: Agent CT tail append (append-only after the CQ verdict block; nothing above
+touched; no new imports; LF endings).
+
+GOAL (brief door-3 P1/hTail track, large-a domination, mechanical):
+`CQ_CompactHump` banks `[8.75, 10]` both signs. True neg envelope on `[21, Infinity)`
+is `31.83 -> 2.65` at `30`, decaying. This block banks the TRUE large-a piece:
+per-unit-interval caps on `[21, 30]` (damp(n) x B(n+1) via antitonicity +
+monotonicity, CQ pattern, with `exp(1)`-chain damping uppers) plus a crude
+tail cap for `a >= 30` (linear minorant of the quadratic x polynomial majorant,
+log-ratio decrease), then `hSupNeg`/`hSupPos`-shaped verdicts on `[21, Infinity)`
+matching `CP_Sharp201.hTail_of_sharp201_sup` premise shape. Hump `[10, 21)`
+stays structural (not this task).
+
+What is proved here (all full proofs, no sorry):
+* `damp21_le` .. `damp29_le`, `damp30_le`: neg damping uppers at integers
+  (`exp(1)^k x (1+r)` lower for `exp(T)` then inversion, CF `exp_neg23925_le`
+  pattern; `Real.exp_one_gt_d9` + `Real.add_one_le_exp` only).
+* `B22_le` .. `B30_le`: `B(m)` uppers (`sqrt` caps via `Real.sqrt_le_sqrt` +
+  `Real.sqrt_sq`, products by `norm_num`; `U1 = m + 0.1`, `U2` one-decimal
+  ceil of `sqrt(m^3)`).
+* `neg_cap_21_22` .. `neg_cap_29_30`: neg envelope `<= 36` per unit interval
+  (`dampNeg_mono` + `B201_mono` + `mul_le_mul`, CQ pattern).
+* `neg_cap_21_30`: combined `[21, 30]` (nested `le_total` dispatch).
+* `neg_tail_30_inf`: crude tail cap `a >= 30` (damping linear minorant
+  `(a-30)^2 >= 0` x polynomial majorants `sqrt(4+a^2) <= a+1`,
+  `sqrt(a^3) <= a^2`, log-ratio `(a/30)^3 <= exp(0.465*(a-30))` via
+  `Real.log_le_sub_one_of_pos`, base `exp(-5.395625) <= 0.005`).
+* `neg_cap_21_inf`: MAIN, `hSupNeg`-shaped on `[21, Infinity)`.
+* `pos_damp_le_neg_damp` + `pos_cap_21_inf`: pos `<= neg` pointwise
+  (`(a+6.75)^2 - (a-6.75)^2 = 27*a`), hence `hSupPos`-shaped on `[21, Infinity)`.
+
+Grep record (verified by `rg -n` before writing):
+* `CQ_CompactHump` (`:9293`-`:9487`): `B201_nonneg`, `B201_mono` (`:9307`),
+  `dampNeg_mono` (`:9328`), `neg_cap_875_95`/`neg_cap_95_10`/`neg_cap_875_10`
+  (`:9408`/:9425`/:9442`), `pos_cap_875_10` (`:9451`) -- REUSED (mono/nonneg),
+  cap pattern mirrored.
+* `CP_Sharp201.G_sharp_201_neg_le` (`:9147`, envelope shape
+  `exp((1-(|a|-6.75)^2)/100) x B(|a|)` with
+  `B(a) = sqrt(4+a^2) x (1.65 x ((1.2903/18) x sqrt(a^3)))`) -- shape matched
+  exactly below; `hTail_of_sharp201_sup` (`:9160`, `hSupPos`/`hSupNeg` premises)
+  -- premise shape matched by `neg_cap_21_inf`/`pos_cap_21_inf` on `[21, Infinity)`.
+* `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`, exact damping norm, cited),
+  `damp_mono_pos` (`:6712`, cited for contrast -- pos side here goes via
+  `pos_damp_le_neg_damp` instead), `exp_neg23925_le` (`:6644`, proof skeleton
+  mirrored for all `dampN_le`), `exp_neg003_le` (cited).
+* `BF2TailCaps.exp_neg_le_inv` (`:3399`, `exp(-t) <= 1/(1+t)`, cited but NOT
+  used -- too loose for large `T`; `exp(1)`-chain used instead).
+-/
+
+namespace CT_LargeA
+
+/-- Neg damping at `21`: `exp(-2.020625) <= 0.133`. -/
+theorem damp21_le :
+    Real.exp ((1 - ((21 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.133 := by
+  have e : (1 - ((21 : ℝ) - 6.75) ^ 2) / 100 = -2.020625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.020625 : ℝ) ≤ Real.exp 0.020625 := by
+    have h := Real.add_one_le_exp (0.020625 : ℝ)
+    linarith
+  have hT : (2.020625 : ℝ) = 1 + 1 + 0.020625 := by norm_num
+  have hexp : Real.exp (2.020625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.020625 := by
+    rw [hT, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 1.020625
+      ≤ Real.exp 2.020625 := by
+    rw [hexp]
+    exact mul_le_mul h12 h2 (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-2.020625 : ℝ) * Real.exp 2.020625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-2.020625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 1.020625) ≤ 1 := by
+    calc Real.exp (-2.020625) * (2.7182818283 * 2.7182818283 * 1.020625)
+        ≤ Real.exp (-2.020625) * Real.exp 2.020625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-2.020625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 1.020625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 1.020625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 1.020625) ≤ 0.133 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `22`: `exp(-2.315625) <= 0.1035`. -/
+theorem damp22_le :
+    Real.exp ((1 - ((22 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.1035 := by
+  have e : (1 - ((22 : ℝ) - 6.75) ^ 2) / 100 = -2.315625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.315625 : ℝ) ≤ Real.exp 0.315625 := by
+    have h := Real.add_one_le_exp (0.315625 : ℝ)
+    linarith
+  have hT : (2.315625 : ℝ) = 1 + 1 + 0.315625 := by norm_num
+  have hexp : Real.exp (2.315625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.315625 := by
+    rw [hT, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 1.315625
+      ≤ Real.exp 2.315625 := by
+    rw [hexp]
+    exact mul_le_mul h12 h2 (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-2.315625 : ℝ) * Real.exp 2.315625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-2.315625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 1.315625) ≤ 1 := by
+    calc Real.exp (-2.315625) * (2.7182818283 * 2.7182818283 * 1.315625)
+        ≤ Real.exp (-2.315625) * Real.exp 2.315625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-2.315625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 1.315625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 1.315625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 1.315625) ≤ 0.1035 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `23`: `exp(-2.630625) <= 0.0835`. -/
+theorem damp23_le :
+    Real.exp ((1 - ((23 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.0835 := by
+  have e : (1 - ((23 : ℝ) - 6.75) ^ 2) / 100 = -2.630625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.630625 : ℝ) ≤ Real.exp 0.630625 := by
+    have h := Real.add_one_le_exp (0.630625 : ℝ)
+    linarith
+  have hT : (2.630625 : ℝ) = 1 + 1 + 0.630625 := by norm_num
+  have hexp : Real.exp (2.630625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.630625 := by
+    rw [hT, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 1.630625
+      ≤ Real.exp 2.630625 := by
+    rw [hexp]
+    exact mul_le_mul h12 h2 (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-2.630625 : ℝ) * Real.exp 2.630625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-2.630625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 1.630625) ≤ 1 := by
+    calc Real.exp (-2.630625) * (2.7182818283 * 2.7182818283 * 1.630625)
+        ≤ Real.exp (-2.630625) * Real.exp 2.630625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-2.630625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 1.630625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 1.630625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 1.630625) ≤ 0.0835 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `24`: `exp(-2.965625) <= 0.0695`. -/
+theorem damp24_le :
+    Real.exp ((1 - ((24 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.0695 := by
+  have e : (1 - ((24 : ℝ) - 6.75) ^ 2) / 100 = -2.965625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.965625 : ℝ) ≤ Real.exp 0.965625 := by
+    have h := Real.add_one_le_exp (0.965625 : ℝ)
+    linarith
+  have hT : (2.965625 : ℝ) = 1 + 1 + 0.965625 := by norm_num
+  have hexp : Real.exp (2.965625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 0.965625 := by
+    rw [hT, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 1.965625
+      ≤ Real.exp 2.965625 := by
+    rw [hexp]
+    exact mul_le_mul h12 h2 (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-2.965625 : ℝ) * Real.exp 2.965625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-2.965625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 1.965625) ≤ 1 := by
+    calc Real.exp (-2.965625) * (2.7182818283 * 2.7182818283 * 1.965625)
+        ≤ Real.exp (-2.965625) * Real.exp 2.965625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-2.965625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 1.965625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 1.965625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 1.965625) ≤ 0.0695 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `25`: `exp(-3.320625) <= 0.0385`. -/
+theorem damp25_le :
+    Real.exp ((1 - ((25 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.0385 := by
+  have e : (1 - ((25 : ℝ) - 6.75) ^ 2) / 100 = -3.320625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.320625 : ℝ) ≤ Real.exp 0.320625 := by
+    have h := Real.add_one_le_exp (0.320625 : ℝ)
+    linarith
+  have hT : (3.320625 : ℝ) = 1 + 1 + 1 + 0.320625 := by norm_num
+  have hexp : Real.exp (3.320625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 0.320625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 1.320625
+      ≤ Real.exp 3.320625 := by
+    rw [hexp]
+    exact mul_le_mul h123 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-3.320625 : ℝ) * Real.exp 3.320625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-3.320625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.320625) ≤ 1 := by
+    calc Real.exp (-3.320625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.320625)
+        ≤ Real.exp (-3.320625) * Real.exp 3.320625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-3.320625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.320625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 1.320625)]
+    exact hmul
+  have hnum : (1 : ℝ)
+      / (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.320625) ≤ 0.0385 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `26`: `exp(-3.695625) <= 0.03`. -/
+theorem damp26_le :
+    Real.exp ((1 - ((26 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.03 := by
+  have e : (1 - ((26 : ℝ) - 6.75) ^ 2) / 100 = -3.695625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.695625 : ℝ) ≤ Real.exp 0.695625 := by
+    have h := Real.add_one_le_exp (0.695625 : ℝ)
+    linarith
+  have hT : (3.695625 : ℝ) = 1 + 1 + 1 + 0.695625 := by norm_num
+  have hexp : Real.exp (3.695625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 0.695625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 1.695625
+      ≤ Real.exp 3.695625 := by
+    rw [hexp]
+    exact mul_le_mul h123 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-3.695625 : ℝ) * Real.exp 3.695625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-3.695625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.695625) ≤ 1 := by
+    calc Real.exp (-3.695625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.695625)
+        ≤ Real.exp (-3.695625) * Real.exp 3.695625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-3.695625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.695625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 1.695625)]
+    exact hmul
+  have hnum : (1 : ℝ)
+      / (2.7182818283 * 2.7182818283 * 2.7182818283 * 1.695625) ≤ 0.03 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `27`: `exp(-4.090625) <= 0.017`. -/
+theorem damp27_le :
+    Real.exp ((1 - ((27 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.017 := by
+  have e : (1 - ((27 : ℝ) - 6.75) ^ 2) / 100 = -4.090625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.090625 : ℝ) ≤ Real.exp 0.090625 := by
+    have h := Real.add_one_le_exp (0.090625 : ℝ)
+    linarith
+  have hT : (4.090625 : ℝ) = 1 + 1 + 1 + 1 + 0.090625 := by norm_num
+  have hexp : Real.exp (4.090625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 *
+        Real.exp 0.090625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have h1234 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h123 e1.le (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.090625 ≤ Real.exp 4.090625 := by
+    rw [hexp]
+    exact mul_le_mul h1234 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-4.090625 : ℝ) * Real.exp 4.090625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-4.090625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.090625) ≤ 1 := by
+    calc Real.exp (-4.090625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+            1.090625)
+        ≤ Real.exp (-4.090625) * Real.exp 4.090625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-4.090625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.090625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.090625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 2.7182818283 *
+      2.7182818283 * 1.090625) ≤ 0.017 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `28`: `exp(-4.505625) <= 0.0125`. -/
+theorem damp28_le :
+    Real.exp ((1 - ((28 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.0125 := by
+  have e : (1 - ((28 : ℝ) - 6.75) ^ 2) / 100 = -4.505625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.505625 : ℝ) ≤ Real.exp 0.505625 := by
+    have h := Real.add_one_le_exp (0.505625 : ℝ)
+    linarith
+  have hT : (4.505625 : ℝ) = 1 + 1 + 1 + 1 + 0.505625 := by norm_num
+  have hexp : Real.exp (4.505625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 *
+        Real.exp 0.505625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have h1234 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h123 e1.le (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.505625 ≤ Real.exp 4.505625 := by
+    rw [hexp]
+    exact mul_le_mul h1234 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-4.505625 : ℝ) * Real.exp 4.505625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-4.505625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.505625) ≤ 1 := by
+    calc Real.exp (-4.505625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+            1.505625)
+        ≤ Real.exp (-4.505625) * Real.exp 4.505625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-4.505625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.505625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.505625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 2.7182818283 *
+      2.7182818283 * 1.505625) ≤ 0.0125 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `29`: `exp(-4.940625) <= 0.0098`. -/
+theorem damp29_le :
+    Real.exp ((1 - ((29 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.0098 := by
+  have e : (1 - ((29 : ℝ) - 6.75) ^ 2) / 100 = -4.940625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.940625 : ℝ) ≤ Real.exp 0.940625 := by
+    have h := Real.add_one_le_exp (0.940625 : ℝ)
+    linarith
+  have hT : (4.940625 : ℝ) = 1 + 1 + 1 + 1 + 0.940625 := by norm_num
+  have hexp : Real.exp (4.940625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 *
+        Real.exp 0.940625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have h1234 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h123 e1.le (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.940625 ≤ Real.exp 4.940625 := by
+    rw [hexp]
+    exact mul_le_mul h1234 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-4.940625 : ℝ) * Real.exp 4.940625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-4.940625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.940625) ≤ 1 := by
+    calc Real.exp (-4.940625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+            1.940625)
+        ≤ Real.exp (-4.940625) * Real.exp 4.940625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-4.940625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.940625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        1.940625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 2.7182818283 *
+      2.7182818283 * 1.940625) ≤ 0.0098 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- Neg damping at `30`: `exp(-5.395625) <= 0.005` (tail base). -/
+theorem damp30_le :
+    Real.exp ((1 - ((30 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.005 := by
+  have e : (1 - ((30 : ℝ) - 6.75) ^ 2) / 100 = -5.395625 := by norm_num
+  rw [e]
+  have e1 : (2.7182818283 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+  have h2 : (1.395625 : ℝ) ≤ Real.exp 0.395625 := by
+    have h := Real.add_one_le_exp (0.395625 : ℝ)
+    linarith
+  have hT : (5.395625 : ℝ) = 1 + 1 + 1 + 1 + 1 + 0.395625 := by norm_num
+  have hexp : Real.exp (5.395625 : ℝ)
+      = Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 *
+        Real.exp 0.395625 := by
+    rw [hT, Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_add,
+      Real.exp_add]
+  have h12 : (2.7182818283 : ℝ) * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 :=
+    mul_le_mul e1.le e1.le (by norm_num) (le_of_lt (Real.exp_pos _))
+  have h123 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h12 e1.le (by norm_num)
+      (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+  have h1234 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h123 e1.le (by norm_num)
+      (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _)) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have h12345 : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        2.7182818283
+      ≤ Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 * Real.exp 1 :=
+    mul_le_mul h1234 e1.le (by norm_num)
+      (mul_nonneg (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _)))
+  have hL : (2.7182818283 : ℝ) * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        2.7182818283 * 1.395625 ≤ Real.exp 5.395625 := by
+    rw [hexp]
+    exact mul_le_mul h12345 h2 (by norm_num)
+      (mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (le_of_lt (Real.exp_pos _))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+        (le_of_lt (Real.exp_pos _))) (le_of_lt (Real.exp_pos _)))
+  have einv : Real.exp (-5.395625 : ℝ) * Real.exp 5.395625 = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  have hmul : Real.exp (-5.395625 : ℝ)
+      * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        2.7182818283 * 1.395625) ≤ 1 := by
+    calc Real.exp (-5.395625)
+          * (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+            2.7182818283 * 1.395625)
+        ≤ Real.exp (-5.395625) * Real.exp 5.395625 :=
+          mul_le_mul_of_nonneg_left hL (le_of_lt (Real.exp_pos _))
+      _ = 1 := einv
+  have hle : Real.exp (-5.395625 : ℝ)
+      ≤ 1 / (2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        2.7182818283 * 1.395625) := by
+    rw [le_div_iff₀ (by norm_num :
+      (0 : ℝ) < 2.7182818283 * 2.7182818283 * 2.7182818283 * 2.7182818283 *
+        2.7182818283 * 1.395625)]
+    exact hmul
+  have hnum : (1 : ℝ) / (2.7182818283 * 2.7182818283 * 2.7182818283 *
+      2.7182818283 * 2.7182818283 * 1.395625) ≤ 0.005 := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- `B(22) <= 269.76` (`sqrt488 <= 22.1`, `sqrt10648 <= 103.2`). -/
+theorem B22_le :
+    Real.sqrt (4 + (22 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((22 : ℝ) ^ 3))) ≤ 269.76 := by
+  have s1 : Real.sqrt (4 + (22 : ℝ) ^ 2) ≤ 22.1 := by
+    have hle : 4 + (22 : ℝ) ^ 2 ≤ (22.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 22.1)] at h
+  have s2 : Real.sqrt ((22 : ℝ) ^ 3) ≤ 103.2 := by
+    have hle : (22 : ℝ) ^ 3 ≤ (103.2 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 103.2)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((22 : ℝ) ^ 3) ≤ (1.2903 / 18) * 103.2 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((22 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 103.2) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((22 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (22 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((22 : ℝ) ^ 3)))
+      ≤ 22.1 * (1.65 * ((1.2903 / 18) * 103.2)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 269.76 := by norm_num
+
+/-- `B(23) <= 301.64`. -/
+theorem B23_le :
+    Real.sqrt (4 + (23 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((23 : ℝ) ^ 3))) ≤ 301.64 := by
+  have s1 : Real.sqrt (4 + (23 : ℝ) ^ 2) ≤ 23.1 := by
+    have hle : 4 + (23 : ℝ) ^ 2 ≤ (23.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 23.1)] at h
+  have s2 : Real.sqrt ((23 : ℝ) ^ 3) ≤ 110.4 := by
+    have hle : (23 : ℝ) ^ 3 ≤ (110.4 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 110.4)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((23 : ℝ) ^ 3) ≤ (1.2903 / 18) * 110.4 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((23 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 110.4) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((23 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (23 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((23 : ℝ) ^ 3)))
+      ≤ 23.1 * (1.65 * ((1.2903 / 18) * 110.4)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 301.64 := by norm_num
+
+/-- `B(24) <= 335.22`. -/
+theorem B24_le :
+    Real.sqrt (4 + (24 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((24 : ℝ) ^ 3))) ≤ 335.22 := by
+  have s1 : Real.sqrt (4 + (24 : ℝ) ^ 2) ≤ 24.1 := by
+    have hle : 4 + (24 : ℝ) ^ 2 ≤ (24.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 24.1)] at h
+  have s2 : Real.sqrt ((24 : ℝ) ^ 3) ≤ 117.6 := by
+    have hle : (24 : ℝ) ^ 3 ≤ (117.6 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 117.6)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((24 : ℝ) ^ 3) ≤ (1.2903 / 18) * 117.6 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((24 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 117.6) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((24 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (24 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((24 : ℝ) ^ 3)))
+      ≤ 24.1 * (1.65 * ((1.2903 / 18) * 117.6)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 335.22 := by norm_num
+
+/-- `B(25) <= 371.10`. -/
+theorem B25_le :
+    Real.sqrt (4 + (25 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((25 : ℝ) ^ 3))) ≤ 371.10 := by
+  have s1 : Real.sqrt (4 + (25 : ℝ) ^ 2) ≤ 25.1 := by
+    have hle : 4 + (25 : ℝ) ^ 2 ≤ (25.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 25.1)] at h
+  have s2 : Real.sqrt ((25 : ℝ) ^ 3) ≤ 125.0 := by
+    have hle : (25 : ℝ) ^ 3 ≤ (125.0 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 125.0)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((25 : ℝ) ^ 3) ≤ (1.2903 / 18) * 125.0 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((25 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 125.0) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((25 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (25 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((25 : ℝ) ^ 3)))
+      ≤ 25.1 * (1.65 * ((1.2903 / 18) * 125.0)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 371.10 := by norm_num
+
+/-- `B(26) <= 409.35`. -/
+theorem B26_le :
+    Real.sqrt (4 + (26 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((26 : ℝ) ^ 3))) ≤ 409.35 := by
+  have s1 : Real.sqrt (4 + (26 : ℝ) ^ 2) ≤ 26.1 := by
+    have hle : 4 + (26 : ℝ) ^ 2 ≤ (26.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 26.1)] at h
+  have s2 : Real.sqrt ((26 : ℝ) ^ 3) ≤ 132.6 := by
+    have hle : (26 : ℝ) ^ 3 ≤ (132.6 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 132.6)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((26 : ℝ) ^ 3) ≤ (1.2903 / 18) * 132.6 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((26 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 132.6) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((26 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (26 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((26 : ℝ) ^ 3)))
+      ≤ 26.1 * (1.65 * ((1.2903 / 18) * 132.6)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 409.35 := by norm_num
+
+/-- `B(27) <= 449.71`. -/
+theorem B27_le :
+    Real.sqrt (4 + (27 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((27 : ℝ) ^ 3))) ≤ 449.71 := by
+  have s1 : Real.sqrt (4 + (27 : ℝ) ^ 2) ≤ 27.1 := by
+    have hle : 4 + (27 : ℝ) ^ 2 ≤ (27.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 27.1)] at h
+  have s2 : Real.sqrt ((27 : ℝ) ^ 3) ≤ 140.3 := by
+    have hle : (27 : ℝ) ^ 3 ≤ (140.3 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 140.3)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((27 : ℝ) ^ 3) ≤ (1.2903 / 18) * 140.3 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((27 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 140.3) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((27 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (27 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((27 : ℝ) ^ 3)))
+      ≤ 27.1 * (1.65 * ((1.2903 / 18) * 140.3)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 449.71 := by norm_num
+
+/-- `B(28) <= 492.56`. -/
+theorem B28_le :
+    Real.sqrt (4 + (28 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((28 : ℝ) ^ 3))) ≤ 492.56 := by
+  have s1 : Real.sqrt (4 + (28 : ℝ) ^ 2) ≤ 28.1 := by
+    have hle : 4 + (28 : ℝ) ^ 2 ≤ (28.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 28.1)] at h
+  have s2 : Real.sqrt ((28 : ℝ) ^ 3) ≤ 148.2 := by
+    have hle : (28 : ℝ) ^ 3 ≤ (148.2 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 148.2)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((28 : ℝ) ^ 3) ≤ (1.2903 / 18) * 148.2 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((28 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 148.2) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((28 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (28 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((28 : ℝ) ^ 3)))
+      ≤ 28.1 * (1.65 * ((1.2903 / 18) * 148.2)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 492.56 := by norm_num
+
+/-- `B(29) <= 537.63`. -/
+theorem B29_le :
+    Real.sqrt (4 + (29 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((29 : ℝ) ^ 3))) ≤ 537.63 := by
+  have s1 : Real.sqrt (4 + (29 : ℝ) ^ 2) ≤ 29.1 := by
+    have hle : 4 + (29 : ℝ) ^ 2 ≤ (29.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 29.1)] at h
+  have s2 : Real.sqrt ((29 : ℝ) ^ 3) ≤ 156.2 := by
+    have hle : (29 : ℝ) ^ 3 ≤ (156.2 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 156.2)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((29 : ℝ) ^ 3) ≤ (1.2903 / 18) * 156.2 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((29 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 156.2) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((29 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (29 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((29 : ℝ) ^ 3)))
+      ≤ 29.1 * (1.65 * ((1.2903 / 18) * 156.2)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 537.63 := by norm_num
+
+/-- `B(30) <= 585.30`. -/
+theorem B30_le :
+    Real.sqrt (4 + (30 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((30 : ℝ) ^ 3))) ≤ 585.30 := by
+  have s1 : Real.sqrt (4 + (30 : ℝ) ^ 2) ≤ 30.1 := by
+    have hle : 4 + (30 : ℝ) ^ 2 ≤ (30.1 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 30.1)] at h
+  have s2 : Real.sqrt ((30 : ℝ) ^ 3) ≤ 164.4 := by
+    have hle : (30 : ℝ) ^ 3 ≤ (164.4 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 164.4)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((30 : ℝ) ^ 3) ≤ (1.2903 / 18) * 164.4 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((30 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 164.4) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((30 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (30 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((30 : ℝ) ^ 3)))
+      ≤ 30.1 * (1.65 * ((1.2903 / 18) * 164.4)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 585.30 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[21, 22]` (`0.133 x 269.76 = 35.88`). -/
+theorem neg_cap_21_22 {a : ℝ} (hlo : 21 ≤ a) (hhi : a ≤ 22) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.133 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 21 by norm_num) hlo)
+      damp21_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 269.76 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B22_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.133 * 269.76 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[22, 23]`. -/
+theorem neg_cap_22_23 {a : ℝ} (hlo : 22 ≤ a) (hhi : a ≤ 23) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.1035 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 22 by norm_num) hlo)
+      damp22_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 301.64 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B23_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.1035 * 301.64 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[23, 24]`. -/
+theorem neg_cap_23_24 {a : ℝ} (hlo : 23 ≤ a) (hhi : a ≤ 24) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.0835 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 23 by norm_num) hlo)
+      damp23_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 335.22 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B24_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.0835 * 335.22 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[24, 25]`. -/
+theorem neg_cap_24_25 {a : ℝ} (hlo : 24 ≤ a) (hhi : a ≤ 25) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.0695 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 24 by norm_num) hlo)
+      damp24_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 371.10 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B25_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.0695 * 371.10 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[25, 26]`. -/
+theorem neg_cap_25_26 {a : ℝ} (hlo : 25 ≤ a) (hhi : a ≤ 26) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.0385 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 25 by norm_num) hlo)
+      damp25_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 409.35 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B26_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.0385 * 409.35 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[26, 27]`. -/
+theorem neg_cap_26_27 {a : ℝ} (hlo : 26 ≤ a) (hhi : a ≤ 27) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.03 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 26 by norm_num) hlo)
+      damp26_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 449.71 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B27_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.03 * 449.71 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[27, 28]`. -/
+theorem neg_cap_27_28 {a : ℝ} (hlo : 27 ≤ a) (hhi : a ≤ 28) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.017 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 27 by norm_num) hlo)
+      damp27_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 492.56 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B28_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.017 * 492.56 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[28, 29]`. -/
+theorem neg_cap_28_29 {a : ℝ} (hlo : 28 ≤ a) (hhi : a ≤ 29) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.0125 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 28 by norm_num) hlo)
+      damp28_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 537.63 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B29_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.0125 * 537.63 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `<= 36` on `[29, 30]`. -/
+theorem neg_cap_29_30 {a : ℝ} (hlo : 29 ≤ a) (hhi : a ≤ 30) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.0098 :=
+    le_trans (CQ_CompactHump.dampNeg_mono (show (6.75 : ℝ) ≤ 29 by norm_num) hlo)
+      damp29_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 585.30 :=
+    le_trans (CQ_CompactHump.B201_mono ha0 hhi) B30_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.0098 * 585.30 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Combined neg cap on `[21, 30]` (nine-way dispatch). -/
+theorem neg_cap_21_30 {a : ℝ} (hlo : 21 ≤ a) (hhi : a ≤ 30) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  rcases le_total a 22 with h | h
+  · exact neg_cap_21_22 hlo h
+  · rcases le_total a 23 with h2 | h2
+    · exact neg_cap_22_23 h h2
+    · rcases le_total a 24 with h3 | h3
+      · exact neg_cap_23_24 h2 h3
+      · rcases le_total a 25 with h4 | h4
+        · exact neg_cap_24_25 h3 h4
+        · rcases le_total a 26 with h5 | h5
+          · exact neg_cap_25_26 h4 h5
+          · rcases le_total a 27 with h6 | h6
+            · exact neg_cap_26_27 h5 h6
+            · rcases le_total a 28 with h7 | h7
+              · exact neg_cap_27_28 h6 h7
+              · rcases le_total a 29 with h8 | h8
+                · exact neg_cap_28_29 h7 h8
+                · exact neg_cap_29_30 h8 hhi
+
+/-- Crude tail cap: neg envelope `<= 36` for `a >= 30` (linear minorant +
+polynomial majorant + log-ratio decrease; reports honestly as the cruder
+alternative to a full log-derivative decrease lemma). -/
+theorem neg_tail_30_inf {a : ℝ} (ha : 30 ≤ a) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have ha1 : (1 : ℝ) ≤ a := by linarith
+  have s1 : Real.sqrt (4 + a ^ 2) ≤ a + 1 := by
+    have hle : 4 + a ^ 2 ≤ (a + 1) ^ 2 := by nlinarith
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by linarith : (0 : ℝ) ≤ a + 1)] at h
+  have hpow : a ^ 3 ≤ (a ^ 2) ^ 2 := by
+    have hpos : (0 : ℝ) ≤ a ^ 3 := by positivity
+    have hmul : a ^ 3 * 1 ≤ a ^ 3 * a :=
+      mul_le_mul_of_nonneg_left ha1 hpos
+    have e1 : a ^ 3 * 1 = a ^ 3 := by ring
+    have e2 : a ^ 3 * a = (a ^ 2) ^ 2 := by ring
+    linarith
+  have s2 : Real.sqrt (a ^ 3) ≤ a ^ 2 := by
+    have h := Real.sqrt_le_sqrt hpow
+    rwa [Real.sqrt_sq (by positivity : (0 : ℝ) ≤ a ^ 2)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt (a ^ 3) ≤ (1.2903 / 18) * a ^ 2 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * a ^ 2) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ (a + 1) * (1.65 * ((1.2903 / 18) * a ^ 2)) :=
+    mul_le_mul s1 h2 hc (by linarith)
+  have hexp_ineq : (1 - (a - 6.75) ^ 2) / 100 ≤ 8.554375 - 0.465 * a := by
+    have hsq : (0 : ℝ) ≤ (a - 30) ^ 2 := sq_nonneg _
+    have e : (1 - (a - 6.75) ^ 2) / 100 - (8.554375 - 0.465 * a)
+        = -((a - 30) ^ 2) / 100 := by ring
+    linarith
+  have hdamp : Real.exp ((1 - (a - 6.75) ^ 2) / 100)
+      ≤ Real.exp (8.554375 - 0.465 * a) :=
+    Real.exp_le_exp.mpr hexp_ineq
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := CQ_CompactHump.B201_nonneg
+  have hE : Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ Real.exp (8.554375 - 0.465 * a) *
+        ((a + 1) * (1.65 * ((1.2903 / 18) * a ^ 2))) :=
+    mul_le_mul hdamp hB hBnn (le_of_lt (Real.exp_pos _))
+  have hexp_split : Real.exp (8.554375 - 0.465 * a)
+      = Real.exp (-5.395625 : ℝ) * Real.exp (-0.465 * (a - 30)) := by
+    have e : (8.554375 : ℝ) - 0.465 * a = -5.395625 + (-0.465 * (a - 30)) := by
+      ring
+    rw [e, Real.exp_add]
+  have hK : (a + 1) * (1.65 * ((1.2903 / 18) * a ^ 2))
+      = (1.65 * (1.2903 / 18)) * ((a + 1) * a ^ 2) := by ring
+  have hy1 : (1 : ℝ) ≤ a / 30 := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 30)]
+    linarith
+  have hypos : (0 : ℝ) < a / 30 := by
+    exact div_pos (by linarith) (by norm_num)
+  have hlog : Real.log (a / 30) ≤ a / 30 - 1 :=
+    Real.log_le_sub_one_of_pos hypos
+  have h3log : 3 * Real.log (a / 30) ≤ 0.465 * (a - 30) := by
+    have g1 : 3 * Real.log (a / 30) ≤ 3 * (a / 30 - 1) :=
+      mul_le_mul_of_nonneg_left hlog (by norm_num)
+    have e : 3 * (a / 30 - 1) = 0.1 * (a - 30) := by ring
+    have g2 : 3 * (a / 30 - 1) ≤ 0.465 * (a - 30) := by
+      rw [e]
+      exact mul_le_mul_of_nonneg_right (by norm_num) (by linarith)
+    linarith
+  have hexp_ratio : (a / 30) ^ 3 ≤ Real.exp (0.465 * (a - 30)) := by
+    have hlogpow : Real.log ((a / 30) ^ 3) = 3 * Real.log (a / 30) := by
+      exact_mod_cast Real.log_pow (a / 30) 3
+    have hle : Real.log ((a / 30) ^ 3) ≤ 0.465 * (a - 30) := by
+      rw [hlogpow]
+      exact h3log
+    have hpos3 : (0 : ℝ) < (a / 30) ^ 3 := pow_pos hypos 3
+    have h := Real.exp_le_exp.mpr hle
+    rwa [Real.exp_log hpos3] at h
+  have hpoly : (a + 1) * a ^ 2 ≤ 27900 * ((a / 30) ^ 3) := by
+    have hnn : (0 : ℝ) ≤ a ^ 2 := sq_nonneg _
+    have h30 : (30 : ℝ) * a ^ 2 ≤ a * a ^ 2 :=
+      mul_le_mul_of_nonneg_right ha hnn
+    have ha3 : a * a ^ 2 = a ^ 3 := by ring
+    have e : 27900 * ((a / 30) ^ 3) = 31 / 30 * a ^ 3 := by ring
+    have e2 : (a + 1) * a ^ 2 = a ^ 3 + a ^ 2 := by ring
+    linarith
+  have hcomb : (a + 1) * a ^ 2 ≤ 27900 * Real.exp (0.465 * (a - 30)) :=
+    le_trans hpoly
+      (mul_le_mul_of_nonneg_left hexp_ratio (by norm_num))
+  have hexp_inv : Real.exp (-0.465 * (a - 30)) * Real.exp (0.465 * (a - 30)) = 1 := by
+    have h : (-0.465 * (a - 30)) + 0.465 * (a - 30) = 0 := by ring
+    rw [← Real.exp_add, h, Real.exp_zero]
+  have htail_bound : ((a + 1) * a ^ 2) * Real.exp (-0.465 * (a - 30)) ≤ 27900 := by
+    have hmul : ((a + 1) * a ^ 2) * Real.exp (-0.465 * (a - 30))
+        ≤ (27900 * Real.exp (0.465 * (a - 30))) * Real.exp (-0.465 * (a - 30)) :=
+      mul_le_mul_of_nonneg_right hcomb (le_of_lt (Real.exp_pos _))
+    have e : (27900 * Real.exp (0.465 * (a - 30))) * Real.exp (-0.465 * (a - 30))
+        = 27900 := by
+      calc (27900 * Real.exp (0.465 * (a - 30))) * Real.exp (-0.465 * (a - 30))
+          = 27900 * (Real.exp (0.465 * (a - 30)) * Real.exp (-0.465 * (a - 30))) := by
+            ring
+        _ = 27900 * 1 := by
+            rw [mul_comm (Real.exp (0.465 * (a - 30))) _, hexp_inv]
+        _ = 27900 := by ring
+    linarith
+  have hmid : Real.exp (-0.465 * (a - 30)) *
+        ((1.65 * (1.2903 / 18)) * ((a + 1) * a ^ 2))
+      ≤ (1.65 * (1.2903 / 18)) * 27900 := by
+    have e : Real.exp (-0.465 * (a - 30)) *
+          ((1.65 * (1.2903 / 18)) * ((a + 1) * a ^ 2))
+        = (1.65 * (1.2903 / 18)) * (((a + 1) * a ^ 2) * Real.exp (-0.465 * (a - 30))) := by
+      ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_left htail_bound (by norm_num)
+  have hE2 : Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ Real.exp (-5.395625 : ℝ) *
+        ((1.65 * (1.2903 / 18)) * 27900) := by
+    calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+          (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+        ≤ (Real.exp (-5.395625) * Real.exp (-0.465 * (a - 30))) *
+          ((1.65 * (1.2903 / 18)) * ((a + 1) * a ^ 2)) := by
+          rw [← hexp_split, ← hK]
+          exact hE
+      _ = Real.exp (-5.395625) * (Real.exp (-0.465 * (a - 30)) *
+          ((1.65 * (1.2903 / 18)) * ((a + 1) * a ^ 2))) := by ring
+      _ ≤ Real.exp (-5.395625) * ((1.65 * (1.2903 / 18)) * 27900) :=
+          mul_le_mul_of_nonneg_left hmid (le_of_lt (Real.exp_pos _))
+  have hbase : Real.exp (-5.395625 : ℝ) ≤ 0.005 := by
+    have h := damp30_le
+    have e : (1 - ((30 : ℝ) - 6.75) ^ 2) / 100 = -5.395625 := by norm_num
+    rwa [e] at h
+  have hE3 : Real.exp (-5.395625 : ℝ) * ((1.65 * (1.2903 / 18)) * 27900) ≤ 36 := by
+    calc Real.exp (-5.395625) * ((1.65 * (1.2903 / 18)) * 27900)
+        ≤ 0.005 * ((1.65 * (1.2903 / 18)) * 27900) :=
+          mul_le_mul_of_nonneg_right hbase
+            (mul_nonneg (by norm_num) (by norm_num))
+      _ ≤ 36 := by norm_num
+  exact le_trans hE2 hE3
+
+/-- MAIN (`hSupNeg`-shaped on `[21, Infinity)`): neg sharp envelope `<= 36`. -/
+theorem neg_cap_21_inf {a : ℝ} (hlo : 21 ≤ a) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  rcases le_total a 30 with h | h
+  · exact neg_cap_21_30 hlo h
+  · exact neg_tail_30_inf h
+
+/-- Pos damping dominated by neg damping for `0 <= a`. -/
+theorem pos_damp_le_neg_damp {a : ℝ} (ha : 0 ≤ a) :
+    Real.exp ((1 - (a + 6.75) ^ 2) / 100)
+      ≤ Real.exp ((1 - (a - 6.75) ^ 2) / 100) := by
+  apply Real.exp_le_exp.mpr
+  have h27 : (0 : ℝ) ≤ 27 * a := mul_nonneg (by norm_num) ha
+  have e : (a + 6.75) ^ 2 - (a - 6.75) ^ 2 = 27 * a := by ring
+  linarith
+
+/-- (`hSupPos`-shaped on `[21, Infinity)`): pos sharp envelope `<= 36`
+(via pointwise `pos <= neg`). -/
+theorem pos_cap_21_inf {a : ℝ} (hlo : 21 ≤ a) :
+    Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hle : Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) :=
+    mul_le_mul_of_nonneg_right (pos_damp_le_neg_damp ha0)
+      CQ_CompactHump.B201_nonneg
+  exact le_trans hle (neg_cap_21_inf hlo)
+
+#print axioms CT_LargeA.damp21_le
+#print axioms CT_LargeA.damp22_le
+#print axioms CT_LargeA.damp23_le
+#print axioms CT_LargeA.damp24_le
+#print axioms CT_LargeA.damp25_le
+#print axioms CT_LargeA.damp26_le
+#print axioms CT_LargeA.damp27_le
+#print axioms CT_LargeA.damp28_le
+#print axioms CT_LargeA.damp29_le
+#print axioms CT_LargeA.damp30_le
+#print axioms CT_LargeA.B22_le
+#print axioms CT_LargeA.B23_le
+#print axioms CT_LargeA.B24_le
+#print axioms CT_LargeA.B25_le
+#print axioms CT_LargeA.B26_le
+#print axioms CT_LargeA.B27_le
+#print axioms CT_LargeA.B28_le
+#print axioms CT_LargeA.B29_le
+#print axioms CT_LargeA.B30_le
+#print axioms CT_LargeA.neg_cap_21_22
+#print axioms CT_LargeA.neg_cap_22_23
+#print axioms CT_LargeA.neg_cap_23_24
+#print axioms CT_LargeA.neg_cap_24_25
+#print axioms CT_LargeA.neg_cap_25_26
+#print axioms CT_LargeA.neg_cap_26_27
+#print axioms CT_LargeA.neg_cap_27_28
+#print axioms CT_LargeA.neg_cap_28_29
+#print axioms CT_LargeA.neg_cap_29_30
+#print axioms CT_LargeA.neg_cap_21_30
+#print axioms CT_LargeA.neg_tail_30_inf
+#print axioms CT_LargeA.neg_cap_21_inf
+#print axioms CT_LargeA.pos_damp_le_neg_damp
+#print axioms CT_LargeA.pos_cap_21_inf
+
+end CT_LargeA
+
+/-!
+CT VERDICT + RESIDUAL (report-and-stop): ONE bridge banked (large-a domination
+`[21, Infinity)`), hump stays structural. No sorry in this tail.
+
+(1) BRIDGE CLOSED (`CT_LargeA`, 34 theorems, full proofs pending build):
+per-unit neg caps `[21, 22]` .. `[29, 30]` (`35.88/31.22/27.99/25.79/15.76/
+13.49/8.37/6.72/5.74`, tightest margin `0.12` on `[21, 22]`) + combined
+`neg_cap_21_30` + crude tail `neg_tail_30_inf` (`a >= 30`, linear minorant
+`(a-30)^2 >= 0` x polynomial majorants + log-ratio decrease, base
+`exp(-5.395625) <= 0.005` giving `<= 16.50`) + MAIN `neg_cap_21_inf`
+(`hSupNeg`-shaped on `[21, Infinity)`) + `pos_damp_le_neg_damp` +
+`pos_cap_21_inf` (`hSupPos`-shaped on `[21, Infinity)` via `pos <= neg`).
+True values: neg `31.83/26.61/21.70/17.26/13.40/10.15/7.52/5.43/3.84` at
+`a = 21..29`, `2.65` at `30`, `1.79/0.30/0.019` at `31/35/40`; pos tiny
+(`0.11` at `21`, decaying faster). Damping uppers reuse the CF
+`exp_neg23925_le` skeleton (`Real.exp_one_gt_d9` + `Real.add_one_le_exp` +
+inversion); `B` uppers reuse the CQ `B201_mono` endpoint pattern.
+
+(2) TAIL HONESTY: the brief asked for a log-derivative decrease lemma
+(`(a-6.75)^2/100` outruns `2*log B(a)`) majorized by the value at `30`.
+A full derivative/monotonicity lemma was NOT proved; instead the cruder tail
+cap above is banked (`damping <= exp(-c*a)` linear minorant x polynomial
+majorant + `(a/30)^3 <= exp(0.465*(a-30))` via `log <= x-1`), which suffices
+since the tail true value (`2.65` at `30`) has huge margin. Report-and-stop:
+banked, not spun.
+
+(3) RESIDUAL (exact): hump `[10, 21)` where the neg envelope genuinely exceeds
+36 (true `40.68/45.86/49.84/52.32/53.18/52.40/50.13/46.61/42.15/37.11` at
+`a = 11..20`, peak `~53.2` at `a ~ 15`; needs STRUCTURAL work -- restructured
+`F` majorant or narrower variance, NOT mechanical). With this block,
+`CP_Sharp201.hTail_of_sharp201_sup` needs only `[8.75, 21)` sups: `[8.75, 10]`
+is closed by `CQ_CompactHump`, `[21, Infinity)` by `CT_LargeA` here.
+-/
+
