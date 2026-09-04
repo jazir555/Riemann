@@ -1427,7 +1427,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`D3_S16_im_upper` et al.):** bracket `[-1.138, +0.173]` STRADDLES 0 (true `-0.51` inside) — no
     positive lower; needs `0.68` total sin-sharpening (higher-order Taylor, tasked). **SIGN CLOSED
     (`D3_S16_norm_ge_sharp`):** quintic sharpening at k=11 (`0.25→0.0765`) ⇒ **`‖S₁₆‖ ≥ 29/42000`**
-    — FIRST positive `‖S‖` lower (razor-thin; k=9/k=4/amp widening tasked). **Stirling Gamma tail
+    — FIRST positive `‖S‖` lower (razor-thin; k=9/k=4/amp widening tasked). **Widened 120×
+    (`D3_S16_norm_ge_sharp9413`):** k=9 monotonicity + k=4 septic + amp `5/8`-exponents ⇒
+    **`‖S₁₆‖ ≥ 1159/14000 ≈ 0.0828`**. Leftover: sin k=12–16 coarse + amp k=12/14 (round 2 tasked). **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
@@ -1477,7 +1479,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
   `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
-  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **hTail sharpest-cap (`CC_hTailGap`):**
+  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Joint composition CLOSED
+  (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
+  edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
   majorant — sharp-Gaussian recomposition tasked (edge `≈180` expected, still short; true-`F` gap next).
   **Sharp-damping CLOSED (`CF_SharpDamp`):** top edge `198.46` (10× gain, 5.5× over; damping slack only
