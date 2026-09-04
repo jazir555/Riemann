@@ -1490,7 +1490,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **`‖S₁₆‖ ≥ 393063866333/2017726326000 ≈ 0.1948`** (1.0237×, gain `0.00452`; δ₁₃ contributed
     `0.00013` as predicted). Next: term12 amp `20/93` slack `~0.0032` now dominates term12 (large-
     denominator `3/5` clearing toward floor `0.21190`, tasked); term14 amp floor residual `~0.00265`;
-    middle upper (Tier-3 vdC).
+    middle upper (Tier-3 vdC). **Term12-amp essentially floored (`D3_S16_norm_ge_DH`, `015f763f`, green,
+    axioms clean):** `D3_amp 12 ≤ 211911/987460 ≈ 0.21460211` (only `1.23e-11` above the `3/5`-floor;
+    exact-`0.605` needs `~1e145` ints, infeasible) ⇒ **`‖S₁₆‖ ≥ 15666477209474893/80339678946450000 ≈
+    0.19500`** (1.00102×, gain `0.000198`). NOTE: block landed with a Lean placement bug (60-line `/--`
+    docstring before `set_option … in` — rejected); coordinator 1-char micro-fix (`/--`→`/-`, comment
+    syntax only, disclosed in commit). DH's report never arrived (session lost post-write) — verified
+    from diff per protocol. Next: term14-amp larger-`q` clearing (tasked); middle Tier-3 vdC still open.
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
     in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
     build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
@@ -1606,10 +1612,16 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    **4.824**/threshold **48.24** (brief's `4.845` above true damping minimum `≈0.92287`, proved FALSE —
    `0.919` banked; P1 unaffected, margin `12.24`) ⇒ **`GP_P1_of_gaps_and_tailT`: P1 `‖ζ‖≤10` on R02
    conditional on THREE named hyps only**: `hGapLo` (`‖G_P‖≤36`, `Re=−1`, `8.75<|Im|<10.6`), `hGapHi`
-   (`21<|Im|`), `hTailT` (strip tail, `9<|Im|`). Next (all mechanical transfers, tasked): `hGapLo` via
+   (`21<|Im|`), `hTailT` (strip tail, `9<|Im|`). Next (all mechanical transfers, tasked):    `hGapLo` via
    CQ/CW + `/28`-vs-`/100` damping comparison (both exponents `≤0` there), `hGapHi` via CT transfer,
    `hTailT` via BZ mirror at `/28` (strictly easier constants) — then parallel P1 closes with NO
-   premises. **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   premises. **Gap transfers CLOSED + UNCONDITIONAL PARALLEL P1 (`DG_GapTransfer`, `0e15835e`, green
+   8702 jobs, axioms clean):** comparison lemma proved once; `F`-part byte-identical on both tracks
+   (only damping differs) ⇒ (a) `hGapLo` (CQ+CW+CZ caps transferred), (b) `hGapHi` (CT transferred),
+   (c) `hTailT` (BZ mirror via strip-wide `‖G_P‖≤1.16·‖G‖`, `T_P=1.16·T`) ⇒ **`P1_R02_unconditional`:
+   `‖ζ‖≤10` on R02 with premises = pure cell membership ONLY** (fired `GP_P1_of_gaps_and_tailT`).
+   **P1 TRACK DONE — `R02_zeta_upper_obligation` now dischargeable** (plug into `DerivCauchyBridge` /
+   AO rewiring, tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
