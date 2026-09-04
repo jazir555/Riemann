@@ -20222,3 +20222,269 @@ or bank a per-8 refinement of DZ1c (two k=1 applications) if it lowers
 #print axioms DZ1c_eps_sum_le
 #print axioms DZ1c_linear_le
 #print axioms DZ1c_main
+
+/-!
+## Door-3 middle-upper Abel weight bridge (DZ2 tail, append-only).
+
+GREP-FIRST RECORD (`rg -n` in `zeta_rigorous.lean`, run before writing):
+* `DZ1c_main` (:20065), `DV_mid_conditional_012` (:18657),
+  `Finset.sum_range_by_parts` (:4864, :5080, :5182 via `T2_abel_eq`),
+  `D3_eta` (`D3_eta_re` :5991, `D3_eta_im` :6004).
+* New prefix `DZ2_*`: 0 hits before writing.
+* Reuse is read-only: `DZ1c_main` (:20065), `DZ_piece_unit` (true-phase unit
+  modulus), `T2_abel_norm` (:5187, Abel norm from `sum_range_by_parts`).
+
+WHAT IS PROVED (unconditional; FULL proofs):
+* (DZ2-a) `DZ2w` envelope `w_n = (16+n)^(-0.605)` via `Real.rpow`, positivity,
+  antitone (`rpow_le_rpow_of_nonpos`), max at `0`.
+* (DZ2-b) `DZ2w0_le_quarter`: `w_0 <= 1/4` via `16 = 2^4`,
+  `4*0.605 = 2.42 >= 2` (`rpow_natCast`, `rpow_mul`,
+  `rpow_le_rpow_of_exponent_le`, `rpow_neg`, `inv_le_inv₀`).
+* (DZ2-c) Weight variation: `‖f_{i+1}-f_i‖ = w_i-w_{i+1}`,
+  telescope `∑_{i<15}(w_i-w_{i+1}) = w_0-w_15`, hence `TV <= 1/4`.
+* (DZ2-d) Prefix caps `‖∑_{j<k} ZPiece j‖ <= 16` for all `k <= 16`
+  (triangle via `DZ_piece_unit` for `k < 16`, `DZ1c_main <= 13.85 <= 16`
+  for `k = 16`).
+* (DZ2-e) MACHINERY `DZ2_weighted_le_of_cap`: for any `B` with prefix caps `B`,
+  `‖∑_{i<16} f_i*ZPiece_i‖ <= w_0*B` via `T2_abel_norm` (read-only).
+* (DZ2-f) HEADLINE unconditional `DZ2_weighted_le_four`: `‖∑ w·ZPiece‖ <= 4`
+  (`w_0 <= 1/4`, `B = 16`).
+* (DZ2-g) CONDITIONAL 13.85-shape `DZ2_weighted_conditional_1385`:
+  under prefix caps `13.85`, `‖∑ w·ZPiece‖ <= 3.4625` (`(1/4)*13.85`).
+* (DZ2-h) `DZ2_gap_012`: `4/(12/6300) = 2100`,
+  `3.4625/(12/6300) = 1817.8125`.
+
+NUMBERS: need `12/6300 ≈ 0.0019048` per 16-block for `DV_mid_conditional_012`;
+naive `13.85*0.19 ≈ 2.6` is ~1300x short; this bridge banks `4` (2100x short)
+unconditional and `3.4625` (1817.8x short) conditional on full 13.85 prefix
+caps. Partial summation does NOT close the gap (telescoping gives `w_0*B`,
+no extra savings beyond max weight since weights are monotone).
+-/
+
+/-- (DZ2-a) Amplitude envelope `w_n = (16+n)^(-0.605)` (`Real.rpow`). -/
+noncomputable def DZ2w (n : ℕ) : ℝ := Real.rpow (16 + (n : ℝ)) (-(0.605 : ℝ))
+
+/-- (DZ2-a) Complex weight (real envelope coerced). -/
+noncomputable def DZ2f (n : ℕ) : ℂ := (DZ2w n : ℂ)
+
+/-- (DZ2-a) Positivity of the envelope. -/
+theorem DZ2w_pos (n : ℕ) : 0 < DZ2w n := by
+  unfold DZ2w
+  apply Real.rpow_pos_of_pos
+  have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+  linarith
+
+/-- (DZ2-a) Antitone (decreasing) envelope via nonpositive exponent. -/
+theorem DZ2w_anti (n : ℕ) : DZ2w (n + 1) ≤ DZ2w n := by
+  unfold DZ2w
+  have hpos : (0 : ℝ) < 16 + (n : ℝ) := by
+    have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hle : (16 : ℝ) + (n : ℝ) ≤ 16 + ((((n + 1 : ℕ)) : ℝ)) := by
+    push_cast
+    linarith
+  have hexp : (-(0.605 : ℝ)) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hpos hle hexp
+
+/-- (DZ2-a) Max at `0`: `w_n ≤ w_0`. -/
+theorem DZ2w_le_zero (n : ℕ) : DZ2w n ≤ DZ2w 0 := by
+  have hpos16 : (0 : ℝ) < 16 := by norm_num
+  have hle : (16 : ℝ) ≤ 16 + (n : ℝ) := by
+    have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hexp : (-(0.605 : ℝ)) ≤ 0 := by norm_num
+  have h := Real.rpow_le_rpow_of_nonpos hpos16 hle hexp
+  unfold DZ2w
+  simp only [Nat.cast_zero, add_zero]
+  exact h
+
+/-- (DZ2-b) Explicit head weight `w_0 ≤ 1/4` via `0.5 ≤ 0.605` comparison. -/
+theorem DZ2w0_le_quarter : DZ2w 0 ≤ 1 / 4 := by
+  have e0 : DZ2w 0 = Real.rpow (16 : ℝ) (-(0.605 : ℝ)) := by
+    unfold DZ2w
+    simp only [Nat.cast_zero, add_zero]
+  have h16pos : (0 : ℝ) < 16 := by norm_num
+  have hle : (4 : ℝ) ≤ Real.rpow (16 : ℝ) (0.605 : ℝ) := by
+    have hhat : (4 : ℝ) ≤ ((16 : ℝ) ^ (0.605 : ℝ)) := by
+      have h16eq : (16 : ℝ) = (2 : ℝ) ^ (4 : ℕ) := by norm_num
+      have h1 : ((((2 : ℝ) ^ (4 : ℕ)) ^ (0.605 : ℝ)))
+          = (2 : ℝ) ^ (((((4 : ℕ)) : ℝ)) * (0.605 : ℝ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      have hexp_ge : (2 : ℝ) ≤ ((((4 : ℕ)) : ℝ)) * (0.605 : ℝ) := by norm_num
+      have h2 : (2 : ℝ) ^ ((2 : ℝ))
+          ≤ (2 : ℝ) ^ (((((4 : ℕ)) : ℝ)) * (0.605 : ℝ)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_ge
+      have e2 : (2 : ℝ) = ((((2 : ℕ)) : ℝ)) := by norm_num
+      have h3 : (2 : ℝ) ^ ((2 : ℝ)) = 4 := by
+        rw [e2, Real.rpow_natCast]
+        norm_num
+      rw [h3] at h2
+      rw [h16eq, h1]
+      exact h2
+    exact hhat
+  have hpos605 : (0 : ℝ) < Real.rpow (16 : ℝ) (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos h16pos _
+  have hneg : Real.rpow (16 : ℝ) (-(0.605 : ℝ))
+      = (Real.rpow (16 : ℝ) (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (le_of_lt h16pos) _
+  have hinv : (Real.rpow (16 : ℝ) (0.605 : ℝ))⁻¹ ≤ ((4 : ℝ))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hle
+  have h14 : ((4 : ℝ))⁻¹ = 1 / 4 := by norm_num
+  rw [h14] at hinv
+  rw [e0, hneg]
+  exact hinv
+
+/-- (DZ2-c) Pointwise variation equals the real drop. -/
+theorem DZ2_abs_diff (i : ℕ) :
+    ‖DZ2f (i + 1) - DZ2f i‖ = DZ2w i - DZ2w (i + 1) := by
+  have hle : DZ2w (i + 1) ≤ DZ2w i := DZ2w_anti i
+  have hdiff : DZ2w (i + 1) - DZ2w i ≤ 0 := by linarith
+  have e : DZ2f (i + 1) - DZ2f i = ((DZ2w (i + 1) - DZ2w i : ℝ) : ℂ) := by
+    unfold DZ2f
+    rw [← Complex.ofReal_sub]
+  rw [e, Complex.norm_real, Real.norm_eq_abs, abs_of_nonpos hdiff]
+  ring
+
+/-- (DZ2-c) Telescoping real-drop sum. -/
+theorem DZ2_telescope (n : ℕ) :
+    ∑ i ∈ Finset.range n, (DZ2w i - DZ2w (i + 1)) = DZ2w 0 - DZ2w n := by
+  induction n with
+  | zero => simp
+  | succ n ih => rw [Finset.sum_range_succ, ih]; ring
+
+/-- (DZ2-c) Total variation equals `w_0 - w_15`. -/
+theorem DZ2_TV_eq :
+    ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖
+      = DZ2w 0 - DZ2w 15 := by
+  have h1 : ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖
+      = ∑ i ∈ Finset.range 15, (DZ2w i - DZ2w (i + 1)) :=
+    Finset.sum_congr rfl (fun i _ => DZ2_abs_diff i)
+  rw [h1]
+  exact DZ2_telescope 15
+
+/-- (DZ2-c) Explicit total-variation bound `TV ≤ 1/4`. -/
+theorem DZ2_TV_le :
+    ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖ ≤ 1 / 4 := by
+  rw [DZ2_TV_eq]
+  have hw0 := DZ2w0_le_quarter
+  have hpos15 : 0 ≤ DZ2w 15 := le_of_lt (DZ2w_pos 15)
+  linarith
+
+/-- (DZ2-c) Last-weight norm. -/
+theorem DZ2_last_norm : ‖DZ2f 15‖ = DZ2w 15 := by
+  unfold DZ2f
+  rw [Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (le_of_lt (DZ2w_pos 15))]
+
+/-- (DZ2-d) Uniform prefix caps `≤ 16` (triangle + `DZ1c_main` at `k = 16`). -/
+theorem DZ2_prefix16_le (k : ℕ) (hk : k ≤ 16) :
+    ‖∑ j ∈ Finset.range k, ZPiece j‖ ≤ 16 := by
+  by_cases hk16 : k = 16
+  · subst hk16
+    calc ‖∑ j ∈ Finset.range 16, ZPiece j‖ ≤ 13.85 := DZ1c_main
+      _ ≤ 16 := by norm_num
+  · have hklt : k < 16 := by omega
+    calc ‖∑ j ∈ Finset.range k, ZPiece j‖
+        ≤ ∑ j ∈ Finset.range k, ‖ZPiece j‖ := norm_sum_le _ _
+      _ = (k : ℝ) := by
+          have e : ∑ j ∈ Finset.range k, ‖ZPiece j‖
+              = ∑ j ∈ Finset.range k, (1 : ℝ) :=
+            Finset.sum_congr rfl (fun j _ => DZ_piece_unit j)
+          rw [e, Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one]
+      _ ≤ 16 := by
+          have h : (k : ℝ) ≤ (((16 : ℕ)) : ℝ) := by exact_mod_cast hk
+          simpa using h
+
+set_option maxHeartbeats 800000 in
+/-- (DZ2-e) MACHINERY: Abel-weighted bound `≤ w_0 * B` from prefix caps `B`
+(read-only `T2_abel_norm` over `Finset.sum_range_by_parts`). -/
+theorem DZ2_weighted_le_of_cap (B : ℝ)
+    (hB : ∀ k, k ≤ 16 → ‖∑ j ∈ Finset.range k, ZPiece j‖ ≤ B)
+    (hB0 : 0 ≤ B) :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ DZ2w 0 * B := by
+  have hAbel := T2_abel_norm DZ2f ZPiece 16 B hB hB0
+  have e15 : (16 - 1 : ℕ) = 15 := by norm_num
+  rw [e15] at hAbel
+  have hlast : ‖DZ2f 15‖ = DZ2w 15 := DZ2_last_norm
+  have hTV : ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖
+      = DZ2w 0 - DZ2w 15 := DZ2_TV_eq
+  have hsumMul : ∑ i ∈ Finset.range 15, ‖DZ2f (i + 1) - DZ2f i‖ * B
+      = (DZ2w 0 - DZ2w 15) * B := by
+    rw [← Finset.sum_mul, hTV]
+  rw [hlast, hsumMul] at hAbel
+  have e : DZ2w 15 * B + (DZ2w 0 - DZ2w 15) * B = DZ2w 0 * B := by ring
+  rw [e] at hAbel
+  exact hAbel
+
+/-- (DZ2-f) HEADLINE unconditional amplitude-weighted `[16,32)` bound `≤ 4`. -/
+theorem DZ2_weighted_le_four :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ 4 := by
+  have h := DZ2_weighted_le_of_cap 16 DZ2_prefix16_le (by norm_num)
+  have hw := DZ2w0_le_quarter
+  have hle : DZ2w 0 * 16 ≤ (1 / 4) * 16 :=
+    mul_le_mul_of_nonneg_right hw (by norm_num)
+  have e : ((1 / 4 : ℝ)) * 16 = 4 := by norm_num
+  linarith
+
+/-- (DZ2-g) CONDITIONAL 13.85-shape: under full `13.85` prefix caps,
+weighted `≤ 3.4625`. -/
+theorem DZ2_weighted_conditional_1385
+    (hB : ∀ k, k ≤ 16 → ‖∑ j ∈ Finset.range k, ZPiece j‖ ≤ 13.85) :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ 3.4625 := by
+  have h := DZ2_weighted_le_of_cap 13.85 hB (by norm_num)
+  have hw := DZ2w0_le_quarter
+  have hle : DZ2w 0 * 13.85 ≤ (1 / 4) * 13.85 :=
+    mul_le_mul_of_nonneg_right hw (by norm_num)
+  have e : ((1 / 4 : ℝ)) * 13.85 = 3.4625 := by norm_num
+  linarith
+
+/-- (DZ2-h) Gap verdict numerals vs `12/6300`. -/
+theorem DZ2_gap_012 :
+    (4 : ℝ) / (12 / 6300) = 2100 ∧ (3.4625 : ℝ) / (12 / 6300) = 1817.8125
+      ∧ (12 / 6300 : ℝ) < 4 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ2 report-and-stop): ONE proved Abel bridge banked — amplitude-weighted
+`‖∑_{n<16} w_n·ZPiece_n‖ ≤ 4` (`DZ2_weighted_le_four`) unconditionally via
+in-file `w_n = (16+n)^(-0.605)` envelope (`w_0 ≤ 1/4`, `TV ≤ 1/4`) + read-only
+`T2_abel_norm` (`Finset.sum_range_by_parts`) + prefix caps `≤ 16`
+(triangle + `DZ1c_main` at `k = 16`); plus conditional 13.85-shape
+`≤ 3.4625` (`DZ2_weighted_conditional_1385`) under full `13.85` prefix caps.
+Partial summation does NOT close the 1300x gap: telescoping gives
+`w_15*B + (w_0-w_15)*B = w_0*B` (no extra savings for monotone weights);
+`4` is `2100x` over `12/6300 ≈ 0.0019048`, `3.4625` is `1817.8x` over.
+The `13.85` full-prefix hypothesis itself is open (only `k = 16` is landed;
+`k = 14,15` triangle gives `14,15 > 13.85`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2 tail, do NOT touch
+`riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): prove ONE of (i) tighter
+head-weight `w_0 ≤ 0.19` (needs `16^0.605 ≥ 5.264` via `0.6 ≤ 0.605` + integer
+`16^3 ≥ 5^5`-shape in-file, lowering `4 → 3.04` and `3.4625 → 2.6315`), or
+(ii) per-prefix `13.85` caps for `k = 14,15` (needs per-`k` k=1 re-applications
+of `KL_linear_firstDerivTest` with in-file error sums, not triangle), or
+(iii) TRUE eta-term identification on `[16,32)` connecting `DZ2f·ZPiece` to
+`etaDirichletTerm (1-zetaCellS0)` (explicit `(-1)^k`, `(k+1)^s` norm, and
+`16+n` vs `17+n` off-by-one, all constants concrete, created in-file).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ2w
+#print axioms DZ2f
+#print axioms DZ2w_pos
+#print axioms DZ2w_anti
+#print axioms DZ2w_le_zero
+#print axioms DZ2w0_le_quarter
+#print axioms DZ2_abs_diff
+#print axioms DZ2_telescope
+#print axioms DZ2_TV_eq
+#print axioms DZ2_TV_le
+#print axioms DZ2_last_norm
+#print axioms DZ2_prefix16_le
+#print axioms DZ2_weighted_le_of_cap
+#print axioms DZ2_weighted_le_four
+#print axioms DZ2_weighted_conditional_1385
+#print axioms DZ2_gap_012
