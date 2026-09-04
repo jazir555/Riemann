@@ -1422,6 +1422,8 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     mirror of `log_five_d9` method):** θ₇/θ₁₁/θ₁₃ unlocked for the K=16 push. **Prime stacks CLOSED
     (`D3_S7_re_lower` et al.):** θ₇/θ₁₁/θ₁₃ full enclosures green     (Re-route negative as predicted —
     per-term technology banked). Composites 8/9/10/12/14/15/16 tasked (log-bridge follower).
+    **Im-route opened (`D3_S16_im_lower` et al.):** per-term Im lowers x=1..16 green, but sum WEAK
+    (`≥-1.138`, true `≈-0.51`) — needs Im-UPPER assembly (`Im S₁₆ ≤ -c`, tasked).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
     **x=10 CLOSED (`D3_S10_re_lower` et al.):** `log 10 = log 2 + log 5` bridge green
@@ -1470,7 +1472,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Windowed P1 CLOSED-conditional (`BH2TailWindow`, BH3-repaired, green):** `‖G‖≤36` on closed strip
   `[-1,2]` from windowed caps + explicit `hTail`, then **`‖ζ‖≤10` on R02** via the threshold theorem
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
-  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **Tail numerals landing
+  Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **hTail sharpest-cap (`CC_hTailGap`):**
+  pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
+  majorant — sharp-Gaussian recomposition tasked (edge `≈180` expected, still short; true-`F` gap next). **Tail numerals landing
   (`BV2OuterTail`):** outer-envelope Gaussian domination `T=18·exp(165.23)` green; middle exp-3/2
   numeral (Young `u^{3/2}` bound + completing square) tasked, then tail-`T` assembly.
   **Middle numeral CLOSED (`BXMiddleTail`):** Young SOS (`K·t³ ≤ t⁴/200+10⁶K⁴`) + `middle_gauss_le`
