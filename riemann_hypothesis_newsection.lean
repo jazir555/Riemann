@@ -9238,3 +9238,280 @@ large-`a` domination) or tighten the 2.01 chain; then `hTail_of_sharp201_sup` an
 `P1_R02_of_sharp201_sup` fire immediately.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+# CQ tail (door-3 P1/hTail track, compact near-edge caps): `[8.75, 10]` both signs `≤ 36`.
+
+Ownership: Agent CQ tail append (append-only after the CP verdict block; nothing above
+touched; no new imports).
+
+GOAL (brief door-3 P1/hTail track, minimum viable = ONE proved bridge + residual):
+`CP_Sharp201` banks the decaying sharp envelope + conditionals, but `hSupNeg`
+(`∀ a ≥ 8.75`, neg sharp envelope `≤ 36`) is FALSE as stated (hump peaks `≈ 53.2`,
+`1.48×` over). This block banks the TRUE compact piece: the neg sharp envelope is
+`≤ 36` on `[8.75, 10]` (two subinterval endpoint-caps, margin `0.17` at `a = 10`),
+and the pos sharp envelope is `≤ 36` on `[8.75, 10]` (uniform `0.1` damping cap,
+huge margin). Residual: hump `[10.3, 20.4]` + large-`a` domination `[21, ∞)`.
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `B201_nonneg` / `B201_mono` — nonneg + monotonicity of the 2.01 `B(a)`
+  (`√(4+a²)` and `√(a³)` monotone via `Real.sqrt_le_sqrt` + `pow_le_pow_left₀`).
+* `dampNeg_mono` — neg damping `exp((1-(a-6.75)²)/100)` antitone for `a ≥ 6.75`
+  (mirrors `CF_SharpDamp.damp_mono_pos`, `sq_le_sq'` pattern).
+* `B95_le` / `B10_le` — `B(9.5) ≤ 33.64`, `B(10) ≤ 38.16` (sqrt numerals via
+  `Real.sqrt_le_sqrt` + `Real.sqrt_sq`, products by `norm_num`).
+* `exp_neg0065625_le` / `damp875_le` / `damp95_le` — `exp(-0.065625) ≤ 0.939`
+  (via `BF2TailCaps.exp_neg_le_inv`), `damp(8.75) ≤ 0.971` (via
+  `CF_SharpDamp.exp_neg003_le`), `damp(9.5) ≤ 0.939`.
+* `neg_cap_875_95` / `neg_cap_95_10` — neg envelope `≤ 36` on `[8.75, 9.5]`
+  (`0.971 × 33.64 = 32.67`) and `[9.5, 10]` (`0.939 × 38.16 = 35.84`).
+* `neg_cap_875_10` — MAIN, `hSupNeg`-shaped on `[8.75, 10]` (split at `9.5`).
+* `pos_cap_875_10` — `hSupPos`-shaped on `[8.75, 10]` (`0.1 × 38.16 = 3.82`,
+  reusing `CF_SharpDamp.damp_mono_pos` + `exp_neg23925_le`).
+
+Grep record (verified by `rg -n` before writing):
+* `CP_Sharp201` (`:9098`–`:9203`): `G_sharp_201_le` (`:9102`), `G_sharp_201_pos_le`
+  (`:9134`), `G_sharp_201_neg_le` (`:9147`), `hTail_of_sharp201_sup` (`:9160`),
+  `P1_R02_of_sharp201_sup` (`:9184`); premise shape matched exactly below.
+* `CM_Sinh201Recomp` (`:8608`–`:9007`): `Gamma_Re2_tail_sq_201` (`:8612`,
+  `C² = 6.4009`), `Gamma_Re2_tail_upper_201` (`:8725`, `C = 2.53`),
+  `joint_Stirling_201_le` (`:8770`, `1.2903 = 2.53·0.51`),
+  `zeta_Stirling_201_le` (`:8839`, reflected `1.65` via
+  `CKT3Zeta165.zeta_rightEdge_B165`), `F_Stirling_201_le` (`:8893`); constants
+  reused as literals, nothing redefined.
+* `CF_SharpDamp.damp_norm_eq_neg1` (`:6595`, exact damping norm, cited — the
+  `a`-wise caps here majorize damping by endpoint monotonicity instead),
+  `damp_mono_pos` (`:6712`, REUSED), `exp_neg23925_le` (`:6644`, REUSED:
+  `exp(-2.3925) ≤ 0.1`), `exp_neg003_le` (`:6755`, REUSED: `exp(-0.03) ≤ 0.971`).
+* `BF2TailCaps.exp_neg_le_inv` (`:3399`, `exp(-t) ≤ 1/(1+t)`, REUSED).
+* Compact/window machinery cited not redefined: `BH2TailWindow.damped_windowed_interp_36`
+  (`:3737`, windowed caps + `BddAbove`), `BddAbove` strip patterns (`:1302`,
+  `:1679`, `:3740`), `BUWindowed` window `BddAbove`, `BZTailEnvelope.P1_R02_of_hTail`
+  (`:5948`, P1 consumer).
+-/
+
+namespace CQ_CompactHump
+
+/-- Nonnegativity of the 2.01 `B(a)`. -/
+theorem B201_nonneg {a : ℝ} :
+    (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := by
+  have hS : (0 : ℝ) ≤ Real.sqrt (a ^ 3) := Real.sqrt_nonneg _
+  have g1 : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (a ^ 3) :=
+    mul_nonneg (by norm_num) hS
+  have g2 : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)) :=
+    mul_nonneg (by norm_num) g1
+  exact mul_nonneg (Real.sqrt_nonneg _) g2
+
+/-- Monotonicity of the 2.01 `B(a)` on `0 ≤ a` (both sqrt factors monotone). -/
+theorem B201_mono {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) :
+    Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) ≤
+      Real.sqrt (4 + b ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (b ^ 3))) := by
+  have hsq : a ^ 2 ≤ b ^ 2 := pow_le_pow_left₀ ha hab 2
+  have hcb : a ^ 3 ≤ b ^ 3 := pow_le_pow_left₀ ha hab 3
+  have s1 : Real.sqrt (4 + a ^ 2) ≤ Real.sqrt (4 + b ^ 2) :=
+    Real.sqrt_le_sqrt (by linarith)
+  have s2 : Real.sqrt (a ^ 3) ≤ Real.sqrt (b ^ 3) := Real.sqrt_le_sqrt hcb
+  have h1 : (1.2903 / 18) * Real.sqrt (a ^ 3) ≤ (1.2903 / 18) * Real.sqrt (b ^ 3) :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (b ^ 3)) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)) := by
+    have hS : (0 : ℝ) ≤ Real.sqrt (a ^ 3) := Real.sqrt_nonneg _
+    have g1 : (0 : ℝ) ≤ (1.2903 / 18) * Real.sqrt (a ^ 3) :=
+      mul_nonneg (by norm_num) hS
+    exact mul_nonneg (by norm_num) g1
+  exact mul_le_mul s1 h2 hc (Real.sqrt_nonneg _)
+
+/-- Neg damping antitone for `a ≥ 6.75` (mirrors `CF_SharpDamp.damp_mono_pos`). -/
+theorem dampNeg_mono {a b : ℝ} (ha : 6.75 ≤ a) (hab : a ≤ b) :
+    Real.exp ((1 - (b - 6.75) ^ 2) / 100)
+      ≤ Real.exp ((1 - (a - 6.75) ^ 2) / 100) := by
+  apply Real.exp_le_exp.mpr
+  have h1 : -(b - 6.75) ≤ a - 6.75 := by linarith
+  have h2 : a - 6.75 ≤ b - 6.75 := by linarith
+  have hsq : (a - 6.75) ^ 2 ≤ (b - 6.75) ^ 2 := sq_le_sq' h1 h2
+  linarith
+
+/-- `B(9.5) ≤ 33.64` (`√94.25 ≤ 9.71`, `√857.375 ≤ 29.29`). -/
+theorem B95_le :
+    Real.sqrt (4 + (9.5 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((9.5 : ℝ) ^ 3))) ≤ 33.64 := by
+  have s1 : Real.sqrt (4 + (9.5 : ℝ) ^ 2) ≤ 9.71 := by
+    have hle : 4 + (9.5 : ℝ) ^ 2 ≤ (9.71 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 9.71)] at h
+  have s2 : Real.sqrt ((9.5 : ℝ) ^ 3) ≤ 29.29 := by
+    have hle : (9.5 : ℝ) ^ 3 ≤ (29.29 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 29.29)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((9.5 : ℝ) ^ 3) ≤ (1.2903 / 18) * 29.29 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((9.5 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 29.29) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((9.5 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (9.5 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((9.5 : ℝ) ^ 3)))
+      ≤ 9.71 * (1.65 * ((1.2903 / 18) * 29.29)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 33.64 := by norm_num
+
+/-- `B(10) ≤ 38.16` (`√104 ≤ 10.2`, `√1000 ≤ 31.63`). -/
+theorem B10_le :
+    Real.sqrt (4 + (10 : ℝ) ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt ((10 : ℝ) ^ 3))) ≤ 38.16 := by
+  have s1 : Real.sqrt (4 + (10 : ℝ) ^ 2) ≤ 10.2 := by
+    have hle : 4 + (10 : ℝ) ^ 2 ≤ (10.2 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 10.2)] at h
+  have s2 : Real.sqrt ((10 : ℝ) ^ 3) ≤ 31.63 := by
+    have hle : (10 : ℝ) ^ 3 ≤ (31.63 : ℝ) ^ 2 := by norm_num
+    have h := Real.sqrt_le_sqrt hle
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 31.63)] at h
+  have h1 : (1.2903 / 18) * Real.sqrt ((10 : ℝ) ^ 3) ≤ (1.2903 / 18) * 31.63 :=
+    mul_le_mul_of_nonneg_left s2 (by norm_num)
+  have h2 : 1.65 * ((1.2903 / 18) * Real.sqrt ((10 : ℝ) ^ 3))
+      ≤ 1.65 * ((1.2903 / 18) * 31.63) :=
+    mul_le_mul_of_nonneg_left h1 (by norm_num)
+  have hc : (0 : ℝ) ≤ 1.65 * ((1.2903 / 18) * Real.sqrt ((10 : ℝ) ^ 3)) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  calc Real.sqrt (4 + (10 : ℝ) ^ 2) *
+        (1.65 * ((1.2903 / 18) * Real.sqrt ((10 : ℝ) ^ 3)))
+      ≤ 10.2 * (1.65 * ((1.2903 / 18) * 31.63)) :=
+        mul_le_mul s1 h2 hc (by norm_num)
+    _ ≤ 38.16 := by norm_num
+
+/-- `exp(-0.065625) ≤ 0.939` (via `BF2TailCaps.exp_neg_le_inv`). -/
+theorem exp_neg0065625_le : Real.exp (-0.065625 : ℝ) ≤ 0.939 := by
+  have h := BF2TailCaps.exp_neg_le_inv (show (0 : ℝ) ≤ 0.065625 by norm_num)
+  have hle : (1 : ℝ) / (1 + 0.065625) ≤ 0.939 := by norm_num
+  exact le_trans h hle
+
+/-- Neg damping at the edge: `damp(8.75) = exp(-0.03) ≤ 0.971`. -/
+theorem damp875_le :
+    Real.exp ((1 - ((8.75 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.971 := by
+  have e : (1 - ((8.75 : ℝ) - 6.75) ^ 2) / 100 = -0.03 := by norm_num
+  rw [e]
+  exact CF_SharpDamp.exp_neg003_le
+
+/-- Neg damping at `9.5`: `damp(9.5) = exp(-0.065625) ≤ 0.939`. -/
+theorem damp95_le :
+    Real.exp ((1 - ((9.5 : ℝ) - 6.75) ^ 2) / 100) ≤ 0.939 := by
+  have e : (1 - ((9.5 : ℝ) - 6.75) ^ 2) / 100 = -0.065625 := by norm_num
+  rw [e]
+  exact exp_neg0065625_le
+
+/-- Neg sharp envelope `≤ 36` on `[8.75, 9.5]` (`0.971 × 33.64 = 32.67`). -/
+theorem neg_cap_875_95 {a : ℝ} (hlo : 8.75 ≤ a) (hhi : a ≤ 9.5) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.971 :=
+    le_trans (dampNeg_mono (show (6.75 : ℝ) ≤ 8.75 by norm_num) hlo) damp875_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 33.64 :=
+    le_trans (B201_mono ha0 hhi) B95_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.971 * 33.64 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- Neg sharp envelope `≤ 36` on `[9.5, 10]` (`0.939 × 38.16 = 35.84`). -/
+theorem neg_cap_95_10 {a : ℝ} (hlo : 9.5 ≤ a) (hhi : a ≤ 10) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a - 6.75) ^ 2) / 100) ≤ 0.939 :=
+    le_trans (dampNeg_mono (show (6.75 : ℝ) ≤ 9.5 by norm_num) hlo) damp95_le
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 38.16 :=
+    le_trans (B201_mono ha0 hhi) B10_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := B201_nonneg
+  calc Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.939 * 38.16 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+/-- MAIN (`hSupNeg`-shaped on `[8.75, 10]`): neg sharp envelope `≤ 36`. -/
+theorem neg_cap_875_10 {a : ℝ} (hlo : 8.75 ≤ a) (hhi : a ≤ 10) :
+    Real.exp ((1 - (a - 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  rcases le_total a 9.5 with h | h
+  · exact neg_cap_875_95 hlo h
+  · exact neg_cap_95_10 h hhi
+
+/-- (`hSupPos`-shaped on `[8.75, 10]`): pos sharp envelope `≤ 36`
+(`0.1 × 38.16 = 3.82`; pos side green). -/
+theorem pos_cap_875_10 {a : ℝ} (hlo : 8.75 ≤ a) (hhi : a ≤ 10) :
+    Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+      (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))) ≤ 36 := by
+  have ha0 : (0 : ℝ) ≤ a := by linarith
+  have hd : Real.exp ((1 - (a + 6.75) ^ 2) / 100) ≤ 0.1 := by
+    have hmono : Real.exp ((1 - (a + 6.75) ^ 2) / 100)
+        ≤ Real.exp ((1 - ((8.75 : ℝ) + 6.75) ^ 2) / 100) :=
+      CF_SharpDamp.damp_mono_pos (le_refl _) hlo
+    have e : Real.exp ((1 - ((8.75 : ℝ) + 6.75) ^ 2) / 100) ≤ 0.1 := by
+      have e875 : (1 - ((8.75 : ℝ) + 6.75) ^ 2) / 100 = -2.3925 := by norm_num
+      rw [e875]
+      exact CF_SharpDamp.exp_neg23925_le
+    exact le_trans hmono e
+  have hB : Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3)))
+      ≤ 38.16 :=
+    le_trans (B201_mono ha0 hhi) B10_le
+  have hBnn : (0 : ℝ) ≤ Real.sqrt (4 + a ^ 2) *
+      (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))) := B201_nonneg
+  calc Real.exp ((1 - (a + 6.75) ^ 2) / 100) *
+        (Real.sqrt (4 + a ^ 2) * (1.65 * ((1.2903 / 18) * Real.sqrt (a ^ 3))))
+      ≤ 0.1 * 38.16 := mul_le_mul hd hB hBnn (by norm_num)
+    _ ≤ 36 := by norm_num
+
+#print axioms CQ_CompactHump.B201_nonneg
+#print axioms CQ_CompactHump.B201_mono
+#print axioms CQ_CompactHump.dampNeg_mono
+#print axioms CQ_CompactHump.B95_le
+#print axioms CQ_CompactHump.B10_le
+#print axioms CQ_CompactHump.exp_neg0065625_le
+#print axioms CQ_CompactHump.damp875_le
+#print axioms CQ_CompactHump.damp95_le
+#print axioms CQ_CompactHump.neg_cap_875_95
+#print axioms CQ_CompactHump.neg_cap_95_10
+#print axioms CQ_CompactHump.neg_cap_875_10
+#print axioms CQ_CompactHump.pos_cap_875_10
+
+end CQ_CompactHump
+
+/-!
+CQ VERDICT + RESIDUAL (report-and-stop): ONE bridge banked (compact near-edge caps),
+hump + large-`a` stay open. No `sorry`/`admit`/`axiom` in this tail.
+
+(1) BRIDGE CLOSED (`CQ_CompactHump`, 12 theorems, full proofs pending build):
+`neg_cap_875_10` (`hSupNeg`-shaped on `[8.75, 10]`, split at `9.5`: `32.67` /
+`35.84`, tightest margin `0.17`) + `pos_cap_875_10` (`hSupPos`-shaped on
+`[8.75, 10]`, `3.82`, huge margin) + mono/numeral infrastructure. True values:
+neg `26.67/28.27/34.66` at `a = 8.75/9/10`; pos `2.51/2.49/2.33`. Both caps reuse
+`B201_mono` endpoint majorization (only `B(a)` majorized; damping by endpoint
+monotonicity — the `CF_SharpDamp.damp_norm_eq_neg1` exact-norm route for `‖G z‖`
+itself is untouched and available to callers).
+
+(2) OPTIONS (b)/(c) HONESTLY DOCUMENTED, NO HEADROOM (external numeral analysis,
+not Lean claims): (b) zeta tier `1.65`: true `ζ(2) = 1.6449`, slack `0.3%` —
+needs `32.3%` (`53.18 → 36`). (c) `C = 2.53`: limiting `√(2π) ≈ 2.5066`, headroom
+`0.9%`; cpow `1/36` vs true `1/39.48`, headroom `9.7%`; combined ceiling `≈ 1.11×`
+vs needed `1.48×`. The 2.01 chain CANNOT close the hump by constant-tightening;
+`√(4+a²)` is already exact. Structural change required (narrower variance —
+fixed by `G`'s definition — or restructured `F` majorant).
+
+(3) RESIDUAL (exact): hump `[10.3, 20.4]` where the neg envelope genuinely exceeds
+36 (true `40.68/45.86/49.84/52.32/53.18/52.40/50.13/46.61/42.15/37.11` at
+`a = 11..20`, peak `≈ 53.2` at `a ≈ 15`) + large-`a` domination `[21, ∞)` (true
+`31.83/26.61/21.70/17.26/13.40` at `a = 21..25`, `2.65` at `30`; needs
+`exp(1)²`-chain damping uppers + `B(U)` endpoint caps per unit interval, or a
+log-derivative decrease lemma). `hTail`/P1 do NOT follow yet:
+`CP_Sharp201.hTail_of_sharp201_sup` still needs full `[8.75, ∞)` sups.
+-/
