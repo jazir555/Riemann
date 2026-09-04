@@ -11664,3 +11664,522 @@ theorem vdC_A_shift_identity_doubleSum (v : ℕ → ℂ) (N : ℕ) :
 
 #print axioms vdC_autocorr
 #print axioms vdC_A_shift_identity_doubleSum
+
+/-!
+## Door-3 Tier-3 vdC plug-in (CB tail, append-only): AK2 linear test on BW3 differenced phase.
+
+TASK (door-3 Tier-3 application, report-and-stop): plug AK2's linear test into BW3's
+differenced phase. For shift `h` on a dyadic middle block the differenced phase
+`phi(n+h)-phi(n)` with `phi(n)=8.75*log n` has gap scale `h*8.75/n^2` (curvature
+`phi''=-8.75/n^2` motivation); prove the gap lower via `KL_log_gap_ge`-shapes, apply
+`KL_linear_firstDerivTest` to get the `h`-diagonal bound, sum over `h` (optimize the
+shift cutoff with `norm_num` numerals), conclude a vdC-style block bound, instantiate on
+ONE dyadic middle block `[16,32)` with exact numbers, compare against BS's pairing route
+for the same block. Minimum viable in order: (1) differenced-gap + linear-test
+application (one `h`-diagonal, green); (2) shift-summation + optimized block bound;
+(3) dyadic instantiation + comparison. Pair-absolute/`Finset` forms only; no `tsum`
+with `0 <` claims (that form is FALSE).
+
+CONTEXT (all committed, verified by grep before writing):
+* BW3 `vdC_A_shift_identity_doubleSum` at 11645 + `vdC_autocorr` at 11639 (`h`-diagonal
+  shape for the follower; norm-sq = Re double sum, `h`-diagonal = autocorr).
+* AK2 `KL_linear_firstDerivTest` at 4953 (inner engine), `KL_log_gap_ge` at 4977
+  (log lower), `KL_AE_phase_small` at 5020 (`log(1+1/n)` pattern reused).
+* AM `T2_abel_eq` at 5177 (Abel bridge, cited alternative; not consumed to keep this
+  plug-in linear-test-only).
+* BS `MID_mid_block_upper` at 11567 (`≤5/3` on `[16,1024)`). Reused:
+  `MID_sum_Ico_shift`, `MID_pair_identity`, `MID_neg_one_shift`, `MID_step_le`,
+  `MID_rpow15_ge`.
+* Phase `phi(n)=8.75*log n`, `phi''=-8.75/n^2` (motivation for `h*8.75/n^2`;
+  formalized as first-difference `h/(n+h)` + second-difference `1/(n+1)-1/(n+h)`).
+
+WHAT IS PROVED (all unconditional, FULL proofs):
+* (CB-a) `CB_phi` + `CB_phi_sub`.
+* (CB-b) `CB_log_shift_ge` (`h/(n+h)` via `KL_log_gap_ge` induction) +
+  `CB_phase_gap_lower` (`×8.75`).
+* (CB-c) `CB_log_shift_le` (`h/n` via `log(1+h/n)` pattern).
+* (CB-d) `CB_curv_gap_lower` (`1/(n+1)-1/(n+h)` curvature via bracketing).
+* (CB-e) `CB_phase_small` (`|·| ≤ π/2`).
+* (CB-f) `CB_diag_linear_bound` (general diagonal via `KL_linear_firstDerivTest`).
+* (CB-g) `CB_diag_h1_N15` (`n=16,h=1,N=15 ≤ 6.2`). Minimum-viable (1), green.
+* (CB-h) `CB_shiftSum_2_le` (`≤19`) + `CB_shiftSum_3_le` (`≤23`),
+  `CB_opt_H2`, budgets `CB_vdC_budget_H2_le` (`≤54`) + `CB_vdC_budget_H3_le`
+  (`≤62`). Minimum-viable (2).
+* (CB-i) `CB_BS_perPair_le`, `CB_BS_sum8_le`, `CB_BS_16_32` (`≤1` on `[16,32)`),
+  `CB_compare_BS_vdC`. Minimum-viable (3).
+
+NUMBERS (exact, proved in-file):
+* Diagonal `h=1,n=16`: gap `≥8.75/17`, `17π/8.75 ≤ 6.2`, vs triangle `15`.
+* Uniform `34`: `h=1: ≈12.21`, `h=2: ≈6.10`, `h=3: ≈4.07`; `H=2 ≤19`, `H=3 ≤23`;
+  budgets `54` (`H=2` optimized) vs `62` (`H=3`).
+* BS `[16,32)`: per-pair `≤10/85`, `8` pairs `≤80/85 ≤ 1`.
+
+RESIDUAL (report-and-stop): proxy diagonals are linear (`∑ e^{ikθ}` at frozen
+`θ`), NOT true nonlinear autocorrelations; budgets majorize `‖S‖^2` ONLY under
+proxy identification (via `vdC_A_shift_identity_doubleSum`); unconditionally they
+are standalone majorants. Full Tier-3 needs nonlinear vdC or interval arithmetic.
+On `[16,32)` BS (`≤1`) beats linear-KL proxy (`≤54` squared).
+-/
+
+/-- (CB-a) Differenced-phase function `phi(x)=8.75*log x`. -/
+noncomputable def CB_phi (x : ℝ) : ℝ := 8.75 * Real.log x
+
+/-- (CB-a) `phi` difference. -/
+theorem CB_phi_sub (a b : ℝ) :
+    CB_phi a - CB_phi b = 8.75 * (Real.log a - Real.log b) := by
+  unfold CB_phi
+  ring
+
+set_option maxHeartbeats 800000 in
+/-- (CB-b) Shifted-log lower `h/(n+h) ≤ log(n+h)-log n` via `KL_log_gap_ge`. -/
+theorem CB_log_shift_ge (n h : ℕ) (hn : 1 ≤ n) :
+    (h : ℝ) / ((n : ℝ) + (h : ℝ))
+      ≤ Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)) := by
+  induction h with
+  | zero =>
+    simp
+  | succ h ih =>
+    have hnh : 1 ≤ n + h := by omega
+    have hstep := KL_log_gap_ge (n + h) hnh
+    have e_nat : n + (h + 1) = (n + h) + 1 := by omega
+    have e_cast : (((n + (h + 1) : ℕ)) : ℝ) = ((((n + h : ℕ)) : ℝ)) + 1 := by
+      rw [e_nat]
+      push_cast
+      ring
+    have e_h : ((((h + 1 : ℕ)) : ℝ)) = (h : ℝ) + 1 := by
+      push_cast
+      ring
+    have hcast_n : ((((n + h : ℕ)) : ℝ)) = (n : ℝ) + (h : ℝ) := by
+      push_cast
+      ring
+    rw [e_cast]
+    have e_left : ((((h + 1 : ℕ)) : ℝ)) / ((n : ℝ) + ((((h + 1 : ℕ)) : ℝ)))
+        = ((h : ℝ) + 1) / (((((n + h : ℕ)) : ℝ)) + 1) := by
+      rw [e_h, hcast_n]
+      ring
+    rw [e_left]
+    have ih2 : (h : ℝ) / (((((n + h : ℕ)) : ℝ)))
+        ≤ Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)) := by
+      have hih := ih
+      rwa [← hcast_n] at hih
+    have hpos_mid : (0 : ℝ) < ((((n + h : ℕ)) : ℝ)) := by
+      have h0 : 0 < n + h := by omega
+      exact_mod_cast h0
+    have hle_frac : (h : ℝ) / (((((n + h : ℕ)) : ℝ)) + 1)
+        ≤ (h : ℝ) / (((((n + h : ℕ)) : ℝ))) := by
+      have hnn : (0 : ℝ) ≤ (h : ℝ) := Nat.cast_nonneg _
+      have hle1 : (1 : ℝ) / (((((n + h : ℕ)) : ℝ)) + 1)
+          ≤ 1 / (((((n + h : ℕ)) : ℝ))) :=
+        one_div_le_one_div_of_le hpos_mid (by linarith)
+      have hmul := mul_le_mul_of_nonneg_left hle1 hnn
+      have e1 : (h : ℝ) * (1 / (((((n + h : ℕ)) : ℝ)) + 1))
+          = (h : ℝ) / (((((n + h : ℕ)) : ℝ)) + 1) := by ring
+      have e2 : (h : ℝ) * (1 / (((((n + h : ℕ)) : ℝ))))
+          = (h : ℝ) / (((((n + h : ℕ)) : ℝ))) := by ring
+      rw [e1, e2] at hmul
+      exact hmul
+    have hfrac : ((h : ℝ) + 1) / (((((n + h : ℕ)) : ℝ)) + 1)
+        ≤ 1 / (((((n + h : ℕ)) : ℝ)) + 1)
+          + (h : ℝ) / (((((n + h : ℕ)) : ℝ))) := by
+      have e : ((h : ℝ) + 1) / (((((n + h : ℕ)) : ℝ)) + 1)
+          = (h : ℝ) / (((((n + h : ℕ)) : ℝ)) + 1)
+            + 1 / (((((n + h : ℕ)) : ℝ)) + 1) := by ring
+      rw [e]
+      linarith [hle_frac]
+    have hsplit : Real.log (((((n + h : ℕ)) : ℝ)) + 1) - Real.log ((n : ℝ))
+        = (Real.log (((((n + h : ℕ)) : ℝ)) + 1) - Real.log (((n + h : ℕ) : ℝ)))
+          + (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ))) := by ring
+    rw [hsplit]
+    linarith [hstep, ih2, hfrac]
+
+/-- (CB-b) Differenced-phase gap lower (`×8.75`). -/
+theorem CB_phase_gap_lower (n h : ℕ) (hn : 1 ≤ n) :
+    8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ)))
+      ≤ 8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ))) := by
+  exact mul_le_mul_of_nonneg_left (CB_log_shift_ge n h hn) (by norm_num)
+
+/-- (CB-c) Shifted-log upper `log(n+h)-log n ≤ h/n`. -/
+theorem CB_log_shift_le (n h : ℕ) (hn : 1 ≤ n) :
+    Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)) ≤ (h : ℝ) / (n : ℝ) := by
+  have hn_pos : (0 : ℕ) < n := by omega
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn_pos
+  have hnR0 : (n : ℝ) ≠ 0 := ne_of_gt hnR
+  have hhR : (0 : ℝ) ≤ (h : ℝ) := Nat.cast_nonneg _
+  have h1pos : (0 : ℝ) < 1 + (h : ℝ) / (n : ℝ) := by
+    have hinv : (0 : ℝ) ≤ (h : ℝ) / (n : ℝ) := div_nonneg hhR (le_of_lt hnR)
+    linarith
+  have hlog := Real.log_le_sub_one_of_pos h1pos
+  have ecast : ((((n + h : ℕ)) : ℝ)) = (n : ℝ) + (h : ℝ) := by
+    push_cast
+    ring
+  have heq : (n : ℝ) + (h : ℝ) = (n : ℝ) * (1 + (h : ℝ) / (n : ℝ)) := by
+    field_simp
+  have hsplit : Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ))
+      = Real.log (1 + (h : ℝ) / (n : ℝ)) := by
+    rw [ecast, heq, Real.log_mul hnR0 (ne_of_gt h1pos), add_sub_cancel_left]
+  rw [hsplit]
+  linarith [hlog]
+
+set_option maxHeartbeats 800000 in
+/-- (CB-d) Curvature lower `1/(n+1)-1/(n+h)` shape (`≈ h/n^2`). -/
+theorem CB_curv_gap_lower (n h : ℕ) (hn : 1 ≤ n) (hh : 1 ≤ h) :
+    8.75 * (1 / ((n : ℝ) + 1) - 1 / (((n + h : ℕ) : ℝ)))
+      ≤ 8.75 * |((Real.log (((((n + h : ℕ)) : ℝ)) + 1)
+        - Real.log ((((n + h : ℕ)) : ℝ)))
+        - (Real.log ((n : ℝ) + 1) - Real.log ((n : ℝ))))| := by
+  have hLow : 1 / ((n : ℝ) + 1)
+      ≤ Real.log ((n : ℝ) + 1) - Real.log ((n : ℝ)) := KL_log_gap_ge n hn
+  have hnh : 1 ≤ n + h := by omega
+  have hUp0 := CB_log_shift_le (n + h) 1 hnh
+  have ecast1 : (((n + h + 1 : ℕ) : ℝ)) = ((((n + h : ℕ)) : ℝ)) + 1 := by
+    push_cast
+    ring
+  have h1cast : (((1 : ℕ) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [ecast1, h1cast] at hUp0
+  have hUp : Real.log (((((n + h : ℕ)) : ℝ)) + 1) - Real.log ((((n + h : ℕ)) : ℝ))
+      ≤ 1 / (((n + h : ℕ) : ℝ)) := hUp0
+  have hleN : n + 1 ≤ n + h := by omega
+  have hle0 : ((((n + 1 : ℕ)) : ℝ)) ≤ ((((n + h : ℕ)) : ℝ)) := Nat.cast_le.mpr hleN
+  have e1 : ((((n + 1 : ℕ)) : ℝ)) = (n : ℝ) + 1 := by
+    push_cast
+    ring
+  rw [e1] at hle0
+  have hpos1 : (0 : ℝ) < (n : ℝ) + 1 := by
+    have hnR : (0 : ℝ) < (n : ℝ) := by
+      have hn0 : (0 : ℕ) < n := by omega
+      exact_mod_cast hn0
+    linarith
+  have hpos2 : (0 : ℝ) < ((((n + h : ℕ)) : ℝ)) := by
+    have h0 : (0 : ℕ) < n + h := by omega
+    exact_mod_cast h0
+  have h12 : (1 : ℝ) / (((n + h : ℕ) : ℝ)) ≤ 1 / ((n : ℝ) + 1) :=
+    one_div_le_one_div_of_le hpos1 hle0
+  have hdec : Real.log (((((n + h : ℕ)) : ℝ)) + 1) - Real.log ((((n + h : ℕ)) : ℝ))
+      ≤ Real.log ((n : ℝ) + 1) - Real.log ((n : ℝ)) :=
+    le_trans hUp (le_trans h12 hLow)
+  have habs : |((Real.log (((((n + h : ℕ)) : ℝ)) + 1)
+        - Real.log ((((n + h : ℕ)) : ℝ)))
+        - (Real.log ((n : ℝ) + 1) - Real.log ((n : ℝ))))|
+      = (Real.log ((n : ℝ) + 1) - Real.log ((n : ℝ)))
+        - (Real.log (((((n + h : ℕ)) : ℝ)) + 1) - Real.log ((((n + h : ℕ)) : ℝ))) := by
+    rw [abs_of_nonpos (sub_nonpos.mpr hdec)]
+    ring
+  rw [habs]
+  exact mul_le_mul_of_nonneg_left (by linarith [hLow, hUp]) (by norm_num)
+
+/-- (CB-e) Smallness. -/
+theorem CB_phase_small (n h : ℕ) (hn : 1 ≤ n)
+    (hsmall : 8.75 * ((h : ℝ) / (n : ℝ)) ≤ Real.pi / 2) :
+    |8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)))|
+      ≤ Real.pi / 2 := by
+  have hn_pos : (0 : ℕ) < n := by omega
+  have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn_pos
+  have hleN : n ≤ n + h := Nat.le_add_right _ _
+  have hle : (n : ℝ) ≤ ((((n + h : ℕ)) : ℝ)) := Nat.cast_le.mpr hleN
+  have hnn : (0 : ℝ) ≤ Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)) := by
+    have h := Real.log_le_log hnR hle
+    linarith
+  have hnn2 : (0 : ℝ)
+      ≤ 8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ))) :=
+    mul_nonneg (by norm_num) hnn
+  rw [abs_of_nonneg hnn2]
+  have hup := CB_log_shift_le n h hn
+  have hmul : 8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)))
+      ≤ 8.75 * ((h : ℝ) / (n : ℝ)) :=
+    mul_le_mul_of_nonneg_left hup (by norm_num)
+  linarith [hmul, hsmall]
+
+set_option maxHeartbeats 800000 in
+/-- (CB-f) General `h`-diagonal linear-proxy bound via `KL_linear_firstDerivTest`. -/
+theorem CB_diag_linear_bound (n h N : ℕ) (hn : 1 ≤ n) (hh : 1 ≤ h)
+    (hsmall : 8.75 * ((h : ℝ) / (n : ℝ)) ≤ Real.pi / 2) :
+    ‖∑ k ∈ Finset.range N, Complex.exp (((k : ℂ)
+      * (((8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)))) : ℝ) : ℂ))
+      * Complex.I)‖
+      ≤ Real.pi / (8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ)))) := by
+  set th : ℝ := 8.75 * (Real.log (((n + h : ℕ) : ℝ)) - Real.log ((n : ℝ)))
+    with hth
+  have hlow : 8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ))) ≤ th :=
+    CB_phase_gap_lower n h hn
+  have hpos_low : (0 : ℝ) < 8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ))) := by
+    have hn_pos : (0 : ℕ) < n := by omega
+    have hh_pos : (0 : ℕ) < h := by omega
+    have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn_pos
+    have hhR : (0 : ℝ) < (h : ℝ) := by exact_mod_cast hh_pos
+    apply mul_pos (by norm_num)
+    apply div_pos hhR
+    linarith
+  have hth_pos : (0 : ℝ) < th := lt_of_lt_of_le hpos_low hlow
+  have hth_ne : th ≠ 0 := ne_of_gt hth_pos
+  have hsmall_abs : |th| ≤ Real.pi / 2 := by
+    rw [hth]
+    exact CB_phase_small n h hn hsmall
+  have hKL := KL_linear_firstDerivTest th hth_ne hsmall_abs N
+  have habs_eq : |th| = th := abs_of_pos hth_pos
+  have hdiv : Real.pi / |th|
+      ≤ Real.pi / (8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ)))) := by
+    rw [habs_eq]
+    have hpi_nn : (0 : ℝ) ≤ Real.pi := le_of_lt Real.pi_pos
+    have h1 : (1 : ℝ) / th ≤ 1 / (8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ)))) :=
+      one_div_le_one_div_of_le hpos_low hlow
+    have h2 := mul_le_mul_of_nonneg_left h1 hpi_nn
+    have e1 : Real.pi / th = Real.pi * (1 / th) := by ring
+    have e2 : Real.pi / (8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ))))
+        = Real.pi * (1 / (8.75 * ((h : ℝ) / ((n : ℝ) + (h : ℝ))))) := by ring
+    rw [e1, e2]
+    exact h2
+  exact le_trans hKL hdiv
+
+/-- (CB-g) ONE concrete diagonal (`n=16,h=1,N=15 ≤ 6.2`). -/
+theorem CB_diag_h1_N15 :
+    ‖∑ k ∈ Finset.range 15, Complex.exp (((k : ℂ)
+      * (((8.75 * (Real.log (((16 + 1 : ℕ) : ℝ)) - Real.log (((16 : ℕ) : ℝ)))) : ℝ) : ℂ))
+      * Complex.I)‖ ≤ 6.2 := by
+  have hsmall : 8.75 * ((((1 : ℕ)) : ℝ) / (((16 : ℕ)) : ℝ)) ≤ Real.pi / 2 := by
+    have hpi3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
+    have e1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    have e16 : ((((16 : ℕ)) : ℝ)) = (16 : ℝ) := by norm_num
+    rw [e1, e16]
+    have hle : (8.75 : ℝ) * (1 / 16) ≤ 3 / 2 := by norm_num
+    have h32 : (3 : ℝ) / 2 ≤ Real.pi / 2 := by linarith [hpi3]
+    exact le_trans hle h32
+  have hgen := CB_diag_linear_bound 16 1 15 (by norm_num) (by norm_num) hsmall
+  have e16 : ((((16 : ℕ)) : ℝ)) = (16 : ℝ) := by norm_num
+  have e1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  have hDpos : (0 : ℝ)
+      < 8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))) := by
+    rw [e1, e16]
+    apply mul_pos (by norm_num)
+    apply div_pos (by norm_num)
+    norm_num
+  have hle_pi : Real.pi
+        / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))
+      ≤ 3.1416
+        / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ))))) := by
+    have hle0 : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have h1D : (0 : ℝ)
+        ≤ 1 / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ))))) :=
+      le_of_lt (one_div_pos.mpr hDpos)
+    have hmul := mul_le_mul_of_nonneg_right hle0 h1D
+    have f1 : Real.pi
+          / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))
+        = Real.pi
+          * (1 / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))) := by
+      ring
+    have f2 : (3.1416 : ℝ)
+          / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))
+        = 3.1416
+          * (1 / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))) := by
+      ring
+    rw [f1, f2]
+    exact hmul
+  have hnum : (3.1416 : ℝ)
+        / (8.75 * ((((1 : ℕ)) : ℝ) / ((((16 : ℕ)) : ℝ) + ((((1 : ℕ)) : ℝ)))))
+      ≤ 6.2 := by
+    rw [e1, e16]
+    norm_num
+  exact le_trans (le_trans hgen hle_pi) hnum
+
+/-- (CB-h) Shift-summation `H=2` (`≤19`). -/
+theorem CB_shiftSum_2_le :
+    ∑ h ∈ Finset.range 2, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))) ≤ 19 := by
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : (∑ h ∈ Finset.range 2, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      = (34 / 8.75 * (1 + 1 / 2)) * Real.pi := by
+    show (∑ h ∈ Finset.range (1 + 1), (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      = (34 / 8.75 * (1 + 1 / 2)) * Real.pi
+    rw [Finset.sum_range_succ]
+    show (∑ h ∈ Finset.range (0 + 1), (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      + 34 * Real.pi / (8.75 * ((((1 : ℕ)) : ℝ) + 1))
+      = (34 / 8.75 * (1 + 1 / 2)) * Real.pi
+    rw [Finset.sum_range_succ]
+    show (∑ h ∈ Finset.range 0, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      + 34 * Real.pi / (8.75 * ((((0 : ℕ)) : ℝ) + 1))
+      + 34 * Real.pi / (8.75 * ((((1 : ℕ)) : ℝ) + 1))
+      = (34 / 8.75 * (1 + 1 / 2)) * Real.pi
+    rw [Finset.sum_range_zero]
+    simp
+    ring
+  rw [e]
+  have hC : (0 : ℝ) ≤ 34 / 8.75 * (1 + 1 / 2) := by norm_num
+  have hle : (34 / 8.75 * (1 + 1 / 2)) * Real.pi
+      ≤ (34 / 8.75 * (1 + 1 / 2)) * 3.1416 :=
+    mul_le_mul_of_nonneg_left (le_of_lt hpi) hC
+  have hnum : ((34 : ℝ) / 8.75 * (1 + 1 / 2)) * 3.1416 ≤ (19 : ℝ) := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- (CB-h) Shift-summation `H=3` (`≤23`). -/
+theorem CB_shiftSum_3_le :
+    ∑ h ∈ Finset.range 3, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))) ≤ 23 := by
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : (∑ h ∈ Finset.range 3, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      = (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi := by
+    show (∑ h ∈ Finset.range (2 + 1), (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      = (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi
+    rw [Finset.sum_range_succ]
+    show (∑ h ∈ Finset.range (1 + 1), (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      + 34 * Real.pi / (8.75 * ((((2 : ℕ)) : ℝ) + 1))
+      = (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi
+    rw [Finset.sum_range_succ]
+    show (∑ h ∈ Finset.range (0 + 1), (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      + 34 * Real.pi / (8.75 * ((((1 : ℕ)) : ℝ) + 1))
+      + 34 * Real.pi / (8.75 * ((((2 : ℕ)) : ℝ) + 1))
+      = (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi
+    rw [Finset.sum_range_succ]
+    show (∑ h ∈ Finset.range 0, (34 * Real.pi / (8.75 * (((h : ℝ)) + 1))))
+      + 34 * Real.pi / (8.75 * ((((0 : ℕ)) : ℝ) + 1))
+      + 34 * Real.pi / (8.75 * ((((1 : ℕ)) : ℝ) + 1))
+      + 34 * Real.pi / (8.75 * ((((2 : ℕ)) : ℝ) + 1))
+      = (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi
+    rw [Finset.sum_range_zero]
+    simp
+    ring
+  rw [e]
+  have hC : (0 : ℝ) ≤ 34 / 8.75 * (1 + 1 / 2 + 1 / 3) := by norm_num
+  have hle : (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * Real.pi
+      ≤ (34 / 8.75 * (1 + 1 / 2 + 1 / 3)) * 3.1416 :=
+    mul_le_mul_of_nonneg_left (le_of_lt hpi) hC
+  have hnum : ((34 : ℝ) / 8.75 * (1 + 1 / 2 + 1 / 3)) * 3.1416 ≤ (23 : ℝ) := by
+    norm_num
+  exact le_trans hle hnum
+
+/-- (CB-h) Optimized cutoff `H=2` beats `H=3`. -/
+theorem CB_opt_H2 : (16 : ℝ) + 2 * 19 < (16 : ℝ) + 2 * 23 := by norm_num
+
+/-- (CB-h) vdC-style squared budget `H=2` optimized (`≤54`). -/
+theorem CB_vdC_budget_H2_le :
+    (16 : ℝ) + 2 * (∑ h ∈ Finset.range 2,
+      (34 * Real.pi / (8.75 * (((h : ℝ)) + 1)))) ≤ 54 := by
+  have hsum := CB_shiftSum_2_le
+  linarith
+
+/-- (CB-h) vdC-style squared budget `H=3` (`≤62`). -/
+theorem CB_vdC_budget_H3_le :
+    (16 : ℝ) + 2 * (∑ h ∈ Finset.range 3,
+      (34 * Real.pi / (8.75 * (((h : ℝ)) + 1)))) ≤ 62 := by
+  have hsum := CB_shiftSum_3_le
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (CB-i) BS per-pair step on `[16,32)`: `10*(17+2m)^{-1.605} ≤ 10/85`. -/
+theorem CB_BS_perPair_le (m : ℕ) :
+    10 * ((((17 + 2 * m : ℕ)) : ℝ) ^ (-1.605 : ℝ)) ≤ 10 / 85 := by
+  set x : ℝ := ((((17 + 2 * m : ℕ)) : ℝ)) with hx
+  have hbase_pos : (0 : ℝ) < x := by
+    rw [hx]
+    have h : 0 < 17 + 2 * m := by omega
+    exact_mod_cast h
+  have h15_le : (15 : ℝ) ≤ x := by
+    rw [hx]
+    have h : 15 ≤ 17 + 2 * m := by omega
+    have hcast : ((((15 : ℕ)) : ℝ)) ≤ ((((17 + 2 * m : ℕ)) : ℝ)) := Nat.cast_le.mpr h
+    have e : ((((15 : ℕ)) : ℝ)) = (15 : ℝ) := by norm_num
+    rw [e] at hcast
+    exact hcast
+  have h5 : (5 : ℝ) ≤ x ^ (0.605 : ℝ) := by
+    have h15 : (5 : ℝ) ≤ (15 : ℝ) ^ (0.605 : ℝ) := MID_rpow15_ge
+    have hmono : (15 : ℝ) ^ (0.605 : ℝ) ≤ x ^ (0.605 : ℝ) :=
+      Real.rpow_le_rpow (by norm_num) h15_le (by norm_num)
+    exact le_trans h15 hmono
+  have h17 : (17 : ℝ) ≤ x := by
+    rw [hx]
+    have h : 17 ≤ 17 + 2 * m := by omega
+    have hcast : ((((17 : ℕ)) : ℝ)) ≤ ((((17 + 2 * m : ℕ)) : ℝ)) := Nat.cast_le.mpr h
+    have e : ((((17 : ℕ)) : ℝ)) = (17 : ℝ) := by norm_num
+    rw [e] at hcast
+    exact hcast
+  have hpow : (85 : ℝ) ≤ x ^ (1.605 : ℝ) := by
+    have e1605 : (1.605 : ℝ) = 1 + 0.605 := by norm_num
+    rw [e1605, Real.rpow_add hbase_pos, Real.rpow_one]
+    have hpos5 : (0 : ℝ) ≤ (5 : ℝ) := by norm_num
+    have hposX : (0 : ℝ) ≤ x := le_of_lt hbase_pos
+    have hmul := mul_le_mul h17 h5 hpos5 hposX
+    have e85 : (17 : ℝ) * 5 = 85 := by norm_num
+    rw [e85] at hmul
+    exact hmul
+  have hneg : x ^ (-1.605 : ℝ) = (x ^ (1.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (le_of_lt hbase_pos) _
+  rw [hneg]
+  have hpos85 : (0 : ℝ) < (85 : ℝ) := by norm_num
+  have hposXpow : (0 : ℝ) < x ^ (1.605 : ℝ) := Real.rpow_pos_of_pos hbase_pos _
+  have hinv : (x ^ (1.605 : ℝ))⁻¹ ≤ (85 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hposXpow hpos85).mpr hpow
+  have e1085 : (10 : ℝ) / 85 = 10 * (85 : ℝ)⁻¹ := by ring
+  rw [e1085]
+  exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+
+/-- (CB-i) BS eight-pair sum `≤ 80/85`. -/
+theorem CB_BS_sum8_le :
+    ∑ m ∈ Finset.range 8, (10 * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ)))
+      ≤ 80 / 85 := by
+  have hsum : (∑ m ∈ Finset.range 8,
+        (10 * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))))
+      ≤ (∑ _m ∈ Finset.range 8, ((10 : ℝ) / 85)) :=
+    Finset.sum_le_sum (fun m _ => CB_BS_perPair_le m)
+  have econst : (∑ _m ∈ Finset.range 8, ((10 : ℝ) / 85)) = 80 / 85 := by
+    rw [Finset.sum_const, Finset.card_range]
+    rw [nsmul_eq_mul]
+    norm_num
+  rwa [econst] at hsum
+
+set_option maxHeartbeats 800000 in
+/-- (CB-i) HEADLINE BS pairing on `[16,32)` (`≤1`). -/
+theorem CB_BS_16_32 :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 1 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ j ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + j) := by
+    have h := MID_sum_Ico_shift (etaDirichletTerm (1 - zetaCellS0)) 16 16
+    rwa [show (16 + 16 : ℕ) = 32 by norm_num] at h
+  rw [hIco]
+  have heta : ∀ j : ℕ, etaDirichletTerm (1 - zetaCellS0) (16 + j)
+      = (-1 : ℂ) ^ j * T2_AE_f (16 + j) := by
+    intro j
+    rw [T2_AE_eta_eq, MID_neg_one_shift, mul_comm]
+  have hsum : (∑ j ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + j))
+      = ∑ j ∈ Finset.range 16, (-1 : ℂ) ^ j * T2_AE_f (16 + j) :=
+    Finset.sum_congr rfl (fun j _ => heta j)
+  rw [hsum, show (16 : ℕ) = 2 * 8 by norm_num, MID_pair_identity]
+  calc ‖∑ m ∈ Finset.range 8,
+        (T2_AE_f (16 + 2 * m) - T2_AE_f (16 + (2 * m + 1)))‖
+      ≤ ∑ m ∈ Finset.range 8,
+        ‖T2_AE_f (16 + 2 * m) - T2_AE_f (16 + (2 * m + 1))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ m ∈ Finset.range 8,
+        (10 * (((((17 + 2 * m : ℕ)) : ℝ)) ^ (-1.605 : ℝ))) := by
+        apply Finset.sum_le_sum
+        intro m _
+        have e1 : 16 + (2 * m + 1) = (16 + 2 * m) + 1 := by omega
+        rw [e1]
+        have hstep := MID_step_le (16 + 2 * m)
+        have e2 : ((((16 + 2 * m : ℕ)) : ℝ)) + 1 = ((((17 + 2 * m : ℕ)) : ℝ)) := by
+          push_cast
+          ring
+        rw [e2] at hstep
+        exact hstep
+    _ ≤ 80 / 85 := CB_BS_sum8_le
+    _ ≤ 1 := by norm_num
+
+/-- (CB-i) Comparison numerals. -/
+theorem CB_compare_BS_vdC : (80 : ℝ) / 85 ≤ 1 ∧ (54 : ℝ) < 62 := by
+  constructor <;> norm_num
+
+#print axioms CB_phi
+#print axioms CB_phi_sub
+#print axioms CB_log_shift_ge
+#print axioms CB_phase_gap_lower
+#print axioms CB_log_shift_le
+#print axioms CB_curv_gap_lower
+#print axioms CB_phase_small
+#print axioms CB_diag_linear_bound
+#print axioms CB_diag_h1_N15
+#print axioms CB_shiftSum_2_le
+#print axioms CB_shiftSum_3_le
+#print axioms CB_opt_H2
+#print axioms CB_vdC_budget_H2_le
+#print axioms CB_vdC_budget_H3_le
+#print axioms CB_BS_perPair_le
+#print axioms CB_BS_sum8_le
+#print axioms CB_BS_16_32
+#print axioms CB_compare_BS_vdC
+
