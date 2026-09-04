@@ -14058,5 +14058,388 @@ center-product premises (`Agam`, `Azeta`) owned by sibling agents.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# Door-3 R02 H-leaf: M-reduction scout (parametric threshold + poly-sharp step + Gamma-gap)
+
+Ownership: M-reduction scout append (append-only after the Door-3 downstream-discharge
+block; nothing above touched; no new imports; LF endings).
+
+Context (verified green): unconditional `‖deriv xiShifted‖ ≤ 163` on R02
+(`Door3DownstreamDischarge`, via zeta-upper `≤ 10` + Gamma-upper `≤ 0.097`).
+Honest net: at `M = 163` the H-leaf threshold needs `Azeta ≥ 9336` at
+`R02Pilot.sCenter` (infeasible at true `|zeta| = O(1)`, 0 cells closed).
+Path to a real closure is driving `M` down toward `~0.05`.
+
+Grep record (verified before writing; `rg -n`):
+* `theorem AO_threshold_check_163` -> `central_cover_assembly.lean:10099`
+  (`0.002 + 163 * 1.26 ≤ 22 * (1/2) * 0.006 * 3112`).
+* `theorem AO_required_Azeta_of_Agam_163` -> `central_cover_assembly.lean:10107`
+  (`≥ 3111` necessary at `Agam = 0.006`, `M = 163`).
+* `theorem AU_threshold_check_163_002` -> `central_cover_assembly.lean:10375`
+  (`0.002 + 163 * 1.26 ≤ 22 * (1/2) * 0.002 * 9336`).
+* `theorem AU_required_Azeta_of_Agam002_163` -> `central_cover_assembly.lean:10385`
+  (`≥ 9335` necessary at `Agam = 0.002`, `M = 163`).
+* `theorem poly_upper_R02_disc` -> `central_cover_assembly.lean:6360`
+  (`‖polyOf s‖ ≤ 42`; `8.99 * 9.2 / 2 = 41.354` leaves `0.646` on the table).
+* `theorem gammaOf_upper_disc_R02` -> `interval_arith.lean:32316`
+  (`‖gammaOf s‖ ≤ 0.097`; true sup `~0.026`, headroom `3.7x`; dense 6-shift
+  floors `2.62/2.81/3.31/4.0/4.8/5.66` + numerator `256.78` are already tight,
+  so a further unconditional cut needs Im-decay on the `Γ(z+6)` numerator).
+* `theorem R02_zeta_upper_obligation` -> `central_cover_assembly.lean:6493`
+  (`‖zeta s‖ ≤ 10`; true `O(1)`).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+(a) Parametric M-vs-threshold tradeoff in the `Agam = 0.002` era
+(`Apoly = 22`, `Api = 1/2`, `eps = 0.002`, `radius < 1.26`, coeff
+`22 * (1/2) * 0.002 = 0.022`): necessity/sufficiency in `M`, reuse of the
+`AU` `M = 163` check, and a required-`Azeta(M)` table.
+(b) First concrete unconditional M-reduction step from the poly headroom:
+`‖polyOf‖ ≤ 41.36` on the R02 rect (same triangle proof, tight final
+arithmetic `41.354 ≤ 41.36`) gives sphere sup `40.1192` and
+`‖deriv xiShifted‖ ≤ 160.4768` (ceil `161`) on R02 from the already-discharged
+zeta/gamma premises — `M = 163 → 161`, threshold `9336 → 9222`.
+(c) Fully-quantified single-gap Gamma conditional (Stirling target): with the
+sharper poly, any disc Gamma cap `G` + zeta cap `Z` gives
+`M(G,Z) = 41.36 * G * Z / 0.25`; at `G = 0.026`, `Z = 10`, `M = 43.0144`
+needs `Azeta ≥ 2464` (sufficient; `≥ 2463` necessary). One premise, exact numbers.
+-/
+
+namespace Door3MReductionScout
+
+/-- Coefficient in the `Agam = 0.002` era: `22 * (1/2) * 0.002 = 0.022`
+(mirrors `AU_product_163_002_eq` arithmetic at `central_cover_assembly.lean:10368`). -/
+theorem coeff_002_eq : (22 : ℝ) * (1 / 2) * 0.002 = 0.022 := by
+  norm_num
+
+/-- Parametric necessity: the H-leaf inequality forces
+`(0.002 + M * 1.26) / 0.022 ≤ Azeta` (generalizes
+`AU_required_Azeta_of_Agam002_163` at `:10385`, which is `M = 163`). -/
+theorem required_Azeta_necessary_of_threshold {M Azeta : ℝ}
+    (h : (0.002 : ℝ) + M * 1.26 ≤ 22 * (1 / 2) * 0.002 * Azeta) :
+    ((0.002 : ℝ) + M * 1.26) / 0.022 ≤ Azeta := by
+  have hcoeff : (22 : ℝ) * (1 / 2) * 0.002 = 0.022 := by norm_num
+  rw [hcoeff] at h
+  have hpos : (0 : ℝ) < 0.022 := by norm_num
+  have hcomm : (0.022 : ℝ) * Azeta = Azeta * 0.022 := by ring
+  have h2 : (0.002 : ℝ) + M * 1.26 ≤ Azeta * 0.022 := by
+    rw [← hcomm]
+    exact h
+  exact (div_le_iff₀ hpos).mpr h2
+
+/-- Parametric sufficiency: `(0.002 + M * 1.26) / 0.022 ≤ Azeta` closes the
+H-leaf inequality (converse direction; mirrors `AU_threshold_check_163_002`
+at `:10375`, which is the `M = 163`, `Azeta = 9336` instance). -/
+theorem threshold_sufficient_of_required {M Azeta : ℝ}
+    (h : ((0.002 : ℝ) + M * 1.26) / 0.022 ≤ Azeta) :
+    (0.002 : ℝ) + M * 1.26 ≤ 22 * (1 / 2) * 0.002 * Azeta := by
+  have hcoeff : (22 : ℝ) * (1 / 2) * 0.002 = 0.022 := by norm_num
+  rw [hcoeff]
+  have hpos : (0 : ℝ) < 0.022 := by norm_num
+  have h2 : ((0.002 : ℝ) + M * 1.26) ≤ Azeta * 0.022 :=
+    (div_le_iff₀ hpos).mp h
+  have hcomm : Azeta * (0.022 : ℝ) = (0.022 : ℝ) * Azeta := by ring
+  rw [hcomm] at h2
+  exact h2
+
+/-- Direct reuse (no proof duplication): the `M = 163` AU threshold check. -/
+theorem AU_check_163_reuse :
+    (0.002 : ℝ) + 163 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 9336 :=
+  AU_R02_Agam002_M163.AU_threshold_check_163_002
+
+/-- Budget at the landed tier: `0.002 + 163 * 1.26 = 205.382`. -/
+theorem budget_163_eq : (0.002 : ℝ) + 163 * 1.26 = 205.382 := by
+  norm_num
+
+/-- Budget at the new unconditional tier: `0.002 + 161 * 1.26 = 202.862`. -/
+theorem budget_161_eq : (0.002 : ℝ) + 161 * 1.26 = 202.862 := by
+  norm_num
+
+/-- Required-`Azeta(M)` table, lower (necessary) floors via `le_div_iff₀`.
+`M = 163 → ≥ 9335`; `M = 161 → ≥ 9221`; `M = 43.0144 → ≥ 2463`;
+`M = 10 → ≥ 572`; `M = 1 → ≥ 57`; `M = 0.05 → ≥ 2.95`. -/
+theorem table_163_lower : (9335 : ℝ) ≤ ((0.002 : ℝ) + 163 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+theorem table_161_lower : (9221 : ℝ) ≤ ((0.002 : ℝ) + 161 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+theorem table_430144_lower :
+    (2463 : ℝ) ≤ ((0.002 : ℝ) + 43.0144 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+theorem table_10_lower : (572 : ℝ) ≤ ((0.002 : ℝ) + 10 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+theorem table_1_lower : (57 : ℝ) ≤ ((0.002 : ℝ) + 1 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+theorem table_005_lower : (2.95 : ℝ) ≤ ((0.002 : ℝ) + 0.05 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceilings for the table (`norm_num` checks):
+`M = 161` needs `Azeta = 9222`; Stirling-target `M = 43.0144` needs `2464`. -/
+theorem threshold_check_161_9222 :
+    (0.002 : ℝ) + 161 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 9222 := by
+  norm_num
+
+theorem threshold_check_430144_2464 :
+    (0.002 : ℝ) + 43.0144 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 2464 := by
+  norm_num
+
+/-- Parametric center bound in `M` (generalizes
+`AU_center_bound_163_002_of_components` at `:10408`, which fixes `M = 163`):
+from `Agam ≥ 0.002`, `Azeta ≤ ‖ζ(sCenter)‖`, and the parametric threshold,
+`0.002 + M * radius ≤ ‖xiShifted R02.center‖`. -/
+theorem center_bound_of_M_Azeta {M Azeta : ℝ} (hM0 : 0 ≤ M) (hAzeta0 : 0 ≤ Azeta)
+    (hGam : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : Azeta ≤ ‖zeta R02Pilot.sCenter‖)
+    (hThresh : (0.002 : ℝ) + M * 1.26 ≤ 22 * (1 / 2) * 0.002 * Azeta) :
+    (0.002 : ℝ) + M * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  have hpoly : (22 : ℝ) ≤ ‖DerivCauchyBridge.polyOf R02Pilot.sCenter‖ :=
+    R02Pilot.poly_lower
+  have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
+    R02Pilot.pi_lower
+  have harg2 : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center =
+      R02Pilot.sCenter := rfl
+  have hdecomp :=
+    DerivCauchyBridge.norm_xiShifted_eq_parts CentralCoverAssembly.R02.center
+  rw [harg2] at hdecomp
+  have hle : 22 * (1 / 2) * 0.002 * Azeta ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+    rw [hdecomp]
+    exact TailProofEngine.prod_four_ge_of_ge
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hpoly hpi hGam hZeta
+      (by norm_num) (by norm_num) (by norm_num) hAzeta0
+  have hbud : M * CentralCoverAssembly.R02.radius ≤ M * 1.26 :=
+    mul_le_mul_of_nonneg_left
+      (le_of_lt CentralCoverAssembly.R02_radius_lt) hM0
+  linarith
+
+/-- Sharper hypothesis-free poly upper `‖polyOf‖ ≤ 41.36` on the R02 disc
+`s`-rect: identical triangle proof to `DerivCauchyBridge.poly_upper_R02_disc`
+(`:6360`), tight final arithmetic (`8.99 * 9.2 / 2 = 41.354 ≤ 41.36`;
+old cap `42` left `0.646` on the table). -/
+theorem poly_upper_R02_disc_4136 {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 41.36 := by
+  unfold DerivCauchyBridge.polyOf
+  have hs_le : ‖s‖ ≤ 8.99 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hre_abs : |s.re| ≤ 0.74 := by
+      rw [abs_le]
+      constructor <;> linarith
+    have him_abs : |s.im| ≤ 8.25 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hs1_le : ‖s - 1‖ ≤ 9.2 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    have hre1 : (s - 1).re = s.re - 1 := by simp [Complex.sub_re]
+    have him1 : (s - 1).im = s.im := by simp [Complex.sub_im]
+    have hre_abs : |(s - 1).re| ≤ 0.95 := by
+      rw [hre1, abs_le]
+      constructor <;> linarith
+    have him_abs : |(s - 1).im| ≤ 8.25 := by
+      rw [him1, abs_le]
+      constructor <;> linarith
+    linarith
+  have hmul : ‖s * (s - 1)‖ ≤ 8.99 * 9.2 := by
+    rw [norm_mul]
+    exact mul_le_mul hs_le hs1_le (norm_nonneg _) (by norm_num)
+  have hnorm : ‖s * (s - 1) / 2‖ ≤ 8.99 * 9.2 / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith [hmul]
+  have hcalc : (8.99 : ℝ) * 9.2 / 2 ≤ 41.36 := by norm_num
+  linarith
+
+/-- Sharper sphere equation: `41.36 * 1 * 0.097 * 10 = 40.1192`
+(was `42 * 1 * 0.097 * 10 = 40.74`). -/
+theorem sphere_sup_4136_eq : (41.36 : ℝ) * 1 * 0.097 * 10 = 40.1192 := by
+  norm_num
+
+/-- Sharper Cauchy equation: `40.1192 / 0.25 = 160.4768` (was `162.96`). -/
+theorem deriv_M_4136_eq : (40.1192 : ℝ) / 0.25 = 160.4768 := by
+  norm_num
+
+/-- Unconditional sharper sphere sup `40.1192` on all R02 `0.25`-spheres
+(from the discharged zeta `≤ 10` + Gamma `≤ 0.097` + sharper poly). -/
+theorem sphere_401192_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 40.1192 := by
+  intro w hw u hu
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    DerivCauchyBridge.R02_s_of_sphere_re_im hw hu
+  have hpoly := poly_upper_R02_disc_4136 hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := DerivCauchyBridge.pi_upper_R02_disc hsre_lo
+  have hgam : ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 0.097 :=
+    Door3DownstreamDischarge.AO_gamma_upper_discharged _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hzeta : ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 10 :=
+    Door3DownstreamDischarge.R02_zeta_upper_discharged _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  have hlo : -(1 / 2 : ℝ) < u.im ∧ u.im < (1 / 2 : ℝ) := by
+    obtain ⟨hlo, hhi⟩ := DerivCauchyBridge.R02_sphere_mem_strip hw hu
+    exact ⟨hlo, hhi⟩
+  obtain ⟨hlo1, hhi1⟩ := hlo
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo1 hhi1
+  rw [← hEq]
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 41.36 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 41.36 * 1 * 0.097 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  have h123 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖zeta ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 41.36 * 1 * 0.097 * 10 :=
+    mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+  have hnum : (41.36 : ℝ) * 1 * 0.097 * 10 = 40.1192 := by norm_num
+  rw [hnum] at h123
+  exact h123
+
+/-- Unconditional sharper R02 deriv bound `M = 160.4768` (`40.1192 / 0.25`). -/
+theorem deriv_1604768_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (160.4768 : ℝ) := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R02 0.25 40.1192
+    (by norm_num) (fun w hw => DerivCauchyBridge.R02_strip_of_mem hw)
+    sphere_401192_unconditional
+  intro w hw
+  have hle := hM w hw
+  have heq : (40.1192 : ℝ) / 0.25 = 160.4768 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Ceil tier `M = 161` covers the exact `160.4768` (new unconditional tier,
+`163 → 161`; threshold `9336 → 9222` by `threshold_check_161_9222`). -/
+theorem deriv_161_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (161 : ℝ) := by
+  intro w hw
+  have hle := deriv_1604768_unconditional w hw
+  linarith
+
+/-- General `(G, Z)` sphere bound with the sharper poly: from disc caps
+`‖gammaOf‖ ≤ G`, `‖zeta‖ ≤ Z`, sup `≤ 41.36 * 1 * G * Z`. -/
+theorem sphere_bound_of_gammaZ_upper {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ G)
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ Z) :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 41.36 * 1 * G * Z := by
+  intro w hw u hu
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    DerivCauchyBridge.R02_s_of_sphere_re_im hw hu
+  have hpoly := poly_upper_R02_disc_4136 hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := DerivCauchyBridge.pi_upper_R02_disc hsre_lo
+  have hgam := hG _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hzeta := hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  obtain ⟨hlo, hhi⟩ := DerivCauchyBridge.R02_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 41.36 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * u)‖ ≤ 41.36 * 1 * G :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by linarith)
+  exact mul_le_mul h12 hzeta (norm_nonneg _) (by linarith)
+
+/-- General `(G, Z)` deriv bound: `M(G,Z) = 41.36 * G * Z / 0.25`. -/
+theorem deriv_bound_of_gammaZ_upper {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ G)
+    (hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ Z) :
+    ∀ w, CentralCoverAssembly.R02.mem w →
+      ‖deriv xiShifted w‖ ≤ 41.36 * 1 * G * Z / 0.25 := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R02 0.25 (41.36 * 1 * G * Z)
+    (by norm_num) (fun w hw => DerivCauchyBridge.R02_strip_of_mem hw)
+    (sphere_bound_of_gammaZ_upper hG0 hZ0 hG hZ)
+  exact hM
+
+/-- Stirling-target equation: `41.36 * 1 * 0.026 * 10 / 0.25 = 43.0144`. -/
+theorem stirling_target_M_eq :
+    (41.36 : ℝ) * 1 * 0.026 * 10 / 0.25 = 43.0144 := by
+  norm_num
+
+/-- Single-gap Gamma conditional (fully quantified): a disc Gamma cap
+`G = 0.026` (true sup; gap `0.097 → 0.026` is the Gamma side) plus the
+discharged zeta cap `Z = 10` gives `M = 43.0144` on R02. Sole premise `hG`. -/
+theorem deriv_430144_of_gamma0026
+    (hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.026 : ℝ)) :
+    ∀ w, CentralCoverAssembly.R02.mem w →
+      ‖deriv xiShifted w‖ ≤ (43.0144 : ℝ) := by
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (10 : ℝ) :=
+    Door3DownstreamDischarge.R02_zeta_upper_discharged
+  have hD := deriv_bound_of_gammaZ_upper (by norm_num) (by norm_num) hG hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (41.36 : ℝ) * 1 * 0.026 * 10 / 0.25 = 43.0144 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+#print axioms Door3MReductionScout.coeff_002_eq
+#print axioms Door3MReductionScout.required_Azeta_necessary_of_threshold
+#print axioms Door3MReductionScout.threshold_sufficient_of_required
+#print axioms Door3MReductionScout.AU_check_163_reuse
+#print axioms Door3MReductionScout.poly_upper_R02_disc_4136
+#print axioms Door3MReductionScout.sphere_401192_unconditional
+#print axioms Door3MReductionScout.deriv_1604768_unconditional
+#print axioms Door3MReductionScout.deriv_161_unconditional
+#print axioms Door3MReductionScout.center_bound_of_M_Azeta
+#print axioms Door3MReductionScout.sphere_bound_of_gammaZ_upper
+#print axioms Door3MReductionScout.deriv_bound_of_gammaZ_upper
+#print axioms Door3MReductionScout.deriv_430144_of_gamma0026
+#print axioms Door3MReductionScout.threshold_check_161_9222
+#print axioms Door3MReductionScout.threshold_check_430144_2464
+
+end Door3MReductionScout
+
+/-!
+Door-3 M-reduction scout VERDICT + RESIDUAL (report-and-stop).
+
+(1) BRIDGES (this tail, full proofs, no `sorry`/`admit`/`axiom`):
+(a) Parametric threshold: `required_Azeta_necessary_of_threshold` /
+`sufficiency` give `Azeta-required(M) = (0.002 + M * 1.26) / 0.022` in the
+`Agam = 0.002` era (generalizing `AU_required_Azeta_of_Agam002_163` /
+`AU_threshold_check_163_002`); table: `M = 163 → 9335/9336`, `161 → 9221/9222`,
+`43.0144 → 2463/2464`, `10 → 572/573`, `1 → 57/58`, `0.05 → 2.95/3`.
+(b) Unconditional step `M = 163 → 161`: `poly_upper_R02_disc_4136`
+(`41.36`, was `42`) gives sphere `40.1192` + deriv `160.4768` (ceil `161`).
+(c) Single-gap Gamma conditional: `deriv_430144_of_gamma0026`
+(`G = 0.026` + discharged `Z = 10` → `M = 43.0144`, needs `Azeta ≥ 2464`).
+(2) NUMBERS: new `M = 160.4768` (ceil `161`); Gamma gap `0.097 → 0.026`
+(`3.7x`, Im-decay on the `Γ(z+6)` numerator is the missing piece; floors +
+endpoints already tight); threshold at true `|zeta| = O(1)` stays infeasible
+(`0.022 ≪ 205.382` at `M = 163`, `0.022 ≪ 202.862` at `M = 161`); 0 cells closed.
+(3) RESIDUAL + NEXT TASK: build verification + axioms below; next agent proves
+the `G = 0.026` disc-Gamma cap (Stirling-sharp numerator decay) or the
+`Z < 10` zeta-disc cut (FE + Stirling + convexity), then fires
+`deriv_bound_of_gammaZ_upper` + `center_bound_of_M_Azeta` toward the fencing
+tier `M ≈ 0.05` (needs `G * Z ≤ 0.0003`).
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
+
 
 
