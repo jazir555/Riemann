@@ -1631,11 +1631,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    axioms clean):** `R02_zeta_upper_discharged` (from `P1_R02_unconditional` via `zeta = riemannZeta`
    defeq) + `AO_gamma_upper_discharged` (from landed `R02GammaDisc.gammaOf_upper_disc_R02`) ⇒
    **UNCONDITIONAL `‖deriv xiShifted‖ ≤ 67200` on R02** (and `≤ 162.96`, ceil **`M = 163`** with the
-   `0.097` Gamma cap). Zeta-upper + deriv wall CLOSED with zero premises. Remaining R02 H-leaf is
-   center-product premises owned by siblings (`Agam`/`Azeta` thresholds at `R02Pilot.sCenter` —
-   `Azeta ≥ 9336` at `M = 163`, infeasible at true `|ζ| = O(1)`; honest net still 0 cells closed —
-   closing a cell needs M driven down via Stirling-sharp Gamma-upper + tighter zeta-upper, tasked
-   as scout). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   `0.097` Gamma cap). Zeta-upper + deriv wall CLOSED with zero premises. **M-reduction scout
+   (`Door3MReductionScout`, DL, `26a6620b`, green 8702 jobs, axioms clean):** parametric
+   `Azeta(M)` floors (`9335 @163 → 9221 @161 → 2463 @43.0144 → 572 @10 → 57 @1 → 2.95 @0.05`) +
+   first unconditional cut **`M = 160.4768`** (ceil 161, poly `42 → 41.36` headroom; saves 114 Azeta,
+   still infeasible) + fully-quantified single-gap conditional `M(G,Z) = 165.44·G·Z` (fencing `M ≈
+   0.05` needs `G·Z ≤ 0.0003`; Stirling target `G = 0.026 → M = 43.0144`). Remaining R02 H-leaf is
+   center-product premises (`Agam`/`Azeta` at `R02Pilot.sCenter`); next: disc-Gamma `0.026` cap or
+   zeta-disc cut below 10 (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
    MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
    marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
