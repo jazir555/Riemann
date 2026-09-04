@@ -1461,7 +1461,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   zero-write):** right `σ∈[1.5,2]` + left `σ∈[-1,-0.5]` envelopes DONE in-file; middle `σ∈[-0.5,1.5]`
   has NO envelope (Euler blows up, eta denominator zeros, FE no gain, log-bound absent). **Unblock
   found:** `ZeroFreeRegionHadamard.xi_norm_bound_whole_plane` (`‖xi‖≤exp(K‖z‖^{3/2})`) EXISTS and that
-  module imports ONLY Mathlib — any work file can import it cycle-free (AD precedent). **Update — Gamma factor fully closed for all 40 centers:**
+  module imports ONLY Mathlib — any work file can import it cycle-free (AD precedent).
+  **Outer thirds CLOSED (`BNStripThirds`):** exp-linear `F` envelope off the middle (`C=18`, `K=1+π/2`).
+  R1-as-stated (exp-linear) PROVED unreachable via xi (`exp(O(|τ|^1.5))` never fits); three-lines circular.
+  Relaxation tasked: exp-3/2 middle via xi + Gaussian domination ⇒ `hBdd` (damping beats any 1.5-power). **Update — Gamma factor fully closed for all 40 centers:**
   32/32 inner caps proved (rows 0–3: `0.05/0.15/0.5/1.5/1.2/0.5/0.15/0.05` outward→central, reusing the 4
   numerator chains; true ratios `~0.03→1.1`). Every cell's center product budget now has all four factors
   bounded (poly/pi/Gamma/zeta-upper); what remains per cell is a USABLE `Azeta` (division bridge, next)
