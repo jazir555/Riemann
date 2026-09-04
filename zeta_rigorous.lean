@@ -16761,6 +16761,200 @@ theorem D3_S16_norm_ge_CX :
 #print axioms D3_S16_im_abs_ge_CX
 #print axioms D3_S16_norm_ge_CX
 
+/-! ## Door-3 `S_16` margin Azeta track CY (Agent CY 2026-09-04): x=13 amp upper
+clearing `11/50 -> 20/93`.
+
+GREP-FIRST RECORD (run before writing; `grep` in `zeta_rigorous.lean` + Mathlib):
+* CS integer-clearing mirror pattern: `D3_amp_eleven_lower_CO` (:15541,
+  `9^8 = 43046721 >= 41229056 = 11^5*2^8`, `5/8`-exponent lower);
+  `D3_amp_twelve_upper_CS` (:15945, `151^5 = 78502725751 <= 78512412672 =
+  12^3*34^5`, `3/5`-exponent upper); `D3_amp_sixteen_lower_CS` (:16001,
+  `17^8 = 6975757441 >= 6879707136 = 16^5*3^8`, `5/8`-exponent lower).
+* Current x=13 amp upper: `D3_amp_thirteen_upper_CL` (:15169,
+  `D3_amp 12 <= 11/50`, `3/5`-exponent upper via `(50/11)^5 = 312500000/161051
+  <= 2197 = 13^3`, since `3/5 <= 0.605`; exponent form read and mirrored here).
+* x=16 amp sides: UPPER `D3_amp_sixteen_upper` (:11003, `D3_amp 15 <= 1/5`,
+  `3/5`-exponent, feeds only Re/early terms); LOWER `D3_amp_sixteen_lower_CS`
+  (:16001, `3/17 <= D3_amp 15`, `5/8`-exponent). `D3_term15_im_hi_CS` (:16033)
+  reads `ha_lo := D3_amp_sixteen_lower_CS` (amp LOWER, since `sin <= -0.757`
+  is negative and odd `k = 15` gives `Im = amp*sin`; upper would loosen the
+  term, so it is NOT touched here).
+* Term-12 feeder: `D3_term12_im_hi_CX` (:16668, `<= 4829/50000`, consumes
+  `D3_amp_thirteen_upper_CL` + `D3_sin_theta_thirteen_lo_CX` (`-0.439`); even
+  `k = 12`, so `Im = -(amp*sin)` with `sin` negative, hence the UPPER is the
+  tightening side -- this is the side cleared below).
+* CX assembly: `D3_S16_im_upper_CX` (:16690,
+  `Im S_16 <= -505966012/2695350000`) -> `D3_S16_norm_ge_CX` (:16751,
+  `>= 505966012/2695350000 ~= 0.1877`, head lower bound).
+* New names below -- 0 hits before writing (verified absent via `grep "_CY"`).
+* Pair-absolute/Tendsto forms only; `Finset.range` sums exclusively (no `sum'`).
+
+WHAT IS PROVED (all unconditional, FULL proofs, no `sorry`/`admit`/`axiom`):
+* (CY-A) `D3_amp_thirteen_upper_CY`: `D3_amp 12 <= 20/93` (was `11/50`;
+  mirror of `D3_amp_thirteen_upper_CL` with `c = 93/20` in place of `50/11`).
+* (CY-T) `D3_term12_im_hi_CY`: term-12 `Im <= 439/4650 ~= 0.0944086`
+  (was `4829/50000 = 0.09658`; mirror of `D3_term12_im_hi_CX` with (CY-A);
+  interval: `amp <= 20/93`, `sin >= -0.439`; even `k = 12`).
+* (CY-C) `D3_S16_im_upper_CY`: `Im S_16 <= -3173275873/16711170000
+  ~= -0.1898895`.
+* (CY-V) Verdicts: `|Im S_16| >= 3173275873/16711170000`,
+  `||S_16|| >= 3173275873/16711170000 ~= 0.18989` (`~1.0116x` the CX `0.18772`).
+
+NUMBERS: `(93/20)^5 = 6956883693/3200000 ~= 2174.03 <= 2197 = 13^3`
+(margin `73516307 ~= 1.05%`); `(20/93)*0.439 = 439/4650`;
+new sum `= -505966012/2695350000 - 4829/50000 + 439/4650
+= -3173275873/16711170000`. Honest throughout
+(true `Im S_16 ~= -0.51` remains the ceiling; true term-12 `Im ~= +0.09257`
+vs bound `0.09441`).
+True amps: `13^{-0.605} ~= 0.211867`; old `0.22` slack `0.00813`, new
+`20/93 ~= 0.215054` slack `0.00319` (best `3/5`-exponent `~= 0.21461`,
+so `~0.0027` is the `3/5` floor; exact-`0.605` clearing would need
+`200`-power integers).
+x=16 amp (NOT touched, documented): lower `3/17 ~= 0.176471` vs true
+`16^{-0.605} ~= 0.186856` slack `0.01039`; clearing `17^8 - 16^5*3^8
+= 96050305 ~= 1.40%`; best `5/8`-exponent `~= 0.17677` (gain `~0.0003`),
+so the `5/8` route is near-exhausted; upper `1/5 = 0.2` does NOT feed term15.
+
+RESIDUAL (named, NOT attempted here -- report-and-stop): x=16 amp lower
+(`3/17` vs true `~= 0.18686`, needs exact-`0.605`/large-denominator clearing
+or `5/8`-optimal `35/198` micro-gain `~0.00023` on term15); micro-levers
+(`-0.439 -> -0.4382` on the CX box, `pi_d20`-era `delta_13`, term14
+trivial-bound tightening).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (CY-A) Amplitude upper `D3_amp 12 ≤ 20/93` (was `11/50`; via
+    `13^{3/5} ≥ 93/20`, cleared: `93^5 = 6956883693 ≤ 7030400000 =
+    13^3·20^5`, since `3/5 ≤ 0.605`; mirrors `D3_amp_thirteen_upper_CL`). -/
+theorem D3_amp_thirteen_upper_CY : D3_amp 12 ≤ 20 / 93 := by
+  unfold D3_amp
+  have hcast : ((((12 : ℕ)) : ℝ) + 1 : ℝ) = 13 := by norm_num
+  rw [hcast]
+  have h35 : (3 / 5 : ℝ) ≤ (0.605 : ℝ) := by norm_num
+  have hmono : (13 : ℝ) ^ ((3 / 5 : ℝ)) ≤ (13 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) h35
+  have hpow : ((93 / 20 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((13 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((13 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (13 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 13)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 13 3
+    rw [e]
+    norm_num
+  have hstep : (93 / 20 : ℝ) ≤ (13 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  have h13ge : (93 / 20 : ℝ) ≤ (13 : ℝ) ^ (0.605 : ℝ) := le_trans hstep hmono
+  have hpos : (0 : ℝ) < (13 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 13)]
+  have heq : (20 / 93 : ℝ) = ((93 / 20 : ℝ))⁻¹ := by norm_num
+  rw [heq]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr h13ge
+
+/-- (CY-T) Sharpened twelfth-term imaginary-part upper `≤ 439/4650`
+    (was `4829/50000`; mirror of `D3_term12_im_hi_CX` with (CY-A) in place of
+    `D3_amp_thirteen_upper_CL`; interval: `amp ≤ 20/93`, `sin ≥ -0.439`;
+    even `k = 12`, so `Im = -(amp·sin)`). -/
+theorem D3_term12_im_hi_CY :
+    (etaDirichletTerm (1 - zetaCellS0) 12).im ≤ (439 / 4650 : ℝ) := by
+  rw [D3_eta_im]
+  have ha := D3_amp_thirteen_upper_CY
+  have hann : (0 : ℝ) ≤ D3_amp 12 := D3_amp_nonneg 12
+  have hs := D3_sin_theta_thirteen_lo_CX
+  have hpow12 : ((-1 : ℝ) ^ (12 : ℕ)) = 1 := by norm_num
+  rw [hpow12, one_mul]
+  have h1 : D3_amp 12 * (-0.439) ≤ D3_amp 12 * Real.sin (D3_phase 12) :=
+    mul_le_mul_of_nonneg_left hs hann
+  have h2 : D3_amp 12 * (0.439 : ℝ) ≤ (20 / 93) * 0.439 :=
+    mul_le_mul_of_nonneg_right ha (by norm_num)
+  have hnum : (439 / 4650 : ℝ) = -((20 / 93) * (-0.439)) := by norm_num
+  rw [hnum]
+  have e1 : D3_amp 12 * (-0.439) = -(D3_amp 12 * 0.439) := by ring
+  have e2 : (20 / 93 : ℝ) * (-0.439) = -((20 / 93) * 0.439) := by ring
+  linarith [h1, h2, e1, e2]
+
+set_option maxHeartbeats 800000 in
+/-- (CY-C) Sharpened `Im S_16 ≤ -3173275873/16711170000`: the (CX) assembly with
+    exactly one term swapped (`D3_term12_im_hi_CY` for `D3_term12_im_hi_CX`);
+    `-505966012/2695350000 - 4829/50000 + 439/4650
+    = -3173275873/16711170000`. -/
+theorem D3_S16_im_upper_CY :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤
+      (-3173275873 / 16711170000 : ℝ) := by
+  rw [D3_sum_im_eq]
+  have h16 : (∑ k ∈ Finset.range 16, (etaDirichletTerm (1 - zetaCellS0) k).im) =
+      (etaDirichletTerm (1 - zetaCellS0) 0).im +
+      (etaDirichletTerm (1 - zetaCellS0) 1).im +
+      (etaDirichletTerm (1 - zetaCellS0) 2).im +
+      (etaDirichletTerm (1 - zetaCellS0) 3).im +
+      (etaDirichletTerm (1 - zetaCellS0) 4).im +
+      (etaDirichletTerm (1 - zetaCellS0) 5).im +
+      (etaDirichletTerm (1 - zetaCellS0) 6).im +
+      (etaDirichletTerm (1 - zetaCellS0) 7).im +
+      (etaDirichletTerm (1 - zetaCellS0) 8).im +
+      (etaDirichletTerm (1 - zetaCellS0) 9).im +
+      (etaDirichletTerm (1 - zetaCellS0) 10).im +
+      (etaDirichletTerm (1 - zetaCellS0) 11).im +
+      (etaDirichletTerm (1 - zetaCellS0) 12).im +
+      (etaDirichletTerm (1 - zetaCellS0) 13).im +
+      (etaDirichletTerm (1 - zetaCellS0) 14).im +
+      (etaDirichletTerm (1 - zetaCellS0) 15).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add]
+  rw [h16, D3_term0_im]
+  have h1 := D3_term1_im_hi
+  have h2 := D3_term2_im_hi
+  have h3 := D3_term3_im_hi
+  have h4 := D3_term4_im_hi_sharp
+  have h5 := D3_term5_im_hi
+  have h6 := D3_term6_im_hi_CN
+  have h7 := D3_term7_im_hi
+  have h8 := D3_term8_im_hi
+  have h9 := D3_term9_im_hi_sharp
+  have h10 := D3_term10_im_hi_CR
+  have h11 := D3_term11_im_hi_CV
+  have h12 := D3_term12_im_hi_CY
+  have h13 := D3_term13_im_hi_CL
+  have h14 := D3_term14_im_hi_CL
+  have h15 := D3_term15_im_hi_CV
+  linarith
+
+/-- (CY-V) Sign verdict: the CY `Im S_16` upper is negative. -/
+theorem D3_S16_im_upper_CY_neg : (-3173275873 / 16711170000 : ℝ) < 0 := by norm_num
+
+/-- (CY-V) `|Im S_16| ≥ 3173275873/16711170000` from the negative upper. -/
+theorem D3_S16_im_abs_ge_CY :
+    (3173275873 / 16711170000 : ℝ) ≤
+      |(∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im| := by
+  have h := D3_S16_im_upper_CY
+  have h0 : (∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k).im ≤ 0 := by
+    linarith
+  rw [abs_of_nonpos h0]
+  linarith
+
+/-- (CY-V) `‖S_16‖ ≥ 3173275873/16711170000`: door-3 Azeta-track CY margin
+    (positive lower on the partial-sum norm from the `Im` channel). -/
+theorem D3_S16_norm_ge_CY :
+    (3173275873 / 16711170000 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) k‖ := by
+  exact le_trans D3_S16_im_abs_ge_CY (Complex.abs_im_le_norm _)
+
+#print axioms D3_amp_thirteen_upper_CY
+#print axioms D3_term12_im_hi_CY
+#print axioms D3_S16_im_upper_CY
+#print axioms D3_S16_im_upper_CY_neg
+#print axioms D3_S16_im_abs_ge_CY
+#print axioms D3_S16_norm_ge_CY
+
 
 
 
