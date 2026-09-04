@@ -1474,6 +1474,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **Rollout template CLOSED (`AX_CellTemplate`):** `CellClosed_of_factorBounds` (generic cell ⇒ H-leaf from
   explicit numeric premises) + R02 recovery of AU v2 as corollary + tier table for all 39 cells + 20
   strip cells (`Azeta ≥ (eps+M·radCap)/(Apoly·Api·Agam)` per group; G4 needs small-r deriv packaging).
+  **Apoly rollout CLOSED for G1 (`R03R10PolyLower`):** R03–R10 hypothesis-free lowers (11.3/3.85/0.39/0.88/
+  5.35/13.8/26.3/38.3, slacks 0.02–0.11, same quadratic skeleton — no extension needed; R01 skipped).
+  Poly column done for the whole bottom row; remaining per-cell blockers unchanged (`Azeta`, `M`).
   **R31 small-r packaging CLOSED (`BB_Row3SmallR`):** `r=0.008` admissible (`0.498<0.5`; `r=0.25` provably
   exits) + `C=5600` + **`M=700000`** + R31 through the template (conditional on sup/center premises;
   threshold at M=700000 infeasible at `O(1)` — same wall). R32–R40: copy template, recompute numerals. Remaining 39 cells: same shape, different `s`-rects
