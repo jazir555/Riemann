@@ -33602,3 +33602,615 @@ theorem gammaOf_lower_R02_sharp :
 #print axioms R02SineSharp.gammaOf_lower_R02_sharp
 
 end R02SineSharp
+/-!
+## Hypothesis-free `Apoly` lowers for R03–R10 (door-3 rollout, Agent BC).
+
+Status / grep-first record (checked before writing):
+* `rg "poly_lower_R0" interval_arith.lean` → only `R00Numerics.poly_lower_R00`
+  (`30`) and `R02Uniform.poly_lower_R02` (`22`) exist; no `poly_lower_R03..R10`.
+* `rg "^namespace R03R10PolyLower" interval_arith.lean` → absent (this block).
+* Centers verified against `central_cover_assembly.lean` (`RXX_x0/x1/y0/y1`) and
+  the committed `RXXGammaUpper.RXX_center_eq` copies in this file:
+  R03 `-4.75`, R04 `-2.75`, R05 `-0.75`, R06 `1.25`, R07 `3.25`, R08 `5.25`,
+  R09 `7.25`, R10 `8.75` (all with `+ 0.105·I`; R01 skipped — no gridFine
+  membership, `(-7.5,-5) ∉ fineGridX`).
+* Method: exact copy of the `R02Uniform.poly_lower_R02` skeleton
+  (`s`-center def → `center_eq` → `re`/`im` → two norm floors via
+  `Complex.sq_norm`/`normSq_apply` + `Real.sqrt_le_sqrt` → `polyPart_norm`
+  via `R00Numerics.norm_half` → `mul_le_mul` + `nlinarith`). No new
+  Mathlib material was needed (all lemmas already in Mathlib / this file),
+  so nothing was created beyond the per-cell numerals below.
+* Bottom row: `Re s = 0.395`, `(s-1).re = -0.605` for every cell; only
+  `Im s = cx` varies. True `‖poly‖ = 0.5·√(0.395²+cx²)·√(0.605²+cx²)`:
+
+  | cell | cx    | true Apoly | proved | slack |
+  | R03  | -4.75 | ≈ 11.4116  | 11.3   | ≈ 0.11 |
+  | R04  | -2.75 | ≈ 3.9114   | 3.85   | ≈ 0.06 |
+  | R05  | -0.75 | ≈ 0.4084   | 0.39   | ≈ 0.018 |
+  | R06  | 1.25  | ≈ 0.9102   | 0.88   | ≈ 0.03 |
+  | R07  | 3.25  | ≈ 5.4115   | 5.35   | ≈ 0.06 |
+  | R08  | 5.25  | ≈ 13.9117  | 13.8   | ≈ 0.11 |
+  | R09  | 7.25  | ≈ 26.4117  | 26.3   | ≈ 0.11 |
+  | R10  | 8.75  | ≈ 38.4117  | 38.3   | ≈ 0.11 |
+-/
+
+namespace R03R10PolyLower
+
+/-- The R03 `s`-plane center: `s = 1/2 + I·z` at `z = R03.center`. -/
+noncomputable def sR03 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R03.center
+
+/-- `R03.center = -4.75 + 0.105·I` (from `R03_x0/x1/y0/y1`). -/
+theorem R03_center_eq :
+    CentralCoverAssembly.R03.center =
+      (((-4.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R03_x0, CentralCoverAssembly.R03_x1,
+      CentralCoverAssembly.R03_y0, CentralCoverAssembly.R03_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R03_x0, CentralCoverAssembly.R03_x1,
+      CentralCoverAssembly.R03_y0, CentralCoverAssembly.R03_y1]
+    simp
+    norm_num
+
+/-- `Re sR03 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR03_re : sR03.re = 0.395 := by
+  unfold sR03
+  rw [R03_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR03 = -4.75`. -/
+theorem sR03_im : sR03.im = -4.75 := by
+  unfold sR03
+  rw [R03_center_eq]
+  simp
+
+/-- `‖sR03‖ ≥ 4.76` (`4.76² = 22.6576 < 0.395² + 4.75² = 22.718525`). -/
+theorem norm_sR03_ge : (4.76 : ℝ) ≤ ‖sR03‖ := by
+  have hsq : (4.76 : ℝ) ^ 2 ≤ ‖sR03‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR03_re, sR03_im]
+    norm_num
+  calc (4.76 : ℝ) = Real.sqrt ((4.76 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR03‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR03‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR03 - 1‖ ≥ 4.78` (`0.605² + 4.75² = 22.928525 > 22.8484`). -/
+theorem norm_sR03_sub_one_ge : (4.78 : ℝ) ≤ ‖sR03 - 1‖ := by
+  have hr1 : (sR03 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR03_re]
+    norm_num
+  have hi1 : (sR03 - 1).im = -4.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR03_im]
+    norm_num
+  have hsq : (4.78 : ℝ) ^ 2 ≤ ‖sR03 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (4.78 : ℝ) = Real.sqrt ((4.78 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR03 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR03 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR03`. -/
+theorem polyPart_norm_R03 :
+    ‖R00Enclosure.polyPart sR03‖ = (1 / 2) * ‖sR03‖ * ‖sR03 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `11.3 ≤ ‖polyPart sR03‖`
+(`4.76·4.78/2 = 11.3764 ≥ 11.3`; true `≈ 11.4116`, slack `≈ 0.11`). -/
+theorem poly_lower_R03 : (11.3 : ℝ) ≤ ‖R00Enclosure.polyPart sR03‖ := by
+  have hprod : (4.76 : ℝ) * 4.78 ≤ ‖sR03‖ * ‖sR03 - 1‖ :=
+    mul_le_mul norm_sR03_ge norm_sR03_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R03]
+  nlinarith [hprod]
+
+/-- The R04 `s`-plane center: `s = 1/2 + I·z` at `z = R04.center`. -/
+noncomputable def sR04 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R04.center
+
+/-- `R04.center = -2.75 + 0.105·I` (from `R04_x0/x1/y0/y1`). -/
+theorem R04_center_eq :
+    CentralCoverAssembly.R04.center =
+      (((-2.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R04_x0, CentralCoverAssembly.R04_x1,
+      CentralCoverAssembly.R04_y0, CentralCoverAssembly.R04_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R04_x0, CentralCoverAssembly.R04_x1,
+      CentralCoverAssembly.R04_y0, CentralCoverAssembly.R04_y1]
+    simp
+    norm_num
+
+/-- `Re sR04 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR04_re : sR04.re = 0.395 := by
+  unfold sR04
+  rw [R04_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR04 = -2.75`. -/
+theorem sR04_im : sR04.im = -2.75 := by
+  unfold sR04
+  rw [R04_center_eq]
+  simp
+
+/-- `‖sR04‖ ≥ 2.77` (`2.77² = 7.6729 < 0.395² + 2.75² = 7.718525`). -/
+theorem norm_sR04_ge : (2.77 : ℝ) ≤ ‖sR04‖ := by
+  have hsq : (2.77 : ℝ) ^ 2 ≤ ‖sR04‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR04_re, sR04_im]
+    norm_num
+  calc (2.77 : ℝ) = Real.sqrt ((2.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR04‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR04‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR04 - 1‖ ≥ 2.81` (`0.605² + 2.75² = 7.928525 > 7.8961`). -/
+theorem norm_sR04_sub_one_ge : (2.81 : ℝ) ≤ ‖sR04 - 1‖ := by
+  have hr1 : (sR04 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR04_re]
+    norm_num
+  have hi1 : (sR04 - 1).im = -2.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR04_im]
+    norm_num
+  have hsq : (2.81 : ℝ) ^ 2 ≤ ‖sR04 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (2.81 : ℝ) = Real.sqrt ((2.81 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR04 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR04 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR04`. -/
+theorem polyPart_norm_R04 :
+    ‖R00Enclosure.polyPart sR04‖ = (1 / 2) * ‖sR04‖ * ‖sR04 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `3.85 ≤ ‖polyPart sR04‖`
+(`2.77·2.81/2 = 3.89185 ≥ 3.85`; true `≈ 3.9114`, slack `≈ 0.06`). -/
+theorem poly_lower_R04 : (3.85 : ℝ) ≤ ‖R00Enclosure.polyPart sR04‖ := by
+  have hprod : (2.77 : ℝ) * 2.81 ≤ ‖sR04‖ * ‖sR04 - 1‖ :=
+    mul_le_mul norm_sR04_ge norm_sR04_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R04]
+  nlinarith [hprod]
+
+/-- The R05 `s`-plane center: `s = 1/2 + I·z` at `z = R05.center`. -/
+noncomputable def sR05 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R05.center
+
+/-- `R05.center = -0.75 + 0.105·I` (from `R05_x0/x1/y0/y1`). -/
+theorem R05_center_eq :
+    CentralCoverAssembly.R05.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R05_x0, CentralCoverAssembly.R05_x1,
+      CentralCoverAssembly.R05_y0, CentralCoverAssembly.R05_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R05_x0, CentralCoverAssembly.R05_x1,
+      CentralCoverAssembly.R05_y0, CentralCoverAssembly.R05_y1]
+    simp
+    norm_num
+
+/-- `Re sR05 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR05_re : sR05.re = 0.395 := by
+  unfold sR05
+  rw [R05_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR05 = -0.75`. -/
+theorem sR05_im : sR05.im = -0.75 := by
+  unfold sR05
+  rw [R05_center_eq]
+  simp
+
+/-- `‖sR05‖ ≥ 0.84` (`0.84² = 0.7056 < 0.395² + 0.75² = 0.718525`). -/
+theorem norm_sR05_ge : (0.84 : ℝ) ≤ ‖sR05‖ := by
+  have hsq : (0.84 : ℝ) ^ 2 ≤ ‖sR05‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR05_re, sR05_im]
+    norm_num
+  calc (0.84 : ℝ) = Real.sqrt ((0.84 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR05‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR05‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR05 - 1‖ ≥ 0.95` (`0.605² + 0.75² = 0.928525 > 0.9025`). -/
+theorem norm_sR05_sub_one_ge : (0.95 : ℝ) ≤ ‖sR05 - 1‖ := by
+  have hr1 : (sR05 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR05_re]
+    norm_num
+  have hi1 : (sR05 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR05_im]
+    norm_num
+  have hsq : (0.95 : ℝ) ^ 2 ≤ ‖sR05 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.95 : ℝ) = Real.sqrt ((0.95 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR05 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR05 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR05`. -/
+theorem polyPart_norm_R05 :
+    ‖R00Enclosure.polyPart sR05‖ = (1 / 2) * ‖sR05‖ * ‖sR05 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `0.39 ≤ ‖polyPart sR05‖`
+(`0.84·0.95/2 = 0.399 ≥ 0.39`; true `≈ 0.4084`, slack `≈ 0.018`). -/
+theorem poly_lower_R05 : (0.39 : ℝ) ≤ ‖R00Enclosure.polyPart sR05‖ := by
+  have hprod : (0.84 : ℝ) * 0.95 ≤ ‖sR05‖ * ‖sR05 - 1‖ :=
+    mul_le_mul norm_sR05_ge norm_sR05_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R05]
+  nlinarith [hprod]
+
+/-- The R06 `s`-plane center: `s = 1/2 + I·z` at `z = R06.center`. -/
+noncomputable def sR06 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R06.center
+
+/-- `R06.center = 1.25 + 0.105·I` (from `R06_x0/x1/y0/y1`). -/
+theorem R06_center_eq :
+    CentralCoverAssembly.R06.center =
+      (((1.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R06_x0, CentralCoverAssembly.R06_x1,
+      CentralCoverAssembly.R06_y0, CentralCoverAssembly.R06_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R06_x0, CentralCoverAssembly.R06_x1,
+      CentralCoverAssembly.R06_y0, CentralCoverAssembly.R06_y1]
+    simp
+    norm_num
+
+/-- `Re sR06 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR06_re : sR06.re = 0.395 := by
+  unfold sR06
+  rw [R06_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR06 = 1.25`. -/
+theorem sR06_im : sR06.im = 1.25 := by
+  unfold sR06
+  rw [R06_center_eq]
+  simp
+
+/-- `‖sR06‖ ≥ 1.30` (`1.30² = 1.69 < 0.395² + 1.25² = 1.718525`). -/
+theorem norm_sR06_ge : (1.30 : ℝ) ≤ ‖sR06‖ := by
+  have hsq : (1.30 : ℝ) ^ 2 ≤ ‖sR06‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR06_re, sR06_im]
+    norm_num
+  calc (1.30 : ℝ) = Real.sqrt ((1.30 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR06‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR06‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR06 - 1‖ ≥ 1.38` (`0.605² + 1.25² = 1.928525 > 1.9044`). -/
+theorem norm_sR06_sub_one_ge : (1.38 : ℝ) ≤ ‖sR06 - 1‖ := by
+  have hr1 : (sR06 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR06_re]
+    norm_num
+  have hi1 : (sR06 - 1).im = 1.25 := by
+    simp only [Complex.sub_im, Complex.one_im, sR06_im]
+    norm_num
+  have hsq : (1.38 : ℝ) ^ 2 ≤ ‖sR06 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.38 : ℝ) = Real.sqrt ((1.38 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR06 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR06 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR06`. -/
+theorem polyPart_norm_R06 :
+    ‖R00Enclosure.polyPart sR06‖ = (1 / 2) * ‖sR06‖ * ‖sR06 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `0.88 ≤ ‖polyPart sR06‖`
+(`1.30·1.38/2 = 0.897 ≥ 0.88`; true `≈ 0.9102`, slack `≈ 0.03`). -/
+theorem poly_lower_R06 : (0.88 : ℝ) ≤ ‖R00Enclosure.polyPart sR06‖ := by
+  have hprod : (1.30 : ℝ) * 1.38 ≤ ‖sR06‖ * ‖sR06 - 1‖ :=
+    mul_le_mul norm_sR06_ge norm_sR06_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R06]
+  nlinarith [hprod]
+
+/-- The R07 `s`-plane center: `s = 1/2 + I·z` at `z = R07.center`. -/
+noncomputable def sR07 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R07.center
+
+/-- `R07.center = 3.25 + 0.105·I` (from `R07_x0/x1/y0/y1`). -/
+theorem R07_center_eq :
+    CentralCoverAssembly.R07.center =
+      (((3.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R07_x0, CentralCoverAssembly.R07_x1,
+      CentralCoverAssembly.R07_y0, CentralCoverAssembly.R07_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R07_x0, CentralCoverAssembly.R07_x1,
+      CentralCoverAssembly.R07_y0, CentralCoverAssembly.R07_y1]
+    simp
+    norm_num
+
+/-- `Re sR07 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR07_re : sR07.re = 0.395 := by
+  unfold sR07
+  rw [R07_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR07 = 3.25`. -/
+theorem sR07_im : sR07.im = 3.25 := by
+  unfold sR07
+  rw [R07_center_eq]
+  simp
+
+/-- `‖sR07‖ ≥ 3.27` (`3.27² = 10.6929 < 0.395² + 3.25² = 10.718525`). -/
+theorem norm_sR07_ge : (3.27 : ℝ) ≤ ‖sR07‖ := by
+  have hsq : (3.27 : ℝ) ^ 2 ≤ ‖sR07‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR07_re, sR07_im]
+    norm_num
+  calc (3.27 : ℝ) = Real.sqrt ((3.27 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR07‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR07‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR07 - 1‖ ≥ 3.30` (`0.605² + 3.25² = 10.928525 > 10.89`). -/
+theorem norm_sR07_sub_one_ge : (3.30 : ℝ) ≤ ‖sR07 - 1‖ := by
+  have hr1 : (sR07 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR07_re]
+    norm_num
+  have hi1 : (sR07 - 1).im = 3.25 := by
+    simp only [Complex.sub_im, Complex.one_im, sR07_im]
+    norm_num
+  have hsq : (3.30 : ℝ) ^ 2 ≤ ‖sR07 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (3.30 : ℝ) = Real.sqrt ((3.30 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR07 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR07 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR07`. -/
+theorem polyPart_norm_R07 :
+    ‖R00Enclosure.polyPart sR07‖ = (1 / 2) * ‖sR07‖ * ‖sR07 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `5.35 ≤ ‖polyPart sR07‖`
+(`3.27·3.30/2 = 5.3955 ≥ 5.35`; true `≈ 5.4115`, slack `≈ 0.06`). -/
+theorem poly_lower_R07 : (5.35 : ℝ) ≤ ‖R00Enclosure.polyPart sR07‖ := by
+  have hprod : (3.27 : ℝ) * 3.30 ≤ ‖sR07‖ * ‖sR07 - 1‖ :=
+    mul_le_mul norm_sR07_ge norm_sR07_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R07]
+  nlinarith [hprod]
+
+/-- The R08 `s`-plane center: `s = 1/2 + I·z` at `z = R08.center`. -/
+noncomputable def sR08 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R08.center
+
+/-- `R08.center = 5.25 + 0.105·I` (from `R08_x0/x1/y0/y1`). -/
+theorem R08_center_eq :
+    CentralCoverAssembly.R08.center =
+      (((5.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R08_x0, CentralCoverAssembly.R08_x1,
+      CentralCoverAssembly.R08_y0, CentralCoverAssembly.R08_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R08_x0, CentralCoverAssembly.R08_x1,
+      CentralCoverAssembly.R08_y0, CentralCoverAssembly.R08_y1]
+    simp
+    norm_num
+
+/-- `Re sR08 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR08_re : sR08.re = 0.395 := by
+  unfold sR08
+  rw [R08_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR08 = 5.25`. -/
+theorem sR08_im : sR08.im = 5.25 := by
+  unfold sR08
+  rw [R08_center_eq]
+  simp
+
+/-- `‖sR08‖ ≥ 5.26` (`5.26² = 27.6676 < 0.395² + 5.25² = 27.718525`). -/
+theorem norm_sR08_ge : (5.26 : ℝ) ≤ ‖sR08‖ := by
+  have hsq : (5.26 : ℝ) ^ 2 ≤ ‖sR08‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR08_re, sR08_im]
+    norm_num
+  calc (5.26 : ℝ) = Real.sqrt ((5.26 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR08‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR08‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR08 - 1‖ ≥ 5.28` (`0.605² + 5.25² = 27.928525 > 27.8784`). -/
+theorem norm_sR08_sub_one_ge : (5.28 : ℝ) ≤ ‖sR08 - 1‖ := by
+  have hr1 : (sR08 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR08_re]
+    norm_num
+  have hi1 : (sR08 - 1).im = 5.25 := by
+    simp only [Complex.sub_im, Complex.one_im, sR08_im]
+    norm_num
+  have hsq : (5.28 : ℝ) ^ 2 ≤ ‖sR08 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (5.28 : ℝ) = Real.sqrt ((5.28 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR08 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR08 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR08`. -/
+theorem polyPart_norm_R08 :
+    ‖R00Enclosure.polyPart sR08‖ = (1 / 2) * ‖sR08‖ * ‖sR08 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `13.8 ≤ ‖polyPart sR08‖`
+(`5.26·5.28/2 = 13.8864 ≥ 13.8`; true `≈ 13.9117`, slack `≈ 0.11`). -/
+theorem poly_lower_R08 : (13.8 : ℝ) ≤ ‖R00Enclosure.polyPart sR08‖ := by
+  have hprod : (5.26 : ℝ) * 5.28 ≤ ‖sR08‖ * ‖sR08 - 1‖ :=
+    mul_le_mul norm_sR08_ge norm_sR08_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R08]
+  nlinarith [hprod]
+
+/-- The R09 `s`-plane center: `s = 1/2 + I·z` at `z = R09.center`. -/
+noncomputable def sR09 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R09.center
+
+/-- `R09.center = 7.25 + 0.105·I` (from `R09_x0/x1/y0/y1`). -/
+theorem R09_center_eq :
+    CentralCoverAssembly.R09.center =
+      (((7.25 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R09_x0, CentralCoverAssembly.R09_x1,
+      CentralCoverAssembly.R09_y0, CentralCoverAssembly.R09_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R09_x0, CentralCoverAssembly.R09_x1,
+      CentralCoverAssembly.R09_y0, CentralCoverAssembly.R09_y1]
+    simp
+    norm_num
+
+/-- `Re sR09 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR09_re : sR09.re = 0.395 := by
+  unfold sR09
+  rw [R09_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR09 = 7.25`. -/
+theorem sR09_im : sR09.im = 7.25 := by
+  unfold sR09
+  rw [R09_center_eq]
+  simp
+
+/-- `‖sR09‖ ≥ 7.25` (`7.25² = 52.5625 < 0.395² + 7.25² = 52.718525`). -/
+theorem norm_sR09_ge : (7.25 : ℝ) ≤ ‖sR09‖ := by
+  have hsq : (7.25 : ℝ) ^ 2 ≤ ‖sR09‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR09_re, sR09_im]
+    norm_num
+  calc (7.25 : ℝ) = Real.sqrt ((7.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR09‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR09‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR09 - 1‖ ≥ 7.27` (`0.605² + 7.25² = 52.928525 > 52.8529`). -/
+theorem norm_sR09_sub_one_ge : (7.27 : ℝ) ≤ ‖sR09 - 1‖ := by
+  have hr1 : (sR09 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR09_re]
+    norm_num
+  have hi1 : (sR09 - 1).im = 7.25 := by
+    simp only [Complex.sub_im, Complex.one_im, sR09_im]
+    norm_num
+  have hsq : (7.27 : ℝ) ^ 2 ≤ ‖sR09 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (7.27 : ℝ) = Real.sqrt ((7.27 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR09 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR09 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR09`. -/
+theorem polyPart_norm_R09 :
+    ‖R00Enclosure.polyPart sR09‖ = (1 / 2) * ‖sR09‖ * ‖sR09 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `26.3 ≤ ‖polyPart sR09‖`
+(`7.25·7.27/2 = 26.35375 ≥ 26.3`; true `≈ 26.4117`, slack `≈ 0.11`). -/
+theorem poly_lower_R09 : (26.3 : ℝ) ≤ ‖R00Enclosure.polyPart sR09‖ := by
+  have hprod : (7.25 : ℝ) * 7.27 ≤ ‖sR09‖ * ‖sR09 - 1‖ :=
+    mul_le_mul norm_sR09_ge norm_sR09_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R09]
+  nlinarith [hprod]
+
+/-- The R10 `s`-plane center: `s = 1/2 + I·z` at `z = R10.center`. -/
+noncomputable def sR10 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R10.center
+
+/-- `R10.center = 8.75 + 0.105·I` (from `R10_x0/x1/y0/y1`). -/
+theorem R10_center_eq :
+    CentralCoverAssembly.R10.center =
+      (((8.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R10_x0, CentralCoverAssembly.R10_x1,
+      CentralCoverAssembly.R10_y0, CentralCoverAssembly.R10_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R10_x0, CentralCoverAssembly.R10_x1,
+      CentralCoverAssembly.R10_y0, CentralCoverAssembly.R10_y1]
+    simp
+    norm_num
+
+/-- `Re sR10 = 0.395` (`1/2 - 0.105`, same bottom row as R00/R02). -/
+theorem sR10_re : sR10.re = 0.395 := by
+  unfold sR10
+  rw [R10_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR10 = 8.75`. -/
+theorem sR10_im : sR10.im = 8.75 := by
+  unfold sR10
+  rw [R10_center_eq]
+  simp
+
+/-- `‖sR10‖ ≥ 8.75` (`8.75² = 76.5625 < 0.395² + 8.75² = 76.718525`). -/
+theorem norm_sR10_ge : (8.75 : ℝ) ≤ ‖sR10‖ := by
+  have hsq : (8.75 : ℝ) ^ 2 ≤ ‖sR10‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sR10_re, sR10_im]
+    norm_num
+  calc (8.75 : ℝ) = Real.sqrt ((8.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR10‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR10‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR10 - 1‖ ≥ 8.76` (`0.605² + 8.75² = 76.928525 > 76.7376`). -/
+theorem norm_sR10_sub_one_ge : (8.76 : ℝ) ≤ ‖sR10 - 1‖ := by
+  have hr1 : (sR10 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR10_re]
+    norm_num
+  have hi1 : (sR10 - 1).im = 8.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR10_im]
+    norm_num
+  have hsq : (8.76 : ℝ) ^ 2 ≤ ‖sR10 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (8.76 : ℝ) = Real.sqrt ((8.76 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR10 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR10 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Norm version of `polyPart` at `sR10`. -/
+theorem polyPart_norm_R10 :
+    ‖R00Enclosure.polyPart sR10‖ = (1 / 2) * ‖sR10‖ * ‖sR10 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- ENCLOSURE (hypothesis-free): `38.3 ≤ ‖polyPart sR10‖`
+(`8.75·8.76/2 = 38.325 ≥ 38.3`; true `≈ 38.4117`, slack `≈ 0.11`). -/
+theorem poly_lower_R10 : (38.3 : ℝ) ≤ ‖R00Enclosure.polyPart sR10‖ := by
+  have hprod : (8.75 : ℝ) * 8.76 ≤ ‖sR10‖ * ‖sR10 - 1‖ :=
+    mul_le_mul norm_sR10_ge norm_sR10_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R10]
+  nlinarith [hprod]
+
+#print axioms R03R10PolyLower.poly_lower_R03
+#print axioms R03R10PolyLower.poly_lower_R04
+#print axioms R03R10PolyLower.poly_lower_R05
+#print axioms R03R10PolyLower.poly_lower_R06
+#print axioms R03R10PolyLower.poly_lower_R07
+#print axioms R03R10PolyLower.poly_lower_R08
+#print axioms R03R10PolyLower.poly_lower_R09
+#print axioms R03R10PolyLower.poly_lower_R10
+
+end R03R10PolyLower
