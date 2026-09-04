@@ -1443,7 +1443,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `2/9 ≤ D3_amp 10` (`9^8=43046721 ≥ 11^5·2^8`, margin 4.4%) ⇒ term10 `≤-79/450` ⇒
     **`‖S₁₆‖ ≥ 457021/3150000 ≈ 0.1451`** (1.138×, gain `0.01756`). Next: x=11 sin-lower septic (`0.79→0.84`,
     expected sum `→≈-0.156`, tasked); x=12/x=16 need tighter log phase or large-denominator clearing.
-    **Stirling Gamma tail
+    **x=11 septic CLOSED (`D3_S16_norm_ge_CR`, `5de5c4ab`, green, axioms clean):** septic route SUCCEEDED no
+    stall — `S(0.998)=0.840386…≥0.84` beats `0.79` on the existing phase box (monotone transfer
+    `z∈[0.998,1.069]`, margin `0.000386`) ⇒ term10 `≤-14/75≈-0.186667` ⇒
+    **`‖S₁₆‖ ≥ 492021/3150000 ≈ 0.1562`** (1.076×, gain `0.01111`; true `≈-0.51` ceiling). Taylor levers now
+    EXHAUSTED on the early block — residual is the hard set: x=12/x=16 tighter log phase or
+    large-denominator amp clearing (tasked). **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
