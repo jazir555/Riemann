@@ -1476,6 +1476,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   (`zeta_R02_le_ten_of_tail`, margin 14.925). Opens: (i) `hTail` (`‖G‖≤36` off-window — needs
   Stirling-scale `F` bound), (ii) `hBdd` (strip `ζ`-growth). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
+  majorant — sharp-Gaussian recomposition tasked (edge `≈180` expected, still short; true-`F` gap next).
+  **Sharp-damping CLOSED (`CF_SharpDamp`):** top edge `198.46` (10× gain, 5.5× over; damping slack only
+  ~9% — remainder in cubic `F` majorant); negative edge `1927` (53× over — damping centered at -6.75
+  nearly useless there). Joint `Γ·cos` Gaussian analysis tasked (load-bearing on negative side). **hTail sharpest-cap (`CC_hTailGap`):**
+  pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
   majorant — sharp-Gaussian recomposition tasked (edge `≈180` expected, still short; true-`F` gap next). **Tail numerals landing
   (`BV2OuterTail`):** outer-envelope Gaussian domination `T=18·exp(165.23)` green; middle exp-3/2
   numeral (Young `u^{3/2}` bound + completing square) tasked, then tail-`T` assembly.
