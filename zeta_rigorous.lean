@@ -20611,3 +20611,205 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ2_weighted_le_three_two
 #print axioms DZ2_weighted_conditional_277
 #print axioms DZ2_gap_012_tight
+
+/-!
+Door-3 middle-upper per-k 13.85 prefix caps (DZ2-c3, append-only DZ2 tail).
+
+BRIDGE (ii): `DZ1c_main` (k = 16 only) generalizes to `forall k <= 16` at the
+same `13.85 = 8.62 + 5.23`, since `KL_linear_firstDerivTest` is
+length-independent (`Real.pi / |theta|`) and
+`sum_{n<k} |eps_n| <= sum_{n<16} |eps_n|` by nonnegativity.
+Payoff: the conditional `<= 2.77` becomes unconditional.
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (DZ2-c3) Per-prefix `13.85` caps for all `k <= 16` (per-k replay of `DZ1c_main`). -/
+theorem DZ2_prefix1385_le (k : ℕ) (hk : k ≤ 16) :
+    ‖∑ n ∈ Finset.range k, ZPiece n‖ ≤ 13.85 := by
+  have hunit : ∀ n : ℕ,
+      ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ = 1 := by
+    intro n
+    have e : ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        = ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I := by
+      push_cast
+      ring
+    rw [e]
+    exact Complex.norm_exp_ofReal_mul_I _
+  have hterm : ∀ n ∈ Finset.range k, ZPiece n
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)) := by
+    intro n hn
+    have hmem16 : n < 16 :=
+      Nat.lt_of_lt_of_le (Finset.mem_range.mp hn) hk
+    have hphi := DZ1_phi_eq n hmem16
+    have h1 : ((ZPhi n : ℝ):ℂ)
+        = (DZ1_A:ℂ) + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ)
+          + ((DZ1_eps n:ℝ):ℂ) := by
+      have e : ((ZPhi n : ℝ):ℂ)
+          = (((DZ1_A + (n:ℝ) * DZ1_theta + DZ1_eps n : ℝ)):ℂ) := by
+        rw [hphi]
+      rw [e]
+      push_cast
+      ring
+    have eexp : ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I
+        = ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I) := by
+      push_cast
+      ring
+    have ecast : ((ZPhi n : ℝ):ℂ) * Complex.I
+        = ((DZ1_A:ℂ) * Complex.I + ((((n:ℝ) * DZ1_theta : ℝ)):ℂ) * Complex.I)
+          + ((DZ1_eps n:ℝ):ℂ) * Complex.I := by
+      rw [h1]
+      ring
+    unfold ZPiece
+    rw [ecast, Complex.exp_add, Complex.exp_add, eexp]
+    ring
+  have hsum : (∑ n ∈ Finset.range k, ZPiece n)
+      = Complex.exp ((DZ1_A:ℂ) * Complex.I)
+        * (∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun n hn => hterm n hn)
+  have hnormA : ‖Complex.exp ((DZ1_A:ℂ) * Complex.I)‖ = 1 :=
+    Complex.norm_exp_ofReal_mul_I _
+  have hnormEq : ‖∑ n ∈ Finset.range k, ZPiece n‖
+      = ‖∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ := by
+    rw [hsum, norm_mul, hnormA, one_mul]
+  rw [hnormEq]
+  have hsplit : (∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+      - (∑ n ∈ Finset.range k,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      = ∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)) := by
+    rw [← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro n _
+    ring
+  have eTS : (∑ n ∈ Finset.range k,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+        + ((∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range k,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+      = (∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))) := by
+    abel
+  have htri : ‖∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖
+      ≤ ‖∑ n ∈ Finset.range k,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+        + ‖(∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+          - (∑ n ∈ Finset.range k,
+            Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ := by
+    have h := norm_add_le (∑ n ∈ Finset.range k,
+      Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))
+      ((∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range k,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)))
+    rw [eTS] at h
+    exact h
+  have hdiff_le : ‖(∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+        - (∑ n ∈ Finset.range k,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+      ≤ ∑ n ∈ Finset.range k, |DZ1_eps n| := by
+    rw [hsplit]
+    calc ‖∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+          * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1))‖
+        ≤ ∑ n ∈ Finset.range k,
+          ‖Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * (Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1)‖ :=
+          norm_sum_le _ _
+      _ = ∑ n ∈ Finset.range k,
+          ‖Complex.exp ((DZ1_eps n:ℂ) * Complex.I) - 1‖ := by
+          apply Finset.sum_congr rfl
+          intro n _
+          rw [norm_mul, hunit n, one_mul]
+      _ ≤ ∑ n ∈ Finset.range k, |DZ1_eps n| := by
+          apply Finset.sum_le_sum
+          intro n _
+          exact DZ1_exp_im_norm_le _
+  have hlin : ‖∑ n ∈ Finset.range k,
+        Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖ ≤ 8.62 := by
+    have hKL := KL_linear_firstDerivTest DZ1_theta
+      DZ1_theta_props.1 DZ1_theta_props.2.1 k
+    have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hth : |DZ1_theta| = 8.75 / 24 := by
+      unfold DZ1_theta
+      rw [abs_of_pos (by norm_num : (0:ℝ) < 8.75 / 24)]
+    rw [hth] at hKL
+    have heq : Real.pi / (8.75 / 24) = 24 * Real.pi / 8.75 := by
+      rw [div_div_eq_mul_div, mul_comm]
+    rw [heq] at hKL
+    have hbound : 24 * Real.pi / 8.75 ≤ 8.62 := by
+      have h3 : (24:ℝ) * 3.1416 / 8.75 ≤ 8.62 := by norm_num
+      have h2 : 24 * Real.pi / 8.75 ≤ 24 * 3.1416 / 8.75 := by
+        gcongr
+      linarith
+    exact le_trans hKL hbound
+  have herr5 : (∑ n ∈ Finset.range k, |DZ1_eps n|) ≤ 5.23 := by
+    have hmono : (∑ n ∈ Finset.range k, |DZ1_eps n|)
+        ≤ ∑ n ∈ Finset.range 16, |DZ1_eps n| :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono hk)
+        (fun i _ _ => abs_nonneg _)
+    have h := DZ1c_eps_sum_le
+    have hb : (8.75:ℝ) * (344 / 576) ≤ 5.23 := by norm_num
+    linarith
+  have htot : ‖∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+        * Complex.exp ((DZ1_eps n:ℂ) * Complex.I))‖ ≤ 8.62 + 5.23 := by
+    have hle : ‖∑ n ∈ Finset.range k,
+          Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)‖
+          + ‖(∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+            - (∑ n ∈ Finset.range k,
+              Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖
+        ≤ 8.62 + 5.23 := by
+      have h2 : ‖(∑ n ∈ Finset.range k, (Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I)
+            * Complex.exp ((DZ1_eps n:ℂ) * Complex.I)))
+              - (∑ n ∈ Finset.range k,
+                Complex.exp ((n:ℂ) * (DZ1_theta:ℂ) * Complex.I))‖ ≤ 5.23 :=
+        le_trans hdiff_le herr5
+      exact add_le_add hlin h2
+    exact le_trans htri hle
+  have hfin : (8.62:ℝ) + 5.23 = 13.85 := by norm_num
+  linarith
+
+/-- (DZ2-g3) Unconditional `≤ 2.77` on `[16,32)`: the conditional becomes banked. -/
+theorem DZ2_weighted_le_two_seven_seven :
+    ‖∑ i ∈ Finset.range 16, DZ2f i * ZPiece i‖ ≤ 2.77 :=
+  DZ2_weighted_conditional_277 (fun k hk => DZ2_prefix1385_le k hk)
+
+/-!
+RESIDUAL (DZ2-c3 report-and-stop): ONE proved bridge (ii) banked —
+`DZ2_prefix1385_le : forall k <= 16, ||sum_{j<k} ZPiece j|| <= 13.85`
+(per-k replay of `DZ1c_main`: `KL_linear_firstDerivTest` gives the same `8.62`
+for every `k` since `Real.pi / |theta|` is length-independent, plus
+`sum_{n<k} |eps_n| <= sum_{n<16} |eps_n| <= 5.23` by nonnegativity via
+`Finset.sum_le_sum_of_subset_of_nonneg` + read-only `DZ1c_eps_sum_le`;
+per-`k` `DZ1_phi_eq` re-application read-only, no triangle at `k = 14,15`).
+Hence `DZ2_weighted_le_two_seven_seven : ||sum w*ZPiece|| <= 2.77`
+UNCONDITIONALLY (discharge of `DZ2_weighted_conditional_277`).
+Gap vs `12/6300 ~= 0.0019048`: `2.77` is `1454.25x` over (same numeral as
+`DZ2_gap_012_tight`; now unconditional, was conditional on full prefix caps).
+Remaining: `DV_mid_conditional_012` still needs `<= 0.0019`/block (`1454x`
+short even at `2.77`); next agent owns the TRUE eta-term identification (iii)
+on `[16,32)` (`DZ2f * ZPiece` vs `etaDirichletTerm (1 - zetaCellS0)`:
+explicit `(-1)^k`, `(k+1)^s` norm, `16+n` vs `17+n` off-by-one, in-file).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2 tail after
+`DZ2_weighted_le_two_seven_seven`, do NOT touch
+`riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): prove (iii) TRUE
+eta-term identification on `[16,32)` connecting `DZ2f * ZPiece` to
+`etaDirichletTerm (1 - zetaCellS0)` (explicit `(-1)^k`, `(k+1)^s` norm, and
+`16+n` vs `17+n` off-by-one, all constants concrete, created in-file).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ2_prefix1385_le
+#print axioms DZ2_weighted_le_two_seven_seven
