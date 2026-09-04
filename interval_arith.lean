@@ -34214,3 +34214,156 @@ theorem poly_lower_R10 : (38.3 : ℝ) ≤ ‖R00Enclosure.polyPart sR10‖ := by
 #print axioms R03R10PolyLower.poly_lower_R10
 
 end R03R10PolyLower
+
+/-!
+## Strip-uniform R-Gamma pieces for the BP2 middle envelope (Agent BT).
+
+**Task (door-3 R-Gamma discharge).** BP2's `F_middleThird_exp32_of_GammaLower`
+(`riemann_hypothesis_newsection.lean:4421`, namespace `BP2Middle32`) is conditional
+on ONE explicit premise `hGlow : forall s, s in verticalClosedStrip (-1) 2 ->
+-1/2 <= s.re -> s.re <= 3/2 -> c <= ||GammaR s||` with `0 < c`. Via reflection
+`||G(w)|| = pi / (||sin(pi*w)|| * ||G(1-w)||)` at `w = s/2`, prove strip-uniform
+pieces on the middle strip (`Re in [-1/2,3/2]`, all `Im`): (a) sine upper with
+exponential growth, (b) reflected-Gamma upper, (c) composed strip lower in `hGlow` shape.
+
+**Results here.**
+* (a) CLOSED: `sin_pi_half_strip_upper`: `||sin(pi*(s/2))|| <= exp (2*|Im s|)`
+  on the middle strip (`C = 1`, `K = 2`; true growth is `exp (pi*|t|/2)`, so `K = 2`
+  is honest via `pi < 3.1416 < 4`). Reuses `RowFE.RowFE_norm_sin_le`; no new exp material.
+* (b) CLOSED: `gamma_one_sub_half_strip_upper`: `||G(1-s/2)|| <= 4` on the middle strip.
+  Since `(1-s/2).re = 1-Re/2 in [1/4,5/4]`, `R00GammaLower.norm_Gamma_le_realGamma`
+  reduces to `Real.Gamma <= 4` on `[0.25,1.25]`: direct convexity (`<= 1`) on `[1,1.25]`,
+  one-shift (`G(x+1) <= 1` on `[1.25,2]`, divide by `x >= 0.25`) on `[0.25,1]` -- the
+  `R00GammaLower.realGamma_one_sub_half_le` template at strip scale.
+* (c) REFUTED (honest negative, proved in-file): `no_uniform_GammaR_lower_middle`:
+  NO `c > 0` satisfies `hGlow` -- at `s = 0` (in the strip, middle hyps hold)
+  `GammaR 0 = pi^0 * G(0) = 0` (`Complex.Gamma_zero`), so `c <= 0`, contra `0 < c`.
+  Load-bearing, not technical: `||GammaR(s+i*t)|| -> 0` exponentially in `|t|`
+  (Stirling: `||GammaR|| ~ exp (-pi*|t|/4)` at fixed `Re`; true `||GammaR(1/2)|| ~= 3.45`
+  at `t = 0` vs `~= 1.5e-7` at `t = 20`). BP2 `hGlow` can NEVER be discharged as stated;
+  the envelope needs a windowed (`|Im| <= T`, where (a)+(b) give an explicit positive
+  min) or exp-decay relaxation.
+
+**Grep-first record (verified by `rg -n` before writing, per HARD RULES).**
+* `BP2Middle32` / `F_middleThird_exp32_of_GammaLower` / `hGlow` shape: only
+  `riemann_hypothesis_newsection.lean:4377/:4421`; absent from `interval_arith.lean`.
+* Strip-uniform `GammaR` lower: absent repo-wide (only pointwise/disc lowers).
+* `RowFE.RowFE_norm_sin_le` (`interval_arith.lean:30873`): REUSED for (a).
+* `R00GammaLower.norm_Gamma_le_realGamma` (`:541`) + convexity-shift template
+  `realGamma_one_sub_half_le` (`:567`, `Real.convexOn_Gamma` + `Real.Gamma_add_one`
+  + `one_div_le_one_div_of_le` + `le_div_iff₀`): REUSED for (b).
+* `Complex.Gamma_zero` (`Mathlib/.../Gamma/Basic.lean:339`, `@[simp]`): REUSED.
+* `Complex.GammaR_def` (`Mathlib/.../Gamma/Deligne.lean:45`, `rfl`-lemma): REUSED.
+* `Complex.HadamardThreeLines.verticalClosedStrip` (`Mathlib/.../Hadamard.lean:73`): REUSED.
+* `Complex.cpow_zero` (`Mathlib/.../Pow/Complex.lean:42`): REUSED.
+* Namespace `BTStripGamma` + all lemma names below: absent (`rg` zero hits).
+-/
+
+namespace BTStripGamma
+
+/-- (a) Strip-uniform sine upper with exponential growth: `||sin(pi*(s/2))|| <= exp (2*|Im s|)`
+for `Re in [-1/2,3/2]` (all `Im`). `C = 1`, `K = 2` (true `K = pi/2`). -/
+theorem sin_pi_half_strip_upper {s : ℂ}
+    (_h1 : (-1 / 2 : ℝ) ≤ s.re) (_h2 : s.re ≤ (3 / 2 : ℝ)) :
+    ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp (2 * |s.im|) := by
+  apply RowFE.RowFE_norm_sin_le
+  have hs2im : (s / 2).im = s.im / 2 := by rw [Complex.div_ofNat_im]
+  have hw_im : ((Real.pi : ℂ) * (s / 2)).im = Real.pi * (s.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hs2im]
+  have hdiv : |s.im / 2| = |s.im| / 2 := by rw [abs_div, abs_two]
+  rw [hw_im, abs_mul, hdiv]
+  have hpi : |Real.pi| ≤ 4 := by
+    rw [abs_of_pos Real.pi_pos]
+    have h := Real.pi_lt_d4
+    linarith
+  calc |Real.pi| * (|s.im| / 2) ≤ 4 * (|s.im| / 2) :=
+        mul_le_mul_of_nonneg_right hpi (by positivity)
+    _ = 2 * |s.im| := by ring
+
+/-- Real-Gamma cap `≤ 1` on `[1,2]` by convexity (`G 1 = G 2 = 1`);
+feeder for the strip reflected upper (mirrors the `R00GammaLower` convexity block). -/
+theorem realGamma_Icc12_le_one {y : ℝ} (hlo : (1 : ℝ) ≤ y) (hhi : y ≤ 2) :
+    Real.Gamma y ≤ 1 := by
+  have hy_mem1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy_mem2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha_nn : (0 : ℝ) ≤ 2 - y := by linarith
+  have hb_nn : (0 : ℝ) ≤ y - 1 := by linarith
+  have hab : (2 - y) + (y - 1) = 1 := by ring
+  have h := Real.convexOn_Gamma.2 hy_mem1 hy_mem2 ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - y) * 1 + (y - 1) * 2 = y := by ring
+  rw [heq] at h
+  have hrhs : (2 - y) * 1 + (y - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  exact h
+
+/-- Real-Gamma cap `≤ 4` on `[0.25,1.25]`: direct convexity on `[1,1.25]`,
+one-shift (`G(x) = G(x+1)/x`, `G(x+1) ≤ 1`) on `[0.25,1]`. -/
+theorem realGamma_strip_025_125_le {x : ℝ} (hlo : (0.25 : ℝ) ≤ x) (hhi : x ≤ 1.25) :
+    Real.Gamma x ≤ 4 := by
+  rcases le_total x 1 with hx1 | hx1
+  · have hy1 : (1 : ℝ) ≤ x + 1 := by linarith
+    have hy2 : x + 1 ≤ 2 := by linarith
+    have hG := realGamma_Icc12_le_one hy1 hy2
+    have hx_pos : (0 : ℝ) < x := by linarith
+    have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+    have hadd := Real.Gamma_add_one hx_ne
+    have hfin : Real.Gamma x ≤ 1 / x := by
+      rw [le_div_iff₀ hx_pos, mul_comm, ← hadd]
+      exact hG
+    have hfrac : (1 : ℝ) / x ≤ 4 := by
+      have h1 : (1 : ℝ) / x ≤ 1 / 0.25 :=
+        one_div_le_one_div_of_le (by norm_num) hlo
+      have h2 : (1 : ℝ) / 0.25 ≤ 4 := by norm_num
+      exact le_trans h1 h2
+    exact le_trans hfin hfrac
+  · have hG := realGamma_Icc12_le_one hx1 (by linarith)
+    linarith
+
+/-- (b) Strip-uniform reflected-Gamma upper: `||G(1-s/2)|| ≤ 4` for `Re in [-1/2,3/2]`
+(all `Im`). `(1-s/2).re = 1-Re/2 in [0.25,1.25]`; integral majorant + real cap. -/
+theorem gamma_one_sub_half_strip_upper {s : ℂ}
+    (h1 : (-1 / 2 : ℝ) ≤ s.re) (h2 : s.re ≤ (3 / 2 : ℝ)) :
+    ‖Complex.Gamma (1 - s / 2)‖ ≤ 4 := by
+  have hre2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hx_eq : (1 - s / 2).re = 1 - s.re / 2 := by
+    rw [Complex.sub_re, Complex.one_re, hre2]
+  have hx_lo : (0.25 : ℝ) ≤ (1 - s / 2).re := by rw [hx_eq]; linarith
+  have hx_hi : (1 - s / 2).re ≤ (1.25 : ℝ) := by rw [hx_eq]; linarith
+  have hx_pos : (0 : ℝ) < (1 - s / 2).re := by linarith
+  exact le_trans (R00GammaLower.norm_Gamma_le_realGamma hx_pos)
+    (realGamma_strip_025_125_le hx_lo hx_hi)
+
+/-- `GammaR 0 = 0` (`pi^0 * G(0)`, `Complex.Gamma_zero`): the witness that no
+strip-uniform positive lower bound exists. -/
+theorem GammaR_zero : Complex.Gammaℝ (0 : ℂ) = 0 := by
+  have e1 : (-(0 : ℂ) / 2) = 0 := by simp
+  have e2 : ((0 : ℂ) / 2) = 0 := by simp
+  rw [Complex.Gammaℝ_def, e1, e2, Complex.cpow_zero, Complex.Gamma_zero, mul_zero]
+
+/-- (c) VERDICT -- `hGlow` is undischargable: no `c > 0` minorizes `||GammaR .||`
+on the middle strip (exactly BP2 `hGlow` shape: strip `[-1,2]` + middle hyps).
+Witness `s = 0`: in the strip, middle hyps hold, `||GammaR 0|| = 0`. -/
+theorem no_uniform_GammaR_lower_middle :
+    ¬ ∃ c : ℝ, 0 < c ∧ ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      (-1 / 2 : ℝ) ≤ s.re → s.re ≤ (3 / 2 : ℝ) → c ≤ ‖Complex.Gammaℝ s‖ := by
+  rintro ⟨c, hc, h⟩
+  have h0mem : (0 : ℂ) ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    simp only [Set.mem_preimage, Set.mem_Icc, Complex.zero_re]
+    norm_num
+  have h1 : (-1 / 2 : ℝ) ≤ (0 : ℂ).re := by rw [Complex.zero_re]; norm_num
+  have h2 : (0 : ℂ).re ≤ (3 / 2 : ℝ) := by rw [Complex.zero_re]; norm_num
+  have hle := h 0 h0mem h1 h2
+  rw [GammaR_zero, norm_zero] at hle
+  linarith
+
+#print axioms BTStripGamma.sin_pi_half_strip_upper
+#print axioms BTStripGamma.realGamma_Icc12_le_one
+#print axioms BTStripGamma.realGamma_strip_025_125_le
+#print axioms BTStripGamma.gamma_one_sub_half_strip_upper
+#print axioms BTStripGamma.GammaR_zero
+#print axioms BTStripGamma.no_uniform_GammaR_lower_middle
+
+end BTStripGamma
