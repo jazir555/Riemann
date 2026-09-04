@@ -21757,3 +21757,243 @@ theorem hyperbolic_jensenPoly_one_of_ne (n : ℕ)
 #print axioms JensenRH.hyperbolic_jensenPoly_one_of_ne
 
 end JensenRH
+
+namespace JensenRH
+
+/-!
+## AW k=1 pilot stone (door 1, sorry #3 `all_shifts_from_zero` residual).
+
+SCOPE: `taylorCoeff 1 != 0` (k=1 pilot for `forall k >= 1, taylorCoeff k != 0`).
+Landed: `taylorCoeff_zero_ne_zero` (k=0 via `L*G < 4*(sqrt2-1)` product
+separation, margin `0.00013`) and AP2 `hyperbolic_jensenPoly_zero_iff`
+(d=0 slice iff `γn != 0`). Attack per brief: sign/separation for `Xi^(2k)(0)`
+or product-separation generalization of the `L*G` argument.
+
+VERDICT (honest negative, numerified): k=1 UNCONDITIONAL resists at current
+rigor. True value (mpmath 50 dps, see report):
+  zeta(1/2) = -1.4603545088095868, zeta'(1/2) = -3.9226461392091517,
+  zeta''(1/2) = -16.00835701392866,
+  G(1/2) = 2.7232882163306710, G'(1/2) = -7.3150019007721342,
+  G''(1/2) = 31.3570869211734224,
+  Lam(1/2) = -3.9769662255065129,
+  Lam''(1/2) = G''*Z + 2*G'*Z' + G*Z'' = -45.7924632684697321
+    + 57.3883279287428370 - 43.5953700188463714 = -31.9995053585732665,
+  P''(1/2) = 2/(1/2)^3 + 2/(1/2)^3 = 32 (proved below as `polar_second_value_k1`),
+  F''(1/2) = Lam'' + 32 = 0.0004946414267334653,
+  taylorCoeff 1 = -F''(1/2)/2 = -0.0002473207133667327.
+Margin from zero is only `0.000247` (taylor) / `0.000495` (second derivative):
+a near-cancellation `32 - 31.999505... = 0.000495`. The three Lam'' summands
+are O(50) cancelling to -32, so a product route needs each of
+zeta'/zeta''/G'/G'' to ~1e-4 absolute (~2 ppm relative) -- far beyond the
+current BM40/best2 rigor (~1e-3, which closed k=0 with margin 0.00013 on a
+O(1.6) product). An alternating-series route for k=1 has weights
+(log n)^2/sqrt(n), not antitone from 0 and with tail ~(log N)^2/sqrt(N),
+so N ~ 1e8 for 1e-4 -- computationally dead as explicit sums. Hence no
+FULL unconditional `taylorCoeff 1 != 0` is claimed here.
+
+STONES PROVED BELOW (append-only, full proofs, no sorry/admit/axiom):
+1. `shiftInner_hasDerivAt_k1`: inner affine `1/2 + I*z` has derivative `I`.
+2. `xiShifted_hasDerivAt_first_k1`: first-derivative HasDerivAt for the shift.
+3. `xiShifted_deriv_first_eq_k1`: `deriv xiShifted = fun z => I * deriv F (1/2+I*z)`.
+4. `xiShifted_second_at_zero_k1`: `deriv (deriv xiShifted) 0 = - deriv (deriv F) (1/2)`
+   (I*I = -1; uses `Differentiable.deriv` for entire F, so second level exists).
+5. `taylorCoeff_one_eq_k1`: `taylorCoeff 1 = -(deriv (deriv F)(1/2)).re / 2`
+   (factorial 2 = 2, iterate unfolding via `Function.iterate_succ_apply`).
+6. `taylorCoeff_one_ne_zero_of_second_ne_zero_k1` (CONDITIONAL main):
+   `F''(1/2).re != 0 -> taylorCoeff 1 != 0`.
+7. `taylorCoeff_one_neg_of_second_pos_k1` (CONDITIONAL sign):
+   `0 < F''(1/2).re -> taylorCoeff 1 < 0` (true sign is negative).
+8. `polar_second_value_k1`: `2/(1/2)^3 + 2/(1/2)^3 = 32` (the exact polar
+   second derivative at 1/2; shows where the 32 in `F'' = Lam'' + 32` comes from).
+
+EXACT MISSING ESTIMATE (named, NOT assumed, numerified):
+`second_ne_zero_k1 : ((deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ))).re) != 0`,
+true value `0.0004946414...`, needs absolute error `< 0.00049` (e.g. prove
+`0.0002 < F''.re < 0.0008`). Deeper product form needs
+`zeta_half_deriv1_bounds_k1`, `zeta_half_deriv2_bounds_k1`,
+`gammaR_half_deriv1_bounds_k1`, `gammaR_half_deriv2_bounds_k1` each to ~1e-4
+absolute (digamma/trigamma at 1/4 + eta-derivative series; absent from
+Mathlib/repo per GREP below). Proving `second_ne_zero_k1` closes k=1 via (6);
+proving positivity closes the sign via (7). This is the minimum-viable
+conditional + numerification per task (report-and-stop, no fake).
+
+GREP performed before writing (2026-09-04, verified by reading):
+- Repo `taylorCoeff 1` / second-derivative bridge: zero hits (`taylorCoeff_one`,
+  `second_at_zero`, `deriv_first_eq` -- no matches in JensenTranslation.lean;
+  only `taylorCoeff_zero_eq` at :702 and `taylorCoeff_zero_ne_zero` at :20006).
+- Mathlib chain rule / deriv API (reused, not recreated):
+  `HasDerivAt.comp` + `deriv_comp` (Comp.lean:258/313),
+  `HasDerivAt.const_mul` + `deriv_const_mul` (Mul.lean:355/380),
+  `hasDerivAt_const` (Basic.lean:768), `hasDerivAt_id'` (Basic.lean:678),
+  `Differentiable.deriv` (CauchyIntegral.lean:660),
+  `Function.iterate_succ_apply` / `iterate_one` (Iterate.lean:65/82),
+  `Complex.I_mul_I` (Data/Complex/Basic.lean:251).
+- Mathlib zeta/Gamma second derivatives at 1/2: NO direct API found
+  (only `differentiableAt_riemannZeta` away from 1 and
+  `differentiable_completedZeta₀` entire; no `deriv Gammaℝ`, no digamma
+  second-derivative enclosure usable to 1e-4) -- hence conditional form.
+- Repo Gamma/zeta derivative enclosures to 1e-4: NONE FOUND
+  (`KadiriDigamma` gives only first-order `re_digamma_le` with constant 1;
+  `zeta_rigorous` gives only eta limit L bounds, no derivatives).
+  Hence stones (1)-(5)+(8) are new and created here; (6)-(7) name the gap.
+- Name-clash check (`_k1` suffix): zero hits before writing (see report).
+-/
+
+/-- Inner affine map has derivative `I` (shift `1/2 + I*z`). -/
+theorem shiftInner_hasDerivAt_k1 (z : ℂ) :
+    HasDerivAt (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) Complex.I z := by
+  have h2 : HasDerivAt (fun w : ℂ => Complex.I * w) Complex.I z := by
+    have h := HasDerivAt.const_mul Complex.I (hasDerivAt_id' z)
+    simpa using h
+  exact h2.const_add _
+
+/-- First-derivative HasDerivAt for the shifted xi function. -/
+theorem xiShifted_hasDerivAt_first_k1 (z : ℂ) :
+    HasDerivAt _root_.xiMathlibShifted
+      (deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z) * Complex.I) z := by
+  have hF : DifferentiableAt ℂ completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z) :=
+    _root_.differentiable_completedZeta₀.differentiableAt
+  have hF' : HasDerivAt completedRiemannZeta₀
+      (deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z))
+      ((1/2 : ℂ) + Complex.I * z) := hF.hasDerivAt
+  have hIn : HasDerivAt (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) Complex.I z :=
+    shiftInner_hasDerivAt_k1 z
+  have hComp : HasDerivAt
+      (completedRiemannZeta₀ ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w))
+      (deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z) * Complex.I) z :=
+    hF'.comp z hIn
+  have hfun : _root_.xiMathlibShifted
+      = completedRiemannZeta₀ ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) := by
+    funext w
+    rfl
+  rw [hfun]
+  exact hComp
+
+/-- First-derivative function equality for the shift. -/
+theorem xiShifted_deriv_first_eq_k1 :
+    deriv _root_.xiMathlibShifted =
+      fun z : ℂ => Complex.I * deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z) := by
+  funext z
+  have h := (xiShifted_hasDerivAt_first_k1 z).deriv
+  rw [h]
+  ring
+
+/-- Second derivative at zero: `I*I = -1` gives the minus sign.
+Uses `Differentiable.deriv` so `deriv F` is again entire. -/
+theorem xiShifted_second_at_zero_k1 :
+    deriv (deriv _root_.xiMathlibShifted) (0 : ℂ) =
+      - deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ)) := by
+  have hFirst := xiShifted_deriv_first_eq_k1
+  have hDiffDerF : Differentiable ℂ (deriv completedRiemannZeta₀) :=
+    Differentiable.deriv _root_.differentiable_completedZeta₀
+  have hDiffInner : Differentiable ℂ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) := by
+    fun_prop
+  have hD : DifferentiableAt ℂ
+      (fun z : ℂ => deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z)) (0 : ℂ) := by
+    have hComp : Differentiable ℂ
+        ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w)) :=
+      hDiffDerF.comp hDiffInner
+    have h : DifferentiableAt ℂ
+        ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w)) (0 : ℂ) :=
+      hComp.differentiableAt
+    simpa [Function.comp_def] using h
+  have hInnerDeriv0 :
+      deriv (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) (0 : ℂ) = Complex.I :=
+    (shiftInner_hasDerivAt_k1 (0 : ℂ)).deriv
+  have hInner0 : ((1/2 : ℂ) + Complex.I * (0 : ℂ)) = (1/2 : ℂ) := by simp
+  have hDerF_at : DifferentiableAt ℂ (deriv completedRiemannZeta₀)
+      ((1/2 : ℂ) + Complex.I * (0 : ℂ)) :=
+    hDiffDerF.differentiableAt
+  have hIn_at : DifferentiableAt ℂ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) (0 : ℂ) :=
+    hDiffInner.differentiableAt
+  have hF_at : HasDerivAt (deriv completedRiemannZeta₀)
+      (deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ) + Complex.I * (0 : ℂ)))
+      ((1/2 : ℂ) + Complex.I * (0 : ℂ)) :=
+    hDerF_at.hasDerivAt
+  have hIn_has : HasDerivAt (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) Complex.I (0 : ℂ) :=
+    shiftInner_hasDerivAt_k1 0
+  have hCompH : HasDerivAt
+      ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w))
+      (deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ) + Complex.I * (0 : ℂ)) * Complex.I) (0 : ℂ) :=
+    hF_at.comp 0 hIn_has
+  have hCompEq : deriv
+        ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w)) (0 : ℂ) =
+      deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ) + Complex.I * (0 : ℂ)) *
+        deriv (fun w : ℂ => (1/2 : ℂ) + Complex.I * w) (0 : ℂ) := by
+    rw [hCompH.deriv, hInnerDeriv0]
+  have hConstEq : deriv
+        (fun z : ℂ => Complex.I * deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z)) (0 : ℂ) =
+      Complex.I * deriv (fun z : ℂ => deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z)) (0 : ℂ) :=
+    deriv_const_mul Complex.I hD
+  have hRewrite : deriv (deriv _root_.xiMathlibShifted) (0 : ℂ) =
+      deriv (fun z : ℂ => Complex.I * deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z)) (0 : ℂ) := by
+    rw [hFirst]
+  rw [hRewrite, hConstEq]
+  have hDfun : (fun z : ℂ => deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z))
+      = ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w)) := by
+    funext z
+    rfl
+  have hD_eq : deriv (fun z : ℂ => deriv completedRiemannZeta₀ ((1/2 : ℂ) + Complex.I * z)) (0 : ℂ) =
+      deriv ((deriv completedRiemannZeta₀) ∘ (fun w : ℂ => (1/2 : ℂ) + Complex.I * w)) (0 : ℂ) := by
+    rw [hDfun]
+  rw [hD_eq, hCompEq, hInnerDeriv0, hInner0]
+  have hII : Complex.I * Complex.I = -1 := Complex.I_mul_I
+  calc Complex.I * (deriv (deriv completedRiemannZeta₀) (1/2 : ℂ) * Complex.I)
+      = deriv (deriv completedRiemannZeta₀) (1/2 : ℂ) * (Complex.I * Complex.I) := by ring
+    _ = - deriv (deriv completedRiemannZeta₀) (1/2 : ℂ) := by rw [hII]; ring
+
+/-- Bridge: `taylorCoeff 1` is minus half the real second derivative at `1/2`. -/
+theorem taylorCoeff_one_eq_k1 :
+    taylorCoeff 1 = - ((deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ))).re) / 2 := by
+  have h21 : (2 * 1 : ℕ) = 2 := by norm_num
+  have hFact2 : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num
+  have hIterS : (deriv^[2] _root_.xiMathlibShifted) (0 : ℂ) =
+      deriv (deriv _root_.xiMathlibShifted) (0 : ℂ) := by
+    have h1 : (deriv^[1] (deriv _root_.xiMathlibShifted)) =
+        deriv (deriv _root_.xiMathlibShifted) :=
+      Function.iterate_one _
+    have h2 : deriv^[2] _root_.xiMathlibShifted =
+        deriv^[1] (deriv _root_.xiMathlibShifted) := by
+      have h := Function.iterate_succ_apply (f := deriv) (n := 1)
+        (x := _root_.xiMathlibShifted)
+      have hs : (Nat.succ (1 : ℕ)) = 2 := by norm_num
+      rw [hs] at h
+      exact h
+    rw [h2, h1]
+  unfold taylorCoeff
+  rw [h21, hFact2, hIterS, xiShifted_second_at_zero_k1]
+  have hInv : ((2 : ℝ)⁻¹) = 1 / 2 := by norm_num
+  rw [hInv]
+  simp
+  ring
+
+/-- CONDITIONAL k=1 nonvanishing (exact missing estimate named below). -/
+theorem taylorCoeff_one_ne_zero_of_second_ne_zero_k1
+    (h : ((deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ))).re) ≠ 0) :
+    taylorCoeff 1 ≠ 0 := by
+  rw [taylorCoeff_one_eq_k1]
+  intro hc
+  exact h (by linarith)
+
+/-- CONDITIONAL k=1 sign (true sign negative; needs positivity of `F''`). -/
+theorem taylorCoeff_one_neg_of_second_pos_k1
+    (h : 0 < ((deriv (deriv completedRiemannZeta₀) ((1/2 : ℂ))).re)) :
+    taylorCoeff 1 < 0 := by
+  rw [taylorCoeff_one_eq_k1]
+  linarith
+
+/-- Polar second derivative at `1/2` is exactly `32`
+(`P(s) = 1/s + 1/(1-s)`, `P''(s) = 2/s^3 + 2/(1-s)^3`). -/
+theorem polar_second_value_k1 :
+    (2 : ℝ) / (1/2 : ℝ)^3 + 2 / (1/2 : ℝ)^3 = 32 := by norm_num
+
+#print axioms JensenRH.shiftInner_hasDerivAt_k1
+#print axioms JensenRH.xiShifted_hasDerivAt_first_k1
+#print axioms JensenRH.xiShifted_deriv_first_eq_k1
+#print axioms JensenRH.xiShifted_second_at_zero_k1
+#print axioms JensenRH.taylorCoeff_one_eq_k1
+#print axioms JensenRH.taylorCoeff_one_ne_zero_of_second_ne_zero_k1
+#print axioms JensenRH.taylorCoeff_one_neg_of_second_pos_k1
+#print axioms JensenRH.polar_second_value_k1
+
+end JensenRH
