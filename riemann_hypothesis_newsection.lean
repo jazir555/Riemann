@@ -5358,6 +5358,633 @@ with `N = 3200` giving `C·exp(16384000000·K⁴)`); (iii) `hTail`, P1 downstrea
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# BZ tail (door-3 tail-envelope assembly): tail Gamma-lower + tail F-envelope +
+# negative-`τ` numerals + tail-`T` → `hBdd` → P1
+
+Ownership: Agent BZ tail append (append-only after the BX verdict block; nothing above
+touched; no new imports).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* TIER 1 — `GammaR_tail_lower`: tail Gamma-lower via reflection on `9 < |Im|`
+  (`3/(16·exp(2|Im|)) ≤ ‖Gammaℝ s‖` on the middle third): sine-upper at tail from
+  BT's strip piece (`BTStripGamma.sin_pi_half_strip_upper`, `exp (2|Im|)` form),
+  reflected-Gamma-upper `U = 4` from the convexity chain
+  (`BTStripGamma.gamma_one_sub_half_strip_upper`, strip-uniform hence valid on tails),
+  cpow lower `1/4` (`BUWindowed.cpow_pi_lower`), `π ≥ 3` — the SAME reflection
+  `Gamma(s/2)·Gamma(1-s/2) = π/sin(πs/2)` as BU's windowed lower, with tail
+  numerals. Sine-nonzero on the tail needs no norm puncture (`9 < |Im|` kills the
+  real-axis zeros `s = 2k` via `Im` alone). An honest tiny positive lower, any
+  magnitude (decays with `|Im|`, as it must: the sine factor grows).
+* TIER 2 — `F_middle_tail_exp32`: tail F-envelope via BL's xi-transfer fed with
+  Tier 1 (whole-plane transfer `BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi` +
+  `xi_norm_bound_whole_plane`, restricted to the tail domain — same proof shape as
+  BP2/BU, tail domain): `‖F s‖ ≤ C·exp(K·|Im|^(3/2))` on the middle third with
+  `9 < |Im|`. The decaying Tier-1 lower contributes an extra `exp (2|Im|)` growth
+  factor, absorbed into the 3/2-power via `abs_le_rpow32_div_three`
+  (`2u ≤ (2/3)·u^(3/2)` for `9 ≤ u`); small-`‖s‖` via compactness over the
+  (compact) tail slice of the ball. `C,K` stay existential (functions of `Kxi`).
+* TIER 3 — negative-`τ` companion numerals (mirror BX's SOS template with the
+  `(u−6.75)²` form, since `(τ+6.75)² = (|τ|−6.75)²` for `τ ≤ 0`):
+  `middle_gauss_neg_le` (`C·exp(K·u^{3/2})·exp(−(u−6.75)²/100) ≤ C·exp(10⁶K⁴+1)`,
+  Young + `(u−6.75)² ≥ u²−13.5u` + linear cap `0.135u−u²/200 ≤ 1` via
+  `(u−13.5)² ≥ 0`) and `outer_gauss_neg_le` (BV2-mirror, exp-linear:
+  `18·exp((1+π/2)u)·exp(−(u−6.75)²/100) ≤ 18·exp(183.034)` via completing the
+  square at `K+0.135 ≤ 2.7058`).
+* TIER 4 — `G_tail_bdd` (tail-`T`: `∃ T, ∀ s ∈ [-1,2], 9 < |Im| → ‖G s‖ ≤ T`,
+  four cases outer/middle × positive/negative-`τ` from BN + Tier 2, damping split
+  by sign, `σ² ≤ 4` cap `exp 0.04`); `hBdd_unconditional` (BU's tail premise
+  discharged → full-strip `hBdd`); `P1_R02_of_hTail` (P1 `‖ζ‖ ≤ 10` on R02 with
+  BH2 `hTail` the ONLY remaining explicit premise).
+
+Grep record (verified by `rg -n` before writing):
+* `BZTailEnvelope` + all lemma names below: absent repo-wide (checked).
+* `BTStripGamma.sin_pi_half_strip_upper` / `gamma_one_sub_half_strip_upper` —
+  `interval_arith.lean:34266/34325` (strip-uniform, valid on tails).
+* `BUWindowed.cpow_pi_lower` — this file `:4655` (needs only `Re ≤ 3/2`, valid on tails).
+* `BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi` — this file `:3863` (reused).
+* `BP2Middle32.middle_norm_rpow32_le` — this file `:4392` (reused).
+* `BNStripThirds.F_outerThirds_le` — this file `:4286` (outer tail thirds).
+* `BXMiddleTail.young_rpow32` — this file `:5298` (Young feeder for Tier 3a).
+* `BV2OuterTail.outer_gauss_le` — this file `:5178` (positive-`τ` outer numeral).
+* `BUWindowed.hBdd_of_window_and_tail` — this file `:5081` (tail-`T` consumer).
+* `BUWindowed.P1_R02_of_window_and_tails` — this file `:5105` (P1 consumer).
+* `BH2TailWindow.damp_re_general` — this file `:3623` (damping split).
+* `ZeroFreeRegionHadamard.xi_norm_bound_whole_plane` —
+  `ZeroFreeRegionHadamard.lean:4535`.
+* `Complex.Gamma_mul_Gamma_one_sub`, `Complex.Gamma_ne_zero_of_re_pos`,
+  `Complex.Gammaℝ_def`, `Complex.sin_eq_zero_iff` — Mathlib (same as BU).
+* `Real.pi_lt_d4`, `Real.sqrt_le_sqrt`, `Real.sqrt_sq`, `Real.rpow_add`,
+  `Real.rpow_one`, `Real.sqrt_eq_rpow` — Mathlib (same as BV2/BX).
+-/
+
+namespace BZTailEnvelope
+
+/-- Sine-nonzero on the tail middle: `9 < |Im|` kills the real-axis zeros `s = 2k`
+via `Im` alone (no norm puncture needed, unlike BU's windowed version). -/
+theorem sin_ne_zero_of_tail_middle {s : ℂ}
+    (_hmid1 : (-1 / 2 : ℝ) ≤ s.re) (_hmid2 : s.re ≤ (3 / 2 : ℝ))
+    (htail : 9 < |s.im|) :
+    Complex.sin ((Real.pi : ℂ) * (s / 2)) ≠ 0 := by
+  intro hsin0
+  rw [Complex.sin_eq_zero_iff] at hsin0
+  obtain ⟨k, hk⟩ := hsin0
+  have hpi_ne : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt Real.pi_pos)
+  have hk2 : (Real.pi : ℂ) * (s / 2) = (Real.pi : ℂ) * (k : ℂ) := by
+    rw [hk, mul_comm]
+  have hks : s / 2 = (k : ℂ) := mul_left_cancel₀ hpi_ne hk2
+  have him : s.im = 0 := by
+    have hcongr := congrArg Complex.im hks
+    rw [Complex.div_ofNat_im] at hcongr
+    simp at hcongr
+    linarith
+  rw [him, abs_zero] at htail
+  linarith
+
+/-- (1) MAIN — tail `Gammaℝ` lower via reflection on `9 < |Im|`:
+`3/(16·exp(2|Im|)) ≤ ‖Gammaℝ s‖` on the middle third
+(`S = exp(2|Im|)` tail sine-upper, `U = 4` reflected upper, cpow `≥ 1/4`,
+`π ≥ 3`; same reflection skeleton as `BUWindowed.GammaR_window_lower`). -/
+theorem GammaR_tail_lower {s : ℂ}
+    (_hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2)
+    (hmid1 : (-1 / 2 : ℝ) ≤ s.re) (hmid2 : s.re ≤ (3 / 2 : ℝ))
+    (htail : 9 < |s.im|) :
+    3 / (16 * Real.exp (2 * |s.im|)) ≤ ‖Complex.Gammaℝ s‖ := by
+  have hS : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≤ Real.exp (2 * |s.im|) :=
+    BTStripGamma.sin_pi_half_strip_upper hmid1 hmid2
+  have hU : ‖Complex.Gamma (1 - s / 2)‖ ≤ 4 :=
+    BTStripGamma.gamma_one_sub_half_strip_upper hmid1 hmid2
+  have hcpow_ge : (1 / 4 : ℝ) ≤ ‖(Real.pi : ℂ) ^ (-s / 2)‖ :=
+    BUWindowed.cpow_pi_lower hmid2
+  have hsin_ne : Complex.sin ((Real.pi : ℂ) * (s / 2)) ≠ 0 :=
+    sin_ne_zero_of_tail_middle hmid1 hmid2 htail
+  have hdiv_re : (s / 2 : ℂ).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have h1sub_re : (1 - s / 2 : ℂ).re = 1 - s.re / 2 := by
+    rw [Complex.sub_re, Complex.one_re, hdiv_re]
+  have h1pos : (0 : ℝ) < (1 - s / 2 : ℂ).re := by
+    rw [h1sub_re]
+    linarith
+  have hG1_ne : Complex.Gamma (1 - s / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1pos
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (s / 2)
+  have hpi_ne : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt Real.pi_pos)
+  have hrhs_ne : (Real.pi : ℂ) / Complex.sin ((Real.pi : ℂ) * (s / 2)) ≠ 0 :=
+    div_ne_zero hpi_ne hsin_ne
+  have hGhalf_ne : Complex.Gamma (s / 2) ≠ 0 := left_ne_zero_of_mul (hrefl.symm ▸ hrhs_ne)
+  have hT_pos : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ :=
+    lt_of_le_of_ne (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hsin_ne))
+  have hB_pos : (0 : ℝ) < ‖Complex.Gamma (1 - s / 2)‖ :=
+    lt_of_le_of_ne (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hG1_ne))
+  have hT_ne : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ ≠ 0 := ne_of_gt hT_pos
+  have hB_ne : ‖Complex.Gamma (1 - s / 2)‖ ≠ 0 := ne_of_gt hB_pos
+  have hpinorm : ‖(Real.pi : ℂ)‖ = Real.pi := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+  have hAB : ‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma (1 - s / 2)‖
+      = Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ := by
+    have h := congrArg norm hrefl
+    rw [norm_mul, norm_div, hpinorm] at h
+    exact h
+  have hTB_le : ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖
+      ≤ Real.exp (2 * |s.im|) * 4 :=
+    mul_le_mul hS hU (norm_nonneg _) (Real.exp_nonneg _)
+  have hpi_ge : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
+  have hSU_pos : (0 : ℝ) < Real.exp (2 * |s.im|) * 4 := by positivity
+  have h3SU_le : (3 : ℝ) / (Real.exp (2 * |s.im|) * 4)
+      ≤ Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖) := by
+    have hTB_pos : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖ :=
+      mul_pos hT_pos hB_pos
+    have h1 : (3 : ℝ) / (Real.exp (2 * |s.im|) * 4) ≤ Real.pi / (Real.exp (2 * |s.im|) * 4) := by
+      apply div_le_div_of_nonneg_right hpi_ge hSU_pos.le
+    have h2 : Real.pi / (Real.exp (2 * |s.im|) * 4)
+        ≤ Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖) := by
+      apply div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) hTB_pos hTB_le
+    exact le_trans h1 h2
+  have hA_eq : ‖Complex.Gamma (s / 2)‖
+      = Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (s / 2))‖ * ‖Complex.Gamma (1 - s / 2)‖) := by
+    have hA2 : ‖Complex.Gamma (s / 2)‖ = (‖Complex.Gamma (s / 2)‖ * ‖Complex.Gamma (1 - s / 2)‖)
+        / ‖Complex.Gamma (1 - s / 2)‖ := (mul_div_cancel_right₀ _ hB_ne).symm
+    rw [hAB] at hA2
+    rw [hA2, div_div]
+  have hGhalf_ge : (3 : ℝ) / (Real.exp (2 * |s.im|) * 4) ≤ ‖Complex.Gamma (s / 2)‖ := by
+    rw [hA_eq]
+    exact h3SU_le
+  have hGR_eq : ‖Complex.Gammaℝ s‖
+      = ‖(Real.pi : ℂ) ^ (-s / 2)‖ * ‖Complex.Gamma (s / 2)‖ := by
+    rw [Complex.Gammaℝ_def, norm_mul]
+  have hGR_ge : (1 / 4 : ℝ) * (3 / (Real.exp (2 * |s.im|) * 4)) ≤ ‖Complex.Gammaℝ s‖ := by
+    rw [hGR_eq]
+    exact mul_le_mul hcpow_ge hGhalf_ge (by positivity) (norm_nonneg _)
+  have hnum : 3 / (16 * Real.exp (2 * |s.im|))
+      = (1 / 4 : ℝ) * (3 / (Real.exp (2 * |s.im|) * 4)) := by
+    have hE : Real.exp (2 * |s.im|) ≠ 0 := Real.exp_ne_zero _
+    field_simp
+    ring
+  rw [hnum]
+  exact hGR_ge
+
+/-- `u^(3/2:ℝ) = u·√u` for `0 < u` (feeder for the absorption lemma). -/
+theorem rpow32_eq_mul_sqrt {u : ℝ} (hu : 0 < u) :
+    u ^ (3 / 2 : ℝ) = u * Real.sqrt u := by
+  have e : (3 / 2 : ℝ) = 1 + 1 / 2 := by norm_num
+  rw [e, Real.rpow_add hu, Real.rpow_one, ← Real.sqrt_eq_rpow]
+
+/-- `3 ≤ √u` for `9 ≤ u`. -/
+theorem sqrt_ge_three_of_nine_le {u : ℝ} (hu : 9 ≤ u) : 3 ≤ Real.sqrt u := by
+  have h9 : Real.sqrt 9 = 3 := by
+    have e : (9 : ℝ) = 3 ^ 2 := by norm_num
+    rw [e, Real.sqrt_sq (by norm_num)]
+  calc (3 : ℝ) = Real.sqrt 9 := h9.symm
+    _ ≤ Real.sqrt u := Real.sqrt_le_sqrt hu
+
+/-- Absorption of the sine-growth exponent into the 3/2-power:
+`2u ≤ (2/3)·u^(3/2)` for `9 ≤ u` (since `u^(3/2) = u·√u ≥ 3u`). -/
+theorem abs_le_rpow32_div_three {u : ℝ} (hu : 9 ≤ u) :
+    2 * u ≤ (2 / 3) * u ^ (3 / 2 : ℝ) := by
+  have hu0 : (0 : ℝ) < u := by linarith
+  have h32 : u ^ (3 / 2 : ℝ) = u * Real.sqrt u := rpow32_eq_mul_sqrt hu0
+  have hsq : (3 : ℝ) ≤ Real.sqrt u := sqrt_ge_three_of_nine_le hu
+  have h3u : 3 * u ≤ u ^ (3 / 2 : ℝ) := by
+    rw [h32]
+    have h := mul_le_mul_of_nonneg_left hsq hu0.le
+    linarith
+  linarith
+
+/-- (2) MAIN — tail middle envelope in exp-3/2 form via BL's xi-transfer fed with
+Tier 1: `‖F s‖ ≤ C·exp(K·|Im s|^(3/2))` on `σ ∈ [-1/2,3/2]`, `9 < |Im|`.
+Same proof shape as `BUWindowed.F_middle_window_exp32`, tail domain; the extra
+`exp (2|Im|)` from the decaying Tier-1 lower is absorbed into `K`
+(`K = Kxi·2^(3/2) + 2/3`). -/
+theorem F_middle_tail_exp32 :
+    ∃ C K : ℝ, 0 ≤ C ∧ 0 ≤ K ∧ ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      -1 / 2 ≤ s.re → s.re ≤ 3 / 2 → 9 < |s.im| →
+      ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ C * Real.exp (K * (|s.im| ^ (3 / 2 : ℝ))) := by
+  obtain ⟨Kxi, hKxi, C0, hC0, hxi⟩ := ZeroFreeRegionHadamard.xi_norm_bound_whole_plane
+  have hKxi_nn : (0 : ℝ) ≤ Kxi := hKxi
+  have hB2nn : (0 : ℝ) ≤ (2 : ℝ) ^ (3 / 2 : ℝ) := Real.rpow_nonneg (by norm_num) _
+  have hKnn : (0 : ℝ) ≤ Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3 :=
+    add_nonneg (mul_nonneg hKxi_nn hB2nn) (by norm_num)
+  have hstrip_closed : IsClosed (Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip
+    exact IsClosed.preimage Complex.continuous_re isClosed_Icc
+  have htail_closed : IsClosed {s : ℂ | 9 ≤ |s.im|} :=
+    isClosed_Ici.preimage Complex.continuous_im.abs
+  have hKcompact : IsCompact (Metric.closedBall (0 : ℂ) (max C0 1) ∩
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 ∩ {s : ℂ | 9 ≤ |s.im|}) :=
+    ((isCompact_closedBall _ _).inter_right hstrip_closed).inter_right htail_closed
+  have hFcont : Continuous ZetaUpperR02ThreeLines.poleRemovedZeta :=
+    ZetaUpperR02ThreeLines.poleRemovedZeta_differentiable.continuous
+  obtain ⟨M, hM⟩ := hKcompact.exists_bound_of_continuousOn hFcont.continuousOn
+  have hCfin_nn : (0 : ℝ) ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M :=
+    le_trans (by positivity) (le_max_left _ _)
+  refine ⟨max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M,
+    Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3, hCfin_nn, hKnn,
+    fun s hs hmid1 hmid2 htail => ?_⟩
+  have hnorm_rpow := BP2Middle32.middle_norm_rpow32_le hmid1 hmid2
+  have h9 : (9 : ℝ) ≤ |s.im| := le_of_lt htail
+  by_cases hsmall : ‖s‖ ≤ max C0 1
+  · have hdist : dist s (0 : ℂ) ≤ max C0 1 := by
+      have e : dist s (0 : ℂ) = ‖s‖ := by
+        rw [dist_eq_norm, sub_zero]
+      rw [e]
+      exact hsmall
+    have hmemK : s ∈ Metric.closedBall (0 : ℂ) (max C0 1) ∩
+        Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 ∩ {s : ℂ | 9 ≤ |s.im|} :=
+      ⟨⟨Metric.mem_closedBall.mpr hdist, hs⟩, h9⟩
+    have hMs : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ M := hM s hmemK
+    have harg_nn : (0 : ℝ) ≤ (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ)) :=
+      mul_nonneg hKnn (Real.rpow_nonneg (abs_nonneg _) _)
+    have hexp1 : (1 : ℝ) ≤ Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      have h := Real.add_one_le_exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ)))
+      linarith
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤ M := hMs
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M := le_max_right _ _
+      _ = max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M * 1 := (mul_one _).symm
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) :=
+        mul_le_mul_of_nonneg_left hexp1 hCfin_nn
+  · have hlarge : max C0 1 < ‖s‖ := not_le.mp hsmall
+    have hC0le : C0 ≤ ‖s‖ := le_trans (le_max_left _ _) (le_of_lt hlarge)
+    have hs1le : (1 : ℝ) ≤ ‖s‖ := le_trans (le_max_right _ _) (le_of_lt hlarge)
+    have hmax_nn : (0 : ℝ) ≤ max C0 1 :=
+      le_trans (by norm_num : (0 : ℝ) ≤ 1) (le_max_right _ _)
+    have hs_pos : (0 : ℝ) < ‖s‖ := lt_of_le_of_lt hmax_nn hlarge
+    have hs0 : s ≠ 0 := by
+      intro h
+      rw [h, norm_zero] at hlarge
+      linarith
+    have hs1 : s ≠ 1 := by
+      intro h
+      rw [h, norm_one] at hlarge
+      have h1le : (1 : ℝ) ≤ max C0 1 := le_max_right _ _
+      linarith
+    have hGlow_le : 3 / (16 * Real.exp (2 * |s.im|)) ≤ ‖Complex.Gammaℝ s‖ :=
+      GammaR_tail_lower hs hmid1 hmid2 htail
+    have hGRne : Complex.Gammaℝ s ≠ 0 := by
+      intro h
+      rw [h, norm_zero] at hGlow_le
+      have hc : (0 : ℝ) < 3 / (16 * Real.exp (2 * |s.im|)) := by positivity
+      linarith
+    have hGne : Complex.Gamma (s / 2) ≠ 0 := by
+      intro hG0
+      apply hGRne
+      rw [Complex.Gammaℝ_def, hG0, mul_zero]
+    have hnorm_eq := BLMiddleEnvelope.poleRemoved_norm_of_hadamardXi hs0 hs1 hGne
+    have hxi_le := hxi s hC0le
+    have hc : (0 : ℝ) < 3 / (16 * Real.exp (2 * |s.im|)) := by positivity
+    have hGn_pos : (0 : ℝ) < ‖Complex.Gammaℝ s‖ := lt_of_lt_of_le hc hGlow_le
+    have hDpos : (0 : ℝ) < ‖s‖ * ‖Complex.Gammaℝ s‖ := mul_pos hs_pos hGn_pos
+    have hDle2 : 3 / (16 * Real.exp (2 * |s.im|)) ≤ ‖s‖ * ‖Complex.Gammaℝ s‖ := by
+      calc 3 / (16 * Real.exp (2 * |s.im|)) = 1 * (3 / (16 * Real.exp (2 * |s.im|))) := (one_mul _).symm
+        _ ≤ ‖s‖ * ‖Complex.Gammaℝ s‖ :=
+          mul_le_mul hs1le hGlow_le hc.le (norm_nonneg _)
+    have hFle1 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / (‖s‖ * ‖Complex.Gammaℝ s‖) := by
+      rw [hnorm_eq]
+      exact div_le_div_of_nonneg_right hxi_le hDpos.le
+    have hFle2 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / (3 / (16 * Real.exp (2 * |s.im|))) :=
+      le_trans hFle1 (div_le_div_of_nonneg_left (Real.exp_nonneg _) hc hDle2)
+    have hE : Real.exp (2 * |s.im|) ≠ 0 := Real.exp_ne_zero _
+    have hFle2b : Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / (3 / (16 * Real.exp (2 * |s.im|)))
+        = (Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) * Real.exp (2 * |s.im|)) * (16 / 3) := by
+      field_simp
+    have hexp_mono : Kxi * ‖s‖ ^ (3 / 2 : ℝ) + 2 * |s.im|
+        ≤ Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)
+          + (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ)) := by
+      have hmul_le : Kxi * ‖s‖ ^ (3 / 2 : ℝ) ≤
+          Kxi * ((4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hnorm_rpow hKxi_nn
+      have habsorb : 2 * |s.im| ≤ (2 / 3) * (|s.im| ^ (3 / 2 : ℝ)) :=
+        abs_le_rpow32_div_three h9
+      have heq : Kxi * ((4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ))
+          + (2 / 3) * (|s.im| ^ (3 / 2 : ℝ))
+          = Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)
+            + (Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ)) := by
+        ring
+      have h1 : Kxi * ‖s‖ ^ (3 / 2 : ℝ) + 2 * |s.im|
+          ≤ Kxi * ((4 : ℝ) ^ (3 / 2 : ℝ) + (2 : ℝ) ^ (3 / 2 : ℝ) * |s.im| ^ (3 / 2 : ℝ))
+            + (2 / 3) * (|s.im| ^ (3 / 2 : ℝ)) := by
+        linarith [hmul_le, habsorb]
+      rwa [heq] at h1
+    have hexp_le : Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) * Real.exp (2 * |s.im|)
+        ≤ Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      rw [← Real.exp_add, ← Real.exp_add]
+      exact Real.exp_le_exp.mpr hexp_mono
+    have hFle3 : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+        (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) *
+        Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) := by
+      calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+            Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) / (3 / (16 * Real.exp (2 * |s.im|))) := hFle2
+        _ = (Real.exp (Kxi * ‖s‖ ^ (3 / 2 : ℝ)) * Real.exp (2 * |s.im|)) * (16 / 3) := hFle2b
+        _ ≤ (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) *
+            Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ)))) * (16 / 3) :=
+          mul_le_mul_of_nonneg_right hexp_le (by norm_num)
+        _ = (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) *
+            Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) := by
+          ring
+    calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ ≤
+          (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) := hFle3
+      _ ≤ max (Real.exp (Kxi * (4 : ℝ) ^ (3 / 2 : ℝ)) * 16 / 3) M *
+          Real.exp ((Kxi * (2 : ℝ) ^ (3 / 2 : ℝ) + 2 / 3) * (|s.im| ^ (3 / 2 : ℝ))) :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) (Real.exp_nonneg _)
+
+/-- (3a) Middle negative-`τ` companion numeral (BX-mirror with the `(u−6.75)²`
+form): for `u ≥ 9`, `C·exp(K·u^{3/2})·exp(−(u−6.75)²/100) ≤ C·exp(10⁶K⁴+1)`.
+Young (`BXMiddleTail.young_rpow32`) + `(u−6.75)² ≥ u²−13.5u` + linear cap
+`0.135u−u²/200 ≤ 1` (max `0.91125` at `u = 13.5`, via `(u−13.5)² ≥ 0`). -/
+theorem middle_gauss_neg_le {u C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K) (hu : 9 ≤ u) :
+    C * Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u - 6.75) ^ 2) / 100)) ≤
+      C * Real.exp (1000000 * K ^ 4 + 1) := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hyoung : K * u ^ (3 / 2 : ℝ) ≤ u ^ 2 / 200 + 1000000 * K ^ 4 :=
+    BXMiddleTail.young_rpow32 hK hu0
+  have hshift : u ^ 2 - 13.5 * u ≤ (u - 6.75) ^ 2 := by
+    have e : (u - 6.75) ^ 2 = u ^ 2 - 13.5 * u + 45.5625 := by ring
+    linarith
+  have hlin : 0.135 * u - u ^ 2 / 200 ≤ 1 := by
+    have hsq : (0 : ℝ) ≤ (u - 13.5) ^ 2 := sq_nonneg _
+    linarith
+  have hquad : K * u ^ (3 / 2 : ℝ) - (u - 6.75) ^ 2 / 100 ≤ 1000000 * K ^ 4 + 1 := by
+    linarith [hyoung, hshift, hlin]
+  have hexp_arg : K * u ^ (3 / 2 : ℝ) + (-(((u - 6.75) ^ 2) / 100))
+      ≤ 1000000 * K ^ 4 + 1 := by
+    linarith [hquad]
+  have hexp : Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u - 6.75) ^ 2) / 100))
+      ≤ Real.exp (1000000 * K ^ 4 + 1) := by
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr hexp_arg
+  calc C * Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u - 6.75) ^ 2) / 100))
+      = C * (Real.exp (K * u ^ (3 / 2 : ℝ)) * Real.exp (-(((u - 6.75) ^ 2) / 100))) := by
+        ring
+    _ ≤ C * Real.exp (1000000 * K ^ 4 + 1) :=
+        mul_le_mul_of_nonneg_left hexp hC
+
+/-- (3b) Outer negative-`τ` companion numeral (BV2-mirror with the `(u−6.75)²`
+form, exp-linear): for `u ≥ 9`,
+`18·exp((1+π/2)u)·exp(−(u−6.75)²/100) ≤ 18·exp(183.034)`.
+Completing the square at `K+0.135 ≤ 2.7058` (`(u−6.75)² ≥ u²−13.5u` shifts the
+linear coefficient by `+0.135`); `25·2.7058² = 183.033841 ≤ 183.034`. -/
+theorem outer_gauss_neg_le {u : ℝ} (hu : 9 ≤ u) :
+    18 * Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u - 6.75) ^ 2) / 100)) ≤
+      18 * Real.exp 183.034 := by
+  have hu0 : (0 : ℝ) ≤ u := by linarith
+  have hKnn : (0 : ℝ) ≤ 1 + Real.pi / 2 := by
+    have hpi : (0 : ℝ) < Real.pi := Real.pi_pos
+    linarith
+  have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hKle : 1 + Real.pi / 2 + 0.135 ≤ (2.7058 : ℝ) := by linarith
+  have hKsq : 25 * (1 + Real.pi / 2 + 0.135) ^ 2 ≤ (183.034 : ℝ) := by
+    have hnn1 : (0 : ℝ) ≤ 2.7058 - (1 + Real.pi / 2 + 0.135) := by linarith
+    have hnn2 : (0 : ℝ) ≤ 2.7058 + (1 + Real.pi / 2 + 0.135) := by linarith
+    have hprod : (0 : ℝ) ≤ (2.7058 - (1 + Real.pi / 2 + 0.135)) * (2.7058 + (1 + Real.pi / 2 + 0.135)) :=
+      mul_nonneg hnn1 hnn2
+    have hsq2 : (2.7058 : ℝ) ^ 2 = 7.32135364 := by norm_num
+    nlinarith [hprod, hsq2]
+  have hshift : u ^ 2 - 13.5 * u ≤ (u - 6.75) ^ 2 := by
+    have e : (u - 6.75) ^ 2 = u ^ 2 - 13.5 * u + 45.5625 := by ring
+    linarith
+  have hquad : (1 + Real.pi / 2) * u - (u - 6.75) ^ 2 / 100
+      ≤ 25 * (1 + Real.pi / 2 + 0.135) ^ 2 := by
+    have hsqnn : (0 : ℝ) ≤ (u - 50 * (1 + Real.pi / 2 + 0.135)) ^ 2 := sq_nonneg _
+    have hcs : (1 + Real.pi / 2) * u - (u ^ 2 - 13.5 * u) / 100
+        = 25 * (1 + Real.pi / 2 + 0.135) ^ 2 - (u - 50 * (1 + Real.pi / 2 + 0.135)) ^ 2 / 100 := by
+      ring
+    linarith [hsqnn, hshift, hcs]
+  have hexp_arg : (1 + Real.pi / 2) * u + (-(((u - 6.75) ^ 2) / 100))
+      ≤ (183.034 : ℝ) := by
+    linarith [hquad, hKsq]
+  have hexp : Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u - 6.75) ^ 2) / 100))
+      ≤ Real.exp 183.034 := by
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr hexp_arg
+  calc 18 * Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u - 6.75) ^ 2) / 100))
+      = 18 * (Real.exp ((1 + Real.pi / 2) * u) * Real.exp (-(((u - 6.75) ^ 2) / 100))) := by
+        ring
+    _ ≤ 18 * Real.exp 183.034 :=
+        mul_le_mul_of_nonneg_left hexp (by norm_num)
+
+/-- (4a) MAIN — tail-`T`: an explicit uniform cap on `‖G‖` over the whole tail
+`9 < |Im|` of the strip `[-1,2]`. Four cases (outer/middle ×
+nonnegative/negative-`τ`): outer thirds via BN (`F_outerThirds_le`) with the
+BV2/outer-neg numerals, middle via Tier 2 with the BX/middle-neg numerals;
+damping split by sign of `τ`, `σ² ≤ 4` cap `exp 0.04`. -/
+theorem G_tail_bdd :
+    ∃ T : ℝ, ∀ s : ℂ,
+      s ∈ Complex.HadamardThreeLines.verticalClosedStrip (-1) 2 →
+      9 < |s.im| → ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖ ≤ T := by
+  obtain ⟨Cmid, Kmid, hCnn, hKnn, hmid⟩ := F_middle_tail_exp32
+  have hBop_nn : (0 : ℝ) ≤ 18 * Real.exp 165.225316 :=
+    mul_nonneg (by norm_num) (Real.exp_nonneg _)
+  have hBon_nn : (0 : ℝ) ≤ 18 * Real.exp 183.034 :=
+    mul_nonneg (by norm_num) (Real.exp_nonneg _)
+  have hTop_nn : (0 : ℝ) ≤ Cmid * Real.exp (1000000 * Kmid ^ 4) :=
+    mul_nonneg hCnn (Real.exp_nonneg _)
+  have hTon_nn : (0 : ℝ) ≤ Cmid * Real.exp (1000000 * Kmid ^ 4 + 1) :=
+    mul_nonneg hCnn (Real.exp_nonneg _)
+  refine ⟨max (max (18 * Real.exp 165.225316 * Real.exp 0.04)
+      (18 * Real.exp 183.034 * Real.exp 0.04))
+    (max (Cmid * Real.exp (1000000 * Kmid ^ 4) * Real.exp 0.04)
+      (Cmid * Real.exp (1000000 * Kmid ^ 4 + 1) * Real.exp 0.04)),
+    fun s hs htail => ?_⟩
+  have hmem : (-1 : ℝ) ≤ s.re ∧ s.re ≤ 2 := by
+    unfold Complex.HadamardThreeLines.verticalClosedStrip at hs
+    simp only [Set.mem_preimage, Set.mem_Icc] at hs
+    exact hs
+  obtain ⟨hlo, hhi⟩ := hmem
+  have hσ : s.re ^ 2 ≤ 4 := by
+    have e1 : (0 : ℝ) ≤ s.re + 1 := by linarith
+    have e2 : (0 : ℝ) ≤ 2 - s.re := by linarith
+    nlinarith [mul_nonneg e1 e2]
+  have h9 : (9 : ℝ) ≤ |s.im| := le_of_lt htail
+  have hdamp_eq : ‖Complex.exp (((1 / 100 : ℝ) : ℂ) *
+      (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖
+      = Real.exp (s.re ^ 2 / 100) * Real.exp (-(((s.im + 6.75) ^ 2) / 100)) := by
+    rw [ZetaUpperR02ThreeLines.norm_complex_exp, BH2TailWindow.damp_re_general,
+      ← Real.exp_add]
+    congr 1
+    ring
+  have hexp04 : Real.exp (s.re ^ 2 / 100) ≤ Real.exp 0.04 :=
+    Real.exp_le_exp.mpr (by linarith)
+  have hG : ZetaUpperR02ThreeLines.dampedPoleRemoved s
+      = ZetaUpperR02ThreeLines.poleRemovedZeta s * Complex.exp (((1 / 100 : ℝ) : ℂ)
+        * (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2) := rfl
+  have hnorm : ‖ZetaUpperR02ThreeLines.dampedPoleRemoved s‖
+      = ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖
+        * ‖Complex.exp (((1 / 100 : ℝ) : ℂ)
+          * (s - ZetaUpperR02ThreeLines.dampCenter) ^ 2)‖ := by
+    rw [hG, norm_mul]
+  rw [hnorm, hdamp_eq]
+  rcases le_total 0 s.im with hnn | hneg
+  · -- Nonnegative-`τ` side: `(τ+6.75)² = (|τ|+6.75)²`.
+    have habs : |s.im| = s.im := abs_of_nonneg hnn
+    have hsq : (s.im + 6.75) ^ 2 = (|s.im| + 6.75) ^ 2 := by rw [habs]
+    rw [hsq]
+    rcases le_total s.re (-1 / 2) with hleft | hmid1
+    · -- Outer-left, `τ ≥ 0`: BN + BV2.
+      have hF := BNStripThirds.F_outerThirds_le hs (Or.inl hleft)
+      have hnum := BV2OuterTail.outer_gauss_le (u := |s.im|) h9
+      have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+          ≤ 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+      have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+          ≤ 18 * Real.exp 165.225316 := le_trans hFE hnum
+      calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+            (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)))
+          = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))) *
+            Real.exp (s.re ^ 2 / 100) := by ring
+        _ ≤ (18 * Real.exp 165.225316) * Real.exp (s.re ^ 2 / 100) :=
+            mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+        _ ≤ (18 * Real.exp 165.225316) * Real.exp 0.04 :=
+            mul_le_mul_of_nonneg_left hexp04 hBop_nn
+        _ ≤ _ := le_trans (le_max_left _ _) (le_max_left _ _)
+    · by_cases hright : (3 / 2 : ℝ) ≤ s.re
+      · -- Outer-right, `τ ≥ 0`: BN + BV2.
+        have hF := BNStripThirds.F_outerThirds_le hs (Or.inr hright)
+        have hnum := BV2OuterTail.outer_gauss_le (u := |s.im|) h9
+        have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+            ≤ 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)) :=
+          mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+        have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+            ≤ 18 * Real.exp 165.225316 := le_trans hFE hnum
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+              (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)))
+            = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))) *
+              Real.exp (s.re ^ 2 / 100) := by ring
+          _ ≤ (18 * Real.exp 165.225316) * Real.exp (s.re ^ 2 / 100) :=
+              mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+          _ ≤ (18 * Real.exp 165.225316) * Real.exp 0.04 :=
+              mul_le_mul_of_nonneg_left hexp04 hBop_nn
+          _ ≤ _ := le_trans (le_max_left _ _) (le_max_left _ _)
+      · -- Middle, `τ ≥ 0`: Tier 2 + BX.
+        have hmid2 : s.re ≤ (3 / 2 : ℝ) := le_of_not_ge hright
+        have hF := hmid s hs hmid1 hmid2 htail
+        have hnum := BXMiddleTail.middle_gauss_le hCnn hKnn h9
+        have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+            ≤ Cmid * Real.exp (Kmid * (|s.im| ^ (3 / 2 : ℝ))) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)) :=
+          mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+        have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))
+            ≤ Cmid * Real.exp (1000000 * Kmid ^ 4) := le_trans hFE hnum
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+              (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100)))
+            = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| + 6.75) ^ 2) / 100))) *
+              Real.exp (s.re ^ 2 / 100) := by ring
+          _ ≤ (Cmid * Real.exp (1000000 * Kmid ^ 4)) * Real.exp (s.re ^ 2 / 100) :=
+              mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+          _ ≤ (Cmid * Real.exp (1000000 * Kmid ^ 4)) * Real.exp 0.04 :=
+              mul_le_mul_of_nonneg_left hexp04 hTop_nn
+          _ ≤ _ := le_trans (le_max_left _ _) (le_max_right _ _)
+  · -- Negative-`τ` side: `(τ+6.75)² = (|τ|−6.75)²`.
+    have habs : |s.im| = -s.im := abs_of_nonpos hneg
+    have hsq : (s.im + 6.75) ^ 2 = (|s.im| - 6.75) ^ 2 := by
+      rw [habs]
+      ring
+    rw [hsq]
+    rcases le_total s.re (-1 / 2) with hleft | hmid1
+    · -- Outer-left, `τ ≤ 0`: BN + outer-neg numeral.
+      have hF := BNStripThirds.F_outerThirds_le hs (Or.inl hleft)
+      have hnum := outer_gauss_neg_le (u := |s.im|) h9
+      have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+          ≤ 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)) :=
+        mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+      have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+          ≤ 18 * Real.exp 183.034 := le_trans hFE hnum
+      calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+            (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)))
+          = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))) *
+            Real.exp (s.re ^ 2 / 100) := by ring
+        _ ≤ (18 * Real.exp 183.034) * Real.exp (s.re ^ 2 / 100) :=
+            mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+        _ ≤ (18 * Real.exp 183.034) * Real.exp 0.04 :=
+            mul_le_mul_of_nonneg_left hexp04 hBon_nn
+        _ ≤ _ := le_trans (le_max_right _ _) (le_max_left _ _)
+    · by_cases hright : (3 / 2 : ℝ) ≤ s.re
+      · -- Outer-right, `τ ≤ 0`: BN + outer-neg numeral.
+        have hF := BNStripThirds.F_outerThirds_le hs (Or.inr hright)
+        have hnum := outer_gauss_neg_le (u := |s.im|) h9
+        have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+            ≤ 18 * Real.exp ((1 + Real.pi / 2) * |s.im|) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)) :=
+          mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+        have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+            ≤ 18 * Real.exp 183.034 := le_trans hFE hnum
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+              (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)))
+            = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))) *
+              Real.exp (s.re ^ 2 / 100) := by ring
+          _ ≤ (18 * Real.exp 183.034) * Real.exp (s.re ^ 2 / 100) :=
+              mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+          _ ≤ (18 * Real.exp 183.034) * Real.exp 0.04 :=
+              mul_le_mul_of_nonneg_left hexp04 hBon_nn
+          _ ≤ _ := le_trans (le_max_right _ _) (le_max_left _ _)
+      · -- Middle, `τ ≤ 0`: Tier 2 + middle-neg numeral.
+        have hmid2 : s.re ≤ (3 / 2 : ℝ) := le_of_not_ge hright
+        have hF := hmid s hs hmid1 hmid2 htail
+        have hnum := middle_gauss_neg_le hCnn hKnn h9
+        have hFE : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+            ≤ Cmid * Real.exp (Kmid * (|s.im| ^ (3 / 2 : ℝ))) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)) :=
+          mul_le_mul_of_nonneg_right hF (Real.exp_nonneg _)
+        have hcap : ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))
+            ≤ Cmid * Real.exp (1000000 * Kmid ^ 4 + 1) := le_trans hFE hnum
+        calc ‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ *
+              (Real.exp (s.re ^ 2 / 100) * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100)))
+            = (‖ZetaUpperR02ThreeLines.poleRemovedZeta s‖ * Real.exp (-(((|s.im| - 6.75) ^ 2) / 100))) *
+              Real.exp (s.re ^ 2 / 100) := by ring
+          _ ≤ (Cmid * Real.exp (1000000 * Kmid ^ 4 + 1)) * Real.exp (s.re ^ 2 / 100) :=
+              mul_le_mul_of_nonneg_right hcap (Real.exp_nonneg _)
+          _ ≤ (Cmid * Real.exp (1000000 * Kmid ^ 4 + 1)) * Real.exp 0.04 :=
+              mul_le_mul_of_nonneg_left hexp04 hTon_nn
+          _ ≤ _ := le_trans (le_max_right _ _) (le_max_right _ _)
+
+/-- (4b) Full-strip `hBdd`, UNCONDITIONAL: BU's tail premise discharged by `G_tail_bdd`. -/
+theorem hBdd_unconditional :
+    BddAbove ((norm ∘ ZetaUpperR02ThreeLines.dampedPoleRemoved) ''
+      Complex.HadamardThreeLines.verticalClosedStrip (-1) 2) :=
+  BUWindowed.hBdd_of_window_and_tail G_tail_bdd
+
+/-- (4c) P1 conditional on BH2 `hTail` ONLY (BU's tail premise now discharged):
+`‖ζ‖ ≤ 10` on the R02 rect. -/
+theorem P1_R02_of_hTail
+    (hTail : ∀ z ∈ Set.preimage Complex.re {(-1 : ℝ)}, 8.75 < |z.im| →
+      ‖ZetaUpperR02ThreeLines.dampedPoleRemoved z‖ ≤ 36)
+    {s : ℂ} (hs_lo : 0.05 ≤ s.re) (hs_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 10 :=
+  BUWindowed.P1_R02_of_window_and_tails hTail G_tail_bdd hs_lo hs_hi him_lo him_hi
+
+#print axioms BZTailEnvelope.sin_ne_zero_of_tail_middle
+#print axioms BZTailEnvelope.GammaR_tail_lower
+#print axioms BZTailEnvelope.rpow32_eq_mul_sqrt
+#print axioms BZTailEnvelope.sqrt_ge_three_of_nine_le
+#print axioms BZTailEnvelope.abs_le_rpow32_div_three
+#print axioms BZTailEnvelope.F_middle_tail_exp32
+#print axioms BZTailEnvelope.middle_gauss_neg_le
+#print axioms BZTailEnvelope.outer_gauss_neg_le
+#print axioms BZTailEnvelope.G_tail_bdd
+#print axioms BZTailEnvelope.hBdd_unconditional
+#print axioms BZTailEnvelope.P1_R02_of_hTail
+
+end BZTailEnvelope
+
+/-!
+BZ VERDICT + RESIDUAL (report-and-stop): door-3 tail-envelope assembly.
+(1) GREEN: tail Gamma-lower via reflection on `9 < |Im|`
+(`GammaR_tail_lower`, `3/(16·exp(2|Im|)) ≤ ‖Gammaℝ s‖`; tail numerals with BT's
+strip sine-upper + reflected `U = 4`; sine-nonzero needs no puncture).
+(2) GREEN: tail F-envelope via BL's xi-transfer fed with (1)
+(`F_middle_tail_exp32`, `‖F‖ ≤ C·exp(K·|Im|^{3/2))}` on the tail middle;
+`exp(2|Im|)` growth absorbed into `K = Kxi·2^{3/2}+2/3`).
+(3) GREEN: negative-`τ` companion numerals (`middle_gauss_neg_le`,
+`C·exp(10⁶K⁴+1)` cap; `outer_gauss_neg_le`, `18·exp(183.034)` cap).
+(4) GREEN: tail-`T` assembled (`G_tail_bdd`) → BU's tail premise discharged →
+`hBdd` UNCONDITIONAL (`hBdd_unconditional`) → P1 as far as honestly composes
+(`P1_R02_of_hTail`, BH2 `hTail` the sole remaining explicit premise).
+NOT reached (honest residual, needs Stirling-scale `F` bound, absent repo-wide):
+BH2 `hTail` (`‖G‖ ≤ 36` on `Re = -1`, `8.75 < |Im|`); hence P1 stays conditional.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
