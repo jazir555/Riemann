@@ -1568,19 +1568,17 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    load-bearing). Damping recenter FORCED to −6.75 for this track (parallel assembly needed to move it).
    `hTail` now needs ONLY **`(10.5,21)`** (peak `~48.1`, `1.34×` over). Ordered deeper levers: (i) exact
    `‖Γ·cos‖` joint (`(1+a²)·πa/2·coth(πa/2)` + zeta phase); (ii) pointwise `|ζ(2+iy)|` cancellation
-   (~1.4×, KL/vdC or interval); (iii) recentered-damping parallel track. **NEW AMMO — zeta-23-lean
-   (door-3 verdict):** workspace already imports it (`lakefile` globs `Zeta23.*` via `zeta-23-lean/`
-   symlink, rc1 oleans built 8/28–9/1, `Zeta23Probe.lean` green EXITCODE:0) — agents may `import`
-   directly, no setup. DOOR-3-USEFUL: (i) hump: `Zeta23.GammaFacts.StirlingVert.re_digamma_stirling[_']`
-   (explicit-constant Re Γ′/Γ on vertical lines; integrate à la `IntMu` to sharp |Γ| uppers replacing the
-   C=2.53/sinh chain; needs Re>0 — reflect rest; tasked to CZ). (ii) middle `[16,1024)` / Tier-3:
-   `Zeta23.MV.Final.mv_hilbert` (ready-made MV Hilbert, C=26 via `MVDiag 13`) as large-sieve input —
-   bridge frequencies `λ_r=8.75·log n`; task AFTER DA reports (same-file lane). DOOR-3-MARGINAL:
-   `RvM.ZetaGrowth` linear bounds + `ZetaUpperBnd` (`‖ζ‖≤C·log|t|` near σ=1) — windows are bounded
-   (numerals win) and damping dominates at ∞; ζ-1.65 already near-exact. DOOR-3-NONE: σ>1 lowers
-   (`ZetaLowerBound3`/`ZetaLowerBnd`/`ZetaInvBnd` — no cell has Re>1), `ZetaZeroFree` (needs covers, not
-   subregions), EF/Backlund/Chebyshev/XiPrime/Poisson/PairCeiling/headline-2/3 (statistics/density ≠
-   pointwise bounds; no door transfer).
+   (~1.4×, KL/vdC or interval); (iii) recentered-damping parallel track. **Exact joint CLOSED
+   (`CZ_JointHump`, `ffcd24a0`, green, axioms clean):** `cosh/sinh ≤ 1.001` (`t≥15.75`) ⇒
+   **`‖Γ·cos‖ ≤ 1.26·√(|Im|³)`** (was 1.2653; true ratio `≤1.25899`, decreasing — 2.01-sinh and E·C
+   separation slack PERMANENTLY removed on hump) ⇒ **closed `[10.5,10.6]`** (35.16, margin 0.84).
+   **Zeta23-Stirling verdict NEGATIVE** (numbers): ceiling `√(2π)≈2.50663` vs `2.53` = 1.0093× max plus
+   `5/t²` log-error (`~1.046×` loss at 10.5) — no import taken, zero dep-build. **Uniform-constant route
+   now exhausted IN PRINCIPLE** (dream ceiling `1.236×` < `1.331×` needed; peak would sit `~38.8`).
+   `hTail` needs **`(10.6,21)`** (peak `47.93`). ONLY structural route left: (iii) recentered damping +
+   re-proved threshold assembly (tasked). **Zeta23 door-3 verdict retained:** Stirling route dead (above);
+   MV large-sieve (`Zeta23.MV.Final.mv_hilbert`, C=26) tasked to DB for the middle block; log-bounds
+   marginal (bounded windows); σ>1 lowers / zero-free / statistics machinery no door transfer.
    **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
