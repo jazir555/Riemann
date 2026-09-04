@@ -1458,7 +1458,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     HAS `Real.pi_gt_d4`/`pi_lt_d4` (`3.1415<π<3.1416`), used directly ⇒ width `0.01→0.0001` (100×) ⇒
     `δ₁₂∈[2.8924,2.894]` w=`0.0016` (38×, true `≈2.89338` inside) + `θ₁₆−8π∈[−0.8728,−0.871]` w=`0.0018`
     (45×, true `≈−0.87259` inside). Trig re-derivation on the tight boxes (re-sharpen sin/cos θ₁₂/θ₁₆, feed
-    term11/term15) tasked; head stays `≈0.1712` until recomposed. **Stirling Gamma tail
+    term11/term15) tasked; head stays `≈0.1712` until recomposed. **Trig recomposed (`D3_S16_norm_ge_CV`,
+    `816f5782`, green, axioms clean):** sin θ₁₂ `≤0.247` (was `0.306`; tight box `−y∈[0.2475,0.2492]` +
+    exact quintic `Q(0.2492)≈0.24663`, gap `0.0013` vs true `≈0.24567`) + sin θ₁₆ `≤-0.764` (was `-0.757`;
+    septic `S(0.871)≈0.76497`, gap `0.0020` vs true `≈-0.76600`) ⇒
+    **`‖S₁₆‖ ≥ 500629219/2695350000 ≈ 0.1857`** (1.085×, gain `0.01452`). Next: sin θ₁₃ still on the wide
+    `pi_d2`-era box — needs CU-style delta tightening + quintic re-sharpening to feed term12 (tasked).
+    **Stirling Gamma tail
     CLOSED (`CH2GammaTail`, C=4, ~25% headroom):** joint-with-cosine composition tasked (hTail).
     **x=8,9 CLOSED (`D3_S8/S9_re_lower` et al.):** power-bridges (`log 8 = 3·log 2`, `log 9 = 2·log 3`)
     green (Re-route dead again, `cannot_reach` proved). 10/12 tasked next, then 14/15/16.
@@ -1529,8 +1535,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    + pos side (`0.1×38.16=3.82`) — `hSupNeg`/`hSupPos`-shaped on `[8.75,10]`. Constant-tightening PROVED dead:
    zeta tier no headroom (true `ζ(2)=1.6449` vs `1.65`, 0.3% vs 32.3% needed), `C<2.53` ceiling `~1.11×` vs
    `1.48×` needed. Exact residual: hump **`[10.3,20.4]`** (true peak `≈53.2` at `a≈15`, needs structural work —
-   restructured `F` majorant or narrower variance) + large-`a` **`[21,∞)`** (mechanical: per-unit caps +
-   tail decrease, tasked). **Joint composition CLOSED
+   restructured `F` majorant or narrower variance) +    large-`a` **`[21,∞)`** (mechanical: per-unit caps +
+   tail decrease, tasked). **Large-a CLOSED (`CT_LargeA`, `167ff503`, green, axioms clean):** nine per-unit
+   neg caps `[21,30]` (tightest margin `0.12` on `[21,22]`: `35.88`) + tail `a≥30 ≤16.50` + pos side via
+   `pos ≤ neg` pointwise ⇒ **`hSupNeg`/`hSupPos`-shaped on `[21,∞)`**. Full log-derivative decrease NOT
+   proved (cruder tail cap banked, honest). `hTail_of_sharp201_sup` now needs ONLY `[8.75,21)`: `[8.75,10]`
+   closed (CQ), `[21,∞)` closed (CT) — remaining hump **`[10,21)`** is STRUCTURAL (true `40.68–53.18`,
+   peak `≈53.2`; constant-tightening dead; needs restructured `F` majorant or narrower variance, tasked).
+   **Joint composition CLOSED
   (`CIJointStirling`):** joint `92→52.8` (1.75× inside one estimate); pos edge **`6.32<36` CLOSED at
   edge**; neg edge `61.3` (1.70× over — tighter-`C`/sqrt-form/zeta tiers tasked). **hTail sharpest-cap (`CC_hTailGap`):**
   pointwise `B(a)`, edge `B(8.75)=1984.6` (`~55×` over 36), `no_crossover` PROVED for the `1·poly`
