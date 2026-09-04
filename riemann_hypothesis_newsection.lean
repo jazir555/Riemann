@@ -13936,5 +13936,127 @@ unconditionally and the door-3 P1 track reduces to downstream consumers
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# Door-3 downstream discharge (P1 track done): `R02_zeta_upper_obligation` + deriv Ms.
+
+Ownership: downstream-discharge append (append-only after the DG verdict block;
+nothing above touched; no new imports; LF endings).
+
+GOAL (ledger `d17a7d28`: P1 TRACK DONE, obligation discharge tasked): DG's
+`DG_GapTransfer.P1_R02_unconditional` (`:13893`) gives `‖riemannZeta s‖ ≤ 10`
+on the R02 rect with NO premises. This block plugs it into the two downstream
+consumers named in the ledger (`DerivCauchyBridge` / AO rewiring):
+
+(a) `R02_zeta_upper_discharged` — `DerivCauchyBridge.R02_zeta_upper_obligation`
+(`central_cover_assembly.lean:6493`, `∀ s, 0.05 ≤ re → re ≤ 0.74 →
+-8.25 ≤ im → im ≤ -5.25 → ‖zeta s‖ ≤ 10`) from `P1_R02_unconditional`.
+`zeta` is definitionally `riemannZeta` (`riemann_hypothesis.lean:16`
+`def zeta : ℂ → ℂ := riemannZeta`), so the `show` step is `rfl`-defeq.
+(b) `AO_gamma_upper_discharged` — `AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation`
+(`central_cover_assembly.lean:9975`) from landed
+`R02GammaDisc.gammaOf_upper_disc_R02` (`interval_arith.lean:32316`; already
+imported at top of this file, so no new import, no cycle).
+(c) Unconditional deriv `M`s by firing the two conditional bridges with (a)+(b):
+`R02_deriv_67200_unconditional` (`M = 67200` via
+`DerivCauchyBridge.R02_deriv_bound_of_zeta_upper`), `AO_R02_deriv_16296_unconditional`
+(`M = 162.96` via `AO_R02_deriv_bound_of_zeta_upper`), `AO_R02_deriv_163_unconditional`
+(`M = 163` ceil tier via `AO_R02_deriv_bound_163_of_zeta_upper`), plus the two
+unconditional sphere sups (`16800`, `40.74`).
+
+Grep record (verified before writing; `rg -n`):
+* `def R02_zeta_upper_obligation` -> `central_cover_assembly.lean:6493`.
+* `theorem R02_deriv_bound_of_zeta_upper` -> `central_cover_assembly.lean:6550`.
+* `theorem R02_uniform_sphere_bound` -> `central_cover_assembly.lean:6541`.
+* `def AO_gamma_upper_disc_R02_obligation` -> `central_cover_assembly.lean:9975`.
+* `theorem AO_R02_deriv_bound_of_zeta_upper` -> `central_cover_assembly.lean:10063`.
+* `theorem AO_R02_deriv_bound_163_of_zeta_upper` -> `central_cover_assembly.lean:10078`.
+* `theorem AO_R02_uniform_sphere_bound` -> `central_cover_assembly.lean:10051`.
+* `theorem gammaOf_upper_disc_R02` -> `interval_arith.lean:32316`.
+* `theorem P1_R02_unconditional` -> this file `:13893` (`DG_GapTransfer`).
+* `def zeta : ℂ → ℂ := riemannZeta` -> `riemann_hypothesis.lean:16`.
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `R02_zeta_upper_discharged`, `AO_gamma_upper_discharged`.
+* `R02_sphere_16800_unconditional`, `R02_deriv_67200_unconditional`.
+* `AO_sphere_4074_unconditional`, `AO_R02_deriv_16296_unconditional`,
+  `AO_R02_deriv_163_unconditional`.
+-/
+
+namespace Door3DownstreamDischarge
+
+/-- Discharge of `DerivCauchyBridge.R02_zeta_upper_obligation` (`‖zeta‖ ≤ 10`
+on the R02 disc `s`-rect) from the unconditional parallel P1.
+`zeta = riemannZeta` definitionally (`riemann_hypothesis.lean:16`). -/
+theorem R02_zeta_upper_discharged :
+    DerivCauchyBridge.R02_zeta_upper_obligation := by
+  intro s hs_lo hs_hi him_lo him_hi
+  show ‖riemannZeta s‖ ≤ 10
+  exact DG_GapTransfer.P1_R02_unconditional hs_lo hs_hi him_lo him_hi
+
+/-- Discharge of `AO_gamma_upper_disc_R02_obligation` (`‖gammaOf‖ ≤ 0.097`)
+from the landed `R02GammaDisc.gammaOf_upper_disc_R02` (identical statement). -/
+theorem AO_gamma_upper_discharged :
+    AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation := by
+  intro s hre_lo hre_hi him_lo him_hi
+  exact R02GammaDisc.gammaOf_upper_disc_R02 hre_lo hre_hi him_lo him_hi
+
+/-- Unconditional sphere sup `16800` on all R02 `0.25`-spheres. -/
+theorem R02_sphere_16800_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800 :=
+  DerivCauchyBridge.R02_uniform_sphere_bound R02_zeta_upper_discharged
+
+/-- Unconditional R02 deriv bound `M = 67200` (`16800 / 0.25`). -/
+theorem R02_deriv_67200_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ 67200 :=
+  DerivCauchyBridge.R02_deriv_bound_of_zeta_upper R02_zeta_upper_discharged
+
+/-- Unconditional AO sphere sup `40.74` on all R02 `0.25`-spheres. -/
+theorem AO_sphere_4074_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 40.74 :=
+  AO_R02DiscUpdate.AO_R02_uniform_sphere_bound
+    AO_gamma_upper_discharged R02_zeta_upper_discharged
+
+/-- Unconditional AO R02 deriv bound `M = 162.96` (`40.74 / 0.25`). -/
+theorem AO_R02_deriv_16296_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (162.96 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_of_zeta_upper
+    AO_gamma_upper_discharged R02_zeta_upper_discharged
+
+/-- Unconditional AO R02 deriv bound, ceil tier `M = 163`. -/
+theorem AO_R02_deriv_163_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper
+    AO_gamma_upper_discharged R02_zeta_upper_discharged
+
+#print axioms Door3DownstreamDischarge.R02_zeta_upper_discharged
+#print axioms Door3DownstreamDischarge.AO_gamma_upper_discharged
+#print axioms Door3DownstreamDischarge.R02_sphere_16800_unconditional
+#print axioms Door3DownstreamDischarge.R02_deriv_67200_unconditional
+#print axioms Door3DownstreamDischarge.AO_sphere_4074_unconditional
+#print axioms Door3DownstreamDischarge.AO_R02_deriv_16296_unconditional
+#print axioms Door3DownstreamDischarge.AO_R02_deriv_163_unconditional
+
+end Door3DownstreamDischarge
+
+/-!
+Door-3 downstream-discharge VERDICT + RESIDUAL (report-and-stop).
+
+(1) DISCHARGED (this tail, full proofs, no `sorry`/`admit`/`axiom`):
+(a) `R02_zeta_upper_obligation` (`‖zeta‖ ≤ 10` on the R02 rect) via
+`DG_GapTransfer.P1_R02_unconditional` (`zeta = riemannZeta` defeq).
+(b) `AO_gamma_upper_disc_R02_obligation` via landed
+`R02GammaDisc.gammaOf_upper_disc_R02`.
+(c) Unconditional deriv `M`s: `67200` (`DerivCauchyBridge`), `162.96` / `163`
+(AO rewiring), plus unconditional sphere sups `16800` / `40.74`.
+(2) RESIDUAL: build verification (`lake build riemann_hypothesis_newsection`)
++ `#print axioms` inspection. If green with exactly
+`[propext, Classical.choice, Quot.sound]` throughout, the door-3 P1 track is
+fully discharged downstream and the remaining R02 H-leaf work is the
+center-product premises (`Agam`, `Azeta`) owned by sibling agents.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
