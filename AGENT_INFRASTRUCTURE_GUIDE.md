@@ -1482,6 +1482,15 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     now in micro-gains — remaining: `pi_d20` δ₁₃ (`~0.00012`), term14 (`499/2500`, largest micro-pool
     `~0.007`, needs fresh scoping). Next macro-lever: MIDDLE `[16,1024)` upper via
     `Zeta23.MV.Final.mv_hilbert` large-sieve bridge (tasked — fires the queued Zeta23 lever).
+    **Both micro-levers CLOSED (`D3_S16_norm_ge_DE2`, `3fdff6ae`, green, axioms clean):** `pi_d20`
+    wrappers (1e-20 width, verified exist) ⇒ δ₁₃ w=`0.001001` + δ₁₅ w=`0.001001` (theta-dominated) ⇒
+    sin θ₁₃ `≥-0.4376` (gap `0.0007`) + sin θ₁₅ `≥-0.9912` (gap `0.000097`, was `0.0069`; tight-box
+    cos-shift + quartic) + amp15 `≤245/1244≈0.1969453` (16-digit clearing, margin `0.00066%`, best
+    `q<3000` at 3/5) ⇒ term14 `≤60711/311000≈0.19521` (slack now all-amp) ⇒
+    **`‖S₁₆‖ ≥ 393063866333/2017726326000 ≈ 0.1948`** (1.0237×, gain `0.00452`; δ₁₃ contributed
+    `0.00013` as predicted). Next: term12 amp `20/93` slack `~0.0032` now dominates term12 (large-
+    denominator `3/5` clearing toward floor `0.21190`, tasked); term14 amp floor residual `~0.00265`;
+    middle upper (Tier-3 vdC).
     **MV bridge CLOSED-honest-negative (`DB_*`, `fee0d39c`, green, axioms clean):** first Zeta23 import
     in a door-3 work file (`import Zeta23.MV.Final`, cycle-safe: Zeta23-internal+Mathlib only, full-file
     build green 8693 jobs) ⇒ `MVHilbert 26` instantiated at `λ_r=8.75·log n` (gap admissibility via
