@@ -14440,6 +14440,206 @@ tier `M ≈ 0.05` (needs `G * Z ≤ 0.0003`).
 No `sorry`/`admit`/`axiom` in this tail.
 -/
 
+/-!
+# Door-3 R02 zeta-disc cut: `Z = 10 → 7.5` (free P1 rescaling) + `M = 120.3576`
+
+Ownership: zeta-cut append (append-only after the scout verdict block;
+nothing above touched; no new imports; LF endings).
+
+CHOICE (either-or, grep-decided): bridge (B), the zeta-disc cut. Headroom
+analysis: (A) needs `0.097 → 0.026` (`3.7x`, new Stirling-sharp numerator
+decay — hard analysis, still open); (B) is a FREE rescaling — the landed
+`DF_ParallelP1.GP_uniform` with `A = B = 36` gives
+`‖ζ‖ ≤ 36 / (5.25 * 0.919) = 36 / 4.82475 = 7.461…`, while
+`DG_GapTransfer.P1_R02_unconditional` rounds up to `≤ 10`
+(`GP_ten_of_bounds` uses the loose sufficient cap `A ≤ 48.24 = 10 * 4.82475`,
+margin `12.24` at `A = 36`). So `Z = 7.5` (hence `Z = 9`) holds on the SAME
+premises, reusing `DF_ParallelP1` / `DG_GapTransfer` read-only, zero new
+analysis. Fired with the discharged `G = 0.097` through
+`Door3MReductionScout.deriv_bound_of_gammaZ_upper`:
+`M = 41.36 * 0.097 * 7.5 / 0.25 = 120.3576` (ceil `121`).
+
+Grep record (`rg -n`, verified before writing):
+* `theorem GP_uniform` -> this file `:13215` (`DF_ParallelP1`,
+  `‖riemannZeta s‖ ≤ A / (5.25 * 0.919)`).
+* `theorem GP_hBdd_of_tailT` -> this file (DF_ParallelP1, takes `hTailT`).
+* `theorem GP_hTailP_of_gaps` -> this file (DF_ParallelP1, takes gaps).
+* `theorem GP_left_whole_36_of_tailP` / `GP_right_whole_36` -> this file.
+* `theorem hGapLo_para` / `hGapHi_para` / `hTailT_para` -> this file `:13596+`
+  (`DG_GapTransfer`).
+* `theorem deriv_bound_of_gammaZ_upper` -> this file (scout tail,
+  `M(G,Z) = 41.36 * 1 * G * Z / 0.25`).
+* `theorem sphere_bound_of_gammaZ_upper` -> this file (scout tail).
+* `def zeta : ℂ → ℂ := riemannZeta` -> `riemann_hypothesis.lean:16`
+  (the `show` step below is `rfl`-defeq, mirroring
+  `Door3DownstreamDischarge.R02_zeta_upper_discharged`).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `R02_zeta_upper_75` — unconditional `‖zeta‖ ≤ 7.5` on the R02 disc `s`-rect.
+* `R02_zeta_upper_9` — corollary `‖zeta‖ ≤ 9` (the tasked minimal cut).
+* `sphere_sup_75_eq` / `deriv_M_75_eq` — numerified equations.
+* `sphere_300894_unconditional` — sphere sup `30.0894`.
+* `deriv_1203576_unconditional` — deriv `M = 120.3576` (new unconditional tier,
+  `161 → 121`); `deriv_121_unconditional` ceil tier.
+* `table_1203576_lower` / `threshold_check_1203576_6894` — `Azeta ≥ 6893/6894`.
+* `table_121_lower` / `threshold_check_121_6931` — `Azeta ≥ 6930/6931`.
+-/
+
+namespace Door3ZetaCut75
+
+/-- Unconditional zeta-disc cut `‖zeta‖ ≤ 7.5` on the R02 disc `s`-rect.
+
+Reuses the landed parallel-P1 components read-only: `GP_uniform` at
+`l = -1, u = 2, A = B = 36` gives `‖riemannZeta s‖ ≤ 36 / (5.25 * 0.919)`,
+and `36 / 4.82475 = 7.461… ≤ 7.5`. The `BddAbove` / left-whole / right-whole
+inputs are assembled from `hTailT_para` + `hGapLo_para` + `hGapHi_para`
+exactly as `P1_R02_unconditional` does (via `GP_hTailP_of_gaps`). -/
+theorem R02_zeta_upper_75 : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 →
+    -8.25 ≤ s.im → s.im ≤ -5.25 → ‖zeta s‖ ≤ (7.5 : ℝ) := by
+  intro s hs_lo hs_hi him_lo him_hi
+  have hBdd := DF_ParallelP1.GP_hBdd_of_tailT DG_GapTransfer.hTailT_para
+  have hTailP := DF_ParallelP1.GP_hTailP_of_gaps
+    DG_GapTransfer.hGapLo_para DG_GapTransfer.hGapHi_para
+  have hLeft := DF_ParallelP1.GP_left_whole_36_of_tailP hTailP
+  have hRight : ∀ z ∈ Set.preimage Complex.re {(2 : ℝ)},
+      ‖DD_RecenterDamp.dampedPoleRemovedP z‖ ≤ (36 : ℝ) :=
+    fun z hz => DF_ParallelP1.GP_right_whole_36 hz
+  have hU := DF_ParallelP1.GP_uniform (l := -1) (u := 2)
+    (by norm_num) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num)
+    hBdd hLeft hRight hs_lo hs_hi him_lo him_hi
+  have hcap : (36 : ℝ) / (5.25 * 0.919) ≤ 7.5 := by
+    rw [div_le_iff₀ (by norm_num)]
+    norm_num
+  show ‖riemannZeta s‖ ≤ (7.5 : ℝ)
+  exact le_trans hU hcap
+
+/-- Tasked minimal cut `‖zeta‖ ≤ 9` (direct corollary of the `7.5` cut). -/
+theorem R02_zeta_upper_9 : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 →
+    -8.25 ≤ s.im → s.im ≤ -5.25 → ‖zeta s‖ ≤ (9 : ℝ) := by
+  intro s hs_lo hs_hi him_lo him_hi
+  have hle := R02_zeta_upper_75 s hs_lo hs_hi him_lo him_hi
+  linarith
+
+/-- Sphere equation at the cut tier: `41.36 * 1 * 0.097 * 7.5 = 30.0894`
+(was `41.36 * 1 * 0.097 * 10 = 40.1192`). -/
+theorem sphere_sup_75_eq : (41.36 : ℝ) * 1 * 0.097 * 7.5 = 30.0894 := by
+  norm_num
+
+/-- Cauchy equation at the cut tier: `30.0894 / 0.25 = 120.3576`. -/
+theorem deriv_M_75_eq : (30.0894 : ℝ) / 0.25 = 120.3576 := by
+  norm_num
+
+/-- Unconditional sphere sup `30.0894` on all R02 `0.25`-spheres
+(from the cut `Z = 7.5` + discharged `G = 0.097` + sharper poly). -/
+theorem sphere_300894_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (30.0894 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.097 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3DownstreamDischarge.AO_gamma_upper_discharged s hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hS := Door3MReductionScout.sphere_bound_of_gammaZ_upper
+    (G := (0.097 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw u hu
+  have hle := hS w hw u hu
+  have heq : (41.36 : ℝ) * 1 * 0.097 * 7.5 = 30.0894 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Unconditional R02 deriv bound `M = 120.3576` (`30.0894 / 0.25`):
+new unconditional tier (`161 → 121`). -/
+theorem deriv_1203576_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (120.3576 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.097 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3DownstreamDischarge.AO_gamma_upper_discharged s hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hD := Door3MReductionScout.deriv_bound_of_gammaZ_upper
+    (G := (0.097 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (41.36 : ℝ) * 1 * 0.097 * 7.5 / 0.25 = 120.3576 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Ceil tier `M = 121` covers the exact `120.3576`. -/
+theorem deriv_121_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (121 : ℝ) := by
+  intro w hw
+  have hle := deriv_1203576_unconditional w hw
+  linarith
+
+/-- Required-`Azeta` lower (necessary) floor at the cut tier:
+`M = 120.3576 → ≥ 6893` (via `le_div_iff₀`). -/
+theorem table_1203576_lower :
+    (6893 : ℝ) ≤ ((0.002 : ℝ) + 120.3576 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at the cut tier:
+`M = 120.3576` needs `Azeta = 6894`. -/
+theorem threshold_check_1203576_6894 :
+    (0.002 : ℝ) + 120.3576 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 6894 := by
+  norm_num
+
+/-- Required-`Azeta` lower (necessary) floor at the ceil tier:
+`M = 121 → ≥ 6930` (via `le_div_iff₀`). -/
+theorem table_121_lower :
+    (6930 : ℝ) ≤ ((0.002 : ℝ) + 121 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at the ceil tier:
+`M = 121` needs `Azeta = 6931`. -/
+theorem threshold_check_121_6931 :
+    (0.002 : ℝ) + 121 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 6931 := by
+  norm_num
+
+#print axioms Door3ZetaCut75.R02_zeta_upper_75
+#print axioms Door3ZetaCut75.R02_zeta_upper_9
+#print axioms Door3ZetaCut75.sphere_sup_75_eq
+#print axioms Door3ZetaCut75.deriv_M_75_eq
+#print axioms Door3ZetaCut75.sphere_300894_unconditional
+#print axioms Door3ZetaCut75.deriv_1203576_unconditional
+#print axioms Door3ZetaCut75.deriv_121_unconditional
+#print axioms Door3ZetaCut75.table_1203576_lower
+#print axioms Door3ZetaCut75.threshold_check_1203576_6894
+#print axioms Door3ZetaCut75.table_121_lower
+#print axioms Door3ZetaCut75.threshold_check_121_6931
+
+end Door3ZetaCut75
+
+/-!
+Door-3 zeta-cut VERDICT + RESIDUAL (report-and-stop).
+
+(1) BRIDGE (this tail, full proof, no `sorry`/`admit`/`axiom`): bridge (B).
+`R02_zeta_upper_75` (`‖zeta‖ ≤ 7.5` on the R02 rect, unconditional) by free
+P1 rescaling (`GP_uniform` at `A = B = 36`: `36/4.82475 = 7.461… ≤ 7.5`);
+`R02_zeta_upper_9` corollary. Fired with discharged `G = 0.097` via
+`deriv_bound_of_gammaZ_upper`: sphere `30.0894`, deriv `M = 120.3576`
+(ceil `121`).
+(2) NUMBERS: `(G, Z, M, Azeta) = (0.097, 7.5, 120.3576, 6894)`
+(ceil tier `(0.097, 7.5, 121, 6931)`); unconditional step `161 → 121`
+(`25%` cut on `Z`, `40.1192 → 30.0894` on the sphere); 0 cells closed.
+(3) RESIDUAL + NEXT TASK: build verification + axioms below; next agent owns
+the remaining `G * Z ≤ 0.0003` gap toward fencing `M ≈ 0.05` — either the
+Stirling-sharp disc-Gamma cap `G = 0.026` (Im-decay on the `Γ(z+6)`
+numerator; 6-shift floors already tight, do NOT retry them) to reach
+`M = 41.36*0.026*7.5/0.25 = 32.2608`, or a deeper zeta cut below `7.46`
+(left-window tightening under `36`, FE cos-form, or eta-remainder
+sharpening). Current tier alone still needs `Azeta ≥ 6894` at the center.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
+
 
 
 
