@@ -1399,7 +1399,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cos/sin(8.75·log n)` interval arithmetic or Tier-3 second-derivative for an early-block upper.
     **D3 interval framework CLOSED (`D3_block_norm_ge_sum_lo` + `D3_S1024_of_S1` + `D3_S2_norm_ge`):**
     per-term cpow enclosures (`θ₂∈[6.065,6.066]`, `cos θ₂≥0.97`, `2^{-0.605}∈[5/8,2/3]`) ⇒ `S_1`, `S_2≥1/3`
-    green. Exact K-table (true): K=4 dead, K=8 fails by 0.019, **K=16 first feasible** (margin 0.024). **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
+    green. Exact K-table (true): K=4 dead, K=8 fails by 0.019, **K=16 first feasible** (margin 0.024).
+    **S_4 enclosures banked (`D3_S4_re_lower` et al.):** θ₃/θ₄ + per-term bounds in the S₂ shape — but true
+    `Re S₄≈-0.54<0`, so the Re-sum route NEVER reaches `8/15` (proved `D3_S4_cannot_reach_8_15`); the
+    durable asset is per-term technology for x=3,4. Next per K-table: θ₅–θ₁₆ toward K=16 + middle upper. **Generalized per-row (`RowFE`, all 4 rows, uniform over `|Im|≤8.75`):**
   sin-half `≤1e7` shared; Γ upper `3/4/5/10`; Γ lower `1e-13` all rows; cos lower `0.8–0.98`
   (R00's `1≤‖cos‖` FAILS row-uniformly at Im=0 — replaced via `cos(Re)≤‖cos‖` + real Taylor);
   `‖F‖` upper `6e7/8e7/1e8/2e8`, lower `1e-14` all rows. Factor half of reflected-eta `Azeta` ready;
@@ -1444,7 +1447,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
    `n≈15` shift chain + near-perfect sine required). With `Agam=0.002` the threshold needs only
    `Azeta≥2.95` (was `≥59090`). **Deeper shift banked (`R02GammaUpperDeep`, n=21):** reflected upper
    `U: 0.05→0.026` (1.93×; brief's `n≈15` yields only `≈0.028`) ⇒ `S·U=780` → `π/780≈0.00403`, `1.5×`
-   short. Tier-2 sine (`S≈20067`) would give `521.7≤523.6` — closes in principle. Poly `22`, pi `1/2`,
+   short. Tier-2 sine (`S≈20067`) would give `521.7≤523.6` — closes in principle.
+   **Tier-2 sine CLOSED (`R02SineSharp`):** fractional-exp lemma (`e^0.6029≤1.8275` via `Real.exp_bound'`)
+   ⇒ `e^10.6029≤40255` ⇒ `‖sin‖≤20128` (true `≈20125.7`, 0.012%) ⇒ `S·U=523.328≤523.6` (margin 0.272) ⇒
+   composed **`0.006 ≤ ‖Γ(sR02/2)‖`** (margin 0.0000031, 0.05%) + drop-in. **P3 Gamma-lower leg DONE —
+   `Agam=0.006` premise met exactly.** No further sine/Gamma work at R02. Poly `22`, pi `1/2`,
   Gamma-upper `0.05` at R02: no gap. Feasibility gap: `67200` is far too large for fencing (`ε+M·1.26` vs `‖ξ(center)‖=O(0.1)`;
   crude `‖Γ‖≤Real.Gamma` ignores Im-decay, true `~0.01` vs proved `40`) — needs the Stirling Gamma upper
   + tighter zeta upper to reach tier `M≈0.05`. **Stirling disc-upper CLOSED (`R02GammaDisc`, 412×):**
@@ -1462,7 +1469,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   (P1 zeta-upper OPEN, P2 Gamma-upper LANDED, P3 Gamma-lower LANDED, P4 zeta-lower OPEN, poly/pi/leaf CLOSED).
   **Rollout template CLOSED (`AX_CellTemplate`):** `CellClosed_of_factorBounds` (generic cell ⇒ H-leaf from
   explicit numeric premises) + R02 recovery of AU v2 as corollary + tier table for all 39 cells + 20
-  strip cells (`Azeta ≥ (eps+M·radCap)/(Apoly·Api·Agam)` per group; G4 needs small-r deriv packaging). Remaining 39 cells: same shape, different `s`-rects
+  strip cells (`Azeta ≥ (eps+M·radCap)/(Apoly·Api·Agam)` per group; G4 needs small-r deriv packaging).
+  **R31 small-r packaging CLOSED (`BB_Row3SmallR`):** `r=0.008` admissible (`0.498<0.5`; `r=0.25` provably
+  exits) + `C=5600` + **`M=700000`** + R31 through the template (conditional on sup/center premises;
+  threshold at M=700000 infeasible at `O(1)` — same wall). R32–R40: copy template, recompute numerals. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
   infeasible in principle (R02 needs `Azeta ≥ 5.9×10⁴`, R00 `≥ 4.3×10⁴`; true `|ζ|=O(1)`).
