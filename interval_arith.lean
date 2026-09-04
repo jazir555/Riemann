@@ -33368,3 +33368,237 @@ theorem gamma_one_sub_half_upper_R02_deep :
 #print axioms R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep
 
 end R02GammaUpperDeep
+
+namespace R02SineSharp
+
+/-! ## Sharp sine upper at the R02 reflected point (`‖sin(π·sR02/2)‖ ≤ 20128`)
+
+**Goal (door-3 closure premise, tier 3 of the `0.002 → 0.006` close).** AN banked
+`R02GammaLower.gamma_lower_R02_center`: `0.002 ≤ ‖Γ(sR02/2)‖` via reflection
+`π/(S·U)` with halved-triangle sine cap `S = 30000`
+(`R02GammaLower.sin_upper_R02`, from `|Im(πw)| ≤ 11` and `exp 11 < 59999`) and
+reflected upper `U = 0.05`. AT2 banked `R02GammaUpperDeep`:
+reflected upper `U ≤ 0.026` (21-shift chain), so `S·U = 780` with the loose
+sine (`π/780 ≈ 0.00403`, exactly `1.5×` short of `0.006`). The named Tier-2 is
+this block: a near-perfect sine upper `S ≈ 20067` (then `S·U ≈ 521.7 ≤ 523.6`
+closes `≥ 0.006` in principle).
+
+**Result here.** `sin_upper_R02_sharp`: `‖sin(π·(sR02/2))‖ ≤ 20128`
+(true value `≈ 20125.7`, within `0.012%`), plus the composed
+`gamma_lower_R02_sharp`: `0.006 ≤ ‖Γ(sR02/2)‖` (both halves meet: `S = 20128`
+here, `U = 0.026` from `R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep`;
+`3.141592/523.328 ≈ 0.0060031 ≥ 0.006` via `Real.pi_gt_d6`), plus the drop-in
+`gammaOf_lower_R02_sharp` for `DerivCauchyBridge.gammaOf R02Pilot.sCenter`.
+
+**Method (non-integer `e^10.6029` upper via integer + fractional split).**
+`|Im(π·(sR02/2))| = π·3.375 ≤ 3.1416·3.375 = 10.6029`
+(`pi_half_im_abs_le_sharp`; the old cap rounded up to `11`). Split
+`exp 10.6029 = exp 10 · exp 0.6029` (`Real.exp_add`):
+* `exp 10 < 22026.47` (`exp_ten_lt`, true `e^10 ≈ 22026.46579`, via the
+  committed `(exp 1)^n` + `exp_one_lt_d9` pattern);
+* `exp 0.6029 ≤ 1.8275` (`exp_frac_lt`, true `≈ 1.82741061` — the minimal
+  in-file fractional-exp lemma, via Mathlib's Taylor remainder
+  `Real.exp_bound'` at `n = 7`: partial sum `≈ 1.82740441` + remainder
+  `x^7·8/(5040·7) ≈ 0.00000657`).
+Product `22026.47·1.8275 = 40253.37… ≤ 40255` (`exp_106029_lt`, true
+`≈ 40251.40`); halved triangle cap `(40255+1)/2 = 20128` since
+`Im(π·(sR02/2)) < 0` (one exponential is `≤ 1`, reusing
+`R02GammaLower.pi_half_im_nonpos`). Composed: `S·U = 20128·0.026 = 523.328`
+(`composed_product`), and `0.006·523.328 = 3.139968 ≤ 3.141592 < π`
+(`threshold_meets`, `Real.pi_gt_d6`) gives `π/(S·U) ≥ 0.006`.
+
+**Grep-first record (2026-09-04, verified via `rg -n`, exact names).**
+* Non-integer-`Real.exp` numeral upper in repo: ABSENT — only integer
+  `(exp 1)^n` caps (`R00GammaLower.exp_sixteen_lt`,
+  `R02GammaLower.exp_eleven_lt`, `RowFE_exp28_lt`); created here by splitting
+  off the fractional part.
+* Mathlib Taylor upper for `Real.exp`: PRESENT
+  (`Real.exp_bound'`, `Mathlib/Analysis/Complex/Exponential.lean:523`,
+  `exp x ≤ ∑ range n + x^n·(n+1)/(n!·n)` for `0 ≤ x ≤ 1`) — REUSED, not
+  redefined. (Sibling `Real.exp_bound` `:517` is the absolute version;
+  `Complex.exp_bound` `:377` the complex one.)
+* Sharp pointwise sine upper at R02 (`≤ 20128`): ABSENT — only the loose
+  `≤ 30000` (`R02GammaLower.sin_upper_R02`) and the wide `≤ exp 16 < 1e7`
+  caps; the `|Im| ≤ 10.6029` sharpening and both exp halves are created here.
+* Namespace `R02SineSharp`: ABSENT (`rg` zero hits); no clash with
+  `R02GammaUpper` / `R02GammaDisc` / `R02GammaLower` / `R02GammaUpperDeep` /
+  `R02Uniform` / `R02Pilot`.
+-/
+
+/-- `Real.exp 10 < 22026.47` via `(exp 1)^10` and `exp_one_lt_d9`
+(true `e^10 ≈ 22026.46579`; mirrors `R02GammaLower.exp_eleven_lt`). -/
+theorem exp_ten_lt : Real.exp 10 < 22026.47 := by
+  have h1 : Real.exp (10 : ℝ) = (Real.exp 1) ^ (10 : ℕ) := by
+    have := Real.exp_nat_mul (1 : ℝ) (10 : ℕ)
+    simpa using this.symm
+  have h2 : (Real.exp 1) ^ (10 : ℕ) < (2.7182818286 : ℝ) ^ (10 : ℕ) := by
+    apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+  have h3 : (2.7182818286 : ℝ) ^ (10 : ℕ) < 22026.47 := by norm_num
+  rw [h1]
+  exact lt_trans h2 h3
+
+/-- `Real.exp 0.6029 ≤ 1.8275` via the Taylor remainder `Real.exp_bound'`
+at `n = 7` (true `≈ 1.82741061`; partial sum `≈ 1.82740441`, remainder
+`≈ 0.00000657`). The minimal in-file fractional-exp lemma. -/
+theorem exp_frac_lt : Real.exp 0.6029 ≤ 1.8275 := by
+  have h := Real.exp_bound' (x := (0.6029 : ℝ)) (by norm_num) (by norm_num)
+    (n := 7) (by norm_num)
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+  norm_num at h
+  linarith
+
+/-- `Real.exp 10.6029 ≤ 40255` from `exp(10 + 0.6029) = exp(10)·exp(0.6029)`:
+`22026.47·1.8275 = 40253.37… ≤ 40255` (true `≈ 40251.40`). -/
+theorem exp_106029_lt : Real.exp 10.6029 ≤ 40255 := by
+  have hsplit : (10.6029 : ℝ) = 10 + 0.6029 := by norm_num
+  have h10 := exp_ten_lt
+  have hfr := exp_frac_lt
+  have hmul : Real.exp 10 * Real.exp 0.6029 ≤ 22026.47 * 1.8275 :=
+    mul_le_mul h10.le hfr (le_of_lt (Real.exp_pos _)) (by norm_num)
+  have hcap : (22026.47 : ℝ) * 1.8275 ≤ 40255 := by norm_num
+  calc Real.exp 10.6029 = Real.exp 10 * Real.exp 0.6029 := by
+        rw [hsplit, Real.exp_add]
+    _ ≤ 22026.47 * 1.8275 := hmul
+    _ ≤ 40255 := hcap
+
+/-- `|Im(π·(sR02/2))| ≤ 10.6029` (`π·3.375 ≤ 3.1416·3.375 = 10.6029`;
+sharpens `R02GammaLower.pi_half_im_abs_le` from `11`). -/
+theorem pi_half_im_abs_le_sharp :
+    |((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2)).im| ≤ 10.6029 := by
+  rw [R02GammaLower.pi_half_im_eq]
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have habs : |Real.pi * -3.375| = Real.pi * 3.375 := by
+    rw [abs_mul]
+    have h1 : |-3.375| = (3.375 : ℝ) := by norm_num
+    rw [h1, abs_of_pos Real.pi_pos]
+  rw [habs]
+  calc Real.pi * 3.375 ≤ 3.1416 * 3.375 :=
+        mul_le_mul_of_nonneg_right hpi (by norm_num)
+    _ = 10.6029 := by norm_num
+
+/-- MAIN sharp sine cap `‖sin(π·(sR02/2))‖ ≤ 20128` (true `≈ 20125.7`,
+within `0.012%`; halved triangle cap `(40255 + 1)/2` since `Im < 0`). -/
+theorem sin_upper_R02_sharp :
+    ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ ≤ 20128 := by
+  set w : ℂ := (Real.pi : ℂ) * (R02GammaUpper.sR02 / 2) with hw_def
+  have habs : |w.im| ≤ 10.6029 := by
+    rw [hw_def]
+    exact pi_half_im_abs_le_sharp
+  have hnonpos : w.im ≤ 0 := by
+    rw [hw_def]
+    exact R02GammaLower.pi_half_im_nonpos
+  have hsin_eq : Complex.sin w
+      = (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) * Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ 1 := by
+    calc Real.exp w.im ≤ Real.exp 0 := Real.exp_le_exp.mpr hnonpos
+      _ = 1 := Real.exp_zero
+  have e2 : Real.exp (-w.im) ≤ Real.exp 10.6029 := by
+    apply Real.exp_le_exp.mpr
+    exact le_trans (neg_le_abs _) habs
+  have hfin : (Real.exp w.im + Real.exp (-w.im)) / 2 ≤ 20128 := by
+    have hexp := exp_106029_lt
+    linarith
+  exact le_trans hle hfin
+
+/-- Composed denominator product `S·U = 20128·0.026 = 523.328 ≤ 523.6`. -/
+theorem composed_product : (20128 : ℝ) * 0.026 = 523.328 := by norm_num
+
+/-- Threshold arithmetic `0.006·523.328 = 3.139968 ≤ 3.141592`
+(the `Real.pi_gt_d6` lower bound clears it by `0.001624`). -/
+theorem threshold_meets : (0.006 : ℝ) * 523.328 ≤ 3.141592 := by norm_num
+
+/-- MAIN composed lower: `0.006 ≤ ‖Gamma(sR02/2)‖` at the R02 center, from
+reflection `Gamma(w)·Gamma(1-w) = π/sin(πw)` with `‖sin‖ ≤ 20128`
+(`sin_upper_R02_sharp`) and `‖Gamma(1-w)‖ ≤ 0.026`
+(`R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep`):
+`3.141592/523.328 ≈ 0.0060031 ≥ 0.006`. Meets the `Agam ≥ 0.006` premise of
+`R02_closed_of_factorBounds`. -/
+theorem gamma_lower_R02_sharp :
+    (0.006 : ℝ) ≤ ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖ := by
+  have h1w_re : (0 : ℝ) < (1 - R02GammaUpper.sR02 / 2).re := by
+    rw [R02GammaUpper.zUpR02_re]
+    norm_num
+  have hG1_ne : Complex.Gamma (1 - R02GammaUpper.sR02 / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1w_re
+  have hsin_ne := R02GammaLower.sin_ne_R02
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (R02GammaUpper.sR02 / 2)
+  have hnorm : ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      = Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ := by
+    have h := congrArg (fun x : ℂ => ‖x‖) hrefl
+    simp only [norm_mul, norm_div] at h
+    have hpi_norm : ‖(Real.pi : ℂ)‖ = Real.pi := by
+      rw [Complex.norm_real]
+      exact Real.norm_of_nonneg Real.pi_pos.le
+    rw [hpi_norm] at h
+    exact h
+  have hG1_le : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≤ 0.026 :=
+    R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep
+  have hsin_le : ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ ≤ 20128 :=
+    sin_upper_R02_sharp
+  have hpos1 : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖ :=
+    norm_pos_iff.mpr hsin_ne
+  have hpos2 : (0 : ℝ) < ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+    norm_pos_iff.mpr hG1_ne
+  have hden_pos : (0 : ℝ)
+      < ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+    mul_pos hpos1 hpos2
+  have hden_le : ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖
+      ≤ 20128 * 0.026 :=
+    mul_le_mul hsin_le hG1_le (norm_nonneg _) (by norm_num)
+  have hfrac_le : Real.pi / (20128 * 0.026)
+      ≤ Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+        * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖) :=
+    div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) hden_pos hden_le
+  have hnum : Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖
+      * ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖)
+      = ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖ := by
+    have hb_ne : ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ ≠ 0 := ne_of_gt hpos2
+    have h1 : ‖Complex.Gamma (R02GammaUpper.sR02 / 2)‖
+        = (Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R02GammaUpper.sR02 / 2))‖)
+          / ‖Complex.Gamma (1 - R02GammaUpper.sR02 / 2)‖ :=
+      eq_div_of_mul_eq hb_ne hnorm
+    rw [h1, div_div]
+  have hbase : (0.006 : ℝ) ≤ Real.pi / (20128 * 0.026) := by
+    have hprod : (20128 : ℝ) * 0.026 = 523.328 := composed_product
+    rw [hprod, le_div_iff₀ (by norm_num)]
+    have hpi : (3.141592 : ℝ) < Real.pi := Real.pi_gt_d6
+    have hmul : (0.006 : ℝ) * 523.328 = 3.139968 := by norm_num
+    rw [hmul]
+    linarith
+  exact le_trans hbase (hfrac_le.trans_eq hnum)
+
+/-- Drop-in for `R02_closed_of_factorBounds`: `0.006 ≤ ‖gammaOf sCenter‖`. -/
+theorem gammaOf_lower_R02_sharp :
+    (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖ := by
+  have h := gamma_lower_R02_sharp
+  rw [R02GammaLower.sR02_eq_pilot] at h
+  show (0.006 : ℝ) ≤ ‖Complex.Gamma (R02Pilot.sCenter / 2)‖
+  exact h
+
+#print axioms R02SineSharp.exp_ten_lt
+#print axioms R02SineSharp.exp_frac_lt
+#print axioms R02SineSharp.exp_106029_lt
+#print axioms R02SineSharp.pi_half_im_abs_le_sharp
+#print axioms R02SineSharp.sin_upper_R02_sharp
+#print axioms R02SineSharp.gamma_lower_R02_sharp
+#print axioms R02SineSharp.gammaOf_lower_R02_sharp
+
+end R02SineSharp
