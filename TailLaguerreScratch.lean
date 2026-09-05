@@ -1087,3 +1087,167 @@ always zero, triangle sum `∑(1-n/K) ~ K/2` grows) remain the only tail-lane
 options. Exact next-agent task: prove `‖riemannZeta s - 2‖ < 2` on the banked
 s-rect (`Re∈[0,1/2]`, `|Im|∈[10,11]`, `‖s‖≤12`) via stated FE/convexity input,
 or push `K≥5` evaluations only to confirm growth (no closure expected). -/
+
+/-!
+## Door-4 tail leaf: LAST route `‖ζ-2‖<2` bridge (tail lane, 2026-09-05, append-only)
+
+Verified-green context (read-only reuse, no redefinition):
+* ALL split routes dead: `B*e+d<1` fails at K=2,3,4 with K=2 minimal
+  (`tailNumerals_test_fail`, `tailNumerals_three/four_test_fail`,
+  `tailMollifierError_order`: `e=1/2<2/3<1` proved).
+* Banked s-rect (read-only): `tailShiftedSReal_re_mem_cell` (`Re∈[0,1/2]`),
+  `tailShiftedSReal_im_abs_mem_cell` (`|Im|∈[10,11]`),
+  `tailShiftedSReal_norm_le12_cell` (`‖s‖≤12`).
+* Closer (read-only): `tailK2_gap_iff_norm_sub_two`
+  (`K=2` product gap `<1 ↔ ‖ζ-2‖<2`).
+
+Why a zeta-UPPER bound alone can never close: `‖ζ-2‖ ≤ ‖ζ‖+2` is vacuous
+for the `<2` target (e.g. `ζ=-B` gives `B+2`). The single operative input is
+a zeta-NEAR-ONE bound `‖ζ-1‖ ≤ d` with `d<1` (then `‖ζ-2‖ ≤ d+1 <2`), or
+directly `‖ζ-2‖ ≤ r` with `r<2`.
+
+Banked here (FULLY PROVED, no sorry/admit/axiom):
+* `TailStripZetaNearOne d` / `TailStripZetaSubTwo r` — clearly-named
+  FE/convexity hypothesis Props (Mathlib with `import Mathlib` only supplies
+  the FE identity `riemannZeta_one_sub` but no explicit critical-strip
+  numeral; the numerical input is isolated here).
+* `tailZetaSubTwo_of_nearOne_le` / `tailZetaSubTwo_lt_two_of_nearOne_lt_one`
+  — unconditional triangle step `d → d+1` (strict `<2` when `d<1`).
+* `tailK2_gap_of_nearOne_lt_one` / `tailK2_gap_of_subTwo_lt_two` — conditional
+  CLOSURE of the exact `K=2` Rouché gap via `tailK2_gap_iff_norm_sub_two`.
+* `tailZetaSubTwoContinuousOnCell` + `exists_tailCell_zetaSubTwo` —
+  STRONGEST unconditional partial bound: `∃ B2` with
+  `∀ z ∈ cell, ‖ζ-2‖ ≤ B2` (compactness; numeral-free, so gap open).
+* `tailInvSub_norm_le_tenth_cell` — unconditional EXPLICIT polar cap
+  `‖(s-1)⁻¹‖ ≤ 1/10` on the cell (the `(s-1)⁻¹` piece of
+  `riemannZeta_eq_inv_sub_add`; residual is the entire `ζ₀` part).
+-/
+
+/-- FE/convexity hypothesis (near-one form): uniform `‖ζ-1‖ ≤ d` on the cell.
+This is the isolated analytic input (functional equation + convexity /
+certified evaluation would supply it); with `d < 1` it closes the leaf via
+`tailK2_gap_of_nearOne_lt_one` below. -/
+def TailStripZetaNearOne (d : ℝ) : Prop :=
+  ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d
+
+/-- FE/convexity hypothesis (direct form): uniform `‖ζ-2‖ ≤ r` on the cell.
+With `r < 2` it closes the leaf via `tailK2_gap_of_subTwo_lt_two` below. -/
+def TailStripZetaSubTwo (r : ℝ) : Prop :=
+  ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z) - 2‖ ≤ r
+
+/-- Unconditional triangle step: `‖ζ-1‖ ≤ d → ‖ζ-2‖ ≤ d+1`. -/
+theorem tailZetaSubTwo_of_nearOne_le {d : ℝ} (z : ℂ)
+    (h : ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d) :
+    ‖riemannZeta (tailShiftedSReal z) - 2‖ ≤ d + 1 := by
+  have heq : riemannZeta (tailShiftedSReal z) - 2 =
+      (riemannZeta (tailShiftedSReal z) - 1) - 1 := by ring
+  calc ‖riemannZeta (tailShiftedSReal z) - 2‖
+      = ‖(riemannZeta (tailShiftedSReal z) - 1) - 1‖ := by rw [heq]
+    _ ≤ ‖riemannZeta (tailShiftedSReal z) - 1‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+    _ = ‖riemannZeta (tailShiftedSReal z) - 1‖ + 1 := by rw [norm_one]
+    _ ≤ d + 1 := by linarith
+
+/-- Strict form: `‖ζ-1‖ < 1 → ‖ζ-2‖ < 2`. -/
+theorem tailZetaSubTwo_lt_two_of_nearOne_lt_one (z : ℂ)
+    (h : ‖riemannZeta (tailShiftedSReal z) - 1‖ < 1) :
+    ‖riemannZeta (tailShiftedSReal z) - 2‖ < 2 := by
+  have hle := tailZetaSubTwo_of_nearOne_le
+    (d := ‖riemannZeta (tailShiftedSReal z) - 1‖) z le_rfl
+  linarith
+
+/-- Conditional CLOSURE from near-one input: `TailStripZetaNearOne d` with
+`d < 1` implies the exact `K=2` Rouché product gap on the strict regime. -/
+theorem tailK2_gap_of_nearOne_lt_one {d : ℝ}
+    (hd : TailStripZetaNearOne d) (hdl : d < 1)
+    (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hle : |z.re| ≤ 11)
+    (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < 1 / 2) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 := by
+  have hzmem : z ∈ tailCellBounded := tailCellBounded_mem_of_regime z hx hle hy0 hy1
+  have h1 := hd z hzmem
+  have h2 : ‖riemannZeta (tailShiftedSReal z) - 2‖ < 2 := by
+    have hle2 := tailZetaSubTwo_of_nearOne_le z h1
+    linarith
+  exact (tailK2_gap_iff_norm_sub_two z).mpr h2
+
+/-- Conditional CLOSURE from direct input: `TailStripZetaSubTwo r` with
+`r < 2` implies the exact `K=2` Rouché product gap on the strict regime. -/
+theorem tailK2_gap_of_subTwo_lt_two {r : ℝ}
+    (hr : TailStripZetaSubTwo r) (hrl : r < 2)
+    (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hle : |z.re| ≤ 11)
+    (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < 1 / 2) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 := by
+  have hzmem : z ∈ tailCellBounded := tailCellBounded_mem_of_regime z hx hle hy0 hy1
+  have h2 : ‖riemannZeta (tailShiftedSReal z) - 2‖ ≤ r := hr z hzmem
+  have hlt : ‖riemannZeta (tailShiftedSReal z) - 2‖ < 2 := lt_of_le_of_lt h2 hrl
+  exact (tailK2_gap_iff_norm_sub_two z).mpr hlt
+
+/-- Shifted zeta-minus-two is continuous on the cell (companion to
+`tailZetaSubOneContinuousOnCell` read-only). -/
+theorem tailZetaSubTwoContinuousOnCell :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z) - 2) tailCellBounded :=
+  tailZetaContinuousOnCell.sub continuousOn_const
+
+/-- STRONGEST unconditional partial bound: `∃ B2` uniform for `‖ζ-2‖` on the
+cell (compactness; numeral-free — the quantified gap is `B2 < 2`). -/
+theorem exists_tailCell_zetaSubTwo :
+    ∃ B2 : ℝ, ∀ z ∈ tailCellBounded,
+      ‖riemannZeta (tailShiftedSReal z) - 2‖ ≤ B2 :=
+  tailCellBounded_isCompact.exists_bound_of_continuousOn tailZetaSubTwoContinuousOnCell
+
+/-- Shifted pole displacement imaginary part: `(s-1).im = s.im`. -/
+theorem tailShiftedSubOne_im (z : ℂ) :
+    (tailShiftedSReal z - 1).im = (tailShiftedSReal z).im := by
+  simp
+
+/-- Pole distance floor on the cell: `10 ≤ ‖s-1‖` (via `|Im| ≥ 10`). -/
+theorem tailShiftedSubOne_norm_ge10_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    (10 : ℝ) ≤ ‖tailShiftedSReal z - 1‖ := by
+  have him := tailShiftedSReal_im_abs_mem_cell z hz
+  have hle : |((tailShiftedSReal z - 1).im)| ≤ ‖tailShiftedSReal z - 1‖ :=
+    Complex.abs_im_le_norm _
+  rw [tailShiftedSubOne_im] at hle
+  linarith
+
+/-- Unconditional EXPLICIT polar cap: `‖(s-1)⁻¹‖ ≤ 1/10` on the cell.
+This is the `(s-1)⁻¹` piece of `riemannZeta_eq_inv_sub_add`
+(`ζ = (s-1)⁻¹ + ζ₀`); the residual is an explicit bound on the entire part
+`‖ζ₀‖` (or `‖ζ₀-2‖`) on the s-rect. -/
+theorem tailInvSub_norm_le_tenth_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    ‖((tailShiftedSReal z - 1)⁻¹ : ℂ)‖ ≤ 1 / 10 := by
+  have h10 : (10 : ℝ) ≤ ‖tailShiftedSReal z - 1‖ :=
+    tailShiftedSubOne_norm_ge10_cell z hz
+  rw [norm_inv]
+  have hinv : (‖tailShiftedSReal z - 1‖)⁻¹ ≤ (10 : ℝ)⁻¹ :=
+    inv_anti₀ (by norm_num) h10
+  calc (‖tailShiftedSReal z - 1‖)⁻¹ ≤ (10 : ℝ)⁻¹ := hinv
+    _ = 1 / 10 := by norm_num
+
+#print axioms TailStripZetaNearOne
+#print axioms TailStripZetaSubTwo
+#print axioms tailZetaSubTwo_of_nearOne_le
+#print axioms tailZetaSubTwo_lt_two_of_nearOne_lt_one
+#print axioms tailK2_gap_of_nearOne_lt_one
+#print axioms tailK2_gap_of_subTwo_lt_two
+#print axioms tailZetaSubTwoContinuousOnCell
+#print axioms exists_tailCell_zetaSubTwo
+#print axioms tailShiftedSubOne_im
+#print axioms tailShiftedSubOne_norm_ge10_cell
+#print axioms tailInvSub_norm_le_tenth_cell
+
+/- Quantified remainder after this block (2026-09-05, Door-4 LAST tail route):
+BANKED the full `‖ζ-2‖<2` bridge EXCEPT the single analytic numeral —
+`tailZetaSubTwo_of_nearOne_le` (`d→d+1`), strict `<2` from `d<1`,
+conditional closures `tailK2_gap_of_nearOne_lt_one` /
+`tailK2_gap_of_subTwo_lt_two` (via read-only `tailK2_gap_iff_norm_sub_two`),
+strongest unconditional partial `exists_tailCell_zetaSubTwo` (`∃ B2`,
+numeral-free), and explicit polar cap `tailInvSub_norm_le_tenth_cell`
+(`‖(s-1)⁻¹‖≤1/10`; Temp-checked `|s-1|≥10` from `|Im|≥10`).
+QUANTIFIED GAP: `B*e+d<1` dead at K=2,3,4 (`2`, `7/3`, `3` all `>1`);
+upper-only `B` can never close (`‖ζ-2‖≤B+2` vacuous).
+SINGLE LEMMA TO CLOSE (exact next-agent task): prove ONE of
+`TailStripZetaNearOne d` with explicit `d<1` (e.g. `d=9/10`: needs FE +
+convexity / certified eta evaluation on `Re∈[0,1/2]`, `|Im|∈[10,11]`) or
+`TailStripZetaSubTwo r` with explicit `r<2` (e.g. `r=19/10`), or explicit
+`‖ζ₀‖`/`‖ζ₀-2‖` cap combining with `1/10` via `riemannZeta_eq_inv_sub_add`
+to get `r<2`; then compose via `tailK2_gap_of_nearOne_lt_one` /
+`tailK2_gap_of_subTwo_lt_two`. -/
