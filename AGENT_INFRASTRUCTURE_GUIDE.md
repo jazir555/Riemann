@@ -1660,6 +1660,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cos16 ≤ 0.96` upper + `amp16 ≤ 1/5.4735` ⇒ **pair-8 `Re ≤ 0.031`** (gap to `0.02`
     is `0.011`; true `≈ −0.00215`).
     Next: five-decimal `A16`, `A17·c17` upward, pair-9 `Re` start, or `k=6` cap (tasked).
+    **Pair-9 template (`DZ3r_*`, G10, `97e92ace`, green 8693 jobs, axioms clean):**
+    log-19/log-20 intervals + `2π` reduction + cos bounds + two-sided amps (26 theorems)
+    ⇒ **pair-9 `Re ≤ 0.10`**. HONEST: does NOT beat MVT norm `0.08402` (short `0.01598`;
+    sqrt-majorant template ceiling `≈ 0.088`).
+    Next: Taylor cos upper (`cos18 ≤ ~0.852`), `A18 ≤ 1/5.85`, or pair-10 `Re` start (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
