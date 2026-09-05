@@ -1536,7 +1536,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (−20%; now 1680×/1454× short). **Per-k caps (`DZ2_prefix1385_le`, DV, `27ba18a4`, green 8693
     jobs, axioms clean):** `13.85` for ALL prefixes `k ≤ 16` (KL length-independent `8.62` +
     subset-monotone error) ⇒ **`2.77` promoted to UNCONDITIONAL**. Still 1454× short of
-    `0.0019`/block. Next: TRUE eta-term identification on `[16,32)` (tasked).
+    `0.0019`/block. **TRUE eta identification (`DZ2e_*`, DW, `bb5b3c18`, green 8693 jobs, axioms
+    clean):** `etaDirichletTerm (1-zetaCellS0) (16+n) = (-1)^n·((17+n)^(-s1))` (sign, norm,
+    `16+n` vs `17+n` off-by-one all explicit) + one-sided remainder `‖eta‖ ≤ ‖DZ‖ ≤ 1/5` ⇒
+    **TRUE block `≤ 3.2`** (triangle; 1680× over need). HONEST: synthetic Abel `2.77` does NOT
+    transfer (conjugate + alternating + off-by-one); `DZ2_prefix1385_le` caps synthetic partials
+    only. Next: true-phase prefix caps (replay at slope `−8.75/24`) or cancellation-aware TRUE
+    block via `D3_eta_re/im` intervals (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
