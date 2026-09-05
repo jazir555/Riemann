@@ -1785,6 +1785,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`center_bound` shape at outer tier); Python generator emits all 40 proxy blocks
     (Temp `door3_certs40.lean`, 46KB). True `ξ`-enclosure still the missing link.
     Next: land proxy blocks cell-by-cell (tasked).
+    **Proxy batch (`door3_cell_checker`, C3, `3294a46e`, 6× green ~45s, axioms clean):**
+    R13/R23/R33/R43/R53/R63 proxies banked — **7/40 cells** (33 remaining).
+    Next: bottom-row remainder R73/R83/R93/R03 (tasked).
     **Deriv lane (`door3_deriv_certs`, V, `fba59747`, green 45s, axioms clean):**
     Cauchy-estimate toolkit (`deriv_bound_of_sphere_sup_on_ball` from Mathlib Liouville +
     rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
