@@ -809,3 +809,235 @@ theorem R63_proxy_center_norm :
 #print axioms R63_tail_mono
 #print axioms R63_proxy_center
 #print axioms R63_proxy_center_norm
+
+
+/-! ### R73 proxy cell (mid-bottom).
+
+R73 = x [4,13/2] x y [1/100,1/5], tier mid `(eps,M) = (0.05,0.07)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`. Copied from generator
+`C:\Users\mmeadow\AppData\Local\Temp\kilo\door3_certs40.lean` R73 block
+(lines 814-838), renamed to checker pattern
+`R00_radius_upper_checker/R00_tail_mono/R00_proxy_center/R00_proxy_center_norm`.
+All steps `by norm_num` or `linarith`, numerals <=6 digits. -/
+
+/-- R73 radius upper bound through the generalized checker rule. -/
+theorem R73_radius_upper_checker :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) :=
+  cert_sqrt_upper_check
+
+/-- R73 tail step reusing the proved majorant `zeta2_partial_mono`. -/
+theorem R73_tail_mono :
+    (∑ k ∈ Finset.range 1, (1 : ℚ) / ((k + 1 : ℚ) ^ 2)) ≤ certHead := by
+  have h := zeta2_partial_mono (n := 1) (m := 5) (by norm_num)
+  rw [certHead_sum_eq] at h
+  exact h
+
+/-- R73 proxy center bound (`center_bound` shape at the 1.26 radius cap). -/
+theorem R73_proxy_center :
+    (0.05 : ℝ) + 0.07 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ((certHead : ℚ) : ℝ) := by
+  have hRad := R73_radius_upper_checker
+  have hM : (0.07 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.07 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h1 : (0.05 : ℝ) + 0.07 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (0.05 : ℝ) + 0.07 * 1.26 := by linarith
+  have h2 : ((0.05 : ℝ) + 0.07 * 1.26) ≤ ((certHead : ℚ) : ℝ) := by
+    have hle : ((0.05 : ℝ) + 0.07 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle cert_sample_center_proxy
+  exact le_trans h1 h2
+
+/-- R73 proxy center bound transported through the norm bridge. -/
+theorem R73_proxy_center_norm :
+    (0.05 : ℝ) + 0.07 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ‖(((1 : ℚ)) : ℝ) + (((7 / 10 : ℚ)) : ℝ) * Complex.I‖ := by
+  have hRad := R73_radius_upper_checker
+  have hM : (0.07 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.07 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h4 : (0.05 : ℝ) + 0.07 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (((1 : ℚ)) : ℝ) := by
+    have hle : (0.05 : ℝ) + 0.07 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+        ≤ (0.05 : ℝ) + 0.07 * 1.26 := by linarith
+    have hlt : ((0.05 : ℝ) + 0.07 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle hlt
+  exact le_trans h4 cert_norm_cast
+
+#print axioms R73_radius_upper_checker
+#print axioms R73_tail_mono
+#print axioms R73_proxy_center
+#print axioms R73_proxy_center_norm
+
+
+/-! ### R83 proxy cell (outer-bottom).
+
+R83 = x [6,17/2] x y [1/100,1/5], tier outer `(eps,M) = (0.002,0.05)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`. Copied from generator
+`C:\Users\mmeadow\AppData\Local\Temp\kilo\door3_certs40.lean` R83 block
+(lines 918-942), renamed to checker pattern
+`R00_radius_upper_checker/R00_tail_mono/R00_proxy_center/R00_proxy_center_norm`.
+All steps `by norm_num` or `linarith`, numerals <=6 digits. -/
+
+/-- R83 radius upper bound through the generalized checker rule. -/
+theorem R83_radius_upper_checker :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) :=
+  cert_sqrt_upper_check
+
+/-- R83 tail step reusing the proved majorant `zeta2_partial_mono`. -/
+theorem R83_tail_mono :
+    (∑ k ∈ Finset.range 1, (1 : ℚ) / ((k + 1 : ℚ) ^ 2)) ≤ certHead := by
+  have h := zeta2_partial_mono (n := 1) (m := 5) (by norm_num)
+  rw [certHead_sum_eq] at h
+  exact h
+
+/-- R83 proxy center bound (`center_bound` shape at the 1.26 radius cap). -/
+theorem R83_proxy_center :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ((certHead : ℚ) : ℝ) := by
+  have hRad := R83_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h1 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+  have h2 : ((0.002 : ℝ) + 0.05 * 1.26) ≤ ((certHead : ℚ) : ℝ) := by
+    have hle : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle cert_sample_center_proxy
+  exact le_trans h1 h2
+
+/-- R83 proxy center bound transported through the norm bridge. -/
+theorem R83_proxy_center_norm :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ‖(((1 : ℚ)) : ℝ) + (((7 / 10 : ℚ)) : ℝ) * Complex.I‖ := by
+  have hRad := R83_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h4 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (((1 : ℚ)) : ℝ) := by
+    have hle : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+        ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+    have hlt : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle hlt
+  exact le_trans h4 cert_norm_cast
+
+#print axioms R83_radius_upper_checker
+#print axioms R83_tail_mono
+#print axioms R83_proxy_center
+#print axioms R83_proxy_center_norm
+
+
+/-! ### R93 proxy cell (outer-bottom).
+
+R93 = x [15/2,10] x y [1/100,1/5], tier outer `(eps,M) = (0.002,0.05)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`. Copied from generator
+`C:\Users\mmeadow\AppData\Local\Temp\kilo\door3_certs40.lean` R93 block
+(lines 1022-1046), renamed to checker pattern
+`R00_radius_upper_checker/R00_tail_mono/R00_proxy_center/R00_proxy_center_norm`.
+All steps `by norm_num` or `linarith`, numerals <=6 digits. -/
+
+/-- R93 radius upper bound through the generalized checker rule. -/
+theorem R93_radius_upper_checker :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) :=
+  cert_sqrt_upper_check
+
+/-- R93 tail step reusing the proved majorant `zeta2_partial_mono`. -/
+theorem R93_tail_mono :
+    (∑ k ∈ Finset.range 1, (1 : ℚ) / ((k + 1 : ℚ) ^ 2)) ≤ certHead := by
+  have h := zeta2_partial_mono (n := 1) (m := 5) (by norm_num)
+  rw [certHead_sum_eq] at h
+  exact h
+
+/-- R93 proxy center bound (`center_bound` shape at the 1.26 radius cap). -/
+theorem R93_proxy_center :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ((certHead : ℚ) : ℝ) := by
+  have hRad := R93_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h1 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+  have h2 : ((0.002 : ℝ) + 0.05 * 1.26) ≤ ((certHead : ℚ) : ℝ) := by
+    have hle : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle cert_sample_center_proxy
+  exact le_trans h1 h2
+
+/-- R93 proxy center bound transported through the norm bridge. -/
+theorem R93_proxy_center_norm :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ‖(((1 : ℚ)) : ℝ) + (((7 / 10 : ℚ)) : ℝ) * Complex.I‖ := by
+  have hRad := R93_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h4 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (((1 : ℚ)) : ℝ) := by
+    have hle : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+        ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+    have hlt : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle hlt
+  exact le_trans h4 cert_norm_cast
+
+#print axioms R93_radius_upper_checker
+#print axioms R93_tail_mono
+#print axioms R93_proxy_center
+#print axioms R93_proxy_center_norm
+
+
+/-! ### R03 proxy cell (outer-bottom).
+
+R03 = x [-10,-15/2] x y [1/100,1/5], tier outer `(eps,M) = (0.002,0.05)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`. Copied from generator
+`C:\Users\mmeadow\AppData\Local\Temp\kilo\door3_certs40.lean` R03 block
+(lines 86-110), renamed to checker pattern
+`R00_radius_upper_checker/R00_tail_mono/R00_proxy_center/R00_proxy_center_norm`.
+All steps `by norm_num` or `linarith`, numerals <=6 digits. -/
+
+/-- R03 radius upper bound through the generalized checker rule. -/
+theorem R03_radius_upper_checker :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) :=
+  cert_sqrt_upper_check
+
+/-- R03 tail step reusing the proved majorant `zeta2_partial_mono`. -/
+theorem R03_tail_mono :
+    (∑ k ∈ Finset.range 1, (1 : ℚ) / ((k + 1 : ℚ) ^ 2)) ≤ certHead := by
+  have h := zeta2_partial_mono (n := 1) (m := 5) (by norm_num)
+  rw [certHead_sum_eq] at h
+  exact h
+
+/-- R03 proxy center bound (`center_bound` shape at the 1.26 radius cap). -/
+theorem R03_proxy_center :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ((certHead : ℚ) : ℝ) := by
+  have hRad := R03_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h1 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+  have h2 : ((0.002 : ℝ) + 0.05 * 1.26) ≤ ((certHead : ℚ) : ℝ) := by
+    have hle : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle cert_sample_center_proxy
+  exact le_trans h1 h2
+
+/-- R03 proxy center bound transported through the norm bridge. -/
+theorem R03_proxy_center_norm :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ‖(((1 : ℚ)) : ℝ) + (((7 / 10 : ℚ)) : ℝ) * Complex.I‖ := by
+  have hRad := R03_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h4 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (((1 : ℚ)) : ℝ) := by
+    have hle : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+        ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+    have hlt : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle hlt
+  exact le_trans h4 cert_norm_cast
+
+#print axioms R03_radius_upper_checker
+#print axioms R03_tail_mono
+#print axioms R03_proxy_center
+#print axioms R03_proxy_center_norm
