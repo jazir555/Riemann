@@ -1780,6 +1780,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `Rat` reduction stuck; bridge via `Complex.normSq_eq_norm_sq`); sample cert checks in 53s.
     Missing link: rigorous `ξ`-enclosures (`riemannZeta`/`Gamma`/`cpow` interval arith).
     Next: generalize checker + 40-cell generator (tasked).
+    **Checker generalized (`door3_cell_checker`, C2, `bc1ea2bb`, green, axioms clean):**
+    two-sided complex-mul enclosure + rigorous `√` upper rule; R00 proxy cell certified
+    (`center_bound` shape at outer tier); Python generator emits all 40 proxy blocks
+    (Temp `door3_certs40.lean`, 46KB). True `ξ`-enclosure still the missing link.
+    Next: land proxy blocks cell-by-cell (tasked).
     **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
     exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
