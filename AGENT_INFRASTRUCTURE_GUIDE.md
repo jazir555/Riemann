@@ -1716,6 +1716,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **pair-15 `Re ≤ −0.02`** (beats triangle `2/31 ≈ 0.0645` by `≈ 0.0845`).
     **ALL pairs 8–15 MVT-closed** (`0.031, 0.08402, 0.0673, 0.057, 0.035, 0, −0.03, −0.02`).
     Next: `[16,32)` window Re-sum aggregate (tasked).
+    **Window aggregate (`DZ3ad_*`, G22, `94da0b99`, green 8693 jobs, axioms clean):**
+    **window Re-sum `≤ 0.22432`** (beats summed MVT `≈ 0.47047` by `≈ 0.246`,
+    triangle `≈ 0.69266`). Pair program endpoint: transfer to Ico-block next (tasked).
     **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
     (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
     hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
