@@ -1705,6 +1705,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cos26 ≤ −0.844` (sextic), `−cos27 ≤ 0.637` (quartic), amps `1/7.9 + 1/8.1` ⇒
     **pair-13 `Re ≤ 0`** (beats triangle `2/27 ≈ 0.0741`; MVT slot `≈ 0.053`; true `≈ −0.0305`).
     Next: pair-14 `Re` start (queued behind H6 verification).
+    **Pair-14 CLOSED (`DZ3ab_*`, G20, `c991c30d`, green 8693 jobs, axioms clean):**
+    `log30 = log2+log3+log5`, `log29` via `log(29/30)` fallback,
+    `cos28 ≤ −0.36` (sextic), `−cos29 ≤ 0.1` (quartic), amps `1/8.3 + 2/15` ⇒
+    **pair-14 `Re ≤ −0.03`** (beats triangle `2/29 ≈ 0.0690` by `≈ 0.099`; true negative).
+    Next: pair-15 `Re` start — LAST pair (tasked).
     **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
     (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
     hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
@@ -1735,6 +1740,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     8702 jobs, axioms clean):** same `s=6.03/D=2675/2684` at `G=0.0811` ⇒
     **`(G,Z,M,Azeta)=(0.0811,7.5,100.62888,5764)`** (`ΔM=−0.248`).
     Next: `G=0.0809` same-shape or third middle piece (tasked).
+    **Trio split (`Door3GammaCutR02SplitTrio0810`, H7, `0f3c2183`, green 8702 jobs, axioms clean):**
+    `G=0.0809` 2-piece FAILS high cap (`217.5 > 217.1356`) ⇒ third middle piece
+    (`N=215.7/216.6/217.5`, `D=2675/2684/2687`) ⇒
+    **`(G,Z,M,Azeta)=(0.0810,7.5,100.5048,5757)`** (`ΔM=−0.124`).
+    Next: `G=0.0809` via `a=0.05` refloor or `xmax<6.37` numerator (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
