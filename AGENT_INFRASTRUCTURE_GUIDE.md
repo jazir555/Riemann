@@ -2688,3 +2688,18 @@ on the center ball. These are unconditional reduction lemmas; the finite zeta
 certificate and the entire-function sup enclosure remain to be supplied.
 Validation: `lake build door3_zeta_cutoff` succeeded (8700 jobs); the new
 axiom reports contain only `propext`, `Classical.choice`, and `Quot.sound`.
+
+## Door-3 grid boundary audit (2026-09-05)
+
+The legacy `bridgedCoversUpper` statement in `central_cover_trusted.lean` is
+not a satisfiable combinatorial claim. Its hypotheses allow the outer
+boundaries `Re z = ±10`, while every listed rectangle has strict endpoint
+inequalities. More generally, adjacent certificate columns meet at shared
+endpoints such as `Re z = -7.5`; the 32-cell list has no overlap there, so no
+cell can satisfy both `R.x0 < z.re` and `z.re < R.x1`. Unfolding
+`bridgedZeroFreeRectsUpper`, `bridgedCells`, and the rectangle projections
+reduces the proposed witness at `Re z = -7.5` to an explicit contradiction
+for every list element. A valid cover must use overlapping columns (as
+`fineGridX` does) or weaken the boundary relation and then separately recover
+the strict interior needed by `XiLocalZeroFreeRect.no_zero`; this cannot be
+closed by a finite endpoint-comparison lemma alone.
