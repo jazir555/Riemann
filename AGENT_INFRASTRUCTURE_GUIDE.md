@@ -1544,9 +1544,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     only. **TRUE tightening (`DZ2g_*`, DX, `9413c995`, green 8693 jobs, axioms clean):**
     `D3_amp 31 ≤ 1/8` (`8^5 = 32768 = 32^3`) + per-term `|Re|/|Im| ≤ amp` ⇒ **TRUE block `≤
     3.125`** (`15×1/5 + 1/8`; −2.34%, now 1640× over need). Still triangle (one tight tail).
-    Next: true-phase prefix caps (replay at slope `−8.75/24`) or second TRUE tightening via
-    genuine `Re/Im` cancellation (tasked).
-    **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
+    **Double peel (`DZ2h_*`, DY, `a492ffab`, green 8693 jobs, axioms clean):** `D3_amp 30 ≤ 2/15`
+    ⇒ **TRUE block `≤ 3.06`** (`14/5 + 2/15 + 1/8`; now 1606× over need). One peel step left
+    (`D3_amp 29`, three-tail `29,30,31`); genuine cancellation still untouched.
+    Next: true-phase prefix caps (replay at slope `−8.75/24`) or third TRUE tightening (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
