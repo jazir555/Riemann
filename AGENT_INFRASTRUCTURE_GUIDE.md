@@ -2673,3 +2673,18 @@ Validation: `lake build door3_gamma_cutoff` succeeded (8690 jobs); all three
 adapter axiom reports contain only `propext`, `Classical.choice`, and `Quot.sound`.
 CutR10 still needs its zeta lower bound and derivative upper bound. No complete
 cell cover, unbounded-tail certificate, or unconditional RH theorem is claimed.
+
+## Door-3 update: cutoff zeta and derivative interfaces (2026-09-05)
+
+`door3_zeta_cutoff.lean` proves the cutoff eta conversion factor is at most
+`1`; the phase enclosure uses the existing nine-decimal `log 2` and four-decimal
+`pi` bounds together with the quadratic cosine lower bound. It then supplies
+`zeta_cutoff_lower_of_certificate_one` and
+`cutR10_zetaRemainder_of_certificate_one`, reducing the named `7/5` zeta floor
+to a finite eta partial-sum and pair-tail certificate. The same file proves
+`cutR10_derivRemainder_of_closedBall_sup`, reducing the named `M = 0.04`
+derivative remainder to one explicit sup enclosure for the entire xi extension
+on the center ball. These are unconditional reduction lemmas; the finite zeta
+certificate and the entire-function sup enclosure remain to be supplied.
+Validation: `lake build door3_zeta_cutoff` succeeded (8700 jobs); the new
+axiom reports contain only `propext`, `Classical.choice`, and `Quot.sound`.
