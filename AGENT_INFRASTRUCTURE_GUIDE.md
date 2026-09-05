@@ -1829,6 +1829,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     mirrored in-lane; mollifier error CLOSED `e=1/2` at `K=2`; Dirichlet majorant PROVABLY
     inapplicable (`Re<1` on regime); zeta-upper `B` + zeta-near-one `d` open.
     Next: compact-cell zeta bounds (tasked).
+    **Compact-cell bounds (T4, `1508e122`, green, axioms clean):** closed cell
+    `10≤|Re|≤11` compact + shifted-continuous + pole avoided ⇒ `∃ Bcell/dcell`
+    (non-explicit) + `tailCellGap_of_cellBounds_two` implication. Explicit numerals open.
+    Next: explicit Bnum/dnum (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
