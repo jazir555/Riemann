@@ -1673,6 +1673,17 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     axioms clean):** `cos18 ≤ 0.8567` (quartic majorant, per-monomial endpoints) ⇒
     **pair-9 `Re ≤ 0.0866`** (gap to MVT norm `0.08402` now `0.00258`; was `0.00628`).
     Next: raise `cos19`/`A19` lower to finish, or pair-10 `Re` start (tasked).
+    **Pair-9 closed (`DZ3u_*`, G13, `845c064d`, green 8693 jobs, axioms clean):**
+    sextic `cos19 ≥ 0.43` ⇒ **pair-9 `Re ≤ 0.08402`** (meets MVT norm; previous gap closed).
+    Next: pair-10 `Re` start (tasked).
+    **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
+    (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
+    hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
+    `norm_num` on huge numerals). Diff stashed reversibly (`shelve DT two-step…`) +
+    30KB backup in `Temp/kilo/dt_twostep_shelved.diff`. Lane retasked with DIFFERENT
+    instructions: wire LANDED H0/H1 numerators (228.0/217.5 → `G≈0.086/0.082` tiers +
+    `M` tiers) with per-theorem timebox + bisect-on-hang protocol; two-step route NOT
+    to be reintroduced.
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
