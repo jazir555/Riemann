@@ -24891,3 +24891,154 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3c_gap_07
 
 
+/-!
+Door-3 middle-upper second cancellation tightening (DZ3d, append-only DZ3c tail).
+
+Bridge (c2) banked (exactly one): TRUE block `||sum_{Ico 16 32} eta s1|| <= 0.61`,
+strictly below `0.70`, via tightened `||s1|| <= 8.78` (no new technology).
+Read-only reuse: `zetaRefl_re/im/pos`, `norm_etaPairTerm_le`,
+`DZ3c_base_ge_five`, `DZ3c_sum_eq`. Nothing redefined.
+
+* `DZ3d_s1_norm_le`: `||1 - zetaCellS0|| <= 8.78` via `0.605^2+8.75^2=76.928525
+  <= 77.0884=8.78^2` (`le_of_pow_le_pow_left0` + `Complex.sq_norm`).
+* `DZ3d_pair_le`: for `8 <= m`, `||pair m|| <= 1.756/((2*m+1:ℕ):ℝ)` via
+  `||s1|| <= 8.78` and `(2m+1)^(-0.605-1) <= (1/5)*(1/(2m+1))`
+  (`8.78/5 = 1.756`), replay of `DZ3c_pair_le` with tightened norm.
+* `DZ3d_true_block_le_zero_six_one`: `||sum_{Ico 16 32} eta|| <= 0.61`
+  = `1.756*(1/17+1/19+1/21+1/23+1/25+1/27+1/29+1/31) = 0.6081... <= 0.61`
+  (triangle over 8 cancelled pairs via `DZ3c_sum_eq`).
+* `DZ3d_gap_061`: `0.61 < 0.70`, `0.61 < 2.553`, `0.61/(12/6300)=320.25`.
+
+NUMBERS: banked `0.61`, gap vs `0.70` is `0.09` strictly below;
+gap vs `2.553` is `1.943`; gap vs `3.2` is `2.59`;
+need `12/6300~=0.0019048`; `0.61/(12/6300)=320.25`
+(was `367.5` at `0.70`, saves `47.25` ratio units; was `1340.325` at `2.553`,
+saves `1020.075`; was `1680` at `3.2`, saves `1359.75`).
+-/
+
+/-- (DZ3d) Tightened reflected norm `||1 - s0|| <= 8.78`. -/
+theorem DZ3d_s1_norm_le : ‖1 - zetaCellS0‖ ≤ 8.78 := by
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  have him : (1 - zetaCellS0).im = (8.75 : ℝ) := zetaRefl_im
+  have hsq : ‖1 - zetaCellS0‖ ^ 2 ≤ (8.78 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+/-- (DZ3d) Tightened cancelled pair bound `||pair m|| <= 1.756/(2*m+1)` for `8 <= m`. -/
+theorem DZ3d_pair_le (m : ℕ) (hm : 8 ≤ m) :
+    ‖etaPairTerm (1 - zetaCellS0) m‖ ≤ 1.756 / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+  have hs := zetaRefl_pos
+  have hle := norm_etaPairTerm_le (1 - zetaCellS0) hs m
+  have hnorm : ‖1 - zetaCellS0‖ ≤ 8.78 := DZ3d_s1_norm_le
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  rw [hre] at hle
+  have hbase_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have h : 0 < 2 * m + 1 := by omega
+    exact_mod_cast h
+  have h5 := DZ3c_base_ge_five m hm
+  have hsplit : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      = ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+    have e : (-0.605 - 1 : ℝ) = (-(0.605 : ℝ)) + (-(1 : ℝ)) := by ring
+    rw [e, Real.rpow_add hbase_pos,
+      Real.rpow_neg (le_of_lt hbase_pos) (0.605 : ℝ),
+      Real.rpow_neg (le_of_lt hbase_pos) (1 : ℝ), Real.rpow_one]
+  have hpos605 : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_pos_of_pos hbase_pos _
+  have hinv5 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (5 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos605 (by norm_num)).mpr h5
+  have hbase_inv_nn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    inv_nonneg.mpr (le_of_lt hbase_pos)
+  have hprod_le : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹
+      ≤ (5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    mul_le_mul_of_nonneg_right hinv5 hbase_inv_nn
+  have hXnn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos hbase_pos _)
+  have h1 : ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 8.78 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    mul_le_mul_of_nonneg_right hnorm hXnn
+  have h2 : (8.78 : ℝ) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 8.78 * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := by
+    rw [hsplit]
+    exact mul_le_mul_of_nonneg_left hprod_le (by norm_num)
+  have h878 : (8.78 : ℝ) * (5 : ℝ)⁻¹ = 1.756 := by norm_num
+  have hfin : (8.78 : ℝ) * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹)
+      = 1.756 / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    rw [← mul_assoc, h878, div_eq_mul_inv]
+  calc ‖etaPairTerm (1 - zetaCellS0) m‖
+      ≤ ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := hle
+    _ ≤ 8.78 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := h1
+    _ ≤ 8.78 * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := h2
+    _ = 1.756 / ((((2 * m + 1 : ℕ)) : ℝ)) := hfin
+
+/-- (DZ3d) Second-cancellation TRUE block `<= 0.61 < 0.70` (8 tightened pairs). -/
+theorem DZ3d_true_block_le_zero_six_one :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.61 := by
+  rw [DZ3c_sum_eq]
+  calc ‖∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)‖
+      ≤ ∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ m ∈ Finset.range 8, (1.756 / ((((2 * (8 + m) + 1 : ℕ)) : ℝ))) := by
+        apply Finset.sum_le_sum
+        intro m _
+        exact DZ3d_pair_le (8 + m) (by omega)
+    _ ≤ 0.61 := by
+        have c0 : ((((2 * (8 + 0) + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+        have c1 : ((((2 * (8 + 1) + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+        have c2 : ((((2 * (8 + 2) + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+        have c3 : ((((2 * (8 + 3) + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+        have c4 : ((((2 * (8 + 4) + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+        have c5 : ((((2 * (8 + 5) + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+        have c6 : ((((2 * (8 + 6) + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+        have c7 : ((((2 * (8 + 7) + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+        have e : (∑ m ∈ Finset.range 8, (1.756 / ((((2 * (8 + m) + 1 : ℕ)) : ℝ))))
+            = 1.756 / 17 + 1.756 / 19 + 1.756 / 21 + 1.756 / 23
+              + 1.756 / 25 + 1.756 / 27 + 1.756 / 29 + 1.756 / 31 := by
+          rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+            Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+            Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+            c0, c1, c2, c3, c4, c5, c6, c7]
+        rw [e]
+        norm_num
+
+/-- (DZ3d) Gap verdict for `0.61` vs `0.70`, vs `2.553`, vs `12/6300`. -/
+theorem DZ3d_gap_061 :
+    (0.61 : ℝ) < 0.70 ∧ (0.61 : ℝ) < 2.553 ∧ (0.61 : ℝ) / (12 / 6300) = 320.25
+      ∧ (12 / 6300 : ℝ) < 0.61 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3d report-and-stop): ONE proved bridge (c2) banked —
+`DZ3d_true_block_le_zero_six_one : ||sum_{Ico 16 32} eta s1|| <= 0.61`
+via 8 MVT-cancelled pairs with tightened `DZ3d_s1_norm_le : ||s1|| <= 8.78`
+(`0.605^2+8.75^2=76.928525 <= 77.0884`; `DZ3d_pair_le : ||pair m|| <= 1.756/(2m+1)`
+since `8.78/5=1.756`, replay of `DZ3c_pair_le`; block identity read-only
+`DZ3c_sum_eq`; `1.756*(1/17+...+1/31)=0.6081... <= 0.61`).
+Banked constant `0.61`, strictly below `0.70` by `0.09` (below `2.553` by `1.943`,
+below `3.2` by `2.59`); `0.61/(12/6300)=320.25` (`DZ3d_gap_061`), was `367.5`
+(saves `47.25` ratio units; was `1340.325`, saves `1020.075`; was `1680`,
+saves `1359.75`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~320x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual); uniform `5 <= base^0.605` still in force.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3d tail after
+`DZ3d_gap_061`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `0.61` toward an Abel `<= 0.6`-shape); or
+(c2 again) a third genuine-cancellation tightening below `0.61` (e.g. non-uniform
+`base^0.605` lowers at `19..31` (saves `~0.02`), or `Re`-only pair sums via
+`DZ3c_pair_re` + `DZ3c_signed_re` intervals, or `1/7`/`2/15`/`1/8` tail-shape
+re-checks reusing `D3_amp` read-only).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3d_s1_norm_le
+#print axioms DZ3d_pair_le
+#print axioms DZ3d_true_block_le_zero_six_one
+#print axioms DZ3d_gap_061
