@@ -1605,6 +1605,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`3/16 + 2/11×2 + 1/6×8 + 1/7 + 2/15×3 + 1/8`; now 1340× over need). MILESTONE:
     all 16 terms peeled — per-term triangle shaping exhausted; remaining routes are
     true-phase prefix caps + Abel feed, or genuine `Re/Im` cancellation (tasked).
+    **BREAKTHROUGH — paired MVT cancellation (`DZ3c_*`, F5, `08b93861`, green 8693 jobs, axioms
+    clean):** `norm_etaPairTerm_le` at `s1` (`zetaRefl`, `‖s1‖ ≤ 10`) ⇒ `‖pair m‖ ≤ 2/(2m+1)`
+    for `m ≥ 8` ⇒ 8-pair sum `0.6926… ≤` **TRUE block `≤ 0.70`** (was `2.553`; saves 972.8 ratio
+    units — now 367× over need). First genuine cancellation (not triangle).
+    Next: non-uniform tightening toward `~0.60` (`‖s1‖ ≤ 8.78`), true-phase prefix caps + Abel
+    toward `≤ 0.6`-shape, or `Re`-only pair sums (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
