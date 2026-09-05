@@ -1563,7 +1563,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     cancellation (tasked). **Sixth peel (`DZ2l_*`, E4, `599ae607`, green 8693 jobs, axioms
     clean):** `D3_amp 26 ≤ 1/6` ⇒ **TRUE block `≤ 2.835`** (`10/5 + 1/6 + 1/7 + 2/15×3 + 1/8`;
     now 1488× over need). Same `1/6`-shape available at base 26 (`7776 ≤ 17576 = 26^3`) for
-    `D3_amp 25`. Next: seventh peel, true-phase prefix caps, or genuine cancellation (tasked).
+    `D3_amp 25`. **Seventh peel (`DZ2m_*`, E5, `6ae0d220`, green 8693 jobs, axioms clean):**
+    `D3_amp 25 ≤ 1/6` (base-26 fit) ⇒ **TRUE block `≤ 2.802`** (`9/5 + 1/6×2 + 1/7 + 2/15×3 +
+    1/8`; now 1471× over need). `1/6`-shape holds at bases 27, 26 (next: base 25,
+    `7776 ≤ 15625 = 25^3`, for `D3_amp 24`).
+    Next: eighth peel, true-phase prefix caps, or genuine cancellation (tasked).
     Next: true-phase prefix caps or genuine `Re/Im` cancellation (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
