@@ -1799,6 +1799,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
     + `tailNormLower_of_absRe`/`tailSqLower_of_absRe` floors. Gap: real `zeta`/`shiftedS`/
     `dirichletMollifier` substitution + zeta-upper/mollifier-error bounds (tasked next).
+    **Conditional leaf bridge (T2, `feee4b94`, green, axioms clean):**
+    `‖ζ·M−1‖ ≤ B·e+d` split + `tailLeafGap_of_stubBounds`/`tailMollifiedRoucheLeaf_of_stubBounds`
+    (stub Props; real import exceeds tail budget). Remainder: admissible real `(B,e,d)`.
+    Next: real triple (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
