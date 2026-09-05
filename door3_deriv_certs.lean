@@ -612,3 +612,202 @@ theorem R00_deriv_meets_tier_of_xi_conds {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 �
 #print axioms R00_PGZ_threshold_for_tier
 #print axioms R00_deriv_bound_of_xi_conds
 #print axioms R00_deriv_meets_tier_of_xi_conds
+
+/-!
+## Door-3 Gamma sup (deriv-lane tail: V4 Gamma bridge)
+
+Banks `GammaSupCond 1.52` (Stirling-free, elementary): for `s ∈ sImageRect`
+(`s.re ∈ [-1.61, 2.40]`, `s.im ∈ [-10.75, -6.75]`), `w := s / 2` has
+`w.re ∈ [-0.805, 1.20]` and `‖w‖ ≥ 3.375` (from `|w.im| = |s.im| / 2 ≥ 3.375`),
+so one recurrence step `Γ(w) = Γ(w + 1) / w` shifts into
+`Re (w + 1) ∈ [0.195, 2.20]`, where the Euler-integral majorant
+`‖Γ‖ ≤ Real.Gamma` plus convexity (`Real.Gamma ≤ 1` on `[1, 2]`) give
+`Real.Gamma ≤ 5.13`; hence `‖Γ(w)‖ ≤ 5.13 / 3.375 = 1.52`.
+
+Also banked: the quantified tier gap (`1.52` forces `Z ≤ 0.00007`, i.e. the
+`ξ`-product route needs a zeta sup far below the true `|ζ| ~ 1` scale on this
+rectangle) and the instantiated four-factor sup `385.472 * Z`.
+
+Numerals used (all ≤ 6 digits): `1.52`, `5.13`, `3.375`, `0.195`, `2.20`,
+`0.00007`, `385.472`, `0.02536`, `0.0001`.
+-/
+
+/-- Integral majorant `‖Γ z‖ ≤ Real.Gamma z.re` for `0 < z.re` (triangle
+inequality for the Euler integral; same proof as
+`DerivCauchyBridge.norm_Gamma_le_realGamma` in `central_cover_assembly.lean`,
+restated here to keep this lane import-free). -/
+theorem deriv_norm_Gamma_le_realGamma {z : ℂ} (hz : 0 < z.re) :
+    ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
+  have hC := Complex.GammaIntegral_convergent hz
+  have hR := Real.GammaIntegral_convergent hz
+  rw [Complex.Gamma_eq_integral hz, Real.Gamma_eq_integral hz]
+  unfold Complex.GammaIntegral
+  calc ‖∫ x in Set.Ioi (0 : ℝ), ((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖
+      ≤ ∫ x in Set.Ioi (0 : ℝ), ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ :=
+        MeasureTheory.norm_integral_le_integral_norm _
+    _ = ∫ x in Set.Ioi (0 : ℝ), Real.exp (-x) * x ^ (z.re - 1) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro x hx
+        have hx0 : (0 : ℝ) < x := Set.mem_Ioi.mp hx
+        show ‖((Real.exp (-x) : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)‖ = _
+        rw [norm_mul]
+        have h1 : ‖((Real.exp (-x) : ℝ) : ℂ)‖ = Real.exp (-x) :=
+          Complex.norm_of_nonneg (le_of_lt (Real.exp_pos _))
+        have h2 : ‖(x : ℂ) ^ (z - 1)‖ = x ^ ((z - 1).re) :=
+          Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+        rw [h1, h2]
+        have hexp : (z - 1).re = z.re - 1 := by simp [Complex.sub_re]
+        rw [hexp]
+
+/-- Real-Gamma cap `Real.Gamma y ≤ 1` for `y ∈ [1, 2]` (convexity with
+`Gamma 1 = Gamma 2 = 1`; same pattern as `realGamma_le_40_of_mem` in
+`central_cover_assembly.lean`). -/
+theorem deriv_realGamma_le_one_of_mem_12 {y : ℝ} (h1 : (1 : ℝ) ≤ y) (h2 : y ≤ 2) :
+    Real.Gamma y ≤ 1 := by
+  have hy1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 2 - y := by linarith
+  have hb : (0 : ℝ) ≤ y - 1 := by linarith
+  have hab : (2 - y) + (y - 1) = 1 := by ring
+  have h := Real.convexOn_Gamma.2 hy1 hy2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - y) * 1 + (y - 1) * 2 = y := by ring
+  rw [heq] at h
+  have hrhs : (2 - y) * 1 + (y - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  exact h
+
+/-- Real-Gamma cap `Real.Gamma x ≤ 5.13` for `x ∈ [0.195, 2.20]`: below `1`
+shift up (`Γ(x) = Γ(x+1)/x ≤ 1/0.195 ≤ 5.13`), on `[1, 2]` use the unit cap,
+above `2` shift down (`Γ(x) = (x-1)Γ(x-1) ≤ 1.2`). -/
+theorem deriv_realGamma_le_513 {x : ℝ} (hlo : (0.195 : ℝ) ≤ x) (hhi : x ≤ 2.20) :
+    Real.Gamma x ≤ 5.13 := by
+  rcases le_total x 1 with hx1 | hx1
+  · have hx_pos : (0 : ℝ) < x := by linarith
+    have hne : x ≠ 0 := ne_of_gt hx_pos
+    have hy1 : (1 : ℝ) ≤ x + 1 := by linarith
+    have hy2 : x + 1 ≤ (2 : ℝ) := by linarith
+    have h1 : Real.Gamma (x + 1) ≤ 1 := deriv_realGamma_le_one_of_mem_12 hy1 hy2
+    have hadd := Real.Gamma_add_one hne
+    rw [hadd] at h1
+    have hfin : Real.Gamma x ≤ 1 / x := by
+      rw [le_div_iff₀ hx_pos, mul_comm]
+      exact h1
+    have hfrac : (1 : ℝ) / x ≤ 5.13 := by
+      have h1d : (1 : ℝ) / x ≤ 1 / 0.195 :=
+        one_div_le_one_div_of_le (by norm_num) hlo
+      have h2d : (1 : ℝ) / 0.195 ≤ 5.13 := by norm_num
+      exact le_trans h1d h2d
+    exact le_trans hfin hfrac
+  · rcases le_total x 2 with hx2 | hx2
+    · calc Real.Gamma x ≤ 1 := deriv_realGamma_le_one_of_mem_12 hx1 hx2
+        _ ≤ 5.13 := by norm_num
+    · have hm1 : (1 : ℝ) ≤ x - 1 := by linarith
+      have hm2 : x - 1 ≤ (2 : ℝ) := by linarith
+      have h1 : Real.Gamma (x - 1) ≤ 1 := deriv_realGamma_le_one_of_mem_12 hm1 hm2
+      have hne : x - 1 ≠ 0 := ne_of_gt (by linarith)
+      have hadd := Real.Gamma_add_one hne
+      have hxeq : x - 1 + 1 = x := by ring
+      rw [hxeq] at hadd
+      have hpos : (0 : ℝ) ≤ Real.Gamma (x - 1) :=
+        le_of_lt (Real.Gamma_pos_of_pos (by linarith))
+      calc Real.Gamma x = (x - 1) * Real.Gamma (x - 1) := hadd
+        _ ≤ 1.2 * 1 := mul_le_mul (by linarith) h1 hpos (by norm_num)
+        _ = 1.2 := by norm_num
+        _ ≤ 5.13 := by norm_num
+
+/-- One-step recurrence solved for `Γ(w)`: `Γ(w) = Γ(w + 1) / w` for `w ≠ 0`
+(from `Complex.Gamma_add_one`). -/
+theorem deriv_Gamma_shift_one (w : ℂ) (hw : w ≠ 0) :
+    Complex.Gamma w = Complex.Gamma (w + 1) / w := by
+  have h := Complex.Gamma_add_one w hw
+  rw [eq_div_iff_mul_eq hw, h]
+  ring
+
+/-- Denominator floor: `‖s / 2‖ ≥ 3.375` on `sImageRect`
+(`|s.im| ≥ 6.75`, halved). Bounds taken explicitly so callers may `obtain`. -/
+theorem deriv_shifted_half_norm_ge (s : ℂ) (_ : (-1.61 : ℝ) ≤ s.re) (_ : s.re ≤ 2.40)
+    (_ : (-10.75 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-6.75 : ℝ)) :
+    (3.375 : ℝ) ≤ ‖s / 2‖ := by
+  have him : |(s / 2).im| ≤ ‖s / 2‖ := Complex.abs_im_le_norm _
+  have heim : (s / 2).im = s.im / 2 := Complex.div_ofNat_im _ _
+  have habs : (6.75 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  have h2 : |(s / 2).im| = |s.im| / 2 := by
+    rw [heim]
+    simp [abs_div]
+  linarith
+
+/-- **Gamma sup on the `s`-image: `GammaSupCond 1.52`.** One recurrence step
+moves `s / 2` (`Re ∈ [-0.805, 1.20]`) into `Re ∈ [0.195, 2.20]` where
+`Real.Gamma ≤ 5.13`; dividing by `‖s / 2‖ ≥ 3.375` gives
+`5.13 / 3.375 = 1.52`. -/
+theorem deriv_GammaSupCond_152 : GammaSupCond 1.52 := by
+  intro s hs
+  obtain ⟨hre_lo, hre_hi, him_lo, him_hi⟩ := hs
+  unfold fGamma_shape
+  have hre2 : (s / 2).re = s.re / 2 := Complex.div_ofNat_re _ _
+  have hsh : (s / 2 + 1).re = s.re / 2 + 1 := by
+    rw [Complex.add_re, Complex.one_re, hre2]
+  have hlo : (0.195 : ℝ) ≤ (s / 2 + 1).re := by rw [hsh]; linarith
+  have hhi : (s / 2 + 1).re ≤ (2.20 : ℝ) := by rw [hsh]; linarith
+  have hpos : (0 : ℝ) < (s / 2 + 1).re := by linarith
+  have hle : ‖Complex.Gamma (s / 2 + 1)‖ ≤ Real.Gamma (s / 2 + 1).re :=
+    deriv_norm_Gamma_le_realGamma hpos
+  have hR : Real.Gamma (s / 2 + 1).re ≤ 5.13 := deriv_realGamma_le_513 hlo hhi
+  have hG : ‖Complex.Gamma (s / 2 + 1)‖ ≤ 5.13 := le_trans hle hR
+  have hden : (3.375 : ℝ) ≤ ‖s / 2‖ :=
+    deriv_shifted_half_norm_ge s hre_lo hre_hi him_lo him_hi
+  have hwpos : (0 : ℝ) < ‖s / 2‖ := lt_of_lt_of_le (by norm_num) hden
+  have hwnez : s / 2 ≠ 0 := by
+    intro hcon
+    rw [hcon, norm_zero] at hden
+    norm_num at hden
+  have hrec : Complex.Gamma (s / 2) = Complex.Gamma (s / 2 + 1) / (s / 2) :=
+    deriv_Gamma_shift_one _ hwnez
+  have h152 : (1.52 : ℝ) = 5.13 / 3.375 := by norm_num
+  rw [hrec, norm_div, h152, div_le_iff₀ hwpos]
+  calc ‖Complex.Gamma (s / 2 + 1)‖ ≤ 5.13 := hG
+    _ = 5.13 / 3.375 * 3.375 := by
+        rw [div_mul_cancel₀ _ (by norm_num : (3.375 : ℝ) ≠ 0)]
+    _ ≤ 5.13 / 3.375 * ‖s / 2‖ :=
+        mul_le_mul_of_nonneg_left hden (by norm_num)
+    _ = 5.13 / 3.375 * ‖s / 2‖ := rfl
+
+/-- Quantified gap at `G = 1.52`: reaching `G * Z ≤ 0.0001` forces
+`Z ≤ 0.00007` (`1.52 * 0.00007 = 0.0001064 > 0.0001`). -/
+theorem deriv_GZ_gap_152 {Z : ℝ} (h : (1.52 : ℝ) * Z ≤ 0.0001) : Z ≤ 0.00007 := by
+  by_contra hc
+  push_neg at hc
+  have h2 : (1.52 : ℝ) * 0.00007 < 1.52 * Z :=
+    mul_lt_mul_of_pos_left hc (by norm_num)
+  norm_num at h2
+  linarith
+
+/-- Tier gap with the banked Gamma numeral: the four-factor tier hypothesis
+`63.4 * 4 * 1.52 * Z ≤ 1 / 40` forces `Z ≤ 0.00007` (via the banked
+`R00_PGZ_threshold_for_tier`, i.e. `G * Z ≤ 0.0001`). -/
+theorem deriv_tier_gap_of_gamma152 {Z : ℝ} (h : 63.4 * 4 * 1.52 * Z ≤ 1 / 40) :
+    Z ≤ 0.00007 :=
+  deriv_GZ_gap_152 (R00_PGZ_threshold_for_tier h)
+
+/-- Four-factor `ξ`-shape sup with the banked Gamma numeral:
+`‖xiFourShapeAt z‖ ≤ 385.472 * Z` (`63.4 * 4 * 1.52 = 385.472`) under any
+`ZetaSupCond Z`. -/
+theorem deriv_xiFourShapeAt_sup_of_gamma152 {Z : ℝ} (hZ0 : 0 ≤ Z) (hZ : ZetaSupCond Z)
+    (z : ℂ) (hz : z ∈ closedBall R00c 2) : ‖xiFourShapeAt z‖ ≤ 385.472 * Z := by
+  have h := xiFourShapeAt_sup_of_conds (G := 1.52) (Z := Z) (by norm_num) hZ0
+    deriv_GammaSupCond_152 hZ z hz
+  have e : (63.4 * 4 * 1.52 * Z : ℝ) = 385.472 * Z := by ring
+  rwa [e] at h
+
+#print axioms deriv_norm_Gamma_le_realGamma
+#print axioms deriv_realGamma_le_one_of_mem_12
+#print axioms deriv_realGamma_le_513
+#print axioms deriv_Gamma_shift_one
+#print axioms deriv_shifted_half_norm_ge
+#print axioms deriv_GammaSupCond_152
+#print axioms deriv_GZ_gap_152
+#print axioms deriv_tier_gap_of_gamma152
+#print axioms deriv_xiFourShapeAt_sup_of_gamma152
