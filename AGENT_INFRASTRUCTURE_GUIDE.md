@@ -1808,6 +1808,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     LOCK PROTOCOL FIX: release lock in `finally` ONLY if you acquired it (guard flag) —
     a lane's unconditional remove deleted another lane's live lock this wave.
     Next: `6.37` piece (tasked).
+    **Sliver covered (W3, `c4a2d720`, green 8702 jobs, axioms clean):**
+    `≤217.2`/`≤217.4` on full width PROVABLY FAIL (squared margins negative);
+    `217.5` kept on `[6.025,6.37]` — full narrow table `215.7<…<217.5` closed.
+    Narrow lane endpoint (diminishing returns below `0.1`); lane retires to cell support.
+    Next: sub-sliver `[6.30,6.33]` 217.3-class attempt (tasked, last narrow wave).
     **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
     exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
