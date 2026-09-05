@@ -13957,3 +13957,631 @@ end BG_R40SmallR
 #print axioms BG_R40SmallR.R40_uniform_deriv_of_closedBall_bound
 #print axioms BG_R40SmallR.R40_deriv_bound_of_factor_bounds
 #print axioms BG_R40SmallR.R40_closed_of_smallR_factorBounds
+
+/-! ## BD row-3 R33+R34 small-r bridge (door-3 rollout, cover lane)
+
+GREP-first record (2026-09-05, verified before writing; exact names):
+* `DerivCauchyBridge.uniform_deriv_of_sphere_bound` -> `central_cover_assembly.lean:6201`;
+  `DerivCauchyBridge.uniform_deriv_of_closedBall_bound` -> `:6233`
+  (`sphere_subset_closedBall_of_rect_mem` `:6213`).
+* `CentralCoverAssembly.R33` (`(-6,-3.5,0.3,0.49)`) -> `:4345`;
+  `R33_x0/x1/y0/y1` -> `:4348-4351`; `R33_strip_lo/hi` -> `:4356-4357`;
+  `R33_radius_lt` (`< 1.26`) -> `:4372`; `R33_mem_gridFine` -> `:4375`;
+  `R33_leaf_obligations (0.05,0.07)` -> `:4385`.
+* `CentralCoverAssembly.R34` (`(-4,-1.5,0.3,0.49)`) -> `:4429`;
+  `R34_x0/x1/y0/y1` -> `:4432-4435`; `R34_strip_lo/hi` -> `:4440-4441`;
+  `R34_radius_lt` (`< 1.26`) -> `:4456`; `R34_mem_gridFine` -> `:4459`;
+  `R34_leaf_obligations (0.05,0.07)` -> mid tier.
+* `AX_CellTemplate.CellClosed_of_factorBounds` -> `:10676`.
+* Shared row-3 facts live once in `BD_Row3Shared` (`:11261`: `pi_upper_row3`,
+  `realGamma_0105_le_mirror`) and are REUSED here read-only, not copied.
+  Per-cell obligations quote sup values only (no import of `interval_arith`,
+  which imports this file -- BB/BD pattern): poly `56` (edge-strip poly-56
+  tier, cf. `:6699`); pi `1`; Gamma `10`; zeta `10`
+  (`DerivCauchyBridge.R02_zeta_upper_obligation`, `:6493`).
+
+DERIV CAVEAT: `r = 0.25` spheres exit the strip (`0.49 + 0.25 = 0.74 > 0.5`,
+proved per cell as `RXX_sphere_025_exits`), so the deriv premise uses
+`r = 0.008` (`0.49 + 0.008 = 0.498 < 0.5`, `RXX_small_radius_admissible`),
+giving `M = 5600 / 0.008 = 700000` (`RXX_M_eq`), same as R31/R32.
+Full proofs only; no `sorry`/`admit`/`axiom`; 0 cells claimed closed
+(`hThresh` stays a premise: at mid tier `M = 700000` closure needs
+`Apoly * Api * Agam * Azeta >= 0.05 + 700000 * 1.26 = 882000.05`).
+Namespaces are fresh `BD_R33SmallR` / `BD_R34SmallR` (distinct from the
+`BG_` rollout namespaces); per-cell numerals recomputed below.
+-/
+
+namespace BD_R33SmallR
+
+/-- R33 `mem` unpacked to numeric bounds
+(mirrors `DerivCauchyBridge.R02_mem_bounds` `:6246`). -/
+theorem R33_mem_bounds {w : Complex} (hw : CentralCoverAssembly.R33.mem w) :
+    -6 ≤ w.re ∧ w.re ≤ -3.5 ∧ 0.3 ≤ w.im ∧ w.im ≤ 0.49 := by
+  obtain ⟨hx0, hx1, hy0, hy1⟩ := hw
+  have e0 : CentralCoverAssembly.R33.x0 = -6 := CentralCoverAssembly.R33_x0
+  have e1 : CentralCoverAssembly.R33.x1 = -3.5 := CentralCoverAssembly.R33_x1
+  have e2 : CentralCoverAssembly.R33.y0 = 0.3 := CentralCoverAssembly.R33_y0
+  have e3 : CentralCoverAssembly.R33.y1 = 0.49 := CentralCoverAssembly.R33_y1
+  rw [e0] at hx0
+  rw [e1] at hx1
+  rw [e2] at hy0
+  rw [e3] at hy1
+  exact ⟨hx0, hx1, hy0, hy1⟩
+
+/-- Every R33 point lies in the open strip (deriv transfer applies). -/
+theorem R33_strip_of_mem {w : Complex} (hw : CentralCoverAssembly.R33.mem w) :
+    -(1 / 2 : Real) < w.im ∧ w.im < (1 / 2 : Real) := by
+  obtain ⟨_, _, hy0, hy1⟩ := R33_mem_bounds hw
+  constructor <;> linarith
+
+/-- Exact admissibility: `r = 0.008` keeps the top edge in-strip
+(`0.49 + 0.008 = 0.498 < 0.5`). -/
+theorem R33_small_radius_admissible : (0.49 : Real) + 0.008 < 0.5 := by
+  norm_num
+
+/-- The `r = 0.25` sphere exits the strip over R33
+(`0.49 + 0.25 = 0.74 > 0.5`): the R02 `0.25`-sphere numbers are unusable here. -/
+theorem R33_sphere_025_exits : (0.5 : Real) < 0.49 + 0.25 := by
+  norm_num
+
+/-- Real parts on the `0.008`-sphere over R33: `[-6.008,-3.492]`. -/
+theorem R33_small_sphere_re_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    -6.008 ≤ u.re ∧ u.re ≤ -3.492 := by
+  obtain ⟨hx0, hx1, _, _⟩ := R33_mem_bounds hw
+  have hdist : dist u w = (0.008 : Real) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.008 : Real) := by rwa [dist_eq_norm] at hdist
+  have hre : |(u - w).re| ≤ (0.008 : Real) := by
+    calc |(u - w).re| ≤ ‖u - w‖ := Complex.abs_re_le_norm _
+      _ = 0.008 := hnorm
+  have here : (u - w).re = u.re - w.re := by simp [Complex.sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+/-- Imaginary parts on the `0.008`-sphere over R33: `[0.292,0.498]`. -/
+theorem R33_small_sphere_im_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    0.292 ≤ u.im ∧ u.im ≤ 0.498 := by
+  obtain ⟨_, _, hy0, hy1⟩ := R33_mem_bounds hw
+  have hdist : dist u w = (0.008 : Real) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.008 : Real) := by rwa [dist_eq_norm] at hdist
+  have him : |(u - w).im| ≤ (0.008 : Real) := by
+    calc |(u - w).im| ≤ ‖u - w‖ := Complex.abs_im_le_norm _
+      _ = 0.008 := hnorm
+  have heim : (u - w).im = u.im - w.im := by simp [Complex.sub_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  constructor <;> linarith
+
+/-- The `0.008`-sphere over R33 stays strictly inside the strip
+(`[0.292,0.498] subset (-1/2,1/2)`), so `xiShifted = xiShiftedEntire` there. -/
+theorem R33_small_sphere_mem_strip {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    -(1 / 2 : Real) < u.im ∧ u.im < (1 / 2 : Real) := by
+  obtain ⟨hlo, hhi⟩ := R33_small_sphere_im_bounds hw hu
+  constructor <;> linarith
+
+/-- (1) ClosedBall-bridge instantiation for the row-3 cell R33:
+from a single closed-ball sup `C` over
+`closedBall R33.center (R33.radius + 0.008)`, uniform
+`‖deriv xiShifted‖ ≤ C / 0.008` on `R33.mem`.
+Mirrors `DerivCauchyBridge.uniform_deriv_of_closedBall_bound` (`:6233`)
+at the exact admissible radius `0.008 < 0.01`. -/
+theorem R33_uniform_deriv_of_closedBall_bound (C : Real)
+    (hCball : ∀ z ∈ Metric.closedBall CentralCoverAssembly.R33.center
+      (CentralCoverAssembly.R33.radius + 0.008),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ∀ w, CentralCoverAssembly.R33.mem w → ‖deriv xiShifted w‖ ≤ C / 0.008 := by
+  exact DerivCauchyBridge.uniform_deriv_of_closedBall_bound
+    CentralCoverAssembly.R33 0.008 C (by norm_num)
+    (fun w hw => R33_strip_of_mem hw) hCball
+
+/-- Poly-upper obligation on the R33 small-`r` disc `s`-rect
+(value `56`: edge-strip poly-56 tier, cf. `:6699`). -/
+def R33_poly_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-6.01 : Real) ≤ s.im → s.im ≤ (-3.49 : Real) →
+    ‖DerivCauchyBridge.polyOf s‖ ≤ (56 : Real)
+
+/-- Pi-upper obligation (value `1`: shared proof
+`BD_Row3Shared.pi_upper_row3`; its proof needs only `0 < s.re`). -/
+def R33_pi_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-6.01 : Real) ≤ s.im → s.im ≤ (-3.49 : Real) →
+    ‖DerivCauchyBridge.piOf s‖ ≤ (1 : Real)
+
+/-- Gamma-upper obligation (value `10`: shared
+`BD_Row3Shared.realGamma_0105_le_mirror`; true sup is `O(0.01)` by
+Im-decay since `|s.im| >= 3.49` -- undischarged, needs the Stirling-disc
+treatment, not the crude majorant). -/
+def R33_gamma_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-6.01 : Real) ≤ s.im → s.im ≤ (-3.49 : Real) →
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ (10 : Real)
+
+/-- Zeta-upper obligation (value `10`: `R02_zeta_upper_obligation` value,
+`:6493`; true `|zeta| = O(1)` on this rect). -/
+def R33_zeta_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-6.01 : Real) ≤ s.im → s.im ≤ (-3.49 : Real) →
+    ‖zeta s‖ ≤ (10 : Real)
+
+/-- `s = 1/2 + I*u` coordinates for `u` on an R33 `0.008`-sphere:
+`s.re in [0.001,0.21]`, `s.im in [-6.01,-3.49]`
+(tight rect `[0.002,0.208] x [-6.008,-3.492]`, loosened for clean numerals). -/
+theorem R33_s_of_small_sphere_re_im {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    0.001 ≤ ((1 / 2 : Complex) + Complex.I * u).re ∧
+    ((1 / 2 : Complex) + Complex.I * u).re ≤ 0.21 ∧
+    -6.01 ≤ ((1 / 2 : Complex) + Complex.I * u).im ∧
+    ((1 / 2 : Complex) + Complex.I * u).im ≤ -3.49 := by
+  obtain ⟨hre_lo, hre_hi⟩ := R33_small_sphere_re_bounds hw hu
+  obtain ⟨him_lo, him_hi⟩ := R33_small_sphere_im_bounds hw hu
+  have hsre : ((1 / 2 : Complex) + Complex.I * u).re = 1 / 2 - u.im := by
+    simp [Complex.add_re, Complex.mul_re]
+    ring
+  have hsim : ((1 / 2 : Complex) + Complex.I * u).im = u.re := by
+    simp [Complex.add_im, Complex.mul_im]
+  rw [hsre, hsim]
+  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
+
+/-- Disc factor product: `56 * 1 * 10 * 10 = 5600`. -/
+theorem R33_C_eq : (56 : Real) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy `M`: `5600 / 0.008 = 700000`. -/
+theorem R33_M_eq : (5600 : Real) / 0.008 = 700000 := by
+  norm_num
+
+/-- (2a) Conditional `xiShifted` upper on an R33 small-sphere point:
+`‖xi‖ ≤ 56*1*10*10 = 5600` from the four disc-sup obligations
+(mirrors `AO_xiShifted_upper_of_zeta_upper_R02` `:10004`). -/
+theorem R33_xiShifted_upper_of_factor_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real))
+    (hP : R33_poly_upper_obligation) (hPi : R33_pi_upper_obligation)
+    (hG : R33_gamma_upper_obligation) (hZ : R33_zeta_upper_obligation) :
+    ‖xiShifted u‖ ≤ 5600 := by
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    R33_s_of_small_sphere_re_im hw hu
+  have hpoly := hP _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := hPi _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hgam := hG _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hzeta := hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 * 10 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  have h123 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖zeta ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 * 10 * 10 :=
+    mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+  have hnum : (56 : Real) * 1 * 10 * 10 = 5600 := by norm_num
+  rw [hnum] at h123
+  exact h123
+
+/-- Transfer to the entire extension on the small sphere (agrees in-strip). -/
+theorem R33_entire_upper_of_factor_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R33.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real))
+    (hP : R33_poly_upper_obligation) (hPi : R33_pi_upper_obligation)
+    (hG : R33_gamma_upper_obligation) (hZ : R33_zeta_upper_obligation) :
+    ‖CentralCoverAssembly.xiShiftedEntire u‖ ≤ 5600 := by
+  obtain ⟨hlo, hhi⟩ := R33_small_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  exact R33_xiShifted_upper_of_factor_bounds hw hu hP hPi hG hZ
+
+/-- Uniform sup `5600` on all R33 `0.008`-spheres from the four obligations. -/
+theorem R33_uniform_sphere_bound
+    (hP : R33_poly_upper_obligation) (hPi : R33_pi_upper_obligation)
+    (hG : R33_gamma_upper_obligation) (hZ : R33_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R33.mem w → ∀ z ∈ Metric.sphere w (0.008 : Real),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 5600 := by
+  intro w hw z hz
+  exact R33_entire_upper_of_factor_bounds hw hz hP hPi hG hZ
+
+/-- (2b) Row-3 deriv bound for R33: uniform `‖deriv xiShifted‖ ≤ 700000`
+(`5600 / 0.008`) modulo exactly the four disc-sup obligations above.
+This is the small-`r` replacement for the `0.25`-sphere `M` on upper rows. -/
+theorem R33_deriv_bound_of_factor_bounds
+    (hP : R33_poly_upper_obligation) (hPi : R33_pi_upper_obligation)
+    (hG : R33_gamma_upper_obligation) (hZ : R33_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R33.mem w → ‖deriv xiShifted w‖ ≤ (700000 : Real) := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R33 0.008 5600
+    (by norm_num) (fun w hw => R33_strip_of_mem hw)
+    (R33_uniform_sphere_bound hP hPi hG hZ)
+  intro w hw
+  have hle := hM w hw
+  have heq : (5600 : Real) / 0.008 = 700000 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- R33 `s`-plane center `s = 1/2 + I * R33.center` (row-3 `s.Re = 0.105`). -/
+noncomputable def sC33 : Complex :=
+  (1 / 2 : Complex) + Complex.I * CentralCoverAssembly.R33.center
+
+/-- R33 center coordinates. -/
+theorem R33_center_eq :
+    CentralCoverAssembly.R33.center =
+      (((-4.75 : Real) : Complex)) + Complex.I * (((0.395 : Real) : Complex)) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R33_x0, CentralCoverAssembly.R33_x1,
+      CentralCoverAssembly.R33_y0, CentralCoverAssembly.R33_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R33_x0, CentralCoverAssembly.R33_x1,
+      CentralCoverAssembly.R33_y0, CentralCoverAssembly.R33_y1]
+    simp
+    norm_num
+
+/-- `Re sC33 = 0.105` (row-3 `s`-value, cf. G4 `:10827`). -/
+theorem sC33_re : sC33.re = 0.105 := by
+  unfold sC33
+  rw [R33_center_eq]
+  simp
+  norm_num
+
+/-- `Im sC33 = -4.75`. -/
+theorem sC33_im : sC33.im = -4.75 := by
+  unfold sC33
+  rw [R33_center_eq]
+  simp
+
+/-- (3) Row-3 closure for R33 through `AX_CellTemplate.CellClosed_of_factorBounds`
+with the small-`r` deriv bound (`M = 700000`) discharging the template's deriv
+premise. Center floors + threshold stay premises (honest residual: at mid tier
+`M = 700000` the threshold needs
+`Apoly * Api * Agam * Azeta >= 0.05 + 700000 * 1.26 = 882000.05`). -/
+theorem R33_closed_of_smallR_factorBounds
+    (Apoly Api Agam Azeta : Real)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hpoly : Apoly ≤ ‖DerivCauchyBridge.polyOf sC33‖)
+    (hpi : Api ≤ ‖DerivCauchyBridge.piOf sC33‖)
+    (hGam : Agam ≤ ‖DerivCauchyBridge.gammaOf sC33‖)
+    (hZeta : Azeta ≤ ‖zeta sC33‖)
+    (hP : R33_poly_upper_obligation) (hPi : R33_pi_upper_obligation)
+    (hG : R33_gamma_upper_obligation) (hZ : R33_zeta_upper_obligation)
+    (hThresh : (0.05 : Real) + 700000 * 1.26 ≤ Apoly * Api * Agam * Azeta)
+    (c : Real × Real × Real × Real) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-6, -3.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : Real),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : Real) < R.y0 ∧ R.y1 < (1 / 2 : Real) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hsC : (1 / 2 : Complex) + Complex.I * CentralCoverAssembly.R33.center =
+      sC33 := rfl
+  have hDeriv : ∀ w, CentralCoverAssembly.R33.mem w →
+      ‖deriv xiShifted w‖ ≤ (700000 : Real) :=
+    R33_deriv_bound_of_factor_bounds hP hPi hG hZ
+  have hRad : CentralCoverAssembly.R33.radius ≤ (1.26 : Real) :=
+    le_of_lt CentralCoverAssembly.R33_radius_lt
+  subst hc_eq
+  exact AX_CellTemplate.CellClosed_of_factorBounds
+    CentralCoverAssembly.R33 sC33 hsC
+    Apoly Api Agam Azeta 0.05 700000 1.26
+    hA0 hB0 hC0 hD0 (by norm_num)
+    hpoly hpi hGam hZeta hDeriv hRad hThresh
+    CentralCoverAssembly.R33_strip_lo CentralCoverAssembly.R33_strip_hi (by norm_num)
+    _ hc_mem rfl rfl rfl rfl
+
+end BD_R33SmallR
+
+#print axioms BD_R33SmallR.R33_uniform_deriv_of_closedBall_bound
+#print axioms BD_R33SmallR.R33_deriv_bound_of_factor_bounds
+#print axioms BD_R33SmallR.R33_closed_of_smallR_factorBounds
+
+namespace BD_R34SmallR
+
+/-- R34 `mem` unpacked to numeric bounds
+(mirrors `DerivCauchyBridge.R02_mem_bounds` `:6246`). -/
+theorem R34_mem_bounds {w : Complex} (hw : CentralCoverAssembly.R34.mem w) :
+    -4 ≤ w.re ∧ w.re ≤ -1.5 ∧ 0.3 ≤ w.im ∧ w.im ≤ 0.49 := by
+  obtain ⟨hx0, hx1, hy0, hy1⟩ := hw
+  have e0 : CentralCoverAssembly.R34.x0 = -4 := CentralCoverAssembly.R34_x0
+  have e1 : CentralCoverAssembly.R34.x1 = -1.5 := CentralCoverAssembly.R34_x1
+  have e2 : CentralCoverAssembly.R34.y0 = 0.3 := CentralCoverAssembly.R34_y0
+  have e3 : CentralCoverAssembly.R34.y1 = 0.49 := CentralCoverAssembly.R34_y1
+  rw [e0] at hx0
+  rw [e1] at hx1
+  rw [e2] at hy0
+  rw [e3] at hy1
+  exact ⟨hx0, hx1, hy0, hy1⟩
+
+/-- Every R34 point lies in the open strip (deriv transfer applies). -/
+theorem R34_strip_of_mem {w : Complex} (hw : CentralCoverAssembly.R34.mem w) :
+    -(1 / 2 : Real) < w.im ∧ w.im < (1 / 2 : Real) := by
+  obtain ⟨_, _, hy0, hy1⟩ := R34_mem_bounds hw
+  constructor <;> linarith
+
+/-- Exact admissibility: `r = 0.008` keeps the top edge in-strip
+(`0.49 + 0.008 = 0.498 < 0.5`). -/
+theorem R34_small_radius_admissible : (0.49 : Real) + 0.008 < 0.5 := by
+  norm_num
+
+/-- The `r = 0.25` sphere exits the strip over R34
+(`0.49 + 0.25 = 0.74 > 0.5`): the R02 `0.25`-sphere numbers are unusable here. -/
+theorem R34_sphere_025_exits : (0.5 : Real) < 0.49 + 0.25 := by
+  norm_num
+
+/-- Real parts on the `0.008`-sphere over R34: `[-4.008,-1.492]`. -/
+theorem R34_small_sphere_re_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    -4.008 ≤ u.re ∧ u.re ≤ -1.492 := by
+  obtain ⟨hx0, hx1, _, _⟩ := R34_mem_bounds hw
+  have hdist : dist u w = (0.008 : Real) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.008 : Real) := by rwa [dist_eq_norm] at hdist
+  have hre : |(u - w).re| ≤ (0.008 : Real) := by
+    calc |(u - w).re| ≤ ‖u - w‖ := Complex.abs_re_le_norm _
+      _ = 0.008 := hnorm
+  have here : (u - w).re = u.re - w.re := by simp [Complex.sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+/-- Imaginary parts on the `0.008`-sphere over R34: `[0.292,0.498]`. -/
+theorem R34_small_sphere_im_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    0.292 ≤ u.im ∧ u.im ≤ 0.498 := by
+  obtain ⟨_, _, hy0, hy1⟩ := R34_mem_bounds hw
+  have hdist : dist u w = (0.008 : Real) := Metric.mem_sphere.mp hu
+  have hnorm : ‖u - w‖ = (0.008 : Real) := by rwa [dist_eq_norm] at hdist
+  have him : |(u - w).im| ≤ (0.008 : Real) := by
+    calc |(u - w).im| ≤ ‖u - w‖ := Complex.abs_im_le_norm _
+      _ = 0.008 := hnorm
+  have heim : (u - w).im = u.im - w.im := by simp [Complex.sub_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  constructor <;> linarith
+
+/-- The `0.008`-sphere over R34 stays strictly inside the strip
+(`[0.292,0.498] subset (-1/2,1/2)`), so `xiShifted = xiShiftedEntire` there. -/
+theorem R34_small_sphere_mem_strip {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    -(1 / 2 : Real) < u.im ∧ u.im < (1 / 2 : Real) := by
+  obtain ⟨hlo, hhi⟩ := R34_small_sphere_im_bounds hw hu
+  constructor <;> linarith
+
+/-- (1) ClosedBall-bridge instantiation for the row-3 cell R34:
+from a single closed-ball sup `C` over
+`closedBall R34.center (R34.radius + 0.008)`, uniform
+`‖deriv xiShifted‖ ≤ C / 0.008` on `R34.mem`.
+Mirrors `DerivCauchyBridge.uniform_deriv_of_closedBall_bound` (`:6233`)
+at the exact admissible radius `0.008 < 0.01`. -/
+theorem R34_uniform_deriv_of_closedBall_bound (C : Real)
+    (hCball : ∀ z ∈ Metric.closedBall CentralCoverAssembly.R34.center
+      (CentralCoverAssembly.R34.radius + 0.008),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ∀ w, CentralCoverAssembly.R34.mem w → ‖deriv xiShifted w‖ ≤ C / 0.008 := by
+  exact DerivCauchyBridge.uniform_deriv_of_closedBall_bound
+    CentralCoverAssembly.R34 0.008 C (by norm_num)
+    (fun w hw => R34_strip_of_mem hw) hCball
+
+/-- Poly-upper obligation on the R34 small-`r` disc `s`-rect
+(value `56`: edge-strip poly-56 tier, cf. `:6699`). -/
+def R34_poly_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-4.01 : Real) ≤ s.im → s.im ≤ (-1.49 : Real) →
+    ‖DerivCauchyBridge.polyOf s‖ ≤ (56 : Real)
+
+/-- Pi-upper obligation (value `1`: shared proof
+`BD_Row3Shared.pi_upper_row3`; its proof needs only `0 < s.re`). -/
+def R34_pi_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-4.01 : Real) ≤ s.im → s.im ≤ (-1.49 : Real) →
+    ‖DerivCauchyBridge.piOf s‖ ≤ (1 : Real)
+
+/-- Gamma-upper obligation (value `10`: shared
+`BD_Row3Shared.realGamma_0105_le_mirror`; true sup is `O(0.01)` by
+Im-decay since `|s.im| >= 1.49` -- undischarged, needs the Stirling-disc
+treatment, not the crude majorant). -/
+def R34_gamma_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-4.01 : Real) ≤ s.im → s.im ≤ (-1.49 : Real) →
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ (10 : Real)
+
+/-- Zeta-upper obligation (value `10`: `R02_zeta_upper_obligation` value,
+`:6493`; true `|zeta| = O(1)` on this rect). -/
+def R34_zeta_upper_obligation : Prop :=
+  ∀ s : Complex, (0.001 : Real) ≤ s.re → s.re ≤ (0.21 : Real) →
+    (-4.01 : Real) ≤ s.im → s.im ≤ (-1.49 : Real) →
+    ‖zeta s‖ ≤ (10 : Real)
+
+/-- `s = 1/2 + I*u` coordinates for `u` on an R34 `0.008`-sphere:
+`s.re in [0.001,0.21]`, `s.im in [-4.01,-1.49]`
+(tight rect `[0.002,0.208] x [-4.008,-1.492]`, loosened for clean numerals). -/
+theorem R34_s_of_small_sphere_re_im {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real)) :
+    0.001 ≤ ((1 / 2 : Complex) + Complex.I * u).re ∧
+    ((1 / 2 : Complex) + Complex.I * u).re ≤ 0.21 ∧
+    -4.01 ≤ ((1 / 2 : Complex) + Complex.I * u).im ∧
+    ((1 / 2 : Complex) + Complex.I * u).im ≤ -1.49 := by
+  obtain ⟨hre_lo, hre_hi⟩ := R34_small_sphere_re_bounds hw hu
+  obtain ⟨him_lo, him_hi⟩ := R34_small_sphere_im_bounds hw hu
+  have hsre : ((1 / 2 : Complex) + Complex.I * u).re = 1 / 2 - u.im := by
+    simp [Complex.add_re, Complex.mul_re]
+    ring
+  have hsim : ((1 / 2 : Complex) + Complex.I * u).im = u.re := by
+    simp [Complex.add_im, Complex.mul_im]
+  rw [hsre, hsim]
+  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
+
+/-- Disc factor product: `56 * 1 * 10 * 10 = 5600`. -/
+theorem R34_C_eq : (56 : Real) * 1 * 10 * 10 = 5600 := by
+  norm_num
+
+/-- Cauchy `M`: `5600 / 0.008 = 700000`. -/
+theorem R34_M_eq : (5600 : Real) / 0.008 = 700000 := by
+  norm_num
+
+/-- (2a) Conditional `xiShifted` upper on an R34 small-sphere point:
+`‖xi‖ ≤ 56*1*10*10 = 5600` from the four disc-sup obligations
+(mirrors `AO_xiShifted_upper_of_zeta_upper_R02` `:10004`). -/
+theorem R34_xiShifted_upper_of_factor_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real))
+    (hP : R34_poly_upper_obligation) (hPi : R34_pi_upper_obligation)
+    (hG : R34_gamma_upper_obligation) (hZ : R34_zeta_upper_obligation) :
+    ‖xiShifted u‖ ≤ 5600 := by
+  obtain ⟨hsre_lo, hsre_hi, hsim_lo, hsim_hi⟩ :=
+    R34_s_of_small_sphere_re_im hw hu
+  have hpoly := hP _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hpi := hPi _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hgam := hG _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hzeta := hZ _ hsre_lo hsre_hi hsim_lo hsim_hi
+  have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts u
+  rw [hdecomp]
+  have h1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have h12 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 * 10 :=
+    mul_le_mul h1 hgam (norm_nonneg _) (by norm_num)
+  have h123 : ‖DerivCauchyBridge.polyOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.piOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖DerivCauchyBridge.gammaOf ((1 / 2 : Complex) + Complex.I * u)‖ *
+      ‖zeta ((1 / 2 : Complex) + Complex.I * u)‖ ≤ 56 * 1 * 10 * 10 :=
+    mul_le_mul h12 hzeta (norm_nonneg _) (by norm_num)
+  have hnum : (56 : Real) * 1 * 10 * 10 = 5600 := by norm_num
+  rw [hnum] at h123
+  exact h123
+
+/-- Transfer to the entire extension on the small sphere (agrees in-strip). -/
+theorem R34_entire_upper_of_factor_bounds {w u : Complex}
+    (hw : CentralCoverAssembly.R34.mem w)
+    (hu : u ∈ Metric.sphere w (0.008 : Real))
+    (hP : R34_poly_upper_obligation) (hPi : R34_pi_upper_obligation)
+    (hG : R34_gamma_upper_obligation) (hZ : R34_zeta_upper_obligation) :
+    ‖CentralCoverAssembly.xiShiftedEntire u‖ ≤ 5600 := by
+  obtain ⟨hlo, hhi⟩ := R34_small_sphere_mem_strip hw hu
+  have hEq : xiShifted u = CentralCoverAssembly.xiShiftedEntire u :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip u hlo hhi
+  rw [← hEq]
+  exact R34_xiShifted_upper_of_factor_bounds hw hu hP hPi hG hZ
+
+/-- Uniform sup `5600` on all R34 `0.008`-spheres from the four obligations. -/
+theorem R34_uniform_sphere_bound
+    (hP : R34_poly_upper_obligation) (hPi : R34_pi_upper_obligation)
+    (hG : R34_gamma_upper_obligation) (hZ : R34_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R34.mem w → ∀ z ∈ Metric.sphere w (0.008 : Real),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 5600 := by
+  intro w hw z hz
+  exact R34_entire_upper_of_factor_bounds hw hz hP hPi hG hZ
+
+/-- (2b) Row-3 deriv bound for R34: uniform `‖deriv xiShifted‖ ≤ 700000`
+(`5600 / 0.008`) modulo exactly the four disc-sup obligations above.
+This is the small-`r` replacement for the `0.25`-sphere `M` on upper rows. -/
+theorem R34_deriv_bound_of_factor_bounds
+    (hP : R34_poly_upper_obligation) (hPi : R34_pi_upper_obligation)
+    (hG : R34_gamma_upper_obligation) (hZ : R34_zeta_upper_obligation) :
+    ∀ w, CentralCoverAssembly.R34.mem w → ‖deriv xiShifted w‖ ≤ (700000 : Real) := by
+  have hM := DerivCauchyBridge.uniform_deriv_of_sphere_bound
+    CentralCoverAssembly.R34 0.008 5600
+    (by norm_num) (fun w hw => R34_strip_of_mem hw)
+    (R34_uniform_sphere_bound hP hPi hG hZ)
+  intro w hw
+  have hle := hM w hw
+  have heq : (5600 : Real) / 0.008 = 700000 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- R34 `s`-plane center `s = 1/2 + I * R34.center` (row-3 `s.Re = 0.105`). -/
+noncomputable def sC34 : Complex :=
+  (1 / 2 : Complex) + Complex.I * CentralCoverAssembly.R34.center
+
+/-- R34 center coordinates. -/
+theorem R34_center_eq :
+    CentralCoverAssembly.R34.center =
+      (((-2.75 : Real) : Complex)) + Complex.I * (((0.395 : Real) : Complex)) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R34_x0, CentralCoverAssembly.R34_x1,
+      CentralCoverAssembly.R34_y0, CentralCoverAssembly.R34_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [CentralCoverAssembly.R34_x0, CentralCoverAssembly.R34_x1,
+      CentralCoverAssembly.R34_y0, CentralCoverAssembly.R34_y1]
+    simp
+    norm_num
+
+/-- `Re sC34 = 0.105` (row-3 `s`-value, cf. G4 `:10827`). -/
+theorem sC34_re : sC34.re = 0.105 := by
+  unfold sC34
+  rw [R34_center_eq]
+  simp
+  norm_num
+
+/-- `Im sC34 = -2.75`. -/
+theorem sC34_im : sC34.im = -2.75 := by
+  unfold sC34
+  rw [R34_center_eq]
+  simp
+
+/-- (3) Row-3 closure for R34 through `AX_CellTemplate.CellClosed_of_factorBounds`
+with the small-`r` deriv bound (`M = 700000`) discharging the template's deriv
+premise. Center floors + threshold stay premises (honest residual: at mid tier
+`M = 700000` the threshold needs
+`Apoly * Api * Agam * Azeta >= 0.05 + 700000 * 1.26 = 882000.05`). -/
+theorem R34_closed_of_smallR_factorBounds
+    (Apoly Api Agam Azeta : Real)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hpoly : Apoly ≤ ‖DerivCauchyBridge.polyOf sC34‖)
+    (hpi : Api ≤ ‖DerivCauchyBridge.piOf sC34‖)
+    (hGam : Agam ≤ ‖DerivCauchyBridge.gammaOf sC34‖)
+    (hZeta : Azeta ≤ ‖zeta sC34‖)
+    (hP : R34_poly_upper_obligation) (hPi : R34_pi_upper_obligation)
+    (hG : R34_gamma_upper_obligation) (hZ : R34_zeta_upper_obligation)
+    (hThresh : (0.05 : Real) + 700000 * 1.26 ≤ Apoly * Api * Agam * Azeta)
+    (c : Real × Real × Real × Real) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = (-4, -1.5, 0.3, 0.49)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : Real),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : Real) < R.y0 ∧ R.y1 < (1 / 2 : Real) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hsC : (1 / 2 : Complex) + Complex.I * CentralCoverAssembly.R34.center =
+      sC34 := rfl
+  have hDeriv : ∀ w, CentralCoverAssembly.R34.mem w →
+      ‖deriv xiShifted w‖ ≤ (700000 : Real) :=
+    R34_deriv_bound_of_factor_bounds hP hPi hG hZ
+  have hRad : CentralCoverAssembly.R34.radius ≤ (1.26 : Real) :=
+    le_of_lt CentralCoverAssembly.R34_radius_lt
+  subst hc_eq
+  exact AX_CellTemplate.CellClosed_of_factorBounds
+    CentralCoverAssembly.R34 sC34 hsC
+    Apoly Api Agam Azeta 0.05 700000 1.26
+    hA0 hB0 hC0 hD0 (by norm_num)
+    hpoly hpi hGam hZeta hDeriv hRad hThresh
+    CentralCoverAssembly.R34_strip_lo CentralCoverAssembly.R34_strip_hi (by norm_num)
+    _ hc_mem rfl rfl rfl rfl
+
+end BD_R34SmallR
+
+#print axioms BD_R33SmallR.R33_uniform_deriv_of_closedBall_bound
+#print axioms BD_R33SmallR.R33_deriv_bound_of_factor_bounds
+#print axioms BD_R33SmallR.R33_closed_of_smallR_factorBounds
+#print axioms BD_R34SmallR.R34_uniform_deriv_of_closedBall_bound
+#print axioms BD_R34SmallR.R34_deriv_bound_of_factor_bounds
+#print axioms BD_R34SmallR.R34_closed_of_smallR_factorBounds
