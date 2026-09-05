@@ -28497,3 +28497,136 @@ report-and-stop with residual.
 #print axioms DZ3r_pair9_re_eq
 #print axioms DZ3r_pair9_re_le_one_tenth
 #print axioms DZ3r_saving
+
+/-!
+# Door-3 DZ3s pair-9 A18-tightening bridge: `Re <= 0.0903` (zeta lane)
+
+Ownership: DZ3s append-only tail after `DZ3r_saving`; nothing above touched;
+no new imports; LF endings. Sibling `riemann_hypothesis_newsection.lean`
+(DT in flight), `central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE bridge only (option (b)): tighter `A18` upper below `2/11`.
+Read-only reuse: `D3_amp`, `D3_amp_nonneg`, `DZ3r_pair9_re_eq`,
+`DZ3r_cos18_upper` (`<= 0.878`), `DZ3r_amp19_lower` (`1/6.6 <= A19`),
+`DZ3r_cos19_lower` (`0.395 <= cos`), `DZ2t` rpow/amp template (read-only pattern).
+
+Strategy: `5.85 <= 19^0.605` via `3/5 <= 0.605` + `5.85^5 = 6851.4001115625
+<= 6859 = 19^3` (integer check `117^5 = 21924480357 <= 21948800000 =
+19^3*20^5`, margin `24319643/3200000 ~= 7.60`); hence
+`D3_amp 18 = 19^(-0.605) <= 1/5.85 ~= 0.17094` (saves `~= 0.00955` on the
+`A18*c18` term vs `2/11*0.878`); refire
+`Re = A18*c18 - A19*c19 <= 1/5.85*0.878 - 1/6.6*0.395 ~= 0.090237 <= 0.0903`.
+
+NUMBERS: banked `Re(pair 9) <= 0.0903` (beats `DZ3r 0.10` by `~= 0.0097`;
+beats `DZ3c_pair_le` slot `2/19 ~= 0.105263` by `~= 0.01496`); `A18 <= 1/5.85
+~= 0.17094` (true `~= 0.16840`, residual slack `~= 0.00254`); `cos18 <= 0.878`
+(true `~= 0.80738`, slack `~= 0.0706` — next squeeze); `A19 >= 1/6.6`,
+`cos19 >= 0.395` (true `~= 0.47140`). True `Re ~= 0.05901`, so `0.0903` is
+still loose but rigorous; it does NOT yet beat the DZ3e MVT norm
+`8.78/5.5/19 ~= 0.08401914 <= 0.08402` (residual gap `0.0903 - 0.08402 =
+0.00628`; previous gap `0.01598`, closed `~= 0.00970`).
+-/
+
+/-- (DZ3s) `19^(0.605) >= 5.85` via `3/5 <= 0.605` + `5.85^5 <= 19^3`. -/
+theorem DZ3s_rpow19_ge_585 : ((5.85 : ℝ)) ≤ (19 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : (((5.85 : ℝ)) ^ ((5 : ℕ)))
+      ≤ ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (19 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 19)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 19 3
+    rw [e]
+    norm_num
+  have hstep : ((5.85 : ℝ)) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc ((5.85 : ℝ)) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (19 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3s) Tightened amplitude `D3_amp 18 <= 1/5.85` (base `18+1 = 19`). -/
+theorem DZ3s_amp18_le_inv585 : D3_amp 18 ≤ 1 / 5.85 := by
+  unfold D3_amp
+  have hcast : ((((18 : ℕ)) : ℝ) + 1 : ℝ) = 19 := by norm_num
+  rw [hcast]
+  have hge := DZ3s_rpow19_ge_585
+  have hpos605 : (0 : ℝ) < (19 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (19 : ℝ) ^ (-(0.605 : ℝ))
+      = ((19 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 19) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((19 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (((5.85 : ℝ)))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hge
+  have h585 : (((5.85 : ℝ)))⁻¹ = 1 / 5.85 := by rw [one_div]
+  rw [h585] at hinv
+  exact hinv
+
+/-- (DZ3s) Pair-9 signed Re: `Re <= 0.0903`
+(`1/5.85*0.878 - 1/6.6*0.395 ~= 0.090237`, beats `DZ3r 0.10`). -/
+theorem DZ3s_pair9_re_le_zero_nine_zero_three :
+    (etaPairTerm (1 - zetaCellS0) 9).re ≤ (0.0903 : ℝ) := by
+  rw [DZ3r_pair9_re_eq]
+  have hA18 := DZ3s_amp18_le_inv585
+  have hA19 := DZ3r_amp19_lower
+  have hc18_up := DZ3r_cos18_upper
+  have hc18_nn : (0 : ℝ) ≤ Real.cos (D3_phase 18) := by
+    linarith [DZ3r_cos18_lower]
+  have hc19_lo := DZ3r_cos19_lower
+  have hA19_nn := D3_amp_nonneg 19
+  have hprod18 : D3_amp 18 * Real.cos (D3_phase 18)
+      ≤ (1 / 5.85 : ℝ) * 0.878 := by
+    have h := mul_le_mul hA18 hc18_up hc18_nn
+      (by norm_num : (0 : ℝ) ≤ 1 / 5.85)
+    exact h
+  have hprod19 : (1 / 6.6 : ℝ) * 0.395
+      ≤ D3_amp 19 * Real.cos (D3_phase 19) := by
+    have h := mul_le_mul hA19 hc19_lo (by norm_num : (0 : ℝ) ≤ 0.395) hA19_nn
+    exact h
+  have hnum : (1 / 5.85 : ℝ) * 0.878 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.0903 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3s) Saving verdict: `1/5.85*0.878-1/6.6*0.395 <= 0.0903 < 2/19`,
+DZ3e norm `8.78/5.5/19 <= 0.08402` recorded (residual `0.00628`). -/
+theorem DZ3s_saving :
+    (1 / 5.85 : ℝ) * 0.878 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.0903 : ℝ)
+      ∧ (0.0903 : ℝ) < 2 / 19 ∧ (8.78 : ℝ) / 5.5 / 19 ≤ 0.08402 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3s report-and-stop): banked pair-9 A18-tightening bridge (zeta lane) —
+`DZ3s_rpow19_ge_585` (`5.85 <= 19^0.605`, `5.85^5 = 6851.4001115625 <= 6859 =
+19^3`), `DZ3s_amp18_le_inv585` (`A18 <= 1/5.85 ~= 0.17094`, true `~= 0.16840`),
+refired `DZ3s_pair9_re_le_zero_nine_zero_three`
+(`Re <= 1/5.85*0.878-1/6.6*0.395 ~= 0.090237 <= 0.0903`, beats `DZ3r 0.10` by
+`~= 0.00970`, beats `DZ3c 2/19 ~= 0.105263` by `~= 0.01496`).
+True `Re ~= 0.05901`, so `0.0903` is loose but rigorous; it does NOT yet beat
+the DZ3e MVT norm `8.78/5.5/19 ~= 0.08401914` (residual gap `0.0903 - 0.08402 =
+0.00628`; previous gap `0.01598`, closed `~= 0.00970`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3s tail after
+`DZ3s_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): close the remaining `0.00628` gap to
+`<= 0.08402` via EITHER (a) a Taylor quartic cos upper reusing `CG_cos_le_quartic`
+(`cos u <= 1-u^2/2+u^4/24` on `u >= 0`, then per-monomial endpoints
+`1-0.55^2/2+0.66^4/24 ~= 0.8567`, saving `~= 0.0037` on the `A18*c18` term at
+`1/5.85`), which STACKS with DZ3s (`1/5.85*0.8567-1/6.6*0.395 ~= 0.08659`,
+leaving `~= 0.00257` — then tighten `cos19 >= 0.395` upward or `A19` lower
+upward to finish), OR (c) start pair-10 `Re` with the `log-22/log-21` template
+(`log 22 = log 2 + log 11` from `log_two/eleven_gt/lt_d9`, then
+`log(21/22) in [-1/21, -1/22]` via `log <= x-1` both sides, mirroring
+`DZ3r_log19_eq` read-only). Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3s_rpow19_ge_585
+#print axioms DZ3s_amp18_le_inv585
+#print axioms DZ3s_pair9_re_le_zero_nine_zero_three
+#print axioms DZ3s_saving
