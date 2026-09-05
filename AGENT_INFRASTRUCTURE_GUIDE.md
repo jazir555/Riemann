@@ -1788,6 +1788,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Proxy batch (`door3_cell_checker`, C3, `3294a46e`, 6× green ~45s, axioms clean):**
     R13/R23/R33/R43/R53/R63 proxies banked — **7/40 cells** (33 remaining).
     Next: bottom-row remainder R73/R83/R93/R03 (tasked).
+    **Bottom row done (C4, `e48975e6`, 4× green ~65s, axioms clean):**
+    R73/R83/R93/R03 proxies banked — **11/40 cells** (29 remaining).
+    Next: y-row 2 (R02/R12/R22/R32, tasked).
     **Deriv lane (`door3_deriv_certs`, V, `fba59747`, green 45s, axioms clean):**
     Cauchy-estimate toolkit (`deriv_bound_of_sphere_sup_on_ball` from Mathlib Liouville +
     rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
