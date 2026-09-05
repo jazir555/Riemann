@@ -1820,8 +1820,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `dirichletMollifier` substitution + zeta-upper/mollifier-error bounds (tasked next).
     **Conditional leaf bridge (T2, `feee4b94`, green, axioms clean):**
     `‖ζ·M−1‖ ≤ B·e+d` split + `tailLeafGap_of_stubBounds`/`tailMollifiedRoucheLeaf_of_stubBounds`
-    (stub Props; real import exceeds tail budget). Remainder: admissible real `(B,e,d)`.
+    (stub Props; real import exceeds tail budget).     Remainder: admissible real `(B,e,d)`.
     Next: real triple (tasked).
+    **Real bridge (T3, `be9176b4`, green, axioms clean):** real `shiftedS`/`Mollifier` defs
+    mirrored in-lane; mollifier error CLOSED `e=1/2` at `K=2`; Dirichlet majorant PROVABLY
+    inapplicable (`Re<1` on regime); zeta-upper `B` + zeta-near-one `d` open.
+    Next: compact-cell zeta bounds (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
