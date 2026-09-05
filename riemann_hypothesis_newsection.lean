@@ -19819,3 +19819,191 @@ theorem center_10013256_5735
 #print axioms Door3GammaCutR02SplitQuad0807.center_10013256_5735
 
 end Door3GammaCutR02SplitQuad0807
+
+/-!
+# Door-3 Gamma narrow table: mid-high piece `216.9` at `xmax = 6.25` (analytic lane)
+
+Ownership: append-only tail (nothing above touched; no new imports; LF endings).
+Frozen tiers untouched: `G = 0.0807` / `M = 100.13256` / `Azeta = 5735` NOT re-derived
+here (M-grind frozen). This block banks ONE rigorous numerator drop on a sub-rect
+of the R02 window plus the per-sub-rect table row, toward the `±0.01` full-narrow
+residual (`n ~= 50-60` per guide; DQ true `||Gamma|| ~= 131` top edge).
+
+Route (b)+(a): same matched-`x` monotone-square shape as
+`R02MatchedX.matched_gamma_div_sqrt_le` / `Door3GammaCutR02Split.matched_low_2166`
+(read-only reuse: `R02MatchedX.gamma_uniform_le` with `xmax = 6.37` cover,
+`Real.Gamma_add_one`, `DZ4a_Door3SinglePoint.DZ4a_w_norm_floor_6571`,
+`R00GammaLower.norm_Gamma_le_realGamma`), specialized to `xmax = 6.25`:
+
+* `matched_625_2169`: `Real.Gamma (x+1) / sqrt (x^2+b^2) <= 216.9` for
+  `x in [6.025, 6.25]`, `b in [2.625, 4.125]`. Worst corner at `xmax = 6.25`:
+  `235.19 * 6.25 / sqrt (6.25^2 + 2.625^2) = 216.841... <= 216.9`
+  (squared form `(235.19^2 - 216.9^2) * 6.25^2 = 322997.11... <= 324173.65...`,
+  margin `~1176`, one `norm_num`).
+* `complex_Gamma_625_2169`: one-step lift `||Complex.Gamma w|| <= 216.9` on
+  `Re w in [6.025, 6.25]`, `|Im w| in [2.625, 4.125]` (mirrors
+  `Door3GammaCutR02Split.complex_Gamma_low_2166` with `matched_625_2169`).
+* Table rows banked (proved caps per `x`-piece, all landed except the new row):
+  `[6.025,6.03] -> 215.7` (SplitFine), `[6.03,6.04] -> 215.8` (SplitBal),
+  `[6.04,6.20] -> 216.6` (Split), `[6.025,6.25] -> 216.9` (NEW here),
+  `[6.025,6.37] -> 217.5` (matched-2175). Drop banked: `217.5 - 216.9 = 0.6`
+  on the `[6.20,6.25]` overlap (high-piece lower half); residual to DQ true
+  `131`: `216.9 - 131 = 85.9` (was `86.5`, shaved `0.6`).
+* BANNED routes NOT retried: uniform `<= 68.85` (FALSE per DQ), 6-shift floor
+  re-tightening, shelved two-step DT diff.
+
+Hang-guard: every `norm_num` on `<= 6`-digit numerals (same shapes as landed).
+-/
+
+namespace Door3GammaCutR02Quad0807Narrow
+
+/-- Matched bound at `xmax = 6.25`: `Real.Gamma (x+1) / sqrt (x^2+b^2) <= 216.9`
+for `x in [6.025,6.25]`, `b in [2.625,4.125]`. Same shape as
+`Door3GammaCutR02Split.matched_low_2166` with `xmax = 6.25`, `N = 216.9`. -/
+theorem matched_625_2169 {x b : ℝ}
+    (hx_lo : (6.025 : ℝ) ≤ x) (hx_hi : x ≤ (6.25 : ℝ))
+    (hb_lo : (2.625 : ℝ) ≤ b) (_hb_hi : b ≤ (4.125 : ℝ)) :
+    Real.Gamma (x + 1) / Real.sqrt (x ^ 2 + b ^ 2) ≤ 216.9 := by
+  have hx_pos : (0 : ℝ) < x := by linarith
+  have hx_nn : (0 : ℝ) ≤ x := le_of_lt hx_pos
+  have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+  have hx_hi37 : x ≤ (6.37 : ℝ) := by linarith
+  have hGx : Real.Gamma x ≤ 235.19 := R02MatchedX.gamma_uniform_le hx_lo hx_hi37
+  have hadd : Real.Gamma (x + 1) = x * Real.Gamma x :=
+    Real.Gamma_add_one hx_ne
+  have hnum : Real.Gamma (x + 1) ≤ 235.19 * x := by
+    rw [hadd]
+    calc x * Real.Gamma x ≤ x * 235.19 :=
+          mul_le_mul_of_nonneg_left hGx hx_nn
+      _ = 235.19 * x := mul_comm _ _
+  have hb2 : (2.625 : ℝ) ^ 2 ≤ b ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hb_lo 2
+  have hden_le : x ^ 2 + (2.625 : ℝ) ^ 2 ≤ x ^ 2 + b ^ 2 := by linarith
+  have hsqrt_mono : Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2)
+      ≤ Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_le_sqrt hden_le
+  have hsq_pos : (0 : ℝ) < x ^ 2 + b ^ 2 := by
+    have hx2 : (0 : ℝ) < x ^ 2 := pow_pos hx_pos 2
+    have hbsq : (0 : ℝ) ≤ b ^ 2 := by positivity
+    linarith
+  have hden_pos : (0 : ℝ) < Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_pos.mpr hsq_pos
+  have hx2_le : x ^ 2 ≤ (6.25 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hx_nn hx_hi 2
+  have hcoeff : (0 : ℝ) ≤ 235.19 ^ 2 - 216.9 ^ 2 := by norm_num
+  have hstep1 : (235.19 ^ 2 - 216.9 ^ 2) * x ^ 2
+      ≤ (235.19 ^ 2 - 216.9 ^ 2) * (6.25 : ℝ) ^ 2 :=
+    mul_le_mul_of_nonneg_left hx2_le hcoeff
+  have hstep2 : (235.19 ^ 2 - 216.9 ^ 2) * (6.25 : ℝ) ^ 2
+      ≤ (216.9 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by norm_num
+  have hkey2 : (235.19 ^ 2 - 216.9 ^ 2) * x ^ 2
+      ≤ (216.9 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := le_trans hstep1 hstep2
+  have hkey : (235.19 * x) ^ 2
+      ≤ (216.9 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have e : (235.19 * x) ^ 2 - (216.9 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)
+        = (235.19 ^ 2 - 216.9 ^ 2) * x ^ 2 - (216.9 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by
+      ring
+    linarith
+  have hnum_nn : (0 : ℝ) ≤ 235.19 * x := mul_nonneg (by norm_num) hx_nn
+  have hsqrt_key : 235.19 * x ≤ 216.9 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have h1 : Real.sqrt ((235.19 * x) ^ 2)
+        ≤ Real.sqrt ((216.9 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)) :=
+      Real.sqrt_le_sqrt hkey
+    rw [Real.sqrt_sq hnum_nn] at h1
+    rw [Real.sqrt_mul (show (0 : ℝ) ≤ (216.9 : ℝ) ^ 2 by norm_num)] at h1
+    rw [Real.sqrt_sq (show (0 : ℝ) ≤ (216.9 : ℝ) by norm_num)] at h1
+    exact h1
+  have hfinal : Real.Gamma (x + 1) ≤ 216.9 * Real.sqrt (x ^ 2 + b ^ 2) := by
+    calc Real.Gamma (x + 1) ≤ 235.19 * x := hnum
+      _ ≤ 216.9 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := hsqrt_key
+      _ ≤ 216.9 * Real.sqrt (x ^ 2 + b ^ 2) :=
+          mul_le_mul_of_nonneg_left hsqrt_mono (by norm_num)
+  exact (div_le_iff₀ hden_pos).mpr hfinal
+
+/-- Complex one-step lift at `xmax = 6.25`: `‖Complex.Gamma w‖ ≤ 216.9` for
+`Re w in [6.025,6.25]`, `|Im w| in [2.625,4.125]`. Mirrors
+`Door3GammaCutR02Split.complex_Gamma_low_2166` with `matched_625_2169`. -/
+theorem complex_Gamma_625_2169 {w : ℂ}
+    (hre_lo : (6.025 : ℝ) ≤ w.re) (hre_hi : w.re ≤ (6.25 : ℝ))
+    (him_lo : (2.625 : ℝ) ≤ |w.im|) (him_hi : |w.im| ≤ (4.125 : ℝ)) :
+    ‖Complex.Gamma w‖ ≤ (216.9 : ℝ) := by
+  have hwpos : 0 < w.re := by linarith
+  have hnez : w ≠ 0 := by
+    intro hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hre
+    linarith [hwpos]
+  have hden : (6.571 : ℝ) ≤ ‖w‖ :=
+    DZ4a_Door3SinglePoint.DZ4a_w_norm_floor_6571 hre_lo him_lo
+  have hDpos : (0 : ℝ) < ‖w‖ := lt_of_lt_of_le (by norm_num) hden
+  have e : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hnez
+  have n : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [e, norm_mul]
+  have hre1 : (w + 1).re = w.re + 1 := by
+    simp [Complex.add_re, Complex.one_re]
+  have hpos : (0 : ℝ) < (w + 1).re := by rw [hre1]; linarith
+  have hG : ‖Complex.Gamma (w + 1)‖ ≤ Real.Gamma (w.re + 1) := by
+    have h := R00GammaLower.norm_Gamma_le_realGamma (z := w + 1) hpos
+    rwa [hre1] at h
+  have hle : ‖w‖ * ‖Complex.Gamma w‖ ≤ Real.Gamma (w.re + 1) := by
+    rw [← n]
+    exact hG
+  have hdiv : ‖Complex.Gamma w‖ ≤ Real.Gamma (w.re + 1) / ‖w‖ := by
+    have hmc : ‖Complex.Gamma w‖ * ‖w‖ ≤ Real.Gamma (w.re + 1) := by
+      rw [mul_comm]
+      exact hle
+    exact (le_div_iff₀ hDpos).mpr hmc
+  have hsq2 : w.re ^ 2 + |w.im| ^ 2 ≤ ‖w‖ ^ 2 := by
+    have e2 : ‖w‖ ^ 2 = w.re ^ 2 + w.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply, pow_two, pow_two]
+    rw [e2, sq_abs]
+  have hden_le : Real.sqrt (w.re ^ 2 + |w.im| ^ 2) ≤ ‖w‖ := by
+    have h := Real.sqrt_le_sqrt hsq2
+    rwa [Real.sqrt_sq (norm_nonneg _)] at h
+  have hsqrtpos : (0 : ℝ) < Real.sqrt (w.re ^ 2 + |w.im| ^ 2) := by
+    apply Real.sqrt_pos.mpr
+    have hx2 : (0 : ℝ) < w.re ^ 2 := pow_pos hwpos 2
+    have hnn : (0 : ℝ) ≤ |w.im| ^ 2 := sq_nonneg _
+    linarith
+  have hmatch : Real.Gamma (w.re + 1) / Real.sqrt (w.re ^ 2 + |w.im| ^ 2)
+      ≤ (216.9 : ℝ) :=
+    matched_625_2169 hre_lo hre_hi him_lo him_hi
+  have hfin' : Real.Gamma (w.re + 1)
+      ≤ 216.9 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2) :=
+    (div_le_iff₀ hsqrtpos).mp hmatch
+  have step1 : Real.Gamma (w.re + 1) / ‖w‖
+      ≤ (216.9 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖ :=
+    div_le_div_of_nonneg_right hfin' hDpos.le
+  have hle1 : Real.sqrt (w.re ^ 2 + |w.im| ^ 2) / ‖w‖ ≤ 1 :=
+    (div_le_one hDpos).mpr hden_le
+  have step2 : (216.9 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖
+      ≤ (216.9 : ℝ) := by
+    have ee : (216.9 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖
+        = 216.9 * (Real.sqrt (w.re ^ 2 + |w.im| ^ 2) / ‖w‖) := by ring
+    rw [ee]
+    calc (216.9 : ℝ) * _ ≤ 216.9 * 1 :=
+          mul_le_mul_of_nonneg_left hle1 (by norm_num)
+      _ = 216.9 := by ring
+  exact le_trans (le_trans hdiv step1) step2
+
+/-- Banked drop + residual gaps: `216.9 < 217.5`, drop `0.6`, residual to DQ
+true top-edge `131` is `85.9` (was `86.5`). -/
+theorem narrow_table_gaps :
+    (216.9 : ℝ) < 217.5 ∧ (217.5 : ℝ) - 216.9 = 0.6 ∧
+      (216.9 : ℝ) - 131 = 85.9 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-- Per-sub-rect cap chain (landed rows + NEW `216.9` row):
+`215.7 < 215.8 < 216.6 < 216.9 < 217.5`. -/
+theorem narrow_caps_chain :
+    (215.7 : ℝ) < 215.8 ∧ (215.8 : ℝ) < 216.6 ∧ (216.6 : ℝ) < 216.9 ∧
+      (216.9 : ℝ) < 217.5 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+#print axioms Door3GammaCutR02Quad0807Narrow.matched_625_2169
+#print axioms Door3GammaCutR02Quad0807Narrow.complex_Gamma_625_2169
+#print axioms Door3GammaCutR02Quad0807Narrow.narrow_table_gaps
+#print axioms Door3GammaCutR02Quad0807Narrow.narrow_caps_chain
+
+end Door3GammaCutR02Quad0807Narrow
