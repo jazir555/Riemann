@@ -29429,3 +29429,189 @@ Quot.sound]`; report-and-stop with residual.
 #print axioms DZ3v_pair10_re_eq
 #print axioms DZ3v_pair10_re_le_zero_zero_seven_four
 #print axioms DZ3v_saving
+
+/-!
+# Door-3 DZ3w pair-10 amp-tightening bridge: `Re <= 0.0701` (zeta lane)
+
+Ownership: DZ3w append-only tail after `DZ3v_saving`; nothing above touched;
+no new imports; LF endings. Sibling `riemann_hypothesis_newsection.lean`
+(DT in flight), `central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE bridge only (option (b)): tighter amp uppers below `1/6`.
+Read-only reuse: `D3_amp`, `D3_amp_nonneg`, `DZ3v_pair10_re_eq`,
+`DZ3v_cos20_upper` (`cos20 <= 0.101`), `DZ3v_cos21_lower` (`-0.343 <= cos21`),
+`DZ2r/DZ2q` rpow/amp template (read-only pattern).
+
+Strategy: `6.2 <= 21^0.605` via `3/5 <= 0.605` + `6.2^5 = 9161.32832
+<= 9261 = 21^3` (margin `99.67168`); hence
+`D3_amp 20 = 21^(-0.605) <= 1/6.2 ~= 0.16129` (saves `~= 0.00088` on the
+`A20*c20` term vs `1/6*0.101`); `6.38 <= 22^0.605` via `3/5 <= 0.605` +
+`6.38^5 ~= 10570.69139 <= 10648 = 22^3` (margin `~= 77.31`); hence
+`D3_amp 21 <= 1/6.38 ~= 0.15674` (saves `~= 0.00306` on the `A21*(-c21)`
+term vs `1/6*0.343`); refire with the DZ3v shift trick
+(no sign hypothesis on the cosines needed)
+`Re = A20*c20 - A21*c21 <= 1/6.2*0.101 + 1/6.38*0.343 ~= 0.070052 <= 0.0701`.
+
+NUMBERS: banked `Re(pair 10) <= 0.0701` (beats DZ3v `0.074` by `0.0039`;
+beats `DZ3c 2/21 ~= 0.095238` by `~= 0.02514`); `A20 <= 1/6.2 ~= 0.16129`
+(true `~= 0.15851`, slack `~= 0.00278`); `A21 <= 1/6.38 ~= 0.15674`
+(true `~= 0.15411`, slack `~= 0.00263`); `cos20 <= 0.101`
+(true `~= 0.06392`), `cos21 >= -0.343` (true `~= -0.33639`).
+True `Re ~= 0.06197`. Residual gap to the MVT norm
+`8.771/6.2134/21 ~= 0.06722031 <= 0.0673`: `0.0701 - 0.0673 = 0.0028`
+(previous gap `0.0067`, closed `~= 0.0039`).
+-/
+
+/-- (DZ3w) `21^(0.605) >= 6.2` via `3/5 <= 0.605` + `6.2^5 <= 21^3`. -/
+theorem DZ3w_rpow21_ge_six_point_two : ((6.2 : ℝ)) ≤ (21 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : (((6.2 : ℝ)) ^ ((5 : ℕ)))
+      ≤ ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (21 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 21)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 21 3
+    rw [e]
+    norm_num
+  have hstep : ((6.2 : ℝ)) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc ((6.2 : ℝ)) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (21 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3w) Tightened amplitude `D3_amp 20 <= 1/6.2` (base `20+1 = 21`). -/
+theorem DZ3w_amp20_le_inv62 : D3_amp 20 ≤ 1 / 6.2 := by
+  unfold D3_amp
+  have hcast : ((((20 : ℕ)) : ℝ) + 1 : ℝ) = 21 := by norm_num
+  rw [hcast]
+  have hge := DZ3w_rpow21_ge_six_point_two
+  have hpos605 : (0 : ℝ) < (21 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (21 : ℝ) ^ (-(0.605 : ℝ))
+      = ((21 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 21) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((21 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (((6.2 : ℝ)))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hge
+  have h62 : (((6.2 : ℝ)))⁻¹ = 1 / 6.2 := by rw [one_div]
+  rw [h62] at hinv
+  exact hinv
+
+/-- (DZ3w) `22^(0.605) >= 6.38` via `3/5 <= 0.605` + `6.38^5 <= 22^3`. -/
+theorem DZ3w_rpow22_ge_six_point_three_eight : ((6.38 : ℝ)) ≤ (22 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : (((6.38 : ℝ)) ^ ((5 : ℕ)))
+      ≤ ((((22 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((22 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (22 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 22)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 22 3
+    rw [e]
+    norm_num
+  have hstep : ((6.38 : ℝ)) ≤ (22 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc ((6.38 : ℝ)) ≤ (22 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (22 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3w) Tightened amplitude `D3_amp 21 <= 1/6.38` (base `21+1 = 22`). -/
+theorem DZ3w_amp21_le_inv638 : D3_amp 21 ≤ 1 / 6.38 := by
+  unfold D3_amp
+  have hcast : ((((21 : ℕ)) : ℝ) + 1 : ℝ) = 22 := by norm_num
+  rw [hcast]
+  have hge := DZ3w_rpow22_ge_six_point_three_eight
+  have hpos605 : (0 : ℝ) < (22 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (22 : ℝ) ^ (-(0.605 : ℝ))
+      = ((22 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 22) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((22 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (((6.38 : ℝ)))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hge
+  have h638 : (((6.38 : ℝ)))⁻¹ = 1 / 6.38 := by rw [one_div]
+  rw [h638] at hinv
+  exact hinv
+
+/-- (DZ3w) Pair-10 signed Re refire: `Re <= 0.0701`
+(`1/6.2*0.101 + 1/6.38*0.343 ~= 0.070052`, beats DZ3v `0.074`). -/
+theorem DZ3w_pair10_re_le_zero_zero_seven_zero_one :
+    (etaPairTerm (1 - zetaCellS0) 10).re ≤ (0.0701 : ℝ) := by
+  rw [DZ3v_pair10_re_eq]
+  have hA20 := DZ3w_amp20_le_inv62
+  have hA21 := DZ3w_amp21_le_inv638
+  have hc20 := DZ3v_cos20_upper
+  have hc21 := DZ3v_cos21_lower
+  have h1 : D3_amp 20 * Real.cos (D3_phase 20) ≤ (1 / 6.2 : ℝ) * 0.101 := by
+    have e : D3_amp 20 * Real.cos (D3_phase 20)
+        = D3_amp 20 * 0.101 - D3_amp 20 * (0.101 - Real.cos (D3_phase 20)) := by
+      ring
+    have hnn : (0 : ℝ) ≤ D3_amp 20 * (0.101 - Real.cos (D3_phase 20)) :=
+      mul_nonneg (D3_amp_nonneg 20) (by linarith)
+    have hle : D3_amp 20 * 0.101 ≤ (1 / 6.2 : ℝ) * 0.101 :=
+      mul_le_mul_of_nonneg_right hA20 (by norm_num)
+    linarith
+  have h2 : -(D3_amp 21 * Real.cos (D3_phase 21)) ≤ (1 / 6.38 : ℝ) * 0.343 := by
+    have e : -(D3_amp 21 * Real.cos (D3_phase 21))
+        = D3_amp 21 * 0.343 - D3_amp 21 * (0.343 + Real.cos (D3_phase 21)) := by
+      ring
+    have hnn : (0 : ℝ) ≤ D3_amp 21 * (0.343 + Real.cos (D3_phase 21)) :=
+      mul_nonneg (D3_amp_nonneg 21) (by linarith)
+    have hle : D3_amp 21 * 0.343 ≤ (1 / 6.38 : ℝ) * 0.343 :=
+      mul_le_mul_of_nonneg_right hA21 (by norm_num)
+    linarith
+  have hnum : (1 / 6.2 : ℝ) * 0.101 + (1 / 6.38 : ℝ) * 0.343 ≤ (0.0701 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3w) Saving verdict: `1/6.2*0.101+1/6.38*0.343 <= 0.0701 < 0.074`,
+MVT slot `8.771/6.2134/21 <= 0.0673` recorded (residual `0.0028`). -/
+theorem DZ3w_saving :
+    (1 / 6.2 : ℝ) * 0.101 + (1 / 6.38 : ℝ) * 0.343 ≤ (0.0701 : ℝ)
+      ∧ (0.0701 : ℝ) < 0.074 ∧ (8.771 : ℝ) / 6.2134 / 21 ≤ 0.0673
+      ∧ (0.0701 : ℝ) - 0.0673 = (0.0028 : ℝ) := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3w report-and-stop): banked pair-10 amp-tightening bridge (zeta lane) —
+`DZ3w_rpow21_ge_six_point_two` (`6.2 <= 21^0.605`, `6.2^5 = 9161.32832 <= 9261 =
+21^3`), `DZ3w_amp20_le_inv62` (`A20 <= 1/6.2 ~= 0.16129`, true `~= 0.15851`),
+`DZ3w_rpow22_ge_six_point_three_eight` (`6.38 <= 22^0.605`, `6.38^5 ~=
+10570.69139 <= 10648 = 22^3`), `DZ3w_amp21_le_inv638` (`A21 <= 1/6.38 ~=
+0.15674`, true `~= 0.15411`), refired `DZ3w_pair10_re_le_zero_zero_seven_zero_one`
+(`Re <= 1/6.2*0.101+1/6.38*0.343 ~= 0.070052 <= 0.0701`, beats DZ3v `0.074` by
+`0.0039`, beats `DZ3c 2/21 ~= 0.095238` by `~= 0.02514`).
+True `Re ~= 0.06197`. Residual gap to the MVT norm `0.0673`: `0.0028`
+(previous gap `0.0067`, closed `~= 0.0039`; PARTIAL — MVT not yet met).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3w tail after
+`DZ3w_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): close the remaining `0.0028`
+gap to `<= 0.0673` via (a) a sextic-majorant (octic) cos upper
+`cos u <= 1-u^2/2+u^4/24-u^6/720+u^8/40320` on `u >= 0` bootstrapped over
+read-only `CG_sin_ge_septic` (`:13912`), then per-monomial endpoints on
+read-only `u20 in [1.4971, 1.517]` (`1-1.4971^2/2+1.517^4/24-1.4971^6/720+
+1.517^8/40320 ~= 0.08507`, stacked with `1/6.2, 1/6.38` gives `~= 0.06748`,
+leaving `~= 0.00018` — combine with a `cos21 >= -0.342`-class micro-tightening
+or a `6.21`-class amp micro-step to finish), OR (c) start pair-11 `Re` with the
+`log-24/log-23` template (`log 24 = log 2 + (log 2 + log 2 + log 3)`-shape from
+`log_two/three_gt/lt_d9`, then `log(23/24) in [-1/23, -1/24]`). Success = full
+proofs, `#print axioms` exactly `[propext, Classical.choice, Quot.sound]`;
+report-and-stop with residual.
+-/
+
+#print axioms DZ3w_rpow21_ge_six_point_two
+#print axioms DZ3w_amp20_le_inv62
+#print axioms DZ3w_rpow22_ge_six_point_three_eight
+#print axioms DZ3w_amp21_le_inv638
+#print axioms DZ3w_pair10_re_le_zero_zero_seven_zero_one
+#print axioms DZ3w_saving
