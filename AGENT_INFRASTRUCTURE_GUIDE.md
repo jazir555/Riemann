@@ -1600,6 +1600,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`3/16 + 1/5 + 2/11 + 1/6×8 + 1/7 + 2/15×3 + 1/8`; now 1349× over need). Cheapest next:
     `D3_amp 17 ≤ 2/11` (base 18: `5032.8 ≤ 5832 = 18^3` passes).
     Next: sixteenth peel, true-phase prefix caps, or genuine cancellation (tasked).
+    **Sixteenth peel (`DZ2v_*`, F4, `085f791e`, green 8693 jobs, axioms clean):**
+    `D3_amp 17 ≤ 2/11` (base-18 fit, last `1/5` replaced) ⇒ **TRUE block `≤ 2.553`**
+    (`3/16 + 2/11×2 + 1/6×8 + 1/7 + 2/15×3 + 1/8`; now 1340× over need). MILESTONE:
+    all 16 terms peeled — per-term triangle shaping exhausted; remaining routes are
+    true-phase prefix caps + Abel feed, or genuine `Re/Im` cancellation (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
