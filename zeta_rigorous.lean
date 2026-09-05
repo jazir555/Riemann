@@ -27869,3 +27869,173 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3p_amp17_mem
 #print axioms DZ3p_pair8_re_le_zero_zero_five
 #print axioms DZ3p_saving
+
+/-!
+# Door-3 DZ3q pair-8 tighten: `Re <= 0.05 -> <= 0.031` (zeta lane)
+
+Ownership: DZ3q append-only tail after `DZ3p_saving`; nothing above touched;
+no new imports; LF endings.
+
+RESULT (this tail, full proofs, no sorry): upgraded pair-8 signed Re
+`Re <= 0.031` (beats `DZ3p 0.05` by `0.019`), via exactly the tasked two-part
+squeeze, keeping `A17 >= 5/31`, `cos17 >= 0.9` read-only:
+* `DZ3q_cos16_upper`: `cos(phase16) <= 0.96` (`u = 8pi-phase16 in [0.315,0.424]`
+  from read-only `DZ3p_delta16_mem`, four `cos_sub_two_pi` steps + `cos_neg`,
+  majorant `Real.cos_le_one_div_sqrt_sq_add_one` (`|u| <= 3pi/2` from `pi_d2`),
+  denominator floor `u >= 0.315`, `1.042^2 <= u^2+1`, `1/1.042 <= 0.96`).
+* `DZ3q_amp16_le_inv54735`: `D3_amp 16 <= 1/5.4735` (`~= 0.18270 < 3/16`)
+  from read-only `DZ3l_rpow17_ge_five_point_four_seven_three_five` via `inv`.
+* `DZ3q_pair8_re_le_zero_three_one`:
+  `Re = A16*c16 - A17*c17 <= 1/5.4735*0.96 - 5/31*0.9 ~= 0.03023 <= 0.031`.
+* `DZ3q_saving`: arithmetic bank + quantified gaps (`0.05-0.031 = 0.019`
+  saved; `0.031-0.02 = 0.011` still above `0.02`; true `Re ~= -0.00215`).
+
+Grep record (verified before writing via `Grep`/`Read`):
+* `D3_phase`/`D3_amp` defs -> `zeta_rigorous.lean:5911/5914`.
+* `D3_amp_nonneg` -> `zeta_rigorous.lean:6073`.
+* `DZ2u_amp16_le_three_sixteenths` -> `zeta_rigorous.lean:24131` (pattern only).
+* `DZ3l_rpow17_ge_five_point_four_seven_three_five` -> `zeta_rigorous.lean:26912`
+  (read-only premise, NOT recopied).
+* `DZ3m_pair8_re_eq` -> `zeta_rigorous.lean:27197`.
+* `DZ3p_delta16_mem`/`DZ3p_cos16_lower`/`DZ3p_cos17_lower`/`DZ3p_amp17_lower`
+  -> DZ3p tail (read-only).
+* `Real.cos_le_one_div_sqrt_sq_add_one` ->
+  `Mathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean:242`.
+* `Real.le_sqrt_of_sq_le` -> `Mathlib/Analysis/Real/Sqrt.lean:258`.
+* `one_div_le_one_div_of_le` -> `Mathlib/Algebra/Order/Field/Basic.lean:69`.
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3q) `cos(phase16) <= 0.96` via `u = 8pi-phase16 in [0.315,0.424]`
+(four `cos_sub_two_pi` steps + `cos_neg`, majorant
+`cos u <= 1/sqrt(u^2+1)`, floor `u >= 0.315`). -/
+theorem DZ3q_cos16_upper : Real.cos (D3_phase 16) ≤ (0.96 : ℝ) := by
+  have hmem := DZ3p_delta16_mem
+  have c1 : Real.cos (D3_phase 16 - 2 * Real.pi) = Real.cos (D3_phase 16) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 16 - 4 * Real.pi
+      = (D3_phase 16 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 16 - 4 * Real.pi)
+      = Real.cos (D3_phase 16 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 16 - 6 * Real.pi
+      = (D3_phase 16 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 16 - 6 * Real.pi)
+      = Real.cos (D3_phase 16 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 16 - 8 * Real.pi
+      = (D3_phase 16 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 16 - 8 * Real.pi)
+      = Real.cos (D3_phase 16 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 16 - 8 * Real.pi)
+      = Real.cos (D3_phase 16) := by
+    rw [c4, c3, c2, c1]
+  have eneg : D3_phase 16 - 8 * Real.pi
+      = -((8 * Real.pi - D3_phase 16)) := by ring
+  have hneg : Real.cos (D3_phase 16 - 8 * Real.pi)
+      = Real.cos (8 * Real.pi - D3_phase 16) := by
+    rw [eneg, Real.cos_neg]
+  have hcos_eq : Real.cos (D3_phase 16)
+      = Real.cos (8 * Real.pi - D3_phase 16) := by
+    rw [← hred, hneg]
+  rw [hcos_eq]
+  have hu_lo : (0.315 : ℝ) ≤ 8 * Real.pi - D3_phase 16 := by
+    linarith [hmem.2]
+  have hu_hi : 8 * Real.pi - D3_phase 16 ≤ (0.424 : ℝ) := by
+    linarith [hmem.1]
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  have hx1 : -(3 * Real.pi / 2) ≤ 8 * Real.pi - D3_phase 16 := by
+    linarith
+  have hx2 : 8 * Real.pi - D3_phase 16 ≤ 3 * Real.pi / 2 := by
+    linarith
+  have hmaj : Real.cos (8 * Real.pi - D3_phase 16)
+      ≤ 1 / Real.sqrt ((8 * Real.pi - D3_phase 16) ^ 2 + 1) :=
+    Real.cos_le_one_div_sqrt_sq_add_one hx1 hx2
+  have hsq_lo : (0.315 : ℝ) ^ 2 ≤ (8 * Real.pi - D3_phase 16) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 2
+  have hSq : (1.042 : ℝ) ^ 2 ≤ (8 * Real.pi - D3_phase 16) ^ 2 + 1 := by
+    have hnum : (1.042 : ℝ) ^ 2 ≤ (0.315 : ℝ) ^ 2 + 1 := by norm_num
+    linarith
+  have hS : (1.042 : ℝ) ≤ Real.sqrt ((8 * Real.pi - D3_phase 16) ^ 2 + 1) :=
+    Real.le_sqrt_of_sq_le hSq
+  have hInv : 1 / Real.sqrt ((8 * Real.pi - D3_phase 16) ^ 2 + 1)
+      ≤ 1 / (1.042 : ℝ) :=
+    one_div_le_one_div_of_le (by norm_num) hS
+  have hNum : 1 / (1.042 : ℝ) ≤ (0.96 : ℝ) := by norm_num
+  exact le_trans hmaj (le_trans hInv hNum)
+
+/-- (DZ3q) `D3_amp 16 <= 1/5.4735` from read-only
+`DZ3l_rpow17_ge_five_point_four_seven_three_five` via `inv`
+(`~= 0.18270`, beats `3/16 = 0.1875`). -/
+theorem DZ3q_amp16_le_inv54735 : D3_amp 16 ≤ 1 / 5.4735 := by
+  unfold D3_amp
+  have hcast : ((((16 : ℕ)) : ℝ) + 1 : ℝ) = 17 := by norm_num
+  rw [hcast]
+  have hge := DZ3l_rpow17_ge_five_point_four_seven_three_five
+  have hpos : (0 : ℝ) < (17 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hpos5 : (0 : ℝ) < (5.4735 : ℝ) := by norm_num
+  have hneg : (17 : ℝ) ^ (-(0.605 : ℝ))
+      = ((17 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 17) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((17 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ ((5.4735 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos hpos5).mpr hge
+  have h15 : (1 / 5.4735 : ℝ) = ((5.4735 : ℝ))⁻¹ := by rw [one_div]
+  rw [h15]
+  exact hinv
+
+/-- (DZ3q) Upgraded pair-8 signed Re: `Re <= 0.031`
+(`1/5.4735*0.96 - 5/31*0.9 ~= 0.03023`, beats `DZ3p 0.05`). -/
+theorem DZ3q_pair8_re_le_zero_three_one :
+    (etaPairTerm (1 - zetaCellS0) 8).re ≤ (0.031 : ℝ) := by
+  rw [DZ3m_pair8_re_eq]
+  have hA16 := DZ3q_amp16_le_inv54735
+  have hA17 := DZ3p_amp17_lower
+  have hc16_up := DZ3q_cos16_upper
+  have hc16_nn : (0 : ℝ) ≤ Real.cos (D3_phase 16) := by
+    linarith [DZ3p_cos16_lower]
+  have hc17_lo := DZ3p_cos17_lower
+  have hA16_nn := D3_amp_nonneg 16
+  have hA17_nn := D3_amp_nonneg 17
+  have hprod16 : D3_amp 16 * Real.cos (D3_phase 16)
+      ≤ (1 / 5.4735 : ℝ) * 0.96 := by
+    have h := mul_le_mul hA16 hc16_up hc16_nn
+      (by norm_num : (0 : ℝ) ≤ 1 / 5.4735)
+    exact h
+  have hprod17 : (5 / 31 : ℝ) * 0.9
+      ≤ D3_amp 17 * Real.cos (D3_phase 17) := by
+    have h := mul_le_mul hA17 hc17_lo (by norm_num : (0 : ℝ) ≤ 0.9) hA17_nn
+    exact h
+  have hnum : (1 / 5.4735 : ℝ) * 0.96 - (5 / 31 : ℝ) * 0.9 ≤ (0.031 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3q) Saving verdict: `1/5.4735*0.96-(5/31)*0.9 <= 0.031 < 0.05`,
+gap `0.031-0.02 = 0.011` remains to the `0.02` target. -/
+theorem DZ3q_saving :
+    (1 / 5.4735 : ℝ) * 0.96 - (5 / 31 : ℝ) * 0.9 ≤ (0.031 : ℝ)
+      ∧ (0.031 : ℝ) < 0.05 ∧ (0.031 : ℝ) - 0.02 = (0.011 : ℝ) := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3q report-and-stop): banked `DZ3q_pair8_re_le_zero_three_one`
+(`Re <= 0.031`, saves `0.019` under `DZ3p 0.05`; true `~= -0.00215`).
+Gap to `<= 0.02` is exactly `0.011`; gap to `DV_mid_conditional_012`
+(`<= 0.0019/block`) is `0.0291`. Next squeeze must lower `A16*c16`
+below `~0.1754` (e.g. `cos16 <= 0.92` needs `u >= 0.40` uniform — FALSE
+since `u` can be `0.315` — so must split `u` or tighten `A16` via a
+five-decimal `17^0.605` floor, or tighten the `A17*c17` subtraction upward
+via `cos17 <= 0.171`-upper complement) or start pair-9 `Re` with the
+`log-19/log-20` template (mirror `DZ3p_log18` read-only). Do NOT touch
+`riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md` / `interval_arith.lean`; do NOT commit/push.
+-/
+
+#print axioms DZ3q_cos16_upper
+#print axioms DZ3q_amp16_le_inv54735
+#print axioms DZ3q_pair8_re_le_zero_three_one
+#print axioms DZ3q_saving
