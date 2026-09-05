@@ -32049,3 +32049,11 @@ theorem DZ3ad_window16_32_verdict :
 #print axioms DZ3ad_window16_32_re_sum_le
 #print axioms DZ3ad_window16_32_Re_le
 #print axioms DZ3ad_window16_32_verdict
+
+/-- (DZ3ae) Ico-block `Re`-sum `≤ 0.22432` via `DZ3c_sum_eq` transfer (zeta lane, pair-program finale). -/
+theorem DZ3ae_ico16_32_Re_le :
+    (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k).re ≤ (0.22432 : ℝ) := by
+  rw [DZ3c_sum_eq]
+  exact DZ3ad_window16_32_Re_le
+
+#print axioms DZ3ae_ico16_32_Re_le
