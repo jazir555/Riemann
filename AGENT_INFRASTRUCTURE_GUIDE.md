@@ -2071,8 +2071,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
   **R31 small-r packaging CLOSED (`BB_Row3SmallR`):** `r=0.008` admissible (`0.498<0.5`; `r=0.25` provably
   exits) + `C=5600` + **`M=700000`** + R31 through the template (conditional on sup/center premises;
   threshold at M=700000 infeasible at `O(1)` — same wall). R32–R40: copy template, recompute numerals.
-  **R32 CLOSED-packaged (`BD_R32SmallR` + shared `BD_Row3Shared`):** pi-upper + Gamma-mirror shared once;
-  R32 (`-8,-5.5`, outer) through the template (r=0.008/C=5600/M=700000). R33–R40 mapped with numerals
+    **R32 CLOSED-packaged (`BD_R32SmallR` + shared `BD_Row3Shared`):** pi-upper + Gamma-mirror shared once;
+    R32 (`-8,-5.5`, outer) through the template (r=0.008/C=5600/M=700000). R33–R40 mapped with numerals
+    **R33+R34 CLOSED-packaged (R, `15372ede`, green 8687 jobs, axioms clean):**
+    `BD_R33SmallR`/`BD_R34SmallR` mirror the template (same C/M). R35–R40 next (tasked).
   (mid/inner thresholds 882000.05/882000.15) — copy agent tasked. Remaining 39 cells: same shape, different `s`-rects
   (upper rows `y≤0.49` need `r<0.01` or the closedBall version).
 - **Load-bearing budget finding:** even with zeta closed, the `1/1e7` Gamma constant makes product checks
