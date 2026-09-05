@@ -1849,7 +1849,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`‖ζ·M−1‖<1 ↔ ‖ζ−2‖<2` at K=2).     Next: `‖ζ−2‖<2` or `K>2` (tasked).
     **K>2 DEAD (T6, `4941a01b`, green, axioms clean):** `e(2)=1/2 < e(3)=2/3 < e(4)=1`
     PROVED (K=2 minimal; `B·e+d<1` dead at K=2,3,4). ONLY route left: `‖ζ−2‖<2`
-    on the s-rect (needs FE/convexity). Next: that attempt (tasked).
+    on the s-rect (needs FE/convexity).     Next: that attempt (tasked).
+    **Conditional closures (T7, `d465d118`, green, axioms clean):** `d<1` or `r<2`
+    ⇒ K=2 gap (both compositions proved) + explicit polar cap `1/10` + `∃ B2`.
+    LAST tail route reduces to ONE numeral needing FE input.
+    **TAIL LANE PAUSED pending FE lane (no duplicate FE work).**
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
