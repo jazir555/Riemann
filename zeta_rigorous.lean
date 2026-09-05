@@ -25595,3 +25595,223 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3f_pair8_le
 #print axioms DZ3f_true_block_le_zero_four_eight_five
 #print axioms DZ3f_gap_0485
+
+/-!
+Door-3 middle-upper fifth tightening (DZ3g, append-only DZ3f tail).
+
+Bridge (c5) banked (exactly one): TRUE block `||sum_{Ico 16 32} eta s1|| <= 0.482`,
+strictly below `0.485`, via tightened reflected norm `||s1|| <= 8.771`
+(`0.605^2+8.75^2=76.928525 <= 76.930441=8.771^2`; `8.771^2=76.930441` verified
+by `norm_num`), replaying generic `DZ3e_pair_le_of_base` with `8.771` for `8.78`.
+Read-only reuse: `DZ3f_rpow17_ge_five_point_four`, `DZ3e_rpow19_ge_five_point_five`,
+`DZ3e_rpow21_ge_six`, `DZ3e_rpow23_ge_six_point_five`, `DZ3e_rpow25_ge_six_point_eight`,
+`DZ3e_rpow27_ge_seven_point_two`, `DZ3e_rpow29_ge_seven_point_five`,
+`DZ3e_rpow31_ge_seven_point_eight`, `DZ3c_sum_eq`. Nothing redefined.
+
+* `DZ3g_s1_norm_le`: `||1 - zetaCellS0|| <= 8.771`.
+* `DZ3g_pair_le_of_base`: generic `||pair m|| <= 8.771/c/(2m+1)` from `c <= base^0.605`.
+* `DZ3g_true_block_le_zero_four_eight_two`: `||sum_{Ico 16 32} eta|| <= 0.482`
+  = `8.771/5.4/17 + 8.771/5.5/19 + ... + 8.771/7.8/31 = 0.48107... <= 0.482`.
+* `DZ3g_gap_0482`: `0.482 < 0.485`, `0.482 < 0.50`, `0.482/(12/6300)=253.05`.
+
+NUMBERS: banked `0.482`, gap vs `0.485` is `0.003` strictly below;
+gap vs `0.50` is `0.018`; gap vs `0.61` is `0.128`; gap vs `0.70` is `0.218`;
+gap vs `2.553` is `2.071`; need `12/6300~=0.0019048`;
+`0.482/(12/6300)=253.05` (was `254.625` at `0.485`, saves `1.575` ratio units;
+was `262.5` at `0.50`, saves `9.45`; was `320.25` at `0.61`, saves `67.2`).
+-/
+
+/-- (DZ3g) Tightened reflected norm `||1 - s0|| <= 8.771`
+(`0.605^2+8.75^2=76.928525 <= 76.930441=8.771^2`). -/
+theorem DZ3g_s1_norm_le : ‖1 - zetaCellS0‖ ≤ 8.771 := by
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  have him : (1 - zetaCellS0).im = (8.75 : ℝ) := zetaRefl_im
+  have hsq : ‖1 - zetaCellS0‖ ^ 2 ≤ (8.771 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+/-- (DZ3g) Generic non-uniform cancelled pair bound with `8.771` (replay of `DZ3e_pair_le_of_base`). -/
+theorem DZ3g_pair_le_of_base (m : ℕ) (c : ℝ) (hcpos : 0 < c)
+    (hc : c ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ)) :
+    ‖etaPairTerm (1 - zetaCellS0) m‖ ≤ 8.771 / c / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+  have hs := zetaRefl_pos
+  have hle := norm_etaPairTerm_le (1 - zetaCellS0) hs m
+  have hnorm : ‖1 - zetaCellS0‖ ≤ 8.771 := DZ3g_s1_norm_le
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  rw [hre] at hle
+  have hbase_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have h : 0 < 2 * m + 1 := by omega
+    exact_mod_cast h
+  have hsplit : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      = ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+    have e : (-0.605 - 1 : ℝ) = (-(0.605 : ℝ)) + (-(1 : ℝ)) := by ring
+    rw [e, Real.rpow_add hbase_pos,
+      Real.rpow_neg (le_of_lt hbase_pos) (0.605 : ℝ),
+      Real.rpow_neg (le_of_lt hbase_pos) (1 : ℝ), Real.rpow_one]
+  have hpos605 : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_pos_of_pos hbase_pos _
+  have hinvc : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ c⁻¹ :=
+    (inv_le_inv₀ hpos605 hcpos).mpr hc
+  have hbase_inv_nn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    inv_nonneg.mpr (le_of_lt hbase_pos)
+  have hprod_le : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹
+      ≤ c⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    mul_le_mul_of_nonneg_right hinvc hbase_inv_nn
+  have hXnn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos hbase_pos _)
+  have h1 : ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 8.771 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    mul_le_mul_of_nonneg_right hnorm hXnn
+  have h2 : (8.771 : ℝ) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 8.771 * (c⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := by
+    rw [hsplit]
+    exact mul_le_mul_of_nonneg_left hprod_le (by norm_num)
+  have hfin : (8.771 : ℝ) * (c⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹)
+      = 8.771 / c / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    ring
+  calc ‖etaPairTerm (1 - zetaCellS0) m‖
+      ≤ ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := hle
+    _ ≤ 8.771 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := h1
+    _ ≤ 8.771 * (c⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := h2
+    _ = 8.771 / c / ((((2 * m + 1 : ℕ)) : ℝ)) := hfin
+
+/-- (DZ3g) Fifth-tightening TRUE block `<= 0.482 < 0.485` (8 pairs, `8.771` norm). -/
+theorem DZ3g_true_block_le_zero_four_eight_two :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.482 := by
+  rw [DZ3c_sum_eq]
+  have b0 : ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ ≤ 8.771 / 5.4 / 17 := by
+    have e0 : (8 + 0 : ℕ) = 8 := by norm_num
+    rw [e0]
+    have hbase : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+    have hc : (5.4 : ℝ) ≤ ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3f_rpow17_ge_five_point_four
+    have h := DZ3g_pair_le_of_base 8 5.4 (by norm_num) hc
+    rwa [hbase] at h
+  have b1 : ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖ ≤ 8.771 / 5.5 / 19 := by
+    have e1 : (8 + 1 : ℕ) = 9 := by norm_num
+    rw [e1]
+    have hbase : ((((2 * 9 + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+    have hc : (5.5 : ℝ) ≤ ((((2 * 9 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow19_ge_five_point_five
+    have h := DZ3g_pair_le_of_base 9 5.5 (by norm_num) hc
+    rwa [hbase] at h
+  have b2 : ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ ≤ 8.771 / 6 / 21 := by
+    have e2 : (8 + 2 : ℕ) = 10 := by norm_num
+    rw [e2]
+    have hbase : ((((2 * 10 + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+    have hc : (6 : ℝ) ≤ ((((2 * 10 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow21_ge_six
+    have h := DZ3g_pair_le_of_base 10 6 (by norm_num) hc
+    rwa [hbase] at h
+  have b3 : ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖ ≤ 8.771 / 6.5 / 23 := by
+    have e3 : (8 + 3 : ℕ) = 11 := by norm_num
+    rw [e3]
+    have hbase : ((((2 * 11 + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+    have hc : (6.5 : ℝ) ≤ ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow23_ge_six_point_five
+    have h := DZ3g_pair_le_of_base 11 6.5 (by norm_num) hc
+    rwa [hbase] at h
+  have b4 : ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ ≤ 8.771 / 6.8 / 25 := by
+    have e4 : (8 + 4 : ℕ) = 12 := by norm_num
+    rw [e4]
+    have hbase : ((((2 * 12 + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+    have hc : (6.8 : ℝ) ≤ ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow25_ge_six_point_eight
+    have h := DZ3g_pair_le_of_base 12 6.8 (by norm_num) hc
+    rwa [hbase] at h
+  have b5 : ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖ ≤ 8.771 / 7.2 / 27 := by
+    have e5 : (8 + 5 : ℕ) = 13 := by norm_num
+    rw [e5]
+    have hbase : ((((2 * 13 + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+    have hc : (7.2 : ℝ) ≤ ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow27_ge_seven_point_two
+    have h := DZ3g_pair_le_of_base 13 7.2 (by norm_num) hc
+    rwa [hbase] at h
+  have b6 : ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ ≤ 8.771 / 7.5 / 29 := by
+    have e6 : (8 + 6 : ℕ) = 14 := by norm_num
+    rw [e6]
+    have hbase : ((((2 * 14 + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+    have hc : (7.5 : ℝ) ≤ ((((2 * 14 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow29_ge_seven_point_five
+    have h := DZ3g_pair_le_of_base 14 7.5 (by norm_num) hc
+    rwa [hbase] at h
+  have b7 : ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ ≤ 8.771 / 7.8 / 31 := by
+    have e7 : (8 + 7 : ℕ) = 15 := by norm_num
+    rw [e7]
+    have hbase : ((((2 * 15 + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+    have hc : (7.8 : ℝ) ≤ ((((2 * 15 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow31_ge_seven_point_eight
+    have h := DZ3g_pair_le_of_base 15 7.8 (by norm_num) hc
+    rwa [hbase] at h
+  have hexp : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖)
+      = ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  have htot : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖) ≤ 0.482 := by
+    rw [hexp]
+    have hbound : (8.771 : ℝ) / 5.4 / 17 + 8.771 / 5.5 / 19 + 8.771 / 6 / 21 + 8.771 / 6.5 / 23
+        + 8.771 / 6.8 / 25 + 8.771 / 7.2 / 27 + 8.771 / 7.5 / 29 + 8.771 / 7.8 / 31 ≤ 0.482 := by
+      norm_num
+    linarith
+  calc ‖∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)‖
+      ≤ ∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖ :=
+        norm_sum_le _ _
+    _ ≤ 0.482 := htot
+
+/-- (DZ3g) Gap verdict for `0.482` vs `0.485`, vs `0.50`, vs `12/6300`. -/
+theorem DZ3g_gap_0482 :
+    (0.482 : ℝ) < 0.485 ∧ (0.482 : ℝ) < 0.50 ∧ (0.482 : ℝ) < 0.61 ∧ (0.482 : ℝ) < 0.70
+      ∧ (0.482 : ℝ) / (12 / 6300) = 253.05
+      ∧ (12 / 6300 : ℝ) < 0.482 ∧ (0.482 : ℝ) < 2.553 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3g report-and-stop): ONE proved bridge (c5) banked —
+`DZ3g_true_block_le_zero_four_eight_two : ||sum_{Ico 16 32} eta s1|| <= 0.482`
+via tightened `DZ3g_s1_norm_le : ||s1|| <= 8.771`
+(`0.605^2+8.75^2=76.928525 <= 76.930441=8.771^2`;
+generic `DZ3g_pair_le_of_base : ||pair m|| <= 8.771/c/(2m+1)` replaying
+`DZ3e_pair_le_of_base`; block identity read-only `DZ3c_sum_eq`;
+`8.771/5.4/17+8.771/5.5/19+...+8.771/7.8/31=0.48107... <= 0.482`).
+Banked constant `0.482`, strictly below `0.485` by `0.003` (below `0.50` by `0.018`,
+below `0.61` by `0.128`, below `0.70` by `0.218`, below `2.553` by `2.071`);
+`0.482/(12/6300)=253.05` (`DZ3g_gap_0482`), was `254.625`
+(saves `1.575` ratio units; was `262.5`, saves `9.45`; was `320.25`,
+saves `67.2`; was `367.5`, saves `114.45`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~253x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3g tail after
+`DZ3g_gap_0482`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `0.482` toward an Abel `<= 0.5`-shape); or
+(c5 again) a sixth tightening below `0.482` (e.g. `Re`-only pair sums via
+`DZ3c_pair_re` + `DZ3c_signed_re` intervals, or sharper `c` at `19..31`
+(`5.5->5.7` at `19` since `5.7^5=6016.9 <= 6859=19^3`, `6->6.2` at `21`, etc.),
+or `||s1||` below `8.771` via even tighter `zetaCellS0` bounds).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3g_s1_norm_le
+#print axioms DZ3g_pair_le_of_base
+#print axioms DZ3g_true_block_le_zero_four_eight_two
+#print axioms DZ3g_gap_0482
