@@ -1609,8 +1609,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     clean):** `norm_etaPairTerm_le` at `s1` (`zetaRefl`, `‖s1‖ ≤ 10`) ⇒ `‖pair m‖ ≤ 2/(2m+1)`
     for `m ≥ 8` ⇒ 8-pair sum `0.6926… ≤` **TRUE block `≤ 0.70`** (was `2.553`; saves 972.8 ratio
     units — now 367× over need). First genuine cancellation (not triangle).
-    Next: non-uniform tightening toward `~0.60` (`‖s1‖ ≤ 8.78`), true-phase prefix caps + Abel
-    toward `≤ 0.6`-shape, or `Re`-only pair sums (tasked).
+    **Tightening (`DZ3d_*`, F6, `829bb740`, green 8693 jobs, axioms clean):**
+    `‖1 - zetaCellS0‖ ≤ 8.78` ⇒ pair `≤ 1.756/(2m+1)` ⇒ **TRUE block `≤ 0.61`**
+    (now 320× over need).
+    Next: non-uniform base tightening (`~0.02`), true-phase prefix caps + Abel toward
+    `≤ 0.6`-shape, or `Re`-only pair sums (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
