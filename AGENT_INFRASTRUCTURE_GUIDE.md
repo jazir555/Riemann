@@ -1615,7 +1615,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     Next: non-uniform base tightening (`~0.02`), true-phase prefix caps + Abel toward
     `≤ 0.6`-shape, or `Re`-only pair sums (tasked). **Non-uniform tightening (`DZ3e_*`, F7,
     `cff3982f`, green 8693 jobs, axioms clean):** per-base floors (`5.5–7.8` at `19–31`) ⇒
-    pair sum `0.48921… ≤` **TRUE block `≤ 0.50`** (now 262× over need).
+    pair sum `0.48921… ≤` **TRUE block `≤ 0.50`** (now 262× over need). **Fourth tightening
+    (`DZ3f_*`, F8, `92e82afb`, green 8693 jobs, axioms clean):** sharper base-17 floor (`5.4`:
+    `5.4^5 = 4591.65 ≤ 4913`) ⇒ **TRUE block `≤ 0.485`** (now 254× over need).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
