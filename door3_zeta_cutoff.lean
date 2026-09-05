@@ -197,9 +197,34 @@ theorem cutR10_zetaRemainder_of_certificate_one
   rw [hscut] at h
   exact hbound.trans h
 
+/- A Cauchy supplier interface for the remaining cutoff derivative leaf.  A
+   single entire-function sup enclosure on the center ball of radius
+   `CutR10.radius + 1` gives the named `M = 0.04` derivative remainder. -/
+theorem cutR10_derivRemainder_of_closedBall_sup
+    (hC : ∀ z ∈ Metric.closedBall CentralCoverAssembly.CutR10.center
+      (CentralCoverAssembly.CutR10.radius + 1),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (0.04 : ℝ)) :
+    Door3CutR10Center.cutR10_derivRemainder 0.04 := by
+  unfold Door3CutR10Center.cutR10_derivRemainder
+  have hstrip : ∀ w, CentralCoverAssembly.CutR10.mem w →
+      -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+    intro w hw
+    have hlo : CentralCoverAssembly.CutR10.y0 ≤ w.im := hw.2.2.1
+    have hhi : w.im ≤ CentralCoverAssembly.CutR10.y1 := hw.2.2.2
+    rw [CentralCoverAssembly.CutR10_y0] at hlo
+    rw [CentralCoverAssembly.CutR10_y1] at hhi
+    constructor <;> linarith
+  have hD := DerivCauchyBridge.uniform_deriv_of_closedBall_bound
+    CentralCoverAssembly.CutR10 1 (0.04 : ℝ) (by norm_num) hstrip hC
+  intro w hw
+  have hle := hD w hw
+  norm_num at hle ⊢
+  exact hle
+
 end Door3ZetaCutoff
 
 #print axioms Door3ZetaCutoff.zeta_cutoff_lower_of_certificate
 #print axioms Door3ZetaCutoff.zeta_cutoff_lower_of_certificate_one
 #print axioms Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate
 #print axioms Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate_one
+#print axioms Door3ZetaCutoff.cutR10_derivRemainder_of_closedBall_sup
