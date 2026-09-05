@@ -28630,3 +28630,143 @@ upward to finish), OR (c) start pair-10 `Re` with the `log-22/log-21` template
 #print axioms DZ3s_amp18_le_inv585
 #print axioms DZ3s_pair9_re_le_zero_nine_zero_three
 #print axioms DZ3s_saving
+
+/-!
+# Door-3 DZ3t pair-9 quartic-cos-upper bridge: `Re <= 0.0866` (zeta lane)
+
+Ownership: DZ3t append-only tail after `DZ3s_saving`; nothing above touched;
+no new imports; LF endings. Sibling `riemann_hypothesis_newsection.lean`
+(DT in flight), `central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE bridge only (option (a)): Taylor QUARTIC cos upper reusing
+`CG_cos_le_quartic` (`cos x <= 1 - x^2/2 + x^4/24` on `x >= 0`, :13364).
+Read-only reuse: `DZ3r_delta18_mem` (`u = phase18 - 8*pi in [0.55, 0.66]`),
+`DZ3s_amp18_le_inv585` (`A18 <= 1/5.85`), `DZ3r_amp19_lower` (`1/6.6 <= A19`),
+`DZ3r_cos19_lower` (`0.395 <= cos19`), `DZ3r_cos18_lower` (nonneg),
+`DZ3r_pair9_re_eq`, `D3_amp_nonneg`.
+
+Strategy: `cos(phase18) = cos u <= 1 - u^2/2 + u^4/24` with per-monomial
+endpoints (`u^2 >= 0.55^2` lower since the term is subtracted,
+`u^4 <= 0.66^4` upper): `1 - 0.55^2/2 + 0.66^4/24 = 1 - 0.15125 +
+0.00790614 = 0.85665614 <= 0.8567` (saves `~= 0.0213` on `cos18` vs the
+DZ3r sqrt majorant `0.878`; at `A18 <= 1/5.85` that saves `~= 0.00364` on
+the `A18*c18` term); refire
+`Re = A18*c18 - A19*c19 <= 1/5.85*0.8567 - 1/6.6*0.395 ~= 0.086596
+<= 0.0866`.
+
+NUMBERS: banked `Re(pair 9) <= 0.0866` (beats DZ3s `0.0903` by `~= 0.0037`;
+beats `DZ3c 2/19 ~= 0.105263` by `~= 0.01866`); `cos18 <= 0.8567`
+(true `~= 0.80738`, residual slack `~= 0.0493` — quintic/sextic or tighter
+`u` interval next); `A18 <= 1/5.85 ~= 0.17094` (true `~= 0.16840`);
+`A19 >= 1/6.6`, `cos19 >= 0.395` (true `~= 0.47140` — next squeeze).
+True `Re ~= 0.05901`. Residual gap to the DZ3e MVT norm
+`8.78/5.5/19 ~= 0.08401914 <= 0.08402`: `0.0866 - 0.08402 = 0.00258`
+(previous gap `0.00628`, closed `~= 0.00370`).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3t) `cos(phase18) <= 0.8567` via the quartic Taylor majorant
+`CG_cos_le_quartic` on `u = phase18 - 8*pi in [0.55, 0.66]`
+(four `cos_sub_two_pi` steps, per-monomial endpoints). -/
+theorem DZ3t_cos18_upper_quartic : Real.cos (D3_phase 18) ≤ (0.8567 : ℝ) := by
+  have hmem := DZ3r_delta18_mem
+  have c1 : Real.cos (D3_phase 18 - 2 * Real.pi) = Real.cos (D3_phase 18) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 18 - 4 * Real.pi
+      = (D3_phase 18 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 18 - 4 * Real.pi)
+      = Real.cos (D3_phase 18 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 18 - 6 * Real.pi
+      = (D3_phase 18 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 18 - 6 * Real.pi)
+      = Real.cos (D3_phase 18 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 18 - 8 * Real.pi
+      = (D3_phase 18 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 18 - 8 * Real.pi)
+      = Real.cos (D3_phase 18 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 18 - 8 * Real.pi)
+      = Real.cos (D3_phase 18) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_nn : (0 : ℝ) ≤ D3_phase 18 - 8 * Real.pi := by linarith [hmem.1]
+  have hu_lo : (0.55 : ℝ) ≤ D3_phase 18 - 8 * Real.pi := hmem.1
+  have hu_hi : D3_phase 18 - 8 * Real.pi ≤ (0.66 : ℝ) := hmem.2
+  have hQ := CG_cos_le_quartic hu_nn
+  have hsq_lo : (0.55 : ℝ) ^ 2 ≤ (D3_phase 18 - 8 * Real.pi) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 2
+  have h4hi : (D3_phase 18 - 8 * Real.pi) ^ 4 ≤ (0.66 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hu_nn hu_hi 4
+  have hnum : (1 : ℝ) - (0.55 : ℝ) ^ 2 / 2 + (0.66 : ℝ) ^ 4 / 24 ≤ 0.8567 := by
+    norm_num
+  have hle : 1 - (D3_phase 18 - 8 * Real.pi) ^ 2 / 2
+      + (D3_phase 18 - 8 * Real.pi) ^ 4 / 24
+      ≤ 1 - (0.55 : ℝ) ^ 2 / 2 + (0.66 : ℝ) ^ 4 / 24 := by
+    linarith [hsq_lo, h4hi]
+  linarith
+
+/-- (DZ3t) Pair-9 signed Re refire: `Re <= 0.0866`
+(`1/5.85*0.8567 - 1/6.6*0.395 ~= 0.086596`, beats DZ3s `0.0903`). -/
+theorem DZ3t_pair9_re_le_zero_eight_six_six :
+    (etaPairTerm (1 - zetaCellS0) 9).re ≤ (0.0866 : ℝ) := by
+  rw [DZ3r_pair9_re_eq]
+  have hA18 := DZ3s_amp18_le_inv585
+  have hA19 := DZ3r_amp19_lower
+  have hc18_up := DZ3t_cos18_upper_quartic
+  have hc18_nn : (0 : ℝ) ≤ Real.cos (D3_phase 18) := by
+    linarith [DZ3r_cos18_lower]
+  have hc19_lo := DZ3r_cos19_lower
+  have hA19_nn := D3_amp_nonneg 19
+  have hprod18 : D3_amp 18 * Real.cos (D3_phase 18)
+      ≤ (1 / 5.85 : ℝ) * 0.8567 := by
+    have h := mul_le_mul hA18 hc18_up hc18_nn
+      (by norm_num : (0 : ℝ) ≤ 1 / 5.85)
+    exact h
+  have hprod19 : (1 / 6.6 : ℝ) * 0.395
+      ≤ D3_amp 19 * Real.cos (D3_phase 19) := by
+    have h := mul_le_mul hA19 hc19_lo (by norm_num : (0 : ℝ) ≤ 0.395) hA19_nn
+    exact h
+  have hnum : (1 / 5.85 : ℝ) * 0.8567 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.0866 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3t) Saving verdict: `1/5.85*0.8567-1/6.6*0.395 <= 0.0866 < 2/19`,
+residual to the DZ3e norm `0.08402` is `0.00258 <= 0.0026`. -/
+theorem DZ3t_saving :
+    (1 / 5.85 : ℝ) * 0.8567 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.0866 : ℝ)
+      ∧ (0.0866 : ℝ) < 2 / 19 ∧ (0.0866 : ℝ) - 0.08402 ≤ 0.0026 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3t report-and-stop): banked pair-9 quartic-cos-upper bridge
+(zeta lane) — `DZ3t_cos18_upper_quartic` (`cos(phase18) <= 0.8567` via
+`CG_cos_le_quartic` on `u in [0.55, 0.66]`, `1-0.55^2/2+0.66^4/24 =
+0.85665614`, true `~= 0.80738`), refired
+`DZ3t_pair9_re_le_zero_eight_six_six`
+(`Re <= 1/5.85*0.8567-1/6.6*0.395 ~= 0.086596 <= 0.0866`, beats DZ3s
+`0.0903` by `~= 0.00370`, beats `DZ3c 2/19 ~= 0.105263` by `~= 0.01866`).
+True `Re ~= 0.05901`. Residual gap to the DZ3e MVT norm `0.08402`:
+`0.0866 - 0.08402 = 0.00258` (previous gap `0.00628`, closed `~= 0.00370`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3t tail after
+`DZ3t_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): close the remaining `0.00258`
+gap to `<= 0.08402` via EITHER (a) raising `cos19 >= 0.395` upward
+(`u19 = phase19 - 8*pi in [1.01, 1.10]`, sextic/septic lower or a sharper
+quadratic-floor endpoint — each `+0.01` on `cos19` saves `~= 0.00152` via
+`A19 >= 1/6.6`, so `cos19 >= 0.41`-class closes roughly half the gap;
+combine with an `A19` lower raise toward true `~= 0.15610`), OR (c) start
+pair-10 `Re` with the `log-22/log-21` template (`log 22 = log 2 + log 11`
+from `log_two/eleven_gt/lt_d9`, then `log(21/22) in [-1/21, -1/22]` via
+`log <= x-1` both sides, mirroring `DZ3r_log19_eq` read-only). Success =
+full proofs, `#print axioms` exactly `[propext, Classical.choice,
+Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3t_cos18_upper_quartic
+#print axioms DZ3t_pair9_re_le_zero_eight_six_six
+#print axioms DZ3t_saving
