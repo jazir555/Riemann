@@ -1785,6 +1785,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`center_bound` shape at outer tier); Python generator emits all 40 proxy blocks
     (Temp `door3_certs40.lean`, 46KB). True `ξ`-enclosure still the missing link.
     Next: land proxy blocks cell-by-cell (tasked).
+    **Deriv lane (`door3_deriv_certs`, V, `fba59747`, green 45s, axioms clean):**
+    Cauchy-estimate toolkit (`deriv_bound_of_sphere_sup_on_ball` from Mathlib Liouville +
+    rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
+    (meets outer tier `0.05` iff sup `qB ≤ 1/40`). Missing: uniform `ξ`-sup enclosure.
+    Next: `ξ`-sup on `ball R00c 2` then replicate per cell (tasked).
     **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
     exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
