@@ -1745,6 +1745,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     (`N=215.7/216.6/217.5`, `D=2675/2684/2687`) ⇒
     **`(G,Z,M,Azeta)=(0.0810,7.5,100.5048,5757)`** (`ΔM=−0.124`).
     Next: `G=0.0809` via `a=0.05` refloor or `xmax<6.37` numerator (tasked).
+    **Trio 0.0809 (`Door3GammaCutR02SplitTrio0809`, H8, `d09e08f4`, green 8702 jobs, axioms clean):**
+    `a=0.05` refloor ⇒ `D ≥ 2689` ⇒
+    **`(G,Z,M,Azeta)=(0.0809,7.5,100.38072,5750)`** (`ΔM=−0.124`).
+    Next: `G=0.0808` via `a=0.06` refloor (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
