@@ -763,3 +763,327 @@ RESIDUAL: unconditional `∀ z ∈ tailCellBounded, ‖zeta‖ ≤ 2` /
 forces `~1.35>1`). Exact next-agent task: prove `‖riemannZeta s - 2‖ < 2`
 on the banked s-rect (`Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`, `‖s‖ ≤ 12`) or switch
 to `K>2` (smaller mollifier error), then close via `tailK2_gap_iff_norm_sub_two`. -/
+
+/-!
+## Door-4 tail leaf: K=3,4 mollifier errors (tail lane, 2026-09-05, append-only)
+
+K>2 route verdict (Temp `tail_k34_cert.py`, `Fraction`): the smoothed
+Mollifier does NOT get closer to 1 as K grows — triangle errors grow
+`e(2)=1/2 < e(3)=2/3 < e(4)=1`, so `B*e+d` with `B=2,d=1` gives
+`2, 7/3, 3` (all `>1`). K=2 is minimal among {2,3,4}; no K>2 closes.
+
+Banked here (FULLY PROVED, no sorry/admit/axiom), mirroring
+`tailMollifierReal_two` read-only:
+* `tailNatCpowNeg_norm_le_one` — `‖(n:ℂ)^{-s}‖ ≤ 1` for `1 ≤ n`, `0 ≤ Re s`
+  (via `Complex.norm_natCast_cpow_of_pos` + `Real.rpow_le_one_of_one_le_of_nonpos`);
+* `tailMollifierReal_three` (`2/3 - (1/3)*2^{-s}`) + `tailMollifierReal_nearOne_three_le`
+  (`≤ 2/3` on `0 ≤ Re s`);
+* `tailMollifierReal_four` (`3/4 - (1/2)*2^{-s} - (1/4)*3^{-s}`) +
+  `tailMollifierReal_nearOne_four_le` (`≤ 1` on `0 ≤ Re s`);
+* `tailRealGap_of_zetaBounds_three/four` — conditional gaps with `e=2/3,1`;
+* `tailNumerals_three/four_cert_arith` + `test_fail` (`7/3`, `3`, both `¬ <1`);
+* `tailMollifierError_order` (`1/2 < 2/3 < 1`).
+-/
+
+/-- Cpow-norm cap: `‖(n:ℂ)^{-s}‖ ≤ 1` when `1 ≤ n` and `0 ≤ Re s`. -/
+theorem tailNatCpowNeg_norm_le_one (n : ℕ) (hn : 1 ≤ n) (s : ℂ) (hre : 0 ≤ s.re) :
+    ‖((n : ℂ) ^ (-s))‖ ≤ 1 := by
+  have hn0 : 0 < n := by omega
+  rw [Complex.norm_natCast_cpow_of_pos hn0 (-s), Complex.neg_re]
+  have h1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have h2 : -s.re ≤ 0 := by linarith
+  exact Real.rpow_le_one_of_one_le_of_nonpos h1 h2
+
+/-- Component (c) at `K = 3`: `M = 2/3 - (1/3)*2^{-s}`
+(the `n = 2` term carries `1 - 3/3 = 0`). -/
+theorem tailMollifierReal_three (s : ℂ) :
+    tailMollifierReal s 3 =
+      (2 / 3 : ℂ) - (1 / 3 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s)) := by
+  have hmu1 : ArithmeticFunction.moebius 1 = 1 :=
+    ArithmeticFunction.moebius_apply_one
+  have hmu2 : ArithmeticFunction.moebius 2 = -1 :=
+    ArithmeticFunction.moebius_apply_prime (by norm_num)
+  have h01 : ((0 + 1 : ℕ) : ℂ) = (1 : ℂ) := by push_cast; norm_num
+  have h11 : ((1 + 1 : ℕ) : ℂ) = (2 : ℂ) := by push_cast; norm_num
+  have h21 : ((2 + 1 : ℕ) : ℂ) = (3 : ℂ) := by push_cast; norm_num
+  have h3c : ((3 : ℕ) : ℂ) = (3 : ℂ) := by norm_cast
+  have h01N : (0 + 1 : ℕ) = 1 := by norm_num
+  have h11N : (1 + 1 : ℕ) = 2 := by norm_num
+  have hF0 : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) *
+      ((((0 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((0 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ))) = (2 / 3 : ℂ) := by
+    have hmoeb : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) = (1 : ℂ)) := by
+      rw [h01N, hmu1]
+      norm_cast
+    have hcpow : ((((0 + 1 : ℕ))) : ℂ) ^ (-s) = (1 : ℂ) := by
+      rw [h01]
+      exact Complex.one_cpow _
+    have hfrac : (1 : ℂ) - ((((0 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ) = (2 / 3 : ℂ) := by
+      rw [h01, h3c]
+      norm_num
+    rw [hmoeb, hcpow, hfrac]
+    ring
+  have hF1 : (((ArithmeticFunction.moebius (1 + 1) : ℤ) : ℂ) *
+      ((((1 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((1 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ))) =
+      -((1 / 3 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s))) := by
+    have hmoeb : (((ArithmeticFunction.moebius (1 + 1) : ℤ) : ℂ) = (-1 : ℂ)) := by
+      rw [h11N, hmu2]
+      norm_cast
+    have hbase : ((((1 + 1 : ℕ))) : ℂ) ^ (-s) = ((((2 : ℕ) : ℂ)) ^ (-s)) := by
+      have hcast : ((((1 + 1 : ℕ))) : ℂ) = ((((2 : ℕ) : ℂ))) := by norm_cast
+      rw [hcast]
+    have hfrac : (1 : ℂ) - ((((1 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ) = (1 / 3 : ℂ) := by
+      rw [h11, h3c]
+      norm_num
+    rw [hmoeb, hbase, hfrac]
+    ring
+  have hF2 : (((ArithmeticFunction.moebius (2 + 1) : ℤ) : ℂ) *
+      ((((2 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((2 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ))) = 0 := by
+    have hfactor : (1 : ℂ) - ((((2 + 1 : ℕ))) : ℂ) / ((((3 : ℕ))) : ℂ) = 0 := by
+      have heq : ((((2 + 1 : ℕ))) : ℂ) = ((((3 : ℕ))) : ℂ) := by norm_cast
+      have hne : ((((3 : ℕ))) : ℂ) ≠ 0 := by exact_mod_cast (by norm_num : (3 : ℕ) ≠ 0)
+      rw [heq, div_self hne, sub_self]
+    rw [hfactor, mul_zero]
+  unfold tailMollifierReal
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+  rw [hF0, hF1, hF2]
+  ring
+
+/-- Uniform `K = 3` mollifier error `e = 2/3` when `0 ≤ Re s`. -/
+theorem tailMollifierReal_nearOne_three_le (s : ℂ) (hre : 0 ≤ s.re) :
+    ‖tailMollifierReal s 3 - 1‖ ≤ 2 / 3 := by
+  have hM := tailMollifierReal_three s
+  have h2 := tailNatCpowNeg_norm_le_one 2 (by norm_num) s hre
+  have h2c : ((((2 : ℕ) : ℂ)) ^ (-s)) = ((((1 + 1 : ℕ)) : ℂ) ^ (-s)) := by norm_cast
+  rw [hM]
+  have heq : (2 / 3 : ℂ) - (1 / 3 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s)) - 1 =
+      (-(1 / 3 : ℂ)) + (-(1 / 3 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s)) := by ring
+  rw [heq]
+  calc ‖(-(1 / 3 : ℂ)) + (-(1 / 3 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖
+      ≤ ‖(-(1 / 3 : ℂ))‖ + ‖(-(1 / 3 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖ :=
+        norm_add_le _ _
+    _ = 1 / 3 + (1 / 3) * ‖((((2 : ℕ) : ℂ)) ^ (-s))‖ := by
+        rw [norm_neg, norm_mul, norm_neg]
+        norm_num
+    _ ≤ 1 / 3 + (1 / 3) * 1 := by
+        have := mul_le_mul_of_nonneg_left h2 (show (0 : ℝ) ≤ 1 / 3 by norm_num)
+        linarith
+    _ = 2 / 3 := by norm_num
+
+/-- Component (c) at `K = 4`: `M = 3/4 - (1/2)*2^{-s} - (1/4)*3^{-s}`
+(the `n = 3` term carries `1 - 4/4 = 0`). -/
+theorem tailMollifierReal_four (s : ℂ) :
+    tailMollifierReal s 4 =
+      (3 / 4 : ℂ) - (1 / 2 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s)) -
+        (1 / 4 : ℂ) * ((((3 : ℕ) : ℂ)) ^ (-s)) := by
+  have hmu1 : ArithmeticFunction.moebius 1 = 1 :=
+    ArithmeticFunction.moebius_apply_one
+  have hmu2 : ArithmeticFunction.moebius 2 = -1 :=
+    ArithmeticFunction.moebius_apply_prime (by norm_num)
+  have hmu3 : ArithmeticFunction.moebius 3 = -1 :=
+    ArithmeticFunction.moebius_apply_prime (by norm_num)
+  have h01 : ((0 + 1 : ℕ) : ℂ) = (1 : ℂ) := by push_cast; norm_num
+  have h11 : ((1 + 1 : ℕ) : ℂ) = (2 : ℂ) := by push_cast; norm_num
+  have h21 : ((2 + 1 : ℕ) : ℂ) = (3 : ℂ) := by push_cast; norm_num
+  have h31 : ((3 + 1 : ℕ) : ℂ) = (4 : ℂ) := by push_cast; norm_num
+  have h4c : ((4 : ℕ) : ℂ) = (4 : ℂ) := by norm_cast
+  have h01N : (0 + 1 : ℕ) = 1 := by norm_num
+  have h11N : (1 + 1 : ℕ) = 2 := by norm_num
+  have h21N : (2 + 1 : ℕ) = 3 := by norm_num
+  have hF0 : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) *
+      ((((0 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((0 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ))) = (3 / 4 : ℂ) := by
+    have hmoeb : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) = (1 : ℂ)) := by
+      rw [h01N, hmu1]
+      norm_cast
+    have hcpow : ((((0 + 1 : ℕ))) : ℂ) ^ (-s) = (1 : ℂ) := by
+      rw [h01]
+      exact Complex.one_cpow _
+    have hfrac : (1 : ℂ) - ((((0 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ) = (3 / 4 : ℂ) := by
+      rw [h01, h4c]
+      norm_num
+    rw [hmoeb, hcpow, hfrac]
+    ring
+  have hF1 : (((ArithmeticFunction.moebius (1 + 1) : ℤ) : ℂ) *
+      ((((1 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((1 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ))) =
+      -((1 / 2 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s))) := by
+    have hmoeb : (((ArithmeticFunction.moebius (1 + 1) : ℤ) : ℂ) = (-1 : ℂ)) := by
+      rw [h11N, hmu2]
+      norm_cast
+    have hbase : ((((1 + 1 : ℕ))) : ℂ) ^ (-s) = ((((2 : ℕ) : ℂ)) ^ (-s)) := by
+      have hcast : ((((1 + 1 : ℕ))) : ℂ) = ((((2 : ℕ) : ℂ))) := by norm_cast
+      rw [hcast]
+    have hfrac : (1 : ℂ) - ((((1 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ) = (1 / 2 : ℂ) := by
+      rw [h11, h4c]
+      norm_num
+    rw [hmoeb, hbase, hfrac]
+    ring
+  have hF2 : (((ArithmeticFunction.moebius (2 + 1) : ℤ) : ℂ) *
+      ((((2 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((2 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ))) =
+      -((1 / 4 : ℂ) * ((((3 : ℕ) : ℂ)) ^ (-s))) := by
+    have hmoeb : (((ArithmeticFunction.moebius (2 + 1) : ℤ) : ℂ) = (-1 : ℂ)) := by
+      rw [h21N, hmu3]
+      norm_cast
+    have hbase : ((((2 + 1 : ℕ))) : ℂ) ^ (-s) = ((((3 : ℕ) : ℂ)) ^ (-s)) := by
+      have hcast : ((((2 + 1 : ℕ))) : ℂ) = ((((3 : ℕ) : ℂ))) := by norm_cast
+      rw [hcast]
+    have hfrac : (1 : ℂ) - ((((2 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ) = (1 / 4 : ℂ) := by
+      rw [h21, h4c]
+      norm_num
+    rw [hmoeb, hbase, hfrac]
+    ring
+  have hF3 : (((ArithmeticFunction.moebius (3 + 1) : ℤ) : ℂ) *
+      ((((3 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((3 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ))) = 0 := by
+    have hfactor : (1 : ℂ) - ((((3 + 1 : ℕ))) : ℂ) / ((((4 : ℕ))) : ℂ) = 0 := by
+      have heq : ((((3 + 1 : ℕ))) : ℂ) = ((((4 : ℕ))) : ℂ) := by norm_cast
+      have hne : ((((4 : ℕ))) : ℂ) ≠ 0 := by exact_mod_cast (by norm_num : (4 : ℕ) ≠ 0)
+      rw [heq, div_self hne, sub_self]
+    rw [hfactor, mul_zero]
+  unfold tailMollifierReal
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+  rw [hF0, hF1, hF2, hF3]
+  ring
+
+/-- Uniform `K = 4` mollifier error `e = 1` when `0 ≤ Re s`. -/
+theorem tailMollifierReal_nearOne_four_le (s : ℂ) (hre : 0 ≤ s.re) :
+    ‖tailMollifierReal s 4 - 1‖ ≤ 1 := by
+  have hM := tailMollifierReal_four s
+  have h2 := tailNatCpowNeg_norm_le_one 2 (by norm_num) s hre
+  have h3 := tailNatCpowNeg_norm_le_one 3 (by norm_num) s hre
+  rw [hM]
+  have heq : (3 / 4 : ℂ) - (1 / 2 : ℂ) * ((((2 : ℕ) : ℂ)) ^ (-s)) -
+      (1 / 4 : ℂ) * ((((3 : ℕ) : ℂ)) ^ (-s)) - 1 =
+      (-(1 / 4 : ℂ)) + (-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s)) +
+        (-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s)) := by ring
+  rw [heq]
+  have htri : ‖(-(1 / 4 : ℂ)) + (-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s)) +
+      (-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ ≤
+      ‖(-(1 / 4 : ℂ))‖ + ‖(-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖ +
+        ‖(-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ := by
+    calc ‖(-(1 / 4 : ℂ)) + (-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s)) +
+        (-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖
+        = ‖((-(1 / 4 : ℂ)) + (-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))) +
+          (-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ := by ring_nf
+      _ ≤ ‖(-(1 / 4 : ℂ)) + (-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖ +
+          ‖(-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ := norm_add_le _ _
+      _ ≤ (‖(-(1 / 4 : ℂ))‖ + ‖(-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖) +
+          ‖(-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ := by
+          gcongr
+          exact norm_add_le _ _
+  have e1 : ‖(-(1 / 4 : ℂ))‖ = (1 / 4 : ℝ) := by norm_num
+  have e2 : ‖(-(1 / 2 : ℂ)) * ((((2 : ℕ) : ℂ)) ^ (-s))‖ =
+      (1 / 2) * ‖((((2 : ℕ) : ℂ)) ^ (-s))‖ := by
+    rw [norm_mul, norm_neg]
+    norm_num
+  have e3 : ‖(-(1 / 4 : ℂ)) * ((((3 : ℕ) : ℂ)) ^ (-s))‖ =
+      (1 / 4) * ‖((((3 : ℕ) : ℂ)) ^ (-s))‖ := by
+    rw [norm_mul, norm_neg]
+    norm_num
+  rw [e1, e2, e3] at htri
+  have hle : (1 / 4 : ℝ) + (1 / 2) * ‖((((2 : ℕ) : ℂ)) ^ (-s))‖ +
+      (1 / 4) * ‖((((3 : ℕ) : ℂ)) ^ (-s))‖ ≤ 1 := by
+    have h2' : (1 / 2 : ℝ) * ‖((((2 : ℕ) : ℂ)) ^ (-s))‖ ≤ 1 / 2 := by
+      have := mul_le_mul_of_nonneg_left h2 (show (0 : ℝ) ≤ 1 / 2 by norm_num)
+      linarith
+    have h3' : (1 / 4 : ℝ) * ‖((((3 : ℕ) : ℂ)) ^ (-s))‖ ≤ 1 / 4 := by
+      have := mul_le_mul_of_nonneg_left h3 (show (0 : ℝ) ≤ 1 / 4 by norm_num)
+      linarith
+    linarith
+  linarith
+
+/-- Real conditional tail gap at `K = 3` with banked `e = 2/3`. -/
+theorem tailRealGap_of_zetaBounds_three {B d : ℝ}
+    (hB : ∀ z : ℂ, z ∈ tailCellBounded →
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B)
+    (hd : ∀ z : ℂ, z ∈ tailCellBounded →
+      ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d)
+    (hB0 : 0 ≤ B)
+    (hgap : B * (2 / 3) + d < 1)
+    (z : ℂ) (hz : z ∈ tailCellBounded) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 3 - 1‖ < 1 := by
+  have hsplit := norm_product_sub_one_le
+    (riemannZeta (tailShiftedSReal z)) (tailMollifierReal (tailShiftedSReal z) 3)
+  have h1 := hB z hz
+  have hre : 0 ≤ (tailShiftedSReal z).re := (tailShiftedSReal_re_mem_cell z hz).1
+  have h2 := tailMollifierReal_nearOne_three_le (tailShiftedSReal z) hre
+  have h3 := hd z hz
+  have hprod : ‖riemannZeta (tailShiftedSReal z)‖ *
+      ‖tailMollifierReal (tailShiftedSReal z) 3 - 1‖ ≤ B * (2 / 3) :=
+    mul_le_mul h1 h2 (norm_nonneg _) hB0
+  linarith
+
+/-- Real conditional tail gap at `K = 4` with banked `e = 1`. -/
+theorem tailRealGap_of_zetaBounds_four {B d : ℝ}
+    (hB : ∀ z : ℂ, z ∈ tailCellBounded →
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B)
+    (hd : ∀ z : ℂ, z ∈ tailCellBounded →
+      ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d)
+    (hB0 : 0 ≤ B)
+    (hgap : B * 1 + d < 1)
+    (z : ℂ) (hz : z ∈ tailCellBounded) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 4 - 1‖ < 1 := by
+  have hsplit := norm_product_sub_one_le
+    (riemannZeta (tailShiftedSReal z)) (tailMollifierReal (tailShiftedSReal z) 4)
+  have h1 := hB z hz
+  have hre : 0 ≤ (tailShiftedSReal z).re := (tailShiftedSReal_re_mem_cell z hz).1
+  have h2 := tailMollifierReal_nearOne_four_le (tailShiftedSReal z) hre
+  have h3 := hd z hz
+  have hprod : ‖riemannZeta (tailShiftedSReal z)‖ *
+      ‖tailMollifierReal (tailShiftedSReal z) 4 - 1‖ ≤ B * 1 :=
+    mul_le_mul h1 h2 (norm_nonneg _) hB0
+  linarith
+
+/-- Certificate arithmetic at `K = 3` (exact `Fraction` in Temp `tail_k34_cert.py`):
+`Bnum*(2/3)+dnum = 7/3`. -/
+theorem tailNumerals_three_cert_arith : tailBnum * (2 / 3) + tailDnum = 7 / 3 := by
+  unfold tailBnum tailDnum
+  norm_num
+
+/-- Test verdict at `K = 3`: `B*e+d<1` FAILS (`7/3<1` false). -/
+theorem tailNumerals_three_test_fail : ¬ (tailBnum * (2 / 3) + tailDnum < 1) := by
+  rw [tailNumerals_three_cert_arith]
+  norm_num
+
+/-- Certificate arithmetic at `K = 4`: `Bnum*1+dnum = 3`. -/
+theorem tailNumerals_four_cert_arith : tailBnum * 1 + tailDnum = 3 := by
+  unfold tailBnum tailDnum
+  norm_num
+
+/-- Test verdict at `K = 4`: `B*e+d<1` FAILS (`3<1` false). -/
+theorem tailNumerals_four_test_fail : ¬ (tailBnum * 1 + tailDnum < 1) := by
+  rw [tailNumerals_four_cert_arith]
+  norm_num
+
+/-- Error ordering: `K=2` minimal among `{2,3,4}` (`1/2 < 2/3 < 1`). -/
+theorem tailMollifierError_order : (1 / 2 : ℝ) < 2 / 3 ∧ (2 / 3 : ℝ) < 1 := by
+  constructor <;> norm_num
+
+#print axioms tailNatCpowNeg_norm_le_one
+#print axioms tailMollifierReal_three
+#print axioms tailMollifierReal_nearOne_three_le
+#print axioms tailMollifierReal_four
+#print axioms tailMollifierReal_nearOne_four_le
+#print axioms tailRealGap_of_zetaBounds_three
+#print axioms tailRealGap_of_zetaBounds_four
+#print axioms tailNumerals_three_cert_arith
+#print axioms tailNumerals_three_test_fail
+#print axioms tailNumerals_four_cert_arith
+#print axioms tailNumerals_four_test_fail
+#print axioms tailMollifierError_order
+
+/- Quantified remainder after this block (2026-09-05): BANKED `K=3,4` real
+mollifier evaluations + triangle errors (`e=2/3,1`), conditional gaps
+`tailRealGap_of_zetaBounds_three/four`, `Fraction`-certified FAIL verdicts
+(`7/3`, `3`, both `¬ <1`), and ordering `1/2<2/3<1` (K=2 minimal). K>2 does
+NOT improve the split — errors grow, so `B*e+d<1` with `B=2,d=1` is dead at
+`K=2,3,4`. RESIDUAL: the direct `‖zeta-2‖<2` target
+(`tailK2_gap_iff_norm_sub_two`) and any `K≥5` (same growth pattern; top term
+always zero, triangle sum `∑(1-n/K) ~ K/2` grows) remain the only tail-lane
+options. Exact next-agent task: prove `‖riemannZeta s - 2‖ < 2` on the banked
+s-rect (`Re∈[0,1/2]`, `|Im|∈[10,11]`, `‖s‖≤12`) via stated FE/convexity input,
+or push `K≥5` evaluations only to confirm growth (no closure expected). -/
