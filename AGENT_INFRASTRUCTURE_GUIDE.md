@@ -1836,6 +1836,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `10≤|Re|≤11` compact + shifted-continuous + pole avoided ⇒ `∃ Bcell/dcell`
     (non-explicit) + `tailCellGap_of_cellBounds_two` implication. Explicit numerals open.
     Next: explicit Bnum/dnum (tasked).
+    **K=2 split DEAD (T5, `b63a2122`, green, axioms clean):** explicit `B=2,d=1,e=1/2`
+    give `B·e+d=2`, `¬<1` PROVED (true values `~1.35`); redirect banked
+    (`‖ζ·M−1‖<1 ↔ ‖ζ−2‖<2` at K=2). Next: `‖ζ−2‖<2` or `K>2` (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
