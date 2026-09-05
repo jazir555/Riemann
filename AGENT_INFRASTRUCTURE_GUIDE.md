@@ -1700,6 +1700,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cos24 ≤ −0.99` (sextic), `−cos25 ≤ 0.974` (quartic), amps `1/7.5 + 1/7.7` ⇒
     **pair-12 `Re ≤ 0.035`** (meets MVT slot `≈ 0.057`; triangle `0.08`).
     Next: pair-13 `Re` start (tasked).
+    **Pair-13 CLOSED (`DZ3aa_*`, G19, `8ee33164`, green 8693 jobs, axioms clean):**
+    `log27 = 3·log3`, `log28 = 2·log2+log7` (log-7 d9 path),
+    `cos26 ≤ −0.844` (sextic), `−cos27 ≤ 0.637` (quartic), amps `1/7.9 + 1/8.1` ⇒
+    **pair-13 `Re ≤ 0`** (beats triangle `2/27 ≈ 0.0741`; MVT slot `≈ 0.053`; true `≈ −0.0305`).
+    Next: pair-14 `Re` start (queued behind H6 verification).
     **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
     (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
     hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
