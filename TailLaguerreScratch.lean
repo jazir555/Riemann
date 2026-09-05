@@ -439,3 +439,164 @@ Exact next-agent task: on a BOUNDED tail cell (e.g. `10 < |Re z| ≤ 11`,
 shifted image, and likewise `∃ dcell` for `‖zeta - 1‖`; then test the numeric
 side condition `Bcell * (1/2) + dcell < 1` (expected to fail on first attempt
 — that failure value is the next quantified remainder). -/
+
+/-!
+## Door-4 tail leaf: compact-cell zeta bounds (tail lane, 2026-09-05, append-only)
+
+Bounded tail cell (two-sided, closed so compact):
+`10 ≤ |Re z| ≤ 11`, `0 ≤ Im z ≤ 1/2`. The strict regime
+`10 < |Re z| ≤ 11`, `0 < Im z < 1/2` embeds into it
+(`tailCellBounded_mem_of_regime`).
+
+Banked here (FULLY PROVED, no sorry/admit/axiom):
+* `tailCellBounded_isCompact` via Heine–Borel
+  (`isCompact_iff_isClosed_bounded`: closed preimage of `Icc` under
+  `Complex.continuous_re/im + continuous_abs`, bounded inside
+  `Metric.closedBall 0 12` via `‖z‖^2 = re^2+im^2`);
+* `tailShiftedSReal_continuous` + `tailShiftedSReal_ne_one_of_cell`
+  (closed-cell pole avoidance, so `differentiableAt_riemannZeta` applies);
+* `tailZetaContinuousOnCell` / `tailZetaSubOneContinuousOnCell` by composition
+  (`DifferentiableAt.continuousAt.comp'`);
+* `exists_tailCell_zetaUpper` (`∃ Bcell`) + `exists_tailCell_zetaNearOne`
+  (`∃ dcell`) via `IsCompact.exists_bound_of_continuousOn`;
+* `tailCellGap_of_cellBounds_two`: the numeric test as an implication —
+  cell bounds `Bcell,dcell` with `Bcell*(1/2)+dcell<1` imply the exact
+  Rouché product gap at `K=2` (reuses T2 `norm_product_sub_one_le` +
+  banked `tailMollifierReal_nearOne_two_le`).
+
+Existence-only status: `Bcell,dcell` are existential (compactness gives no
+numerals), so `Bcell*(1/2)+dcell<1` cannot yet be discharged numerically.
+Explicit numerals are the follow-up (functional-equation / Lindelöf-type
+input or certified cell evaluation).
+-/
+
+/-- Bounded two-sided tail cell (closed, hence compact):
+`10 ≤ |Re z| ≤ 11`, `0 ≤ Im z ≤ 1/2`. -/
+def tailCellBounded : Set ℂ :=
+  Complex.re ⁻¹' ((fun x : ℝ => |x|) ⁻¹' Set.Icc (10 : ℝ) 11) ∩
+    Complex.im ⁻¹' Set.Icc (0 : ℝ) (1 / 2)
+
+/-- Strict bounded regime embeds into the closed cell. -/
+theorem tailCellBounded_mem_of_regime (z : ℂ) (hx : (10 : ℝ) < |z.re|)
+    (hle : |z.re| ≤ 11) (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < 1 / 2) :
+    z ∈ tailCellBounded := by
+  simp only [tailCellBounded, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hx.le, hle⟩, hy0.le, hy1.le⟩
+
+/-- The bounded tail cell is closed. -/
+theorem tailCellBounded_isClosed : IsClosed tailCellBounded := by
+  unfold tailCellBounded
+  exact (IsClosed.preimage Complex.continuous_re
+    (IsClosed.preimage continuous_abs isClosed_Icc)).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The bounded tail cell lies in `closedBall 0 12`, hence is bounded. -/
+theorem tailCellBounded_isBounded : Bornology.IsBounded tailCellBounded := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h10, h11⟩, h0, h12⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have habs_re : |z.re| ≤ 11 := h11
+  have habs_im : |z.im| ≤ 1 / 2 := by
+    rw [abs_of_nonneg h0]
+    exact h12
+  have hre2 : z.re * z.re ≤ (11 : ℝ) * 11 := by
+    have h := mul_le_mul habs_re habs_re (abs_nonneg _) (show (0 : ℝ) ≤ 11 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (1 / 2 : ℝ) * (1 / 2) := by
+    have h := mul_le_mul habs_im habs_im (abs_nonneg _)
+      (show (0 : ℝ) ≤ 1 / 2 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (12 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h144 : (11 : ℝ) * 11 + (1 / 2) * (1 / 2) ≤ 12 ^ 2 := by norm_num
+    exact le_trans hsum h144
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The bounded tail cell is compact (Heine–Borel). -/
+theorem tailCellBounded_isCompact : IsCompact tailCellBounded := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨tailCellBounded_isClosed, tailCellBounded_isBounded⟩
+
+/-- The real shifted coordinate is globally continuous. -/
+theorem tailShiftedSReal_continuous : Continuous tailShiftedSReal := by
+  unfold tailShiftedSReal
+  exact continuous_const.add (continuous_const.mul continuous_id)
+
+/-- Closed-cell pole avoidance: shifted cell points are never `1`. -/
+theorem tailShiftedSReal_ne_one_of_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    tailShiftedSReal z ≠ 1 := by
+  intro h
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re h
+  rw [tailShiftedSReal_re, Complex.one_re] at hre
+  obtain ⟨⟨_, _⟩, h0, h12⟩ := hz
+  linarith
+
+/-- Zeta pulled back through the shift is continuous on the cell
+(by `differentiableAt_riemannZeta` + closed-cell pole avoidance). -/
+theorem tailZetaContinuousOnCell :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) tailCellBounded := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := tailShiftedSReal_ne_one_of_cell x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Shifted zeta-minus-one is continuous on the cell. -/
+theorem tailZetaSubOneContinuousOnCell :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z) - 1) tailCellBounded :=
+  tailZetaContinuousOnCell.sub continuousOn_const
+
+/-- Compact-cell zeta upper bound (existential): `∃ Bcell` uniform on the cell. -/
+theorem exists_tailCell_zetaUpper :
+    ∃ Bcell : ℝ, ∀ z ∈ tailCellBounded,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ Bcell :=
+  tailCellBounded_isCompact.exists_bound_of_continuousOn tailZetaContinuousOnCell
+
+/-- Compact-cell zeta-near-one bound (existential): `∃ dcell` uniform on the cell. -/
+theorem exists_tailCell_zetaNearOne :
+    ∃ dcell : ℝ, ∀ z ∈ tailCellBounded,
+      ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ dcell :=
+  tailCellBounded_isCompact.exists_bound_of_continuousOn tailZetaSubOneContinuousOnCell
+
+/-- Cell-gap test as an implication: cell bounds with `Bcell*(1/2)+dcell<1`
+imply the exact `K=2` Rouché product gap on the strict bounded regime. -/
+theorem tailCellGap_of_cellBounds_two {Bcell dcell : ℝ}
+    (hB : ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z)‖ ≤ Bcell)
+    (hd : ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ dcell)
+    (hB0 : 0 ≤ Bcell) (hgap : Bcell * (1 / 2) + dcell < 1)
+    (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hle : |z.re| ≤ 11)
+    (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < 1 / 2) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 := by
+  have hzmem : z ∈ tailCellBounded := tailCellBounded_mem_of_regime z hx hle hy0 hy1
+  have hsplit := norm_product_sub_one_le
+    (riemannZeta (tailShiftedSReal z)) (tailMollifierReal (tailShiftedSReal z) 2)
+  have h1 := hB z hzmem
+  have h2 := tailMollifierReal_nearOne_two_le z
+  have h3 := hd z hzmem
+  have hprod : ‖riemannZeta (tailShiftedSReal z)‖ *
+      ‖tailMollifierReal (tailShiftedSReal z) 2 - 1‖ ≤ Bcell * (1 / 2) :=
+    mul_le_mul h1 h2 (norm_nonneg _) hB0
+  linarith
+
+#print axioms tailCellBounded_isCompact
+#print axioms tailZetaContinuousOnCell
+#print axioms exists_tailCell_zetaUpper
+#print axioms exists_tailCell_zetaNearOne
+#print axioms tailCellGap_of_cellBounds_two
+
+/- Quantified remainder after this block (2026-09-05): BANKED existence-only
+cell bounds `exists_tailCell_zetaUpper` (`∃ Bcell`) + `exists_tailCell_zetaNearOne`
+(`∃ dcell`) on `tailCellBounded` (`10 ≤ |Re| ≤ 11`, `0 ≤ Im ≤ 1/2`), plus the
+conditional test `tailCellGap_of_cellBounds_two`
+(`Bcell*(1/2)+dcell<1 ⇒ K=2 product gap` on the strict bounded regime).
+The numeric side condition is NOT yet discharged (no numerals for
+`Bcell,dcell` — compactness is non-explicit). Exact next-agent task: produce
+EXPLICIT numerals `Bnum,dnum` with proved
+`∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z)‖ ≤ Bnum` and
+`‖zeta-1‖ ≤ dnum` (functional-equation / Lindelöf-type estimate or certified
+cell evaluation with ≤6-digit numerals), then `norm_num`-check
+`Bnum*(1/2)+dnum<1` and compose via `tailCellGap_of_cellBounds_two`. -/
