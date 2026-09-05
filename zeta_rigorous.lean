@@ -29615,3 +29615,271 @@ report-and-stop with residual.
 #print axioms DZ3w_amp21_le_inv638
 #print axioms DZ3w_pair10_re_le_zero_zero_seven_zero_one
 #print axioms DZ3w_saving
+
+/-!
+# Door-3 DZ3x pair-10 MVT closure: `Re <= 0.0673` (zeta lane)
+
+Ownership: append-only tail after `DZ3w_saving` (nothing above touched; no new
+imports; LF endings).
+
+Read-only reuse: `CG_sin_ge_septic` (`:13912`,
+`x - x^3/6 + x^5/120 - x^7/5040 <= sin x` on `x >= 0`), `DZ3v_delta20_mem`
+(`u20 = phase20 - 8*pi in [1.4971, 1.517]`), `DZ3v_theta21_lo/hi`
+(`phase21 in [27.0466, 27.0467]`), `Real.pi_gt_d4/lt_d4`
+(`3.1415 < pi < 3.1416`), `Real.cos_sub_two_pi`, `Real.cos_pi_sub`,
+`DZ3w_amp20_le_inv62` (`A20 <= 1/6.2`), `DZ3w_amp21_le_inv638`
+(`A21 <= 1/6.38`), `DZ3v_pair10_re_eq`, `D3_amp_nonneg`.
+
+Strategy: (i) octic cos majorant `cos x <= 1 - x^2/2 + x^4/24 - x^6/720 +
+x^8/40320` on `x >= 0` bootstrapped over `CG_sin_ge_septic` (mirror of the
+`DZ3u_cos_sextic_lower` proof: `g(t) = P8(t) - cos t` has `g(0) = 0` and
+`g'(t) = sin t - (t - t^3/6 + t^5/120 - t^7/5040) >= 0`); (ii) per-monomial
+endpoints on `u20` (`1 - 1.4971^2/2 + 1.517^4/24 - 1.4971^6/720 +
+1.517^8/40320 = 0.08506751... <= 0.086`, true `cos ~= 0.0538-0.0736`);
+(iii) pi-shift lower for `cos21`: `v = 9*pi - phase21 = pi - (phase21 - 8*pi)
+in [1.2268, 1.2278]`, `cos(phase21) = -cos(v) >= -P8(v) >= -0.338`
+(`1 - 1.2268^2/2 + 1.2278^4/24 - 1.2268^6/720 + 1.2278^8/40320 =
+0.33756301... <= 0.338`, true `cos21 ~= -0.33639`); (iv) refire
+`Re = A20*c20 - A21*c21 <= 1/6.2*0.086 + 1/6.38*0.338 = 0.06684902... <=
+0.0673` (MVT slot `8.771/6.2134/21 <= 0.0673`, CLOSED).
+
+NUMBERS: banked `Re(pair 10) <= 0.0673` (beats DZ3w `0.0701` by `~= 0.0028`;
+beats `DZ3c 2/21 ~= 0.095238` by `~= 0.02794`); `cos20 <= 0.086` (true `~=
+0.0538-0.0736`, slack `~= 0.0124-0.0322`); `cos21 >= -0.338` (true `~=
+-0.33639`, slack `~= 0.00161`); `A20 <= 1/6.2 ~= 0.16129` (true `~=
+0.15851`); `A21 <= 1/6.38 ~= 0.15674` (true `~= 0.15411`).
+True `Re ~= 0.06197`. Residual gap to the MVT norm `0.0673`: `<= 0`
+(CLOSED; previous gap `0.0028`, closed `~= 0.0028`).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3x) Octic Taylor upper for `cos` on `[0, +infty)`.
+    Bootstrap over the septic sine lower: `g(t) = P8(t) - cos t` has
+    `g(0) = 0` and `g'(t) = sin t - (t - t^3/6 + t^5/120 - t^7/5040) >= 0`
+    on `t >= 0` (by `CG_sin_ge_septic`), so `g` is monotone on `Ici 0`. -/
+theorem DZ3x_cos_octic_upper {x : ℝ} (hx : 0 ≤ x) :
+    Real.cos x ≤ 1 - x ^ 2 / 2 + x ^ 4 / 24 - x ^ 6 / 720 + x ^ 8 / 40320 := by
+  have key : ∀ t : ℝ, HasDerivAt
+      (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720 + u ^ 8 / 40320
+        - Real.cos u)
+      (-t + t ^ 3 / 6 - t ^ 5 / 120 + t ^ 7 / 5040 + Real.sin t) t := by
+    intro t
+    have h2 : HasDerivAt (fun u : ℝ => u ^ 2 / 2) t t := by
+      have h := (hasDerivAt_pow 2 t).div_const (2 : ℝ)
+      have e : ((2 : ℕ) : ℝ) * t ^ (2 - 1) / 2 = t := by
+        rw [show (2 - 1 : ℕ) = 1 by decide, pow_one]
+        ring
+      rwa [e] at h
+    have h4 : HasDerivAt (fun u : ℝ => u ^ 4 / 24) (t ^ 3 / 6) t := by
+      have h := (hasDerivAt_pow 4 t).div_const (24 : ℝ)
+      have e : ((4 : ℕ) : ℝ) * t ^ (4 - 1) / 24 = t ^ 3 / 6 := by
+        rw [show (4 - 1 : ℕ) = 3 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have h6 : HasDerivAt (fun u : ℝ => u ^ 6 / 720) (t ^ 5 / 120) t := by
+      have h := (hasDerivAt_pow 6 t).div_const (720 : ℝ)
+      have e : ((6 : ℕ) : ℝ) * t ^ (6 - 1) / 720 = t ^ 5 / 120 := by
+        rw [show (6 - 1 : ℕ) = 5 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have h8 : HasDerivAt (fun u : ℝ => u ^ 8 / 40320) (t ^ 7 / 5040) t := by
+      have h := (hasDerivAt_pow 8 t).div_const (40320 : ℝ)
+      have e : ((8 : ℕ) : ℝ) * t ^ (8 - 1) / 40320 = t ^ 7 / 5040 := by
+        rw [show (8 - 1 : ℕ) = 7 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have hcos : HasDerivAt (fun u : ℝ => Real.cos u) (-Real.sin t) t :=
+      Real.hasDerivAt_cos t
+    have hbase : HasDerivAt
+        (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720 + u ^ 8 / 40320
+          - Real.cos u)
+        (0 - t + t ^ 3 / 6 - t ^ 5 / 120 + t ^ 7 / 5040 - -Real.sin t) t :=
+      ((((hasDerivAt_const t (1 : ℝ)).sub h2).add h4).sub h6).add h8
+        |>.sub hcos
+    have e : (0 : ℝ) - t + t ^ 3 / 6 - t ^ 5 / 120 + t ^ 7 / 5040 - -Real.sin t
+        = -t + t ^ 3 / 6 - t ^ 5 / 120 + t ^ 7 / 5040 + Real.sin t := by
+      ring
+    rwa [e] at hbase
+  have hcont : ContinuousOn
+      (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720 + u ^ 8 / 40320
+        - Real.cos u)
+      (Set.Ici 0) := by
+    fun_prop
+  have hdiff : DifferentiableOn ℝ
+      (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720 + u ^ 8 / 40320
+        - Real.cos u)
+      (interior (Set.Ici 0)) :=
+    fun t _ => (key t).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Ici (0 : ℝ)),
+      0 ≤ deriv
+        (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720 + u ^ 8 / 40320
+          - Real.cos u)
+        t := by
+    intro t ht
+    rw [interior_Ici] at ht
+    have ht0 : (0 : ℝ) ≤ t := le_of_lt (Set.mem_Ioi.mp ht)
+    rw [(key t).deriv]
+    have hq := CG_sin_ge_septic ht0
+    linarith
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hnn
+  have h0x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  have hf0 : (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720
+      + u ^ 8 / 40320 - Real.cos u) 0 = 0 := by
+    norm_num [Real.cos_zero]
+  rw [hf0] at h0x
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3x) `cos(phase20) <= 0.086` via the octic Taylor majorant
+`DZ3x_cos_octic_upper` on `u = phase20 - 8*pi in [1.4971, 1.517]`
+(four `cos_sub_two_pi` steps, per-monomial endpoints). -/
+theorem DZ3x_cos20_upper_octic : Real.cos (D3_phase 20) ≤ (0.086 : ℝ) := by
+  have hmem := DZ3v_delta20_mem
+  have c1 : Real.cos (D3_phase 20 - 2 * Real.pi) = Real.cos (D3_phase 20) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 20 - 4 * Real.pi
+      = (D3_phase 20 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 20 - 4 * Real.pi)
+      = Real.cos (D3_phase 20 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 20 - 6 * Real.pi
+      = (D3_phase 20 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 20 - 6 * Real.pi)
+      = Real.cos (D3_phase 20 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 20 - 8 * Real.pi
+      = (D3_phase 20 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 20 - 8 * Real.pi)
+      = Real.cos (D3_phase 20 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 20 - 8 * Real.pi)
+      = Real.cos (D3_phase 20) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_nn : (0 : ℝ) ≤ D3_phase 20 - 8 * Real.pi := by linarith [hmem.1]
+  have hu_lo : (1.4971 : ℝ) ≤ D3_phase 20 - 8 * Real.pi := hmem.1
+  have hu_hi : D3_phase 20 - 8 * Real.pi ≤ (1.517 : ℝ) := hmem.2
+  have hQ := DZ3x_cos_octic_upper hu_nn
+  have hsq_lo : (1.4971 : ℝ) ^ 2 ≤ (D3_phase 20 - 8 * Real.pi) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 2
+  have h4hi : (D3_phase 20 - 8 * Real.pi) ^ 4 ≤ (1.517 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hu_nn hu_hi 4
+  have h6lo : (1.4971 : ℝ) ^ 6 ≤ (D3_phase 20 - 8 * Real.pi) ^ 6 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 6
+  have h8hi : (D3_phase 20 - 8 * Real.pi) ^ 8 ≤ (1.517 : ℝ) ^ 8 :=
+    pow_le_pow_left₀ hu_nn hu_hi 8
+  have hnum : (1 : ℝ) - (1.4971 : ℝ) ^ 2 / 2 + (1.517 : ℝ) ^ 4 / 24
+      - (1.4971 : ℝ) ^ 6 / 720 + (1.517 : ℝ) ^ 8 / 40320 ≤ 0.086 := by
+    norm_num
+  have hle : 1 - (D3_phase 20 - 8 * Real.pi) ^ 2 / 2
+      + (D3_phase 20 - 8 * Real.pi) ^ 4 / 24
+      - (D3_phase 20 - 8 * Real.pi) ^ 6 / 720
+      + (D3_phase 20 - 8 * Real.pi) ^ 8 / 40320
+      ≤ 1 - (1.4971 : ℝ) ^ 2 / 2 + (1.517 : ℝ) ^ 4 / 24
+        - (1.4971 : ℝ) ^ 6 / 720 + (1.517 : ℝ) ^ 8 / 40320 := by
+    linarith [hsq_lo, h4hi, h6lo, h8hi]
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3x) `-0.338 <= cos(phase21)` via the pi-shift `v = 9*pi - phase21 =
+pi - (phase21 - 8*pi) in [1.2268, 1.2278]` and the octic majorant on `v`
+(`cos(phase21) = -cos(v) >= -P8(v) >= -0.338`). -/
+theorem DZ3x_cos21_lower_octic_pi : (-0.338 : ℝ) ≤ Real.cos (D3_phase 21) := by
+  have hlo := DZ3v_theta21_lo
+  have hhi := DZ3v_theta21_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  set v := 9 * Real.pi - D3_phase 21 with hv_def
+  have hv_lo : (1.2268 : ℝ) ≤ v := by rw [hv_def]; linarith
+  have hv_hi : v ≤ (1.2278 : ℝ) := by rw [hv_def]; linarith
+  have hv_nn : (0 : ℝ) ≤ v := by linarith
+  have c1 : Real.cos (D3_phase 21 - 2 * Real.pi) = Real.cos (D3_phase 21) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 21 - 4 * Real.pi
+      = (D3_phase 21 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 21 - 4 * Real.pi)
+      = Real.cos (D3_phase 21 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 21 - 6 * Real.pi
+      = (D3_phase 21 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 21 - 6 * Real.pi)
+      = Real.cos (D3_phase 21 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 21 - 8 * Real.pi
+      = (D3_phase 21 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 21 - 8 * Real.pi)
+      = Real.cos (D3_phase 21 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 21 - 8 * Real.pi)
+      = Real.cos (D3_phase 21) := by
+    rw [c4, c3, c2, c1]
+  have hveq : v = Real.pi - (D3_phase 21 - 8 * Real.pi) := by
+    rw [hv_def]; ring
+  have hcos_neg : Real.cos v = -Real.cos (D3_phase 21) := by
+    rw [hveq, Real.cos_pi_sub, hred]
+  have hQ := DZ3x_cos_octic_upper hv_nn
+  rw [hcos_neg] at hQ
+  have h2lo : (1.2268 : ℝ) ^ 2 ≤ v ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 2
+  have h4hi : v ^ 4 ≤ (1.2278 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hv_nn hv_hi 4
+  have h6lo : (1.2268 : ℝ) ^ 6 ≤ v ^ 6 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 6
+  have h8hi : v ^ 8 ≤ (1.2278 : ℝ) ^ 8 :=
+    pow_le_pow_left₀ hv_nn hv_hi 8
+  have hnum : (1 : ℝ) - (1.2268 : ℝ) ^ 2 / 2 + (1.2278 : ℝ) ^ 4 / 24
+      - (1.2268 : ℝ) ^ 6 / 720 + (1.2278 : ℝ) ^ 8 / 40320 ≤ 0.338 := by
+    norm_num
+  have hle : 1 - v ^ 2 / 2 + v ^ 4 / 24 - v ^ 6 / 720 + v ^ 8 / 40320
+      ≤ 1 - (1.2268 : ℝ) ^ 2 / 2 + (1.2278 : ℝ) ^ 4 / 24
+        - (1.2268 : ℝ) ^ 6 / 720 + (1.2278 : ℝ) ^ 8 / 40320 := by
+    linarith [h2lo, h4hi, h6lo, h8hi]
+  linarith
+
+/-- (DZ3x) Pair-10 signed Re refire: `Re <= 0.0673`
+(`1/6.2*0.086 + 1/6.38*0.338 = 0.06684902...`, closes the MVT slot). -/
+theorem DZ3x_pair10_re_le_zero_zero_six_seven_three :
+    (etaPairTerm (1 - zetaCellS0) 10).re ≤ (0.0673 : ℝ) := by
+  rw [DZ3v_pair10_re_eq]
+  have hA20 := DZ3w_amp20_le_inv62
+  have hA21 := DZ3w_amp21_le_inv638
+  have hc20 := DZ3x_cos20_upper_octic
+  have hc21 := DZ3x_cos21_lower_octic_pi
+  have h1 : D3_amp 20 * Real.cos (D3_phase 20) ≤ (1 / 6.2 : ℝ) * 0.086 := by
+    have e : D3_amp 20 * Real.cos (D3_phase 20)
+        = D3_amp 20 * 0.086 - D3_amp 20 * (0.086 - Real.cos (D3_phase 20)) := by
+      ring
+    have hnn : (0 : ℝ) ≤ D3_amp 20 * (0.086 - Real.cos (D3_phase 20)) :=
+      mul_nonneg (D3_amp_nonneg 20) (by linarith)
+    have hle : D3_amp 20 * 0.086 ≤ (1 / 6.2 : ℝ) * 0.086 :=
+      mul_le_mul_of_nonneg_right hA20 (by norm_num)
+    linarith
+  have h2 : -(D3_amp 21 * Real.cos (D3_phase 21)) ≤ (1 / 6.38 : ℝ) * 0.338 := by
+    have e : -(D3_amp 21 * Real.cos (D3_phase 21))
+        = D3_amp 21 * 0.338 - D3_amp 21 * (0.338 + Real.cos (D3_phase 21)) := by
+      ring
+    have hnn : (0 : ℝ) ≤ D3_amp 21 * (0.338 + Real.cos (D3_phase 21)) :=
+      mul_nonneg (D3_amp_nonneg 21) (by linarith)
+    have hle : D3_amp 21 * 0.338 ≤ (1 / 6.38 : ℝ) * 0.338 :=
+      mul_le_mul_of_nonneg_right hA21 (by norm_num)
+    linarith
+  have hnum : (1 / 6.2 : ℝ) * 0.086 + (1 / 6.38 : ℝ) * 0.338 ≤ (0.0673 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3x) Closure verdict: `1/6.2*0.086+1/6.38*0.338 <= 0.0673 < 0.0701`,
+MVT slot `8.771/6.2134/21 <= 0.0673` met (residual `0`). -/
+theorem DZ3x_saving :
+    (1 / 6.2 : ℝ) * 0.086 + (1 / 6.38 : ℝ) * 0.338 ≤ (0.0673 : ℝ)
+      ∧ (0.0673 : ℝ) < 0.0701 ∧ (8.771 : ℝ) / 6.2134 / 21 ≤ 0.0673
+      ∧ (0.0701 : ℝ) - 0.0673 = (0.0028 : ℝ) := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+#print axioms DZ3x_cos_octic_upper
+#print axioms DZ3x_cos20_upper_octic
+#print axioms DZ3x_cos21_lower_octic_pi
+#print axioms DZ3x_pair10_re_le_zero_zero_six_seven_three
+#print axioms DZ3x_saving
