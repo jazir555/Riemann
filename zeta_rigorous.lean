@@ -32057,3 +32057,264 @@ theorem DZ3ae_ico16_32_Re_le :
   exact DZ3ad_window16_32_Re_le
 
 #print axioms DZ3ae_ico16_32_Re_le
+
+/-!
+## Door-3 FE bridge (zeta lane): functional-equation zeta uppers for the strip.
+
+Mathlib FE quoted (exact name + location):
+`Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178`
+`theorem riemannZeta_one_sub {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n) (hs' : s ≠ 1) :`
+`    riemannZeta (1 - s) = 2 * (2 * π) ^ (-s) * Gamma s * cos (π * s / 2) * riemannZeta s`
+
+Banked here (FULL proofs, no sorry):
+* `zetaChi`: chi-factor `χ(s) = 2(2π)^{-s} Γ(s) cos(πs/2)`;
+* `zeta_FE_chi`, `zeta_eq_chi_mul_reflected`: FE restated in both directions;
+* `zeta_Dirichlet_le_three`: `‖ζ(s)‖ ≤ 3` for `2 ≤ Re s` (via `hasSum_zeta_two`, `π ≤ 4`);
+* `norm_cos_le_exp_abs_im`: `‖cos z‖ ≤ exp|Im z|` (elementary, via `Complex.two_cos`);
+* `zetaChi_norm_le`: chi-factor upper with ONLY `‖Γ s‖` symbolic
+  (cpow exact-norm + the elementary cos bound);
+* `zeta_reflected_le`: `Re t ≤ -1 → ‖ζ(t)‖ ≤ ‖χ(1-t)‖ * 3`
+  (covers the `Re ≤ -1` slice of the deriv s-image `Re ∈ [-1.61, 2.40]`);
+* `zeta_upper_of_reflected`: conditional strip bridge `‖ζ(s)‖ ≤ C * Z`
+  (plug-in form for the deriv / tail / checker lanes);
+* `chi_cpow_tail_le_one`, `chi_arg_im_le22`, `chi_cos_tail_le`: numeral elementary
+  chi-factors (`≤ 1`, `|Im| ≤ 22`, cos `≤ exp 22`) on the tail s-rect
+  (`Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`);
+* `zeta_tail_rect_of_chi_gamma`: tail-rect upper modulo the TWO explicit missing
+  numerals `G = ‖Γ(1-s)‖` and `Z = ‖ζ(1-s)‖` (feeds the tail lane's `zeta-upper B`).
+
+PRECISE MISSING LEMMA (next agent): an explicit numeral upper `G` for
+`‖Complex.Gamma w‖` on `Re w ∈ [1/2,1]`, `|Im w| ∈ [10,11]`
+(Mathlib has no complex-Gamma norm upper), plus a middle-strip zeta upper `Z`
+for `‖ζ(1-s)‖` on the reflected rect.
+-/
+
+/-- FE chi-factor `χ(s) = 2(2π)^{-s} Γ(s) cos(πs/2)`. -/
+noncomputable def zetaChi (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s * Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- FE restated through `zetaChi` (from Mathlib `riemannZeta_one_sub`). -/
+theorem zeta_FE_chi {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n) (hs' : s ≠ 1) :
+    riemannZeta (1 - s) = zetaChi s * riemannZeta s := by
+  unfold zetaChi
+  rw [riemannZeta_one_sub hs hs']
+
+/-- FE backward: `ζ(s) = χ(1-s) ζ(1-s)`. -/
+theorem zeta_eq_chi_mul_reflected {s : ℂ} (hs1 : ∀ n : ℕ, (1 - s) ≠ -n) (hs2 : (1 - s) ≠ 1) :
+    riemannZeta s = zetaChi (1 - s) * riemannZeta (1 - s) := by
+  have h := zeta_FE_chi (s := 1 - s) hs1 hs2
+  rwa [sub_sub_cancel] at h
+
+/-- Rigorous Dirichlet majorant: `‖ζ(s)‖ ≤ 3` for `2 ≤ Re s` (via `ζ(2) = π²/6`, `π ≤ 4`). -/
+theorem zeta_Dirichlet_le_three {s : ℂ} (hs : 2 ≤ s.re) :
+    ‖riemannZeta s‖ ≤ 3 := by
+  have hs1 : 1 < s.re := by linarith
+  have hs0 : s ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_re] at hs
+    norm_num at hs
+  have hsum : Summable (fun n : ℕ => (1 : ℂ) / (n : ℂ) ^ s) :=
+    Complex.summable_one_div_nat_cpow.mpr hs1
+  have hnorm : Summable (fun n : ℕ => ‖(1 : ℂ) / (n : ℂ) ^ s‖) :=
+    summable_norm_iff.mpr hsum
+  have hRHS : Summable (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) :=
+    hasSum_zeta_two.summable
+  have hval : (∑' n : ℕ, (1 : ℝ) / (n : ℝ) ^ 2) = Real.pi ^ 2 / 6 :=
+    hasSum_zeta_two.tsum_eq
+  have hle : ∀ n : ℕ, ‖(1 : ℂ) / (n : ℂ) ^ s‖ ≤ (1 : ℝ) / (n : ℝ) ^ 2 := by
+    intro n
+    by_cases hn : n = 0
+    · subst hn
+      simp only [Nat.cast_zero]
+      rw [Complex.zero_cpow hs0]
+      simp
+    · have hnpos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+      have hx1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr hn
+      have hcast : ((n : ℕ) : ℂ) = (((n : ℝ)) : ℂ) := by norm_cast
+      rw [hcast, norm_div, norm_one,
+        Complex.norm_cpow_eq_rpow_re_of_pos hnpos s]
+      have hpow_le : ((n : ℝ)) ^ 2 ≤ ((n : ℝ)) ^ s.re := by
+        have h := Real.rpow_le_rpow_of_exponent_le (x := ((n : ℝ))) hx1 (y := 2) (z := s.re)
+          (by linarith)
+        rwa [Real.rpow_two] at h
+      exact one_div_le_one_div_of_le (pow_pos hnpos 2) hpow_le
+  have hpi2 : Real.pi ^ 2 ≤ 16 := by
+    have hpi4 : Real.pi ≤ 4 := Real.pi_le_four
+    have hpi0 : 0 ≤ Real.pi := Real.pi_pos.le
+    nlinarith
+  calc ‖riemannZeta s‖ = ‖∑' n : ℕ, (1 : ℂ) / (n : ℂ) ^ s‖ := by
+        rw [zeta_eq_tsum_one_div_nat_cpow hs1]
+    _ ≤ ∑' n : ℕ, ‖(1 : ℂ) / (n : ℂ) ^ s‖ := norm_tsum_le_tsum_norm hnorm
+    _ ≤ ∑' n : ℕ, (1 : ℝ) / (n : ℝ) ^ 2 := hnorm.tsum_le_tsum hle hRHS
+    _ = Real.pi ^ 2 / 6 := hval
+    _ ≤ 3 := by linarith
+
+/-- Elementary complex-cosine upper: `‖cos z‖ ≤ exp |Im z|` (via `Complex.two_cos`). -/
+theorem norm_cos_le_exp_abs_im (z : ℂ) : ‖Complex.cos z‖ ≤ Real.exp |z.im| := by
+  have h2 : (2 : ℂ) * Complex.cos z
+      = Complex.exp (z * Complex.I) + Complex.exp (-z * Complex.I) :=
+    Complex.two_cos z
+  have e1 : ‖Complex.exp (z * Complex.I)‖ = Real.exp (-z.im) := by
+    rw [Complex.norm_exp]
+    simp [Complex.mul_re]
+  have e2 : ‖Complex.exp (-z * Complex.I)‖ = Real.exp z.im := by
+    rw [Complex.norm_exp]
+    simp [Complex.mul_re]
+  have hcos : Complex.cos z
+      = (Complex.exp (z * Complex.I) + Complex.exp (-z * Complex.I)) / 2 := by
+    have h2ne : (2 : ℂ) ≠ 0 := by norm_num
+    rw [eq_div_iff h2ne]
+    linear_combination h2
+  have hle : ‖Complex.cos z‖ ≤ (Real.exp (-z.im) + Real.exp z.im) / 2 := by
+    rw [hcos, norm_div]
+    have h2n : ‖(2 : ℂ)‖ = 2 := by norm_num
+    rw [h2n, ← e1, ← e2]
+    exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
+  have hmax : (Real.exp (-z.im) + Real.exp z.im) / 2 ≤ Real.exp |z.im| := by
+    have g1 : Real.exp (-z.im) ≤ Real.exp |z.im| :=
+      Real.exp_le_exp.mpr (neg_le_abs _)
+    have g2 : Real.exp z.im ≤ Real.exp |z.im| :=
+      Real.exp_le_exp.mpr (le_abs_self _)
+    linarith
+  exact le_trans hle hmax
+
+/-- Chi-factor upper with only `‖Γ s‖` symbolic (cpow exact-norm + elementary cos bound). -/
+theorem zetaChi_norm_le (s : ℂ) :
+    ‖zetaChi s‖ ≤ 2 * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖
+      * Real.exp |(((Real.pi : ℂ)) * s / 2).im| := by
+  have h2pi : (0 : ℝ) < 2 * Real.pi := by linarith [Real.pi_pos]
+  have hcast : (2 * (Real.pi : ℂ)) = (((2 * Real.pi : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  have hcos := norm_cos_le_exp_abs_im (((Real.pi : ℂ)) * s / 2)
+  have e2 : ‖(2 : ℂ)‖ = 2 := by norm_num
+  have hrnn : (0 : ℝ) ≤ (2 * Real.pi) ^ (-s.re) :=
+    Real.rpow_nonneg (le_of_lt h2pi) _
+  have hgnn : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  unfold zetaChi
+  simp only [norm_mul, e2]
+  rw [hcast, Complex.norm_cpow_eq_rpow_re_of_pos h2pi (-s), Complex.neg_re]
+  exact mul_le_mul_of_nonneg_left hcos (by positivity)
+
+/-- Reflected bound: `Re t ≤ -1 → ‖ζ(t)‖ ≤ ‖χ(1-t)‖ * 3` (FE + Dirichlet majorant).
+Covers the `Re ≤ -1` slice of the deriv s-image `Re ∈ [-1.61, 2.40]`. -/
+theorem zeta_reflected_le {t : ℂ} (ht : t.re ≤ -1) :
+    ‖riemannZeta t‖ ≤ ‖zetaChi (1 - t)‖ * 3 := by
+  have hs : 2 ≤ (1 - t).re := by
+    have e : (1 - t).re = 1 - t.re := by simp
+    linarith
+  have h1 : ∀ n : ℕ, (1 - t) ≠ -n := by
+    intro n hn
+    have hnn : (1 - t).re = -((n : ℝ)) := by
+      rw [hn]
+      simp
+    have hn0 : (0 : ℝ) ≤ ((n : ℝ)) := Nat.cast_nonneg n
+    linarith
+  have h1' : (1 - t) ≠ 1 := by
+    intro h
+    rw [h, Complex.one_re] at hs
+    norm_num at hs
+  have hFE := zeta_FE_chi (s := 1 - t) h1 h1'
+  rw [sub_sub_cancel] at hFE
+  rw [hFE, norm_mul]
+  exact mul_le_mul_of_nonneg_left (zeta_Dirichlet_le_three hs) (norm_nonneg _)
+
+/-- Conditional strip bridge: chi-upper `C` + reflected-zeta-upper `Z` give `‖ζ(s)‖ ≤ C * Z`.
+Plug-in form for the deriv / tail / checker lanes. -/
+theorem zeta_upper_of_reflected {s : ℂ} (hs1 : ∀ n : ℕ, (1 - s) ≠ -n) (hs2 : (1 - s) ≠ 1)
+    (C Z : ℝ) (hC : ‖zetaChi (1 - s)‖ ≤ C) (hZ : ‖riemannZeta (1 - s)‖ ≤ Z) :
+    ‖riemannZeta s‖ ≤ C * Z := by
+  rw [zeta_eq_chi_mul_reflected hs1 hs2, norm_mul]
+  exact mul_le_mul hC hZ (norm_nonneg _) (le_trans (norm_nonneg _) hC)
+
+/-- Cpow chi-factor on the strip side is `≤ 1` (base `2π ≥ 1`, exponent `≤ 0`). -/
+theorem chi_cpow_tail_le_one {s : ℂ} (hs : s.re ≤ 1 / 2) :
+    (2 * Real.pi) ^ (-(1 - s).re) ≤ 1 := by
+  apply Real.rpow_le_one_of_one_le_of_nonpos
+  · have hpi := Real.pi_gt_three
+    linarith
+  · have e : (1 - s).re = 1 - s.re := by simp
+    linarith
+
+/-- The chi-argument imaginary part at `1 - s`. -/
+theorem chi_arg_im_eq (s : ℂ) :
+    ((((Real.pi : ℂ)) * (1 - s) / 2)).im = -(Real.pi * s.im / 2) := by
+  have harg : ((Real.pi : ℂ) * (1 - s) / 2) = (((Real.pi / 2 : ℝ)) : ℂ) * (1 - s) := by
+    push_cast
+    ring
+  rw [harg]
+  have him : ((((Real.pi / 2 : ℝ)) : ℂ) * (1 - s)).im
+      = (Real.pi / 2) * (1 - s).im := by
+    simp [Complex.mul_im]
+  have him2 : (1 - s).im = -s.im := by simp
+  rw [him, him2]
+  ring
+
+/-- `|Im|` of the chi-argument on the tail rect is `≤ 22` (`π ≤ 4`, `|Im| ≤ 11`). -/
+theorem chi_arg_im_le22 {s : ℂ} (hs : |s.im| ≤ 11) :
+    |((((Real.pi : ℂ)) * (1 - s) / 2)).im| ≤ 22 := by
+  rw [chi_arg_im_eq, abs_neg]
+  have hpi4 : Real.pi / 2 ≤ 2 := by linarith [Real.pi_le_four]
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  rw [e]
+  have h2 := mul_le_mul hpi4 hs (abs_nonneg _) (show (0 : ℝ) ≤ 2 by norm_num)
+  linarith
+
+/-- Cos chi-factor on the tail rect is `≤ exp 22` (`π ≤ 4`, `|Im| ≤ 11`). -/
+theorem chi_cos_tail_le {s : ℂ} (hs : |s.im| ≤ 11) :
+    ‖Complex.cos ((Real.pi : ℂ) * (1 - s) / 2)‖ ≤ Real.exp 22 :=
+  le_trans (norm_cos_le_exp_abs_im _) (Real.exp_le_exp.mpr (chi_arg_im_le22 hs))
+
+/-- Tail-rect upper modulo explicit `G`, `Z`: on `Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`,
+`‖ζ(s)‖ ≤ (2*1*G*exp 22) * Z` from `‖Γ(1-s)‖ ≤ G`, `‖ζ(1-s)‖ ≤ Z`.
+Feeds the tail lane's `zeta-upper B` with `B = (2*G*exp 22) * Z`. -/
+theorem zeta_tail_rect_of_chi_gamma {s : ℂ}
+    (_hre0 : 0 ≤ s.re) (hre1 : s.re ≤ 1 / 2) (him_lo : 10 ≤ |s.im|) (him_hi : |s.im| ≤ 11)
+    (G Z : ℝ) (hG : ‖Complex.Gamma (1 - s)‖ ≤ G) (hZ : ‖riemannZeta (1 - s)‖ ≤ Z) :
+    ‖riemannZeta s‖ ≤ (2 * 1 * G * Real.exp 22) * Z := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    have him0 : s.im = 0 := by simp [h]
+    rw [him0, abs_zero] at him_lo
+    norm_num at him_lo
+  have hs1 : ∀ n : ℕ, (1 - s) ≠ -n := by
+    intro n hn
+    have hnn : (1 - s).re = -((n : ℝ)) := by
+      rw [hn]
+      simp
+    have hn0 : (0 : ℝ) ≤ ((n : ℝ)) := Nat.cast_nonneg n
+    have hre : (1 - s).re = 1 - s.re := by simp
+    linarith
+  have hs2 : (1 - s) ≠ 1 := by
+    intro h
+    exact hs0 (by linear_combination -h)
+  have hC : ‖zetaChi (1 - s)‖ ≤ 2 * 1 * G * Real.exp 22 := by
+    have hchi := zetaChi_norm_le (1 - s)
+    have hcpow : (2 * Real.pi) ^ (-(1 - s).re) ≤ 1 := chi_cpow_tail_le_one hre1
+    have him_le : Real.exp |((((Real.pi : ℂ)) * (1 - s) / 2)).im| ≤ Real.exp 22 :=
+      Real.exp_le_exp.mpr (chi_arg_im_le22 him_hi)
+    have hA : 2 * (2 * Real.pi) ^ (-(1 - s).re) * ‖Complex.Gamma (1 - s)‖
+        ≤ 2 * 1 * G := by
+      have h2c : 2 * (2 * Real.pi) ^ (-(1 - s).re) ≤ 2 * 1 :=
+        mul_le_mul_of_nonneg_left hcpow (by norm_num)
+      exact mul_le_mul h2c hG (norm_nonneg _) (by norm_num)
+    have hGnn : (0 : ℝ) ≤ 2 * 1 * G := by
+      have hnn := norm_nonneg (Complex.Gamma (1 - s))
+      linarith
+    exact le_trans hchi (mul_le_mul hA him_le (Real.exp_nonneg _) hGnn)
+  exact zeta_upper_of_reflected hs1 hs2 _ _ hC hZ
+
+#print axioms zeta_FE_chi
+#print axioms zeta_eq_chi_mul_reflected
+#print axioms zeta_Dirichlet_le_three
+#print axioms norm_cos_le_exp_abs_im
+#print axioms zetaChi_norm_le
+#print axioms zeta_reflected_le
+#print axioms zeta_upper_of_reflected
+#print axioms chi_cpow_tail_le_one
+#print axioms chi_arg_im_eq
+#print axioms chi_arg_im_le22
+#print axioms chi_cos_tail_le
+#print axioms zeta_tail_rect_of_chi_gamma
