@@ -23816,3 +23816,269 @@ report-and-stop with residual.
 #print axioms DZ2s_amp19_le_sixth
 #print axioms DZ2s_true_block_le_two_six_zero_two
 #print axioms DZ2s_gap_2602
+/-!
+DZ2t b14 bridge (door-3 middle-upper, fourteenth TRUE peel below 2.602):
+
+* `DZ2t_rpow19_ge_eleven_halves : 11/2 <= 19^(0.605)` (invert below,
+  base `18+1 = 19`; `(11/2)^5 = 161051/32 = 5032.84375 <= 6859 = 19^3`).
+* `DZ2t_amp18_le_two_elevenths : D3_amp 18 <= 2/11` (base `19`).
+* `DZ2t_true_block_le_two_five_eight_four`:
+  `||sum_{Ico 16 32} eta s1|| <= 2.584`
+  = `2*(1/5) + 2/11 + 1/6*8 + 1/7 + 2/15*3 + 1/8`
+  (`23867/9240 = 2.5830086... <= 2.584`; triangle via `norm_sum_le`, per-term
+  `DZ2e_eta_norm`, peel `range 16 = range 15 + {15}` down to
+  `range 3 = range 2 + {2}` with
+  `16+2 = 18`, `16+3 = 19`, `16+4 = 20`, `16+5 = 21`, `16+6 = 22`,
+  `16+7 = 23`, `16+8 = 24`, `16+9 = 25`, `16+10 = 26`, `16+11 = 27`,
+  `16+12 = 28`, `16+13 = 29`, `16+14 = 30`, `16+15 = 31` for the fourteen
+  tight tail terms; head `range 2` stays `<= 1/5` via
+  `DZ2g_true_amp_le_fifth`).
+  Strictly below `2.602` (saves `0.018`) and below `2.635`/`2.668`/`3.0`/`3.2`.
+
+NUMBERS: banked constant `2.584`; gap vs `2.602` is `0.018` strictly below;
+gap vs `2.635` is `0.051`; gap vs `3.2` is `0.616`; need `12/6300 ~= 0.0019048`;
+`2.584/(12/6300) = 1356.6` (was `1366.05` at `2.602`, saves `9.45` ratio
+units; was `1383.375` at `2.635`, saves `26.775`; was `1680` at `3.2`,
+saves `323.4`).
+-/
+
+/-- (DZ2t) `19^(0.605) >= 11/2` via `3/5 <= 0.605` + `(11/2)^5 <= 19^3`. -/
+theorem DZ2t_rpow19_ge_eleven_halves : ((11 / 2 : ℝ)) ≤ (19 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : (((11 / 2 : ℝ)) ^ ((5 : ℕ)))
+      ≤ ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (19 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 19)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 19 3
+    rw [e]
+    norm_num
+  have hstep : ((11 / 2 : ℝ)) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc ((11 / 2 : ℝ)) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (19 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ2t) Fourteenth tail amplitude `D3_amp 18 <= 2/11` (base `18+1 = 19`). -/
+theorem DZ2t_amp18_le_two_elevenths : D3_amp 18 ≤ 2 / 11 := by
+  unfold D3_amp
+  have hcast : ((((18 : ℕ)) : ℝ) + 1 : ℝ) = 19 := by norm_num
+  rw [hcast]
+  have hge := DZ2t_rpow19_ge_eleven_halves
+  have hpos605 : (0 : ℝ) < (19 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (19 : ℝ) ^ (-(0.605 : ℝ))
+      = ((19 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 19) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((19 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (((11 / 2 : ℝ)))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hge
+  have h112 : (((11 / 2 : ℝ)))⁻¹ = 2 / 11 := by norm_num
+  rw [h112] at hinv
+  exact hinv
+
+/-- (DZ2t) Fourteen-times-peeled TRUE block on `[16,32)`: `<= 2.584 < 2.602`. -/
+theorem DZ2t_true_block_le_two_five_eight_four :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 2.584 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n) := by
+    have h := Finset.sum_Ico_eq_sum_range (etaDirichletTerm (1 - zetaCellS0)) 16 32
+    rwa [show (32 - 16 : ℕ) = 16 by norm_num] at h
+  rw [hIco]
+  have hsum_eq : (∑ n ∈ Finset.range 16, ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖)
+      = ∑ n ∈ Finset.range 16, D3_amp (16 + n) :=
+    Finset.sum_congr rfl (fun n _ => DZ2e_eta_norm n)
+  have h2 : (∑ n ∈ Finset.range 2, D3_amp (16 + n)) ≤ 2 * (1 / 5 : ℝ) := by
+    calc ∑ n ∈ Finset.range 2, D3_amp (16 + n)
+        ≤ ∑ _n ∈ Finset.range 2, (1 / 5 : ℝ) :=
+          Finset.sum_le_sum (fun n _ => DZ2g_true_amp_le_fifth n)
+      _ = 2 * (1 / 5 : ℝ) := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+          norm_num
+  have h18 : D3_amp (16 + 2) ≤ 2 / 11 := by
+    have e18 : (16 + 2 : ℕ) = 18 := by norm_num
+    rw [e18]
+    exact DZ2t_amp18_le_two_elevenths
+  have h19 : D3_amp (16 + 3) ≤ 1 / 6 := by
+    have e19 : (16 + 3 : ℕ) = 19 := by norm_num
+    rw [e19]
+    exact DZ2s_amp19_le_sixth
+  have h20 : D3_amp (16 + 4) ≤ 1 / 6 := by
+    have e20 : (16 + 4 : ℕ) = 20 := by norm_num
+    rw [e20]
+    exact DZ2r_amp20_le_sixth
+  have h21 : D3_amp (16 + 5) ≤ 1 / 6 := by
+    have e21 : (16 + 5 : ℕ) = 21 := by norm_num
+    rw [e21]
+    exact DZ2q_amp21_le_sixth
+  have h22 : D3_amp (16 + 6) ≤ 1 / 6 := by
+    have e22 : (16 + 6 : ℕ) = 22 := by norm_num
+    rw [e22]
+    exact DZ2p_amp22_le_sixth
+  have h23 : D3_amp (16 + 7) ≤ 1 / 6 := by
+    have e23 : (16 + 7 : ℕ) = 23 := by norm_num
+    rw [e23]
+    exact DZ2o_amp23_le_sixth
+  have h24 : D3_amp (16 + 8) ≤ 1 / 6 := by
+    have e24 : (16 + 8 : ℕ) = 24 := by norm_num
+    rw [e24]
+    exact DZ2n_amp24_le_sixth
+  have h25 : D3_amp (16 + 9) ≤ 1 / 6 := by
+    have e25 : (16 + 9 : ℕ) = 25 := by norm_num
+    rw [e25]
+    exact DZ2m_amp25_le_sixth
+  have h26 : D3_amp (16 + 10) ≤ 1 / 6 := by
+    have e26 : (16 + 10 : ℕ) = 26 := by norm_num
+    rw [e26]
+    exact DZ2l_amp26_le_sixth
+  have h27 : D3_amp (16 + 11) ≤ 1 / 7 := by
+    have e27 : (16 + 11 : ℕ) = 27 := by norm_num
+    rw [e27]
+    exact DZ2k_amp27_le_seventh
+  have h28 : D3_amp (16 + 12) ≤ 2 / 15 := by
+    have e28 : (16 + 12 : ℕ) = 28 := by norm_num
+    rw [e28]
+    exact DZ2j_amp28_le_two_fifteenths
+  have h29 : D3_amp (16 + 13) ≤ 2 / 15 := by
+    have e29 : (16 + 13 : ℕ) = 29 := by norm_num
+    rw [e29]
+    exact DZ2i_amp29_le_two_fifteenths
+  have h30 : D3_amp (16 + 14) ≤ 2 / 15 := by
+    have e30 : (16 + 14 : ℕ) = 30 := by norm_num
+    rw [e30]
+    exact DZ2h_amp30_le_two_fifteenths
+  have h31 : D3_amp (16 + 15) ≤ 1 / 8 := by
+    have e31 : (16 + 15 : ℕ) = 31 := by norm_num
+    rw [e31]
+    exact DZ2g_amp31_le_eighth
+  have hsplit3 : (∑ n ∈ Finset.range 3, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 2, D3_amp (16 + n)) + D3_amp (16 + 2) := by
+    have e3 : (3 : ℕ) = 2 + 1 := by norm_num
+    rw [e3, Finset.sum_range_succ]
+  have hsplit4 : (∑ n ∈ Finset.range 4, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 3, D3_amp (16 + n)) + D3_amp (16 + 3) := by
+    have e4 : (4 : ℕ) = 3 + 1 := by norm_num
+    rw [e4, Finset.sum_range_succ]
+  have hsplit5 : (∑ n ∈ Finset.range 5, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 4, D3_amp (16 + n)) + D3_amp (16 + 4) := by
+    have e5 : (5 : ℕ) = 4 + 1 := by norm_num
+    rw [e5, Finset.sum_range_succ]
+  have hsplit6 : (∑ n ∈ Finset.range 6, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 5, D3_amp (16 + n)) + D3_amp (16 + 5) := by
+    have e6 : (6 : ℕ) = 5 + 1 := by norm_num
+    rw [e6, Finset.sum_range_succ]
+  have hsplit7 : (∑ n ∈ Finset.range 7, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 6, D3_amp (16 + n)) + D3_amp (16 + 6) := by
+    have e7 : (7 : ℕ) = 6 + 1 := by norm_num
+    rw [e7, Finset.sum_range_succ]
+  have hsplit8 : (∑ n ∈ Finset.range 8, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 7, D3_amp (16 + n)) + D3_amp (16 + 7) := by
+    have e8 : (8 : ℕ) = 7 + 1 := by norm_num
+    rw [e8, Finset.sum_range_succ]
+  have hsplit9 : (∑ n ∈ Finset.range 9, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 8, D3_amp (16 + n)) + D3_amp (16 + 8) := by
+    have e9 : (9 : ℕ) = 8 + 1 := by norm_num
+    rw [e9, Finset.sum_range_succ]
+  have hsplit10 : (∑ n ∈ Finset.range 10, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 9, D3_amp (16 + n)) + D3_amp (16 + 9) := by
+    have e10 : (10 : ℕ) = 9 + 1 := by norm_num
+    rw [e10, Finset.sum_range_succ]
+  have hsplit11 : (∑ n ∈ Finset.range 11, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 10, D3_amp (16 + n)) + D3_amp (16 + 10) := by
+    have e11 : (11 : ℕ) = 10 + 1 := by norm_num
+    rw [e11, Finset.sum_range_succ]
+  have hsplit12 : (∑ n ∈ Finset.range 12, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 11, D3_amp (16 + n)) + D3_amp (16 + 11) := by
+    have e12 : (12 : ℕ) = 11 + 1 := by norm_num
+    rw [e12, Finset.sum_range_succ]
+  have hsplit13 : (∑ n ∈ Finset.range 13, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 12, D3_amp (16 + n)) + D3_amp (16 + 12) := by
+    have e13 : (13 : ℕ) = 12 + 1 := by norm_num
+    rw [e13, Finset.sum_range_succ]
+  have hsplit14 : (∑ n ∈ Finset.range 14, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 13, D3_amp (16 + n)) + D3_amp (16 + 13) := by
+    have e14 : (14 : ℕ) = 13 + 1 := by norm_num
+    rw [e14, Finset.sum_range_succ]
+  have hsplit15 : (∑ n ∈ Finset.range 15, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 14, D3_amp (16 + n)) + D3_amp (16 + 14) := by
+    have e15 : (15 : ℕ) = 14 + 1 := by norm_num
+    rw [e15, Finset.sum_range_succ]
+  have hsplit16 : (∑ n ∈ Finset.range 16, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 15, D3_amp (16 + n)) + D3_amp (16 + 15) := by
+    have e16 : (16 : ℕ) = 15 + 1 := by norm_num
+    rw [e16, Finset.sum_range_succ]
+  have htot : (∑ n ∈ Finset.range 16, D3_amp (16 + n)) ≤ 2.584 := by
+    rw [hsplit16, hsplit15, hsplit14, hsplit13, hsplit12, hsplit11, hsplit10, hsplit9, hsplit8, hsplit7, hsplit6, hsplit5, hsplit4, hsplit3]
+    have hbound : (2 : ℝ) * (1 / 5) + 2 / 11 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 6 + 1 / 7 + 2 / 15 + 2 / 15 + 2 / 15 + 1 / 8 ≤ 2.584 := by norm_num
+    linarith
+  calc ‖∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n)‖
+      ≤ ∑ n ∈ Finset.range 16, ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ :=
+        norm_sum_le _ _
+    _ = ∑ n ∈ Finset.range 16, D3_amp (16 + n) := hsum_eq
+    _ ≤ 2.584 := htot
+
+/-- (DZ2t) Gap verdict for `2.584` vs `12/6300`, vs `2.602`, vs `2.635`, vs `2.668`, vs `3.2`. -/
+theorem DZ2t_gap_2584 :
+    (2.584 : ℝ) / (12 / 6300) = 1356.6 ∧ (2.584 : ℝ) < 2.602
+      ∧ (2.584 : ℝ) < 2.635 ∧ (2.584 : ℝ) < 2.668 ∧ (2.584 : ℝ) < 3.2 ∧ (12 / 6300 : ℝ) < 2.584 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ2t report-and-stop): ONE proved bridge (b14) banked —
+`DZ2t_true_block_le_two_five_eight_four :
+||sum_{Ico 16 32} eta s1|| <= 2.584` (`2 x <=1/5` via
+`DZ2g_true_amp_le_fifth` + `D3_amp 18 <= 2/11` via `DZ2t_rpow19_ge_eleven_halves`
+(`(11/2)^5 = 161051/32 = 5032.84375 <= 6859 = 19^3`) + `D3_amp 19 <= 1/6` via
+`DZ2s_amp19_le_sixth` + `D3_amp 20 <= 1/6` via
+`DZ2r_amp20_le_sixth` + `D3_amp 21 <= 1/6` via
+`DZ2q_amp21_le_sixth` + `D3_amp 22 <= 1/6` via
+`DZ2p_amp22_le_sixth` + `D3_amp 23 <= 1/6` via
+`DZ2o_amp23_le_sixth` + `D3_amp 24 <= 1/6` via
+`DZ2n_amp24_le_sixth` + `D3_amp 25 <= 1/6` via
+`DZ2m_amp25_le_sixth` + `D3_amp 26 <= 1/6` via
+`DZ2l_amp26_le_sixth` + `D3_amp 27 <= 1/7` via
+`DZ2k_amp27_le_seventh` + `D3_amp 28 <= 2/15` via
+`DZ2j_amp28_le_two_fifteenths` + `D3_amp 29 <= 2/15` via
+`DZ2i_amp29_le_two_fifteenths` + `D3_amp 30 <= 2/15` via
+`DZ2h_amp30_le_two_fifteenths` + `D3_amp 31 <= 1/8` via
+`DZ2g_amp31_le_eighth`; `16+2 = 18`, `16+3 = 19`, `16+4 = 20`,
+`16+5 = 21`, `16+6 = 22`, `16+7 = 23`, `16+8 = 24`, `16+9 = 25`,
+`16+10 = 26`, `16+11 = 27`, `16+12 = 28`, `16+13 = 29`, `16+14 = 30`,
+`16+15 = 31` fourteen-tail peel;
+per-term `DZ2e_eta_norm` from `D3_eta_re/im` sign shapes, `|Re|,|Im| <= amp`
+in `DZ2g_true_re_abs_le/im_abs_le`).
+Banked constant `2.584`, strictly below `2.602` by `0.018` (below `2.635` by
+`0.051`, below `2.668` by `0.084`, below `3.2` by `0.616`);
+`2.584/(12/6300) = 1356.6` (`DZ2t_gap_2584`), was `1366.05`
+(saves `9.45` ratio units; was `1383.375`, saves `26.775`; was `1680`,
+saves `323.4`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~1356x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual). Note: `1/6`-shape remains exhausted at base
+`19` (`6^5 = 7776 > 6859`); this bridge uses the new `2/11`-shape at base
+`19` (`161051/32 = 5032.84 <= 6859`, slack `1826.16`) replacing one `1/5`.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2t tail after
+`DZ2t_gap_2584`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `2.584` toward an Abel `<= 2.7`-shape); or
+(b15) a fifteenth TRUE-block tightening below `2.584` (new tail shape for
+`D3_amp 16` or `17` at base `17`/`18`, or fifteen-tail `17..31`
+intervals, reusing `D3_amp`/`DZ2e_offbyone_le` read-only; or genuine `Re/Im`
+cancellation on `k = 16..31` via `D3_eta_re/im` signs). Success = full
+proofs, `#print axioms` exactly `[propext, Classical.choice, Quot.sound]`;
+report-and-stop with residual.
+-/
+
+#print axioms DZ2t_rpow19_ge_eleven_halves
+#print axioms DZ2t_amp18_le_two_elevenths
+#print axioms DZ2t_true_block_le_two_five_eight_four
+#print axioms DZ2t_gap_2584
