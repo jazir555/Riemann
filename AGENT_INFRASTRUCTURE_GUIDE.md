@@ -1704,6 +1704,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **`(G,Z,M,Azeta)=(0.0822,7.5,101.99376,5842)`**, ceil `(0.0822,7.5,102,5842)`
     (`ΔM=−5.9558` vs prior `107.9496` tier). Conditional `(0.026,7.5,32.2608,1848)` untouched.
     Single gap: `‖gammaOf‖ ≤ 0.026` on the R02 rect.
+    **Split-rect shave (`Door3GammaCutR02Split`, H3, `130a03ab`, green 8702 jobs, axioms clean):**
+    low piece `‖Γw‖ ≤ 216.6` (`x ≤ 6.2`) + high piece `D ≥ 2659` ⇒
+    **`(G,Z,M,Azeta)=(0.0818,7.5,101.49744,5814)`** (`ΔM=−0.496`).
+    Split at `x=6.2` unbalanced (`G_low=0.08180` vs `G_high≈0.0702`); optimizer next (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
