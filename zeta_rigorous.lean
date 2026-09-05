@@ -26001,3 +26001,193 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3h_rpow19_ge_five_point_eight
 #print axioms DZ3h_true_block_le_zero_four_seven_seven
 #print axioms DZ3h_gap_0477
+
+/-!
+DZ3i c7 bridge (door-3 middle-upper, seventh TRUE tightening below 0.477):
+
+* `DZ3i_rpow21_ge_six_point_two : 6.2 <= 21^(0.605)` via `3/5 <= 0.605`
+  + `6.2^5 <= 21^3` (`6.2^5 = 9161.32832 <= 9261 = 21^3`, slack `99.67`).
+* `DZ3i_true_block_le_zero_four_seven_five`:
+  `||sum_{Ico 16 32} eta s1|| <= 0.475`
+  = `8.771/5.4/17 + 8.771/5.8/19 + 8.771/6.2/21 + 8.771/6.5/23`
+  + `8.771/6.8/25 + 8.771/7.2/27 + 8.771/7.5/29 + 8.771/7.8/31`
+  (`= 0.47448344... <= 0.475`; replay of `DZ3h_true_block_le_zero_four_seven_seven`
+  with `b2` sharpened `6 -> 6.2` at base `21`; block identity read-only
+  `DZ3c_sum_eq`; pair bound read-only-shape `DZ3g_pair_le_of_base` with
+  `DZ3g_s1_norm_le`; rpow bases read-only `DZ3f_rpow17_ge_five_point_four`,
+  `DZ3h_rpow19_ge_five_point_eight`,
+  `DZ3e_rpow23_ge_six_point_five`,
+  `DZ3e_rpow25_ge_six_point_eight`, `DZ3e_rpow27_ge_seven_point_two`,
+  `DZ3e_rpow29_ge_seven_point_five`, `DZ3e_rpow31_ge_seven_point_eight`).
+  Strictly below `0.477` (saves `0.002`).
+
+NUMBERS: banked `0.475`; gap vs `0.477` is `0.002` strictly below;
+gap vs `0.482` is `0.007`; gap vs `0.485` is `0.010`; gap vs `0.50` is `0.025`;
+need `12/6300 ~= 0.0019048`; `0.475/(12/6300) = 249.375`
+(was `250.425` at `0.477`, saves `1.05` ratio units; was `253.05` at `0.482`,
+saves `3.675`; was `254.625` at `0.485`, saves `5.25`; was `262.5` at `0.50`,
+saves `13.125`).
+-/
+
+/-- (DZ3i) `21^(0.605) >= 6.2` via `3/5 <= 0.605` + `6.2^5 <= 21^3`. -/
+theorem DZ3i_rpow21_ge_six_point_two : (6.2 : ℝ) ≤ (21 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((6.2 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (21 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 21)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 21 3
+    rw [e]
+    norm_num
+  have hstep : (6.2 : ℝ) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (6.2 : ℝ) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (21 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3i) Seventh-tightening TRUE block `<= 0.475 < 0.477` (8 pairs, `8.771` norm, `6.2` at base `21`). -/
+theorem DZ3i_true_block_le_zero_four_seven_five :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.475 := by
+  rw [DZ3c_sum_eq]
+  have b0 : ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ ≤ 8.771 / 5.4 / 17 := by
+    have e0 : (8 + 0 : ℕ) = 8 := by norm_num
+    rw [e0]
+    have hbase : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+    have hc : (5.4 : ℝ) ≤ ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3f_rpow17_ge_five_point_four
+    have h := DZ3g_pair_le_of_base 8 5.4 (by norm_num) hc
+    rwa [hbase] at h
+  have b1 : ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖ ≤ 8.771 / 5.8 / 19 := by
+    have e1 : (8 + 1 : ℕ) = 9 := by norm_num
+    rw [e1]
+    have hbase : ((((2 * 9 + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+    have hc : (5.8 : ℝ) ≤ ((((2 * 9 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3h_rpow19_ge_five_point_eight
+    have h := DZ3g_pair_le_of_base 9 5.8 (by norm_num) hc
+    rwa [hbase] at h
+  have b2 : ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ ≤ 8.771 / 6.2 / 21 := by
+    have e2 : (8 + 2 : ℕ) = 10 := by norm_num
+    rw [e2]
+    have hbase : ((((2 * 10 + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+    have hc : (6.2 : ℝ) ≤ ((((2 * 10 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3i_rpow21_ge_six_point_two
+    have h := DZ3g_pair_le_of_base 10 6.2 (by norm_num) hc
+    rwa [hbase] at h
+  have b3 : ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖ ≤ 8.771 / 6.5 / 23 := by
+    have e3 : (8 + 3 : ℕ) = 11 := by norm_num
+    rw [e3]
+    have hbase : ((((2 * 11 + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+    have hc : (6.5 : ℝ) ≤ ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow23_ge_six_point_five
+    have h := DZ3g_pair_le_of_base 11 6.5 (by norm_num) hc
+    rwa [hbase] at h
+  have b4 : ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ ≤ 8.771 / 6.8 / 25 := by
+    have e4 : (8 + 4 : ℕ) = 12 := by norm_num
+    rw [e4]
+    have hbase : ((((2 * 12 + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+    have hc : (6.8 : ℝ) ≤ ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow25_ge_six_point_eight
+    have h := DZ3g_pair_le_of_base 12 6.8 (by norm_num) hc
+    rwa [hbase] at h
+  have b5 : ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖ ≤ 8.771 / 7.2 / 27 := by
+    have e5 : (8 + 5 : ℕ) = 13 := by norm_num
+    rw [e5]
+    have hbase : ((((2 * 13 + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+    have hc : (7.2 : ℝ) ≤ ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow27_ge_seven_point_two
+    have h := DZ3g_pair_le_of_base 13 7.2 (by norm_num) hc
+    rwa [hbase] at h
+  have b6 : ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ ≤ 8.771 / 7.5 / 29 := by
+    have e6 : (8 + 6 : ℕ) = 14 := by norm_num
+    rw [e6]
+    have hbase : ((((2 * 14 + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+    have hc : (7.5 : ℝ) ≤ ((((2 * 14 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow29_ge_seven_point_five
+    have h := DZ3g_pair_le_of_base 14 7.5 (by norm_num) hc
+    rwa [hbase] at h
+  have b7 : ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ ≤ 8.771 / 7.8 / 31 := by
+    have e7 : (8 + 7 : ℕ) = 15 := by norm_num
+    rw [e7]
+    have hbase : ((((2 * 15 + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+    have hc : (7.8 : ℝ) ≤ ((((2 * 15 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3e_rpow31_ge_seven_point_eight
+    have h := DZ3g_pair_le_of_base 15 7.8 (by norm_num) hc
+    rwa [hbase] at h
+  have hexp : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖)
+      = ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  have htot : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖) ≤ 0.475 := by
+    rw [hexp]
+    have hbound : (8.771 : ℝ) / 5.4 / 17 + 8.771 / 5.8 / 19 + 8.771 / 6.2 / 21 + 8.771 / 6.5 / 23
+        + 8.771 / 6.8 / 25 + 8.771 / 7.2 / 27 + 8.771 / 7.5 / 29 + 8.771 / 7.8 / 31 ≤ 0.475 := by
+      norm_num
+    linarith
+  calc ‖∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)‖
+      ≤ ∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖ :=
+        norm_sum_le _ _
+    _ ≤ 0.475 := htot
+
+/-- (DZ3i) Gap verdict for `0.475` vs `0.477`, vs `0.482`, vs `12/6300`. -/
+theorem DZ3i_gap_0475 :
+    (0.475 : ℝ) < 0.477 ∧ (0.475 : ℝ) < 0.482 ∧ (0.475 : ℝ) < 0.485 ∧ (0.475 : ℝ) < 0.50
+      ∧ (0.475 : ℝ) / (12 / 6300) = 249.375
+      ∧ (12 / 6300 : ℝ) < 0.475 ∧ (0.475 : ℝ) < 2.553 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3i report-and-stop): ONE proved bridge (c7) banked —
+`DZ3i_true_block_le_zero_four_seven_five : ||sum_{Ico 16 32} eta s1|| <= 0.475`
+via sharpened `DZ3i_rpow21_ge_six_point_two`
+(`6.2^5 = 9161.32832 <= 9261 = 21^3`, slack `99.67`; replaces `6` at base `21`);
+`8.771/5.4/17+8.771/5.8/19+8.771/6.2/21+...+8.771/7.8/31=0.47448344... <= 0.475`
+(saves `0.00225` over the `6`-term `0.06961 -> 0.06737`).
+Banked constant `0.475`, strictly below `0.477` by `0.002` (below `0.482` by `0.007`,
+below `0.485` by `0.010`, below `0.50` by `0.025`, below `0.61` by `0.135`);
+`0.475/(12/6300)=249.375` (`DZ3i_gap_0475`), was `250.425`
+(saves `1.05` ratio units; was `253.05`, saves `3.675`; was `254.625`,
+saves `5.25`; was `262.5`, saves `13.125`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~249x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual). Note: `6.2`-shape at base `21`
+(`9161.33 <= 9261`, slack `99.67`) still has headroom (`6.3^5 = 9924.4 > 9261`
+fails, so `6.2` is the maximal one-decimal shape here); next steps: sharper `c`
+at `23` (`6.5 -> 6.7` since `6.7^5 = 13501.3 <= 12167 = 23^3` fails — check
+`tighter candidates via 5th-power test`), at `25..31`, or
+`||s1||` below `8.771` via tighter `zetaCellS0` bounds, or `Re`-only pair sums
+via `DZ3c_pair_re` + `DZ3c_signed_re`, or true-phase prefix caps + `T2_abel_norm`.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3i tail after
+`DZ3i_gap_0475`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `0.475` toward an Abel `<= 0.5`-shape); or
+(c7 again) an eighth tightening below `0.475` (e.g. `Re`-only pair sums via
+`DZ3c_pair_re` + `DZ3c_signed_re` intervals, or sharper `c` at `23..31`
+(`6.5->6.6` at `23` if `6.6^5 <= 23^3`, etc.),
+or `||s1||` below `8.771` via even tighter `zetaCellS0` bounds).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3i_rpow21_ge_six_point_two
+#print axioms DZ3i_true_block_le_zero_four_seven_five
+#print axioms DZ3i_gap_0475
