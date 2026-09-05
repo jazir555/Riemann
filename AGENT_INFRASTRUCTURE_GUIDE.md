@@ -1623,7 +1623,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `d8181c02`, green 8693 jobs, axioms clean):** base-19 floor sharpened (`5.5 → 5.8`:
     `5.8^5 = 6563.57 ≤ 6859`) ⇒ **TRUE block `≤ 0.477`** (now 250× over need). Sharpest
     leads: `6 → 6.2` at base 21, further `23..31` c-sharpenings, `‖s1‖` below `8.771`, or
-    `Re`-only pair sums.
+    `Re`-only pair sums. **Seventh tightening (`DZ3i_*`, G1, `9e345693`, green 8693 jobs,
+    axioms clean):** base-21 floor `6.2` (maximal one-decimal: `6.3^5 = 9924.4 > 9261`
+    fails) ⇒ **TRUE block `≤ 0.475`** (now 249× over need). One-decimal shaping
+    near-exhausted; remaining: two-decimal floors, `‖s1‖` cut, `Re`-only pairs, or prefix
+    caps + Abel.
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
