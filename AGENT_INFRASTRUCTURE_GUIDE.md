@@ -1731,6 +1731,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     split `s=6.03` (`N=215.7`, `D_low=2675`, `D_high=2684`) ⇒
     **`(G,Z,M,Azeta)=(0.0813,7.5,100.87704,5778)`** (`ΔM=−0.248`).
     Next: `G=0.0811` same-shape or third middle piece (tasked).
+    **Finer split (`Door3GammaCutR02SplitFiner`, H6, `db80d5d7`, verified green by H6b,
+    8702 jobs, axioms clean):** same `s=6.03/D=2675/2684` at `G=0.0811` ⇒
+    **`(G,Z,M,Azeta)=(0.0811,7.5,100.62888,5764)`** (`ΔM=−0.248`).
+    Next: `G=0.0809` same-shape or third middle piece (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
