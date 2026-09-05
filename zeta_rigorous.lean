@@ -28770,3 +28770,215 @@ Quot.sound]`; report-and-stop with residual.
 #print axioms DZ3t_cos18_upper_quartic
 #print axioms DZ3t_pair9_re_le_zero_eight_six_six
 #print axioms DZ3t_saving
+
+/-!
+# Door-3 DZ3u pair-9 sextic-cos19-lower bridge: `Re <= 0.08402` (zeta lane)
+
+Ownership: DZ3u append-only tail after `DZ3t_saving`; nothing above touched;
+no new imports; LF endings. Sibling `riemann_hypothesis_newsection.lean`
+(DT in flight), `central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE bridge only (option (a)): sextic cos lower for `cos19`.
+Read-only reuse: `DZ3r_delta19_mem` (`u19 = phase19 - 8*pi in [1.01, 1.10]`),
+`CG_sin_le_quintic` (`sin t <= t - t^3/6 + t^5/120` on `t >= 0`, :13416),
+`DZ3s_amp18_le_inv585` (`A18 <= 1/5.85`), `DZ3t_cos18_upper_quartic`
+(`cos18 <= 0.8567`), `DZ3r_amp19_lower` (`1/6.6 <= A19`),
+`DZ3r_cos18_lower` (nonneg), `DZ3r_pair9_re_eq`, `D3_amp_nonneg`.
+
+Strategy: prove `DZ3u_cos_sextic_lower` (`1 - x^2/2 + x^4/24 - x^6/720 <= cos x`
+on `x >= 0`) by bootstrapping over `CG_sin_le_quintic` (mirror of the
+`CG_cos_le_quartic` proof: `g(t) = cos t - poly6(t)` has `g(0) = 0` and
+`g'(t) = -sin t + t - t^3/6 + t^5/120 >= 0`); then per-monomial endpoints on
+`u19` (`u^2 <= 1.10^2` upper since subtracted, `u^4 >= 1.01^4` lower since
+added, `u^6 <= 1.10^6` upper since subtracted):
+`1 - 1.10^2/2 + 1.01^4/24 - 1.10^6/720 = 0.435898 ~= 0.43590 >= 0.43`
+(true `cos(u19) ~= 0.47140`); refire
+`Re = A18*c18 - A19*c19 <= 1/5.85*0.8567 - 1/6.6*0.43 ~= 0.081293 <= 0.08402`.
+
+NUMBERS: banked `Re(pair 9) <= 0.08402` (beats DZ3t `0.0866` by `~= 0.00258`;
+beats `DZ3c 2/19 ~= 0.105263` by `~= 0.02124`); `cos19 >= 0.43`
+(true `~= 0.47140`, residual slack `~= 0.0414`); `A18 <= 1/5.85 ~= 0.17094`
+(true `~= 0.16840`); `cos18 <= 0.8567` (true `~= 0.80738`).
+True `Re ~= 0.05901`. Residual gap to the DZ3e MVT norm
+`8.78/5.5/19 ~= 0.08401914 <= 0.08402`: `0.08402 - 0.08402 = 0` (CLOSED;
+previous gap `0.00258`, closed `~= 0.00258`).
+-/
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3u) Sextic Taylor lower for `cos` on `[0, +infty)`.
+    Bootstrap over the quintic sine upper: `g(t) = cos t - poly6(t)` has
+    `g(0) = 0` and `g'(t) = -sin t + t - t^3/6 + t^5/120 >= 0` on `t >= 0`
+    (by `CG_sin_le_quintic`), so `g` is monotone on `Ici 0`. -/
+theorem DZ3u_cos_sextic_lower {x : ℝ} (hx : 0 ≤ x) :
+    1 - x ^ 2 / 2 + x ^ 4 / 24 - x ^ 6 / 720 ≤ Real.cos x := by
+  have key : ∀ t : ℝ, HasDerivAt
+      (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+      (-Real.sin t - (-t + t ^ 3 / 6 - t ^ 5 / 120)) t := by
+    intro t
+    have h2 : HasDerivAt (fun u : ℝ => u ^ 2 / 2) t t := by
+      have h := (hasDerivAt_pow 2 t).div_const (2 : ℝ)
+      have e : ((2 : ℕ) : ℝ) * t ^ (2 - 1) / 2 = t := by
+        rw [show (2 - 1 : ℕ) = 1 by decide, pow_one]
+        ring
+      rwa [e] at h
+    have h4 : HasDerivAt (fun u : ℝ => u ^ 4 / 24) (t ^ 3 / 6) t := by
+      have h := (hasDerivAt_pow 4 t).div_const (24 : ℝ)
+      have e : ((4 : ℕ) : ℝ) * t ^ (4 - 1) / 24 = t ^ 3 / 6 := by
+        rw [show (4 - 1 : ℕ) = 3 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have h6 : HasDerivAt (fun u : ℝ => u ^ 6 / 720) (t ^ 5 / 120) t := by
+      have h := (hasDerivAt_pow 6 t).div_const (720 : ℝ)
+      have e : ((6 : ℕ) : ℝ) * t ^ (6 - 1) / 720 = t ^ 5 / 120 := by
+        rw [show (6 - 1 : ℕ) = 5 by decide]
+        push_cast
+        ring
+      rwa [e] at h
+    have hcos : HasDerivAt (fun u : ℝ => Real.cos u) (-Real.sin t) t :=
+      Real.hasDerivAt_cos t
+    have hone : HasDerivAt (fun _ : ℝ => (1 : ℝ)) 0 t := hasDerivAt_const t 1
+    have hP : HasDerivAt (fun u : ℝ => 1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720)
+        (0 - t + t ^ 3 / 6 - t ^ 5 / 120) t :=
+      ((hone.sub h2).add h4).sub h6
+    have hbase : HasDerivAt
+        (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+        (-Real.sin t - (0 - t + t ^ 3 / 6 - t ^ 5 / 120)) t :=
+      hcos.sub hP
+    have e : -Real.sin t - (0 - t + t ^ 3 / 6 - t ^ 5 / 120)
+        = -Real.sin t - (-t + t ^ 3 / 6 - t ^ 5 / 120) := by ring
+    rwa [e] at hbase
+  have hcont : ContinuousOn
+      (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+      (Set.Ici 0) := by
+    fun_prop
+  have hdiff : DifferentiableOn ℝ
+      (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+      (interior (Set.Ici 0)) :=
+    fun t _ => (key t).differentiableAt.differentiableWithinAt
+  have hnn : ∀ t ∈ interior (Set.Ici (0 : ℝ)),
+      0 ≤ deriv
+        (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+        t := by
+    intro t ht
+    rw [interior_Ici] at ht
+    have ht0 : (0 : ℝ) ≤ t := le_of_lt (Set.mem_Ioi.mp ht)
+    rw [(key t).deriv]
+    have hq := CG_sin_le_quintic ht0
+    linarith
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hnn
+  have h0x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  have hf0 : (fun u : ℝ => Real.cos u - (1 - u ^ 2 / 2 + u ^ 4 / 24 - u ^ 6 / 720))
+      0 = 0 := by
+    norm_num [Real.cos_zero]
+  rw [hf0] at h0x
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3u) `0.43 <= cos(phase19)` via the sextic lower on
+`u19 = phase19 - 8*pi in [1.01, 1.10]` (four `cos_sub_two_pi` steps,
+per-monomial endpoints). -/
+theorem DZ3u_cos19_lower_sharp : (0.43 : ℝ) ≤ Real.cos (D3_phase 19) := by
+  have hmem := DZ3r_delta19_mem
+  have c1 : Real.cos (D3_phase 19 - 2 * Real.pi) = Real.cos (D3_phase 19) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 19 - 4 * Real.pi
+      = (D3_phase 19 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 19 - 4 * Real.pi)
+      = Real.cos (D3_phase 19 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 19 - 6 * Real.pi
+      = (D3_phase 19 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 19 - 6 * Real.pi)
+      = Real.cos (D3_phase 19 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 19 - 8 * Real.pi
+      = (D3_phase 19 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 19 - 8 * Real.pi)
+      = Real.cos (D3_phase 19 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 19 - 8 * Real.pi)
+      = Real.cos (D3_phase 19) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_nn : (0 : ℝ) ≤ D3_phase 19 - 8 * Real.pi := by linarith [hmem.1]
+  have hu_lo : (1.01 : ℝ) ≤ D3_phase 19 - 8 * Real.pi := hmem.1
+  have hu_hi : D3_phase 19 - 8 * Real.pi ≤ (1.10 : ℝ) := hmem.2
+  have hS := DZ3u_cos_sextic_lower hu_nn
+  have h2hi : (D3_phase 19 - 8 * Real.pi) ^ 2 ≤ (1.10 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hu_nn hu_hi 2
+  have h4lo : (1.01 : ℝ) ^ 4 ≤ (D3_phase 19 - 8 * Real.pi) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 4
+  have h6hi : (D3_phase 19 - 8 * Real.pi) ^ 6 ≤ (1.10 : ℝ) ^ 6 :=
+    pow_le_pow_left₀ hu_nn hu_hi 6
+  have hnum : (0.43 : ℝ)
+      ≤ 1 - (1.10 : ℝ) ^ 2 / 2 + (1.01 : ℝ) ^ 4 / 24 - (1.10 : ℝ) ^ 6 / 720 := by
+    norm_num
+  have hle : 1 - (1.10 : ℝ) ^ 2 / 2 + (1.01 : ℝ) ^ 4 / 24 - (1.10 : ℝ) ^ 6 / 720
+      ≤ 1 - (D3_phase 19 - 8 * Real.pi) ^ 2 / 2
+        + (D3_phase 19 - 8 * Real.pi) ^ 4 / 24
+        - (D3_phase 19 - 8 * Real.pi) ^ 6 / 720 := by
+    linarith [h2hi, h4lo, h6hi]
+  linarith
+
+/-- (DZ3u) Pair-9 signed Re refire: `Re <= 0.08402`
+(`1/5.85*0.8567 - 1/6.6*0.43 ~= 0.081293`, closes the DZ3e norm gap). -/
+theorem DZ3u_pair9_re_le_zero_eight_four_zero_two :
+    (etaPairTerm (1 - zetaCellS0) 9).re ≤ (0.08402 : ℝ) := by
+  rw [DZ3r_pair9_re_eq]
+  have hA18 := DZ3s_amp18_le_inv585
+  have hA19 := DZ3r_amp19_lower
+  have hc18_up := DZ3t_cos18_upper_quartic
+  have hc18_nn : (0 : ℝ) ≤ Real.cos (D3_phase 18) := by
+    linarith [DZ3r_cos18_lower]
+  have hc19_lo := DZ3u_cos19_lower_sharp
+  have hA19_nn := D3_amp_nonneg 19
+  have hprod18 : D3_amp 18 * Real.cos (D3_phase 18)
+      ≤ (1 / 5.85 : ℝ) * 0.8567 := by
+    have h := mul_le_mul hA18 hc18_up hc18_nn
+      (by norm_num : (0 : ℝ) ≤ 1 / 5.85)
+    exact h
+  have hprod19 : (1 / 6.6 : ℝ) * 0.43
+      ≤ D3_amp 19 * Real.cos (D3_phase 19) := by
+    have h := mul_le_mul hA19 hc19_lo (by norm_num : (0 : ℝ) ≤ 0.43) hA19_nn
+    exact h
+  have hnum : (1 / 5.85 : ℝ) * 0.8567 - (1 / 6.6 : ℝ) * 0.43 ≤ (0.08402 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3u) Saving verdict: `1/5.85*0.8567-1/6.6*0.43 <= 0.08402`,
+at the DZ3e norm (`gap 0`), beats `2/19`. -/
+theorem DZ3u_saving :
+    (1 / 5.85 : ℝ) * 0.8567 - (1 / 6.6 : ℝ) * 0.43 ≤ (0.08402 : ℝ)
+      ∧ (0.08402 : ℝ) < 2 / 19 ∧ (8.78 : ℝ) / 5.5 / 19 ≤ 0.08402 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3u report-and-stop): banked pair-9 sextic-cos19-lower bridge
+(zeta lane) — `DZ3u_cos_sextic_lower` (`1 - x^2/2 + x^4/24 - x^6/720 <= cos x`
+on `x >= 0` via `CG_sin_le_quintic`), `DZ3u_cos19_lower_sharp`
+(`0.43 <= cos(phase19)`, `u19 in [1.01, 1.10]`,
+`1-1.10^2/2+1.01^4/24-1.10^6/720 = 0.435898 >= 0.43`, true `~= 0.47140`),
+refired `DZ3u_pair9_re_le_zero_eight_four_zero_two`
+(`Re <= 1/5.85*0.8567-1/6.6*0.43 ~= 0.081293 <= 0.08402`, beats DZ3t
+`0.0866` by `~= 0.00258`, beats `DZ3c 2/19 ~= 0.105263` by `~= 0.02124`).
+True `Re ~= 0.05901`. Residual gap to the DZ3e MVT norm `0.08402`: `0`
+(CLOSED — `Re <= 0.08402` meets `DV_mid_conditional_012` per-block needs
+when combined with pair-8 `Re <= 0.031` and TRUE block `<= 0.47047`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3u tail after
+`DZ3u_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): start pair-10 `Re` with the
+`log-22/log-21` template (`log 22 = log 2 + log 11` from
+`log_two/eleven_gt/lt_d9`, then `log(21/22) in [-1/21, -1/22]` via
+`log <= x-1` both sides, mirroring `DZ3r_log19_eq` read-only). Success =
+full proofs, `#print axioms` exactly `[propext, Classical.choice,
+Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3u_cos_sextic_lower
+#print axioms DZ3u_cos19_lower_sharp
+#print axioms DZ3u_pair9_re_le_zero_eight_four_zero_two
+#print axioms DZ3u_saving
