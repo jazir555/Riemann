@@ -811,3 +811,251 @@ theorem deriv_xiFourShapeAt_sup_of_gamma152 {Z : ℝ} (hZ0 : 0 ≤ Z) (hZ : Zeta
 #print axioms deriv_GZ_gap_152
 #print axioms deriv_tier_gap_of_gamma152
 #print axioms deriv_xiFourShapeAt_sup_of_gamma152
+
+/-!
+## Door-3 joint-sup / smaller-ball tier route (V5 bridge)
+
+Tier route that does NOT factor through `G * Z ≤ 0.0001`:
+
+* (a) JOINT sup: `JointGZSupCond J` bounds `‖fGamma * fZeta‖ ≤ J` directly on
+  the `s`-image. With poly `63.4` and `fPi ≤ 4` banked above,
+  `‖xiFourShapeAt z‖ ≤ 63.4 * 4 * J` on `closedBall R00c 2`, so the Cauchy
+  rule (margin `r = 1/2`) gives `‖deriv‖ ≤ 2 * (63.4 * 4 * J)`. Tier
+  `63.4 * 4 * J ≤ 1/40` forces `J ≤ 0.0001` (`R00_joint_threshold_for_tier`).
+* (b) SMALLER BALL: triple `(center R00c, R = 1.5, r = 0.24)` with poly sup
+  `57.89` (`10.76 ^ 2 / 2`). `B / r` is WORSE than the `R = 2` baseline
+  (`57.89*4/0.24 > 63.4*4/0.5`, i.e. `964.83 > 507.2`), and the joint tier
+  threshold tightens to `J ≤ 0.00006`. Smaller ball is a quantified no-go.
+* (c) LOCALIZE: `sImageRect = Lo ∪ Hi` split at `s.re = 0.39/0.40` with
+  per-piece joint sups combining to `max J1 J2`.
+
+Verdict vs `0.05`: at the mpmath-suggestive scale `J = 0.03`,
+`63.4*4*0.03 = 7.608 > 1/40` and the deriv bound `2*7.608 = 15.216 > 0.05`
+(`R00_joint_dead_at_003`) — the joint route misses the tier by ~300x, the
+smaller ball by ~600x. No route clears `0.05`; the factorization gap is
+confirmed, not bypassed.
+
+Numerals used (all ≤ 6 digits): `57.89`, `10.26`, `10.76`, `0.24`, `1.5`,
+`0.40`, `0.39`, `0.0001`, `0.00006`, `0.03`, `0.02536`, `0.05789`.
+-/
+
+/-- Joint Gamma-zeta product sup on the `s`-image (no factorization). -/
+def JointGZSupCond (J : ℝ) : Prop :=
+  ∀ s : ℂ, sImageRect s → ‖fGamma_shape s * fZeta_shape s‖ ≤ J
+
+/-- Poly-times-pi sup on the ball: `‖poly * fPi‖ ≤ 63.4 * 4`. -/
+theorem R00_poly_pi_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖(((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+      fPi_shape (shiftedS_shape z)‖ ≤ 63.4 * 4 := by
+  have hpoly : ∀ w ∈ closedBall R00c 2,
+      ‖((1 / 2 : ℂ) + Complex.I * w) * (((1 / 2 : ℂ) + Complex.I * w) - 1) / 2‖ ≤
+        63.4 :=
+    fun w hw => shiftedS_poly_shape_sup_on_ball w hw
+  have hpi : ∀ w ∈ closedBall R00c 2, ‖fPi_shape (shiftedS_shape w)‖ ≤ 4 :=
+    fun w hw => fPi_shape_sup_on_sImage _ (shiftedS_shape_mem_sImage_of_mem_ball hw)
+  exact norm_sup_mul_of_factor_sups (by norm_num) (by norm_num) hpoly hpi z hz
+
+/-- Joint four-factor `ξ` sup on the ball: `‖xiFourShapeAt z‖ ≤ 63.4 * 4 * J`
+under `JointGZSupCond J` (regrouped as `(poly * pi) * (Gamma * zeta)`). -/
+theorem R00_xi_joint_sup_of_conds {J : ℝ} (hJ0 : 0 ≤ J) (hJ : JointGZSupCond J)
+    (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖xiFourShapeAt z‖ ≤ 63.4 * 4 * J := by
+  have hPP : ∀ w ∈ closedBall R00c 2,
+      ‖(((1 / 2 : ℂ) + Complex.I * w) * (((1 / 2 : ℂ) + Complex.I * w) - 1) / 2) *
+        fPi_shape (shiftedS_shape w)‖ ≤ 63.4 * 4 :=
+    fun w hw => R00_poly_pi_sup_on_ball w hw
+  have hJJ : ∀ w ∈ closedBall R00c 2,
+      ‖fGamma_shape (shiftedS_shape w) * fZeta_shape (shiftedS_shape w)‖ ≤ J :=
+    fun w hw => hJ _ (shiftedS_shape_mem_sImage_of_mem_ball hw)
+  have h := norm_sup_mul_of_factor_sups (by norm_num : (0 : ℝ) ≤ 63.4 * 4) hJ0
+    hPP hJJ z hz
+  have e : xiFourShapeAt z =
+      ((((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+        fPi_shape (shiftedS_shape z)) *
+      (fGamma_shape (shiftedS_shape z) * fZeta_shape (shiftedS_shape z)) := by
+    unfold xiFourShapeAt
+    ring
+  rw [e]
+  exact h
+
+/-- Joint tier threshold: `63.4 * 4 * J ≤ 1 / 40` forces `J ≤ 0.0001`
+(`63.4 * 4 * 0.0001 = 0.02536 > 1 / 40`). -/
+theorem R00_joint_threshold_for_tier {J : ℝ} (h : 63.4 * 4 * J ≤ 1 / 40) :
+    J ≤ 0.0001 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 63.4 * 4 := by norm_num
+  have h2 : (63.4 * 4 : ℝ) * 0.0001 < (63.4 * 4) * J :=
+    mul_lt_mul_of_pos_left hc hpos
+  have e1 : (63.4 * 4 : ℝ) * 0.0001 = 0.02536 := by norm_num
+  have e2 : (63.4 * 4 : ℝ) * J = 63.4 * 4 * J := by ring
+  rw [e1, e2] at h2
+  linarith
+
+/-- Conditional deriv bound for the joint route (margin `r = 1 / 2`). -/
+theorem R00_deriv_bound_of_joint_conds {J : ℝ} (hJ0 : 0 ≤ J)
+    (hJ : JointGZSupCond J)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv xiFourShapeAt w‖ ≤ 2 * (63.4 * 4 * J) := by
+  have hB : ∀ z ∈ closedBall R00c 2, ‖xiFourShapeAt z‖ ≤ 63.4 * 4 * J :=
+    fun z hz => R00_xi_joint_sup_of_conds hJ0 hJ z hz
+  have hsub : ‖w - R00c‖ ≤ 1.26 := R00Rect_norm_sub_le w hw
+  have hw' : ‖w - R00c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : (63.4 * 4 * J) / (1 / 2 : ℝ) = 2 * (63.4 * 4 * J) := by ring
+  rwa [heq] at h
+
+/-- Conditional joint tier closure: `63.4 * 4 * J ≤ 1 / 40` gives `‖deriv‖ ≤ 0.05`. -/
+theorem R00_deriv_meets_tier_of_joint_conds {J : ℝ} (hJ0 : 0 ≤ J)
+    (hJ : JointGZSupCond J)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w)
+    (hTier : 63.4 * 4 * J ≤ 1 / 40) :
+    ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  have h := R00_deriv_bound_of_joint_conds hJ0 hJ hd hw
+  linarith
+
+/-- Numeric verdict at the suggestive scale `J = 0.03`:
+`63.4*4*0.03 = 7.608` exceeds `1/40` (~300x) and the deriv bound `15.216`
+exceeds `0.05` (~300x). The joint route does not clear the tier. -/
+theorem R00_joint_dead_at_003 :
+    (1 / 40 : ℝ) < 63.4 * 4 * 0.03 ∧ (0.05 : ℝ) < 2 * (63.4 * 4 * 0.03) := by
+  constructor <;> norm_num
+
+/-- Every `z ∈ closedBall R00c 1.5` satisfies `‖z‖ ≤ 10.26`. -/
+theorem mem_closedBall15_norm_le {z : ℂ} (hz : z ∈ closedBall R00c 1.5) :
+    ‖z‖ ≤ 10.26 := by
+  rw [mem_closedBall, dist_eq_norm] at hz
+  calc ‖z‖ = ‖(z - R00c) + R00c‖ := by congr 1; abel
+    _ ≤ ‖z - R00c‖ + ‖R00c‖ := norm_add_le _ _
+    _ ≤ 1.5 + 8.76 := add_le_add hz R00c_norm_le
+    _ = 10.26 := by norm_num
+
+/-- Smaller-ball poly sup: `‖s * (s - 1) / 2‖ ≤ 57.89` on `closedBall R00c 1.5`
+(`10.76 * 10.76 / 2 = 57.8888 ≤ 57.89`). -/
+theorem R00_smallball_poly_sup_15 (z : ℂ) (hz : z ∈ closedBall R00c 1.5) :
+    ‖((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2‖ ≤
+      57.89 := by
+  have hn : ‖z‖ ≤ 10.26 := mem_closedBall15_norm_le hz
+  have hIz : ‖Complex.I * z‖ = ‖z‖ := by rw [norm_mul, Complex.norm_I, one_mul]
+  have h12 : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp [Complex.norm_div, Complex.norm_ofNat]
+  have hs : ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤ 10.76 := by
+    calc ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤ ‖(1 / 2 : ℂ)‖ + ‖Complex.I * z‖ :=
+          norm_add_le _ _
+      _ = 1 / 2 + ‖z‖ := by rw [hIz, h12]
+      _ ≤ 1 / 2 + 10.26 := add_le_add le_rfl hn
+      _ = 10.76 := by norm_num
+  have hs1 : ‖((1 / 2 : ℂ) + Complex.I * z) - 1‖ ≤ 10.76 := by
+    have e : ((1 / 2 : ℂ) + Complex.I * z) - 1 = Complex.I * z - (1 / 2 : ℂ) := by
+      ring
+    rw [e]
+    calc ‖Complex.I * z - (1 / 2 : ℂ)‖ ≤ ‖Complex.I * z‖ + ‖(1 / 2 : ℂ)‖ :=
+          norm_sub_le _ _
+      _ = ‖z‖ + 1 / 2 := by rw [hIz, h12]
+      _ ≤ 10.26 + 1 / 2 := add_le_add hn le_rfl
+      _ = 10.76 := by norm_num
+  have hmul : ‖(1 / 2 : ℂ) + Complex.I * z‖ *
+      ‖((1 / 2 : ℂ) + Complex.I * z) - 1‖ ≤ 10.76 * 10.76 :=
+    mul_le_mul hs hs1 (norm_nonneg _) (by norm_num)
+  have h2 : ‖(2 : ℂ)‖ = (2 : ℝ) := by simp [Complex.norm_ofNat]
+  have hv : (10.76 : ℝ) * 10.76 / 2 ≤ 57.89 := by norm_num
+  rw [Complex.norm_div, norm_mul, h2]
+  linarith
+
+/-- Smaller-ball no-go: `B / r` at `(R, r) = (1.5, 0.24)` is strictly worse
+than the `R = 2` baseline (`964.83 > 507.2`). Shrinking the ball loses. -/
+theorem R00_smallball_factor_no_go :
+    (63.4 * 4 / 0.5 : ℝ) < 57.89 * 4 / 0.24 := by
+  norm_num
+
+/-- Smaller-ball conditional deriv bound for the joint route
+(`R = 1.5`, margin `r = 0.24`: `1.26 + 0.24 = 1.50`). -/
+theorem R00_smallball_deriv_bound_of_joint {J : ℝ} (hJ0 : 0 ≤ J)
+    (hJ : JointGZSupCond J)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 1.5)) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv xiFourShapeAt w‖ ≤ (57.89 * 4 * J) / 0.24 := by
+  have hsub : ‖w - R00c‖ ≤ 1.26 := R00Rect_norm_sub_le w hw
+  have hw' : ‖w - R00c‖ + (0.24 : ℝ) ≤ 1.5 := by linarith
+  have hB : ∀ z ∈ closedBall R00c 1.5, ‖xiFourShapeAt z‖ ≤ 57.89 * 4 * J := by
+    intro z hz
+    have hz2 : z ∈ closedBall R00c 2 := by
+      have h1 : dist z R00c ≤ 1.5 := mem_closedBall.mp hz
+      have h2 : dist z R00c ≤ (2 : ℝ) := le_trans h1 (by norm_num)
+      exact mem_closedBall.mpr h2
+    have h1 := R00_smallball_poly_sup_15 z hz
+    have h2 := fPi_shape_sup_on_sImage _ (shiftedS_shape_mem_sImage_of_mem_ball hz2)
+    have hPP : ‖(((1 / 2 : ℂ) + Complex.I * z) *
+        (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+        fPi_shape (shiftedS_shape z)‖ ≤ 57.89 * 4 := by
+      rw [norm_mul]
+      exact mul_le_mul h1 h2 (norm_nonneg _) (by norm_num)
+    have hJJ : ‖fGamma_shape (shiftedS_shape z) * fZeta_shape (shiftedS_shape z)‖ ≤ J :=
+      hJ _ (shiftedS_shape_mem_sImage_of_mem_ball hz2)
+    have e : xiFourShapeAt z =
+        ((((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+          fPi_shape (shiftedS_shape z)) *
+        (fGamma_shape (shiftedS_shape z) * fZeta_shape (shiftedS_shape z)) := by
+      unfold xiFourShapeAt
+      ring
+    rw [e, norm_mul]
+    exact mul_le_mul hPP hJJ (norm_nonneg _) (by norm_num : (0 : ℝ) ≤ 57.89 * 4)
+  exact deriv_bound_of_sphere_sup_on_ball hd hB (show (0 : ℝ) < 0.24 by norm_num) hw'
+
+/-- Smaller-ball joint threshold: `(57.89*4*J)/0.24 ≤ 0.05` forces
+`J ≤ 0.00006` (strictly tighter than the `R = 2` threshold `0.0001`). -/
+theorem R00_smallball_joint_threshold {J : ℝ} (h : (57.89 * 4 * J) / 0.24 ≤ 0.05) :
+    J ≤ 0.00006 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 57.89 * 4 / 0.24 := by norm_num
+  have h2 : (57.89 * 4 / 0.24 : ℝ) * 0.00006 < (57.89 * 4 / 0.24) * J :=
+    mul_lt_mul_of_pos_left hc hpos
+  have e1 : (57.89 * 4 / 0.24 : ℝ) * 0.00006 = 0.05789 := by norm_num
+  have e2 : (57.89 * 4 / 0.24 : ℝ) * J = (57.89 * 4 * J) / 0.24 := by ring
+  rw [e1, e2] at h2
+  linarith
+
+/-- Lower half of the `s`-image split (`s.re ≤ 0.40`). -/
+def sImageRectLo (s : ℂ) : Prop :=
+  (-1.61 : ℝ) ≤ s.re ∧ s.re ≤ 0.40 ∧ (-10.75 : ℝ) ≤ s.im ∧ s.im ≤ (-6.75 : ℝ)
+
+/-- Upper half of the `s`-image split (`0.39 ≤ s.re`, overlapping `Lo`). -/
+def sImageRectHi (s : ℂ) : Prop :=
+  (0.39 : ℝ) ≤ s.re ∧ s.re ≤ 2.40 ∧ (-10.75 : ℝ) ≤ s.im ∧ s.im ≤ (-6.75 : ℝ)
+
+/-- The `s`-image rectangle is covered by the two halves. -/
+theorem sImageRect_cover_lo_hi {s : ℂ} (hs : sImageRect s) :
+    sImageRectLo s ∨ sImageRectHi s := by
+  obtain ⟨hlo, hhi, himlo, himhi⟩ := hs
+  unfold sImageRectLo sImageRectHi
+  by_cases hc : s.re ≤ 0.40
+  · left
+    exact ⟨hlo, hc, himlo, himhi⟩
+  · right
+    push_neg at hc
+    exact ⟨by linarith, hhi, himlo, himhi⟩
+
+/-- Localization: per-half joint sups combine to `max J1 J2` on the whole image. -/
+theorem joint_sup_of_split {J1 J2 : ℝ}
+    (h1 : ∀ s : ℂ, sImageRectLo s → ‖fGamma_shape s * fZeta_shape s‖ ≤ J1)
+    (h2 : ∀ s : ℂ, sImageRectHi s → ‖fGamma_shape s * fZeta_shape s‖ ≤ J2) :
+    JointGZSupCond (max J1 J2) := by
+  intro s hs
+  rcases sImageRect_cover_lo_hi hs with h | h
+  · exact le_trans (h1 s h) (le_max_left _ _)
+  · exact le_trans (h2 s h) (le_max_right _ _)
+
+#print axioms JointGZSupCond
+#print axioms R00_poly_pi_sup_on_ball
+#print axioms R00_xi_joint_sup_of_conds
+#print axioms R00_joint_threshold_for_tier
+#print axioms R00_deriv_bound_of_joint_conds
+#print axioms R00_deriv_meets_tier_of_joint_conds
+#print axioms R00_joint_dead_at_003
+#print axioms mem_closedBall15_norm_le
+#print axioms R00_smallball_poly_sup_15
+#print axioms R00_smallball_factor_no_go
+#print axioms R00_smallball_deriv_bound_of_joint
+#print axioms R00_smallball_joint_threshold
+#print axioms sImageRect_cover_lo_hi
+#print axioms joint_sup_of_split
