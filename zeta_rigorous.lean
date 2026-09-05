@@ -26191,3 +26191,348 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3i_rpow21_ge_six_point_two
 #print axioms DZ3i_true_block_le_zero_four_seven_five
 #print axioms DZ3i_gap_0475
+
+/-!
+DZ3j c8 bridge (door-3 middle-upper, eighth TRUE tightening below 0.475):
+
+Two-decimal per-base floors (maximal at two decimals; next hundredth fails
+via `c^5 <= base^3` integer test `k^5 <= base^3 * 10^10`):
+
+* base 17: `5.47` (`547^5=48970736047507 <= 49130000000000=17^3*10^10`,
+  slack `159263952493`; `5.48^5=49420005843968 > 49130000000000` fails).
+* base 19: `5.85` (`585^5=68514001115625 <= 68590000000000`,
+  slack `75998884375`; `5.86` fails).
+* base 21: `6.21` (`621^5=92354487127101 <= 92610000000000`,
+  slack `255512872899`; `6.22` fails; `6.3^5=99243654300000 > 92610000000000` fails).
+* base 23: `6.56` (`656^5=121484031819776 <= 121670000000000`,
+  slack `185968180224`; `6.57` fails; `6.6^5=125233257600000 > 121670000000000` fails).
+* base 25: `6.89` (`689^5=155273059182449 <= 156250000000000`,
+  slack `976940817551`; `6.90` fails).
+* base 27: `7.22` (`722^5=196194120249632 <= 196830000000000`,
+  slack `635879750368`; `7.23` fails).
+* base 29: `7.54` (`754^5=243700673461024 <= 243890000000000`,
+  slack `189326538976`; `7.55` fails).
+* base 31: `7.84` (`784^5=296196766695424 <= 297910000000000`,
+  slack `1713233304576`; `7.85` fails).
+
+* `DZ3j_true_block_le_zero_four_seven_one`:
+  `||sum_{Ico 16 32} eta s1|| <= 0.471`
+  = `8.771/5.47/17 + 8.771/5.85/19 + 8.771/6.21/21 + 8.771/6.56/23`
+  + `8.771/6.89/25 + 8.771/7.22/27 + 8.771/7.54/29 + 8.771/7.84/31`
+  (`= 0.47073747... <= 0.471`; replay of `DZ3i_true_block_le_zero_four_seven_five`
+  with all eight `c` sharpened to two decimals; block identity read-only
+  `DZ3c_sum_eq`; pair bound read-only-shape `DZ3g_pair_le_of_base` with
+  `DZ3g_s1_norm_le`). Strictly below `0.475` (saves `0.004`).
+
+NUMBERS: banked `0.471`; gap vs `0.475` is `0.004` strictly below;
+gap vs `0.477` is `0.006`; gap vs `0.482` is `0.011`; gap vs `0.485` is `0.014`;
+gap vs `0.50` is `0.029`;
+need `12/6300 ~= 0.0019048`; `0.471/(12/6300) = 247.275`
+(was `249.375` at `0.475`, saves `2.1` ratio units; was `250.425` at `0.477`,
+saves `3.15`; was `253.05` at `0.482`, saves `5.775`).
+-/
+
+/-- (DZ3j) `17^(0.605) >= 5.47` via `3/5 <= 0.605` + `5.47^5 <= 17^3`. -/
+theorem DZ3j_rpow17_ge_five_point_four_seven : (5.47 : ℝ) ≤ (17 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((5.47 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((17 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((17 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (17 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 17)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 17 3
+    rw [e]
+    norm_num
+  have hstep : (5.47 : ℝ) ≤ (17 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (5.47 : ℝ) ≤ (17 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (17 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `19^(0.605) >= 5.85` via `3/5 <= 0.605` + `5.85^5 <= 19^3`. -/
+theorem DZ3j_rpow19_ge_five_point_eight_five : (5.85 : ℝ) ≤ (19 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((5.85 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((19 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (19 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 19)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 19 3
+    rw [e]
+    norm_num
+  have hstep : (5.85 : ℝ) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (5.85 : ℝ) ≤ (19 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (19 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `21^(0.605) >= 6.21` via `3/5 <= 0.605` + `6.21^5 <= 21^3`. -/
+theorem DZ3j_rpow21_ge_six_point_two_one : (6.21 : ℝ) ≤ (21 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((6.21 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((21 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (21 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 21)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 21 3
+    rw [e]
+    norm_num
+  have hstep : (6.21 : ℝ) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (6.21 : ℝ) ≤ (21 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (21 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `23^(0.605) >= 6.56` via `3/5 <= 0.605` + `6.56^5 <= 23^3`. -/
+theorem DZ3j_rpow23_ge_six_point_five_six : (6.56 : ℝ) ≤ (23 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((6.56 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((23 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((23 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (23 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 23)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 23 3
+    rw [e]
+    norm_num
+  have hstep : (6.56 : ℝ) ≤ (23 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (6.56 : ℝ) ≤ (23 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (23 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `25^(0.605) >= 6.89` via `3/5 <= 0.605` + `6.89^5 <= 25^3`. -/
+theorem DZ3j_rpow25_ge_six_point_eight_nine : (6.89 : ℝ) ≤ (25 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((6.89 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((25 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((25 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (25 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 25)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 25 3
+    rw [e]
+    norm_num
+  have hstep : (6.89 : ℝ) ≤ (25 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (6.89 : ℝ) ≤ (25 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (25 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `27^(0.605) >= 7.22` via `3/5 <= 0.605` + `7.22^5 <= 27^3`. -/
+theorem DZ3j_rpow27_ge_seven_point_two_two : (7.22 : ℝ) ≤ (27 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((7.22 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((27 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((27 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (27 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 27)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 27 3
+    rw [e]
+    norm_num
+  have hstep : (7.22 : ℝ) ≤ (27 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (7.22 : ℝ) ≤ (27 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (27 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `29^(0.605) >= 7.54` via `3/5 <= 0.605` + `7.54^5 <= 29^3`. -/
+theorem DZ3j_rpow29_ge_seven_point_five_four : (7.54 : ℝ) ≤ (29 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((7.54 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((29 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((29 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (29 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 29)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 29 3
+    rw [e]
+    norm_num
+  have hstep : (7.54 : ℝ) ≤ (29 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (7.54 : ℝ) ≤ (29 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (29 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) `31^(0.605) >= 7.84` via `3/5 <= 0.605` + `7.84^5 <= 31^3`. -/
+theorem DZ3j_rpow31_ge_seven_point_eight_four : (7.84 : ℝ) ≤ (31 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((7.84 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((31 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((31 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (31 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 31)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 31 3
+    rw [e]
+    norm_num
+  have hstep : (7.84 : ℝ) ≤ (31 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (7.84 : ℝ) ≤ (31 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (31 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3j) Eighth-tightening TRUE block `<= 0.471 < 0.475` (8 pairs, two-decimal floors). -/
+theorem DZ3j_true_block_le_zero_four_seven_one :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.471 := by
+  rw [DZ3c_sum_eq]
+  have b0 : ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ ≤ 8.771 / 5.47 / 17 := by
+    have e0 : (8 + 0 : ℕ) = 8 := by norm_num
+    rw [e0]
+    have hbase : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+    have hc : (5.47 : ℝ) ≤ ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow17_ge_five_point_four_seven
+    have h := DZ3g_pair_le_of_base 8 5.47 (by norm_num) hc
+    rwa [hbase] at h
+  have b1 : ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖ ≤ 8.771 / 5.85 / 19 := by
+    have e1 : (8 + 1 : ℕ) = 9 := by norm_num
+    rw [e1]
+    have hbase : ((((2 * 9 + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+    have hc : (5.85 : ℝ) ≤ ((((2 * 9 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow19_ge_five_point_eight_five
+    have h := DZ3g_pair_le_of_base 9 5.85 (by norm_num) hc
+    rwa [hbase] at h
+  have b2 : ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ ≤ 8.771 / 6.21 / 21 := by
+    have e2 : (8 + 2 : ℕ) = 10 := by norm_num
+    rw [e2]
+    have hbase : ((((2 * 10 + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+    have hc : (6.21 : ℝ) ≤ ((((2 * 10 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow21_ge_six_point_two_one
+    have h := DZ3g_pair_le_of_base 10 6.21 (by norm_num) hc
+    rwa [hbase] at h
+  have b3 : ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖ ≤ 8.771 / 6.56 / 23 := by
+    have e3 : (8 + 3 : ℕ) = 11 := by norm_num
+    rw [e3]
+    have hbase : ((((2 * 11 + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+    have hc : (6.56 : ℝ) ≤ ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow23_ge_six_point_five_six
+    have h := DZ3g_pair_le_of_base 11 6.56 (by norm_num) hc
+    rwa [hbase] at h
+  have b4 : ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ ≤ 8.771 / 6.89 / 25 := by
+    have e4 : (8 + 4 : ℕ) = 12 := by norm_num
+    rw [e4]
+    have hbase : ((((2 * 12 + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+    have hc : (6.89 : ℝ) ≤ ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow25_ge_six_point_eight_nine
+    have h := DZ3g_pair_le_of_base 12 6.89 (by norm_num) hc
+    rwa [hbase] at h
+  have b5 : ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖ ≤ 8.771 / 7.22 / 27 := by
+    have e5 : (8 + 5 : ℕ) = 13 := by norm_num
+    rw [e5]
+    have hbase : ((((2 * 13 + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+    have hc : (7.22 : ℝ) ≤ ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow27_ge_seven_point_two_two
+    have h := DZ3g_pair_le_of_base 13 7.22 (by norm_num) hc
+    rwa [hbase] at h
+  have b6 : ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ ≤ 8.771 / 7.54 / 29 := by
+    have e6 : (8 + 6 : ℕ) = 14 := by norm_num
+    rw [e6]
+    have hbase : ((((2 * 14 + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+    have hc : (7.54 : ℝ) ≤ ((((2 * 14 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow29_ge_seven_point_five_four
+    have h := DZ3g_pair_le_of_base 14 7.54 (by norm_num) hc
+    rwa [hbase] at h
+  have b7 : ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ ≤ 8.771 / 7.84 / 31 := by
+    have e7 : (8 + 7 : ℕ) = 15 := by norm_num
+    rw [e7]
+    have hbase : ((((2 * 15 + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+    have hc : (7.84 : ℝ) ≤ ((((2 * 15 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+      rw [hbase]
+      exact DZ3j_rpow31_ge_seven_point_eight_four
+    have h := DZ3g_pair_le_of_base 15 7.84 (by norm_num) hc
+    rwa [hbase] at h
+  have hexp : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖)
+      = ‖etaPairTerm (1 - zetaCellS0) (8 + 0)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 1)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 2)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 3)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 4)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 5)‖
+        + ‖etaPairTerm (1 - zetaCellS0) (8 + 6)‖ + ‖etaPairTerm (1 - zetaCellS0) (8 + 7)‖ := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  have htot : (∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖) ≤ 0.471 := by
+    rw [hexp]
+    have hbound : (8.771 : ℝ) / 5.47 / 17 + 8.771 / 5.85 / 19 + 8.771 / 6.21 / 21 + 8.771 / 6.56 / 23
+        + 8.771 / 6.89 / 25 + 8.771 / 7.22 / 27 + 8.771 / 7.54 / 29 + 8.771 / 7.84 / 31 ≤ 0.471 := by
+      norm_num
+    linarith
+  calc ‖∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)‖
+      ≤ ∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖ :=
+        norm_sum_le _ _
+    _ ≤ 0.471 := htot
+
+/-- (DZ3j) Gap verdict for `0.471` vs `0.475`, vs `0.477`, vs `12/6300`. -/
+theorem DZ3j_gap_0471 :
+    (0.471 : ℝ) < 0.475 ∧ (0.471 : ℝ) < 0.477 ∧ (0.471 : ℝ) < 0.482 ∧ (0.471 : ℝ) < 0.485
+      ∧ (0.471 : ℝ) < 0.50
+      ∧ (0.471 : ℝ) / (12 / 6300) = 247.275
+      ∧ (12 / 6300 : ℝ) < 0.471 ∧ (0.471 : ℝ) < 2.553 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3j report-and-stop): ONE proved bridge (c8) banked —
+`DZ3j_true_block_le_zero_four_seven_one : ||sum_{Ico 16 32} eta s1|| <= 0.471`
+via eight maximal two-decimal floors
+(`5.47/17`, `5.85/19`, `6.21/21`, `6.56/23`, `6.89/25`, `7.22/27`, `7.54/29`,
+`7.84/31`, each `c^5 <= base^3` by `norm_num`, next hundredth fails by the
+integer test above);
+`8.771/5.47/17+...+8.771/7.84/31=0.47073747... <= 0.471`
+(saves `0.00374598` over `0.47448344...` at one-decimal `c`).
+Banked constant `0.471`, strictly below `0.475` by `0.004` (below `0.477` by
+`0.006`, below `0.482` by `0.011`, below `0.50` by `0.029`);
+`0.471/(12/6300)=247.275` (`DZ3j_gap_0471`), was `249.375`
+(saves `2.1` ratio units; was `250.425`, saves `3.15`; was `253.05`,
+saves `5.775`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~247x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual). Two-decimal lane now exhausted at all eight
+bases (each maximal: next hundredth provably fails); next steps: three-decimal
+floors (e.g. `5.471..5.479` at base `17` while `5.48` fails), or `||s1||`
+below `8.771` via tighter `zetaCellS0` bounds (test rational refinements
+below `76.930441`), or `Re`-only pair sums via `DZ3c_pair_re` intervals, or
+true-phase prefix caps (`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16`
+replaying `DZ2_prefix1385_le` in true phase) + read-only `T2_abel_norm`.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3j tail after
+`DZ3j_gap_0471`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `0.471` toward an Abel `<= 0.5`-shape); or
+(c8 again) a ninth tightening below `0.471` (e.g. three-decimal `c` at
+`17..31`, or sharper `||s1||` below `8.771`, or `Re`-only pair sums via
+`DZ3c_pair_re`).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3j_rpow17_ge_five_point_four_seven
+#print axioms DZ3j_rpow19_ge_five_point_eight_five
+#print axioms DZ3j_rpow21_ge_six_point_two_one
+#print axioms DZ3j_rpow23_ge_six_point_five_six
+#print axioms DZ3j_rpow25_ge_six_point_eight_nine
+#print axioms DZ3j_rpow27_ge_seven_point_two_two
+#print axioms DZ3j_rpow29_ge_seven_point_five_four
+#print axioms DZ3j_rpow31_ge_seven_point_eight_four
+#print axioms DZ3j_true_block_le_zero_four_seven_one
+#print axioms DZ3j_gap_0471
