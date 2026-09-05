@@ -1591,9 +1591,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `D3_amp 19 ≤ 1/6` (base-20 fit, slack 224) ⇒ **TRUE block `≤ 2.602`** (`3/5 + 1/6×8 + 1/7 +
     2/15×3 + 1/8`; now 1366× over need). `1/6`-shape EXHAUSTED (next base 19: `19^3 = 6859 <
     7776` — genuinely fails).
-    Next: new denominator shape for `D3_amp 18`, true-phase prefix caps, or genuine
+    **New-shape peel (`DZ2t_*`, F2, `1f5b4a97`, green 8693 jobs, axioms clean):**
+    `D3_amp 18 ≤ 2/11` (`(11/2)^5 = 5032.8 ≤ 6859 = 19^3`) ⇒ **TRUE block `≤ 2.584`**
+    (`2/5 + 2/11 + 1/6×8 + 1/7 + 2/15×3 + 1/8`; now 1356× over need).
+    Next: new shape for `D3_amp 16/17`, true-phase prefix caps, or genuine `Re/Im`
     cancellation (tasked).
-    Next: true-phase prefix caps or genuine `Re/Im` cancellation (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
