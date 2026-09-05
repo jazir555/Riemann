@@ -1669,7 +1669,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `A18 ≤ 1/5.85` (`5.85^5 = 6851.40 ≤ 6859`) ⇒ **pair-9 `Re ≤ 0.0903`** (gap to MVT
     norm `0.08402` now `0.00628`; was `0.01598`).
     Next: quartic cos upper (`≈ 0.08659`, then raise `cos19`/`A19` lower to finish) or
-    pair-10 `Re` start (tasked).
+    pair-10 `Re` start (tasked). **Quartic cos (`DZ3t_*`, G12, `2e5ae04c`, green 8693 jobs,
+    axioms clean):** `cos18 ≤ 0.8567` (quartic majorant, per-monomial endpoints) ⇒
+    **pair-9 `Re ≤ 0.0866`** (gap to MVT norm `0.08402` now `0.00258`; was `0.00628`).
+    Next: raise `cos19`/`A19` lower to finish, or pair-10 `Re` start (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
