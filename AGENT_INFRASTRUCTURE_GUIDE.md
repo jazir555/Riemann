@@ -1682,6 +1682,10 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `A20 ≥ 1/6.75`, `A21 ≥ 1/6.95` ⇒ **pair-10 `Re ≤ 0.074`**
     (beats triangle `2/21 ≈ 0.0952` by `≥ 0.021`; `≈ 0.0067` above MVT slot `≈ 0.0673`).
     Next: close the `0.0067` gap (sextic cos20 / tighter amps) or pair-11 start (tasked).
+    **Pair-10 tightened (`DZ3w_*`, G15, `9833092b`, green 8693 jobs, axioms clean):**
+    `A20 ≤ 1/6.2` (via `6.2^5 ≤ 21^3`), `A21 ≤ 1/6.38` (via `6.38^5 ≤ 22^3`) ⇒
+    **pair-10 `Re ≤ 0.0701`** (residual `0.0028` above MVT slot `≈ 0.0673`).
+    Next: octic cos20 micro-close or pair-11 start (tasked).
     **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
     (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
     hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
