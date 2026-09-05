@@ -17465,3 +17465,599 @@ end Door3GammaCutR02SplitBal
 
 
 
+
+/-!
+# Door-3 R02 fine split: `G = 0.0815 -> 0.0813` (newsection lane)
+
+Ownership: append-only tail (nothing above touched; no new imports; LF endings).
+Reuses read-only, all landed: `R02GammaDisc.shift_norm_ge_sqrt`,
+`R02MatchedX.gamma_uniform_le`,
+`Door3GammaCutR02.complex_Gamma_matched_2175`,
+`Door3GammaCutR02Split.gamma_drop_with_floor`,
+`DZ4a_Door3SinglePoint.DZ4a_w_norm_floor_6571`,
+`R00GammaLower.norm_Gamma_le_realGamma`,
+`Door3MReductionScout.deriv_bound_of_gammaZ_upper` /
+`sphere_bound_of_gammaZ_upper` / `center_bound_of_M_Azeta`,
+`Door3ZetaCut75.R02_zeta_upper_75`.
+
+Fine split at `s = 6.03` (`z.re = 0.03` since `w = z+6`):
+* low piece `x in [6.025,6.03]`: matched numerator `215.7`
+  (`matched_low_2157`, same monotone-square shape with `xmax = 6.03`,
+  `(235.19^2-215.7^2)*6.03^2 <= 215.7^2*2.625^2` closed by one small
+  `norm_num`), denominator refloored at `a = 0.025` with 3-decimal floors
+  to `D >= 2675` (`2.625*2.818*3.315*4.005*4.805*5.669 = 2675.19... >= 2675`;
+  `215.7 <= 0.0813*2675 = 217.4775`);
+* high piece `x in [6.03,6.37]` (`z.re >= 0.03`): numerator keeps landed
+  `217.5`, denominator refloored at `a = 0.03` with 3-decimal floors to
+  `D >= 2684` (product `2.625*2.819*3.318*4.008*4.809*5.673 = 2684.70...`;
+  `217.5 <= 0.0813*2684 = 218.2092`).
+Both pieces give `G = 0.0813`; the join is one `le_total` case split at `0.03`.
+Tier: `(G,Z,M,Azeta) = (0.0813,7.5,100.87704,5778)` (sphere `25.21926`).
+Deltas vs balanced-split `(0.0815,7.5,101.1252,5792)`: `G -0.0002`,
+`sphere -0.06204`, `M -0.24816`, `Azeta -14`.
+Hang-guard: every `norm_num` is on `<= 6`-digit numerals (same shapes as the
+landed green proofs).
+-/
+
+namespace Door3GammaCutR02SplitFine
+
+/-- Low-piece matched bound: `Real.Gamma (x+1) / sqrt (x^2+b^2) <= 215.7` for
+`x in [6.025,6.03]`, `b in [2.625,4.125]`. Same proof shape as
+`Door3GammaCutR02SplitBal.matched_low_2158` with `xmax = 6.03`. -/
+theorem matched_low_2157 {x b : ℝ}
+    (hx_lo : (6.025 : ℝ) ≤ x) (hx_hi : x ≤ (6.03 : ℝ))
+    (hb_lo : (2.625 : ℝ) ≤ b) (hb_hi : b ≤ (4.125 : ℝ)) :
+    Real.Gamma (x + 1) / Real.sqrt (x ^ 2 + b ^ 2) ≤ 215.7 := by
+  have hx_pos : (0 : ℝ) < x := by linarith
+  have hx_nn : (0 : ℝ) ≤ x := le_of_lt hx_pos
+  have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+  have hx_hi37 : x ≤ (6.37 : ℝ) := by linarith
+  have hGx : Real.Gamma x ≤ 235.19 := R02MatchedX.gamma_uniform_le hx_lo hx_hi37
+  have hadd : Real.Gamma (x + 1) = x * Real.Gamma x :=
+    Real.Gamma_add_one hx_ne
+  have hnum : Real.Gamma (x + 1) ≤ 235.19 * x := by
+    rw [hadd]
+    calc x * Real.Gamma x ≤ x * 235.19 :=
+          mul_le_mul_of_nonneg_left hGx hx_nn
+      _ = 235.19 * x := mul_comm _ _
+  have hb2 : (2.625 : ℝ) ^ 2 ≤ b ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hb_lo 2
+  have hden_le : x ^ 2 + (2.625 : ℝ) ^ 2 ≤ x ^ 2 + b ^ 2 := by linarith
+  have hsqrt_mono : Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2)
+      ≤ Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_le_sqrt hden_le
+  have hsq_pos : (0 : ℝ) < x ^ 2 + b ^ 2 := by
+    have hx2 : (0 : ℝ) < x ^ 2 := pow_pos hx_pos 2
+    have hbsq : (0 : ℝ) ≤ b ^ 2 := by positivity
+    linarith
+  have hden_pos : (0 : ℝ) < Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_pos.mpr hsq_pos
+  have hx2_le : x ^ 2 ≤ (6.03 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hx_nn hx_hi 2
+  have hcoeff : (0 : ℝ) ≤ 235.19 ^ 2 - 215.7 ^ 2 := by norm_num
+  have hstep1 : (235.19 ^ 2 - 215.7 ^ 2) * x ^ 2
+      ≤ (235.19 ^ 2 - 215.7 ^ 2) * (6.03 : ℝ) ^ 2 :=
+    mul_le_mul_of_nonneg_left hx2_le hcoeff
+  have hstep2 : (235.19 ^ 2 - 215.7 ^ 2) * (6.03 : ℝ) ^ 2
+      ≤ (215.7 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by norm_num
+  have hkey2 : (235.19 ^ 2 - 215.7 ^ 2) * x ^ 2
+      ≤ (215.7 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := le_trans hstep1 hstep2
+  have hkey : (235.19 * x) ^ 2
+      ≤ (215.7 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have e : (235.19 * x) ^ 2 - (215.7 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)
+        = (235.19 ^ 2 - 215.7 ^ 2) * x ^ 2 - (215.7 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by
+      ring
+    linarith
+  have hnum_nn : (0 : ℝ) ≤ 235.19 * x := mul_nonneg (by norm_num) hx_nn
+  have hsqrt_key : 235.19 * x ≤ 215.7 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have h1 : Real.sqrt ((235.19 * x) ^ 2)
+        ≤ Real.sqrt ((215.7 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)) :=
+      Real.sqrt_le_sqrt hkey
+    rw [Real.sqrt_sq hnum_nn] at h1
+    rw [Real.sqrt_mul (show (0 : ℝ) ≤ (215.7 : ℝ) ^ 2 by norm_num)] at h1
+    rw [Real.sqrt_sq (show (0 : ℝ) ≤ (215.7 : ℝ) by norm_num)] at h1
+    exact h1
+  have hfinal : Real.Gamma (x + 1) ≤ 215.7 * Real.sqrt (x ^ 2 + b ^ 2) := by
+    calc Real.Gamma (x + 1) ≤ 235.19 * x := hnum
+      _ ≤ 215.7 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := hsqrt_key
+      _ ≤ 215.7 * Real.sqrt (x ^ 2 + b ^ 2) :=
+          mul_le_mul_of_nonneg_left hsqrt_mono (by norm_num)
+  exact (div_le_iff₀ hden_pos).mpr hfinal
+
+/-- Low-piece complex one-step upper: `‖Complex.Gamma w‖ ≤ 215.7` for
+`Re w in [6.025,6.03]`, `|Im w| in [2.625,4.125]`. Mirrors
+`Door3GammaCutR02SplitBal.complex_Gamma_low_2158` with `matched_low_2157`. -/
+theorem complex_Gamma_low_2157 {w : ℂ}
+    (hre_lo : (6.025 : ℝ) ≤ w.re) (hre_hi : w.re ≤ (6.03 : ℝ))
+    (him_lo : (2.625 : ℝ) ≤ |w.im|) (him_hi : |w.im| ≤ (4.125 : ℝ)) :
+    ‖Complex.Gamma w‖ ≤ (215.7 : ℝ) := by
+  have hwpos : 0 < w.re := by linarith
+  have hnez : w ≠ 0 := by
+    intro hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hre
+    linarith [hwpos]
+  have hden : (6.571 : ℝ) ≤ ‖w‖ :=
+    DZ4a_Door3SinglePoint.DZ4a_w_norm_floor_6571 hre_lo him_lo
+  have hDpos : (0 : ℝ) < ‖w‖ := lt_of_lt_of_le (by norm_num) hden
+  have e : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hnez
+  have n : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [e, norm_mul]
+  have hre1 : (w + 1).re = w.re + 1 := by
+    simp [Complex.add_re, Complex.one_re]
+  have hpos : (0 : ℝ) < (w + 1).re := by rw [hre1]; linarith
+  have hG : ‖Complex.Gamma (w + 1)‖ ≤ Real.Gamma (w.re + 1) := by
+    have h := R00GammaLower.norm_Gamma_le_realGamma (z := w + 1) hpos
+    rwa [hre1] at h
+  have hle : ‖w‖ * ‖Complex.Gamma w‖ ≤ Real.Gamma (w.re + 1) := by
+    rw [← n]
+    exact hG
+  have hdiv : ‖Complex.Gamma w‖ ≤ Real.Gamma (w.re + 1) / ‖w‖ := by
+    have hmc : ‖Complex.Gamma w‖ * ‖w‖ ≤ Real.Gamma (w.re + 1) := by
+      rw [mul_comm]
+      exact hle
+    exact (le_div_iff₀ hDpos).mpr hmc
+  have hsq2 : w.re ^ 2 + |w.im| ^ 2 ≤ ‖w‖ ^ 2 := by
+    have e2 : ‖w‖ ^ 2 = w.re ^ 2 + w.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply, pow_two, pow_two]
+    rw [e2, sq_abs]
+  have hden_le : Real.sqrt (w.re ^ 2 + |w.im| ^ 2) ≤ ‖w‖ := by
+    have h := Real.sqrt_le_sqrt hsq2
+    rwa [Real.sqrt_sq (norm_nonneg _)] at h
+  have hsqrtpos : (0 : ℝ) < Real.sqrt (w.re ^ 2 + |w.im| ^ 2) := by
+    apply Real.sqrt_pos.mpr
+    have hx2 : (0 : ℝ) < w.re ^ 2 := pow_pos hwpos 2
+    have hnn : (0 : ℝ) ≤ |w.im| ^ 2 := sq_nonneg _
+    linarith
+  have hmatch : Real.Gamma (w.re + 1) / Real.sqrt (w.re ^ 2 + |w.im| ^ 2)
+      ≤ (215.7 : ℝ) :=
+    matched_low_2157 hre_lo hre_hi him_lo him_hi
+  have hfin' : Real.Gamma (w.re + 1)
+      ≤ 215.7 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2) :=
+    (div_le_iff₀ hsqrtpos).mp hmatch
+  have step1 : Real.Gamma (w.re + 1) / ‖w‖
+      ≤ (215.7 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖ :=
+    div_le_div_of_nonneg_right hfin' hDpos.le
+  have hle1 : Real.sqrt (w.re ^ 2 + |w.im| ^ 2) / ‖w‖ ≤ 1 :=
+    (div_le_one hDpos).mpr hden_le
+  have step2 : (215.7 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖
+      ≤ (215.7 : ℝ) := by
+    have ee : (215.7 * Real.sqrt (w.re ^ 2 + |w.im| ^ 2)) / ‖w‖
+        = 215.7 * (Real.sqrt (w.re ^ 2 + |w.im| ^ 2) / ‖w‖) := by ring
+    rw [ee]
+    calc (215.7 : ℝ) * _ ≤ 215.7 * 1 :=
+          mul_le_mul_of_nonneg_left hle1 (by norm_num)
+      _ = 215.7 := by ring
+  exact le_trans (le_trans hdiv step1) step2
+
+/-- Fine low-piece floor `k = 0` at `a = 0.025` (3-dec): `2.625 ≤ ‖z‖`
+(`2.625^2 = 6.890625 ≤ 0.025^2 + 2.625^2 = 6.89125`). -/
+theorem low_floor0 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (2.625 : ℝ) ≤ ‖z + ((0 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 0
+    (by norm_num) (by norm_num) hre him
+  have hs : (2.625 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((0 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (2.625 : ℝ) ^ 2 ≤ (0.025 + ((0 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece floor `k = 1` at `a = 0.025` (3-dec): `2.818 ≤ ‖z+1‖`
+(`2.818^2 = 7.941124 ≤ 1.025^2 + 2.625^2 = 7.94125`). -/
+theorem low_floor1 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (2.818 : ℝ) ≤ ‖z + ((1 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 1
+    (by norm_num) (by norm_num) hre him
+  have hs : (2.818 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (2.818 : ℝ) ^ 2 ≤ (0.025 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece floor `k = 2` at `a = 0.025` (3-dec): `3.315 ≤ ‖z+2‖`
+(`3.315^2 = 10.989225 ≤ 2.025^2 + 2.625^2 = 10.99125`). -/
+theorem low_floor2 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (3.315 : ℝ) ≤ ‖z + ((2 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 2
+    (by norm_num) (by norm_num) hre him
+  have hs : (3.315 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (3.315 : ℝ) ^ 2 ≤ (0.025 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece floor `k = 3` at `a = 0.025` (3-dec): `4.005 ≤ ‖z+3‖`
+(`4.005^2 = 16.040025 ≤ 3.025^2 + 2.625^2 = 16.04125`). -/
+theorem low_floor3 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (4.005 : ℝ) ≤ ‖z + ((3 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 3
+    (by norm_num) (by norm_num) hre him
+  have hs : (4.005 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.005 : ℝ) ^ 2 ≤ (0.025 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece floor `k = 4` at `a = 0.025` (3-dec): `4.805 ≤ ‖z+4‖`
+(`4.805^2 = 23.088025 ≤ 4.025^2 + 2.625^2 = 23.09125`). -/
+theorem low_floor4 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (4.805 : ℝ) ≤ ‖z + ((4 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 4
+    (by norm_num) (by norm_num) hre him
+  have hs : (4.805 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.805 : ℝ) ^ 2 ≤ (0.025 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece floor `k = 5` at `a = 0.025` (3-dec): `5.669 ≤ ‖z+5‖`
+(`5.669^2 = 32.137561 ≤ 5.025^2 + 2.625^2 = 32.14125`). -/
+theorem low_floor5 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (5.669 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.025 2.625 5
+    (by norm_num) (by norm_num) hre him
+  have hs : (5.669 : ℝ)
+      ≤ Real.sqrt ((0.025 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (5.669 : ℝ) ^ 2 ≤ (0.025 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine low-piece denominator product: `D(z) ≥ 2675` for `Re z ≥ 0.025`
+(product of the 3-dec floors is `2675.19... ≥ 2675`). -/
+theorem denom_low_2675 {z : ℂ} (hre : (0.025 : ℝ) ≤ z.re)
+    (habs : (2.625 : ℝ) ≤ |z.im|) :
+    (2675 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖
+      * (‖z + ((4 : ℕ) : ℂ)‖
+      * (‖z + ((3 : ℕ) : ℂ)‖
+      * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) := by
+  have fz0 : (2.625 : ℝ) ≤ ‖z + ((0 : ℕ) : ℂ)‖ := low_floor0 hre habs
+  have fz : (2.625 : ℝ) ≤ ‖z‖ := by
+    have heq : z + ((0 : ℕ) : ℂ) = z := by simp
+    rw [heq] at fz0
+    exact fz0
+  have f1 := low_floor1 hre habs
+  have f2 := low_floor2 hre habs
+  have f3 := low_floor3 hre habs
+  have f4 := low_floor4 hre habs
+  have f5 := low_floor5 hre habs
+  have q1 : (2.818 : ℝ) * 2.625 ≤ ‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖ :=
+    mul_le_mul f1 fz (by norm_num) (norm_nonneg _)
+  have q2 : (3.315 : ℝ) * (2.818 * 2.625)
+      ≤ ‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖) :=
+    mul_le_mul f2 q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.005 : ℝ) * (3.315 * (2.818 * 2.625))
+      ≤ ‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)) :=
+    mul_le_mul f3 q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.805 : ℝ) * (4.005 * (3.315 * (2.818 * 2.625)))
+      ≤ ‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))) :=
+    mul_le_mul f4 q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.669 : ℝ) * (4.805 * (4.005 * (3.315 * (2.818 * 2.625))))
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    mul_le_mul f5 q4 (by positivity) (norm_nonneg _)
+  have hDlo : (2675 : ℝ)
+      ≤ 5.669 * (4.805 * (4.005 * (3.315 * (2.818 * 2.625)))) := by
+    norm_num
+  exact le_trans hDlo q5
+
+/-- Fine high-piece floor `k = 0` at `a = 0.03` (3-dec): `2.625 ≤ ‖z‖`
+(`2.625^2 = 6.890625 ≤ 0.03^2 + 2.625^2 = 6.891525`). -/
+theorem high_floor0 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (2.625 : ℝ) ≤ ‖z + ((0 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 0
+    (by norm_num) (by norm_num) hre him
+  have hs : (2.625 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((0 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (2.625 : ℝ) ^ 2 ≤ (0.03 + ((0 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece floor `k = 1` at `a = 0.03` (3-dec): `2.819 ≤ ‖z+1‖`
+(`2.819^2 = 7.946761 ≤ 1.03^2 + 2.625^2 = 7.951525`). -/
+theorem high_floor1 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (2.819 : ℝ) ≤ ‖z + ((1 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 1
+    (by norm_num) (by norm_num) hre him
+  have hs : (2.819 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (2.819 : ℝ) ^ 2 ≤ (0.03 + ((1 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece floor `k = 2` at `a = 0.03` (3-dec): `3.318 ≤ ‖z+2‖`
+(`3.318^2 = 11.009124 ≤ 2.03^2 + 2.625^2 = 11.011525`). -/
+theorem high_floor2 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (3.318 : ℝ) ≤ ‖z + ((2 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 2
+    (by norm_num) (by norm_num) hre him
+  have hs : (3.318 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (3.318 : ℝ) ^ 2 ≤ (0.03 + ((2 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece floor `k = 3` at `a = 0.03` (3-dec): `4.008 ≤ ‖z+3‖`
+(`4.008^2 = 16.064064 ≤ 3.03^2 + 2.625^2 = 16.071525`). -/
+theorem high_floor3 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (4.008 : ℝ) ≤ ‖z + ((3 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 3
+    (by norm_num) (by norm_num) hre him
+  have hs : (4.008 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.008 : ℝ) ^ 2 ≤ (0.03 + ((3 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece floor `k = 4` at `a = 0.03` (3-dec): `4.809 ≤ ‖z+4‖`
+(`4.809^2 = 23.126481 ≤ 4.03^2 + 2.625^2 = 23.131525`). -/
+theorem high_floor4 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (4.809 : ℝ) ≤ ‖z + ((4 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 4
+    (by norm_num) (by norm_num) hre him
+  have hs : (4.809 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (4.809 : ℝ) ^ 2 ≤ (0.03 + ((4 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece floor `k = 5` at `a = 0.03` (3-dec): `5.673 ≤ ‖z+5‖`
+(`5.673^2 = 32.182929 ≤ 5.03^2 + 2.625^2 = 32.191525`). -/
+theorem high_floor5 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (him : (2.625 : ℝ) ≤ |z.im|) : (5.673 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖ := by
+  have h := R02GammaDisc.shift_norm_ge_sqrt z 0.03 2.625 5
+    (by norm_num) (by norm_num) hre him
+  have hs : (5.673 : ℝ)
+      ≤ Real.sqrt ((0.03 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2) := by
+    have hsq : (5.673 : ℝ) ^ 2 ≤ (0.03 + ((5 : ℕ) : ℝ)) ^ 2 + 2.625 ^ 2 := by
+      norm_num
+    have hle := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (by norm_num)] at hle
+  exact le_trans hs h
+
+/-- Fine high-piece denominator product: `D(z) ≥ 2684` for `Re z ≥ 0.03`
+(product of the 3-dec floors is `2684.70... ≥ 2684`). -/
+theorem denom_high_2684 {z : ℂ} (hre : (0.03 : ℝ) ≤ z.re)
+    (habs : (2.625 : ℝ) ≤ |z.im|) :
+    (2684 : ℝ) ≤ ‖z + ((5 : ℕ) : ℂ)‖
+      * (‖z + ((4 : ℕ) : ℂ)‖
+      * (‖z + ((3 : ℕ) : ℂ)‖
+      * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) := by
+  have fz0 : (2.625 : ℝ) ≤ ‖z + ((0 : ℕ) : ℂ)‖ := high_floor0 hre habs
+  have fz : (2.625 : ℝ) ≤ ‖z‖ := by
+    have heq : z + ((0 : ℕ) : ℂ) = z := by simp
+    rw [heq] at fz0
+    exact fz0
+  have f1 := high_floor1 hre habs
+  have f2 := high_floor2 hre habs
+  have f3 := high_floor3 hre habs
+  have f4 := high_floor4 hre habs
+  have f5 := high_floor5 hre habs
+  have q1 : (2.819 : ℝ) * 2.625 ≤ ‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖ :=
+    mul_le_mul f1 fz (by norm_num) (norm_nonneg _)
+  have q2 : (3.318 : ℝ) * (2.819 * 2.625)
+      ≤ ‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖) :=
+    mul_le_mul f2 q1 (by positivity) (norm_nonneg _)
+  have q3 : (4.008 : ℝ) * (3.318 * (2.819 * 2.625))
+      ≤ ‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)) :=
+    mul_le_mul f3 q2 (by positivity) (norm_nonneg _)
+  have q4 : (4.809 : ℝ) * (4.008 * (3.318 * (2.819 * 2.625)))
+      ≤ ‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖))) :=
+    mul_le_mul f4 q3 (by positivity) (norm_nonneg _)
+  have q5 : (5.673 : ℝ) * (4.809 * (4.008 * (3.318 * (2.819 * 2.625))))
+      ≤ ‖z + ((5 : ℕ) : ℂ)‖
+        * (‖z + ((4 : ℕ) : ℂ)‖
+        * (‖z + ((3 : ℕ) : ℂ)‖
+        * (‖z + ((2 : ℕ) : ℂ)‖ * (‖z + ((1 : ℕ) : ℂ)‖ * ‖z‖)))) :=
+    mul_le_mul f5 q4 (by positivity) (norm_nonneg _)
+  have hDlo : (2684 : ℝ)
+      ≤ 5.673 * (4.809 * (4.008 * (3.318 * (2.819 * 2.625)))) := by
+    norm_num
+  exact le_trans hDlo q5
+
+/-- Fine low piece: `‖Γ z‖ ≤ 0.0813` for `z.re in [0.025,0.03]`
+(`w = z+6`, `Re w in [6.025,6.03]`, numerator `215.7`, `D >= 2675`). -/
+theorem piece_low_gamma {z : ℂ}
+    (hz_lo : (0.025 : ℝ) ≤ z.re) (hz_hi : z.re ≤ (0.03 : ℝ))
+    (habs : (2.625 : ℝ) ≤ |z.im|) (habs_hi : |z.im| ≤ (4.125 : ℝ)) :
+    ‖Complex.Gamma z‖ ≤ (0.0813 : ℝ) := by
+  have eR6 : ((6 : ℕ) : ℝ) = 6 := by norm_num
+  have hz6re : (z + ((6 : ℕ) : ℂ)).re = z.re + 6 := by
+    rw [Complex.add_re, Complex.natCast_re, eR6]
+  have hx_lo : (6.025 : ℝ) ≤ (z + ((6 : ℕ) : ℂ)).re := by
+    rw [hz6re]; linarith [hz_lo]
+  have hx_hi : (z + ((6 : ℕ) : ℂ)).re ≤ (6.03 : ℝ) := by
+    rw [hz6re]; linarith [hz_hi]
+  have hwim : (z + ((6 : ℕ) : ℂ)).im = z.im := by simp
+  have hwabs : (2.625 : ℝ) ≤ |(z + ((6 : ℕ) : ℂ)).im| := by
+    rw [hwim]; exact habs
+  have hwabs_hi : |(z + ((6 : ℕ) : ℂ)).im| ≤ (4.125 : ℝ) := by
+    rw [hwim]; exact habs_hi
+  have hGN : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ ≤ (215.7 : ℝ) :=
+    complex_Gamma_low_2157 hx_lo hx_hi hwabs hwabs_hi
+  have hD := denom_low_2675 hz_lo habs
+  have hcap : (215.7 : ℝ) ≤ 0.0813 * 2675 := by norm_num
+  exact Door3GammaCutR02Split.gamma_drop_with_floor hz_lo habs hD (by norm_num)
+    hGN (by norm_num) hcap
+
+/-- Fine high piece: `‖Γ z‖ ≤ 0.0813` for `z.re in [0.03,0.37]`
+(numerator keeps landed `217.5`, refloored `D >= 2684`). -/
+theorem piece_high_gamma {z : ℂ}
+    (hz_lo : (0.03 : ℝ) ≤ z.re) (hz_hi : z.re ≤ (0.37 : ℝ))
+    (habs : (2.625 : ℝ) ≤ |z.im|) (habs_hi : |z.im| ≤ (4.125 : ℝ)) :
+    ‖Complex.Gamma z‖ ≤ (0.0813 : ℝ) := by
+  have hz25 : (0.025 : ℝ) ≤ z.re := by linarith
+  have eR6 : ((6 : ℕ) : ℝ) = 6 := by norm_num
+  have hz6re : (z + ((6 : ℕ) : ℂ)).re = z.re + 6 := by
+    rw [Complex.add_re, Complex.natCast_re, eR6]
+  have hx_lo : (6.025 : ℝ) ≤ (z + ((6 : ℕ) : ℂ)).re := by
+    rw [hz6re]; linarith [hz_lo]
+  have hx_hi : (z + ((6 : ℕ) : ℂ)).re ≤ (6.37 : ℝ) := by
+    rw [hz6re]; linarith [hz_hi]
+  have hwim : (z + ((6 : ℕ) : ℂ)).im = z.im := by simp
+  have hwabs : (2.625 : ℝ) ≤ |(z + ((6 : ℕ) : ℂ)).im| := by
+    rw [hwim]; exact habs
+  have hwabs_hi : |(z + ((6 : ℕ) : ℂ)).im| ≤ (4.125 : ℝ) := by
+    rw [hwim]; exact habs_hi
+  have hGN : ‖Complex.Gamma (z + ((6 : ℕ) : ℂ))‖ ≤ (217.5 : ℝ) :=
+    Door3GammaCutR02.complex_Gamma_matched_2175 hx_lo hx_hi hwabs hwabs_hi
+  have hD := denom_high_2684 hz_lo habs
+  have hcap : (217.5 : ℝ) ≤ 0.0813 * 2684 := by norm_num
+  exact Door3GammaCutR02Split.gamma_drop_with_floor hz25 habs hD (by norm_num)
+    hGN (by norm_num) hcap
+
+/-- Joined fine split-rect drop-in: `‖gammaOf‖ ≤ 0.0813` on the R02 disc
+`s`-rect (split at `z.re = 0.03`). -/
+theorem gammaOf_upper_disc_R02_0813 {s : ℂ}
+    (hre_lo : (0.05 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (0.74 : ℝ))
+    (him_lo : (-8.25 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.25 : ℝ)) :
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.0813 : ℝ) := by
+  show ‖Complex.Gamma (s / 2)‖ ≤ (0.0813 : ℝ)
+  set z : ℂ := s / 2 with hz
+  have hzre : z.re = s.re / 2 := by
+    rw [hz, Complex.div_ofNat_re]
+  have hzim : z.im = s.im / 2 := by
+    rw [hz, Complex.div_ofNat_im]
+  have hzre_lo : (0.025 : ℝ) ≤ z.re := by rw [hzre]; linarith
+  have hzre_hi : z.re ≤ (0.37 : ℝ) := by rw [hzre]; linarith
+  have hzim_lo : z.im ≤ (-2.625 : ℝ) := by rw [hzim]; linarith
+  have hzim_ge : (-4.125 : ℝ) ≤ z.im := by rw [hzim]; linarith
+  have hneg : z.im < 0 := by linarith
+  have habs : (2.625 : ℝ) ≤ |z.im| := by
+    rw [abs_of_neg hneg]; linarith
+  have habs_hi : |z.im| ≤ (4.125 : ℝ) := by
+    rw [abs_of_neg hneg]; linarith
+  rcases le_total z.re (0.03 : ℝ) with h | h
+  · exact piece_low_gamma hzre_lo h habs habs_hi
+  · exact piece_high_gamma h hzre_hi habs habs_hi
+
+/-- Sphere equation at tier `G = 0.0813`: `41.36 * 1 * 0.0813 * 7.5 = 25.21926`. -/
+theorem sphere_sup_813_eq : (41.36 : ℝ) * 1 * 0.0813 * 7.5 = 25.21926 := by
+  norm_num
+
+/-- Cauchy equation at tier `G = 0.0813`: `25.21926 / 0.25 = 100.87704`. -/
+theorem deriv_M_813_eq : (25.21926 : ℝ) / 0.25 = 100.87704 := by
+  norm_num
+
+/-- Unconditional sphere sup `25.21926` on all R02 `0.25`-spheres
+(tier `G = 0.0813` + cut `Z = 7.5` + sharper poly). -/
+theorem sphere_2521926_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ∀ z ∈ Metric.sphere w (0.25 : ℝ),
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (25.21926 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.0813 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      gammaOf_upper_disc_R02_0813 hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3ZetaCut75.R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hS := Door3MReductionScout.sphere_bound_of_gammaZ_upper
+    (G := (0.0813 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw u hu
+  have hle := hS w hw u hu
+  have heq : (41.36 : ℝ) * 1 * 0.0813 * 7.5 = 25.21926 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Unconditional R02 deriv bound `M = 100.87704` (`25.21926 / 0.25`). -/
+theorem deriv_10087704_unconditional :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (100.87704 : ℝ) := by
+  have hG : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ (0.0813 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      gammaOf_upper_disc_R02_0813 hre_lo hre_hi him_lo him_hi
+  have hZ : ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ‖zeta s‖ ≤ (7.5 : ℝ) :=
+    fun s hre_lo hre_hi him_lo him_hi =>
+      Door3ZetaCut75.R02_zeta_upper_75 s hre_lo hre_hi him_lo him_hi
+  have hD := Door3MReductionScout.deriv_bound_of_gammaZ_upper
+    (G := (0.0813 : ℝ)) (Z := (7.5 : ℝ)) (by norm_num) (by norm_num) hG hZ
+  intro w hw
+  have hle := hD w hw
+  have heq : (41.36 : ℝ) * 1 * 0.0813 * 7.5 / 0.25 = 100.87704 := by norm_num
+  rw [heq] at hle
+  exact hle
+
+/-- Required-`Azeta` lower (necessary) floor at tier `G = 0.0813`:
+`M = 100.87704 → ≥ 5777` (via `le_div_iff₀`). -/
+theorem table_10087704_lower :
+    (5777 : ℝ) ≤ ((0.002 : ℝ) + 100.87704 * 1.26) / 0.022 := by
+  rw [le_div_iff₀ (by norm_num)]
+  norm_num
+
+/-- Sufficient integer ceiling at tier `G = 0.0813`:
+`M = 100.87704` needs `Azeta = 5778`. -/
+theorem threshold_check_10087704_5778 :
+    (0.002 : ℝ) + 100.87704 * 1.26 ≤ 22 * (1 / 2) * 0.002 * 5778 := by
+  norm_num
+
+/-- Center inequality at tier `G = 0.0813`: fires
+`Door3MReductionScout.center_bound_of_M_Azeta` read-only with the banked
+threshold (`hGam`/`hZeta` stay hypotheses). -/
+theorem center_10087704_5778
+    (hGam : (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZeta : (5778 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖) :
+    (0.002 : ℝ) + 100.87704 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ :=
+  Door3MReductionScout.center_bound_of_M_Azeta
+    (by norm_num) (by norm_num) hGam hZeta threshold_check_10087704_5778
+
+#print axioms Door3GammaCutR02SplitFine.matched_low_2157
+#print axioms Door3GammaCutR02SplitFine.complex_Gamma_low_2157
+#print axioms Door3GammaCutR02SplitFine.low_floor0
+#print axioms Door3GammaCutR02SplitFine.low_floor1
+#print axioms Door3GammaCutR02SplitFine.low_floor2
+#print axioms Door3GammaCutR02SplitFine.low_floor3
+#print axioms Door3GammaCutR02SplitFine.low_floor4
+#print axioms Door3GammaCutR02SplitFine.low_floor5
+#print axioms Door3GammaCutR02SplitFine.denom_low_2675
+#print axioms Door3GammaCutR02SplitFine.high_floor0
+#print axioms Door3GammaCutR02SplitFine.high_floor1
+#print axioms Door3GammaCutR02SplitFine.high_floor2
+#print axioms Door3GammaCutR02SplitFine.high_floor3
+#print axioms Door3GammaCutR02SplitFine.high_floor4
+#print axioms Door3GammaCutR02SplitFine.high_floor5
+#print axioms Door3GammaCutR02SplitFine.denom_high_2684
+#print axioms Door3GammaCutR02SplitFine.piece_low_gamma
+#print axioms Door3GammaCutR02SplitFine.piece_high_gamma
+#print axioms Door3GammaCutR02SplitFine.gammaOf_upper_disc_R02_0813
+#print axioms Door3GammaCutR02SplitFine.sphere_sup_813_eq
+#print axioms Door3GammaCutR02SplitFine.deriv_M_813_eq
+#print axioms Door3GammaCutR02SplitFine.sphere_2521926_unconditional
+#print axioms Door3GammaCutR02SplitFine.deriv_10087704_unconditional
+#print axioms Door3GammaCutR02SplitFine.table_10087704_lower
+#print axioms Door3GammaCutR02SplitFine.threshold_check_10087704_5778
+#print axioms Door3GammaCutR02SplitFine.center_10087704_5778
+
+end Door3GammaCutR02SplitFine
