@@ -1627,7 +1627,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     axioms clean):** base-21 floor `6.2` (maximal one-decimal: `6.3^5 = 9924.4 > 9261`
     fails) ⇒ **TRUE block `≤ 0.475`** (now 249× over need). One-decimal shaping
     near-exhausted; remaining: two-decimal floors, `‖s1‖` cut, `Re`-only pairs, or prefix
-    caps + Abel.
+    caps + Abel. **Two-decimal floors (`DZ3j_*`, G2, `84eefea1`, green 8693 jobs, axioms
+    clean):** maximal two-decimal floors at all 8 bases ⇒ **TRUE block `≤ 0.471`**
+    (now 247× over need). Two-decimal lane exhausted (each maximal). NOTE: G2 left a
+    stray build log in the repo root; removed at commit (untracked artifact).
+    Next: three-decimal floors, `‖s1‖` cut, `Re`-only pairs, or prefix caps + Abel (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
