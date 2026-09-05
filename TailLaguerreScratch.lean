@@ -600,3 +600,166 @@ EXPLICIT numerals `Bnum,dnum` with proved
 `‖zeta-1‖ ≤ dnum` (functional-equation / Lindelöf-type estimate or certified
 cell evaluation with ≤6-digit numerals), then `norm_num`-check
 `Bnum*(1/2)+dnum<1` and compose via `tailCellGap_of_cellBounds_two`. -/
+
+/-!
+## Door-4 tail leaf: explicit Bnum/dnum numerals (tail lane, 2026-09-05, append-only)
+
+Explicit-numeral bridge for the T4 cell `tailCellBounded`
+(`10 ≤ |Re| ≤ 11`, `0 ≤ Im ≤ 1/2`; shifted `s = 1/2 + I*z` has
+`Re(s) ∈ [0,1/2]`, `|Im(s)| ∈ [10,11]`).
+
+Numeral source (Temp-only, no repo logs):
+* `C:\Users\mmeadow\AppData\Local\Temp\kilo\tail_zeta_est.py` — Dirichlet-eta
+  partial sums (`zeta = eta/(1-2^(1-s))`, `N = 5000/15000`) on the shifted
+  strip give `|zeta| ~ 1.5-1.9`, `|zeta-1| ~ 0.55-0.9`; ceilings
+  `Bnum = 2`, `dnum = 1` are the realistic optimistic numerals.
+* `C:\Users\mmeadow\AppData\Local\Temp\kilo\tail_bnum_cert.py` (`Fraction`) —
+  exact `Bnum*(1/2)+dnum = 2` and `(1/2)^2+11^2 = 485/4 ≤ 144`.
+
+Banked here (FULLY PROVED, no sorry/admit/axiom):
+* `tailShiftedSReal_re_mem_cell` / `tailShiftedSReal_im_abs_mem_cell` /
+  `tailShiftedSReal_norm_le12_cell` — unconditional explicit s-image rect
+  (`Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`, `‖s‖ ≤ 12`) for the FE route.
+* `tailBnum`/`tailDnum` (`2`/`1`, ≤6 digits) + `tailNumerals_cert_arith`
+  (`Bnum*(1/2)+dnum = 2` by `norm_num`) + `tailNumerals_test_fail`
+  (`¬ Bnum*(1/2)+dnum<1`): the `B*e+d<1` sufficient test FAILS at `K=2`
+  (`e=1/2`), so `tailCellGap_of_cellBounds_two` cannot discharge with
+  realistic bounds — the split is too coarse (true `|zeta|~1.5` already
+  forces `B*0.5+d ~ 1.35 > 1`).
+* `tailCellGap_of_explicitBounds` — conditional composition specialized to
+  the numerals (reuses T4 `tailCellGap_of_cellBounds_two`).
+* `tailK2_product_eq` / `tailK2_gap_iff_norm_sub_two` — direct `K=2`
+  reformulation (`M=1/2` via `tailMollifierReal_two`): product gap `<1`
+  iff `‖zeta-2‖<2`, a strictly weaker target than `B*0.5+d<1` that may
+  still hold (`|zeta|~1.5 ⇒ |zeta-2|~0.5<2`).
+
+Unconditional `∀ z ∈ cell, ‖zeta‖ ≤ Bnum` / `‖zeta-1‖ ≤ dnum` are NOT
+claimed (would need FE/Stirling/convexity absent from Mathlib with
+`import Mathlib` only); the numerals are realistic ceilings with a proved
+FAIL verdict, not proved zeta bounds.
+-/
+
+/-- s-image real part on the closed cell: `Re ∈ [0,1/2]`. -/
+theorem tailShiftedSReal_re_mem_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    0 ≤ (tailShiftedSReal z).re ∧ (tailShiftedSReal z).re ≤ 1 / 2 := by
+  obtain ⟨⟨_, _⟩, h0, h12⟩ := hz
+  rw [tailShiftedSReal_re]
+  constructor <;> linarith
+
+/-- s-image imaginary modulus on the closed cell: `|Im| ∈ [10,11]`. -/
+theorem tailShiftedSReal_im_abs_mem_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    10 ≤ |(tailShiftedSReal z).im| ∧ |(tailShiftedSReal z).im| ≤ 11 := by
+  have him : (tailShiftedSReal z).im = z.re := tailShiftedSReal_im z
+  rw [him]
+  obtain ⟨⟨h10, h11⟩, _, _⟩ := hz
+  exact ⟨h10, h11⟩
+
+/-- s-image norm cap on the closed cell: `‖s‖ ≤ 12`
+(`(1/2)^2+11^2 = 485/4 ≤ 144`, cf. Temp `tail_bnum_cert.py`). -/
+theorem tailShiftedSReal_norm_le12_cell (z : ℂ) (hz : z ∈ tailCellBounded) :
+    ‖tailShiftedSReal z‖ ≤ 12 := by
+  have hre := tailShiftedSReal_re_mem_cell z hz
+  have him := tailShiftedSReal_im_abs_mem_cell z hz
+  have habs_re : |(tailShiftedSReal z).re| ≤ 1 / 2 := by
+    obtain ⟨h0, h12⟩ := hre
+    rw [abs_of_nonneg h0]
+    exact h12
+  have habs_im : |(tailShiftedSReal z).im| ≤ 11 := him.2
+  have hre2 : (tailShiftedSReal z).re * (tailShiftedSReal z).re ≤
+      (1 / 2 : ℝ) * (1 / 2) := by
+    have h := mul_le_mul habs_re habs_re (abs_nonneg _)
+      (show (0 : ℝ) ≤ 1 / 2 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : (tailShiftedSReal z).im * (tailShiftedSReal z).im ≤
+      (11 : ℝ) * 11 := by
+    have h := mul_le_mul habs_im habs_im (abs_nonneg _)
+      (show (0 : ℝ) ≤ 11 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have hnorm : ‖tailShiftedSReal z‖ ^ 2 =
+      (tailShiftedSReal z).re * (tailShiftedSReal z).re +
+      (tailShiftedSReal z).im * (tailShiftedSReal z).im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖tailShiftedSReal z‖ ^ 2 ≤ (12 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h144 : (1 / 2 : ℝ) * (1 / 2) + 11 * 11 ≤ 12 ^ 2 := by norm_num
+    exact le_trans hsum h144
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- Explicit zeta-upper numeral (realistic ceiling from Temp `tail_zeta_est.py`;
+unconditional `∀ z ∈ cell` bound NOT claimed — see header). -/
+def tailBnum : ℝ := 2
+
+/-- Explicit zeta-near-one numeral (realistic ceiling from Temp `tail_zeta_est.py`;
+unconditional `∀ z ∈ cell` bound NOT claimed — see header). -/
+def tailDnum : ℝ := 1
+
+/-- Certificate arithmetic (exact `Fraction` in Temp `tail_bnum_cert.py`):
+`Bnum*(1/2)+dnum = 2`. -/
+theorem tailNumerals_cert_arith : tailBnum * (1 / 2) + tailDnum = 2 := by
+  unfold tailBnum tailDnum
+  norm_num
+
+/-- Test verdict: the `B*e+d<1` sufficient condition FAILS for the explicit
+numerals (`2<1` is false), so the T4 split cannot close `K=2` with realistic
+bounds. -/
+theorem tailNumerals_test_fail : ¬ (tailBnum * (1 / 2) + tailDnum < 1) := by
+  rw [tailNumerals_cert_arith]
+  norm_num
+
+/-- Conditional composition specialized to the explicit numerals
+(reuses T4 `tailCellGap_of_cellBounds_two`). -/
+theorem tailCellGap_of_explicitBounds
+    (hB : ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z)‖ ≤ tailBnum)
+    (hd : ∀ z ∈ tailCellBounded, ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ tailDnum)
+    (hgap : tailBnum * (1 / 2) + tailDnum < 1)
+    (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hle : |z.re| ≤ 11)
+    (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < 1 / 2) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 := by
+  have hB0 : 0 ≤ tailBnum := by unfold tailBnum; norm_num
+  exact tailCellGap_of_cellBounds_two hB hd hB0 hgap z hx hle hy0 hy1
+
+/-- Direct `K=2` product shape (`M=1/2` via `tailMollifierReal_two`). -/
+theorem tailK2_product_eq (z : ℂ) :
+    riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1 =
+    riemannZeta (tailShiftedSReal z) / 2 - 1 := by
+  rw [tailMollifierReal_two]
+  ring
+
+/-- Direct `K=2` gap reformulation: product gap `<1` iff `‖zeta-2‖<2`
+(`(zeta-2)/2`, strictly weaker than `B*0.5+d<1`). -/
+theorem tailK2_gap_iff_norm_sub_two (z : ℂ) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 ↔
+    ‖riemannZeta (tailShiftedSReal z) - 2‖ < 2 := by
+  have heq : riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1 =
+      (riemannZeta (tailShiftedSReal z) - 2) / 2 := by
+    rw [tailMollifierReal_two]
+    ring
+  rw [heq, norm_div]
+  have h2 : ‖(2 : ℂ)‖ = (2 : ℝ) := by simp
+  rw [h2]
+  constructor <;> intro h <;> linarith
+
+#print axioms tailShiftedSReal_re_mem_cell
+#print axioms tailShiftedSReal_im_abs_mem_cell
+#print axioms tailShiftedSReal_norm_le12_cell
+#print axioms tailNumerals_cert_arith
+#print axioms tailNumerals_test_fail
+#print axioms tailCellGap_of_explicitBounds
+#print axioms tailK2_product_eq
+#print axioms tailK2_gap_iff_norm_sub_two
+
+/- Quantified remainder after this block (2026-09-05): BANKED explicit numerals
+`tailBnum = 2` / `tailDnum = 1` (realistic ceilings from Temp eta estimates,
+`Fraction`-certified `Bnum*(1/2)+dnum = 2`) with proved FAIL verdict
+`tailNumerals_test_fail` (`¬ Bnum*(1/2)+dnum<1`), conditional composition
+`tailCellGap_of_explicitBounds` (via T4), s-image rect
+`tailShiftedSReal_re_mem_cell` / `im_abs_mem_cell` / `norm_le12_cell`
+(`Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`, `‖s‖ ≤ 12`), and direct `K=2` reduction
+`tailK2_product_eq` / `tailK2_gap_iff_norm_sub_two` (`gap<1 ↔ ‖zeta-2‖<2`).
+RESIDUAL: unconditional `∀ z ∈ tailCellBounded, ‖zeta‖ ≤ 2` /
+`‖zeta-1‖ ≤ 1` remain OPEN (need FE/Stirling/convexity); moreover the
+`B*e+d<1` split is PROVED too coarse at `K=2`/`e=1/2` (true `|zeta|~1.5`
+forces `~1.35>1`). Exact next-agent task: prove `‖riemannZeta s - 2‖ < 2`
+on the banked s-rect (`Re ∈ [0,1/2]`, `|Im| ∈ [10,11]`, `‖s‖ ≤ 12`) or switch
+to `K>2` (smaller mollifier error), then close via `tailK2_gap_iff_norm_sub_two`. -/
