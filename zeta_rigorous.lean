@@ -27181,3 +27181,171 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ3l_rpow31_ge_seven_point_eight_four_nine
 #print axioms DZ3l_true_block_le_zero_four_seven_zero_four_seven
 #print axioms DZ3l_gap_047047
+
+/-!
+DOOR-3 MIDDLE-UPPER (DZ3m): SINGLE-pair signed-Re cancellation lemma (zeta lane).
+
+Scope: ONE pair only (`m = 8`, i.e. Dirichlet terms `k = 16, 17`).
+Read-only reuse: `D3_eta_re` (per-term signed Re), `DZ3g_pair_le_of_base`
+(generic `8.771` pair-norm bound), `DZ3l_rpow17_ge_five_point_four_seven_three_five`
+(four-decimal floor at base `17`), `Complex.re_le_norm` / `Complex.abs_re_le_norm`.
+Nothing else touched; append-only tail.
+-/
+
+/-- (DZ3m) Signed Re decomposition of the `m = 8` pair: opposite `(-1)^k`
+signs computed explicitly (`+` at `k = 16`, `-` at `k = 17`). -/
+theorem DZ3m_pair8_re_eq :
+    (etaPairTerm (1 - zetaCellS0) 8).re =
+      D3_amp 16 * Real.cos (D3_phase 16) - D3_amp 17 * Real.cos (D3_phase 17) := by
+  have e0 : (2 * 8 : ℕ) = 16 := by norm_num
+  have e1 : (2 * 8 + 1 : ℕ) = 17 := by norm_num
+  have h16 := D3_eta_re 16
+  have h17 := D3_eta_re 17
+  have s16 : (-1 : ℝ) ^ (16 : ℕ) = 1 := by norm_num
+  have s17 : (-1 : ℝ) ^ (17 : ℕ) = -1 := by norm_num
+  rw [s16] at h16
+  rw [s17] at h17
+  unfold etaPairTerm
+  rw [Complex.add_re, e0, e1, h16, h17]
+  ring
+
+/-- (DZ3m) Tight norm bound for the `m = 8` pair (replay of the DZ3l `b0`
+step as a standalone lemma). -/
+theorem DZ3m_pair8_norm_le :
+    ‖etaPairTerm (1 - zetaCellS0) 8‖ ≤ 8.771 / 5.4735 / 17 := by
+  have hbase : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+  have hc : (5.4735 : ℝ) ≤ ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+    rw [hbase]
+    exact DZ3l_rpow17_ge_five_point_four_seven_three_five
+  have h := DZ3g_pair_le_of_base 8 5.4735 (by norm_num) hc
+  rwa [hbase] at h
+
+/-- (DZ3m) SIGNED Re upper bound for the `m = 8` pair via `Re <= norm`. -/
+theorem DZ3m_pair8_re_le :
+    (etaPairTerm (1 - zetaCellS0) 8).re ≤ 8.771 / 5.4735 / 17 :=
+  le_trans (Complex.re_le_norm _) DZ3m_pair8_norm_le
+
+/-- (DZ3m) Two-sided signed Re interval for the `m = 8` pair. -/
+theorem DZ3m_pair8_re_abs_le :
+    |(etaPairTerm (1 - zetaCellS0) 8).re| ≤ 8.771 / 5.4735 / 17 :=
+  le_trans (Complex.abs_re_le_norm _) DZ3m_pair8_norm_le
+
+/-- (DZ3m) Decimal Re bound for the `m = 8` pair: `Re <= 0.095`. -/
+theorem DZ3m_pair8_re_le_zero_zero_nine_five :
+    (etaPairTerm (1 - zetaCellS0) 8).re ≤ 0.095 := by
+  have h := DZ3m_pair8_re_le
+  have hbound : (8.771 : ℝ) / 5.4735 / 17 ≤ 0.095 := by norm_num
+  linarith
+
+/-- (DZ3m) Saving verdict: the tight signed-Re constant is STRICTLY below
+the `DZ3c_pair_le` triangle contribution `2/17 ≈ 0.11765` of this pair. -/
+theorem DZ3m_pair8_saving :
+    (8.771 : ℝ) / 5.4735 / 17 ≤ 0.095 ∧ (8.771 : ℝ) / 5.4735 / 17 < 2 / 17
+      ∧ (0.095 : ℝ) < 2 / 17 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3m report-and-stop): banked SINGLE-pair signed-Re bridge at `m = 8`:
+`DZ3m_pair8_re_eq` (opposite signs `+`/`-` explicit via `D3_eta_re`),
+`DZ3m_pair8_norm_le` (`||pair 8|| <= 8.771/5.4735/17 ≈ 0.09426`),
+`DZ3m_pair8_re_le` / `DZ3m_pair8_re_abs_le` (signed `Re` in the tight interval),
+`DZ3m_pair8_re_le_zero_zero_nine_five` (`Re <= 0.095`),
+`DZ3m_pair8_saving` (`0.095 < 2/17`, saves `≈ 0.02265` on this pair's
+triangle slot; tight constant saves `2/17 - 8.771/5.4735/17 ≈ 0.02339`).
+Genuine `cos`-level cancellation (`Re ≈ 0.0002` numerically) NOT yet proved;
+that needs rigorous `8.75*log(17/18)` + `cos` intervals (unstarted).
+EXACT NEXT-AGENT TASK (door-3, append-only DZ3m tail, do NOT touch
+`riemann_hypothesis_newsection.lean` / `central_cover_assembly.lean` /
+`AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT commit/push): prove `cos` lower
+bounds `0.9 <= cos(D3_phase 16)`, `0.9 <= cos(D3_phase 17)` via rigorous
+`log 17/18` intervals + `2π` reduction + `1-u^2/2 <= cos`, plus `amp`
+two-sided bounds, then upgrade `DZ3m_pair8_re_le` toward `<= 0.05`.
+-/
+
+#print axioms DZ3m_pair8_re_eq
+#print axioms DZ3m_pair8_norm_le
+#print axioms DZ3m_pair8_re_le
+#print axioms DZ3m_pair8_re_abs_le
+#print axioms DZ3m_pair8_re_le_zero_zero_nine_five
+#print axioms DZ3m_pair8_saving
+/-!
+Door-3 middle-upper single-k TRUE prefix cap (DZ3n, append-only DZ3m tail).
+
+Tiny bridge (exactly one accountable cap): the `k = 2` TRUE prefix equals
+MVT pair 8 (`DZ3n_prefix2_eq`: `16 + 0 = 2 * 8`, `16 + 1 = 2 * 8 + 1`),
+hence `DZ3n_prefix2_le : ||sum_{j<2} eta s1 (16+j)|| <= 0.095` via
+read-only `DZ3g_pair_le_of_base` with the maximal four-decimal floor
+(read-only `DZ3l_rpow17_ge_five_point_four_seven_three_five`):
+`8.771/5.4735/17 = 0.09426166... <= 0.095`.
+Read-only reuse: `etaPairTerm`, `DZ3g_pair_le_of_base`, `DZ3l_*` floor.
+Nothing redefined. Name prefix `DZ3n_` is fresh (sibling G6 owns `DZ3m_`).
+
+NUMBERS: banked cap `0.095` at `k = 2` (pure-triangle fallback would give
+`amp16 + amp17 <= 1/5.4735 + 1/5.8512 ~= 0.35361`, i.e. `3.72x` worse;
+pair cancellation saves `~= 0.25861`); need `12/6300 ~= 0.0019048`;
+`0.095/(12/6300) = 49.875` (`DZ3n_gap_0095`); `0.095 < 0.47047`
+(block record `DZ3l` untouched).
+-/
+
+/-- (DZ3n) The `k = 2` TRUE prefix is exactly MVT pair 8. -/
+theorem DZ3n_prefix2_eq :
+    (∑ j ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) (16 + j))
+      = etaPairTerm (1 - zetaCellS0) 8 := by
+  have hexp : (∑ j ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) (16 + j))
+      = etaDirichletTerm (1 - zetaCellS0) (16 + 0)
+        + etaDirichletTerm (1 - zetaCellS0) (16 + 1) := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  rw [hexp]
+  have e0 : (16 + 0 : ℕ) = 2 * 8 := by norm_num
+  have e1 : (16 + 1 : ℕ) = 2 * 8 + 1 := by norm_num
+  unfold etaPairTerm
+  rw [e0, e1]
+
+/-- (DZ3n) Single-k TRUE prefix cap at `k = 2`: `<= 0.095`. -/
+theorem DZ3n_prefix2_le :
+    ‖∑ j ∈ Finset.range 2, etaDirichletTerm (1 - zetaCellS0) (16 + j)‖ ≤ 0.095 := by
+  rw [DZ3n_prefix2_eq]
+  have hbase : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+  have hc : (5.4735 : ℝ) ≤ ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+    rw [hbase]
+    exact DZ3l_rpow17_ge_five_point_four_seven_three_five
+  have h := DZ3g_pair_le_of_base 8 5.4735 (by norm_num) hc
+  rw [hbase] at h
+  have hbound : (8.771 : ℝ) / 5.4735 / 17 ≤ 0.095 := by norm_num
+  linarith
+
+/-- (DZ3n) Gap verdict for `0.095` vs `12/6300` and vs block `0.47047`. -/
+theorem DZ3n_gap_0095 :
+    (0.095 : ℝ) / (12 / 6300) = 49.875 ∧ (0.095 : ℝ) < 0.47047
+      ∧ (12 / 6300 : ℝ) < 0.095 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3n report-and-stop): ONE tiny bridge banked —
+`DZ3n_prefix2_eq` (`k = 2` prefix = pair 8, two-term peel) +
+`DZ3n_prefix2_le : ||sum_{j<2} eta s1 (16+j)|| <= 0.095`
+(`8.771/5.4735/17 = 0.09426166... <= 0.095`, read-only `DZ3g_pair_le_of_base`
++ read-only floor `DZ3l_rpow17_ge_five_point_four_seven_three_five`) +
+`DZ3n_gap_0095` (`49.875x` over need; `0.095 < 0.47047`).
+Triangle fallback at `k = 2` would be `~= 0.35361` (`1/5.4735+1/5.8512`);
+pair form saves `~= 0.25861` (`3.72x`).
+Block record stays `0.47047` (read-only `DZ3l`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3n tail after
+`DZ3n_gap_0095`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove the `k = 4` prefix cap
+`||sum_{j<4} eta s1 (16+j)|| <= 0.174` (= pair 8 + pair 9:
+`0.09426166 + 0.07889519 = 0.17315685 <= 0.174`, read-only
+`DZ3g_pair_le_of_base` at `m = 9` with read-only floor
+`DZ3l_rpow19_ge_five_point_eight_five_one_two`, plus `DZ3n_prefix2_eq`-shape
+two-pair identity via read-only `DZ3c_range_two_mul`), then `k = 6, 8, ...`
+toward a uniform `B <= 0.57` for all `k <= 16` (odd `k` adds one
+`D3_amp`-bounded term via read-only `DZ2e_eta_norm`).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3n_prefix2_eq
+#print axioms DZ3n_prefix2_le
+#print axioms DZ3n_gap_0095
