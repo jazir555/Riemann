@@ -20610,4 +20610,415 @@ theorem sliver_633_split :
 
 end Door3GammaCutR02Sept0807Narrow633
 
+/-!
+# Door-3 deriv-lane Gamma sups on the s-image rect (newsection tail)
+
+Bridge for the deriv lane (`door3_deriv_certs.lean`, read-only): bank explicit
+`‖Complex.Gamma (s / 2)‖ ≤ G0` numerals on the `s`-image rectangle
+`s.re ∈ [-1.61, 2.40]`, `s.im ∈ [-10.75, -6.75]` (so
+`(s/2).re ∈ [-0.805, 1.20]`, `(s/2).im ∈ [-5.375, -3.375]`).
+
+Routes used (Stirling-free, no reflection formula needed): `Gamma_add_one`
+recurrence stepping up into the right half-plane, then elementary
+`Real.Gamma` majorants there via the Euler-integral triangle inequality
+(`R00GammaLower.norm_Gamma_le_realGamma`, imported from `interval_arith.lean`,
+ reused read-only) plus convexity (`Real.Gamma ≤ 1` on `[1, 2]`).
+
+Frozen tiers untouched: `G = 0.0807` / `M = 100.13256` / `Azeta = 5735` and the
+narrow `217.x` rows above are NOT re-derived. The shelved two-step block
+(`stash@{0}`) is NOT popped. Banned numerals (`68.85`) and 6-shift refloors are
+NOT used. This lane banks Gamma SUP-side bounds only.
+
+Banked here (sorry-free):
+* one-step `G0 = 1.52` (`5.13 / 3.375`, `Re(w+1) ∈ [0.195, 2.20]`);
+* two-step `G0 = 0.24` and refined `G0 = 0.232`
+  (`2.64 / (3.375 * 3.375)`, `Re(w+2) ∈ [1.195, 3.20]`, denominators
+  `‖w‖ ≥ 3.375`, `‖w+1‖ ≥ 3.375` from `±Im ≥ 3.375`);
+* quantified gaps `G * Z ≤ 0.0001 → Z ≤ …` and the tier-gap bridge
+  `63.4 * 4 * G * Z ≤ 1 / 40 → G * Z ≤ 0.0001 → Z ≤ …`.
+
+Implied Z0 budgets (`G0 * Z0 ≤ 0.0001`): `1.52 → 0.00007`,
+`0.24 → 0.00042`, `0.232 → 0.00044` (smallest G0 gives the largest budget).
+
+Numerals used (all ≤ 6 digits): `1.52`, `5.13`, `3.375`, `0.195`, `2.20`,
+`0.24`, `0.232`, `2.64`, `1.195`, `3.20`, `1.20`, `2.20`, `0.00007`,
+`0.00042`, `0.00044`, `0.0001`, `63.4`, `0.02536`.
+-/
+
+namespace Door3DerivGammaSupSImage
+
+/-- `s`-image rectangle for the deriv lane (mirror of `sImageRect` in
+`door3_deriv_certs.lean`: `s.re ∈ [-1.61, 2.40]`, `s.im ∈ [-10.75, -6.75]`). -/
+def derivSImageRect (s : ℂ) : Prop :=
+  (-1.61 : ℝ) ≤ s.re ∧ s.re ≤ 2.40 ∧ (-10.75 : ℝ) ≤ s.im ∧ s.im ≤ (-6.75 : ℝ)
+
+/-- `(s / 2).re = s.re / 2`. -/
+theorem half_re_eq (s : ℂ) : (s / 2).re = s.re / 2 := by
+  simp [Complex.div_ofNat]
+
+/-- `(s / 2).im = s.im / 2`. -/
+theorem half_im_eq (s : ℂ) : (s / 2).im = s.im / 2 := by
+  simp [Complex.div_ofNat]
+
+/-- `(s / 2 + 1).re = s.re / 2 + 1`. -/
+theorem half_add_one_re_eq (s : ℂ) : (s / 2 + 1).re = s.re / 2 + 1 := by
+  rw [Complex.add_re, Complex.one_re, half_re_eq]
+
+/-- `(s / 2 + 2).re = s.re / 2 + 2`. -/
+theorem half_add_two_re_eq (s : ℂ) : (s / 2 + 2).re = s.re / 2 + 2 := by
+  have h2 : ((2 : ℂ)).re = (2 : ℝ) := by simp
+  rw [Complex.add_re, h2, half_re_eq]
+
+/-- `Re` window for `w := s / 2`: `[-0.805, 1.20]`. -/
+theorem half_re_bounds {s : ℂ} (hs : derivSImageRect s) :
+    (-0.805 : ℝ) ≤ (s / 2).re ∧ (s / 2).re ≤ 1.20 := by
+  obtain ⟨hlo, hhi, _, _⟩ := hs
+  rw [half_re_eq]
+  constructor <;> linarith
+
+/-- Shifted `Re` window for `w + 1`: `[0.195, 2.20]`. -/
+theorem half_add_one_re_mem {s : ℂ} (hs : derivSImageRect s) :
+    (0.195 : ℝ) ≤ (s / 2 + 1).re ∧ (s / 2 + 1).re ≤ 2.20 := by
+  obtain ⟨hlo, hhi, _, _⟩ := hs
+  rw [half_add_one_re_eq]
+  constructor <;> linarith
+
+/-- Twice-shifted `Re` window for `w + 2`: `[1.195, 3.20]`. -/
+theorem half_add_two_re_mem {s : ℂ} (hs : derivSImageRect s) :
+    (1.195 : ℝ) ≤ (s / 2 + 2).re ∧ (s / 2 + 2).re ≤ 3.20 := by
+  obtain ⟨hlo, hhi, _, _⟩ := hs
+  rw [half_add_two_re_eq]
+  constructor <;> linarith
+
+/-- Denominator floor `‖s / 2‖ ≥ 3.375` (`|Im| = |s.im| / 2 ≥ 3.375`). -/
+theorem half_norm_ge {s : ℂ} (hs : derivSImageRect s) :
+    (3.375 : ℝ) ≤ ‖s / 2‖ := by
+  obtain ⟨_, _, hlo_im, hhi⟩ := hs
+  have him : |(s / 2).im| ≤ ‖s / 2‖ := Complex.abs_im_le_norm _
+  have heim : (s / 2).im = s.im / 2 := half_im_eq s
+  have habs : (6.75 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  have h2 : |(s / 2).im| = |s.im| / 2 := by
+    rw [heim]
+    simp [abs_div]
+  linarith
+
+/-- Denominator floor `‖s / 2 + 1‖ ≥ 3.375` (same `Im` as `s / 2`). -/
+theorem half_add_one_norm_ge {s : ℂ} (hs : derivSImageRect s) :
+    (3.375 : ℝ) ≤ ‖s / 2 + 1‖ := by
+  obtain ⟨_, _, hlo_im, hhi⟩ := hs
+  have him : |(s / 2 + 1).im| ≤ ‖s / 2 + 1‖ := Complex.abs_im_le_norm _
+  have heim : (s / 2 + 1).im = s.im / 2 := by
+    have h1 : ((1 : ℂ)).im = (0 : ℝ) := by simp
+    rw [Complex.add_im, h1, half_im_eq]
+    ring
+  have habs : (6.75 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos (by linarith)]
+    linarith
+  have h2 : |(s / 2 + 1).im| = |s.im| / 2 := by
+    rw [heim]
+    simp [abs_div]
+  linarith
+
+/-- `s / 2 ≠ 0` on the rectangle (norm floor `3.375 > 0`). -/
+theorem half_ne_zero {s : ℂ} (hs : derivSImageRect s) : s / 2 ≠ 0 := by
+  intro hcon
+  have hden := half_norm_ge hs
+  rw [hcon, norm_zero] at hden
+  norm_num at hden
+
+/-- `s / 2 + 1 ≠ 0` on the rectangle. -/
+theorem half_add_one_ne_zero {s : ℂ} (hs : derivSImageRect s) :
+    s / 2 + 1 ≠ 0 := by
+  intro hcon
+  have hden := half_add_one_norm_ge hs
+  rw [hcon, norm_zero] at hden
+  norm_num at hden
+
+/-- Real-Gamma cap `Real.Gamma y ≤ 1` for `y ∈ [1, 2]` (convexity with
+`Gamma 1 = Gamma 2 = 1`). -/
+theorem realGamma_le_one_of_mem_12 {y : ℝ} (h1 : (1 : ℝ) ≤ y) (h2 : y ≤ 2) :
+    Real.Gamma y ≤ 1 := by
+  have hy1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hy2 : (2 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 2 - y := by linarith
+  have hb : (0 : ℝ) ≤ y - 1 := by linarith
+  have hab : (2 - y) + (y - 1) = 1 := by ring
+  have h := Real.convexOn_Gamma.2 hy1 hy2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - y) * 1 + (y - 1) * 2 = y := by ring
+  rw [heq] at h
+  have hrhs : (2 - y) * 1 + (y - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  exact h
+
+/-- Real-Gamma cap `Real.Gamma x ≤ 5.13` for `x ∈ [0.195, 2.20]`: below `1`
+shift up (`Γ(x) = Γ(x+1)/x ≤ 1/0.195 ≤ 5.13`), on `[1, 2]` use the unit cap,
+above `2` shift down (`Γ(x) = (x-1)Γ(x-1) ≤ 1.2`). -/
+theorem realGamma_le_513 {x : ℝ} (hlo : (0.195 : ℝ) ≤ x) (hhi : x ≤ 2.20) :
+    Real.Gamma x ≤ 5.13 := by
+  rcases le_total x 1 with hx1 | hx1
+  · have hx_pos : (0 : ℝ) < x := by linarith
+    have hne : x ≠ 0 := ne_of_gt hx_pos
+    have hy1 : (1 : ℝ) ≤ x + 1 := by linarith
+    have hy2 : x + 1 ≤ (2 : ℝ) := by linarith
+    have h1 : Real.Gamma (x + 1) ≤ 1 := realGamma_le_one_of_mem_12 hy1 hy2
+    have hadd := Real.Gamma_add_one hne
+    rw [hadd] at h1
+    have hfin : Real.Gamma x ≤ 1 / x := by
+      rw [le_div_iff₀ hx_pos, mul_comm]
+      exact h1
+    have hfrac : (1 : ℝ) / x ≤ 5.13 := by
+      have h1d : (1 : ℝ) / x ≤ 1 / 0.195 :=
+        one_div_le_one_div_of_le (by norm_num) hlo
+      have h2d : (1 : ℝ) / 0.195 ≤ 5.13 := by norm_num
+      exact le_trans h1d h2d
+    exact le_trans hfin hfrac
+  · rcases le_total x 2 with hx2 | hx2
+    · calc Real.Gamma x ≤ 1 := realGamma_le_one_of_mem_12 hx1 hx2
+        _ ≤ 5.13 := by norm_num
+    · have hm1 : (1 : ℝ) ≤ x - 1 := by linarith
+      have hm2 : x - 1 ≤ (2 : ℝ) := by linarith
+      have h1 : Real.Gamma (x - 1) ≤ 1 := realGamma_le_one_of_mem_12 hm1 hm2
+      have hne : x - 1 ≠ 0 := ne_of_gt (by linarith)
+      have hadd := Real.Gamma_add_one hne
+      have hxeq : x - 1 + 1 = x := by ring
+      rw [hxeq] at hadd
+      have hpos : (0 : ℝ) ≤ Real.Gamma (x - 1) :=
+        le_of_lt (Real.Gamma_pos_of_pos (by linarith))
+      calc Real.Gamma x = (x - 1) * Real.Gamma (x - 1) := hadd
+        _ ≤ 1.2 * 1 := mul_le_mul (by linarith) h1 hpos (by norm_num)
+        _ = 1.2 := by norm_num
+        _ ≤ 5.13 := by norm_num
+
+/-- Helper cap `Real.Gamma y ≤ 1.20` for `y ∈ [1, 2.20]`: on `[1, 2]` use the
+unit cap, above `2` shift down once (`Γ(y) = (y-1)Γ(y-1) ≤ 1.20`). -/
+theorem realGamma_le_12_of_mem_1_220 {y : ℝ} (h1 : (1 : ℝ) ≤ y)
+    (h2 : y ≤ 2.20) : Real.Gamma y ≤ 1.20 := by
+  rcases le_total y 2 with hy2 | hy2
+  · calc Real.Gamma y ≤ 1 := realGamma_le_one_of_mem_12 h1 hy2
+      _ ≤ 1.20 := by norm_num
+  · have hm1 : (1 : ℝ) ≤ y - 1 := by linarith
+    have hm2 : y - 1 ≤ (2 : ℝ) := by linarith
+    have h0 : Real.Gamma (y - 1) ≤ 1 := realGamma_le_one_of_mem_12 hm1 hm2
+    have hne : y - 1 ≠ 0 := ne_of_gt (by linarith)
+    have hadd := Real.Gamma_add_one hne
+    have hyeq : y - 1 + 1 = y := by ring
+    rw [hyeq] at hadd
+    have hpos : (0 : ℝ) ≤ Real.Gamma (y - 1) :=
+      le_of_lt (Real.Gamma_pos_of_pos (by linarith))
+    calc Real.Gamma y = (y - 1) * Real.Gamma (y - 1) := hadd
+      _ ≤ 1.20 * 1 := mul_le_mul (by linarith) h0 hpos (by norm_num)
+      _ = 1.20 := by norm_num
+
+/-- Real-Gamma cap `Real.Gamma x ≤ 2.64` for `x ∈ [1.195, 3.20]`: on `[1, 2]`
+use the unit cap (hence `≤ 2.64`), above `2` shift down once
+(`Γ(x) = (x-1)Γ(x-1) ≤ 2.20 * 1.20 = 2.64`). -/
+theorem realGamma_le_264 {x : ℝ} (hlo : (1.195 : ℝ) ≤ x) (hhi : x ≤ 3.20) :
+    Real.Gamma x ≤ 2.64 := by
+  rcases le_total x 2 with hx2 | hx2
+  · have hx1 : (1 : ℝ) ≤ x := by linarith
+    calc Real.Gamma x ≤ 1 := realGamma_le_one_of_mem_12 hx1 hx2
+      _ ≤ 2.64 := by norm_num
+  · have hm1 : (1 : ℝ) ≤ x - 1 := by linarith
+    have hm2 : x - 1 ≤ (2.20 : ℝ) := by linarith
+    have h0 : Real.Gamma (x - 1) ≤ 1.20 := realGamma_le_12_of_mem_1_220 hm1 hm2
+    have hne : x - 1 ≠ 0 := ne_of_gt (by linarith)
+    have hadd := Real.Gamma_add_one hne
+    have hxeq : x - 1 + 1 = x := by ring
+    rw [hxeq] at hadd
+    have hpos : (0 : ℝ) ≤ Real.Gamma (x - 1) :=
+      le_of_lt (Real.Gamma_pos_of_pos (by linarith))
+    calc Real.Gamma x = (x - 1) * Real.Gamma (x - 1) := hadd
+      _ ≤ 2.20 * 1.20 := mul_le_mul (by linarith) h0 hpos (by norm_num)
+      _ = 2.64 := by norm_num
+
+/-- One-step recurrence solved for `Γ(w)`: `Γ(w) = Γ(w + 1) / w` for `w ≠ 0`. -/
+theorem Gamma_shift_one (w : ℂ) (hw : w ≠ 0) :
+    Complex.Gamma w = Complex.Gamma (w + 1) / w := by
+  have h := Complex.Gamma_add_one w hw
+  rw [eq_div_iff_mul_eq hw, h]
+  ring
+
+/-- Two-step recurrence: `Γ(w) = Γ(w + 2) / ((w + 1) * w)` for
+`w ≠ 0`, `w + 1 ≠ 0`. -/
+theorem Gamma_shift_two (w : ℂ) (hw : w ≠ 0) (hw1 : w + 1 ≠ 0) :
+    Complex.Gamma w = Complex.Gamma (w + 2) / ((w + 1) * w) := by
+  have h1 := Complex.Gamma_add_one w hw
+  have h2 := Complex.Gamma_add_one (w + 1) hw1
+  have heq : w + 1 + 1 = w + 2 := by ring
+  rw [heq] at h2
+  rw [h1] at h2
+  rw [eq_div_iff_mul_eq (mul_ne_zero hw1 hw)]
+  rw [h2]
+  ring
+
+/-- One-step Gamma sup: `‖Γ(s/2)‖ ≤ 1.52` on the rectangle
+(`Real.Gamma ≤ 5.13` on `Re(w+1) ∈ [0.195, 2.20]`, divided by `3.375`). -/
+theorem deriv_gamma_sup_152 {s : ℂ} (hs : derivSImageRect s) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1.52 := by
+  obtain ⟨hlo, hhi⟩ := half_add_one_re_mem hs
+  have hpos : (0 : ℝ) < (s / 2 + 1).re := by linarith
+  have hle : ‖Complex.Gamma (s / 2 + 1)‖ ≤ Real.Gamma (s / 2 + 1).re :=
+    R00GammaLower.norm_Gamma_le_realGamma hpos
+  have hR : Real.Gamma (s / 2 + 1).re ≤ 5.13 := realGamma_le_513 hlo hhi
+  have hG : ‖Complex.Gamma (s / 2 + 1)‖ ≤ 5.13 := le_trans hle hR
+  have hden : (3.375 : ℝ) ≤ ‖s / 2‖ := half_norm_ge hs
+  have hwpos : (0 : ℝ) < ‖s / 2‖ := lt_of_lt_of_le (by norm_num) hden
+  have hwnez := half_ne_zero hs
+  have hrec : Complex.Gamma (s / 2) = Complex.Gamma (s / 2 + 1) / (s / 2) :=
+    Gamma_shift_one _ hwnez
+  have h152 : (1.52 : ℝ) = 5.13 / 3.375 := by norm_num
+  rw [hrec, norm_div, h152, div_le_iff₀ hwpos]
+  calc ‖Complex.Gamma (s / 2 + 1)‖ ≤ 5.13 := hG
+    _ = 5.13 / 3.375 * 3.375 := by
+        rw [div_mul_cancel₀ _ (by norm_num : (3.375 : ℝ) ≠ 0)]
+    _ ≤ 5.13 / 3.375 * ‖s / 2‖ :=
+        mul_le_mul_of_nonneg_left hden (by norm_num)
+    _ = 5.13 / 3.375 * ‖s / 2‖ := rfl
+
+/-- Two-step core quotient:
+`‖Γ(s/2)‖ ≤ 2.64 / (3.375 * 3.375)` on the rectangle. -/
+theorem deriv_gamma_le_quot {s : ℂ} (hs : derivSImageRect s) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 2.64 / (3.375 * 3.375) := by
+  obtain ⟨hlo, hhi⟩ := half_add_two_re_mem hs
+  have hpos : (0 : ℝ) < (s / 2 + 2).re := by linarith
+  have hle : ‖Complex.Gamma (s / 2 + 2)‖ ≤ Real.Gamma (s / 2 + 2).re :=
+    R00GammaLower.norm_Gamma_le_realGamma hpos
+  have hR : Real.Gamma (s / 2 + 2).re ≤ 2.64 := realGamma_le_264 hlo hhi
+  have hG : ‖Complex.Gamma (s / 2 + 2)‖ ≤ 2.64 := le_trans hle hR
+  have hd0 : (3.375 : ℝ) ≤ ‖s / 2‖ := half_norm_ge hs
+  have hd1 : (3.375 : ℝ) ≤ ‖s / 2 + 1‖ := half_add_one_norm_ge hs
+  have hden : (3.375 : ℝ) * 3.375 ≤ ‖s / 2 + 1‖ * ‖s / 2‖ :=
+    mul_le_mul hd1 hd0 (by norm_num) (by linarith)
+  have hw := half_ne_zero hs
+  have hw1 := half_add_one_ne_zero hs
+  have hrec : Complex.Gamma (s / 2)
+      = Complex.Gamma (s / 2 + 2) / ((s / 2 + 1) * (s / 2)) :=
+    Gamma_shift_two _ hw hw1
+  have hDpos : (0 : ℝ) < ‖s / 2 + 1‖ * ‖s / 2‖ := by
+    apply mul_pos
+    · exact lt_of_lt_of_le (by norm_num) hd1
+    · exact lt_of_lt_of_le (by norm_num) hd0
+  have hQpos : (0 : ℝ) < 3.375 * 3.375 := by norm_num
+  have hQne : (3.375 * 3.375 : ℝ) ≠ 0 := ne_of_gt hQpos
+  rw [hrec, norm_div, norm_mul, div_le_iff₀ hDpos]
+  calc ‖Complex.Gamma (s / 2 + 2)‖ ≤ 2.64 := hG
+    _ = 2.64 / (3.375 * 3.375) * (3.375 * 3.375) := by
+        rw [div_mul_cancel₀ _ hQne]
+    _ ≤ 2.64 / (3.375 * 3.375) * (‖s / 2 + 1‖ * ‖s / 2‖) :=
+        mul_le_mul_of_nonneg_left hden (by norm_num)
+
+/-- Two-step Gamma sup: `‖Γ(s/2)‖ ≤ 0.24` on the rectangle. -/
+theorem deriv_gamma_sup_24 {s : ℂ} (hs : derivSImageRect s) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 0.24 := by
+  have h := deriv_gamma_le_quot hs
+  have hcap : (2.64 : ℝ) / (3.375 * 3.375) ≤ 0.24 := by norm_num
+  exact le_trans h hcap
+
+/-- Two-step refined Gamma sup (smallest banked): `‖Γ(s/2)‖ ≤ 0.232`. -/
+theorem deriv_gamma_sup_232 {s : ℂ} (hs : derivSImageRect s) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 0.232 := by
+  have h := deriv_gamma_le_quot hs
+  have hcap : (2.64 : ℝ) / (3.375 * 3.375) ≤ 0.232 := by norm_num
+  exact le_trans h hcap
+
+/-- Quantified gap at `G = 1.52`: `1.52 * Z ≤ 0.0001 → Z ≤ 0.00007`. -/
+theorem deriv_gz_gap_152 {Z : ℝ} (h : (1.52 : ℝ) * Z ≤ 0.0001) :
+    Z ≤ 0.00007 := by
+  by_contra hc
+  push_neg at hc
+  have h2 : (1.52 : ℝ) * 0.00007 < 1.52 * Z :=
+    mul_lt_mul_of_pos_left hc (by norm_num)
+  norm_num at h2
+  linarith
+
+/-- Quantified gap at `G = 0.24`: `0.24 * Z ≤ 0.0001 → Z ≤ 0.00042`. -/
+theorem deriv_gz_gap_24 {Z : ℝ} (h : (0.24 : ℝ) * Z ≤ 0.0001) :
+    Z ≤ 0.00042 := by
+  by_contra hc
+  push_neg at hc
+  have h2 : (0.24 : ℝ) * 0.00042 < 0.24 * Z :=
+    mul_lt_mul_of_pos_left hc (by norm_num)
+  norm_num at h2
+  linarith
+
+/-- Quantified gap at `G = 0.232`: `0.232 * Z ≤ 0.0001 → Z ≤ 0.00044`. -/
+theorem deriv_gz_gap_232 {Z : ℝ} (h : (0.232 : ℝ) * Z ≤ 0.0001) :
+    Z ≤ 0.00044 := by
+  by_contra hc
+  push_neg at hc
+  have h2 : (0.232 : ℝ) * 0.00044 < 0.232 * Z :=
+    mul_lt_mul_of_pos_left hc (by norm_num)
+  norm_num at h2
+  linarith
+
+/-- Product-tier bridge: `63.4 * 4 * G * Z ≤ 1 / 40 → G * Z ≤ 0.0001`
+(`63.4 * 4 * 0.0001 = 0.02536 > 1 / 40`). -/
+theorem deriv_pgz_threshold {G Z : ℝ} (h : 63.4 * 4 * G * Z ≤ 1 / 40) :
+    G * Z ≤ 0.0001 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 63.4 * 4 := by norm_num
+  have h2 : (63.4 * 4 : ℝ) * 0.0001 < (63.4 * 4) * (G * Z) :=
+    mul_lt_mul_of_pos_left hc hpos
+  have e1 : (63.4 * 4 : ℝ) * 0.0001 = 0.02536 := by norm_num
+  have e2 : (63.4 * 4 : ℝ) * (G * Z) = 63.4 * 4 * G * Z := by ring
+  rw [e1, e2] at h2
+  linarith
+
+/-- Tier gap at `G = 1.52`: `63.4 * 4 * 1.52 * Z ≤ 1 / 40 → Z ≤ 0.00007`. -/
+theorem deriv_tier_gap_152 {Z : ℝ} (h : 63.4 * 4 * 1.52 * Z ≤ 1 / 40) :
+    Z ≤ 0.00007 :=
+  deriv_gz_gap_152 (deriv_pgz_threshold h)
+
+/-- Tier gap at `G = 0.24`: `63.4 * 4 * 0.24 * Z ≤ 1 / 40 → Z ≤ 0.00042`. -/
+theorem deriv_tier_gap_24 {Z : ℝ} (h : 63.4 * 4 * 0.24 * Z ≤ 1 / 40) :
+    Z ≤ 0.00042 := by
+  have hpgz : (0.24 : ℝ) * Z ≤ 0.0001 := by
+    have h0 := deriv_pgz_threshold (G := 0.24) (Z := Z) (by linarith : 63.4 * 4 * 0.24 * Z ≤ 1 / 40)
+    linarith [h0]
+  exact deriv_gz_gap_24 hpgz
+
+/-- Tier gap at `G = 0.232`: `63.4 * 4 * 0.232 * Z ≤ 1 / 40 → Z ≤ 0.00044`. -/
+theorem deriv_tier_gap_232 {Z : ℝ} (h : 63.4 * 4 * 0.232 * Z ≤ 1 / 40) :
+    Z ≤ 0.00044 := by
+  have hpgz : (0.232 : ℝ) * Z ≤ 0.0001 := by
+    have h0 := deriv_pgz_threshold (G := 0.232) (Z := Z) (by linarith : 63.4 * 4 * 0.232 * Z ≤ 1 / 40)
+    linarith [h0]
+  exact deriv_gz_gap_232 hpgz
+
+#print axioms Door3DerivGammaSupSImage.half_re_eq
+#print axioms Door3DerivGammaSupSImage.half_im_eq
+#print axioms Door3DerivGammaSupSImage.half_add_one_re_eq
+#print axioms Door3DerivGammaSupSImage.half_add_two_re_eq
+#print axioms Door3DerivGammaSupSImage.half_re_bounds
+#print axioms Door3DerivGammaSupSImage.half_add_one_re_mem
+#print axioms Door3DerivGammaSupSImage.half_add_two_re_mem
+#print axioms Door3DerivGammaSupSImage.half_norm_ge
+#print axioms Door3DerivGammaSupSImage.half_add_one_norm_ge
+#print axioms Door3DerivGammaSupSImage.half_ne_zero
+#print axioms Door3DerivGammaSupSImage.half_add_one_ne_zero
+#print axioms Door3DerivGammaSupSImage.realGamma_le_one_of_mem_12
+#print axioms Door3DerivGammaSupSImage.realGamma_le_513
+#print axioms Door3DerivGammaSupSImage.realGamma_le_12_of_mem_1_220
+#print axioms Door3DerivGammaSupSImage.realGamma_le_264
+#print axioms Door3DerivGammaSupSImage.Gamma_shift_one
+#print axioms Door3DerivGammaSupSImage.Gamma_shift_two
+#print axioms Door3DerivGammaSupSImage.deriv_gamma_sup_152
+#print axioms Door3DerivGammaSupSImage.deriv_gamma_le_quot
+#print axioms Door3DerivGammaSupSImage.deriv_gamma_sup_24
+#print axioms Door3DerivGammaSupSImage.deriv_gamma_sup_232
+#print axioms Door3DerivGammaSupSImage.deriv_gz_gap_152
+#print axioms Door3DerivGammaSupSImage.deriv_gz_gap_24
+#print axioms Door3DerivGammaSupSImage.deriv_gz_gap_232
+#print axioms Door3DerivGammaSupSImage.deriv_pgz_threshold
+#print axioms Door3DerivGammaSupSImage.deriv_tier_gap_152
+#print axioms Door3DerivGammaSupSImage.deriv_tier_gap_24
+#print axioms Door3DerivGammaSupSImage.deriv_tier_gap_232
+
+end Door3DerivGammaSupSImage
+
+
 
