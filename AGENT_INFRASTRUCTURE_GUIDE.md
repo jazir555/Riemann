@@ -1540,9 +1540,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     clean):** `etaDirichletTerm (1-zetaCellS0) (16+n) = (-1)^n·((17+n)^(-s1))` (sign, norm,
     `16+n` vs `17+n` off-by-one all explicit) + one-sided remainder `‖eta‖ ≤ ‖DZ‖ ≤ 1/5` ⇒
     **TRUE block `≤ 3.2`** (triangle; 1680× over need). HONEST: synthetic Abel `2.77` does NOT
-    transfer (conjugate + alternating + off-by-one); `DZ2_prefix1385_le` caps synthetic partials
-    only. Next: true-phase prefix caps (replay at slope `−8.75/24`) or cancellation-aware TRUE
-    block via `D3_eta_re/im` intervals (tasked).
+    transfer     (conjugate + alternating + off-by-one); `DZ2_prefix1385_le` caps synthetic partials
+    only. **TRUE tightening (`DZ2g_*`, DX, `9413c995`, green 8693 jobs, axioms clean):**
+    `D3_amp 31 ≤ 1/8` (`8^5 = 32768 = 32^3`) + per-term `|Re|/|Im| ≤ amp` ⇒ **TRUE block `≤
+    3.125`** (`15×1/5 + 1/8`; −2.34%, now 1640× over need). Still triangle (one tight tail).
+    Next: true-phase prefix caps (replay at slope `−8.75/24`) or second TRUE tightening via
+    genuine `Re/Im` cancellation (tasked).
     **Do NOT verify/commit DQ's newsection block until zeta is green** (it imports zeta).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
