@@ -20813,3 +20813,272 @@ Success = full proofs, `#print axioms` exactly
 
 #print axioms DZ2_prefix1385_le
 #print axioms DZ2_weighted_le_two_seven_seven
+
+/-!
+Door-3 middle-upper TRUE eta-term identification on [16,32) (DZ2e, append-only DZ2 tail).
+
+GREP-FIRST RECORD (`rg -n` in `zeta_rigorous.lean`, run before writing):
+* `etaDirichletTerm` (:389, `(-1)^n/(n+1)^s`), `etaDirichletTerm_eq_cpow_neg` (:830),
+  `zetaCellS0` (:2601, `<0.395,-8.75>`), `zetaCellS0_re/im` (:2603/2605),
+  `D3_amp` (:5911, `(k+1)^(-0.605)`), `D3_phase` (:5914, `8.75*log(k+1)`),
+  `D3_eta_re/im` (:5991/:6004, `(-1)^k` factor), `D3_cpow_re/im` (:5917/:5948),
+  `ZPhi` (:18765, `8.75*log(16+n)`), `ZPiece` (:18771, `exp(i*ZPhi)`),
+  `DZ2w` (:20265, `rpow(16+n,-0.605)`), `DZ2f` (:20268), `DZ2w0_le_fifth` (:20512),
+  `DZ2w_le_zero` (:20290), `DZ_piece_unit` (:18918), `DV_mid_conditional_012` (:18657).
+* New prefix `DZ2e_*`: 0 hits before writing. Reuse is read-only; nothing redefined.
+
+WHAT IS PROVED (unconditional; FULL proofs, no `sorry`/`admit`/`axiom`):
+* (DZ2e-a) `s1 = 1 - zetaCellS0` has `Re = 0.605`, `Im = 8.75`; hence
+  `(-s1).re = -0.605` (`DZ2e_s1_re/im/neg_s1_re`).
+* (DZ2e-b) Sign: `(-1:ℂ)^(16+n) = (-1:ℂ)^n` and `(-1:ℝ)^(16+n) = (-1:ℝ)^n`
+  (`16` even via `Even.neg_one_pow`; `DZ2e_sign16`, `DZ2e_sign16_real`).
+* (DZ2e-c) EXACT IDENTIFICATION on `[16,32)` (`DZ2e_eta_shift`):
+  `etaDirichletTerm s1 (16+n) = (-1)^n * (((17+n : ℝ):ℂ)^(-s1))`,
+  i.e. Dirichlet index `k = 16+n` carries denominator `k+1 = 17+n`
+  while the synthetic `DZ2f n * ZPiece n = (16+n)^(-0.605)*exp(i*8.75*log(16+n))`
+  carries base `16+n` — the `16+n` vs `17+n` off-by-one, explicit.
+* (DZ2e-d) Norms: `‖cpow(17+n,-s1)‖ = (17+n)^(-0.605)` (`DZ2e_cpow_norm`
+  via `Complex.norm_cpow_eq_rpow_re_of_pos`); hence
+  `‖eta s1 (16+n)‖ = D3_amp (16+n)` (`DZ2e_eta_norm`) and
+  `‖DZ2f n * ZPiece n‖ = DZ2w n` (`DZ2e_dz_norm` via `DZ_piece_unit`).
+* (DZ2e-e) Phase split (conjugate made explicit):
+  `(DZ2f*ZPiece).re/im = w*cos/sin(ZPhi)` (`DZ2e_dz_re/im`) vs
+  true `(eta).re/im = (-1)^n*amp*cos` / `(-1)^n*(-amp*sin)` (`DZ2e_eta_re/im`
+  via `D3_eta_re/im`); i.e. true = `(-1)^n * conj(synthetic at 17+n)`
+  up to the amplitude off-by-one.
+* (DZ2e-f) Off-by-one remainder, one-sided and sharp in direction
+  (`DZ2e_amp_shift`, `DZ2e_offbyone_le`, `DZ2e_eta_le_dz`):
+  `D3_amp (16+n) = rpow(17+n,-0.605) ≤ rpow(16+n,-0.605) = DZ2w n`
+  (`Real.rpow_le_rpow_of_nonpos`, exponent `-0.605 ≤ 0`), so
+  `‖eta(16+n)‖ ≤ ‖DZ2f n * ZPiece n‖ ≤ 1/5`.
+* (DZ2e-g) TRUE eta-block bound, triangle (`DZ2e_true_block_le_three_two`):
+  `‖∑_{k∈Ico 16 32} eta s1 k‖ ≤ 3.2` (Ico=range shift via
+  `Finset.sum_Ico_eq_sum_range`, `norm_sum_le`, per-term `≤ DZ2w ≤ 1/5`).
+  Same numeral as the synthetic unconditional `3.2`, but now for TRUE terms.
+  Gap vs `12/6300 ≈ 0.0019048`: `1680x` (`DZ2e_gap_true`).
+
+NUMBERS: `s1 = 0.605 + 8.75*I`; `‖eta(16+n)‖ = (17+n)^(-0.605)`;
+`‖DZ(n)‖ = (16+n)^(-0.605)`; `w0 ≤ 1/5`; true block `≤ 16/5 = 3.2`;
+need `12/6300 ≈ 0.0019048`; `3.2/(12/6300) = 1680`.
+-/
+
+/-- (DZ2e-a) `Re(1 - zetaCellS0) = 0.605`. -/
+theorem DZ2e_s1_re : (1 - zetaCellS0).re = (0.605 : ℝ) := by
+  rw [Complex.sub_re, Complex.one_re, zetaCellS0_re]
+  norm_num
+
+/-- (DZ2e-a) `Im(1 - zetaCellS0) = 8.75`. -/
+theorem DZ2e_s1_im : (1 - zetaCellS0).im = (8.75 : ℝ) := by
+  rw [Complex.sub_im, Complex.one_im, zetaCellS0_im]
+  norm_num
+
+/-- (DZ2e-a) `Re(-(1 - zetaCellS0)) = -0.605`. -/
+theorem DZ2e_neg_s1_re : (-(1 - zetaCellS0)).re = (-0.605 : ℝ) := by
+  rw [Complex.neg_re, DZ2e_s1_re]
+
+/-- (DZ2e-b) Complex sign periodicity: `(-1)^(16+n) = (-1)^n`. -/
+theorem DZ2e_sign16 (n : ℕ) : (-1 : ℂ) ^ (16 + n) = (-1 : ℂ) ^ n := by
+  rw [pow_add]
+  have h16 : (-1 : ℂ) ^ (16 : ℕ) = 1 := Even.neg_one_pow ⟨8, by norm_num⟩
+  rw [h16, one_mul]
+
+/-- (DZ2e-b) Real sign periodicity: `(-1)^(16+n) = (-1)^n`. -/
+theorem DZ2e_sign16_real (n : ℕ) : (-1 : ℝ) ^ (16 + n) = (-1 : ℝ) ^ n := by
+  rw [pow_add]
+  have h16 : (-1 : ℝ) ^ (16 : ℕ) = 1 := Even.neg_one_pow ⟨8, by norm_num⟩
+  rw [h16, one_mul]
+
+/-- (DZ2e-c) EXACT IDENTIFICATION on `[16,32)`: true eta term at `16+n`
+equals `(-1)^n` times the cpow at base `17+n` (off-by-one explicit). -/
+theorem DZ2e_eta_shift (n : ℕ) :
+    etaDirichletTerm (1 - zetaCellS0) (16 + n) =
+      (-1 : ℂ) ^ n * (((((17 : ℝ) + (n : ℝ))) : ℂ) ^ (-(1 - zetaCellS0))) := by
+  have h := etaDirichletTerm_eq_cpow_neg (1 - zetaCellS0) (16 + n)
+  have hsign : (-1 : ℂ) ^ (16 + n) = (-1 : ℂ) ^ n := DZ2e_sign16 n
+  have hcastR : ((((16 + n : ℕ) : ℝ) + 1 : ℝ)) = (17 : ℝ) + (n : ℝ) := by
+    push_cast
+    ring
+  rw [hsign, hcastR] at h
+  rw [Complex.ofReal_add] at h
+  exact h
+
+/-- (DZ2e-d) Cpow norm at `17+n`: `‖(17+n)^(-s1)‖ = (17+n)^(-0.605)`. -/
+theorem DZ2e_cpow_norm (n : ℕ) :
+    ‖((((17 : ℝ) + (n : ℝ))) : ℂ) ^ (-(1 - zetaCellS0))‖ =
+      (17 + (n : ℝ)) ^ (-0.605 : ℝ) := by
+  have hpos : (0 : ℝ) < 17 + (n : ℝ) := by
+    have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+    linarith
+  rw [← Complex.ofReal_add]
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos (x := (17 + (n : ℝ))) hpos
+    (-(1 - zetaCellS0))
+  rw [DZ2e_neg_s1_re] at h
+  exact h
+
+/-- (DZ2e-d) True-term norm: `‖eta s1 (16+n)‖ = D3_amp (16+n)`. -/
+theorem DZ2e_eta_norm (n : ℕ) :
+    ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ = D3_amp (16 + n) := by
+  rw [DZ2e_eta_shift n, norm_mul]
+  have h1 : ‖(-1 : ℂ)‖ = 1 := by simp
+  have hsign_norm : ‖(-1 : ℂ) ^ n‖ = 1 := by
+    rw [norm_pow, h1, one_pow]
+  rw [hsign_norm, one_mul, DZ2e_cpow_norm n]
+  unfold D3_amp
+  have hcast : ((((16 + n : ℕ) : ℝ) + 1 : ℝ)) = (17 : ℝ) + (n : ℝ) := by
+    push_cast
+    ring
+  rw [hcast]
+
+/-- (DZ2e-d) Synthetic-term norm: `‖DZ2f n * ZPiece n‖ = DZ2w n`. -/
+theorem DZ2e_dz_norm (n : ℕ) : ‖DZ2f n * ZPiece n‖ = DZ2w n := by
+  rw [norm_mul, DZ_piece_unit]
+  unfold DZ2f
+  rw [Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (le_of_lt (DZ2w_pos n)), mul_one]
+
+/-- (DZ2e-e) Synthetic real part: `w*cos(ZPhi)`. -/
+theorem DZ2e_dz_re (n : ℕ) :
+    (DZ2f n * ZPiece n).re = DZ2w n * Real.cos (ZPhi n) := by
+  have ha_re : ((DZ2w n : ℝ) : ℂ).re = DZ2w n := Complex.ofReal_re _
+  have ha_im : ((DZ2w n : ℝ) : ℂ).im = 0 := Complex.ofReal_im _
+  have hb_re : (Complex.exp (((ZPhi n : ℝ) : ℂ) * Complex.I)).re =
+      Real.cos (ZPhi n) := Complex.exp_ofReal_mul_I_re _
+  have hb_im : (Complex.exp (((ZPhi n : ℝ) : ℂ) * Complex.I)).im =
+      Real.sin (ZPhi n) := Complex.exp_ofReal_mul_I_im _
+  unfold DZ2f ZPiece
+  rw [Complex.mul_re, ha_re, ha_im, hb_re, hb_im]
+  ring
+
+/-- (DZ2e-e) Synthetic imaginary part: `w*sin(ZPhi)`. -/
+theorem DZ2e_dz_im (n : ℕ) :
+    (DZ2f n * ZPiece n).im = DZ2w n * Real.sin (ZPhi n) := by
+  have ha_re : ((DZ2w n : ℝ) : ℂ).re = DZ2w n := Complex.ofReal_re _
+  have ha_im : ((DZ2w n : ℝ) : ℂ).im = 0 := Complex.ofReal_im _
+  have hb_re : (Complex.exp (((ZPhi n : ℝ) : ℂ) * Complex.I)).re =
+      Real.cos (ZPhi n) := Complex.exp_ofReal_mul_I_re _
+  have hb_im : (Complex.exp (((ZPhi n : ℝ) : ℂ) * Complex.I)).im =
+      Real.sin (ZPhi n) := Complex.exp_ofReal_mul_I_im _
+  unfold DZ2f ZPiece
+  rw [Complex.mul_im, ha_re, ha_im, hb_re, hb_im]
+  ring
+
+/-- (DZ2e-e) True real part at `16+n` with explicit `(-1)^n` sign. -/
+theorem DZ2e_eta_re (n : ℕ) :
+    (etaDirichletTerm (1 - zetaCellS0) (16 + n)).re =
+      (-1 : ℝ) ^ n * (D3_amp (16 + n) * Real.cos (D3_phase (16 + n))) := by
+  have h := D3_eta_re (16 + n)
+  have hsign : (-1 : ℝ) ^ (16 + n) = (-1 : ℝ) ^ n := DZ2e_sign16_real n
+  rw [hsign] at h
+  exact h
+
+/-- (DZ2e-e) True imaginary part at `16+n`: note the extra minus (conjugate). -/
+theorem DZ2e_eta_im (n : ℕ) :
+    (etaDirichletTerm (1 - zetaCellS0) (16 + n)).im =
+      (-1 : ℝ) ^ n * (-(D3_amp (16 + n) * Real.sin (D3_phase (16 + n)))) := by
+  have h := D3_eta_im (16 + n)
+  have hsign : (-1 : ℝ) ^ (16 + n) = (-1 : ℝ) ^ n := DZ2e_sign16_real n
+  rw [hsign] at h
+  exact h
+
+/-- (DZ2e-f) Amplitude shift: `D3_amp (16+n) = (17+n)^(-0.605)`. -/
+theorem DZ2e_amp_shift (n : ℕ) :
+    D3_amp (16 + n) = (17 + (n : ℝ)) ^ (-0.605 : ℝ) := by
+  unfold D3_amp
+  have hcast : ((((16 + n : ℕ) : ℝ) + 1 : ℝ)) = (17 : ℝ) + (n : ℝ) := by
+    push_cast
+    ring
+  rw [hcast]
+
+/-- (DZ2e-f) Off-by-one remainder (direction-sharp): true amplitude ≤ synthetic weight. -/
+theorem DZ2e_offbyone_le (n : ℕ) : D3_amp (16 + n) ≤ DZ2w n := by
+  rw [DZ2e_amp_shift n]
+  unfold DZ2w
+  have hpos : (0 : ℝ) < 16 + (n : ℝ) := by
+    have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+    linarith
+  have hle : (16 : ℝ) + (n : ℝ) ≤ 17 + (n : ℝ) := by linarith
+  exact Real.rpow_le_rpow_of_nonpos hpos hle (by norm_num)
+
+/-- (DZ2e-f) Pointwise norm corollary: true ≤ synthetic. -/
+theorem DZ2e_eta_le_dz (n : ℕ) :
+    ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ ≤ DZ2w n := by
+  rw [DZ2e_eta_norm n]
+  exact DZ2e_offbyone_le n
+
+/-- (DZ2e-f) Phase-base off-by-one arguments differ by exactly one. -/
+theorem DZ2e_phase_args (n : ℕ) :
+    (17 : ℝ) + (n : ℝ) = (16 + (n : ℝ)) + 1 := by ring
+
+/-- (DZ2e-g) TRUE eta-block bound on `[16,32)`: `‖∑_{Ico 16 32} eta‖ ≤ 3.2`. -/
+theorem DZ2e_true_block_le_three_two :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 3.2 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n) := by
+    have h := Finset.sum_Ico_eq_sum_range (etaDirichletTerm (1 - zetaCellS0)) 16 32
+    rwa [show (32 - 16 : ℕ) = 16 by norm_num] at h
+  rw [hIco]
+  calc ‖∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n)‖
+      ≤ ∑ n ∈ Finset.range 16, ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ n ∈ Finset.range 16, DZ2w n :=
+        Finset.sum_le_sum (fun n _ => DZ2e_eta_le_dz n)
+    _ ≤ ∑ _n ∈ Finset.range 16, (1 / 5 : ℝ) :=
+        Finset.sum_le_sum (fun n _ => le_trans (DZ2w_le_zero n) DZ2w0_le_fifth)
+    _ = 3.2 := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        norm_num
+
+/-- (DZ2e-g) Gap verdict for the true block vs `12/6300`. -/
+theorem DZ2e_gap_true :
+    (3.2 : ℝ) / (12 / 6300) = 1680 ∧ (12 / 6300 : ℝ) < 3.2 := by
+  refine ⟨by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ2e report-and-stop): ONE proved bridge (iii) banked — TRUE eta-term
+identification `DZ2e_eta_shift : eta s1 (16+n) = (-1)^n * ((17+n:ℂ)^(-s1))`
+with `s1 = 1 - zetaCellS0 = 0.605 + 8.75*I`, hence norm
+`DZ2e_eta_norm : ‖eta‖ = D3_amp (16+n) = (17+n)^(-0.605)` vs synthetic
+`DZ2e_dz_norm : ‖DZ2f*ZPiece‖ = DZ2w = (16+n)^(-0.605)`; phases
+`DZ2e_dz_re/im` (`+sin`) vs `DZ2e_eta_re/im` (`-sin`, i.e. conjugate) with
+explicit `(-1)^n` and `16+n` vs `17+n` off-by-one (`DZ2e_phase_args`);
+remainder `DZ2e_offbyone_le/eta_le_dz` (true ≤ synthetic pointwise); TRUE block
+`DZ2e_true_block_le_three_two : ‖∑_{Ico 16 32} eta‖ ≤ 3.2` (triangle, honest),
+`1680x` over `12/6300 ≈ 0.0019048` (`DZ2e_gap_true`).
+The synthetic Abel `2.77` does NOT transfer: true phases are conjugated
+(`-sin`), alternating (`(-1)^n`), and off-by-one in base — prefix caps for
+`ZPiece` (`DZ2_prefix1385_le`) are not prefix caps for true eta partials.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2e tail after
+`DZ2e_gap_true`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`‖∑_{j<k} eta s1 (16+j)‖ ≤ B` for all `k ≤ 16` with an explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase — needs
+`KL_linear_firstDerivTest` at slope `-8.75/24` plus the same `5.23` error,
+in-file), then feed through read-only `T2_abel_norm` to upgrade the TRUE
+`3.2` (triangle) toward an Abel `≤ 2.77`-shape; or (b) a second-derivative /
+cancellation-aware TRUE block upper below `3.2` (e.g. `≤ 2.0` via per-term
+`D3_eta_re/im` intervals on `k = 16..31`, reusing `D3_amp/D3_phase` read-only).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ2e_s1_re
+#print axioms DZ2e_s1_im
+#print axioms DZ2e_neg_s1_re
+#print axioms DZ2e_sign16
+#print axioms DZ2e_sign16_real
+#print axioms DZ2e_eta_shift
+#print axioms DZ2e_cpow_norm
+#print axioms DZ2e_eta_norm
+#print axioms DZ2e_dz_norm
+#print axioms DZ2e_dz_re
+#print axioms DZ2e_dz_im
+#print axioms DZ2e_eta_re
+#print axioms DZ2e_eta_im
+#print axioms DZ2e_amp_shift
+#print axioms DZ2e_offbyone_le
+#print axioms DZ2e_eta_le_dz
+#print axioms DZ2e_phase_args
+#print axioms DZ2e_true_block_le_three_two
+#print axioms DZ2e_gap_true
