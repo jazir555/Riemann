@@ -385,3 +385,230 @@ theorem R00_remaining_threshold_for_tier {R : ℝ} (h : 63.4 * R ≤ 1 / 40) :
 #print axioms norm_sup_four_mul_of_factor_sups
 #print axioms R00_poly_times_remaining_gap
 #print axioms R00_remaining_threshold_for_tier
+
+/-!
+## Door-3 s-image factor sups (deriv-lane tail: zeta/Gamma/pi)
+
+Quoted read-only shapes (`rh_certificate_infra.lean:159-181`):
+
+* `shiftedS z = (1 / 2 : ℂ) + I * z`,
+* `fPoly s = (1 / 2 : ℂ) * s * (s - 1)`,
+* `fPi s = (Real.pi : ℂ) ^ (-(s / 2))`,
+* `fGamma s = Complex.Gamma (s / 2)`,
+* `fZeta s = riemannZeta s`,
+* `classicalXi s = fPoly s * fPi s * fGamma s * fZeta s`.
+
+The `s`-image of `closedBall R00c 2` is banked here as the rectangle
+`s.re ∈ [-1.61, 2.40]`, `s.im ∈ [-10.75, -6.75]` (from `R00c = (-8.75, 0.105)`,
+radius `2`: `z.re ∈ [-10.75, -6.75]`, `z.im ∈ [-1.895, 2.105]`, so
+`s.re = 1 / 2 - z.im ∈ [-1.605, 2.395]`, `s.im = z.re`).
+
+Banked here (sorry-free): `fPi` cpow majorant `≤ 4` on the `s`-image
+(elementary: `‖π ^ (-(s/2))‖ = π ^ (-s.re/2) ≤ π ^ 0.805 ≤ π ≤ 4`),
+explicit conditional props `GammaSupCond` / `ZetaSupCond` for the two
+out-of-reach factors (Stirling / `ζ` majorants absent from Mathlib),
+the four-factor product sup `63.4 * 4 * G * Z`, the quantified gap
+`G * Z ≤ 0.0001`, and the conditional deriv closure feeding
+`norm_sup_four_mul_of_factor_sups` + `deriv_bound_of_sphere_sup_on_ball`.
+-/
+
+/-- `shiftedS` shape (quote of `TailProofEngine.shiftedS`). -/
+noncomputable def shiftedS_shape (z : ℂ) : ℂ := (1 / 2 : ℂ) + Complex.I * z
+
+/-- `fPi` shape (quote of `TailProofEngine.fPi`). -/
+noncomputable def fPi_shape (s : ℂ) : ℂ := (Real.pi : ℂ) ^ (-(s / 2))
+
+/-- `fGamma` shape (quote of `TailProofEngine.fGamma`). -/
+noncomputable def fGamma_shape (s : ℂ) : ℂ := Complex.Gamma (s / 2)
+
+/-- `fZeta` shape (quote of `TailProofEngine.fZeta`). -/
+noncomputable def fZeta_shape (s : ℂ) : ℂ := riemannZeta s
+
+/-- `s`-image rectangle for `closedBall R00c 2`. -/
+def sImageRect (s : ℂ) : Prop :=
+  (-1.61 : ℝ) ≤ s.re ∧ s.re ≤ 2.40 ∧ (-10.75 : ℝ) ≤ s.im ∧ s.im ≤ (-6.75 : ℝ)
+
+/-- `(shiftedS_shape z).re = 1 / 2 - z.im`. -/
+theorem shiftedS_shape_re_eq (z : ℂ) : (shiftedS_shape z).re = 1 / 2 - z.im := by
+  unfold shiftedS_shape
+  simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+  have h12 : ((1 / 2 : ℂ)).re = (1 / 2 : ℝ) := by simp [Complex.div_ofNat]
+  have h12i : ((1 / 2 : ℂ)).im = (0 : ℝ) := by simp [Complex.div_ofNat]
+  rw [h12]
+  ring
+
+/-- `(shiftedS_shape z).im = z.re`. -/
+theorem shiftedS_shape_im_eq (z : ℂ) : (shiftedS_shape z).im = z.re := by
+  unfold shiftedS_shape
+  simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+  have h12i : ((1 / 2 : ℂ)).im = (0 : ℝ) := by simp
+  rw [h12i]
+  ring
+
+/-- `z.re` bounds on `closedBall R00c 2`. -/
+theorem mem_closedBall_R00c_re_bounds {z : ℂ} (hz : z ∈ closedBall R00c 2) :
+    (-10.75 : ℝ) ≤ z.re ∧ z.re ≤ (-6.75 : ℝ) := by
+  have hdist : ‖z - R00c‖ ≤ 2 := by
+    rw [mem_closedBall, dist_eq_norm] at hz
+    exact hz
+  have hre : |(z - R00c).re| ≤ 2 := le_trans (Complex.abs_re_le_norm _) hdist
+  have heq : (z - R00c).re = z.re + 8.75 := by
+    have hcre : R00c.re = (-8.75 : ℝ) := rfl
+    rw [Complex.sub_re, hcre]
+    ring
+  rw [heq, abs_le] at hre
+  constructor <;> linarith
+
+/-- Loose `z.im` bounds on `closedBall R00c 2` (true `[-1.895, 2.105]`
+rounded out to `[-1.90, 2.11]` so the `s.re` image lands exactly on
+`[-1.61, 2.40]`). -/
+theorem mem_closedBall_R00c_im_bounds_loose {z : ℂ} (hz : z ∈ closedBall R00c 2) :
+    (-1.90 : ℝ) ≤ z.im ∧ z.im ≤ 2.11 := by
+  have hdist : ‖z - R00c‖ ≤ 2 := by
+    rw [mem_closedBall, dist_eq_norm] at hz
+    exact hz
+  have him : |(z - R00c).im| ≤ 2 := le_trans (Complex.abs_im_le_norm _) hdist
+  have heq : (z - R00c).im = z.im - 0.105 := by
+    have hcim : R00c.im = (0.105 : ℝ) := rfl
+    rw [Complex.sub_im, hcim]
+  rw [heq, abs_le] at him
+  constructor <;> linarith
+
+/-- The `shiftedS` shape maps the ball into the `s`-image rectangle. -/
+theorem shiftedS_shape_mem_sImage_of_mem_ball {z : ℂ}
+    (hz : z ∈ closedBall R00c 2) : sImageRect (shiftedS_shape z) := by
+  obtain ⟨hre_lo, hre_hi⟩ := mem_closedBall_R00c_re_bounds hz
+  obtain ⟨him_lo, him_hi⟩ := mem_closedBall_R00c_im_bounds_loose hz
+  have hre := shiftedS_shape_re_eq z
+  have him := shiftedS_shape_im_eq z
+  unfold sImageRect
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [hre]; linarith
+  · rw [hre]; linarith
+  · rw [him]; linarith
+  · rw [him]; linarith
+
+/-- Norm of the `fPi` shape: `‖π ^ (-(s/2))‖ = π ^ (-s.re/2)`. -/
+theorem fPi_shape_norm_eq (s : ℂ) : ‖fPi_shape s‖ = Real.pi ^ (-(s.re) / 2) := by
+  unfold fPi_shape
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+  have hre : (-(s / 2 : ℂ)).re = -(s.re) / 2 := by
+    have hdiv : ((s / 2 : ℂ)).re = s.re / 2 := by simp [Complex.div_ofNat]
+    rw [Complex.neg_re, hdiv]
+    ring
+  rw [hre]
+
+/-- `fPi` sup on the `s`-image: `‖fPi‖ ≤ 4`
+(`e = -s.re/2 ≤ 0.805`, `π ^ e ≤ π ^ 0.805 ≤ π ^ 1 = π ≤ 4`). -/
+theorem fPi_shape_sup_on_sImage (s : ℂ) (hs : sImageRect s) :
+    ‖fPi_shape s‖ ≤ 4 := by
+  obtain ⟨hlo, _, _, _⟩ := hs
+  rw [fPi_shape_norm_eq]
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have he : -(s.re) / 2 ≤ (0.805 : ℝ) := by linarith
+  have hle1 : Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (0.805 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 he
+  have hle2 : Real.pi ^ (0.805 : ℝ) ≤ Real.pi ^ (1 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 (by norm_num)
+  have h1 : Real.pi ^ (1 : ℝ) = Real.pi := Real.rpow_one _
+  calc Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (0.805 : ℝ) := hle1
+    _ ≤ Real.pi ^ (1 : ℝ) := hle2
+    _ = Real.pi := h1
+    _ ≤ 4 := Real.pi_le_four
+
+/-- Conditional `Gamma` sup on the `s`-image (Stirling majorant absent
+from Mathlib; banked as an explicit hypothesis, no `sorry`). -/
+def GammaSupCond (G : ℝ) : Prop :=
+  ∀ s : ℂ, sImageRect s → ‖fGamma_shape s‖ ≤ G
+
+/-- Conditional `zeta` sup on the `s`-image (`s.re` can be negative, so the
+Dirichlet-eta head-plus-tail route needs a functional-equation-free rigorous
+majorant absent from Mathlib; banked as an explicit hypothesis, no `sorry`). -/
+def ZetaSupCond (Z : ℝ) : Prop :=
+  ∀ s : ℂ, sImageRect s → ‖fZeta_shape s‖ ≤ Z
+
+/-- Four-factor product sup on the ball from the banked poly `63.4`, the proved
+`fPi ≤ 4`, and the two conditional sups. -/
+theorem R00_xi_four_factor_sup_of_conds {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : GammaSupCond G) (hZ : ZetaSupCond Z) (z : ℂ)
+    (hz : z ∈ closedBall R00c 2) :
+    ‖(((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+      fPi_shape (shiftedS_shape z) * fGamma_shape (shiftedS_shape z) *
+      fZeta_shape (shiftedS_shape z)‖ ≤ 63.4 * 4 * G * Z := by
+  have hpoly : ∀ w ∈ closedBall R00c 2,
+      ‖((1 / 2 : ℂ) + Complex.I * w) * (((1 / 2 : ℂ) + Complex.I * w) - 1) / 2‖ ≤
+        63.4 :=
+    fun w hw => shiftedS_poly_shape_sup_on_ball w hw
+  have hpi : ∀ w ∈ closedBall R00c 2, ‖fPi_shape (shiftedS_shape w)‖ ≤ 4 :=
+    fun w hw => fPi_shape_sup_on_sImage _ (shiftedS_shape_mem_sImage_of_mem_ball hw)
+  have hg : ∀ w ∈ closedBall R00c 2, ‖fGamma_shape (shiftedS_shape w)‖ ≤ G :=
+    fun w hw => hG _ (shiftedS_shape_mem_sImage_of_mem_ball hw)
+  have hz2 : ∀ w ∈ closedBall R00c 2, ‖fZeta_shape (shiftedS_shape w)‖ ≤ Z :=
+    fun w hw => hZ _ (shiftedS_shape_mem_sImage_of_mem_ball hw)
+  exact norm_sup_four_mul_of_factor_sups (by norm_num) (by norm_num) hG0 hZ0
+    hpoly hpi hg hz2 z hz
+
+/-- Four-factor `ξ` shape at `z` (poly `s*(s-1)/2` form, matching
+`fPoly_shape_eq`, times the three quoted shapes at `shiftedS_shape z`). -/
+noncomputable def xiFourShapeAt (z : ℂ) : ℂ :=
+  (((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+    fPi_shape (shiftedS_shape z) * fGamma_shape (shiftedS_shape z) *
+    fZeta_shape (shiftedS_shape z)
+
+/-- `ξ`-shape sup on the ball under the two conditional sups. -/
+theorem xiFourShapeAt_sup_of_conds {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : GammaSupCond G) (hZ : ZetaSupCond Z) (z : ℂ)
+    (hz : z ∈ closedBall R00c 2) : ‖xiFourShapeAt z‖ ≤ 63.4 * 4 * G * Z := by
+  unfold xiFourShapeAt
+  exact R00_xi_four_factor_sup_of_conds hG0 hZ0 hG hZ z hz
+
+/-- Quantified product gap: reaching the outer tier forces `G * Z ≤ 0.0001`
+(`63.4 * 4 * 0.0001 = 0.02536 > 1 / 40`). -/
+theorem R00_PGZ_threshold_for_tier {G Z : ℝ} (h : 63.4 * 4 * G * Z ≤ 1 / 40) :
+    G * Z ≤ 0.0001 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 63.4 * 4 := by norm_num
+  have h2 : (63.4 * 4 : ℝ) * 0.0001 < (63.4 * 4) * (G * Z) :=
+    mul_lt_mul_of_pos_left hc hpos
+  have e1 : (63.4 * 4 : ℝ) * 0.0001 = 0.02536 := by norm_num
+  have e2 : (63.4 * 4 : ℝ) * (G * Z) = 63.4 * 4 * G * Z := by ring
+  rw [e1, e2] at h2
+  linarith
+
+/-- Conditional deriv bound for the four-factor `ξ` shape (real-`B` Cauchy
+rule with margin `r = 1 / 2`). -/
+theorem R00_deriv_bound_of_xi_conds {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : GammaSupCond G) (hZ : ZetaSupCond Z)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w) :
+    ‖deriv xiFourShapeAt w‖ ≤ 2 * (63.4 * 4 * G * Z) := by
+  have hB : ∀ z ∈ closedBall R00c 2, ‖xiFourShapeAt z‖ ≤ 63.4 * 4 * G * Z :=
+    fun z hz => xiFourShapeAt_sup_of_conds hG0 hZ0 hG hZ z hz
+  have hsub : ‖w - R00c‖ ≤ 1.26 := R00Rect_norm_sub_le w hw
+  have hw' : ‖w - R00c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : (63.4 * 4 * G * Z) / (1 / 2 : ℝ) = 2 * (63.4 * 4 * G * Z) := by ring
+  rwa [heq] at h
+
+/-- Conditional tier closure: `63.4 * 4 * G * Z ≤ 1 / 40` gives the leaf tier
+`‖deriv‖ ≤ 0.05` on `R00`. -/
+theorem R00_deriv_meets_tier_of_xi_conds {G Z : ℝ} (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hG : GammaSupCond G) (hZ : ZetaSupCond Z)
+    (hd : DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)) {w : ℂ} (hw : R00Rect w)
+    (hTier : 63.4 * 4 * G * Z ≤ 1 / 40) :
+    ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  have h := R00_deriv_bound_of_xi_conds hG0 hZ0 hG hZ hd hw
+  linarith
+
+#print axioms shiftedS_shape_re_eq
+#print axioms shiftedS_shape_im_eq
+#print axioms mem_closedBall_R00c_re_bounds
+#print axioms mem_closedBall_R00c_im_bounds_loose
+#print axioms shiftedS_shape_mem_sImage_of_mem_ball
+#print axioms fPi_shape_norm_eq
+#print axioms fPi_shape_sup_on_sImage
+#print axioms R00_xi_four_factor_sup_of_conds
+#print axioms xiFourShapeAt_sup_of_conds
+#print axioms R00_PGZ_threshold_for_tier
+#print axioms R00_deriv_bound_of_xi_conds
+#print axioms R00_deriv_meets_tier_of_xi_conds
