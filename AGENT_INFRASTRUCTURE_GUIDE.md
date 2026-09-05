@@ -1773,6 +1773,13 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     brief arithmetic corrected); `a=0.04/0.07` refloors (`D≥2685/2696`) + quad split ⇒
     **`(G,Z,M,Azeta)=(0.0807,7.5,100.13256,5735)`** (`ΔM=−0.124`).
     **M-GRIND FROZEN here — pivot to cell-certificate program (checker + generator lanes).**
+    **Certificate spike (`door3_cell_checker.lean`, C1, `5c62edca`, green, axioms clean):**
+    exact cell obligation quoted (`CellData.center_bound`, simplest cell R00 center
+    `(-8.75, 0.105)`); rational-interval checker core (`qintv/qrect/norm` rules, zero Float);
+    Python `Fraction`-only generator emits `norm_num`-checkable certs (NOT `decide` — kernel
+    `Rat` reduction stuck; bridge via `Complex.normSq_eq_norm_sq`); sample cert checks in 53s.
+    Missing link: rigorous `ξ`-enclosures (`riemannZeta`/`Gamma`/`cpow` interval arith).
+    Next: generalize checker + 40-cell generator (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
