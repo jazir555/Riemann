@@ -28039,3 +28039,461 @@ via `cos17 <= 0.171`-upper complement) or start pair-9 `Re` with the
 #print axioms DZ3q_amp16_le_inv54735
 #print axioms DZ3q_pair8_re_le_zero_three_one
 #print axioms DZ3q_saving
+
+/-!
+# Door-3 DZ3r pair-9 signed-Re bridge: `Re <= 0.10` (zeta lane)
+
+Ownership: DZ3r append-only tail after `DZ3q_saving`; nothing above touched;
+no new imports; LF endings. Sibling `riemann_hypothesis_newsection.lean`
+(DT in flight), `central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE pair only (`m = 9`, i.e. Dirichlet terms `k = 18, 19`).
+Read-only reuse: `D3_eta_re` (per-term signed Re),
+`DZ2t_amp18_le_two_elevenths` (`D3_amp 18 <= 2/11`),
+`DZ2s_amp19_le_sixth` (`D3_amp 19 <= 1/6`), `Real.log_two/five_gt_d9/lt_d9`,
+`Real.pi_gt_d2/lt_d2`, `Real.one_sub_sq_div_two_le_cos`,
+`Real.cos_le_one_div_sqrt_sq_add_one`, `D3_amp_nonneg`, `DZ3c_pair_le`
+(slot reference only).
+
+Strategy (mirror of the DZ3p `log18` template, read-only):
+`log 20 = log 2 + (log 2 + log 5)` (composite `2*(2*5)`, no new log);
+`log(19/20) in [-1/19, -1/20]` via `log <= x-1` both sides;
+`log 19 = log 20 + log(19/20)`; phases `8.75*log`, `2pi`-reduction
+(`-8pi`, four `cos_sub_two_pi` steps) to `u18 in [0.55, 0.66]`,
+`u19 in [1.01, 1.10]` (both positive, so no `cos_neg` needed);
+`1-u^2/2 <= cos` gives `cos18 >= 0.78`, `cos19 >= 0.395`;
+`cos18 <= 0.878` via the DZ3q sqrt majorant (`u >= 0.55`,
+`1.14^2 <= u^2+1`, `1/1.14 <= 0.878`); amps `1/6.35 <= A18`
+(`19^5 <= 6.35^8`), `1/6.6 <= A19` (`20^5 <= 6.6^8`); then
+`Re = A18*c18 - A19*c19 <= 2/11*0.878 - 1/6.6*0.395 ~= 0.09979 <= 0.10`.
+
+NUMBERS: banked `Re(pair 9) <= 0.10` (beats `DZ3c_pair_le` triangle slot
+`2/19 ~= 0.105263` by `~= 0.00526`; beats amp-triangle `2/11+1/6 ~=
+0.34848` by `~= 0.24848`); `cos18 in [0.78, 0.878]` (true `0.80738`),
+`cos19 >= 0.395` (true `0.47140`); `A18 in [1/6.35, 2/11] =
+[0.15748, 0.18182]` (true `0.16840`), `A19 in [1/6.6, 1/6] =
+[0.15152, 0.16667]` (true `0.16326`). True `Re ~= 0.05901`, so `0.10`
+is loose but rigorous; it does NOT beat the DZ3e MVT norm
+`8.78/5.5/19 ~= 0.08402` (gap `-0.01598`, next squeeze must close via a
+Taylor-type cos upper or a tighter `A18` floor).
+-/
+
+/-- (DZ3r) `log 20 = log 2 + (log 2 + log 5)` (composite `2*(2*5)`). -/
+theorem DZ3r_log20_eq : Real.log 20 = Real.log 2 + (Real.log 2 + Real.log 5) := by
+  have h20 : (20 : ℝ) = 2 * (2 * 5) := by norm_num
+  rw [h20, Real.log_mul (by norm_num) (by norm_num),
+    Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (DZ3r) `log 20 >= 2.9957322729` from `log_two/five_gt_d9`. -/
+theorem DZ3r_log20_lo : (2.9957322729 : ℝ) ≤ Real.log 20 := by
+  rw [DZ3r_log20_eq]
+  have h2 := Real.log_two_gt_d9
+  have h5 := Real.log_five_gt_d9
+  have hnum : (2.9957322729 : ℝ)
+      = 0.6931471803 + (0.6931471803 + 1.6094379123) := by norm_num
+  linarith
+
+/-- (DZ3r) `log 20 <= 2.9957322742` from `log_two/five_lt_d9`. -/
+theorem DZ3r_log20_hi : Real.log 20 ≤ (2.9957322742 : ℝ) := by
+  rw [DZ3r_log20_eq]
+  have h2 := Real.log_two_lt_d9
+  have h5 := Real.log_five_lt_d9
+  have hnum : (0.6931471808 : ℝ) + (0.6931471808 + 1.6094379126)
+      = 2.9957322742 := by norm_num
+  linarith
+
+/-- (DZ3r) `log(19/20) <= -1/20` via `log x <= x-1`. -/
+theorem DZ3r_log_ratio19_le : Real.log ((19 : ℝ) / 20) ≤ -(1 / 20 : ℝ) := by
+  have hpos : (0 : ℝ) < 19 / 20 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos
+  have heq : (19 / 20 : ℝ) - 1 = -(1 / 20 : ℝ) := by norm_num
+  linarith
+
+/-- (DZ3r) `-1/19 <= log(19/20)` via `log(20/19) <= 1/19` + `log_inv`. -/
+theorem DZ3r_log_ratio19_ge : (-(1 / 19) : ℝ) ≤ Real.log ((19 : ℝ) / 20) := by
+  have hpos2 : (0 : ℝ) < 20 / 19 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos2
+  have heq2 : (20 / 19 : ℝ) - 1 = (1 / 19 : ℝ) := by norm_num
+  have hinv : ((20 / 19 : ℝ))⁻¹ = (19 / 20 : ℝ) := by norm_num
+  have e : ((19 : ℝ) / 20) = ((20 / 19 : ℝ))⁻¹ := hinv.symm
+  rw [e, Real.log_inv]
+  linarith
+
+/-- (DZ3r) `log 19 = log 20 + log(19/20)` via `19 = 20*(19/20)`. -/
+theorem DZ3r_log19_eq : Real.log 19 = Real.log 20 + Real.log ((19 : ℝ) / 20) := by
+  have h19 : (19 : ℝ) = 20 * (19 / 20) := by norm_num
+  conv_lhs => rw [h19]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (DZ3r) `log 19 >= 2.943` (`log20_lo - 1/19`). -/
+theorem DZ3r_log19_lo : (2.943 : ℝ) ≤ Real.log 19 := by
+  rw [DZ3r_log19_eq]
+  have h20 := DZ3r_log20_lo
+  have hr := DZ3r_log_ratio19_ge
+  have hnum : (2.943 : ℝ) ≤ 2.9957322729 - 1 / 19 := by norm_num
+  linarith
+
+/-- (DZ3r) `log 19 <= 2.9458` (`log20_hi - 1/20`). -/
+theorem DZ3r_log19_hi : Real.log 19 ≤ (2.9458 : ℝ) := by
+  rw [DZ3r_log19_eq]
+  have h20 := DZ3r_log20_hi
+  have hr := DZ3r_log_ratio19_le
+  have hnum : (2.9957322742 : ℝ) - 1 / 20 ≤ 2.9458 := by norm_num
+  linarith
+
+/-- (DZ3r) `D3_phase 18 = 8.75*log 19`. -/
+theorem DZ3r_phase18_eq : D3_phase 18 = 8.75 * Real.log 19 := by
+  unfold D3_phase
+  have h : ((((18 : ℕ)) : ℝ) + 1 : ℝ) = 19 := by norm_num
+  rw [h]
+
+/-- (DZ3r) `D3_phase 19 = 8.75*log 20`. -/
+theorem DZ3r_phase19_eq : D3_phase 19 = 8.75 * Real.log 20 := by
+  unfold D3_phase
+  have h : ((((19 : ℕ)) : ℝ) + 1 : ℝ) = 20 := by norm_num
+  rw [h]
+
+/-- (DZ3r) `25.751 <= phase18` from `DZ3r_log19_lo`. -/
+theorem DZ3r_theta18_lo : (25.751 : ℝ) ≤ D3_phase 18 := by
+  rw [DZ3r_phase18_eq]
+  have h := DZ3r_log19_lo
+  have hnum : (25.751 : ℝ) ≤ 8.75 * 2.943 := by norm_num
+  have hle : 8.75 * 2.943 ≤ 8.75 * Real.log 19 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3r) `phase18 <= 25.776` from `DZ3r_log19_hi`. -/
+theorem DZ3r_theta18_hi : D3_phase 18 ≤ (25.776 : ℝ) := by
+  rw [DZ3r_phase18_eq]
+  have h := DZ3r_log19_hi
+  have hnum : 8.75 * 2.9458 ≤ (25.776 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 19 ≤ 8.75 * 2.9458 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3r) `26.212 <= phase19` from `DZ3r_log20_lo`. -/
+theorem DZ3r_theta19_lo : (26.212 : ℝ) ≤ D3_phase 19 := by
+  rw [DZ3r_phase19_eq]
+  have h := DZ3r_log20_lo
+  have hnum : (26.212 : ℝ) ≤ 8.75 * 2.9957322729 := by norm_num
+  have hle : 8.75 * 2.9957322729 ≤ 8.75 * Real.log 20 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3r) `phase19 <= 26.213` from `DZ3r_log20_hi`. -/
+theorem DZ3r_theta19_hi : D3_phase 19 ≤ (26.213 : ℝ) := by
+  rw [DZ3r_phase19_eq]
+  have h := DZ3r_log20_hi
+  have hnum : 8.75 * 2.9957322742 ≤ (26.213 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 20 ≤ 8.75 * 2.9957322742 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3r) Reduced `phase18 - 8pi in [0.55, 0.66]` (from `pi_d2`). -/
+theorem DZ3r_delta18_mem :
+    (0.55 : ℝ) ≤ D3_phase 18 - 8 * Real.pi ∧ D3_phase 18 - 8 * Real.pi ≤ 0.66 := by
+  have hlo := DZ3r_theta18_lo
+  have hhi := DZ3r_theta18_hi
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  constructor <;> linarith
+
+/-- (DZ3r) Reduced `phase19 - 8pi in [1.01, 1.10]` (from `pi_d2`). -/
+theorem DZ3r_delta19_mem :
+    (1.01 : ℝ) ≤ D3_phase 19 - 8 * Real.pi ∧ D3_phase 19 - 8 * Real.pi ≤ 1.10 := by
+  have hlo := DZ3r_theta19_lo
+  have hhi := DZ3r_theta19_hi
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3r) `0.78 <= cos(phase18)` (`-8pi` reduction + `1-u^2/2`). -/
+theorem DZ3r_cos18_lower : (0.78 : ℝ) ≤ Real.cos (D3_phase 18) := by
+  have hmem := DZ3r_delta18_mem
+  have c1 : Real.cos (D3_phase 18 - 2 * Real.pi) = Real.cos (D3_phase 18) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 18 - 4 * Real.pi = (D3_phase 18 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 18 - 4 * Real.pi)
+      = Real.cos (D3_phase 18 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 18 - 6 * Real.pi = (D3_phase 18 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 18 - 6 * Real.pi)
+      = Real.cos (D3_phase 18 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 18 - 8 * Real.pi = (D3_phase 18 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 18 - 8 * Real.pi)
+      = Real.cos (D3_phase 18 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 18 - 8 * Real.pi) = Real.cos (D3_phase 18) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_hi : D3_phase 18 - 8 * Real.pi ≤ (0.66 : ℝ) := hmem.2
+  have hu_nn : (0 : ℝ) ≤ D3_phase 18 - 8 * Real.pi := by linarith [hmem.1]
+  have hsq : (D3_phase 18 - 8 * Real.pi) ^ 2 ≤ (0.66 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hu_nn hu_hi 2
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := D3_phase 18 - 8 * Real.pi)
+  have hnum : (0.78 : ℝ) ≤ 1 - (0.66 : ℝ) ^ 2 / 2 := by norm_num
+  have hle : 1 - (0.66 : ℝ) ^ 2 / 2 ≤ 1 - (D3_phase 18 - 8 * Real.pi) ^ 2 / 2 := by
+    linarith [hsq]
+  linarith [hcos_lo, hle, hnum]
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3r) `0.395 <= cos(phase19)` (`-8pi` reduction + `1-u^2/2`). -/
+theorem DZ3r_cos19_lower : (0.395 : ℝ) ≤ Real.cos (D3_phase 19) := by
+  have hmem := DZ3r_delta19_mem
+  have c1 : Real.cos (D3_phase 19 - 2 * Real.pi) = Real.cos (D3_phase 19) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 19 - 4 * Real.pi = (D3_phase 19 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 19 - 4 * Real.pi)
+      = Real.cos (D3_phase 19 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 19 - 6 * Real.pi = (D3_phase 19 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 19 - 6 * Real.pi)
+      = Real.cos (D3_phase 19 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 19 - 8 * Real.pi = (D3_phase 19 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 19 - 8 * Real.pi)
+      = Real.cos (D3_phase 19 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 19 - 8 * Real.pi) = Real.cos (D3_phase 19) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_hi : D3_phase 19 - 8 * Real.pi ≤ (1.10 : ℝ) := hmem.2
+  have hu_nn : (0 : ℝ) ≤ D3_phase 19 - 8 * Real.pi := by linarith [hmem.1]
+  have hsq : (D3_phase 19 - 8 * Real.pi) ^ 2 ≤ (1.10 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hu_nn hu_hi 2
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := D3_phase 19 - 8 * Real.pi)
+  have hnum : (0.395 : ℝ) ≤ 1 - (1.10 : ℝ) ^ 2 / 2 := by norm_num
+  have hle : 1 - (1.10 : ℝ) ^ 2 / 2 ≤ 1 - (D3_phase 19 - 8 * Real.pi) ^ 2 / 2 := by
+    linarith [hsq]
+  linarith [hcos_lo, hle, hnum]
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3r) `cos(phase18) <= 0.878` via `u = phase18-8pi >= 0.55`
+(four `cos_sub_two_pi` steps, majorant `cos u <= 1/sqrt(u^2+1)`). -/
+theorem DZ3r_cos18_upper : Real.cos (D3_phase 18) ≤ (0.878 : ℝ) := by
+  have hmem := DZ3r_delta18_mem
+  have c1 : Real.cos (D3_phase 18 - 2 * Real.pi) = Real.cos (D3_phase 18) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 18 - 4 * Real.pi
+      = (D3_phase 18 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 18 - 4 * Real.pi)
+      = Real.cos (D3_phase 18 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 18 - 6 * Real.pi
+      = (D3_phase 18 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 18 - 6 * Real.pi)
+      = Real.cos (D3_phase 18 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 18 - 8 * Real.pi
+      = (D3_phase 18 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 18 - 8 * Real.pi)
+      = Real.cos (D3_phase 18 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 18 - 8 * Real.pi)
+      = Real.cos (D3_phase 18) := by
+    rw [c4, c3, c2, c1]
+  rw [← hred]
+  have hu_lo : (0.55 : ℝ) ≤ D3_phase 18 - 8 * Real.pi := hmem.1
+  have hpi_lo := Real.pi_gt_d2
+  have hpi_hi := Real.pi_lt_d2
+  have hx1 : -(3 * Real.pi / 2) ≤ D3_phase 18 - 8 * Real.pi := by
+    linarith
+  have hx2 : D3_phase 18 - 8 * Real.pi ≤ 3 * Real.pi / 2 := by
+    linarith
+  have hmaj : Real.cos (D3_phase 18 - 8 * Real.pi)
+      ≤ 1 / Real.sqrt ((D3_phase 18 - 8 * Real.pi) ^ 2 + 1) :=
+    Real.cos_le_one_div_sqrt_sq_add_one hx1 hx2
+  have hsq_lo : (0.55 : ℝ) ^ 2 ≤ (D3_phase 18 - 8 * Real.pi) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hu_lo 2
+  have hSq : (1.14 : ℝ) ^ 2 ≤ (D3_phase 18 - 8 * Real.pi) ^ 2 + 1 := by
+    have hnum : (1.14 : ℝ) ^ 2 ≤ (0.55 : ℝ) ^ 2 + 1 := by norm_num
+    linarith
+  have hS : (1.14 : ℝ) ≤ Real.sqrt ((D3_phase 18 - 8 * Real.pi) ^ 2 + 1) :=
+    Real.le_sqrt_of_sq_le hSq
+  have hInv : 1 / Real.sqrt ((D3_phase 18 - 8 * Real.pi) ^ 2 + 1)
+      ≤ 1 / (1.14 : ℝ) :=
+    one_div_le_one_div_of_le (by norm_num) hS
+  have hNum : 1 / (1.14 : ℝ) ≤ (0.878 : ℝ) := by norm_num
+  exact le_trans hmaj (le_trans hInv hNum)
+
+/-- (DZ3r) `1/6.35 <= D3_amp 18` via `0.605 <= 5/8` + `19^5 <= 6.35^8`. -/
+theorem DZ3r_amp18_lower : (1 / 6.35 : ℝ) ≤ D3_amp 18 := by
+  unfold D3_amp
+  have hcast : ((((18 : ℕ)) : ℝ) + 1 : ℝ) = 19 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (19 : ℝ) ^ (0.605 : ℝ) ≤ (19 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((19 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 19 ^ (5 : ℕ) := by
+    have h1 : (((19 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (19 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((19 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((6.35 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (19 : ℝ) ^ (5 / 8 : ℝ) ≤ 6.35 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h196 : (19 : ℝ) ^ (0.605 : ℝ) ≤ 6.35 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (19 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 19)]
+  have heq : (1 / 6.35 : ℝ) = ((6.35 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 6.35) hpos).mpr h196
+
+/-- (DZ3r) `1/6.6 <= D3_amp 19` via `0.605 <= 5/8` + `20^5 <= 6.6^8`. -/
+theorem DZ3r_amp19_lower : (1 / 6.6 : ℝ) ≤ D3_amp 19 := by
+  unfold D3_amp
+  have hcast : ((((19 : ℕ)) : ℝ) + 1 : ℝ) = 20 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (20 : ℝ) ^ (0.605 : ℝ) ≤ (20 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((20 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 20 ^ (5 : ℕ) := by
+    have h1 : (((20 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (20 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((20 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((6.6 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (20 : ℝ) ^ (5 / 8 : ℝ) ≤ 6.6 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h206 : (20 : ℝ) ^ (0.605 : ℝ) ≤ 6.6 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (20 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 20)]
+  have heq : (1 / 6.6 : ℝ) = ((6.6 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 6.6) hpos).mpr h206
+
+/-- (DZ3r) Two-sided `A18 in [1/6.35, 2/11]`. -/
+theorem DZ3r_amp18_mem : (1 / 6.35 : ℝ) ≤ D3_amp 18 ∧ D3_amp 18 ≤ 2 / 11 :=
+  ⟨DZ3r_amp18_lower, DZ2t_amp18_le_two_elevenths⟩
+
+/-- (DZ3r) Two-sided `A19 in [1/6.6, 1/6]`. -/
+theorem DZ3r_amp19_mem : (1 / 6.6 : ℝ) ≤ D3_amp 19 ∧ D3_amp 19 ≤ 1 / 6 :=
+  ⟨DZ3r_amp19_lower, DZ2s_amp19_le_sixth⟩
+
+/-- (DZ3r) Signed Re decomposition of the `m = 9` pair: opposite `(-1)^k`
+signs computed explicitly (`+` at `k = 18`, `-` at `k = 19`). -/
+theorem DZ3r_pair9_re_eq :
+    (etaPairTerm (1 - zetaCellS0) 9).re =
+      D3_amp 18 * Real.cos (D3_phase 18) - D3_amp 19 * Real.cos (D3_phase 19) := by
+  have e0 : (2 * 9 : ℕ) = 18 := by norm_num
+  have e1 : (2 * 9 + 1 : ℕ) = 19 := by norm_num
+  have h18 := D3_eta_re 18
+  have h19 := D3_eta_re 19
+  have s18 : (-1 : ℝ) ^ (18 : ℕ) = 1 := by norm_num
+  have s19 : (-1 : ℝ) ^ (19 : ℕ) = -1 := by norm_num
+  rw [s18] at h18
+  rw [s19] at h19
+  unfold etaPairTerm
+  rw [Complex.add_re, e0, e1, h18, h19]
+  ring
+
+/-- (DZ3r) Pair-9 signed Re: `Re <= 0.10`
+(`2/11*0.878 - 1/6.6*0.395 ~= 0.09979`, beats `DZ3c 2/19`). -/
+theorem DZ3r_pair9_re_le_one_tenth :
+    (etaPairTerm (1 - zetaCellS0) 9).re ≤ (0.10 : ℝ) := by
+  rw [DZ3r_pair9_re_eq]
+  have hA18 := DZ2t_amp18_le_two_elevenths
+  have hA19 := DZ3r_amp19_lower
+  have hc18_up := DZ3r_cos18_upper
+  have hc18_nn : (0 : ℝ) ≤ Real.cos (D3_phase 18) := by
+    linarith [DZ3r_cos18_lower]
+  have hc19_lo := DZ3r_cos19_lower
+  have hA18_nn := D3_amp_nonneg 18
+  have hA19_nn := D3_amp_nonneg 19
+  have hprod18 : D3_amp 18 * Real.cos (D3_phase 18)
+      ≤ (2 / 11 : ℝ) * 0.878 := by
+    have h := mul_le_mul hA18 hc18_up hc18_nn
+      (by norm_num : (0 : ℝ) ≤ 2 / 11)
+    exact h
+  have hprod19 : (1 / 6.6 : ℝ) * 0.395
+      ≤ D3_amp 19 * Real.cos (D3_phase 19) := by
+    have h := mul_le_mul hA19 hc19_lo (by norm_num : (0 : ℝ) ≤ 0.395) hA19_nn
+    exact h
+  have hnum : (2 / 11 : ℝ) * 0.878 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.10 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3r) Saving verdict: `2/11*0.878-1/6.6*0.395 <= 0.10 < 2/19`,
+old DZ3e norm `8.78/5.5/19 <= 0.0841` recorded. -/
+theorem DZ3r_saving :
+    (2 / 11 : ℝ) * 0.878 - (1 / 6.6 : ℝ) * 0.395 ≤ (0.10 : ℝ)
+      ∧ (0.10 : ℝ) < 2 / 19 ∧ (8.78 : ℝ) / 5.5 / 19 ≤ 0.0841 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3r report-and-stop): banked pair-9 cos-upgrade bridge (zeta lane) —
+`DZ3r_cos18_lower` (`0.78 <= cos(phase18)`, `phase18 in [25.751, 25.776]`,
+`phase18-8pi in [0.55, 0.66]`, `1-0.66^2/2 = 0.7822`),
+`DZ3r_cos19_lower` (`0.395 <= cos(phase19)`, `phase19 in [26.212, 26.213]`,
+`phase19-8pi in [1.01, 1.10]`, `1-1.10^2/2 = 0.395`),
+`DZ3r_cos18_upper` (`cos(phase18) <= 0.878`, sqrt majorant, `u >= 0.55`,
+`1.14^2 = 1.2996 <= u^2+1`, `1/1.14 ~= 0.87719`), via `log20 =
+log2+(log2+log5)` (`d9` intervals) + `log(19/20) in [-1/19, -1/20]`
+(`log<=x-1` both sides) + four `cos_sub_two_pi` steps (no `cos_neg`
+needed, both reduced angles positive); two-sided amps `DZ3r_amp18_mem`
+(`[1/6.35, 2/11]`, `19^5 = 2476099 <= 2643563.8 ~= 6.35^8`),
+`DZ3r_amp19_mem` (`[1/6.6, 1/6]`, `20^5 = 3200000 <= 3600406.1 ~=
+6.6^8`); upgrade `DZ3r_pair9_re_le_one_tenth`
+(`Re <= 2/11*0.878-1/6.6*0.395 ~= 0.09979 <= 0.10`, beats `DZ3c_pair_le`
+slot `2/19 ~= 0.105263` by `~= 0.00526`, beats amp-triangle
+`2/11+1/6 ~= 0.34848` by `~= 0.24848`).
+True `Re ~= 0.05901`, so `0.10` is loose but rigorous; it does NOT beat
+the DZ3e MVT norm `8.78/5.5/19 ~= 0.08402` (short by `~= 0.01598`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3r tail after
+`DZ3r_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): close the `0.01598` gap to
+the DZ3e norm `<= 0.08402` (true `Re ~= 0.05901`, so headroom exists)
+via EITHER (a) a Taylor-type cos upper `cos u <= 1-u^2/2+u^4/24`
+(no such Mathlib lemma currently; would need proving from
+`cos_le_one_sub_mul_cos_sq`-style bounds or power-series remainder,
+then `cos18 <= ~0.852` at `u >= 0.55`), OR (b) a tighter `A18` upper
+below `2/11` (e.g. `A18 <= 1/5.85` via `5.85^5 = 6851.40 <= 6859 =
+19^3`, saving `~= 0.0109` on the `A18*c18` term), OR (c) start pair-10
+`Re` with the same `log-21/log-22` template. Success = full proofs,
+`#print axioms` exactly `[propext, Classical.choice, Quot.sound]`;
+report-and-stop with residual.
+-/
+
+#print axioms DZ3r_log20_eq
+#print axioms DZ3r_log20_lo
+#print axioms DZ3r_log20_hi
+#print axioms DZ3r_log_ratio19_le
+#print axioms DZ3r_log_ratio19_ge
+#print axioms DZ3r_log19_eq
+#print axioms DZ3r_log19_lo
+#print axioms DZ3r_log19_hi
+#print axioms DZ3r_phase18_eq
+#print axioms DZ3r_phase19_eq
+#print axioms DZ3r_theta18_lo
+#print axioms DZ3r_theta18_hi
+#print axioms DZ3r_theta19_lo
+#print axioms DZ3r_theta19_hi
+#print axioms DZ3r_delta18_mem
+#print axioms DZ3r_delta19_mem
+#print axioms DZ3r_cos18_lower
+#print axioms DZ3r_cos19_lower
+#print axioms DZ3r_cos18_upper
+#print axioms DZ3r_amp18_lower
+#print axioms DZ3r_amp19_lower
+#print axioms DZ3r_amp18_mem
+#print axioms DZ3r_amp19_mem
+#print axioms DZ3r_pair9_re_eq
+#print axioms DZ3r_pair9_re_le_one_tenth
+#print axioms DZ3r_saving
