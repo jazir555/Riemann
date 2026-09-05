@@ -1639,6 +1639,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `0.00003`; still ~247× over need). Floor-tightening now yields `~1e-5`/bridge —
     DIMINISHING; remaining structural routes are prefix caps + Abel or `Re`-only pairs.
     Next: prefix caps + Abel (preferred), `Re`-only pairs, or `‖s1‖` cut (tasked).
+    **G5 FAILED EMPTY (no commit):** full prefix-caps+Abel scope too big — zero lines written,
+    empty report (DE precedent). Salvaged via reduced-scope G6 (single-pair Re-cancellation
+    lemma + report-from-diff clause, tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
