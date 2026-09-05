@@ -202,3 +202,268 @@ theorem cert_sample_center_proxy : ((1 : ℚ) : ℝ) ≤ ((certHead : ℚ) : ℝ
 #print axioms zeta2_partial_mono
 #print axioms certHead_lower
 #print axioms cert_norm_cast
+/-! ## Door-3 generalization (checker lane): two-sided complex mul + sqrt upper.
+
+Banked this wave (sorry-free):
+* `qintv_mem_sub`: interval subtraction enclosure.
+* `qintv_mem_mul`: general two-sided interval multiplication enclosure via
+  explicit corner bounds (handles negative bounds; proved by sign-split on `b`
+  and the interval endpoint, using only `mul_le_mul_of_nonneg_left/right`
+  plus `ring`/`linarith` — no `decide`, no floats).
+* `qrect_mem_mul_of_products`: two-sided complex-multiplication enclosure:
+  four real product enclosures (each via `qintv_mem_mul`) combine through
+  `qintv_mem_sub` (real part) and `qintv_mem_add` (imag part).
+* `real_sqrt_upper` + `qsqrt_upper`: rigorous `Real.sqrt` UPPER-bound rules.
+-/
+
+/-- Interval subtraction encloses pointwise subtraction. -/
+theorem qintv_mem_sub {A B : QIntv} {a b : ℚ}
+    (ha : A.mem a) (hb : B.mem b) :
+    (QIntv.mk (A.lo - B.hi) (A.hi - B.lo)).mem (a - b) := by
+  obtain ⟨ha1, ha2⟩ := ha
+  obtain ⟨hb1, hb2⟩ := hb
+  exact ⟨by linarith, by linarith⟩
+
+/-- General two-sided interval multiplication: if `lo`/`hi` bound all four
+corner products, they enclose every pointwise product (negative bounds OK). -/
+theorem qintv_mem_mul {A B : QIntv} {a b : ℚ} {lo hi : ℚ}
+    (ha : A.mem a) (hb : B.mem b)
+    (hlo1 : lo ≤ A.lo * B.lo) (hlo2 : lo ≤ A.lo * B.hi)
+    (hlo3 : lo ≤ A.hi * B.lo) (hlo4 : lo ≤ A.hi * B.hi)
+    (hhi1 : A.lo * B.lo ≤ hi) (hhi2 : A.lo * B.hi ≤ hi)
+    (hhi3 : A.hi * B.lo ≤ hi) (hhi4 : A.hi * B.hi ≤ hi) :
+    (QIntv.mk lo hi).mem (a * b) := by
+  obtain ⟨ha1, ha2⟩ := ha
+  obtain ⟨hb1, hb2⟩ := hb
+  constructor
+  · by_cases hb0 : 0 ≤ b
+    · have hAB : A.lo * b ≤ a * b := mul_le_mul_of_nonneg_right ha1 hb0
+      by_cases hAlo : 0 ≤ A.lo
+      · have h2 : A.lo * B.lo ≤ A.lo * b := mul_le_mul_of_nonneg_left hb1 hAlo
+        linarith
+      · push_neg at hAlo
+        have hpos : 0 ≤ -A.lo := by linarith
+        have h2 : (-A.lo) * b ≤ (-A.lo) * B.hi :=
+          mul_le_mul_of_nonneg_left hb2 hpos
+        have e1 : (-A.lo) * b = -(A.lo * b) := by ring
+        have e2 : (-A.lo) * B.hi = -(A.lo * B.hi) := by ring
+        have h3 : A.lo * B.hi ≤ A.lo * b := by linarith
+        linarith
+    · push_neg at hb0
+      have hneg : 0 ≤ -b := by linarith
+      have hAB : A.hi * b ≤ a * b := by
+        have h2 : (-b) * a ≤ (-b) * A.hi :=
+          mul_le_mul_of_nonneg_left ha2 hneg
+        have e1 : (-b) * a = -(a * b) := by ring
+        have e2 : (-b) * A.hi = -(A.hi * b) := by ring
+        linarith
+      by_cases hAhi : 0 ≤ A.hi
+      · have h2 : A.hi * B.lo ≤ A.hi * b := mul_le_mul_of_nonneg_left hb1 hAhi
+        linarith
+      · push_neg at hAhi
+        have hpos : 0 ≤ -A.hi := by linarith
+        have h2 : (-A.hi) * b ≤ (-A.hi) * B.hi :=
+          mul_le_mul_of_nonneg_left hb2 hpos
+        have e1 : (-A.hi) * b = -(A.hi * b) := by ring
+        have e2 : (-A.hi) * B.hi = -(A.hi * B.hi) := by ring
+        have h3 : A.hi * B.hi ≤ A.hi * b := by linarith
+        linarith
+  · by_cases hb0 : 0 ≤ b
+    · have hAB : a * b ≤ A.hi * b := mul_le_mul_of_nonneg_right ha2 hb0
+      by_cases hAhi : 0 ≤ A.hi
+      · have h2 : A.hi * b ≤ A.hi * B.hi := mul_le_mul_of_nonneg_left hb2 hAhi
+        linarith
+      · push_neg at hAhi
+        have hpos : 0 ≤ -A.hi := by linarith
+        have h2 : (-A.hi) * B.lo ≤ (-A.hi) * b :=
+          mul_le_mul_of_nonneg_left hb1 hpos
+        have e1 : (-A.hi) * B.lo = -(A.hi * B.lo) := by ring
+        have e2 : (-A.hi) * b = -(A.hi * b) := by ring
+        have h3 : A.hi * b ≤ A.hi * B.lo := by linarith
+        linarith
+    · push_neg at hb0
+      have hneg : 0 ≤ -b := by linarith
+      have hAB : a * b ≤ A.lo * b := by
+        have h2 : (-b) * A.lo ≤ (-b) * a :=
+          mul_le_mul_of_nonneg_left ha1 hneg
+        have e1 : (-b) * A.lo = -(A.lo * b) := by ring
+        have e2 : (-b) * a = -(a * b) := by ring
+        linarith
+      by_cases hAlo : 0 ≤ A.lo
+      · have h2 : A.lo * b ≤ A.lo * B.hi := mul_le_mul_of_nonneg_left hb2 hAlo
+        linarith
+      · push_neg at hAlo
+        have hpos : 0 ≤ -A.lo := by linarith
+        have h2 : (-A.lo) * B.lo ≤ (-A.lo) * b :=
+          mul_le_mul_of_nonneg_left hb1 hpos
+        have e1 : (-A.lo) * B.lo = -(A.lo * B.lo) := by ring
+        have e2 : (-A.lo) * b = -(A.lo * b) := by ring
+        have h3 : A.lo * b ≤ A.lo * B.lo := by linarith
+        linarith
+
+/-- Two-sided complex-multiplication enclosure from four real product
+enclosures (real part via sub, imag part via add; negatives OK). -/
+theorem qrect_mem_mul_of_products {z w : ℚ × ℚ}
+    {P1 P2 P3 P4 : QIntv}
+    (hP1 : P1.mem (z.1 * w.1)) (hP2 : P2.mem (z.2 * w.2))
+    (hP3 : P3.mem (z.1 * w.2)) (hP4 : P4.mem (z.2 * w.1)) :
+    (QRect.mk (P1.lo - P2.hi) (P1.hi - P2.lo)
+      (P3.lo + P4.lo) (P3.hi + P4.hi)).mem
+      (z.1 * w.1 - z.2 * w.2, z.1 * w.2 + z.2 * w.1) := by
+  have hRe := qintv_mem_sub hP1 hP2
+  have hIm := qintv_mem_add hP3 hP4
+  obtain ⟨hr1, hr2⟩ := hRe
+  obtain ⟨hi1, hi2⟩ := hIm
+  exact ⟨hr1, hr2, hi1, hi2⟩
+
+/-- Rigorous `Real.sqrt` upper bound (real version). -/
+theorem real_sqrt_upper {x m : ℝ} (hm : 0 ≤ m) (h : x ≤ m ^ 2) :
+    Real.sqrt x ≤ m := by
+  calc Real.sqrt x ≤ Real.sqrt (m ^ 2) := Real.sqrt_le_sqrt h
+    _ = m := Real.sqrt_sq hm
+
+/-- Rigorous `Real.sqrt` upper bound (rational bridge; exact Fractions). -/
+theorem qsqrt_upper {x b : ℚ} (hb : 0 ≤ b) (h : x ≤ b * b) :
+    Real.sqrt (x : ℝ) ≤ (b : ℝ) := by
+  apply real_sqrt_upper (by exact_mod_cast hb)
+  have hcast : (x : ℝ) ≤ (b : ℝ) * (b : ℝ) := by exact_mod_cast h
+  have h2 : (b : ℝ) ^ 2 = (b : ℝ) * (b : ℝ) := by ring
+  rw [h2]
+  exact hcast
+
+/-! ### Demos of the generalized rules (exact rationals, `by norm_num` only).
+All numerals ≤6 digits. -/
+
+/-- Demo: interval subtraction `(3/2) - (1/2) = 1`. -/
+theorem cert_sub_check :
+    (QIntv.mk ((3 / 2 : ℚ) - 1 / 2) ((3 / 2 : ℚ) - 1 / 2)).mem
+      ((3 / 2 : ℚ) - 1 / 2) :=
+  qintv_mem_sub (A := QIntv.mk (3 / 2) (3 / 2)) (B := QIntv.mk (1 / 2) (1 / 2))
+    ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+
+/-- Demo value: `(3/2) - (1/2) = 1`. -/
+theorem cert_sub_value : ((3 / 2 : ℚ) - 1 / 2) = (1 : ℚ) := by norm_num
+
+/-- Demo: two-sided product with negatives.
+`a = -3/2 ∈ [-2,-1]`, `b = 1/2 ∈ [-3,2]`; corners `6,-4,3,-2`; `lo=-4,hi=6`. -/
+theorem cert_mul_two_sided_check :
+    (QIntv.mk (-4 : ℚ) 6).mem ((-3 / 2 : ℚ) * (1 / 2 : ℚ)) :=
+  qintv_mem_mul (A := QIntv.mk (-2) (-1)) (B := QIntv.mk (-3) 2)
+    ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+
+/-- Demo value: `(-3/2) * (1/2) = -3/4`. -/
+theorem cert_mul_two_sided_value : ((-3 / 2 : ℚ) * (1 / 2 : ℚ)) = (-3 / 4 : ℚ) := by
+  norm_num
+
+/-- Demo: complex product `(1,1) * (1,-1) = (2,0)` via four product enclosures.
+`P1=[1,1] ∋ 1*1`, `P2=[-1,-1] ∋ 1*(-1)`, `P3=[-1,-1] ∋ 1*(-1)`, `P4=[1,1] ∋ 1*1`. -/
+theorem cert_rect_mul_check :
+    (QRect.mk (1 - (-1) : ℚ) (1 - (-1) : ℚ) ((-1) + 1 : ℚ) ((-1) + 1 : ℚ)).mem
+      ((1 : ℚ) * 1 - 1 * (-1), (1 : ℚ) * (-1) + 1 * 1) := by
+  have hP1 : (QIntv.mk (1 : ℚ) 1).mem ((1 : ℚ) * 1) :=
+    qintv_mem_mul (A := QIntv.mk 1 1) (B := QIntv.mk 1 1)
+      ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have hP2 : (QIntv.mk (-1 : ℚ) (-1)).mem ((1 : ℚ) * (-1)) :=
+    qintv_mem_mul (A := QIntv.mk 1 1) (B := QIntv.mk (-1) (-1))
+      ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have hP3 : (QIntv.mk (-1 : ℚ) (-1)).mem ((1 : ℚ) * (-1)) :=
+    qintv_mem_mul (A := QIntv.mk 1 1) (B := QIntv.mk (-1) (-1))
+      ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have hP4 : (QIntv.mk (1 : ℚ) 1).mem ((1 : ℚ) * 1) :=
+    qintv_mem_mul (A := QIntv.mk 1 1) (B := QIntv.mk 1 1)
+      ⟨by norm_num, by norm_num⟩ ⟨by norm_num, by norm_num⟩
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+      (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have h := qrect_mem_mul_of_products (z := (1, 1)) (w := (1, -1)) hP1 hP2 hP3 hP4
+  exact h
+
+/-- Demo value: complex product closes at `(2,0)`. -/
+theorem cert_rect_mul_value :
+    ((1 : ℚ) * 1 - 1 * (-1), (1 : ℚ) * (-1) + 1 * 1) = (2, 0) := by
+  norm_num
+
+/-- Demo: rigorous sqrt upper bound for the R00 geometry
+`√(1.25² + 0.095²) ≤ 1.26` (exact decimal check `1.571525 ≤ 1.5876`). -/
+theorem cert_sqrt_upper_check :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) := by
+  apply real_sqrt_upper (by norm_num)
+  norm_num
+
+/-! ### R00 full proxy cell obligation (`center_bound` shape, outer tier).
+
+Corner cell `R00 = (-10,-7.5) × (0.01,0.2)` (central_cover_assembly.lean:1132),
+tier `(ε,M) = (0.002,0.05)` (`fine_feasible_outer`), center `(-8.75,0.105)`,
+`dx = 1.25`, `dy = 0.095`. Shape mirrors `CellData.center_bound` /
+`R00_leaf_obligations` with the rational proxy head `certHead` in place of
+`‖xiShifted center‖` (true `ξ`-enclosure absent from Mathlib — the residual
+missing lemma is inventoried below): head sum (`certHead_sum_eq`) + tail mono
+(`zeta2_partial_mono` reuse) + norm lower (`qnorm_lower_of_sq`).
+All steps `by norm_num`, numerals ≤6 digits. -/
+
+/-- R00 radius upper bound through the generalized checker rule. -/
+theorem R00_radius_upper_checker :
+    Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2) ≤ (1.26 : ℝ) :=
+  cert_sqrt_upper_check
+
+/-- R00 tail step reusing the proved majorant `zeta2_partial_mono`
+(one-term partial sum ≤ five-term head). -/
+theorem R00_tail_mono :
+    (∑ k ∈ Finset.range 1, (1 : ℚ) / ((k + 1 : ℚ) ^ 2)) ≤ certHead := by
+  have h := zeta2_partial_mono (n := 1) (m := 5) (by norm_num)
+  rw [certHead_sum_eq] at h
+  exact h
+
+/-- R00 proxy center bound (`center_bound` shape at the 1.26 radius cap):
+`0.002 + 0.05 * √(1.25²+0.095²) ≤ certHead`. -/
+theorem R00_proxy_center :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ((certHead : ℚ) : ℝ) := by
+  have hRad := R00_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h1 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+  have h2 : ((0.002 : ℝ) + 0.05 * 1.26) ≤ ((certHead : ℚ) : ℝ) := by
+    have hle : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle cert_sample_center_proxy
+  exact le_trans h1 h2
+
+/-- R00 proxy center bound transported through the norm bridge
+(`center_bound` shape with an explicit complex norm target). -/
+theorem R00_proxy_center_norm :
+    (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ ‖(((1 : ℚ)) : ℝ) + (((7 / 10 : ℚ)) : ℝ) * Complex.I‖ := by
+  have hRad := R00_radius_upper_checker
+  have hM : (0.05 : ℝ) * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ 0.05 * 1.26 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have h4 : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+      ≤ (((1 : ℚ)) : ℝ) := by
+    have hle : (0.002 : ℝ) + 0.05 * Real.sqrt ((1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2)
+        ≤ (0.002 : ℝ) + 0.05 * 1.26 := by linarith
+    have hlt : ((0.002 : ℝ) + 0.05 * 1.26) ≤ (((1 : ℚ)) : ℝ) := by norm_num
+    exact le_trans hle hlt
+  exact le_trans h4 cert_norm_cast
+
+#print axioms qintv_mem_sub
+#print axioms qintv_mem_mul
+#print axioms qrect_mem_mul_of_products
+#print axioms real_sqrt_upper
+#print axioms qsqrt_upper
+#print axioms cert_sub_check
+#print axioms cert_mul_two_sided_check
+#print axioms cert_rect_mul_check
+#print axioms cert_sqrt_upper_check
+#print axioms R00_radius_upper_checker
+#print axioms R00_tail_mono
+#print axioms R00_proxy_center
+#print axioms R00_proxy_center_norm
