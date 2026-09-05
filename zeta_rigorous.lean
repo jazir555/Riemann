@@ -24638,3 +24638,256 @@ report-and-stop with residual.
 #print axioms DZ2v_true_block_le_two_five_five_three
 #print axioms DZ2v_gap_2553
 
+/-!
+Door-3 middle-upper genuine cancellation (DZ3c, append-only DZ2v tail).
+
+Bridge (c) banked (exactly one): TRUE block `||sum_{Ico 16 32} eta s1|| <= 0.70`,
+strictly below `2.553`, via paired adjacent-term cancellation (MVT), not
+per-term triangle. Read-only reuse: `zetaRefl_pos/re/norm_le`,
+`norm_etaPairTerm_le` (MVT `||pair|| <= ||s||*(2m+1)^{-Re-1}`), `etaPairTerm`,
+`D3_eta_re/im` signed shapes via `DZ2e_eta_re/im`, `D3_amp/D3_phase`.
+Nothing redefined.
+
+* `DZ3c_rpow17_ge_five : 5 <= 17^(0.605)` via `3/5 <= 0.605` + `5^5=3125 <= 4913=17^3`.
+* `DZ3c_base_ge_five`: for `8 <= m`, `5 <= ((2*m+1:ℕ):ℝ)^(0.605)` by monotonicity.
+* `DZ3c_signed_re/im`: per-term signed `Re/Im` equalities with explicit `(-1)^n`
+  and conjugate `-sin` (aliases of `DZ2e_eta_re/im` from `D3_eta_re/im`).
+* `DZ3c_pair_re/im`: pair `Re/Im` are sums of signed term `Re/Im` (cancellation point).
+* `DZ3c_pair_le`: for `8 <= m`, `||pair m|| <= 2/((2*m+1:ℕ):ℝ)` via `||s1|| <= 10`
+  and `(2m+1)^(-0.605-1) = (2m+1)^(-0.605)*(2m+1)^(-1) <= (1/5)*(1/(2m+1))`.
+* `DZ3c_range_two_mul`: `sum_{n<2*M} f n = sum_{m<M} (f(2*m)+f(2*m+1))` by induction.
+* `DZ3c_sum_eq`: `sum_{Ico 16 32} eta = sum_{m in range 8} pair (8+m)` (`2*(8+m)=16+2*m`).
+* `DZ3c_true_block_le_zero_seven`: `||sum_{Ico 16 32} eta|| <= 0.70`
+  = `2/17+2/19+2/21+2/23+2/25+2/27+2/29+2/31 = 0.6926... <= 0.70`
+  (triangle over 8 cancelled pairs, not 16 amps).
+* `DZ3c_gap_07`: `0.70 < 2.553`, `0.70/(12/6300)=367.5`.
+
+NUMBERS: banked `0.70`, gap vs `2.553` is `1.853` strictly below;
+gap vs `3.2` is `2.50`; need `12/6300~=0.0019048`; `0.70/(12/6300)=367.5`
+(was `1340.325` at `2.553`, saves `972.825` ratio units; was `1680` at `3.2`,
+saves `1312.5`).
+-/
+
+/-- (DZ3c) `17^(0.605) >= 5` via `3/5 <= 0.605` + `5^5 <= 17^3`. -/
+theorem DZ3c_rpow17_ge_five : (5 : ℝ) ≤ (17 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((5 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((17 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((17 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (17 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 17)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 17 3
+    rw [e]
+    norm_num
+  have hstep : (5 : ℝ) ≤ (17 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (5 : ℝ) ≤ (17 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (17 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ3c) Uniform base lower `5 <= ((2*m+1:ℕ):ℝ)^(0.605)` for `8 <= m`. -/
+theorem DZ3c_base_ge_five (m : ℕ) (hm : 8 ≤ m) :
+    (5 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) := by
+  have h17 : (17 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    exact_mod_cast (show 17 ≤ 2 * m + 1 by omega)
+  calc (5 : ℝ) ≤ (17 : ℝ) ^ (0.605 : ℝ) := DZ3c_rpow17_ge_five
+    _ ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow (by norm_num) h17 (by norm_num)
+
+/-- (DZ3c) Per-term signed real part with explicit `(-1)^n` (from `D3_eta_re` via `DZ2e`). -/
+theorem DZ3c_signed_re (n : ℕ) :
+    (etaDirichletTerm (1 - zetaCellS0) (16 + n)).re =
+      (-1 : ℝ) ^ n * (D3_amp (16 + n) * Real.cos (D3_phase (16 + n))) :=
+  DZ2e_eta_re n
+
+/-- (DZ3c) Per-term signed imaginary part with conjugate `-sin` (from `D3_eta_im` via `DZ2e`). -/
+theorem DZ3c_signed_im (n : ℕ) :
+    (etaDirichletTerm (1 - zetaCellS0) (16 + n)).im =
+      (-1 : ℝ) ^ n * (-(D3_amp (16 + n) * Real.sin (D3_phase (16 + n)))) :=
+  DZ2e_eta_im n
+
+/-- (DZ3c) Pair real part is the sum of signed term real parts (cancellation point). -/
+theorem DZ3c_pair_re (m : ℕ) :
+    (etaPairTerm (1 - zetaCellS0) m).re =
+      (etaDirichletTerm (1 - zetaCellS0) (2 * m)).re +
+        (etaDirichletTerm (1 - zetaCellS0) (2 * m + 1)).re := by
+  simp only [etaPairTerm, Complex.add_re]
+
+/-- (DZ3c) Pair imaginary part is the sum of signed term imaginary parts. -/
+theorem DZ3c_pair_im (m : ℕ) :
+    (etaPairTerm (1 - zetaCellS0) m).im =
+      (etaDirichletTerm (1 - zetaCellS0) (2 * m)).im +
+        (etaDirichletTerm (1 - zetaCellS0) (2 * m + 1)).im := by
+  simp only [etaPairTerm, Complex.add_im]
+
+/-- (DZ3c) Cancelled pair bound `||pair m|| <= 2/((2*m+1:ℕ):ℝ)` for `8 <= m`. -/
+theorem DZ3c_pair_le (m : ℕ) (hm : 8 ≤ m) :
+    ‖etaPairTerm (1 - zetaCellS0) m‖ ≤ 2 / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+  have hs := zetaRefl_pos
+  have hle := norm_etaPairTerm_le (1 - zetaCellS0) hs m
+  have hnorm : ‖1 - zetaCellS0‖ ≤ 10 := zetaRefl_norm_le
+  have hre : (1 - zetaCellS0).re = (0.605 : ℝ) := zetaRefl_re
+  rw [hre] at hle
+  have hbase_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have h : 0 < 2 * m + 1 := by omega
+    exact_mod_cast h
+  have h5 := DZ3c_base_ge_five m hm
+  have hsplit : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      = ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+    have e : (-0.605 - 1 : ℝ) = (-(0.605 : ℝ)) + (-(1 : ℝ)) := by ring
+    rw [e, Real.rpow_add hbase_pos,
+      Real.rpow_neg (le_of_lt hbase_pos) (0.605 : ℝ),
+      Real.rpow_neg (le_of_lt hbase_pos) (1 : ℝ), Real.rpow_one]
+  have hpos605 : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ)) :=
+    Real.rpow_pos_of_pos hbase_pos _
+  have hinv5 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ (5 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos605 (by norm_num)).mpr h5
+  have hbase_inv_nn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    inv_nonneg.mpr (le_of_lt hbase_pos)
+  have hprod_le : ((((2 * m + 1 : ℕ)) : ℝ) ^ (0.605 : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹
+      ≤ (5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ :=
+    mul_le_mul_of_nonneg_right hinv5 hbase_inv_nn
+  have hXnn : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos hbase_pos _)
+  have h1 : ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 10 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) :=
+    mul_le_mul_of_nonneg_right hnorm hXnn
+  have h2 : (10 : ℝ) * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ))
+      ≤ 10 * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := by
+    rw [hsplit]
+    exact mul_le_mul_of_nonneg_left hprod_le (by norm_num)
+  have hfin : (10 : ℝ) * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹)
+      = 2 / ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    rw [div_eq_mul_inv]
+    ring
+  calc ‖etaPairTerm (1 - zetaCellS0) m‖
+      ≤ ‖1 - zetaCellS0‖ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := hle
+    _ ≤ 10 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-0.605 - 1 : ℝ)) := h1
+    _ ≤ 10 * ((5 : ℝ)⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ))⁻¹) := h2
+    _ = 2 / ((((2 * m + 1 : ℕ)) : ℝ)) := hfin
+
+/-- (DZ3c) Even/odd split of `range (2*M)` into pairs. -/
+theorem DZ3c_range_two_mul (f : ℕ → ℂ) (M : ℕ) :
+    (∑ n ∈ Finset.range (2 * M), f n)
+      = ∑ m ∈ Finset.range M, (f (2 * m) + f (2 * m + 1)) := by
+  induction M with
+  | zero => simp
+  | succ M ih =>
+    have h2s : 2 * (M + 1) = (2 * M + 1) + 1 := by ring
+    calc (∑ n ∈ Finset.range (2 * (M + 1)), f n)
+        = (∑ n ∈ Finset.range (2 * M), f n) + f (2 * M) + f (2 * M + 1) := by
+          rw [h2s, Finset.sum_range_succ, Finset.sum_range_succ]
+      _ = (∑ m ∈ Finset.range M, (f (2 * m) + f (2 * m + 1)))
+          + (f (2 * M) + f (2 * M + 1)) := by rw [ih, add_assoc]
+      _ = ∑ m ∈ Finset.range (M + 1), (f (2 * m) + f (2 * m + 1)) := by
+          rw [Finset.sum_range_succ]
+
+/-- (DZ3c) Block-to-pairs identity `Ico 16 32 = 8 pairs at 8+m`. -/
+theorem DZ3c_sum_eq :
+    (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m) := by
+  have hIco : (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n) := by
+    have h := Finset.sum_Ico_eq_sum_range (etaDirichletTerm (1 - zetaCellS0)) 16 32
+    rwa [show (32 - 16 : ℕ) = 16 by norm_num] at h
+  rw [hIco]
+  have h16 : (16 : ℕ) = 2 * 8 := by norm_num
+  have hgen := DZ3c_range_two_mul (fun n => etaDirichletTerm (1 - zetaCellS0) (16 + n)) 8
+  rw [← h16] at hgen
+  rw [hgen]
+  apply Finset.sum_congr rfl
+  intro m _
+  show etaDirichletTerm (1 - zetaCellS0) (16 + (2 * m)) +
+    etaDirichletTerm (1 - zetaCellS0) (16 + (2 * m + 1))
+      = etaPairTerm (1 - zetaCellS0) (8 + m)
+  have e0 : 16 + (2 * m) = 2 * (8 + m) := by omega
+  have e1 : 16 + (2 * m + 1) = 2 * (8 + m) + 1 := by omega
+  unfold etaPairTerm
+  rw [e0, e1]
+
+/-- (DZ3c) Genuine-cancellation TRUE block `<= 0.70 < 2.553` (8 cancelled pairs). -/
+theorem DZ3c_true_block_le_zero_seven :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 0.70 := by
+  rw [DZ3c_sum_eq]
+  calc ‖∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)‖
+      ≤ ∑ m ∈ Finset.range 8, ‖etaPairTerm (1 - zetaCellS0) (8 + m)‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ m ∈ Finset.range 8, (2 / ((((2 * (8 + m) + 1 : ℕ)) : ℝ))) := by
+        apply Finset.sum_le_sum
+        intro m _
+        exact DZ3c_pair_le (8 + m) (by omega)
+    _ ≤ 0.70 := by
+        have c0 : ((((2 * (8 + 0) + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+        have c1 : ((((2 * (8 + 1) + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+        have c2 : ((((2 * (8 + 2) + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+        have c3 : ((((2 * (8 + 3) + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+        have c4 : ((((2 * (8 + 4) + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+        have c5 : ((((2 * (8 + 5) + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+        have c6 : ((((2 * (8 + 6) + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+        have c7 : ((((2 * (8 + 7) + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+        have e : (∑ m ∈ Finset.range 8, (2 / ((((2 * (8 + m) + 1 : ℕ)) : ℝ))))
+            = 2 / 17 + 2 / 19 + 2 / 21 + 2 / 23 + 2 / 25 + 2 / 27 + 2 / 29 + 2 / 31 := by
+          rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+            Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+            Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+            c0, c1, c2, c3, c4, c5, c6, c7]
+        rw [e]
+        norm_num
+
+/-- (DZ3c) Gap verdict for `0.70` vs `2.553`, vs `12/6300`, vs `3.2`. -/
+theorem DZ3c_gap_07 :
+    (0.70 : ℝ) < 2.553 ∧ (0.70 : ℝ) / (12 / 6300) = 367.5 ∧ (12 / 6300 : ℝ) < 0.70
+      ∧ (0.70 : ℝ) < 3.2 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3c report-and-stop): ONE proved bridge (c) banked —
+`DZ3c_true_block_le_zero_seven : ||sum_{Ico 16 32} eta s1|| <= 0.70`
+via 8 MVT-cancelled pairs (`DZ3c_pair_le : ||pair m|| <= 2/(2m+1)` from
+`norm_etaPairTerm_le` + `||s1|| <= 10` + `DZ3c_base_ge_five` via
+`DZ3c_rpow17_ge_five` (`5^5=3125 <= 4913=17^3`); block identity `DZ3c_sum_eq`
+via `DZ3c_range_two_mul` with `2*(8+m)=16+2*m`; per-term signed `Re/Im`
+shapes `DZ3c_signed_re/im` (= `DZ2e_eta_re/im` from `D3_eta_re/im`, explicit
+`(-1)^n`, conjugate `-sin`) summed as `DZ3c_pair_re/im`, i.e. adjacent
+`~151-degree` terms cancel (`cos(pi-delta)=-cos delta`); triangle only over
+8 cancelled pairs, never over 16 amps).
+Banked constant `0.70`, strictly below `2.553` by `1.853` (below `3.2` by
+`2.50`); `0.70/(12/6300)=367.5` (`DZ3c_gap_07`), was `1340.325` (saves
+`972.825` ratio units; was `1680`, saves `1312.5`).
+`DV_mid_conditional_012` need (`<= 0.0019`/block) still `~367x` away;
+synthetic Abel `2.77` still does NOT transfer (conjugate + alternating +
+off-by-one, per DZ2e residual); per-term triangle shaping remains exhausted.
+Note: pair bound `2/(2m+1)` used uniform `5 <= base^0.605`; non-uniform
+`5,5.2,...` or `||s1|| <= 8.78` would tighten `0.70` toward `~0.60` without
+new technology.
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3c tail after
+`DZ3c_gap_07`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `0.70` toward an Abel `<= 0.6`-shape); or
+(c2) a second genuine-cancellation tightening below `0.70` (e.g. non-uniform
+`base^0.605` lowers at `19..31` or `||s1|| <= 8.78` shape, or `Re`-only
+pair sums via `DZ3c_pair_re` + `DZ3c_signed_re` intervals).
+Success = full proofs, `#print axioms` exactly
+`[propext, Classical.choice, Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3c_rpow17_ge_five
+#print axioms DZ3c_base_ge_five
+#print axioms DZ3c_signed_re
+#print axioms DZ3c_signed_im
+#print axioms DZ3c_pair_re
+#print axioms DZ3c_pair_im
+#print axioms DZ3c_pair_le
+#print axioms DZ3c_range_two_mul
+#print axioms DZ3c_sum_eq
+#print axioms DZ3c_true_block_le_zero_seven
+#print axioms DZ3c_gap_07
+
+
