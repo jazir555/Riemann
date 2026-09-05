@@ -31140,3 +31140,393 @@ theorem DZ3aa_saving :
 #print axioms DZ3aa_pair13_re_eq
 #print axioms DZ3aa_pair13_re_le_zero
 #print axioms DZ3aa_saving
+
+/-- (DZ3ab) `log 30 = log 2 + log 3 + log 5` (from `30 = 2*(3*5)`). -/
+theorem DZ3ab_log30_eq : Real.log 30 = Real.log 2 + Real.log 3 + Real.log 5 := by
+  have h30 : (30 : ℝ) = 2 * (3 * 5) := by norm_num
+  rw [h30, Real.log_mul (by norm_num) (by norm_num),
+    Real.log_mul (by norm_num) (by norm_num)]
+  ring
+
+/-- (DZ3ab) `log 30 >= 3.4011973811` from `log_two/three/five_gt_d9`. -/
+theorem DZ3ab_log30_lo : (3.4011973811 : ℝ) ≤ Real.log 30 := by
+  rw [DZ3ab_log30_eq]
+  have h2 := Real.log_two_gt_d9
+  have h3 := Real.log_three_gt_d9
+  have h5 := Real.log_five_gt_d9
+  have hnum : (3.4011973811 : ℝ)
+      = 0.6931471803 + 1.0986122885 + 1.6094379123 := by
+    norm_num
+  linarith
+
+/-- (DZ3ab) `log 30 <= 3.4011973822` from `log_two/three/five_lt_d9`. -/
+theorem DZ3ab_log30_hi : Real.log 30 ≤ (3.4011973822 : ℝ) := by
+  rw [DZ3ab_log30_eq]
+  have h2 := Real.log_two_lt_d9
+  have h3 := Real.log_three_lt_d9
+  have h5 := Real.log_five_lt_d9
+  have hnum : (0.6931471808 : ℝ)
+      + 1.0986122888 + 1.6094379126 = 3.4011973822 := by
+    norm_num
+  linarith
+
+/-- (DZ3ab) `log(29/30) <= -1/30` via `log x <= x-1`. -/
+theorem DZ3ab_log_ratio_le : Real.log ((29 : ℝ) / 30) ≤ -(1 / 30 : ℝ) := by
+  have hpos : (0 : ℝ) < 29 / 30 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos
+  have heq : (29 / 30 : ℝ) - 1 = -(1 / 30 : ℝ) := by norm_num
+  linarith
+
+/-- (DZ3ab) `-1/29 <= log(29/30)` via `log(30/29) <= 1/29` + `log_inv`. -/
+theorem DZ3ab_log_ratio_ge : (-(1 / 29) : ℝ) ≤ Real.log ((29 : ℝ) / 30) := by
+  have hpos2 : (0 : ℝ) < 30 / 29 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos2
+  have heq2 : (30 / 29 : ℝ) - 1 = (1 / 29 : ℝ) := by norm_num
+  have hinv : ((30 / 29 : ℝ))⁻¹ = (29 / 30 : ℝ) := by norm_num
+  have e : ((29 : ℝ) / 30) = ((30 / 29 : ℝ))⁻¹ := hinv.symm
+  rw [e, Real.log_inv]
+  linarith
+
+/-- (DZ3ab) `log 29 = log 30 + log(29/30)` via `29 = 30*(29/30)`. -/
+theorem DZ3ab_log29_eq : Real.log 29 = Real.log 30 + Real.log ((29 : ℝ) / 30) := by
+  have h29 : (29 : ℝ) = 30 * (29 / 30) := by norm_num
+  conv_lhs => rw [h29]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (DZ3ab) `log 29 >= 3.36671` (`log30_lo - 1/29`). -/
+theorem DZ3ab_log29_lo : (3.36671 : ℝ) ≤ Real.log 29 := by
+  rw [DZ3ab_log29_eq]
+  have h30 := DZ3ab_log30_lo
+  have hr := DZ3ab_log_ratio_ge
+  have hnum : (3.36671 : ℝ) ≤ 3.4011973811 - 1 / 29 := by norm_num
+  linarith
+
+/-- (DZ3ab) `log 29 <= 3.36787` (`log30_hi - 1/30`). -/
+theorem DZ3ab_log29_hi : Real.log 29 ≤ (3.36787 : ℝ) := by
+  rw [DZ3ab_log29_eq]
+  have h30 := DZ3ab_log30_hi
+  have hr := DZ3ab_log_ratio_le
+  have hnum : (3.4011973822 : ℝ) - 1 / 30 ≤ 3.36787 := by norm_num
+  linarith
+
+/-- (DZ3ab) `D3_phase 28 = 8.75*log 29`. -/
+theorem DZ3ab_phase28_eq : D3_phase 28 = 8.75 * Real.log 29 := by
+  unfold D3_phase
+  have h : ((((28 : ℕ)) : ℝ) + 1 : ℝ) = 29 := by norm_num
+  rw [h]
+
+/-- (DZ3ab) `D3_phase 29 = 8.75*log 30`. -/
+theorem DZ3ab_phase29_eq : D3_phase 29 = 8.75 * Real.log 30 := by
+  unfold D3_phase
+  have h : ((((29 : ℕ)) : ℝ) + 1 : ℝ) = 30 := by norm_num
+  rw [h]
+
+/-- (DZ3ab) `29.458 <= phase28` from `DZ3ab_log29_lo`. -/
+theorem DZ3ab_theta28_lo : (29.458 : ℝ) ≤ D3_phase 28 := by
+  rw [DZ3ab_phase28_eq]
+  have h := DZ3ab_log29_lo
+  have hnum : (29.458 : ℝ) ≤ 8.75 * 3.36671 := by norm_num
+  have hle : 8.75 * 3.36671 ≤ 8.75 * Real.log 29 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3ab) `phase28 <= 29.469` from `DZ3ab_log29_hi`. -/
+theorem DZ3ab_theta28_hi : D3_phase 28 ≤ (29.469 : ℝ) := by
+  rw [DZ3ab_phase28_eq]
+  have h := DZ3ab_log29_hi
+  have hnum : 8.75 * 3.36787 ≤ (29.469 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 29 ≤ 8.75 * 3.36787 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3ab) `29.76047 <= phase29` from `DZ3ab_log30_lo`. -/
+theorem DZ3ab_theta29_lo : (29.76047 : ℝ) ≤ D3_phase 29 := by
+  rw [DZ3ab_phase29_eq]
+  have h := DZ3ab_log30_lo
+  have hnum : (29.76047 : ℝ) ≤ 8.75 * 3.4011973811 := by norm_num
+  have hle : 8.75 * 3.4011973811 ≤ 8.75 * Real.log 30 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3ab) `phase29 <= 29.76048` from `DZ3ab_log30_hi`. -/
+theorem DZ3ab_theta29_hi : D3_phase 29 ≤ (29.76048 : ℝ) := by
+  rw [DZ3ab_phase29_eq]
+  have h := DZ3ab_log30_hi
+  have hnum : 8.75 * 3.4011973822 ≤ (29.76048 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 30 ≤ 8.75 * 3.4011973822 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3ab) Forward shift `w28 = phase28 - 9*pi in [1.183, 1.196]` (from `pi_d4`). -/
+theorem DZ3ab_w28_mem :
+    (1.183 : ℝ) ≤ D3_phase 28 - 9 * Real.pi
+      ∧ D3_phase 28 - 9 * Real.pi ≤ 1.196 := by
+  have hlo := DZ3ab_theta28_lo
+  have hhi := DZ3ab_theta28_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- (DZ3ab) Forward shift `w29 = phase29 - 9*pi in [1.486, 1.487]` (from `pi_d4`). -/
+theorem DZ3ab_w29_mem :
+    (1.486 : ℝ) ≤ D3_phase 29 - 9 * Real.pi
+      ∧ D3_phase 29 - 9 * Real.pi ≤ 1.487 := by
+  have hlo := DZ3ab_theta29_lo
+  have hhi := DZ3ab_theta29_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3ab) `cos(phase28) <= -0.36` via the forward shift `w = phase28 - 9*pi
+in [1.183, 1.196]` and the sextic lower `DZ3u_cos_sextic_lower` on `w`
+(`cos(phase28) = -cos(w)` since `phase28 - 8*pi = w + pi`; four
+`cos_sub_two_pi` steps). -/
+theorem DZ3ab_cos28_upper : Real.cos (D3_phase 28) ≤ (-0.36 : ℝ) := by
+  have hlo := DZ3ab_theta28_lo
+  have hhi := DZ3ab_theta28_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  have c1 : Real.cos (D3_phase 28 - 2 * Real.pi) = Real.cos (D3_phase 28) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 28 - 4 * Real.pi
+      = (D3_phase 28 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 28 - 4 * Real.pi)
+      = Real.cos (D3_phase 28 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 28 - 6 * Real.pi
+      = (D3_phase 28 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 28 - 6 * Real.pi)
+      = Real.cos (D3_phase 28 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 28 - 8 * Real.pi
+      = (D3_phase 28 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 28 - 8 * Real.pi)
+      = Real.cos (D3_phase 28 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 28 - 8 * Real.pi)
+      = Real.cos (D3_phase 28) := by
+    rw [c4, c3, c2, c1]
+  set w := D3_phase 28 - 9 * Real.pi with hw_def
+  have hw_lo : (1.183 : ℝ) ≤ w := by rw [hw_def]; linarith
+  have hw_hi : w ≤ (1.196 : ℝ) := by rw [hw_def]; linarith
+  have hw_nn : (0 : ℝ) ≤ w := by linarith
+  have hweq : D3_phase 28 - 8 * Real.pi = w + Real.pi := by
+    rw [hw_def]; ring
+  have hcos_neg : Real.cos (D3_phase 28 - 8 * Real.pi) = -Real.cos w := by
+    rw [hweq, Real.cos_add_pi]
+  have hS := DZ3u_cos_sextic_lower hw_nn
+  rw [hred] at hcos_neg
+  rw [hcos_neg]
+  have h2hi : w ^ 2 ≤ (1.196 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hw_nn hw_hi 2
+  have h4lo : (1.183 : ℝ) ^ 4 ≤ w ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hw_lo 4
+  have h6hi : w ^ 6 ≤ (1.196 : ℝ) ^ 6 :=
+    pow_le_pow_left₀ hw_nn hw_hi 6
+  have hnum : (0.36 : ℝ)
+      ≤ 1 - (1.196 : ℝ) ^ 2 / 2 + (1.183 : ℝ) ^ 4 / 24 - (1.196 : ℝ) ^ 6 / 720 := by
+    norm_num
+  have hle : 1 - (1.196 : ℝ) ^ 2 / 2 + (1.183 : ℝ) ^ 4 / 24 - (1.196 : ℝ) ^ 6 / 720
+      ≤ 1 - w ^ 2 / 2 + w ^ 4 / 24 - w ^ 6 / 720 := by
+    linarith [h2hi, h4lo, h6hi]
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3ab) `-cos(phase29) <= 0.1` via the forward shift `w = phase29 - 9*pi
+in [1.486, 1.487]` and the quartic majorant `CG_cos_le_quartic` on `w`
+(`cos(phase29) = -cos(w)` since `phase29 - 8*pi = w + pi`; four
+`cos_sub_two_pi` steps). -/
+theorem DZ3ab_cos29_neg_le : -Real.cos (D3_phase 29) ≤ (0.1 : ℝ) := by
+  have hlo := DZ3ab_theta29_lo
+  have hhi := DZ3ab_theta29_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  have c1 : Real.cos (D3_phase 29 - 2 * Real.pi) = Real.cos (D3_phase 29) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 29 - 4 * Real.pi
+      = (D3_phase 29 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 29 - 4 * Real.pi)
+      = Real.cos (D3_phase 29 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 29 - 6 * Real.pi
+      = (D3_phase 29 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 29 - 6 * Real.pi)
+      = Real.cos (D3_phase 29 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 29 - 8 * Real.pi
+      = (D3_phase 29 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 29 - 8 * Real.pi)
+      = Real.cos (D3_phase 29 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 29 - 8 * Real.pi)
+      = Real.cos (D3_phase 29) := by
+    rw [c4, c3, c2, c1]
+  set w := D3_phase 29 - 9 * Real.pi with hw_def
+  have hw_lo : (1.486 : ℝ) ≤ w := by rw [hw_def]; linarith
+  have hw_hi : w ≤ (1.487 : ℝ) := by rw [hw_def]; linarith
+  have hw_nn : (0 : ℝ) ≤ w := by linarith
+  have hweq : D3_phase 29 - 8 * Real.pi = w + Real.pi := by
+    rw [hw_def]; ring
+  have hcos_neg : Real.cos (D3_phase 29 - 8 * Real.pi) = -Real.cos w := by
+    rw [hweq, Real.cos_add_pi]
+  have hQ := CG_cos_le_quartic hw_nn
+  rw [hred] at hcos_neg
+  rw [hcos_neg]
+  have h2lo : (1.486 : ℝ) ^ 2 ≤ w ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hw_lo 2
+  have h4hi : w ^ 4 ≤ (1.487 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hw_nn hw_hi 4
+  have hnum : (1 : ℝ) - (1.486 : ℝ) ^ 2 / 2 + (1.487 : ℝ) ^ 4 / 24 ≤ 0.1 := by
+    norm_num
+  have hle : 1 - w ^ 2 / 2 + w ^ 4 / 24
+      ≤ 1 - (1.486 : ℝ) ^ 2 / 2 + (1.487 : ℝ) ^ 4 / 24 := by
+    linarith [h2lo, h4hi]
+  linarith
+
+/-- (DZ3ab) `1/8.3 <= D3_amp 28` via `0.605 <= 5/8` + `29^5 <= 8.3^8`. -/
+theorem DZ3ab_amp28_lower : (1 / 8.3 : ℝ) ≤ D3_amp 28 := by
+  unfold D3_amp
+  have hcast : ((((28 : ℕ)) : ℝ) + 1 : ℝ) = 29 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (29 : ℝ) ^ (0.605 : ℝ) ≤ (29 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((29 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 29 ^ (5 : ℕ) := by
+    have h1 : (((29 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (29 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((29 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((8.3 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (29 : ℝ) ^ (5 / 8 : ℝ) ≤ 8.3 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h296 : (29 : ℝ) ^ (0.605 : ℝ) ≤ 8.3 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (29 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 29)]
+  have heq : (1 / 8.3 : ℝ) = ((8.3 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 8.3) hpos).mpr h296
+
+/-- (DZ3ab) `1/8.5 <= D3_amp 29` via `0.605 <= 5/8` + `30^5 <= 8.5^8`. -/
+theorem DZ3ab_amp29_lower : (1 / 8.5 : ℝ) ≤ D3_amp 29 := by
+  unfold D3_amp
+  have hcast : ((((29 : ℕ)) : ℝ) + 1 : ℝ) = 30 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (30 : ℝ) ^ (0.605 : ℝ) ≤ (30 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((30 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 30 ^ (5 : ℕ) := by
+    have h1 : (((30 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (30 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((30 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((8.5 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (30 : ℝ) ^ (5 / 8 : ℝ) ≤ 8.5 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h306 : (30 : ℝ) ^ (0.605 : ℝ) ≤ 8.5 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (30 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 30)]
+  have heq : (1 / 8.5 : ℝ) = ((8.5 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 8.5) hpos).mpr h306
+
+/-- (DZ3ab) Two-sided `A28 in [1/8.3, 2/15]`. -/
+theorem DZ3ab_amp28_mem : (1 / 8.3 : ℝ) ≤ D3_amp 28 ∧ D3_amp 28 ≤ 2 / 15 :=
+  ⟨DZ3ab_amp28_lower, DZ2j_amp28_le_two_fifteenths⟩
+
+/-- (DZ3ab) Two-sided `A29 in [1/8.5, 2/15]`. -/
+theorem DZ3ab_amp29_mem : (1 / 8.5 : ℝ) ≤ D3_amp 29 ∧ D3_amp 29 ≤ 2 / 15 :=
+  ⟨DZ3ab_amp29_lower, DZ2i_amp29_le_two_fifteenths⟩
+
+/-- (DZ3ab) Signed Re decomposition of the `m = 14` pair: opposite `(-1)^k`
+signs computed explicitly (`+` at `k = 28`, `-` at `k = 29`). -/
+theorem DZ3ab_pair14_re_eq :
+    (etaPairTerm (1 - zetaCellS0) 14).re =
+      D3_amp 28 * Real.cos (D3_phase 28) - D3_amp 29 * Real.cos (D3_phase 29) := by
+  have e0 : (2 * 14 : ℕ) = 28 := by norm_num
+  have e1 : (2 * 14 + 1 : ℕ) = 29 := by norm_num
+  have h28 := D3_eta_re 28
+  have h29 := D3_eta_re 29
+  have s28 : (-1 : ℝ) ^ (28 : ℕ) = 1 := by norm_num
+  have s29 : (-1 : ℝ) ^ (29 : ℕ) = -1 := by norm_num
+  rw [s28] at h28
+  rw [s29] at h29
+  unfold etaPairTerm
+  rw [Complex.add_re, e0, e1, h28, h29]
+  ring
+
+/-- (DZ3ab) Pair-14 signed Re: `Re <= -0.03`
+(`1/8.3*(-0.36) + 2/15*0.1 = -0.03004...`, beats `2/29 ~= 0.06897`). -/
+theorem DZ3ab_pair14_re_le_neg :
+    (etaPairTerm (1 - zetaCellS0) 14).re ≤ (-0.03 : ℝ) := by
+  rw [DZ3ab_pair14_re_eq]
+  have hA28lo := DZ3ab_amp28_lower
+  have hA29hi := DZ2i_amp29_le_two_fifteenths
+  have hc28 := DZ3ab_cos28_upper
+  have hc29 := DZ3ab_cos29_neg_le
+  have hA28nn := D3_amp_nonneg 28
+  have hA29nn := D3_amp_nonneg 29
+  have h1 : D3_amp 28 * Real.cos (D3_phase 28)
+      ≤ (1 / 8.3 : ℝ) * (-0.36) := by
+    have e1 : D3_amp 28 * Real.cos (D3_phase 28) ≤ D3_amp 28 * (-0.36) :=
+      mul_le_mul_of_nonneg_left (by linarith) hA28nn
+    have e2 : D3_amp 28 * (-0.36) ≤ (1 / 8.3 : ℝ) * (-0.36) :=
+      mul_le_mul_of_nonpos_right hA28lo (by norm_num)
+    linarith
+  have h2 : -(D3_amp 29 * Real.cos (D3_phase 29))
+      ≤ (2 / 15 : ℝ) * 0.1 := by
+    have g1 : D3_amp 29 * (-Real.cos (D3_phase 29)) ≤ D3_amp 29 * 0.1 :=
+      mul_le_mul_of_nonneg_left hc29 hA29nn
+    have g2 : D3_amp 29 * 0.1 ≤ (2 / 15 : ℝ) * 0.1 :=
+      mul_le_mul_of_nonneg_right hA29hi (by norm_num)
+    have e : -(D3_amp 29 * Real.cos (D3_phase 29))
+        = D3_amp 29 * (-Real.cos (D3_phase 29)) := by ring
+    linarith
+  have hnum : (1 / 8.3 : ℝ) * (-0.36) + (2 / 15 : ℝ) * 0.1 ≤ (-0.03 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3ab) Saving verdict: `1/8.3*(-0.36)+2/15*0.1 <= -0.03 < 2/29`,
+MVT slot `8.771/6.2134/29 <= 0.049` met (residual `<= -0.03`). -/
+theorem DZ3ab_saving :
+    (0 : ℝ) < 2 / 29 ∧ (8.771 : ℝ) / 6.2134 / 29 ≤ 0.049
+      ∧ (-0.03 : ℝ) ≤ 0.049 ∧ (2 / 29 : ℝ) - (-0.03) ≥ 0.09 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+#print axioms DZ3ab_log30_eq
+#print axioms DZ3ab_log30_lo
+#print axioms DZ3ab_log30_hi
+#print axioms DZ3ab_log_ratio_le
+#print axioms DZ3ab_log_ratio_ge
+#print axioms DZ3ab_log29_eq
+#print axioms DZ3ab_log29_lo
+#print axioms DZ3ab_log29_hi
+#print axioms DZ3ab_phase28_eq
+#print axioms DZ3ab_phase29_eq
+#print axioms DZ3ab_theta28_lo
+#print axioms DZ3ab_theta28_hi
+#print axioms DZ3ab_theta29_lo
+#print axioms DZ3ab_theta29_hi
+#print axioms DZ3ab_w28_mem
+#print axioms DZ3ab_w29_mem
+#print axioms DZ3ab_cos28_upper
+#print axioms DZ3ab_cos29_neg_le
+#print axioms DZ3ab_amp28_lower
+#print axioms DZ3ab_amp29_lower
+#print axioms DZ3ab_amp28_mem
+#print axioms DZ3ab_amp29_mem
+#print axioms DZ3ab_pair14_re_eq
+#print axioms DZ3ab_pair14_re_le_neg
+#print axioms DZ3ab_saving
