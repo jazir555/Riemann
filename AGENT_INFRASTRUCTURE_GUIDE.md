@@ -1656,9 +1656,20 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `≈ −0.00215`, slack is `cos ≤ 1` on `c16`). NOTE: G7's commit held one wave (G8's
     concurrent append carried an error + `sorryAx`) — G8 self-repaired, joint commit.
     Next: pair-8 toward `≤ 0.02`, pair-9 `Re` start, `k=6` cap (tasked).
+    **Pair-8 upgrade (`DZ3q_*`, G9, `f156682e`, green 8693 jobs, axioms clean):**
+    `cos16 ≤ 0.96` upper + `amp16 ≤ 1/5.4735` ⇒ **pair-8 `Re ≤ 0.031`** (gap to `0.02`
+    is `0.011`; true `≈ −0.00215`).
+    Next: five-decimal `A16`, `A17·c17` upward, pair-9 `Re` start, or `k=6` cap (tasked).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
-    — zero lines written, empty report (G5/DE precedent). Lane stays open; reduced-scope
-    retry tasked (single matched-x lemma + report-from-diff).
+    — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
+    lane) + H1 (matched-x lane) with deconfliction.
+    **Single-point + matched-x (`DZ4a_*/R02MatchedX`, H0r+H1, `0982f5db` joint, green 8688
+    jobs, axioms clean):** single-point re-derivation (Γ7.025 ≤ 760.9, Γ7.37 ≤ 1498.11,
+    one-step numerator **228.0**) + matched-x main (`Γ(x+1)/√(x²+b²) ≤ 217.5`, 7.5% under
+    uniform; ~2.9% slack over true majorant max ~211.3). Gap to 68.85 stands (3.16×;
+    no convexity/`Gamma_add_one` majorant can reach it — true max ~211). Deconfliction
+    held (sequential namespaces). Next: wire 228.0/217.5 as numerators (newsection lane),
+    or infinite-product/Stirling toward true ~131 (tasked, DT lane).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
