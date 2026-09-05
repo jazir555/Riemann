@@ -1816,6 +1816,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `217.5` kept on `[6.025,6.37]` — full narrow table `215.7<…<217.5` closed.
     Narrow lane endpoint (diminishing returns below `0.1`); lane retires to cell support.
     Next: sub-sliver `[6.30,6.33]` 217.3-class attempt (tasked, last narrow wave).
+    **Sub-sliver closed (W4, `0bf9b4e3`, green 8702 jobs, axioms clean):**
+    `[6.30,6.33]` at `217.3` (margin `~1011`); residual `[6.33,6.37]` (`0.04`) at `217.5`.
+    **NARROW LANE RETIRED — newsection tail quiet unless cell support needs it.**
     **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
     exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
