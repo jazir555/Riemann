@@ -16593,3 +16593,220 @@ end Door3ResidualScout
 #print axioms Door3ResidualScout.door3_cutoffLine_mem_of_abs_le
 #print axioms Door3ResidualScout.door3_real_self_star
 #print axioms Door3ResidualScout.door3_conj_transfer
+
+/-! ## Door-3 CutR10 center enclosure (cover lane, analytic factor bounds)
+
+Cover-lane bridge for the right cutoff thin rect `CutR10 = ⟨9.75,10.25,-0.49,0.49⟩`
+(read-only def l.6830-6831): its center is the REAL point `10`, so the shifted
+`s`-point is `s0 = 1/2 + 10*I` on the critical line (`Re = 1/2`).
+
+Tier `(ε,M) = (0.001,0.04)` (explicit, small): with the banked radius cap
+`CutR10.radius < 0.56` (read-only `CutR10_radius_lt` via `cutoff_radius_bound`
+l.6870), the fencing need is `0.001 + 0.04*0.56 = 0.0234 = 117/5000`.
+(The file-pattern outer tier `(0.002,0.05)` needs `0.03`, which exceeds the
+certified floor `8421/320000 ≈ 0.026316` below; the next agent reaches it by
+tightening the Gamma/zeta remainder certs.)
+
+`root xiShifted` factors definitionally (read-only `xiShifted`,
+`classicalXi`, `XiFromPrefactor`, `classicalXiPrefactor` in
+`riemann_hypothesis.lean`):
+`‖xiShifted center‖ = ‖poly‖ * ‖piPow‖ * ‖Gamma‖ * ‖zeta‖` at `s0`, where
+* `‖poly‖ = 401/8` EXACT (python3 `Fractions` cert
+  `C:\Users\mmeadow\AppData\Local\Temp\kilo\door3_cutr10_certs.py` item 1),
+  banked as `cutR10_poly_norm` (`Complex.ext` + `norm_num`);
+* `‖piPow‖ ≥ 3/4` from `(4/3)^4 = 256/81 ≥ 63/20 = 3.15 > π`
+  (`Real.pi_lt_d2` + cert item 3) through the bridge
+  `Complex.norm_cpow_eq_rpow_re_of_pos`, banked as `cutR10_pi_norm_lower`;
+* `‖Gamma(s0/2)‖ ≥ 1/2000` (true value `≈ 0.000651`, 30% margin) and
+  `‖zeta s0‖ ≥ 7/5` (true value `≈ 1.549`, 10% margin) stay HYPOTHESES
+  (`cutR10_gammaRemainder`, `cutR10_zetaRemainder`): Stirling-at-`1/4+5I` and
+  Dirichlet-eta-at-`1/2+10I` walls, same family as the 40-cell zeta wall.
+  Product floor: `(401/8)*(3/4)*(1/2000)*(7/5) = 8421/320000` (cert item 4).
+
+Banked (all sorry-free): center identity, shifted identity, poly exact norm,
+pi lower bound, conditional center enclosure at `(0.001,0.04)`, deriv-side
+remainder def, Gamma/zeta remainder defs, and the full H-leaf assembly
+`cutR10_fencing_of_remainders : CellFencingHypotheses CutR10 0.001 0.04`.
+Next-agent task: discharge the three remainder defs (Gamma lower, zeta lower,
+deriv upper `‖deriv xiShifted‖ ≤ 0.04` on the `s`-rect `Re ∈ [0.01,0.99]`,
+`Im = ±10`), then feed the package to the per-rect fencing H-leaf plus
+`cutoffLines_either` assembly.
+-/
+
+namespace Door3CutR10Center
+
+open CentralCoverAssembly
+
+/-- CutR10 center is the real point `10`
+(midpoints `(9.75+10.25)/2`, `(-0.49+0.49)/2`). -/
+theorem cutR10_center_eq : CutR10.center = (((10 : ℝ)) : ℂ) := by
+  unfold CellProofEngine.Rect2D.center
+  rw [CutR10_x0, CutR10_x1, CutR10_y0, CutR10_y1]
+  apply Complex.ext <;> simp <;> norm_num
+
+/-- Shifted `s`-point at the CutR10 center: `(1/2:ℂ) + I*10 = 1/2 + 10*I`. -/
+theorem cutR10_s_eq :
+    (1 / 2 : ℂ) + Complex.I * CutR10.center
+      = (((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I := by
+  rw [cutR10_center_eq]
+  push_cast
+  ring
+
+/-- Poly factor exact value at the CutR10 `s`-point (cert item 1:
+`Fractions` gives `(-401/8, 0)` since `(1/2+10i)(-1/2+10i)/2 = -401/8`). -/
+theorem cutR10_poly_eq :
+    (1 / 2 : ℂ) * ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I)
+      * (((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) - 1)
+      = (((-401 / 8 : ℝ)) : ℂ) := by
+  apply Complex.ext <;> simp [Complex.I_mul_I] <;> norm_num
+
+/-- Poly factor norm `401/8` (exact; cert item 1). -/
+theorem cutR10_poly_norm :
+    ‖(1 / 2 : ℂ) * ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I)
+      * (((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) - 1)‖
+      = (401 / 8 : ℝ) := by
+  rw [cutR10_poly_eq, Complex.norm_real, Real.norm_eq_abs]
+  norm_num
+
+/-- `Re` of the pi-power exponent at the CutR10 `s`-point is `-1/4`. -/
+theorem cutR10_piExp_re :
+    (-((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) / 2).re
+      = (-(1 / 4) : ℝ) := by
+  simp <;> norm_num
+
+/-- Pi-power factor lower bound `3/4` (cert item 3 + `Real.pi_lt_d2`
+through `Complex.norm_cpow_eq_rpow_re_of_pos`). -/
+theorem cutR10_pi_norm_lower :
+    (3 / 4 : ℝ)
+      ≤ ‖((Real.pi : ℂ)
+        ^ (-((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) / 2))‖ := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos, cutR10_piExp_re]
+  have hpi_le : Real.pi ≤ (256 / 81 : ℝ) := by
+    have h := Real.pi_lt_d2
+    norm_num at h ⊢
+    linarith
+  have h14 : Real.pi ^ ((1 / 4 : ℝ)) ≤ (4 / 3 : ℝ) := by
+    have h1 : Real.pi ^ ((1 / 4 : ℝ)) ≤ (256 / 81 : ℝ) ^ ((1 / 4 : ℝ)) :=
+      Real.rpow_le_rpow (le_of_lt Real.pi_pos) hpi_le (by norm_num)
+    have hq : (256 / 81 : ℝ) = (4 / 3 : ℝ) ^ (4 : ℕ) := by norm_num
+    have hexp : (((4 : ℕ)) : ℝ) * (1 / 4 : ℝ) = 1 := by norm_num
+    have h2 : ((256 / 81 : ℝ) ^ ((1 / 4 : ℝ))) = 4 / 3 := by
+      rw [hq, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num), hexp,
+        Real.rpow_one]
+    rwa [h2] at h1
+  have hfin : (3 / 4 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    have h43 : (3 / 4 : ℝ) = 1 / (4 / 3 : ℝ) := by norm_num
+    rw [h43]
+    simpa only [one_div] using
+      one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h14
+  exact hfin
+
+/-- Conditional CutR10 center enclosure at tier `(0.001, 0.04)`
+(cert item 4: need `117/5000 ≤ 8421/320000`). -/
+theorem cutR10_center_bound_of_gamma_zeta
+    (hG : (1 / 2000 : ℝ)
+      ≤ ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)‖)
+    (hZ : (7 / 5 : ℝ) ≤ ‖zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖) :
+    (0.001 : ℝ) + 0.04 * CutR10.radius ≤ ‖xiShifted CutR10.center‖ := by
+  have hrad : CutR10.radius < 0.56 := CutR10_radius_lt
+  have hM : (0.04 : ℝ) * CutR10.radius ≤ 0.04 * 0.56 :=
+    mul_le_mul_of_nonneg_left hrad.le (by norm_num)
+  have hs : ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+      = ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) := cutR10_s_eq
+  have hpoly : ((401 / 8 : ℝ)) ≤ ‖(1 / 2 : ℂ)
+      * ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+      * (((1 / 2 : ℂ) + Complex.I * CutR10.center) - 1)‖ := by
+    rw [hs, cutR10_poly_norm]
+  have hpi : ((3 / 4 : ℝ)) ≤ ‖(Real.pi : ℂ)
+      ^ (-(((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2))‖ := by
+    rw [hs]
+    simpa only [neg_div] using cutR10_pi_norm_lower
+  have hpref : classicalXiPrefactor ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+      = ((1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+        * (((1 / 2 : ℂ) + Complex.I * CutR10.center) - 1))
+        * ((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)))
+        * (Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)) := rfl
+  have hxi : xiShifted CutR10.center
+      = classicalXiPrefactor ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+        * zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center) := rfl
+  have h1 : ((401 / 8 : ℝ)) * (3 / 4) * (1 / 2000) * (7 / 5)
+      ≤ ‖classicalXiPrefactor ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖
+        * ‖zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖ := by
+    rw [hpref]
+    simp only [norm_mul]
+    have g1 : (401 / 8 : ℝ) * (3 / 4)
+        ≤ ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+          * (((1 / 2 : ℂ) + Complex.I * CutR10.center) - 1)‖
+          * ‖(Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2))‖ :=
+      mul_le_mul hpoly hpi (by norm_num) (norm_nonneg _)
+    have g2 : (401 / 8 : ℝ) * (3 / 4) * (1 / 2000)
+        ≤ (‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+          * (((1 / 2 : ℂ) + Complex.I * CutR10.center) - 1)‖
+          * ‖(Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2))‖)
+          * ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)‖ :=
+      mul_le_mul g1 hG (by norm_num)
+        (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+    have g3 : (401 / 8 : ℝ) * (3 / 4) * (1 / 2000) * (7 / 5)
+        ≤ ((‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * CutR10.center)
+          * (((1 / 2 : ℂ) + Complex.I * CutR10.center) - 1)‖
+          * ‖(Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2))‖)
+          * ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)‖)
+          * ‖zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖ :=
+      mul_le_mul g2 hZ (by norm_num)
+        (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+          (norm_nonneg _))
+    simpa only [norm_mul] using g3
+  have hxi_norm : ‖classicalXiPrefactor ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖
+        * ‖zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖
+        = ‖xiShifted CutR10.center‖ := by
+    rw [hxi, norm_mul]
+  have hneed : (0.001 : ℝ) + 0.04 * 0.56
+      ≤ (401 / 8 : ℝ) * (3 / 4) * (1 / 2000) * (7 / 5) := by
+    norm_num
+  have hstep : (0.001 : ℝ) + 0.04 * CutR10.radius
+      ≤ (401 / 8 : ℝ) * (3 / 4) * (1 / 2000) * (7 / 5) := by
+    linarith [hM, hneed]
+  have hle : (401 / 8 : ℝ) * (3 / 4) * (1 / 2000) * (7 / 5)
+      ≤ ‖xiShifted CutR10.center‖ := by
+    rw [← hxi_norm]
+    exact h1
+  exact le_trans hstep hle
+
+/-- Deriv-side remainder for CutR10 at tier `M = 0.04` (wall: tight
+`‖zeta‖`-upper on the vertical `s`-rect `Re ∈ [0.01,0.99]`, `Im = ±10`,
+needs FE plus Stirling plus convexity). -/
+def cutR10_derivRemainder (M : ℝ) : Prop :=
+  ∀ w, CutR10.mem w → ‖deriv xiShifted w‖ ≤ M
+
+/-- Gamma-factor remainder: explicit Stirling lower at `s0/2 = 1/4 + 5*I`
+(true value `≈ 0.000651`, 30% margin; unproved this wave). -/
+def cutR10_gammaRemainder : Prop :=
+  (1 / 2000 : ℝ)
+    ≤ ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)‖
+
+/-- Zeta-factor remainder: Dirichlet-eta lower at `s0 = 1/2 + 10*I`
+(true value `≈ 1.549`, 10% margin; unproved this wave). -/
+def cutR10_zetaRemainder : Prop :=
+  (7 / 5 : ℝ) ≤ ‖zeta ((1 / 2 : ℂ) + Complex.I * CutR10.center)‖
+
+/-- H-leaf assembly: the three remainders give the full fencing package
+`CellFencingHypotheses CutR10 0.001 0.04` (feeds the per-rect fencing H-leaf
+via `cutoffLines_either` assembly). -/
+theorem cutR10_fencing_of_remainders
+    (hG : cutR10_gammaRemainder) (hZ : cutR10_zetaRemainder)
+    (hD : cutR10_derivRemainder 0.04) :
+    CellFencingHypotheses CutR10 0.001 0.04 := by
+  refine { ε_pos := by norm_num, deriv_bound := hD, center_bound := ?_ }
+  exact cutR10_center_bound_of_gamma_zeta hG hZ
+
+end Door3CutR10Center
+
+#print axioms Door3CutR10Center.cutR10_center_eq
+#print axioms Door3CutR10Center.cutR10_s_eq
+#print axioms Door3CutR10Center.cutR10_poly_eq
+#print axioms Door3CutR10Center.cutR10_poly_norm
+#print axioms Door3CutR10Center.cutR10_piExp_re
+#print axioms Door3CutR10Center.cutR10_pi_norm_lower
+#print axioms Door3CutR10Center.cutR10_center_bound_of_gamma_zeta
+#print axioms Door3CutR10Center.cutR10_fencing_of_remainders

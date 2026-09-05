@@ -2659,3 +2659,17 @@ exactly what makes the bridge close, so do NOT switch to a bound with a larger a
 | `xi` type mismatch between files | root `xi` ≠ Zeta23 `xi` (factor 1/2) | only use root `xi` (`ZeroFreeRegionHadamard.xi`) in this target |
 | build writes no `.olean` | used `lake env lean` (intermittent EXIT=-1) | use `lake build <Module>` (EXIT 0) |
 | two builds corrupt `.lake/build` | ran `lake` in parallel | always take `.lake_build_lock` (App. I) |
+
+## Door-3 update: cutoff Gamma supplier (2026-09-05)
+
+`door3_gamma_product.lean` proves finite-product bounds for the complex Gamma
+norm at every positive real part, including a squared form with rational factors.
+`door3_gamma_cutoff.lean` uses 128 exact rational factors and Euler reflection to
+prove `Door3GammaCutoff.cutR10_gammaRemainder` without analytic premises.
+This supplies `1/2000 <= norm (Gamma (1/4 + 5*I))` to the CutR10 center assembly.
+The named adapters `cutR10_center_bound_of_zeta` and
+`cutR10_fencing_of_zeta_deriv` consume that proof directly.
+Validation: `lake build door3_gamma_cutoff` succeeded (8690 jobs); all three
+adapter axiom reports contain only `propext`, `Classical.choice`, and `Quot.sound`.
+CutR10 still needs its zeta lower bound and derivative upper bound. No complete
+cell cover, unbounded-tail certificate, or unconditional RH theorem is claimed.
