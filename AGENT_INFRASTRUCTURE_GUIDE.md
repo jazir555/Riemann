@@ -1811,6 +1811,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     Block's own 3 errors fixed in-diff but UNBUILT: verification blocked by R5's
     mid-work cover insertion (`sorryAx` in `door3_conj_transfer`, type error :16579).
     Verifier fires after R5 reports; commit only on green.
+    **Gamma sups verified (`Door3DerivGammaSupSImage`, GS, `64057b8e`, GSv GREEN,
+    8702 jobs, axioms clean):** smallest `G0=0.232` (2-step recurrence); implied budget
+    `Z≤0.00044` — tier stays zeta-side blocked (FE2 owns the Z numeral).
     **Deriv lane (`door3_deriv_certs`, V, `fba59747`, green 45s, axioms clean):**
     Cauchy-estimate toolkit (`deriv_bound_of_sphere_sup_on_ball` from Mathlib Liouville +
     rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
