@@ -34367,3 +34367,670 @@ theorem no_uniform_GammaR_lower_middle :
 #print axioms BTStripGamma.no_uniform_GammaR_lower_middle
 
 end BTStripGamma
+
+/-!
+## Door-3 SINGLE-POINT Gamma uppers (DZ4a lane, Agent DZ4a).
+
+**Task (narrowed single-point scope).** Tighten the one-step shifted endpoints
+below the newsection-lane values `Real.Gamma 7.025 ≤ 765.175` and
+`Real.Gamma 7.37 ≤ 1498.17` (`Door3GammaCut87.realGamma_7025_le/_737_le`),
+rigorously, in this file only. SINGLE-POINT route: no matched-`x`
+monotonicity (sibling H1's lane — not attempted here), no infinite-product
+decay (sibling DT's lane — not attempted here).
+
+**Method.** One new Mathlib input vs the landed `R02GammaDisc` chains:
+`Real.Gamma_one_half_eq` (`Gamma (1/2) = √π`) gives
+`Real.Gamma 1.5 = √π/2 ≤ 0.88625` (`DZ4a_realGamma_15_le`, via
+`Real.pi_lt_d4`). Convexity chords on `[1, 1.5]` (same
+`Real.convexOn_Gamma` shape as `R02GammaDisc.realGamma_1025_le_one`) give
+tighter bases `Gamma 1.025 ≤ 0.9944`, `Gamma 1.37 ≤ 0.9159` (old: `≤ 1`).
+The landed 5-step recurrence pattern (`Real.Gamma_add_one`) is re-run with
+the tighter bases threaded through, giving tighter chains and endpoints.
+`R02GammaDisc` itself is untouched (read-only pattern reuse only).
+
+**Banked constants (old → new).**
+
+| quantity | old | new | theorem |
+| `Real.Gamma 1.5` | — | `0.88625` | `DZ4a_realGamma_15_le` |
+| `Real.Gamma 1.025` | `1` | `0.9944` | `DZ4a_realGamma_1025_le` |
+| `Real.Gamma 1.37` | `1` | `0.9159` | `DZ4a_realGamma_137_le` |
+| `Real.Gamma 6.025` | `127` | `126.29` | `DZ4a_realGamma_6025_le` |
+| `Real.Gamma 7.025` | `765.175` | `760.9` | `DZ4a_realGamma_7025_le` |
+| `Real.Gamma 6.37` | `256.78` | `235.19` | `DZ4a_realGamma_637_le` |
+| `Real.Gamma 7.37` | `1498.17` | `1498.11` | `DZ4a_realGamma_737_le` |
+| `Real.Gamma 8.37` | `11041.52` | `11041.08` | `DZ4a_realGamma_837_le` |
+| one-step `‖Γ(w)‖` | `228.1` | `228.0` | `DZ4a_complex_gamma_one_step_upper` |
+
+**Gap-to-target verdict (numerator target `≤ 68.85` per DQ audit).**
+`DZ4a_gap_737_blocked`: `68.85 * 6.571 = 452.41335 < 1498.11` — a one-step
+numerator would need `≤ 452.41` to reach `68.85`; the tightened `1498.11`
+is `3.31×` over. Composed: `228.0` vs `68.85` → gap `+159.15`
+(`228.0/68.85 = 3.312×`); `228.0/2648 = 0.08611` stays in the `0.087`
+tier. The `68.85` target remains infeasible by single-point methods
+(top-edge true value `≈ 131`); closing it needs H1's matched-`x` lane or
+DT's infinite-product lane.
+
+**Grep-first record (verified via `Grep` before writing).**
+* `DZ4a_` in `interval_arith.lean` → 0 hits (fresh prefix; no clash with H1).
+* `realGamma_737` / `realGamma_7025` in `interval_arith.lean` → 0 hits
+  (those live in `riemann_hypothesis_newsection.lean`, untouched here).
+* `R02GammaDisc.realGamma_6025_le` (`:31956`), `realGamma_637_le` (`:32012`),
+  `R00GammaLower.norm_Gamma_le_realGamma` (`:541`) → present, reused
+  read-only (referenced, never edited).
+* `Real.Gamma_one_half_eq` → `Mathlib/.../Gaussian/GaussianIntegral.lean:324`,
+  available via `import Mathlib`; `Real.pi_lt_d4` already used in-file.
+-/
+
+namespace DZ4a_Door3SinglePoint
+
+/-- `Real.Gamma 1.5 ≤ 0.88625` via `Gamma (1/2 + 1) = (1/2) * Gamma (1/2)`
+(`Real.Gamma_add_one`), `Gamma (1/2) = √π` (`Real.Gamma_one_half_eq`),
+and `√π ≤ 1.7725` (`π ≤ 3.1416`, `1.7725² = 3.14175625`; true `≈ 0.886227`). -/
+theorem DZ4a_realGamma_15_le : Real.Gamma 1.5 ≤ 0.88625 := by
+  have hadd : Real.Gamma ((1 / 2 : ℝ) + 1) = (1 / 2) * Real.Gamma (1 / 2) :=
+    Real.Gamma_add_one (by norm_num)
+  have h12 : Real.Gamma (1 / 2 : ℝ) = Real.sqrt Real.pi :=
+    Real.Gamma_one_half_eq
+  have e : Real.Gamma (1 / 2 + 1) = (1 / 2) * Real.sqrt Real.pi := by
+    rw [hadd, h12]
+  have h15 : (1.5 : ℝ) = 1 / 2 + 1 := by norm_num
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hsq : Real.sqrt Real.pi ≤ 1.7725 := by
+    have hbase : Real.sqrt Real.pi ≤ Real.sqrt 3.1416 := Real.sqrt_le_sqrt hpi
+    have hcap : Real.sqrt (3.1416 : ℝ) ≤ 1.7725 := by
+      have hle : (3.1416 : ℝ) ≤ 1.7725 ^ 2 := by norm_num
+      calc Real.sqrt 3.1416 ≤ Real.sqrt (1.7725 ^ 2) := Real.sqrt_le_sqrt hle
+        _ = 1.7725 := Real.sqrt_sq (by norm_num)
+    exact le_trans hbase hcap
+  calc Real.Gamma 1.5 = (1 / 2) * Real.sqrt Real.pi := by rw [h15]; exact e
+    _ ≤ (1 / 2) * 1.7725 :=
+        mul_le_mul_of_nonneg_left hsq (by norm_num)
+    _ = 0.88625 := by norm_num
+
+/-- Tighter convexity base: `Real.Gamma 1.025 ≤ 0.9944`
+(`1.025 = 0.95·1 + 0.05·1.5`; old feeder `≤ 1`). -/
+theorem DZ4a_realGamma_1025_le : Real.Gamma 1.025 ≤ 0.9944 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (1.5 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.95 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.05 := by norm_num
+  have hab : (0.95 : ℝ) + 0.05 = 1 := by norm_num
+  have h := hconv.2 h1 h2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one] at h
+  have heq : (0.95 : ℝ) * 1 + 0.05 * 1.5 = 1.025 := by norm_num
+  rw [heq] at h
+  have g : (0.05 : ℝ) * Real.Gamma 1.5 ≤ 0.05 * 0.88625 :=
+    mul_le_mul_of_nonneg_left DZ4a_realGamma_15_le (by norm_num)
+  linarith
+
+/-- Tighter convexity base: `Real.Gamma 1.37 ≤ 0.9159`
+(`1.37 = 0.26·1 + 0.74·1.5`; old feeder `≤ 1`). -/
+theorem DZ4a_realGamma_137_le : Real.Gamma 1.37 ≤ 0.9159 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h2 : (1.5 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.26 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.74 := by norm_num
+  have hab : (0.26 : ℝ) + 0.74 = 1 := by norm_num
+  have h := hconv.2 h1 h2 ha hb hab
+  simp only [smul_eq_mul, Real.Gamma_one] at h
+  have heq : (0.26 : ℝ) * 1 + 0.74 * 1.5 = 1.37 := by norm_num
+  rw [heq] at h
+  have g : (0.74 : ℝ) * Real.Gamma 1.5 ≤ 0.74 * 0.88625 :=
+    mul_le_mul_of_nonneg_left DZ4a_realGamma_15_le (by norm_num)
+  linarith
+
+/-- Bottom endpoint chain with tightened base:
+`Real.Gamma 6.025 ≤ 1.025·2.025·3.025·4.025·5.025·0.9944`
+(same 5-step `Real.Gamma_add_one` shape as
+`R02GammaDisc.realGamma_6025_le`). -/
+theorem DZ4a_chain_6025 :
+    Real.Gamma 6.025 ≤ 1.025 * 2.025 * 3.025 * 4.025 * 5.025 * 0.9944 := by
+  have g1 : Real.Gamma 2.025 ≤ 1.025 * 0.9944 := by
+    have h : Real.Gamma (1.025 + 1) = 1.025 * Real.Gamma 1.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.025 : ℝ) + 1 = 2.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    exact mul_le_mul_of_nonneg_left DZ4a_realGamma_1025_le (by norm_num)
+  have g2 : Real.Gamma 3.025 ≤ 1.025 * 2.025 * 0.9944 := by
+    have h : Real.Gamma (2.025 + 1) = 2.025 * Real.Gamma 2.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.025 : ℝ) + 1 = 3.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (2.025 : ℝ) * Real.Gamma 2.025 ≤ 2.025 * (1.025 * 0.9944) :=
+      mul_le_mul_of_nonneg_left g1 (by norm_num)
+    calc (2.025 : ℝ) * Real.Gamma 2.025 ≤ 2.025 * (1.025 * 0.9944) := hle
+      _ = 1.025 * 2.025 * 0.9944 := by ring
+  have g3 : Real.Gamma 4.025 ≤ 1.025 * 2.025 * 3.025 * 0.9944 := by
+    have h : Real.Gamma (3.025 + 1) = 3.025 * Real.Gamma 3.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.025 : ℝ) + 1 = 4.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (3.025 : ℝ) * Real.Gamma 3.025 ≤ 3.025 * (1.025 * 2.025 * 0.9944) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.025 : ℝ) * Real.Gamma 3.025
+          ≤ 3.025 * (1.025 * 2.025 * 0.9944) := hle
+      _ = 1.025 * 2.025 * 3.025 * 0.9944 := by ring
+  have g4 : Real.Gamma 5.025 ≤ 1.025 * 2.025 * 3.025 * 4.025 * 0.9944 := by
+    have h : Real.Gamma (4.025 + 1) = 4.025 * Real.Gamma 4.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.025 : ℝ) + 1 = 5.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (4.025 : ℝ) * Real.Gamma 4.025
+        ≤ 4.025 * (1.025 * 2.025 * 3.025 * 0.9944) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.025 : ℝ) * Real.Gamma 4.025
+          ≤ 4.025 * (1.025 * 2.025 * 3.025 * 0.9944) := hle
+      _ = 1.025 * 2.025 * 3.025 * 4.025 * 0.9944 := by ring
+  have g5 : Real.Gamma 6.025
+      ≤ 1.025 * 2.025 * 3.025 * 4.025 * 5.025 * 0.9944 := by
+    have h : Real.Gamma (5.025 + 1) = 5.025 * Real.Gamma 5.025 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.025 : ℝ) + 1 = 6.025 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (5.025 : ℝ) * Real.Gamma 5.025
+        ≤ 5.025 * (1.025 * 2.025 * 3.025 * 4.025 * 0.9944) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.025 : ℝ) * Real.Gamma 5.025
+          ≤ 5.025 * (1.025 * 2.025 * 3.025 * 4.025 * 0.9944) := hle
+      _ = 1.025 * 2.025 * 3.025 * 4.025 * 5.025 * 0.9944 := by ring
+  exact g5
+
+/-- Tightened bottom endpoint: `Real.Gamma 6.025 ≤ 126.29` (old `127`;
+`126.991959…·0.9944 = 126.2808…`). -/
+theorem DZ4a_realGamma_6025_le : Real.Gamma 6.025 ≤ 126.29 := by
+  have hfin : (1.025 : ℝ) * 2.025 * 3.025 * 4.025 * 5.025 * 0.9944
+      ≤ 126.29 := by norm_num
+  exact le_trans DZ4a_chain_6025 hfin
+
+/-- Tightened shifted bottom endpoint: `Real.Gamma 7.025 ≤ 760.9`
+(old `765.175`; `6.025·126.29 = 760.89725`). -/
+theorem DZ4a_realGamma_7025_le : Real.Gamma 7.025 ≤ 760.9 := by
+  have h : Real.Gamma (6.025 + 1) = 6.025 * Real.Gamma 6.025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (6.025 : ℝ) + 1 = 7.025 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : (6.025 : ℝ) * Real.Gamma 6.025 ≤ 6.025 * 126.29 :=
+    mul_le_mul_of_nonneg_left DZ4a_realGamma_6025_le (by norm_num)
+  have hfin : (6.025 : ℝ) * 126.29 ≤ 760.9 := by norm_num
+  exact le_trans hle hfin
+
+/-- Top endpoint chain with tightened base:
+`Real.Gamma 6.37 ≤ 1.37·2.37·3.37·4.37·5.37·0.9159`
+(same 5-step shape as `R02GammaDisc.realGamma_637_le`). -/
+theorem DZ4a_chain_637 :
+    Real.Gamma 6.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by
+  have g1 : Real.Gamma 2.37 ≤ 1.37 * 0.9159 := by
+    have h : Real.Gamma (1.37 + 1) = 1.37 * Real.Gamma 1.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.37 : ℝ) + 1 = 2.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    exact mul_le_mul_of_nonneg_left DZ4a_realGamma_137_le (by norm_num)
+  have g2 : Real.Gamma 3.37 ≤ 1.37 * 2.37 * 0.9159 := by
+    have h : Real.Gamma (2.37 + 1) = 2.37 * Real.Gamma 2.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.37 : ℝ) + 1 = 3.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (2.37 : ℝ) * Real.Gamma 2.37 ≤ 2.37 * (1.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g1 (by norm_num)
+    calc (2.37 : ℝ) * Real.Gamma 2.37 ≤ 2.37 * (1.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 0.9159 := by ring
+  have g3 : Real.Gamma 4.37 ≤ 1.37 * 2.37 * 3.37 * 0.9159 := by
+    have h : Real.Gamma (3.37 + 1) = 3.37 * Real.Gamma 3.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.37 : ℝ) + 1 = 4.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (3.37 : ℝ) * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.37 : ℝ) * Real.Gamma 3.37
+          ≤ 3.37 * (1.37 * 2.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 0.9159 := by ring
+  have g4 : Real.Gamma 5.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by
+    have h : Real.Gamma (4.37 + 1) = 4.37 * Real.Gamma 4.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.37 : ℝ) + 1 = 5.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (4.37 : ℝ) * Real.Gamma 4.37
+        ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.37 : ℝ) * Real.Gamma 4.37
+          ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by ring
+  have g5 : Real.Gamma 6.37
+      ≤ 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by
+    have h : Real.Gamma (5.37 + 1) = 5.37 * Real.Gamma 5.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.37 : ℝ) + 1 = 6.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : (5.37 : ℝ) * Real.Gamma 5.37
+        ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.37 : ℝ) * Real.Gamma 5.37
+          ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by ring
+  exact g5
+
+/-- Tightened top endpoint: `Real.Gamma 6.37 ≤ 235.19` (old `256.78`;
+`256.776064…·0.9159 = 235.181197…`). -/
+theorem DZ4a_realGamma_637_le : Real.Gamma 6.37 ≤ 235.19 := by
+  have hfin : (1.37 : ℝ) * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159
+      ≤ 235.19 := by norm_num
+  exact le_trans DZ4a_chain_637 hfin
+
+/-- Tightened shifted top endpoint: `Real.Gamma 7.37 ≤ 1498.11`
+(old `1498.17`; `6.37·235.181197… = 1498.104222…`). -/
+theorem DZ4a_realGamma_737_le : Real.Gamma 7.37 ≤ 1498.11 := by
+  have h : Real.Gamma (6.37 + 1) = 6.37 * Real.Gamma 6.37 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (6.37 : ℝ) + 1 = 7.37 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : (6.37 : ℝ) * Real.Gamma 6.37
+      ≤ 6.37 * (1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159) :=
+    mul_le_mul_of_nonneg_left DZ4a_chain_637 (by norm_num)
+  have hfin : (6.37 : ℝ) * (1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159)
+      ≤ 1498.11 := by norm_num
+  exact le_trans hle hfin
+
+/-- Uniform shifted cap: `Real.Gamma x ≤ 1498.11` for `x ∈ [7.025, 7.37]`
+(convexity join of the two tightened endpoints; same width-`0.345` shape as
+`R02GammaDisc.realGamma_uniform_6025_637`). -/
+theorem DZ4a_realGamma_uniform_7025_737 {x : ℝ} (hlo : (7.025 : ℝ) ≤ x)
+    (hhi : x ≤ (7.37 : ℝ)) : Real.Gamma x ≤ 1498.11 := by
+  set w1 : ℝ := (7.37 - x) / 0.345 with hw1
+  set w2 : ℝ := (x - 7.025) / 0.345 with hw2
+  have hw1nn : (0 : ℝ) ≤ w1 := div_nonneg (by linarith) (by norm_num)
+  have hw2nn : (0 : ℝ) ≤ w2 := div_nonneg (by linarith) (by norm_num)
+  have hnum : (7.37 - x) + (x - 7.025) = (0.345 : ℝ) := by ring
+  have hne : (0.345 : ℝ) ≠ 0 := by norm_num
+  have hsum : w1 + w2 = 1 := by
+    rw [hw1, hw2, ← add_div, hnum]
+    exact div_self hne
+  have hcombo : w1 * 7.025 + w2 * 7.37 = x := by
+    rw [hw1, hw2]
+    field_simp
+    ring
+  have hconv := Real.convexOn_Gamma
+  have hm1 : (7.025 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hm2 : (7.37 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 hm1 hm2 hw1nn hw2nn hsum
+  simp only [smul_eq_mul] at h
+  rw [hcombo] at h
+  have e1 : Real.Gamma 7.025 ≤ 1498.11 :=
+    le_trans DZ4a_realGamma_7025_le (by norm_num)
+  have e2 : Real.Gamma 7.37 ≤ 1498.11 := DZ4a_realGamma_737_le
+  have f1 : w1 * Real.Gamma 7.025 ≤ w1 * 1498.11 :=
+    mul_le_mul_of_nonneg_left e1 hw1nn
+  have f2 : w2 * Real.Gamma 7.37 ≤ w2 * 1498.11 :=
+    mul_le_mul_of_nonneg_left e2 hw2nn
+  have hfin : w1 * 1498.11 + w2 * 1498.11 ≤ 1498.11 := by
+    have he : w1 * 1498.11 + w2 * 1498.11 = (w1 + w2) * 1498.11 := by ring
+    rw [he, hsum, one_mul]
+  exact le_trans h (le_trans (add_le_add f1 f2) hfin)
+
+/-- One-step denominator floor: `6.571 ≤ ‖w‖` when `Re w ≥ 6.025` and
+`|Im w| ≥ 2.625` (`6.571² = 43.178041 ≤ 6.025² + 2.625² = 43.19125`;
+same `Complex.sq_norm` shape as `R02GammaDisc.disc_shift_floor_z`). -/
+theorem DZ4a_w_norm_floor_6571 {w : ℂ} (hre : (6.025 : ℝ) ≤ w.re)
+    (him : (2.625 : ℝ) ≤ |w.im|) : (6.571 : ℝ) ≤ ‖w‖ := by
+  have h1 : (6.025 : ℝ) * 6.025 ≤ w.re * w.re :=
+    mul_le_mul hre hre (by norm_num) (by linarith)
+  have h2 : (2.625 : ℝ) * 2.625 ≤ w.im * w.im := by
+    have h := mul_le_mul him him (by norm_num) (abs_nonneg _)
+    rwa [abs_mul_abs_self] at h
+  have hsq : (6.571 : ℝ) ^ 2 ≤ ‖w‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    linarith [h1, h2]
+  calc (6.571 : ℝ) = Real.sqrt ((6.571 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖w‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖w‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- MAIN one-step complex upper: `‖Complex.Gamma w‖ ≤ 228.0` for
+`Re w ∈ [6.025, 6.37]`, `|Im w| ≥ 2.625`
+(`Γ(w+1) = w·Γ(w)`, integral majorant + uniform cap on `w + 1`,
+`1498.11/6.571 = 227.988… ≤ 228.0`; old one-step `228.1`). -/
+theorem DZ4a_complex_gamma_one_step_upper {w : ℂ}
+    (hre_lo : (6.025 : ℝ) ≤ w.re) (hre_hi : w.re ≤ (6.37 : ℝ))
+    (him : (2.625 : ℝ) ≤ |w.im|) : ‖Complex.Gamma w‖ ≤ 228.0 := by
+  have hw_ne : w ≠ 0 := by
+    intro hcon
+    have hre := congrArg Complex.re hcon
+    simp only [Complex.zero_re] at hre
+    linarith
+  have e : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw_ne
+  have nrm : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [e, norm_mul]
+  have hre1 : (w + 1).re = w.re + 1 := by
+    simp [Complex.add_re, Complex.one_re]
+  have hx_lo : (7.025 : ℝ) ≤ (w + 1).re := by rw [hre1]; linarith
+  have hx_hi : (w + 1).re ≤ (7.37 : ℝ) := by rw [hre1]; linarith
+  have hpos : (0 : ℝ) < (w + 1).re := by linarith
+  have hG : ‖Complex.Gamma (w + 1)‖ ≤ 1498.11 :=
+    le_trans (R00GammaLower.norm_Gamma_le_realGamma hpos)
+      (DZ4a_realGamma_uniform_7025_737 hx_lo hx_hi)
+  have hden : (6.571 : ℝ) ≤ ‖w‖ := DZ4a_w_norm_floor_6571 hre_lo him
+  have hposd : (0 : ℝ) < ‖w‖ := lt_of_lt_of_le (by norm_num) hden
+  have hle : ‖w‖ * ‖Complex.Gamma w‖ ≤ 1498.11 := by
+    rw [← nrm]
+    exact hG
+  have hdiv : ‖Complex.Gamma w‖ ≤ 1498.11 / ‖w‖ :=
+    (le_div_iff₀ hposd).mpr (by rw [mul_comm]; exact hle)
+  have hcap : (1498.11 : ℝ) ≤ 228.0 * ‖w‖ := by
+    calc (1498.11 : ℝ) ≤ 228.0 * 6.571 := by norm_num
+      _ ≤ 228.0 * ‖w‖ := mul_le_mul_of_nonneg_left hden (by norm_num)
+  have hfin : 1498.11 / ‖w‖ ≤ (228.0 : ℝ) :=
+    (div_le_iff₀ hposd).mpr hcap
+  exact le_trans hdiv hfin
+
+/-- Two-step helper tightening: `Real.Gamma 8.37 ≤ 11041.08`
+(old two-step `11041.52`; `7.37·1498.11 = 11041.0707`). -/
+theorem DZ4a_realGamma_837_le : Real.Gamma 8.37 ≤ 11041.08 := by
+  have h : Real.Gamma (7.37 + 1) = 7.37 * Real.Gamma 7.37 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (7.37 : ℝ) + 1 = 8.37 := by norm_num
+  rw [heq] at h
+  rw [h]
+  have hle : (7.37 : ℝ) * Real.Gamma 7.37 ≤ 7.37 * 1498.11 :=
+    mul_le_mul_of_nonneg_left DZ4a_realGamma_737_le (by norm_num)
+  have hfin : (7.37 : ℝ) * 1498.11 ≤ 11041.08 := by norm_num
+  exact le_trans hle hfin
+
+/-- Gap verdict: even the tightened one-step numerator exceeds what `68.85`
+needs (`68.85·6.571 = 452.41335 < 1498.11`), so no one-step route reaches
+numerator `≤ 68.85`; the residual belongs to the matched-`x` /
+infinite-product lanes. -/
+theorem DZ4a_gap_737_blocked : (68.85 : ℝ) * 6.571 < 1498.11 := by norm_num
+
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_15_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_1025_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_137_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_chain_6025
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_6025_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_7025_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_chain_637
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_637_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_737_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_uniform_7025_737
+#print axioms DZ4a_Door3SinglePoint.DZ4a_w_norm_floor_6571
+#print axioms DZ4a_Door3SinglePoint.DZ4a_complex_gamma_one_step_upper
+#print axioms DZ4a_Door3SinglePoint.DZ4a_realGamma_837_le
+#print axioms DZ4a_Door3SinglePoint.DZ4a_gap_737_blocked
+
+end DZ4a_Door3SinglePoint
+
+/-!
+# Door-3 matched-x one-step majorant: `Gamma(x+1)/sqrt(x^2+b^2) <= 217.5` (interval_arith lane)
+
+Ownership: append-only tail block (nothing above touched; no new imports; LF endings).
+
+RESULT (this tail, full proofs, no `sorry`/`admit`/`axiom`): the SINGLE matched-x
+monotonicity lemma `matched_gamma_div_sqrt_le`: for real `x` in `[6.025, 6.37]` and
+`b` in `[2.625, 4.125]`,
+`Real.Gamma (x+1) / Real.sqrt (x^2 + b^2) <= 217.5`.
+This banks `C = 217.5 < 235.19` (7.5% under the tightened uniform numerator `235.19`,
+4.6% under the one-step `228.1` mixing top numerator with bottom denominator), with
+only ~2.9% slack over the true majorant max `~211.3` at the top corner
+(`Gamma(7.37) ~= 1456`, `sqrt(6.37^2 + 2.625^2) ~= 6.89`).
+
+Method (matched-x, elementary): write `Gamma(x+1) = x * Gamma(x)`
+(`Real.Gamma_add_one`) with the uniform improved cap `Gamma(x) <= 235.19`
+(re-derived here from the half-integer anchor `Gamma(1.5) <= 0.8863` + tightened
+base `Gamma(1.37) <= 0.9159` + top chain; bottom chain
+`R02GammaDisc.realGamma_6025_le` reused read-only), so the numerator is the MATCHED
+linear majorant `235.19 * x` (not the uniform top `1498.17`). The denominator is
+matched from below by `sqrt(x^2 + 2.625^2)` (monotonicity of `sqrt` and `b^2`,
+`b >= 2.625`). The ratio bound `235.19 * x <= 217.5 * sqrt(x^2 + 2.625^2)` is
+monotonicity in `x^2`: after squaring it reads
+`(235.19^2 - 217.5^2) * x^2 <= 217.5^2 * 2.625^2` with positive slope `8008.0861`,
+hence worst at the top `x = 6.37` (`324943.31 <= 325969.63`), closed by `norm_num`.
+
+Grep-first record (verified before writing):
+* `Real.Gamma | Gamma_add_one | R02GammaDisc` in `interval_arith.lean`: six-shift
+  floors `disc_shift_floor_z/1..5`, endpoint chains `realGamma_6025_le` (`<= 127`),
+  `realGamma_637_le` (`<= 256.78`), uniform `realGamma_uniform_6025_637` — reused
+  read-only (`R02GammaDisc.realGamma_6025_le`), never recopied or modified.
+* `MatchedX | Door3Matched | matchedGamma` in `interval_arith.lean` and
+  `riemann_hypothesis_newsection.lean`: zero hits — namespace `R02MatchedX` is fresh;
+  no duplication of the sibling DT infinite-product route (newsection tail).
+* `Gamma_add_one` (real, `s != 0`), `convexOn_Gamma`, `Gamma_one/two`,
+  `Gamma_one_half_eq`, `pi_lt_d20`: Mathlib only (no complex-Stirling input exists).
+
+Verdict `matched_verdict`: `217.5 < 235.19` (progress banked) but `68.85 < 217.5`
+(gap `148.65`, `68.85 * 3.15 < 217.5` i.e. `3.16x` over): the tasked uniform `68.85`
+does NOT fit this majorant (true majorant max `~211 > 68.85`; true `||Gamma w||`
+`~131 > 68.85` per DQ) — residual for the next agent below.
+-/
+
+namespace R02MatchedX
+
+/-- Half-integer anchor: `Real.Gamma 1.5 <= 0.8863`
+(`Gamma(1.5) = Gamma(0.5)/2 = sqrt(pi)/2`, `sqrt(pi) <= 1.7725` since
+`pi < 3.1415926536 < 1.7725^2 = 3.14175625`). -/
+theorem gamma15_le : Real.Gamma 1.5 ≤ 0.8863 := by
+  have h15 : Real.Gamma (0.5 + 1) = 0.5 * Real.Gamma 0.5 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (0.5 : ℝ) + 1 = 1.5 := by norm_num
+  rw [heq] at h15
+  have hhalf : Real.Gamma (0.5 : ℝ) = Real.sqrt Real.pi := by
+    have h05 : (0.5 : ℝ) = 1 / 2 := by norm_num
+    rw [h05]
+    exact Real.Gamma_one_half_eq
+  have hsqrt : Real.sqrt Real.pi ≤ 1.7725 := by
+    have hpi := Real.pi_lt_d20
+    have hsq : (1.7725 : ℝ) ^ 2 = 3.14175625 := by norm_num
+    have hle : Real.pi ≤ (1.7725 : ℝ) ^ 2 := by linarith
+    calc Real.sqrt Real.pi ≤ Real.sqrt ((1.7725 : ℝ) ^ 2) := Real.sqrt_le_sqrt hle
+      _ = 1.7725 := Real.sqrt_sq (by norm_num)
+  have hmul : (0.5 : ℝ) * Real.sqrt Real.pi ≤ 0.5 * 1.7725 :=
+    mul_le_mul_of_nonneg_left hsqrt (by norm_num)
+  rw [h15, hhalf]
+  linarith
+
+/-- Tighter convexity base: `Real.Gamma 1.37 <= 0.9159`
+(`1.37 = 0.26*1 + 0.74*1.5`, chord `0.26*1 + 0.74*0.8863 = 0.915862`). -/
+theorem gamma137_le : Real.Gamma 1.37 ≤ 0.9159 := by
+  have hconv := Real.convexOn_Gamma
+  have h1 : (1 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h15 : (1.5 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have ha : (0 : ℝ) ≤ 0.26 := by norm_num
+  have hb : (0 : ℝ) ≤ 0.74 := by norm_num
+  have hab : (0.26 : ℝ) + 0.74 = 1 := by norm_num
+  have h := hconv.2 h1 h15 ha hb hab
+  simp only [smul_eq_mul] at h
+  have heq : (0.26 : ℝ) * 1 + 0.74 * 1.5 = 1.37 := by norm_num
+  rw [heq] at h
+  have hcap : (0.26 : ℝ) * 1 + 0.74 * 0.8863 ≤ 0.9159 := by norm_num
+  have hle : (0.26 : ℝ) * Real.Gamma 1 + 0.74 * Real.Gamma 1.5
+      ≤ 0.26 * 1 + 0.74 * 0.8863 := by
+    have f1 : (0.26 : ℝ) * Real.Gamma 1 ≤ 0.26 * 1 := by rw [Real.Gamma_one]
+    have f2 : (0.74 : ℝ) * Real.Gamma 1.5 ≤ 0.74 * 0.8863 :=
+      mul_le_mul_of_nonneg_left gamma15_le (by norm_num)
+    linarith
+  linarith
+
+/-- Numerator endpoint chain (top, tightened): `Real.Gamma 6.37 <= 235.19`
+(`1.37*2.37*3.37*4.37*5.37*0.9159 = 235.181... <= 235.19`). -/
+theorem gamma637_le : Real.Gamma 6.37 ≤ 235.19 := by
+  have g1 : Real.Gamma 2.37 ≤ 1.37 * 0.9159 := by
+    have h : Real.Gamma (1.37 + 1) = 1.37 * Real.Gamma 1.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (1.37 : ℝ) + 1 = 2.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    exact mul_le_mul_of_nonneg_left gamma137_le (by norm_num)
+  have g2 : Real.Gamma 3.37 ≤ 1.37 * 2.37 * 0.9159 := by
+    have h : Real.Gamma (2.37 + 1) = 2.37 * Real.Gamma 2.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (2.37 : ℝ) + 1 = 3.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    calc (2.37 : ℝ) * Real.Gamma 2.37 ≤ 2.37 * (1.37 * 0.9159) :=
+          mul_le_mul_of_nonneg_left g1 (by norm_num)
+      _ = 1.37 * 2.37 * 0.9159 := by ring
+  have g3 : Real.Gamma 4.37 ≤ 1.37 * 2.37 * 3.37 * 0.9159 := by
+    have h : Real.Gamma (3.37 + 1) = 3.37 * Real.Gamma 3.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (3.37 : ℝ) + 1 = 4.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 3.37 * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g2 (by norm_num)
+    calc (3.37 : ℝ) * Real.Gamma 3.37 ≤ 3.37 * (1.37 * 2.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 0.9159 := by ring
+  have g4 : Real.Gamma 5.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by
+    have h : Real.Gamma (4.37 + 1) = 4.37 * Real.Gamma 4.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (4.37 : ℝ) + 1 = 5.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 4.37 * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g3 (by norm_num)
+    calc (4.37 : ℝ) * Real.Gamma 4.37 ≤ 4.37 * (1.37 * 2.37 * 3.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 0.9159 := by ring
+  have g5 : Real.Gamma 6.37 ≤ 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by
+    have h : Real.Gamma (5.37 + 1) = 5.37 * Real.Gamma 5.37 :=
+      Real.Gamma_add_one (by norm_num)
+    have heq : (5.37 : ℝ) + 1 = 6.37 := by norm_num
+    rw [heq] at h
+    rw [h]
+    have hle : 5.37 * Real.Gamma 5.37
+        ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) :=
+      mul_le_mul_of_nonneg_left g4 (by norm_num)
+    calc (5.37 : ℝ) * Real.Gamma 5.37
+          ≤ 5.37 * (1.37 * 2.37 * 3.37 * 4.37 * 0.9159) := hle
+      _ = 1.37 * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 := by ring
+  have hfin : (1.37 : ℝ) * 2.37 * 3.37 * 4.37 * 5.37 * 0.9159 ≤ 235.19 := by norm_num
+  exact le_trans g5 hfin
+
+/-- Uniform improved numerator: `Real.Gamma x <= 235.19` for `x` in `[6.025, 6.37]`
+(convexity between the reused bottom chain `R02GammaDisc.realGamma_6025_le`
+(`<= 127`) and the tightened top chain `gamma637_le`). -/
+theorem gamma_uniform_le {x : ℝ} (hlo : (6.025 : ℝ) ≤ x)
+    (hhi : x ≤ (6.37 : ℝ)) : Real.Gamma x ≤ 235.19 := by
+  set w1 : ℝ := (6.37 - x) / 0.345 with hw1
+  set w2 : ℝ := (x - 6.025) / 0.345 with hw2
+  have hw1nn : (0 : ℝ) ≤ w1 := div_nonneg (by linarith) (by norm_num)
+  have hw2nn : (0 : ℝ) ≤ w2 := div_nonneg (by linarith) (by norm_num)
+  have hnum : (6.37 - x) + (x - 6.025) = (0.345 : ℝ) := by ring
+  have hne : (0.345 : ℝ) ≠ 0 := by norm_num
+  have hsum : w1 + w2 = 1 := by
+    rw [hw1, hw2, ← add_div, hnum]
+    exact div_self hne
+  have hcombo : w1 * 6.025 + w2 * 6.37 = x := by
+    rw [hw1, hw2]
+    field_simp
+    ring
+  have hconv := Real.convexOn_Gamma
+  have hm1 : (6.025 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have hm2 : (6.37 : ℝ) ∈ Set.Ioi (0 : ℝ) := Set.mem_Ioi.mpr (by norm_num)
+  have h := hconv.2 hm1 hm2 hw1nn hw2nn hsum
+  simp only [smul_eq_mul] at h
+  rw [hcombo] at h
+  have e1 : Real.Gamma 6.025 ≤ 235.19 :=
+    le_trans R02GammaDisc.realGamma_6025_le (by norm_num)
+  have e2 : Real.Gamma 6.37 ≤ 235.19 :=
+    le_trans gamma637_le (le_refl _)
+  have f1 : w1 * Real.Gamma 6.025 ≤ w1 * 235.19 :=
+    mul_le_mul_of_nonneg_left e1 hw1nn
+  have f2 : w2 * Real.Gamma 6.37 ≤ w2 * 235.19 :=
+    mul_le_mul_of_nonneg_left e2 hw2nn
+  have hfin : w1 * 235.19 + w2 * 235.19 ≤ 235.19 := by
+    have he : w1 * 235.19 + w2 * 235.19 = (w1 + w2) * 235.19 := by ring
+    rw [he, hsum, one_mul]
+  exact le_trans h (le_trans (add_le_add f1 f2) hfin)
+
+/-- SINGLE matched-x monotonicity lemma: for `x` in `[6.025, 6.37]` and `b` in
+`[2.625, 4.125]`, `Real.Gamma (x+1) / Real.sqrt (x^2 + b^2) <= 217.5`.
+The numerator is the matched linear majorant `235.19 * x` (via
+`Gamma(x+1) = x * Gamma(x)` and the uniform cap); the denominator is matched from
+below by `sqrt(x^2 + 2.625^2)`; the squared comparison is monotone in `x^2`, worst
+at the top corner `x = 6.37`. -/
+theorem matched_gamma_div_sqrt_le {x b : ℝ}
+    (hx_lo : (6.025 : ℝ) ≤ x) (hx_hi : x ≤ (6.37 : ℝ))
+    (hb_lo : (2.625 : ℝ) ≤ b) (hb_hi : b ≤ (4.125 : ℝ)) :
+    Real.Gamma (x + 1) / Real.sqrt (x ^ 2 + b ^ 2) ≤ 217.5 := by
+  have hx_pos : (0 : ℝ) < x := by linarith
+  have hx_nn : (0 : ℝ) ≤ x := le_of_lt hx_pos
+  have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+  have hGx : Real.Gamma x ≤ 235.19 := gamma_uniform_le hx_lo hx_hi
+  have hadd : Real.Gamma (x + 1) = x * Real.Gamma x :=
+    Real.Gamma_add_one hx_ne
+  have hnum : Real.Gamma (x + 1) ≤ 235.19 * x := by
+    rw [hadd]
+    calc x * Real.Gamma x ≤ x * 235.19 :=
+          mul_le_mul_of_nonneg_left hGx hx_nn
+      _ = 235.19 * x := mul_comm _ _
+  have hb2 : (2.625 : ℝ) ^ 2 ≤ b ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hb_lo 2
+  have hden_le : x ^ 2 + (2.625 : ℝ) ^ 2 ≤ x ^ 2 + b ^ 2 := by linarith
+  have hsqrt_mono : Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2)
+      ≤ Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_le_sqrt hden_le
+  have hsq_pos : (0 : ℝ) < x ^ 2 + b ^ 2 := by
+    have hx2 : (0 : ℝ) < x ^ 2 := pow_pos hx_pos 2
+    have hbsq : (0 : ℝ) ≤ b ^ 2 := by positivity
+    linarith
+  have hden_pos : (0 : ℝ) < Real.sqrt (x ^ 2 + b ^ 2) :=
+    Real.sqrt_pos.mpr hsq_pos
+  have hx2_le : x ^ 2 ≤ (6.37 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hx_nn hx_hi 2
+  have hcoeff : (0 : ℝ) ≤ 235.19 ^ 2 - 217.5 ^ 2 := by norm_num
+  have hstep1 : (235.19 ^ 2 - 217.5 ^ 2) * x ^ 2
+      ≤ (235.19 ^ 2 - 217.5 ^ 2) * (6.37 : ℝ) ^ 2 :=
+    mul_le_mul_of_nonneg_left hx2_le hcoeff
+  have hstep2 : (235.19 ^ 2 - 217.5 ^ 2) * (6.37 : ℝ) ^ 2
+      ≤ (217.5 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by norm_num
+  have hkey2 : (235.19 ^ 2 - 217.5 ^ 2) * x ^ 2
+      ≤ (217.5 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := le_trans hstep1 hstep2
+  have hkey : (235.19 * x) ^ 2
+      ≤ (217.5 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have e : (235.19 * x) ^ 2 - (217.5 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)
+        = (235.19 ^ 2 - 217.5 ^ 2) * x ^ 2 - (217.5 : ℝ) ^ 2 * (2.625 : ℝ) ^ 2 := by
+      ring
+    linarith
+  have hnum_nn : (0 : ℝ) ≤ 235.19 * x := mul_nonneg (by norm_num) hx_nn
+  have hsqrt_key : 235.19 * x ≤ 217.5 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := by
+    have h1 : Real.sqrt ((235.19 * x) ^ 2)
+        ≤ Real.sqrt ((217.5 : ℝ) ^ 2 * (x ^ 2 + (2.625 : ℝ) ^ 2)) :=
+      Real.sqrt_le_sqrt hkey
+    rw [Real.sqrt_sq hnum_nn] at h1
+    rw [Real.sqrt_mul (show (0 : ℝ) ≤ (217.5 : ℝ) ^ 2 by norm_num)] at h1
+    rw [Real.sqrt_sq (show (0 : ℝ) ≤ (217.5 : ℝ) by norm_num)] at h1
+    exact h1
+  have hfinal : Real.Gamma (x + 1) ≤ 217.5 * Real.sqrt (x ^ 2 + b ^ 2) := by
+    calc Real.Gamma (x + 1) ≤ 235.19 * x := hnum
+      _ ≤ 217.5 * Real.sqrt (x ^ 2 + (2.625 : ℝ) ^ 2) := hsqrt_key
+      _ ≤ 217.5 * Real.sqrt (x ^ 2 + b ^ 2) :=
+          mul_le_mul_of_nonneg_left hsqrt_mono (by norm_num)
+  exact (div_le_iff₀ hden_pos).mpr hfinal
+
+/-- Gap-to-68.85 verdict: `217.5 < 235.19` (progress banked) but `68.85 < 217.5`
+with gap `148.65` (`68.85 * 3.15 < 217.5`, i.e. `3.16x` over target): the tasked
+uniform `68.85` does NOT fit this majorant. -/
+theorem matched_verdict :
+    (217.5 : ℝ) < 235.19 ∧ (68.85 : ℝ) < 217.5 ∧
+      (217.5 : ℝ) - 68.85 = 148.65 ∧ (68.85 : ℝ) * 3.15 < 217.5 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+#print axioms R02MatchedX.gamma15_le
+#print axioms R02MatchedX.gamma137_le
+#print axioms R02MatchedX.gamma637_le
+#print axioms R02MatchedX.gamma_uniform_le
+#print axioms R02MatchedX.matched_gamma_div_sqrt_le
+#print axioms R02MatchedX.matched_verdict
+
+end R02MatchedX
