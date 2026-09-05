@@ -1695,6 +1695,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cos23 ≥ −0.894` (octic), amps `1/7.1 + 1/7.3` ⇒
     **pair-11 `Re ≤ 0.057`** (meets MVT slot `≈ 0.0614` on first bridge; true `≈ 0.03032`).
     Next: pair-12 `Re` start (tasked).
+    **Pair-12 CLOSED first-bridge (`DZ3z_*`, G18, `cc275b64`, green 8693 jobs, axioms clean):**
+    `log25 = 2·log5`, `log26 = log2+log13` (log-13 path, no fallback needed),
+    `cos24 ≤ −0.99` (sextic), `−cos25 ≤ 0.974` (quartic), amps `1/7.5 + 1/7.7` ⇒
+    **pair-12 `Re ≤ 0.035`** (meets MVT slot `≈ 0.057`; triangle `0.08`).
+    Next: pair-13 `Re` start (tasked).
     **DT SHELVED (build poison):** DT's uncommitted 589-line two-step Gamma block
     (`Door3GammaCut85`, `G=0.085` target) HUNG the newsection build indefinitely (agent
     hung with it; coordinator HEAD rebuild green 8702 — hang was DT's tactics, likely a
