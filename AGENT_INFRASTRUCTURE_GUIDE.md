@@ -1790,6 +1790,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
     (meets outer tier `0.05` iff sup `qB ≤ 1/40`). Missing: uniform `ξ`-sup enclosure.
     Next: `ξ`-sup on `ball R00c 2` then replicate per cell (tasked).
+    **Factor sups (V2, `532f4b9b`, green, axioms clean):** ball-norm `10.76`, poly shape
+    `63.4`, s-factors `11.26`; 4-factor composition banked; tier needs remaining
+    `P·G·Z ≤ 0.0004` (triangle-via-entire route proven dead). Next: factor sups (tasked).
     **Gamma narrow (`Door3GammaCutR02Quad0807Narrow`, W, `301b6128`, green 8702 jobs,
     axioms clean):** numerator `216.9` at `xmax=6.25` (drop `0.6` on `[6.20,6.25]` overlap);
     table `215.7<215.8<216.6<216.9<217.5`. Frozen tiers untouched.
