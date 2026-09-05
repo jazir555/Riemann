@@ -29883,3 +29883,485 @@ theorem DZ3x_saving :
 #print axioms DZ3x_cos21_lower_octic_pi
 #print axioms DZ3x_pair10_re_le_zero_zero_six_seven_three
 #print axioms DZ3x_saving
+
+/-!
+# Door-3 DZ3y pair-11 Re start (zeta lane)
+
+Ownership: append-only tail after `DZ3x_saving` (nothing above touched; no new
+imports; LF endings). Sibling `riemann_hypothesis_newsection.lean`,
+`central_cover_assembly.lean`, `AGENT_INFRASTRUCTURE_GUIDE.md`,
+`interval_arith.lean` untouched; no commit/push.
+
+Scope: ONE bridge only — pair-11 (`m = 11`, eta terms `k = 22, 23`) `Re` start,
+mirroring the DZ3v template read-only.
+Read-only reuse: `D3_phase`, `D3_amp`, `D3_amp_nonneg`, `D3_eta_re`,
+`Real.log_two_gt/lt_d9`, `Real.log_three_gt/lt_d9`, `Real.log_le_sub_one_of_pos`,
+`Real.pi_gt/lt_d4`, `Real.cos_sub_two_pi`, `Real.cos_pi_sub`,
+`CG_cos_le_quartic` (available), `DZ3u_cos_sextic_lower`, `DZ3x_cos_octic_upper`,
+`DZ2p_amp22_le_sixth` (`A22 <= 1/6`), `DZ2o_amp23_le_sixth` (`A23 <= 1/6`),
+`DZ3c_pair_le` (slot reference only). Name prefix `DZ3y_` is fresh (0 hits).
+Nothing redefined.
+
+Strategy (mirror of the DZ3v `log22` template, read-only):
+`log 24 = log 2 + (log 2 + (log 2 + log 3))` (from `24 = 2*(2*(2*3))`, d9
+`log_two/three` bounds, no new log);
+`log(23/24) in [-1/23, -1/24]` via `log <= x-1` both sides;
+`log 23 = log 24 + log(23/24)`; phases `8.75*log`, pi-shift
+`v = 9*pi - phase` (`cos(phase) = -cos(v)` via `cos_pi_sub` after four
+`cos_sub_two_pi` steps) to `v22 in [0.83, 0.847]`, `v23 in [0.4655, 0.4665]`
+(both positive, d4 pi);
+sextic `DZ3u_cos_sextic_lower` gives `cos(v22) >= 0.66`, hence
+`cos22 <= -0.66`; octic `DZ3x_cos_octic_upper` gives `cos(v23) <= 0.894`,
+hence `cos23 >= -0.894`;
+amps `1/7.1 <= A22` (`23^5 <= 7.1^8`), `1/7.3 <= A23` (`24^5 <= 7.3^8`),
+uppers reuse `1/6`; then (both cosines genuinely negative, so the even term
+contributes negatively)
+`Re = A22*c22 - A23*c23 <= 1/7.1*(-0.66) + 1/6*0.894 = 0.05604225... <= 0.057`
+(the even-term step uses the amp LOWER since the cosine upper is negative:
+`A22*c22 <= A22*(-0.66) <= 1/7.1*(-0.66)`; no sign hypothesis on the
+cosines is needed beyond the proved bounds).
+
+NUMBERS: banked `Re(pair 11) <= 0.057` (beats `DZ3c_pair_le` triangle slot
+`2/23 ~= 0.0869565` by `~= 0.02996`; beats the MVT slot
+`8.771/6.2134/23 ~= 0.0613751 <= 0.0614` by `~= 0.00433`, so the MVT slot is
+met on the first pair-11 bridge); `cos22 <= -0.66` (true `~= -0.66839`),
+`cos23 >= -0.894` (true `~= -0.89321`); `A22 in [1/7.1, 1/6] =
+[0.140845, 0.166667]` (true `~= 0.15002`), `A23 in [1/7.3, 1/6] =
+[0.136986, 0.166667]` (true `~= 0.14621`). True `Re ~= 0.03032`, so `0.057`
+is loose but rigorous (the pair partly cancels: even term `~= -0.10027`,
+odd contribution `~= +0.13059`).
+-/
+
+/-- (DZ3y) `log 24 = log 2 + (log 2 + (log 2 + log 3))` (from `24 = 2*(2*(2*3))`). -/
+theorem DZ3y_log24_eq :
+    Real.log 24 = Real.log 2 + (Real.log 2 + (Real.log 2 + Real.log 3)) := by
+  have h24 : (24 : ℝ) = 2 * (2 * (2 * 3)) := by norm_num
+  rw [h24, Real.log_mul (by norm_num) (by norm_num),
+    Real.log_mul (by norm_num) (by norm_num),
+    Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (DZ3y) `log 24 >= 3.1780538294` from `log_two/three_gt_d9`. -/
+theorem DZ3y_log24_lo : (3.1780538294 : ℝ) ≤ Real.log 24 := by
+  rw [DZ3y_log24_eq]
+  have h2 := Real.log_two_gt_d9
+  have h3 := Real.log_three_gt_d9
+  have hnum : (3.1780538294 : ℝ)
+      = 0.6931471803 + (0.6931471803 + (0.6931471803 + 1.0986122885)) := by
+    norm_num
+  linarith
+
+/-- (DZ3y) `log 24 <= 3.1780538312` from `log_two/three_lt_d9`. -/
+theorem DZ3y_log24_hi : Real.log 24 ≤ (3.1780538312 : ℝ) := by
+  rw [DZ3y_log24_eq]
+  have h2 := Real.log_two_lt_d9
+  have h3 := Real.log_three_lt_d9
+  have hnum : (0.6931471808 : ℝ)
+      + (0.6931471808 + (0.6931471808 + 1.0986122888)) = 3.1780538312 := by
+    norm_num
+  linarith
+
+/-- (DZ3y) `log(23/24) <= -1/24` via `log x <= x-1`. -/
+theorem DZ3y_log_ratio_le : Real.log ((23 : ℝ) / 24) ≤ -(1 / 24 : ℝ) := by
+  have hpos : (0 : ℝ) < 23 / 24 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos
+  have heq : (23 / 24 : ℝ) - 1 = -(1 / 24 : ℝ) := by norm_num
+  linarith
+
+/-- (DZ3y) `-1/23 <= log(23/24)` via `log(24/23) <= 1/23` + `log_inv`. -/
+theorem DZ3y_log_ratio_ge : (-(1 / 23) : ℝ) ≤ Real.log ((23 : ℝ) / 24) := by
+  have hpos2 : (0 : ℝ) < 24 / 23 := by norm_num
+  have h := Real.log_le_sub_one_of_pos hpos2
+  have heq2 : (24 / 23 : ℝ) - 1 = (1 / 23 : ℝ) := by norm_num
+  have hinv : ((24 / 23 : ℝ))⁻¹ = (23 / 24 : ℝ) := by norm_num
+  have e : ((23 : ℝ) / 24) = ((24 / 23 : ℝ))⁻¹ := hinv.symm
+  rw [e, Real.log_inv]
+  linarith
+
+/-- (DZ3y) `log 23 = log 24 + log(23/24)` via `23 = 24*(23/24)`. -/
+theorem DZ3y_log23_eq :
+    Real.log 23 = Real.log 24 + Real.log ((23 : ℝ) / 24) := by
+  have h23 : (23 : ℝ) = 24 * (23 / 24) := by norm_num
+  conv_lhs => rw [h23]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- (DZ3y) `log 23 >= 3.13457` (`log24_lo - 1/23`). -/
+theorem DZ3y_log23_lo : (3.13457 : ℝ) ≤ Real.log 23 := by
+  rw [DZ3y_log23_eq]
+  have h24 := DZ3y_log24_lo
+  have hr := DZ3y_log_ratio_ge
+  have hnum : (3.13457 : ℝ) ≤ 3.1780538294 - 1 / 23 := by norm_num
+  linarith
+
+/-- (DZ3y) `log 23 <= 3.13639` (`log24_hi - 1/24`). -/
+theorem DZ3y_log23_hi : Real.log 23 ≤ (3.13639 : ℝ) := by
+  rw [DZ3y_log23_eq]
+  have h24 := DZ3y_log24_hi
+  have hr := DZ3y_log_ratio_le
+  have hnum : (3.1780538312 : ℝ) - 1 / 24 ≤ 3.13639 := by norm_num
+  linarith
+
+/-- (DZ3y) `D3_phase 22 = 8.75*log 23`. -/
+theorem DZ3y_phase22_eq : D3_phase 22 = 8.75 * Real.log 23 := by
+  unfold D3_phase
+  have h : ((((22 : ℕ)) : ℝ) + 1 : ℝ) = 23 := by norm_num
+  rw [h]
+
+/-- (DZ3y) `D3_phase 23 = 8.75*log 24`. -/
+theorem DZ3y_phase23_eq : D3_phase 23 = 8.75 * Real.log 24 := by
+  unfold D3_phase
+  have h : ((((23 : ℕ)) : ℝ) + 1 : ℝ) = 24 := by norm_num
+  rw [h]
+
+/-- (DZ3y) `27.4274 <= phase22` from `DZ3y_log23_lo`. -/
+theorem DZ3y_theta22_lo : (27.4274 : ℝ) ≤ D3_phase 22 := by
+  rw [DZ3y_phase22_eq]
+  have h := DZ3y_log23_lo
+  have hnum : (27.4274 : ℝ) ≤ 8.75 * 3.13457 := by norm_num
+  have hle : 8.75 * 3.13457 ≤ 8.75 * Real.log 23 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3y) `phase22 <= 27.4435` from `DZ3y_log23_hi`. -/
+theorem DZ3y_theta22_hi : D3_phase 22 ≤ (27.4435 : ℝ) := by
+  rw [DZ3y_phase22_eq]
+  have h := DZ3y_log23_hi
+  have hnum : 8.75 * 3.13639 ≤ (27.4435 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 23 ≤ 8.75 * 3.13639 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3y) `27.80797 <= phase23` from `DZ3y_log24_lo`. -/
+theorem DZ3y_theta23_lo : (27.80797 : ℝ) ≤ D3_phase 23 := by
+  rw [DZ3y_phase23_eq]
+  have h := DZ3y_log24_lo
+  have hnum : (27.80797 : ℝ) ≤ 8.75 * 3.1780538294 := by norm_num
+  have hle : 8.75 * 3.1780538294 ≤ 8.75 * Real.log 24 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3y) `phase23 <= 27.80798` from `DZ3y_log24_hi`. -/
+theorem DZ3y_theta23_hi : D3_phase 23 ≤ (27.80798 : ℝ) := by
+  rw [DZ3y_phase23_eq]
+  have h := DZ3y_log24_hi
+  have hnum : 8.75 * 3.1780538312 ≤ (27.80798 : ℝ) := by norm_num
+  have hle : 8.75 * Real.log 24 ≤ 8.75 * 3.1780538312 :=
+    mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
+  linarith
+
+/-- (DZ3y) Pi-shifted `v22 = 9*pi - phase22 in [0.83, 0.847]` (from `pi_d4`). -/
+theorem DZ3y_v22_mem :
+    (0.83 : ℝ) ≤ 9 * Real.pi - D3_phase 22
+      ∧ 9 * Real.pi - D3_phase 22 ≤ 0.847 := by
+  have hlo := DZ3y_theta22_lo
+  have hhi := DZ3y_theta22_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- (DZ3y) Pi-shifted `v23 = 9*pi - phase23 in [0.4655, 0.4665]` (from `pi_d4`). -/
+theorem DZ3y_v23_mem :
+    (0.4655 : ℝ) ≤ 9 * Real.pi - D3_phase 23
+      ∧ 9 * Real.pi - D3_phase 23 ≤ 0.4665 := by
+  have hlo := DZ3y_theta23_lo
+  have hhi := DZ3y_theta23_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3y) `cos(phase22) <= -0.66` via the pi-shift `v = 9*pi - phase22 =
+pi - (phase22 - 8*pi) in [0.83, 0.847]` and the sextic lower
+`DZ3u_cos_sextic_lower` on `v`
+(`cos(phase22) = -cos(v) <= -0.66`; four `cos_sub_two_pi` steps). -/
+theorem DZ3y_cos22_upper : Real.cos (D3_phase 22) ≤ (-0.66 : ℝ) := by
+  have hlo := DZ3y_theta22_lo
+  have hhi := DZ3y_theta22_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  have c1 : Real.cos (D3_phase 22 - 2 * Real.pi) = Real.cos (D3_phase 22) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 22 - 4 * Real.pi
+      = (D3_phase 22 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 22 - 4 * Real.pi)
+      = Real.cos (D3_phase 22 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 22 - 6 * Real.pi
+      = (D3_phase 22 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 22 - 6 * Real.pi)
+      = Real.cos (D3_phase 22 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 22 - 8 * Real.pi
+      = (D3_phase 22 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 22 - 8 * Real.pi)
+      = Real.cos (D3_phase 22 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 22 - 8 * Real.pi)
+      = Real.cos (D3_phase 22) := by
+    rw [c4, c3, c2, c1]
+  set v := 9 * Real.pi - D3_phase 22 with hv_def
+  have hv_lo : (0.83 : ℝ) ≤ v := by rw [hv_def]; linarith
+  have hv_hi : v ≤ (0.847 : ℝ) := by rw [hv_def]; linarith
+  have hv_nn : (0 : ℝ) ≤ v := by linarith
+  have hveq : v = Real.pi - (D3_phase 22 - 8 * Real.pi) := by
+    rw [hv_def]; ring
+  have hcos_neg : Real.cos v = -Real.cos (D3_phase 22) := by
+    rw [hveq, Real.cos_pi_sub, hred]
+  have hS := DZ3u_cos_sextic_lower hv_nn
+  rw [hcos_neg] at hS
+  have h2hi : v ^ 2 ≤ (0.847 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hv_nn hv_hi 2
+  have h4lo : (0.83 : ℝ) ^ 4 ≤ v ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 4
+  have h6hi : v ^ 6 ≤ (0.847 : ℝ) ^ 6 :=
+    pow_le_pow_left₀ hv_nn hv_hi 6
+  have hnum : (0.66 : ℝ)
+      ≤ 1 - (0.847 : ℝ) ^ 2 / 2 + (0.83 : ℝ) ^ 4 / 24 - (0.847 : ℝ) ^ 6 / 720 := by
+    norm_num
+  have hle : 1 - (0.847 : ℝ) ^ 2 / 2 + (0.83 : ℝ) ^ 4 / 24 - (0.847 : ℝ) ^ 6 / 720
+      ≤ 1 - v ^ 2 / 2 + v ^ 4 / 24 - v ^ 6 / 720 := by
+    linarith [h2hi, h4lo, h6hi]
+  linarith
+
+set_option maxHeartbeats 800000 in
+/-- (DZ3y) `-0.894 <= cos(phase23)` via the pi-shift `v = 9*pi - phase23 =
+pi - (phase23 - 8*pi) in [0.4655, 0.4665]` and the octic majorant
+`DZ3x_cos_octic_upper` on `v`
+(`cos(phase23) = -cos(v) >= -0.894`; four `cos_sub_two_pi` steps). -/
+theorem DZ3y_cos23_lower : (-0.894 : ℝ) ≤ Real.cos (D3_phase 23) := by
+  have hlo := DZ3y_theta23_lo
+  have hhi := DZ3y_theta23_hi
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  have c1 : Real.cos (D3_phase 23 - 2 * Real.pi) = Real.cos (D3_phase 23) :=
+    Real.cos_sub_two_pi _
+  have e2 : D3_phase 23 - 4 * Real.pi
+      = (D3_phase 23 - 2 * Real.pi) - 2 * Real.pi := by ring
+  have c2 : Real.cos (D3_phase 23 - 4 * Real.pi)
+      = Real.cos (D3_phase 23 - 2 * Real.pi) := by
+    rw [e2]; exact Real.cos_sub_two_pi _
+  have e3 : D3_phase 23 - 6 * Real.pi
+      = (D3_phase 23 - 4 * Real.pi) - 2 * Real.pi := by ring
+  have c3 : Real.cos (D3_phase 23 - 6 * Real.pi)
+      = Real.cos (D3_phase 23 - 4 * Real.pi) := by
+    rw [e3]; exact Real.cos_sub_two_pi _
+  have e4 : D3_phase 23 - 8 * Real.pi
+      = (D3_phase 23 - 6 * Real.pi) - 2 * Real.pi := by ring
+  have c4 : Real.cos (D3_phase 23 - 8 * Real.pi)
+      = Real.cos (D3_phase 23 - 6 * Real.pi) := by
+    rw [e4]; exact Real.cos_sub_two_pi _
+  have hred : Real.cos (D3_phase 23 - 8 * Real.pi)
+      = Real.cos (D3_phase 23) := by
+    rw [c4, c3, c2, c1]
+  set v := 9 * Real.pi - D3_phase 23 with hv_def
+  have hv_lo : (0.4655 : ℝ) ≤ v := by rw [hv_def]; linarith
+  have hv_hi : v ≤ (0.4665 : ℝ) := by rw [hv_def]; linarith
+  have hv_nn : (0 : ℝ) ≤ v := by linarith
+  have hveq : v = Real.pi - (D3_phase 23 - 8 * Real.pi) := by
+    rw [hv_def]; ring
+  have hcos_neg : Real.cos v = -Real.cos (D3_phase 23) := by
+    rw [hveq, Real.cos_pi_sub, hred]
+  have hQ := DZ3x_cos_octic_upper hv_nn
+  rw [hcos_neg] at hQ
+  have h2lo : (0.4655 : ℝ) ^ 2 ≤ v ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 2
+  have h4hi : v ^ 4 ≤ (0.4665 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hv_nn hv_hi 4
+  have h6lo : (0.4655 : ℝ) ^ 6 ≤ v ^ 6 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 6
+  have h8hi : v ^ 8 ≤ (0.4665 : ℝ) ^ 8 :=
+    pow_le_pow_left₀ hv_nn hv_hi 8
+  have hnum : (1 : ℝ) - (0.4655 : ℝ) ^ 2 / 2 + (0.4665 : ℝ) ^ 4 / 24
+      - (0.4655 : ℝ) ^ 6 / 720 + (0.4665 : ℝ) ^ 8 / 40320 ≤ 0.894 := by
+    norm_num
+  have hle : 1 - v ^ 2 / 2 + v ^ 4 / 24 - v ^ 6 / 720 + v ^ 8 / 40320
+      ≤ 1 - (0.4655 : ℝ) ^ 2 / 2 + (0.4665 : ℝ) ^ 4 / 24
+        - (0.4655 : ℝ) ^ 6 / 720 + (0.4665 : ℝ) ^ 8 / 40320 := by
+    linarith [h2lo, h4hi, h6lo, h8hi]
+  linarith
+
+/-- (DZ3y) `1/7.1 <= D3_amp 22` via `0.605 <= 5/8` + `23^5 <= 7.1^8`. -/
+theorem DZ3y_amp22_lower : (1 / 7.1 : ℝ) ≤ D3_amp 22 := by
+  unfold D3_amp
+  have hcast : ((((22 : ℕ)) : ℝ) + 1 : ℝ) = 23 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (23 : ℝ) ^ (0.605 : ℝ) ≤ (23 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((23 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 23 ^ (5 : ℕ) := by
+    have h1 : (((23 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (23 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((23 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((7.1 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (23 : ℝ) ^ (5 / 8 : ℝ) ≤ 7.1 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h236 : (23 : ℝ) ^ (0.605 : ℝ) ≤ 7.1 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (23 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 23)]
+  have heq : (1 / 7.1 : ℝ) = ((7.1 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 7.1) hpos).mpr h236
+
+/-- (DZ3y) `1/7.3 <= D3_amp 23` via `0.605 <= 5/8` + `24^5 <= 7.3^8`. -/
+theorem DZ3y_amp23_lower : (1 / 7.3 : ℝ) ≤ D3_amp 23 := by
+  unfold D3_amp
+  have hcast : ((((23 : ℕ)) : ℝ) + 1 : ℝ) = 24 := by norm_num
+  rw [hcast]
+  have hle_exp : (0.605 : ℝ) ≤ 5 / 8 := by norm_num
+  have hmono : (24 : ℝ) ^ (0.605 : ℝ) ≤ (24 : ℝ) ^ (5 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hle_exp
+  have hpow_eq : (((24 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) = 24 ^ (5 : ℕ) := by
+    have h1 : (((24 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ))
+        = (24 : ℝ) ^ ((5 / 8 : ℝ) * (((8 : ℕ)) : ℝ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    rw [h1]
+    have hexp : (5 / 8 : ℝ) * (((8 : ℕ)) : ℝ) = ((((5 : ℕ)) : ℝ)) := by norm_num
+    rw [hexp, Real.rpow_natCast]
+  have hpow_le : (((24 : ℝ) ^ (5 / 8 : ℝ)) ^ (8 : ℕ)) ≤ (((7.3 : ℝ)) ^ (8 : ℕ)) := by
+    rw [hpow_eq]
+    norm_num
+  have h58 : (24 : ℝ) ^ (5 / 8 : ℝ) ≤ 7.3 :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow_le
+  have h246 : (24 : ℝ) ^ (0.605 : ℝ) ≤ 7.3 := le_trans hmono h58
+  have hpos : (0 : ℝ) < (24 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 24)]
+  have heq : (1 / 7.3 : ℝ) = ((7.3 : ℝ))⁻¹ := by rw [one_div]
+  rw [heq]
+  exact (inv_le_inv₀ (by norm_num : (0 : ℝ) < 7.3) hpos).mpr h246
+
+/-- (DZ3y) Two-sided `A22 in [1/7.1, 1/6]`. -/
+theorem DZ3y_amp22_mem : (1 / 7.1 : ℝ) ≤ D3_amp 22 ∧ D3_amp 22 ≤ 1 / 6 :=
+  ⟨DZ3y_amp22_lower, DZ2p_amp22_le_sixth⟩
+
+/-- (DZ3y) Two-sided `A23 in [1/7.3, 1/6]`. -/
+theorem DZ3y_amp23_mem : (1 / 7.3 : ℝ) ≤ D3_amp 23 ∧ D3_amp 23 ≤ 1 / 6 :=
+  ⟨DZ3y_amp23_lower, DZ2o_amp23_le_sixth⟩
+
+/-- (DZ3y) Signed Re decomposition of the `m = 11` pair: opposite `(-1)^k`
+signs computed explicitly (`+` at `k = 22`, `-` at `k = 23`). -/
+theorem DZ3y_pair11_re_eq :
+    (etaPairTerm (1 - zetaCellS0) 11).re =
+      D3_amp 22 * Real.cos (D3_phase 22) - D3_amp 23 * Real.cos (D3_phase 23) := by
+  have e0 : (2 * 11 : ℕ) = 22 := by norm_num
+  have e1 : (2 * 11 + 1 : ℕ) = 23 := by norm_num
+  have h22 := D3_eta_re 22
+  have h23 := D3_eta_re 23
+  have s22 : (-1 : ℝ) ^ (22 : ℕ) = 1 := by norm_num
+  have s23 : (-1 : ℝ) ^ (23 : ℕ) = -1 := by norm_num
+  rw [s22] at h22
+  rw [s23] at h23
+  unfold etaPairTerm
+  rw [Complex.add_re, e0, e1, h22, h23]
+  ring
+
+/-- (DZ3y) Pair-11 signed Re: `Re <= 0.057`
+(`1/7.1*(-0.66) + 1/6*0.894 = 0.05604225...`, beats `DZ3c 2/23`). -/
+theorem DZ3y_pair11_re_le_zero_zero_five_seven :
+    (etaPairTerm (1 - zetaCellS0) 11).re ≤ (0.057 : ℝ) := by
+  rw [DZ3y_pair11_re_eq]
+  have hA22lo := DZ3y_amp22_lower
+  have hA23hi := DZ2o_amp23_le_sixth
+  have hc22 := DZ3y_cos22_upper
+  have hc23 := DZ3y_cos23_lower
+  have hA22nn := D3_amp_nonneg 22
+  have hA23nn := D3_amp_nonneg 23
+  have h1 : D3_amp 22 * Real.cos (D3_phase 22)
+      ≤ (1 / 7.1 : ℝ) * (-0.66) := by
+    have e1 : D3_amp 22 * Real.cos (D3_phase 22) ≤ D3_amp 22 * (-0.66) :=
+      mul_le_mul_of_nonneg_left (by linarith) hA22nn
+    have e2 : D3_amp 22 * (-0.66) ≤ (1 / 7.1 : ℝ) * (-0.66) :=
+      mul_le_mul_of_nonpos_right hA22lo (by norm_num)
+    linarith
+  have h2 : -(D3_amp 23 * Real.cos (D3_phase 23))
+      ≤ (1 / 6 : ℝ) * 0.894 := by
+    have g1 : -Real.cos (D3_phase 23) ≤ (0.894 : ℝ) := by linarith
+    have g2 : D3_amp 23 * (-Real.cos (D3_phase 23)) ≤ D3_amp 23 * 0.894 :=
+      mul_le_mul_of_nonneg_left g1 hA23nn
+    have g3 : D3_amp 23 * 0.894 ≤ (1 / 6 : ℝ) * 0.894 :=
+      mul_le_mul_of_nonneg_right hA23hi (by norm_num)
+    have e : -(D3_amp 23 * Real.cos (D3_phase 23))
+        = D3_amp 23 * (-Real.cos (D3_phase 23)) := by ring
+    linarith
+  have hnum : (1 / 7.1 : ℝ) * (-0.66) + (1 / 6 : ℝ) * 0.894 ≤ (0.057 : ℝ) := by
+    norm_num
+  linarith
+
+/-- (DZ3y) Saving verdict: `1/7.1*(-0.66)+1/6*0.894 <= 0.057 < 2/23`,
+MVT slot `8.771/6.2134/23 <= 0.0614` met (residual `<= 0`). -/
+theorem DZ3y_saving :
+    (0.057 : ℝ) < 2 / 23 ∧ (8.771 : ℝ) / 6.2134 / 23 ≤ 0.0614
+      ∧ (0.057 : ℝ) ≤ 0.0614 ∧ (2 / 23 : ℝ) - 0.057 ≥ 0.029 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ3y report-and-stop): banked pair-11 `Re`-start bridge (zeta lane) —
+`DZ3y_log24_eq/lo/hi` (`log 24 = log 2 + (log 2 + (log 2 + log 3))`,
+`log24 in [3.1780538294, 3.1780538312]` from `log_two/three_gt/lt_d9`),
+`DZ3y_log_ratio_le/ge` (`log(23/24) in [-1/23, -1/24]`, `log<=x-1` both sides),
+`DZ3y_log23_eq/lo/hi` (`log23 in [3.13457, 3.13639]`),
+`DZ3y_phase22/23_eq` (`8.75*log 23/24`), `DZ3y_theta22_lo/hi`
+(`phase22 in [27.4274, 27.4435]`), `DZ3y_theta23_lo/hi`
+(`phase23 in [27.80797, 27.80798]`), `DZ3y_v22_mem` (`v22 = 9*pi - phase22 in
+[0.83, 0.847]`), `DZ3y_v23_mem` (`v23 in [0.4655, 0.4665]`, d4 pi),
+`DZ3y_cos22_upper` (`cos22 <= -0.66`, sextic `DZ3u_cos_sextic_lower`,
+`1-0.847^2/2+0.83^4/24-0.847^6/720 = 0.660557... >= 0.66`),
+`DZ3y_cos23_lower` (`cos23 >= -0.894`, octic `DZ3x_cos_octic_upper`,
+`1-0.4655^2/2+0.4665^4/24-0.4655^6/720+0.4665^8/40320 = 0.893614... <=
+0.894`), two-sided `DZ3y_amp22_mem` (`[1/7.1, 1/6]`, `23^5 = 6436343 <=
+6457535.3 ~= 7.1^8`), `DZ3y_amp23_mem` (`[1/7.3, 1/6]`, `24^5 = 7962624 <=
+8064600.9 ~= 7.3^8`), upgrade
+`DZ3y_pair11_re_le_zero_zero_five_seven`
+(`Re <= 1/7.1*(-0.66)+1/6*0.894 = 0.05604225... <= 0.057`, beats `DZ3c_pair_le`
+slot `2/23 ~= 0.0869565` by `~= 0.02996`, beats the MVT slot
+`8.771/6.2134/23 ~= 0.0613751 <= 0.0614` by `~= 0.00433`, so the pair-11 MVT
+slot is met on the first bridge).
+True `Re ~= 0.03032` (`cos22 ~= -0.66839`, `cos23 ~= -0.89321`, so the pair
+partly cancels: even term `~= -0.10027`, odd contribution `~= +0.13059`).
+Residual gap to the MVT norm `0.0614`: `<= 0` (CLOSED for pair-11;
+`DZ3y_saving`).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ3y tail after
+`DZ3y_saving`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md` /
+`interval_arith.lean`, do NOT commit/push): start pair-12 `Re` with the
+`log-26/log-25` template (`log 26 = log 2 + log 13`-shape needs a `log 13`
+d9 bound if available read-only, else `log 25 = 2*log 5` from
+`log_five_gt/lt_d9` + `log(25/26) in [-1/25, -1/26]`; note pair-12 is
+`k = 24, 25`, i.e. `D3_phase 24 = 8.75*log 25`, `D3_phase 25 = 8.75*log 26`).
+Success = full proofs, `#print axioms` exactly `[propext, Classical.choice,
+Quot.sound]`; report-and-stop with residual.
+-/
+
+#print axioms DZ3y_log24_eq
+#print axioms DZ3y_log24_lo
+#print axioms DZ3y_log24_hi
+#print axioms DZ3y_log_ratio_le
+#print axioms DZ3y_log_ratio_ge
+#print axioms DZ3y_log23_eq
+#print axioms DZ3y_log23_lo
+#print axioms DZ3y_log23_hi
+#print axioms DZ3y_phase22_eq
+#print axioms DZ3y_phase23_eq
+#print axioms DZ3y_theta22_lo
+#print axioms DZ3y_theta22_hi
+#print axioms DZ3y_theta23_lo
+#print axioms DZ3y_theta23_hi
+#print axioms DZ3y_v22_mem
+#print axioms DZ3y_v23_mem
+#print axioms DZ3y_cos22_upper
+#print axioms DZ3y_cos23_lower
+#print axioms DZ3y_amp22_lower
+#print axioms DZ3y_amp23_lower
+#print axioms DZ3y_amp22_mem
+#print axioms DZ3y_amp23_mem
+#print axioms DZ3y_pair11_re_eq
+#print axioms DZ3y_pair11_re_le_zero_zero_five_seven
+#print axioms DZ3y_saving
