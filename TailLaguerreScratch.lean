@@ -161,3 +161,100 @@ this file's stubs, (b) a zeta upper bound uniform in `‖shiftedS z‖ > 10`, an
 `0 < z.im < 1/2`. Next agent: instantiate (b)+(c) and compose with
 `CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`
 into `tailPointwise10_of_absTail`. -/
+
+/-!
+## Door-4 tail leaf: zeta-upper + mollifier-error bridge (2026-09-05, append-only)
+
+GREP VERDICT (read-only, no import added):
+* real `zeta := riemannZeta` at `riemann_hypothesis.lean:16`;
+  real `shiftedS z = 1/2 + I*z` at `riemann_hypothesis.lean:2793`;
+  real `dirichletMollifier` (truncated smoothed Mobius sum) at
+  `riemann_hypothesis.lean:11984`; stub `MollifiedRoucheLeaf.gap` shape matches
+  `riemann_hypothesis_newsection.lean:45-47`.
+* `riemann_hypothesis.lean` imports only `Mathlib, TestAnalytic, ZeroFreeRegion`
+  (no cycle back to this file), so importing it here would be logically
+  acyclic — but it pulls the full 133k-line core file plus `newsection` pulls
+  `riemann_hypothesis + zeta_rigorous + central_cover_assembly +
+  ZeroFreeRegionHadamard`, which blows the tail-lane build budget (hang-guard
+  15 min). Hence the cycle-safe conditional route below: the needed real-side
+  estimates are stated as explicit stub-assumption Props
+  (`TailStubZetaUpper`, `TailStubMollifierNearOne`, `TailStubZetaNearOne`),
+  and every theorem is a FULLY PROVED implication (no sorry/admit/axiom)
+  discharging `‖zeta*M-1‖ < 1` from those Props plus an explicit numeric
+  side condition. Instantiating the Props for the real definitions is the
+  quantified remainder.
+-/
+
+/-- Stub-conditional zeta UPPER hypothesis, bridge (b):
+uniform `‖zeta (shiftedS z)‖ ≤ B` on the tail strip
+`10 < |Re z|, 0 < Im z < 1/2`. For the REAL zeta this is the open analytic
+input; for this file's `zeta = 0` stub it is trivially true for any `0 ≤ B`. -/
+def TailStubZetaUpper (B : ℝ) : Prop :=
+  ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) →
+    ‖zeta (shiftedS z)‖ ≤ B
+
+/-- Stub-conditional mollifier ERROR hypothesis, bridge (c):
+uniform `‖M - 1‖ ≤ e` on the tail strip. For the REAL mollifier this is the
+open approximation input; for this file's `M = 1` stub it holds with `e = 0`. -/
+def TailStubMollifierNearOne (e : ℝ) (K : ℕ) : Prop :=
+  ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) →
+    ‖dirichletMollifier (shiftedS z) K - 1‖ ≤ e
+
+/-- Stub-conditional zeta NEAR-ONE hypothesis: uniform `‖zeta - 1‖ ≤ d` on the
+tail strip. Companion to the upper bound; together with the mollifier error
+it yields the Rouche product gap via the triangle split below. -/
+def TailStubZetaNearOne (d : ℝ) : Prop :=
+  ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < (1 / 2 : ℝ) →
+    ‖zeta (shiftedS z) - 1‖ ≤ d
+
+/-- Pure product-gap split (no stubs, no hypotheses): the Rouche product
+error is controlled by the zeta size times the mollifier error plus the
+zeta displacement. This is the quantitative form feeding the leaf. -/
+theorem norm_product_sub_one_le (u v : ℂ) :
+    ‖u * v - 1‖ ≤ ‖u‖ * ‖v - 1‖ + ‖u - 1‖ := by
+  have heq : u * v - 1 = u * (v - 1) + (u - 1) := by ring
+  calc ‖u * v - 1‖ = ‖u * (v - 1) + (u - 1)‖ := by rw [heq]
+    _ ≤ ‖u * (v - 1)‖ + ‖u - 1‖ := norm_add_le _ _
+    _ = ‖u‖ * ‖v - 1‖ + ‖u - 1‖ := by rw [norm_mul]
+
+/-- Conditional tail Rouche gap from stub bounds: under
+`TailStubZetaUpper B` (b) + `TailStubMollifierNearOne e K` (c) +
+`TailStubZetaNearOne d`, the explicit numeric side condition
+`B * e + d < 1` implies the exact leaf inequality
+`‖zeta*M - 1‖ < 1` at every tail point. -/
+theorem tailLeafGap_of_stubBounds {B e d : ℝ} {K : ℕ}
+    (hZ : TailStubZetaUpper B) (hM : TailStubMollifierNearOne e K)
+    (hZ1 : TailStubZetaNearOne d)
+    (hB : 0 ≤ B) (_he : 0 ≤ e)
+    (hgap : B * e + d < 1) (z : ℂ)
+    (hx : (10 : ℝ) < |z.re|) (hy0 : (0 : ℝ) < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    ‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1 := by
+  have h1 := hZ z hx hy0 hy1
+  have h2 := hM z hx hy0 hy1
+  have h3 := hZ1 z hx hy0 hy1
+  have hsplit := norm_product_sub_one_le
+    (zeta (shiftedS z)) (dirichletMollifier (shiftedS z) K)
+  have hprod : ‖zeta (shiftedS z)‖ * ‖dirichletMollifier (shiftedS z) K - 1‖ ≤ B * e :=
+    mul_le_mul h1 h2 (norm_nonneg _) hB
+  linarith
+
+/-- Conditional leaf constructor: the same hypotheses package the gap into
+this file's `MollifiedRoucheLeaf K` (same `gap` shape as
+`riemann_hypothesis_newsection.lean:45-47`). -/
+theorem tailMollifiedRoucheLeaf_of_stubBounds {B e d : ℝ} {K : ℕ}
+    (hZ : TailStubZetaUpper B) (hM : TailStubMollifierNearOne e K)
+    (hZ1 : TailStubZetaNearOne d)
+    (hB : 0 ≤ B) (he : 0 ≤ e)
+    (hgap : B * e + d < 1) : MollifiedRoucheLeaf K where
+  gap := fun z hx hy0 hy1 => tailLeafGap_of_stubBounds hZ hM hZ1 hB he hgap z hx hy0 hy1
+
+/- Quantified remainder after this bridge: the implication chain
+`TailStubZetaUpper + TailStubMollifierNearOne + TailStubZetaNearOne +
+(B*e+d<1) => MollifiedRoucheLeaf.gap` is fully proved above. What remains is
+instantiating the three Props for the REAL `zeta/shiftedS/dirichletMollifier`
+(`riemann_hypothesis.lean:16,2793,11984`): a uniform zeta upper `B` on the
+shifted strip plus mollifier/zeta near-one errors `e,d` with `B*e+d<1`.
+Note the stub values themselves (`zeta=0`, `M=1`) do NOT satisfy the package
+with `<1` (stub `‖zeta-1‖=1`), so no vacuous closure is claimed. Next agent:
+prove the real-side (b)+(c) estimates (functional equation / Dirichlet-series
+majorant on the shifted strip) and rewrite this file's stub Props. -/
