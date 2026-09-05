@@ -1634,7 +1634,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Three-decimal floors (`DZ3k_*`, G3, `5d9a12f7`, green 8693 jobs, axioms clean):**
     maximal three-decimal floors at all 8 bases ⇒ **TRUE block `≤ 0.4705`** (now 247×
     over need). Three-decimal lane exhausted (each maximal).
-    Next: four-decimal floors, `‖s1‖` cut, `Re`-only pairs, or prefix caps + Abel (tasked).
+    **Four-decimal floors (`DZ3l_*`, G4, `17bd6397`, green 8693 jobs, axioms clean):**
+    maximal four-decimal floors (6 strict, 2 reused) ⇒ **TRUE block `≤ 0.47047`** (saves
+    `0.00003`; still ~247× over need). Floor-tightening now yields `~1e-5`/bridge —
+    DIMINISHING; remaining structural routes are prefix caps + Abel or `Re`-only pairs.
+    Next: prefix caps + Abel (preferred), `Re`-only pairs, or `‖s1‖` cut (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
