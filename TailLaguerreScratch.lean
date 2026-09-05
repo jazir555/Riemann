@@ -101,3 +101,63 @@ theorem rectNormBound (z : ℂ) (hre : |z.re| ≤ 1) (him : |z.im| ≤ 1) :
     z.re * z.re + z.im * z.im ≤ 1 + 1 :=
       add_le_add (abs_le_one_iff_mul_self_le_one.mp hre) (abs_le_one_iff_mul_self_le_one.mp him)
     _ ≤ 2 := by norm_num
+
+/-!
+## Door-4 tail-leaf bridge (append-only, 2026-09-05)
+
+Target leaf obligation (upper half; the lower half follows by conjugation via
+`CrossDoorTailBridge.xiShifted_lower_tail_nonvanishing_from_upper`):
+`MollifiedRoucheLeaf.gap` —
+`∀ z, 10 < |z.re| → 0 < z.im → z.im < 1/2 →
+‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1`,
+which via
+`CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`
+supplies exactly the hypothesis of `tailPointwise10_of_absTail`.
+
+Below: three proved analytic feeders at tail parameters plus quantified gap
+(see trailing comment for what remains open).
+-/
+
+/-- Geometric tail at the concrete tail ratio `r = 11`: uniform `< 1/10` bound.
+Instantiation of `geomTailDecay` for the `|Re z| > 10` tail regime. -/
+theorem tailGeomBound_at11 (N : ℕ) :
+    (∑ i ∈ Finset.range N, ((11 : ℝ)⁻¹) ^ (i + 1)) < 1 / 10 := by
+  have h := geomTailDecay (r := (11 : ℝ)) (by norm_num) N
+  have heq : (1 : ℝ) / ((11 : ℝ) - 1) = 1 / 10 := by norm_num
+  rw [heq] at h
+  exact h
+
+/-- Tail points lie outside the radius-10 ball: `10 < |Re z| → 10 < ‖z‖`.
+Geometric fact placing the `|Re z| > 10` tail outside every radius-10 estimate. -/
+theorem tailNormLower_of_absRe (z : ℂ) (hx : (10 : ℝ) < |z.re|) :
+    (10 : ℝ) < ‖z‖ := by
+  have h1 : |z.re| ≤ ‖z‖ :=
+    Complex.abs_re_le_norm z
+  linarith
+
+/-- Squared-modulus complement of `rectNormBound`: on the tail,
+`100 < Re(z)² + Im(z)²`. -/
+theorem tailSqLower_of_absRe (z : ℂ) (hx : (10 : ℝ) < |z.re|) :
+    (100 : ℝ) < z.re ^ 2 + z.im ^ 2 := by
+  have hpos1 : (0 : ℝ) < |z.re| - 10 := sub_pos.mpr hx
+  have hpos2 : (0 : ℝ) < |z.re| + 10 := by
+    have hnn : (0 : ℝ) ≤ |z.re| := abs_nonneg z.re
+    linarith
+  have hmul : (0 : ℝ) < (|z.re| - 10) * (|z.re| + 10) := mul_pos hpos1 hpos2
+  have hkey : |z.re| ^ 2 = 100 + (|z.re| - 10) * (|z.re| + 10) := by ring
+  have hsq : (100 : ℝ) < |z.re| ^ 2 := by linarith
+  have habs : |z.re| ^ 2 = z.re ^ 2 := sq_abs z.re
+  have hle : z.re ^ 2 ≤ z.re ^ 2 + z.im ^ 2 :=
+    le_add_of_nonneg_right (sq_nonneg z.im)
+  linarith
+
+/- Quantified gap to the full door-4 tail leaf: the feeders above give
+uniform geometric decay (`tailGeomBound_at11`) and the tail-norm floor
+(`tailNormLower_of_absRe`, `tailSqLower_of_absRe`), but the leaf conclusion
+`‖zeta (shiftedS z) * dirichletMollifier (shiftedS z) K - 1‖ < 1` still needs
+(a) the real `zeta`/`shiftedS`/`dirichletMollifier` definitions substituted for
+this file's stubs, (b) a zeta upper bound uniform in `‖shiftedS z‖ > 10`, and
+(c) a mollifier approximation bound `< 1 - (zeta-error)` on the strip
+`0 < z.im < 1/2`. Next agent: instantiate (b)+(c) and compose with
+`CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`
+into `tailPointwise10_of_absTail`. -/
