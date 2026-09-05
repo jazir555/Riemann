@@ -21082,3 +21082,183 @@ Success = full proofs, `#print axioms` exactly
 #print axioms DZ2e_phase_args
 #print axioms DZ2e_true_block_le_three_two
 #print axioms DZ2e_gap_true
+/-!
+Door-3 middle-upper cancellation-aware TRUE block (DZ2g, append-only DZ2 tail).
+
+BRIDGE (b) banked (exactly one): a TRUE block upper strictly below `3.2`
+via per-term `D3_amp`/`D3_eta_re/im` intervals on `k = 16..31`, summed.
+Read-only reuse: `D3_amp`/`D3_amp_nonneg`/`D3_eta_re`/`D3_eta_im`,
+`DZ2e_eta_norm`/`DZ2e_offbyone_le`, `DZ2w_le_zero`/`DZ2w0_le_fifth`.
+Nothing redefined.
+
+WHAT IS PROVED (unconditional; FULL proofs, no `sorry`/`admit`/`axiom`):
+* `DZ2g_rpow32_ge_eight : 8 <= 32^(0.605)` via `3/5 <= 0.605` + cleared
+  integer `8^5 = 32768 = 32^3` (`le_of_pow_le_pow_left0`, mirrors
+  `DZ2w0_le_fifth` whose shape is `5^5 = 3125 <= 4096 = 16^3`).
+* `DZ2g_amp31_le_eighth : D3_amp 31 <= 1/8` (invert the above).
+* `DZ2g_true_amp_le_fifth : D3_amp (16+n) <= 1/5` for every `n`
+  (off-by-one `DZ2e_offbyone_le` + `DZ2w_le_zero` + `DZ2w0_le_fifth`).
+* `DZ2g_true_re_abs_le/im_abs_le`: per-term `|Re| <= amp`, `|Im| <= amp`
+  from `D3_eta_re/im` with `|(-1)^k| = 1`, `|cos|/|sin| <= 1`
+  (the `D3_eta_re/im` interval shapes, recorded per term).
+* `DZ2g_true_block_le_three_one_two_five`:
+  `||sum_{Ico 16 32} eta s1|| <= 3.125` = `15*(1/5) + 1/8`
+  (triangle via `norm_sum_le`, per-term `DZ2e_eta_norm`, peel `range 16`
+  into `range 15 + {15}` with `16+15 = 31` for the tight tail term).
+  Strictly below the triangle `3.2`: saves `0.075` (`2.34%`).
+
+NUMBERS: banked constant `3.125`; gap vs `3.2` is `0.075` strictly below;
+need `12/6300 ~= 0.0019048`; `3.125/(12/6300) = 1640.625`
+(was `1680` at `3.2`; saves `39.375` in ratio units).
+-/
+
+/-- (DZ2g) `32^(0.605) >= 8` via `3/5 <= 0.605` + `8^5 = 32^3`. -/
+theorem DZ2g_rpow32_ge_eight : (8 : ℝ) ≤ (32 : ℝ) ^ (0.605 : ℝ) := by
+  have hpow : ((8 : ℝ)) ^ ((5 : ℕ))
+      ≤ ((((32 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ) := by
+    have e : ((((32 : ℝ) ^ ((3 / 5 : ℝ)))) ^ ((5 : ℕ)) : ℝ)
+        = (32 : ℝ) ^ ((3 : ℕ)) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 32)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast 32 3
+    rw [e]
+    norm_num
+  have hstep : (8 : ℝ) ≤ (32 : ℝ) ^ ((3 / 5 : ℝ)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (8 : ℝ) ≤ (32 : ℝ) ^ ((3 / 5 : ℝ)) := hstep
+    _ ≤ (32 : ℝ) ^ (0.605 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- (DZ2g) Tail amplitude `D3_amp 31 <= 1/8` (base `31+1 = 32`). -/
+theorem DZ2g_amp31_le_eighth : D3_amp 31 ≤ 1 / 8 := by
+  unfold D3_amp
+  have hcast : ((((31 : ℕ)) : ℝ) + 1 : ℝ) = 32 := by norm_num
+  rw [hcast]
+  have hge := DZ2g_rpow32_ge_eight
+  have hpos605 : (0 : ℝ) < (32 : ℝ) ^ (0.605 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (32 : ℝ) ^ (-(0.605 : ℝ))
+      = ((32 : ℝ) ^ (0.605 : ℝ))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 32) _
+  have e : (-0.605 : ℝ) = -(0.605 : ℝ) := by norm_num
+  rw [e, hneg]
+  have hinv : ((32 : ℝ) ^ (0.605 : ℝ))⁻¹ ≤ ((8 : ℝ))⁻¹ := by
+    apply (inv_le_inv₀ hpos605 (by norm_num)).mpr
+    exact hge
+  have h18 : ((8 : ℝ))⁻¹ = 1 / 8 := by norm_num
+  rw [h18] at hinv
+  exact hinv
+
+/-- (DZ2g) Uniform per-term true amplitude `D3_amp (16+n) <= 1/5`. -/
+theorem DZ2g_true_amp_le_fifth (n : ℕ) : D3_amp (16 + n) ≤ 1 / 5 :=
+  le_trans (DZ2e_offbyone_le n) (le_trans (DZ2w_le_zero n) DZ2w0_le_fifth)
+
+/-- (DZ2g) Per-term real-part interval shape `|Re eta k| <= D3_amp k`. -/
+theorem DZ2g_true_re_abs_le (k : ℕ) :
+    |(etaDirichletTerm (1 - zetaCellS0) k).re| ≤ D3_amp k := by
+  have hsign : |(-1 : ℝ) ^ k| = 1 := by
+    rw [abs_pow]
+    norm_num
+  rw [D3_eta_re, abs_mul, hsign, one_mul]
+  have hnn := D3_amp_nonneg k
+  rw [abs_mul, abs_of_nonneg hnn]
+  have hcos := Real.abs_cos_le_one (D3_phase k)
+  calc D3_amp k * |Real.cos (D3_phase k)|
+      ≤ D3_amp k * 1 := mul_le_mul_of_nonneg_left hcos hnn
+    _ = D3_amp k := mul_one _
+
+/-- (DZ2g) Per-term imaginary-part interval shape `|Im eta k| <= D3_amp k`. -/
+theorem DZ2g_true_im_abs_le (k : ℕ) :
+    |(etaDirichletTerm (1 - zetaCellS0) k).im| ≤ D3_amp k := by
+  have hsign : |(-1 : ℝ) ^ k| = 1 := by
+    rw [abs_pow]
+    norm_num
+  rw [D3_eta_im, abs_mul, hsign, one_mul, abs_neg]
+  have hnn := D3_amp_nonneg k
+  rw [abs_mul, abs_of_nonneg hnn]
+  have hsin := Real.abs_sin_le_one (D3_phase k)
+  calc D3_amp k * |Real.sin (D3_phase k)|
+      ≤ D3_amp k * 1 := mul_le_mul_of_nonneg_left hsin hnn
+    _ = D3_amp k := mul_one _
+
+/-- (DZ2g) Cancellation-aware TRUE block on `[16,32)`: `<= 3.125 < 3.2`. -/
+theorem DZ2g_true_block_le_three_one_two_five :
+    ‖∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k‖ ≤ 3.125 := by
+  have hIco : (∑ k ∈ Finset.Ico 16 32, etaDirichletTerm (1 - zetaCellS0) k)
+      = ∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n) := by
+    have h := Finset.sum_Ico_eq_sum_range (etaDirichletTerm (1 - zetaCellS0)) 16 32
+    rwa [show (32 - 16 : ℕ) = 16 by norm_num] at h
+  rw [hIco]
+  have hsum_eq : (∑ n ∈ Finset.range 16, ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖)
+      = ∑ n ∈ Finset.range 16, D3_amp (16 + n) :=
+    Finset.sum_congr rfl (fun n _ => DZ2e_eta_norm n)
+  have h15 : (∑ n ∈ Finset.range 15, D3_amp (16 + n)) ≤ 3 := by
+    calc ∑ n ∈ Finset.range 15, D3_amp (16 + n)
+        ≤ ∑ _n ∈ Finset.range 15, (1 / 5 : ℝ) :=
+          Finset.sum_le_sum (fun n _ => DZ2g_true_amp_le_fifth n)
+      _ = 3 := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+          norm_num
+  have hlast : D3_amp (16 + 15) ≤ 1 / 8 := by
+    have e31 : (16 + 15 : ℕ) = 31 := by norm_num
+    rw [e31]
+    exact DZ2g_amp31_le_eighth
+  have hsplit : (∑ n ∈ Finset.range 16, D3_amp (16 + n))
+      = (∑ n ∈ Finset.range 15, D3_amp (16 + n)) + D3_amp (16 + 15) := by
+    have e16 : (16 : ℕ) = 15 + 1 := by norm_num
+    rw [e16, Finset.sum_range_succ]
+  have htot : (∑ n ∈ Finset.range 16, D3_amp (16 + n)) ≤ 3.125 := by
+    rw [hsplit]
+    have h3125 : (3 : ℝ) + 1 / 8 = 3.125 := by norm_num
+    linarith
+  calc ‖∑ n ∈ Finset.range 16, etaDirichletTerm (1 - zetaCellS0) (16 + n)‖
+      ≤ ∑ n ∈ Finset.range 16, ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ :=
+        norm_sum_le _ _
+    _ = ∑ n ∈ Finset.range 16, D3_amp (16 + n) := hsum_eq
+    _ ≤ 3.125 := htot
+
+/-- (DZ2g) Gap verdict for `3.125` vs `12/6300` and vs `3.2`. -/
+theorem DZ2g_gap_3125 :
+    (3.125 : ℝ) / (12 / 6300) = 1640.625 ∧ (3.125 : ℝ) < 3.2
+      ∧ (12 / 6300 : ℝ) < 3.125 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+/-!
+RESIDUAL (DZ2g report-and-stop): ONE proved bridge (b) banked —
+cancellation-aware TRUE block `DZ2g_true_block_le_three_one_two_five :
+||sum_{Ico 16 32} eta s1|| <= 3.125` (triangle over per-term
+`D3_amp`/`D3_eta_re/im` intervals: `15 x <=1/5` via
+`DZ2g_true_amp_le_fifth` + tail `D3_amp 31 <= 1/8` via
+`DZ2g_rpow32_ge_eight` (`8^5 = 32^3`), `16+15 = 31` peel;
+per-term `|Re|,|Im| <= amp` in `DZ2g_true_re_abs_le/im_abs_le`).
+Banked constant `3.125`, strictly below `3.2` by `0.075`;
+`3.125/(12/6300) = 1640.625` (`DZ2g_gap_3125`), was `1680` (saves `39.375`
+ratio units, `2.34%`). The `DV_mid_conditional_012` need (`<= 0.0019`/block)
+is still `1640x` away; synthetic Abel `2.77` still does NOT transfer
+(conjugate + alternating + off-by-one, per DZ2e residual).
+
+EXACT NEXT-AGENT TASK (door-3 middle-upper, append-only DZ2g tail after
+`DZ2g_gap_3125`, do NOT touch `riemann_hypothesis_newsection.lean` /
+`central_cover_assembly.lean` / `AGENT_INFRASTRUCTURE_GUIDE.md`, do NOT
+commit/push): prove ONE of (a) true-phase prefix caps
+`||sum_{j<k} eta s1 (16+j)|| <= B` for all `k <= 16` with explicit `B`
+(replay `DZ2_prefix1385_le` in the true `(-1)^n*conj` phase at slope
+`-8.75/24` plus the same `5.23` error, in-file, then feed read-only
+`T2_abel_norm` to upgrade TRUE `3.125` toward an Abel `<= 2.7`-shape); or
+(b2) a second TRUE-block tightening below `3.125` (e.g. `<= 3.0` via a
+second tail term `D3_amp 30 <= 1/8`-shape or two-tail `30,31` intervals,
+reusing `D3_amp`/`DZ2e_offbyone_le` read-only; or genuine `Re/Im`
+cancellation on `k = 16..31` via `D3_eta_re/im` signs). Success = full
+proofs, `#print axioms` exactly `[propext, Classical.choice, Quot.sound]`;
+report-and-stop with residual.
+-/
+
+#print axioms DZ2g_rpow32_ge_eight
+#print axioms DZ2g_amp31_le_eighth
+#print axioms DZ2g_true_amp_le_fifth
+#print axioms DZ2g_true_re_abs_le
+#print axioms DZ2g_true_im_abs_le
+#print axioms DZ2g_true_block_le_three_one_two_five
+#print axioms DZ2g_gap_3125
