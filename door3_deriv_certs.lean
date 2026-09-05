@@ -183,3 +183,205 @@ theorem R00_deriv_tier_threshold :
 #print axioms R00_deriv_bound_of_sup
 #print axioms R00_deriv_meets_outer_tier
 #print axioms R00_deriv_tier_threshold
+
+/-!
+## Door-3 ξ-sup bridge (deriv-lane tail): per-factor enclosures on `closedBall R00c 2`
+
+Goal (missing lemma): uniform `‖xiShifted z‖ ≤ qB` with `qB ≤ 1 / 40` on
+`closedBall R00c 2`, to discharge the sup hypothesis of `R00_deriv_bound_of_sup`.
+
+Import decision (deliberate, verified cycle-safe but build-costly): `central_cover_assembly`
+imports `Mathlib + riemann_hypothesis + rh_certificate_infra` (lines 1-3) and nothing
+imports `door3_deriv_certs` (only `lakefile.lean` registers it as a `RootScratch` root),
+so importing the assembly would be cycle-safe — but it would drag the whole
+`riemann_hypothesis` build into this lane and re-expose the totalized-`Gamma` /
+`riemannZeta` boundary poles documented at `central_cover_assembly.lean:13-24,774-802`.
+This tail therefore stays import-free (`import Mathlib` only) and banks the ξ-factor
+shapes **explicitly**, quoting the read-only definitions:
+
+* `shiftedS z = (1 / 2 : ℂ) + I * z` (`rh_certificate_infra.lean:159-161`),
+* `fPoly s = (1 / 2 : ℂ) * s * (s - 1)` (`rh_certificate_infra.lean:163-165`),
+* `classicalXi s = fPoly s * fPi s * fGamma s * fZeta s`
+  (`rh_certificate_infra.lean:179-181`),
+* `xiShifted z = classicalXi (shiftedS z)` (`rh_certificate_infra.lean:183-185`,
+  `riemann hypothesis.lean:228-229`),
+* `xiShiftedEntire z = 1 / 2 - (z ^ 2 + 1 / 4) / 2 * completedRiemannZeta₀ ((1/2:ℂ)+I*z)`
+  (`central_cover_assembly.lean:821-824`).
+
+Banked here (sorry-free): `R00c_norm_le`, `mem_closedBall_R00c_norm_le`,
+`poly_prefactor_sup_on_ball` + `poly_prefactor_half_sup_on_ball` (entire-shape prefactor
+`(z ^ 2 + 1 / 4) / 2 ≤ 58.02`), `shiftedS_norm_sup_on_ball`,
+`shiftedS_sub_one_norm_sup_on_ball`, `fPoly_shape_eq`,
+`shiftedS_poly_shape_sup_on_ball` (`fPoly ∘ shiftedS` shape `≤ 63.4`), generic two- and
+four-factor sup composition, `R00_poly_times_remaining_gap`, and the numeric gap
+`R00_remaining_threshold_for_tier` (with the poly factor banked at `63.4`, the remaining
+`fPi * fGamma * fZeta` product needs sup `≤ 0.0004` to reach `1 / 40`).
+
+Residual: rigorous `‖fPi‖`, `‖fGamma‖`, `‖fZeta‖` sups on the `s`-image of the ball
+(`s.re ∈ [-1.61, 2.40]`, `s.im ∈ [-10.75, -6.75]`) need Stirling / `ζ` majorants absent
+from Mathlib. Note the triangle route via `xiShiftedEntire` (`1 / 2 + 58.02 * R`) can
+never reach `1 / 40` (the `1 / 2` constant alone exceeds it); the four-factor product
+route above is the live one.
+-/
+
+/-- `‖R00c‖ ≤ 8.76` (`‖R00c‖ ^ 2 = 76.573525 ≤ 8.76 ^ 2`). -/
+theorem R00c_norm_le : ‖R00c‖ ≤ 8.76 := by
+  have hsq : ‖R00c‖ ^ 2 ≤ (8.76 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have h1 : R00c.re = (-8.75 : ℝ) := rfl
+    have h2 : R00c.im = (0.105 : ℝ) := rfl
+    rw [h1, h2]
+    norm_num
+  have hnn : (0 : ℝ) ≤ ‖R00c‖ := norm_nonneg _
+  calc ‖R00c‖ = Real.sqrt (‖R00c‖ ^ 2) := (Real.sqrt_sq hnn).symm
+    _ ≤ Real.sqrt ((8.76 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = 8.76 := Real.sqrt_sq (by norm_num)
+
+/-- Every `z ∈ closedBall R00c 2` satisfies `‖z‖ ≤ 10.76`. -/
+theorem mem_closedBall_R00c_norm_le {z : ℂ} (hz : z ∈ closedBall R00c 2) :
+    ‖z‖ ≤ 10.76 := by
+  rw [mem_closedBall, dist_eq_norm] at hz
+  calc ‖z‖ = ‖(z - R00c) + R00c‖ := by congr 1; abel
+    _ ≤ ‖z - R00c‖ + ‖R00c‖ := norm_add_le _ _
+    _ ≤ 2 + 8.76 := add_le_add hz R00c_norm_le
+    _ = 10.76 := by norm_num
+
+/-- Entire-shape polynomial prefactor: `‖z ^ 2 + 1 / 4‖ ≤ 116.03` on the ball
+(`10.76 ^ 2 + 1 / 4 = 116.0276 ≤ 116.03`). -/
+theorem poly_prefactor_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤ 116.03 := by
+  have hn : ‖z‖ ≤ 10.76 := mem_closedBall_R00c_norm_le hz
+  have h2 : ‖z ^ 2‖ ≤ (10.76 : ℝ) ^ 2 := by
+    rw [norm_pow]
+    exact pow_le_pow_left₀ (norm_nonneg _) hn 2
+  have h14 : ‖(1 / 4 : ℂ)‖ = (1 / 4 : ℝ) := by
+    simp [Complex.norm_div, Complex.norm_ofNat]
+  have hv : (10.76 : ℝ) ^ 2 + 1 / 4 ≤ 116.03 := by norm_num
+  calc ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤ ‖z ^ 2‖ + ‖(1 / 4 : ℂ)‖ := norm_add_le _ _
+    _ ≤ (10.76 : ℝ) ^ 2 + 1 / 4 := by rw [h14]; exact add_le_add h2 le_rfl
+    _ ≤ 116.03 := hv
+
+/-- Halved entire-shape prefactor: `‖(z ^ 2 + 1 / 4) / 2‖ ≤ 58.02` on the ball. -/
+theorem poly_prefactor_half_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ ≤ 58.02 := by
+  have h := poly_prefactor_sup_on_ball z hz
+  have h2 : ‖(2 : ℂ)‖ = (2 : ℝ) := by simp [Complex.norm_ofNat]
+  rw [Complex.norm_div, h2]
+  linarith
+
+/-- `s`-coordinate sup: `‖(1 / 2 : ℂ) + I * z‖ ≤ 11.26` on the ball
+(`0.5 + 10.76`, matching `shiftedS`). -/
+theorem shiftedS_norm_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤ 11.26 := by
+  have hn : ‖z‖ ≤ 10.76 := mem_closedBall_R00c_norm_le hz
+  have hIz : ‖Complex.I * z‖ = ‖z‖ := by rw [norm_mul, Complex.norm_I, one_mul]
+  have h12 : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp [Complex.norm_div, Complex.norm_ofNat]
+  calc ‖(1 / 2 : ℂ) + Complex.I * z‖ ≤ ‖(1 / 2 : ℂ)‖ + ‖Complex.I * z‖ :=
+        norm_add_le _ _
+    _ = 1 / 2 + ‖z‖ := by rw [hIz, h12]
+    _ ≤ 1 / 2 + 10.76 := add_le_add le_rfl hn
+    _ = 11.26 := by norm_num
+
+/-- Shifted `s - 1` sup: `‖((1 / 2 : ℂ) + I * z) - 1‖ ≤ 11.26` on the ball. -/
+theorem shiftedS_sub_one_norm_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖((1 / 2 : ℂ) + Complex.I * z) - 1‖ ≤ 11.26 := by
+  have hn : ‖z‖ ≤ 10.76 := mem_closedBall_R00c_norm_le hz
+  have hIz : ‖Complex.I * z‖ = ‖z‖ := by rw [norm_mul, Complex.norm_I, one_mul]
+  have h12 : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp [Complex.norm_div, Complex.norm_ofNat]
+  have e : ((1 / 2 : ℂ) + Complex.I * z) - 1 = Complex.I * z - (1 / 2 : ℂ) := by
+    ring
+  rw [e]
+  calc ‖Complex.I * z - (1 / 2 : ℂ)‖ ≤ ‖Complex.I * z‖ + ‖(1 / 2 : ℂ)‖ :=
+        norm_sub_le _ _
+    _ = ‖z‖ + 1 / 2 := by rw [hIz, h12]
+    _ ≤ 10.76 + 1 / 2 := add_le_add hn le_rfl
+    _ = 11.26 := by norm_num
+
+/-- Shape match: `s * (s - 1) / 2 = (1 / 2 : ℂ) * s * (s - 1)` (the `fPoly` form). -/
+theorem fPoly_shape_eq (s : ℂ) : s * (s - 1) / 2 = (1 / 2 : ℂ) * s * (s - 1) := by
+  ring
+
+/-- `fPoly ∘ shiftedS` shape sup: `‖s * (s - 1) / 2‖ ≤ 63.4` on the ball
+(`11.26 * 11.26 / 2 = 63.3938 ≤ 63.4`). -/
+theorem shiftedS_poly_shape_sup_on_ball (z : ℂ) (hz : z ∈ closedBall R00c 2) :
+    ‖((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2‖ ≤
+      63.4 := by
+  have hs := shiftedS_norm_sup_on_ball z hz
+  have hs1 := shiftedS_sub_one_norm_sup_on_ball z hz
+  have hmul : ‖(1 / 2 : ℂ) + Complex.I * z‖ *
+      ‖((1 / 2 : ℂ) + Complex.I * z) - 1‖ ≤ 11.26 * 11.26 :=
+    mul_le_mul hs hs1 (norm_nonneg _) (by norm_num)
+  have h2 : ‖(2 : ℂ)‖ = (2 : ℝ) := by simp [Complex.norm_ofNat]
+  have hv : (11.26 : ℝ) * 11.26 / 2 ≤ 63.4 := by norm_num
+  rw [Complex.norm_div, norm_mul, h2]
+  linarith
+
+/-- Generic two-factor sup composition (upper-bound mirror of
+`TailProofEngine.prod_four_ge_of_ge` in `rh_certificate_infra.lean`). -/
+theorem norm_sup_mul_of_factor_sups {S : Set ℂ} {a b : ℂ → ℂ} {A B : ℝ}
+    (hA0 : 0 ≤ A) (hB0 : 0 ≤ B)
+    (ha : ∀ z ∈ S, ‖a z‖ ≤ A) (hb : ∀ z ∈ S, ‖b z‖ ≤ B) (z : ℂ) (hz : z ∈ S) :
+    ‖a z * b z‖ ≤ A * B := by
+  have _hB := hB0
+  rw [norm_mul]
+  exact mul_le_mul (ha z hz) (hb z hz) (norm_nonneg _) hA0
+
+/-- Generic four-factor sup composition (upper-bound mirror of
+`TailProofEngine.prod_four_ge_of_ge` in `rh_certificate_infra.lean`). -/
+theorem norm_sup_four_mul_of_factor_sups {S : Set ℂ} {a b c d : ℂ → ℂ}
+    {A B C D : ℝ} (hA0 : 0 ≤ A) (hB0 : 0 ≤ B) (hC0 : 0 ≤ C) (hD0 : 0 ≤ D)
+    (ha : ∀ z ∈ S, ‖a z‖ ≤ A) (hb : ∀ z ∈ S, ‖b z‖ ≤ B)
+    (hc : ∀ z ∈ S, ‖c z‖ ≤ C) (hd : ∀ z ∈ S, ‖d z‖ ≤ D) (z : ℂ) (hz : z ∈ S) :
+    ‖a z * b z * c z * d z‖ ≤ A * B * C * D := by
+  have h1 : ‖a z‖ * ‖b z‖ ≤ A * B :=
+    mul_le_mul (ha z hz) (hb z hz) (norm_nonneg _) hA0
+  have hAB : 0 ≤ A * B := mul_nonneg hA0 hB0
+  have h2 : ‖a z‖ * ‖b z‖ * ‖c z‖ ≤ A * B * C :=
+    mul_le_mul h1 (hc z hz) (norm_nonneg _) hAB
+  have hABC : 0 ≤ A * B * C := mul_nonneg hAB hC0
+  have h3 : ‖a z‖ * ‖b z‖ * ‖c z‖ * ‖d z‖ ≤ A * B * C * D :=
+    mul_le_mul h2 (hd z hz) (norm_nonneg _) hABC
+  have _hD := hD0
+  calc ‖a z * b z * c z * d z‖
+      = ‖a z‖ * ‖b z‖ * ‖c z‖ * ‖d z‖ := by rw [norm_mul, norm_mul, norm_mul]
+    _ ≤ A * B * C * D := h3
+
+/-- Banked poly factor times a general remaining factor: if the rest of the ξ product
+has sup `R` on the ball, the poly-inclusive product has sup `63.4 * R`. -/
+theorem R00_poly_times_remaining_gap {r : ℂ → ℂ} {R : ℝ} (hR0 : 0 ≤ R)
+    (hr : ∀ z ∈ closedBall R00c 2, ‖r z‖ ≤ R) (z : ℂ)
+    (hz : z ∈ closedBall R00c 2) :
+    ‖(((1 / 2 : ℂ) + Complex.I * z) * (((1 / 2 : ℂ) + Complex.I * z) - 1) / 2) *
+      r z‖ ≤ 63.4 * R := by
+  have hpoly : ∀ w ∈ closedBall R00c 2,
+      ‖((1 / 2 : ℂ) + Complex.I * w) * (((1 / 2 : ℂ) + Complex.I * w) - 1) / 2‖ ≤
+        63.4 :=
+    fun w hw => shiftedS_poly_shape_sup_on_ball w hw
+  exact norm_sup_mul_of_factor_sups (by norm_num) hR0 hpoly hr z hz
+
+/-- Quantified product gap: with the poly factor banked at `63.4`, reaching the outer
+tier (`63.4 * R ≤ 1 / 40`) forces the remaining `fPi * fGamma * fZeta` product sup
+`R ≤ 0.0004` (`63.4 * 0.0004 = 0.02536 > 1 / 40`). -/
+theorem R00_remaining_threshold_for_tier {R : ℝ} (h : 63.4 * R ≤ 1 / 40) :
+    R ≤ 0.0004 := by
+  by_contra hc
+  push_neg at hc
+  have hpos : (0 : ℝ) < 63.4 := by norm_num
+  have h2 : (63.4 : ℝ) * 0.0004 < 63.4 * R := mul_lt_mul_of_pos_left hc hpos
+  norm_num at h2
+  linarith
+
+#print axioms R00c_norm_le
+#print axioms mem_closedBall_R00c_norm_le
+#print axioms poly_prefactor_sup_on_ball
+#print axioms poly_prefactor_half_sup_on_ball
+#print axioms shiftedS_norm_sup_on_ball
+#print axioms shiftedS_sub_one_norm_sup_on_ball
+#print axioms fPoly_shape_eq
+#print axioms shiftedS_poly_shape_sup_on_ball
+#print axioms norm_sup_mul_of_factor_sups
+#print axioms norm_sup_four_mul_of_factor_sups
+#print axioms R00_poly_times_remaining_gap
+#print axioms R00_remaining_threshold_for_tier
