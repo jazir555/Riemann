@@ -1801,6 +1801,9 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **Y-row 2 closed 10/10 (C7, `6e6fd277`, 2× green ~30s, axioms clean):**
     R82/R92 proxies banked — **21/40 cells** (19 remaining).
     Next: y-row 1 R01/R11 (tasked).
+    **Y-row 1 opened (C8, `e0ff7401`, 2× green ~33s, axioms clean):**
+    R01/R11 proxies banked — **23/40 cells** (17 remaining).
+    Next: y-row 1 R21/R31 (tasked).
     **FE bridge (`zeta_rigorous` tail, FE, `d930680b`, green 8693 jobs, axioms clean):**
     chi-factor def + forward/backward FE + Dirichlet `‖ζ‖≤3` (`Re≥2`) + chi-norm upper
     (Γ symbolic) + reflected-slice/reflected-bridge + tail-rect `B=(2·G·e^22)·Z`.
