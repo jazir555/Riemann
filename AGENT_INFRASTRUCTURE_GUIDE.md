@@ -1780,6 +1780,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `Rat` reduction stuck; bridge via `Complex.normSq_eq_norm_sq`); sample cert checks in 53s.
     Missing link: rigorous `ξ`-enclosures (`riemannZeta`/`Gamma`/`cpow` interval arith).
     Next: generalize checker + 40-cell generator (tasked).
+    **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
+    exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
+    upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
+    + `tailNormLower_of_absRe`/`tailSqLower_of_absRe` floors. Gap: real `zeta`/`shiftedS`/
+    `dirichletMollifier` substitution + zeta-upper/mollifier-error bounds (tasked next).
     **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
     — zero lines written, empty report (G5/DE precedent). Salvaged via H0-resumed (single-point
     lane) + H1 (matched-x lane) with deconfliction.
