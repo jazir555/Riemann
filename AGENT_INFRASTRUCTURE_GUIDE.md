@@ -1617,9 +1617,14 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `cff3982f`, green 8693 jobs, axioms clean):** per-base floors (`5.5–7.8` at `19–31`) ⇒
     pair sum `0.48921… ≤` **TRUE block `≤ 0.50`** (now 262× over need). **Fourth tightening
     (`DZ3f_*`, F8, `92e82afb`, green 8693 jobs, axioms clean):** sharper base-17 floor (`5.4`:
-    `5.4^5 = 4591.65 ≤ 4913`) ⇒ **TRUE block `≤ 0.485`** (now 254× over need). **Fifth
+    `5.4^5 = 4591.65 ≤ 4913`) ⇒ **TRUE block `≤ 0.485`** (now 254× over need).     **Fifth
     tightening (`DZ3g_*`, F9, `4dbb9579`, green 8693 jobs, axioms clean):** `‖s1‖ ≤ 8.771`
-    replay ⇒ **TRUE block `≤ 0.482`** (now 253× over need). **Sixth tightening (`DZ3h_*`, G0,
+    replay ⇒ **TRUE block `≤ 0.482`** (now 253× over need). **Single-pair Re lemma
+    (`DZ3m_*`, G6, `7c18fcb3` joint, green 8693 jobs, axioms clean):** pair-8 `Re`
+    explicit (`(-1)^k` signs) + `Re ≤ 0.095 < 2/17` (rides `Re ≤ norm`, not genuine
+    cancellation — `Re ≈ 0.0002` unproved). **G5 salvage (`DZ3n_*`, G5-resumed, same
+    commit):** `k=2` TRUE prefix cap `≤ 0.095` (MVT pair-8 form; deconfliction with G6
+    held — non-colliding names, sequential anchors). **Sixth tightening (`DZ3h_*`, G0,
     `d8181c02`, green 8693 jobs, axioms clean):** base-19 floor sharpened (`5.5 → 5.8`:
     `5.8^5 = 6563.57 ≤ 6859`) ⇒ **TRUE block `≤ 0.477`** (now 250× over need). Sharpest
     leads: `6 → 6.2` at base 21, further `23..31` c-sharpenings, `‖s1‖` below `8.771`, or
