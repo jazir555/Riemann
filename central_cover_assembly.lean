@@ -16460,3 +16460,136 @@ end BD_R40SmallR
 #print axioms BD_R40SmallR.R40_uniform_deriv_of_closedBall_bound
 #print axioms BD_R40SmallR.R40_deriv_bound_of_factor_bounds
 #print axioms BD_R40SmallR.R40_closed_of_smallR_factorBounds
+
+/-! ## Door-3 residual scout: real axis + Re=+-10 lines + edge-strip status (2026-09-05)
+
+MAPPING (obligations quoted, all read-only above; BD cover lane R31-R40 closed):
+
+1. REAL AXIS (`z.im = 0`): NO feeder covers it.
+   - `centralCovers_inner` (l.320-322) takes `(hgap : z.im < -0.01 ∨ 0.01 < z.im)`,
+     explicitly excluding the strip `(-0.01,0.01)` ("excludes real-axis strip
+     `(-0.01,0.01)`, which needs `BoundaryProofEngine` for coordinator", l.317-318).
+   - `strip_nonvanishing_of_base_bounds` (l.2222-2224) needs `(hy_pos : 0 < z.im)`,
+     so `z.im = 0` is out of reach of the designated nonzero-base feeder
+     (`BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base`, l.2236-2239).
+   - `/-- ... -/` inventory (l.755-760): "the strips `(0,0.01]`, `[0.49,1/2)`, the
+     lines `x = ±10`, and the real axis need
+     `BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base` /
+     `..._of_simple_zero_base` (real-axis fencing)".
+   - First step banked below: `door3_real_self_star` (`z.im = 0 → star z = z`)
+     + `door3_conj_transfer` (nonvanishing reflects across `conj` inside the
+     strip via `classicalXi_symmetry.conj_symm`); hence an upper-half
+     nonvanishing result at `z` gives the conjugate point for free, and real-axis
+     points are self-conjugate (no analysis, no zeta wall).
+
+2. LINES `Re = ±10`: strict-interior hypotheses exclude them; thin rects exist.
+   - `centralCovers_inner` (l.320) needs `(hx_lo : (-10.0:ℝ) < z.re)`
+     `(hx_hi : z.re < (10.0:ℝ))` (strict; "endpoints `±10` excluded", l.318-319).
+   - `CutR10_mem_of_line` (l.6888-6890): `(hx : z.re = 10) → -0.49 ≤ z.im →
+     z.im ≤ 0.49 → CutR10.mem z`; `CutL10_mem_of_line` (l.6898-6900): mirror at
+     `-10`; `cutoffLines_either` (l.6908-6911): `Re=±10, |Im|<1/2` lands in a thin
+     rect or in strip range `0.49 ≤ |Im|`.
+   - Residual inventory (l.6956): "Cutoff lines `Re=±10` (2 thin rects `CutL10`,
+     `CutR10`): per rect CENTER plus DERIV same two `zeta` enclosures on vertical
+     `s`-rects (`Re` in `[0.01,0.99]`, `Im=±10`, true `O(1)`)".
+   - First step banked below: `door3_cutoffLine_mem_of_abs_le` reduces the
+     `|Im| ≤ 0.49` part of either line to `CutL10.mem z ∨ CutR10.mem z`, i.e. to
+     the per-rect fencing H-leaf (`CellFencingHypotheses CutL10/CutR10`, same
+     shape as `R00_leaf_obligations`, l.1175-1177).
+
+3. EDGE STRIPS (`y ∈ [0.49,1/2)`, 10 cells): need their OWN obligation shape;
+   they do NOT reuse `CellData` / `Rxx_leaf_obligations`.
+   - `CellData` (l.111-126) demands `(y1_lt_half : y1 < (1/2:ℝ))`; every
+     `edgeStripCells` entry (l.6584-6594) has `y1 = 0.5` (proved
+     `door3_edgeStrip_y1_eq_half` below), and `EdgeS00_touches_top` (l.6697):
+     `¬ EdgeS00.y1 < (1/2:ℝ)`, so "inner strip fencing
+     (`R.y1<1/2`) does NOT apply; outer-bound tool needed" (l.6696-6697).
+   - Combinatorics closed: `edgeStripCells_covers` (l.6597-6600) tiles
+     `(-10,10) × [0.49,0.5)`; geometry closed: `edgeStrip_radius_bound`
+     (l.6685-6689, radius `< 1.26`).
+   - Residual inventory (l.6955): per cell CENTER lower needs `Azeta` lower at
+     NEW re-value `s.re ∈ (0,0.01]` + DERIV upper needs tight `‖zeta‖ ≤ 10`
+     (zeta wall); top-touching `y1 = 0.5` additionally needs
+     `upper_boundary_nonvanishing_from_outer_bound`.
+   - `conj_of` blocked for full strips: `edgeS00_full_strip_conj_blocked`
+     (l.8302-8303); lower mirrors stay residual (l.6974).
+   - First step banked below: `door3_edgeStrip_needs_own_obligation`
+     (`∀ c ∈ edgeStripCells, ¬ c.2.2.2 < 1/2`): the `CellData`-reuse route is
+     formally closed off, pinning the outer-bound obligation shape for the next
+     agent.
+
+Cheapest-first order for the next agent: cutoff-line H-leaf → strip outer-bound
+→ real-axis base point (needs a `zeta`/entire-extension lower bound at one real
+point, the only analytic input).
+-/
+
+namespace Door3ResidualScout
+
+open CentralCoverAssembly
+
+/-- Every edge-strip cell has `y0 = 0.49` (pure `rfl` per `edgeStripCells`, l.6584). -/
+theorem door3_edgeStrip_y0_eq : ∀ c ∈ edgeStripCells, c.2.2.1 = 0.49 := by
+  intro c hc
+  unfold edgeStripCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+
+/-- Every edge-strip cell has `y1 = 0.5` (pure `rfl` per `edgeStripCells`, l.6584). -/
+theorem door3_edgeStrip_y1_eq_half : ∀ c ∈ edgeStripCells, c.2.2.2 = 0.5 := by
+  intro c hc
+  unfold edgeStripCells at hc
+  simp at hc
+  rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+
+/-- Strip cells need their OWN obligation shape: `CellData.y1_lt_half`
+(`central_cover_assembly.lean:118`) can never hold since `y1 = 0.5`. -/
+theorem door3_edgeStrip_needs_own_obligation :
+    ∀ c ∈ edgeStripCells, ¬ c.2.2.2 < (1 / 2 : ℝ) := by
+  intro c hc hlt
+  have heq := door3_edgeStrip_y1_eq_half c hc
+  rw [heq] at hlt
+  linarith
+
+/-- `Re = ±10` with `|Im| ≤ 0.49` lands in a cutoff thin rect
+(`CutL10_mem_of_line` l.6898 / `CutR10_mem_of_line` l.6888): the `±10`-line
+obligation reduces to the per-rect fencing H-leaf
+(`CellFencingHypotheses`, same shape as `R00_leaf_obligations` l.1175). -/
+theorem door3_cutoffLine_mem_of_abs_le {z : ℂ}
+    (heq : z.re = 10 ∨ z.re = -10)
+    (hy_lo : -0.49 ≤ z.im) (hy_hi : z.im ≤ 0.49) :
+    CutL10.mem z ∨ CutR10.mem z := by
+  rcases heq with hx | hx
+  · exact Or.inr (CutR10_mem_of_line hx hy_lo hy_hi)
+  · exact Or.inl (CutL10_mem_of_line hx hy_lo hy_hi)
+
+/-- Real-axis points are self-conjugate (first symmetry step toward the real-axis
+residual; `centralCovers_inner` l.320 excludes `z.im = 0` via `hgap`). -/
+theorem door3_real_self_star {z : ℂ} (h : z.im = 0) : star z = z := by
+  have hre : (star z).re = z.re := by simp [conj_re]
+  have him : (star z).im = z.im := by simp [conj_im, h]
+  exact Complex.ext hre him
+
+/-- Nonvanishing reflects across conjugation inside the strip
+(`classicalXi_symmetry.conj_symm` needs `-(1/2:ℝ) < z.im < 1/2`, same side
+conditions as `XiLocalZeroFreeRect.conj_of` l.521): upper-half results transfer
+to the lower half, and with `door3_real_self_star` the real axis is fixed. -/
+theorem door3_conj_transfer {z : ℂ}
+    (hgt : (-1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hz : xiShifted z ≠ 0) : xiShifted (star z) ≠ 0 := by
+  have hsym := classicalXi_symmetry.conj_symm z hgt hlt
+  intro hcon
+  apply hz
+  have h2 : star (xiShifted z) = 0 := by
+    rw [← hsym]
+    exact hcon
+  have hcc := congr_arg star h2
+  rwa [star_star, star_zero] at hcc
+
+end Door3ResidualScout
+
+#print axioms Door3ResidualScout.door3_edgeStrip_y0_eq
+#print axioms Door3ResidualScout.door3_edgeStrip_y1_eq_half
+#print axioms Door3ResidualScout.door3_edgeStrip_needs_own_obligation
+#print axioms Door3ResidualScout.door3_cutoffLine_mem_of_abs_le
+#print axioms Door3ResidualScout.door3_real_self_star
+#print axioms Door3ResidualScout.door3_conj_transfer
