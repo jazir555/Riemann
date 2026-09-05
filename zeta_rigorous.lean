@@ -31915,3 +31915,137 @@ theorem DZ3ac_saving :
 #print axioms DZ3ac_pair15_re_eq
 #print axioms DZ3ac_pair15_re_le_neg
 #print axioms DZ3ac_saving
+
+/-!
+DOOR-3 MIDDLE-UPPER [16,32) WINDOW Re-SUM AGGREGATE (zeta lane, DZ3ad).
+
+Bridge: eight banked pair `Re` uppers (read-only reuse, no redefinition):
+* pair-8 `DZ3q_pair8_re_le_zero_three_one` (`Re <= 0.031`),
+* pair-9 `DZ3u_pair9_re_le_zero_eight_four_zero_two` (`Re <= 0.08402`),
+* pair-10 `DZ3x_pair10_re_le_zero_zero_six_seven_three` (`Re <= 0.0673`),
+* pair-11 `DZ3y_pair11_re_le_zero_zero_five_seven` (`Re <= 0.057`),
+* pair-12 `DZ3z_pair12_re_le_zero_zero_three_five` (`Re <= 0.035`),
+* pair-13 `DZ3aa_pair13_re_le_zero` (`Re <= 0`),
+* pair-14 `DZ3ab_pair14_re_le_neg` (`Re <= -0.03`),
+* pair-15 `DZ3ac_pair15_re_le_neg` (`Re <= -0.02`),
+plus one in-file real-part split (`DZ3ad_pair_re_split`, via `Complex.add_re`
++ `Finset.sum_range_succ` induction, mirroring `DZ3c_pair_re`).
+
+Banked window constant:
+`B = 0.031 + 0.08402 + 0.0673 + 0.057 + 0.035 + 0 - 0.03 - 0.02 = 0.22432`.
+Verdict (`DZ3ad_window16_32_verdict`): `B < MVT_sum <= 0.47047` where
+`MVT_sum = 8.771/5.4735/17 + 8.771/5.8512/19 + 8.771/6.2134/21
++ 8.771/6.562/23 + 8.771/6.8986/25 + 8.771/7.2246/27
++ 8.771/7.5411/29 + 8.771/7.849/31` (DZ3l refined norm slots),
+and `B < triangle_sum = 2/17 + 2/19 + 2/21 + 2/23 + 2/25 + 2/27 + 2/29 + 2/31`.
+-/
+
+/-- (DZ3ad) In-file real-part split for the 8-pair window sum. -/
+theorem DZ3ad_pair_re_split :
+    (∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)).re
+      = ∑ m ∈ Finset.range 8, (etaPairTerm (1 - zetaCellS0) (8 + m)).re := by
+  have h : ∀ n : ℕ,
+      (∑ m ∈ Finset.range n, etaPairTerm (1 - zetaCellS0) (8 + m)).re
+        = ∑ m ∈ Finset.range n, (etaPairTerm (1 - zetaCellS0) (8 + m)).re := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ k ih =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Complex.add_re, ih]
+  exact h 8
+
+/-- (DZ3ad) Explicit 8-term window `Re`-sum `<= 0.22432` from the eight banked pair lemmas. -/
+theorem DZ3ad_window16_32_explicit_re_le :
+    (etaPairTerm (1 - zetaCellS0) 8).re + (etaPairTerm (1 - zetaCellS0) 9).re
+      + (etaPairTerm (1 - zetaCellS0) 10).re + (etaPairTerm (1 - zetaCellS0) 11).re
+      + (etaPairTerm (1 - zetaCellS0) 12).re + (etaPairTerm (1 - zetaCellS0) 13).re
+      + (etaPairTerm (1 - zetaCellS0) 14).re + (etaPairTerm (1 - zetaCellS0) 15).re
+      ≤ (0.22432 : ℝ) := by
+  have h8 := DZ3q_pair8_re_le_zero_three_one
+  have h9 := DZ3u_pair9_re_le_zero_eight_four_zero_two
+  have h10 := DZ3x_pair10_re_le_zero_zero_six_seven_three
+  have h11 := DZ3y_pair11_re_le_zero_zero_five_seven
+  have h12 := DZ3z_pair12_re_le_zero_zero_three_five
+  have h13 := DZ3aa_pair13_re_le_zero
+  have h14 := DZ3ab_pair14_re_le_neg
+  have h15 := DZ3ac_pair15_re_le_neg
+  have hnum : (0.031 : ℝ) + 0.08402 + 0.0673 + 0.057 + 0.035 + 0 + (-0.03) + (-0.02)
+      = (0.22432 : ℝ) := by norm_num
+  linarith
+
+/-- (DZ3ad) Finset window `Re`-sum `<= 0.22432` (bridge to `DZ3c_sum_eq` indexing). -/
+theorem DZ3ad_window16_32_re_sum_le :
+    ∑ m ∈ Finset.range 8, (etaPairTerm (1 - zetaCellS0) (8 + m)).re ≤ (0.22432 : ℝ) := by
+  have h8 : (etaPairTerm (1 - zetaCellS0) (8 + 0)).re ≤ (0.031 : ℝ) := by
+    have e0 : (8 + 0 : ℕ) = 8 := by norm_num
+    rw [e0]
+    exact DZ3q_pair8_re_le_zero_three_one
+  have h9 : (etaPairTerm (1 - zetaCellS0) (8 + 1)).re ≤ (0.08402 : ℝ) := by
+    have e1 : (8 + 1 : ℕ) = 9 := by norm_num
+    rw [e1]
+    exact DZ3u_pair9_re_le_zero_eight_four_zero_two
+  have h10 : (etaPairTerm (1 - zetaCellS0) (8 + 2)).re ≤ (0.0673 : ℝ) := by
+    have e2 : (8 + 2 : ℕ) = 10 := by norm_num
+    rw [e2]
+    exact DZ3x_pair10_re_le_zero_zero_six_seven_three
+  have h11 : (etaPairTerm (1 - zetaCellS0) (8 + 3)).re ≤ (0.057 : ℝ) := by
+    have e3 : (8 + 3 : ℕ) = 11 := by norm_num
+    rw [e3]
+    exact DZ3y_pair11_re_le_zero_zero_five_seven
+  have h12 : (etaPairTerm (1 - zetaCellS0) (8 + 4)).re ≤ (0.035 : ℝ) := by
+    have e4 : (8 + 4 : ℕ) = 12 := by norm_num
+    rw [e4]
+    exact DZ3z_pair12_re_le_zero_zero_three_five
+  have h13 : (etaPairTerm (1 - zetaCellS0) (8 + 5)).re ≤ (0 : ℝ) := by
+    have e5 : (8 + 5 : ℕ) = 13 := by norm_num
+    rw [e5]
+    exact DZ3aa_pair13_re_le_zero
+  have h14 : (etaPairTerm (1 - zetaCellS0) (8 + 6)).re ≤ (-0.03 : ℝ) := by
+    have e6 : (8 + 6 : ℕ) = 14 := by norm_num
+    rw [e6]
+    exact DZ3ab_pair14_re_le_neg
+  have h15 : (etaPairTerm (1 - zetaCellS0) (8 + 7)).re ≤ (-0.02 : ℝ) := by
+    have e7 : (8 + 7 : ℕ) = 15 := by norm_num
+    rw [e7]
+    exact DZ3ac_pair15_re_le_neg
+  have hexp : (∑ m ∈ Finset.range 8, (etaPairTerm (1 - zetaCellS0) (8 + m)).re)
+      = (etaPairTerm (1 - zetaCellS0) (8 + 0)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 1)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 2)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 3)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 4)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 5)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 6)).re
+        + (etaPairTerm (1 - zetaCellS0) (8 + 7)).re := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  rw [hexp]
+  have hnum : (0.031 : ℝ) + 0.08402 + 0.0673 + 0.057 + 0.035 + 0 + (-0.03) + (-0.02)
+      = (0.22432 : ℝ) := by norm_num
+  linarith
+
+/-- (DZ3ad) `Re` of the complex window pair-sum `<= 0.22432`. -/
+theorem DZ3ad_window16_32_Re_le :
+    (∑ m ∈ Finset.range 8, etaPairTerm (1 - zetaCellS0) (8 + m)).re ≤ (0.22432 : ℝ) := by
+  rw [DZ3ad_pair_re_split]
+  exact DZ3ad_window16_32_re_sum_le
+
+/-- (DZ3ad) Window verdict: `B = 0.22432` beats the summed MVT slots and triangle slots. -/
+theorem DZ3ad_window16_32_verdict :
+    (0.22432 : ℝ) < (8.771 : ℝ) / 5.4735 / 17 + 8.771 / 5.8512 / 19
+      + 8.771 / 6.2134 / 21 + 8.771 / 6.562 / 23 + 8.771 / 6.8986 / 25
+      + 8.771 / 7.2246 / 27 + 8.771 / 7.5411 / 29 + 8.771 / 7.849 / 31
+    ∧ ((8.771 : ℝ) / 5.4735 / 17 + 8.771 / 5.8512 / 19
+      + 8.771 / 6.2134 / 21 + 8.771 / 6.562 / 23 + 8.771 / 6.8986 / 25
+      + 8.771 / 7.2246 / 27 + 8.771 / 7.5411 / 29 + 8.771 / 7.849 / 31 ≤ (0.47047 : ℝ))
+    ∧ (0.22432 : ℝ) < (0.47047 : ℝ)
+    ∧ (0.22432 : ℝ) < 2 / 17 + 2 / 19 + 2 / 21 + 2 / 23 + 2 / 25 + 2 / 27
+      + 2 / 29 + 2 / 31 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+#print axioms DZ3ad_pair_re_split
+#print axioms DZ3ad_window16_32_explicit_re_le
+#print axioms DZ3ad_window16_32_re_sum_le
+#print axioms DZ3ad_window16_32_Re_le
+#print axioms DZ3ad_window16_32_verdict
