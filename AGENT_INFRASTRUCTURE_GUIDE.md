@@ -1646,7 +1646,19 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     Next: prefix caps + Abel (preferred), `Re`-only pairs, or `‖s1‖` cut (tasked).
     **G5 FAILED EMPTY (no commit):** full prefix-caps+Abel scope too big — zero lines written,
     empty report (DE precedent). Salvaged via reduced-scope G6 (single-pair Re-cancellation
-    lemma + report-from-diff clause, tasked).
+    lemma + report-from-diff clause) + resumed G5 (single-k cap).
+    **Single-pair Re + k=2 cap (`DZ3m_*/DZ3n_*`, G6+G5r, `7c18fcb3` joint, green 8693 jobs,
+    axioms clean):** pair-8 `Re ≤ 0.095` (explicit signs; rides `Re ≤ norm`) + `k=2` TRUE
+    prefix cap `≤ 0.095` (deconfliction held).
+    **k=4 cap + genuine cos-cancellation (`DZ3o_*/DZ3p_*`, G7+G8, `492c8aaf` joint, green
+    8693 jobs, axioms clean):** `k=4` TRUE prefix cap `≤ 0.174` (pairs 8+9) + pair-8
+    `Re ≤ 0.05` (rigorous `0.9 ≤ cos16, cos17` via log intervals + `2π` reduction; true
+    `≈ −0.00215`, slack is `cos ≤ 1` on `c16`). NOTE: G7's commit held one wave (G8's
+    concurrent append carried an error + `sorryAx`) — G8 self-repaired, joint commit.
+    Next: pair-8 toward `≤ 0.02`, pair-9 `Re` start, `k=6` cap (tasked).
+    **H0 FAILED EMPTY (no commit):** new `interval_arith` lane (matched-x Gamma monotonicity)
+    — zero lines written, empty report (G5/DE precedent). Lane stays open; reduced-scope
+    retry tasked (single matched-x lemma + report-from-diff).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
     read-only `KL_log_gap_ge`) + quartic-majorant pointwise cos bound ⇒ **headline `DZ_diag_Re_le`:
