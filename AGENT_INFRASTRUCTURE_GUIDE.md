@@ -2132,6 +2132,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     **R39+R40 CLOSED-packaged (R4, `10d1032f`, green 8687 jobs, axioms clean):**
     `BD_R39SmallR`/`BD_R40SmallR` (outer-tier eps `0.002`).
     **BD COVER LANE CLOSED — R31–R40 all packaged (cover tail quiet unless needed).**
+    **Residual scout (R5, `4640a851`, green 8687 jobs, axioms clean):** mapped all three —
+    real axis (needs `BoundaryProofEngine`, `StripBaseBounds` nonzero-base feeder),
+    ±10 lines (CutL10/CutR10 thin rects exist; per-rect center+deriv H-leaf missing),
+    strips (own obligation shape PROVED — `CellData` reuse formally closed).
+    Banked `door3_conj_transfer`/`door3_real_self_star`/`door3_cutoffLine_mem_of_abs_le`.
+    Next: CutR10 center enclosure (tasked).
     **R37+R38 CLOSED-packaged (R3, `d96deaa0`, green 8687 jobs, axioms clean):**
     `BD_R37SmallR`/`BD_R38SmallR` mirror the template (mid-tier eps `0.05`). R39+R40 LAST (tasked).
   (mid/inner thresholds 882000.05/882000.15) — copy agent tasked. Remaining 39 cells: same shape, different `s`-rects
