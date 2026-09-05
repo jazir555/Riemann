@@ -1810,6 +1810,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     proved Stirling-free (shift into `[0.195,2.20]`, `5.13/3.375`); but factorization tier
     NUMERICALLY DEAD (`G·Z≤0.0001` vs true product `≈0.03–0.10`, 300–1000× off).
     Next: joint-sup / smaller-ball tier route (tasked).
+    **All tier routes dead (V5, `a7e45593`, green, axioms clean):** joint (`507.2·J`,
+    needs `J≤0.0001` vs true `≈0.03`), smaller-ball (worse, `J≤0.00006`), localization
+    (same threshold per piece) — 300–600× off everywhere. Crude-sup Cauchy is too lossy;
+    needs FE-grade zeta sups, not geometry tweaks.
+    **DERIV LANE PAUSED pending FE lane (same as tail).**
     **Gamma narrow (`Door3GammaCutR02Quad0807Narrow`, W, `301b6128`, green 8702 jobs,
     axioms clean):** numerator `216.9` at `xmax=6.25` (drop `0.6` on `[6.20,6.25]` overlap);
     table `215.7<215.8<216.6<216.9<217.5`. Frozen tiers untouched.
