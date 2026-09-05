@@ -1800,6 +1800,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     axioms clean):** numerator `216.9` at `xmax=6.25` (drop `0.6` on `[6.20,6.25]` overlap);
     table `215.7<215.8<216.6<216.9<217.5`. Frozen tiers untouched.
     Next: `6.30` piece `≤217.1` (tasked).
+    **Narrow 6.30 (W2, `cc6e31d2`, green 8702 jobs, axioms clean):**
+    `≤217.1` on `[6.025,6.30]` (drop `0.4`); sliver at `217.5` now `[6.30,6.37]` only.
+    LOCK PROTOCOL FIX: release lock in `finally` ONLY if you acquired it (guard flag) —
+    a lane's unconditional remove deleted another lane's live lock this wave.
+    Next: `6.37` piece (tasked).
     **Tail-leaf feeders (`TailLaguerreScratch`, T, `80968b3b`, green, axioms clean):**
     exact leaf obligation quoted (`tailPointwise10_of_absTail` ← `MollifiedRoucheLeaf.gap`
     upper half + conjugation composition); banked `tailGeomBound_at11` (`<1/10` at `r=11`)
