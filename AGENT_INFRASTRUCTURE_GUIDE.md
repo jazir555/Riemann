@@ -1799,7 +1799,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     chi-factor def + forward/backward FE + Dirichlet `‖ζ‖≤3` (`Re≥2`) + chi-norm upper
     (Γ symbolic) + reflected-slice/reflected-bridge + tail-rect `B=(2·G·e^22)·Z`.
     Full strip numeral unreachable (FE fixes the strip); missing: complex-Γ norm upper
-    on reflected rect + reflected-ζ numeral Z. Next: Z numeral via eta-pairs (tasked).
+    on reflected rect + reflected-ζ numeral Z.     Next: Z numeral via eta-pairs (tasked).
+    **Gamma sups (GS, UNCOMMITTED — pending verification):** `G0=0.232` smallest
+    (2-step recurrence; budgets `Z≤0.00044` — tier still zeta-side blocked).
+    Block's own 3 errors fixed in-diff but UNBUILT: verification blocked by R5's
+    mid-work cover insertion (`sorryAx` in `door3_conj_transfer`, type error :16579).
+    Verifier fires after R5 reports; commit only on green.
     **Deriv lane (`door3_deriv_certs`, V, `fba59747`, green 45s, axioms clean):**
     Cauchy-estimate toolkit (`deriv_bound_of_sphere_sup_on_ball` from Mathlib Liouville +
     rational-endpoint wrapper) + R00 rect ⊆ ball + conditional `R00_deriv_bound_of_sup`
