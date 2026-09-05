@@ -1801,7 +1801,11 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     `P·G·Z ≤ 0.0004` (triangle-via-entire route proven dead).     Next: factor sups (tasked).
     **Pi sup + conds (V3, `5e3bbf9f`, green, axioms clean):** `‖fPi‖ ≤ 4` proved
     (elementary cpow/rpow); Gamma/Zeta sups as explicit conditional Props (no sorry);
-    tier threshold now `G·Z ≤ 0.0001`. Next: GammaSup/ZetaSup numerals (tasked).
+    tier threshold now `G·Z ≤ 0.0001`.     Next: GammaSup/ZetaSup numerals (tasked).
+    **GammaSup + tier verdict (V4, `0db4bb84`, green, axioms clean):** `GammaSupCond 1.52`
+    proved Stirling-free (shift into `[0.195,2.20]`, `5.13/3.375`); but factorization tier
+    NUMERICALLY DEAD (`G·Z≤0.0001` vs true product `≈0.03–0.10`, 300–1000× off).
+    Next: joint-sup / smaller-ball tier route (tasked).
     **Gamma narrow (`Door3GammaCutR02Quad0807Narrow`, W, `301b6128`, green 8702 jobs,
     axioms clean):** numerator `216.9` at `xmax=6.25` (drop `0.6` on `[6.20,6.25]` overlap);
     table `215.7<215.8<216.6<216.9<217.5`. Frozen tiers untouched.
