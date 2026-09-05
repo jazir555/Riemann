@@ -258,3 +258,184 @@ Note the stub values themselves (`zeta=0`, `M=1`) do NOT satisfy the package
 with `<1` (stub `‖zeta-1‖=1`), so no vacuous closure is claimed. Next agent:
 prove the real-side (b)+(c) estimates (functional equation / Dirichlet-series
 majorant on the shifted strip) and rewrite this file's stub Props. -/
+
+/-!
+## Door-4 tail leaf: real triple component (c) + shifted geometry (2026-09-05, append-only)
+
+Real definitions (mirroring `riemann_hypothesis.lean`, read-only, no import added):
+* `tailShiftedSReal z = 1/2 + I*z` (cf. `shiftedS`, `riemann_hypothesis.lean:2793`);
+* `tailMollifierReal s K` = truncated smoothed Moebius sum
+  (cf. `dirichletMollifier`, `riemann_hypothesis.lean:11984`);
+* the zeta side uses Mathlib `riemannZeta` directly
+  (cf. `zeta := riemannZeta`, `riemann_hypothesis.lean:16`).
+
+Banked here (FULLY PROVED, no sorry/admit/axiom):
+* shifted geometry: Re/Im formulas, `0 < Re < 1/2` on the regime,
+  `‖tailShiftedSReal z‖ > 10`, `≠ 1` (so `differentiableAt_riemannZeta` applies);
+* component (c): at `K = 2` the real mollifier is the constant `1/2`
+  (`tailMollifierReal_two`), hence uniform error `e = 1/2`
+  (`tailMollifierReal_nearOne_two`);
+* real conditional gap `tailRealGap_of_zetaBounds_two`: reuses T2's
+  `norm_product_sub_one_le` with the banked `e = 1/2`, reducing the leaf to
+  zeta-side bounds `B,d` with `B * (1/2) + d < 1`.
+
+Why the Dirichlet-series majorant cannot supply (b)/(d) here:
+`tailShiftedSReal_re_range` gives `Re ∈ (0,1/2)`, i.e. `Re < 1`, so
+`zeta_eq_tsum_one_div_nat_add_one_cpow` (needs `1 < Re`) does NOT apply.
+(b) and (d) need functional-equation / Lindeloef-type input (or a compact-cell
+argument); see the quantified remainder at the end of this block.
+-/
+
+/-- Real shifted coordinate (cf. `shiftedS`, `riemann_hypothesis.lean:2793`). -/
+noncomputable def tailShiftedSReal (z : ℂ) : ℂ := (1 / 2 : ℂ) + Complex.I * z
+
+/-- Real truncated smoothed Moebius mollifier
+(cf. `dirichletMollifier`, `riemann_hypothesis.lean:11984`). -/
+noncomputable def tailMollifierReal (s : ℂ) (K : ℕ) : ℂ :=
+  ∑ n ∈ Finset.range K, (((ArithmeticFunction.moebius (n + 1) : ℤ) : ℂ) *
+    (((n + 1 : ℕ) : ℂ) ^ (-s)) * (1 - ((n + 1 : ℕ) : ℂ) / ((K : ℕ) : ℂ)))
+
+/-- Real shifted real part: `Re = 1/2 - Im z`. -/
+theorem tailShiftedSReal_re (z : ℂ) :
+    (tailShiftedSReal z).re = 1 / 2 - z.im := by
+  unfold tailShiftedSReal
+  simp only [Complex.add_re, Complex.I_mul_re]
+  norm_num <;> ring
+
+/-- Real shifted imaginary part: `Im = Re z`. -/
+theorem tailShiftedSReal_im (z : ℂ) :
+    (tailShiftedSReal z).im = z.re := by
+  unfold tailShiftedSReal
+  simp only [Complex.add_im, Complex.I_mul_im]
+  norm_num <;> simp
+
+/-- On the tail regime the shifted real part lies in `(0,1/2)`
+(hence `Re < 1`: the `Re > 1` Dirichlet majorant does not apply). -/
+theorem tailShiftedSReal_re_range (z : ℂ) (hy0 : 0 < z.im) (hy1 : z.im < 1 / 2) :
+    0 < (tailShiftedSReal z).re ∧ (tailShiftedSReal z).re < 1 / 2 := by
+  rw [tailShiftedSReal_re]
+  constructor <;> linarith
+
+/-- Shifted points lie outside the radius-10 ball on the tail regime. -/
+theorem tailShiftedSReal_norm_gt10 (z : ℂ) (hx : 10 < |z.re|) :
+    10 < ‖tailShiftedSReal z‖ := by
+  have him : |(tailShiftedSReal z).im| = |z.re| := by rw [tailShiftedSReal_im]
+  have hle : |(tailShiftedSReal z).im| ≤ ‖tailShiftedSReal z‖ :=
+    Complex.abs_im_le_norm _
+  linarith
+
+/-- Shifted tail points avoid the zeta pole at `1`. -/
+theorem tailShiftedSReal_ne_one (z : ℂ) (hy0 : 0 < z.im) (hy1 : z.im < 1 / 2) :
+    tailShiftedSReal z ≠ 1 := by
+  intro h
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re h
+  rw [tailShiftedSReal_re, Complex.one_re] at hre
+  linarith
+
+/-- Component (c), exact value: at `K = 2` the real mollifier is the constant
+`1/2` (the `n = 1` term carries the factor `1 - 2/2 = 0`; the `n = 0` term is
+`mu 1 * 1^{-s} * (1 - 1/2) = 1/2`). -/
+theorem tailMollifierReal_two (s : ℂ) :
+    tailMollifierReal s 2 = 1 / 2 := by
+  have hmu : ArithmeticFunction.moebius 1 = 1 :=
+    ArithmeticFunction.moebius_apply_one
+  have h01 : ((0 + 1 : ℕ) : ℂ) = (1 : ℂ) := by push_cast; norm_num
+  have h11 : ((1 + 1 : ℕ) : ℂ) = (2 : ℂ) := by push_cast; norm_num
+  have h2c : ((2 : ℕ) : ℂ) = (2 : ℂ) := by norm_cast
+  have h01' : (0 + 1 : ℕ) = 1 := by norm_num
+  have hF1 : (((ArithmeticFunction.moebius (1 + 1) : ℤ) : ℂ) *
+      ((((1 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((1 + 1 : ℕ))) : ℂ) / ((((2 : ℕ))) : ℂ))) = 0 := by
+    have hfactor : (1 : ℂ) - ((((1 + 1 : ℕ))) : ℂ) / ((((2 : ℕ))) : ℂ) = 0 := by
+      rw [h11]
+      norm_num
+    rw [hfactor, mul_zero]
+  have hF0 : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) *
+      ((((0 + 1 : ℕ)) : ℂ) ^ (-s)) *
+      (1 - ((((0 + 1 : ℕ))) : ℂ) / ((((2 : ℕ))) : ℂ))) = 1 / 2 := by
+    have hmoeb : (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) = (1 : ℂ)) := by
+      rw [h01', hmu]
+      norm_cast
+    have hcpow : ((((0 + 1 : ℕ))) : ℂ) ^ (-s) = (1 : ℂ) := by
+      rw [h01]
+      exact Complex.one_cpow _
+    have hfrac : (1 : ℂ) - ((((0 + 1 : ℕ))) : ℂ) / ((((2 : ℕ))) : ℂ) = 1 / 2 := by
+      rw [h01, h2c]
+      norm_num
+    calc (((ArithmeticFunction.moebius (0 + 1) : ℤ) : ℂ) *
+          ((((0 + 1 : ℕ)) : ℂ) ^ (-s)) *
+          (1 - ((((0 + 1 : ℕ))) : ℂ) / ((((2 : ℕ))) : ℂ)))
+        = 1 * 1 * (1 / 2 : ℂ) := by rw [hmoeb, hcpow, hfrac]
+      _ = 1 / 2 := by ring
+  unfold tailMollifierReal
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+  rw [hF0, hF1]
+  simp
+
+/-- Component (c), uniform error: the `K = 2` real mollifier is `1/2` away
+from `1` at every shifted tail point. -/
+theorem tailMollifierReal_nearOne_two (z : ℂ) :
+    ‖tailMollifierReal (tailShiftedSReal z) 2 - 1‖ = 1 / 2 := by
+  have hM := tailMollifierReal_two (tailShiftedSReal z)
+  calc ‖tailMollifierReal (tailShiftedSReal z) 2 - 1‖
+      = ‖(1 / 2 : ℂ) - 1‖ := by rw [hM]
+    _ = ‖(1 / 2 : ℂ)‖ := by
+        have h : ((1 / 2 : ℂ) - 1) = -((1 / 2 : ℂ)) := by ring
+        rw [h, norm_neg]
+    _ = 1 / 2 := by norm_num
+
+/-- Component (c) in `≤` form for the product split. -/
+theorem tailMollifierReal_nearOne_two_le (z : ℂ) :
+    ‖tailMollifierReal (tailShiftedSReal z) 2 - 1‖ ≤ 1 / 2 :=
+  le_of_eq (tailMollifierReal_nearOne_two z)
+
+/-- Real conditional tail gap at `K = 2` (reuses T2's `norm_product_sub_one_le`):
+with the banked `e = 1/2`, zeta-side bounds `‖zeta‖ ≤ B`, `‖zeta - 1‖ ≤ d`
+and `B * (1/2) + d < 1` imply the exact Rouche product gap. -/
+theorem tailRealGap_of_zetaBounds_two {B d : ℝ}
+    (hB : ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < 1 / 2 →
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B)
+    (hd : ∀ z : ℂ, 10 < |z.re| → 0 < z.im → z.im < 1 / 2 →
+      ‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d)
+    (hB0 : 0 ≤ B)
+    (hgap : B * (1 / 2) + d < 1)
+    (z : ℂ) (hx : 10 < |z.re|) (hy0 : 0 < z.im) (hy1 : z.im < 1 / 2) :
+    ‖riemannZeta (tailShiftedSReal z) * tailMollifierReal (tailShiftedSReal z) 2 - 1‖ < 1 := by
+  have hsplit := norm_product_sub_one_le
+    (riemannZeta (tailShiftedSReal z)) (tailMollifierReal (tailShiftedSReal z) 2)
+  have h1 := hB z hx hy0 hy1
+  have h2 := tailMollifierReal_nearOne_two_le z
+  have h3 := hd z hx hy0 hy1
+  have hprod : ‖riemannZeta (tailShiftedSReal z)‖ *
+      ‖tailMollifierReal (tailShiftedSReal z) 2 - 1‖ ≤ B * (1 / 2) :=
+    mul_le_mul h1 h2 (norm_nonneg _) hB0
+  linarith
+
+#print axioms tailShiftedSReal_re
+#print axioms tailShiftedSReal_im
+#print axioms tailShiftedSReal_re_range
+#print axioms tailShiftedSReal_norm_gt10
+#print axioms tailShiftedSReal_ne_one
+#print axioms tailMollifierReal_two
+#print axioms tailMollifierReal_nearOne_two
+#print axioms tailRealGap_of_zetaBounds_two
+
+/- Quantified remainder after this block (2026-09-05): CLOSED for the REAL
+definitions — shifted geometry (`tailShiftedSReal_re/im/re_range/norm_gt10/
+ne_one`), mollifier component (c) `e = 1/2` at `K = 2`
+(`tailMollifierReal_two`, `tailMollifierReal_nearOne_two`), and the real
+conditional gap `tailRealGap_of_zetaBounds_two` (T2's `norm_product_sub_one_le`
+instantiated with the banked `e`). OPEN — the zeta-side triple remainder:
+uniform `B` with `‖riemannZeta (tailShiftedSReal z)‖ ≤ B` (b) and uniform `d`
+with `‖riemannZeta (tailShiftedSReal z) - 1‖ ≤ d` (d) on the unbounded regime
+`10 < |Re z|, 0 < Im z < 1/2`, with `B * (1/2) + d < 1`. The Dirichlet-series
+majorant is PROVABLY inapplicable (`tailShiftedSReal_re_range` gives
+`Re ∈ (0,1/2)`, while `zeta_eq_tsum_one_div_nat_add_one_cpow` needs `1 < Re`).
+Exact next-agent task: on a BOUNDED tail cell (e.g. `10 < |Re z| ≤ 11`,
+`0 < Im z < 1/2`) prove `∃ Bcell, ∀ z in cell,
+‖riemannZeta (tailShiftedSReal z)‖ ≤ Bcell` via
+`IsCompact.image_of_continuousOn` applied to `riemannZeta` (continuous by
+`differentiableAt_riemannZeta` + `tailShiftedSReal_ne_one`) over the compact
+shifted image, and likewise `∃ dcell` for `‖zeta - 1‖`; then test the numeric
+side condition `Bcell * (1/2) + dcell < 1` (expected to fail on first attempt
+— that failure value is the next quantified remainder). -/
