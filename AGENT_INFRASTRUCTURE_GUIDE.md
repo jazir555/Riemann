@@ -1551,6 +1551,12 @@ pi 1/2, Gamma 1e-7 + `R02_H_of_components` modulo two named missing enclosures).
     ⇒ **TRUE block `≤ 3.0`** (`13/5 + 2/15 + 2/15 + 1/8`; now 1575× over need). Peel pattern
     exhausted at this denominator (`2/15`-shape needs `k^3 ≥ (15/2)^5 = 23730` — `28^3 = 21952`
     falls short, so `D3_amp 28` needs a new shape or genuine cancellation).
+    **Fourth peel (`DZ2j_*`, E2, `510de05a`, green 8693 jobs, axioms clean):** CORRECTION —
+    `D3_amp 28` uses base `28+1 = 29`, and `29^3 = 24389 ≥ 23730` fits the `2/15`-shape ⇒
+    **TRUE block `≤ 2.925`** (`12/5 + 2/15×3 + 1/8`; now 1535× over need). `2/15`-shape NOW
+    exhausted (`D3_amp 27` needs `28^3 = 21952 < 23730` — genuinely fails).
+    Next: true-phase prefix caps, or fifth tightening via sevenths shape (`D3_amp 27 ≤ 1/7`:
+    `7^5 = 16807 ≤ 21952`), or genuine `Re/Im` cancellation (tasked).
     Next: true-phase prefix caps or genuine `Re/Im` cancellation (tasked).
     **True-phase diagonal banked (`DZ_*`, DO, `17190ac1`, green 8693 jobs, axioms clean):** defs
     (`ZPhi`/`ZDelta`/`ZPiece`/`ZDiag16`, true `8.75·log(16+n)` phase) + `DZ_delta_lower` (via
