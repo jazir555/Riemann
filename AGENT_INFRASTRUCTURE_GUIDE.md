@@ -2715,3 +2715,10 @@ inequality, and the numerical xi bound must be stated with that slack.
 Validation: `lake build door3_float_bridge_audit` succeeded (8683 jobs), with
 the audit theorems using only the standard `propext`, `Classical.choice`, and
 `Quot.sound` axioms.
+
+`door3_real_radius_bridge.lean` now provides
+`Door3RealRadiusBridge.lowerBoundRectOfRealCertificate` and
+`zeroFreeRectOfRealCertificate`. These adapters consume the exact real
+rectangle center/radius and a real derivative supplier directly, so a future
+numerical certificate can connect without relying on the disproved Float/ℝ
+radius equality. The adapter build is green (8691 jobs).
