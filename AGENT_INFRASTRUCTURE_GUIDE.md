@@ -2703,3 +2703,15 @@ for every list element. A valid cover must use overlapping columns (as
 `fineGridX` does) or weaken the boundary relation and then separately recover
 the strict interior needed by `XiLocalZeroFreeRect.no_zero`; this cannot be
 closed by a finite endpoint-comparison lemma alone.
+
+The Float radius bridge has an independent exact obstruction. In
+`door3_float_bridge_audit.lean`, the first cell's Float radius is evaluated
+with `native_decide` as the rational `5645734119880132 / 2^52`, and the exact
+real radius is `sqrt(62861) / 200`. The file proves both that these values are
+unequal and that the Float radius is strictly below the real radius. Therefore
+the `bridgedToLowerBoundRect` proof cannot obtain its real-radius center bound
+by rewriting the Float certificate; it needs a separately proved slackened
+inequality, and the numerical xi bound must be stated with that slack.
+Validation: `lake build door3_float_bridge_audit` succeeded (8683 jobs), with
+the audit theorems using only the standard `propext`, `Classical.choice`, and
+`Quot.sound` axioms.
