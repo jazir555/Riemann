@@ -32318,3 +32318,42 @@ theorem zeta_tail_rect_of_chi_gamma {s : ℂ}
 #print axioms chi_arg_im_le22
 #print axioms chi_cos_tail_le
 #print axioms zeta_tail_rect_of_chi_gamma
+
+/-!
+## Door-3 true-phase prefix caps (DZ3o)
+
+The true eta terms on the first middle block have the exact norm
+`D3_amp (16+n)`.  The uniform `1/5` envelope therefore gives a completely
+explicit cap for every prefix, including the endpoints `k = 0` and `k = 16`.
+This is intentionally a direct true-phase statement; it does not identify the
+synthetic `ZPiece` phase with the eta phase.
+-/
+
+theorem DZ3o_true_prefix_le_three_two (k : ℕ) (hk : k ≤ 16) :
+    ‖∑ n ∈ Finset.range k,
+      etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ ≤ (16 / 5 : ℝ) := by
+  calc
+    ‖∑ n ∈ Finset.range k,
+        etaDirichletTerm (1 - zetaCellS0) (16 + n)‖
+        ≤ ∑ n ∈ Finset.range k,
+            ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ := norm_sum_le _ _
+    _ = ∑ n ∈ Finset.range k, D3_amp (16 + n) := by
+      apply Finset.sum_congr rfl
+      intro n hn
+      exact DZ2e_eta_norm n
+    _ ≤ ∑ _n ∈ Finset.range k, (1 / 5 : ℝ) := by
+      apply Finset.sum_le_sum
+      intro n hn
+      exact DZ2g_true_amp_le_fifth n
+    _ = (k : ℝ) * (1 / 5 : ℝ) := by
+      rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    _ ≤ (16 / 5 : ℝ) := by
+      have hk' : (k : ℝ) ≤ 16 := by exact_mod_cast hk
+      nlinarith
+
+theorem DZ3o_true_prefix_gap :
+    (16 / 5 : ℝ) = 3.2 ∧ (12 / 6300 : ℝ) < 16 / 5 := by
+  norm_num
+
+#print axioms DZ3o_true_prefix_le_three_two
+#print axioms DZ3o_true_prefix_gap
