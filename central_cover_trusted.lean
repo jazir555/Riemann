@@ -623,11 +623,9 @@ version). -/
 def bridgedZeroFreeRects (cs : List BridgedCellCertificate) : List XiLocalZeroFreeRect :=
   bridgedZeroFreeRectsUpper cs ++ cs.map bridgedConjOf
 
-/-- The upper-half covers theorem (pure combinatorics, same grid as central_cover_assembly).
-
-    TRUSTED: the grid covers the rectangle by construction; the proof is `sorry`
-    here because the exact coverage argument is combinatorial and already
-    validated by the Python generator. -/
+/-- The upper-half cover adapter.  The geometric coverage certificate is an
+explicit argument; this theorem only transports it to the packaged upper
+rectangles. -/
 theorem bridgedCoversUpper (cs : List BridgedCellCertificate)
     (hcover : ∀ z : ℂ, -10 < z.re → z.re < 10 →
       (1 : ℝ) / 100 < z.im → z.im < (49 : ℝ) / 100 →
