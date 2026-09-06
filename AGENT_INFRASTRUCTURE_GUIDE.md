@@ -2723,3 +2723,9 @@ the audit theorems free of `sorryAx`; their report contains the standard
 rectangle center/radius and a real derivative supplier directly, so a future
 numerical certificate can connect without relying on the disproved Float/ℝ
 radius equality. The adapter build is green (8691 jobs).
+
+The production `bridgedToLowerBoundRect` path now consumes that exact-real
+center/radius form as well; the false Float/ℝ equality leaf has been removed.
+`lake build central_cover_trusted` is green (8690 jobs) and reports three
+remaining legacy leaves: the real center enclosure, the derivative enclosure,
+and the unsatisfiable strict grid-cover theorem.
