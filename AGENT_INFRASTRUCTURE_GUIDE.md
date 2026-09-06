@@ -2767,3 +2767,14 @@ Consequently `central_cover_trusted` contains no `sorry` declarations and its
 build is green.  The 40 analytic certificate fields and the boundary-strip
 certificates remain genuine inputs; no unconditional `XiCentralZeroFreeCover`
 or RH theorem is manufactured from absent numerical evidence.
+
+## Door-3 update: closed-cell boundary interface (2026-09-05)
+
+`door3_closed_cover.lean` adds `XiLocalClosedZeroFreeRect` and
+`XiCentralClosedZeroFreeCover`.  Their coverage predicates use closed
+coordinate inequalities, so adjacent numerical cells can meet exactly on a
+grid edge.  `xiLocalClosedZeroFreeRect_of_fencing` reuses the existing
+closed-rectangle Taylor estimate, and
+`xiCentralPointwise_of_closed_cover` assembles a closed cover into the central
+pointwise obligation.  The module builds without `sorryAx`; only the standard
+Lean classical/propositional axioms occur in its reports.
