@@ -122,6 +122,42 @@ theorem closed_inner_nonvanishing_of_fenced_grid_fine
   rw [hzero, norm_zero] at hle
   exact (not_le_of_gt hε) hle
 
+theorem closed_inner_nonvanishing_of_fenced_grid_fine_both_halves
+    (H : ∀ c ∈ gridFine, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖)
+    {z : ℂ} (hx_lo : -10 ≤ z.re) (hx_hi : z.re ≤ 10)
+    (hgap : (0.01 : ℝ) ≤ z.im ∧ z.im ≤ 0.49 ∨
+      (-0.49 : ℝ) ≤ z.im ∧ z.im ≤ -0.01) :
+    xiShifted z ≠ 0 := by
+  rcases hgap with hupper | hlower
+  · exact closed_inner_nonvanishing_of_fenced_grid_fine H hx_lo hx_hi hupper.1 hupper.2
+  · have hstar_re : (star z).re = z.re := by
+      simp [Complex.conj_re]
+    have hstar_im : (star z).im = -z.im := by
+      simp [Complex.conj_im]
+    have hstar_lo : (0.01 : ℝ) ≤ (star z).im := by
+      rw [hstar_im]
+      linarith [hlower.2]
+    have hstar_hi : (star z).im ≤ (0.49 : ℝ) := by
+      rw [hstar_im]
+      linarith [hlower.1]
+    have hstar_nz : xiShifted (star z) ≠ 0 :=
+      closed_inner_nonvanishing_of_fenced_grid_fine H
+        (by simpa [hstar_re] using hx_lo) (by simpa [hstar_re] using hx_hi)
+        hstar_lo hstar_hi
+    intro hz
+    have him_gt : (-1 / 2 : ℝ) < z.im := by linarith [hlower.1]
+    have him_lt : z.im < (1 / 2 : ℝ) := by linarith [hlower.2]
+    have hsym := classicalXi_symmetry.conj_symm z him_gt him_lt
+    have hstar_zero : xiShifted (star z) = 0 := by
+      have hconj : star (xiShifted z) = 0 := by simp [hz]
+      rw [hsym]
+      exact hconj
+    exact hstar_nz hstar_zero
+
 /-! A closed-cell constructor from the same Taylor-fencing hypotheses used by
 the open-cell assembly.  `Rect2D.mem` is closed, so the resulting certificate
 also handles points lying exactly on a cell edge. -/
