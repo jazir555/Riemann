@@ -45,6 +45,54 @@ structure XiCentralClosedZeroFreeCover (X : ℝ) where
         R.y0 ≤ z.im ∧
         z.im ≤ R.y1
 
+/-! The fine grid also covers the *closed* inner rectangle.  This is the
+boundary form needed when a point lands exactly on a numerical cell edge. -/
+
+theorem fineGridX_covers_closed {x : ℝ} (hx_lo : -10 ≤ x) (hx_hi : x ≤ 10) :
+    ∃ p ∈ fineGridX, p.1 ≤ x ∧ x ≤ p.2 := by
+  unfold fineGridX
+  by_cases h1 : x ≤ -7.5
+  · exact ⟨(-10, -7.5), by simp, hx_lo, h1⟩
+  · by_cases h2 : x ≤ -5.5
+    · exact ⟨(-8, -5.5), by simp, by linarith, h2⟩
+    · by_cases h3 : x ≤ -3.5
+      · exact ⟨(-6, -3.5), by simp, by linarith, h3⟩
+      · by_cases h4 : x ≤ -1.5
+        · exact ⟨(-4, -1.5), by simp, by linarith, h4⟩
+        · by_cases h5 : x ≤ 0.5
+          · exact ⟨(-2, 0.5), by simp, by linarith, h5⟩
+          · by_cases h6 : x ≤ 2.5
+            · exact ⟨(0, 2.5), by simp, by linarith, h6⟩
+            · by_cases h7 : x ≤ 4.5
+              · exact ⟨(2, 4.5), by simp, by linarith, h7⟩
+              · by_cases h8 : x ≤ 6.5
+                · exact ⟨(4, 6.5), by simp, by linarith, h8⟩
+                · by_cases h9 : x ≤ 8.5
+                  · exact ⟨(6, 8.5), by simp, by linarith, h9⟩
+                  · exact ⟨(7.5, 10), by simp, by linarith, hx_hi⟩
+
+theorem innerGridY_covers_closed {y : ℝ} (hy_lo : 0.01 ≤ y) (hy_hi : y ≤ 0.49) :
+    ∃ q ∈ innerGridY, q.1 ≤ y ∧ y ≤ q.2 := by
+  unfold innerGridY
+  by_cases h1 : 0.3 ≤ y
+  · exact ⟨(0.3, 0.49), by simp, h1, hy_hi⟩
+  · by_cases h2 : 0.2 ≤ y
+    · exact ⟨(0.2, 0.4), by simp, by linarith, by linarith⟩
+    · by_cases h3 : 0.1 ≤ y
+      · exact ⟨(0.1, 0.3), by simp, by linarith, by linarith⟩
+      · exact ⟨(0.01, 0.2), by simp, hy_lo, by linarith⟩
+
+theorem gridFine_covers_closed_inner {x y : ℝ}
+    (hx_lo : -10 ≤ x) (hx_hi : x ≤ 10)
+    (hy_lo : 0.01 ≤ y) (hy_hi : y ≤ 0.49) :
+    ∃ c ∈ gridFine, c.1 ≤ x ∧ x ≤ c.2.1 ∧ c.2.2.1 ≤ y ∧ y ≤ c.2.2.2 := by
+  obtain ⟨px, hpx_mem, hpx_lo, hpx_hi⟩ := fineGridX_covers_closed hx_lo hx_hi
+  obtain ⟨py, hpy_mem, hpy_lo, hpy_hi⟩ := innerGridY_covers_closed hy_lo hy_hi
+  refine ⟨(px.1, px.2, py.1, py.2), ?_, hpx_lo, hpx_hi, hpy_lo, hpy_hi⟩
+  unfold gridFine
+  rw [List.mem_flatMap]
+  exact ⟨px, hpx_mem, by simp [hpy_mem]⟩
+
 /-! A closed-cell constructor from the same Taylor-fencing hypotheses used by
 the open-cell assembly.  `Rect2D.mem` is closed, so the resulting certificate
 also handles points lying exactly on a cell edge. -/

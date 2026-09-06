@@ -2778,3 +2778,10 @@ closed-rectangle Taylor estimate, and
 `xiCentralPointwise_of_closed_cover` assembles a closed cover into the central
 pointwise obligation.  The module builds without `sorryAx`; only the standard
 Lean classical/propositional axioms occur in its reports.
+
+The same module now proves `fineGridX_covers_closed`,
+`innerGridY_covers_closed`, and `gridFine_covers_closed_inner`.  Thus the
+40-cell geometry covers the closed rectangle
+`[-10,10] × [0.01,0.49]`, including every numerical grid boundary.  This is a
+pure real-arithmetic result; it does not discharge the per-cell analytic
+fencing fields or the boundary strips outside that rectangle.
