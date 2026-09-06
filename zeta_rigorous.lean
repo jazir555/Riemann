@@ -32355,5 +32355,58 @@ theorem DZ3o_true_prefix_gap :
     (16 / 5 : ℝ) = 3.2 ∧ (12 / 6300 : ℝ) < 16 / 5 := by
   norm_num
 
+theorem DZ3o_true_prefix_le_three (k : ℕ) (hk : k ≤ 16) :
+    ‖∑ n ∈ Finset.range k,
+      etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ ≤ (3 : ℝ) := by
+  have hfull : (∑ n ∈ Finset.range 16, D3_amp (16 + n)) ≤ (3 : ℝ) := by
+    have h13 : (∑ n ∈ Finset.range 13, D3_amp (16 + n)) ≤ 13 * (1 / 5 : ℝ) := by
+      calc
+        ∑ n ∈ Finset.range 13, D3_amp (16 + n)
+            ≤ ∑ _n ∈ Finset.range 13, (1 / 5 : ℝ) :=
+          Finset.sum_le_sum (fun n _ => DZ2g_true_amp_le_fifth n)
+        _ = 13 * (1 / 5 : ℝ) := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+          norm_num
+    have h29 : D3_amp (16 + 13) ≤ 2 / 15 := by
+      have e29 : (16 + 13 : ℕ) = 29 := by norm_num
+      rw [e29]
+      exact DZ2i_amp29_le_two_fifteenths
+    have h30 : D3_amp (16 + 14) ≤ 2 / 15 := by
+      have e30 : (16 + 14 : ℕ) = 30 := by norm_num
+      rw [e30]
+      exact DZ2h_amp30_le_two_fifteenths
+    have h31 : D3_amp (16 + 15) ≤ 1 / 8 := by
+      have e31 : (16 + 15 : ℕ) = 31 := by norm_num
+      rw [e31]
+      exact DZ2g_amp31_le_eighth
+    have hsplit14 : (∑ n ∈ Finset.range 14, D3_amp (16 + n))
+        = (∑ n ∈ Finset.range 13, D3_amp (16 + n)) + D3_amp (16 + 13) := by
+      rw [show (14 : ℕ) = 13 + 1 by norm_num, Finset.sum_range_succ]
+    have hsplit15 : (∑ n ∈ Finset.range 15, D3_amp (16 + n))
+        = (∑ n ∈ Finset.range 14, D3_amp (16 + n)) + D3_amp (16 + 14) := by
+      rw [show (15 : ℕ) = 14 + 1 by norm_num, Finset.sum_range_succ]
+    have hsplit16 : (∑ n ∈ Finset.range 16, D3_amp (16 + n))
+        = (∑ n ∈ Finset.range 15, D3_amp (16 + n)) + D3_amp (16 + 15) := by
+      rw [show (16 : ℕ) = 15 + 1 by norm_num, Finset.sum_range_succ]
+    rw [hsplit16, hsplit15, hsplit14]
+    have hnum : (13 : ℝ) * (1 / 5) + 2 / 15 + 2 / 15 + 1 / 8 ≤ 3 := by
+      norm_num
+    linarith
+  calc
+    ‖∑ n ∈ Finset.range k,
+        etaDirichletTerm (1 - zetaCellS0) (16 + n)‖
+        ≤ ∑ n ∈ Finset.range k,
+            ‖etaDirichletTerm (1 - zetaCellS0) (16 + n)‖ := norm_sum_le _ _
+    _ = ∑ n ∈ Finset.range k, D3_amp (16 + n) := by
+      apply Finset.sum_congr rfl
+      intro n hn
+      exact DZ2e_eta_norm n
+    _ ≤ ∑ n ∈ Finset.range 16, D3_amp (16 + n) := by
+      apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono hk)
+      intro n hn hnk
+      exact D3_amp_nonneg (16 + n)
+    _ ≤ 3 := hfull
+
 #print axioms DZ3o_true_prefix_le_three_two
 #print axioms DZ3o_true_prefix_gap
+#print axioms DZ3o_true_prefix_le_three
