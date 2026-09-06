@@ -2790,3 +2790,9 @@ fencing fields or the boundary strips outside that rectangle.
 closed-boundary assembly: any supplier of the existing 40 per-cell fencing
 fields yields nonvanishing on the entire closed inner rectangle.  It carries
 those fields explicitly and introduces no trusted numerical claim.
+
+`zeta_rigorous.lean` now also contains `DZ3o_true_prefix_le_three_two` and
+the tighter `DZ3o_true_prefix_le_three`: every prefix of the true eta block
+`[16,32)` is bounded by `3`, using the exact norm identity and proved
+amplitude floors.  These are unconditional finite-sum bounds; the middle-block
+cancellation obligation remains separate.
