@@ -564,14 +564,15 @@ structure BridgedCell where
   y0_pos : 0 < y0
   y1_lt : y1 < 1 / 2
 
-/-- TRUSTED (mpmath 50 dps): the Float ε lower bound, converted to ℝ, is ≤ the actual |ξ(center)|.
+/-- TRUSTED (mpmath 50 dps): the real ε/M enclosure at a bridged cell center.
 
-    The center is computed in Float then converted; the radius is the Float
-    distance from center to corner. The inequality is verified by mpmath with
-    margin ≥ 1.235e-02 > 0. -/
+    The certificate is stated directly with the exact real rectangle radius
+    and center. This avoids the false Float/ℝ radius equality that the former
+    adapter required; the remaining obligation is the numerical ξ enclosure
+    itself. -/
 theorem bridged_center_bound (b : BridgedCell) :
-    b.ε + b.M * (Float.toReal (Float.sqrt (((b.cell.x1 - b.cell.x0)/2)^2 + ((b.cell.y1 - b.cell.y0)/2)^2)) : ℝ)
-    ≤ ‖xiShifted (Float.toReal ((b.cell.x0 + b.cell.x1)/2 : Float) + I * Float.toReal ((b.cell.y0 + b.cell.y1)/2 : Float))‖ := by
+    b.ε + b.M * Real.sqrt (((b.x1 - b.x0) / 2)^2 + ((b.y1 - b.y0) / 2)^2)
+    ≤ ‖xiShifted (((b.x0 + b.x1) / 2 : ℝ) + I * ((b.y0 + b.y1) / 2 : ℝ))‖ := by
   sorry  -- TRUSTED: mpmath-verified, margin ≥ 1.235e-02 > 0
 
 /-- TRUSTED (mpmath 50 dps): the Float M derivative bound, converted to ℝ, bounds |ξ'| on the rect. -/
@@ -597,8 +598,7 @@ def bridgedToLowerBoundRect (b : BridgedCell) : XiLocalLowerBoundRect :=
     (fun w hw => bridged_deriv_bound b w hw.1 hw.2.1 hw.2.2.1 hw.2.2.2)
     (by
       have h := bridged_center_bound b
-      simp [Rect2D.radius, Rect2D.dx, Rect2D.dy, Rect2D.center] at h ⊢
-      sorry  -- TRUSTED: Float-computed center/radius agree with ℝ-computed ones
+      simpa [Rect2D.radius, Rect2D.dx, Rect2D.dy, Rect2D.center] using h
     )
 
 /-- Build a `XiLocalZeroFreeRect` from a `BridgedCell`. -/
