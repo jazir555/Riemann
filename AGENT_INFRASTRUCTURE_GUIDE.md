@@ -2872,3 +2872,50 @@ The same module now proves `exists_imaginary_axis_compact_lower_bound`: the
 entire extension has a strictly positive minimum on the complete closed
 imaginary-axis segment `[-1/2,1/2]`. The proof handles both totalization
 endpoints explicitly and uses the unconditional eta-based interior feeder.
+
+The new `door3_imag_axis_strip.lean` module upgrades this to
+`Door3ImagAxis.exists_imaginary_axis_horizontal_strip`: a positive-width
+two-dimensional neighborhood of that axis has a uniform positive lower bound.
+It uses only convexity, the compact-axis minimum, and an existential Cauchy
+derivative bound; the width remains qualitative.
+
+`Door3ImagAxis.exists_imaginary_axis_local_rect` packages a strict interior
+rectangle `[-ρ/2,ρ/2] × [-1/4,1/4]` from that strip as an unconditional
+`XiLocalZeroFreeRect`. This is a concrete central-cover cell; the remaining
+cover still requires the off-axis cells and their numerical zeta enclosures.
+
+`Door3ImagAxis.exists_small_central_zero_free_cover` goes one step further:
+for some explicitly positive (though qualitative) `X`, the single rectangle
+`[-ρ,ρ] × [-1/2,1/2]` is a complete `XiCentralZeroFreeCover X`. Thus the
+unconditional work now closes a nontrivial central band and leaves only the
+complementary off-axis width needed to reach `X = 10`.
+
+The same file defines `combine_central_cover_with_annulus`, a kernel-checked
+assembly operator that appends any certified annular list to a central cover.
+Its remaining input is exactly the off-axis annulus coverage certificate; no
+analytic claim is hidden in the assembly itself.
+
+The module also proves `exists_top_edge_zero_free_rect` and
+`exists_bottom_edge_zero_free_rect`.  These convert the two-edge Cauchy data
+into explicit `XiLocalZeroFreeRect` certificates over every finite interval
+`[a,b]` with `a < b`; the conversion includes the entire-extension identity
+and uses the positive norm lower bound to discharge `no_zero`.  Finite edge
+partitions can therefore be assembled directly from these objects.  The
+remaining analytic input is still the off-axis annular coverage between the
+axis strip and the two edge strips.
+
+`exists_boundary_edge_rectangles` specializes these constructors to the full
+finite interval `[-10,10]`, yielding reusable upper and lower edge cells for
+the final annulus list.
+
+## Door-3 certificate-range audit (2026-09-06)
+
+`door3_zeta_cert_range_audit.lean` kernel-checks the range of the existing
+`zeta_cert_data` table: every row has its first height coordinate strictly
+above `10`, and every row ends strictly below `12`.  The table therefore
+covers the height band `(10,12)`, while the central Door-3 cells require the
+band `[0.01,0.49]` over `Re z ∈ [-10,10]`.  The audit is finite and contains
+no `sorry`, `admit`, or custom axiom; it records the range mismatch rather
+than treating the Float table as an analytic certificate for the central
+rectangle.  Its theorem `zeta_cert_data_disjoint_from_central_height_band`
+also checks directly that no row intersects the required central height band.
