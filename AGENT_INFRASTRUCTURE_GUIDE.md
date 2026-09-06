@@ -2703,6 +2703,11 @@ for every list element. A valid cover must use overlapping columns (as
 `fineGridX` does) or weaken the boundary relation and then separately recover
 the strict interior needed by `XiLocalZeroFreeRect.no_zero`; this cannot be
 closed by a finite endpoint-comparison lemma alone.
+This obstruction is now kernel-checked in
+`door3_grid_boundary_counterexample.lean`: `no_strict_cover_at_neg75` proves
+that no legacy bridged rectangle contains `Re z = -7.5` with both strict
+horizontal inequalities. `lake build door3_grid_boundary_counterexample`
+succeeds (8691 jobs), with only the standard axioms in its report.
 
 The Float radius bridge has an independent exact obstruction. In
 `door3_float_bridge_audit.lean`, the first cell's Float radius is evaluated
