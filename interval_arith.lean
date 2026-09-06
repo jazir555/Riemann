@@ -1896,8 +1896,8 @@ explicit premises. -/
 theorem R02_center_with_poly_pi_gamma (Azeta : ℝ)
     (hD0 : 0 ≤ Azeta)
     (hzeta : Azeta ≤ ‖zeta sR02‖)
-    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta) :
-    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+    (hprod : (0.002 : ℝ) + 0.07 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R02.radius ≤
       ‖xiShifted CentralCoverAssembly.R02.center‖ := by
   have harg : sR02
       = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center := rfl
@@ -1906,7 +1906,7 @@ theorem R02_center_with_poly_pi_gamma (Azeta : ℝ)
   have hgam := gamma_lower_R02
   rw [harg] at hpoly hpi hgam hzeta
   exact CellUniform.center_bound_of_component_bounds
-    CentralCoverAssembly.R02 0.002 0.05 (by norm_num)
+    CentralCoverAssembly.R02 0.002 0.07 (by norm_num)
     (le_of_lt CentralCoverAssembly.R02_radius_lt)
     22 (1 / 2) (1 / 10000000) Azeta
     (by norm_num) (by norm_num) (le_of_lt R00GammaLower.gamma_const_pos) hD0
@@ -1921,8 +1921,8 @@ Dirichlet-eta identity + remainder estimate, cf. `R00ZetaEM`) and `hderiv`
 theorem R02_H_of_components (Azeta : ℝ)
     (hD0 : 0 ≤ Azeta)
     (hzeta : Azeta ≤ ‖zeta sR02‖)
-    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta)
-    (hderiv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+    (hprod : (0.002 : ℝ) + 0.07 * 1.26 ≤ 22 * (1 / 2) * (1 / 10000000) * Azeta)
+    (hderiv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
     (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
     (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
     ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),

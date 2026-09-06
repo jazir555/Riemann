@@ -1,0 +1,982 @@
+import central_cover_assembly
+import door3_boundary_real
+import door3_boundary_endpoints
+
+open Complex Real Set Topology
+noncomputable section
+
+namespace Door3TopEdge
+
+open CentralCoverAssembly
+
+theorem xiShiftedEntire_eq_xiShifted_top {x : ℝ} (hx : x ≠ 0) :
+    CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I / 2) =
+      _root_.xiShifted ((x : ℂ) + Complex.I / 2) := by
+  have hs : (1 / 2 : ℂ) + Complex.I * ((x : ℂ) + Complex.I / 2) =
+      Complex.I * (x : ℂ) := by
+    rw [mul_add]
+    have hI : (Complex.I : ℂ) * (Complex.I / 2) = -(1 / 2 : ℂ) := by
+      calc
+        (Complex.I : ℂ) * (Complex.I / 2) =
+            (Complex.I * Complex.I) / 2 := by ring
+        _ = -(1 / 2 : ℂ) := by rw [Complex.I_mul_I]; ring
+    rw [hI]
+    ring
+  have hs0 : Complex.I * (x : ℂ) ≠ 0 := by
+    intro h
+    have hi := congr_arg Complex.im h
+    have hix : x = 0 := by simpa using hi
+    exact hx hix
+  have hs1 : Complex.I * (x : ℂ) ≠ 1 := by
+    intro h
+    have hr := congr_arg Complex.re h
+    norm_num at hr
+  have hgam : Complex.Gamma ((Complex.I * (x : ℂ)) / 2) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n hn
+    have hi := congr_arg Complex.im hn
+    have hix : x = 0 := by simpa using hi
+    exact hx hix
+  have hxi := classicalXi_eq_completed_add_half
+      (Complex.I * (x : ℂ)) hs0 hs1 hgam
+  unfold CentralCoverAssembly.xiShiftedEntire
+  unfold _root_.xiShifted
+  rw [hs]
+  rw [hxi]
+  ring_nf
+  simp only [Complex.I_sq]
+  ring
+
+theorem xiShiftedEntire_ne_zero_top {x : ℝ} :
+    CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I / 2) ≠ 0 := by
+  by_cases hx : x = 0
+  · subst x
+    have harg : ((0 : ℂ) + Complex.I / 2) = Complex.I / 2 := by ring
+    change CentralCoverAssembly.xiShiftedEntire ((0 : ℂ) + Complex.I / 2) ≠ 0
+    rw [harg, Door3BoundaryEndpoints.xiShiftedEntire_at_pos_I_half]
+    norm_num
+  · rw [xiShiftedEntire_eq_xiShifted_top hx]
+    exact xiShifted_ne_zero_on_top_edge_proved hx
+
+theorem exists_top_edge_lower_bound {a b : ℝ} (hab : a ≤ b) :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ x ∈ Set.Icc a b,
+        ε ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I / 2)‖ := by
+  let F : ℝ → ℝ := fun x =>
+    ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I / 2)‖
+  have hcont : Continuous F := by
+    have hE : Continuous CentralCoverAssembly.xiShiftedEntire :=
+      CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+    fun_prop
+  have hmin := isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr hab)
+      hcont.continuousOn
+  obtain ⟨x₀, hx₀, hxmin⟩ := hmin
+  have hE₀ : CentralCoverAssembly.xiShiftedEntire ((x₀ : ℂ) + Complex.I / 2) ≠ 0 :=
+    xiShiftedEntire_ne_zero_top
+  refine ⟨F x₀, ?_, ?_⟩
+  · exact norm_pos_iff.mpr hE₀
+  · intro x hx
+    exact (isMinOn_iff.mp hxmin) x hx
+
+theorem xiShiftedEntire_eq_xiShifted_bottom {x : ℝ} (hx : x ≠ 0) :
+    CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I / 2) =
+      _root_.xiShifted ((x : ℂ) - Complex.I / 2) := by
+  have hs : (1 / 2 : ℂ) + Complex.I * ((x : ℂ) - Complex.I / 2) =
+      1 + Complex.I * (x : ℂ) := by
+    rw [mul_sub]
+    have hI : (Complex.I : ℂ) * (Complex.I / 2) = -(1 / 2 : ℂ) := by
+      calc
+        (Complex.I : ℂ) * (Complex.I / 2) =
+            (Complex.I * Complex.I) / 2 := by ring
+        _ = -(1 / 2 : ℂ) := by rw [Complex.I_mul_I]; ring
+    rw [hI]
+    ring
+  have hs0 : (1 : ℂ) + Complex.I * (x : ℂ) ≠ 0 := by
+    intro h
+    have hr := congr_arg Complex.re h
+    norm_num at hr
+  have hs1 : (1 : ℂ) + Complex.I * (x : ℂ) ≠ 1 := by
+    intro h
+    have hi := congr_arg Complex.im h
+    have hix : x = 0 := by simpa using hi
+    exact hx hix
+  have hgam : Complex.Gamma ((1 + Complex.I * (x : ℂ)) / 2) ≠ 0 := by
+    apply Complex.Gamma_ne_zero
+    intro n hn
+    have hr := congr_arg Complex.re hn
+    have hn0 : (0 : ℝ) ≤ n := by positivity
+    norm_num at hr
+    linarith
+  have hxi := classicalXi_eq_completed_add_half
+      (1 + Complex.I * (x : ℂ)) hs0 hs1 hgam
+  unfold CentralCoverAssembly.xiShiftedEntire
+  unfold _root_.xiShifted
+  rw [hs]
+  rw [hxi]
+  ring_nf
+  simp only [Complex.I_sq]
+  ring
+
+theorem xiShiftedEntire_ne_zero_bottom {x : ℝ} :
+    CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I / 2) ≠ 0 := by
+  by_cases hx : x = 0
+  · subst x
+    have harg : ((0 : ℂ) - Complex.I / 2) = -(Complex.I / 2) := by ring
+    change CentralCoverAssembly.xiShiftedEntire ((0 : ℂ) - Complex.I / 2) ≠ 0
+    rw [harg, Door3BoundaryEndpoints.xiShiftedEntire_at_neg_I_half]
+    norm_num
+  · rw [xiShiftedEntire_eq_xiShifted_bottom hx]
+    unfold _root_.xiShifted
+    intro hz
+    have hs : (1 / 2 : ℂ) + Complex.I * ((x : ℂ) - Complex.I / 2) =
+        1 + Complex.I * (x : ℂ) := by
+      rw [mul_sub]
+      have hI : (Complex.I : ℂ) * (Complex.I / 2) = -(1 / 2 : ℂ) := by
+        calc
+          (Complex.I : ℂ) * (Complex.I / 2) =
+              (Complex.I * Complex.I) / 2 := by ring
+          _ = -(1 / 2 : ℂ) := by rw [Complex.I_mul_I]; ring
+      rw [hI]
+      ring
+    rw [hs] at hz
+    have hs1 : (1 : ℂ) + Complex.I * (x : ℂ) ≠ 1 := by
+      intro h
+      have hi := congr_arg Complex.im h
+      have hix : x = 0 := by simpa using hi
+      exact hx hix
+    have hs0 : (1 : ℂ) + Complex.I * (x : ℂ) ≠ 0 := by
+      intro h
+      have hr := congr_arg Complex.re h
+      norm_num at hr
+    have hzeta : zeta (1 + Complex.I * (x : ℂ)) ≠ 0 := by
+      simpa [zeta] using (riemannZeta_ne_zero_of_one_le_re (s :=
+        (1 : ℂ) + Complex.I * (x : ℂ)) (by norm_num))
+    have hpref : classicalXiPrefactor (1 + Complex.I * (x : ℂ)) ≠ 0 := by
+      unfold classicalXiPrefactor
+      have hhalf : (1 / 2 : ℂ) ≠ 0 := by norm_num
+      have hpi : (Real.pi : ℂ) ^ (-((1 + Complex.I * (x : ℂ)) / 2)) ≠ 0 :=
+        pi_cpow_ne_zero _
+      have hgamma : Complex.Gamma ((1 + Complex.I * (x : ℂ)) / 2) ≠ 0 := by
+        apply Complex.Gamma_ne_zero
+        intro n hn
+        have hr := congr_arg Complex.re hn
+        have hn0 : (0 : ℝ) ≤ n := by positivity
+        norm_num at hr
+        linarith
+      have hsm1 : (1 + Complex.I * (x : ℂ)) - 1 ≠ 0 := sub_ne_zero.mpr hs1
+      exact mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero hhalf hs0) hsm1) hpi) hgamma
+    exact hzeta ((mul_eq_zero.mp (by simpa [classicalXi, XiFromPrefactor] using hz)).resolve_left hpref)
+
+theorem exists_bottom_edge_lower_bound {a b : ℝ} (hab : a ≤ b) :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ x ∈ Set.Icc a b,
+        ε ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I / 2)‖ := by
+  let F : ℝ → ℝ := fun x =>
+    ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I / 2)‖
+  have hcont : Continuous F := by
+    have hE : Continuous CentralCoverAssembly.xiShiftedEntire :=
+      CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+    fun_prop
+  have hmin := isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr hab)
+      hcont.continuousOn
+  obtain ⟨x₀, hx₀, hxmin⟩ := hmin
+  have hE₀ : CentralCoverAssembly.xiShiftedEntire ((x₀ : ℂ) - Complex.I / 2) ≠ 0 :=
+    xiShiftedEntire_ne_zero_bottom
+  refine ⟨F x₀, ?_, ?_⟩
+  · exact norm_pos_iff.mpr hE₀
+  · intro x hx
+    exact (isMinOn_iff.mp hxmin) x hx
+
+/-! A qualitative (non-quantitative) consequence of the edge certificate:
+every fixed top-edge point has an open vertical zero-free neighbourhood.  The
+proof obtains a Cauchy bound from continuity on one compact closed ball and
+then applies the outer-bound fencing theorem. -/
+theorem exists_top_edge_local_strip (x : ℝ) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ y : ℝ, (1 / 2 : ℝ) - δ < y → y < (1 / 2 : ℝ) →
+        _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+  let ztop : ℂ := (x : ℂ) + Complex.I / 2
+  have htop : CentralCoverAssembly.xiShiftedEntire ztop ≠ 0 := by
+    dsimp [ztop]
+    exact xiShiftedEntire_ne_zero_top
+  let e0 : ℝ := ‖CentralCoverAssembly.xiShiftedEntire ztop‖
+  have he0 : 0 < e0 := by
+    dsimp [e0]
+    exact norm_pos_iff.mpr htop
+  have hcont : Continuous CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+  obtain ⟨C, hC⟩ :=
+    (isCompact_closedBall ztop (2 : ℝ)).exists_bound_of_continuousOn
+      (hcont.continuousOn)
+  let M : ℝ := max C 1
+  have hM : 0 < M := lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  let e : ℝ := min e0 M
+  have he : 0 < e := lt_min he0 hM
+  let δ : ℝ := e / M
+  have hδ : 0 < δ := div_pos he hM
+  refine ⟨δ, hδ, ?_⟩
+  intro y hy_low hy_top
+  have hδle : δ ≤ 1 := by
+    dsimp [δ]
+    have heM : e ≤ M := min_le_right _ _
+    apply (div_le_iff₀ hM).2
+    simpa using heM
+  have hmargin : (1 / 2 : ℝ) - y < δ := by
+    linarith
+  have hderiv : ∀ v ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (v : ℂ))‖ ≤ M := by
+    intro v hv
+    let w : ℂ := (x : ℂ) + Complex.I * (v : ℂ)
+    have hwtop : dist w ztop = (1 / 2 : ℝ) - v := by
+      have heq : w - ztop = Complex.I * (((v - (1 / 2 : ℝ)) : ℝ) : ℂ) := by
+        dsimp [w, ztop]
+        push_cast
+        ring
+      rw [dist_eq_norm, heq, norm_mul, Complex.norm_I, one_mul,
+        Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonpos (sub_nonpos.mpr hv.2)]
+      ring
+    have hsphere : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        z ∈ Metric.closedBall ztop (2 : ℝ) := by
+      intro z hz
+      have hzw : dist z w = (1 : ℝ) := Metric.mem_sphere.mp hz
+      have htri : dist z ztop ≤ dist z w + dist w ztop := dist_triangle _ _ _
+      rw [hzw, hwtop] at htri
+      rw [Metric.mem_closedBall]
+      have hv_lower : -(1 / 2 : ℝ) ≤ v := by
+        linarith [hv.1, hδle]
+      linarith
+    have hDC : DiffContOnCl ℂ CentralCoverAssembly.xiShiftedEntire
+        (Metric.ball w (1 : ℝ)) :=
+      CentralCoverAssembly.xiShiftedEntire_differentiable.diffContOnCl
+    have hsphere_bound : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+      intro z hz
+      exact hC z (hsphere z hz)
+    have hbound : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 :=
+      Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by norm_num) hDC hsphere_bound
+    have hCM : C ≤ M := le_max_left _ _
+    have hboundM : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ M := by
+      calc
+        ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 := hbound
+        _ = C := by ring
+        _ ≤ M := hCM
+    simpa [w] using hboundM
+  have htopbound : e ≤ ‖CentralCoverAssembly.xiShiftedEntire ztop‖ := by
+    change e ≤ e0
+    exact min_le_left _ _
+  have htopbound' : e ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖ := by
+    have harg : ((x : ℂ) + Complex.I * (1 / 2 : ℂ)) = ztop := by
+      dsimp [ztop]
+      ring
+    rw [harg]
+    exact htopbound
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    have hres := BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable x e M he hM htopbound'
+      hderiv y (by simpa [δ] using hy_low) (le_of_lt hy_top)
+    simpa [ztop] using hres
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by
+    linarith [hy_low, hδle]
+  have him : ((x : ℂ) + Complex.I * (y : ℂ)).im = y := by
+    simp
+  have hagree : _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ (by simpa [him] using hstrip_lo)
+      (by simpa [him] using hy_top)
+  rw [hagree]
+  exact hne_ent
+
+theorem exists_top_edge_uniform_strip {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ x ∈ Set.Icc a b, ∀ y : ℝ,
+        (1 / 2 : ℝ) - δ < y → y < (1 / 2 : ℝ) →
+          _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+  obtain ⟨e0, he0, htop⟩ := exists_top_edge_lower_bound hab
+  let R : ℝ := max |a| |b| + 3
+  have hR : 0 < R := by
+    dsimp [R]
+    have : 0 ≤ max |a| |b| :=
+      le_trans (abs_nonneg a) (le_max_left _ _)
+    linarith
+  have hcont : Continuous CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+  obtain ⟨C, hC⟩ :=
+    (isCompact_closedBall (0 : ℂ) R).exists_bound_of_continuousOn
+      hcont.continuousOn
+  let M : ℝ := max C 1
+  have hM : 0 < M := lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  let e : ℝ := min e0 M
+  have he : 0 < e := lt_min he0 hM
+  let δ : ℝ := e / M
+  have hδ : 0 < δ := div_pos he hM
+  have hδle : δ ≤ 1 := by
+    dsimp [δ]
+    apply (div_le_iff₀ hM).2
+    have heM : e ≤ M := by
+      dsimp [e]
+      exact min_le_right _ _
+    simpa using heM
+  refine ⟨δ, hδ, ?_⟩
+  intro x hx y hy_low hy_top
+  have hderiv : ∀ v ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (v : ℂ))‖ ≤ M := by
+    intro v hv
+    let w : ℂ := (x : ℂ) + Complex.I * (v : ℂ)
+    have hxabs : |x| ≤ max |a| |b| :=
+      abs_le_max_abs_abs (Set.mem_Icc.mp hx).1 (Set.mem_Icc.mp hx).2
+    have hvabs : |v| ≤ 1 := by
+      rw [abs_le]
+      constructor
+      · linarith [hv.1, hδle]
+      · linarith [hv.2]
+    have hw_norm : ‖w‖ ≤ max |a| |b| + 1 := by
+      dsimp [w]
+      calc
+        ‖(x : ℂ) + Complex.I * (v : ℂ)‖ ≤
+            ‖(x : ℂ)‖ + ‖Complex.I * (v : ℂ)‖ := norm_add_le _ _
+        _ = |x| + |v| := by
+          rw [Complex.norm_real, Real.norm_eq_abs, norm_mul, Complex.norm_I,
+            one_mul, Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ max |a| |b| + 1 := by linarith
+    have hsphere : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        z ∈ Metric.closedBall (0 : ℂ) R := by
+      intro z hz
+      have hzw : dist z w = (1 : ℝ) := Metric.mem_sphere.mp hz
+      have htri : dist z 0 ≤ dist z w + dist w 0 := dist_triangle _ _ _
+      have hw0 : dist w 0 = ‖w‖ := by simp [dist_eq_norm]
+      rw [hzw, hw0] at htri
+      rw [Metric.mem_closedBall]
+      dsimp [R]
+      linarith
+    have hDC : DiffContOnCl ℂ CentralCoverAssembly.xiShiftedEntire
+        (Metric.ball w (1 : ℝ)) :=
+      CentralCoverAssembly.xiShiftedEntire_differentiable.diffContOnCl
+    have hsphere_bound : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+      intro z hz
+      exact hC z (hsphere z hz)
+    have hbound : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 :=
+      Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by norm_num) hDC hsphere_bound
+    have hCM : C ≤ M := le_max_left _ _
+    have hboundM : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ M := by
+      calc
+        ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 := hbound
+        _ = C := by ring
+        _ ≤ M := hCM
+    simpa [w] using hboundM
+  have htopbound : e ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖ := by
+    have hx0 := htop x hx
+    have harg : ((x : ℂ) + Complex.I * (1 / 2 : ℂ)) =
+        ((x : ℂ) + Complex.I / 2) := by ring
+    rw [harg]
+    exact le_trans (min_le_left _ _) hx0
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    have hres := BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable x e M he hM htopbound
+      hderiv y (by simpa [δ] using hy_low) (le_of_lt hy_top)
+    simpa using hres
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by
+    linarith [hy_low, hδle]
+  have him : ((x : ℂ) + Complex.I * (y : ℂ)).im = y := by simp
+  have hagree : _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ (by simpa [him] using hstrip_lo)
+      (by simpa [him] using hy_top)
+  rw [hagree]
+  exact hne_ent
+
+theorem lower_boundary_nonvanishing_from_outer_bound
+    (f : ℂ → ℂ) (hf : Differentiable ℂ f) (x : ℝ)
+    (ε_top M1 : ℝ) (hε : 0 < ε_top) (hM1 : 0 < M1)
+    (h_bottom : ε_top ≤ ‖f ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (h_deriv : ∀ y ∈ Set.Icc (-(1 / 2 : ℝ))
+        (-(1 / 2 : ℝ) + ε_top / M1),
+        ‖deriv f ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M1)
+    (y : ℝ) (hy_bottom : -(1 / 2 : ℝ) < y)
+    (hy_low : y < -(1 / 2 : ℝ) + ε_top / M1) :
+    f ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+  let g : ℂ → ℂ := fun z => f (z - Complex.I / 2)
+  have hg : Differentiable ℂ g := by
+    unfold g
+    exact hf.comp (by fun_prop)
+  have hη : 0 < ε_top / M1 := div_pos hε hM1
+  have hbase : ε_top ≤ ‖g (x : ℂ)‖ := by
+    dsimp [g]
+    simpa [sub_eq_add_neg, div_eq_mul_inv] using h_bottom
+  have hderiv_g : ∀ t ∈ Set.Icc (0 : ℝ) (ε_top / M1),
+      ‖deriv g ((x : ℂ) + Complex.I * (t : ℂ))‖ ≤ M1 := by
+    intro t ht
+    have hv : -(1 / 2 : ℝ) ≤ t - 1 / 2 ∧
+        t - 1 / 2 ≤ -(1 / 2 : ℝ) + ε_top / M1 := by
+      constructor <;> linarith [ht.1, ht.2]
+    have hpoint : ((x : ℂ) + Complex.I * (t : ℂ)) - Complex.I / 2 =
+        (x : ℂ) + Complex.I * ((t - 1 / 2 : ℝ) : ℂ) := by
+      push_cast
+      ring
+    have hcomp : deriv g ((x : ℂ) + Complex.I * (t : ℂ)) =
+        deriv f ((x : ℂ) + Complex.I * ((t - 1 / 2 : ℝ) : ℂ)) := by
+      have hout := (hf (((x : ℂ) + Complex.I * (t : ℂ)) - Complex.I / 2)).hasDerivAt
+      have hin := (hasDerivAt_id ((x : ℂ) + Complex.I * (t : ℂ))).sub_const
+        (Complex.I / 2)
+      have hc := hout.comp (x := ((x : ℂ) + Complex.I * (t : ℂ))) hin
+      simpa [g, Function.comp_def, hpoint] using hc.deriv
+    rw [hcomp]
+    exact h_deriv (t - 1 / 2) ⟨hv.1, hv.2⟩
+  have hres := BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base
+    g hg x ε_top M1 (ε_top / M1) hε hM1 hη hbase hderiv_g
+    (y + 1 / 2) (by linarith) (by linarith) (by linarith)
+  have harg : ((x : ℂ) + Complex.I * ((y + 1 / 2 : ℝ) : ℂ)) - Complex.I / 2 =
+      (x : ℂ) + Complex.I * (y : ℂ) := by
+    push_cast
+    ring
+  change f (((x : ℂ) + Complex.I * ((y + 1 / 2 : ℝ) : ℂ)) - Complex.I / 2) ≠ 0 at hres
+  rw [harg] at hres
+  exact hres
+
+theorem exists_bottom_edge_uniform_strip {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ x ∈ Set.Icc a b, ∀ y : ℝ,
+        -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δ →
+          _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+  obtain ⟨e0, he0, hbottom⟩ := exists_bottom_edge_lower_bound hab
+  let R : ℝ := max |a| |b| + 3
+  have hR : 0 < R := by
+    dsimp [R]
+    have hnonneg : 0 ≤ max |a| |b| :=
+      le_trans (abs_nonneg a) (le_max_left _ _)
+    linarith
+  have hcont : Continuous CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+  obtain ⟨C, hC⟩ :=
+    (isCompact_closedBall (0 : ℂ) R).exists_bound_of_continuousOn
+      hcont.continuousOn
+  let M : ℝ := max C 1
+  have hM : 0 < M := lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  let e : ℝ := min e0 M
+  have he : 0 < e := lt_min he0 hM
+  let δ : ℝ := e / M
+  have hδ : 0 < δ := div_pos he hM
+  have hδle : δ ≤ 1 := by
+    dsimp [δ]
+    apply (div_le_iff₀ hM).2
+    have heM : e ≤ M := by
+      dsimp [e]
+      exact min_le_right _ _
+    simpa using heM
+  refine ⟨δ, hδ, ?_⟩
+  intro x hx y hy_bottom hy_high
+  have hderiv : ∀ v ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + δ),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (v : ℂ))‖ ≤ M := by
+    intro v hv
+    let w : ℂ := (x : ℂ) + Complex.I * (v : ℂ)
+    have hxabs : |x| ≤ max |a| |b| :=
+      abs_le_max_abs_abs (Set.mem_Icc.mp hx).1 (Set.mem_Icc.mp hx).2
+    have hvabs : |v| ≤ 1 := by
+      rw [abs_le]
+      constructor
+      · linarith [hv.1]
+      · linarith [hv.2, hδle]
+    have hw_norm : ‖w‖ ≤ max |a| |b| + 1 := by
+      dsimp [w]
+      calc
+        ‖(x : ℂ) + Complex.I * (v : ℂ)‖ ≤
+            ‖(x : ℂ)‖ + ‖Complex.I * (v : ℂ)‖ := norm_add_le _ _
+        _ = |x| + |v| := by
+          rw [Complex.norm_real, Real.norm_eq_abs, norm_mul, Complex.norm_I,
+            one_mul, Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ max |a| |b| + 1 := by linarith
+    have hsphere : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        z ∈ Metric.closedBall (0 : ℂ) R := by
+      intro z hz
+      have hzw : dist z w = (1 : ℝ) := Metric.mem_sphere.mp hz
+      have htri : dist z 0 ≤ dist z w + dist w 0 := dist_triangle _ _ _
+      have hw0 : dist w 0 = ‖w‖ := by simp [dist_eq_norm]
+      rw [hzw, hw0] at htri
+      rw [Metric.mem_closedBall]
+      dsimp [R]
+      linarith
+    have hDC : DiffContOnCl ℂ CentralCoverAssembly.xiShiftedEntire
+        (Metric.ball w (1 : ℝ)) :=
+      CentralCoverAssembly.xiShiftedEntire_differentiable.diffContOnCl
+    have hsphere_bound : ∀ z ∈ Metric.sphere w (1 : ℝ),
+        ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+      intro z hz
+      exact hC z (hsphere z hz)
+    have hbound : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 :=
+      Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by norm_num) hDC hsphere_bound
+    have hCM : C ≤ M := le_max_left _ _
+    have hboundM : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ M := by
+      calc
+        ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ C / 1 := hbound
+        _ = C := by ring
+        _ ≤ M := hCM
+    simpa [w] using hboundM
+  have hbottombound : e ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖ := by
+    have hx0 := hbottom x hx
+    have harg : ((x : ℂ) - Complex.I * (1 / 2 : ℂ)) =
+        ((x : ℂ) - Complex.I / 2) := by ring
+    rw [harg]
+    exact le_trans (min_le_left _ _) hx0
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    have hres := lower_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable x e M he hM hbottombound
+      hderiv y hy_bottom (by simpa [δ] using hy_high)
+    simpa using hres
+  have him : ((x : ℂ) + Complex.I * (y : ℂ)).im = y := by simp
+  have hagree : _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ (by simpa [him] using hy_bottom)
+      (by simpa [him] using (by linarith [hy_high, hδle] : y < (1 / 2 : ℝ)))
+  rw [hagree]
+  exact hne_ent
+
+theorem exists_top_edge_compact_lower_bound {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m : ℝ, 0 < δ ∧ 0 < m ∧
+      ∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ := by
+  obtain ⟨δ₀, hδ₀, hstrip⟩ := exists_top_edge_uniform_strip hab
+  let δ : ℝ := min (δ₀ / 2) (1 / 4 : ℝ)
+  have hδ : 0 < δ := by
+    dsimp [δ]
+    exact lt_min (by linarith) (by norm_num)
+  let s : Set (ℝ × ℝ) := Set.Icc a b ×ˢ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ)
+  have hscomp : IsCompact s := (isCompact_Icc.prod isCompact_Icc)
+  have hsne : s.Nonempty := by
+    refine ⟨(a, (1 / 2 : ℝ) - δ), ?_⟩
+    exact ⟨⟨le_rfl, hab⟩, ⟨le_rfl, by linarith⟩⟩
+  let F : ℝ × ℝ → ℝ := fun p =>
+    ‖CentralCoverAssembly.xiShiftedEntire
+      ((p.1 : ℂ) + Complex.I * (p.2 : ℂ))‖
+  have hcont_ent : Continuous CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+  have hF : Continuous F := by
+    have hmap : Continuous (fun p : ℝ × ℝ =>
+        ((p.1 : ℂ) + Complex.I * (p.2 : ℂ))) := by fun_prop
+    dsimp [F]
+    exact (hcont_ent.comp hmap).norm
+  have hFpos : ∀ p ∈ s, 0 < F p := by
+    intro p hp
+    have hxp : p.1 ∈ Set.Icc a b := hp.1
+    have hyp : p.2 ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ) := hp.2
+    have hygt : (1 / 2 : ℝ) - δ₀ < p.2 := by
+      dsimp [δ] at hyp ⊢
+      have hle : min (δ₀ / 2) (1 / 4 : ℝ) ≤ δ₀ / 2 := min_le_left _ _
+      linarith [hyp.1, hδ₀, hle]
+    have hygt_im : -(1 / 2 : ℝ) < p.2 := by
+      dsimp [δ] at hyp
+      have hle : min (δ₀ / 2) (1 / 4 : ℝ) ≤ (1 / 4 : ℝ) := min_le_right _ _
+      linarith [hyp.1, hle]
+    by_cases htop : p.2 = (1 / 2 : ℝ)
+    · have hne := xiShiftedEntire_ne_zero_top (x := p.1)
+      have hnepoint : CentralCoverAssembly.xiShiftedEntire
+          ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) ≠ 0 := by
+        rw [htop]
+        convert hne using 1 <;> norm_num <;> ring
+      exact norm_pos_iff.mpr hnepoint
+    · have hylt : p.2 < (1 / 2 : ℝ) := lt_of_le_of_ne hyp.2 htop
+      have hne := hstrip p.1 hxp p.2 hygt hylt
+      have him : ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)).im = p.2 := by simp
+      have hagree : _root_.xiShifted ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) =
+          CentralCoverAssembly.xiShiftedEntire ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) :=
+        CentralCoverAssembly.xiShifted_eq_entire_on_strip _
+          (by rw [him]; exact hygt_im)
+          (by rw [him]; exact hylt)
+      have hne_ent : CentralCoverAssembly.xiShiftedEntire
+          ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) ≠ 0 := by
+        rw [← hagree]
+        exact hne
+      exact norm_pos_iff.mpr hne_ent
+  obtain ⟨m, hm, hmlow⟩ := hscomp.exists_forall_le' hF.continuousOn hFpos
+  refine ⟨δ, m, hδ, hm, ?_⟩
+  intro x hx y hy
+  exact hmlow (x, y) ⟨hx, hy⟩
+
+theorem exists_bottom_edge_compact_lower_bound {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m : ℝ, 0 < δ ∧ 0 < m ∧
+      ∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ := by
+  obtain ⟨δ₀, hδ₀, hstrip⟩ := exists_bottom_edge_uniform_strip hab
+  let δ : ℝ := min (δ₀ / 2) (1 / 4 : ℝ)
+  have hδ : 0 < δ := by
+    dsimp [δ]
+    exact lt_min (by linarith) (by norm_num)
+  let s : Set (ℝ × ℝ) := Set.Icc a b ×ˢ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ)
+  have hscomp : IsCompact s := (isCompact_Icc.prod isCompact_Icc)
+  have hsne : s.Nonempty := by
+    refine ⟨(a, -(1 / 2 : ℝ)), ?_⟩
+    exact ⟨⟨le_rfl, hab⟩, ⟨le_rfl, by linarith⟩⟩
+  let F : ℝ × ℝ → ℝ := fun p =>
+    ‖CentralCoverAssembly.xiShiftedEntire
+      ((p.1 : ℂ) + Complex.I * (p.2 : ℂ))‖
+  have hcont_ent : Continuous CentralCoverAssembly.xiShiftedEntire :=
+    CentralCoverAssembly.xiShiftedEntire_differentiable.continuous
+  have hF : Continuous F := by
+    have hmap : Continuous (fun p : ℝ × ℝ =>
+        ((p.1 : ℂ) + Complex.I * (p.2 : ℂ))) := by fun_prop
+    dsimp [F]
+    exact (hcont_ent.comp hmap).norm
+  have hFpos : ∀ p ∈ s, 0 < F p := by
+    intro p hp
+    have hxp : p.1 ∈ Set.Icc a b := hp.1
+    have hyp : p.2 ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ) := hp.2
+    by_cases heq : p.2 = -(1 / 2 : ℝ)
+    · have hne := xiShiftedEntire_ne_zero_bottom (x := p.1)
+      have hnepoint : CentralCoverAssembly.xiShiftedEntire
+          ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) ≠ 0 := by
+        rw [heq]
+        convert hne using 1 <;> norm_num <;> ring
+      exact norm_pos_iff.mpr hnepoint
+    · have hygt : -(1 / 2 : ℝ) < p.2 := lt_of_le_of_ne hyp.1 (Ne.symm heq)
+      have hylt : p.2 < -(1 / 2 : ℝ) + δ₀ := by
+        dsimp [δ] at hyp ⊢
+        have hle : min (δ₀ / 2) (1 / 4 : ℝ) ≤ δ₀ / 2 := min_le_left _ _
+        linarith [hyp.2, hδ₀, hle]
+      have hne := hstrip p.1 hxp p.2 hygt hylt
+      have him : ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)).im = p.2 := by simp
+      have hagree : _root_.xiShifted ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) =
+          CentralCoverAssembly.xiShiftedEntire ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) :=
+        CentralCoverAssembly.xiShifted_eq_entire_on_strip _
+          (by rw [him]; exact hygt)
+          (by rw [him]; have hle : min (δ₀ / 2) (1 / 4 : ℝ) ≤ (1 / 4 : ℝ) := min_le_right _ _; dsimp [δ] at hyp; linarith [hyp.2, hle])
+      have hne_ent : CentralCoverAssembly.xiShiftedEntire
+          ((p.1 : ℂ) + Complex.I * (p.2 : ℂ)) ≠ 0 := by
+        rw [← hagree]
+        exact hne
+      exact norm_pos_iff.mpr hne_ent
+  obtain ⟨m, hm, hmlow⟩ := hscomp.exists_forall_le' hF.continuousOn hFpos
+  refine ⟨δ, m, hδ, hm, ?_⟩
+  intro x hx y hy
+  exact hmlow (x, y) ⟨hx, hy⟩
+
+theorem exists_deriv_bound_on_closedBall
+    (f : ℂ → ℂ) (hf : Differentiable ℂ f) {R : ℝ} (hR : 0 < R) :
+    ∃ M : ℝ, 0 < M ∧
+      ∀ z ∈ Metric.closedBall (0 : ℂ) R, ‖deriv f z‖ ≤ M := by
+  let R' : ℝ := R + 1
+  have hR' : 0 < R' := by dsimp [R']; linarith
+  obtain ⟨C, hC⟩ :=
+    (isCompact_closedBall (0 : ℂ) R').exists_bound_of_continuousOn
+      hf.continuous.continuousOn
+  let M : ℝ := max C 1
+  have hM : 0 < M := lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  refine ⟨M, hM, ?_⟩
+  intro z hz
+  let w : ℂ := z
+  have hz0 : dist z 0 ≤ R := by
+    exact Metric.mem_closedBall.mp hz
+  have hsphere : ∀ u ∈ Metric.sphere w (1 : ℝ),
+      u ∈ Metric.closedBall (0 : ℂ) R' := by
+    intro u hu
+    have huz : dist u z = (1 : ℝ) := by
+      simpa [w] using (Metric.mem_sphere.mp hu)
+    have htri : dist u 0 ≤ dist u z + dist z 0 := dist_triangle _ _ _
+    rw [huz] at htri
+    rw [Metric.mem_closedBall]
+    dsimp [R']
+    linarith
+  have hDC : DiffContOnCl ℂ f (Metric.ball w (1 : ℝ)) :=
+    hf.diffContOnCl
+  have hsphere_bound : ∀ u ∈ Metric.sphere w (1 : ℝ), ‖f u‖ ≤ C := by
+    intro u hu
+    exact hC u (hsphere u hu)
+  have hbound : ‖deriv f w‖ ≤ C / 1 :=
+    Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by norm_num) hDC
+      hsphere_bound
+  have hCM : C ≤ M := le_max_left _ _
+  calc
+    ‖deriv f z‖ = ‖deriv f w‖ := by rfl
+    _ ≤ C / 1 := hbound
+    _ = C := by ring
+    _ ≤ M := hCM
+
+theorem exists_top_edge_cauchy_data {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m M : ℝ, 0 < δ ∧ 0 < m ∧ 0 < M ∧
+      ∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M := by
+  obtain ⟨δ₀, m₀, hδ₀, hm₀, hbound₀⟩ := exists_top_edge_compact_lower_bound hab
+  let δ : ℝ := min δ₀ (1 / 4 : ℝ)
+  have hδ : 0 < δ := lt_min hδ₀ (by norm_num)
+  let R : ℝ := max |a| |b| + 2
+  have hR : 0 < R := by
+    dsimp [R]
+    have hnonneg : 0 ≤ max |a| |b| :=
+      le_trans (abs_nonneg a) (le_max_left _ _)
+    linarith
+  obtain ⟨M, hM, hderiv⟩ :=
+    exists_deriv_bound_on_closedBall CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable hR
+  refine ⟨δ, m₀, M, hδ, hm₀, hM, ?_⟩
+  intro x hx y hy
+  have hδle : δ ≤ (1 / 4 : ℝ) := min_le_right _ _
+  have hδle0 : δ ≤ δ₀ := min_le_left _ _
+  have hylow : (1 / 4 : ℝ) ≤ y := by linarith [hy.1, hδle]
+  have hyhigh : y ≤ (1 / 2 : ℝ) := hy.2
+  have hyabs : |y| ≤ 1 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have hxabs : |x| ≤ max |a| |b| :=
+    abs_le_max_abs_abs hx.1 hx.2
+  let w : ℂ := (x : ℂ) + Complex.I * (y : ℂ)
+  have hwball : w ∈ Metric.closedBall (0 : ℂ) R := by
+    rw [Metric.mem_closedBall]
+    have hw_norm : ‖w‖ ≤ max |a| |b| + 1 := by
+      dsimp [w]
+      calc
+        ‖(x : ℂ) + Complex.I * (y : ℂ)‖ ≤
+            ‖(x : ℂ)‖ + ‖Complex.I * (y : ℂ)‖ := norm_add_le _ _
+        _ = |x| + |y| := by
+          rw [Complex.norm_real, Real.norm_eq_abs, norm_mul, Complex.norm_I,
+            one_mul, Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ max |a| |b| + 1 := by linarith
+    have hdist : dist w 0 = ‖w‖ := by simp [dist_eq_norm]
+    rw [hdist]
+    dsimp [R]
+    linarith
+  have hlow : m₀ ≤ ‖CentralCoverAssembly.xiShiftedEntire w‖ := by
+    have hy₀ : y ∈ Set.Icc ((1 / 2 : ℝ) - δ₀) (1 / 2 : ℝ) := by
+      constructor
+      · dsimp [δ] at hy ⊢
+        exact le_trans (sub_le_sub_left (min_le_left _ _) _) hy.1
+      · exact hy.2
+    exact hbound₀ x hx y hy₀
+  have hD : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ M :=
+    hderiv w hwball
+  exact ⟨by simpa [w] using hlow, by simpa [w] using hD⟩
+
+theorem exists_bottom_edge_cauchy_data {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m M : ℝ, 0 < δ ∧ 0 < m ∧ 0 < M ∧
+      ∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M := by
+  obtain ⟨δ₀, m₀, hδ₀, hm₀, hbound₀⟩ := exists_bottom_edge_compact_lower_bound hab
+  let δ : ℝ := min (δ₀ / 2) (1 / 4 : ℝ)
+  have hδ : 0 < δ := by
+    dsimp [δ]
+    exact lt_min (by linarith) (by norm_num)
+  let R : ℝ := max |a| |b| + 2
+  have hR : 0 < R := by
+    dsimp [R]
+    have hnonneg : 0 ≤ max |a| |b| :=
+      le_trans (abs_nonneg a) (le_max_left _ _)
+    linarith
+  obtain ⟨M, hM, hderiv⟩ :=
+    exists_deriv_bound_on_closedBall CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable hR
+  refine ⟨δ, m₀, M, hδ, hm₀, hM, ?_⟩
+  intro x hx y hy
+  have hδle : δ ≤ (1 / 4 : ℝ) := min_le_right _ _
+  have hδle0 : δ ≤ δ₀ := by
+    dsimp [δ]
+    exact le_trans (min_le_left _ _) (by linarith)
+  have hylow : -(1 / 2 : ℝ) ≤ y := hy.1
+  have hyhigh : y ≤ -(1 / 2 : ℝ) + δ := hy.2
+  have hyabs : |y| ≤ 1 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have hxabs : |x| ≤ max |a| |b| :=
+    abs_le_max_abs_abs hx.1 hx.2
+  let w : ℂ := (x : ℂ) + Complex.I * (y : ℂ)
+  have hwball : w ∈ Metric.closedBall (0 : ℂ) R := by
+    rw [Metric.mem_closedBall]
+    have hw_norm : ‖w‖ ≤ max |a| |b| + 1 := by
+      dsimp [w]
+      calc
+        ‖(x : ℂ) + Complex.I * (y : ℂ)‖ ≤
+            ‖(x : ℂ)‖ + ‖Complex.I * (y : ℂ)‖ := norm_add_le _ _
+        _ = |x| + |y| := by
+          rw [Complex.norm_real, Real.norm_eq_abs, norm_mul, Complex.norm_I,
+            one_mul, Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ max |a| |b| + 1 := by linarith
+    have hdist : dist w 0 = ‖w‖ := by simp [dist_eq_norm]
+    rw [hdist]
+    dsimp [R]
+    linarith
+  have hlow : m₀ ≤ ‖CentralCoverAssembly.xiShiftedEntire w‖ := by
+    have hy₀ : y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ₀) := by
+      constructor
+      · exact hy.1
+      · linarith [hy.2, hδle0]
+    exact hbound₀ x hx y hy₀
+  have hD : ‖deriv CentralCoverAssembly.xiShiftedEntire w‖ ≤ M :=
+    hderiv w hwball
+  exact ⟨by simpa [w] using hlow, by simpa [w] using hD⟩
+
+theorem exists_imaginary_axis_compact_lower_bound :
+    ∃ m : ℝ, 0 < m ∧
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire (Complex.I * (y : ℂ))‖ := by
+  let K : Set ℝ := Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ)
+  have hK : IsCompact K := isCompact_Icc
+  have hKne : K.Nonempty := by
+    refine ⟨0, ?_⟩
+    exact ⟨by norm_num, by norm_num⟩
+  let F : ℝ → ℝ := fun y =>
+    ‖CentralCoverAssembly.xiShiftedEntire (Complex.I * (y : ℂ))‖
+  have hFcont : Continuous F := by
+    have hmap : Continuous (fun y : ℝ => Complex.I * (y : ℂ)) := by fun_prop
+    exact (CentralCoverAssembly.xiShiftedEntire_differentiable.continuous.comp hmap).norm
+  have hFpos : ∀ y ∈ K, 0 < F y := by
+    intro y hy
+    have hylo : -(1 / 2 : ℝ) ≤ y := hy.1
+    have hyhi : y ≤ (1 / 2 : ℝ) := hy.2
+    have hne : CentralCoverAssembly.xiShiftedEntire (Complex.I * (y : ℂ)) ≠ 0 := by
+      by_cases htop : y = (1 / 2 : ℝ)
+      · subst y
+        have hv : CentralCoverAssembly.xiShiftedEntire
+            (Complex.I * ((1 / 2 : ℝ) : ℂ)) = (1 / 2 : ℂ) := by
+          simpa [div_eq_mul_inv] using
+            Door3BoundaryEndpoints.xiShiftedEntire_at_pos_I_half
+        rw [hv]
+        norm_num
+      by_cases hbot : y = -(1 / 2 : ℝ)
+      · subst y
+        have hne : CentralCoverAssembly.xiShiftedEntire
+            (-(Complex.I / 2)) ≠ 0 := by
+          rw [Door3BoundaryEndpoints.xiShiftedEntire_at_neg_I_half]
+          norm_num
+        convert hne using 1 <;> norm_num [div_eq_mul_inv]
+      have hylo' : -(1 / 2 : ℝ) < y := lt_of_le_of_ne hylo (Ne.symm hbot)
+      have hyhi' : y < (1 / 2 : ℝ) := lt_of_le_of_ne hyhi htop
+      have hxi := xiShifted_ne_zero_on_imaginary_axis_all_proved y hylo' hyhi'
+      have hzlo : -(1 / 2 : ℝ) < (Complex.I * (y : ℂ)).im := by
+        simpa [Complex.mul_im] using hylo'
+      have hzhi : (Complex.I * (y : ℂ)).im < (1 / 2 : ℝ) := by
+        simpa [Complex.mul_im] using hyhi'
+      have heq := CentralCoverAssembly.xiShifted_eq_entire_on_strip
+        (Complex.I * (y : ℂ)) hzlo hzhi
+      intro hzero
+      apply hxi
+      rw [heq]
+      exact hzero
+    exact norm_pos_iff.mpr hne
+  obtain ⟨m, hm, hmlow⟩ := hK.exists_forall_le' hFcont.continuousOn hFpos
+  refine ⟨m, hm, ?_⟩
+  intro y hy
+  exact hmlow y hy
+
+theorem exists_two_edge_cauchy_data {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m M : ℝ, 0 < δ ∧ δ ≤ (1 / 4 : ℝ) ∧ 0 < m ∧ 0 < M ∧
+      (∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+            ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+          ‖deriv CentralCoverAssembly.xiShiftedEntire
+            ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M) ∧
+      (∀ x ∈ Set.Icc a b, ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ),
+        m ≤ ‖CentralCoverAssembly.xiShiftedEntire
+            ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+          ‖deriv CentralCoverAssembly.xiShiftedEntire
+            ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M) := by
+  obtain ⟨δt, mt, Mt, hδt, hmt, hMt, htop⟩ := exists_top_edge_cauchy_data hab
+  obtain ⟨δb, mb, Mb, hδb, hmb, hMb, hbot⟩ := exists_bottom_edge_cauchy_data hab
+  let δ₀ : ℝ := min δt δb
+  let δ : ℝ := min δ₀ (1 / 4 : ℝ)
+  let m : ℝ := min mt mb
+  let M : ℝ := max Mt Mb
+  have hδ₀ : 0 < δ₀ := lt_min hδt hδb
+  have hδ : 0 < δ := lt_min hδ₀ (by norm_num)
+  have hδsmall : δ ≤ (1 / 4 : ℝ) := min_le_right _ _
+  have hm : 0 < m := lt_min hmt hmb
+  have hM : 0 < M := lt_of_lt_of_le hMt (le_max_left _ _)
+  refine ⟨δ, m, M, hδ, hδsmall, hm, hM, ?_, ?_⟩
+  · intro x hx y hy
+    have hy' : y ∈ Set.Icc ((1 / 2 : ℝ) - δt) (1 / 2 : ℝ) := by
+      constructor
+      · exact le_trans (sub_le_sub_left
+          (le_trans (min_le_left _ _) (min_le_left _ _)) _) hy.1
+      · exact hy.2
+    obtain ⟨hval, hderiv⟩ := htop x hx y hy'
+    exact ⟨le_trans (min_le_left _ _) hval, le_trans hderiv (le_max_left _ _)⟩
+  · intro x hx y hy
+    have hy' : y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δb) := by
+      constructor
+      · exact hy.1
+      · have hδb' : δ ≤ δb := by
+          dsimp [δ, δ₀]
+          exact le_trans (min_le_left _ _) (min_le_right _ _)
+        linarith [hy.2, hδb']
+    obtain ⟨hval, hderiv⟩ := hbot x hx y hy'
+    exact ⟨le_trans (min_le_right _ _) hval, le_trans hderiv (le_max_right _ _)⟩
+
+theorem exists_two_edge_open_cauchy_data {a b : ℝ} (hab : a ≤ b) :
+    ∃ δ m M : ℝ, 0 < δ ∧ 0 < m ∧ 0 < M ∧
+      (∀ x ∈ Set.Icc a b, ∀ y : ℝ,
+        (1 / 2 : ℝ) - δ ≤ y → y < (1 / 2 : ℝ) →
+          m ≤ ‖_root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+          ‖deriv _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M) ∧
+      (∀ x ∈ Set.Icc a b, ∀ y : ℝ,
+        -(1 / 2 : ℝ) < y → y ≤ -(1 / 2 : ℝ) + δ →
+          m ≤ ‖_root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ))‖ ∧
+          ‖deriv _root_.xiShifted ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ M) := by
+  obtain ⟨δ, m, M, hδ, hδsmall, hm, hM, htop, hbot⟩ :=
+    exists_two_edge_cauchy_data hab
+  refine ⟨δ, m, M, hδ, hm, hM, ?_, ?_⟩
+  · intro x hx y hylo hyhi
+    have hyclosed : y ∈ Set.Icc ((1 / 2 : ℝ) - δ) (1 / 2 : ℝ) :=
+      ⟨hylo, le_of_lt hyhi⟩
+    obtain ⟨hval, hderiv⟩ := htop x hx y hyclosed
+    let z : ℂ := (x : ℂ) + Complex.I * (y : ℂ)
+    have him : z.im = y := by simp [z]
+    have hstrip_lo : -(1 / 2 : ℝ) < y := by linarith [hylo, hδsmall]
+    have hz_lo : -(1 / 2 : ℝ) < z.im := by simpa [him] using hstrip_lo
+    have hz_hi : z.im < (1 / 2 : ℝ) := by simpa [him] using hyhi
+    have heq : _root_.xiShifted z = CentralCoverAssembly.xiShiftedEntire z :=
+      CentralCoverAssembly.xiShifted_eq_entire_on_strip z hz_lo hz_hi
+    have hdeq : deriv _root_.xiShifted z =
+        deriv CentralCoverAssembly.xiShiftedEntire z :=
+      CentralCoverAssembly.deriv_xiShifted_eq_entire_of_mem_strip z hz_lo hz_hi
+    exact ⟨by simpa [z, heq] using hval, by simpa [z, hdeq] using hderiv⟩
+  · intro x hx y hylo hyhi
+    have hyclosed : y ∈ Set.Icc (-(1 / 2 : ℝ)) (- (1 / 2 : ℝ) + δ) :=
+      ⟨le_of_lt hylo, hyhi⟩
+    obtain ⟨hval, hderiv⟩ := hbot x hx y hyclosed
+    let z : ℂ := (x : ℂ) + Complex.I * (y : ℂ)
+    have him : z.im = y := by simp [z]
+    have hz_lo : -(1 / 2 : ℝ) < z.im := by simpa [him] using hylo
+    have hz_hi : z.im < (1 / 2 : ℝ) := by linarith [hyhi, hδsmall]
+    have heq : _root_.xiShifted z = CentralCoverAssembly.xiShiftedEntire z :=
+      CentralCoverAssembly.xiShifted_eq_entire_on_strip z hz_lo hz_hi
+    have hdeq : deriv _root_.xiShifted z =
+        deriv CentralCoverAssembly.xiShiftedEntire z :=
+      CentralCoverAssembly.deriv_xiShifted_eq_entire_of_mem_strip z hz_lo hz_hi
+    exact ⟨by simpa [z, heq] using hval, by simpa [z, hdeq] using hderiv⟩
+
+#print axioms xiShiftedEntire_eq_xiShifted_top
+#print axioms xiShiftedEntire_ne_zero_top
+#print axioms exists_top_edge_lower_bound
+#print axioms xiShiftedEntire_eq_xiShifted_bottom
+#print axioms xiShiftedEntire_ne_zero_bottom
+#print axioms exists_bottom_edge_lower_bound
+#print axioms exists_top_edge_local_strip
+#print axioms exists_top_edge_uniform_strip
+#print axioms lower_boundary_nonvanishing_from_outer_bound
+#print axioms exists_bottom_edge_uniform_strip
+#print axioms exists_top_edge_compact_lower_bound
+#print axioms exists_bottom_edge_compact_lower_bound
+#print axioms exists_deriv_bound_on_closedBall
+#print axioms exists_top_edge_cauchy_data
+#print axioms exists_bottom_edge_cauchy_data
+#print axioms exists_imaginary_axis_compact_lower_bound
+#print axioms exists_two_edge_cauchy_data
+#print axioms exists_two_edge_open_cauchy_data
+
+end Door3TopEdge

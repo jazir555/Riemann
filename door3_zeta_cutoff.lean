@@ -1,5 +1,6 @@
 import zeta_rigorous
 import central_cover_assembly
+import door3_tail_eta_upper
 
 /-! # CutR10 zeta lower-bound adapter
 
@@ -23,6 +24,18 @@ theorem sCut_im : sCut.im = (10 : ℝ) := by
 theorem sCut_pos : 0 < sCut.re := by rw [sCut_re]; norm_num
 
 theorem sCut_re_ne_one : sCut.re ≠ 1 := by rw [sCut_re]; norm_num
+
+/-! The unconditional eta-pair majorant also supplies a finite upper wall at
+the cutoff itself.  This is used by derivative-side suppliers; it carries no
+numerical or analytic hypothesis beyond the defining cutoff coordinates. -/
+
+theorem zeta_cutoff_upper_125 : ‖riemannZeta sCut‖ ≤ (125 : ℝ) := by
+  apply Door3TailEtaUpper.zeta_upper_tail_quarter
+  · rw [sCut_re]
+    norm_num
+  · rw [sCut_re]
+  · rw [sCut_im]
+    norm_num
 
 /-- The eta conversion factor at the cutoff has a simple universal upper bound. -/
 theorem eta_factor_cutoff_upper :
@@ -136,6 +149,194 @@ theorem eta_factor_cutoff_upper_one :
   have hnonneg : 0 ≤ ‖(1 : ℂ) - q‖ := norm_nonneg _
   nlinarith
 
+/-! A sharper cutoff factor is needed for the named `7/5` zeta floor.  The
+    preceding proof deliberately stopped at `1`; retaining the exact
+    real-part identity and the same quadratic cosine enclosure gives a
+    rational bound below `9/10`. -/
+
+theorem eta_factor_cutoff_upper_nine_tenths :
+    ‖1 - (2 : ℂ) ^ ((1 : ℂ) - sCut)‖ ≤ (9 / 10 : ℝ) := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - sCut)
+  have hqre : q.re = Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    dsimp [q]
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re]
+    have hargre : (Complex.log (2 : ℂ) * (1 - sCut)).re = Real.log 2 / 2 := by
+      rw [Complex.mul_re, hlogre, hlogim]
+      simp [sCut]
+      ring
+    have hargim : (Complex.log (2 : ℂ) * (1 - sCut)).im = -(10 * Real.log 2) := by
+      rw [Complex.mul_im, hlogre, hlogim]
+      simp [sCut]
+      ring
+    rw [hargre, hargim]
+    have hexp : Real.exp (Real.log 2 / 2) = Real.sqrt 2 := by
+      calc
+        Real.exp (Real.log 2 / 2) = Real.exp (Real.log 2 * (1 / 2 : ℝ)) := by congr 1 <;> ring
+        _ = (2 : ℝ) ^ (1 / 2 : ℝ) :=
+          (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+        _ = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    rw [hexp, Real.cos_neg]
+  have hqnorm : ‖q‖ = Real.sqrt 2 := by
+    dsimp [q]
+    rw [two_cpow_norm]
+    have hpow : (2 : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    convert hpow using 1 <;> norm_num [sCut]
+  have hsqid : ‖(1 : ℂ) - q‖ ^ 2 = 1 + ‖q‖ ^ 2 - 2 * q.re := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have hq : ‖q‖ ^ 2 = q.re ^ 2 + q.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      ring
+    rw [hq]
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im,
+      sub_zero, zero_sub]
+    ring
+  have hcos : (789 / 1000 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+    have hloglo := Real.log_two_gt_d9
+    have hloghi := Real.log_two_lt_d9
+    have hθlo : (6.931471803 : ℝ) < 10 * Real.log 2 := by linarith
+    have hθhi : 10 * Real.log 2 < (6.931471808 : ℝ) := by linarith
+    have hπlo := Real.pi_gt_d4
+    have hπhi := Real.pi_lt_d4
+    have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+    have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+    have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+      have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+      nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+    have hc := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 2 - 2 * Real.pi)
+    have hcosd : (789 / 1000 : ℝ) ≤
+        Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+      nlinarith [hc, hsq]
+    rw [Real.cos_sub_two_pi] at hcosd
+    exact hcosd
+  have hsqrt : (7 / 5 : ℝ) ≤ Real.sqrt 2 := by
+    have hs := Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)
+    nlinarith [Real.sqrt_nonneg 2]
+  have hprod : (1095 / 1000 : ℝ) ≤
+      Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    have hc0 : 0 ≤ Real.cos (10 * Real.log 2) := by linarith
+    have hs0 : 0 ≤ Real.sqrt 2 := Real.sqrt_nonneg 2
+    have hmul := mul_le_mul hsqrt hcos (by norm_num) (by linarith)
+    nlinarith [hmul]
+  have hsq : ‖(1 : ℂ) - q‖ ^ 2 ≤ (81 / 100 : ℝ) := by
+    rw [hsqid, hqnorm, hqre]
+    have hsqroot : (Real.sqrt 2) ^ 2 = (2 : ℝ) :=
+      Real.sq_sqrt (by norm_num)
+    nlinarith [hprod, hsqroot]
+  have hnonneg : 0 ≤ ‖(1 : ℂ) - q‖ := norm_nonneg _
+  change ‖(1 : ℂ) - q‖ ≤ (9 / 10 : ℝ)
+  nlinarith
+
+/-! The same phase enclosure gives a quantitative lower wall for the
+conversion factor.  It is useful when a cutoff certificate is phrased as an
+absolute eta sum rather than as a zeta lower bound. -/
+
+theorem eta_factor_cutoff_lower_nine_hundredths :
+    (9 / 100 : ℝ) ≤ ‖1 - (2 : ℂ) ^ ((1 : ℂ) - sCut)‖ := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - sCut)
+  have hqre : q.re = Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    dsimp [q]
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re]
+    have hargre : (Complex.log (2 : ℂ) * (1 - sCut)).re = Real.log 2 / 2 := by
+      rw [Complex.mul_re, hlogre, hlogim]
+      simp [sCut]
+      ring
+    have hargim : (Complex.log (2 : ℂ) * (1 - sCut)).im = -(10 * Real.log 2) := by
+      rw [Complex.mul_im, hlogre, hlogim]
+      simp [sCut]
+      ring
+    rw [hargre, hargim]
+    have hexp : Real.exp (Real.log 2 / 2) = Real.sqrt 2 := by
+      calc
+        Real.exp (Real.log 2 / 2) = Real.exp (Real.log 2 * (1 / 2 : ℝ)) := by congr 1 <;> ring
+        _ = (2 : ℝ) ^ (1 / 2 : ℝ) :=
+          (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+        _ = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    rw [hexp, Real.cos_neg]
+  have hcos : (789 / 1000 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+    have hloglo := Real.log_two_gt_d9
+    have hloghi := Real.log_two_lt_d9
+    have hθlo : (6.931471803 : ℝ) < 10 * Real.log 2 := by linarith
+    have hθhi : 10 * Real.log 2 < (6.931471808 : ℝ) := by linarith
+    have hπlo := Real.pi_gt_d4
+    have hπhi := Real.pi_lt_d4
+    have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+    have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+    have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+      have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+      nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+    have hc := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 2 - 2 * Real.pi)
+    have hcosd : (789 / 1000 : ℝ) ≤
+        Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+      nlinarith [hc, hsq]
+    rw [Real.cos_sub_two_pi] at hcosd
+    exact hcosd
+  have hsqrt : (7 / 5 : ℝ) ≤ Real.sqrt 2 := by
+    have hs := Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)
+    nlinarith [Real.sqrt_nonneg 2]
+  have hqre_lo : (1095 / 1000 : ℝ) ≤ q.re := by
+    rw [hqre]
+    have hc0 : 0 ≤ Real.cos (10 * Real.log 2) := by linarith
+    have hmul := mul_le_mul hsqrt hcos (by norm_num) (by linarith)
+    nlinarith [hmul]
+  have hreal : (9 / 100 : ℝ) ≤ |(1 - q).re| := by
+    have hre : (1 - q).re = 1 - q.re := by simp
+    rw [hre, abs_of_nonpos]
+    · linarith
+    · linarith
+  exact le_trans hreal (Complex.abs_re_le_norm (1 - q))
+
+theorem eta_factor_cutoff_ne_zero :
+    (1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - sCut) ≠ 0 := by
+  intro h
+  have hz : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - sCut)‖ = 0 := by rw [h]; simp
+  have hlow := eta_factor_cutoff_lower_nine_hundredths
+  rw [hz] at hlow
+  norm_num at hlow
+
+theorem zeta_cutoff_lower_of_certificate_nine_tenths
+    (N : ℕ) (S : ℂ)
+    (hSdef : S = ∑ k ∈ Finset.range N, etaDirichletTerm sCut k)
+    (slow rtail : ℝ)
+    (hSlow : slow ≤ ‖S‖)
+    (hTail : ‖(∑' m, etaPairTerm sCut m) - S‖ ≤ rtail)
+    (hgap : rtail < slow) :
+    (slow - rtail) / (9 / 10 : ℝ) ≤ ‖riemannZeta sCut‖ := by
+  have h := zeta_lower_of_Sn_tail_factor sCut_pos sCut_re_ne_one N S hSdef
+    slow hSlow rtail hTail (9 / 10) (by norm_num)
+      eta_factor_cutoff_upper_nine_tenths
+  exact h
+
+theorem cutR10_zetaRemainder_of_certificate_nine_tenths
+    (N : ℕ) (S : ℂ)
+    (hSdef : S = ∑ k ∈ Finset.range N, etaDirichletTerm sCut k)
+    (slow rtail : ℝ) (hSlow : slow ≤ ‖S‖)
+    (hTail : ‖(∑' m, etaPairTerm sCut m) - S‖ ≤ rtail)
+    (hEnough : (7 / 5 : ℝ) * (9 / 10 : ℝ) + rtail ≤ slow) :
+    Door3CutR10Center.cutR10_zetaRemainder := by
+  unfold Door3CutR10Center.cutR10_zetaRemainder
+  have h := zeta_cutoff_lower_of_certificate_nine_tenths N S hSdef
+    slow rtail hSlow hTail (by linarith)
+  have hbound : (7 / 5 : ℝ) ≤ (slow - rtail) / (9 / 10 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num)]
+    linarith
+  have hscut : sCut = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.CutR10.center := by
+    rw [Door3CutR10Center.cutR10_s_eq]
+    simp [sCut]
+  rw [hscut] at h
+  exact hbound.trans h
+
 theorem zeta_cutoff_lower_of_certificate
     (N : ℕ) (S : ℂ)
     (hSdef : S = ∑ k ∈ Finset.range N, etaDirichletTerm sCut k)
@@ -225,6 +426,13 @@ end Door3ZetaCutoff
 
 #print axioms Door3ZetaCutoff.zeta_cutoff_lower_of_certificate
 #print axioms Door3ZetaCutoff.zeta_cutoff_lower_of_certificate_one
+#print axioms Door3ZetaCutoff.zeta_cutoff_upper_125
+#print axioms Door3ZetaCutoff.eta_factor_cutoff_upper_nine_tenths
+#print axioms Door3ZetaCutoff.eta_factor_cutoff_lower_nine_hundredths
+#print axioms Door3ZetaCutoff.zeta_cutoff_lower_of_certificate_nine_tenths
+#print axioms Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate_nine_tenths
 #print axioms Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate
 #print axioms Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate_one
 #print axioms Door3ZetaCutoff.cutR10_derivRemainder_of_closedBall_sup
+
+#print axioms Door3ZetaCutoff.eta_factor_cutoff_ne_zero

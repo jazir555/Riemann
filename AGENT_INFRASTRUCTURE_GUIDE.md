@@ -2796,3 +2796,79 @@ the tighter `DZ3o_true_prefix_le_three`: every prefix of the true eta block
 `[16,32)` is bounded by `3`, using the exact norm identity and proved
 amplitude floors.  These are unconditional finite-sum bounds; the middle-block
 cancellation obligation remains separate.
+
+
+## Door-3 update: real critical interval eta feeder (2026-09-06)
+
+`door3_tail_eta_upper.lean` now proves `Door3TailEtaUpper.zeta_real_nonzero_critical`: for every real `0 < t < 1`, `ζ(t) ≠ 0`.  The proof rewrites the continued eta value as a convergent paired series, identifies each real pair with a strictly positive real `rpow` difference, and applies `Summable.tsum_pos`; the eta factor is separately shown nonzero.  `door3_boundary_real.lean` exports this as `zetaRealNonzeroInCritical_proved` and discharges the corresponding imaginary-axis `xiShifted` and hard-difference statements.  These declarations build with only `[propext, Classical.choice, Quot.sound]`.  This closes that real-zeta feeder; it does not discharge the 40 central `xiShifted` fencing fields, the real-axis base bounds, or the mollified tail gap.
+
+The same feeder also proves `xiShifted_ne_zero_at_origin_proved`, extends the imaginary-axis result through `y = 0` as `xiShifted_ne_zero_on_imaginary_axis_all_proved`, and proves the corresponding hard-difference nonvanishing at the origin and on the full imaginary axis. These are boundary facts only and do not discharge the central rectangle certificates.
+
+It also exports `classicalXiPrefactor_ne_zero_on_real_critical_proved` and `classicalXi_ne_zero_on_real_critical_proved`, so the real-zeta feeder can be consumed directly at the classical-ξ layer. Their axiom reports contain only the standard Lean axioms.
+
+`Door3TailEtaUpper.zeta_real_nonzero_positive` and its wrapper `zetaRealNonzeroPositive_proved` extend the real-zeta result from `(0,1)` to every positive real argument, using the eta-pair proof below `1`, the standard value at `1`, and the Euler-product nonvanishing theorem above `1`.
+
+## Boundary endpoint consistency feeder (2026-09-06)
+
+`door3_boundary_endpoints.lean` proves without assumptions and without new axioms that the totalized product definition satisfies
+
+* `_root_.xiShifted (I/2) = 0` and `_root_.xiShifted (-(I/2)) = 0`, because the polynomial prefactor vanishes at `s=0` and `s=1`;
+* `CentralCoverAssembly.xiShiftedEntire (I/2) = 1/2` and `CentralCoverAssembly.xiShiftedEntire (-(I/2)) = 1/2`.
+
+These points lie on the strip boundary and therefore are excluded from the interior cover. The result records the exact endpoint behavior needed when treating edge strips and prevents using the interior identity there. The module reports only `[propext, Classical.choice, Quot.sound]`.
+
+`Door3TailEtaUpper.zeta_re_zero_nonzero` now exports the unconditional open imaginary-axis zeta result: `Re s = 0` and `Im s ≠ 0` imply `ζ(s) ≠ 0`, by the functional equation and the established `Re(1-s)=1` Euler-product zero-free theorem. `xiShifted_ne_zero_on_top_edge_proved` consumes this together with the exact nonzero Gamma, pi-power, and polynomial factors to prove the totalized shifted xi is nonzero at every open top-edge point `x + I/2` with `x ≠ 0`. The endpoint `x=0` remains the separately recorded totalization zero.
+
+## Top-edge compact lower-bound feeder (2026-09-06)
+
+`door3_top_edge.lean` proves that `xiShiftedEntire` agrees with the totalized product `xiShifted` at every open top-edge point `x + I/2` with `x ≠ 0`, and separately repairs the endpoint `x=0` using the entire extension's exact value there. It proves the corresponding bottom-edge statements at `x - I/2` using the Euler-product zero-free theorem on `Re s = 1`, together with the bottom endpoint value. Compactness then gives a strictly positive uniform lower bound on either edge over every closed real interval. This is unconditional and uses only the standard Lean axioms. The result supplies qualitative outer-bound values required by the top-touching boundary lemma; explicit derivative suprema and the quantitative edge-strip constants remain separate obligations.
+
+The same module also proves `exists_top_edge_local_strip`: at each fixed real `x`, continuity on a compact closed ball gives a Cauchy derivative bound and hence an open zero-free vertical neighbourhood below the top edge.
+
+`exists_top_edge_uniform_strip` now supplies that compact-region step: for every closed interval `[a,b]`, one obtains a single positive width `δ` for which the open strip `1/2−δ < Im z < 1/2` above `[a,b]` is zero-free. The theorem is unconditional, but it does not provide the numerical width `0.01` needed by the fixed edge-strip decomposition; proving `δ ≥ 0.01` remains a quantitative bound obligation.
+
+The module also adds `lower_boundary_nonvanishing_from_outer_bound`, obtained by translating the lower edge to the existing base-strip fencing theorem. It is an unconditional generic lower-edge counterpart; a numerical lower-edge width and the remaining zeta/derivative suppliers are still separate.
+
+`exists_bottom_edge_uniform_strip` is the matching compact-interval result for the lower edge. Both edge sides now have unconditional qualitative uniform-width certificates; neither supplies the fixed numerical `0.01` margin required by the current cell grid.
+
+The same file now proves `exists_top_edge_compact_lower_bound` and
+`exists_bottom_edge_compact_lower_bound`. After shrinking the qualitative
+edge width, compactness of the closed interval-by-height rectangle gives a
+strictly positive minimum of `‖xiShiftedEntire‖` on each closed edge strip,
+including the endpoint edge itself. These minima are unconditional and are
+available for later Rouché or Taylor estimates; they remain existential and
+do not replace the missing explicit `0.01` numerical certificates.
+
+It also exports `exists_deriv_bound_on_closedBall`: every differentiable
+complex function has an existential finite derivative bound on any prescribed
+closed ball, obtained from a compact outer-ball function bound and Cauchy's
+derivative estimate. This is an unconditional reusable supplier for later
+cutoff and edge certificates; its bound is qualitative until a numerical
+supremum for the particular function is proved.
+
+Finally, `exists_top_edge_cauchy_data` packages the two preceding outputs over
+any closed real interval: it supplies positive `δ`, `m`, and `M` so that the
+closed strip of height `δ` below the top edge has the lower bound `m` for
+`‖xiShiftedEntire‖` and derivative bound `M`. The data are unconditional but
+qualitative; the fixed `δ ≥ 0.01` and numerical values required by the central
+cell certificate remain open.
+
+The symmetric `exists_bottom_edge_cauchy_data` theorem supplies the same
+qualitative lower and derivative data on a closed strip above the bottom edge.
+It likewise leaves the fixed-width and numerical central-cell estimates open.
+
+`exists_two_edge_cauchy_data` combines both sides over one interval, shrinking
+the width and lower bound and enlarging the derivative bound. This gives a
+single unconditional interface for later two-edge assembly while preserving
+the still-open numerical obligations.
+
+`exists_two_edge_open_cauchy_data` transfers that package through the exact
+entire-extension identity and derivative identity, yielding lower and
+derivative bounds for the original `xiShifted` on the open top and bottom edge
+strips. Its width is still qualitative and therefore does not discharge the
+fixed `0.01` edge cells.
+
+The same module now proves `exists_imaginary_axis_compact_lower_bound`: the
+entire extension has a strictly positive minimum on the complete closed
+imaginary-axis segment `[-1/2,1/2]`. The proof handles both totalization
+endpoints explicitly and uses the unconditional eta-based interior feeder.

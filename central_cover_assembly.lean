@@ -1468,21 +1468,21 @@ theorem R02_mem_gridFine :
 /-- The two remaining numerical enclosures for `R02` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R02_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R02.radius ≤ ‖xiShifted R02.center‖) ∧
-  (∀ w, R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R02.radius ≤ ‖xiShifted R02.center‖) ∧
+  (∀ w, R02.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R02_fencing_of_bounds (h : R02_leaf_obligations) :
-    CellFencingHypotheses R02 0.002 0.05 :=
+    CellFencingHypotheses R02 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R02_lowerBound_of_bounds (h : R02_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R02 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R02 0.002 0.07
     R02_strip_lo R02_strip_hi (R02_fencing_of_bounds h)
 
 noncomputable def R02_zeroFree_of_bounds (h : R02_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R02 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R02 0.002 fine_eps_outer_pos 0.07
     R02_strip_lo R02_strip_hi h.2 h.1
 
 theorem R02_nonvanishing_of_bounds (h : R02_leaf_obligations) {z : ℂ}
@@ -1490,7 +1490,7 @@ theorem R02_nonvanishing_of_bounds (h : R02_leaf_obligations) {z : ℂ}
     (hy0 : R02.y0 ≤ z.im) (hy1 : z.im ≤ R02.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R02 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R02 0.002 0.07
       R02_strip_lo R02_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -1505,7 +1505,7 @@ theorem R02_H_instance (h : R02_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R02, 0.002, 0.05, rfl, rfl, rfl, rfl, R02_strip_lo, R02_strip_hi,
+  exact ⟨R02, 0.002, 0.07, rfl, rfl, rfl, rfl, R02_strip_lo, R02_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 #print axioms R02_H_instance
@@ -2070,21 +2070,21 @@ theorem R09_mem_gridFine :
 /-- The two remaining numerical enclosures for `R09` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R09_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R09.radius ≤ ‖xiShifted R09.center‖) ∧
-  (∀ w, R09.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R09.radius ≤ ‖xiShifted R09.center‖) ∧
+  (∀ w, R09.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R09_fencing_of_bounds (h : R09_leaf_obligations) :
-    CellFencingHypotheses R09 0.002 0.05 :=
+    CellFencingHypotheses R09 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R09_lowerBound_of_bounds (h : R09_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R09 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R09 0.002 0.07
     R09_strip_lo R09_strip_hi (R09_fencing_of_bounds h)
 
 noncomputable def R09_zeroFree_of_bounds (h : R09_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R09 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R09 0.002 fine_eps_outer_pos 0.07
     R09_strip_lo R09_strip_hi h.2 h.1
 
 theorem R09_nonvanishing_of_bounds (h : R09_leaf_obligations) {z : ℂ}
@@ -2092,7 +2092,7 @@ theorem R09_nonvanishing_of_bounds (h : R09_leaf_obligations) {z : ℂ}
     (hy0 : R09.y0 ≤ z.im) (hy1 : z.im ≤ R09.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R09 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R09 0.002 0.07
       R09_strip_lo R09_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -2107,7 +2107,7 @@ theorem R09_H_instance (h : R09_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R09, 0.002, 0.05, rfl, rfl, rfl, rfl, R09_strip_lo, R09_strip_hi,
+  exact ⟨R09, 0.002, 0.07, rfl, rfl, rfl, rfl, R09_strip_lo, R09_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 #print axioms R09_H_instance
@@ -2615,21 +2615,21 @@ theorem R12_mem_gridFine :
 /-- The two remaining numerical enclosures for `R12` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R12_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R12.radius ≤ ‖xiShifted R12.center‖) ∧
-  (∀ w, R12.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R12.radius ≤ ‖xiShifted R12.center‖) ∧
+  (∀ w, R12.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R12_fencing_of_bounds (h : R12_leaf_obligations) :
-    CellFencingHypotheses R12 0.002 0.05 :=
+    CellFencingHypotheses R12 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R12_lowerBound_of_bounds (h : R12_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R12 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R12 0.002 0.07
     R12_strip_lo R12_strip_hi (R12_fencing_of_bounds h)
 
 noncomputable def R12_zeroFree_of_bounds (h : R12_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R12 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R12 0.002 fine_eps_outer_pos 0.07
     R12_strip_lo R12_strip_hi h.2 h.1
 
 theorem R12_nonvanishing_of_bounds (h : R12_leaf_obligations) {z : ℂ}
@@ -2637,7 +2637,7 @@ theorem R12_nonvanishing_of_bounds (h : R12_leaf_obligations) {z : ℂ}
     (hy0 : R12.y0 ≤ z.im) (hy1 : z.im ≤ R12.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R12 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R12 0.002 0.07
       R12_strip_lo R12_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -2652,7 +2652,7 @@ theorem R12_H_instance (h : R12_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R12, 0.002, 0.05, rfl, rfl, rfl, rfl, R12_strip_lo, R12_strip_hi,
+  exact ⟨R12, 0.002, 0.07, rfl, rfl, rfl, rfl, R12_strip_lo, R12_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R13 = (-6, -3.5, 0.1, 0.3), mid tier `(0.05,0.07)` -/
@@ -3203,21 +3203,21 @@ theorem R19_mem_gridFine :
 /-- The two remaining numerical enclosures for `R19` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R19_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R19.radius ≤ ‖xiShifted R19.center‖) ∧
-  (∀ w, R19.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R19.radius ≤ ‖xiShifted R19.center‖) ∧
+  (∀ w, R19.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R19_fencing_of_bounds (h : R19_leaf_obligations) :
-    CellFencingHypotheses R19 0.002 0.05 :=
+    CellFencingHypotheses R19 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R19_lowerBound_of_bounds (h : R19_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R19 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R19 0.002 0.07
     R19_strip_lo R19_strip_hi (R19_fencing_of_bounds h)
 
 noncomputable def R19_zeroFree_of_bounds (h : R19_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R19 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R19 0.002 fine_eps_outer_pos 0.07
     R19_strip_lo R19_strip_hi h.2 h.1
 
 theorem R19_nonvanishing_of_bounds (h : R19_leaf_obligations) {z : ℂ}
@@ -3225,7 +3225,7 @@ theorem R19_nonvanishing_of_bounds (h : R19_leaf_obligations) {z : ℂ}
     (hy0 : R19.y0 ≤ z.im) (hy1 : z.im ≤ R19.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R19 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R19 0.002 0.07
       R19_strip_lo R19_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -3240,7 +3240,7 @@ theorem R19_H_instance (h : R19_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R19, 0.002, 0.05, rfl, rfl, rfl, rfl, R19_strip_lo, R19_strip_hi,
+  exact ⟨R19, 0.002, 0.07, rfl, rfl, rfl, rfl, R19_strip_lo, R19_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R20 = (7.5, 10, 0.1, 0.3), outer tier `(0.002,0.05)` -/
@@ -3457,21 +3457,21 @@ theorem R22_mem_gridFine :
 /-- The two remaining numerical enclosures for `R22` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R22_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R22.radius ≤ ‖xiShifted R22.center‖) ∧
-  (∀ w, R22.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R22.radius ≤ ‖xiShifted R22.center‖) ∧
+  (∀ w, R22.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R22_fencing_of_bounds (h : R22_leaf_obligations) :
-    CellFencingHypotheses R22 0.002 0.05 :=
+    CellFencingHypotheses R22 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R22_lowerBound_of_bounds (h : R22_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R22 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R22 0.002 0.07
     R22_strip_lo R22_strip_hi (R22_fencing_of_bounds h)
 
 noncomputable def R22_zeroFree_of_bounds (h : R22_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R22 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R22 0.002 fine_eps_outer_pos 0.07
     R22_strip_lo R22_strip_hi h.2 h.1
 
 theorem R22_nonvanishing_of_bounds (h : R22_leaf_obligations) {z : ℂ}
@@ -3479,7 +3479,7 @@ theorem R22_nonvanishing_of_bounds (h : R22_leaf_obligations) {z : ℂ}
     (hy0 : R22.y0 ≤ z.im) (hy1 : z.im ≤ R22.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R22 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R22 0.002 0.07
       R22_strip_lo R22_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -3494,7 +3494,7 @@ theorem R22_H_instance (h : R22_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R22, 0.002, 0.05, rfl, rfl, rfl, rfl, R22_strip_lo, R22_strip_hi,
+  exact ⟨R22, 0.002, 0.07, rfl, rfl, rfl, rfl, R22_strip_lo, R22_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R23 = (-6, -3.5, 0.2, 0.4), mid tier `(0.05,0.07)` -/
@@ -4045,21 +4045,21 @@ theorem R29_mem_gridFine :
 /-- The two remaining numerical enclosures for `R29` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R29_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R29.radius ≤ ‖xiShifted R29.center‖) ∧
-  (∀ w, R29.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R29.radius ≤ ‖xiShifted R29.center‖) ∧
+  (∀ w, R29.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R29_fencing_of_bounds (h : R29_leaf_obligations) :
-    CellFencingHypotheses R29 0.002 0.05 :=
+    CellFencingHypotheses R29 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R29_lowerBound_of_bounds (h : R29_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R29 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R29 0.002 0.07
     R29_strip_lo R29_strip_hi (R29_fencing_of_bounds h)
 
 noncomputable def R29_zeroFree_of_bounds (h : R29_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R29 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R29 0.002 fine_eps_outer_pos 0.07
     R29_strip_lo R29_strip_hi h.2 h.1
 
 theorem R29_nonvanishing_of_bounds (h : R29_leaf_obligations) {z : ℂ}
@@ -4067,7 +4067,7 @@ theorem R29_nonvanishing_of_bounds (h : R29_leaf_obligations) {z : ℂ}
     (hy0 : R29.y0 ≤ z.im) (hy1 : z.im ≤ R29.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R29 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R29 0.002 0.07
       R29_strip_lo R29_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -4082,7 +4082,7 @@ theorem R29_H_instance (h : R29_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R29, 0.002, 0.05, rfl, rfl, rfl, rfl, R29_strip_lo, R29_strip_hi,
+  exact ⟨R29, 0.002, 0.07, rfl, rfl, rfl, rfl, R29_strip_lo, R29_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R30 = (7.5, 10, 0.2, 0.4), outer tier `(0.002,0.05)` -/
@@ -4299,21 +4299,21 @@ theorem R32_mem_gridFine :
 /-- The two remaining numerical enclosures for `R32` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R32_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R32.radius ≤ ‖xiShifted R32.center‖) ∧
-  (∀ w, R32.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R32.radius ≤ ‖xiShifted R32.center‖) ∧
+  (∀ w, R32.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R32_fencing_of_bounds (h : R32_leaf_obligations) :
-    CellFencingHypotheses R32 0.002 0.05 :=
+    CellFencingHypotheses R32 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R32_lowerBound_of_bounds (h : R32_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R32 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R32 0.002 0.07
     R32_strip_lo R32_strip_hi (R32_fencing_of_bounds h)
 
 noncomputable def R32_zeroFree_of_bounds (h : R32_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R32 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R32 0.002 fine_eps_outer_pos 0.07
     R32_strip_lo R32_strip_hi h.2 h.1
 
 theorem R32_nonvanishing_of_bounds (h : R32_leaf_obligations) {z : ℂ}
@@ -4321,7 +4321,7 @@ theorem R32_nonvanishing_of_bounds (h : R32_leaf_obligations) {z : ℂ}
     (hy0 : R32.y0 ≤ z.im) (hy1 : z.im ≤ R32.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R32 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R32 0.002 0.07
       R32_strip_lo R32_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -4336,7 +4336,7 @@ theorem R32_H_instance (h : R32_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R32, 0.002, 0.05, rfl, rfl, rfl, rfl, R32_strip_lo, R32_strip_hi,
+  exact ⟨R32, 0.002, 0.07, rfl, rfl, rfl, rfl, R32_strip_lo, R32_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R33 = (-6, -3.5, 0.3, 0.49), mid tier `(0.05,0.07)` -/
@@ -4887,21 +4887,21 @@ theorem R39_mem_gridFine :
 /-- The two remaining numerical enclosures for `R39` (outer tier), as explicit
 hypotheses exactly as `R00_leaf_obligations` does. -/
 def R39_leaf_obligations : Prop :=
-  ((0.002 : ℝ) + 0.05 * R39.radius ≤ ‖xiShifted R39.center‖) ∧
-  (∀ w, R39.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+  ((0.002 : ℝ) + 0.07 * R39.radius ≤ ‖xiShifted R39.center‖) ∧
+  (∀ w, R39.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
 
 theorem R39_fencing_of_bounds (h : R39_leaf_obligations) :
-    CellFencingHypotheses R39 0.002 0.05 :=
+    CellFencingHypotheses R39 0.002 0.07 :=
   ⟨fine_eps_outer_pos, h.2, h.1⟩
 
 noncomputable def R39_lowerBound_of_bounds (h : R39_leaf_obligations) :
     XiLocalLowerBoundRect :=
-  lowerBoundRect_of_fencingHypotheses_strip R39 0.002 0.05
+  lowerBoundRect_of_fencingHypotheses_strip R39 0.002 0.07
     R39_strip_lo R39_strip_hi (R39_fencing_of_bounds h)
 
 noncomputable def R39_zeroFree_of_bounds (h : R39_leaf_obligations) :
     XiLocalZeroFreeRect :=
-  zeroFreeRect_of_rect_center_bound_strip R39 0.002 fine_eps_outer_pos 0.05
+  zeroFreeRect_of_rect_center_bound_strip R39 0.002 fine_eps_outer_pos 0.07
     R39_strip_lo R39_strip_hi h.2 h.1
 
 theorem R39_nonvanishing_of_bounds (h : R39_leaf_obligations) {z : ℂ}
@@ -4909,7 +4909,7 @@ theorem R39_nonvanishing_of_bounds (h : R39_leaf_obligations) {z : ℂ}
     (hy0 : R39.y0 ≤ z.im) (hy1 : z.im ≤ R39.y1) :
     xiShifted z ≠ 0 := by
   have hle : (0.002 : ℝ) ≤ ‖xiShifted z‖ :=
-    xi_rect_lower_bound_of_center_bound_strip R39 0.002 0.05
+    xi_rect_lower_bound_of_center_bound_strip R39 0.002 0.07
       R39_strip_lo R39_strip_hi h.2 h.1 z ⟨hx0, hx1, hy0, hy1⟩
   intro hzero
   rw [hzero, norm_zero] at hle
@@ -4924,7 +4924,7 @@ theorem R39_H_instance (h : R39_leaf_obligations)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
   subst hc_eq
-  exact ⟨R39, 0.002, 0.05, rfl, rfl, rfl, rfl, R39_strip_lo, R39_strip_hi,
+  exact ⟨R39, 0.002, 0.07, rfl, rfl, rfl, rfl, R39_strip_lo, R39_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
 /-! ### R40 = (7.5, 10, 0.3, 0.49), outer tier `(0.002,0.05)` -/
@@ -9745,8 +9745,8 @@ theorem center_bound_of_components (Apoly Api Agam Azeta : ℝ)
     (hpi : Api ≤ ‖DerivCauchyBridge.piOf sCenter‖)
     (hgam : Agam ≤ ‖DerivCauchyBridge.gammaOf sCenter‖)
     (hzeta : Azeta ≤ ‖zeta sCenter‖)
-    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ Apoly * Api * Agam * Azeta) :
-    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+    (hprod : (0.002 : ℝ) + 0.07 * 1.26 ≤ Apoly * Api * Agam * Azeta) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R02.radius ≤
       ‖xiShifted CentralCoverAssembly.R02.center‖ := by
   have harg2 : (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R02.center = sCenter := rfl
   have hdecomp := DerivCauchyBridge.norm_xiShifted_eq_parts CentralCoverAssembly.R02.center
@@ -9756,13 +9756,13 @@ theorem center_bound_of_components (Apoly Api Agam Azeta : ℝ)
     exact TailProofEngine.prod_four_ge_of_ge
       (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
       hpoly hpi hgam hzeta hA0 hB0 hC0 hD0
-  have hbud : 0.05 * CentralCoverAssembly.R02.radius ≤ 0.05 * 1.26 :=
+  have hbud : 0.07 * CentralCoverAssembly.R02.radius ≤ 0.07 * 1.26 :=
     mul_le_mul_of_nonneg_left
       (le_of_lt CentralCoverAssembly.R02_radius_lt) (by norm_num)
   linarith
 
 /-- Numeric product check for the chosen conditional thresholds. -/
-theorem threshold_check : (0.002 : ℝ) + 0.05 * 1.26 ≤ 22 * (1 / 2) * 0.006 * 1 := by
+theorem threshold_check : (0.002 : ℝ) + 0.07 * 1.26 ≤ 22 * (1 / 2) * 0.009 * 1 := by
   norm_num
 
 #print axioms R02Pilot.poly_lower
@@ -9776,9 +9776,9 @@ the H-leaf of `inner_nonvanishing_of_fenced_grid_fine` at R02's grid cell.
 This turns all future factor work into plug-and-play: prove the three bounds
 and the pilot cell closes. -/
 theorem R02_closed_of_factorBounds
-    (hGam : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hGam : (0.009 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
     (hZeta : (1 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖)
-    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ))
+    (hDeriv : ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ))
     (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
     (hc_eq : c = (-8, -5.5, 0.01, 0.2)) :
     ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
@@ -9790,9 +9790,9 @@ theorem R02_closed_of_factorBounds
     R02Pilot.poly_lower
   have hpi : (1 / 2 : ℝ) ≤ ‖DerivCauchyBridge.piOf R02Pilot.sCenter‖ :=
     R02Pilot.pi_lower
-  have hcenter : (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R02.radius ≤
+  have hcenter : (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R02.radius ≤
       ‖xiShifted CentralCoverAssembly.R02.center‖ :=
-    R02Pilot.center_bound_of_components 22 (1 / 2) 0.006 1
+    R02Pilot.center_bound_of_components 22 (1 / 2) 0.009 1
       (by norm_num) (by norm_num) (by norm_num) (by norm_num)
       hpoly hpi hGam hZeta R02Pilot.threshold_check
   have hleaf : CentralCoverAssembly.R02_leaf_obligations := ⟨hcenter, hDeriv⟩

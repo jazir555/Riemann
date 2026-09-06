@@ -1,0 +1,409 @@
+import zeta_rigorous
+
+open Complex Real Set Topology
+open scoped BigOperators
+
+noncomputable section
+
+/-!
+  A hypothesis-free eta-pair upper on the part of the high-height strip with
+  `1/4 ≤ Re s ≤ 1/2`.  This is a small but useful feeder for the Door-3/FE
+  tail route: unlike the old `R02` rectangle, its denominator is bounded away
+  from zero directly by `Re s ≤ 1/2`.
+-/
+
+namespace Door3TailEtaUpper
+
+private theorem eta_s2_upper {s : ℂ} (hsre : (0 : ℝ) ≤ s.re) :
+    ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ (2 : ℝ) := by
+  have h0 : etaDirichletTerm s 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hterm1_eq : etaDirichletTerm s 1 =
+      -1 / ((((2 : ℕ)) : ℂ) ^ s) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = (((2 : ℝ) : ℂ)) := by norm_num
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ s)‖ = (2 : ℝ) ^ s.re := by
+    rw [h2cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have h2ge : (1 : ℝ) ≤ (2 : ℝ) ^ s.re := by
+    exact le_trans (by norm_num)
+      (Real.rpow_le_rpow_of_exponent_le (by norm_num) hsre)
+  have h1_norm : ‖etaDirichletTerm s 1‖ ≤ 1 := by
+    rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm]
+    rw [div_le_one (Real.rpow_pos_of_pos (by norm_num) _)]
+    exact h2ge
+  have hsum2 : (∑ k ∈ Finset.range 2, etaDirichletTerm s k) =
+      etaDirichletTerm s 0 + etaDirichletTerm s 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum2, h0]
+  calc
+    ‖(1 : ℂ) + etaDirichletTerm s 1‖ ≤
+        ‖(1 : ℂ)‖ + ‖etaDirichletTerm s 1‖ := norm_add_le _ _
+    _ ≤ 1 + 1 := by rw [norm_one]; linarith
+    _ = 2 := by norm_num
+
+theorem eta_factor_ge_two_fifths {s : ℂ} (hs : s.re ≤ (1 / 2 : ℝ)) :
+    (2 / 5 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - s)
+  have hqnorm : ‖q‖ = (2 : ℝ) ^ ((1 - s).re) := by
+    dsimp [q]
+    have hb : (2 : ℂ) = ((2 : ℝ) : ℂ) := by norm_num
+    rw [hb]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hexp : (1 / 2 : ℝ) ≤ (1 - s).re := by
+    simp only [Complex.sub_re, Complex.one_re]
+    linarith
+  have hsqrt : (7 / 5 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : (7 / 5 : ℝ) ^ (2 : ℕ) ≤ (2 : ℝ) := by norm_num
+    have hpow : ((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ) = 2 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hqge : (7 / 5 : ℝ) ≤ ‖q‖ := by
+    rw [hqnorm]
+    exact le_trans hsqrt
+      (Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp)
+  have htri := norm_add_le (q - 1) (1 : ℂ)
+  have hqdecomp : q - 1 + 1 = q := by ring
+  rw [hqdecomp, norm_one, norm_sub_rev] at htri
+  linarith
+
+theorem eta_pair_sum_upper_quarter {s : ℂ}
+    (hsre : (1 / 4 : ℝ) ≤ s.re) (hsnorm : ‖s‖ ≤ 12) :
+    ‖∑' m, etaPairTerm s m‖ ≤ (50 : ℝ) := by
+  have hspos : 0 < s.re := by linarith
+  have htail := zetaCell_even_remainder_le hspos hsnorm
+    (by norm_num : (0 : ℝ) ≤ 12) 1 (by norm_num)
+  have hone : ((((1 : ℕ)) : ℝ) ^ (-s.re)) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  rw [hone] at htail
+  have hdiv : (12 : ℝ) / s.re ≤ 48 := by
+    apply (div_le_iff₀ hspos).2
+    nlinarith
+  have htail0 : ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ (48 : ℝ) := by
+    have htail' : ‖(∑' m, etaPairTerm s m) -
+        (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ (12 : ℝ) / s.re := by
+      simpa [div_eq_mul_inv] using htail
+    exact le_trans htail' hdiv
+  have hS2 : ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ (2 : ℝ) :=
+    eta_s2_upper (by linarith)
+  have htri := norm_add_le (∑ k ∈ Finset.range 2, etaDirichletTerm s k)
+    ((∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range 2, etaDirichletTerm s k))
+  rw [add_sub_cancel] at htri
+  linarith
+
+/-! A coarser companion remains useful below `Re s = 1/4`: the same paired
+tail estimate with `M = 1` costs only `12 / Re s`, hence gives a fully
+unconditional finite upper on the tenth-line strip. -/
+
+theorem eta_pair_sum_upper_tenth {s : ℂ}
+    (hsre : (1 / 10 : ℝ) ≤ s.re) (hsnorm : ‖s‖ ≤ 12) :
+    ‖∑' m, etaPairTerm s m‖ ≤ (122 : ℝ) := by
+  have hspos : 0 < s.re := by linarith
+  have htail := zetaCell_even_remainder_le hspos hsnorm
+    (by norm_num : (0 : ℝ) ≤ 12) 1 (by norm_num)
+  have hone : ((((1 : ℕ)) : ℝ) ^ (-s.re)) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  rw [hone] at htail
+  have hdiv : (12 : ℝ) / s.re ≤ 120 := by
+    apply (div_le_iff₀ hspos).2
+    nlinarith
+  have htail0 : ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ (120 : ℝ) := by
+    have htail' : ‖(∑' m, etaPairTerm s m) -
+        (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ (12 : ℝ) / s.re := by
+      simpa [div_eq_mul_inv] using htail
+    exact le_trans htail' hdiv
+  have hS2 : ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ (2 : ℝ) :=
+    eta_s2_upper (by linarith)
+  have htri := norm_add_le (∑ k ∈ Finset.range 2, etaDirichletTerm s k)
+    ((∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range 2, etaDirichletTerm s k))
+  rw [add_sub_cancel] at htri
+  linarith
+
+theorem zeta_upper_tenth_threequarters {s : ℂ}
+    (hsre_lo : (1 / 10 : ℝ) ≤ s.re) (hsre_hi : s.re ≤ (3 / 4 : ℝ))
+    (hsnorm : ‖s‖ ≤ 12) :
+    ‖riemannZeta s‖ ≤ (1220 : ℝ) := by
+  have hspos : 0 < s.re := by linarith
+  have hre : s.re ≠ 1 := by linarith
+  have hZ := zeta_of_etaPairLim_of_re_ne hspos hre
+  rw [hZ, norm_div]
+  have hnum := eta_pair_sum_upper_tenth hsre_lo hsnorm
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - s)
+  have hqnorm : (11 / 10 : ℝ) ≤ ‖q‖ := by
+    dsimp [q]
+    rw [two_cpow_one_sub_norm]
+    have hexp : (1 / 4 : ℝ) ≤ 1 - s.re := by linarith
+    have hroot : (11 / 10 : ℝ) ≤ (2 : ℝ) ^ (1 / 4 : ℝ) := by
+      have hpow : ((11 / 10 : ℝ) ^ (4 : ℕ)) ≤ (2 : ℝ) := by norm_num
+      have hpow' : (((2 : ℝ) ^ (1 / 4 : ℝ)) ^ (4 : ℕ)) = 2 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+        norm_num
+      rw [← hpow'] at hpow
+      exact le_of_pow_le_pow_left₀ (by norm_num)
+        (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+    exact le_trans hroot
+      (Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp)
+  have hden : (1 / 10 : ℝ) ≤ ‖(1 : ℂ) - q‖ := by
+    have hrev := norm_sub_norm_le q (1 : ℂ)
+    rw [norm_one, norm_sub_rev] at hrev
+    linarith
+  have hdenpos : 0 < ‖(1 : ℂ) - q‖ :=
+    lt_of_lt_of_le (by norm_num) hden
+  have hscale : (122 : ℝ) ≤ 1220 * ‖(1 : ℂ) - q‖ := by
+    nlinarith
+  have hle : ‖∑' m, etaPairTerm s m‖ ≤
+      1220 * ‖(1 : ℂ) - q‖ := le_trans hnum hscale
+  apply (div_le_iff₀ hdenpos).2
+  simpa [q] using hle
+
+theorem zeta_upper_tail_quarter {s : ℂ}
+    (hsre_lo : (1 / 4 : ℝ) ≤ s.re) (hsre_hi : s.re ≤ (1 / 2 : ℝ))
+    (him : |s.im| ≤ 11) :
+    ‖riemannZeta s‖ ≤ (125 : ℝ) := by
+  have hspos : 0 < s.re := by linarith
+  have hre : s.re ≠ 1 := by linarith
+  have hZ := zeta_of_etaPairLim_of_re_ne hspos hre
+  rw [hZ, norm_div]
+  have hnorm : ‖s‖ ≤ 12 := by
+    have h := Complex.norm_le_abs_re_add_abs_im s
+    have hreabs : |s.re| ≤ (1 / 2 : ℝ) := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hnum := eta_pair_sum_upper_quarter hsre_lo hnorm
+  have hden := eta_factor_ge_two_fifths hsre_hi
+  have hdenpos : 0 < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden
+  apply (div_le_iff₀ hdenpos).2
+  have hscale : (50 : ℝ) ≤ 125 *
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    nlinarith
+  exact le_trans hnum hscale
+
+/-! The complex-Gamma numeral needed by the FE tail bridge.  The integral
+majorant reduces it to a real-Gamma bound; convexity on `[1,2]` and the
+recurrence then give the uniform constant `2` on `1/2 ≤ Re s ≤ 1`. -/
+
+theorem realGamma_half_one_le_two {x : ℝ}
+    (hx0 : (1 / 2 : ℝ) ≤ x) (hx1 : x ≤ 1) :
+    Real.Gamma x ≤ 2 := by
+  have hxpos : 0 < x := by linarith
+  have hy_lo : (1 : ℝ) ≤ x + 1 := by linarith
+  have hy_hi : x + 1 ≤ (2 : ℝ) := by linarith
+  have hconv := Real.convexOn_Gamma
+  have ha_nn : (0 : ℝ) ≤ 2 - (x + 1) := by linarith
+  have hb_nn : (0 : ℝ) ≤ (x + 1) - 1 := by linarith
+  have hab : (2 - (x + 1)) + ((x + 1) - 1) = 1 := by ring
+  have h := hconv.2
+    (show (1 : ℝ) ∈ Set.Ioi 0 by norm_num)
+    (show (2 : ℝ) ∈ Set.Ioi 0 by norm_num)
+    ha_nn hb_nn hab
+  simp only [smul_eq_mul, Real.Gamma_one, Real.Gamma_two] at h
+  have heq : (2 - (x + 1)) * 1 + ((x + 1) - 1) * 2 = x + 1 := by ring
+  rw [heq] at h
+  have hrhs : (2 - (x + 1)) * 1 + ((x + 1) - 1) * 1 = (1 : ℝ) := by ring
+  rw [hrhs] at h
+  have hadd := Real.Gamma_add_one (ne_of_gt hxpos)
+  rw [show x + 1 = x + 1 by rfl, hadd] at h
+  have hfin : Real.Gamma x ≤ 1 / x := by
+    rw [le_div_iff₀ hxpos, mul_comm]
+    exact h
+  have hfrac : (1 : ℝ) / x ≤ 2 := by
+    have := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 1 / 2) hx0
+    linarith
+  exact le_trans hfin hfrac
+
+theorem gamma_tail_upper {s : ℂ}
+    (hre0 : (1 / 2 : ℝ) ≤ s.re) (hre1 : s.re ≤ 1) :
+    ‖Complex.Gamma s‖ ≤ (2 : ℝ) := by
+  have hpos : 0 < s.re := by linarith
+  exact le_trans (zetaFE_norm_Gamma_le_realGamma hpos)
+    (realGamma_half_one_le_two hre0 hre1)
+
+#print axioms eta_factor_ge_two_fifths
+#print axioms eta_pair_sum_upper_quarter
+#print axioms eta_pair_sum_upper_tenth
+#print axioms zeta_upper_tenth_threequarters
+#print axioms zeta_upper_tail_quarter
+#print axioms realGamma_half_one_le_two
+#print axioms gamma_tail_upper
+
+end Door3TailEtaUpper
+
+/-! An unconditional FE tail-rectangle specialization.  The reflected point
+`1-s` lies in the strip `1/2 ≤ Re ≤ 1` and has norm at most `12`, so the
+eta-pair upper and the Gamma integral majorant discharge both symbolic inputs
+of `zeta_tail_rect_of_chi_gamma`. -/
+
+theorem zeta_tail_rect_upper_exp22 {s : ℂ}
+    (hre0 : (1 / 4 : ℝ) ≤ s.re) (hre1 : s.re ≤ (1 / 2 : ℝ))
+    (him_lo : (10 : ℝ) ≤ |s.im|) (him_hi : |s.im| ≤ 11) :
+    ‖riemannZeta s‖ ≤ (5000 : ℝ) * Real.exp 22 := by
+  have hnorm : ‖1 - s‖ ≤ (12 : ℝ) := by
+    have h := Complex.norm_le_abs_re_add_abs_im (1 - s)
+    have hre : |(1 - s).re| ≤ (1 : ℝ) := by
+      rw [Complex.sub_re, Complex.one_re]
+      rw [abs_le]
+      constructor <;> linarith
+    have him : |(1 - s).im| ≤ (11 : ℝ) := by
+      simpa [Complex.sub_im, abs_neg] using him_hi
+    linarith [h]
+  have hG : ‖Complex.Gamma (1 - s)‖ ≤ (2 : ℝ) := by
+    apply Door3TailEtaUpper.gamma_tail_upper
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
+  have hZ : ‖riemannZeta (1 - s)‖ ≤ (1220 : ℝ) := by
+    apply Door3TailEtaUpper.zeta_upper_tenth_threequarters
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
+    · rw [Complex.sub_re, Complex.one_re]
+      linarith
+    · exact hnorm
+  have h := zeta_tail_rect_of_chi_gamma (by linarith : (0 : ℝ) ≤ s.re)
+    hre1 him_lo him_hi
+    (2 : ℝ) (1220 : ℝ) hG hZ
+  calc
+    ‖riemannZeta s‖ ≤ (2 * 1 * 2 * Real.exp 22) * 1220 := h
+    _ = (4880 : ℝ) * Real.exp 22 := by ring_nf
+    _ ≤ (5000 : ℝ) * Real.exp 22 := by
+      have he : (0 : ℝ) ≤ Real.exp 22 := (Real.exp_pos _).le
+      nlinarith
+
+#print axioms zeta_tail_rect_upper_exp22
+
+/-! The same certificate in the shifted Door 3 coordinates. -/
+
+theorem zeta_shifted_tail_rect_upper_exp22 {z : ℂ}
+    (hre0 : (10 : ℝ) ≤ |z.re|) (hre1 : |z.re| ≤ 11)
+    (him0 : 0 ≤ z.im) (him1 : z.im ≤ (1 / 4 : ℝ)) :
+    ‖riemannZeta ((1 / 2 : ℂ) + Complex.I * z)‖ ≤
+      (5000 : ℝ) * Real.exp 22 := by
+  apply zeta_tail_rect_upper_exp22
+  · simp only [Complex.add_re, Complex.I_mul_re]
+    norm_num
+    linarith
+  · simp only [Complex.add_re, Complex.I_mul_re]
+    norm_num
+    linarith
+  · simp only [Complex.add_im, Complex.I_mul_im]
+    norm_num
+    exact hre0
+  · simp only [Complex.add_im, Complex.I_mul_im]
+    norm_num
+    exact hre1
+
+#print axioms zeta_shifted_tail_rect_upper_exp22
+
+
+
+namespace Door3TailEtaUpper
+def etaPairRGeneral (t : ℝ) (m : ℕ) : ℝ :=
+  ((((2 * m + 1 : ℕ) : ℝ) ^ (-t)) -
+   (((2 * m + 2 : ℕ) : ℝ) ^ (-t)))
+
+lemma etaPairTerm_ofReal (t : ℝ) (m : ℕ) :
+    etaPairTerm (t : ℂ) m = (etaPairRGeneral t m : ℂ) := by
+  rw [etaPairTerm_eq_cpow_sub]
+  unfold etaPairRGeneral
+  have h1 := Complex.ofReal_cpow (by positivity : (0 : ℝ) ≤ (((2 * m + 1 : ℕ) : ℝ))) (-t)
+  have h2 := Complex.ofReal_cpow (by positivity : (0 : ℝ) ≤ (((2 * m + 2 : ℕ) : ℝ))) (-t)
+  have he : ((-t : ℝ) : ℂ) = -(t : ℂ) := by simp
+  rw [he] at h1 h2
+  rw [← h1, ← h2]
+  simp
+
+lemma etaPairRGeneral_pos {t : ℝ} (ht : 0 < t) (m : ℕ) :
+    0 < etaPairRGeneral t m := by
+  unfold etaPairRGeneral
+  have h1 : (0 : ℝ) < (((2 * m + 1 : ℕ) : ℝ)) := by positivity
+  have hle : (((2 * m + 1 : ℕ) : ℝ)) < (((2 * m + 2 : ℕ) : ℝ)) := by norm_num
+  have hpow : (((2 * m + 1 : ℕ) : ℝ) ^ (-t)) >
+      (((2 * m + 2 : ℕ) : ℝ) ^ (-t)) := by
+    exact Real.rpow_lt_rpow_of_neg h1 hle (by linarith)
+  linarith
+
+lemma etaPairRGeneral_summable {t : ℝ} (ht : 0 < t) :
+    Summable (etaPairRGeneral t) := by
+  have h := summable_etaPairTerm (s := (t : ℂ)) (by simpa using ht)
+  have hc : Summable (fun m => (etaPairRGeneral t m : ℂ)) :=
+    h.congr (fun m => etaPairTerm_ofReal t m)
+  exact summable_ofReal.mp hc
+
+lemma etaPairLim_real_pos {t : ℝ} (ht0 : 0 < t) :
+    0 < ∑' m, etaPairRGeneral t m := by
+  apply Summable.tsum_pos (etaPairRGeneral_summable ht0)
+  · intro m
+    exact (etaPairRGeneral_pos ht0 m).le
+  · exact etaPairRGeneral_pos ht0 0
+
+lemma zeta_real_nonzero_critical {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
+    riemannZeta (t : ℂ) ≠ 0 := by
+  have hpos : 0 < (t : ℂ).re := by simpa using ht0
+  have hne : (t : ℂ).re ≠ 1 := by simpa using (ne_of_lt ht1)
+  have hz := zeta_of_etaPairLim_of_re_ne hpos hne
+  intro hz0
+  rw [hz] at hz0
+  have hfac : (1 - (2 : ℂ) ^ (1 - (t : ℂ))) ≠ 0 :=
+    etaFactor_ne_zero_of_re_ne hne
+  have hsum : (∑' m, etaPairTerm (t : ℂ) m) = 0 := by
+    exact (div_eq_zero_iff.mp hz0).resolve_right hfac
+  have hsumC : ((∑' m, etaPairRGeneral t m : ℝ) : ℂ) = 0 := by
+    rw [Complex.ofReal_tsum]
+    simpa only [etaPairTerm_ofReal] using hsum
+  have hsumR : (∑' m, etaPairRGeneral t m : ℝ) = 0 :=
+    Complex.ofReal_inj.mp hsumC
+  linarith [etaPairLim_real_pos ht0]
+
+lemma zeta_real_nonzero_positive {t : ℝ} (ht : 0 < t) :
+    riemannZeta (t : ℂ) ≠ 0 := by
+  by_cases hlt : t < 1
+  · exact zeta_real_nonzero_critical ht hlt
+  by_cases heq : t = 1
+  · subst t
+    simpa using riemannZeta_one_ne_zero
+  have hgt : (1 : ℝ) < t :=
+    lt_of_le_of_ne (le_of_not_gt hlt) (Ne.symm heq)
+  exact riemannZeta_ne_zero_of_one_lt_re (by simpa using hgt)
+
+/-! The open imaginary axis is another unconditional zeta feeder.  The
+functional equation moves a hypothetical zero at `Re s = 0` to `Re (1-s)=1`,
+where the Euler-product nonvanishing theorem applies. -/
+
+lemma zeta_re_zero_nonzero {s : ℂ} (hRe : s.re = 0) (hIm : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  have hs1 : s ≠ 1 := by
+    intro h
+    have hr := congr_arg Complex.re h
+    simp [hRe] at hr
+  have hs_ne : ∀ n : ℕ, s ≠ -n := by
+    intro n h
+    have hi := congr_arg Complex.im h
+    simp at hi
+    exact hIm hi
+  have h1s_re : (1 - s).re = 1 := by simp [Complex.sub_re, hRe]
+  have h1s_ne1 : 1 - s ≠ 1 := by
+    intro h
+    have hi := congr_arg Complex.im h
+    simp only [Complex.sub_im, Complex.one_im] at hi
+    exact hIm (by linarith)
+  have hz1 : riemannZeta (1 - s) = 0 := by
+    rw [riemannZeta_one_sub hs_ne hs1, hz, mul_zero]
+  exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz1
+
+
+#print axioms zeta_real_nonzero_critical
+#print axioms zeta_real_nonzero_positive
+#print axioms zeta_re_zero_nonzero
+
+end Door3TailEtaUpper
