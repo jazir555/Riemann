@@ -61,3 +61,6 @@ theorem r00_float_radius_le_real : r00FloatRadius ≤ r00RealRadius := by
   exact (sq_le_sq₀ (by norm_num) (by positivity)).mp hsq'
 
 end Door3FloatBridgeAudit
+
+#print axioms Door3FloatBridgeAudit.r00_float_radius_ne_real
+#print axioms Door3FloatBridgeAudit.r00_float_radius_le_real
