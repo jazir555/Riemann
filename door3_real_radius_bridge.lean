@@ -46,3 +46,5 @@ theorem zeroFreeRectOfRealCertificate_bounds (b : BridgedCell)
   constructor <;> rfl
 
 end Door3RealRadiusBridge
+
+#print axioms Door3RealRadiusBridge.zeroFreeRectOfRealCertificate_bounds
