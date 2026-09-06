@@ -2713,8 +2713,9 @@ the `bridgedToLowerBoundRect` proof cannot obtain its real-radius center bound
 by rewriting the Float certificate; it needs a separately proved slackened
 inequality, and the numerical xi bound must be stated with that slack.
 Validation: `lake build door3_float_bridge_audit` succeeded (8683 jobs), with
-the audit theorems using only the standard `propext`, `Classical.choice`, and
-`Quot.sound` axioms.
+the audit theorems free of `sorryAx`; their report contains the standard
+`propext`, `Classical.choice`, `Quot.sound`, and the compiler-generated
+`native_decide` evaluation axiom used to evaluate Float operations.
 
 `door3_real_radius_bridge.lean` now provides
 `Door3RealRadiusBridge.lowerBoundRectOfRealCertificate` and
