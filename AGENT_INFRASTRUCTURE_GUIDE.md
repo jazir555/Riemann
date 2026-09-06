@@ -2729,3 +2729,15 @@ center/radius form as well; the false Float/ℝ equality leaf has been removed.
 `lake build central_cover_trusted` is green (8690 jobs) and reports three
 remaining legacy leaves: the real center enclosure, the derivative enclosure,
 and the unsatisfiable strict grid-cover theorem.
+
+## Door-3 update: analytic zeta pair tightening (2026-09-05)
+
+`door3_zeta_pair_tightening.lean` adds an unconditional degree-eight cosine
+majorant, proves that polynomial is antitone on the phase-20 interval, and
+derives the explicit bounds `cos(D3_phase 20) ≤ 0.074` and
+`-0.343 ≤ cos(D3_phase 21)`. Together with the existing amplitude bounds and
+the exact rational inequality, this proves
+`(etaPairTerm (1 - zetaCellS0) 10).re ≤ 0.0673` with no numerical hypotheses.
+Validation: `lake build door3_zeta_pair_tightening` succeeded (8694 jobs); the
+new theorem axiom reports contain only `propext`, `Classical.choice`, and
+`Quot.sound`.
