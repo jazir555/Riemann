@@ -9,8 +9,8 @@ namespace Door3GridBoundaryCounterexample
 /-- The strict legacy rectangles cannot cover the shared column boundary
 `Re z = -7.5`; this is a kernel-checked obstruction to the old cover claim. -/
 theorem no_strict_cover_at_neg75 :
-    ¬ ∃ R ∈ bridgedZeroFreeRectsUpper,
-      R.x0 < (-7.5 : ℝ) ∧ (-7.5 : ℝ) < R.x1 := by
+    ¬ ∃ b ∈ bridgedCells,
+      b.x0 < (-7.5 : ℝ) ∧ (-7.5 : ℝ) < b.x1 := by
   have e0 : (-10.0 : Float).toReal = (-10 : ℝ) := by
     have h : (-10.0 : Float).toRatParts = some (-5629499534213120, -49) := by native_decide
     unfold Float.toReal; simp [h]; norm_num
@@ -39,10 +39,7 @@ theorem no_strict_cover_at_neg75 :
     have h : (10.0 : Float).toRatParts = some (5629499534213120, -49) := by native_decide
     unfold Float.toReal; simp [h]; norm_num
   intro h
-  simp [bridgedZeroFreeRectsUpper, bridgedCells, central_cert_data,
-    bridgedToZeroFreeRect, bridgedToLowerBoundRect,
-    lowerBoundRect_of_rect_center_bound_strip,
-    XiLocalZeroFreeRect_of_lower_bound, e0, e1, e2, e3, e4, e5, e6, e7, e8] at h
+  simp [bridgedCells, central_cert_data, e0, e1, e2, e3, e4, e5, e6, e7, e8] at h
   norm_num at h
 
 end Door3GridBoundaryCounterexample

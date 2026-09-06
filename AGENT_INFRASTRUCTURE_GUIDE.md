@@ -2754,3 +2754,16 @@ the exact rational inequality, this proves
 Validation: `lake build door3_zeta_pair_tightening` succeeded (8694 jobs); the
 new theorem axiom reports contain only `propext`, `Classical.choice`, and
 `Quot.sound`.
+
+## Door-3 update: sound certificate API (2026-09-05)
+
+The three unsound global leaves in `central_cover_trusted.lean` have been
+redesigned.  `BridgedCellCertificate` now carries the exact real center and
+derivative inequalities as fields; the rectangle and conjugation adapters
+consume those fields explicitly.  The cover combinatorics are parameterized by
+an explicit inner-grid coverage certificate, and `bridgedCoversInner` is stated
+only on the strict inner band `(-10,10) × ((-0.49,-0.01) ∪ (0.01,0.49))`.
+Consequently `central_cover_trusted` contains no `sorry` declarations and its
+build is green.  The 40 analytic certificate fields and the boundary-strip
+certificates remain genuine inputs; no unconditional `XiCentralZeroFreeCover`
+or RH theorem is manufactured from absent numerical evidence.

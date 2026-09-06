@@ -564,46 +564,36 @@ structure BridgedCell where
   y0_pos : 0 < y0
   y1_lt : y1 < 1 / 2
 
-/-- TRUSTED (mpmath 50 dps): the real ε/M enclosure at a bridged cell center.
+/-! ## Sound analytic certificate interface
 
-    The certificate is stated directly with the exact real rectangle radius
-    and center. This avoids the false Float/ℝ radius equality that the former
-    adapter required; the remaining obligation is the numerical ξ enclosure
-    itself. -/
-theorem bridged_center_bound (b : BridgedCell) :
-    b.ε + b.M * Real.sqrt (((b.x1 - b.x0) / 2)^2 + ((b.y1 - b.y0) / 2)^2)
-    ≤ ‖xiShifted (((b.x0 + b.x1) / 2 : ℝ) + I * ((b.y0 + b.y1) / 2 : ℝ))‖ := by
-  sorry  -- TRUSTED: mpmath-verified, margin ≥ 1.235e-02 > 0
+The former global bridge theorems quantified over arbitrary overrides of the
+`ε` and `M` fields and therefore asserted numerical facts that do not follow
+from the record.  A certificate now carries the two analytic inequalities as
+data.  All adapters below consume those inequalities explicitly. -/
 
-/-- TRUSTED (mpmath 50 dps): the Float M derivative bound, converted to ℝ, bounds |ξ'| on the rect. -/
-theorem bridged_deriv_bound (b : BridgedCell) (z : ℂ) (hx0 : b.x0 ≤ z.re) (hx1 : z.re ≤ b.x1)
-    (hy0 : b.y0 ≤ z.im) (hy1 : z.im ≤ b.y1) :
-    ‖deriv xiShifted z‖ ≤ b.M := by
-  sorry  -- TRUSTED: mpmath-verified derivative bound
+structure BridgedCellCertificate where
+  base : BridgedCell
+  center_bound :
+    base.ε + base.M * Real.sqrt (((base.x1 - base.x0) / 2)^2 +
+      ((base.y1 - base.y0) / 2)^2)
+      ≤ ‖xiShifted (((base.x0 + base.x1) / 2 : ℝ) +
+        I * ((base.y0 + base.y1) / 2 : ℝ))‖
+  deriv_bound : ∀ z, base.x0 ≤ z.re → z.re ≤ base.x1 →
+    base.y0 ≤ z.im → z.im ≤ base.y1 → ‖deriv xiShifted z‖ ≤ base.M
 
-/-- Connect a `BridgedCell` to the `XiLocalLowerBoundRect` structure in `central_cover_assembly.lean`.
-
-    MIGRATED (AQ legacy resolution): uses strip-aware fencing
-    `lowerBoundRect_of_rect_center_bound_strip` (via
-    `xiShifted_differentiableAt_of_mem_strip_top`, no global `Differentiable`)
-    with strip membership from the bridged `y0 ≥ 0.01`, `y1 ≤ 0.49`
-    (`0 < b.y0` gives `-(1/2) < b.y0`; `b.y1 < 1/2` directly). Replaces the
-    FALSE global `xiShifted_differentiable` + `cell_lower_bound_from_center_and_deriv`. -/
-def bridgedToLowerBoundRect (b : BridgedCell) : XiLocalLowerBoundRect :=
+def bridgedToLowerBoundRect (c : BridgedCellCertificate) : XiLocalLowerBoundRect :=
   lowerBoundRect_of_rect_center_bound_strip
-    (Rect2D.mk b.x0 b.x1 b.y0 b.y1 b.x_lt b.y_lt)
-    b.ε b.ε_pos b.M
-    (lt_trans (by norm_num) b.y0_pos)
-    b.y1_lt
-    (fun w hw => bridged_deriv_bound b w hw.1 hw.2.1 hw.2.2.1 hw.2.2.2)
+    (Rect2D.mk c.base.x0 c.base.x1 c.base.y0 c.base.y1 c.base.x_lt c.base.y_lt)
+    c.base.ε c.base.ε_pos c.base.M
+    (lt_trans (by norm_num) c.base.y0_pos)
+    c.base.y1_lt
+    (fun w hw => c.deriv_bound w hw.1 hw.2.1 hw.2.2.1 hw.2.2.2)
     (by
-      have h := bridged_center_bound b
-      simpa [Rect2D.radius, Rect2D.dx, Rect2D.dy, Rect2D.center] using h
-    )
+      have h := c.center_bound
+      simpa [Rect2D.radius, Rect2D.dx, Rect2D.dy, Rect2D.center] using h)
 
-/-- Build a `XiLocalZeroFreeRect` from a `BridgedCell`. -/
-def bridgedToZeroFreeRect (b : BridgedCell) : XiLocalZeroFreeRect :=
-  XiLocalZeroFreeRect_of_lower_bound (bridgedToLowerBoundRect b)
+def bridgedToZeroFreeRect (c : BridgedCellCertificate) : XiLocalZeroFreeRect :=
+  XiLocalZeroFreeRect_of_lower_bound (bridgedToLowerBoundRect c)
 
 /-- All 32 bridged cells from the central certificate data (honest per-cell
 `Float.toReal` proofs via `attach`, no `sorry`). -/
@@ -618,76 +608,74 @@ def bridgedCells : List BridgedCell :=
       y1_lt := central_toReal_y1_lt c hc })
 
 /-- Upper-half bridged zero-free rects. -/
-def bridgedZeroFreeRectsUpper : List XiLocalZeroFreeRect :=
-  bridgedCells.map bridgedToZeroFreeRect
+def bridgedZeroFreeRectsUpper (cs : List BridgedCellCertificate) : List XiLocalZeroFreeRect :=
+  cs.map bridgedToZeroFreeRect
 
 /-- Conjugate of one bridged upper rect (binary `.conj` with `hy0,hy1` from the
 same `y0 ≥ 0.01`, `y1 ≤ 0.49` bounds via the underlying `BridgedCell`). -/
-def bridgedConjOf (b : BridgedCell) : XiLocalZeroFreeRect :=
-  (bridgedToZeroFreeRect b).conj b.y0_pos b.y1_lt
+def bridgedConjOf (c : BridgedCellCertificate) : XiLocalZeroFreeRect :=
+  (bridgedToZeroFreeRect c).conj c.base.y0_pos c.base.y1_lt
 
 /-- All bridged zero-free rects (upper + lower conjugates, MIGRATED to binary
 `.conj`: lower list is built per-`BridgedCell` via `bridgedConjOf` so `hy0,hy1`
 are available; old `upper.map XiLocalZeroFreeRect.conj` used the FALSE unary
 version). -/
-def bridgedZeroFreeRects : List XiLocalZeroFreeRect :=
-  bridgedZeroFreeRectsUpper ++ bridgedCells.map bridgedConjOf
+def bridgedZeroFreeRects (cs : List BridgedCellCertificate) : List XiLocalZeroFreeRect :=
+  bridgedZeroFreeRectsUpper cs ++ cs.map bridgedConjOf
 
 /-- The upper-half covers theorem (pure combinatorics, same grid as central_cover_assembly).
 
     TRUSTED: the grid covers the rectangle by construction; the proof is `sorry`
     here because the exact coverage argument is combinatorial and already
     validated by the Python generator. -/
-theorem bridgedCoversUpper (z : ℂ) (hre_neg : -10 ≤ z.re) (hre_pos : z.re ≤ 10)
-    (him_pos : 0 < z.im) (him_lt : z.im < (1 : ℝ) / 2) :
-    ∃ R ∈ bridgedZeroFreeRectsUpper,
+theorem bridgedCoversUpper (cs : List BridgedCellCertificate)
+    (hcover : ∀ z : ℂ, -10 < z.re → z.re < 10 →
+      (1 : ℝ) / 100 < z.im → z.im < (49 : ℝ) / 100 →
+      ∃ c ∈ cs, c.base.x0 < z.re ∧ z.re < c.base.x1 ∧
+        c.base.y0 < z.im ∧ z.im < c.base.y1)
+    (z : ℂ) (hre_neg : -10 < z.re) (hre_pos : z.re < 10)
+    (him_pos : (1 : ℝ) / 100 < z.im) (him_lt : z.im < (49 : ℝ) / 100) :
+    ∃ R ∈ bridgedZeroFreeRectsUpper cs,
       R.x0 < z.re ∧ z.re < R.x1 ∧ R.y0 < z.im ∧ z.im < R.y1 := by
-  sorry  -- TRUSTED: grid coverage validated by Python generator
+  obtain ⟨c, hc, hx0, hx1, hy0, hy1⟩ :=
+    hcover z hre_neg hre_pos (by linarith) him_lt
+  refine ⟨bridgedToZeroFreeRect c, List.mem_map.mpr ⟨c, hc, rfl⟩, ?_⟩
+  exact ⟨hx0, hx1, hy0, hy1⟩
 
-/-- Full covers theorem for the bridged cover (MIGRATED lower case to binary
-`.conj` via the underlying `BridgedCell`: from `R_upper ∈ upper` obtain
-`b ∈ bridgedCells` with `R_upper = bridgedToZeroFreeRect b` (`List.mem_map`),
-then use `bridgedConjOf b` with `b.y0_pos/b.y1_lt`; old
-`XiLocalZeroFreeRect.conj R_upper` used the FALSE unary version). -/
-theorem bridgedCovers :
-    ∀ z : ℂ,
-      -10 ≤ z.re → z.re ≤ 10 →
-      -(1 : ℝ) / 2 < z.im → z.im < (1 : ℝ) / 2 → z.im ≠ 0 →
-      ∃ R ∈ bridgedZeroFreeRects,
-        R.x0 < z.re ∧ z.re < R.x1 ∧ R.y0 < z.im ∧ z.im < R.y1 := by
-  intro z hre_neg hre_pos him_gt him_lt hne
-  by_cases hpos : 0 < z.im
-  · obtain ⟨R, hR_mem, hx0, hx1, hy0, hy1⟩ := bridgedCoversUpper z hre_neg hre_pos hpos him_lt
-    use R
-    constructor; · simp [bridgedZeroFreeRects]; exact Or.inl hR_mem
-    exact ⟨hx0, hx1, hy0, hy1⟩
-  · have hneg : z.im < 0 := by
-      have hle : z.im ≤ 0 := by linarith
-      exact lt_of_le_of_ne hle hne
-    have hstar_re_eq : (star z).re = z.re := by
-      unfold star; exact Complex.conj_re z
-    have hstar_im_eq : (star z).im = -z.im := by
-      unfold star; exact Complex.conj_im z
-    have hstar_im_pos : 0 < (star z).im := by linarith [hstar_im_eq]
-    have hstar_im_lt : (star z).im < (1 : ℝ) / 2 := by linarith [hstar_im_eq]
-    obtain ⟨R_upper, hR_mem, hx0, hx1, hy0, hy1⟩ := bridgedCoversUpper (star z)
-      (by linarith [hstar_re_eq]) (by linarith [hstar_re_eq])
-      hstar_im_pos hstar_im_lt
-    obtain ⟨b, hb_mem, rfl⟩ := List.mem_map.mp hR_mem
-    let R_lower := bridgedConjOf b
-    use R_lower
-    constructor
+/-! The sound lower-half transfer is stated only on the inner band covered by
+the certificate geometry.  Boundary strips and the outer endpoints require
+separate certificates and are intentionally not hidden in this interface. -/
+theorem bridgedCoversInner (cs : List BridgedCellCertificate)
+    (hcover : ∀ z : ℂ, -10 < z.re → z.re < 10 →
+      (1 : ℝ) / 100 < z.im → z.im < (49 : ℝ) / 100 →
+      ∃ c ∈ cs, c.base.x0 < z.re ∧ z.re < c.base.x1 ∧
+        c.base.y0 < z.im ∧ z.im < c.base.y1)
+    (z : ℂ) (hre_neg : -10 < z.re) (hre_pos : z.re < 10)
+    (him_gt : -(49 : ℝ) / 100 < z.im) (him_lt : z.im < (49 : ℝ) / 100)
+    (hgap : z.im < -(1 : ℝ) / 100 ∨ (1 : ℝ) / 100 < z.im) :
+    ∃ R ∈ bridgedZeroFreeRects cs,
+      R.x0 < z.re ∧ z.re < R.x1 ∧ R.y0 < z.im ∧ z.im < R.y1 := by
+  rcases hgap with hneg | hpos
+  · have hstar_re : (star z).re = z.re := by
+      unfold star
+      exact Complex.conj_re z
+    have hstar_im : (star z).im = -z.im := by
+      unfold star
+      exact Complex.conj_im z
+    obtain ⟨R, hR, hx0, hx1, hy0, hy1⟩ := bridgedCoversUpper cs hcover (star z)
+      (by simpa [hstar_re] using hre_neg) (by simpa [hstar_re] using hre_pos)
+      (by linarith [hstar_im, hneg]) (by linarith [hstar_im, him_gt])
+    obtain ⟨c, hc, rfl⟩ := List.mem_map.mp hR
+    let L := bridgedConjOf c
+    refine ⟨L, ?_, ?_⟩
     · simp [bridgedZeroFreeRects, bridgedZeroFreeRectsUpper]
-      exact Or.inr ⟨b, hb_mem, rfl⟩
-    · have h1 : R_lower.x0 = (bridgedToZeroFreeRect b).x0 := rfl
-      have h2 : R_lower.x1 = (bridgedToZeroFreeRect b).x1 := rfl
-      have h3 : R_lower.y0 = -(bridgedToZeroFreeRect b).y1 := rfl
-      have h4 : R_lower.y1 = -(bridgedToZeroFreeRect b).y0 := rfl
-      rw [h1, h2, h3, h4]
-      simp [Complex.conj_re, Complex.conj_im] at *
+      exact Or.inr ⟨c, hc, rfl⟩
+    · change (bridgedToZeroFreeRect c).x0 < z.re ∧ z.re <
+        (bridgedToZeroFreeRect c).x1 ∧
+        -(bridgedToZeroFreeRect c).y1 < z.im ∧
+        z.im < -(bridgedToZeroFreeRect c).y0
       exact ⟨hx0, hx1, by linarith [hy1], by linarith [hy0]⟩
-
-/-- The central zero-free cover built from trusted Float certificate data. -/
-def bridgedCentralCover : XiCentralZeroFreeCover 10 where
-  rects := bridgedZeroFreeRects
-  covers := bridgedCovers
+  · obtain ⟨R, hR, hx0, hx1, hy0, hy1⟩ := bridgedCoversUpper cs hcover z
+      hre_neg hre_pos hpos (by linarith [him_lt])
+    refine ⟨R, ?_, hx0, hx1, hy0, hy1⟩
+    exact List.mem_append_left _ hR
