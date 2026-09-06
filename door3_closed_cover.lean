@@ -93,6 +93,35 @@ theorem gridFine_covers_closed_inner {x y : ℝ}
   rw [List.mem_flatMap]
   exact ⟨px, hpx_mem, by simp [hpy_mem]⟩
 
+/-! The closed-grid counterpart of the existing strict-inner assembly.  The
+same fencing supplier is enough because the Taylor estimate is proved on a
+closed `Rect2D.mem`; only the geometric inequalities change from `<` to `≤`. -/
+
+theorem closed_inner_nonvanishing_of_fenced_grid_fine
+    (H : ∀ c ∈ gridFine, ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖)
+    {z : ℂ} (hx_lo : -10 ≤ z.re) (hx_hi : z.re ≤ 10)
+    (hy_lo : 0.01 ≤ z.im) (hy_hi : z.im ≤ 0.49) :
+    xiShifted z ≠ 0 := by
+  obtain ⟨c, hc_mem, hloX, hhiX, hloY, hhiY⟩ :=
+    gridFine_covers_closed_inner hx_lo hx_hi hy_lo hy_hi
+  obtain ⟨R, ε, M, hx0, hx1, hy0, hy1, hStripLo, hStripHi, hε, hM, hcenter⟩ :=
+    H c hc_mem
+  have hmem : R.mem z := by
+    have e1 : R.x0 ≤ z.re := by rw [hx0]; exact hloX
+    have e2 : z.re ≤ R.x1 := by rw [hx1]; exact hhiX
+    have e3 : R.y0 ≤ z.im := by rw [hy0]; exact hloY
+    have e4 : z.im ≤ R.y1 := by rw [hy1]; exact hhiY
+    exact ⟨e1, e2, e3, e4⟩
+  have hle : ε ≤ ‖xiShifted z‖ :=
+    xi_rect_lower_bound_of_center_bound_strip R ε M hStripLo hStripHi hM hcenter z hmem
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  exact (not_le_of_gt hε) hle
+
 /-! A closed-cell constructor from the same Taylor-fencing hypotheses used by
 the open-cell assembly.  `Rect2D.mem` is closed, so the resulting certificate
 also handles points lying exactly on a cell edge. -/

@@ -2785,3 +2785,8 @@ The same module now proves `fineGridX_covers_closed`,
 `[-10,10] × [0.01,0.49]`, including every numerical grid boundary.  This is a
 pure real-arithmetic result; it does not discharge the per-cell analytic
 fencing fields or the boundary strips outside that rectangle.
+
+`closed_inner_nonvanishing_of_fenced_grid_fine` is the corresponding
+closed-boundary assembly: any supplier of the existing 40 per-cell fencing
+fields yields nonvanishing on the entire closed inner rectangle.  It carries
+those fields explicitly and introduces no trusted numerical claim.
