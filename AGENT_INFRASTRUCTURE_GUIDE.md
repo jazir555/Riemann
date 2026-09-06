@@ -2735,6 +2735,14 @@ center/radius form as well; the false Float/ℝ equality leaf has been removed.
 remaining legacy leaves: the real center enclosure, the derivative enclosure,
 and the unsatisfiable strict grid-cover theorem.
 
+`door3_trusted_statement_audit.lean` machine-checks a stronger defect in the
+legacy center leaf: `not_universal_bridged_center_bound` proves that the
+universal theorem cannot hold for the current `BridgedCell` structure, because
+its `ε` field is unconstrained above. The proof constructs a valid record with
+`ε = ‖xiShifted center‖ + 1` and `M = 0`, yielding an immediate contradiction.
+Its build succeeds (8691 jobs) and its axiom report contains only the standard
+`propext`, `Classical.choice`, and `Quot.sound`.
+
 ## Door-3 update: analytic zeta pair tightening (2026-09-05)
 
 `door3_zeta_pair_tightening.lean` adds an unconditional degree-eight cosine
