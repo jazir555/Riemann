@@ -327,6 +327,13 @@ theorem D3_imag_axis_explicit_center_nonzero_uniform {y : ℝ}
   rw [hz, norm_zero] at h
   norm_num at h
 
+theorem D3_imag_axis_explicit_center_re_abs_lower {y : ℝ}
+    (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    D3_imag_axis_explicit_center_lower y ≤
+      |(xiShifted (Complex.I * (y : ℂ))).re| := by
+  rw [← D3_imag_axis_xi_norm_eq_abs_re]
+  exact D3_imag_axis_explicit_center_lower_le hy0 hy1
+
 def D3_real_xi_center_lower (s : ℝ) : ℝ :=
   (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ / 2
 
