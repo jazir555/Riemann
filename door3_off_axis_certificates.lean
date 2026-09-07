@@ -1778,12 +1778,17 @@ theorem R10_zeta_norm_eq_R00 :
     ‖zeta R03R10PolyLower.sR10‖ = ‖zeta zetaCellS0‖ := by
   have hs : star zetaCellS0 = R03R10PolyLower.sR10 := by
     apply Complex.ext
-    · rw [Complex.conj_re, zetaCellS0_re, R03R10PolyLower.sR10_re]
-    · rw [Complex.conj_im, zetaCellS0_im, R03R10PolyLower.sR10_im]
+    · change zetaCellS0.re = R03R10PolyLower.sR10.re
+      rw [zetaCellS0_re, R03R10PolyLower.sR10_re]
+      norm_num
+    · change -zetaCellS0.im = R03R10PolyLower.sR10.im
+      rw [zetaCellS0_im, R03R10PolyLower.sR10_im]
+      norm_num
   rw [← hs]
   change ‖riemannZeta (star zetaCellS0)‖ = ‖riemannZeta zetaCellS0‖
+  change ‖riemannZeta ((starRingEnd ℂ) zetaCellS0)‖ = ‖riemannZeta zetaCellS0‖
   rw [riemannZeta_conj]
-  simp
+  exact norm_star _
 
 /-!
 This record is the exact finite-data interface required by the unconditional
@@ -1902,7 +1907,7 @@ theorem R10_center_certificate_of_R00_finite_zeta
     (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
     (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R10.radius ≤
       ‖xiShifted CentralCoverAssembly.R10.center‖ := by
-  apply R10_center_certificate_of_zeta_ge_half
+  apply R10_center_certificate_small_of_zeta_ge_half
   have h0 : (0.5 : ℝ) ≤ ‖zeta zetaCellS0‖ :=
     hHalf.trans (C.lower_of_re (by rw [zetaCellS0_re]; norm_num)
       (by rw [zetaCellS0_re]; norm_num))
@@ -2046,5 +2051,7 @@ theorem OffAxisFiniteCertificateBundle.rects_length
 
 #print axioms FiniteZetaLowerCertificate.lower_of_re
 #print axioms R03_center_certificate_of_finite_zeta
+#print axioms R10_zeta_norm_eq_R00
+#print axioms OffAxisFiniteCertificateBundle.rects_length
 
 end Door3OffAxis
