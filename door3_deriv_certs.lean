@@ -1199,3 +1199,79 @@ theorem stripBaseBoundsShape_deriv_of_ballSup {f : ℂ → ℂ} {x : ℝ} {B M1 
 #print axioms bottomStrip_margin_example
 #print axioms stripBaseBoundsShape_of_explicit
 #print axioms stripBaseBoundsShape_deriv_of_ballSup
+
+/-!
+## Door-3 remainder 2 final conjunct: real-axis minorant (explicit numerals)
+
+Import-free bridge (`import Mathlib` only): the unconditional
+`ε0 ≤ ‖xiShiftedEntire (x : ℂ)‖` minorant on `-10 < x < 10` needs a uniform
+critical-line `ξ` lower bound (`s = 1 / 2 + I * x`, `|x| < 10`), absent from
+Mathlib. The banked real-`s`-axis / imaginary-axis feeders
+(`door3_real_center_bounds`, `door3_boundary_real`, `door3_imag_axis_strip`)
+are a different slice (`z = I * y`, i.e. `s` real) and do not transfer.
+
+Banked here (sorry-free, explicit numerals only, all `≤ 6` digits): the
+margin-compatible pair `ε0 = 0.025`, `M1 = 1` with `0.01 * M1 < ε0` proved by
+`norm_num`, its margin via a `bottomStrip_margin_of_mul_lt` CALL (not redone),
+the full-shape instance from explicit base/deriv hypotheses, the positivity
+corollary `0 < ‖f (x : ℂ)‖`, the `M1 = 1` deriv specialization of the banked
+segment rule, and the per-`x` existential closure
+`∃ ε0 M1, StripBaseBoundsShape f x ε0 M1` for handoff to `bottom_strip_covered`
+(`central_cover_assembly.lean:2250`) after setting `f := xiShiftedEntire`.
+
+Residual (exact): supply `hb : (0.025 : ℝ) ≤ ‖xiShiftedEntire (x : ℂ)‖` and
+`hB : ∀ z ∈ closedBall (stripSegCenter x) 1, ‖xiShiftedEntire z‖ ≤ B` with
+`B / (1 / 2) ≤ 1`, uniformly for `-10 < x < 10` (critical-line lower bound plus
+ball sup on the strip tube; the `|Im| ∈ [10, 11]` tail numerals are a disjoint
+height band and do not transfer).
+-/
+
+/-- Margin compatibility in `*` form: `0.01 * 1 < 0.025`. -/
+theorem bottomStrip_mul_lt_example : (0.01 : ℝ) * (1 : ℝ) < (0.025 : ℝ) := by
+  norm_num
+
+/-- Margin via the banked constructor (CALL, not redone). -/
+theorem bottomStrip_margin_via_mul_lt :
+    (0.01 : ℝ) < (0.025 : ℝ) / (1 : ℝ) :=
+  bottomStrip_margin_of_mul_lt (by norm_num) bottomStrip_mul_lt_example
+
+/-- Full-shape instance at the explicit pair `(0.025, 1)` from explicit
+base/deriv hypotheses (base lower bound is the residual real-axis minorant). -/
+theorem stripBaseBoundsShape_explicit_of_bounds {f : ℂ → ℂ} {x : ℝ}
+    (hb : (0.025 : ℝ) ≤ ‖f (x : ℂ)‖)
+    (hd : ∀ (y : ℝ), y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ) →
+      ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ (1 : ℝ)) :
+    StripBaseBoundsShape f x (0.025 : ℝ) (1 : ℝ) :=
+  stripBaseBoundsShape_of_explicit (by norm_num) (by norm_num) hb hd
+    bottomStrip_margin_via_mul_lt
+
+/-- Positivity corollary of the explicit base hypothesis. -/
+theorem stripBaseBoundsShape_base_pos_of_explicit {f : ℂ → ℂ} {x : ℝ}
+    (hb : (0.025 : ℝ) ≤ ‖f (x : ℂ)‖) : (0 : ℝ) < ‖f (x : ℂ)‖ :=
+  lt_of_lt_of_le (by norm_num) hb
+
+/-- `M1 = 1` deriv specialization of the banked segment rule. -/
+theorem stripBaseBoundsShape_deriv_explicit_of_ballSup {f : ℂ → ℂ} {x : ℝ}
+    {B : ℝ}
+    (hd : DiffContOnCl ℂ f (ball (stripSegCenter x) 1))
+    (hB : ∀ (z : ℂ), z ∈ closedBall (stripSegCenter x) 1 → ‖f z‖ ≤ B)
+    (hM : B / (1 / 2 : ℝ) ≤ (1 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ)) :
+    ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ (1 : ℝ) :=
+  stripBaseBoundsShape_deriv_of_ballSup hd hB hM y hy
+
+/-- Per-`x` existential closure at explicit numerals, for handoff to
+`bottom_strip_covered` after `f := xiShiftedEntire`. -/
+theorem stripBaseBoundsShape_exists_of_explicit_bounds {f : ℂ → ℂ} {x : ℝ}
+    (hb : (0.025 : ℝ) ≤ ‖f (x : ℂ)‖)
+    (hd : ∀ (y : ℝ), y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ) →
+      ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ (1 : ℝ)) :
+    ∃ (e0 : ℝ), ∃ (M1 : ℝ), StripBaseBoundsShape f x e0 M1 :=
+  ⟨(0.025 : ℝ), (1 : ℝ), stripBaseBoundsShape_explicit_of_bounds hb hd⟩
+
+#print axioms bottomStrip_mul_lt_example
+#print axioms bottomStrip_margin_via_mul_lt
+#print axioms stripBaseBoundsShape_explicit_of_bounds
+#print axioms stripBaseBoundsShape_base_pos_of_explicit
+#print axioms stripBaseBoundsShape_deriv_explicit_of_ballSup
+#print axioms stripBaseBoundsShape_exists_of_explicit_bounds
