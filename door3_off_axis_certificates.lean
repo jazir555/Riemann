@@ -1,10 +1,45 @@
 import interval_arith
+import door3_tail_eta_upper
 
 open Complex Real
 noncomputable section
 
 namespace Door3OffAxis
 
+theorem R03_zeta_upper_center :
+    ‖zeta R03GammaUpper.sR03‖ ≤ (125 : ℝ) := by
+  apply Door3TailEtaUpper.zeta_upper_tail_quarter
+  · rw [R03GammaUpper.sR03_re]
+    norm_num
+  · rw [R03GammaUpper.sR03_re]
+    norm_num
+  · rw [R03GammaUpper.sR03_im]
+    rw [abs_of_neg (by norm_num)]
+    norm_num
+
+theorem R03_zeta_upper_on_rect {w : ℂ}
+    (hw : CentralCoverAssembly.R03.mem w) :
+    ‖zeta (shiftedS w)‖ ≤ (125 : ℝ) := by
+  apply Door3TailEtaUpper.zeta_upper_tail_quarter
+  · rw [shiftedS_re]
+    have hy0 := hw.2.2.1
+    have hy1 := hw.2.2.2
+    rw [CentralCoverAssembly.R03_y0] at hy0
+    rw [CentralCoverAssembly.R03_y1] at hy1
+    linarith
+  · rw [shiftedS_re]
+    have hy0 := hw.2.2.1
+    have hy1 := hw.2.2.2
+    rw [CentralCoverAssembly.R03_y0] at hy0
+    rw [CentralCoverAssembly.R03_y1] at hy1
+    linarith
+  · rw [RHProofScaffold.LeafDecomp.shiftedS_im_eq]
+    have hx0 := hw.1
+    have hx1 := hw.2.1
+    rw [CentralCoverAssembly.R03_x0] at hx0
+    rw [CentralCoverAssembly.R03_x1] at hx1
+    rw [abs_le]
+    constructor <;> linarith
 /-- The two independently generated descriptions of the R02 centre coincide. -/
 theorem R02_s_center_eq : R02Uniform.sR02 = R02GammaUpper.sR02 := by
   rfl
