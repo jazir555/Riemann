@@ -3319,3 +3319,7 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
+- 2026-09-07 BS2 (`b3f02274`, deriv tail, green 8682 jobs, axioms clean):
+  per-`x` conditional closure `∃ ε0 M1, StripBaseBoundsShape` at
+  `(0.025, 1)`. Residual: UNIFORM `0.025 ≤ ‖ξ(x)‖` on `-10<x<10`
+  (critical-line ξ minorant, tasked as BS3).
