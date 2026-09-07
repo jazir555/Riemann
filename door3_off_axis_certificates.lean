@@ -2141,3 +2141,122 @@ theorem OffAxisFiniteCertificateBundle.rects_length
 #print axioms OffAxisFiniteCertificateBundle.rects_length
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- R03 two-term eta partial sum in closed form (`S₂ = 1 - (2^s)⁻¹`). -/
+theorem R03_eta_S2_eq :
+    (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR03 k)
+      = 1 - ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR03)⁻¹) := by
+  have hsum : (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR03 k)
+      = etaDirichletTerm R03R10PolyLower.sR03 0 + etaDirichletTerm R03R10PolyLower.sR03 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  have h0 : etaDirichletTerm R03R10PolyLower.sR03 0 = 1 := by
+    have h01 : (0 + 1 : ℕ) = 1 := rfl
+    have hcast : ((((0 + 1 : ℕ)) : ℂ)) = 1 := by
+      rw [h01, Nat.cast_one]
+    simp only [etaDirichletTerm, pow_zero, hcast, Complex.one_cpow, div_one]
+  have h1 : etaDirichletTerm R03R10PolyLower.sR03 1
+      = -((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR03)⁻¹) := by
+    unfold etaDirichletTerm
+    rw [pow_one]
+    rw [show (((1 + 1 : ℕ) : ℂ)) = ((((2 : ℕ)) : ℂ)) by norm_num]
+    rw [neg_div, one_div]
+  rw [hsum, h0, h1]
+  ring
+
+/-- Modulus of the R03 second eta term (`2^{-0.395} ≤ 4/5`, from `5/4 ≤ 2^0.395`). -/
+theorem R03_eta_second_norm_le :
+    ‖((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR03)⁻¹)‖ ≤ 4 / 5 := by
+  have h2eq : ((((2 : ℕ)) : ℂ)) = (2 : ℂ) := by norm_cast
+  rw [h2eq, norm_inv, two_cpow_norm, R03R10PolyLower.sR03_re]
+  have hge := zetaCellS0_rpow_0395_ge
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (0.395 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  rw [show (4 / 5 : ℝ) = ((5 / 4 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Genuine R03 finite-sum lower bound (`1/5 ≤ ‖S₂‖`, reverse triangle). -/
+theorem R03_eta_S2_norm_ge :
+    (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR03 k‖ := by
+  rw [R03_eta_S2_eq]
+  have hX := R03_eta_second_norm_le
+  have h := norm_add_le
+    (1 - ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR03)⁻¹))
+    ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR03)⁻¹)
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  linarith
+
+/-- Genuine R03 eta-factor upper bound (`‖1 - 2^{1-s}‖ ≤ 13/5`, needs only `Re = 0.395`). -/
+theorem R03_etaFactor_upper :
+    ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR03))‖ ≤ 13 / 5 := by
+  have hre : ((1 : ℂ) - R03R10PolyLower.sR03).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R03R10PolyLower.sR03_re]
+    norm_num
+  have hY : ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR03)‖ ≤ 8 / 5 := by
+    rw [two_cpow_norm, hre]
+    exact zetaCellS0_rpow_0605_le
+  calc ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR03)‖
+        ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR03)‖ :=
+          norm_sub_le _ _
+    _ ≤ 13 / 5 := by
+          rw [norm_one]
+          linarith [hY]
+
+/-- R03 center norm upper (`‖sR03‖ ≤ 4.77` from `0.395² + 4.75² ≤ 4.77²`). -/
+theorem R03_s_norm_le : ‖R03R10PolyLower.sR03‖ ≤ (4.77 : ℝ) := by
+  have hsq : ‖R03R10PolyLower.sR03‖ ^ 2 ≤ (4.77 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, R03R10PolyLower.sR03_re,
+      R03R10PolyLower.sR03_im]
+    norm_num
+  have hnn : (0 : ℝ) ≤ ‖R03R10PolyLower.sR03‖ := norm_nonneg _
+  calc ‖R03R10PolyLower.sR03‖ = Real.sqrt (‖R03R10PolyLower.sR03‖ ^ 2) :=
+        (Real.sqrt_sq hnn).symm
+    _ ≤ Real.sqrt ((4.77 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = (4.77 : ℝ) := Real.sqrt_sq (by norm_num)
+
+/-- Genuine R03 paired tail at `M = 1` (`‖G - S₂‖ ≤ 61/5`, via `zetaCell_even_remainder_le`). -/
+theorem R03_eta_tail_1_le :
+    ‖(∑' m, etaPairTerm R03R10PolyLower.sR03 m)
+      - (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR03 k)‖ ≤
+      (61 / 5 : ℝ) := by
+  have hs : 0 < R03R10PolyLower.sR03.re := by
+    rw [R03R10PolyLower.sR03_re]
+    norm_num
+  have hC : ‖R03R10PolyLower.sR03‖ ≤ (4.77 : ℝ) := R03_s_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 1 (by norm_num)
+  have h21 : 2 * 1 = 2 := by norm_num
+  rw [h21] at hgen
+  have hre : R03R10PolyLower.sR03.re = (0.395 : ℝ) := R03R10PolyLower.sR03_re
+  rw [hre] at hgen
+  have h1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_cast
+  rw [h1, Real.one_rpow] at hgen
+  have hle : (4.77 : ℝ) * (1 / (0.395 : ℝ)) ≤ (61 / 5 : ℝ) := by norm_num
+  linarith
+
+/-- Genuine (fully proved-field) R03 finite zeta lower certificate at `N = 2`.
+Its `(slow - rtail) / cF` ratio is negative, so the `0.5` threshold stays open:
+the next step is a larger-`N` slow bound plus a small-`M` tail decay bound. -/
+noncomputable def R03_genuine_finite_zeta_certificate :
+    FiniteZetaLowerCertificate R03R10PolyLower.sR03 :=
+  { N := 2
+    S := ∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR03 k
+    slow := 1 / 5
+    rtail := 61 / 5
+    cF := 13 / 5
+    hSdef := rfl
+    hSlow := R03_eta_S2_norm_ge
+    hTail := R03_eta_tail_1_le
+    hcFpos := by norm_num
+    hFac := R03_etaFactor_upper }
+
+#print axioms R03_eta_S2_eq
+#print axioms R03_eta_S2_norm_ge
+#print axioms R03_etaFactor_upper
+#print axioms R03_s_norm_le
+#print axioms R03_eta_tail_1_le
+#print axioms R03_genuine_finite_zeta_certificate
+
+end Door3OffAxis
