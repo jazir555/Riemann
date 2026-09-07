@@ -35,8 +35,7 @@ theorem xiShifted_ne_zero_on_imaginary_axis_proved
     (y : ℝ) (hyne : y ≠ 0)
     (hgt : -(1 / 2 : ℝ) < y) (hlt : y < (1 / 2 : ℝ)) :
     xiShifted (Complex.I * (y : ℂ)) ≠ 0 := by
-  exact xiShifted_ne_zero_on_imaginary_axis
-    zetaRealNonzeroInCritical_proved y hyne hgt hlt
+  exact D3_imag_axis_explicit_center_nonzero hgt hlt
 
 /-- The hard-difference form of the same unconditional imaginary-axis result. -/
 theorem hardDifferenceNonzero_on_imaginary_axis_proved
