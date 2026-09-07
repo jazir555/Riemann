@@ -98,6 +98,128 @@ noncomputable def R02_zero_free_certificate_of_zeta_ge_one
   have hcenter := R02_center_certificate_of_zeta_ge_one hzeta
   exact CentralCoverAssembly.R02_zeroFree_of_bounds ⟨hcenter, hderiv⟩
 
+
+/-- Generic off-axis centre certificate. -/
+theorem center_certificate_of_components
+    (R : CellProofEngine.Rect2D) (s : ℂ) (ε M Apoly Api Agam Azeta : ℝ)
+    (harg : s = (1 / 2 : ℂ) + Complex.I * R.center)
+    (hM0 : 0 ≤ M) (hrad : R.radius ≤ 1.26)
+    (hA0 : 0 ≤ Apoly) (hB0 : 0 ≤ Api) (hC0 : 0 ≤ Agam) (hD0 : 0 ≤ Azeta)
+    (hpoly : Apoly ≤ ‖R00Enclosure.polyPart s‖)
+    (hpi : Api ≤ ‖R00Enclosure.piPart s‖)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart s‖)
+    (hzeta : Azeta ≤ ‖zeta s‖)
+    (hprod : ε + M * 1.26 ≤ Apoly * Api * Agam * Azeta) :
+    ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds R ε M hM0 hrad
+    Apoly Api Agam Azeta hA0 hB0 hC0 hD0 hpoly hpi hgam hzeta hprod
+
+theorem R03_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR03‖)
+    (hgam : (0.025 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR03‖) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R03.radius ≤
+      ‖xiShifted CentralCoverAssembly.R03.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR03‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR03_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R03 R03R10PolyLower.sR03
+    0.05 0.07 11.3 (1 / 2 : ℝ) 0.025 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R03_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R03 hpi hgam hzeta
+    (by norm_num)
+
+theorem R04_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR04‖)
+    (hgam : (0.08 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR04‖) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R04.radius ≤
+      ‖xiShifted CentralCoverAssembly.R04.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR04‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR04_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R04 R03R10PolyLower.sR04
+    0.05 0.07 3.85 (1 / 2 : ℝ) 0.08 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R04_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R04 hpi hgam hzeta
+    (by norm_num)
+
+theorem R05_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖)
+    (hgam : (1.2 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR05‖) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R05.radius ≤
+      ‖xiShifted CentralCoverAssembly.R05.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR05‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR05_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R05 R03R10PolyLower.sR05
+    0.15 0.06 0.39 (1 / 2 : ℝ) 1.2 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R05_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R05 hpi hgam hzeta
+    (by norm_num)
+
+theorem R06_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR06‖)
+    (hgam : (0.52 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR06‖) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R06.radius ≤
+      ‖xiShifted CentralCoverAssembly.R06.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR06‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR06_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R06 R03R10PolyLower.sR06
+    0.15 0.06 0.88 (1 / 2 : ℝ) 0.52 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R06_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R06 hpi hgam hzeta
+    (by norm_num)
+
+theorem R07_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR07‖)
+    (hgam : (0.052 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR07‖) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R07.radius ≤
+      ‖xiShifted CentralCoverAssembly.R07.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR07‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR07_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R07 R03R10PolyLower.sR07
+    0.05 0.07 5.35 (1 / 2 : ℝ) 0.052 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R07_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R07 hpi hgam hzeta
+    (by norm_num)
+
+theorem R08_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
+    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R08.radius ≤
+      ‖xiShifted CentralCoverAssembly.R08.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR08‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR08_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R08 R03R10PolyLower.sR08
+    0.05 0.07 13.8 (1 / 2 : ℝ) 0.021 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R08_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R08 hpi hgam hzeta
+    (by norm_num)
+
+theorem R09_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR09‖)
+    (hgam : (0.007 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR09‖) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R09.radius ≤
+      ‖xiShifted CentralCoverAssembly.R09.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR09‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR09_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R09 R03R10PolyLower.sR09
+    0.002 0.07 26.3 (1 / 2 : ℝ) 0.007 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R09_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R09 hpi hgam hzeta
+    (by norm_num)
+
+theorem R10_center_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR10‖)
+    (hgam : (0.0035 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR10‖) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R10.radius ≤
+      ‖xiShifted CentralCoverAssembly.R10.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR10‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R10 R03R10PolyLower.sR10
+    0.002 0.05 38.3 (1 / 2 : ℝ) 0.0035 1 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R10_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R10 hpi hgam hzeta
+    (by norm_num)
+
+
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
 #print axioms R02_zero_free_certificate_of_zeta_ge_one
