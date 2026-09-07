@@ -3316,6 +3316,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 TS (`6d3bc2af`, newsection tail, green 8702 jobs, axioms clean):
   `Door3TailSlab278` slab supplier (`‖ζ‖ ≤ 278`, shifted feeder, K2
   Rouché-product cap). Still open: `CompletedZetaTailU10` Gamma wiring.
+- 2026-09-07 ZU2 (`b310203a` pt 1, zeta tail, green 8693 jobs, axioms clean):
+  FE strip-cap tier (`‖F‖ ≤ 30` right edge, chi caps, `‖ζ‖=‖F‖/‖s-1‖`
+  conversion). Residual: Stirling Gamma numeral `G` (tasked as ZU3).
+- 2026-09-07 RX (`b310203a` pt 2, tail-scratch, green 8682 jobs):
+  `door3RealSeg` compact bridge (uniform⇔pointwise certificate pair).
+  Residual: critical-line zeta lower numeral on `1/2+I·[-1,1]`
+  (tasked as RX2).
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
