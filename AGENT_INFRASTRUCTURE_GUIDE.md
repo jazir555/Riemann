@@ -3302,3 +3302,7 @@ for the full Door-2 capstone, the cutoff-line and edge-strip suppliers. These
 are named inputs in the theorem signatures, not hidden assumptions. No current
 commit proves all of them, so Door 3 and RH remain open despite the
 sorry-free infrastructure and the complete commit ledger above.
+- 2026-09-07 ZU (`ad4e3085`, zeta_rigorous tail, green, axioms clean):
+  `R02_D3_zeta_upper_934` (`‖ζ‖ ≤ 934` on R02 rect, was `≤1012`).
+  Eta-route floor documented in-file: reaching `≤10` needs `M ≥ 33.2^20`
+  terms — infeasible; next: FE+Stirling+convexity route (tasked as ZU2).
