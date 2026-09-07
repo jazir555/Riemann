@@ -866,11 +866,11 @@ scope". **Float-layer status:** `float_jensen.lean` proves the Jensen hyperbolic
 - `xiZeros_simple` — a declared `axiom` stating the *simplicity of the xi zeros* (a separate open
   conjecture, **not** an RH-equivalence door). It is used only as a *hypothesis* by the Hadamard
   factorization, never as a route to RH. Leave it as-is; do NOT try to remove it by `sorry`.
-- **Float-layer trusted lemmas** (`central_cover_trusted.lean`): `bridged_center_bound`,
-  `bridged_deriv_bound`, and the `BridgedCell` order/positivity proofs are `sorry` (TRUSTED, mpmath
-  50 dps). They are **not** "unclosable" — they are the final trusted→proved transition. Closing
-  them requires either a computable ℝ ξ approximation or interval arithmetic in Lean. The rigorous
-  `zeta_rigorous.lean` path (§18b.7) shows how such a transition is done without trusted statements.
+- **Historical Float-layer trusted lemmas** (`central_cover_trusted.lean`): the original
+  `bridged_center_bound`/`bridged_deriv_bound` design used mpmath-backed `sorry` leaves. The current
+  file has no `sorry` declarations: the production `BridgedCellCertificate` takes exact real center,
+  derivative, and coverage inequalities as explicit fields. The remaining task is to supply those
+  fields by a kernel-checked complex-ζ/ξ enclosure; the later Door-3 updates record the migrated API.
 - **`zeta_rigorous.lean`** — rigorous ℝ proof that `η(1/2) > 0` (hence `ζ(1/2) < 0`, `ξ(1/2) > 0`)
   via Mathlib's alternating series test. **0 sorrys.** `eta_half_pos` (correct `Tendsto` form — the
   `0 < ∑'` tsum form is false for conditionally convergent series), the `HasSum`/summability links,
@@ -1038,23 +1038,23 @@ The coercion that connects Float data to ℝ proofs:
   `toRatParts` is the only access path. `Float` was added to Mathlib's `Batteries` in v4.33 but
   without a ℝ coercion — this file supplies it.
 
-### 18b.4 Central cover assembly (`central_cover_trusted.lean`)
+### 18b.4 Central cover assembly (`central_cover_trusted.lean`) — historical Float path
 
 Bridges the Float cert to the ℝ central cover structure:
 
 - `BridgedCell` — wraps `CentralCell` with `Float.toReal` conversions for `x0,x1,y0,y1,ε,M`.
-- `bridged_center_bound` (TRUSTED, mpmath): `Float.toReal ε + M·radius ≤ ‖ξ(center)‖`.
-- `bridged_deriv_bound` (TRUSTED, mpmath): `∀z ∈ rect, ‖ξ'(z)‖ ≤ Float.toReal M`.
+- `bridged_center_bound` (historical trusted Float statement): `Float.toReal ε + M·radius ≤ ‖ξ(center)‖`.
+- `bridged_deriv_bound` (historical trusted Float statement): `∀z ∈ rect, ‖ξ'(z)‖ ≤ Float.toReal M`.
 - `bridgedToLowerBoundRect` → `XiLocalLowerBoundRect` (uses `cell_lower_bound_from_center_and_deriv`).
 - `bridgedToZeroFreeRect` → `XiLocalZeroFreeRect` (uses `XiLocalZeroFreeRect_of_lower_bound`).
-- `bridgedCentralCover : XiCentralZeroFreeCover 10` — **the assembled central cover**, built from the
-  32-cell Float certificate. This is the concrete deliverable of the convergent target.
+- `bridgedCentralCover : XiCentralZeroFreeCover 10` — the historical 32-cell Float assembly.
 
-**The `sorry` lemmas in this file are TRUSTED** (justified by mpmath 50 dps, margin ≥ 1.235e-02 > 0),
-not machine-checked in Lean. They assert that the Float-computed bounds agree with the actual ℝ ξ
-norm/derivative. Closing them rigorously requires either (a) a computable ℝ ξ approximation, or (b)
-interval arithmetic in Lean — both are beyond current Mathlib. The infrastructure is complete; the
-remaining gap is the trusted→proved transition.
+This subsection records the original Float design.  The current implementation has migrated the
+production path to exact real certificate fields: `central_cover_trusted.lean` contains no `sorry`
+declarations, and its `BridgedCellCertificate` requires the center, derivative, and coverage
+inequalities as explicit inputs.  The mpmath/Float rows remain computational candidates until those
+analytic inequalities are supplied by a kernel-checked enclosure.  See the dated Door-3 updates at
+the end of this guide for the current 40-cell and finite-certificate status.
 
 ### 18b.5 Jensen hyperbolicity in Float (`float_jensen.lean`, namespace `FloatJensen`)
 
@@ -1069,7 +1069,7 @@ Parallel Float-based Jensen polynomial machinery mirroring `JensenTranslation.le
 
 ### 18b.6 Convergence: how RH is obtained
 
-With the Float layer complete, the path to `RiemannHypothesisProp` is:
+With the historical Float layer complete, the path to `RiemannHypothesisProp` was:
 
 1. `bridgedCentralCover : XiCentralZeroFreeCover 10` (this Float layer) — central rectangle.
 2. Tail bound from `riemann_hypothesis_newsection.lean` / `cross_door_synthesis.lean`
@@ -1098,8 +1098,9 @@ With the Float layer complete, the path to `RiemannHypothesisProp` is:
   0.0041 ≈ ±0.002, inside the ±0.003 budget) via sharp convexity telescoping at M=8 with 4-decimal
   `√`-enclosures. The `η`-to-`ζ`-to-`ξ` chain at `s=1/2` is fully rigorous: `zeta_half_value`,
   `etaTendsto_eq_etaHurwitz` (hLim, paired-difference summability + identity theorem) all closed.
-- The main remaining gap is the **80 per-cell numerical enclosures** (`center ε+M·r ≤ ‖ξ(center)‖`
-  + uniform `‖deriv‖≤M` for each of 40 cells): needs rigorous complex `ζ`/`Γ`/`cpow` interval
+- The main remaining gap is the **80 per-cell numerical enclosures** (two fields for each of the
+  40 current cells: `center ε+M·r ≤ ‖ξ(center)‖` and uniform `‖deriv‖≤M`): it needs rigorous
+  complex `ζ`/`Γ`/`cpow` interval
   arithmetic absent from Mathlib (real `Re>1` zeta bounds only; `eta_half_pos` is real-alternating,
   off-real centers need a full complex ξ-enclosure). Also open: x=±10 endpoints, y∈[0.49,1/2),
   the real axis, and the Gamma full narrow to ±0.01 (n≈50–60). Step 3 (applying the reduction
@@ -1135,13 +1136,13 @@ Mathlib `Real`/`Complex` analysis). **The file currently has 0 `sorry`s.**
 Float layer proves `ζ(1/2) < 0` via `native_decide`; this file proves `η(1/2) > 0` (hence
 `ζ(1/2) < 0`) via Mathlib's real analysis. Together they show both paths.
 
-**Build:** `lake build zeta_rigorous` (currently 2 `sorry`s; `etaPartial 2 > 0` and `etaPartial 2 ≤ L`
-build).
+**Build:** `lake build zeta_rigorous`; the current source has 0 `sorry` declarations.  The older
+two-sorry status referred to an intermediate revision and is retained only in the commit history.
 
 ### 18b.8 What `zeta_rigorous` unlocks and what remains
 
-Once its 2 remaining `sorry`s are filled, `eta_half_pos` (`0 < η(1/2)`) is fully rigorous — **no
-`sorry`, no axioms, no Float**. From it:
+`zeta_rigorous.lean` now has no `sorry` declarations. Its `eta_half_pos` result (`0 < η(1/2)`) is
+fully rigorous — **no `sorry`, no axioms, no Float**. From it:
 
 - `η(1/2) > 0` + `ζ(s) = η(s)/(1 - 2^{1-s})` gives `ζ(1/2) < 0` (since `1 - √2 < 0`).
 - `ξ(1/2) = ½·(1/2-1)·π^{-1/4}·Γ(1/4)·ζ(1/2)` has prefactor `−1/8 < 0` times `ζ(1/2) < 0` → `ξ(1/2) > 0`.
@@ -1151,12 +1152,12 @@ Once its 2 remaining `sorry`s are filled, `eta_half_pos` (`0 < η(1/2)`) is full
 `hC` needs **all** `k`, and `all_shifts_from_zero_of_nonvanishing` (`JensenScratch.lean:508`)
 needs `hC` plus `∀ d, Hyperbolic (jensenPoly d 0)` to get `∀ d n, Hyperbolic`. So
 `zeta_rigorous` closes **one coefficient**, not the full Jensen door. Likewise, the central cover
-(`central_cover_trusted.lean`) needs the same Float→ℝ bridge but for **32 distinct cell centers**,
+needs the same analytic bridge for **40 distinct cell centers**,
 not one point. The `zeta_rigorous` proof is the **reusable template** for that bridge.
 
 In short: `zeta_rigorous` proves one coefficient and demonstrates the rigorous bridge pattern. A
-full door still requires applying that pattern to **all** coefficients (Jensen) or to **all 32 cells**
-(central cover), plus the `tendsto`/`tsum` links now being filled.
+full door still requires applying that pattern to **all** coefficients (Jensen) or to **all 40 cells**
+(central cover), plus the remaining complex enclosure and edge/cutoff suppliers.
 
 ### 18b.9 How the template fits each door
 
@@ -1172,14 +1173,12 @@ door's Float→ℝ bridge instantiates. How it fits, door by door:
   `a_k`). The `eta_terms_antitone`/`eta_terms_tendsto_zero`/`alternating_series_le_tendsto` chain
   is the template; instantiate it per `k` with the `k`-th derivative's `a_k`.
 
-- **Central cover door** (`central_cover_trusted.lean:91` + `central_cover_assembly.lean`).
-  Needs `bridged_center_bound` and `bridged_deriv_bound` for **32 distinct cell centers**,
-  each of the form `ε_i + M_i·r_i ≤ ‖ξ(center_i)‖`. Today those are `sorry` (TRUSTED, mpmath).
-  `zeta_rigorous` is the template for **one** such bound proved in `Real` without Float:
-  replace the Float lower bound `ε_i` with the `etaPartial 2 ≤ L` lower-bound step, and the
-  `‖ξ(center_i)‖` lower bound with the same `S₂`-is-a-lower-bound argument applied to the
-  cell's `a_k`. In other words, `eta_half_pos`'s `S₂ = 1 - 1/√2 > 0` becomes, per cell,
-  `S_{2}^{(i)} > 0` for that cell's alternating series.
+- **Central cover door** (`central_cover_trusted.lean` + `central_cover_assembly.lean`).
+  Needs explicit center and derivative inequalities for **40 current cell centers**, each of the
+  form `ε_i + M_i·r_i ≤ ‖ξ(center_i)‖`.  The old 32-cell Float leaves have been removed from the
+  production API; `BridgedCellCertificate` now receives these real inequalities as fields.
+  `zeta_rigorous` remains a template for proving one such bound in `Real` without Float, while the
+  current off-axis interface additionally permits finite eta-sum certificates.
 
 - **Hard-difference door** (`riemann_hypothesis_newsection.lean` + `cross_door_synthesis.lean`).
   Fits identically to the central cover: `rh_from_mollified_tail_and_central_cover` consumes the
@@ -1187,8 +1186,8 @@ door's Float→ℝ bridge instantiates. How it fits, door by door:
   transitively.
 
 - **Thin-region door** (`rh_residual_gap.lean:247` + `FirstQuadrantScratch.lean`).
-  Fits via `rh_iff_thin_region_zeta` which consumes `BoundedCoverZeta T₀` — the same 32-cell
-  finite-cover data, just expressed in `s`-plane `ζ` coordinates. The `zeta_rigorous` template
+  Fits via `rh_iff_thin_region_zeta` which consumes `BoundedCoverZeta T₀` — the same current
+  40-cell finite-cover data, just expressed in `s`-plane `ζ` coordinates. The `zeta_rigorous` template
   applies verbatim: each cell's `η`/`ζ` lower bound is an `eta_terms_antitone`-style antitone
   sequence with a `tendsto_zero` and an `S₂`-lower-bound.
 
@@ -1327,7 +1326,7 @@ riemann_hypothesis` green):** hypothesis Props mirroring supplier shapes (`XiCen
 **`rh_from_mainBand10_edgeStrips10_tail10_cutoff`** (main band + edge strips + tail + cutoff lines →
 `RiemannHypothesisProp`) + `tailPointwise10_of_absTail` adapter (plugs a door-4 mollifier leaf into the
 tail hypothesis) + feeders showing the new hyps are weaker than `XiCentralZeroFreeCover 10`. Residual is
-four named supplier obligations: 80 per-cell enclosures (door 3), edge strips `y∈[0.49,1/2)`, tail leaf
+four named supplier obligations: 80 per-cell enclosures (two fields for each current 40-cell row; door 3), edge strips `y∈[0.49,1/2)`, tail leaf
 (door 4), lines `Re=±10`.
 
 **Door 3 — Thin-region / central cover. THE BOTTLENECK.**
@@ -2320,8 +2319,8 @@ Float computation layer (convergent target fuel)
        ├─ float_real_bridge.lean  [Float.toReal : Float → ℝ, via toRatParts]
        │
        ├─ central_cover_trusted.lean  [BridgedCell, bridgedCentralCover]
-       │       ├─ bridged_center_bound  (TRUSTED: mpmath)  ── Float ε → ℝ ≤ |ξ(center)|
-       │       ├─ bridged_deriv_bound   (TRUSTED: mpmath)  ── Float M → ℝ ≥ |ξ'| on rect
+       │       ├─ bridged_center_bound  (historical mpmath trust)  ── Float ε → ℝ ≤ |ξ(center)|
+       │       ├─ bridged_deriv_bound   (historical mpmath trust)  ── Float M → ℝ ≥ |ξ'| on rect
        │       └─ bridgedCentralCover : XiCentralZeroFreeCover 10  ← CONVERGENT DELIVERABLE
        │
        └─ float_jensen.lean  [FloatJensen namespace: gammaFloat n := taylorCoeffFloat (2n)]
@@ -2959,3 +2958,75 @@ analytic complex-`ζ` lower enclosures and uniform derivative bounds for the
 central cells, together with the fixed-width edge and cutoff certificates.  The
 finite certificate interfaces expose these obligations directly and do not
 close them by hypothesis or by the forbidden `RiemannHypothesisProp_apply`.
+
+## Door-3 commit review: post-`4d38e41c` work (2026-09-07)
+
+The commit range `202e5a97..85d7b4f6` added a substantial implementation layer
+that was not represented in the earlier ledger. The following is the current
+record of that work.
+
+* **Generated target and geometry pipeline** (`202e5a97`, `939d5a1e`,
+  `cee61a93`, `d4e7f321`, `08ff946b`): `door3_numeric_targets.json` and its
+  generated Lean companion contain 40 exact-rational target rows. Lean proves
+  positivity, nonnegative slopes, positive fencing margins, the squared-radius
+  bound, the 40-row count, the radius transfer, and the budget-to-fencing
+  adapter (`all_budgets_ok`, `all_margins_pos`, `all_geometry_sq`,
+  `transfer_budget`, `make_cell_fencing`). The target `centerLower` values and
+  derivative slopes are still sampled data; no theorem equates them with an
+  analytic `ξ` value or derivative supremum.
+* **Exact open-grid coverage** (`556d319f`, `6b67d328`):
+  `door3_rational_certificates.lean` records 40 exact-rational candidate rows,
+  while `door3_rational_grid_cover.lean` proves the overlapping x and y
+  interval disjunctions and the resulting open cover of
+  `(-10,10) × (0.01,0.49)`. The final generated theorem
+  `door3_rational_candidates_all_ok` checks every row's arithmetic and geometry
+  in the kernel. These are combinatorial certificates only; the rows are
+  explicitly `sampled_unverified` for the analytic fields.
+* **Correct height and finite-evidence bridge** (`f223f222`, `d50bdd01`,
+  `0b8ef94a`, `a23225d7`, `54848771`, `f0d76330`, `25f96600`, `bcd2c0ec`):
+  `door3_height11_bridge.lean` replaces the earlier height-14 interface with
+  the exact `|Im s| < 11` range induced by `shiftedS`. It supplies
+  `CriticalStripEvidence11` and `FiniteCriticalStripEvidence11`, finite
+  rectangle-to-zero-free adapters, bounded ζ and classical-ξ cover adapters,
+  and the conditional assembly theorems
+  `rh_from_finite_evidence11_and_rectangle_tailU` and
+  `xiNoRightHalfZerosFull_of_finite_evidence`. They consume explicit finite
+  evidence and a tail supplier; no evidence instance is fabricated.
+* **Axiom-free rectangle/RH wiring** (`eb282b07`, `6fe850a6`, `04ba16fb`,
+  `563306a5`, `e9a5f85e`): `riemann_hypothesis_newsection.lean` now exposes
+  the approximation and Euler--Maclaurin rectangle bridges and their RH
+  assembly implications. The R02 eta identity is discharged unconditionally:
+  `R02_zeta_upper_unconditional` gives `‖ζ‖ ≤ 1012` on the R02 disc and
+  `R02_deriv_bound_unconditional` gives `‖deriv ξ‖ ≤ 6800640`. The conditional
+  three-lines route still has a smaller `‖ζ‖ ≤ 10` target, but the unconditional
+  constants above do not meet the current cell-fencing budget.
+* **Head and axis certificates** (`290e25e8`, `6b67d328`, and the subsequent
+  `2847bfd9` through `b02f08e3` center-bound commits):
+  `door3_s4_imag.lean` proves the reflected four-term head norm lower bound
+  `1/6` and the `1/6 − U` lower bound for the 1024-term prefix once the middle
+  block is bounded. `door3_center_bounds.lean` and
+  `door3_real_center_bounds.lean` provide unconditional real-critical ζ
+  nonvanishing, explicit real-axis `ξ` center lower bounds, and uniform
+  imaginary-axis center lower bounds, including the zero-height case. These
+  axis results close the feeder facts but do not cover the off-axis cells.
+* **Off-axis factor and finite-sum interfaces** (`4a892f75` through
+  `784da527`): the R02--R10 constructors now include unconditional polynomial,
+  π-power, Gamma, reflection, and upper-bound components, together with
+  center/zero-free constructors, the R10 conjugation bridge, and the
+  eight-cell `OffAxisFiniteCertificateBundle`. The later
+  `FiniteZetaLowerCertificate` layer makes the only missing analytic input
+  explicit: a genuine finite eta-sum lower bound (plus the corresponding
+  derivative field). The constructors remain implication APIs and do not
+  turn candidate numbers into proofs.
+* **Generator and audit hardening** (`16ac9b4c`, `9ed8723c`, `85d7b4f6`): the
+  certificate generator now emits both the Boolean arithmetic audit and the
+  proposition-valued `door3_rational_candidates_all_ok` proof, and regeneration
+  preserves that proof. The audited declarations use only standard Lean
+  axioms and contain no `sorryAx` or `RiemannHypothesisProp_apply`.
+
+This commit review changes the implementation inventory, not the closure
+status. Door 3 still lacks the kernel-checked complex-ζ lower enclosures and
+uniform derivative bounds needed for the 40 central cells, the explicit
+fixed-width edge/cutoff certificates, and a supplied finite-sum certificate for
+the off-axis bundle. The new bridges expose exactly those inputs and the
+downstream RH implications, but no recent commit proves them by assumption.
