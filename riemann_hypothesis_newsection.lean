@@ -21269,3 +21269,176 @@ threshold/Azeta arithmetic (center lower + `M * radius` budget vs product) plus
 next-cell / Gamma-lower wiring — coordinator to assign.
 No `sorry`/`admit`/`axiom` in this tail.
 -/
+
+/-!
+# Door-3 downstream tail slab: unconditional zeta upper `≤ 278` (tail-supplier step)
+
+Ownership: append-only tail (nothing above touched; no new imports; LF endings).
+Existing imports reused read-only: `riemann_hypothesis` (root `shiftedS`,
+`shiftedS_re`, `RHProofScaffold.LeafDecomp.shiftedS_im_eq`, `zeta = riemannZeta`
+by `rfl`), `zeta_rigorous` (`zetaCell_even_remainder_le`,
+`zeta_of_etaPairLim_of_re_ne`).
+
+Downstream assembly boundary (per guide §Authoritative Door-3): the RH
+implication theorems consume an explicit tail supplier
+(`AnalyticChallenge.CompletedZetaTailU10` via `rh_from_first_quadrant_and_tailU`
+/ `rh_from_rectangle_and_tailU`, or the mollified tail `MollifiedRoucheLeaf K`
+via `rh_from_mollified_tail_and_central_cover`). This block banks the tightest
+proved step toward that supplier on the `10..11` height slab, with explicit
+numbers, by CALLING (not redoing) existing pieces:
+
+* `R02ZetaUpper.R02_etaDirichlet_S2_norm_le` (two-term eta sum `≤ 2`;
+  our slab `1/4 ≤ Re` satisfies its `0.05 ≤ Re` premise by `linarith`);
+* `zetaCell_even_remainder_le` at `M = 1`, `C = 12` (paired-eta tail
+  `12 / Re ≤ 48`; same `M = 1` shape as `R02_etaPairLim_upper`, whose rect
+  does NOT cover this slab, so the slab arithmetic here is new but the
+  analytic inputs are all reused);
+* `R02ZetaUpper.R02_cvtFactor_norm_ge` (eta-factor lower `0.18 ≤ ‖1-2^{1-s}‖`;
+  our slab `Re ≤ 1/2` satisfies its `Re ≤ 0.74` premise by `linarith`);
+* `zeta_of_etaPairLim_of_re_ne` (unconditional eta-pair division for
+  `riemannZeta`; hence NO `hCont` continuation premise — cf. the conditional
+  `R02_zeta_upper_of_etaPairLim_eq` shape);
+* `MollifiedAttack.dirichletMollifier_tail_two_norm_le` (`‖M₂‖ ≤ 1/2`).
+
+What is proved (all unconditional, no `sorry`/`admit`/`axiom`):
+* `tailSlab_etaPairLim_upper` — `‖∑' m, etaPairTerm s m‖ ≤ 50` on
+  `1/4 ≤ Re ≤ 1/2`, `|Im| ≤ 11` (`S₂ ≤ 2` + tail `≤ 48`).
+* `tailSlab_zeta_upper_278` — `‖riemannZeta s‖ ≤ 278` on the same slab
+  (`50 / 0.18 = 277.77… ≤ 278`).
+* `zeta_shifted_tailSlab_upper_278` — same bound in shifted Door-3
+  coordinates (`10 ≤ |Re z| ≤ 11`, `0 ≤ Im z ≤ 1/4`): the exact `B`-feeder
+  input the `MollifiedRoucheLeaf`-gap chain (`mollified_gap_gives_zeta_lower_bound`
+  with `B = 278`) consumes.
+* `zeta_mollifier_K2_product_tailSlab_le` — assembled Rouché-product cap
+  `‖zeta(shiftedS z) * M₂‖ ≤ 139` (`278 * 1/2`; the product whose distance
+  to `1` the leaf gap constrains).
+
+Residual (honest): slab covers heights `10..11` only (`11..∞` open);
+`CompletedZetaTailU10` needs the `completedRiemannZeta₀` bound (Gamma-factor
+wiring from this zeta bound open); the `K = 2` gap `‖ζ/2-1‖ < 1` needs
+phase/cancellation beyond any size bound (per `mollified_K2_gap_implies_zeta_bound`
+converse note). Next agent: extend slab upward (eta-pair `C`-growth +
+`|Im|`-uniform denominator) or wire `completedRiemannZeta₀` via the polar+xi
+split (`completedRiemannZeta₀_eq_polar_plus_xi`).
+
+Hang-guard: explicit binders, no `simpa`, numerals ≤ 6 digits, `norm_num`
+never `decide` on `ℚ`.
+-/
+
+namespace Door3TailSlab278
+
+open scoped BigOperators
+
+/-- Slab norm cap: `‖s‖ ≤ 12` on `1/4 ≤ Re ≤ 1/2`, `|Im| ≤ 11`. -/
+theorem tailSlab_norm_le_twelve (s : ℂ)
+    (hre_lo : (1 / 4 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (1 / 2 : ℝ))
+    (him : |s.im| ≤ 11) :
+    ‖s‖ ≤ 12 := by
+  have h := Complex.norm_le_abs_re_add_abs_im s
+  have hre_abs : |s.re| ≤ (1 / 2 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith
+  linarith
+
+/-- Paired-eta-limit upper `≤ 50` on the tail slab
+(`S₂ ≤ 2` via `R02_etaDirichlet_S2_norm_le` + tail `12 / Re ≤ 48`). -/
+theorem tailSlab_etaPairLim_upper (s : ℂ)
+    (hre_lo : (1 / 4 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (1 / 2 : ℝ))
+    (him : |s.im| ≤ 11) :
+    ‖∑' m, etaPairTerm s m‖ ≤ 50 := by
+  have hspos : 0 < s.re := by linarith
+  have hC : ‖s‖ ≤ 12 := tailSlab_norm_le_twelve s hre_lo hre_hi him
+  have hC0 : (0 : ℝ) ≤ 12 := by norm_num
+  have hS2 : ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ 2 :=
+    R02ZetaUpper.R02_etaDirichlet_S2_norm_le (by linarith)
+  have hM1 : ((((1 : ℕ)) : ℝ) ^ (-s.re)) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  have hrem0 := zetaCell_even_remainder_le hspos hC hC0 1 (by norm_num)
+  rw [show (2 * 1 : ℕ) = 2 by norm_num, hM1] at hrem0
+  have hdiv : (12 : ℝ) * (1 / s.re) ≤ 48 := by
+    have hpos : (0 : ℝ) < s.re := hspos
+    have hinv : 1 / s.re ≤ 4 := by
+      rw [div_le_iff₀ hpos]
+      linarith
+    have h12 : (12 : ℝ) * (1 / s.re) ≤ 12 * 4 :=
+      mul_le_mul_of_nonneg_left hinv (by norm_num)
+    linarith
+  have htail48 : ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ 48 :=
+    le_trans hrem0 hdiv
+  have htri := norm_add_le (∑ k ∈ Finset.range 2, etaDirichletTerm s k)
+    ((∑' m, etaPairTerm s m) - (∑ k ∈ Finset.range 2, etaDirichletTerm s k))
+  rw [add_sub_cancel] at htri
+  linarith
+
+/-- Unconditional zeta upper `≤ 278` on the tail slab
+(`50 / 0.18 = 277.77… ≤ 278` via `R02_cvtFactor_norm_ge`). -/
+theorem tailSlab_zeta_upper_278 (s : ℂ)
+    (hre_lo : (1 / 4 : ℝ) ≤ s.re) (hre_hi : s.re ≤ (1 / 2 : ℝ))
+    (him : |s.im| ≤ 11) :
+    ‖riemannZeta s‖ ≤ 278 := by
+  have hspos : 0 < s.re := by linarith
+  have hre : s.re ≠ 1 := by linarith
+  have hZ := zeta_of_etaPairLim_of_re_ne hspos hre
+  rw [hZ, norm_div]
+  have hnum := tailSlab_etaPairLim_upper s hre_lo hre_hi him
+  have hden : (0.18 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    R02ZetaUpper.R02_cvtFactor_norm_ge (by linarith)
+  have hdenpos : 0 < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden
+  apply (div_le_iff₀ hdenpos).2
+  have hmul := mul_le_mul_of_nonneg_left hden (show (0 : ℝ) ≤ 278 by norm_num)
+  have heq : (278 : ℝ) * 0.18 = 50.04 := by norm_num
+  have hscale : (50 : ℝ) ≤ 278 * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    linarith
+  exact le_trans hnum hscale
+
+/-- Shifted Door-3 coordinates: `‖riemannZeta (shiftedS z)‖ ≤ 278` for
+`10 ≤ |Re z| ≤ 11`, `0 ≤ Im z ≤ 1/4` (the `B = 278` tail feeder). -/
+theorem zeta_shifted_tailSlab_upper_278 (z : ℂ)
+    (hre_lo : (10 : ℝ) ≤ |z.re|) (hre_hi : |z.re| ≤ 11)
+    (him_lo : (0 : ℝ) ≤ z.im) (him_hi : z.im ≤ (1 / 4 : ℝ)) :
+    ‖riemannZeta (shiftedS z)‖ ≤ 278 := by
+  have hsre_lo : (1 / 4 : ℝ) ≤ (shiftedS z).re := by
+    rw [shiftedS_re]
+    linarith
+  have hsre_hi : (shiftedS z).re ≤ (1 / 2 : ℝ) := by
+    rw [shiftedS_re]
+    linarith
+  have hsim : |(shiftedS z).im| ≤ 11 := by
+    rw [RHProofScaffold.LeafDecomp.shiftedS_im_eq]
+    exact hre_hi
+  exact tailSlab_zeta_upper_278 _ hsre_lo hsre_hi hsim
+
+/-- `zeta`-alias version (`zeta = riemannZeta` by `rfl`) for direct
+`MollifiedRoucheLeaf`-gap plugging. -/
+theorem zeta_shifted_tailSlab_upper_278_alias (z : ℂ)
+    (hre_lo : (10 : ℝ) ≤ |z.re|) (hre_hi : |z.re| ≤ 11)
+    (him_lo : (0 : ℝ) ≤ z.im) (him_hi : z.im ≤ (1 / 4 : ℝ)) :
+    ‖zeta (shiftedS z)‖ ≤ 278 := by
+  have h : zeta (shiftedS z) = riemannZeta (shiftedS z) := rfl
+  rw [h]
+  exact zeta_shifted_tailSlab_upper_278 z hre_lo hre_hi him_lo him_hi
+
+/-- Assembled `K = 2` Rouché-product cap `≤ 139` on the slab
+(`278 * 1/2`; zeta upper × `‖M₂‖ ≤ 1/2`). -/
+theorem zeta_mollifier_K2_product_tailSlab_le (z : ℂ)
+    (hre_lo : (10 : ℝ) ≤ |z.re|) (hre_hi : |z.re| ≤ 11)
+    (him_lo : (0 : ℝ) ≤ z.im) (him_hi : z.im ≤ (1 / 4 : ℝ)) :
+    ‖zeta (shiftedS z) * MollifiedAttack.dirichletMollifier (shiftedS z) 2‖ ≤ 139 := by
+  have hz := zeta_shifted_tailSlab_upper_278_alias z hre_lo hre_hi him_lo him_hi
+  have hM := MollifiedAttack.dirichletMollifier_tail_two_norm_le z
+  rw [norm_mul]
+  calc ‖zeta (shiftedS z)‖ * ‖MollifiedAttack.dirichletMollifier (shiftedS z) 2‖
+      ≤ 278 * (1 / 2) :=
+        mul_le_mul hz hM (norm_nonneg _) (by norm_num)
+    _ = 139 := by norm_num
+
+#print axioms Door3TailSlab278.tailSlab_norm_le_twelve
+#print axioms Door3TailSlab278.tailSlab_etaPairLim_upper
+#print axioms Door3TailSlab278.tailSlab_zeta_upper_278
+#print axioms Door3TailSlab278.zeta_shifted_tailSlab_upper_278
+#print axioms Door3TailSlab278.zeta_shifted_tailSlab_upper_278_alias
+#print axioms Door3TailSlab278.zeta_mollifier_K2_product_tailSlab_le
+
+end Door3TailSlab278
