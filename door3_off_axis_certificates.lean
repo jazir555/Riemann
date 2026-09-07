@@ -1999,6 +1999,51 @@ noncomputable def R10_zero_free_certificate_of_R00_finite_zeta
     CentralCoverAssembly.R10_strip_hi hderiv
     (R10_center_certificate_of_R00_finite_zeta C hHalf)
 
+/- A single bundle is convenient for generated certificate files: the
+finite eta data and the derivative enclosures remain explicit fields, while
+this constructor assembles the eight corresponding zero-free rectangles. -/
+structure OffAxisFiniteCertificateBundle where
+  C03 : FiniteZetaLowerCertificate R03R10PolyLower.sR03
+  C04 : FiniteZetaLowerCertificate R03R10PolyLower.sR04
+  C05 : FiniteZetaLowerCertificate R03R10PolyLower.sR05
+  C06 : FiniteZetaLowerCertificate R03R10PolyLower.sR06
+  C07 : FiniteZetaLowerCertificate R03R10PolyLower.sR07
+  C08 : FiniteZetaLowerCertificate R03R10PolyLower.sR08
+  C09 : FiniteZetaLowerCertificate R03R10PolyLower.sR09
+  C10 : FiniteZetaLowerCertificate R03R10PolyLower.sR10
+  h03 : (0.5 : ℝ) ≤ (C03.slow - C03.rtail) / C03.cF
+  h04 : (0.5 : ℝ) ≤ (C04.slow - C04.rtail) / C04.cF
+  h05 : (0.5 : ℝ) ≤ (C05.slow - C05.rtail) / C05.cF
+  h06 : (0.5 : ℝ) ≤ (C06.slow - C06.rtail) / C06.cF
+  h07 : (0.5 : ℝ) ≤ (C07.slow - C07.rtail) / C07.cF
+  h08 : (0.5 : ℝ) ≤ (C08.slow - C08.rtail) / C08.cF
+  h09 : (0.5 : ℝ) ≤ (C09.slow - C09.rtail) / C09.cF
+  h10 : (0.5 : ℝ) ≤ (C10.slow - C10.rtail) / C10.cF
+  d03 : ∀ w, CentralCoverAssembly.R03.mem w → ‖deriv xiShifted w‖ ≤ (0.01 : ℝ)
+  d04 : ∀ w, CentralCoverAssembly.R04.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+  d05 : ∀ w, CentralCoverAssembly.R05.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)
+  d06 : ∀ w, CentralCoverAssembly.R06.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)
+  d07 : ∀ w, CentralCoverAssembly.R07.mem w → ‖deriv xiShifted w‖ ≤ (0.04 : ℝ)
+  d08 : ∀ w, CentralCoverAssembly.R08.mem w → ‖deriv xiShifted w‖ ≤ (0.001 : ℝ)
+  d09 : ∀ w, CentralCoverAssembly.R09.mem w → ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)
+  d10 : ∀ w, CentralCoverAssembly.R10.mem w → ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)
+
+noncomputable def OffAxisFiniteCertificateBundle.rects
+    (B : OffAxisFiniteCertificateBundle) :
+    List XiLocalZeroFreeRect :=
+  [ R03_zero_free_certificate_of_finite_zeta B.C03 B.h03 B.d03
+  , R04_zero_free_certificate_of_finite_zeta B.C04 B.h04 B.d04
+  , R05_zero_free_certificate_of_finite_zeta B.C05 B.h05 B.d05
+  , R06_zero_free_certificate_of_finite_zeta B.C06 B.h06 B.d06
+  , R07_zero_free_certificate_of_finite_zeta B.C07 B.h07 B.d07
+  , R08_zero_free_certificate_of_finite_zeta B.C08 B.h08 B.d08
+  , R09_zero_free_certificate_of_finite_zeta B.C09 B.h09 B.d09
+  , R10_zero_free_certificate_of_finite_zeta B.C10 B.h10 B.d10 ]
+
+theorem OffAxisFiniteCertificateBundle.rects_length
+    (B : OffAxisFiniteCertificateBundle) : B.rects.length = 8 := by
+  simp [OffAxisFiniteCertificateBundle.rects]
+
 #print axioms FiniteZetaLowerCertificate.lower_of_re
 #print axioms R03_center_certificate_of_finite_zeta
 
