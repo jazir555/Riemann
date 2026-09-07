@@ -248,6 +248,11 @@ theorem D3_explicit_center_lower_89 :
   convert D3_imag_axis_explicit_center_lower_le (y := (89 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
 
+theorem D3_explicit_center_lower_0 :
+    (1 / 16 : ℝ) ≤ ‖xiShifted (0 : ℂ)‖ := by
+  convert D3_imag_axis_explicit_center_lower_le (y := (0 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
+    norm_num [D3_imag_axis_explicit_center_lower]
+
 theorem D3_imag_axis_explicit_center_uniform {y : ℝ}
     (hy0 : -(49 / 100 : ℝ) ≤ y) (hy1 : y ≤ (49 / 100 : ℝ)) :
     (1 / 40000 : ℝ) ≤ ‖xiShifted (Complex.I * (y : ℂ))‖ := by
@@ -258,6 +263,14 @@ theorem D3_imag_axis_explicit_center_uniform {y : ℝ}
     nlinarith [sq_nonneg ((1 / 2 - y) - (1 / 100 : ℝ))]
   unfold D3_imag_axis_explicit_center_lower at h
   nlinarith
+
+theorem D3_imag_axis_explicit_center_nonzero_uniform {y : ℝ}
+    (hy0 : -(49 / 100 : ℝ) ≤ y) (hy1 : y ≤ (49 / 100 : ℝ)) :
+    xiShifted (Complex.I * (y : ℂ)) ≠ 0 := by
+  have h := D3_imag_axis_explicit_center_uniform hy0 hy1
+  intro hz
+  rw [hz, norm_zero] at h
+  norm_num at h
 
 def D3_real_xi_center_lower (s : ℝ) : ℝ :=
   (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ / 2
