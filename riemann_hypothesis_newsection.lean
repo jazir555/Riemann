@@ -21020,5 +21020,98 @@ theorem deriv_tier_gap_232 {Z : ℝ} (h : 63.4 * 4 * 0.232 * Z ≤ 1 / 40) :
 
 end Door3DerivGammaSupSImage
 
+/-!
+# Door-3 downstream discharge (DI): R02 zeta-upper obligation + unconditional deriv bounds
 
+Grep-first record (verified 2026-09-04 via Grep tool before writing):
+* `def zeta : ℂ → ℂ := riemannZeta` -> `riemann_hypothesis.lean:16`
+  (so `zeta s = riemannZeta s := rfl`; cf. `newsection:786` `hzeta_eq`).
+* `def R02_zeta_upper_obligation` -> `central_cover_assembly.lean:6493`
+  (`∀ s, 0.05 ≤ s.re → ... → ‖zeta s‖ ≤ 10`).
+* `theorem R02_deriv_bound_of_zeta_upper` -> `central_cover_assembly.lean:6550`
+  (`hZ : R02_zeta_upper_obligation ⊢ ∀ w, R02.mem w → ‖deriv xiShifted w‖ ≤ 67200`).
+* `def AO_gamma_upper_disc_R02_obligation` -> `central_cover_assembly.lean:9975`
+  (`∀ s, ... → ‖gammaOf s‖ ≤ 0.097`; import-cycle-safe restatement of
+  `R02GammaDisc.gammaOf_upper_disc_R02` at `interval_arith.lean:32316`).
+* `theorem AO_R02_deriv_bound_of_zeta_upper` -> `central_cover_assembly.lean:10063`
+  (`162.96`); `theorem AO_R02_deriv_bound_163_of_zeta_upper` -> `:10078` (`163`).
+* `DG_GapTransfer.P1_R02_unconditional` -> `newsection:13893`
+  (`‖riemannZeta s‖ ≤ 10`, NO premises).
 
+Ownership: DI tail append (append-only after the DG verdict block; nothing above
+touched; existing imports at lines 1-5 reused, not re-added; no new imports to
+avoid cycles — `central_cover_assembly` + `interval_arith` already imported).
+
+What is proved here (all full proofs, no `sorry`/`admit`/`axiom`):
+* `R02_zeta_upper_obligation_discharged` — the ONE bridge: obligation from P1
+  via `zeta = riemannZeta` (`rfl` rewrite).
+* `R02_deriv_bound_unconditional_67200` — `M = 67200` unconditional on R02 via
+  `DerivCauchyBridge.R02_deriv_bound_of_zeta_upper`.
+* `AO_gamma_upper_disc_R02_discharged` — AO Gamma-upper obligation from the
+  landed `R02GammaDisc.gammaOf_upper_disc_R02` (identical statement).
+* `AO_R02_deriv_bound_unconditional_162_96` / `_163` — `M = 162.96` / `163`
+  unconditional on R02 via `AO_R02DiscUpdate` theorems.
+-/
+
+namespace DI_R02Discharge
+
+/-- The ONE bridge: `R02_zeta_upper_obligation` from unconditional parallel P1. -/
+theorem R02_zeta_upper_obligation_discharged :
+    DerivCauchyBridge.R02_zeta_upper_obligation := by
+  intro s hs_lo hs_hi him_lo him_hi
+  have h : zeta s = riemannZeta s := rfl
+  rw [h]
+  exact DG_GapTransfer.P1_R02_unconditional hs_lo hs_hi him_lo him_hi
+
+/-- UNCONDITIONAL `M = 67200` deriv bound on R02 (zeta `≤ 10` + crude Gamma `≤ 40`). -/
+theorem R02_deriv_bound_unconditional_67200 :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (67200 : ℝ) :=
+  DerivCauchyBridge.R02_deriv_bound_of_zeta_upper R02_zeta_upper_obligation_discharged
+
+/-- AO Gamma-upper obligation discharged by the landed disc lemma (identical statement). -/
+theorem AO_gamma_upper_disc_R02_discharged :
+    AO_R02DiscUpdate.AO_gamma_upper_disc_R02_obligation := by
+  intro s hre_lo hre_hi him_lo him_hi
+  exact R02GammaDisc.gammaOf_upper_disc_R02 hre_lo hre_hi him_lo him_hi
+
+/-- UNCONDITIONAL `M = 162.96` deriv bound on R02 (zeta `≤ 10` + sharp Gamma `≤ 0.097`). -/
+theorem AO_R02_deriv_bound_unconditional_162_96 :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (162.96 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_of_zeta_upper
+    AO_gamma_upper_disc_R02_discharged R02_zeta_upper_obligation_discharged
+
+/-- UNCONDITIONAL ceil-tier `M = 163` deriv bound on R02 (integer tier for thresholds). -/
+theorem AO_R02_deriv_bound_unconditional_163 :
+    ∀ w, CentralCoverAssembly.R02.mem w → ‖deriv xiShifted w‖ ≤ (163 : ℝ) :=
+  AO_R02DiscUpdate.AO_R02_deriv_bound_163_of_zeta_upper
+    AO_gamma_upper_disc_R02_discharged R02_zeta_upper_obligation_discharged
+
+#print axioms DI_R02Discharge.R02_zeta_upper_obligation_discharged
+#print axioms DI_R02Discharge.R02_deriv_bound_unconditional_67200
+#print axioms DI_R02Discharge.AO_gamma_upper_disc_R02_discharged
+#print axioms DI_R02Discharge.AO_R02_deriv_bound_unconditional_162_96
+#print axioms DI_R02Discharge.AO_R02_deriv_bound_unconditional_163
+
+end DI_R02Discharge
+
+/-!
+DI VERDICT + RESIDUAL (report-and-stop): downstream discharge FIRED (pending build).
+
+(1) BRIDGES (this tail, full proofs, no `sorry`/`admit`/`axiom`):
+(a) `DI_R02Discharge.R02_zeta_upper_obligation_discharged` — obligation from
+`DG_GapTransfer.P1_R02_unconditional` via `zeta = riemannZeta` (`rfl`).
+(b) `DI_R02Discharge.R02_deriv_bound_unconditional_67200` — `M = 67200`
+unconditional on R02 via `DerivCauchyBridge.R02_deriv_bound_of_zeta_upper`.
+(c) `DI_R02Discharge.AO_gamma_upper_disc_R02_discharged` — AO Gamma-upper from
+`R02GammaDisc.gammaOf_upper_disc_R02` (identical statement, no cycle: both
+parents already imported at lines 3-4).
+(d)+(e) `DI_R02Discharge.AO_R02_deriv_bound_unconditional_162_96` / `_163` —
+`M = 162.96` / `163` unconditional on R02 via `AO_R02DiscUpdate` theorems.
+(2) RESIDUAL: build verification (`lake build riemann_hypothesis_newsection`
+under `.lake_build_lock`) + `#print axioms` inspection. If green with exactly
+`[propext, Classical.choice, Quot.sound]` throughout, R02 deriv wall is CLOSED
+unconditionally at both tiers and the remaining R02 H-leaf closure reduces to
+threshold/Azeta arithmetic (center lower + `M * radius` budget vs product) plus
+next-cell / Gamma-lower wiring — coordinator to assign.
+No `sorry`/`admit`/`axiom` in this tail.
+-/
