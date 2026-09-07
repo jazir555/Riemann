@@ -248,6 +248,17 @@ theorem D3_explicit_center_lower_89 :
   convert D3_imag_axis_explicit_center_lower_le (y := (89 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
 
+theorem D3_imag_axis_explicit_center_uniform {y : ℝ}
+    (hy0 : -(49 / 100 : ℝ) ≤ y) (hy1 : y ≤ (49 / 100 : ℝ)) :
+    (1 / 40000 : ℝ) ≤ ‖xiShifted (Complex.I * (y : ℂ))‖ := by
+  have h := D3_imag_axis_explicit_center_lower_le
+    (y := y) (by linarith) (by linarith)
+  have hs : (1 / 100 : ℝ) ≤ 1 / 2 - y := by linarith
+  have hsquare : (1 / 100 : ℝ) ^ 2 ≤ (1 / 2 - y) ^ 2 := by
+    nlinarith [sq_nonneg ((1 / 2 - y) - (1 / 100 : ℝ))]
+  unfold D3_imag_axis_explicit_center_lower at h
+  nlinarith
+
 def D3_real_xi_center_lower (s : ℝ) : ℝ :=
   (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ / 2
 
