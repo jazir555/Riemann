@@ -80,6 +80,10 @@ theorem D3_center_lower_89_200_explicit :
       ‖xiShifted (Complex.I * ((89 / 200 : ℝ) : ℂ))‖ :=
   D3_explicit_center_lower_89
 
+theorem D3_center_lower_0_explicit :
+    (1 / 16 : ℝ) ≤ ‖xiShifted (0 : ℂ)‖ :=
+  D3_explicit_center_lower_0
+
 theorem D3_center_lower_uniform_explicit {y : ℝ}
     (hy0 : -(49 / 100 : ℝ) ≤ y) (hy1 : y ≤ (49 / 100 : ℝ)) :
     (1 / 40000 : ℝ) ≤ ‖xiShifted (Complex.I * (y : ℂ))‖ :=
