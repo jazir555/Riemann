@@ -1059,3 +1059,143 @@ theorem joint_sup_of_split {J1 J2 : ℝ}
 #print axioms R00_smallball_joint_threshold
 #print axioms sImageRect_cover_lo_hi
 #print axioms joint_sup_of_split
+
+/-!
+## Door-3 bottom-strip supplier (deriv-lane tail: BottomStripObligations bridge)
+
+Quoted obligation shapes (`central_cover_assembly.lean:2208-2217`):
+* `StripBaseBounds x e0 M1 := 0 < e0 ∧ 0 < M1 ∧
+    e0 ≤ ‖xiShiftedEntire (x : ℂ)‖ ∧
+    (∀ y ∈ Set.Icc 0 0.02,
+      ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ M1) ∧
+    0.01 < e0 / M1`
+* `BottomStripObligations :=
+    ∀ x : ℝ, -10 < x → x < 10 → ∃ e0 M1 : ℝ, StripBaseBounds x e0 M1`
+Consumer: `bottom_strip_covered` (~2250) via the feeder
+`BoundaryProofEngine.boundary_strip_nonvanishing_of_nonzero_base`
+(`rh_certificate_infra.lean:254`, with `η := 0.02`).
+
+This lane stays import-free (`import Mathlib` only), so the entire extension is
+a parameter `f : ℂ → ℂ`; set `f := xiShiftedEntire` after importing the assembly
+downstream. Banked here (sorry-free): the segment-point shape `stripSeg` (exact
+quote of the obligation's point expression), its per-point distance cap to the
+midpoint center, the segment deriv bound from the banked Cauchy rule
+(`deriv_bound_of_sphere_sup_on_ball`, called — not redone), the margin
+constructor plus a concrete margin instance, and the full-shape assembler
+`stripBaseBoundsShape_of_explicit` mirroring the obligation conjuncts.
+
+Residual: the base lower bound `e0 ≤ ‖xiShiftedEntire (x : ℂ)‖` for
+`-10 < x < 10` (needs a rigorous `ξ`-minorant on the real axis, absent from
+Mathlib); it is taken as the explicit hypothesis `hb` below.
+-/
+
+/-- Bottom-strip segment point, exact quote of the obligation's point
+expression (`central_cover_assembly.lean:2211-2212`). -/
+def stripSeg (x : ℝ) (y : ℝ) : ℂ := (x : ℂ) + Complex.I * ((y : ℝ) : ℂ)
+
+/-- Midpoint center of the `0 ≤ y ≤ 0.02` segment at fixed `x`. -/
+def stripSegCenter (x : ℝ) : ℂ := (x : ℂ) + Complex.I * ((0.01 : ℝ) : ℂ)
+
+/-- The segment point is definitionally the obligation's point expression. -/
+theorem stripSeg_eq_assembly_point (x : ℝ) (y : ℝ) :
+    stripSeg x y = (x : ℂ) + Complex.I * ((y : ℝ) : ℂ) := rfl
+
+/-- Segment displacement factors through `I`. -/
+theorem stripSeg_sub_center_eq (x : ℝ) (y : ℝ) :
+    stripSeg x y - stripSegCenter x =
+      Complex.I * (((y : ℝ) : ℂ) - ((0.01 : ℝ) : ℂ)) := by
+  unfold stripSeg stripSegCenter
+  ring
+
+/-- Every segment point is within `0.01` of the midpoint center
+(`|y - 0.01| ≤ 0.01` for `y ∈ [0, 0.02]`). -/
+theorem stripSeg_dist_center_le (x : ℝ) (y : ℝ) (hy0 : (0 : ℝ) ≤ y)
+    (hy1 : y ≤ (0.02 : ℝ)) :
+    ‖stripSeg x y - stripSegCenter x‖ ≤ (0.01 : ℝ) := by
+  have heq := stripSeg_sub_center_eq x y
+  have hfold : ((y : ℝ) : ℂ) - ((0.01 : ℝ) : ℂ) = (((y - 0.01 : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  have hnorm : ‖(((y - 0.01 : ℝ)) : ℂ)‖ = |y - 0.01| := RCLike.norm_ofReal _
+  have habs : |y - 0.01| ≤ (0.01 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith
+  calc ‖stripSeg x y - stripSegCenter x‖
+      = ‖Complex.I * ((((y - 0.01 : ℝ)) : ℂ))‖ := by rw [heq, hfold]
+    _ = ‖(((y - 0.01 : ℝ)) : ℂ)‖ := by
+        rw [norm_mul, Complex.norm_I, one_mul]
+    _ = |y - 0.01| := hnorm
+    _ ≤ 0.01 := habs
+
+/-- **Segment deriv bound (obligation conjunct 4).** A sup bound `B` on
+`closedBall (stripSegCenter x) 1` gives `‖deriv f‖ ≤ M1` at every
+`y ∈ Icc 0 0.02` (margin `r = 1 / 2`: `0.01 + 1 / 2 ≤ 1`), via the banked
+Cauchy rule `deriv_bound_of_sphere_sup_on_ball`. Set `f := xiShiftedEntire`. -/
+theorem bottomSeg_deriv_bound_of_ballSup {f : ℂ → ℂ} {x : ℝ} {B M1 : ℝ}
+    (hd : DiffContOnCl ℂ f (ball (stripSegCenter x) 1))
+    (hB : ∀ z ∈ closedBall (stripSegCenter x) 1, ‖f z‖ ≤ B)
+    (hM : B / (1 / 2 : ℝ) ≤ M1)
+    (y : ℝ) (hy : y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ)) :
+    ‖deriv f (stripSeg x y)‖ ≤ M1 := by
+  obtain ⟨hy0, hy1⟩ := hy
+  have hdist : ‖stripSeg x y - stripSegCenter x‖ ≤ (0.01 : ℝ) :=
+    stripSeg_dist_center_le x y hy0 hy1
+  have hw : ‖stripSeg x y - stripSegCenter x‖ + (1 / 2 : ℝ) ≤ 1 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw
+  exact le_trans h hM
+
+/-- **Margin constructor (obligation conjunct 5):** `0.01 * M1 < e0` gives
+`0.01 < e0 / M1`. -/
+theorem bottomStrip_margin_of_mul_lt {e0 M1 : ℝ} (hM1 : (0 : ℝ) < M1)
+    (h : (0.01 : ℝ) * M1 < e0) : (0.01 : ℝ) < e0 / M1 := by
+  have hiff : (0.01 : ℝ) < e0 / M1 ↔ (0.01 : ℝ) * M1 < e0 :=
+    lt_div_iff₀ hM1
+  rw [hiff]
+  exact h
+
+/-- Concrete margin instance: `e0 = 0.025`, `M1 = 1` clears `0.01`. -/
+theorem bottomStrip_margin_example : (0.01 : ℝ) < (0.025 : ℝ) / (1 : ℝ) := by
+  norm_num
+
+/-- Local mirror of `StripBaseBounds` (`central_cover_assembly.lean:2208-2213`)
+for a general `f`; set `f := xiShiftedEntire` downstream. Conjunct order matches
+exactly so the supplier rewrites into the obligation. -/
+def StripBaseBoundsShape (f : ℂ → ℂ) (x : ℝ) (e0 M1 : ℝ) : Prop :=
+  0 < e0 ∧ 0 < M1 ∧
+  e0 ≤ ‖f (x : ℂ)‖ ∧
+  (∀ y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ),
+    ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ M1) ∧
+  (0.01 : ℝ) < e0 / M1
+
+/-- Full-shape assembler from the three explicit supplier components (base lower
+bound taken as hypothesis `hb` — the residual xi-minorant; segment deriv bound
+supplied by `bottomSeg_deriv_bound_of_ballSup`; margin by
+`bottomStrip_margin_of_mul_lt`). -/
+theorem stripBaseBoundsShape_of_explicit {f : ℂ → ℂ} {x : ℝ} {e0 M1 : ℝ}
+    (hE0 : (0 : ℝ) < e0) (hM1 : (0 : ℝ) < M1)
+    (hb : e0 ≤ ‖f (x : ℂ)‖)
+    (hd : ∀ y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ),
+      ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ M1)
+    (hm : (0.01 : ℝ) < e0 / M1) :
+    StripBaseBoundsShape f x e0 M1 :=
+  ⟨hE0, hM1, hb, hd, hm⟩
+
+/-- The banked segment bound feeds the assembler's deriv conjunct directly
+(`stripSeg x y` is the obligation's point by `rfl`). -/
+theorem stripBaseBoundsShape_deriv_of_ballSup {f : ℂ → ℂ} {x : ℝ} {B M1 : ℝ}
+    (hd : DiffContOnCl ℂ f (ball (stripSegCenter x) 1))
+    (hB : ∀ z ∈ closedBall (stripSegCenter x) 1, ‖f z‖ ≤ B)
+    (hM : B / (1 / 2 : ℝ) ≤ M1)
+    (y : ℝ) (hy : y ∈ Set.Icc (0 : ℝ) (0.02 : ℝ)) :
+    ‖deriv f ((x : ℂ) + Complex.I * ((y : ℝ) : ℂ))‖ ≤ M1 :=
+  bottomSeg_deriv_bound_of_ballSup hd hB hM y hy
+
+#print axioms stripSeg_eq_assembly_point
+#print axioms stripSeg_sub_center_eq
+#print axioms stripSeg_dist_center_le
+#print axioms bottomSeg_deriv_bound_of_ballSup
+#print axioms bottomStrip_margin_of_mul_lt
+#print axioms bottomStrip_margin_example
+#print axioms stripBaseBoundsShape_of_explicit
+#print axioms stripBaseBoundsShape_deriv_of_ballSup
