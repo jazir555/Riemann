@@ -1780,7 +1780,6 @@ theorem R10_zeta_norm_eq_R00 :
     apply Complex.ext
     · change zetaCellS0.re = R03R10PolyLower.sR10.re
       rw [zetaCellS0_re, R03R10PolyLower.sR10_re]
-      norm_num
     · change -zetaCellS0.im = R03R10PolyLower.sR10.im
       rw [zetaCellS0_im, R03R10PolyLower.sR10_im]
       norm_num
@@ -1788,7 +1787,7 @@ theorem R10_zeta_norm_eq_R00 :
   change ‖riemannZeta (star zetaCellS0)‖ = ‖riemannZeta zetaCellS0‖
   change ‖riemannZeta ((starRingEnd ℂ) zetaCellS0)‖ = ‖riemannZeta zetaCellS0‖
   rw [riemannZeta_conj]
-  exact norm_star _
+  simp
 
 /-!
 This record is the exact finite-data interface required by the unconditional
@@ -1849,7 +1848,13 @@ theorem R00_finite_zeta_certificate_lower
     (1 / 26 : ℝ) ≤ ‖zeta zetaCellS0‖ := by
   have h := (R00_finite_zeta_certificate Slarge hSdef hSlow).lower_of_re
     zetaCellS0_pos (by rw [zetaCellS0_re]; norm_num)
-  norm_num at h ⊢
+  have heq : ((R00_finite_zeta_certificate Slarge hSdef hSlow).slow -
+      (R00_finite_zeta_certificate Slarge hSdef hSlow).rtail) /
+      (R00_finite_zeta_certificate Slarge hSdef hSlow).cF =
+      (1 / 26 : ℝ) := by
+    simp [R00_finite_zeta_certificate]
+    norm_num
+  rw [heq] at h
   exact h
 
 noncomputable def R00_reflected_finite_zeta_certificate
@@ -1879,8 +1884,23 @@ theorem R00_reflected_finite_zeta_certificate_lower
     (1 / 39 : ℝ) ≤ ‖zeta (1 - zetaCellS0)‖ := by
   have h := (R00_reflected_finite_zeta_certificate Slarge hSdef hSlow).lower_of_re
     zetaRefl_pos (by rw [zetaRefl_re]; norm_num)
-  norm_num at h ⊢
+  have heq : ((R00_reflected_finite_zeta_certificate Slarge hSdef hSlow).slow -
+      (R00_reflected_finite_zeta_certificate Slarge hSdef hSlow).rtail) /
+      (R00_reflected_finite_zeta_certificate Slarge hSdef hSlow).cF =
+      (1 / 39 : ℝ) := by
+    simp [R00_reflected_finite_zeta_certificate]
+    norm_num
+  rw [heq] at h
   exact h
+
+theorem R00_zeta_lower_of_reflected_finite_certificate
+    (Slarge : ℂ)
+    (hSdef : Slarge = ∑ k ∈ Finset.range (2 * 1024),
+      etaDirichletTerm (1 - zetaCellS0) k)
+    (hSlow : (1 / 3 : ℝ) ≤ ‖Slarge‖) :
+    (1 / 2340000000 : ℝ) ≤ ‖zeta zetaCellS0‖ := by
+  exact zeta_S0_lower_of_S1
+    (R00_reflected_finite_zeta_certificate_lower Slarge hSdef hSlow)
 
 theorem R02_center_certificate_of_finite_zeta
     (C : FiniteZetaLowerCertificate R02Uniform.sR02)
@@ -1974,7 +1994,7 @@ theorem R10_center_certificate_of_R00_finite_zeta
   have h0 : (0.5 : ℝ) ≤ ‖zeta zetaCellS0‖ :=
     hHalf.trans (C.lower_of_re (by rw [zetaCellS0_re]; norm_num)
       (by rw [zetaCellS0_re]; norm_num))
-  rw [← R10_zeta_norm_eq_R00]
+  rw [R10_zeta_norm_eq_R00]
   exact h0
 
 /- Complete rectangle packages fed by the same finite certificate and the
