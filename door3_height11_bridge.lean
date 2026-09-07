@@ -1,0 +1,109 @@
+import riemann_hypothesis_newsection
+
+open Complex Real Set
+
+noncomputable section
+
+/-!
+# Exact-height Door-3 certificate interface
+
+The shifted rectangle has `s.im = z.re`, hence its height is strictly below
+`11`, not `14.13`.  The original `CriticalStripEvidence14` interface was
+therefore stronger than necessary (and its `14.14` open rectangle reaches
+above the target).  This file provides the precise height-11 certificate
+interface used by the Door-3 rectangle.
+-/
+
+namespace Door3Height11
+
+open RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert
+
+def yTop11 : ℝ := 11
+def yBot11 : ℝ := -11
+
+structure CriticalStripEvidence11 where
+  upper : RectIntervalBound 0 1 0 yTop11
+  upper_ex : IntervalExcludesZero upper
+  lower : RectIntervalBound 0 1 yBot11 0
+  lower_ex : IntervalExcludesZero lower
+
+structure CriticalStripCover11 where
+  rects : List ZeroFreeRect
+  covers :
+    ∀ s : ℂ, 0 < s.re → s.re < 1 → |s.im| < (11 : ℝ) → s.im ≠ 0 →
+      ∃ R ∈ rects, inOpenRect R.x0 R.x1 R.y0 R.y1 s
+
+def criticalStripCover11_of_evidence
+    (E : CriticalStripEvidence11) : CriticalStripCover11 :=
+  { rects := [zeroFreeRect_of_interval E.upper E.upper_ex,
+      zeroFreeRect_of_interval E.lower E.lower_ex]
+    covers := by
+      intro s hs0 hs1 him him0
+      by_cases hpos : 0 < s.im
+      · have hle := (abs_lt.mp him).2
+        have htop : s.im < yTop11 := by
+          simpa [yTop11] using hle
+        exact ⟨zeroFreeRect_of_interval E.upper E.upper_ex,
+          List.mem_cons_self, hs0, hs1, hpos, htop⟩
+      · have hneg : s.im < 0 := by
+          have hle : s.im ≤ 0 := le_of_not_gt hpos
+          exact lt_of_le_of_ne hle him0
+        have hge := (abs_lt.mp him).1
+        have hbot : yBot11 < s.im := by
+          dsimp [yBot11]
+          linarith
+        exact ⟨zeroFreeRect_of_interval E.lower E.lower_ex,
+          List.mem_cons_of_mem
+            (y := zeroFreeRect_of_interval E.upper E.upper_ex)
+            List.mem_cons_self, hs0, hs1, hbot, hneg⟩ }
+
+theorem riemannZeta_ne_zero_of_evidence
+    (E : CriticalStripEvidence11) (s : ℂ)
+    (hs0 : 0 < s.re) (hs1 : s.re < 1)
+    (him : |s.im| < (11 : ℝ)) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  rcases (criticalStripCover11_of_evidence E).covers s hs0 hs1 him him0 with
+    ⟨R, hR, hs⟩
+  exact (R.no_zero s hs) hz
+
+theorem xiShifted_no_zero_in_rect_10_of_evidence
+    (E : CriticalStripEvidence11) (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  set s := shiftedS z
+  have hs_re : s.re = 1 / 2 - z.im := shiftedS_re z
+  have hs_im : s.im = z.re :=
+    RHProofScaffold.LeafDecomp.shiftedS_im_eq z
+  have hs0 : 0 < s.re := by rw [hs_re]; linarith
+  have hs1 : s.re < 1 := by rw [hs_re]; linarith
+  have him : |s.im| ≤ (11 : ℝ) := by
+    rw [hs_im]
+    rw [abs_le]
+    constructor <;> linarith
+  have hzeta : riemannZeta s ≠ 0 := by
+    by_cases hzre : z.re = 0
+    · have hs_real : s = (s.re : ℂ) := by
+        apply Complex.ext
+        · simp
+        · rw [hs_im, hzre]
+          simp
+      rw [hs_real]
+      exact RHProofScaffold.ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo
+        hs0 hs1
+    · have him0 : s.im ≠ 0 := by rw [hs_im]; exact hzre
+      have him' : |s.im| < (11 : ℝ) := by
+        rw [hs_im, abs_lt]
+        constructor <;> linarith
+      exact riemannZeta_ne_zero_of_evidence E s hs0 hs1 him' him0
+  have hxi : xiShifted z = 0 ↔ riemannZeta s = 0 :=
+    classicalXi_zero_equivalence_from_gamma
+      classical_gamma_nonzero_instrip s hs0 hs1
+  intro hz
+  exact hzeta (hxi.mp hz)
+
+#print axioms riemannZeta_ne_zero_of_evidence
+#print axioms xiShifted_no_zero_in_rect_10_of_evidence
+
+end Door3Height11
