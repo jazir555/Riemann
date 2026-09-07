@@ -32426,3 +32426,192 @@ theorem DZ3o_true_prefix_le_three (k : ℕ) (hk : k ≤ 16) :
 #print axioms DZ3o_true_prefix_le_three_two
 #print axioms DZ3o_true_prefix_gap
 #print axioms DZ3o_true_prefix_le_three
+
+/-!
+## Door-3 R02 disc tightened upper (this lane): `‖ζ‖ ≤ 934` unconditional.
+
+Context: `R02_zeta_upper_unconditional` (`‖ζ‖ ≤ 1012`) is `182 / 0.18` with
+`182 = 2 + 9 / 0.05` (`C = 9` from `‖s‖ ≤ 9` via `|Re| + |Im|`). This lane
+tightens only the `‖s‖` envelope to the Euclidean `‖s‖ ≤ 8.3`
+(`0.74 ^ 2 + 8.25 ^ 2 = 68.6101 ≤ 8.3 ^ 2 = 68.89`), keeping the same
+`S₂ ≤ 2`, denominator `≥ 0.18`, and `M = 1` remainder shape. Hence
+`G = 2 + 8.3 / 0.05 = 168` and `168 / 0.18 = 933.33 ≤ 934`, a genuine
+strict improvement over `1012` with identical R02-rect hypotheses
+(`0.05 ≤ Re ≤ 0.74`, `-8.25 ≤ Im ≤ -5.25`), so it plugs into the R02
+fencing tier (`R02_deriv_bound_of_zeta_upper_general` gives
+`42 * 1 * 40 * 934 / 0.25 = 6275520 < 6800640`).
+
+Honest negative (with numbers): this `M = 1` eta route cannot reach `≤ 10`
+because `r(M) = C * M ^ (-σ) / σ` with `σ = 0.05`, `C = 8.3` gives
+`r(1) = 166`; reaching `r ≤ 5` needs `M ^ 0.05 ≥ 33.2`, i.e.
+`M ≥ 33.2 ^ 20 ≈ 2.3 * 10 ^ 30` terms — infeasible. `≤ 10` needs FE +
+Stirling + convexity (three-lines on pole-removed `(s - 1) * ζ(s)`),
+not longer eta sums.
+-/
+
+/-- Euclidean `‖s‖ ≤ 8.3` on the R02 rect (tightens `|Re| + |Im| ≤ 9`). -/
+theorem R02_D3_norm_le (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖s‖ ≤ 8.3 := by
+  have hsq : ‖s‖ ^ 2 ≤ (8.3 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have h1 : (-0.74 : ℝ) ≤ s.re := by linarith
+    have h2 : s.re ≤ (0.74 : ℝ) := hre_hi
+    have h3 : (-8.25 : ℝ) ≤ s.im := him_lo
+    have h4 : s.im ≤ (8.25 : ℝ) := by linarith
+    have hre2 : s.re ^ 2 ≤ (0.74 : ℝ) ^ 2 := by nlinarith
+    have him2 : s.im ^ 2 ≤ (8.25 : ℝ) ^ 2 := by nlinarith
+    nlinarith
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+/-- Conversion-factor lower `0.18 ≤ ‖1 - 2 ^ (1 - s)‖` for `s.re ≤ 0.74`. -/
+theorem R02_D3_cvtFactor_ge (s : ℂ) (hre_hi : s.re ≤ 0.74) :
+    (0.18 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hre1 : ((1 : ℂ) - s).re = 1 - s.re := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hbase : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ = (2 : ℝ) ^ (((1 : ℂ) - s).re) := by
+    rw [hbase]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hre_ge : (0.25 : ℝ) ≤ (((1 : ℂ) - s).re) := by
+    rw [hre1]
+    linarith
+  have h118_025 : (1.18 : ℝ) ≤ (2 : ℝ) ^ ((0.25 : ℝ)) := by
+    have hpow : ((1.18 : ℝ)) ^ ((4 : ℕ)) ≤ ((((2 : ℝ) ^ ((0.25 : ℝ)))) ^ ((4 : ℕ)) : ℝ) := by
+      have e : ((((2 : ℝ) ^ ((0.25 : ℝ)))) ^ ((4 : ℕ)) : ℝ) = (2 : ℝ) ^ ((1 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+        rw [show (0.25 : ℝ) * ((((4 : ℕ)) : ℝ)) = (1 : ℝ) by norm_num]
+        rw [show (1 : ℝ) = ((((1 : ℕ)) : ℝ)) by norm_num]
+        exact Real.rpow_natCast 2 1
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  have h118_le : (1.18 : ℝ) ≤ (2 : ℝ) ^ (((1 : ℂ) - s).re) :=
+    le_trans h118_025 (Real.rpow_le_rpow_of_exponent_le (by norm_num) hre_ge)
+  have hw_ge : (1.18 : ℝ) ≤ ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hnorm]
+    exact h118_le
+  have htri := norm_add_le ((2 : ℂ) ^ ((1 : ℂ) - s) - 1) (1 : ℂ)
+  rw [sub_add_cancel] at htri
+  rw [norm_one] at htri
+  have hrev : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := norm_sub_rev _ _
+  rw [hrev] at htri
+  linarith
+
+/-- Two-term eta partial sum `‖S₂(s)‖ ≤ 2` for `0.05 ≤ Re`. -/
+theorem R02_D3_S2_le (s : ℂ) (hre_lo : 0.05 ≤ s.re) :
+    ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ 2 := by
+  have h0 : etaDirichletTerm s 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hterm1_eq : etaDirichletTerm s 1 = -1 / ((((2 : ℕ)) : ℂ) ^ s) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ s)‖ = (2 : ℝ) ^ (s.re) := by
+    rw [h2cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have h2ge : (1 : ℝ) ≤ (2 : ℝ) ^ (s.re) := by
+    have hexp_nonneg : (0 : ℝ) ≤ s.re := by linarith
+    calc (1 : ℝ) = (2 : ℝ) ^ ((0 : ℝ)) := by rw [Real.rpow_zero]
+      _ ≤ (2 : ℝ) ^ (s.re) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_nonneg
+  have h1_norm : ‖etaDirichletTerm s 1‖ ≤ 1 := by
+    rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm]
+    rw [div_le_one (Real.rpow_pos_of_pos (by norm_num) _)]
+    exact h2ge
+  have hsum2 : (∑ k ∈ Finset.range 2, etaDirichletTerm s k) =
+      etaDirichletTerm s 0 + etaDirichletTerm s 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum2, h0]
+  calc ‖(1 : ℂ) + etaDirichletTerm s 1‖
+      ≤ ‖(1 : ℂ)‖ + ‖etaDirichletTerm s 1‖ := norm_add_le _ _
+    _ ≤ 1 + 1 := by rw [norm_one]; linarith [h1_norm]
+    _ = 2 := by norm_num
+
+/-- Paired-eta-limit upper `‖∑' pairs‖ ≤ 168` on the R02 rect. -/
+theorem R02_D3_pairLim_upper (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖∑' m : ℕ, etaPairTerm s m‖ ≤ 168 := by
+  have hspos : 0 < s.re := by linarith
+  have hC : ‖s‖ ≤ 8.3 := R02_D3_norm_le s hre_lo hre_hi him_lo him_hi
+  have hC0 : (0 : ℝ) ≤ 8.3 := by norm_num
+  have hS2 : ‖∑ k ∈ Finset.range 2, etaDirichletTerm s k‖ ≤ 2 :=
+    R02_D3_S2_le s hre_lo
+  have hM1 : ((((1 : ℕ)) : ℝ) ^ (-s.re)) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  have hrem0 := zetaCell_even_remainder_le hspos hC hC0 1 (by norm_num)
+  rw [show (2 * 1 : ℕ) = 2 by norm_num, hM1] at hrem0
+  have hdiv : (8.3 : ℝ) * (1 / s.re) ≤ 166 := by
+    have hpos : (0 : ℝ) < s.re := hspos
+    have hinv : 1 / s.re ≤ 20 := by
+      rw [div_le_iff₀ hpos]
+      linarith
+    have hmul : (8.3 : ℝ) * (1 / s.re) ≤ 8.3 * 20 :=
+      mul_le_mul_of_nonneg_left hinv (by norm_num)
+    have heq : (8.3 : ℝ) * 20 = 166 := by norm_num
+    linarith
+  have htail166 : ‖(∑' m : ℕ, etaPairTerm s m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm s k)‖ ≤ 166 := by
+    exact le_trans hrem0 hdiv
+  have htri := norm_add_le (∑ k ∈ Finset.range 2, etaDirichletTerm s k)
+    ((∑' m : ℕ, etaPairTerm s m) - (∑ k ∈ Finset.range 2, etaDirichletTerm s k))
+  rw [add_sub_cancel] at htri
+  linarith
+
+/-- Tightened R02 zeta upper `‖ζ‖ ≤ 934`, same rect as `R02_zeta_upper_unconditional`. -/
+theorem R02_D3_zeta_upper_934 (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 934 := by
+  have hG : ‖∑' m : ℕ, etaPairTerm s m‖ ≤ 168 :=
+    R02_D3_pairLim_upper s hre_lo hre_hi him_lo him_hi
+  have hConts : (∑' m : ℕ, etaPairTerm s m) = etaHurwitz s :=
+    etaPairLim_eq_etaHurwitz_of_pos (by linarith)
+  have hne1 : s ≠ 1 := by
+    intro h
+    have hs1 : s.re = 1 := by rw [h, Complex.one_re]
+    linarith
+  have hmem : s ∈ ({1}ᶜ : Set ℂ) := by
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    exact hne1
+  have heq := etaHurwitz_eq_etaRHS_compl hmem
+  have hGeq : (∑' m : ℕ, etaPairTerm s m) =
+      (1 - (2 : ℂ) ^ ((1 : ℂ) - s)) * riemannZeta s := by
+    rw [hConts, heq]
+    rfl
+  have hden_ge := R02_D3_cvtFactor_ge s hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hden_ne : (1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s) ≠ 0 :=
+    norm_pos_iff.mp hden_pos
+  have hZeq : riemannZeta s =
+      (∑' m : ℕ, etaPairTerm s m) / ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)) := by
+    rw [eq_div_iff hden_ne, mul_comm]
+    exact hGeq.symm
+  have hZnorm : ‖riemannZeta s‖ =
+      ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      168 / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hG
+      (inv_nonneg.mpr (le_trans (by norm_num) hden_ge))
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖)⁻¹ ≤ ((0.18 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hstep2 : (168 : ℝ) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 168 / 0.18 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have hle : ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      168 / 0.18 := le_trans hstep1 hstep2
+  have h168 : (168 : ℝ) / 0.18 ≤ 934 := by norm_num
+  rw [hZnorm]
+  exact le_trans hle h168
+
+#print axioms R02_D3_norm_le
+#print axioms R02_D3_cvtFactor_ge
+#print axioms R02_D3_S2_le
+#print axioms R02_D3_pairLim_upper
+#print axioms R02_D3_zeta_upper_934
