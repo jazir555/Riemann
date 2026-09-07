@@ -171,6 +171,56 @@ theorem D3_real_xi_explicit_center_lower_le {s : ℝ} (hs : 0 < s) (hs1 : s < 1)
   rw [hid]
   nlinarith [hhalf', hprod]
 
+def D3_imag_axis_explicit_center_lower (y : ℝ) : ℝ :=
+  (1 / 2 - y) ^ 2 / 8
+
+theorem D3_imag_axis_explicit_center_lower_le {y : ℝ}
+    (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    D3_imag_axis_explicit_center_lower y ≤
+      ‖xiShifted (Complex.I * (y : ℂ))‖ := by
+  unfold D3_imag_axis_explicit_center_lower
+  have hs0 : 0 < (1 / 2 : ℝ) - y := by linarith
+  have hs1 : (1 / 2 : ℝ) - y < 1 := by linarith
+  have h := D3_real_xi_explicit_center_lower_le hs0 hs1
+  have hsarg : (1 / 2 : ℂ) + Complex.I * (Complex.I * (y : ℂ)) =
+      ((1 / 2 - y : ℝ) : ℂ) := by
+    calc
+      (1 / 2 : ℂ) + Complex.I * (Complex.I * (y : ℂ)) =
+          (1 / 2 : ℂ) + Complex.I ^ 2 * (y : ℂ) := by ring
+      _ = (1 / 2 - y : ℝ) := by
+        rw [Complex.I_sq]
+        push_cast
+        ring
+  rw [show xiShifted (Complex.I * (y : ℂ)) =
+      classicalXi ((1 / 2 - y : ℝ) : ℂ) by
+        unfold xiShifted
+        rw [hsarg]]
+  exact h
+
+theorem D3_explicit_center_lower_21 :
+    (6241 / 320000 : ℝ) ≤
+      ‖xiShifted (Complex.I * ((21 / 200 : ℝ) : ℂ))‖ := by
+  convert D3_imag_axis_explicit_center_lower_le (y := (21 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
+    norm_num [D3_imag_axis_explicit_center_lower]
+
+theorem D3_explicit_center_lower_1_4 :
+    (1 / 128 : ℝ) ≤
+      ‖xiShifted (Complex.I * ((1 / 4 : ℝ) : ℂ))‖ := by
+  convert D3_imag_axis_explicit_center_lower_le (y := (1 / 4 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
+    norm_num [D3_imag_axis_explicit_center_lower]
+
+theorem D3_explicit_center_lower_7_20 :
+    (9 / 3200 : ℝ) ≤
+      ‖xiShifted (Complex.I * ((7 / 20 : ℝ) : ℂ))‖ := by
+  convert D3_imag_axis_explicit_center_lower_le (y := (7 / 20 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
+    norm_num [D3_imag_axis_explicit_center_lower]
+
+theorem D3_explicit_center_lower_89 :
+    (121 / 320000 : ℝ) ≤
+      ‖xiShifted (Complex.I * ((89 / 200 : ℝ) : ℂ))‖ := by
+  convert D3_imag_axis_explicit_center_lower_le (y := (89 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
+    norm_num [D3_imag_axis_explicit_center_lower]
+
 def D3_real_xi_center_lower (s : ℝ) : ℝ :=
   (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ / 2
 
