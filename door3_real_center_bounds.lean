@@ -171,8 +171,35 @@ theorem D3_real_xi_explicit_center_lower_le {s : ℝ} (hs : 0 < s) (hs1 : s < 1)
   rw [hid]
   nlinarith [hhalf', hprod]
 
+def D3_real_xi_explicit_center_lower_strong (s : ℝ) : ℝ := s ^ 2 / 4
+
+theorem D3_real_xi_explicit_center_lower_strong_le {s : ℝ}
+    (hs : 0 < s) (hs1 : s < 1) :
+    D3_real_xi_explicit_center_lower_strong s ≤ ‖classicalXi (s : ℂ)‖ := by
+  unfold D3_real_xi_explicit_center_lower_strong classicalXi XiFromPrefactor
+  have hz := D3_real_zeta_norm_lower hs hs1
+  have hp := D3_real_prefactor_norm_lower hs hs1
+  have hq : 0 ≤ s / (1 - s) := div_nonneg hs.le (by linarith)
+  have hmul : (s / (1 - s)) * (s * (1 - s) / 4) ≤
+      ‖riemannZeta (s : ℂ)‖ * ‖classicalXiPrefactor (s : ℂ)‖ := by
+    have hleft : (s / (1 - s)) * (s * (1 - s) / 4) ≤
+        (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ :=
+      mul_le_mul_of_nonneg_left hp hq
+    have hright : (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ ≤
+        ‖riemannZeta (s : ℂ)‖ * ‖classicalXiPrefactor (s : ℂ)‖ := by
+      have hh := mul_le_mul_of_nonneg_right hz
+        (norm_nonneg (classicalXiPrefactor (s : ℂ)))
+      simpa [mul_comm] using hh
+    exact hleft.trans hright
+  rw [norm_mul]
+  simp only [zeta]
+  have hid : s ^ 2 / 4 = (s / (1 - s)) * (s * (1 - s) / 4) := by
+    field_simp [ne_of_gt (show 0 < 1 - s by linarith)]
+  rw [hid]
+  nlinarith [hmul]
+
 def D3_imag_axis_explicit_center_lower (y : ℝ) : ℝ :=
-  (1 / 2 - y) ^ 2 / 8
+  (1 / 2 - y) ^ 2 / 4
 
 theorem D3_imag_axis_explicit_center_lower_le {y : ℝ}
     (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
@@ -181,7 +208,7 @@ theorem D3_imag_axis_explicit_center_lower_le {y : ℝ}
   unfold D3_imag_axis_explicit_center_lower
   have hs0 : 0 < (1 / 2 : ℝ) - y := by linarith
   have hs1 : (1 / 2 : ℝ) - y < 1 := by linarith
-  have h := D3_real_xi_explicit_center_lower_le hs0 hs1
+  have h := D3_real_xi_explicit_center_lower_strong_le hs0 hs1
   have hsarg : (1 / 2 : ℂ) + Complex.I * (Complex.I * (y : ℂ)) =
       ((1 / 2 - y : ℝ) : ℂ) := by
     calc
@@ -198,25 +225,25 @@ theorem D3_imag_axis_explicit_center_lower_le {y : ℝ}
   exact h
 
 theorem D3_explicit_center_lower_21 :
-    (6241 / 320000 : ℝ) ≤
+    (6241 / 160000 : ℝ) ≤
       ‖xiShifted (Complex.I * ((21 / 200 : ℝ) : ℂ))‖ := by
   convert D3_imag_axis_explicit_center_lower_le (y := (21 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
 
 theorem D3_explicit_center_lower_1_4 :
-    (1 / 128 : ℝ) ≤
+    (1 / 64 : ℝ) ≤
       ‖xiShifted (Complex.I * ((1 / 4 : ℝ) : ℂ))‖ := by
   convert D3_imag_axis_explicit_center_lower_le (y := (1 / 4 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
 
 theorem D3_explicit_center_lower_7_20 :
-    (9 / 3200 : ℝ) ≤
+    (9 / 1600 : ℝ) ≤
       ‖xiShifted (Complex.I * ((7 / 20 : ℝ) : ℂ))‖ := by
   convert D3_imag_axis_explicit_center_lower_le (y := (7 / 20 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
 
 theorem D3_explicit_center_lower_89 :
-    (121 / 320000 : ℝ) ≤
+    (121 / 160000 : ℝ) ≤
       ‖xiShifted (Complex.I * ((89 / 200 : ℝ) : ℂ))‖ := by
   convert D3_imag_axis_explicit_center_lower_le (y := (89 / 200 : ℝ)) (by norm_num) (by norm_num) using 1 <;>
     norm_num [D3_imag_axis_explicit_center_lower]
