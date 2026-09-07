@@ -287,6 +287,15 @@ def finiteBoundedXiCover11 (E : FiniteCriticalStripEvidence11) :
     intro s hs_half hs_one hs_height
     exact boundedCoverXi11_of_finite_evidence E s hs_half hs_one hs_height
 
+theorem xiNoRightHalfZerosFull_of_finite_evidence
+    (h_classical : ClassicalZeroFreeRegion)
+    (h_thin : ThinRegionNonVanishing h_classical.C h_classical.T₀)
+    (hT : h_classical.T₀ = (11 : ℝ))
+    (E : FiniteCriticalStripEvidence11) :
+    XiNoRightHalfZerosFull := by
+  apply xiNoRightHalfZerosFull_from_all_three h_classical h_thin
+  simpa [hT] using finiteBoundedXiCover11 E
+
 #print axioms riemannZeta_ne_zero_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
 #print axioms riemannZeta_ne_zero_of_finite_evidence
@@ -296,5 +305,6 @@ def finiteBoundedXiCover11 (E : FiniteCriticalStripEvidence11) :
 #print axioms boundedCoverZeta11_of_finite_evidence
 #print axioms boundedCoverXi11_of_finite_evidence
 #print axioms finiteBoundedXiCover11
+#print axioms xiNoRightHalfZerosFull_of_finite_evidence
 
 end Door3Height11
