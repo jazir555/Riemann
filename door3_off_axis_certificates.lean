@@ -1819,6 +1819,39 @@ theorem FiniteZetaLowerCertificate.lower_of_re
     C.rtail C.hTail C.cF C.hcFpos C.hFac
   simpa only [zeta] using h
 
+/- The existing unconditional eta-pair tail and factor estimates package the
+R00 finite certificate completely; the only supplied field is the genuine
+finite-sum lower bound. -/
+noncomputable def R00_finite_zeta_certificate
+    (Slarge : ℂ)
+    (hSdef : Slarge = ∑ k ∈ Finset.range (2 * 2097152),
+      etaDirichletTerm zetaCellS0 k)
+    (hSlow : (1 / 5 : ℝ) ≤ ‖Slarge‖) :
+    FiniteZetaLowerCertificate zetaCellS0 :=
+  { N := 2 * 2097152
+    S := Slarge
+    slow := 1 / 5
+    rtail := 0.1
+    cF := 13 / 5
+    hSdef := hSdef
+    hSlow := hSlow
+    hTail := by
+      rw [hSdef]
+      exact zetaCellS0_tail_2097152_le
+    hcFpos := by norm_num
+    hFac := etaFactor_upper_S0 }
+
+theorem R00_finite_zeta_certificate_lower
+    (Slarge : ℂ)
+    (hSdef : Slarge = ∑ k ∈ Finset.range (2 * 2097152),
+      etaDirichletTerm zetaCellS0 k)
+    (hSlow : (1 / 5 : ℝ) ≤ ‖Slarge‖) :
+    (1 / 26 : ℝ) ≤ ‖zeta zetaCellS0‖ := by
+  have h := (R00_finite_zeta_certificate Slarge hSdef hSlow).lower_of_re
+    zetaCellS0_pos (by rw [zetaCellS0_re]; norm_num)
+  norm_num at h ⊢
+  exact h
+
 theorem R02_center_certificate_of_finite_zeta
     (C : FiniteZetaLowerCertificate R02Uniform.sR02)
     (hOne : (1 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
