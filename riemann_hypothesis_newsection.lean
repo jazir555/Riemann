@@ -122,8 +122,25 @@ theorem xiShifted_no_zero_in_rect_10_of_two_approx_bounds
       lower_ex := EL }
     z hx0 hx1 hy0 hy1
 
+theorem xiShifted_no_zero_in_rect_10_of_two_euler_maclaurin_bounds
+    (UE : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.EulerMaclaurinZetaBound
+      0 1 0 RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yTop)
+    (EU : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.IntervalExcludesZero
+      (RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_eulerMaclaurin UE))
+    (LE : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.EulerMaclaurinZetaBound
+      0 1 RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yBot 0)
+    (EL : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.IntervalExcludesZero
+      (RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_eulerMaclaurin LE))
+    (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  apply xiShifted_no_zero_in_rect_10_of_two_approx_bounds
+    UE.toApproxRectBound EU LE.toApproxRectBound EL z hx0 hx1 hy0 hy1
+
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_two_approx_bounds
+#print axioms xiShifted_no_zero_in_rect_10_of_two_euler_maclaurin_bounds
 
 noncomputable def quadrantPlan_10_of_evidence
     (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14) :
