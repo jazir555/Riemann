@@ -32615,3 +32615,131 @@ theorem R02_D3_zeta_upper_934 (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re 
 #print axioms R02_D3_S2_le
 #print axioms R02_D3_pairLim_upper
 #print axioms R02_D3_zeta_upper_934
+
+/-!
+## Door-3 FE+Stirling+convexity bridge, step 1 (zeta lane): R02 strip caps.
+
+Route: Hadamard three-lines
+(`Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`,
+`Mathlib/Analysis/Complex/Hadamard.lean:608`) applied to pole-removed
+`F(s) = (s-1)*ζ(s)` on a strip `[l,u] ⊃ [0.05,0.74]`, with FE
+(`zeta_FE_chi`, `zeta_eq_chi_mul_reflected`) + Stirling/Gamma inputs.
+Direct `f = ζ` three-lines is blocked by the pole (`DiffContOnCl` fails at
+`s = 1`); the conversion `‖ζ‖ = ‖F‖/‖s-1‖` needs the `‖s-1‖` lower
+(`R02_D3_subOne_ge`) and a right-edge `‖F‖` cap
+(`R02_D3_F_rightEdge_window`).
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_subOne_ge`: `5.25 ≤ ‖s-1‖` on the R02 rect
+  (via `Complex.abs_im_le_norm`, `Mathlib/Analysis/Complex/Norm.lean:185`).
+* `R02_D3_F_rightEdge_window`: `‖(s-1)*ζ(s)‖ ≤ 30` on `Re = 2`,
+  `|Im| ≤ 8.75` (via `zeta_Dirichlet_le_three` +
+  `Complex.norm_le_abs_re_add_abs_im`, `:181`).
+* `R02_D3_chiCpow_le_one`: strip-side cpow `(2π)^{-w.re} ≤ 1` for `0 ≤ w.re`.
+* `R02_D3_chiArg_im_le13`: `|Im(π(1-s)/2)| ≤ 13` on the R02 rect
+  (via `chi_arg_im_eq` + `Real.pi_lt_d4`,
+  `Mathlib/Analysis/Real/Pi/Bounds.lean:172`).
+* `R02_D3_chiCos_le`: cos chi-factor `≤ exp 13` on the R02 rect.
+* `R02_D3_zetaChi_of_gamma`: `‖χ(1-s)‖ ≤ 2*G*exp 13` modulo explicit
+  `G = ‖Γ(1-s)‖` (via `zetaChi_norm_le`).
+
+RESIDUAL (exact next step): a Stirling-sharp numeral upper `G` for
+`‖Complex.Gamma (1-s)‖` on the R02 rect (`(1-s).re ∈ [0.26,0.95]`,
+`|Im| ≤ 8.25`; Mathlib has no complex-Gamma norm upper), then Hadamard on
+damped `G(s) = F(s)*exp((s-c)^2/100)` with `BddAbove` + `DiffContOnCl` to
+close `‖ζ‖ ≤ 10` (`R02_D3_subOne_ge` converts the `‖F‖` interpolation back:
+`‖ζ‖ ≤ ‖F‖/5.25`).
+-/
+
+/-- `‖s - 1‖ ≥ 5.25` on the R02 rect (denominator lower for `‖ζ‖ = ‖F‖/‖s-1‖`). -/
+theorem R02_D3_subOne_ge (s : ℂ) (him_hi : s.im ≤ -5.25) :
+    5.25 ≤ ‖s - 1‖ := by
+  have h1 : (s - 1).im = s.im := by simp
+  have h2 : |s.im| ≤ ‖s - 1‖ := by
+    rw [← h1]
+    exact Complex.abs_im_le_norm _
+  have h3 : (5.25 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos (by linarith : s.im ≤ 0)]
+    linarith
+  linarith
+
+/-- Right-edge window cap for pole-removed `F(s) = (s-1)*ζ(s)` on `Re = 2`. -/
+theorem R02_D3_F_rightEdge_window (s : ℂ) (hre : s.re = 2) (him : |s.im| ≤ 8.75) :
+    ‖(s - 1) * riemannZeta s‖ ≤ 30 := by
+  have hZ : ‖riemannZeta s‖ ≤ 3 := zeta_Dirichlet_le_three (by rw [hre])
+  have h1re : (s - 1).re = s.re - 1 := by simp
+  have h1im : (s - 1).im = s.im := by simp
+  have hn : ‖s - 1‖ ≤ 9.75 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (s - 1)
+    rw [h1re, h1im, hre, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2 - 1)] at h
+    linarith
+  have hmul : ‖s - 1‖ * ‖riemannZeta s‖ ≤ 9.75 * 3 :=
+    mul_le_mul hn hZ (norm_nonneg _) (by norm_num)
+  have hnum : (9.75 : ℝ) * 3 ≤ 30 := by norm_num
+  rw [norm_mul]
+  linarith
+
+/-- Strip-side cpow chi-factor is `≤ 1` when the chi-argument has `0 ≤ Re`. -/
+theorem R02_D3_chiCpow_le_one (w : ℂ) (hw : 0 ≤ w.re) :
+    (2 * Real.pi) ^ (-w.re) ≤ 1 := by
+  apply Real.rpow_le_one_of_one_le_of_nonpos
+  · have hpi := Real.pi_gt_three
+    linarith
+  · linarith
+
+/-- Chi-argument imaginary part on the R02 rect is `≤ 13` (`π < 3.1416`). -/
+theorem R02_D3_chiArg_im_le13 (s : ℂ) (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    |((((Real.pi : ℂ)) * (1 - s) / 2)).im| ≤ 13 := by
+  rw [chi_arg_im_eq, abs_neg]
+  have habs : |s.im| ≤ 8.25 := abs_le.mpr ⟨by linarith, by linarith⟩
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  rw [e]
+  have h2 := mul_le_mul (le_of_lt (by linarith : Real.pi < 3.1416)) habs
+    (abs_nonneg _) (show (0 : ℝ) ≤ 3.1416 by norm_num)
+  have hnum : (3.1416 : ℝ) * 8.25 = 25.9182 := by norm_num
+  have h2b : Real.pi * |s.im| ≤ 25.9182 := by linarith
+  linarith
+
+/-- Cos chi-factor on the R02 rect is `≤ exp 13`. -/
+theorem R02_D3_chiCos_le (s : ℂ) (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖Complex.cos ((Real.pi : ℂ) * (1 - s) / 2)‖ ≤ Real.exp 13 := by
+  exact le_trans (norm_cos_le_exp_abs_im _)
+    (Real.exp_le_exp.mpr (R02_D3_chiArg_im_le13 s him_lo him_hi))
+
+/-- Chi-factor cap on the R02 rect modulo explicit `G = ‖Γ(1-s)‖`
+(Gamma-factor cap on the strip; feeds the three-lines left edge). -/
+theorem R02_D3_zetaChi_of_gamma (s : ℂ) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (G : ℝ) (hG : ‖Complex.Gamma (1 - s)‖ ≤ G) :
+    ‖zetaChi (1 - s)‖ ≤ 2 * 1 * G * Real.exp 13 := by
+  have hchi := zetaChi_norm_le (1 - s)
+  have hw : (0 : ℝ) ≤ (1 - s).re := by
+    have e : (1 - s).re = 1 - s.re := by simp
+    linarith
+  have hcp := R02_D3_chiCpow_le_one (1 - s) hw
+  have harg := R02_D3_chiArg_im_le13 s him_lo him_hi
+  have hG0 : (0 : ℝ) ≤ G := le_trans (norm_nonneg _) hG
+  have hE : Real.exp |((((Real.pi : ℂ)) * (1 - s) / 2)).im| ≤ Real.exp 13 :=
+    Real.exp_le_exp.mpr harg
+  have hE0 : (0 : ℝ) ≤ Real.exp |((((Real.pi : ℂ)) * (1 - s) / 2)).im| :=
+    (Real.exp_pos _).le
+  have step1 : (2 : ℝ) * (2 * Real.pi) ^ (-(1 - s).re) ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcp (by norm_num)
+  have hGam0 : (0 : ℝ) ≤ ‖Complex.Gamma (1 - s)‖ := norm_nonneg _
+  have step2 : (2 : ℝ) * (2 * Real.pi) ^ (-(1 - s).re) * ‖Complex.Gamma (1 - s)‖ ≤
+      2 * 1 * G :=
+    mul_le_mul step1 hG hGam0 (by norm_num)
+  have step3 : (2 : ℝ) * (2 * Real.pi) ^ (-(1 - s).re) * ‖Complex.Gamma (1 - s)‖ *
+      Real.exp |((((Real.pi : ℂ)) * (1 - s) / 2)).im| ≤ 2 * 1 * G * Real.exp 13 :=
+    mul_le_mul step2 hE hE0 (mul_nonneg (by norm_num) hG0)
+  exact le_trans hchi step3
+
+#print axioms R02_D3_subOne_ge
+#print axioms R02_D3_F_rightEdge_window
+#print axioms R02_D3_chiCpow_le_one
+#print axioms R02_D3_chiArg_im_le13
+#print axioms R02_D3_chiCos_le
+#print axioms R02_D3_zetaChi_of_gamma

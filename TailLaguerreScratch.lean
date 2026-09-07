@@ -1251,3 +1251,230 @@ convexity / certified eta evaluation on `Re∈[0,1/2]`, `|Im|∈[10,11]`) or
 `‖ζ₀‖`/`‖ζ₀-2‖` cap combining with `1/10` via `riemannZeta_eq_inv_sub_add`
 to get `r<2`; then compose via `tailK2_gap_of_nearOne_lt_one` /
 `tailK2_gap_of_subTwo_lt_two`. -/
+
+/-!
+## Door-3 remainder 5: real-axis segment certificate (tail lane, 2026-09-07, append-only)
+
+Target (Authoritative Door-3 state, "Real-axis segment"): the central cover
+deliberately excludes `z.im = 0`; the proved imaginary-axis results
+(`z = I*y`) are a different slice. Required: a nonvanishing/lower-bound
+certificate for real `z` with `-10 < z.re < 10`.
+
+Slice audit (read-only, no import added — `import Mathlib` only here):
+* `door3_boundary_real.lean` / `door3_real_center_bounds.lean`
+  (`D3_real_zeta_norm_lower`, `D3_imag_axis_explicit_center_lower_le`,
+  `zetaRealNonzeroInCritical_proved`) concern `z = I*y` (shifted `s` real in
+  `(0,1)`) or the top edge — a different slice; no bound on `z.im = 0`.
+* `door3_boundary_endpoints.lean` records totalized-product endpoint zeros at
+  `±I/2` — boundary data, not a real-segment bound.
+* `door3_imag_axis_strip.lean` gives a positive-width strip around the
+  imaginary axis — again not the real segment.
+* Real-`s`-axis xi values (`D3_explicit_center_lower_0`,
+  `1/16 ≤ ‖xiShifted 0‖`) sit at the single point `z = 0` only.
+
+Banked here (FULLY PROVED, no sorry/admit/axiom), in Mathlib-`riemannZeta` +
+`tailShiftedSReal` coordinates, CALLING tail feeders `tailShiftedSReal_re`,
+`tailShiftedSReal_im`, `tailShiftedSReal_continuous` and the T4 compact-bound
+pattern (`tailCellBounded_isCompact` +
+`IsCompact.exists_bound_of_continuousOn`, as in `exists_tailCell_zetaUpper`):
+* explicit compact real sub-segment `door3RealSeg` (`-1 ≤ Re ≤ 1`, `Im = 0`;
+  `door3RealSeg_in_open_strip` places it inside `-10 < Re < 10, Im = 0`);
+* unconditional shifted image on the critical line (`door3RealShift_re/im`:
+  `Re s = 1/2`, `Im s = Re z`), pole avoidance
+  (`door3RealShift_ne_one_of_seg`, so `differentiableAt_riemannZeta` applies),
+  continuity (`door3RealZetaContinuousOnSeg`);
+* conditional certificate pair: uniform lower bound implies pointwise
+  nonvanishing (`door3RealNonvan_of_lower`), and pointwise nonvanishing
+  implies a uniform positive lower bound (`door3RealUniform_of_nonvan`, via
+  the reciprocal bound capped by `IsCompact.exists_bound_of_continuousOn`).
+
+The remaining analytic input is ONE explicit numeral: a `c > 0` with
+`∀ z ∈ door3RealSeg, c ≤ ‖riemannZeta (tailShiftedSReal z)‖`
+(critical-line zeta lower bound on `1/2 + I * [-1,1]`; the
+`|Im| ∈ [10,11]` tail numerals do not transfer — disjoint height band).
+-/
+
+/-- Explicit compact real sub-segment of the Door-3 remainder-5 slice:
+`-1 ≤ Re z ≤ 1`, `Im z = 0` (well inside `-10 < Re < 10`). -/
+def door3RealSeg : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (-1 : ℝ) 1 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the real sub-segment. -/
+theorem door3RealSeg_mem_of_reim (z : ℂ) (hre1 : (-1 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 1) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSeg := by
+  simp only [door3RealSeg, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Open-interval points with `Im = 0` land in the closed sub-segment. -/
+theorem door3RealSeg_mem_of_open (z : ℂ) (hx1 : (-1 : ℝ) < z.re)
+    (hx2 : z.re < 1) (him : z.im = 0) :
+    z ∈ door3RealSeg := by
+  have hlo : (0 : ℝ) ≤ z.im := by simp [him]
+  have hhi : z.im ≤ (0 : ℝ) := by simp [him]
+  exact door3RealSeg_mem_of_reim z hx1.le hx2.le hlo hhi
+
+/-- The origin lies in the real sub-segment (nonempty witness). -/
+theorem door3RealSeg_zero_mem : (0 : ℂ) ∈ door3RealSeg := by
+  apply door3RealSeg_mem_of_reim
+  · norm_num [Complex.zero_re]
+  · norm_num [Complex.zero_re]
+  · norm_num [Complex.zero_im]
+  · norm_num [Complex.zero_im]
+
+/-- The real sub-segment is closed. -/
+theorem door3RealSeg_isClosed : IsClosed door3RealSeg := by
+  unfold door3RealSeg
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The real sub-segment lies in `closedBall 0 2`, hence is bounded. -/
+theorem door3RealSeg_isBounded : Bornology.IsBounded door3RealSeg := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 1 := abs_le.mpr ⟨by linarith, h2⟩
+  have hre2 : z.re * z.re ≤ (1 : ℝ) * 1 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 1 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (2 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h4 : (1 : ℝ) * 1 + 0 ≤ 2 ^ 2 := by norm_num
+    exact le_trans hsum h4
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The real sub-segment is compact (Heine–Borel). -/
+theorem door3RealSeg_isCompact : IsCompact door3RealSeg := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSeg_isClosed, door3RealSeg_isBounded⟩
+
+/-- The sub-segment sits inside the required open slice
+`-10 < Re < 10, Im = 0`. -/
+theorem door3RealSeg_in_open_strip (z : ℂ) (hz : z ∈ door3RealSeg) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the real sub-segment: `Re s = 1/2`
+(critical line; CALLS `tailShiftedSReal_re`). -/
+theorem door3RealShift_re (z : ℂ) (hz : z ∈ door3RealSeg) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Shifted imaginary part on the real sub-segment: `Im s = Re z`
+(CALLS `tailShiftedSReal_im`). -/
+theorem door3RealShift_im (z : ℂ) :
+    (tailShiftedSReal z).im = z.re :=
+  tailShiftedSReal_im z
+
+/-- Pole avoidance on the real sub-segment (so
+`differentiableAt_riemannZeta` applies). -/
+theorem door3RealShift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSeg) :
+    tailShiftedSReal z ≠ 1 := by
+  intro h
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re h
+  rw [door3RealShift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the real sub-segment
+(CALLS `tailShiftedSReal_continuous`; same shape as
+`tailZetaContinuousOnCell`). -/
+theorem door3RealZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSeg := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealShift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Conditional certificate, lower bound to nonvanishing: an explicit uniform
+`c > 0` with `c ≤ ‖ζ‖` on the sub-segment gives `ζ ≠ 0` at every
+sub-segment point. -/
+theorem door3RealNonvan_of_lower {c : ℝ}
+    (h : ∀ z ∈ door3RealSeg, c ≤ ‖riemannZeta (tailShiftedSReal z)‖)
+    (hc : 0 < c) (z : ℂ) (hz : z ∈ door3RealSeg) :
+    riemannZeta (tailShiftedSReal z) ≠ 0 := by
+  intro hzero
+  have h1 := h z hz
+  rw [hzero, norm_zero] at h1
+  linarith
+
+/-- Conditional certificate, nonvanishing to uniform bound: pointwise `ζ ≠ 0`
+on the compact sub-segment upgrades to an explicit-uniform `∃ c > 0`
+lower bound (reciprocal bound via `IsCompact.exists_bound_of_continuousOn`,
+the same lemma as the T4 feeders `exists_tailCell_zetaUpper`). -/
+theorem door3RealUniform_of_nonvan
+    (h : ∀ z ∈ door3RealSeg, riemannZeta (tailShiftedSReal z) ≠ 0) :
+    ∃ c : ℝ, 0 < c ∧ ∀ z ∈ door3RealSeg,
+      c ≤ ‖riemannZeta (tailShiftedSReal z)‖ := by
+  have hcont := door3RealZetaContinuousOnSeg.inv₀ h
+  obtain ⟨B, hB⟩ := door3RealSeg_isCompact.exists_bound_of_continuousOn hcont
+  have hz0 : (0 : ℂ) ∈ door3RealSeg := door3RealSeg_zero_mem
+  have hB0 := hB _ hz0
+  rw [Pi.inv_apply] at hB0
+  have hpos0 : 0 < ‖(riemannZeta (tailShiftedSReal 0))⁻¹‖ :=
+    norm_pos_iff.mpr (inv_ne_zero (h _ hz0))
+  have hBpos : 0 < B := lt_of_lt_of_le hpos0 hB0
+  refine ⟨B⁻¹, inv_pos.mpr hBpos, fun z hz => ?_⟩
+  have h1 := hB z hz
+  rw [Pi.inv_apply] at h1
+  have e1 : (1 : ℂ) = (riemannZeta (tailShiftedSReal z))⁻¹ *
+      (riemannZeta (tailShiftedSReal z)) := by
+    rw [inv_mul_cancel₀ (h z hz)]
+  have e2 : ‖(1 : ℂ)‖ =
+      ‖(riemannZeta (tailShiftedSReal z))⁻¹ * (riemannZeta (tailShiftedSReal z))‖ := by
+    rw [e1]
+  have e3 : ‖(riemannZeta (tailShiftedSReal z))⁻¹ * (riemannZeta (tailShiftedSReal z))‖ =
+      ‖(riemannZeta (tailShiftedSReal z))⁻¹‖ * ‖riemannZeta (tailShiftedSReal z)‖ :=
+    Complex.norm_mul _ _
+  have e4 : (1 : ℝ) ≤
+      ‖(riemannZeta (tailShiftedSReal z))⁻¹‖ * ‖riemannZeta (tailShiftedSReal z)‖ := by
+    have n1 : (1 : ℝ) = ‖(1 : ℂ)‖ := (norm_one).symm
+    rw [n1, e2, e3]
+  have e5 : (1 : ℝ) ≤ B * ‖riemannZeta (tailShiftedSReal z)‖ := by
+    have m1 := mul_le_mul_of_nonneg_right h1 (norm_nonneg (riemannZeta (tailShiftedSReal z)))
+    exact e4.trans m1
+  have hmul : B⁻¹ * (B * ‖riemannZeta (tailShiftedSReal z)‖) =
+      ‖riemannZeta (tailShiftedSReal z)‖ := by
+    rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hBpos), one_mul]
+  have hle : B⁻¹ * 1 ≤ B⁻¹ * (B * ‖riemannZeta (tailShiftedSReal z)‖) :=
+    mul_le_mul_of_nonneg_left e5 (le_of_lt (inv_pos.mpr hBpos))
+  rw [mul_one] at hle
+  rw [hmul] at hle
+  exact hle
+
+#print axioms door3RealSeg_isCompact
+#print axioms door3RealShift_re
+#print axioms door3RealShift_im
+#print axioms door3RealShift_ne_one_of_seg
+#print axioms door3RealZetaContinuousOnSeg
+#print axioms door3RealNonvan_of_lower
+#print axioms door3RealUniform_of_nonvan
+
+/- Quantified remainder after this block (2026-09-07, Door-3 remainder 5):
+BANKED the full real-axis sub-segment bridge EXCEPT the single analytic
+numeral — compact `door3RealSeg` (`-1 ≤ Re ≤ 1`, `Im = 0`,
+`door3RealSeg_isCompact` via Heine–Borel), open-slice placement
+(`door3RealSeg_in_open_strip`: inside `-10 < Re < 10, Im = 0`), critical-line
+image (`door3RealShift_re/im`: `Re s = 1/2`), pole avoidance
+(`door3RealShift_ne_one_of_seg`), continuity
+(`door3RealZetaContinuousOnSeg`), and the conditional certificate pair
+(`door3RealNonvan_of_lower`, `door3RealUniform_of_nonvan`).
+SINGLE NUMERAL TO CLOSE (exact next-agent task): prove an explicit `c > 0`
+with `∀ z ∈ door3RealSeg, c ≤ ‖riemannZeta (tailShiftedSReal z)‖`
+(critical-line zeta lower bound on `1/2 + I * [-1,1]`, e.g. via a
+kernel-checked zeta enclosure at height `|t| ≤ 1`), then compose via
+`door3RealNonvan_of_lower`. Note `D3_real_zeta_norm_lower`
+(`s/(1-s) ≤ ‖ζ(s)‖` on real `(0,1)`) does NOT transfer (different slice:
+real `s` vs `s = 1/2 + I*t`). -/
