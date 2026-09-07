@@ -85,6 +85,12 @@ theorem D3_center_lower_uniform_explicit {y : ℝ}
     (1 / 40000 : ℝ) ≤ ‖xiShifted (Complex.I * (y : ℂ))‖ :=
   D3_imag_axis_explicit_center_uniform hy0 hy1
 
+theorem D3_center_lower_re_abs_explicit {y : ℝ}
+    (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    ((1 / 2 - y) ^ 2 / 4 : ℝ) ≤
+      |(xiShifted (Complex.I * (y : ℂ))).re| :=
+  D3_imag_axis_explicit_center_re_abs_lower hy0 hy1
+
 #print axioms D3_imag_axis_center_lower_pos
 #print axioms D3_imag_axis_center_lower_le
 #print axioms D3_center_lower_21_pos
