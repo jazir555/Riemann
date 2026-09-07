@@ -352,3 +352,8 @@ theorem D3_imag_axis_xi_center_lower_le {y : ℝ}
 
 #print axioms D3_real_zeta_re_upper
 #print axioms D3_real_zeta_norm_lower
+#print axioms D3_zeta_real_nonzero_in_critical
+#print axioms D3_imag_axis_nonzero_unconditional
+#print axioms D3_explicit_center_lower_0
+#print axioms D3_imag_axis_explicit_center_uniform
+#print axioms D3_imag_axis_explicit_center_nonzero_uniform
