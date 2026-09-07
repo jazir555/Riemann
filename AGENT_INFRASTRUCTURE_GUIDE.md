@@ -3033,8 +3033,9 @@ downstream RH implications, but no recent commit proves them by assumption.
 
 ## Complete commit ledger for the last two days
 
-This audit uses the current branch history from 2026-09-05 00:00 through the latest commit. It finds 181 commits; every commit hash and subject is listed below, including documentation and ledger commits. The narrative Door-3 sections above summarize the technical groups; this ledger is the hash-level completeness check.
+This audit uses the current branch history from 2026-09-05 00:00 through the audited source commit `1cc25d65`, immediately before this documentation-only snapshot. It finds 182 commits; every commit hash and subject is listed below, including documentation and ledger commits. The narrative Door-3 sections above summarize the technical groups; this ledger is the hash-level completeness check.
 
+- 1cc25d65 | 2026-09-07 | record complete two-day commit ledger
 - 8aee8307 | 2026-09-07 | update guide with recent Door 3 commits
 - ae2cfd0c | 2026-09-07 | document Door 3 certificate interfaces and residuals
 - 85d7b4f6 | 2026-09-07 | fix generated candidate proposition audit proof
@@ -3216,3 +3217,88 @@ This audit uses the current branch history from 2026-09-05 00:00 through the lat
 - 3d0131d6 | 2026-09-05 | Agent H9: trio G 0.0808 via a=0.06 refloor D2692, tier M 100.25664 Azeta 5743; axioms clean
 - 1acceab1 | 2026-09-05 | Ledger: record G21 last pair, all pairs MVT-closed
 - ba0dccdb | 2026-09-05 | Agent G21: pair15 Re<=-0.02 LAST pair, all pairs 8-15 MVT-closed; axioms clean
+
+## Authoritative Door-3 state and residuals (2026-09-07)
+
+This section supersedes intermediate status notes above. The current source has
+the complete certificate *interfaces* and the complete finite geometry, but it
+does not yet contain a supplied instance of the analytic fields. In particular,
+`central_cover_assembly.lean` reports zero cells closed end to end.
+
+### What is proved
+
+* The fine grid has 40 current cells: `R00`, `R02`--`R10`, and `R11`--`R40`.
+  Their exact coordinates, radius bounds, row/column membership, overlapping
+  open and closed coverage, lower-half conjugation maps, and row assembly are
+  proved. The rational generator and `door3_rational_grid_cover.lean` provide
+  the same geometry independently of the analytic layer.
+* Every cell has a sorry-free fencing and zero-free constructor. The joint
+  theorem `allCentral_H_of_obligations` reduces all 40 cells to
+  `FullCentralObligations`, and `full_central_covered` reduces the inner cover
+  to `FullCentralObligations` plus `BottomStripObligations`. These are
+  implication theorems; neither obligation is currently instantiated.
+* Polynomial, π-power, Gamma, reflection, and most factor arithmetic is
+  unconditional. The R02 eta continuation now gives the unconditional bounds
+  `R02_zeta_upper_unconditional` (`‖ζ‖ ≤ 1012`) and
+  `R02_deriv_bound_unconditional` (`‖deriv ξ‖ ≤ 6800640`). Those bounds are
+  genuine theorems, but the derivative constant is too large for the chosen
+  R02 fencing tier and the required `‖ζ‖ ≤ 10` bound remains a separate
+  quantitative target.
+* The real-critical ζ feeder, real-`s`-axis ξ values, the
+  complete imaginary-axis shifted-ξ nonvanishing result (including the
+  origin), the four-term reflected head lower bound `1/6`, endpoint identities,
+  and qualitative compact edge/axis neighborhoods are unconditional. They do
+  not prove nonvanishing on the `z.im = 0` segment of the central rectangle.
+* `FiniteZetaLowerCertificate.lower_of_re`, the R00/reflected constructors,
+  the R03--R10 constructors, and `OffAxisFiniteCertificateBundle` are ordinary
+  kernel implication APIs. The only analytic fields they consume are explicit
+  finite-sum/tail/factor lower data and derivative bounds; no Float value and no
+  `RiemannHypothesisProp_apply` is hidden in them.
+
+### What remains for Door 3
+
+1. **Inner 40-cell analytic fields (80 obligations).** For each current cell,
+   supply the center inequality
+   `ε + M * radius ≤ ‖xiShifted center‖` and the uniform derivative inequality
+   `∀ z ∈ rect, ‖deriv xiShifted z‖ ≤ M`. The exact-rational tables prove only
+   positivity, geometry, and budget arithmetic. Their `centerLower` and
+   `derivUpper` values are marked `sampled_unverified` and are not analytic
+   bounds. A kernel-checked complex-ζ/ξ enclosure is still required.
+2. **Bottom strip.** Instantiate `BottomStripObligations`: for every
+   `-10 < x < 10`, provide a positive base lower bound for
+   `xiShiftedEntire (x : ℂ)`, a derivative bound on the `0 ≤ y ≤ 0.02`
+   vertical segment, and the strict `0.01 < ε₀/M₁` margin. The imaginary-axis
+   and local-strip theorems supply qualitative data only and do not provide
+   this uniform numerical supplier.
+3. **Top and bottom edge strips.** The ten cells covering
+   `(-10,10) × [0.49,0.5)` have `y1 = 0.5`, so the inner-cell fencing theorem
+   cannot be reused. They need the outer-boundary theorem with an explicit
+   fixed-width (at least `0.01`) lower bound and derivative bound, then lower
+   halves must be mirrored. The existing compactness results provide a
+   positive width and minimum existentially, not the required numerical values.
+4. **Cutoff lines `Re z = ±10`.** `CutL10`, `CutR10`, and
+   `cutoffLines_either` prove the geometric split. The two thin-rectangle
+   center and derivative enclosures on the vertical `s` rectangles
+   (`Im s = ±10`, `Re s ∈ [0.01,0.99]`) are still missing; the same edge-strip
+   obligations cover the `0.49 ≤ |Im z| < 0.5` parts.
+5. **Real-axis segment.** The central cover deliberately excludes `z.im = 0`.
+   The proved imaginary-axis result concerns `z = I*y` and is a different
+   slice. A nonvanishing/lower-bound certificate for every real `z` with
+   `-10 < z.re < 10` is still required before the central rectangle is closed.
+6. **Finite off-axis sums.** The eight-cell bundle for `R03`--`R10` still
+   needs genuine finite eta-sum lower certificates meeting the stated
+   `1/2` thresholds and the eight derivative suppliers. R00 and its reflected
+   R10 bridge reduce to explicit finite sums as well; the candidate tables do
+   not supply those sums.
+
+### Downstream assembly boundary
+
+Once the central, strip, edge, cutoff, and real-axis suppliers are actually
+provided, the existing rectangle and conjugation assemblies yield the required
+`XiCentralZeroFreeCover 10`-shaped input. The RH implication theorems in
+`riemann_hypothesis_newsection.lean` and `door3_height11_bridge.lean` still also
+take their explicit tail supplier (`CompletedZetaTailU10`/mollified tail) and,
+for the full Door-2 capstone, the cutoff-line and edge-strip suppliers. These
+are named inputs in the theorem signatures, not hidden assumptions. No current
+commit proves all of them, so Door 3 and RH remain open despite the
+sorry-free infrastructure and the complete commit ledger above.
