@@ -1852,6 +1852,36 @@ theorem R00_finite_zeta_certificate_lower
   norm_num at h ⊢
   exact h
 
+noncomputable def R00_reflected_finite_zeta_certificate
+    (Slarge : ℂ)
+    (hSdef : Slarge = ∑ k ∈ Finset.range (2 * 1024),
+      etaDirichletTerm (1 - zetaCellS0) k)
+    (hSlow : (1 / 3 : ℝ) ≤ ‖Slarge‖) :
+    FiniteZetaLowerCertificate (1 - zetaCellS0) :=
+  { N := 2 * 1024
+    S := Slarge
+    slow := 1 / 3
+    rtail := 4 / 15
+    cF := 13 / 5
+    hSdef := hSdef
+    hSlow := hSlow
+    hTail := by
+      rw [hSdef]
+      exact zetaRefl_tail_1024_le
+    hcFpos := by norm_num
+    hFac := etaFactor_upper_S1refl }
+
+theorem R00_reflected_finite_zeta_certificate_lower
+    (Slarge : ℂ)
+    (hSdef : Slarge = ∑ k ∈ Finset.range (2 * 1024),
+      etaDirichletTerm (1 - zetaCellS0) k)
+    (hSlow : (1 / 3 : ℝ) ≤ ‖Slarge‖) :
+    (1 / 39 : ℝ) ≤ ‖zeta (1 - zetaCellS0)‖ := by
+  have h := (R00_reflected_finite_zeta_certificate Slarge hSdef hSlow).lower_of_re
+    zetaRefl_pos (by rw [zetaRefl_re]; norm_num)
+  norm_num at h ⊢
+  exact h
+
 theorem R02_center_certificate_of_finite_zeta
     (C : FiniteZetaLowerCertificate R02Uniform.sR02)
     (hOne : (1 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
