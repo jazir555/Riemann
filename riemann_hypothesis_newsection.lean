@@ -131,6 +131,22 @@ def remainingQuadrant_10_of_evidence
 #print axioms quadrantPlan_10_of_evidence
 #print axioms remainingQuadrant_10_of_evidence
 
+theorem rh_from_evidence_and_tailU
+    (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14)
+    (B : AnalyticChallenge.CompletedZetaTailU10) :
+    RiemannHypothesisProp := by
+  let A : AnalyticChallenge.FirstQuadrant10 :=
+    { no_zero := by
+        intro z hx0 hx1 hy0 hy1
+        apply xiShifted_no_zero_in_rect_10_of_evidence E z
+        · linarith
+        · linarith
+        · exact hy0
+        · exact hy1 }
+  exact RHProofScaffold.rh_from_first_quadrant_and_tailU A B
+
+#print axioms rh_from_evidence_and_tailU
+
 end Door3CertificateBridge
 
 namespace MollifiedAttack
