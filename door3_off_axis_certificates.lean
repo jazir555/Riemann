@@ -413,6 +413,21 @@ theorem R04_gamma_lower_sharp :
   exact le_trans hbase (hfrac_le.trans_eq hnum)
 
 
+
+theorem R04_center_certificate_of_zeta_ge_one
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR04‖) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R04.radius ≤
+      ‖xiShifted CentralCoverAssembly.R04.center‖ :=
+  R04_center_certificate hzeta R04_gamma_lower_sharp
+
+noncomputable def R04_zero_free_certificate_of_zeta_ge_one
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR04‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R04.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R04_zeroFree_of_bounds
+    ⟨R04_center_certificate_of_zeta_ge_one hzeta, hderiv⟩
+
+
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
 #print axioms R02_zero_free_certificate_of_zeta_ge_one
