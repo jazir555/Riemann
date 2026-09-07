@@ -327,6 +327,16 @@ theorem D3_imag_axis_explicit_center_nonzero_uniform {y : ℝ}
   rw [hz, norm_zero] at h
   norm_num at h
 
+theorem D3_imag_axis_explicit_center_pos {y : ℝ}
+    (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    0 < ‖xiShifted (Complex.I * (y : ℂ))‖ := by
+  have h := D3_imag_axis_explicit_center_lower_le hy0 hy1
+  have hpos : 0 < D3_imag_axis_explicit_center_lower y := by
+    unfold D3_imag_axis_explicit_center_lower
+    have hs : 0 < (1 / 2 : ℝ) - y := by linarith
+    positivity
+  linarith
+
 theorem D3_imag_axis_explicit_center_re_abs_lower {y : ℝ}
     (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
     D3_imag_axis_explicit_center_lower y ≤

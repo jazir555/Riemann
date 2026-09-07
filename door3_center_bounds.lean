@@ -27,6 +27,11 @@ theorem D3_imag_axis_center_lower_le {y : ℝ} :
   have hnorm : 0 ≤ ‖xiShifted (Complex.I * (y : ℂ))‖ := norm_nonneg _
   linarith
 
+theorem D3_imag_axis_center_norm_pos_unconditional {y : ℝ}
+    (hgt : -(1 / 2 : ℝ) < y) (hlt : y < (1 / 2 : ℝ)) :
+    0 < ‖xiShifted (Complex.I * (y : ℂ))‖ :=
+  D3_imag_axis_explicit_center_pos hgt hlt
+
 /- Four exact heights used by the standard central y-tiling. -/
 theorem D3_center_lower_21_pos :
     0 < D3_imag_axis_center_lower (21 / 200 : ℝ) := by
