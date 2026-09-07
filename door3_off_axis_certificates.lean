@@ -1541,7 +1541,7 @@ noncomputable def R09_zero_free_certificate_small_of_zeta_ge_half
     (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR09‖)
     (hderiv : ∀ w, CentralCoverAssembly.R09.mem w →
       ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect := by
-  exact zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R09 0.001
+  exact CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R09 0.001
     (by norm_num) 0.003 CentralCoverAssembly.R09_strip_lo
     CentralCoverAssembly.R09_strip_hi hderiv
     (R09_center_certificate_small_of_zeta_ge_half hzeta)
@@ -1563,11 +1563,122 @@ noncomputable def R10_zero_free_certificate_small_of_zeta_ge_half
     (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR10‖)
     (hderiv : ∀ w, CentralCoverAssembly.R10.mem w →
       ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect := by
-  exact zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R10 0.001
+  exact CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R10 0.001
     (by norm_num) 0.003 CentralCoverAssembly.R10_strip_lo
     CentralCoverAssembly.R10_strip_hi hderiv
     (R10_center_certificate_small_of_zeta_ge_half hzeta)
 
+
+/-! Additional half-zeta off-axis certificates.  These use the unconditional
+Gamma lower bounds proved above and expose the remaining analytic inputs as
+explicit zeta and derivative bounds. -/
+
+theorem R03_center_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR03‖) :
+    (0.05 : ℝ) + 0.01 * CentralCoverAssembly.R03.radius ≤
+      ‖xiShifted CentralCoverAssembly.R03.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR03‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR03_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R03 R03R10PolyLower.sR03
+    0.05 0.01 11.3 (1 / 2 : ℝ) 0.025 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R03_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R03 hpi
+    R03_gamma_lower_sharp hzeta (by norm_num)
+
+noncomputable def R03_zero_free_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR03‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R03.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.01 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R03 0.05
+    (by norm_num) 0.01 CentralCoverAssembly.R03_strip_lo
+    CentralCoverAssembly.R03_strip_hi hderiv
+    (R03_center_certificate_of_zeta_ge_half hzeta)
+
+theorem R05_center_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖) :
+    (0.03 : ℝ) + 0.06 * CentralCoverAssembly.R05.radius ≤
+      ‖xiShifted CentralCoverAssembly.R05.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR05‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR05_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R05 R03R10PolyLower.sR05
+    0.03 0.06 0.39 (1 / 2 : ℝ) 1.2 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R05_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R05 hpi
+    R05_gamma_lower_sharp hzeta (by norm_num)
+
+noncomputable def R05_zero_free_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R05.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R05 0.03
+    (by norm_num) 0.06 CentralCoverAssembly.R05_strip_lo
+    CentralCoverAssembly.R05_strip_hi hderiv
+    (R05_center_certificate_of_zeta_ge_half hzeta)
+
+theorem R06_center_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR06‖) :
+    (0.03 : ℝ) + 0.06 * CentralCoverAssembly.R06.radius ≤
+      ‖xiShifted CentralCoverAssembly.R06.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR06‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR06_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R06 R03R10PolyLower.sR06
+    0.03 0.06 0.88 (1 / 2 : ℝ) 0.52 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R06_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R06 hpi
+    R06_gamma_lower_sharp hzeta (by norm_num)
+
+noncomputable def R06_zero_free_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR06‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R06.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R06 0.03
+    (by norm_num) 0.06 CentralCoverAssembly.R06_strip_lo
+    CentralCoverAssembly.R06_strip_hi hderiv
+    (R06_center_certificate_of_zeta_ge_half hzeta)
+
+theorem R07_center_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR07‖) :
+    (0.015 : ℝ) + 0.04 * CentralCoverAssembly.R07.radius ≤
+      ‖xiShifted CentralCoverAssembly.R07.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR07‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR07_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R07 R03R10PolyLower.sR07
+    0.015 0.04 5.35 (1 / 2 : ℝ) 0.052 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R07_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R07 hpi
+    R07_gamma_lower_sharp hzeta (by norm_num)
+
+noncomputable def R07_zero_free_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR07‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R07.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.04 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R07 0.015
+    (by norm_num) 0.04 CentralCoverAssembly.R07_strip_lo
+    CentralCoverAssembly.R07_strip_hi hderiv
+    (R07_center_certificate_of_zeta_ge_half hzeta)
+
+theorem R08_center_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
+    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖) :
+    (0.005 : ℝ) + 0.05 * CentralCoverAssembly.R08.radius ≤
+      ‖xiShifted CentralCoverAssembly.R08.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR08‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR08_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R08 R03R10PolyLower.sR08
+    0.005 0.05 13.8 (1 / 2 : ℝ) 0.021 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R08_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R08 hpi
+    hgam hzeta (by norm_num)
+
+noncomputable def R08_zero_free_certificate_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
+    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R08.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.05 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R08 0.005
+    (by norm_num) 0.05 CentralCoverAssembly.R08_strip_lo
+    CentralCoverAssembly.R08_strip_hi hderiv
+    (R08_center_certificate_of_zeta_ge_half hzeta hgam)
 
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
