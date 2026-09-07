@@ -1521,6 +1521,53 @@ theorem R10_gamma_lower_sharp_small :
     have hp : (3.14 : ℝ) < Real.pi := lt_trans (by norm_num) Real.pi_gt_d4
     nlinarith
 
+/- The revised small-budget centre certificates use the proved Gamma floors.
+   They are parameterized only by the still explicit zeta lower input and by
+   the derivative bound needed by the rectangle fencing theorem. -/
+theorem R09_center_certificate_small_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR09‖) :
+    (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R09.radius ≤
+      ‖xiShifted CentralCoverAssembly.R09.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤
+      ‖R00Enclosure.piPart R03R10PolyLower.sR09‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR09_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R09 R03R10PolyLower.sR09
+    0.001 0.003 26.3 (1 / 2 : ℝ) 0.001 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R09_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R09 hpi
+    R09_gamma_lower_sharp_small hzeta (by norm_num)
+
+noncomputable def R09_zero_free_certificate_small_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR09‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R09.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect := by
+  exact zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R09 0.001
+    (by norm_num) 0.003 CentralCoverAssembly.R09_strip_lo
+    CentralCoverAssembly.R09_strip_hi hderiv
+    (R09_center_certificate_small_of_zeta_ge_half hzeta)
+
+theorem R10_center_certificate_small_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR10‖) :
+    (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R10.radius ≤
+      ‖xiShifted CentralCoverAssembly.R10.center‖ := by
+  have hpi : ((1 / 2 : ℝ) : ℝ) ≤
+      ‖R00Enclosure.piPart R03R10PolyLower.sR10‖ := by
+    exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
+  exact center_certificate_of_components CentralCoverAssembly.R10 R03R10PolyLower.sR10
+    0.001 0.003 38.3 (1 / 2 : ℝ) 0.0006 0.5 rfl (by norm_num)
+    (le_of_lt CentralCoverAssembly.R10_radius_lt) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R10 hpi
+    R10_gamma_lower_sharp_small hzeta (by norm_num)
+
+noncomputable def R10_zero_free_certificate_small_of_zeta_ge_half
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR10‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R10.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect := by
+  exact zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R10 0.001
+    (by norm_num) 0.003 CentralCoverAssembly.R10_strip_lo
+    CentralCoverAssembly.R10_strip_hi hderiv
+    (R10_center_certificate_small_of_zeta_ge_half hzeta)
+
 
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
