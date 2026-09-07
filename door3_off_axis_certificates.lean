@@ -220,6 +220,72 @@ theorem R10_center_certificate
     (by norm_num)
 
 
+
+noncomputable def R03_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR03‖)
+    (hgam : (0.025 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR03‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R03.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R03_zeroFree_of_bounds
+    ⟨R03_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R04_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR04‖)
+    (hgam : (0.08 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR04‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R04.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R04_zeroFree_of_bounds
+    ⟨R04_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R05_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖)
+    (hgam : (1.2 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR05‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R05.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R05_zeroFree_of_bounds
+    ⟨R05_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R06_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR06‖)
+    (hgam : (0.52 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR06‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R06.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R06_zeroFree_of_bounds
+    ⟨R06_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R07_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR07‖)
+    (hgam : (0.052 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR07‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R07.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R07_zeroFree_of_bounds
+    ⟨R07_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R08_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
+    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R08.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R08_zeroFree_of_bounds
+    ⟨R08_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R09_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR09‖)
+    (hgam : (0.007 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR09‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R09.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R09_zeroFree_of_bounds
+    ⟨R09_center_certificate hzeta hgam, hderiv⟩
+
+noncomputable def R10_zero_free_certificate
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR10‖)
+    (hgam : (0.0035 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR10‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R10.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.05 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R10_zeroFree_of_bounds
+    ⟨R10_center_certificate hzeta hgam, hderiv⟩
+
+
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
 #print axioms R02_zero_free_certificate_of_zeta_ge_one
