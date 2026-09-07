@@ -3316,3 +3316,6 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 TS (`6d3bc2af`, newsection tail, green 8702 jobs, axioms clean):
   `Door3TailSlab278` slab supplier (`‖ζ‖ ≤ 278`, shifted feeder, K2
   Rouché-product cap). Still open: `CompletedZetaTailU10` Gamma wiring.
+- 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
+  segment deriv bound + margin assembler mirror `StripBaseBounds`.
+  Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
