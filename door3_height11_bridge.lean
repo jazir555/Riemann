@@ -210,6 +210,24 @@ theorem xiShifted_no_zero_in_rect_10_of_finite_evidence
       constructor <;> linarith
     exact riemannZeta_ne_zero_of_finite_evidence E s hs0 hs1 him him0 (hxi.mp hz)
 
+def boundedRectangle10_of_finite_evidence
+    (E : FiniteCriticalStripEvidence11) :
+    AnalyticChallenge.BoundedRectangle10 where
+  no_zero := by
+    intro z hx0 hx1 hy0 hy1
+    apply xiShifted_no_zero_in_rect_10_of_finite_evidence E z
+    · linarith
+    · linarith
+    · exact hy0
+    · exact hy1
+
+theorem rh_from_finite_evidence11_and_rectangle_tailU
+    (E : FiniteCriticalStripEvidence11)
+    (B : AnalyticChallenge.CompletedZetaTailU10) :
+    RiemannHypothesisProp := by
+  exact RHProofScaffold.rh_from_rectangle_and_tailU
+    (boundedRectangle10_of_finite_evidence E) B
+
 theorem rh_from_finite_evidence11_and_tailU
     (E : FiniteCriticalStripEvidence11)
     (B : AnalyticChallenge.CompletedZetaTailU10) :
@@ -329,6 +347,8 @@ theorem xiNoRightHalfZerosFull_of_finite_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
 #print axioms riemannZeta_ne_zero_of_finite_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_finite_evidence
+#print axioms boundedRectangle10_of_finite_evidence
+#print axioms rh_from_finite_evidence11_and_rectangle_tailU
 #print axioms rh_from_finite_evidence11_and_tailU
 #print axioms rh_from_evidence11_and_tailU
 #print axioms boundedCoverZeta11_of_finite_evidence
