@@ -2133,6 +2133,9 @@ theorem OffAxisFiniteCertificateBundle.rects_length
   simp [OffAxisFiniteCertificateBundle.rects]
 
 #print axioms FiniteZetaLowerCertificate.lower_of_re
+#print axioms R00_finite_zeta_certificate_lower
+#print axioms R00_reflected_finite_zeta_certificate_lower
+#print axioms R00_zeta_lower_of_reflected_finite_certificate
 #print axioms R03_center_certificate_of_finite_zeta
 #print axioms R10_zeta_norm_eq_R00
 #print axioms OffAxisFiniteCertificateBundle.rects_length
