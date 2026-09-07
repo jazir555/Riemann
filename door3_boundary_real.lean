@@ -1,5 +1,6 @@
 import riemann_hypothesis
 import door3_tail_eta_upper
+import door3_real_center_bounds
 
 /-- Unconditional real-axis zeta nonvanishing in the open critical interval.
 The proof is supplied by the positive paired Dirichlet-eta series, rather than
@@ -71,10 +72,10 @@ theorem xiShifted_ne_zero_at_origin_proved :
 theorem xiShifted_ne_zero_on_imaginary_axis_all_proved
     (y : ℝ) (hgt : -(1 / 2 : ℝ) < y) (hlt : y < (1 / 2 : ℝ)) :
     xiShifted (Complex.I * (y : ℂ)) ≠ 0 := by
-  by_cases hyne : y = 0
-  · subst y
-    simpa using xiShifted_ne_zero_at_origin_proved
-  · exact xiShifted_ne_zero_on_imaginary_axis_proved y hyne hgt hlt
+  have hnorm := D3_imag_axis_explicit_center_pos hgt hlt
+  intro hz
+  rw [hz, norm_zero] at hnorm
+  linarith
 
 theorem hardDifferenceNonzero_at_origin_proved :
     1 / ((Complex.I * (0 : ℂ)) ^ 2 + (1 / 4 : ℂ)) -
