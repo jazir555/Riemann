@@ -1,5 +1,6 @@
 import Mathlib
 import rh_certificate_infra
+import central_cover_assembly
 
 namespace Door3NumericTargets
 
@@ -262,6 +263,17 @@ theorem transfer_budget {ε M c radius n : ℝ}
     ε + M * radius ≤ n := by
   have hm := mul_le_mul_of_nonneg_left hr hM
   linarith
+
+/-- Package the transferred center inequality as the exact fencing
+hypothesis consumed by the Door 3 cover. -/
+theorem make_cell_fencing (R : CellProofEngine.Rect2D) (ε M c : ℝ)
+    (hε : 0 < ε) (hM : ∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M)
+    (hM0 : 0 ≤ M) (hr : R.radius ≤ (126 / 100 : ℝ))
+    (hb : ε + M * (126 / 100 : ℝ) ≤ c)
+    (hc : c ≤ ‖xiShifted R.center‖) :
+    CentralCoverAssembly.CellFencingHypotheses R ε M := by
+  refine ⟨hε, hM, ?_⟩
+  exact transfer_budget hM0 hr hb hc
 
 /-- The strict radius estimate needed to use `budget_ok` is proved
     separately in `central_cover_assembly`; this theorem does not
