@@ -134,6 +134,35 @@ structure FiniteCriticalStripEvidence11 where
     ∀ s : ℂ, 0 < s.re → s.re < 1 → |s.im| < (11 : ℝ) → s.im ≠ 0 →
       ∃ E ∈ rects, inOpenRect E.x0 E.x1 E.y0 E.y1 s
 
+def upperRectEvidence (E : CriticalStripEvidence11) : RectEvidence :=
+  { x0 := 0, x1 := 1, y0 := 0, y1 := yTop11,
+    bound := E.upper, excludes := E.upper_ex }
+
+def lowerRectEvidence (E : CriticalStripEvidence11) : RectEvidence :=
+  { x0 := 0, x1 := 1, y0 := yBot11, y1 := 0,
+    bound := E.lower, excludes := E.lower_ex }
+
+def finiteEvidence11_of_global_evidence
+    (E : CriticalStripEvidence11) : FiniteCriticalStripEvidence11 where
+  rects := [upperRectEvidence E, lowerRectEvidence E]
+  covers := by
+    intro s hs0 hs1 him him0
+    by_cases hpos : 0 < s.im
+    · have htop : s.im < yTop11 := by
+        have h := (abs_lt.mp him).2
+        simpa [yTop11] using h
+      exact ⟨upperRectEvidence E,
+        List.mem_cons_self, hs0, hs1, hpos, htop⟩
+    · have hneg : s.im < 0 := lt_of_le_of_ne (le_of_not_gt hpos) him0
+      have hbot : yBot11 < s.im := by
+        have h := (abs_lt.mp him).1
+        dsimp [yBot11]
+        linarith
+      exact ⟨lowerRectEvidence E,
+        List.mem_cons_of_mem
+          (y := upperRectEvidence E)
+          List.mem_cons_self, hs0, hs1, hbot, hneg⟩
+
 def finiteCover11 (E : FiniteCriticalStripEvidence11) : CriticalStripCover11 :=
   { rects := E.rects.map (fun R => zeroFreeRect_of_interval R.bound R.excludes)
     covers := by
