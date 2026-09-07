@@ -3306,3 +3306,6 @@ sorry-free infrastructure and the complete commit ledger above.
   `R02_D3_zeta_upper_934` (`‖ζ‖ ≤ 934` on R02 rect, was `≤1012`).
   Eta-route floor documented in-file: reaching `≤10` needs `M ≥ 33.2^20`
   terms — infeasible; next: FE+Stirling+convexity route (tasked as ZU2).
+- 2026-09-07 CC (`e9b6d579`, cover tail lines 16813–16972, green 8687 jobs):
+  CutR10 eta-factor cap `‖1-2^(1-s)‖ ≤ 1` + outer-tier honest negative.
+  Next: finite partial-sum datum for `cutR10_zetaRemainder_of_certificate_one`.
