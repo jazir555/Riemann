@@ -103,7 +103,22 @@ theorem xiShifted_no_zero_in_rect_10_of_evidence
   intro hz
   exact hzeta (hxi.mp hz)
 
+theorem rh_from_evidence11_and_tailU
+    (E : CriticalStripEvidence11)
+    (B : AnalyticChallenge.CompletedZetaTailU10) :
+    RiemannHypothesisProp := by
+  let A : AnalyticChallenge.FirstQuadrant10 :=
+    { no_zero := by
+        intro z hx0 hx1 hy0 hy1
+        apply xiShifted_no_zero_in_rect_10_of_evidence E z
+        · linarith
+        · linarith
+        · exact hy0
+        · exact hy1 }
+  exact RHProofScaffold.rh_from_first_quadrant_and_tailU A B
+
 #print axioms riemannZeta_ne_zero_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
+#print axioms rh_from_evidence11_and_tailU
 
 end Door3Height11
