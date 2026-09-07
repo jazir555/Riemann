@@ -337,6 +337,14 @@ theorem D3_imag_axis_explicit_center_pos {y : ℝ}
     positivity
   linarith
 
+theorem D3_imag_axis_explicit_center_nonzero {y : ℝ}
+    (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    xiShifted (Complex.I * (y : ℂ)) ≠ 0 := by
+  have hnorm := D3_imag_axis_explicit_center_pos hy0 hy1
+  intro hz
+  rw [hz, norm_zero] at hnorm
+  linarith
+
 theorem D3_imag_axis_explicit_center_re_abs_lower {y : ℝ}
     (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
     D3_imag_axis_explicit_center_lower y ≤
