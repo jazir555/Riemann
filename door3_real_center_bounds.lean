@@ -59,6 +59,118 @@ theorem D3_real_zeta_norm_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
       linarith
     _ ≤ ‖riemannZeta (s : ℂ)‖ := Complex.abs_re_le_norm _
 
+private theorem D3_real_gamma_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
+    1 ≤ Real.Gamma (s / 2) := by
+  have hx : s / 2 ∈ Set.Ioc (0 : ℝ) 1 := by constructor <;> linarith
+  have hy : (1 : ℝ) ∈ Set.Ioc (0 : ℝ) 1 := by norm_num
+  have h := Real.Gamma_strictAntiOn_Ioc.antitoneOn hx hy (by linarith : s / 2 ≤ 1)
+  simpa [Real.Gamma_one] using h
+
+private theorem D3_real_cpow_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
+    (1 / 2 : ℝ) ≤ ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ := by
+  have hcpow : (Real.pi : ℂ) ^ (-(s / 2 : ℂ)) =
+      ((Real.pi ^ (-(s / 2 : ℝ)) : ℝ) : ℂ) := by
+    have hexp : -(s / 2 : ℂ) = (-(s / 2 : ℝ) : ℂ) := by
+      push_cast
+      ring
+    rw [hexp]
+    simpa using (Complex.ofReal_cpow (x := Real.pi) (y := -(s / 2 : ℝ))
+      (le_of_lt Real.pi_pos)).symm
+  rw [hcpow]
+  simp only [Complex.norm_real]
+  change (1 / 2 : ℝ) ≤ |Real.pi ^ (-(s / 2 : ℝ))|
+  rw [abs_of_pos (Real.rpow_pos_of_pos Real.pi_pos _)]
+  have hpi : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp : -(1 / 2 : ℝ) ≤ -(s / 2 : ℝ) := by linarith
+  have hp : Real.pi ^ (-(1 / 2 : ℝ)) ≤ Real.pi ^ (-(s / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le hpi hexp
+  have hpi4 : Real.pi < 4 := Real.pi_lt_four
+  have hsqrt : Real.sqrt Real.pi < 2 := by
+    nlinarith [Real.sq_sqrt (le_of_lt Real.pi_pos)]
+  have hinv : (1 / 2 : ℝ) < Real.pi ^ (-(1 / 2 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos), ← Real.sqrt_eq_rpow]
+    have h := one_div_lt_one_div_of_lt (Real.sqrt_pos.2 Real.pi_pos) hsqrt
+    simpa [one_div] using h
+  linarith
+
+theorem D3_real_prefactor_norm_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
+    s * (1 - s) / 4 ≤ ‖classicalXiPrefactor (s : ℂ)‖ := by
+  unfold classicalXiPrefactor
+  rw [norm_mul, norm_mul, norm_mul, norm_mul]
+  simp only [Complex.norm_real, Complex.Gamma_ofReal]
+  have hsabs : ‖s‖ = s := by simp [abs_of_pos hs]
+  have hsm1 : ‖(s : ℂ) - 1‖ = 1 - s := by
+    have heq : (s : ℂ) - 1 = ((s - 1 : ℝ) : ℂ) := by
+      rw [Complex.ofReal_sub]
+      norm_num
+    rw [heq, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_neg (by linarith : s - 1 < 0)]
+    ring
+  have hcpow := D3_real_cpow_lower hs hs1
+  have hgamma : (1 : ℝ) ≤ ‖Complex.Gamma ((s : ℂ) / 2)‖ := by
+    have heq : (s : ℂ) / 2 = ((s / 2 : ℝ) : ℂ) := by norm_num
+    rw [heq, Complex.Gamma_ofReal]
+    rw [Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (Real.Gamma_pos_of_pos (by positivity : 0 < s / 2))]
+    exact D3_real_gamma_lower hs hs1
+  rw [hsabs, hsm1]
+  norm_num
+  have hq : 0 ≤ s * (1 - s) := mul_nonneg hs.le (by linarith)
+  have h1 : s * (1 - s) / 4 ≤ s * (1 - s) / 2 *
+      ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ := by
+    nlinarith
+  have h2 : s * (1 - s) / 2 * ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ ≤
+      s * (1 - s) / 2 * ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ *
+        ‖Complex.Gamma ((s : ℂ) / 2)‖ :=
+    le_mul_of_one_le_right (by positivity) hgamma
+  calc
+    s * (1 - s) / 4 ≤ s * (1 - s) / 2 *
+        ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ := h1
+    _ ≤ s * (1 - s) / 2 * ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ *
+        ‖Complex.Gamma ((s : ℂ) / 2)‖ := h2
+    _ ≤ (1 / 2 : ℝ) * s * (1 - s) *
+        ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ *
+        ‖Complex.Gamma ((s : ℂ) / 2)‖ := by
+      have heq : (1 / 2 : ℝ) * s * (1 - s) *
+          ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ *
+          ‖Complex.Gamma ((s : ℂ) / 2)‖ =
+          s * (1 - s) / 2 * ‖(Real.pi : ℂ) ^ (-(s / 2 : ℂ))‖ *
+            ‖Complex.Gamma ((s : ℂ) / 2)‖ := by ring
+      rw [heq]
+
+def D3_real_xi_explicit_center_lower (s : ℝ) : ℝ := s ^ 2 / 8
+
+theorem D3_real_xi_explicit_center_lower_le {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
+    D3_real_xi_explicit_center_lower s ≤ ‖classicalXi (s : ℂ)‖ := by
+  unfold D3_real_xi_explicit_center_lower classicalXi XiFromPrefactor
+  have hz := D3_real_zeta_norm_lower hs hs1
+  have hp := D3_real_prefactor_norm_lower hs hs1
+  have hq : 0 ≤ s / (1 - s) := div_nonneg hs.le (by linarith)
+  have hmul : (s / (1 - s)) * (s * (1 - s) / 4) ≤
+      ‖riemannZeta (s : ℂ)‖ * ‖classicalXiPrefactor (s : ℂ)‖ := by
+    have hleft : (s / (1 - s)) * (s * (1 - s) / 4) ≤
+        (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ :=
+      mul_le_mul_of_nonneg_left hp hq
+    have hright : (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ ≤
+        ‖riemannZeta (s : ℂ)‖ * ‖classicalXiPrefactor (s : ℂ)‖ := by
+      have hh := mul_le_mul_of_nonneg_right hz
+        (norm_nonneg (classicalXiPrefactor (s : ℂ)))
+      simpa [mul_comm] using hh
+    exact hleft.trans hright
+  rw [norm_mul]
+  simp only [zeta]
+  have hid : s ^ 2 / 8 = (s / (1 - s)) * (s * (1 - s) / 4) / 2 := by
+    field_simp [ne_of_gt (show 0 < 1 - s by linarith)]
+    ring
+  have hprod : 0 ≤ ‖classicalXiPrefactor (s : ℂ)‖ * ‖riemannZeta (s : ℂ)‖ :=
+    mul_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hhalf := div_le_div_of_nonneg_right hmul (by norm_num : (0 : ℝ) ≤ 2)
+  have hhalf' : (s / (1 - s)) * (s * (1 - s) / 4) / 2 ≤
+      ‖classicalXiPrefactor (s : ℂ)‖ * ‖riemannZeta (s : ℂ)‖ / 2 := by
+    simpa [mul_comm] using hhalf
+  rw [hid]
+  nlinarith [hhalf', hprod]
+
 def D3_real_xi_center_lower (s : ℝ) : ℝ :=
   (s / (1 - s)) * ‖classicalXiPrefactor (s : ℂ)‖ / 2
 
