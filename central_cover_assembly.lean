@@ -16810,3 +16810,163 @@ end Door3CutR10Center
 #print axioms Door3CutR10Center.cutR10_pi_norm_lower
 #print axioms Door3CutR10Center.cutR10_center_bound_of_gamma_zeta
 #print axioms Door3CutR10Center.cutR10_fencing_of_remainders
+/-! ## Door-3 CutR10 eta conversion factor (cover lane, `cF = 1` wall)
+
+Cover-lane bridge for the right cutoff thin rect `CutR10`: the zeta-factor
+remainder `cutR10_zetaRemainder` (`7/5 <= ‖zeta s0‖` at `s0 = 1/2 + 10*I`)
+factors through the Dirichlet-eta certificate adapter
+(`door3_zeta_cutoff.lean`: `cutR10_zetaRemainder_of_certificate_one` needs only
+`slow - rtail` plus the conversion-factor cap `‖1 - 2^(1-s0)‖ <= 1`).
+This section lands that conversion-factor cap SELF-CONTAINED (Mathlib plus
+`Door3CutR10Center.cutR10_s_eq` only). It mirrors sibling
+`Door3ZetaCutoff.eta_factor_cutoff_upper_one`, which this file cannot import:
+`door3_zeta_cutoff` imports `central_cover_assembly`, so importing it back
+would be circular. No `sorry`/`admit`/`axiom`; numerals are short decimals.
+
+Banked here (all sorry-free): `sCutR` closed form + transfer to the CutR10
+center point, phase-cosine floor `3/4 <= cos(10*log 2)`, conversion-factor cap
+`‖1 - 2^(1-s0)‖ <= 1` in closed form and at the center point, product-floor
+arithmetic `8421/320000` vs need `117/5000`, and the honest outer-tier
+negative (`8421/320000 < 0.03`, so tier `(0.002, 0.05)` stays out of reach).
+Next-agent task: supply the finite partial-sum datum
+(`slow <= ‖S‖`, `‖tail - S‖ <= rtail`, `(7/5) + rtail <= slow`) and feed it to
+`Door3ZetaCutoff.cutR10_zetaRemainder_of_certificate_one`, then close the
+Gamma remainder via `Door3GammaCutoff.cutR10_gammaRemainder`.
+-/
+
+namespace Door3CutR10EtaFactor
+
+/-- CutR10 `s`-point in closed form (`Re = 1/2`, `Im = 10`). -/
+noncomputable def sCutR : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I
+
+theorem sCutR_re : sCutR.re = (1 / 2 : ℝ) := by
+  simp [sCutR]
+
+theorem sCutR_im : sCutR.im = (10 : ℝ) := by
+  simp [sCutR]
+
+/-- Transfer: `sCutR` is the shifted point at the CutR10 center. -/
+theorem sCutR_eq_center :
+    sCutR = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.CutR10.center := by
+  unfold sCutR
+  rw [← Door3CutR10Center.cutR10_s_eq]
+
+/-- Norm of `2^s` (three-line Mathlib corollary; `zeta_rigorous` has its own
+copy which this file cannot import). -/
+theorem cutR10_two_cpow_norm (s : ℂ) :
+    ‖(2 : ℂ) ^ s‖ = (2 : ℝ) ^ s.re := by
+  have h2 : (2 : ℂ) = (((2 : ℝ)) : ℂ) := by norm_cast
+  rw [h2, Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2)]
+
+/-- Phase-cosine floor at the cutoff (`10*log 2` reduced mod `2*pi`). -/
+theorem cutR10_phase_cos_lower :
+    (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+  have hloglo := Real.log_two_gt_d9
+  have hloghi := Real.log_two_lt_d9
+  have hπlo := Real.pi_gt_d4
+  have hπhi := Real.pi_lt_d4
+  have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+  have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+  have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+    have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+    nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+  have hc := Real.one_sub_sq_div_two_le_cos (x := 10 * Real.log 2 - 2 * Real.pi)
+  have hbase : (3 / 4 : ℝ) ≤ 1 - (0.6486 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosd : (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+    nlinarith [hc, hsq]
+  rw [Real.cos_sub_two_pi] at hcosd
+  exact hcosd
+
+/-- Eta conversion-factor cap `1` at the cutoff (feeds the `_one` certificate
+adapter; mirrors `Door3ZetaCutoff.eta_factor_cutoff_upper_one`). -/
+theorem cutR10_etaFactor_le_one :
+    ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - sCutR)‖ ≤ (1 : ℝ) := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - sCutR)
+  have hqre : q.re = Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    dsimp [q]
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re]
+    have hargre : (Complex.log (2 : ℂ) * (1 - sCutR)).re = Real.log 2 / 2 := by
+      rw [Complex.mul_re, hlogre, hlogim]
+      simp [sCutR]
+      ring
+    have hargim : (Complex.log (2 : ℂ) * (1 - sCutR)).im = -(10 * Real.log 2) := by
+      rw [Complex.mul_im, hlogre, hlogim]
+      simp [sCutR]
+      ring
+    rw [hargre, hargim]
+    have hexp : Real.exp (Real.log 2 / 2) = Real.sqrt 2 := by
+      calc
+        Real.exp (Real.log 2 / 2) = Real.exp (Real.log 2 * (1 / 2 : ℝ)) := by congr 1 <;> ring
+        _ = (2 : ℝ) ^ (1 / 2 : ℝ) :=
+          (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+        _ = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    rw [hexp, Real.cos_neg]
+  have hqnorm : ‖q‖ = Real.sqrt 2 := by
+    dsimp [q]
+    rw [cutR10_two_cpow_norm]
+    have hpow : (2 : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    convert hpow using 1 <;> norm_num [sCutR]
+  have hsqid : ‖(1 : ℂ) - q‖ ^ 2 = 1 + ‖q‖ ^ 2 - 2 * q.re := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have hq : ‖q‖ ^ 2 = q.re ^ 2 + q.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      ring
+    rw [hq]
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im,
+      sub_zero, zero_sub]
+    ring
+  have hsqrt : (4 / 3 : ℝ) ≤ Real.sqrt 2 := by
+    have hs := Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)
+    nlinarith [Real.sqrt_nonneg 2]
+  have hcos := cutR10_phase_cos_lower
+  have hprod : (1 : ℝ) ≤ Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    nlinarith [mul_le_mul_of_nonneg_right hsqrt (by nlinarith [hcos])]
+  have hsq : ‖(1 : ℂ) - q‖ ^ 2 ≤ 1 := by
+    rw [hsqid, hqnorm, hqre]
+    have hsqroot : (Real.sqrt 2) ^ 2 = (2 : ℝ) := by
+      exact Real.sq_sqrt (by norm_num)
+    nlinarith
+  have hnonneg : 0 ≤ ‖(1 : ℂ) - q‖ := norm_nonneg _
+  nlinarith
+
+/-- Conversion-factor cap stated at the CutR10 center point. -/
+theorem cutR10_etaFactor_at_center_le_one :
+    ‖(1 : ℂ) - (2 : ℂ) ^
+      ((1 : ℂ) - ((1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.CutR10.center))‖ ≤
+      (1 : ℝ) := by
+  have h := cutR10_etaFactor_le_one
+  rwa [sCutR_eq_center] at h
+
+/-- Product floor value (cert item 4 of the CutR10 center assembly). -/
+theorem cutR10_floor_eq :
+    (401 / 8 : ℝ) * (3 / 4) * (1 / 2000) * (7 / 5) = 8421 / 320000 := by norm_num
+
+/-- Fencing need at tier `(0.001, 0.04)` with the banked radius cap `0.56`. -/
+theorem cutR10_need_eq : (0.001 : ℝ) + 0.04 * 0.56 = 117 / 5000 := by norm_num
+
+/-- The floor covers the need (so tier `(0.001, 0.04)` is reachable). -/
+theorem cutR10_floor_suffices : (117 / 5000 : ℝ) ≤ 8421 / 320000 := by norm_num
+
+/-- Honest negative: the floor does NOT reach the outer tier need `0.03`
+(`(0.002, 0.05)` needs `0.002 + 0.05*0.56 = 0.03`); that tier stays residual
+until the Gamma/zeta remainder certs are tightened. -/
+theorem cutR10_outer_tier_negative : (8421 / 320000 : ℝ) < 0.03 := by norm_num
+
+end Door3CutR10EtaFactor
+
+#print axioms Door3CutR10EtaFactor.sCutR_re
+#print axioms Door3CutR10EtaFactor.sCutR_im
+#print axioms Door3CutR10EtaFactor.sCutR_eq_center
+#print axioms Door3CutR10EtaFactor.cutR10_two_cpow_norm
+#print axioms Door3CutR10EtaFactor.cutR10_phase_cos_lower
+#print axioms Door3CutR10EtaFactor.cutR10_etaFactor_le_one
+#print axioms Door3CutR10EtaFactor.cutR10_etaFactor_at_center_le_one
+#print axioms Door3CutR10EtaFactor.cutR10_floor_eq
+#print axioms Door3CutR10EtaFactor.cutR10_need_eq
+#print axioms Door3CutR10EtaFactor.cutR10_floor_suffices
+#print axioms Door3CutR10EtaFactor.cutR10_outer_tier_negative
