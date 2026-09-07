@@ -329,6 +329,152 @@ theorem sin_upper_of_nonpos_im_five {w : ℂ}
     linarith
   exact le_trans hle hfin
 
+/- A sharp local sine enclosure used for the R05 Gamma reflection.  The
+   identity `‖sin(x+iy)‖² = sin(x)² + sinh(y)²` keeps the bound below the
+   1.66 threshold needed by the centre product. -/
+theorem norm_sin_of_re_im_small {w : ℂ} (hx : |w.re| ≤ (0.63 : ℝ))
+    (hy : |w.im| ≤ (1.2 : ℝ)) :
+    ‖Complex.sin w‖ ≤ (1.66 : ℝ) := by
+  have hsin : |Real.sin w.re| ≤ |w.re| := Real.abs_sin_le_abs
+  have hsinh : |Real.sinh w.im| ≤ Real.sinh |w.im| := by
+    rw [Real.abs_sinh]
+  have hsq_sinh : (Real.sinh |w.im|)^2 ≤ (Real.sinh (1.2:ℝ))^2 := by
+    exact (sq_le_sq₀ (by positivity) (by positivity)).mpr
+      (Real.sinh_le_sinh.mpr hy)
+  have hexp12 : Real.exp (1.2:ℝ) ≤ (3.35:ℝ) := by
+    have he1' := Real.exp_one_lt_d9
+    have he1 : Real.exp (1:ℝ) ≤ (2.719:ℝ) := by linarith
+    have he02 : Real.exp (0.2:ℝ) ≤ (1.23:ℝ) := by
+      have h := Real.exp_bound' (x := (0.2 : ℝ)) (by norm_num) (by norm_num)
+        (n := 4) (by norm_num)
+      simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+      norm_num at h
+      linarith
+    calc
+      Real.exp (1.2:ℝ) = Real.exp 1 * Real.exp 0.2 := by
+        rw [show (1.2:ℝ)=1+0.2 by norm_num, Real.exp_add]
+      _ ≤ 2.719 * 1.23 := mul_le_mul he1 he02 (by positivity) (by norm_num)
+      _ ≤ 3.35 := by norm_num
+  have hexpneg : (1 / (3.35:ℝ)) ≤ Real.exp (-(1.2:ℝ)) := by
+    rw [Real.exp_neg]
+    simpa [one_div] using (one_div_le_one_div_of_le (by positivity) hexp12)
+  have hsinh12 : Real.sinh (1.2:ℝ) ≤ (1.53:ℝ) := by
+    rw [Real.sinh_eq]
+    have hpos : 0 ≤ Real.exp (-(1.2:ℝ)) := (Real.exp_pos _).le
+    nlinarith [hexp12, hexpneg]
+  have hsq_sinh' : (Real.sinh w.im)^2 ≤ (1.53:ℝ)^2 := by
+    calc
+      (Real.sinh w.im)^2 = |Real.sinh w.im|^2 := by rw [sq_abs]
+      _ ≤ (Real.sinh |w.im|)^2 :=
+        (sq_le_sq₀ (by positivity) (by positivity)).mpr hsinh
+      _ ≤ (Real.sinh (1.2:ℝ))^2 := hsq_sinh
+      _ ≤ (1.53:ℝ)^2 :=
+        (sq_le_sq₀ (by positivity) (by positivity)).mpr hsinh12
+  have hsq_sin : (Real.sin w.re)^2 ≤ (0.63:ℝ)^2 := by
+    calc
+      (Real.sin w.re)^2 = |Real.sin w.re|^2 := by rw [sq_abs]
+      _ ≤ |w.re|^2 :=
+        (sq_le_sq₀ (by positivity) (by positivity)).mpr hsin
+      _ ≤ (0.63:ℝ)^2 :=
+        (sq_le_sq₀ (by positivity) (by positivity)).mpr hx
+  have hsq : ‖Complex.sin w‖^2 ≤ (1.66:ℝ)^2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, Complex.sin_eq]
+    simp only [Complex.add_re, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.add_im, Complex.sub_re, Complex.sub_im,
+      Complex.I_re, Complex.I_im, Complex.sin_ofReal_re, Complex.sin_ofReal_im,
+      Complex.cos_ofReal_re, Complex.cos_ofReal_im, Complex.sinh_ofReal_re,
+      Complex.sinh_ofReal_im, Complex.cosh_ofReal_re, Complex.cosh_ofReal_im]
+    norm_num
+    ring_nf
+    nlinarith [Real.sin_sq_add_cos_sq w.re, Real.cosh_sq' w.im,
+      hsq_sin, hsq_sinh']
+  exact (sq_le_sq₀ (norm_nonneg _) (by norm_num)).mp hsq
+
+theorem R05_sine_upper_tight :
+    ‖Complex.sin ((Real.pi : ℂ) * (R03R10PolyLower.sR05 / 2))‖ ≤ (1.66 : ℝ) := by
+  let w : ℂ := (Real.pi : ℂ) * (R03R10PolyLower.sR05 / 2)
+  have hre : w.re = Real.pi * (R03R10PolyLower.sR05.re / 2) := by
+    dsimp [w]
+    simp [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.div_ofNat_re]
+  have him : w.im = Real.pi * (R03R10PolyLower.sR05.im / 2) := by
+    dsimp [w]
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.div_ofNat_im]
+  have hpi : |Real.pi| ≤ (3.1416 : ℝ) := by
+    rw [abs_of_pos Real.pi_pos]
+    exact le_of_lt Real.pi_lt_d4
+  have hx : |w.re| ≤ (0.63 : ℝ) := by
+    rw [hre, R03R10PolyLower.sR05_re, abs_mul]
+    calc
+      |Real.pi| * |0.395 / 2| ≤ 3.1416 * 0.1975 := by
+        apply mul_le_mul hpi (by norm_num) (by norm_num) (by norm_num)
+      _ ≤ 0.63 := by norm_num
+  have hy : |w.im| ≤ (1.2 : ℝ) := by
+    rw [him, R03R10PolyLower.sR05_im, abs_mul]
+    calc
+      |Real.pi| * |-0.75 / 2| ≤ 3.1416 * 0.375 := by
+        apply mul_le_mul hpi (by norm_num) (by norm_num) (by norm_num)
+      _ ≤ 1.2 := by norm_num
+  exact norm_sin_of_re_im_small hx hy
+
+theorem R05_gamma_lower_sharp :
+    (1.2 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR05‖ := by
+  have hs : R03R10PolyLower.sR05 = R05GammaUpper.sR05 := rfl
+  rw [hs]
+  have h1w_re : (0 : ℝ) < (1 - R05GammaUpper.sR05 / 2).re := by
+    rw [R05GammaUpper.zUpR05_re]
+    norm_num
+  have hG1_ne : Complex.Gamma (1 - R05GammaUpper.sR05 / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1w_re
+  have hsin_ne : Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2)) ≠ 0 := by
+    apply CellGammaUniform.sin_pi_half_ne_wide
+    rw [R05GammaUpper.sR05_im]
+    norm_num
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub (R05GammaUpper.sR05 / 2)
+  have hnorm : ‖Complex.Gamma (R05GammaUpper.sR05 / 2)‖
+        * ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ =
+      Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ := by
+    have h := congrArg (fun x : ℂ => ‖x‖) hrefl
+    simp only [norm_mul, norm_div] at h
+    have hp : ‖(Real.pi : ℂ)‖ = Real.pi := by
+      rw [Complex.norm_real]
+      exact Real.norm_of_nonneg Real.pi_pos.le
+    rw [hp] at h
+    exact h
+  have hG1_le : ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ ≤ 1.5 :=
+    R05GammaUpper.gamma_one_sub_half_upper_R05
+  have hsin_le : ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ ≤ 1.66 := by
+    exact R05_sine_upper_tight
+  have hpos1 : (0 : ℝ) < ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ :=
+    norm_pos_iff.mpr hsin_ne
+  have hpos2 : (0 : ℝ) < ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ :=
+    norm_pos_iff.mpr hG1_ne
+  have hden_pos : (0 : ℝ) <
+      ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ *
+        ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ := mul_pos hpos1 hpos2
+  have hden_le : ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ *
+      ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ ≤ 1.66 * 1.5 :=
+    mul_le_mul hsin_le hG1_le (norm_nonneg _) (by norm_num)
+  have hfrac_le : Real.pi / (1.66 * 1.5) ≤
+      Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ *
+        ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖) :=
+    div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) hden_pos hden_le
+  have hnum : Real.pi / (‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖ *
+      ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖) =
+      ‖Complex.Gamma (R05GammaUpper.sR05 / 2)‖ := by
+    have hb_ne : ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ ≠ 0 := ne_of_gt hpos2
+    have h1 : ‖Complex.Gamma (R05GammaUpper.sR05 / 2)‖ =
+        (Real.pi / ‖Complex.sin ((Real.pi : ℂ) * (R05GammaUpper.sR05 / 2))‖) /
+          ‖Complex.Gamma (1 - R05GammaUpper.sR05 / 2)‖ :=
+      eq_div_of_mul_eq hb_ne hnorm
+    rw [h1, div_div]
+  have hbase : (1.2 : ℝ) ≤ Real.pi / (1.66 * 1.5) := by
+    rw [le_div_iff₀ (by norm_num)]
+    have hp : (3.14 : ℝ) < Real.pi := lt_trans (by norm_num) Real.pi_gt_d4
+    nlinarith
+  exact le_trans hbase (hfrac_le.trans_eq hnum)
+
 theorem R04_pi_half_im_abs_le_five :
     |((Real.pi : ℂ) * (R03R10PolyLower.sR04 / 2)).im| ≤ (5 : ℝ) := by
   have him : ((Real.pi : ℂ) * (R03R10PolyLower.sR04 / 2)).im =
@@ -426,6 +572,19 @@ noncomputable def R04_zero_free_certificate_of_zeta_ge_one
       ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
   CentralCoverAssembly.R04_zeroFree_of_bounds
     ⟨R04_center_certificate_of_zeta_ge_one hzeta, hderiv⟩
+
+theorem R05_center_certificate_of_zeta_ge_one
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖) :
+    (0.15 : ℝ) + 0.06 * CentralCoverAssembly.R05.radius ≤
+      ‖xiShifted CentralCoverAssembly.R05.center‖ :=
+  R05_center_certificate hzeta R05_gamma_lower_sharp
+
+noncomputable def R05_zero_free_certificate_of_zeta_ge_one
+    (hzeta : (1 : ℝ) ≤ ‖zeta R03R10PolyLower.sR05‖)
+    (hderiv : ∀ w, CentralCoverAssembly.R05.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R05_zeroFree_of_bounds
+    ⟨R05_center_certificate_of_zeta_ge_one hzeta, hderiv⟩
 
 
 
