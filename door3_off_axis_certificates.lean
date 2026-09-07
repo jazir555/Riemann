@@ -1766,3 +1766,123 @@ noncomputable def R08_zero_free_certificate_of_zeta_ge_half
 #print axioms R02_zero_free_certificate_of_zeta_ge_one
 
 end Door3OffAxis
+
+open Complex Real
+noncomputable section
+
+namespace Door3OffAxis
+
+/-!
+This record is the exact finite-data interface required by the unconditional
+eta-pair continuation theorem.  It deliberately stores the finite sum and
+the tail/factor bounds as propositions in `ℝ`; no Float value is ever coerced
+into a theorem.  Once a generated interval proof supplies these fields, the
+resulting lower bound is an ordinary kernel theorem.
+-/
+structure FiniteZetaLowerCertificate (s : ℂ) where
+  N : ℕ
+  S : ℂ
+  slow : ℝ
+  rtail : ℝ
+  cF : ℝ
+  hSdef : S = ∑ k ∈ Finset.range N, etaDirichletTerm s k
+  hSlow : slow ≤ ‖S‖
+  hTail : ‖(∑' m, etaPairTerm s m) - S‖ ≤ rtail
+  hcFpos : 0 < cF
+  hFac : ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - s))‖ ≤ cF
+
+/- The positivity and `Re s ≠ 1` premises are concrete center facts; this
+version leaves them explicit so the record is useful for every off-axis center. -/
+theorem FiniteZetaLowerCertificate.lower_of_re
+    {s : ℂ} (C : FiniteZetaLowerCertificate s)
+    (hs : 0 < s.re) (hre : s.re ≠ 1) :
+    (C.slow - C.rtail) / C.cF ≤ ‖zeta s‖ := by
+  have h := zeta_lower_of_Sn_tail_factor hs hre C.N C.S C.hSdef C.slow C.hSlow
+    C.rtail C.hTail C.cF C.hcFpos C.hFac
+  simpa only [zeta] using h
+
+theorem R02_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R02Uniform.sR02)
+    (hOne : (1 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R02.radius ≤
+      ‖xiShifted CentralCoverAssembly.R02.center‖ := by
+  apply R02_center_certificate_of_zeta_ge_one
+  exact hOne.trans (C.lower_of_re (by rw [R02Uniform.sR02_re]; norm_num)
+    (by rw [R02Uniform.sR02_re]; norm_num))
+
+theorem R03_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR03)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.05 : ℝ) + 0.01 * CentralCoverAssembly.R03.radius ≤
+      ‖xiShifted CentralCoverAssembly.R03.center‖ :=
+  R03_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR03_re]; norm_num)
+      (by rw [R03R10PolyLower.sR03_re]; norm_num)))
+
+theorem R04_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR04)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R04.radius ≤
+      ‖xiShifted CentralCoverAssembly.R04.center‖ :=
+  R04_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR04_re]; norm_num)
+      (by rw [R03R10PolyLower.sR04_re]; norm_num)))
+
+theorem R05_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR05)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.03 : ℝ) + 0.06 * CentralCoverAssembly.R05.radius ≤
+      ‖xiShifted CentralCoverAssembly.R05.center‖ :=
+  R05_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR05_re]; norm_num)
+      (by rw [R03R10PolyLower.sR05_re]; norm_num)))
+
+theorem R06_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR06)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.03 : ℝ) + 0.06 * CentralCoverAssembly.R06.radius ≤
+      ‖xiShifted CentralCoverAssembly.R06.center‖ :=
+  R06_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR06_re]; norm_num)
+      (by rw [R03R10PolyLower.sR06_re]; norm_num)))
+
+theorem R07_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR07)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.015 : ℝ) + 0.04 * CentralCoverAssembly.R07.radius ≤
+      ‖xiShifted CentralCoverAssembly.R07.center‖ :=
+  R07_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR07_re]; norm_num)
+      (by rw [R03R10PolyLower.sR07_re]; norm_num)))
+
+theorem R08_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR08)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.001 : ℝ) + 0.001 * CentralCoverAssembly.R08.radius ≤
+      ‖xiShifted CentralCoverAssembly.R08.center‖ :=
+  R08_center_certificate_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR08_re]; norm_num)
+      (by rw [R03R10PolyLower.sR08_re]; norm_num)))
+
+theorem R09_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR09)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R09.radius ≤
+      ‖xiShifted CentralCoverAssembly.R09.center‖ :=
+  R09_center_certificate_small_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR09_re]; norm_num)
+      (by rw [R03R10PolyLower.sR09_re]; norm_num)))
+
+theorem R10_center_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR10)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R10.radius ≤
+      ‖xiShifted CentralCoverAssembly.R10.center‖ :=
+  R10_center_certificate_small_of_zeta_ge_half
+    (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
+      (by rw [R03R10PolyLower.sR10_re]; norm_num)))
+
+#print axioms FiniteZetaLowerCertificate.lower_of_re
+#print axioms R03_center_certificate_of_finite_zeta
+
+end Door3OffAxis
