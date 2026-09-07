@@ -102,6 +102,18 @@ theorem D3_imag_axis_xi_im_zero {y : ℝ} :
         rw [hsarg]]
   exact D3_real_xi_im_zero
 
+theorem D3_imag_axis_xi_norm_eq_abs_re {y : ℝ} :
+    ‖xiShifted (Complex.I * (y : ℂ))‖ =
+      |(xiShifted (Complex.I * (y : ℂ))).re| := by
+  have hi := D3_imag_axis_xi_im_zero (y := y)
+  have hz : xiShifted (Complex.I * (y : ℂ)) =
+      (((xiShifted (Complex.I * (y : ℂ))).re : ℝ) : ℂ) := by
+    apply Complex.ext
+    · simp
+    · simpa [hi]
+  rw [hz, Complex.norm_real, Real.norm_eq_abs]
+  simp
+
 private theorem D3_real_gamma_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
     1 ≤ Real.Gamma (s / 2) := by
   have hx : s / 2 ∈ Set.Ioc (0 : ℝ) 1 := by constructor <;> linarith
