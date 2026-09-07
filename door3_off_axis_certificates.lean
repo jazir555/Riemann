@@ -1401,6 +1401,89 @@ theorem exp_thirteen_point_sevenfive_le_990000 :
     _ ≤ 450000 * 2.2 := mul_le_mul h13 h075 (by positivity) (by norm_num)
     _ ≤ 990000 := by norm_num
 
+theorem exp_eight_point_three_le_4200 : Real.exp (8.3 : ℝ) ≤ (4200 : ℝ) := by
+  have h8 : Real.exp (8 : ℝ) ≤ (3000 : ℝ) := by
+    have hpow : Real.exp (8 : ℝ) = (Real.exp 1) ^ (8 : ℕ) := by
+      have h := Real.exp_nat_mul (1 : ℝ) (8 : ℕ)
+      simpa using h.symm
+    rw [hpow]
+    have hh : (Real.exp 1) ^ (8 : ℕ) < (2.7182818286 : ℝ) ^ (8 : ℕ) := by
+      apply pow_lt_pow_left₀ Real.exp_one_lt_d9 (le_of_lt (Real.exp_pos _)) (by norm_num)
+    exact le_of_lt (calc
+      (Real.exp 1) ^ (8 : ℕ) < (2.7182818286 : ℝ) ^ (8 : ℕ) := hh
+      _ < 3000 := by norm_num)
+  have h03 : Real.exp (0.3 : ℝ) ≤ (1.37 : ℝ) := by
+    have h := Real.exp_bound' (x := (0.3 : ℝ)) (by norm_num) (by norm_num)
+      (n := 5) (by norm_num)
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero] at h
+    norm_num at h
+    linarith
+  calc
+    Real.exp (8.3 : ℝ) = Real.exp 8 * Real.exp 0.3 := by
+      rw [show (8.3 : ℝ) = 8 + 0.3 by norm_num, Real.exp_add]
+    _ ≤ 3000 * 1.37 := mul_le_mul h8 h03 (by positivity) (by norm_num)
+    _ ≤ 4200 := by norm_num
+
+theorem R08_pi_half_im_abs_le_eight_point_three :
+    |((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2)).im| ≤ (8.3 : ℝ) := by
+  have him : ((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2)).im =
+      Real.pi * (R03R10PolyLower.sR08.im / 2) := by
+    simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.div_ofNat_im]
+  rw [him, R03R10PolyLower.sR08_im, abs_mul]
+  have hpi : |Real.pi| ≤ (3.1416 : ℝ) := by
+    rw [abs_of_pos Real.pi_pos]
+    exact le_of_lt Real.pi_lt_d4
+  calc
+    |Real.pi| * |5.25 / 2| ≤ 3.1416 * 2.625 := by
+      apply mul_le_mul hpi (by norm_num) (by norm_num) (by norm_num)
+    _ ≤ 8.3 := by norm_num
+
+theorem R08_sine_upper_large :
+    ‖Complex.sin ((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2))‖ ≤ (2101 : ℝ) := by
+  have h := sin_upper_of_nonpos_im_of_exp_bound
+    (w := -((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2)))
+    (K := (8.3 : ℝ)) (E := (4200 : ℝ))
+    (by simpa [abs_neg] using R08_pi_half_im_abs_le_eight_point_three)
+    (by
+      have him : ((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2)).im =
+          Real.pi * (R03R10PolyLower.sR08.im / 2) := by
+        simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+          Complex.div_ofNat_im]
+      rw [Complex.neg_im, him, R03R10PolyLower.sR08_im]
+      nlinarith [Real.pi_pos])
+    exp_eight_point_three_le_4200
+  have heq : ‖Complex.sin (-((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2)))‖ =
+      ‖Complex.sin ((Real.pi : ℂ) * (R03R10PolyLower.sR08 / 2))‖ := by
+    rw [Complex.sin_neg, norm_neg]
+  rw [heq] at h
+  linarith
+
+theorem R08_gamma_lower_sharp_small :
+    (0.005 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖ := by
+  have hs : R03R10PolyLower.sR08 = R08GammaUpper.sR08 := rfl
+  rw [hs]
+  have h1w_re : (0 : ℝ) < (1 - R08GammaUpper.sR08 / 2).re := by
+    rw [R08GammaUpper.zUpR08_re]
+    norm_num
+  have hG1_ne : Complex.Gamma (1 - R08GammaUpper.sR08 / 2) ≠ 0 :=
+    Complex.Gamma_ne_zero_of_re_pos h1w_re
+  have hsin_ne : Complex.sin ((Real.pi : ℂ) * (R08GammaUpper.sR08 / 2)) ≠ 0 := by
+    apply CellGammaUniform.sin_pi_half_ne_wide
+    rw [R08GammaUpper.sR08_im]
+    norm_num
+  apply gamma_lower_of_reflection (s := R08GammaUpper.sR08)
+    (L := (0.005 : ℝ)) (G := (0.15 : ℝ)) (S := (2101 : ℝ))
+  · norm_num
+  · norm_num
+  · exact hG1_ne
+  · exact hsin_ne
+  · exact R08GammaUpper.gamma_one_sub_half_upper_R08
+  · exact R08_sine_upper_large
+  · rw [le_div_iff₀ (by norm_num)]
+    have hp : (3.14 : ℝ) < Real.pi := lt_trans (by norm_num) Real.pi_gt_d4
+    nlinarith
+
 theorem R09_pi_half_im_abs_le_eleven_point_four :
     |((Real.pi : ℂ) * (R03R10PolyLower.sR09 / 2)).im| ≤ (11.4 : ℝ) := by
   have him : ((Real.pi : ℂ) * (R03R10PolyLower.sR09 / 2)).im =
@@ -1659,24 +1742,24 @@ noncomputable def R07_zero_free_certificate_of_zeta_ge_half
 
 theorem R08_center_certificate_of_zeta_ge_half
     (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
-    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖) :
-    (0.005 : ℝ) + 0.05 * CentralCoverAssembly.R08.radius ≤
+    (hgam : (0.005 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖) :
+    (0.001 : ℝ) + 0.001 * CentralCoverAssembly.R08.radius ≤
       ‖xiShifted CentralCoverAssembly.R08.center‖ := by
   have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR08‖ := by
     exact CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR08_re]; norm_num)
   exact center_certificate_of_components CentralCoverAssembly.R08 R03R10PolyLower.sR08
-    0.005 0.05 13.8 (1 / 2 : ℝ) 0.021 0.5 rfl (by norm_num)
+    0.001 0.001 13.8 (1 / 2 : ℝ) 0.005 0.5 rfl (by norm_num)
     (le_of_lt CentralCoverAssembly.R08_radius_lt) (by norm_num) (by norm_num)
     (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R08 hpi
     hgam hzeta (by norm_num)
 
 noncomputable def R08_zero_free_certificate_of_zeta_ge_half
     (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
-    (hgam : (0.021 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖)
+    (hgam : (0.005 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖)
     (hderiv : ∀ w, CentralCoverAssembly.R08.mem w →
-      ‖deriv xiShifted w‖ ≤ (0.05 : ℝ)) : XiLocalZeroFreeRect :=
-  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R08 0.005
-    (by norm_num) 0.05 CentralCoverAssembly.R08_strip_lo
+      ‖deriv xiShifted w‖ ≤ (0.001 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R08 0.001
+    (by norm_num) 0.001 CentralCoverAssembly.R08_strip_lo
     CentralCoverAssembly.R08_strip_hi hderiv
     (R08_center_certificate_of_zeta_ge_half hzeta hgam)
 
