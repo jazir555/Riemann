@@ -254,6 +254,39 @@ theorem boundedCoverZeta11_of_finite_evidence
     simpa [s'] using hzero_reflect
   exact hzero' hz'
 
+/-! The same finite certificate can be exposed in the classical-ξ shape used by
+the three-part right-half decomposition.  Inside the critical strip, ξ and ζ
+have the same zeros, so this adapter needs no functional-equation assumption
+and no RH axiom. -/
+
+theorem boundedCoverXi11_of_finite_evidence
+    (E : FiniteCriticalStripEvidence11) :
+    ∀ s : ℂ, (1 : ℝ) / 2 < s.re → s.re < 1 →
+      |s.im| < (11 : ℝ) → classicalXi s ≠ 0 := by
+  intro s hs_half hs_one hs_height hz
+  have hxi : classicalXi s = 0 ↔ riemannZeta s = 0 :=
+    classicalXi_zero_equivalence_from_gamma
+      classical_gamma_nonzero_instrip s (by linarith) (by linarith)
+  by_cases hsim : s.im = 0
+  · have hs_real : s = (s.re : ℂ) := by
+      apply Complex.ext
+      · simp
+      · simpa [hsim]
+    have hzeta : riemannZeta s ≠ 0 := by
+      rw [hs_real]
+      exact RHProofScaffold.ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo
+        (by linarith) hs_one
+    exact hzeta (hxi.mp hz)
+  · have hzeta : riemannZeta s ≠ 0 :=
+      riemannZeta_ne_zero_of_finite_evidence E s (by linarith) hs_one hs_height hsim
+    exact hzeta (hxi.mp hz)
+
+def finiteBoundedXiCover11 (E : FiniteCriticalStripEvidence11) :
+    FiniteBoundedRectCover (11 : ℝ) where
+  covers := by
+    intro s hs_half hs_one hs_height
+    exact boundedCoverXi11_of_finite_evidence E s hs_half hs_one hs_height
+
 #print axioms riemannZeta_ne_zero_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
 #print axioms riemannZeta_ne_zero_of_finite_evidence
@@ -261,5 +294,7 @@ theorem boundedCoverZeta11_of_finite_evidence
 #print axioms rh_from_finite_evidence11_and_tailU
 #print axioms rh_from_evidence11_and_tailU
 #print axioms boundedCoverZeta11_of_finite_evidence
+#print axioms boundedCoverXi11_of_finite_evidence
+#print axioms finiteBoundedXiCover11
 
 end Door3Height11
