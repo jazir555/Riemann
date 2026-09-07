@@ -3309,3 +3309,7 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 CC (`e9b6d579`, cover tail lines 16813–16972, green 8687 jobs):
   CutR10 eta-factor cap `‖1-2^(1-s)‖ ≤ 1` + outer-tier honest negative.
   Next: finite partial-sum datum for `cutR10_zetaRemainder_of_certificate_one`.
+- 2026-09-07 OA (`e00cb9df`, off-axis tail, green 8702 jobs, axioms clean):
+  first genuine `FiniteZetaLowerCertificate` instance (R03, N=2).
+  Honest gap: ratio `(1/5-61/5)/(13/5) < 0.5` — M=1 tail dwarfs slow bound
+  row-wide; threshold needs larger-N slow + decayed tail (tasked as OA2).
