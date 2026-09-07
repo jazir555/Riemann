@@ -3313,3 +3313,6 @@ sorry-free infrastructure and the complete commit ledger above.
   first genuine `FiniteZetaLowerCertificate` instance (R03, N=2).
   Honest gap: ratio `(1/5-61/5)/(13/5) < 0.5` — M=1 tail dwarfs slow bound
   row-wide; threshold needs larger-N slow + decayed tail (tasked as OA2).
+- 2026-09-07 TS (`6d3bc2af`, newsection tail, green 8702 jobs, axioms clean):
+  `Door3TailSlab278` slab supplier (`‖ζ‖ ≤ 278`, shifted feeder, K2
+  Rouché-product cap). Still open: `CompletedZetaTailU10` Gamma wiring.
