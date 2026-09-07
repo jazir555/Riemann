@@ -9448,9 +9448,9 @@ theorem zUpR03_add11_ne0 : (1 - sR03 / 2 + 11) ≠ 0 := by
   norm_num at hre
 
 /-- MAIN uniform UPPER bound at the R03 corner:
-`‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.15` (bottom-row outer-tier mirror, `re = 0.8025`). -/
+`‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.14` (bottom-row outer-tier mirror, `re = 0.8025`). -/
 theorem gamma_one_sub_half_upper_R03 :
-    ‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.15 := by
+    ‖Complex.Gamma (1 - sR03 / 2)‖ ≤ 0.14 := by
   -- Shift chain `Gamma(z0+12) = (z0+11)..z0*Gamma(z0)`.
   have e0 : Complex.Gamma (1 - sR03 / 2 + 1)
       = (1 - sR03 / 2) * Complex.Gamma (1 - sR03 / 2) :=
@@ -9728,7 +9728,7 @@ theorem gamma_one_sub_half_upper_R03 :
         :=
     (le_div_iff₀ hD_pos).mpr hmul_comm
   have hcap : (313000000 : ℝ)
-      ≤ 0.15 * (‖1 - sR03 / 2 + 11‖
+      ≤ 0.14 * (‖1 - sR03 / 2 + 11‖
         * (‖1 - sR03 / 2 + 10‖
         * (‖1 - sR03 / 2 + 9‖
         * (‖1 - sR03 / 2 + 8‖
@@ -9740,11 +9740,11 @@ theorem gamma_one_sub_half_upper_R03 :
         * (‖1 - sR03 / 2 + 2‖
         * (‖1 - sR03 / 2 + 1‖
           * ‖1 - sR03 / 2‖))))))))))) := by
-    calc (313000000 : ℝ) ≤ 0.15 * 2900000000 := by norm_num
-      _ ≤ 0.15 * _ :=
+    calc (313000000 : ℝ) ≤ 0.14 * 2900000000 := by norm_num
+      _ ≤ 0.14 * _ :=
           mul_le_mul_of_nonneg_left hD_ge (by norm_num)
   have hfinal : 313000000 / (‖1 - sR03 / 2 + 11‖ * (‖1 - sR03 / 2 + 10‖ * (‖1 - sR03 / 2 + 9‖ * (‖1 - sR03 / 2 + 8‖ * (‖1 - sR03 / 2 + 7‖ * (‖1 - sR03 / 2 + 6‖ * (‖1 - sR03 / 2 + 5‖ * (‖1 - sR03 / 2 + 4‖ * (‖1 - sR03 / 2 + 3‖ * (‖1 - sR03 / 2 + 2‖ * (‖1 - sR03 / 2 + 1‖ * (‖1 - sR03 / 2‖))))))))))))
-      ≤ 0.15 :=
+      ≤ 0.14 :=
     (div_le_iff₀ hD_pos).mpr hcap
   exact le_trans hdiv hfinal
 
