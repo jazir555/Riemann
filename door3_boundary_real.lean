@@ -156,6 +156,14 @@ theorem xiShifted_ne_zero_on_top_edge_proved {x : ℝ} (hx : x ≠ 0) :
   apply mul_ne_zero hpref
   simpa [zeta] using hz
 
+theorem xiShifted_top_edge_center_norm_pos {x : ℝ} (hx : x ≠ 0) :
+    0 < ‖xiShifted ((x : ℂ) + Complex.I / 2)‖ :=
+  norm_pos_iff.mpr (xiShifted_ne_zero_on_top_edge_proved hx)
+
+theorem xiShifted_top_edge_center_norm_nonzero {x : ℝ} (hx : x ≠ 0) :
+    ‖xiShifted ((x : ℂ) + Complex.I / 2)‖ ≠ 0 :=
+  ne_of_gt (xiShifted_top_edge_center_norm_pos hx)
+
 #print axioms zetaRealNonzeroInCritical_proved
 #print axioms classicalXiPrefactor_ne_zero_on_real_critical_proved
 #print axioms classicalXi_ne_zero_on_real_critical_proved
