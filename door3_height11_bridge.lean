@@ -195,11 +195,71 @@ theorem rh_from_finite_evidence11_and_tailU
         · exact hy1 }
   exact RHProofScaffold.rh_from_first_quadrant_and_tailU A B
 
+/-! ### ζ-native bounded-cover adapter
+
+The finite certificate is stated in the full strip, so it can also be
+consumed directly by the ζ-native residual formulation.  For the right half
+of the strip we use the functional-equation reflection `s ↦ 1 - s`; the
+reflected point remains in `(0,1)` and has the same height modulus, hence is
+covered by the finite evidence.  This adapter contains no xi or RH axiom. -/
+
+theorem boundedCoverZeta11_of_finite_evidence
+    (E : FiniteCriticalStripEvidence11) :
+    ∀ s : ℂ, (1 : ℝ) / 2 < s.re → s.re < 1 →
+      |s.im| < (11 : ℝ) → riemannZeta s ≠ 0 := by
+  intro s hs_half hs_one hs_height
+  by_cases hsim : s.im = 0
+  · have hs_real : s = (s.re : ℂ) := by
+      apply Complex.ext
+      · simp
+      · simpa [hsim]
+    rw [hs_real]
+    exact RHProofScaffold.ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo
+      (by linarith) (by linarith)
+  let s' : ℂ := 1 - s
+  have hs're : 0 < s'.re := by
+    have h : s'.re = 1 - s.re := by simp [s', Complex.sub_re]
+    rw [h]
+    linarith
+  have hs're_lt : s'.re < 1 := by
+    have h : s'.re = 1 - s.re := by simp [s', Complex.sub_re]
+    rw [h]
+    linarith
+  have hs'im_abs : |s'.im| = |s.im| := by
+    have h : s'.im = -s.im := by simp [s', Complex.sub_im]
+    rw [h, abs_neg]
+  have hs'height : |s'.im| < (11 : ℝ) := by
+    rw [hs'im_abs]
+    exact hs_height
+  have hs'im_ne : s'.im ≠ 0 := by
+    intro h
+    have : s.im = 0 := by
+      dsimp [s'] at h
+      simpa using h
+    exact hsim this
+  have hzero' : riemannZeta s' ≠ 0 :=
+    riemannZeta_ne_zero_of_finite_evidence E s' hs're hs're_lt hs'height hs'im_ne
+  intro hz
+  have hz' : riemannZeta s' = 0 := by
+    have hxi_s : classicalXi s = 0 :=
+      (classicalXi_zero_equivalence_from_gamma
+        classical_gamma_nonzero_instrip s (by linarith) (by linarith)).mpr hz
+    have hxi_reflect : classicalXi (1 - s) = 0 := by
+      rw [classicalXi_functional_equation s (by linarith) (by linarith)]
+      exact hxi_s
+    have hzero_reflect : riemannZeta (1 - s) = 0 :=
+      (classicalXi_zero_equivalence_from_gamma
+        classical_gamma_nonzero_instrip (1 - s) (by simp; linarith) (by simp; linarith)).mp
+        hxi_reflect
+    simpa [s'] using hzero_reflect
+  exact hzero' hz'
+
 #print axioms riemannZeta_ne_zero_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
 #print axioms riemannZeta_ne_zero_of_finite_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_finite_evidence
 #print axioms rh_from_finite_evidence11_and_tailU
 #print axioms rh_from_evidence11_and_tailU
+#print axioms boundedCoverZeta11_of_finite_evidence
 
 end Door3Height11
