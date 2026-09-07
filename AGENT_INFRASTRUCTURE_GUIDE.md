@@ -3030,3 +3030,189 @@ uniform derivative bounds needed for the 40 central cells, the explicit
 fixed-width edge/cutoff certificates, and a supplied finite-sum certificate for
 the off-axis bundle. The new bridges expose exactly those inputs and the
 downstream RH implications, but no recent commit proves them by assumption.
+
+## Complete commit ledger for the last two days
+
+This audit uses the current branch history from 2026-09-05 00:00 through the latest commit. It finds 181 commits; every commit hash and subject is listed below, including documentation and ledger commits. The narrative Door-3 sections above summarize the technical groups; this ledger is the hash-level completeness check.
+
+- 8aee8307 | 2026-09-07 | update guide with recent Door 3 commits
+- ae2cfd0c | 2026-09-07 | document Door 3 certificate interfaces and residuals
+- 85d7b4f6 | 2026-09-07 | fix generated candidate proposition audit proof
+- 9ed8723c | 2026-09-07 | preserve proposition audit in certificate generator
+- 16ac9b4c | 2026-09-07 | prove rational candidate table proposition audit
+- 784da527 | 2026-09-07 | audit finite certificate axioms
+- f016dc78 | 2026-09-07 | wire finite certificate lower bounds
+- 9232858c | 2026-09-07 | add reflected finite zeta certificate bridge
+- b11dfa0c | 2026-09-07 | package R00 finite eta certificate
+- 1b7fbf2a | 2026-09-07 | fix R10 conjugation bridge proof
+- 04703d60 | 2026-09-07 | bundle finite off-axis rectangle certificates
+- 750df34f | 2026-09-07 | add R10 conjugation certificate bridge
+- 5737e225 | 2026-09-07 | add finite zeta to rectangle certificate bridge
+- e6d07d63 | 2026-09-07 | package finite eta zeta lower certificates
+- 747813f4 | 2026-09-07 | package unconditional R08 gamma certificate
+- 062eb39a | 2026-09-07 | add unconditional R08 gamma lower bound
+- 035f9d77 | 2026-09-07 | add half-zeta off-axis rectangle certificates
+- 5281209b | 2026-09-07 | add small-budget R09 and R10 centre certificates
+- 7d8969c0 | 2026-09-07 | add unconditional large-height gamma reflection bounds
+- 38d22f8a | 2026-09-07 | generalize bottom rectangle zeta upper bound
+- 23ac2296 | 2026-09-07 | add unconditional R03 zeta upper enclosure
+- 05c2fe8e | 2026-09-07 | sharpen R03 gamma and add off-axis certificate
+- c5c629c1 | 2026-09-07 | add reusable reflection and tighter R04 bounds
+- ed537542 | 2026-09-07 | prove unconditional R05 gamma center lower bound
+- 7d32969e | 2026-09-06 | prove unconditional R06 gamma center lower bound
+- a963d2fc | 2026-09-06 | prove unconditional R07 gamma center lower bound
+- 5860ef14 | 2026-09-06 | wire R04 gamma bound into rectangle certificate
+- b87543f6 | 2026-09-06 | prove unconditional R04 gamma center lower bound
+- 95644cb7 | 2026-09-06 | wire off-axis rectangle certificate constructors
+- 168f6b8d | 2026-09-06 | add off-axis center certificate constructors
+- 4a892f75 | 2026-09-06 | add unconditional off-axis R02 center certificate
+- b02f08e3 | 2026-09-06 | add direct analytic axis center nonvanishing
+- 5107f9be | 2026-09-06 | wire explicit xi center positivity into axis nonvanishing
+- 5ef9a7bd | 2026-09-06 | add unconditional open-strip xi norm positivity
+- db966ec1 | 2026-09-06 | add explicit zero-height center certificate
+- 105ddf29 | 2026-09-06 | expose explicit real-part center lower bound
+- 09ebc0f4 | 2026-09-06 | replace center positivity with analytic xi bounds
+- 11d448d8 | 2026-09-06 | add top-edge xi center norm certificates
+- 9afde591 | 2026-09-06 | bridge axis center norm bounds to real parts
+- 4834966a | 2026-09-06 | add real-axis xi norm representation
+- e5641373 | 2026-09-06 | record reality of real xi center values
+- fe878919 | 2026-09-06 | certify unconditional axis center nonvanishing
+- 97312561 | 2026-09-06 | close real critical zeta nonvanishing bridge
+- 4e58e5a1 | 2026-09-06 | add uniform imaginary-axis xi nonvanishing certificate
+- 161357b4 | 2026-09-06 | add uniform axis xi center certificate
+- b3c4d1ce | 2026-09-06 | sharpen explicit real xi center lower bound
+- 2350fc3d | 2026-09-06 | add explicit rational xi axis center bounds
+- c57e5d5b | 2026-09-06 | strengthen analytic xi center bounds
+- f4ee119e | 2026-09-06 | register analytic Door 3 center bound module
+- 2847bfd9 | 2026-09-06 | prove analytic real-axis zeta and xi center lower bounds
+- 6b67d328 | 2026-09-06 | prove unconditional Door 3 axis center bounds and grid coverage
+- 290e25e8 | 2026-09-06 | add unconditional Door 3 head imaginary certificate
+- 556d319f | 2026-09-06 | generate exact rational Door 3 candidate certificates
+- bcd2c0ec | 2026-09-06 | wire finite evidence to bounded rectangle assembly
+- 25f96600 | 2026-09-06 | convert global strip evidence to finite certificate
+- f0d76330 | 2026-09-06 | wire finite xi cover into bounded decomposition
+- 54848771 | 2026-09-06 | expose bounded classical xi cover adapter
+- a23225d7 | 2026-09-06 | add zeta bounded-cover adapter for finite evidence
+- 0b8ef94a | 2026-09-06 | add finite interval cover certificate interface
+- d50bdd01 | 2026-09-06 | wire height-11 evidence to RH assembly
+- f223f222 | 2026-09-06 | align Door 3 certificate bridge to height 11
+- e9a5f85e | 2026-09-06 | add Euler Maclaurin rectangle bridge
+- 563306a5 | 2026-09-06 | add approximation-bound rectangle bridge
+- 04ba16fb | 2026-09-06 | connect rectangle evidence to RH assembly
+- 6fe850a6 | 2026-09-06 | add axiom-free rectangle certificate bridge
+- eb282b07 | 2026-09-06 | discharge R02 zeta upper and derivative bridge
+- 08ff946b | 2026-09-06 | connect target budgets to cell fencing
+- d4e7f321 | 2026-09-06 | add radius transfer lemma for generated targets
+- cee61a93 | 2026-09-06 | record exact fine-grid geometry checks
+- 939d5a1e | 2026-09-06 | check positive margins for Door 3 targets
+- 202e5a97 | 2026-09-06 | add generated Door 3 arithmetic target shell
+- 4d38e41c | 2026-09-06 | up
+- 51216a19 | 2026-09-06 | UP
+- 968445f1 | 2026-09-05 | Transfer closed-grid fencing to both halves
+- dbc7ec6f | 2026-09-05 | Correct stale zeta proof status comments
+- 9d3e7b93 | 2026-09-05 | Record true eta prefix bounds
+- 8332ec67 | 2026-09-05 | Tighten true eta prefix cap
+- 76e7e9cb | 2026-09-05 | Add unconditional true eta prefix cap
+- 60a0d4a2 | 2026-09-05 | Clarify explicit central cover adapter
+- 6f627bfc | 2026-09-05 | Assemble closed-grid nonvanishing conditionally
+- 65e66fb5 | 2026-09-05 | Prove closed fine-grid boundary coverage
+- 99d78946 | 2026-09-05 | Add closed-cell Door 3 cover interface
+- cb577b4c | 2026-09-05 | Redesign Door 3 bridge as explicit certificate API
+- 59fac02c | 2026-09-05 | Formalize false Door 3 center-bound statement
+- f3718085 | 2026-09-05 | Formalize Door 3 legacy grid boundary obstruction
+- 3afecb24 | 2026-09-05 | Tighten Door 3 zeta pair enclosure
+- ce50e817 | 2026-09-05 | Record production real-radius bridge migration
+- 584e8d4b | 2026-09-05 | Replace false Float radius bridge with real radius
+- a8643fa8 | 2026-09-05 | Correct Float audit axiom report
+- 25099270 | 2026-09-05 | Verify Float radius audit axioms
+- 891f7ba4 | 2026-09-05 | Verify real-radius bridge axioms
+- 2920e55a | 2026-09-05 | Document real-radius bridge interface
+- 758ea1b7 | 2026-09-05 | Add exact real-radius Door 3 bridge interface
+- 850fbc25 | 2026-09-05 | Document Float radius bridge obstruction
+- 38388e4e | 2026-09-05 | Audit Door 3 Float radius bridge
+- d7317486 | 2026-09-05 | Record Door 3 bridged grid boundary obstruction
+- 2dcba98a | 2026-09-05 | Document cutoff zeta and derivative reductions
+- 0090daf7 | 2026-09-05 | Add cutoff derivative supplier interface
+- 4f91baa5 | 2026-09-05 | Tighten Door 3 cutoff eta factor
+- 100fe071 | 2026-09-05 | Add Door 3 zeta cutoff certificate adapter
+- 493ae9e6 | 2026-09-05 | Prove Door 3 cutoff Gamma lower bound with finite products
+- 2e7d2ac2 | 2026-09-05 | Ledger: record C11 29/40 proxies
+- 579da30c | 2026-09-05 | Agent C11: R61+R71 mid pair (29/40 proxies); axioms clean
+- fc4538f7 | 2026-09-05 | Ledger: record C10 27/40 proxies
+- 3f6db734 | 2026-09-05 | Agent C10: R41+R51 inner tier (27/40 proxies); axioms clean
+- 3198d54c | 2026-09-05 | Ledger: record C9 25/40 proxies
+- 81c398d1 | 2026-09-05 | Agent C9: R21+R31 mid pair (25/40 proxies); axioms clean
+- df02150b | 2026-09-05 | Ledger: record C8 23/40 proxies
+- e0ff7401 | 2026-09-05 | Agent C8: R01+R11 open y-row 1 (23/40 proxies); axioms clean
+- 01a343d8 | 2026-09-05 | Ledger: record GS verification
+- 64057b8e | 2026-09-05 | Agent GS (verified GSv): Gamma sups G0=0.232 smallest, tier zeta-side blocked; axioms clean
+- 1508c662 | 2026-09-05 | Ledger: record C7 21/40 proxies
+- 6e6fd277 | 2026-09-05 | Agent C7: R82+R92 close y-row 2 10/10 (21/40 proxies); axioms clean
+- c2e77d23 | 2026-09-05 | Ledger: record R5 scout mapping
+- 4640a851 | 2026-09-05 | Agent R5: residual mapping + scout theorems (strips/cutoffs/axis); axioms clean
+- bbdeab71 | 2026-09-05 | Ledger: record C6 19/40 proxies
+- 2adf4c30 | 2026-09-05 | Agent C6: y-row 2 remainder R42/R52/R62/R72 (19/40 proxies); axioms clean
+- f45cd314 | 2026-09-05 | Ledger: record GS pending verification (blocked on R5 cover)
+- 55af7afd | 2026-09-05 | Ledger: record FE bridge (placement fixed)
+- d930680b | 2026-09-05 | Agent FE: chi-factor machinery + Dirichlet <=3, strip numeral open; axioms clean
+- 76beeb4a | 2026-09-05 | Ledger: record V5, pause deriv lane pending FE
+- a7e45593 | 2026-09-05 | Agent V5: joint/smallball/localization all quantified dead (300-600x); axioms clean
+- 51940b73 | 2026-09-05 | Ledger: record T7, pause tail lane pending FE
+- d465d118 | 2026-09-05 | Agent T7: conditional closures d<1/r<2 imply gap, polar cap 1/10; axioms clean
+- f240e796 | 2026-09-05 | Ledger: record C5 15/40 proxies
+- ae832401 | 2026-09-05 | Agent C5: y-row 2 R02/R12/R22/R32 proxies (15/40); axioms clean
+- e4edd021 | 2026-09-05 | Ledger: record V4, factorization dead
+- 0db4bb84 | 2026-09-05 | Agent V4: GammaSup G0=1.52 Stirling-free, factorization tier numerically dead (300x); axioms clean
+- 8ae103a5 | 2026-09-05 | Ledger: record R4 finale, BD lane closed
+- 10d1032f | 2026-09-05 | Agent R4: R39+R40 packaging, BD cover lane CLOSED R31-R40; axioms clean
+- 7f28e4e0 | 2026-09-05 | Ledger: record T6 K-verdict
+- 4941a01b | 2026-09-05 | Agent T6: K>2 dead (e grows), K=2 minimal, only ||zeta-2||<2 left; axioms clean
+- f61f0354 | 2026-09-05 | Ledger: record R37-R38 packaging
+- d96deaa0 | 2026-09-05 | Agent R3: R37+R38 small-r packaging via BD template; axioms clean
+- 254f7da8 | 2026-09-05 | Ledger: record T5 K=2 dead
+- b63a2122 | 2026-09-05 | Agent T5: K=2 split provably dead (B*e+d=2), redirect to ||zeta-2||<2 or K>2; axioms clean
+- ee6bb4aa | 2026-09-05 | Ledger: record W4, retire narrow lane
+- 0bf9b4e3 | 2026-09-05 | Agent W4: sub-sliver [6.30,6.33] at 217.3, narrow lane DONE; axioms clean
+- b781d2c5 | 2026-09-05 | Ledger: record T4 compact bounds
+- 1508e122 | 2026-09-05 | Agent T4: compact-cell zeta existence bounds + gap implication; axioms clean
+- d92e0766 | 2026-09-05 | Ledger: record R35-R36 packaging
+- 42106b13 | 2026-09-05 | Agent R2: R35+R36 small-r packaging via BD template; axioms clean
+- 9bbe1d30 | 2026-09-05 | Ledger: record V3 Pi sup
+- 5e3bbf9f | 2026-09-05 | Agent V3: fPi sup P=4 proved, Gamma/ZetaSup conds, threshold G*Z<=0.0001; axioms clean
+- 04aaf466 | 2026-09-05 | Ledger: record T3 real bridge
+- be9176b4 | 2026-09-05 | Agent T3: real shiftedS/mollifier defs, e=1/2 at K=2, Dirichlet route dead; axioms clean
+- 529bec03 | 2026-09-05 | Ledger: record R33-R34 packaging
+- 15372ede | 2026-09-05 | Agent R: R33+R34 small-r packaging via BD template; axioms clean
+- 79b6b4bc | 2026-09-05 | Ledger: record W3 sliver cover
+- c4a2d720 | 2026-09-05 | Agent W3: sliver [6.30,6.37] covered at 217.5 (217.2 provably fails); axioms clean
+- 46d38bb5 | 2026-09-05 | Ledger: record C4 11/40 proxies
+- e48975e6 | 2026-09-05 | Agent C4: bottom-row remainder R73/R83/R93/R03 (11/40 proxies); axioms clean
+- 2372249c | 2026-09-05 | Ledger: record W2 6.30 piece, lock-protocol fix
+- cc6e31d2 | 2026-09-05 | Agent W2: narrow 6.30 piece <=217.1, sliver now [6.30,6.37]; axioms clean
+- 040f3037 | 2026-09-05 | Ledger: record C3 7/40 proxies
+- 3294a46e | 2026-09-05 | Agent C3: 6 proxy cells R13-R63 (7/40), all green ~45s; axioms clean
+- 1780778a | 2026-09-05 | Ledger: record V2 factor sups
+- 532f4b9b | 2026-09-05 | Agent V2: factor sups poly 63.4, four-factor composition, tier threshold; axioms clean
+- b6f65b29 | 2026-09-05 | Ledger: record T2 conditional bridge
+- feee4b94 | 2026-09-05 | Agent T2: conditional leaf bridge B*e+d<1 implies MollifiedRoucheLeaf; axioms clean
+- 05840948 | 2026-09-05 | Ledger: record W narrow 216.9
+- 301b6128 | 2026-09-05 | Agent W: Gamma narrow 216.9 at xmax 6.25, table row; axioms clean
+- 5d538673 | 2026-09-05 | Ledger: record V deriv toolkit
+- fba59747 | 2026-09-05 | Agent V: deriv lane Cauchy toolkit + R00 conditional bound; axioms clean
+- 6411e7f0 | 2026-09-05 | Ledger: record C2 checker generalization
+- bc1ea2bb | 2026-09-05 | Agent C2: two-sided mul + sqrt-upper rules, R00 proxy cert, 40-cell generator in Temp; axioms clean
+- 91ea0e92 | 2026-09-05 | Ledger: record T tail feeders
+- 80968b3b | 2026-09-05 | Agent T: tail-leaf feeders (geom bound at 11, norm floors); axioms clean
+- b9dc936f | 2026-09-05 | Lakefile: register door3_deriv_certs root for parallel deriv lane
+- 79422456 | 2026-09-05 | Ledger: record C1 cert spike
+- 5c62edca | 2026-09-05 | Agent C1: cell-cert spike, checker core + timed sample (53s), lakefile root; axioms clean
+- 156e2d15 | 2026-09-05 | Ledger: record H10 quad 0.0807, freeze M-grind, pivot to certificates
+- e078122c | 2026-09-05 | Agent H10: quad G 0.0807 (D2685/2696 refloors), tier M 100.13256 Azeta 5735; axioms clean
+- 7e091e30 | 2026-09-05 | Ledger: record G23, pair program closed
+- c1df399f | 2026-09-05 | Agent G23: Ico-block transfer, pair program CLOSED; axioms clean
+- 22733052 | 2026-09-05 | Ledger: record G22 window aggregate
+- 94da0b99 | 2026-09-05 | Agent G22: [16,32) window Re-sum <=0.22432 aggregate + verdict; axioms clean
+- d6343f31 | 2026-09-05 | Ledger: record H9 trio 0.0808
+- 3d0131d6 | 2026-09-05 | Agent H9: trio G 0.0808 via a=0.06 refloor D2692, tier M 100.25664 Azeta 5743; axioms clean
+- 1acceab1 | 2026-09-05 | Ledger: record G21 last pair, all pairs MVT-closed
+- ba0dccdb | 2026-09-05 | Agent G21: pair15 Re<=-0.02 LAST pair, all pairs 8-15 MVT-closed; axioms clean
