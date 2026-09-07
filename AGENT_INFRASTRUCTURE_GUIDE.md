@@ -3330,3 +3330,7 @@ sorry-free infrastructure and the complete commit ledger above.
   per-`x` conditional closure `∃ ε0 M1, StripBaseBoundsShape` at
   `(0.025, 1)`. Residual: UNIFORM `0.025 ≤ ‖ξ(x)‖` on `-10<x<10`
   (critical-line ξ minorant, tasked as BS3).
+- 2026-09-07 BS3 (`aa809e24`, zeta-cutoff tail, green 8701 jobs):
+  unconditional `0.025 ≤ ‖ξ(0)‖` minorant + `bottomStrip_obligations_
+  of_uniform_bounds` bridge. Residual: UNIFORM hb+hB on `-10<x<10`
+  (BS lane PAUSED pending RX2's critical-line zeta numeral).
