@@ -15,7 +15,7 @@ def up(s):
     return str(Decimal(s).quantize(q, rounding=ROUND_UP))
 
 lines = [
-    "import Mathlib", "", "namespace Door3NumericTargets", "",
+    "import Mathlib", "import rh_certificate_infra", "", "namespace Door3NumericTargets", "",
     "/-- Exact-rational shell for generated numerical targets.  The fields are",
     "deliberately separated from `xiShifted`: the JSON generator samples mpmath,",
     "so these inequalities are arithmetic checks only, pending formal analytic",
@@ -52,6 +52,13 @@ lines += ["]", "", "theorem all_budgets_ok : ∀ t ∈ targets,",
           "theorem all_geometry_sq : ∀ t ∈ targets,",
           "    ((t.x1 - t.x0) / 2)^2 + ((t.y1 - t.y0) / 2)^2 < (126 / 100 : ℚ)^2 := by",
           "  intro t ht", "  exact t.geometry_sq", "",
+          "/-- Convert the exact square budget into the geometric radius bound",
+          "used by `inner_nonvanishing_of_fenced_grid_fine`. -/",
+          "theorem rect_radius_lt_of_geometry (R : CellProofEngine.Rect2D)",
+          "    (h : R.dx ^ 2 + R.dy ^ 2 < (126 / 100 : ℝ)^2) :",
+          "    R.radius < (126 / 100 : ℝ) := by",
+          "  unfold CellProofEngine.Rect2D.radius",
+          "  exact (Real.sqrt_lt' (by norm_num)).2 h", "",
           "/-- Arithmetic transfer used by the real cell-fencing theorem. -/",
           "theorem transfer_budget {ε M c radius n : ℝ}",
           "    (hM : 0 ≤ M) (hr : radius ≤ (126 / 100 : ℝ))",
