@@ -102,7 +102,28 @@ theorem xiShifted_no_zero_in_rect_10_of_evidence
     intro hz
     exact hzeta (hxi.mp hz)
 
+theorem xiShifted_no_zero_in_rect_10_of_two_approx_bounds
+    (UA : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.ApproxRectBound
+      0 1 0 RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yTop)
+    (EU : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.IntervalExcludesZero
+      (RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_approx UA))
+    (LA : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.ApproxRectBound
+      0 1 RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yBot 0)
+    (EL : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.IntervalExcludesZero
+      (RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_approx LA))
+    (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  exact xiShifted_no_zero_in_rect_10_of_evidence
+    { upper := RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_approx UA
+      upper_ex := EU
+      lower := RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.rectIntervalBound_from_approx LA
+      lower_ex := EL }
+    z hx0 hx1 hy0 hy1
+
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
+#print axioms xiShifted_no_zero_in_rect_10_of_two_approx_bounds
 
 noncomputable def quadrantPlan_10_of_evidence
     (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14) :
