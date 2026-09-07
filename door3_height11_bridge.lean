@@ -117,8 +117,89 @@ theorem rh_from_evidence11_and_tailU
         · exact hy1 }
   exact RHProofScaffold.rh_from_first_quadrant_and_tailU A B
 
+/-! A finite certificate is the natural interval-arithmetic shape: a single
+axis-aligned enclosure over the whole strip is unnecessarily restrictive. -/
+
+structure RectEvidence where
+  x0 : ℝ
+  x1 : ℝ
+  y0 : ℝ
+  y1 : ℝ
+  bound : RectIntervalBound x0 x1 y0 y1
+  excludes : IntervalExcludesZero bound
+
+structure FiniteCriticalStripEvidence11 where
+  rects : List RectEvidence
+  covers :
+    ∀ s : ℂ, 0 < s.re → s.re < 1 → |s.im| < (11 : ℝ) → s.im ≠ 0 →
+      ∃ E ∈ rects, inOpenRect E.x0 E.x1 E.y0 E.y1 s
+
+def finiteCover11 (E : FiniteCriticalStripEvidence11) : CriticalStripCover11 :=
+  { rects := E.rects.map (fun R => zeroFreeRect_of_interval R.bound R.excludes)
+    covers := by
+      intro s hs0 hs1 him him0
+      obtain ⟨R, hR, hs⟩ := E.covers s hs0 hs1 him him0
+      refine ⟨zeroFreeRect_of_interval R.bound R.excludes, ?_, hs⟩
+      exact List.mem_map.mpr ⟨R, hR, rfl⟩ }
+
+theorem riemannZeta_ne_zero_of_finite_evidence
+    (E : FiniteCriticalStripEvidence11) (s : ℂ)
+    (hs0 : 0 < s.re) (hs1 : s.re < 1)
+    (him : |s.im| < (11 : ℝ)) (him0 : s.im ≠ 0) :
+    riemannZeta s ≠ 0 := by
+  intro hz
+  obtain ⟨R, hR, hs⟩ := E.covers s hs0 hs1 him him0
+  exact (riemannZeta_ne_zero_of_interval_exclusion R.bound R.excludes s hs) hz
+
+theorem xiShifted_no_zero_in_rect_10_of_finite_evidence
+    (E : FiniteCriticalStripEvidence11) (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  set s := shiftedS z
+  have hs_re : s.re = 1 / 2 - z.im := shiftedS_re z
+  have hs_im : s.im = z.re := RHProofScaffold.LeafDecomp.shiftedS_im_eq z
+  have hs0 : 0 < s.re := by rw [hs_re]; linarith
+  have hs1 : s.re < 1 := by rw [hs_re]; linarith
+  have hxi : xiShifted z = 0 ↔ riemannZeta s = 0 :=
+    classicalXi_zero_equivalence_from_gamma
+      classical_gamma_nonzero_instrip s hs0 hs1
+  intro hz
+  by_cases hzre : z.re = 0
+  · have hs_real : s = (s.re : ℂ) := by
+      apply Complex.ext
+      · simp
+      · rw [hs_im, hzre]
+        simp
+    apply RHProofScaffold.ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo
+      hs0 hs1
+    rw [← hs_real]
+    exact hxi.mp hz
+  · have him0 : s.im ≠ 0 := by rw [hs_im]; exact hzre
+    have him : |s.im| < (11 : ℝ) := by
+      rw [hs_im, abs_lt]
+      constructor <;> linarith
+    exact riemannZeta_ne_zero_of_finite_evidence E s hs0 hs1 him him0 (hxi.mp hz)
+
+theorem rh_from_finite_evidence11_and_tailU
+    (E : FiniteCriticalStripEvidence11)
+    (B : AnalyticChallenge.CompletedZetaTailU10) :
+    RiemannHypothesisProp := by
+  let A : AnalyticChallenge.FirstQuadrant10 :=
+    { no_zero := by
+        intro z hx0 hx1 hy0 hy1
+        apply xiShifted_no_zero_in_rect_10_of_finite_evidence E z
+        · linarith
+        · linarith
+        · exact hy0
+        · exact hy1 }
+  exact RHProofScaffold.rh_from_first_quadrant_and_tailU A B
+
 #print axioms riemannZeta_ne_zero_of_evidence
 #print axioms xiShifted_no_zero_in_rect_10_of_evidence
+#print axioms riemannZeta_ne_zero_of_finite_evidence
+#print axioms xiShifted_no_zero_in_rect_10_of_finite_evidence
+#print axioms rh_from_finite_evidence11_and_tailU
 #print axioms rh_from_evidence11_and_tailU
 
 end Door3Height11
