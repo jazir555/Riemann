@@ -75,6 +75,33 @@ theorem D3_imag_axis_nonzero_unconditional {y : ℝ}
   xiShifted_ne_zero_on_imaginary_axis D3_zeta_real_nonzero_in_critical y
     hyne hy0 hy1
 
+theorem D3_real_xi_im_zero {s : ℝ} :
+    (classicalXi (s : ℂ)).im = 0 := by
+  have h := classicalXi_conj (s : ℂ)
+  have hs : star (s : ℂ) = (s : ℂ) := by simp
+  rw [hs] at h
+  have hi := congrArg Complex.im h
+  have hieq : (classicalXi (s : ℂ)).im =
+      -(classicalXi (s : ℂ)).im := by simpa using hi
+  linarith
+
+theorem D3_imag_axis_xi_im_zero {y : ℝ} :
+    (xiShifted (Complex.I * (y : ℂ))).im = 0 := by
+  have hsarg : (1 / 2 : ℂ) + Complex.I * (Complex.I * (y : ℂ)) =
+      ((1 / 2 - y : ℝ) : ℂ) := by
+    calc
+      (1 / 2 : ℂ) + Complex.I * (Complex.I * (y : ℂ)) =
+          (1 / 2 : ℂ) + Complex.I ^ 2 * (y : ℂ) := by ring
+      _ = (1 / 2 - y : ℝ) := by
+        rw [Complex.I_sq]
+        push_cast
+        ring
+  rw [show xiShifted (Complex.I * (y : ℂ)) =
+      classicalXi ((1 / 2 - y : ℝ) : ℂ) by
+        unfold xiShifted
+        rw [hsarg]]
+  exact D3_real_xi_im_zero
+
 private theorem D3_real_gamma_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
     1 ≤ Real.Gamma (s / 2) := by
   have hx : s / 2 ∈ Set.Ioc (0 : ℝ) 1 := by constructor <;> linarith
