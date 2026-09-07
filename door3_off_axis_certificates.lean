@@ -1882,6 +1882,86 @@ theorem R10_center_certificate_of_finite_zeta
     (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
       (by rw [R03R10PolyLower.sR10_re]; norm_num)))
 
+/- Complete rectangle packages fed by the same finite certificate and the
+uniform derivative enclosure on the corresponding cell. -/
+noncomputable def R03_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR03)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R03.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.01 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R03 0.05
+    (by norm_num) 0.01 CentralCoverAssembly.R03_strip_lo
+    CentralCoverAssembly.R03_strip_hi hderiv
+    (R03_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R04_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR04)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R04.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.R04_zeroFree_of_bounds
+    ⟨R04_center_certificate_of_finite_zeta C hHalf, hderiv⟩
+
+noncomputable def R05_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR05)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R05.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R05 0.03
+    (by norm_num) 0.06 CentralCoverAssembly.R05_strip_lo
+    CentralCoverAssembly.R05_strip_hi hderiv
+    (R05_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R06_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR06)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R06.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R06 0.03
+    (by norm_num) 0.06 CentralCoverAssembly.R06_strip_lo
+    CentralCoverAssembly.R06_strip_hi hderiv
+    (R06_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R07_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR07)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R07.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.04 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R07 0.015
+    (by norm_num) 0.04 CentralCoverAssembly.R07_strip_lo
+    CentralCoverAssembly.R07_strip_hi hderiv
+    (R07_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R08_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR08)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R08.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.001 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R08 0.001
+    (by norm_num) 0.001 CentralCoverAssembly.R08_strip_lo
+    CentralCoverAssembly.R08_strip_hi hderiv
+    (R08_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R09_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR09)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R09.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R09 0.001
+    (by norm_num) 0.003 CentralCoverAssembly.R09_strip_lo
+    CentralCoverAssembly.R09_strip_hi hderiv
+    (R09_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R10_zero_free_certificate_of_finite_zeta
+    (C : FiniteZetaLowerCertificate R03R10PolyLower.sR10)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R10.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R10 0.001
+    (by norm_num) 0.003 CentralCoverAssembly.R10_strip_lo
+    CentralCoverAssembly.R10_strip_hi hderiv
+    (R10_center_certificate_of_finite_zeta C hHalf)
+
 #print axioms FiniteZetaLowerCertificate.lower_of_re
 #print axioms R03_center_certificate_of_finite_zeta
 
