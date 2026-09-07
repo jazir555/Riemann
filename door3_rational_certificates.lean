@@ -139,7 +139,7 @@ theorem door3_rational_candidates_all_ok :
   intro c hc
   simp only [door3RationalCandidates, List.mem_cons, List.mem_singleton] at hc
   rcases hc with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h |
-    h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+    h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
   all_goals subst c <;>
     constructor <;>
     norm_num [Door3RationalCandidate.geometryOK, Door3RationalCandidate.arithmeticOK]
