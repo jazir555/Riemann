@@ -1772,6 +1772,19 @@ noncomputable section
 
 namespace Door3OffAxis
 
+/- The positive-height R10 center is the conjugate of the R00 center.  This
+identity transports any rigorously proved norm enclosure at R00 to R10. -/
+theorem R10_zeta_norm_eq_R00 :
+    ‖zeta R03R10PolyLower.sR10‖ = ‖zeta zetaCellS0‖ := by
+  have hs : star zetaCellS0 = R03R10PolyLower.sR10 := by
+    apply Complex.ext
+    · rw [Complex.conj_re, zetaCellS0_re, R03R10PolyLower.sR10_re]
+    · rw [Complex.conj_im, zetaCellS0_im, R03R10PolyLower.sR10_im]
+  rw [← hs]
+  change ‖riemannZeta (star zetaCellS0)‖ = ‖riemannZeta zetaCellS0‖
+  rw [riemannZeta_conj]
+  simp
+
 /-!
 This record is the exact finite-data interface required by the unconditional
 eta-pair continuation theorem.  It deliberately stores the finite sum and
@@ -1882,6 +1895,20 @@ theorem R10_center_certificate_of_finite_zeta
     (hHalf.trans (C.lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
       (by rw [R03R10PolyLower.sR10_re]; norm_num)))
 
+/- A finite eta certificate at the reflected R00 point is enough for the R10
+center, by the conjugation identity above. -/
+theorem R10_center_certificate_of_R00_finite_zeta
+    (C : FiniteZetaLowerCertificate zetaCellS0)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF) :
+    (0.001 : ℝ) + 0.003 * CentralCoverAssembly.R10.radius ≤
+      ‖xiShifted CentralCoverAssembly.R10.center‖ := by
+  apply R10_center_certificate_of_zeta_ge_half
+  have h0 : (0.5 : ℝ) ≤ ‖zeta zetaCellS0‖ :=
+    hHalf.trans (C.lower_of_re (by rw [zetaCellS0_re]; norm_num)
+      (by rw [zetaCellS0_re]; norm_num))
+  rw [← R10_zeta_norm_eq_R00]
+  exact h0
+
 /- Complete rectangle packages fed by the same finite certificate and the
 uniform derivative enclosure on the corresponding cell. -/
 noncomputable def R03_zero_free_certificate_of_finite_zeta
@@ -1961,6 +1988,16 @@ noncomputable def R10_zero_free_certificate_of_finite_zeta
     (by norm_num) 0.003 CentralCoverAssembly.R10_strip_lo
     CentralCoverAssembly.R10_strip_hi hderiv
     (R10_center_certificate_of_finite_zeta C hHalf)
+
+noncomputable def R10_zero_free_certificate_of_R00_finite_zeta
+    (C : FiniteZetaLowerCertificate zetaCellS0)
+    (hHalf : (0.5 : ℝ) ≤ (C.slow - C.rtail) / C.cF)
+    (hderiv : ∀ w, CentralCoverAssembly.R10.mem w →
+      ‖deriv xiShifted w‖ ≤ (0.003 : ℝ)) : XiLocalZeroFreeRect :=
+  CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R10 0.001
+    (by norm_num) 0.003 CentralCoverAssembly.R10_strip_lo
+    CentralCoverAssembly.R10_strip_hi hderiv
+    (R10_center_certificate_of_R00_finite_zeta C hHalf)
 
 #print axioms FiniteZetaLowerCertificate.lower_of_re
 #print axioms R03_center_certificate_of_finite_zeta
