@@ -33,6 +33,106 @@ The key mathematical facts are:
    available. This is reported precisely as the open leaf.
 -/
 
+/-!
+## Axiom-free finite-rectangle bridge
+
+The rectangle leaf in `riemann_hypothesis.lean` is intentionally kept as the
+legacy RH-backed statement.  The theorem below is the replacement interface
+for a genuine numerical certificate: once interval arithmetic supplies
+`CriticalStripEvidence14`, the implication to the shifted-xi rectangle is
+kernel-checked and does not use `RiemannHypothesisProp_apply`.
+-/
+
+namespace Door3CertificateBridge
+
+open Complex
+open RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert
+
+theorem xiShifted_no_zero_in_rect_10_of_evidence
+    (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14)
+    (z : ℂ)
+    (hx0 : -1 < z.re) (hx1 : z.re < 11)
+    (hy0 : 0 < z.im) (hy1 : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  set s := shiftedS z with hs_def
+  have hs_re : s.re = 1 / 2 - z.im := shiftedS_re z
+  have hs_im : s.im = z.re :=
+    RHProofScaffold.LeafDecomp.shiftedS_im_eq z
+  have hs0 : 0 < s.re := by
+    rw [hs_re]
+    linarith
+  have hs1 : s.re < 1 := by
+    rw [hs_re]
+    linarith
+  have him_lo : -(RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yLimit : ℝ) ≤ s.im := by
+    rw [hs_im]
+    dsimp [RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yLimit]
+    linarith
+  have him_hi : s.im ≤ RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yLimit := by
+    rw [hs_im]
+    dsimp [RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yLimit]
+    linarith
+  have him : |s.im| ≤ RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.yLimit :=
+    (abs_le).2 ⟨him_lo, him_hi⟩
+  by_cases hzre : z.re = 0
+  · have hs_real : s = (s.re : ℂ) := by
+      apply Complex.ext
+      · simp
+      · rw [hs_im, hzre]
+        simp
+    have hzeta : riemannZeta s ≠ 0 := by
+      rw [hs_real]
+      exact RHProofScaffold.ClosedCertificate.Task1Completion.riemannZeta_ne_zero_real_Ioo
+        hs0 hs1
+    have hxi : xiShifted z = 0 ↔ riemannZeta s = 0 :=
+      classicalXi_zero_equivalence_from_gamma
+        classical_gamma_nonzero_instrip s hs0 hs1
+    intro hz
+    exact hzeta (hxi.mp hz)
+  · have him0 : s.im ≠ 0 := by
+      rw [hs_im]
+      exact hzre
+    have hzeta : riemannZeta s ≠ 0 :=
+      RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.riemannZeta_ne_zero_of_zeta_cover
+        (RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.criticalStripCover14_of_evidence E)
+        s hs0 hs1 him him0
+    have hxi : xiShifted z = 0 ↔ riemannZeta s = 0 :=
+      classicalXi_zero_equivalence_from_gamma
+        classical_gamma_nonzero_instrip s hs0 hs1
+    intro hz
+    exact hzeta (hxi.mp hz)
+
+#print axioms xiShifted_no_zero_in_rect_10_of_evidence
+
+noncomputable def quadrantPlan_10_of_evidence
+    (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14) :
+    QuadrantZeroFreePlan (10 : ℝ) where
+  rects :=
+    [{
+      x0 := -1
+      x1 := 11
+      y0 := 0
+      y1 := (1 : ℝ) / 2
+      x_lt := by norm_num
+      y_lt := by norm_num
+      no_zero := fun z hx0 hx1 hy0 hy1 =>
+        xiShifted_no_zero_in_rect_10_of_evidence E z hx0 hx1 hy0 hy1
+    }]
+  covers := by
+    intro z hx0 hx1 hy0 hy1
+    refine ⟨_, List.mem_singleton_self _, ?_⟩
+    exact ⟨by linarith, by linarith, hy0, hy1⟩
+
+def remainingQuadrant_10_of_evidence
+    (E : RHProofScaffold.ClosedCertificate.Task1Completion.ZetaNumericCert.CriticalStripEvidence14) :
+    RemainingQuadrantNonvanishing (10 : ℝ) :=
+  quadrant_nonvanishing_from_plan (quadrantPlan_10_of_evidence E)
+
+#print axioms quadrantPlan_10_of_evidence
+#print axioms remainingQuadrant_10_of_evidence
+
+end Door3CertificateBridge
+
 namespace MollifiedAttack
 
 open scoped BigOperators
