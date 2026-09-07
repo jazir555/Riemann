@@ -59,6 +59,22 @@ theorem D3_real_zeta_norm_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
       linarith
     _ ≤ ‖riemannZeta (s : ℂ)‖ := Complex.abs_re_le_norm _
 
+theorem D3_zeta_real_nonzero_in_critical : ZetaRealNonzeroInCritical := by
+  intro t ht ht1 hz
+  have hz' : riemannZeta (t : ℂ) = 0 := by
+    simpa only [zeta] using hz
+  have hnorm : ‖riemannZeta (t : ℂ)‖ = 0 := by
+    rw [hz', norm_zero]
+  have hlower := D3_real_zeta_norm_lower ht ht1
+  have hpos : 0 < t / (1 - t) := div_pos ht (by linarith)
+  linarith
+
+theorem D3_imag_axis_nonzero_unconditional {y : ℝ}
+    (hyne : y ≠ 0) (hy0 : -(1 / 2 : ℝ) < y) (hy1 : y < (1 / 2 : ℝ)) :
+    xiShifted (Complex.I * (y : ℂ)) ≠ 0 :=
+  xiShifted_ne_zero_on_imaginary_axis D3_zeta_real_nonzero_in_critical y
+    hyne hy0 hy1
+
 private theorem D3_real_gamma_lower {s : ℝ} (hs : 0 < s) (hs1 : s < 1) :
     1 ≤ Real.Gamma (s / 2) := by
   have hx : s / 2 ∈ Set.Ioc (0 : ℝ) 1 := by constructor <;> linarith
