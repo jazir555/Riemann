@@ -1741,8 +1741,7 @@ noncomputable def R07_zero_free_certificate_of_zeta_ge_half
     (R07_center_certificate_of_zeta_ge_half hzeta)
 
 theorem R08_center_certificate_of_zeta_ge_half
-    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
-    (hgam : (0.005 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖) :
+    (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖) :
     (0.001 : ℝ) + 0.001 * CentralCoverAssembly.R08.radius ≤
       ‖xiShifted CentralCoverAssembly.R08.center‖ := by
   have hpi : ((1 / 2 : ℝ) : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR08‖ := by
@@ -1751,17 +1750,16 @@ theorem R08_center_certificate_of_zeta_ge_half
     0.001 0.001 13.8 (1 / 2 : ℝ) 0.005 0.5 rfl (by norm_num)
     (le_of_lt CentralCoverAssembly.R08_radius_lt) (by norm_num) (by norm_num)
     (by norm_num) (by norm_num) R03R10PolyLower.poly_lower_R08 hpi
-    hgam hzeta (by norm_num)
+    R08_gamma_lower_sharp_small hzeta (by norm_num)
 
 noncomputable def R08_zero_free_certificate_of_zeta_ge_half
     (hzeta : (0.5 : ℝ) ≤ ‖zeta R03R10PolyLower.sR08‖)
-    (hgam : (0.005 : ℝ) ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR08‖)
     (hderiv : ∀ w, CentralCoverAssembly.R08.mem w →
       ‖deriv xiShifted w‖ ≤ (0.001 : ℝ)) : XiLocalZeroFreeRect :=
   CentralCoverAssembly.zeroFreeRect_of_rect_center_bound_strip CentralCoverAssembly.R08 0.001
     (by norm_num) 0.001 CentralCoverAssembly.R08_strip_lo
     CentralCoverAssembly.R08_strip_hi hderiv
-    (R08_center_certificate_of_zeta_ge_half hzeta hgam)
+    (R08_center_certificate_of_zeta_ge_half hzeta)
 
 #print axioms R02_pi_lower_tight
 #print axioms R02_center_certificate_of_zeta_ge_one
