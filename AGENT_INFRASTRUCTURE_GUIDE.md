@@ -1339,9 +1339,11 @@ proved, analytic 2/6 FALSE with numbers (wide-grid infeasible: `LHS>50` vs `O(1)
 `legacy_grid_infeasible_wide_top`); full `coversUpper` FALSE (4 counterexamples) → inner triple
 (`coversUpper_inner`/`coversLower_inner`/`centralCovers_inner`) proved. **Trusted migration CLOSED:**
 `central_cover_trusted.lean` repointed off removed names (strip differentiability + binary `.conj` with
-`hy0,hy1` from bridged bounds) + 4/4 Float-order sorrys proved (`native_decide` toRatParts pattern —
-carries standard native_decide aux axioms, no sorryAx); remaining **4 sorry-terms** (mpmath-margin
-center/deriv bounds, Float/ℝ agreement, grid coverage :575/581/601/645, all honestly blocked);
+`hy0,hy1` from bridged bounds) and all four Float-order bridges are proved (`native_decide`
+`toRatParts` pattern).  The module contains no `sorry` terms; its `BridgedCellCertificate` interface
+keeps the mpmath-derived center/derivative inequalities and coverage as explicit data rather than
+silently treating sampled Float values as analytic proofs.  The standard auxiliary axioms introduced
+by `native_decide` are present, but no `sorryAx` is used;
 `rh_residual_gap.lean` has **0**; `interval_arith.lean` has **0**. `RXX_mem_gridFine` already exists for
 R00 and R02–R40 and all 41 `H_instance`s exist (R01 correctly has none: `(-7.5,-5) ∉ fineGridX`).
 Committed (rigorous, 0 sorrys): all **40 cells** packaged (R00–R10 bottom, R11–R40 upper) with
@@ -2919,3 +2921,41 @@ no `sorry`, `admit`, or custom axiom; it records the range mismatch rather
 than treating the Float table as an analytic certificate for the central
 rectangle.  Its theorem `zeta_cert_data_disjoint_from_central_height_band`
 also checks directly that no row intersects the required central height band.
+
+## Door-3 update: analytic center and off-axis certificate interfaces (2026-09-07)
+
+`door3_real_center_bounds.lean` now proves the real critical-interval lower bound
+for `ζ`, the corresponding real-axis `ξ` center lower bound, and the complete
+imaginary-axis center bound.  These results are unconditional and their axiom
+reports contain only `[propext, Classical.choice, Quot.sound]`.
+
+`door3_off_axis_certificates.lean` adds the finite-data interface
+`FiniteZetaLowerCertificate`.  Its `lower_of_re` theorem converts a certified
+finite eta sum, paired-tail estimate, and eta-factor bound into a kernel-checked
+lower bound for `‖ζ s‖`.  The R00 and reflected R00 constructors package all
+already-proved tail and factor estimates; their only supplied analytic field is
+the genuine finite-sum lower bound.  The R03--R10 center and zero-free rectangle
+constructors, the R10 conjugation bridge, and
+`OffAxisFiniteCertificateBundle` assemble the eight bottom-row off-axis cells
+once those finite-sum and derivative fields are supplied.  No Float value is
+coerced into an analytic theorem.
+
+`door3_rational_certificates.lean` and `generate_door3_certificates.py` now
+generate forty exact-rational candidate rows.  The proposition-valued theorem
+`door3_rational_candidates_all_ok` proves every row's geometry and fencing
+arithmetic in Lean, and the generator preserves that proof on regeneration.
+The rows remain explicitly marked `sampled_unverified`: they do not assert the
+analytic `ξ` center or derivative inequalities.
+
+Verification performed after this update:
+
+```text
+lake build door3_rational_certificates
+lake build door3_rational_grid_cover door3_real_center_bounds door3_off_axis_certificates
+```
+
+The exact remaining Door-3 obligations are therefore unchanged in substance:
+analytic complex-`ζ` lower enclosures and uniform derivative bounds for the
+central cells, together with the fixed-width edge and cutoff certificates.  The
+finite certificate interfaces expose these obligations directly and do not
+close them by hypothesis or by the forbidden `RiemannHypothesisProp_apply`.
