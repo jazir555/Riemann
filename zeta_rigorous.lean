@@ -33093,3 +33093,60 @@ theorem R02_D3_zeta_of_F_le (s : ℂ) (him_hi : s.im ≤ -5.25) (M : ℝ)
 #print axioms R02_D3_G_diffContOnCl
 #print axioms R02_D3_G_interp_of_edges
 #print axioms R02_D3_zeta_of_F_le
+
+/-!
+## Door-3 quantitative close, step 4 (zeta lane): damp-factor lower bound on the R02 rect.
+
+Route: `‖damp(s)‖ = exp(Re(((s-1)^2)/100))` via `Complex.norm_exp`, with
+`Re(((s-1)^2)/100) = ((s.re-1)^2 - s.im^2)/100 ≥ -1` on the R02 rect
+(`s.re ∈ [0.05, 0.74]`, `s.im ∈ [-8.25, -5.25]`), since `s.im^2 ≤ 81`
+and `(s.re-1)^2 ≥ 0`. Monotonicity `Real.exp_le_exp` then gives
+`exp(-1) ≤ ‖damp‖`. This is input (3) for the close: with
+`‖G‖ ≤ interp` from `R02_D3_G_interp_of_edges`, `‖F‖ ≤ interp/exp(-1)`
+follows by dividing, and `R02_D3_zeta_of_F_le` closes `‖ζ‖`.
+
+Banked here (FULL proof, no sorry):
+* `R02_D3_damp_ge_exp_neg_one`: `Real.exp (-1) ≤ ‖R02_D3_dampFactor s‖`
+  on the R02 rect.
+
+RESIDUAL (exact next step): whole-line edge numerals `a`, `b` for damped
+`G` on `Re = 0.05` / `Re = 0.74` (all `Im`, via FE + Stirling chi caps with
+damping decay) plus `BddAbove` for full `G` (zeta-growth estimate on the
+strip); then `R02_D3_G_interp_of_edges` gives `‖G‖`, the bound below
+converts back to `‖F‖` via `‖F‖ ≤ ‖G‖/exp(-1)`, and `R02_D3_zeta_of_F_le`
+closes `‖ζ‖ ≤ 10` on the R02 rect.
+-/
+
+/-- Damp-factor lower bound `exp(-1) ≤ ‖damp‖` on the R02 rect (close input 3). -/
+theorem R02_D3_damp_ge_exp_neg_one (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    Real.exp (-1) ≤ ‖R02_D3_dampFactor s‖ := by
+  have hsub_re : (s - 1).re = s.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hsub_im : (s - 1).im = s.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have hsq : (((s - 1) ^ 2).re) = (s.re - 1) * (s.re - 1) - s.im * s.im := by
+    rw [pow_two, Complex.mul_re, hsub_re, hsub_im]
+  have hdiv : ((((s - 1) ^ 2) / (100 : ℂ)).re) = ((((s - 1) ^ 2).re) / 100) := by
+    rw [Complex.div_ofNat_re]
+  have hnorm : ‖R02_D3_dampFactor s‖ = Real.exp ((((s - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor s = Complex.exp ((((s - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [e, Complex.norm_exp]
+  rw [hnorm]
+  apply Real.exp_le_exp.mpr
+  rw [hdiv, hsq]
+  have h9lo : (-9 : ℝ) ≤ s.im := by linarith
+  have h9hi : s.im ≤ (9 : ℝ) := by linarith
+  have h_a : (0 : ℝ) ≤ 9 - s.im := by linarith
+  have h_b : (0 : ℝ) ≤ 9 + s.im := by linarith
+  have h_prod : (0 : ℝ) ≤ (9 - s.im) * (9 + s.im) := mul_nonneg h_a h_b
+  have hexpand : (9 - s.im) * (9 + s.im) = 81 - s.im * s.im := by ring
+  have him_sq : s.im * s.im ≤ 81 := by linarith
+  have hre_sq : (0 : ℝ) ≤ (s.re - 1) * (s.re - 1) := mul_self_nonneg _
+  have hnum : (-100 : ℝ) ≤ (s.re - 1) * (s.re - 1) - s.im * s.im := by linarith
+  have hfin : (-1 : ℝ) ≤ ((s.re - 1) * (s.re - 1) - s.im * s.im) / 100 := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 100)]
+    linarith
+  exact hfin
+
+#print axioms R02_D3_damp_ge_exp_neg_one
