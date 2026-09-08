@@ -3329,6 +3329,10 @@ sorry-free infrastructure and the complete commit ledger above.
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
   `‖χ‖ ≤ 2·1·4·e^13` banked. Next: three-lines interpolation (ZU4).
+- 2026-09-07 ZU4 (`d8759a5c`, zeta tail, green, axioms clean):
+  damped-`G` `DiffContOnCl` + conditional interpolation instance +
+  `‖ζ‖ ≤ M/5.25` converter. Residual: edge numerals a/b + `BddAbove`
+  + damp lower (tasked as ZU5).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
