@@ -34092,3 +34092,137 @@ theorem R02_D3_Gamma_line095_window55 (s : ℂ) (hre : s.re = 0.95)
 #print axioms R02_D3_Gamma_line095_shift_decay
 #print axioms R02_D3_Gamma_line095_poly_decay
 #print axioms R02_D3_Gamma_line095_window55
+
+/-!
+## Door-3 quantitative close, step 8 (zeta lane): window55 chi-ratio (sharpened).
+
+Route: plug `R02_D3_Gamma_line095_poly_decay` (`‖Γ‖ ≤ 2/|Im|^2`) into the
+`R02_D3_zetaChi_exp_line095` assembly (which used decay-free `‖Γ‖ ≤ 4`).
+The cpow factor is unchanged (`R02_D3_chiCpow_le_one`, `≤ 1`) and the cos
+factor is unchanged (`R02_D3_chiCos_exp_line095`, `≤ exp(3.1416*|Im|/2)`),
+so `‖χ‖ ≤ 2*1*(2/|Im|^2)*exp(3.1416*|Im|/2) = (4/|Im|^2)*exp(3.1416*|Im|/2)`.
+At `|Im| ≥ 5.25` this is `≤ 0.1452*exp(3.1416*|Im|/2)` (55x over `8*exp`).
+The FE ratio inherits the same factor via banked `zeta_FE_chi`.
+
+Honest residual (exact numbers): the surviving `exp(1.5708*|Im|)` is beaten
+at large `|Im|` by the banked Gaussian damp `exp(-Im^2/100)`
+(`R02_D3_gauss_domination`, `R02_D3_damp_upper_line005/074`), but the
+whole-line damped-`G` caps `a` (`Re = 0.05` via `R02_D3_zeta05_of_ratio`
+with the ratio below) and `b` (`Re = 0.74`) plus strip `BddAbove` still need
+a line-uniform `‖ζ‖ ≤ C*(1+|Im|)` input on `Re = 0.95` (near-Dirichlet side)
+and on the strip / `Re = 0.26`. No such bound is banked
+(`zeta_Dirichlet_le_three` needs `2 ≤ Re`; `R02_D3_zeta_upper_934` covers
+only `Re ∈ [0.05, 0.74]`), so `‖ζ‖ ≤ 10` on the R02 rect is NOT closed here.
+At small `|Im|` the banked window / decay-free caps apply directly.
+The three theorems below are the tightest proved step (FULL proofs, no sorry).
+-/
+
+/-- Sharpened chi-factor cap on `Re = 0.95` with polynomial decay
+`‖χ(s)‖ ≤ (4/|Im|^2) * exp(3.1416*|Im|/2)` for `|Im| ≥ 1`. -/
+theorem R02_D3_zetaChi_poly_line095 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 1 ≤ |s.im|) :
+    ‖zetaChi s‖ ≤ (4 / (|s.im| * |s.im|)) * Real.exp (3.1416 * |s.im| / 2) := by
+  have hchi := zetaChi_norm_le s
+  have hw : (0 : ℝ) ≤ s.re := by
+    rw [hre]
+    norm_num
+  have hcp := R02_D3_chiCpow_le_one s hw
+  have hG := R02_D3_Gamma_line095_poly_decay s hre ht
+  have harg := R02_D3_chiArg_im_eq_direct s
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  have h2 : Real.pi / 2 ≤ 3.1416 / 2 := by
+    have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+    linarith
+  have h3 := mul_le_mul_of_nonneg_right h2 (abs_nonneg s.im)
+  have hfin : |((((Real.pi : ℂ)) * s / 2)).im| ≤ 3.1416 * |s.im| / 2 := by
+    rw [harg, e]
+    linarith
+  have hE : Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ Real.exp (3.1416 * |s.im| / 2) := Real.exp_le_exp.mpr hfin
+  have hE0 : (0 : ℝ) ≤ Real.exp |((((Real.pi : ℂ)) * s / 2)).im| :=
+    (Real.exp_pos _).le
+  have hDpos : (0 : ℝ) < |s.im| * |s.im| := by
+    apply mul_pos
+    · linarith
+    · linarith
+  have hDnn : (0 : ℝ) ≤ |s.im| * |s.im| := le_of_lt hDpos
+  have hFracnn : (0 : ℝ) ≤ 2 / (|s.im| * |s.im|) := by
+    apply div_nonneg (by norm_num) hDnn
+  have hGnn : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  have step1 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcp (by norm_num)
+  have step2 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ ≤
+      2 * 1 * (2 / (|s.im| * |s.im|)) :=
+    mul_le_mul step1 hG hGnn (by norm_num)
+  have hBnn : (0 : ℝ) ≤ 2 * 1 * (2 / (|s.im| * |s.im|)) :=
+    mul_nonneg (by norm_num) hFracnn
+  have step3 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ *
+      Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ (2 * 1 * (2 / (|s.im| * |s.im|))) * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul step2 hE hE0 hBnn
+  have heq : (2 * 1 * (2 / (|s.im| * |s.im|))) * Real.exp (3.1416 * |s.im| / 2)
+      = (4 / (|s.im| * |s.im|)) * Real.exp (3.1416 * |s.im| / 2) := by
+    ring
+  rw [heq] at step3
+  exact le_trans hchi step3
+
+/-- Sharpened FE chi-ratio on `Re = 0.95` with polynomial-decay prefactor. -/
+theorem R02_D3_zeta_ratio_poly_line095 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 1 ≤ |s.im|) :
+    ‖riemannZeta (1 - s)‖ ≤
+      ((4 / (|s.im| * |s.im|)) * Real.exp (3.1416 * |s.im| / 2)) *
+        ‖riemannZeta s‖ := by
+  have hs1 : ∀ n : ℕ, s ≠ (-(n : ℂ)) := by
+    intro n hn
+    have h1 : s.re = ((-(n : ℂ))).re := by rw [hn]
+    have h2 : ((-(n : ℂ))).re = -((n : ℝ)) := by simp
+    rw [h2] at h1
+    have hn0 : (0 : ℝ) ≤ ((n : ℝ)) := Nat.cast_nonneg n
+    rw [hre] at h1
+    linarith
+  have hs2 : s ≠ 1 := by
+    intro h
+    have h1 : s.re = 1 := by
+      rw [h]
+      exact Complex.one_re
+    rw [hre] at h1
+    norm_num at h1
+  have hFE := zeta_FE_chi (s := s) hs1 hs2
+  have hChi := R02_D3_zetaChi_poly_line095 s hre ht
+  rw [hFE, norm_mul]
+  exact mul_le_mul_of_nonneg_right hChi (norm_nonneg _)
+
+/-- Window chi numeral: `‖χ(s)‖ ≤ 0.1452 * exp(3.1416*|Im|/2)` at `|Im| ≥ 5.25`. -/
+theorem R02_D3_zetaChi_window55_exp_line095 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 5.25 ≤ |s.im|) :
+    ‖zetaChi s‖ ≤ 0.1452 * Real.exp (3.1416 * |s.im| / 2) := by
+  have ht1 : (1 : ℝ) ≤ |s.im| := by linarith
+  have hpoly := R02_D3_zetaChi_poly_line095 s hre ht1
+  have hden : (5.25 : ℝ) * 5.25 ≤ |s.im| * |s.im| :=
+    mul_le_mul ht ht (by norm_num) (by linarith [abs_nonneg s.im])
+  have hpos : (0 : ℝ) < 5.25 * 5.25 := by norm_num
+  have hinv : (1 : ℝ) / (|s.im| * |s.im|) ≤ 1 / (5.25 * 5.25) :=
+    one_div_le_one_div_of_le hpos hden
+  have hmul : (4 : ℝ) / (|s.im| * |s.im|) ≤ 4 / (5.25 * 5.25) := by
+    have eX : (4 : ℝ) / (|s.im| * |s.im|) = 4 * (1 / (|s.im| * |s.im|)) :=
+      div_eq_mul_one_div _ _
+    have eY : (4 : ℝ) / (5.25 * 5.25) = 4 * (1 / (5.25 * 5.25)) :=
+      div_eq_mul_one_div _ _
+    rw [eX, eY]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have hnum : (4 : ℝ) / (5.25 * 5.25) ≤ 0.1452 := by norm_num
+  have hEpos : (0 : ℝ) ≤ Real.exp (3.1416 * |s.im| / 2) :=
+    (Real.exp_pos _).le
+  have hstep : (4 / (|s.im| * |s.im|)) * Real.exp (3.1416 * |s.im| / 2)
+      ≤ (4 / (5.25 * 5.25)) * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul_of_nonneg_right hmul hEpos
+  have hcap : (4 / (5.25 * 5.25)) * Real.exp (3.1416 * |s.im| / 2)
+      ≤ 0.1452 * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul_of_nonneg_right hnum hEpos
+  exact le_trans (le_trans hpoly hstep) hcap
+
+#print axioms R02_D3_zetaChi_poly_line095
+#print axioms R02_D3_zeta_ratio_poly_line095
+#print axioms R02_D3_zetaChi_window55_exp_line095
