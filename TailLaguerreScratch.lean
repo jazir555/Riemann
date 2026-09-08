@@ -3542,3 +3542,153 @@ theorem d3EtaFactor_ne_zero_neg :
 #print axioms d3HalfNegPt_one_sub_re
 #print axioms d3EtaFactor_upper_neg
 #print axioms d3EtaFactor_ne_zero_neg
+
+/-!
+## Door-3 remainder 5 (paired-tail step 1): in-tail pair term + cleared rpow bound
+
+In-tail `d3EtaPairTerm` replica of `etaPairTerm`, pair-zero identity
+(`pair 0 = S₂`), and cleared-square rpow bound `5/3 ≤ 3^(1/2:ℝ)`
+feeding the `m = 1` pair estimate at height `1/2`.
+-/
+
+/-- In-tail paired eta increment replica (mirror of `etaPairTerm`). -/
+noncomputable def d3EtaPairTerm (s : ℂ) (m : ℕ) : ℂ :=
+  d3EtaTerm s (2 * m) + d3EtaTerm s (2 * m + 1)
+
+/-- Pair zero unfolds to the first two Dirichlet terms. -/
+theorem d3EtaPair_zero_eq (s : ℂ) :
+    d3EtaPairTerm s 0 = d3EtaTerm s 0 + d3EtaTerm s 1 := by
+  unfold d3EtaPairTerm
+  rw [show (2 * 0 : ℕ) = 0 by norm_num, show (2 * 0 + 1 : ℕ) = 1 by norm_num]
+
+/-- Pair zero equals the two-term partial sum `S₂`. -/
+theorem d3EtaPair_zero_eq_S2 (s : ℂ) :
+    d3EtaPairTerm s 0 = ∑ k ∈ Finset.range 2, d3EtaTerm s k := by
+  have hsum : (∑ k ∈ Finset.range 2, d3EtaTerm s k) =
+      d3EtaTerm s 0 + d3EtaTerm s 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum]
+  exact d3EtaPair_zero_eq s
+
+/-- Cleared square: `(3^(1/2:ℝ))^2 = 3`. -/
+theorem d3rpow_sqrt3_sq :
+    (((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) = 3 := by
+  rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+  rw [show ((1 / 2 : ℝ)) * (((2 : ℕ)) : ℝ) = (1 : ℝ) by norm_num]
+  exact Real.rpow_one 3
+
+/-- Numeral rpow lower bound `5/3 ≤ 3^(1/2:ℝ)` (cleared: `(5/3)^2 ≤ 3`). -/
+theorem d3rpow_sqrt3_ge : (5 / 3 : ℝ) ≤ (3 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hpow : ((5 / 3 : ℝ)) ^ ((2 : ℕ)) ≤
+      (((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) := by
+    rw [d3rpow_sqrt3_sq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Numeral rpow lower bound `2 ≤ 4^(1/2:ℝ)` (cleared: `2^2 ≤ 4`). -/
+theorem d3rpow_four_half_ge : (2 : ℝ) ≤ (4 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hsq : (((((4 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) = 4 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [show ((1 / 2 : ℝ)) * (((2 : ℕ)) : ℝ) = (1 : ℝ) by norm_num]
+    exact Real.rpow_one 4
+  have hpow : ((2 : ℝ)) ^ ((2 : ℕ)) ≤
+      (((((4 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) := by
+    rw [hsq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Modulus of the height-`1/2` third eta term (`3^(-1/2) ≤ 3/5`). -/
+theorem d3Eta_term2_norm_le :
+    ‖d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 2‖ ≤ 3 / 5 := by
+  have hcast : ((((3 : ℕ)) : ℂ)) = (((3 : ℝ)) : ℂ) := by norm_cast
+  have hnorm : ‖((((3 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+      (3 : ℝ) ^ ((1 / 2 : ℝ)) := by
+    rw [hcast]
+    have hbase := Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 3)
+      (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))
+    rw [d3HalfPt_re] at hbase
+    exact hbase
+  have hterm : d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 2 =
+      (-1 : ℂ) ^ (2 : ℕ) /
+        ((((3 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) := by
+    unfold d3EtaTerm
+    rw [show ((((2 + 1 : ℕ)) : ℂ)) = ((((3 : ℕ)) : ℂ)) by norm_num]
+  have hneg : ‖((-1 : ℂ) ^ (2 : ℕ))‖ = 1 := by
+    have h1 : ‖(-1 : ℂ)‖ = 1 := by
+      rw [norm_neg, norm_one]
+    rw [norm_pow, h1, one_pow]
+  rw [hterm, norm_div, hneg, hnorm]
+  have hge := d3rpow_sqrt3_ge
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (((5 / 3 : ℝ)))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : (((5 / 3 : ℝ)))⁻¹ ≤ (3 / 5 : ℝ) := by norm_num
+  have hdiv : (1 : ℝ) / ((3 : ℝ) ^ ((1 / 2 : ℝ))) =
+      (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ := by
+    rw [one_div]
+  rw [hdiv]
+  exact le_trans hInv heq
+
+/-- Pair one unfolds to the third and fourth Dirichlet terms. -/
+theorem d3EtaPair_one_eq (s : ℂ) :
+    d3EtaPairTerm s 1 = d3EtaTerm s 2 + d3EtaTerm s 3 := by
+  unfold d3EtaPairTerm
+  rw [show (2 * 1 : ℕ) = 2 by norm_num, show (2 * 1 + 1 : ℕ) = 3 by norm_num]
+
+/-- Modulus of the height-`1/2` fourth eta term (`4^(-1/2) ≤ 1/2`). -/
+theorem d3Eta_term3_norm_le :
+    ‖d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 3‖ ≤ 1 / 2 := by
+  have hcast : ((((4 : ℕ)) : ℂ)) = (((4 : ℝ)) : ℂ) := by norm_cast
+  have hnorm : ‖((((4 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+      (4 : ℝ) ^ ((1 / 2 : ℝ)) := by
+    rw [hcast]
+    have hbase := Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 4)
+      (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))
+    rw [d3HalfPt_re] at hbase
+    exact hbase
+  have hterm : d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 3 =
+      (-1 : ℂ) ^ (3 : ℕ) /
+        ((((4 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) := by
+    unfold d3EtaTerm
+    rw [show ((((3 + 1 : ℕ)) : ℂ)) = ((((4 : ℕ)) : ℂ)) by norm_num]
+  have hneg : ‖((-1 : ℂ) ^ (3 : ℕ))‖ = 1 := by
+    have h1 : ‖(-1 : ℂ)‖ = 1 := by
+      rw [norm_neg, norm_one]
+    rw [norm_pow, h1, one_pow]
+  rw [hterm, norm_div, hneg, hnorm]
+  have hge := d3rpow_four_half_ge
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (((4 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ ((2 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : ((2 : ℝ))⁻¹ ≤ (1 / 2 : ℝ) := by norm_num
+  have hdiv : (1 : ℝ) / ((4 : ℝ) ^ ((1 / 2 : ℝ))) =
+      (((4 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ := by
+    rw [one_div]
+  rw [hdiv]
+  exact le_trans hInv heq
+
+/-- In-tail pair estimate at height `1/2`: `‖pair 1‖ ≤ 11/10`
+(triangle on the third and fourth Dirichlet terms). -/
+theorem d3EtaPair_one_norm_le :
+    ‖d3EtaPairTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 1‖ ≤ 11 / 10 := by
+  rw [d3EtaPair_one_eq]
+  have h2 := d3Eta_term2_norm_le
+  have h3 := d3Eta_term3_norm_le
+  have htri := norm_add_le (d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 2)
+    (d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) 3)
+  linarith
+
+#print axioms d3EtaPair_zero_eq
+#print axioms d3EtaPair_zero_eq_S2
+#print axioms d3rpow_sqrt3_sq
+#print axioms d3rpow_sqrt3_ge
+#print axioms d3rpow_four_half_ge
+#print axioms d3Eta_term2_norm_le
+#print axioms d3EtaPair_one_eq
+#print axioms d3Eta_term3_norm_le
+#print axioms d3EtaPair_one_norm_le
