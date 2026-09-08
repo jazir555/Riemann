@@ -3332,6 +3332,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 RX4 (`af510691`, tail-scratch, green 8682 jobs, 6 builds):
   UNCONDITIONAL `1 ≤ ‖ζ(1/2)‖` via mirrored term-engine
   (`door3EMRightAnalytic_proved`). Next: uniform lift + tiling (RX5).
+- 2026-09-08 RX5 (`5dd24ff0`, tail-scratch, green 8682 jobs, axioms clean):
+  height `|t|≤1` enclosure + second tile (`door3RealSegNext2`,
+  coverage now [-1,3]). Residual: pointwise nonvanishing on full arc
+  (tasked as RX6).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
