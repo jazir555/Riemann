@@ -34315,3 +34315,43 @@ theorem R02_D3_eta_denom_floor_line095 (s : ℂ) (hre : s.re = 0.95) :
 #print axioms R02_D3_pow_1035_20_le_two
 #print axioms R02_D3_rpow_1035_le_two005
 #print axioms R02_D3_eta_denom_floor_line095
+
+/-- Per-pair eta bound on the `Re = 0.95` line: specialization of banked
+    `norm_etaPairTerm_le` (MVT via `Convex.norm_image_sub_le_of_norm_deriv_le` +
+    `Complex.norm_cpow_eq_rpow_re_of_pos`) at `-s.re - 1 = -1.95`. -/
+theorem R02_D3_etaPair_bound_line095 (s : ℂ) (hre : s.re = 0.95) (n : ℕ) :
+    ‖etaPairTerm s n‖ ≤ ‖s‖ * (((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) := by
+  have hs : (0 : ℝ) < s.re := by
+    rw [hre]
+    norm_num
+  have h := norm_etaPairTerm_le s hs n
+  have e : (-s.re - 1 : ℝ) = -1.95 := by
+    rw [hre]
+    norm_num
+  rw [e] at h
+  exact h
+
+#print axioms R02_D3_etaPair_bound_line095
+
+/-- Pair-zero cap on `Re = 0.95`: `‖pair 0‖ ≤ ‖s‖` (the `n = 0` case of the
+    line-095 pair bound, since `(1:ℝ) ^ (-1.95) = 1`). -/
+theorem R02_D3_etaPair_zero_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖etaPairTerm s 0‖ ≤ ‖s‖ := by
+  have h := R02_D3_etaPair_bound_line095 s hre 0
+  have e : ((((2 * 0 + 1 : ℕ)) : ℝ)) = 1 := by
+    norm_num
+  rw [e, Real.one_rpow, mul_one] at h
+  exact h
+
+/-- Norm split on `Re = 0.95`: `‖s‖ ≤ 0.95 + |Im s|` (linear-input shape). -/
+theorem R02_D3_norm_le_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖s‖ ≤ 0.95 + |s.im| := by
+  have h := Complex.norm_le_abs_re_add_abs_im s
+  have e : |s.re| = (0.95 : ℝ) := by
+    rw [hre]
+    norm_num
+  rw [e] at h
+  exact h
+
+#print axioms R02_D3_etaPair_zero_line095
+#print axioms R02_D3_norm_le_line095
