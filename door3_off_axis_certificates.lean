@@ -4702,3 +4702,88 @@ theorem R05_pair4_stop :
 
 end Door3OffAxis
 
+namespace Door3OffAxis
+
+/-- Genuine R05 paired tail at `M = 4` (`‖G - S₈‖ ≤ 7/5`,
+via `zetaCell_even_remainder_le` with the banked `‖sR05‖ ≤ 0.85` upper.
+Mirrors banked `R05_eta_tail_2_le` (M = 2 gave `7/4`); here `2 * 4 = 8`
+so the partial sum is exactly the eight-term `S₈`. -/
+theorem R05_eta_tail_4_le :
+    ‖(∑' m, etaPairTerm R03R10PolyLower.sR05 m) -
+      (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k)‖ ≤
+      (7 / 5 : Real) := by
+  have hs : 0 < R03R10PolyLower.sR05.re := by
+    rw [R03R10PolyLower.sR05_re]
+    norm_num
+  have hC : ‖R03R10PolyLower.sR05‖ ≤ (0.85 : Real) := R05_s_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 4 (by norm_num)
+  have h24 : 2 * 4 = 8 := by norm_num
+  rw [h24] at hgen
+  have hre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  rw [hre] at hgen
+  have h4c : ((((4 : Nat)) : Real)) = (4 : Real) := by norm_cast
+  rw [h4c] at hgen
+  have hamp := R05_rpow_four_neg0395_le
+  have hdiv : (4 : Real) ^ (-0.395 : Real) / (0.395 : Real) ≤
+      (16 / 25 : Real) / (0.395 : Real) := by
+    rw [div_le_div_iff_of_pos_right (by norm_num : (0 : Real) < 0.395)]
+    exact hamp
+  have hmul : (0.85 : Real) * ((4 : Real) ^ (-0.395 : Real) / (0.395 : Real)) ≤
+      (0.85 : Real) * ((16 / 25 : Real) / (0.395 : Real)) :=
+    mul_le_mul_of_nonneg_left hdiv (by norm_num)
+  have hnum : (0.85 : Real) * ((16 / 25 : Real) / (0.395 : Real)) ≤
+      (7 / 5 : Real) := by
+    norm_num
+  linarith
+
+/-- Honest S8 residual certificate at `N = 8`: slow `923/2500` (banked
+`R05_S8_norm_ge`, `Re`-route), genuine M = 4 tail `7/5`, phase-aware
+factor `cF = 1` (`R05_etaFactor_phase_le_one`). Value is negative
+(`(923/2500 - 7/5)/1 = -2577/2500`), honestly recording that the
+`1/2` threshold stays open on the even-remainder route. -/
+noncomputable def R05_S8_finite_zeta_certificate :
+    FiniteZetaLowerCertificate R03R10PolyLower.sR05 :=
+  { N := 8
+    S := ∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k
+    slow := 923 / 2500
+    rtail := 7 / 5
+    cF := 1
+    hSdef := rfl
+    hSlow := R05_S8_norm_ge
+    hTail := R05_eta_tail_4_le
+    hcFpos := by norm_num
+    hFac := R05_etaFactor_phase_le_one }
+
+/-- The honest S8 certificate wired through the API. -/
+theorem R05_S8_zeta_lower :
+    ((R05_S8_finite_zeta_certificate.slow - R05_S8_finite_zeta_certificate.rtail) /
+      R05_S8_finite_zeta_certificate.cF) ≤ ‖zeta R03R10PolyLower.sR05‖ :=
+  R05_S8_finite_zeta_certificate.lower_of_re
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+
+/-- Exact ratio of the honest S8 certificate:
+`(923/2500 - 7/5)/1 = -2577/2500`. -/
+theorem R05_S8_ratio_eq :
+    ((R05_S8_finite_zeta_certificate.slow - R05_S8_finite_zeta_certificate.rtail) /
+      R05_S8_finite_zeta_certificate.cF) = (-2577 / 2500 : Real) := by
+  have h1 : R05_S8_finite_zeta_certificate.slow = (923 / 2500 : Real) := rfl
+  have h2 : R05_S8_finite_zeta_certificate.rtail = (7 / 5 : Real) := rfl
+  have h3 : R05_S8_finite_zeta_certificate.cF = (1 : Real) := rfl
+  rw [h1, h2, h3]
+  norm_num
+
+/-- The honest S8 value sits below `1/2` (threshold open, no overclaim). -/
+theorem R05_S8_ratio_lt_half :
+    ((R05_S8_finite_zeta_certificate.slow - R05_S8_finite_zeta_certificate.rtail) /
+      R05_S8_finite_zeta_certificate.cF) < (1 / 2 : Real) := by
+  rw [R05_S8_ratio_eq]
+  norm_num
+
+#print axioms R05_eta_tail_4_le
+#print axioms R05_S8_finite_zeta_certificate
+#print axioms R05_S8_zeta_lower
+#print axioms R05_S8_ratio_eq
+#print axioms R05_S8_ratio_lt_half
+
+end Door3OffAxis
