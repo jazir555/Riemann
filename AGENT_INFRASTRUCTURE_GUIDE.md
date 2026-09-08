@@ -3351,6 +3351,10 @@ sorry-free infrastructure and the complete commit ledger above.
   sixth tile (`door3RealSegNext6`, coverage [-1,7]) + height-`1/2`
   slow (`1/5`) + factor (`13/5`) at exact point. Residual: paired-tail
   `‖G−S₂‖ ≤ rtail` in-tail (tasked as RX10).
+- 2026-09-08 RX10 (`ad87cd10`, tail-scratch, green 8682 jobs, axioms clean):
+  tile [7,8] (coverage [-1,8]) + neg-height mirror block. NOTE: agent
+  cut off mid-write (empty report); 2-paren rescue by coordinator.
+  Residual: paired-tail bound still open (tasked as RX11).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
