@@ -3357,6 +3357,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 ZU7 (`3668dba6`, zeta tail, green 8693 jobs, axioms clean):
   conditional whole-line caps (805·C/616·C) + strip `BddAbove` +
   Gauss-domination core. Residual: linear growth inputs C/K (ZU8).
+- 2026-09-08 ZU8 (`ab925e91`, zeta tail, green 8693 jobs, axioms clean):
+  linear Dirichlet inputs (C=3 at Re=2, C=934 window) + exp chi-ratio
+  `8·e^(1.5708|Im|)`. Honest negative: uniform K UNREACHABLE (banked
+  Gamma cap has no Stirling decay; 3.4M at window). Next: line-uniform
+  Stirling decay (ZU9).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
