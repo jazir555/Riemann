@@ -3329,6 +3329,9 @@ sorry-free infrastructure and the complete commit ledger above.
   `1 ≤ ‖ζ(1/2)‖` reduced to ONE lemma `Door3EMRightAnalytic`
   (EM identity banked; ~500-line continuation engine over budget).
   Next: mirror TestAnalytic termTSumC engine (RX4).
+- 2026-09-07 RX4 (`af510691`, tail-scratch, green 8682 jobs, 6 builds):
+  UNCONDITIONAL `1 ≤ ‖ζ(1/2)‖` via mirrored term-engine
+  (`door3EMRightAnalytic_proved`). Next: uniform lift + tiling (RX5).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
