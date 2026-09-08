@@ -3321,8 +3321,10 @@ sorry-free infrastructure and the complete commit ledger above.
   conversion). Residual: Stirling Gamma numeral `G` (tasked as ZU3).
 - 2026-09-07 RX (`b310203a` pt 2, tail-scratch, green 8682 jobs):
   `door3RealSeg` compact bridge (uniform⇔pointwise certificate pair).
-  Residual: critical-line zeta lower numeral on `1/2+I·[-1,1]`
-  (tasked as RX2).
+- 2026-09-07 RX2 (`0e1cdf29`, tail-scratch, green 8682 jobs, axioms clean):
+  height-0 numeral `c=1` + `door3RealSegNext` tile, conditional on
+  `Door3HalfRealHyp` (`1 ≤ ‖ζ(1/2)‖`, proved in zeta-cutoff but outside
+  tail import closure). Next: discharge hyp in-file (RX3).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
