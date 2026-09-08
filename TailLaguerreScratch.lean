@@ -2573,3 +2573,138 @@ theorem door3RealSegNext2_meet :
 #print axioms door3RealNext2Shift_ne_one_of_seg
 #print axioms door3RealNext2ZetaContinuousOnSeg
 #print axioms door3RealSegNext2_meet
+
+/-!
+## Door-3 remainder 5 third tile: `[3,4]` toward `(-10,10)` (2026-09-08, append-only)
+
+Extends the committed `door3RealSegNext2` pattern (`[-1,3]` chained by
+`door3RealSeg_next_meet` + `door3RealSegNext2_meet`) one step further to
+`[-1,4]`. Same critical-line shape (`Re s = 1/2` via `tailShiftedSReal_re`),
+pole avoidance (`Re s = 1/2`, so `differentiableAt_riemannZeta` applies),
+continuity, plus upper enclosures on both the committed second tile and the
+new third tile (one-liner `IsCompact.exists_bound_of_continuousOn`, as in
+committed `exists_door3RealSeg_zetaUpper`). The new-height pointwise LOWER
+bound (`c > 0` at `t = +-1/2`, or nonvanishing at a meet point, via a
+kernel-checked enclosure) remains the exact residual; this tile is the
+tightest proved step toward it.
+-/
+
+/-- Third compact tile toward `(-10,10)`: `3 ≤ Re z ≤ 4`, `Im z = 0`. -/
+def door3RealSegNext3 : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (3 : ℝ) 4 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the third tile. -/
+theorem door3RealSegNext3_mem_of_reim (z : ℂ) (hre1 : (3 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 4) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSegNext3 := by
+  simp only [door3RealSegNext3, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Witness: `7/2` lies in the third tile. -/
+theorem door3RealSegNext3_witness : ((((7 / 2 : ℝ))) : ℂ) ∈ door3RealSegNext3 := by
+  simp only [door3RealSegNext3, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc,
+    Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- The third tile is closed. -/
+theorem door3RealSegNext3_isClosed : IsClosed door3RealSegNext3 := by
+  unfold door3RealSegNext3
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The third tile lies in `closedBall 0 5`, hence is bounded. -/
+theorem door3RealSegNext3_isBounded : Bornology.IsBounded door3RealSegNext3 := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 4 := by
+    rw [abs_le]
+    constructor
+    · linarith
+    · exact h2
+  have hre2 : z.re * z.re ≤ (4 : ℝ) * 4 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 4 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (5 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h25 : (4 : ℝ) * 4 + 0 ≤ 5 ^ 2 := by norm_num
+    exact le_trans hsum h25
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The third tile is compact (Heine–Borel). -/
+theorem door3RealSegNext3_isCompact : IsCompact door3RealSegNext3 := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSegNext3_isClosed, door3RealSegNext3_isBounded⟩
+
+/-- The third tile sits inside the required open slice `-10 < Re < 10`. -/
+theorem door3RealSegNext3_in_open_strip (z : ℂ) (hz : z ∈ door3RealSegNext3) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the third tile: `Re s = 1/2` (critical line). -/
+theorem door3RealNext3Shift_re (z : ℂ) (hz : z ∈ door3RealSegNext3) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Pole avoidance on the third tile. -/
+theorem door3RealNext3Shift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSegNext3) :
+    tailShiftedSReal z ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re hcon
+  rw [door3RealNext3Shift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the third tile. -/
+theorem door3RealNext3ZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSegNext3 := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealNext3Shift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Height upper enclosure over the committed second tile
+(mirror of `exists_door3RealSeg_zetaUpper`). -/
+theorem exists_door3RealSegNext2_zetaUpper :
+    ∃ B : ℝ, ∀ z ∈ door3RealSegNext2,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B :=
+  door3RealSegNext2_isCompact.exists_bound_of_continuousOn door3RealNext2ZetaContinuousOnSeg
+
+/-- Height upper enclosure over the third tile
+(mirror of `exists_door3RealSeg_zetaUpper`). -/
+theorem exists_door3RealSegNext3_zetaUpper :
+    ∃ B : ℝ, ∀ z ∈ door3RealSegNext3,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B :=
+  door3RealSegNext3_isCompact.exists_bound_of_continuousOn door3RealNext3ZetaContinuousOnSeg
+
+/-- Chaining point: `3` lies in both tiles, so `[-1,3] ∪ [3,4] = [-1,4]`. -/
+theorem door3RealSegNext3_meet :
+    ((((3 : ℝ))) : ℂ) ∈ door3RealSegNext2 ∧
+      ((((3 : ℝ))) : ℂ) ∈ door3RealSegNext3 := by
+  simp only [door3RealSegNext2, door3RealSegNext3, Set.mem_inter_iff, Set.mem_preimage,
+    Set.mem_Icc, Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+#print axioms door3RealSegNext3_witness
+#print axioms door3RealSegNext3_isClosed
+#print axioms door3RealSegNext3_isBounded
+#print axioms door3RealSegNext3_isCompact
+#print axioms door3RealSegNext3_in_open_strip
+#print axioms door3RealNext3Shift_re
+#print axioms door3RealNext3Shift_ne_one_of_seg
+#print axioms door3RealNext3ZetaContinuousOnSeg
+#print axioms exists_door3RealSegNext2_zetaUpper
+#print axioms exists_door3RealSegNext3_zetaUpper
+#print axioms door3RealSegNext3_meet
