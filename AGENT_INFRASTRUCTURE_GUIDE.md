@@ -3323,6 +3323,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `door3RealSeg` compact bridge (uniform⇔pointwise certificate pair).
   Residual: critical-line zeta lower numeral on `1/2+I·[-1,1]`
   (tasked as RX2).
+- 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
+  Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
+  convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
+  `‖χ‖ ≤ 2·1·4·e^13` banked. Next: three-lines interpolation (ZU4).
+- 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
+  R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
+  threshold-meeting certificate assembly (OA3).
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
