@@ -3392,6 +3392,10 @@ sorry-free infrastructure and the complete commit ledger above.
   m=2 pair floor (`Re pair2 ≥ 1/20`) → `‖S₆‖ ≥ 459/1250` (0.3672);
   shortfall 707/2500 vs 13/20. WARNING: pair floors decay (θ8≈π/2,
   θ9>π/2 → negative at m≥4). Next: pair m=3 w/ stop rule (OA9).
+- 2026-09-08 OA9 (`b1a61e48`, off-axis tail, green 8702 jobs, axioms clean):
+  pair-3 floor `Re pair3 ≥ 1/500` POSITIVE (fresh `log 7` bounds derived,
+  no d9 lemma existed) → S8 `Re ≥ 923/2500`; shortfall 702/2500.
+  m=4 expected stall (cos(0.75·log 9)<0). Next: S8 + m=4 (OA10).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
