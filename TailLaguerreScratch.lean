@@ -1701,3 +1701,216 @@ Mathlib alone), then lift the height-0 `c = 1` to uniform `c > 0` over
 `|Im| ∈ [10,11]` tail numerals) via `door3RealNonvan_of_lower`, and tile
 `[-1,2]` onward toward `(-10,10)` by repeating the `door3RealSegNext`
 pattern. -/
+
+/-!
+## Door-3 remainder 5: discharge of `Door3HalfRealHyp` up to one analytic lemma (2026-09-08, append-only)
+
+Slice audit (read-only, no import added — `import Mathlib` only here):
+* `door3_zeta_cutoff.lean:472` (`zeta_half_norm_lower_one`) and
+  `door3_real_center_bounds.lean:44` (`D3_real_zeta_norm_lower`) prove
+  `1 ≤ ‖ζ(1/2)‖` via `TestAnalytic.lean:497`
+  (`riemannZeta₀_eq_one_sub_mul_termTSum_on`), which sits outside this
+  file's `import Mathlib` closure — NOT called (calling it needs a
+  top-of-file import edit, outside tail ownership; per task direction a
+  prior agent succeeded by reproving in-file, which is what is done here).
+* Reproved here from Mathlib-visible lemmas only
+  (`riemannZeta_eq_inv_sub_add`,
+  `zeta_eq_tsum_one_div_nat_add_one_cpow`,
+  `ZetaAsymptotics.zeta_limit_aux1`, `ZetaAsymptotics.term_nonneg`,
+  `differentiable_riemannZeta₀`,
+  `AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq`): the
+  Euler–Maclaurin identity for `1 < s` (`door3EM_of_gt`), left-side
+  real-analyticity on `(0,∞)` (`door3EM_left_analytic`), and the identity
+  theorem packaging (`door3EM_eqOn_of_rightAnalytic`).
+
+Banked here (FULLY PROVED, no sorry/admit/axiom): everything EXCEPT the
+real-analyticity of the explicit RHS `g(s) = 1 - s * termTSum s` on
+`(0,∞)`, isolated as the single hypothesis `Door3EMRightAnalytic`
+(proved from Mathlib alone in `TestAnalytic.lean:455` via the complex
+extension `termTSumC` — the one lemma left to mirror). Given it: the
+identity at `s = 1/2` (`door3HalfIdentity_of_EM`), `Re ≤ 1`
+(`door3HalfRe_le_one_of_EM`), `1 ≤ ‖ζ(1/2)‖`
+(`door3HalfNorm_ge_one_of_EM`), discharge of the old `Door3HalfRealHyp`
+(`door3HalfRealHyp_of_EM`), and the height-0 lift
+(`door3RealPointwiseOne_at_zero_of_EM`, `door3RealNonvan_at_zero_of_EM`,
+`door3RealSeg_pointwiseC0_of_EM`), composable with committed
+`door3RealNonvan_of_lower`.
+-/
+
+open scoped Topology
+
+/-- Single remaining analytic input: real-analyticity of the explicit
+Euler–Maclaurin RHS on `(0,∞)` (proved in `TestAnalytic.lean:455`). -/
+def Door3EMRightAnalytic : Prop :=
+  AnalyticOnNhd ℝ (fun s : ℝ => 1 - s * ZetaAsymptotics.termTSum s) (Set.Ioi 0)
+
+/-- Real-part formula for `riemannZeta₀` at real `s ≠ 1`
+(mirror of `TestAnalytic.lean:465`, Mathlib-only). -/
+theorem door3RealZeta0_re_of_real (s : ℝ) (hs : s ≠ 1) :
+    (riemannZeta₀ (s : ℂ)).re = (riemannZeta (s : ℂ)).re - 1 / (s - 1) := by
+  unfold riemannZeta₀
+  rw [if_neg (by exact_mod_cast hs : (s : ℂ) ≠ 1)]
+  simp only [Complex.sub_re, Complex.inv_re, Complex.ofReal_re, Complex.one_re]
+  rw [show (s : ℂ) - 1 = ((s - 1 : ℝ) : ℂ) from (Complex.ofReal_sub s 1).symm]
+  simp only [Complex.normSq_ofReal]
+  field_simp [sub_ne_zero.mpr hs]
+
+/-- Euler–Maclaurin identity for `1 < s` (mirror of
+`TestAnalytic.lean:474`, Mathlib-only). -/
+theorem door3EM_of_gt (s : ℝ) (_hs0 : 0 < s) (hs1 : 1 < s) :
+    (riemannZeta₀ (s : ℂ)).re = 1 - s * ZetaAsymptotics.termTSum s := by
+  have hsne : s ≠ 1 := by linarith
+  rw [door3RealZeta0_re_of_real s hsne]
+  suffices h : (riemannZeta (s : ℂ)).re = ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s from by
+    rw [h, ZetaAsymptotics.zeta_limit_aux1 hs1]
+  rw [zeta_eq_tsum_one_div_nat_add_one_cpow
+    (by simp [Complex.ofReal_re]; linarith : 1 < Complex.re (s : ℂ))]
+  have hterm : ∀ n : ℕ,
+      (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ) =
+      ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ)) := by
+    intro n
+    have hp : 0 ≤ (↑n + 1 : ℝ) := by positivity
+    push_cast
+    rw [Complex.ofReal_cpow hp]
+    norm_cast
+  rw [show (∑' n : ℕ, (1 : ℂ) / (↑n + 1 : ℂ) ^ (s : ℂ)) =
+      (∑' n : ℕ, ((↑((1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s) : ℂ))) from tsum_congr hterm]
+  rw [(_root_.Complex.ofReal_tsum
+    (fun n => (1 : ℝ) / (↑(n + 1 : ℕ) : ℝ) ^ s : ℕ → ℝ)).symm]
+  simp [Complex.ofReal_re]
+
+/-- Left side is real-analytic on `(0,∞)`
+(mirror of `TestAnalytic.lean:502`). -/
+theorem door3EM_left_analytic :
+    AnalyticOnNhd ℝ (fun s : ℝ => (riemannZeta₀ (s : ℂ)).re) (Set.Ioi 0) := by
+  intro s hs
+  exact AnalyticAt.re_ofReal (Differentiable.analyticAt differentiable_riemannZeta₀ (s : ℂ))
+
+/-- Identity-theorem packaging: given right-side analyticity, both sides
+agree on `(0,∞)` (mirror of `TestAnalytic.lean:514`). -/
+theorem door3EM_eqOn_of_rightAnalytic (h : Door3EMRightAnalytic) :
+    Set.EqOn (fun s : ℝ => (riemannZeta₀ (s : ℂ)).re)
+      (fun s : ℝ => 1 - s * ZetaAsymptotics.termTSum s) (Set.Ioi 0) := by
+  unfold Door3EMRightAnalytic at h
+  refine AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq door3EM_left_analytic h
+    isPreconnected_Ioi (by norm_num : (2 : ℝ) ∈ Set.Ioi 0) ?_
+  have hAgree : ∀ z ∈ Set.Ioo (1 : ℝ) 3,
+      (riemannZeta₀ (z : ℂ)).re = 1 - z * ZetaAsymptotics.termTSum z := by
+    intro z hz
+    exact door3EM_of_gt z (by linarith [hz.1] : 0 < z) hz.1
+  have hmem : Set.Ioo (1 : ℝ) 3 ∈ 𝓝[≠] (2 : ℝ) := by
+    rw [mem_nhdsWithin_iff_exists_mem_nhds_inter]
+    refine ⟨Set.Ioo (1 : ℝ) 3, isOpen_Ioo.mem_nhds (by norm_num), ?_⟩
+    intro x hx
+    exact hx.1
+  have hsubset : Set.Ioo (1 : ℝ) 3 ⊆
+      {z : ℝ | (riemannZeta₀ (z : ℂ)).re = 1 - z * ZetaAsymptotics.termTSum z} := by
+    intro z hz
+    exact hAgree z hz
+  have hfg' : ∀ᶠ (z : ℝ) in 𝓝[≠] (2 : ℝ),
+      (riemannZeta₀ (z : ℂ)).re = 1 - z * ZetaAsymptotics.termTSum z :=
+    Filter.mem_of_superset hmem hsubset
+  exact Filter.Eventually.frequently hfg'
+
+/-- The Euler–Maclaurin identity at `s = 1/2`, modulo the one analytic lemma. -/
+theorem door3HalfIdentity_of_EM (h : Door3EMRightAnalytic) :
+    (riemannZeta₀ ((((1 / 2 : ℝ))) : ℂ)).re =
+      1 - (1 / 2 : ℝ) * ZetaAsymptotics.termTSum (1 / 2 : ℝ) := by
+  have hEq := door3EM_eqOn_of_rightAnalytic h
+  have hmem : (1 / 2 : ℝ) ∈ Set.Ioi (0 : ℝ) := by norm_num
+  exact hEq hmem
+
+/-- Real-part upper bound at `s = 1/2`, modulo the one analytic lemma. -/
+theorem door3HalfRe_le_one_of_EM (h : Door3EMRightAnalytic) :
+    (riemannZeta₀ ((((1 / 2 : ℝ))) : ℂ)).re ≤ 1 := by
+  have h0 := door3HalfIdentity_of_EM h
+  have ht : (0 : ℝ) ≤ ZetaAsymptotics.termTSum (1 / 2 : ℝ) :=
+    tsum_nonneg (fun n => ZetaAsymptotics.term_nonneg (n + 1) (1 / 2 : ℝ))
+  have hprod : (0 : ℝ) ≤ (1 / 2 : ℝ) * ZetaAsymptotics.termTSum (1 / 2 : ℝ) :=
+    mul_nonneg (by norm_num) ht
+  linarith
+
+/-- Norm lower bound at `s = 1/2` (mirror of `door3_zeta_cutoff.lean:472`),
+modulo the one analytic lemma. -/
+theorem door3HalfNorm_ge_one_of_EM (h : Door3EMRightAnalytic) :
+    (1 : ℝ) ≤ ‖riemannZeta ((((1 / 2 : ℝ))) : ℂ)‖ := by
+  have h12 : (1 / 2 : ℝ) ≠ 1 := by norm_num
+  have hsne : ((((1 / 2 : ℝ))) : ℂ) ≠ 1 := by exact_mod_cast h12
+  have hz := riemannZeta_eq_inv_sub_add (s := ((((1 / 2 : ℝ))) : ℂ)) hsne
+  have hz0 := door3HalfRe_le_one_of_EM h
+  have heq : ((((1 / 2 : ℝ))) : ℂ) - 1 = (((-1 / 2 : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  have hinv : ((((((1 / 2 : ℝ))) : ℂ) - 1)⁻¹).re = (-2 : ℝ) := by
+    rw [heq, ← Complex.ofReal_inv, Complex.ofReal_re]
+    norm_num
+  have hre : (riemannZeta ((((1 / 2 : ℝ))) : ℂ)).re ≤ -1 := by
+    rw [hz, Complex.add_re, hinv]
+    linarith
+  have hneg : (riemannZeta ((((1 / 2 : ℝ))) : ℂ)).re < 0 := by linarith
+  calc (1 : ℝ) ≤ |(riemannZeta ((((1 / 2 : ℝ))) : ℂ)).re| := by
+        rw [abs_of_neg hneg]
+        linarith
+    _ ≤ ‖riemannZeta ((((1 / 2 : ℝ))) : ℂ)‖ := Complex.abs_re_le_norm _
+
+/-- Discharge of the committed hypothesis `Door3HalfRealHyp`
+(modulo the one analytic lemma). -/
+theorem door3HalfRealHyp_of_EM (h : Door3EMRightAnalytic) : Door3HalfRealHyp := by
+  unfold Door3HalfRealHyp
+  exact door3HalfNorm_ge_one_of_EM h
+
+/-- Height-0 numeral from the EM bridge. -/
+theorem door3RealPointwiseOne_at_zero_of_EM (h : Door3EMRightAnalytic) :
+    (1 : ℝ) ≤ ‖riemannZeta (tailShiftedSReal 0)‖ := by
+  rw [door3RealShift_at_zero]
+  exact door3HalfNorm_ge_one_of_EM h
+
+/-- Height-0 nonvanishing from the EM bridge. -/
+theorem door3RealNonvan_at_zero_of_EM (h : Door3EMRightAnalytic) :
+    riemannZeta (tailShiftedSReal 0) ≠ 0 := by
+  have h1 := door3RealPointwiseOne_at_zero_of_EM h
+  intro hzero
+  rw [hzero, norm_zero] at h1
+  norm_num at h1
+
+/-- The height-0 point lies on the segment with the numeral bound. -/
+theorem door3RealSeg_pointwiseC0_of_EM (h : Door3EMRightAnalytic) :
+    door3RealC0 ≤ ‖riemannZeta (tailShiftedSReal (0 : ℂ))‖ ∧
+      (0 : ℂ) ∈ door3RealSeg := by
+  refine ⟨?_, door3RealSeg_zero_mem⟩
+  unfold door3RealC0
+  exact door3RealPointwiseOne_at_zero_of_EM h
+
+#print axioms door3RealZeta0_re_of_real
+#print axioms door3EM_of_gt
+#print axioms door3EM_left_analytic
+#print axioms door3EM_eqOn_of_rightAnalytic
+#print axioms door3HalfIdentity_of_EM
+#print axioms door3HalfRe_le_one_of_EM
+#print axioms door3HalfNorm_ge_one_of_EM
+#print axioms door3HalfRealHyp_of_EM
+#print axioms door3RealPointwiseOne_at_zero_of_EM
+#print axioms door3RealNonvan_at_zero_of_EM
+#print axioms door3RealSeg_pointwiseC0_of_EM
+
+/- Quantified remainder after this block (2026-09-08, Door-3 remainder 5):
+BANKED the full height-0 discharge modulo ONE explicitly isolated analytic
+lemma: `Door3EMRightAnalytic` (real-analyticity of
+`1 - s * termTSum s` on `(0,∞)`, Mathlib-proved in
+`TestAnalytic.lean:455` via `termTSumC`), plus unconditional in-file
+`door3RealZeta0_re_of_real`, `door3EM_of_gt` (EM identity for `1 < s`),
+`door3EM_left_analytic`, and conditional `door3EM_eqOn_of_rightAnalytic`,
+`door3HalfIdentity_of_EM`, `door3HalfRe_le_one_of_EM`,
+`door3HalfNorm_ge_one_of_EM` (`1 ≤ ‖ζ(1/2)‖`),
+`door3HalfRealHyp_of_EM` (discharges committed `Door3HalfRealHyp`),
+`door3RealPointwiseOne_at_zero_of_EM`, `door3RealNonvan_at_zero_of_EM`,
+`door3RealSeg_pointwiseC0_of_EM` (height-0 `c = 1` on `door3RealSeg`).
+RESIDUAL (exact next-agent task): mirror `TestAnalytic.lean:38-455`
+(`termC`/`termTSumC` analyticity on `{z | 0 < z.re}` + agreement
+`termTSumC_eq_termTSum`) in this tail to prove `Door3EMRightAnalytic`
+unconditionally (Mathlib-only, no import edit), making
+`door3HalfNorm_ge_one_of_EM` unconditional; then lift the height-0
+`c = 1` to uniform `c > 0` over `door3RealSeg` (`1/2 + I*[-1,1]`, needs
+height `|t| ≤ 1` enclosure) via committed `door3RealNonvan_of_lower`,
+and tile `[-1,2]` onward toward `(-10,10)` by repeating the
+`door3RealSegNext` pattern. -/
