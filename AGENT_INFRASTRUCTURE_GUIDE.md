@@ -3348,6 +3348,10 @@ sorry-free infrastructure and the complete commit ledger above.
   banked-tail ratio 1/52, shortfall 25/52; slow needed 29/20).
   NOTE: user's commit `56b91432` swept the 144-line append mid-task;
   repair verified separately. Next: phase-aware eta-factor (OA4).
+- 2026-09-08 OA4 (`95fb745a`, off-axis tail, green 8702 jobs):
+  phase-aware factor `‖1-2^(1-s)‖ ≤ 1` (cos floor at `0.75·ln2`);
+  slow target drops `29/20 → 13/20`. Residual: larger-N slow
+  `‖S₂₀₄₈‖ ≥ 13/20` (tasked as OA5).
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
