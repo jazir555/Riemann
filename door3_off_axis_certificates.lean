@@ -3414,3 +3414,456 @@ theorem R05_phase_ratio_eq :
 #print axioms R05_phase_ratio_eq
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-6 split (`log 6 = log 2 + log 3`) via `log (2 * 3)`. -/
+theorem R05_log_six_eq :
+    Real.log 6 = Real.log 2 + Real.log 3 := by
+  have h6 : (6 : Real) = 2 * 3 := by norm_num
+  rw [h6, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase of the R05 fifth eta term (`0.75 * log 5` in `[1.207, 1.208]`)
+from the banked `log 5` d9 bounds. -/
+theorem R05_theta5_mem :
+    (1.207 : Real) ≤ 0.75 * Real.log 5 ∧ 0.75 * Real.log 5 ≤ (1.208 : Real) := by
+  have h5lo := Real.log_five_gt_d9
+  have h5hi := Real.log_five_lt_d9
+  constructor <;> linarith
+
+/-- Cosine floor at the fifth-term phase (`7/20 ≤ cos (0.75 * log 5)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log5_lower :
+    (7 / 20 : Real) ≤ Real.cos (0.75 * Real.log 5) := by
+  have hmem := R05_theta5_mem
+  have hpos : (0 : Real) < Real.log 5 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 5 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.207 : Real) ≤ 0.75 * Real.log 5 := hmem.1
+  have hhi : 0.75 * Real.log 5 ≤ (1.208 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 5) ^ 2 ≤ (1.208 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.207 : Real) ^ 4 ≤ (0.75 * Real.log 5) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 5) ^ 6 ≤ (1.208 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (7 / 20 : Real) ≤
+      1 - (1.208 : Real) ^ 2 / 2 + (1.207 : Real) ^ 4 / 24 -
+        (1.208 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Phase of the R05 sixth eta term (`0.75 * log 6` in `[1.3438, 1.3439]`)
+from the banked `log 2` / `log 3` d9 bounds via `R05_log_six_eq`. -/
+theorem R05_theta6_mem :
+    (1.3438 : Real) ≤ 0.75 * Real.log 6 ∧ 0.75 * Real.log 6 ≤ (1.3439 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hx : 0.75 * Real.log 6 = 0.75 * (Real.log 2 + Real.log 3) := by
+    rw [R05_log_six_eq]
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the sixth-term phase (`cos (0.75 * log 6) ≤ 47/200`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log6_upper :
+    Real.cos (0.75 * Real.log 6) ≤ (47 / 200 : Real) := by
+  have hmem := R05_theta6_mem
+  have hpos : (0 : Real) < Real.log 6 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 6 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.3438 : Real) ≤ 0.75 * Real.log 6 := hmem.1
+  have hhi : 0.75 * Real.log 6 ≤ (1.3439 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.3438 : Real) ^ 2 ≤ (0.75 * Real.log 6) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 6) ^ 4 ≤ (1.3439 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.3438 : Real) ^ 2 / 2 + (1.3439 : Real) ^ 4 / 24 ≤
+      (47 / 200 : Real) := by
+    norm_num
+  linarith
+
+/-- Cosine floor at the sixth-term phase (`1/5 ≤ cos (0.75 * log 6)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log6_lower :
+    (1 / 5 : Real) ≤ Real.cos (0.75 * Real.log 6) := by
+  have hmem := R05_theta6_mem
+  have hpos : (0 : Real) < Real.log 6 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 6 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.3438 : Real) ≤ 0.75 * Real.log 6 := hmem.1
+  have hhi : 0.75 * Real.log 6 ≤ (1.3439 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 6) ^ 2 ≤ (1.3439 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.3438 : Real) ^ 4 ≤ (0.75 * Real.log 6) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 6) ^ 6 ≤ (1.3439 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (1 / 5 : Real) ≤
+      1 - (1.3439 : Real) ^ 2 / 2 + (1.3438 : Real) ^ 4 / 24 -
+        (1.3439 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Rpow upper (`5 ^ 0.395 ≤ 191/100`) via cleared `(5 ^ (2/5)) ^ 5 = 25`. -/
+theorem R05_five_rpow_le : (5 : Real) ^ (0.395 : Real) ≤ (191 / 100 : Real) := by
+  have hpow : ((((5 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((191 / 100 : Real)) ^ (5 : Nat) := by
+    have e : ((((5 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (5 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 5)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 5 2
+    rw [e]
+    norm_num
+  have hstep : (5 : Real) ^ ((2 / 5 : Real)) ≤ (191 / 100 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (5 : Real) ^ (0.395 : Real) ≤ (5 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (191 / 100 : Real) := hstep
+
+/-- Real rpow inverse lower (`100/191 ≤ 5 ^ (-0.395)`) from `5 ^ 0.395 ≤ 191/100`. -/
+theorem R05_rpow_five_neg0395_ge :
+    (100 / 191 : Real) ≤ (5 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_five_rpow_le
+  have hpos : (0 : Real) < (5 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (5 : Real) ^ (-0.395 : Real) = (((5 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (100 / 191 : Real) = ((191 / 100 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Rpow lower (`37/20 ≤ 6 ^ 0.395`) via cleared `(37/20) ^ 20 ≤ 6 ^ 7`. -/
+theorem R05_six_rpow_ge : (37 / 20 : Real) ≤ (6 : Real) ^ (0.395 : Real) := by
+  have h2up : ((37 / 20 : Real)) ^ (2 : Nat) ≤ (343 / 100 : Real) := by norm_num
+  have h2nn : (0 : Real) ≤ ((37 / 20 : Real)) ^ (2 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h4le : ((((37 / 20 : Real)) ^ (2 : Nat))) ^ (2 : Nat) ≤
+      ((343 / 100 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h2nn h2up 2
+  have h4eq : ((((37 / 20 : Real)) ^ (2 : Nat))) ^ (2 : Nat) =
+      ((37 / 20 : Real)) ^ (4 : Nat) := by
+    rw [← pow_mul, show (2 * 2 : Nat) = 4 by norm_num]
+  have h4up : ((37 / 20 : Real)) ^ (4 : Nat) ≤ (1177 / 100 : Real) := by
+    have hcalc : ((343 / 100 : Real)) ^ (2 : Nat) ≤ (1177 / 100 : Real) := by norm_num
+    rw [← h4eq]
+    exact le_trans h4le hcalc
+  have h4nn : (0 : Real) ≤ ((37 / 20 : Real)) ^ (4 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h5eq : ((37 / 20 : Real)) ^ (4 : Nat) * (37 / 20 : Real) =
+      ((37 / 20 : Real)) ^ (5 : Nat) := by
+    have hps := pow_succ ((37 / 20 : Real)) (4 : Nat)
+    rw [show (4 + 1 : Nat) = 5 by norm_num] at hps
+    exact hps.symm
+  have h5le : ((37 / 20 : Real)) ^ (4 : Nat) * (37 / 20 : Real) ≤
+      (1177 / 100 : Real) * (37 / 20 : Real) :=
+    mul_le_mul h4up (le_refl _) (by norm_num) (by norm_num)
+  have h5up : ((37 / 20 : Real)) ^ (5 : Nat) ≤ (2178 / 100 : Real) := by
+    have hcalc : (1177 / 100 : Real) * (37 / 20 : Real) ≤ (2178 / 100 : Real) := by norm_num
+    rw [← h5eq]
+    exact le_trans h5le hcalc
+  have h5nn : (0 : Real) ≤ ((37 / 20 : Real)) ^ (5 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h10le : ((((37 / 20 : Real)) ^ (5 : Nat))) ^ (2 : Nat) ≤
+      ((2178 / 100 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h5nn h5up 2
+  have h10eq : ((((37 / 20 : Real)) ^ (5 : Nat))) ^ (2 : Nat) =
+      ((37 / 20 : Real)) ^ (10 : Nat) := by
+    rw [← pow_mul, show (5 * 2 : Nat) = 10 by norm_num]
+  have h10up : ((37 / 20 : Real)) ^ (10 : Nat) ≤ (4744 / 10 : Real) := by
+    have hcalc : ((2178 / 100 : Real)) ^ (2 : Nat) ≤ (4744 / 10 : Real) := by norm_num
+    rw [← h10eq]
+    exact le_trans h10le hcalc
+  have h10nn : (0 : Real) ≤ ((37 / 20 : Real)) ^ (10 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h20le : ((((37 / 20 : Real)) ^ (10 : Nat))) ^ (2 : Nat) ≤
+      ((4744 / 10 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h10nn h10up 2
+  have h20eq : ((((37 / 20 : Real)) ^ (10 : Nat))) ^ (2 : Nat) =
+      ((37 / 20 : Real)) ^ (20 : Nat) := by
+    rw [← pow_mul, show (10 * 2 : Nat) = 20 by norm_num]
+  have h20up : ((37 / 20 : Real)) ^ (20 : Nat) ≤ (279936 : Real) := by
+    have hcalc : ((4744 / 10 : Real)) ^ (2 : Nat) ≤ (279936 : Real) := by norm_num
+    rw [← h20eq]
+    exact le_trans h20le hcalc
+  have h67 : ((37 / 20 : Real)) ^ (20 : Nat) ≤ (6 : Real) ^ (7 : Nat) := by
+    have h67num : (279936 : Real) ≤ (6 : Real) ^ (7 : Nat) := by norm_num
+    exact le_trans h20up h67num
+  have e : ((((6 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) = (6 : Real) ^ (7 : Nat) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 6)]
+    rw [show (7 / 20 : Real) * ((((20 : Nat)) : Real)) = (7 : Real) by norm_num]
+    rw [show (7 : Real) = ((((7 : Nat)) : Real)) by norm_num]
+    exact Real.rpow_natCast 6 7
+  have hpow : ((37 / 20 : Real)) ^ (20 : Nat) ≤
+      ((((6 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) := by
+    rw [e]
+    exact h67
+  have hstep : (37 / 20 : Real) ≤ (6 : Real) ^ ((7 / 20 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (37 / 20 : Real) ≤ (6 : Real) ^ ((7 / 20 : Real)) := hstep
+    _ ≤ (6 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Real rpow inverse upper (`6 ^ (-0.395) ≤ 20/37`) from `37/20 ≤ 6 ^ 0.395`. -/
+theorem R05_rpow_six_neg0395_le :
+    (6 : Real) ^ (-0.395 : Real) ≤ (20 / 37 : Real) := by
+  have hge := R05_six_rpow_ge
+  have hpos : (0 : Real) < (6 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (6 : Real) ^ (-0.395 : Real) = (((6 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (20 / 37 : Real) = ((37 / 20 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Real part of the R05 fifth eta inverse
+(`Re (5 ^ s)⁻¹ = 5 ^ (-0.395) * cos (0.75 * log 5)`). -/
+theorem R05_inv_five_cpow_re_eq :
+    (((((5 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (5 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 5) := by
+  have h5eq : ((((5 : Nat)) : Complex)) = (5 : Complex) := by norm_cast
+  rw [h5eq]
+  have hlog : Complex.log (5 : Complex) = (((Real.log 5 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 5)).symm
+  have hlogre : (Complex.log (5 : Complex)).re = Real.log 5 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (5 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (5 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 5 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (5 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 5 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (5 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (5 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (5 : Complex) ≠ 0)]
+  have hinv : ((5 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (5 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (5 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 5 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (5 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 5 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (5 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 5 * 0.395)) * Real.cos (-(Real.log 5 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 5 * (-0.75))) = Real.cos (0.75 * Real.log 5) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 5 * 0.395)) = (5 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 5 * 0.395) = Real.log 5 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [← Real.rpow_def_of_pos (by norm_num : (0 : Real) < 5)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- Real part of the R05 sixth eta inverse
+(`Re (6 ^ s)⁻¹ = 6 ^ (-0.395) * cos (0.75 * log 6)`). -/
+theorem R05_inv_six_cpow_re_eq :
+    (((((6 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (6 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 6) := by
+  have h6eq : ((((6 : Nat)) : Complex)) = (6 : Complex) := by norm_cast
+  rw [h6eq]
+  have hlog : Complex.log (6 : Complex) = (((Real.log 6 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 6)).symm
+  have hlogre : (Complex.log (6 : Complex)).re = Real.log 6 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (6 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (6 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 6 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (6 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 6 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (6 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (6 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (6 : Complex) ≠ 0)]
+  have hinv : ((6 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (6 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (6 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 6 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (6 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 6 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (6 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 6 * 0.395)) * Real.cos (-(Real.log 6 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 6 * (-0.75))) = Real.cos (0.75 * Real.log 6) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 6 * 0.395)) = (6 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 6 * 0.395) = Real.log 6 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [← Real.rpow_def_of_pos (by norm_num : (0 : Real) < 6)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 fifth eta term in closed form (`term 4 = (5^s)⁻¹`, since `(-1)^4 = 1`). -/
+theorem R05_eta_fifth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 4 =
+      ((((5 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (4 + 1 : Nat) = 5 := rfl
+  have hcast : ((((4 + 1 : Nat)) : Complex)) = ((((5 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (4 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- R05 sixth eta term in closed form (`term 5 = -((6 ^ s)⁻¹)`, since `(-1)^5 = -1`). -/
+theorem R05_eta_sixth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 5 =
+      -((((6 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (5 + 1 : Nat) = 6 := rfl
+  have hcast : ((((5 + 1 : Nat)) : Complex)) = ((((6 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (5 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- Real part of the R05 fifth eta term (`9/50 ≤ Re term5`,
+from `(100/191) * (7/20) = 35/191 ≥ 9/50`). -/
+theorem R05_eta_fifth_Re_ge :
+    (9 / 50 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 4).re := by
+  rw [R05_eta_fifth_eq, R05_inv_five_cpow_re_eq]
+  have hamp := R05_rpow_five_neg0395_ge
+  have hcos := R05_cos_075log5_lower
+  have hamp_nn : (0 : Real) ≤ (5 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hprod : (100 / 191 : Real) * (7 / 20 : Real) ≤
+      (5 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 5) :=
+    mul_le_mul hamp hcos (by norm_num) hamp_nn
+  have heq : (100 / 191 : Real) * (7 / 20 : Real) = (35 / 191 : Real) := by
+    norm_num
+  have hle : (9 / 50 : Real) ≤ (35 / 191 : Real) := by norm_num
+  linarith
+
+/-- Real part of the R05 sixth eta term (`-(47/370) ≤ Re term6`,
+from `-((20/37) * (47/200))`). -/
+theorem R05_eta_sixth_Re_ge :
+    (-(47 / 370) : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 5).re := by
+  rw [R05_eta_sixth_eq, Complex.neg_re, R05_inv_six_cpow_re_eq]
+  have hamp := R05_rpow_six_neg0395_le
+  have hcos := R05_cos_075log6_upper
+  have hamp_nn : (0 : Real) ≤ (6 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hcos_nn : (0 : Real) ≤ Real.cos (0.75 * Real.log 6) := by
+    have h := R05_cos_075log6_lower
+    linarith
+  have hprod : (6 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 6) ≤
+      (20 / 37 : Real) * (47 / 200 : Real) :=
+    mul_le_mul hamp hcos hcos_nn (by norm_num)
+  have heq : (20 / 37 : Real) * (47 / 200 : Real) = (47 / 370 : Real) := by
+    norm_num
+  linarith
+
+/-- Phase-aware second-pair real part (`1/20 ≤ Re pair 2`,
+from `9/50 - 47/370 = 49/925 ≥ 1/20`). -/
+theorem R05_pair2_Re_ge :
+    (1 / 20 : Real) ≤ (etaPairTerm R03R10PolyLower.sR05 2).re := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 2 =
+      etaDirichletTerm R03R10PolyLower.sR05 4 +
+        etaDirichletTerm R03R10PolyLower.sR05 5 := by
+    unfold etaPairTerm
+    have e0 : 2 * 2 = 4 := by norm_num
+    have e1 : 2 * 2 + 1 = 5 := by norm_num
+    rw [e0, e1]
+  rw [hp, Complex.add_re]
+  have ht4 := R05_eta_fifth_Re_ge
+  have ht5 := R05_eta_sixth_Re_ge
+  have hle : (1 / 20 : Real) ≤ (9 / 50 : Real) - (47 / 370 : Real) := by norm_num
+  linarith
+
+/-- Six-term split (`S6 = S4 + pair 2`). -/
+theorem R05_S6_eq :
+    (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaPairTerm R03R10PolyLower.sR05 2 := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 2 =
+      etaDirichletTerm R03R10PolyLower.sR05 4 +
+        etaDirichletTerm R03R10PolyLower.sR05 5 := by
+    unfold etaPairTerm
+    have e0 : 2 * 2 = 4 := by norm_num
+    have e1 : 2 * 2 + 1 = 5 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        (etaDirichletTerm R03R10PolyLower.sR05 4 +
+          etaDirichletTerm R03R10PolyLower.sR05 5) := by
+    rw [show (6 : Nat) = 5 + 1 by norm_num, Finset.sum_range_succ,
+      show (5 : Nat) = 4 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- Phase-aware R05 six-term real part (`459/1250 ≤ Re S6`,
+from `793/2500 + 1/20`). -/
+theorem R05_S6_Re_ge :
+    (459 / 1250 : Real) ≤
+      (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S6_eq, Complex.add_re]
+  have hS4 := R05_S4_Re_phase_ge
+  have hp := R05_pair2_Re_ge
+  have hle : (459 / 1250 : Real) ≤ (793 / 2500 : Real) + (1 / 20 : Real) := by
+    norm_num
+  linarith
+
+/-- Six-term slow bound (`459/1250 ≤ ‖S6‖`, `Re`-route). -/
+theorem R05_S6_norm_ge :
+    (459 / 1250 : Real) ≤
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  have hRe := R05_S6_Re_ge
+  have hle : (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k).re ≤
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k‖ :=
+    Complex.re_le_norm _
+  linarith
+
+/-- Honest residual: `S6 = 459/1250` with banked tail `3/20` and `cF = 1` gives
+`(459/1250 - 3/20) / 1 = 543/2500 < 1/2`; the `13/20` slow target for `N = 2048`
+stays open (shortfall `707/2500`). -/
+theorem R05_S6_banked_ratio_eq :
+    ((((459 / 1250 : Real)) - (3 / 20 : Real)) / (1 : Real)) = (543 / 2500 : Real) := by
+  norm_num
+
+theorem R05_S6_banked_ratio_lt_half : (543 / 2500 : Real) < (1 / 2 : Real) := by
+  norm_num
+
+#print axioms R05_log_six_eq
+#print axioms R05_theta5_mem
+#print axioms R05_cos_075log5_lower
+#print axioms R05_theta6_mem
+#print axioms R05_cos_075log6_upper
+#print axioms R05_cos_075log6_lower
+#print axioms R05_five_rpow_le
+#print axioms R05_rpow_five_neg0395_ge
+#print axioms R05_six_rpow_ge
+#print axioms R05_rpow_six_neg0395_le
+#print axioms R05_inv_five_cpow_re_eq
+#print axioms R05_inv_six_cpow_re_eq
+#print axioms R05_eta_fifth_eq
+#print axioms R05_eta_sixth_eq
+#print axioms R05_eta_fifth_Re_ge
+#print axioms R05_eta_sixth_Re_ge
+#print axioms R05_pair2_Re_ge
+#print axioms R05_S6_eq
+#print axioms R05_S6_Re_ge
+#print axioms R05_S6_norm_ge
+#print axioms R05_S6_banked_ratio_eq
+#print axioms R05_S6_banked_ratio_lt_half
+
+end Door3OffAxis
