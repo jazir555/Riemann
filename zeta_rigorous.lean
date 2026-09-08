@@ -33753,3 +33753,182 @@ theorem R02_D3_Gdamp_bddAbove_strip_of_linear (C : ℝ) (hC0 : 0 ≤ C)
 #print axioms R02_D3_Gdamp_wholeline_left_of_linear
 #print axioms R02_D3_Gdamp_wholeline_right_of_linear
 #print axioms R02_D3_Gdamp_bddAbove_strip_of_linear
+
+/-!
+## Door-3 quantitative close, step 7 (zeta lane): Dirichlet linear input + line-095 exponential chi caps.
+
+Route: (a) Dirichlet-side linear bound is trivially Im-uniform: on `Re = 2`,
+`‖ζ‖ ≤ 3` (banked `zeta_Dirichlet_le_three`) and `1 ≤ 1 + |Im|`, so
+`‖ζ(s)‖ ≤ 3 * (1 + |s.im|)` with explicit `C = 3` (whole line, FULL proof,
+Mathlib-only). The right-edge reflection target `Re = 0.26` lies inside the
+eta window, so the banked rect cap `‖ζ‖ ≤ 934` (`R02_D3_zeta_upper_934`) gives
+the window linear bound `‖ζ‖ ≤ 934 * (1 + |Im|)` with explicit `C = 934`.
+(b) On the whole line `Re = 0.95`: `‖Γ(s)‖ ≤ 4` Im-uniformly (banked
+`R02_D3_Gamma_norm_le_Real_Gamma` + `R02_D3_Real_Gamma_le_four` CALLED),
+`(2π)^{-Re} ≤ 1` (banked `R02_D3_chiCpow_le_one` CALLED), but the cos factor is
+`‖cos(πs/2)‖ ≤ exp(3.1416 * |Im| / 2)` — EXPONENTIAL in `|Im|`, proved here
+from `norm_cos_le_exp_abs_im` + `Real.pi_lt_d4`. Hence the cos-form FE factor
+satisfies `‖χ(s)‖ ≤ 8 * exp(3.1416 * |Im| / 2)` and the FE ratio is
+`‖ζ(1-s)‖ ≤ (8 * exp(3.1416 * |Im| / 2)) * ‖ζ(s)‖` on `Re = 0.95`
+(via banked `zeta_FE_chi` + `zetaChi_norm_le`, both CALLED).
+
+HONEST NEGATIVE with exact numbers: a line-UNIFORM chi-ratio
+`‖ζ(1-s)‖ ≤ K * ‖ζ(s)‖` on `Re = 0.95` is UNREACHABLE with the banked
+ingredients, because the banked cos bound grows as `exp(1.5708 * |Im|)` while
+the banked Gamma bound `‖Γ‖ ≤ 4` has no `exp(-π|Im|/2)` Stirling decay to
+cancel it. Concretely at `|Im| = 8.25` the ratio factor proved here is
+`8 * exp(12.96) ≈ 8 * 425000`, i.e. `K ≈ 3400000` on the rect window — and it
+grows without bound as `|Im| → ∞`. Closing uniform `K` needs line-uniform
+Stirling with exponential decay (absent from Mathlib), NOT longer eta sums.
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_zeta_linear_Dirichlet_Re2`: `‖ζ‖ ≤ 3 * (1+|Im|)` on `Re = 2` (C = 3).
+* `R02_D3_zeta_linear_Re026_window`: `‖ζ‖ ≤ 934 * (1+|Im|)` on `Re = 0.26` rect window.
+* `R02_D3_Gamma_le_line095`: `‖Γ(s)‖ ≤ 4` on the whole line `Re = 0.95`.
+* `R02_D3_chiArg_im_eq_direct`: `Im(πs/2) = π * Im s / 2`.
+* `R02_D3_chiCos_exp_line095`: cos chi-factor `≤ exp(3.1416*|Im|/2)` on `Re = 0.95`.
+* `R02_D3_zetaChi_exp_line095`: `‖χ(s)‖ ≤ 8 * exp(3.1416*|Im|/2)` on `Re = 0.95`.
+* `R02_D3_zeta_ratio_exp_line095`: FE ratio with explicit exponential factor.
+
+RESIDUAL (exact next step): line-uniform Stirling decay
+`‖Γ(0.95 + it)‖ ≤ 4 * exp(-1.57 * |t|)` (or any explicit
+`exp(-c|t|)` with `c > 1.5708`) to cancel the cos growth and yield uniform `K`;
+then `R02_D3_zeta05_of_ratio` gives the `Re = 0.05` linear input, and with the
+`Re = 0.26` window input above (extended to the whole line) the ZU7 lemmas
+`R02_D3_Gdamp_wholeline_left_of_linear` / `_right_of_linear` /
+`R02_D3_Gdamp_bddAbove_strip_of_linear` instantiate to concrete `a`, `b`, `hB`,
+feeding `R02_D3_G_interp_of_edges` + `R02_D3_damp_ge_exp_neg_one` +
+`R02_D3_zeta_of_F_le` to close `‖ζ‖ ≤ 10`.
+-/
+
+/-- Dirichlet-side linear zeta bound `‖ζ‖ ≤ 3 * (1+|Im|)` on the whole line `Re = 2`. -/
+theorem R02_D3_zeta_linear_Dirichlet_Re2 (s : ℂ) (hre : s.re = 2) :
+    ‖riemannZeta s‖ ≤ 3 * (1 + |s.im|) := by
+  have hs : (2 : ℝ) ≤ s.re := by rw [hre]
+  have hZ : ‖riemannZeta s‖ ≤ 3 := zeta_Dirichlet_le_three hs
+  have hab : (0 : ℝ) ≤ |s.im| := abs_nonneg s.im
+  have h1 : (1 : ℝ) ≤ 1 + |s.im| := by linarith
+  have h3 : (3 : ℝ) ≤ 3 * (1 + |s.im|) := by
+    calc (3 : ℝ) = 3 * 1 := by ring
+      _ ≤ 3 * (1 + |s.im|) :=
+        mul_le_mul_of_nonneg_left h1 (by norm_num : (0 : ℝ) ≤ 3)
+  exact le_trans hZ h3
+
+/-- Window linear zeta bound `‖ζ‖ ≤ 934 * (1+|Im|)` on `Re = 0.26` (right-edge reflection target). -/
+theorem R02_D3_zeta_linear_Re026_window (s : ℂ) (hre : s.re = 0.26)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖riemannZeta s‖ ≤ 934 * (1 + |s.im|) := by
+  have hre_lo : (0.05 : ℝ) ≤ s.re := by rw [hre]; norm_num
+  have hre_hi : s.re ≤ (0.74 : ℝ) := by rw [hre]; norm_num
+  have hZ : ‖riemannZeta s‖ ≤ 934 :=
+    R02_D3_zeta_upper_934 s hre_lo hre_hi him_lo him_hi
+  have hab : (0 : ℝ) ≤ |s.im| := abs_nonneg s.im
+  have h1 : (1 : ℝ) ≤ 1 + |s.im| := by linarith
+  have h934 : (934 : ℝ) ≤ 934 * (1 + |s.im|) := by
+    calc (934 : ℝ) = 934 * 1 := by ring
+      _ ≤ 934 * (1 + |s.im|) :=
+        mul_le_mul_of_nonneg_left h1 (by norm_num : (0 : ℝ) ≤ 934)
+  exact le_trans hZ h934
+
+/-- Whole-line Gamma cap `‖Γ(s)‖ ≤ 4` on `Re = 0.95` (Im-uniform; CALLS banked Gamma lemmas). -/
+theorem R02_D3_Gamma_le_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖Complex.Gamma s‖ ≤ 4 := by
+  have hw0 : (0 : ℝ) < s.re := by rw [hre]; norm_num
+  have hle := R02_D3_Gamma_norm_le_Real_Gamma s hw0
+  have hy0 : (0.26 : ℝ) ≤ s.re := by rw [hre]; norm_num
+  have hy1 : s.re ≤ (0.95 : ℝ) := by rw [hre]
+  have hcap := R02_D3_Real_Gamma_le_four s.re hy0 hy1
+  exact le_trans hle hcap
+
+/-- Direct chi-argument imaginary part: `Im(π * s / 2) = π * Im s / 2`. -/
+theorem R02_D3_chiArg_im_eq_direct (s : ℂ) :
+    ((((Real.pi : ℂ)) * s / 2)).im = Real.pi * s.im / 2 := by
+  have harg : ((Real.pi : ℂ) * s / 2) = (((Real.pi / 2 : ℝ)) : ℂ) * s := by
+    push_cast
+    ring
+  rw [harg]
+  have him : ((((Real.pi / 2 : ℝ)) : ℂ) * s).im = (Real.pi / 2) * s.im := by
+    simp [Complex.mul_im]
+  rw [him]
+  ring
+
+/-- Cos chi-factor on `Re = 0.95` is `≤ exp(3.1416 * |Im| / 2)` (EXPONENTIAL, hence no uniform K). -/
+theorem R02_D3_chiCos_exp_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖Complex.cos ((Real.pi : ℂ) * s / 2)‖ ≤ Real.exp (3.1416 * |s.im| / 2) := by
+  have hcos := norm_cos_le_exp_abs_im (((Real.pi : ℂ)) * s / 2)
+  have harg := R02_D3_chiArg_im_eq_direct s
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  have h2 : Real.pi / 2 ≤ 3.1416 / 2 := by linarith
+  have h3 := mul_le_mul_of_nonneg_right h2 (abs_nonneg s.im)
+  have hfin : |((((Real.pi : ℂ)) * s / 2)).im| ≤ 3.1416 * |s.im| / 2 := by
+    rw [harg, e]
+    linarith
+  exact le_trans hcos (Real.exp_le_exp.mpr hfin)
+
+/-- Chi-factor cap on `Re = 0.95`: `‖χ(s)‖ ≤ 8 * exp(3.1416 * |Im| / 2)` (CALLS banked cpow/Gamma). -/
+theorem R02_D3_zetaChi_exp_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖zetaChi s‖ ≤ 8 * Real.exp (3.1416 * |s.im| / 2) := by
+  have hchi := zetaChi_norm_le s
+  have hw : (0 : ℝ) ≤ s.re := by rw [hre]; norm_num
+  have hcp := R02_D3_chiCpow_le_one s hw
+  have hG := R02_D3_Gamma_le_line095 s hre
+  have hcos := R02_D3_chiCos_exp_line095 s hre
+  have harg := R02_D3_chiArg_im_eq_direct s
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  have h2 : Real.pi / 2 ≤ 3.1416 / 2 := by linarith
+  have h3 := mul_le_mul_of_nonneg_right h2 (abs_nonneg s.im)
+  have hfin : |((((Real.pi : ℂ)) * s / 2)).im| ≤ 3.1416 * |s.im| / 2 := by
+    rw [harg, e]
+    linarith
+  have hE : Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ Real.exp (3.1416 * |s.im| / 2) := Real.exp_le_exp.mpr hfin
+  have hE0 : (0 : ℝ) ≤ Real.exp |((((Real.pi : ℂ)) * s / 2)).im| :=
+    (Real.exp_pos _).le
+  have step1 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcp (by norm_num)
+  have hGam0 : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  have step2 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ ≤ 2 * 1 * 4 :=
+    mul_le_mul step1 hG hGam0 (by norm_num)
+  have step3 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ *
+      Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ 2 * 1 * 4 * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul step2 hE hE0 (by norm_num)
+  have heq : (2 : ℝ) * 1 * 4 * Real.exp (3.1416 * |s.im| / 2)
+      = 8 * Real.exp (3.1416 * |s.im| / 2) := by ring
+  rw [heq] at step3
+  exact le_trans hchi step3
+
+/-- FE chi-ratio on `Re = 0.95` with explicit EXPONENTIAL factor (uniform K unreachable). -/
+theorem R02_D3_zeta_ratio_exp_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖riemannZeta (1 - s)‖ ≤ (8 * Real.exp (3.1416 * |s.im| / 2)) * ‖riemannZeta s‖ := by
+  have hs1 : ∀ n : ℕ, s ≠ (-(n : ℂ)) := by
+    intro n hn
+    have h1 : s.re = ((-(n : ℂ))).re := by rw [hn]
+    have h2 : ((-(n : ℂ))).re = -((n : ℝ)) := by simp
+    rw [h2] at h1
+    have hn0 : (0 : ℝ) ≤ ((n : ℝ)) := Nat.cast_nonneg n
+    rw [hre] at h1
+    linarith
+  have hs2 : s ≠ 1 := by
+    intro h
+    have h1 : s.re = 1 := by rw [h]; exact Complex.one_re
+    rw [hre] at h1
+    norm_num at h1
+  have hFE := zeta_FE_chi (s := s) hs1 hs2
+  have hChi := R02_D3_zetaChi_exp_line095 s hre
+  rw [hFE, norm_mul]
+  exact mul_le_mul_of_nonneg_right hChi (norm_nonneg _)
+
+#print axioms R02_D3_zeta_linear_Dirichlet_Re2
+#print axioms R02_D3_zeta_linear_Re026_window
+#print axioms R02_D3_Gamma_le_line095
+#print axioms R02_D3_chiArg_im_eq_direct
+#print axioms R02_D3_chiCos_exp_line095
+#print axioms R02_D3_zetaChi_exp_line095
+#print axioms R02_D3_zeta_ratio_exp_line095
