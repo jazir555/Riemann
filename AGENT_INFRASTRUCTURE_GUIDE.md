@@ -3336,6 +3336,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
+- 2026-09-07 OA3 (`032f75d3`, off-axis tail, green 8702 jobs):
+  R05 genuine N=2 cert + PROVED honest negative (ratio -10/13;
+  banked-tail ratio 1/52, shortfall 25/52; slow needed 29/20).
+  NOTE: user's commit `56b91432` swept the 144-line append mid-task;
+  repair verified separately. Next: phase-aware eta-factor (OA4).
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
