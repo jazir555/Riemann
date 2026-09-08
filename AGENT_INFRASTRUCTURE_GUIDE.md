@@ -3370,6 +3370,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `8·e^(1.5708|Im|)`. Honest negative: uniform K UNREACHABLE (banked
   Gamma cap has no Stirling decay; 3.4M at window). Next: line-uniform
   Stirling decay (ZU9).
+- 2026-09-08 ZU9 (`74b89285` pt 1, zeta tail, green 8693 jobs, axioms clean):
+  shift-decay `‖Γ‖ ≤ 2/(‖s‖‖s+1‖)` → poly-decay → window55 `≤ 0.0726`
+  (55× over decay-free). Honest negative: requested `c>π/2` rate FALSE
+  (true `|t|^0.45·e^(-π|t|/2)`); polynomial factor needed (ZU10).
+- 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
+  S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
+  (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
