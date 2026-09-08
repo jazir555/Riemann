@@ -3402,6 +3402,10 @@ sorry-free infrastructure and the complete commit ledger above.
   pair-3 floor `Re pair3 ≥ 1/500` POSITIVE (fresh `log 7` bounds derived,
   no d9 lemma existed) → S8 `Re ≥ 923/2500`; shortfall 702/2500.
   m=4 expected stall (cos(0.75·log 9)<0). Next: S8 + m=4 (OA10).
+- 2026-09-08 OA10 (`733210d9`, off-axis tail, green 8702 jobs, axioms clean):
+  S8 assembly (slow 923/2500, ratio 137/625) + pair-4 STOP verdict
+  (`Re pair4 ≥ −1/240 ≤ 0`; term 8 drags via negative cosine).
+  Pair route CLOSED per stop rule. Next: M=4 tail or cF (OA11).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
