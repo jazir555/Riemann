@@ -2562,3 +2562,120 @@ theorem R05_slow_needed_eq :
 #print axioms R05_slow_needed_eq
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- R05 phase-cosine floor (`cos (0.75 * log 2) ≥ 43/50`): `0.75 * log 2 < 0.5199`
+from the banked `log 2` upper bound, then `1 - x ^ 2 / 2 ≤ cos x`. -/
+theorem R05_phase_cos_lower :
+    (43 / 50 : ℝ) ≤ Real.cos (0.75 * Real.log 2) := by
+  have hloghi := Real.log_two_lt_d9
+  have hpos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ 0.75 * Real.log 2 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : 0.75 * Real.log 2 < (0.5199 : ℝ) := by linarith
+  have hle : 0.75 * Real.log 2 ≤ (0.5199 : ℝ) := le_of_lt hhi
+  have hsq : (0.75 * Real.log 2) ^ 2 ≤ (0.5199 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hle 2
+  have hc := Real.one_sub_sq_div_two_le_cos (x := 0.75 * Real.log 2)
+  have hbase : (43 / 50 : ℝ) ≤ 1 - (0.5199 : ℝ) ^ 2 / 2 := by norm_num
+  linarith [hc, hsq, hbase]
+
+/-- Phase-aware R05 eta-factor upper bound (`‖1 - 2 ^ (1 - sR05)‖ ≤ 1`).
+With `q = 2 ^ (1 - sR05)`, `‖q‖ = 2 ^ 0.605 ≤ 8 / 5` and
+`Re q = 2 ^ 0.605 * cos (0.75 * log 2)`; the phase floor gives
+`‖q‖ ≤ 2 * cos (0.75 * log 2)`, hence
+`‖1 - q‖ ^ 2 = 1 + ‖q‖ * (‖q‖ - 2 * cos θ) ≤ 1`.
+This drops the factor cap `13 / 5 → 1`. -/
+theorem R05_etaFactor_phase_le_one :
+    ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ≤ (1 : ℝ) := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  have hwre : ((1 : ℂ) - R03R10PolyLower.sR05).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R03R10PolyLower.sR05_re]
+    norm_num
+  have hwim : ((1 : ℂ) - R03R10PolyLower.sR05).im = (0.75 : ℝ) := by
+    rw [Complex.sub_im, Complex.one_im, R03R10PolyLower.sR05_im]
+    norm_num
+  have hargre : (Complex.log (2 : ℂ) * ((1 : ℂ) - R03R10PolyLower.sR05)).re =
+      Real.log 2 * 0.605 := by
+    rw [Complex.mul_re, hlogre, hlogim, hwre, hwim]
+    ring
+  have hargim : (Complex.log (2 : ℂ) * ((1 : ℂ) - R03R10PolyLower.sR05)).im =
+      Real.log 2 * 0.75 := by
+    rw [Complex.mul_im, hlogre, hlogim, hwre, hwim]
+    ring
+  have hqre : ((2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)).re =
+      (2 : ℝ) ^ (0.605 : ℝ) * Real.cos (0.75 * Real.log 2) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re, hargre, hargim]
+    have hexp : Real.exp (Real.log 2 * 0.605) = (2 : ℝ) ^ (0.605 : ℝ) :=
+      (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+    rw [hexp]
+    have hcos : Real.cos (Real.log 2 * 0.75) = Real.cos (0.75 * Real.log 2) := by
+      congr 1
+      ring
+    rw [hcos]
+  have hqnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ =
+      (2 : ℝ) ^ (0.605 : ℝ) := by
+    rw [two_cpow_norm, hwre]
+  have hsqid : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ^ 2 =
+      1 + ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ^ 2
+        - 2 * ((2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)).re := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have hq : ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ^ 2 =
+        ((2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)).re ^ 2
+          + ((2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)).im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      ring
+    rw [hq]
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im,
+      zero_sub]
+    ring
+  have hRle : (2 : ℝ) ^ (0.605 : ℝ) ≤ (8 / 5 : ℝ) := zetaCellS0_rpow_0605_le
+  have hRnn : (0 : ℝ) ≤ (2 : ℝ) ^ (0.605 : ℝ) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hcos := R05_phase_cos_lower
+  have hRle2 : (2 : ℝ) ^ (0.605 : ℝ) ≤ 2 * Real.cos (0.75 * Real.log 2) := by
+    linarith [hRle, hcos]
+  have hprod : (2 : ℝ) ^ (0.605 : ℝ)
+      * ((2 : ℝ) ^ (0.605 : ℝ) - 2 * Real.cos (0.75 * Real.log 2)) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hRnn (by linarith [hRle2])
+  have hsq : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ^ 2 ≤ 1 := by
+    have heq : (1 : ℝ) + ((2 : ℝ) ^ (0.605 : ℝ)) ^ 2
+        - 2 * ((2 : ℝ) ^ (0.605 : ℝ) * Real.cos (0.75 * Real.log 2))
+        = 1 + (2 : ℝ) ^ (0.605 : ℝ)
+          * ((2 : ℝ) ^ (0.605 : ℝ) - 2 * Real.cos (0.75 * Real.log 2)) := by
+      ring
+    rw [hsqid, hqnorm, hqre]
+    linarith [hprod, heq]
+  have hnonneg : (0 : ℝ) ≤
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ := norm_nonneg _
+  nlinarith [hsq, hnonneg]
+
+/-- With the phase-aware factor cap `cF = 1` and the banked tail `3 / 20`,
+threshold meeting needs `slow ≥ 1 / 2 * 1 + 3 / 20 = 13 / 20`
+(down from `29 / 20` with the magnitude-only cap `13 / 5`). -/
+theorem R05_slow_needed_phase_eq :
+    ((1 / 2 : ℝ) * 1 + (3 / 20 : ℝ)) = (13 / 20 : ℝ) := by
+  norm_num
+
+/-- Honest residual: the `N = 2` slow value with banked tail and phase-aware
+factor gives only `(1 / 5 - 3 / 20) / 1 = 1 / 20 < 1 / 2`, so the larger-`N`
+slow bound (`slow ≥ 13 / 20`) remains the exact next task. -/
+theorem R05_phase_ratio_S2_eq :
+    (((1 / 5 : ℝ) - (3 / 20 : ℝ)) / (1 : ℝ)) = (1 / 20 : ℝ) := by
+  norm_num
+
+theorem R05_phase_ratio_S2_lt_half : (1 / 20 : ℝ) < (1 / 2 : ℝ) := by
+  norm_num
+
+#print axioms R05_phase_cos_lower
+#print axioms R05_etaFactor_phase_le_one
+#print axioms R05_slow_needed_phase_eq
+#print axioms R05_phase_ratio_S2_eq
+#print axioms R05_phase_ratio_S2_lt_half
+
+end Door3OffAxis
