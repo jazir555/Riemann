@@ -2523,16 +2523,15 @@ theorem R05_genuine_zeta_lower :
     (by rw [R03R10PolyLower.sR05_re]; norm_num)
     (by rw [R03R10PolyLower.sR05_re]; norm_num)
 
-/-- Exact ratio of the genuine R05 `N = 2` certificate: `(1/5 - 11/5)/(13/5) = -8/13`. -/
+/-- Exact ratio of the genuine R05 `N = 2` certificate: `(1/5 - 11/5)/(13/5) = -10/13`. -/
 theorem R05_genuine_ratio_eq :
     ((R05_genuine_finite_zeta_certificate.slow - R05_genuine_finite_zeta_certificate.rtail) /
-      R05_genuine_finite_zeta_certificate.cF) = (-8 / 13 : ℝ) := by
-  have heq : ((R05_genuine_finite_zeta_certificate.slow -
-      R05_genuine_finite_zeta_certificate.rtail) /
-      R05_genuine_finite_zeta_certificate.cF) = (-8 / 13 : ℝ) := by
-    simp [R05_genuine_finite_zeta_certificate]
-    norm_num
-  exact heq
+      R05_genuine_finite_zeta_certificate.cF) = (-10 / 13 : ℝ) := by
+  have h1 : R05_genuine_finite_zeta_certificate.slow = (1 / 5 : ℝ) := rfl
+  have h2 : R05_genuine_finite_zeta_certificate.rtail = (11 / 5 : ℝ) := rfl
+  have h3 : R05_genuine_finite_zeta_certificate.cF = (13 / 5 : ℝ) := rfl
+  rw [h1, h2, h3]
+  norm_num
 
 /-- With the banked `M = 1024` tail value (`3/20`) in place of the `M = 1` tail,
 the `N = 2` slow value gives ratio exactly `1/52`: magnitude-only bounds cannot
@@ -2551,6 +2550,7 @@ theorem R05_slow_needed_eq :
   norm_num
 
 #print axioms R05_eta_S2_eq
+#print axioms R05_eta_second_norm_le
 #print axioms R05_eta_S2_norm_ge
 #print axioms R05_etaFactor_upper
 #print axioms R05_eta_tail_1_le
