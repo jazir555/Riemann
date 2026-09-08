@@ -3409,6 +3409,10 @@ sorry-free infrastructure and the complete commit ledger above.
   S8 assembly (slow 923/2500, ratio 137/625) + pair-4 STOP verdict
   (`Re pair4 ≥ −1/240 ≤ 0`; term 8 drags via negative cosine).
   Pair route CLOSED per stop rule. Next: M=4 tail or cF (OA11).
+- 2026-09-08 OA11 (`767fa46b`, off-axis tail, green 8702 jobs, axioms clean):
+  M=4 tail (`‖G−S₈‖ ≤ 7/5`) + filed honest S8 cert (ratio −2577/2500).
+  VERDICT: tail no longer binding — slow-sum size is. Next: individual
+  term floors k=8..15, non-pair route (OA12).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
