@@ -3435,6 +3435,10 @@ sorry-free infrastructure and the complete commit ledger above.
   M=4 tail (`‖G−S₈‖ ≤ 7/5`) + filed honest S8 cert (ratio −2577/2500).
   VERDICT: tail no longer binding — slow-sum size is. Next: individual
   term floors k=8..15, non-pair route (OA12).
+- 2026-09-08+ OA12 (`de5d681c`, off-axis tail, 4× green 8702 jobs):
+  twelfth-term recipe (`log12` d9 + quartic cos + cleared rpow) →
+  `Re (term 11) ≥ 1/15` (sign-flip positive); slow ≈0.4359 vs 0.65.
+  Residual: wire S9/S12 sums + k=13 (n=14) floor (OA13, LARGE scope).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
