@@ -2835,3 +2835,148 @@ theorem door3RealSegNext4_meet :
 #print axioms door3RealNext4ZetaContinuousOnSeg
 #print axioms exists_door3RealSegNext4_zetaUpper
 #print axioms door3RealSegNext4_meet
+
+/-!
+## Door-3 remainder 5 fifth tile: `[5,6]` toward `(-10,10)` (2026-09-08, append-only)
+
+Extends the committed `door3RealSegNext4` pattern (`[-1,5]` chained by
+`door3RealSeg_next_meet` + `door3RealSegNext2_meet` + `door3RealSegNext3_meet` +
+`door3RealSegNext4_meet`) one step further to `[-1,6]`. Same critical-line
+shape (`Re s = 1/2` via `tailShiftedSReal_re`), pole avoidance (`Re s = 1/2`,
+so `differentiableAt_riemannZeta` applies), continuity, plus an upper
+enclosure on the new fifth tile (one-liner
+`IsCompact.exists_bound_of_continuousOn`, as in committed
+`exists_door3RealSeg_zetaUpper`).
+
+Height-`t != 0` scope verdict (2026-09-08, Mathlib-visible only): NO Mathlib
+lemma yields a lower bound `‖riemannZeta s‖ >= c > 0` (or nonvanishing) at any
+point with `s.re = 1/2` and `s.im != 0`. Closest hits, all inapplicable on
+the critical line:
+- `riemannZeta_ne_zero_of_one_lt_re` (`Dirichlet.lean:328`, needs `1 < s.re`);
+- `riemannZeta_ne_zero_of_one_le_re` (`Nonvanishing.lean:411`, needs
+  `1 <= s.re`; junk value at `s = 1` handled by `riemannZeta_one_ne_zero`);
+- `LFunction_ne_zero_of_re_eq_one` (`Nonvanishing.lean:385`, needs `s.re = 1`);
+- `LFunction_ne_zero_of_one_le_re` (`Nonvanishing.lean:398`, needs `1 <= s.re`);
+- `RiemannZeta.lean:186` is the Riemann-hypothesis *statement*
+  (zeros imply `s.re = 1/2`), not an enclosure;
+- value lemmas (`riemannZeta_zero`, `riemannZeta_four`,
+  `riemannZeta_two_mul_nat`, `riemannZeta_neg_two_mul_nat_add_one`) are at
+  isolated real/even points only;
+- zero grep hits Mathlib-wide for `‖riemannZeta`, `ZeroFree`/`zeroFree`, or
+  `1/2`-height zeta enclosures.
+So the new-height pointwise LOWER bound (`c > 0` at `t = +-1/2`, or
+nonvanishing at a meet point, via a kernel-checked enclosure) remains the
+exact residual; this tile is the tightest proved step toward it.
+-/
+
+/-- Fifth compact tile toward `(-10,10)`: `5 ≤ Re z ≤ 6`, `Im z = 0`. -/
+def door3RealSegNext5 : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (5 : ℝ) 6 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the fifth tile. -/
+theorem door3RealSegNext5_mem_of_reim (z : ℂ) (hre1 : (5 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 6) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSegNext5 := by
+  simp only [door3RealSegNext5, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Witness: `11/2` lies in the fifth tile. -/
+theorem door3RealSegNext5_witness : ((((11 / 2 : ℝ))) : ℂ) ∈ door3RealSegNext5 := by
+  simp only [door3RealSegNext5, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc,
+    Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- The fifth tile is closed. -/
+theorem door3RealSegNext5_isClosed : IsClosed door3RealSegNext5 := by
+  unfold door3RealSegNext5
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The fifth tile lies in `closedBall 0 7`, hence is bounded. -/
+theorem door3RealSegNext5_isBounded : Bornology.IsBounded door3RealSegNext5 := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 6 := by
+    rw [abs_le]
+    constructor
+    · linarith
+    · exact h2
+  have hre2 : z.re * z.re ≤ (6 : ℝ) * 6 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 6 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (7 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h49 : (6 : ℝ) * 6 + 0 ≤ 7 ^ 2 := by norm_num
+    exact le_trans hsum h49
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The fifth tile is compact (Heine–Borel). -/
+theorem door3RealSegNext5_isCompact : IsCompact door3RealSegNext5 := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSegNext5_isClosed, door3RealSegNext5_isBounded⟩
+
+/-- The fifth tile sits inside the required open slice `-10 < Re < 10`. -/
+theorem door3RealSegNext5_in_open_strip (z : ℂ) (hz : z ∈ door3RealSegNext5) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the fifth tile: `Re s = 1/2` (critical line). -/
+theorem door3RealNext5Shift_re (z : ℂ) (hz : z ∈ door3RealSegNext5) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Pole avoidance on the fifth tile. -/
+theorem door3RealNext5Shift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSegNext5) :
+    tailShiftedSReal z ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re hcon
+  rw [door3RealNext5Shift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the fifth tile. -/
+theorem door3RealNext5ZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSegNext5 := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealNext5Shift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Height upper enclosure over the fifth tile
+(mirror of `exists_door3RealSeg_zetaUpper`). -/
+theorem exists_door3RealSegNext5_zetaUpper :
+    ∃ B : ℝ, ∀ z ∈ door3RealSegNext5,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B :=
+  door3RealSegNext5_isCompact.exists_bound_of_continuousOn door3RealNext5ZetaContinuousOnSeg
+
+/-- Chaining point: `5` lies in both tiles, so `[-1,5] ∪ [5,6] = [-1,6]`. -/
+theorem door3RealSegNext5_meet :
+    ((((5 : ℝ))) : ℂ) ∈ door3RealSegNext4 ∧
+      ((((5 : ℝ))) : ℂ) ∈ door3RealSegNext5 := by
+  simp only [door3RealSegNext4, door3RealSegNext5, Set.mem_inter_iff, Set.mem_preimage,
+    Set.mem_Icc, Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+#print axioms door3RealSegNext5_witness
+#print axioms door3RealSegNext5_isClosed
+#print axioms door3RealSegNext5_isBounded
+#print axioms door3RealSegNext5_isCompact
+#print axioms door3RealSegNext5_in_open_strip
+#print axioms door3RealNext5Shift_re
+#print axioms door3RealNext5Shift_ne_one_of_seg
+#print axioms door3RealNext5ZetaContinuousOnSeg
+#print axioms exists_door3RealSegNext5_zetaUpper
+#print axioms door3RealSegNext5_meet
