@@ -3384,6 +3384,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
+- 2026-09-08 OA8 (`db737041`, off-axis tail, green 8702 jobs, axioms clean):
+  m=2 pair floor (`Re pair2 ≥ 1/20`) → `‖S₆‖ ≥ 459/1250` (0.3672);
+  shortfall 707/2500 vs 13/20. WARNING: pair floors decay (θ8≈π/2,
+  θ9>π/2 → negative at m≥4). Next: pair m=3 w/ stop rule (OA9).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
