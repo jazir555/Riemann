@@ -3129,4 +3129,288 @@ theorem R05_S3_banked_ratio_eq :
 #print axioms R05_S3_norm_ge
 #print axioms R05_S3_banked_ratio_eq
 
+/-- Log-4 double (`log 4 = 2 * log 2`) via `log (2 * 2)`. -/
+theorem R05_log_four_eq :
+    Real.log 4 = 2 * Real.log 2 := by
+  have h4 : (4 : Real) = 2 * 2 := by norm_num
+  rw [h4, Real.log_mul (by norm_num) (by norm_num)]
+  ring
+
+/-- Phase of the R05 fourth eta term (`0.75 * log 4` in `[1.039, 1.04]`)
+from the banked `log 2` d9 bounds. -/
+theorem R05_theta4_mem :
+    (1.039 : Real) ≤ 0.75 * Real.log 4 ∧ 0.75 * Real.log 4 ≤ (1.04 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have hx : 0.75 * Real.log 4 = 1.5 * Real.log 2 := by
+    rw [R05_log_four_eq]
+    ring
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the fourth-term phase (`cos (0.75 * log 4) ≤ 13/25`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log4_upper :
+    Real.cos (0.75 * Real.log 4) ≤ (13 / 25 : Real) := by
+  have hmem := R05_theta4_mem
+  have hpos : (0 : Real) < Real.log 4 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 4 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.039 : Real) ≤ 0.75 * Real.log 4 := hmem.1
+  have hhi : 0.75 * Real.log 4 ≤ (1.04 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.039 : Real) ^ 2 ≤ (0.75 * Real.log 4) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 4) ^ 4 ≤ (1.04 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.039 : Real) ^ 2 / 2 + (1.04 : Real) ^ 4 / 24 ≤
+      (13 / 25 : Real) := by
+    norm_num
+  linarith
+
+/-- Cosine floor at the fourth-term phase (`1/2 ≤ cos (0.75 * log 4)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log4_lower :
+    (1 / 2 : Real) ≤ Real.cos (0.75 * Real.log 4) := by
+  have hmem := R05_theta4_mem
+  have hpos : (0 : Real) < Real.log 4 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 4 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.039 : Real) ≤ 0.75 * Real.log 4 := hmem.1
+  have hhi : 0.75 * Real.log 4 ≤ (1.04 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 4) ^ 2 ≤ (1.04 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.039 : Real) ^ 4 ≤ (0.75 * Real.log 4) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 4) ^ 6 ≤ (1.04 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (1 / 2 : Real) ≤
+      1 - (1.04 : Real) ^ 2 / 2 + (1.039 : Real) ^ 4 / 24 -
+        (1.04 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Real rpow fourth inverse upper (`4 ^ (-0.395) ≤ 16/25`) from
+banked `2 ^ (-0.395) ≤ 4/5`, squared via `Real.mul_rpow`. -/
+theorem R05_rpow_four_neg0395_le :
+    (4 : Real) ^ (-0.395 : Real) ≤ (16 / 25 : Real) := by
+  have h2 := R05_rpow_neg0395_le
+  have hnn : (0 : Real) ≤ (2 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have h42 : (4 : Real) = 2 * 2 := by norm_num
+  have heq : (4 : Real) ^ (-0.395 : Real) =
+      (2 : Real) ^ (-0.395 : Real) * (2 : Real) ^ (-0.395 : Real) := by
+    rw [h42, Real.mul_rpow (by norm_num) (by norm_num)]
+  have hsq : (2 : Real) ^ (-0.395 : Real) * (2 : Real) ^ (-0.395 : Real) ≤
+      (4 / 5 : Real) * (4 / 5 : Real) :=
+    mul_le_mul h2 h2 hnn (by norm_num)
+  have hnum : (4 / 5 : Real) * (4 / 5 : Real) = (16 / 25 : Real) := by
+    norm_num
+  rw [heq]
+  rw [hnum] at hsq
+  exact hsq
+
+/-- Real part of the R05 fourth eta inverse
+(`Re (4 ^ s)⁻¹ = 4 ^ (-0.395) * cos (0.75 * log 4)`). -/
+theorem R05_inv_four_cpow_re_eq :
+    (((((4 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (4 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 4) := by
+  have h4eq : ((((4 : Nat)) : Complex)) = (4 : Complex) := by norm_cast
+  rw [h4eq]
+  have hlog : Complex.log (4 : Complex) = (((Real.log 4 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 4)).symm
+  have hlogre : (Complex.log (4 : Complex)).re = Real.log 4 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (4 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (4 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 4 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (4 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 4 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (4 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (4 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (4 : Complex) ≠ 0)]
+  have hinv : ((4 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (4 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (4 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 4 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (4 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 4 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (4 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 4 * 0.395)) * Real.cos (-(Real.log 4 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 4 * (-0.75))) = Real.cos (0.75 * Real.log 4) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 4 * 0.395)) = (4 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 4 * 0.395) = Real.log 4 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 4)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 fourth eta term in closed form (`term 3 = -((4 ^ s)⁻¹)`, since `(-1)^3 = -1`). -/
+theorem R05_eta_fourth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 3 =
+      -((((4 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (3 + 1 : Nat) = 4 := rfl
+  have hcast : ((((3 + 1 : Nat)) : Complex)) = ((((4 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (3 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- Real part of the R05 fourth eta term (`-(208/625) ≤ Re term4`,
+from `-(16/25 * 13/25)`). -/
+theorem R05_eta_fourth_Re_ge :
+    (-(208 / 625) : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 3).re := by
+  rw [R05_eta_fourth_eq, Complex.neg_re, R05_inv_four_cpow_re_eq]
+  have hamp := R05_rpow_four_neg0395_le
+  have hcos := R05_cos_075log4_upper
+  have hamp_nn : (0 : Real) ≤ (4 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hcos_nn : (0 : Real) ≤ Real.cos (0.75 * Real.log 4) := by
+    have h := R05_cos_075log4_lower
+    linarith
+  have hprod : (4 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 4) ≤
+      (16 / 25 : Real) * (13 / 25 : Real) :=
+    mul_le_mul hamp hcos hcos_nn (by norm_num)
+  have heq : (16 / 25 : Real) * (13 / 25 : Real) = (208 / 625 : Real) := by
+    norm_num
+  linarith
+
+/-- Phase-aware first-pair real part (`43/2500 ≤ Re pair 1`,
+from `7/20 - 208/625`). -/
+theorem R05_pair1_Re_ge :
+    (43 / 2500 : Real) ≤ (etaPairTerm R03R10PolyLower.sR05 1).re := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 1 =
+      etaDirichletTerm R03R10PolyLower.sR05 2 +
+        etaDirichletTerm R03R10PolyLower.sR05 3 := by
+    unfold etaPairTerm
+    have e0 : 2 * 1 = 2 := by norm_num
+    have e1 : 2 * 1 + 1 = 3 := by norm_num
+    rw [e0, e1]
+  rw [hp, Complex.add_re]
+  have ht2 := R05_eta_third_Re_ge
+  have ht3 := R05_eta_fourth_Re_ge
+  linarith
+
+/-- Phase-aware R05 four-term real part (`793/2500 ≤ Re S4`). -/
+theorem R05_S4_Re_phase_ge :
+    (793 / 2500 : Real) ≤
+      (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S4_eq, Complex.add_re]
+  have hS2 := R05_S2_Re_ge
+  have hp := R05_pair1_Re_ge
+  linarith
+
+/-- Improved larger-N slow bound (`793/2500 ≤ ‖S4‖`, `Re`-route;
+replaces the `1/10` magnitude-route cap). -/
+theorem R05_S4_norm_phase_ge :
+    (793 / 2500 : Real) ≤
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  have hRe := R05_S4_Re_phase_ge
+  have hle : (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k).re ≤
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k‖ :=
+    Complex.re_le_norm _
+  linarith
+
+/-- Honest residual: `S4 = 793/2500` with banked tail `3/20` and `cF = 1` gives
+`(793/2500 - 3/20) / 1 = 209/1250 < 1/2`; the `13/20` slow target for `N = 2048`
+stays open (shortfall `416/1250`). -/
+theorem R05_S4_Re_phase_ratio_eq :
+    ((((793 / 2500 : Real)) - (3 / 20 : Real)) / (1 : Real)) = (209 / 1250 : Real) := by
+  norm_num
+
+theorem R05_S4_Re_phase_ratio_lt_half : (209 / 1250 : Real) < (1 / 2 : Real) := by
+  norm_num
+
+/-- Genuine R05 paired tail at `M = 2` (`‖G - S₄‖ ≤ 7/4`,
+via `zetaCell_even_remainder_le`). -/
+theorem R05_eta_tail_2_le :
+    ‖(∑' m, etaPairTerm R03R10PolyLower.sR05 m) -
+      (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k)‖ ≤
+      (7 / 4 : Real) := by
+  have hs : 0 < R03R10PolyLower.sR05.re := by
+    rw [R03R10PolyLower.sR05_re]
+    norm_num
+  have hC : ‖R03R10PolyLower.sR05‖ ≤ (0.85 : Real) := R05_s_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 2 (by norm_num)
+  have h22 : 2 * 2 = 4 := by norm_num
+  rw [h22] at hgen
+  have hre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  rw [hre] at hgen
+  have h2c : ((((2 : Nat)) : Real)) = (2 : Real) := by norm_cast
+  rw [h2c] at hgen
+  have hamp := R05_rpow_neg0395_le
+  have hdiv : (2 : Real) ^ (-0.395 : Real) / (0.395 : Real) ≤
+      (4 / 5 : Real) / (0.395 : Real) := by
+    rw [div_le_div_iff_of_pos_right (by norm_num : (0 : Real) < 0.395)]
+    exact hamp
+  have hmul : (0.85 : Real) * ((2 : Real) ^ (-0.395 : Real) / (0.395 : Real)) ≤
+      (0.85 : Real) * ((4 / 5 : Real) / (0.395 : Real)) :=
+    mul_le_mul_of_nonneg_left hdiv (by norm_num)
+  have hnum : (0.85 : Real) * ((4 / 5 : Real) / (0.395 : Real)) ≤ (7 / 4 : Real) := by
+    norm_num
+  linarith
+
+/-- Phase-aware R05 finite zeta lower certificate at `N = 4`
+(slow `793/2500` from the `Re`-route, `M = 2` tail, phase-aware factor `cF = 1`). -/
+noncomputable def R05_phase_finite_zeta_certificate :
+    FiniteZetaLowerCertificate R03R10PolyLower.sR05 :=
+  { N := 4
+    S := ∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k
+    slow := 793 / 2500
+    rtail := 7 / 4
+    cF := 1
+    hSdef := rfl
+    hSlow := R05_S4_norm_phase_ge
+    hTail := R05_eta_tail_2_le
+    hcFpos := by norm_num
+    hFac := R05_etaFactor_phase_le_one }
+
+/-- The phase-aware R05 certificate wired through the API (negative-valued, honest). -/
+theorem R05_phase_zeta_lower :
+    ((R05_phase_finite_zeta_certificate.slow - R05_phase_finite_zeta_certificate.rtail) /
+      R05_phase_finite_zeta_certificate.cF) ≤ ‖zeta R03R10PolyLower.sR05‖ :=
+  R05_phase_finite_zeta_certificate.lower_of_re
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+
+/-- Exact ratio of the phase-aware R05 `N = 4` certificate:
+`(793/2500 - 7/4)/1 = -1791/1250`. -/
+theorem R05_phase_ratio_eq :
+    ((R05_phase_finite_zeta_certificate.slow - R05_phase_finite_zeta_certificate.rtail) /
+      R05_phase_finite_zeta_certificate.cF) = (-1791 / 1250 : Real) := by
+  have h1 : R05_phase_finite_zeta_certificate.slow = (793 / 2500 : Real) := rfl
+  have h2 : R05_phase_finite_zeta_certificate.rtail = (7 / 4 : Real) := rfl
+  have h3 : R05_phase_finite_zeta_certificate.cF = (1 : Real) := rfl
+  rw [h1, h2, h3]
+  norm_num
+
+#print axioms R05_log_four_eq
+#print axioms R05_theta4_mem
+#print axioms R05_cos_075log4_upper
+#print axioms R05_cos_075log4_lower
+#print axioms R05_rpow_four_neg0395_le
+#print axioms R05_inv_four_cpow_re_eq
+#print axioms R05_eta_fourth_eq
+#print axioms R05_eta_fourth_Re_ge
+#print axioms R05_pair1_Re_ge
+#print axioms R05_S4_Re_phase_ge
+#print axioms R05_S4_norm_phase_ge
+#print axioms R05_S4_Re_phase_ratio_eq
+#print axioms R05_S4_Re_phase_ratio_lt_half
+#print axioms R05_eta_tail_2_le
+#print axioms R05_phase_finite_zeta_certificate
+#print axioms R05_phase_zeta_lower
+#print axioms R05_phase_ratio_eq
+
 end Door3OffAxis

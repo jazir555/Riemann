@@ -33932,3 +33932,163 @@ theorem R02_D3_zeta_ratio_exp_line095 (s : ℂ) (hre : s.re = 0.95) :
 #print axioms R02_D3_chiCos_exp_line095
 #print axioms R02_D3_zetaChi_exp_line095
 #print axioms R02_D3_zeta_ratio_exp_line095
+
+/-!
+## Door-3 Stirling bridge (zeta lane, D3-next): two-step shift decay on `Re = 0.95`.
+
+Mathlib inventory (checked before theorizing):
+* No Stirling asymptotics exist in Mathlib: `Mathlib/Analysis/SpecialFunctions/Gamma/*`
+  provides only `Gamma_add_one` (Complex + Real), `Gamma_eq_integral`,
+  Bohr-Mollerup log-convexity (`convexOn_log_Gamma`, `convexOn_Gamma`), and the
+  Euler-limit `GammaSeq` convergence. No `‖Γ(σ+it)‖ ≤ C * exp(-c * |t|)` lemma exists.
+* Hence route (a) Euler-integral van-der-Corput and route (b) large-`Re` Stirling transfer
+  are both unbankable Mathlib-only: the oscillatory-integral decay estimate and the
+  large-`Re` explicit Stirling remainder are absent from Mathlib.
+
+What IS bankable: the recurrence `Γ(w+2) = w * (w+1) * Γ(w)` moves the line
+`Re = 0.95` to `Re = 2.95`, where the banked domination
+`R02_D3_Gamma_norm_le_Real_Gamma` plus a convexity cap (`Γ(2.95) ≤ 2`) applies.
+Dividing by `‖s‖ * ‖s+1‖` yields genuine line-uniform *polynomial* decay
+`‖Γ(s)‖ ≤ 2 / |Im| ^ 2`, e.g. `≤ 0.0726` at `|Im| ≥ 5.25` (55x sharper than the
+decay-free cap `≤ 4`). This is the tightest proved step toward the Stirling bridge.
+
+Honest negative (exact obstruction): the requested pure-exponential bound
+`‖Γ(0.95+t*I)‖ ≤ 4 * exp(-c * |t|)` with `c > 1.5708` (i.e. `c > π/2`) is
+asymptotically FALSE as stated: true Stirling growth is
+`~(2π)^0.5 * |t|^0.45 * exp(-π*|t|/2)`, so any `c > π/2` with a constant prefactor
+is eventually violated by the `|t|^0.45` polynomial factor. The correct target is
+`‖Γ‖ ≤ C * (1+|t|)^0.45 * exp(-π*|t|/2)` or `c < π/2` with polynomial loss; neither
+the upper Stirling remainder nor the matching lower bound exists in Mathlib, so the
+full exponential bridge is unreachable with banked ingredients alone.
+The shift-decay below is the maximal Mathlib-only step (FULL proofs, no sorry).
+-/
+
+/-- Two-step Gamma shift identity (isolates the Stirling-decay mechanism). -/
+theorem R02_D3_Gamma_shift_two (w : ℂ) (hw : w ≠ 0) (hw1 : w + 1 ≠ 0) :
+    Complex.Gamma (w + 2) = w * (w + 1) * Complex.Gamma w := by
+  have h1 : Complex.Gamma (w + 1 + 1) = (w + 1) * Complex.Gamma (w + 1) :=
+    Complex.Gamma_add_one (w + 1) hw1
+  have h2 : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw
+  have heq : w + 2 = w + 1 + 1 := by ring
+  rw [heq, h1, h2]
+  ring
+
+/-- Real Gamma cap `Γ(1.95) ≤ 1` (convexity on `[1,2]`, mirrors banked pattern). -/
+theorem R02_D3_Real_Gamma_195_le_one : Real.Gamma 1.95 ≤ 1 := by
+  have ha : (0 : ℝ) ≤ 1 - 0.95 := by norm_num
+  have hb : (0 : ℝ) ≤ (0.95 : ℝ) := by norm_num
+  have hab : ((1 : ℝ) - 0.95) + 0.95 = 1 := by ring
+  have h1mem : (1 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+  have h2mem : (2 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+  have hJ := Real.convexOn_Gamma.2 h1mem h2mem ha hb hab
+  simp only [smul_eq_mul] at hJ
+  have hpt : (1 - (0.95 : ℝ)) * 1 + 0.95 * 2 = 1.95 := by ring
+  rw [hpt, Real.Gamma_one, Real.Gamma_two] at hJ
+  have he : (1 - (0.95 : ℝ)) * 1 + 0.95 * 1 = 1 := by ring
+  exact le_trans hJ (le_of_eq he)
+
+/-- Real Gamma cap `Γ(2.95) ≤ 2` (one shift above the `[1,2]` convexity cap). -/
+theorem R02_D3_Real_Gamma_295_le_two : Real.Gamma 2.95 ≤ 2 := by
+  have hne : (1.95 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (1.95 + 1) = 1.95 * Real.Gamma 1.95 :=
+    Real.Gamma_add_one hne
+  have heq : (1.95 : ℝ) + 1 = 2.95 := by ring
+  have hcap : Real.Gamma 1.95 ≤ 1 := R02_D3_Real_Gamma_195_le_one
+  have h := mul_le_mul_of_nonneg_left hcap (show (0 : ℝ) ≤ 1.95 by norm_num)
+  rw [← heq, hshift]
+  calc (1.95 : ℝ) * Real.Gamma 1.95 ≤ 1.95 * 1 := h
+    _ = 1.95 := by ring
+    _ ≤ 2 := by norm_num
+
+/-- Line-uniform shift decay for complex Gamma on `Re = 0.95` (Stirling bridge step). -/
+theorem R02_D3_Gamma_line095_shift_decay (s : ℂ) (hre : s.re = 0.95) :
+    ‖Complex.Gamma s‖ ≤ 2 / (‖s‖ * ‖s + 1‖) := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    have h1 : s.re = 0 := by rw [h]; simp
+    rw [hre] at h1
+    norm_num at h1
+  have hs1 : s + 1 ≠ 0 := by
+    intro h
+    have h1 : (s + 1).re = 0 := by rw [h]; simp
+    have hre1 : (s + 1).re = s.re + 1 := by simp
+    rw [hre1, hre] at h1
+    norm_num at h1
+  have hshift := R02_D3_Gamma_shift_two s hs0 hs1
+  have hre2 : (s + 2).re = 2.95 := by
+    have h2 : (s + 2).re = s.re + 2 := by simp
+    rw [h2, hre]
+    norm_num
+  have hw0 : (0 : ℝ) < (s + 2).re := by rw [hre2]; norm_num
+  have hle := R02_D3_Gamma_norm_le_Real_Gamma (s + 2) hw0
+  have hcap : Real.Gamma (s + 2).re ≤ 2 := by
+    rw [hre2]
+    exact R02_D3_Real_Gamma_295_le_two
+  have hG2 : ‖Complex.Gamma (s + 2)‖ ≤ 2 := le_trans hle hcap
+  have hnorm : ‖Complex.Gamma (s + 2)‖ = ‖s‖ * ‖s + 1‖ * ‖Complex.Gamma s‖ := by
+    rw [hshift, norm_mul, norm_mul]
+  have hpos : (0 : ℝ) < ‖s‖ * ‖s + 1‖ := by
+    apply mul_pos
+    · exact norm_pos_iff.mpr hs0
+    · exact norm_pos_iff.mpr hs1
+  rw [hnorm] at hG2
+  have hmul : ‖Complex.Gamma s‖ * (‖s‖ * ‖s + 1‖) ≤ 2 := by
+    calc ‖Complex.Gamma s‖ * (‖s‖ * ‖s + 1‖)
+        = ‖s‖ * ‖s + 1‖ * ‖Complex.Gamma s‖ := by ring
+      _ ≤ 2 := hG2
+  exact (le_div_iff₀ hpos).mpr hmul
+
+/-- Polynomial-decay corollary `‖Γ(s)‖ ≤ 2 / |Im| ^ 2` on `Re = 0.95` for `|Im| ≥ 1`. -/
+theorem R02_D3_Gamma_line095_poly_decay (s : ℂ) (hre : s.re = 0.95)
+    (ht : 1 ≤ |s.im|) : ‖Complex.Gamma s‖ ≤ 2 / (|s.im| * |s.im|) := by
+  have hdec := R02_D3_Gamma_line095_shift_decay s hre
+  have h1 : |s.im| ≤ ‖s‖ := Complex.abs_im_le_norm s
+  have h2 : |s.im| ≤ ‖s + 1‖ := by
+    have h := Complex.abs_im_le_norm (s + 1)
+    have him : (s + 1).im = s.im := by simp
+    rw [him] at h
+    exact h
+  have hpos : (0 : ℝ) < |s.im| * |s.im| := by
+    apply mul_pos
+    · linarith
+    · linarith
+  have hden : |s.im| * |s.im| ≤ ‖s‖ * ‖s + 1‖ :=
+    mul_le_mul h1 h2 (abs_nonneg _) (norm_nonneg _)
+  have hinv : (1 : ℝ) / (‖s‖ * ‖s + 1‖) ≤ 1 / (|s.im| * |s.im|) :=
+    one_div_le_one_div_of_le hpos hden
+  have hmul : (2 : ℝ) / (‖s‖ * ‖s + 1‖) ≤ 2 / (|s.im| * |s.im|) := by
+    have eX : (2 : ℝ) / (‖s‖ * ‖s + 1‖) = 2 * (1 / (‖s‖ * ‖s + 1‖)) :=
+      div_eq_mul_one_div _ _
+    have eY : (2 : ℝ) / (|s.im| * |s.im|) = 2 * (1 / (|s.im| * |s.im|)) :=
+      div_eq_mul_one_div _ _
+    rw [eX, eY]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  exact le_trans hdec hmul
+
+/-- Window numeral: `‖Γ(s)‖ ≤ 0.0726` on `Re = 0.95` at `|Im| ≥ 5.25` (55x over `≤ 4`). -/
+theorem R02_D3_Gamma_line095_window55 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 5.25 ≤ |s.im|) : ‖Complex.Gamma s‖ ≤ 0.0726 := by
+  have ht1 : (1 : ℝ) ≤ |s.im| := by linarith
+  have hpoly := R02_D3_Gamma_line095_poly_decay s hre ht1
+  have hden : (5.25 : ℝ) * 5.25 ≤ |s.im| * |s.im| :=
+    mul_le_mul ht ht (by norm_num) (by linarith [abs_nonneg s.im])
+  have hpos : (0 : ℝ) < 5.25 * 5.25 := by norm_num
+  have hinv : (1 : ℝ) / (|s.im| * |s.im|) ≤ 1 / (5.25 * 5.25) :=
+    one_div_le_one_div_of_le hpos hden
+  have hmul : (2 : ℝ) / (|s.im| * |s.im|) ≤ 2 / (5.25 * 5.25) := by
+    have eX : (2 : ℝ) / (|s.im| * |s.im|) = 2 * (1 / (|s.im| * |s.im|)) :=
+      div_eq_mul_one_div _ _
+    have eY : (2 : ℝ) / (5.25 * 5.25) = 2 * (1 / (5.25 * 5.25)) :=
+      div_eq_mul_one_div _ _
+    rw [eX, eY]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have hnum : (2 : ℝ) / (5.25 * 5.25) ≤ 0.0726 := by norm_num
+  exact le_trans (le_trans hpoly hmul) hnum
+
+#print axioms R02_D3_Gamma_shift_two
+#print axioms R02_D3_Real_Gamma_195_le_one
+#print axioms R02_D3_Real_Gamma_295_le_two
+#print axioms R02_D3_Gamma_line095_shift_decay
+#print axioms R02_D3_Gamma_line095_poly_decay
+#print axioms R02_D3_Gamma_line095_window55
