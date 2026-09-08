@@ -34226,3 +34226,92 @@ theorem R02_D3_zetaChi_window55_exp_line095 (s : ℂ) (hre : s.re = 0.95)
 #print axioms R02_D3_zetaChi_poly_line095
 #print axioms R02_D3_zeta_ratio_poly_line095
 #print axioms R02_D3_zetaChi_window55_exp_line095
+
+/-- Cleared integer-pow cap: `(1.035)^20 ≤ 2` via tight small-step upper bounds
+    (mirror of banked `R05_pow_16_15_20_ge_two`; every `norm_num` is at most a
+    square of a short decimal). -/
+theorem R02_D3_pow_1035_20_le_two : ((1.035 : ℝ)) ^ (20 : ℕ) ≤ 2 := by
+  have h2 : ((1.035 : ℝ)) ^ (2 : ℕ) ≤ (1.0713 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.035 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((1.0713 : ℝ)) ^ (2 : ℕ) ≤ (1.1477 : ℝ) := by norm_num
+  have h4le : ((((1.035 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((1.0713 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.035 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.035 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.035 : ℝ)) ^ (4 : ℕ) ≤ (1.1477 : ℝ) := by
+    rw [← h44]
+    exact le_trans h4le hsq
+  have h5mul : ((1.035 : ℝ)) ^ (4 : ℕ) * (1.035 : ℝ) =
+      ((1.035 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.035 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.1477 : ℝ) * (1.035 : ℝ) ≤ (1.1879 : ℝ) := by norm_num
+  have h5le : ((1.035 : ℝ)) ^ (4 : ℕ) * (1.035 : ℝ) ≤
+      (1.1477 : ℝ) * (1.035 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.035 : ℝ)) ^ (5 : ℕ) ≤ (1.1879 : ℝ) := by
+    rw [← h5mul]
+    exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.035 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((1.1879 : ℝ)) ^ (2 : ℕ) ≤ (1.4112 : ℝ) := by norm_num
+  have h10le : ((((1.035 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤
+      ((1.1879 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.035 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.035 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.035 : ℝ)) ^ (10 : ℕ) ≤ (1.4112 : ℝ) := by
+    rw [← h1010]
+    exact le_trans h10le hsq10
+  have h10nn : (0 : ℝ) ≤ ((1.035 : ℝ)) ^ (10 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq20 : ((1.4112 : ℝ)) ^ (2 : ℕ) ≤ (2 : ℝ) := by norm_num
+  have h20le : ((((1.035 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) ≤
+      ((1.4112 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h10nn g10 2
+  have h2020 : ((((1.035 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.035 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans h20le hsq20
+
+/-- Rpow lower: `1.035 ≤ 2^0.05` (cleared via `(1.035)^20 ≤ 2`;
+    mirror of banked `R05_rpow_005_le`). -/
+theorem R02_D3_rpow_1035_le_two005 : (1.035 : ℝ) ≤ (2 : ℝ) ^ (0.05 : ℝ) := by
+  by_contra hle
+  have hlt : (2 : ℝ) ^ (0.05 : ℝ) < (1.035 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (2 : ℝ) ^ (0.05 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) ≤
+      ((((1.035 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 20
+  have h2_eq : ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h2_eq] at hle_pow
+  have hge := R02_D3_pow_1035_20_le_two
+  linarith
+
+/-- Eta-denominator floor on the `Re = 0.95` line: `‖1 - 2^{1-s}‖ ≥ 0.035`,
+    uniformly in `Im s` (since `‖2^{1-s}‖ = 2^0.05 ≥ 1.035` via banked
+    `two_cpow_one_sub_norm`). -/
+theorem R02_D3_eta_denom_floor_line095 (s : ℂ) (hre : s.re = 0.95) :
+    (0.035 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hnorm := two_cpow_one_sub_norm s
+  have hrexp : (1 : ℝ) - s.re = (0.05 : ℝ) := by
+    rw [hre]
+    norm_num
+  rw [hrexp] at hnorm
+  have hge := R02_D3_rpow_1035_le_two005
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - s)) (1 : ℂ)
+  rw [norm_one, hnorm] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    norm_sub_rev _ _
+  linarith
+
+#print axioms R02_D3_pow_1035_20_le_two
+#print axioms R02_D3_rpow_1035_le_two005
+#print axioms R02_D3_eta_denom_floor_line095
