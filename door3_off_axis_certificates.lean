@@ -2259,4 +2259,162 @@ noncomputable def R03_genuine_finite_zeta_certificate :
 #print axioms R03_eta_tail_1_le
 #print axioms R03_genuine_finite_zeta_certificate
 
+/-- R05 center norm upper (`‖sR05‖ ≤ 0.85` from `0.395² + 0.75² ≤ 0.85²`). -/
+theorem R05_s_norm_le : ‖R03R10PolyLower.sR05‖ ≤ (0.85 : ℝ) := by
+  have hsq : ‖R03R10PolyLower.sR05‖ ^ 2 ≤ (0.85 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, R03R10PolyLower.sR05_re,
+      R03R10PolyLower.sR05_im]
+    norm_num
+  have hnn : (0 : ℝ) ≤ ‖R03R10PolyLower.sR05‖ := norm_nonneg _
+  calc ‖R03R10PolyLower.sR05‖ = Real.sqrt (‖R03R10PolyLower.sR05‖ ^ 2) :=
+        (Real.sqrt_sq hnn).symm
+    _ ≤ Real.sqrt ((0.85 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = (0.85 : ℝ) := Real.sqrt_sq (by norm_num)
+
+/-- Cast helper: `((1024 : ℕ) : ℝ) = 2 ^ (10 : ℕ)`. -/
+theorem R05_M1024_eq : ((((1024 : ℕ)) : ℝ)) = (2 : ℝ) ^ (10 : ℕ) := by
+  norm_num
+
+/-- Cleared integer-pow lemma: `(16/15)^20 ≥ 2` via small-step lower bounds. -/
+theorem R05_pow_16_15_20_ge_two : (2 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (20 : ℕ) := by
+  have h106 : (1.06 : ℝ) ≤ (16 / 15 : ℝ) := by norm_num
+  have h106nn : (0 : ℝ) ≤ (1.06 : ℝ) := by norm_num
+  have h112 : (1.12 : ℝ) ≤ ((1.06 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h2le : ((1.06 : ℝ)) ^ (2 : ℕ) ≤ ((16 / 15 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h106nn h106 2
+  have g2 : (1.12 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (2 : ℕ) := le_trans h112 h2le
+  have h125 : (1.25 : ℝ) ≤ ((1.12 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h4le : ((1.12 : ℝ)) ^ (2 : ℕ) ≤ ((((16 / 15 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g2 2
+  have h44 : ((((16 / 15 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((16 / 15 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : (1.25 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (4 : ℕ) := by
+    rw [← h44]
+    exact le_trans h125 h4le
+  have h4nn : (0 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (4 : ℕ) := pow_nonneg (by norm_num) _
+  have h5mul : ((16 / 15 : ℝ)) ^ (4 : ℕ) * (16 / 15 : ℝ) =
+      ((16 / 15 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((16 / 15 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have h5le : (1.25 : ℝ) * (1.06 : ℝ) ≤
+      ((16 / 15 : ℝ)) ^ (4 : ℕ) * (16 / 15 : ℝ) :=
+    mul_le_mul g4 h106 (by norm_num) h4nn
+  have h132 : (1.32 : ℝ) ≤ (1.25 : ℝ) * (1.06 : ℝ) := by norm_num
+  have g5 : (1.32 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (5 : ℕ) := by
+    rw [← h5mul]
+    exact le_trans h132 h5le
+  have h174 : (1.74 : ℝ) ≤ ((1.32 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h10le : ((1.32 : ℝ)) ^ (2 : ℕ) ≤
+      ((((16 / 15 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g5 2
+  have h1010 : ((((16 / 15 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((16 / 15 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : (1.74 : ℝ) ≤ ((16 / 15 : ℝ)) ^ (10 : ℕ) := by
+    rw [← h1010]
+    exact le_trans h174 h10le
+  have h2low : (2 : ℝ) ≤ ((1.74 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h20le : ((1.74 : ℝ)) ^ (2 : ℕ) ≤
+      ((((16 / 15 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g10 2
+  have h2020 : ((((16 / 15 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((16 / 15 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans h2low h20le
+
+/-- Small rpow upper: `2^0.05 ≤ 16/15` (cleared via `(16/15)^20 ≥ 2`). -/
+theorem R05_rpow_005_le : (2 : ℝ) ^ (0.05 : ℝ) ≤ (16 / 15 : ℝ) := by
+  by_contra hle
+  have hlt : (16 / 15 : ℝ) < (2 : ℝ) ^ (0.05 : ℝ) := lt_of_not_ge hle
+  have hle_pow : ((16 / 15 : ℝ)) ^ (20 : ℕ) ≤
+      ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ (by norm_num) hlt.le 20
+  have h2_eq : ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h2_eq] at hle_pow
+  have hge := R05_pow_16_15_20_ge_two
+  linarith
+
+/-- Rpow lower: `15 ≤ ((1024 : ℕ) : ℝ)^0.395` via `2^3.95 = 16/2^0.05`. -/
+theorem R05_M1024_rpow_ge :
+    (15 : ℝ) ≤ ((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)) := by
+  rw [R05_M1024_eq]
+  have h1 : (((2 : ℝ) ^ (10 : ℕ)) ^ (0.395 : ℝ)) =
+      (2 : ℝ) ^ (((((10 : ℕ)) : ℝ)) * (0.395 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have e_exp : ((((10 : ℕ)) : ℝ)) * (0.395 : ℝ) = 4 - (0.05 : ℝ) := by norm_num
+  rw [e_exp]
+  have hsub : (2 : ℝ) ^ (4 - (0.05 : ℝ)) =
+      (2 : ℝ) ^ (4 : ℝ) / (2 : ℝ) ^ (0.05 : ℝ) := by
+    rw [Real.rpow_sub (by norm_num)]
+  rw [hsub]
+  have e4 : (4 : ℝ) = ((((4 : ℕ)) : ℝ)) := by norm_num
+  have h16 : (2 : ℝ) ^ (4 : ℝ) = 16 := by
+    rw [e4, Real.rpow_natCast]
+    norm_num
+  rw [h16]
+  have h005 := R05_rpow_005_le
+  have h005pos : (0 : ℝ) < (2 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have h15 : (15 : ℝ) ≤ 16 / ((2 : ℝ) ^ (0.05 : ℝ)) := by
+    rw [le_div_iff₀ h005pos]
+    have hmul : (15 : ℝ) * ((2 : ℝ) ^ (0.05 : ℝ)) ≤ 15 * (16 / 15) :=
+      mul_le_mul_of_nonneg_left h005 (by norm_num)
+    have heq : (15 : ℝ) * (16 / 15) = 16 := by norm_num
+    linarith
+  linarith
+
+/-- R05 `M = 1024` tail-decay bound: `0.85·(1024^-0.395)/0.395 ≤ 3/20`. -/
+theorem R05_r_1024_le :
+    (0.85 : ℝ) * ((((((1024 : ℕ)) : ℝ) ^ (-0.395 : ℝ))) / (0.395 : ℝ)) ≤
+      (3 / 20 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((1024 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := R05_M1024_rpow_ge
+  have hrw : ((((1024 : ℕ)) : ℝ) ^ (-0.395 : ℝ)) =
+      (((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ ≤ (15 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ / (0.395 : ℝ) ≤
+      (15 : ℝ)⁻¹ / (0.395 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (0.85 : ℝ) * ((((((1024 : ℕ)) : ℝ) ^ (0.395 : ℝ)))⁻¹ /
+      (0.395 : ℝ)) ≤ (0.85 : ℝ) * ((15 : ℝ)⁻¹ / (0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (0.85 : ℝ) * ((15 : ℝ)⁻¹ / (0.395 : ℝ)) ≤ (3 / 20 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Genuine R05 paired tail at `M = 1024` (`‖G - S₂₀₄₈‖ ≤ 3/20`). -/
+theorem R05_eta_tail_1024_le :
+    ‖(∑' m, etaPairTerm R03R10PolyLower.sR05 m) -
+      (∑ k ∈ Finset.range (2 * 1024), etaDirichletTerm R03R10PolyLower.sR05 k)‖ ≤
+      (3 / 20 : ℝ) := by
+  have hs : 0 < R03R10PolyLower.sR05.re := by
+    rw [R03R10PolyLower.sR05_re]
+    norm_num
+  have hC : ‖R03R10PolyLower.sR05‖ ≤ (0.85 : ℝ) := R05_s_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 1024 (by norm_num)
+  have hre : R03R10PolyLower.sR05.re = (0.395 : ℝ) := R03R10PolyLower.sR05_re
+  rw [hre] at hgen
+  have hr := R05_r_1024_le
+  linarith
+
+#print axioms R05_s_norm_le
+#print axioms R05_M1024_eq
+#print axioms R05_pow_16_15_20_ge_two
+#print axioms R05_rpow_005_le
+#print axioms R05_M1024_rpow_ge
+#print axioms R05_r_1024_le
+#print axioms R05_eta_tail_1024_le
+
 end Door3OffAxis

@@ -32743,3 +32743,140 @@ theorem R02_D3_zetaChi_of_gamma (s : ℂ) (hre_hi : s.re ≤ 0.74)
 #print axioms R02_D3_chiArg_im_le13
 #print axioms R02_D3_chiCos_le
 #print axioms R02_D3_zetaChi_of_gamma
+
+
+/-!
+## Door-3 FE+Stirling+convexity bridge, step 2 (zeta lane): Stirling-sharp Gamma numeral.
+
+Route: complex-to-real Euler-integral domination
+(`Complex.Gamma_eq_integral`, `Real.Gamma_eq_integral`,
+`Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean`) +
+real shift-down (`Real.Gamma_add_one`) + convexity cap on `[1,2]`
+(`Real.convexOn_Gamma`, `Real.Gamma_one`, `Real.Gamma_two`).
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_Gamma_norm_le_Real_Gamma`: `‖Γ(w)‖ ≤ Γ(Re w)` for `0 < Re w`
+  (pointwise `‖exp(-x) * x^(w-1)‖ = exp(-x) * x^(Re w - 1)` via
+  `Complex.norm_cpow_eq_rpow_re_of_pos`, then `norm_integral_le_integral_norm`).
+* `R02_D3_Real_Gamma_le_four`: `Γ(y) ≤ 4` for `y ∈ [0.26, 0.95]`
+  (shift `Γ(y+1) = y * Γ(y)` down to the convexity cap `Γ ≤ 1` on `[1,2]`,
+  then `1/y ≤ 1/0.26 ≤ 4`).
+* `R02_D3_Gamma_le`: `‖Γ(1-s)‖ ≤ 4` on the R02 rect
+  (`(1-s).re ∈ [0.26, 0.95]` from `s.re ∈ [0.05, 0.74]`).
+* `R02_D3_zetaChi_le`: chi-factor cap `‖χ(1-s)‖ ≤ 2*1*4*exp 13` on the R02 rect
+  (banked `R02_D3_zetaChi_of_gamma` at `G = 4`).
+
+RESIDUAL (exact next step): Hadamard three-lines
+(`Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`,
+`Mathlib/Analysis/Complex/Hadamard.lean:608`) on damped
+`G(s) = F(s)*exp((s-c)^2/100)` with `BddAbove` + `DiffContOnCl`,
+using `R02_D3_zetaChi_le` (left edge via FE) + `R02_D3_F_rightEdge_window`
+(right edge) to close `‖F‖`, then `R02_D3_subOne_ge` converts back:
+`‖ζ‖ ≤ ‖F‖/5.25 ≤ 10`.
+-/
+
+/-- Complex Gamma is dominated by real Gamma at `Re` (Euler-integral domination). -/
+theorem R02_D3_Gamma_norm_le_Real_Gamma (w : ℂ) (hw : 0 < w.re) :
+    ‖Complex.Gamma w‖ ≤ Real.Gamma w.re := by
+  have hC : Complex.Gamma w = Complex.GammaIntegral w :=
+    Complex.Gamma_eq_integral hw
+  have hR : Real.Gamma w.re
+      = ∫ x : ℝ in Set.Ioi 0, Real.exp (-x) * x ^ (w.re - 1) :=
+    Real.Gamma_eq_integral hw
+  rw [hC, hR]
+  unfold Complex.GammaIntegral
+  have hpoint : ∀ x : ℝ, x ∈ Set.Ioi (0 : ℝ) →
+      ‖((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖
+        = Real.exp (-x) * x ^ (w.re - 1) := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := Set.mem_Ioi.mp hx
+    have e1 : ‖((Real.exp (-x) : ℝ) : ℂ)‖ = Real.exp (-x) :=
+      Complex.norm_of_nonneg (le_of_lt (Real.exp_pos (-x)))
+    have e2 : ‖((x : ℝ) : ℂ) ^ (w - 1)‖ = x ^ (w.re - 1) := by
+      have hcp := Complex.norm_cpow_eq_rpow_re_of_pos hx0 (w - 1)
+      have ere : (w - 1).re = w.re - 1 := by simp
+      rw [ere] at hcp
+      exact hcp
+    rw [norm_mul, e1, e2]
+  have heq : (∫ x : ℝ in Set.Ioi (0 : ℝ),
+        ‖((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖) =
+      ∫ x : ℝ in Set.Ioi (0 : ℝ), Real.exp (-x) * x ^ (w.re - 1) :=
+    MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun x hx => hpoint x hx)
+  have hI : MeasurableSet (Set.Ioi (0 : ℝ)) := measurableSet_Ioi
+  have hbound : ‖∫ x : ℝ in Set.Ioi (0 : ℝ),
+        ((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖ ≤
+      ∫ x : ℝ in Set.Ioi (0 : ℝ),
+        ‖((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖ := by
+    simp only [← MeasureTheory.integral_indicator hI]
+    have hcomm : ∀ x : ℝ, ‖(Set.Ioi (0 : ℝ)).indicator
+        (fun x => ((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)) x‖ =
+        (Set.Ioi (0 : ℝ)).indicator
+        (fun x => ‖((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖) x := by
+      intro x
+      by_cases hx : x ∈ Set.Ioi (0 : ℝ)
+      · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]
+      · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, norm_zero]
+    calc ‖∫ x : ℝ, (Set.Ioi (0 : ℝ)).indicator
+            (fun x => ((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)) x‖
+          ≤ ∫ x : ℝ, ‖(Set.Ioi (0 : ℝ)).indicator
+            (fun x => ((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)) x‖ :=
+        MeasureTheory.norm_integral_le_integral_norm _
+      _ = ∫ x : ℝ, (Set.Ioi (0 : ℝ)).indicator
+            (fun x => ‖((Real.exp (-x) : ℝ) : ℂ) * ((x : ℝ) : ℂ) ^ (w - 1)‖) x :=
+        MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hcomm)
+  exact le_trans hbound (le_of_eq heq)
+
+/-- Real Gamma on `[0.26, 0.95]` is `≤ 4` (shift + convexity cap on `[1,2]`). -/
+theorem R02_D3_Real_Gamma_le_four (y : ℝ) (hy0 : 0.26 ≤ y) (hy1 : y ≤ 0.95) :
+    Real.Gamma y ≤ 4 := by
+  have hypos : (0 : ℝ) < y := by linarith
+  have hyne : y ≠ 0 := ne_of_gt hypos
+  have hshift : Real.Gamma (y + 1) = y * Real.Gamma y := Real.Gamma_add_one hyne
+  have hcap : Real.Gamma (y + 1) ≤ 1 := by
+    have ha : (0 : ℝ) ≤ 1 - y := by linarith
+    have hb : (0 : ℝ) ≤ y := by linarith
+    have hab : (1 - y) + y = 1 := by ring
+    have h1mem : (1 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+    have h2mem : (2 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+    have hJ := Real.convexOn_Gamma.2 h1mem h2mem ha hb hab
+    simp only [smul_eq_mul] at hJ
+    have hpt : (1 - y) * 1 + y * 2 = y + 1 := by ring
+    rw [hpt, Real.Gamma_one, Real.Gamma_two] at hJ
+    have he : (1 - y) * 1 + y * 1 = 1 := by ring
+    exact le_trans hJ (le_of_eq he)
+  have hdiv : Real.Gamma y = Real.Gamma (y + 1) / y := by
+    rw [eq_div_iff_mul_eq hyne]
+    rw [hshift]
+    ring
+  have h1 : Real.Gamma (y + 1) / y ≤ 1 / y := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hypos))
+  have h2 : (1 : ℝ) / y ≤ 1 / 0.26 :=
+    one_div_le_one_div_of_le (by norm_num) hy0
+  have h3 : (1 : ℝ) / 0.26 ≤ 4 := by norm_num
+  calc Real.Gamma y = Real.Gamma (y + 1) / y := hdiv
+    _ ≤ 1 / y := h1
+    _ ≤ 1 / 0.26 := h2
+    _ ≤ 4 := h3
+
+/-- Stirling-sharp Gamma numeral on the R02 rect: `‖Γ(1-s)‖ ≤ 4`. -/
+theorem R02_D3_Gamma_le (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 4 := by
+  have hre : (1 - s).re = 1 - s.re := by simp
+  have hw0 : (0 : ℝ) < (1 - s).re := by rw [hre]; linarith
+  have hle := R02_D3_Gamma_norm_le_Real_Gamma (1 - s) hw0
+  have hy0 : (0.26 : ℝ) ≤ (1 - s).re := by rw [hre]; linarith
+  have hy1 : (1 - s).re ≤ (0.95 : ℝ) := by rw [hre]; linarith
+  have hcap := R02_D3_Real_Gamma_le_four (1 - s).re hy0 hy1
+  exact le_trans hle hcap
+
+/-- Chi-factor cap on the R02 rect at `G = 4` (feeds the three-lines left edge). -/
+theorem R02_D3_zetaChi_le (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖zetaChi (1 - s)‖ ≤ 2 * 1 * 4 * Real.exp 13 :=
+  R02_D3_zetaChi_of_gamma s hre_hi him_lo him_hi 4 (R02_D3_Gamma_le s hre_lo hre_hi)
+
+#print axioms R02_D3_Gamma_norm_le_Real_Gamma
+#print axioms R02_D3_Real_Gamma_le_four
+#print axioms R02_D3_Gamma_le
+#print axioms R02_D3_zetaChi_le
