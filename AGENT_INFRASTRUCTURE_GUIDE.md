@@ -3336,6 +3336,9 @@ sorry-free infrastructure and the complete commit ledger above.
   height `|t|≤1` enclosure + second tile (`door3RealSegNext2`,
   coverage now [-1,3]). Residual: pointwise nonvanishing on full arc
   (tasked as RX6).
+- 2026-09-08 RX6 (`2e0de714`, tail-scratch, green 8682 jobs, axioms clean):
+  third tile (`door3RealSegNext3`, coverage [-1,4]) + tile uppers.
+  Residual: pointwise LOWER at new height (tasked as RX7).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
