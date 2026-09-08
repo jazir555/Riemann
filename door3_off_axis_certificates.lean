@@ -2679,3 +2679,272 @@ theorem R05_phase_ratio_S2_lt_half : (1 / 20 : ℝ) < (1 / 2 : ℝ) := by
 #print axioms R05_phase_ratio_S2_lt_half
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- R05 cosine upper (`cos (0.75 * log 2) <= 87/100`) via quartic majorant. -/
+theorem R05_cos_075log2_upper :
+    Real.cos (0.75 * Real.log 2) <= (87 / 100 : Real) := by
+  have hloghi := Real.log_two_lt_d9
+  have hloglo := Real.log_two_gt_d9
+  have hpos : (0 : Real) < Real.log 2 := Real.log_pos (by norm_num)
+  have hx_nn : (0 : Real) <= 0.75 * Real.log 2 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hx_hi : 0.75 * Real.log 2 <= (0.52 : Real) := by linarith
+  have hx_lo : (0.519 : Real) <= 0.75 * Real.log 2 := by linarith
+  have hcos := CG_cos_le_quartic hx_nn
+  have h2lo : (0.519 : Real) ^ 2 <= (0.75 * Real.log 2) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo 2
+  have h4hi : (0.75 * Real.log 2) ^ 4 <= (0.52 : Real) ^ 4 :=
+    pow_le_pow_left₀ hx_nn hx_hi 4
+  have hnum : (1 : Real) - (0.519 : Real) ^ 2 / 2 + (0.52 : Real) ^ 4 / 24 <= (87 / 100 : Real) := by
+    norm_num
+  linarith
+
+/-- Real rpow inverse upper (`2 ^ (-0.395) <= 4/5`) from banked `5/4 <= 2 ^ 0.395`. -/
+theorem R05_rpow_neg0395_le : (2 : Real) ^ (-0.395 : Real) <= (4 / 5 : Real) := by
+  have hge := zetaCellS0_rpow_0395_ge
+  have hpos : (0 : Real) < (2 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (2 : Real) ^ (-0.395 : Real) = (((2 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (4 / 5 : Real) = ((5 / 4 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Real part of the R05 second eta inverse (`Re (2 ^ s)⁻¹ = 2 ^ (-0.395) * cos`). -/
+theorem R05_inv_two_cpow_re_eq :
+    (((((2 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (2 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 2) := by
+  have h2eq : ((((2 : Nat)) : Complex)) = (2 : Complex) := by norm_cast
+  rw [h2eq]
+  have hlog : Complex.log (2 : Complex) = (((Real.log 2 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) <= 2)).symm
+  have hlogre : (Complex.log (2 : Complex)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (2 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 2 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (2 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 2 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (2 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (2 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : Complex) ≠ 0)]
+  have hinv : ((2 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (2 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (2 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 2 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (2 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 2 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (2 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 2 * 0.395)) * Real.cos (-(Real.log 2 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 2 * (-0.75))) = Real.cos (0.75 * Real.log 2) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 2 * 0.395)) = (2 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 2 * 0.395) = Real.log 2 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 2)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- Phase-aware R05 two-term real part (`3/10 <= Re S2`). -/
+theorem R05_S2_Re_ge :
+    (3 / 10 : Real) <= (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_eta_S2_eq]
+  rw [Complex.sub_re, Complex.one_re]
+  have hre := R05_inv_two_cpow_re_eq
+  rw [hre]
+  have hrpow := R05_rpow_neg0395_le
+  have hcos_hi := R05_cos_075log2_upper
+  have hcos_lo := R05_phase_cos_lower
+  have hrpow_nn : (0 : Real) <= (2 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hcos_nn : (0 : Real) <= Real.cos (0.75 * Real.log 2) := by linarith
+  have hprod : (2 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 2) <=
+      (4 / 5 : Real) * (87 / 100 : Real) :=
+    mul_le_mul hrpow hcos_hi hcos_nn (by norm_num)
+  have hle : (4 / 5 : Real) * (87 / 100 : Real) <= (7 / 10 : Real) := by norm_num
+  linarith
+
+/-- Rpow lower (`29/20 <= 3 ^ 0.395`) via cleared `(29/20) ^ 20 <= 3 ^ 7`. -/
+theorem R05_three_rpow_ge : (29 / 20 : Real) <= (3 : Real) ^ (0.395 : Real) := by
+  have h2up : ((29 / 20 : Real)) ^ (2 : Nat) <= (211 / 100 : Real) := by norm_num
+  have h2nn : (0 : Real) <= ((29 / 20 : Real)) ^ (2 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h4le : ((((29 / 20 : Real)) ^ (2 : Nat))) ^ (2 : Nat) <=
+      ((211 / 100 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h2nn h2up 2
+  have h4eq : ((((29 / 20 : Real)) ^ (2 : Nat))) ^ (2 : Nat) =
+      ((29 / 20 : Real)) ^ (4 : Nat) := by
+    rw [<- pow_mul, show (2 * 2 : Nat) = 4 by norm_num]
+  have h4up : ((29 / 20 : Real)) ^ (4 : Nat) <= (446 / 100 : Real) := by
+    have hcalc : ((211 / 100 : Real)) ^ (2 : Nat) <= (446 / 100 : Real) := by norm_num
+    rw [<- h4eq]
+    exact le_trans h4le hcalc
+  have h4nn : (0 : Real) <= ((29 / 20 : Real)) ^ (4 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h5eq : ((29 / 20 : Real)) ^ (4 : Nat) * (29 / 20 : Real) =
+      ((29 / 20 : Real)) ^ (5 : Nat) := by
+    have hps := pow_succ ((29 / 20 : Real)) (4 : Nat)
+    rw [show (4 + 1 : Nat) = 5 by norm_num] at hps
+    exact hps.symm
+  have h5le : ((29 / 20 : Real)) ^ (4 : Nat) * (29 / 20 : Real) <=
+      (446 / 100 : Real) * (29 / 20 : Real) :=
+    mul_le_mul h4up (le_refl _) (by norm_num) (by norm_num)
+  have h5up : ((29 / 20 : Real)) ^ (5 : Nat) <= (647 / 100 : Real) := by
+    have hcalc : (446 / 100 : Real) * (29 / 20 : Real) <= (647 / 100 : Real) := by norm_num
+    rw [<- h5eq]
+    exact le_trans h5le hcalc
+  have h5nn : (0 : Real) <= ((29 / 20 : Real)) ^ (5 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h10le : ((((29 / 20 : Real)) ^ (5 : Nat))) ^ (2 : Nat) <=
+      ((647 / 100 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h5nn h5up 2
+  have h10eq : ((((29 / 20 : Real)) ^ (5 : Nat))) ^ (2 : Nat) =
+      ((29 / 20 : Real)) ^ (10 : Nat) := by
+    rw [<- pow_mul, show (5 * 2 : Nat) = 10 by norm_num]
+  have h10up : ((29 / 20 : Real)) ^ (10 : Nat) <= (4187 / 100 : Real) := by
+    have hcalc : ((647 / 100 : Real)) ^ (2 : Nat) <= (4187 / 100 : Real) := by norm_num
+    rw [<- h10eq]
+    exact le_trans h10le hcalc
+  have h10nn : (0 : Real) <= ((29 / 20 : Real)) ^ (10 : Nat) :=
+    pow_nonneg (by norm_num) _
+  have h20le : ((((29 / 20 : Real)) ^ (10 : Nat))) ^ (2 : Nat) <=
+      ((4187 / 100 : Real)) ^ (2 : Nat) :=
+    pow_le_pow_left₀ h10nn h10up 2
+  have h20eq : ((((29 / 20 : Real)) ^ (10 : Nat))) ^ (2 : Nat) =
+      ((29 / 20 : Real)) ^ (20 : Nat) := by
+    rw [<- pow_mul, show (10 * 2 : Nat) = 20 by norm_num]
+  have h20up : ((29 / 20 : Real)) ^ (20 : Nat) <= (1754 : Real) := by
+    have hcalc : ((4187 / 100 : Real)) ^ (2 : Nat) <= (1754 : Real) := by norm_num
+    rw [<- h20eq]
+    exact le_trans h20le hcalc
+  have h37 : ((29 / 20 : Real)) ^ (20 : Nat) <= (3 : Real) ^ (7 : Nat) := by
+    have h37num : (1754 : Real) <= (3 : Real) ^ (7 : Nat) := by norm_num
+    exact le_trans h20up h37num
+  have e : ((((3 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) = (3 : Real) ^ (7 : Nat) := by
+    rw [<- Real.rpow_natCast, <- Real.rpow_mul (by norm_num : (0 : Real) <= 3)]
+    rw [show (7 / 20 : Real) * ((((20 : Nat)) : Real)) = (7 : Real) by norm_num]
+    rw [show (7 : Real) = ((((7 : Nat)) : Real)) by norm_num]
+    exact Real.rpow_natCast 3 7
+  have hpow : ((29 / 20 : Real)) ^ (20 : Nat) <=
+      ((((3 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) := by
+    rw [e]
+    exact h37
+  have hstep : (29 / 20 : Real) <= (3 : Real) ^ ((7 / 20 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (29 / 20 : Real) <= (3 : Real) ^ ((7 / 20 : Real)) := hstep
+    _ <= (3 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- First-pair magnitude cap (`‖pair 1‖ <= 1/5`) from `‖s‖ <= 0.85` and `3 ^ 0.395 >= 29/20`. -/
+theorem R05_pair1_norm_le :
+    ‖etaPairTerm R03R10PolyLower.sR05 1‖ <= (1 / 5 : Real) := by
+  have hs : 0 < R03R10PolyLower.sR05.re := by
+    rw [R03R10PolyLower.sR05_re]
+    norm_num
+  have hgen := norm_etaPairTerm_le R03R10PolyLower.sR05 hs 1
+  have hC : ‖R03R10PolyLower.sR05‖ <= (0.85 : Real) := R05_s_norm_le
+  have hre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  rw [hre] at hgen
+  have hcast : ((((2 * 1 + 1 : Nat)) : Real)) = (3 : Real) := by norm_num
+  rw [hcast] at hgen
+  have h3ge := R05_three_rpow_ge
+  have h3pos : (0 : Real) < (3 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have h3inv : (((3 : Real) ^ (0.395 : Real)))⁻¹ <= ((29 / 20 : Real))⁻¹ :=
+    (inv_le_inv₀ h3pos (by norm_num)).mpr h3ge
+  have hrw1 : (3 : Real) ^ (-0.395 - 1 : Real) =
+      ((3 : Real) ^ (0.395 : Real))⁻¹ * ((3 : Real) ^ (-1 : Real)) := by
+    rw [show (-0.395 - 1 : Real) = (-0.395 : Real) + (-1 : Real) by ring]
+    rw [Real.rpow_add (by norm_num)]
+    rw [Real.rpow_neg (by norm_num : (0 : Real) <= 3)]
+  have hrw2 : (3 : Real) ^ (-1 : Real) = (1 / 3 : Real) := by
+    rw [Real.rpow_neg (by norm_num : (0 : Real) <= 3), Real.rpow_one]
+    norm_num
+  have hbase : (3 : Real) ^ (-0.395 - 1 : Real) <= (20 / 29 : Real) * (1 / 3 : Real) := by
+    rw [hrw1, hrw2]
+    have heq : ((29 / 20 : Real))⁻¹ = (20 / 29 : Real) := by norm_num
+    rw [heq] at h3inv
+    exact mul_le_mul h3inv (le_refl _) (by norm_num) (by norm_num)
+  have hmul : ‖R03R10PolyLower.sR05‖ * ((3 : Real) ^ (-0.395 - 1 : Real)) <=
+      (0.85 : Real) * ((20 / 29 : Real) * (1 / 3 : Real)) :=
+    mul_le_mul hC hbase (by positivity) (by norm_num)
+  have hnum : (0.85 : Real) * ((20 / 29 : Real) * (1 / 3 : Real)) <= (1 / 5 : Real) := by
+    norm_num
+  linarith
+
+/-- Four-term split (`S4 = S2 + pair 1`). -/
+theorem R05_S4_eq :
+    (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaPairTerm R03R10PolyLower.sR05 1 := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 1 =
+      etaDirichletTerm R03R10PolyLower.sR05 2 +
+        etaDirichletTerm R03R10PolyLower.sR05 3 := by
+    unfold etaPairTerm
+    have e0 : 2 * 1 = 2 := by norm_num
+    have e1 : 2 * 1 + 1 = 3 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        (etaDirichletTerm R03R10PolyLower.sR05 2 +
+          etaDirichletTerm R03R10PolyLower.sR05 3) := by
+    rw [show (4 : Nat) = 3 + 1 by norm_num, Finset.sum_range_succ,
+      show (3 : Nat) = 2 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- Larger-N slow bound (`1/10 <= ‖S4‖`, `N = 4 > 2`, phase-aware Re route). -/
+theorem R05_S4_norm_ge :
+    (1 / 10 : Real) <= ‖∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  have hS2 := R05_S2_Re_ge
+  have hp := R05_pair1_norm_le
+  have hdecomp := R05_S4_eq
+  have hRe4 : (1 / 10 : Real) <=
+      (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+    rw [hdecomp, Complex.add_re]
+    have habs : |(etaPairTerm R03R10PolyLower.sR05 1).re| <=
+        ‖etaPairTerm R03R10PolyLower.sR05 1‖ :=
+      Complex.abs_re_le_norm _
+    have hneg : -(etaPairTerm R03R10PolyLower.sR05 1).re <=
+        |(etaPairTerm R03R10PolyLower.sR05 1).re| :=
+      neg_le_abs _
+    linarith
+  have hle : (∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k).re <=
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm R03R10PolyLower.sR05 k‖ :=
+    Complex.re_le_norm _
+  linarith
+
+/-- Honest residual: `S4 = 1/10` with banked tail `3/20` and `cF = 1` gives
+`(1/10 - 3/20) / 1 = -1/20 < 1/2`; the `13/20` slow target stays open. -/
+theorem R05_S4_phase_ratio_eq :
+    (((1 / 10 : Real) - (3 / 20 : Real)) / (1 : Real)) = (-1 / 20 : Real) := by
+  norm_num
+
+theorem R05_S4_phase_ratio_lt_half : (-1 / 20 : Real) < (1 / 2 : Real) := by
+  norm_num
+
+#print axioms R05_cos_075log2_upper
+#print axioms R05_rpow_neg0395_le
+#print axioms R05_inv_two_cpow_re_eq
+#print axioms R05_S2_Re_ge
+#print axioms R05_three_rpow_ge
+#print axioms R05_pair1_norm_le
+#print axioms R05_S4_eq
+#print axioms R05_S4_norm_ge
+#print axioms R05_S4_phase_ratio_eq
+#print axioms R05_S4_phase_ratio_lt_half
+
+end Door3OffAxis
