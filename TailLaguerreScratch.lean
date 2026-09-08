@@ -1478,3 +1478,226 @@ kernel-checked zeta enclosure at height `|t| ≤ 1`), then compose via
 `door3RealNonvan_of_lower`. Note `D3_real_zeta_norm_lower`
 (`s/(1-s) ≤ ‖ζ(s)‖` on real `(0,1)`) does NOT transfer (different slice:
 real `s` vs `s = 1/2 + I*t`). -/
+
+/-!
+## Door-3 remainder 5 final numeral: height-0 pointwise bound + next tile (2026-09-08, append-only)
+
+Slice audit (read-only, no import added — `import Mathlib` only here):
+* `door3_zeta_cutoff.lean:472` (`Door3ZetaCutoff.zeta_half_norm_lower_one`:
+  `1 ≤ ‖riemannZeta (((1/2:ℝ)):ℂ)‖`, mirror of
+  `door3_real_center_bounds.lean:44` `D3_real_zeta_norm_lower` at `s = 1/2`)
+  is the ONE committed bound whose slice matches `door3RealSeg` at height
+  `t = 0`: `tailShiftedSReal 0 = ((1/2:ℝ):ℂ)` (proved below as
+  `door3RealShift_at_zero`), i.e. `z.im = 0, z.re = 0 ↦ 1/2 + I*0`.
+* `D3_real_zeta_norm_lower` for `t ≠ 0`, `D3_imag_axis_*` (`z = I*y` slice),
+  `door3_boundary_endpoints` (±I/2 zeros), `door3_imag_axis_strip`,
+  `zeta_rigorous.lean` eta positivity — all different slices; NOT called.
+* The analytic identity behind the `s = 1/2` instance is
+  `TestAnalytic.lean:497` (`riemannZeta₀_eq_one_sub_mul_termTSum_on`,
+  Mathlib-transitively-visible via `riemann_hypothesis`/`door3_*` but NOT
+  in this file's `import Mathlib` closure). Per task direction (CALL, don't
+  redo) it is isolated as the single explicit hypothesis `Door3HalfRealHyp`
+  below — already proved unconditionally in committed files — and composed
+  here with a proved slice rewrite plus `door3RealSeg_zero_mem`.
+
+Banked here (FULLY PROVED, no sorry/admit/axiom, Mathlib-only given the
+explicit hypothesis):
+* `door3RealShift_at_zero` / `door3RealShift_re_at_zero` /
+  `door3RealShift_im_at_zero` — unconditional slice verification at `0`;
+* `door3RealPointwiseOne_at_zero_of_hyp` (`1 ≤ ‖ζ‖` at `tailShiftedSReal 0`),
+  `door3RealC0` (`= 1`, `≤6` digits) + `door3RealC0_pos` +
+  `door3RealC0_le_at_zero_of_hyp`, `door3RealNonvan_at_zero_of_hyp`
+  (`ζ ≠ 0` at height 0), `door3RealSeg_pointwiseC0_of_hyp` (point on seg);
+* next tile toward `(-10,10)`: `door3RealSegNext` (`1 ≤ Re ≤ 2`, `Im = 0`)
+  with `mem_of_reim`, `witness` (`3/2`), `isClosed/isBounded/isCompact`,
+  `in_open_strip`, `shift_re`, `ne_one`, `continuousOn`, and the
+  `meet` point (`1` in both tiles) chaining `[-1,1]` to `[-1,2]`.
+-/
+
+/-- Slice verification: the shift at the origin is the real `1/2`. -/
+theorem door3RealShift_at_zero :
+    tailShiftedSReal 0 = (((1 / 2 : ℝ)) : ℂ) := by
+  unfold tailShiftedSReal
+  simp
+
+/-- Slice verification: shifted real part at the origin. -/
+theorem door3RealShift_re_at_zero :
+    (tailShiftedSReal 0).re = 1 / 2 := by
+  rw [door3RealShift_at_zero]
+  simp
+
+/-- Slice verification: shifted imaginary part at the origin. -/
+theorem door3RealShift_im_at_zero :
+    (tailShiftedSReal 0).im = 0 := by
+  rw [door3RealShift_at_zero]
+  simp
+
+/-- Single explicit analytic input at `s = 1/2`, already proved in committed
+files (`door3_zeta_cutoff.lean:472`, via `door3_real_center_bounds.lean:44`
+and `TestAnalytic.lean:497`); isolated here as a hypothesis (CALL, don't
+redo). -/
+def Door3HalfRealHyp : Prop :=
+  (1 : ℝ) ≤ ‖riemannZeta (((1 / 2 : ℝ)) : ℂ)‖
+
+/-- Pointwise numeral at height 0: `1 ≤ ‖ζ‖` at `tailShiftedSReal 0`. -/
+theorem door3RealPointwiseOne_at_zero_of_hyp (h : Door3HalfRealHyp) :
+    (1 : ℝ) ≤ ‖riemannZeta (tailShiftedSReal 0)‖ := by
+  rw [door3RealShift_at_zero]
+  unfold Door3HalfRealHyp at h
+  exact h
+
+/-- Explicit `c > 0` numeral at one height (`≤6` digits). -/
+def door3RealC0 : ℝ := 1
+
+/-- Positivity of the explicit numeral. -/
+theorem door3RealC0_pos : 0 < door3RealC0 := by
+  unfold door3RealC0
+  norm_num
+
+/-- The explicit numeral bounds zeta at height 0. -/
+theorem door3RealC0_le_at_zero_of_hyp (h : Door3HalfRealHyp) :
+    door3RealC0 ≤ ‖riemannZeta (tailShiftedSReal 0)‖ := by
+  unfold door3RealC0
+  exact door3RealPointwiseOne_at_zero_of_hyp h
+
+/-- Pointwise nonvanishing at height 0 from the numeral. -/
+theorem door3RealNonvan_at_zero_of_hyp (h : Door3HalfRealHyp) :
+    riemannZeta (tailShiftedSReal 0) ≠ 0 := by
+  have h1 := door3RealPointwiseOne_at_zero_of_hyp h
+  intro hzero
+  rw [hzero, norm_zero] at h1
+  norm_num at h1
+
+/-- The height-0 point lies on the segment with the numeral bound. -/
+theorem door3RealSeg_pointwiseC0_of_hyp (h : Door3HalfRealHyp) :
+    door3RealC0 ≤ ‖riemannZeta (tailShiftedSReal (0 : ℂ))‖ ∧
+      (0 : ℂ) ∈ door3RealSeg := by
+  exact ⟨door3RealC0_le_at_zero_of_hyp h, door3RealSeg_zero_mem⟩
+
+/-- Next compact tile toward `(-10,10)`: `1 ≤ Re z ≤ 2`, `Im z = 0`. -/
+def door3RealSegNext : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (1 : ℝ) 2 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the next tile. -/
+theorem door3RealSegNext_mem_of_reim (z : ℂ) (hre1 : (1 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 2) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSegNext := by
+  simp only [door3RealSegNext, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Witness: `3/2` lies in the next tile. -/
+theorem door3RealSegNext_witness : ((((3 / 2 : ℝ))) : ℂ) ∈ door3RealSegNext := by
+  simp only [door3RealSegNext, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc,
+    Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- The next tile is closed. -/
+theorem door3RealSegNext_isClosed : IsClosed door3RealSegNext := by
+  unfold door3RealSegNext
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The next tile lies in `closedBall 0 3`, hence is bounded. -/
+theorem door3RealSegNext_isBounded : Bornology.IsBounded door3RealSegNext := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 2 := by
+    rw [abs_le]
+    constructor
+    · linarith
+    · exact h2
+  have hre2 : z.re * z.re ≤ (2 : ℝ) * 2 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 2 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (3 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h9 : (2 : ℝ) * 2 + 0 ≤ 3 ^ 2 := by norm_num
+    exact le_trans hsum h9
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The next tile is compact (Heine–Borel). -/
+theorem door3RealSegNext_isCompact : IsCompact door3RealSegNext := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSegNext_isClosed, door3RealSegNext_isBounded⟩
+
+/-- The next tile sits inside the required open slice `-10 < Re < 10`. -/
+theorem door3RealSegNext_in_open_strip (z : ℂ) (hz : z ∈ door3RealSegNext) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the next tile: `Re s = 1/2` (critical line). -/
+theorem door3RealNextShift_re (z : ℂ) (hz : z ∈ door3RealSegNext) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Pole avoidance on the next tile. -/
+theorem door3RealNextShift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSegNext) :
+    tailShiftedSReal z ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re hcon
+  rw [door3RealNextShift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the next tile. -/
+theorem door3RealNextZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSegNext := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealNextShift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Chaining point: `1` lies in both tiles, so `[-1,1] ∪ [1,2] = [-1,2]`. -/
+theorem door3RealSeg_next_meet :
+    ((((1 : ℝ))) : ℂ) ∈ door3RealSeg ∧
+      ((((1 : ℝ))) : ℂ) ∈ door3RealSegNext := by
+  simp only [door3RealSeg, door3RealSegNext, Set.mem_inter_iff, Set.mem_preimage,
+    Set.mem_Icc, Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+#print axioms door3RealShift_at_zero
+#print axioms door3RealShift_re_at_zero
+#print axioms door3RealShift_im_at_zero
+#print axioms door3RealPointwiseOne_at_zero_of_hyp
+#print axioms door3RealC0_pos
+#print axioms door3RealC0_le_at_zero_of_hyp
+#print axioms door3RealNonvan_at_zero_of_hyp
+#print axioms door3RealSeg_pointwiseC0_of_hyp
+#print axioms door3RealSegNext_isCompact
+#print axioms door3RealNextShift_re
+#print axioms door3RealNextShift_ne_one_of_seg
+#print axioms door3RealNextZetaContinuousOnSeg
+#print axioms door3RealSeg_next_meet
+
+/- Quantified remainder after this block (2026-09-08, Door-3 remainder 5):
+BANKED the tightest proved step short of the uniform numeral: an explicit
+`c = door3RealC0 = 1` pointwise lower bound at height `t = 0`
+(`door3RealPointwiseOne_at_zero_of_hyp` / `door3RealC0_le_at_zero_of_hyp`,
+conditional on the single committed `s = 1/2` instance `Door3HalfRealHyp`
+=`Door3ZetaCutoff.zeta_half_norm_lower_one`, slice-verified by
+`door3RealShift_at_zero/re/im_at_zero`), composed to pointwise nonvanishing
+(`door3RealNonvan_at_zero_of_hyp`) on `door3RealSeg` at `0`
+(`door3RealSeg_pointwiseC0_of_hyp`), plus one more tile toward `(-10,10)`:
+compact `door3RealSegNext` (`1 ≤ Re ≤ 2`, `Im = 0`, chained by
+`door3RealSeg_next_meet`) with the same critical-line pattern
+(`door3RealNextShift_re/ne_one/continuousOn`).
+RESIDUAL: discharge `Door3HalfRealHyp` inside this file's `import Mathlib`
+closure (needs `TestAnalytic.lean:497` continuation at `s = 1/2`, absent from
+Mathlib alone), then lift the height-0 `c = 1` to uniform `c > 0` over
+`door3RealSeg` (`1/2 + I*[-1,1]`, needs height `|t| ≤ 1` enclosure, not the
+`|Im| ∈ [10,11]` tail numerals) via `door3RealNonvan_of_lower`, and tile
+`[-1,2]` onward toward `(-10,10)` by repeating the `door3RealSegNext`
+pattern. -/
