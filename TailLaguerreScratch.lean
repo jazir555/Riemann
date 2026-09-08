@@ -2445,3 +2445,131 @@ theorem door3RealSeg_pointwiseC0 :
 #print axioms door3HalfNorm_ge_one
 #print axioms door3HalfRealHyp
 #print axioms door3RealSeg_pointwiseC0
+
+/-!
+## Door-3 remainder 5c: height-|t|<=1 upper enclosure + second tile toward (-10,10) (2026-09-08, append-only)
+
+Slice audit (read-only, `import Mathlib` only, no new import):
+* Uniform `c > 0` over `door3RealSeg` needs pointwise nonvanishing on the whole
+  `1/2 + I*[-1,1]` arc; the banked numeral covers height `t = 0` only, and the
+  `|Im| in [10,11]` tail numerals live in a disjoint band -- so the uniform lower
+  bound stays residual. What IS banked here, Mathlib-only and unconditional:
+  (a) the one-sided height enclosure (upper bound) over `door3RealSeg` via the
+  committed T4 compact-continuity pattern (`door3RealSeg_isCompact` +
+  `IsCompact.exists_bound_of_continuousOn`, as in `exists_tailCell_zetaUpper`);
+  (b) the second tile `door3RealSegNext2` (`2 <= Re <= 3`, `Im = 0`) repeating the
+  committed `door3RealSegNext` pattern, chained by `door3RealSegNext2_meet`
+  (`2` in both tiles), extending coverage `[-1,2]` to `[-1,3]` toward `(-10,10)`.
+-/
+
+/-- Height-`|t| <= 1` UPPER enclosure over `door3RealSeg`
+(mirror of `exists_tailCell_zetaUpper`: compactness + continuity). -/
+theorem exists_door3RealSeg_zetaUpper :
+    ∃ B : ℝ, ∀ z ∈ door3RealSeg,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B :=
+  door3RealSeg_isCompact.exists_bound_of_continuousOn door3RealZetaContinuousOnSeg
+
+/-- Second compact tile toward `(-10,10)`: `2 ≤ Re z ≤ 3`, `Im z = 0`. -/
+def door3RealSegNext2 : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (2 : ℝ) 3 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the second tile. -/
+theorem door3RealSegNext2_mem_of_reim (z : ℂ) (hre1 : (2 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 3) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSegNext2 := by
+  simp only [door3RealSegNext2, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Witness: `5/2` lies in the second tile. -/
+theorem door3RealSegNext2_witness : ((((5 / 2 : ℝ))) : ℂ) ∈ door3RealSegNext2 := by
+  simp only [door3RealSegNext2, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc,
+    Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- The second tile is closed. -/
+theorem door3RealSegNext2_isClosed : IsClosed door3RealSegNext2 := by
+  unfold door3RealSegNext2
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The second tile lies in `closedBall 0 4`, hence is bounded. -/
+theorem door3RealSegNext2_isBounded : Bornology.IsBounded door3RealSegNext2 := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 3 := by
+    rw [abs_le]
+    constructor
+    · linarith
+    · exact h2
+  have hre2 : z.re * z.re ≤ (3 : ℝ) * 3 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 3 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (4 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h16 : (3 : ℝ) * 3 + 0 ≤ 4 ^ 2 := by norm_num
+    exact le_trans hsum h16
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The second tile is compact (Heine–Borel). -/
+theorem door3RealSegNext2_isCompact : IsCompact door3RealSegNext2 := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSegNext2_isClosed, door3RealSegNext2_isBounded⟩
+
+/-- The second tile sits inside the required open slice `-10 < Re < 10`. -/
+theorem door3RealSegNext2_in_open_strip (z : ℂ) (hz : z ∈ door3RealSegNext2) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the second tile: `Re s = 1/2` (critical line). -/
+theorem door3RealNext2Shift_re (z : ℂ) (hz : z ∈ door3RealSegNext2) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Pole avoidance on the second tile. -/
+theorem door3RealNext2Shift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSegNext2) :
+    tailShiftedSReal z ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re hcon
+  rw [door3RealNext2Shift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the second tile. -/
+theorem door3RealNext2ZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSegNext2 := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealNext2Shift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Chaining point: `2` lies in both tiles, so `[-1,2] ∪ [2,3] = [-1,3]`. -/
+theorem door3RealSegNext2_meet :
+    ((((2 : ℝ))) : ℂ) ∈ door3RealSegNext ∧
+      ((((2 : ℝ))) : ℂ) ∈ door3RealSegNext2 := by
+  simp only [door3RealSegNext, door3RealSegNext2, Set.mem_inter_iff, Set.mem_preimage,
+    Set.mem_Icc, Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+#print axioms exists_door3RealSeg_zetaUpper
+#print axioms door3RealSegNext2_witness
+#print axioms door3RealSegNext2_isClosed
+#print axioms door3RealSegNext2_isBounded
+#print axioms door3RealSegNext2_isCompact
+#print axioms door3RealSegNext2_in_open_strip
+#print axioms door3RealNext2Shift_re
+#print axioms door3RealNext2Shift_ne_one_of_seg
+#print axioms door3RealNext2ZetaContinuousOnSeg
+#print axioms door3RealSegNext2_meet
