@@ -20,5 +20,33 @@
   "files.readonlyInclude": {
     "**/.elan/**": true,
     "**/.lake/**": true
+  },
+  "lean4.automaticallyBuildDependencies": false,
+  "lean4.infoview.autoOpen": false,
+  "lean4.autofocusOutput": false,
+  "lean4.showSetupWarnings": true,
+  "lean4.alwaysShowTitleBarMenu": false,
+  "git.autorefresh": false,
+  "git.autofetch": false,
+  "workbench.startupEditor": "none",
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.lake/**": true,
+    "**/zeta-23-lean/.lake/**": true,
+    "**/.lake/build/**": true,
+    "**/*.olean": true,
+    "**/*.ilean": true,
+    "**/*.olean.private": true,
+    "**/*.trace": true,
+    "**/*.setup.json": true
+  },
+  "search.exclude": {
+    "**/.lake/**": true,
+    "**/zeta-23-lean/.lake/**": true,
+    "**/.git/**": true
+  },
+  "files.exclude": {
+    "**/.lake": true,
+    "**/zeta-23-lean/.lake": true
   }
 }

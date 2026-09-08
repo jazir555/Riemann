@@ -2418,3 +2418,147 @@ theorem R05_eta_tail_1024_le :
 #print axioms R05_eta_tail_1024_le
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- R05 two-term eta partial sum in closed form (`S₂ = 1 - (2^s)⁻¹`). -/
+theorem R05_eta_S2_eq :
+    (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k)
+      = 1 - ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR05)⁻¹) := by
+  have hsum : (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k)
+      = etaDirichletTerm R03R10PolyLower.sR05 0 + etaDirichletTerm R03R10PolyLower.sR05 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  have h0 : etaDirichletTerm R03R10PolyLower.sR05 0 = 1 := by
+    have h01 : (0 + 1 : ℕ) = 1 := rfl
+    have hcast : ((((0 + 1 : ℕ)) : ℂ)) = 1 := by
+      rw [h01, Nat.cast_one]
+    simp only [etaDirichletTerm, pow_zero, hcast, Complex.one_cpow, div_one]
+  have h1 : etaDirichletTerm R03R10PolyLower.sR05 1
+      = -((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR05)⁻¹) := by
+    unfold etaDirichletTerm
+    rw [pow_one]
+    rw [show (((1 + 1 : ℕ) : ℂ)) = ((((2 : ℕ)) : ℂ)) by norm_num]
+    rw [neg_div, one_div]
+  rw [hsum, h0, h1]
+  ring
+
+/-- Modulus of the R05 second eta term (`2^{-0.395} ≤ 4/5`, from `5/4 ≤ 2^0.395`). -/
+theorem R05_eta_second_norm_le :
+    ‖((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR05)⁻¹)‖ ≤ 4 / 5 := by
+  have h2eq : ((((2 : ℕ)) : ℂ)) = (2 : ℂ) := by norm_cast
+  rw [h2eq, norm_inv, two_cpow_norm, R03R10PolyLower.sR05_re]
+  have hge := zetaCellS0_rpow_0395_ge
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (0.395 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  rw [show (4 / 5 : ℝ) = ((5 / 4 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Genuine R05 finite-sum lower bound (`1/5 ≤ ‖S₂‖`, reverse triangle). -/
+theorem R05_eta_S2_norm_ge :
+    (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  rw [R05_eta_S2_eq]
+  have hX := R05_eta_second_norm_le
+  have h := norm_add_le
+    (1 - ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR05)⁻¹))
+    ((((2 : ℕ) : ℂ) ^ R03R10PolyLower.sR05)⁻¹)
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  linarith
+
+/-- Genuine R05 eta-factor upper bound (`‖1 - 2^{1-s}‖ ≤ 13/5`, needs only `Re = 0.395`). -/
+theorem R05_etaFactor_upper :
+    ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05))‖ ≤ 13 / 5 := by
+  have hre : ((1 : ℂ) - R03R10PolyLower.sR05).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R03R10PolyLower.sR05_re]
+    norm_num
+  have hY : ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ ≤ 8 / 5 := by
+    rw [two_cpow_norm, hre]
+    exact zetaCellS0_rpow_0605_le
+  calc ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖
+        ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - R03R10PolyLower.sR05)‖ :=
+          norm_sub_le _ _
+    _ ≤ 13 / 5 := by
+          rw [norm_one]
+          linarith [hY]
+
+/-- Genuine R05 paired tail at `M = 1` (`‖G - S₂‖ ≤ 11/5`, via `zetaCell_even_remainder_le`). -/
+theorem R05_eta_tail_1_le :
+    ‖(∑' m, etaPairTerm R03R10PolyLower.sR05 m)
+      - (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k)‖ ≤
+      (11 / 5 : ℝ) := by
+  have hs : 0 < R03R10PolyLower.sR05.re := by
+    rw [R03R10PolyLower.sR05_re]
+    norm_num
+  have hC : ‖R03R10PolyLower.sR05‖ ≤ (0.85 : ℝ) := R05_s_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 1 (by norm_num)
+  have h21 : 2 * 1 = 2 := by norm_num
+  rw [h21] at hgen
+  have hre : R03R10PolyLower.sR05.re = (0.395 : ℝ) := R03R10PolyLower.sR05_re
+  rw [hre] at hgen
+  have h1 : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_cast
+  rw [h1, Real.one_rpow] at hgen
+  have hle : (0.85 : ℝ) * (1 / (0.395 : ℝ)) ≤ (11 / 5 : ℝ) := by norm_num
+  linarith
+
+/-- Genuine (fully proved-field) R05 finite zeta lower certificate at `N = 2`. -/
+noncomputable def R05_genuine_finite_zeta_certificate :
+    FiniteZetaLowerCertificate R03R10PolyLower.sR05 :=
+  { N := 2
+    S := ∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k
+    slow := 1 / 5
+    rtail := 11 / 5
+    cF := 13 / 5
+    hSdef := rfl
+    hSlow := R05_eta_S2_norm_ge
+    hTail := R05_eta_tail_1_le
+    hcFpos := by norm_num
+    hFac := R05_etaFactor_upper }
+
+/-- The genuine R05 certificate wired through the API (negative-valued, honest). -/
+theorem R05_genuine_zeta_lower :
+    ((R05_genuine_finite_zeta_certificate.slow - R05_genuine_finite_zeta_certificate.rtail) /
+      R05_genuine_finite_zeta_certificate.cF) ≤ ‖zeta R03R10PolyLower.sR05‖ :=
+  R05_genuine_finite_zeta_certificate.lower_of_re
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+    (by rw [R03R10PolyLower.sR05_re]; norm_num)
+
+/-- Exact ratio of the genuine R05 `N = 2` certificate: `(1/5 - 11/5)/(13/5) = -8/13`. -/
+theorem R05_genuine_ratio_eq :
+    ((R05_genuine_finite_zeta_certificate.slow - R05_genuine_finite_zeta_certificate.rtail) /
+      R05_genuine_finite_zeta_certificate.cF) = (-8 / 13 : ℝ) := by
+  have heq : ((R05_genuine_finite_zeta_certificate.slow -
+      R05_genuine_finite_zeta_certificate.rtail) /
+      R05_genuine_finite_zeta_certificate.cF) = (-8 / 13 : ℝ) := by
+    simp [R05_genuine_finite_zeta_certificate]
+    norm_num
+  exact heq
+
+/-- With the banked `M = 1024` tail value (`3/20`) in place of the `M = 1` tail,
+the `N = 2` slow value gives ratio exactly `1/52`: magnitude-only bounds cannot
+meet the `1/2` threshold (shortfall `25/52`). -/
+theorem R05_banked_tail_ratio_eq :
+    (((1 / 5 : ℝ) - (3 / 20 : ℝ)) / (13 / 5 : ℝ)) = (1 / 52 : ℝ) := by
+  norm_num
+
+theorem R05_banked_tail_ratio_lt_half : (1 / 52 : ℝ) < (1 / 2 : ℝ) := by
+  norm_num
+
+/-- Threshold meeting with banked numbers needs `slow ≥ 1/2 * cF + rtail = 29/20`:
+the quantified target for the larger-`N` slow bound plus phase-aware factor bound. -/
+theorem R05_slow_needed_eq :
+    ((1 / 2 : ℝ) * (13 / 5 : ℝ) + (3 / 20 : ℝ)) = (29 / 20 : ℝ) := by
+  norm_num
+
+#print axioms R05_eta_S2_eq
+#print axioms R05_eta_S2_norm_ge
+#print axioms R05_etaFactor_upper
+#print axioms R05_eta_tail_1_le
+#print axioms R05_genuine_finite_zeta_certificate
+#print axioms R05_genuine_zeta_lower
+#print axioms R05_genuine_ratio_eq
+#print axioms R05_banked_tail_ratio_eq
+#print axioms R05_banked_tail_ratio_lt_half
+#print axioms R05_slow_needed_eq
+
+end Door3OffAxis
