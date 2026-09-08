@@ -34571,3 +34571,65 @@ theorem R02_D3_zeta_linear_line095 (s : ℂ) (hre : s.re = 0.95) :
   exact le_trans (le_trans hstep1 hstep2) hcap
 
 #print axioms R02_D3_zeta_linear_line095
+
+/-!
+## Door-3 close, step 11 (zeta lane): FE-reflected whole-line 0.05 bound (exponential).
+
+Route: reflect the banked whole-line `Re = 0.95` linear bound
+(`R02_D3_zeta_linear_line095`, `C = 58.86`) through the banked exponential
+FE ratio (`R02_D3_zeta_ratio_exp_line095` / poly `R02_D3_zeta_ratio_poly_line095`).
+No uniform `K` is claimed (blocked by `exp(1.5708*|Im|)` cos growth); the two
+theorems below are the tightest proved FE-reflected whole-line 0.05 step.
+-/
+
+/-- FE-reflected whole-line 0.05 zeta bound (exponential chi factor). -/
+theorem R02_D3_zeta05_exp_line005 (w : ℂ) (hw : w.re = 0.05) :
+    ‖riemannZeta w‖ ≤ (8 * Real.exp (3.1416 * |w.im| / 2)) * (58.86 * (1 + |w.im|)) := by
+  have hs_re : (1 - w).re = 0.95 := by
+    rw [Complex.sub_re, Complex.one_re, hw]
+    norm_num
+  have hs_im : (1 - w).im = -w.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have h1s : (1 : ℂ) - (1 - w) = w := by
+    rw [sub_sub_cancel]
+  have hR := R02_D3_zeta_ratio_exp_line095 (1 - w) hs_re
+  have hZ := R02_D3_zeta_linear_line095 (1 - w) hs_re
+  rw [h1s] at hR
+  rw [hs_im, abs_neg] at hR
+  rw [hs_im, abs_neg] at hZ
+  calc ‖riemannZeta w‖
+      ≤ (8 * Real.exp (3.1416 * |w.im| / 2)) * ‖riemannZeta (1 - w)‖ := hR
+    _ ≤ (8 * Real.exp (3.1416 * |w.im| / 2)) * (58.86 * (1 + |w.im|)) :=
+        mul_le_mul_of_nonneg_left hZ
+          (mul_nonneg (by norm_num) (Real.exp_pos _).le)
+
+/-- FE-reflected whole-line 0.05 zeta bound (poly-sharpened chi, `|Im| ≥ 1`). -/
+theorem R02_D3_zeta05_polyexp_line005 (w : ℂ) (hw : w.re = 0.05) (ht : 1 ≤ |w.im|) :
+    ‖riemannZeta w‖ ≤ ((4 / (|w.im| * |w.im|)) * Real.exp (3.1416 * |w.im| / 2)) *
+      (58.86 * (1 + |w.im|)) := by
+  have hs_re : (1 - w).re = 0.95 := by
+    rw [Complex.sub_re, Complex.one_re, hw]
+    norm_num
+  have hs_im : (1 - w).im = -w.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have ht2 : (1 : ℝ) ≤ |(1 - w).im| := by
+    rw [hs_im, abs_neg]
+    exact ht
+  have h1s : (1 : ℂ) - (1 - w) = w := by
+    rw [sub_sub_cancel]
+  have hR := R02_D3_zeta_ratio_poly_line095 (1 - w) hs_re ht2
+  have hZ := R02_D3_zeta_linear_line095 (1 - w) hs_re
+  rw [h1s] at hR
+  rw [hs_im, abs_neg] at hR
+  rw [hs_im, abs_neg] at hZ
+  calc ‖riemannZeta w‖
+      ≤ ((4 / (|w.im| * |w.im|)) * Real.exp (3.1416 * |w.im| / 2)) *
+        ‖riemannZeta (1 - w)‖ := hR
+    _ ≤ ((4 / (|w.im| * |w.im|)) * Real.exp (3.1416 * |w.im| / 2)) *
+        (58.86 * (1 + |w.im|)) :=
+        mul_le_mul_of_nonneg_left hZ
+          (mul_nonneg (div_nonneg (by norm_num)
+            (mul_nonneg (abs_nonneg _) (abs_nonneg _))) (Real.exp_pos _).le)
+
+#print axioms R02_D3_zeta05_exp_line005
+#print axioms R02_D3_zeta05_polyexp_line005
