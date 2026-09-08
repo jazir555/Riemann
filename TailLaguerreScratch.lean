@@ -2980,3 +2980,313 @@ theorem door3RealSegNext5_meet :
 #print axioms door3RealNext5ZetaContinuousOnSeg
 #print axioms exists_door3RealSegNext5_zetaUpper
 #print axioms door3RealSegNext5_meet
+
+/-!
+## Door-3 remainder 5 sixth tile: `[6,7]` + height-`1/2` enclosure attempt (2026-09-08, append-only)
+
+Two parts, both FULLY PROVED below (no sorry/admit/axiom, `import Mathlib` only):
+
+PART 1 — sixth compact tile toward `(-10,10)`: `6 ≤ Re z ≤ 7`, `Im z = 0`.
+Extends the committed `door3RealSegNext5` pattern (`[-1,6]` chained by
+`door3RealSeg_next_meet` + `door3RealSegNext2_meet` + `door3RealSegNext3_meet` +
+`door3RealSegNext4_meet` + `door3RealSegNext5_meet`) one step further to
+`[-1,7]`. Same critical-line shape (`Re s = 1/2` via `tailShiftedSReal_re`),
+pole avoidance, continuity, upper enclosure
+(`IsCompact.exists_bound_of_continuousOn`), witness `13/2`, `closedBall 0 8`,
+meet point `6`.
+
+PART 2 — direct kernel-checked enclosure ATTEMPT at `1/2 + I/2`
+(= `tailShiftedSReal (((1/2:ℝ)):ℂ)`, since `Re s = 1/2 - Im z`,
+`Im s = Re z`). The `door3_off_axis_certificates` module
+(`FiniteZetaLowerCertificate`, `lower_of_re`, `zeta_lower_of_Sn_tail_factor`,
+`zetaCell_even_remainder_le`) is OUTSIDE this file's `import Mathlib` closure,
+so per task direction the needed eta bounds are reproved in-tail from
+Mathlib-visible lemmas (R03/R05 slow+tail+factor pattern):
+`d3EtaTerm` replica of `etaDirichletTerm`, two-term closed form `d3Eta_S2_eq`,
+cleared-square rpow bounds `d3rpow_half_ge/le` (`7/5 ≤ 2^(1/2) ≤ 8/5`),
+slow bound `d3Eta_S2_norm_ge` (`1/5 ≤ ‖S₂‖` by reverse triangle),
+factor upper `d3EtaFactor_upper` (`‖1 - 2^(1-s)‖ ≤ 13/5`), factor
+nonvanishing `d3EtaFactor_ne_zero`. TIGHTEST PROVED STEP: slow + factor at the
+exact height-`1/2` point. RESIDUAL (honest, Mathlib-closure gap): the paired
+tail estimate `‖G - S₂‖ ≤ rtail` (needs `etaPairTerm` summability/remainder
+machinery) and the division bridge `ζ(s) = G/(1-2^(1-s))`, hence the final
+`c₁ ≤ ‖ζ(1/2+I/2)‖` feeding `door3RealNonvan_of_lower` stays open.
+-/
+
+/-- Sixth compact tile toward `(-10,10)`: `6 ≤ Re z ≤ 7`, `Im z = 0`. -/
+def door3RealSegNext6 : Set ℂ :=
+  Complex.re ⁻¹' Set.Icc (6 : ℝ) 7 ∩ Complex.im ⁻¹' Set.Icc (0 : ℝ) 0
+
+/-- Closed-rectangle membership for the sixth tile. -/
+theorem door3RealSegNext6_mem_of_reim (z : ℂ) (hre1 : (6 : ℝ) ≤ z.re)
+    (hre2 : z.re ≤ 7) (hlo : (0 : ℝ) ≤ z.im) (hhi : z.im ≤ 0) :
+    z ∈ door3RealSegNext6 := by
+  simp only [door3RealSegNext6, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc]
+  exact ⟨⟨hre1, hre2⟩, hlo, hhi⟩
+
+/-- Witness: `13/2` lies in the sixth tile. -/
+theorem door3RealSegNext6_witness : ((((13 / 2 : ℝ))) : ℂ) ∈ door3RealSegNext6 := by
+  simp only [door3RealSegNext6, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Icc,
+    Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- The sixth tile is closed. -/
+theorem door3RealSegNext6_isClosed : IsClosed door3RealSegNext6 := by
+  unfold door3RealSegNext6
+  exact (IsClosed.preimage Complex.continuous_re isClosed_Icc).inter
+    (IsClosed.preimage Complex.continuous_im isClosed_Icc)
+
+/-- The sixth tile lies in `closedBall 0 8`, hence is bounded. -/
+theorem door3RealSegNext6_isBounded : Bornology.IsBounded door3RealSegNext6 := by
+  apply Metric.isBounded_closedBall.subset
+  intro z hz
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have him : z.im = 0 := le_antisymm hhi hlo
+  have habs : |z.re| ≤ 7 := by
+    rw [abs_le]
+    constructor
+    · linarith
+    · exact h2
+  have hre2 : z.re * z.re ≤ (7 : ℝ) * 7 := by
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 7 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have him2 : z.im * z.im ≤ (0 : ℝ) := by
+    rw [him]
+    norm_num
+  have hnorm : ‖z‖ ^ 2 = z.re * z.re + z.im * z.im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖z‖ ^ 2 ≤ (8 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h64 : (7 : ℝ) * 7 + 0 ≤ 8 ^ 2 := by norm_num
+    exact le_trans hsum h64
+  exact le_of_sq_le_sq hle (by norm_num)
+
+/-- The sixth tile is compact (Heine–Borel). -/
+theorem door3RealSegNext6_isCompact : IsCompact door3RealSegNext6 := by
+  rw [Metric.isCompact_iff_isClosed_bounded]
+  exact ⟨door3RealSegNext6_isClosed, door3RealSegNext6_isBounded⟩
+
+/-- The sixth tile sits inside the required open slice `-10 < Re < 10`. -/
+theorem door3RealSegNext6_in_open_strip (z : ℂ) (hz : z ∈ door3RealSegNext6) :
+    (-10 : ℝ) < z.re ∧ z.re < 10 ∧ z.im = 0 := by
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  exact ⟨by linarith, by linarith, le_antisymm hhi hlo⟩
+
+/-- Shifted real part on the sixth tile: `Re s = 1/2` (critical line). -/
+theorem door3RealNext6Shift_re (z : ℂ) (hz : z ∈ door3RealSegNext6) :
+    (tailShiftedSReal z).re = 1 / 2 := by
+  obtain ⟨_, hlo, hhi⟩ := hz
+  have him : z.im = 0 := le_antisymm hhi hlo
+  rw [tailShiftedSReal_re, him]
+  norm_num
+
+/-- Pole avoidance on the sixth tile. -/
+theorem door3RealNext6Shift_ne_one_of_seg (z : ℂ) (hz : z ∈ door3RealSegNext6) :
+    tailShiftedSReal z ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal z).re = (1 : ℂ).re := congrArg Complex.re hcon
+  rw [door3RealNext6Shift_re z hz, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Zeta pulled back through the shift is continuous on the sixth tile. -/
+theorem door3RealNext6ZetaContinuousOnSeg :
+    ContinuousOn (fun z => riemannZeta (tailShiftedSReal z)) door3RealSegNext6 := by
+  intro x hx
+  have hne : tailShiftedSReal x ≠ 1 := door3RealNext6Shift_ne_one_of_seg x hx
+  have hdiff : DifferentiableAt ℂ riemannZeta (tailShiftedSReal x) :=
+    differentiableAt_riemannZeta hne
+  exact (hdiff.continuousAt.comp' tailShiftedSReal_continuous.continuousAt).continuousWithinAt
+
+/-- Height upper enclosure over the sixth tile
+(mirror of `exists_door3RealSeg_zetaUpper`). -/
+theorem exists_door3RealSegNext6_zetaUpper :
+    ∃ B : ℝ, ∀ z ∈ door3RealSegNext6,
+      ‖riemannZeta (tailShiftedSReal z)‖ ≤ B :=
+  door3RealSegNext6_isCompact.exists_bound_of_continuousOn door3RealNext6ZetaContinuousOnSeg
+
+/-- Chaining point: `6` lies in both tiles, so `[-1,6] ∪ [6,7] = [-1,7]`. -/
+theorem door3RealSegNext6_meet :
+    ((((6 : ℝ))) : ℂ) ∈ door3RealSegNext5 ∧
+      ((((6 : ℝ))) : ℂ) ∈ door3RealSegNext6 := by
+  simp only [door3RealSegNext5, door3RealSegNext6, Set.mem_inter_iff, Set.mem_preimage,
+    Set.mem_Icc, Complex.ofReal_re, Complex.ofReal_im]
+  norm_num
+
+/-- Height-`1/2` target: shifted real part at real `1/2` is `1/2`. -/
+theorem d3HalfPt_re :
+    (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)).re = 1 / 2 := by
+  rw [tailShiftedSReal_re, Complex.ofReal_im, sub_zero]
+
+/-- Height-`1/2` target: shifted imaginary part at real `1/2` is `1/2`. -/
+theorem d3HalfPt_im :
+    (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)).im = 1 / 2 := by
+  rw [tailShiftedSReal_im, Complex.ofReal_re]
+
+/-- Height-`1/2` target avoids the zeta pole at `1`. -/
+theorem d3HalfPt_ne_one :
+    tailShiftedSReal (((1 / 2 : ℝ)) : ℂ) ≠ 1 := by
+  intro hcon
+  have hre : (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)).re = (1 : ℂ).re :=
+    congrArg Complex.re hcon
+  rw [d3HalfPt_re, Complex.one_re] at hre
+  norm_num at hre
+
+/-- Height-`1/2` target lies in `closedBall 0 1`. -/
+theorem d3HalfPt_norm_le :
+    ‖tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)‖ ≤ 1 := by
+  have hsq : ‖tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)‖ ^ 2 ≤ (1 : ℝ) ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, d3HalfPt_re, d3HalfPt_im]
+    norm_num
+  exact le_of_sq_le_sq hsq (by norm_num)
+
+/-- In-tail Dirichlet eta term replica (mirror of `etaDirichletTerm`;
+Mathlib-only closure, no import added). -/
+noncomputable def d3EtaTerm (s : ℂ) (n : ℕ) : ℂ := (-1 : ℂ) ^ n / ((((n + 1 : ℕ)) : ℂ) ^ s)
+
+/-- In-tail two-term eta partial sum in closed form (`S₂ = 1 - (2^s)⁻¹`,
+mirror of `R03_eta_S2_eq`). -/
+theorem d3Eta_S2_eq (s : ℂ) :
+    (∑ k ∈ Finset.range 2, d3EtaTerm s k) = 1 - (((((2 : ℕ)) : ℂ) ^ s)⁻¹) := by
+  have hsum : (∑ k ∈ Finset.range 2, d3EtaTerm s k) = d3EtaTerm s 0 + d3EtaTerm s 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  have h0 : d3EtaTerm s 0 = 1 := by
+    have h01 : (0 + 1 : ℕ) = 1 := rfl
+    have hcast : ((((0 + 1 : ℕ)) : ℂ)) = 1 := by
+      rw [h01, Nat.cast_one]
+    simp only [d3EtaTerm, pow_zero, hcast, Complex.one_cpow, div_one]
+  have h1 : d3EtaTerm s 1 = -((((((2 : ℕ)) : ℂ) ^ s)⁻¹)) := by
+    unfold d3EtaTerm
+    rw [pow_one]
+    rw [show (((1 + 1 : ℕ) : ℂ)) = ((((2 : ℕ)) : ℂ)) by norm_num]
+    rw [neg_div, one_div]
+  rw [hsum, h0, h1]
+  ring
+
+/-- Cleared square: `(2^(1/2:ℝ))^2 = 2` (mirror of the R03/R05 rpow clearing). -/
+theorem d3rpow_half_sq :
+    (((((2 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) = 2 := by
+  rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+  rw [show ((1 / 2 : ℝ)) * (((2 : ℕ)) : ℝ) = (1 : ℝ) by norm_num]
+  exact Real.rpow_one 2
+
+/-- Numeral rpow lower bound `7/5 ≤ 2^(1/2:ℝ)` (cleared: `(7/5)^2 ≤ 2`). -/
+theorem d3rpow_half_ge : (7 / 5 : ℝ) ≤ (2 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hpow : ((7 / 5 : ℝ)) ^ ((2 : ℕ)) ≤
+      (((((2 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) := by
+    rw [d3rpow_half_sq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Numeral rpow upper bound `2^(1/2:ℝ) ≤ 8/5` (cleared: `2 ≤ (8/5)^2`). -/
+theorem d3rpow_half_le : (2 : ℝ) ^ ((1 / 2 : ℝ)) ≤ (8 / 5 : ℝ) := by
+  have hpow : (((((2 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) ≤
+      ((8 / 5 : ℝ)) ^ ((2 : ℕ)) := by
+    rw [d3rpow_half_sq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Modulus of the height-`1/2` second eta term (`2^(-1/2) ≤ 4/5`,
+mirror of `R03_eta_second_norm_le`). -/
+theorem d3Eta_second_norm_le :
+    ‖((((2 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))⁻¹‖ ≤ 4 / 5 := by
+  have h2eq : ((((2 : ℕ)) : ℂ)) = (2 : ℂ) := by norm_cast
+  have hnorm : ‖(2 : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)‖ =
+      (2 : ℝ) ^ ((1 / 2 : ℝ)) := by
+    have hbase := Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2)
+      (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))
+    rw [d3HalfPt_re] at hbase
+    exact hbase
+  rw [h2eq, norm_inv, hnorm]
+  have hge := d3rpow_half_ge
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (((2 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (((7 / 5 : ℝ)))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : (((7 / 5 : ℝ)))⁻¹ ≤ (4 / 5 : ℝ) := by norm_num
+  exact le_trans hInv heq
+
+/-- In-tail finite-sum lower bound at height `1/2`
+(`1/5 ≤ ‖S₂‖`, reverse triangle, mirror of `R03_eta_S2_norm_ge`). -/
+theorem d3Eta_S2_norm_ge :
+    (1 / 5 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 2, d3EtaTerm (tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) k‖ := by
+  rw [d3Eta_S2_eq]
+  have hX := d3Eta_second_norm_le
+  have h := norm_add_le
+    (1 - ((((2 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))⁻¹)
+    (((((2 : ℕ)) : ℂ) ^ tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))⁻¹)
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  linarith
+
+/-- Real part of the eta factor base at height `1/2`: `Re (1 - s) = 1/2`. -/
+theorem d3HalfPt_one_sub_re :
+    (((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))).re = (1 / 2 : ℝ) := by
+  rw [Complex.sub_re, Complex.one_re, d3HalfPt_re]
+  norm_num
+
+/-- In-tail eta-factor upper bound at height `1/2`
+(`‖1 - 2^(1-s)‖ ≤ 13/5`, mirror of `R03_etaFactor_upper`). -/
+theorem d3EtaFactor_upper :
+    ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)))‖ ≤
+      13 / 5 := by
+  have hY : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ ≤
+      8 / 5 := by
+    have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+        (2 : ℝ) ^ ((((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2) _
+    rw [hnorm, d3HalfPt_one_sub_re]
+    exact d3rpow_half_le
+  calc ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖
+        ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ :=
+          norm_sub_le _ _
+    _ ≤ 13 / 5 := by
+          rw [norm_one]
+          linarith [hY]
+
+/-- In-tail eta-factor nonvanishing at height `1/2`
+(mirror of `etaFactor_ne_zero_of_re_ne` at `Re = 1/2`). -/
+theorem d3EtaFactor_ne_zero :
+    (1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))) ≠ 0 := by
+  intro h
+  have heq : (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)) = 1 :=
+    (sub_eq_zero.mp h).symm
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+      ‖(1 : ℂ)‖ := congrArg (fun x : ℂ => ‖x‖) heq
+  have hbase : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+      (2 : ℝ) ^ ((1 / 2 : ℝ)) := by
+    have hnorm2 : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))‖ =
+        (2 : ℝ) ^ ((((1 : ℂ) - tailShiftedSReal (((1 / 2 : ℝ)) : ℂ))).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2) _
+    rw [hnorm2, d3HalfPt_one_sub_re]
+  rw [hbase, norm_one] at hnorm
+  have hge := d3rpow_half_ge
+  linarith
+
+#print axioms door3RealSegNext6_witness
+#print axioms door3RealSegNext6_isClosed
+#print axioms door3RealSegNext6_isBounded
+#print axioms door3RealSegNext6_isCompact
+#print axioms door3RealSegNext6_in_open_strip
+#print axioms door3RealNext6Shift_re
+#print axioms door3RealNext6Shift_ne_one_of_seg
+#print axioms door3RealNext6ZetaContinuousOnSeg
+#print axioms exists_door3RealSegNext6_zetaUpper
+#print axioms door3RealSegNext6_meet
+#print axioms d3HalfPt_re
+#print axioms d3HalfPt_im
+#print axioms d3HalfPt_ne_one
+#print axioms d3HalfPt_norm_le
+#print axioms d3Eta_S2_eq
+#print axioms d3rpow_half_sq
+#print axioms d3rpow_half_ge
+#print axioms d3rpow_half_le
+#print axioms d3Eta_second_norm_le
+#print axioms d3Eta_S2_norm_ge
+#print axioms d3HalfPt_one_sub_re
+#print axioms d3EtaFactor_upper
+#print axioms d3EtaFactor_ne_zero
