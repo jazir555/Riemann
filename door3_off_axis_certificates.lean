@@ -3867,3 +3867,395 @@ theorem R05_S6_banked_ratio_lt_half : (543 / 2500 : Real) < (1 / 2 : Real) := by
 #print axioms R05_S6_banked_ratio_lt_half
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-8 split (`log 8 = 3 * log 2`) via `8 = 2 ^ 3`. -/
+theorem R05_log_eight_eq :
+    Real.log 8 = 3 * Real.log 2 := by
+  have h8 : (8 : Real) = 2 ^ (3 : Nat) := by norm_num
+  rw [h8, Real.log_pow]
+  have h3 : ((((3 : Nat))) : Real) = (3 : Real) := by norm_num
+  rw [h3]
+
+/-- Fresh `log 7` lower bound (`1.9365 ≤ log 7`) from `log 7 = 3 * log 2 + log (7/8)`
+with the d9 `log 2` lower bound and `log (8/7) ≤ 1/7`
+(no d9 lemma for `log 7` exists in Mathlib). -/
+theorem R05_log_seven_ge :
+    (1.9365 : Real) ≤ Real.log 7 := by
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have hub87 : Real.log (8 / 7 : Real) ≤ (1 / 7 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 8 / 7)
+    have he : (8 / 7 : Real) - 1 = (1 / 7 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (7 / 8 : Real) = -Real.log (8 / 7 : Real) := by
+    have heq : (7 / 8 : Real) = (8 / 7 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hmeq : (8 : Real) * (7 / 8) = 7 := by norm_num
+  have hlog7 : Real.log 7 = 3 * Real.log 2 + Real.log (7 / 8 : Real) := by
+    have h := Real.log_mul (show (8 : Real) ≠ 0 by norm_num)
+      (show (7 / 8 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [R05_log_eight_eq] at h
+    exact h
+  have hfin : (1.9365 : Real) ≤ 3 * (0.693147 : Real) - (1 / 7 : Real) := by
+    norm_num
+  rw [hlog7, hinv]
+  linarith
+
+/-- Fresh `log 7` upper bound (`log 7 ≤ 1.9545`) from `log 7 = 3 * log 2 + log (7/8)`
+with the d9 `log 2` upper bound and `log (7/8) ≤ -1/8`. -/
+theorem R05_log_seven_le :
+    Real.log 7 ≤ (1.9545 : Real) := by
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have hub78 : Real.log (7 / 8 : Real) ≤ (-1 / 8 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 7 / 8)
+    have he : (7 / 8 : Real) - 1 = (-1 / 8 : Real) := by norm_num
+    linarith
+  have hmeq : (8 : Real) * (7 / 8) = 7 := by norm_num
+  have hlog7 : Real.log 7 = 3 * Real.log 2 + Real.log (7 / 8 : Real) := by
+    have h := Real.log_mul (show (8 : Real) ≠ 0 by norm_num)
+      (show (7 / 8 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [R05_log_eight_eq] at h
+    exact h
+  have hfin : 3 * (0.693148 : Real) + (-1 / 8 : Real) ≤ (1.9545 : Real) := by
+    norm_num
+  rw [hlog7]
+  linarith
+
+/-- Phase of the R05 seventh eta term (`0.75 * log 7` in `[1.4523, 1.4659]`)
+from the fresh `log 7` bounds. -/
+theorem R05_theta7_mem :
+    (1.4523 : Real) ≤ 0.75 * Real.log 7 ∧ 0.75 * Real.log 7 ≤ (1.4659 : Real) := by
+  have hlo := R05_log_seven_ge
+  have hhi := R05_log_seven_le
+  constructor <;> linarith
+
+/-- Phase of the R05 eighth eta term (`0.75 * log 8` in `[1.5595, 1.5596]`)
+from the d9 `log 2` bounds via `R05_log_eight_eq`. -/
+theorem R05_theta8_mem :
+    (1.5595 : Real) ≤ 0.75 * Real.log 8 ∧ 0.75 * Real.log 8 ≤ (1.5596 : Real) := by
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have he := R05_log_eight_eq
+  constructor <;> rw [he] <;> linarith
+
+/-- Cosine floor at the seventh-term phase (`1/20 ≤ cos (0.75 * log 7)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log7_lower :
+    (1 / 20 : Real) ≤ Real.cos (0.75 * Real.log 7) := by
+  have hmem := R05_theta7_mem
+  have hpos : (0 : Real) < Real.log 7 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 7 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.4523 : Real) ≤ 0.75 * Real.log 7 := hmem.1
+  have hhi : 0.75 * Real.log 7 ≤ (1.4659 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 7) ^ 2 ≤ (1.4659 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.4523 : Real) ^ 4 ≤ (0.75 * Real.log 7) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 7) ^ 6 ≤ (1.4659 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (1 / 20 : Real) ≤
+      1 - (1.4659 : Real) ^ 2 / 2 + (1.4523 : Real) ^ 4 / 24 -
+        (1.4659 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Cosine upper at the eighth-term phase (`cos (0.75 * log 8) ≤ 1/25`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log8_upper :
+    Real.cos (0.75 * Real.log 8) ≤ (1 / 25 : Real) := by
+  have hmem := R05_theta8_mem
+  have hpos : (0 : Real) < Real.log 8 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 8 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.5595 : Real) ≤ 0.75 * Real.log 8 := hmem.1
+  have hhi : 0.75 * Real.log 8 ≤ (1.5596 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.5595 : Real) ^ 2 ≤ (0.75 * Real.log 8) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 8) ^ 4 ≤ (1.5596 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.5595 : Real) ^ 2 / 2 + (1.5596 : Real) ^ 4 / 24 ≤
+      (1 / 25 : Real) := by
+    norm_num
+  linarith
+
+/-- Cosine nonnegativity at the eighth-term phase (`0 ≤ cos (0.75 * log 8)`)
+since `θ8 ≤ 1.5596 < π / 2` (from `π > 3.1415`). -/
+theorem R05_cos_075log8_nonneg :
+    (0 : Real) ≤ Real.cos (0.75 * Real.log 8) := by
+  have hmem := R05_theta8_mem
+  have hpi_lo : (3.1415 : Real) < Real.pi := Real.pi_gt_d4
+  have hpos : (0 : Real) < Real.log 8 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 8 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : 0.75 * Real.log 8 ≤ (1.5596 : Real) := hmem.2
+  have hle : (1.5596 : Real) ≤ Real.pi / 2 := by linarith
+  have hm : 0.75 * Real.log 8 ∈ Set.Icc (-(Real.pi / 2)) (Real.pi / 2) :=
+    Set.mem_Icc.mpr ⟨by linarith, by linarith⟩
+  exact Real.cos_nonneg_of_mem_Icc hm
+
+/-- Rpow upper (`7 ^ 0.395 ≤ 11/5`) via cleared `(7 ^ (2/5)) ^ 5 = 49`. -/
+theorem R05_seven_rpow_le : (7 : Real) ^ (0.395 : Real) ≤ (11 / 5 : Real) := by
+  have hpow : ((((7 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((11 / 5 : Real)) ^ (5 : Nat) := by
+    have e : ((((7 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (7 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 7)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 7 2
+    rw [e]
+    norm_num
+  have hstep : (7 : Real) ^ ((2 / 5 : Real)) ≤ (11 / 5 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (7 : Real) ^ (0.395 : Real) ≤ (7 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (11 / 5 : Real) := hstep
+
+/-- Real rpow inverse lower (`5/11 ≤ 7 ^ (-0.395)`) from `7 ^ 0.395 ≤ 11/5`. -/
+theorem R05_rpow_seven_neg0395_ge :
+    (5 / 11 : Real) ≤ (7 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_seven_rpow_le
+  have hpos : (0 : Real) < (7 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (7 : Real) ^ (-0.395 : Real) = (((7 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (5 / 11 : Real) = ((11 / 5 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Rpow lower (`2 ≤ 8 ^ 0.395`) via cleared `(2) ^ 20 ≤ 8 ^ 7`. -/
+theorem R05_eight_rpow_ge : (2 : Real) ≤ (8 : Real) ^ (0.395 : Real) := by
+  have h67 : ((2 : Real)) ^ (20 : Nat) ≤ (8 : Real) ^ (7 : Nat) := by norm_num
+  have e : ((((8 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) =
+      (8 : Real) ^ (7 : Nat) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 8)]
+    rw [show (7 / 20 : Real) * ((((20 : Nat)) : Real)) = (7 : Real) by norm_num]
+    rw [show (7 : Real) = ((((7 : Nat)) : Real)) by norm_num]
+    exact Real.rpow_natCast 8 7
+  have hpow : ((2 : Real)) ^ (20 : Nat) ≤
+      ((((8 : Real) ^ ((7 / 20 : Real)))) ^ (20 : Nat)) := by
+    rw [e]
+    exact h67
+  have hstep : (2 : Real) ≤ (8 : Real) ^ ((7 / 20 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (2 : Real) ≤ (8 : Real) ^ ((7 / 20 : Real)) := hstep
+    _ ≤ (8 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Real rpow inverse upper (`8 ^ (-0.395) ≤ 1/2`) from `2 ≤ 8 ^ 0.395`. -/
+theorem R05_rpow_eight_neg0395_le :
+    (8 : Real) ^ (-0.395 : Real) ≤ (1 / 2 : Real) := by
+  have hge := R05_eight_rpow_ge
+  have hpos : (0 : Real) < (8 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (8 : Real) ^ (-0.395 : Real) = (((8 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 2 : Real) = ((2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Real part of the R05 seventh eta inverse
+(`Re (7 ^ s)⁻¹ = 7 ^ (-0.395) * cos (0.75 * log 7)`). -/
+theorem R05_inv_seven_cpow_re_eq :
+    (((((7 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (7 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 7) := by
+  have h7eq : ((((7 : Nat)) : Complex)) = (7 : Complex) := by norm_cast
+  rw [h7eq]
+  have hlog : Complex.log (7 : Complex) = (((Real.log 7 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 7)).symm
+  have hlogre : (Complex.log (7 : Complex)).re = Real.log 7 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (7 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (7 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 7 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (7 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 7 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (7 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (7 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (7 : Complex) ≠ 0)]
+  have hinv : ((7 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (7 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (7 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 7 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (7 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 7 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (7 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 7 * 0.395)) * Real.cos (-(Real.log 7 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 7 * (-0.75))) = Real.cos (0.75 * Real.log 7) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 7 * 0.395)) = (7 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 7 * 0.395) = Real.log 7 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [← Real.rpow_def_of_pos (by norm_num : (0 : Real) < 7)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- Real part of the R05 eighth eta inverse
+(`Re (8 ^ s)⁻¹ = 8 ^ (-0.395) * cos (0.75 * log 8)`). -/
+theorem R05_inv_eight_cpow_re_eq :
+    (((((8 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (8 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 8) := by
+  have h8eq : ((((8 : Nat)) : Complex)) = (8 : Complex) := by norm_cast
+  rw [h8eq]
+  have hlog : Complex.log (8 : Complex) = (((Real.log 8 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 8)).symm
+  have hlogre : (Complex.log (8 : Complex)).re = Real.log 8 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (8 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (8 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 8 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (8 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 8 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (8 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (8 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (8 : Complex) ≠ 0)]
+  have hinv : ((8 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (8 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (8 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 8 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (8 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 8 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (8 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 8 * 0.395)) * Real.cos (-(Real.log 8 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 8 * (-0.75))) = Real.cos (0.75 * Real.log 8) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 8 * 0.395)) = (8 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 8 * 0.395) = Real.log 8 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [← Real.rpow_def_of_pos (by norm_num : (0 : Real) < 8)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 seventh eta term in closed form (`term 6 = (7^s)⁻¹`, since `(-1)^6 = 1`). -/
+theorem R05_eta_seventh_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 6 =
+      ((((7 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (6 + 1 : Nat) = 7 := rfl
+  have hcast : ((((6 + 1 : Nat)) : Complex)) = ((((7 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (6 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- R05 eighth eta term in closed form (`term 7 = -((8 ^ s)⁻¹)`, since `(-1)^7 = -1`). -/
+theorem R05_eta_eighth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 7 =
+      -((((8 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (7 + 1 : Nat) = 8 := rfl
+  have hcast : ((((7 + 1 : Nat)) : Complex)) = ((((8 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (7 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- Real part of the R05 seventh eta term (`1/44 ≤ Re term7`,
+from `(5/11) * (1/20) = 1/44`). -/
+theorem R05_eta_seventh_Re_ge :
+    (1 / 44 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 6).re := by
+  rw [R05_eta_seventh_eq, R05_inv_seven_cpow_re_eq]
+  have hamp := R05_rpow_seven_neg0395_ge
+  have hcos := R05_cos_075log7_lower
+  have hamp_nn : (0 : Real) ≤ (7 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hprod : (5 / 11 : Real) * (1 / 20 : Real) ≤
+      (7 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 7) :=
+    mul_le_mul hamp hcos (by norm_num) hamp_nn
+  have heq : (5 / 11 : Real) * (1 / 20 : Real) = (1 / 44 : Real) := by
+    norm_num
+  linarith
+
+/-- Real part of the R05 eighth eta term (`-(1/50) ≤ Re term8`,
+from `-((1/2) * (1/25))`). -/
+theorem R05_eta_eighth_Re_ge :
+    (-(1 / 50) : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 7).re := by
+  rw [R05_eta_eighth_eq, Complex.neg_re, R05_inv_eight_cpow_re_eq]
+  have hamp := R05_rpow_eight_neg0395_le
+  have hcos := R05_cos_075log8_upper
+  have hamp_nn : (0 : Real) ≤ (8 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hcos_nn : (0 : Real) ≤ Real.cos (0.75 * Real.log 8) :=
+    R05_cos_075log8_nonneg
+  have hprod : (8 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 8) ≤
+      (1 / 2 : Real) * (1 / 25 : Real) :=
+    mul_le_mul hamp hcos hcos_nn (by norm_num)
+  have heq : (1 / 2 : Real) * (1 / 25 : Real) = (1 / 50 : Real) := by
+    norm_num
+  linarith
+
+/-- Phase-aware third-pair real part (`1/500 ≤ Re pair 3`,
+from `1/44 - 1/50 = 3/1100 ≥ 1/500`).
+Stop-rule verdict: the floor stays POSITIVE at m=3 (no stop here);
+`θ8 ≈ 1.5596` is still below `π/2`, but `θ9 ≈ 1.648 > π/2`, so the
+pair route is expected to stall at m=4. -/
+theorem R05_pair3_Re_ge :
+    (1 / 500 : Real) ≤ (etaPairTerm R03R10PolyLower.sR05 3).re := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 3 =
+      etaDirichletTerm R03R10PolyLower.sR05 6 +
+        etaDirichletTerm R03R10PolyLower.sR05 7 := by
+    unfold etaPairTerm
+    have e0 : 2 * 3 = 6 := by norm_num
+    have e1 : 2 * 3 + 1 = 7 := by norm_num
+    rw [e0, e1]
+  rw [hp, Complex.add_re]
+  have ht6 := R05_eta_seventh_Re_ge
+  have ht7 := R05_eta_eighth_Re_ge
+  have hle : (1 / 500 : Real) ≤ (1 / 44 : Real) - (1 / 50 : Real) := by norm_num
+  linarith
+
+#print axioms R05_log_eight_eq
+#print axioms R05_log_seven_ge
+#print axioms R05_log_seven_le
+#print axioms R05_theta7_mem
+#print axioms R05_theta8_mem
+#print axioms R05_cos_075log7_lower
+#print axioms R05_cos_075log8_upper
+#print axioms R05_cos_075log8_nonneg
+#print axioms R05_seven_rpow_le
+#print axioms R05_rpow_seven_neg0395_ge
+#print axioms R05_eight_rpow_ge
+#print axioms R05_rpow_eight_neg0395_le
+#print axioms R05_inv_seven_cpow_re_eq
+#print axioms R05_inv_eight_cpow_re_eq
+#print axioms R05_eta_seventh_eq
+#print axioms R05_eta_eighth_eq
+#print axioms R05_eta_seventh_Re_ge
+#print axioms R05_eta_eighth_Re_ge
+#print axioms R05_pair3_Re_ge
+
+end Door3OffAxis
+
