@@ -3692,3 +3692,222 @@ theorem d3EtaPair_one_norm_le :
 #print axioms d3EtaPair_one_eq
 #print axioms d3Eta_term3_norm_le
 #print axioms d3EtaPair_one_norm_le
+
+/-!
+## Door-3 remainder 5 (paired-tail step 2a): in-tail pair cpow-difference form
+
+Helpers reproved in-tail (mirror of `zeta_rigorous` `etaDirichletTerm_eq_cpow_neg`
++ `etaPairTerm_eq_cpow_sub`, no import added): `(-1)^(2k)=1`,
+`(-1)^(2k+1)=-1`, term cpow-neg form, pair cpow-difference form.
+-/
+
+/-- In-tail `(-1)^(2k) = 1` over `ℂ`. -/
+theorem d3_neg_one_pow_two_mul (k : ℕ) : ((-1 : ℂ) ^ (2 * k) = 1) := by
+  rw [pow_mul]
+  simp
+
+/-- In-tail `(-1)^(2k+1) = -1` over `ℂ`. -/
+theorem d3_neg_one_pow_two_mul_add_one (k : ℕ) : ((-1 : ℂ) ^ (2 * k + 1) = -1) := by
+  rw [pow_add, d3_neg_one_pow_two_mul k, pow_one, one_mul]
+
+/-- In-tail Dirichlet eta term in cpow-neg form. -/
+theorem d3EtaTerm_eq_cpow_neg (s : ℂ) (n : ℕ) :
+    d3EtaTerm s n = (-1 : ℂ) ^ n * (((((n : ℝ) + 1 : ℝ))) : ℂ) ^ (-s) := by
+  have hcast : ((((n + 1 : ℕ) : ℂ))) = (((((n : ℝ) + 1 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  unfold d3EtaTerm
+  rw [hcast, div_eq_mul_inv, ← Complex.cpow_neg]
+
+/-- In-tail pair in cpow-difference form. -/
+theorem d3EtaPair_eq_cpow_sub (s : ℂ) (m : ℕ) :
+    d3EtaPairTerm s m
+      = (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-s))
+        - (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-s)) := by
+  have e0 := d3EtaTerm_eq_cpow_neg s (2 * m)
+  have e1 := d3EtaTerm_eq_cpow_neg s (2 * m + 1)
+  have hcast0 : ((((2 * m : ℕ) : ℝ) + 1 : ℝ)) = ((((2 * m + 1 : ℕ) : ℝ))) := by
+    push_cast
+    ring
+  have hcast1 : ((((2 * m + 1 : ℕ) : ℝ) + 1 : ℝ)) = ((((2 * m + 2 : ℕ) : ℝ))) := by
+    push_cast
+    ring
+  unfold d3EtaPairTerm
+  rw [e0, e1, d3_neg_one_pow_two_mul, d3_neg_one_pow_two_mul_add_one, hcast0,
+    hcast1]
+  ring
+
+#print axioms d3_neg_one_pow_two_mul
+#print axioms d3_neg_one_pow_two_mul_add_one
+#print axioms d3EtaTerm_eq_cpow_neg
+#print axioms d3EtaPair_eq_cpow_sub
+
+/-- In-tail mean-value pair bound
+`‖pair m‖ ≤ ‖s‖ * (2m+1)^{-Re s - 1}` (`0 < Re s`; mirror of
+`zeta_rigorous.norm_etaPairTerm_le`, reproved in-tail via
+`Convex.norm_image_sub_le_of_norm_deriv_le`). -/
+theorem d3EtaPair_norm_le (s : ℂ) (hs : 0 < s.re) (m : ℕ) :
+    ‖d3EtaPairTerm s m‖ ≤ ‖s‖ * (((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1))) := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_re] at hs
+    exact lt_irrefl _ hs
+  have hnegs : -s ≠ 0 := neg_ne_zero.mpr hs0
+  set a : ℝ := (((2 * m + 1 : ℕ) : ℝ)) with ha
+  set b : ℝ := (((2 * m + 2 : ℕ) : ℝ)) with hb
+  have ha_pos : (0 : ℝ) < a := by
+    rw [ha]
+    exact Nat.cast_pos.mpr (by omega)
+  have hab : a ≤ b := by
+    rw [ha, hb]
+    exact Nat.cast_le.mpr (by omega)
+  have hb_eq : b = a + 1 := by
+    rw [ha, hb]
+    have heq : 2 * m + 1 + 1 = 2 * m + 2 := by omega
+    calc ((((2 * m + 2 : ℕ)) : ℝ))
+        = ((((2 * m + 1 + 1 : ℕ)) : ℝ)) := by rw [heq]
+      _ = ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by rw [Nat.cast_add, Nat.cast_one]
+  have hpair : d3EtaPairTerm s m = (a : ℂ) ^ (-s) - (b : ℂ) ^ (-s) := by
+    rw [d3EtaPair_eq_cpow_sub]
+  have hdiff : ∀ x ∈ Set.Icc a b,
+      DifferentiableAt ℝ (fun t : ℝ => (t : ℂ) ^ (-s)) x := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha_pos (Set.mem_Icc.mp hx).1
+    exact (hasDerivAt_ofReal_cpow_const (ne_of_gt hx0) hnegs).differentiableAt
+  have hderiv_eq : ∀ x : ℝ, x ≠ 0 →
+      deriv (fun t : ℝ => (t : ℂ) ^ (-s)) x = (-s) * (x : ℂ) ^ (-s - 1) := by
+    intro x hx0
+    exact Complex.deriv_ofReal_cpow_const hx0 hnegs
+  have hexp_nonpos : -s.re - 1 ≤ 0 := by linarith
+  have hbound : ∀ x ∈ Set.Icc a b, ‖deriv (fun t : ℝ => (t : ℂ) ^ (-s)) x‖
+      ≤ ‖s‖ * (a ^ (-s.re - 1)) := by
+    intro x hx
+    have hx0 : (0 : ℝ) < x := lt_of_lt_of_le ha_pos (Set.mem_Icc.mp hx).1
+    have hax : a ≤ x := (Set.mem_Icc.mp hx).1
+    rw [hderiv_eq x (ne_of_gt hx0)]
+    have hnorm_cpow : ‖(x : ℂ) ^ (-s - 1)‖ = x ^ ((-s - 1).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos hx0 _
+    have hre : ((-s - 1).re) = -s.re - 1 := by
+      rw [Complex.sub_re, Complex.neg_re, Complex.one_re]
+    have hle : x ^ (-s.re - 1) ≤ a ^ (-s.re - 1) :=
+      Real.rpow_le_rpow_of_nonpos ha_pos hax hexp_nonpos
+    calc ‖-s * (x : ℂ) ^ (-s - 1)‖
+        = ‖s‖ * (x ^ (-s.re - 1)) := by
+          rw [norm_mul, norm_neg, hnorm_cpow, hre]
+      _ ≤ ‖s‖ * (a ^ (-s.re - 1)) :=
+          mul_le_mul_of_nonneg_left hle (norm_nonneg _)
+  have hmvt := Convex.norm_image_sub_le_of_norm_deriv_le hdiff hbound
+    (convex_Icc a b) (Set.left_mem_Icc.mpr hab) (Set.right_mem_Icc.mpr hab)
+  have hba : ‖b - a‖ = 1 := by
+    have hsub : b - a = 1 := by rw [hb_eq]; ring
+    rw [hsub, norm_one]
+  rw [hba, mul_one] at hmvt
+  have hrev : ‖(a : ℂ) ^ (-s) - (b : ℂ) ^ (-s)‖
+      = ‖(b : ℂ) ^ (-s) - (a : ℂ) ^ (-s)‖ := norm_sub_rev _ _
+  rw [hpair, hrev]
+  exact hmvt
+
+#print axioms d3EtaPair_norm_le
+
+/-- In-tail paired series is summable at `Re = 1/2` (M-test vs `p = 3/2 > 1`;
+mirror of `zeta_rigorous.summable_etaPairTerm`). -/
+theorem summable_d3EtaPair (s : ℂ) (hs : s.re = 1 / 2) :
+    Summable (d3EtaPairTerm s) := by
+  have hspos : 0 < s.re := by rw [hs]; norm_num
+  have hp1 : (1 : ℝ) < s.re + 1 := by rw [hs]; norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (s.re + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have hC : Summable (fun m : ℕ => ‖s‖ * ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹) :=
+    hshift.mul_left _
+  refine Summable.of_norm_bounded hC (fun m => ?_)
+  have hle1 := d3EtaPair_norm_le s hspos m
+  have ha_pos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_pos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp_nonneg : (0 : ℝ) ≤ s.re + 1 := by linarith
+  have hrpow_eq : ((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1))
+      = ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by
+    have e : -s.re - 1 = -(s.re + 1) := by ring
+    rw [e]
+    exact Real.rpow_neg (Nat.cast_nonneg _) _
+  have hrpow_le : ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹
+      ≤ ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by
+    apply (inv_le_inv₀ (Real.rpow_pos_of_pos ha_pos _)
+      (Real.rpow_pos_of_pos hm_pos _)).mpr
+    exact Real.rpow_le_rpow (Nat.cast_nonneg _) hm_le hexp_nonneg
+  calc ‖d3EtaPairTerm s m‖ ≤ ‖s‖ * ((((2 * m + 1 : ℕ) : ℝ)) ^ (-s.re - 1)) := hle1
+    _ = ‖s‖ * ((((2 * m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ := by rw [hrpow_eq]
+    _ ≤ ‖s‖ * ((((m + 1 : ℕ) : ℝ) ^ (s.re + 1)))⁻¹ :=
+        mul_le_mul_of_nonneg_left hrpow_le (norm_nonneg _)
+
+#print axioms summable_d3EtaPair
+
+/-!
+## Door-3 remainder 5 (paired-tail step 3a): M=1 tail-shift identity
+
+`∑' m, pair (m+1) = G - S₂` via `Summable.sum_add_tsum_nat_add` at `k = 1`
+plus the committed `d3EtaPair_zero_eq_S2`.
+-/
+
+/-- Height-`1/2` in-tail base point. -/
+noncomputable abbrev d3HalfS0 : ℂ := tailShiftedSReal (((1 / 2 : ℝ)) : ℂ)
+
+/-- M=1 paired-tail shift: the shifted tsum is the full paired sum minus
+the two-term partial sum `S₂`. -/
+theorem d3Pair_tail_eq (s : ℂ) (hs : Summable (d3EtaPairTerm s)) :
+    (∑' m, d3EtaPairTerm s (m + 1))
+      = (∑' m, d3EtaPairTerm s m) - ∑ k ∈ Finset.range 2, d3EtaTerm s k := by
+  have h1 := hs.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one] at h1
+  have heq : (∑' i, d3EtaPairTerm s (i + 1))
+      = (∑' i, d3EtaPairTerm s i) - d3EtaPairTerm s 0 := by
+    rw [← h1]
+    exact (add_sub_cancel_left _ _).symm
+  have hpair0 := d3EtaPair_zero_eq_S2 s
+  rw [heq, hpair0]
+
+#print axioms d3Pair_tail_eq
+
+/-- Zeta lower bound from a paired-tail bound: with `‖G - S₂‖ ≤ rtail < 1/5`
+and the eta bridge `G = (1 - 2^(1-s₀)) * ζ(s₀)`, reverse-triangle on the
+committed `1/5 ≤ ‖S₂‖` plus the committed factor cap `13/5` yields
+`(1/5 - rtail)/(13/5) ≤ ‖ζ(s₀)‖` for `door3RealNonvan_of_lower`. -/
+theorem d3Zeta_lower_of_tail (rtail : ℝ) (hrt : rtail < 1 / 5)
+    (hTail : ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 1)‖ ≤ rtail)
+    (hZeta : (∑' m, d3EtaPairTerm d3HalfS0 m)
+      = (1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0)) * riemannZeta d3HalfS0) :
+    (1 / 5 - rtail) / (13 / 5) ≤ ‖riemannZeta d3HalfS0‖ := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have hS2 : (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, d3EtaTerm d3HalfS0 k‖ :=
+    d3Eta_S2_norm_ge
+  have hFac : ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0))‖ ≤ 13 / 5 :=
+    d3EtaFactor_upper
+  have hshift := d3Pair_tail_eq d3HalfS0 (summable_d3EtaPair d3HalfS0 hre)
+  have htri : ‖∑ k ∈ Finset.range 2, d3EtaTerm d3HalfS0 k‖
+      ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + rtail := by
+    have hdecomp : (∑ k ∈ Finset.range 2, d3EtaTerm d3HalfS0 k)
+        = (∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 1)) := by
+      rw [hshift]
+      ring
+    calc ‖∑ k ∈ Finset.range 2, d3EtaTerm d3HalfS0 k‖
+        = ‖(∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 1))‖ := by rw [hdecomp]
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+          + ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 1)‖ := norm_sub_le _ _
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + rtail := by linarith [hTail]
+  have hGle : ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+      ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    rw [hZeta, norm_mul]
+    exact mul_le_mul_of_nonneg_right hFac (norm_nonneg _)
+  have hkey : (1 / 5 - rtail) ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    linarith [hS2, htri, hGle]
+  have : 0 < (1 / 5 : ℝ) - rtail := by linarith
+  rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 13 / 5)]
+  rw [mul_comm]
+  exact hkey
+
+#print axioms d3Zeta_lower_of_tail
