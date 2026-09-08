@@ -3358,6 +3358,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 RX11 (`a62e7875`, tail-scratch, 3× green 8682 jobs):
   in-tail pair replica + `‖pair 1‖ ≤ 11/10` estimate (anti-cutoff
   discipline held). Residual: MVT pair bound + summability (RX12).
+- 2026-09-08 RX12 (`14ad9197`, tail-scratch, 5× green 8682 jobs):
+  in-tail MVT pair bound + summability at Re=1/2 + `d3Zeta_lower_of_tail`
+  bridge. Residual: rtail numeral + eta bridge (RX13).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
