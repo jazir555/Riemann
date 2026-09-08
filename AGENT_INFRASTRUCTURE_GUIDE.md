@@ -3347,6 +3347,10 @@ sorry-free infrastructure and the complete commit ledger above.
   VERDICT (in-file doc): Mathlib has NO height-`t≠0` zeta enclosure
   (closest need `Re≥1`; RH statement is not a bound). Next: tile [6,7]
   + direct enclosure attempt (RX9).
+- 2026-09-08 RX9 (`afb42327`, tail-scratch, green 8682 jobs, axioms clean):
+  sixth tile (`door3RealSegNext6`, coverage [-1,7]) + height-`1/2`
+  slow (`1/5`) + factor (`13/5`) at exact point. Residual: paired-tail
+  `‖G−S₂‖ ≤ rtail` in-tail (tasked as RX10).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
