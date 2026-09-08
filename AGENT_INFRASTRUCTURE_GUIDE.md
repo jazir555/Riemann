@@ -3372,6 +3372,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 OA5 (`608a9362`, off-axis tail, green 8702 jobs):
   N=4 slow `‖S₄‖ ≥ 1/10` + honest shortfall (11/20 vs 13/20).
   Next: Re-S3 route to `‖S₃‖ ≥ 13/20` (OA6).
+- 2026-09-08 OA6 (`83f2ff92`, off-axis tail, green 8702 jobs, axioms clean):
+  `‖S₃‖ ≥ 13/20` BRIDGE (Re-S3 route) + ratio arithmetic.
+  Residual: N-match for assembly (S₃ vs M=1024 tail; N=2048 route
+  dead by head-sum caps per report). Next: pair-by-pair (OA7).
 - 2026-09-07 BS (`351a6d4f`, deriv tail lines 1062–1201, green 8682 jobs):
   segment deriv bound + margin assembler mirror `StripBaseBounds`.
   Residual: base lower `ε0 ≤ ‖ξ(x)‖` banked as hypothesis (tasked as BS2).
