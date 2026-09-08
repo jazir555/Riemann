@@ -34424,3 +34424,150 @@ theorem R02_D3_tail2_le_integral :
 #print axioms R02_D3_shift195_summable
 #print axioms R02_D3_odd195_summable
 #print axioms R02_D3_tail2_le_integral
+
+/-!
+## Door-3 quantitative close, step 9 (zeta lane): integral numeral + K0 cap.
+
+Route: closed-form `∫ x in Ioi 1, x^(-1.95) = 1/0.95` via Mathlib
+`integral_Ioi_rpow_of_lt`, hence tail `∑' n, (n+2)^(-1.95) ≤ 1.06`;
+odd head is `1`, odd tail `≤` shift tail, so `∑' n, (2n+1)^(-1.95) ≤ 2.06`.
+-/
+
+/-- Closed-form integral `∫ x in Ioi 1, x^(-1.95) = 1/0.95`. -/
+theorem R02_D3_integral195_eq :
+    (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.95 : ℝ)) = 1 / 0.95 := by
+  have hlt : (-1.95 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.95 : ℝ) + 1 = -0.95 := by norm_num
+  rw [e1] at h
+  have ec : ((((1 : ℕ)) : ℝ)) ^ (-0.95 : ℝ) = (1 : ℝ) := by
+    have ecast : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    rw [ecast, Real.one_rpow]
+  rw [ec] at h
+  have e2 : (-(1 : ℝ)) / (-0.95 : ℝ) = 1 / 0.95 := by norm_num
+  exact e2 ▸ h
+
+/-- Shift-tail numeral `∑' n, (n+2)^(-1.95) ≤ 1.06`. -/
+theorem R02_D3_tail2_le_106 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) ≤ 1.06 := by
+  have htail := R02_D3_tail2_le_integral
+  have hval := R02_D3_integral195_eq
+  have h106 : (1 : ℝ) / 0.95 ≤ 1.06 := by norm_num
+  calc (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ))
+      ≤ (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.95 : ℝ)) := htail
+    _ = 1 / 0.95 := hval
+    _ ≤ 1.06 := h106
+
+/-- Odd head `((2*0+1):ℝ)^(-1.95) = 1`. -/
+theorem R02_D3_odd195_zero_eq_one :
+    ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) = 1 := by
+  have e : ((((2 * 0 + 1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [e, Real.one_rpow]
+
+/-- K0 cap `∑' n, (2n+1)^(-1.95) ≤ 2.06` (head `1` + tail `≤ 1.06`). -/
+theorem R02_D3_odd195_tsum_le_206 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) ≤ 2.06 := by
+  have hOddShift : Summable (fun n : ℕ => ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_odd195_summable
+  have hShiftShift : Summable (fun n : ℕ => ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_shift195_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) ≤
+      ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) := by
+    intro n
+    exact R02_D3_odd195_le_shift (n + 1)
+  have htail_mono := hOddShift.tsum_le_tsum hle hShiftShift
+  have htail106 := R02_D3_tail2_le_106
+  have hsplit := R02_D3_odd195_summable.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one, R02_D3_odd195_zero_eq_one] at hsplit
+  linarith
+
+#print axioms R02_D3_integral195_eq
+#print axioms R02_D3_tail2_le_106
+#print axioms R02_D3_odd195_zero_eq_one
+#print axioms R02_D3_odd195_tsum_le_206
+
+/-!
+## Door-3 close, step 10 (zeta lane): eta linear bound on `Re = 0.95` (K0 = 2.06).
+-/
+
+/-- Eta tsum `‖∑' pairs‖ ≤ ‖s‖ * 2.06` on `Re = 0.95`. -/
+theorem R02_D3_etaPair_tsum_le_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖∑' m : ℕ, etaPairTerm s m‖ ≤ ‖s‖ * 2.06 := by
+  have hs : (0 : ℝ) < s.re := by
+    rw [hre]
+    norm_num
+  have hmajor : Summable (fun n : ℕ => ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) :=
+    R02_D3_odd195_summable.mul_left ‖s‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm s n‖ ≤
+      ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) := by
+    intro n
+    exact R02_D3_etaPair_bound_line095 s hre n
+  have htsum : ‖∑' m : ℕ, etaPairTerm s m‖ ≤
+      ∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) :=
+    tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) =
+      ‖s‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) :=
+    Summable.tsum_mul_left ‖s‖ R02_D3_odd195_summable
+  have hK0 := R02_D3_odd195_tsum_le_206
+  calc ‖∑' m : ℕ, etaPairTerm s m‖
+      ≤ ∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) := htsum
+    _ = ‖s‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) := hfactor
+    _ ≤ ‖s‖ * 2.06 := mul_le_mul_of_nonneg_left hK0 (norm_nonneg _)
+
+/-- Eta linear `‖∑' pairs‖ ≤ 2.06 * (1 + |Im|)` on `Re = 0.95`. -/
+theorem R02_D3_etaPair_linear_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖∑' m : ℕ, etaPairTerm s m‖ ≤ 2.06 * (1 + |s.im|) := by
+  have h1 := R02_D3_etaPair_tsum_le_line095 s hre
+  have h2 := R02_D3_norm_le_line095 s hre
+  have h3 : ‖s‖ * 2.06 ≤ (0.95 + |s.im|) * 2.06 :=
+    mul_le_mul_of_nonneg_right h2 (by norm_num)
+  have h4 : (0.95 + |s.im|) * 2.06 ≤ (1 + |s.im|) * 2.06 := by
+    apply mul_le_mul_of_nonneg_right _ (by norm_num)
+    linarith [abs_nonneg s.im]
+  calc ‖∑' m : ℕ, etaPairTerm s m‖ ≤ ‖s‖ * 2.06 := h1
+    _ ≤ (0.95 + |s.im|) * 2.06 := h3
+    _ ≤ (1 + |s.im|) * 2.06 := h4
+    _ = 2.06 * (1 + |s.im|) := by ring
+
+#print axioms R02_D3_etaPair_tsum_le_line095
+#print axioms R02_D3_etaPair_linear_line095
+
+/-- Zeta linear `‖ζ(s)‖ ≤ 58.86 * (1 + |Im|)` on `Re = 0.95` (floor 0.035). -/
+theorem R02_D3_zeta_linear_line095 (s : ℂ) (hre : s.re = 0.95) :
+    ‖riemannZeta s‖ ≤ 58.86 * (1 + |s.im|) := by
+  have hs : (0 : ℝ) < s.re := by
+    rw [hre]
+    norm_num
+  have hre_ne : s.re ≠ 1 := by
+    rw [hre]
+    norm_num
+  have hG := R02_D3_etaPair_linear_line095 s hre
+  have hden_ge := R02_D3_eta_denom_floor_line095 s hre
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta s‖ =
+      ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      (2.06 * (1 + |s.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hG (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖)⁻¹ ≤ ((0.035 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 2.06 * (1 + |s.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg s.im])
+  have hstep2 : (2.06 * (1 + |s.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      (2.06 * (1 + |s.im|)) / 0.035 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (2.06 * (1 + |s.im|)) / 0.035 ≤ 58.86 * (1 + |s.im|) := by
+    have hratio : (2.06 : ℝ) / 0.035 ≤ 58.86 := by norm_num
+    have e : (2.06 * (1 + |s.im|)) / 0.035 = (2.06 / 0.035) * (1 + |s.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg s.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+#print axioms R02_D3_zeta_linear_line095
