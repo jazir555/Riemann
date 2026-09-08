@@ -2948,3 +2948,185 @@ theorem R05_S4_phase_ratio_lt_half : (-1 / 20 : Real) < (1 / 2 : Real) := by
 #print axioms R05_S4_phase_ratio_lt_half
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Rpow upper (`3 ^ 0.395 <= 8/5`) via cleared `(3 ^ (2/5)) ^ 5 = 9 <= (8/5) ^ 5`. -/
+theorem R05_three_rpow_le : (3 : Real) ^ (0.395 : Real) ≤ (8 / 5 : Real) := by
+  have hpow : ((((3 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((8 / 5 : Real)) ^ (5 : Nat) := by
+    have e : ((((3 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (3 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 3)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 3 2
+    rw [e]
+    norm_num
+  have hstep : (3 : Real) ^ ((2 / 5 : Real)) ≤ (8 / 5 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (3 : Real) ^ (0.395 : Real) ≤ (3 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (8 / 5 : Real) := hstep
+
+/-- Phase of the R05 third eta term (`0.75 * log 3` in `[4/5, 5/6]`)
+from the banked `log 3` d9 bounds. -/
+theorem R05_theta3_mem :
+    (4 / 5 : Real) ≤ 0.75 * Real.log 3 ∧ 0.75 * Real.log 3 ≤ (5 / 6 : Real) := by
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  constructor <;> linarith
+
+/-- Cosine floor at the third-term phase (`cos (0.75 * log 3) >= 14/25`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log3_lower :
+    (14 / 25 : Real) ≤ Real.cos (0.75 * Real.log 3) := by
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hpos : (0 : Real) < Real.log 3 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 3 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (4 / 5 : Real) ≤ 0.75 * Real.log 3 := by linarith
+  have hhi : 0.75 * Real.log 3 ≤ (5 / 6 : Real) := by linarith
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 3) ^ 2 ≤ (5 / 6 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (4 / 5 : Real) ^ 4 ≤ (0.75 * Real.log 3) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 3) ^ 6 ≤ (5 / 6 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (14 / 25 : Real) ≤
+      1 - (5 / 6 : Real) ^ 2 / 2 + (4 / 5 : Real) ^ 4 / 24 -
+        (5 / 6 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Real part of the R05 third eta inverse
+(`Re (3 ^ s)⁻¹ = 3 ^ (-0.395) * cos (0.75 * log 3)`). -/
+theorem R05_inv_three_cpow_re_eq :
+    (((((3 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (3 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 3) := by
+  have h3eq : ((((3 : Nat)) : Complex)) = (3 : Complex) := by norm_cast
+  rw [h3eq]
+  have hlog : Complex.log (3 : Complex) = (((Real.log 3 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 3)).symm
+  have hlogre : (Complex.log (3 : Complex)).re = Real.log 3 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (3 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (3 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 3 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (3 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 3 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (3 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (3 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (3 : Complex) ≠ 0)]
+  have hinv : ((3 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (3 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (3 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 3 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (3 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 3 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (3 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 3 * 0.395)) * Real.cos (-(Real.log 3 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 3 * (-0.75))) = Real.cos (0.75 * Real.log 3) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 3 * 0.395)) = (3 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 3 * 0.395) = Real.log 3 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 3)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- Real rpow inverse lower (`5/8 <= 3 ^ (-0.395)`) from `3 ^ 0.395 <= 8/5`. -/
+theorem R05_rpow_three_neg0395_ge :
+    (5 / 8 : Real) ≤ (3 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_three_rpow_le
+  have hpos : (0 : Real) < (3 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (3 : Real) ^ (-0.395 : Real) = (((3 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (5 / 8 : Real) = ((8 / 5 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- R05 third eta term in closed form (`term 2 = (3^s)⁻¹`, since `(-1)^2 = 1`). -/
+theorem R05_eta_third_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 2 =
+      ((((3 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (2 + 1 : Nat) = 3 := rfl
+  have hcast : ((((2 + 1 : Nat)) : Complex)) = ((((3 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (2 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- Real part of the R05 third eta term (`7/20 <= Re term3`,
+from `5/8 * 14/25 = 7/20`). -/
+theorem R05_eta_third_Re_ge :
+    (7 / 20 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 2).re := by
+  rw [R05_eta_third_eq, R05_inv_three_cpow_re_eq]
+  have hamp := R05_rpow_three_neg0395_ge
+  have hcos := R05_cos_075log3_lower
+  have hamp_nn : (0 : Real) ≤ (3 : Real) ^ (-0.395 : Real) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hprod : (5 / 8 : Real) * (14 / 25 : Real) ≤
+      (3 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 3) :=
+    mul_le_mul hamp hcos (by norm_num) hamp_nn
+  have heq : (5 / 8 : Real) * (14 / 25 : Real) = (7 / 20 : Real) := by norm_num
+  linarith
+
+/-- Three-term split (`S3 = S2 + term 2`). -/
+theorem R05_S3_eq :
+    (∑ k ∈ Finset.range 3, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 2 := by
+  rw [show (3 : Nat) = 2 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Phase-aware R05 three-term real part (`13/20 <= Re S3`). -/
+theorem R05_S3_Re_ge :
+    (13 / 20 : Real) ≤
+      (∑ k ∈ Finset.range 3, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S3_eq, Complex.add_re]
+  have hS2 := R05_S2_Re_ge
+  have ht := R05_eta_third_Re_ge
+  linarith
+
+/-- Bridge: three-term slow bound (`13/20 <= ‖S3‖`, `Re`-route). -/
+theorem R05_S3_norm_ge :
+    (13 / 20 : Real) ≤
+      ‖∑ k ∈ Finset.range 3, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  have hRe := R05_S3_Re_ge
+  have hle : (∑ k ∈ Finset.range 3, etaDirichletTerm R03R10PolyLower.sR05 k).re ≤
+      ‖∑ k ∈ Finset.range 3, etaDirichletTerm R03R10PolyLower.sR05 k‖ :=
+    Complex.re_le_norm _
+  linarith
+
+/-- Banked-ratio arithmetic: with `slow = 13/20`, banked tail `3/20` and
+phase-aware factor `cF = 1`, `(slow - rtail) / cF = 1/2` exactly. -/
+theorem R05_S3_banked_ratio_eq :
+    (((13 / 20 : Real) - (3 / 20 : Real)) / (1 : Real)) = (1 / 2 : Real) := by
+  norm_num
+
+#print axioms R05_three_rpow_le
+#print axioms R05_theta3_mem
+#print axioms R05_cos_075log3_lower
+#print axioms R05_inv_three_cpow_re_eq
+#print axioms R05_rpow_three_neg0395_ge
+#print axioms R05_eta_third_eq
+#print axioms R05_eta_third_Re_ge
+#print axioms R05_S3_eq
+#print axioms R05_S3_Re_ge
+#print axioms R05_S3_norm_ge
+#print axioms R05_S3_banked_ratio_eq
+
+end Door3OffAxis
