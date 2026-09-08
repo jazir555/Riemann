@@ -3364,6 +3364,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 RX13 (`a1455037`, tail-scratch, 3× green 8682 jobs):
   pair-1 MVT bound `≤1/5` + PROVED M=1 unprovability (MVT sums ≈0.35).
   Route: deeper shift K=3 (≈0.14 feasible) + re-index (RX14).
+- 2026-09-08 RX14 (`cb0bdd50`, tail-scratch, 5× green 8682 jobs):
+  integral tail mirror + shift `≤5/6` + `‖∑' pair(m+3)‖≤5/6` +
+  PROVED `<1/5` unprovable at K=3 on MVT route (true ≈0.40).
+  Route: K≥16 peel, K≈8 exact-norm, or re-indexed head (RX15).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
