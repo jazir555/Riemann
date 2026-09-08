@@ -32880,3 +32880,216 @@ theorem R02_D3_zetaChi_le (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 
 #print axioms R02_D3_Real_Gamma_le_four
 #print axioms R02_D3_Gamma_le
 #print axioms R02_D3_zetaChi_le
+
+/-!
+## Door-3 quantitative close, step 3 (zeta lane): Hadamard side conditions + conditional interpolation.
+
+Route: Hadamard three-lines
+(`Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'`,
+`Mathlib/Analysis/Complex/Hadamard.lean:608`) on the pole-free strip
+`[0.05, 0.74]` (the strip avoids `s = 1`, so `DiffContOnCl` for
+`F(s) = (s-1)*ζ(s)` holds via `differentiableAt_riemannZeta`,
+`Mathlib/NumberTheory/LSeries/RiemannZeta.lean:139`) with damped
+`G(s) = F(s)*exp(((s-1)^2)/100)`.
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_closure_strip_subset`: closure of the open strip lies in the closed strip.
+* `R02_D3_F_diffAt` / `R02_D3_F_diffOn_closed` / `R02_D3_F_diffContOnCl`:
+  `DiffContOnCl` for pole-removed `F` on the open strip.
+* `R02_D3_dampFactor` / `R02_D3_damp_diffAt` / `R02_D3_damp_bddAbove`:
+  the damping factor is differentiable everywhere and uniformly bounded
+  (`≤ Real.exp 1`) on the closed strip (via `Complex.norm_exp` and the explicit
+  square bound `Re(((s-1)^2)/100) ≤ 1`).
+* `R02_D3_Gdamp` / `R02_D3_G_diffAt` / `R02_D3_G_diffOn_closed` /
+  `R02_D3_G_diffContOnCl`: `DiffContOnCl` for damped `G = F * damp`.
+* `R02_D3_G_interp_of_edges`: conditional Hadamard interpolation for `G`
+  (proved `DiffContOnCl` fed in; `BddAbove` + whole-line edge caps `a`, `b`
+  as hypotheses).
+* `R02_D3_zeta_of_F_le`: `‖ζ(s)‖ ≤ M/5.25` from `‖F(s)‖ ≤ M`
+  (via banked `R02_D3_subOne_ge`).
+
+RESIDUAL (exact next step): supply the two whole-line edge numerals `a`, `b`
+for damped `G` on `Re = 0.05` / `Re = 0.74` (all `Im`, via FE + Stirling chi
+caps with damping decay) plus `BddAbove` for full `G` (zeta-growth estimate on
+the strip); then `R02_D3_G_interp_of_edges` gives `‖G‖`, a damp-factor lower
+bound on the rect converts back to `‖F‖`, and `R02_D3_zeta_of_F_le` closes
+`‖ζ‖ ≤ 10` on the R02 rect.
+-/
+
+/-- Damping factor `exp(((s-1)^2)/100)` (entire, decays for large `|Im|`). -/
+noncomputable def R02_D3_dampFactor (s : ℂ) : ℂ :=
+  Complex.exp (((s - 1) ^ 2) / (100 : ℂ))
+
+/-- Damped pole-removed product `G(s) = F(s) * damp(s)`. -/
+noncomputable def R02_D3_Gdamp (s : ℂ) : ℂ :=
+  ((s - 1) * riemannZeta s) * R02_D3_dampFactor s
+
+/-- Closure of the open strip lies in the closed strip. -/
+theorem R02_D3_closure_strip_subset :
+    closure (Complex.HadamardThreeLines.verticalStrip (0.05 : ℝ) (0.74 : ℝ)) ⊆
+      Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ) := by
+  refine closure_minimal ?_ ?_
+  · intro z hz
+    have hmem : z.re ∈ Set.Ioo (0.05 : ℝ) (0.74 : ℝ) := hz
+    have h1 : (0.05 : ℝ) ≤ z.re := le_of_lt hmem.1
+    have h2 : z.re ≤ (0.74 : ℝ) := le_of_lt hmem.2
+    show z.re ∈ Set.Icc (0.05 : ℝ) (0.74 : ℝ)
+    exact ⟨h1, h2⟩
+  · exact isClosed_Icc.preimage Complex.continuous_re
+
+/-- `F` is differentiable at each point of the closed strip (it avoids `s = 1`). -/
+theorem R02_D3_F_diffAt (x : ℂ)
+    (hx : x ∈ Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ)) :
+    DifferentiableAt ℂ (fun s : ℂ => (s - 1) * riemannZeta s) x := by
+  have hmem : x.re ∈ Set.Icc (0.05 : ℝ) (0.74 : ℝ) := hx
+  have hle : x.re ≤ (0.74 : ℝ) := (Set.mem_Icc.mp hmem).2
+  have hne : x ≠ (1 : ℂ) := by
+    intro h
+    have e : x.re = 1 := by
+      rw [h]
+      exact Complex.one_re
+    linarith
+  exact (differentiableAt_id.sub_const (1 : ℂ)).mul (differentiableAt_riemannZeta hne)
+
+/-- `F` is differentiable on the closed strip. -/
+theorem R02_D3_F_diffOn_closed :
+    DifferentiableOn ℂ (fun s : ℂ => (s - 1) * riemannZeta s)
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ)) := by
+  intro x hx
+  exact (R02_D3_F_diffAt x hx).differentiableWithinAt
+
+/-- `DiffContOnCl` for pole-removed `F` on the open strip. -/
+theorem R02_D3_F_diffContOnCl :
+    DiffContOnCl ℂ (fun s : ℂ => (s - 1) * riemannZeta s)
+      (Complex.HadamardThreeLines.verticalStrip (0.05 : ℝ) (0.74 : ℝ)) :=
+  (R02_D3_F_diffOn_closed.mono R02_D3_closure_strip_subset).diffContOnCl
+
+/-- Damping factor is differentiable everywhere. -/
+theorem R02_D3_damp_diffAt (x : ℂ) :
+    DifferentiableAt ℂ R02_D3_dampFactor x := by
+  have hsub : DifferentiableAt ℂ (fun s : ℂ => s - 1) x :=
+    differentiableAt_id.sub_const (1 : ℂ)
+  have hpow : DifferentiableAt ℂ (fun s : ℂ => (s - 1) ^ 2) x := hsub.pow 2
+  have hdiv : DifferentiableAt ℂ (fun s : ℂ => ((s - 1) ^ 2) / (100 : ℂ)) x :=
+    hpow.div_const (100 : ℂ)
+  have hexp : DifferentiableAt ℂ
+      (fun s : ℂ => Complex.exp (((s - 1) ^ 2) / (100 : ℂ))) x := hdiv.cexp
+  exact hexp
+
+/-- Damping factor is uniformly bounded by `exp 1` on the closed strip. -/
+theorem R02_D3_damp_bddAbove :
+    BddAbove ((norm ∘ R02_D3_dampFactor) ''
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ))) := by
+  refine ⟨Real.exp 1, ?_⟩
+  intro y hy
+  obtain ⟨z, hz, rfl⟩ := hy
+  have hmem : z.re ∈ Set.Icc (0.05 : ℝ) (0.74 : ℝ) := hz
+  have hlo : (0.05 : ℝ) ≤ z.re := (Set.mem_Icc.mp hmem).1
+  have hhi : z.re ≤ (0.74 : ℝ) := (Set.mem_Icc.mp hmem).2
+  have hsub_re : ((z - 1).re) = z.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hu_lo : (-0.95 : ℝ) ≤ (z - 1).re := by
+    rw [hsub_re]
+    linarith
+  have hu_hi : (z - 1).re ≤ (-0.26 : ℝ) := by
+    rw [hsub_re]
+    linarith
+  have hsq : (((z - 1) ^ 2).re)
+      = (z - 1).re * (z - 1).re - (z - 1).im * (z - 1).im := by
+    rw [pow_two, Complex.mul_re]
+  have hsqnn : (0 : ℝ) ≤ (z - 1).im * (z - 1).im := mul_self_nonneg _
+  have hpos : (0 : ℝ) ≤ ((z - 1).re + 0.95) * (0.95 - (z - 1).re) :=
+    mul_nonneg (by linarith) (by linarith)
+  have hre_sq : (((z - 1) ^ 2).re) ≤ (0.9025 : ℝ) := by
+    have hrr : (z - 1).re * (z - 1).re = (z - 1).re ^ 2 := by ring
+    have hexpand : ((z - 1).re + 0.95) * (0.95 - (z - 1).re)
+        = (0.95 : ℝ) * 0.95 - (z - 1).re ^ 2 := by ring
+    have h095 : (0.95 : ℝ) * 0.95 = 0.9025 := by norm_num
+    linarith
+  have hre_div : ((((z - 1) ^ 2) / (100 : ℂ)).re) ≤ 1 := by
+    rw [Complex.div_ofNat_re]
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 100)]
+    linarith
+  have hnorm : (norm ∘ R02_D3_dampFactor) z
+      = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor z = Complex.exp ((((z - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [Function.comp_apply, e, Complex.norm_exp]
+  calc (norm ∘ R02_D3_dampFactor) z
+        = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := hnorm
+    _ ≤ Real.exp 1 := Real.exp_le_exp.mpr hre_div
+
+/-- Damped `G` is differentiable at each point of the closed strip. -/
+theorem R02_D3_G_diffAt (x : ℂ)
+    (hx : x ∈ Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ)) :
+    DifferentiableAt ℂ R02_D3_Gdamp x := by
+  have hF : DifferentiableAt ℂ (fun s : ℂ => (s - 1) * riemannZeta s) x :=
+    R02_D3_F_diffAt x hx
+  have hsub : DifferentiableAt ℂ (fun s : ℂ => s - 1) x :=
+    differentiableAt_id.sub_const (1 : ℂ)
+  have hpow : DifferentiableAt ℂ (fun s : ℂ => (s - 1) ^ 2) x := hsub.pow 2
+  have hdiv : DifferentiableAt ℂ (fun s : ℂ => ((s - 1) ^ 2) / (100 : ℂ)) x :=
+    hpow.div_const (100 : ℂ)
+  have hexp : DifferentiableAt ℂ
+      (fun s : ℂ => Complex.exp (((s - 1) ^ 2) / (100 : ℂ))) x := hdiv.cexp
+  have hmul : DifferentiableAt ℂ
+      (fun s : ℂ => ((s - 1) * riemannZeta s)
+        * Complex.exp (((s - 1) ^ 2) / (100 : ℂ))) x :=
+    hF.mul hexp
+  exact hmul
+
+/-- Damped `G` is differentiable on the closed strip. -/
+theorem R02_D3_G_diffOn_closed :
+    DifferentiableOn ℂ R02_D3_Gdamp
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ)) := by
+  intro x hx
+  exact (R02_D3_G_diffAt x hx).differentiableWithinAt
+
+/-- `DiffContOnCl` for damped `G` on the open strip (Hadamard side condition). -/
+theorem R02_D3_G_diffContOnCl :
+    DiffContOnCl ℂ R02_D3_Gdamp
+      (Complex.HadamardThreeLines.verticalStrip (0.05 : ℝ) (0.74 : ℝ)) :=
+  (R02_D3_G_diffOn_closed.mono R02_D3_closure_strip_subset).diffContOnCl
+
+/-- Conditional Hadamard interpolation for damped `G` (edge caps as hypotheses). -/
+theorem R02_D3_G_interp_of_edges (a b : ℝ)
+    (hB : BddAbove ((norm ∘ R02_D3_Gdamp) ''
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ))))
+    (ha : ∀ z ∈ Set.preimage Complex.re {(0.05 : ℝ)}, ‖R02_D3_Gdamp z‖ ≤ a)
+    (hb : ∀ z ∈ Set.preimage Complex.re {(0.74 : ℝ)}, ‖R02_D3_Gdamp z‖ ≤ b)
+    (s : ℂ)
+    (hs : s ∈ Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ)) :
+    ‖R02_D3_Gdamp s‖ ≤
+      a ^ (1 - (s.re - 0.05) / (0.74 - 0.05))
+        * b ^ ((s.re - 0.05) / (0.74 - 0.05)) := by
+  have hul : (0.05 : ℝ) < (0.74 : ℝ) := by norm_num
+  exact Complex.HadamardThreeLines.norm_le_interp_of_mem_verticalClosedStrip'
+    hul hs R02_D3_G_diffContOnCl hB ha hb
+
+/-- `‖ζ‖` from `‖F‖`: divide the pole-removed cap by `‖s-1‖ ≥ 5.25`. -/
+theorem R02_D3_zeta_of_F_le (s : ℂ) (him_hi : s.im ≤ -5.25) (M : ℝ)
+    (hF : ‖(s - 1) * riemannZeta s‖ ≤ M) :
+    ‖riemannZeta s‖ ≤ M / 5.25 := by
+  have hsub : (5.25 : ℝ) ≤ ‖s - 1‖ := R02_D3_subOne_ge s him_hi
+  have hmul : ‖s - 1‖ * ‖riemannZeta s‖ ≤ M := by
+    rw [← norm_mul]
+    exact hF
+  have h5 : (0 : ℝ) < 5.25 := by norm_num
+  have h1 : (5.25 : ℝ) * ‖riemannZeta s‖ ≤ M :=
+    le_trans (mul_le_mul_of_nonneg_right hsub (norm_nonneg _)) hmul
+  have h2 : ‖riemannZeta s‖ * 5.25 ≤ M := by
+    rw [mul_comm]
+    exact h1
+  rw [le_div_iff₀ h5]
+  exact h2
+
+#print axioms R02_D3_closure_strip_subset
+#print axioms R02_D3_F_diffAt
+#print axioms R02_D3_F_diffOn_closed
+#print axioms R02_D3_F_diffContOnCl
+#print axioms R02_D3_damp_diffAt
+#print axioms R02_D3_damp_bddAbove
+#print axioms R02_D3_G_diffAt
+#print axioms R02_D3_G_diffOn_closed
+#print axioms R02_D3_G_diffContOnCl
+#print axioms R02_D3_G_interp_of_edges
+#print axioms R02_D3_zeta_of_F_le
