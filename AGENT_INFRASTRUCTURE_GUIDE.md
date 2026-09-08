@@ -3404,6 +3404,9 @@ sorry-free infrastructure and the complete commit ledger above.
   shift/odd summability + antitone majorant + integrability +
   integral-tail comparison (1-line strictness fix by coordinator).
   Residual: K0 numeral + linear assembly + close (ZU14).
+- 2026-09-08 ZU14 (`dfc0e97b`, zeta tail, 3× green 8693 jobs):
+  K0=2.06 (integral 1/0.95) + line095 linear `‖ζ‖≤58.86(1+|Im|)`.
+  Residual: FE-reflected whole-line 0.05 + whole-line 0.74 + strip + close (ZU15).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
