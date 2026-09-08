@@ -4787,3 +4787,172 @@ theorem R05_S8_ratio_lt_half :
 #print axioms R05_S8_ratio_lt_half
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-12 split (`log 12 = log 3 + 2 * log 2`) via `12 = 3 * 4`. -/
+theorem R05_log_twelve_eq :
+    Real.log 12 = Real.log 3 + 2 * Real.log 2 := by
+  have h12 : (12 : Real) = 3 * 4 := by norm_num
+  rw [h12, Real.log_mul (by norm_num) (by norm_num)]
+  have h4 : Real.log 4 = 2 * Real.log 2 := by
+    have h4e : (4 : Real) = 2 * 2 := by norm_num
+    rw [h4e, Real.log_mul (by norm_num) (by norm_num)]
+    ring
+  rw [h4]
+
+/-- Phase of the R05 twelfth eta term (`0.75 * log 12` in `[1.8636, 1.8637]`)
+from the banked `log 2` / `log 3` d9 bounds via `R05_log_twelve_eq`. -/
+theorem R05_theta12_mem :
+    (1.8636 : Real) ≤ 0.75 * Real.log 12 ∧ 0.75 * Real.log 12 ≤ (1.8637 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hx : 0.75 * Real.log 12 = 0.75 * Real.log 3 + 1.5 * Real.log 2 := by
+    rw [R05_log_twelve_eq]
+    ring
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the twelfth-term phase (`cos (0.75 * log 12) ≤ -1/5`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log12_upper :
+    Real.cos (0.75 * Real.log 12) ≤ (-1 / 5 : Real) := by
+  have hmem := R05_theta12_mem
+  have hpos : (0 : Real) < Real.log 12 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 12 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.8636 : Real) ≤ 0.75 * Real.log 12 := hmem.1
+  have hhi : 0.75 * Real.log 12 ≤ (1.8637 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.8636 : Real) ^ 2 ≤ (0.75 * Real.log 12) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 12) ^ 4 ≤ (1.8637 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.8636 : Real) ^ 2 / 2 + (1.8637 : Real) ^ 4 / 24 ≤
+      (-1 / 5 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_log_twelve_eq
+#print axioms R05_theta12_mem
+#print axioms R05_cos_075log12_upper
+
+/-- Rpow upper (`12 ^ 0.395 ≤ 3`) via cleared `(12 ^ (2/5)) ^ 5 = 144 ≤ 243`. -/
+theorem R05_twelve_rpow_le : (12 : Real) ^ (0.395 : Real) ≤ (3 : Real) := by
+  have hpow : ((((12 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((3 : Real)) ^ (5 : Nat) := by
+    have e : ((((12 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (12 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 12)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 12 2
+    rw [e]
+    norm_num
+  have hstep : (12 : Real) ^ ((2 / 5 : Real)) ≤ (3 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (12 : Real) ^ (0.395 : Real) ≤ (12 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (3 : Real) := hstep
+
+/-- Real rpow twelfth inverse lower (`1/3 ≤ 12 ^ (-0.395)`) from `12 ^ 0.395 ≤ 3`. -/
+theorem R05_rpow_twelve_neg0395_ge :
+    (1 / 3 : Real) ≤ (12 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_twelve_rpow_le
+  have hpos : (0 : Real) < (12 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (12 : Real) ^ (-0.395 : Real) = (((12 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 3 : Real) = ((3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_twelve_rpow_le
+#print axioms R05_rpow_twelve_neg0395_ge
+
+/-- Real part of the R05 twelfth eta inverse
+(`Re (12 ^ s)⁻¹ = 12 ^ (-0.395) * cos (0.75 * log 12)`). -/
+theorem R05_inv_twelve_cpow_re_eq :
+    (((((12 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (12 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 12) := by
+  have h12eq : ((((12 : Nat)) : Complex)) = (12 : Complex) := by norm_cast
+  rw [h12eq]
+  have hlog : Complex.log (12 : Complex) = (((Real.log 12 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 12)).symm
+  have hlogre : (Complex.log (12 : Complex)).re = Real.log 12 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (12 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (12 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 12 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (12 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 12 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (12 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (12 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (12 : Complex) ≠ 0)]
+  have hinv : ((12 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (12 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (12 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 12 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (12 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 12 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (12 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 12 * 0.395)) * Real.cos (-(Real.log 12 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 12 * (-0.75))) = Real.cos (0.75 * Real.log 12) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 12 * 0.395)) = (12 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 12 * 0.395) = Real.log 12 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 12)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 twelfth eta term in closed form (`term 11 = -((12 ^ s)⁻¹)`, since `(-1)^11 = -1`). -/
+theorem R05_eta_twelfth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 11 =
+      -((((12 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (11 + 1 : Nat) = 12 := rfl
+  have hcast : ((((11 + 1 : Nat)) : Complex)) = ((((12 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (11 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+#print axioms R05_inv_twelve_cpow_re_eq
+#print axioms R05_eta_twelfth_eq
+
+/-- Real part of the R05 twelfth eta term (`1/15 ≤ Re term12`,
+from `(1/3) * (1/5)`: the `(-1)^11` sign flips the negative twelfth cosine
+into a positive contribution). -/
+theorem R05_eta_twelfth_Re_ge :
+    (1 / 15 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 11).re := by
+  rw [R05_eta_twelfth_eq, Complex.neg_re, R05_inv_twelve_cpow_re_eq]
+  have hamp := R05_rpow_twelve_neg0395_ge
+  have hcos := R05_cos_075log12_upper
+  have hamp_pos : (0 : Real) < (12 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (1 / 5 : Real) ≤ -(Real.cos (0.75 * Real.log 12)) := by
+    linarith
+  have hprod : (1 / 3 : Real) * (1 / 5 : Real) ≤
+      (12 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 12))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (1 / 3 : Real) * (1 / 5 : Real) = (1 / 15 : Real) := by
+    norm_num
+  have hsplit : (12 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 12))) =
+      -((12 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 12)) := by
+    ring
+  linarith
+
+#print axioms R05_eta_twelfth_Re_ge
+
+end Door3OffAxis
