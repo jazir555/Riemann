@@ -3354,6 +3354,9 @@ sorry-free infrastructure and the complete commit ledger above.
   damp line-uppers + window caps 23400 + rect `BddAbove`. Honest gap:
   23400 → ~12000 after interp split, not 10; whole-line caps missing
   (tasked as ZU7).
+- 2026-09-08 ZU7 (`3668dba6`, zeta tail, green 8693 jobs, axioms clean):
+  conditional whole-line caps (805·C/616·C) + strip `BddAbove` +
+  Gauss-domination core. Residual: linear growth inputs C/K (ZU8).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
