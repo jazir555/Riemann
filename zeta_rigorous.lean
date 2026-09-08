@@ -33386,3 +33386,370 @@ theorem R02_D3_Gdamp_bddAbove_rect :
 #print axioms R02_D3_Gdamp_window_left
 #print axioms R02_D3_Gdamp_window_right
 #print axioms R02_D3_Gdamp_bddAbove_rect
+
+/-!
+## Door-3 quantitative close, step 6 (zeta lane): Im-uniform Gaussian domination
++ conditional whole-line edge caps for damped `G`.
+
+GREP VERDICT (searches run before writing; repo + Mathlib):
+* No zeta-growth / convexity / subconvexity bound exists in Mathlib: stems
+  `zeta+growth`, `convexity`, `Phragmen`, `subconvex` give only
+  `Mathlib/NumberTheory/Harmonic/ZetaAsymp.lean:591,644`
+  (local `deriv_riemannZeta_add_inv_sub_sq_bounded`-style bounds, not
+  line-uniform growth) plus the Phragmen-Lindelof
+  (`Mathlib/Analysis/Complex/PhragmenLindelof.lean`) and Hadamard
+  (`Mathlib/Analysis/Complex/Hadamard.lean:608`) machines with no zeta
+  instantiation. `zeta_Dirichlet_le_three` (banked above) needs `2 ≤ Re s`.
+* FE exists: `riemannZeta_one_sub`
+  (`Mathlib/NumberTheory/LSeries/RiemannZeta.lean:178`):
+  `ζ(1-s) = 2*(2*π)^(-s)*Gamma s*cos(π*s/2)*ζ(s)`. Its chi factor needs
+  line-uniform Stirling for `Complex.Gamma` on `Re = 0.95`, which is NOT
+  banked (only single-point `zetaFE_*` caps at the R00 corner). So the
+  chi-ratio is isolated as an explicit hypothesis below, not proved here.
+
+Route: the Gaussian damp decay `exp(-im^2/100)` dominates every fixed
+polynomial majorant, uniformly in `Im`. The domination core is the
+rational bound `exp(-t^2/100) ≤ 100/(100+t^2)` from `1+x ≤ exp x`
+(`Real.add_one_le_exp`), giving `(1+t^2)*exp(-t^2/100) ≤ 100`. With a
+linear zeta majorant `‖ζ‖ ≤ C*(1+|Im|)` on an edge line and
+`‖z-1‖ ≤ a0+|Im|`, the product `(a0+|t|)*(1+|t|)` expands to
+`a0 + (a0+1)*|t| + |t|^2`, each term killed by the domination
+(`a0*E ≤ a0`, `(a0+1)*|t|*E ≤ (a0+1)*100`, `t^2*E ≤ 100`), and the
+damp prefactor `exp(dc) ≤ exp 1 ≤ 2.72` closes the numeral.
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_gauss_inv_upper` / `R02_D3_gauss_domination`: Im-uniform
+  Gaussian-vs-polynomial domination (unconditional).
+* `R02_D3_abs_im_le_one_add_sq`: `|Im| ≤ 1+Im^2` (unconditional helper).
+* `R02_D3_damp_upper_strip`: strip-wide decaying damp bound
+  `‖damp‖ ≤ exp(0.0091)*exp(-im^2/100)` on the closed strip (unconditional;
+  `(Re-1)^2 ≤ 0.9025` there).
+* `R02_D3_zeta05_of_ratio`: a `Re = 0.95` linear zeta bound plus an FE
+  chi-ratio bound `‖ζ(1-s)‖ ≤ K*‖ζ(s)‖` yields the `Re = 0.05` linear
+  bound with constant `K*C` (this is the `‖ζ(1-s)‖`-at-`Re=0.95`
+  reflection step, with Stirling isolated in the ratio hypothesis).
+* `R02_D3_Gdamp_pt_of_linear`: per-point assembly (linear zeta + `‖z-1‖`
+  + decaying damp `⇒ ‖G‖ ≤ K*C`).
+* `R02_D3_Gdamp_wholeline_left_of_linear` / `..._right_of_linear`:
+  whole-line `‖G‖ ≤ 805*C` on `Re = 0.05` / `‖G‖ ≤ 616*C` on `Re = 0.74`
+  (the `ha`, `hb` inputs for `R02_D3_G_interp_of_edges`, modulo the
+  linear growth hypotheses).
+* `R02_D3_Gdamp_bddAbove_strip_of_linear`: strip `BddAbove` for `G`
+  (the `hB` input for `R02_D3_G_interp_of_edges`, modulo the strip
+  linear growth hypothesis).
+
+RESIDUAL (exact next step): prove the two linear growth inputs —
+(a) `‖ζ(s)‖ ≤ C*(1+|Im|)` on `Re = 0.95` (near-Dirichlet side) and on the
+strip / `Re = 0.26` (for the right edge via its own reflection), and
+(b) the FE chi-ratio `‖ζ(1-s)‖ ≤ K*‖ζ(s)‖` on `Re = 0.95` (line-uniform
+Stirling for the cos-form factor) — then instantiate the three lemmas
+above to get concrete `a`, `b`, `hB`, and feed
+`R02_D3_G_interp_of_edges` + `R02_D3_damp_ge_exp_neg_one` +
+`R02_D3_zeta_of_F_le` to close `‖ζ‖ ≤ 10` on the R02 rect.
+-/
+
+/-- Im-uniform rational Gaussian bound `exp(-t^2/100) ≤ 100/(100+t^2)`. -/
+theorem R02_D3_gauss_inv_upper (t : ℝ) :
+    Real.exp (-(t * t / 100)) ≤ 100 / (100 + t * t) := by
+  have htt : (0 : ℝ) ≤ t * t := mul_self_nonneg t
+  have hpos : (0 : ℝ) < 1 + t * t / 100 := by
+    have h := div_nonneg htt (by norm_num : (0 : ℝ) ≤ 100)
+    linarith
+  have hle : 1 + t * t / 100 ≤ Real.exp (t * t / 100) := by
+    have h := Real.add_one_le_exp (t * t / 100)
+    linarith
+  have hinv : (Real.exp (t * t / 100))⁻¹ ≤ (1 + t * t / 100)⁻¹ :=
+    (inv_le_inv₀ (Real.exp_pos _) hpos).mpr hle
+  have hsplit : (1 : ℝ) + t * t / 100 = (100 + t * t) / 100 := by ring
+  have heq : ((1 : ℝ) + t * t / 100)⁻¹ = 100 / (100 + t * t) := by
+    rw [hsplit, inv_div]
+  have hexp : Real.exp (-(t * t / 100)) = (Real.exp (t * t / 100))⁻¹ :=
+    Real.exp_neg _
+  rw [hexp, ← heq]
+  exact hinv
+
+/-- Im-uniform Gaussian domination `(1+t^2)*exp(-t^2/100) ≤ 100`. -/
+theorem R02_D3_gauss_domination (t : ℝ) :
+    (1 + t * t) * Real.exp (-(t * t / 100)) ≤ 100 := by
+  have htt : (0 : ℝ) ≤ t * t := mul_self_nonneg t
+  have hden : (0 : ℝ) < 100 + t * t := by linarith
+  have hinv := R02_D3_gauss_inv_upper t
+  have hnn : (0 : ℝ) ≤ 1 + t * t := by linarith
+  have hstep : (1 + t * t) * Real.exp (-(t * t / 100))
+      ≤ (1 + t * t) * (100 / (100 + t * t)) :=
+    mul_le_mul_of_nonneg_left hinv hnn
+  have hfrac : (1 + t * t) * (100 / (100 + t * t)) ≤ 100 := by
+    have hle : (1 + t * t) / (100 + t * t) ≤ 1 := by
+      rw [div_le_one hden]
+      linarith
+    have heq : (1 + t * t) * (100 / (100 + t * t))
+        = 100 * ((1 + t * t) / (100 + t * t)) := by ring
+    rw [heq]
+    have hle100 := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 100)
+    linarith
+  exact le_trans hstep hfrac
+
+/-- Linear-vs-quadratic majorant `|Im| ≤ 1+Im^2`. -/
+theorem R02_D3_abs_im_le_one_add_sq (z : ℂ) : |z.im| ≤ 1 + z.im * z.im := by
+  have h1 := sq_nonneg (|z.im| - 1)
+  have h2 : |z.im| ^ 2 = z.im * z.im := by rw [sq_abs, pow_two]
+  have h3 := abs_nonneg z.im
+  linarith
+
+/-- Strip-wide decaying damp bound (unconditional; `(Re-1)^2 ≤ 0.9025`). -/
+theorem R02_D3_damp_upper_strip (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) :
+    ‖R02_D3_dampFactor z‖ ≤ Real.exp 0.0091 * Real.exp (-(z.im * z.im / 100)) := by
+  have hsub_re : (z - 1).re = z.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hsub_im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have hsq : (((z - 1) ^ 2).re) = (z.re - 1) * (z.re - 1) - z.im * z.im := by
+    rw [pow_two, Complex.mul_re, hsub_re, hsub_im]
+  have hdiv : ((((z - 1) ^ 2) / (100 : ℂ)).re) = ((((z - 1) ^ 2).re) / 100) := by
+    rw [Complex.div_ofNat_re]
+  have hnorm : ‖R02_D3_dampFactor z‖
+      = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor z = Complex.exp ((((z - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [e, Complex.norm_exp]
+  have hu_lo : (-0.95 : ℝ) ≤ z.re - 1 := by linarith
+  have hu_hi : (z.re - 1) ≤ (-0.26 : ℝ) := by linarith
+  have hpos : (0 : ℝ) ≤ ((z.re - 1) + 0.95) * (0.95 - (z.re - 1)) :=
+    mul_nonneg (by linarith) (by linarith)
+  have hsq_le : (z.re - 1) * (z.re - 1) ≤ 0.9025 := by
+    have hexpand : ((z.re - 1) + 0.95) * (0.95 - (z.re - 1))
+        = (0.95 : ℝ) * 0.95 - (z.re - 1) ^ 2 := by ring
+    have h095 : (0.95 : ℝ) * 0.95 = 0.9025 := by norm_num
+    have hrr : (z.re - 1) * (z.re - 1) = (z.re - 1) ^ 2 := by ring
+    linarith
+  have h009 : (0.9025 : ℝ) / 100 ≤ 0.0091 := by norm_num
+  have hsplit : ((z.re - 1) * (z.re - 1) - z.im * z.im) / 100
+      = ((z.re - 1) * (z.re - 1)) / 100 + -(z.im * z.im / 100) := by ring
+  have hle2 : ((z.re - 1) * (z.re - 1)) / 100 ≤ 0.9025 / 100 := by
+    have h100 : (0 : ℝ) < 100 := by norm_num
+    have hmul := mul_le_mul_of_nonneg_right hsq_le (inv_nonneg.mpr h100.le)
+    simp only [div_eq_mul_inv]
+    exact hmul
+  have key : ((((z - 1) ^ 2) / (100 : ℂ)).re) ≤ 0.0091 + -(z.im * z.im / 100) := by
+    rw [hdiv, hsq, hsplit]
+    exact add_le_add (le_trans hle2 h009) le_rfl
+  calc ‖R02_D3_dampFactor z‖
+        = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := hnorm
+    _ ≤ Real.exp (0.0091 + -(z.im * z.im / 100)) := Real.exp_le_exp.mpr key
+    _ = Real.exp 0.0091 * Real.exp (-(z.im * z.im / 100)) := Real.exp_add _ _
+
+/-- Reflection transfer: `Re = 0.95` linear zeta bound + FE chi-ratio
+gives the `Re = 0.05` linear bound with constant `K*C`. -/
+theorem R02_D3_zeta05_of_ratio (C K : ℝ) (hC0 : 0 ≤ C) (hK0 : 0 ≤ K)
+    (hZ95 : ∀ s : ℂ, s.re = 0.95 → ‖riemannZeta s‖ ≤ C * (1 + |s.im|))
+    (hRatio : ∀ s : ℂ, s.re = 0.95 → ‖riemannZeta (1 - s)‖ ≤ K * ‖riemannZeta s‖)
+    (w : ℂ) (hw : w.re = 0.05) :
+    ‖riemannZeta w‖ ≤ (K * C) * (1 + |w.im|) := by
+  have hs_re : (1 - w).re = 0.95 := by
+    rw [Complex.sub_re, Complex.one_re, hw]
+    norm_num
+  have hs_im : (1 - w).im = -w.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have h1s : (1 : ℂ) - (1 - w) = w := by
+    rw [sub_sub_cancel]
+  have hR := hRatio (1 - w) hs_re
+  have hZ := hZ95 (1 - w) hs_re
+  rw [h1s] at hR
+  rw [hs_im, abs_neg] at hZ
+  calc ‖riemannZeta w‖ ≤ K * ‖riemannZeta (1 - w)‖ := hR
+    _ ≤ K * (C * (1 + |w.im|)) := mul_le_mul_of_nonneg_left hZ hK0
+    _ = (K * C) * (1 + |w.im|) := by ring
+
+/-- Per-point assembly: linear zeta + `‖z-1‖` + decaying damp `⇒ ‖G‖ ≤ K*C`. -/
+theorem R02_D3_Gdamp_pt_of_linear (C a0 dc K : ℝ) (hC0 : 0 ≤ C) (ha0 : 0 ≤ a0)
+    (hdc : Real.exp dc ≤ 2.72)
+    (hcap : (a0 + (a0 + 1) * 100 + 100) * 2.72 ≤ K)
+    (z : ℂ)
+    (hZz : ‖riemannZeta z‖ ≤ C * (1 + |z.im|))
+    (hn : ‖z - 1‖ ≤ a0 + |z.im|)
+    (hnnA : (0 : ℝ) ≤ a0 + |z.im|)
+    (hD : ‖R02_D3_dampFactor z‖ ≤ Real.exp dc * Real.exp (-(z.im * z.im / 100))) :
+    ‖R02_D3_Gdamp z‖ ≤ K * C := by
+  have hF : ‖(z - 1) * riemannZeta z‖ ≤ (a0 + |z.im|) * (C * (1 + |z.im|)) := by
+    rw [norm_mul]
+    exact mul_le_mul hn hZz (norm_nonneg _) hnnA
+  have hdom := R02_D3_gauss_domination z.im
+  have hinv := R02_D3_gauss_inv_upper z.im
+  have htt : (0 : ℝ) ≤ z.im * z.im := mul_self_nonneg _
+  have hEpos : (0 : ℝ) ≤ Real.exp (-(z.im * z.im / 100)) := (Real.exp_pos _).le
+  have hE1 : Real.exp (-(z.im * z.im / 100)) ≤ 1 := by
+    have hden : (0 : ℝ) < 100 + z.im * z.im := by linarith
+    have hle : 100 / (100 + z.im * z.im) ≤ 1 := by
+      rw [div_le_one hden]
+      linarith
+    exact le_trans hinv hle
+  have hab := R02_D3_abs_im_le_one_add_sq z
+  have hlin : |z.im| * Real.exp (-(z.im * z.im / 100)) ≤ 100 := by
+    have hle : |z.im| * Real.exp (-(z.im * z.im / 100))
+        ≤ (1 + z.im * z.im) * Real.exp (-(z.im * z.im / 100)) :=
+      mul_le_mul_of_nonneg_right hab hEpos
+    exact le_trans hle hdom
+  have hsq : (z.im * z.im) * Real.exp (-(z.im * z.im / 100)) ≤ 100 := by
+    have hle : (z.im * z.im) * Real.exp (-(z.im * z.im / 100))
+        ≤ (1 + z.im * z.im) * Real.exp (-(z.im * z.im / 100)) := by
+      apply mul_le_mul_of_nonneg_right _ hEpos
+      linarith
+    exact le_trans hle hdom
+  have habssq : |z.im| * |z.im| = z.im * z.im := by
+    have h := sq_abs z.im
+    have h2 : z.im ^ 2 = z.im * z.im := pow_two _
+    have h1 : |z.im| * |z.im| = |z.im| ^ 2 := (pow_two _).symm
+    rw [h1, h, h2]
+  have hexpand : (a0 + |z.im|) * (1 + |z.im|)
+      = a0 + (a0 + 1) * |z.im| + |z.im| * |z.im| := by ring
+  have hA : a0 * Real.exp (-(z.im * z.im / 100)) ≤ a0 := by
+    have h := mul_le_mul_of_nonneg_left hE1 ha0
+    linarith
+  have hB : (a0 + 1) * (|z.im| * Real.exp (-(z.im * z.im / 100)))
+      ≤ (a0 + 1) * 100 :=
+    mul_le_mul_of_nonneg_left hlin (by linarith)
+  have hCc : (|z.im| * |z.im|) * Real.exp (-(z.im * z.im / 100)) ≤ 100 := by
+    rw [habssq]
+    exact hsq
+  have hPE : ((a0 + |z.im|) * (1 + |z.im|)) * Real.exp (-(z.im * z.im / 100))
+      ≤ a0 + (a0 + 1) * 100 + 100 := by
+    have hsplit : ((a0 + |z.im|) * (1 + |z.im|)) * Real.exp (-(z.im * z.im / 100))
+        = a0 * Real.exp (-(z.im * z.im / 100))
+          + (a0 + 1) * (|z.im| * Real.exp (-(z.im * z.im / 100)))
+          + (|z.im| * |z.im|) * Real.exp (-(z.im * z.im / 100)) := by
+      rw [hexpand]
+      ring
+    rw [hsplit]
+    linarith
+  have hBnn : (0 : ℝ) ≤ Real.exp dc * Real.exp (-(z.im * z.im / 100)) :=
+    mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le
+  have hAnn : (0 : ℝ) ≤ (a0 + |z.im|) * (C * (1 + |z.im|)) :=
+    mul_nonneg hnnA (mul_nonneg hC0 (by have := abs_nonneg z.im; linarith))
+  have hGdamp : ‖R02_D3_Gdamp z‖
+      ≤ ((a0 + |z.im|) * (C * (1 + |z.im|)))
+        * (Real.exp dc * Real.exp (-(z.im * z.im / 100))) := by
+    have e : R02_D3_Gdamp z = ((z - 1) * riemannZeta z) * R02_D3_dampFactor z := rfl
+    rw [e, norm_mul]
+    exact mul_le_mul hF hD (norm_nonneg _) hAnn
+  have hD2 : Real.exp dc * Real.exp (-(z.im * z.im / 100))
+      ≤ 2.72 * Real.exp (-(z.im * z.im / 100)) :=
+    mul_le_mul_of_nonneg_right hdc hEpos
+  have hM : ((a0 + |z.im|) * (C * (1 + |z.im|)))
+        * (2.72 * Real.exp (-(z.im * z.im / 100)))
+      = C * ((((a0 + |z.im|) * (1 + |z.im|)) * Real.exp (-(z.im * z.im / 100))) * 2.72) := by
+    ring
+  have hN : C * ((((a0 + |z.im|) * (1 + |z.im|)) * Real.exp (-(z.im * z.im / 100))) * 2.72)
+      ≤ C * ((a0 + (a0 + 1) * 100 + 100) * 2.72) :=
+    mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_right hPE (by norm_num : (0 : ℝ) ≤ 2.72)) hC0
+  have hnum : C * ((a0 + (a0 + 1) * 100 + 100) * 2.72) ≤ K * C := by
+    have h := mul_le_mul_of_nonneg_left hcap hC0
+    linarith
+  calc ‖R02_D3_Gdamp z‖
+      ≤ ((a0 + |z.im|) * (C * (1 + |z.im|)))
+        * (Real.exp dc * Real.exp (-(z.im * z.im / 100))) := hGdamp
+    _ ≤ ((a0 + |z.im|) * (C * (1 + |z.im|)))
+        * (2.72 * Real.exp (-(z.im * z.im / 100))) :=
+        mul_le_mul_of_nonneg_left hD2
+          (mul_nonneg hnnA (mul_nonneg hC0 (by have := abs_nonneg z.im; linarith)))
+    _ = C * ((((a0 + |z.im|) * (1 + |z.im|)) * Real.exp (-(z.im * z.im / 100))) * 2.72) := hM
+    _ ≤ C * ((a0 + (a0 + 1) * 100 + 100) * 2.72) := hN
+    _ ≤ K * C := hnum
+
+/-- Whole-line left edge cap `‖G‖ ≤ 805*C` on `Re = 0.05` (interp input `ha`). -/
+theorem R02_D3_Gdamp_wholeline_left_of_linear (C : ℝ) (hC0 : 0 ≤ C)
+    (hZ : ∀ z : ℂ, z.re = 0.05 → ‖riemannZeta z‖ ≤ C * (1 + |z.im|))
+    (z : ℂ) (hre : z.re = 0.05) :
+    ‖R02_D3_Gdamp z‖ ≤ 805 * C := by
+  have h1re : (z - 1).re = -0.95 := by
+    rw [Complex.sub_re, Complex.one_re, hre]
+    norm_num
+  have h1im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have habs : ‖z - 1‖ ≤ 0.95 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    rw [h1re, h1im] at h
+    have habs95 : |(-0.95 : ℝ)| = 0.95 := by norm_num
+    rw [habs95] at h
+    exact h
+  have hnnA : (0 : ℝ) ≤ 0.95 + |z.im| := by
+    have := abs_nonneg z.im
+    linarith
+  have hdc : Real.exp 0.0091 ≤ 2.72 :=
+    le_trans (Real.exp_le_exp.mpr (by norm_num : (0.0091 : ℝ) ≤ 1))
+      R02_D3_exp_one_le_two72
+  have hcap : ((0.95 : ℝ) + (0.95 + 1) * 100 + 100) * 2.72 ≤ 805 := by norm_num
+  exact R02_D3_Gdamp_pt_of_linear C 0.95 0.0091 805 hC0 (by norm_num) hdc hcap
+    z (hZ z hre) habs hnnA (R02_D3_damp_upper_line005 z hre)
+
+/-- Whole-line right edge cap `‖G‖ ≤ 616*C` on `Re = 0.74` (interp input `hb`). -/
+theorem R02_D3_Gdamp_wholeline_right_of_linear (C : ℝ) (hC0 : 0 ≤ C)
+    (hZ : ∀ z : ℂ, z.re = 0.74 → ‖riemannZeta z‖ ≤ C * (1 + |z.im|))
+    (z : ℂ) (hre : z.re = 0.74) :
+    ‖R02_D3_Gdamp z‖ ≤ 616 * C := by
+  have h1re : (z - 1).re = -0.26 := by
+    rw [Complex.sub_re, Complex.one_re, hre]
+    norm_num
+  have h1im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have habs : ‖z - 1‖ ≤ 0.26 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    rw [h1re, h1im] at h
+    have habs26 : |(-0.26 : ℝ)| = 0.26 := by norm_num
+    rw [habs26] at h
+    exact h
+  have hnnA : (0 : ℝ) ≤ 0.26 + |z.im| := by
+    have := abs_nonneg z.im
+    linarith
+  have hdc : Real.exp 0.0007 ≤ 2.72 :=
+    le_trans (Real.exp_le_exp.mpr (by norm_num : (0.0007 : ℝ) ≤ 1))
+      R02_D3_exp_one_le_two72
+  have hcap : ((0.26 : ℝ) + (0.26 + 1) * 100 + 100) * 2.72 ≤ 616 := by norm_num
+  exact R02_D3_Gdamp_pt_of_linear C 0.26 0.0007 616 hC0 (by norm_num) hdc hcap
+    z (hZ z hre) habs hnnA (R02_D3_damp_upper_line074 z hre)
+
+/-- Strip `BddAbove` for damped `G` from a strip linear zeta bound (interp input `hB`). -/
+theorem R02_D3_Gdamp_bddAbove_strip_of_linear (C : ℝ) (hC0 : 0 ≤ C)
+    (hZ : ∀ z : ℂ, z ∈ Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ) →
+      ‖riemannZeta z‖ ≤ C * (1 + |z.im|)) :
+    BddAbove ((norm ∘ R02_D3_Gdamp) ''
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ))) := by
+  refine ⟨805 * C, ?_⟩
+  intro y hy
+  obtain ⟨z, hz, rfl⟩ := hy
+  have hmem : z.re ∈ Set.Icc (0.05 : ℝ) (0.74 : ℝ) := hz
+  have hre_lo : (0.05 : ℝ) ≤ z.re := (Set.mem_Icc.mp hmem).1
+  have hre_hi : z.re ≤ (0.74 : ℝ) := (Set.mem_Icc.mp hmem).2
+  have h1re_lo : (-0.95 : ℝ) ≤ (z - 1).re := by
+    rw [Complex.sub_re, Complex.one_re]
+    linarith
+  have h1re_hi : (z - 1).re ≤ (-0.26 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re]
+    linarith
+  have h1im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have habs : ‖z - 1‖ ≤ 0.95 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    rw [h1im] at h
+    have habsre : |(z - 1).re| ≤ 0.95 := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  have hnnA : (0 : ℝ) ≤ 0.95 + |z.im| := by
+    have := abs_nonneg z.im
+    linarith
+  have hdc : Real.exp 0.0091 ≤ 2.72 :=
+    le_trans (Real.exp_le_exp.mpr (by norm_num : (0.0091 : ℝ) ≤ 1))
+      R02_D3_exp_one_le_two72
+  have hcap : ((0.95 : ℝ) + (0.95 + 1) * 100 + 100) * 2.72 ≤ 805 := by norm_num
+  exact R02_D3_Gdamp_pt_of_linear C 0.95 0.0091 805 hC0 (by norm_num) hdc hcap
+    z (hZ z hz) habs hnnA (R02_D3_damp_upper_strip z hre_lo hre_hi)
+
+#print axioms R02_D3_gauss_inv_upper
+#print axioms R02_D3_gauss_domination
+#print axioms R02_D3_abs_im_le_one_add_sq
+#print axioms R02_D3_damp_upper_strip
+#print axioms R02_D3_zeta05_of_ratio
+#print axioms R02_D3_Gdamp_pt_of_linear
+#print axioms R02_D3_Gdamp_wholeline_left_of_linear
+#print axioms R02_D3_Gdamp_wholeline_right_of_linear
+#print axioms R02_D3_Gdamp_bddAbove_strip_of_linear
