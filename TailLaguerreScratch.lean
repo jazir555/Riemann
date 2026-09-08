@@ -3911,3 +3911,63 @@ theorem d3Zeta_lower_of_tail (rtail : ℝ) (hrt : rtail < 1 / 5)
   exact hkey
 
 #print axioms d3Zeta_lower_of_tail
+
+/-!
+## Door-3 remainder 5 (paired-tail step 3b): single-pair head numeral `‖pair 1‖ ≤ 1/5`
+
+Tightest proved step toward the `rtail < 1/5` hypothesis of committed
+`d3Zeta_lower_of_tail`: the MVT pair bound (`d3EtaPair_norm_le` at `Re = 1/2`,
+`‖s₀‖ ≤ 1` from `d3HalfPt_norm_le`) gives `‖pair 1‖ ≤ 3^(-3/2)`, and the cleared
+rpow bound `5/3 ≤ 3^(1/2)` yields `3^(-3/2) ≤ 1/5` (`5 ≤ 3*√3` cleared).
+Full `∑' m, pair (m+1)` tail numeral stays open (needs p-series integral tail).
+-/
+
+/-- rpow split `3^(3/2) = 3 * 3^(1/2)`. -/
+theorem d3rpow_three_half_eq : (3 : ℝ) ^ ((3 / 2 : ℝ)) = 3 * (3 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have h12 : ((3 / 2 : ℝ)) = 1 + (1 / 2 : ℝ) := by norm_num
+  rw [h12, Real.rpow_add (by norm_num : (0 : ℝ) < 3)]
+  rw [Real.rpow_one]
+
+/-- Cleared bound `5 ≤ 3^(3/2)` from banked `5/3 ≤ 3^(1/2)`. -/
+theorem d3rpow_three_half_ge : (5 : ℝ) ≤ (3 : ℝ) ^ ((3 / 2 : ℝ)) := by
+  rw [d3rpow_three_half_eq]
+  have h := d3rpow_sqrt3_ge
+  have h5 : (5 : ℝ) = 3 * (5 / 3) := by norm_num
+  rw [h5]
+  exact mul_le_mul_of_nonneg_left h (by norm_num)
+
+/-- Negated rpow bound `3^(-3/2) ≤ 1/5`. -/
+theorem d3rpow_three_neghalf_le : (3 : ℝ) ^ ((-3 / 2 : ℝ)) ≤ 1 / 5 := by
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((3 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : ((-3 / 2 : ℝ)) = -((3 / 2 : ℝ)) := by norm_num
+  have er : (3 : ℝ) ^ ((-3 / 2 : ℝ)) = ((3 : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ := by
+    rw [e]
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [er]
+  have hge := d3rpow_three_half_ge
+  have hInv : ((3 : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ ≤ ((5 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : ((5 : ℝ))⁻¹ = 1 / 5 := by norm_num
+  rw [heq] at hInv
+  exact hInv
+
+/-- In-tail single-pair head numeral at height `1/2`: `‖pair 1‖ ≤ 1/5`. -/
+theorem d3EtaPair_one_MVT_le : ‖d3EtaPairTerm d3HalfS0 1‖ ≤ 1 / 5 := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have hspos : 0 < d3HalfS0.re := by rw [hre]; norm_num
+  have hle := d3EtaPair_norm_le d3HalfS0 hspos 1
+  have hcast : ((((2 * 1 + 1 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+  have hexp : -d3HalfS0.re - 1 = (-3 / 2 : ℝ) := by rw [hre]; norm_num
+  rw [hcast, hexp] at hle
+  have hnorm : ‖d3HalfS0‖ ≤ 1 := d3HalfPt_norm_le
+  have h3 := d3rpow_three_neghalf_le
+  calc ‖d3EtaPairTerm d3HalfS0 1‖ ≤ ‖d3HalfS0‖ * ((3 : ℝ) ^ ((-3 / 2 : ℝ))) := hle
+    _ ≤ 1 * (1 / 5) := mul_le_mul hnorm h3
+        (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 3) _) (by norm_num)
+    _ = 1 / 5 := by norm_num
+
+#print axioms d3rpow_three_half_eq
+#print axioms d3rpow_three_half_ge
+#print axioms d3rpow_three_neghalf_le
+#print axioms d3EtaPair_one_MVT_le
