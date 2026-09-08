@@ -3971,3 +3971,197 @@ theorem d3EtaPair_one_MVT_le : ‖d3EtaPairTerm d3HalfS0 1‖ ≤ 1 / 5 := by
 #print axioms d3rpow_three_half_ge
 #print axioms d3rpow_three_neghalf_le
 #print axioms d3EtaPair_one_MVT_le
+
+/-!
+## Door-3 remainder 5 (K=3 shift, step 4a): p-series integral-tail comparison at `-3/2`
+
+Mirror of the zeta-lane `R02_D3_tail2_le_integral` (committed in `zeta_rigorous`):
+for the antitone majorant `x^(-3/2)`, the shifted tsum from `7` is bounded by
+`∫ x in Ioi 6, x^(-3/2)`. Shift `6` is chosen so the odd domino
+`(2m+7)^(-3/2) ≤ (m+7)^(-3/2)` (step 4b) feeds exactly this comparison.
+-/
+
+/-- Antitone majorant `x^(-3/2)` on `Ici 6`. -/
+theorem d3rpow32_antitone6 :
+    AntitoneOn (fun x : ℝ => x ^ ((-3 / 2 : ℝ))) (Set.Ici ((((6 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : ((-3 / 2 : ℝ)) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((6 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-3/2)` on `Ioi 6`. -/
+theorem d3rpow32_integrable6 :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ ((-3 / 2 : ℝ))) (Set.Ioi ((((6 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : ((-3 / 2 : ℝ)) < -1)
+  norm_num
+
+/-- `K = 3` integral-tail comparison for the shifted tail. -/
+theorem d3tail32_le_integral6 :
+    (∑' n : ℕ, ((((n + 6 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) ≤
+      (∫ x : ℝ in Set.Ioi ((((6 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 6 d3rpow32_antitone6
+    d3rpow32_integrable6 (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+#print axioms d3rpow32_antitone6
+#print axioms d3rpow32_integrable6
+#print axioms d3tail32_le_integral6
+
+/-! ## Door-3 remainder 5 (K=3 shift, step 4b): closed integral + `6^(-1/2)` cap. -/
+
+/-- Closed-form integral `∫ x in Ioi 6, x^(-3/2) = 2 * 6^(-1/2)`. -/
+theorem d3integral32_eq6 :
+    (∫ x : ℝ in Set.Ioi ((((6 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) =
+      2 * (6 : ℝ) ^ ((-1 / 2 : ℝ)) := by
+  have hlt : ((-3 / 2 : ℝ)) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((6 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : ((-3 / 2 : ℝ)) + 1 = (-1 / 2 : ℝ) := by norm_num
+  have ec : ((((6 : ℕ)) : ℝ)) = (6 : ℝ) := by norm_num
+  rw [e1, ec] at h
+  have e2 : (-((6 : ℝ) ^ ((-1 / 2 : ℝ)))) / (-1 / 2 : ℝ) =
+      2 * (6 : ℝ) ^ ((-1 / 2 : ℝ)) := by ring
+  exact e2 ▸ h
+
+/-- Numeral rpow lower bound `12/5 ≤ 6^(1/2:ℝ)` (cleared: `(12/5)^2 ≤ 6`). -/
+theorem d3sqrt6_ge : (12 / 5 : ℝ) ≤ (6 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hsq : (((((6 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) = 6 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 6)]
+    rw [show ((1 / 2 : ℝ)) * (((2 : ℕ)) : ℝ) = (1 : ℝ) by norm_num]
+    exact Real.rpow_one 6
+  have hpow : ((12 / 5 : ℝ)) ^ ((2 : ℕ)) ≤
+      (((((6 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) := by
+    rw [hsq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Negated rpow bound `6^(-1/2) ≤ 5/12`. -/
+theorem d3rpow_six_neghalf_le : (6 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 5 / 12 := by
+  have hpos : (0 : ℝ) < (6 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : ((-1 / 2 : ℝ)) = -((1 / 2 : ℝ)) := by norm_num
+  have er : (6 : ℝ) ^ ((-1 / 2 : ℝ)) = ((6 : ℝ) ^ ((1 / 2 : ℝ)))⁻¹ := by
+    rw [e]
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 6) _
+  rw [er]
+  have hge := d3sqrt6_ge
+  have hInv : ((6 : ℝ) ^ ((1 / 2 : ℝ)))⁻¹ ≤ ((12 / 5 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : ((12 / 5 : ℝ))⁻¹ = 5 / 12 := by norm_num
+  rw [heq] at hInv
+  exact hInv
+
+#print axioms d3integral32_eq6
+#print axioms d3sqrt6_ge
+#print axioms d3rpow_six_neghalf_le
+
+/-! ## Door-3 remainder 5 (K=3 shift, step 4c): odd-vs-shift domino + summability. -/
+
+/-- Odd-vs-shift pointwise: `(2m+7)^(-3/2) ≤ (m+7)^(-3/2)`. -/
+theorem d3odd32_le_shift7 (m : ℕ) :
+    ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) ≤
+      ((((m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by
+  have hm_pos : (0 : ℝ) < ((((m + 7 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 7 : ℕ)) : ℝ)) ≤ ((((2 * m + 7 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : ((-3 / 2 : ℝ)) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+/-- Shift-series summability `(m+7)^(-3/2)` via `Real.summable_nat_rpow_inv`. -/
+theorem d3shift32_summable7 :
+    Summable (fun n : ℕ => ((((n + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+  have hp1 : (1 : ℝ) < (1 / 2 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((1 / 2 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 7 : ℕ) : ℝ) ^ ((1 / 2 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 7).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) =
+      (fun m : ℕ => ((((m + 7 : ℕ) : ℝ) ^ ((1 / 2 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : ((-3 / 2 : ℝ)) = -((1 / 2 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-series summability via norm comparison with the shift series. -/
+theorem d3odd32_summable7 :
+    Summable (fun m : ℕ => ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+  apply Summable.of_norm_bounded d3shift32_summable7
+  intro m
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact d3odd32_le_shift7 m
+
+#print axioms d3odd32_le_shift7
+#print axioms d3shift32_summable7
+#print axioms d3odd32_summable7
+
+/-! ## Door-3 remainder 5 (K=3 shift, step 4d): shift numeral + per-pair bound. -/
+
+/-- Shift-tail numeral `∑' n, ((n+7):ℝ)^(-3/2) ≤ 5/6`. -/
+theorem d3shift32_tail6_le :
+    (∑' n : ℕ, ((((n + 6 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) ≤ 5 / 6 := by
+  have htail := d3tail32_le_integral6
+  have hval := d3integral32_eq6
+  have hcap := d3rpow_six_neghalf_le
+  have h256 : 2 * (6 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 5 / 6 := by
+    calc 2 * (6 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 2 * (5 / 12) :=
+          mul_le_mul_of_nonneg_left hcap (by norm_num)
+      _ = 5 / 6 := by norm_num
+  calc (∑' n : ℕ, ((((n + 6 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)))
+      ≤ (∫ x : ℝ in Set.Ioi ((((6 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) := htail
+    _ = 2 * (6 : ℝ) ^ ((-1 / 2 : ℝ)) := hval
+    _ ≤ 5 / 6 := h256
+
+/-- K=3 per-pair MVT bound: `‖pair (m+3)‖ ≤ (2m+7)^(-3/2)`. -/
+theorem d3K3_pairTerm_le (m : ℕ) :
+    ‖d3EtaPairTerm d3HalfS0 (m + 3)‖ ≤
+      ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have hspos : 0 < d3HalfS0.re := by rw [hre]; norm_num
+  have hle := d3EtaPair_norm_le d3HalfS0 hspos (m + 3)
+  have hexp : -d3HalfS0.re - 1 = (-3 / 2 : ℝ) := by rw [hre]; norm_num
+  have hnat : 2 * (m + 3) + 1 = 2 * m + 7 := by omega
+  have hcast : ((((2 * (m + 3) + 1 : ℕ)) : ℝ)) = ((((2 * m + 7 : ℕ)) : ℝ)) := by
+    rw [hnat]
+  rw [hcast, hexp] at hle
+  have hnorm : ‖d3HalfS0‖ ≤ 1 := d3HalfPt_norm_le
+  have hnn : (0 : ℝ) ≤ ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  calc ‖d3EtaPairTerm d3HalfS0 (m + 3)‖
+      ≤ ‖d3HalfS0‖ * ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := hle
+    _ ≤ 1 * ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_right hnorm hnn
+    _ = ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by norm_num
+
+#print axioms d3shift32_tail6_le
+#print axioms d3K3_pairTerm_le
+
+/-! ## Door-3 remainder 5 (K=3 shift, step 4e): shifted-tail closed enclosure. -/
+
+/-- K=3 shifted-tail closed enclosure: `‖∑' m, pair (m+3)‖ ≤ 5/6`. -/
+theorem d3K3_pairTail_le :
+    ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 3)‖ ≤ 5 / 6 := by
+  have hnormSum : Summable (fun m => ‖d3EtaPairTerm d3HalfS0 (m + 3)‖) := by
+    apply Summable.of_norm_bounded d3odd32_summable7
+    intro m
+    rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    exact d3K3_pairTerm_le m
+  have hfun : (fun m : ℕ => ((((m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) =
+      (fun n : ℕ => ((((n + 6 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+    funext m
+    have h7 : m + 7 = m + 6 + 1 := by omega
+    rw [h7]
+  have hcap := d3shift32_tail6_le
+  rw [← hfun] at hcap
+  calc ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 3)‖
+      ≤ ∑' m, ‖d3EtaPairTerm d3HalfS0 (m + 3)‖ := norm_tsum_le_tsum_norm hnormSum
+    _ ≤ ∑' m, ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+        hnormSum.tsum_le_tsum (fun m => d3K3_pairTerm_le m) d3odd32_summable7
+    _ ≤ ∑' m, ((((m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+        d3odd32_summable7.tsum_le_tsum (fun m => d3odd32_le_shift7 m)
+          d3shift32_summable7
+    _ ≤ 5 / 6 := hcap
+
+#print axioms d3K3_pairTail_le
