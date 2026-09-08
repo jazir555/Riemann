@@ -3411,6 +3411,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 ZU14 (`dfc0e97b`, zeta tail, 3× green 8693 jobs):
   K0=2.06 (integral 1/0.95) + line095 linear `‖ζ‖≤58.86(1+|Im|)`.
   Residual: FE-reflected whole-line 0.05 + whole-line 0.74 + strip + close (ZU15).
+- 2026-09-08+ ZU15 (`f5d7ab8e`, zeta tail, 1× green 8693 jobs):
+  FE-reflected whole-line 0.05 bounds (exp + poly-sharpened) +
+  PROVED uniform-K reflection blocked on MVT route (chi exp-growth
+  vs poly Gamma decay; crude 805-constant unreachable).
+  Route: direct eta-pair linear on Re=0.05 (C05≈23) + Re=0.74/0.26 (ZU16).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
