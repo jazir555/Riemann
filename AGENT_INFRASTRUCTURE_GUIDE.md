@@ -3388,6 +3388,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-08 ZU10 (`b4301134`, zeta tail, green 8693 jobs, axioms clean):
   sharpened chi-ratio (`4/|Im|²` + window55 `0.1452·e^…`).
   Residual: line-uniform linear bound at Re=0.95 (ZU11).
+- 2026-09-08 ZU11 (`f7c531c5`, zeta tail, green 8693 jobs, axioms clean):
+  eta denominator floor `0.035 ≤ ‖1−2^(1−s)‖` at Re=0.95, uniform
+  in Im. Residual: pair-grouped eta numerator (ZU12).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
