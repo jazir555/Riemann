@@ -3368,6 +3368,11 @@ sorry-free infrastructure and the complete commit ledger above.
   integral tail mirror + shift `≤5/6` + `‖∑' pair(m+3)‖≤5/6` +
   PROVED `<1/5` unprovable at K=3 on MVT route (true ≈0.40).
   Route: K≥16 peel, K≈8 exact-norm, or re-indexed head (RX15).
+- 2026-09-08+ RX15 (`509e27a5`, tail-scratch, 4× green 8682 jobs):
+  K=51 shift enclosure `‖∑' pair(m+51)‖ < 1/5` (single cleared-square
+  numeral `201/20`; minimal K on loose shift majorant).
+  Residual: generalize re-index to K=51 + enlarged-head bound + close
+  (RX16, LARGE scope).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
