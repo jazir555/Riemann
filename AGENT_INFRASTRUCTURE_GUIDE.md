@@ -3378,6 +3378,9 @@ sorry-free infrastructure and the complete commit ledger above.
   shift-decay `‖Γ‖ ≤ 2/(‖s‖‖s+1‖)` → poly-decay → window55 `≤ 0.0726`
   (55× over decay-free). Honest negative: requested `c>π/2` rate FALSE
   (true `|t|^0.45·e^(-π|t|/2)`); polynomial factor needed (ZU10).
+- 2026-09-08 ZU10 (`b4301134`, zeta tail, green 8693 jobs, axioms clean):
+  sharpened chi-ratio (`4/|Im|²` + window55 `0.1452·e^…`).
+  Residual: line-uniform linear bound at Re=0.95 (ZU11).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
