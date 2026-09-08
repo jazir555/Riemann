@@ -34355,3 +34355,72 @@ theorem R02_D3_norm_le_line095 (s : ℂ) (hre : s.re = 0.95) :
 
 #print axioms R02_D3_etaPair_zero_line095
 #print axioms R02_D3_norm_le_line095
+
+/-!
+## Door-3 quantitative close, step 8 (zeta lane): tail-series numeral at `Re = 0.95`.
+
+Per-pair input is banked (`R02_D3_etaPair_bound_line095`):
+`‖pair n‖ ≤ ‖s‖ * (2n+1)^(-1.95)`. Here we bank the scalar tail-series
+comparison helpers: shift summability, odd-vs-shift pointwise bound,
+odd summability, and the `M = 1` integral-tail comparison.
+-/
+
+/-- Shift-series summability `(n+1)^(-1.95)` via `Real.summable_nat_rpow_inv`. -/
+theorem R02_D3_shift195_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) := by
+  have hp1 : (1 : ℝ) < (0.95 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((0.95 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.95 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.95 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : (-1.95 : ℝ) = -((0.95 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-vs-shift pointwise: `(2n+1)^(-1.95) ≤ (n+1)^(-1.95)`. -/
+theorem R02_D3_odd195_le_shift (n : ℕ) :
+    ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) ≤ ((((n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ) := by
+  have hm_pos : (0 : ℝ) < ((((n + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((n + 1 : ℕ)) : ℝ)) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : (-1.95 : ℝ) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+/-- Odd-series summability via norm comparison with the shift series. -/
+theorem R02_D3_odd195_summable :
+    Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) := by
+  apply Summable.of_norm_bounded R02_D3_shift195_summable
+  intro n
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact R02_D3_odd195_le_shift n
+
+/-- Antitone majorant `x^(-1.95)` on `Ici 1`. -/
+theorem R02_D3_rpow195_antitone :
+    AntitoneOn (fun x : ℝ => x ^ (-1.95 : ℝ)) (Set.Ici ((((1 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.95 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.95)` on `Ioi 1`. -/
+theorem R02_D3_rpow195_integrable :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.95 : ℝ)) (Set.Ioi ((((1 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.95 : ℝ) < -1)
+  norm_num
+
+/-- `M = 1` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail2_le_integral :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.95 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.95 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 1 R02_D3_rpow195_antitone
+    R02_D3_rpow195_integrable (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+#print axioms R02_D3_shift195_summable
+#print axioms R02_D3_odd195_summable
+#print axioms R02_D3_tail2_le_integral
