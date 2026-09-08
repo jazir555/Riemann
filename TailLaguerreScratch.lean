@@ -1914,3 +1914,534 @@ unconditionally (Mathlib-only, no import edit), making
 height `|t| ≤ 1` enclosure) via committed `door3RealNonvan_of_lower`,
 and tile `[-1,2]` onward toward `(-10,10)` by repeating the
 `door3RealSegNext` pattern. -/
+
+/-! ## Door-3 remainder 5b: EM right-analytic engine, prefix A (2026-09-08, append-only)
+Mirror of `TestAnalytic.lean:24-172` with `door3`-prefixed names, Mathlib-only,
+no import edit. No `simpa` (hang-guard); explicit binders; numerals ≤ 6 digits. -/
+
+open Real MeasureTheory Filter
+
+/-- Complex extension of `ZetaAsymptotics.term` (mirror of `termC`). -/
+noncomputable def door3termC (n : ℕ) (s : ℂ) : ℂ :=
+  ∫ x : ℝ in (n : ℝ)..((n : ℝ) + 1),
+    ((x - (n : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))
+
+/-- Derivative of `door3termC n` in `s` (mirror of `termC'`). -/
+noncomputable def door3termC' (n : ℕ) (s : ℂ) : ℂ :=
+  ∫ x : ℝ in (n : ℝ)..((n : ℝ) + 1),
+    -((x - (n : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1)) * Complex.log (x : ℂ)
+
+/-- Complex extension of `ZetaAsymptotics.termTSum` (mirror of `termTSumC`). -/
+noncomputable def door3termTSumC (s : ℂ) : ℂ :=
+  ∑' n : ℕ, door3termC (n + 1) s
+
+/-- `door3termC n` agrees with `ZetaAsymptotics.term n` on the real axis
+(mirror of `TestAnalytic.lean:39`). -/
+theorem door3termC_eq_term {n : ℕ} (_hn : 0 < n) {s : ℝ} :
+    door3termC n (s : ℂ) = (ZetaAsymptotics.term n s : ℂ) := by
+  unfold door3termC ZetaAsymptotics.term
+  rw [← intervalIntegral.integral_ofReal]
+  apply intervalIntegral.integral_congr
+  intro x hx
+  dsimp only []
+  have hx0 : 0 ≤ x := by
+    rw [Set.uIcc_of_le (by linarith : (n : ℝ) ≤ (n : ℝ) + 1)] at hx
+    exact le_trans (by exact_mod_cast (Nat.zero_le n)) hx.1
+  rw [show -((s : ℂ) + 1) = ((-(s + 1) : ℝ) : ℂ) by norm_num]
+  rw [← Complex.ofReal_cpow hx0 (-(s + 1))]
+  rw [Real.rpow_neg hx0]
+  norm_cast
+
+/-- `door3termTSumC` agrees with `ZetaAsymptotics.termTSum` on `0 < s`
+(mirror of `TestAnalytic.lean:55`). -/
+theorem door3termTSumC_eq_termTSum {s : ℝ} (_hs : 0 < s) :
+    door3termTSumC (s : ℂ) = (ZetaAsymptotics.termTSum s : ℂ) := by
+  unfold door3termTSumC ZetaAsymptotics.termTSum
+  rw [tsum_congr (fun n => door3termC_eq_term (Nat.succ_pos n))]
+  exact (Complex.ofReal_tsum (fun n : ℕ => ZetaAsymptotics.term (n + 1) s)).symm
+
+/-- Integrand of `door3termC` is differentiable in `s`
+(mirror of `TestAnalytic.lean:62`). -/
+theorem door3hasDerivAt_termC_integrand (n : ℕ) {s : ℂ} {x : ℝ} (hx : 1 ≤ x) :
+    HasDerivAt (fun t : ℂ => ((x - (n : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1)))
+      (-((x - (n : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1)) * Complex.log (x : ℂ)) s := by
+  have hxne : (x : ℂ) ≠ 0 := by
+    exact ofReal_ne_zero.mpr (by linarith)
+  have hlin : HasDerivAt (fun t : ℂ => -(t + 1)) (-1) s := by
+    exact HasDerivAt.neg (HasDerivAt.add_const (1 : ℂ) (hasDerivAt_id s))
+  have hpow : HasDerivAt (fun t : ℂ => (x : ℂ) ^ (-(t + 1)))
+      ((x : ℂ) ^ (-(s + 1)) * Complex.log (x : ℂ) * (-1)) s := by
+    exact HasDerivAt.const_cpow hlin (Or.inl hxne)
+  have hscalar : HasDerivAt (fun t : ℂ => ((x - (n : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1)))
+      (((x - (n : ℝ)) : ℂ) * ((x : ℂ) ^ (-(s + 1)) * Complex.log (x : ℂ) * (-1))) s := by
+    exact HasDerivAt.const_mul ((x - (n : ℝ)) : ℂ) hpow
+  exact hscalar.congr_deriv (by ring)
+
+/-- `x ↦ (x : ℂ)` shifted is continuous (mirror of `TestAnalytic.lean:78`). -/
+theorem door3continuousAt_ofReal_sub (n : ℕ) (x : ℝ) :
+    ContinuousAt (fun x : ℝ => ((x - (n + 1 : ℝ)) : ℂ)) x := by
+  have h1 : ContinuousAt (fun x : ℝ => (x : ℂ)) x := Complex.continuous_ofReal.continuousAt
+  have h2 : ContinuousAt (fun x : ℝ => ((n + 1 : ℝ) : ℂ)) x := continuousAt_const
+  convert h1.sub h2 using 1
+  ext y
+  simp
+
+/-- `x ↦ (x : ℂ) ^ c` is continuous at positive `x`
+(mirror of `TestAnalytic.lean:87`, no `simpa`). -/
+theorem door3continuousAt_cpow_ofReal (c : ℂ) {x : ℝ} (hxpos : 0 < x) :
+    ContinuousAt (fun x : ℝ => (x : ℂ) ^ c) x := by
+  have hre : 0 < ((x : ℂ)).re := by
+    rw [Complex.ofReal_re]
+    exact hxpos
+  have hmem : (x : ℂ) ∈ Complex.slitPlane := by
+    rw [Complex.mem_slitPlane_iff]
+    exact Or.inl hre
+  have hd0 : HasDerivAt (fun y : ℂ => y ^ c) (c * (x : ℂ) ^ (c - 1) * 1) (x : ℂ) :=
+    HasDerivAt.cpow_const (hasDerivAt_id (x : ℂ)) hmem
+  have hd : HasDerivAt (fun y : ℂ => y ^ c) (c * (x : ℂ) ^ (c - 1)) (x : ℂ) :=
+    hd0.congr_deriv (by ring)
+  exact hd.continuousAt.comp Complex.continuous_ofReal.continuousAt
+
+/-- `x ↦ Complex.log (x : ℂ)` is continuous at positive `x`
+(mirror of `TestAnalytic.lean:95`, no `simpa`). -/
+theorem door3continuousAt_log_ofReal {x : ℝ} (hxpos : 0 < x) :
+    ContinuousAt (fun x : ℝ => Complex.log (x : ℂ)) x := by
+  have hre : 0 < ((x : ℂ)).re := by
+    rw [Complex.ofReal_re]
+    exact hxpos
+  have hmem : (x : ℂ) ∈ Complex.slitPlane := by
+    rw [Complex.mem_slitPlane_iff]
+    exact Or.inl hre
+  have hdlog : HasDerivAt Complex.log (x : ℂ)⁻¹ (x : ℂ) :=
+    Complex.hasDerivAt_log hmem
+  exact hdlog.continuousAt.comp Complex.continuous_ofReal.continuousAt
+
+/-- Integrand of `door3termC` is continuous on `[n+1, n+2]`
+(mirror of `TestAnalytic.lean:104`). -/
+theorem door3continuousOn_termC_integrand (n : ℕ) (t : ℂ) :
+    ContinuousOn (fun x : ℝ => ((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1)))
+      (Set.Icc (n + 1 : ℝ) ((n + 1 : ℝ) + 1)) := by
+  refine continuousOn_of_forall_continuousAt (fun x hx => ?_)
+  have hxpos : 0 < x := by linarith [hx.1]
+  exact ContinuousAt.mul (door3continuousAt_ofReal_sub n x)
+    (door3continuousAt_cpow_ofReal (-(t + 1)) hxpos)
+
+/-- Derivative integrand of `door3termC` is continuous on `[n+1, n+2]`
+(mirror of `TestAnalytic.lean:112`). -/
+theorem door3continuousOn_termC'_integrand (n : ℕ) (t : ℂ) :
+    ContinuousOn (fun x : ℝ =>
+      -((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1)) * Complex.log (x : ℂ))
+      (Set.Icc (n + 1 : ℝ) ((n + 1 : ℝ) + 1)) := by
+  refine continuousOn_of_forall_continuousAt (fun x hx => ?_)
+  have hxpos : 0 < x := by linarith [hx.1]
+  exact ContinuousAt.mul
+    (ContinuousAt.mul (door3continuousAt_ofReal_sub n x).neg
+      (door3continuousAt_cpow_ofReal (-(t + 1)) hxpos))
+    (door3continuousAt_log_ofReal hxpos)
+
+/-- Norm of the derivative integrand is bounded
+(mirror of `TestAnalytic.lean:124`). -/
+theorem door3norm_termC'_integrand_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) {x : ℝ}
+    (hx1 : (n + 1 : ℝ) ≤ x) :
+    ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1)) * Complex.log (x : ℂ)‖ ≤
+      (x - (n + 1 : ℝ)) * x ^ (-(1 : ℝ)) * Real.log x := by
+  have hxpos : 0 < x := by
+    have hnp : 0 < (n + 1 : ℝ) := by positivity
+    linarith
+  have hxge1 : 1 ≤ x := by linarith
+  have hlog : Complex.log (x : ℂ) = (Real.log x : ℂ) := (Complex.ofReal_log hxpos.le).symm
+  rw [hlog]
+  have h1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+    rw [norm_neg]; norm_cast; exact abs_of_nonneg (sub_nonneg.mpr (by exact_mod_cast hx1))
+  have h2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]
+    rw [show (-(s + 1)).re = -(s.re + 1) by simp]
+  have h3 : ‖(Real.log x : ℂ)‖ = Real.log x := by
+    calc
+      ‖(Real.log x : ℂ)‖ = |Real.log x| := RCLike.norm_ofReal (Real.log x)
+      _ = Real.log x := abs_of_nonneg (Real.log_nonneg hxge1)
+  rw [norm_mul, norm_mul]
+  rw [h1, h2, h3]
+  have hpow : x ^ (-(s.re + 1)) ≤ x ^ (-(1 : ℝ)) := by
+    exact rpow_le_rpow_of_exponent_le hxge1 (by linarith [hs])
+  have hnonneg : 0 ≤ (x - (n + 1 : ℝ)) * Real.log x :=
+    mul_nonneg (sub_nonneg.mpr hx1) (Real.log_nonneg hxge1)
+  calc
+    (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) * Real.log x
+        = (x - (n + 1 : ℝ)) * Real.log x * x ^ (-(s.re + 1)) := by ring
+    _ ≤ (x - (n + 1 : ℝ)) * Real.log x * x ^ (-(1 : ℝ)) := by
+        exact mul_le_mul_of_nonneg_left hpow hnonneg
+    _ = (x - (n + 1 : ℝ)) * x ^ (-(1 : ℝ)) * Real.log x := by ring
+
+/-- Norm of the `door3termC` integrand is bounded
+(mirror of `TestAnalytic.lean:157`). -/
+theorem door3norm_termC_integrand_le (n : ℕ) {s : ℂ} (_hs : 0 < s.re) {x : ℝ}
+    (hx1 : (n + 1 : ℝ) ≤ x) :
+    ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ ≤
+      (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) := by
+  have hxpos : 0 < x := by
+    have hnp : 0 < (n + 1 : ℝ) := by positivity
+    linarith
+  rw [norm_mul]
+  have h1 : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+    norm_cast; exact abs_of_nonneg (sub_nonneg.mpr (by exact_mod_cast hx1))
+  rw [h1]
+  have h2 : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]
+    rw [show (-(s + 1)).re = -(s.re + 1) by simp]
+  rw [h2]
+
+#print axioms door3termC_eq_term
+#print axioms door3termTSumC_eq_termTSum
+#print axioms door3hasDerivAt_termC_integrand
+#print axioms door3continuousOn_termC_integrand
+#print axioms door3continuousOn_termC'_integrand
+#print axioms door3norm_termC'_integrand_le
+#print axioms door3norm_termC_integrand_le
+
+/-! ## Door-3 remainder 5c: engine prefix B — single-term differentiability + norm
+Mirror of `TestAnalytic.lean:173-314` with `door3` names. No `simpa`. -/
+
+/-- `door3termC (n+1)` is differentiable on the right half-plane
+(mirror of `TestAnalytic.lean:174`). -/
+theorem door3hasDerivAt_termC (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
+    HasDerivAt (fun t : ℂ => door3termC (n + 1) t) (door3termC' (n + 1) s) s := by
+  let a : ℝ := (n + 1 : ℝ)
+  let b : ℝ := (n + 1 : ℝ) + 1
+  let F : ℂ → ℝ → ℂ := fun t x => ((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1))
+  let F' : ℂ → ℝ → ℂ := fun t x =>
+    -((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(t + 1)) * Complex.log (x : ℂ)
+  let bound : ℝ → ℝ := fun x => (x - (n + 1 : ℝ)) * x ^ (-(1 : ℝ)) * Real.log x
+  let halfPlane : Set ℂ := {z : ℂ | 0 < z.re}
+  have hhalf_open : IsOpen halfPlane := isOpen_lt continuous_const continuous_re
+  have hhalf_mem : halfPlane ∈ 𝓝 s := hhalf_open.mem_nhds hs
+  have hA : a ≤ b := by dsimp [a, b]; linarith
+  have hF_meas : ∀ᶠ t in 𝓝 s, AEStronglyMeasurable (F t) (volume.restrict (Set.uIoc a b)) := by
+    filter_upwards [hhalf_mem] with t ht
+    refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_uIoc
+    rw [Set.uIoc_of_le hA]
+    exact (door3continuousOn_termC_integrand n t).mono Set.Ioc_subset_Icc_self
+  have hF_int : IntervalIntegrable (F s) volume a b := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+    exact ContinuousOn.integrableOn_Icc (door3continuousOn_termC_integrand n s) |>.mono_set Set.Ioc_subset_Icc_self
+  have hF'_meas : AEStronglyMeasurable (F' s) (volume.restrict (Set.uIoc a b)) := by
+    rw [Set.uIoc_of_le hA]
+    refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioc
+    exact (door3continuousOn_termC'_integrand n s).mono Set.Ioc_subset_Icc_self
+  have hcontBound : ContinuousOn bound (Set.Icc a b) := by
+    apply continuousOn_of_forall_continuousAt
+    intro x hx
+    have hxpos : 0 < x := by
+      have hnp : 0 < (n + 1 : ℝ) := by positivity
+      linarith [hx.1]
+    dsimp [bound]
+    exact ContinuousAt.mul
+      (ContinuousAt.mul
+        (ContinuousAt.sub continuousAt_id continuousAt_const)
+        (Real.continuousAt_rpow_const x (-(1 : ℝ)) (Or.inl (by linarith : x ≠ 0))))
+      (Real.continuousAt_log (by linarith : x ≠ 0))
+  have hbound_int : IntervalIntegrable bound volume a b := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+    exact ContinuousOn.integrableOn_Icc hcontBound |>.mono_set Set.Ioc_subset_Icc_self
+  have h_bound : ∀ᵐ x ∂volume, x ∈ Set.uIoc a b → ∀ t ∈ halfPlane, ‖F' t x‖ ≤ bound x := by
+    refine ae_of_all volume (fun x hx => ?_)
+    intro t ht
+    have hx1 : (n + 1 : ℝ) ≤ x := by
+      rw [Set.uIoc_of_le hA] at hx
+      exact le_of_lt hx.1
+    dsimp [F', bound]
+    exact door3norm_termC'_integrand_le n ht hx1
+  have h_diff : ∀ᵐ x ∂volume, x ∈ Set.uIoc a b → ∀ t ∈ halfPlane,
+      HasDerivAt (fun t => F t x) (F' t x) t := by
+    refine ae_of_all volume (fun x hx => ?_)
+    intro t ht
+    have hx1 : 1 ≤ x := by
+      have hle : (n + 1 : ℝ) ≤ x := by
+        rw [Set.uIoc_of_le hA] at hx
+        exact le_of_lt hx.1
+      have h1n : 1 ≤ (n + 1 : ℝ) := by linarith
+      linarith
+    have hbase := door3hasDerivAt_termC_integrand (n + 1) (s := t) hx1
+    have hEq1 : (fun u : ℂ => ((x - (((n + 1 : ℕ) : ℝ))) : ℂ) * (x : ℂ) ^ (-(u + 1)))
+        = (fun u : ℂ => F u x) := by
+      funext u
+      dsimp [F]
+      congr 1
+      congr 1
+      push_cast
+      ring
+    have hEq2 : -((x - (((n + 1 : ℕ) : ℝ))) : ℂ) * (x : ℂ) ^ (-(t + 1)) *
+        Complex.log (x : ℂ) = F' t x := by
+      dsimp [F']
+      push_cast
+      ring
+    rw [← hEq1, ← hEq2]
+    exact hbase
+  have h := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le (𝕜 := ℂ)
+    (μ := volume) (a := a) (b := b) (bound := bound) hhalf_mem hF_meas hF_int hF'_meas h_bound
+    hbound_int h_diff
+  have h2 := h.2
+  have hfun : (fun t : ℂ => door3termC (n + 1) t) = (fun x => ∫ t in a..b, F x t) := by
+    funext t
+    simp only [door3termC, F, a, b]
+    norm_cast
+  have hderiv : door3termC' (n + 1) s = ∫ t in a..b, F' s t := by
+    simp only [door3termC', F', a, b]
+    norm_cast
+  rw [hfun] at *
+  rw [hderiv]
+  exact h2
+
+/-- Norm of `door3termC (n+1)` on the right half-plane
+(mirror of `TestAnalytic.lean:256`). -/
+theorem door3norm_termC_le (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
+    ‖door3termC (n + 1) s‖ ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+  unfold door3termC
+  have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by norm_num
+  have h1 : ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ :=
+    intervalIntegral.norm_integral_le_integral_norm hA
+  have hbound : ∀ x, x ∈ Set.uIoc ((n + 1 : ℝ)) ((n + 1 : ℝ) + 1) →
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖ ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    intro x hx
+    have hx1 : (n + 1 : ℝ) ≤ x := by rw [Set.uIoc_of_le hA] at hx; exact hx.1.le
+    have hxpos : 0 < x := by
+      have hnp : 0 < (n + 1 : ℝ) := by positivity
+      exact lt_of_lt_of_le hnp hx1
+    have h1n : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+      have hnn : ‖((x - (n + 1 : ℝ)) : ℂ)‖ = |x - (n + 1 : ℝ)| := by norm_cast
+      rw [hnn]
+      exact abs_of_nonneg (by linarith)
+    have h2n : ‖(x : ℂ) ^ (-(s + 1))‖ = x ^ (-(s.re + 1)) := by
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(s + 1))]; simp
+    rw [norm_mul, h1n, h2n]
+    have hpow : x ^ (-(s.re + 1)) ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+      exact rpow_le_rpow_of_nonpos (by positivity : 0 < (n + 1 : ℝ)) hx1 (by linarith [hs])
+    have h5 : (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) ≤ (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+      have h6 : (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1)) ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(s.re + 1)) :=
+        mul_le_mul_of_nonneg_left hpow (by linarith)
+      have h7 : x - (n + 1 : ℝ) ≤ 1 := by
+        have hxx : x ≤ (n + 1 : ℝ) + 1 := by
+          rw [Set.uIoc_of_le hA] at hx; exact hx.2
+        linarith
+      have h8 : (n + 1 : ℝ) ^ (-(s.re + 1)) ≥ 0 := rpow_nonneg (by positivity) _
+      calc (x - (n + 1 : ℝ)) * x ^ (-(s.re + 1))
+        ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(s.re + 1)) := h6
+      _ ≤ 1 * (n + 1 : ℝ) ^ (-(s.re + 1)) := mul_le_mul_of_nonneg_right h7 h8
+      _ = (n + 1 : ℝ) ^ (-(s.re + 1)) := one_mul _
+    exact h5
+  have h2 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      ‖((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(s + 1))‖) ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1), (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    refine intervalIntegral.integral_mono_on hA ?_ ?_ (fun x hx => ?_)
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+      exact (continuous_norm.comp_continuousOn (door3continuousOn_termC_integrand n s)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+      exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+    · by_cases heq : x = n + 1
+      · subst heq; simp [norm_zero, mul_zero]; positivity
+      · have hx' : x ∈ Set.uIoc (n + 1 : ℝ) ((n + 1 : ℝ) + 1) := by
+          rw [Set.uIoc_of_le hA]; exact ⟨lt_of_le_of_ne hx.1 (Ne.symm heq), hx.2⟩
+        exact hbound x hx'
+  have h3 : (∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+      (n + 1 : ℝ) ^ (-(s.re + 1))) = (n + 1 : ℝ) ^ (-(s.re + 1)) := by
+    rw [intervalIntegral.integral_const, smul_eq_mul]
+    ring_nf
+  rw [h3] at h2
+  norm_cast at *
+  linarith [h1, h2]
+
+#print axioms door3hasDerivAt_termC
+#print axioms door3norm_termC_le
+
+/-! ## Door-3 remainder 5d: engine prefix C — tsum differentiability + bridge
+Mirror of `TestAnalytic.lean:316-462` with `door3` names. No `simpa`. -/
+
+/-- `door3termTSumC` is differentiable on the right half-plane
+(mirror of `TestAnalytic.lean:317`). -/
+theorem door3hasDerivAt_termTSumC {s : ℂ} (hs : 0 < s.re) :
+    HasDerivAt door3termTSumC (∑' n : ℕ, door3termC' (n + 1) s) s := by
+  let σ : ℝ := s.re
+  let t : Set ℂ := {z : ℂ | σ / 2 < z.re}
+  have ht_open : IsOpen t := isOpen_lt continuous_const continuous_re
+  have ht_pre : IsPreconnected t :=
+    (convex_halfSpace_re_gt (σ / 2)).isPreconnected
+  have hst : s ∈ t := by dsimp [t, σ]; linarith [hs]
+  have hσpos : 0 < σ := by dsimp [σ]; exact hs
+  have hsum_pow : ∀ p : ℝ, p < -1 → Summable (fun n : ℕ => (n + 1 : ℝ) ^ p) := by
+    intro p hp
+    have h1 : Summable (fun n : ℕ => (n : ℝ) ^ p) := Real.summable_nat_rpow.mpr hp
+    have h2 : Summable ((fun n : ℕ => (n : ℝ) ^ p) ∘ Nat.succ) :=
+      Summable.comp_injective h1 Nat.succ_injective
+    have he : (fun n : ℕ => ((n : ℝ) + 1) ^ p) = ((fun n : ℕ => (n : ℝ) ^ p) ∘ Nat.succ) := by
+      ext n; norm_cast
+    rw [he]; exact h2
+  let u : ℕ → ℝ := fun n => (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2)
+  have hu : Summable u := by
+    let v : ℕ → ℝ := fun n => ((4 / σ) * 2 ^ (σ / 4)) * (n + 1 : ℝ) ^ (-(σ / 4 + 1))
+    have hv : Summable v :=
+      (hsum_pow (-(σ / 4 + 1)) (by linarith [hσpos])).mul_left
+        ((4 / σ) * 2 ^ (σ / 4))
+    refine Summable.of_norm_bounded hv (fun n => ?_)
+    dsimp [u, v]
+    rw [abs_of_nonneg]
+    · have hlog : Real.log (n + 2 : ℝ) ≤ (n + 2 : ℝ) ^ (σ / 4) / (σ / 4) := by
+        have hll := Real.log_natCast_le_rpow_div (n + 2) (by linarith : 0 < σ / 4)
+        push_cast at hll ⊢
+        exact hll
+      have hpow : (n + 2 : ℝ) ^ (σ / 4) ≤ (2 * (n + 1 : ℝ)) ^ (σ / 4) := by
+        refine rpow_le_rpow (by positivity : 0 ≤ (n + 2 : ℝ)) ?_ ?_
+        · nlinarith
+        · exact div_nonneg (le_of_lt hσpos) (by norm_num)
+      have h2 : (2 * (n + 1 : ℝ)) ^ (σ / 4) = 2 ^ (σ / 4) * (n + 1 : ℝ) ^ (σ / 4) := by
+        rw [mul_rpow] <;> positivity
+      have hpow2 : (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * (n + 1 : ℝ) ^ (σ / 4) =
+          (n + 1 : ℝ) ^ (-(σ / 4 + 1)) := by
+        rw [← rpow_add (by positivity : 0 < (n + 1 : ℝ))]
+        congr 1
+        ring
+      have hnonneg : 0 ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by positivity
+      calc (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (↑n + 2)
+        ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * ((↑n + 2) ^ (σ / 4) / (σ / 4)) :=
+          mul_le_mul_of_nonneg_left hlog hnonneg
+      _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * ((2 * (↑n + 1)) ^ (σ / 4) / (σ / 4)) := by
+        apply mul_le_mul_of_nonneg_left _ hnonneg
+        rw [div_eq_mul_inv, div_eq_mul_inv]
+        exact mul_le_mul_of_nonneg_right hpow (inv_nonneg.mpr (le_of_lt (by linarith [hσpos])))
+      _ = (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * (2 ^ (σ / 4) * (↑n + 1) ^ (σ / 4) / (σ / 4)) := by rw [h2]
+      _ = (n + 1 : ℝ) ^ (-(σ / 4 + 1)) * (2 ^ (σ / 4) / (σ / 4)) := by
+        rw [← hpow2]; ring
+      _ = 4 / σ * 2 ^ (σ / 4) * (n + 1 : ℝ) ^ (-(σ / 4 + 1)) := by ring
+    · exact mul_nonneg (by positivity) (Real.log_nonneg (by linarith))
+  have hg0 : Summable (fun n : ℕ => door3termC (n + 1) s) := by
+    refine Summable.of_norm_bounded (hsum_pow (-(σ + 1)) (by linarith [hσpos])) (fun n => ?_)
+    exact door3norm_termC_le (n := n) hs
+  have hg : ∀ n y, y ∈ t → HasDerivAt (fun z : ℂ => door3termC (n + 1) z) (door3termC' (n + 1) y) y := by
+    intro n y hy
+    have hypos : 0 < y.re := by
+      have hlt : σ / 2 < y.re := by dsimp [t] at hy; exact hy
+      linarith [hσpos]
+    exact door3hasDerivAt_termC n hypos
+  have hg' : ∀ n y, y ∈ t → ‖door3termC' (n + 1) y‖ ≤ u n := by
+    intro n y hy
+    dsimp [door3termC', u]
+    have hyσ : σ / 2 ≤ y.re := le_of_lt (by dsimp [t] at hy; exact hy)
+    have hA : (n + 1 : ℝ) ≤ (n + 1 : ℝ) + 1 := by norm_num
+    have hnorm :
+        ‖∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+          -((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+        ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+          ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ :=
+      intervalIntegral.norm_integral_le_integral_norm hA
+    have hbnd : ∀ x, (n + 1 : ℝ) ≤ x → x ≤ (n + 1 : ℝ) + 1 →
+        ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+          (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      intro x hx1 hx2
+      by_cases heq : x = n + 1
+      · subst heq; simp [neg_zero, zero_mul, norm_zero]
+        exact mul_nonneg (rpow_nonneg (by positivity) _) (Real.log_nonneg (by linarith [Nat.le_add_left 1 n]))
+      have hx1' : (n + 1 : ℝ) < x := lt_of_le_of_ne hx1 (Ne.symm heq)
+      have hxpos : 0 < x := by
+        have hnp : 0 < (n + 1 : ℝ) := by positivity
+        linarith
+      have hxge1 : 1 ≤ x := by linarith
+      have hlogc : Complex.log (x : ℂ) = (Real.log x : ℂ) := (Complex.ofReal_log hxpos.le).symm
+      rw [hlogc]
+      have h1 : ‖-((x - (n + 1 : ℝ)) : ℂ)‖ = x - (n + 1 : ℝ) := by
+        rw [norm_neg]; norm_cast; exact abs_of_nonneg (sub_nonneg.mpr (by exact_mod_cast hx1))
+      have h2 : ‖(x : ℂ) ^ (-(y + 1))‖ = x ^ (-(y.re + 1)) := by
+        rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos (-(y + 1))]; simp
+      have h3 : ‖(Real.log x : ℂ)‖ = Real.log x := by
+        calc
+          ‖(Real.log x : ℂ)‖ = |Real.log x| := RCLike.norm_ofReal (Real.log x)
+          _ = Real.log x := abs_of_nonneg (Real.log_nonneg hxge1)
+      rw [norm_mul, norm_mul, h1, h2, h3]
+      have hpow_le : x ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(y.re + 1)) :=
+        rpow_le_rpow_of_nonpos (by positivity) hx1 (by linarith)
+      have hpow2 : (n + 1 : ℝ) ^ (-(y.re + 1)) ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by
+        apply rpow_le_rpow_of_exponent_le _ (by linarith)
+        linarith [Nat.le_succ n]
+      have hlog : Real.log x ≤ Real.log (n + 2) :=
+        Real.log_le_log (by positivity) (by push_cast; linarith)
+      have hn1 : 0 ≤ x - (n + 1 : ℝ) := sub_nonneg.mpr hx1
+      have hn2 : 0 ≤ Real.log x := Real.log_nonneg hxge1
+      have hn3 : 0 ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) := by positivity
+      calc (x - (n + 1 : ℝ)) * x ^ (-(y.re + 1)) * Real.log x
+        ≤ (x - (n + 1 : ℝ)) * (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x :=
+            mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (le_trans hpow_le hpow2) hn1) hn2
+        _ ≤ 1 * (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x :=
+            mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (by linarith) hn3) hn2
+        _ = (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log x := by ring
+        _ ≤ (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) :=
+            mul_le_mul_of_nonneg_left hlog hn3
+    have hint : ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        ‖-((x - (n + 1 : ℝ)) : ℂ) * (x : ℂ) ^ (-(y + 1)) * Complex.log (x : ℂ)‖ ≤
+      ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      refine intervalIntegral.integral_mono_on hA ?_ ?_ (fun x hx => ?_)
+      · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+        exact (continuous_norm.comp_continuousOn (door3continuousOn_termC'_integrand n y)).integrableOn_Icc |>.mono_set Set.Ioc_subset_Icc_self
+      · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hA]
+        exact continuousOn_const.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self
+      · exact hbnd x hx.1 hx.2
+    have hconst : ∫ x : ℝ in (n + 1 : ℝ)..((n + 1 : ℝ) + 1),
+        (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) ≤
+      (n + 1 : ℝ) ^ (-(σ / 2 + 1)) * Real.log (n + 2) := by
+      rw [intervalIntegral.integral_const]; simp [smul_eq_mul, mul_one]
+    exact_mod_cast le_trans hnorm (le_trans hint hconst)
+  exact hasDerivAt_tsum_of_isPreconnected (𝕜 := ℂ) hu ht_open ht_pre hg hg' hst hg0 hst
+
+/-- `door3termTSumC` is analytic on the right half-plane
+(mirror of `TestAnalytic.lean:449`). -/
+theorem door3analyticOnNhd_termTSumC :
+    AnalyticOnNhd ℂ door3termTSumC {z : ℂ | 0 < z.re} := by
+  refine DifferentiableOn.analyticOnNhd ?_ (isOpen_lt continuous_const continuous_re)
+  intro z hz
+  exact (door3hasDerivAt_termTSumC hz).differentiableAt.differentiableWithinAt
+
+/-- `ZetaAsymptotics.termTSum` is real-analytic on `(0,∞)`
+(mirror of `TestAnalytic.lean:455`). -/
+theorem door3analyticOnNhd_termTSum_real :
+    AnalyticOnNhd ℝ ZetaAsymptotics.termTSum (Set.Ioi 0) := by
+  intro s hs
+  have hA : AnalyticAt ℝ (fun t : ℝ => (door3termTSumC (t : ℂ)).re) s := by
+    exact AnalyticAt.re_ofReal (door3analyticOnNhd_termTSumC _ hs)
+  refine hA.congr ?_
+  filter_upwards [isOpen_Ioi.mem_nhds hs] with t ht
+  rw [door3termTSumC_eq_termTSum ht]
+  rfl
+
+/-- THE BRIDGE: unconditional proof of the isolated analytic lemma. -/
+theorem door3EMRightAnalytic_proved : Door3EMRightAnalytic := by
+  unfold Door3EMRightAnalytic
+  intro s hs
+  have h1 : AnalyticAt ℝ (fun _t : ℝ => (1 : ℝ)) s := analyticAt_const
+  have h2 : AnalyticAt ℝ (fun t : ℝ => t) s := analyticAt_id
+  have h3 : AnalyticAt ℝ (fun t : ℝ => ZetaAsymptotics.termTSum t) s :=
+    door3analyticOnNhd_termTSum_real s hs
+  have h4 : AnalyticAt ℝ (fun t : ℝ => t * ZetaAsymptotics.termTSum t) s := h2.mul h3
+  exact h1.sub h4
+
+/-- Unconditional norm bound `1 ≤ ‖ζ(1/2)‖` (discharges the `of_EM` chain). -/
+theorem door3HalfNorm_ge_one : (1 : ℝ) ≤ ‖riemannZeta ((((1 / 2 : ℝ))) : ℂ)‖ :=
+  door3HalfNorm_ge_one_of_EM door3EMRightAnalytic_proved
+
+/-- Unconditional discharge of committed `Door3HalfRealHyp`. -/
+theorem door3HalfRealHyp : Door3HalfRealHyp :=
+  door3HalfRealHyp_of_EM door3EMRightAnalytic_proved
+
+/-- Unconditional height-0 numeral on the segment. -/
+theorem door3RealSeg_pointwiseC0 :
+    door3RealC0 ≤ ‖riemannZeta (tailShiftedSReal (0 : ℂ))‖ ∧
+      (0 : ℂ) ∈ door3RealSeg :=
+  door3RealSeg_pointwiseC0_of_EM door3EMRightAnalytic_proved
+
+#print axioms door3hasDerivAt_termTSumC
+#print axioms door3analyticOnNhd_termTSumC
+#print axioms door3analyticOnNhd_termTSum_real
+#print axioms door3EMRightAnalytic_proved
+#print axioms door3HalfNorm_ge_one
+#print axioms door3HalfRealHyp
+#print axioms door3RealSeg_pointwiseC0
