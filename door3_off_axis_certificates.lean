@@ -4259,3 +4259,446 @@ theorem R05_pair3_Re_ge :
 
 end Door3OffAxis
 
+namespace Door3OffAxis
+
+/-- Eight-term split (`S8 = S6 + pair 3`). -/
+theorem R05_S8_eq :
+    (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaPairTerm R03R10PolyLower.sR05 3 := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 3 =
+      etaDirichletTerm R03R10PolyLower.sR05 6 +
+        etaDirichletTerm R03R10PolyLower.sR05 7 := by
+    unfold etaPairTerm
+    have e0 : 2 * 3 = 6 := by norm_num
+    have e1 : 2 * 3 + 1 = 7 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        (etaDirichletTerm R03R10PolyLower.sR05 6 +
+          etaDirichletTerm R03R10PolyLower.sR05 7) := by
+    rw [show (8 : Nat) = 7 + 1 by norm_num, Finset.sum_range_succ,
+      show (7 : Nat) = 6 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- Phase-aware R05 eight-term real part (`923/2500 ≤ Re S8`,
+from `459/1250 + 1/500`). -/
+theorem R05_S8_Re_ge :
+    (923 / 2500 : Real) ≤
+      (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S8_eq, Complex.add_re]
+  have hS6 := R05_S6_Re_ge
+  have hp := R05_pair3_Re_ge
+  have hle : (923 / 2500 : Real) ≤ (459 / 1250 : Real) + (1 / 500 : Real) := by
+    norm_num
+  linarith
+
+/-- Eight-term slow bound (`923/2500 ≤ ‖S8‖`, `Re`-route). -/
+theorem R05_S8_norm_ge :
+    (923 / 2500 : Real) ≤
+      ‖∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k‖ := by
+  have hRe := R05_S8_Re_ge
+  have hle : (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k).re ≤
+      ‖∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k‖ :=
+    Complex.re_le_norm _
+  linarith
+
+/-- Honest residual: `S8 = 923/2500` with banked tail `3/20` and `cF = 1` gives
+`(923/2500 - 3/20) / 1 = 137/625 < 1/2`; the `13/20` slow target for `N = 2048`
+stays open (shortfall `702/2500`). -/
+theorem R05_S8_banked_ratio_eq :
+    ((((923 / 2500 : Real)) - (3 / 20 : Real)) / (1 : Real)) = (137 / 625 : Real) := by
+  norm_num
+
+theorem R05_S8_banked_ratio_lt_half : (137 / 625 : Real) < (1 / 2 : Real) := by
+  norm_num
+
+#print axioms R05_S8_eq
+#print axioms R05_S8_Re_ge
+#print axioms R05_S8_norm_ge
+#print axioms R05_S8_banked_ratio_eq
+#print axioms R05_S8_banked_ratio_lt_half
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-9 double (`log 9 = 2 * log 3`) via `9 = 3 * 3`. -/
+theorem R05_log_nine_eq :
+    Real.log 9 = 2 * Real.log 3 := by
+  have h9 : (9 : Real) = 3 * 3 := by norm_num
+  rw [h9, Real.log_mul (by norm_num) (by norm_num)]
+  ring
+
+/-- Log-10 split (`log 10 = log 2 + log 5`) via `10 = 2 * 5`. -/
+theorem R05_log_ten_eq :
+    Real.log 10 = Real.log 2 + Real.log 5 := by
+  have h10 : (10 : Real) = 2 * 5 := by norm_num
+  rw [h10, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase of the R05 ninth eta term (`0.75 * log 9` in `[1.6479, 1.648]`)
+from the banked `log 3` d9 bounds via `R05_log_nine_eq`.
+Note `1.6479 > π / 2 ≈ 1.5708`: the phase has crossed the axis. -/
+theorem R05_theta9_mem :
+    (1.6479 : Real) ≤ 0.75 * Real.log 9 ∧ 0.75 * Real.log 9 ≤ (1.648 : Real) := by
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hx : 0.75 * Real.log 9 = 1.5 * Real.log 3 := by
+    rw [R05_log_nine_eq]
+    ring
+  constructor <;> rw [hx] <;> linarith
+
+/-- Phase of the R05 tenth eta term (`0.75 * log 10` in `[1.7269, 1.727]`)
+from the banked `log 2` / `log 5` d9 bounds via `R05_log_ten_eq`. -/
+theorem R05_theta10_mem :
+    (1.7269 : Real) ≤ 0.75 * Real.log 10 ∧ 0.75 * Real.log 10 ≤ (1.727 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h5lo := Real.log_five_gt_d9
+  have h5hi := Real.log_five_lt_d9
+  have hx : 0.75 * Real.log 10 = 0.75 * (Real.log 2 + Real.log 5) := by
+    rw [R05_log_ten_eq]
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the ninth-term phase (`cos (0.75 * log 9) ≤ -1/25`)
+via `CG_cos_le_quartic` with per-monomial endpoints.
+This is the stop-rule mechanism: the ninth-term cosine is NEGATIVE. -/
+theorem R05_cos_075log9_upper :
+    Real.cos (0.75 * Real.log 9) ≤ (-1 / 25 : Real) := by
+  have hmem := R05_theta9_mem
+  have hpos : (0 : Real) < Real.log 9 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 9 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.6479 : Real) ≤ 0.75 * Real.log 9 := hmem.1
+  have hhi : 0.75 * Real.log 9 ≤ (1.648 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.6479 : Real) ^ 2 ≤ (0.75 * Real.log 9) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 9) ^ 4 ≤ (1.648 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.6479 : Real) ^ 2 / 2 + (1.648 : Real) ^ 4 / 24 ≤
+      (-1 / 25 : Real) := by
+    norm_num
+  linarith
+
+/-- The ninth-term cosine is strictly negative (stop-rule trigger). -/
+theorem R05_cos_075log9_neg :
+    Real.cos (0.75 * Real.log 9) < 0 := by
+  have h := R05_cos_075log9_upper
+  linarith
+
+/-- Cosine floor at the ninth-term phase (`-1/12 ≤ cos (0.75 * log 9)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log9_lower :
+    (-1 / 12 : Real) ≤ Real.cos (0.75 * Real.log 9) := by
+  have hmem := R05_theta9_mem
+  have hpos : (0 : Real) < Real.log 9 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 9 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.6479 : Real) ≤ 0.75 * Real.log 9 := hmem.1
+  have hhi : 0.75 * Real.log 9 ≤ (1.648 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 9) ^ 2 ≤ (1.648 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.6479 : Real) ^ 4 ≤ (0.75 * Real.log 9) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 9) ^ 6 ≤ (1.648 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-1 / 12 : Real) ≤
+      1 - (1.648 : Real) ^ 2 / 2 + (1.6479 : Real) ^ 4 / 24 -
+        (1.648 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Cosine upper at the tenth-term phase (`cos (0.75 * log 10) ≤ -1/10`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log10_upper :
+    Real.cos (0.75 * Real.log 10) ≤ (-1 / 10 : Real) := by
+  have hmem := R05_theta10_mem
+  have hpos : (0 : Real) < Real.log 10 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 10 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.7269 : Real) ≤ 0.75 * Real.log 10 := hmem.1
+  have hhi : 0.75 * Real.log 10 ≤ (1.727 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.7269 : Real) ^ 2 ≤ (0.75 * Real.log 10) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 10) ^ 4 ≤ (1.727 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.7269 : Real) ^ 2 / 2 + (1.727 : Real) ^ 4 / 24 ≤
+      (-1 / 10 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_log_nine_eq
+#print axioms R05_log_ten_eq
+#print axioms R05_theta9_mem
+#print axioms R05_theta10_mem
+#print axioms R05_cos_075log9_upper
+#print axioms R05_cos_075log9_neg
+#print axioms R05_cos_075log9_lower
+#print axioms R05_cos_075log10_upper
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Rpow lower (`2 ≤ 9 ^ 0.395`) via cleared `(2) ^ 3 ≤ (9 ^ (1/3)) ^ 3 = 9`. -/
+theorem R05_nine_rpow_ge : (2 : Real) ≤ (9 : Real) ^ (0.395 : Real) := by
+  have hstep : (2 : Real) ≤ (9 : Real) ^ ((1 / 3 : Real)) := by
+    have hpow : ((2 : Real)) ^ (3 : Nat) ≤
+        ((((9 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((9 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (9 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 9)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 9 1
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  calc (2 : Real) ≤ (9 : Real) ^ ((1 / 3 : Real)) := hstep
+    _ ≤ (9 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Real rpow ninth inverse upper (`9 ^ (-0.395) ≤ 1/2`) from `2 ≤ 9 ^ 0.395`. -/
+theorem R05_rpow_nine_neg0395_le :
+    (9 : Real) ^ (-0.395 : Real) ≤ (1 / 2 : Real) := by
+  have hle := R05_nine_rpow_ge
+  have hpos : (0 : Real) < (9 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (9 : Real) ^ (-0.395 : Real) = (((9 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 2 : Real) = ((2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hle
+
+/-- Rpow upper (`10 ^ 0.395 ≤ 8/3`) via cleared `(10 ^ (2/5)) ^ 5 = 100`. -/
+theorem R05_ten_rpow_le : (10 : Real) ^ (0.395 : Real) ≤ (8 / 3 : Real) := by
+  have hpow : ((((10 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((8 / 3 : Real)) ^ (5 : Nat) := by
+    have e : ((((10 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (10 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 10)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 10 2
+    rw [e]
+    norm_num
+  have hstep : (10 : Real) ^ ((2 / 5 : Real)) ≤ (8 / 3 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (10 : Real) ^ (0.395 : Real) ≤ (10 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (8 / 3 : Real) := hstep
+
+/-- Real rpow tenth inverse lower (`3/8 ≤ 10 ^ (-0.395)`) from `10 ^ 0.395 ≤ 8/3`. -/
+theorem R05_rpow_ten_neg0395_ge :
+    (3 / 8 : Real) ≤ (10 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_ten_rpow_le
+  have hpos : (0 : Real) < (10 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (10 : Real) ^ (-0.395 : Real) = (((10 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (3 / 8 : Real) = ((8 / 3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Real part of the R05 ninth eta inverse
+(`Re (9 ^ s)⁻¹ = 9 ^ (-0.395) * cos (0.75 * log 9)`). -/
+theorem R05_inv_nine_cpow_re_eq :
+    (((((9 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (9 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 9) := by
+  have h9eq : ((((9 : Nat)) : Complex)) = (9 : Complex) := by norm_cast
+  rw [h9eq]
+  have hlog : Complex.log (9 : Complex) = (((Real.log 9 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 9)).symm
+  have hlogre : (Complex.log (9 : Complex)).re = Real.log 9 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (9 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (9 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 9 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (9 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 9 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (9 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (9 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (9 : Complex) ≠ 0)]
+  have hinv : ((9 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (9 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (9 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 9 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (9 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 9 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (9 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 9 * 0.395)) * Real.cos (-(Real.log 9 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 9 * (-0.75))) = Real.cos (0.75 * Real.log 9) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 9 * 0.395)) = (9 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 9 * 0.395) = Real.log 9 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 9)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- Real part of the R05 tenth eta inverse
+(`Re (10 ^ s)⁻¹ = 10 ^ (-0.395) * cos (0.75 * log 10)`). -/
+theorem R05_inv_ten_cpow_re_eq :
+    (((((10 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (10 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 10) := by
+  have h10eq : ((((10 : Nat)) : Complex)) = (10 : Complex) := by norm_cast
+  rw [h10eq]
+  have hlog : Complex.log (10 : Complex) = (((Real.log 10 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 10)).symm
+  have hlogre : (Complex.log (10 : Complex)).re = Real.log 10 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (10 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (10 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 10 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (10 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 10 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (10 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (10 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (10 : Complex) ≠ 0)]
+  have hinv : ((10 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (10 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (10 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 10 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (10 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 10 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (10 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 10 * 0.395)) * Real.cos (-(Real.log 10 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 10 * (-0.75))) = Real.cos (0.75 * Real.log 10) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 10 * 0.395)) = (10 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 10 * 0.395) = Real.log 10 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 10)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 ninth eta term in closed form (`term 8 = (9^s)⁻¹`, since `(-1)^8 = 1`). -/
+theorem R05_eta_ninth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 8 =
+      ((((9 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (8 + 1 : Nat) = 9 := rfl
+  have hcast : ((((8 + 1 : Nat)) : Complex)) = ((((9 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (8 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- R05 tenth eta term in closed form (`term 9 = -((10 ^ s)⁻¹)`, since `(-1)^9 = -1`). -/
+theorem R05_eta_tenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 9 =
+      -((((10 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (9 + 1 : Nat) = 10 := rfl
+  have hcast : ((((9 + 1 : Nat)) : Complex)) = ((((10 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (9 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- Real part of the R05 ninth eta term (`-(1/24) ≤ Re term9`,
+from `(1/2) * (-1/12)` with amplitude `≤ 1/2` and the negative cosine floor). -/
+theorem R05_eta_ninth_Re_ge :
+    (-(1 / 24) : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 8).re := by
+  rw [R05_eta_ninth_eq, R05_inv_nine_cpow_re_eq]
+  have hamp := R05_rpow_nine_neg0395_le
+  have hcos := R05_cos_075log9_lower
+  have hamp_pos : (0 : Real) < (9 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e1 : (9 : Real) ^ (-0.395 : Real) * (-1 / 12 : Real) ≤
+      (9 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 9) :=
+    mul_le_mul_of_nonneg_left hcos hamp_pos.le
+  have e2 : (1 / 2 : Real) * (-1 / 12 : Real) ≤
+      (9 : Real) ^ (-0.395 : Real) * (-1 / 12 : Real) :=
+    mul_le_mul_of_nonpos_right hamp (by norm_num)
+  have heq : (1 / 2 : Real) * (-1 / 12 : Real) = (-(1 / 24) : Real) := by
+    norm_num
+  linarith
+
+/-- Real part of the R05 tenth eta term (`3/80 ≤ Re term10`,
+from `(3/8) * (1/10)`: the `(-1)^9` sign flips the negative tenth cosine
+into a positive contribution). -/
+theorem R05_eta_tenth_Re_ge :
+    (3 / 80 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 9).re := by
+  rw [R05_eta_tenth_eq, Complex.neg_re, R05_inv_ten_cpow_re_eq]
+  have hamp := R05_rpow_ten_neg0395_ge
+  have hcos := R05_cos_075log10_upper
+  have hamp_pos : (0 : Real) < (10 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (1 / 10 : Real) ≤ -(Real.cos (0.75 * Real.log 10)) := by
+    linarith
+  have hprod : (3 / 8 : Real) * (1 / 10 : Real) ≤
+      (10 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 10))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (3 / 8 : Real) * (1 / 10 : Real) = (3 / 80 : Real) := by
+    norm_num
+  have hsplit : (10 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 10))) =
+      -((10 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 10)) := by
+    ring
+  linarith
+
+/-- Phase-aware fourth-pair floor (`-1/240 ≤ Re pair 4`,
+from `-1/24 + 3/80`).
+STOP-RULE VERDICT: the floor is NONPOSITIVE (`-1/240 ≤ 0`), so the pair route
+stalls here — do NOT push further (`θ9 ≈ 1.648 > π/2` killed the ninth cosine,
+and even crediting term 10 its full `+3/80` leaves the pair floor negative). -/
+theorem R05_pair4_Re_ge :
+    (-1 / 240 : Real) ≤ (etaPairTerm R03R10PolyLower.sR05 4).re := by
+  have hp : etaPairTerm R03R10PolyLower.sR05 4 =
+      etaDirichletTerm R03R10PolyLower.sR05 8 +
+        etaDirichletTerm R03R10PolyLower.sR05 9 := by
+    unfold etaPairTerm
+    have e0 : 2 * 4 = 8 := by norm_num
+    have e1 : 2 * 4 + 1 = 9 := by norm_num
+    rw [e0, e1]
+  rw [hp, Complex.add_re]
+  have ht8 := R05_eta_ninth_Re_ge
+  have ht9 := R05_eta_tenth_Re_ge
+  have hle : (-1 / 240 : Real) ≤ (-(1 / 24) : Real) + (3 / 80 : Real) := by
+    norm_num
+  linarith
+
+/-- Stop-rule verdict: the banked pair-4 floor is nonpositive — the pair route ends. -/
+theorem R05_pair4_stop :
+    (etaPairTerm R03R10PolyLower.sR05 4).re ≥ (-1 / 240 : Real) ∧
+      (-1 / 240 : Real) ≤ 0 := by
+  exact ⟨R05_pair4_Re_ge, by norm_num⟩
+
+#print axioms R05_nine_rpow_ge
+#print axioms R05_rpow_nine_neg0395_le
+#print axioms R05_ten_rpow_le
+#print axioms R05_rpow_ten_neg0395_ge
+#print axioms R05_inv_nine_cpow_re_eq
+#print axioms R05_inv_ten_cpow_re_eq
+#print axioms R05_eta_ninth_eq
+#print axioms R05_eta_tenth_eq
+#print axioms R05_eta_ninth_Re_ge
+#print axioms R05_eta_tenth_Re_ge
+#print axioms R05_pair4_Re_ge
+#print axioms R05_pair4_stop
+
+end Door3OffAxis
+
