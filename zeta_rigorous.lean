@@ -33150,3 +33150,239 @@ theorem R02_D3_damp_ge_exp_neg_one (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : 
   exact hfin
 
 #print axioms R02_D3_damp_ge_exp_neg_one
+
+/-!
+## Door-3 quantitative close, step 5 (zeta lane): per-line damp decay + rect-window `G` numerals.
+
+Route: per-line damp uppers `‖damp‖ ≤ exp(c)·exp(-im²/100)` are whole-line
+(`Complex.norm_exp` + `Complex.div_ofNat_re`, ZU5 pattern) with
+`c = 0.0091` on `Re = 0.05` (`(0.05-1)² = 0.9025`) and `c = 0.0007` on
+`Re = 0.74` (`(0.74-1)² = 0.0676`). Rect-window `G` numerals
+(`Re = 0.05` / `Re = 0.74`, `Im ∈ [-8.25,-5.25]`) go through banked
+`R02_D3_zeta_upper_934` (`‖ζ‖ ≤ 934`) + `‖s-1‖ ≤ 9.2`
+(`Complex.norm_le_abs_re_add_abs_im`) + damp `≤ 2.72`
+(`Real.exp_one_lt_d9`), giving `a = b = 23400`. Rect `BddAbove` for `G`
+uses the same triple on the full rect.
+
+Banked here (FULL proofs, no sorry):
+* `R02_D3_damp_upper_line005` / `R02_D3_damp_upper_line074`: whole-line
+  damp decay (exact spec helpers for the edge-cap assembly).
+* `R02_D3_exp_one_le_two72`: `Real.exp 1 ≤ 2.72`.
+* `R02_D3_damp_le_two72_rect`: damp `≤ 2.72` on the R02 rect.
+* `R02_D3_Gdamp_window_left` / `R02_D3_Gdamp_window_right`: `‖G‖ ≤ 23400`
+  on the left / right rect-window edges.
+* `R02_D3_Gdamp_bddAbove_rect`: `BddAbove` for `G` on the R02 rect window.
+
+RESIDUAL (exact next step): whole-line `‖G‖` edge caps (all `Im`) need an
+Im-uniform growth bound for `‖ζ(1-s)‖` at `Re = 0.95` / `Re = 0.26`
+(FE reflection of `Re = 0.05` / `Re = 0.74` lands at `Re < 1`, so
+`zeta_Dirichlet_le_three` does not apply; the eta-pair route grows with
+`‖w‖` hence with `|Im|`), plus strip `BddAbove` for `G` (Gaussian damp
+decay dominates, but the explicit polynomial-vs-Gaussian comparison is
+not yet formalized). Numerals here (`23400` from the crude eta `934`)
+are far above the `≤ 10` target; the close needs FE + Stirling
+polynomial bounds, not longer eta sums. Next agent: prove the Im-uniform
+reflected-zeta bound, then assemble whole-line `a`, `b`, strip `BddAbove`,
+and feed `R02_D3_G_interp_of_edges` + `R02_D3_damp_ge_exp_neg_one` +
+`R02_D3_zeta_of_F_le` to close `‖ζ‖ ≤ 10`.
+-/
+
+/-- Per-line damp upper on `Re = 0.05` with Gaussian decay (whole line, all `Im`). -/
+theorem R02_D3_damp_upper_line005 (z : ℂ) (hre : z.re = 0.05) :
+    ‖R02_D3_dampFactor z‖ ≤ Real.exp 0.0091 * Real.exp (-(z.im * z.im / 100)) := by
+  have hsub_re : (z - 1).re = z.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hsub_im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have hsq : (((z - 1) ^ 2).re) = (z.re - 1) * (z.re - 1) - z.im * z.im := by
+    rw [pow_two, Complex.mul_re, hsub_re, hsub_im]
+  have hdiv : ((((z - 1) ^ 2) / (100 : ℂ)).re) = ((((z - 1) ^ 2).re) / 100) := by
+    rw [Complex.div_ofNat_re]
+  have hnorm : ‖R02_D3_dampFactor z‖
+      = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor z = Complex.exp ((((z - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [e, Complex.norm_exp]
+  have hline : (z.re - 1) * (z.re - 1) = 0.9025 := by
+    rw [hre]
+    norm_num
+  have h009 : (0.9025 : ℝ) / 100 ≤ 0.0091 := by norm_num
+  have hsplit : (0.9025 - z.im * z.im) / 100
+      = 0.9025 / 100 + -(z.im * z.im / 100) := by ring
+  have key : ((((z - 1) ^ 2) / (100 : ℂ)).re) ≤ 0.0091 + -(z.im * z.im / 100) := by
+    rw [hdiv, hsq, hline, hsplit]
+    exact add_le_add h009 le_rfl
+  calc ‖R02_D3_dampFactor z‖
+        = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := hnorm
+    _ ≤ Real.exp (0.0091 + -(z.im * z.im / 100)) := Real.exp_le_exp.mpr key
+    _ = Real.exp 0.0091 * Real.exp (-(z.im * z.im / 100)) := Real.exp_add _ _
+
+/-- Per-line damp upper on `Re = 0.74` with Gaussian decay (whole line, all `Im`). -/
+theorem R02_D3_damp_upper_line074 (z : ℂ) (hre : z.re = 0.74) :
+    ‖R02_D3_dampFactor z‖ ≤ Real.exp 0.0007 * Real.exp (-(z.im * z.im / 100)) := by
+  have hsub_re : (z - 1).re = z.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hsub_im : (z - 1).im = z.im := by
+    rw [Complex.sub_im, Complex.one_im, sub_zero]
+  have hsq : (((z - 1) ^ 2).re) = (z.re - 1) * (z.re - 1) - z.im * z.im := by
+    rw [pow_two, Complex.mul_re, hsub_re, hsub_im]
+  have hdiv : ((((z - 1) ^ 2) / (100 : ℂ)).re) = ((((z - 1) ^ 2).re) / 100) := by
+    rw [Complex.div_ofNat_re]
+  have hnorm : ‖R02_D3_dampFactor z‖
+      = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor z = Complex.exp ((((z - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [e, Complex.norm_exp]
+  have hline : (z.re - 1) * (z.re - 1) = 0.0676 := by
+    rw [hre]
+    norm_num
+  have h0007 : (0.0676 : ℝ) / 100 ≤ 0.0007 := by norm_num
+  have hsplit : (0.0676 - z.im * z.im) / 100
+      = 0.0676 / 100 + -(z.im * z.im / 100) := by ring
+  have key : ((((z - 1) ^ 2) / (100 : ℂ)).re) ≤ 0.0007 + -(z.im * z.im / 100) := by
+    rw [hdiv, hsq, hline, hsplit]
+    exact add_le_add h0007 le_rfl
+  calc ‖R02_D3_dampFactor z‖
+        = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := hnorm
+    _ ≤ Real.exp (0.0007 + -(z.im * z.im / 100)) := Real.exp_le_exp.mpr key
+    _ = Real.exp 0.0007 * Real.exp (-(z.im * z.im / 100)) := Real.exp_add _ _
+
+/-- `Real.exp 1 ≤ 2.72` (from `Real.exp_one_lt_d9`). -/
+theorem R02_D3_exp_one_le_two72 : Real.exp 1 ≤ 2.72 := by
+  have h := Real.exp_one_lt_d9
+  linarith
+
+/-- Damp factor `≤ 2.72` on the R02 rect (strip square bound + `exp 1` cap). -/
+theorem R02_D3_damp_le_two72_rect (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) :
+    ‖R02_D3_dampFactor z‖ ≤ 2.72 := by
+  have hsub_re : ((z - 1).re) = z.re - 1 := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hu_lo : (-0.95 : ℝ) ≤ (z - 1).re := by
+    rw [hsub_re]
+    linarith
+  have hu_hi : (z - 1).re ≤ (-0.26 : ℝ) := by
+    rw [hsub_re]
+    linarith
+  have hsq : (((z - 1) ^ 2).re)
+      = (z - 1).re * (z - 1).re - (z - 1).im * (z - 1).im := by
+    rw [pow_two, Complex.mul_re]
+  have hsqnn : (0 : ℝ) ≤ (z - 1).im * (z - 1).im := mul_self_nonneg _
+  have hpos : (0 : ℝ) ≤ ((z - 1).re + 0.95) * (0.95 - (z - 1).re) :=
+    mul_nonneg (by linarith) (by linarith)
+  have hre_sq : (((z - 1) ^ 2).re) ≤ (0.9025 : ℝ) := by
+    have hrr : (z - 1).re * (z - 1).re = (z - 1).re ^ 2 := by ring
+    have hexpand : ((z - 1).re + 0.95) * (0.95 - (z - 1).re)
+        = (0.95 : ℝ) * 0.95 - (z - 1).re ^ 2 := by ring
+    have h095 : (0.95 : ℝ) * 0.95 = 0.9025 := by norm_num
+    linarith
+  have hre_div : ((((z - 1) ^ 2) / (100 : ℂ)).re) ≤ 1 := by
+    rw [Complex.div_ofNat_re]
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 100)]
+    linarith
+  have hnorm : ‖R02_D3_dampFactor z‖
+      = Real.exp ((((z - 1) ^ 2) / (100 : ℂ)).re) := by
+    have e : R02_D3_dampFactor z = Complex.exp ((((z - 1) ^ 2) / (100 : ℂ))) := rfl
+    rw [e, Complex.norm_exp]
+  rw [hnorm]
+  exact le_trans (Real.exp_le_exp.mpr hre_div) R02_D3_exp_one_le_two72
+
+/-- Left rect-window edge numeral for damped `G`: `‖G‖ ≤ 23400` on `Re = 0.05`. -/
+theorem R02_D3_Gdamp_window_left (z : ℂ) (hre : z.re = 0.05)
+    (him_lo : -8.25 ≤ z.im) (him_hi : z.im ≤ -5.25) :
+    ‖R02_D3_Gdamp z‖ ≤ 23400 := by
+  have hre_lo : (0.05 : ℝ) ≤ z.re := by rw [hre]
+  have hre_hi : z.re ≤ (0.74 : ℝ) := by rw [hre]; norm_num
+  have hZ : ‖riemannZeta z‖ ≤ 934 :=
+    R02_D3_zeta_upper_934 z hre_lo hre_hi him_lo him_hi
+  have h1re : (z - 1).re = z.re - 1 := by simp
+  have h1im : (z - 1).im = z.im := by simp
+  have habs_re : |(z - 1).re| ≤ 0.95 := by
+    rw [h1re, hre, abs_of_nonpos (by norm_num : (0.05 : ℝ) - 1 ≤ 0)]
+    norm_num
+  have habs_im : |(z - 1).im| ≤ 8.25 := by
+    rw [h1im, abs_of_nonpos (by linarith : z.im ≤ 0)]
+    linarith
+  have hn : ‖z - 1‖ ≤ 9.2 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    linarith
+  have hF : ‖(z - 1) * riemannZeta z‖ ≤ 9.2 * 934 := by
+    rw [norm_mul]
+    exact mul_le_mul hn hZ (norm_nonneg _) (by norm_num)
+  have hdamp : ‖R02_D3_dampFactor z‖ ≤ 2.72 :=
+    R02_D3_damp_le_two72_rect z hre_lo hre_hi
+  have hG : ‖R02_D3_Gdamp z‖ ≤ (9.2 * 934) * 2.72 := by
+    have e : R02_D3_Gdamp z = ((z - 1) * riemannZeta z) * R02_D3_dampFactor z := rfl
+    rw [e, norm_mul]
+    exact mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+  have hnum : (9.2 * 934 : ℝ) * 2.72 ≤ 23400 := by norm_num
+  exact le_trans hG hnum
+
+/-- Right rect-window edge numeral for damped `G`: `‖G‖ ≤ 23400` on `Re = 0.74`. -/
+theorem R02_D3_Gdamp_window_right (z : ℂ) (hre : z.re = 0.74)
+    (him_lo : -8.25 ≤ z.im) (him_hi : z.im ≤ -5.25) :
+    ‖R02_D3_Gdamp z‖ ≤ 23400 := by
+  have hre_lo : (0.05 : ℝ) ≤ z.re := by rw [hre]; norm_num
+  have hre_hi : z.re ≤ (0.74 : ℝ) := by rw [hre]
+  have hZ : ‖riemannZeta z‖ ≤ 934 :=
+    R02_D3_zeta_upper_934 z hre_lo hre_hi him_lo him_hi
+  have h1re : (z - 1).re = z.re - 1 := by simp
+  have h1im : (z - 1).im = z.im := by simp
+  have habs_re : |(z - 1).re| ≤ 0.95 := by
+    rw [h1re, hre, abs_of_nonpos (by norm_num : (0.74 : ℝ) - 1 ≤ 0)]
+    norm_num
+  have habs_im : |(z - 1).im| ≤ 8.25 := by
+    rw [h1im, abs_of_nonpos (by linarith : z.im ≤ 0)]
+    linarith
+  have hn : ‖z - 1‖ ≤ 9.2 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    linarith
+  have hF : ‖(z - 1) * riemannZeta z‖ ≤ 9.2 * 934 := by
+    rw [norm_mul]
+    exact mul_le_mul hn hZ (norm_nonneg _) (by norm_num)
+  have hdamp : ‖R02_D3_dampFactor z‖ ≤ 2.72 :=
+    R02_D3_damp_le_two72_rect z hre_lo hre_hi
+  have hG : ‖R02_D3_Gdamp z‖ ≤ (9.2 * 934) * 2.72 := by
+    have e : R02_D3_Gdamp z = ((z - 1) * riemannZeta z) * R02_D3_dampFactor z := rfl
+    rw [e, norm_mul]
+    exact mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+  have hnum : (9.2 * 934 : ℝ) * 2.72 ≤ 23400 := by norm_num
+  exact le_trans hG hnum
+
+/-- `BddAbove` for damped `G` on the R02 rect window (strip-`BddAbove` restricted). -/
+theorem R02_D3_Gdamp_bddAbove_rect :
+    BddAbove ((norm ∘ R02_D3_Gdamp) ''
+      {z : ℂ | 0.05 ≤ z.re ∧ z.re ≤ 0.74 ∧ -8.25 ≤ z.im ∧ z.im ≤ -5.25}) := by
+  refine ⟨23400, ?_⟩
+  intro y hy
+  obtain ⟨z, hz, rfl⟩ := hy
+  obtain ⟨hre_lo, hre_hi, him_lo, him_hi⟩ := hz
+  have hZ : ‖riemannZeta z‖ ≤ 934 :=
+    R02_D3_zeta_upper_934 z hre_lo hre_hi him_lo him_hi
+  have h1re : (z - 1).re = z.re - 1 := by simp
+  have h1im : (z - 1).im = z.im := by simp
+  have habs_re : |(z - 1).re| ≤ 0.95 := by
+    rw [h1re, abs_of_nonpos (by linarith : z.re - 1 ≤ 0)]
+    linarith
+  have habs_im : |(z - 1).im| ≤ 8.25 := by
+    rw [h1im, abs_of_nonpos (by linarith : z.im ≤ 0)]
+    linarith
+  have hn : ‖z - 1‖ ≤ 9.2 := by
+    have h := Complex.norm_le_abs_re_add_abs_im (z - 1)
+    linarith
+  have hF : ‖(z - 1) * riemannZeta z‖ ≤ 9.2 * 934 := by
+    rw [norm_mul]
+    exact mul_le_mul hn hZ (norm_nonneg _) (by norm_num)
+  have hdamp : ‖R02_D3_dampFactor z‖ ≤ 2.72 :=
+    R02_D3_damp_le_two72_rect z hre_lo hre_hi
+  have hG : ‖R02_D3_Gdamp z‖ ≤ (9.2 * 934) * 2.72 := by
+    have e : R02_D3_Gdamp z = ((z - 1) * riemannZeta z) * R02_D3_dampFactor z := rfl
+    rw [e, norm_mul]
+    exact mul_le_mul hF hdamp (norm_nonneg _) (by norm_num)
+  have hnum : (9.2 * 934 : ℝ) * 2.72 ≤ 23400 := by norm_num
+  exact le_trans hG hnum
+
+#print axioms R02_D3_damp_upper_line005
+#print axioms R02_D3_damp_upper_line074
+#print axioms R02_D3_exp_one_le_two72
+#print axioms R02_D3_damp_le_two72_rect
+#print axioms R02_D3_Gdamp_window_left
+#print axioms R02_D3_Gdamp_window_right
+#print axioms R02_D3_Gdamp_bddAbove_rect
