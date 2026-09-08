@@ -4165,3 +4165,190 @@ theorem d3K3_pairTail_le :
     _ ≤ 5 / 6 := hcap
 
 #print axioms d3K3_pairTail_le
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5a): p-series integral-tail at `102`. -/
+
+/-- Antitone majorant `x^(-3/2)` on `Ici 102`. -/
+theorem d3rpow32_antitone102 :
+    AntitoneOn (fun x : ℝ => x ^ ((-3 / 2 : ℝ))) (Set.Ici ((((102 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : ((-3 / 2 : ℝ)) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((102 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-3/2)` on `Ioi 102`. -/
+theorem d3rpow32_integrable102 :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ ((-3 / 2 : ℝ))) (Set.Ioi ((((102 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : ((-3 / 2 : ℝ)) < -1)
+  norm_num
+
+/-- `K = 51` integral-tail comparison for the shifted tail. -/
+theorem d3tail32_le_integral102 :
+    (∑' n : ℕ, ((((n + 102 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) ≤
+      (∫ x : ℝ in Set.Ioi ((((102 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 102 d3rpow32_antitone102
+    d3rpow32_integrable102 (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+/-- Closed-form integral `∫ x in Ioi 102, x^(-3/2) = 2 * 102^(-1/2)`. -/
+theorem d3integral32_eq102 :
+    (∫ x : ℝ in Set.Ioi ((((102 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) =
+      2 * (102 : ℝ) ^ ((-1 / 2 : ℝ)) := by
+  have hlt : ((-3 / 2 : ℝ)) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((102 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : ((-3 / 2 : ℝ)) + 1 = (-1 / 2 : ℝ) := by norm_num
+  have ec : ((((102 : ℕ)) : ℝ)) = (102 : ℝ) := by norm_num
+  rw [e1, ec] at h
+  have e2 : (-((102 : ℝ) ^ ((-1 / 2 : ℝ)))) / (-1 / 2 : ℝ) =
+      2 * (102 : ℝ) ^ ((-1 / 2 : ℝ)) := by ring
+  exact e2 ▸ h
+
+#print axioms d3rpow32_antitone102
+#print axioms d3rpow32_integrable102
+#print axioms d3tail32_le_integral102
+#print axioms d3integral32_eq102
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5b): `102^(-1/2)` cap + domino. -/
+
+/-- Numeral rpow lower bound `201/20 ≤ 102^(1/2:ℝ)` (cleared: `(201/20)^2 ≤ 102`). -/
+theorem d3sqrt102_ge : (201 / 20 : ℝ) ≤ (102 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hsq : (((((102 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) = 102 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 102)]
+    rw [show ((1 / 2 : ℝ)) * (((2 : ℕ)) : ℝ) = (1 : ℝ) by norm_num]
+    exact Real.rpow_one 102
+  have hpow : ((201 / 20 : ℝ)) ^ ((2 : ℕ)) ≤
+      (((((102 : ℝ) ^ ((1 / 2 : ℝ)))) ^ ((2 : ℕ)) : ℝ)) := by
+    rw [hsq]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Negated rpow bound `102^(-1/2) ≤ 20/201`. -/
+theorem d3rpow_102_neghalf_le : (102 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 20 / 201 := by
+  have hpos : (0 : ℝ) < (102 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have e : ((-1 / 2 : ℝ)) = -((1 / 2 : ℝ)) := by norm_num
+  have er : (102 : ℝ) ^ ((-1 / 2 : ℝ)) = ((102 : ℝ) ^ ((1 / 2 : ℝ)))⁻¹ := by
+    rw [e]
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 102) _
+  rw [er]
+  have hge := d3sqrt102_ge
+  have hInv : ((102 : ℝ) ^ ((1 / 2 : ℝ)))⁻¹ ≤ ((201 / 20 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have heq : ((201 / 20 : ℝ))⁻¹ = 20 / 201 := by norm_num
+  rw [heq] at hInv
+  exact hInv
+
+/-- Odd-vs-shift pointwise: `(2m+103)^(-3/2) ≤ (m+103)^(-3/2)`. -/
+theorem d3odd32_le_shift103 (m : ℕ) :
+    ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) ≤
+      ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by
+  have hm_pos : (0 : ℝ) < ((((m + 103 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((m + 103 : ℕ)) : ℝ)) ≤ ((((2 * m + 103 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : ((-3 / 2 : ℝ)) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+#print axioms d3sqrt102_ge
+#print axioms d3rpow_102_neghalf_le
+#print axioms d3odd32_le_shift103
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5c): summability + per-pair bound. -/
+
+/-- Shift-series summability `(m+103)^(-3/2)` via `Real.summable_nat_rpow_inv`. -/
+theorem d3shift32_summable103 :
+    Summable (fun n : ℕ => ((((n + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+  have hp1 : (1 : ℝ) < (1 / 2 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((1 / 2 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 103 : ℕ) : ℝ) ^ ((1 / 2 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 103).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) =
+      (fun m : ℕ => ((((m + 103 : ℕ) : ℝ) ^ ((1 / 2 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : ((-3 / 2 : ℝ)) = -((1 / 2 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-series summability via norm comparison with the shift series. -/
+theorem d3odd32_summable103 :
+    Summable (fun m : ℕ => ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+  apply Summable.of_norm_bounded d3shift32_summable103
+  intro m
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact d3odd32_le_shift103 m
+
+/-- K=51 per-pair MVT bound: `‖pair (m+51)‖ ≤ (2m+103)^(-3/2)`. -/
+theorem d3K51_pairTerm_le (m : ℕ) :
+    ‖d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤
+      ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have hspos : 0 < d3HalfS0.re := by rw [hre]; norm_num
+  have hle := d3EtaPair_norm_le d3HalfS0 hspos (m + 51)
+  have hexp : -d3HalfS0.re - 1 = (-3 / 2 : ℝ) := by rw [hre]; norm_num
+  have hnat : 2 * (m + 51) + 1 = 2 * m + 103 := by omega
+  have hcast : ((((2 * (m + 51) + 1 : ℕ)) : ℝ)) = ((((2 * m + 103 : ℕ)) : ℝ)) := by
+    rw [hnat]
+  rw [hcast, hexp] at hle
+  have hnorm : ‖d3HalfS0‖ ≤ 1 := d3HalfPt_norm_le
+  have hnn : (0 : ℝ) ≤ ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  calc ‖d3EtaPairTerm d3HalfS0 (m + 51)‖
+      ≤ ‖d3HalfS0‖ * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := hle
+    _ ≤ 1 * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_right hnorm hnn
+    _ = ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by norm_num
+
+#print axioms d3shift32_summable103
+#print axioms d3odd32_summable103
+#print axioms d3K51_pairTerm_le
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5d): closed enclosure `< 1/5`. -/
+
+/-- Shift-tail numeral `∑' n, ((n+103):ℝ)^(-3/2) ≤ 40/201`. -/
+theorem d3shift32_tail102_le :
+    (∑' n : ℕ, ((((n + 102 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) ≤ 40 / 201 := by
+  have htail := d3tail32_le_integral102
+  have hval := d3integral32_eq102
+  have hcap := d3rpow_102_neghalf_le
+  have h256 : 2 * (102 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 40 / 201 := by
+    calc 2 * (102 : ℝ) ^ ((-1 / 2 : ℝ)) ≤ 2 * (20 / 201) :=
+          mul_le_mul_of_nonneg_left hcap (by norm_num)
+      _ = 40 / 201 := by norm_num
+  calc (∑' n : ℕ, ((((n + 102 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)))
+      ≤ (∫ x : ℝ in Set.Ioi ((((102 : ℕ)) : ℝ)), x ^ ((-3 / 2 : ℝ))) := htail
+    _ = 2 * (102 : ℝ) ^ ((-1 / 2 : ℝ)) := hval
+    _ ≤ 40 / 201 := h256
+
+/-- K=51 closed enclosure: `‖∑' m, pair (m+51)‖ < 1/5`. -/
+theorem d3K51_pairTail_lt :
+    ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ < 1 / 5 := by
+  have hnormSum : Summable (fun m => ‖d3EtaPairTerm d3HalfS0 (m + 51)‖) := by
+    apply Summable.of_norm_bounded d3odd32_summable103
+    intro m
+    rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    exact d3K51_pairTerm_le m
+  have hfun : (fun m : ℕ => ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) =
+      (fun n : ℕ => ((((n + 102 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+    funext m
+    have h103 : m + 103 = m + 102 + 1 := by omega
+    rw [h103]
+  have hcap := d3shift32_tail102_le
+  rw [← hfun] at hcap
+  have hle : ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤ 40 / 201 :=
+    calc ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖
+        ≤ ∑' m, ‖d3EtaPairTerm d3HalfS0 (m + 51)‖ := norm_tsum_le_tsum_norm hnormSum
+      _ ≤ ∑' m, ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+          hnormSum.tsum_le_tsum (fun m => d3K51_pairTerm_le m) d3odd32_summable103
+      _ ≤ ∑' m, ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+          d3odd32_summable103.tsum_le_tsum (fun m => d3odd32_le_shift103 m)
+            d3shift32_summable103
+      _ ≤ 40 / 201 := hcap
+  calc ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤ 40 / 201 := hle
+    _ < 1 / 5 := by norm_num
+
+#print axioms d3shift32_tail102_le
+#print axioms d3K51_pairTail_lt
