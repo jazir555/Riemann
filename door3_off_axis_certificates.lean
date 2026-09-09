@@ -7708,3 +7708,179 @@ theorem R05_slow_residual20_tight_eq :
 #print axioms R05_slow_residual20_tight_eq
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight pair-9 floor (`-1319/15050 ≈ -0.08764`, from `-125/602 + 3/25`;
+beats `-13/120`). -/
+theorem R05_pair9_Re_ge_tight :
+    (-1319 / 15050 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 18 + etaDirichletTerm R03R10PolyLower.sR05 19).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_nineteenth_Re_ge_tight
+  have hO := R05_eta_twentieth_Re_ge_tight
+  have hle : (-1319 / 15050 : Real) ≤ (-125 / 602 : Real) + (3 / 25 : Real) := by norm_num
+  linarith
+
+#print axioms R05_pair9_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight pair-block sum over k = 10..19: `-16789/46200 + -1319/15050 = -25601/56760`
+(beats the coarse `-10897/23100`). -/
+theorem R05_pairblock_5_9_sum_eq_tight2 :
+    (-16789 / 46200 : Real) + (-1319 / 15050 : Real) = (-25601 / 56760 : Real) := by
+  norm_num
+
+#print axioms R05_pairblock_5_9_sum_eq_tight2
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight slow-assembly verdict: the best contiguous bound is the S20 frontier
+`-406809/4730000 ≈ -0.08601` (tight folds through pair-9). -/
+theorem R05_slow_tight_verdict_total :
+    (-406809 / 4730000 : Real) ≤
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k).re :=
+  R05_S20_Re_ge_tight
+
+/-- Verdict residual from the best partial (S16 `93659/770000 ≈ 0.1216`) to `13/20`:
+`406841/770000 ≈ 0.5284` still to cover. -/
+theorem R05_slow_tight_verdict_S16_residual_eq :
+    (13 / 20 : Real) - (93659 / 770000 : Real) = (406841 / 770000 : Real) := by
+  norm_num
+
+/-- Honest pair-route projection: the tight five-pair block (k = 10..19) totals
+`-25601/56760 ≈ -0.45104`, so the pair route is net negative and the tail beyond
+k = 20 must cover `62495/56760 ≈ 1.1011` to reach `13/20`. -/
+theorem R05_pairblock_tight_verdict_gap_eq :
+    (13 / 20 : Real) - (-25601 / 56760 : Real) = (62495 / 56760 : Real) := by
+  norm_num
+
+#print axioms R05_slow_tight_verdict_total
+#print axioms R05_slow_tight_verdict_S16_residual_eq
+#print axioms R05_pairblock_tight_verdict_gap_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight rpow upper (`21 ^ 0.395 ≤ 7/2`): amplitude half of pair-10 term 21. -/
+theorem R05_twentyone_rpow_le_tight : (21 : Real) ^ (0.395 : Real) ≤ (7 / 2 : Real) := by
+  have hpow : ((((21 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((7 / 2 : Real)) ^ (5 : Nat) := by
+    have e : ((((21 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (21 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 21)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 21 2
+    rw [e]
+    norm_num
+  have hstep : (21 : Real) ^ ((2 / 5 : Real)) ≤ (7 / 2 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (21 : Real) ^ (0.395 : Real) ≤ (21 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (7 / 2 : Real) := hstep
+/-- Tight twenty-first inverse lower (`2/7 ≤ 21 ^ (-0.395)`) for pair-10 term 21. -/
+theorem R05_rpow_twentyone_neg0395_ge_tight :
+    (2 / 7 : Real) ≤ (21 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_twentyone_rpow_le_tight
+  have hpos : (0 : Real) < (21 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (21 : Real) ^ (-0.395 : Real) = (((21 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (2 / 7 : Real) = ((7 / 2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+/-- Tight rpow upper (`22 ^ 0.395 ≤ 7/2`): amplitude half of pair-10 term 22. -/
+theorem R05_twentytwo_rpow_le_tight : (22 : Real) ^ (0.395 : Real) ≤ (7 / 2 : Real) := by
+  have hpow : ((((22 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((7 / 2 : Real)) ^ (5 : Nat) := by
+    have e : ((((22 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (22 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 22)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 22 2
+    rw [e]
+    norm_num
+  have hstep : (22 : Real) ^ ((2 / 5 : Real)) ≤ (7 / 2 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (22 : Real) ^ (0.395 : Real) ≤ (22 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (7 / 2 : Real) := hstep
+/-- Peak-to-frontier drop: S16 peak sits exactly one term-19 floor above S20. -/
+theorem R05_S16_S20_drop_eq :
+    (93659 / 770000 : Real) - (-406809 / 4730000 : Real) = (125 / 602 : Real) := by
+  norm_num
+
+#print axioms R05_twentyone_rpow_le_tight
+#print axioms R05_rpow_twentyone_neg0395_ge_tight
+#print axioms R05_twentytwo_rpow_le_tight
+#print axioms R05_S16_S20_drop_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Fresh `log 21` bounds (`3.0433 ≤ log 21 ≤ 3.0458`) via `log 20`
+(`R05_log_twenty_eq` + `R05_log_ten_eq`) and `log (21/20) ≤ 1/20`. -/
+theorem R05_log_twentyone_mem :
+    (3.0433 : Real) ≤ Real.log 21 ∧ Real.log 21 ≤ (3.0458 : Real) := by
+  have h20 := R05_log_twenty_eq
+  have h10 := R05_log_ten_eq
+  have hub_lo : Real.log (20 / 21 : Real) ≤ (-1 / 21 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 20 / 21)
+    have he : (20 / 21 : Real) - 1 = (-1 / 21 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (21 / 20 : Real) = -Real.log (20 / 21 : Real) := by
+    have heq : (21 / 20 : Real) = (20 / 21 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hub_hi : Real.log (21 / 20 : Real) ≤ (1 / 20 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 21 / 20)
+    have he : (21 / 20 : Real) - 1 = (1 / 20 : Real) := by norm_num
+    linarith
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have h5lo : (1.609437 : Real) < Real.log 5 := by
+    have h9 := Real.log_five_gt_d9
+    linarith
+  have h5hi : Real.log 5 < (1.609438 : Real) := by
+    have h9 := Real.log_five_lt_d9
+    linarith
+  have hlog21 : Real.log 21 =
+      2 * Real.log 2 + Real.log 5 + Real.log (21 / 20 : Real) := by
+    have h := Real.log_mul (show (20 : Real) ≠ 0 by norm_num)
+      (show (21 / 20 : Real) ≠ 0 by norm_num)
+    have hmeq : (20 : Real) * (21 / 20) = 21 := by norm_num
+    rw [hmeq] at h
+    rw [h20, h10] at h
+    linarith
+  have hfin_lo : (3.0433 : Real) ≤
+      2 * (0.693147 : Real) + (1.609437 : Real) + (1 / 21 : Real) := by
+    norm_num
+  have hfin_hi : 2 * (0.693148 : Real) + (1.609438 : Real) + (1 / 20 : Real) ≤
+      (3.0458 : Real) := by
+    norm_num
+  refine ⟨?_, ?_⟩
+  · rw [hlog21, hinv]
+    linarith
+  · rw [hlog21]
+    linarith
+
+#print axioms R05_log_twentyone_mem
+
+end Door3OffAxis
