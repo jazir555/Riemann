@@ -3449,6 +3449,15 @@ sorry-free infrastructure and the complete commit ledger above.
   never citable). Capstone 0/4. Lane-banked Gamma remainder
   UNWIRABLE in-tail (import cycle) — needs downstream file.
   Residual: downstream wiring file (RH-WIRE).
+- 2026-09-09 RH-WIRE (`fdc9e72a`, new file, green 8705 jobs via
+  wrapper after 9h stall cleared): Gamma wall closed downstream
+  + zeta/deriv adapters + CutR10 fencing assembly + rect +
+  right-line nonvanishing + `XiCutoffLines10` + capstone
+  `rh_of_cutR10_fencing_and_premises` (axioms-clean, no banned
+  circular cites). Conditional on 5 premises: (a) zeta slow-sum
+  triple at sCut=1/2+10I (OFF-AXIS lane), (b) closedBall sup
+  (real-arc), (c) CutL10 left line, (d) 0.49-sliver, (e) feeders.
+  Residual: (a) slow-cert at sCut → feed fencing (OA24).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
