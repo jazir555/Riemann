@@ -37810,3 +37810,130 @@ theorem R02_D3_zeta_rect_cap_slice5074_tight151 (z : ℂ) (hre_lo : 0.5 ≤ z.re
       _ ≤ 151 := by norm_num
   exact le_trans h hcap
 #print axioms R02_D3_zeta_rect_cap_slice5074_tight151
+/-!
+## Door-3 strip endgame, step 38s (zeta lane): full-width assembly 525.
+Low `assembly7` (`525` on `0.05 ≤ Re ≤ 0.5`) plus high `tight151`
+(`151` on `0.5 ≤ Re ≤ 0.74`); by-cases at `Re ≤ 0.5` keeps best `525`.
+-/
+/-- Full-strip assembly: `‖ζ‖ ≤ 525` on `0.05 ≤ Re ≤ 0.74`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_slice_assembly8 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 525 := by
+  by_cases hcut : z.re ≤ 0.5
+  · have h := R02_D3_zeta_rect_slice_assembly7 z hre_lo hcut him
+    linarith
+  · have hlt : (0.5 : ℝ) < z.re := lt_of_not_ge hcut
+    have h := R02_D3_zeta_rect_cap_slice5074_tight151 z hlt.le hre_hi him
+    linarith
+/-- Full-strip edge: `151 < 525`; gap `525 - 151 = 374`. -/
+theorem R02_D3_zeta_rect_slice_edge8 :
+    (151 : ℝ) < 525 ∧ (10 : ℝ) < 525 ∧ (525 : ℝ) - 151 = 374 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+#print axioms R02_D3_zeta_rect_slice_assembly8
+#print axioms R02_D3_zeta_rect_slice_edge8
+/-! ## Door-3 step 38t: `1.51 ≤ 2^0.6` + mid denom floor `0.51`. -/
+/-- Cleared integer-pow cap: `(1.51)^5 ≤ 8` via small-step upper bounds. -/
+theorem R02_D3_pow_151_5_le_8 : ((1.51 : ℝ)) ^ (5 : ℕ) ≤ 8 := by
+  have h2 : ((1.51 : ℝ)) ^ (2 : ℕ) ≤ (2.2801 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.51 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((2.2801 : ℝ)) ^ (2 : ℕ) ≤ (5.1989 : ℝ) := by norm_num
+  have h4le : ((((1.51 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((2.2801 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.51 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) = ((1.51 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.51 : ℝ)) ^ (4 : ℕ) ≤ (5.1989 : ℝ) := by
+    rw [← h44]
+    exact le_trans h4le hsq
+  have h5mul : ((1.51 : ℝ)) ^ (4 : ℕ) * (1.51 : ℝ) = ((1.51 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.51 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (5.1989 : ℝ) * (1.51 : ℝ) ≤ (7.8504 : ℝ) := by norm_num
+  have h5le : ((1.51 : ℝ)) ^ (4 : ℕ) * (1.51 : ℝ) ≤ (5.1989 : ℝ) * (1.51 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.51 : ℝ)) ^ (5 : ℕ) ≤ (7.8504 : ℝ) := by
+    rw [← h5mul]
+    exact le_trans h5le hprod
+  have hcap : (7.8504 : ℝ) ≤ 8 := by norm_num
+  exact le_trans g5 hcap
+/-- Rpow lower: `1.51 ≤ 2^0.6` (cleared via `(1.51)^5 ≤ 8 = 2^3`). -/
+theorem R02_D3_rpow_206_le_151 : (1.51 : ℝ) ≤ (2 : ℝ) ^ (0.6 : ℝ) := by
+  by_contra hle
+  have hlt : (2 : ℝ) ^ (0.6 : ℝ) < (1.51 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (2 : ℝ) ^ (0.6 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((2 : ℝ) ^ (0.6 : ℝ))) ^ (5 : ℕ)) ≤ ((((1.51 : ℝ))) ^ (5 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 5
+  have h2_eq : ((((2 : ℝ) ^ (0.6 : ℝ))) ^ (5 : ℕ)) = 8 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.6 : ℝ) * ((((5 : ℕ)) : ℝ)) = 3 := by norm_num
+    have e3 : (3 : ℝ) = ((((3 : ℕ)) : ℝ)) := by norm_num
+    rw [e, e3, Real.rpow_natCast]
+    norm_num
+  rw [h2_eq] at hle_pow
+  have hge := R02_D3_pow_151_5_le_8
+  linarith
+/-- Eta-denominator floor on the mid slice: `‖1 - 2^{1-s}‖ ≥ 0.51` for `Re ≤ 0.4`. -/
+theorem R02_D3_eta_denom_floor_slice0304 (s : ℂ) (hre : s.re ≤ 0.4) :
+    (0.51 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hnorm := two_cpow_one_sub_norm s
+  have hexp : (0.6 : ℝ) ≤ 1 - s.re := by linarith
+  have h2mono : (2 : ℝ) ^ (0.6 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp
+  have hge : (1.51 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    le_trans R02_D3_rpow_206_le_151 h2mono
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - s)) (1 : ℂ)
+  rw [norm_one, hnorm] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := norm_sub_rev _ _
+  linarith
+#print axioms R02_D3_pow_151_5_le_8
+#print axioms R02_D3_rpow_206_le_151
+#print axioms R02_D3_eta_denom_floor_slice0304
+/-! ## Door-3 step 38u: mid-piece linear `41` + rect `451` + far split at `0.4`. -/
+/-- Mid-piece zeta linear `‖ζ‖ ≤ 41*(1+|Im|)` on `0.05 ≤ Re ≤ 0.4`. -/
+theorem R02_D3_zeta_linear_slice0304_41 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.4) :
+    ‖riemannZeta z‖ ≤ 41 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by intro h; linarith
+  have hetaLin := R02_D3_etaPair_linear_slice0550_peeled z hre_lo (by linarith)
+  have hden_ge := R02_D3_eta_denom_floor_slice0304 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ = ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]; exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.51 : ℝ))⁻¹ := (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 20.57 * (1 + |z.im|) := mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (20.57 * (1 + |z.im|)) / 0.51 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]; exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (20.57 * (1 + |z.im|)) / 0.51 ≤ 41 * (1 + |z.im|) := by
+    have hratio : (20.57 : ℝ) / 0.51 ≤ 41 := by norm_num
+    have e : (20.57 * (1 + |z.im|)) / 0.51 = (20.57 / 0.51) * (1 + |z.im|) := by ring
+    rw [e]; exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]; exact le_trans (le_trans hstep1 hstep2) hcap
+/-- Mid-piece rect cap: `‖ζ‖ ≤ 451` on `0.05 ≤ Re ≤ 0.4`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_cap_slice0304_451 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.4) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 451 := by
+  have h := R02_D3_zeta_linear_slice0304_41 z hre_lo hre_hi
+  have hcap : (41 : ℝ) * (1 + |z.im|) ≤ 451 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (41 : ℝ) * (1 + |z.im|) ≤ 41 * 11 := mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 451 := by norm_num
+  exact le_trans h hcap
+/-- Far-piece split at `0.4`: mid `451` vs tail `525`; keeps `525` on `0.3 ≤ Re ≤ 0.5`. -/
+theorem R02_D3_zeta_rect_cap_slice0305_split04 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (hfar : 0.3 ≤ z.re) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 525 := by
+  by_cases hcut : z.re ≤ 0.4
+  · have h := R02_D3_zeta_rect_cap_slice0304_451 z hre_lo hcut him
+    linarith
+  · have hlt : (0.4 : ℝ) < z.re := lt_of_not_ge hcut
+    have h := R02_D3_zeta_rect_cap_slice0305_tight z hre_lo hre_hi hfar him
+    linarith
+/-- Mid-piece gap verdict: `451 < 525`; drop `74`. -/
+theorem R02_D3_zeta_rect_slice_edge0304 :
+    (451 : ℝ) < 525 ∧ (10 : ℝ) < 451 ∧ (525 : ℝ) - 451 = 74 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+#print axioms R02_D3_zeta_linear_slice0304_41
+#print axioms R02_D3_zeta_rect_cap_slice0304_451
+#print axioms R02_D3_zeta_rect_cap_slice0305_split04
+#print axioms R02_D3_zeta_rect_slice_edge0304
