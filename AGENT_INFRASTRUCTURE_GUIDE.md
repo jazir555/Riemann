@@ -3454,6 +3454,14 @@ sorry-free infrastructure and the complete commit ledger above.
   forces a,b ≥ 9856; floor ≈9593+). Missing: Stirling remainder
   (Mathlib Gamma: no exp-decay upper) + non-Gdamp endgame.
   Residual: Stirling remainder from Gamma integral (ZU19, LARGE).
+- 2026-09-09 ZU19 (`8138972a`, zeta tail, 3× green 8693 jobs):
+  Gamma shift-3 (`Γ(w+3)` recurrence) + `Real.Gamma 3.95 ≤ 6` +
+  cubic poly decay `6/|t|³` (NO exponential — Stirling exp still
+  missing from Mathlib) + direct rect cap **`‖ζ‖≤1221`** (strip
+  dominates) + gap verdict 1211. FE-reflected route DOMINATED
+  (conditional 5181 > unconditional 1221).
+  Residual: staged poly-decay/chi-cap appends + endgame pivot
+  to strip-C lowering (ZU20, LARGE scope).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
