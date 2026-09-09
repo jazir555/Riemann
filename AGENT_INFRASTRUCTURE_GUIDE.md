@@ -3422,6 +3422,12 @@ sorry-free infrastructure and the complete commit ledger above.
   → **`‖S₆‖ ≥ 33/100`** (first 2-D bound; shortfall 20/100;
   brief sub-targets proven jointly insufficient anyway).
   Residual: interval tightening → 53/100 (RX27).
+- 2026-09-09 RX27 (`0c6132c8`, tail-scratch, green 8682 jobs via
+  wrapper after 9h stall cleared): rpow lowers + stronger cos
+  lowers + sqrt-route sin uppers → Re 42/100 + Im 14/100 →
+  **`‖S₆‖ ≥ 44/100`** (+11; gap 9/100). PROVED Re ≥ 0.50
+  infeasible (true 0.4977) — my sub-target was wrong.
+  Residual: odd-term upper tightening (RX28).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
