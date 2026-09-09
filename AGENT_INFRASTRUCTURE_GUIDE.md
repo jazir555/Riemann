@@ -354,12 +354,16 @@ move on. Spinning helps no one.
 - `lake build <Module>` is the only supported command. A successful EXIT 0 writes the `.olean`
   to `.lake\build\lib\lean\`. A bare `lake env lean` sometimes crashes (EXIT=-1); prefer
   `lake build`.
-- **One process at a time.** Acquire the filesystem mutex before any `lake`/`lean`:
+- **One process at a time.** Build ONLY via the guarded wrapper (it owns the
+  filesystem mutex, auto-clears stale locks, and owner-checks release):
+  `pwsh -File scripts/Invoke-GuardedLakeBuild.ps1 -Module <Module>`.
+  Manual fallback only if the wrapper itself breaks — acquire the mutex first:
   - Lock file: `C:\Users\mmeadow\Documents\Lean\mathlib4\.lake_build_lock`.
   - Acquire: `New-Item -Path <lock> -ErrorAction Stop` (atomic).
   - If it exists OR a `lake.exe` process is running, wait ~10s and retry. A lock older than
-    25 min is stale — delete it.
-  - Release: `Remove-Item <lock>` in a `finally` block.
+    25 min **with no live lake/lean process** is stale — delete it (the wrapper does this
+    automatically and logs `GUARD-AUTOCLEARED`).
+  - Release: `Remove-Item <lock>` in a `finally` block, only if you created it.
 - Heavy imports → set Bash `timeout` up to **900000 ms**.
 
 ---
