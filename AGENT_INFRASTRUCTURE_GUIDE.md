@@ -3537,6 +3537,11 @@ sorry-free infrastructure and the complete commit ledger above.
   (was 154) + assembly7 (low 525). Global still 525 (far piece
   [0.3,0.5] bottleneck). Residual: full assembly8 + far-piece
   0305 attack (ZU28).
+- 2026-09-09 ZU28 (`46ce49f0`, zeta tail, 3× green 8693 jobs via
+  wrapper): assembly8 (FULL strip `≤525`) + mid-piece chain
+  (`2^0.6≥1.51` → denom 0.51 → C=41 → rect **451** on
+  [0.05,0.4]). Bottleneck now tail [0.4,0.5] at 525.
+  Residual: mid tight-norm 431 + tail K0 attack (ZU29).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
