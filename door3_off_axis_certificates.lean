@@ -8195,3 +8195,108 @@ theorem R05_eta_twentysecond_eq :
 #print axioms R05_eta_twentysecond_eq
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight twenty-first eta floor (`-1/4 ≤ Re term21`): banked `-3/4` cosine
+times the tight `1/3` amplitude (beats `-5/24`). -/
+theorem R05_eta_twentyfirst_Re_ge_tight :
+    (-1 / 4 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 20).re := by
+  rw [R05_eta_twentyfirst_eq, R05_inv_twentyone_cpow_re_eq]
+  have hamp := R05_rpow_twentyone_neg0395_le
+  have hcos := R05_cos_075log21_lower
+  have hamp_pos : (0 : Real) < (21 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (21 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 21) + 3 / 4) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (1 / 3 - (21 : Real) ^ (-0.395 : Real)) * (3 / 4 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Tight twenty-second eta floor (`4/35 ≤ Re term22`): banked `-2/5` cosine
+times the tight `2/7` amplitude with the `(-1)^21` sign flip (beats `1/10`). -/
+theorem R05_eta_twentysecond_Re_ge_tight :
+    (4 / 35 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 21).re := by
+  rw [R05_eta_twentysecond_eq, Complex.neg_re, R05_inv_twentytwo_cpow_re_eq]
+  have hamp := R05_rpow_twentytwo_neg0395_ge_tight
+  have hcos := R05_cos_075log22_upper
+  have hamp_pos : (0 : Real) < (22 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (2 / 5 : Real) ≤ -(Real.cos (0.75 * Real.log 22)) := by
+    linarith
+  have hprod : (2 / 7 : Real) * (2 / 5 : Real) ≤
+      (22 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 22))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (2 / 7 : Real) * (2 / 5 : Real) = (4 / 35 : Real) := by
+    norm_num
+  have hsplit : (22 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 22))) =
+      -((22 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 22)) := by
+    ring
+  linarith
+
+/-- Tight pair-10 floor (`-19/140`, from `-1/4 + 4/35`; beats `-13/120`). -/
+theorem R05_pair10_Re_ge_tight :
+    (-19 / 140 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 20 + etaDirichletTerm R03R10PolyLower.sR05 21).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_twentyfirst_Re_ge_tight
+  have hO := R05_eta_twentysecond_Re_ge_tight
+  have hle : (-19 / 140 : Real) ≤ (-1 / 4 : Real) + (4 / 35 : Real) := by norm_num
+  linarith
+
+#print axioms R05_eta_twentyfirst_Re_ge_tight
+#print axioms R05_eta_twentysecond_Re_ge_tight
+#print axioms R05_pair10_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Twenty-one-term split (`S21 = S20 + term 20`, non-pair slow-sum step). -/
+theorem R05_S21_eq :
+    (∑ k ∈ Finset.range 21, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 20 := by
+  rw [show (21 : Nat) = 20 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Tight twenty-one-term real part (`-1589309/4730000 ≤ Re S21`, from `S20' - 1/4`). -/
+theorem R05_S21_Re_ge_tight :
+    (-1589309 / 4730000 : Real) ≤
+      (∑ k ∈ Finset.range 21, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S21_eq, Complex.add_re]
+  have hS20 := R05_S20_Re_ge_tight
+  have ht := R05_eta_twentyfirst_Re_ge_tight
+  have hle : (-1589309 / 4730000 : Real) ≤ (-406809 / 4730000 : Real) + (-(1 / 4) : Real) := by
+    norm_num
+  linarith
+
+/-- Twenty-two-term split (`S22 = S21 + term 21`, non-pair slow-sum step). -/
+theorem R05_S22_eq :
+    (∑ k ∈ Finset.range 22, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 21, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 21 := by
+  rw [show (22 : Nat) = 21 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Tight twenty-two-term real part (`-7341163/33110000 ≤ Re S22`, from `S21' + 4/35`). -/
+theorem R05_S22_Re_ge_tight :
+    (-7341163 / 33110000 : Real) ≤
+      (∑ k ∈ Finset.range 22, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S22_eq, Complex.add_re]
+  have hS21 := R05_S21_Re_ge_tight
+  have ht := R05_eta_twentysecond_Re_ge_tight
+  have hle : (-7341163 / 33110000 : Real) ≤ (-1589309 / 4730000 : Real) + (4 / 35 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_S21_eq
+#print axioms R05_S21_Re_ge_tight
+#print axioms R05_S22_eq
+#print axioms R05_S22_Re_ge_tight
+
+end Door3OffAxis
