@@ -3442,6 +3442,12 @@ sorry-free infrastructure and the complete commit ledger above.
   **`‖ζ‖ ≤ 23·(1+|Im|)` on Re=0.05** (FE path superseded).
   Residual: mirror on Re=0.74/0.26 + Gdamp instantiate + close
   (ZU17, LARGE scope).
+- 2026-09-09 ZU17 (`6412602e`, zeta tail, 8× green 8693 jobs):
+  exponent-1.74 mirror → K0=3 → **`‖ζ‖≤16(1+|Im|)` Re=0.74** +
+  strip `‖ζ‖≤111(1+|Im|)` (feeds hB directly) + PROVED Gdamp route
+  floor: best-possible ≈9593 (crude 805/616 constants), ~960× over.
+  Eta-mirror path CLOSED at its floor. Residual: line-uniform FE
+  chi-ratio with Stirling exp decay (ZU18, LARGE scope).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
