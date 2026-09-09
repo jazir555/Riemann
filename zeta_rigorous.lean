@@ -35753,3 +35753,332 @@ theorem R02_D3_zeta_rect_gap_verdict : (10 : ℝ) < 1221 ∧ (1221 : ℝ) - 10 =
 #print axioms R02_D3_zeta_rect_cap_of_strip111
 #print axioms R02_D3_zeta_rect_edge_caps
 #print axioms R02_D3_zeta_rect_gap_verdict
+
+/-!
+## Door-3 quantitative close, step 23 (zeta lane): cubic Gamma decay + chi corollary.
+
+From banked three-step shift decay (`R02_D3_Gamma_line095_shift3_decay`):
+`‖s‖,‖s+1‖,‖s+2‖ ≥ |Im|` gives `‖Γ(s)‖ ≤ 6/|Im|^3` for `|Im| ≥ 1`
+(1.5x the constant of the quadratic `2/|Im|^2` at `|Im| = 5.25` the window
+is `≤ 0.0415`, 1.75x sharper than banked `0.0726`). The chi assembly is
+unchanged (`R02_D3_chiCpow_le_one`, `R02_D3_chiCos_exp_line095`), so
+`‖χ‖ ≤ (12/|Im|^3)·exp(3.1416·|Im|/2)`. Still polynomial-times-exponential
+growth — not the missing uniform Stirling cap. FULL proofs, no sorry.
+-/
+
+/-- Cubic polynomial-decay corollary `‖Γ(s)‖ ≤ 6/|Im|^3` on `Re = 0.95`. -/
+theorem R02_D3_Gamma_line095_poly3_decay (s : ℂ) (hre : s.re = 0.95)
+    (ht : 1 ≤ |s.im|) : ‖Complex.Gamma s‖ ≤ 6 / (|s.im| * |s.im| * |s.im|) := by
+  have hdec := R02_D3_Gamma_line095_shift3_decay s hre
+  have h1 : |s.im| ≤ ‖s‖ := Complex.abs_im_le_norm s
+  have h2 : |s.im| ≤ ‖s + 1‖ := by
+    have h := Complex.abs_im_le_norm (s + 1)
+    have him : (s + 1).im = s.im := by simp
+    rw [him] at h
+    exact h
+  have h3 : |s.im| ≤ ‖s + 1 + 1‖ := by
+    have h := Complex.abs_im_le_norm (s + 1 + 1)
+    have eA : ((s + 1) + 1).im = (s + 1).im := by simp
+    have eB : (s + 1).im = s.im := by simp
+    have him : (s + 1 + 1).im = s.im := by linarith
+    rw [him] at h
+    exact h
+  have hpos : (0 : ℝ) < |s.im| * |s.im| * |s.im| := by
+    apply mul_pos
+    apply mul_pos
+    · linarith
+    · linarith
+    · linarith
+  have hden : |s.im| * |s.im| * |s.im| ≤ ‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖ := by
+    apply mul_le_mul
+    · exact mul_le_mul h1 h2 (abs_nonneg _) (norm_nonneg _)
+    · exact h3
+    · exact abs_nonneg _
+    · apply mul_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hinv : (1 : ℝ) / (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖)
+      ≤ 1 / (|s.im| * |s.im| * |s.im|) :=
+    one_div_le_one_div_of_le hpos hden
+  have hmul : (6 : ℝ) / (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖)
+      ≤ 6 / (|s.im| * |s.im| * |s.im|) := by
+    have eX : (6 : ℝ) / (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖)
+        = 6 * (1 / (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖)) := div_eq_mul_one_div _ _
+    have eY : (6 : ℝ) / (|s.im| * |s.im| * |s.im|)
+        = 6 * (1 / (|s.im| * |s.im| * |s.im|)) := div_eq_mul_one_div _ _
+    rw [eX, eY]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  exact le_trans hdec hmul
+
+#print axioms R02_D3_Gamma_line095_poly3_decay
+
+/-- Window numeral: `‖Γ(s)‖ ≤ 0.0415` on `Re = 0.95` at `|Im| ≥ 5.25`. -/
+theorem R02_D3_Gamma_line095_window3_55 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 5.25 ≤ |s.im|) : ‖Complex.Gamma s‖ ≤ 0.0415 := by
+  have ht1 : (1 : ℝ) ≤ |s.im| := by linarith
+  have hpoly := R02_D3_Gamma_line095_poly3_decay s hre ht1
+  have hden : (5.25 : ℝ) * 5.25 * 5.25 ≤ |s.im| * |s.im| * |s.im| := by
+    apply mul_le_mul
+    · exact mul_le_mul ht ht (by norm_num) (by linarith [abs_nonneg s.im])
+    · exact ht
+    · exact by norm_num
+    · apply mul_nonneg (by norm_num) (by linarith [abs_nonneg s.im])
+  have hpos : (0 : ℝ) < 5.25 * 5.25 * 5.25 := by norm_num
+  have hinv : (1 : ℝ) / (|s.im| * |s.im| * |s.im|) ≤ 1 / (5.25 * 5.25 * 5.25) :=
+    one_div_le_one_div_of_le hpos hden
+  have hmul : (6 : ℝ) / (|s.im| * |s.im| * |s.im|) ≤ 6 / (5.25 * 5.25 * 5.25) := by
+    have eX : (6 : ℝ) / (|s.im| * |s.im| * |s.im|)
+        = 6 * (1 / (|s.im| * |s.im| * |s.im|)) := div_eq_mul_one_div _ _
+    have eY : (6 : ℝ) / (5.25 * 5.25 * 5.25)
+        = 6 * (1 / (5.25 * 5.25 * 5.25)) := div_eq_mul_one_div _ _
+    rw [eX, eY]
+    exact mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have hnum : (6 : ℝ) / (5.25 * 5.25 * 5.25) ≤ 0.0415 := by norm_num
+  exact le_trans (le_trans hpoly hmul) hnum
+
+#print axioms R02_D3_Gamma_line095_window3_55
+
+/-- Cubic chi-factor cap on `Re = 0.95` for `|Im| ≥ 1` (unconditional). -/
+theorem R02_D3_zetaChi_poly3_line095 (s : ℂ) (hre : s.re = 0.95)
+    (ht : 1 ≤ |s.im|) :
+    ‖zetaChi s‖ ≤ (12 / (|s.im| * |s.im| * |s.im|))
+      * Real.exp (3.1416 * |s.im| / 2) := by
+  have hchi := zetaChi_norm_le s
+  have hw : (0 : ℝ) ≤ s.re := by rw [hre]; norm_num
+  have hcp := R02_D3_chiCpow_le_one s hw
+  have hG := R02_D3_Gamma_line095_poly3_decay s hre ht
+  have harg := R02_D3_chiArg_im_eq_direct s
+  have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+    rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  have h2 : Real.pi / 2 ≤ 3.1416 / 2 := by
+    have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+    linarith
+  have h3 := mul_le_mul_of_nonneg_right h2 (abs_nonneg s.im)
+  have hfin : |((((Real.pi : ℂ)) * s / 2)).im| ≤ 3.1416 * |s.im| / 2 := by
+    rw [harg, e]
+    linarith
+  have hE : Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ Real.exp (3.1416 * |s.im| / 2) := Real.exp_le_exp.mpr hfin
+  have hE0 : (0 : ℝ) ≤ Real.exp |((((Real.pi : ℂ)) * s / 2)).im| :=
+    (Real.exp_pos _).le
+  have hDnn : (0 : ℝ) ≤ |s.im| * |s.im| * |s.im| := by
+    apply mul_nonneg
+    apply mul_nonneg (abs_nonneg _) (abs_nonneg _)
+    exact abs_nonneg _
+  have hFracnn : (0 : ℝ) ≤ 6 / (|s.im| * |s.im| * |s.im|) := by
+    apply div_nonneg (by norm_num) hDnn
+  have hGnn : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  have step1 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcp (by norm_num)
+  have step2 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ ≤
+      2 * 1 * (6 / (|s.im| * |s.im| * |s.im|)) :=
+    mul_le_mul step1 hG hGnn (by norm_num)
+  have hBnn : (0 : ℝ) ≤ 2 * 1 * (6 / (|s.im| * |s.im| * |s.im|)) :=
+    mul_nonneg (by norm_num) hFracnn
+  have step3 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ *
+      Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ (2 * 1 * (6 / (|s.im| * |s.im| * |s.im|)))
+        * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul step2 hE hE0 hBnn
+  have heq : (2 * 1 * (6 / (|s.im| * |s.im| * |s.im|)))
+      * Real.exp (3.1416 * |s.im| / 2)
+      = (12 / (|s.im| * |s.im| * |s.im|)) * Real.exp (3.1416 * |s.im| / 2) := by
+    ring
+  rw [heq] at step3
+  exact le_trans hchi step3
+
+#print axioms R02_D3_zetaChi_poly3_line095
+
+/-!
+## Door-3 quantitative close, step 25 (zeta lane): low-slice denom floor.
+
+Strip `C = 111` takes worst K0 (`21`, at `Re = 0.05`) with worst denom floor
+(`0.19`, at `Re = 0.74`) — opposite edges that never co-occur. First slice
+fix: on `Re ≤ 0.5`, `‖2^{1-s}‖ = 2^{1-Re} ≥ 2^0.5 ≥ 1.414`, so the floor
+rises to `0.414` while K0 `= 21` (from `Re ≥ 0.05`) is unchanged: slice
+constant `21/0.414 ≤ 51`. FULL proofs, no sorry.
+-/
+
+/-- Rpow lower: `1.414 ≤ 2^0.5` (cleared via `(1.414)^2 ≤ 2 = (2^0.5)^2`). -/
+theorem R02_D3_rpow_2005_ge_1414 : (1.414 : ℝ) ≤ (2 : ℝ) ^ (0.5 : ℝ) := by
+  by_contra hle
+  have hlt : (2 : ℝ) ^ (0.5 : ℝ) < 1.414 := lt_of_not_ge hle
+  have hnn : (0 : ℝ) ≤ (2 : ℝ) ^ (0.5 : ℝ) :=
+    Real.rpow_nonneg (by norm_num) _
+  have hle_pow : ((((2 : ℝ) ^ (0.5 : ℝ))) ^ (2 : ℕ)) <
+      ((((1.414 : ℝ))) ^ (2 : ℕ)) :=
+    pow_lt_pow_left₀ hlt hnn (by norm_num)
+  have h2_eq : ((((2 : ℝ) ^ (0.5 : ℝ))) ^ (2 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.5 : ℝ) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e]
+    have e1 : (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+    rw [e1, Real.rpow_natCast]
+    norm_num
+  have hcap : ((1.414 : ℝ)) ^ (2 : ℕ) ≤ 2 := by norm_num
+  rw [h2_eq] at hle_pow
+  linarith
+
+/-- Eta-denominator floor on the low slice: `‖1 - 2^{1-s}‖ ≥ 0.414` for `Re ≤ 0.5`. -/
+theorem R02_D3_eta_denom_floor_slice0550 (s : ℂ) (hre : s.re ≤ 0.5) :
+    (0.414 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hnorm := two_cpow_one_sub_norm s
+  have hexp : (0.5 : ℝ) ≤ 1 - s.re := by linarith
+  have h2mono : (2 : ℝ) ^ (0.5 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp
+  have hge : (1.414 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    le_trans R02_D3_rpow_2005_ge_1414 h2mono
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - s)) (1 : ℂ)
+  rw [norm_one, hnorm] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    norm_sub_rev _ _
+  linarith
+
+#print axioms R02_D3_rpow_2005_ge_1414
+#print axioms R02_D3_eta_denom_floor_slice0550
+
+/-!
+## Door-3 quantitative close, step 26 (zeta lane): low-slice eta linear bound.
+
+The strip eta argument uses only `Re ≥ 0.05` (exponent `≤ -1.05`, K0 `= 21`)
+plus `‖z‖ ≤ 1 + |Im|`; both hold on the low slice `0.05 ≤ Re ≤ 0.5`
+(the norm cap even tightens to `0.5 + |Im|`). Standalone lemma so the
+slice zeta assembly need not redo the tsum. FULL proof, no sorry.
+-/
+
+/-- Eta linear `‖∑' pairs‖ ≤ 21 * (1 + |Im|)` on the low slice `0.05 ≤ Re ≤ 0.5`. -/
+theorem R02_D3_etaPair_linear_slice0550 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) :
+    ‖∑' m : ℕ, etaPairTerm z m‖ ≤ 21 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hexp_le : ∀ n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) ≤
+      ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hn1 : (1 : ℕ) ≤ 2 * n + 1 := by omega
+    have h1 : (1 : ℝ) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+      calc (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+        _ ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := Nat.cast_le.mpr hn1
+    have he : -z.re - 1 ≤ (-1.05 : ℝ) := by linarith
+    exact Real.rpow_le_rpow_of_exponent_le h1 he
+  have hodd_Re : Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := by
+    apply Summable.of_norm_bounded R02_D3_odd105_summable
+    intro n
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+    exact hexp_le n
+  have hK : (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) ≤ 21 :=
+    le_trans (hodd_Re.tsum_le_tsum (fun n => hexp_le n) R02_D3_odd105_summable)
+      R02_D3_odd105_tsum_le_21
+  have hmajor : Summable (fun n : ℕ => ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    hodd_Re.mul_left ‖z‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm z n‖ ≤
+      ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := by
+    intro n
+    exact norm_etaPairTerm_le z hs n
+  have htsum : ‖∑' m : ℕ, etaPairTerm z m‖ ≤
+      ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) :=
+    tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) =
+      ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    Summable.tsum_mul_left ‖z‖ hodd_Re
+  have heta : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 21 := by
+    calc ‖∑' m : ℕ, etaPairTerm z m‖
+        ≤ ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := htsum
+      _ = ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := hfactor
+      _ ≤ ‖z‖ * 21 := mul_le_mul_of_nonneg_left hK (norm_nonneg _)
+  have hnorm : ‖z‖ ≤ 1 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im z
+    have habs : |z.re| ≤ (0.5 : ℝ) := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  calc ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 21 := heta
+    _ ≤ (1 + |z.im|) * 21 :=
+      mul_le_mul_of_nonneg_right hnorm (by norm_num)
+    _ = 21 * (1 + |z.im|) := by ring
+
+#print axioms R02_D3_etaPair_linear_slice0550
+
+/-!
+## Door-3 quantitative close, step 27 (zeta lane): low-slice zeta `C = 51`.
+
+Division of the slice eta linear bound (`21 * (1 + |Im|)`, step 26) through
+the slice denominator floor (`0.414`, step 25): `21 / 0.414 ≤ 51`.
+Beats strip `111` on the low half `0.05 ≤ Re ≤ 0.5`. FULL proof, no sorry.
+-/
+
+/-- Slice zeta linear `‖ζ(z)‖ ≤ 51 * (1 + |Im|)` on `0.05 ≤ Re ≤ 0.5` (floor 0.414). -/
+theorem R02_D3_zeta_linear_slice0550 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) :
+    ‖riemannZeta z‖ ≤ 51 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by
+    intro h
+    linarith
+  have hetaLin := R02_D3_etaPair_linear_slice0550 z hre_lo hre_hi
+  have hden_ge := R02_D3_eta_denom_floor_slice0550 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ =
+      ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (21 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.414 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 21 * (1 + |z.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (21 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (21 * (1 + |z.im|)) / 0.414 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (21 * (1 + |z.im|)) / 0.414 ≤ 51 * (1 + |z.im|) := by
+    have hratio : (21 : ℝ) / 0.414 ≤ 51 := by norm_num
+    have e : (21 * (1 + |z.im|)) / 0.414 = (21 / 0.414) * (1 + |z.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+#print axioms R02_D3_zeta_linear_slice0550
+
+/-!
+## Door-3 quantitative close, step 28 (zeta lane): low-slice rect cap + assembly.
+
+`51·11 = 561` on the low half (`0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10`); the high
+half (`0.5 < Re ≤ 0.74`) still uses strip `1221`. Two-slice assembly
+re-derives the full-rect `1221` with the low half tightened to `561`.
+Best rect stays `1221 ≫ 10` — closing the high slice needs K0 at `-1.5`
+(not yet banked). FULL proofs, no sorry.
+-/
+
+/-- Low-slice rect cap: `‖ζ‖ ≤ 561` on `0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_cap_slice0550 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 561 := by
+  have h := R02_D3_zeta_linear_slice0550 z hre_lo hre_hi
+  have hcap : (51 : ℝ) * (1 + |z.im|) ≤ 561 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (51 : ℝ) * (1 + |z.im|) ≤ 51 * 11 :=
+          mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 561 := by norm_num
+  exact le_trans h hcap
+
+/-- Two-slice rect recovery: slices re-derive `‖ζ‖ ≤ 1221` on the full R02 rect. -/
+theorem R02_D3_zeta_rect_slice_assembly (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 1221 := by
+  by_cases hcut : z.re ≤ 0.5
+  · have h := R02_D3_zeta_rect_cap_slice0550 z hre_lo hcut him
+    linarith
+  · exact R02_D3_zeta_rect_cap_of_strip111 z hre_lo hre_hi him
+
+/-- Slice edge: the low-slice cap `561` beats the strip cap `1221` by `660`. -/
+theorem R02_D3_zeta_rect_slice_edge : (561 : ℝ) < 1221 ∧ (1221 : ℝ) - 561 = 660 := by
+  constructor <;> norm_num
+
+#print axioms R02_D3_zeta_rect_cap_slice0550
+#print axioms R02_D3_zeta_rect_slice_assembly
+#print axioms R02_D3_zeta_rect_slice_edge
