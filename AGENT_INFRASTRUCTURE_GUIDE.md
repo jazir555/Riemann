@@ -3479,6 +3479,11 @@ sorry-free infrastructure and the complete commit ledger above.
   rect-176 numeral + assembly2 (561/176) + peeled Ioi2 integral
   `≤1.42` (STEP 2 partial; head numeral open).
   Residual: peeled head numeral + tightened K0 assembly (ZU23).
+- 2026-09-09 ZU23 (`2e592831`, zeta tail, 5× green 8693 jobs):
+  N=2 odd-head numeral (`3^(−1.5)≤0.20`) + M=2 comparison →
+  **K0 3→2.62 → C 16→14 → rect 176→154** high slice; assembly3
+  best rect 561 (low slice dominates, gap 551).
+  Residual: low-slice N=3 peel, K0 21→~peeled (ZU24).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
