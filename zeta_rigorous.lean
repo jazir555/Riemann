@@ -36740,3 +36740,653 @@ theorem R02_D3_zeta_rect_slice_edge3 :
 #print axioms R02_D3_zeta_rect_cap_slice5074_peeled
 #print axioms R02_D3_zeta_rect_slice_assembly3
 #print axioms R02_D3_zeta_rect_slice_edge3
+
+/-!
+## Door-3 strip endgame, step 38a (zeta lane): `3^0.05 ≤ 1.06` cleared cap.
+
+Mirror of banked `R02_D3_pow_1036_20_ge_two` / `R02_D3_rpow_2005_le_1036`:
+`(1.06)^20 ≥ 3` via small-step lower bounds forces `3^0.05 ≤ 1.06`.
+-/
+
+/-- Cleared integer-pow cap: `3 ≤ (1.06)^20` via small-step lower bounds. -/
+theorem R02_D3_pow_106_20_ge_three : (3 : ℝ) ≤ ((1.06 : ℝ)) ^ (20 : ℕ) := by
+  have h2 : (1.1236 : ℝ) ≤ ((1.06 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h4le : ((1.1236 : ℝ)) ^ (2 : ℕ) ≤ ((((1.06 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) h2 2
+  have h44 : ((((1.06 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.06 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have hsq : (1.2624 : ℝ) ≤ ((1.1236 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have g4 : (1.2624 : ℝ) ≤ ((1.06 : ℝ)) ^ (4 : ℕ) := by
+    rw [← h44]
+    exact le_trans hsq h4le
+  have h5mul : ((1.06 : ℝ)) ^ (4 : ℕ) * (1.06 : ℝ) =
+      ((1.06 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.06 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.3381 : ℝ) ≤ (1.2624 : ℝ) * (1.06 : ℝ) := by norm_num
+  have h5le : (1.2624 : ℝ) * (1.06 : ℝ) ≤
+      ((1.06 : ℝ)) ^ (4 : ℕ) * (1.06 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : (1.3381 : ℝ) ≤ ((1.06 : ℝ)) ^ (5 : ℕ) := by
+    rw [← h5mul]
+    exact le_trans hprod h5le
+  have hsq10 : (1.7905 : ℝ) ≤ ((1.3381 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h10le : (((1.3381 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.06 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g5 2
+  have h1010 : ((((1.06 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.06 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : (1.7905 : ℝ) ≤ ((1.06 : ℝ)) ^ (10 : ℕ) := by
+    rw [← h1010]
+    exact le_trans hsq10 h10le
+  have hsq20 : (3 : ℝ) ≤ ((1.7905 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h20le : (((1.7905 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.06 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g10 2
+  have h2020 : ((((1.06 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.06 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans hsq20 h20le
+
+#print axioms R02_D3_pow_106_20_ge_three
+
+/-- Rpow upper: `3^0.05 ≤ 1.06` (cleared via `(1.06)^20 ≥ 3`). -/
+theorem R02_D3_rpow_3005_le_106 : (3 : ℝ) ^ (0.05 : ℝ) ≤ (1.06 : ℝ) := by
+  by_contra hle
+  have hlt : (1.06 : ℝ) < (3 : ℝ) ^ (0.05 : ℝ) := lt_of_not_ge hle
+  have hle_pow : ((((1.06 : ℝ))) ^ (20 : ℕ)) <
+      ((((3 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) :=
+    pow_lt_pow_left₀ hlt (by norm_num) (by norm_num)
+  have h3_eq : ((((3 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 3 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h3_eq] at hle_pow
+  have hge := R02_D3_pow_106_20_ge_three
+  linarith
+
+#print axioms R02_D3_rpow_3005_le_106
+
+/-!
+## Door-3 strip endgame, step 38b (zeta lane): `1.05 ≤ 3^0.05` cleared floor.
+
+Mirror of banked `R02_D3_pow_1035_20_le_two` (upper-bound direction flipped):
+`(1.05)^20 ≤ 3` via small-step upper bounds forces `1.05 ≤ 3^0.05`.
+The upper cap `3^0.05 ≤ 1.06` (step 38a) lower-bounds negative powers, so
+the head numeral and the `M = 3` integral both need this floor.
+-/
+
+/-- Cleared integer-pow cap: `(1.05)^20 ≤ 3` via small-step upper bounds. -/
+theorem R02_D3_pow_105_20_le_three : ((1.05 : ℝ)) ^ (20 : ℕ) ≤ 3 := by
+  have h2 : ((1.05 : ℝ)) ^ (2 : ℕ) ≤ (1.1025 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.05 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((1.1025 : ℝ)) ^ (2 : ℕ) ≤ (1.2156 : ℝ) := by norm_num
+  have h4le : ((((1.05 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((1.1025 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.05 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.05 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.05 : ℝ)) ^ (4 : ℕ) ≤ (1.2156 : ℝ) := by
+    rw [← h44]
+    exact le_trans h4le hsq
+  have h5mul : ((1.05 : ℝ)) ^ (4 : ℕ) * (1.05 : ℝ) =
+      ((1.05 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.05 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.2156 : ℝ) * (1.05 : ℝ) ≤ (1.2764 : ℝ) := by norm_num
+  have h5le : ((1.05 : ℝ)) ^ (4 : ℕ) * (1.05 : ℝ) ≤
+      (1.2156 : ℝ) * (1.05 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.05 : ℝ)) ^ (5 : ℕ) ≤ (1.2764 : ℝ) := by
+    rw [← h5mul]
+    exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.05 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((1.2764 : ℝ)) ^ (2 : ℕ) ≤ (1.6293 : ℝ) := by norm_num
+  have h10le : ((((1.05 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤
+      ((1.2764 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.05 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.05 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.05 : ℝ)) ^ (10 : ℕ) ≤ (1.6293 : ℝ) := by
+    rw [← h1010]
+    exact le_trans h10le hsq10
+  have h10nn : (0 : ℝ) ≤ ((1.05 : ℝ)) ^ (10 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq20 : ((1.6293 : ℝ)) ^ (2 : ℕ) ≤ (3 : ℝ) := by norm_num
+  have h20le : ((((1.05 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) ≤
+      ((1.6293 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h10nn g10 2
+  have h2020 : ((((1.05 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.05 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans h20le hsq20
+
+/-- Rpow lower: `1.05 ≤ 3^0.05` (cleared via `(1.05)^20 ≤ 3`). -/
+theorem R02_D3_rpow_105_le_3005 : (1.05 : ℝ) ≤ (3 : ℝ) ^ (0.05 : ℝ) := by
+  by_contra hle
+  have hlt : (3 : ℝ) ^ (0.05 : ℝ) < (1.05 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (3 : ℝ) ^ (0.05 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((3 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) ≤
+      ((((1.05 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 20
+  have h3_eq : ((((3 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 3 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h3_eq] at hle_pow
+  have hge := R02_D3_pow_105_20_le_three
+  linarith
+
+#print axioms R02_D3_pow_105_20_le_three
+#print axioms R02_D3_rpow_105_le_3005
+
+/-!
+## Door-3 strip endgame, step 38c (zeta lane): `3^(-1.05) ≤ 0.32` head numeral.
+
+Via `3^1.05 = 3 * 3^0.05 ≥ 3.15` (floor step 38b) and inversion, mirroring
+`R02_D3_rpow3_neg150_le_020`. Gives the second low-slice head term.
+-/
+
+/-- Cleared-power head numeral `(3:ℝ)^(-1.05) ≤ 0.32`. -/
+theorem R02_D3_rpow3_neg105_le_032 :
+    (3 : ℝ) ^ (-1.05 : ℝ) ≤ 0.32 := by
+  have hle := R02_D3_rpow_105_le_3005
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (3 : ℝ) ^ (1.05 : ℝ) = 3 * (3 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (3.15 : ℝ) ≤ (3 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (3.15 : ℝ) = 3 * 1.05 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (3 : ℝ) ^ (-1.05 : ℝ) = ((3 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((3 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (3.15 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (3.15 : ℝ)⁻¹ ≤ 0.32 := by norm_num
+  exact le_trans hinv hnum
+
+#print axioms R02_D3_rpow3_neg105_le_032
+
+/-!
+## Door-3 strip endgame, step 38d (zeta lane): `5^0.05 ≤ 1.09` cleared cap.
+
+Mirror of step 38a (`R02_D3_pow_106_20_ge_three`): `(1.09)^20 ≥ 5` via
+small-step lower bounds forces `5^0.05 ≤ 1.09`. Feeds the third head term
+`5^(-1.05)` of the low-slice `N = 3` peel.
+-/
+
+/-- Cleared integer-pow cap: `5 ≤ (1.09)^20` via small-step lower bounds. -/
+theorem R02_D3_pow_109_20_ge_five : (5 : ℝ) ≤ ((1.09 : ℝ)) ^ (20 : ℕ) := by
+  have h2 : (1.1881 : ℝ) ≤ ((1.09 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h4le : ((1.1881 : ℝ)) ^ (2 : ℕ) ≤ ((((1.09 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) h2 2
+  have h44 : ((((1.09 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.09 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have hsq : (1.4115 : ℝ) ≤ ((1.1881 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have g4 : (1.4115 : ℝ) ≤ ((1.09 : ℝ)) ^ (4 : ℕ) := by
+    rw [← h44]
+    exact le_trans hsq h4le
+  have h5mul : ((1.09 : ℝ)) ^ (4 : ℕ) * (1.09 : ℝ) =
+      ((1.09 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.09 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.5385 : ℝ) ≤ (1.4115 : ℝ) * (1.09 : ℝ) := by norm_num
+  have h5le : (1.4115 : ℝ) * (1.09 : ℝ) ≤
+      ((1.09 : ℝ)) ^ (4 : ℕ) * (1.09 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : (1.5385 : ℝ) ≤ ((1.09 : ℝ)) ^ (5 : ℕ) := by
+    rw [← h5mul]
+    exact le_trans hprod h5le
+  have hsq10 : (2.3669 : ℝ) ≤ ((1.5385 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h10le : (((1.5385 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.09 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g5 2
+  have h1010 : ((((1.09 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.09 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : (2.3669 : ℝ) ≤ ((1.09 : ℝ)) ^ (10 : ℕ) := by
+    rw [← h1010]
+    exact le_trans hsq10 h10le
+  have hsq20 : (5 : ℝ) ≤ ((2.3669 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h20le : (((2.3669 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.09 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g10 2
+  have h2020 : ((((1.09 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.09 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans hsq20 h20le
+
+/-- Rpow upper: `5^0.05 ≤ 1.09` (cleared via `(1.09)^20 ≥ 5`). -/
+theorem R02_D3_rpow_5005_le_109 : (5 : ℝ) ^ (0.05 : ℝ) ≤ (1.09 : ℝ) := by
+  by_contra hle
+  have hlt : (1.09 : ℝ) < (5 : ℝ) ^ (0.05 : ℝ) := lt_of_not_ge hle
+  have hle_pow : ((((1.09 : ℝ))) ^ (20 : ℕ)) <
+      ((((5 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) :=
+    pow_lt_pow_left₀ hlt (by norm_num) (by norm_num)
+  have h5_eq : ((((5 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 5 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h5_eq] at hle_pow
+  have hge := R02_D3_pow_109_20_ge_five
+  linarith
+
+#print axioms R02_D3_pow_109_20_ge_five
+#print axioms R02_D3_rpow_5005_le_109
+
+/-!
+## Door-3 strip endgame, step 38e (zeta lane): `1.08 ≤ 5^0.05` cleared floor.
+
+Mirror of step 38b: `(1.08)^20 ≤ 5` via small-step upper bounds forces
+`1.08 ≤ 5^0.05`. Upper-bounding the negative power `5^(-1.05)` needs this
+floor (`5^1.05 ≥ 5.4`), not the step-38d upper cap.
+-/
+
+/-- Cleared integer-pow cap: `(1.08)^20 ≤ 5` via small-step upper bounds. -/
+theorem R02_D3_pow_108_20_le_five : ((1.08 : ℝ)) ^ (20 : ℕ) ≤ 5 := by
+  have h2 : ((1.08 : ℝ)) ^ (2 : ℕ) ≤ (1.1664 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.08 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((1.1664 : ℝ)) ^ (2 : ℕ) ≤ (1.3605 : ℝ) := by norm_num
+  have h4le : ((((1.08 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((1.1664 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.08 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.08 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.08 : ℝ)) ^ (4 : ℕ) ≤ (1.3605 : ℝ) := by
+    rw [← h44]
+    exact le_trans h4le hsq
+  have h5mul : ((1.08 : ℝ)) ^ (4 : ℕ) * (1.08 : ℝ) =
+      ((1.08 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.08 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.3605 : ℝ) * (1.08 : ℝ) ≤ (1.4694 : ℝ) := by norm_num
+  have h5le : ((1.08 : ℝ)) ^ (4 : ℕ) * (1.08 : ℝ) ≤
+      (1.3605 : ℝ) * (1.08 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.08 : ℝ)) ^ (5 : ℕ) ≤ (1.4694 : ℝ) := by
+    rw [← h5mul]
+    exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.08 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((1.4694 : ℝ)) ^ (2 : ℕ) ≤ (2.1592 : ℝ) := by norm_num
+  have h10le : ((((1.08 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤
+      ((1.4694 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.08 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.08 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.08 : ℝ)) ^ (10 : ℕ) ≤ (2.1592 : ℝ) := by
+    rw [← h1010]
+    exact le_trans h10le hsq10
+  have h10nn : (0 : ℝ) ≤ ((1.08 : ℝ)) ^ (10 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq20 : ((2.1592 : ℝ)) ^ (2 : ℕ) ≤ (5 : ℝ) := by norm_num
+  have h20le : ((((1.08 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) ≤
+      ((2.1592 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h10nn g10 2
+  have h2020 : ((((1.08 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.08 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans h20le hsq20
+
+/-- Rpow lower: `1.08 ≤ 5^0.05` (cleared via `(1.08)^20 ≤ 5`). -/
+theorem R02_D3_rpow_108_le_5005 : (1.08 : ℝ) ≤ (5 : ℝ) ^ (0.05 : ℝ) := by
+  by_contra hle
+  have hlt : (5 : ℝ) ^ (0.05 : ℝ) < (1.08 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (5 : ℝ) ^ (0.05 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((5 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) ≤
+      ((((1.08 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 20
+  have h5_eq : ((((5 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 5 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h5_eq] at hle_pow
+  have hge := R02_D3_pow_108_20_le_five
+  linarith
+
+#print axioms R02_D3_pow_108_20_le_five
+#print axioms R02_D3_rpow_108_le_5005
+
+/-!
+## Door-3 strip endgame, step 38f (zeta lane): `5^(-1.05) ≤ 0.19` head numeral.
+
+Via `5^1.05 = 5 * 5^0.05 ≥ 5.4` (floor step 38e) and inversion, mirroring
+step 38c. Gives the third low-slice head term for the `N = 3` peel.
+-/
+
+/-- Cleared-power head numeral `(5:ℝ)^(-1.05) ≤ 0.19`. -/
+theorem R02_D3_rpow5_neg105_le_019 :
+    (5 : ℝ) ^ (-1.05 : ℝ) ≤ 0.19 := by
+  have hle := R02_D3_rpow_108_le_5005
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (5 : ℝ) ^ (1.05 : ℝ) = 5 * (5 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (5.4 : ℝ) ≤ (5 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (5.4 : ℝ) = 5 * 1.08 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (5 : ℝ) ^ (-1.05 : ℝ) = ((5 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((5 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (5.4 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (5.4 : ℝ)⁻¹ ≤ 0.19 := by norm_num
+  exact le_trans hinv hnum
+
+#print axioms R02_D3_rpow5_neg105_le_019
+
+/-!
+## Door-3 strip endgame, step 38g (zeta lane): `M = 3` shift-tail at -1.05.
+
+Mirrors the `M = 2` block at -1.5 (`R02_D3_rpow150_antitone_Ici2` etc.):
+antitone / integrable on `Ici/Ioi 3`, tail comparison
+`∑ n, (n+4)^(-1.05) ≤ ∫ Ioi 3`. The numeral follows in step 38h.
+-/
+
+/-- Antitone majorant `x^(-1.05)` on `Ici 3`. -/
+theorem R02_D3_rpow105_antitone_Ici3 :
+    AntitoneOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ici ((((3 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.05 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h3 : (0 : ℝ) < ((((3 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.05)` on `Ioi 3`. -/
+theorem R02_D3_rpow105_integrable_Ioi3 :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ioi ((((3 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.05 : ℝ) < -1)
+  norm_num
+
+/-- `M = 3` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail4_le_integral105_Ioi3 :
+    (∑' n : ℕ, ((((n + 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((3 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 3 R02_D3_rpow105_antitone_Ici3
+    R02_D3_rpow105_integrable_Ioi3 (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+#print axioms R02_D3_rpow105_antitone_Ici3
+#print axioms R02_D3_rpow105_integrable_Ioi3
+#print axioms R02_D3_tail4_le_integral105_Ioi3
+
+/-!
+## Door-3 strip endgame, step 38h (zeta lane): `M = 3` integral numeral at -1.05.
+
+Closed form `∫ x in Ioi 3, x^(-1.05) = 3^(-0.05)/0.05` via Mathlib
+`integral_Ioi_rpow_of_lt`; with the step-38b floor `1.05 ≤ 3^0.05`,
+`3^(-0.05) = (3^0.05)⁻¹ ≤ 0.953`, so the integral is `≤ 19.06`.
+-/
+
+/-- Closed form `∫ x in Ioi 3, x^(-1.05) = 3^(-0.05)/0.05`. -/
+theorem R02_D3_integral105_Ioi3_eq :
+    (∫ x : ℝ in Set.Ioi (3 : ℝ), x ^ (-1.05 : ℝ)) =
+      (3 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by
+  have hlt : (-1.05 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < (3 : ℝ) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.05 : ℝ) + 1 = -0.05 := by norm_num
+  rw [e1] at h
+  have e2 : (-(3 : ℝ) ^ (-0.05 : ℝ)) / (-0.05 : ℝ) =
+      (3 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by ring
+  exact e2 ▸ h
+
+/-- Integral numeral `∫ x in Ioi 3, x^(-1.05) ≤ 19.06`. -/
+theorem R02_D3_integral105_Ioi3_le_1906 :
+    (∫ x : ℝ in Set.Ioi (3 : ℝ), x ^ (-1.05 : ℝ)) ≤ 19.06 := by
+  have heq := R02_D3_integral105_Ioi3_eq
+  have hfloor := R02_D3_rpow_105_le_3005
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (3 : ℝ) ^ (-0.05 : ℝ) = ((3 : ℝ) ^ (0.05 : ℝ))⁻¹ := by
+    have e : (-0.05 : ℝ) = -(0.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((3 : ℝ) ^ (0.05 : ℝ))⁻¹ ≤ (1.05 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hfloor
+  have h0953 : (1.05 : ℝ)⁻¹ ≤ 0.953 := by norm_num
+  have hhead : (3 : ℝ) ^ (-0.05 : ℝ) ≤ 0.953 := by
+    rw [hneg]
+    exact le_trans hinv h0953
+  have hdiv : (3 : ℝ) ^ (-0.05 : ℝ) / 0.05 ≤ 0.953 / 0.05 := by
+    have e1 : (3 : ℝ) ^ (-0.05 : ℝ) / 0.05 =
+        (3 : ℝ) ^ (-0.05 : ℝ) * (0.05 : ℝ)⁻¹ := by ring
+    have e2 : (0.953 : ℝ) / 0.05 = 0.953 * (0.05 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h1906 : (0.953 : ℝ) / 0.05 = 19.06 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (3 : ℝ), x ^ (-1.05 : ℝ))
+        = (3 : ℝ) ^ (-0.05 : ℝ) / 0.05 := heq
+      _ ≤ 0.953 / 0.05 := hdiv
+      _ = 19.06 := h1906
+
+/-- Shift-tail numeral `∑' n, (n+4)^(-1.05) ≤ 19.06`. -/
+theorem R02_D3_tail105_M3_le_1906 :
+    (∑' n : ℕ, ((((n + 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 19.06 := by
+  have ecast : ((((3 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+  have htail : (∑' n : ℕ, ((((n + 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi (3 : ℝ), x ^ (-1.05 : ℝ)) := by
+    have h := R02_D3_tail4_le_integral105_Ioi3
+    rw [ecast] at h
+    exact h
+  exact le_trans htail R02_D3_integral105_Ioi3_le_1906
+
+#print axioms R02_D3_integral105_Ioi3_eq
+#print axioms R02_D3_integral105_Ioi3_le_1906
+#print axioms R02_D3_tail105_M3_le_1906
+
+/-!
+## Door-3 strip endgame, step 38i (zeta lane): peeled K0 cap at -1.05.
+
+Three-term head `1 + 3^(-1.05) + 5^(-1.05) ≤ 1.51` plus the `M = 3`
+shift tail `≤ 19.06` (step 38h):
+`∑' n, (2n+1)^(-1.05) ≤ 20.57`, tightening K0 `21 → 20.57`.
+Mirrors step 36b (`R02_D3_odd150_tsum_le_262`). FULL proofs.
+-/
+
+/-- Odd head third term `((2*2+1):ℝ)^(-1.05) = 5^(-1.05)`. -/
+theorem R02_D3_odd105_two_eq_five :
+    ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = (5 : ℝ) ^ (-1.05 : ℝ) := by
+  have e : ((((2 * 2 + 1 : ℕ)) : ℝ)) = (5 : ℝ) := by norm_num
+  rw [e]
+
+/-- Peeled K0 cap `∑' n, (2n+1)^(-1.05) ≤ 20.57` (head `1.51` + tail `19.06`). -/
+theorem R02_D3_odd105_tsum_le_2057 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 20.57 := by
+  have hOddTail : Summable (fun n : ℕ => ((((2 * (n + 3) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 3).mpr R02_D3_odd105_summable
+  have hShiftTail : Summable (fun n : ℕ => ((((n + 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 3).mpr R02_D3_shift105_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 3) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤
+      ((((n + 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hm_pos : (0 : ℝ) < ((((n + 3 + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+    have hm_le : ((((n + 3 + 1 : ℕ)) : ℝ)) ≤ ((((2 * (n + 3) + 1 : ℕ)) : ℝ)) :=
+      Nat.cast_le.mpr (by omega)
+    have hexp : (-1.05 : ℝ) ≤ 0 := by norm_num
+    exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+  have htail_mono := hOddTail.tsum_le_tsum hle hShiftTail
+  have htail2 := R02_D3_tail105_M3_le_1906
+  have hhead1 : ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 0.32 := by
+    have e : ((((2 * 1 + 1 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+    rw [e]
+    exact R02_D3_rpow3_neg105_le_032
+  have hhead2 : ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 0.19 := by
+    rw [R02_D3_odd105_two_eq_five]
+    exact R02_D3_rpow5_neg105_le_019
+  have hhead : (∑ i ∈ Finset.range 3, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      1 + ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) +
+      ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    show (∑ i ∈ Finset.range (2 + 1), ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      1 + ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) +
+      ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      R02_D3_odd105_zero_eq_one]
+  have hsplit := R02_D3_odd105_summable.sum_add_tsum_nat_add 3
+  rw [hhead] at hsplit
+  linarith
+
+#print axioms R02_D3_odd105_two_eq_five
+#print axioms R02_D3_odd105_tsum_le_2057
+
+/-!
+## Door-3 strip endgame, step 38j (zeta lane): peeled low-slice eta/zeta linear.
+
+Mirror of steps 26–27 (`R02_D3_etaPair_linear_slice0550`,
+`R02_D3_zeta_linear_slice0550`) with peeled K0 `20.57`
+(`R02_D3_odd105_tsum_le_2057`) replacing `21`: eta `20.57 * (1 + |Im|)`,
+zeta `50 * (1 + |Im|)` via `20.57 / 0.414 ≤ 50`. FULL proofs, no sorry.
+-/
+
+/-- Peeled eta linear `‖∑' pairs‖ ≤ 20.57 * (1 + |Im|)` on `0.05 ≤ Re ≤ 0.5`. -/
+theorem R02_D3_etaPair_linear_slice0550_peeled (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) :
+    ‖∑' m : ℕ, etaPairTerm z m‖ ≤ 20.57 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hexp_le : ∀ n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) ≤
+      ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hn1 : (1 : ℕ) ≤ 2 * n + 1 := by omega
+    have h1 : (1 : ℝ) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+      calc (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+        _ ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := Nat.cast_le.mpr hn1
+    have he : -z.re - 1 ≤ (-1.05 : ℝ) := by linarith
+    exact Real.rpow_le_rpow_of_exponent_le h1 he
+  have hodd_Re : Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := by
+    apply Summable.of_norm_bounded R02_D3_odd105_summable
+    intro n
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+    exact hexp_le n
+  have hK : (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) ≤ 20.57 :=
+    le_trans (hodd_Re.tsum_le_tsum (fun n => hexp_le n) R02_D3_odd105_summable)
+      R02_D3_odd105_tsum_le_2057
+  have hmajor : Summable (fun n : ℕ => ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    hodd_Re.mul_left ‖z‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm z n‖ ≤
+      ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := by
+    intro n
+    exact norm_etaPairTerm_le z hs n
+  have htsum : ‖∑' m : ℕ, etaPairTerm z m‖ ≤
+      ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) :=
+    tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) =
+      ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    Summable.tsum_mul_left ‖z‖ hodd_Re
+  have heta : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 20.57 := by
+    calc ‖∑' m : ℕ, etaPairTerm z m‖
+        ≤ ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := htsum
+      _ = ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := hfactor
+      _ ≤ ‖z‖ * 20.57 := mul_le_mul_of_nonneg_left hK (norm_nonneg _)
+  have hnorm : ‖z‖ ≤ 1 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im z
+    have habs : |z.re| ≤ (0.5 : ℝ) := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  calc ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 20.57 := heta
+    _ ≤ (1 + |z.im|) * 20.57 :=
+      mul_le_mul_of_nonneg_right hnorm (by norm_num)
+    _ = 20.57 * (1 + |z.im|) := by ring
+
+#print axioms R02_D3_etaPair_linear_slice0550_peeled
+
+/-- Peeled slice zeta linear `‖ζ(z)‖ ≤ 50 * (1 + |Im|)` on `0.05 ≤ Re ≤ 0.5`. -/
+theorem R02_D3_zeta_linear_slice0550_peeled (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) :
+    ‖riemannZeta z‖ ≤ 50 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by
+    intro h
+    linarith
+  have hetaLin := R02_D3_etaPair_linear_slice0550_peeled z hre_lo hre_hi
+  have hden_ge := R02_D3_eta_denom_floor_slice0550 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ =
+      ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.414 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 20.57 * (1 + |z.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (20.57 * (1 + |z.im|)) / 0.414 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (20.57 * (1 + |z.im|)) / 0.414 ≤ 50 * (1 + |z.im|) := by
+    have hratio : (20.57 : ℝ) / 0.414 ≤ 50 := by norm_num
+    have e : (20.57 * (1 + |z.im|)) / 0.414 = (20.57 / 0.414) * (1 + |z.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+#print axioms R02_D3_zeta_linear_slice0550_peeled
+
+/-!
+## Door-3 strip endgame, step 38k (zeta lane): peeled low-slice rect + assembly.
+
+`50·11 = 550` on the low half (`0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10`); the high
+half uses peeled `154` (`R02_D3_zeta_rect_cap_slice5074_peeled`).
+Two-slice assembly keeps best rect `550` (was `561`). FULL proofs, no sorry.
+-/
+
+/-- Peeled low-slice rect cap: `‖ζ‖ ≤ 550` on `0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_cap_slice0550_peeled (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 550 := by
+  have h := R02_D3_zeta_linear_slice0550_peeled z hre_lo hre_hi
+  have hcap : (50 : ℝ) * (1 + |z.im|) ≤ 550 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (50 : ℝ) * (1 + |z.im|) ≤ 50 * 11 :=
+          mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 550 := by norm_num
+  exact le_trans h hcap
+
+/-- Two-slice rect assembly: `‖ζ‖ ≤ 550` on the full R02 rect (peeled both). -/
+theorem R02_D3_zeta_rect_slice_assembly4 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 550 := by
+  by_cases hcut : z.re ≤ 0.5
+  · have h := R02_D3_zeta_rect_cap_slice0550_peeled z hre_lo hcut him
+    linarith
+  · have hlt : (0.5 : ℝ) < z.re := lt_of_not_ge hcut
+    have hle : (0.5 : ℝ) ≤ z.re := le_of_lt hlt
+    have h := R02_D3_zeta_rect_cap_slice5074_peeled z hle hre_hi him
+    linarith
+
+/-- Updated gap verdict: peeled low cap `550 < 561`; best rect `550` vs `10`. -/
+theorem R02_D3_zeta_rect_slice_edge4 :
+    (550 : ℝ) < 561 ∧ (10 : ℝ) < 550 ∧ (550 : ℝ) - 10 = 540 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+#print axioms R02_D3_zeta_rect_cap_slice0550_peeled
+#print axioms R02_D3_zeta_rect_slice_assembly4
+#print axioms R02_D3_zeta_rect_slice_edge4
