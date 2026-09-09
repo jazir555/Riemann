@@ -3392,6 +3392,12 @@ sorry-free infrastructure and the complete commit ledger above.
   +0.251 viable; eta bridge needs Dirichlet-eta continuation
   (Mathlib: Re>1 only); uniform head needs >16/67.
   Residual: rigorous S₆ bound via cos/log intervals (RX19, LARGE).
+- 2026-09-09 RX19: silent failure (empty diff, empty report) → RX20.
+- 2026-09-09 RX20 (`f5001ca7`, tail-scratch, 12× green 8682 jobs):
+  self-contained cos-quadratic floor + log2–log6 bounds +
+  θ₀..θ₅ phases + 6 cos plugs + 6 rpow floors (25 theorems).
+  Residual: S₆ assembly from floors (check eta sign/phase
+  convention first; mirror d3_rpow_two pattern) (RX21).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
