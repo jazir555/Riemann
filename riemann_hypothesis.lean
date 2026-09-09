@@ -12299,3 +12299,178 @@ theorem xiCentralMainBand10_of_centralPointwise
   intro z hx_lo hx_hi hy
   obtain ⟨hgt, hlt, hne⟩ := mainBand10_im_bounds hy
   exact C.central_nonvanishing z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne
+
+/-!
+# Door-3 meta-lane: unconditional imaginary-axis neighborhood discharges
+
+`ZetaRealNonzeroInCritical` is banked unconditionally by
+`zetaRealNonzeroInCritical_holds`; the local imaginary-axis theory below takes
+no other certificate hypothesis, so discharging `hReal` here is a genuine
+conditional-to-unconditional step (mirroring
+`xiShifted_imag_axis_nonvanishing_unconditional`). Nothing here cites the
+retained `RiemannHypothesisProp_apply` axiom.
+-/
+
+/-- Unconditional zero-free ball around `I * y0` (`hReal` discharged). -/
+theorem xiShifted_eventually_ne_zero_ball_unconditional
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ ε > 0,
+      ∀ z : ℂ,
+        ‖z - I * (y0 : ℂ)‖ < ε →
+        xiShifted z ≠ 0 :=
+  xiShifted_eventually_ne_zero_ball zetaRealNonzeroInCritical_holds y0 hy0 hgt hlt
+
+/-- Unconditional zero-free rectangle around `I * y0` (`hReal` discharged). -/
+theorem exists_zero_free_rect_around_imag_point_unconditional
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ ε > 0,
+      ∀ z : ℂ,
+        -ε < z.re →
+        z.re < ε →
+        y0 - ε < z.im →
+        z.im < y0 + ε →
+        xiShifted z ≠ 0 :=
+  exists_zero_free_rect_around_imag_point zetaRealNonzeroInCritical_holds y0 hy0 hgt hlt
+
+/-- Unconditional packaged `XiLocalZeroFreeRect` around `I * y0`. -/
+theorem exists_zero_free_rect_struct_around_imag_point_unconditional
+    (y0 : ℝ)
+    (hy0 : y0 ≠ 0)
+    (hgt : -(1 / 2 : ℝ) < y0)
+    (hlt : y0 < (1 / 2 : ℝ)) :
+    ∃ R : XiLocalZeroFreeRect,
+      R.x0 < 0 ∧
+      0 < R.x1 ∧
+      R.y0 < y0 ∧
+      y0 < R.y1 ∧
+      ∀ z : ℂ,
+        R.x0 < z.re →
+        z.re < R.x1 →
+        R.y0 < z.im →
+        z.im < R.y1 →
+        xiShifted z ≠ 0 :=
+  exists_zero_free_rect_struct_around_imag_point zetaRealNonzeroInCritical_holds y0 hy0 hgt hlt
+
+/-- Unconditional finite segment cover over compact `[a, b] ⊂ (0, 1/2)`. -/
+theorem exists_finite_imaginary_segment_zero_free_cover_unconditional
+    (a b : ℝ)
+    (ha : 0 < a)
+    (hab : a ≤ b)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∃ _C : FiniteImaginarySegmentZeroFreeCover a b, True :=
+  exists_finite_imaginary_segment_zero_free_cover zetaRealNonzeroInCritical_holds a b ha hab hb
+
+/-- Unconditional zero-free vertical band over compact `[a, b] ⊂ (0, 1/2)`
+    (cover from `..._unconditional`, band from
+    `zero_free_vertical_band_from_segment_cover`). -/
+theorem zero_free_vertical_band_upper_unconditional
+    (a b : ℝ)
+    (ha : 0 < a)
+    (hab : a ≤ b)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∃ δ > 0,
+      ∀ z : ℂ,
+        |z.re| < δ →
+        a ≤ z.im →
+        z.im ≤ b →
+        xiShifted z ≠ 0 := by
+  obtain ⟨C, _⟩ :=
+    exists_finite_imaginary_segment_zero_free_cover_unconditional a b ha hab hb
+  exact ⟨C.δ, C.δ_pos, fun z hx hlo hhi => zero_free_vertical_band_from_segment_cover C z hx hlo hhi⟩
+
+/-- Unconditional zero-free vertical band over `[-b, -a]` (mirror of the upper
+    band via the banked `classicalXi_symmetry.conj_symm`, as in
+    `zerosReal_from_upperHalf`). -/
+theorem zero_free_vertical_band_lower_unconditional
+    (a b : ℝ)
+    (ha : 0 < a)
+    (hab : a ≤ b)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∃ δ > 0,
+      ∀ z : ℂ,
+        |z.re| < δ →
+        -b ≤ z.im →
+        z.im ≤ -a →
+        xiShifted z ≠ 0 := by
+  obtain ⟨δ, hδpos, hband⟩ := zero_free_vertical_band_upper_unconditional a b ha hab hb
+  refine ⟨δ, hδpos, fun z hx hlo hhi => ?_⟩
+  have hre : |(star z).re| < δ := by
+    have hrr : (star z).re = z.re := by simp [Complex.conj_re]
+    rw [hrr]
+    exact hx
+  have him_lo : a ≤ (star z).im := by
+    simp [Complex.conj_im]
+    linarith
+  have him_hi : (star z).im ≤ b := by
+    simp [Complex.conj_im]
+    linarith
+  have hne : xiShifted (star z) ≠ 0 := hband (star z) hre him_lo him_hi
+  have hgt : -(1 : ℝ) / 2 < z.im := by linarith
+  have hlt : z.im < (1 : ℝ) / 2 := by linarith
+  rw [classicalXi_symmetry.conj_symm z hgt hlt] at hne
+  exact fun h => hne (by rw [h, star_zero])
+
+#print axioms xiShifted_eventually_ne_zero_ball_unconditional
+#print axioms exists_zero_free_rect_around_imag_point_unconditional
+#print axioms exists_zero_free_rect_struct_around_imag_point_unconditional
+#print axioms exists_finite_imaginary_segment_zero_free_cover_unconditional
+#print axioms zero_free_vertical_band_upper_unconditional
+#print axioms zero_free_vertical_band_lower_unconditional
+
+/-- Two-sided punctured band over `a ≤ |Im| ≤ b` (upper + lower bands combined.
+    The near-real strip `|Im| < a`, including `Im = 0`, stays open: it needs the
+    negative-imaginary certificate owned by the off-axis lane). -/
+theorem zero_free_vertical_band_two_sided_unconditional
+    (a b : ℝ)
+    (ha : 0 < a)
+    (hab : a ≤ b)
+    (hb : b < (1 / 2 : ℝ)) :
+    ∃ δ > 0,
+      ∀ z : ℂ,
+        |z.re| < δ →
+        a ≤ |z.im| →
+        |z.im| ≤ b →
+        xiShifted z ≠ 0 := by
+  obtain ⟨δu, hδu, hup⟩ := zero_free_vertical_band_upper_unconditional a b ha hab hb
+  obtain ⟨δl, hδl, hlo⟩ := zero_free_vertical_band_lower_unconditional a b ha hab hb
+  refine ⟨min δu δl, lt_min hδu hδl, fun z hx habs hbabs => ?_⟩
+  by_cases hpos : 0 < z.im
+  · apply hup z _ _ _
+    · calc |z.re| < min δu δl := hx
+        _ ≤ δu := min_le_left _ _
+    · rw [← abs_of_pos hpos]
+      exact habs
+    · rw [← abs_of_pos hpos]
+      exact hbabs
+  · have hle : z.im ≤ 0 := le_of_not_gt hpos
+    have habs' : a ≤ -z.im := by
+      rw [← abs_of_nonpos hle]
+      exact habs
+    have hbabs' : -z.im ≤ b := by
+      rw [← abs_of_nonpos hle]
+      exact hbabs
+    apply hlo z _ _ _
+    · calc |z.re| < min δu δl := hx
+        _ ≤ δl := min_le_right _ _
+    · linarith
+    · linarith
+
+#print axioms zero_free_vertical_band_two_sided_unconditional
+
+-- Circularity flags (read-only evidence, no new mathematics): the two
+-- apparently-closed chains below both transitively cite the retained
+-- `RiemannHypothesisProp_apply` axiom (`:9183`, `:11585`), so neither counts
+-- as an unconditional discharge. Recorded so future wiring cannot mistake
+-- them for banked instances.
+#print axioms RHProofScaffold.ClosedCertificate.Task1Completion.xiShifted_no_zero_in_rect_10
+#print axioms RHProofScaffold.Challenge2.xiShifted_nonvanishing_on_tail
+#print axioms RHProofScaffold.Challenge2.zetaTail_offLine_nonvanishing_10
+#print axioms RHProofScaffold.Challenge2.challenge2_certificate
+#print axioms RHProofScaffold.Challenge2.riemann_hypothesis_of_challenge2
+#print axioms RHProofScaffold.ClosedCertificate.remainingQuadrant_10_closed
