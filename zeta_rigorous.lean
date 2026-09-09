@@ -34633,3 +34633,361 @@ theorem R02_D3_zeta05_polyexp_line005 (w : ℂ) (hw : w.re = 0.05) (ht : 1 ≤ |
 
 #print axioms R02_D3_zeta05_exp_line005
 #print axioms R02_D3_zeta05_polyexp_line005
+
+/-!
+## Door-3 close, step 12 (zeta lane): direct eta-pair line-0.05 series helpers.
+
+Direct route on `Re = 0.05` (FE bypass): per-pair exponent is
+`-Re - 1 = -1.05`. Mirror of the banked line-0.95 block
+(`R02_D3_shift195_summable` etc.): shift summability, odd-vs-shift
+pointwise bound, odd summability.
+-/
+
+/-- Shift-series summability `(n+1)^(-1.05)` via `Real.summable_nat_rpow_inv`. -/
+theorem R02_D3_shift105_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+  have hp1 : (1 : ℝ) < (0.05 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((0.05 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.05 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.05 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : (-1.05 : ℝ) = -((0.05 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-vs-shift pointwise: `(2n+1)^(-1.05) ≤ (n+1)^(-1.05)`. -/
+theorem R02_D3_odd105_le_shift (n : ℕ) :
+    ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+  have hm_pos : (0 : ℝ) < ((((n + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((n + 1 : ℕ)) : ℝ)) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : (-1.05 : ℝ) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+/-- Odd-series summability via norm comparison with the shift series. -/
+theorem R02_D3_odd105_summable :
+    Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+  apply Summable.of_norm_bounded R02_D3_shift105_summable
+  intro n
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact R02_D3_odd105_le_shift n
+
+#print axioms R02_D3_shift105_summable
+#print axioms R02_D3_odd105_summable
+
+/-!
+## Door-3 close, step 13 (zeta lane): line-0.05 integral-tail comparison.
+-/
+
+/-- Antitone majorant `x^(-1.05)` on `Ici 1`. -/
+theorem R02_D3_rpow105_antitone :
+    AntitoneOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ici ((((1 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.05 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.05)` on `Ioi 1`. -/
+theorem R02_D3_rpow105_integrable :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ioi ((((1 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.05 : ℝ) < -1)
+  norm_num
+
+/-- `M = 1` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail2_le_integral105 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 1 R02_D3_rpow105_antitone
+    R02_D3_rpow105_integrable (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+#print axioms R02_D3_rpow105_antitone
+#print axioms R02_D3_rpow105_integrable
+#print axioms R02_D3_tail2_le_integral105
+
+/-!
+## Door-3 close, step 14 (zeta lane): integral numeral + K0 cap on line 0.05.
+
+Closed form `∫ x in Ioi 1, x^(-1.05) = 1/0.05 = 20`, so the shifted tail is
+`≤ 20`; the odd head is `1`, giving `∑' n, (2n+1)^(-1.05) ≤ 21`.
+-/
+
+/-- Closed-form integral `∫ x in Ioi 1, x^(-1.05) = 1/0.05`. -/
+theorem R02_D3_integral105_eq :
+    (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) = 1 / 0.05 := by
+  have hlt : (-1.05 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.05 : ℝ) + 1 = -0.05 := by norm_num
+  rw [e1] at h
+  have ec : ((((1 : ℕ)) : ℝ)) ^ (-0.05 : ℝ) = (1 : ℝ) := by
+    have ecast : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    rw [ecast, Real.one_rpow]
+  rw [ec] at h
+  have e2 : (-(1 : ℝ)) / (-0.05 : ℝ) = 1 / 0.05 := by norm_num
+  exact e2 ▸ h
+
+/-- Shift-tail numeral `∑' n, (n+2)^(-1.05) ≤ 20`. -/
+theorem R02_D3_tail2_le_20 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 20 := by
+  have htail := R02_D3_tail2_le_integral105
+  have hval := R02_D3_integral105_eq
+  have h20 : (1 : ℝ) / 0.05 ≤ 20 := by norm_num
+  calc (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))
+      ≤ (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := htail
+    _ = 1 / 0.05 := hval
+    _ ≤ 20 := h20
+
+/-- Odd head `((2*0+1):ℝ)^(-1.05) = 1`. -/
+theorem R02_D3_odd105_zero_eq_one :
+    ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = 1 := by
+  have e : ((((2 * 0 + 1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [e, Real.one_rpow]
+
+/-- K0 cap `∑' n, (2n+1)^(-1.05) ≤ 21` (head `1` + tail `≤ 20`). -/
+theorem R02_D3_odd105_tsum_le_21 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 21 := by
+  have hOddShift : Summable (fun n : ℕ => ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_odd105_summable
+  have hShiftShift : Summable (fun n : ℕ => ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_shift105_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤
+      ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    exact R02_D3_odd105_le_shift (n + 1)
+  have htail_mono := hOddShift.tsum_le_tsum hle hShiftShift
+  have htail20 := R02_D3_tail2_le_20
+  have hsplit := R02_D3_odd105_summable.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one, R02_D3_odd105_zero_eq_one] at hsplit
+  linarith
+
+#print axioms R02_D3_integral105_eq
+#print axioms R02_D3_tail2_le_20
+#print axioms R02_D3_odd105_zero_eq_one
+#print axioms R02_D3_odd105_tsum_le_21
+
+/-!
+## Door-3 close, step 15 (zeta lane): eta linear bound on `Re = 0.05` (K0 = 21).
+-/
+
+/-- Per-pair eta bound on the `Re = 0.05` line: specialization of banked
+    `norm_etaPairTerm_le` at `-s.re - 1 = -1.05`. -/
+theorem R02_D3_etaPair_bound_line005 (s : ℂ) (hre : s.re = 0.05) (n : ℕ) :
+    ‖etaPairTerm s n‖ ≤ ‖s‖ * (((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+  have hs : (0 : ℝ) < s.re := by
+    rw [hre]
+    norm_num
+  have h := norm_etaPairTerm_le s hs n
+  have e : (-s.re - 1 : ℝ) = -1.05 := by
+    rw [hre]
+    norm_num
+  rw [e] at h
+  exact h
+
+/-- Norm split on `Re = 0.05`: `‖s‖ ≤ 0.05 + |Im s|` (linear-input shape). -/
+theorem R02_D3_norm_le_line005 (s : ℂ) (hre : s.re = 0.05) :
+    ‖s‖ ≤ 0.05 + |s.im| := by
+  have h := Complex.norm_le_abs_re_add_abs_im s
+  have e : |s.re| = (0.05 : ℝ) := by
+    rw [hre]
+    norm_num
+  rw [e] at h
+  exact h
+
+/-- Eta tsum `‖∑' pairs‖ ≤ ‖s‖ * 21` on `Re = 0.05`. -/
+theorem R02_D3_etaPair_tsum_le_line005 (s : ℂ) (hre : s.re = 0.05) :
+    ‖∑' m : ℕ, etaPairTerm s m‖ ≤ ‖s‖ * 21 := by
+  have hmajor : Summable (fun n : ℕ => ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    R02_D3_odd105_summable.mul_left ‖s‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm s n‖ ≤
+      ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    exact R02_D3_etaPair_bound_line005 s hre n
+  have htsum : ‖∑' m : ℕ, etaPairTerm s m‖ ≤
+      ∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) :=
+    tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      ‖s‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    Summable.tsum_mul_left ‖s‖ R02_D3_odd105_summable
+  have hK0 := R02_D3_odd105_tsum_le_21
+  calc ‖∑' m : ℕ, etaPairTerm s m‖
+      ≤ ∑' n : ℕ, ‖s‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := htsum
+    _ = ‖s‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := hfactor
+    _ ≤ ‖s‖ * 21 := mul_le_mul_of_nonneg_left hK0 (norm_nonneg _)
+
+/-- Eta linear `‖∑' pairs‖ ≤ 21 * (1 + |Im|)` on `Re = 0.05`. -/
+theorem R02_D3_etaPair_linear_line005 (s : ℂ) (hre : s.re = 0.05) :
+    ‖∑' m : ℕ, etaPairTerm s m‖ ≤ 21 * (1 + |s.im|) := by
+  have h1 := R02_D3_etaPair_tsum_le_line005 s hre
+  have h2 := R02_D3_norm_le_line005 s hre
+  have h3 : ‖s‖ * 21 ≤ (0.05 + |s.im|) * 21 :=
+    mul_le_mul_of_nonneg_right h2 (by norm_num)
+  have h4 : (0.05 + |s.im|) * 21 ≤ (1 + |s.im|) * 21 := by
+    apply mul_le_mul_of_nonneg_right _ (by norm_num)
+    linarith [abs_nonneg s.im]
+  calc ‖∑' m : ℕ, etaPairTerm s m‖ ≤ ‖s‖ * 21 := h1
+    _ ≤ (0.05 + |s.im|) * 21 := h3
+    _ ≤ (1 + |s.im|) * 21 := h4
+    _ = 21 * (1 + |s.im|) := by ring
+
+#print axioms R02_D3_etaPair_bound_line005
+#print axioms R02_D3_norm_le_line005
+#print axioms R02_D3_etaPair_tsum_le_line005
+#print axioms R02_D3_etaPair_linear_line005
+
+/-!
+## Door-3 close, step 16 (zeta lane): `2^0.95` floor via a `(1.036)^20 ≥ 2` cap.
+
+On `Re = 0.05`, `‖2^{1-s}‖ = 2^0.95 = 2/2^0.05`. The upper mirror of the
+banked `(1.035)^20 ≤ 2` cap: `(1.036)^20 ≥ 2` forces `2^0.05 ≤ 1.036`.
+-/
+
+/-- Cleared integer-pow cap: `2 ≤ (1.036)^20` via small-step lower bounds. -/
+theorem R02_D3_pow_1036_20_ge_two : (2 : ℝ) ≤ ((1.036 : ℝ)) ^ (20 : ℕ) := by
+  have h2 : (1.0732 : ℝ) ≤ ((1.036 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h4le : ((1.0732 : ℝ)) ^ (2 : ℕ) ≤ ((((1.036 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) h2 2
+  have h44 : ((((1.036 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.036 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have hsq : (1.1517 : ℝ) ≤ ((1.0732 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have g4 : (1.1517 : ℝ) ≤ ((1.036 : ℝ)) ^ (4 : ℕ) := by
+    rw [← h44]
+    exact le_trans hsq h4le
+  have h5mul : ((1.036 : ℝ)) ^ (4 : ℕ) * (1.036 : ℝ) =
+      ((1.036 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.036 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (1.1931 : ℝ) ≤ (1.1517 : ℝ) * (1.036 : ℝ) := by norm_num
+  have h5le : (1.1517 : ℝ) * (1.036 : ℝ) ≤
+      ((1.036 : ℝ)) ^ (4 : ℕ) * (1.036 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : (1.1931 : ℝ) ≤ ((1.036 : ℝ)) ^ (5 : ℕ) := by
+    rw [← h5mul]
+    exact le_trans hprod h5le
+  have hsq10 : (1.4234 : ℝ) ≤ ((1.1931 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h10le : (((1.1931 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.036 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g5 2
+  have h1010 : ((((1.036 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.036 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : (1.4234 : ℝ) ≤ ((1.036 : ℝ)) ^ (10 : ℕ) := by
+    rw [← h1010]
+    exact le_trans hsq10 h10le
+  have hsq20 : (2 : ℝ) ≤ ((1.4234 : ℝ)) ^ (2 : ℕ) := by norm_num
+  have h20le : (((1.4234 : ℝ)) ^ (2 : ℕ)) ≤
+      ((((1.036 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ (by norm_num) g10 2
+  have h2020 : ((((1.036 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) =
+      ((1.036 : ℝ)) ^ (20 : ℕ) := by
+    rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]
+  exact le_trans hsq20 h20le
+
+#print axioms R02_D3_pow_1036_20_ge_two
+
+/-- Rpow upper: `2^0.05 ≤ 1.036` (cleared via `(1.036)^20 ≥ 2`). -/
+theorem R02_D3_rpow_2005_le_1036 : (2 : ℝ) ^ (0.05 : ℝ) ≤ (1.036 : ℝ) := by
+  by_contra hle
+  have hlt : (1.036 : ℝ) < (2 : ℝ) ^ (0.05 : ℝ) := lt_of_not_ge hle
+  have hle_pow : ((((1.036 : ℝ))) ^ (20 : ℕ)) <
+      ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) :=
+    pow_lt_pow_left₀ hlt (by norm_num) (by norm_num)
+  have h2_eq : ((((2 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h2_eq] at hle_pow
+  have hge := R02_D3_pow_1036_20_ge_two
+  linarith
+
+/-- Rpow lower: `1.93 ≤ 2^0.95` (via `2^0.95 * 2^0.05 = 2` and the upper cap). -/
+theorem R02_D3_rpow_2095_ge_193 : (1.93 : ℝ) ≤ (2 : ℝ) ^ (0.95 : ℝ) := by
+  have hmul : (2 : ℝ) ^ (0.95 : ℝ) * (2 : ℝ) ^ (0.05 : ℝ) = 2 := by
+    rw [← Real.rpow_add (by norm_num)]
+    have e : (0.95 : ℝ) + (0.05 : ℝ) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle := R02_D3_rpow_2005_le_1036
+  have hnn : (0 : ℝ) ≤ (2 : ℝ) ^ (0.95 : ℝ) :=
+    Real.rpow_nonneg (by norm_num) _
+  have h2al : (2 : ℝ) ≤ (2 : ℝ) ^ (0.95 : ℝ) * 1.036 := by
+    calc (2 : ℝ) = (2 : ℝ) ^ (0.95 : ℝ) * (2 : ℝ) ^ (0.05 : ℝ) := hmul.symm
+      _ ≤ (2 : ℝ) ^ (0.95 : ℝ) * 1.036 :=
+        mul_le_mul_of_nonneg_left hle hnn
+  have h193 : (1.93 : ℝ) * 1.036 ≤ 2 := by norm_num
+  have hle2 : (1.93 : ℝ) * 1.036 ≤ (2 : ℝ) ^ (0.95 : ℝ) * 1.036 :=
+    le_trans h193 h2al
+  exact le_of_mul_le_mul_right hle2 (by norm_num)
+
+/-- Eta-denominator floor on the `Re = 0.05` line: `‖1 - 2^{1-s}‖ ≥ 0.93`. -/
+theorem R02_D3_eta_denom_floor_line005 (s : ℂ) (hre : s.re = 0.05) :
+    (0.93 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hnorm := two_cpow_one_sub_norm s
+  have hrexp : (1 : ℝ) - s.re = (0.95 : ℝ) := by
+    rw [hre]
+    norm_num
+  rw [hrexp] at hnorm
+  have hge := R02_D3_rpow_2095_ge_193
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - s)) (1 : ℂ)
+  rw [norm_one, hnorm] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    norm_sub_rev _ _
+  linarith
+
+#print axioms R02_D3_rpow_2005_le_1036
+#print axioms R02_D3_rpow_2095_ge_193
+#print axioms R02_D3_eta_denom_floor_line005
+
+/-!
+## Door-3 close, step 18 (zeta lane): direct zeta linear bound on `Re = 0.05`.
+
+Division of the line-0.05 eta linear bound (`21 * (1 + |Im|)`) through the
+line-0.05 denominator floor (`0.93`): `21 / 0.93 ≤ 23`.
+-/
+
+/-- Direct zeta linear `‖ζ(s)‖ ≤ 23 * (1 + |Im|)` on `Re = 0.05` (floor 0.93). -/
+theorem R02_D3_zeta_linear_line005 (s : ℂ) (hre : s.re = 0.05) :
+    ‖riemannZeta s‖ ≤ 23 * (1 + |s.im|) := by
+  have hs : (0 : ℝ) < s.re := by
+    rw [hre]
+    norm_num
+  have hre_ne : s.re ≠ 1 := by
+    rw [hre]
+    norm_num
+  have hG := R02_D3_etaPair_linear_line005 s hre
+  have hden_ge := R02_D3_eta_denom_floor_line005 s hre
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta s‖ =
+      ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm s m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      (21 * (1 + |s.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hG (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖)⁻¹ ≤ ((0.93 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 21 * (1 + |s.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg s.im])
+  have hstep2 : (21 * (1 + |s.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      (21 * (1 + |s.im|)) / 0.93 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (21 * (1 + |s.im|)) / 0.93 ≤ 23 * (1 + |s.im|) := by
+    have hratio : (21 : ℝ) / 0.93 ≤ 23 := by norm_num
+    have e : (21 * (1 + |s.im|)) / 0.93 = (21 / 0.93) * (1 + |s.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg s.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+#print axioms R02_D3_zeta_linear_line005
