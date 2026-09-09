@@ -3634,6 +3634,11 @@ sorry-free infrastructure and the complete commit ledger above.
   amplitude halves (21/22 rpow) + S16→S20 drop identity +
   log21 bounds. Best S16′ ≈ 0.1216 (residual ≈0.528).
   Residual: pair-10 cosines + floors + S21/S22 (OA22).
+- 2026-09-09 OA22 (`8a9bc8d9`, off-axis tail, 7× green 8702 jobs):
+  pair-10 steps (a)–(c) + term bridges (theta21/22, cos
+  −3/4/−2/5, rpow, inv/cpow, eta-21/22 eqs). Best S16′ ≈
+  0.1216 (residual ≈0.528).
+  Residual: eta 21/22 floors + pair-10 + S21/S22 (OA23).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
