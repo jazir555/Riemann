@@ -3437,6 +3437,12 @@ sorry-free infrastructure and the complete commit ledger above.
   Im15+norm45 verified as-is + sin-θ₄-upper → Im17 →
   **`‖S₆‖ ≥ 46/100`** (+1; gap 7/100).
   Residual: sin-θ₅ 0.76+ + narrower θ₂/θ₄ intervals (RX31).
+- 2026-09-09 RX31 (`4ffd5510`, tail-scratch, 7× green 8682 jobs
+  + 1 fail-fixed): log3 10× narrower (width 0.0071) via
+  log(9/8) trick → sin θ₅ 77/100 → cos θ₅ ≤ 65/100 +
+  θ₂ narrowed → cos θ₂ 84/100 → Re 45/100 + Im 18/100 →
+  **`‖S₆‖ ≥ 48/100`** (+2; gap 5/100).
+  Residual: θ₄ narrow via log(25/24) trick (RX32).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
