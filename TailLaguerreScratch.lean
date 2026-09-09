@@ -5335,3 +5335,118 @@ theorem d3EtaTerm_re_5 : (d3EtaTerm d3HalfS0 5).re
 #print axioms d3EtaTerm_re_3
 #print axioms d3EtaTerm_re_4
 #print axioms d3EtaTerm_re_5
+/-- Im part of a natural-base inverse cpow at `s₀`: negated rpow times sine. -/
+theorem d3_inv_nat_cpow_im_eq (b : ℕ) (hb : 0 < b) :
+    (((((b : ℕ)) : ℂ) ^ d3HalfS0)⁻¹).im =
+      -(((b : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log (b : ℝ))) := by
+  have hbR : (0 : ℝ) < (b : ℝ) := Nat.cast_pos.mpr hb
+  have hcast : ((((b : ℕ)) : ℂ)) = (((b : ℝ)) : ℂ) := by
+    norm_cast
+  rw [hcast]
+  have hne : (((b : ℝ)) : ℂ) ≠ 0 := by
+    have h : (b : ℝ) ≠ 0 := ne_of_gt hbR
+    exact_mod_cast h
+  have hlog : Complex.log (((b : ℝ)) : ℂ) = (((Real.log (b : ℝ))) : ℂ) :=
+    (Complex.ofReal_log hbR.le).symm
+  have hlogre : (Complex.log (((b : ℝ)) : ℂ)).re = Real.log (b : ℝ) := by
+    rw [hlog]
+    rfl
+  have hlogim : (Complex.log (((b : ℝ)) : ℂ)).im = 0 := by
+    rw [hlog]
+    rfl
+  have hsre : d3HalfS0.re = (1 / 2 : ℝ) := d3HalfPt_re
+  have hsim : d3HalfS0.im = (1 / 2 : ℝ) := d3HalfPt_im
+  have hargre : (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0).re =
+      Real.log (b : ℝ) * (1 / 2) := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0).im =
+      Real.log (b : ℝ) * (1 / 2) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (((b : ℝ)) : ℂ) ^ d3HalfS0 = Complex.exp (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0) := by
+    rw [Complex.cpow_def_of_ne_zero hne]
+  have hinv : ((((b : ℝ)) : ℂ) ^ d3HalfS0)⁻¹ = Complex.exp (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)).re = -(Real.log (b : ℝ) * (1 / 2)) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)).im = -(Real.log (b : ℝ) * (1 / 2)) := by
+    rw [Complex.neg_im, hargim]
+  have him : (Complex.exp (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0))).im =
+      Real.exp (-(Real.log (b : ℝ) * (1 / 2)))
+        * Real.sin (-(Real.log (b : ℝ) * (1 / 2))) := by
+    rw [Complex.exp_im, hnegre, hnegim]
+  have hsin : Real.sin (-(Real.log (b : ℝ) * (1 / 2)))
+      = -Real.sin ((1 / 2) * Real.log (b : ℝ)) := by
+    have harg : -(Real.log (b : ℝ) * (1 / 2)) = -((1 / 2) * Real.log (b : ℝ)) := by
+      ring
+    rw [harg, Real.sin_neg]
+  have hexp : Real.exp (-(Real.log (b : ℝ) * (1 / 2)))
+      = (b : ℝ) ^ (-(1 / 2) : ℝ) := by
+    have heq : -(Real.log (b : ℝ) * (1 / 2))
+        = Real.log (b : ℝ) * (-(1 / 2) : ℝ) := by
+      ring
+    rw [heq, ← Real.rpow_def_of_pos hbR]
+  rw [hinv, him, hexp, hsin]
+  ring
+#print axioms d3_inv_nat_cpow_im_eq
+/-- Im residue 0: even term, base 1 (negated). -/
+theorem d3EtaTerm_im_0 : (d3EtaTerm d3HalfS0 0).im
+    = -(((((1 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((1 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 0 = d3EtaTerm d3HalfS0 (2 * 0) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 0 + 1 : ℕ) = 1 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_im_eq 1 (by norm_num)
+/-- Im residue 1: odd term, base 2 (sign flips to positive). -/
+theorem d3EtaTerm_im_1 : (d3EtaTerm d3HalfS0 1).im
+    = (((((2 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((2 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 1 = d3EtaTerm d3HalfS0 (2 * 0 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 0 + 1 + 1 : ℕ) = 2 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((2 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((2 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_im, d3_inv_nat_cpow_im_eq 2 (by norm_num), neg_neg]
+/-- Im residue 2: even term, base 3 (negated). -/
+theorem d3EtaTerm_im_2 : (d3EtaTerm d3HalfS0 2).im
+    = -(((((3 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((3 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 2 = d3EtaTerm d3HalfS0 (2 * 1) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 1 + 1 : ℕ) = 3 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_im_eq 3 (by norm_num)
+#print axioms d3EtaTerm_im_0
+#print axioms d3EtaTerm_im_1
+#print axioms d3EtaTerm_im_2
+/-- Im residue 3: odd term, base 4 (sign flips to positive). -/
+theorem d3EtaTerm_im_3 : (d3EtaTerm d3HalfS0 3).im
+    = (((((4 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((4 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 3 = d3EtaTerm d3HalfS0 (2 * 1 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 1 + 1 + 1 : ℕ) = 4 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((4 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((4 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_im, d3_inv_nat_cpow_im_eq 4 (by norm_num), neg_neg]
+/-- Im residue 4: even term, base 5 (negated). -/
+theorem d3EtaTerm_im_4 : (d3EtaTerm d3HalfS0 4).im
+    = -(((((5 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((5 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 4 = d3EtaTerm d3HalfS0 (2 * 2) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 2 + 1 : ℕ) = 5 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_im_eq 5 (by norm_num)
+/-- Im residue 5: odd term, base 6 (sign flips to positive). -/
+theorem d3EtaTerm_im_5 : (d3EtaTerm d3HalfS0 5).im
+    = (((((6 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.sin ((1 / 2) * Real.log ((((6 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 5 = d3EtaTerm d3HalfS0 (2 * 2 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 2 + 1 + 1 : ℕ) = 6 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((6 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((6 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_im, d3_inv_nat_cpow_im_eq 6 (by norm_num), neg_neg]
+#print axioms d3EtaTerm_im_3
+#print axioms d3EtaTerm_im_4
+#print axioms d3EtaTerm_im_5
