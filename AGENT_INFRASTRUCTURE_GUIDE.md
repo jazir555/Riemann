@@ -3626,6 +3626,14 @@ sorry-free infrastructure and the complete commit ledger above.
   S19′/S20′ folds (frontier S20′ ≈ −0.086, best holds S16′
   ≈ 0.1216). Residual 3481309/4730000 ≈ 0.736.
   Residual: tight pair-9 + block update (OA20).
+- 2026-09-09 OA20 (`49a1e73e` part 1, off-axis tail, 2× green):
+  tight pair-9 (−1319/15050) + block −25601/56760 + 3 verdict
+  theorems (landed unverified under upstream breakage).
+- 2026-09-09 OA21 (`49a1e73e` part 2, off-axis tail, 2× green
+  after 9h stall cleared): verdicts verified AS-IS + pair-10
+  amplitude halves (21/22 rpow) + S16→S20 drop identity +
+  log21 bounds. Best S16′ ≈ 0.1216 (residual ≈0.528).
+  Residual: pair-10 cosines + floors + S21/S22 (OA22).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
