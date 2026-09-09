@@ -19,3 +19,6 @@ node_modules/
 
 # Embedded lean workspace/projects (as used in the OpenEvolve repos)
 lean_workspace/
+
+# Agent build-lock (auto-managed by scripts/Invoke-GuardedLakeBuild.ps1)
+.lake_build_lock
