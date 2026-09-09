@@ -3428,6 +3428,15 @@ sorry-free infrastructure and the complete commit ledger above.
   **`‖S₆‖ ≥ 44/100`** (+11; gap 9/100). PROVED Re ≥ 0.50
   infeasible (true 0.4977) — my sub-target was wrong.
   Residual: odd-term upper tightening (RX28).
+- 2026-09-09 RX28 (`fb6a7395` part 1, tail-scratch, appended
+  unbuilt under contention): tighter rpow uppers (3→7/12,
+  6→49/120, 2→99/140).
+- 2026-09-09 RX29 (`fb6a7395` part 2, tail-scratch, 2× green):
+  uppers verified + Re43 floor.
+- 2026-09-09 RX30 (`fb6a7395` part 3, tail-scratch, 2× green):
+  Im15+norm45 verified as-is + sin-θ₄-upper → Im17 →
+  **`‖S₆‖ ≥ 46/100`** (+1; gap 7/100).
+  Residual: sin-θ₅ 0.76+ + narrower θ₂/θ₄ intervals (RX31).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
