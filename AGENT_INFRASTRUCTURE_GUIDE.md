@@ -3417,6 +3417,11 @@ sorry-free infrastructure and the complete commit ledger above.
   via wrapper): `d3_sin_lower` (wraps `Real.sin_ge_sub_cube`) +
   6 theta sin plugs (33/100..74/100). Im-side trig COMPLETE.
   Residual: Re/Im floor assembly → norm 53/100 (RX26).
+- 2026-09-09 RX26 (`e29fdc7d`, tail-scratch, 3× green 8682 jobs
+  via wrapper): cos-uppers helper + Re ≥ 31/100 + Im ≥ 12/100
+  → **`‖S₆‖ ≥ 33/100`** (first 2-D bound; shortfall 20/100;
+  brief sub-targets proven jointly insufficient anyway).
+  Residual: interval tightening → 53/100 (RX27).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
