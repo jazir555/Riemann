@@ -3499,6 +3499,12 @@ sorry-free infrastructure and the complete commit ledger above.
   N=3 head (1.51) + M=3 integral (19.06) → **K0 20.57 → C=50
   → rect 550** (gain 11; slow-tail wall confirmed). Best 550/154.
   Residual: N=4 peel or low-slice denom lift (ZU25).
+- 2026-09-09 ZU25 (`6ef06244`, zeta tail, 4× green 8693 jobs via
+  wrapper): N=4 REJECTED (K0→20.32 < 20.286 needed, zero gain);
+  sub-slice denom lift PICKED (`2^0.7≥1.62` → floor 0.62 →
+  **C=34, rect 374** on [0.05,0.3]). Global still 550 (far piece
+  [0.3,0.5] pinned: denom 0.414 tight at s=0.5).
+  Residual: far-piece norm cap `‖z‖≤0.5+|Im|` → 525 (ZU26).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
