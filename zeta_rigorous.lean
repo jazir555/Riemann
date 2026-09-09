@@ -36082,3 +36082,258 @@ theorem R02_D3_zeta_rect_slice_edge : (561 : ℝ) < 1221 ∧ (1221 : ℝ) - 561 
 #print axioms R02_D3_zeta_rect_cap_slice0550
 #print axioms R02_D3_zeta_rect_slice_assembly
 #print axioms R02_D3_zeta_rect_slice_edge
+
+/-!
+## Door-3 strip endgame, step 29 (zeta lane): high-slice K0 at exponent -1.5.
+
+High half `0.5 < Re <= 0.74` has worst-case exponent `-Re - 1 = -1.5`.
+Mirror of the banked line-0.05 block (`R02_D3_shift105_summable` etc.).
+-/
+
+/-- Shift-series summability `(n+1)^(-1.5)` via `Real.summable_nat_rpow_inv`. -/
+theorem R02_D3_shift150_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) := by
+  have hp1 : (1 : ℝ) < (0.5 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((0.5 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift : Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.5 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.5 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : (-1.5 : ℝ) = -((0.5 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-vs-shift pointwise: `(2n+1)^(-1.5) ≤ (n+1)^(-1.5)`. -/
+theorem R02_D3_odd150_le_shift (n : ℕ) :
+    ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) ≤ ((((n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) := by
+  have hm_pos : (0 : ℝ) < ((((n + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((n + 1 : ℕ)) : ℝ)) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : (-1.5 : ℝ) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+/-- Odd-series summability via norm comparison with the shift series. -/
+theorem R02_D3_odd150_summable :
+    Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) := by
+  apply Summable.of_norm_bounded R02_D3_shift150_summable
+  intro n
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact R02_D3_odd150_le_shift n
+
+#print axioms R02_D3_shift150_summable
+#print axioms R02_D3_odd150_summable
+
+/-- Antitone majorant `x^(-1.5)` on `Ici 1`. -/
+theorem R02_D3_rpow150_antitone :
+    AntitoneOn (fun x : ℝ => x ^ (-1.5 : ℝ)) (Set.Ici ((((1 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.5 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.5)` on `Ioi 1`. -/
+theorem R02_D3_rpow150_integrable :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.5 : ℝ)) (Set.Ioi ((((1 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.5 : ℝ) < -1)
+  norm_num
+
+/-- `M = 1` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail2_le_integral150 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.5 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 1 R02_D3_rpow150_antitone
+    R02_D3_rpow150_integrable (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+#print axioms R02_D3_rpow150_antitone
+#print axioms R02_D3_rpow150_integrable
+#print axioms R02_D3_tail2_le_integral150
+
+/-!
+## Door-3 strip endgame, step 30 (zeta lane): integral numeral + K0 cap at -1.5.
+
+Closed form `∫ x in Ioi 1, x^(-1.5) = 1/0.5 = 2`, so the shifted tail is
+`≤ 2`; the odd head is `1`, giving `∑' n, (2n+1)^(-1.5) ≤ 3`.
+-/
+
+/-- Closed-form integral `∫ x in Ioi 1, x^(-1.5) = 1/0.5`. -/
+theorem R02_D3_integral150_eq :
+    (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.5 : ℝ)) = 1 / 0.5 := by
+  have hlt : (-1.5 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.5 : ℝ) + 1 = -0.5 := by norm_num
+  rw [e1] at h
+  have ec : ((((1 : ℕ)) : ℝ)) ^ (-0.5 : ℝ) = (1 : ℝ) := by
+    have ecast : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    rw [ecast, Real.one_rpow]
+  rw [ec] at h
+  have e2 : (-(1 : ℝ)) / (-0.5 : ℝ) = 1 / 0.5 := by norm_num
+  exact e2 ▸ h
+
+/-- Shift-tail numeral `∑' n, (n+2)^(-1.5) ≤ 2`. -/
+theorem R02_D3_tail150_le_2 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) ≤ 2 := by
+  have htail := R02_D3_tail2_le_integral150
+  have hval := R02_D3_integral150_eq
+  have h2 : (1 : ℝ) / 0.5 ≤ 2 := by norm_num
+  calc (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ))
+      ≤ (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.5 : ℝ)) := htail
+    _ = 1 / 0.5 := hval
+    _ ≤ 2 := h2
+
+/-- Odd head `((2*0+1):ℝ)^(-1.5) = 1`. -/
+theorem R02_D3_odd150_zero_eq_one :
+    ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) = 1 := by
+  have e : ((((2 * 0 + 1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [e, Real.one_rpow]
+
+/-- K0 cap `∑' n, (2n+1)^(-1.5) ≤ 3` (head `1` + tail `≤ 2`). -/
+theorem R02_D3_odd150_tsum_le_3 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) ≤ 3 := by
+  have hOddShift : Summable (fun n : ℕ => ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_odd150_summable
+  have hShiftShift : Summable (fun n : ℕ => ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr R02_D3_shift150_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) ≤
+      ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) := by
+    intro n
+    exact R02_D3_odd150_le_shift (n + 1)
+  have htail_mono := hOddShift.tsum_le_tsum hle hShiftShift
+  have htail2 := R02_D3_tail150_le_2
+  have hsplit := R02_D3_odd150_summable.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one, R02_D3_odd150_zero_eq_one] at hsplit
+  linarith
+
+#print axioms R02_D3_integral150_eq
+#print axioms R02_D3_tail150_le_2
+#print axioms R02_D3_odd150_zero_eq_one
+#print axioms R02_D3_odd150_tsum_le_3
+
+/-!
+## Door-3 strip endgame, step 31 (zeta lane): high-slice eta linear bound.
+
+The strip eta argument uses only `Re ≥ 0.5` (exponent `≤ -1.5`, K0 `= 3`)
+plus `‖z‖ ≤ 1 + |Im|`; both hold on the high slice `0.5 ≤ Re ≤ 0.74`.
+-/
+
+/-- Eta linear `‖∑' pairs‖ ≤ 3 * (1 + |Im|)` on the high slice `0.5 ≤ Re ≤ 0.74`. -/
+theorem R02_D3_etaPair_linear_slice5074 (z : ℂ)
+    (hre_lo : 0.5 ≤ z.re) (hre_hi : z.re ≤ 0.74) :
+    ‖∑' m : ℕ, etaPairTerm z m‖ ≤ 3 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hexp_le : ∀ n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) ≤
+      ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.5 : ℝ) := by
+    intro n
+    have hn1 : (1 : ℕ) ≤ 2 * n + 1 := by omega
+    have h1 : (1 : ℝ) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+      calc (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+        _ ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := Nat.cast_le.mpr hn1
+    have he : -z.re - 1 ≤ (-1.5 : ℝ) := by linarith
+    exact Real.rpow_le_rpow_of_exponent_le h1 he
+  have hodd_Re : Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := by
+    apply Summable.of_norm_bounded R02_D3_odd150_summable
+    intro n
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+    exact hexp_le n
+  have hK : (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) ≤ 3 :=
+    le_trans (hodd_Re.tsum_le_tsum (fun n => hexp_le n) R02_D3_odd150_summable)
+      R02_D3_odd150_tsum_le_3
+  have hmajor : Summable (fun n : ℕ => ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    hodd_Re.mul_left ‖z‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm z n‖ ≤
+      ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := by
+    intro n
+    exact norm_etaPairTerm_le z hs n
+  have htsum : ‖∑' m : ℕ, etaPairTerm z m‖ ≤
+      ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) :=
+    tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) =
+      ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    Summable.tsum_mul_left ‖z‖ hodd_Re
+  have heta : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 3 := by
+    calc ‖∑' m : ℕ, etaPairTerm z m‖
+        ≤ ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := htsum
+      _ = ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := hfactor
+      _ ≤ ‖z‖ * 3 := mul_le_mul_of_nonneg_left hK (norm_nonneg _)
+  have hnorm : ‖z‖ ≤ 1 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im z
+    have habs : |z.re| ≤ (0.74 : ℝ) := by
+      rw [abs_le]
+      constructor <;> linarith
+    linarith
+  calc ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 3 := heta
+    _ ≤ (1 + |z.im|) * 3 :=
+      mul_le_mul_of_nonneg_right hnorm (by norm_num)
+    _ = 3 * (1 + |z.im|) := by ring
+
+#print axioms R02_D3_etaPair_linear_slice5074
+
+/-!
+## Door-3 strip endgame, step 32 (zeta lane): high-slice zeta `C = 16`.
+
+Division of the high-slice eta linear bound (`3 * (1 + |Im|)`, step 31)
+through the strip denominator floor (`0.19`, banked at `Re = 0.74` and valid
+across the strip since `1 - Re ≥ 0.26`): `3 / 0.19 ≤ 16`.
+Tightens the high half `0.5 ≤ Re ≤ 0.74` from strip `1221` toward `176`.
+-/
+
+/-- Eta-denominator floor on the high slice: `‖1 - 2^{1-z}‖ ≥ 0.19`. -/
+theorem R02_D3_eta_denom_floor_slice5074 (z : ℂ)
+    (hre_lo : 0.5 ≤ z.re) (hre_hi : z.re ≤ 0.74) :
+    (0.19 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+  have hnorm2 := two_cpow_one_sub_norm z
+  have hexp2 : (0.26 : ℝ) ≤ 1 - z.re := by linarith
+  have h2mono : (2 : ℝ) ^ (0.26 : ℝ) ≤ (2 : ℝ) ^ (1 - z.re) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp2
+  have hge : (1.19 : ℝ) ≤ (2 : ℝ) ^ (1 - z.re) :=
+    le_trans R02_D3_rpow_2026_ge_119 h2mono
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - z)) (1 : ℂ)
+  rw [norm_one, hnorm2] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - z) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ :=
+    norm_sub_rev _ _
+  linarith
+
+/-- Slice zeta linear `‖ζ(z)‖ ≤ 16 * (1 + |Im|)` on `0.5 ≤ Re ≤ 0.74` (floor 0.19). -/
+theorem R02_D3_zeta_linear_slice5074 (z : ℂ)
+    (hre_lo : 0.5 ≤ z.re) (hre_hi : z.re ≤ 0.74) :
+    ‖riemannZeta z‖ ≤ 16 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by
+    intro h
+    linarith
+  have hetaLin := R02_D3_etaPair_linear_slice5074 z hre_lo hre_hi
+  have hden_ge := R02_D3_eta_denom_floor_slice5074 z hre_lo hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ =
+      ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (3 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.19 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 3 * (1 + |z.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (3 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (3 * (1 + |z.im|)) / 0.19 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (3 * (1 + |z.im|)) / 0.19 ≤ 16 * (1 + |z.im|) := by
+    have hratio : (3 : ℝ) / 0.19 ≤ 16 := by norm_num
+    have e : (3 * (1 + |z.im|)) / 0.19 = (3 / 0.19) * (1 + |z.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+#print axioms R02_D3_eta_denom_floor_slice5074
+#print axioms R02_D3_zeta_linear_slice5074
