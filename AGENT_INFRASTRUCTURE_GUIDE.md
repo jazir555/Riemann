@@ -3421,6 +3421,12 @@ sorry-free infrastructure and the complete commit ledger above.
   PROVED uniform-K reflection blocked on MVT route (chi exp-growth
   vs poly Gamma decay; crude 805-constant unreachable).
   Route: direct eta-pair linear on Re=0.05 (C05≈23) + Re=0.74/0.26 (ZU16).
+- 2026-09-08+ ZU16 (`fd4eb414`, zeta tail, 7× green 8693 jobs):
+  exponent-1.05 chain (summability → integral 1/0.05 → K0=21 →
+  eta linear → `2^0.95` floor → denom 0.93) →
+  **`‖ζ‖ ≤ 23·(1+|Im|)` on Re=0.05** (FE path superseded).
+  Residual: mirror on Re=0.74/0.26 + Gdamp instantiate + close
+  (ZU17, LARGE scope).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
