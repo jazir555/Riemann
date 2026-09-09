@@ -3448,6 +3448,12 @@ sorry-free infrastructure and the complete commit ledger above.
   floor: best-possible ≈9593 (crude 805/616 constants), ~960× over.
   Eta-mirror path CLOSED at its floor. Residual: line-uniform FE
   chi-ratio with Stirling exp decay (ZU18, LARGE scope).
+- 2026-09-09 ZU18 (`95fc3d4e`, zeta tail, 3× green 8693 jobs):
+  chi/ratio/linear/Gdamp CONDITIONALS on exp-Gamma hypothesis +
+  PROVED Gdamp CLOSED-NEGATIVE for `‖ζ‖≤10` regardless (damp-loss
+  forces a,b ≥ 9856; floor ≈9593+). Missing: Stirling remainder
+  (Mathlib Gamma: no exp-decay upper) + non-Gdamp endgame.
+  Residual: Stirling remainder from Gamma integral (ZU19, LARGE).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
