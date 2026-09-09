@@ -36337,3 +36337,122 @@ theorem R02_D3_zeta_linear_slice5074 (z : ℂ)
 
 #print axioms R02_D3_eta_denom_floor_slice5074
 #print axioms R02_D3_zeta_linear_slice5074
+
+/-!
+## Door-3 strip endgame, step 33 (zeta lane): high-slice rect cap + assembly.
+
+`16 * 11 = 176` on the high half (`0.5 ≤ Re ≤ 0.74`, `|Im| ≤ 10`).
+Two-slice assembly by-cases at `Re ≤ 0.5`: low half uses `561`
+(`R02_D3_zeta_rect_cap_slice0550`), high half uses `176`; best rect `561`.
+Gap to `‖ζ‖ ≤ 10` is `551`. FULL proofs, no sorry.
+-/
+
+/-- High-slice rect cap: `‖ζ‖ ≤ 176` on `0.5 ≤ Re ≤ 0.74`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_cap_slice5074 (z : ℂ)
+    (hre_lo : 0.5 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 176 := by
+  have h := R02_D3_zeta_linear_slice5074 z hre_lo hre_hi
+  have hcap : (16 : ℝ) * (1 + |z.im|) ≤ 176 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (16 : ℝ) * (1 + |z.im|) ≤ 16 * 11 :=
+          mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 176 := by norm_num
+  exact le_trans h hcap
+
+/-- Two-slice rect assembly: `‖ζ‖ ≤ 561` on the full R02 rect. -/
+theorem R02_D3_zeta_rect_slice_assembly2 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 561 := by
+  by_cases hcut : z.re ≤ 0.5
+  · have h := R02_D3_zeta_rect_cap_slice0550 z hre_lo hcut him
+    linarith
+  · have hlt : (0.5 : ℝ) < z.re := lt_of_not_ge hcut
+    have hle : (0.5 : ℝ) ≤ z.re := le_of_lt hlt
+    have h := R02_D3_zeta_rect_cap_slice5074 z hle hre_hi him
+    linarith
+
+/-- Updated gap verdict: high cap `176 < 561`; best rect `561` vs target `10`. -/
+theorem R02_D3_zeta_rect_slice_edge2 :
+    (176 : ℝ) < 561 ∧ (10 : ℝ) < 561 ∧ (561 : ℝ) - 10 = 551 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+#print axioms R02_D3_zeta_rect_cap_slice5074
+#print axioms R02_D3_zeta_rect_slice_assembly2
+#print axioms R02_D3_zeta_rect_slice_edge2
+
+/-!
+## Door-3 strip endgame, step 34 (zeta lane): peeled numerals at -1.5.
+
+Head-peel setup for the high-slice K0: exact `2^(-1.5) ≤ 0.36` via the
+banked `2^0.5 ≥ 1.414`, and the `M = 2` integral `∫ x in Ioi 2, x^(-1.5)
+= 2^(-0.5)/0.5 ≤ 1.42`. FULL proofs, no sorry.
+-/
+
+/-- Cleared-power head numeral `(2:ℝ)^(-1.5) ≤ 0.36`. -/
+theorem R02_D3_rpow2_neg150_le_036 :
+    (2 : ℝ) ^ (-1.5 : ℝ) ≤ 0.36 := by
+  have hsqrt := R02_D3_rpow_2005_ge_1414
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (1.5 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (2 : ℝ) ^ (1.5 : ℝ) = 2 * (2 : ℝ) ^ (0.5 : ℝ) := by
+    have e : (1.5 : ℝ) = 1 + 0.5 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (2.828 : ℝ) ≤ (2 : ℝ) ^ (1.5 : ℝ) := by
+    rw [hadd]
+    have e2 : (2.828 : ℝ) = 2 * 1.414 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hsqrt (by norm_num)
+  have hneg : (2 : ℝ) ^ (-1.5 : ℝ) = ((2 : ℝ) ^ (1.5 : ℝ))⁻¹ := by
+    have e : (-1.5 : ℝ) = -(1.5 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((2 : ℝ) ^ (1.5 : ℝ))⁻¹ ≤ (2.828 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hcap : (2.828 : ℝ)⁻¹ ≤ 0.36 := by norm_num
+  exact le_trans hinv hcap
+
+/-- Closed form `∫ x in Ioi 2, x^(-1.5) = 2^(-0.5)/0.5`. -/
+theorem R02_D3_integral150_Ioi2_eq :
+    (∫ x : ℝ in Set.Ioi (2 : ℝ), x ^ (-1.5 : ℝ)) =
+      (2 : ℝ) ^ (-0.5 : ℝ) / 0.5 := by
+  have hlt : (-1.5 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < (2 : ℝ) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.5 : ℝ) + 1 = -0.5 := by norm_num
+  rw [e1] at h
+  have e2 : (-(2 : ℝ) ^ (-0.5 : ℝ)) / (-0.5 : ℝ) =
+      (2 : ℝ) ^ (-0.5 : ℝ) / 0.5 := by ring
+  exact e2 ▸ h
+
+/-- Integral numeral `∫ x in Ioi 2, x^(-1.5) ≤ 1.42`. -/
+theorem R02_D3_integral150_Ioi2_le_142 :
+    (∫ x : ℝ in Set.Ioi (2 : ℝ), x ^ (-1.5 : ℝ)) ≤ 1.42 := by
+  have heq := R02_D3_integral150_Ioi2_eq
+  have hsqrt := R02_D3_rpow_2005_ge_1414
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (0.5 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (2 : ℝ) ^ (-0.5 : ℝ) = ((2 : ℝ) ^ (0.5 : ℝ))⁻¹ := by
+    have e : (-0.5 : ℝ) = -(0.5 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((2 : ℝ) ^ (0.5 : ℝ))⁻¹ ≤ (1.414 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+  have h071 : (1.414 : ℝ)⁻¹ ≤ 0.71 := by norm_num
+  have hhead : (2 : ℝ) ^ (-0.5 : ℝ) ≤ 0.71 := by
+    rw [hneg]
+    exact le_trans hinv h071
+  have hdiv : (2 : ℝ) ^ (-0.5 : ℝ) / 0.5 ≤ 0.71 / 0.5 := by
+    have e1 : (2 : ℝ) ^ (-0.5 : ℝ) / 0.5 =
+        (2 : ℝ) ^ (-0.5 : ℝ) * (0.5 : ℝ)⁻¹ := by ring
+    have e2 : (0.71 : ℝ) / 0.5 = 0.71 * (0.5 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h142 : (0.71 : ℝ) / 0.5 = 1.42 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (2 : ℝ), x ^ (-1.5 : ℝ))
+        = (2 : ℝ) ^ (-0.5 : ℝ) / 0.5 := heq
+      _ ≤ 0.71 / 0.5 := hdiv
+      _ = 1.42 := h142
+
+#print axioms R02_D3_rpow2_neg150_le_036
+#print axioms R02_D3_integral150_Ioi2_eq
+#print axioms R02_D3_integral150_Ioi2_le_142
