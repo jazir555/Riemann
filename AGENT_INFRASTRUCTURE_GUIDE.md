@@ -3426,6 +3426,14 @@ sorry-free infrastructure and the complete commit ledger above.
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
   it is NOT your file under any spelling.
+- 2026-09-09 RH-DIS (`3cfbb366`, RH tail, green 8685 jobs;
+  resumed after harness crash, tail intact): 7 genuine
+  unconditional theorems (imag-axis balls/rects/covers/bands,
+  axiom-free) + inventory (~60 conditionals classified) +
+  CIRCULARITY FLAGS (6 names transitively citing line-34 —
+  never citable). Capstone 0/4. Lane-banked Gamma remainder
+  UNWIRABLE in-tail (import cycle) — needs downstream file.
+  Residual: downstream wiring file (RH-WIRE).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
