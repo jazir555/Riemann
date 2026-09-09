@@ -3398,6 +3398,15 @@ sorry-free infrastructure and the complete commit ledger above.
   θ₀..θ₅ phases + 6 cos plugs + 6 rpow floors (25 theorems).
   Residual: S₆ assembly from floors (check eta sign/phase
   convention first; mirror d3_rpow_two pattern) (RX21).
+- 2026-09-09 RX21: convention lemmas (signed alternating) —
+  left `d3_inv_nat_cpow_re_eq` UNVERIFIED → RX22.
+- 2026-09-09 RX22: re-fix green (sorryAx eliminated) + 5u block
+  appended unvalidated → RX23.
+- 2026-09-09 RX23 (`bd517f00`, tail-scratch, 3× green 8682 jobs
+  via wrapper): 5u RED→GREEN (3-line repair: rpow-nonneg arg +
+  whole-term rfl rewrites) + Re residues 2–5 (bases 3–6).
+  Re(S₆)≈0.4977<0.53 CONFIRMED — 2-D enclosure mandatory.
+  Residual: Im factorization + im_0..5 (RX24).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
