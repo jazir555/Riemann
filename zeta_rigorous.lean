@@ -35428,3 +35428,170 @@ theorem R02_D3_zeta_linear_strip (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.
   exact le_trans (le_trans hstep1 hstep2) hcap
 
 #print axioms R02_D3_zeta_linear_strip
+
+/-!
+## Door-3 quantitative close, step 19 (zeta lane): conditional Stirling→chi bridge.
+
+Conditional on the missing line-uniform Stirling decay on `Re = 0.95`
+(`‖Γ(s)‖ ≤ 4 * exp(-1.58 * |Im|)`, beating banked cos growth in
+`R02_D3_chiCos_exp_line095`): uniform chi cap. Absent from Mathlib (checked):
+no `‖Γ(σ+it)‖ ≤ C * exp(-c|t|)` upper exists in `Gamma/*`. FULL proof, no sorry.
+-/
+
+/-- Conditional uniform chi cap `‖χ(s)‖ ≤ 8` on `Re = 0.95` from exp Gamma decay. -/
+theorem R02_D3_chi_uniform_of_expGamma
+    (hG : ∀ s : ℂ, s.re = 0.95 → ‖Complex.Gamma s‖ ≤ 4 * Real.exp (-1.58 * |s.im|))
+    (s : ℂ) (hre : s.re = 0.95) : ‖zetaChi s‖ ≤ 8 := by
+  have hchi := zetaChi_norm_le s
+  have hw : (0 : ℝ) ≤ s.re := by rw [hre]; norm_num
+  have hcp := R02_D3_chiCpow_le_one s hw
+  have hGc := hG s hre
+  have hE : Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ Real.exp (3.1416 * |s.im| / 2) := by
+    apply Real.exp_le_exp.mpr
+    rw [R02_D3_chiArg_im_eq_direct s]
+    have e : |Real.pi * s.im / 2| = (Real.pi / 2) * |s.im| := by
+      rw [show Real.pi * s.im / 2 = (Real.pi / 2) * s.im by ring, abs_mul,
+        abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+    rw [e]
+    have h2 : Real.pi / 2 ≤ 3.1416 / 2 := by
+      have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+      linarith
+    have h3 := mul_le_mul_of_nonneg_right h2 (abs_nonneg s.im)
+    linarith
+  have hnet : Real.exp (-1.58 * |s.im|) * Real.exp (3.1416 * |s.im| / 2) ≤ 1 := by
+    have hnn := abs_nonneg s.im
+    have hle : -1.58 * |s.im| + 3.1416 * |s.im| / 2 ≤ 0 := by linarith
+    calc Real.exp (-1.58 * |s.im|) * Real.exp (3.1416 * |s.im| / 2)
+        = Real.exp (-1.58 * |s.im| + 3.1416 * |s.im| / 2) := (Real.exp_add _ _).symm
+      _ ≤ Real.exp 0 := Real.exp_le_exp.mpr hle
+      _ = 1 := Real.exp_zero
+  have step1 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) ≤ 2 * 1 :=
+    mul_le_mul_of_nonneg_left hcp (by norm_num)
+  have hGnn : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  have step2 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ ≤
+      2 * 1 * (4 * Real.exp (-1.58 * |s.im|)) :=
+    mul_le_mul step1 hGc hGnn (by norm_num)
+  have hBnn : (0 : ℝ) ≤ 2 * 1 * (4 * Real.exp (-1.58 * |s.im|)) := by positivity
+  have hE0 : (0 : ℝ) ≤ Real.exp |((((Real.pi : ℂ)) * s / 2)).im| :=
+    (Real.exp_pos _).le
+  have step3 : (2 : ℝ) * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖ *
+      Real.exp |((((Real.pi : ℂ)) * s / 2)).im|
+      ≤ (2 * 1 * (4 * Real.exp (-1.58 * |s.im|))) * Real.exp (3.1416 * |s.im| / 2) :=
+    mul_le_mul step2 hE hE0 hBnn
+  have heq : (2 * 1 * (4 * Real.exp (-1.58 * |s.im|))) * Real.exp (3.1416 * |s.im| / 2)
+      = 8 * (Real.exp (-1.58 * |s.im|) * Real.exp (3.1416 * |s.im| / 2)) := by ring
+  rw [heq] at step3
+  have hfin : (8 : ℝ) * (Real.exp (-1.58 * |s.im|) * Real.exp (3.1416 * |s.im| / 2))
+      ≤ 8 := by
+    have h8 : (8 : ℝ) * (Real.exp (-1.58 * |s.im|) * Real.exp (3.1416 * |s.im| / 2))
+        ≤ 8 * 1 := mul_le_mul_of_nonneg_left hnet (by norm_num)
+    rwa [mul_one] at h8
+  exact le_trans hchi (le_trans step3 hfin)
+
+#print axioms R02_D3_chi_uniform_of_expGamma
+
+/-!
+## Door-3 quantitative close, step 20 (zeta lane): conditional uniform ratio → C05.
+
+Feeds step-19 uniform chi cap through banked `zeta_FE_chi` and the banked
+line-0.95 linear bound (`R02_D3_zeta_linear_line095`, `C = 58.86`) to an
+explicit conditional `C05 = 471` (`8 * 58.86 = 470.88`). FULL proofs, no sorry.
+-/
+
+/-- Conditional uniform FE ratio `‖ζ(1-s)‖ ≤ 8 * ‖ζ(s)‖` on `Re = 0.95`. -/
+theorem R02_D3_zeta_ratio_uniform_of_expGamma
+    (hG : ∀ s : ℂ, s.re = 0.95 → ‖Complex.Gamma s‖ ≤ 4 * Real.exp (-1.58 * |s.im|))
+    (s : ℂ) (hre : s.re = 0.95) :
+    ‖riemannZeta (1 - s)‖ ≤ 8 * ‖riemannZeta s‖ := by
+  have hs1 : ∀ n : ℕ, s ≠ (-(n : ℂ)) := by
+    intro n hn
+    have h1 : s.re = ((-(n : ℂ))).re := by rw [hn]
+    have h2 : ((-(n : ℂ))).re = -((n : ℝ)) := by simp
+    rw [h2] at h1
+    have hn0 : (0 : ℝ) ≤ ((n : ℝ)) := Nat.cast_nonneg n
+    rw [hre] at h1
+    linarith
+  have hs2 : s ≠ 1 := by
+    intro h
+    have h1 : s.re = 1 := by rw [h]; exact Complex.one_re
+    rw [hre] at h1
+    norm_num at h1
+  have hFE := zeta_FE_chi (s := s) hs1 hs2
+  have hChi := R02_D3_chi_uniform_of_expGamma hG s hre
+  rw [hFE, norm_mul]
+  exact mul_le_mul_of_nonneg_right hChi (norm_nonneg _)
+
+/-- Conditional line-0.05 linear bound `‖ζ‖ ≤ 471 * (1 + |Im|)` (explicit C05). -/
+theorem R02_D3_zeta_linear_line005_of_expGamma
+    (hG : ∀ s : ℂ, s.re = 0.95 → ‖Complex.Gamma s‖ ≤ 4 * Real.exp (-1.58 * |s.im|))
+    (w : ℂ) (hw : w.re = 0.05) :
+    ‖riemannZeta w‖ ≤ 471 * (1 + |w.im|) := by
+  have hs_re : (1 - w).re = 0.95 := by
+    rw [Complex.sub_re, Complex.one_re, hw]
+    norm_num
+  have hs_im : (1 - w).im = -w.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have h1s : (1 : ℂ) - (1 - w) = w := by
+    rw [sub_sub_cancel]
+  have hR := R02_D3_zeta_ratio_uniform_of_expGamma hG (1 - w) hs_re
+  have hZ := R02_D3_zeta_linear_line095 (1 - w) hs_re
+  rw [h1s] at hR
+  rw [hs_im, abs_neg] at hZ
+  have hX : (0 : ℝ) ≤ 1 + |w.im| := by linarith [abs_nonneg w.im]
+  have hcap : (8 : ℝ) * (58.86 * (1 + |w.im|)) ≤ 471 * (1 + |w.im|) := by
+    have e : (8 : ℝ) * (58.86 * (1 + |w.im|)) = (8 * 58.86) * (1 + |w.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right (by norm_num) hX
+  calc ‖riemannZeta w‖ ≤ 8 * ‖riemannZeta (1 - w)‖ := hR
+    _ ≤ 8 * (58.86 * (1 + |w.im|)) :=
+        mul_le_mul_of_nonneg_left hZ (by norm_num)
+    _ ≤ 471 * (1 + |w.im|) := hcap
+
+#print axioms R02_D3_zeta_ratio_uniform_of_expGamma
+#print axioms R02_D3_zeta_linear_line005_of_expGamma
+
+/-!
+## Door-3 quantitative close, step 21 (zeta lane): Gdamp caps + floor verdict.
+
+Instantiates banked Gdamp wholeline/strip lemmas: left cap from conditional
+`C05 = 471` (`805 * 471 = 379155`), right cap from banked `C74 = 16`
+(`616 * 16 = 9856`), strip `BddAbove` from banked strip `C = 111`.
+Verdict: Gdamp CANNOT reach `‖ζ‖ ≤ 10` — the damp-loss constants 805/616 force
+`a, b ≥ 9856` even with direct `C05 = 23` (`a = 18515`, prior floor 9593);
+any FE-improved `C05` in the tens still gives `a ≥ 805 * 22 > 17000`.
+Closing `≤ 10` needs a non-Gdamp endgame (direct rect bounds). FULL proofs.
+-/
+
+/-- Conditional Gdamp left cap `‖G‖ ≤ 379155` on `Re = 0.05` (`C05 = 471`). -/
+theorem R02_D3_Gdamp_left_of_expGamma
+    (hG : ∀ s : ℂ, s.re = 0.95 → ‖Complex.Gamma s‖ ≤ 4 * Real.exp (-1.58 * |s.im|))
+    (z : ℂ) (hre : z.re = 0.05) :
+    ‖R02_D3_Gdamp z‖ ≤ 379155 := by
+  have h := R02_D3_Gdamp_wholeline_left_of_linear 471 (by norm_num)
+    (R02_D3_zeta_linear_line005_of_expGamma hG) z hre
+  have e : (805 : ℝ) * 471 = 379155 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- Gdamp right cap `‖G‖ ≤ 9856` on `Re = 0.74` (banked `C74 = 16`). -/
+theorem R02_D3_Gdamp_right_of_C74 (z : ℂ) (hre : z.re = 0.74) :
+    ‖R02_D3_Gdamp z‖ ≤ 9856 := by
+  have h := R02_D3_Gdamp_wholeline_right_of_linear 16 (by norm_num)
+    R02_D3_zeta_linear_line074 z hre
+  have e : (616 : ℝ) * 16 = 9856 := by norm_num
+  rw [e] at h
+  exact h
+
+/-- Strip `BddAbove` for damped `G` from banked strip `C = 111`. -/
+theorem R02_D3_Gdamp_bddAbove_of_strip111 :
+    BddAbove ((norm ∘ R02_D3_Gdamp) ''
+      (Complex.HadamardThreeLines.verticalClosedStrip (0.05 : ℝ) (0.74 : ℝ))) := by
+  apply R02_D3_Gdamp_bddAbove_strip_of_linear 111 (by norm_num)
+  intro z hz
+  have hmem : z.re ∈ Set.Icc (0.05 : ℝ) (0.74 : ℝ) := hz
+  exact R02_D3_zeta_linear_strip z (Set.mem_Icc.mp hmem).1 (Set.mem_Icc.mp hmem).2
+
+#print axioms R02_D3_Gdamp_left_of_expGamma
+#print axioms R02_D3_Gdamp_right_of_C74
+#print axioms R02_D3_Gdamp_bddAbove_of_strip111
