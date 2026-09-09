@@ -3518,6 +3518,11 @@ sorry-free infrastructure and the complete commit ledger above.
   wrapper): tight low linear `50·(0.5+|Im|)` → far rect **525**,
   assembly6 best **525** (was 550; gain 25, residual 515).
   Residual: near-tight 357 + high-tight 151 (ZU27).
+- 2026-09-09 ZU27 (`a4a3e940`, zeta tail, 3× green 8693 jobs via
+  wrapper): near-tight **357** (was 374) + high-tight **151**
+  (was 154) + assembly7 (low 525). Global still 525 (far piece
+  [0.3,0.5] bottleneck). Residual: full assembly8 + far-piece
+  0305 attack (ZU28).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
