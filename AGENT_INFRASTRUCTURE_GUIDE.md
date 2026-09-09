@@ -3563,6 +3563,16 @@ sorry-free infrastructure and the complete commit ledger above.
   contiguous S16 ≈ 0.0400.
   Residual: STEP-3 assembly + even-k re-derivation via 3/8
   template (OA17).
+- 2026-09-09 OA17 (`164294a9` part 1, off-axis tail, 6× green):
+  assembly + tight even floors (−5/44,−6/35,−5/24,−11/50) +
+  tight pairs 5–8 (block −0.3634 beats −1/2); S11–S14 tights
+  appended unvalidated.
+- 2026-09-09 OA18 (`164294a9` part 2, off-axis tail, 3× green):
+  S11–S14 validated as-is + S15–S18 tights + tight assembly:
+  frontier **S18′ ≈ +0.00164 (FLIPS POSITIVE)**,
+  best contiguous **S16′ ≈ 0.1216** (was 0.0400),
+  residual 499241/770000 ≈ 0.64836.
+  Residual: tight 19/20 floors + S19/S20 tight folds (OA19).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
