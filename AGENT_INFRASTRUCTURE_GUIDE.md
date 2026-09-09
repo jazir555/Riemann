@@ -3474,6 +3474,11 @@ sorry-free infrastructure and the complete commit ledger above.
   not yet banked). Best rect 561/176 (was 561/1221).
   Residual: rect numeral + assembly + gap verdict, then K0
   tightening or new idea (ZU22).
+- 2026-09-09 ZU22 (`daf6a312`, zeta tail, coordinator-validated
+  green 8693 jobs; agent report empty, work orphaned in tree):
+  rect-176 numeral + assembly2 (561/176) + peeled Ioi2 integral
+  `≤1.42` (STEP 2 partial; head numeral open).
+  Residual: peeled head numeral + tightened K0 assembly (ZU23).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
