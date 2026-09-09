@@ -3657,6 +3657,11 @@ sorry-free infrastructure and the complete commit ledger above.
   −3/4/−2/5, rpow, inv/cpow, eta-21/22 eqs). Best S16′ ≈
   0.1216 (residual ≈0.528).
   Residual: eta 21/22 floors + pair-10 + S21/S22 (OA23).
+- 2026-09-09 OA23 (`8ee4acc9`, off-axis tail, 2× green 8702 jobs
+  + 1 contention kill with proper lock clear): eta-21 (−1/4) +
+  eta-22 (4/35) + pair-10 (−19/140) + S21′/S22′ folds
+  (frontier S22′ ≈ −0.222; best holds S16′ ≈ 0.1216).
+  Residual: PIVOT to sCut slow-cert for CutR10 fencing (OA24).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
