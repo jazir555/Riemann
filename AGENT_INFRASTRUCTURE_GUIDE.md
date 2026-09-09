@@ -3380,6 +3380,14 @@ sorry-free infrastructure and the complete commit ledger above.
   uppers); uniformity gap (pointwise t=1/2 vs ∀ seg) also open.
   Residual: direct 102-term head estimate + eta bridge + uniform
   lift (RX17, LARGE scope).
+- 2026-09-09 RX17: silent failure (empty diff, empty report) → RX18.
+- 2026-09-09 RX18 (`6bcf1639`, tail-scratch, 7× green 8682 jobs):
+  `head₁₀₂ = S₆ + tail` split + uniform eta-factor/shift/pair
+  bounds + uniform tail `16/67` + uniform bridge shape.
+  Gaps quantified: `‖head₁₀₂‖≈0.660`, `‖S₆‖≈0.559`, A=3 margin
+  +0.251 viable; eta bridge needs Dirichlet-eta continuation
+  (Mathlib: Re>1 only); uniform head needs >16/67.
+  Residual: rigorous S₆ bound via cos/log intervals (RX19, LARGE).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
