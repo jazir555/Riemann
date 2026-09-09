@@ -4715,3 +4715,411 @@ theorem d3Zeta_uniform_lower_of_head
   exact hkey
 
 #print axioms d3Zeta_uniform_lower_of_head
+
+/-! ## Door-3 remainder 5 (step 5r): s₀-phase trig/log interval machinery.
+
+For the `‖S₆‖ ≥ 53/100` blocker we need interval bounds on
+`θ_k = (1/2)·Real.log (k+1)` (k = 0..5), cosine floors at those phases, and
+rpow floors `(k+1)^(-(1/2))`. This block banks the cosine Taylor floor, the
+log bounds, the phase intervals, the cosine plugs, and the cleared-power
+rpow floors. It mirrors the validated off-axis `R05` recipe but is proved
+fully in-tail (no dependency on `zeta_rigorous.lean` / off-axis files).
+-/
+
+/-- Quadratic cosine floor: `1 - x^2/2 ≤ cos x` for `0 ≤ x ≤ 2`.
+Via `cos x = 1 - 2·sin(x/2)^2` (`Real.cos_two_mul` + `sin²+cos²=1`),
+`sin t ≤ t` (`Real.sin_le`), and `0 ≤ sin` on `[0,π]`. -/
+theorem d3_cos_quad_lower {x : ℝ} (hx0 : 0 ≤ x) (hx2 : x ≤ 2) :
+    1 - x ^ 2 / 2 ≤ Real.cos x := by
+  have hpi : (3.1415 : ℝ) < Real.pi := Real.pi_gt_d4
+  have ht0 : (0 : ℝ) ≤ x / 2 := by positivity
+  have htpi : x / 2 ≤ Real.pi := by linarith
+  have hsin_nn : (0 : ℝ) ≤ Real.sin (x / 2) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi ht0 htpi
+  have hsin_le : Real.sin (x / 2) ≤ x / 2 := Real.sin_le ht0
+  have hsq : Real.sin (x / 2) ^ 2 ≤ (x / 2) ^ 2 :=
+    pow_le_pow_left₀ hsin_nn hsin_le 2
+  have h2t : 2 * (x / 2) = x := by ring
+  have hcos2 : Real.cos x = 1 - 2 * Real.sin (x / 2) ^ 2 := by
+    have h := Real.cos_two_mul (x / 2)
+    have hpy := Real.sin_sq_add_cos_sq (x / 2)
+    rw [h2t] at h
+    linarith
+  have ht2 : (x / 2) ^ 2 = x ^ 2 / 4 := by ring
+  rw [hcos2]
+  linarith
+
+#print axioms d3_cos_quad_lower
+
+/-- d9 `log 2` lower, rounded to 6 digits (mirrors `R05` usage). -/
+theorem d3_log2_ge : (0.693147 : ℝ) < Real.log 2 := by
+  have h9 := Real.log_two_gt_d9
+  linarith
+
+/-- d9 `log 2` upper, rounded to 6 digits (mirrors `R05` usage). -/
+theorem d3_log2_le : Real.log 2 < (0.693148 : ℝ) := by
+  have h9 := Real.log_two_lt_d9
+  linarith
+
+/-- `log 4 = 2 * log 2` (exact, for the `θ₃` phase). -/
+theorem d3_log_four_eq : Real.log 4 = 2 * Real.log 2 := by
+  have h4 : (4 : ℝ) = 2 ^ (2 : ℕ) := by norm_num
+  rw [h4, Real.log_pow]
+  norm_num
+
+/-- Fresh `log 3` lower (`1.0529 ≤ log 3`) from `log 3 = 2·log 2 + log(3/4)`
+with the d9 `log 2` lower and `log(4/3) ≤ 1/3`
+(mirrors the `R05_log_seven_ge` recipe). -/
+theorem d3_log_three_ge : (1.0529 : ℝ) ≤ Real.log 3 := by
+  have h2lo := d3_log2_ge
+  have hub43 : Real.log (4 / 3 : ℝ) ≤ (1 / 3 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 4 / 3)
+    have he : (4 / 3 : ℝ) - 1 = (1 / 3 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (3 / 4 : ℝ) = -Real.log (4 / 3 : ℝ) := by
+    have heq : (3 / 4 : ℝ) = (4 / 3 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hmeq : (4 : ℝ) * (3 / 4) = 3 := by norm_num
+  have hlog3 : Real.log 3 = 2 * Real.log 2 + Real.log (3 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (3 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, d3_log_four_eq] at h
+    exact h
+  have hfin : (1.0529 : ℝ) ≤ 2 * (0.693147 : ℝ) - (1 / 3 : ℝ) := by
+    norm_num
+  rw [hlog3, hinv]
+  linarith
+
+#print axioms d3_log_three_ge
+
+/-- Fresh `log 3` upper (`log 3 ≤ 1.1363`) from `log 3 = 2·log 2 + log(3/4)`
+with the d9 `log 2` upper and `log(3/4) ≤ -1/4`
+(mirrors the `R05_log_seven_le` recipe). -/
+theorem d3_log_three_le : Real.log 3 ≤ (1.1363 : ℝ) := by
+  have h2hi := d3_log2_le
+  have hub34 : Real.log (3 / 4 : ℝ) ≤ (-1 / 4 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 3 / 4)
+    have he : (3 / 4 : ℝ) - 1 = (-1 / 4 : ℝ) := by norm_num
+    linarith
+  have hmeq : (4 : ℝ) * (3 / 4) = 3 := by norm_num
+  have hlog3 : Real.log 3 = 2 * Real.log 2 + Real.log (3 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (3 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, d3_log_four_eq] at h
+    exact h
+  have hfin : 2 * (0.693148 : ℝ) + (-1 / 4 : ℝ) ≤ (1.1363 : ℝ) := by
+    norm_num
+  rw [hlog3]
+  linarith
+
+/-- Fresh `log 5` lower (`1.5862 ≤ log 5`) from `log 5 = 2·log 2 + log(5/4)`
+with the d9 `log 2` lower and `log(4/5) ≤ -1/5`. -/
+theorem d3_log_five_ge : (1.5862 : ℝ) ≤ Real.log 5 := by
+  have h2lo := d3_log2_ge
+  have hub45 : Real.log (4 / 5 : ℝ) ≤ (-1 / 5 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 4 / 5)
+    have he : (4 / 5 : ℝ) - 1 = (-1 / 5 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (5 / 4 : ℝ) = -Real.log (4 / 5 : ℝ) := by
+    have heq : (5 / 4 : ℝ) = (4 / 5 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hmeq : (4 : ℝ) * (5 / 4) = 5 := by norm_num
+  have hlog5 : Real.log 5 = 2 * Real.log 2 + Real.log (5 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (5 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, d3_log_four_eq] at h
+    exact h
+  have hfin : (1.5862 : ℝ) ≤ 2 * (0.693147 : ℝ) - (-1 / 5 : ℝ) := by
+    norm_num
+  rw [hlog5, hinv]
+  linarith
+
+#print axioms d3_log_five_ge
+
+/-- Fresh `log 5` upper (`log 5 ≤ 1.6363`) from `log 5 = 2·log 2 + log(5/4)`
+with the d9 `log 2` upper and `log(5/4) ≤ 1/4`. -/
+theorem d3_log_five_le : Real.log 5 ≤ (1.6363 : ℝ) := by
+  have h2hi := d3_log2_le
+  have hub54 : Real.log (5 / 4 : ℝ) ≤ (1 / 4 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 5 / 4)
+    have he : (5 / 4 : ℝ) - 1 = (1 / 4 : ℝ) := by norm_num
+    linarith
+  have hmeq : (4 : ℝ) * (5 / 4) = 5 := by norm_num
+  have hlog5 : Real.log 5 = 2 * Real.log 2 + Real.log (5 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (5 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, d3_log_four_eq] at h
+    exact h
+  have hfin : 2 * (0.693148 : ℝ) + (1 / 4 : ℝ) ≤ (1.6363 : ℝ) := by
+    norm_num
+  rw [hlog5]
+  linarith
+
+/-- `log 6 = log 2 + log 3` (exact, for the `θ₅` phase). -/
+theorem d3_log_six_eq : Real.log 6 = Real.log 2 + Real.log 3 := by
+  have hmeq : (2 : ℝ) * 3 = 6 := by norm_num
+  have h := Real.log_mul (show (2 : ℝ) ≠ 0 by norm_num)
+    (show (3 : ℝ) ≠ 0 by norm_num)
+  rw [hmeq] at h
+  exact h
+
+/-- `log 6` lower (`1.746 ≤ log 6`) from d9 `log 2` + fresh `log 3`. -/
+theorem d3_log_six_ge : (1.746 : ℝ) ≤ Real.log 6 := by
+  have h2 := d3_log2_ge
+  have h3 := d3_log_three_ge
+  rw [d3_log_six_eq]
+  linarith
+
+#print axioms d3_log_six_ge
+
+/-- `log 6` upper (`log 6 ≤ 1.8295`) from d9 `log 2` + fresh `log 3`. -/
+theorem d3_log_six_le : Real.log 6 ≤ (1.8295 : ℝ) := by
+  have h2 := d3_log2_le
+  have h3 := d3_log_three_le
+  rw [d3_log_six_eq]
+  linarith
+
+/-- Phase `θ₀ = 0` exactly (`log 1 = 0`). -/
+theorem d3_theta0_eq : (1 / 2 : ℝ) * Real.log 1 = 0 := by
+  rw [Real.log_one, mul_zero]
+
+/-- Phase `θ₁ = (1/2)·log 2` in `[0.346573, 0.346574]` (d9 `log 2`). -/
+theorem d3_theta1_mem :
+    (0.346573 : ℝ) ≤ (1 / 2) * Real.log 2 ∧ (1 / 2) * Real.log 2 ≤ (0.346574 : ℝ) := by
+  have h2lo := d3_log2_ge
+  have h2hi := d3_log2_le
+  constructor <;> linarith
+
+/-- Phase `θ₂ = (1/2)·log 3` in `[0.5264, 0.5682]` (fresh `log 3`). -/
+theorem d3_theta2_mem :
+    (0.5264 : ℝ) ≤ (1 / 2) * Real.log 3 ∧ (1 / 2) * Real.log 3 ≤ (0.5682 : ℝ) := by
+  have hlo := d3_log_three_ge
+  have hhi := d3_log_three_le
+  constructor <;> linarith
+
+/-- Phase `θ₃ = (1/2)·log 4` in `[0.693147, 0.693148]` (d9 via `log 4`). -/
+theorem d3_theta3_mem :
+    (0.693147 : ℝ) ≤ (1 / 2) * Real.log 4 ∧ (1 / 2) * Real.log 4 ≤ (0.693148 : ℝ) := by
+  have h2lo := d3_log2_ge
+  have h2hi := d3_log2_le
+  have he := d3_log_four_eq
+  constructor <;> rw [he] <;> linarith
+
+#print axioms d3_theta3_mem
+
+/-- Phase `θ₄ = (1/2)·log 5` in `[0.7931, 0.8182]` (fresh `log 5`). -/
+theorem d3_theta4_mem :
+    (0.7931 : ℝ) ≤ (1 / 2) * Real.log 5 ∧ (1 / 2) * Real.log 5 ≤ (0.8182 : ℝ) := by
+  have hlo := d3_log_five_ge
+  have hhi := d3_log_five_le
+  constructor <;> linarith
+
+/-- Phase `θ₅ = (1/2)·log 6` in `[0.873, 0.9148]` (fresh `log 6`). -/
+theorem d3_theta5_mem :
+    (0.873 : ℝ) ≤ (1 / 2) * Real.log 6 ∧ (1 / 2) * Real.log 6 ≤ (0.9148 : ℝ) := by
+  have hlo := d3_log_six_ge
+  have hhi := d3_log_six_le
+  constructor <;> linarith
+
+/-- Cosine at `θ₀` is exactly `1`. -/
+theorem d3_cos_theta0 : Real.cos ((1 / 2 : ℝ) * Real.log 1) = 1 := by
+  rw [d3_theta0_eq, Real.cos_zero]
+
+/-- Cosine floor at `θ₁` (`93/100 ≤ cos θ₁`) via `d3_cos_quad_lower`. -/
+theorem d3_cos_theta1_lower :
+    (93 / 100 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 2) := by
+  have hmem := d3_theta1_mem
+  have hpos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 2 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 2 ≤ (0.346574 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 2) ^ 2 ≤ (0.346574 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (93 / 100 : ℝ) ≤ 1 - (0.346574 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+
+#print axioms d3_cos_theta1_lower
+
+/-- Cosine floor at `θ₂` (`83/100 ≤ cos θ₂`) via `d3_cos_quad_lower`. -/
+theorem d3_cos_theta2_lower :
+    (83 / 100 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 3) := by
+  have hmem := d3_theta2_mem
+  have hpos : (0 : ℝ) < Real.log 3 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 3 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 3 ≤ (0.5682 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 3) ^ 2 ≤ (0.5682 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (83 / 100 : ℝ) ≤ 1 - (0.5682 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+
+/-- Cosine floor at `θ₃` (`3/4 ≤ cos θ₃`) via `d3_cos_quad_lower`. -/
+theorem d3_cos_theta3_lower :
+    (3 / 4 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 4) := by
+  have hmem := d3_theta3_mem
+  have hpos : (0 : ℝ) < Real.log 4 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 4 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 4 ≤ (0.693148 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 4) ^ 2 ≤ (0.693148 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (3 / 4 : ℝ) ≤ 1 - (0.693148 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+
+#print axioms d3_cos_theta3_lower
+
+/-- Cosine floor at `θ₄` (`3/5 ≤ cos θ₄`) via `d3_cos_quad_lower`. -/
+theorem d3_cos_theta4_lower :
+    (3 / 5 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 5) := by
+  have hmem := d3_theta4_mem
+  have hpos : (0 : ℝ) < Real.log 5 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 5 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 5 ≤ (0.8182 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 5) ^ 2 ≤ (0.8182 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (3 / 5 : ℝ) ≤ 1 - (0.8182 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+
+/-- Cosine floor at `θ₅` (`1/2 ≤ cos θ₅`) via `d3_cos_quad_lower`. -/
+theorem d3_cos_theta5_lower :
+    (1 / 2 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 6) := by
+  have hmem := d3_theta5_mem
+  have hpos : (0 : ℝ) < Real.log 6 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 6 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 6 ≤ (0.9148 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 6) ^ 2 ≤ (0.9148 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (1 / 2 : ℝ) ≤ 1 - (0.9148 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+
+#print axioms d3_cos_theta5_lower
+
+/-- Rpow floor (`7/10 ≤ 2^(-1/2)`) via cleared `(2^(1/2))^2 = 2 ≤ (10/7)^2`
+(mirrors the `R05_*_rpow_*` recipe). -/
+theorem d3_rpow_two_neghalf_ge : (7 / 10 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (2 : ℝ) ^ ((1 / 2 : ℝ)) ≤ (10 / 7 : ℝ) := by
+    have hcleared : (((2 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))
+        ≤ ((10 / 7 : ℝ) ^ (2 : ℕ)) := by
+      have e : ((((2 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 2 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+        rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+        exact Real.rpow_one 2
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (2 : ℝ) ^ (-(1 / 2) : ℝ) = (((2 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2) _
+  rw [hrw, show (7 / 10 : ℝ) = ((10 / 7 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 10 / 7 by norm_num) hpos).mpr hsqrt
+
+#print axioms d3_rpow_two_neghalf_ge
+
+/-- Rpow floor (`1/2 ≤ 3^(-1/2)`) via cleared `(3^(1/2))^2 = 3 ≤ 2^2`. -/
+theorem d3_rpow_three_neghalf_ge : (1 / 2 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (3 : ℝ) ^ ((1 / 2 : ℝ)) ≤ (2 : ℝ) := by
+    have hcleared : (((3 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))
+        ≤ (((2 : ℝ)) ^ (2 : ℕ)) := by
+      have e : ((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 3 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+        rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+        exact Real.rpow_one 3
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (3 : ℝ) ^ (-(1 / 2) : ℝ) = (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [hrw]
+  conv_lhs => rw [show (1 / 2 : ℝ) = ((2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 2 by norm_num) hpos).mpr hsqrt
+
+/-- Rpow floor (`2/5 ≤ 5^(-1/2)`) via cleared `(5^(1/2))^2 = 5 ≤ (5/2)^2`. -/
+theorem d3_rpow_five_neghalf_ge : (2 / 5 : ℝ) ≤ (5 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (5 : ℝ) ^ ((1 / 2 : ℝ)) ≤ (5 / 2 : ℝ) := by
+    have hcleared : (((5 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))
+        ≤ (((5 / 2 : ℝ)) ^ (2 : ℕ)) := by
+      have e : ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 5 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+        rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+        exact Real.rpow_one 5
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (5 : ℝ) ^ (-(1 / 2) : ℝ) = (((5 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _
+  rw [hrw, show (2 / 5 : ℝ) = ((5 / 2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 5 / 2 by norm_num) hpos).mpr hsqrt
+
+#print axioms d3_rpow_five_neghalf_ge
+
+/-- Rpow floor (`2/5 ≤ 6^(-1/2)`) via cleared `(6^(1/2))^2 = 6 ≤ (5/2)^2`. -/
+theorem d3_rpow_six_neghalf_ge : (2 / 5 : ℝ) ≤ (6 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (6 : ℝ) ^ ((1 / 2 : ℝ)) ≤ (5 / 2 : ℝ) := by
+    have hcleared : (((6 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))
+        ≤ (((5 / 2 : ℝ)) ^ (2 : ℕ)) := by
+      have e : ((((6 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 6 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 6)]
+        rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+        exact Real.rpow_one 6
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+  have hpos : (0 : ℝ) < (6 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (6 : ℝ) ^ (-(1 / 2) : ℝ) = (((6 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 6) _
+  rw [hrw, show (2 / 5 : ℝ) = ((5 / 2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 5 / 2 by norm_num) hpos).mpr hsqrt
+
+/-- Exact floor at `n = 1` (`1^(-1/2) = 1`). -/
+theorem d3_rpow_one_neghalf : (1 : ℝ) ^ (-(1 / 2) : ℝ) = 1 :=
+  Real.one_rpow _
+
+/-- Exact floor at `n = 4` (`4^(-1/2) = 1/2`) via `4^(1/2) = 2`. -/
+theorem d3_rpow_four_neghalf : (4 : ℝ) ^ (-(1 / 2) : ℝ) = 1 / 2 := by
+  have h4 : (4 : ℝ) ^ ((1 / 2 : ℝ)) = 2 := by
+    have h44 : (4 : ℝ) = 2 ^ (2 : ℕ) := by norm_num
+    rw [h44, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [show (((((2 : ℕ))) : ℝ)) * (1 / 2 : ℝ) = 1 by norm_num]
+    exact Real.rpow_one 2
+  have hrw : (4 : ℝ) ^ (-(1 / 2) : ℝ) = (((4 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4) _
+  rw [hrw, h4]
+  norm_num
+
+#print axioms d3_rpow_six_neghalf_ge
+#print axioms d3_rpow_one_neghalf
+#print axioms d3_rpow_four_neghalf
+#print axioms d3_log2_ge
+#print axioms d3_log2_le
+#print axioms d3_log_four_eq
+#print axioms d3_log_three_le
+#print axioms d3_log_five_le
+#print axioms d3_log_six_eq
+#print axioms d3_log_six_le
+#print axioms d3_theta0_eq
+#print axioms d3_theta1_mem
+#print axioms d3_theta2_mem
+#print axioms d3_theta4_mem
+#print axioms d3_theta5_mem
+#print axioms d3_cos_theta0
+#print axioms d3_cos_theta2_lower
+#print axioms d3_cos_theta4_lower
+#print axioms d3_rpow_three_neghalf_ge
