@@ -4956,3 +4956,1152 @@ theorem R05_eta_twelfth_Re_ge :
 #print axioms R05_eta_twelfth_Re_ge
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Nine-term split (`S9 = S8 + term 8`, non-pair slow-sum step). -/
+theorem R05_S9_eq :
+    (∑ k ∈ Finset.range 9, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 8, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 8 := by
+  rw [show (9 : Nat) = 8 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 nine-term real part (`4913/15000 ≤ Re S9`,
+from `923/2500 - 1/24`). -/
+theorem R05_S9_Re_ge :
+    (4913 / 15000 : Real) ≤
+      (∑ k ∈ Finset.range 9, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S9_eq, Complex.add_re]
+  have hS8 := R05_S8_Re_ge
+  have ht := R05_eta_ninth_Re_ge
+  have hle : (4913 / 15000 : Real) ≤ (923 / 2500 : Real) + (-(1 / 24) : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_S9_eq
+#print axioms R05_S9_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Ten-term split (`S10 = S9 + term 9`, non-pair slow-sum step). -/
+theorem R05_S10_eq :
+    (∑ k ∈ Finset.range 10, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 9, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 9 := by
+  rw [show (10 : Nat) = 9 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 ten-term real part (`10951/30000 ≤ Re S10`,
+from `4913/15000 + 3/80`). -/
+theorem R05_S10_Re_ge :
+    (10951 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 10, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S10_eq, Complex.add_re]
+  have hS9 := R05_S9_Re_ge
+  have ht := R05_eta_tenth_Re_ge
+  have hle : (10951 / 30000 : Real) ≤ (4913 / 15000 : Real) + (3 / 80 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_S10_eq
+#print axioms R05_S10_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-14 split (`log 14 = log 2 + log 7`) via `14 = 2 * 7`. -/
+theorem R05_log_fourteen_eq :
+    Real.log 14 = Real.log 2 + Real.log 7 := by
+  have h14 : (14 : Real) = 2 * 7 := by norm_num
+  rw [h14, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase of the R05 thirteenth eta term (`0.75 * log 14` in `[1.9722, 1.9858]`)
+from the `log 2` d9 bounds and banked `R05_log_seven` bounds
+via `R05_log_fourteen_eq`. -/
+theorem R05_theta14_mem :
+    (1.9722 : Real) ≤ 0.75 * Real.log 14 ∧ 0.75 * Real.log 14 ≤ (1.9858 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h7lo := R05_log_seven_ge
+  have h7hi := R05_log_seven_le
+  have hx : 0.75 * Real.log 14 = 0.75 * (Real.log 2 + Real.log 7) := by
+    rw [R05_log_fourteen_eq]
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the thirteenth-term phase (`cos (0.75 * log 14) ≤ -1/4`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log14_upper :
+    Real.cos (0.75 * Real.log 14) ≤ (-1 / 4 : Real) := by
+  have hmem := R05_theta14_mem
+  have hpos : (0 : Real) < Real.log 14 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 14 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (1.9722 : Real) ≤ 0.75 * Real.log 14 := hmem.1
+  have hhi : 0.75 * Real.log 14 ≤ (1.9858 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (1.9722 : Real) ^ 2 ≤ (0.75 * Real.log 14) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 14) ^ 4 ≤ (1.9858 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (1.9722 : Real) ^ 2 / 2 + (1.9858 : Real) ^ 4 / 24 ≤
+      (-1 / 4 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_log_fourteen_eq
+#print axioms R05_theta14_mem
+#print axioms R05_cos_075log14_upper
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Rpow upper (`14 ^ 0.395 ≤ 3`) via cleared `(14 ^ (2/5)) ^ 5 = 196 ≤ 243`. -/
+theorem R05_fourteen_rpow_le : (14 : Real) ^ (0.395 : Real) ≤ (3 : Real) := by
+  have hpow : ((((14 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((3 : Real)) ^ (5 : Nat) := by
+    have e : ((((14 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (14 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 14)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 14 2
+    rw [e]
+    norm_num
+  have hstep : (14 : Real) ^ ((2 / 5 : Real)) ≤ (3 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (14 : Real) ^ (0.395 : Real) ≤ (14 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (3 : Real) := hstep
+
+/-- Real rpow fourteenth inverse lower (`1/3 ≤ 14 ^ (-0.395)`) from `14 ^ 0.395 ≤ 3`. -/
+theorem R05_rpow_fourteen_neg0395_ge :
+    (1 / 3 : Real) ≤ (14 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_fourteen_rpow_le
+  have hpos : (0 : Real) < (14 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (14 : Real) ^ (-0.395 : Real) = (((14 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 3 : Real) = ((3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_fourteen_rpow_le
+#print axioms R05_rpow_fourteen_neg0395_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 fourteenth eta inverse
+(`Re (14 ^ s)⁻¹ = 14 ^ (-0.395) * cos (0.75 * log 14)`). -/
+theorem R05_inv_fourteen_cpow_re_eq :
+    (((((14 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (14 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 14) := by
+  have h14eq : ((((14 : Nat)) : Complex)) = (14 : Complex) := by norm_cast
+  rw [h14eq]
+  have hlog : Complex.log (14 : Complex) = (((Real.log 14 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 14)).symm
+  have hlogre : (Complex.log (14 : Complex)).re = Real.log 14 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (14 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (14 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 14 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (14 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 14 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (14 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (14 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (14 : Complex) ≠ 0)]
+  have hinv : ((14 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (14 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (14 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 14 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (14 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 14 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (14 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 14 * 0.395)) * Real.cos (-(Real.log 14 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 14 * (-0.75))) = Real.cos (0.75 * Real.log 14) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 14 * 0.395)) = (14 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 14 * 0.395) = Real.log 14 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 14)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 fourteenth eta term in closed form (`term 13 = -((14 ^ s)⁻¹)`,
+k = 13, n = 14, since `(-1)^13 = -1`). -/
+theorem R05_eta_fourteenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 13 =
+      -((((14 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (13 + 1 : Nat) = 14 := rfl
+  have hcast : ((((13 + 1 : Nat)) : Complex)) = ((((14 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (13 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+#print axioms R05_inv_fourteen_cpow_re_eq
+#print axioms R05_eta_fourteenth_eq
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 fourteenth eta term (`1/12 ≤ Re term14`,
+from `(1/3) * (1/4)`: the `(-1)^13` sign flips the negative fourteenth cosine
+into a positive contribution). -/
+theorem R05_eta_fourteenth_Re_ge :
+    (1 / 12 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 13).re := by
+  rw [R05_eta_fourteenth_eq, Complex.neg_re, R05_inv_fourteen_cpow_re_eq]
+  have hamp := R05_rpow_fourteen_neg0395_ge
+  have hcos := R05_cos_075log14_upper
+  have hamp_pos : (0 : Real) < (14 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (1 / 4 : Real) ≤ -(Real.cos (0.75 * Real.log 14)) := by
+    linarith
+  have hprod : (1 / 3 : Real) * (1 / 4 : Real) ≤
+      (14 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 14))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (1 / 3 : Real) * (1 / 4 : Real) = (1 / 12 : Real) := by
+    norm_num
+  have hsplit : (14 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 14))) =
+      -((14 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 14)) := by
+    ring
+  linarith
+
+#print axioms R05_eta_fourteenth_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Log-16 double-double (`log 16 = 4 * log 2`) via `16 = 4 * 4`. -/
+theorem R05_log_sixteen_eq :
+    Real.log 16 = 4 * Real.log 2 := by
+  have h16 : (16 : Real) = 4 * 4 := by norm_num
+  rw [h16, Real.log_mul (by norm_num) (by norm_num)]
+  have h4 : Real.log 4 = 2 * Real.log 2 := by
+    have h4e : (4 : Real) = 2 * 2 := by norm_num
+    rw [h4e, Real.log_mul (by norm_num) (by norm_num)]
+    ring
+  rw [h4]
+  ring
+
+/-- Phase of the R05 sixteenth eta term (`0.75 * log 16` in `[2.0794, 2.0795]`)
+from the banked `log 2` d9 bounds via `R05_log_sixteen_eq`. -/
+theorem R05_theta16_mem :
+    (2.0794 : Real) ≤ 0.75 * Real.log 16 ∧ 0.75 * Real.log 16 ≤ (2.0795 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have hx : 0.75 * Real.log 16 = 3 * Real.log 2 := by
+    rw [R05_log_sixteen_eq]
+    ring
+  constructor <;> rw [hx] <;> linarith
+
+/-- Cosine upper at the sixteenth-term phase (`cos (0.75 * log 16) ≤ -1/3`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log16_upper :
+    Real.cos (0.75 * Real.log 16) ≤ (-1 / 3 : Real) := by
+  have hmem := R05_theta16_mem
+  have hpos : (0 : Real) < Real.log 16 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 16 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (2.0794 : Real) ≤ 0.75 * Real.log 16 := hmem.1
+  have hhi : 0.75 * Real.log 16 ≤ (2.0795 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (2.0794 : Real) ^ 2 ≤ (0.75 * Real.log 16) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 16) ^ 4 ≤ (2.0795 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (2.0794 : Real) ^ 2 / 2 + (2.0795 : Real) ^ 4 / 24 ≤
+      (-1 / 3 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_log_sixteen_eq
+#print axioms R05_theta16_mem
+#print axioms R05_cos_075log16_upper
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Rpow upper (`16 ^ 0.395 ≤ 16/5`) via cleared `(16 ^ (2/5)) ^ 5 = 256 ≤ 335`. -/
+theorem R05_sixteen_rpow_le : (16 : Real) ^ (0.395 : Real) ≤ (16 / 5 : Real) := by
+  have hpow : ((((16 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((16 / 5 : Real)) ^ (5 : Nat) := by
+    have e : ((((16 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (16 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 16)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 16 2
+    rw [e]
+    norm_num
+  have hstep : (16 : Real) ^ ((2 / 5 : Real)) ≤ (16 / 5 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (16 : Real) ^ (0.395 : Real) ≤ (16 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (16 / 5 : Real) := hstep
+
+/-- Real rpow sixteenth inverse lower (`5/16 ≤ 16 ^ (-0.395)`)
+from `16 ^ 0.395 ≤ 16/5`. -/
+theorem R05_rpow_sixteen_neg0395_ge :
+    (5 / 16 : Real) ≤ (16 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_sixteen_rpow_le
+  have hpos : (0 : Real) < (16 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (16 : Real) ^ (-0.395 : Real) = (((16 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (5 / 16 : Real) = ((16 / 5 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_sixteen_rpow_le
+#print axioms R05_rpow_sixteen_neg0395_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 sixteenth eta inverse
+(`Re (16 ^ s)⁻¹ = 16 ^ (-0.395) * cos (0.75 * log 16)`). -/
+theorem R05_inv_sixteen_cpow_re_eq :
+    (((((16 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (16 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 16) := by
+  have h16eq : ((((16 : Nat)) : Complex)) = (16 : Complex) := by norm_cast
+  rw [h16eq]
+  have hlog : Complex.log (16 : Complex) = (((Real.log 16 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 16)).symm
+  have hlogre : (Complex.log (16 : Complex)).re = Real.log 16 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (16 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (16 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 16 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (16 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 16 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (16 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (16 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (16 : Complex) ≠ 0)]
+  have hinv : ((16 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (16 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (16 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 16 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (16 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 16 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (16 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 16 * 0.395)) * Real.cos (-(Real.log 16 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 16 * (-0.75))) = Real.cos (0.75 * Real.log 16) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 16 * 0.395)) = (16 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 16 * 0.395) = Real.log 16 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 16)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 sixteenth eta term in closed form (`term 15 = -((16 ^ s)⁻¹)`,
+k = 15, n = 16, since `(-1)^15 = -1`). -/
+theorem R05_eta_sixteenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 15 =
+      -((((16 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (15 + 1 : Nat) = 16 := rfl
+  have hcast : ((((15 + 1 : Nat)) : Complex)) = ((((16 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (15 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- Real part of the R05 sixteenth eta term (`1/10 ≤ Re term16`,
+from `(5/16) * (1/3) = 5/48 ≥ 1/10`: the `(-1)^15` sign flips the negative
+sixteenth cosine into a positive contribution). -/
+theorem R05_eta_sixteenth_Re_ge :
+    (1 / 10 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 15).re := by
+  rw [R05_eta_sixteenth_eq, Complex.neg_re, R05_inv_sixteen_cpow_re_eq]
+  have hamp := R05_rpow_sixteen_neg0395_ge
+  have hcos := R05_cos_075log16_upper
+  have hamp_pos : (0 : Real) < (16 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (1 / 3 : Real) ≤ -(Real.cos (0.75 * Real.log 16)) := by
+    linarith
+  have hprod : (5 / 16 : Real) * (1 / 3 : Real) ≤
+      (16 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 16))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (5 / 16 : Real) * (1 / 3 : Real) = (5 / 48 : Real) := by
+    norm_num
+  have hle : (1 / 10 : Real) ≤ (5 / 48 : Real) := by norm_num
+  have hsplit : (16 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 16))) =
+      -((16 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 16)) := by
+    ring
+  linarith
+
+#print axioms R05_inv_sixteen_cpow_re_eq
+#print axioms R05_eta_sixteenth_eq
+#print axioms R05_eta_sixteenth_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Fresh `log 11` lower bound (`2.3939 ≤ log 11`) via `log 12` and `log (11/12) ≥ -1/11`. -/
+theorem R05_log_eleven_ge :
+    (2.3939 : Real) ≤ Real.log 11 := by
+  have h12 := R05_log_twelve_eq
+  have hub : Real.log (12 / 11 : Real) ≤ (1 / 11 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 12 / 11)
+    have he : (12 / 11 : Real) - 1 = (1 / 11 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (11 / 12 : Real) = -Real.log (12 / 11 : Real) := by
+    have heq : (11 / 12 : Real) = (12 / 11 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have h3lo : (1.098612 : Real) < Real.log 3 := by
+    have h9 := Real.log_three_gt_d9
+    linarith
+  have hmeq : (12 : Real) * (11 / 12) = 11 := by norm_num
+  have hlog11 : Real.log 11 = Real.log 3 + 2 * Real.log 2 + Real.log (11 / 12 : Real) := by
+    have h := Real.log_mul (show (12 : Real) ≠ 0 by norm_num)
+      (show (11 / 12 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h12] at h
+    exact h
+  have hfin : (2.3939 : Real) ≤ 1.098612 + 2 * (0.693147 : Real) - (1 / 11 : Real) := by
+    norm_num
+  rw [hlog11, hinv]
+  linarith
+
+/-- Fresh `log 11` upper bound (`log 11 ≤ 2.4016`) via `log 12` and `log (11/12) ≤ -1/12`. -/
+theorem R05_log_eleven_le :
+    Real.log 11 ≤ (2.4016 : Real) := by
+  have h12 := R05_log_twelve_eq
+  have hub : Real.log (11 / 12 : Real) ≤ (-1 / 12 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 11 / 12)
+    have he : (11 / 12 : Real) - 1 = (-1 / 12 : Real) := by norm_num
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have h3hi : Real.log 3 < (1.098613 : Real) := by
+    have h9 := Real.log_three_lt_d9
+    linarith
+  have hmeq : (12 : Real) * (11 / 12) = 11 := by norm_num
+  have hlog11 : Real.log 11 = Real.log 3 + 2 * Real.log 2 + Real.log (11 / 12 : Real) := by
+    have h := Real.log_mul (show (12 : Real) ≠ 0 by norm_num)
+      (show (11 / 12 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h12] at h
+    exact h
+  have hfin : 1.098613 + 2 * (0.693148 : Real) + (-1 / 12 : Real) ≤ (2.4016 : Real) := by
+    norm_num
+  rw [hlog11]
+  linarith
+
+#print axioms R05_log_eleven_ge
+#print axioms R05_log_eleven_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Cosine lower at the eleventh-term phase (`-1/4 ≤ cos (0.75 * log 11)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log11_lower :
+    (-1 / 4 : Real) ≤ Real.cos (0.75 * Real.log 11) := by
+  have hloge := R05_log_eleven_ge
+  have hlogl := R05_log_eleven_le
+  have hlo : (1.7954 : Real) ≤ 0.75 * Real.log 11 := by linarith
+  have hhi : 0.75 * Real.log 11 ≤ (1.8012 : Real) := by linarith
+  have hpos : (0 : Real) < Real.log 11 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 11 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 11) ^ 2 ≤ (1.8012 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.7954 : Real) ^ 4 ≤ (0.75 * Real.log 11) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 11) ^ 6 ≤ (1.8012 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-1 / 4 : Real) ≤
+      1 - (1.8012 : Real) ^ 2 / 2 + (1.7954 : Real) ^ 4 / 24 -
+        (1.8012 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Real rpow eleventh inverse upper (`11 ^ (-0.395) ≤ 1/2`) from `2 ≤ 11 ^ 0.395`
+(cleared `(11 ^ (1/3)) ^ 3 = 11 ≥ 8`, then `1/3 ≤ 0.395`). -/
+theorem R05_rpow_eleven_neg0395_le :
+    (11 : Real) ^ (-0.395 : Real) ≤ (1 / 2 : Real) := by
+  have hge : (2 : Real) ≤ (11 : Real) ^ (0.395 : Real) := by
+    have hpow : ((2 : Real)) ^ (3 : Nat) ≤ ((((11 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((11 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (11 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 11)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 11 1
+      rw [e]
+      norm_num
+    have hstep : (2 : Real) ≤ (11 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc (2 : Real) ≤ (11 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (11 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (11 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (11 : Real) ^ (-0.395 : Real) = (((11 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 2 : Real) = ((2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_cos_075log11_lower
+#print axioms R05_rpow_eleven_neg0395_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 eleventh eta inverse
+(`Re (11 ^ s)⁻¹ = 11 ^ (-0.395) * cos (0.75 * log 11)`). -/
+theorem R05_inv_eleven_cpow_re_eq :
+    (((((11 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (11 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 11) := by
+  have h11eq : ((((11 : Nat)) : Complex)) = (11 : Complex) := by norm_cast
+  rw [h11eq]
+  have hlog : Complex.log (11 : Complex) = (((Real.log 11 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 11)).symm
+  have hlogre : (Complex.log (11 : Complex)).re = Real.log 11 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (11 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (11 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 11 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (11 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 11 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (11 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (11 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (11 : Complex) ≠ 0)]
+  have hinv : ((11 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (11 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (11 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 11 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (11 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 11 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (11 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 11 * 0.395)) * Real.cos (-(Real.log 11 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 11 * (-0.75))) = Real.cos (0.75 * Real.log 11) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 11 * 0.395)) = (11 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 11 * 0.395) = Real.log 11 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 11)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 eleventh eta term in closed form (`term 10 = ((11 ^ s)⁻¹)`, since `(-1)^10 = 1`). -/
+theorem R05_eta_eleventh_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 10 =
+      ((((11 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (10 + 1 : Nat) = 11 := rfl
+  have hcast : ((((10 + 1 : Nat)) : Complex)) = ((((11 : Nat)) : Complex)) := by
+    rw [e1]
+  have hpos : (-1 : Complex) ^ (10 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hpos, one_div]
+
+#print axioms R05_inv_eleven_cpow_re_eq
+#print axioms R05_eta_eleventh_eq
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 eleventh eta term (`-1/8 ≤ Re term11`, honest negative floor:
+k = 10 even so the sign is `+1`, and `θ11 ≈ 1.80 past π/2` makes the cosine negative). -/
+theorem R05_eta_eleventh_Re_ge :
+    (-1 / 8 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 10).re := by
+  rw [R05_eta_eleventh_eq, R05_inv_eleven_cpow_re_eq]
+  have hamp := R05_rpow_eleven_neg0395_le
+  have hcos := R05_cos_075log11_lower
+  have hamp_pos : (0 : Real) < (11 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (11 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 11) + 1 / 4) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (1 / 2 - (11 : Real) ^ (-0.395 : Real)) * (1 / 4 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Eleven-term split (`S11 = S10 + term 10`, non-pair slow-sum step). -/
+theorem R05_S11_eq :
+    (∑ k ∈ Finset.range 11, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 10, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 10 := by
+  rw [show (11 : Nat) = 10 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 eleven-term real part (`7201/30000 ≤ Re S11`, from `10951/30000 - 1/8`). -/
+theorem R05_S11_Re_ge :
+    (7201 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 11, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S11_eq, Complex.add_re]
+  have hS10 := R05_S10_Re_ge
+  have ht := R05_eta_eleventh_Re_ge
+  have hle : (7201 / 30000 : Real) ≤ (10951 / 30000 : Real) + (-(1 / 8) : Real) := by
+    norm_num
+  linarith
+
+/-- Twelve-term split (`S12 = S11 + term 11`, non-pair slow-sum step). -/
+theorem R05_S12_eq :
+    (∑ k ∈ Finset.range 12, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 11, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 11 := by
+  rw [show (12 : Nat) = 11 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 twelve-term real part (`3067/10000 ≤ Re S12`, from `7201/30000 + 1/15`). -/
+theorem R05_S12_Re_ge :
+    (3067 / 10000 : Real) ≤
+      (∑ k ∈ Finset.range 12, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S12_eq, Complex.add_re]
+  have hS11 := R05_S11_Re_ge
+  have ht := R05_eta_twelfth_Re_ge
+  have hle : (3067 / 10000 : Real) ≤ (7201 / 30000 : Real) + (1 / 15 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_eta_eleventh_Re_ge
+#print axioms R05_S11_eq
+#print axioms R05_S11_Re_ge
+#print axioms R05_S12_eq
+#print axioms R05_S12_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Fresh `log 13` lower bound (`2.5618 ≤ log 13`) via `log 12` and `log (13/12) ≥ 1/13`. -/
+theorem R05_log_thirteen_ge :
+    (2.5618 : Real) ≤ Real.log 13 := by
+  have h12 := R05_log_twelve_eq
+  have hub : Real.log (12 / 13 : Real) ≤ (-1 / 13 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 12 / 13)
+    have he : (12 / 13 : Real) - 1 = (-1 / 13 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (13 / 12 : Real) = -Real.log (12 / 13 : Real) := by
+    have heq : (13 / 12 : Real) = (12 / 13 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have h3lo : (1.098612 : Real) < Real.log 3 := by
+    have h9 := Real.log_three_gt_d9
+    linarith
+  have hmeq : (12 : Real) * (13 / 12) = 13 := by norm_num
+  have hlog13 : Real.log 13 = Real.log 3 + 2 * Real.log 2 + Real.log (13 / 12 : Real) := by
+    have h := Real.log_mul (show (12 : Real) ≠ 0 by norm_num)
+      (show (13 / 12 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h12] at h
+    exact h
+  have hfin : (2.5618 : Real) ≤ 1.098612 + 2 * (0.693147 : Real) + (1 / 13 : Real) := by
+    norm_num
+  rw [hlog13, hinv]
+  linarith
+
+/-- Fresh `log 13` upper bound (`log 13 ≤ 2.5683`) via `log 12` and `log (13/12) ≤ 1/12`. -/
+theorem R05_log_thirteen_le :
+    Real.log 13 ≤ (2.5683 : Real) := by
+  have h12 := R05_log_twelve_eq
+  have hub : Real.log (13 / 12 : Real) ≤ (1 / 12 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 13 / 12)
+    have he : (13 / 12 : Real) - 1 = (1 / 12 : Real) := by norm_num
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have h3hi : Real.log 3 < (1.098613 : Real) := by
+    have h9 := Real.log_three_lt_d9
+    linarith
+  have hmeq : (12 : Real) * (13 / 12) = 13 := by norm_num
+  have hlog13 : Real.log 13 = Real.log 3 + 2 * Real.log 2 + Real.log (13 / 12 : Real) := by
+    have h := Real.log_mul (show (12 : Real) ≠ 0 by norm_num)
+      (show (13 / 12 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h12] at h
+    exact h
+  have hfin : 1.098613 + 2 * (0.693148 : Real) + (1 / 12 : Real) ≤ (2.5683 : Real) := by
+    norm_num
+  rw [hlog13]
+  linarith
+
+#print axioms R05_log_thirteen_ge
+#print axioms R05_log_thirteen_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Cosine lower at the thirteenth-term phase (`-2/5 ≤ cos (0.75 * log 13)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log13_lower :
+    (-2 / 5 : Real) ≤ Real.cos (0.75 * Real.log 13) := by
+  have hloge := R05_log_thirteen_ge
+  have hlogl := R05_log_thirteen_le
+  have hlo : (1.9213 : Real) ≤ 0.75 * Real.log 13 := by linarith
+  have hhi : 0.75 * Real.log 13 ≤ (1.9263 : Real) := by linarith
+  have hpos : (0 : Real) < Real.log 13 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 13 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 13) ^ 2 ≤ (1.9263 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (1.9213 : Real) ^ 4 ≤ (0.75 * Real.log 13) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 13) ^ 6 ≤ (1.9263 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-2 / 5 : Real) ≤
+      1 - (1.9263 : Real) ^ 2 / 2 + (1.9213 : Real) ^ 4 / 24 -
+        (1.9263 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Real rpow thirteenth inverse upper (`13 ^ (-0.395) ≤ 1/2`) from `2 ≤ 13 ^ 0.395`
+(cleared `(13 ^ (1/3)) ^ 3 = 13 ≥ 8`, then `1/3 ≤ 0.395`). -/
+theorem R05_rpow_thirteen_neg0395_le :
+    (13 : Real) ^ (-0.395 : Real) ≤ (1 / 2 : Real) := by
+  have hge : (2 : Real) ≤ (13 : Real) ^ (0.395 : Real) := by
+    have hpow : ((2 : Real)) ^ (3 : Nat) ≤ ((((13 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((13 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (13 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 13)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 13 1
+      rw [e]
+      norm_num
+    have hstep : (2 : Real) ≤ (13 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc (2 : Real) ≤ (13 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (13 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (13 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (13 : Real) ^ (-0.395 : Real) = (((13 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 2 : Real) = ((2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_cos_075log13_lower
+#print axioms R05_rpow_thirteen_neg0395_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 thirteenth eta inverse
+(`Re (13 ^ s)⁻¹ = 13 ^ (-0.395) * cos (0.75 * log 13)`). -/
+theorem R05_inv_thirteen_cpow_re_eq :
+    (((((13 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (13 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 13) := by
+  have h13eq : ((((13 : Nat)) : Complex)) = (13 : Complex) := by norm_cast
+  rw [h13eq]
+  have hlog : Complex.log (13 : Complex) = (((Real.log 13 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 13)).symm
+  have hlogre : (Complex.log (13 : Complex)).re = Real.log 13 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (13 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (13 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 13 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (13 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 13 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (13 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (13 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (13 : Complex) ≠ 0)]
+  have hinv : ((13 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (13 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (13 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 13 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (13 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 13 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (13 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 13 * 0.395)) * Real.cos (-(Real.log 13 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 13 * (-0.75))) = Real.cos (0.75 * Real.log 13) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 13 * 0.395)) = (13 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 13 * 0.395) = Real.log 13 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 13)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 thirteenth eta term in closed form (`term 12 = ((13 ^ s)⁻¹)`, since `(-1)^12 = 1`). -/
+theorem R05_eta_thirteenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 12 =
+      ((((13 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (12 + 1 : Nat) = 13 := rfl
+  have hcast : ((((12 + 1 : Nat)) : Complex)) = ((((13 : Nat)) : Complex)) := by
+    rw [e1]
+  have hpos : (-1 : Complex) ^ (12 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hpos, one_div]
+
+#print axioms R05_inv_thirteen_cpow_re_eq
+#print axioms R05_eta_thirteenth_eq
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 thirteenth eta term (`-1/5 ≤ Re term13`, honest negative floor:
+k = 12 even so the sign is `+1`, and `θ13 ≈ 1.92 past π/2` makes the cosine negative). -/
+theorem R05_eta_thirteenth_Re_ge :
+    (-1 / 5 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 12).re := by
+  rw [R05_eta_thirteenth_eq, R05_inv_thirteen_cpow_re_eq]
+  have hamp := R05_rpow_thirteen_neg0395_le
+  have hcos := R05_cos_075log13_lower
+  have hamp_pos : (0 : Real) < (13 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (13 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 13) + 2 / 5) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (1 / 2 - (13 : Real) ^ (-0.395 : Real)) * (2 / 5 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Thirteen-term split (`S13 = S12 + term 12`, non-pair slow-sum step). -/
+theorem R05_S13_eq :
+    (∑ k ∈ Finset.range 13, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 12, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 12 := by
+  rw [show (13 : Nat) = 12 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 thirteen-term real part (`1067/10000 ≤ Re S13`, from `3067/10000 - 1/5`). -/
+theorem R05_S13_Re_ge :
+    (1067 / 10000 : Real) ≤
+      (∑ k ∈ Finset.range 13, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S13_eq, Complex.add_re]
+  have hS12 := R05_S12_Re_ge
+  have ht := R05_eta_thirteenth_Re_ge
+  have hle : (1067 / 10000 : Real) ≤ (3067 / 10000 : Real) + (-(1 / 5) : Real) := by
+    norm_num
+  linarith
+
+/-- Fourteen-term split (`S14 = S13 + term 13`, non-pair slow-sum step). -/
+theorem R05_S14_eq :
+    (∑ k ∈ Finset.range 14, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 13, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 13 := by
+  rw [show (14 : Nat) = 13 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 fourteen-term real part (`5701/30000 ≤ Re S14`, from `1067/10000 + 1/12`). -/
+theorem R05_S14_Re_ge :
+    (5701 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 14, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S14_eq, Complex.add_re]
+  have hS13 := R05_S13_Re_ge
+  have ht := R05_eta_fourteenth_Re_ge
+  have hle : (5701 / 30000 : Real) ≤ (1067 / 10000 : Real) + (1 / 12 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_eta_thirteenth_Re_ge
+#print axioms R05_S13_eq
+#print axioms R05_S13_Re_ge
+#print axioms R05_S14_eq
+#print axioms R05_S14_Re_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Fresh `log 15` lower bound (`2.7059 ≤ log 15`) via `log 16` and `log (15/16) ≥ -1/15`. -/
+theorem R05_log_fifteen_ge :
+    (2.7059 : Real) ≤ Real.log 15 := by
+  have h16 := R05_log_sixteen_eq
+  have hub : Real.log (16 / 15 : Real) ≤ (1 / 15 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 16 / 15)
+    have he : (16 / 15 : Real) - 1 = (1 / 15 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (15 / 16 : Real) = -Real.log (16 / 15 : Real) := by
+    have heq : (15 / 16 : Real) = (16 / 15 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have hmeq : (16 : Real) * (15 / 16) = 15 := by norm_num
+  have hlog15 : Real.log 15 = 4 * Real.log 2 + Real.log (15 / 16 : Real) := by
+    have h := Real.log_mul (show (16 : Real) ≠ 0 by norm_num)
+      (show (15 / 16 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h16] at h
+    exact h
+  have hfin : (2.7059 : Real) ≤ 4 * (0.693147 : Real) - (1 / 15 : Real) := by
+    norm_num
+  rw [hlog15, hinv]
+  linarith
+
+/-- Fresh `log 15` upper bound (`log 15 ≤ 2.7101`) via `log 16` and `log (15/16) ≤ -1/16`. -/
+theorem R05_log_fifteen_le :
+    Real.log 15 ≤ (2.7101 : Real) := by
+  have h16 := R05_log_sixteen_eq
+  have hub : Real.log (15 / 16 : Real) ≤ (-1 / 16 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 15 / 16)
+    have he : (15 / 16 : Real) - 1 = (-1 / 16 : Real) := by norm_num
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have hmeq : (16 : Real) * (15 / 16) = 15 := by norm_num
+  have hlog15 : Real.log 15 = 4 * Real.log 2 + Real.log (15 / 16 : Real) := by
+    have h := Real.log_mul (show (16 : Real) ≠ 0 by norm_num)
+      (show (15 / 16 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h16] at h
+    exact h
+  have hfin : 4 * (0.693148 : Real) + (-1 / 16 : Real) ≤ (2.7101 : Real) := by
+    norm_num
+  rw [hlog15]
+  linarith
+
+#print axioms R05_log_fifteen_ge
+#print axioms R05_log_fifteen_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Cosine lower at the fifteenth-term phase (`-1/2 ≤ cos (0.75 * log 15)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log15_lower :
+    (-1 / 2 : Real) ≤ Real.cos (0.75 * Real.log 15) := by
+  have hloge := R05_log_fifteen_ge
+  have hlogl := R05_log_fifteen_le
+  have hlo : (2.0294 : Real) ≤ 0.75 * Real.log 15 := by linarith
+  have hhi : 0.75 * Real.log 15 ≤ (2.0326 : Real) := by linarith
+  have hpos : (0 : Real) < Real.log 15 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 15 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 15) ^ 2 ≤ (2.0326 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (2.0294 : Real) ^ 4 ≤ (0.75 * Real.log 15) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 15) ^ 6 ≤ (2.0326 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-1 / 2 : Real) ≤
+      1 - (2.0326 : Real) ^ 2 / 2 + (2.0294 : Real) ^ 4 / 24 -
+        (2.0326 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Real rpow fifteenth inverse upper (`15 ^ (-0.395) ≤ 1/2`) from `2 ≤ 15 ^ 0.395`
+(cleared `(15 ^ (1/3)) ^ 3 = 15 ≥ 8`, then `1/3 ≤ 0.395`). -/
+theorem R05_rpow_fifteen_neg0395_le :
+    (15 : Real) ^ (-0.395 : Real) ≤ (1 / 2 : Real) := by
+  have hge : (2 : Real) ≤ (15 : Real) ^ (0.395 : Real) := by
+    have hpow : ((2 : Real)) ^ (3 : Nat) ≤ ((((15 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((15 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (15 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 15)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 15 1
+      rw [e]
+      norm_num
+    have hstep : (2 : Real) ≤ (15 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc (2 : Real) ≤ (15 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (15 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (15 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (15 : Real) ^ (-0.395 : Real) = (((15 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 2 : Real) = ((2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_cos_075log15_lower
+#print axioms R05_rpow_fifteen_neg0395_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 fifteenth eta inverse
+(`Re (15 ^ s)⁻¹ = 15 ^ (-0.395) * cos (0.75 * log 15)`). -/
+theorem R05_inv_fifteen_cpow_re_eq :
+    (((((15 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (15 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 15) := by
+  have h15eq : ((((15 : Nat)) : Complex)) = (15 : Complex) := by norm_cast
+  rw [h15eq]
+  have hlog : Complex.log (15 : Complex) = (((Real.log 15 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 15)).symm
+  have hlogre : (Complex.log (15 : Complex)).re = Real.log 15 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (15 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (15 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 15 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (15 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 15 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (15 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (15 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (15 : Complex) ≠ 0)]
+  have hinv : ((15 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (15 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (15 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 15 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (15 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 15 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (15 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 15 * 0.395)) * Real.cos (-(Real.log 15 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 15 * (-0.75))) = Real.cos (0.75 * Real.log 15) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 15 * 0.395)) = (15 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 15 * 0.395) = Real.log 15 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 15)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 fifteenth eta term in closed form (`term 14 = ((15 ^ s)⁻¹)`, since `(-1)^14 = 1`). -/
+theorem R05_eta_fifteenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 14 =
+      ((((15 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (14 + 1 : Nat) = 15 := rfl
+  have hcast : ((((14 + 1 : Nat)) : Complex)) = ((((15 : Nat)) : Complex)) := by
+    rw [e1]
+  have hpos : (-1 : Complex) ^ (14 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hpos, one_div]
+
+#print axioms R05_inv_fifteen_cpow_re_eq
+#print axioms R05_eta_fifteenth_eq
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 fifteenth eta term (`-1/4 ≤ Re term15`, honest negative floor:
+k = 14 even so the sign is `+1`, and `θ15 ≈ 2.03 past π/2` makes the cosine negative). -/
+theorem R05_eta_fifteenth_Re_ge :
+    (-1 / 4 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 14).re := by
+  rw [R05_eta_fifteenth_eq, R05_inv_fifteen_cpow_re_eq]
+  have hamp := R05_rpow_fifteen_neg0395_le
+  have hcos := R05_cos_075log15_lower
+  have hamp_pos : (0 : Real) < (15 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (15 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 15) + 1 / 2) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (1 / 2 - (15 : Real) ^ (-0.395 : Real)) * (1 / 2 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Fifteen-term split (`S15 = S14 + term 14`, non-pair slow-sum step). -/
+theorem R05_S15_eq :
+    (∑ k ∈ Finset.range 15, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 14, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 14 := by
+  rw [show (15 : Nat) = 14 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 fifteen-term real part (`-1799/30000 ≤ Re S15`, from `5701/30000 - 1/4`;
+honest dip: the even-k fifteenth term is genuinely negative). -/
+theorem R05_S15_Re_ge :
+    (-1799 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 15, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S15_eq, Complex.add_re]
+  have hS14 := R05_S14_Re_ge
+  have ht := R05_eta_fifteenth_Re_ge
+  have hle : (-1799 / 30000 : Real) ≤ (5701 / 30000 : Real) + (-(1 / 4) : Real) := by
+    norm_num
+  linarith
+
+/-- Sixteen-term split (`S16 = S15 + term 15`, non-pair slow-sum step). -/
+theorem R05_S16_eq :
+    (∑ k ∈ Finset.range 16, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 15, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 15 := by
+  rw [show (16 : Nat) = 15 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 sixteen-term real part (`1201/30000 ≤ Re S16`, from `-1799/30000 + 1/10`). -/
+theorem R05_S16_Re_ge :
+    (1201 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 16, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S16_eq, Complex.add_re]
+  have hS15 := R05_S15_Re_ge
+  have ht := R05_eta_sixteenth_Re_ge
+  have hle : (1201 / 30000 : Real) ≤ (-1799 / 30000 : Real) + (1 / 10 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_eta_fifteenth_Re_ge
+#print axioms R05_S15_eq
+#print axioms R05_S15_Re_ge
+#print axioms R05_S16_eq
+#print axioms R05_S16_Re_ge
+
+end Door3OffAxis
