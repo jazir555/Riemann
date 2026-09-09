@@ -4495,3 +4495,223 @@ theorem d3K51_segPt_mem : ((((1 / 2 : ℝ))) : ℂ) ∈ door3RealSeg := by
 #print axioms d3K51_zeta_explicit_of_head
 #print axioms d3K51_nonvan_of_head
 #print axioms d3K51_segPt_mem
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5h): finite head split at 6 terms.
+
+Unconditional finite identity feeding the STEP-1 head estimate: the 102-term
+head is the exactly-computed 6-term sum `S6` plus the 48 paired terms from
+`m + 3`. The residual analytic gap is a lower bound on `||S6||` (needs
+rigorous `cos` bounds for `(k+1)^(-s0)` phases) plus the already-banked
+`d3K51_pairTerm_le` majorant for the 48-term tail.
+-/
+
+/-- Finite head split: `head_102 = S6 + sum_{m<48} pair (m+3)` at any `s`. -/
+theorem d3Head102_eq_S6_add_tail (s : ℂ) :
+    (∑ k ∈ Finset.range 102, d3EtaTerm s k)
+      = (∑ k ∈ Finset.range 6, d3EtaTerm s k)
+        + (∑ m ∈ Finset.range 48, d3EtaPairTerm s (m + 3)) := by
+  have h51 := d3Pair_sum_range_eq s 51
+  have h3 := d3Pair_sum_range_eq s 3
+  have h102 : (102 : ℕ) = 2 * 51 := by norm_num
+  have h6 : (6 : ℕ) = 2 * 3 := by norm_num
+  have h351 : 3 + 48 = 51 := by norm_num
+  have hsplit := Finset.sum_range_add (d3EtaPairTerm s) 3 48
+  rw [h351] at hsplit
+  have htail : (∑ i ∈ Finset.range 48, d3EtaPairTerm s (3 + i))
+      = (∑ m ∈ Finset.range 48, d3EtaPairTerm s (m + 3)) :=
+    Finset.sum_congr rfl (fun m _ => by rw [add_comm 3 m])
+  rw [htail] at hsplit
+  rw [h102, ← h51, h6, ← h3]
+  exact hsplit
+
+#print axioms d3Head102_eq_S6_add_tail
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5i): height-uniform factor + shift-norm caps.
+
+STEP-3 machinery over `door3RealSeg`: the eta-factor cap `13/5` depends only
+on `Re(1-s) = 1/2` (hence is height-uniform by `door3RealShift_re`), and the
+shifted point satisfies `||s|| <= 6/5` since `||s||^2 = 1/4 + (Re z)^2 <= 5/4`.
+-/
+
+/-- Height-uniform eta-factor upper bound on the real sub-segment. -/
+theorem d3EtaFactor_uniform_upper (z : ℂ) (hz : z ∈ door3RealSeg) :
+    ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z))‖ ≤ 13 / 5 := by
+  have hre : (tailShiftedSReal z).re = 1 / 2 := door3RealShift_re z hz
+  have h1 : ((((1 : ℂ) - tailShiftedSReal z))).re = (1 / 2 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, hre]
+    norm_num
+  have hY : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)‖ ≤ 8 / 5 := by
+    have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)‖ =
+        (2 : ℝ) ^ ((((1 : ℂ) - tailShiftedSReal z)).re) :=
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2) _
+    rw [hnorm, h1]
+    exact d3rpow_half_le
+  calc ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)‖
+        ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)‖ :=
+          norm_sub_le _ _
+    _ ≤ 13 / 5 := by
+          rw [norm_one]
+          linarith [hY]
+
+/-- Height-uniform shifted-point norm cap on the real sub-segment. -/
+theorem d3ShiftNorm_uniform_le (z : ℂ) (hz : z ∈ door3RealSeg) :
+    ‖tailShiftedSReal z‖ ≤ 6 / 5 := by
+  have hre : (tailShiftedSReal z).re = 1 / 2 := door3RealShift_re z hz
+  have him : (tailShiftedSReal z).im = z.re := door3RealShift_im z
+  obtain ⟨⟨h1, h2⟩, hlo, hhi⟩ := hz
+  have habs : |z.re| ≤ 1 := abs_le.mpr ⟨by linarith, h2⟩
+  have hre2 : (tailShiftedSReal z).re * (tailShiftedSReal z).re ≤ (1 / 2 : ℝ) * (1 / 2) := by
+    rw [hre]
+  have him2 : (tailShiftedSReal z).im * (tailShiftedSReal z).im ≤ (1 : ℝ) * 1 := by
+    rw [him]
+    have h := mul_le_mul habs habs (abs_nonneg _) (show (0 : ℝ) ≤ 1 by norm_num)
+    rwa [abs_mul_abs_self] at h
+  have hnorm : ‖tailShiftedSReal z‖ ^ 2
+      = (tailShiftedSReal z).re * (tailShiftedSReal z).re
+        + (tailShiftedSReal z).im * (tailShiftedSReal z).im := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+  have hle : ‖tailShiftedSReal z‖ ^ 2 ≤ (6 / 5 : ℝ) ^ 2 := by
+    rw [hnorm]
+    have hsum := add_le_add hre2 him2
+    have h4 : (1 / 2 : ℝ) * (1 / 2) + 1 * 1 ≤ (6 / 5 : ℝ) ^ 2 := by norm_num
+    exact le_trans hsum h4
+  exact le_of_sq_le_sq hle (by norm_num)
+
+#print axioms d3EtaFactor_uniform_upper
+#print axioms d3ShiftNorm_uniform_le
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5j): height-uniform K51 tail cap.
+
+The K51 majorant is height-uniform: it uses only `Re s = 1/2`
+(`door3RealShift_re`) plus the uniform `||s|| <= 6/5`, so the paired tail
+over `door3RealSeg` is capped by `(6/5) * (40/201) = 16/67`.
+-/
+
+/-- Height-uniform K=51 per-pair MVT bound. -/
+theorem d3K51_pairTerm_uniform_le (z : ℂ) (hz : z ∈ door3RealSeg) (m : ℕ) :
+    ‖d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖ ≤
+      (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := by
+  have hre : (tailShiftedSReal z).re = 1 / 2 := door3RealShift_re z hz
+  have hspos : 0 < (tailShiftedSReal z).re := by rw [hre]; norm_num
+  have hle := d3EtaPair_norm_le (tailShiftedSReal z) hspos (m + 51)
+  have hexp : -(tailShiftedSReal z).re - 1 = (-3 / 2 : ℝ) := by rw [hre]; norm_num
+  have hnat : 2 * (m + 51) + 1 = 2 * m + 103 := by omega
+  have hcast : ((((2 * (m + 51) + 1 : ℕ)) : ℝ)) = ((((2 * m + 103 : ℕ)) : ℝ)) := by
+    rw [hnat]
+  rw [hcast, hexp] at hle
+  have hnorm : ‖tailShiftedSReal z‖ ≤ 6 / 5 := d3ShiftNorm_uniform_le z hz
+  have hnn : (0 : ℝ) ≤ ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  calc ‖d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖
+      ≤ ‖tailShiftedSReal z‖ * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := hle
+    _ ≤ (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) :=
+        mul_le_mul_of_nonneg_right hnorm hnn
+
+
+#print axioms d3K51_pairTerm_uniform_le
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5j2): uniform tail cap `16/67`.
+
+Scales the banked `d3shift32_tail102_le` (`40/201`) by the uniform `6/5`.
+-/
+
+theorem d3K51_pairTail_uniform_le (z : ℂ) (hz : z ∈ door3RealSeg) :
+    ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖ ≤ 16 / 67 := by
+  have hmaj : Summable
+      (fun m : ℕ => (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) :=
+    d3odd32_summable103.mul_left (6 / 5 : ℝ)
+  have hnormSum : Summable (fun m => ‖d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖) := by
+    apply Summable.of_norm_bounded hmaj
+    intro m
+    rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    exact d3K51_pairTerm_uniform_le z hz m
+  have hfun : (fun m : ℕ => ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) =
+      (fun n : ℕ => ((((n + 102 + 1 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := by
+    funext m
+    have h103 : m + 103 = m + 102 + 1 := by omega
+    rw [h103]
+  have hcap := d3shift32_tail102_le
+  rw [← hfun] at hcap
+  have hstep1 : (∑' m, ‖d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖)
+      ≤ (∑' m, (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) :=
+    hnormSum.tsum_le_tsum (fun m => d3K51_pairTerm_uniform_le z hz m)
+      (d3odd32_summable103.mul_left (6 / 5 : ℝ))
+  have hodd_le : (∑' m, (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)))
+      ≤ (∑' m, (6 / 5) * ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) :=
+    (d3odd32_summable103.mul_left (6 / 5 : ℝ)).tsum_le_tsum
+      (fun m => mul_le_mul_of_nonneg_left (d3odd32_le_shift103 m) (by norm_num))
+      (d3shift32_summable103.mul_left (6 / 5 : ℝ))
+  have hscale : (∑' m, (6 / 5) * ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)))
+      = (6 / 5) * (∑' m, ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) :=
+    tsum_mul_left
+  have hfin : (6 / 5) * (∑' m, ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) ≤ 16 / 67 := by
+    have hmul := mul_le_mul_of_nonneg_left hcap (by norm_num : (0 : ℝ) ≤ 6 / 5)
+    have heq : (6 / 5 : ℝ) * (40 / 201) = 16 / 67 := by norm_num
+    rw [heq] at hmul
+    exact hmul
+  calc ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖
+      ≤ ∑' m, ‖d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖ :=
+        norm_tsum_le_tsum_norm hnormSum
+    _ ≤ (∑' m, (6 / 5) * ((((2 * m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := hstep1
+    _ ≤ (∑' m, (6 / 5) * ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := hodd_le
+    _ = (6 / 5) * (∑' m, ((((m + 103 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))) := hscale
+    _ ≤ 16 / 67 := hfin
+
+#print axioms d3K51_pairTerm_uniform_le
+#print axioms d3K51_pairTail_uniform_le
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5k): conditional uniform zeta lower.
+
+Uniform bridge shape for STEP 3 (mirrors `d3Zeta_lower_of_tail51` pointwise):
+with a uniform head bound above the uniform tail cap `16/67`, the uniform
+tail cap, and the per-point eta bridge, reverse-triangle plus the uniform
+factor cap yields a uniform `(||head z|| - 16/67)/(13/5) <= ||zeta||`.
+Remaining gaps after this block: (i) the uniform head lower (same analytic
+blocker as STEP 1, now uniform over heights `t in [-1,1]`); (ii) the eta
+bridge `hZeta` at `Re = 1/2` (needs analytic continuation beyond the
+`Re > 1` Mathlib series lemmas visible from `import Mathlib`).
+-/
+
+/-- Conditional uniform zeta lower from a uniform enlarged-head bound. -/
+theorem d3Zeta_uniform_lower_of_head
+    (hHead : ∀ z ∈ door3RealSeg,
+      (16 / 67 : ℝ) < ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖)
+    (hZeta : ∀ z ∈ door3RealSeg,
+      (∑' m, d3EtaPairTerm (tailShiftedSReal z) m)
+        = (1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z))
+          * riemannZeta (tailShiftedSReal z))
+    (z : ℂ) (hz : z ∈ door3RealSeg) :
+    (‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖ - 16 / 67) / (13 / 5)
+      ≤ ‖riemannZeta (tailShiftedSReal z)‖ := by
+  have hre : (tailShiftedSReal z).re = 1 / 2 := door3RealShift_re z hz
+  have hFac : ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z))‖ ≤ 13 / 5 :=
+    d3EtaFactor_uniform_upper z hz
+  have hTail : ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖ ≤ 16 / 67 :=
+    d3K51_pairTail_uniform_le z hz
+  have hshift := d3Pair_tail51_eq (tailShiftedSReal z)
+    (summable_d3EtaPair (tailShiftedSReal z) hre)
+  have htri : ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖
+      ≤ ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) m‖ + 16 / 67 := by
+    have hdecomp : (∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k)
+        = (∑' m, d3EtaPairTerm (tailShiftedSReal z) m)
+          - (∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51)) := by
+      rw [hshift]
+      ring
+    calc ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖
+        = ‖(∑' m, d3EtaPairTerm (tailShiftedSReal z) m)
+          - (∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51))‖ := by rw [hdecomp]
+      _ ≤ ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) m‖
+          + ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) (m + 51)‖ := norm_sub_le _ _
+      _ ≤ ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) m‖ + 16 / 67 := by linarith [hTail]
+  have hGle : ‖∑' m, d3EtaPairTerm (tailShiftedSReal z) m‖
+      ≤ (13 / 5) * ‖riemannZeta (tailShiftedSReal z)‖ := by
+    rw [hZeta z hz, norm_mul]
+    exact mul_le_mul_of_nonneg_right hFac (norm_nonneg _)
+  have hkey : (‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖ - 16 / 67)
+      ≤ (13 / 5) * ‖riemannZeta (tailShiftedSReal z)‖ := by
+    linarith [htri, hGle]
+  rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 13 / 5)]
+  rw [mul_comm]
+  exact hkey
+
+#print axioms d3Zeta_uniform_lower_of_head
