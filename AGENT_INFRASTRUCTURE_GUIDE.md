@@ -3494,6 +3494,11 @@ sorry-free infrastructure and the complete commit ledger above.
   **K0 3→2.62 → C 16→14 → rect 176→154** high slice; assembly3
   best rect 561 (low slice dominates, gap 551).
   Residual: low-slice N=3 peel, K0 21→~peeled (ZU24).
+- 2026-09-09 ZU24 (`3bb54a19`, zeta tail, 10× green 8693 jobs;
+  resumed after stale-lock stall, prior 179 lines green as-is):
+  N=3 head (1.51) + M=3 integral (19.06) → **K0 20.57 → C=50
+  → rect 550** (gain 11; slow-tail wall confirmed). Best 550/154.
+  Residual: N=4 peel or low-slice denom lift (ZU25).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
