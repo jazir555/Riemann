@@ -3537,6 +3537,13 @@ sorry-free infrastructure and the complete commit ledger above.
   vs even drag −17/20 — contiguous folding CERTIFIED unable).
   Residual: n=19/20 + pair-9; tighten even-k amplitude uppers
   below 1/2 (OA16).
+- 2026-09-09 OA16 (`a2625bff`, off-axis tail, 4× green 8702 jobs
+  via new guarded wrapper): n=19 floor (−5/24, FIRST sub-1/2
+  even-k amplitude via 3/8-exponent clear) + n=20 floor (1/10) +
+  S19/S20 + pair-9 (−13/120). Frontier S20 ≈ −0.2433; best
+  contiguous S16 ≈ 0.0400.
+  Residual: STEP-3 assembly + even-k re-derivation via 3/8
+  template (OA17).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
