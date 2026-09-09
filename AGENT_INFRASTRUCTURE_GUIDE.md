@@ -3584,6 +3584,11 @@ sorry-free infrastructure and the complete commit ledger above.
   (was 451, −20). Global still 525 (tail bottleneck; cheap
   wins exhausted — slack only ~0.15 vs 0.29 needed).
   Residual: N=5 peel at −1.05 → ~515 (ZU30).
+- 2026-09-09 ZU30 (`c99367a3`, zeta tail, 7× green 8693 jobs
+  incl. 6 post-stall-resume): N=5 head (1.75) + M=5 integral
+  (18.52) → **K0 20.27 → C=49 → global 515** (was 525;
+  edge `525−515=10`). Slack to 48-linear ~0.40.
+  Residual: N=7 peel → 505 (ZU31).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
