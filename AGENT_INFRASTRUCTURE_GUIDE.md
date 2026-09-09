@@ -3542,6 +3542,11 @@ sorry-free infrastructure and the complete commit ledger above.
   (`2^0.6≥1.51` → denom 0.51 → C=41 → rect **451** on
   [0.05,0.4]). Bottleneck now tail [0.4,0.5] at 525.
   Residual: mid tight-norm 431 + tail K0 attack (ZU29).
+- 2026-09-09 ZU29 (`4d2d47db`, zeta tail, 4× green 8693 jobs via
+  wrapper): mid tight-norm `41·(0.5+|Im|)` → rect **431**
+  (was 451, −20). Global still 525 (tail bottleneck; cheap
+  wins exhausted — slack only ~0.15 vs 0.29 needed).
+  Residual: N=5 peel at −1.05 → ~515 (ZU30).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
