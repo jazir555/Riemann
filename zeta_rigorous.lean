@@ -37390,3 +37390,184 @@ theorem R02_D3_zeta_rect_slice_edge4 :
 #print axioms R02_D3_zeta_rect_cap_slice0550_peeled
 #print axioms R02_D3_zeta_rect_slice_assembly4
 #print axioms R02_D3_zeta_rect_slice_edge4
+
+/-!
+## Door-3 strip endgame, step 38l (zeta lane): `(1.62)^10 ≤ 128` cleared cap.
+
+For the `0.05 ≤ Re ≤ 0.3` sub-slice split: `|2^{1-s}| = 2^{1-Re} ≥ 2^0.7`,
+so a cleared floor `1.62 ≤ 2^0.7` (via `(1.62)^10 ≤ 128 = 2^7`) lifts the
+eta-denominator floor `0.414 → 0.62` there. Small-step upper bounds only.
+-/
+
+/-- Cleared integer-pow cap: `(1.62)^10 ≤ 128` via small-step upper bounds. -/
+theorem R02_D3_pow_162_10_le_128 : ((1.62 : ℝ)) ^ (10 : ℕ) ≤ 128 := by
+  have h2 : ((1.62 : ℝ)) ^ (2 : ℕ) ≤ (2.6244 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.62 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((2.6244 : ℝ)) ^ (2 : ℕ) ≤ (6.8875 : ℝ) := by norm_num
+  have h4le : ((((1.62 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((2.6244 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.62 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) =
+      ((1.62 : ℝ)) ^ (4 : ℕ) := by
+    rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.62 : ℝ)) ^ (4 : ℕ) ≤ (6.8875 : ℝ) := by
+    rw [← h44]
+    exact le_trans h4le hsq
+  have h5mul : ((1.62 : ℝ)) ^ (4 : ℕ) * (1.62 : ℝ) =
+      ((1.62 : ℝ)) ^ (5 : ℕ) := by
+    have hps := pow_succ ((1.62 : ℝ)) (4 : ℕ)
+    rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps
+    exact hps.symm
+  have hprod : (6.8875 : ℝ) * (1.62 : ℝ) ≤ (11.1578 : ℝ) := by norm_num
+  have h5le : ((1.62 : ℝ)) ^ (4 : ℕ) * (1.62 : ℝ) ≤
+      (6.8875 : ℝ) * (1.62 : ℝ) :=
+    mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.62 : ℝ)) ^ (5 : ℕ) ≤ (11.1578 : ℝ) := by
+    rw [← h5mul]
+    exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.62 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((11.1578 : ℝ)) ^ (2 : ℕ) ≤ (124.5 : ℝ) := by norm_num
+  have h10le : ((((1.62 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤
+      ((11.1578 : ℝ)) ^ (2 : ℕ) :=
+    pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.62 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) =
+      ((1.62 : ℝ)) ^ (10 : ℕ) := by
+    rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.62 : ℝ)) ^ (10 : ℕ) ≤ (124.5 : ℝ) := by
+    rw [← h1010]
+    exact le_trans h10le hsq10
+  have hcap : (124.5 : ℝ) ≤ 128 := by norm_num
+  exact le_trans g10 hcap
+
+#print axioms R02_D3_pow_162_10_le_128
+
+/-!
+## Door-3 strip endgame, step 38m (zeta lane): `1.62 ≤ 2^0.7` + sub-slice denom.
+
+Cleared floor via `(1.62)^10 ≤ 128 = 2^7` (`0.7 * 10 = 7`), then the
+eta-denominator floor on `Re ≤ 0.3`: `‖1 - 2^{1-s}‖ ≥ 1.62 - 1 = 0.62`,
+mirror of `R02_D3_eta_denom_floor_slice0550` (`0.414`). FULL proofs.
+-/
+
+/-- Rpow lower: `1.62 ≤ 2^0.7` (cleared via `(1.62)^10 ≤ 128 = 2^7`). -/
+theorem R02_D3_rpow_207_le_162 : (1.62 : ℝ) ≤ (2 : ℝ) ^ (0.7 : ℝ) := by
+  by_contra hle
+  have hlt : (2 : ℝ) ^ (0.7 : ℝ) < (1.62 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (2 : ℝ) ^ (0.7 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((2 : ℝ) ^ (0.7 : ℝ))) ^ (10 : ℕ)) ≤
+      ((((1.62 : ℝ))) ^ (10 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 10
+  have h2_eq : ((((2 : ℝ) ^ (0.7 : ℝ))) ^ (10 : ℕ)) = 128 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.7 : ℝ) * ((((10 : ℕ)) : ℝ)) = 7 := by norm_num
+    have e7 : (7 : ℝ) = ((((7 : ℕ)) : ℝ)) := by norm_num
+    rw [e, e7, Real.rpow_natCast]
+    norm_num
+  rw [h2_eq] at hle_pow
+  have hge := R02_D3_pow_162_10_le_128
+  linarith
+
+/-- Eta-denominator floor on the near slice: `‖1 - 2^{1-s}‖ ≥ 0.62` for `Re ≤ 0.3`. -/
+theorem R02_D3_eta_denom_floor_slice0503 (s : ℂ) (hre : s.re ≤ 0.3) :
+    (0.62 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  have hnorm := two_cpow_one_sub_norm s
+  have hexp : (0.7 : ℝ) ≤ 1 - s.re := by linarith
+  have h2mono : (2 : ℝ) ^ (0.7 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp
+  have hge : (1.62 : ℝ) ≤ (2 : ℝ) ^ (1 - s.re) :=
+    le_trans R02_D3_rpow_207_le_162 h2mono
+  have htri := norm_sub_norm_le ((2 : ℂ) ^ ((1 : ℂ) - s)) (1 : ℂ)
+  rw [norm_one, hnorm] at htri
+  have hsym : ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ =
+      ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    norm_sub_rev _ _
+  linarith
+
+#print axioms R02_D3_rpow_207_le_162
+#print axioms R02_D3_eta_denom_floor_slice0503
+
+/-!
+## Door-3 strip endgame, step 38n (zeta lane): near-slice linear `C = 34` + rect.
+
+Mirror of `R02_D3_zeta_linear_slice0550_peeled` on `0.05 ≤ Re ≤ 0.3` with
+peeled K0 `20.57` and lifted denom `0.62`: `20.57 / 0.62 ≤ 34`, so
+`‖ζ(z)‖ ≤ 34 * (1 + |Im|)` and `≤ 374` on `|Im| ≤ 10`. FULL proofs.
+-/
+
+/-- Near-slice zeta linear `‖ζ(z)‖ ≤ 34 * (1 + |Im|)` on `0.05 ≤ Re ≤ 0.3`. -/
+theorem R02_D3_zeta_linear_slice0503_34 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.3) :
+    ‖riemannZeta z‖ ≤ 34 * (1 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by
+    intro h
+    linarith
+  have hetaLin := R02_D3_etaPair_linear_slice0550_peeled z hre_lo (by linarith)
+  have hden_ge := R02_D3_eta_denom_floor_slice0503 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ :=
+    lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ =
+      ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.62 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 20.57 * (1 + |z.im|) :=
+    mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (20.57 * (1 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤
+      (20.57 * (1 + |z.im|)) / 0.62 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (20.57 * (1 + |z.im|)) / 0.62 ≤ 34 * (1 + |z.im|) := by
+    have hratio : (20.57 : ℝ) / 0.62 ≤ 34 := by norm_num
+    have e : (20.57 * (1 + |z.im|)) / 0.62 = (20.57 / 0.62) * (1 + |z.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+
+/-- Near-slice rect cap: `‖ζ‖ ≤ 374` on `0.05 ≤ Re ≤ 0.3`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_cap_slice0503_34 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.3) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 374 := by
+  have h := R02_D3_zeta_linear_slice0503_34 z hre_lo hre_hi
+  have hcap : (34 : ℝ) * (1 + |z.im|) ≤ 374 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (34 : ℝ) * (1 + |z.im|) ≤ 34 * 11 :=
+          mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 374 := by norm_num
+  exact le_trans h hcap
+
+#print axioms R02_D3_zeta_linear_slice0503_34
+#print axioms R02_D3_zeta_rect_cap_slice0503_34
+
+/-!
+## Door-3 strip endgame, step 38o (zeta lane): sub-slice assembly + edge.
+
+Low slice `[0.05, 0.5]` split at `0.3`: near piece `374` (step 38n), far
+piece `550` (peeled cap); assembly keeps best rect `550` while banking the
+first sub-400 sub-slice cap. FULL proofs, no sorry.
+-/
+
+/-- Low-slice split assembly: `‖ζ‖ ≤ 550` on `0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10`. -/
+theorem R02_D3_zeta_rect_slice_assembly5 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 550 := by
+  by_cases hcut : z.re ≤ 0.3
+  · have h := R02_D3_zeta_rect_cap_slice0503_34 z hre_lo hcut him
+    linarith
+  · have hlt : (0.3 : ℝ) < z.re := lt_of_not_ge hcut
+    have h := R02_D3_zeta_rect_cap_slice0550_peeled z hre_lo hre_hi him
+    linarith
+
+/-- Sub-slice gap verdict: near cap `374 < 550`; best rect `550` vs `10`. -/
+theorem R02_D3_zeta_rect_slice_edge5 :
+    (374 : ℝ) < 550 ∧ (10 : ℝ) < 550 ∧ (550 : ℝ) - 374 = 176 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+
+#print axioms R02_D3_zeta_rect_slice_assembly5
+#print axioms R02_D3_zeta_rect_slice_edge5
