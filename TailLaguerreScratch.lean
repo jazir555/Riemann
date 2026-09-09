@@ -4352,3 +4352,146 @@ theorem d3K51_pairTail_lt :
 
 #print axioms d3shift32_tail102_le
 #print axioms d3K51_pairTail_lt
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5e): paired-tail shift identity. -/
+
+/-- Finite pair-to-eta aggregation: `∑_{m<N} pair m = ∑_{k<2N} eta k`. -/
+theorem d3Pair_sum_range_eq (s : ℂ) (N : ℕ) :
+    (∑ m ∈ Finset.range N, d3EtaPairTerm s m) =
+      (∑ k ∈ Finset.range (2 * N), d3EtaTerm s k) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    have hpairN : d3EtaPairTerm s N = d3EtaTerm s (2 * N) + d3EtaTerm s (2 * N + 1) := rfl
+    have h2 : 2 * (N + 1) = (2 * N + 1) + 1 := by omega
+    rw [Finset.sum_range_succ, ih, h2, Finset.sum_range_succ, Finset.sum_range_succ,
+      hpairN]
+    ring
+
+/-- K=51 paired-tail shift: `∑' m, pair (m+51) = G - ∑_{k<102} eta_k`. -/
+theorem d3Pair_tail51_eq (s : ℂ) (hs : Summable (d3EtaPairTerm s)) :
+    (∑' m, d3EtaPairTerm s (m + 51))
+      = (∑' m, d3EtaPairTerm s m) - ∑ k ∈ Finset.range 102, d3EtaTerm s k := by
+  have h1 := hs.sum_add_tsum_nat_add 51
+  have hpair := d3Pair_sum_range_eq s 51
+  have h102 : 2 * 51 = 102 := by norm_num
+  rw [h102] at hpair
+  have heq : (∑' i, d3EtaPairTerm s (i + 51))
+      = ((∑ m ∈ Finset.range 51, d3EtaPairTerm s m) + (∑' i, d3EtaPairTerm s (i + 51)))
+        - (∑ m ∈ Finset.range 51, d3EtaPairTerm s m) := by
+    rw [add_sub_cancel_left]
+  rw [h1, hpair] at heq
+  exact heq
+
+#print axioms d3Pair_sum_range_eq
+#print axioms d3Pair_tail51_eq
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5f): conditional zeta lower. -/
+
+/-- K=51 zeta lower from an enlarged-head bound: with `40/201 < ‖head₁₀₂‖`,
+`‖tail₅₁‖ ≤ 40/201` and the eta bridge, reverse-triangle plus the committed
+factor cap `13/5` yields `(‖head₁₀₂‖ - 40/201)/(13/5) ≤ ‖ζ(s₀)‖`. -/
+theorem d3Zeta_lower_of_tail51
+    (hHead : (40 / 201 : ℝ) < ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖)
+    (hTail : ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤ 40 / 201)
+    (hZeta : (∑' m, d3EtaPairTerm d3HalfS0 m)
+      = (1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0)) * riemannZeta d3HalfS0) :
+    (‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ - 40 / 201) / (13 / 5)
+      ≤ ‖riemannZeta d3HalfS0‖ := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have _hpos : (40 / 201 : ℝ) < ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ :=
+    hHead
+  have hFac : ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0))‖ ≤ 13 / 5 :=
+    d3EtaFactor_upper
+  have hshift := d3Pair_tail51_eq d3HalfS0 (summable_d3EtaPair d3HalfS0 hre)
+  have htri : ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖
+      ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + 40 / 201 := by
+    have hdecomp : (∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k)
+        = (∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 51)) := by
+      rw [hshift]
+      ring
+    calc ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖
+        = ‖(∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 51))‖ := by rw [hdecomp]
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+          + ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ := norm_sub_le _ _
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + 40 / 201 := by linarith [hTail]
+  have hGle : ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+      ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    rw [hZeta, norm_mul]
+    exact mul_le_mul_of_nonneg_right hFac (norm_nonneg _)
+  have hkey : (‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ - 40 / 201)
+      ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    linarith [htri, hGle]
+  rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 13 / 5)]
+  rw [mul_comm]
+  exact hkey
+
+#print axioms d3Zeta_lower_of_tail51
+
+/-! ## Door-3 remainder 5 (K=51 shift, step 5g): explicit `c` + segment point. -/
+
+/-- Explicit numeral: under a `1/5` enlarged-head hypothesis,
+`1/2613 ≤ ‖ζ(s₀)‖` since `(1/5 - 40/201)/(13/5) = 1/2613`. -/
+theorem d3K51_zeta_explicit_of_head
+    (hHead5 : (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖)
+    (hTail : ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤ 40 / 201)
+    (hZeta : (∑' m, d3EtaPairTerm d3HalfS0 m)
+      = (1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0)) * riemannZeta d3HalfS0) :
+    (1 / 2613 : ℝ) ≤ ‖riemannZeta d3HalfS0‖ := by
+  have hre : d3HalfS0.re = 1 / 2 := d3HalfPt_re
+  have hFac : ‖(1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0))‖ ≤ 13 / 5 :=
+    d3EtaFactor_upper
+  have hshift := d3Pair_tail51_eq d3HalfS0 (summable_d3EtaPair d3HalfS0 hre)
+  have htri : ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖
+      ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + 40 / 201 := by
+    have hdecomp : (∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k)
+        = (∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 51)) := by
+      rw [hshift]
+      ring
+    calc ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖
+        = ‖(∑' m, d3EtaPairTerm d3HalfS0 m)
+          - (∑' m, d3EtaPairTerm d3HalfS0 (m + 51))‖ := by rw [hdecomp]
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+          + ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ := norm_sub_le _ _
+      _ ≤ ‖∑' m, d3EtaPairTerm d3HalfS0 m‖ + 40 / 201 := by linarith [hTail]
+  have hGle : ‖∑' m, d3EtaPairTerm d3HalfS0 m‖
+      ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    rw [hZeta, norm_mul]
+    exact mul_le_mul_of_nonneg_right hFac (norm_nonneg _)
+  have hkey : (1 / 1005 : ℝ) ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+    have h5 : (1 / 5 : ℝ) - 40 / 201 = 1 / 1005 := by norm_num
+    have hle : (1 / 5 : ℝ) - 40 / 201 ≤ (13 / 5) * ‖riemannZeta d3HalfS0‖ := by
+      linarith [hHead5, htri, hGle]
+    rw [h5] at hle
+    exact hle
+  have hgoal : (1 / 2613 : ℝ) = (1 / 1005) / (13 / 5) := by norm_num
+  rw [hgoal, div_le_iff₀ (by norm_num : (0 : ℝ) < 13 / 5)]
+  rw [mul_comm]
+  exact hkey
+
+/-- Pointwise nonvanishing at `s₀` from the explicit numeral. -/
+theorem d3K51_nonvan_of_head
+    (hHead5 : (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖)
+    (hTail : ‖∑' m, d3EtaPairTerm d3HalfS0 (m + 51)‖ ≤ 40 / 201)
+    (hZeta : (∑' m, d3EtaPairTerm d3HalfS0 m)
+      = (1 - (2 : ℂ) ^ ((1 : ℂ) - d3HalfS0)) * riemannZeta d3HalfS0) :
+    riemannZeta d3HalfS0 ≠ 0 := by
+  have hle := d3K51_zeta_explicit_of_head hHead5 hTail hZeta
+  intro hzero
+  rw [hzero, norm_zero] at hle
+  norm_num at hle
+
+/-- The `s₀` preimage `((1/2:ℝ)):ℂ` lies on the real sub-segment. -/
+theorem d3K51_segPt_mem : ((((1 / 2 : ℝ))) : ℂ) ∈ door3RealSeg := by
+  apply door3RealSeg_mem_of_reim
+  · norm_num [Complex.ofReal_re]
+  · norm_num [Complex.ofReal_re]
+  · norm_num [Complex.ofReal_im]
+  · norm_num [Complex.ofReal_im]
+
+#print axioms d3K51_zeta_explicit_of_head
+#print axioms d3K51_nonvan_of_head
+#print axioms d3K51_segPt_mem
