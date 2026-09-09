@@ -3457,6 +3457,14 @@ sorry-free infrastructure and the complete commit ledger above.
   twelfth-term recipe (`log12` d9 + quartic cos + cleared rpow) →
   `Re (term 11) ≥ 1/15` (sign-flip positive); slow ≈0.4359 vs 0.65.
   Residual: wire S9/S12 sums + k=13 (n=14) floor (OA13, LARGE scope).
+- 2026-09-08+ OA13 (`449f2b25` part 1, off-axis tail, built green):
+  S9/S10 folds + fourteenth floor `1/12` + sixteenth floor `1/10`
+  (latter appended unbuilt, validated green by OA14 as-is).
+- 2026-09-09 OA14 (`449f2b25` part 2, off-axis tail, 7× green 8702):
+  33 theorems — prime floors n=11/13/15 (honest-negative) +
+  contiguous S11–S16 folds (S16 ≈ 0.04003; contiguous dips, pair
+  S15+S16 nets −3/20). Standalone credit 1/4; all k≤15 floored.
+  Residual: n=17/18 floors + pair-tail certificate (OA15, LARGE).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
