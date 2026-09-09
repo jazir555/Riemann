@@ -3468,6 +3468,12 @@ sorry-free infrastructure and the complete commit ledger above.
   on 0.05≤Re≤0.5; high half still 1221). Best rect 561 low /
   1221 high (gap 551/1211).
   Residual: high-slice K0 at exponent −1.5 → C≈14 (ZU21).
+- 2026-09-09 ZU21 (`b6f4ea3a`, zeta tail, 4× green 8693 jobs):
+  exponent-1.5 chain (integral 1/0.5 → K0=3, true ≈1.69) →
+  **`‖ζ‖≤16(1+|Im|)` on 0.5≤Re≤0.74** (high rect implied 176,
+  not yet banked). Best rect 561/176 (was 561/1221).
+  Residual: rect numeral + assembly + gap verdict, then K0
+  tightening or new idea (ZU22).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
