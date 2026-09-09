@@ -7884,3 +7884,314 @@ theorem R05_log_twentyone_mem :
 #print axioms R05_log_twentyone_mem
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight real rpow twenty-second inverse lower (`2/7 ≤ 22 ^ (-0.395)`)
+from `22 ^ 0.395 ≤ 7/2` (completes the pair-10 amplitude halves). -/
+theorem R05_rpow_twentytwo_neg0395_ge_tight :
+    (2 / 7 : Real) ≤ (22 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_twentytwo_rpow_le_tight
+  have hpos : (0 : Real) < (22 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (22 : Real) ^ (-0.395 : Real) = (((22 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (2 / 7 : Real) = ((7 / 2 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_rpow_twentytwo_neg0395_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Phase of the R05 twenty-first eta term (`0.75 * log 21` in `[2.2824, 2.2844]`)
+from the banked `log 21` bounds. -/
+theorem R05_theta21_mem :
+    (2.2824 : Real) ≤ 0.75 * Real.log 21 ∧ 0.75 * Real.log 21 ≤ (2.2844 : Real) := by
+  have h := R05_log_twentyone_mem
+  constructor <;> linarith
+
+/-- Fresh `log 22` bounds (`3.0866 ≤ log 22 ≤ 3.0958`) via `log 20`
+(`R05_log_twenty_eq` + `R05_log_ten_eq`) and `log (22/20)` trapped by `x - 1`. -/
+theorem R05_log_twentytwo_mem :
+    (3.0866 : Real) ≤ Real.log 22 ∧ Real.log 22 ≤ (3.0958 : Real) := by
+  have h20 := R05_log_twenty_eq
+  have h10 := R05_log_ten_eq
+  have hub_lo : Real.log (20 / 22 : Real) ≤ (-1 / 11 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 20 / 22)
+    have he : (20 / 22 : Real) - 1 = (-1 / 11 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (22 / 20 : Real) = -Real.log (20 / 22 : Real) := by
+    have heq : (22 / 20 : Real) = (20 / 22 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hub_hi : Real.log (22 / 20 : Real) ≤ (1 / 10 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 22 / 20)
+    have he : (22 / 20 : Real) - 1 = (1 / 10 : Real) := by norm_num
+    linarith
+  have hlog22 : Real.log 22 =
+      2 * Real.log 2 + Real.log 5 + Real.log (22 / 20 : Real) := by
+    have h := Real.log_mul (show (20 : Real) ≠ 0 by norm_num)
+      (show (22 / 20 : Real) ≠ 0 by norm_num)
+    have hmeq : (20 : Real) * (22 / 20) = 22 := by norm_num
+    rw [hmeq] at h
+    rw [h20, h10] at h
+    linarith
+  have hfin_lo : (3.0866 : Real) ≤
+      2 * (0.693147 : Real) + (1.609437 : Real) + (1 / 11 : Real) := by
+    norm_num
+  have hfin_hi : 2 * (0.693148 : Real) + (1.609438 : Real) + (1 / 10 : Real) ≤
+      (3.0958 : Real) := by
+    norm_num
+  refine ⟨?_, ?_⟩
+  · rw [hlog22, hinv]
+    have h2lo : (0.693147 : Real) < Real.log 2 := by
+      have h9 := Real.log_two_gt_d9
+      linarith
+    have h5lo : (1.609437 : Real) < Real.log 5 := by
+      have h9 := Real.log_five_gt_d9
+      linarith
+    linarith
+  · rw [hlog22]
+    have h2hi : Real.log 2 < (0.693148 : Real) := by
+      have h9 := Real.log_two_lt_d9
+      linarith
+    have h5hi : Real.log 5 < (1.609438 : Real) := by
+      have h9 := Real.log_five_lt_d9
+      linarith
+    linarith
+
+/-- Phase of the R05 twenty-second eta term (`0.75 * log 22` in `[2.3149, 2.3219]`)
+from the fresh `log 22` bounds. -/
+theorem R05_theta22_mem :
+    (2.3149 : Real) ≤ 0.75 * Real.log 22 ∧ 0.75 * Real.log 22 ≤ (2.3219 : Real) := by
+  have h := R05_log_twentytwo_mem
+  constructor <;> linarith
+
+#print axioms R05_theta21_mem
+#print axioms R05_log_twentytwo_mem
+#print axioms R05_theta22_mem
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Cosine lower at the twenty-first-term phase (`-3/4 ≤ cos (0.75 * log 21)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log21_lower :
+    (-3 / 4 : Real) ≤ Real.cos (0.75 * Real.log 21) := by
+  have hmem := R05_theta21_mem
+  have hpos : (0 : Real) < Real.log 21 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 21 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (2.2824 : Real) ≤ 0.75 * Real.log 21 := hmem.1
+  have hhi : 0.75 * Real.log 21 ≤ (2.2844 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 21) ^ 2 ≤ (2.2844 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (2.2824 : Real) ^ 4 ≤ (0.75 * Real.log 21) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 21) ^ 6 ≤ (2.2844 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-3 / 4 : Real) ≤
+      1 - (2.2844 : Real) ^ 2 / 2 + (2.2824 : Real) ^ 4 / 24 -
+        (2.2844 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Cosine upper at the twenty-second-term phase (`cos (0.75 * log 22) ≤ -2/5`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log22_upper :
+    Real.cos (0.75 * Real.log 22) ≤ (-2 / 5 : Real) := by
+  have hmem := R05_theta22_mem
+  have hpos : (0 : Real) < Real.log 22 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 22 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (2.3149 : Real) ≤ 0.75 * Real.log 22 := hmem.1
+  have hhi : 0.75 * Real.log 22 ≤ (2.3219 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (2.3149 : Real) ^ 2 ≤ (0.75 * Real.log 22) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 22) ^ 4 ≤ (2.3219 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (2.3149 : Real) ^ 2 / 2 + (2.3219 : Real) ^ 4 / 24 ≤
+      (-2 / 5 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_cos_075log21_lower
+#print axioms R05_cos_075log22_upper
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Base-rpow lower (`3 ≤ 21 ^ 0.395`) from cleared `21 ^ 3 = 9261 ≥ 6561 = 3 ^ 8`
+with exponent `3/8 = 0.375 ≤ 0.395` (amplitude upper half of pair-10 term 21). -/
+theorem R05_twentyone_rpow_ge : (3 : Real) ≤ (21 : Real) ^ (0.395 : Real) := by
+  have hpow : ((3 : Real)) ^ (8 : Nat) ≤ ((((21 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) := by
+    have e : ((((21 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) =
+        (21 : Real) ^ (3 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 21)]
+      rw [show (3 / 8 : Real) * ((((8 : Nat)) : Real)) = (3 : Real) by norm_num]
+      rw [show (3 : Real) = ((((3 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 21 3
+    rw [e]
+    norm_num
+  have hstep : (3 : Real) ≤ (21 : Real) ^ ((3 / 8 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+  calc (3 : Real) ≤ (21 : Real) ^ ((3 / 8 : Real)) := hstep
+    _ ≤ (21 : Real) ^ (0.395 : Real) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Real rpow twenty-first inverse upper (`21 ^ (-0.395) ≤ 1/3`) from `3 ≤ 21 ^ 0.395`. -/
+theorem R05_rpow_twentyone_neg0395_le :
+    (21 : Real) ^ (-0.395 : Real) ≤ (1 / 3 : Real) := by
+  have hge := R05_twentyone_rpow_ge
+  have hpos : (0 : Real) < (21 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (21 : Real) ^ (-0.395 : Real) = (((21 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 3 : Real) = ((3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_twentyone_rpow_ge
+#print axioms R05_rpow_twentyone_neg0395_le
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 twenty-first eta inverse
+(`Re (21 ^ s)⁻¹ = 21 ^ (-0.395) * cos (0.75 * log 21)`). -/
+theorem R05_inv_twentyone_cpow_re_eq :
+    (((((21 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (21 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 21) := by
+  have h21eq : ((((21 : Nat)) : Complex)) = (21 : Complex) := by norm_cast
+  rw [h21eq]
+  have hlog : Complex.log (21 : Complex) = (((Real.log 21 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 21)).symm
+  have hlogre : (Complex.log (21 : Complex)).re = Real.log 21 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (21 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (21 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 21 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (21 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 21 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (21 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (21 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (21 : Complex) ≠ 0)]
+  have hinv : ((21 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (21 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (21 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 21 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (21 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 21 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (21 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 21 * 0.395)) * Real.cos (-(Real.log 21 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 21 * (-0.75))) = Real.cos (0.75 * Real.log 21) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 21 * 0.395)) = (21 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 21 * 0.395) = Real.log 21 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 21)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 twenty-first eta term in closed form (`term 20 = ((21 ^ s)⁻¹)`, since `(-1)^20 = 1`). -/
+theorem R05_eta_twentyfirst_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 20 =
+      ((((21 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (20 + 1 : Nat) = 21 := rfl
+  have hcast : ((((20 + 1 : Nat)) : Complex)) = ((((21 : Nat)) : Complex)) := by
+    rw [e1]
+  have hpos : (-1 : Complex) ^ (20 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hpos, one_div]
+
+#print axioms R05_inv_twentyone_cpow_re_eq
+#print axioms R05_eta_twentyfirst_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 twenty-second eta inverse
+(`Re (22 ^ s)⁻¹ = 22 ^ (-0.395) * cos (0.75 * log 22)`). -/
+theorem R05_inv_twentytwo_cpow_re_eq :
+    (((((22 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (22 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 22) := by
+  have h22eq : ((((22 : Nat)) : Complex)) = (22 : Complex) := by norm_cast
+  rw [h22eq]
+  have hlog : Complex.log (22 : Complex) = (((Real.log 22 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 22)).symm
+  have hlogre : (Complex.log (22 : Complex)).re = Real.log 22 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (22 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (22 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 22 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (22 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 22 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (22 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (22 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (22 : Complex) ≠ 0)]
+  have hinv : ((22 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (22 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (22 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 22 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (22 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 22 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (22 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 22 * 0.395)) * Real.cos (-(Real.log 22 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 22 * (-0.75))) = Real.cos (0.75 * Real.log 22) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 22 * 0.395)) = (22 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 22 * 0.395) = Real.log 22 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 22)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 twenty-second eta term in closed form (`term 21 = -((22 ^ s)⁻¹)`, since `(-1)^21 = -1`). -/
+theorem R05_eta_twentysecond_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 21 =
+      -((((22 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (21 + 1 : Nat) = 22 := rfl
+  have hcast : ((((21 + 1 : Nat)) : Complex)) = ((((22 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (21 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+#print axioms R05_inv_twentytwo_cpow_re_eq
+#print axioms R05_eta_twentysecond_eq
+
+end Door3OffAxis
