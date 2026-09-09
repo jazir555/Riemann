@@ -5123,3 +5123,215 @@ theorem d3_rpow_four_neghalf : (4 : ℝ) ^ (-(1 / 2) : ℝ) = 1 / 2 := by
 #print axioms d3_cos_theta2_lower
 #print axioms d3_cos_theta4_lower
 #print axioms d3_rpow_three_neghalf_ge
+
+/-! ## Door-3 remainder 5 (step 5s): eta sign/phase convention + magnitude identity.
+
+STEP-1 convention check (read-only audit of `d3EtaTerm s n = (-1)^n / ((n+1)^s)`):
+S₆ sums SIGNED alternating terms (even `k` positive, odd `k` negative —
+`d3EtaTerm_even_eq` / `d3EtaTerm_odd_eq`), NOT magnitudes. `d3EtaTerm_norm_eq`
+shows the modulus strips sign and phase, so a per-term-floor sum is an UPPER
+(triangle) bound, useless for `‖S₆‖ ≥ 53/100`. The sound route is phase-aware:
+`‖S₆‖ ≥ Re(S₆)` with `Re(eta_k) = (-1)^k * r_k * cos θ_k`; even-`k` Re-floors
+from banked `r_k`/`cos θ_k` lowers are immediate, odd-`k` Re-floors need rpow
+uppers (`cos ≤ 1`, `2^(-1/2) ≤ 5/7`, `3^(-1/2) ≤ 3/5`, `6^(-1/2) ≤ 5/12`
+banked; `5^(-1/2) ≤ 5/11` from `11/5 ≤ √5` still to bank) plus the Re-of-cpow
+factorization per residue (mirroring `R05_inv_two_cpow_re_eq`, reproved
+in-tail). True `Re(S₆) ≈ 0.4977`, `‖S₆‖ ≈ 0.5590`, floor-signed-Re ≈ 0.4290,
+so `53/100` needs the full 2-D enclosure — exact next-agent task.
+-/
+
+/-- Magnitude identity: the eta modulus strips sign and phase. -/
+theorem d3EtaTerm_norm_eq (s : ℂ) (n : ℕ) :
+    ‖d3EtaTerm s n‖ = ((((n + 1 : ℕ)) : ℝ)) ^ (-s.re) := by
+  have hcast : ((((n + 1 : ℕ)) : ℂ)) = (((((n + 1 : ℕ)) : ℝ)) : ℂ) := by
+    norm_cast
+  have hnorm : ‖((((n + 1 : ℕ)) : ℂ) ^ s)‖ = ((((n + 1 : ℕ)) : ℝ)) ^ s.re := by
+    rw [hcast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (Nat.cast_pos.mpr (by omega)) s
+  have hneg : ‖((-1 : ℂ) ^ n)‖ = 1 := by
+    have h1 : ‖(-1 : ℂ)‖ = 1 := by
+      rw [norm_neg, norm_one]
+    rw [norm_pow, h1, one_pow]
+  unfold d3EtaTerm
+  rw [norm_div, hneg, hnorm, one_div]
+  exact (Real.rpow_neg (Nat.cast_nonneg _) _).symm
+
+/-- Even eta terms are positive-signed. -/
+theorem d3EtaTerm_even_eq (s : ℂ) (m : ℕ) :
+    d3EtaTerm s (2 * m) = 1 / (((((2 * m + 1 : ℕ)) : ℂ) ^ s)) := by
+  unfold d3EtaTerm
+  rw [d3_neg_one_pow_two_mul m]
+
+/-- Odd eta terms are negative-signed. -/
+theorem d3EtaTerm_odd_eq (s : ℂ) (m : ℕ) :
+    d3EtaTerm s (2 * m + 1) = -1 / (((((2 * m + 1 + 1 : ℕ)) : ℂ) ^ s)) := by
+  unfold d3EtaTerm
+  rw [d3_neg_one_pow_two_mul_add_one m]
+
+#print axioms d3EtaTerm_norm_eq
+#print axioms d3EtaTerm_even_eq
+#print axioms d3EtaTerm_odd_eq
+
+/-! ## Door-3 remainder 5 (step 5t): Re-of-cpow factorization at `s₀`.
+
+Phase-aware assembly needs `Re(((b:ℂ)^s₀)⁻¹) = b^(-1/2)·cos(θ_b)` with
+`θ_b = (1/2)·log b`, proved fresh in-tail via `Complex.cpow_def_of_ne_zero`
++ `Complex.exp_re` (same shape as the off-axis `R05_inv_two_cpow_re_eq`,
+reproved here from the banked `d3HalfPt_re/im`, not copied).
+-/
+
+/-- Real part of a natural-base inverse cpow at `s₀`: rpow times cosine. -/
+theorem d3_inv_nat_cpow_re_eq (b : ℕ) (hb : 0 < b) :
+    (((((b : ℕ)) : ℂ) ^ d3HalfS0)⁻¹).re =
+      ((b : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log (b : ℝ)) := by
+  have hbR : (0 : ℝ) < (b : ℝ) := Nat.cast_pos.mpr hb
+  have hcast : ((((b : ℕ)) : ℂ)) = (((b : ℝ)) : ℂ) := by
+    norm_cast
+  rw [hcast]
+  have hne : (((b : ℝ)) : ℂ) ≠ 0 := by
+    have h : (b : ℝ) ≠ 0 := ne_of_gt hbR
+    exact_mod_cast h
+  have hlog : Complex.log (((b : ℝ)) : ℂ) = (((Real.log (b : ℝ))) : ℂ) :=
+    (Complex.ofReal_log hbR.le).symm
+  have hlogre : (Complex.log (((b : ℝ)) : ℂ)).re = Real.log (b : ℝ) := by
+    rw [hlog]
+    rfl
+  have hlogim : (Complex.log (((b : ℝ)) : ℂ)).im = 0 := by
+    rw [hlog]
+    rfl
+  have hsre : d3HalfS0.re = (1 / 2 : ℝ) := d3HalfPt_re
+  have hsim : d3HalfS0.im = (1 / 2 : ℝ) := d3HalfPt_im
+  have hargre : (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0).re =
+      Real.log (b : ℝ) * (1 / 2) := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0).im =
+      Real.log (b : ℝ) * (1 / 2) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (((b : ℝ)) : ℂ) ^ d3HalfS0 =
+      Complex.exp (Complex.log (((b : ℝ)) : ℂ) * d3HalfS0) := by
+    rw [Complex.cpow_def_of_ne_zero hne]
+  have hinv : ((((b : ℝ)) : ℂ) ^ d3HalfS0)⁻¹ =
+      Complex.exp (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)).re =
+      -(Real.log (b : ℝ) * (1 / 2)) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0)).im =
+      -(Real.log (b : ℝ) * (1 / 2)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (((b : ℝ)) : ℂ) * d3HalfS0))).re =
+      Real.exp (-(Real.log (b : ℝ) * (1 / 2)))
+        * Real.cos (-(Real.log (b : ℝ) * (1 / 2))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log (b : ℝ) * (1 / 2)))
+      = Real.cos ((1 / 2) * Real.log (b : ℝ)) := by
+    have harg : -(Real.log (b : ℝ) * (1 / 2)) = -((1 / 2) * Real.log (b : ℝ)) := by
+      ring
+    rw [harg, Real.cos_neg]
+  have hexp : Real.exp (-(Real.log (b : ℝ) * (1 / 2)))
+      = (b : ℝ) ^ (-(1 / 2) : ℝ) := by
+    have heq : -(Real.log (b : ℝ) * (1 / 2))
+        = Real.log (b : ℝ) * (-(1 / 2) : ℝ) := by
+      ring
+    rw [heq, ← Real.rpow_def_of_pos hbR]
+  rw [hinv, hre, hexp, hcos]
+
+#print axioms d3_inv_nat_cpow_re_eq
+/-! ## Door-3 remainder 5 (step 5u): `√5` bank + rpow uppers + Re residues 0,1.
+Odd-term floors need `5^(-1/2) ≤ 5/11` (from `11/5 ≤ √5`); `2^(-1/2) ≤ 5/7`,
+`3^(-1/2) ≤ 3/5` by inversion of banked sqrt lowers. -/
+/-- Sqrt lower `11/5 ≤ 5^(1/2:ℝ)` (cleared: `(11/5)^2 ≤ 5`). -/
+theorem d3_sqrt5_ge : (11 / 5 : ℝ) ≤ (5 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hpow : ((11 / 5 : ℝ)) ^ (2 : ℕ) ≤ ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) := by
+    have e : ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 5 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+      rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+      exact Real.rpow_one 5
+    rw [e]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+/-- Rpow upper (`2^(-1/2) ≤ 5/7`) by inversion of `d3rpow_half_ge`. -/
+theorem d3_rpow_two_neghalf_le : (2 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 5 / 7 := by
+  have hrw : (2 : ℝ) ^ (-(1 / 2) : ℝ) = (((2 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2) _
+  rw [hrw, show (5 / 7 : ℝ) = ((7 / 5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr d3rpow_half_ge
+/-- Rpow upper (`3^(-1/2) ≤ 3/5`) by inversion of `d3rpow_sqrt3_ge`. -/
+theorem d3_rpow_three_neghalf_le : (3 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 3 / 5 := by
+  have hrw : (3 : ℝ) ^ (-(1 / 2) : ℝ) = (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [hrw, show (3 / 5 : ℝ) = ((5 / 3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr d3rpow_sqrt3_ge
+/-- Rpow upper (`5^(-1/2) ≤ 5/11`) by inversion of `d3_sqrt5_ge`. -/
+theorem d3_rpow_five_neghalf_le : (5 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 5 / 11 := by
+  have hrw : (5 : ℝ) ^ (-(1 / 2) : ℝ) = (((5 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _
+  rw [hrw, show (5 / 11 : ℝ) = ((11 / 5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr d3_sqrt5_ge
+/-- Re residue 0: even term, base 1. -/
+theorem d3EtaTerm_re_0 : (d3EtaTerm d3HalfS0 0).re
+    = ((((1 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((1 : ℕ)) : ℝ))) := by
+  have e : d3EtaTerm d3HalfS0 0 = d3EtaTerm d3HalfS0 (2 * 0) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 0 + 1 : ℕ) = 1 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_re_eq 1 (by norm_num)
+/-- Re residue 1: odd term, base 2 (negated). -/
+theorem d3EtaTerm_re_1 : (d3EtaTerm d3HalfS0 1).re
+    = -(((((2 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((2 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 1 = d3EtaTerm d3HalfS0 (2 * 0 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 0 + 1 + 1 : ℕ) = 2 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((2 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((2 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_re, d3_inv_nat_cpow_re_eq 2 (by norm_num)]
+#print axioms d3_sqrt5_ge
+#print axioms d3_rpow_two_neghalf_le
+#print axioms d3_rpow_three_neghalf_le
+#print axioms d3_rpow_five_neghalf_le
+#print axioms d3EtaTerm_re_0
+#print axioms d3EtaTerm_re_1
+/-! ## Door-3 remainder 5 (step 5v): Re residues 2,3,4,5 (bases 3,4,5,6). -/
+/-- Re residue 2: even term, base 3. -/
+theorem d3EtaTerm_re_2 : (d3EtaTerm d3HalfS0 2).re
+    = ((((3 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((3 : ℕ)) : ℝ))) := by
+  have e : d3EtaTerm d3HalfS0 2 = d3EtaTerm d3HalfS0 (2 * 1) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 1 + 1 : ℕ) = 3 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_re_eq 3 (by norm_num)
+/-- Re residue 3: odd term, base 4 (negated). -/
+theorem d3EtaTerm_re_3 : (d3EtaTerm d3HalfS0 3).re
+    = -(((((4 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((4 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 3 = d3EtaTerm d3HalfS0 (2 * 1 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 1 + 1 + 1 : ℕ) = 4 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((4 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((4 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_re, d3_inv_nat_cpow_re_eq 4 (by norm_num)]
+/-- Re residue 4: even term, base 5. -/
+theorem d3EtaTerm_re_4 : (d3EtaTerm d3HalfS0 4).re
+    = ((((5 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((5 : ℕ)) : ℝ))) := by
+  have e : d3EtaTerm d3HalfS0 4 = d3EtaTerm d3HalfS0 (2 * 2) := rfl
+  rw [e, d3EtaTerm_even_eq]
+  have hb : (2 * 2 + 1 : ℕ) = 5 := by norm_num
+  rw [hb, one_div]
+  exact d3_inv_nat_cpow_re_eq 5 (by norm_num)
+/-- Re residue 5: odd term, base 6 (negated). -/
+theorem d3EtaTerm_re_5 : (d3EtaTerm d3HalfS0 5).re
+    = -(((((6 : ℕ)) : ℝ)) ^ (-(1 / 2) : ℝ) * Real.cos ((1 / 2) * Real.log ((((6 : ℕ)) : ℝ)))) := by
+  have e : d3EtaTerm d3HalfS0 5 = d3EtaTerm d3HalfS0 (2 * 2 + 1) := rfl
+  rw [e, d3EtaTerm_odd_eq]
+  have hb : (2 * 2 + 1 + 1 : ℕ) = 6 := by norm_num
+  rw [hb]
+  have hneg : ((-1 : ℂ) / ((((6 : ℕ)) : ℂ) ^ d3HalfS0)) = -(((((6 : ℕ)) : ℂ) ^ d3HalfS0)⁻¹) := by
+    rw [div_eq_mul_inv, neg_one_mul]
+  rw [hneg, Complex.neg_re, d3_inv_nat_cpow_re_eq 6 (by norm_num)]
+#print axioms d3EtaTerm_re_2
+#print axioms d3EtaTerm_re_3
+#print axioms d3EtaTerm_re_4
+#print axioms d3EtaTerm_re_5
