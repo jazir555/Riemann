@@ -3578,6 +3578,11 @@ sorry-free infrastructure and the complete commit ledger above.
   best contiguous **S16′ ≈ 0.1216** (was 0.0400),
   residual 499241/770000 ≈ 0.64836.
   Residual: tight 19/20 floors + S19/S20 tight folds (OA19).
+- 2026-09-09 OA19 (`27872ce4`, off-axis tail, 4× green 8702 jobs):
+  tight 19 (`−125/602`) + tight 20 (`3/25`, beats 1/10) →
+  S19′/S20′ folds (frontier S20′ ≈ −0.086, best holds S16′
+  ≈ 0.1216). Residual 3481309/4730000 ≈ 0.736.
+  Residual: tight pair-9 + block update (OA20).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
