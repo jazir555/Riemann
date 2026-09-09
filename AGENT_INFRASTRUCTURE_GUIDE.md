@@ -3505,6 +3505,10 @@ sorry-free infrastructure and the complete commit ledger above.
   **C=34, rect 374** on [0.05,0.3]). Global still 550 (far piece
   [0.3,0.5] pinned: denom 0.414 tight at s=0.5).
   Residual: far-piece norm cap `‖z‖≤0.5+|Im|` → 525 (ZU26).
+- 2026-09-09 ZU26 (`cedfba2f`, zeta tail, 2× green 8693 jobs via
+  wrapper): tight low linear `50·(0.5+|Im|)` → far rect **525**,
+  assembly6 best **525** (was 550; gain 25, residual 515).
+  Residual: near-tight 357 + high-tight 151 (ZU27).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
