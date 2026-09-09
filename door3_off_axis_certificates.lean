@@ -7537,3 +7537,174 @@ theorem R05_pairblock_5_9_sum_eq_tight :
 #print axioms R05_pairblock_5_9_sum_eq_tight
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight base-rpow lower (`301/100 ≤ 19 ^ 0.395`) from cleared `(301/100) ^ 8 ≤ 19 ^ 3`
+with exponent `3/8 = 0.375 ≤ 0.395` (beats the coarse `3 ≤ 19 ^ 0.395`). -/
+theorem R05_nineteen_rpow_ge_tight : ((301 / 100 : Real)) ≤ (19 : Real) ^ (0.395 : Real) := by
+  have hpow : (((301 / 100 : Real))) ^ (8 : Nat) ≤ ((((19 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) := by
+    have e : ((((19 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) =
+        (19 : Real) ^ (3 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 19)]
+      rw [show (3 / 8 : Real) * ((((8 : Nat)) : Real)) = (3 : Real) by norm_num]
+      rw [show (3 : Real) = ((((3 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 19 3
+    rw [e]
+    norm_num
+  have hstep : (((301 / 100 : Real))) ≤ (19 : Real) ^ ((3 / 8 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+  calc (((301 / 100 : Real))) ≤ (19 : Real) ^ ((3 / 8 : Real)) := hstep
+    _ ≤ (19 : Real) ^ (0.395 : Real) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Tight real rpow nineteenth inverse upper (`19 ^ (-0.395) ≤ 100/301`)
+from `301/100 ≤ 19 ^ 0.395` (beats `1/3`). -/
+theorem R05_rpow_nineteen_neg0395_le_tight :
+    (19 : Real) ^ (-0.395 : Real) ≤ (100 / 301 : Real) := by
+  have hge := R05_nineteen_rpow_ge_tight
+  have hpos : (0 : Real) < (19 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (19 : Real) ^ (-0.395 : Real) = (((19 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (100 / 301 : Real) = (((301 / 100 : Real)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_nineteen_rpow_ge_tight
+#print axioms R05_rpow_nineteen_neg0395_le_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight rpow upper (`20 ^ 0.395 ≤ 10/3`) via cleared `(20 ^ (2/5)) ^ 5 = 400 ≤ 100000/243`
+(beats the coarse `20 ^ 0.395 ≤ 4`). -/
+theorem R05_twenty_rpow_le_tight : (20 : Real) ^ (0.395 : Real) ≤ (10 / 3 : Real) := by
+  have hpow : ((((20 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((10 / 3 : Real)) ^ (5 : Nat) := by
+    have e : ((((20 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (20 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 20)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 20 2
+    rw [e]
+    norm_num
+  have hstep : (20 : Real) ^ ((2 / 5 : Real)) ≤ (10 / 3 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (20 : Real) ^ (0.395 : Real) ≤ (20 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (10 / 3 : Real) := hstep
+
+/-- Tight real rpow twentieth inverse lower (`3/10 ≤ 20 ^ (-0.395)`)
+from `20 ^ 0.395 ≤ 10/3` (beats `1/4`). -/
+theorem R05_rpow_twenty_neg0395_ge_tight :
+    (3 / 10 : Real) ≤ (20 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_twenty_rpow_le_tight
+  have hpos : (0 : Real) < (20 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (20 : Real) ^ (-0.395 : Real) = (((20 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (3 / 10 : Real) = ((10 / 3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_twenty_rpow_le_tight
+#print axioms R05_rpow_twenty_neg0395_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight nineteenth eta floor (`-125/602 ≤ Re term19`): banked `-5/8` cosine
+times the tight `100/301` amplitude (beats `-5/24`). -/
+theorem R05_eta_nineteenth_Re_ge_tight :
+    (-125 / 602 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 18).re := by
+  rw [R05_eta_nineteenth_eq, R05_inv_nineteen_cpow_re_eq]
+  have hamp := R05_rpow_nineteen_neg0395_le_tight
+  have hcos := R05_cos_075log19_lower
+  have hamp_pos : (0 : Real) < (19 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (19 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 19) + 5 / 8) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (100 / 301 - (19 : Real) ^ (-0.395 : Real)) * (5 / 8 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Tight twentieth eta floor (`3/25 ≤ Re term20`): banked `-2/5` cosine
+times the tight `3/10` amplitude (beats `1/10`). -/
+theorem R05_eta_twentieth_Re_ge_tight :
+    (3 / 25 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 19).re := by
+  rw [R05_eta_twentieth_eq, Complex.neg_re, R05_inv_twenty_cpow_re_eq]
+  have hamp := R05_rpow_twenty_neg0395_ge_tight
+  have hcos := R05_cos_075log20_upper
+  have hamp_pos : (0 : Real) < (20 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (2 / 5 : Real) ≤ -(Real.cos (0.75 * Real.log 20)) := by
+    linarith
+  have hprod : (3 / 10 : Real) * (2 / 5 : Real) ≤
+      (20 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 20))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (3 / 10 : Real) * (2 / 5 : Real) = (3 / 25 : Real) := by
+    norm_num
+  have hsplit : (20 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 20))) =
+      -((20 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 20)) := by
+    ring
+  linarith
+
+#print axioms R05_eta_nineteenth_Re_ge_tight
+#print axioms R05_eta_twentieth_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight nineteen-term real part (`-974409/4730000 ≤ Re S19`, from `S18' - 125/602`). -/
+theorem R05_S19_Re_ge_tight :
+    (-974409 / 4730000 : Real) ≤
+      (∑ k ∈ Finset.range 19, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S19_eq, Complex.add_re]
+  have hS18 := R05_S18_Re_ge_tight
+  have ht := R05_eta_nineteenth_Re_ge_tight
+  have hle : (-974409 / 4730000 : Real) ≤ (1259 / 770000 : Real) + (-(125 / 602) : Real) := by
+    norm_num
+  linarith
+
+/-- Tight twenty-term real part (`-406809/4730000 ≤ Re S20`, from `S19' + 3/25`). -/
+theorem R05_S20_Re_ge_tight :
+    (-406809 / 4730000 : Real) ≤
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S20_eq, Complex.add_re]
+  have hS19 := R05_S19_Re_ge_tight
+  have ht := R05_eta_twentieth_Re_ge_tight
+  have hle : (-406809 / 4730000 : Real) ≤ (-974409 / 4730000 : Real) + (3 / 25 : Real) := by
+    norm_num
+  linarith
+
+/-- Tight R05 slow-sum lower bound: the S20 frontier `-406809/4730000 ≈ -0.08601`
+(contiguous tight folds through pair-9; S20 = S19 + term 19). -/
+theorem R05_slow_total20_Re_ge_tight :
+    (-406809 / 4730000 : Real) ≤
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k).re :=
+  R05_S20_Re_ge_tight
+
+/-- Exact tight residual from the S20 frontier to `13/20`: `3481309/4730000`. -/
+theorem R05_slow_residual20_tight_eq :
+    (13 / 20 : Real) - (-406809 / 4730000 : Real) = (3481309 / 4730000 : Real) := by
+  norm_num
+
+#print axioms R05_S19_Re_ge_tight
+#print axioms R05_S20_Re_ge_tight
+#print axioms R05_slow_total20_Re_ge_tight
+#print axioms R05_slow_residual20_tight_eq
+
+end Door3OffAxis
