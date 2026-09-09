@@ -5450,3 +5450,94 @@ theorem d3EtaTerm_im_5 : (d3EtaTerm d3HalfS0 5).im
 #print axioms d3EtaTerm_im_3
 #print axioms d3EtaTerm_im_4
 #print axioms d3EtaTerm_im_5
+/-! ## Door-3 remainder 5 (step 5x): cubic sin floor + first phase plugs. -/
+/-- Cubic sine floor `x - x^3/6 ≤ sin x` for `0 ≤ x` (Mathlib `Real.sin_ge_sub_cube`). -/
+theorem d3_sin_lower {x : ℝ} (hx0 : 0 ≤ x) :
+    x - x ^ 3 / 6 ≤ Real.sin x :=
+  Real.sin_ge_sub_cube hx0
+/-- Sine at `θ₀` is exactly `0`. -/
+theorem d3_sin_theta0 : Real.sin ((1 / 2 : ℝ) * Real.log 1) = 0 := by
+  rw [d3_theta0_eq, Real.sin_zero]
+/-- Sine floor at `θ₁` (`33/100 ≤ sin θ₁`) via `d3_sin_lower` + `d3_theta1_mem`. -/
+theorem d3_sin_theta1_lower :
+    (33 / 100 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 2) := by
+  have hmem := d3_theta1_mem
+  have hpos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 2 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (0.346573 : ℝ) ≤ (1 / 2) * Real.log 2 := hmem.1
+  have hhi : (1 / 2) * Real.log 2 ≤ (0.346574 : ℝ) := hmem.2
+  have hsin := d3_sin_lower hnn
+  have hcube : ((1 / 2) * Real.log 2) ^ 3 ≤ (0.346574 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hnn hhi 3
+  have hnum : (33 / 100 : ℝ) ≤ (0.346573 : ℝ) - (0.346574 : ℝ) ^ 3 / 6 := by
+    norm_num
+  linarith
+/-- Sine floor at `θ₂` (`49/100 ≤ sin θ₂`) via `d3_sin_lower` + `d3_theta2_mem`. -/
+theorem d3_sin_theta2_lower :
+    (49 / 100 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 3) := by
+  have hmem := d3_theta2_mem
+  have hpos : (0 : ℝ) < Real.log 3 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 3 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (0.5264 : ℝ) ≤ (1 / 2) * Real.log 3 := hmem.1
+  have hhi : (1 / 2) * Real.log 3 ≤ (0.5682 : ℝ) := hmem.2
+  have hsin := d3_sin_lower hnn
+  have hcube : ((1 / 2) * Real.log 3) ^ 3 ≤ (0.5682 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hnn hhi 3
+  have hnum : (49 / 100 : ℝ) ≤ (0.5264 : ℝ) - (0.5682 : ℝ) ^ 3 / 6 := by
+    norm_num
+  linarith
+#print axioms d3_sin_lower
+#print axioms d3_sin_theta0
+#print axioms d3_sin_theta1_lower
+#print axioms d3_sin_theta2_lower
+/-! ## Door-3 remainder 5 (step 5y): remaining sine phase plugs. -/
+/-- Sine floor at `θ₃` (`63/100 ≤ sin θ₃`) via `d3_sin_lower` + `d3_theta3_mem`. -/
+theorem d3_sin_theta3_lower :
+    (63 / 100 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 4) := by
+  have hmem := d3_theta3_mem
+  have hpos : (0 : ℝ) < Real.log 4 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 4 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (0.693147 : ℝ) ≤ (1 / 2) * Real.log 4 := hmem.1
+  have hhi : (1 / 2) * Real.log 4 ≤ (0.693148 : ℝ) := hmem.2
+  have hsin := d3_sin_lower hnn
+  have hcube : ((1 / 2) * Real.log 4) ^ 3 ≤ (0.693148 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hnn hhi 3
+  have hnum : (63 / 100 : ℝ) ≤ (0.693147 : ℝ) - (0.693148 : ℝ) ^ 3 / 6 := by
+    norm_num
+  linarith
+/-- Sine floor at `θ₄` (`69/100 ≤ sin θ₄`) via `d3_sin_lower` + `d3_theta4_mem`. -/
+theorem d3_sin_theta4_lower :
+    (69 / 100 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 5) := by
+  have hmem := d3_theta4_mem
+  have hpos : (0 : ℝ) < Real.log 5 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 5 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (0.7931 : ℝ) ≤ (1 / 2) * Real.log 5 := hmem.1
+  have hhi : (1 / 2) * Real.log 5 ≤ (0.8182 : ℝ) := hmem.2
+  have hsin := d3_sin_lower hnn
+  have hcube : ((1 / 2) * Real.log 5) ^ 3 ≤ (0.8182 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hnn hhi 3
+  have hnum : (69 / 100 : ℝ) ≤ (0.7931 : ℝ) - (0.8182 : ℝ) ^ 3 / 6 := by
+    norm_num
+  linarith
+/-- Sine floor at `θ₅` (`74/100 ≤ sin θ₅`) via `d3_sin_lower` + `d3_theta5_mem`. -/
+theorem d3_sin_theta5_lower :
+    (74 / 100 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 6) := by
+  have hmem := d3_theta5_mem
+  have hpos : (0 : ℝ) < Real.log 6 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 6 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (0.873 : ℝ) ≤ (1 / 2) * Real.log 6 := hmem.1
+  have hhi : (1 / 2) * Real.log 6 ≤ (0.9148 : ℝ) := hmem.2
+  have hsin := d3_sin_lower hnn
+  have hcube : ((1 / 2) * Real.log 6) ^ 3 ≤ (0.9148 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hnn hhi 3
+  have hnum : (74 / 100 : ℝ) ≤ (0.873 : ℝ) - (0.9148 : ℝ) ^ 3 / 6 := by
+    norm_num
+  linarith
+#print axioms d3_sin_theta3_lower
+#print axioms d3_sin_theta4_lower
+#print axioms d3_sin_theta5_lower
