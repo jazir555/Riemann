@@ -7096,3 +7096,444 @@ theorem R05_pair9_Re_ge :
 #print axioms R05_pair9_Re_ge
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Best R05 slow-sum lower bound: the S20 frontier `-7299/30000`
+(contiguous folds through pair-9; S20 = S19 + term 19). -/
+theorem R05_slow_total20_Re_ge :
+    (-7299 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k).re :=
+  R05_S20_Re_ge
+
+/-- Exact residual from the S20 frontier to `13/20`: `26799/30000`
+(`13/20 - (-7299/30000) = 26799/30000`). -/
+theorem R05_slow_residual20_eq :
+    (13 / 20 : Real) - (-7299 / 30000 : Real) = (26799 / 30000 : Real) := by
+  norm_num
+
+/-- Pair-block verdict over k = 10..19: the pair-5-8 block sums to `-1/2`
+and pair-9 adds `-13/120`, for a five-pair total of `-73/120`. -/
+theorem R05_pairblock_5_9_sum_eq :
+    (-1 / 2 : Real) + (-13 / 120 : Real) = (-73 / 120 : Real) := by
+  norm_num
+
+#print axioms R05_slow_total20_Re_ge
+#print axioms R05_slow_residual20_eq
+#print axioms R05_pairblock_5_9_sum_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight eleventh inverse upper (`11 ^ (-0.395) ≤ 5/11`) from `11/5 ≤ 11 ^ 0.395`
+(cleared `((11/5)) ^ 3 = 1331/125 ≤ 11`, then `1/3 ≤ 0.395`; beats `1/2`). -/
+theorem R05_rpow_eleven_neg0395_le_tight :
+    (11 : Real) ^ (-0.395 : Real) ≤ (5 / 11 : Real) := by
+  have hge : ((11 / 5 : Real)) ≤ (11 : Real) ^ (0.395 : Real) := by
+    have hpow : ((11 / 5 : Real)) ^ (3 : Nat) ≤
+        ((((11 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((11 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (11 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 11)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 11 1
+      rw [e]
+      norm_num
+    have hstep : ((11 / 5 : Real)) ≤ (11 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc ((11 / 5 : Real)) ≤ (11 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (11 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (11 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (11 : Real) ^ (-0.395 : Real) = (((11 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (5 / 11 : Real) = (((11 / 5 : Real)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Tight thirteenth inverse upper (`13 ^ (-0.395) ≤ 3/7`) from `7/3 ≤ 13 ^ 0.395`
+(cleared `(7/3) ^ 3 = 343/27 ≤ 13`, then `1/3 ≤ 0.395`; beats `1/2`). -/
+theorem R05_rpow_thirteen_neg0395_le_tight :
+    (13 : Real) ^ (-0.395 : Real) ≤ (3 / 7 : Real) := by
+  have hge : ((7 / 3 : Real)) ≤ (13 : Real) ^ (0.395 : Real) := by
+    have hpow : ((7 / 3 : Real)) ^ (3 : Nat) ≤
+        ((((13 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((13 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (13 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 13)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 13 1
+      rw [e]
+      norm_num
+    have hstep : ((7 / 3 : Real)) ≤ (13 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc ((7 / 3 : Real)) ≤ (13 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (13 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (13 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (13 : Real) ^ (-0.395 : Real) = (((13 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (3 / 7 : Real) = (((7 / 3 : Real)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_rpow_eleven_neg0395_le_tight
+#print axioms R05_rpow_thirteen_neg0395_le_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight fifteenth inverse upper (`15 ^ (-0.395) ≤ 5/12`) from `12/5 ≤ 15 ^ 0.395`
+(cleared `(12/5) ^ 3 = 1728/125 ≤ 15`, then `1/3 ≤ 0.395`; beats `1/2`). -/
+theorem R05_rpow_fifteen_neg0395_le_tight :
+    (15 : Real) ^ (-0.395 : Real) ≤ (5 / 12 : Real) := by
+  have hge : ((12 / 5 : Real)) ≤ (15 : Real) ^ (0.395 : Real) := by
+    have hpow : ((12 / 5 : Real)) ^ (3 : Nat) ≤
+        ((((15 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((15 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (15 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 15)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 15 1
+      rw [e]
+      norm_num
+    have hstep : ((12 / 5 : Real)) ≤ (15 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc ((12 / 5 : Real)) ≤ (15 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (15 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (15 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (15 : Real) ^ (-0.395 : Real) = (((15 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (5 / 12 : Real) = (((12 / 5 : Real)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Tight seventeenth inverse upper (`17 ^ (-0.395) ≤ 2/5`) from `5/2 ≤ 17 ^ 0.395`
+(cleared `(5/2) ^ 3 = 125/8 ≤ 17`, then `1/3 ≤ 0.395`; beats `1/2`). -/
+theorem R05_rpow_seventeen_neg0395_le_tight :
+    (17 : Real) ^ (-0.395 : Real) ≤ (2 / 5 : Real) := by
+  have hge : ((5 / 2 : Real)) ≤ (17 : Real) ^ (0.395 : Real) := by
+    have hpow : ((5 / 2 : Real)) ^ (3 : Nat) ≤
+        ((((17 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) := by
+      have e : ((((17 : Real) ^ ((1 / 3 : Real)))) ^ (3 : Nat)) =
+          (17 : Real) ^ (1 : Nat) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 17)]
+        rw [show (1 / 3 : Real) * ((((3 : Nat)) : Real)) = (1 : Real) by norm_num]
+        rw [show (1 : Real) = ((((1 : Nat)) : Real)) by norm_num]
+        exact Real.rpow_natCast 17 1
+      rw [e]
+      norm_num
+    have hstep : ((5 / 2 : Real)) ≤ (17 : Real) ^ ((1 / 3 : Real)) :=
+      le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+    calc ((5 / 2 : Real)) ≤ (17 : Real) ^ ((1 / 3 : Real)) := hstep
+      _ ≤ (17 : Real) ^ (0.395 : Real) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  have hpos : (0 : Real) < (17 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (17 : Real) ^ (-0.395 : Real) = (((17 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (2 / 5 : Real) = (((5 / 2 : Real)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_rpow_fifteen_neg0395_le_tight
+#print axioms R05_rpow_seventeen_neg0395_le_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight eleventh eta floor (`-5/44 ≤ Re term11`): banked `-1/4` cosine
+times the tight `5/11` amplitude (beats `-1/8`). -/
+theorem R05_eta_eleventh_Re_ge_tight :
+    (-5 / 44 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 10).re := by
+  rw [R05_eta_eleventh_eq, R05_inv_eleven_cpow_re_eq]
+  have hamp := R05_rpow_eleven_neg0395_le_tight
+  have hcos := R05_cos_075log11_lower
+  have hamp_pos : (0 : Real) < (11 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (11 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 11) + 1 / 4) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (5 / 11 - (11 : Real) ^ (-0.395 : Real)) * (1 / 4 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Tight thirteenth eta floor (`-6/35 ≤ Re term13`): banked `-2/5` cosine
+times the tight `3/7` amplitude (beats `-1/5`). -/
+theorem R05_eta_thirteenth_Re_ge_tight :
+    (-6 / 35 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 12).re := by
+  rw [R05_eta_thirteenth_eq, R05_inv_thirteen_cpow_re_eq]
+  have hamp := R05_rpow_thirteen_neg0395_le_tight
+  have hcos := R05_cos_075log13_lower
+  have hamp_pos : (0 : Real) < (13 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (13 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 13) + 2 / 5) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (3 / 7 - (13 : Real) ^ (-0.395 : Real)) * (2 / 5 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+#print axioms R05_eta_eleventh_Re_ge_tight
+#print axioms R05_eta_thirteenth_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight fifteenth eta floor (`-5/24 ≤ Re term15`): banked `-1/2` cosine
+times the tight `5/12` amplitude (beats `-1/4`). -/
+theorem R05_eta_fifteenth_Re_ge_tight :
+    (-5 / 24 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 14).re := by
+  rw [R05_eta_fifteenth_eq, R05_inv_fifteen_cpow_re_eq]
+  have hamp := R05_rpow_fifteen_neg0395_le_tight
+  have hcos := R05_cos_075log15_lower
+  have hamp_pos : (0 : Real) < (15 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (15 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 15) + 1 / 2) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (5 / 12 - (15 : Real) ^ (-0.395 : Real)) * (1 / 2 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Tight seventeenth eta floor (`-11/50 ≤ Re term17`): banked `-11/20` cosine
+times the tight `2/5` amplitude (beats `-11/40`). -/
+theorem R05_eta_seventeenth_Re_ge_tight :
+    (-11 / 50 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 16).re := by
+  rw [R05_eta_seventeenth_eq, R05_inv_seventeen_cpow_re_eq]
+  have hamp := R05_rpow_seventeen_neg0395_le_tight
+  have hcos := R05_cos_075log17_lower
+  have hamp_pos : (0 : Real) < (17 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (17 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 17) + 11 / 20) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (2 / 5 - (17 : Real) ^ (-0.395 : Real)) * (11 / 20 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+#print axioms R05_eta_fifteenth_Re_ge_tight
+#print axioms R05_eta_seventeenth_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight pair-5 floor (`-31/660`, from `-5/44 + 1/15`; beats `-7/120`). -/
+theorem R05_pair5_Re_ge_tight :
+    (-31 / 660 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 10 + etaDirichletTerm R03R10PolyLower.sR05 11).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_eleventh_Re_ge_tight
+  have hO := R05_eta_twelfth_Re_ge
+  have hle : (-31 / 660 : Real) ≤ (-5 / 44 : Real) + (1 / 15 : Real) := by norm_num
+  linarith
+
+/-- Tight pair-6 floor (`-37/420`, from `-6/35 + 1/12`; beats `-7/60`). -/
+theorem R05_pair6_Re_ge_tight :
+    (-37 / 420 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 12 + etaDirichletTerm R03R10PolyLower.sR05 13).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_thirteenth_Re_ge_tight
+  have hO := R05_eta_fourteenth_Re_ge
+  have hle : (-37 / 420 : Real) ≤ (-6 / 35 : Real) + (1 / 12 : Real) := by norm_num
+  linarith
+
+/-- Tight pair-7 floor (`-13/120`, from `-5/24 + 1/10`; beats `-3/20`). -/
+theorem R05_pair7_Re_ge_tight :
+    (-13 / 120 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 14 + etaDirichletTerm R03R10PolyLower.sR05 15).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_fifteenth_Re_ge_tight
+  have hO := R05_eta_sixteenth_Re_ge
+  have hle : (-13 / 120 : Real) ≤ (-5 / 24 : Real) + (1 / 10 : Real) := by norm_num
+  linarith
+
+/-- Tight pair-8 floor (`-3/25`, from `-11/50 + 1/10`; beats `-7/40`). -/
+theorem R05_pair8_Re_ge_tight :
+    (-3 / 25 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 16 + etaDirichletTerm R03R10PolyLower.sR05 17).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_seventeenth_Re_ge_tight
+  have hO := R05_eta_eighteenth_Re_ge
+  have hle : (-3 / 25 : Real) ≤ (-11 / 50 : Real) + (1 / 10 : Real) := by norm_num
+  linarith
+
+/-- Tight pair-block sum over k = 10..17: `-16789/46200 ≈ -0.3634`
+(beats the coarse `-1/2`). -/
+theorem R05_pairblock_5_8_sum_eq_tight :
+    (-31 / 660 : Real) + (-37 / 420 : Real) + (-13 / 120 : Real) + (-3 / 25 : Real) =
+      (-16789 / 46200 : Real) := by
+  norm_num
+
+#print axioms R05_pair5_Re_ge_tight
+#print axioms R05_pair6_Re_ge_tight
+#print axioms R05_pair7_Re_ge_tight
+#print axioms R05_pair8_Re_ge_tight
+#print axioms R05_pairblock_5_8_sum_eq_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight eleven-term real part (`82961/330000 ≤ Re S11`, from `S10 - 5/44`). -/
+theorem R05_S11_Re_ge_tight :
+    (82961 / 330000 : Real) ≤
+      (∑ k ∈ Finset.range 11, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S11_eq, Complex.add_re]
+  have hS10 := R05_S10_Re_ge
+  have ht := R05_eta_eleventh_Re_ge_tight
+  have hle : (82961 / 330000 : Real) ≤ (10951 / 30000 : Real) + (-(5 / 44) : Real) := by
+    norm_num
+  linarith
+
+/-- Tight twelve-term real part (`34987/110000 ≤ Re S12`, from `S11' + 1/15`). -/
+theorem R05_S12_Re_ge_tight :
+    (34987 / 110000 : Real) ≤
+      (∑ k ∈ Finset.range 12, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S12_eq, Complex.add_re]
+  have hS11 := R05_S11_Re_ge_tight
+  have ht := R05_eta_twelfth_Re_ge
+  have hle : (34987 / 110000 : Real) ≤ (82961 / 330000 : Real) + (1 / 15 : Real) := by
+    norm_num
+  linarith
+
+/-- Tight thirteen-term real part (`112909/770000 ≤ Re S13`, from `S12' - 6/35`). -/
+theorem R05_S13_Re_ge_tight :
+    (112909 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 13, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S13_eq, Complex.add_re]
+  have hS12 := R05_S12_Re_ge_tight
+  have ht := R05_eta_thirteenth_Re_ge_tight
+  have hle : (112909 / 770000 : Real) ≤ (34987 / 110000 : Real) + (-(6 / 35) : Real) := by
+    norm_num
+  linarith
+
+/-- Tight fourteen-term real part (`531227/2310000 ≤ Re S14`, from `S13' + 1/12`). -/
+theorem R05_S14_Re_ge_tight :
+    (531227 / 2310000 : Real) ≤
+      (∑ k ∈ Finset.range 14, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S14_eq, Complex.add_re]
+  have hS13 := R05_S13_Re_ge_tight
+  have ht := R05_eta_fourteenth_Re_ge
+  have hle : (531227 / 2310000 : Real) ≤ (112909 / 770000 : Real) + (1 / 12 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_S11_Re_ge_tight
+#print axioms R05_S12_Re_ge_tight
+#print axioms R05_S13_Re_ge_tight
+#print axioms R05_S14_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight fifteen-term real part (`16659/770000 ≤ Re S15`, from `S14' - 5/24`). -/
+theorem R05_S15_Re_ge_tight :
+    (16659 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 15, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S15_eq, Complex.add_re]
+  have hS14 := R05_S14_Re_ge_tight
+  have ht := R05_eta_fifteenth_Re_ge_tight
+  have hle : (16659 / 770000 : Real) ≤ (531227 / 2310000 : Real) + (-(5 / 24) : Real) := by
+    norm_num
+  linarith
+
+/-- Tight sixteen-term real part (`93659/770000 ≤ Re S16`, from `S15' + 1/10`). -/
+theorem R05_S16_Re_ge_tight :
+    (93659 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 16, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S16_eq, Complex.add_re]
+  have hS15 := R05_S15_Re_ge_tight
+  have ht := R05_eta_sixteenth_Re_ge
+  have hle : (93659 / 770000 : Real) ≤ (16659 / 770000 : Real) + (1 / 10 : Real) := by
+    norm_num
+  linarith
+
+/-- Tight seventeen-term real part (`-75741/770000 ≤ Re S17`, from `S16' - 11/50`). -/
+theorem R05_S17_Re_ge_tight :
+    (-75741 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 17, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S17_eq, Complex.add_re]
+  have hS16 := R05_S16_Re_ge_tight
+  have ht := R05_eta_seventeenth_Re_ge_tight
+  have hle : (-75741 / 770000 : Real) ≤ (93659 / 770000 : Real) + (-(11 / 50) : Real) := by
+    norm_num
+  linarith
+
+/-- Tight eighteen-term real part (`1259/770000 ≤ Re S18`, from `S17' + 1/10`). -/
+theorem R05_S18_Re_ge_tight :
+    (1259 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 18, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S18_eq, Complex.add_re]
+  have hS17 := R05_S17_Re_ge_tight
+  have ht := R05_eta_eighteenth_Re_ge
+  have hle : (1259 / 770000 : Real) ≤ (-75741 / 770000 : Real) + (1 / 10 : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_S15_Re_ge_tight
+#print axioms R05_S16_Re_ge_tight
+#print axioms R05_S17_Re_ge_tight
+#print axioms R05_S18_Re_ge_tight
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Tight R05 slow-sum lower bound: the S18 frontier `1259/770000 ≈ +0.00164`
+(contiguous tight folds through the pair-certified block; frontier flips positive). -/
+theorem R05_slow_total18_Re_ge_tight :
+    (1259 / 770000 : Real) ≤
+      (∑ k ∈ Finset.range 18, etaDirichletTerm R03R10PolyLower.sR05 k).re :=
+  R05_S18_Re_ge_tight
+
+/-- Exact tight residual from the S18 frontier to `13/20`: `499241/770000`. -/
+theorem R05_slow_residual18_tight_eq :
+    (13 / 20 : Real) - (1259 / 770000 : Real) = (499241 / 770000 : Real) := by
+  norm_num
+
+/-- Tight pair-block verdict over k = 10..19: the tight pair-5-8 block sums to
+`-16789/46200` and pair-9 adds `-13/120`, for a five-pair total of `-10897/23100`. -/
+theorem R05_pairblock_5_9_sum_eq_tight :
+    (-16789 / 46200 : Real) + (-13 / 120 : Real) = (-10897 / 23100 : Real) := by
+  norm_num
+
+#print axioms R05_slow_total18_Re_ge_tight
+#print axioms R05_slow_residual18_tight_eq
+#print axioms R05_pairblock_5_9_sum_eq_tight
+
+end Door3OffAxis
