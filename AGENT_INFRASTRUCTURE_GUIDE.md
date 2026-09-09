@@ -3373,6 +3373,13 @@ sorry-free infrastructure and the complete commit ledger above.
   numeral `201/20`; minimal K on loose shift majorant).
   Residual: generalize re-index to K=51 + enlarged-head bound + close
   (RX16, LARGE scope).
+- 2026-09-08+ RX16 (`6e5490c9`, tail-scratch, 3× green 8682 jobs):
+  finite aggregation + K51 re-index + conditional lower-bridge +
+  explicit `c = 1/2613` + pointwise nonvan + segPt membership.
+  PROVED S2-reverse-triangle route vacuous (margin 1/1005 vs pair
+  uppers); uniformity gap (pointwise t=1/2 vs ∀ seg) also open.
+  Residual: direct 102-term head estimate + eta bridge + uniform
+  lift (RX17, LARGE scope).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
