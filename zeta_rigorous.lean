@@ -35595,3 +35595,161 @@ theorem R02_D3_Gdamp_bddAbove_of_strip111 :
 #print axioms R02_D3_Gdamp_left_of_expGamma
 #print axioms R02_D3_Gdamp_right_of_C74
 #print axioms R02_D3_Gdamp_bddAbove_of_strip111
+
+/-!
+## Door-3 quantitative close, step 22 (zeta lane): three-step Gamma shift decay.
+
+Tightens the banked two-step shift decay (`R02_D3_Gamma_line095_shift_decay`,
+`‖Γ‖ ≤ 2/|Im|^2`) by one more recurrence step: `Γ(w+3) = w(w+1)(w+2)Γ(w)`
+moves `Re = 0.95` to `Re = 3.95` where `Γ(3.95) = 2.95*Γ(2.95) ≤ 2.95*2 ≤ 6`
+(banked `R02_D3_Real_Gamma_295_le_two`). Gives `‖Γ(s)‖ ≤ 6/(‖s‖‖s+1‖‖s+2‖)`.
+Honest status: still polynomial, not the missing exponential Stirling
+remainder (which needs `|t|^0.45·exp(-π|t|/2)` control absent from Mathlib).
+FULL proofs, no sorry.
+-/
+
+/-- Three-step Gamma shift identity (Stirling-decay mechanism, one step further). -/
+theorem R02_D3_Gamma_shift_three (w : ℂ) (hw : w ≠ 0) (hw1 : w + 1 ≠ 0)
+    (hw2 : w + 1 + 1 ≠ 0) :
+    Complex.Gamma (w + 3) = w * (w + 1) * (w + 1 + 1) * Complex.Gamma w := by
+  have h1 : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw
+  have h2 : Complex.Gamma (w + 1 + 1) = (w + 1) * Complex.Gamma (w + 1) :=
+    Complex.Gamma_add_one (w + 1) hw1
+  have h3 : Complex.Gamma (w + 1 + 1 + 1) = (w + 1 + 1) * Complex.Gamma (w + 1 + 1) :=
+    Complex.Gamma_add_one (w + 1 + 1) hw2
+  have heq : w + 3 = w + 1 + 1 + 1 := by ring
+  rw [heq, h3, h2, h1]
+  ring
+
+/-- Real Gamma cap `Γ(3.95) ≤ 6` (one shift above banked `Γ(2.95) ≤ 2`). -/
+theorem R02_D3_Real_Gamma_395_le_six : Real.Gamma 3.95 ≤ 6 := by
+  have hne : (2.95 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (2.95 + 1) = 2.95 * Real.Gamma 2.95 :=
+    Real.Gamma_add_one hne
+  have heq : (2.95 : ℝ) + 1 = 3.95 := by ring
+  have hcap : Real.Gamma 2.95 ≤ 2 := R02_D3_Real_Gamma_295_le_two
+  have h := mul_le_mul_of_nonneg_left hcap (show (0 : ℝ) ≤ 2.95 by norm_num)
+  rw [heq] at hshift
+  rw [hshift]
+  calc (2.95 : ℝ) * Real.Gamma 2.95 ≤ 2.95 * 2 := h
+    _ = 5.9 := by ring
+    _ ≤ 6 := by norm_num
+
+#print axioms R02_D3_Gamma_shift_three
+#print axioms R02_D3_Real_Gamma_395_le_six
+
+/-!
+## Door-3 quantitative close, step 22b (zeta lane): three-step shift decay lemma.
+
+Second half of step 22: line-uniform bound from banked shift identity
+and real cap. FULL proof, no sorry.
+-/
+
+/-- Line-uniform three-step shift decay on `Re = 0.95`. -/
+theorem R02_D3_Gamma_line095_shift3_decay (s : ℂ) (hre : s.re = 0.95) :
+    ‖Complex.Gamma s‖ ≤ 6 / (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖) := by
+  have hs0 : s ≠ 0 := by
+    intro h
+    have h1 : s.re = 0 := by rw [h]; simp
+    rw [hre] at h1
+    norm_num at h1
+  have hs1 : s + 1 ≠ 0 := by
+    intro h
+    have h1 : (s + 1).re = 0 := by rw [h]; simp
+    have hre1 : (s + 1).re = s.re + 1 := by simp
+    rw [hre1, hre] at h1
+    norm_num at h1
+  have hs2 : s + 1 + 1 ≠ 0 := by
+    intro h
+    have h1 : (s + 1 + 1).re = 0 := by rw [h]; simp
+    have eA : ((s + 1) + 1).re = (s + 1).re + 1 := by simp
+    have eB : (s + 1).re = s.re + 1 := by simp
+    have hre2 : (s + 1 + 1).re = s.re + 2 := by linarith
+    rw [hre2, hre] at h1
+    norm_num at h1
+  have hshift := R02_D3_Gamma_shift_three s hs0 hs1 hs2
+  have hre3 : (s + 3).re = 3.95 := by
+    have h3 : (s + 3).re = s.re + 3 := by simp
+    rw [h3, hre]
+    norm_num
+  have hw0 : (0 : ℝ) < (s + 3).re := by rw [hre3]; norm_num
+  have hle := R02_D3_Gamma_norm_le_Real_Gamma (s + 3) hw0
+  have hcap : Real.Gamma (s + 3).re ≤ 6 := by
+    rw [hre3]
+    exact R02_D3_Real_Gamma_395_le_six
+  have hG3 : ‖Complex.Gamma (s + 3)‖ ≤ 6 := le_trans hle hcap
+  have hnorm : ‖Complex.Gamma (s + 3)‖
+      = ‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖ * ‖Complex.Gamma s‖ := by
+    rw [hshift, norm_mul, norm_mul, norm_mul]
+  have hpos : (0 : ℝ) < ‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖ := by
+    apply mul_pos
+    apply mul_pos
+    · exact norm_pos_iff.mpr hs0
+    · exact norm_pos_iff.mpr hs1
+    · exact norm_pos_iff.mpr hs2
+  rw [hnorm] at hG3
+  have hmul : ‖Complex.Gamma s‖ * (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖) ≤ 6 := by
+    calc ‖Complex.Gamma s‖ * (‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖)
+        = ‖s‖ * ‖s + 1‖ * ‖s + 1 + 1‖ * ‖Complex.Gamma s‖ := by ring
+      _ ≤ 6 := hG3
+  exact (le_div_iff₀ hpos).mpr hmul
+
+#print axioms R02_D3_Gamma_line095_shift3_decay
+
+/-!
+## Door-3 quantitative close, step 24 (zeta lane): best direct R02-rect bound.
+
+Unconditional endgame assembly from banked ingredients only
+(`R02_D3_zeta_linear_strip`, `C = 111`; `R02_D3_zeta_linear_line005`, `C = 23`;
+`R02_D3_zeta_linear_line074`, `C = 16`): on the R02 rect
+(`0.05 ≤ Re ≤ 0.74`, `|Im| ≤ 10`) the strip bound gives
+`‖ζ‖ ≤ 111·(1+10) = 1221`. The edge lines give `253` / `176` there, so the
+strip constant dominates. Verdict: `1221 ≫ 10` — the rect is NOT closed;
+exact gap factor `122.1x`. Closing needs either a non-Gdamp endgame with
+`C_strip·11 ≤ 10` (i.e. `C_strip ≤ 0.91`, far below banked `111`) or the
+missing Stirling remainder discharging the ZU18 conditional `C05 = 471`
+(which is worse here: `471·11 = 5181`). FULL proofs, no sorry.
+-/
+
+/-- Best direct R02-rect cap from banked strip-111: `‖ζ‖ ≤ 1221`. -/
+theorem R02_D3_zeta_rect_cap_of_strip111 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 1221 := by
+  have h := R02_D3_zeta_linear_strip z hre_lo hre_hi
+  have hcap : (111 : ℝ) * (1 + |z.im|) ≤ 1221 := by
+    have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+    calc (111 : ℝ) * (1 + |z.im|) ≤ 111 * 11 :=
+          mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 1221 := by norm_num
+  exact le_trans h hcap
+
+/-- Edge-line rect caps: `253` on `Re = 0.05`, `176` on `Re = 0.74` (`|Im| ≤ 10`). -/
+theorem R02_D3_zeta_rect_edge_caps (z : ℂ) (him : |z.im| ≤ 10) :
+    (z.re = 0.05 → ‖riemannZeta z‖ ≤ 253) ∧
+    (z.re = 0.74 → ‖riemannZeta z‖ ≤ 176) := by
+  constructor
+  · intro hre
+    have h := R02_D3_zeta_linear_line005 z hre
+    have hcap : (23 : ℝ) * (1 + |z.im|) ≤ 253 := by
+      have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+      calc (23 : ℝ) * (1 + |z.im|) ≤ 23 * 11 :=
+            mul_le_mul_of_nonneg_left hX (by norm_num)
+        _ = 253 := by norm_num
+    exact le_trans h hcap
+  · intro hre
+    have h := R02_D3_zeta_linear_line074 z hre
+    have hcap : (16 : ℝ) * (1 + |z.im|) ≤ 176 := by
+      have hX : (1 : ℝ) + |z.im| ≤ 11 := by linarith
+      calc (16 : ℝ) * (1 + |z.im|) ≤ 16 * 11 :=
+            mul_le_mul_of_nonneg_left hX (by norm_num)
+        _ = 176 := by norm_num
+    exact le_trans h hcap
+
+/-- Gap verdict: the rect cap `1221` exceeds the `‖ζ‖ ≤ 10` target by `1211`. -/
+theorem R02_D3_zeta_rect_gap_verdict : (10 : ℝ) < 1221 ∧ (1221 : ℝ) - 10 = 1211 := by
+  constructor <;> norm_num
+
+#print axioms R02_D3_zeta_rect_cap_of_strip111
+#print axioms R02_D3_zeta_rect_edge_caps
+#print axioms R02_D3_zeta_rect_gap_verdict
