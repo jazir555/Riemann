@@ -3407,6 +3407,12 @@ sorry-free infrastructure and the complete commit ledger above.
   whole-term rfl rewrites) + Re residues 2–5 (bases 3–6).
   Re(S₆)≈0.4977<0.53 CONFIRMED — 2-D enclosure mandatory.
   Residual: Im factorization + im_0..5 (RX24).
+- 2026-09-09 RX24 (`fcca75c1`, tail-scratch, 3× green 8682 jobs
+  via wrapper): Im factorization (`−r·sin θ`) + Im residues
+  0–5 (odd double-negation via `neg_neg`). Re+Im per-residue
+  equations COMPLETE (k=0..5 both parts).
+  Residual: sin lower-bound helper + 6 sin plugs + Re/Im
+  floor assembly (RX25).
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
