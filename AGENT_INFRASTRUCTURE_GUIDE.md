@@ -3413,6 +3413,14 @@ sorry-free infrastructure and the complete commit ledger above.
   equations COMPLETE (k=0..5 both parts).
   Residual: sin lower-bound helper + 6 sin plugs + Re/Im
   floor assembly (RX25).
+- 2026-09-09 RX25 (`d754d8ae`, tail-scratch, 2× green 8682 jobs
+  via wrapper): `d3_sin_lower` (wraps `Real.sin_ge_sub_cube`) +
+  6 theta sin plugs (33/100..74/100). Im-side trig COMPLETE.
+  Residual: Re/Im floor assembly → norm 53/100 (RX26).
+- 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
+  filename, 11968 lines) found deleted from disk (unstaged);
+  restored via `git checkout`. All agents: NEVER touch it —
+  it is NOT your file under any spelling.
 - 2026-09-07 ZU3 (`7856eef2` pt 1, zeta tail, green 8693 jobs):
   Stirling Gamma numeral `‖Γ(1-s)‖ ≤ 4` (integral domination + shift +
   convexity cap; 3 identifier micro-fixes by coordinator). Chi cap
