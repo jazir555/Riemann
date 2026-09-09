@@ -6623,3 +6623,476 @@ theorem R05_slow_residual_S16_eq :
 #print axioms R05_slow_residual_S16_eq
 
 end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Fresh `log 19` lower bound (`2.9429 ≤ log 19`) via `log 18` and `log (18/19) ≤ -1/19`. -/
+theorem R05_log_nineteen_ge :
+    (2.9429 : Real) ≤ Real.log 19 := by
+  have h18 := R05_log_eighteen_eq
+  have hub : Real.log (18 / 19 : Real) ≤ (-1 / 19 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 18 / 19)
+    have he : (18 / 19 : Real) - 1 = (-1 / 19 : Real) := by norm_num
+    linarith
+  have hinv : Real.log (19 / 18 : Real) = -Real.log (18 / 19 : Real) := by
+    have heq : (19 / 18 : Real) = (18 / 19 : Real)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have h2lo : (0.693147 : Real) < Real.log 2 := by
+    have h9 := Real.log_two_gt_d9
+    linarith
+  have h3lo : (1.098612 : Real) < Real.log 3 := by
+    have h9 := Real.log_three_gt_d9
+    linarith
+  have hmeq : (18 : Real) * (19 / 18) = 19 := by norm_num
+  have hlog19 : Real.log 19 =
+      2 * Real.log 3 + Real.log 2 + Real.log (19 / 18 : Real) := by
+    have h := Real.log_mul (show (18 : Real) ≠ 0 by norm_num)
+      (show (19 / 18 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h18] at h
+    exact h
+  have hfin : (2.9429 : Real) ≤
+      2 * (1.098612 : Real) + (0.693147 : Real) + (1 / 19 : Real) := by
+    norm_num
+  rw [hlog19, hinv]
+  linarith
+
+#print axioms R05_log_nineteen_ge
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Fresh `log 19` upper bound (`log 19 ≤ 2.9460`) via `log 18` and `log (19/18) ≤ 1/18`. -/
+theorem R05_log_nineteen_le :
+    Real.log 19 ≤ (2.9460 : Real) := by
+  have h18 := R05_log_eighteen_eq
+  have hub : Real.log (19 / 18 : Real) ≤ (1 / 18 : Real) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : Real) < 19 / 18)
+    have he : (19 / 18 : Real) - 1 = (1 / 18 : Real) := by norm_num
+    linarith
+  have h2hi : Real.log 2 < (0.693148 : Real) := by
+    have h9 := Real.log_two_lt_d9
+    linarith
+  have h3hi : Real.log 3 < (1.098613 : Real) := by
+    have h9 := Real.log_three_lt_d9
+    linarith
+  have hmeq : (18 : Real) * (19 / 18) = 19 := by norm_num
+  have hlog19 : Real.log 19 =
+      2 * Real.log 3 + Real.log 2 + Real.log (19 / 18 : Real) := by
+    have h := Real.log_mul (show (18 : Real) ≠ 0 by norm_num)
+      (show (19 / 18 : Real) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    rw [h18] at h
+    exact h
+  have hfin : 2 * (1.098613 : Real) + (0.693148 : Real) + (1 / 18 : Real) ≤
+      (2.9460 : Real) := by
+    norm_num
+  rw [hlog19]
+  linarith
+
+#print axioms R05_log_nineteen_le
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Phase of the R05 nineteenth eta term (`0.75 * log 19` in `[2.2071, 2.2095]`)
+from the fresh `log 19` bounds. -/
+theorem R05_theta19_mem :
+    (2.2071 : Real) ≤ 0.75 * Real.log 19 ∧ 0.75 * Real.log 19 ≤ (2.2095 : Real) := by
+  have hge := R05_log_nineteen_ge
+  have hle := R05_log_nineteen_le
+  constructor <;> linarith
+
+#print axioms R05_theta19_mem
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Cosine lower at the nineteenth-term phase (`-5/8 ≤ cos (0.75 * log 19)`)
+via `DZ3u_cos_sextic_lower` with per-monomial endpoints. -/
+theorem R05_cos_075log19_lower :
+    (-5 / 8 : Real) ≤ Real.cos (0.75 * Real.log 19) := by
+  have hmem := R05_theta19_mem
+  have hpos : (0 : Real) < Real.log 19 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 19 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (2.2071 : Real) ≤ 0.75 * Real.log 19 := hmem.1
+  have hhi : 0.75 * Real.log 19 ≤ (2.2095 : Real) := hmem.2
+  have hcos := DZ3u_cos_sextic_lower hnn
+  have h2 : (0.75 * Real.log 19) ^ 2 ≤ (2.2095 : Real) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have h4 : (2.2071 : Real) ^ 4 ≤ (0.75 * Real.log 19) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hlo 4
+  have h6 : (0.75 * Real.log 19) ^ 6 ≤ (2.2095 : Real) ^ 6 :=
+    pow_le_pow_left₀ hnn hhi 6
+  have hnum : (-5 / 8 : Real) ≤
+      1 - (2.2095 : Real) ^ 2 / 2 + (2.2071 : Real) ^ 4 / 24 -
+        (2.2095 : Real) ^ 6 / 720 := by
+    norm_num
+  linarith
+
+/-- Tight base-rpow lower (`3 ≤ 19 ^ 0.395`) from cleared `19 ^ 3 = 6859 ≥ 6561 = 3 ^ 8`
+with exponent `3/8 = 0.375 ≤ 0.395` (beats the coarse `2 ≤ 19 ^ 0.395`). -/
+theorem R05_nineteen_rpow_ge : (3 : Real) ≤ (19 : Real) ^ (0.395 : Real) := by
+  have hpow : ((3 : Real)) ^ (8 : Nat) ≤ ((((19 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) := by
+    have e : ((((19 : Real) ^ ((3 / 8 : Real)))) ^ (8 : Nat)) =
+        (19 : Real) ^ (3 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 19)]
+      rw [show (3 / 8 : Real) * ((((8 : Nat)) : Real)) = (3 : Real) by norm_num]
+      rw [show (3 : Real) = ((((3 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 19 3
+    rw [e]
+    norm_num
+  have hstep : (3 : Real) ≤ (19 : Real) ^ ((3 / 8 : Real)) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_nonneg (by norm_num) _) hpow
+  calc (3 : Real) ≤ (19 : Real) ^ ((3 / 8 : Real)) := hstep
+    _ ≤ (19 : Real) ^ (0.395 : Real) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+
+/-- Tight real rpow nineteenth inverse upper (`19 ^ (-0.395) ≤ 1/3`) from `3 ≤ 19 ^ 0.395`. -/
+theorem R05_rpow_nineteen_neg0395_le :
+    (19 : Real) ^ (-0.395 : Real) ≤ (1 / 3 : Real) := by
+  have hge := R05_nineteen_rpow_ge
+  have hpos : (0 : Real) < (19 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (19 : Real) ^ (-0.395 : Real) = (((19 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 3 : Real) = ((3 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+#print axioms R05_cos_075log19_lower
+#print axioms R05_nineteen_rpow_ge
+#print axioms R05_rpow_nineteen_neg0395_le
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 nineteenth eta inverse
+(`Re (19 ^ s)⁻¹ = 19 ^ (-0.395) * cos (0.75 * log 19)`). -/
+theorem R05_inv_nineteen_cpow_re_eq :
+    (((((19 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (19 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 19) := by
+  have h19eq : ((((19 : Nat)) : Complex)) = (19 : Complex) := by norm_cast
+  rw [h19eq]
+  have hlog : Complex.log (19 : Complex) = (((Real.log 19 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 19)).symm
+  have hlogre : (Complex.log (19 : Complex)).re = Real.log 19 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (19 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (19 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 19 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (19 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 19 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (19 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (19 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (19 : Complex) ≠ 0)]
+  have hinv : ((19 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (19 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (19 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 19 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (19 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 19 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (19 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 19 * 0.395)) * Real.cos (-(Real.log 19 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 19 * (-0.75))) = Real.cos (0.75 * Real.log 19) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 19 * 0.395)) = (19 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 19 * 0.395) = Real.log 19 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 19)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 nineteenth eta term in closed form (`term 18 = ((19 ^ s)⁻¹)`, since `(-1)^18 = 1`). -/
+theorem R05_eta_nineteenth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 18 =
+      ((((19 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (18 + 1 : Nat) = 19 := rfl
+  have hcast : ((((18 + 1 : Nat)) : Complex)) = ((((19 : Nat)) : Complex)) := by
+    rw [e1]
+  have hpos : (-1 : Complex) ^ (18 : Nat) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hpos, one_div]
+
+#print axioms R05_inv_nineteen_cpow_re_eq
+#print axioms R05_eta_nineteenth_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 nineteenth eta term (`-5/24 ≤ Re term19`, honest negative floor:
+k = 18 even so the sign is `+1`, and the tight `1/3` amplitude times the `-5/8` cosine
+gives `-5/24 ≈ -0.208`, beating the coarse `-11/40`). -/
+theorem R05_eta_nineteenth_Re_ge :
+    (-5 / 24 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 18).re := by
+  rw [R05_eta_nineteenth_eq, R05_inv_nineteen_cpow_re_eq]
+  have hamp := R05_rpow_nineteen_neg0395_le
+  have hcos := R05_cos_075log19_lower
+  have hamp_pos : (0 : Real) < (19 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have g1 : (0 : Real) ≤ (19 : Real) ^ (-0.395 : Real) *
+      (Real.cos (0.75 * Real.log 19) + 5 / 8) := by
+    apply mul_nonneg hamp_pos.le
+    linarith
+  have g2 : (0 : Real) ≤ (1 / 3 - (19 : Real) ^ (-0.395 : Real)) * (5 / 8 : Real) := by
+    apply mul_nonneg
+    · linarith
+    · norm_num
+  linarith
+
+/-- Nineteen-term split (`S19 = S18 + term 18`, non-pair slow-sum step). -/
+theorem R05_S19_eq :
+    (∑ k ∈ Finset.range 19, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 18, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 18 := by
+  rw [show (19 : Nat) = 18 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 nineteen-term real part (`-10299/30000 ≤ Re S19`, from `-4049/30000 - 5/24`;
+honest dip: the even-k nineteenth term is genuinely negative). -/
+theorem R05_S19_Re_ge :
+    (-10299 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 19, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S19_eq, Complex.add_re]
+  have hS18 := R05_S18_Re_ge
+  have ht := R05_eta_nineteenth_Re_ge
+  have hle : (-10299 / 30000 : Real) ≤ (-4049 / 30000 : Real) + (-(5 / 24) : Real) := by
+    norm_num
+  linarith
+
+#print axioms R05_eta_nineteenth_Re_ge
+#print axioms R05_S19_eq
+#print axioms R05_S19_Re_ge
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Log-20 split (`log 20 = log 10 + log 2`) via `20 = 10 * 2` and banked `log 10`. -/
+theorem R05_log_twenty_eq :
+    Real.log 20 = Real.log 10 + Real.log 2 := by
+  have h20 : (20 : Real) = 10 * 2 := by norm_num
+  rw [h20, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase of the R05 twentieth eta term (`0.75 * log 20` in `[2.2467, 2.2469]`)
+from the d9 `log 2` / `log 5` bounds via `R05_log_twenty_eq` and `R05_log_ten_eq`. -/
+theorem R05_theta20_mem :
+    (2.2467 : Real) ≤ 0.75 * Real.log 20 ∧ 0.75 * Real.log 20 ≤ (2.2469 : Real) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h5lo := Real.log_five_gt_d9
+  have h5hi := Real.log_five_lt_d9
+  have hx : 0.75 * Real.log 20 = 0.75 * ((Real.log 2 + Real.log 5) + Real.log 2) := by
+    rw [R05_log_twenty_eq, R05_log_ten_eq]
+  constructor <;> rw [hx] <;> linarith
+
+#print axioms R05_log_twenty_eq
+#print axioms R05_theta20_mem
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Cosine upper at the twentieth-term phase (`cos (0.75 * log 20) ≤ -2/5`)
+via `CG_cos_le_quartic` with per-monomial endpoints. -/
+theorem R05_cos_075log20_upper :
+    Real.cos (0.75 * Real.log 20) ≤ (-2 / 5 : Real) := by
+  have hmem := R05_theta20_mem
+  have hpos : (0 : Real) < Real.log 20 := Real.log_pos (by norm_num)
+  have hnn : (0 : Real) ≤ 0.75 * Real.log 20 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hlo : (2.2467 : Real) ≤ 0.75 * Real.log 20 := hmem.1
+  have hhi : 0.75 * Real.log 20 ≤ (2.2469 : Real) := hmem.2
+  have hcos := CG_cos_le_quartic hnn
+  have h2 : (2.2467 : Real) ^ 2 ≤ (0.75 * Real.log 20) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hlo 2
+  have h4 : (0.75 * Real.log 20) ^ 4 ≤ (2.2469 : Real) ^ 4 :=
+    pow_le_pow_left₀ hnn hhi 4
+  have hnum : (1 : Real) - (2.2467 : Real) ^ 2 / 2 + (2.2469 : Real) ^ 4 / 24 ≤
+      (-2 / 5 : Real) := by
+    norm_num
+  linarith
+
+/-- Rpow upper (`20 ^ 0.395 ≤ 4`) via cleared `(20 ^ (2/5)) ^ 5 = 400 ≤ 1024`. -/
+theorem R05_twenty_rpow_le : (20 : Real) ^ (0.395 : Real) ≤ (4 : Real) := by
+  have hpow : ((((20 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) ≤
+      ((4 : Real)) ^ (5 : Nat) := by
+    have e : ((((20 : Real) ^ ((2 / 5 : Real)))) ^ (5 : Nat)) =
+        (20 : Real) ^ (2 : Nat) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : Real) ≤ 20)]
+      rw [show (2 / 5 : Real) * ((((5 : Nat)) : Real)) = (2 : Real) by norm_num]
+      rw [show (2 : Real) = ((((2 : Nat)) : Real)) by norm_num]
+      exact Real.rpow_natCast 20 2
+    rw [e]
+    norm_num
+  have hstep : (20 : Real) ^ ((2 / 5 : Real)) ≤ (4 : Real) :=
+    le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+  calc (20 : Real) ^ (0.395 : Real) ≤ (20 : Real) ^ ((2 / 5 : Real)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    _ ≤ (4 : Real) := hstep
+
+/-- Real rpow twentieth inverse lower (`1/4 ≤ 20 ^ (-0.395)`) from `20 ^ 0.395 ≤ 4`. -/
+theorem R05_rpow_twenty_neg0395_ge :
+    (1 / 4 : Real) ≤ (20 : Real) ^ (-0.395 : Real) := by
+  have hle := R05_twenty_rpow_le
+  have hpos : (0 : Real) < (20 : Real) ^ (0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (20 : Real) ^ (-0.395 : Real) = (((20 : Real) ^ (0.395 : Real)))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw]
+  rw [show (1 / 4 : Real) = ((4 : Real))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+#print axioms R05_cos_075log20_upper
+#print axioms R05_twenty_rpow_le
+#print axioms R05_rpow_twenty_neg0395_ge
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 twentieth eta inverse
+(`Re (20 ^ s)⁻¹ = 20 ^ (-0.395) * cos (0.75 * log 20)`). -/
+theorem R05_inv_twenty_cpow_re_eq :
+    (((((20 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹).re =
+      (20 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 20) := by
+  have h20eq : ((((20 : Nat)) : Complex)) = (20 : Complex) := by norm_cast
+  rw [h20eq]
+  have hlog : Complex.log (20 : Complex) = (((Real.log 20 : Real)) : Complex) :=
+    (Complex.ofReal_log (by norm_num : (0 : Real) ≤ 20)).symm
+  have hlogre : (Complex.log (20 : Complex)).re = Real.log 20 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (20 : Complex)).im = 0 := by rw [hlog]; rfl
+  have hsre : R03R10PolyLower.sR05.re = (0.395 : Real) := R03R10PolyLower.sR05_re
+  have hsim : R03R10PolyLower.sR05.im = (-0.75 : Real) := R03R10PolyLower.sR05_im
+  have hargre : (Complex.log (20 : Complex) * R03R10PolyLower.sR05).re =
+      Real.log 20 * 0.395 := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (20 : Complex) * R03R10PolyLower.sR05).im =
+      Real.log 20 * (-0.75) := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (20 : Complex) ^ R03R10PolyLower.sR05 =
+      Complex.exp (Complex.log (20 : Complex) * R03R10PolyLower.sR05) := by
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (20 : Complex) ≠ 0)]
+  have hinv : ((20 : Complex) ^ R03R10PolyLower.sR05)⁻¹ =
+      Complex.exp (-(Complex.log (20 : Complex) * R03R10PolyLower.sR05)) := by
+    rw [hcpow, <- Complex.exp_neg]
+  have hnegre : (-(Complex.log (20 : Complex) * R03R10PolyLower.sR05)).re =
+      -(Real.log 20 * 0.395) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (20 : Complex) * R03R10PolyLower.sR05)).im =
+      -(Real.log 20 * (-0.75)) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (20 : Complex) * R03R10PolyLower.sR05))).re =
+      Real.exp (-(Real.log 20 * 0.395)) * Real.cos (-(Real.log 20 * (-0.75))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log 20 * (-0.75))) = Real.cos (0.75 * Real.log 20) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log 20 * 0.395)) = (20 : Real) ^ (-0.395 : Real) := by
+    have heq : -(Real.log 20 * 0.395) = Real.log 20 * (-0.395 : Real) := by
+      ring
+    rw [heq]
+    rw [<- Real.rpow_def_of_pos (by norm_num : (0 : Real) < 20)]
+  rw [hinv, hre, hexp, hcos]
+
+/-- R05 twentieth eta term in closed form (`term 19 = -((20 ^ s)⁻¹)`, since `(-1)^19 = -1`). -/
+theorem R05_eta_twentieth_eq :
+    etaDirichletTerm R03R10PolyLower.sR05 19 =
+      -((((20 : Nat)) : Complex) ^ R03R10PolyLower.sR05)⁻¹ := by
+  have e1 : (19 + 1 : Nat) = 20 := rfl
+  have hcast : ((((19 + 1 : Nat)) : Complex)) = ((((20 : Nat)) : Complex)) := by
+    rw [e1]
+  have hneg : (-1 : Complex) ^ (19 : Nat) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+#print axioms R05_inv_twenty_cpow_re_eq
+#print axioms R05_eta_twentieth_eq
+
+end Door3OffAxis
+
+
+namespace Door3OffAxis
+
+/-- Real part of the R05 twentieth eta term (`1/10 ≤ Re term20`,
+from `(1/4) * (2/5)`: the `(-1)^19` sign flips the negative twentieth cosine
+into a positive contribution). -/
+theorem R05_eta_twentieth_Re_ge :
+    (1 / 10 : Real) ≤ (etaDirichletTerm R03R10PolyLower.sR05 19).re := by
+  rw [R05_eta_twentieth_eq, Complex.neg_re, R05_inv_twenty_cpow_re_eq]
+  have hamp := R05_rpow_twenty_neg0395_ge
+  have hcos := R05_cos_075log20_upper
+  have hamp_pos : (0 : Real) < (20 : Real) ^ (-0.395 : Real) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hnc : (2 / 5 : Real) ≤ -(Real.cos (0.75 * Real.log 20)) := by
+    linarith
+  have hprod : (1 / 4 : Real) * (2 / 5 : Real) ≤
+      (20 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 20))) :=
+    mul_le_mul hamp hnc (by norm_num) hamp_pos.le
+  have heq : (1 / 4 : Real) * (2 / 5 : Real) = (1 / 10 : Real) := by
+    norm_num
+  have hsplit : (20 : Real) ^ (-0.395 : Real) * (-(Real.cos (0.75 * Real.log 20))) =
+      -((20 : Real) ^ (-0.395 : Real) * Real.cos (0.75 * Real.log 20)) := by
+    ring
+  linarith
+
+/-- Twenty-term split (`S20 = S19 + term 19`, non-pair slow-sum step). -/
+theorem R05_S20_eq :
+    (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k) =
+      (∑ k ∈ Finset.range 19, etaDirichletTerm R03R10PolyLower.sR05 k) +
+        etaDirichletTerm R03R10PolyLower.sR05 19 := by
+  rw [show (20 : Nat) = 19 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- R05 twenty-term real part (`-7299/30000 ≤ Re S20`, from `-10299/30000 + 1/10`). -/
+theorem R05_S20_Re_ge :
+    (-7299 / 30000 : Real) ≤
+      (∑ k ∈ Finset.range 20, etaDirichletTerm R03R10PolyLower.sR05 k).re := by
+  rw [R05_S20_eq, Complex.add_re]
+  have hS19 := R05_S19_Re_ge
+  have ht := R05_eta_twentieth_Re_ge
+  have hle : (-7299 / 30000 : Real) ≤ (-10299 / 30000 : Real) + (1 / 10 : Real) := by
+    norm_num
+  linarith
+
+/-- Pair-9 floor (`-13/120 ≤ Re (term 19 + term 20)`, from `-5/24 + 1/10`:
+the tight nineteenth amplitude makes this pair net better than pair-8). -/
+theorem R05_pair9_Re_ge :
+    (-13 / 120 : Real) ≤
+      (etaDirichletTerm R03R10PolyLower.sR05 18 + etaDirichletTerm R03R10PolyLower.sR05 19).re := by
+  rw [Complex.add_re]
+  have hE := R05_eta_nineteenth_Re_ge
+  have hO := R05_eta_twentieth_Re_ge
+  have hle : (-13 / 120 : Real) ≤ (-5 / 24 : Real) + (1 / 10 : Real) := by norm_num
+  linarith
+
+#print axioms R05_eta_twentieth_Re_ge
+#print axioms R05_S20_eq
+#print axioms R05_S20_Re_ge
+#print axioms R05_pair9_Re_ge
+
+end Door3OffAxis
