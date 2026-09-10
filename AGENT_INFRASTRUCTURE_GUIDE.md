@@ -3929,6 +3929,12 @@ sorry-free infrastructure and the complete commit ledger above.
   7/5 contract UNSATISFIABLE (‖eta‖≈1.3375<1.4) — stop
   N-variants; retarget consumer to 6/5 (N=4 head +
   pair-norm tail + 9/10 factor cap + transport).**
+- 2026-09-10 ZU37 (`f067e571`, zeta file 237/0, no
+  build): 9/10 factor cap CLOSED; N=4 magnitude-route
+  FAILED honestly (slow −1.73, tail 14.43 — ‖s‖≈10
+  constant kills both). 6/5 OPEN. ZU38 fired: Im-route
+  head + tradeoff curve N∈{4,6,8,12,16}, cap 3 variants,
+  close-or-quantify.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
