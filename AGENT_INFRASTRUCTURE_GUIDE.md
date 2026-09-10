@@ -3629,6 +3629,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (true integral ≈18.146>18.0; total ≈20.044>20.0). Best stays
   515. Peel treadmill near end (each N buys ~0.15).
   Residual: denom lift 0.414→0.42 → 505 (ZU32); N=11 fallback.
+- 2026-09-10 ZU32 (`e5859129` part 1, zeta tail, appended
+  unbuilt): 0.42-impossibility PROOF (|1−√2|≈0.4142) + 2
+  cleared-pows (N=11 fallback start).
+- 2026-09-10 ZU33 (`e5859129` part 2, zeta tail, 1× green):
+  cleared-pows verified + 38c/38d floors/identities (unbuilt).
+- 2026-09-10 ZU34 (`e5859129` part 3, zeta tail, 10× green
+  8693 jobs): 38c/38d verified + full N=11 chain (head 2.119
+  + tail 17.75 → **K0 19.869 → C=48 → GLOBAL 505**,
+  edge `515−505=10`).
+  Residual: N=13 peel → 495 (ZU35).
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
   8× green 8682 jobs; wrapper AUTOCLEAR observed live):
   Weierstrass-product route → FIRST exponential Γ-bound
