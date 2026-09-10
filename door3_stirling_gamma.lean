@@ -1463,3 +1463,20 @@ theorem D3SG_TierC_gamma_rect_sliver (s : ℂ)
     _ = 600 * Real.exp (-(1 / 2) * |s.im|) := by rw [e]
 
 #print axioms D3SG_TierC_gamma_rect_sliver
+
+/-- Tier-C wide join on `Re ∈ [0.005,0.95]`: `‖Γ s‖ ≤ 600·exp(−|Im|/2)`. -/
+theorem D3SG_TierC_gamma_wide (s : ℂ)
+    (hlo : 0.005 ≤ s.re) (hhi : s.re ≤ 0.95) :
+    ‖Complex.Gamma s‖ ≤ 600 * Real.exp (-(1 / 2) * |s.im|) := by
+  by_cases hc : s.re ≤ 0.05
+  · exact D3SG_TierC_gamma_rect_sliver s hlo hc
+  · have h05 : (0.05 : ℝ) ≤ s.re := le_of_not_ge hc
+    have h60 : ‖Complex.Gamma s‖ ≤ 60 * Real.exp (-(1 / 2) * |s.im|) :=
+      D3SG_TierC_gamma_rect s h05 hhi
+    have hle : (60 : ℝ) * Real.exp (-(1 / 2) * |s.im|)
+        ≤ 600 * Real.exp (-(1 / 2) * |s.im|) :=
+      mul_le_mul_of_nonneg_right (by norm_num : (60 : ℝ) ≤ 600)
+        (le_of_lt (Real.exp_pos _))
+    exact le_trans h60 hle
+
+#print axioms D3SG_TierC_gamma_wide
