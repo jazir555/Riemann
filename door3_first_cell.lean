@@ -235,7 +235,7 @@ theorem FC_deriv67200_proved :
 theorem FC_deriv_of_ballSup (hBall : FC_ballSup_obligation) :
     ∀ w, FC_rect.mem w → ‖deriv xiShifted w‖ ≤ 16800 / 0.25 := by
   exact DerivCauchyBridge.uniform_deriv_of_closedBall_bound
-    FC_rect 0.25 16800 (by norm_num) FC_strip_of_mem hBall
+    FC_rect 0.25 16800 (by norm_num) (fun w hw => FC_strip_of_mem hw) hBall
 
 /-- Closed form `16800 / 0.25 = 67200` of the Cauchy route. -/
 theorem FC_deriv67200_of_ballSup (hBall : FC_ballSup_obligation) {w : ℂ}
@@ -550,8 +550,8 @@ theorem FC_eta0395_S2_le (L : ℝ)
     show (2 : ℕ) = 1 + 1 from by norm_num] at h1
   have h_eq : (∑ i ∈ Finset.range (1 + 1),
       (-1 : ℝ) ^ i * FC_etaF0395 i) = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) := by
-    rw [Finset.sum_range_succ, show (1 : ℕ) = 0 + 1 from by norm_num,
-      Finset.sum_range_succ, Finset.sum_range_zero]
+    simp only [Finset.sum_range_succ, Finset.sum_range_one,
+      Finset.sum_range_zero]
     simp only [FC_etaF0395, pow_zero, pow_one, Nat.cast_zero, Nat.cast_one,
       Real.one_rpow]
     ring
@@ -600,8 +600,10 @@ theorem FC_cauchy_C_ge_centerLower (C low : ℝ)
     Metric.mem_closedBall.mpr (by rw [dist_self]; exact hRnn)
   have hCle := hC _ hmem
   have him : (Door3FirstCell.FC_rect.center).im = 0.105 := by
-    rw [hce]
-    exact FC_center_im
+    rw [hce, R02Pilot.center_eq]
+    simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    norm_num
   have hagree : xiShifted Door3FirstCell.FC_rect.center =
       CentralCoverAssembly.xiShiftedEntire Door3FirstCell.FC_rect.center :=
     CentralCoverAssembly.xiShifted_eq_entire_on_strip _
@@ -714,7 +716,7 @@ theorem FC_fat_z_re (z : ℂ)
     have hlt := Door3FirstCell.FC_rect_radius_lt
     linarith
   have hn : ‖z - CentralCoverAssembly.R02.center‖ < 1.51 := by
-    rw [hce] at hd ⊢
+    rw [hce] at hd
     rw [← dist_eq_norm]
     linarith [hd, hR]
   have hre : |(z - CentralCoverAssembly.R02.center).re| < 1.51 :=
@@ -737,7 +739,7 @@ theorem FC_fat_z_im (z : ℂ)
     have hlt := Door3FirstCell.FC_rect_radius_lt
     linarith
   have hn : ‖z - CentralCoverAssembly.R02.center‖ < 1.51 := by
-    rw [hce] at hd ⊢
+    rw [hce] at hd
     rw [← dist_eq_norm]
     linarith [hd, hR]
   have him : |(z - CentralCoverAssembly.R02.center).im| < 1.51 :=
@@ -794,8 +796,9 @@ theorem FC_fatNorm_upper (z : ℂ)
       CentralCoverAssembly.R02.center := by abel
   calc ‖z‖ ≤ ‖z - CentralCoverAssembly.R02.center‖ +
         ‖CentralCoverAssembly.R02.center‖ := by
-        rw [hzz]
-        exact norm_add_le _ _
+        conv_lhs => rw [hzz]
+        exact norm_add_le (z - CentralCoverAssembly.R02.center)
+          CentralCoverAssembly.R02.center
     _ ≤ 8.27 := by linarith [hzc, FC_center_norm_le]
 
 /-- `‖(1/2 : ℂ)‖ = 1/2`. -/
