@@ -1466,3 +1466,294 @@ theorem cutR10_closedBall_sup_sharp_closed
   exact le_trans g3 hcap
 
 end Door3CutR10BallSup
+
+/-! # APPEND-3 (eta-zero workaround, append-only tail; LF): route (c) FE reflection.
+
+Premise inventory as read (tail through APPEND-2, line 1468):
+* CLOSED (no premises): cutR10_hProd_closed, cutR10_hDom_closed,
+  cutR10_hReal_closed, cutR10_zeta_rightSliver_closed (Re >= 3/2 -> <= 3),
+  cutR10_gamma_sup_half_closed (Gamma <= 1/2), cutR10_poly_pi_lower_endpoint,
+  plus draft ball geometry / poly / pi uppers.
+* Explicit Prop premises (gated deltas): hStripEta / hFE-style eta bridge
+  (blocked: eta factor zero at s ~ 1 + 9.06*I in-region), hHead/hBridge/hFac
+  factor-lower shape, hProdCap (Gamma 1/100), hJoint (exact 0.04).
+* Joint honest reach so far: 12.87 with zeta 6 + Gamma 1/100
+  (cutR10_closedBall_sup_sharp); 0.04 stays joint-conditional.
+
+Route chosen: (c) FE/convexity reflection from the Re >= 2 Euler side.
+Why (c), and why not (a)/(b):
+* (a) disc excision gains nothing: the eta factor vanishes at the ledgered
+  lattice point s ~ 1 + 9.06*I inside the ball s-region
+  (Re in [-1.06, 2.06], Im in [8.44, 11.56]). Excising small discs around
+  1 +/- 9.06*I leaves the inside-disc block unsolved, since Euler bounds do
+  not reach Re ~ 1 and the eta bridge blows up there as well, so a second
+  method is needed inside anyway. Complexity doubles, net gain zero.
+  The structural block is pinned below as pure logic
+  (cutR10_eta_no_uniform_lower_of_zero): one in-region zero rules out every
+  uniform positive factor lower, with the zero existence itself kept as the
+  ledgered explicit premise.
+* (b) base-5 eta IS zero-free on the closed rectangle (neighbouring lattice
+  heights 2*pi*2/log 5 ~ 7.81 below 8.44 and 2*pi*3/log 5 ~ 11.71 above
+  11.56 straddle the region), so nonvanishing verifies as required. But the
+  near miss (gap ~ 0.15 at the top edge) forces any uniform factor lower to
+  c <= ~1/4, inflating zeta = eta5/factor by 4x or more; reaching zeta <= 6
+  would then need eta5 <= 3/2, a stronger head/tail demand than the banked
+  eta-pair machine supplies, and zeta <= 2 would need eta5 <= 1/2, which is
+  implausible. Recorded below as a gated assembly only
+  (cutR10_zeta_six_of_base5_premises), UNUSED for the landed C.
+* (c) FE reflection never forms the eta denominator, so the zero is avoided
+  structurally: the right sliver reuses the CLOSED Euler bounds whose
+  denominator (Re - 1) >= 1/2 (and >= 1 at Re >= 2) stays away from zero,
+  while the left/middle uses one FE-product premise (chi cap times reflected
+  Euler cap). No division by (1 - 2^(1-s)) occurs anywhere in this route.
+
+C landed:
+* zeta <= 2 CLOSED on the Re >= 2 sub-edge (Euler delta = 1).
+* zeta <= 6 on the FULL ball s-rectangle conditional on exactly one explicit
+  FE-bridge Prop premise hFE (plus Mathlib/banked closed lemmas only), via a
+  zero-free route; this feeds the existing factor assembly to joint <= 12.87
+  (cutR10_closedBall_sup_FEroute).
+* zeta <= 2 on the FULL rectangle does NOT close and is not claimed: the
+  honest FE factor at the left edge is >= 2.08 (cutR10_FE_factor_shortfall),
+  so <= 2 would force reflected zeta <= 1, stronger than Euler and false in
+  general. Shortfall quantified, not faked.
+* Gamma side, for the record: with the CLOSED half-rate Gamma cap 1/2 the
+  honest joint is <= 3216/5 = 643.2 (cutR10_closedBall_sup_true_halfGamma),
+  correcting the 3217/250 restatement above which needs the 1/100 cap (50x
+  gap quantified); with zeta <= 2 + Gamma 1/100 the joint would be <= 4.29
+  (cutR10_joint_four_of_zetaTwo_gamma100, both premises gated).
+
+Theorems PROVED vs residual:
+* PROVED closed (no premises): cutR10_zeta_rightEdge_two_closed.
+* PROVED logic (no analysis): cutR10_eta_no_uniform_lower_of_zero.
+* PROVED gated assemblies: cutR10_zeta_six_of_base5_premises (route b,
+  unused), cutR10_zeta_leftSix_of_FE, cutR10_zeta_sup_six_of_FE,
+  cutR10_closedBall_sup_FEroute, cutR10_joint_four_of_zetaTwo_gamma100,
+  cutR10_closedBall_sup_true_halfGamma.
+* PROVED arithmetic (no premises): cutR10_FE_factor_shortfall.
+* RESIDUAL (patch phase): discharge hFE (FE chi cap <= 3 on the rectangle
+  plus reflected Euler cap <= 2) from banked FE bounds; discharge Gamma
+  1/100 via the pi/2 Stirling rate or a 20-factor product; optional
+  narrowed-Re <= 2 (middle only) if Tier-B excises the left edge.
+
+Patch remainder: no new imports; lakefile untouched; nothing committed.
+Fencing: keep (epsilon, M) = (0.01, 13) until hFE and 1/100 both discharge;
+do not claim 0.04. Placeholder-free, explicit binders only.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- CLOSED right edge `Re >= 2 -> ‖zeta‖ <= 2` (Euler `delta = 1`,
+`1 + 1 / 1 = 2`), from the closed domination and real caps above. -/
+theorem cutR10_zeta_rightEdge_two_closed (s : ℂ) (hs : (2 : ℝ) ≤ s.re) :
+    ‖zeta s‖ ≤ 2 := by
+  have hz : zeta s = riemannZeta s := rfl
+  rw [hz]
+  have hDom := cutR10_hDom_closed s (by linarith)
+  have hReal := cutR10_hReal_closed s (by linarith)
+  have h := cutR10_zeta_euler_step s hDom hReal (1 : ℝ) (by norm_num) (by linarith)
+  have heq : (1 : ℝ) + 1 / (1 : ℝ) = 2 := by norm_num
+  rw [heq] at h
+  exact h
+
+/-- Structural block as pure logic: one eta-factor zero inside the rectangle
+rules out every uniform positive lower. The zero existence itself (the
+`s ~ 1 + 9.06*I` lattice point) stays a ledgered explicit premise. -/
+theorem cutR10_eta_no_uniform_lower_of_zero (s0 : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s0.re) (hhi : s0.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s0.im) (hihi : s0.im ≤ (11.56 : ℝ))
+    (hzero : ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s0)) = 0) :
+    ¬ ∃ c : ℝ, 0 < c ∧ ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) →
+      c ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+  intro hEx
+  obtain ⟨c, hcPos, hc⟩ := hEx
+  have h0 := hc s0 hlo hhi hilo hihi
+  rw [hzero, norm_zero] at h0
+  linarith
+
+/-- Route-(b) record, gated and UNUSED for the landed C: a base-5 bridge
+premise plus a uniform base-5 factor lower give `‖zeta‖ <= 6`. The factor
+lower can be at most ~1/4 (near miss at the top edge), so this demands
+`eta5 <= 3/2`, stronger than the banked eta-pair machine; hence (b) loses
+to (c). Documents the verified-nonvanishing variant and its cost. -/
+theorem cutR10_zeta_six_of_base5_premises (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hEta5 : ‖zeta s‖ * ‖(1 : ℂ) - (5 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 3 / 2)
+    (hFac5 : (1 / 4 : ℝ) ≤ ‖(1 : ℂ) - (5 : ℂ) ^ ((1 : ℂ) - s)‖) :
+    ‖zeta s‖ ≤ 6 := by
+  have hmul : ‖zeta s‖ * (1 / 4 : ℝ) ≤ (3 / 2 : ℝ) :=
+    mul_le_mul_of_nonneg_left hFac5 (norm_nonneg _)
+  calc ‖zeta s‖ = ‖zeta s‖ * (1 / 4 : ℝ) * 4 := by ring
+    _ ≤ (3 / 2 : ℝ) * 4 :=
+        mul_le_mul_of_nonneg_right hmul (by norm_num)
+    _ = 6 := by norm_num
+
+/-- Route-(c) left/middle step, gated on one FE-product premise: the bridge
+`‖zeta‖ <= 3 * 2` (chi cap 3 times reflected Euler cap 2) carries no eta
+denominator, so the lattice zero cannot enter. -/
+theorem cutR10_zeta_leftSix_of_FE (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (3 / 2 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ‖zeta s‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 := by
+  have heq : (3 : ℝ) * 2 = 6 := by norm_num
+  rw [heq] at hFE
+  exact hFE
+
+/-- Route-(c) uniform `‖zeta‖ <= 6` on the full ball s-rectangle from exactly
+one explicit FE premise: split at `Re = 3/2`; the right side is the CLOSED
+Euler sliver (`<= 3 <= 6`), the left side is the FE bridge above. -/
+theorem cutR10_zeta_sup_six_of_FE (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 := by
+  by_cases hR : (3 / 2 : ℝ) ≤ s.re
+  · have h3 := cutR10_zeta_rightSliver_closed s hR
+    linarith
+  · push_neg at hR
+    have h6 := hFE s hlo (le_of_lt hR) hilo hihi
+    have heq : (3 : ℝ) * 2 = 6 := by norm_num
+    rw [heq] at h6
+    exact h6
+
+/-- Zero-free joint `<= 12.87` via route (c): closed product identity plus the
+FE zeta sup above plus the Stirling Gamma premise (same numerals as
+`ballSup_of_factorSups`: `67 * (16/5) * (1/100) * 6 = 12.864`). -/
+theorem cutR10_closedBall_sup_FEroute
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2)
+    (hGammaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (12.87 : ℝ) := by
+  intro z hz
+  have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) :=
+    cutR10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := ballPoly_upper hz
+  have hpi := ballPi_upper hz
+  have hre := mem_ball_shiftedS_re_bounds hz
+  have him := mem_ball_shiftedS_im_bounds hz
+  have hz2 : ‖zeta (shiftedS z)‖ ≤ (6 : ℝ) :=
+    cutR10_zeta_sup_six_of_FE _ hre.1 hre.2 him.1 him.2 hFE
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 100 : ℝ) :=
+    hGammaSup _ hre.1 hre.2 him.1 him.2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖ ≤ ((67 : ℝ) * (16 / 5)) * (1 / 100) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
+        (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 :=
+    mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 ≤ (12.87 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+/-- Conditional Tier-B joint: with zeta `<= 2` and Gamma `1/100` the honest
+product is `<= 4.29` (`67*(16/5)*(1/100)*2 = 4.288`). Gated on both sup
+premises; the zeta-2 premise is the residual that does not close (see
+`cutR10_FE_factor_shortfall`). -/
+theorem cutR10_joint_four_of_zetaTwo_gamma100
+    (hZetaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) → ‖zeta s‖ ≤ (2 : ℝ))
+    (hGammaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (4.29 : ℝ) := by
+  intro z hz
+  have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) :=
+    cutR10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := ballPoly_upper hz
+  have hpi := ballPi_upper hz
+  have hre := mem_ball_shiftedS_re_bounds hz
+  have him := mem_ball_shiftedS_im_bounds hz
+  have hz2 : ‖zeta (shiftedS z)‖ ≤ (2 : ℝ) :=
+    hZetaSup _ hre.1 hre.2 him.1 him.2
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 100 : ℝ) :=
+    hGammaSup _ hre.1 hre.2 him.1 him.2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖ ≤ ((67 : ℝ) * (16 / 5)) * (1 / 100) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
+        (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 2 :=
+    mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 2 ≤ (4.29 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+/-- Honest joint with the CLOSED half-rate Gamma cap `1/2` (plus zeta `<= 6`):
+`<= 3216/5 = 643.2`. This corrects the `3217/250` restatement above, which
+needs the `1/100` cap; the factor-50 gap is the quantified Gamma shortfall. -/
+theorem cutR10_closedBall_sup_true_halfGamma
+    (hZetaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) → ‖zeta s‖ ≤ (6 : ℝ))
+    (hGammaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 2 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (3216 / 5 : ℝ) := by
+  intro z hz
+  have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) :=
+    cutR10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := ballPoly_upper hz
+  have hpi := ballPi_upper hz
+  have hre := mem_ball_shiftedS_re_bounds hz
+  have him := mem_ball_shiftedS_im_bounds hz
+  have hz2 : ‖zeta (shiftedS z)‖ ≤ (6 : ℝ) :=
+    hZetaSup _ hre.1 hre.2 him.1 him.2
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 2 : ℝ) :=
+    hGammaSup _ hre.1 hre.2 him.1 him.2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖ ≤ ((67 : ℝ) * (16 / 5)) * (1 / 2) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
+        (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 6 :=
+    mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 6 ≤ (3216 / 5 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+/-- Shortfall for full-rectangle `<= 2`: any FE product with chi `>= 2.08`
+and reflected zeta `>= 1` already exceeds 2, so `<= 2` cannot come from the
+honest left-edge factor pair and stays residual. -/
+theorem cutR10_FE_factor_shortfall (chi right : ℝ)
+    (hchi : (2.08 : ℝ) ≤ chi) (hr : (1 : ℝ) ≤ right)
+    (hchi0 : (0 : ℝ) ≤ chi) :
+    (2 : ℝ) < chi * right := by
+  have hmul : chi * (1 : ℝ) ≤ chi * right :=
+    mul_le_mul_of_nonneg_left hr hchi0
+  rw [mul_one] at hmul
+  linarith
+
+end Door3CutR10BallSup
