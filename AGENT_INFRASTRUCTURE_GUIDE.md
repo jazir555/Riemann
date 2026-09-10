@@ -3913,6 +3913,13 @@ sorry-free infrastructure and the complete commit ledger above.
   R29 TIGHT ~1.05×), 2 feasibility-negative (R21/R30,
   deficit −0.05 each → re-tier/subdivision). 60 premises
   listed with TRUE values.
+- 2026-09-10 TIERB (`door3_tierB_subdiv.lean`, no build,
+  re-fire after empty first attempt): subdivision machine
+  (count + Cauchy + fencing) + CutR10 instantiation (264
+  subcells 12×22) + `tierB_1287_005_infeasible` PROVED +
+  caps C ≤ 0.506 / target (0.5, 0.05) feasible. Gap
+  quantified: 12.87 → ≤0.5 (~25.4×), owed by π/2
+  integral + local-M + zeta≤2.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
