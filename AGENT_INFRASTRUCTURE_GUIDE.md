@@ -3877,6 +3877,14 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
+- 2026-09-10 ST14 (`c1ecce0d`, stirling file, 1× green 8682
+  jobs, resumed after conn-reset with zero partial work):
+  **`D3SG_TierC_gamma_wide`** (600·exp(−|Im|/2) on full
+  [0.005,0.95]). Gamma uniformity COMPLETE. Next: π/2
+  scout (PI2, separate file) + local-M split.
+- 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
+  jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
+  [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
 - 2026-09-10 TIER-FEASIBILITY (coordinator, lemma shape
   `M=C/r` verified): Tier A TRUE-dead (sup_true≈0.09 vs
   need ≤0.04); Tier C TRUE-dead (needs sup≤0.04·margin≤0.01
