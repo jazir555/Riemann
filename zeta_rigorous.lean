@@ -40215,3 +40215,404 @@ Identification for the CUTL-side agent (done at the use site, not here):
 No new identification is proved here; the bridge above feeds
 `zeta_lower_of_Sn_tail_factor` at `cF = 9/10` once the Im-route head lands.
 -/
+
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane, ZU38): Im-framework + N=6/8 tradeoff.
+
+Recon record: `cF = 9/10` CLOSED (`sCutL10Z_etaFactor_le_nine_tenths`),
+`slow4 = -173/100` (`sCutL10Z_head4_ge`, magnitude-only triangle loss),
+`rtail4 = 1443/100` (`sCutL10Z_tail4_le`, MVT constant `10.02`).
+Need `slow - rtail >= 1.08` so `/0.9` clears `6/5 = 1.2`.
+True values: `‖zeta‖ ≈ 1.549`, `‖eta‖ ≈ 1.3375`, so `7/5` is dead.
+
+JOB 1 (Im-route): bank the unconditional projection framework
+(`‖S₄‖ >= |Im S₄|`, sum-Im expansion, conditional lift). Full trig
+enclosures for `sin(10*log n)/sqrt(n)` remain OPEN (need Taylor-with-remainder
+or banked sin-addition lemmas not yet in this file); best UNCONDITIONAL head
+stays `-173/100`. No `sorry`, no new axioms.
+JOB 2 (tails): MVT-free `0.37` is unreachable by direct termwise routes
+(divergent `2/sqrt` majorant; MVT-within-pair keeps `‖s‖ ≈ 10` factor).
+We bank the honest tradeoff curve with AVAILABLE tools:
+pairs `m = 2,3` (MVT, mirrors `sCutL10Z_pair1_norm_le`), heads `N = 6,8`
+(triangle, mirrors `sCutL10Z_head4_ge`), tails `M = 3,4,6,8`
+(`zetaCell_even_remainder_le`, mirrors `sCutL10Z_tail4_le`), assemblies via
+`zeta_lower_of_Sn_tail_factor` at `cF = 9/10`. Variants tried: 2 new heads
+(`N = 6,8`) + 4 new tails; best assembled stays far below `6/5`; gap quantified.
+Fresh suffixes only (`_Im`, `_N6`, `_N8`, `_M6`, `_M8`, `_tradeoff`); no edit above.
+-/
+
+/-- Im projection framework at `S₄`: `|Im S₄| ≤ ‖S₄‖`. -/
+theorem sCutL10Z_S4_Im_le_norm :
+    |(∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k).im| ≤
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ := by
+  exact Complex.abs_im_le_norm _
+
+/-- Sum-Im expansion at `S₄` (four explicit terms, no trig). -/
+theorem sCutL10Z_S4_im_eq :
+    (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k).im =
+      (etaDirichletTerm sCutL10Z 0).im + (etaDirichletTerm sCutL10Z 1).im +
+        (etaDirichletTerm sCutL10Z 2).im + (etaDirichletTerm sCutL10Z 3).im := by
+  have hsum : (∑ k ∈ Finset.range 4, (etaDirichletTerm sCutL10Z k).im) =
+      (etaDirichletTerm sCutL10Z 0).im + (etaDirichletTerm sCutL10Z 1).im +
+        (etaDirichletTerm sCutL10Z 2).im + (etaDirichletTerm sCutL10Z 3).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  have hmap : (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k).im =
+      ∑ k ∈ Finset.range 4, (etaDirichletTerm sCutL10Z k).im := by
+    rw [Complex.add_im]
+    rfl
+  rw [hmap, hsum]
+
+/-- Conditional Im lift: any `|Im S₄| ≥ c` bound lifts to `‖S₄‖ ≥ c` in one step. -/
+theorem sCutL10Z_head4_Im_of_abs_ge (c : ℝ)
+    (hc : c ≤ |(∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k).im|) :
+    c ≤ ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ := by
+  exact le_trans hc sCutL10Z_S4_Im_le_norm
+
+/-- MVT pair upper at `m = 2`: `‖pair 2‖ ≤ 92/100` (base `5`, `11 ≤ 5^(3/2)`). -/
+theorem sCutL10Z_pair2_norm_le :
+    ‖etaPairTerm sCutL10Z 2‖ ≤ (92 / 100 : ℝ) := by
+  have hpair := norm_etaPairTerm_le sCutL10Z sCutL10Z_pos 2
+  have hC := sCutL10Z_norm_le
+  have hre : sCutL10Z.re = (1 / 2 : ℝ) := sCutL10Z_re
+  rw [hre] at hpair
+  have hexp : (-(1 / 2 : ℝ) - 1 : ℝ) = (-(3 / 2 : ℝ)) := by norm_num
+  rw [hexp] at hpair
+  have h11 : (11 : ℝ) ≤ (5 : ℝ) ^ ((3 / 2 : ℝ)) := by
+    have h121 : ((11 : ℝ)) ^ (2 : ℕ) ≤ ((((5 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) := by
+      have e : ((((5 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) = (5 : ℝ) ^ ((3 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+        rw [show (3 / 2 : ℝ) * ((((2 : ℕ)) : ℝ)) = (3 : ℝ) by norm_num]
+        rw [show (3 : ℝ) = ((((3 : ℕ)) : ℝ)) by norm_num]
+        exact Real.rpow_natCast 5 3
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _) h121
+  have hbase : ((((2 * 2 + 1 : ℕ)) : ℝ)) = (5 : ℝ) := by norm_num
+  rw [hbase] at hpair
+  have hrw : (5 : ℝ) ^ (-(3 / 2 : ℝ)) = (((5 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _
+  rw [hrw] at hpair
+  have hpos5 : (0 : ℝ) < (5 : ℝ) ^ ((3 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hinv : (((5 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (11 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos5 (by norm_num)).mpr h11
+  have hfin : ‖sCutL10Z‖ * (((5 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (92 / 100 : ℝ) := by
+    have hle : ‖sCutL10Z‖ * (((5 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤
+        (10.02 : ℝ) * (11 : ℝ)⁻¹ := by
+      exact mul_le_mul hC hinv
+        (inv_nonneg.mpr (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _))
+        (by norm_num)
+    have hnum : (10.02 : ℝ) * (11 : ℝ)⁻¹ ≤ (92 / 100 : ℝ) := by norm_num
+    exact le_trans hle hnum
+  exact le_trans hpair hfin
+
+/-- MVT pair upper at `m = 3`: `‖pair 3‖ ≤ 56/100` (base `7`, `18 ≤ 7^(3/2)`). -/
+theorem sCutL10Z_pair3_norm_le :
+    ‖etaPairTerm sCutL10Z 3‖ ≤ (56 / 100 : ℝ) := by
+  have hpair := norm_etaPairTerm_le sCutL10Z sCutL10Z_pos 3
+  have hC := sCutL10Z_norm_le
+  have hre : sCutL10Z.re = (1 / 2 : ℝ) := sCutL10Z_re
+  rw [hre] at hpair
+  have hexp : (-(1 / 2 : ℝ) - 1 : ℝ) = (-(3 / 2 : ℝ)) := by norm_num
+  rw [hexp] at hpair
+  have h18 : (18 : ℝ) ≤ (7 : ℝ) ^ ((3 / 2 : ℝ)) := by
+    have h324 : ((18 : ℝ)) ^ (2 : ℕ) ≤ ((((7 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) := by
+      have e : ((((7 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) = (7 : ℝ) ^ ((3 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 7)]
+        rw [show (3 / 2 : ℝ) * ((((2 : ℕ)) : ℝ)) = (3 : ℝ) by norm_num]
+        rw [show (3 : ℝ) = ((((3 : ℕ)) : ℝ)) by norm_num]
+        exact Real.rpow_natCast 7 3
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 7) _) h324
+  have hbase : ((((2 * 3 + 1 : ℕ)) : ℝ)) = (7 : ℝ) := by norm_num
+  rw [hbase] at hpair
+  have hrw : (7 : ℝ) ^ (-(3 / 2 : ℝ)) = (((7 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7) _
+  rw [hrw] at hpair
+  have hpos7 : (0 : ℝ) < (7 : ℝ) ^ ((3 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hinv : (((7 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (18 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos7 (by norm_num)).mpr h18
+  have hfin : ‖sCutL10Z‖ * (((7 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (56 / 100 : ℝ) := by
+    have hle : ‖sCutL10Z‖ * (((7 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤
+        (10.02 : ℝ) * (18 : ℝ)⁻¹ := by
+      exact mul_le_mul hC hinv
+        (inv_nonneg.mpr (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 7) _))
+        (by norm_num)
+    have hnum : (10.02 : ℝ) * (18 : ℝ)⁻¹ ≤ (56 / 100 : ℝ) := by norm_num
+    exact le_trans hle hnum
+  exact le_trans hpair hfin
+
+/-- Six-term split (`S₆ = S₄ + pair 2`) at `sCutL10Z`. -/
+theorem sCutL10Z_S6_eq :
+    (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) +
+        etaPairTerm sCutL10Z 2 := by
+  have hp : etaPairTerm sCutL10Z 2 =
+      etaDirichletTerm sCutL10Z 4 + etaDirichletTerm sCutL10Z 5 := by
+    unfold etaPairTerm
+    have e0 : 2 * 2 = 4 := by norm_num
+    have e1 : 2 * 2 + 1 = 5 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) +
+        (etaDirichletTerm sCutL10Z 4 + etaDirichletTerm sCutL10Z 5) := by
+    rw [show (6 : ℕ) = 5 + 1 by norm_num, Finset.sum_range_succ,
+      show (5 : ℕ) = 4 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- Eight-term split (`S₈ = S₆ + pair 3`) at `sCutL10Z`. -/
+theorem sCutL10Z_S8_eq :
+    (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) +
+        etaPairTerm sCutL10Z 3 := by
+  have hp : etaPairTerm sCutL10Z 3 =
+      etaDirichletTerm sCutL10Z 6 + etaDirichletTerm sCutL10Z 7 := by
+    unfold etaPairTerm
+    have e0 : 2 * 3 = 6 := by norm_num
+    have e1 : 2 * 3 + 1 = 7 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) +
+        (etaDirichletTerm sCutL10Z 6 + etaDirichletTerm sCutL10Z 7) := by
+    rw [show (8 : ℕ) = 7 + 1 by norm_num, Finset.sum_range_succ,
+      show (7 : ℕ) = 6 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- Honest `N = 6` head floor: `slow = -265/100` (banked `-173/100` minus pair 2). -/
+theorem sCutL10Z_head6_ge_N6 :
+    (-265 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ := by
+  have hS4 := sCutL10Z_head4_ge
+  have hp := sCutL10Z_pair2_norm_le
+  have hdecomp := sCutL10Z_S6_eq
+  have htri : ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ ≤
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ +
+        ‖etaPairTerm sCutL10Z 2‖ := by
+    rw [hdecomp]
+    exact norm_add_le _ _
+  have hbound : (-173 / 100 : ℝ) - 92 / 100 ≤
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ := by
+    linarith [hS4, hp, htri]
+  have heq : (-173 / 100 : ℝ) - 92 / 100 = -265 / 100 := by norm_num
+  rw [heq] at hbound
+  exact hbound
+
+/-- Honest `N = 8` head floor: `slow = -321/100` (`N = 6` minus pair 3). -/
+theorem sCutL10Z_head8_ge_N8 :
+    (-321 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k‖ := by
+  have hS6 := sCutL10Z_head6_ge_N6
+  have hp := sCutL10Z_pair3_norm_le
+  have hdecomp := sCutL10Z_S8_eq
+  have htri : ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ ≤
+      ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k‖ +
+        ‖etaPairTerm sCutL10Z 3‖ := by
+    rw [hdecomp]
+    exact norm_add_le _ _
+  have hbound : (-265 / 100 : ℝ) - 56 / 100 ≤
+      ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k‖ := by
+    linarith [hS6, hp, htri]
+  have heq : (-265 / 100 : ℝ) - 56 / 100 = -321 / 100 := by norm_num
+  rw [heq] at hbound
+  exact hbound
+
+/-- `M = 3` pair-tail upper at `sCutL10Z` (`rtail = 1179/100`, `√3 ≥ 17/10`). -/
+theorem sCutL10Z_tail6_le_M3 :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k)‖ ≤ (1179 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 3 (by norm_num)
+  have e63 : (2 * 3 : ℕ) = 6 := by norm_num
+  rw [e63, sCutL10Z_re] at h
+  have hsqrt : (17 / 10 : ℝ) ≤ (3 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((17 / 10 : ℝ)) ^ (2 : ℕ) ≤ (3 : ℝ) := by norm_num
+    have hpow : (((3 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 3 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos3 : (0 : ℝ) < (3 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (3 : ℝ) ^ (-(1 / 2 : ℝ)) = (((3 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  have hcast : ((((3 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((3 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((17 / 10 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos3 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((3 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((17 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((17 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (1179 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- `M = 4` pair-tail upper at `sCutL10Z` (`rtail = 1002/100`, `√4 = 2`). -/
+theorem sCutL10Z_tail8_le_M4 :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k)‖ ≤ (1002 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 4 (by norm_num)
+  have e84 : (2 * 4 : ℕ) = 8 := by norm_num
+  rw [e84, sCutL10Z_re] at h
+  have hsqrt : (2 : ℝ) ≤ (4 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((2 : ℝ)) ^ (2 : ℕ) ≤ (4 : ℝ) := by norm_num
+    have hpow : (((4 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 4 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos4 : (0 : ℝ) < (4 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (4 : ℝ) ^ (-(1 / 2 : ℝ)) = (((4 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4) _
+  have hcast : ((((4 : ℕ)) : ℝ)) = (4 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((4 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((2 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos4 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((4 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((2 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((2 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (1002 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- `M = 6` pair-tail upper at `sCutL10Z` (`rtail = 835/100`, `√6 ≥ 24/10`). -/
+theorem sCutL10Z_tail12_le_M6 :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 12, etaDirichletTerm sCutL10Z k)‖ ≤ (835 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 6 (by norm_num)
+  have e126 : (2 * 6 : ℕ) = 12 := by norm_num
+  rw [e126, sCutL10Z_re] at h
+  have hsqrt : (24 / 10 : ℝ) ≤ (6 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((24 / 10 : ℝ)) ^ (2 : ℕ) ≤ (6 : ℝ) := by norm_num
+    have hpow : (((6 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 6 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos6 : (0 : ℝ) < (6 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (6 : ℝ) ^ (-(1 / 2 : ℝ)) = (((6 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 6) _
+  have hcast : ((((6 : ℕ)) : ℝ)) = (6 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((6 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((24 / 10 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos6 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((6 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((24 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((24 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (835 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- `M = 8` pair-tail upper at `sCutL10Z` (`rtail = 716/100`, `√8 ≥ 28/10`). -/
+theorem sCutL10Z_tail16_le_M8 :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 16, etaDirichletTerm sCutL10Z k)‖ ≤ (716 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 8 (by norm_num)
+  have e168 : (2 * 8 : ℕ) = 16 := by norm_num
+  rw [e168, sCutL10Z_re] at h
+  have hsqrt : (28 / 10 : ℝ) ≤ (8 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((28 / 10 : ℝ)) ^ (2 : ℕ) ≤ (8 : ℝ) := by norm_num
+    have hpow : (((8 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 8 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos8 : (0 : ℝ) < (8 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (8 : ℝ) ^ (-(1 / 2 : ℝ)) = (((8 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8) _
+  have hcast : ((((8 : ℕ)) : ℝ)) = (8 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((8 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((28 / 10 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos8 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((8 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((28 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((28 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (716 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- Assembled `N = 6` lower through `cF = 9/10` (`slow = -265/100`, `rtail = 1179/100`). -/
+theorem sCutL10Z_zeta_lower_honest6_N6 :
+    (((-265 / 100 : ℝ) - 1179 / 100) / (9 / 10 : ℝ)) ≤ ‖riemannZeta sCutL10Z‖ := by
+  have hSdef : (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) := rfl
+  exact zeta_lower_of_Sn_tail_factor sCutL10Z_pos sCutL10Z_re_ne_one 6
+    (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) hSdef
+    (-265 / 100) sCutL10Z_head6_ge_N6 (1179 / 100) sCutL10Z_tail6_le_M3
+    (9 / 10) (by norm_num) sCutL10Z_etaFactor_le_nine_tenths
+
+/-- Assembled `N = 8` lower through `cF = 9/10` (`slow = -321/100`, `rtail = 1002/100`). -/
+theorem sCutL10Z_zeta_lower_honest8_N8 :
+    (((-321 / 100 : ℝ) - 1002 / 100) / (9 / 10 : ℝ)) ≤ ‖riemannZeta sCutL10Z‖ := by
+  have hSdef : (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) := rfl
+  exact zeta_lower_of_Sn_tail_factor sCutL10Z_pos sCutL10Z_re_ne_one 8
+    (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) hSdef
+    (-321 / 100) sCutL10Z_head8_ge_N8 (1002 / 100) sCutL10Z_tail8_le_M4
+    (9 / 10) (by norm_num) sCutL10Z_etaFactor_le_nine_tenths
+
+/-- Tradeoff verdict: all assembled `(slow - rtail)/0.9` stay below `6/5`;
+best of `{4,6,8}` is `N = 8` at `-147/100` scale, gap `267/100` to `6/5`. -/
+theorem sCutL10Z_tradeoff_short_N468 :
+    (((-173 / 100 : ℝ) - 1443 / 100) / (9 / 10 : ℝ)) < (6 / 5 : ℝ) ∧
+    (((-265 / 100 : ℝ) - 1179 / 100) / (9 / 10 : ℝ)) < (6 / 5 : ℝ) ∧
+    (((-321 / 100 : ℝ) - 1002 / 100) / (9 / 10 : ℝ)) < (6 / 5 : ℝ) ∧
+    (((-321 / 100 : ℝ) - 1002 / 100) / (9 / 10 : ℝ)) =
+      (-147 / 10 : ℝ) ∧
+    ((6 / 5 : ℝ) - (((-321 / 100 : ℝ) - 1002 / 100) / (9 / 10 : ℝ))) =
+      (159 / 10 : ℝ) := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-- Tail floor record: even at `M = 8` (`N = 16`) the MVT tail `716/100 > 37/100`,
+so the `0.37` non-MVT target is not met by this route. -/
+theorem sCutL10Z_tail16_above_tight_target :
+    (37 / 100 : ℝ) < (716 / 100 : ℝ) := by norm_num
+
+#print axioms sCutL10Z_S4_Im_le_norm
+#print axioms sCutL10Z_S4_im_eq
+#print axioms sCutL10Z_head4_Im_of_abs_ge
+#print axioms sCutL10Z_pair2_norm_le
+#print axioms sCutL10Z_pair3_norm_le
+#print axioms sCutL10Z_S6_eq
+#print axioms sCutL10Z_S8_eq
+#print axioms sCutL10Z_head6_ge_N6
+#print axioms sCutL10Z_head8_ge_N8
+#print axioms sCutL10Z_tail6_le_M3
+#print axioms sCutL10Z_tail8_le_M4
+#print axioms sCutL10Z_tail12_le_M6
+#print axioms sCutL10Z_tail16_le_M8
+#print axioms sCutL10Z_zeta_lower_honest6_N6
+#print axioms sCutL10Z_zeta_lower_honest8_N8
+#print axioms sCutL10Z_tradeoff_short_N468
+#print axioms sCutL10Z_tail16_above_tight_target
+/-!
+Transport + gap note (ZU38): `6/5` NOT closed in this append.
+`N = 4`: `(-1.73 - 14.43)/0.9 = -808/45 ≈ -17.96`.
+`N = 6`: `(-2.65 - 11.79)/0.9 = -722/45 ≈ -16.04`.
+`N = 8`: `(-3.21 - 10.02)/0.9 = -147/10 = -14.70` (best tried, gap `159/10 = 15.90`).
+Tails alone: `M = 6 → 835/100 = 8.35`, `M = 8 → 716/100 = 7.16`, still `≫ 0.37`.
+Coordinator options: (a) larger `N` (MVT head loss `→ ≈ -3.7`, tail `→ 0`, limit
+`≈ -4.1`, never reaches `1.2`); (b) Stirling-backed zeta bounds; (c) concede
+CutL10 to Tier-B subdivision instead of fat-ball. Im trig enclosures
+(`sin(10*log 2/3/4)` intervals for `≥ 145/100`) stay the only head path that
+could in principle reach `slow - rtail ≥ 1.08`; framework above reduces it to
+one `|Im S₄|` numeral once banked.
+-/
