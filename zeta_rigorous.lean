@@ -39978,3 +39978,240 @@ theorem sCutL10Z_residual_short :
 #print axioms sCutL10Z_tail1_le
 #print axioms sCutL10Z_zeta_lower_honest
 #print axioms sCutL10Z_residual_short
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane): `9/10` eta-factor mirror + `N = 4` honest block.
+
+Retarget `6/5 = 1.2` (the `7/5` contract is dead: `‖eta sCutL10Z‖ ≈ 1.3375`).
+The `20.04` MVT pair-tail is NOT reused below; `M = 2` gives `≈ 14.3`.
+The `1.45` head target needs an Im-route (open); we bank the `S₄` split,
+an MVT pair upper, and the honest `slow = -173/100` triangle floor.
+-/
+
+/-- Eta conversion-factor cap `9/10` at `sCutL10Z` (mirror of
+`eta_factor_cutoff_upper_nine_tenths`; only the `hargim` sign flips). -/
+theorem sCutL10Z_etaFactor_le_nine_tenths :
+    ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - sCutL10Z)‖ ≤ (9 / 10 : ℝ) := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - sCutL10Z)
+  have hqre : q.re = Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    dsimp [q]
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re]
+    have hargre : (Complex.log (2 : ℂ) * (1 - sCutL10Z)).re = Real.log 2 / 2 := by
+      rw [Complex.mul_re, hlogre, hlogim]
+      simp [sCutL10Z]
+      ring
+    have hargim : (Complex.log (2 : ℂ) * (1 - sCutL10Z)).im = 10 * Real.log 2 := by
+      rw [Complex.mul_im, hlogre, hlogim]
+      simp [sCutL10Z]
+      ring
+    rw [hargre, hargim]
+    have hexp : Real.exp (Real.log 2 / 2) = Real.sqrt 2 := by
+      calc
+        Real.exp (Real.log 2 / 2) = Real.exp (Real.log 2 * (1 / 2 : ℝ)) := by congr 1 <;> ring
+        _ = (2 : ℝ) ^ (1 / 2 : ℝ) :=
+          (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+        _ = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    rw [hexp]
+  have hqnorm : ‖q‖ = Real.sqrt 2 := by
+    dsimp [q]
+    rw [two_cpow_norm]
+    have hpow : (2 : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    convert hpow using 1 <;> norm_num [sCutL10Z]
+  have hsqid : ‖(1 : ℂ) - q‖ ^ 2 = 1 + ‖q‖ ^ 2 - 2 * q.re := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have hq : ‖q‖ ^ 2 = q.re ^ 2 + q.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      ring
+    rw [hq]
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im,
+      sub_zero, zero_sub]
+    ring
+  have hcos : (789 / 1000 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+    have hloglo := Real.log_two_gt_d9
+    have hloghi := Real.log_two_lt_d9
+    have hπlo := Real.pi_gt_d4
+    have hπhi := Real.pi_lt_d4
+    have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+    have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+    have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+      have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+      nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+    have hc := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 2 - 2 * Real.pi)
+    have hcosd : (789 / 1000 : ℝ) ≤
+        Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+      nlinarith [hc, hsq]
+    rw [Real.cos_sub_two_pi] at hcosd
+    exact hcosd
+  have hsqrt : (7 / 5 : ℝ) ≤ Real.sqrt 2 := by
+    have hs := Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)
+    nlinarith [Real.sqrt_nonneg 2]
+  have hprod : (1095 / 1000 : ℝ) ≤
+      Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    have hc0 : 0 ≤ Real.cos (10 * Real.log 2) := by linarith
+    have hmul := mul_le_mul hsqrt hcos (by norm_num) (by linarith)
+    nlinarith [hmul]
+  have hsq : ‖(1 : ℂ) - q‖ ^ 2 ≤ (81 / 100 : ℝ) := by
+    rw [hsqid, hqnorm, hqre]
+    have hsqroot : (Real.sqrt 2) ^ 2 = (2 : ℝ) :=
+      Real.sq_sqrt (by norm_num)
+    nlinarith [hprod, hsqroot]
+  have hnonneg : 0 ≤ ‖(1 : ℂ) - q‖ := norm_nonneg _
+  change ‖(1 : ℂ) - q‖ ≤ (9 / 10 : ℝ)
+  nlinarith
+
+#print axioms sCutL10Z_etaFactor_le_nine_tenths
+/-! `S₄` split at `sCutL10Z` (`S₄ = S₂ + pair 1`, trig-free Finset algebra). -/
+
+/-- Four-term split (`S₄ = S₂ + pair 1`) at `sCutL10Z`. -/
+theorem sCutL10Z_S4_eq :
+    (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) +
+        etaPairTerm sCutL10Z 1 := by
+  have hp : etaPairTerm sCutL10Z 1 =
+      etaDirichletTerm sCutL10Z 2 + etaDirichletTerm sCutL10Z 3 := by
+    unfold etaPairTerm
+    have e0 : 2 * 1 = 2 := by norm_num
+    have e1 : 2 * 1 + 1 = 3 := by norm_num
+    rw [e0, e1]
+  have h : (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) +
+        (etaDirichletTerm sCutL10Z 2 + etaDirichletTerm sCutL10Z 3) := by
+    rw [show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ,
+      show (3 : ℕ) = 2 + 1 by norm_num, Finset.sum_range_succ]
+    ring
+  rw [h, hp]
+
+/-- MVT pair upper at `m = 1`: `‖pair 1‖ ≤ 201/100` (uses `‖s‖ ≤ 10.02`
+and `3 ^ (3/2) ≥ 5` since `27 ≥ 25`). -/
+theorem sCutL10Z_pair1_norm_le :
+    ‖etaPairTerm sCutL10Z 1‖ ≤ (201 / 100 : ℝ) := by
+  have hpair := norm_etaPairTerm_le sCutL10Z sCutL10Z_pos 1
+  have hC := sCutL10Z_norm_le
+  have hre : sCutL10Z.re = (1 / 2 : ℝ) := sCutL10Z_re
+  rw [hre] at hpair
+  have hexp : (-(1 / 2 : ℝ) - 1 : ℝ) = (-(3 / 2 : ℝ)) := by norm_num
+  rw [hexp] at hpair
+  have h3gt : (5 : ℝ) ≤ (3 : ℝ) ^ ((3 / 2 : ℝ)) := by
+    have h27 : ((5 : ℝ)) ^ (2 : ℕ) ≤ ((((3 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) := by
+      have e : ((((3 : ℝ) ^ ((3 / 2 : ℝ)))) ^ (2 : ℕ) : ℝ) = (3 : ℝ) ^ ((3 : ℕ)) := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+        rw [show (3 / 2 : ℝ) * ((((2 : ℕ)) : ℝ)) = (3 : ℝ) by norm_num]
+        rw [show (3 : ℝ) = ((((3 : ℕ)) : ℝ)) by norm_num]
+        exact Real.rpow_natCast 3 3
+      rw [e]
+      norm_num
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 3) _) h27
+  have hbase : ((((2 * 1 + 1 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+  rw [hbase] at hpair
+  have hrw : (3 : ℝ) ^ (-(3 / 2 : ℝ)) = (((3 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [hrw] at hpair
+  have hpos3 : (0 : ℝ) < (3 : ℝ) ^ ((3 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hinv : (((3 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (5 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos3 (by norm_num)).mpr h3gt
+  have hfin : ‖sCutL10Z‖ * (((3 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤ (201 / 100 : ℝ) := by
+    have hle : ‖sCutL10Z‖ * (((3 : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤
+        (10.02 : ℝ) * (5 : ℝ)⁻¹ := by
+      exact mul_le_mul hC hinv
+        (inv_nonneg.mpr (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 3) _))
+        (by norm_num)
+    have hnum : (10.02 : ℝ) * (5 : ℝ)⁻¹ ≤ (201 / 100 : ℝ) := by norm_num
+    exact le_trans hle hnum
+  exact le_trans hpair hfin
+
+/-- Honest `N = 4` head floor: `slow = -173/100` via `S₂ ≥ 28/100` minus
+`pair 1 ≤ 201/100`. The `145/100` target needs an Im-route (open). -/
+theorem sCutL10Z_head4_ge :
+    (-173 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ := by
+  have hS2 := sCutL10Z_head2_ge
+  have hp := sCutL10Z_pair1_norm_le
+  have hdecomp := sCutL10Z_S4_eq
+  have htri : ‖∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k‖ ≤
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ +
+        ‖etaPairTerm sCutL10Z 1‖ := by
+    rw [hdecomp]
+    exact norm_add_le _ _
+  have hbound : (28 / 100 : ℝ) - 201 / 100 ≤
+      ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ := by
+    linarith [hS2, hp, htri]
+  have heq : (28 / 100 : ℝ) - 201 / 100 = -173 / 100 := by norm_num
+  rw [heq] at hbound
+  exact hbound
+
+/-- `M = 2` pair-tail upper at `sCutL10Z` (`rtail = 1443/100 ≈ 14.43`).
+The `0.37` target is unreachable by this MVT route (`C = 10.02`). -/
+theorem sCutL10Z_tail4_le :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k)‖ ≤ (1443 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 2 (by norm_num)
+  have e42 : (2 * 2 : ℕ) = 4 := by norm_num
+  rw [e42, sCutL10Z_re] at h
+  have hsqrt_lo : (14 / 10 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : (14 / 10 : ℝ) ^ (2 : ℕ) ≤ (2 : ℝ) := by norm_num
+    have hpow : ((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ) = 2 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos2 : (0 : ℝ) < (2 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (2 : ℝ) ^ (-(1 / 2 : ℝ)) = (((2 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2) _
+  have hcast : ((((2 : ℕ)) : ℝ)) = (2 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((2 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((14 / 10 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos2 (by norm_num)).mpr hsqrt_lo
+  have hle : (10.02 : ℝ) * ((((2 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((14 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((14 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (1443 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- Assembled honest lower at `sCutL10Z` through the `cF = 9/10` bridge
+with `slow = -173/100`, `rtail = 1443/100` (negative numerator; `6/5` open). -/
+theorem sCutL10Z_zeta_lower_honest4 :
+    (((-173 / 100 : ℝ) - 1443 / 100) / (9 / 10 : ℝ)) ≤ ‖riemannZeta sCutL10Z‖ := by
+  have hSdef : (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) := rfl
+  exact zeta_lower_of_Sn_tail_factor sCutL10Z_pos sCutL10Z_re_ne_one 4
+    (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) hSdef
+    (-173 / 100) sCutL10Z_head4_ge (1443 / 100) sCutL10Z_tail4_le
+    (9 / 10) (by norm_num) sCutL10Z_etaFactor_le_nine_tenths
+
+/-- Honest residual: the banked `(-173/100, 1443/100, 9/10)` numerals fall
+short of `6/5`, so the `6/5` consumer target needs the Im-route head. -/
+theorem sCutL10Z_residual4_short :
+    (((-173 / 100 : ℝ) - 1443 / 100) / (9 / 10 : ℝ)) < (6 / 5 : ℝ) := by norm_num
+
+#print axioms sCutL10Z_etaFactor_le_nine_tenths
+#print axioms sCutL10Z_S4_eq
+#print axioms sCutL10Z_pair1_norm_le
+#print axioms sCutL10Z_head4_ge
+#print axioms sCutL10Z_tail4_le
+#print axioms sCutL10Z_zeta_lower_honest4
+#print axioms sCutL10Z_residual4_short
+/-!
+## Transport note (zeta lane → CUTL consumer).
+
+Identification for the CUTL-side agent (done at the use site, not here):
+* `sCutL10Z = Door3CutL10EtaFactor.sCutL`: both are
+  `(((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I`
+  (zeta-local `sCutL10Z` def line 39762; consumer `sCutL` in
+  `door3_cutL10_remainders.lean` line 389; same `OfReal` casts and `* Complex.I`).
+* `riemannZeta sCutL10Z` (zeta lane) is the consumer `zeta sCutL`
+  (`Door3CutL10EtaFactor` / `CentralCoverAssembly` point
+  `(1 / 2 : ℂ) + Complex.I * CutL10.center` via `sCutL_eq_center`).
+No new identification is proved here; the bridge above feeds
+`zeta_lower_of_Sn_tail_factor` at `cF = 9/10` once the Im-route head lands.
+-/
