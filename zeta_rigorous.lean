@@ -40616,3 +40616,54 @@ CutL10 to Tier-B subdivision instead of fat-ball. Im trig enclosures
 could in principle reach `slow - rtail ≥ 1.08`; framework above reduces it to
 one `|Im S₄|` numeral once banked.
 -/
+
+/-!
+## CutL10 conjugation transport (ZU39, NO-BANKED-BOUND)
+
+`NO-BANKED-BOUND`: no right-side `t = 10` lower bound of the form
+`6/5 ≤ ‖riemannZeta _‖` (or `7/5`, or `head275` / `slow-head275` / `rtail6/5`)
+exists in this file. Grep (via `Select-String`) tried on `zeta_rigorous.lean`:
+`sCutR`, `head275`, `275`, `6/5.*riemannZeta`, `riemannZeta.*6/5`,
+`riemannZeta_conj`, `Complex.norm_conj`, `norm_conj`, `starRingEnd`
+(conj-lemma hits: none; `starRingEnd_apply` only at line 11659, unrelated).
+Repo-wide `*.lean` for `head275|slow-head275|rtail6/5|6/5.*riemannZeta`:
+no hits; `7/5.*riemannZeta`: no hits. The only `7/5` zeta lower is the
+`Prop` remainder `cutR10_zetaRemainder` for `‖zeta _‖` (not `riemannZeta`,
+not closed) in `central_cover_assembly.lean`. So step 3 (`6/5` transfer)
+is NOT attempted here; only the conjugation norm identity below is banked.
+-/
+/-- Mirror-point identification: `sCutL10Z` is the conjugate of the explicit
+right-side cast form. No zeta-local `sCutR10Z`-style def exists in this file,
+so the explicit `(((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I` form is
+used, mirroring `sCutL10Z` def (line 39762) with `-10` → `+10`. -/
+theorem sCutL10Z_conj_sCutR10Z :
+    sCutL10Z = (starRingEnd ℂ) ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) := by
+  apply Complex.ext
+  · simp [sCutL10Z, starRingEnd_apply, Complex.star_def]
+  · simp [sCutL10Z, starRingEnd_apply, Complex.star_def]
+
+/-- Conjugation norm identity: `‖riemannZeta sCutL10Z‖` equals the right-side
+norm at `1/2 + 10*I`. Via Mathlib `riemannZeta_conj` plus norm-conj. -/
+theorem sCutL10Z_zeta_conj_eq :
+    ‖riemannZeta sCutL10Z‖ =
+      ‖riemannZeta ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I)‖ := by
+  have hpt : sCutL10Z =
+      (starRingEnd ℂ) ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) :=
+    sCutL10Z_conj_sCutR10Z
+  rw [hpt]
+  rw [riemannZeta_conj]
+  simp
+
+#print axioms sCutL10Z_conj_sCutR10Z
+#print axioms sCutL10Z_zeta_conj_eq
+
+/-!
+Transport note update (ZU39, CUTL-side identification, exact cast forms):
+- zeta-local left point: `sCutL10Z : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I`.
+- right-side mirror (no local def in this file): `(((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I`.
+- point transport: `sCutL10Z_conj_sCutR10Z : sCutL10Z = (starRingEnd ℂ) <right-point>`.
+- norm transport: `sCutL10Z_zeta_conj_eq : ‖riemannZeta sCutL10Z‖ = ‖riemannZeta <right-point>‖`.
+- consumer `Door3CutL10EtaFactor.sCutL : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I`
+  is cast-identical to `sCutL10Z`; `riemannZeta sCutL10Z` is the zeta-lane form of consumer `zeta sCutL`.
+- closed numeral: NONE (NO-BANKED-BOUND); `6/5` and original `7/5` consumer targets remain open on this route.
+-/
