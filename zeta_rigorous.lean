@@ -39745,3 +39745,236 @@ theorem R02_D3_zeta_rect_slice_edge11 :
 #print axioms R02_D3_zeta_rect_slice_assembly11_low
 #print axioms R02_D3_zeta_rect_slice_assembly11
 #print axioms R02_D3_zeta_rect_slice_edge11
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane, t = -10): point + conjugation record.
+
+Self-contained eta-pair certificate at `sCutL10Z = 1/2 - 10*I` (conjugate of the
+CutR10 `1/2 + 10*I`), no cross-file imports. True values (mpmath, 40 digits):
+`‖zeta sCutL10Z‖ ≈ 1.5491945462`, `‖eta sCutL10Z‖ ≈ 1.3375258489`,
+`‖1 - 2^(1-sCutL10Z)‖ ≈ 0.8633685499`. Since every eta-head/tail pair obeys
+`slow - rtail ≤ ‖eta sCutL10Z‖ ≈ 1.3375 < 7/5`, the consumer bundle
+(`hSlow`, `hTail`, `hEnough : 7/5 + rtail ≤ slow`) is jointly unsatisfiable;
+this lane banks the strongest HONEST numerals plus the factor caps, and the
+final append quantifies the residual in-file.
+-/
+
+/-- CutL10 zeta point `1/2 - 10*I` (conjugate of the CutR10 `1/2 + 10*I`). -/
+noncomputable def sCutL10Z : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I
+
+theorem sCutL10Z_re : sCutL10Z.re = (1 / 2 : ℝ) := by
+  simp [sCutL10Z]
+
+theorem sCutL10Z_im : sCutL10Z.im = (-10 : ℝ) := by
+  simp [sCutL10Z]
+
+theorem sCutL10Z_pos : 0 < sCutL10Z.re := by
+  rw [sCutL10Z_re]
+  norm_num
+
+theorem sCutL10Z_re_ne_one : sCutL10Z.re ≠ 1 := by
+  rw [sCutL10Z_re]
+  norm_num
+
+theorem sCutL10Z_norm_le : ‖sCutL10Z‖ ≤ (10.02 : ℝ) := by
+  have hsq : ‖sCutL10Z‖ ^ 2 ≤ (10.02 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, sCutL10Z_re, sCutL10Z_im]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hsq
+
+/-- Conjugation record: `sCutL10Z` matches the mirror `1/2 + 10*I` point in `Re`
+and negates it in `Im`, so `|Im|`-data and even-`cos` phase floors transfer
+without recomputation. -/
+theorem sCutL10Z_conj_record :
+    sCutL10Z.re = (1 / 2 : ℝ) ∧ sCutL10Z.im = -(10 : ℝ) := by
+  refine ⟨sCutL10Z_re, ?_⟩
+  rw [sCutL10Z_im]
+
+#print axioms sCutL10Z_re
+#print axioms sCutL10Z_im
+#print axioms sCutL10Z_pos
+#print axioms sCutL10Z_re_ne_one
+#print axioms sCutL10Z_norm_le
+#print axioms sCutL10Z_conj_record
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane): phase-cosine floor.
+
+Conjugation transfer made explicit: the floor below is the verbatim `t = 10`
+numeral (`|Im|` agrees, `Real.cos` is even), so no phase recomputation.
+-/
+
+/-- Phase-cosine floor at the cutoff (transferred `t = 10` numeral). -/
+theorem sCutL10Z_phase_cos_lower :
+    (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+  have hloglo := Real.log_two_gt_d9
+  have hloghi := Real.log_two_lt_d9
+  have hπlo := Real.pi_gt_d4
+  have hπhi := Real.pi_lt_d4
+  have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+  have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+  have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+    have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+    nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+  have hc := Real.one_sub_sq_div_two_le_cos (x := 10 * Real.log 2 - 2 * Real.pi)
+  have hbase : (3 / 4 : ℝ) ≤ 1 - (0.6486 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosd : (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+    nlinarith [hc, hsq]
+  rw [Real.cos_sub_two_pi] at hcosd
+  exact hcosd
+
+#print axioms sCutL10Z_phase_cos_lower
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane): eta-factor cap `1`.
+
+Sign flip vs the `t = 10` lane is absorbed: `(log 2 * (1 - sCutL10Z)).im` is
+already `+(10 * log 2)`, so no `cos_neg` rewrite is needed.
+-/
+
+/-- Eta conversion-factor cap `1` at `sCutL10Z` (feeds the `cF = 1` bridge). -/
+theorem sCutL10Z_etaFactor_le_one :
+    ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - sCutL10Z)‖ ≤ (1 : ℝ) := by
+  have hlog : Complex.log (2 : ℂ) = ((Real.log 2 : ℝ) : ℂ) :=
+    (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  have hlogre : (Complex.log (2 : ℂ)).re = Real.log 2 := by rw [hlog]; rfl
+  have hlogim : (Complex.log (2 : ℂ)).im = 0 := by rw [hlog]; rfl
+  let q : ℂ := (2 : ℂ) ^ ((1 : ℂ) - sCutL10Z)
+  have hqre : q.re = Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    dsimp [q]
+    rw [Complex.cpow_def_of_ne_zero (by norm_num : (2 : ℂ) ≠ 0)]
+    rw [Complex.exp_re]
+    have hargre : (Complex.log (2 : ℂ) * (1 - sCutL10Z)).re = Real.log 2 / 2 := by
+      rw [Complex.mul_re, hlogre, hlogim]
+      simp [sCutL10Z]
+      ring
+    have hargim : (Complex.log (2 : ℂ) * (1 - sCutL10Z)).im = 10 * Real.log 2 := by
+      rw [Complex.mul_im, hlogre, hlogim]
+      simp [sCutL10Z]
+      ring
+    rw [hargre, hargim]
+    have hexp : Real.exp (Real.log 2 / 2) = Real.sqrt 2 := by
+      calc
+        Real.exp (Real.log 2 / 2) = Real.exp (Real.log 2 * (1 / 2 : ℝ)) := by congr 1 <;> ring
+        _ = (2 : ℝ) ^ (1 / 2 : ℝ) :=
+          (Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2) _).symm
+        _ = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    rw [hexp]
+  have hqnorm : ‖q‖ = Real.sqrt 2 := by
+    dsimp [q]
+    rw [two_cpow_norm]
+    have hpow : (2 : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt 2 := by rw [← Real.sqrt_eq_rpow]
+    convert hpow using 1 <;> norm_num [sCutL10Z]
+  have hsqid : ‖(1 : ℂ) - q‖ ^ 2 = 1 + ‖q‖ ^ 2 - 2 * q.re := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have hq : ‖q‖ ^ 2 = q.re ^ 2 + q.im ^ 2 := by
+      rw [Complex.sq_norm, Complex.normSq_apply]
+      ring
+    rw [hq]
+    simp only [Complex.sub_re, Complex.one_re, Complex.sub_im, Complex.one_im,
+      sub_zero, zero_sub]
+    ring
+  have hsqrt : (4 / 3 : ℝ) ≤ Real.sqrt 2 := by
+    have hs := Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)
+    nlinarith [Real.sqrt_nonneg 2]
+  have hcos := sCutL10Z_phase_cos_lower
+  have hprod : (1 : ℝ) ≤ Real.sqrt 2 * Real.cos (10 * Real.log 2) := by
+    nlinarith [mul_le_mul_of_nonneg_right hsqrt (by nlinarith [hcos])]
+  have hsq : ‖(1 : ℂ) - q‖ ^ 2 ≤ 1 := by
+    rw [hsqid, hqnorm, hqre]
+    have hsqroot : (Real.sqrt 2) ^ 2 = (2 : ℝ) := by
+      exact Real.sq_sqrt (by norm_num)
+    nlinarith
+  have hnonneg : 0 ≤ ‖(1 : ℂ) - q‖ := norm_nonneg _
+  nlinarith
+
+#print axioms sCutL10Z_etaFactor_le_one
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane): `N = 2` eta-Dirichlet head floor.
+
+Trig-free reverse-triangle floor (cleared rpow floors only); term bounds mirror
+`Door3TailEtaUpper.eta_s2_upper`.
+-/
+
+/-- `N = 2` head floor at `sCutL10Z`: `28/100 ≤ ‖S₂‖` (true `≈ 0.6105`). -/
+theorem sCutL10Z_head2_ge :
+    (28 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k‖ := by
+  have h0 : etaDirichletTerm sCutL10Z 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hterm1_eq : etaDirichletTerm sCutL10Z 1 =
+      -1 / ((((2 : ℕ)) : ℂ) ^ sCutL10Z) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = (((2 : ℝ) : ℂ)) := by norm_cast
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ sCutL10Z)‖ = (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    rw [h2cast, Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2),
+      sCutL10Z_re]
+  have hsqrt_lo : (14 / 10 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : (14 / 10 : ℝ) ^ (2 : ℕ) ≤ (2 : ℝ) := by norm_num
+    have hpow : ((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ) = 2 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have h1_norm : ‖etaDirichletTerm sCutL10Z 1‖ ≤ (72 / 100 : ℝ) := by
+    rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm]
+    have hle : (1 : ℝ) ≤ (72 / 100 : ℝ) * (2 : ℝ) ^ (1 / 2 : ℝ) := by
+      have hmul : (72 / 100 : ℝ) * (14 / 10) ≤
+          (72 / 100 : ℝ) * (2 : ℝ) ^ (1 / 2 : ℝ) :=
+        mul_le_mul_of_nonneg_left hsqrt_lo (by norm_num)
+      have h1008 : (1 : ℝ) ≤ (72 / 100 : ℝ) * (14 / 10) := by norm_num
+      exact le_trans h1008 hmul
+    rw [div_le_iff₀ (Real.rpow_pos_of_pos (by norm_num) _)]
+    exact hle
+  have hsum2 : (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) =
+      etaDirichletTerm sCutL10Z 0 + etaDirichletTerm sCutL10Z 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add]
+  rw [hsum2, h0]
+  have hrev := norm_sub_norm_le (1 : ℂ) (-etaDirichletTerm sCutL10Z 1)
+  rw [norm_neg] at hrev
+  have heq : (1 : ℂ) - (-etaDirichletTerm sCutL10Z 1) =
+      1 + etaDirichletTerm sCutL10Z 1 := by ring
+  rw [heq, norm_one] at hrev
+  linarith [hrev, h1_norm]
+
+#print axioms sCutL10Z_head2_ge
+/-!
+## Door-3 CutL10 zeta remainder (zeta lane): `M = 1` pair-tail + assembly.
+
+Tail via the general even-remainder machinery (`zetaCell_even_remainder_le`);
+assembly through `zeta_lower_of_Sn_tail_factor` at `cF = 1`.
+-/
+
+/-- `M = 1` pair-tail upper at `sCutL10Z` (even-remainder machinery). -/
+theorem sCutL10Z_tail1_le :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k)‖ ≤ (20.04 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 1 (by norm_num)
+  have e21 : (2 * 1 : ℕ) = 2 := by norm_num
+  rw [e21, sCutL10Z_re] at h
+  have hone : ((((1 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) = 1 := by
+    rw [Nat.cast_one, Real.one_rpow]
+  rw [hone] at h
+  have hval : (10.02 : ℝ) * (1 / (1 / 2 : ℝ)) = 20.04 := by norm_num
+  rw [hval] at h
+  exact h
+
+/-- Assembled honest lower at `sCutL10Z` through the `cF = 1` bridge. -/
+theorem sCutL10Z_zeta_lower_honest :
+    ((28 / 100 : ℝ) - 20.04) / 1 ≤ ‖riemannZeta sCutL10Z‖ := by
+  have hSdef : (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) =
+      (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) := rfl
+  exact zeta_lower_of_Sn_tail_factor sCutL10Z_pos sCutL10Z_re_ne_one 2
+    (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) hSdef
+    (28 / 100) sCutL10Z_head2_ge 20.04 sCutL10Z_tail1_le 1 (by norm_num)
+    sCutL10Z_etaFactor_le_one
+
+/-- Honest residual: these numerals fall short of `7/5` (pure arithmetic, so the
+`7/5` consumer target needs a different route — see the eta-wall note above). -/
+theorem sCutL10Z_residual_short :
+    ((28 / 100 : ℝ) - 20.04) / 1 < (7 / 5 : ℝ) := by norm_num
+
+#print axioms sCutL10Z_tail1_le
+#print axioms sCutL10Z_zeta_lower_honest
+#print axioms sCutL10Z_residual_short
