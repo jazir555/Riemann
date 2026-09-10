@@ -3678,6 +3678,12 @@ sorry-free infrastructure and the complete commit ledger above.
   eta-22 (4/35) + pair-10 (−19/140) + S21′/S22′ folds
   (frontier S22′ ≈ −0.222; best holds S16′ ≈ 0.1216).
   Residual: PIVOT to sCut slow-cert for CutR10 fencing (OA24).
+- 2026-09-09 OA24 (`a43f2eb3`, off-axis tail, green 8702 jobs):
+  sCut triple banked (`slow=2/7`, `rtail=24`) + PROVED
+  `hEnough` IMPOSSIBLE at sCut (`|η(1/2+10i)|≈1.3375<1.4`;
+  shortfall 879/35; banked sR05 floors non-transferable).
+  Residual: (i) nine_tenths variant or (ii) move cutoff point
+  to |η|≥1.5 height (OA25).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
