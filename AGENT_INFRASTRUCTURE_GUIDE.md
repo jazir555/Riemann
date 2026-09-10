@@ -3671,7 +3671,34 @@ sorry-free infrastructure and the complete commit ledger above.
   scoping before any lane takes it. NOTE (same trace): RX
   bridge product is likewise consumerless (real axis: feeder
   closed + `Im≠0` in every capstone premise) — retire RX lane
-  after RX38/RX39 land the in-file chain.
+  after RX38/RX39 land the in-file chain (DONE: RX38 `5e56cf8c`,
+  lane retired, no RX39).
+- 2026-09-10 CUTL draft received (NEW `door3_cutL10_remainders.lean`,
+  552 lines, untracked-only, 0 sorry, unbuilt): full
+  `Door3CutL10Center` mirror (center/poly/pi PROVED; eta-factor
+  cap `‖1−2^(1−sCutL)‖≤1` PROVED; `hLeft`-shaped conclusion +
+  both-fencings `xiCutoffLines10` assembly PROVED conditional).
+  Premises for fix-waves: zeta-lane numeral at `sCutL`
+  (exact ZU36 target shape specified in-file), gamma
+  `hConjNorm`+banked, deriv sup `hC` (mirrors :404).
+  Lakefile registration deferred until all 4 write-only
+  drafts land.
+- 2026-09-10 SLIV draft received (NEW `door3_sliver_nonvan.lean`,
+  227 lines, untracked-only, 0 sorry, unbuilt): routing +
+  packaging PROVED conditional, end-to-end `hSliver`-shaped
+  `hSliver_of_uniformData` PROVED conditional. ONLY new
+  numerics for fix-waves: uniform widths `δT,δB > 0.01`
+  (banked strips qualitative; needs edge lower + deriv-sup
+  numerics; strict-`<` stated so open-bottom strips apply).
+- 2026-09-10 CELL draft received (NEW `door3_first_cell.lean`,
+  398 lines, untracked-only, 0 sorry, unbuilt): R02-pattern
+  cell `(−8,−5.5)×(0.01,0.2)` picked (radius <1.26
+  tied-smallest, center margin ≈+0.15, 5 banked reuses);
+  poly/pi/Gamma-upper/zeta-upper-10/sphere/deriv discharges
+  PROVED as cites; center+deriv+fencing+H-leaf PROVED modulo
+  4 explicit premises (gamma-lower 0.008, zeta-lower 1.1 at
+  sCenter [the wall], deriv-tier 0.07, fat-ball sup 16800);
+  12-step replication TEMPLATE banked for remaining cells.
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
   8× green 8682 jobs; wrapper AUTOCLEAR observed live):
   Weierstrass-product route → FIRST exponential Γ-bound
