@@ -39338,3 +39338,410 @@ theorem R02_D3_zeta_rect_slice_edge10 :
 #print axioms R02_D3_zeta_rect_slice_assembly10_low
 #print axioms R02_D3_zeta_rect_slice_assembly10
 #print axioms R02_D3_zeta_rect_slice_edge10
+/-!
+## Door-3 strip endgame, step 39a (zeta lane): floors `1.16 <= 23^0.05, 25^0.05, 27^0.05`.
+Chain `1.16 <= 21^0.05` with base-monotonicity (`21 <= 23/25/27`); odd-head
+identities for the N=13 peel (`2*11+1=23`, `2*12+1=25`, `2*13+1=27`).
+-/
+/-- Rpow lower: `1.16 <= 23^0.05` (chains `1.16 <= 21^0.05` with `21 <= 23`). -/
+theorem R02_D3_rpow_116_le_2305 : (1.16 : ℝ) ≤ (23 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_116_le_2105
+  have h2 : (21 : ℝ) ^ (0.05 : ℝ) ≤ (23 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Rpow lower: `1.16 <= 25^0.05` (chains `1.16 <= 21^0.05` with `21 <= 25`). -/
+theorem R02_D3_rpow_116_le_2505 : (1.16 : ℝ) ≤ (25 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_116_le_2105
+  have h2 : (21 : ℝ) ^ (0.05 : ℝ) ≤ (25 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Rpow lower: `1.16 <= 27^0.05` (chains `1.16 <= 21^0.05` with `21 <= 27`). -/
+theorem R02_D3_rpow_116_le_2705 : (1.16 : ℝ) ≤ (27 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_116_le_2105
+  have h2 : (21 : ℝ) ^ (0.05 : ℝ) ≤ (27 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Odd head twelfth term `((2*11+1):ℝ)^(-1.05) = 23^(-1.05)`. -/
+theorem R02_D3_odd105_eleven_eq_23 :
+    ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = (23 : ℝ) ^ (-1.05 : ℝ) := by
+  have e : ((((2 * 11 + 1 : ℕ)) : ℝ)) = (23 : ℝ) := by norm_num
+  rw [e]
+/-- Odd head thirteenth term `((2*12+1):ℝ)^(-1.05) = 25^(-1.05)`. -/
+theorem R02_D3_odd105_twelve_eq_25 :
+    ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = (25 : ℝ) ^ (-1.05 : ℝ) := by
+  have e : ((((2 * 12 + 1 : ℕ)) : ℝ)) = (25 : ℝ) := by norm_num
+  rw [e]
+/-- Odd head fourteenth term `((2*13+1):ℝ)^(-1.05) = 27^(-1.05)`. -/
+theorem R02_D3_odd105_thirteen_eq_27 :
+    ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = (27 : ℝ) ^ (-1.05 : ℝ) := by
+  have e : ((((2 * 13 + 1 : ℕ)) : ℝ)) = (27 : ℝ) := by norm_num
+  rw [e]
+#print axioms R02_D3_rpow_116_le_2305
+#print axioms R02_D3_rpow_116_le_2505
+#print axioms R02_D3_rpow_116_le_2705
+#print axioms R02_D3_odd105_eleven_eq_23
+#print axioms R02_D3_odd105_twelve_eq_25
+#print axioms R02_D3_odd105_thirteen_eq_27
+/-!
+## Door-3 strip endgame, step 39b (zeta lane): `23^(-1.05) <= 0.038`, `25^(-1.05) <= 0.035`, `27^(-1.05) <= 0.032`.
+Head numerals via `23^1.05 >= 26.68`, `25^1.05 >= 29.0`, `27^1.05 >= 31.32`
+(all from `1.16 <= 21^0.05` chain); feed the N=13 peel.
+-/
+/-- Cleared-power head numeral `(23:ℝ)^(-1.05) <= 0.038`. -/
+theorem R02_D3_rpow23_neg105_le_0038 :
+    (23 : ℝ) ^ (-1.05 : ℝ) ≤ 0.038 := by
+  have hle := R02_D3_rpow_116_le_2305
+  have hpos : (0 : ℝ) < (23 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (23 : ℝ) ^ (1.05 : ℝ) = 23 * (23 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (26.68 : ℝ) ≤ (23 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (26.68 : ℝ) = 23 * 1.16 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (23 : ℝ) ^ (-1.05 : ℝ) = ((23 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((23 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (26.68 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (26.68 : ℝ)⁻¹ ≤ 0.038 := by norm_num
+  exact le_trans hinv hnum
+/-- Cleared-power head numeral `(25:ℝ)^(-1.05) <= 0.035`. -/
+theorem R02_D3_rpow25_neg105_le_0035 :
+    (25 : ℝ) ^ (-1.05 : ℝ) ≤ 0.035 := by
+  have hle := R02_D3_rpow_116_le_2505
+  have hpos : (0 : ℝ) < (25 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (25 : ℝ) ^ (1.05 : ℝ) = 25 * (25 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (29.0 : ℝ) ≤ (25 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (29.0 : ℝ) = 25 * 1.16 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (25 : ℝ) ^ (-1.05 : ℝ) = ((25 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((25 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (29.0 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (29.0 : ℝ)⁻¹ ≤ 0.035 := by norm_num
+  exact le_trans hinv hnum
+/-- Cleared-power head numeral `(27:ℝ)^(-1.05) <= 0.032`. -/
+theorem R02_D3_rpow27_neg105_le_0032 :
+    (27 : ℝ) ^ (-1.05 : ℝ) ≤ 0.032 := by
+  have hle := R02_D3_rpow_116_le_2705
+  have hpos : (0 : ℝ) < (27 : ℝ) ^ (1.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hadd : (27 : ℝ) ^ (1.05 : ℝ) = 27 * (27 : ℝ) ^ (0.05 : ℝ) := by
+    have e : (1.05 : ℝ) = 1 + 0.05 := by norm_num
+    rw [e, Real.rpow_add (by norm_num)]
+    rw [Real.rpow_one]
+  have hge : (31.32 : ℝ) ≤ (27 : ℝ) ^ (1.05 : ℝ) := by
+    rw [hadd]
+    have e2 : (31.32 : ℝ) = 27 * 1.16 := by norm_num
+    rw [e2]
+    exact mul_le_mul_of_nonneg_left hle (by norm_num)
+  have hneg : (27 : ℝ) ^ (-1.05 : ℝ) = ((27 : ℝ) ^ (1.05 : ℝ))⁻¹ := by
+    have e : (-1.05 : ℝ) = -(1.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  rw [hneg]
+  have hinv : ((27 : ℝ) ^ (1.05 : ℝ))⁻¹ ≤ (31.32 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hnum : (31.32 : ℝ)⁻¹ ≤ 0.032 := by norm_num
+  exact le_trans hinv hnum
+#print axioms R02_D3_rpow23_neg105_le_0038
+#print axioms R02_D3_rpow25_neg105_le_0035
+#print axioms R02_D3_rpow27_neg105_le_0032
+/-!
+## Door-3 strip endgame, step 39c (zeta lane): tight floor `1.136 <= 13^0.05`.
+Cleared via `(1.136)^20 <= 13` (small-step upper bounds); tightens the M=13
+tail from `17.75` toward `17.61` so the N=13 head growth still nets a K0 drop.
+-/
+/-- Cleared integer-pow cap: `(1.136)^20 <= 13` via small-step upper bounds. -/
+theorem R02_D3_pow_1136_20_le_thirteen : ((1.136 : ℝ)) ^ (20 : ℕ) ≤ 13 := by
+  have h2 : ((1.136 : ℝ)) ^ (2 : ℕ) ≤ (1.2906 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.136 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((1.2906 : ℝ)) ^ (2 : ℕ) ≤ (1.6657 : ℝ) := by norm_num
+  have h4le : ((((1.136 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((1.2906 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.136 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) = ((1.136 : ℝ)) ^ (4 : ℕ) := by rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.136 : ℝ)) ^ (4 : ℕ) ≤ (1.6657 : ℝ) := by rw [← h44]; exact le_trans h4le hsq
+  have h5mul : ((1.136 : ℝ)) ^ (4 : ℕ) * (1.136 : ℝ) = ((1.136 : ℝ)) ^ (5 : ℕ) := by have hps := pow_succ ((1.136 : ℝ)) (4 : ℕ); rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps; exact hps.symm
+  have hprod : (1.6657 : ℝ) * (1.136 : ℝ) ≤ (1.8923 : ℝ) := by norm_num
+  have h5le : ((1.136 : ℝ)) ^ (4 : ℕ) * (1.136 : ℝ) ≤ (1.6657 : ℝ) * (1.136 : ℝ) := mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.136 : ℝ)) ^ (5 : ℕ) ≤ (1.8923 : ℝ) := by rw [← h5mul]; exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.136 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((1.8923 : ℝ)) ^ (2 : ℕ) ≤ (3.5809 : ℝ) := by norm_num
+  have h10le : ((((1.136 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤ ((1.8923 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.136 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) = ((1.136 : ℝ)) ^ (10 : ℕ) := by rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.136 : ℝ)) ^ (10 : ℕ) ≤ (3.5809 : ℝ) := by rw [← h1010]; exact le_trans h10le hsq10
+  have h10nn : (0 : ℝ) ≤ ((1.136 : ℝ)) ^ (10 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq20 : ((3.5809 : ℝ)) ^ (2 : ℕ) ≤ (13 : ℝ) := by norm_num
+  have h20le : ((((1.136 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) ≤ ((3.5809 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h10nn g10 2
+  have h2020 : ((((1.136 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) = ((1.136 : ℝ)) ^ (20 : ℕ) := by rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]; exact le_trans h20le hsq20
+/-- Rpow lower: `1.136 <= 13^0.05` (cleared via `(1.136)^20 <= 13`). -/
+theorem R02_D3_rpow_1136_le_1305 : (1.136 : ℝ) ≤ (13 : ℝ) ^ (0.05 : ℝ) := by
+  by_contra hle
+  have hlt : (13 : ℝ) ^ (0.05 : ℝ) < (1.136 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (13 : ℝ) ^ (0.05 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((13 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) ≤ ((((1.136 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 20
+  have h13_eq : ((((13 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 13 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h13_eq] at hle_pow
+  have hge := R02_D3_pow_1136_20_le_thirteen
+  linarith
+#print axioms R02_D3_pow_1136_20_le_thirteen
+#print axioms R02_D3_rpow_1136_le_1305
+/-!
+## Door-3 strip endgame, step 39d (zeta lane): `M = 13` shift-tail at -1.05.
+Mirrors step 38h at `M = 11`: antitone/integrable on `Ici/Ioi 13`, comparison
+`∑ n, (n+14)^(-1.05) <= ∫ Ioi 13`, closed form `13^(-0.05)/0.05`.
+-/
+/-- Antitone majorant `x^(-1.05)` on `Ici 13`. -/
+theorem R02_D3_rpow105_antitone_Ici13 :
+    AntitoneOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ici ((((13 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.05 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h13 : (0 : ℝ) < ((((13 : ℕ)) : ℝ)) := by norm_num
+  linarith
+/-- Integrability of `x^(-1.05)` on `Ioi 13`. -/
+theorem R02_D3_rpow105_integrable_Ioi13 :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ioi ((((13 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.05 : ℝ) < -1)
+  norm_num
+/-- `M = 13` integral-tail comparison for the shifted tail. -/
+theorem R02_D3_tail14_le_integral105_Ioi13 :
+    (∑' n : ℕ, ((((n + 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((13 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 13 R02_D3_rpow105_antitone_Ici13
+    R02_D3_rpow105_integrable_Ioi13 (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+/-- Closed form `∫ x in Ioi 13, x^(-1.05) = 13^(-0.05)/0.05`. -/
+theorem R02_D3_integral105_Ioi13_eq :
+    (∫ x : ℝ in Set.Ioi (13 : ℝ), x ^ (-1.05 : ℝ)) =
+      (13 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by
+  have hlt : (-1.05 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < (13 : ℝ) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.05 : ℝ) + 1 = -0.05 := by norm_num
+  rw [e1] at h
+  have e2 : (-(13 : ℝ) ^ (-0.05 : ℝ)) / (-0.05 : ℝ) =
+      (13 : ℝ) ^ (-0.05 : ℝ) / 0.05 := by ring
+  exact e2 ▸ h
+#print axioms R02_D3_rpow105_antitone_Ici13
+#print axioms R02_D3_rpow105_integrable_Ioi13
+#print axioms R02_D3_tail14_le_integral105_Ioi13
+#print axioms R02_D3_integral105_Ioi13_eq
+/-!
+## Door-3 strip endgame, step 39e (zeta lane): integral `<= 17.61` + tail at M=13.
+Via `1.136 <= 13^0.05`: `13^(-0.05) <= 0.8804`, `/0.05 = 17.608 <= 17.61`.
+-/
+/-- Integral numeral `∫ x in Ioi 13, x^(-1.05) <= 17.61` (via `1.136 <= 13^0.05`). -/
+theorem R02_D3_integral105_Ioi13_le_1761 :
+    (∫ x : ℝ in Set.Ioi (13 : ℝ), x ^ (-1.05 : ℝ)) ≤ 17.61 := by
+  have heq := R02_D3_integral105_Ioi13_eq
+  have hfloor := R02_D3_rpow_1136_le_1305
+  have hpos : (0 : ℝ) < (13 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (13 : ℝ) ^ (-0.05 : ℝ) = ((13 : ℝ) ^ (0.05 : ℝ))⁻¹ := by
+    have e : (-0.05 : ℝ) = -(0.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((13 : ℝ) ^ (0.05 : ℝ))⁻¹ ≤ (1.136 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hfloor
+  have h08804 : (1.136 : ℝ)⁻¹ ≤ 0.8804 := by norm_num
+  have hhead : (13 : ℝ) ^ (-0.05 : ℝ) ≤ 0.8804 := by
+    rw [hneg]
+    exact le_trans hinv h08804
+  have hdiv : (13 : ℝ) ^ (-0.05 : ℝ) / 0.05 ≤ 0.8804 / 0.05 := by
+    have e1 : (13 : ℝ) ^ (-0.05 : ℝ) / 0.05 =
+        (13 : ℝ) ^ (-0.05 : ℝ) * (0.05 : ℝ)⁻¹ := by ring
+    have e2 : (0.8804 : ℝ) / 0.05 = 0.8804 * (0.05 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h17608 : (0.8804 : ℝ) / 0.05 = 17.608 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (13 : ℝ), x ^ (-1.05 : ℝ))
+        = (13 : ℝ) ^ (-0.05 : ℝ) / 0.05 := heq
+      _ ≤ 0.8804 / 0.05 := hdiv
+      _ = 17.608 := h17608
+      _ ≤ 17.61 := by norm_num
+/-- Shift-tail numeral `∑' n, (n+14)^(-1.05) <= 17.61`. -/
+theorem R02_D3_tail105_M13_le_1761 :
+    (∑' n : ℕ, ((((n + 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 17.61 := by
+  have ecast : ((((13 : ℕ)) : ℝ)) = (13 : ℝ) := by norm_num
+  have htail : (∑' n : ℕ, ((((n + 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi (13 : ℝ), x ^ (-1.05 : ℝ)) := by
+    have h := R02_D3_tail14_le_integral105_Ioi13
+    rw [ecast] at h
+    exact h
+  exact le_trans htail R02_D3_integral105_Ioi13_le_1761
+#print axioms R02_D3_integral105_Ioi13_le_1761
+#print axioms R02_D3_tail105_M13_le_1761
+/-! ## Door-3 strip endgame, step 39f-head (zeta lane): thirteen-term head `<= 2.192`.
+`2.119 + 0.038 + 0.035` via `sum_range_add` split at 11. -/
+/-- Thirteen-term head sum `∑ i in range 13, ((2i+1):ℝ)^(-1.05) <= 2.192`. -/
+theorem R02_D3_odd105_head13_le_2192 :
+    (∑ i ∈ Finset.range 13, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 2.192 := by
+  have hhead11 := R02_D3_odd105_head11_le_2119
+  have h11 : ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 0.038 := by
+    rw [R02_D3_odd105_eleven_eq_23]; exact R02_D3_rpow23_neg105_le_0038
+  have h12 : ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 0.035 := by
+    rw [R02_D3_odd105_twelve_eq_25]; exact R02_D3_rpow25_neg105_le_0035
+  have hsplit : (∑ i ∈ Finset.range 13, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      (∑ i ∈ Finset.range 11, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) +
+      ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    have h12 : (∑ i ∈ Finset.range 12, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+        (∑ i ∈ Finset.range 11, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+        ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+      have h := Finset.sum_range_succ (fun i => ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) 11
+      have e : (11 + 1 : ℕ) = 12 := by norm_num
+      rw [e] at h
+      exact h
+    have h13 : (∑ i ∈ Finset.range 13, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+        (∑ i ∈ Finset.range 12, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+        ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+      have h := Finset.sum_range_succ (fun i => ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) 12
+      have e : (12 + 1 : ℕ) = 13 := by norm_num
+      rw [e] at h
+      exact h
+    rw [h13, h12]
+  rw [hsplit]
+  linarith
+/-!
+## Door-3 strip endgame, step 39f-tsum (zeta lane): peeled K0 cap `19.802` at N=13.
+Thirteen-term head `2.192` plus `M = 13` tail `<= 17.61`, under the `48`-linear
+bar `19.872 = 48 * 0.414`.
+-/
+/-- Peeled K0 cap `∑' n, (2n+1)^(-1.05) <= 19.802` (head `2.192` + tail `17.61`). -/
+theorem R02_D3_odd105_tsum_le_19802 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 19.802 := by
+  have hOddTail : Summable (fun n : ℕ => ((((2 * (n + 13) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 13).mpr R02_D3_odd105_summable
+  have hShiftTail : Summable (fun n : ℕ => ((((n + 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 13).mpr R02_D3_shift105_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 13) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤
+      ((((n + 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hm_pos : (0 : ℝ) < ((((n + 13 + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+    have hm_le : ((((n + 13 + 1 : ℕ)) : ℝ)) ≤ ((((2 * (n + 13) + 1 : ℕ)) : ℝ)) :=
+      Nat.cast_le.mpr (by omega)
+    have hexp : (-1.05 : ℝ) ≤ 0 := by norm_num
+    exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+  have htail_mono := hOddTail.tsum_le_tsum hle hShiftTail
+  have htail2 := R02_D3_tail105_M13_le_1761
+  have hhead := R02_D3_odd105_head13_le_2192
+  have hsplit := R02_D3_odd105_summable.sum_add_tsum_nat_add 13
+  linarith
+#print axioms R02_D3_odd105_head13_le_2192
+#print axioms R02_D3_odd105_tsum_le_19802
+/-! ## Door-3 strip endgame, step 39g (zeta lane): tight linear `48*(0.5+|Im|)`.
+N=13 K0 `19.802` with denom `0.414`: `19.802/0.414 <= 48`. Mirrors 38k. -/
+/-- Tight zeta linear `‖ζ‖ ≤ 48*(0.5+|Im|)` on `0.05 ≤ Re ≤ 0.5` (N=13 K0). -/
+theorem R02_D3_zeta_linear_slice0550_tight48_N13 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) :
+    ‖riemannZeta z‖ ≤ 48 * (0.5 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by intro h; linarith
+  have hexp_le : ∀ n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hn1 : (1 : ℕ) ≤ 2 * n + 1 := by omega
+    have h1 : (1 : ℝ) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := by
+      calc (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+        _ ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := Nat.cast_le.mpr hn1
+    have he : -z.re - 1 ≤ (-1.05 : ℝ) := by linarith
+    exact Real.rpow_le_rpow_of_exponent_le h1 he
+  have hodd_Re : Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := by
+    apply Summable.of_norm_bounded R02_D3_odd105_summable
+    intro n
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+    exact hexp_le n
+  have hK : (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) ≤ 19.802 :=
+    le_trans (hodd_Re.tsum_le_tsum (fun n => hexp_le n) R02_D3_odd105_summable) R02_D3_odd105_tsum_le_19802
+  have hmajor : Summable (fun n : ℕ => ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := hodd_Re.mul_left ‖z‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm z n‖ ≤ ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := fun n => norm_etaPairTerm_le z hs n
+  have htsum : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) = ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := Summable.tsum_mul_left ‖z‖ hodd_Re
+  have heta : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 19.802 := le_trans htsum (by rw [hfactor]; exact mul_le_mul_of_nonneg_left hK (norm_nonneg _))
+  have hnorm : ‖z‖ ≤ 0.5 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im z
+    have habs : |z.re| ≤ (0.5 : ℝ) := by rw [abs_le]; constructor <;> linarith
+    linarith
+  have hetaLin : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ 19.802 * (0.5 + |z.im|) := by
+    calc ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 19.802 := heta
+      _ ≤ (0.5 + |z.im|) * 19.802 := mul_le_mul_of_nonneg_right hnorm (by norm_num)
+      _ = 19.802 * (0.5 + |z.im|) := by ring
+  have hden_ge := R02_D3_eta_denom_floor_slice0550 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ = ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (19.802 * (0.5 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.414 : ℝ))⁻¹ := (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 19.802 * (0.5 + |z.im|) := mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (19.802 * (0.5 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (19.802 * (0.5 + |z.im|)) / 0.414 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (19.802 * (0.5 + |z.im|)) / 0.414 ≤ 48 * (0.5 + |z.im|) := by
+    have hratio : (19.802 : ℝ) / 0.414 ≤ 48 := by norm_num
+    have e : (19.802 * (0.5 + |z.im|)) / 0.414 = (19.802 / 0.414) * (0.5 + |z.im|) := by ring
+    rw [e]
+    exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]
+  exact le_trans (le_trans hstep1 hstep2) hcap
+#print axioms R02_D3_zeta_linear_slice0550_tight48_N13
+/-!
+## Door-3 strip endgame, step 39h (zeta lane): far rect `504` + assemblies.
+`48*10.5 = 504` on `0.3 <= Re <= 0.5`; low assembly keeps `504`
+(near `374`); full assembly keeps global `504` (high `151`). Drops `505 -> 504`.
+K0 `19.802` cannot reach `47`-linear (`19.802 > 19.458`); `495` needs `47`.
+-/
+/-- Far-piece rect cap: `‖ζ‖ ≤ 504` on `0.3 ≤ Re ≤ 0.5`, `|Im| ≤ 10` (N=13). -/
+theorem R02_D3_zeta_rect_cap_slice0305_tight504_N13 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (hfar : 0.3 ≤ z.re) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 504 := by
+  have h := R02_D3_zeta_linear_slice0550_tight48_N13 z hre_lo hre_hi
+  have hcap : (48 : ℝ) * (0.5 + |z.im|) ≤ 504 := by
+    have hX : (0.5 : ℝ) + |z.im| ≤ 10.5 := by linarith
+    calc (48 : ℝ) * (0.5 + |z.im|) ≤ 48 * 10.5 := mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 504 := by norm_num
+  exact le_trans h hcap
+/-- Low-slice assembly: `‖ζ‖ ≤ 504` on `0.05 ≤ Re ≤ 0.5`, `|Im| ≤ 10` (N=13). -/
+theorem R02_D3_zeta_rect_slice_assembly11_low (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.5) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 504 := by
+  by_cases hcut : z.re ≤ 0.3
+  · have h := R02_D3_zeta_rect_cap_slice0503_34 z hre_lo hcut him
+    linarith
+  · have hlt : (0.3 : ℝ) < z.re := lt_of_not_ge hcut
+    have h := R02_D3_zeta_rect_cap_slice0305_tight504_N13 z hre_lo hre_hi hlt.le him
+    linarith
+/-- Full-strip assembly: `‖ζ‖ ≤ 504` on `0.05 ≤ Re ≤ 0.74`, `|Im| ≤ 10` (N=13). -/
+theorem R02_D3_zeta_rect_slice_assembly11 (z : ℂ)
+    (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.74) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 504 := by
+  by_cases hcut : z.re ≤ 0.5
+  · have h := R02_D3_zeta_rect_slice_assembly11_low z hre_lo hcut him
+    linarith
+  · have hlt : (0.5 : ℝ) < z.re := lt_of_not_ge hcut
+    have h := R02_D3_zeta_rect_cap_slice5074_tight151 z hlt.le hre_hi him
+    linarith
+/-- Gap verdict: new best `504 < 505`; drop `1`. `495` needs `47`-linear. -/
+theorem R02_D3_zeta_rect_slice_edge11 :
+    (504 : ℝ) < 505 ∧ (151 : ℝ) < 504 ∧ (505 : ℝ) - 504 = 1 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+#print axioms R02_D3_zeta_rect_cap_slice0305_tight504_N13
+#print axioms R02_D3_zeta_rect_slice_assembly11_low
+#print axioms R02_D3_zeta_rect_slice_assembly11
+#print axioms R02_D3_zeta_rect_slice_edge11
