@@ -1448,3 +1448,18 @@ theorem D3SG_Real_Gamma_uniform_0005_005_le_200 (σ : ℝ)
     _ ≤ 200 := h200
 
 #print axioms D3SG_Real_Gamma_uniform_0005_005_le_200
+
+/-- Tier-C decay on sliver `Re ∈ [0.005,0.05]`: `‖Γ s‖ ≤ 600·exp(−|Im|/2)`. -/
+theorem D3SG_TierC_gamma_rect_sliver (s : ℂ)
+    (hlo : 0.005 ≤ s.re) (hhi : s.re ≤ 0.05) :
+    ‖Complex.Gamma s‖ ≤ 600 * Real.exp (-(1 / 2) * |s.im|) := by
+  have hpos : (0 : ℝ) < s.re := by linarith
+  have hle1 : s.re ≤ 1 := by linarith
+  have hcap : Real.Gamma s.re ≤ 200 :=
+    D3SG_Real_Gamma_uniform_0005_005_le_200 s.re hlo hhi
+  have h := D3SG_decay_sigma s s.re 200 (by linarith) (by linarith) rfl (by norm_num) hcap
+  have e : (3 : ℝ) * 200 = 600 := by norm_num
+  calc ‖Complex.Gamma s‖ ≤ 3 * 200 * Real.exp (-(1 / 2) * |s.im|) := h
+    _ = 600 * Real.exp (-(1 / 2) * |s.im|) := by rw [e]
+
+#print axioms D3SG_TierC_gamma_rect_sliver
