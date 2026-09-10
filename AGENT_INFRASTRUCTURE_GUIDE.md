@@ -3699,6 +3699,20 @@ sorry-free infrastructure and the complete commit ledger above.
   `hLower` at sCutL (ZU36 owns) + `hJoint` 0.04-tightness +
   already-banked `hBanked`.
 - 2026-09-10 SLIV draft received (NEW `door3_sliver_nonvan.lean`,
+- 2026-09-10 SLIV-EDGE received (`8305537d`, NEW 420 lines,
+  0 sorry, unbuilt): edge s-mapping PINNED (top→`Ix`,
+  bottom→`1+Ix` — bottom is Euler territory); pointwise
+  mT=mB=1/2 at x=0 PROVED; MT/MB conditional on
+  closedBall-0-12 sup. Residual: uniform edge-lowers +
+  ball sups + numeric gates.
+- 2026-09-10 ETA-BALL received (`8305537d`, 510/0 on top,
+  unbuilt): Euler `hDom/hReal` + right-sliver ≤3 CLOSED;
+  eta head/tail/factor pieces proved; Gamma reaches 1/2
+  (not 1/100 — 50× shortfall, needs π/2-rate or ~20×
+  product); sharp 12.868 closed. STRUCTURAL: uniform ≤6
+  via eta-bridge BLOCKED — eta-factor zero at s≈1+9.06i
+  in-band, no uniform denom lower exists (excise discs or
+  zero-free variant). Tier-C rect [9.75,10.25] avoids it.
   227 lines, untracked-only, 0 sorry, unbuilt): routing +
   packaging PROVED conditional, end-to-end `hSliver`-shaped
   `hSliver_of_uniformData` PROVED conditional. ONLY new
