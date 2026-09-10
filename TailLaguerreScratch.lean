@@ -6475,3 +6475,155 @@ theorem d3_S6_norm_ge6 :
     linarith
   exact le_of_sq_le_sq hsq (norm_nonneg _)
 #print axioms d3_S6_norm_ge6
+/-! ## Door-3 remainder 5 (step 5z10o): Re hold 45/100 via cos-θ₄ 67/100. -/
+/-- Real-part floor 45/100 ≤ Re(S₆) (value 574961/1260000). -/
+theorem d3_S6_Re_lower5 :
+    (45 / 100 : ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by
+  have hexp : (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re
+      = (d3EtaTerm d3HalfS0 0).re + (d3EtaTerm d3HalfS0 1).re
+        + (d3EtaTerm d3HalfS0 2).re + (d3EtaTerm d3HalfS0 3).re
+        + (d3EtaTerm d3HalfS0 4).re + (d3EtaTerm d3HalfS0 5).re := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.add_re, Complex.add_re]
+  rw [hexp, d3EtaTerm_re_0, d3EtaTerm_re_1, d3EtaTerm_re_2,
+    d3EtaTerm_re_3, d3EtaTerm_re_4, d3EtaTerm_re_5]
+  simp only [Nat.cast_one, Nat.cast_ofNat]
+  rw [d3_rpow_one_neghalf, d3_cos_theta0, d3_rpow_four_neghalf]
+  have hr2u := d3_rpow_two_neghalf_le2
+  have hc1u := d3_cos_theta1_upper
+  have hc1l := d3_cos_theta1_lower
+  have hr3l := d3_rpow_three_neghalf_ge2
+  have hc2l := d3_cos_theta2_lower2
+  have hc3u := d3_cos_theta3_upper
+  have hc3l := d3_cos_theta3_lower
+  have hr5l := d3_rpow_five_neghalf_ge2
+  have hc4l := d3_cos_theta4_lower3
+  have hr6u := d3_rpow_six_neghalf_le2
+  have hc5u := d3_cos_theta5_upper2
+  have hc5l := d3_cos_theta5_lower2
+  have p1 : (2:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 2) ≤ (99/140)*(944/1000) :=
+    mul_le_mul hr2u hc1u (by linarith) (by norm_num)
+  have p2 : (4/7:ℝ)*(84/100) ≤ (3:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 3) :=
+    mul_le_mul hr3l hc2l (by norm_num) (by linarith)
+  have p3 : (1/2:ℝ)*Real.cos ((1/2:ℝ)*Real.log 4) ≤ (1/2)*(777/1000) :=
+    mul_le_mul (by norm_num : (1/2:ℝ) ≤ 1/2) hc3u (by linarith) (by norm_num)
+  have p4 : (4/9:ℝ)*(67/100) ≤ (5:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 5) :=
+    mul_le_mul hr5l hc4l (by norm_num) (by linarith)
+  have p5 : (6:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 6) ≤ (49/120)*(65/100) :=
+    mul_le_mul hr6u hc5u (by linarith) (by norm_num)
+  have hnum : (45/100:ℝ) ≤ 1*1 - (99/140)*(944/1000) + (4/7)*(84/100)
+      - (1/2)*(777/1000) + (4/9)*(67/100) - (49/120)*(65/100) := by norm_num
+  linarith
+#print axioms d3_S6_Re_lower5
+/-! ## Door-3 remainder 5 (step 5z10p): sqrt uppers 1733/2237 + cos-θ₅ 64/100. -/
+/-- Sqrt upper `3^(1/2) ≤ 1733/1000` (cleared: `3 ≤ (1733/1000)^2`). -/
+theorem d3_sqrt3_le3 : (3 : ℝ) ^ ((1 / 2 : ℝ)) ≤ 1733 / 1000 := by
+  have hcleared : (((3 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ)) ≤ (((1733 / 1000 : ℝ)) ^ (2 : ℕ)) := by
+    have e : ((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 3 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+      rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+      exact Real.rpow_one 3
+    rw [e]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+/-- Rpow floor `1000/1733 ≤ 3^(-1/2)` by inversion of `d3_sqrt3_le3`. -/
+theorem d3_rpow_three_neghalf_ge3 : (1000 / 1733 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (3 : ℝ) ^ ((1 / 2 : ℝ)) ≤ 1733 / 1000 := d3_sqrt3_le3
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((1 / 2 : ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (3 : ℝ) ^ (-(1 / 2) : ℝ) = (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [hrw, show (1000 / 1733 : ℝ) = ((1733 / 1000 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 1733 / 1000 by norm_num) hpos).mpr hsqrt
+/-- Sqrt upper `5^(1/2) ≤ 2237/1000` (cleared: `5 ≤ (2237/1000)^2`). -/
+theorem d3_sqrt5_le3 : (5 : ℝ) ^ ((1 / 2 : ℝ)) ≤ 2237 / 1000 := by
+  have hcleared : (((5 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ)) ≤ (((2237 / 1000 : ℝ)) ^ (2 : ℕ)) := by
+    have e : ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 5 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+      rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+      exact Real.rpow_one 5
+    rw [e]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (by norm_num) hcleared
+/-- Rpow floor `1000/2237 ≤ 5^(-1/2)` by inversion of `d3_sqrt5_le3`. -/
+theorem d3_rpow_five_neghalf_ge3 : (1000 / 2237 : ℝ) ≤ (5 : ℝ) ^ (-(1 / 2) : ℝ) := by
+  have hsqrt : (5 : ℝ) ^ ((1 / 2 : ℝ)) ≤ 2237 / 1000 := d3_sqrt5_le3
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ ((1 / 2 : ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (5 : ℝ) ^ (-(1 / 2) : ℝ) = (((5 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _
+  rw [hrw, show (1000 / 2237 : ℝ) = ((2237 / 1000 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (show (0 : ℝ) < 2237 / 1000 by norm_num) hpos).mpr hsqrt
+/-- Cosine upper at `θ₅` (`cos θ₅ ≤ 64/100`) from `sin θ₅ ≥ 77/100`. -/
+theorem d3_cos_theta5_upper3 :
+    Real.cos ((1 / 2 : ℝ) * Real.log 6) ≤ (64 / 100 : ℝ) := by
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 6 :=
+    mul_nonneg (by norm_num) (le_of_lt (Real.log_pos (by norm_num)))
+  have hhi : (1 / 2) * Real.log 6 ≤ (0.8978 : ℝ) := d3_theta5_mem2.2
+  have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
+  have hcos0 : (0 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 6) :=
+    Real.cos_nonneg_of_mem_Icc ⟨by linarith, by linarith⟩
+  have hU : (1 : ℝ) - (77 / 100) ^ 2 ≤ (64 / 100) ^ 2 := by norm_num
+  exact d3_cos_le_of_sin_ge _ _ _ (by norm_num) d3_sin_theta5_lower2 hcos0 hU (by norm_num)
+#print axioms d3_sqrt3_le3
+#print axioms d3_rpow_three_neghalf_ge3
+#print axioms d3_sqrt5_le3
+#print axioms d3_rpow_five_neghalf_ge3
+#print axioms d3_cos_theta5_upper3
+/-! ## Door-3 remainder 5 (step 5z10q): Re 46/100 + norm 50/100. -/
+/-- Real-part floor `46/100 ≤ Re(S₆)` with ge3 floors + cos-θ₅ 64/100. -/
+theorem d3_S6_Re_lower6 :
+    (46 / 100 : ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by
+  have hexp : (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re
+      = (d3EtaTerm d3HalfS0 0).re + (d3EtaTerm d3HalfS0 1).re
+        + (d3EtaTerm d3HalfS0 2).re + (d3EtaTerm d3HalfS0 3).re
+        + (d3EtaTerm d3HalfS0 4).re + (d3EtaTerm d3HalfS0 5).re := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.add_re, Complex.add_re]
+  rw [hexp, d3EtaTerm_re_0, d3EtaTerm_re_1, d3EtaTerm_re_2,
+    d3EtaTerm_re_3, d3EtaTerm_re_4, d3EtaTerm_re_5]
+  simp only [Nat.cast_one, Nat.cast_ofNat]
+  rw [d3_rpow_one_neghalf, d3_cos_theta0, d3_rpow_four_neghalf]
+  have hr2u := d3_rpow_two_neghalf_le2
+  have hc1u := d3_cos_theta1_upper
+  have hc1l := d3_cos_theta1_lower
+  have hr3l := d3_rpow_three_neghalf_ge3
+  have hc2l := d3_cos_theta2_lower2
+  have hc3u := d3_cos_theta3_upper
+  have hc3l := d3_cos_theta3_lower
+  have hr5l := d3_rpow_five_neghalf_ge3
+  have hc4l := d3_cos_theta4_lower3
+  have hr6u := d3_rpow_six_neghalf_le2
+  have hc5u := d3_cos_theta5_upper3
+  have hc5l := d3_cos_theta5_lower2
+  have p1 : (2:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 2) ≤ (99/140)*(944/1000) :=
+    mul_le_mul hr2u hc1u (by linarith) (by norm_num)
+  have p2 : (1000/1733:ℝ)*(84/100) ≤ (3:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 3) :=
+    mul_le_mul hr3l hc2l (by norm_num) (by linarith)
+  have p3 : (1/2:ℝ)*Real.cos ((1/2:ℝ)*Real.log 4) ≤ (1/2)*(777/1000) :=
+    mul_le_mul (by norm_num : (1/2:ℝ) ≤ 1/2) hc3u (by linarith) (by norm_num)
+  have p4 : (1000/2237:ℝ)*(67/100) ≤ (5:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 5) :=
+    mul_le_mul hr5l hc4l (by norm_num) (by linarith)
+  have p5 : (6:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 6) ≤ (49/120)*(64/100) :=
+    mul_le_mul hr6u hc5u (by linarith) (by norm_num)
+  have hnum : (46/100:ℝ) ≤ 1*1 - (99/140)*(944/1000) + (1000/1733)*(84/100)
+      - (1/2)*(777/1000) + (1000/2237)*(67/100) - (49/120)*(64/100) := by norm_num
+  linarith
+#print axioms d3_S6_Re_lower6
+/-- Norm floor `50/100 ≤ ‖S₆‖` from the `46/100 + 20/100` floors. -/
+theorem d3_S6_norm_ge7 :
+    (50 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖ := by
+  have hRe := d3_S6_Re_lower6
+  have hIm := d3_S6_Im_floor6
+  have hRe0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by linarith
+  have hIm0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).im := by linarith
+  have hRe2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 46/100) hRe 2
+  have hIm2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 20/100) hIm 2
+  have hsq : (50/100:ℝ)^2 ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖^2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    have hnum : (50/100:ℝ)^2 ≤ (46/100:ℝ)^2 + (20/100:ℝ)^2 := by norm_num
+    linarith
+  exact le_of_sq_le_sq hsq (norm_nonneg _)
+#print axioms d3_S6_norm_ge7
