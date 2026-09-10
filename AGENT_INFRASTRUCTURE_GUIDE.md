@@ -3935,6 +3935,12 @@ sorry-free infrastructure and the complete commit ledger above.
   constant kills both). 6/5 OPEN. ZU38 fired: Im-route
   head + tradeoff curve N∈{4,6,8,12,16}, cap 3 variants,
   close-or-quantify.
+- 2026-09-10 ZU38 (`3c1706cc`, zeta file 401/0, no
+  build): tradeoff CLOSED-NEGATIVE (MVT limit ≈−4.1,
+  best N=8 gap 15.90; sin-enclosures open). New plan:
+  conjugation transport from banked t=10 right-side
+  bound (‖zeta(1/2−10i)‖ = ‖zeta(1/2+10i)‖). ZU39
+  fired.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
