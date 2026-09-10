@@ -6912,3 +6912,82 @@ theorem d3_S6_norm_ge9 :
     linarith
   exact le_of_sq_le_sq hsq (norm_nonneg _)
 #print axioms d3_S6_norm_ge9
+/-! ## Door-3 remainder 5 (step 5z10w): cos-θ₂ 85/100 + cos-θ₄ 68/100 via sin uppers. -/
+/-- Cosine lower from sine upper (`c ≤ cos x` given `sin x ≤ s`, `c^2+s^2 ≤ 1`). -/
+theorem d3_cos_ge_of_sin_le (x c s : ℝ) (hc : 0 ≤ c) (hs0 : 0 ≤ Real.sin x)
+    (hcos0 : 0 ≤ Real.cos x) (hs : Real.sin x ≤ s) (hcs : c ^ 2 + s ^ 2 ≤ 1) :
+    c ≤ Real.cos x := by
+  have hsc := Real.sin_sq_add_cos_sq x
+  have hsin2 := pow_le_pow_left₀ hs0 hs 2
+  have hcos2 : c ^ 2 ≤ Real.cos x ^ 2 := by linarith
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) hcos0 hcos2
+/-- Cosine floor at `θ₂` (`85/100 ≤ cos θ₂`) from `sin θ₂ ≤ 525/1000`. -/
+theorem d3_cos_theta2_lower3 :
+    (85 / 100 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 3) := by
+  have hsin0 : (0:ℝ) ≤ Real.sin ((1/2:ℝ)*Real.log 3) := by
+    have h := d3_sin_theta2_lower; linarith
+  have hcos0 : (0:ℝ) ≤ Real.cos ((1/2:ℝ)*Real.log 3) := by
+    have h := d3_cos_theta2_lower2; linarith
+  have hU : (85/100:ℝ)^2 + (525/1000:ℝ)^2 ≤ 1 := by norm_num
+  exact d3_cos_ge_of_sin_le _ _ _ (by norm_num) hsin0 hcos0 d3_sin_theta2_upper4 hU
+/-- Cosine floor at `θ₄` (`68/100 ≤ cos θ₄`) from `sin θ₄ ≤ 724/1000`. -/
+theorem d3_cos_theta4_lower4 :
+    (68 / 100 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 5) := by
+  have hsin0 : (0:ℝ) ≤ Real.sin ((1/2:ℝ)*Real.log 5) := by
+    have h := d3_sin_theta4_lower; linarith
+  have hcos0 : (0:ℝ) ≤ Real.cos ((1/2:ℝ)*Real.log 5) := by
+    have h := d3_cos_theta4_lower3; linarith
+  have hU : (68/100:ℝ)^2 + (724/1000:ℝ)^2 ≤ 1 := by norm_num
+  exact d3_cos_ge_of_sin_le _ _ _ (by norm_num) hsin0 hcos0 d3_sin_theta4_upper5 hU
+#print axioms d3_cos_theta2_lower3
+#print axioms d3_cos_theta4_lower4
+/-! ## Door-3 remainder 5 (step 5z10x): Re 48/100 + norm 53/100. -/
+/-- Real-part floor `48/100 ≤ Re(S₆)` with cos-θ₂ 85/100 + cos-θ₄ 68/100. -/
+theorem d3_S6_Re_lower8 :
+    (48 / 100 : ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by
+  have hexp : (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re
+      = (d3EtaTerm d3HalfS0 0).re + (d3EtaTerm d3HalfS0 1).re
+        + (d3EtaTerm d3HalfS0 2).re + (d3EtaTerm d3HalfS0 3).re
+        + (d3EtaTerm d3HalfS0 4).re + (d3EtaTerm d3HalfS0 5).re := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.add_re, Complex.add_re]
+  rw [hexp, d3EtaTerm_re_0, d3EtaTerm_re_1, d3EtaTerm_re_2,
+    d3EtaTerm_re_3, d3EtaTerm_re_4, d3EtaTerm_re_5]
+  simp only [Nat.cast_one, Nat.cast_ofNat]
+  rw [d3_rpow_one_neghalf, d3_cos_theta0, d3_rpow_four_neghalf]
+  have hr2u := d3_rpow_two_neghalf_le2; have hc1u := d3_cos_theta1_upper2
+  have hc1l := d3_cos_theta1_lower; have hr3l := d3_rpow_three_neghalf_ge3
+  have hc2l := d3_cos_theta2_lower3; have hc3u := d3_cos_theta3_upper
+  have hc3l := d3_cos_theta3_lower; have hr5l := d3_rpow_five_neghalf_ge3
+  have hc4l := d3_cos_theta4_lower4; have hr6u := d3_rpow_six_neghalf_le2
+  have hc5u := d3_cos_theta5_upper4; have hc5l := d3_cos_theta5_lower2
+  have p1 : (2:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 2) ≤ (99/140)*(941/1000) :=
+    mul_le_mul hr2u hc1u (by linarith) (by norm_num)
+  have p2 : (1000/1733:ℝ)*(85/100) ≤ (3:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 3) :=
+    mul_le_mul hr3l hc2l (by norm_num) (by linarith)
+  have p3 : (1/2:ℝ)*Real.cos ((1/2:ℝ)*Real.log 4) ≤ (1/2)*(777/1000) :=
+    mul_le_mul (by norm_num : (1/2:ℝ) ≤ 1/2) hc3u (by linarith) (by norm_num)
+  have p4 : (1000/2237:ℝ)*(68/100) ≤ (5:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 5) :=
+    mul_le_mul hr5l hc4l (by norm_num) (by linarith)
+  have p5 : (6:ℝ)^(-(1/2):ℝ) * Real.cos ((1/2:ℝ)*Real.log 6) ≤ (49/120)*(635/1000) :=
+    mul_le_mul hr6u hc5u (by linarith) (by norm_num)
+  have hnum : (48/100:ℝ) ≤ 1*1 - (99/140)*(941/1000) + (1000/1733)*(85/100)
+      - (1/2)*(777/1000) + (1000/2237)*(68/100) - (49/120)*(635/1000) := by norm_num
+  linarith
+#print axioms d3_S6_Re_lower8
+/-- Norm floor `53/100 ≤ ‖S₆‖` from the `48/100 + 23/100` floors. -/
+theorem d3_S6_norm_ge10 :
+    (53 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖ := by
+  have hRe := d3_S6_Re_lower8; have hIm := d3_S6_Im_floor9
+  have hRe0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by linarith
+  have hIm0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).im := by linarith
+  have hRe2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 48/100) hRe 2
+  have hIm2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 23/100) hIm 2
+  have hsq : (53/100:ℝ)^2 ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖^2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    have hnum : (53/100:ℝ)^2 ≤ (48/100:ℝ)^2 + (23/100:ℝ)^2 := by norm_num
+    linarith
+  exact le_of_sq_le_sq hsq (norm_nonneg _)
+#print axioms d3_S6_norm_ge10
