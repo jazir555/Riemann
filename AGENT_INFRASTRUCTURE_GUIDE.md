@@ -3460,6 +3460,11 @@ sorry-free infrastructure and the complete commit ledger above.
   +0.00425). Norm holds 51 (52 needs 0.2704 > 0.2693).
   Residual to 53: 0.0116. Next: sin-θ₁ lift → Im23 →
   norm52 (RX36).
+- 2026-09-10 RX36 (`053781b2`, tail-scratch, 1× green 8682 jobs
+  + 1 fail-fixed): sin-θ₁ 3395/10000 (margin +0.000085) →
+  Im23 (+0.0009) → **`‖S₆‖ ≥ 52/100`** via 47+23
+  (margin +0.0034). Residual to 53: 0.0071.
+  Next: Im25 or Re48+Im23 → 53/100 (RX37).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
