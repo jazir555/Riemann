@@ -3858,6 +3858,15 @@ sorry-free infrastructure and the complete commit ledger above.
   jobs): **`Real.Gamma σ ≤ 20` on [0.05,0.95]** (convexity
   + shift route, essentially optimal) + Tier-C gamma rect
   corollary. Residual: sliver σ∈[0.005,0.05) M=200 (ST12).
+- 2026-09-10 ST12 (`647c1d0b`, stirling file, 1× green 8682
+  jobs): **`Real.Gamma σ ≤ 200` on [0.005,0.05]** (same
+  route). Gamma caps now cover [0.005,0.95] uniformly.
+- 2026-09-10 TIERB-UNLOCK (coordinator): Tier B needs joint
+  C≤2.5 (ρ=0.01) while poly·pi=214 — Gamma·zeta ≤0.0117.
+  TRUE joint ≈0.08 (fits 30×); bounds 400× loose on Gamma
+  (c=1/2 vs true π/2). UNLOCK = π/2-rate + local-M σ-split
+  (Γ(0.4)≈2.2) + zeta→2: 214·0.007·1.5≈2.25≤2.5 FEASIBLE.
+  π/2-rate now CONSUMER-BACKED. ST13 = sliver rect.
 - 2026-09-10 TIER-FEASIBILITY (coordinator, lemma shape
   `M=C/r` verified): Tier A TRUE-dead (sup_true≈0.09 vs
   need ≤0.04); Tier C TRUE-dead (needs sup≤0.04·margin≤0.01
