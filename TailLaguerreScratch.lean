@@ -6284,3 +6284,194 @@ theorem d3_S6_norm_ge5 :
     linarith
   exact le_of_sq_le_sq hsq (norm_nonneg _)
 #print axioms d3_S6_norm_ge5
+
+/-! ## Door-3 remainder 5 (step 5z10k): narrow log5 via 25/24 (linear only). -/
+/-- Fresh `log 5` lower (`1.606 ≤ log 5`) from `log(25/24)=2log5-3log2-log3`
+with d9 `log 2`, narrow `log 3`, and `1/25 ≤ log(25/24)`. -/
+theorem d3_log_five_ge2 : (1.606 : ℝ) ≤ Real.log 5 := by
+  have h2lo := d3_log2_ge
+  have h3lo := d3_log_three_ge2
+  have hlow : (1 / 25 : ℝ) ≤ Real.log (25 / 24 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 24 / 25)
+    have he : (24 / 25 : ℝ) - 1 = (-1 / 25 : ℝ) := by norm_num
+    have hub : Real.log (24 / 25 : ℝ) ≤ (-1 / 25 : ℝ) := by linarith
+    have hinv : Real.log (25 / 24 : ℝ) = -Real.log (24 / 25 : ℝ) := by
+      have heq : (25 / 24 : ℝ) = (24 / 25 : ℝ)⁻¹ := by norm_num
+      rw [heq, Real.log_inv]
+    rw [hinv]
+    linarith
+  have h25 : Real.log (25 : ℝ) = 2 * Real.log 5 := by
+    have h25e : (25 : ℝ) = 5 ^ (2 : ℕ) := by norm_num
+    rw [h25e, Real.log_pow]
+    norm_num
+  have h8 : Real.log (8 : ℝ) = 3 * Real.log 2 := by
+    have h8e : (8 : ℝ) = 2 ^ (3 : ℕ) := by norm_num
+    rw [h8e, Real.log_pow]
+    norm_num
+  have h24 : Real.log (24 : ℝ) = Real.log 8 + Real.log 3 := by
+    have hmeq : (8 : ℝ) * 3 = 24 := by norm_num
+    have h := Real.log_mul (show (8 : ℝ) ≠ 0 by norm_num)
+      (show (3 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    exact h
+  have hdiv : Real.log (25 / 24 : ℝ) = Real.log 25 - Real.log 24 := by
+    exact Real.log_div (by norm_num) (by norm_num)
+  rw [hdiv, h25, h24, h8] at hlow
+  have hnum : (1.606 : ℝ) ≤ (3 * (0.693147 : ℝ) + 1.0952 + 1 / 25) / 2 := by
+    norm_num
+  linarith
+#print axioms d3_log_five_ge2
+/-- Fresh `log 5` upper (`log 5 ≤ 1.612`) from `log(25/24)=2log5-3log2-log3`
+with d9 `log 2`, narrow `log 3`, and `log(25/24) ≤ 1/24`. -/
+theorem d3_log_five_le2 : Real.log 5 ≤ (1.612 : ℝ) := by
+  have h2hi := d3_log2_le
+  have h3hi := d3_log_three_le2
+  have hub : Real.log (25 / 24 : ℝ) ≤ (1 / 24 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 25 / 24)
+    have he : (25 / 24 : ℝ) - 1 = (1 / 24 : ℝ) := by norm_num
+    linarith
+  have h25 : Real.log (25 : ℝ) = 2 * Real.log 5 := by
+    have h25e : (25 : ℝ) = 5 ^ (2 : ℕ) := by norm_num
+    rw [h25e, Real.log_pow]
+    norm_num
+  have h8 : Real.log (8 : ℝ) = 3 * Real.log 2 := by
+    have h8e : (8 : ℝ) = 2 ^ (3 : ℕ) := by norm_num
+    rw [h8e, Real.log_pow]
+    norm_num
+  have h24 : Real.log (24 : ℝ) = Real.log 8 + Real.log 3 := by
+    have hmeq : (8 : ℝ) * 3 = 24 := by norm_num
+    have h := Real.log_mul (show (8 : ℝ) ≠ 0 by norm_num)
+      (show (3 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq] at h
+    exact h
+  have hdiv : Real.log (25 / 24 : ℝ) = Real.log 25 - Real.log 24 := by
+    exact Real.log_div (by norm_num) (by norm_num)
+  rw [hdiv, h25, h24, h8] at hub
+  have hnum : (3 * (0.693148 : ℝ) + 1.1023 + 1 / 24) / 2 ≤ (1.612 : ℝ) := by
+    norm_num
+  linarith
+/-- Phase `θ₄ = (1/2)·log 5` in `[0.803, 0.806]` (narrow, via 25/24 log5). -/
+theorem d3_theta4_mem2 :
+    (0.803 : ℝ) ≤ (1 / 2) * Real.log 5 ∧ (1 / 2) * Real.log 5 ≤ (0.806 : ℝ) := by
+  have hlo := d3_log_five_ge2
+  have hhi := d3_log_five_le2
+  constructor <;> linarith
+#print axioms d3_log_five_le2
+#print axioms d3_theta4_mem2
+/-! ## Door-3 remainder 5 (step 5z10l): narrow cos/sin at θ₄ + sin θ₂. -/
+/-- Cosine floor at `θ₄` (`67/100 ≤ cos θ₄`) via narrow `d3_theta4_mem2`. -/
+theorem d3_cos_theta4_lower3 :
+    (67 / 100 : ℝ) ≤ Real.cos ((1 / 2 : ℝ) * Real.log 5) := by
+  have hmem := d3_theta4_mem2
+  have hpos : (0 : ℝ) < Real.log 5 := Real.log_pos (by norm_num)
+  have hnn : (0 : ℝ) ≤ (1 / 2) * Real.log 5 :=
+    mul_nonneg (by norm_num) (le_of_lt hpos)
+  have hhi : (1 / 2) * Real.log 5 ≤ (0.806 : ℝ) := hmem.2
+  have hcos := d3_cos_quad_lower hnn (by linarith)
+  have h2 : ((1 / 2) * Real.log 5) ^ 2 ≤ (0.806 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hnn hhi 2
+  have hnum : (67 / 100 : ℝ) ≤ 1 - (0.806 : ℝ) ^ 2 / 2 := by
+    norm_num
+  linarith
+/-- Sine upper at `θ₄` (`sin θ₄ ≤ 743/1000`) from `cos θ₄ ≥ 67/100`. -/
+theorem d3_sin_theta4_upper4 :
+    Real.sin ((1 / 2 : ℝ) * Real.log 5) ≤ (743 / 1000 : ℝ) := by
+  have hcos := d3_cos_theta4_lower3
+  have hsin0 : (0 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 5) := by
+    have h := d3_sin_theta4_lower
+    linarith
+  have hU : (1 : ℝ) - (67 / 100) ^ 2 ≤ (743 / 1000) ^ 2 := by norm_num
+  exact d3_sin_le_of_cos_ge _ _ _ (by norm_num) hcos hsin0 hU (by norm_num)
+/-- Sine upper at `θ₂` (`sin θ₂ ≤ 543/1000`) from `cos θ₂ ≥ 84/100`. -/
+theorem d3_sin_theta2_upper3 :
+    Real.sin ((1 / 2 : ℝ) * Real.log 3) ≤ (543 / 1000 : ℝ) := by
+  have hcos := d3_cos_theta2_lower2
+  have hsin0 : (0 : ℝ) ≤ Real.sin ((1 / 2 : ℝ) * Real.log 3) := by
+    have h := d3_sin_theta2_lower
+    linarith
+  have hU : (1 : ℝ) - (84 / 100) ^ 2 ≤ (543 / 1000) ^ 2 := by norm_num
+  exact d3_sin_le_of_cos_ge _ _ _ (by norm_num) hcos hsin0 hU (by norm_num)
+#print axioms d3_cos_theta4_lower3
+#print axioms d3_sin_theta4_upper4
+#print axioms d3_sin_theta2_upper3
+/-! ## Door-3 remainder 5 (step 5z10m): tighter rpow uppers 11/19 and 9/20. -/
+/-- Sqrt lower `19/11 ≤ 3^(1/2:ℝ)` (cleared: `(19/11)^2 ≤ 3`). -/
+theorem d3_sqrt3_ge3 : (19 / 11 : ℝ) ≤ (3 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hcleared : (((19 / 11 : ℝ)) ^ (2 : ℕ)) ≤ ((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) := by
+    have e : ((((3 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 3 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+      rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+      exact Real.rpow_one 3
+    rw [e]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (Real.rpow_nonneg (by norm_num) _) hcleared
+/-- Rpow upper `3^(-1/2) ≤ 11/19` by inversion of `d3_sqrt3_ge3`. -/
+theorem d3_rpow_three_neghalf_le3 : (3 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 11 / 19 := by
+  have hrw : (3 : ℝ) ^ (-(1 / 2) : ℝ) = (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _
+  rw [hrw, show (11 / 19 : ℝ) = ((19 / 11 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr d3_sqrt3_ge3
+/-- Sqrt lower `20/9 ≤ 5^(1/2:ℝ)` (cleared: `(20/9)^2 ≤ 5`). -/
+theorem d3_sqrt5_ge2 : (20 / 9 : ℝ) ≤ (5 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have hcleared : (((20 / 9 : ℝ)) ^ (2 : ℕ)) ≤ ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) := by
+    have e : ((((5 : ℝ) ^ ((1 / 2 : ℝ)))) ^ (2 : ℕ)) = 5 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+      rw [show (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 by norm_num]
+      exact Real.rpow_one 5
+    rw [e]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) (Real.rpow_nonneg (by norm_num) _) hcleared
+/-- Rpow upper `5^(-1/2) ≤ 9/20` by inversion of `d3_sqrt5_ge2`. -/
+theorem d3_rpow_five_neghalf_le2 : (5 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 9 / 20 := by
+  have hrw : (5 : ℝ) ^ (-(1 / 2) : ℝ) = (((5 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _
+  rw [hrw, show (9 / 20 : ℝ) = ((20 / 9 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by norm_num) _) (by norm_num)).mpr d3_sqrt5_ge2
+#print axioms d3_sqrt3_ge3
+#print axioms d3_rpow_three_neghalf_le3
+#print axioms d3_sqrt5_ge2
+#print axioms d3_rpow_five_neghalf_le2
+/-! ## Door-3 remainder 5 (step 5z10n): Im floor 20/100 + Re hold 45/100. -/
+/-- Imag-part floor `20/100 ≤ Im(S₆)` with tightened sin/rpow uppers. -/
+theorem d3_S6_Im_floor6 :
+    (20 / 100 : ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).im := by
+  have hexp : (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).im = (d3EtaTerm d3HalfS0 0).im + (d3EtaTerm d3HalfS0 1).im + (d3EtaTerm d3HalfS0 2).im + (d3EtaTerm d3HalfS0 3).im + (d3EtaTerm d3HalfS0 4).im + (d3EtaTerm d3HalfS0 5).im := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im]
+  rw [hexp, d3EtaTerm_im_0, d3EtaTerm_im_1, d3EtaTerm_im_2, d3EtaTerm_im_3, d3EtaTerm_im_4, d3EtaTerm_im_5]
+  simp only [Nat.cast_one, Nat.cast_ofNat]
+  rw [d3_rpow_one_neghalf, d3_sin_theta0, d3_rpow_four_neghalf]
+  have hs1l := d3_sin_theta1_lower
+  have hr2l := d3_rpow_two_neghalf_ge
+  have hs2l := d3_sin_theta2_lower
+  have hr3u := d3_rpow_three_neghalf_le3
+  have hs2u := d3_sin_theta2_upper3
+  have hs3l := d3_sin_theta3_lower
+  have hs4l := d3_sin_theta4_lower
+  have hr5u := d3_rpow_five_neghalf_le2
+  have hs4u := d3_sin_theta4_upper4
+  have hs5l := d3_sin_theta5_lower2
+  have hr6l := d3_rpow_six_neghalf_ge
+  have q1 : (7/10:ℝ)*(33/100) ≤ (2:ℝ)^(-(1/2):ℝ) * Real.sin ((1/2:ℝ)*Real.log 2) := mul_le_mul hr2l hs1l (by norm_num) (by linarith)
+  have q2 : (3:ℝ)^(-(1/2):ℝ) * Real.sin ((1/2:ℝ)*Real.log 3) ≤ (11/19)*(543/1000) := mul_le_mul hr3u hs2u (by linarith) (by norm_num)
+  have q3 : (1/2:ℝ)*(63/100) ≤ (1/2)*Real.sin ((1/2:ℝ)*Real.log 4) := mul_le_mul (by norm_num : (1/2:ℝ) ≤ 1/2) hs3l (by norm_num) (by norm_num)
+  have q4 : (5:ℝ)^(-(1/2):ℝ) * Real.sin ((1/2:ℝ)*Real.log 5) ≤ (9/20)*(743/1000) := mul_le_mul hr5u hs4u (by linarith) (by norm_num)
+  have q5 : (2/5:ℝ)*(77/100) ≤ (6:ℝ)^(-(1/2):ℝ) * Real.sin ((1/2:ℝ)*Real.log 6) := mul_le_mul hr6l hs5l (by norm_num) (by linarith)
+  have hnum : (20/100:ℝ) ≤ -(1*0) + (7/10)*(33/100) - (11/19)*(543/1000) + (1/2)*(63/100) - (9/20)*(743/1000) + (2/5)*(77/100) := by norm_num
+  linarith
+#print axioms d3_S6_Im_floor6
+/-- Norm floor `49/100 ≤ ‖S₆‖` from the `45/100 + 20/100` floors. -/
+theorem d3_S6_norm_ge6 :
+    (49 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖ := by
+  have hRe := d3_S6_Re_lower4
+  have hIm := d3_S6_Im_floor6
+  have hRe0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).re := by linarith
+  have hIm0 : (0:ℝ) ≤ (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k).im := by linarith
+  have hRe2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 45/100) hRe 2
+  have hIm2 := pow_le_pow_left₀ (by norm_num : (0:ℝ) ≤ 20/100) hIm 2
+  have hsq : (49/100:ℝ)^2 ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖^2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    have hnum : (49/100:ℝ)^2 ≤ (45/100:ℝ)^2 + (20/100:ℝ)^2 := by norm_num
+    linarith
+  exact le_of_sq_le_sq hsq (norm_nonneg _)
+#print axioms d3_S6_norm_ge6
