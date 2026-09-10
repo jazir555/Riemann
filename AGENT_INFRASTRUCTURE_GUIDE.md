@@ -3944,9 +3944,23 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-10 ZU39 (`a4f43901`, zeta file 51/0, no
   build): NO-BANKED-BOUND (no 6/5·7/5·head275 zeta-lower
   anywhere; only open Prop premises). Conj identity
-  banked. STRATEGIC PAUSE on grind: recon fired —
+  banked. STRATEGIC PAUSE on grind:   recon fired —
   right-side precedent? interval_arith? consumer exact
   need? — recommendation (a/b/c/d) pending.
+- 2026-09-10 zeta-lower recon DELIVERED (read-only):
+  right side has NO closed lower (open 7/5 Prop only);
+  interval_arith is real-only (no complex zeta/Gamma
+  enclosures by its own header); consumer needs 7/5
+  (not 6/5) at CENTER 1/2−10i; Stirling file has zero
+  zeta content. Recommends (d) concede fat-ball.
+  COORDINATOR DECISION: fat-ball doubly dead (joint
+  falsified + lower walled) — STOP ball-joint/lower
+  grind. Single-cell+tight-M path needs same lowers;
+  subdivision multiplies them. KEY Q: is qualitative
+  (Rouche) nonvanishing sufficient on cutoff strips?
+  Fired: BUILD-SWEEP (11 unbuilt modules, guarded,
+  diagnose-only) + CUTOFF-ARCH recon (wiring needs?
+  floors-vs-≠0? Door-4 upper convergence?).
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
