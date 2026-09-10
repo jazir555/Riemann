@@ -6991,3 +6991,109 @@ theorem d3_S6_norm_ge10 :
     linarith
   exact le_of_sq_le_sq hsq (norm_nonneg _)
 #print axioms d3_S6_norm_ge10
+/-! ## Door-3 remainder 5 (step 5z10y): 48-term finite majorant cap `33/100`. -/
+noncomputable def d3F (m : ℕ) : ℝ := ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ))
+/-- Cleared-cube rpow cap: `(2m+7)^(-3/2) ≤ u` from `1 ≤ u^2*(2m+7)^3`. -/
+theorem d3odd32_cap (m : ℕ) (u : ℝ) (hu : 0 < u)
+    (h : 1 ≤ u ^ 2 * (2 * (m : ℝ) + 7) ^ 3) :
+    ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) ≤ u := by
+  have hcast : ((((2 * m + 7 : ℕ)) : ℝ)) = 2 * (m : ℝ) + 7 := by push_cast; ring
+  rw [hcast]
+  have hn : (0 : ℝ) < 2 * (m : ℝ) + 7 := by positivity
+  have h3 : (0 : ℝ) < (2 * (m : ℝ) + 7) ^ 3 := by positivity
+  have e1 : ((2 * (m : ℝ) + 7) ^ ((-3 / 2 : ℝ))) ^ (2 : ℕ)
+      = ((2 * (m : ℝ) + 7) ^ (3 : ℕ))⁻¹ := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt hn), show (-3 / 2 : ℝ) * (((2 : ℕ)) : ℝ) = -(((3 : ℕ)) : ℝ) by norm_num, Real.rpow_neg (le_of_lt hn), Real.rpow_natCast]
+  have hle : ((2 * (m : ℝ) + 7) ^ ((-3 / 2 : ℝ))) ^ (2 : ℕ) ≤ u ^ (2 : ℕ) := by
+    rw [e1]
+    have hmul := mul_le_mul_of_nonneg_right h (inv_nonneg.mpr (le_of_lt h3))
+    rwa [one_mul, mul_assoc, mul_inv_cancel₀ (ne_of_gt h3), mul_one] at hmul
+  exact le_of_pow_le_pow_left₀ (show (2 : ℕ) ≠ 0 by norm_num) hu.le hle
+theorem d3blk_le (a b : ℕ) (B : ℝ)
+    (hcap : ((((2 * a + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) ≤ B) (hab : a ≤ b) :
+    ∑ m ∈ Finset.Ico a b, d3F m ≤ ((b : ℝ) - (a : ℝ)) * B := by
+  have h1 : ∀ m ∈ Finset.Ico a b, d3F m ≤ B := by
+    intro m hm
+    have hle : 2 * a + 7 ≤ 2 * m + 7 := by have ham : a ≤ m := (Finset.mem_Ico.mp hm).1; omega
+    have hmo : ((((2 * m + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) ≤ ((((2 * a + 7 : ℕ)) : ℝ)) ^ ((-3 / 2 : ℝ)) := Real.rpow_le_rpow_of_nonpos (Nat.cast_pos.mpr (show 0 < 2 * a + 7 by omega)) (Nat.cast_le.mpr hle) (by norm_num)
+    exact le_trans hmo hcap
+  have h2 := Finset.sum_le_card_nsmul (Finset.Ico a b) (fun m => d3F m) B h1
+  rwa [Nat.card_Ico, nsmul_eq_mul, Nat.cast_sub hab] at h2
+theorem d3c0 : d3F 0 ≤ 0.053996 := d3odd32_cap 0 _ (by norm_num) (by norm_num)
+theorem d3c1 : d3F 1 ≤ 0.037039 := d3odd32_cap 1 _ (by norm_num) (by norm_num)
+theorem d3c2 : d3F 2 ≤ 0.027412 := d3odd32_cap 2 _ (by norm_num) (by norm_num)
+theorem d3c3 : d3F 3 ≤ 0.021336 := d3odd32_cap 3 _ (by norm_num) (by norm_num)
+theorem d3c4 : d3F 4 ≤ 0.017215 := d3odd32_cap 4 _ (by norm_num) (by norm_num)
+theorem d3c5 : d3F 5 ≤ 0.014268 := d3odd32_cap 5 _ (by norm_num) (by norm_num)
+theorem d3c6 : d3F 6 ≤ 0.012076 := d3odd32_cap 6 _ (by norm_num) (by norm_num)
+theorem d3c7 : d3F 7 ≤ 0.010393 := d3odd32_cap 7 _ (by norm_num) (by norm_num)
+theorem d3c8 : d3F 8 ≤ 0.009067 := d3odd32_cap 8 _ (by norm_num) (by norm_num)
+theorem d3c9 : d3F 9 ≤ 0.008001 := d3odd32_cap 9 _ (by norm_num) (by norm_num)
+theorem d3e10 : ∑ m ∈ Finset.range 10, d3F m ≤ 0.053996 + 0.037039 + 0.027412 + 0.021336 + 0.017215 + 0.014268 + 0.012076 + 0.010393 + 0.009067 + 0.008001 := by
+  rw [show (10 : ℕ) = 9 + 1 from rfl, Finset.sum_range_succ, show (9 : ℕ) = 8 + 1 from rfl, Finset.sum_range_succ, show (8 : ℕ) = 7 + 1 from rfl, Finset.sum_range_succ, show (7 : ℕ) = 6 + 1 from rfl, Finset.sum_range_succ, show (6 : ℕ) = 5 + 1 from rfl, Finset.sum_range_succ, show (5 : ℕ) = 4 + 1 from rfl, Finset.sum_range_succ, show (4 : ℕ) = 3 + 1 from rfl, Finset.sum_range_succ, show (3 : ℕ) = 2 + 1 from rfl, Finset.sum_range_succ, show (2 : ℕ) = 1 + 1 from rfl, Finset.sum_range_succ, Finset.sum_range_one]
+  exact add_le_add (add_le_add (add_le_add (add_le_add (add_le_add (add_le_add (add_le_add (add_le_add (add_le_add d3c0 d3c1) d3c2) d3c3) d3c4) d3c5) d3c6) d3c7) d3c8) d3c9
+theorem d3b1 : ∑ m ∈ Finset.Ico 10 14, d3F m ≤ ((((14 : ℕ)) : ℝ) - (((10 : ℕ)) : ℝ)) * 0.007129 := d3blk_le 10 14 0.007129 (d3odd32_cap 10 _ (by norm_num) (by norm_num)) (by norm_num)
+theorem d3b2 : ∑ m ∈ Finset.Ico 14 19, d3F m ≤ ((((19 : ℕ)) : ℝ) - (((14 : ℕ)) : ℝ)) * 0.004831 := d3blk_le 14 19 0.004831 (d3odd32_cap 14 _ (by norm_num) (by norm_num)) (by norm_num)
+theorem d3b3 : ∑ m ∈ Finset.Ico 19 26, d3F m ≤ ((((26 : ℕ)) : ℝ) - (((19 : ℕ)) : ℝ)) * 0.003314 := d3blk_le 19 26 0.003314 (d3odd32_cap 19 _ (by norm_num) (by norm_num)) (by norm_num)
+theorem d3b4 : ∑ m ∈ Finset.Ico 26 35, d3F m ≤ ((((35 : ℕ)) : ℝ) - (((26 : ℕ)) : ℝ)) * 0.002208 := d3blk_le 26 35 0.002208 (d3odd32_cap 26 _ (by norm_num) (by norm_num)) (by norm_num)
+theorem d3b5 : ∑ m ∈ Finset.Ico 35 48, d3F m ≤ ((((48 : ℕ)) : ℝ) - (((35 : ℕ)) : ℝ)) * 0.001482 := d3blk_le 35 48 0.001482 (d3odd32_cap 35 _ (by norm_num) (by norm_num)) (by norm_num)
+theorem d3rpow48_le : ∑ m ∈ Finset.range 48, d3F m ≤ 33 / 100 := by
+  calc ∑ m ∈ Finset.range 48, d3F m
+      = ∑ m ∈ Finset.range 10, d3F m + ∑ m ∈ Finset.Ico 10 48, d3F m := (Finset.sum_range_add_sum_Ico _ (show (10 : ℕ) ≤ 48 by norm_num)).symm
+    _ = ∑ m ∈ Finset.range 10, d3F m + (∑ m ∈ Finset.Ico 10 14, d3F m + (∑ m ∈ Finset.Ico 14 19, d3F m + (∑ m ∈ Finset.Ico 19 26, d3F m + (∑ m ∈ Finset.Ico 26 35, d3F m + ∑ m ∈ Finset.Ico 35 48, d3F m)))) := by rw [← Finset.sum_Ico_consecutive _ (show (10 : ℕ) ≤ 14 by norm_num) (show (14 : ℕ) ≤ 48 by norm_num), ← Finset.sum_Ico_consecutive _ (show (14 : ℕ) ≤ 19 by norm_num) (show (19 : ℕ) ≤ 48 by norm_num), ← Finset.sum_Ico_consecutive _ (show (19 : ℕ) ≤ 26 by norm_num) (show (26 : ℕ) ≤ 48 by norm_num), ← Finset.sum_Ico_consecutive _ (show (26 : ℕ) ≤ 35 by norm_num) (show (35 : ℕ) ≤ 48 by norm_num)]
+    _ ≤ 0.053996 + 0.037039 + 0.027412 + 0.021336 + 0.017215 + 0.014268 + 0.012076 + 0.010393 + 0.009067 + 0.008001 + (((((14 : ℕ)) : ℝ) - (((10 : ℕ)) : ℝ)) * 0.007129 + (((((19 : ℕ)) : ℝ) - (((14 : ℕ)) : ℝ)) * 0.004831 + (((((26 : ℕ)) : ℝ) - (((19 : ℕ)) : ℝ)) * 0.003314 + (((((35 : ℕ)) : ℝ) - (((26 : ℕ)) : ℝ)) * 0.002208 + ((((48 : ℕ)) : ℝ) - (((35 : ℕ)) : ℝ)) * 0.001482)))) := add_le_add d3e10 (add_le_add d3b1 (add_le_add d3b2 (add_le_add d3b3 (add_le_add d3b4 d3b5))))
+    _ ≤ 33 / 100 := by norm_num
+theorem d3tail48_norm_le : ‖∑ m ∈ Finset.range 48, d3EtaPairTerm d3HalfS0 (m + 3)‖ ≤ 33 / 100 := by
+  have hKK : ∀ m ∈ Finset.range 48, ‖d3EtaPairTerm d3HalfS0 (m + 3)‖ ≤ d3F m :=
+    fun m _ => d3K3_pairTerm_le m
+  calc ‖∑ m ∈ Finset.range 48, d3EtaPairTerm d3HalfS0 (m + 3)‖
+      ≤ ∑ m ∈ Finset.range 48, ‖d3EtaPairTerm d3HalfS0 (m + 3)‖ := norm_sum_le _ _
+    _ ≤ ∑ m ∈ Finset.range 48, d3F m := Finset.sum_le_sum hKK
+    _ ≤ 33 / 100 := d3rpow48_le
+#print axioms d3tail48_norm_le
+/-- Head-102 lower `1/5 ≤ ‖head₁₀₂‖` via `S₆` + 48-term cap (exact `0.53-0.33`). -/
+theorem d3head102_norm_ge :
+    (1 / 5 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ := by
+  have hsplit := d3Head102_eq_S6_add_tail d3HalfS0
+  have hS6 := d3_S6_norm_ge10
+  have htail := d3tail48_norm_le
+  have hdecomp : (∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k)
+      = (∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k)
+        - (∑ m ∈ Finset.range 48, d3EtaPairTerm d3HalfS0 (m + 3)) := by
+    rw [hsplit]; ring
+  have htri : (53 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ + 33 / 100 := by
+    calc (53 / 100 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, d3EtaTerm d3HalfS0 k‖ := hS6
+      _ = ‖(∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k) - (∑ m ∈ Finset.range 48, d3EtaPairTerm d3HalfS0 (m + 3))‖ := by rw [hdecomp]
+      _ ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ + ‖∑ m ∈ Finset.range 48, d3EtaPairTerm d3HalfS0 (m + 3)‖ := norm_sub_le _ _
+      _ ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm d3HalfS0 k‖ + 33 / 100 := by linarith [htail]
+  linarith
+#print axioms d3head102_norm_ge
+/-- Conditional uniform zeta lower `15/3484 ≤ ‖ζ‖` from a uniform `1/4`-head. -/
+theorem d3uniform_zeta_lower_of_head14
+    (hHead : ∀ z ∈ door3RealSeg, (1 / 4 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖)
+    (hZeta : ∀ z ∈ door3RealSeg, (∑' m, d3EtaPairTerm (tailShiftedSReal z) m) = (1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)) * riemannZeta (tailShiftedSReal z))
+    (z : ℂ) (hz : z ∈ door3RealSeg) :
+    (15 / 3484 : ℝ) ≤ ‖riemannZeta (tailShiftedSReal z)‖ := by
+  have h67 : (16 / 67 : ℝ) < 1 / 4 := by norm_num
+  have hHead67 : ∀ z ∈ door3RealSeg, (16 / 67 : ℝ) < ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖ := fun w hw => lt_of_lt_of_le h67 (hHead w hw)
+  have hlow := d3Zeta_uniform_lower_of_head hHead67 hZeta z hz
+  have hmono : ((1 / 4 : ℝ) - 16 / 67) / (13 / 5) ≤ (‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖ - 16 / 67) / (13 / 5) := div_le_div_of_nonneg_right (by linarith [hHead z hz]) (by norm_num)
+  have hnum : ((1 / 4 : ℝ) - 16 / 67) / (13 / 5) = 15 / 3484 := by norm_num
+  rw [hnum] at hmono
+  exact le_trans hmono hlow
+#print axioms d3uniform_zeta_lower_of_head14
+/-- Conditional uniform nonvanishing from the `1/4`-head hypothesis. -/
+theorem d3uniform_nonvan_of_head14
+    (hHead : ∀ z ∈ door3RealSeg, (1 / 4 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖)
+    (hZeta : ∀ z ∈ door3RealSeg, (∑' m, d3EtaPairTerm (tailShiftedSReal z) m) = (1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)) * riemannZeta (tailShiftedSReal z))
+    (z : ℂ) (hz : z ∈ door3RealSeg) :
+    riemannZeta (tailShiftedSReal z) ≠ 0 :=
+  door3RealNonvan_of_lower (fun w hw => d3uniform_zeta_lower_of_head14 hHead hZeta w hw) (by norm_num) z hz
+#print axioms d3uniform_nonvan_of_head14
+/-- Conditional uniform `∃ c` enclosure from the `1/4`-head hypothesis. -/
+theorem d3uniform_c_of_head14
+    (hHead : ∀ z ∈ door3RealSeg, (1 / 4 : ℝ) ≤ ‖∑ k ∈ Finset.range 102, d3EtaTerm (tailShiftedSReal z) k‖)
+    (hZeta : ∀ z ∈ door3RealSeg, (∑' m, d3EtaPairTerm (tailShiftedSReal z) m) = (1 - (2 : ℂ) ^ ((1 : ℂ) - tailShiftedSReal z)) * riemannZeta (tailShiftedSReal z)) :
+    ∃ c : ℝ, 0 < c ∧ ∀ z ∈ door3RealSeg, c ≤ ‖riemannZeta (tailShiftedSReal z)‖ :=
+  door3RealUniform_of_nonvan (d3uniform_nonvan_of_head14 hHead hZeta)
+#print axioms d3uniform_c_of_head14
