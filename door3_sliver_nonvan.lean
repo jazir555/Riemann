@@ -401,7 +401,7 @@ theorem sliver_conj_transfer_general (z : ℂ)
     (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
     (hz : xiShifted z ≠ 0) :
     xiShifted (star z) ≠ 0 :=
-  Door3ResidualScout.door3_conj_transfer hgt hlt hz
+  Door3ResidualScout.door3_conj_transfer (by linarith : (-1 / 2 : ℝ) < z.im) hlt hz
 
 /-- Bottom strip derived from a top strip via proved conjugation (allowed route).
 Needs `d ≤ 1` so the mirror point stays in the strip. -/
@@ -423,9 +423,11 @@ theorem sliver_bottom_of_top_via_conj (d : ℝ) (hd : 0 < d) (hdle : d ≤ 1)
   have him_hi : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im < (1 / 2 : ℝ) := by
     rw [him]
     linarith
+  have him_lo' : (-1 / 2 : ℝ) < ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im := by
+    linarith
   have hstar : xiShifted
       (star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))) ≠ 0 :=
-    Door3ResidualScout.door3_conj_transfer him_lo him_hi hne_mirror
+    Door3ResidualScout.door3_conj_transfer him_lo' him_hi hne_mirror
   have hbase : star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) =
       ((x : ℝ) : ℂ) + Complex.I * ((y : ℝ) : ℂ) := by
     have h := sliver_star_vertical x (-y)
@@ -502,11 +504,11 @@ theorem sliver_shortfall_bottom (mB : ℝ) (MB : ℝ) (hshort : mB / MB ≤ 0.01
 
 /-- Miss identity on top: the numeric miss `0.01 - mT / MT` equals the edge gap. -/
 theorem sliver_miss_top (mT : ℝ) (MT : ℝ) :
-    (0.01 : ℝ) - mT / MT = (0.49 : ℝ) - ((1 / 2 : ℝ) - mT / MT) := by ring
+    (0.01 : ℝ) - mT / MT = ((1 / 2 : ℝ) - mT / MT) - (0.49 : ℝ) := by ring
 
 /-- Miss identity on bottom (mirror). -/
 theorem sliver_miss_bottom (mB : ℝ) (MB : ℝ) :
-    (0.01 : ℝ) - mB / MB = (-(1 / 2 : ℝ) + mB / MB) - (-0.49 : ℝ) := by ring
+    (0.01 : ℝ) - mB / MB = (-0.49 : ℝ) - (-(1 / 2 : ℝ) + mB / MB) := by ring
 
 /-- End-to-end `hSliver` supply from explicit numeric edge data (both edges direct).
 Residual premises (genuinely unclosable suppliers): `hTopLower`, `hTopDeriv`,
