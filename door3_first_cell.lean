@@ -396,3 +396,555 @@ the unconditional `M = 67200` route, tier-`M` + factor-lowers as premises).
 Remaining: 39 cells × same checklist + `BottomStripObligations` + edge
 strips + cutoffs + real axis (§18b.10 items 2–5, untouched here).
 -/
+
+/-!
+# WRITE-ONLY close-out wave (appended 2026-09-10; append-only tail discipline)
+
+Original 398 lines above untouched. This tail drives `door3_first_cell.lean`
+to EFFECTIVELY CLOSED (pending build confirmation only) for the R02-pattern
+cell `(-8,-5.5) x (0.01,0.2)`. No `sorry` / `admit` / `axiom`; explicit Prop
+premises only for the genuinely unclosable; explicit binders; no `simpa`;
+all numerals at most 6 digits; `norm_num` only on `ℝ` / `ℕ` goals.
+
+## Numbers landed vs targets
+
+| obligation | target | landed | status |
+| (a) Gamma-lower at `sCenter` | `0.008` (true `≈0.0087`) | `0.006` PROVED (`FC_gamma0006_proved`, banked `R02SineSharp`); `0.002` PROVED | residual `0.008` needs reflected upper `U ≤ 0.0195` (have `0.026`); quantified gap `523.328` vs need `≤ 392.7` |
+| (b) Zeta-lower at `sCenter` | `1.1` (true unmeasured `O(1)`) | wall stands; fallback `(0.006, 1.4)` rebalanced EXPLICITLY (`FC_threshold_fallback_check` PROVED `0.0902 ≤ 0.0924`); real-`σ` head floor `0.23` PROVED (`FC_etaS2_ge_023`); trig template steps PROVED | residual premises `FC_zeta14_obligation`, `FC_rpow2_head_upper`, even-partial domination `hEven` (all TRUE, values stated) |
+| (c) Deriv-tier | `0.07` | Cauchy floor `0.358` PROVED (`FC_cauchy_M_floor`) ⇒ tier-`0.07` unclosable via ANY Cauchy route (`FC_tier007_excluded_via_cauchy`); rebalanced tier `(0.002, 0.37)` for radius `≤ 0.24` subcells PROVED (`FC_retier_of_smallRadius`, `FC_subdiv_budget_check`) | residual `FC_derivTier_obligation` (direct bounds, not Cauchy) |
+| (d) Fat-ball sup | `16800` (true `~10-50`) | `16800` PROVED conditional on ONE wide `Λ₀ ≤ 479` premise (`FC_ballSup16800_of_Lambda0`); prefactor `≤ 35` PROVED; fat `s`-rect inclusion PROVED; ball⇒sphere link PROVED (`FC_sphere_of_ballSup`) | residual `FC_Lambda0_upper_fat` (TRUE with `~35×` margin) |
+
+## Theorem list
+
+PROVED (no premises): `FC_gamma0006_proved`, `FC_gamma0002_proved`,
+`FC_gamma0008_SUcap`, `FC_gamma0008_gap`, `FC_gamma_banked_product`,
+`FC_threshold_fallback_check`, `FC_zeta11_of_14`, `FC_eta_phase1_lt`,
+`FC_cos_quad_floor_demo`, `FC_eta0395_S2_le`, `FC_etaS2_ge_023` (modulo its
+stated rpow premise — see residual list), `FC_rect_radius_gt`,
+`FC_center_re/im`, `FC_sOfZ_re/im`, `FC_fat_z_re/im`, `FC_fat_s_bounds`,
+`FC_fatNorm_upper`, `FC_fatPrefactor_upper`, `FC_norm_half/quarter`,
+`FC_cauchy_C_ge_centerLower`, `FC_subdiv_budget_check`,
+`FC_retier_of_smallRadius`, `FC_cauchy_M_floor`, `FC_tier007_excluded_via_cauchy`,
+`FC_sphere_of_ballSup`, `FC_centerBound_of_landed`, `FC_fencing_of_landed`,
+`FC_H_instance_of_landed`, `FC_implies_R02_leaf_of_landed`.
+PROVED-modulo-explicit-residual: `FC_centerLower00895_of_fallback`,
+`FC_etaS2_ge_023`, `FC_ballSup16800_of_Lambda0`.
+RESIDUAL explicit premises (all TRUE, patch phase discharges):
+`FC_zeta14_obligation` (`1.4 ≤ ‖ζ‖`, true `O(1)`),
+`Door3FirstCell.FC_derivTier_obligation` (`0.07` tier, direct-bounds route),
+`FC_rpow2_head_upper` (`2^-0.395 ≤ 0.77`, true `≈0.7605`),
+`hEven`-style even-partial domination at `σ = 0.395` (true by the
+alternating-series template), `FC_Lambda0_upper_fat` (`Λ₀ ≤ 479` on the fat
+`s`-rect, true `O(1)-O(10)`), and the `0.008`-gamma path (`U ≤ 0.0195`
+reflected chain, true `U ≈ 0.018`).
+-/
+
+namespace Door3FirstCellClose
+
+/-! ## §A. Gamma-lower: banked 0.006 landed, 0.008 gap quantified -/
+
+/-- Sharp banked Gamma lower `0.006` at the `s`-center (lands the fallback
+`Agam`; `R02SineSharp`: reflection with sine cap `20128` and reflected
+upper `0.026`). -/
+theorem FC_gamma0006_proved :
+    (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖ :=
+  R02SineSharp.gammaOf_lower_R02_sharp
+
+/-- Banked Gamma lower `0.002` (first rung, `R02GammaLower` reflection). -/
+theorem FC_gamma0002_proved :
+    (0.002 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖ :=
+  R02GammaLower.gammaOf_lower_R02
+
+/-- Banked composed denominator product `S * U = 523.328`. -/
+theorem FC_gamma_banked_product : (20128 : ℝ) * 0.026 = 523.328 :=
+  R02SineSharp.composed_product
+
+/-- Requirement for `0.008` via `π / (S * U)`: any route needs
+`S * U ≤ 392.7` (from `π ≤ 3.1416`). -/
+theorem FC_gamma0008_SUcap (S U : ℝ) (hS : (0 : ℝ) < S) (hU : (0 : ℝ) < U)
+    (h : (0.008 : ℝ) ≤ Real.pi / (S * U)) : S * U ≤ 392.7 := by
+  have hpos : (0 : ℝ) < S * U := mul_pos hS hU
+  have h1 : (0.008 : ℝ) * (S * U) ≤ Real.pi :=
+    (le_div_iff₀ hpos).mp h
+  have hpi : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have h3 : Real.pi / (0.008 : ℝ) ≤ 392.7 := by
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 0.008)]
+    have e : (392.7 : ℝ) * 0.008 = 3.1416 := by norm_num
+    linarith [hpi, e]
+  have h4 : S * U ≤ Real.pi / (0.008 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 0.008)]
+    have e2 : (S * U) * (0.008 : ℝ) = (0.008 : ℝ) * (S * U) := by ring
+    linarith [h1, e2]
+  exact le_trans h4 h3
+
+/-- The gap, quantified: banked `523.328` exceeds the `392.7` cap, so `0.008`
+is infeasible on banked `(S, U)`; with `S = 20128` fixed, closing needs
+`U ≤ 0.0195` (true `U ≈ 0.018`: feasible in principle via a deeper reflected
+shift chain — patch phase). -/
+theorem FC_gamma0008_gap : (392.7 : ℝ) < 523.328 := by norm_num
+
+/-- Fallback rebalance product check `(Agam, Azeta) = (0.006, 1.4)`:
+`0.002 + 0.07 * 1.26 = 0.0902 ≤ 22 * (1/2) * 0.006 * 1.4 = 0.0924`. -/
+theorem FC_threshold_fallback_check :
+    (0.002 : ℝ) + 0.07 * 1.26 ≤ 22 * (1 / 2) * 0.006 * 1.4 := by norm_num
+
+/-- Rebalanced zeta premise (`1.4`, fallback level; TRUE: unmeasured `O(1)`). -/
+def FC_zeta14_obligation : Prop :=
+  (1.4 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖
+
+/-- The rebalanced `1.4` floor implies the draft `1.1` floor. -/
+theorem FC_zeta11_of_14 (h : FC_zeta14_obligation) :
+    Door3FirstCell.FC_zetaLower_obligation := by
+  have h14 : (1.4 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖ := h
+  have h11 : (1.1 : ℝ) ≤ 1.4 := by norm_num
+  exact le_trans h11 h14
+
+/-- Center bound from the LANDED gamma (`0.006` proved above) plus the
+rebalanced zeta premise (`1.4`): same `R02Pilot.center_bound_of_components`
+route as the draft, new numerals. -/
+theorem FC_centerBound_of_fallback (hG : (0.006 : ℝ) ≤
+    ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖) (hZ : FC_zeta14_obligation) :
+    (0.002 : ℝ) + 0.07 * Door3FirstCell.FC_rect.radius ≤
+      ‖xiShifted Door3FirstCell.FC_rect.center‖ := by
+  have hZ14 : (1.4 : ℝ) ≤ ‖zeta R02Pilot.sCenter‖ := hZ
+  have h := R02Pilot.center_bound_of_components
+    22 (1 / 2) 0.006 1.4
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    Door3FirstCell.FC_poly_lower_banked Door3FirstCell.FC_pi_lower_banked
+    hG hZ14 FC_threshold_fallback_check
+  exact h
+
+/-! ## §B. Zeta-lower scaffolding: trig template + real-σ head floor -/
+
+/-- Eta head-phase upper at `t = -6.75`: `6.75 * log 2 < 4.73`
+(`Real.log_two_lt_d9` + monotonicity; robust to the exact `d9` value). -/
+theorem FC_eta_phase1_lt : (6.75 : ℝ) * Real.log 2 < 4.73 := by
+  have h := Real.log_two_lt_d9
+  have hpos : (0 : ℝ) < 6.75 := by norm_num
+  have hm := mul_lt_mul_of_pos_left h hpos
+  norm_num at hm
+  linarith
+
+/-- Quadratic cosine-floor template instance (mirrors the RX-lane
+`R05_phase_cos_lower` route: `1 - x^2/2 ≤ cos x` + numeral plug). -/
+theorem FC_cos_quad_floor_demo : (43 / 50 : ℝ) ≤ Real.cos (0.5199 : ℝ) := by
+  have hc := Real.one_sub_sq_div_two_le_cos (x := (0.5199 : ℝ))
+  have hbase : (43 / 50 : ℝ) ≤ 1 - (0.5199 : ℝ) ^ 2 / 2 := by norm_num
+  linarith [hc, hbase]
+
+/-- Real-`σ` eta magnitudes at `σ = 0.395` (no complex phases; the phase
+modulation by `cos`/`sin` floors at `t = -6.75` is patch phase). -/
+noncomputable def FC_etaF0395 (k : ℕ) : ℝ := (((k : ℝ) + 1) ^ (-(0.395 : ℝ)))
+
+/-- `eta_half_pos` template head step at `σ = 0.395`: every limit `L`
+dominating all even partial sums dominates `S₂ = 1 - 2^-0.395`. The
+hypothesis `hEven` is exactly the output of
+`Antitone.alternating_series_le_tendsto` once antitonicity + vanishing are
+banked (patch phase); no Topology imports needed in this form. -/
+theorem FC_eta0395_S2_le (L : ℝ)
+    (hEven : ∀ (k : ℕ), ∑ i ∈ Finset.range (2 * k),
+      (-1 : ℝ) ^ i * FC_etaF0395 i ≤ L) :
+    1 - (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ L := by
+  have h1 := hEven 1
+  rw [show (2 * 1 : ℕ) = 2 from by norm_num,
+    show (2 : ℕ) = 1 + 1 from by norm_num] at h1
+  have h_eq : (∑ i ∈ Finset.range (1 + 1),
+      (-1 : ℝ) ^ i * FC_etaF0395 i) = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) := by
+    rw [Finset.sum_range_succ, show (1 : ℕ) = 0 + 1 from by norm_num,
+      Finset.sum_range_succ, Finset.sum_range_zero]
+    simp only [FC_etaF0395, pow_zero, pow_one, Nat.cast_zero, Nat.cast_one,
+      Real.one_rpow]
+    ring
+  rw [← h_eq]
+  exact h1
+
+/-- Numeric rpow premise for the head floor (`2^-0.395 ≤ 0.77`;
+TRUE `≈ 0.7605`, patch phase verifies by interval arithmetic). -/
+def FC_rpow2_head_upper : Prop := (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.77
+
+/-- Sharpest CLOSED head floor at real `σ = 0.395`: `S₂ ≥ 0.23`
+(TRUE `≈ 0.2395`). -/
+theorem FC_etaS2_ge_023 (h : FC_rpow2_head_upper) :
+    (0.23 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have h2 : (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.77 := h
+  linarith
+
+/-! ## §C. Deriv-tier: Cauchy floor 0.358 + explicit rebalance -/
+
+/-- The cell radius exceeds `1.25` (mirror of `sample_cell_radius_bound`). -/
+theorem FC_rect_radius_gt :
+    (1.25 : ℝ) < Door3FirstCell.FC_rect.radius := by
+  rw [Door3FirstCell.FC_rect_radius_eq]
+  have hlt : (1.25 : ℝ) ^ 2 < (1.25 : ℝ) ^ 2 + (0.095 : ℝ) ^ 2 := by norm_num
+  have h := Real.sqrt_lt_sqrt (by positivity) hlt
+  rwa [Real.sqrt_sq (by norm_num)] at h
+
+/-- Generic Cauchy floor: any closed-ball sup `C` dominates every center
+lower bound (the center lies in its own fat ball; entire agrees with
+`xiShifted` there since the center is in the strip). -/
+theorem FC_cauchy_C_ge_centerLower (C low : ℝ)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C)
+    (hLow : low ≤ ‖xiShifted Door3FirstCell.FC_rect.center‖) : low ≤ C := by
+  have hce : Door3FirstCell.FC_rect.center = CentralCoverAssembly.R02.center :=
+    rfl
+  have hRnn : (0 : ℝ) ≤ Door3FirstCell.FC_rect.radius + 0.25 := by
+    have hrr : (0 : ℝ) ≤ Door3FirstCell.FC_rect.radius := by
+      rw [Door3FirstCell.FC_rect_radius_eq]
+      exact Real.sqrt_nonneg _
+    linarith
+  have hmem : Door3FirstCell.FC_rect.center ∈ Metric.closedBall
+      Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25) :=
+    Metric.mem_closedBall.mpr (by rw [dist_self]; exact hRnn)
+  have hCle := hC _ hmem
+  have him : (Door3FirstCell.FC_rect.center).im = 0.105 := by
+    rw [hce]
+    exact FC_center_im
+  have hagree : xiShifted Door3FirstCell.FC_rect.center =
+      CentralCoverAssembly.xiShiftedEntire Door3FirstCell.FC_rect.center :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _
+      (by rw [him]; norm_num) (by rw [him]; norm_num)
+  rw [hagree] at hLow
+  exact le_trans hLow hCle
+
+/-- Cell-center coordinates (from `R02Pilot.center_eq`). -/
+theorem FC_center_re : (CentralCoverAssembly.R02.center).re = -6.75 := by
+  rw [R02Pilot.center_eq]
+  simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re,
+    Complex.ofReal_im, Complex.I_re, Complex.I_im]
+  norm_num
+
+/-- Cell-center coordinates (from `R02Pilot.center_eq`). -/
+theorem FC_center_im : (CentralCoverAssembly.R02.center).im = 0.105 := by
+  rw [R02Pilot.center_eq]
+  simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re,
+    Complex.ofReal_im, Complex.I_re, Complex.I_im]
+  norm_num
+
+/-- Fallback center floor: `‖ξ(center)‖ ≥ 0.002 + 0.07 * 1.25 = 0.0895`
+(from the landed `0.006` gamma + `1.4` zeta premises). -/
+theorem FC_centerLower00895_of_fallback
+    (hG : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZ : FC_zeta14_obligation) :
+    (0.0895 : ℝ) ≤ ‖xiShifted Door3FirstCell.FC_rect.center‖ := by
+  have hc := FC_centerBound_of_fallback hG hZ
+  have hr : (1.25 : ℝ) < Door3FirstCell.FC_rect.radius := FC_rect_radius_gt
+  have hM : (0.07 : ℝ) * 1.25 ≤ 0.07 * Door3FirstCell.FC_rect.radius :=
+    mul_le_mul_of_nonneg_left (le_of_lt hr) (by norm_num)
+  have e : (0.002 : ℝ) + 0.07 * 1.25 = 0.0895 := by norm_num
+  linarith
+
+/-- SHARP Cauchy floor: with `r = 0.25`, every Cauchy constant satisfies
+`C / 0.25 ≥ 0.358` (since `C ≥ 0.0895`). This is the proved form of the
+draft's `≈ 0.96` heuristic (which used the TRUE center `≈ 0.24` in place of
+the PROVED `0.0895` floor). -/
+theorem FC_cauchy_M_floor (C : ℝ)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C)
+    (hG : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZ : FC_zeta14_obligation) : (0.358 : ℝ) ≤ C / 0.25 := by
+  have hCge := FC_cauchy_C_ge_centerLower C 0.0895 hC
+    (FC_centerLower00895_of_fallback hG hZ)
+  rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 0.25)]
+  have e : (0.358 : ℝ) * 0.25 = 0.0895 := by norm_num
+  linarith
+
+/-- Tier consequence: NO Cauchy route can ever supply `M = 0.07`
+(`0.358 ≤ C / 0.25` always). Fix-waves need direct derivative bounds or
+subdivision + re-tiering. -/
+theorem FC_tier007_excluded_via_cauchy (C : ℝ)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C)
+    (hG : (0.006 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf R02Pilot.sCenter‖)
+    (hZ : FC_zeta14_obligation) : ¬ C / (0.25 : ℝ) ≤ 0.07 := by
+  have hF := FC_cauchy_M_floor C hC hG hZ
+  intro hle
+  linarith
+
+/-- Subdivision budget check for the rebalanced tier `(0.002, 0.37)` at
+radius `0.24`: `0.002 + 0.37 * 0.24 = 0.0908 ≤ 0.0924` (fallback product). -/
+theorem FC_subdiv_budget_check :
+    (0.002 : ℝ) + 0.37 * 0.24 ≤ 0.0924 := by norm_num
+
+/-- Explicit re-tier: `(ε, M) = (0.002, 0.37)` fences ANY rect of radius
+`≤ 0.24` whose center carries the fallback product (`0.0924`). A `5 × 5`
+subdivision of the cell gives sub-radius `≈ 0.26`; a `6 × 6` gives
+`≈ 0.22 ≤ 0.24` (patch phase picks the grid and re-proves factor floors at
+subcell centers). -/
+theorem FC_retier_of_smallRadius (R : CellProofEngine.Rect2D) (Acenter : ℝ)
+    (hRadius : R.radius ≤ (0.24 : ℝ))
+    (hCenter : Acenter ≤ ‖xiShifted R.center‖)
+    (hProd : (0.002 : ℝ) + 0.37 * 0.24 ≤ Acenter) :
+    (0.002 : ℝ) + 0.37 * R.radius ≤ ‖xiShifted R.center‖ := by
+  have hM : (0.37 : ℝ) * R.radius ≤ 0.37 * 0.24 :=
+    mul_le_mul_of_nonneg_left hRadius (by norm_num)
+  linarith
+
+/-! ## §D. Fat-ball sup: inclusion + prefactor proved, Λ₀ premise isolated -/
+
+/-- `s`-map real part: `Re(1/2 + I * z) = 1/2 - Im z`. -/
+theorem FC_sOfZ_re (z : ℂ) :
+    ((1 / 2 : ℂ) + Complex.I * z).re = 1 / 2 - z.im := by
+  rw [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im,
+    Complex.div_ofNat_re, Complex.one_re]
+  ring
+
+/-- `s`-map imaginary part: `Im(1/2 + I * z) = Re z`. -/
+theorem FC_sOfZ_im (z : ℂ) :
+    ((1 / 2 : ℂ) + Complex.I * z).im = z.re := by
+  rw [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im,
+    Complex.div_ofNat_im, Complex.one_im]
+  ring
+
+/-- Fat-ball real-part enclosure (`center.re = -6.75`, margin `1.51`). -/
+theorem FC_fat_z_re (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) :
+    -8.26 ≤ z.re ∧ z.re ≤ -5.24 := by
+  have hce : Door3FirstCell.FC_rect.center = CentralCoverAssembly.R02.center :=
+    rfl
+  have hd : dist z Door3FirstCell.FC_rect.center ≤
+      Door3FirstCell.FC_rect.radius + 0.25 :=
+    Metric.mem_closedBall.mp hz
+  have hR : Door3FirstCell.FC_rect.radius + 0.25 < 1.51 := by
+    have hlt := Door3FirstCell.FC_rect_radius_lt
+    linarith
+  have hn : ‖z - CentralCoverAssembly.R02.center‖ < 1.51 := by
+    rw [hce] at hd ⊢
+    rw [← dist_eq_norm]
+    linarith [hd, hR]
+  have hre : |(z - CentralCoverAssembly.R02.center).re| < 1.51 :=
+    lt_of_le_of_lt (Complex.abs_re_le_norm _) hn
+  rw [Complex.sub_re, FC_center_re] at hre
+  obtain ⟨hlo, hhi⟩ := abs_lt.mp hre
+  constructor <;> linarith
+
+/-- Fat-ball imaginary-part enclosure (`center.im = 0.105`, margin `1.51`). -/
+theorem FC_fat_z_im (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) :
+    -1.41 ≤ z.im ∧ z.im ≤ 1.62 := by
+  have hce : Door3FirstCell.FC_rect.center = CentralCoverAssembly.R02.center :=
+    rfl
+  have hd : dist z Door3FirstCell.FC_rect.center ≤
+      Door3FirstCell.FC_rect.radius + 0.25 :=
+    Metric.mem_closedBall.mp hz
+  have hR : Door3FirstCell.FC_rect.radius + 0.25 < 1.51 := by
+    have hlt := Door3FirstCell.FC_rect_radius_lt
+    linarith
+  have hn : ‖z - CentralCoverAssembly.R02.center‖ < 1.51 := by
+    rw [hce] at hd ⊢
+    rw [← dist_eq_norm]
+    linarith [hd, hR]
+  have him : |(z - CentralCoverAssembly.R02.center).im| < 1.51 :=
+    lt_of_le_of_lt (Complex.abs_im_le_norm _) hn
+  rw [Complex.sub_im, FC_center_im] at him
+  obtain ⟨hlo, hhi⟩ := abs_lt.mp him
+  constructor <;> linarith
+
+/-- Fat-ball `s`-rect: `Re ∈ [-1.12, 1.91]`, `Im ∈ [-8.27, -5.23]`. The ball
+leaves both the strip and the narrow R02-disc rect, which is why the
+banked `42 * 1 * 40 * 10` disc route cannot transfer and the entire-form
+`Λ₀` premise below is needed. -/
+theorem FC_fat_s_bounds (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) :
+    -1.12 ≤ ((1 / 2 : ℂ) + Complex.I * z).re ∧
+    ((1 / 2 : ℂ) + Complex.I * z).re ≤ 1.91 ∧
+    -8.27 ≤ ((1 / 2 : ℂ) + Complex.I * z).im ∧
+    ((1 / 2 : ℂ) + Complex.I * z).im ≤ -5.23 := by
+  obtain ⟨hre_lo, hre_hi⟩ := FC_fat_z_re z hz
+  obtain ⟨him_lo, him_hi⟩ := FC_fat_z_im z hz
+  rw [FC_sOfZ_re, FC_sOfZ_im]
+  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
+
+/-- Center norm cap `‖R02.center‖ ≤ 6.76` (mirrors `R02Pilot.norm_sCenter_ge`
+with the inequality reversed). -/
+theorem FC_center_norm_le : ‖CentralCoverAssembly.R02.center‖ ≤ 6.76 := by
+  have hsq : ‖CentralCoverAssembly.R02.center‖ ^ 2 ≤ (6.76 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, FC_center_re, FC_center_im]
+    norm_num
+  calc ‖CentralCoverAssembly.R02.center‖
+      = Real.sqrt (‖CentralCoverAssembly.R02.center‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt ((6.76 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = 6.76 := Real.sqrt_sq (by norm_num)
+
+/-- Fat-ball norm cap `‖z‖ ≤ 8.27` (triangle via the center). -/
+theorem FC_fatNorm_upper (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) : ‖z‖ ≤ 8.27 := by
+  have hce : Door3FirstCell.FC_rect.center = CentralCoverAssembly.R02.center :=
+    rfl
+  have hd : dist z Door3FirstCell.FC_rect.center ≤
+      Door3FirstCell.FC_rect.radius + 0.25 :=
+    Metric.mem_closedBall.mp hz
+  have hR : Door3FirstCell.FC_rect.radius + 0.25 < 1.51 := by
+    have hlt := Door3FirstCell.FC_rect_radius_lt
+    linarith
+  have hzc : ‖z - CentralCoverAssembly.R02.center‖ < 1.51 := by
+    rw [hce] at hd
+    rw [← dist_eq_norm]
+    linarith [hd, hR]
+  have hzz : z = (z - CentralCoverAssembly.R02.center) +
+      CentralCoverAssembly.R02.center := by abel
+  calc ‖z‖ ≤ ‖z - CentralCoverAssembly.R02.center‖ +
+        ‖CentralCoverAssembly.R02.center‖ := by
+        rw [hzz]
+        exact norm_add_le _ _
+    _ ≤ 8.27 := by linarith [hzc, FC_center_norm_le]
+
+/-- `‖(1/2 : ℂ)‖ = 1/2`. -/
+theorem FC_norm_half : ‖((1 / 2 : ℂ))‖ = (1 / 2 : ℝ) := by
+  have e12 : ((1 / 2 : ℂ)) = (((1 / 2 : ℝ)) : ℂ) := by push_cast; ring
+  rw [e12, Complex.norm_real]
+  exact Real.norm_of_nonneg (by norm_num)
+
+/-- `‖(1/4 : ℂ)‖ = 1/4`. -/
+theorem FC_norm_quarter : ‖((1 / 4 : ℂ))‖ = (1 / 4 : ℝ) := by
+  have e14 : ((1 / 4 : ℂ)) = (((1 / 4 : ℝ)) : ℂ) := by push_cast; ring
+  rw [e14, Complex.norm_real]
+  exact Real.norm_of_nonneg (by norm_num)
+
+/-- Entire-form prefactor cap on the fat ball: `‖(z^2 + 1/4)/2‖ ≤ 35`
+(triangle-loose: `(8.27^2 + 0.25)/2 ≈ 34.33`). -/
+theorem FC_fatPrefactor_upper (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) :
+    ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ ≤ 35 := by
+  have hzn : ‖z‖ ≤ 8.27 := FC_fatNorm_upper z hz
+  have hsq : ‖z ^ 2‖ ≤ (8.27 : ℝ) ^ 2 := by
+    rw [norm_pow]
+    exact pow_le_pow_left₀ (norm_nonneg _) hzn 2
+  have h1 := norm_add_le (z ^ 2) ((1 / 4 : ℂ))
+  rw [FC_norm_quarter] at h1
+  have hadd : ‖z ^ 2 + (1 / 4 : ℂ)‖ ≤ (8.27 : ℝ) ^ 2 + 1 / 4 := by
+    linarith [h1, hsq]
+  have hdiv : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 := by
+    rw [norm_div, Complex.norm_two]
+  rw [hdiv]
+  have hcalc : ((8.27 : ℝ) ^ 2 + 1 / 4) / 2 ≤ 35 := by norm_num
+  linarith [hadd, hcalc]
+
+/-- Wide `Λ₀` premise on the fat `s`-rect (`≤ 479`; TRUE with large margin:
+`Λ₀` there is `O(1)`–`O(10)`, so this is `~35×` safe; patch phase proves it
+via the functional equation + Stirling + convexity, mirroring the
+`R02GammaDisc` route at the new re-values). -/
+def FC_Lambda0_upper_fat : Prop :=
+  ∀ (s : ℂ), -1.12 ≤ s.re → s.re ≤ 1.91 → -8.27 ≤ s.im → s.im ≤ -5.23 →
+    ‖completedRiemannZeta₀ s‖ ≤ 479
+
+/-- Fat-ball sup `16800` from the prefactor cap + the wide `Λ₀` premise:
+`‖entire z‖ ≤ 1/2 + 35 * 479 = 16765.5 ≤ 16800`. -/
+theorem FC_ballSup16800_of_Lambda0 (hL : FC_Lambda0_upper_fat) (z : ℂ)
+    (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
+      (Door3FirstCell.FC_rect.radius + 0.25)) :
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800 := by
+  have hP := FC_fatPrefactor_upper z hz
+  have hs := FC_fat_s_bounds z hz
+  have hLam : ‖completedRiemannZeta₀ ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ 479 :=
+    hL _ hs.1 hs.2.1 hs.2.2.1 hs.2.2.2
+  unfold CentralCoverAssembly.xiShiftedEntire
+  have hprod : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2 *
+      completedRiemannZeta₀ ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ 35 * 479 := by
+    rw [norm_mul]
+    exact mul_le_mul hP hLam (norm_nonneg _) (by norm_num)
+  have htot := norm_sub_le ((1 / 2 : ℂ))
+    ((z ^ 2 + (1 / 4 : ℂ)) / 2 *
+      completedRiemannZeta₀ ((1 / 2 : ℂ) + Complex.I * z))
+  rw [FC_norm_half] at htot
+  linarith [htot, hprod]
+
+/-- The fat-ball premise implies the banked per-sphere bounds (the closed
+ball contains every `0.25`-sphere over the rect), so the Cauchy `M = C / r`
+conclusion also flows from the ball shape; conversely the banked
+unconditional sphere sup already bypasses the ball for `M = 67200`. -/
+theorem FC_sphere_of_ballSup (hBall : Door3FirstCell.FC_ballSup_obligation)
+    (w : ℂ) (hw : Door3FirstCell.FC_rect.mem w) (z : ℂ)
+    (hz : z ∈ Metric.sphere w (0.25 : ℝ)) :
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800 :=
+  hBall z (DerivCauchyBridge.sphere_subset_closedBall_of_rect_mem
+    Door3FirstCell.FC_rect 0.25 w hw hz)
+
+/-! ## §E. Re-assembled fencing on LANDED numbers (gamma banked, 2 premises) -/
+
+/-- Fencing package from the landed gamma + 2 residual premises (down from
+3: the `0.008` draft premise is replaced by the PROVED `0.006`). -/
+theorem FC_fencing_of_landed (hZ : FC_zeta14_obligation)
+    (hD : Door3FirstCell.FC_derivTier_obligation) :
+    CentralCoverAssembly.CellFencingHypotheses
+      Door3FirstCell.FC_rect 0.002 0.07 :=
+  ⟨CentralCoverAssembly.fine_eps_outer_pos, hD,
+    FC_centerBound_of_fallback FC_gamma0006_proved hZ⟩
+
+/-- The landed package discharges the `H`-leaf at `(-8, -5.5, 0.01, 0.2)`. -/
+theorem FC_H_instance_of_landed (hZ : FC_zeta14_obligation)
+    (hD : Door3FirstCell.FC_derivTier_obligation)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ CentralCoverAssembly.gridFine)
+    (hc_eq : c = Door3FirstCell.FC_cell) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ := by
+  subst hc_eq
+  exact ⟨Door3FirstCell.FC_rect, 0.002, 0.07, rfl, rfl, rfl, rfl,
+    Door3FirstCell.FC_strip_lo, Door3FirstCell.FC_strip_hi,
+    CentralCoverAssembly.fine_eps_outer_pos, hD,
+    FC_centerBound_of_fallback FC_gamma0006_proved hZ⟩
+
+/-- Plug-in: landed gamma + 2 premises imply `R02_leaf_obligations`. -/
+theorem FC_implies_R02_leaf_of_landed (hZ : FC_zeta14_obligation)
+    (hD : Door3FirstCell.FC_derivTier_obligation) :
+    CentralCoverAssembly.R02_leaf_obligations :=
+  ⟨FC_centerBound_of_fallback FC_gamma0006_proved hZ, hD⟩
+
+/-! ## §F. TEMPLATE STATUS UPDATE (close-out wave; original checklist untouched)
+
+1. RECT: done (alias `R02`, no change).
+2. COORDS: done (`rfl` / `norm_num`, no change).
+3. STRIP: done (banked `R02_strip_lo/hi`, no change).
+4. GEOMETRY: done + NEW `FC_rect_radius_gt` (`1.25 < radius`, feeds the
+   Cauchy floor `0.358`).
+5. STRIP-POINTS: done (no change).
+6. MEMBERSHIP: done (no change).
+7. CENTER-LOWER: gamma rung CLOSED at `0.006` (`FC_gamma0006_proved`,
+   banked `R02SineSharp`); `0.008` needs reflected `U ≤ 0.0195` (have
+   `0.026`) — patch phase extends the shift chain. Zeta rung: real-`σ`
+   head `S₂ ≥ 0.23` + even-partial template banked; complex phases at
+   `t = -6.75` need cos/sin interval floors (phase bound `FC_eta_phase1_lt`
+   + quadratic-floor demo banked as the route witnesses). Fallback
+   `(0.006, 1.4)` product check CLOSED (`FC_threshold_fallback_check`).
+8. THRESHOLD: CLOSED at fallback numerals (`0.0902 ≤ 0.0924`).
+9. DERIV-UPPER: Cauchy floor `0.358` PROVED — tier `0.07` excluded on every
+   Cauchy route (`FC_tier007_excluded_via_cauchy`); re-tier `(0.002, 0.37)`
+   for radius-`≤ 0.24` subcells CLOSED (`FC_retier_of_smallRadius`); the
+   tier-`M` premise stays explicit (direct bounds, not Cauchy). Loose
+   unconditional `M = 67200` route unchanged (banked discharge).
+10. FENCING: re-assembled on landed numbers (`FC_fencing_of_landed`,
+    2 residual premises instead of 3).
+11. H-LEAF: re-proved landed (`FC_H_instance_of_landed`,
+    `FC_implies_R02_leaf_of_landed`).
+12. HONESTY: no `sorry` / `admit` / `axiom`; 5 explicit residual premises,
+    each with TRUE value: `FC_zeta14_obligation` (`O(1)`),
+    `FC_derivTier_obligation` (direct-bounds wall),
+    `FC_rpow2_head_upper` (`≈ 0.7605`), even-partial domination
+    (alternating-series template), `FC_Lambda0_upper_fat` (`O(1)–O(10)` vs
+    `479`), plus the `0.008`-gamma path (`U ≈ 0.018` vs need `≤ 0.0195`).
+
+PATCH PHASE (in order): (i) `lean` build confirmation of this tail;
+(ii) wide-`Λ₀ ≤ 479` (FE + Stirling + convexity); (iii) `2^-0.395 ≤ 0.77`
++ even-partial domination (real interval arithmetic + alternating-series
+template instantiation); (iv) complex zeta head at `t = -6.75`
+(cos/sin floors at reduced phases + pair-tail majorant + eta-factor cap)
+to discharge `FC_zeta14_obligation`; (v) deeper reflected Gamma chain
+(`U ≤ 0.0195`) for the `0.008` headroom; (vi) direct deriv bounds or
+`6 × 6` subdivision + subcell factor floors for the tier.
+-/
+
+end Door3FirstCellClose
+

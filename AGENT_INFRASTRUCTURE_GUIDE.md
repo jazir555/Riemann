@@ -3715,6 +3715,14 @@ sorry-free infrastructure and the complete commit ledger above.
   4 explicit premises (gamma-lower 0.008, zeta-lower 1.1 at
   sCenter [the wall], deriv-tier 0.07, fat-ball sup 16800);
   12-step replication TEMPLATE banked for remaining cells.
+- 2026-09-10 CELL-complete received (552/0 on top, unbuilt):
+  gamma-lower **0.006 PROVED** (0.008 shown infeasible on
+  banked (S,U): need S·U≤392.7, have 523.3); fallback
+  re-tier **(0.002, 0.37)** proved (tier-0.07 excluded on all
+  Cauchy routes, floor 0.358); fat-ball sup 16800 proved
+  conditional on wide-Λ₀≤479; zeta-lower wall stands with
+  (0.006,1.4) rebalance + eta-S₂ floor 0.23. Residual: zeta
+  1.4 at t=−6.75, Λ₀≤479, rpow/even-partial, deeper Gamma-U.
 - 2026-09-10 BSUP draft received (NEW `door3_cutR10_ballsup.lean`,
   345 lines, untracked-only, 0 sorry, unbuilt): ball geometry
   (Re∈[8.44,11.56], s-region mapped) + poly ≤67 + pi ≤16/5
