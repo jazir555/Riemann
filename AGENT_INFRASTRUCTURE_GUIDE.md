@@ -3756,6 +3756,15 @@ sorry-free infrastructure and the complete commit ledger above.
   tail + bridge), `hProdCap` via ST half-count, then
   fencing renegotiation (`M=12.87` needs ε+M·0.56≈7.21
   center — infeasible; switch tier/ball/leaf).
+- 2026-09-10 TIER decision (`58af9dc4`, NEW retier file, 233
+  lines, 0 sorry, unbuilt): Tier A (honest M=12.87) PROVED
+  infeasible (need 7.2082 vs floor/true); Tier B (ρ=0.001
+  subdivision) feasible-held as fallback; **Tier C
+  RECOMMENDED: keep (0.001,0.04), thin s-rect deriv bridge**
+  (need 0.0234 vs floor 0.0263, margin ~11%; vs true 0.038,
+  ~38%). Patch: land `sRectZetaSup+sRectGammaSup`
+  (Re∈[0.01,0.99], Im∈[9.75,10.25]) → `thinDerivRemainder
+  0.04`; rewire fencing consumers to `tierC_thin_fencing`.
 - 2026-09-10 lakefile registers all 4 new modules
   (ballsup/sliver/cutL10/first_cell, roots+globs).
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
