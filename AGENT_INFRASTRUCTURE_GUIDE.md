@@ -3605,6 +3605,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (18.52) → **K0 20.27 → C=49 → global 515** (was 525;
   edge `525−515=10`). Slack to 48-linear ~0.40.
   Residual: N=7 peel → 505 (ZU31).
+- 2026-09-09 ZU31 (`65ea4104`, zeta tail, 6× green 8693 jobs):
+  N=7 head + M=7 integral (18.2) → **K0 20.12** (was 20.27) +
+  gap verdict. Brief's 505 numbers DISPROVED by computation
+  (true integral ≈18.146>18.0; total ≈20.044>20.0). Best stays
+  515. Peel treadmill near end (each N buys ~0.15).
+  Residual: denom lift 0.414→0.42 → 505 (ZU32); N=11 fallback.
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
