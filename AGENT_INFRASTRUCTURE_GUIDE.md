@@ -3736,6 +3736,13 @@ sorry-free infrastructure and the complete commit ledger above.
   4 explicit premises (gamma-lower 0.008, zeta-lower 1.1 at
   sCenter [the wall], deriv-tier 0.07, fat-ball sup 16800);
   12-step replication TEMPLATE banked for remaining cells.
+- 2026-09-10 CELL-SUP received (`e8f9f7d3`, NEW 694 lines,
+  0 sorry, unbuilt): rpow `2^-0.395≤0.77` CLOSED; phase cap
+  4.679 + cos-floor + S₂≥0.23 proved; Λ₀ packaged as
+  FE-step (sufficient); 0.008-bridge proved conditional
+  (20128×0.0195=392.496≤392.7). HONEST: 1.4 does NOT close
+  at N=2 (slow ~1.03 vs need 3.542; phase-aware factor ≤1
+  FALSE, need 2.53) — needs larger-N slow + pair-tail.
 - 2026-09-10 batches A+B received (`9185b068`, NEW files,
   722+1170 lines, 0 sorry, unbuilt): A = 3 bottom-row cells
   (BA00/03/04, 6 premises each, thresholds proved, Cauchy
