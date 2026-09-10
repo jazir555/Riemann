@@ -1420,3 +1420,31 @@ theorem D3SG_TierC_gamma_rect (s : ℂ)
     _ = 60 * Real.exp (-(1 / 2) * |s.im|) := by rw [e]
 
 #print axioms D3SG_TierC_gamma_rect
+
+/-- Uniform sliver cap `Γ σ ≤ 200` on `[0.005,0.05]` (shift + `[1,2]` cap). -/
+theorem D3SG_Real_Gamma_uniform_0005_005_le_200 (σ : ℝ)
+    (hlo : 0.005 ≤ σ) (hhi : σ ≤ 0.05) :
+    Real.Gamma σ ≤ 200 := by
+  have hpos : (0 : ℝ) < σ := by linarith
+  have hne : σ ≠ 0 := ne_of_gt hpos
+  have hshift : Real.Gamma (σ + 1) = σ * Real.Gamma σ :=
+    Real.Gamma_add_one hne
+  have h1 : (1 : ℝ) ≤ σ + 1 := by linarith
+  have h2 : σ + 1 ≤ 2 := by linarith
+  have hcap : Real.Gamma (σ + 1) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one (σ + 1) h1 h2
+  have hdiv : Real.Gamma σ = Real.Gamma (σ + 1) / σ := by
+    rw [eq_div_iff_mul_eq hne]
+    rw [hshift]
+    ring
+  have h1div : Real.Gamma (σ + 1) / σ ≤ 1 / σ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hpos))
+  have h200 : (1 : ℝ) / σ ≤ 200 := by
+    rw [div_le_iff₀ hpos]
+    linarith
+  calc Real.Gamma σ = Real.Gamma (σ + 1) / σ := hdiv
+    _ ≤ 1 / σ := h1div
+    _ ≤ 200 := h200
+
+#print axioms D3SG_Real_Gamma_uniform_0005_005_le_200
