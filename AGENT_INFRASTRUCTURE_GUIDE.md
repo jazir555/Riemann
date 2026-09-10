@@ -3465,6 +3465,12 @@ sorry-free infrastructure and the complete commit ledger above.
   Im23 (+0.0009) → **`‖S₆‖ ≥ 52/100`** via 47+23
   (margin +0.0034). Residual to 53: 0.0071.
   Next: Im25 or Re48+Im23 → 53/100 (RX37).
+- 2026-09-10 RX37 (`df35cb13`, tail-scratch, 2× green 8682 jobs):
+  sin→cos inversion helper (`c²+s²≤1`) → cos θ₂ 85/100 +
+  cos θ₄ 68/100 → Re 48/100 → **ENCLOSURE CLOSED:
+  `‖S₆‖ ≥ 53/100`** (surplus 0.0024; gap-to-true ≈0.029).
+  Residual: 48-term cap + head discharge + uniformize (RX38;
+  caution: S₆ bound is pointwise, hHead needs seg-uniform).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
