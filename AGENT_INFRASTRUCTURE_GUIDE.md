@@ -3920,6 +3920,15 @@ sorry-free infrastructure and the complete commit ledger above.
   caps C ≤ 0.506 / target (0.5, 0.05) feasible. Gap
   quantified: 12.87 → ≤0.5 (~25.4×), owed by π/2
   integral + local-M + zeta≤2.
+- 2026-09-10 ZU36 (`21c60325`, zeta file 233/0, guarded
+  builds A/B/C green + quiet-state lean typecheck, axioms
+  clean): sCutL10Z conj certs (etaFactor ≤1, S₂ ≥0.28,
+  honest lower, shortfall quantified −19.76 vs 7/5).
+  **FINDINGS: (1) lakefile:214 missing `Glob.one` broke
+  fresh lake elaboration — FIXED same commit. (2) eta
+  7/5 contract UNSATISFIABLE (‖eta‖≈1.3375<1.4) — stop
+  N-variants; retarget consumer to 6/5 (N=4 head +
+  pair-norm tail + 9/10 factor cap + transport).**
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
