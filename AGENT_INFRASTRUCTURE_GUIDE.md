@@ -3644,6 +3644,13 @@ sorry-free infrastructure and the complete commit ledger above.
   (committed line + lemma move) — repaired in-file; ST file is
   ST-lane-only, no other agent may touch it.
   Residual: C=3 one-append + third tier (~0.69) + σ-gen (ST3).
+- 2026-09-10 ST3 (`1896e411`, stirling file, 4× green 8682 jobs):
+  **`‖Γ‖ ≤ 3·exp(−|t|/2)`** (small-height via `1.1·e≤3`;
+  tall via 4.84≤9 headroom) + third-tier ingredients
+  (1/16-factor, quarter-count, sixteenth-product) +
+  σ-general count/product. Rate still 1/2; C≈2.2 untuned
+  (contradiction noted).
+  Residual: three-tier decay c≈0.69 + σ-gen bounds (ST4).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
