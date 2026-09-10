@@ -3689,6 +3689,12 @@ sorry-free infrastructure and the complete commit ledger above.
   shortfall 879/35; banked sR05 floors non-transferable).
   Residual: (i) nine_tenths variant or (ii) move cutoff point
   to |η|≥1.5 height (OA25).
+- 2026-09-09 OA25 (`65f25d41`, off-axis tail, green 8702 jobs):
+  feasibility scan (nine_tenths margin +0.0775 too thin) →
+  MOVED to t=11 (`|η|≈2.30`, margin +0.90; exact C=12 port) +
+  triple shape re-banked. hEnough still needs M=2048 rtail
+  (≤7/10) + N=4096 slow (≥21/10).
+  Residual: M=2048 rtail + N=4096 slow → hEnough (OA26).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
