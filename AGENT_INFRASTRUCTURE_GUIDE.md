@@ -3831,7 +3831,15 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-10 ST7 (`87d88fb8` part 2, stirling file, 3× green
   8682 jobs): held tail VALIDATED green + `D3SG_prod_two_tier_sigma`
   + `D3SG_tall_prod_bound_half_sigma` + `D3SG_small_height_sigma`
-  (cap explicit). Residual: `D3SG_decay_sigma` assembly (ST8).
+  (cap explicit).   Residual: `D3SG_decay_sigma` assembly (ST8).
+- 2026-09-10 ST8 (`435be1a4` part 1, stirling tail, unbuilt):
+  `D3SG_decay_sigma` (`‖Γ‖ ≤ 3M·exp(−|Im|/2)`,
+  cap-explicit) landed 60/0, guard-killed.
+- 2026-09-10 ST10 (`435be1a4` part 2, stirling file, 1×
+  green 8682 jobs): tail VALIDATED as-held, axioms clean
+  (all 3 fragility flags passed). σ-decay COMPLETE
+  (cap-explicit). Residual: uniform-M numeral → Tier-C
+  sRectGammaSup (ST11); zeta half separate (ZU-SRECT).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
