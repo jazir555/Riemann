@@ -3891,6 +3891,28 @@ sorry-free infrastructure and the complete commit ledger above.
   C≤6 merge. Fourth-tier 64th-lemmas proved; FE σ≤0
   blocked (Gdamp-line). Tier-B (≤0.5,ρ=0.05) now needs the
   integral route — TIERB tracks as open residual.
+- 2026-09-10 TAILEDGE+CUTL-D (`54cd3ebc`, no build):
+  NEW `door3_tail_edge_push.lean` — tail K=2 conditional
+  (B/2+d<1 → leaf; recon: Hedge S00-S09 live in
+  central_cover_assembly not closed_cover; Door-4 single
+  missing numeral = uniform `‖ζ‖≤B`). CUTL-D 386-line
+  tail: **left-ball joint-0.04 FALSIFIED (TRUE ≈0.062
+  > 0.04; needs zeta ≤2/3 below first zero)** — Tier-B
+  conditionals + (12.87,0.001) instance banked.
+- 2026-09-10 ZSTRIP (`ee2fb8f7`, ballsup file, no build):
+  route (c) FE/convexity — zeta ≤6 full ball on ONE `hFE`
+  premise (chi≤3 × reflected Euler≤2); zeta ≤2 CLOSED on
+  Re≥2 sub-edge; honest joint ≤643.2 with closed Gamma.
+  Full-rect ≤2 NOT closed.
+- Lakefile now registers 9 newer modules (sliver_edge,
+  srect_zeta, cell_suppliers, batches A/B/C, retier,
+  gamma_pi2, tail_edge_push); tierB_subdiv + batchD on
+  delivery.
+- 2026-09-10 batchD (NEW `door3_cells_batchD.lean`, no
+  build): third row R21–R30 — 8 closed-conditional (R28,
+  R29 TIGHT ~1.05×), 2 feasibility-negative (R21/R30,
+  deficit −0.05 each → re-tier/subdivision). 60 premises
+  listed with TRUE values.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
