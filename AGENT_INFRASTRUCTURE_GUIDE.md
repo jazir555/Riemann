@@ -3882,6 +3882,15 @@ sorry-free infrastructure and the complete commit ledger above.
   **`D3SG_TierC_gamma_wide`** (600·exp(−|Im|/2) on full
   [0.005,0.95]). Gamma uniformity COMPLETE. Next: π/2
   scout (PI2, separate file) + local-M split.
+- 2026-09-10 PI2 (`08598c87`, NEW file `door3_gamma_pi2.lean`,
+  write-only): **π/2 by dyadic tiers INFEASIBLE — even
+  infinite dyadic tiers cap at c≈0.87 (need 1.5708).**
+  True rate needs full-tail integral route (exact-log
+  product + integral comparison). M=20 FAILS low ball
+  T≈4.5 (~2.4×) even at true rate; need local-M σ-split +
+  C≤6 merge. Fourth-tier 64th-lemmas proved; FE σ≤0
+  blocked (Gdamp-line). Tier-B (≤0.5,ρ=0.05) now needs the
+  integral route — TIERB tracks as open residual.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
