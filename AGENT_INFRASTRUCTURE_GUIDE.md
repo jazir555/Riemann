@@ -3719,6 +3719,13 @@ sorry-free infrastructure and the complete commit ledger above.
   numerics for fix-waves: uniform widths `δT,δB > 0.01`
   (banked strips qualitative; needs edge lower + deriv-sup
   numerics; strict-`<` stated so open-bottom strips apply).
+- 2026-09-10 FIX-sliver (`e9246ea9`, 6/4, 1× green 8705 jobs
+  + 1 red-fixed + 3 guard-killed): 4 errors fixed (2×
+  `-(1/2)` vs `-1/2` defeq via `by linarith` conversion;
+  2× FALSE miss-identities sign-corrected, `ring` closes).
+  Statements hold (miss-lemmas corrected, not weakened),
+  supplier premises intact, axioms clean. Second NEW
+  module GREEN.
 - 2026-09-10 SLIV-complete received (361/0 on top, unbuilt):
   width-gate iff + 0.011-example arithmetic + sharp `m/M`
   widths + shortfall identities PROVED; Cauchy step +
