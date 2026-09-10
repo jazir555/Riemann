@@ -3874,6 +3874,9 @@ sorry-free infrastructure and the complete commit ledger above.
   (c=1/2 vs true π/2). UNLOCK = π/2-rate + local-M σ-split
   (Γ(0.4)≈2.2) + zeta→2: 214·0.007·1.5≈2.25≤2.5 FEASIBLE.
   π/2-rate now CONSUMER-BACKED. ST13 = sliver rect.
+- 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
+  jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
+  [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
 - 2026-09-10 TIER-FEASIBILITY (coordinator, lemma shape
   `M=C/r` verified): Tier A TRUE-dead (sup_true≈0.09 vs
   need ≤0.04); Tier C TRUE-dead (needs sup≤0.04·margin≤0.01
