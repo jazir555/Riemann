@@ -8300,3 +8300,62 @@ theorem R05_S22_Re_ge_tight :
 #print axioms R05_S22_Re_ge_tight
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- CutR10 slow-cert point: closed term identical to `Door3ZetaCutoff.sCut` (`1 / 2 + 10 * I`). -/
+def sCutOA : ℂ := (1 / 2 : ℂ) + 10 * Complex.I
+
+theorem sCutOA_re : sCutOA.re = (1 / 2 : ℝ) := by simp [sCutOA]
+theorem sCutOA_im : sCutOA.im = (10 : ℝ) := by simp [sCutOA]
+
+theorem sCutOA_norm_le : ‖sCutOA‖ ≤ (12 : ℝ) := by
+  have h := Complex.norm_le_abs_re_add_abs_im sCutOA
+  have hre : |sCutOA.re| = (1 / 2 : ℝ) := by rw [sCutOA_re]; norm_num
+  have him : |sCutOA.im| = (10 : ℝ) := by rw [sCutOA_im]; norm_num
+  rw [hre, him] at h
+  linarith
+
+theorem sCutOA_term1_norm_le : ‖etaDirichletTerm sCutOA 1‖ ≤ (5 / 7 : ℝ) := by
+  have hterm1_eq : etaDirichletTerm sCutOA 1 = -1 / ((((2 : ℕ)) : ℂ) ^ sCutOA) := by simp only [etaDirichletTerm]; norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = (((2 : ℝ) : ℂ)) := by norm_num
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ sCutOA)‖ = (2 : ℝ) ^ sCutOA.re := by rw [h2cast]; exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hroot : (7 / 5 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hpow : ((7 / 5 : ℝ) ^ (2 : ℕ)) ≤ (2 : ℝ) := by norm_num
+    have hpow' : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) = 2 := by rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+    rw [← hpow'] at hpow
+    exact le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm, sCutOA_re]
+  rw [div_le_iff₀ (Real.rpow_pos_of_pos (by norm_num) _)]
+  have hmul := mul_le_mul_of_nonneg_left hroot (show (0 : ℝ) ≤ 5 / 7 by norm_num)
+  have heq : (5 / 7 : ℝ) * (7 / 5 : ℝ) = 1 := by norm_num
+  rw [heq] at hmul
+  linarith
+
+theorem sCutOA_slow : (2 / 7 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA k‖ := by
+  have h0 : etaDirichletTerm sCutOA 0 = 1 := by simp only [etaDirichletTerm]; simp
+  have hS2 : (∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA k) = 1 + etaDirichletTerm sCutOA 1 := by rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add, h0]
+  have ht := sCutOA_term1_norm_le
+  rw [hS2]
+  have hrev := norm_sub_norm_le (1 : ℂ) (-(etaDirichletTerm sCutOA 1))
+  rw [norm_one, norm_neg, sub_neg_eq_add] at hrev
+  linarith
+
+theorem sCutOA_rtail : ‖(∑' m, etaPairTerm sCutOA m) - (∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA k)‖ ≤ (24 : ℝ) := by
+  have hspos : 0 < sCutOA.re := by rw [sCutOA_re]; norm_num
+  have htail := zetaCell_even_remainder_le hspos sCutOA_norm_le (show (0 : ℝ) ≤ 12 by norm_num) 1 (by norm_num)
+  have hone : ((((1 : ℕ)) : ℝ) ^ (-sCutOA.re)) = 1 := by rw [Nat.cast_one, Real.one_rpow]
+  rw [hone] at htail
+  have hdiv : (12 : ℝ) * (1 / sCutOA.re) ≤ 24 := by rw [sCutOA_re]; norm_num
+  exact le_trans htail hdiv
+
+/-- Certificate triple in the exact shape `cutR10_zetaRemainder_of_certificate_one` consumes, minus `hEnough` (see shortfall below). -/
+theorem sCutOA_certTriple : ∃ (N : ℕ) (S : ℂ), S = ∑ k ∈ Finset.range N, etaDirichletTerm sCutOA k ∧ (2 / 7 : ℝ) ≤ ‖S‖ ∧ ‖(∑' m, etaPairTerm sCutOA m) - S‖ ≤ (24 : ℝ) := ⟨2, _, rfl, sCutOA_slow, sCutOA_rtail⟩
+
+theorem sCutOA_hEnough_shortfall : ((7 / 5 : ℝ) + 24) - 2 / 7 = (879 / 35 : ℝ) := by norm_num
+
+#print axioms sCutOA_slow
+#print axioms sCutOA_rtail
+#print axioms sCutOA_certTriple
+end Door3OffAxis
