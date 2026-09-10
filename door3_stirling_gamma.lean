@@ -1065,3 +1065,239 @@ theorem D3SG_tall_three_tier (s : ℂ) (hre : s.re = 0.95)
   exact hsqrt
 
 #print axioms D3SG_tall_three_tier
+
+/-- Small-height global piece: `|T| ≤ 4 → ‖Γ‖ ≤ 18·exp(−log2·|T|)` on `Re = 0.95`. -/
+theorem D3SG_small_height_four (s : ℂ) (hre : s.re = 0.95)
+    (hT : |s.im| ≤ 4) :
+    ‖Complex.Gamma s‖ ≤ 18 * Real.exp (-Real.log 2 * |s.im|) := by
+  have hspos : (0 : ℝ) < s.re := by rw [hre]; norm_num
+  have hdom : ‖Complex.Gamma s‖ ≤ Real.Gamma 0.95 := by
+    have h := D3SG_Gamma_norm_le_real s hspos
+    rwa [hre] at h
+  have hlog2 : (0 : ℝ) < Real.log 2 := lt_trans (by norm_num) D3SG_log_two_gt
+  have h4 : ((1 / 2 : ℝ) ^ 4) = Real.exp (-(4 : ℝ) * Real.log 2) := by
+    have h := D3SG_half_pow_exp 4
+    have hc : (((4 : ℕ)) : ℝ) = 4 := by norm_num
+    rw [hc] at h
+    exact h
+  have hexp16 : Real.exp (-(4 : ℝ) * Real.log 2) = 1 / 16 := by
+    rw [← h4]
+    norm_num
+  have hle : Real.log 2 * |s.im| ≤ Real.log 2 * 4 :=
+    mul_le_mul_of_nonneg_left hT hlog2.le
+  have harg : -(4 : ℝ) * Real.log 2 ≤ -Real.log 2 * |s.im| := by
+    have e1 : -(4 : ℝ) * Real.log 2 = -(Real.log 2 * 4) := by ring
+    have e2 : -Real.log 2 * |s.im| = -(Real.log 2 * |s.im|) := by ring
+    rw [e1, e2]
+    exact neg_le_neg hle
+  have hmono : Real.exp (-(4 : ℝ) * Real.log 2)
+      ≤ Real.exp (-Real.log 2 * |s.im|) := Real.exp_le_exp.mpr harg
+  have hexp : (1.1 : ℝ) ≤ 18 * Real.exp (-Real.log 2 * |s.im|) := by
+    calc (1.1 : ℝ) ≤ 18 * (1 / 16) := by norm_num
+      _ = 18 * Real.exp (-(4 : ℝ) * Real.log 2) := by rw [hexp16]
+      _ ≤ 18 * Real.exp (-Real.log 2 * |s.im|) :=
+        mul_le_mul_of_nonneg_left hmono (by norm_num)
+  exact le_trans (le_trans hdom D3SG_Real_Gamma_095_le_one_one) hexp
+
+#print axioms D3SG_small_height_four
+
+/-- Global merge on `Re = 0.95`: `‖Γ‖ ≤ 18·exp(−log2·|Im|)` (`c = log 2`). -/
+theorem D3SG_Gamma_line095_exp_decay_global (s : ℂ) (hre : s.re = 0.95) :
+    ‖Complex.Gamma s‖ ≤ 18 * Real.exp (-Real.log 2 * |s.im|) := by
+  by_cases hT : |s.im| ≤ 4
+  · exact D3SG_small_height_four s hre hT
+  · have hT4 : (4 : ℝ) ≤ |s.im| := le_of_not_ge hT
+    have h1 := D3SG_tall_three_tier s hre hT4
+    have hpos : (0 : ℝ) ≤ Real.exp (-Real.log 2 * |s.im|) :=
+      (Real.exp_pos _).le
+    have h518 : (5 : ℝ) * Real.exp (-Real.log 2 * |s.im|)
+        ≤ 18 * Real.exp (-Real.log 2 * |s.im|) :=
+      mul_le_mul_of_nonneg_right (by norm_num) hpos
+    exact le_trans h1 h518
+
+#print axioms D3SG_Gamma_line095_exp_decay_global
+
+/-- Half-height count, `σ`-general (`σ ≤ 1`, `2 ≤ T`). -/
+theorem D3SG_floor_half_le_sigma (σ T : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hT : 2 ≤ T) :
+    Nat.floor (T / 2 - σ) + 1 ≤ Nat.floor (T - σ) + 1 := by
+  have hnn : (0 : ℝ) ≤ T / 2 - σ := by linarith
+  have hle : T / 2 - σ ≤ T - σ := by linarith
+  have c : ((Nat.floor (T / 2 - σ) + 1 : ℕ) : ℝ)
+      ≤ ((Nat.floor (T - σ) + 1 : ℕ) : ℝ) := by
+    push_cast
+    have a := Nat.floor_le hnn
+    have b := (Nat.lt_floor_add_one (T - σ)).le
+    linarith
+  exact Nat.cast_le.mp c
+
+#print axioms D3SG_floor_half_le_sigma
+
+/-- Quarter-height count, `σ`-general (`σ ≤ 1`, `4 ≤ T`). -/
+theorem D3SG_floor_quarter_le_sigma (σ T : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hT : 4 ≤ T) :
+    Nat.floor (T / 4 - σ) + 1 ≤ Nat.floor (T / 2 - σ) + 1 := by
+  have hnn : (0 : ℝ) ≤ T / 4 - σ := by linarith
+  have hle : T / 4 - σ ≤ T / 2 - σ := by linarith
+  have c : ((Nat.floor (T / 4 - σ) + 1 : ℕ) : ℝ)
+      ≤ ((Nat.floor (T / 2 - σ) + 1 : ℕ) : ℝ) := by
+    push_cast
+    have a := Nat.floor_le hnn
+    have b := (Nat.lt_floor_add_one (T / 2 - σ)).le
+    linarith
+  exact Nat.cast_le.mp c
+
+#print axioms D3SG_floor_quarter_le_sigma
+
+/-- Quarter-power product, `σ`-general (`σ ≤ 1`, `2 ≤ T`). -/
+theorem D3SG_prod_quarter_pow_sigma (σ T : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hT : 2 ≤ T) :
+    ∏ k ∈ Finset.range (Nat.floor (T / 2 - σ) + 1),
+      ((σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2))
+      ≤ (1 / 2) ^ (2 * (Nat.floor (T / 2 - σ) + 1)) := by
+  have hTh : (0 : ℝ) ≤ T / 2 - σ := by linarith
+  have h1 : ∀ k ∈ Finset.range (Nat.floor (T / 2 - σ) + 1),
+      (σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2) ≤ 1 / 4 := by
+    intro k hk
+    apply D3SG_factor_le_quarter σ T hσ k
+    have hkle : k ≤ Nat.floor (T / 2 - σ) :=
+      Nat.lt_add_one_iff.mp (Finset.mem_range.mp hk)
+    have hc : (k : ℝ) ≤ ((Nat.floor (T / 2 - σ) : ℕ) : ℝ) :=
+      Nat.cast_le.mpr hkle
+    have hf := Nat.floor_le hTh
+    have hTnn : (0 : ℝ) ≤ T := by linarith
+    rw [abs_of_nonneg hTnn]
+    linarith
+  have h := Finset.prod_le_prod
+    (fun k _ => (D3SG_factor_mem_Icc σ T hσ k).1) h1
+  rw [Finset.prod_const, Finset.card_range] at h
+  have e : ((1 / 4 : ℝ)) ^ (Nat.floor (T / 2 - σ) + 1)
+      = (1 / 2) ^ (2 * (Nat.floor (T / 2 - σ) + 1)) := by
+    rw [show (1 / 4 : ℝ) = (1 / 2) ^ 2 by norm_num, ← pow_mul]
+  rwa [e] at h
+
+/-- Half-power product on the middle interval, `σ`-general. -/
+theorem D3SG_prod_Ico_half_pow_sigma (σ T : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hT : 2 ≤ T) :
+    ∏ k ∈ Finset.Ico (Nat.floor (T / 2 - σ) + 1) (Nat.floor (T - σ) + 1),
+      ((σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2))
+      ≤ (1 / 2) ^ (Nat.floor (T - σ) + 1 - (Nat.floor (T / 2 - σ) + 1)) := by
+  have hT0 : (0 : ℝ) ≤ T - σ := by linarith
+  have h1 : ∀ k ∈ Finset.Ico (Nat.floor (T / 2 - σ) + 1) (Nat.floor (T - σ) + 1),
+      (σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2) ≤ 1 / 2 := by
+    intro k hk
+    apply D3SG_factor_le_half σ T hσ k
+    have hlt : k < Nat.floor (T - σ) + 1 := (Finset.mem_Ico.mp hk).2
+    have hkle : k ≤ Nat.floor (T - σ) := Nat.lt_add_one_iff.mp hlt
+    have hc : (k : ℝ) ≤ ((Nat.floor (T - σ) : ℕ) : ℝ) := Nat.cast_le.mpr hkle
+    have hf := Nat.floor_le hT0
+    rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ T)]
+    linarith
+  have h := Finset.prod_le_prod
+    (fun k _ => (D3SG_factor_mem_Icc σ T hσ k).1) h1
+  rwa [Finset.prod_const, Nat.card_Ico] at h
+
+#print axioms D3SG_prod_quarter_pow_sigma
+
+#print axioms D3SG_prod_Ico_half_pow_sigma
+
+/-- Two-tier product, `σ`-general (`σ ≤ 1`, `2 ≤ T`). -/
+theorem D3SG_prod_two_tier_sigma (σ T : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hT : 2 ≤ T) :
+    ∏ k ∈ Finset.range (Nat.floor (T - σ) + 1),
+      ((σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2))
+      ≤ (1 / 2) ^ (Nat.floor (T / 2 - σ) + 1 + (Nat.floor (T - σ) + 1)) := by
+  have hj : Nat.floor (T / 2 - σ) + 1 ≤ Nat.floor (T - σ) + 1 :=
+    D3SG_floor_half_le_sigma σ T hσ hσ1 hT
+  have hsplit : Nat.floor (T / 2 - σ) + 1
+      + (Nat.floor (T - σ) + 1 - (Nat.floor (T / 2 - σ) + 1))
+      = Nat.floor (T - σ) + 1 := Nat.add_sub_cancel' hj
+  have hprod := Finset.prod_range_add
+    (fun k => (σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + T ^ 2))
+    (Nat.floor (T / 2 - σ) + 1)
+    (Nat.floor (T - σ) + 1 - (Nat.floor (T / 2 - σ) + 1))
+  rw [hsplit] at hprod
+  rw [hprod]
+  have hbig' := D3SG_prod_Ico_half_pow_sigma σ T hσ hσ1 hT
+  rw [Finset.prod_Ico_eq_prod_range] at hbig'
+  have hmul := mul_le_mul (D3SG_prod_quarter_pow_sigma σ T hσ hσ1 hT) hbig'
+    (Finset.prod_nonneg (fun (k : ℕ) (_ : k ∈ Finset.range _) =>
+      (D3SG_factor_mem_Icc σ T hσ (Nat.floor (T / 2 - σ) + 1 + k)).1))
+    (by positivity)
+  rw [← pow_add] at hmul
+  have hexp : 2 * (Nat.floor (T / 2 - σ) + 1)
+      + (Nat.floor (T - σ) + 1 - (Nat.floor (T / 2 - σ) + 1))
+      = Nat.floor (T / 2 - σ) + 1 + (Nat.floor (T - σ) + 1) := by omega
+  rwa [hexp] at hmul
+
+#print axioms D3SG_prod_two_tier_sigma
+
+/-- Squared tall-height bound, `σ`-general, capped by `M`. -/
+theorem D3SG_tall_prod_bound_half_sigma (s : ℂ) (σ M : ℝ) (hσ : 0 < σ)
+    (hσ1 : σ ≤ 1) (hre : s.re = σ) (hM : 0 ≤ M)
+    (hcap : Real.Gamma σ ≤ M) (hT : 2 ≤ |s.im|) :
+    ‖Complex.Gamma s‖ ^ 2
+      ≤ M ^ 2 * (1 / 2) ^ (Nat.floor (|s.im| / 2 - σ) + 1
+        + (Nat.floor (|s.im| - σ) + 1)) := by
+  have hspos : (0 : ℝ) < s.re := by rw [hre]; exact hσ
+  have hprod := D3SG_sq_prod hspos (Nat.floor |s.im| + 2)
+  rw [hre, ← sq_abs s.im] at hprod
+  have hsub : Finset.range (Nat.floor (|s.im| - σ) + 1)
+      ⊆ Finset.range (Nat.floor |s.im| + 2) := by
+    intro (x : ℕ) (hx : x ∈ Finset.range _)
+    rw [Finset.mem_range] at hx ⊢
+    exact lt_of_lt_of_le hx (D3SG_floor_count_sigma σ |s.im| hσ.le)
+  have hPsub : ∏ k ∈ Finset.range (Nat.floor |s.im| + 2),
+      ((σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + |s.im| ^ 2))
+      ≤ ∏ k ∈ Finset.range (Nat.floor (|s.im| - σ) + 1),
+      ((σ + (k : ℝ)) ^ 2 / ((σ + (k : ℝ)) ^ 2 + |s.im| ^ 2)) :=
+    Finset.prod_le_prod_of_subset_of_le_one
+      hsub
+      (fun (k : ℕ) (_ : k ∈ Finset.range _) =>
+        (D3SG_factor_mem_Icc σ _ hσ k).1)
+      (fun (k : ℕ) (_ : k ∈ Finset.range _) (_ : k ∉ Finset.range _) =>
+        (D3SG_factor_mem_Icc σ _ hσ k).2)
+  have hP := le_trans hPsub (D3SG_prod_two_tier_sigma σ |s.im| hσ hσ1 hT)
+  have hcap2 : Real.Gamma σ ^ 2 ≤ M ^ 2 :=
+    pow_le_pow_left₀ (le_of_lt (Real.Gamma_pos_of_pos hσ)) hcap 2
+  exact le_trans hprod (mul_le_mul hcap2 hP
+    (Finset.prod_nonneg
+      (fun (k : ℕ) (_ : k ∈ Finset.range _) =>
+        (D3SG_factor_mem_Icc σ _ hσ k).1))
+    (by positivity))
+
+#print axioms D3SG_tall_prod_bound_half_sigma
+
+/-- Small-height bound, `σ`-general, capped by `M`. -/
+theorem D3SG_small_height_sigma (s : ℂ) (σ M : ℝ) (hσ : 0 < σ)
+    (hre : s.re = σ) (hM : 0 ≤ M) (hcap : Real.Gamma σ ≤ M)
+    (hT : |s.im| ≤ 2) :
+    ‖Complex.Gamma s‖ ≤ 3 * M * Real.exp (-(1 / 2) * |s.im|) := by
+  have hspos : (0 : ℝ) < s.re := by rw [hre]; exact hσ
+  have hdom : ‖Complex.Gamma s‖ ≤ Real.Gamma σ := by
+    have h := D3SG_Gamma_norm_le_real s hspos
+    rwa [hre] at h
+  have hub : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+  have hpos : (0 : ℝ) < Real.exp 1 := Real.exp_pos 1
+  have hbase : (1 : ℝ) ≤ 3 * (Real.exp 1)⁻¹ := by
+    rw [le_mul_inv_iff₀ hpos]
+    linarith [hub]
+  have hmono : Real.exp (-1) ≤ Real.exp (-(1 / 2) * |s.im|) := by
+    apply Real.exp_le_exp.mpr
+    have habs := abs_nonneg s.im
+    linarith
+  have hinv : Real.exp (-1) = (Real.exp 1)⁻¹ := by rw [Real.exp_neg]
+  have hexp : (1 : ℝ) ≤ 3 * Real.exp (-(1 / 2) * |s.im|) := by
+    calc (1 : ℝ) ≤ 3 * (Real.exp 1)⁻¹ := hbase
+      _ = 3 * Real.exp (-1) := by rw [hinv]
+      _ ≤ 3 * Real.exp (-(1 / 2) * |s.im|) :=
+        mul_le_mul_of_nonneg_left hmono (by norm_num)
+  have hMle : Real.Gamma σ ≤ 3 * M * Real.exp (-(1 / 2) * |s.im|) := by
+    calc Real.Gamma σ ≤ M := hcap
+      _ = M * 1 := by ring
+      _ ≤ M * (3 * Real.exp (-(1 / 2) * |s.im|)) :=
+        mul_le_mul_of_nonneg_left hexp hM
+      _ = 3 * M * Real.exp (-(1 / 2) * |s.im|) := by ring
+  exact le_trans hdom hMle
+
+#print axioms D3SG_small_height_sigma
