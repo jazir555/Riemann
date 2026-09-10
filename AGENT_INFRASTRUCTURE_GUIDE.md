@@ -3732,6 +3732,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (~5% margin). Fix-wave 1 must numerically verify the joint
   sup FIRST; if false, renegotiate the 0.04 tier (fencing
   ε/M recompute), not more analysis.
+- 2026-09-10 BSUP-complete received (613/0 on top, unbuilt):
+  product identity CLOSED (`hProd` discharged); Euler-step +
+  eta-term/pair machinery + Stirling mirrors + real Gamma
+  caps + denom lowers PROVED; sharp 12.864 ≤ 12.87 TRUE
+  proved. 0.04 tier CONFIRMED unclosable (needs
+  ‖ζ(1/2+8.45i)‖≤0.64 vs center 1.549 — NOT faked).
+  Residual: `hDom/hReal` wiring, `hStripEta` (N=8 head +
+  tail + bridge), `hProdCap` via ST half-count, then
+  fencing renegotiation (`M=12.87` needs ε+M·0.56≈7.21
+  center — infeasible; switch tier/ball/leaf).
 - 2026-09-10 lakefile registers all 4 new modules
   (ballsup/sliver/cutL10/first_cell, roots+globs).
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
