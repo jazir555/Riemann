@@ -3682,7 +3682,15 @@ sorry-free infrastructure and the complete commit ledger above.
   (exact ZU36 target shape specified in-file), gamma
   `hConjNorm`+banked, deriv sup `hC` (mirrors :404).
   Lakefile registration deferred until all 4 write-only
-  drafts land.
+  drafts land (DONE: `c92f58fb` registers all 4).
+- 2026-09-10 CUTL-complete received (456/0 on top, unbuilt):
+  Gamma-conjugation CLOSED (`Complex.Gamma_conj` +
+  `Complex.norm_conj` pinned by read; gamma remainder from
+  banked, premises-free); CutL10 ball geometry + poly ≤67 +
+  pi ≤16/5 PROVED; honest weak cap ≤12.87 (NOT 0.04);
+  supplier-composition chain complete. Residual: ONLY zeta
+  `hLower` at sCutL (ZU36 owns) + `hJoint` 0.04-tightness +
+  already-banked `hBanked`.
 - 2026-09-10 SLIV draft received (NEW `door3_sliver_nonvan.lean`,
   227 lines, untracked-only, 0 sorry, unbuilt): routing +
   packaging PROVED conditional, end-to-end `hSliver`-shaped
@@ -3690,6 +3698,14 @@ sorry-free infrastructure and the complete commit ledger above.
   numerics for fix-waves: uniform widths `δT,δB > 0.01`
   (banked strips qualitative; needs edge lower + deriv-sup
   numerics; strict-`<` stated so open-bottom strips apply).
+- 2026-09-10 SLIV-complete received (361/0 on top, unbuilt):
+  width-gate iff + 0.011-example arithmetic + sharp `m/M`
+  widths + shortfall identities PROVED; Cauchy step +
+  top/bottom strip theorems + conjugation route PROVED;
+  `hSliver`-shaped conclusions complete modulo suppliers.
+  Residual: edge-lower numerals (ξ-lower on top/bottom edge
+  over [−10,10]) + uniform deriv-sups; then gates become
+  `norm_num` checks. No 0.01 faked.
 - 2026-09-10 CELL draft received (NEW `door3_first_cell.lean`,
   398 lines, untracked-only, 0 sorry, unbuilt): R02-pattern
   cell `(−8,−5.5)×(0.01,0.2)` picked (radius <1.26
