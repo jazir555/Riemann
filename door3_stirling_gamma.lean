@@ -1301,3 +1301,63 @@ theorem D3SG_small_height_sigma (s : ℂ) (σ M : ℝ) (hσ : 0 < σ)
   exact le_trans hdom hMle
 
 #print axioms D3SG_small_height_sigma
+/-- Stirling decay, `σ`-general: `‖Γ‖ ≤ 3·M·exp(−|Im|/2)` for `0 < σ ≤ 1`. -/
+theorem D3SG_decay_sigma (s : ℂ) (σ M : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
+    (hre : s.re = σ) (hM : 0 ≤ M) (hcap : Real.Gamma σ ≤ M) :
+    ‖Complex.Gamma s‖ ≤ 3 * M * Real.exp (-(1 / 2) * |s.im|) := by
+  by_cases hT : |s.im| ≤ 2
+  · exact D3SG_small_height_sigma s σ M hσ hre hM hcap hT
+  · have hT2 : (2 : ℝ) ≤ |s.im| := le_of_not_ge hT
+    have h1 := D3SG_tall_prod_bound_half_sigma s σ M hσ hσ1 hre hM hcap hT2
+    have hMle : |s.im| ≤ (2 / 3) * ((((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ)
+        + ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ)) + 2) := by
+      have c1 : |s.im| / 2 - σ < ((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ) := by
+        push_cast
+        exact Nat.lt_floor_add_one _
+      have c2 : |s.im| - σ < ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ) := by
+        push_cast
+        exact Nat.lt_floor_add_one _
+      linarith [hσ1]
+    have hkey : |s.im| ≤ ((((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ)
+        + ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ)) + 2) * Real.log 2 := by
+      have hnn : (0 : ℝ) ≤ (((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ)
+          + ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ)) + 2 := by
+        have n1 := Nat.cast_nonneg (α := ℝ) (Nat.floor (|s.im| / 2 - σ) + 1)
+        have n2 := Nat.cast_nonneg (α := ℝ) (Nat.floor (|s.im| - σ) + 1)
+        linarith
+      calc |s.im| ≤ (2 / 3) * _ := hMle
+        _ ≤ _ * Real.log 2 := by
+          rw [mul_comm]
+          exact mul_le_mul_of_nonneg_left D3SG_log_two_gt.le hnn
+    have hmono : Real.exp (-(((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ)
+        + ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ)) * Real.log 2)
+        ≤ Real.exp (2 * Real.log 2 + -|s.im|) := by
+      apply Real.exp_le_exp.mpr
+      linarith [hkey]
+    have hfin : M ^ 2
+        * Real.exp (-(((Nat.floor (|s.im| / 2 - σ) + 1 : ℕ) : ℝ)
+          + ((Nat.floor (|s.im| - σ) + 1 : ℕ) : ℝ)) * Real.log 2)
+        ≤ (3 * M) ^ 2 * Real.exp (-|s.im|) := by
+      have hle : M ^ 2 * Real.exp (2 * Real.log 2 + -|s.im|)
+          ≤ (3 * M) ^ 2 * Real.exp (-|s.im|) := by
+        rw [Real.exp_add, ← D3SG_four_exp]
+        have hnn : (0 : ℝ) ≤ M ^ 2 * Real.exp (-|s.im|) := by positivity
+        have e : (3 * M) ^ 2 = 9 * M ^ 2 := by ring
+        rw [e]
+        calc M ^ 2 * (4 * Real.exp (-|s.im|))
+            = 4 * (M ^ 2 * Real.exp (-|s.im|)) := by ring
+          _ ≤ 9 * (M ^ 2 * Real.exp (-|s.im|)) := by linarith [hnn]
+          _ = 9 * M ^ 2 * Real.exp (-|s.im|) := by ring
+      exact le_trans
+        (mul_le_mul_of_nonneg_left hmono (by positivity)) hle
+    have hsq : ‖Complex.Gamma s‖ ^ 2
+        ≤ (3 * M * Real.exp (-(1 / 2) * |s.im|)) ^ 2 := by
+      rw [mul_pow, D3SG_exp_half_sq]
+      have h1' := h1
+      rw [D3SG_half_pow_exp, Nat.cast_add] at h1'
+      exact le_trans h1' hfin
+    have hsqrt := Real.sqrt_le_sqrt hsq
+    rw [Real.sqrt_sq (norm_nonneg _),
+      Real.sqrt_sq (by positivity : (0 : ℝ) ≤ 3 * M * Real.exp (-(1 / 2) * |s.im|))] at hsqrt
+    exact hsqrt
+#print axioms D3SG_decay_sigma
