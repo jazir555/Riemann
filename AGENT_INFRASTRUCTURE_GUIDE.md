@@ -3729,6 +3729,12 @@ sorry-free infrastructure and the complete commit ledger above.
   3 premises each, no banked pilots exist there — center
   inequality itself the premise). Patch: factor enclosures
   (complex wall), tier-M direct bounds, fat-ball sups.
+- 2026-09-10 batch C received (`a2c37ce7`, NEW, 1682 lines,
+  0 sorry, unbuilt): top row R31–R40 — 6 CLOSED-conditional
+  (R33–R38, two tight at 1.08–1.09×) + **4 feasibility-
+  NEGATIVE** (R31/R32/R39/R40 outer cells: proved deficits
+  −0.036…−0.05 at true-scale floors; Gamma Im-decay).
+  Negatives need re-tiering/subdivision (patch track).
 - 2026-09-10 CELL-complete received (552/0 on top, unbuilt):
   gamma-lower **0.006 PROVED** (0.008 shown infeasible on
   banked (S,U): need S·U≤392.7, have 523.3); fallback
