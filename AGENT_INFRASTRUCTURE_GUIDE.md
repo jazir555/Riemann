@@ -3611,6 +3611,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (true integral ≈18.146>18.0; total ≈20.044>20.0). Best stays
   515. Peel treadmill near end (each N buys ~0.15).
   Residual: denom lift 0.414→0.42 → 505 (ZU32); N=11 fallback.
+- 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
+  8× green 8682 jobs; wrapper AUTOCLEAR observed live):
+  Weierstrass-product route → FIRST exponential Γ-bound
+  `‖Γ‖ ≤ 8·exp(−|t|/3)` on Re=0.95 (prior best: cubic poly).
+  c=1/3 vs target 1.5708 (gap 4.7×); consumers stay unwired.
+  Residual: factor-cut sharpen (2–3× c) + C~2.2 + σ-gen (ST2).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
