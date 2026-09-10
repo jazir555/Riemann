@@ -3743,6 +3743,20 @@ sorry-free infrastructure and the complete commit ledger above.
   (20128×0.0195=392.496≤392.7). HONEST: 1.4 does NOT close
   at N=2 (slow ~1.03 vs need 3.542; phase-aware factor ≤1
   FALSE, need 2.53) — needs larger-N slow + pair-tail.
+- 2026-09-10 FIX-cell (`a1122dac`, 12/9, 1× green 8703 jobs
+  + 1 red-fixed + 2 guard-killed): 6 errors fixed in-file
+  (implicit→explicit, `rw`→`simp only` NeZero motive,
+  forward-ref inline, `rw at hd` only, `conv_lhs` stuck
+  typeclass). Statements unchanged, 4 premises intact,
+  axioms clean. First NEW module GREEN.
+- 2026-09-10 ZU-SRECT received (`55f8ac14`, NEW 451 lines,
+  0 sorry, unbuilt): eta-zeros verified OUTSIDE Tier-C
+  rect (9.06 below, 18.13 above); pieces 3005/260/65 →
+  uniform **`‖ζ‖ ≤ 3005`** (imports `zeta_rigorous`,
+  cycle-safe, flagged). HONEST: implied deriv-M ≥2344 ≫
+  0.04 — Tier C needs Cz≤0.051 (gap ~5 orders). Residual:
+  `HighEtaDenom` (true ≈0.47) + sibling `sRectGammaSup`;
+  then renegotiate Tier C or Tier-B fallback.
 - 2026-09-10 batches A+B received (`9185b068`, NEW files,
   722+1170 lines, 0 sorry, unbuilt): A = 3 bottom-row cells
   (BA00/03/04, 6 premises each, thresholds proved, Cauchy
