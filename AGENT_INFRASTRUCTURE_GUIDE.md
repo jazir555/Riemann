@@ -3629,6 +3629,15 @@ sorry-free infrastructure and the complete commit ledger above.
   `‖Γ‖ ≤ 8·exp(−|t|/3)` on Re=0.95 (prior best: cubic poly).
   c=1/3 vs target 1.5708 (gap 4.7×); consumers stay unwired.
   Residual: factor-cut sharpen (2–3× c) + C~2.2 + σ-gen (ST2).
+- 2026-09-10 ST2 (`ffa56735`, stirling file, 6+× green 8682 jobs;
+  resumed after harness crash, tail intact): two-tier counting
+  (quarter-factors below T/2 double-counted) + Γ-cap 1.1 →
+  **`‖Γ‖ ≤ 4·exp(−|t|/2)`** (c 1/3→1/2, C 8→4). Two-tier
+  optimum ≈0.62; π/2 needs full tail product (multi-session).
+  INCIDENT: concurrent edit hit this file mid-session
+  (committed line + lemma move) — repaired in-file; ST file is
+  ST-lane-only, no other agent may touch it.
+  Residual: C=3 one-append + third tier (~0.69) + σ-gen (ST3).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
