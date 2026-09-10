@@ -3639,6 +3639,29 @@ sorry-free infrastructure and the complete commit ledger above.
   + tail 17.75 → **K0 19.869 → C=48 → GLOBAL 505**,
   edge `515−505=10`).
   Residual: N=13 peel → 495 (ZU35).
+- 2026-09-10 CONSUMER AUDIT (coordinator, repo-wide `rg`):
+  peel product (`rect_slice_assembly*`, `linear_slice0550_tight*`,
+  `tight48/505`) cited ONLY inside `zeta_rigorous.lean` — NO
+  external consumer. Capstone premises take incompatible shapes
+  (slow LOWER at t=10 [OA-owned]; xi sup ≤0.04 at Re≈10; raw
+  nonvanishing lines/strips with `Im≠0`; Hmain/Hedge/Htail all
+  `Im≠0`). Cutoff s-rect tight-upper-10 need is O(1) at |Im|=10;
+  peel majorants floor ~500 there by construction (C·10.5) —
+  shape-mismatched. VERDICT: stop peeling after ZU35 lands.
+  No `cutL10_zetaRemainder` Prop exists anywhere (CutL10 has
+  geometry only, no interface, no owning lane) — that is the
+  implemented consumer (see redirect).
+- 2026-09-10 REDIRECT (fires as ZU36 when ZU35 reports; same
+  file, so strictly after): CutL10 zeta remainder. Target:
+  `‖zeta (1/2 − 10·I)‖ ≥ 7/5` (mirror of `cutR10_zetaRemainder`,
+  true ≈1.549 by conjugation symmetry), self-contained eta-pair
+  head+tail in zeta tail (conjugated numerals, no cross-file
+  imports), then CutL10 adapter interface. CutR10's 7/5 stays
+  OA-owned via slow-cert; (b) ballSup-0.04 is unowned and needs
+  scoping before any lane takes it. NOTE (same trace): RX
+  bridge product is likewise consumerless (real axis: feeder
+  closed + `Im≠0` in every capstone premise) — retire RX lane
+  after RX38/RX39 land the in-file chain.
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
   8× green 8682 jobs; wrapper AUTOCLEAR observed live):
   Weierstrass-product route → FIRST exponential Γ-bound
