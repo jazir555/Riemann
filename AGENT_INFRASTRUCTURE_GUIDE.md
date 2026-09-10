@@ -3649,6 +3649,13 @@ sorry-free infrastructure and the complete commit ledger above.
   + tail 17.75 → **K0 19.869 → C=48 → GLOBAL 505**,
   edge `515−505=10`).
   Residual: N=13 peel → 495 (ZU35).
+- 2026-09-10 ZU35 (`356424f7`, zeta tail, 6× green 8693 jobs
+  + 2 fail-fixed): N=13 floors + M=13 tail 17.61 → head
+  2.192 → **K0 19.802 → C=48 → GLOBAL 504**
+  (edge `505−504=1`). Target 495 MISSED: 47-linear needs
+  K0≤19.458 (gap 0.344); M13≈17.3 spec unreachable at
+  1.05-exponent. PEEL LANE ENDS HERE per consumer audit
+  (no external reader) — ZU36 redirects to CutL10 (below).
 - 2026-09-10 CONSUMER AUDIT (coordinator, repo-wide `rg`):
   peel product (`rect_slice_assembly*`, `linear_slice0550_tight*`,
   `tight48/505`) cited ONLY inside `zeta_rigorous.lean` — NO
