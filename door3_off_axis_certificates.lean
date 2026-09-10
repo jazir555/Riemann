@@ -8359,3 +8359,62 @@ theorem sCutOA_hEnough_shortfall : ((7 / 5 : ℝ) + 24) - 2 / 7 = (879 / 35 : �
 #print axioms sCutOA_rtail
 #print axioms sCutOA_certTriple
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- Moved cutoff point `1 / 2 + 11 * I` (premise (a)). Temp mpmath scan (50-digit):
+`|η(1/2+11i)| ≈ 2.304502` vs `|η(1/2+10i)| ≈ 1.337526`; margin over `7/5`: `+0.90` vs `-0.06`. -/
+def sCutOA11 : ℂ := (1 / 2 : ℂ) + 11 * Complex.I
+theorem sCutOA11_re : sCutOA11.re = (1 / 2 : ℝ) := by simp [sCutOA11]
+theorem sCutOA11_im : sCutOA11.im = (11 : ℝ) := by simp [sCutOA11]
+
+theorem sCutOA11_norm_le : ‖sCutOA11‖ ≤ (12 : ℝ) := by
+  have h := Complex.norm_le_abs_re_add_abs_im sCutOA11
+  have hre : |sCutOA11.re| = (1 / 2 : ℝ) := by rw [sCutOA11_re]; norm_num
+  have him : |sCutOA11.im| = (11 : ℝ) := by rw [sCutOA11_im]; norm_num
+  rw [hre, him] at h
+  linarith
+
+theorem sCutOA11_term1_norm_le : ‖etaDirichletTerm sCutOA11 1‖ ≤ (5 / 7 : ℝ) := by
+  have hterm1_eq : etaDirichletTerm sCutOA11 1 = -1 / ((((2 : ℕ)) : ℂ) ^ sCutOA11) := by simp only [etaDirichletTerm]; norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = (((2 : ℝ) : ℂ)) := by norm_num
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ sCutOA11)‖ = (2 : ℝ) ^ sCutOA11.re := by rw [h2cast]; exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hroot : (7 / 5 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hpow : ((7 / 5 : ℝ) ^ (2 : ℕ)) ≤ (2 : ℝ) := by norm_num
+    have hpow' : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) = 2 := by rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+    rw [← hpow'] at hpow
+    exact le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+  rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm, sCutOA11_re]
+  rw [div_le_iff₀ (Real.rpow_pos_of_pos (by norm_num) _)]
+  have hmul := mul_le_mul_of_nonneg_left hroot (show (0 : ℝ) ≤ 5 / 7 by norm_num)
+  have heq : (5 / 7 : ℝ) * (7 / 5 : ℝ) = 1 := by norm_num
+  rw [heq] at hmul
+  linarith
+
+theorem sCutOA11_slow : (2 / 7 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA11 k‖ := by
+  have h0 : etaDirichletTerm sCutOA11 0 = 1 := by simp only [etaDirichletTerm]; simp
+  have hS2 : (∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA11 k) = 1 + etaDirichletTerm sCutOA11 1 := by rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero, zero_add, h0]
+  have ht := sCutOA11_term1_norm_le
+  rw [hS2]
+  have hrev := norm_sub_norm_le (1 : ℂ) (-(etaDirichletTerm sCutOA11 1))
+  rw [norm_one, norm_neg, sub_neg_eq_add] at hrev
+  linarith
+
+theorem sCutOA11_rtail : ‖(∑' m, etaPairTerm sCutOA11 m) - (∑ k ∈ Finset.range 2, etaDirichletTerm sCutOA11 k)‖ ≤ (24 : ℝ) := by
+  have hspos : 0 < sCutOA11.re := by rw [sCutOA11_re]; norm_num
+  have htail := zetaCell_even_remainder_le hspos sCutOA11_norm_le (show (0 : ℝ) ≤ 12 by norm_num) 1 (by norm_num)
+  have hone : ((((1 : ℕ)) : ℝ) ^ (-sCutOA11.re)) = 1 := by rw [Nat.cast_one, Real.one_rpow]
+  rw [hone] at htail
+  have hdiv : (12 : ℝ) * (1 / sCutOA11.re) ≤ 24 := by rw [sCutOA11_re]; norm_num
+  exact le_trans htail hdiv
+/-- Triple at `t = 11` in the shape `cutR10_zetaRemainder_of_certificate_one` consumes, minus `hEnough`. -/
+theorem sCutOA11_certTriple : ∃ (N : ℕ) (S : ℂ), S = ∑ k ∈ Finset.range N, etaDirichletTerm sCutOA11 k ∧ (2 / 7 : ℝ) ≤ ‖S‖ ∧ ‖(∑' m, etaPairTerm sCutOA11 m) - S‖ ≤ (24 : ℝ) := ⟨2, _, rfl, sCutOA11_slow, sCutOA11_rtail⟩
+theorem sCutOA11_hEnough_shortfall : ((7 / 5 : ℝ) + 24) - 2 / 7 = (879 / 35 : ℝ) := by norm_num
+/-- Sufficient improved-cert targets at `t = 11` (consistent with `|η| ≈ 2.30`): `M = 2048` gives `rtail' ≈ 0.53 ≤ 7/10`; `slow' ≥ 21/10` needs an `N`-term partial-sum bound (next-agent task). -/
+theorem sCutOA11_targets (slow' rtail' : ℝ) (hs : (21 / 10 : ℝ) ≤ slow') (hr : rtail' ≤ (7 / 10 : ℝ)) :
+    (7 / 5 : ℝ) + rtail' ≤ slow' := by linarith
+
+#print axioms sCutOA11_certTriple
+#print axioms sCutOA11_targets
+end Door3OffAxis
