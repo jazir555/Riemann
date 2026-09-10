@@ -3701,6 +3701,13 @@ sorry-free infrastructure and the complete commit ledger above.
   triple shape re-banked. hEnough still needs M=2048 rtail
   (≤7/10) + N=4096 slow (≥21/10).
   Residual: M=2048 rtail + N=4096 slow → hEnough (OA26).
+- 2026-09-09 OA26 (`d9e4e191`, off-axis tail, 2× green 8702 jobs):
+  **rtail leg CLOSED** (`‖G−S4096‖ ≤ 7/10` at M=2048 via
+  `35 ≤ √2048`) + threshold lemma (7/5+7/10=21/10 bar met).
+  slow N=4096 untouched (best 2/7); hEnough shortfall 127/70.
+  INTERFACE FINDING: wiring consumes t=10 sCut — t=11 cert
+  needs a cutoff-lane port to 11i.
+  Residual: N=4096 slow ≥ 21/10 (OA27).
 - 2026-09-07 OA2 (`7856eef2` pt 2, off-axis tail, green 8702 jobs):
   R05 M=1024 tail-decay chain (norm/rpow/tail bounds). Next: R05
   threshold-meeting certificate assembly (OA3).
