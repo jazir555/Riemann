@@ -1361,3 +1361,62 @@ theorem D3SG_decay_sigma (s : ℂ) (σ M : ℝ) (hσ : 0 < σ) (hσ1 : σ ≤ 1)
       Real.sqrt_sq (by positivity : (0 : ℝ) ≤ 3 * M * Real.exp (-(1 / 2) * |s.im|))] at hsqrt
     exact hsqrt
 #print axioms D3SG_decay_sigma
+
+/-- Cap `Γ ≤ 1` on `[1,2]` via convexity (`Γ 1 = Γ 2 = 1`). -/
+theorem D3SG_Gamma_one_two_le_one (x : ℝ) (h1 : 1 ≤ x) (h2 : x ≤ 2) :
+    Real.Gamma x ≤ 1 := by
+  have ha : (0 : ℝ) ≤ 2 - x := by linarith
+  have hb : (0 : ℝ) ≤ x - 1 := by linarith
+  have hab : ((2 : ℝ) - x) + (x - 1) = 1 := by ring
+  have h1mem : (1 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+  have h2mem : (2 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+  have hJ := Real.convexOn_Gamma.2 h1mem h2mem ha hb hab
+  simp only [smul_eq_mul] at hJ
+  have hpt : ((2 : ℝ) - x) * 1 + (x - 1) * 2 = x := by ring
+  rw [hpt, Real.Gamma_one, Real.Gamma_two] at hJ
+  have he : ((2 : ℝ) - x) * 1 + (x - 1) * 1 = 1 := by ring
+  exact le_trans hJ (le_of_eq he)
+
+/-- Uniform cap `Γ σ ≤ 20` on `[0.05,0.95]` (shift + `[1,2]` cap). -/
+theorem D3SG_Real_Gamma_uniform_005_095_le_20 (σ : ℝ)
+    (hlo : 0.05 ≤ σ) (hhi : σ ≤ 0.95) :
+    Real.Gamma σ ≤ 20 := by
+  have hpos : (0 : ℝ) < σ := by linarith
+  have hne : σ ≠ 0 := ne_of_gt hpos
+  have hshift : Real.Gamma (σ + 1) = σ * Real.Gamma σ :=
+    Real.Gamma_add_one hne
+  have h1 : (1 : ℝ) ≤ σ + 1 := by linarith
+  have h2 : σ + 1 ≤ 2 := by linarith
+  have hcap : Real.Gamma (σ + 1) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one (σ + 1) h1 h2
+  have hdiv : Real.Gamma σ = Real.Gamma (σ + 1) / σ := by
+    rw [eq_div_iff_mul_eq hne]
+    rw [hshift]
+    ring
+  have h1div : Real.Gamma (σ + 1) / σ ≤ 1 / σ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hpos))
+  have h20 : (1 : ℝ) / σ ≤ 20 := by
+    rw [div_le_iff₀ hpos]
+    linarith
+  calc Real.Gamma σ = Real.Gamma (σ + 1) / σ := hdiv
+    _ ≤ 1 / σ := h1div
+    _ ≤ 20 := h20
+
+#print axioms D3SG_Gamma_one_two_le_one
+#print axioms D3SG_Real_Gamma_uniform_005_095_le_20
+
+/-- Tier-C decay on strip `Re ∈ [0.05,0.95]`: `‖Γ s‖ ≤ 60·exp(−|Im|/2)`. -/
+theorem D3SG_TierC_gamma_rect (s : ℂ)
+    (hlo : 0.05 ≤ s.re) (hhi : s.re ≤ 0.95) :
+    ‖Complex.Gamma s‖ ≤ 60 * Real.exp (-(1 / 2) * |s.im|) := by
+  have hpos : (0 : ℝ) < s.re := by linarith
+  have hle1 : s.re ≤ 1 := by linarith
+  have hcap : Real.Gamma s.re ≤ 20 :=
+    D3SG_Real_Gamma_uniform_005_095_le_20 s.re hlo hhi
+  have h := D3SG_decay_sigma s s.re 20 hpos hle1 rfl (by norm_num) hcap
+  have e : (3 : ℝ) * 20 = 60 := by norm_num
+  calc ‖Complex.Gamma s‖ ≤ 3 * 20 * Real.exp (-(1 / 2) * |s.im|) := h
+    _ = 60 * Real.exp (-(1 / 2) * |s.im|) := by rw [e]
+
+#print axioms D3SG_TierC_gamma_rect
