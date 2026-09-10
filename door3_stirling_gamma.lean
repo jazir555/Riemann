@@ -837,3 +837,231 @@ theorem D3SG_prod_le_half_pow_sigma (σ T : ℝ) (hσ : 0 < σ) (hT : 0 ≤ T) (
   rwa [Finset.prod_const, Finset.card_range] at h
 
 #print axioms D3SG_prod_le_half_pow_sigma
+
+/-- Middle-tier product: quarter-factors on `Ico Q H` (half range minus quarter). -/
+theorem D3SG_prod_Ico_quarter_pow (T : ℝ) (hT : 4 ≤ T) :
+    ∏ k ∈ Finset.Ico (Nat.floor (T / 4 - 0.95) + 1)
+      (Nat.floor (T / 2 - 0.95) + 1),
+      ((0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + T ^ 2))
+      ≤ (1 / 2) ^ (2 * (Nat.floor (T / 2 - 0.95) + 1
+        - (Nat.floor (T / 4 - 0.95) + 1))) := by
+  have hT0 : (0 : ℝ) ≤ T / 2 - 0.95 := by linarith
+  have h1 : ∀ k ∈ Finset.Ico (Nat.floor (T / 4 - 0.95) + 1)
+      (Nat.floor (T / 2 - 0.95) + 1),
+      (0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + T ^ 2) ≤ 1 / 4 := by
+    intro k hk
+    apply D3SG_factor_le_quarter 0.95 T (by norm_num) k
+    have hlt : k < Nat.floor (T / 2 - 0.95) + 1 := (Finset.mem_Ico.mp hk).2
+    have hkle : k ≤ Nat.floor (T / 2 - 0.95) := Nat.lt_add_one_iff.mp hlt
+    have hc : (k : ℝ) ≤ ((Nat.floor (T / 2 - 0.95) : ℕ) : ℝ) := Nat.cast_le.mpr hkle
+    have hf := Nat.floor_le hT0
+    rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ T)]
+    linarith
+  have h := Finset.prod_le_prod
+    (fun k _ => (D3SG_factor_mem_Icc 0.95 T (by norm_num) k).1) h1
+  rw [Finset.prod_const, Nat.card_Ico] at h
+  have e : ((1 / 4 : ℝ)) ^ (Nat.floor (T / 2 - 0.95) + 1
+      - (Nat.floor (T / 4 - 0.95) + 1))
+      = (1 / 2) ^ (2 * (Nat.floor (T / 2 - 0.95) + 1
+        - (Nat.floor (T / 4 - 0.95) + 1))) := by
+    rw [show (1 / 4 : ℝ) = (1 / 2) ^ 2 by norm_num, ← pow_mul]
+  rwa [e] at h
+
+#print axioms D3SG_prod_Ico_quarter_pow
+
+/-- Top-tier product in shifted-range form (matches `prod_range_add` tails). -/
+theorem D3SG_prod_range_top_shift (T : ℝ) (hT : 2 ≤ T) :
+    (∏ k ∈ Finset.range (Nat.floor (T - 0.95) + 1 - (Nat.floor (T / 2 - 0.95) + 1)),
+      (0.95 + ((((Nat.floor (T / 2 - 0.95) + 1 + k : ℕ))) : ℝ)) ^ 2
+      / ((0.95 + ((((Nat.floor (T / 2 - 0.95) + 1 + k : ℕ))) : ℝ)) ^ 2 + T ^ 2))
+    ≤ (1 / 2) ^ (Nat.floor (T - 0.95) + 1 - (Nat.floor (T / 2 - 0.95) + 1)) := by
+  have h := D3SG_prod_Ico_half_pow T hT
+  rw [Finset.prod_Ico_eq_prod_range] at h
+  exact h
+
+/-- Three-tier product: sixteenth-factors on `[0,Q)`, quarter on `[Q,H)`, half on `[H,N)`.
+Weights `4·(T/4)+2·(T/4)+1·(T/2)` drive the `c ≈ 0.69` tall bound. -/
+theorem D3SG_prod_three_tier (T : ℝ) (hT : 4 ≤ T) :
+    ∏ k ∈ Finset.range (Nat.floor (T - 0.95) + 1),
+      ((0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + T ^ 2))
+      ≤ (1 / 2) ^ (4 * (Nat.floor (T / 4 - 0.95) + 1)
+        + 2 * (Nat.floor (T / 2 - 0.95) + 1 - (Nat.floor (T / 4 - 0.95) + 1))
+        + (Nat.floor (T - 0.95) + 1 - (Nat.floor (T / 2 - 0.95) + 1))) := by
+  have hT2 : (2 : ℝ) ≤ T := by linarith
+  have hQH : Nat.floor (T / 4 - 0.95) + 1 ≤ Nat.floor (T / 2 - 0.95) + 1 :=
+    D3SG_floor_quarter_le T hT
+  have hHN : Nat.floor (T / 2 - 0.95) + 1 ≤ Nat.floor (T - 0.95) + 1 :=
+    D3SG_floor_half_le T hT2
+  have hsplitHN : Nat.floor (T / 2 - 0.95) + 1
+      + (Nat.floor (T - 0.95) + 1 - (Nat.floor (T / 2 - 0.95) + 1))
+      = Nat.floor (T - 0.95) + 1 := Nat.add_sub_cancel' hHN
+  have hsplitQH : Nat.floor (T / 4 - 0.95) + 1
+      + (Nat.floor (T / 2 - 0.95) + 1 - (Nat.floor (T / 4 - 0.95) + 1))
+      = Nat.floor (T / 2 - 0.95) + 1 := Nat.add_sub_cancel' hQH
+  have hprodT := Finset.prod_range_add
+    (fun k : ℕ => (0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + T ^ 2))
+    (Nat.floor (T / 2 - 0.95) + 1)
+    (Nat.floor (T - 0.95) + 1 - (Nat.floor (T / 2 - 0.95) + 1))
+  rw [hsplitHN] at hprodT
+  have hprodM := Finset.prod_range_add
+    (fun k : ℕ => (0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + T ^ 2))
+    (Nat.floor (T / 4 - 0.95) + 1)
+    (Nat.floor (T / 2 - 0.95) + 1 - (Nat.floor (T / 4 - 0.95) + 1))
+  rw [hsplitQH] at hprodM
+  have h1 := D3SG_prod_sixteenth_pow T hT
+  have h2 := D3SG_prod_Ico_quarter_pow T hT
+  rw [Finset.prod_Ico_eq_prod_range] at h2
+  have h3 := D3SG_prod_range_top_shift T hT2
+  have hmul := mul_le_mul (mul_le_mul h1 h2
+    (Finset.prod_nonneg (fun k _ => (D3SG_factor_mem_Icc 0.95 T (by norm_num)
+      (Nat.floor (T / 4 - 0.95) + 1 + k)).1))
+    (by positivity)) h3
+    (Finset.prod_nonneg (fun k _ => (D3SG_factor_mem_Icc 0.95 T (by norm_num)
+      (Nat.floor (T / 2 - 0.95) + 1 + k)).1))
+    (by positivity)
+  rw [← pow_add, ← pow_add] at hmul
+  rw [hprodT, hprodM]
+  exact hmul
+
+#print axioms D3SG_prod_three_tier
+
+/-- Squared tall-height bound via three-tier counting (`|T| ≥ 4`). -/
+theorem D3SG_tall_prod_bound_three (s : ℂ) (hre : s.re = 0.95)
+    (hT : 4 ≤ |s.im|) :
+    ‖Complex.Gamma s‖ ^ 2
+      ≤ 1.21 * (1 / 2) ^ (4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+        + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+        + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) := by
+  have hspos : (0 : ℝ) < s.re := by rw [hre]; norm_num
+  have hprod := D3SG_sq_prod hspos (Nat.floor |s.im| + 2)
+  rw [hre, ← sq_abs s.im] at hprod
+  have hsub : Finset.range (Nat.floor (|s.im| - 0.95) + 1)
+      ⊆ Finset.range (Nat.floor |s.im| + 2) := by
+    intro x hx
+    rw [Finset.mem_range] at hx ⊢
+    exact lt_of_lt_of_le hx (D3SG_floor_count |s.im|)
+  have hPsub : ∏ k ∈ Finset.range (Nat.floor |s.im| + 2),
+      ((0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + |s.im| ^ 2))
+      ≤ ∏ k ∈ Finset.range (Nat.floor (|s.im| - 0.95) + 1),
+      ((0.95 + (k : ℝ)) ^ 2 / ((0.95 + (k : ℝ)) ^ 2 + |s.im| ^ 2)) :=
+    Finset.prod_le_prod_of_subset_of_le_one
+      hsub
+      (fun k _ => (D3SG_factor_mem_Icc (0.95 : ℝ) _ (by norm_num) k).1)
+      (fun k _ _ => (D3SG_factor_mem_Icc (0.95 : ℝ) _ (by norm_num) k).2)
+  have hP := le_trans hPsub (D3SG_prod_three_tier |s.im| hT)
+  exact le_trans hprod (mul_le_mul D3SG_Gamma095_sq_sharp hP
+    (Finset.prod_nonneg
+      (fun k _ => (D3SG_factor_mem_Icc (0.95 : ℝ) _ (by norm_num) k).1))
+    (by norm_num))
+
+/-- Squaring the `log 2`-rate exponential. -/
+theorem D3SG_exp_log2_sq (T : ℝ) :
+    (Real.exp (-Real.log 2 * T)) ^ 2 = Real.exp (-(2 * Real.log 2) * T) := by
+  rw [← Real.exp_nat_mul]
+  congr 1
+  push_cast
+  ring
+
+/-- Four `log 2`s exponentiate to sixteen (exact, no upper bound needed). -/
+theorem D3SG_exp_four_log2 : Real.exp (4 * Real.log 2) = 16 := by
+  have e : Real.exp (4 * Real.log 2) = (Real.exp (Real.log 2)) ^ 4 := by
+    have h4 : ((4 : ℕ) : ℝ) = 4 := by norm_num
+    calc Real.exp (4 * Real.log 2)
+        = Real.exp (((4 : ℕ) : ℝ) * Real.log 2) := by rw [h4]
+      _ = (Real.exp (Real.log 2)) ^ 4 := Real.exp_nat_mul _ _
+  rw [e, Real.exp_log (by norm_num : (0 : ℝ) < 2)]
+  norm_num
+
+#print axioms D3SG_tall_prod_bound_three
+
+/-- Tall three-tier decay on `Re = 0.95`: `‖Γ‖ ≤ 5·exp(−log 2·|Im|)`, `c = log 2 ≈ 0.69`. -/
+theorem D3SG_tall_three_tier (s : ℂ) (hre : s.re = 0.95)
+    (hT : 4 ≤ |s.im|) :
+    ‖Complex.Gamma s‖ ≤ 5 * Real.exp (-Real.log 2 * |s.im|) := by
+  have h1 := D3SG_tall_prod_bound_three s hre hT
+  have cQ : |s.im| / 4 - 0.95 < ((Nat.floor (|s.im| / 4 - 0.95) + 1 : ℕ) : ℝ) := by
+    push_cast
+    exact Nat.lt_floor_add_one _
+  have cH : |s.im| / 2 - 0.95 < ((Nat.floor (|s.im| / 2 - 0.95) + 1 : ℕ) : ℝ) := by
+    push_cast
+    exact Nat.lt_floor_add_one _
+  have cN : |s.im| - 0.95 < ((Nat.floor (|s.im| - 0.95) + 1 : ℕ) : ℝ) := by
+    push_cast
+    exact Nat.lt_floor_add_one _
+  have dQ : |s.im| / 4 - 0.95 < ((Nat.floor (|s.im| / 4 - 0.95) : ℕ) : ℝ) + 1 := by
+    have h := cQ
+    rwa [Nat.cast_add, Nat.cast_one] at h
+  have dH : |s.im| / 2 - 0.95 < ((Nat.floor (|s.im| / 2 - 0.95) : ℕ) : ℝ) + 1 := by
+    have h := cH
+    rwa [Nat.cast_add, Nat.cast_one] at h
+  have dN : |s.im| - 0.95 < ((Nat.floor (|s.im| - 0.95) : ℕ) : ℝ) + 1 := by
+    have h := cN
+    rwa [Nat.cast_add, Nat.cast_one] at h
+  have hnat : 4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+      + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))
+      = 2 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + (Nat.floor (|s.im| / 2 - 0.95) + 1) + (Nat.floor (|s.im| - 0.95) + 1) := by
+    have g1 := D3SG_floor_quarter_le |s.im| hT
+    have g2 := D3SG_floor_half_le |s.im| (by linarith)
+    omega
+  have hE : 2 * |s.im| - 3.8 ≤ ((((4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+      + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) : ℕ)) : ℝ) := by
+    rw [hnat]
+    push_cast
+    linarith [dQ, dH, dN]
+  have hlog2 : (0 : ℝ) < Real.log 2 := lt_trans (by norm_num) D3SG_log_two_gt
+  have hmul0 := mul_le_mul_of_nonneg_right hE hlog2.le
+  have hmono : Real.exp (-((((4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+      + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) : ℕ)) : ℝ)
+      * Real.log 2)
+      ≤ Real.exp (-(2 * |s.im| - 3.8) * Real.log 2) :=
+    Real.exp_le_exp.mpr (by linarith [hmul0])
+  have hsplit : -(2 * |s.im| - 3.8) * Real.log 2
+      = 3.8 * Real.log 2 + (-(2 * Real.log 2) * |s.im|) := by ring
+  have hcap : Real.exp (3.8 * Real.log 2) ≤ 16 := by
+    have hle : 3.8 * Real.log 2 ≤ 4 * Real.log 2 :=
+      mul_le_mul_of_nonneg_right (by norm_num) hlog2.le
+    rw [← D3SG_exp_four_log2]
+    exact Real.exp_le_exp.mpr hle
+  have hfin : (1.21 : ℝ) * Real.exp (-((((4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+      + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) : ℕ)) : ℝ)
+      * Real.log 2)
+      ≤ 25 * Real.exp (-(2 * Real.log 2) * |s.im|) := by
+    have hbase : (1.21 : ℝ) * Real.exp (3.8 * Real.log 2) ≤ 25 := by
+      calc (1.21 : ℝ) * Real.exp (3.8 * Real.log 2) ≤ 1.21 * 16 :=
+          mul_le_mul_of_nonneg_left hcap (by norm_num)
+        _ ≤ 25 := by norm_num
+    calc (1.21 : ℝ) * Real.exp (-((((4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+        + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+        + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) : ℕ)) : ℝ)
+        * Real.log 2)
+        ≤ 1.21 * Real.exp (-(2 * |s.im| - 3.8) * Real.log 2) :=
+          mul_le_mul_of_nonneg_left hmono (by norm_num)
+      _ = 1.21 * (Real.exp (3.8 * Real.log 2)
+          * Real.exp (-(2 * Real.log 2) * |s.im|)) := by
+          rw [hsplit, Real.exp_add]
+      _ = (1.21 * Real.exp (3.8 * Real.log 2))
+          * Real.exp (-(2 * Real.log 2) * |s.im|) := by ring
+      _ ≤ 25 * Real.exp (-(2 * Real.log 2) * |s.im|) :=
+          mul_le_mul_of_nonneg_right hbase (Real.exp_pos _).le
+  have h1' : ‖Complex.Gamma s‖ ^ 2 ≤ (1.21 : ℝ) * Real.exp
+      (-((((4 * (Nat.floor (|s.im| / 4 - 0.95) + 1)
+      + 2 * (Nat.floor (|s.im| / 2 - 0.95) + 1 - (Nat.floor (|s.im| / 4 - 0.95) + 1))
+      + (Nat.floor (|s.im| - 0.95) + 1 - (Nat.floor (|s.im| / 2 - 0.95) + 1))) : ℕ)) : ℝ)
+      * Real.log 2) := by
+    rw [← D3SG_half_pow_exp]
+    exact h1
+  have hsq : ‖Complex.Gamma s‖ ^ 2
+      ≤ (5 * Real.exp (-Real.log 2 * |s.im|)) ^ 2 := by
+    rw [mul_pow, D3SG_exp_log2_sq, show (5 : ℝ) ^ 2 = 25 by norm_num]
+    exact le_trans h1' hfin
+  have hnn : (0 : ℝ) ≤ 5 * Real.exp (-Real.log 2 * |s.im|) := by positivity
+  have hsqrt := Real.sqrt_le_sqrt hsq
+  rw [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hnn] at hsqrt
+  exact hsqrt
+
+#print axioms D3SG_tall_three_tier
