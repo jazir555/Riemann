@@ -3684,6 +3684,14 @@ sorry-free infrastructure and the complete commit ledger above.
   σ-general count/product. Rate still 1/2; C≈2.2 untuned
   (contradiction noted).
   Residual: three-tier decay c≈0.69 + σ-gen bounds (ST4).
+- 2026-09-10 ST4 (`773e3d54`, stirling file, 4× green 8682 jobs
+  + 1 fail-fixed): **`D3SG_prod_three_tier`** (split
+  `[0,Q)+[Q,H)+[H,N)`, exponent `4Q+2(H−Q)+(N−H)`) →
+  **`‖Γ‖ ≤ 5·exp(−log2·|Im|)`, |T|≥4** (`c≈0.6931` via
+  `exp(4·log2)=16` exact, no log2-upper needed).
+  Gap: global merge needs `|T|≤4` small-height (`C≈18`);
+  σ-gen untouched (σ-uniform cap `M≈20` is hard blocker).
+  Residual: global c≈0.69 merge (ST5).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
