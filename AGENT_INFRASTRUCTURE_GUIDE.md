@@ -3722,6 +3722,13 @@ sorry-free infrastructure and the complete commit ledger above.
   4 explicit premises (gamma-lower 0.008, zeta-lower 1.1 at
   sCenter [the wall], deriv-tier 0.07, fat-ball sup 16800);
   12-step replication TEMPLATE banked for remaining cells.
+- 2026-09-10 batches A+B received (`9185b068`, NEW files,
+  722+1170 lines, 0 sorry, unbuilt): A = 3 bottom-row cells
+  (BA00/03/04, 6 premises each, thresholds proved, Cauchy
+  mismatch explicit); B = full second row R11–R20 (10 cells,
+  3 premises each, no banked pilots exist there — center
+  inequality itself the premise). Patch: factor enclosures
+  (complex wall), tier-M direct bounds, fat-ball sups.
 - 2026-09-10 CELL-complete received (552/0 on top, unbuilt):
   gamma-lower **0.006 PROVED** (0.008 shown infeasible on
   banked (S,U): need S·U≤392.7, have 523.3); fallback
