@@ -3453,6 +3453,13 @@ sorry-free infrastructure and the complete commit ledger above.
   Re 46/100 → **MILESTONE `‖S₆‖ ≥ 50/100`** (Im21 skipped:
   hnum would be false; closed via 46+20 fallback).
   Residual: Im21 via Taylor sin-upper + Re47 → 51/100 (RX34).
+- 2026-09-10 RX34 (`1d6bee59` part 1, tail-scratch, 2× green):
+  Im21 verified + Re47/norm51 (margins +0.001/+0.0049).
+- 2026-09-10 RX35 (`1d6bee59` part 2, tail-scratch, 2× green):
+  norm51 verified as-is + sin-θ₄-upper → **Im22** (margin
+  +0.00425). Norm holds 51 (52 needs 0.2704 > 0.2693).
+  Residual to 53: 0.0116. Next: sin-θ₁ lift → Im23 →
+  norm52 (RX36).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
