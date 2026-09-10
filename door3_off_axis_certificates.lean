@@ -8418,3 +8418,66 @@ theorem sCutOA11_targets (slow' rtail' : ℝ) (hs : (21 / 10 : ℝ) ≤ slow') (
 #print axioms sCutOA11_certTriple
 #print axioms sCutOA11_targets
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- Rpow lower: `35 ≤ ((2048 : ℕ) : ℝ)^(1/2)` via `35^2 = 1225 ≤ 2048`. -/
+theorem sCutOA11_M2048_rpow_ge :
+    (35 : ℝ) ≤ ((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((35 : ℝ) ^ (2 : ℕ)) ≤ ((((2048 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((2048 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `M = 2048` tail-decay bound at `Re = 1/2`: `12*(2048^(-1/2))/(1/2) ≤ 7/10` (`24/35 ≤ 7/10`). -/
+theorem sCutOA11_r_2048_le :
+    (12 : ℝ) * ((((((2048 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤ (7 / 10 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((2048 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := sCutOA11_M2048_rpow_ge
+  have hrw : ((((2048 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (35 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (35 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((35 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((35 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (7 / 10 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Genuine paired tail at `sCutOA11`, `M = 2048` (`‖G - S4096‖ ≤ 7/10`, true value ≈ 0.5303). -/
+theorem sCutOA11_eta_tail_2048_le :
+    ‖(∑' m, etaPairTerm sCutOA11 m) -
+      (∑ k ∈ Finset.range (2 * 2048), etaDirichletTerm sCutOA11 k)‖ ≤
+      (7 / 10 : ℝ) := by
+  have hs : 0 < sCutOA11.re := by rw [sCutOA11_re]; norm_num
+  have hC : ‖sCutOA11‖ ≤ (12 : ℝ) := sCutOA11_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 2048 (by norm_num)
+  have hre : sCutOA11.re = (1 / 2 : ℝ) := sCutOA11_re
+  rw [hre] at hgen
+  have hr := sCutOA11_r_2048_le
+  linarith
+
+/-- Closed `hEnough` threshold with the `M = 2048` tail (`7/5 + 7/10 = 21/10`). -/
+theorem sCutOA11_hEnough_2048_threshold (slow' : ℝ) (hs : (21 / 10 : ℝ) ≤ slow') :
+    (7 / 5 : ℝ) + (7 / 10 : ℝ) ≤ slow' := by linarith
+
+#print axioms sCutOA11_M2048_rpow_ge
+#print axioms sCutOA11_r_2048_le
+#print axioms sCutOA11_eta_tail_2048_le
+end Door3OffAxis
+
+namespace Door3OffAxis
+#print axioms sCutOA11_hEnough_2048_threshold
+end Door3OffAxis
