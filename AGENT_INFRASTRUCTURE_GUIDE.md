@@ -3699,6 +3699,17 @@ sorry-free infrastructure and the complete commit ledger above.
   4 explicit premises (gamma-lower 0.008, zeta-lower 1.1 at
   sCenter [the wall], deriv-tier 0.07, fat-ball sup 16800);
   12-step replication TEMPLATE banked for remaining cells.
+- 2026-09-10 BSUP draft received (NEW `door3_cutR10_ballsup.lean`,
+  345 lines, untracked-only, 0 sorry, unbuilt): ball geometry
+  (Re∈[8.44,11.56], s-region mapped) + poly ≤67 + pi ≤16/5
+  PROVED; honest weak cap ≤12.87 conditional. FLAG: premise
+  (b) as stated may be FALSE — poly·pi·Gamma ≈0.062 > 0.04
+  at z≈8.45 independent of zeta; center product ≈0.03797
+  (~5% margin). Fix-wave 1 must numerically verify the joint
+  sup FIRST; if false, renegotiate the 0.04 tier (fencing
+  ε/M recompute), not more analysis.
+- 2026-09-10 lakefile registers all 4 new modules
+  (ballsup/sliver/cutL10/first_cell, roots+globs).
 - 2026-09-10 ST1 (`b8ab3230`, NEW file door3_stirling_gamma,
   8× green 8682 jobs; wrapper AUTOCLEAR observed live):
   Weierstrass-product route → FIRST exponential Γ-bound

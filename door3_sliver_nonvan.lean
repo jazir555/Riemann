@@ -1,0 +1,227 @@
+import Mathlib
+import central_cover_assembly
+import door3_top_edge
+
+/-! # Door-3 sliver nonvanishing (premise (d) of the door-3 capstone)
+
+TARGET (quoted verbatim from `door3_rh_wiring.lean:88-94`,
+`Door3RHWiring.xiCutoffLines10_of_cutR10_and_leftLine`):
+
+```
+    (hSliver : ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0) :
+```
+
+Region: BOTH cutoff lines `Re = ±10`, band `-(1/2) < Im < 1/2`, off the
+real axis (`Im ≠ 0`), sliver `0.49 ≤ |Im|` (i.e. `0.49 ≤ Im ∨ Im ≤ -0.49`).
+Conclusion: `xiShifted z ≠ 0`.
+
+How `cutoffLines_either` splits rect-vs-sliver
+(`central_cover_assembly.lean:6908-6911`):
+`CentralCoverAssembly.cutoffLines_either` sends every cutoff point
+(`Re = ±10`, `|Im| < 1/2`) to EITHER a thin rect
+(`CutL10.mem z ∨ CutR10.mem z`, covering `|Im| ≤ 0.49` via
+`CutL10_mem_of_line` :6898 / `CutR10_mem_of_line` :6888) OR the sliver
+disjunct (`0.49 ≤ Im ∨ Im ≤ -0.49`). The rect arm is already wired
+(`cutR10_rect_nonvanishing` for `CutR10`; `CutL10` is premise (c), another
+lane). This file owns the sliver arm: the theorem
+`sliver_nonvanishing_of_topBotRects` below has EXACTLY the `hSliver` shape,
+so `xiCutoffLines10_of_cutR10_and_leftLine` consumes it directly
+(`· exact hSliver z heq hgt' hlt hne hs`, wiring line 106).
+
+Banked pieces cited (all qualitative; exact names):
+* `Door3TopEdge.exists_top_edge_uniform_strip` (`door3_top_edge.lean:294`):
+  for every closed `[a,b]` there is a uniform `δ > 0` with the open strip
+  `1/2 - δ < y < 1/2` above `[a,b]` zero-free for `_root_.xiShifted`.
+  Backed by `Door3TopEdge.exists_top_edge_lower_bound` (:61, compact edge
+  minimum via `xiShiftedEntire_ne_zero_top`, endpoint `x = 0` repaired by the
+  entire value) + `BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound`
+  (`rh_certificate_infra.lean:459`, Theorem 3). NOTE: gives NO numeric width;
+  `δ ≥ 0.01` stays open (guide § "Top-edge compact lower-bound feeder").
+* `Door3TopEdge.exists_bottom_edge_uniform_strip` (`door3_top_edge.lean:445`):
+  mirror qualitative strip above the bottom edge; same numeric-width caveat.
+  (Alternative lower route, NOT used here: `Door3TopEdge.lower_boundary_nonvanishing_from_outer_bound`
+  (:397), or upper→lower via `Door3ResidualScout.door3_conj_transfer`
+  (`central_cover_assembly.lean:16576`, `classicalXi_symmetry.conj_symm`).)
+* `CentralCoverAssembly.xiShifted_eq_entire_on_strip` (entire↔totalized transfer
+  inside the open strip; already consumed inside the two uniform-strip lemmas).
+* `Door3ResidualScout.door3_cutoffLine_mem_of_abs_le`
+  (`central_cover_assembly.lean:16557`): `|Im| ≤ 0.49` on either line lands in
+  a thin rect (rect arm, not this file).
+* `RHProofScaffold.XiCutoffLines10` (`riemann_hypothesis.lean:12165`) and
+  `XiCentralEdgeStrips10` (:12157): the capstone Props this feeds.
+
+Why the sliver avoids the top-edge endpoint trap: sliver points have
+`Re = ±10 ≠ 0`, so the `x ≠ 0` side condition of
+`Door3TopEdge.xiShiftedEntire_eq_xiShifted_top` (:12) always holds on the
+lines; the separately-recorded totalization zero
+`_root_.xiShifted (I/2) = 0` (`door3_boundary_endpoints.lean`) is off the lines.
+
+Structure (no `sorry`/`admit`/`axiom` anywhere):
+§1 banked-lemma assembly — all PROVED (pure logic + Mathlib + cited banked certs
+  taken as explicit hypotheses);
+§2 residual quantitative core — the ONLY unclosable numerics
+  (`hwidthT : 1/2 - δT < 0.49`, `hwidthB : -0.49 < -1/2 + δB`, i.e. the
+  `δ ≥ 0.01` obligation) isolated as EXPLICIT hypothesis Props;
+§3 final `hSliver`-shaped theorem, PROVED conditional on the premises.
+-/
+
+namespace Door3SliverNonvan
+
+open CentralCoverAssembly
+
+/-! ### §1 Banked-lemma assembly (proved) -/
+
+/-- Pure split: the sliver disjunct inside the band is an upper sliver
+`0.49 ≤ Im < 1/2` or a lower sliver `-1/2 < Im ≤ -0.49`. -/
+theorem sliver_upper_or_lower {z : ℂ}
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hs : (0.49 : ℝ) ≤ z.im ∨ z.im ≤ -0.49) :
+    ((0.49 : ℝ) ≤ z.im ∧ z.im < 1 / 2) ∨
+      (-(1 / 2 : ℝ) < z.im ∧ z.im ≤ -0.49) := by
+  rcases hs with h | h
+  · exact Or.inl ⟨h, hlt⟩
+  · exact Or.inr ⟨hgt, h⟩
+
+/-- Sliver points (`Re = ±10`) lie in the closed interval `[-10, 10]` fed to
+the uniform-strip banked lemmas. -/
+theorem sliver_re_mem_Icc {z : ℂ}
+    (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) :
+    z.re ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+  rw [Set.mem_Icc]
+  rcases heq with h | h <;> rw [h] <;> constructor <;> norm_num
+
+/-- Every complex point is its vertical-line coordinate form
+`↑Re + I * ↑Im`, matching the `((x : ℂ) + Complex.I * (y : ℂ))` shape of the
+banked uniform-strip conclusions. -/
+theorem sliver_point_eq_vertical (z : ℂ) :
+    (z.re : ℂ) + Complex.I * (z.im : ℂ) = z := by
+  apply Complex.ext
+  · simp [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+  · simp [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
+
+/-- Routing wrapper around the banked rect-vs-sliver split: on the cutoff
+lines, ruling out both thin rects leaves exactly the sliver disjunct that
+`xiCutoffLines10_of_cutR10_and_leftLine` feeds to `hSliver` (wiring line 106).
+Proved from `CentralCoverAssembly.cutoffLines_either` by pure logic. -/
+theorem sliver_of_cutoffLines_either {z : ℂ}
+    (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hnotrect : ¬ (CutL10.mem z ∨ CutR10.mem z)) :
+    (0.49 : ℝ) ≤ z.im ∨ z.im ≤ -0.49 := by
+  rcases CentralCoverAssembly.cutoffLines_either heq hgt hlt with h | hs
+  · exact absurd h hnotrect
+  · exact hs
+
+/-- Upper sliver rect from a uniform-strip certificate plus an explicit width
+inequality. The certificate `hstripT` is discharged by
+`Door3TopEdge.exists_top_edge_uniform_strip` at `a = -10, b = 10`; only
+`hwidthT` (the `δ ≥ 0.01` numeral) is a genuine fix-wave premise. -/
+theorem top_sliver_of_uniform_strip {δT : ℝ}
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - δT < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthT : (1 / 2 : ℝ) - δT < 0.49)
+    {z : ℂ} (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hlo : (0.49 : ℝ) ≤ z.im) (hhi : z.im < (1 / 2 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  have hx : z.re ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := sliver_re_mem_Icc heq
+  have hlow : (1 / 2 : ℝ) - δT < z.im := lt_of_lt_of_le hwidthT hlo
+  have h := hstripT z.re hx z.im hlow hhi
+  have hpoint : ((z.re : ℂ) + Complex.I * (z.im : ℂ)) = z :=
+    sliver_point_eq_vertical z
+  rw [hpoint] at h
+  exact h
+
+/-- Lower sliver rect from a uniform-strip certificate plus an explicit width
+inequality. Mirror of `top_sliver_of_uniform_strip`; the certificate `hstripB`
+is discharged by `Door3TopEdge.exists_bottom_edge_uniform_strip`. -/
+theorem bottom_sliver_of_uniform_strip {δB : ℝ}
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + δB)
+    {z : ℂ} (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hgt : -(1 / 2 : ℝ) < z.im) (hhi : z.im ≤ (-0.49 : ℝ)) :
+    xiShifted z ≠ 0 := by
+  have hx : z.re ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := sliver_re_mem_Icc heq
+  have hhigh : z.im < -(1 / 2 : ℝ) + δB := lt_of_le_of_lt hhi hwidthB
+  have h := hstripB z.re hx z.im hgt hhigh
+  have hpoint : ((z.re : ℂ) + Complex.I * (z.im : ℂ)) = z :=
+    sliver_point_eq_vertical z
+  rw [hpoint] at h
+  exact h
+
+/-! ### §2 Residual quantitative core (premise-gated, sorry-free) -/
+
+/-- Upper sliver rect packaged from uniform data: the off-axis hypothesis
+`hne` is kept (unused) so the statement feeds the `hSliver` shape directly. -/
+theorem sliverTopRect_of_uniform_plus_width {δT : ℝ}
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - δT < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthT : (1 / 2 : ℝ) - δT < 0.49) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      (0.49 : ℝ) ≤ z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      xiShifted z ≠ 0 := by
+  intro z heq hlo hhi _
+  exact top_sliver_of_uniform_strip hstripT hwidthT heq hlo hhi
+
+/-- Lower sliver rect packaged from uniform data (mirror). -/
+theorem sliverBotRect_of_uniform_plus_width {δB : ℝ}
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + δB) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im ≤ (-0.49 : ℝ) → z.im ≠ 0 →
+      xiShifted z ≠ 0 := by
+  intro z heq hgt hhi _
+  exact bottom_sliver_of_uniform_strip hstripB hwidthB heq hgt hhi
+
+/-! ### §3 Final `hSliver`-shaped theorem (premise (d)) -/
+
+/-- The exact `hSliver` premise shape of
+`Door3RHWiring.xiCutoffLines10_of_cutR10_and_leftLine`
+(`door3_rh_wiring.lean:92-94`), proved conditional on the two sliver-rect
+premises (upper `0.49 ≤ Im < 1/2`, lower `-1/2 < Im ≤ -0.49`). -/
+theorem sliver_nonvanishing_of_topBotRects
+    (hTop : ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      (0.49 : ℝ) ≤ z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      xiShifted z ≠ 0)
+    (hBot : ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im ≤ (-0.49 : ℝ) → z.im ≠ 0 →
+      xiShifted z ≠ 0)
+    (z : ℂ) (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) (hs : (0.49 : ℝ) ≤ z.im ∨ z.im ≤ -0.49) :
+    xiShifted z ≠ 0 := by
+  rcases hs with h | h
+  · exact hTop z heq h hlt hne
+  · exact hBot z heq hgt h hne
+
+/-- End-to-end sliver supply: banked uniform-strip certificates + the two
+numeric width premises discharge the exact `hSliver` shape. Fix-wave recipe
+for the certificate premises: `obtain ⟨δT, _, hT⟩ :=
+Door3TopEdge.exists_top_edge_uniform_strip (show (-10:ℝ) ≤ 10 by norm_num)`
+(and the bottom mirror); the ONLY genuinely new obligations are `hwidthT`
+and `hwidthB` below. -/
+theorem hSliver_of_uniformData {δT δB : ℝ}
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - δT < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthT : (1 / 2 : ℝ) - δT < 0.49)
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + δB)
+    (z : ℂ) (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) (hs : (0.49 : ℝ) ≤ z.im ∨ z.im ≤ -0.49) :
+    xiShifted z ≠ 0 := by
+  have hTop := sliverTopRect_of_uniform_plus_width hstripT hwidthT
+  have hBot := sliverBotRect_of_uniform_plus_width hstripB hwidthB
+  exact sliver_nonvanishing_of_topBotRects hTop hBot z heq hgt hlt hne hs
+
+end Door3SliverNonvan
