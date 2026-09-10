@@ -3781,6 +3781,14 @@ sorry-free infrastructure and the complete commit ledger above.
   Gap: global merge needs `|T|≤4` small-height (`C≈18`);
   σ-gen untouched (σ-uniform cap `M≈20` is hard blocker).
   Residual: global c≈0.69 merge (ST5).
+- 2026-09-10 ST5 (`87d88fb8` part 1, stirling file, 2× green):
+  **`D3SG_Gamma_line095_exp_decay_global`
+  (`‖Γ‖ ≤ 18·exp(−log2·|Im|)`, ALL T)** + σ floor-counts
+  (green); tail 48 lines (σ-product halves) unbuilt → held.
+- 2026-09-10 ST7 (`87d88fb8` part 2, stirling file, 3× green
+  8682 jobs): held tail VALIDATED green + `D3SG_prod_two_tier_sigma`
+  + `D3SG_tall_prod_bound_half_sigma` + `D3SG_small_height_sigma`
+  (cap explicit). Residual: `D3SG_decay_sigma` assembly (ST8).
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
