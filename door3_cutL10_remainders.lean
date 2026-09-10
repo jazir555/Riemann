@@ -1006,3 +1006,389 @@ end Door3CutL10FencingClose
 #print axioms Door3CutL10FencingClose.cutL10_hLeft_of_all_suppliers
 #print axioms Door3CutL10FencingClose.cutL10_xiCutoffLines10_of_all_suppliers
 
+/-! ## (d) CutL10 Tier-B closure (append-only tail; LF)
+
+Mirror of the right-ball Tier-B story (`door3_cutR10_ballsup.lean` APPEND-2
+(d) plus `door3_cutR10_retier.lean` Tier B):
+
+(a) LEFT endpoint audit: at the in-ball real endpoint `z0 = -8.44`
+(`s0 = 1/2 - 8.44*I`, conjugate of the right `1/2 + 8.44*I`) the
+poly norm is the same `35.7418` (depends only on `|z0|^2`), the pi
+lower is the same `7/10` (depends only on `Re s0 = 1/2`), hence
+poly times pi is `>= 24` (mirror image of `cutR10_poly_pi_lower_endpoint`).
+TRUE values (conjugation symmetry, norms respect `conj`): poly `35.7418`,
+pi `pi^(-1/4) approx 0.7512`, Stirling Gamma at `s0/2 = 1/4 - 4.22*I`
+approx `0.0023`, so poly times pi times Gamma approx `0.062 > 0.04`
+BEFORE zeta; joint `<= 0.04` would need `|zeta(1/2 - 8.44*I)| <= 2/3`
+(approx `0.64` shortfall), implausible this far below the first zero
+(`t approx 14.13`, center value approx `1.549`). Center four-factor TRUE
+value is the same approx `0.03797`
+(`50.125 * 0.7512 * 0.000651 * 1.549`); certified floor
+`8421/320000` covers need `117/5000 = 0.0234`.
+The zeta lower numeral `hLower` stays ZU36-owned (not duplicated);
+the Gamma lower `hBanked` is banked (see `Door3CutL10GammaConj`).
+
+(b) Tier-B conditional: shared sup `C` on `closedBall center (radius + rhoC)`
+gives deriv `C / rhoC` on the rect (Cauchy), hence shrunken fencing from
+the feasibility inequality `0.001 + (C / rhoC) * rho <= 8421/320000`
+with the LEFT floor/center numbers (same numerals as the right lane by
+conjugation). Instantiated at `(C, rhoC, rho) = (12.87, 1, 0.001)`.
+
+(c) Wired locally (reproved, never imported): endpoint numerals, `hProd`
+closed, Euler sliver conditional, Gamma denom lower plus gated `1/100`
+assembly, sharp `12.87` shared-sup assembly from closed `hProd`.
+Residual: `hZetaSup` strip wall, `hGammaSup` Stirling upper (`hProdCap`),
+`hLower` (zeta lane), `hBanked` (banked), edge-strip sliver.
+Explicit binders only; no placeholders.
+-/
+
+namespace Door3CutL10TierB
+
+open CentralCoverAssembly
+
+/-- Endpoint poly norm at `z0 = -8.44`: `35.7418` (mirror of the right
+`8.44` value; `(-8.44)^2 = 8.44^2`). -/
+theorem cutL10_endpoint_poly_norm :
+    ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+      (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖
+      = (35.7418 : ℝ) := by
+  have heq : (1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+      (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1) =
+      -(((((-8.44 : ℝ)) : ℂ) ^ 2 + (1 / 4 : ℂ)) / 2) := by
+    have hI : Complex.I * Complex.I = (-1 : ℂ) := Complex.I_mul_I
+    have hz : shiftedS ((((-8.44 : ℝ)) : ℂ))
+        = (1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ) := by
+      unfold shiftedS
+      push_cast
+      ring
+    have hpoly := Door3CutL10BallSup.cutL10_ballPoly_eq ((((-8.44 : ℝ)) : ℂ))
+    rw [hz] at hpoly
+    exact hpoly
+  rw [heq, norm_neg]
+  have hcast : (((((-8.44 : ℝ)) : ℂ) ^ 2 + (1 / 4 : ℂ)) / 2)
+      = ((((35.7418 : ℝ)) : ℂ)) := by
+    norm_cast
+    push_cast
+    norm_num
+  rw [hcast, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (by norm_num)]
+
+/-- Endpoint pi lower at `s0 = 1/2 - 8.44*I`: `7/10 <= ‖pi^(-s0/2)‖`
+(depends only on `Re = 1/2`, hence identical to the right lane). -/
+theorem cutL10_endpoint_pi_lower :
+    (7 / 10 : ℝ) ≤ ‖((Real.pi : ℂ) ^
+      (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖ := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+  have hre : (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)).re
+      = (-(1 / 4) : ℝ) := by
+    simp [Complex.div_ofNat]
+  rw [hre]
+  have hpi3 : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
+  have hmono : (3 : ℝ) ^ (-(1 / 4 : ℝ)) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
+    apply Real.rpow_le_rpow (by norm_num) hpi3 (by norm_num)
+  have h3 : (7 / 10 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 4 : ℝ)) := by norm_num
+  exact le_trans h3 hmono
+
+/-- Poly times pi lower at the left endpoint: `>= 24` (mirror image of
+`cutR10_poly_pi_lower_endpoint`). -/
+theorem cutL10_poly_pi_lower_endpoint :
+    ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+      (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖ *
+    ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖
+      ≥ 24 := by
+  have hpoly := cutL10_endpoint_poly_norm
+  have hpi := cutL10_endpoint_pi_lower
+  calc ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+        (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖ *
+      ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖
+      ≥ 35.7418 * (7 / 10) :=
+        mul_le_mul hpoly.le hpi (by norm_num) (by norm_num)
+    _ ≥ 24 := by norm_num
+
+/-- Shortfall implication: triple `>= 6/100` plus joint `<= 4/100` forces
+`‖zeta‖ <= 2/3` at the endpoint (quantified `0.64` shortfall). -/
+theorem cutL10_joint_implies_zeta_cap (g : ℝ) (z0 : ℝ)
+    (hg : (6 / 100 : ℝ) ≤ g) (hz0 : (0 : ℝ) ≤ z0)
+    (hJoint : g * z0 ≤ (4 / 100 : ℝ)) :
+    z0 ≤ (2 / 3 : ℝ) := by
+  have hpos : (0 : ℝ) < g := by linarith
+  rw [div_le_iff₀ hpos] at hg ⊢
+  nlinarith [hJoint]
+
+/-- Shifted-half imaginary part is nonzero on the left ball
+(`(s/2).im = s.im/2 <= -4.22`). -/
+theorem cutL10_shiftedS_half_im_ne_zero (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1)) :
+    (shiftedS z / 2).im ≠ 0 := by
+  have him := Door3CutL10BallSup.cutL10_mem_ball_shiftedS_im_bounds z hz
+  have heq : (shiftedS z / 2).im = (shiftedS z).im / 2 := by
+    simp [Complex.div_ofNat]
+  rw [heq]
+  intro h0
+  linarith [him.2]
+
+/-- `Gamma (shiftedS z / 2) ≠ 0` on the left ball. -/
+theorem cutL10_gamma_half_ne_zero (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1)) :
+    Complex.Gamma (shiftedS z / 2) ≠ 0 := by
+  apply Complex.Gamma_ne_zero
+  intro m hcon
+  have him_ne := cutL10_shiftedS_half_im_ne_zero z hz
+  rw [hcon] at him_ne
+  simp at him_ne
+
+/-- Polar-times-poly cancellation (center-independent). -/
+theorem cutL10_poly_times_polar (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) :
+    ((1 / 2 : ℂ) * s * (s - 1)) * (1 / s + 1 / (1 - s)) = (-1 / 2 : ℂ) := by
+  have h1s : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr hs1.symm
+  field_simp
+  ring
+
+/-- Second cancellation (center-independent). -/
+theorem cutL10_poly_times_xiQuot (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) (X : ℂ) :
+    ((1 / 2 : ℂ) * s * (s - 1)) * (2 * X / (s * (s - 1))) = X := by
+  have hsm : s * (s - 1) ≠ 0 := by
+    apply mul_ne_zero hs0 (sub_ne_zero.mpr hs1)
+  field_simp
+  ring
+
+/-- Entire extension equals `1/2 + poly * completed₀`. -/
+theorem cutL10_entire_eq_half_add_poly_completed (z : ℂ) :
+    xiShiftedEntire z =
+      (1 / 2 : ℂ) + ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+        completedRiemannZeta₀ (shiftedS z) := by
+  have hpoly := Door3CutL10BallSup.cutL10_ballPoly_eq z
+  unfold xiShiftedEntire
+  rw [hpoly]
+  ring
+
+/-- `classicalXi` four-factor unfolding with `zeta = riemannZeta`. -/
+theorem cutL10_classicalXi_eq_fourFactor (s : ℂ) :
+    classicalXi s = ((1 / 2 : ℂ) * s * (s - 1)) *
+      ((Real.pi : ℂ) ^ (-(s / 2))) * (Complex.Gamma (s / 2)) * (zeta s) := by
+  have hz : zeta s = riemannZeta s := rfl
+  unfold classicalXi XiFromPrefactor classicalXiPrefactor
+  rw [hz]
+  ring
+
+/-- Product identity CLOSED on the left ball (discharges `hProd`). -/
+theorem cutL10_hProd_closed (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1)) :
+    xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) := by
+  have hs0 : shiftedS z ≠ 0 :=
+    Door3CutL10BallSup.cutL10_mem_ball_shiftedS_ne_zero z hz
+  have hs1 : shiftedS z ≠ 1 :=
+    Door3CutL10BallSup.cutL10_mem_ball_shiftedS_ne_one z hz
+  have hGamma : Complex.Gamma (shiftedS z / 2) ≠ 0 :=
+    cutL10_gamma_half_ne_zero z hz
+  have hpolar := completedRiemannZeta₀_eq_polar_plus_xi (shiftedS z) hs0 hs1 hGamma
+  have hent := cutL10_entire_eq_half_add_poly_completed z
+  have hcancel := cutL10_poly_times_polar (shiftedS z) hs0 hs1
+  have hX := cutL10_poly_times_xiQuot (shiftedS z) hs0 hs1
+    (classicalXi (shiftedS z))
+  have hfour := cutL10_classicalXi_eq_fourFactor (shiftedS z)
+  have hentXi : xiShiftedEntire z = classicalXi (shiftedS z) := by
+    rw [hent, hpolar]
+    have hexpand : (1 / 2 : ℂ) +
+        ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+        (1 / shiftedS z + 1 / (1 - shiftedS z) +
+          2 * classicalXi (shiftedS z) / (shiftedS z * (shiftedS z - 1))) =
+        ((1 / 2 : ℂ) +
+          ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+          (1 / shiftedS z + 1 / (1 - shiftedS z))) +
+        ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+          (2 * classicalXi (shiftedS z) / (shiftedS z * (shiftedS z - 1))) := by
+      ring
+    rw [hexpand, hcancel, hX]
+    ring
+  rw [hentXi, hfour]
+
+/-- Euler domination step (mirror of `cutR10_zeta_euler_step`; `im`-free). -/
+theorem cutL10_zeta_euler_step (s : ℂ)
+    (hDom : ‖riemannZeta s‖ ≤ ‖riemannZeta (s.re : ℂ)‖)
+    (hReal : ‖riemannZeta (s.re : ℂ)‖ ≤ 1 + 1 / (s.re - 1))
+    (delta : ℝ) (hdelta : 0 < delta)
+    (hs : 1 + delta ≤ s.re) :
+    ‖riemannZeta s‖ ≤ 1 + 1 / delta := by
+  have hle3 : 1 + 1 / (s.re - 1) ≤ 1 + 1 / delta := by
+    have hdiv : 1 / (s.re - 1) ≤ 1 / delta :=
+      one_div_le_one_div_of_le hdelta (by linarith)
+    linarith
+  exact le_trans (le_trans hDom hReal) hle3
+
+/-- Right sliver `Re >= 3/2 → ‖zeta‖ <= 3` from the two Euler premises. -/
+theorem cutL10_zeta_rightSliver_of_euler (s : ℂ)
+    (hDom : ‖riemannZeta s‖ ≤ ‖riemannZeta (s.re : ℂ)‖)
+    (hReal : ‖riemannZeta (s.re : ℂ)‖ ≤ 1 + 1 / (s.re - 1))
+    (hs : 3 / 2 ≤ s.re) :
+    ‖zeta s‖ ≤ 3 := by
+  have hz : zeta s = riemannZeta s := rfl
+  rw [hz]
+  have hdelta : (0 : ℝ) < 1 / 2 := by norm_num
+  have hs2 : (1 : ℝ) + 1 / 2 ≤ s.re := by linarith
+  have h := cutL10_zeta_euler_step s hDom hReal (1 / 2) hdelta hs2
+  have heq : (1 : ℝ) + 1 / (1 / 2 : ℝ) = 3 := by norm_num
+  rw [heq] at h
+  exact h
+
+/-- Denominator lower on the left rectangle: `‖s/2‖ >= 4.22` and
+`‖s/2 + 1‖ >= 4.22` from `|Im| >= 4.22` via `‖w‖ >= |w.im|`
+(conjugate mirror; honest `4.22` on both factors). -/
+theorem cutL10_gamma_denom_lower (s : ℂ)
+    (hhi : s.im ≤ (-8.44 : ℝ)) :
+    (4.22 : ℝ) ≤ ‖s / 2‖ ∧ (4.22 : ℝ) ≤ ‖s / 2 + 1‖ := by
+  have him2 : (s / 2).im ≤ (-4.22 : ℝ) := by
+    have heq : (s / 2).im = s.im / 2 := by simp [Complex.div_ofNat]
+    rw [heq]
+    linarith
+  have h1 : (4.22 : ℝ) ≤ ‖s / 2‖ := by
+    calc (4.22 : ℝ) ≤ |(s / 2).im| := by
+          rw [abs_of_nonpos (by linarith)]
+          linarith
+      _ ≤ ‖s / 2‖ := Complex.abs_im_le_norm _
+  have him3 : (s / 2 + 1).im ≤ (-4.22 : ℝ) := by
+    have heq : (s / 2 + 1).im = (s / 2).im := by simp
+    rw [heq]
+    exact him2
+  have h2 : (4.22 : ℝ) ≤ ‖s / 2 + 1‖ := by
+    calc (4.22 : ℝ) ≤ |(s / 2 + 1).im| := by
+          rw [abs_of_nonpos (by linarith)]
+          linarith
+      _ ≤ ‖s / 2 + 1‖ := Complex.abs_im_le_norm _
+  exact ⟨h1, h2⟩
+
+/-- Gamma `1/100` assembly gated on one explicit product-cap premise
+(the only Stirling delta; half-rate reaches `1/2`, shortfall `50x`). -/
+theorem cutL10_gamma_sup_of_prodCap_gated (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ s.im) (hihi : s.im ≤ (-8.44 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+/-- Tier-B triple `(0.001, 12.87, 0.001)` meets the certified LEFT floor
+(same numerals as the right lane by conjugation). -/
+theorem cutL10_tierB_triple_le_floor :
+    (0.001 : ℝ) + 12.87 * 0.001 ≤ 8421 / 320000 := by
+  norm_num
+
+/-- Tier-B margin against the certified floor. -/
+theorem cutL10_tierB_margin_floor_pos :
+    (0.0124 : ℝ) ≤ 8421 / 320000 - (0.001 + 12.87 * 0.001) := by
+  norm_num
+
+/-- Tier-B deriv from a shared sup: sup `C` on
+`closedBall center (radius + rhoC)` gives `C / rhoC` on `CutL10`
+(Cauchy bridge `uniform_deriv_of_closedBall_bound`). -/
+theorem cutL10_tierB_deriv_of_sharedSup (C : ℝ) (rhoC : ℝ)
+    (hPos : 0 < rhoC)
+    (hSup : ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + rhoC) →
+      ‖xiShiftedEntire z‖ ≤ C) :
+    ∀ (w : ℂ), CutL10.mem w → ‖deriv xiShifted w‖ ≤ C / rhoC := by
+  have hStrip : ∀ (w : ℂ), CutL10.mem w →
+      -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+    intro w hw
+    have hlo : CutL10.y0 ≤ w.im := hw.2.2.1
+    have hhi : w.im ≤ CutL10.y1 := hw.2.2.2
+    rw [CutL10_y0] at hlo
+    rw [CutL10_y1] at hhi
+    constructor <;> linarith
+  exact DerivCauchyBridge.uniform_deriv_of_closedBall_bound
+    CutL10 rhoC C hPos hStrip hSup
+
+/-- Tier-B shrunken fencing (generic `C / rhoC / rho` conditional with the
+LEFT floor): any rect sharing the `CutL10` center with radius `<= rho`
+fences at `(0.001, C / rhoC)` once feasibility holds at its center. -/
+theorem cutL10_tierB_shrunken_fencing
+    (R : CellProofEngine.Rect2D) (C : ℝ) (rhoC : ℝ) (rho : ℝ)
+    (hCenter : R.center = CutL10.center)
+    (hRad : R.radius ≤ rho)
+    (hCnn : 0 ≤ C) (hPos : 0 < rhoC)
+    (hDeriv : ∀ (w : ℂ), R.mem w → ‖deriv xiShifted w‖ ≤ C / rhoC)
+    (hFeas : (0.001 : ℝ) + (C / rhoC) * rho ≤ 8421 / 320000)
+    (hFloor : (8421 / 320000 : ℝ) ≤ ‖xiShifted R.center‖) :
+    CellFencingHypotheses R 0.001 (C / rhoC) := by
+  refine ⟨by norm_num, fun (w : ℂ) (hw : R.mem w) => hDeriv w hw, ?_⟩
+  have hMnn : 0 ≤ C / rhoC := div_nonneg hCnn (le_of_lt hPos)
+  have hM : (C / rhoC) * R.radius ≤ (C / rhoC) * rho :=
+    mul_le_mul_of_nonneg_left hRad hMnn
+  have hneed : (0.001 : ℝ) + (C / rhoC) * R.radius ≤ 8421 / 320000 := by
+    linarith [hM, hFeas]
+  exact le_trans hneed hFloor
+
+/-- Tier-B `(12.87, 0.001)` instance (mirror of `tierB_shrunken_fencing`). -/
+theorem cutL10_tierB_shrunken_fencing_1287
+    (R : CellProofEngine.Rect2D)
+    (hCenter : R.center = CutL10.center)
+    (hRad : R.radius ≤ (0.001 : ℝ))
+    (hDeriv : ∀ (w : ℂ), R.mem w → ‖deriv xiShifted w‖ ≤ (12.87 : ℝ))
+    (hFloor : (8421 / 320000 : ℝ) ≤ ‖xiShifted R.center‖) :
+    CellFencingHypotheses R 0.001 12.87 := by
+  refine ⟨by norm_num, fun (w : ℂ) (hw : R.mem w) => hDeriv w hw, ?_⟩
+  have hM : 12.87 * R.radius ≤ 12.87 * 0.001 :=
+    mul_le_mul_of_nonneg_left hRad (by norm_num)
+  have hcap : (0.001 : ℝ) + 12.87 * 0.001 ≤ 8421 / 320000 :=
+    cutL10_tierB_triple_le_floor
+  have hneed : (0.001 : ℝ) + 12.87 * R.radius ≤ 8421 / 320000 := by
+    linarith [hM, hcap]
+  exact le_trans hneed hFloor
+
+/-- Sharp `12.87` shared sup from closed `hProd` plus the two factor sups
+(TRUE assembly; `hZetaSup` strip wall plus `hGammaSup` Stirling upper stay
+explicit premises). -/
+theorem cutL10_tierB_sharedSup_1287_of_factorSups
+    (hZetaSup : ∀ (s : ℂ), (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ s.im → s.im ≤ (-8.44 : ℝ) → ‖zeta s‖ ≤ (6 : ℝ))
+    (hGammaSup : ∀ (s : ℂ), (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ s.im → s.im ≤ (-8.44 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ)) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (12.87 : ℝ) := by
+  intro z hz
+  have hP := cutL10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := Door3CutL10BallSup.cutL10_ballPoly_upper z hz
+  have hpi := Door3CutL10BallSup.cutL10_ballPi_upper z hz
+  have hre := Door3CutL10BallSup.cutL10_mem_ball_shiftedS_re_bounds z hz
+  have him := Door3CutL10BallSup.cutL10_mem_ball_shiftedS_im_bounds z hz
+  have hz2 : ‖zeta (shiftedS z)‖ ≤ (6 : ℝ) :=
+    hZetaSup _ hre.1 hre.2 him.1 him.2
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 100 : ℝ) :=
+    hGammaSup _ hre.1 hre.2 him.1 him.2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖
+        * ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖
+        * ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖)
+        * ‖Complex.Gamma (shiftedS z / 2)‖
+        ≤ ((67 : ℝ) * (16 / 5)) * (1 / 100) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖
+        * ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖)
+        * ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖
+        ≤ (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 :=
+    mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 ≤ (12.87 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+end Door3CutL10TierB
+
+#print axioms Door3CutL10TierB.cutL10_endpoint_poly_norm
+#print axioms Door3CutL10TierB.cutL10_endpoint_pi_lower
+#print axioms Door3CutL10TierB.cutL10_poly_pi_lower_endpoint
+#print axioms Door3CutL10TierB.cutL10_joint_implies_zeta_cap
+#print axioms Door3CutL10TierB.cutL10_hProd_closed
+#print axioms Door3CutL10TierB.cutL10_zeta_euler_step
+#print axioms Door3CutL10TierB.cutL10_zeta_rightSliver_of_euler
+#print axioms Door3CutL10TierB.cutL10_gamma_denom_lower
+#print axioms Door3CutL10TierB.cutL10_gamma_sup_of_prodCap_gated
+#print axioms Door3CutL10TierB.cutL10_tierB_triple_le_floor
+#print axioms Door3CutL10TierB.cutL10_tierB_margin_floor_pos
+#print axioms Door3CutL10TierB.cutL10_tierB_deriv_of_sharedSup
+#print axioms Door3CutL10TierB.cutL10_tierB_shrunken_fencing
+#print axioms Door3CutL10TierB.cutL10_tierB_shrunken_fencing_1287
+#print axioms Door3CutL10TierB.cutL10_tierB_sharedSup_1287_of_factorSups
+
