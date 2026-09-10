@@ -3471,6 +3471,16 @@ sorry-free infrastructure and the complete commit ledger above.
   `‖S₆‖ ≥ 53/100`** (surplus 0.0024; gap-to-true ≈0.029).
   Residual: 48-term cap + head discharge + uniformize (RX38;
   caution: S₆ bound is pointwise, hHead needs seg-uniform).
+- 2026-09-10 RX38 (`5e56cf8c`, tail-scratch, 2× green 8682 jobs
+  + 2 fail-fixed): 48-term cap (`d3rpow48_le` ≤0.32581,
+  `d3tail48_norm_le` 33/100) + **`d3head102_norm_ge`
+  (1/5 ≤ ‖head₁₀₂‖** via S₆+tail reverse-triangle 0.53−0.33)
+  + conditional uniform wiring (c=15/3484 under hZeta).
+  HONEST: enclosure OPEN — S₆-split uniform route PROVED
+  infeasible (needs S₆-uniform >0.608 > 0.53 pointwise);
+  uniform 1/4-head + hZeta still open.
+  RX LANE RETIRED here (consumerless per 2026-09-10 audit;
+  contention relief).
 - 2026-09-09 INCIDENT: `riemann hypothesis.lean` (spaced legacy
   filename, 11968 lines) found deleted from disk (unstaged);
   restored via `git checkout`. All agents: NEVER touch it —
