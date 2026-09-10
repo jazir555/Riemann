@@ -3854,6 +3854,18 @@ sorry-free infrastructure and the complete commit ledger above.
   (all 3 fragility flags passed). σ-decay COMPLETE
   (cap-explicit). Residual: uniform-M numeral → Tier-C
   sRectGammaSup (ST11); zeta half separate (ZU-SRECT).
+- 2026-09-10 ST11 (`b9fb8b76`, stirling file, 2× green 8682
+  jobs): **`Real.Gamma σ ≤ 20` on [0.05,0.95]** (convexity
+  + shift route, essentially optimal) + Tier-C gamma rect
+  corollary. Residual: sliver σ∈[0.005,0.05) M=200 (ST12).
+- 2026-09-10 TIER-FEASIBILITY (coordinator, lemma shape
+  `M=C/r` verified): Tier A TRUE-dead (sup_true≈0.09 vs
+  need ≤0.04); Tier C TRUE-dead (needs sup≤0.04·margin≤0.01
+  < center 0.038). **Tier B viable with sup-tightening:**
+  C_bound≤0.025/ρ (12.87→ρ≈0.001 ~10⁵ cells; ≤2.5→ρ=0.01
+  ~1225; ≤0.5→ρ=0.05 ~50). Priority: tighten ball sup
+  (Gamma π/2-rate + zeta strip) THEN subdivide. CutL10
+  deriv same story later.
 - 2026-09-08 OA7 (`74b89285` pt 2, off-axis tail, green 8702 jobs):
   S4 phase tighteners (`‖S₄‖ ≥ 793/2500`, 3.17×) + assembled N=4 cert
   (honest-negative ratio). Residual: pair-`Re` floors `m≥2` (OA8).
