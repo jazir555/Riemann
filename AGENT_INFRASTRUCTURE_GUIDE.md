@@ -4053,6 +4053,16 @@ sorry-free infrastructure and the complete commit ledger above.
   off_axis never reached, tail untouched, 0 fix cycles
   used). ZUFIX actively editing zeta (file dirty).
   Everything funnels to ZUFIX green.
+- 2026-09-11 BFIX located-RED, tail fix committed
+  (`1778b33a`, 2/1): tail ≥1469 now error-free; module
+  RED on ~30 PRE-EXISTING errors <1469 (write-only
+  draft sections never built — backlog, not regress).
+  MECHANISM NAILED: `sorryAx` in red-build logs =
+  Lean's placeholder for FAILED proofs, not hidden
+  sorrys (STFIX: "sorryAx gone" post-fix; repo audit:
+  sorrys only in Jensen/Kadiri/float files, none in
+  door3/zeta-tail code). Upstream-taint hypothesis
+  RETRACTED. BFIX2 fired (whole sub-tail file).
 - 2026-09-11 DP-TRIG delivered (`8d7324ab`, NEW
   `door3_dp_trig.lean` ~140 lines Mathlib-only,
   registered, no build): quad floor, cubic floor,
