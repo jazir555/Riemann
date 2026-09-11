@@ -4020,6 +4020,15 @@ sorry-free infrastructure and the complete commit ledger above.
   confirm), BFIX (ballsup tail), CLFIX (cutL10 tail),
   STFIX (stirling tail), RUFIX (rouche). Guarded +
   retry×8 + 15-min kill.
+- 2026-09-11 DP-TRIG delivered (`8d7324ab`, NEW
+  `door3_dp_trig.lean` ~140 lines Mathlib-only,
+  registered, no build): quad floor, cubic floor,
+  /100-ceiling (R1-/120 recorded residual), arg-reduce
+  + invariance, combined enclosure (width ≤1/50,
+  |r|≤1). Honest partial (no cosine side, no demo).
+  STAGE 2 fired (DP thread owner): trig verify-first,
+  NEW `door3_dp_terms.lean` (cos mirror + n=2,3,4 term
+  discs + S₄-Im demo ≥1.0), build-both mandate.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
