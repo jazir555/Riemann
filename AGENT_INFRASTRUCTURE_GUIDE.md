@@ -4208,6 +4208,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (even R05 t=0.75: −0.13). Conditional bridge +
   R05/R06 trig pieces banked. OPEN not dead (N=16..32
   wave may close low-t); high-t stays walled.
+- 2026-09-11 HEADA partial (NEW `door3_dp_headA.lean`
+  ~700 lines, registered, no build): terms 5–8 closed
+  (radius 0.08 banked, centers honest), 9–24 open.
+  REDIRECT: no head follow-ups (disc dead, no live
+  consumer) — effort to low-t N-wave + gamma lowers
+  + direct tier-M (live: 40 cells → Hmain).
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
