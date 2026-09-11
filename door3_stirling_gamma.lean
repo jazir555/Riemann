@@ -1480,3 +1480,430 @@ theorem D3SG_TierC_gamma_wide (s : ℂ)
     exact le_trans h60 hle
 
 #print axioms D3SG_TierC_gamma_wide
+
+/-!
+# Door-3 chi·reflected sup-product (write-only append; report-and-stop).
+
+Consumer: `door3_cutR10_ballsup.lean:cutR10_hFE_of_chi_and_middle` needs, for
+`t.re ∈ [-1.06, 3/2]` and `t.im ∈ [8.44, 11.56]`, chi cap `‖chi(1-t)‖ ≤ 3`
+times middle reflected cap `‖zeta(1-t)‖ ≤ 2`, giving `‖zeta t‖ ≤ 3 * 2`.
+(Box note: the brief wrote `t.re ∈ [-1.06,2.06]`; the exact consumer statement
+uses `t.re ≤ 3 / 2`, hence `(1-t).re ∈ [-0.50,2.06]`, matching `hMid` exactly.)
+
+Route: banked Tier-C decay lane (`D3SG_TierC_gamma_wide`, rate `c = 1 / 2`) plus
+recurrence shift paying explicit polynomial factors. The `π / 2` rate needs the
+open full-tail integral route (`door3_gamma_pi2.lean`: dyadic tiers cap at
+`c ≈ 0.87`); with banked `c = 1 / 2` the cos growth `exp (π * |Im| / 2)` cannot
+cancel, so the honest closed product below is exp-scale with explicit gap vs 6.
+Sin-form remark: Mathlib FE at `1 - s` turns the cos-form below into the
+classical `χ(t) = 2 ^ t * π ^ (t - 1) * sin (π * t / 2) * Γ (1 - t)`; the product
+is stated at `(1 - t)` in cos-form, which is what the bridge consumes.
+
+Banked here (full proofs, explicit binders, small numerals only):
+* `D3SG_CHI_cos_le_exp_abs_im`, `D3SG_CHI_sin_le_exp_abs_im` (generic trig);
+* `D3SG_CHI_sin_box_le` (sin-upper `≤ exp 19` on the box);
+* `D3SG_CHI_norm_le` (symbolic chi upper);
+* real caps `D3SG_CHI_Real_Gamma_095_1_le_two`, `D3SG_CHI_Real_Gamma_1_206_le_two`;
+* `D3SG_CHI_Gamma_upper_mid/high/neg`, `D3SG_CHI_Gamma_refl_box_le` (`≤ 600`);
+* `D3SG_CHI_cpow_box_le7`, `D3SG_CHI_arg_im_le19`, `D3SG_CHI_cos_box_le`;
+* `D3SG_CHI_box_le` (`‖chi(1-t)‖ ≤ 2 * 7 * 600 * exp 19`);
+* `D3SG_chi_refl_product_le` (conditional sup-product; ONE assembly attempt).
+Honest account: at `Z = 2` this closes `(2 * 7 * 600 * exp 19) * 2 ≈ 3e12`;
+target `6` is NOT closed; gap factor `≈ 5e11`. Missing pieces: middle-strip
+`Z = 2` (Euler covers only the `t.re ≤ -1` sliver) and the `π / 2` Gamma tail.
+-/
+
+/-- Elementary complex-cosine upper: `‖cos z‖ ≤ exp |Im z|` (via `Complex.two_cos`;
+mirrors `zeta_rigorous.norm_cos_le_exp_abs_im`). -/
+theorem D3SG_CHI_cos_le_exp_abs_im (z : ℂ) : ‖Complex.cos z‖ ≤ Real.exp |z.im| := by
+  have h2 : (2 : ℂ) * Complex.cos z
+      = Complex.exp (z * Complex.I) + Complex.exp (-z * Complex.I) :=
+    Complex.two_cos z
+  have e1 : ‖Complex.exp (z * Complex.I)‖ = Real.exp (-z.im) := by
+    rw [Complex.norm_exp]
+    simp [Complex.mul_re]
+  have e2 : ‖Complex.exp (-z * Complex.I)‖ = Real.exp z.im := by
+    rw [Complex.norm_exp]
+    simp [Complex.mul_re]
+  have hcos : Complex.cos z
+      = (Complex.exp (z * Complex.I) + Complex.exp (-z * Complex.I)) / 2 := by
+    have h2ne : (2 : ℂ) ≠ 0 := by norm_num
+    rw [eq_div_iff h2ne]
+    linear_combination h2
+  have hle : ‖Complex.cos z‖ ≤ (Real.exp (-z.im) + Real.exp z.im) / 2 := by
+    rw [hcos, norm_div]
+    have h2n : ‖(2 : ℂ)‖ = 2 := by norm_num
+    rw [h2n, ← e1, ← e2]
+    exact div_le_div_of_nonneg_right (norm_add_le _ _) (by norm_num)
+  have hmax : (Real.exp (-z.im) + Real.exp z.im) / 2 ≤ Real.exp |z.im| := by
+    have g1 : Real.exp (-z.im) ≤ Real.exp |z.im| :=
+      Real.exp_le_exp.mpr (neg_le_abs _)
+    have g2 : Real.exp z.im ≤ Real.exp |z.im| :=
+      Real.exp_le_exp.mpr (le_abs_self _)
+    linarith
+  exact le_trans hle hmax
+
+#print axioms D3SG_CHI_cos_le_exp_abs_im
+
+/-- Elementary complex-sine upper: `‖sin w‖ ≤ exp |Im w|` (via `Complex.sin`;
+mirrors `RowFE_norm_sin_le`). -/
+theorem D3SG_CHI_sin_le_exp_abs_im (w : ℂ) : ‖Complex.sin w‖ ≤ Real.exp |w.im| := by
+  have hsin_eq : Complex.sin w =
+      (Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2 := by
+    unfold Complex.sin; ring
+  rw [hsin_eq]
+  have hI : ‖Complex.I‖ = 1 := Complex.norm_I
+  have hle : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+        Complex.I / 2‖
+      ≤ (‖Complex.exp (-w * Complex.I)‖ + ‖Complex.exp (w * Complex.I)‖) / 2 := by
+    have h2 : ‖(Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)) *
+          Complex.I / 2‖
+        = ‖Complex.exp (-w * Complex.I) - Complex.exp (w * Complex.I)‖ / 2 := by
+      simp [norm_div, norm_mul, hI, Complex.norm_ofNat]
+    rw [h2]
+    exact div_le_div_of_nonneg_right (norm_sub_le _ _) (by norm_num)
+  have hre1 : (-w * Complex.I).re = w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.neg_re]
+  have hre2 : (w * Complex.I).re = -w.im := by
+    simp [Complex.mul_re, Complex.I_re, Complex.I_im]
+  rw [Complex.norm_exp, Complex.norm_exp, hre1, hre2] at hle
+  have e1 : Real.exp w.im ≤ Real.exp |w.im| :=
+    Real.exp_le_exp.mpr (le_abs_self _)
+  have e2 : Real.exp (-w.im) ≤ Real.exp |w.im| := by
+    apply Real.exp_le_exp.mpr
+    have hnb : -w.im ≤ |w.im| := neg_le_abs _
+    exact hnb
+  linarith
+
+#print axioms D3SG_CHI_sin_le_exp_abs_im
+
+/-- Local FE chi factor, same shape as `cutR10_chiFE` / `zetaChi`
+(`chi(s) = 2 * (2*pi)^(-s) * Gamma s * cos (pi * s / 2)`; mirrored locally,
+no import of ballsup). -/
+noncomputable def D3SG_chiFE (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s *
+    Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- Chi-factor upper with only `‖Γ s‖` symbolic (cpow exact-norm + cos bound;
+mirrors `zeta_rigorous.zetaChi_norm_le`). -/
+theorem D3SG_CHI_norm_le (s : ℂ) :
+    ‖D3SG_chiFE s‖ ≤ 2 * (2 * Real.pi) ^ (-s.re) * ‖Complex.Gamma s‖
+      * Real.exp |(((Real.pi : ℂ)) * s / 2).im| := by
+  have h2pi : (0 : ℝ) < 2 * Real.pi := by linarith [Real.pi_pos]
+  have hcast : (2 * (Real.pi : ℂ)) = (((2 * Real.pi : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  have hcos := D3SG_CHI_cos_le_exp_abs_im (((Real.pi : ℂ)) * s / 2)
+  have e2 : ‖(2 : ℂ)‖ = 2 := by norm_num
+  have hrnn : (0 : ℝ) ≤ (2 * Real.pi) ^ (-s.re) :=
+    Real.rpow_nonneg (le_of_lt h2pi) _
+  have hgnn : (0 : ℝ) ≤ ‖Complex.Gamma s‖ := norm_nonneg _
+  unfold D3SG_chiFE
+  simp only [norm_mul, e2]
+  rw [hcast, Complex.norm_cpow_eq_rpow_re_of_pos h2pi (-s), Complex.neg_re]
+  exact mul_le_mul_of_nonneg_left hcos (by positivity)
+
+#print axioms D3SG_CHI_norm_le
+
+/-- Chi-argument imaginary part at `1 - t` (mirrors `zeta_rigorous.chi_arg_im_eq`). -/
+theorem D3SG_CHI_arg_im_eq (t : ℂ) :
+    ((((Real.pi : ℂ)) * (1 - t) / 2)).im = -(Real.pi * t.im / 2) := by
+  have harg : ((Real.pi : ℂ) * (1 - t) / 2) = (((Real.pi / 2 : ℝ)) : ℂ) * (1 - t) := by
+    push_cast
+    ring
+  rw [harg]
+  have him : ((((Real.pi / 2 : ℝ)) : ℂ) * (1 - t)).im
+      = (Real.pi / 2) * (1 - t).im := by
+    simp [Complex.mul_im]
+  have him2 : (1 - t).im = -t.im := by simp
+  rw [him, him2]
+  ring
+
+#print axioms D3SG_CHI_arg_im_eq
+
+/-- Sine-argument imaginary part at `t`
+(mirrors `R02_D3_chiArg_im_eq_direct`). -/
+theorem D3SG_CHI_sin_arg_im_eq (t : ℂ) :
+    ((((Real.pi : ℂ)) * t / 2)).im = Real.pi * t.im / 2 := by
+  have harg : ((Real.pi : ℂ) * t / 2) = (((Real.pi / 2 : ℝ)) : ℂ) * t := by
+    push_cast
+    ring
+  rw [harg]
+  have him : ((((Real.pi / 2 : ℝ)) : ℂ) * t).im = (Real.pi / 2) * t.im := by
+    simp [Complex.mul_im]
+  rw [him]
+  ring
+
+#print axioms D3SG_CHI_sin_arg_im_eq
+
+/-- Real cap `Γ x ≤ 2` on `[0.95,1]` (shift into the banked `[1,2]` cap). -/
+theorem D3SG_CHI_Real_Gamma_095_1_le_two (x : ℝ)
+    (hlo : 0.95 ≤ x) (hhi : x ≤ 1) :
+    Real.Gamma x ≤ 2 := by
+  have hpos : (0 : ℝ) < x := by linarith
+  have hne : x ≠ 0 := ne_of_gt hpos
+  have hshift : Real.Gamma (x + 1) = x * Real.Gamma x :=
+    Real.Gamma_add_one hne
+  have h1 : (1 : ℝ) ≤ x + 1 := by linarith
+  have h2 : x + 1 ≤ 2 := by linarith
+  have hcap : Real.Gamma (x + 1) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one (x + 1) h1 h2
+  have hdiv : Real.Gamma x = Real.Gamma (x + 1) / x := by
+    rw [eq_div_iff_mul_eq hne]
+    rw [hshift]
+    ring
+  have h1div : Real.Gamma (x + 1) / x ≤ 1 / x := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hpos))
+  have h2b : (1 : ℝ) / x ≤ 2 := by
+    rw [div_le_iff₀ hpos]
+    linarith
+  calc Real.Gamma x = Real.Gamma (x + 1) / x := hdiv
+    _ ≤ 1 / x := h1div
+    _ ≤ 2 := h2b
+
+#print axioms D3SG_CHI_Real_Gamma_095_1_le_two
+
+/-- Real cap `Γ x ≤ 2` on `[1,2.06]` (banked `[1,2]` cap + one shift). -/
+theorem D3SG_CHI_Real_Gamma_1_206_le_two (x : ℝ)
+    (hlo : 1 ≤ x) (hhi : x ≤ 2.06) :
+    Real.Gamma x ≤ 2 := by
+  by_cases h2 : x ≤ 2
+  · have h := D3SG_Gamma_one_two_le_one x hlo h2
+    linarith
+  · have h2lt : (2 : ℝ) < x := by linarith
+    have hne : x - 1 ≠ 0 := by
+      have hpos1 : (0 : ℝ) < x - 1 := by linarith
+      exact ne_of_gt hpos1
+    have hshift := Real.Gamma_add_one hne
+    have heq : (x - 1) + 1 = x := by ring
+    rw [heq] at hshift
+    have hg : Real.Gamma (x - 1) ≤ 1 :=
+      D3SG_Gamma_one_two_le_one (x - 1) (by linarith) (by linarith)
+    rw [hshift]
+    calc (x - 1) * Real.Gamma (x - 1) ≤ (x - 1) * 1 :=
+          mul_le_mul_of_nonneg_left hg (by linarith)
+      _ = x - 1 := by ring
+      _ ≤ 2 := by linarith
+
+#print axioms D3SG_CHI_Real_Gamma_1_206_le_two
+
+/-- Gamma numeral cap `‖Γ w‖ ≤ 600` on `Re ∈ [0.005,0.95]`
+(banked `D3SG_TierC_gamma_wide` with `exp ≤ 1`). -/
+theorem D3SG_CHI_Gamma_upper_mid (w : ℂ)
+    (hlo : 0.005 ≤ w.re) (hhi : w.re ≤ 0.95) :
+    ‖Complex.Gamma w‖ ≤ 600 := by
+  have hT := D3SG_TierC_gamma_wide w hlo hhi
+  have he1 : Real.exp (-(1 / 2) * |w.im|) ≤ 1 := by
+    have hle : Real.exp (-(1 / 2) * |w.im|) ≤ Real.exp 0 :=
+      Real.exp_le_exp.mpr (by
+        have hnn : (0 : ℝ) ≤ (1 / 2) * |w.im| :=
+          mul_nonneg (by norm_num) (abs_nonneg _)
+        linarith)
+    rw [Real.exp_zero] at hle
+    exact hle
+  have h := mul_le_mul_of_nonneg_left he1 (by norm_num : (0 : ℝ) ≤ 600)
+  rw [mul_one] at h
+  exact le_trans hT h
+
+#print axioms D3SG_CHI_Gamma_upper_mid
+
+/-- Gamma numeral cap `‖Γ w‖ ≤ 2` on `Re ∈ (0.95,2.06]`
+(integral domination + real caps). -/
+theorem D3SG_CHI_Gamma_upper_high (w : ℂ)
+    (hlo : 0.95 < w.re) (hhi : w.re ≤ 2.06) :
+    ‖Complex.Gamma w‖ ≤ 2 := by
+  have hpos : (0 : ℝ) < w.re := by linarith
+  have hdom : ‖Complex.Gamma w‖ ≤ Real.Gamma w.re :=
+    D3SG_Gamma_norm_le_real w hpos
+  by_cases h1 : w.re ≤ 1
+  · have h := D3SG_CHI_Real_Gamma_095_1_le_two w.re (by linarith) h1
+    exact le_trans hdom h
+  · have h1lt : (1 : ℝ) ≤ w.re := by linarith
+    have h := D3SG_CHI_Real_Gamma_1_206_le_two w.re h1lt hhi
+    exact le_trans hdom h
+
+#print axioms D3SG_CHI_Gamma_upper_high
+
+/-- Gamma numeral cap `‖Γ w‖ ≤ 600` on `Re ∈ [-0.50,0.005)`, `8.44 ≤ |Im|`
+(shift `Γ(w+1) = w·Γ(w)` up into the banked lane, paying `‖w‖ ≥ 1`;
+the in-file `D3SG_gamma_shift_norm` needs `0 < Re`, so the `n = 1` step is
+reproved here from `Complex.Gamma_add_one` at `w ≠ 0`). -/
+theorem D3SG_CHI_Gamma_upper_neg (w : ℂ)
+    (hlo : -0.50 ≤ w.re) (hhi : w.re < 0.005)
+    (him : 8.44 ≤ |w.im|) :
+    ‖Complex.Gamma w‖ ≤ 600 := by
+  have hw0 : w ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_im, abs_zero] at him
+    norm_num at him
+  have hG : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw0
+  have hGn : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [hG, norm_mul]
+  have hw1 : (1 : ℝ) ≤ ‖w‖ := by
+    have h := Complex.abs_im_le_norm w
+    linarith
+  have hle : ‖Complex.Gamma w‖ ≤ ‖w‖ * ‖Complex.Gamma w‖ :=
+    le_mul_of_one_le_left (norm_nonneg _) hw1
+  rw [← hGn] at hle
+  have hre1 : (0.50 : ℝ) ≤ (w + 1).re := by
+    have heq : (w + 1).re = w.re + 1 := by simp
+    rw [heq]
+    linarith
+  have hre2 : (w + 1).re ≤ 1.005 := by
+    have heq : (w + 1).re = w.re + 1 := by simp
+    rw [heq]
+    linarith
+  by_cases hmid : (w + 1).re ≤ 0.95
+  · have hcap := D3SG_CHI_Gamma_upper_mid (w + 1) (by linarith) hmid
+    exact le_trans hle hcap
+  · have hlt : (0.95 : ℝ) < (w + 1).re := by linarith
+    have hcap := D3SG_CHI_Gamma_upper_high (w + 1) hlt (by linarith)
+    have h2le : ‖Complex.Gamma (w + 1)‖ ≤ 600 := le_trans hcap (by norm_num)
+    exact le_trans hle h2le
+
+#print axioms D3SG_CHI_Gamma_upper_neg
+
+/-- Uniform Gamma cap `‖Γ(1-t)‖ ≤ 600` on the box
+(`(1-t).re ∈ [-0.50,2.06]`; Gamma-tail core at banked rate `c = 1 / 2`). -/
+theorem D3SG_CHI_Gamma_refl_box_le (t : ℂ)
+    (hlo : -1.06 ≤ t.re) (hhi : t.re ≤ 3 / 2)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56) :
+    ‖Complex.Gamma (1 - t)‖ ≤ 600 := by
+  have hre1 : (-0.50 : ℝ) ≤ (1 - t).re := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have hre2 : (1 - t).re ≤ (2.06 : ℝ) := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have him_eq : (1 - t).im = -t.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have habs : (8.44 : ℝ) ≤ |(1 - t).im| := by
+    rw [him_eq, abs_neg, abs_of_nonneg (by linarith)]
+    linarith
+  by_cases hneg : (1 - t).re < 0.005
+  · exact D3SG_CHI_Gamma_upper_neg (1 - t) hre1 hneg habs
+  · have hlo_mid : (0.005 : ℝ) ≤ (1 - t).re := by linarith
+    by_cases hmid : (1 - t).re ≤ 0.95
+    · exact D3SG_CHI_Gamma_upper_mid (1 - t) hlo_mid hmid
+    · have hlt : (0.95 : ℝ) < (1 - t).re := by linarith
+      exact D3SG_CHI_Gamma_upper_high (1 - t) hlt hre2
+
+#print axioms D3SG_CHI_Gamma_refl_box_le
+
+/-- Chi-argument imaginary part on the box is `≤ 19`
+(`π < 3.1416`, `|Im| ≤ 12`). -/
+theorem D3SG_CHI_arg_im_le19 (t : ℂ)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56) :
+    |((((Real.pi : ℂ)) * (1 - t) / 2)).im| ≤ 19 := by
+  rw [D3SG_CHI_arg_im_eq, abs_neg]
+  have habs : |t.im| ≤ 12 := by
+    rw [abs_of_nonneg (by linarith)]
+    linarith
+  have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
+  have e : |Real.pi * t.im / 2| = (Real.pi / 2) * |t.im| := by
+    rw [show Real.pi * t.im / 2 = (Real.pi / 2) * t.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  rw [e]
+  have h2 := mul_le_mul (le_of_lt (by linarith : Real.pi / 2 < 3.1416 / 2)) habs
+    (abs_nonneg _) (show (0 : ℝ) ≤ 3.1416 / 2 by norm_num)
+  have hnum : (3.1416 / 2 : ℝ) * 12 ≤ 19 := by norm_num
+  linarith
+
+#print axioms D3SG_CHI_arg_im_le19
+
+/-- Cos chi-factor on the box is `≤ exp 19`. -/
+theorem D3SG_CHI_cos_box_le (t : ℂ)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56) :
+    ‖Complex.cos ((Real.pi : ℂ) * (1 - t) / 2)‖ ≤ Real.exp 19 := by
+  exact le_trans (D3SG_CHI_cos_le_exp_abs_im _)
+    (Real.exp_le_exp.mpr (D3SG_CHI_arg_im_le19 t hilo hihi))
+
+#print axioms D3SG_CHI_cos_box_le
+
+/-- Sin-upper on the box: `‖sin(π·t/2)‖ ≤ exp 19` (the banked `exp 16`
+covered `|Im| ≤ 10`; the box needs `|Im| ≤ 11.56`). -/
+theorem D3SG_CHI_sin_box_le (t : ℂ)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56) :
+    ‖Complex.sin ((Real.pi : ℂ) * t / 2)‖ ≤ Real.exp 19 := by
+  have habs : |t.im| ≤ 12 := by
+    rw [abs_of_nonneg (by linarith)]
+    linarith
+  have e : |Real.pi * t.im / 2| = (Real.pi / 2) * |t.im| := by
+    rw [show Real.pi * t.im / 2 = (Real.pi / 2) * t.im by ring, abs_mul,
+      abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
+  have harg : |((((Real.pi : ℂ)) * t / 2)).im| ≤ 19 := by
+    rw [D3SG_CHI_sin_arg_im_eq, e]
+    have h2 := mul_le_mul (le_of_lt (by linarith : Real.pi / 2 < 3.1416 / 2)) habs
+      (abs_nonneg _) (show (0 : ℝ) ≤ 3.1416 / 2 by norm_num)
+    have hnum : (3.1416 / 2 : ℝ) * 12 ≤ 19 := by norm_num
+    linarith
+  exact le_trans (D3SG_CHI_sin_le_exp_abs_im _) (Real.exp_le_exp.mpr harg)
+
+#print axioms D3SG_CHI_sin_box_le
+
+/-- Cpow chi-factor on the box is `≤ 7` (base `2π ≥ 1`, exponent `≤ 1`;
+mirrors the `cutR10_pi_norm_upper` rpow pattern). -/
+theorem D3SG_CHI_cpow_box_le7 (t : ℂ)
+    (hlo : -1.06 ≤ t.re) (hhi : t.re ≤ 3 / 2) :
+    (2 * Real.pi) ^ (-(1 - t).re) ≤ 7 := by
+  have hbase : (1 : ℝ) ≤ 2 * Real.pi := by
+    have h := Real.pi_gt_three
+    linarith
+  have hexp : (-(1 - t).re) ≤ (1 : ℝ) := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have hle : (2 * Real.pi) ^ (-(1 - t).re) ≤ (2 * Real.pi) ^ (1 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hbase hexp
+  rw [Real.rpow_one] at hle
+  have hpi : 2 * Real.pi ≤ 7 := by
+    have h := Real.pi_lt_d4
+    linarith
+  linarith
+
+#print axioms D3SG_CHI_cpow_box_le7
+
+/-- Chi cap on the box: `‖chi(1-t)‖ ≤ 2 * 7 * 600 * exp 19`
+(`2` exact, cpow `≤ 7`, Gamma `≤ 600`, cos `≤ exp 19`). -/
+theorem D3SG_CHI_box_le (t : ℂ)
+    (hlo : -1.06 ≤ t.re) (hhi : t.re ≤ 3 / 2)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56) :
+    ‖D3SG_chiFE (1 - t)‖ ≤ 2 * 7 * 600 * Real.exp 19 := by
+  have hchi := D3SG_CHI_norm_le (1 - t)
+  have hcpow : (2 * Real.pi) ^ (-(1 - t).re) ≤ 7 :=
+    D3SG_CHI_cpow_box_le7 t hlo hhi
+  have hG : ‖Complex.Gamma (1 - t)‖ ≤ 600 :=
+    D3SG_CHI_Gamma_refl_box_le t hlo hhi hilo hihi
+  have him_le : Real.exp |((((Real.pi : ℂ)) * (1 - t) / 2)).im| ≤ Real.exp 19 :=
+    Real.exp_le_exp.mpr (D3SG_CHI_arg_im_le19 t hilo hihi)
+  have hA : 2 * (2 * Real.pi) ^ (-(1 - t).re) * ‖Complex.Gamma (1 - t)‖
+      ≤ 2 * 7 * 600 := by
+    have h2c : 2 * (2 * Real.pi) ^ (-(1 - t).re) ≤ 2 * 7 :=
+      mul_le_mul_of_nonneg_left hcpow (by norm_num)
+    exact mul_le_mul h2c hG (norm_nonneg _) (by norm_num)
+  have hGnn : (0 : ℝ) ≤ 2 * 7 * 600 := by norm_num
+  exact le_trans hchi (mul_le_mul hA him_le (Real.exp_nonneg _) hGnn)
+
+#print axioms D3SG_CHI_box_le
+
+/-- Sup-product, conditional bridge (ONE assembly attempt of max 3):
+chi cap times reflected-zeta premise `Z`. At `Z = 2` this closes
+`(2 * 7 * 600 * exp 19) * 2`; the middle-strip `Z = 2` (`hMid` shape in
+`cutR10_hFE_of_chi_and_middle`) is the remaining open piece — Euler covers
+only the `t.re ≤ -1` sliver — so `≤ 6` is NOT closed here; gap recorded. -/
+theorem D3SG_chi_refl_product_le (t : ℂ)
+    (hlo : -1.06 ≤ t.re) (hhi : t.re ≤ 3 / 2)
+    (hilo : 8.44 ≤ t.im) (hihi : t.im ≤ 11.56)
+    (Z : ℝ) (hZ : ‖riemannZeta (1 - t)‖ ≤ Z) :
+    ‖D3SG_chiFE (1 - t)‖ * ‖riemannZeta (1 - t)‖ ≤
+      (2 * 7 * 600 * Real.exp 19) * Z := by
+  have hC := D3SG_CHI_box_le t hlo hhi hilo hihi
+  have hC0 : (0 : ℝ) ≤ 2 * 7 * 600 * Real.exp 19 := by positivity
+  exact mul_le_mul hC hZ (norm_nonneg _) hC0
+
+#print axioms D3SG_chi_refl_product_le
