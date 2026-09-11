@@ -4080,6 +4080,14 @@ sorry-free infrastructure and the complete commit ledger above.
   axioms ZERO sorryAx (mechanism confirmed: placeholders
   for failed proofs). CONFIRM-SWEEP fired (sequential:
   sliver_edge, off_axis, cutL10, dp_trig).
+- 2026-09-11 BFIX2 BLOCKED after 6/6 cycles with ~40
+  fixes landed, committed (`50966d3a`, 236/144, all
+  <1469, tail untouched, sorry-clean): includes TWO
+  HONEST WEAKENINGS — joint 3217/250→3216/5 (643.2,
+  matches ZSTRIP honest) and strip_six→≤12 (Z·F≤6 with
+  F≥1/2 gives Z≤12, not 6; zero callers). 1 remaining
+  fix (1192 dot-notation) applied post-build,
+  UNVERIFIED. BFIX3 fired (verify + caller check).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
