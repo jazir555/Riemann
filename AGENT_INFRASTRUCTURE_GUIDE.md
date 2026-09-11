@@ -4202,6 +4202,12 @@ sorry-free infrastructure and the complete commit ledger above.
   rewrite left to patch).
 - 2026-09-11 HEADC empty (no file — size failure
   mode); re-fired HEADC1 (n=45..54, min viable 5).
+- 2026-09-11 PREM-ZETA delivered (NEW `door3_premise_
+  zeta.lean` ~550 lines, registered, no build):
+  honest-negative at N≤8 — ALL 31 recon-negative
+  (even R05 t=0.75: −0.13). Conditional bridge +
+  R05/R06 trig pieces banked. OPEN not dead (N=16..32
+  wave may close low-t); high-t stays walled.
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
