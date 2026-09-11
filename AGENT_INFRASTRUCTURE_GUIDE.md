@@ -4062,6 +4062,15 @@ sorry-free infrastructure and the complete commit ledger above.
   commit artifact, fresh by mtime). NOT a source bug.
   REBUILD agent fired (long-build lane: delete stale
   oleans, rebuild RH ≤40min → CCA → tail_edge).
+- 2026-09-11 REBUILD delivered: RH GREEN (8685 jobs),
+  CCA GREEN (8687 jobs) — cascade fresh. STALE THEORY
+  REFUTED with proof: real name is `RHProofScaffold.
+  Challenge2.MollifiedAttack.*` (open namespace :6204
+  never closed). Coordinator applied prefix fix
+  (`b809eb78`, 13/13 replaceAll). TEFIX2 fired
+  (verify, deps warm, expect <3min). NOTE: scaffold
+  tail chain carries pre-existing retained axiom
+  `RiemannHypothesisProp_apply` (not ours, flagged).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
