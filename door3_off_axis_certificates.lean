@@ -8481,3 +8481,483 @@ end Door3OffAxis
 namespace Door3OffAxis
 #print axioms sCutOA11_hEnough_2048_threshold
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- `log 4 = log 2 + log 2` (composite bridge for the `t = 11` slow-sum phases). -/
+theorem OA11_log_four_eq : Real.log 4 = Real.log 2 + Real.log 2 := by
+  have h4 : (4 : ℝ) = 2 * 2 := by norm_num
+  rw [h4, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase `11 * log 2 ∈ [7.6246, 7.6247]` (from `log_two` d9). -/
+theorem OA11_theta2_mem :
+    (7.6246 : ℝ) ≤ 11 * Real.log 2 ∧ 11 * Real.log 2 ≤ (7.6247 : ℝ) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have hlo : (7.6246 : ℝ) ≤ 11 * 0.6931471803 := by norm_num
+  have hhi : 11 * 0.6931471808 ≤ (7.6247 : ℝ) := by norm_num
+  have e1 := mul_lt_mul_of_pos_left h2lo (by norm_num : (0 : ℝ) < 11)
+  have e2 := mul_lt_mul_of_pos_left h2hi (by norm_num : (0 : ℝ) < 11)
+  constructor <;> linarith
+
+/-- Phase `11 * log 3 ∈ [12.0847, 12.0848]` (from `log_three` d9). -/
+theorem OA11_theta3_mem :
+    (12.0847 : ℝ) ≤ 11 * Real.log 3 ∧ 11 * Real.log 3 ≤ (12.0848 : ℝ) := by
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hlo : (12.0847 : ℝ) ≤ 11 * 1.0986122885 := by norm_num
+  have hhi : 11 * 1.0986122888 ≤ (12.0848 : ℝ) := by norm_num
+  have e1 := mul_lt_mul_of_pos_left h3lo (by norm_num : (0 : ℝ) < 11)
+  have e2 := mul_lt_mul_of_pos_left h3hi (by norm_num : (0 : ℝ) < 11)
+  constructor <;> linarith
+
+/-- Phase `11 * log 4 ∈ [15.2492, 15.2493]` (`22 * log 2`, from `log_two` d9). -/
+theorem OA11_theta4_mem :
+    (15.2492 : ℝ) ≤ 11 * Real.log 4 ∧ 11 * Real.log 4 ≤ (15.2493 : ℝ) := by
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h4 : (11 : ℝ) * Real.log 4 = 22 * Real.log 2 := by
+    rw [OA11_log_four_eq]
+    ring
+  have hlo : (15.2492 : ℝ) ≤ 22 * 0.6931471803 := by norm_num
+  have hhi : 22 * 0.6931471808 ≤ (15.2493 : ℝ) := by norm_num
+  have e1 := mul_lt_mul_of_pos_left h2lo (by norm_num : (0 : ℝ) < 22)
+  have e2 := mul_lt_mul_of_pos_left h2hi (by norm_num : (0 : ℝ) < 22)
+  rw [h4]
+  constructor <;> linarith
+
+/-- Phase `11 * log 5 ∈ [17.7038, 17.7039]` (from `log_five` d9). -/
+theorem OA11_theta5_mem :
+    (17.7038 : ℝ) ≤ 11 * Real.log 5 ∧ 11 * Real.log 5 ≤ (17.7039 : ℝ) := by
+  have h5lo := Real.log_five_gt_d9
+  have h5hi := Real.log_five_lt_d9
+  have hlo : (17.7038 : ℝ) ≤ 11 * 1.6094379123 := by norm_num
+  have hhi : 11 * 1.6094379126 ≤ (17.7039 : ℝ) := by norm_num
+  have e1 := mul_lt_mul_of_pos_left h5lo (by norm_num : (0 : ℝ) < 11)
+  have e2 := mul_lt_mul_of_pos_left h5hi (by norm_num : (0 : ℝ) < 11)
+  constructor <;> linarith
+
+#print axioms OA11_log_four_eq
+#print axioms OA11_theta2_mem
+#print axioms OA11_theta3_mem
+#print axioms OA11_theta4_mem
+#print axioms OA11_theta5_mem
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Reduced phase `11 * log 2 - 2π ∈ [1.3414, 1.3417]` (from `pi_d4`). -/
+theorem OA11_delta2_mem :
+    (1.3414 : ℝ) ≤ 11 * Real.log 2 - 2 * Real.pi ∧
+    11 * Real.log 2 - 2 * Real.pi ≤ (1.3417 : ℝ) := by
+  have hth := OA11_theta2_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Reduced phase `4π - 11 * log 3 ∈ [0.4812, 0.4817]` (from `pi_d4`). -/
+theorem OA11_delta3_mem :
+    (0.4812 : ℝ) ≤ 4 * Real.pi - 11 * Real.log 3 ∧
+    4 * Real.pi - 11 * Real.log 3 ≤ (0.4817 : ℝ) := by
+  have hth := OA11_theta3_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Reduced phase `5π - 11 * log 4 ∈ [0.4582, 0.4588]` (from `pi_d4`). -/
+theorem OA11_delta4_mem :
+    (0.4582 : ℝ) ≤ 5 * Real.pi - 11 * Real.log 4 ∧
+    5 * Real.pi - 11 * Real.log 4 ≤ (0.4588 : ℝ) := by
+  have hth := OA11_theta4_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Reduced phase `6π - 11 * log 5 ∈ [1.1451, 1.1458]` (from `pi_d4`). -/
+theorem OA11_delta5_mem :
+    (1.1451 : ℝ) ≤ 6 * Real.pi - 11 * Real.log 5 ∧
+    6 * Real.pi - 11 * Real.log 5 ≤ (1.1458 : ℝ) := by
+  have hth := OA11_theta5_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+#print axioms OA11_delta2_mem
+#print axioms OA11_delta3_mem
+#print axioms OA11_delta4_mem
+#print axioms OA11_delta5_mem
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Combo `sin (11 * log 2) - cos (11 * log 2) ≥ 3 / 5`
+(single-periodicity + cubic floor + quartic ceiling). -/
+theorem OA11_combo2_lower :
+    (3 / 5 : ℝ) ≤ Real.sin (11 * Real.log 2) - Real.cos (11 * Real.log 2) := by
+  have hmem := OA11_delta2_mem
+  have hw_lo := hmem.1
+  have hw_hi := hmem.2
+  have hw_nn : (0 : ℝ) ≤ 11 * Real.log 2 - 2 * Real.pi := by linarith
+  have hpers : Real.sin (11 * Real.log 2 - 2 * Real.pi) =
+      Real.sin (11 * Real.log 2) := Real.sin_sub_two_pi _
+  have hperc : Real.cos (11 * Real.log 2 - 2 * Real.pi) =
+      Real.cos (11 * Real.log 2) := Real.cos_sub_two_pi _
+  have hsin_lo := Real.sin_ge_sub_cube hw_nn
+  have hcube : (11 * Real.log 2 - 2 * Real.pi) ^ 3 ≤ (1.3417 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hw_nn hw_hi 3
+  have hcos_hi := CG_cos_le_quartic hw_nn
+  have hsq : (1.3414 : ℝ) ^ 2 ≤ (11 * Real.log 2 - 2 * Real.pi) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hw_lo 2
+  have hfour : (11 * Real.log 2 - 2 * Real.pi) ^ 4 ≤ (1.3417 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hw_nn hw_hi 4
+  have hnums : (0.9388 : ℝ) ≤ 1.3414 - (1.3417 : ℝ) ^ 3 / 6 := by norm_num
+  have hnumc : 1 - (1.3414 : ℝ) ^ 2 / 2 + (1.3417 : ℝ) ^ 4 / 24 ≤ (0.2354 : ℝ) := by
+    norm_num
+  have hsin : (0.9388 : ℝ) ≤ Real.sin (11 * Real.log 2) := by
+    have h1 : (1.3414 : ℝ) - (1.3417 : ℝ) ^ 3 / 6 ≤
+        (11 * Real.log 2 - 2 * Real.pi) -
+          (11 * Real.log 2 - 2 * Real.pi) ^ 3 / 6 := by
+      linarith
+    rw [← hpers]
+    linarith
+  have hcos : Real.cos (11 * Real.log 2) ≤ (0.2354 : ℝ) := by
+    have h1 : 1 - (11 * Real.log 2 - 2 * Real.pi) ^ 2 / 2 +
+        (11 * Real.log 2 - 2 * Real.pi) ^ 4 / 24 ≤
+        1 - (1.3414 : ℝ) ^ 2 / 2 + (1.3417 : ℝ) ^ 4 / 24 := by
+      linarith
+    rw [← hperc]
+    linarith
+  linarith
+
+#print axioms OA11_combo2_lower
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Combo `cos (11 * log 3) - sin (11 * log 3) ≥ 6 / 5`
+(double-periodicity + quadratic/cubic floors on `4π - θ₃`). -/
+theorem OA11_combo3_lower :
+    (6 / 5 : ℝ) ≤ Real.cos (11 * Real.log 3) - Real.sin (11 * Real.log 3) := by
+  have hmem := OA11_delta3_mem
+  have hv_lo := hmem.1
+  have hv_hi := hmem.2
+  have hv_nn : (0 : ℝ) ≤ 4 * Real.pi - 11 * Real.log 3 := by linarith
+  have hper1c : Real.cos (11 * Real.log 3 - 2 * Real.pi) =
+      Real.cos (11 * Real.log 3) := Real.cos_sub_two_pi _
+  have hper2c : Real.cos ((11 * Real.log 3 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos (11 * Real.log 3 - 2 * Real.pi) := Real.cos_sub_two_pi _
+  have hperc : Real.cos (4 * Real.pi - 11 * Real.log 3) =
+      Real.cos (11 * Real.log 3) := by
+    have e : ((11 * Real.log 3 - 2 * Real.pi) - 2 * Real.pi) =
+        -(4 * Real.pi - 11 * Real.log 3) := by ring
+    rw [e, Real.cos_neg] at hper2c
+    linarith
+  have hper1s : Real.sin (11 * Real.log 3 - 2 * Real.pi) =
+      Real.sin (11 * Real.log 3) := Real.sin_sub_two_pi _
+  have hper2s : Real.sin ((11 * Real.log 3 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (11 * Real.log 3 - 2 * Real.pi) := Real.sin_sub_two_pi _
+  have hpers : Real.sin (4 * Real.pi - 11 * Real.log 3) =
+      -(Real.sin (11 * Real.log 3)) := by
+    have e : ((11 * Real.log 3 - 2 * Real.pi) - 2 * Real.pi) =
+        -(4 * Real.pi - 11 * Real.log 3) := by ring
+    rw [e, Real.sin_neg] at hper2s
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos
+    (x := 4 * Real.pi - 11 * Real.log 3)
+  have hsq : (4 * Real.pi - 11 * Real.log 3) ^ 2 ≤ (0.4817 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hv_nn hv_hi 2
+  have hsin_lo := Real.sin_ge_sub_cube hv_nn
+  have hcube : (4 * Real.pi - 11 * Real.log 3) ^ 3 ≤ (0.4817 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hv_nn hv_hi 3
+  have hnumc : (0.8839 : ℝ) ≤ 1 - (0.4817 : ℝ) ^ 2 / 2 := by norm_num
+  have hnums : (0.4625 : ℝ) ≤ 0.4812 - (0.4817 : ℝ) ^ 3 / 6 := by norm_num
+  have hcos : (0.8839 : ℝ) ≤ Real.cos (11 * Real.log 3) := by
+    rw [← hperc]
+    linarith [hcos_lo, hsq, hnumc]
+  have hsin : Real.sin (11 * Real.log 3) ≤ (-0.4625 : ℝ) := by
+    have h1 : (0.4625 : ℝ) ≤ Real.sin (4 * Real.pi - 11 * Real.log 3) := by
+      have h2 : (0.4812 : ℝ) - (0.4817 : ℝ) ^ 3 / 6 ≤
+          (4 * Real.pi - 11 * Real.log 3) -
+            (4 * Real.pi - 11 * Real.log 3) ^ 3 / 6 := by
+        linarith [hv_lo, hcube]
+      linarith [hsin_lo, h2, hnums]
+    linarith [hpers, h1]
+  linarith
+
+#print axioms OA11_combo3_lower
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Combo `sin (11 * log 4) - cos (11 * log 4) ≥ 6 / 5`
+(double-periodicity + `π`-shift + cubic/quadratic floors on `5π - θ₄`). -/
+theorem OA11_combo4_lower :
+    (6 / 5 : ℝ) ≤ Real.sin (11 * Real.log 4) - Real.cos (11 * Real.log 4) := by
+  have hmem := OA11_delta4_mem
+  have hv_lo := hmem.1
+  have hv_hi := hmem.2
+  have hv_nn : (0 : ℝ) ≤ 5 * Real.pi - 11 * Real.log 4 := by linarith
+  have hper1c : Real.cos (11 * Real.log 4 - 2 * Real.pi) =
+      Real.cos (11 * Real.log 4) := Real.cos_sub_two_pi _
+  have hper2c : Real.cos ((11 * Real.log 4 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos (11 * Real.log 4 - 2 * Real.pi) := Real.cos_sub_two_pi _
+  have hcos4 : Real.cos (11 * Real.log 4) =
+      -(Real.cos (5 * Real.pi - 11 * Real.log 4)) := by
+    have e : ((11 * Real.log 4 - 2 * Real.pi) - 2 * Real.pi) =
+        Real.pi - (5 * Real.pi - 11 * Real.log 4) := by ring
+    rw [e, Real.cos_pi_sub] at hper2c
+    linarith
+  have hper1s : Real.sin (11 * Real.log 4 - 2 * Real.pi) =
+      Real.sin (11 * Real.log 4) := Real.sin_sub_two_pi _
+  have hper2s : Real.sin ((11 * Real.log 4 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (11 * Real.log 4 - 2 * Real.pi) := Real.sin_sub_two_pi _
+  have hsin4 : Real.sin (11 * Real.log 4) =
+      Real.sin (5 * Real.pi - 11 * Real.log 4) := by
+    have e : ((11 * Real.log 4 - 2 * Real.pi) - 2 * Real.pi) =
+        Real.pi - (5 * Real.pi - 11 * Real.log 4) := by ring
+    rw [e, Real.sin_pi_sub] at hper2s
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos
+    (x := 5 * Real.pi - 11 * Real.log 4)
+  have hsq : (5 * Real.pi - 11 * Real.log 4) ^ 2 ≤ (0.4588 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hv_nn hv_hi 2
+  have hsin_lo := Real.sin_ge_sub_cube hv_nn
+  have hcube : (5 * Real.pi - 11 * Real.log 4) ^ 3 ≤ (0.4588 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hv_nn hv_hi 3
+  have hnumc : (0.8947 : ℝ) ≤ 1 - (0.4588 : ℝ) ^ 2 / 2 := by norm_num
+  have hnums : (0.442 : ℝ) ≤ 0.4582 - (0.4588 : ℝ) ^ 3 / 6 := by norm_num
+  have hcos : Real.cos (11 * Real.log 4) ≤ (-0.8947 : ℝ) := by
+    have h1 : (0.8947 : ℝ) ≤ Real.cos (5 * Real.pi - 11 * Real.log 4) := by
+      have h2 : (0.8947 : ℝ) ≤ 1 - (0.4588 : ℝ) ^ 2 / 2 := hnumc
+      have h3 : 1 - (0.4588 : ℝ) ^ 2 / 2 ≤
+          1 - (5 * Real.pi - 11 * Real.log 4) ^ 2 / 2 := by
+        linarith [hsq]
+      linarith [hcos_lo, h2, h3]
+    linarith [hcos4, h1]
+  have hsin : (0.442 : ℝ) ≤ Real.sin (11 * Real.log 4) := by
+    rw [hsin4]
+    have h2 : (0.4582 : ℝ) - (0.4588 : ℝ) ^ 3 / 6 ≤
+        (5 * Real.pi - 11 * Real.log 4) -
+          (5 * Real.pi - 11 * Real.log 4) ^ 3 / 6 := by
+      linarith [hv_lo, hcube]
+    linarith [hsin_lo, h2, hnums]
+  linarith
+
+#print axioms OA11_combo4_lower
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Combo `cos (11 * log 5) - sin (11 * log 5) ≥ 6 / 5`
+(triple-periodicity + sextic/cubic floors on `6π - θ₅`). -/
+theorem OA11_combo5_lower :
+    (6 / 5 : ℝ) ≤ Real.cos (11 * Real.log 5) - Real.sin (11 * Real.log 5) := by
+  have hmem := OA11_delta5_mem
+  have hv_lo := hmem.1
+  have hv_hi := hmem.2
+  have hv_nn : (0 : ℝ) ≤ 6 * Real.pi - 11 * Real.log 5 := by linarith
+  have hper1c : Real.cos (11 * Real.log 5 - 2 * Real.pi) =
+      Real.cos (11 * Real.log 5) := Real.cos_sub_two_pi _
+  have hper2c : Real.cos ((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos (11 * Real.log 5 - 2 * Real.pi) := Real.cos_sub_two_pi _
+  have hper3c : Real.cos (((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) -
+      2 * Real.pi) = Real.cos ((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have hperc : Real.cos (6 * Real.pi - 11 * Real.log 5) =
+      Real.cos (11 * Real.log 5) := by
+    have e : (((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+        -(6 * Real.pi - 11 * Real.log 5) := by ring
+    rw [e, Real.cos_neg] at hper3c
+    linarith [hper1c, hper2c, hper3c]
+  have hper1s : Real.sin (11 * Real.log 5 - 2 * Real.pi) =
+      Real.sin (11 * Real.log 5) := Real.sin_sub_two_pi _
+  have hper2s : Real.sin ((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (11 * Real.log 5 - 2 * Real.pi) := Real.sin_sub_two_pi _
+  have hper3s : Real.sin (((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) -
+      2 * Real.pi) = Real.sin ((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hpers : Real.sin (6 * Real.pi - 11 * Real.log 5) =
+      -(Real.sin (11 * Real.log 5)) := by
+    have e : (((11 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+        -(6 * Real.pi - 11 * Real.log 5) := by ring
+    rw [e, Real.sin_neg] at hper3s
+    linarith [hper1s, hper2s, hper3s]
+  have hcos_lo := DZ3u_cos_sextic_lower hv_nn
+  have hsq : (6 * Real.pi - 11 * Real.log 5) ^ 2 ≤ (1.1458 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hv_nn hv_hi 2
+  have hfour : (1.1451 : ℝ) ^ 4 ≤ (6 * Real.pi - 11 * Real.log 5) ^ 4 :=
+    pow_le_pow_left₀ (by norm_num) hv_lo 4
+  have hsix : (6 * Real.pi - 11 * Real.log 5) ^ 6 ≤ (1.1458 : ℝ) ^ 6 :=
+    pow_le_pow_left₀ hv_nn hv_hi 6
+  have hsin_lo := Real.sin_ge_sub_cube hv_nn
+  have hcube : (6 * Real.pi - 11 * Real.log 5) ^ 3 ≤ (1.1458 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hv_nn hv_hi 3
+  have hnumc : (0.412 : ℝ) ≤
+      1 - (1.1458 : ℝ) ^ 2 / 2 + (1.1451 : ℝ) ^ 4 / 24 -
+        (1.1458 : ℝ) ^ 6 / 720 := by norm_num
+  have hnums : (0.8943 : ℝ) ≤ 1.1451 - (1.1458 : ℝ) ^ 3 / 6 := by norm_num
+  have hcos : (0.412 : ℝ) ≤ Real.cos (11 * Real.log 5) := by
+    rw [← hperc]
+    linarith [hcos_lo, hnumc, hsq, hfour, hsix]
+  have hsin : Real.sin (11 * Real.log 5) ≤ (-0.8943 : ℝ) := by
+    have h1 : (0.8943 : ℝ) ≤ Real.sin (6 * Real.pi - 11 * Real.log 5) := by
+      have h2 : (1.1451 : ℝ) - (1.1458 : ℝ) ^ 3 / 6 ≤
+          (6 * Real.pi - 11 * Real.log 5) -
+            (6 * Real.pi - 11 * Real.log 5) ^ 3 / 6 := by
+        linarith [hv_lo, hcube]
+      linarith [hsin_lo, h2, hnums]
+    linarith [hpers, h1]
+  linarith
+
+#print axioms OA11_combo5_lower
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Cleared-square half-rpow upper: `x ^ (1 / 2) ≤ b` from `x ≤ b ^ 2`. -/
+theorem OA11_sqrt_le_of_sq_le {x b : ℝ} (hx : (0 : ℝ) ≤ x) (hb : (0 : ℝ) ≤ b)
+    (h : x ≤ b ^ (2 : ℕ)) : x ^ ((1 / 2 : ℝ)) ≤ b := by
+  have e : ((x ^ ((1 / 2 : ℝ))) ^ (2 : ℕ)) = x := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hx]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hpow : ((x ^ ((1 / 2 : ℝ))) ^ (2 : ℕ)) ≤ b ^ (2 : ℕ) := by
+    rw [e]
+    exact h
+  exact le_of_pow_le_pow_left₀ (by norm_num) hb hpow
+
+/-- Amplitude floor `7 / 10 ≤ 2 ^ (-(1 / 2))` via `(10 / 7) ^ 2 ≥ 2`. -/
+theorem OA11_amp2_ge : (7 / 10 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hsqrt := OA11_sqrt_le_of_sq_le (show (0 : ℝ) ≤ 2 by norm_num)
+    (show (0 : ℝ) ≤ 10 / 7 by norm_num)
+    (show (2 : ℝ) ≤ (10 / 7 : ℝ) ^ (2 : ℕ) by norm_num)
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (2 : ℝ) ^ (-(1 / 2 : ℝ)) = (((2 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (7 / 10 : ℝ) = (((10 / 7 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hsqrt
+
+/-- Amplitude floor `57 / 100 ≤ 3 ^ (-(1 / 2))` via `(100 / 57) ^ 2 ≥ 3`. -/
+theorem OA11_amp3_ge : (57 / 100 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hsqrt := OA11_sqrt_le_of_sq_le (show (0 : ℝ) ≤ 3 by norm_num)
+    (show (0 : ℝ) ≤ 100 / 57 by norm_num)
+    (show (3 : ℝ) ≤ (100 / 57 : ℝ) ^ (2 : ℕ) by norm_num)
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (3 : ℝ) ^ (-(1 / 2 : ℝ)) = (((3 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (57 / 100 : ℝ) = (((100 / 57 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hsqrt
+
+/-- Amplitude value `4 ^ (-(1 / 2)) = 1 / 2` (via `4 = 2 ^ 2`). -/
+theorem OA11_amp4_eq : ((4 : ℝ) ^ (-(1 / 2 : ℝ))) = (1 / 2 : ℝ) := by
+  have hsqrt4 : (4 : ℝ) ^ ((1 / 2 : ℝ)) = 2 := by
+    have h4 : (4 : ℝ) = (2 : ℝ) ^ (2 : ℕ) := by norm_num
+    rw [h4, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : (((((2 : ℕ)) : ℝ)) * (1 / 2 : ℝ)) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hrw : (4 : ℝ) ^ (-(1 / 2 : ℝ)) = (((4 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, hsqrt4]
+  norm_num
+
+/-- Amplitude floor `11 / 25 ≤ 5 ^ (-(1 / 2))` via `(25 / 11) ^ 2 ≥ 5`. -/
+theorem OA11_amp5_ge : (11 / 25 : ℝ) ≤ (5 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hsqrt := OA11_sqrt_le_of_sq_le (show (0 : ℝ) ≤ 5 by norm_num)
+    (show (0 : ℝ) ≤ 25 / 11 by norm_num)
+    (show (5 : ℝ) ≤ (25 / 11 : ℝ) ^ (2 : ℕ) by norm_num)
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (5 : ℝ) ^ (-(1 / 2 : ℝ)) = (((5 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (11 / 25 : ℝ) = (((25 / 11 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hsqrt
+
+#print axioms OA11_sqrt_le_of_sq_le
+#print axioms OA11_amp2_ge
+#print axioms OA11_amp3_ge
+#print axioms OA11_amp4_eq
+#print axioms OA11_amp5_ge
+
+end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- Re/Im of `((k ^ sCutOA11))⁻¹`:
+`k ^ (-(1/2)) * cos (11 * log k)` and `k ^ (-(1/2)) * sin (-(11 * log k))`. -/
+theorem OA11_inv_cpow_re_im (k : ℕ) (hk : (0 : ℝ) < ((k : ℕ) : ℝ)) :
+    (((((k : ℕ)) : ℂ) ^ sCutOA11)⁻¹).re =
+      ((((k : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)) *
+        Real.cos (11 * Real.log (((k : ℕ)) : ℝ))) ∧
+    (((((k : ℕ)) : ℂ) ^ sCutOA11)⁻¹).im =
+      ((((k : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)) *
+        Real.sin (-(11 * Real.log (((k : ℕ)) : ℝ)))) := by
+  have hkeq : ((((k : ℕ)) : ℂ)) = (((((k : ℕ)) : ℝ))) := by simp
+  rw [hkeq]
+  have hk0 : (((((k : ℕ)) : ℝ))) ≠ 0 := by
+    have hne : ((((k : ℕ)) : ℝ)) ≠ 0 := ne_of_gt hk
+    exact_mod_cast hne
+  have hlog : Complex.log (((((k : ℕ)) : ℝ))) =
+      (((Real.log (((k : ℕ)) : ℝ)))) :=
+    (Complex.ofReal_log (le_of_lt hk)).symm
+  have hlogre : (Complex.log (((((k : ℕ)) : ℝ)))).re =
+      Real.log (((k : ℕ)) : ℝ) := by rw [hlog]; rfl
+  have hlogim : (Complex.log (((((k : ℕ)) : ℝ)))).im = 0 := by rw [hlog]; rfl
+  have hsre : sCutOA11.re = (1 / 2 : ℝ) := sCutOA11_re
+  have hsim : sCutOA11.im = (11 : ℝ) := sCutOA11_im
+  have hargre : (Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11).re =
+      Real.log (((k : ℕ)) : ℝ) * (1 / 2) := by
+    rw [Complex.mul_re, hlogre, hlogim, hsre, hsim]
+    ring
+  have hargim : (Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11).im =
+      Real.log (((k : ℕ)) : ℝ) * 11 := by
+    rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
+    ring
+  have hcpow : (((((k : ℕ)) : ℝ))) ^ sCutOA11 =
+      Complex.exp (Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11) := by
+    rw [Complex.cpow_def_of_ne_zero hk0]
+  have hinv : ((((((k : ℕ)) : ℝ))) ^ sCutOA11)⁻¹ =
+      Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11)) := by
+    rw [hcpow, ← Complex.exp_neg]
+  have hnegre : (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11)).re =
+      -(Real.log (((k : ℕ)) : ℝ) * (1 / 2)) := by
+    rw [Complex.neg_re, hargre]
+  have hnegim : (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11)).im =
+      -(Real.log (((k : ℕ)) : ℝ) * 11) := by
+    rw [Complex.neg_im, hargim]
+  have hre : (Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11))).re =
+      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) *
+        Real.cos (-(Real.log (((k : ℕ)) : ℝ) * 11))) := by
+    rw [Complex.exp_re, hnegre, hnegim]
+  have him : (Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11))).im =
+      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) *
+        Real.sin (-(Real.log (((k : ℕ)) : ℝ) * 11))) := by
+    rw [Complex.exp_im, hnegre, hnegim]
+  have hcos : Real.cos (-(Real.log (((k : ℕ)) : ℝ) * 11)) =
+      Real.cos (11 * Real.log (((k : ℕ)) : ℝ)) := by
+    congr 1
+    ring
+  have hsin : Real.sin (-(Real.log (((k : ℕ)) : ℝ) * 11)) =
+      Real.sin (-(11 * Real.log (((k : ℕ)) : ℝ))) := by
+    congr 1
+    ring
+  have hexp : Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) =
+      ((((k : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) := by
+    have heq : -(Real.log (((k : ℕ)) : ℝ) * (1 / 2))) =
+        Real.log (((k : ℕ)) : ℝ) * (-(1 / 2 : ℝ)) := by ring
+    rw [heq]
+    rw [← Real.rpow_def_of_pos hk]
+  constructor
+  · rw [hinv, hre, hexp, hcos]
+  · rw [hinv, him, hexp, hsin]
+
+#print axioms OA11_inv_cpow_re_im
+
+end Door3OffAxis
