@@ -4088,6 +4088,10 @@ sorry-free infrastructure and the complete commit ledger above.
   F≥1/2 gives Z≤12, not 6; zero callers). 1 remaining
   fix (1192 dot-notation) applied post-build,
   UNVERIFIED. BFIX3 fired (verify + caller check).
+- 2026-09-11 BFIX3 GREEN (31s, zero edits): ballsup
+  module CLOSED — 255 axioms lines, zero sorryAx,
+  weakenings caller-free (def-only hits). Right-ball
+  file fully banked (conditional joints documented).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
