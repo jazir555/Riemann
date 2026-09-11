@@ -4053,6 +4053,15 @@ sorry-free infrastructure and the complete commit ledger above.
   off_axis never reached, tail untouched, 0 fix cycles
   used). ZUFIX actively editing zeta (file dirty).
   Everything funnels to ZUFIX green.
+- 2026-09-11 TFIX split: batchC GREEN (`8a30ecdf` trap
+  fix confirmed; zero axioms lines — file has no
+  `#print axioms`). tail_edge RED-BLOCKED: `Challenge2.
+  MollifiedAttack.*` unknown. Coordinator ROOT-CAUSED:
+  names EXIST in source (underscore file :11984, inside
+  Challenge2 11121-12030) — the olean is STALE (old
+  commit artifact, fresh by mtime). NOT a source bug.
+  REBUILD agent fired (long-build lane: delete stale
+  oleans, rebuild RH ≤40min → CCA → tail_edge).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
