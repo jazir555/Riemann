@@ -4048,6 +4048,11 @@ sorry-free infrastructure and the complete commit ledger above.
   sequential confirm-sweep (sliver_edge, batchC,
   tail_edge, ballsup, cutL10, rouche, off_axis, srect,
   trig+terms).
+- 2026-09-11 OAFIX-retry: lock ACQUIRED on attempt 3,
+  build ran, RED all 8 errors in zeta (same ZUFIX set;
+  off_axis never reached, tail untouched, 0 fix cycles
+  used). ZUFIX actively editing zeta (file dirty).
+  Everything funnels to ZUFIX green.
 - 2026-09-11 DP-TRIG delivered (`8d7324ab`, NEW
   `door3_dp_trig.lean` ~140 lines Mathlib-only,
   registered, no build): quad floor, cubic floor,
