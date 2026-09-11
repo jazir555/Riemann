@@ -4009,6 +4009,17 @@ sorry-free infrastructure and the complete commit ledger above.
   PAUSED unless DP needs uppers. DP-ENCLOSE came back
   empty (too big); re-fired STAGE 1 (`door3_dp_trig`:
   trig enclosures only, partial OK, stage 2 deferred).
+- 2026-09-11 BUILD-SWEEP delivered: 5/11 GREEN
+  (batchB, batchD, tierB_subdiv, retier, pi2 — axioms
+  clean), 6/11 RED. NEW FIND: nested-comment trap
+  (`/-` inside block comments) — coordinator fixed 3
+  by hand (`8a30ecdf`) + import placement; lane tails
+  scanned clean. FIX WAVE ×10 fired: ZUFIX (zeta 5
+  errs + srect), SEFIX (4), BAFIX (3), CSFIX (1),
+  OAFIX (OA27 verify), TFIX (batchC + tail_edge
+  confirm), BFIX (ballsup tail), CLFIX (cutL10 tail),
+  STFIX (stirling tail), RUFIX (rouche). Guarded +
+  retry×8 + 15-min kill.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
