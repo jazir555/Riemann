@@ -4220,6 +4220,13 @@ sorry-free infrastructure and the complete commit ledger above.
   numerals, tight-flagged first), TIERDIRECT (direct
   Leibniz + small-disc Cauchy from banked local
   sups, biggest-margin first).
+- 2026-09-11 ZLOWN delivered (NEW `door3_zlowN.lean`,
+  registered, no build): infra + N16/N32 numbers —
+  R05 N32 −0.10 (trend may close ~N64); all 31 open.
+- 2026-09-11 GAMLOW delivered (NEW `door3_gamma_low.
+  lean`, registered, no build): 34 denominators +
+  shift infra banked; 0/30 lowers (need π/2-rate +
+  Stirling-disc; banked reflection 2–3 orders short).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
