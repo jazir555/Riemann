@@ -8901,9 +8901,8 @@ theorem OA11_inv_cpow_re_im (k : ℕ) (hk : (0 : ℝ) < ((k : ℕ) : ℝ)) :
         Real.sin (-(11 * Real.log (((k : ℕ)) : ℝ)))) := by
   have hkeq : ((((k : ℕ)) : ℂ)) = (((((k : ℕ)) : ℝ))) := by simp
   rw [hkeq]
-  have hk0 : (((((k : ℕ)) : ℝ))) ≠ 0 := by
-    have hne : ((((k : ℕ)) : ℝ)) ≠ 0 := ne_of_gt hk
-    exact_mod_cast hne
+  have hk0 : (((((k : ℕ)) : ℝ) : ℂ)) ≠ 0 := by
+    exact_mod_cast ne_of_gt hk
   have hlog : Complex.log (((((k : ℕ)) : ℝ))) =
       (((Real.log (((k : ℕ)) : ℝ)))) :=
     (Complex.ofReal_log (le_of_lt hk)).symm
@@ -8920,11 +8919,11 @@ theorem OA11_inv_cpow_re_im (k : ℕ) (hk : (0 : ℝ) < ((k : ℕ) : ℝ)) :
       Real.log (((k : ℕ)) : ℝ) * 11 := by
     rw [Complex.mul_im, hlogre, hlogim, hsre, hsim]
     ring
-  have hcpow : (((((k : ℕ)) : ℝ))) ^ sCutOA11 =
-      Complex.exp (Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11) := by
+  have hcpow : (((((k : ℕ)) : ℝ) : ℂ)) ^ sCutOA11 =
+      Complex.exp (Complex.log (((((k : ℕ)) : ℝ) : ℂ)) * sCutOA11) := by
     rw [Complex.cpow_def_of_ne_zero hk0]
-  have hinv : ((((((k : ℕ)) : ℝ))) ^ sCutOA11)⁻¹ =
-      Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11)) := by
+  have hinv : ((((((k : ℕ)) : ℝ) : ℂ)) ^ sCutOA11)⁻¹ =
+      Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ) : ℂ)) * sCutOA11)) := by
     rw [hcpow, ← Complex.exp_neg]
   have hnegre : (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11)).re =
       -(Real.log (((k : ℕ)) : ℝ) * (1 / 2)) := by
@@ -8933,24 +8932,25 @@ theorem OA11_inv_cpow_re_im (k : ℕ) (hk : (0 : ℝ) < ((k : ℕ) : ℝ)) :
       -(Real.log (((k : ℕ)) : ℝ) * 11) := by
     rw [Complex.neg_im, hargim]
   have hre : (Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11))).re =
-      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) *
-        Real.cos (-(Real.log (((k : ℕ)) : ℝ) * 11))) := by
+      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2))) *
+        Real.cos (-(Real.log (((k : ℕ)) : ℝ) * 11)) := by
     rw [Complex.exp_re, hnegre, hnegim]
   have him : (Complex.exp (-(Complex.log (((((k : ℕ)) : ℝ))) * sCutOA11))).im =
-      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) *
-        Real.sin (-(Real.log (((k : ℕ)) : ℝ) * 11))) := by
+      Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2))) *
+        Real.sin (-(Real.log (((k : ℕ)) : ℝ) * 11)) := by
     rw [Complex.exp_im, hnegre, hnegim]
   have hcos : Real.cos (-(Real.log (((k : ℕ)) : ℝ) * 11)) =
       Real.cos (11 * Real.log (((k : ℕ)) : ℝ)) := by
+    rw [Real.cos_neg]
     congr 1
     ring
   have hsin : Real.sin (-(Real.log (((k : ℕ)) : ℝ) * 11)) =
       Real.sin (-(11 * Real.log (((k : ℕ)) : ℝ))) := by
     congr 1
     ring
-  have hexp : Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2)))) =
+  have hexp : Real.exp (-(Real.log (((k : ℕ)) : ℝ) * (1 / 2))) =
       ((((k : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) := by
-    have heq : -(Real.log (((k : ℕ)) : ℝ) * (1 / 2))) =
+    have heq : -(Real.log (((k : ℕ)) : ℝ) * (1 / 2)) =
         Real.log (((k : ℕ)) : ℝ) * (-(1 / 2 : ℝ)) := by ring
     rw [heq]
     rw [← Real.rpow_def_of_pos hk]

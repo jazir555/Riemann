@@ -1,3 +1,4 @@
+import Mathlib
 /-!
 # Door 3, stage 1: rigorous sine / cosine polynomial enclosures.
 
@@ -32,8 +33,6 @@ Residual for stage 2 (exact statement, left for the sibling task):
   numeral bounds (for example the `log 2` upper bounds used by the cell
   suppliers) to certify each Taylor disc.
 -/
-
-import Mathlib
 
 /-- Quadratic cosine floor for every real `x` (one rewrite of the banked lemma). -/
 theorem dp_cos_quad_floor (x : ℝ) : 1 - x ^ 2 / 2 ≤ Real.cos x :=
@@ -118,7 +117,7 @@ theorem dp_sin_enclose_of_reduced (x : ℝ) (hx : |x| ≤ 40) (k : ℤ) (r : ℝ
   have hsin_eq : Real.sin x = Real.sin r := by
     rw [hrdef]
     exact (dp_sin_reduce x k).symm
-  rcases le_or_lt 0 r with hr0 | hrneg
+  rcases le_total 0 r with hr0 | hrneg
   · have hfloor := dp_sin_cubic_floor r hr0
     have hlo : r - r ^ 3 / 6 - |r| ^ 5 / 100 ≤ Real.sin r := by linarith
     refine ⟨r - r ^ 3 / 6 - |r| ^ 5 / 100, r - r ^ 3 / 6 + |r| ^ 5 / 100,
