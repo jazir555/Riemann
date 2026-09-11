@@ -1,3 +1,6 @@
+import Mathlib
+import central_cover_assembly
+
 /-!
 # door3_cutoff_rouche — qualitative cutoff Rouché bypass (WRITE-ONLY delivery)
 
@@ -78,9 +81,6 @@ other, so both WOULD be cycle-safe to import — but this route needs neither
 `central_cover_assembly` only. This file is downstream (nothing imports it).
 -/
 
-import Mathlib
-import central_cover_assembly
-
 noncomputable section
 
 namespace Door3CutoffRouche
@@ -97,13 +97,14 @@ def CutRBoxUpper (B : ℝ) : Prop :=
 
 /-- Conj norm transport for `zeta` via unconditional Mathlib
     `riemannZeta_conj` (`ZetaAsymp.lean:458`,
-    `riemannZeta (conj s) = conj (riemannZeta s)` for all `s`). -/
+    `riemannZeta (star s) = star (riemannZeta s)` for all `s`). -/
 theorem zeta_norm_conj (s : ℂ) :
-    ‖zeta (Complex.conj s)‖ = ‖zeta s‖ := by
-  have h : zeta (Complex.conj s) = Complex.conj (zeta s) := by
-    show riemannZeta (Complex.conj s) = Complex.conj (riemannZeta s)
+    ‖zeta (star s)‖ = ‖zeta s‖ := by
+  have h : zeta (star s) = star (zeta s) := by
+    show riemannZeta (star s) = star (riemannZeta s)
     exact riemannZeta_conj s
-  rw [h, Complex.norm_conj]
+  rw [h]
+  exact Complex.norm_conj _
 
 /-- Conj-mirror: the ONE right-box premise yields the left-box upper
     (`Im ∈ [-11.56, -8.44]`) inside this file. Both boxes covered. -/
@@ -111,21 +112,21 @@ theorem cutLBox_upper_of_cutRBox (B : ℝ) (hR : CutRBoxUpper B) (t : ℂ)
     (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (2.06 : ℝ))
     (hilo : (-11.56 : ℝ) ≤ t.im) (hihi : t.im ≤ (-8.44 : ℝ)) :
     ‖zeta t‖ ≤ B := by
-  have hre : (Complex.conj t).re = t.re := Complex.conj_re t
-  have him : (Complex.conj t).im = -t.im := Complex.conj_im t
-  have h1 : (-1.06 : ℝ) ≤ (Complex.conj t).re := by
+  have hre : (star t).re = t.re := Complex.conj_re t
+  have him : (star t).im = -t.im := Complex.conj_im t
+  have h1 : (-1.06 : ℝ) ≤ (star t).re := by
     rw [hre]
     exact hlo
-  have h2 : (Complex.conj t).re ≤ (2.06 : ℝ) := by
+  have h2 : (star t).re ≤ (2.06 : ℝ) := by
     rw [hre]
     exact hhi
-  have h3 : (8.44 : ℝ) ≤ (Complex.conj t).im := by
+  have h3 : (8.44 : ℝ) ≤ (star t).im := by
     rw [him]
     linarith
-  have h4 : (Complex.conj t).im ≤ (11.56 : ℝ) := by
+  have h4 : (star t).im ≤ (11.56 : ℝ) := by
     rw [him]
     linarith
-  have hB := hR (Complex.conj t) h1 h2 h3 h4
+  have hB := hR (star t) h1 h2 h3 h4
   rw [zeta_norm_conj t] at hB
   exact hB
 
@@ -212,7 +213,8 @@ theorem shiftedS_of_rightLine_mem_box {z : ℂ} (hx : z.re = (10 : ℝ))
     (-1.06 : ℝ) ≤ (shiftedS z).re ∧ (shiftedS z).re ≤ (2.06 : ℝ) ∧
       (8.44 : ℝ) ≤ (shiftedS z).im ∧ (shiftedS z).im ≤ (11.56 : ℝ) := by
   have hre : (shiftedS z).re = (1 / 2 : ℝ) - z.im := shiftedS_re z
-  have him : (shiftedS z).im = z.re := shiftedS_im_eq z
+  have him : (shiftedS z).im = z.re := by
+    simp [shiftedS, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
   rw [hre, him, hx]
   exact ⟨by linarith, by linarith, by linarith, by linarith⟩
 
@@ -223,7 +225,8 @@ theorem shiftedS_of_leftLine_mem_box {z : ℂ} (hx : z.re = (-10 : ℝ))
     (-1.06 : ℝ) ≤ (shiftedS z).re ∧ (shiftedS z).re ≤ (2.06 : ℝ) ∧
       (-11.56 : ℝ) ≤ (shiftedS z).im ∧ (shiftedS z).im ≤ (-8.44 : ℝ) := by
   have hre : (shiftedS z).re = (1 / 2 : ℝ) - z.im := shiftedS_re z
-  have him : (shiftedS z).im = z.re := shiftedS_im_eq z
+  have him : (shiftedS z).im = z.re := by
+    simp [shiftedS, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im]
   rw [hre, him, hx]
   exact ⟨by linarith, by linarith, by linarith, by linarith⟩
 
