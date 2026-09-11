@@ -4122,6 +4122,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `hmain_of_full_central_covered` — shapes aligned
   directly. Hmain now needs ONLY FullCentral (80
   leaves) + BottomStrip.
+- 2026-09-11 CUTL-TAILFIX GREEN in 1 cycle, committed
+  (`b73d00cd`, 50/12): 8 tail fixes (hbase fourth-root
+  calc, .ge, by_contra assembly, hs-rfl, stray rings);
+  Tier-B axioms all clean. CutL10 module CLOSED.
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
