@@ -4074,6 +4074,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-11 TEFIX2 GREEN (30s, no wait, zero edits):
   tail_edge_push builds on fresh cascade. Tail-edge
   lane CLOSED (K=2 conditional + recon banked).
+- 2026-09-11 ZUFIX DOUBLE-GREEN, committed
+  (`e18ec2ee`, zeta 30/10 + srect 2/1): all 5 zeta
+  errors fixed one-line each + 2 srect lines; tail
+  axioms ZERO sorryAx (mechanism confirmed: placeholders
+  for failed proofs). CONFIRM-SWEEP fired (sequential:
+  sliver_edge, off_axis, cutL10, dp_trig).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
