@@ -4291,6 +4291,10 @@ sorry-free infrastructure and the complete commit ledger above.
   one missing lemma. STIRLING-REM fired (master
   explicit-remainder logΓ; priority |Γ|-lower →
   ψ-disc → π/2-upper).
+- 2026-09-11 ETA-MICRO delivered (NEW `door3_eta_
+  prime.lean`, registered, no build): pair/tail
+  shapes closed + R05-n2 demo (c=0,r=1). Instantiation
+  wave queued (per-center trig + summability).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
