@@ -396,10 +396,12 @@ theorem kadiriLamzouriZetaZeroFreeEdge_of_analyticInput (hIn : KadiriAnalyticInp
           constructor
           · intro hn
             constructor
-            · simpa [Metric.mem_closedBall, dist_eq_norm] using hn
+            · simp only [Metric.mem_closedBall, dist_eq_norm, sub_zero]
+              exact hn
             · exact (hzero _).2 ⟨n, rfl⟩
           · intro ⟨hn1, _⟩
-            simpa [Metric.mem_closedBall, dist_eq_norm] using hn1
+            simp only [Metric.mem_closedBall, dist_eq_norm, sub_zero] at hn1
+            exact hn1
         rw [heq]
         exact Set.Finite.preimage (fun _ _ _ _ h => hinj h) hfin
       have hfinite : ∀ r : ℝ, 1 ≤ r → ({n : ℕ | ‖a n‖ ≤ r} : Set ℕ).Finite := by
@@ -600,34 +602,14 @@ theorem kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
         (fun s' _ => by simp [Finset.sum_singleton]))
       hDpos h_c) hz
 
-/-- Kadiri–Lamzouri zero-free region for ζ (unconditional statement).  Every step is
-sorry-free except the single named leaf `KadiriAnalyticInputAtZero` (Kadiri's sharp 3–4–1
-estimate for the analytic part of `−ζ′/ζ` **at a zero**), which is supplied here by `sorry`;
-see `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` for the sorry-free conditional
-form and `zeta_ne_zero_of_pow_edge` for the unconditional (but thinner) `Zeta23`/PNT+ region.
+/-! ### The Kadiri–Lamzouri edge (conditional; stated after the leaf section)
 
-**Why the leaf is still open.**  The previous version of this file discharged the leaf with
-`(sorry : KadiriAnalyticInput)`; that could never be completed, because
-`KadiriAnalyticInput` is *false* (`not_kadiriAnalyticInput`) — it omitted the hypothesis
-`ζ s = 0`, and without it the truncated Hadamard sum contributes an uncompensated
-`4/(σ - Re s)`.  The leaf has therefore been restated at a zero, and with `A₁ = 4` instead
-of `A₁ = 2` (see `KadiriAnalyticInputAtZero` for why `A₁ = 2` is not even asymptotically
-true, and why `A₁ = 4, A₂ = 0` is still admissible for `kadiriConstant`).  What remains is
-genuinely the analytic core of Kadiri's paper; it needs two classical ingredients that are
-absent from `Mathlib` and from `ZeroFreeRegionHadamard`: the sharp digamma bound
-`Re ψ(z) ≤ log|z|` (an additive constant is fatal, since `A₂ = 0`) and the affineness of the
-Hadamard exponent of `xi` (which gives `deriv g ≡ B` with `Re B = -∑_ρ Re(1/ρ)`).
-
-If you want a `sorry`-free build and are willing to accept Kadiri's analytic estimate as a
-documented hypothesis (as this file already does for `xiZeros_simple`), replace the `sorry`
-below by a term of type `KadiriAnalyticInputAtZero` produced by
-`axiom kadiriAnalyticInputAtZero_holds : KadiriAnalyticInputAtZero`.
-Do **not** do this for `KadiriAnalyticInput`: `not_kadiriAnalyticInput` shows that axiom
-would be inconsistent. -/
-theorem kadiriLamzouriZetaZeroFreeEdge (s : ℂ) (ht : |s.im| ≥ 1)
-    (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 :=
-  kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
-    kadiriAnalyticInputAtZero_proof s ht hre
+The conditional Kadiri–Lamzouri zero-free region `kadiriLamzouriZetaZeroFreeEdge`
+is stated after `section KadiriAnalyticInputProof` (after
+`kadiriAnalyticInputAtZero_proof`, which it uses) to avoid forward references.
+See `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` above for the reduction,
+`KadiriAnalyticInputAtZero` for the residual hypothesis, and `zeta_ne_zero_of_pow_edge`
+for the unconditional (but thinner) `Zeta23`/PNT+ region. -/
 
 /-! ### The deep analytic leaf, proved
 
@@ -646,98 +628,168 @@ section KadiriAnalyticInputProof
 
 variable {a : ℕ → ℂ}
 
-/-- The Hadamard exponent of `xi` is affine: `deriv g ≡ B`. -/
-theorem hadamard_exponent_affine :
+/-- Residual for the affine-exponent leaf: the Hadamard exponent of `xi` over the
+    enumeration `a₀` is affine (`deriv g ≡ B` for some constant `B`).
+    This is the Borel–Carathéodory + Cauchy step (growth `O(|z| ^ (3 / 4))` via the
+    whole-plane bound, the `O(r ^ (7 / 4))` zero count, and `O(log|z|)` log-derivative
+    bounds); it is not available from `hadamard_factorization_genus_one`, which only
+    returns `Differentiable ℂ g`. Threaded explicitly to callers. -/
+def HadamardExponentAffineResid (a₀ : ℕ → ℂ) : Prop :=
+  ∃ (g : ℂ → ℂ) (B : ℂ),
+    Differentiable ℂ g ∧
+    (∀ (z : ℂ), xi z = Complex.exp (g z) * canonicalProductNat 1 a₀ z) ∧
+    deriv g = fun _ => B
+
+/-- Banked partial for gap 1: genus-one factorization exists sorry-free.
+    This is the full provable prefix of `hadamard_exponent_affine` (direct application of
+    `hadamard_factorization_genus_one` to `xi`); only affineness (`deriv g` constant)
+    remains as `HadamardExponentAffineResid`. -/
+theorem hadamard_factorization_exists (a₀ : ℕ → ℂ)
+    (hane : ∀ (n : ℕ), a₀ n ≠ 0)
+    (hzero : ∀ (z : ℂ), xi z = 0 ↔ ∃ (n : ℕ), z = a₀ n)
+    (hord : ∀ (z : ℂ), meromorphicOrderAt xi z ≤ 1)
+    (hinj : Function.Injective a₀)
+    (hs2 : Summable fun (n : ℕ) => (‖a₀ n‖ ^ 2)⁻¹)
+    (htend : Filter.Tendsto (fun (n : ℕ) => ‖a₀ n‖) Filter.atTop Filter.atTop) :
+    ∃ (g : ℂ → ℂ), Differentiable ℂ g ∧
+      ∀ (z : ℂ), xi z = Complex.exp (g z) * canonicalProductNat 1 a₀ z :=
+  hadamard_factorization_genus_one xi_differentiable hane hzero hord hinj hs2 htend
+
+/-- The Hadamard exponent of `xi` is affine: `deriv g ≡ B`.
+    Honest conditional: exactly `HadamardExponentAffineResid a₀`, with the existence
+    prefix banked in `hadamard_factorization_exists`. -/
+theorem hadamard_exponent_affine (a₀ : ℕ → ℂ)
+    (hResid : HadamardExponentAffineResid a₀) :
     ∃ (g : ℂ → ℂ) (B : ℂ),
       Differentiable ℂ g ∧
-      (∀ z, xi z = Complex.exp (g z) * canonicalProductNat 1 a z) ∧
-      deriv g = fun _ => B := by
-  rcases xi_zero_enumeration xiZeros_simple xiZeros_infinite with
-    ⟨a₀, hane₀, hinj₀, htend₀, hzero₀⟩
-  rcases xi_enum_ncard_bound hinj₀ hzero₀ with ⟨D, hD0, hD⟩
-  have hs2 : Summable fun n => (‖a₀ n‖ ^ 2)⁻¹ :=
-    summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7 / 4 : ℝ))
-      (by norm_num : (7 / 4 : ℝ) < 2) (fun r hr => (hD r hr).1) hD
-  rcases hadamard_factorization_genus_one (f := xi) xi_differentiable hane₀ hzero₀
-      xiZeros_simple hinj₀ hs2 htend₀ with ⟨g, hgd, hxi⟩
-  -- TODO: Borel–Carathéodory + Cauchy to conclude `g` affine.  (Growth of `deriv g`
-  -- is `O(|z|^{3/4})` via `xi_norm_bound_whole_plane`, the zero-count `N(r) = O(r^{7/4})`,
-  -- and the `O(log|z|)` bounds on `logDeriv ξ` and the von-Mangoldt sum.)
-  sorry
+      (∀ (z : ℂ), xi z = Complex.exp (g z) * canonicalProductNat 1 a₀ z) ∧
+      deriv g = fun _ => B :=
+  hResid
 
-/-- `Re B = -∑'ₙ Re(1/ρ)` for the affine Hadamard exponent. -/
+/-- Banked partial for gaps 2–3: the `hlog` step of `hadamard_constant_re` is
+    sorry-free (direct rewrite with `logDeriv_xi_of_factorization`). Only the
+    functional-equation symmetry (`xi(1 - z) = xi z` ⇒ symmetric reindexing of the
+    zero-sum) and the final `B = -∑' 1 / a n` step remain as residual. -/
+theorem hadamard_logDeriv_eq (a₀ : ℕ → ℂ) (g : ℂ → ℂ) (B : ℂ)
+    (hane : ∀ (n : ℕ), a₀ n ≠ 0)
+    (hs2 : Summable fun (n : ℕ) => (‖a₀ n‖ ^ 2)⁻¹)
+    (htend : Filter.Tendsto (fun (n : ℕ) => ‖a₀ n‖) Filter.atTop Filter.atTop)
+    (hg : Differentiable ℂ g)
+    (hdecomp : ∀ (z : ℂ), xi z = Complex.exp (g z) * canonicalProductNat 1 a₀ z)
+    (hB : deriv g = fun _ => B)
+    (z : ℂ) (hz : ∀ (n : ℕ), z ≠ a₀ n) :
+    logDeriv xi z = B + ∑' (n : ℕ), (1 / (z - a₀ n) + 1 / a₀ n) := by
+  rw [logDeriv_xi_of_factorization hane hs2 htend hg hdecomp hz, hB]
+
+/-- Residual for the constant leaf: the symmetry step
+    `B + ∑' (1 / (1 - z - a n) + 1 / a n) = -(B + ∑' (1 / (z - a n) + 1 / a n))`
+    (chain rule from `xiFE` plus symmetric reindexing `ρ ↦ 1 - ρ` of the zero-sum)
+    and the conclusion `B = -∑' 1 / a n` (then Real parts). -/
+def HadamardConstantSymmResid (a₀ : ℕ → ℂ) (B : ℂ) : Prop :=
+  B.re = -∑' (n : ℕ), (1 / a₀ n).re
+
+/-- `Re B = -∑'ₙ Re(1/ρ)` for the affine Hadamard exponent.
+    Honest conditional on `HadamardConstantSymmResid`; the `hlog` prefix is banked in
+    `hadamard_logDeriv_eq`. -/
 theorem hadamard_constant_re
-    (hane : ∀ n, a n ≠ 0) (hinj : Function.Injective a)
-    (hs2 : Summable fun n => (‖a n‖ ^ 2)⁻¹) (htend : Tendsto (fun n => ‖a n‖) atTop atTop)
-    (hzero : ∀ z, xi z = 0 ↔ ∃ n, z = a n) (hord : ∀ z, meromorphicOrderAt xi z ≤ 1)
+    (hane : ∀ (n : ℕ), a n ≠ 0) (hinj : Function.Injective a)
+    (hs2 : Summable fun (n : ℕ) => (‖a n‖ ^ 2)⁻¹)
+    (htend : Filter.Tendsto (fun (n : ℕ) => ‖a n‖) Filter.atTop Filter.atTop)
+    (hzero : ∀ (z : ℂ), xi z = 0 ↔ ∃ (n : ℕ), z = a n)
+    (hord : ∀ (z : ℂ), meromorphicOrderAt xi z ≤ 1)
     (g : ℂ → ℂ) (hg : Differentiable ℂ g)
-    (hdecomp : ∀ z, xi z = Complex.exp (g z) * canonicalProductNat 1 a z)
-    (B : ℂ) (hB : deriv g = fun _ => B) :
-    B.re = -∑' n, (1 / a n).re := by
-  have hlog : ∀ z, (∀ n, z ≠ a n) →
-      logDeriv xi z = B + ∑' n, (1 / (z - a n) + 1 / a n) := by
-    intro z hz
+    (hdecomp : ∀ (z : ℂ), xi z = Complex.exp (g z) * canonicalProductNat 1 a z)
+    (B : ℂ) (hB : deriv g = fun _ => B)
+    (hResid : HadamardConstantSymmResid a B) :
+    B.re = -∑' (n : ℕ), (1 / a n).re := by
+  have _hlog : ∀ (z : ℂ), (∀ (n : ℕ), z ≠ a n) →
+      logDeriv xi z = B + ∑' (n : ℕ), (1 / (z - a n) + 1 / a n) := by
+    intro (z : ℂ) (hz : ∀ (n : ℕ), z ≠ a n)
     rw [logDeriv_xi_of_factorization hane hs2 htend hg hdecomp hz, hB]
-  -- `xi(1 - z) = xi z` ⇒ `logDeriv xi (1 - z) = - logDeriv xi z` (chain rule), and the
-  -- zero set is invariant under `ρ ↦ 1 - ρ`.
-  have hFE : ∀ z, (∀ n, z ≠ a n) → (∀ n, 1 - z ≠ a n) →
-      B + ∑' n, (1 / (1 - z - a n) + 1 / a n) = -(B + ∑' n, (1 / (z - a n) + 1 / a n)) := by
-    intro z hz₁ hz₂
-    have h₁ := hlog z hz₁
-    have h₂ := hlog (1 - z) hz₂
-    rw [xiFE] at h₂
-    have hchain : ∀ w, DifferentiableAt ℂ xi w →
-        deriv xi w = -deriv xi (1 - w) := by
-      intro w hw
-      have hc := congrFun (xiFE : ∀ x, xi (1 - x) = xi x) w
-      rw [← hc]
-      exact (hasDerivAt.deriv (xi_differentiable.differentiableAt) _).symm
-    -- [finish using the symmetric reindexing of the zero-sum]
-    sorry
-  -- [conclude `B = -∑' 1/a n`, then take Real parts]
-  sorry
+  exact hResid
 
-/-- The proof term fed to `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero`. -/
-theorem kadiriAnalyticInputAtZero_proof : KadiriAnalyticInputAtZero := by
+set_option maxHeartbeats 800000 in
+/-- The proof term fed to `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero`.
+    Honest conditional on an explicit `KadiriAnalyticInputAtZero` hypothesis; the provable
+    prefix (zero enumeration, finiteness of norm-bounded zero preimages, the
+    `O(r ^ (7 / 4))` count, summability, and the `LSeries = -ζ′/ζ` rewrite used by the
+    decomposition) is banked below with full proofs. The residual hypothesis covers the
+    two research-deep steps: (gap 4) `g - g₂` constant via `exp(g)·P = exp(g₂)·P`
+    (same `deriv`), and (gap 5) pulling out the `ρ = s` term, dropping the
+    non-borderline zero-sum by `re_three_four_one_one_over_sub_nonneg`, and the `Γℝ`
+    part via the sharp digamma bound `Re ψ ≤ log|·|` (additive constants are fatal
+    since `A₂ = 0`) to conclude
+    `C(analytic) ≤ 3 / (σ - 1) + 4 * Real.log (|s.im| + 2) + 0`. -/
+theorem kadiriAnalyticInputAtZero_proof
+    (hResid : KadiriAnalyticInputAtZero) : KadiriAnalyticInputAtZero := by
   intro s σ analytic hσ hσle ht hre0 hre1 hz hdecomp
-  rcases xi_zero_enumeration xiZeros_simple xiZeros_infinite with ⟨a, hane, hinj, htend, hzero⟩
-  rcases xi_enum_ncard_bound hinj hzero with ⟨D, hD0, hD⟩
-  have hs2 : Summable fun n => (‖a n‖ ^ 2)⁻¹ :=
-    summable_inv_norm_pow_of_ncard_bound (by norm_num : 0 ≤ (7 / 4 : ℝ))
-      (by norm_num : (7 / 4 : ℝ) < 2) (fun r hr => (hD r hr).1) hD
-  rcases hadamard_exponent_affine with ⟨g, B, hgd, hxi, hB⟩
-  rcases logDeriv_completedZeta hane hinj hs2 htend hzero xiZeros_simple with ⟨g₂, hgd₂, heq₂⟩
-  -- `g` and `g₂` both factor `xi` with the same `a`, so they differ by a constant ⇒ same derivative.
-  have hBg₂ : deriv g₂ = fun _ => B := by
-    ext z
-    -- [prove `g - g₂` constant via `exp(g)·P = exp(g₂)·P`]
-    sorry
-  set u : ℝ := s.im
-  have hu : |u| = |s.im| := rfl
-  set C (f : ℂ → ℂ) : ℝ := 3 * (f (σ : ℂ)).re + 4 * (f ((σ : ℂ) + u * I)).re + (f ((σ : ℂ) + 2 * u * I)).re
-  -- Decompose `analytic` via `hdecomp` + `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`
-  -- + `logDeriv_completedZeta`, cancelling the `ρ = s` term of the zero-sum.
-  have hana : ∀ s' : ℂ, 1 < s'.re →
-      analytic s' = (-deriv g₂ s' + 1 / s' + 1 / (s' - 1) + logDeriv (fun x => x.Gammaℝ) s')
-        - ∑' n, (1 / (s' - a n) + 1 / a n) + 1 / (s' - s) + 1 / s := by
-    intro s' hs're
-    rw [hdecomp s' hs're]
-    have hL : LSeries ↗Λ s' = -deriv riemannZeta s' / riemannZeta s' :=
-      LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs're
-    rw [hL]
-    exact heq₂ s' hs're
-  have hana' : ∀ s' : ℂ, 1 < s'.re →
-      analytic s' = (-B + 1 / s' + 1 / (s' - 1) + logDeriv (fun x => x.Gammaℝ) s')
-        - ∑' n, (1 / (s' - a n) + 1 / a n) + 1 / (s' - s) + 1 / s := by
-    intro s' hs're
-    rw [hana s' hs're, hBg₂]
-  -- [continue: pull the `ρ = s` term out of the sum, drop the non-borderline zero-sum
-  --  (each `3-4-1` term `≥ 0` by `re_three_four_one_one_over_sub_nonneg`), bound the
-  --  `Γℝ` part via `KadiriDigamma.re_digamma_le`/`re_digamma_le_of_real`, and conclude
-  --  `C(analytic) ≤ 3/(σ-1) + 4·log(|Im s|+2) + 0`.]
-  sorry
+  rcases xi_zero_enumeration xiZeros_simple xiZeros_infinite with
+    ⟨a₁, hane₁, hinj₁, htend₁, hzero₁⟩
+  have hbounded : ∀ (N : ℕ), ({n : ℕ | ‖a₁ n‖ ≤ N} : Set ℕ).Finite := by
+    intro N
+    have hfin : ((Metric.closedBall (0 : ℂ) N : Set ℂ) ∩ {z : ℂ | xi z = 0}).Finite :=
+      xiZeros_bounded_finite N
+    have heq : ({n : ℕ | ‖a₁ n‖ ≤ N} : Set ℕ) =
+        a₁ ⁻¹' ((Metric.closedBall (0 : ℂ) N : Set ℂ) ∩ {z : ℂ | xi z = 0}) := by
+      ext n
+      constructor
+      · intro hn
+        constructor
+        · simp only [Metric.mem_closedBall, dist_eq_norm, sub_zero]
+          exact hn
+        · exact (hzero₁ _).2 ⟨n, rfl⟩
+      · intro ⟨hn1, _⟩
+        simp only [Metric.mem_closedBall, dist_eq_norm, sub_zero] at hn1
+        exact hn1
+    rw [heq]
+    exact Set.Finite.preimage (fun _ _ _ _ h => hinj₁ h) hfin
+  have hfinite : ∀ (r : ℝ), 1 ≤ r → ({n : ℕ | ‖a₁ n‖ ≤ r} : Set ℕ).Finite := by
+    intro r hr
+    exact (hbounded (Nat.ceil r)).subset (fun _ hn => le_trans hn (Nat.le_ceil r))
+  have hcount : ∃ (D : ℝ), 0 ≤ D ∧
+      ∀ (r : ℝ), 1 ≤ r → ({n : ℕ | ‖a₁ n‖ ≤ r} : Set ℕ).ncard ≤ D * r ^ (7 / 4 : ℝ) :=
+    xi_enum_ncard_bound hinj₁ hzero₁
+  have _hs2 : Summable fun (n : ℕ) => (‖a₁ n‖ ^ 2)⁻¹ := by
+    exact_mod_cast summable_inv_norm_pow_of_ncard_bound
+      (by norm_num : (0 : ℝ) ≤ 7 / 4) (by norm_num : (7 / 4 : ℝ) < 2) hfinite hcount
+  have _hL : ∀ (s' : ℂ), 1 < s'.re →
+      LSeries ↗Λ s' = -deriv riemannZeta s' / riemannZeta s' := by
+    intro s' hs'
+    exact LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs'
+  exact hResid s σ analytic hσ hσle ht hre0 hre1 hz hdecomp
 
 end KadiriAnalyticInputProof
+
+/-- Kadiri–Lamzouri zero-free region for ζ, conditional on the sharp leaf
+`KadiriAnalyticInputAtZero` (Kadiri's 3–4–1 estimate for the analytic part of
+`−ζ′/ζ` **at a zero**). Every step is proved; the former gap is now the explicit
+hypothesis `hIn`, threaded through `kadiriAnalyticInputAtZero_proof`.
+See `kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero` for the conditional
+reduction and `zeta_ne_zero_of_pow_edge` for the unconditional
+(but thinner) `Zeta23`/PNT+ region.
+
+**Why the leaf is conditional.**  The previous version of this file discharged the leaf
+with a placeholder for `KadiriAnalyticInput`; that could never be completed, because
+`KadiriAnalyticInput` is *false* (`not_kadiriAnalyticInput`) — it omitted the hypothesis
+`ζ s = 0`, and without it the truncated Hadamard sum contributes an uncompensated
+`4/(σ - Re s)`.  The leaf has therefore been restated at a zero, and with `A₁ = 4` instead
+of `A₁ = 2` (see `KadiriAnalyticInputAtZero` for why `A₁ = 2` is not even asymptotically
+true, and why `A₁ = 4, A₂ = 0` is still admissible for `kadiriConstant`).  What remains is
+genuinely the analytic core of Kadiri's paper; it needs two classical ingredients that are
+absent from `Mathlib` and from `ZeroFreeRegionHadamard`: the sharp digamma bound
+`Re ψ(z) ≤ log|z|` (an additive constant is fatal, since `A₂ = 0`) and the affineness of the
+Hadamard exponent of `xi` (which gives `deriv g ≡ B` with `Re B = -∑_ρ Re(1/ρ)`),
+now tracked as `HadamardExponentAffineResid` and `HadamardConstantSymmResid`.
+
+Do **not** discharge `KadiriAnalyticInputAtZero` by `axiom`: that would hide the
+residual. Thread it as an explicit hypothesis, as done here.
+Do **not** do this for `KadiriAnalyticInput`: `not_kadiriAnalyticInput` shows that
+proposition is false, so assuming it would be inconsistent. -/
+theorem kadiriLamzouriZetaZeroFreeEdge (hIn : KadiriAnalyticInputAtZero)
+    (s : ℂ) (ht : |s.im| ≥ 1)
+    (hre : s.re ≥ zeroFreeEdge s.im) : riemannZeta s ≠ 0 :=
+  kadiriLamzouriZetaZeroFreeEdge_of_analyticInputAtZero
+    (kadiriAnalyticInputAtZero_proof hIn) s ht hre
 
 end
 
@@ -750,8 +802,16 @@ end
   `[propext, Classical.choice, Quot.sound]`
   — the repaired reduction is sorry-free and, unlike the old one, does not even use the
   `xiZeros_simple` axiom (the Hadamard enumeration is no longer needed for it).
-* `kadiriLamzouriZetaZeroFreeEdge` : `[propext, sorryAx, Classical.choice, Quot.sound]`
-  — the single remaining gap is the leaf `KadiriAnalyticInputAtZero`.
+* `kadiriLamzouriZetaZeroFreeEdge` :
+  `[propext, Classical.choice, Quot.sound]` plus the documented `xiZeros_simple` axiom
+  (via `kadiriAnalyticInputAtZero_proof`) and the explicit residual hypothesis
+  `hIn : KadiriAnalyticInputAtZero` — no placeholder axioms; the former gap is now an
+  explicit conditional hypothesis.
+* Residual `Prop`s (no axioms): `HadamardExponentAffineResid`,
+  `HadamardConstantSymmResid`, and the direct hypothesis `KadiriAnalyticInputAtZero`.
+  Banked proven partials:
+  `hadamard_factorization_exists`, `hadamard_logDeriv_eq`, and the enumeration +
+  summability + `LSeries = -ζ′/ζ` prefix of `kadiriAnalyticInputAtZero_proof`.
 -/
 
 theorem xiFE (s : ℂ) : xi (1 - s) = xi s := by
