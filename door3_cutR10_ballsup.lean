@@ -134,7 +134,7 @@ theorem mem_ball_abs_norm_le {z : ℂ}
     rw [Complex.norm_real, Real.norm_eq_abs]
     norm_num
   have hdecomp : z = (z - ((((10 : ℝ)) : ℂ))) + ((((10 : ℝ)) : ℂ)) := by abel
-  calc ‖z‖ = ‖(z - ((((10 : ℝ)) : ℂ))) + ((((10 : ℝ)) : ℂ))‖ := by rw [hdecomp]
+  calc ‖z‖ = ‖(z - ((((10 : ℝ)) : ℂ))) + ((((10 : ℝ)) : ℂ))‖ := by conv_lhs => rw [hdecomp]
     _ ≤ ‖z - ((((10 : ℝ)) : ℂ))‖ + ‖((((10 : ℝ)) : ℂ))‖ := norm_add_le _ _
     _ ≤ (11.56 : ℝ) := by rw [h10]; linarith
 
@@ -147,6 +147,13 @@ theorem mem_ball_shiftedS_re_bounds {z : ℂ}
   rw [shiftedS_re]
   obtain ⟨hlo, hhi⟩ := mem_ball_im_bounds hz
   constructor <;> linarith
+
+/-- Imaginary part of `shiftedS`: `(shiftedS z).im = z.re`
+(mirrors `shiftedS_re` in `riemann_hypothesis.lean`). -/
+theorem shiftedS_im_eq (z : ℂ) : (shiftedS z).im = z.re := by
+  unfold shiftedS
+  simp only [Complex.add_im, Complex.I_mul_im]
+  norm_num
 
 /-- `s.im = z.re ∈ [8.44, 11.56]` on the ball (`shiftedS_im_eq`). -/
 theorem mem_ball_shiftedS_im_bounds {z : ℂ}
@@ -195,7 +202,7 @@ theorem ballPoly_upper {z : ℂ}
     ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ ≤ (67 : ℝ) := by
   have hz2 := mem_ball_abs_norm_le hz
   have h14 : ‖((1 / 4 : ℂ))‖ = ((1 / 4 : ℝ)) := by
-    have hcast : ((1 / 4 : ℂ)) = ((((1 / 4 : ℝ)) : ℂ)) := by norm_cast
+    have hcast : ((1 / 4 : ℂ)) = ((((1 / 4 : ℝ)) : ℂ)) := by simp
     rw [hcast, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by norm_num)]
   have h2 : ‖((2 : ℂ))‖ = (2 : ℝ) := by norm_num
   have hsq : ‖z ^ 2‖ = ‖z‖ ^ 2 := norm_pow z 2
@@ -227,7 +234,7 @@ theorem ballPi_upper {z : ℂ}
   have hre : (-(shiftedS z / 2)).re = -(shiftedS z).re / 2 := by
     have hdiv : ((shiftedS z / 2 : ℂ)).re = (shiftedS z).re / 2 := by
       simp [Complex.div_ofNat]
-    rw [Complex.neg_re, hdiv]
+    rw [Complex.neg_re, hdiv, ← neg_div]
   rw [hre]
   have hslo := (mem_ball_shiftedS_re_bounds hz).1
   have hexp : (-(shiftedS z).re / 2) ≤ (1 : ℝ) := by linarith
@@ -432,7 +439,8 @@ theorem cutR10_pi_pow_ne_zero (s : ℂ) :
 /-- `Gammaℝ` unfolds to pi-power times Gamma (exact `Gammaℝ_def` shape). -/
 theorem cutR10_GammaR_unfold (s : ℂ) :
     Complex.Gammaℝ s = ((Real.pi : ℂ) ^ (-(s / 2))) * Complex.Gamma (s / 2) := by
-  rw [Complex.Gammaℝ_def]
+  have h : (-s / 2 : ℂ) = -(s / 2) := by ring
+  rw [Complex.Gammaℝ_def, h]
 
 /-- Polar-times-poly cancellation: `((1/2)*s*(s-1)) * (1/s + 1/(1-s)) = -1/2`
 for `s ≠ 0, 1`. -/
@@ -448,7 +456,6 @@ theorem cutR10_poly_times_xiQuot (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) (X : 
   have hsm : s * (s - 1) ≠ 0 := by
     apply mul_ne_zero hs0 (sub_ne_zero.mpr hs1)
   field_simp
-  ring
 
 /-- Entire extension equals `1/2 + poly * completed₀` (from `ballPoly_eq`). -/
 theorem cutR10_entire_eq_half_add_poly_completed (z : ℂ) :
@@ -456,8 +463,9 @@ theorem cutR10_entire_eq_half_add_poly_completed (z : ℂ) :
       (1 / 2 : ℂ) + ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
         completedRiemannZeta₀ (shiftedS z) := by
   have hpoly := ballPoly_eq z
+  have hs : shiftedS z = (1 / 2 : ℂ) + Complex.I * z := rfl
   unfold xiShiftedEntire
-  rw [hpoly]
+  rw [hpoly, hs]
   ring
 
 /-- `classicalXi` unfolds to the four-factor product with `zeta = riemannZeta`
@@ -468,7 +476,6 @@ theorem cutR10_classicalXi_eq_fourFactor (s : ℂ) :
   have hz : zeta s = riemannZeta s := rfl
   unfold classicalXi XiFromPrefactor classicalXiPrefactor
   rw [hz]
-  ring
 
 /-- Product identity CLOSED: `xiShiftedEntire = poly * piPow * Gamma * zeta`
 on the ball. Discharges draft `hProd` via
@@ -671,8 +678,9 @@ theorem cutR10_zeta_sup_six_of_premises (s : ℂ)
       (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 6) :
     ‖zeta s‖ ≤ 6 := by
   by_cases hR : 3 / 2 ≤ s.re
-  · exact cutR10_zeta_rightSliver_of_euler s (hDom s (by linarith))
+  · have h3 := cutR10_zeta_rightSliver_of_euler s (hDom s (by linarith))
       (hReal s (by linarith)) hR
+    exact le_trans h3 (by norm_num)
   · push_neg at hR
     exact hStripEta s hlo (le_of_lt hR) hilo hihi
 
@@ -780,8 +788,8 @@ theorem cutR10_sq_prod (z : ℂ) (hz : 0 < z.re) (n : ℕ) :
       simp only [Complex.add_re, Complex.natCast_re]
       have hnn : (0 : ℝ) ≤ ((n : ℕ) : ℝ) := Nat.cast_nonneg n
       linarith
-    rw [cutR10_gamma_shift_norm hz, Complex.add_re, Complex.natCast_re,
-      cutR10_real_gamma_shift hz] at hshift
+    rw [cutR10_gamma_shift_norm z hz n, Complex.add_re, Complex.natCast_re,
+      cutR10_real_gamma_shift z.re hz n] at hshift
     rw [Finset.prod_div_distrib, ← mul_div_assoc, le_div_iff₀ hpos]
     exact hshift
   have h := pow_le_pow_left₀ (norm_nonneg _) hle 2
@@ -802,17 +810,21 @@ theorem cutR10_Real_Gamma_103_le_one : Real.Gamma 1.03 ≤ 1 := by
   have hyne : (1.03 : ℝ) ≠ 0 := ne_of_gt hypos
   have hshift : Real.Gamma (1.03 + 1) = 1.03 * Real.Gamma 1.03 :=
     Real.Gamma_add_one hyne
+  have hg3 : Real.Gamma 3 = 2 := by
+    have h := Real.Gamma_add_one (show (2 : ℝ) ≠ 0 by norm_num)
+    rw [Real.Gamma_two, show (2 : ℝ) + 1 = 3 by norm_num] at h
+    linarith
   have hcap : Real.Gamma (1.03 + 1) ≤ 1.03 := by
     have ha : (0 : ℝ) ≤ 1 - 0.03 := by norm_num
     have hb : (0 : ℝ) ≤ 0.03 := by norm_num
     have hab : ((1 : ℝ) - 0.03) + 0.03 = 1 := by ring
-    have h1mem : (1 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
     have h2mem : (2 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
-    have hJ := Real.convexOn_Gamma.2 h1mem h2mem ha hb hab
+    have h3mem : (3 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+    have hJ := Real.convexOn_Gamma.2 h2mem h3mem ha hb hab
     simp only [smul_eq_mul] at hJ
-    have hpt : ((1 : ℝ) - 0.03) * 1 + 0.03 * 2 = 1.03 + 1 := by ring
-    rw [hpt, Real.Gamma_one, Real.Gamma_two] at hJ
-    have he : ((1 : ℝ) - 0.03) * 1 + 0.03 * 1 = 1.03 := by ring
+    have hpt : ((1 : ℝ) - 0.03) * 2 + 0.03 * 3 = 1.03 + 1 := by ring
+    rw [hpt, Real.Gamma_two, hg3] at hJ
+    have he : ((1 : ℝ) - 0.03) * 1 + 0.03 * 2 = 1.03 := by ring
     rw [he] at hJ
     linarith
   have hdiv : Real.Gamma 1.03 = Real.Gamma (1.03 + 1) / 1.03 := by
@@ -829,17 +841,21 @@ theorem cutR10_Real_Gamma_153_le_one : Real.Gamma 1.53 ≤ 1 := by
   have hyne : (1.53 : ℝ) ≠ 0 := ne_of_gt hypos
   have hshift : Real.Gamma (1.53 + 1) = 1.53 * Real.Gamma 1.53 :=
     Real.Gamma_add_one hyne
+  have hg3 : Real.Gamma 3 = 2 := by
+    have h := Real.Gamma_add_one (show (2 : ℝ) ≠ 0 by norm_num)
+    rw [Real.Gamma_two, show (2 : ℝ) + 1 = 3 by norm_num] at h
+    linarith
   have hcap : Real.Gamma (1.53 + 1) ≤ 1.53 := by
     have ha : (0 : ℝ) ≤ 1 - 0.53 := by norm_num
     have hb : (0 : ℝ) ≤ 0.53 := by norm_num
     have hab : ((1 : ℝ) - 0.53) + 0.53 = 1 := by ring
-    have h1mem : (1 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
     have h2mem : (2 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
-    have hJ := Real.convexOn_Gamma.2 h1mem h2mem ha hb hab
+    have h3mem : (3 : ℝ) ∈ Set.Ioi 0 := Set.mem_Ioi.mpr (by norm_num)
+    have hJ := Real.convexOn_Gamma.2 h2mem h3mem ha hb hab
     simp only [smul_eq_mul] at hJ
-    have hpt : ((1 : ℝ) - 0.53) * 1 + 0.53 * 2 = 1.53 + 1 := by ring
-    rw [hpt, Real.Gamma_one, Real.Gamma_two] at hJ
-    have he : ((1 : ℝ) - 0.53) * 1 + 0.53 * 1 = 1.53 := by ring
+    have hpt : ((1 : ℝ) - 0.53) * 2 + 0.53 * 3 = 1.53 + 1 := by ring
+    rw [hpt, Real.Gamma_two, hg3] at hJ
+    have he : ((1 : ℝ) - 0.53) * 1 + 0.53 * 2 = 1.53 := by ring
     rw [he] at hJ
     linarith
   have hdiv : Real.Gamma 1.53 = Real.Gamma (1.53 + 1) / 1.53 := by
@@ -850,11 +866,11 @@ theorem cutR10_Real_Gamma_153_le_one : Real.Gamma 1.53 ≤ 1 := by
   rw [div_le_iff₀ hypos]
   linarith
 
-/-- Denominator lower on the ball: `‖s/2‖ ≥ 4.22` and `‖s/2+1‖ ≥ 4.30`
+/-- Denominator lower on the ball: `‖s/2‖ ≥ 4.22` and `‖s/2+1‖ ≥ 4.22`
 from `|Im| ≥ 4.22` via `‖w‖ ≥ |w.im|`. -/
 theorem cutR10_gamma_denom_lower (s : ℂ)
     (hilo : (8.44 : ℝ) ≤ s.im) :
-    (4.22 : ℝ) ≤ ‖s / 2‖ ∧ (4.30 : ℝ) ≤ ‖s / 2 + 1‖ := by
+    (4.22 : ℝ) ≤ ‖s / 2‖ ∧ (4.22 : ℝ) ≤ ‖s / 2 + 1‖ := by
   have him2 : (4.22 : ℝ) ≤ (s / 2).im := by
     have heq : (s / 2).im = s.im / 2 := by simp [Complex.div_ofNat]
     rw [heq]
@@ -868,12 +884,12 @@ theorem cutR10_gamma_denom_lower (s : ℂ)
     have heq : (s / 2 + 1).im = (s / 2).im := by simp
     rw [heq]
     exact him2
-  have h2 : (4.30 : ℝ) ≤ ‖s / 2 + 1‖ := by
-    calc (4.30 : ℝ) ≤ |(s / 2 + 1).im| := by
+  have h2 : (4.22 : ℝ) ≤ ‖s / 2 + 1‖ := by
+    calc (4.22 : ℝ) ≤ |(s / 2 + 1).im| := by
           rw [abs_of_nonneg (by linarith)]
           exact him3
       _ ≤ ‖s / 2 + 1‖ := Complex.abs_im_le_norm _
-  exact ⟨h1, le_trans (by norm_num) h2⟩
+  exact ⟨h1, h2⟩
 
 /-- Gamma sup assembly: `‖Γ(s/2)‖ ≤ 1/100` on the rectangle from one
 product-cap premise (`hProdCap`: the half-factor-counted square-product cap
@@ -1029,7 +1045,7 @@ theorem cutR10_real_shift_eq (sig : ℝ) (hsig : 1 < sig) :
   have hshift : (∑' n : ℕ, (n : ℝ) ^ (-sig)) =
       (∑' n : ℕ, (((n : ℝ) + 1) ^ (-sig))) := by
     have h := hsumm.tsum_eq_zero_add
-    simp only [h0real, add_zero] at h
+    simp only [Nat.cast_zero, h0real, zero_add, Nat.cast_add, Nat.cast_one] at h
     exact h
   calc (∑' n : ℕ, ((((n + 1 : ℕ) : ℝ) ^ sig))⁻¹)
       = (∑' n : ℕ, (((n : ℝ) + 1) ^ (-sig))) := tsum_congr hterm
@@ -1099,7 +1115,6 @@ theorem cutR10_eta_factor_upper (s : ℂ)
     calc (2 : ℝ) ^ (1 - s.re) ≤ (2 : ℝ) ^ (3 : ℝ) :=
           Real.rpow_le_rpow_of_exponent_le (by norm_num) hle
       _ = 8 := by norm_num
-  rw [hq] at hrpow
   calc ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖
       ≤ ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ := norm_sub_le _ _
     _ ≤ 9 := by simp only [norm_one] at hrpow ⊢; linarith
@@ -1118,139 +1133,175 @@ theorem cutR10_eta_factor_lower_left (s : ℂ) (hs : s.re ≤ 0) :
     have he1 : (2 : ℝ) ^ (1 : ℝ) = 2 := Real.rpow_one _
     rw [he1] at h1
     exact h1
-  rw [hq] at hq2
   have htri : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ + 1 := by
     have hdecomp : (2 : ℂ) ^ ((1 : ℂ) - s) =
         ((2 : ℂ) ^ ((1 : ℂ) - s) - 1) + 1 := by ring
     calc ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖
-        = ‖((2 : ℂ) ^ ((1 : ℂ) - s) - 1) + 1‖ := by rw [hdecomp]
-      _ ≤ ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ + 1 := norm_add_le _ _
+        = ‖((2 : ℂ) ^ ((1 : ℂ) - s) - 1) + 1‖ := by conv_lhs => rw [hdecomp]
+      _ ≤ ‖(2 : ℂ) ^ ((1 : ℂ) - s) - 1‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
       _ = ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ + 1 := by
-            rw [norm_sub_rev]
+            rw [norm_sub_rev, norm_one]
   linarith
 
-/-- Integral majorant tail for the local pair series at `M = 8`, `sig ≥ 1 / 2`,
-`‖s‖ ≤ 12`: tail `∑' m, pair (m + 8)` has norm `≤ 3`. Proof mirrors the
-`zetaCell` integral comparison (antitone majorant plus closed-form integral). -/
-theorem cutR10_eta_tail_eight_le (s : ℂ) (hs : (1 / 2 : ℝ) ≤ s.re)
+/-- Integral majorant tail for the local pair series at `M = 64`, `sig ≥ 1 / 2`,
+`‖s‖ ≤ 12`: tail `∑' m, pair (m + 64)` has norm `≤ 3`. Proof mirrors the
+`zetaCell` integral comparison (antitone majorant plus closed-form integral).
+`M = 64` (not `8`): at `M = 8` the `1 / 4` majorant cap is false (the head
+partial sum `∑_{n=9}^{20} n ^ (-3 / 2)` alone already exceeds `0.24`); at
+`M = 64` the integral gives `64 ^ (-sig) / sig ≤ (1 / 8) / (1 / 2) = 1 / 4`. -/
+theorem cutR10_eta_tail_64_le (s : ℂ) (hs : (1 / 2 : ℝ) ≤ s.re)
     (hC : ‖s‖ ≤ 12) :
-    ‖∑' m : ℕ, cutR10_etaPair s (m + 8)‖ ≤ 3 := by
+    ‖∑' m : ℕ, cutR10_etaPair s (m + 64)‖ ≤ 3 := by
   have hs0 : 0 < s.re := by linarith
-  have hmajor : Summable (fun m : ℕ => (12 : ℝ) * ((((m + 8 + 1 : ℕ) : ℝ) ^ (-s.re - 1)))) := by
+  have hmajor : Summable (fun m : ℕ => (12 : ℝ) * ((((m + 64 + 1 : ℕ) : ℝ) ^ (-s.re - 1)))) := by
     have hp1 : (1 : ℝ) < s.re + 1 := by linarith
     have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (s.re + 1)))⁻¹) :=
       Real.summable_nat_rpow_inv.mpr hp1
-    have hshift : Summable (fun m : ℕ => ((((m + (8 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) :=
-      (summable_nat_add_iff (8 + 1)).mpr hbase
-    have heq : (fun m : ℕ => (12 : ℝ) * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) =
-        (fun m : ℕ => (12 : ℝ) * ((((m + (8 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) := by
+    have hshift : Summable (fun m : ℕ => ((((m + (64 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) :=
+      (summable_nat_add_iff (f := fun n : ℕ => ((((n : ℝ)) ^ (s.re + 1)))⁻¹) (64 + 1)).mpr
+        hbase
+    have heq : (fun m : ℕ => (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) =
+        (fun m : ℕ => (12 : ℝ) * ((((m + (64 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) := by
       funext m
-      have eN : m + 8 + 1 = m + (8 + 1) := by omega
-      rw [eN]
+      have eN : m + 64 + 1 = m + (64 + 1) := by omega
       have eR : -s.re - 1 = -(s.re + 1) := by ring
-      rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+      simp only [eN, eR, Real.rpow_neg (Nat.cast_nonneg _)]
     rw [heq]
-    have h2 : Summable (fun m : ℕ => ((((m + (8 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) := hshift
+    have h2 : Summable (fun m : ℕ => ((((m + (64 + 1) : ℕ)) : ℝ) ^ (s.re + 1))⁻¹) := hshift
     exact h2.mul_left _
-  have hpoint : ∀ m : ℕ, ‖cutR10_etaPair s (m + 8)‖ ≤
-      (12 : ℝ) * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
+  have hpoint : ∀ m : ℕ, ‖cutR10_etaPair s (m + 64)‖ ≤
+      (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
     intro m
-    have hle1 := cutR10_norm_etaPair_le s hs0 (m + 8)
-    have hm_le : ((((m + 8 + 1 : ℕ)) : ℝ)) ≤ ((((2 * (m + 8) + 1 : ℕ)) : ℝ)) :=
+    have hle1 := cutR10_norm_etaPair_le s hs0 (m + 64)
+    have hm_le : ((((m + 64 + 1 : ℕ)) : ℝ)) ≤ ((((2 * (m + 64) + 1 : ℕ)) : ℝ)) :=
       Nat.cast_le.mpr (by omega)
-    have hm_pos : (0 : ℝ) < ((((m + 8 + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+    have hm_pos : (0 : ℝ) < ((((m + 64 + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
     have hexp : -s.re - 1 ≤ 0 := by linarith
-    have hrpow : ((((2 * (m + 8) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) ≤
-        ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+    have hrpow : ((((2 * (m + 64) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) ≤
+        ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
       Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
-    calc ‖cutR10_etaPair s (m + 8)‖
-        ≤ ‖s‖ * ((((2 * (m + 8) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := hle1
-      _ ≤ 12 * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
-            apply mul_le_mul hC hrpow
-            · exact Real.rpow_nonneg (Nat.cast_nonneg _) _
-            · exact norm_nonneg _
-  have htsum : ‖∑' m : ℕ, cutR10_etaPair s (m + 8)‖ ≤
-      ∑' m : ℕ, (12 : ℝ) * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
-    apply norm_tsum_le_tsum_norm
-    exact Summable.of_norm_bounded hmajor hpoint
-  have hint : (∑' m : ℕ, (12 : ℝ) * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤ 3 := by
-    have htail : (∑' m : ℕ, ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤ (1 / 4 : ℝ) := by
-      have hcomp : (∑' m : ℕ, ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤
-          (∫ x : ℝ in Set.Ioi (8 : ℝ), x ^ (-s.re - 1)) := by
-        apply AntitoneOn.tsum_comp_add_le_integral 8
-        · apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by linarith)).mono
-          intro x hx
-          simp only [Set.mem_Ici] at hx
-          simp only [Set.mem_Ioi]
-          linarith
-        · exact integrableOn_Ioi_rpow_of_lt (by linarith) (by norm_num)
-        · intro t ht
-          exact Real.rpow_nonneg (le_of_lt (lt_of_le_of_lt (by norm_num) (Set.mem_Ioi.mp ht))) _
-      have hval : (∫ x : ℝ in Set.Ioi (8 : ℝ), x ^ (-s.re - 1)) = ((8 : ℝ) ^ (-s.re)) / s.re := by
-        have hM0 : (0 : ℝ) < (8 : ℝ) := by norm_num
+    calc ‖cutR10_etaPair s (m + 64)‖
+        ≤ ‖s‖ * ((((2 * (m + 64) + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := hle1
+      _ ≤ 12 * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+          mul_le_mul hC hrpow (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+            (show (0 : ℝ) ≤ (12 : ℝ) by norm_num)
+  have hpointN : ∀ m : ℕ, ‖‖cutR10_etaPair s (m + 64)‖‖ ≤
+      (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
+    intro m
+    calc ‖‖cutR10_etaPair s (m + 64)‖‖ = |‖cutR10_etaPair s (m + 64)‖| :=
+          Real.norm_eq_abs _
+      _ = ‖cutR10_etaPair s (m + 64)‖ := abs_of_nonneg (norm_nonneg _)
+      _ ≤ (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := hpoint m
+  have hsumPair : Summable (fun m : ℕ => ‖cutR10_etaPair s (m + 64)‖) :=
+    Summable.of_norm_bounded hmajor hpointN
+  have hsumF : Summable (fun m : ℕ => ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) :=
+    (summable_mul_left_iff (show (12 : ℝ) ≠ 0 by norm_num)).mp hmajor
+  have h12 : (∑' m : ℕ, (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)))
+      = 12 * (∑' m : ℕ, ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) :=
+    Summable.tsum_mul_left 12 hsumF
+  have htsum : ‖∑' m : ℕ, cutR10_etaPair s (m + 64)‖ ≤
+      ∑' m : ℕ, (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) := by
+    calc ‖∑' m : ℕ, cutR10_etaPair s (m + 64)‖
+        ≤ ∑' m : ℕ, ‖cutR10_etaPair s (m + 64)‖ :=
+          norm_tsum_le_tsum_norm hsumPair
+      _ ≤ ∑' m : ℕ, (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)) :=
+          Summable.tsum_le_tsum hpoint hsumPair hmajor
+  have hint : (∑' m : ℕ, (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤ 3 := by
+    have htail : (∑' m : ℕ, ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤ (1 / 4 : ℝ) := by
+      have hanti : AntitoneOn (fun x : ℝ => x ^ (-s.re - 1)) (Set.Ici (64 : ℝ)) := by
+        have hexp64 : -s.re - 1 ≤ 0 := by linarith
+        apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos hexp64).mono
+        intro x hx
+        simp only [Set.mem_Ici] at hx
+        simp only [Set.mem_Ioi]
+        linarith
+      have hint2 : MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-s.re - 1))
+          (Set.Ioi (64 : ℝ)) MeasureTheory.volume := by
+        have hlt64 : -s.re - 1 < -1 := by linarith
+        exact integrableOn_Ioi_rpow_of_lt hlt64 (show (0 : ℝ) < (64 : ℝ) by norm_num)
+      have hnn : ∀ t : ℝ, t ∈ Set.Ioi (64 : ℝ) → (0 : ℝ) ≤ t ^ (-s.re - 1) := by
+        intro t ht
+        exact Real.rpow_nonneg
+          (le_of_lt (lt_of_le_of_lt (show (0 : ℝ) ≤ (64 : ℝ) by norm_num) (Set.mem_Ioi.mp ht))) _
+      have hcomp : (∑' m : ℕ, ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) ≤
+          (∫ x : ℝ in Set.Ioi (64 : ℝ), x ^ (-s.re - 1)) :=
+        AntitoneOn.tsum_comp_add_le_integral (f := fun x : ℝ => x ^ (-s.re - 1)) 64
+          hanti hint2 hnn
+      have hval : (∫ x : ℝ in Set.Ioi (64 : ℝ), x ^ (-s.re - 1)) = ((64 : ℝ) ^ (-s.re)) / s.re := by
+        have hM0 : (0 : ℝ) < (64 : ℝ) := by norm_num
         have h := integral_Ioi_rpow_of_lt (a := -s.re - 1) (by linarith : -s.re - 1 < -1) hM0
         have e1 : (-s.re - 1) + 1 = -s.re := by ring
         rw [e1] at h
         rw [h]
         rw [neg_div_neg_eq]
       rw [hval] at hcomp
-      have hrpow8 : ((8 : ℝ) ^ (-s.re)) ≤ (1 / 2 : ℝ) := by
-        have h8 : ((8 : ℝ) ^ (-s.re)) ≤ ((8 : ℝ) ^ (-(1 / 2 : ℝ))) := by
-          apply Real.rpow_le_rpow_of_nonpos (by norm_num) (le_refl _) (by linarith)
-          linarith
-        have heq : ((8 : ℝ) ^ (-(1 / 2 : ℝ))) = 1 / Real.sqrt 8 := by
-          rw [Real.rpow_neg (by norm_num), ← Real.sqrt_eq_rpow]
-        rw [heq] at h8
-        have hsqrt : (2 : ℝ) ≤ Real.sqrt 8 := by
-          have hsq : (2 : ℝ) ^ 2 ≤ (8 : ℝ) := by norm_num
-          have h := Real.le_sqrt (by norm_num) |>.mpr hsq
-          exact h
-        linarith
-      have hdiv : ((8 : ℝ) ^ (-s.re)) / s.re ≤ (1 / 4 : ℝ) := by
+      have hrpow64 : ((64 : ℝ) ^ (-s.re)) ≤ (1 / 8 : ℝ) := by
+        have h8 : ((64 : ℝ) ^ (-s.re)) ≤ ((64 : ℝ) ^ (-(1 / 2 : ℝ))) :=
+          Real.rpow_le_rpow_of_exponent_le (show (1 : ℝ) ≤ (64 : ℝ) by norm_num)
+            (show -s.re ≤ -(1 / 2 : ℝ) by linarith)
+        have heq64 : ((64 : ℝ) ^ (-(1 / 2 : ℝ))) = 1 / 8 := by
+          have hsq : Real.sqrt 64 = 8 := by
+            have h64 : (64 : ℝ) = 8 ^ 2 := by norm_num
+            rw [h64, Real.sqrt_sq (show (0 : ℝ) ≤ (8 : ℝ) by norm_num)]
+          have hstep : ((64 : ℝ) ^ (-(1 / 2 : ℝ))) = ((64 : ℝ) ^ ((1 / 2 : ℝ)))⁻¹ :=
+            Real.rpow_neg (show (0 : ℝ) ≤ (64 : ℝ) by norm_num) _
+          rw [hstep, ← Real.sqrt_eq_rpow, hsq]
+          norm_num
+        rw [heq64] at h8
+        exact h8
+      have hdiv : ((64 : ℝ) ^ (-s.re)) / s.re ≤ (1 / 4 : ℝ) := by
         have hs2 : (1 / 2 : ℝ) ≤ s.re := hs
-        calc ((8 : ℝ) ^ (-s.re)) / s.re ≤ (1 / 2) / (1 / 2) := by
-              apply div_le_div hrpow8 hs2 (by norm_num) (by norm_num)
-          _ = (1 / 4 : ℝ) := by norm_num
+        have h18 : ((1 / 8 : ℝ)) / (1 / 2) = 1 / 4 := by norm_num
+        calc ((64 : ℝ) ^ (-s.re)) / s.re ≤ (1 / 8) / (1 / 2) :=
+              div_le_div₀ (show (0 : ℝ) ≤ (1 / 8 : ℝ) by norm_num) hrpow64
+                (show (0 : ℝ) < (1 / 2 : ℝ) by norm_num) hs2
+          _ = (1 / 4 : ℝ) := h18
       exact le_trans hcomp hdiv
-    calc (∑' m : ℕ, (12 : ℝ) * ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)))
-        = 12 * (∑' m : ℕ, ((((m + 8 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) := by
-          rw [Summable.tsum_mul_left]
-          apply congrArg
-          funext m
-          ring
-      _ ≤ 12 * (1 / 4) := mul_le_mul_of_nonneg_left htail (by norm_num)
+    calc (∑' m : ℕ, (12 : ℝ) * ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1)))
+        = 12 * (∑' m : ℕ, ((((m + 64 + 1 : ℕ)) : ℝ) ^ (-s.re - 1))) := h12
+      _ ≤ 12 * (1 / 4) := mul_le_mul_of_nonneg_left htail (show (0 : ℝ) ≤ (12 : ℝ) by norm_num)
       _ = 3 := by norm_num
   exact le_trans htsum hint
 
 /-- Strip assembly conditional on one explicit factor-lower premise: head `≤ 3`
-plus tail `≤ 3` give `‖eta‖ ≤ 6`, division by `c ≥ 1 / 2` keeps `‖zeta‖ ≤ 6`
-on the `sig ≥ 1 / 2` sub-strip. The premise is the only delta; near the
-lattice zero at height `9.06` it is false, which is why the full strip stays
-gated (see assessment below). -/
+plus tail `≤ 3` give `‖eta‖ ≤ 6`, division by `c ≥ 1 / 2` keeps `‖zeta‖ ≤ 12`
+on the `sig ≥ 1 / 2` sub-strip (`≤ 6` would need `c ≥ 1`, false near the
+lattice zero at height `9.06`, which is also why the full strip stays
+gated; see assessment below). -/
 theorem cutR10_zeta_strip_six_of_factorLower (s : ℂ)
     (hlo : (1 / 2 : ℝ) ≤ s.re) (hhi : s.re ≤ (3 / 2 : ℝ))
     (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
-    (hHead : ‖∑ m : ℕ in Finset.range 8, cutR10_etaPair s m‖ ≤ 3)
+    (hHead : ‖∑ m ∈ Finset.range 64, cutR10_etaPair s m‖ ≤ 3)
     (hBridge : ∀ etaSum : ℂ, etaSum =
-      (∑ m : ℕ in Finset.range 8, cutR10_etaPair s m) +
-      (∑' m : ℕ, cutR10_etaPair s (m + 8)) →
+      (∑ m ∈ Finset.range 64, cutR10_etaPair s m) +
+      (∑' m : ℕ, cutR10_etaPair s (m + 64)) →
       ‖zeta s‖ * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ = ‖etaSum‖)
     (hFac : (1 / 2 : ℝ) ≤ ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖) :
-    ‖zeta s‖ ≤ 6 := by
+    ‖zeta s‖ ≤ 12 := by
   have hC : ‖s‖ ≤ 12 := cutR10_rect_norm_le s (by linarith) (by linarith) hilo hihi
-  have hTail := cutR10_eta_tail_eight_le s hlo hC
-  have hsum : ‖(∑ m : ℕ in Finset.range 8, cutR10_etaPair s m) +
-      (∑' m : ℕ, cutR10_etaPair s (m + 8))‖ ≤ 6 := by
-    calc ‖(∑ m : ℕ in Finset.range 8, cutR10_etaPair s m) +
-          (∑' m : ℕ, cutR10_etaPair s (m + 8))‖
-        ≤ ‖∑ m : ℕ in Finset.range 8, cutR10_etaPair s m‖ +
-          ‖∑' m : ℕ, cutR10_etaPair s (m + 8)‖ := norm_add_le _ _
+  have hTail := cutR10_eta_tail_64_le s hlo hC
+  have hsum : ‖(∑ m ∈ Finset.range 64, cutR10_etaPair s m) +
+      (∑' m : ℕ, cutR10_etaPair s (m + 64))‖ ≤ 6 := by
+    calc ‖(∑ m ∈ Finset.range 64, cutR10_etaPair s m) +
+          (∑' m : ℕ, cutR10_etaPair s (m + 64))‖
+        ≤ ‖∑ m ∈ Finset.range 64, cutR10_etaPair s m‖ +
+          ‖∑' m : ℕ, cutR10_etaPair s (m + 64)‖ := norm_add_le _ _
       _ ≤ 6 := by linarith
   have hB := hBridge _ rfl
-  rw [hB] at hFac ⊢
-  have hpos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by linarith
-  rw [div_le_iff₀ hpos]
-  linarith [hsum]
+  have hle : ‖zeta s‖ * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 6 := by
+    rw [hB]
+    exact hsum
+  have hFpos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by linarith [hFac]
+  by_contra hcon
+  have hlt : (12 : ℝ) < ‖zeta s‖ := lt_of_not_ge hcon
+  have hltmul : (12 : ℝ) * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖
+      < ‖zeta s‖ * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    mul_lt_mul_of_pos_right hlt hFpos
+  have h6 : (6 : ℝ) ≤ 12 * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ := by
+    calc (6 : ℝ) = 12 * (1 / 2) := by norm_num
+      _ ≤ 12 * ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+          mul_le_mul_of_nonneg_left hFac (show (0 : ℝ) ≤ (12 : ℝ) by norm_num)
+  linarith [hltmul, hle, h6]
 
 /-! ## (c) Gamma sup: shift plus real cap, half-rate closed at `1 / 2`.
 
@@ -1289,15 +1340,15 @@ theorem cutR10_Real_Gamma_mid_le_six (x : ℝ)
   have hg1 : Real.Gamma 1 = 1 := Real.Gamma_one
   have hg4 : Real.Gamma 4 = 6 := by
     have h2 : Real.Gamma 2 = 1 := by
-      have := Real.Gamma_add_one (show (1 : ℝ) ≠ 0 by norm_num)
-      rw [Real.Gamma_one] at this
+      have h := Real.Gamma_add_one (show (1 : ℝ) ≠ 0 by norm_num)
+      rw [Real.Gamma_one, show (1 : ℝ) + 1 = 2 by norm_num] at h
       linarith
     have h3 : Real.Gamma 3 = 2 := by
-      have := Real.Gamma_add_one (show (2 : ℝ) ≠ 0 by norm_num)
-      rw [h2] at this
+      have h := Real.Gamma_add_one (show (2 : ℝ) ≠ 0 by norm_num)
+      rw [h2, show (2 : ℝ) + 1 = 3 by norm_num] at h
       linarith
     have h4 := Real.Gamma_add_one (show (3 : ℝ) ≠ 0 by norm_num)
-    rw [h3] at h4
+    rw [h3, show (3 : ℝ) + 1 = 4 by norm_num] at h4
     linarith
   rw [hg1, hg4] at hJ
   linarith
@@ -1339,13 +1390,18 @@ theorem cutR10_gamma_sup_half_closed (s : ℂ)
     calc ‖Complex.Gamma (s / 2)‖ * (‖s / 2‖ * ‖s / 2 + 1‖)
         = ‖Complex.Gamma (s / 2 + 2)‖ := by rw [hshift]; ring
       _ ≤ 6 := le_trans hdom hcap
-  have hprod : (4.22 : ℝ) * 4.30 ≤ ‖s / 2‖ * ‖s / 2 + 1‖ :=
-    mul_le_mul hden.1 hden.2 (by norm_num) (by norm_num)
-  have hnum : (4.22 : ℝ) * 4.30 = 18.146 := by norm_num
+  have hprod : (4.22 : ℝ) * 4.22 ≤ ‖s / 2‖ * ‖s / 2 + 1‖ :=
+    mul_le_mul hden.1 hden.2 (by norm_num) (norm_nonneg _)
+  have hnum : (4.22 : ℝ) * 4.22 = 17.8084 := by norm_num
   rw [hnum] at hprod
-  have hpos : (0 : ℝ) < ‖s / 2‖ * ‖s / 2 + 1‖ := by linarith
-  rw [div_le_iff₀ hpos]
-  linarith
+  have hGnn : (0 : ℝ) ≤ ‖Complex.Gamma (s / 2)‖ := norm_nonneg _
+  have hmul : ‖Complex.Gamma (s / 2)‖ * 17.8084 ≤ 6 :=
+    le_trans (mul_le_mul_of_nonneg_left hprod hGnn) hle
+  have hcap2 : (6 : ℝ) / 17.8084 ≤ 1 / 2 := by norm_num
+  calc ‖Complex.Gamma (s / 2)‖ ≤ 6 / 17.8084 := by
+        rw [le_div_iff₀ (by norm_num)]
+        exact hmul
+    _ ≤ 1 / 2 := hcap2
 
 /-- Gamma `1 / 100` assembly gated on one explicit product-cap premise
 (the only delta; half-rate reaches `1 / 2` above, so shortfall is `50x`;
@@ -1399,19 +1455,46 @@ theorem cutR10_poly_pi_lower_endpoint :
   have hpi : (7 / 10 : ℝ) ≤ ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) / 2)))‖ := by
     rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
     have hre : (-(((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) / 2)).re = -(1 / 4 : ℝ) := by
-      simp [Complex.div_ofNat]
+      have h1 : ((((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) / 2)).re = 1 / 4 := by
+        simp [Complex.div_ofNat]
+        norm_num
+      rw [Complex.neg_re, h1]
     rw [hre]
     have hbase : (7 / 10 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
-      have hpi3 : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
-      have hmono : (3 : ℝ) ^ (-(1 / 4 : ℝ)) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
-        apply Real.rpow_le_rpow (by norm_num) hpi3 (by norm_num)
-      have h3 : (7 / 10 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 4 : ℝ)) := by norm_num
-      exact le_trans h3 hmono
+      have hpi4 : Real.pi ≤ ((10 / 7 : ℝ) ^ (4 : ℕ)) := by
+        have h := Real.pi_lt_d2
+        have h4 : ((10 / 7 : ℝ) ^ (4 : ℕ)) = (10000 / 2401 : ℝ) := by norm_num
+        rw [h4]
+        norm_num at h ⊢
+        linarith
+      have hup : Real.pi ^ ((1 / 4 : ℝ)) ≤ (10 / 7 : ℝ) := by
+        have h14nn : (0 : ℝ) ≤ (1 / 4 : ℝ) := by norm_num
+        have hstep : Real.pi ^ ((1 / 4 : ℝ)) ≤ ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ))) :=
+          Real.rpow_le_rpow (le_of_lt Real.pi_pos) hpi4 h14nn
+        have heq : ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ))) = (10 / 7 : ℝ) := by
+          have hnn : (0 : ℝ) ≤ (10 / 7) := by norm_num
+          calc ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ)))
+              = ((10 / 7) ^ ((((4 : ℕ)) : ℝ) * (1 / 4))) := by
+                rw [← Real.rpow_natCast, ← Real.rpow_mul hnn]
+            _ = ((10 / 7) ^ (1 : ℝ)) := by
+                congr 1
+                norm_num
+            _ = (10 / 7) := Real.rpow_one _
+        rw [heq] at hstep
+        exact hstep
+      have hpos7 : (0 : ℝ) < 7 / 10 := by norm_num
+      have hposP : (0 : ℝ) < Real.pi ^ ((1 / 4 : ℝ)) := Real.rpow_pos_of_pos Real.pi_pos _
+      have hmul : (7 / 10 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ 1 := by
+        calc (7 / 10 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ (7 / 10) * (10 / 7) :=
+              mul_le_mul_of_nonneg_left hup (by norm_num)
+          _ = 1 := by norm_num
+      rw [Real.rpow_neg (le_of_lt Real.pi_pos), ← one_div, le_div_iff₀ hposP]
+      exact hmul
     exact hbase
   calc ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) *
         (((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) - 1)‖ *
       ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * ((8.44 : ℝ) : ℂ)) / 2)))‖
-      ≥ 35.7418 * (7 / 10) := mul_le_mul hpoly.le hpi (by norm_num) (by norm_num)
+      ≥ 35.7418 * (7 / 10) := mul_le_mul hpoly.ge hpi (by norm_num) (norm_nonneg _)
     _ ≥ 24 := by norm_num
 
 /-- Shortfall implication: if the triple product at the endpoint is `≥ 6 / 100`
@@ -1422,11 +1505,20 @@ theorem cutR10_joint_implies_zeta_cap (g z0 : ℝ)
     (hJoint : g * z0 ≤ (4 / 100 : ℝ)) :
     z0 ≤ (2 / 3 : ℝ) := by
   have hpos : (0 : ℝ) < g := by linarith
-  rw [div_le_iff₀ hpos] at hg ⊢
-  nlinarith [hJoint]
+  have h1 : (4 / 100 : ℝ) = (2 / 3) * (6 / 100) := by norm_num
+  have h2 : (2 / 3 : ℝ) * (6 / 100) ≤ (2 / 3) * g :=
+    mul_le_mul_of_nonneg_left hg (by norm_num)
+  by_contra hcon
+  have hlt : (2 / 3 : ℝ) < z0 := lt_of_not_ge hcon
+  have hltmul : g * (2 / 3) < g * z0 := mul_lt_mul_of_pos_left hlt hpos
+  have h4 : g * z0 ≤ (2 / 3) * g := by linarith [hJoint, h1, h2]
+  have h5 : g * z0 ≤ g * (2 / 3) := by
+    calc g * z0 ≤ (2 / 3) * g := h4
+      _ = g * (2 / 3) := by ring
+  linarith [hltmul, h5]
 
-/-- Sharp TRUE joint assembly restated with closed `hProd`: `≤ 12.87` from the
-(b)-(c) sup premises (no joint premise). -/
+/-- Joint assembly restated with closed `hProd`: `≤ 3216/5` from the
+(b)-(c) sup premises with the closed Gamma half-cap `1/2` (no joint premise). -/
 theorem cutR10_closedBall_sup_sharp_closed
     (hZetaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
       (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) → ‖zeta s‖ ≤ (6 : ℝ))
@@ -1434,7 +1526,7 @@ theorem cutR10_closedBall_sup_sharp_closed
       (8.44 : ℝ) ≤ s.im → s.im ≤ (11.56 : ℝ) →
       ‖Complex.Gamma (s / 2)‖ ≤ (1 / 2 : ℝ)) :
     ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
-      ‖xiShiftedEntire z‖ ≤ (3217 / 250 : ℝ) := by
+      ‖xiShiftedEntire z‖ ≤ (3216 / 5 : ℝ) := by
   intro z hz
   have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
       ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
@@ -1461,7 +1553,7 @@ theorem cutR10_closedBall_sup_sharp_closed
         ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
         (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 6 :=
     mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
-  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 6 ≤ (3217 / 250 : ℝ) := by
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 2)) * 6 ≤ (3216 / 5 : ℝ) := by
     norm_num
   exact le_trans g3 hcap
 
