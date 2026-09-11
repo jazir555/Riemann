@@ -40687,3 +40687,109 @@ Transport note update (ZU39, CUTL-side identification, exact cast forms):
   is cast-identical to `sCutL10Z`; `riemannZeta sCutL10Z` is the zeta-lane form of consumer `zeta sCutL`.
 - closed numeral: NONE (NO-BANKED-BOUND); `6/5` and original `7/5` consumer targets remain open on this route.
 -/
+
+/-!
+## CutL10 pair-tail past N = 64 (disc program tail lane)
+
+`sCutBox` is the cut-line point `sCutL10Z = 1/2 - 10*I` (`‖s‖ ≤ 10.02` banked
+as `sCutL10Z_norm_le`, `Re = 1/2` as `sCutL10Z_re`). Shape matches
+`zetaCell_even_remainder_le` exactly: `‖∑' m - ∑ range (2*M)‖ ≤ T`.
+
+Closed-form scale at `Re = 1/2`, `C = 10.02`: `T(M) = 20.04 / √M`.
+`T(M) ≤ 1/2` needs `√M ≥ 40.08`, i.e. `M ≥ 1607`, so `1/2` is unreachable
+inside the cap `M ∈ {16, 24, 32, 48, 64}` (whose best closed value is
+`M = 64 → 251/100 = 2.51`). Proven below, mirroring `sCutL10Z_tail16_le_M8`:
+- `sCutBox_eta_tail_M32_le`: `N = 64` head (`2 * 32`), `√32 ≥ 56/10`
+  (`(56/10)^2 = 31.36 ≤ 32`), `T = 358/100 = 3.58` — the head the siblings
+  prove (`n = 5..64` head discs), ready to fold.
+- `sCutBox_eta_tail_M64_le`: `N = 128` head (`2 * 64`), `√64 = 8` exact,
+  `T = 251/100 = 2.51` — tightest honest closed bound in the cap.
+Budgets against `‖zeta‖ ≈ 1.549` (`1549/1000 - T`) are recorded alongside;
+both are negative, so the head-radius lane still owes the disc assembly.
+-/
+/-- `M = 32` pair-tail upper at the cut-box point (`N = 64` head,
+`rtail = 358/100`, `√32 ≥ 56/10`). -/
+theorem sCutBox_eta_tail_M32_le :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 64, etaDirichletTerm sCutL10Z k)‖ ≤ (358 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 32 (by norm_num)
+  have e3264 : (2 * 32 : ℕ) = 64 := by norm_num
+  rw [e3264, sCutL10Z_re] at h
+  have hsqrt : (56 / 10 : ℝ) ≤ (32 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((56 / 10 : ℝ)) ^ (2 : ℕ) ≤ (32 : ℝ) := by norm_num
+    have hpow : (((32 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 32 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos32 : (0 : ℝ) < (32 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (32 : ℝ) ^ (-(1 / 2 : ℝ)) = (((32 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 32) _
+  have hcast : ((((32 : ℕ)) : ℝ)) = (32 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((32 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((56 / 10 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos32 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((32 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((56 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((56 / 10 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (358 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- `M = 64` pair-tail upper at the cut-box point (`N = 128` head,
+`rtail = 251/100`, `√64 = 8` exact). Tightest closed bound in the cap. -/
+theorem sCutBox_eta_tail_M64_le :
+    ‖(∑' m, etaPairTerm sCutL10Z m) -
+      (∑ k ∈ Finset.range 128, etaDirichletTerm sCutL10Z k)‖ ≤ (251 / 100 : ℝ) := by
+  have h := zetaCell_even_remainder_le sCutL10Z_pos sCutL10Z_norm_le
+    (by norm_num : (0 : ℝ) ≤ 10.02) 64 (by norm_num)
+  have e64128 : (2 * 64 : ℕ) = 128 := by norm_num
+  rw [e64128, sCutL10Z_re] at h
+  have hsqrt : (8 : ℝ) ≤ (64 : ℝ) ^ (1 / 2 : ℝ) := by
+    have hsq : ((8 : ℝ)) ^ (2 : ℕ) ≤ (64 : ℝ) := by norm_num
+    have hpow : (((64 : ℝ) ^ (1 / 2 : ℝ))) ^ (2 : ℕ) = 64 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    rw [← hpow] at hsq
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hsq
+  have hpos64 : (0 : ℝ) < (64 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (64 : ℝ) ^ (-(1 / 2 : ℝ)) = (((64 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ := by
+    exact Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 64) _
+  have hcast : ((((64 : ℕ)) : ℝ)) = (64 : ℝ) := by norm_num
+  rw [hcast, hrw] at h
+  have hinv : (((64 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ ≤ ((8 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos64 (by norm_num)).mpr hsqrt
+  have hle : (10.02 : ℝ) * ((((64 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ / (1 / 2 : ℝ)) ≤
+      (10.02 : ℝ) * (((8 : ℝ))⁻¹ / (1 / 2 : ℝ)) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    linarith [hinv]
+  have hnum : (10.02 : ℝ) * (((8 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤
+      (251 / 100 : ℝ) := by norm_num
+  exact le_trans (le_trans h hle) hnum
+
+/-- `1/2` missed even at the tightest in-cap bound (`M = 64 → 251/100`). -/
+theorem sCutBox_eta_tail_half_missed :
+    (1 / 2 : ℝ) < (251 / 100 : ℝ) ∧ (1 / 2 : ℝ) < (358 / 100 : ℝ) := by
+  refine ⟨by norm_num, by norm_num⟩
+
+/-- Head-radius budget left at `M = 32` against `‖zeta‖ ≈ 1549/1000`
+(negative: the head lane still owes the disc). -/
+theorem sCutBox_eta_tail_M32_budget :
+    (1549 / 1000 : ℝ) - (358 / 100 : ℝ) = (-2031 / 1000 : ℝ) := by norm_num
+
+/-- Head-radius budget left at `M = 64` against `‖zeta‖ ≈ 1549/1000`
+(negative: the head lane still owes the disc). -/
+theorem sCutBox_eta_tail_M64_budget :
+    (1549 / 1000 : ℝ) - (251 / 100 : ℝ) = (-961 / 1000 : ℝ) := by norm_num
+
+#print axioms sCutBox_eta_tail_M32_le
+#print axioms sCutBox_eta_tail_M64_le
+#print axioms sCutBox_eta_tail_half_missed
+#print axioms sCutBox_eta_tail_M32_budget
+#print axioms sCutBox_eta_tail_M64_budget
