@@ -4214,6 +4214,12 @@ sorry-free infrastructure and the complete commit ledger above.
   REDIRECT: no head follow-ups (disc dead, no live
   consumer) — effort to low-t N-wave + gamma lowers
   + direct tier-M (live: 40 cells → Hmain).
+- 2026-09-11 LIVE WAVE ×3 fired (write-only, new
+  files): ZLOWN (low-t N=16/32 zeta lowers, easiest
+  first), GAMLOW (30 Gamma lowers via shift+real
+  numerals, tight-flagged first), TIERDIRECT (direct
+  Leibniz + small-disc Cauchy from banked local
+  sups, biggest-margin first).
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
