@@ -4154,6 +4154,20 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-11 sorry-hunt: 4 prover agents fired
   (JensenTranslation×5, KadiriHadamardAffine×3,
   KadiriZeroFree×5, float_xi_bridge×1).
+- 2026-09-11 ALL 14 SORRYS ELIMINATED:
+  JENSEN→conditionals green (`1f3e1112`); FLOAT→
+  conditional unbuilt (`ffc0c6ed`); KADIRI-ZF→
+  conditionals green (`351c228c`, retains documented
+  `axiom xiZeros_simple`); KADIRI-HA→residuals
+  green (`5d1c1247`, +caller fixes).
+- 2026-09-11 DISC-TAIL honest-negative (`13124322`,
+  zeta 106/0): T(M)=20.04/√M, need M≥1607; best
+  M=64→2.51. Coordinator math: min_N total ≈3.98 >
+  1.549 at ANY N — MVT-tail disc DEAD structurally.
+  MACHINE-RECON fired (ApproxZetaLowerBound?
+  BorelC? Zeta23? float_*? cert files? zero-free
+  regions covering the box? non-MVT tails?) before
+  AFE-build-vs-concede decision.
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
