@@ -4139,6 +4139,21 @@ sorry-free infrastructure and the complete commit ledger above.
   recipe (octant ±π/2 shifts + TRUE centers). STAGE 3
   fired (terms tail): tight 1/100 discs + S₄-Im
   ≥145/100 fold.
+- 2026-09-11 DP-S3+FIX GREEN, committed (`e50ecd81`,
+  589/0): octant machinery + 3 tight 1/100 discs.
+  HONEST FIND: 145/100 target arithmetically
+  impossible (signed Im-sum 0.3309, not |·|-sum
+  1.4855); demo `dp_S4_Im_ge_3009_10000` = 0.3009
+  closed. Agent corrections: parens were in h3/h4/e
+  lines (not hre/him); no hcast needed (dead hCre
+  drop sufficed); abs-atom linarith → dp_abs_tri
+  helper; term3-im tightened to 1/10000. NOTE for
+  disc program: Im-route caps at ~0.33 (true) —
+  norm-route (‖center‖≈1.7) or N≈64-head disc feeds
+  rouche `CutBoxZetaDisc`.
+- 2026-09-11 sorry-hunt: 4 prover agents fired
+  (JensenTranslation×5, KadiriHadamardAffine×3,
+  KadiriZeroFree×5, float_xi_bridge×1).
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
