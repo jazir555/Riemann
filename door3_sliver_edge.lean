@@ -97,7 +97,7 @@ theorem edgePoly_top (x : ℝ) :
       (((x : ℂ)) * (((x : ℂ) + Complex.I))) := by
   have hsq : (Complex.I / 2) ^ 2 = (-1 / 4 : ℂ) := by
     calc (Complex.I / 2) ^ 2 = (Complex.I * Complex.I) / 4 := by ring
-      _ = (-1 / 4 : ℂ) := by rw [Complex.I_mul_I]; ring
+      _ = (-1 / 4 : ℂ) := by rw [Complex.I_mul_I]
   have hcross : 2 * (((x : ℂ)) * (Complex.I / 2)) = Complex.I * ((x : ℂ)) := by ring
   calc ((((x : ℂ) + Complex.I / 2)) ^ 2 + (1 / 4 : ℂ))
       = (((x : ℂ)) ^ 2 + 2 * (((x : ℂ)) * (Complex.I / 2)) + (Complex.I / 2) ^ 2 + (1 / 4 : ℂ)) := by ring
@@ -110,7 +110,7 @@ theorem edgePoly_bot (x : ℝ) :
       (((x : ℂ)) * (((x : ℂ) - Complex.I))) := by
   have hsq : (Complex.I / 2) ^ 2 = (-1 / 4 : ℂ) := by
     calc (Complex.I / 2) ^ 2 = (Complex.I * Complex.I) / 4 := by ring
-      _ = (-1 / 4 : ℂ) := by rw [Complex.I_mul_I]; ring
+      _ = (-1 / 4 : ℂ) := by rw [Complex.I_mul_I]
   have hcross : 2 * (((x : ℂ)) * (Complex.I / 2)) = Complex.I * ((x : ℂ)) := by ring
   calc ((((x : ℂ) - Complex.I / 2)) ^ 2 + (1 / 4 : ℂ))
       = (((x : ℂ)) ^ 2 - 2 * (((x : ℂ)) * (Complex.I / 2)) + (Complex.I / 2) ^ 2 + (1 / 4 : ℂ)) := by ring
@@ -403,11 +403,11 @@ theorem example_gate :
 
 /-- Miss identity on top. -/
 theorem miss_top (mT : ℝ) (MT : ℝ) :
-    (0.01 : ℝ) - mT / MT = (0.49 : ℝ) - ((1 / 2 : ℝ) - mT / MT) := by ring
+    (0.01 : ℝ) - mT / MT = ((1 / 2 : ℝ) - mT / MT) - (0.49 : ℝ) := by ring
 
 /-- Miss identity on bottom. -/
 theorem miss_bot (mB : ℝ) (MB : ℝ) :
-    (0.01 : ℝ) - mB / MB = (-(1 / 2 : ℝ) + mB / MB) - (-0.49 : ℝ) := by ring
+    (0.01 : ℝ) - mB / MB = (-0.49 : ℝ) - (-(1 / 2 : ℝ) + mB / MB) := by ring
 
 /-- Shortfall on top: a missed gate leaves the fenced edge at or above `0.49`. -/
 theorem shortfall_top (mT : ℝ) (MT : ℝ) (hshort : mT / MT ≤ 0.01) :
