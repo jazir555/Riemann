@@ -1485,7 +1485,7 @@ Why (c), and why not (a)/(b):
 * (a) disc excision gains nothing: the eta factor vanishes at the ledgered
   lattice point s ~ 1 + 9.06*I inside the ball s-region
   (Re in [-1.06, 2.06], Im in [8.44, 11.56]). Excising small discs around
-  1 +/- 9.06*I leaves the inside-disc block unsolved, since Euler bounds do
+  1 + 9.06*I or 1 - 9.06*I leaves the inside-disc block unsolved, since Euler bounds do
   not reach Re ~ 1 and the eta bridge blows up there as well, so a second
   method is needed inside anyway. Complexity doubles, net gain zero.
   The structural block is pinned below as pure logic

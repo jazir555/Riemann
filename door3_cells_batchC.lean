@@ -93,7 +93,7 @@ measurement at the ten s-centers (currently conservative premises);
 gamma-lower enclosures (Stirling-disc treatment, the documented wall);
 zeta-lower enclosures (complex-zeta wall); tight-premise discharge for
 R35/R38; re-tiering or subdivision for R31/R32/R39/R40 (margin deficits
--0.05/-0.036/-0.05/-0.05 at TRUE scale); central registration (NOT here).
+-0.05, -0.036, -0.05, -0.05 at TRUE scale); central registration (NOT here).
 -/
 
 noncomputable section

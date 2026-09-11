@@ -1,3 +1,6 @@
+import Mathlib
+import central_cover_assembly
+
 /-!
 # door3_tail_edge_push — WRITE-ONLY recon + closest-piece (report-and-stop, no build)
 
@@ -125,9 +128,6 @@ transitively; this file is downstream (nothing imports it), hence cycle-safe.
 No other imports added; `newsection` / `cross_door_synthesis` intentionally NOT
 imported (would also be acyclic, flagged here only).
 -/
-
-import Mathlib
-import central_cover_assembly
 
 open Complex
 

@@ -158,7 +158,7 @@ theorem k2_upper_only_witness :
 
 /-- Minimal sufficient premise (OPEN analytic input): weak two-sided uniform
     disc enclosure of `zeta` on one cutoff s-box (`lo/hi = 8.44/11.56` right,
-    `-11.56/-8.44` left). Instantiating `(c, r)` with TRUE containment plus a
+    `-11.56, -8.44` left). Instantiating `(c, r)` with TRUE containment plus a
     margin `‖c/2-1‖ + r/2 < κ < 1` is the exact remainder. -/
 def CutBoxZetaDisc (c : ℂ) (r lo hi : ℝ) : Prop :=
   ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
