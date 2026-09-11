@@ -4248,6 +4248,11 @@ sorry-free infrastructure and the complete commit ledger above.
   files): GAMDISC (30 Gamma lowers via shift-disc),
   ZN64 (R05-first N=64/pair-fold push), DERIVUP
   (16 local factor-deriv bounds vs M' targets).
+- 2026-09-11 ZN64 delivered (`9ec1f240`, NEW zeta_N64
+  file, registered, no build): R05 FIRES at N64
+  (+0.12), R06 at N128 (+0.03); R04/R25 need N>128.
+  Pair-cost 224 lines/center, parallelizable.
+  R05-CLOSE fired (first unconditional cell-zeta).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
