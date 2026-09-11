@@ -180,14 +180,14 @@ theorem BA00_centerBound_of_premises
       (‖DerivCauchyBridge.polyOf BA00_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA00_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA00_sCenter‖ :=
-    mul_le_mul h12 hG (norm_nonneg _)
+    mul_le_mul h12 hG (by norm_num)
       (mul_nonneg (norm_nonneg _) (norm_nonneg _))
   have hProd : (34 : ℝ) * 0.7 * 0.0015 * 1.9 ≤
       ((‖DerivCauchyBridge.polyOf BA00_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA00_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA00_sCenter‖) *
       ‖zeta BA00_sCenter‖ :=
-    mul_le_mul h123 hZ (by norm_num) (by norm_num)
+    mul_le_mul h123 hZ (by norm_num) (by positivity)
   have hR : BA00_rect.radius < 1.26 := BA00_rect_radius_lt
   have hMcap : (0.05 : ℝ) * BA00_rect.radius ≤ 0.05 * 1.26 :=
     mul_le_mul_of_nonneg_left (le_of_lt hR) (by norm_num)
@@ -388,14 +388,14 @@ theorem BA03_centerBound_of_premises
       (‖DerivCauchyBridge.polyOf BA03_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA03_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA03_sCenter‖ :=
-    mul_le_mul h12 hG (norm_nonneg _)
+    mul_le_mul h12 hG (by norm_num)
       (mul_nonneg (norm_nonneg _) (norm_nonneg _))
   have hProd : (10 : ℝ) * 0.7 * 0.015 * 1.4 ≤
       ((‖DerivCauchyBridge.polyOf BA03_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA03_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA03_sCenter‖) *
       ‖zeta BA03_sCenter‖ :=
-    mul_le_mul h123 hZ (by norm_num) (by norm_num)
+    mul_le_mul h123 hZ (by norm_num) (by positivity)
   have hR : BA03_rect.radius < 1.26 := BA03_rect_radius_lt
   have hMcap : (0.07 : ℝ) * BA03_rect.radius ≤ 0.07 * 1.26 :=
     mul_le_mul_of_nonneg_left (le_of_lt hR) (by norm_num)
@@ -593,14 +593,14 @@ theorem BA04_centerBound_of_premises
       (‖DerivCauchyBridge.polyOf BA04_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA04_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA04_sCenter‖ :=
-    mul_le_mul h12 hG (norm_nonneg _)
+    mul_le_mul h12 hG (by norm_num)
       (mul_nonneg (norm_nonneg _) (norm_nonneg _))
   have hProd : (3.5 : ℝ) * 0.7 * 0.08 * 1.0 ≤
       ((‖DerivCauchyBridge.polyOf BA04_sCenter‖ *
       ‖DerivCauchyBridge.piOf BA04_sCenter‖) *
       ‖DerivCauchyBridge.gammaOf BA04_sCenter‖) *
       ‖zeta BA04_sCenter‖ :=
-    mul_le_mul h123 hZ (by norm_num) (by norm_num)
+    mul_le_mul h123 hZ (by norm_num) (by positivity)
   have hR : BA04_rect.radius < 1.26 := BA04_rect_radius_lt
   have hMcap : (0.07 : ℝ) * BA04_rect.radius ≤ 0.07 * 1.26 :=
     mul_le_mul_of_nonneg_left (le_of_lt hR) (by norm_num)

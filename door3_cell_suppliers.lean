@@ -641,7 +641,7 @@ theorem CS_gamma0008_of_link (hLink : CS_reflection_link)
       (‖Complex.sin ((Real.pi : ℂ) * (R02Pilot.sCenter / 2))‖ *
         ‖Complex.Gamma (1 - R02Pilot.sCenter / 2)‖)
       ≤ ‖Complex.Gamma (R02Pilot.sCenter / 2)‖ := by
-    rw [le_div_iff₀ hpos]
+    rw [div_le_iff₀ hpos]
     linarith
   have hcap : (0.008 : ℝ) ≤ Real.pi /
       (‖Complex.sin ((Real.pi : ℂ) * (R02Pilot.sCenter / 2))‖ *
