@@ -25,7 +25,7 @@ PHASE 1 — RECON (read-only findings):
 - `CrossDoorTailBridge.xiShifted_off_axis_tail_nonvanishing_from_mollified_rouche`
   (`cross_door_synthesis.lean:105`, PROVED no sorry). EXACT premises:
   `(K : N) (H : MollifiedAttack.MollifiedRoucheLeaf K)` [top-level `MollifiedAttack`
-  from `riemann_hypothesis_newsection.lean:190`, NOT `Challenge2.MollifiedAttack`]
+  from `riemann_hypothesis_newsection.lean:190`, NOT `RHProofScaffold.Challenge2.MollifiedAttack`]
   `(z : C) (hx : 10 < |z.re|) (hy0 : -(1/2) < z.im) (hy1 : z.im < 1/2)`
   `(hne : z.im != 0)`; conclusion `xiShifted z != 0` via by_cases on `0 < z.im`.
   Feeders: `xiShifted_upper_tail_nonvanishing_from_mollified_rouche` (:51) needs
@@ -88,7 +88,7 @@ PHASE 1 — RECON (read-only findings):
 
 (c) SINGLE closest-closable piece: TAIL `K = 2` conditional Rouche gap
   `B*(1/2) + d < 1 -> ||zeta*M2 - 1|| < 1` (hence conditional
-  `Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2`). Why smallest: exactly TWO
+  `RHProofScaffold.Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2`). Why smallest: exactly TWO
   explicit numeric Props (`B` upper + `d` near-one) + ONE arithmetic side-condition
   on a single shifted strip, with `e = 1/2` CLOSED here by `norm_num`
   (banked `dirichletMollifier_two` shape re-proved) and pure product-split CLOSED
@@ -110,7 +110,7 @@ PHASE 2 — PROVED vs RESIDUAL (this file):
   `TailZetaNearOneD d` (same wall; `B/2+d < 1` is the sharp fixed-`K` form).
 - PATCH REMAINDER: instantiate `B, d` with `B/2+d < 1` (convexity/Phragmen-Lindelof
   + FE + Stirling; or `K` growing with `|Re z|`); transport this file's
-  `Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2` (visible via
+  `RHProofScaffold.Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2` (visible via
   `central_cover_assembly` -> `riemann_hypothesis`) to top-level
   `MollifiedAttack.MollifiedRoucheLeaf` (newsection, needed by
   `CrossDoorTailBridge` — identical gap shape, distinct Lean types; one-line
@@ -123,7 +123,7 @@ PHASE 2 — PROVED vs RESIDUAL (this file):
 
 IMPORTS: `Mathlib` + `central_cover_assembly` only. `central_cover_assembly`
 imports `riemann_hypothesis` (+ `rh_certificate_infra`), so `_root_` `zeta`,
-`shiftedS`, `xiShifted` and `Challenge2.MollifiedAttack.*` are visible
+`shiftedS`, `xiShifted` and `RHProofScaffold.Challenge2.MollifiedAttack.*` are visible
 transitively; this file is downstream (nothing imports it), hence cycle-safe.
 No other imports added; `newsection` / `cross_door_synthesis` intentionally NOT
 imported (would also be acyclic, flagged here only).
@@ -148,7 +148,7 @@ theorem norm_product_sub_one_le (u v : ℂ) :
     `riemann_hypothesis_newsection.lean:651`, re-proved here for the
     `Challenge2` definition visible via `central_cover_assembly`). -/
 theorem mollifier_two_eq_half (s : ℂ) :
-    Challenge2.MollifiedAttack.dirichletMollifier s 2 = 1 / 2 := by
+    RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier s 2 = 1 / 2 := by
   have hsum : (∑ n ∈ Finset.range 2, (ArithmeticFunction.moebius (n + 1) : ℂ) *
       (↑(n + 1) : ℂ) ^ (-s) * (1 - ↑(n + 1) / ↑(2 : ℕ))) =
       ((ArithmeticFunction.moebius 1 : ℂ) * ((1 : ℕ) : ℂ) ^ (-s) *
@@ -173,14 +173,14 @@ theorem mollifier_two_eq_half (s : ℂ) :
   have e1 : ((ArithmeticFunction.moebius 2 : ℂ) * ((2 : ℕ) : ℂ) ^ (-s) *
       (1 - ((2 : ℕ) : ℂ) / ((2 : ℕ) : ℂ))) = 0 := by
     rw [hw2, mul_zero]
-  unfold Challenge2.MollifiedAttack.dirichletMollifier
+  unfold RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier
   rw [hsum, e0, e1, add_zero]
 
 /-- `K = 2` mollifier error is exactly `1/2` (closed numeral). -/
 theorem mollifier_two_sub_one_norm (s : ℂ) :
-    ‖Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖ = 1 / 2 := by
+    ‖RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖ = 1 / 2 := by
   have hM := mollifier_two_eq_half s
-  calc ‖Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖
+  calc ‖RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖
       = ‖(1 / 2 : ℂ) - 1‖ := by rw [hM]
     _ = ‖(1 / 2 : ℂ)‖ := by
         have h : ((1 / 2 : ℂ) - 1) = -((1 / 2 : ℂ)) := by ring
@@ -189,7 +189,7 @@ theorem mollifier_two_sub_one_norm (s : ℂ) :
 
 /-- `K = 2` mollifier error in `≤` form for the product split. -/
 theorem mollifier_two_sub_one_le (s : ℂ) :
-    ‖Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖ ≤ 1 / 2 :=
+    ‖RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier s 2 - 1‖ ≤ 1 / 2 :=
   le_of_eq (mollifier_two_sub_one_norm s)
 
 /-- Uniform zeta UPPER hypothesis on the tail shifted strip
@@ -216,15 +216,15 @@ theorem tailK2_gap_of_zetaBounds (B d : ℝ)
     (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hy0 : (0 : ℝ) < z.im)
     (hy1 : z.im < (1 / 2 : ℝ)) :
     ‖zeta (shiftedS z) *
-      Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2 - 1‖ < 1 := by
+      RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2 - 1‖ < 1 := by
   have hsplit := norm_product_sub_one_le
     (zeta (shiftedS z))
-    (Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2)
+    (RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2)
   have h1 := hB z hx hy0 hy1
   have h2 := mollifier_two_sub_one_le (shiftedS z)
   have h3 := hd z hx hy0 hy1
   have hprod : ‖zeta (shiftedS z)‖ *
-      ‖Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2 - 1‖ ≤
+      ‖RHProofScaffold.Challenge2.MollifiedAttack.dirichletMollifier (shiftedS z) 2 - 1‖ ≤
       B * (1 / 2) :=
     mul_le_mul h1 h2 (norm_nonneg _) hB0
   linarith
@@ -235,7 +235,7 @@ theorem tailK2_gap_of_zetaBounds (B d : ℝ)
 theorem tailK2_leaf_of_bounds (B d : ℝ)
     (hB : TailZetaUpperB B) (hd : TailZetaNearOneD d)
     (hB0 : 0 ≤ B) (hgap : B * (1 / 2) + d < 1) :
-    Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2 where
+    RHProofScaffold.Challenge2.MollifiedAttack.MollifiedRoucheLeaf 2 where
   gap := fun (z : ℂ) (hx : (10 : ℝ) < |z.re|) (hy0 : (0 : ℝ) < z.im)
     (hy1 : z.im < (1 / 2 : ℝ)) =>
     tailK2_gap_of_zetaBounds B d hB hd hB0 hgap z hx hy0 hy1
