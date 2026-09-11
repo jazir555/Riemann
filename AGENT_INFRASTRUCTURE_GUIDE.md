@@ -4220,6 +4220,15 @@ sorry-free infrastructure and the complete commit ledger above.
   numerals, tight-flagged first), TIERDIRECT (direct
   Leibniz + small-disc Cauchy from banked local
   sups, biggest-margin first).
+- 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
+  direct.lean`, registered): honest-negative — even
+  ρC=0.01 small-disc Cauchy overshoots tiers 200×+
+  (41 mismatches proved). Queues TRUE-MEASURE
+  (numerical TRUE |xi'| per cell: re-tier vs prove?).
+- 2026-09-11 HEADB delivered 20/20 (NEW `door3_dp_
+  headB.lean` 183KB, registered, no build): n=25..44
+  all radius 1/100, centers honest. Infrastructure
+  (disc dead).
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
