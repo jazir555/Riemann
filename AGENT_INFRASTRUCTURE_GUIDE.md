@@ -4102,6 +4102,10 @@ sorry-free infrastructure and the complete commit ledger above.
   RED-BLOCKED (1 sin_neg rewrite-all left). Fired
   CLFIX2 (sub-1009 backlog + RUFIX precedents) +
   TFFIX (last trig error, unblocks DP-S2).
+- 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
+  2/3): double-neg rewrite restructured. DP STAGE 2
+  re-fired (NEW `door3_dp_terms.lean`: cos mirror +
+  n=2,3,4 discs + S₄-Im demo ≥1.0, ≤300 lines).
 - 2026-09-11 BFIX located-RED, tail fix committed
   (`1778b33a`, 2/1): tail ≥1469 now error-free; module
   RED on ~30 PRE-EXISTING errors <1469 (write-only
