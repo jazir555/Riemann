@@ -49,6 +49,16 @@ lane contracts and the fix-wave list at the bottom of each section).
 
 open scoped BigOperators
 
+/- CutL10 `s`-point in closed form (`Re = 1/2`, `Im = -10`).
+Defined here (before `Door3CutL10Center`) so the zeta-certificate
+contract at ~259 can reference it without a forward reference;
+lemmas about it live in the reopened `Door3CutL10EtaFactor` section below. -/
+namespace Door3CutL10EtaFactor
+
+noncomputable def sCutL : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I
+
+end Door3CutL10EtaFactor
+
 namespace Door3CutL10Center
 
 open CentralCoverAssembly
@@ -268,8 +278,9 @@ theorem cutL10_zetaRemainder_of_etaCertificate
   unfold cutL10_zetaRemainder
   have hbl : (7 / 5 : ℝ) ≤ slow - rtail := by linarith
   have hsc : Door3CutL10EtaFactor.sCutL
-      = (1 / 2 : ℂ) + Complex.I * CutL10.center :=
-    Door3CutL10EtaFactor.sCutL_eq_center
+      = (1 / 2 : ℂ) + Complex.I * CutL10.center := by
+    unfold Door3CutL10EtaFactor.sCutL
+    rw [← cutL10_s_eq]
   rw [← hsc]
   exact le_trans hbl hLower
 
@@ -385,8 +396,8 @@ with only a sign flip in the imaginary-part computation.
 
 namespace Door3CutL10EtaFactor
 
-/-- CutL10 `s`-point in closed form (`Re = 1/2`, `Im = -10`). -/
-noncomputable def sCutL : ℂ := (((1 / 2 : ℝ)) : ℂ) + (((-10 : ℝ)) : ℂ) * Complex.I
+/-- `sCutL` is defined above (before `Door3CutL10Center`) to avoid a forward
+reference from the zeta-certificate contract. -/
 
 theorem sCutL_re : sCutL.re = (1 / 2 : ℝ) := by
   simp [sCutL]
@@ -413,7 +424,7 @@ theorem sCutL_re_eq_sCutR_re :
 
 theorem sCutL_im_eq_neg_sCutR_im :
     sCutL.im = -Door3CutR10EtaFactor.sCutR.im := by
-  rw [sCutL_im, Door3CutR10EtaFactor.sCutR_im]; norm_num
+  rw [sCutL_im, Door3CutR10EtaFactor.sCutR_im]
 
 /-- Norm of `2^s` (mirror of `cutR10_two_cpow_norm`). -/
 theorem cutL10_two_cpow_norm (s : ℂ) :
@@ -573,11 +584,12 @@ which is already discharged in its home file (pending build check only).
 namespace Door3CutL10GammaConj
 
 open CentralCoverAssembly
+open scoped ComplexConjugate
 
 /-- Left Gamma point is the conjugate of the right Gamma point. -/
 theorem cutL10_gammaPoint_eq_conj_cutR10_gammaPoint :
     (((1 / 2 : ℂ) + Complex.I * CutL10.center) / 2)
-      = Complex.conj (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2) := by
+      = star (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2) := by
   have hL := Door3CutL10Center.cutL10_s_eq
   have hR := Door3CutR10Center.cutR10_s_eq
   rw [hL, hR]
@@ -589,7 +601,9 @@ theorem cutL10_gammaConjNorm :
     ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutL10.center) / 2)‖
       = ‖Complex.Gamma (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2)‖ := by
   have hpt := cutL10_gammaPoint_eq_conj_cutR10_gammaPoint
-  rw [hpt, Complex.Gamma_conj, Complex.norm_conj]
+  have hptc : (((1 / 2 : ℂ) + Complex.I * CutL10.center) / 2)
+      = conj (((1 / 2 : ℂ) + Complex.I * CutR10.center) / 2) := hpt
+  rw [hptc, Complex.Gamma_conj, Complex.norm_conj]
 
 /-- Gamma remainder from the banked right-lane certificate plus the proved
 conjugacy above. The premise type is byte-for-byte the banked certificate
@@ -662,8 +676,7 @@ theorem cutL10_mem_ball_re_bounds (z : ℂ)
           Complex.abs_re_le_norm _
       _ ≤ (1.56 : ℝ) := hd
   have here : (z - ((((-10 : ℝ)) : ℂ))).re = z.re + 10 := by
-    simp [Complex.sub_re]
-    ring
+    simp
   rw [here] at hre
   obtain ⟨hlo, hhi⟩ := abs_le.mp hre
   constructor <;> linarith
@@ -694,7 +707,7 @@ theorem cutL10_mem_ball_abs_norm_le (z : ℂ)
   have hdecomp : z = (z - ((((-10 : ℝ)) : ℂ))) + ((((-10 : ℝ)) : ℂ)) := by
     abel
   calc ‖z‖ = ‖(z - ((((-10 : ℝ)) : ℂ))) + ((((-10 : ℝ)) : ℂ))‖ := by
-        rw [hdecomp]
+        conv_lhs => rw [hdecomp]
     _ ≤ ‖z - ((((-10 : ℝ)) : ℂ))‖ + ‖((((-10 : ℝ)) : ℂ))‖ :=
         norm_add_le _ _
     _ ≤ (11.56 : ℝ) := by
@@ -713,7 +726,7 @@ theorem cutL10_mem_ball_shiftedS_re_bounds (z : ℂ)
 theorem cutL10_mem_ball_shiftedS_im_bounds (z : ℂ)
     (hz : z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1)) :
     (-11.56 : ℝ) ≤ (shiftedS z).im ∧ (shiftedS z).im ≤ (-8.44 : ℝ) := by
-  rw [shiftedS_im_eq]
+  rw [RHProofScaffold.LeafDecomp.shiftedS_im_eq]
   exact cutL10_mem_ball_re_bounds z hz
 
 /-- The shifted point avoids `0` (its imaginary part is `≤ -8.44`). -/
@@ -723,7 +736,7 @@ theorem cutL10_mem_ball_shiftedS_ne_zero (z : ℂ)
   intro h0
   have him : z.re = 0 := by
     have hcon := congrArg Complex.im h0
-    rw [shiftedS_im_eq] at hcon
+    rw [RHProofScaffold.LeafDecomp.shiftedS_im_eq] at hcon
     simp at hcon
     exact hcon
   linarith [(cutL10_mem_ball_re_bounds z hz).2]
@@ -735,7 +748,7 @@ theorem cutL10_mem_ball_shiftedS_ne_one (z : ℂ)
   intro h0
   have him : z.re = 0 := by
     have hcon := congrArg Complex.im h0
-    rw [shiftedS_im_eq] at hcon
+    rw [RHProofScaffold.LeafDecomp.shiftedS_im_eq] at hcon
     simp at hcon
     exact hcon
   linarith [(cutL10_mem_ball_re_bounds z hz).2]
@@ -754,7 +767,7 @@ theorem cutL10_ballPoly_upper (z : ℂ)
     ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ ≤ (67 : ℝ) := by
   have hz2 := cutL10_mem_ball_abs_norm_le z hz
   have h14 : ‖((1 / 4 : ℂ))‖ = ((1 / 4 : ℝ)) := by
-    have hcast : ((1 / 4 : ℂ)) = ((((1 / 4 : ℝ)) : ℂ)) := by norm_cast
+    have hcast : ((1 / 4 : ℂ)) = ((((1 / 4 : ℝ)) : ℂ)) := by simp
     rw [hcast, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by norm_num)]
   have h2 : ‖((2 : ℂ))‖ = (2 : ℝ) := by norm_num
   have hsq : ‖z ^ 2‖ = ‖z‖ ^ 2 := norm_pow z 2
@@ -781,7 +794,7 @@ theorem cutL10_ballPi_upper (z : ℂ)
   have hre : (-(shiftedS z / 2)).re = -(shiftedS z).re / 2 := by
     have hdiv : ((shiftedS z / 2 : ℂ)).re = (shiftedS z).re / 2 := by
       simp [Complex.div_ofNat]
-    rw [Complex.neg_re, hdiv]
+    rw [Complex.neg_re, hdiv, neg_div]
   rw [hre]
   have hslo := (cutL10_mem_ball_shiftedS_re_bounds z hz).1
   have hexp : (-(shiftedS z).re / 2) ≤ (1 : ℝ) := by linarith
