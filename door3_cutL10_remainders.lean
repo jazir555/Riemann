@@ -1094,13 +1094,43 @@ theorem cutL10_endpoint_pi_lower :
   rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
   have hre : (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)).re
       = (-(1 / 4) : ℝ) := by
-    simp [Complex.div_ofNat]
+    have h1 : ((((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)).re
+        = 1 / 4 := by
+      simp [Complex.div_ofNat]
+      norm_num
+    rw [Complex.neg_re, h1]
   rw [hre]
-  have hpi3 : (3 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_three
-  have hmono : (3 : ℝ) ^ (-(1 / 4 : ℝ)) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
-    apply Real.rpow_le_rpow (by norm_num) hpi3 (by norm_num)
-  have h3 : (7 / 10 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 4 : ℝ)) := by norm_num
-  exact le_trans h3 hmono
+  have hbase : (7 / 10 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
+    have hpi4 : Real.pi ≤ ((10 / 7 : ℝ) ^ (4 : ℕ)) := by
+      have h := Real.pi_lt_d2
+      have h4 : ((10 / 7 : ℝ) ^ (4 : ℕ)) = (10000 / 2401 : ℝ) := by norm_num
+      rw [h4]
+      norm_num at h ⊢
+      linarith
+    have hup : Real.pi ^ ((1 / 4 : ℝ)) ≤ (10 / 7 : ℝ) := by
+      have h14nn : (0 : ℝ) ≤ (1 / 4 : ℝ) := by norm_num
+      have hstep : Real.pi ^ ((1 / 4 : ℝ)) ≤ ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ))) :=
+        Real.rpow_le_rpow (le_of_lt Real.pi_pos) hpi4 h14nn
+      have heq : ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ))) = (10 / 7 : ℝ) := by
+        have hnn : (0 : ℝ) ≤ (10 / 7) := by norm_num
+        calc ((((10 / 7 : ℝ) ^ (4 : ℕ))) ^ ((1 / 4 : ℝ)))
+            = ((10 / 7) ^ ((((4 : ℕ)) : ℝ) * (1 / 4))) := by
+              rw [← Real.rpow_natCast, ← Real.rpow_mul hnn]
+          _ = ((10 / 7) ^ (1 : ℝ)) := by
+              congr 1
+              norm_num
+          _ = (10 / 7) := Real.rpow_one _
+      rw [heq] at hstep
+      exact hstep
+    have hpos7 : (0 : ℝ) < 7 / 10 := by norm_num
+    have hposP : (0 : ℝ) < Real.pi ^ ((1 / 4 : ℝ)) := Real.rpow_pos_of_pos Real.pi_pos _
+    have hmul : (7 / 10 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ 1 := by
+      calc (7 / 10 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ (7 / 10) * (10 / 7) :=
+            mul_le_mul_of_nonneg_left hup (by norm_num)
+        _ = 1 := by norm_num
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos), ← one_div, le_div_iff₀ hposP]
+    exact hmul
+  exact hbase
 
 /-- Poly times pi lower at the left endpoint: `>= 24` (mirror image of
 `cutR10_poly_pi_lower_endpoint`). -/
@@ -1115,7 +1145,7 @@ theorem cutL10_poly_pi_lower_endpoint :
         (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖ *
       ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖
       ≥ 35.7418 * (7 / 10) :=
-        mul_le_mul hpoly.le hpi (by norm_num) (by norm_num)
+        mul_le_mul hpoly.ge hpi (by norm_num) (norm_nonneg _)
     _ ≥ 24 := by norm_num
 
 /-- Shortfall implication: triple `>= 6/100` plus joint `<= 4/100` forces
@@ -1125,8 +1155,17 @@ theorem cutL10_joint_implies_zeta_cap (g : ℝ) (z0 : ℝ)
     (hJoint : g * z0 ≤ (4 / 100 : ℝ)) :
     z0 ≤ (2 / 3 : ℝ) := by
   have hpos : (0 : ℝ) < g := by linarith
-  rw [div_le_iff₀ hpos] at hg ⊢
-  nlinarith [hJoint]
+  have h1 : (4 / 100 : ℝ) = (2 / 3) * (6 / 100) := by norm_num
+  have h2 : (2 / 3 : ℝ) * (6 / 100) ≤ (2 / 3) * g :=
+    mul_le_mul_of_nonneg_left hg (by norm_num)
+  by_contra hcon
+  have hlt : (2 / 3 : ℝ) < z0 := lt_of_not_ge hcon
+  have hltmul : g * (2 / 3) < g * z0 := mul_lt_mul_of_pos_left hlt hpos
+  have h4 : g * z0 ≤ (2 / 3) * g := by linarith [hJoint, h1, h2]
+  have h5 : g * z0 ≤ g * (2 / 3) := by
+    calc g * z0 ≤ (2 / 3) * g := h4
+      _ = g * (2 / 3) := by ring
+  linarith [hltmul, h5]
 
 /-- Shifted-half imaginary part is nonzero on the left ball
 (`(s/2).im = s.im/2 <= -4.22`). -/
@@ -1163,7 +1202,6 @@ theorem cutL10_poly_times_xiQuot (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) (X : 
   have hsm : s * (s - 1) ≠ 0 := by
     apply mul_ne_zero hs0 (sub_ne_zero.mpr hs1)
   field_simp
-  ring
 
 /-- Entire extension equals `1/2 + poly * completed₀`. -/
 theorem cutL10_entire_eq_half_add_poly_completed (z : ℂ) :
@@ -1171,8 +1209,9 @@ theorem cutL10_entire_eq_half_add_poly_completed (z : ℂ) :
       (1 / 2 : ℂ) + ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
         completedRiemannZeta₀ (shiftedS z) := by
   have hpoly := Door3CutL10BallSup.cutL10_ballPoly_eq z
+  have hs : shiftedS z = (1 / 2 : ℂ) + Complex.I * z := rfl
   unfold xiShiftedEntire
-  rw [hpoly]
+  rw [hpoly, hs]
   ring
 
 /-- `classicalXi` four-factor unfolding with `zeta = riemannZeta`. -/
@@ -1182,7 +1221,6 @@ theorem cutL10_classicalXi_eq_fourFactor (s : ℂ) :
   have hz : zeta s = riemannZeta s := rfl
   unfold classicalXi XiFromPrefactor classicalXiPrefactor
   rw [hz]
-  ring
 
 /-- Product identity CLOSED on the left ball (discharges `hProd`). -/
 theorem cutL10_hProd_closed (z : ℂ)
