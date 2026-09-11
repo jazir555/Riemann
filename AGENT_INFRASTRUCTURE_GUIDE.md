@@ -4187,6 +4187,21 @@ sorry-free infrastructure and the complete commit ledger above.
   poly.lean` ~830 lines, registered, no build): 31/31
   poly floors closed (batch B carries none — true
   count 31 not 40), zero false floors.
+- 2026-09-11 PREM-GAMMA delivered (NEW `door3_premise_
+  gamma.lean`, registered, no build): honest partial —
+  40/40 wide uppers via TierC-wide reuse + shift
+  infrastructure banked; 0/30 lowers (open Props,
+  need Stirling-disc wave); tight ≤10 open.
+- 2026-09-11 PREM-TIER delivered (`98241f5b`):
+  Cauchy EXCLUDED everywhere (67200 vs 0.05-0.07,
+  41 mismatches proved); balls systematized as open
+  premises (loose 3 orders). Needs direct-deriv wave.
+- 2026-09-11 PREM-PI delivered (NEW `door3_premise_
+  pi.lean` ~1130 lines, registered, no build): ALL
+  pi floors+uppers closed, zero false floors (alias
+  rewrite left to patch).
+- 2026-09-11 HEADC empty (no file — size failure
+  mode); re-fired HEADC1 (n=45..54, min viable 5).
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
