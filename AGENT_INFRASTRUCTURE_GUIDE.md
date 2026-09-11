@@ -4293,6 +4293,13 @@ sorry-free infrastructure and the complete commit ledger above.
   reflection consequence. Partial (M1–M4 named).
   PSI-SLOPE fired (finite-difference ψ-discs from
   slope forms → discharge DIGAMMA premises).
+- 2026-09-11 PSI-SLOPE delivered (`b9471d0a`, NEW
+  psi_slope file, registered, no build): real discs
+  CLOSED tighter than assumed — complex transfer
+  BLOCKED (Wendel real-only). Same wall as FEED.
+  COMPLEX-WENDEL fired (Im-discount lower or
+  log-convex transfer; honest-useless verdict
+  allowed).
 - 2026-09-11 CONCENTRATION: all gamma-front walls =
   one missing lemma. STIRLING-REM fired (master
   explicit-remainder logΓ; priority |Γ|-lower →
