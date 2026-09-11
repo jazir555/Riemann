@@ -4287,6 +4287,12 @@ sorry-free infrastructure and the complete commit ledger above.
   explicit-remainder Stirling for ψ.
   ETA-DERIV-IN empty (too big twice) — ETA-MICRO
   fired instead (pair/tail shapes + 1 demo).
+- 2026-09-11 STIRLING-REM delivered (`b678ef5d`, NEW
+  rem file, registered, no build): Wendel two-sided
+  + log/slope forms + real lowers (1/2 on [1,2]) +
+  reflection consequence. Partial (M1–M4 named).
+  PSI-SLOPE fired (finite-difference ψ-discs from
+  slope forms → discharge DIGAMMA premises).
 - 2026-09-11 CONCENTRATION: all gamma-front walls =
   one missing lemma. STIRLING-REM fired (master
   explicit-remainder logΓ; priority |Γ|-lower →
