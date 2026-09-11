@@ -4126,6 +4126,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (`b73d00cd`, 50/12): 8 tail fixes (hbase fourth-root
   calc, .ge, by_contra assembly, hs-rfl, stray rings);
   Tier-B axioms all clean. CutL10 module CLOSED.
+- 2026-09-11 BATCHE delivered (NEW `door3_cells_
+  batchE.lean` ~1300 lines, registered, no build):
+  SEVEN leaves (brief said 6; R01+R05–R10 = 7) all
+  closed-conditional, zero feasibility-negative (R10
+  tightest 1.04×). 40/40 main-band leaves now claimed.
+  42 premises with TRUE docs.
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
