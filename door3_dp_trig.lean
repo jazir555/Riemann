@@ -134,10 +134,9 @@ theorem dp_sin_enclose_of_reduced (x : ℝ) (hx : |x| ≤ 40) (k : ℤ) (r : ℝ
     have hfloor := dp_sin_cubic_floor (-r) hs0
     have hBs : Real.sin (-r) ≤ -r - (-r) ^ 3 / 6 + |-r| ^ 5 / 100 :=
       dp_sin_cubic_ceil100 (-r) hs1
-    have hneg : -(-r) = r := neg_neg r
     have hsin_r : Real.sin r = -Real.sin (-r) := by
-      rw [← hneg]
-      exact Real.sin_neg _
+      have h := Real.sin_neg (-r)
+      rwa [neg_neg] at h
     have habs_eq : |-r| = |r| := abs_neg r
     have hcub : -r - (-r) ^ 3 / 6 = -(r - r ^ 3 / 6) := by ring
     rw [habs_eq] at hBs
