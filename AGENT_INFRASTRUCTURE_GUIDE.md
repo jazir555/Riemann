@@ -4020,6 +4020,23 @@ sorry-free infrastructure and the complete commit ledger above.
   confirm), BFIX (ballsup tail), CLFIX (cutL10 tail),
   STFIX (stirling tail), RUFIX (rouche). Guarded +
   retry×8 + 15-min kill.
+- 2026-09-11 CSFIX+BAFIX GREEN, committed (`b2ff0b6d`,
+  1/1 + 6/6 minimal): suppliers `le_div_iff₀`→
+  `div_le_iff₀`; batchA `norm_nonneg`→`by norm_num`
+  + `positivity` (axioms clean).
+- 2026-09-11 CLFIX located-RED (no edits): cutL10
+  tail clean (no sorry, numerals ok) — BLOCKED on
+  upstream zeta RED (verbatim errors relayed).
+  CLFIX ALSO flags `sorryAx` in zeta-tail dependency
+  infos. Coordinator audit: NO sorry tactic in zeta
+  tail or any door3 file; repo sorrys live in
+  JensenTranslation×5, KadiriHadamardAffine×3,
+  KadiriZeroFree×5, float_xi_bridge×1. If ZU-tail
+  theorems inherit sorryAx it comes via UPSTREAM
+  banked lemmas (e.g. `zeta_lower_of_Sn_tail_factor`,
+  `zetaCell_even_remainder_le`). PENDING on ZUFIX
+  green: inspect `#print axioms` per tail theorem in
+  build log, trace any sorryAx to source lemma.
 - 2026-09-11 DP-TRIG delivered (`8d7324ab`, NEW
   `door3_dp_trig.lean` ~140 lines Mathlib-only,
   registered, no build): quad floor, cubic floor,
