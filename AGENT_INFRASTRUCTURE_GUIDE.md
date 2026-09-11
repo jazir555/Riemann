@@ -3980,6 +3980,25 @@ sorry-free infrastructure and the complete commit ledger above.
   namespace-close repositioning, benign; sorry-clean)
   — committed `919a8163`. BUILD-SWEEP/HFE/ROUCHE gave
   no report (died in restart) — RE-FIRED below.
+- 2026-09-11 HFE delivered (`8eeb8902`, ballsup 144/0,
+  no build): Euler half CLOSED
+  (`cutR10_reflected_Euler_two_closed`, t.re≤−1 sliver);
+  chi≤3 ABSENT repo-wide (banked chi exp-scale: exp13/
+  exp22/uniform-8-conditional); middle reflected≤2 also
+  open (true ≈4 — product framing needed, not rigid
+  3×2). Conditionals banked (`cutR10_hFE_of_chi_and_
+  middle`). GAMMA-SUP fired (stirling tail): product
+  ≤6 via shift-recurrence + sin-upper + convexity.
+- 2026-09-11 ROUCHE delivered (NEW `door3_cutoff_
+  rouche.lean`, registered): OBSTRUCTION PROVED —
+  uppers alone CANNOT certify ≠0 (margin ≤4≮1; witness
+  w=6). Conj-mirror banked (one premise → both boxes).
+  Pivot: weak two-sided disc (c,r,κ), tolerance
+  generous (r<1.549 works at c≈1.549). STRATEGIC
+  RESULT: every route (fencing lowers, Rouché disc,
+  subdivision floors) needs two-sided oscillation
+  control → DP-ENCLOSE fired (complex Dirichlet-head
+  enclosure machine, demo on parked Im-S₄ need).
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
