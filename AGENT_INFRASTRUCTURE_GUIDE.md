@@ -3999,6 +3999,16 @@ sorry-free infrastructure and the complete commit ledger above.
   subdivision floors) needs two-sided oscillation
   control → DP-ENCLOSE fired (complex Dirichlet-head
   enclosure machine, demo on parked Im-S₄ need).
+- 2026-09-11 GAMMA-SUP delivered (`4fb5c005`, stirling
+  427/0, no build): sin-upper exp19 (box-correct),
+  Gamma-refl ≤600 (shift-recurrence, same-lane), chi box
+  ≤2·7·600·exp19. Best product ≈3e12 vs 6 (gap 5e11×).
+  STRUCTURAL: c=1/2 can't cancel sin growth; product
+  IS zeta(t) by FE so splitting is artifact. hFE≤6 now
+  feeds NOTHING live (K=2 gap dead) — Gamma line
+  PAUSED unless DP needs uppers. DP-ENCLOSE came back
+  empty (too big); re-fired STAGE 1 (`door3_dp_trig`:
+  trig enclosures only, partial OK, stage 2 deferred).
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
