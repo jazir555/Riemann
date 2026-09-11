@@ -4273,6 +4273,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (R35/R25/E05/R36/R26/E06 → re-tier).
   ETA-DERIV empty (too big) — re-fired INNER-only.
   GAMMA-FEED fired (plug 0.77 → 24 lowers).
+- 2026-09-11 GAMMA-FEED honest-BLOCKED (NEW `door3_
+  gamma_feed.lean`, registered, no build): 24 sound
+  conditionals banked, but 0.77 real does NOT
+  transfer (bridge upper-only; premise numerically
+  FALSE at large |Im|). TRUE missing input = complex
+  Stirling LOWER |Γ| (not real). Await DIGAMMA
+  (Stirling series may serve both ψ and |Γ|-lower)
+  before firing STIRLING-LOW.
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
