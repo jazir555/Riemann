@@ -1791,7 +1791,7 @@ theorem D3SG_CHI_Gamma_refl_box_le (t : ℂ)
     by_cases hmid : (1 - t).re ≤ 0.95
     · exact D3SG_CHI_Gamma_upper_mid (1 - t) hlo_mid hmid
     · have hlt : (0.95 : ℝ) < (1 - t).re := by linarith
-      exact D3SG_CHI_Gamma_upper_high (1 - t) hlt hre2
+      exact le_trans (D3SG_CHI_Gamma_upper_high (1 - t) hlt hre2) (by norm_num)
 
 #print axioms D3SG_CHI_Gamma_refl_box_le
 
@@ -1838,6 +1838,7 @@ theorem D3SG_CHI_sin_box_le (t : ℂ)
       abs_of_nonneg (by linarith [Real.pi_pos] : (0 : ℝ) ≤ Real.pi / 2)]
   have harg : |((((Real.pi : ℂ)) * t / 2)).im| ≤ 19 := by
     rw [D3SG_CHI_sin_arg_im_eq, e]
+    have hpi : Real.pi < 3.1416 := Real.pi_lt_d4
     have h2 := mul_le_mul (le_of_lt (by linarith : Real.pi / 2 < 3.1416 / 2)) habs
       (abs_nonneg _) (show (0 : ℝ) ≤ 3.1416 / 2 by norm_num)
     have hnum : (3.1416 / 2 : ℝ) * 12 ≤ 19 := by norm_num
