@@ -4154,6 +4154,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-11 sorry-hunt: 4 prover agents fired
   (JensenTranslation×5, KadiriHadamardAffine×3,
   KadiriZeroFree×5, float_xi_bridge×1).
+- 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
+  disjoint files): DISC-HEAD A/B/C (terms 5–24 /
+  25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
+  M-pick for ≤1/2) + PREM-POLY/PI/GAMMA/ZETA/TIER
+  (5 premise-class files across 40 cells). Next:
+  disc assembly + BottomStrip/edge/tail + capstone.
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
