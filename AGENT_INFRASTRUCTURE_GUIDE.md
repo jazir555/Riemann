@@ -4253,6 +4253,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (+0.12), R06 at N128 (+0.03); R04/R25 need N>128.
   Pair-cost 224 lines/center, parallelizable.
   R05-CLOSE fired (first unconditional cell-zeta).
+- 2026-09-11 GAMDISC delivered (`946c56fc`, NEW
+  gamma_disc file, registered, no build): 30
+  conditionals closed; single missing input = REAL
+  Gamma lower on [1,2.1] (target 0.88, true min
+  0.8856). REALGAM-LOW fired (any route ≥0.80 wins,
+  with survival table).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
