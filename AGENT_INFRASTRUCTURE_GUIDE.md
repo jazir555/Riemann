@@ -4259,6 +4259,13 @@ sorry-free infrastructure and the complete commit ledger above.
   Gamma lower on [1,2.1] (target 0.88, true min
   0.8856). REALGAM-LOW fired (any route ≥0.80 wins,
   with survival table).
+- 2026-09-11 R05 honest-negative + DERIVUP gaps
+  committed (`77860753`): ZN64's +0.12 used 0.5 both
+  ways (invalid) — honest gap −2.38 (true-est −0.20);
+  fix = tight-cF + N128+. DERIVUP: poly'/pi' closed,
+  gamma' 16M–70M× gap, zeta' structural Cauchy gap.
+  FIRED: DIGAMMA (ψ-Stirling → gamma') + ETA-DERIV
+  (log-weighted DP series → zeta').
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
