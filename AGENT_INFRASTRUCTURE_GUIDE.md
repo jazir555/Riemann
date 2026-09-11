@@ -4037,6 +4037,17 @@ sorry-free infrastructure and the complete commit ledger above.
   `zetaCell_even_remainder_le`). PENDING on ZUFIX
   green: inspect `#print axioms` per tail theorem in
   build log, trace any sorryAx to source lemma.
+- 2026-09-11 STFIX green, committed (`55e7d948`, 2/1
+  lines, full CHI axioms list clean).
+- 2026-09-11 LOCK-THRASHING: OAFIX + SEFIX + DP-S2 all
+  TIMEOUT on guard starvation (proof work done, builds
+  starved). SEFIX 4/4 committed (`95244018`, mirrors
+  banked). OAFIX re-fired with 14×90s patience. DP-S2
+  correctly refused stage 2 on unverified stage 1.
+  POLICY: no new builders until wave drains; then ONE
+  sequential confirm-sweep (sliver_edge, batchC,
+  tail_edge, ballsup, cutL10, rouche, off_axis, srect,
+  trig+terms).
 - 2026-09-11 DP-TRIG delivered (`8d7324ab`, NEW
   `door3_dp_trig.lean` ~140 lines Mathlib-only,
   registered, no build): quad floor, cubic floor,
