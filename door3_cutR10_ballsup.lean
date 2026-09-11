@@ -1583,8 +1583,9 @@ theorem cutR10_zeta_six_of_base5_premises (s : ℂ)
     (hEta5 : ‖zeta s‖ * ‖(1 : ℂ) - (5 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 3 / 2)
     (hFac5 : (1 / 4 : ℝ) ≤ ‖(1 : ℂ) - (5 : ℂ) ^ ((1 : ℂ) - s)‖) :
     ‖zeta s‖ ≤ 6 := by
-  have hmul : ‖zeta s‖ * (1 / 4 : ℝ) ≤ (3 / 2 : ℝ) :=
+  have hle : ‖zeta s‖ * (1 / 4 : ℝ) ≤ ‖zeta s‖ * ‖(1 : ℂ) - (5 : ℂ) ^ ((1 : ℂ) - s)‖ :=
     mul_le_mul_of_nonneg_left hFac5 (norm_nonneg _)
+  have hmul : ‖zeta s‖ * (1 / 4 : ℝ) ≤ (3 / 2 : ℝ) := le_trans hle hEta5
   calc ‖zeta s‖ = ‖zeta s‖ * (1 / 4 : ℝ) * 4 := by ring
     _ ≤ (3 / 2 : ℝ) * 4 :=
         mul_le_mul_of_nonneg_right hmul (by norm_num)
