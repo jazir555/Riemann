@@ -4281,6 +4281,16 @@ sorry-free infrastructure and the complete commit ledger above.
   Stirling LOWER |Γ| (not real). Await DIGAMMA
   (Stirling series may serve both ψ and |Γ|-lower)
   before firing STIRLING-LOW.
+- 2026-09-11 DIGAMMA delivered (`91e5f426`, NEW
+  digamma file, registered, no build): ψ framework
+  conditional; gaps 4×–269× (was 16M×); missing =
+  explicit-remainder Stirling for ψ.
+  ETA-DERIV-IN empty (too big twice) — ETA-MICRO
+  fired instead (pair/tail shapes + 1 demo).
+- 2026-09-11 CONCENTRATION: all gamma-front walls =
+  one missing lemma. STIRLING-REM fired (master
+  explicit-remainder logΓ; priority |Γ|-lower →
+  ψ-disc → π/2-upper).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
