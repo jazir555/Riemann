@@ -40136,8 +40136,13 @@ theorem sCutL10Z_head4_ge :
   have htri : ‖∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k‖ ≤
       ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ +
         ‖etaPairTerm sCutL10Z 1‖ := by
-    rw [hdecomp]
-    exact norm_add_le _ _
+    have hsub : (∑ k ∈ Finset.range 2, etaDirichletTerm sCutL10Z k) =
+        (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) -
+          etaPairTerm sCutL10Z 1 := by
+      rw [hdecomp]
+      ring
+    rw [hsub]
+    exact norm_sub_le _ _
   have hbound : (28 / 100 : ℝ) - 201 / 100 ≤
       ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ := by
     linarith [hS2, hp, htri]
@@ -40259,8 +40264,7 @@ theorem sCutL10Z_S4_im_eq :
       Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
   have hmap : (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k).im =
       ∑ k ∈ Finset.range 4, (etaDirichletTerm sCutL10Z k).im := by
-    rw [Complex.add_im]
-    rfl
+    exact Complex.im_sum _ _
   rw [hmap, hsum]
 
 /-- Conditional Im lift: any `|Im S₄| ≥ c` bound lifts to `‖S₄‖ ≥ c` in one step. -/
@@ -40394,8 +40398,13 @@ theorem sCutL10Z_head6_ge_N6 :
   have htri : ‖∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k‖ ≤
       ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ +
         ‖etaPairTerm sCutL10Z 2‖ := by
-    rw [hdecomp]
-    exact norm_add_le _ _
+    have hsub : (∑ k ∈ Finset.range 4, etaDirichletTerm sCutL10Z k) =
+        (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) -
+          etaPairTerm sCutL10Z 2 := by
+      rw [hdecomp]
+      ring
+    rw [hsub]
+    exact norm_sub_le _ _
   have hbound : (-173 / 100 : ℝ) - 92 / 100 ≤
       ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ := by
     linarith [hS4, hp, htri]
@@ -40412,8 +40421,13 @@ theorem sCutL10Z_head8_ge_N8 :
   have htri : ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k‖ ≤
       ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k‖ +
         ‖etaPairTerm sCutL10Z 3‖ := by
-    rw [hdecomp]
-    exact norm_add_le _ _
+    have hsub : (∑ k ∈ Finset.range 6, etaDirichletTerm sCutL10Z k) =
+        (∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k) -
+          etaPairTerm sCutL10Z 3 := by
+      rw [hdecomp]
+      ring
+    rw [hsub]
+    exact norm_sub_le _ _
   have hbound : (-265 / 100 : ℝ) - 56 / 100 ≤
       ‖∑ k ∈ Finset.range 8, etaDirichletTerm sCutL10Z k‖ := by
     linarith [hS6, hp, htri]
@@ -40639,8 +40653,14 @@ used, mirroring `sCutL10Z` def (line 39762) with `-10` → `+10`. -/
 theorem sCutL10Z_conj_sCutR10Z :
     sCutL10Z = (starRingEnd ℂ) ((((1 / 2 : ℝ)) : ℂ) + (((10 : ℝ)) : ℂ) * Complex.I) := by
   apply Complex.ext
-  · simp [sCutL10Z, starRingEnd_apply, Complex.star_def]
-  · simp [sCutL10Z, starRingEnd_apply, Complex.star_def]
+  · rw [sCutL10Z_re, starRingEnd_apply, Complex.star_def, Complex.conj_re,
+      Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.I_re, Complex.I_im]
+    norm_num
+  · rw [sCutL10Z_im, starRingEnd_apply, Complex.star_def, Complex.conj_im,
+      Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    norm_num
 
 /-- Conjugation norm identity: `‖riemannZeta sCutL10Z‖` equals the right-side
 norm at `1/2 + 10*I`. Via Mathlib `riemannZeta_conj` plus norm-conj. -/

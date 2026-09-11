@@ -363,7 +363,7 @@ theorem zeta_uniform_z_of_denom (s : ℂ)
 theorem srect_poly_le (s : ℂ) (hsnorm : ‖s‖ ≤ (12 : ℝ)) :
     ‖(1 / 2 : ℂ) * s * (s - 1)‖ ≤ (78 : ℝ) := by
   have hhalf : ‖((1 / 2 : ℂ))‖ = ((1 / 2 : ℝ)) := by
-    have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by norm_cast
+    have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by simp
     rw [hcast, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by norm_num)]
   have hsm : ‖s - 1‖ ≤ (13 : ℝ) := by
     have h1 : ‖((1 : ℂ))‖ = (1 : ℝ) := norm_one
@@ -387,6 +387,7 @@ theorem srect_pi_le (s : ℂ) (hlo : (0.01 : ℝ) ≤ s.re) :
     simp [Complex.div_ofNat]
   have hre : (-(s / 2 : ℂ)).re = -s.re / 2 := by
     rw [Complex.neg_re, hdiv]
+    ring
   rw [hre]
   have hexp : -s.re / 2 ≤ (0 : ℝ) := by linarith
   have hbase : Real.pi ^ (-s.re / 2) ≤ Real.pi ^ (0 : ℝ) :=
