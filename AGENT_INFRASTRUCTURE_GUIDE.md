@@ -4132,6 +4132,13 @@ sorry-free infrastructure and the complete commit ledger above.
   closed-conditional, zero feasibility-negative (R10
   tightest 1.04×). 40/40 main-band leaves now claimed.
   42 premises with TRUE docs.
+- 2026-09-11 DP-S2 delivered (`0497e6b3`, NEW terms
+  file 196 lines, registered, self-built GREEN): cos
+  mirror + pipeline shapes banked, but demo PUNTED
+  (radius-2 discs, numeral 0). Remainder gives exact
+  recipe (octant ±π/2 shifts + TRUE centers). STAGE 3
+  fired (terms tail): tight 1/100 discs + S₄-Im
+  ≥145/100 fold.
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
