@@ -4266,6 +4266,13 @@ sorry-free infrastructure and the complete commit ledger above.
   gamma' 16M–70M× gap, zeta' structural Cauchy gap.
   FIRED: DIGAMMA (ψ-Stirling → gamma') + ETA-DERIV
   (log-weighted DP series → zeta').
+- 2026-09-11 REALGAM-LOW delivered (`09014d69`, NEW
+  real_low file, registered, no build): 0.77 CLOSED
+  (target 0.88 missed — exterior secant tops out;
+  upgrade = log-convex 0.78). 24/30 feedable, 6 open
+  (R35/R25/E05/R36/R26/E06 → re-tier).
+  ETA-DERIV empty (too big) — re-fired INNER-only.
+  GAMMA-FEED fired (plug 0.77 → 24 lowers).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
