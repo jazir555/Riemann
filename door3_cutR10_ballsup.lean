@@ -1757,3 +1757,147 @@ theorem cutR10_FE_factor_shortfall (chi right : ℝ)
   linarith
 
 end Door3CutR10BallSup
+
+/-! # APPEND-4 (hFE patch, append-only tail; LF): Euler half CLOSED, chi half OPEN.
+
+Verdict first: hFE NOT CLOSED on the full left rectangle
+  `t.re in [-1.06, 3/2]`, `t.im in [8.44, 11.56]`
+  (`cutR10_closedBall_sup_FEroute` premise:
+  `∀ t, ... → ‖zeta t‖ ≤ 3 * 2`).
+Euler half CLOSED below (`cutR10_reflected_Euler_two_closed`: reflected
+`‖zeta (1 - t)‖ ≤ 2` whenever `t.re ≤ -1`, from the banked
+`cutR10_zeta_rightEdge_two_closed`); FE bridge CLOSED as a conditional
+(`cutR10_zeta_of_chi_reflected` from Mathlib `riemannZeta_one_sub`).
+Chi half OPEN: no banked `‖chi‖ ≤ 3` exists anywhere. Banked chi numerals
+are exponential-scale, all far above 3:
+`zeta_rigorous.zetaChi_norm_le` (symbolic `2 * (2*pi)^(-Re) * ‖Gamma‖ * exp`),
+`R02_D3_zetaChi_le` (`2*1*4*exp 13`), tail `2*1*G*exp 22`,
+line-095 `8 * exp (3.1416 * |Im| / 2)`; the only uniform `≤ 8`
+(`R02_D3_chi_uniform_of_expGamma`) is conditional on the missing
+line-uniform Stirling decay `‖Gamma‖ ≤ 4 * exp (-1.58 * |Im|)` on
+`Re = 0.95`, itself absent from Mathlib. Nothing at `≤ 3` on the needed
+box (`(1 - t).re in [-0.50, 2.06]`, `(1 - t).im in [-11.56, -8.44]`).
+Domain mismatch quantified: reflected Euler (`Re ≥ 2`) covers only the
+`t.re ≤ -1` sliver of hFE, i.e. width 0.06 of the full 2.56 width
+(`-1.06` to `3/2`); the middle `(-1, 3/2]` needs a reflected middle-strip
+`≤ 2` that Euler does not supply. Tightest fully-closed partials banked
+below: reflected Euler unconditional + sliver hFE conditional on chi `≤ 3`
++ full hFE conditional on chi `≤ 3` and the middle reflected `≤ 2`.
+No new imports; lakefile untouched; nothing committed.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Local FE chi factor, same shape as Mathlib `riemannZeta_one_sub`:
+`chi(s) = 2 * (2*pi)^(-s) * Gamma s * cos (pi * s / 2)`. -/
+noncomputable def cutR10_chiFE (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s *
+    Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- FE side conditions from the height band: `Im (1 - t) = -Im t ≠ 0`
+rules out every `s = -n` and `s = 1`. -/
+theorem cutR10_FE_side (t : ℂ)
+    (hilo : (8.44 : ℝ) ≤ t.im) (hihi : t.im ≤ (11.56 : ℝ)) :
+    (∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) ∧ (1 - t) ≠ 1 := by
+  have him : (1 - t).im = -t.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  constructor
+  · intro n hn
+    have hcon := congrArg Complex.im hn
+    rw [him] at hcon
+    simp at hcon
+    linarith
+  · intro hcon1
+    have hcon := congrArg Complex.im hcon1
+    rw [him] at hcon
+    simp at hcon
+    linarith
+
+/-- FE restated through the local chi: `zeta t = chi (1 - t) * zeta (1 - t)`. -/
+theorem cutR10_zeta_eq_chi_mul_reflected (t : ℂ)
+    (hs1 : ∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) (hs2 : (1 - t) ≠ 1) :
+    riemannZeta t = cutR10_chiFE (1 - t) * riemannZeta (1 - t) := by
+  have h := riemannZeta_one_sub (s := 1 - t) hs1 hs2
+  rw [sub_sub_cancel] at h
+  unfold cutR10_chiFE
+  exact h
+
+/-- CLOSED Euler half, reflected form: `t.re ≤ -1 → ‖zeta (1 - t)‖ ≤ 2`
+from the banked `cutR10_zeta_rightEdge_two_closed` (`δ = 1` Euler). -/
+theorem cutR10_reflected_Euler_two_closed (t : ℂ)
+    (ht : t.re ≤ (-1 : ℝ)) :
+    ‖zeta (1 - t)‖ ≤ 2 := by
+  have hre : (2 : ℝ) ≤ (1 - t).re := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  exact cutR10_zeta_rightEdge_two_closed (1 - t) hre
+
+/-- CLOSED conditional bridge: chi cap `C` times reflected cap `Z`. -/
+theorem cutR10_zeta_of_chi_reflected (t : ℂ)
+    (hs1 : ∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) (hs2 : (1 - t) ≠ 1)
+    (C Z : ℝ)
+    (hC : ‖cutR10_chiFE (1 - t)‖ ≤ C)
+    (hZ : ‖zeta (1 - t)‖ ≤ Z) :
+    ‖zeta t‖ ≤ C * Z := by
+  have hz : zeta t = riemannZeta t := rfl
+  have hz2 : zeta (1 - t) = riemannZeta (1 - t) := rfl
+  have hFE := cutR10_zeta_eq_chi_mul_reflected t hs1 hs2
+  have hC0 : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) hC
+  have hZr : ‖riemannZeta (1 - t)‖ ≤ Z := by
+    rw [← hz2]
+    exact hZ
+  rw [hz, hFE, norm_mul]
+  exact mul_le_mul hC hZr (norm_nonneg _) hC0
+
+/-- Tightest closed partial on the Euler sliver: `t.re in [-1.06, -1]`
+gives hFE shape `≤ 3 * 2` conditional on the chi cap `≤ 3` only. -/
+theorem cutR10_hFE_sliver_of_chi (t : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (-1 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ t.im) (hihi : t.im ≤ (11.56 : ℝ))
+    (hChi : ‖cutR10_chiFE (1 - t)‖ ≤ 3) :
+    ‖zeta t‖ ≤ 3 * 2 := by
+  have hside := cutR10_FE_side t hilo hihi
+  have hZ := cutR10_reflected_Euler_two_closed t hhi
+  exact cutR10_zeta_of_chi_reflected t hside.1 hside.2 3 2 hChi hZ
+
+/-- Full-hFE residual as an explicit conditional: chi `≤ 3` on the left
+rectangle plus reflected `≤ 2` on `(1 - t).re in [-0.50, 2.06]`,
+`(1 - t).im in [-11.56, -8.44]` give the exact hFE premise shape.
+The second premise is the open middle strip (Euler supplies only the
+`t.re ≤ -1` sliver); the first premise is the open chi cap. -/
+theorem cutR10_hFE_of_chi_and_middle
+    (hChi : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) →
+      ‖cutR10_chiFE (1 - t)‖ ≤ 3)
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) →
+      ‖zeta u‖ ≤ 2) :
+    ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) →
+      ‖zeta t‖ ≤ 3 * 2 := by
+  intro t hlo hhi hilo hihi
+  have hside := cutR10_FE_side t hilo hihi
+  have hre1 : (-0.50 : ℝ) ≤ (1 - t).re := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have hre2 : (1 - t).re ≤ (2.06 : ℝ) := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have him1 : (-11.56 : ℝ) ≤ (1 - t).im := by
+    have heq : (1 - t).im = -t.im := by
+      rw [Complex.sub_im, Complex.one_im, zero_sub]
+    rw [heq]
+    linarith
+  have him2 : (1 - t).im ≤ (-8.44 : ℝ) := by
+    have heq : (1 - t).im = -t.im := by
+      rw [Complex.sub_im, Complex.one_im, zero_sub]
+    rw [heq]
+    linarith
+  have hC := hChi t hlo hhi hilo hihi
+  have hZ := hMid (1 - t) hre1 hre2 him1 him2
+  exact cutR10_zeta_of_chi_reflected t hside.1 hside.2 3 2 hC hZ
+
+end Door3CutR10BallSup
