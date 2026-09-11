@@ -4117,6 +4117,11 @@ sorry-free infrastructure and the complete commit ledger above.
   6 UNCLAIMED (R01, R05–R10); BottomStrip open;
   edge strips 0/20. Fired WRAPPER (new bridge file)
   + BATCHE (6 leaves, 12-step template).
+- 2026-09-11 WRAPPER CLOSED (NEW `door3_hmain_bridge.
+  lean`, 34 lines, registered, no build):
+  `hmain_of_full_central_covered` — shapes aligned
+  directly. Hmain now needs ONLY FullCentral (80
+  leaves) + BottomStrip.
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
