@@ -4168,6 +4168,25 @@ sorry-free infrastructure and the complete commit ledger above.
   BorelC? Zeta23? float_*? cert files? zero-free
   regions covering the box? non-MVT tails?) before
   AFE-build-vs-concede decision.
+- 2026-09-11 MACHINE-RECON delivered: NOTHING banked
+  closes the disc (counts/thin-≠0/Float-fuel/tables
+  all wrong output type; every tail in 30k-line zeta
+  file is MVT-family; Kadiri edge covers outer ~1/3
+  conditional on AnalyticInputAtZero; middle gap
+  (0.006,0.994) explicitly excluded everywhere).
+  AFE = weeks, not sessions. DECISION (coordinator):
+  cutoff disc DEAD structurally (min_N total ≈3.98
+  > 1.549 at ANY N — analytic wall, not arithmetic).
+  Fallback: cutoff cells go CONDITIONAL (Kadiri-edge
+  slivers via explicit AnalyticInputAtZero hypothesis
+  + middle gap as named open premise — same honest-
+  conditional standard as the sorry-hunt). Head A/B/C
+  land as infrastructure (no assembly fired); premise
+  waves + TAIL unaffected (low-t tradeoffs live).
+- 2026-09-11 PREM-POLY delivered (NEW `door3_premise_
+  poly.lean` ~830 lines, registered, no build): 31/31
+  poly floors closed (batch B carries none — true
+  count 31 not 40), zero false floors.
 - 2026-09-11 ENDGAME WAVE ×9 fired (all write-only,
   disjoint files): DISC-HEAD A/B/C (terms 5–24 /
   25–44 / 45–64, 1/100 discs) + DISC-TAIL (zeta tail,
