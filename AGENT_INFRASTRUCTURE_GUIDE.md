@@ -4109,6 +4109,14 @@ sorry-free infrastructure and the complete commit ledger above.
   sorryAx at 535/987 GONE. Exposed CUTL-D tail RED
   (8 routine errors ≥1096). CUTL-TAILFIX fired (BFIX2
   precedents attached).
+- 2026-09-11 HMAIN recon DELIVERED (read-only): Hmain
+  fully OPEN (2 proved implications from open
+  antecedents + 1 missing ~5-line wrapper
+  `full_central_covered → XiCentralMainBand10`).
+  34/40 leaves claimed (all conditional, 0 closed);
+  6 UNCLAIMED (R01, R05–R10); BottomStrip open;
+  edge strips 0/20. Fired WRAPPER (new bridge file)
+  + BATCHE (6 leaves, 12-step template).
 - 2026-09-11 TFFIX GREEN, committed (`957e4b43`,
   2/3): double-neg rewrite restructured. DP STAGE 2
   re-fired (NEW `door3_dp_terms.lean`: cos mirror +
