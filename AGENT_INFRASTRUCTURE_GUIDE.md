@@ -4225,8 +4225,17 @@ sorry-free infrastructure and the complete commit ledger above.
   R05 N32 −0.10 (trend may close ~N64); all 31 open.
 - 2026-09-11 GAMLOW delivered (NEW `door3_gamma_low.
   lean`, registered, no build): 34 denominators +
-  shift infra banked; 0/30 lowers (need π/2-rate +
+  shift infra   banked; 0/30 lowers (need π/2-rate +
   Stirling-disc; banked reflection 2–3 orders short).
+- 2026-09-11 TRUE-MEASURE delivered (numerical, mpmath
+  50dps, 6 cells + scans): tiers TIGHT-but-TRUE —
+  margins 1.01×(R31) to 1.42×(R05), none factually
+  false; Cauchy overshoots ~10⁶×; ball-sup cap 3×10⁴
+  slack. DECISION: subdivide + re-tier everywhere
+  (M raised ~2×, r shrunk, crude-certified bounds
+  fit with TRUE headroom); prove-tighter only for
+  R05. SUBDIV-DESIGN fired (counts + re-tiers +
+  feasibility as proved arithmetic).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
