@@ -3961,6 +3961,25 @@ sorry-free infrastructure and the complete commit ledger above.
   Fired: BUILD-SWEEP (11 unbuilt modules, guarded,
   diagnose-only) + CUTOFF-ARCH recon (wiring needs?
   floors-vs-≠0? Door-4 upper convergence?).
+- 2026-09-10 arch recon DELIVERED (read-only, superb):
+  wiring needs ONLY CutR10 fencing H + hLeft + hSliver
+  (rest other lanes); `cutoffLines_either` PROVED pure
+  combinatorics; EVERY consumer qualitative (≠0
+  sufficient, floors sufficient-not-necessary); banked
+  Door-4 leaf domain-disjoint (|Re|>10 excludes ±10).
+  Bypass needs bounded-box Rouché (K=2 suffices, no
+  K→∞). COORDINATOR DECISION: adopt qualitative
+  program — (1) hFE discharge (chi≤3 × refl-Euler≤2),
+  (2) bounded-box gap conditional on hFE-box, (3) conj
+  mirror, (4) feed wiring. Sin-grind PARKED. Fired HFE
+  (ballsup tail) + ROUCHE (new file, gap-or-obstruction
+  honestly).
+- 2026-09-11 session resume: OA27 agent lost with
+  restart but left well-formed 482/2 tail (t=11
+  theta/delta/combo/amp phases; 2 deletions =
+  namespace-close repositioning, benign; sorry-clean)
+  — committed `919a8163`. BUILD-SWEEP/HFE/ROUCHE gave
+  no report (died in restart) — RE-FIRED below.
 - 2026-09-10 ST13 (`3cc994c0`, stirling file, 1× green 8682
   jobs): **`D3SG_TierC_gamma_rect_sliver`** (600·exp on
   [0.005,0.05]). Residual: wide join [0.005,0.95] (ST14).
