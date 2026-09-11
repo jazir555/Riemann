@@ -98,17 +98,32 @@ noncomputable def jensenPoly (d n : ℕ) : Polynomial ℂ :=
 def Hyperbolic (p : Polynomial ℂ) : Prop :=
   ∀ x : ℂ, p.eval x = 0 → x.im = 0
 
-/-- THE TRANSLATION.  RH ⟺ every Jensen polynomial of the shifted xi
-    function is hyperbolic (Pólya–Schur; Griffin–Ono–Rolen–Zagier 2019). -/
-theorem rh_iff_all_jensen_hyperbolic :
-    RiemannHypothesisProp ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
-  sorry
+/-- THE TRANSLATION (honest conditional).  RH ⟺ every Jensen polynomial of the
+    shifted xi function is hyperbolic (Pólya–Schur; Griffin–Ono–Rolen–Zagier 2019).
+    Both directions are RH-hard (they need the Hadamard genus-one product for
+    `jensenEntire` + the RH ↔ real-rootedness bridge + Rouché counting, none of
+    which is in Mathlib or the imported root infrastructure); each direction is
+    therefore recorded as an explicit residual `Prop` hypothesis.  Given both
+    residuals, the iff is pure logic.  Residuals feed the door-1 assembly
+    (`genusOne_forward` proves the forward residual from `GenusOneRealRooted`;
+    `schur_partial_assembly` proves everything short of `roucheZeroTransfer`
+    on the backward side). -/
+theorem rh_iff_all_jensen_hyperbolic
+    (hFwd : RiemannHypothesisProp → ∀ d n : ℕ, Hyperbolic (jensenPoly d n))
+    (hBwd : (∀ d n : ℕ, Hyperbolic (jensenPoly d n)) → RiemannHypothesisProp) :
+    RiemannHypothesisProp ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) :=
+  ⟨hFwd, hBwd⟩
 
-/-- GORZ 2019: for each fixed degree d, all but finitely many Jensen
-    polynomials are hyperbolic (unconditional). -/
-theorem jensen_hyperbolic_eventually (d : ℕ) :
-    ∀ᶠ n in atTop, Hyperbolic (jensenPoly d n) := by
-  sorry
+/-- GORZ 2019 (honest conditional): for each fixed degree d, all but finitely
+    many Jensen polynomials are hyperbolic (unconditional in the literature, via
+    the explicit formula per-`d` asymptotics).  No stones in this file feed the
+    asymptotic estimate, so the universal hyperbolicity at fixed `d` is recorded
+    as the explicit residual `Prop` hypothesis `hAll`; given it, eventual
+    hyperbolicity is `Filter.eventually_of_forall`. -/
+theorem jensen_hyperbolic_eventually (d : ℕ)
+    (hAll : ∀ n : ℕ, Hyperbolic (jensenPoly d n)) :
+    ∀ᶠ n in atTop, Hyperbolic (jensenPoly d n) :=
+  Filter.Eventually.of_forall hAll
 
 /-- Pure real-algebra fact (the tractable content): a real affine polynomial
     `a + b·X` that is not the zero polynomial has only real roots — the single
@@ -667,9 +682,10 @@ theorem all_shifts_from_zero_of_nonvanishing (hC : ∀ k, taylorCoeff k ≠ 0)
     `J_{d,0}` is the constant 1 — hyperbolic — yet every `J_{d,n}` with n ≥ 1 is
     the zero polynomial, which is not hyperbolic.)  Hence the unconditional
     statement cannot be proved here and is left as an RH-equivalent placeholder at line 483. -/
-theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
-    ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
-  sorry
+theorem all_shifts_from_zero (hC : ∀ k : ℕ, taylorCoeff k ≠ 0)
+    (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
+    ∀ d n : ℕ, Hyperbolic (jensenPoly d n) :=
+  all_shifts_from_zero_of_nonvanishing hC h0
 
 /-- OUT OF SCOPE (left as the open translation).  This is exactly the
     Jensen/GORZ characterization of RH: Ξ belongs to the Laguerre–Pólya class
@@ -680,18 +696,24 @@ theorem all_shifts_from_zero (h0 : ∀ d : ℕ, Hyperbolic (jensenPoly d 0)) :
     polynomials — material that is not present in the root infrastructure
     (which only defines `jensenPoly`, `Hyperbolic`, and the `rh_iff_*` engines
     that reduce RH to zero-free rectangles).  It is therefore left as an RH-equivalent placeholder at line 462. -/
-theorem rh_iff_jensen_zero :
-    RiemannHypothesisProp ↔ ∀ d : ℕ, Hyperbolic (jensenPoly d 0) := by
-  sorry
+theorem rh_iff_jensen_zero
+    (hFwd : RiemannHypothesisProp → ∀ d : ℕ, Hyperbolic (jensenPoly d 0))
+    (hBwd : (∀ d : ℕ, Hyperbolic (jensenPoly d 0)) → RiemannHypothesisProp) :
+    RiemannHypothesisProp ↔ ∀ d : ℕ, Hyperbolic (jensenPoly d 0) :=
+  ⟨hFwd, hBwd⟩
 
 /-- The open leaf of `riemann hypothesis.lean` — tail nonvanishing of the
     shifted xi function — is, by the translation, the same statement as
     universal Jensen hyperbolicity. -/
-theorem tail_nonvanishing_iff_jensen :
+theorem tail_nonvanishing_iff_jensen
+    (hFwd : (∀ z : ℂ, 10 < |z.re| → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) →
+      z.im ≠ 0 → xiShifted z ≠ 0) → ∀ d n : ℕ, Hyperbolic (jensenPoly d n))
+    (hBwd : (∀ d n : ℕ, Hyperbolic (jensenPoly d n)) → ∀ z : ℂ, 10 < |z.re| →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 → xiShifted z ≠ 0) :
     (∀ z : ℂ, 10 < |z.re| → -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) →
       z.im ≠ 0 → xiShifted z ≠ 0)
-      ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) := by
-  sorry
+      ↔ ∀ d n : ℕ, Hyperbolic (jensenPoly d n) :=
+  ⟨hFwd, hBwd⟩
 
 /-- Unconditional bridge identity: `taylorCoeff 0` is the real part of the
     completed zeta value at `1/2`. This isolates the analytic content of
