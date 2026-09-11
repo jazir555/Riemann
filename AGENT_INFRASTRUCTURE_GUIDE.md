@@ -4240,6 +4240,14 @@ sorry-free infrastructure and the complete commit ledger above.
   fit with TRUE headroom); prove-tighter only for
   R05. SUBDIV-DESIGN fired (counts + re-tiers +
   feasibility as proved arithmetic).
+- 2026-09-11 SUBDIV-DESIGN delivered (`d206353a`,
+  NEW plan file, registered, no build): 512 subcells
+  (112+112+224+64), per-group (ε',M',ρ') proved
+  feasible with TRUE headroom ≥1.5×.
+- 2026-09-11 FACTOR WAVE ×3 fired (write-only, new
+  files): GAMDISC (30 Gamma lowers via shift-disc),
+  ZN64 (R05-first N=64/pair-fold push), DERIVUP
+  (16 local factor-deriv bounds vs M' targets).
 - 2026-09-11 PREM-TIER delivered (NEW `door3_tier_
   direct.lean`, registered): honest-negative — even
   ρC=0.01 small-disc Cauchy overshoots tiers 200×+
