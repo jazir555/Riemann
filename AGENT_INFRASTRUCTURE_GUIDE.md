@@ -4220,6 +4220,10 @@ sorry-free infrastructure and the complete commit ledger above.
   numerals, tight-flagged first), TIERDIRECT (direct
   Leibniz + small-disc Cauchy from banked local
   sups, biggest-margin first).
+- 2026-09-11 HEADC1 minimum viable (NEW `door3_dp_
+  headC1.lean` 791 lines, registered, no build):
+  n=45..49 closed (radius 1/100 ×5, centers honest);
+  50..64 open (no follow-up: disc dead).
 - 2026-09-11 ZLOWN delivered (NEW `door3_zlowN.lean`,
   registered, no build): infra + N16/N32 numbers —
   R05 N32 −0.10 (trend may close ~N64); all 31 open.
