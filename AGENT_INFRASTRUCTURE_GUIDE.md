@@ -4723,6 +4723,17 @@ sorry-free infrastructure and the complete commit ledger above.
   Also in tree: 3-line wiring fix (`hgt`→`hgt'` via `linarith` in
   `xiCentralEdgeStrips10_of_uniformStrips`, attribution uncertain —
   found uncommitted, scan-clean, committed here).
+- 2026-09-17 ETA-NEXT (background `ses_f51606f1fffeZshUQaHBq7WH2x`):
+  slow 1→1.25, BUILD-EXIT=0 in 20s (warm cache), grep-clean:
+  `CS_rpow2_low075_proved:553` (`0.75<=2^-0.395`),
+  `CS_cpow2_norm_eq:613`, `CS_complex_S2_abs_ge_125:623` (Pythagoras
+  `||1-w||^2=1-2Re w+||w||^2` with Re w<=0 + ||w||>=0.75;
+  `1+0.75^2=1.25^2` exact), real-sigma S4 chain `:667-799`
+  (`3^0.395<=1.57`, `0.63<=3^-0.395`, `1.69<=4^0.395`,
+  `4^-0.395<=0.60` → `CS_etaS4_uncond:799`, `0.26<=1-r2+r3-r4`,
+  true ~=0.3095), `CS_zeta_of_S2b:809` + `CS_S2b_shortfall:816`
+  (shortfall `2.292`, was `2.542`, gain `0.25`). Floor 1.4 still
+  fails honestly. Next: S6/S8 slow or cF<2.53 (ETA-NEXT2 tasked).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via

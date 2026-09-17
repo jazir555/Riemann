@@ -526,6 +526,296 @@ need at `cF = 2.53` exceeds the unconditional `slow = 1` by `2.542`. -/
 theorem CS_S2_shortfall : (1.4 : ℝ) * 2.53 - 1 = 2.542 := by
   norm_num
 
+/-! ## §A2. Slow growth: S2 sharpened `1 → 1.25` + real-σ S4 `0.23 → 0.26`
+
+Route (honest, low-risk, mirrors §C/`CS_rpow0605_proved` shapes only):
+* `2^-0.395 ≥ 0.75` via upper `2^0.395 ≤ 1.32` (`exp_bound'` n=4 at
+  `x = 0.395·log 2 ≤ 0.27380`; true `2^0.395 ≈ 1.3152`, margin `0.0048`).
+* Complex S2 Pythagoras: `‖1 - w‖² = 1 - 2·Re w + ‖w‖² ≥ 1 + ‖w‖²`
+  since `Re w = r·cos ≤ 0` (banked `CS_cos675_nonpos_proved`); with
+  `‖w‖ = r ≥ 0.75`, `‖S₂ᶜ‖² ≥ 1 + 0.75² = 1.25²`, so `‖S₂ᶜ‖ ≥ 1.25`.
+  True `‖S₂ᶜ‖ ≈ 1.276`, so `1.25` carries `≈ 2%` margin.
+* Real-σ S4: `1 - r2 + r3 - r4 ≥ 1 - 0.77 + 0.63 - 0.60 = 0.26` via
+  banked `0.77` upper + new `3^-0.395 ≥ 0.63` (from `3^0.395 ≤ 1.57`,
+  `exp_bound'` n=4 at `0.395·log 3 ≤ 0.44884`) + new `4^-0.395 ≤ 0.60`
+  (from `4^0.395 ≥ 1.69`, quadratic lower at `0.395·log 4 ≥ 0.54758`).
+  True S4 real `≈ 0.3095`, so `0.26` is safe.
+* Recomputed assembly `CS_zeta_of_S2b` at `slow = 1.25` + exact new
+  shortfall `1.4·2.53 - 1.25 = 2.292` (was `2.542`; gain `0.25`).
+  The `1.4` floor still fails (`3.542 ≤ 1.25` false); patch must grow
+  further (larger `N`) and/or sharpen `cF`/`tail`. -/
+
+/-- `2^-0.395 ≥ 0.75` lower (TRUE `≈ 0.7605`). -/
+def CS_rpow2_low075 : Prop := (0.75 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- CLOSED: `2^-0.395 ≥ 0.75` via `2^0.395 ≤ 1.32`
+(`exp_bound'` n=4 at `x ≤ 0.27380`; `1 + x + x²/2 + x³/6 + rem ≤ 1.32`). -/
+theorem CS_rpow2_low075_proved : CS_rpow2_low075 := by
+  show (0.75 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ))
+  have hlog : Real.log 2 < (0.693148 : ℝ) := CS_log2_le
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  set x : ℝ := 0.395 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.27380 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.395 * Real.log 2 ≤ 0.395 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.395 : ℝ) * 0.693148 ≤ (0.27380 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (2 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.27380 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.27380 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.27380 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.27380 + (0.27380 : ℝ) ^ 2 / 2 +
+      (0.27380 : ℝ) ^ 3 / 6 + (0.27380 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.32 := by
+    norm_num
+  have hupper : (2 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.32 := by
+    rw [hrpow]
+    linarith
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (2 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (2 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [inv_eq_one_div]
+  have h75 : (0.75 : ℝ) * (2 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.75 : ℝ) * 1.32 ≤ 1 := by norm_num
+    calc (0.75 : ℝ) * (2 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.75 * 1.32 := mul_le_mul_of_nonneg_left hupper (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact h75
+
+/-- Cpow norm identity for the S2 sharpening
+(`‖2^-s‖ = 2^-0.395` via `norm_cpow_eq_rpow_re_of_pos`). -/
+theorem CS_cpow2_norm_eq :
+    ‖((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter))‖ = (2 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have hre : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2), hre]
+
+/-- Sharpened complex-head absolute value `≥ 1.25` (PROVED, unconditional):
+Pythagoras `‖1-w‖² = 1 - 2·Re w + ‖w‖²` with `Re w ≤ 0` (banked cos) and
+`‖w‖ = r ≥ 0.75`, so `‖S₂ᶜ‖² ≥ 1 + 0.75² = 1.25²`. -/
+theorem CS_complex_S2_abs_ge_125 :
+    (1.25 : ℝ) ≤ ‖((1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter))‖ := by
+  have hcast : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have hnorm := CS_cpow2_norm_eq
+  have hReEq := CS_cpow2_sCenter_re
+  have hcos : Real.cos (6.75 * Real.log 2) ≤ 0 := CS_cos675_nonpos_proved
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hrLow : (0.75 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) := CS_rpow2_low075_proved
+  have hReW : (((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re) ≤ 0 := by
+    rw [hReEq]
+    exact mul_nonpos_of_nonneg_of_nonpos hr0 hcos
+  have hS2eq : ((1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter))
+      = ((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter))) := by
+    rw [hcast]
+  rw [hS2eq]
+  have hsq_eq : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)))‖ ^ 2
+      = 1 - 2 * (((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re)
+        + ‖((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter))‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.sq_norm, Complex.normSq_apply,
+      Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im]
+    ring
+  have hwReal : (0.75 : ℝ) ^ 2 ≤ ((2 : ℝ) ^ (-(0.395 : ℝ))) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hrLow 2
+  have hsq_ge : (1.25 : ℝ) ^ 2
+      ≤ ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)))‖ ^ 2 := by
+    have h1 : (1.25 : ℝ) ^ 2 = 1 + (0.75 : ℝ) ^ 2 := by norm_num
+    have h2 : (0 : ℝ) ≤ -2 * (((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re) := by
+      linarith
+    rw [hsq_eq, hnorm]
+    linarith
+  calc (1.25 : ℝ) = Real.sqrt ((1.25 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+        ^ (-R02Pilot.sCenter)))‖ ^ 2) := Real.sqrt_le_sqrt hsq_ge
+    _ = ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)))‖ :=
+        Real.sqrt_sq (norm_nonneg _)
+
+/-- `3^0.395 ≤ 1.57` upper input (TRUE `≈ 1.543`). -/
+def CS_rpow3pos_upper : Prop := (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.57
+
+/-- CLOSED: `3^0.395 ≤ 1.57` via `exp_bound'` n=4 at
+`x = 0.395·log 3 ≤ 0.44884` (uses `CS_log_three_le`). -/
+theorem CS_rpow3pos_proved : CS_rpow3pos_upper := by
+  show (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.57
+  have hlog : Real.log 3 ≤ (1.1363 : ℝ) := CS_log_three_le
+  have hlog_pos : (0 : ℝ) < Real.log 3 := Real.log_pos (by norm_num : (1 : ℝ) < 3)
+  set x : ℝ := 0.395 * Real.log 3 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.44884 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.395 * Real.log 3 ≤ 0.395 * 1.1363 := by
+      apply mul_le_mul_of_nonneg_left hlog (by norm_num)
+    have hcap : (0.395 : ℝ) * 1.1363 ≤ (0.44884 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (3 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 3)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.44884 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.44884 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.44884 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.44884 + (0.44884 : ℝ) ^ 2 / 2 +
+      (0.44884 : ℝ) ^ 3 / 6 + (0.44884 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.57 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- `3^-0.395 ≥ 0.63` lower input (TRUE `≈ 0.6479`). -/
+def CS_rpow3neg_lower : Prop := (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- CLOSED: `3^-0.395 ≥ 0.63` from `3^0.395 ≤ 1.57`
+(`0.63·1.57 = 0.9891 ≤ 1`). -/
+theorem CS_rpow3neg_lower_proved : CS_rpow3neg_lower := by
+  show (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.57 := CS_rpow3pos_proved
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (3 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (3 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3)]
+    rw [inv_eq_one_div]
+  have hle : (0.63 : ℝ) * (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.63 : ℝ) * 1.57 ≤ 1 := by norm_num
+    calc (0.63 : ℝ) * (3 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.63 * 1.57 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- `4^0.395 ≥ 1.69` lower input (TRUE `≈ 1.7292`). -/
+def CS_rpow4pos_lower : Prop := (1.69 : ℝ) ≤ (4 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `4^0.395 ≥ 1.69` via quadratic lower at
+`x = 0.395·log 4 ≥ 0.54758` (`log 4 = 2·log 2` + `CS_log2_ge`). -/
+theorem CS_rpow4pos_proved : CS_rpow4pos_lower := by
+  show (1.69 : ℝ) ≤ (4 : ℝ) ^ ((0.395 : ℝ))
+  have h4 : Real.log 4 = 2 * Real.log 2 := CS_log_four_eq
+  have h2lo : (0.693147 : ℝ) < Real.log 2 := CS_log2_ge
+  have hmul : (0.79 : ℝ) * 0.693147 < 0.79 * Real.log 2 :=
+    mul_lt_mul_of_pos_left h2lo (by norm_num)
+  have hcap : (0.54758 : ℝ) ≤ 0.79 * 0.693147 := by norm_num
+  have hx_eq : 0.395 * Real.log 4 = 0.79 * Real.log 2 := by
+    rw [h4]
+    ring
+  have hx_lo : (0.54758 : ℝ) < 0.395 * Real.log 4 := by linarith
+  set x : ℝ := 0.395 * Real.log 4 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.54758 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (1.69 : ℝ) ≤ 1 + 0.54758 + (0.54758 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (1.69 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (4 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 4)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `4^-0.395 ≤ 0.60` upper input (TRUE `≈ 0.5783`). -/
+def CS_rpow4neg_upper : Prop := (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ)
+
+/-- CLOSED: `4^-0.395 ≤ 0.60` from `4^0.395 ≥ 1.69`
+(`0.60·1.69 = 1.014 ≥ 1`). -/
+theorem CS_rpow4neg_upper_proved : CS_rpow4neg_upper := by
+  show (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ)
+  have hlow : (1.69 : ℝ) ≤ (4 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow4pos_proved
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (4 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.60 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.60 * 1.69 := by norm_num
+    calc (1 : ℝ) ≤ 0.60 * 1.69 := hmul
+      _ ≤ 0.60 * (4 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Real-σ S4 lower, conditional form: `1 - r2 + r3 - r4 ≥ 0.26`
+(TRUE `≈ 0.3095`). Mirrors `CS_etaS2_ge_023`. -/
+theorem CS_etaS4_ge_026 (h2 : CS_rpow2_head_upper)
+    (h3 : CS_rpow3neg_lower) (h4 : CS_rpow4neg_upper) :
+    (0.26 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have h2u : (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.77 := h2
+  have h3l : (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) := h3
+  have h4u : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.60 := h4
+  linarith
+
+/-- UNCONDITIONAL real-σ S4 floor `0.26` (all three premises closed). -/
+theorem CS_etaS4_uncond :
+    (0.26 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+  CS_etaS4_ge_026 CS_rpow2_proved CS_rpow3neg_lower_proved CS_rpow4neg_upper_proved
+
+/-- S4-complex feed into the zeta assembly (exact instantiation shape, one-liner
+mirror of `CS_zeta_of_S2`): with sharpened `slow = 1.25`
+(`CS_complex_S2_abs_ge_125`), `tail = 0`, `cF = 2.53`, `CS_zeta_of_parts`
+applies directly — `hNeed` is still the unclosable `3.542 ≤ 1.25`
+(see `CS_S2b_shortfall`); patch must grow further / sharpen `cF`/`tail`. -/
+theorem CS_zeta_of_S2b (Z : ℝ)
+    (hLink : (1.25 : ℝ) - 0 ≤ 2.53 * Z) (hNeed : (1.4 : ℝ) * 2.53 + 0 ≤ 1.25) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.25 0 2.53 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 2.53` exceeds sharpened `slow = 1.25` by `2.292` (was `2.542`). -/
+theorem CS_S2b_shortfall : (1.4 : ℝ) * 2.53 - 1.25 = 2.292 := by
+  norm_num
+
 /-! ## §B. Wide-`Λ₀ ≤ 479` on the fat `s`-rect (FE + Stirling route)
 
 Lane-local reproofs of the `FC_fat*` chain (mirroring
@@ -858,5 +1148,14 @@ theorem CS_exp_frac_lt : Real.exp 0.6029 ≤ 1.8275 := by
 #print axioms CS_ballSup16800_of_Lambda0
 #print axioms CS_gamma0008_of_link
 #print axioms CS_exp_frac_lt
+#print axioms CS_rpow2_low075_proved
+#print axioms CS_complex_S2_abs_ge_125
+#print axioms CS_rpow3pos_proved
+#print axioms CS_rpow3neg_lower_proved
+#print axioms CS_rpow4pos_proved
+#print axioms CS_rpow4neg_upper_proved
+#print axioms CS_etaS4_uncond
+#print axioms CS_zeta_of_S2b
+#print axioms CS_S2b_shortfall
 
 end Door3CellSuppliers
