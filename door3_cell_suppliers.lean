@@ -331,6 +331,53 @@ theorem CS_cos675_nonpos_proved : CS_cos675_nonpos := by
   have h2 : 6.75 * Real.log 2 ≤ Real.pi + Real.pi / 2 := by linarith
   exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
 
+/-- Cpow real-part split at `sCenter` (phase/norm split via
+`Complex.cpow_def_of_ne_zero` + `Complex.ofReal_log`, mirroring the
+`prefix_R05_cpow2_re` / `r05_cpow_re` recipe: `(-sCenter).re = -0.395`,
+`(-sCenter).im = 6.75`, so the `exp` re-part is `2^-0.395·cos(6.75·log 2)`). -/
+theorem CS_cpow2_sCenter_re : ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+  have h2pos : (0 : ℝ) < 2 := by norm_num
+  have hxC : ((2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h2pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((2 : ℝ) : ℂ) = (((Real.log 2 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h2pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
+  have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 2 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 2 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 2 * (-(0.395 : ℝ)))
+      = (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h2pos _).symm
+  have hcos : Real.cos (Real.log 2 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 2) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- CLOSED: complex-head real-part identity (`CS_S2C_Re_eq`): `Re(1 - 2^-s)`
+at `sCenter` is `1 - 2^-0.395·cos(6.75·log 2)` (cast `(2:ℂ) = ((2:ℝ):ℂ)`
+via `simp`, then `sub_re` / `one_re` / `CS_cpow2_sCenter_re`). -/
+theorem CS_S2C_Re_proved : CS_S2C_Re_eq := by
+  show (((1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter)).re
+    = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2))
+  have hcast : ((2 : ℂ)) = (((2 : ℝ)) : ℂ) := by simp
+  rw [hcast, Complex.sub_re, Complex.one_re, CS_cpow2_sCenter_re]
+
 /-- Complex N=2 head real part `≥ 1` (conditional on TRUE premises:
 `r ≤ 0.77`, `cos ≤ 0` give `1 - r·cos ≥ 1`). -/
 theorem CS_complex_S2_Re_ge_one (hEq : CS_S2C_Re_eq) (hCos0 : CS_cos675_nonpos)

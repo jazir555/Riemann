@@ -4565,8 +4565,23 @@ sorry-free infrastructure and the complete commit ledger above.
   0.0334 (Python-verified); grep-clean, same discipline. Residual: next
   adjacent `CS_S2C_Re_eq:305` (cpow Re identity, strictly bigger;
   needs `Complex.cpow` phase/norm split at sCenter); `CS_complex_S2_Re_ge_one`
-  /`CS_complex_S2_abs_ge_one` one premise nearer (`CS_rpow2_head_upper`
+  /  `CS_complex_S2_abs_ge_one` one premise nearer (`CS_rpow2_head_upper`
   already `CS_rpow2_proved`). No sibling files touched (WAVE3-ETA tasked).
+- 2026-09-17 WAVE3-ETA (background `ses_f529d4a31ffes3NYsCtkdTJIxW`):
+  FULL `CS_S2C_Re_eq` proved in one turn, no fallback needed:
+  `CS_cpow2_sCenter_re:338` (cpow phase/norm split
+  `Re(2^-sCenter)=2^-0.395*cos(6.75*log2)` via `cpow_def_of_ne_zero`
+  + `ofReal_log` + `exp_re`, mirroring `prefix_R05_cpow2_re`;
+  `-sCenter` parts from `R02Pilot.sCenter_re/im`) +
+  `CS_S2C_Re_proved:375` (`Re(1-2^-s)=1-2^-0.395*cos(...)` via
+  `(2:C)=((2:R):C)` cast + `sub_re`/`one_re`), unconditional.
+  Grep-clean. Build: pre-check found stale lock (dead holder, no live
+  builders) but wrapper sat `GUARD-WAIT` 900s (age resetting —
+  sibling queue refreshing); no retry per rule; verification pending.
+  Residual: verify green, then `CS_complex_S2_Re_ge_one`/
+  `CS_complex_S2_abs_ge_one` dischargeable (all three premises now
+  closed: S2C + cos675 + rpow2). Standing sweep clause active:
+  WAVE4-ETA owns suppliers build-error sweep (WAVE4-ETA tasked).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
