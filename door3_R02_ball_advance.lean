@@ -827,6 +827,96 @@ theorem R02_fullDerivUp_bankedPQ_shape (UG UZ DG DZ : ℝ)
     APQ APQ' AG AG' AZ AZ' hVpq hDpq hVG hVZ hDG hDZ
     (by norm_num) (by norm_num) hUG0 hUZ0 hDG0 hDZ0
 
+/-- Gamma-factor value cap on the R02-disc `s`-rect (banked hypothesis-free
+`DerivCauchyBridge.gamma_upper_R02_disc`, `‖Γ(s/2)‖ ≤ 40`).
+Rect check (no mismatch): the banked cap needs only
+`0.05 ≤ s.re ≤ 0.74`; the R02-disc `s`-rect
+`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]` supplies those two premises
+and its `im` bounds are unused here. -/
+theorem R02_gammaVal_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74) :
+    ‖DerivCauchyBridge.gammaOf s‖ ≤ 40 :=
+  DerivCauchyBridge.gamma_upper_R02_disc hre_lo hre_hi
+
+/-- Exact value product feeding the 3-factor `P * Q * G` value cap. -/
+theorem R02_polyPiGammaVal_prod1680 : (42 : ℝ) * 40 = 1680 := by
+  norm_num
+
+/-- Generic 3-factor value upper from a banked partial-product cap plus a
+Gamma value cap (pure `norm_mul`, no deriv needed). -/
+theorem R02_polyPiGammaValUp_of_caps (APQ AG : ℂ) (Vpq UG : ℝ)
+    (hVpq : ‖APQ‖ ≤ Vpq) (hVG : ‖AG‖ ≤ UG)
+    (hVpq0 : 0 ≤ Vpq) :
+    ‖APQ * AG‖ ≤ Vpq * UG := by
+  rw [norm_mul]
+  exact mul_le_mul hVpq hVG (norm_nonneg _) hVpq0
+
+/-- 3-factor VALUE cap on the R02-disc `s`-rect:
+`‖P * Q * G‖ ≤ 42 * 40 = 1680` via `norm_mul` from
+`R02_polyPiVal_cap_disc` and `R02_gammaVal_cap_disc` (no deriv needed). -/
+theorem R02_polyPiGammaVal_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s *
+      DerivCauchyBridge.gammaOf s‖ ≤ 1680 := by
+  have hPQ := R02_polyPiVal_cap_disc hre_lo hre_hi him_lo him_hi
+  have hG := R02_gammaVal_cap_disc hre_lo hre_hi
+  have h := R02_polyPiGammaValUp_of_caps
+    (DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s)
+    (DerivCauchyBridge.gammaOf s) 42 40 hPQ hG (by norm_num)
+  have heq : (42 : ℝ) * 40 = 1680 := by norm_num
+  linarith
+
+/-- Generic `(PQ) * G` deriv upper from value + deriv caps (two-term Leibniz
+norm; `PQ` is treated as one banked factor). -/
+theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)
+    (APQ APQ' AG AG' : ℂ)
+    (hVpq : ‖APQ‖ ≤ Vpq) (hDpq : ‖APQ'‖ ≤ Dpq)
+    (hVG : ‖AG‖ ≤ UG) (hDG : ‖AG'‖ ≤ DG)
+    (hVpq0 : 0 ≤ Vpq) (hDpq0 : 0 ≤ Dpq)
+    (hUG0 : 0 ≤ UG) (hDG0 : 0 ≤ DG) :
+    ‖APQ' * AG + APQ * AG'‖ ≤ Dpq * UG + Vpq * DG := by
+  have n1 : ‖APQ' * AG‖ ≤ Dpq * UG :=
+    mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
+  have n2 : ‖APQ * AG'‖ ≤ Vpq * DG :=
+    mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
+  calc ‖APQ' * AG + APQ * AG'‖
+      ≤ ‖APQ' * AG‖ + ‖APQ * AG'‖ := norm_add_le _ _
+    _ ≤ Dpq * UG + Vpq * DG := add_le_add n1 n2
+
+/-- Exact banked product feeding the `(PQ) * G` deriv shape. -/
+theorem R02_pqGammaDeriv_prod2186 : (54.65 : ℝ) * 40 = 2186 := by
+  norm_num
+
+/-- Banked `(PQ) * G` instantiation: with `Vpq = 42`, `Dpq = 54.65`,
+`UG = 40` the downstream bound is `54.65 * 40 + 42 * DG = 2186 + 42 * DG`.
+On the R02-disc `s`-rect the three hypotheses `‖APQ‖ ≤ 42`,
+`‖APQ'‖ ≤ 54.65`, `‖AG‖ ≤ 40` are discharged by
+`R02_polyPiVal_cap_disc` / `R02_polyPiDeriv_cap_disc` /
+`R02_gammaVal_cap_disc`; `DG` (the Gamma-deriv cap) stays the single open
+deriv premise (mirrors `R02_fullDerivUp_bankedPQ_shape`). -/
+theorem R02_pqGammaDerivUp_bankedPQG_shape (DG : ℝ)
+    (APQ APQ' AG AG' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ 40) (hDG : ‖AG'‖ ≤ DG)
+    (hDG0 : 0 ≤ DG) :
+    ‖APQ' * AG + APQ * AG'‖ ≤ 54.65 * 40 + 42 * DG :=
+  R02_pqGammaDerivUp_of_factorCaps 42 54.65 40 DG
+    APQ APQ' AG AG' hVpq hDpq hVG hDG
+    (by norm_num) (by norm_num) (by norm_num) hDG0
+
+/-- Gamma-deriv gap as a taskable unit (obligation, not a proof): the exact
+statement the `(PQ) * G` deriv assembly still needs is
+`‖deriv gammaOf s‖ ≤ DG` uniformly on the R02-disc `s`-rect.
+Needs a Mathlib `Complex.Gamma` deriv API at `s / 2` (a `HasDerivAt` /
+differentiable lemma for `Complex.Gamma` with `(s / 2).re > 0`),
+composed with the `div_const` chain rule for `s ↦ s / 2`, plus a uniform
+norm majorant (Stirling / integral bound) to fix a concrete `DG`.
+No such Gamma-deriv cap is banked in-tree, so `DG` remains open. -/
+def R02_gammaDeriv_obligation (DG : ℝ) : Prop :=
+  ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖deriv DerivCauchyBridge.gammaOf s‖ ≤ DG
+
 /-- The banked partial-product deriv cap stays above tier `0.07`. -/
 theorem R02_polyPi_5465_above_tier07 : (0.07 : ℝ) < 54.65 := by
   norm_num
@@ -957,6 +1047,13 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_polyPiDeriv_cap_disc
 #print axioms R02_fullDerivUp_of_factorCaps
 #print axioms R02_fullDerivUp_bankedPQ_shape
+#print axioms R02_gammaVal_cap_disc
+#print axioms R02_polyPiGammaVal_prod1680
+#print axioms R02_polyPiGammaValUp_of_caps
+#print axioms R02_polyPiGammaVal_cap_disc
+#print axioms R02_pqGammaDerivUp_of_factorCaps
+#print axioms R02_pqGammaDeriv_prod2186
+#print axioms R02_pqGammaDerivUp_bankedPQG_shape
 #print axioms R02_polyPi_5465_above_tier07
 #print axioms R02_polyPi_gap
 #print axioms R02_retier67200_of_Lambda

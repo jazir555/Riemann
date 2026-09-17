@@ -4792,6 +4792,16 @@ sorry-free infrastructure and the complete commit ledger above.
   `R02_fullDerivUp_bankedPQ_shape:817` (Gamma/Zeta UG/UZ/DG/DZ open
   premises). Tier honesty `:831-835` (54.65 vs 0.07, gap 54.58).
   DERIV-NEXT3 tasked (Gamma value-side 3-factor or Gamma-deriv unit).
+- 2026-09-17 DERIV-NEXT3 (background `ses_f514f98b`, proof-only,
+  grep-clean): 3-factor VALUE side closed — `R02_gammaVal_cap_disc:836`
+  (`<=40`, rect matches, no mismatch), product `:842-857`
+  (`||P*Q*G||<=1680`), 3-factor deriv with DG single open premise
+  (`R02_pqGammaDeriv_prod2186:888` `54.65*40=2186`,
+  `R02_pqGammaDerivUp_bankedPQG_shape:898`), taskable gap
+  `R02_gammaDeriv_obligation:916` (needs Gamma HasDerivAt at s/2 +
+  div_const chain + uniform majorant for concrete DG). Residual:
+  UG/UZ/DZ downstream; tier far. DERIV-NEXT4 tasked (UZ value cap
+  or zeta-obligation spec).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`
