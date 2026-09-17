@@ -476,6 +476,17 @@ theorem bottomStrip_obligations_of_uniform_closed {B : ℝ}
     BottomStripObligations :=
   Door3ZetaCutoff.bottomStrip_obligations_of_uniform_bounds hb hB hM
 
+/-- `StripBaseBounds` at `x = 0` from the unconditional point minorant
+(`Door3ZetaCutoff.xiShiftedEntire_zero_minorant`) modulo the single open ball
+sup. No uniform `hb` premise needed at `x = 0`; the tube sup `hB0` plus `hM`
+stay explicit (residual: open ball sup owned by the real-arc lane). -/
+theorem bottomStrip_baseBounds_at_zero_of_ballSup {B : ℝ}
+    (hB0 : ∀ (z : ℂ), z ∈ Metric.closedBall (Door3ZetaCutoff.bsCenter 0) 1 →
+      ‖xiShiftedEntire z‖ ≤ B)
+    (hM : B / (1 / 2 : ℝ) ≤ (1 : ℝ)) :
+    StripBaseBounds 0 (0.025 : ℝ) (1 : ℝ) :=
+  Door3ZetaCutoff.bs_stripBaseBounds_at_zero_of_ballSup hB0 hM
+
 /-- Upper main band (`0 < Im ≤ 0.49` on `-10 < Re < 10`) from the bottom strip
 (`(0, 0.01]` arm) plus the closed-grid fencing (`[0.01, 0.49]` arm). The lower
 half (`Im < 0`) stays residual (grid lower half covers `[-0.49, -0.01]`; the
@@ -1431,3 +1442,39 @@ end Door3RHWiring
 #print axioms Door3RHWiring.gridH_c04_of_R04
 #print axioms Door3RHWiring.gridH_c05_of_R05
 #print axioms Door3RHWiring.gridH_c06_of_R06
+#print axioms Door3RHWiring.gridH_c07_of_R07
+#print axioms Door3RHWiring.gridH_c08_of_R08
+#print axioms Door3RHWiring.gridH_c09_of_R09
+#print axioms Door3RHWiring.gridH_c10_of_R10
+#print axioms Door3RHWiring.gridH_c11_of_R11
+#print axioms Door3RHWiring.gridH_c12_of_R12
+#print axioms Door3RHWiring.gridH_c13_of_R13
+#print axioms Door3RHWiring.gridH_c14_of_R14
+#print axioms Door3RHWiring.gridH_c15_of_R15
+#print axioms Door3RHWiring.gridH_c16_of_R16
+#print axioms Door3RHWiring.gridH_c17_of_R17
+#print axioms Door3RHWiring.gridH_c18_of_R18
+#print axioms Door3RHWiring.gridH_c19_of_R19
+#print axioms Door3RHWiring.gridH_c20_of_R20
+#print axioms Door3RHWiring.gridH_c21_of_R21
+#print axioms Door3RHWiring.gridH_c22_of_R22
+#print axioms Door3RHWiring.gridH_c23_of_R23
+#print axioms Door3RHWiring.gridH_c24_of_R24
+#print axioms Door3RHWiring.gridH_c25_of_R25
+#print axioms Door3RHWiring.gridH_c26_of_R26
+#print axioms Door3RHWiring.gridH_c27_of_R27
+#print axioms Door3RHWiring.gridH_c28_of_R28
+#print axioms Door3RHWiring.gridH_c29_of_R29
+#print axioms Door3RHWiring.gridH_c30_of_R30
+#print axioms Door3RHWiring.gridH_c31_of_R31
+#print axioms Door3RHWiring.gridH_c32_of_R32
+#print axioms Door3RHWiring.gridH_c33_of_R33
+#print axioms Door3RHWiring.gridH_c34_of_R34
+#print axioms Door3RHWiring.gridH_c35_of_R35
+#print axioms Door3RHWiring.gridH_c36_of_R36
+#print axioms Door3RHWiring.gridH_c37_of_R37
+#print axioms Door3RHWiring.gridH_c38_of_R38
+#print axioms Door3RHWiring.gridH_c39_of_R39
+#print axioms Door3RHWiring.gridH_c40_of_R40
+#print axioms Door3RHWiring.gridH_leaf_count_done
+#print axioms Door3RHWiring.bottomStrip_baseBounds_at_zero_of_ballSup

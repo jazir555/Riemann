@@ -4770,6 +4770,14 @@ sorry-free infrastructure and the complete commit ledger above.
   Residual: push_neg deprecation warning (pre-existing); audit
   block covers only through c06 (c07..c40 + count lack #print).
   EDGE-AUDIT tasked (audit extension + bottomStrip step).
+- 2026-09-17 EDGE-AUDIT (background `ses_f513707a`): audit block
+  extended c07..c40 + count (both green log tails confirm 8712
+  jobs, all `#print` standard; count depends on NO axioms).
+  bottomStrip conditional bridge banked
+  (`bottomStrip_baseBounds_at_zero_of_ballSup`: zero-minorant +
+  ball-sup + hM premises; uniform hb still residual). Wiring file
+  GREEN twice. Edge structural work COMPLETE — lane redirects to
+  ZETA-UPPER (deriv's `UZ<=10` gap). EDGE-DONE; ZETA-UPPER tasked.
 - 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
