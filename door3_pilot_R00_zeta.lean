@@ -824,6 +824,215 @@ theorem R00_shortfall_023_M8388608_eq :
     ((1.9 : ℝ) - (186 / 2530)) = (4621 / 2530 : ℝ) := by
   norm_num
 
+/-! ## ZETA-NEXT3 log bridges + phase-aware slow term (`n = 5`).
+
+* Log bridges (R00-usable lane-local aliases; proofs are `exact` / short
+  `linarith` from the banked `Door3CellSuppliers` lemmas, which another lane
+  owns — nothing duplicated): `log 3` (`1.0529 ≤ log 3 ≤ 1.1363`),
+  `log 4 = 2·log 2` (`1.386294 ≤ log 4 ≤ 1.386296`), `log 5`
+  (`16094/10000 ≤ log 5 ≤ 16095/10000`), `log 6 = log 2 + log 3`
+  (`1.74604 ≤ log 6 ≤ 1.8295`).
+* Banked rpow shapes reused at R00 (`t`-independent real numerals):
+  `3^0.395 ≤ 1.57`, `0.63 ≤ 3^-0.395`, `5^0.395 ≤ 1.90`,
+  `0.52 ≤ 5^-0.395`, `1.92 ≤ 6^0.395`, `6^-0.395 ≤ 0.53`.
+* Phase-aware slow term (`n = 5`, eta sign `+1`): the fifth eta term has
+  closed form `(5^s)⁻¹`, norm `≥ 0.52`, and — the new piece — cpow real
+  part `5^-0.395·cos(8.75·log 5) ≥ 0`. The cosine floor comes from the
+  `log 5` bridge: `8.75·log 5 ∈ [14.08225, 14.08313]`, so the phase shifted
+  by `2·2π` sits in `[1.51, 1.52] ⊆ [-π/2, π/2]` (via `pi_gt_d6` /
+  `pi_lt_d6`), where cosine is nonnegative. True `cos(8.75·log 5) ≈ 0.053`,
+  so `≥ 0` is safe with large margin.
+* Honest status: the binding slow stays `0.23` (`R00_eta_S2_norm_ge_023`);
+  the `Re₅ ≥ 0` piece does not yet assemble into a stronger certificate
+  (`Re` floors for the `n = 3, 4` eta terms, and the `inv_re` bridge from
+  the cpow form to the eta-term form, are still open — sweep notes filed,
+  not fixed). Threshold gap stays `4621/1000 = 4.621`, shortfall stays
+  `4621/2530 ≈ 1.827` (`R00_gap_023_M8388608_eq`,
+  `R00_shortfall_023_M8388608_eq`). -/
+
+/-- R00-usable `log 3` lower (banked supplier bridge). -/
+theorem R00_log_three_ge : (1.0529 : ℝ) ≤ Real.log 3 :=
+  Door3CellSuppliers.CS_log_three_ge
+
+/-- R00-usable `log 3` upper (banked supplier bridge). -/
+theorem R00_log_three_le : Real.log 3 ≤ (1.1363 : ℝ) :=
+  Door3CellSuppliers.CS_log_three_le
+
+/-- R00-usable `log 4 = 2 * log 2` (banked supplier bridge). -/
+theorem R00_log_four_eq : Real.log 4 = 2 * Real.log 2 :=
+  Door3CellSuppliers.CS_log_four_eq
+
+/-- R00-usable `log 4` lower (`2 * 0.693147 = 1.386294`). -/
+theorem R00_log_four_ge : (1.386294 : ℝ) ≤ Real.log 4 := by
+  have h4 := R00_log_four_eq
+  have h2 := Door3CellSuppliers.CS_log2_ge
+  linarith
+
+/-- R00-usable `log 4` upper (`2 * 0.693148 = 1.386296`). -/
+theorem R00_log_four_le : Real.log 4 ≤ (1.386296 : ℝ) := by
+  have h4 := R00_log_four_eq
+  have h2 := Door3CellSuppliers.CS_log2_le
+  linarith
+
+/-- R00-usable `log 5` lower (banked supplier bridge). -/
+theorem R00_log_five_ge : (16094 / 10000 : ℝ) ≤ Real.log 5 :=
+  Door3CellSuppliers.CS_log_five_ge
+
+/-- R00-usable `log 5` upper (banked supplier bridge). -/
+theorem R00_log_five_le : Real.log 5 ≤ (16095 / 10000 : ℝ) :=
+  Door3CellSuppliers.CS_log_five_le
+
+/-- R00-usable `log 6 = log 2 + log 3` (banked supplier bridge). -/
+theorem R00_log_six_eq : Real.log 6 = Real.log 2 + Real.log 3 :=
+  Door3CellSuppliers.CS_log_six_eq
+
+/-- R00-usable `log 6` lower (banked supplier bridge). -/
+theorem R00_log_six_ge : (1.74604 : ℝ) ≤ Real.log 6 :=
+  Door3CellSuppliers.CS_log_six_ge
+
+/-- R00-usable `log 6` upper (banked supplier bridge). -/
+theorem R00_log_six_le : Real.log 6 ≤ (1.8295 : ℝ) :=
+  Door3CellSuppliers.CS_log_six_le
+
+/-- Banked `3^0.395 ≤ 1.57` reused at R00 (same real numeral). -/
+theorem R00_rpow3_pos_le_157 : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ (1.57 : ℝ) :=
+  Door3CellSuppliers.CS_rpow3pos_proved
+
+/-- Banked `0.63 ≤ 3^-0.395` reused at R00 (same real numeral). -/
+theorem R00_rpow3_neg_ge_063 : (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+  Door3CellSuppliers.CS_rpow3neg_lower_proved
+
+/-- Banked `5^0.395 ≤ 1.90` reused at R00 (same real numeral). -/
+theorem R00_rpow5_pos_le_190 : (5 : ℝ) ^ ((0.395 : ℝ)) ≤ (1.90 : ℝ) :=
+  Door3CellSuppliers.CS_rpow5pos_proved
+
+/-- Banked `0.52 ≤ 5^-0.395` reused at R00 (same real numeral). -/
+theorem R00_rpow5_neg_ge_052 : (0.52 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+  Door3CellSuppliers.CS_rpow5neg_lower_proved
+
+/-- Banked `1.92 ≤ 6^0.395` reused at R00 (same real numeral). -/
+theorem R00_rpow6_pos_ge_192 : (1.92 : ℝ) ≤ (6 : ℝ) ^ ((0.395 : ℝ)) :=
+  Door3CellSuppliers.CS_rpow6pos_proved
+
+/-- Banked `6^-0.395 ≤ 0.53` reused at R00 (same real numeral). -/
+theorem R00_rpow6_neg_le_053 : (6 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.53 : ℝ) :=
+  Door3CellSuppliers.CS_rpow6neg_upper_proved
+
+/-- R00 phase lower for `n = 5` (`8.75 * 1.6094 = 14.08225`). -/
+theorem R00_phase5_ge : (14.08225 : ℝ) ≤ 8.75 * Real.log 5 := by
+  have h := R00_log_five_ge
+  have hmul : (8.75 : ℝ) * (16094 / 10000) ≤ 8.75 * Real.log 5 :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (14.08225 : ℝ) ≤ (8.75 : ℝ) * (16094 / 10000) := by norm_num
+  linarith
+
+/-- R00 phase upper for `n = 5` (`8.75 * 1.6095 = 14.083125 ≤ 14.08313`). -/
+theorem R00_phase5_le : 8.75 * Real.log 5 ≤ (14.08313 : ℝ) := by
+  have h := R00_log_five_le
+  have hmul : (8.75 : ℝ) * Real.log 5 ≤ 8.75 * (16095 / 10000) :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (8.75 : ℝ) * (16095 / 10000) ≤ (14.08313 : ℝ) := by norm_num
+  linarith
+
+/-- Phase-aware cosine floor at R00 for `n = 5` (`cos(8.75·log 5) ≥ 0`;
+true `≈ 0.053`). Route: shift by `2·2π` into `[-π/2, π/2]` via the phase
+caps above + `pi_gt_d6` / `pi_lt_d6`, then `cos_nonneg`. -/
+theorem R00_cos_875log5_nonneg : (0 : ℝ) ≤ Real.cos (8.75 * Real.log 5) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo : -(Real.pi / 2) ≤ 8.75 * Real.log 5 - 2 * Real.pi - 2 * Real.pi := by
+    have hmul : (8.75 : ℝ) * (16094 / 10000) ≤ 8.75 * Real.log 5 :=
+      mul_le_mul_of_nonneg_left R00_log_five_ge (by norm_num)
+    have hcap : (14.08225 : ℝ) ≤ (8.75 : ℝ) * (16094 / 10000) := by norm_num
+    have hpi2 : 2 * Real.pi + 2 * Real.pi
+        ≤ 2 * (3.141593 : ℝ) + 2 * (3.141593 : ℝ) := by
+      linarith
+    have hpin : (0 : ℝ) ≤ Real.pi := by linarith
+    linarith
+  have hhi : 8.75 * Real.log 5 - 2 * Real.pi - 2 * Real.pi ≤ Real.pi / 2 := by
+    have hmul : (8.75 : ℝ) * Real.log 5 ≤ 8.75 * (16095 / 10000) :=
+      mul_le_mul_of_nonneg_left R00_log_five_le (by norm_num)
+    have hcap : (8.75 : ℝ) * (16095 / 10000) ≤ (14.08313 : ℝ) := by norm_num
+    linarith
+  have hnn := Real.cos_nonneg_of_neg_pi_div_two_le_of_le hlo hhi
+  have hper1 := Real.cos_sub_two_pi (8.75 * Real.log 5 - 2 * Real.pi)
+  have hper2 := Real.cos_sub_two_pi (8.75 * Real.log 5)
+  have heq : Real.cos (8.75 * Real.log 5 - 2 * Real.pi - 2 * Real.pi)
+      = Real.cos (8.75 * Real.log 5) := by
+    rw [hper1, hper2]
+  rw [heq] at hnn
+  exact hnn
+
+/-- Cpow real-part split at R00 for `n = 5` (mirrors the banked
+`CS_cpow2_sCenter_re` recipe: `(-sR00).re = -0.395`, `(-sR00).im = 8.75`,
+so the `exp` re-part is `5^-0.395·cos(8.75·log 5)`). -/
+theorem R00_cpow5_neg_re : ((((5 : ℝ)) : ℂ) ^ (-sR00)).re
+    = (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 5) := by
+  have h5pos : (0 : ℝ) < 5 := by norm_num
+  have hxC : ((5 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h5pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((5 : ℝ) : ℂ) = (((Real.log 5 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h5pos)).symm
+  rw [hlog]
+  have hre_w : (-sR00).re = (-(0.395 : ℝ)) := by
+    have e : (-sR00).re = -(sR00.re) := rfl
+    rw [e, sR00_re]
+  have him_w : (-sR00).im = (8.75 : ℝ) := by
+    have e : (-sR00).im = -(sR00.im) := rfl
+    rw [e, sR00_im]
+    norm_num
+  have hzre : ((((Real.log 5 : ℝ)) : ℂ)).re = Real.log 5 := Complex.ofReal_re _
+  have hzim : ((((Real.log 5 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 5 : ℝ)) : ℂ) * (-sR00)).re
+      = Real.log 5 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 5 : ℝ)) : ℂ) * (-sR00)).im
+      = Real.log 5 * (8.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 5 * (-(0.395 : ℝ)))
+      = (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h5pos _).symm
+  have hcos : Real.cos (Real.log 5 * (8.75 : ℝ))
+      = Real.cos (8.75 * Real.log 5) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Phase-aware slow term at R00 for `n = 5`: the cpow real part is
+nonnegative (amplitude `≥ 0` times the banked cosine floor). -/
+theorem R00_cpow5_neg_Re_nonneg :
+    (0 : ℝ) ≤ ((((5 : ℝ)) : ℂ) ^ (-sR00)).re := by
+  rw [R00_cpow5_neg_re]
+  have hcos := R00_cos_875log5_nonneg
+  have hr0 : (0 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  exact mul_nonneg hr0 hcos
+
+/-- R00 fifth eta term in closed form (`term 4 = (5^s)⁻¹`, sign `+1`). -/
+theorem R00_eta_fifth_eq :
+    etaDirichletTerm sR00 4 = ((((5 : ℕ) : ℂ) ^ sR00)⁻¹) := by
+  have e : (4 + 1 : ℕ) = 5 := rfl
+  have hcast : ((((4 + 1 : ℕ)) : ℂ)) = ((((5 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (4 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- Modulus lower for the R00 fifth eta term (`≥ 0.52` via banked cap). -/
+theorem R00_eta_fifth_norm_ge_052 :
+    (0.52 : ℝ) ≤ ‖((((5 : ℕ) : ℂ) ^ sR00)⁻¹)‖ := by
+  have h5n : ((((5 : ℕ)) : ℂ)) = (5 : ℂ) := by norm_cast
+  have h5r : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+  rw [h5n, h5r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 5), sR00_re]
+  have hlow : (0.52 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    Door3CellSuppliers.CS_rpow5neg_lower_proved
+  have heq : (((5 : ℝ) ^ (0.395 : ℝ)))⁻¹ = (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _).symm
+  rw [heq]
+  exact hlow
+
 /-! ## Best honest unconditional floor banked here. -/
 
 /-- Best honest unconditional lower bound available in this closure. -/
@@ -879,5 +1088,28 @@ theorem R00_best_unconditional : (0 : ℝ) ≤ ‖zeta sR00‖ :=
 #print axioms R00_cert_value_023_M8388608_eq
 #print axioms R00_gap_023_M8388608_eq
 #print axioms R00_shortfall_023_M8388608_eq
+#print axioms R00_log_three_ge
+#print axioms R00_log_three_le
+#print axioms R00_log_four_eq
+#print axioms R00_log_four_ge
+#print axioms R00_log_four_le
+#print axioms R00_log_five_ge
+#print axioms R00_log_five_le
+#print axioms R00_log_six_eq
+#print axioms R00_log_six_ge
+#print axioms R00_log_six_le
+#print axioms R00_rpow3_pos_le_157
+#print axioms R00_rpow3_neg_ge_063
+#print axioms R00_rpow5_pos_le_190
+#print axioms R00_rpow5_neg_ge_052
+#print axioms R00_rpow6_pos_ge_192
+#print axioms R00_rpow6_neg_le_053
+#print axioms R00_phase5_ge
+#print axioms R00_phase5_le
+#print axioms R00_cos_875log5_nonneg
+#print axioms R00_cpow5_neg_re
+#print axioms R00_cpow5_neg_Re_nonneg
+#print axioms R00_eta_fifth_eq
+#print axioms R00_eta_fifth_norm_ge_052
 
 end Door3PilotR00Zeta

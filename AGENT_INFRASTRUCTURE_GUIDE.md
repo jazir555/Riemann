@@ -4764,6 +4764,15 @@ sorry-free infrastructure and the complete commit ledger above.
   4.664), shortfall `~=1.827` (was 1.844). Tail hydraulics nearly
   exhausted; phase-aware slow (needs log3/5 bridges) is the open
   route. ZETA-NEXT3 tasked (log bridges + phase-aware slow).
+- 2026-09-17 ZETA-NEXT3 (background `ses_f514ef5d`, proof-only,
+  grep-clean): 23 theorems — R00 log bridges `:854-894` (log3/4/5/6
+  as lane-local aliases + rpow shapes `:898-918` via `exact` on
+  `CS_` closures) + FIRST phase-aware slow term: `R00_cos_875log5_
+  nonneg:940` (2·2π shift into [-π/2,π/2]),
+  `R00_cpow5_neg_Re_nonneg:1005`, `R00_eta_fifth_norm_ge_052:1023`
+  (`‖term₅‖≥0.52`). Gap UNCHANGED honestly (needs n=3,4 Re floors
+  + inv_re bridge — open, documented). ZETA-NEXT4 tasked (n=3,4
+  Re floors + term₅ assembly).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
