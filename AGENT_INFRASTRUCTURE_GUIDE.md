@@ -4725,6 +4725,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean): 3 more leaves — `gridH_c16_of_R16:832`,
   `gridH_c17_of_R17:855`, `gridH_c18_of_R18:878` (no skips).
   Leaves done 18/40. EDGE-NEXT9 tasked (c19+ replication run).
+- 2026-09-17 EDGE-NEXT9 (background `ses_f5148600`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c19_of_R19:901`,
+  `gridH_c20_of_R20:924`, `gridH_c21_of_R21:947` (no skips).
+  Leaves done 21/40 — PAST HALFWAY. EDGE-NEXT10 tasked (c22+ run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4847,6 +4851,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `0.00657<=||Gamma||` feed). N=1 approximant ~=0.045 (6.8x
   headroom). Residual: L1+L2 open; all 7 numerators open.
   GAMMA-RATE tasked (L2 rate bound or E09 scaffold replication).
+- 2026-09-17 GAMMA-RATE (background `ses_f5147f21`, proof-only,
+  grep-clean): route (a) verdict — `GammaSeq_tendsto_Gamma` is
+  qualitative only (dominated convergence), NO rate extractable;
+  missing rate lemma documented in-file (host: Stirling-disc/Binet
+  leaf). Route (b) banked: E09 scaffold mirrors E10 (`:1508-1671`:
+  norms 3.82/4.24, prod1<=16.20, L1 0.061 lower, L2<=0.044 spec,
+  `0.01638<=||Gamma||` feed). Scaffolds done 2/7 cells (E10/E09).
+  GAMMA-SCAFFOLD tasked (E08+E07 replication).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
