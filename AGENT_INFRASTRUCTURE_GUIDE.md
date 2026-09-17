@@ -4920,6 +4920,17 @@ sorry-free infrastructure and the complete commit ledger above.
   DG/DZ open). Residual owners: UZ→zeta-upper, DG→Gamma-deriv,
   DZ→zeta-deriv (TBD, no banked cap). DERIV-SWEEP tasked (typecheck
   the assembly + fix elaboration).
+- 2026-09-17 DERIV-SWEEP (background `ses_f514a86d`, build-capable,
+  grep-clean): BUILD-EXIT=1 with 15 in-file errors, ALL FIXED —
+  `_hM0` linter (`:160`), `Complex.norm_one`→`norm_one` x2
+  (`:555/:657`), `Real.pi_lt_d2` is `<3.15` not `<3.1416` (`:634-638`,
+  re-ascribed + explicit linarith), `mul_le_mul` arg-order +
+  missing `0<=U` premise (`:642`, premise added, caller updated),
+  `mul_le_mul`-on-`‖a*b‖` x10 (`:746+`, now `rw [norm_mul]` +
+  `exact`, matching green pattern). Sweep lane `:924-971` itself
+  had NO errors (`deriv zeta s` resolves; sorryAx was transitive
+  fallout). Fixes UNVERIFIED (budget consumed by diagnostic run).
+  DERIV-VERIFY tasked (one rebuild to confirm green).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`

@@ -157,7 +157,7 @@ theorem R02_cauchy_scales_4C (C : ℝ) : C / (0.25 : ℝ) = 4 * C := by
 
 /-- Generic R02 ball-sup assembly at any Lambda cap `M ≥ 0` (the staged
 `CS_ballSup16800_of_Lambda0` is the `M = 479` case). -/
-theorem R02_ballSup_of_LambdaCap (M : ℝ) (hM0 : 0 ≤ M)
+theorem R02_ballSup_of_LambdaCap (M : ℝ) (_hM0 : 0 ≤ M)
     (hL : ∀ (s : ℂ), -1.12 ≤ s.re → s.re ≤ 1.91 → -8.27 ≤ s.im →
       s.im ≤ -5.23 → ‖completedRiemannZeta₀ s‖ ≤ M)
     (z : ℂ)
@@ -552,7 +552,7 @@ theorem R02_polyDerivUp_of_abs (s : ℂ) (A B : ℝ)
     Complex.norm_le_abs_re_add_abs_im s
   have h3 : ‖(1 / 2 : ℂ)‖ = (0.5 : ℝ) := by
     have e1 : ((1 / 2 : ℂ)) = (1 : ℂ) / 2 := by norm_num
-    rw [e1, norm_div, Complex.norm_one, Complex.norm_two]
+    rw [e1, norm_div, norm_one, Complex.norm_two]
     norm_num
   have h4 : ‖s - 1 / 2‖ ≤ (|s.re| + |s.im|) + 0.5 := by
     calc ‖s - 1 / 2‖ ≤ ‖s‖ + ‖(1 / 2 : ℂ)‖ := h1
@@ -633,13 +633,13 @@ theorem R02_logPi_norm_le : ‖Complex.log (Real.pi : ℂ)‖ ≤ (2.15 : ℝ) :
   rw [abs_of_nonneg hnn]
   have h1 : Real.log Real.pi ≤ Real.pi - 1 :=
     Real.log_le_sub_one_of_pos Real.pi_pos
-  have h2 : Real.pi < 3.1416 := Real.pi_lt_d2
-  norm_num at h1 h2 ⊢
+  have h2 : Real.pi < 3.15 := Real.pi_lt_d2
+  have h3 : Real.pi - 1 ≤ (2.15 : ℝ) := by linarith
   linarith
 
 /-- Generic pi-factor deriv upper from a value upper. -/
 theorem R02_piDerivUp_of_upper (s : ℂ) (U : ℝ)
-    (hU : ‖DerivCauchyBridge.piOf s‖ ≤ U) :
+    (hU : ‖DerivCauchyBridge.piOf s‖ ≤ U) (hU0 : 0 ≤ U) :
     ‖deriv DerivCauchyBridge.piOf s‖ ≤ U * 2.15 / 2 := by
   have hder : deriv DerivCauchyBridge.piOf s =
       DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) * (-(1 / 2 : ℂ)) :=
@@ -654,15 +654,14 @@ theorem R02_piDerivUp_of_upper (s : ℂ) (U : ℝ)
   have hn : ‖(-(1 / 2 : ℂ))‖ = (0.5 : ℝ) := by
     rw [norm_neg]
     have e2 : ((1 / 2 : ℂ)) = (1 : ℂ) / 2 := by norm_num
-    rw [e2, norm_div, Complex.norm_one, Complex.norm_two]
+    rw [e2, norm_div, norm_one, Complex.norm_two]
     norm_num
   rw [hn]
   have hlog := R02_logPi_norm_le
-  have hnn1 : 0 ≤ ‖DerivCauchyBridge.piOf s‖ := norm_nonneg _
   have hnn2 : 0 ≤ ‖Complex.log (Real.pi : ℂ)‖ := norm_nonneg _
   have step1 : ‖DerivCauchyBridge.piOf s‖ * ‖Complex.log (Real.pi : ℂ)‖ ≤
       U * 2.15 :=
-    mul_le_mul hU hlog hnn1 (by norm_num)
+    mul_le_mul hU hlog hnn2 hU0
   have step2 : ‖DerivCauchyBridge.piOf s‖ * ‖Complex.log (Real.pi : ℂ)‖ * 0.5 ≤
       U * 2.15 * 0.5 :=
     mul_le_mul_of_nonneg_right step1 (by norm_num)
@@ -686,7 +685,7 @@ theorem R02_piDeriv_prod1075 : (1 : ℝ) * 2.15 / 2 = 1.075 := by
 theorem R02_piDeriv_cap_disc {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
     ‖deriv DerivCauchyBridge.piOf s‖ ≤ 1.075 := by
   have hU := R02_piVal_cap_disc hre_lo
-  have h := R02_piDerivUp_of_upper s 1 hU
+  have h := R02_piDerivUp_of_upper s 1 hU (by norm_num)
   have hprod : (1 : ℝ) * 2.15 / 2 ≤ 1.075 := by norm_num
   linarith
 
@@ -743,10 +742,12 @@ theorem R02_polyPiDerivUp_of_caps (s : ℂ) (VP VQ DP DQ : ℝ)
       DP * VQ + VP * DQ := by
   have e := R02_polyPi_deriv_eq s
   rw [e]
-  have n1 : ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ ≤ DP * VQ :=
-    mul_le_mul hDP hVQ (norm_nonneg _) hDP0
-  have n2 : ‖DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖ ≤ VP * DQ :=
-    mul_le_mul hVP hDQ (norm_nonneg _) hVP0
+  have n1 : ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ ≤ DP * VQ := by
+    rw [norm_mul]
+    exact mul_le_mul hDP hVQ (norm_nonneg _) hDP0
+  have n2 : ‖DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖ ≤ VP * DQ := by
+    rw [norm_mul]
+    exact mul_le_mul hVP hDQ (norm_nonneg _) hVP0
   calc ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s +
         DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖
       ≤ ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ +
@@ -789,18 +790,24 @@ theorem R02_fullDerivUp_of_factorCaps (Vpq Dpq UG UZ DG DZ : ℝ)
     (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ) :
     ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖ ≤
       Dpq * UG * UZ + Vpq * DG * UZ + Vpq * UG * DZ := by
-  have m1 : ‖APQ' * AG‖ ≤ Dpq * UG :=
-    mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
-  have t1 : ‖APQ' * AG * AZ‖ ≤ Dpq * UG * UZ :=
-    mul_le_mul m1 hVZ (norm_nonneg _) (mul_nonneg hDpq0 hUG0)
-  have m2 : ‖APQ * AG'‖ ≤ Vpq * DG :=
-    mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
-  have t2 : ‖APQ * AG' * AZ‖ ≤ Vpq * DG * UZ :=
-    mul_le_mul m2 hVZ (norm_nonneg _) (mul_nonneg hVpq0 hDG0)
-  have m3 : ‖APQ * AG‖ ≤ Vpq * UG :=
-    mul_le_mul hVpq hVG (norm_nonneg _) hVpq0
-  have t3 : ‖APQ * AG * AZ'‖ ≤ Vpq * UG * DZ :=
-    mul_le_mul m3 hDZ (norm_nonneg _) (mul_nonneg hVpq0 hUG0)
+  have m1 : ‖APQ' * AG‖ ≤ Dpq * UG := by
+    rw [norm_mul]
+    exact mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
+  have t1 : ‖APQ' * AG * AZ‖ ≤ Dpq * UG * UZ := by
+    rw [norm_mul]
+    exact mul_le_mul m1 hVZ (norm_nonneg _) (mul_nonneg hDpq0 hUG0)
+  have m2 : ‖APQ * AG'‖ ≤ Vpq * DG := by
+    rw [norm_mul]
+    exact mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
+  have t2 : ‖APQ * AG' * AZ‖ ≤ Vpq * DG * UZ := by
+    rw [norm_mul]
+    exact mul_le_mul m2 hVZ (norm_nonneg _) (mul_nonneg hVpq0 hDG0)
+  have m3 : ‖APQ * AG‖ ≤ Vpq * UG := by
+    rw [norm_mul]
+    exact mul_le_mul hVpq hVG (norm_nonneg _) hVpq0
+  have t3 : ‖APQ * AG * AZ'‖ ≤ Vpq * UG * DZ := by
+    rw [norm_mul]
+    exact mul_le_mul m3 hDZ (norm_nonneg _) (mul_nonneg hVpq0 hUG0)
   calc ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖
       ≤ ‖APQ' * AG * AZ + APQ * AG' * AZ‖ + ‖APQ * AG * AZ'‖ :=
         norm_add_le _ _
@@ -979,10 +986,12 @@ theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)
     (hVpq0 : 0 ≤ Vpq) (hDpq0 : 0 ≤ Dpq)
     (hUG0 : 0 ≤ UG) (hDG0 : 0 ≤ DG) :
     ‖APQ' * AG + APQ * AG'‖ ≤ Dpq * UG + Vpq * DG := by
-  have n1 : ‖APQ' * AG‖ ≤ Dpq * UG :=
-    mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
-  have n2 : ‖APQ * AG'‖ ≤ Vpq * DG :=
-    mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
+  have n1 : ‖APQ' * AG‖ ≤ Dpq * UG := by
+    rw [norm_mul]
+    exact mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
+  have n2 : ‖APQ * AG'‖ ≤ Vpq * DG := by
+    rw [norm_mul]
+    exact mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
   calc ‖APQ' * AG + APQ * AG'‖
       ≤ ‖APQ' * AG‖ + ‖APQ * AG'‖ := norm_add_le _ _
     _ ≤ Dpq * UG + Vpq * DG := add_le_add n1 n2
