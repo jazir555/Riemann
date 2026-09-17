@@ -4749,6 +4749,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `gridH_c31_of_R31:1177`, `gridH_c32_of_R32:1200`,
   `gridH_c33_of_R33:1223` (no skips). Leaves done 33/40.
   EDGE-NEXT14 tasked (c34+ run).
+- 2026-09-17 EDGE-NEXT14 (background `ses_f5141d62`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c34_of_R34:1246`,
+  `gridH_c35_of_R35:1269`, `gridH_c36_of_R36:1292` (no skips).
+  Leaves done 36/40 — FINAL 4. EDGE-NEXT15 tasked (c37+ last run).
 - 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route

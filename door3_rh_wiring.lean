@@ -1233,6 +1233,75 @@ theorem gridH_c33_of_R33 (h : CentralCoverAssembly.R33_leaf_obligations) :
     ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R33_mem_gridFine rfl
 
+/-- Banked `c34 = (-4, -1.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R34_H_instance` at the banked membership
+`R34_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R34_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.105 - 2.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4469` (`R34_leaf_obligations`) and `:4498`
+(`R34_H_instance`). -/
+theorem gridH_c34_of_R34 (h : CentralCoverAssembly.R34_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R34_H_instance h
+    ((-4, -1.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R34_mem_gridFine rfl
+
+/-- Banked `c35 = (-2, 0.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R35_H_instance` at the banked membership
+`R35_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R35_leaf_obligations` only — the two numerical enclosures
+(`0.15 + 0.06 * radius ≤ ‖ξ‖` at `s = 0.105 - 0.75·I`, uniform
+`‖ξ'‖ ≤ 0.06` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4553` (`R35_leaf_obligations`) and `:4582`
+(`R35_H_instance`). -/
+theorem gridH_c35_of_R35 (h : CentralCoverAssembly.R35_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R35_H_instance h
+    ((-2, 0.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R35_mem_gridFine rfl
+
+/-- Banked `c36 = (0, 2.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R36_H_instance` at the banked membership
+`R36_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R36_leaf_obligations` only — the two numerical enclosures
+(`0.15 + 0.06 * radius ≤ ‖ξ‖` at `s = 0.105 + 1.25·I`, uniform
+`‖ξ'‖ ≤ 0.06` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4637` (`R36_leaf_obligations`) and `:4666`
+(`R36_H_instance`). -/
+theorem gridH_c36_of_R36 (h : CentralCoverAssembly.R36_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R36_H_instance h
+    ((0, 2.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R36_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
