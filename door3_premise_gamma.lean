@@ -2605,4 +2605,122 @@ theorem premGamma_E01_Gamma_lower_of_Seq1_rate
   have hle : (0.0314 : ℝ) ≤ (0.032 : ℝ) := by norm_num
   exact le_trans hle h7
 
+/-! ## GAMMA-BINET: E06 N = 2 ceiling audit + N needed (filed, not fixed).
+
+Survey verdict (read-only, this turn):
+* Binet Gamma integral: UNSUPPORTED. Only Binet hits in-repo are Fibonacci
+  Binet (`Mathlib/NumberTheory/Real/GoldenRatio.lean:24,180,197,201`) and the
+  Binet-Cauchy identity (`Mathlib/LinearAlgebra/CrossProduct.lean:111`).
+  No `Complex.Gamma` Binet representation, no `Complex.logGamma` / `Real.logGamma`
+  API (only internal `BohrMollerup.logGammaSeq`, `BohrMollerup.lean:140`);
+  confirmed by `door3_stirling_rem.lean:16-17` and `door3_digamma.lean:13-20`.
+* `Real.Gamma_eq_*` / `Complex.Gamma_eq_*` integral forms: BANKED
+  (`Basic.lean:318` complex, `:404` real) but give only the UPPER
+  `D3SG_Gamma_norm_le_real` (`door3_stirling_gamma.lean:8`); reverse-triangle /
+  phase control for a LOWER is unbanked (`door3_premise_gamma.lean:1254-1261`).
+* Stirling series / `hasSum` remainder bounds: ABSENT. Only `Nat.factorial`
+  Stirling (`Stirling.lean`) plus qualitative `Complex.GammaSeq_tendsto_Gamma`
+  (`Beta.lean:335` complex, `:468` real, def `GammaSeq` at `:230`); no
+  quantitative `GammaSeq` rate anywhere (rate host filed at
+  `door3_premise_gamma.lean:1523-1526,2160-2163,2347-2350`).
+* `door3_stirling_rem.lean:193-240`: `D3SR_gamma_lower_of_refl` + Tier-C form
+  `D3SR_gamma_lower_TierC_of_sin` (constants `pi / 600`, sine premise `S`,
+  residual M1/M2/M3/M4 at `:257-285`); quantitatively dead for E05/E06 shifted
+  numerators (`door3_premise_gamma.lean:1233-1240`).
+* `door3_complex_wendel.lean:102-146`: `sin_norm_le`
+  (`‖sin z‖ ≤ 2 * exp |Im|`, closed); `:328-385`: `lower_inner` 0.38-scale +
+  `inner_big` (explicit `exp` premise `Real.exp (Real.pi * 0.375) ≤ 3.3`); plus
+  `:359-377` outer/leaf/mid envelopes (`0.000002 / 0.00004 / 0.0008`).
+* `door3_digamma.lean:41-56`: psi-Stirling via integration ASSESSED STOP —
+  needs Gauss rep (Mathlib TODO `Digamma.lean:31`) + Stirling remainder + log
+  discs + tails (> 8 lemmas); banks conditional transport only, so it cannot
+  serve a Gamma lower within budget.
+* Hence NO Binet-leaf rate lemma is bankable this turn. Per brief, attempt
+  E06 `N ≥ 2` below: `N = 2` ceiling audited with exact numerals; `N = 2`
+  does NOT clear `0.66`, so no floor is closed — `N` needed is documented.
+
+E06 shifted point: `s = w_E06 + 1 = 1.1975 + 0.625i` (shifted need `0.66`).
+`GammaSeq s 2 = (2 : ℂ) ^ s * 2 / (s * (s + 1) * (s + 2))` in norm, so with an
+optimistic cpow upper `‖(2 : ℂ) ^ s‖ ≤ 2.30` (`2 ^ 1.1975 ≈ 2.293`) and
+optimistic Re denominator lowers `‖s + k‖ ≥ 1.1975 + k`, the ceiling is
+`4.60 / 8.41 ≈ 0.547 < 0.66`. `N = 3` ceiling `22.38 / 35.31 ≈ 0.634 < 0.66`
+is also dead; the first Re-ceiling that clears `0.66` is `N = 4`
+(`126.24 / 183.56 ≈ 0.688 > 0.66`). True approximants sit below Re-ceilings
+(Im widens denominators), so `N = 4` is a lower bound on `N` needed, not a
+sufficiency claim. Nothing is forced: full `0.66` stays open.
+-/
+
+/-- E06 `N = 2` Re-product lower: `8.41 ≤ 1.1975 * 2.1975 * 3.1975`
+(TRUE `≈ 8.41424`). -/
+theorem premGamma_E06_N2_Reprod_lower :
+    (8.41 : ℝ) ≤ 1.1975 * 2.1975 * 3.1975 := by
+  norm_num
+
+/-- E06 `N = 2` ceiling arithmetic: `4.60 / 8.41 < 0.66` (`≈ 0.547`). -/
+theorem premGamma_E06_N2_ceiling_arith :
+    (4.60 : ℝ) / 8.41 < 0.66 := by
+  norm_num
+
+/-- E06 `N = 3` Re-product lower: `35.31 ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975`
+(TRUE `≈ 35.31878`). -/
+theorem premGamma_E06_N3_Reprod_lower :
+    (35.31 : ℝ) ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975 := by
+  norm_num
+
+/-- E06 `N = 3` ceiling arithmetic: `22.38 / 35.31 < 0.66` (`≈ 0.634`). -/
+theorem premGamma_E06_N3_ceiling_arith :
+    (22.38 : ℝ) / 35.31 < 0.66 := by
+  norm_num
+
+/-- E06 `N = 4` Re-product lower: `183.56 ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975`
+(TRUE `≈ 183.569`). -/
+theorem premGamma_E06_N4_Reprod_lower :
+    (183.56 : ℝ) ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975 := by
+  norm_num
+
+/-- E06 `N = 4` ceiling arithmetic: first Re-ceiling clearing the floor
+(`126.24 / 183.56 ≈ 0.688 > 0.66`). Necessity lower bound only. -/
+theorem premGamma_E06_N4_ceiling_arith :
+    (0.66 : ℝ) < 126.24 / 183.56 := by
+  norm_num
+
+/-- Missing link L1 at `N = 2` (filed, not proved): `GammaSeq s 2` norm identity
+at E06 shifted `s = w_E06 + 1` with optimistic cpow numerator `2.30` shape.
+Unfolds `Complex.GammaSeq s 2 = (2 : ℂ) ^ s * 2 / (s * (s + 1) * (s + 2))`
+(`GammaSeq` at `Beta.lean:230`, `2 ! = 2`, `prod_range_succ`), then `norm_div` /
+`norm_mul` / `norm_pow`. Needs only Mathlib; left open because the cpow
+unfolding was not instantiated this turn. -/
+def premGamma_E06_GammaSeq2_link : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2‖ =
+    ‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ * 2 /
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖)
+
+/-- Missing rate L2 at `N = 2` (filed, not proved): quantitative `GammaSeq`
+convergence at E06 shifted point with budget `0.015` (mirrors the `N = 1`
+`premGamma_E06_GammaSeq_rate_needed`). Moot for the full floor: the `N = 2`
+finite ceiling above already sits below `0.66`, so no rate closes `0.66`. -/
+def premGamma_E06_GammaSeq2_rate_needed : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.015 : ℝ)
+
+/-- E06 `N = 2` deadness of the scaffold lower: any finite upper at the
+Re-ceiling plus any `0.015`-rate leaves `‖Seq‖ - ‖Seq - Gamma‖ < 0.66`, so the
+`N = 2` Euler-product route cannot feed `premGamma_E06_ge_of_shift`.
+Takes the finite ceiling as an explicit premise (derived from
+`premGamma_E06_GammaSeq2_link` + cpow/Re premises in a future turn). -/
+theorem premGamma_E06_N2_dead_of_upper
+    (hSeqUpper : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2‖ ≤
+      (4.60 : ℝ) / 8.41)
+    (hRate : premGamma_E06_GammaSeq2_rate_needed) :
+    ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2‖ -
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ <
+      (0.66 : ℝ) := by
+  unfold premGamma_E06_GammaSeq2_rate_needed at hRate
+  have hceil : (4.60 : ℝ) / 8.41 < 0.66 := premGamma_E06_N2_ceiling_arith
+  linarith
+
 end Door3PremiseGamma

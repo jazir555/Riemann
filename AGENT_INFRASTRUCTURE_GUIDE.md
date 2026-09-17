@@ -4918,6 +4918,15 @@ sorry-free infrastructure and the complete commit ledger above.
   (feed 0.0314 FULL). Scaffolds done 7/7. Full feeds 5/7 (E06/E05
   partial). Remaining gamma work: L2 Binet-leaf rates (7 cells) +
   E06/E05 full floors. GAMMA-BINET tasked (Binet rate leaf).
+- 2026-09-17 GAMMA-BINET (background `ses_f514380d`, proof-only,
+  grep-clean): Binet UNSUPPORTED anywhere (in-repo Binet is
+  Fibonacci/CrossProduct; no Complex.logGamma; Stirling-remainder
+  absent; Gamma_eq_integral upper-only; tendsto qualitative;
+  digamma psi-Stirling STOP). E06 N-ladder banked `:2608-2740`:
+  N=2 ceiling ~=0.547 FAILS, N=3 ~=0.634 FAILS, N=4 ~=0.688 FIRST
+  clearing (necessity only) + N=2 link/rate specs filed.
+  E06 0.66 / E05 0.645 stay open. GAMMA-N4 tasked (E06 N=4
+  approximant + cpow uppers).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
@@ -4987,6 +4996,15 @@ sorry-free infrastructure and the complete commit ledger above.
   (`deriv zeta s` resolves; UZ10 instance clean axioms). 4 sorryAx
   infos traced solely to `:180`. Fix UNVERIFIED (budget consumed).
   DERIV-VERIFY2 tasked (one rebuild to confirm green).
+- 2026-09-17 DERIV-VERIFY2 (background `ses_f51448a0`): GREEN —
+  SECOND GREEN LANE MODULE. `GUARD-ACQUIRED` immediate (no lock,
+  zero builders), `[8690/8690] Built door3_R02_ball_advance (20s)`,
+  BUILD-EXIT=0, zero errors, zero sorryAx (all `#print axioms`
+  standard). R02 file untouched by the run (fix `bfa7ac9` stands).
+  Residual: linter-only warnings (`hM0` unused-variable
+  false-positive kept — renaming re-breaks `:180`). Analytic
+  residuals unchanged (UZ/DG/DZ open). DERIV lane build-verified;
+  next: fire UZ/DG/DZ owner lanes (DERIV-DONE; assembly awaits).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`
