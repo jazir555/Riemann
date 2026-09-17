@@ -4758,6 +4758,17 @@ sorry-free infrastructure and the complete commit ledger above.
   pilot `rfl`→explicit-`rw` for 3 `.re` proofs, premise_zeta removal
   of 6 stray post-`rw` `norm_num`s (would fail builds as no-goals).
   Next: complex slow beyond S2 or cos→-0.0336 tightening (ETA-NEXT4).
+- 2026-09-17 ETA-NEXT4 (background `ses_f51561fd6ffeTXBXtGtFOFoRbE`):
+  picked (b) with proved numerals; (a) honestly rejected (`φ3`
+  interval ~0.56 wide, no positive cos lower without new log3
+  sharpening). BUILD-EXIT=0 in 24s, grep-clean: cos lower
+  `-0.04->-0.035` (`CS_cos675_lower_neg0035:1789`, true ~-0.0336) +
+  cF `1.86->1.853` (`CS_etaFactor_1853_proved:1898`, Pythagoras with
+  Re>=-0.053375 + ||w||<=1.525; `3.432375<=1.853^2` exact) →
+  need `2.5942`, shortfall `1.354->1.3442` (shave `0.0098`).
+  VERDICT: cos route nearly exhausted (-0.035 vs true -0.0336);
+  binding constraint is slow (needs >=2.5942, has 1.25) — next waves
+  pivot to slow growth: complex S4 slow or pilot-R00 slow (ETA-NEXT5).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
