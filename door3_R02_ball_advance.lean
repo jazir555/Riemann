@@ -690,6 +690,151 @@ theorem R02_piDeriv_cap_disc {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
   have hprod : (1 : ℝ) * 2.15 / 2 ≤ 1.075 := by norm_num
   linarith
 
+/-- Poly-factor value cap on the R02-disc `s`-rect (banked hypothesis-free
+`DerivCauchyBridge.poly_upper_R02_disc`; proves the value premise the
+Leibniz packaging needs). -/
+theorem R02_polyVal_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖DerivCauchyBridge.polyOf s‖ ≤ 42 :=
+  DerivCauchyBridge.poly_upper_R02_disc hre_lo hre_hi him_lo him_hi
+
+/-- Exact value product feeding the partial-product value cap. -/
+theorem R02_polyPiVal_prod42 : (42 : ℝ) * 1 = 42 := by
+  norm_num
+
+/-- Partial-product value cap `‖P * Q‖ ≤ 42` on the R02-disc `s`-rect. -/
+theorem R02_polyPiVal_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ ≤ 42 := by
+  have hP := R02_polyVal_cap_disc hre_lo hre_hi him_lo him_hi
+  have hQ := R02_piVal_cap_disc hre_lo
+  rw [norm_mul]
+  have h := mul_le_mul hP hQ (norm_nonneg _) (by norm_num)
+  have heq : (42 : ℝ) * 1 = 42 := by norm_num
+  linarith
+
+/-- Partial-product prime on R02 via the Leibniz rule. -/
+theorem R02_polyPi_hasDerivAt (s : ℂ) :
+    HasDerivAt (fun t : ℂ => DerivCauchyBridge.polyOf t * DerivCauchyBridge.piOf t)
+      ((s - 1 / 2) * DerivCauchyBridge.piOf s +
+        DerivCauchyBridge.polyOf s *
+          (DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) * (-(1 / 2 : ℂ)))) s :=
+  (R02_poly_hasDerivAt s).mul (R02_pi_hasDerivAt s)
+
+/-- Partial-product deriv equation (Leibniz packaging in `deriv` form). -/
+theorem R02_polyPi_deriv_eq (s : ℂ) :
+    deriv (fun t : ℂ => DerivCauchyBridge.polyOf t * DerivCauchyBridge.piOf t) s =
+      deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s +
+        DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s := by
+  have h := ((R02_poly_hasDerivAt s).mul (R02_pi_hasDerivAt s)).deriv
+  rw [R02_poly_deriv_eq s, R02_pi_deriv_eq s]
+  exact h
+
+/-- Generic partial-product deriv upper from value + deriv caps. -/
+theorem R02_polyPiDerivUp_of_caps (s : ℂ) (VP VQ DP DQ : ℝ)
+    (hVP : ‖DerivCauchyBridge.polyOf s‖ ≤ VP)
+    (hVQ : ‖DerivCauchyBridge.piOf s‖ ≤ VQ)
+    (hDP : ‖deriv DerivCauchyBridge.polyOf s‖ ≤ DP)
+    (hDQ : ‖deriv DerivCauchyBridge.piOf s‖ ≤ DQ)
+    (hVP0 : 0 ≤ VP) (hVQ0 : 0 ≤ VQ) (hDP0 : 0 ≤ DP) (hDQ0 : 0 ≤ DQ) :
+    ‖deriv (fun t : ℂ => DerivCauchyBridge.polyOf t * DerivCauchyBridge.piOf t) s‖ ≤
+      DP * VQ + VP * DQ := by
+  have e := R02_polyPi_deriv_eq s
+  rw [e]
+  have n1 : ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ ≤ DP * VQ :=
+    mul_le_mul hDP hVQ (norm_nonneg _) hDP0
+  have n2 : ‖DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖ ≤ VP * DQ :=
+    mul_le_mul hVP hDQ (norm_nonneg _) hVP0
+  calc ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s +
+        DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖
+      ≤ ‖deriv DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ +
+        ‖DerivCauchyBridge.polyOf s * deriv DerivCauchyBridge.piOf s‖ :=
+      norm_add_le _ _
+    _ ≤ DP * VQ + VP * DQ := add_le_add n1 n2
+
+/-- Exact Leibniz product feeding the R02-disc partial-product deriv cap. -/
+theorem R02_polyPiDeriv_prod5465 : (9.5 : ℝ) * 1 + 42 * 1.075 = 54.65 := by
+  norm_num
+
+/-- Partial-product deriv cap on the R02-disc `s`-rect:
+`‖deriv (P * Q)‖ ≤ 9.5 * 1 + 42 * 1.075 = 54.65`. -/
+theorem R02_polyPiDeriv_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖deriv (fun t : ℂ => DerivCauchyBridge.polyOf t * DerivCauchyBridge.piOf t) s‖ ≤
+      54.65 := by
+  have hVP := R02_polyVal_cap_disc hre_lo hre_hi him_lo him_hi
+  have hVQ := R02_piVal_cap_disc hre_lo
+  have hDP := R02_polyDeriv_cap_disc hre_lo hre_hi him_lo him_hi
+  have hDQ := R02_piDeriv_cap_disc hre_lo
+  have h := R02_polyPiDerivUp_of_caps s 42 1 9.5 1.075
+    hVP hVQ hDP hDQ (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+  have heq : (9.5 : ℝ) * 1 + 42 * 1.075 = 54.65 := by norm_num
+  linarith
+
+/-- Downstream assembly shape: full `PQ * G * Z` Leibniz majorant from the
+partial-product caps plus explicit Gamma/Zeta value+deriv caps. The
+`fGamma`/`fZeta` majorants (`UG UZ DG DZ`) stay explicit premises (blocked on
+missing majorants); this combinator assumes no analyticity, only the
+three-term Leibniz expansion norm. -/
+theorem R02_fullDerivUp_of_factorCaps (Vpq Dpq UG UZ DG DZ : ℝ)
+    (APQ APQ' AG AG' AZ AZ' : ℂ)
+    (hVpq : ‖APQ‖ ≤ Vpq) (hDpq : ‖APQ'‖ ≤ Dpq)
+    (hVG : ‖AG‖ ≤ UG) (hVZ : ‖AZ‖ ≤ UZ)
+    (hDG : ‖AG'‖ ≤ DG) (hDZ : ‖AZ'‖ ≤ DZ)
+    (hVpq0 : 0 ≤ Vpq) (hDpq0 : 0 ≤ Dpq)
+    (hUG0 : 0 ≤ UG) (hUZ0 : 0 ≤ UZ)
+    (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ) :
+    ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖ ≤
+      Dpq * UG * UZ + Vpq * DG * UZ + Vpq * UG * DZ := by
+  have m1 : ‖APQ' * AG‖ ≤ Dpq * UG :=
+    mul_le_mul hDpq hVG (norm_nonneg _) hDpq0
+  have t1 : ‖APQ' * AG * AZ‖ ≤ Dpq * UG * UZ :=
+    mul_le_mul m1 hVZ (norm_nonneg _) (mul_nonneg hDpq0 hUG0)
+  have m2 : ‖APQ * AG'‖ ≤ Vpq * DG :=
+    mul_le_mul hVpq hDG (norm_nonneg _) hVpq0
+  have t2 : ‖APQ * AG' * AZ‖ ≤ Vpq * DG * UZ :=
+    mul_le_mul m2 hVZ (norm_nonneg _) (mul_nonneg hVpq0 hDG0)
+  have m3 : ‖APQ * AG‖ ≤ Vpq * UG :=
+    mul_le_mul hVpq hVG (norm_nonneg _) hVpq0
+  have t3 : ‖APQ * AG * AZ'‖ ≤ Vpq * UG * DZ :=
+    mul_le_mul m3 hDZ (norm_nonneg _) (mul_nonneg hVpq0 hUG0)
+  calc ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖
+      ≤ ‖APQ' * AG * AZ + APQ * AG' * AZ‖ + ‖APQ * AG * AZ'‖ :=
+        norm_add_le _ _
+    _ ≤ (‖APQ' * AG * AZ‖ + ‖APQ * AG' * AZ‖) + ‖APQ * AG * AZ'‖ :=
+        add_le_add (norm_add_le _ _) le_rfl
+    _ ≤ (Dpq * UG * UZ + Vpq * DG * UZ) + Vpq * UG * DZ :=
+        add_le_add (add_le_add t1 t2) t3
+
+/-- Banked-partial instantiation: with `Vpq = 42`, `Dpq = 54.65` the
+downstream bound is `54.65 * UG * UZ + 42 * DG * UZ + 42 * UG * DZ`.
+On the R02-disc `s`-rect the two hypotheses `‖APQ‖ ≤ 42`,
+`‖APQ'‖ ≤ 54.65` are discharged by `R02_polyPiVal_cap_disc` /
+`R02_polyPiDeriv_cap_disc`; `UG UZ DG DZ` remain open. -/
+theorem R02_fullDerivUp_bankedPQ_shape (UG UZ DG DZ : ℝ)
+    (APQ APQ' AG AG' AZ AZ' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ UG) (hVZ : ‖AZ‖ ≤ UZ)
+    (hDG : ‖AG'‖ ≤ DG) (hDZ : ‖AZ'‖ ≤ DZ)
+    (hUG0 : 0 ≤ UG) (hUZ0 : 0 ≤ UZ)
+    (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ) :
+    ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖ ≤
+      54.65 * UG * UZ + 42 * DG * UZ + 42 * UG * DZ :=
+  R02_fullDerivUp_of_factorCaps 42 54.65 UG UZ DG DZ
+    APQ APQ' AG AG' AZ AZ' hVpq hDpq hVG hVZ hDG hDZ
+    (by norm_num) (by norm_num) hUG0 hUZ0 hDG0 hDZ0
+
+/-- The banked partial-product deriv cap stays above tier `0.07`. -/
+theorem R02_polyPi_5465_above_tier07 : (0.07 : ℝ) < 54.65 := by
+  norm_num
+
+/-- Honest gap of the partial-product cap over tier `0.07`. -/
+theorem R02_polyPi_gap : (54.65 : ℝ) - 0.07 = 54.58 := by
+  norm_num
+
 /-- Route (b): staged retier — any `M ≥ 67200` closes R02 deriv
 conditional on the wide `Λ₀` premise. -/
 theorem R02_retier67200_of_Lambda (M : ℝ) (hM : 67200 ≤ M)
@@ -802,6 +947,18 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_piVal_cap_disc
 #print axioms R02_piDeriv_prod1075
 #print axioms R02_piDeriv_cap_disc
+#print axioms R02_polyVal_cap_disc
+#print axioms R02_polyPiVal_prod42
+#print axioms R02_polyPiVal_cap_disc
+#print axioms R02_polyPi_hasDerivAt
+#print axioms R02_polyPi_deriv_eq
+#print axioms R02_polyPiDerivUp_of_caps
+#print axioms R02_polyPiDeriv_prod5465
+#print axioms R02_polyPiDeriv_cap_disc
+#print axioms R02_fullDerivUp_of_factorCaps
+#print axioms R02_fullDerivUp_bankedPQ_shape
+#print axioms R02_polyPi_5465_above_tier07
+#print axioms R02_polyPi_gap
 #print axioms R02_retier67200_of_Lambda
 #print axioms R02_retier68000_of_Lambda
 #print axioms R02_retier1402_of_Lambda10

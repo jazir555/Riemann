@@ -4758,6 +4758,15 @@ sorry-free infrastructure and the complete commit ledger above.
   Cauchy fallback 60000 recorded in deriv_up); fZeta cap blocked
   behind `R02_zeta_upper_obligation`. DERIV-NEXT2 tasked (poly+pi
   partial-product assembly or Gamma-gap unit).
+- 2026-09-17 DERIV-NEXT2 (background `ses_f5150e366`, proof-only,
+  grep-clean): poly×pi partial-product cap banked — value premise
+  `R02_polyVal_cap_disc:696` (`<=42`), product value `:703-707`,
+  Leibniz `:719-736`, exact cap `R02_polyPiDeriv_cap_disc:763`
+  (`9.5*1+42*1.075=54.65` vs Cauchy 67200 — 1230x tighter on the
+  direct route), downstream `R02_fullDerivUp_of_factorCaps:782` +
+  `R02_fullDerivUp_bankedPQ_shape:817` (Gamma/Zeta UG/UZ/DG/DZ open
+  premises). Tier honesty `:831-835` (54.65 vs 0.07, gap 54.58).
+  DERIV-NEXT3 tasked (Gamma value-side 3-factor or Gamma-deriv unit).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`
