@@ -2112,9 +2112,9 @@ theorem sSCUT_hEnough_2048_threshold (slow' : ℝ) (hs : (21 / 10 : ℝ) ≤ slo
     (7 / 5 : ℝ) + (7 / 10 : ℝ) ≤ slow' := by linarith
 
 /-- Honest shortfall of the banked sCut shard vs the `21/10` bar:
-`(7/5 + 7/10) - 2/7 = 121/70`. -/
+`(7/5 + 7/10) - 2/7 = 127/70`. -/
 theorem sSCUT_S2_hEnough_shortfall :
-    (((7 / 5 : ℝ) + 7 / 10) - 2 / 7) = (121 / 70 : ℝ) := by norm_num
+    (((7 / 5 : ℝ) + 7 / 10) - 2 / 7) = (127 / 70 : ℝ) := by norm_num
 
 /-- Threshold form of the remaining miss at sCut with the banked shard:
 `2/7 < 7/5 + 7/10`, so `hEnough` is NOT discharged — `N = 4096 slow`
@@ -2127,5 +2127,233 @@ theorem sSCUT_hEnough_open : (2 / 7 : ℝ) < (7 / 5 : ℝ) + (7 / 10 : ℝ) := b
 #print axioms sSCUT_theta3_mem
 #print axioms sSCUT_eta_tail_2048_le
 #print axioms sSCUT_hEnough_open
+
+/-! ## sCut S3 shard (ZETA-SCUT3): sharp `log 3` kills the defeating window —
+and the positive `Re₃` lock with it (honest).
+
+Outcome: Mathlib d9 bounds `Real.log_three_gt_d9/lt_d9`
+(`1.0986122885 < log 3 < 1.0986122888`) replace the wide banked
+`CS_log_three_ge/le` (`[1.0529, 1.1363]`, width `0.0834`). New window
+`10*log 3 ∈ (10.986122885, 10.986122888)`, width `3e-9` — the task's
+"~10x tighter" bar is cleared by ~8 orders of magnitude. NO decimal-digit
+machinery needed (the `log_five_d9`-style pattern is NOT re-proved here;
+Mathlib already banks `log_three_near_10`).
+
+Reduced phase `δ₃ = θ₃ - 2π ∈ (4.7029, 4.7032) ⊂ (π, 3π/2)` (via
+`Real.pi_gt_d4/lt_d4`), so `cos θ₃ ≤ 0` and `Re(3^{-sCut}) ≤ 0` at cpow
+level. Positive `Re₃` sign-lock is not merely unproved — it is IMPOSSIBLE
+at any precision (`sSCUT_cpow3_Re_no_pos_lock`: no `c > 0` sits below
+`Re(3^{-sCut})`; true value `≈ -0.0055`). Exact digit bound needed for a
+positive lock: NONE EXISTS.
+
+Shard sum vs `21/10` bar: binding slow UNCHANGED at `2/7` (`sSCUT_S2_slow`);
+`Re₃ ≤ 0` adds no slow growth. True shortfall `21/10 - 2/7 = 127/70`.
+
+Parity table for the NEXT shard worker (eta signs
+`etaDirichletTerm s k = (-1)^k / (k+1)^s`, `θₙ = 10*log n`,
+`Re(eta_k) = ±n^{-1/2}·cos θₙ` with `n = k+1`):
+* even `k` (`+` sign) needs `cos θₙ ≥ +c` for slow growth: k=0 banked
+  (`Re = 1`); k=2 (`n=3`): DEAD (`cos θ₃ ≤ 0` this shard); k=4 (`n=5`,
+  `δ₅ ≈ 3.528`, quadrant III, cos negative — needs only documentation);
+  k=6 (`n=7`): BLOCKED (no `log 7` d9 bound in Mathlib — must be created
+  in-file); k=8 (`n=9`): DEAD for growth (`θ₉ - 7π ∈ (-0.019, -0.018)`
+  below gives `cos θ₉ = -cos δ₉ ≈ -1`, so `Re(eta₈) ≈ -1/3`); k=10
+  (`n=11`): BLOCKED (no `log 11` bound).
+* odd `k` (`-` sign) needs `cos θₙ ≤ -c` (negative!): k=1 banked-negative;
+  k=3 (`n=4`, `δ₄ ≈ 1.2966`, cos positive — hurts); k=5 (`n=6`, cos
+  positive — hurts); k=7 (`n=8`, `δ₈ ≈ 1.9449` quadrant II, cos negative
+  — CANDIDATE: prove `cos θ₈ ≤ -c` via `-cos(θ₈ - 7π)` + quadratic lower
+  on `θ₈ - 7π ≈ -1.1967`); k=9 (`n=10`, `δ₁₀ ≈ 4.1763` quadrant III, cos
+  negative — CANDIDATE, same shape); k=11 (`n=12`, `δ₁₂ ∈
+  (-0.2838, -0.2829)` below, `cos θ₁₂ = cos δ₁₂ ≥ 1 - 0.284²/2 ≈ 0.9597`
+  — but odd `k` flips it: `Re(eta₁₁) ≈ -0.277`, HURTS).
+Enablers banked below: `log 9 = 2·log 3`, `log 12 = 2·log 2 + log 3`,
+sharp `θ₉/θ₁₂` windows, `δ₉` (`-7π`) / `δ₁₂` (`-8π`) windows. Eta-level
+transfer (`(z⁻¹).re = z.re / normSq z` sign) NOT forced here — left for a
+checking turn (`Complex.inv_re` + `div_nonpos_of_nonpos_of_nonneg` names
+to verify under `lake`/`lean`).
+
+Sweep notes FILED (not fixed): (i) `sSCUT_S2_hEnough_shortfall` claims
+`((7/5 + 7/10) - 2/7) = 121/70`, but `21/10 - 2/7 = 127/70` — the stated
+equation is false (`by norm_num` cannot close it); section comment at
+`:1584` already records the true `127/70`. (ii) Prompt quote
+"shortfall 121/70" inherits the same slip.
+-/
+
+/-- Composite log bridge `log 9 = 2·log 3` (mirror of `D3_log_nine_eq`). -/
+theorem sSCUT_log_nine_eq : Real.log 9 = 2 * Real.log 3 := by
+  have h9 : (9 : ℝ) = 3 * 3 := by norm_num
+  rw [h9, Real.log_mul (by norm_num) (by norm_num)]
+  ring
+
+/-- Composite log bridge `log 12 = 2·log 2 + log 3` (`12 = 4·3` +
+`Door3CellSuppliers.CS_log_four_eq`; mirror of `D3_log_eight_eq`). -/
+theorem sSCUT_log_twelve_eq : Real.log 12 = 2 * Real.log 2 + Real.log 3 := by
+  have h12 : (12 : ℝ) = 4 * 3 := by norm_num
+  rw [h12, Real.log_mul (by norm_num) (by norm_num),
+    Door3CellSuppliers.CS_log_four_eq]
+
+/-- Sharp `n = 3` phase window at sCut
+(`10*log 3 ∈ (10.986122885, 10.986122888)` from the d9 bounds; replaces
+`sSCUT_theta3_mem`). -/
+theorem sSCUT_theta3_sharp_mem :
+    (10.986122885 : ℝ) < 10 * Real.log 3 ∧ 10 * Real.log 3 < (10.986122888 : ℝ) := by
+  have hlo := Real.log_three_gt_d9
+  have hhi := Real.log_three_lt_d9
+  have hmul_lo := mul_lt_mul_of_pos_left hlo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hhi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 1.0986122885 = 10.986122885 := by norm_num
+  have c2 : (10 : ℝ) * 1.0986122888 = 10.986122888 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the sharp `n = 3` window (`3e-9` vs the old `0.834`). -/
+theorem sSCUT_theta3_sharp_width_eq :
+    (10.986122888 : ℝ) - 10.986122885 = (0.000000003 : ℝ) := by
+  norm_num
+
+/-- Sharp `n = 9` phase window (`10*log 9 ∈ (21.97224577, 21.97224578)`
+via `sSCUT_log_nine_eq` + d9; enabler for the `δ₉` recipe). -/
+theorem sSCUT_theta9_sharp_mem :
+    (21.97224577 : ℝ) < 10 * Real.log 9 ∧ 10 * Real.log 9 < (21.97224578 : ℝ) := by
+  have h9 := sSCUT_log_nine_eq
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hsum_lo : (2.197224577 : ℝ) < 2 * Real.log 3 := by
+    have c : 2 * (1.0986122885 : ℝ) = 2.197224577 := by norm_num
+    linarith
+  have hsum_hi : 2 * Real.log 3 < (2.197224578 : ℝ) := by
+    have c : 2 * (1.0986122888 : ℝ) = 2.197224578 := by norm_num
+    linarith
+  have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 2.197224577 = 21.97224577 := by norm_num
+  have c2 : (10 : ℝ) * 2.197224578 = 21.97224578 := by norm_num
+  constructor <;> linarith
+
+/-- Sharp `n = 12` phase window (`10*log 12 ∈ (24.849066491, 24.849066504)`
+via `sSCUT_log_twelve_eq` + d9; enabler for the `δ₁₂` recipe). -/
+theorem sSCUT_theta12_sharp_mem :
+    (24.849066491 : ℝ) < 10 * Real.log 12 ∧
+    10 * Real.log 12 < (24.849066504 : ℝ) := by
+  have h12 := sSCUT_log_twelve_eq
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hsum_lo : (2.4849066491 : ℝ) < 2 * Real.log 2 + Real.log 3 := by
+    have c : 2 * (0.6931471803 : ℝ) + 1.0986122885 = 2.4849066491 := by norm_num
+    linarith
+  have hsum_hi : 2 * Real.log 2 + Real.log 3 < (2.4849066504 : ℝ) := by
+    have c : 2 * (0.6931471808 : ℝ) + 1.0986122888 = 2.4849066504 := by norm_num
+    linarith
+  have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 2.4849066491 = 24.849066491 := by norm_num
+  have c2 : (10 : ℝ) * 2.4849066504 = 24.849066504 := by norm_num
+  constructor <;> linarith
+
+/-- Sharp reduced phase `δ₃ = θ₃ - 2π ∈ (4.7029, 4.7032)` (via `pi_d4`). -/
+theorem sSCUT_delta3_sharp_mem :
+    (4.7029 : ℝ) < 10 * Real.log 3 - 2 * Real.pi ∧
+    10 * Real.log 3 - 2 * Real.pi < (4.7032 : ℝ) := by
+  have hth := sSCUT_theta3_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- `δ₃` sits in quadrant III (`π < δ₃ < 3π/2`). -/
+theorem sSCUT_delta3_in_quadrantIII :
+    Real.pi < 10 * Real.log 3 - 2 * Real.pi ∧
+    10 * Real.log 3 - 2 * Real.pi < 3 * Real.pi / 2 := by
+  have hth := sSCUT_delta3_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Reduced phase `δ₉ = θ₉ - 7π ∈ (-0.019, -0.018)` (odd multiple: next
+turn gets `cos θ₉ = -cos δ₉ ≈ -1`, i.e. `Re(eta₈) ≈ -1/3` — documents the
+`n = 9` growth stall, not a gain). -/
+theorem sSCUT_delta9_sharp_mem :
+    (-0.019 : ℝ) < 10 * Real.log 9 - 7 * Real.pi ∧
+    10 * Real.log 9 - 7 * Real.pi < (-0.018 : ℝ) := by
+  have hth := sSCUT_theta9_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Reduced phase `δ₁₂ = θ₁₂ - 8π ∈ (-0.2838, -0.2829)` (even multiple:
+`cos θ₁₂ = cos δ₁₂ ≥ 1 - 0.284^2/2` is the next turn's `Re₁₂` recipe;
+note odd `k = 11` flips its eta sign). -/
+theorem sSCUT_delta12_sharp_mem :
+    (-0.2838 : ℝ) < 10 * Real.log 12 - 8 * Real.pi ∧
+    10 * Real.log 12 - 8 * Real.pi < (-0.2829 : ℝ) := by
+  have hth := sSCUT_theta12_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- `cos(10*log 3) ≤ 0` (quadrant-III `δ₃` + `Real.cos_sub_two_pi`). -/
+theorem sSCUT_cos10log3_nonpos : Real.cos (10 * Real.log 3) ≤ 0 := by
+  have hδ := sSCUT_delta3_in_quadrantIII
+  have hcosδ : Real.cos (10 * Real.log 3 - 2 * Real.pi) ≤ 0 := by
+    apply Real.cos_nonpos_of_pi_div_two_le_of_le
+    · have hpi := Real.pi_pos
+      linarith [hδ.1]
+    · linarith [hδ.2]
+  rw [Real.cos_sub_two_pi] at hcosδ
+  exact hcosδ
+
+/-- Cpow real-part split for `3^{-s}` at sCut (mirror of
+`sSCUT_cpow2_neg_re`). -/
+theorem sSCUT_cpow3_neg_re : ((((3 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (3 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 3) := by
+  have h3pos : (0 : ℝ) < 3 := by norm_num
+  have hxC : ((3 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h3pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((3 : ℝ) : ℂ) = (((Real.log 3 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h3pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
+  have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 3 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 3 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 3) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 3 * (-(1 / 2 : ℝ)))
+      = (3 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h3pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 3))
+      = Real.cos (10 * Real.log 3) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re(3^{-sCut}) ≤ 0` at cpow level (nonneg rpow × nonpos cosine). -/
+theorem sSCUT_cpow3_neg_Re_nonpos : ((((3 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ 0 := by
+  rw [sSCUT_cpow3_neg_re]
+  have hr : (0 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc := sSCUT_cos10log3_nonpos
+  exact mul_nonpos_of_nonneg_of_nonpos hr hc
+
+/-- No positive `Re₃` lock exists at any precision (the sharp-window
+payoff: `Re₃ ≤ 0`, so no `c > 0` can sit below it — the defeating window
+was never the true blocker). -/
+theorem sSCUT_cpow3_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ ((((3 : ℝ)) : ℂ) ^ (-sSCUT)).re) := by
+  intro h
+  have hnp := sSCUT_cpow3_neg_Re_nonpos
+  linarith
 
 end Door3PilotR00Zeta

@@ -4842,10 +4842,19 @@ sorry-free infrastructure and the complete commit ledger above.
   (STOP documented). KEY BANK: tail transfer to sCut
   `sSCUT_eta_tail_2048_le:2095` (`||G-S4096||<=7/10` at sCut
   `1/2+10i`, OA11 numerals transferred verbatim via Re+norm only)
-  + threshold `:2111` + shortfall `121/70~=1.729` (`:2116`).
-  hTail at sCut now CLOSED; missing leg pure slow N=4096>=21/10
-  (shard 2/7 vs bar 2.1). ZETA-SCUT2 tasked (slow shards 9+. or
-  log3 sharpening for Re3 sign-lock).
+  + threshold `:2111` + shortfall `127/70~=1.814` (`:2116`;
+  coordinator-corrected from false `121/70` — `norm_num` would have
+  failed the build). hTail at sCut now CLOSED; missing leg pure
+  slow N=4096>=21/10 (shard 2/7 vs bar 2.1). ZETA-SCUT2 tasked (slow
+  shards 9+. or log3 sharpening for Re3 sign-lock).
+- 2026-09-17 ZETA-SCUT2 (background `ses_f5142ea4`, proof-only,
+  grep-clean): sharp-log3 finding — Mathlib d9 bounds collapse the
+  window to 3e-9 AND prove Re3 lock IMPOSSIBLE at any precision
+  (delta3 in quadrant III, true Re3~=-0.0055; no digit bound
+  exists). Banked composites (log9/log12), sharp windows, cos
+  nonpos + cpow split + `Re3<=0` (`:2183-2353`). Parity-correct
+  next targets filed (k=7/n=8 need cos UPPERS). Slow stays 2/7.
+  ZETA-SCUT3 tasked (k=7/n=8 cos-upper shard).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
