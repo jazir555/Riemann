@@ -3184,4 +3184,38 @@ theorem sSCUT_S8_floor_below_bar_new :
     (-3529 / 1050 : ℝ) < (21 / 10 : ℝ) := by
   norm_num
 
+/-- Eta bridge `eta₉ = -(10^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(10^s)⁻¹` into `10^{-s}`; mirror of `sSCUT_eta7_eq_neg_cpow8`). -/
+theorem sSCUT_eta9_eq_neg_cpow10 :
+    etaDirichletTerm sSCUT 9 = -((((10 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (9 + 1 : ℕ) = 10 := rfl
+  have hcast : ((((9 + 1 : ℕ)) : ℂ)) = ((((10 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (9 : ℕ) = -1 := by norm_num
+  have h10cast : ((((10 : ℕ)) : ℂ)) = ((((10 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h10cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (odd `k = 9`): `Re(eta₉) ≥ +r₁₀/2` (negated cpow signed
+upper `sSCUT_cpow10_neg_Re_upper`; negation flips the upper to a lower;
+`r₁₀ = (10 : ℝ) ^ (-(1/2 : ℝ))` kept SYMBOLIC — no numeric lower banked). -/
+theorem sSCUT_eta9_Re_ge :
+    (10 : ℝ) ^ (-(1 / 2 : ℝ)) / 2 ≤ (etaDirichletTerm sSCUT 9).re := by
+  have h := sSCUT_cpow10_neg_Re_upper
+  rw [sSCUT_eta9_eq_neg_cpow10, Complex.neg_re, sSCUT_cpow10_neg_re]
+  rw [sSCUT_cpow10_neg_re] at h
+  linarith
+
+/-- Honest `S₈ + eta₉` `Re` shard floor (`-3529/1050 + r₁₀/2 ≤ Re(S₈ + eta₉)`;
+old floor plus the `t₉` signed gain; `r₁₀` explicit and symbolic; honest:
+partial sum skips `k = 8` whose `Re` floor is not banked here, and no
+numerics are claimed for `r₁₀`). -/
+theorem sSCUT_S8_add_eta9_Re_ge :
+    (-3529 / 1050 : ℝ) + (10 : ℝ) ^ (-(1 / 2 : ℝ)) / 2 ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9).re := by
+  rw [Complex.add_re]
+  have hS8 := sSCUT_S8_Re_ge_neg3529div1050
+  have h9 := sSCUT_eta9_Re_ge
+  linarith
+
 end Door3PilotR00Zeta

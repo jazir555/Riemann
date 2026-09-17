@@ -4869,6 +4869,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (`:2982`), `+ring` x4 after sq_norm rewrites
   (`:3443/:3730/:3890/:4050`, mirrors green pattern). Bridge
   unblocked. BRIDGE-VERIFY tasked (rebuild bridge).
+- 2026-09-17 BRIDGE-VERIFY (background `ses_f512d8a3`): GREEN —
+  FOURTH GREEN MODULE. No lock, immediate acquire, `[8703/8703]
+  Built door3_R02_zeta_bridge (19s)`, BUILD-EXIT=0, zero errors;
+  transfer `:22` + cap `:31` (1569120) both standard axioms, no
+  sorryAx; upstream ball-advance + zeta_rigorous confirmed green
+  in the same run. No fixes needed. UNLOCKS: deriv 4-factor
+  assembly can now FIRE at UZ=934 (finite closed deriv cap
+  modulo DG/DZ). DERIV-FIRE tasked (UZ=934 assembly).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -5016,6 +5024,14 @@ sorry-free infrastructure and the complete commit ledger above.
   the false -1/2 constant since r10~=0.32). PAYOFF VISIBLE:
   k=9 odd → eta9 = -10^-s → Re(eta9) >= +r10/2 constructive.
   ZETA-SCUT11 tasked (eta9 Re-lower + shard reassembly).
+- 2026-09-17 ZETA-SCUT11 (background `ses_f512cd1d`, proof-only,
+  grep-clean): eta9 payoff banked — `sSCUT_eta9_eq_neg_cpow10
+  :3189` (odd-k sign verified (-1)^9=-1),
+  `sSCUT_eta9_Re_ge :3201` (Re(eta9)>=+r10/2, negation flips
+  the :2625 upper to a lower), `sSCUT_S8_add_eta9_Re_ge :3212`
+  (shard + r10/2, skips k=8 honestly, r10 symbolic).
+  Concretization needs r10 lower (r10~=0.316; >=0.3 gives
+  +0.15). ZETA-SCUT12 tasked (r10>=0.3 floor fenced).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
