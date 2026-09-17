@@ -1548,4 +1548,584 @@ theorem R00_shortfall_023_M8388608_phase5_eq :
 #print axioms R00_gap_023_M8388608_phase5_eq
 #print axioms R00_shortfall_023_M8388608_phase5_eq
 
+/-! ## ZETA-SCUT sCut pilot (parked here; `door3_zeta_cutoff.lean` untouched).
+
+R00 re-route exhausted (`R00_eta_S5_norm_ge_neg237` stalls at `-2.37` on
+destructive phases). This section redirects to the cutoff slow-sum at
+`sCut = 1/2 + 10*I` (`door3_zeta_cutoff.lean:16`).
+
+Banked shapes reused READ-ONLY (exact statement + line):
+* `hSlow/hTail/hEnough`: `Door3ZetaCutoff.zeta_cutoff_lower_of_certificate_one`
+  (`door3_zeta_cutoff.lean:353-359`): `slow ≤ ‖S‖`, `‖G - S‖ ≤ rtail`,
+  `rtail < slow ⟹ slow - rtail ≤ ‖riemannZeta sCut‖`; consumer
+  `cutR10_zetaRemainder_of_certificate_one` (`door3_zeta_cutoff.lean:384-389`)
+  needs `hEnough : 7/5 + rtail ≤ slow`.
+* `rtail` CLOSED at `M = 2048`: `Door3OffAxis.sCutOA11_eta_tail_2048_le`
+  (`door3_off_axis_certificates.lean:8460-8463`): `‖G - S4096‖ ≤ 7/10`,
+  via `sCutOA11_M2048_rpow_ge` (`:8426`) + `sCutOA11_r_2048_le` (`:8437`);
+  threshold `sCutOA11_hEnough_2048_threshold` (`:8473`) gives
+  `7/5 + 7/10 = 21/10 ≤ slow'`. NOTE: banked point is `sCutOA11 = 1/2+11*I`
+  (`:8368`); the tail numerals use only `Re = 1/2` + `‖s‖ ≤ 12`, so the
+  identical proof transfers verbatim to `sCut = 1/2+10*I` below
+  (`sSCUT_eta_tail_2048_le`). The `sCutOA` (`t = 10`) banked triple is only
+  `slow = 2/7`, `rtail = 24` (`sCutOA_slow` `:8336`, `sCutOA_rtail` `:8345`).
+* Slow recipe mirrored (not duplicated): `CS_complex_S4_Re_ge_156`
+  (`door3_cell_suppliers.lean:2213`, `Re ≥ 1.56` via per-term cpow splits
+  `CS_cpow2/3/4_sCenter_re` + cos/rpow floors) and `CS_complex_S6_Re_ge_095`
+  (`:2621`). Below mirrors that phase/norm-split pattern at sCut coords.
+
+SMALL-shard outcome (honest): `S₂ ≥ 2/7` banked (`sSCUT_S2_slow`); per-term
+norm uppers for `k = 2..7` (`n = 3..8`) are each `≤ 1`, so reverse triangle
+from `S₂` gives only `‖S₈‖ ≥ -40/7` (`sSCUT_S8_norm_ge_neg40div7`) — weaker
+than `0`, i.e. the shard does NOT grow toward `21/10`. Defeating window:
+`10 * log 3 ∈ [10.529, 11.363]` (`sSCUT_theta3_mem`, width `0.834` from the
+wide banked `CS_log_three_ge/le`), so no `Re₃` sign-lock is available with
+banked bridges — STOP here for the `N = 4096` slow push; binding sCut slow
+stays `2/7`, shortfall vs `21/10` is `127/70 ≈ 1.814`.
+-/
+
+/-- sCut mirror parked in this file (`1/2 + 10*I`; cutoff file untouched). -/
+noncomputable def sSCUT : ℂ := (1 / 2 : ℂ) + 10 * Complex.I
+
+theorem sSCUT_re : sSCUT.re = (1 / 2 : ℝ) := by simp [sSCUT]
+
+theorem sSCUT_im : sSCUT.im = (10 : ℝ) := by simp [sSCUT]
+
+theorem sSCUT_pos : 0 < sSCUT.re := by rw [sSCUT_re]; norm_num
+
+theorem sSCUT_norm_le : ‖sSCUT‖ ≤ (12 : ℝ) := by
+  have h := Complex.norm_le_abs_re_add_abs_im sSCUT
+  have hre : |sSCUT.re| = (1 / 2 : ℝ) := by rw [sSCUT_re]; norm_num
+  have him : |sSCUT.im| = (10 : ℝ) := by rw [sSCUT_im]; norm_num
+  rw [hre, him] at h
+  linarith
+
+/-- sCut phase cosine floor (`3/4 ≤ cos(10*log 2)`; mirror of
+`Door3ZetaCutoff.cutoff_phase_cos_lower`, banked-bridge route only). -/
+theorem sSCUT_cos10log2_ge : (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2) := by
+  have hloglo := Real.log_two_gt_d9
+  have hloghi := Real.log_two_lt_d9
+  have hθlo : (6.931471803 : ℝ) < 10 * Real.log 2 := by linarith
+  have hθhi : 10 * Real.log 2 < (6.931471808 : ℝ) := by linarith
+  have hπlo := Real.pi_gt_d4
+  have hπhi := Real.pi_lt_d4
+  have hdlo : (0.6482 : ℝ) < 10 * Real.log 2 - 2 * Real.pi := by linarith
+  have hdhi : 10 * Real.log 2 - 2 * Real.pi < (0.6486 : ℝ) := by linarith
+  have hsq : (10 * Real.log 2 - 2 * Real.pi) ^ 2 ≤ (0.6486 : ℝ) ^ 2 := by
+    have hp : 0 ≤ 10 * Real.log 2 - 2 * Real.pi := by linarith
+    nlinarith [sq_nonneg (10 * Real.log 2 - 2 * Real.pi)]
+  have hc := Real.one_sub_sq_div_two_le_cos (x := 10 * Real.log 2 - 2 * Real.pi)
+  have hbase : (3 / 4 : ℝ) ≤ 1 - (0.6486 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosd : (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 2 - 2 * Real.pi) := by
+    nlinarith [hc, hsq]
+  rw [Real.cos_sub_two_pi] at hcosd
+  exact hcosd
+
+/-- `7/5 ≤ 2^(1/2)` (mirror of the `sCutOA_term1_norm_le` root step). -/
+theorem sSCUT_sqrt2_ge : (7 / 5 : ℝ) ≤ (2 : ℝ) ^ (1 / 2 : ℝ) := by
+  have hpow : ((7 / 5 : ℝ) ^ (2 : ℕ)) ≤ (2 : ℝ) := by norm_num
+  have hpow' : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    norm_num
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `2^(1/2) ≤ 3/2` (for the `r₂` lower). -/
+theorem sSCUT_sqrt2_le : (2 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 / 2 : ℝ) := by
+  have hpow : (2 : ℝ) ≤ ((3 / 2 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) = 2 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    norm_num
+  have hle : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) ≤ ((3 / 2 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']; exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `r₂ = 2^(-1/2) ≤ 5/7` (inverse of the root step). -/
+theorem sSCUT_rpow2_neg_le : (2 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (5 / 7 : ℝ) := by
+  have hge := sSCUT_sqrt2_ge
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (2 : ℝ) ^ (-(1 / 2 : ℝ)) = (((2 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)]
+  rw [hneg, show (5 / 7 : ℝ) = ((7 / 5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- `2/3 ≤ r₂` (inverse of the `3/2` cap). -/
+theorem sSCUT_rpow2_neg_ge : (2 / 3 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt2_le
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (2 : ℝ) ^ (-(1 / 2 : ℝ)) = (((2 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)]
+  rw [hneg, show (2 / 3 : ℝ) = ((3 / 2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `2^{-s}` at sCut (mirror of
+`CS_cpow2_sCenter_re`: `(-sSCUT).re = -1/2`, `(-sSCUT).im = -10`). -/
+theorem sSCUT_cpow2_neg_re : ((((2 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2) := by
+  have h2pos : (0 : ℝ) < 2 := by norm_num
+  have hxC : ((2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h2pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((2 : ℝ) : ℂ) = (((Real.log 2 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h2pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
+  have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 2 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 2 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 2) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 2 * (-(1 / 2 : ℝ)))
+      = (2 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h2pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 2))
+      = Real.cos (10 * Real.log 2) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Per-term `Re` product floor at sCut (`1/2 ≤ r₂·cos ≤ 5/7`). -/
+theorem sSCUT_cpow2_Re_mem :
+    (1 / 2 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2) ∧
+    (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2) ≤ (5 / 7 : ℝ) := by
+  have hr_lo := sSCUT_rpow2_neg_ge
+  have hr_hi := sSCUT_rpow2_neg_le
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc_lo := sSCUT_cos10log2_ge
+  have hc_hi : Real.cos (10 * Real.log 2) ≤ 1 := Real.cos_le_one _
+  have hc0 : (0 : ℝ) ≤ Real.cos (10 * Real.log 2) := by linarith
+  constructor
+  · have hmul : (2 / 3 : ℝ) * (3 / 4 : ℝ)
+        ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2) :=
+      mul_le_mul hr_lo hc_lo hc0 (by norm_num)
+    have heq : (2 / 3 : ℝ) * (3 / 4 : ℝ) = 1 / 2 := by norm_num
+    linarith
+  · have hmul : (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2)
+        ≤ (5 / 7 : ℝ) * 1 :=
+      mul_le_mul hr_hi hc_hi hc0 (by norm_num)
+    have heq : (5 / 7 : ℝ) * 1 = 5 / 7 := by norm_num
+    linarith
+
+/-- Second eta-term norm upper at sCut (`≤ 5/7`; mirror of
+`sCutOA_term1_norm_le`). -/
+theorem sSCUT_term1_norm_le : ‖etaDirichletTerm sSCUT 1‖ ≤ (5 / 7 : ℝ) := by
+  have hterm1_eq : etaDirichletTerm sSCUT 1
+      = -1 / ((((2 : ℕ)) : ℂ) ^ sSCUT) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = (((2 : ℝ) : ℂ)) := by norm_num
+  have h2norm : ‖((((2 : ℕ)) : ℂ) ^ sSCUT)‖ = (2 : ℝ) ^ sSCUT.re := by
+    rw [h2cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hroot := sSCUT_sqrt2_ge
+  rw [hterm1_eq, norm_div, norm_neg, norm_one, h2norm, sSCUT_re]
+  rw [div_le_iff₀ (Real.rpow_pos_of_pos (by norm_num) _)]
+  have hmul := mul_le_mul_of_nonneg_left hroot (show (0 : ℝ) ≤ 5 / 7 by norm_num)
+  have heq : (5 / 7 : ℝ) * (7 / 5 : ℝ) = 1 := by norm_num
+  rw [heq] at hmul
+  linarith
+
+/-- sCut two-term slow lower (`2/7 ≤ ‖S₂‖`; mirror of `sCutOA_slow`). -/
+theorem sSCUT_S2_slow :
+    (2 / 7 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k‖ := by
+  have h0 : etaDirichletTerm sSCUT 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hS2 : (∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+      = 1 + etaDirichletTerm sSCUT 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add, h0]
+  have ht := sSCUT_term1_norm_le
+  rw [hS2]
+  have hrev := norm_sub_norm_le (1 : ℂ) (-(etaDirichletTerm sSCUT 1))
+  rw [norm_one, norm_neg, sub_neg_eq_add] at hrev
+  linarith
+
+/-- Third eta-term norm upper at sCut (`3^{-1/2} ≤ 1`, trivial decay;
+mirror of `R00_eta_third_norm_le_one`). -/
+theorem sSCUT_eta_third_norm_le_one :
+    ‖etaDirichletTerm sSCUT 2‖ ≤ (1 : ℝ) := by
+  have heq2 : etaDirichletTerm sSCUT 2 = ((((3 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (2 + 1 : ℕ) = 3 := rfl
+    have hcast : ((((2 + 1 : ℕ)) : ℂ)) = ((((3 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (2 : ℕ) = 1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, one_div]
+  rw [heq2]
+  have h3n : ((((3 : ℕ)) : ℂ)) = (3 : ℂ) := by norm_cast
+  have h3r : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  rw [h3n, h3r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 3), sSCUT_re]
+  have heq : (((3 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (3 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _).symm
+  rw [heq]
+  have hle : (3 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (3 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Fourth eta-term norm upper at sCut (`4^{-1/2} = 1/2 ≤ 1`). -/
+theorem sSCUT_eta_fourth_norm_le_one :
+    ‖etaDirichletTerm sSCUT 3‖ ≤ (1 : ℝ) := by
+  have heq3 : etaDirichletTerm sSCUT 3 = -((((4 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (3 + 1 : ℕ) = 4 := rfl
+    have hcast : ((((3 + 1 : ℕ)) : ℂ)) = ((((4 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (3 : ℕ) = -1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, neg_div, one_div]
+  rw [heq3, norm_neg]
+  have h4n : ((((4 : ℕ)) : ℂ)) = (4 : ℂ) := by norm_cast
+  have h4r : ((4 : ℂ)) = ((((4 : ℝ)) : ℂ)) := by simp
+  rw [h4n, h4r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 4), sSCUT_re]
+  have heq : (((4 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (4 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4) _).symm
+  rw [heq]
+  have hle : (4 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (4 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Fifth eta-term norm upper at sCut (`5^{-1/2} ≤ 1`). -/
+theorem sSCUT_eta_fifth_norm_le_one :
+    ‖etaDirichletTerm sSCUT 4‖ ≤ (1 : ℝ) := by
+  have heq4 : etaDirichletTerm sSCUT 4 = ((((5 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (4 + 1 : ℕ) = 5 := rfl
+    have hcast : ((((4 + 1 : ℕ)) : ℂ)) = ((((5 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (4 : ℕ) = 1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, one_div]
+  rw [heq4]
+  have h5n : ((((5 : ℕ)) : ℂ)) = (5 : ℂ) := by norm_cast
+  have h5r : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+  rw [h5n, h5r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 5), sSCUT_re]
+  have heq : (((5 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (5 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _).symm
+  rw [heq]
+  have hle : (5 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (5 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Sixth eta-term norm upper at sCut (`6^{-1/2} ≤ 1`). -/
+theorem sSCUT_eta_sixth_norm_le_one :
+    ‖etaDirichletTerm sSCUT 5‖ ≤ (1 : ℝ) := by
+  have heq5 : etaDirichletTerm sSCUT 5 = -((((6 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (5 + 1 : ℕ) = 6 := rfl
+    have hcast : ((((5 + 1 : ℕ)) : ℂ)) = ((((6 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (5 : ℕ) = -1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, neg_div, one_div]
+  rw [heq5, norm_neg]
+  have h6n : ((((6 : ℕ)) : ℂ)) = (6 : ℂ) := by norm_cast
+  have h6r : ((6 : ℂ)) = ((((6 : ℝ)) : ℂ)) := by simp
+  rw [h6n, h6r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 6), sSCUT_re]
+  have heq : (((6 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (6 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 6) _).symm
+  rw [heq]
+  have hle : (6 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (6 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Seventh eta-term norm upper at sCut (`7^{-1/2} ≤ 1`). -/
+theorem sSCUT_eta_seventh_norm_le_one :
+    ‖etaDirichletTerm sSCUT 6‖ ≤ (1 : ℝ) := by
+  have heq6 : etaDirichletTerm sSCUT 6 = ((((7 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (6 + 1 : ℕ) = 7 := rfl
+    have hcast : ((((6 + 1 : ℕ)) : ℂ)) = ((((7 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (6 : ℕ) = 1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, one_div]
+  rw [heq6]
+  have h7n : ((((7 : ℕ)) : ℂ)) = (7 : ℂ) := by norm_cast
+  have h7r : ((7 : ℂ)) = ((((7 : ℝ)) : ℂ)) := by simp
+  rw [h7n, h7r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 7), sSCUT_re]
+  have heq : (((7 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (7 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7) _).symm
+  rw [heq]
+  have hle : (7 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (7 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Eighth eta-term norm upper at sCut (`8^{-1/2} ≤ 1`). -/
+theorem sSCUT_eta_eighth_norm_le_one :
+    ‖etaDirichletTerm sSCUT 7‖ ≤ (1 : ℝ) := by
+  have heq7 : etaDirichletTerm sSCUT 7 = -((((8 : ℕ) : ℂ) ^ sSCUT)⁻¹) := by
+    have e : (7 + 1 : ℕ) = 8 := rfl
+    have hcast : ((((7 + 1 : ℕ)) : ℂ)) = ((((8 : ℕ)) : ℂ)) := by rw [e]
+    have hneg : (-1 : ℂ) ^ (7 : ℕ) = -1 := by norm_num
+    unfold etaDirichletTerm
+    rw [hcast, hneg, neg_div, one_div]
+  rw [heq7, norm_neg]
+  have h8n : ((((8 : ℕ)) : ℂ)) = (8 : ℂ) := by norm_cast
+  have h8r : ((8 : ℂ)) = ((((8 : ℝ)) : ℂ)) := by simp
+  rw [h8n, h8r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 8), sSCUT_re]
+  have heq : (((8 : ℝ) ^ (1 / 2 : ℝ)))⁻¹ = (8 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8) _).symm
+  rw [heq]
+  have hle : (8 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (8 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Eight-term shard split at `S₂` (`S₈ = S₂ + t₂ + … + t₇`). -/
+theorem sSCUT_S8_eq :
+    (∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+      = (∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6 + etaDirichletTerm sSCUT 7 := by
+  rw [show (8 : ℕ) = 7 + 1 by norm_num, Finset.sum_range_succ,
+    show (7 : ℕ) = 6 + 1 by norm_num, Finset.sum_range_succ,
+    show (6 : ℕ) = 5 + 1 by norm_num, Finset.sum_range_succ,
+    show (5 : ℕ) = 4 + 1 by norm_num, Finset.sum_range_succ,
+    show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ,
+    show (3 : ℕ) = 2 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Honest 8-term stall at sCut (`-40/7 ≤ ‖S₈‖`; reverse triangle from the
+binding `2/7` S2 floor minus the six `≤ 1` extra term uppers — weaker than
+`0`, so the shard does NOT grow toward `21/10`). -/
+theorem sSCUT_S8_norm_ge_neg40div7 :
+    (-40 / 7 : ℝ) ≤ ‖∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k‖ := by
+  rw [sSCUT_S8_eq]
+  have hS2 := sSCUT_S2_slow
+  have hb := sSCUT_eta_third_norm_le_one
+  have hc := sSCUT_eta_fourth_norm_le_one
+  have hd := sSCUT_eta_fifth_norm_le_one
+  have he := sSCUT_eta_sixth_norm_le_one
+  have hf := sSCUT_eta_seventh_norm_le_one
+  have hg := sSCUT_eta_eighth_norm_le_one
+  have h1 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2‖ + ‖etaDirichletTerm sSCUT 2‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k) + etaDirichletTerm sSCUT 2)
+      (etaDirichletTerm sSCUT 2)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2) - etaDirichletTerm sSCUT 2)
+        = (∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k) := by abel
+    rw [heq] at h
+    exact h
+  have h2 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3‖
+        + ‖etaDirichletTerm sSCUT 3‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3)
+      (etaDirichletTerm sSCUT 3)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3)
+        - etaDirichletTerm sSCUT 3)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+          + etaDirichletTerm sSCUT 2) := by abel
+    rw [heq] at h
+    exact h
+  have h3 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4‖ + ‖etaDirichletTerm sSCUT 4‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4)
+      (etaDirichletTerm sSCUT 4)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4) - etaDirichletTerm sSCUT 4)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+          + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3) := by abel
+    rw [heq] at h
+    exact h
+  have h4 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5‖
+        + ‖etaDirichletTerm sSCUT 5‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5)
+      (etaDirichletTerm sSCUT 5)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5)
+        - etaDirichletTerm sSCUT 5)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+          + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+          + etaDirichletTerm sSCUT 4) := by abel
+    rw [heq] at h
+    exact h
+  have h5 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6‖ + ‖etaDirichletTerm sSCUT 6‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6)
+      (etaDirichletTerm sSCUT 6)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6) - etaDirichletTerm sSCUT 6)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+          + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+          + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5) := by abel
+    rw [heq] at h
+    exact h
+  have h6 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6 + etaDirichletTerm sSCUT 7‖
+        + ‖etaDirichletTerm sSCUT 7‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6 + etaDirichletTerm sSCUT 7)
+      (etaDirichletTerm sSCUT 7)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+        + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+        + etaDirichletTerm sSCUT 6 + etaDirichletTerm sSCUT 7)
+        - etaDirichletTerm sSCUT 7)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+          + etaDirichletTerm sSCUT 2 + etaDirichletTerm sSCUT 3
+          + etaDirichletTerm sSCUT 4 + etaDirichletTerm sSCUT 5
+          + etaDirichletTerm sSCUT 6) := by abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- Defeating phase window at sCut for `n = 3` (`10*log 3 ∈ [10.529, 11.363]`
+from the wide banked `CS_log_three_ge/le`; width `0.834` defeats any `Re₃`
+sign-lock with banked bridges — STOP). -/
+theorem sSCUT_theta3_mem :
+    (10.529 : ℝ) ≤ 10 * Real.log 3 ∧ 10 * Real.log 3 ≤ (11.363 : ℝ) := by
+  have hge := Door3CellSuppliers.CS_log_three_ge
+  have hle := Door3CellSuppliers.CS_log_three_le
+  have hlo : (10 : ℝ) * 1.0529 ≤ 10 * Real.log 3 :=
+    mul_le_mul_of_nonneg_left hge (by norm_num)
+  have hhi : (10 : ℝ) * Real.log 3 ≤ 10 * 1.1363 :=
+    mul_le_mul_of_nonneg_left hle (by norm_num)
+  have c1 : (10 : ℝ) * 1.0529 = 10.529 := by norm_num
+  have c2 : (10 : ℝ) * 1.1363 = 11.363 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the defeating `n = 3` window. -/
+theorem sSCUT_theta3_width_eq : (11.363 : ℝ) - 10.529 = (0.834 : ℝ) := by
+  norm_num
+
+/-- Rpow lower for the sCut `M = 2048` tail (`35 ≤ 2048^{1/2}`; mirror of
+`sCutOA11_M2048_rpow_ge`). -/
+theorem sSCUT_M2048_rpow_ge :
+    (35 : ℝ) ≤ ((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((35 : ℝ) ^ (2 : ℕ)) ≤ ((((2048 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((2048 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `M = 2048` tail-decay bound at `Re = 1/2` (`24/35 ≤ 7/10`; mirror of
+`sCutOA11_r_2048_le`). -/
+theorem sSCUT_r_2048_le :
+    (12 : ℝ) * ((((((2048 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤ (7 / 10 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((2048 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := sSCUT_M2048_rpow_ge
+  have hrw : ((((2048 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (35 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (35 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((2048 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((35 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((35 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (7 / 10 : ℝ) := by
+    norm_num
+  linarith
+
+/-- sCut paired tail at `M = 2048` (`‖G - S4096‖ ≤ 7/10`; transfer of
+`sCutOA11_eta_tail_2048_le` to `t = 10` — numerals use only `Re = 1/2` and
+`‖s‖ ≤ 12`). -/
+theorem sSCUT_eta_tail_2048_le :
+    ‖(∑' m, etaPairTerm sSCUT m) -
+      (∑ k ∈ Finset.range (2 * 2048), etaDirichletTerm sSCUT k)‖ ≤
+      (7 / 10 : ℝ) := by
+  have hs : 0 < sSCUT.re := by rw [sSCUT_re]; norm_num
+  have hC : ‖sSCUT‖ ≤ (12 : ℝ) := sSCUT_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 2048 (by norm_num)
+  have h2M : 2 * 2048 = 4096 := by norm_num
+  rw [h2M] at hgen
+  have hre : sSCUT.re = (1 / 2 : ℝ) := sSCUT_re
+  rw [hre] at hgen
+  have hr := sSCUT_r_2048_le
+  linarith
+
+/-- Closed `hEnough` threshold shape at sCut with the `M = 2048` tail
+(`7/5 + 7/10 = 21/10`; mirror of `sCutOA11_hEnough_2048_threshold`). -/
+theorem sSCUT_hEnough_2048_threshold (slow' : ℝ) (hs : (21 / 10 : ℝ) ≤ slow') :
+    (7 / 5 : ℝ) + (7 / 10 : ℝ) ≤ slow' := by linarith
+
+/-- Honest shortfall of the banked sCut shard vs the `21/10` bar:
+`(7/5 + 7/10) - 2/7 = 121/70`. -/
+theorem sSCUT_S2_hEnough_shortfall :
+    (((7 / 5 : ℝ) + 7 / 10) - 2 / 7) = (121 / 70 : ℝ) := by norm_num
+
+/-- Threshold form of the remaining miss at sCut with the banked shard:
+`2/7 < 7/5 + 7/10`, so `hEnough` is NOT discharged — `N = 4096 slow`
+remains the missing leg. -/
+theorem sSCUT_hEnough_open : (2 / 7 : ℝ) < (7 / 5 : ℝ) + (7 / 10 : ℝ) := by
+  norm_num
+
+#print axioms sSCUT_S2_slow
+#print axioms sSCUT_S8_norm_ge_neg40div7
+#print axioms sSCUT_theta3_mem
+#print axioms sSCUT_eta_tail_2048_le
+#print axioms sSCUT_hEnough_open
+
 end Door3PilotR00Zeta

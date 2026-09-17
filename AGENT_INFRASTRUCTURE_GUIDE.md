@@ -4741,6 +4741,14 @@ sorry-free infrastructure and the complete commit ledger above.
   authorized doc-only fix (assembly `:3416` R22 tier label
   `(0.002,0.05)`→`(0.002,0.07)` in `/-!` comment; 1 line, no code).
   Leaves done 27/40. EDGE-NEXT12 tasked (c28+ run).
+- 2026-09-17 EDGE-NEXT12 (background `ses_f5144409`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c28_of_R28:1108`,
+  `gridH_c29_of_R29:1131`, `gridH_c30_of_R30:1154` (no skips).
+  Leaves done 30/40. EDGE-NEXT13 tasked (c31+ run).
+- 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
+  no report text, no tree writes (suppliers clean). Im(S6) route
+  NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
+  retry, tighter brief).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4811,6 +4819,17 @@ sorry-free infrastructure and the complete commit ledger above.
   LANE VERDICT: R00 Re-route exhausted (same oscillation wall as
   suppliers S6) — redirect to sCut slow-sum (N=4096>=21/10, OA26
   banked rtail leg; cutoff lane's hSlow). ZETA-SCUT tasked.
+- 2026-09-17 ZETA-SCUT (background `ses_f514615a`, proof-only,
+  grep-clean): sCut section `:1553-2130` — S2 shard `2/7<=||S2||`
+  (`:1746`), per-term <=1 n=3..8, S8 stall (-40/7, destructive),
+  defeating window `10*log3 in [10.529,11.363]` width 0.834
+  (STOP documented). KEY BANK: tail transfer to sCut
+  `sSCUT_eta_tail_2048_le:2095` (`||G-S4096||<=7/10` at sCut
+  `1/2+10i`, OA11 numerals transferred verbatim via Re+norm only)
+  + threshold `:2111` + shortfall `121/70~=1.729` (`:2116`).
+  hTail at sCut now CLOSED; missing leg pure slow N=4096>=21/10
+  (shard 2/7 vs bar 2.1). ZETA-SCUT2 tasked (slow shards 9+. or
+  log3 sharpening for Re3 sign-lock).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`

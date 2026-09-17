@@ -1095,6 +1095,75 @@ theorem gridH_c27_of_R27 (h : CentralCoverAssembly.R27_leaf_obligations) :
     ((2, 4.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R27_mem_gridFine rfl
 
+/-- Banked `c28 = (4, 6.5, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R28_H_instance` at the banked membership
+`R28_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R28_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.2 + 5.25·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:3963` (`R28_leaf_obligations`) and `:3992`
+(`R28_H_instance`). -/
+theorem gridH_c28_of_R28 (h : CentralCoverAssembly.R28_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R28_H_instance h
+    ((4, 6.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R28_mem_gridFine rfl
+
+/-- Banked `c29 = (6, 8.5, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R29_H_instance` at the banked membership
+`R29_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R29_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.2 + 7.25·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4047` (`R29_leaf_obligations`) and `:4076`
+(`R29_H_instance`). -/
+theorem gridH_c29_of_R29 (h : CentralCoverAssembly.R29_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R29_H_instance h
+    ((6, 8.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R29_mem_gridFine rfl
+
+/-- Banked `c30 = (7.5, 10, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R30_H_instance` at the banked membership
+`R30_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R30_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.05 * radius ≤ ‖ξ‖` at `s = 0.2 + 8.75·I`, uniform
+`‖ξ'‖ ≤ 0.05` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4131` (`R30_leaf_obligations`) and `:4160`
+(`R30_H_instance`). -/
+theorem gridH_c30_of_R30 (h : CentralCoverAssembly.R30_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R30_H_instance h
+    ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R30_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
