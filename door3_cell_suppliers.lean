@@ -1158,4 +1158,204 @@ theorem CS_exp_frac_lt : Real.exp 0.6029 ≤ 1.8275 := by
 #print axioms CS_zeta_of_S2b
 #print axioms CS_S2b_shortfall
 
+/-! ## §A3. Phase-aware eta-factor sharpening `2.53 → 1.87`
+
+Route (honest, cheapest-first per ETA-NEXT2): keep `slow = 1.25`
+(`CS_complex_S2_abs_ge_125`) and sharpen `cF` via the Pythagoras UPPER
+`‖1-w‖² = 1 - 2·Re w + ‖w‖²` with a LOWER bound on `Re w`.
+Here `w = 2^{1-s}`, `‖w‖ = 2^0.605 ≤ 1.53` (banked), `Re w = r·cos φ`
+with the same head phase `φ = 6.75·log 2` (so `(1-s).im = 6.75` reuses
+the banked phase interval `[4.6787, 4.679)`).
+Since `φ` sits `≈ 0.0336` below `3π/2`, `cos φ = sin d ≥ -|d| ≥ -0.05`
+with `d = φ - 3π/2`, `|d| ≤ 0.05` (coarse `π` + phase bounds only).
+Hence `Re w ≥ -0.05·r ≥ -0.0765`, so
+`‖1-w‖² ≤ 1 + 0.153 + 1.53² = 3.4939 ≤ 1.87² = 3.4969`.
+True `cF ≈ 1.85`, so `1.87` carries `≈ 1%` margin.
+New need `1.4·1.87 = 2.618`; shortfall vs `slow = 1.25` is `1.368`
+(was `2.292`; gain `0.924`). The `1.4` floor still fails
+(`2.618 ≤ 1.25` false); patch must still grow `slow` / sharpen `tail`. -/
+
+/-- Cosine lower at the head phase (`≥ -0.05`; true `≈ -0.0338`). -/
+theorem CS_cos675_lower_neg005 :
+    (-0.05 : ℝ) ≤ Real.cos (6.75 * Real.log 2) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphase_hi := CS_eta_phase1_lt
+  have hlo : (4.6787 : ℝ) ≤ 6.75 * Real.log 2 := by
+    have h2 := CS_log2_ge
+    have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2.le (by norm_num)
+    have hcap : (4.6787 : ℝ) ≤ 6.75 * 0.693147 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 2 with hx_def
+  set d : ℝ := x - 3 * Real.pi / 2 with hd_def
+  have hd_lo : (-0.05 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.05 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have h32eq : (3 : ℝ) * Real.pi / 2 = Real.pi + Real.pi / 2 := by
+    ring
+  have hcos32 : Real.cos (3 * Real.pi / 2) = 0 := by
+    rw [h32eq, Real.cos_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin32 : Real.sin (3 * Real.pi / 2) = -1 := by
+    rw [h32eq, Real.sin_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hx_eq : x = 3 * Real.pi / 2 + d := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = Real.sin d := by
+    rw [hx_eq, Real.cos_add, hcos32, hsin32]
+    ring
+  have hsin_lb : (-0.05 : ℝ) ≤ Real.sin d := by
+    by_cases hd0 : (0 : ℝ) ≤ d
+    · have hd_pi : d ≤ Real.pi := by linarith
+      have hnn : (0 : ℝ) ≤ Real.sin d :=
+        Real.sin_nonneg_of_nonneg_of_le_pi hd0 hd_pi
+      linarith
+    · push_neg at hd0
+      have he_pos : (0 : ℝ) < -d := by linarith
+      have hle : Real.sin (-d) ≤ -d := Real.sin_le he_pos.le
+      have hneg : Real.sin d = -Real.sin (-d) := by
+        have h := Real.sin_neg (x := -d)
+        rw [neg_neg] at h
+        exact h
+      linarith
+  rw [hcos_eq]
+  exact hsin_lb
+
+/-- Cpow real-part split for the eta factor (`1 - sCenter` phase/norm
+split, mirror of `CS_cpow2_sCenter_re`: `(1-s).re = 0.605`,
+`(1-s).im = 6.75`). -/
+theorem CS_cpow_factor_re : ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re
+    = (2 : ℝ) ^ ((0.605 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+  have h2pos : (0 : ℝ) < 2 := by norm_num
+  have hxC : ((2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h2pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((2 : ℝ) : ℂ) = (((Real.log 2 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h2pos)).symm
+  rw [hlog]
+  have hre_w : (((Real.log 2 : ℝ)) : ℂ).re = Real.log 2 := Complex.ofReal_re _
+  have hzim : (((Real.log 2 : ℝ)) : ℂ).im = 0 := Complex.ofReal_im _
+  have hre_z : ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R02Pilot.sCenter_re]
+    norm_num
+  have him_z : ((1 : ℂ) - R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    rw [Complex.sub_im, Complex.one_im, R02Pilot.sCenter_im]
+    norm_num
+  have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * ((1 : ℂ) - R02Pilot.sCenter)).re
+      = Real.log 2 * (0.605 : ℝ) := by
+    rw [Complex.mul_re, hre_w, hzim, hre_z]
+    ring
+  have harg_im : ((((Real.log 2 : ℝ)) : ℂ) * ((1 : ℂ) - R02Pilot.sCenter)).im
+      = Real.log 2 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hre_w, hzim, him_z]
+    ring
+  have hexp : Real.exp (Real.log 2 * (0.605 : ℝ))
+      = (2 : ℝ) ^ ((0.605 : ℝ)) :=
+    (Real.rpow_def_of_pos h2pos _).symm
+  have hcos : Real.cos (Real.log 2 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 2) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow norm identity for the factor (`‖2^{1-s}‖ = 2^0.605`). -/
+theorem CS_cpow_factor_norm_eq :
+    ‖((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))‖
+      = (2 : ℝ) ^ ((0.605 : ℝ)) := by
+  have hre : ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R02Pilot.sCenter_re]
+    norm_num
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2), hre]
+
+/-- Sharpened eta-factor cap `≤ 1.87` (TRUE `≈ 1.85`). -/
+def CS_etaFactor_upper_187 : Prop :=
+  ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.87
+
+/-- Phase-aware factor upper from the `2^0.605` cap + the `-0.05` cosine
+floor (PROVED): Pythagoras upper `‖1-w‖² = 1 - 2·Re w + ‖w‖²` with
+`Re w ≥ -0.0765`, `‖w‖ ≤ 1.53`, so `‖1-w‖² ≤ 3.4939 ≤ 1.87²`. -/
+theorem CS_etaFactor_187_of_bounds (hCap : CS_rpow0605_upper)
+    (hCos : (-0.05 : ℝ) ≤ Real.cos (6.75 * Real.log 2)) :
+    CS_etaFactor_upper_187 := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.87
+  have hReEq := CS_cpow_factor_re
+  have hnormR := CS_cpow_factor_norm_eq
+  have hcast : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have hrHi : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53 := hCap
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ ((0.605 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hRe_lo : (-0.0765 : ℝ)
+      ≤ (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re) := by
+    rw [hReEq]
+    have h1 : (-0.05 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ))
+        ≤ (2 : ℝ) ^ ((0.605 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+      have h := mul_le_mul_of_nonneg_left hCos hr0
+      linarith [h]
+    have hmul : (-0.05 : ℝ) * 1.53 = -0.0765 := by norm_num
+    have h2 : (-0.0765 : ℝ) ≤ (-0.05 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ)) := by
+      linarith
+    linarith
+  have hS_eq : ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+      = ((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))) := by
+    rw [hcast]
+  rw [hS_eq]
+  have hsq_eq : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2
+      = 1 - 2 * (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re)
+        + ‖((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.sq_norm, Complex.normSq_apply,
+      Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im]
+    ring
+  have hr2 : ((2 : ℝ) ^ ((0.605 : ℝ))) ^ 2 ≤ (1.53 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hr0 hrHi 2
+  have hsq_le : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2 ≤ (1.87 : ℝ) ^ 2 := by
+    have hnum : (1 : ℝ) - 2 * (-0.0765) + (1.53 : ℝ) ^ 2 ≤ (1.87 : ℝ) ^ 2 := by
+      norm_num
+    rw [hsq_eq, hnormR]
+    linarith
+  calc ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)))‖
+      = Real.sqrt (‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+        ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt ((1.87 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq_le
+    _ = 1.87 := Real.sqrt_sq (by norm_num)
+
+/-- UNCONDITIONAL sharpened factor cap (both links closed above). -/
+theorem CS_etaFactor_187_proved : CS_etaFactor_upper_187 :=
+  CS_etaFactor_187_of_bounds CS_rpow0605_proved CS_cos675_lower_neg005
+
+/-- Factor-need numeral at the sharpened cap: `1.4·1.87 = 2.618`. -/
+theorem CS_factor_need_187 : (1.4 : ℝ) * 1.87 = 2.618 := by
+  norm_num
+
+/-- S2c feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S2b`): with sharpened `slow = 1.25`, `tail = 0`,
+`cF = 1.87`, `CS_zeta_of_parts` applies directly — `hNeed` is still the
+unclosable `2.618 ≤ 1.25` (see `CS_S2c_shortfall_187`). -/
+theorem CS_zeta_of_S2c (Z : ℝ)
+    (hLink : (1.25 : ℝ) - 0 ≤ 1.87 * Z) (hNeed : (1.4 : ℝ) * 1.87 + 0 ≤ 1.25) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.25 0 1.87 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.87` exceeds sharpened `slow = 1.25` by `1.368` (was `2.292`;
+gain `0.924`). -/
+theorem CS_S2c_shortfall_187 : (1.4 : ℝ) * 1.87 - 1.25 = 1.368 := by
+  norm_num
+
+#print axioms CS_cos675_lower_neg005
+#print axioms CS_cpow_factor_re
+#print axioms CS_cpow_factor_norm_eq
+#print axioms CS_etaFactor_187_proved
+#print axioms CS_S2c_shortfall_187
+
 end Door3CellSuppliers

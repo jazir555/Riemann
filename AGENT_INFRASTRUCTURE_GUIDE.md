@@ -4734,6 +4734,18 @@ sorry-free infrastructure and the complete commit ledger above.
   true ~=0.3095), `CS_zeta_of_S2b:809` + `CS_S2b_shortfall:816`
   (shortfall `2.292`, was `2.542`, gain `0.25`). Floor 1.4 still
   fails honestly. Next: S6/S8 slow or cF<2.53 (ETA-NEXT2 tasked).
+- 2026-09-17 ETA-NEXT2 (background `ses_f515c4afcffe8xnzPRTJgAQlme`):
+  phase-aware cF 2.53->1.87, BUILD-EXIT=0 in 22s, grep-clean:
+  `CS_cos675_lower_neg005:1179` (`cos(6.75*log2)>=-0.05` via
+  `3pi/2+d=sin d` + `|d|<=0.05`, case-split sin lower),
+  `CS_cpow_factor_re:1235` + `CS_cpow_factor_norm_eq:1269`
+  (factor cpow Re/norm mirrors of the S2 lemmas at `(1-s).re/im`
+  `0.605/6.75`), `CS_etaFactor_187_proved:1333` (Pythagoras upper
+  `||1-w||^2<=3.4939<=1.87^2` from Re w>=-0.0765 + ||w||<=1.53),
+  `CS_factor_need_187:1337` (`1.4*1.87=2.618`),
+  `CS_zeta_of_S2c:1344` + `CS_S2c_shortfall_187:1352` (shortfall
+  `1.368`, was `2.292`, gain `0.924` — biggest yet). Floor still
+  fails; next patch must grow slow / sharpen tail (ETA-NEXT3 tasked).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
