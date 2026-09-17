@@ -4992,6 +4992,15 @@ sorry-free infrastructure and the complete commit ledger above.
   cross-checked inside). NOTE: δ₁₀' region has cos POSITIVE
   (~0.51) — constructive term. ZETA-SCUT9 tasked (quadrant +
   cos-lower fenced).
+- 2026-09-17 ZETA-SCUT9 (background `ses_f5130243`, proof-only,
+  grep-clean): SIGN CORRECTION — brief's `1/2<=cos θ₁₀` is FALSE
+  (odd-multiple flip: cos θ₁₀ = -cos δ₁₀' ≈ -0.51078). Banked the
+  correct UPPER `sSCUT_cos10log10_le_neg_half :2534`
+  (cos θ₁₀ <= -1/2 via 3x-two-pi + pi flips; endpoint
+  cos(1.0354)>=1/2 via sine-cubic floor, quadratic only gives
+  0.464). So n=10 is DESTRUCTIVE at full phase (like n=3); the
+  +0.51 lives on the reduced phase only. ZETA-SCUT10 tasked
+  (cpow10 Re-upper + shard honesty check).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`

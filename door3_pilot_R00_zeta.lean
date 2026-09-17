@@ -2529,6 +2529,53 @@ theorem sSCUT_cos10log8_le_neg_quarter :
   rw [key]
   linarith
 
+/-- Signed cosine UPPER `cos(10*log 10) ≤ -(1/2)` (quadrant-III `δ₁₀'` via the
+odd-multiple flip `cos θ₁₀ = -cos δ₁₀'` + sine-cubic floor on `π/2 - 1.0354`). -/
+theorem sSCUT_cos10log10_le_neg_half :
+    Real.cos (10 * Real.log 10) ≤ (-(1 / 2) : ℝ) := by
+  have hδ := sSCUT_delta10p_sharp_mem
+  have key : Real.cos ((10 * Real.log 10 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 10 - 7 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_pi]
+  have e2 : (10 * Real.log 10 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi = 10 * Real.log 10 := by
+    ring
+  rw [e2] at key
+  have hcosδ : (1 / 2 : ℝ) ≤ Real.cos (10 * Real.log 10 - 7 * Real.pi) := by
+    have hpi_lo := Real.pi_gt_d4
+    have hpi_hi := Real.pi_lt_d4
+    have hδnn : (0 : ℝ) ≤ 10 * Real.log 10 - 7 * Real.pi := by
+      linarith [hδ.1]
+    have hbound_pi : (1.0354 : ℝ) ≤ Real.pi := by
+      linarith
+    have hmono : Real.cos (1.0354 : ℝ)
+        ≤ Real.cos (10 * Real.log 10 - 7 * Real.pi) := by
+      apply Real.cos_le_cos_of_nonneg_of_le_pi hδnn hbound_pi
+      linarith [hδ.2]
+    have hy_nn : (0 : ℝ) ≤ Real.pi / 2 - 1.0354 := by
+      linarith
+    have hy_lo : (0.5353 : ℝ) ≤ Real.pi / 2 - 1.0354 := by
+      linarith
+    have hy_hi : Real.pi / 2 - 1.0354 ≤ (0.5354 : ℝ) := by
+      linarith
+    have hy3 : (Real.pi / 2 - 1.0354) ^ 3 ≤ (0.5354 : ℝ) ^ 3 :=
+      pow_le_pow_left₀ hy_nn hy_hi 3
+    have hcube := Real.sin_ge_sub_cube (x := Real.pi / 2 - 1.0354) hy_nn
+    have hrewrite : Real.cos (1.0354 : ℝ)
+        = Real.sin (Real.pi / 2 - 1.0354) :=
+      (Real.sin_pi_div_two_sub 1.0354).symm
+    have hfloor : (1 / 2 : ℝ)
+        ≤ (Real.pi / 2 - 1.0354) - (Real.pi / 2 - 1.0354) ^ 3 / 6 := by
+      have hnum : (1 / 2 : ℝ) ≤ (0.5353 : ℝ) - (0.5354 : ℝ) ^ 3 / 6 := by
+        norm_num
+      linarith
+    rw [hrewrite]
+    linarith
+  rw [key]
+  linarith
+
 /-- Cpow real-part split for `8^{-s}` at sCut (mirror of
 `sSCUT_cpow3_neg_re`). -/
 theorem sSCUT_cpow8_neg_re : ((((8 : ℝ)) : ℂ) ^ (-sSCUT)).re
