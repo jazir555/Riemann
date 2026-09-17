@@ -4602,6 +4602,19 @@ sorry-free infrastructure and the complete commit ledger above.
   `CS_complex_S2_abs_ge_one` dischargeable (all three premises now
   closed: S2C + cos675 + rpow2). Standing sweep clause active:
   WAVE4-ETA owns suppliers build-error sweep (WAVE4-ETA tasked).
+- 2026-09-17 WAVE4-ETA (background `ses_f528d1be3ffetGmDaGYUJ2EYxk`):
+  S2 discharge one-liners banked in `door3_cell_suppliers.lean:410/416`
+  (+13, grep-clean): `CS_complex_S2_Re_proved` /
+  `CS_complex_S2_abs_proved` (unconditional applications of
+  `:383/:396` to the three closed premises S2C+cos675+rpow2;
+  mirrors `CS_etaS2_uncond`/`CS_etaFactor_proved` shape).
+  Fast path applied 3x, all correctly refused (live owners
+  19252/7156/22384 + live lake/lean each time — never a dead lock).
+  Builds: 2x900s, 15x+15x GUARD-WAIT, no BUILD-EXIT (owner rotation
+  observed); no diagnostic ever produced so no fix cycle possible.
+  Edit build-UNVERIFIED. Residual: one green guarded build when a
+  live lock frees, then feed S2 into `CS_zeta_of_parts` assembly
+  (WAVE5-ETA tasked).
 - 2026-09-17 WAVE1-EDGE (background `ses_f52ba7d11ffe2qDtg1yOVVnRST`,
   committed in `2b76f75`): `door3_rh_wiring.lean` extended +194 lines,
   12 new theorems, grep-clean (imports +`door3_cutL10_remainders`,

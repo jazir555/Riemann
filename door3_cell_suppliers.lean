@@ -404,6 +404,19 @@ theorem CS_complex_S2_abs_ge_one (hEq : CS_S2C_Re_eq) (hCos0 : CS_cos675_nonpos)
     linarith
   linarith
 
+/-- CLOSED: complex-head real part `≥ 1` (unconditional; discharges the three
+TRUE premises via the banked closures `CS_S2C_Re_proved`,
+`CS_cos675_nonpos_proved`, `CS_rpow2_proved`). -/
+theorem CS_complex_S2_Re_proved :
+    (1 : ℝ) ≤ (((1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter)).re) :=
+  CS_complex_S2_Re_ge_one CS_S2C_Re_proved CS_cos675_nonpos_proved CS_rpow2_proved
+
+/-- CLOSED: complex-head absolute value `≥ 1` (unconditional; same three
+closures). -/
+theorem CS_complex_S2_abs_proved :
+    (1 : ℝ) ≤ ‖((1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter))‖ :=
+  CS_complex_S2_abs_ge_one CS_S2C_Re_proved CS_cos675_nonpos_proved CS_rpow2_proved
+
 /-- Eta-factor upper at `sCenter` (TRUE premise; magnitude route:
 `‖1 - 2^{1-s}‖ ≤ 1 + 2^0.605 ≈ 2.521`, so `2.53` carries margin; the
 phase-aware `≤ 1` is FALSE here since `cos(6.75·log 2) < 0` — the true
