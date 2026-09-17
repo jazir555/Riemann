@@ -4673,6 +4673,21 @@ sorry-free infrastructure and the complete commit ledger above.
   green in a free window; CutR10 `<=0.04` unreachable, CutL10 zeta-owned,
   `mT/MT` beyond 11/1000 unbanked, mirrored left ball-sup unmatched.
   WAVE4-EDGE tasked (sweep + bottom-gate mirror).
+- 2026-09-17 EDGE-NEXT (background `ses_f51527e69`, proof-only,
+  grep-clean): HONEST NEGATIVE WITH REFUTATION — no supplier bound
+  closes at 11/1000: `hTopLower`/`hBotLower` at m=11 are INFEASIBLE
+  (banked endpoint norms equal 1/2 at x=0 per sliver_edge :221-234 +
+  sharpness :203-210 and boundary_endpoints :28-32; any closable
+  uniform m must satisfy m<=1/2, so 11 is refuted, not merely open).
+  Banked `edge011_topLower_missing` residual spec
+  (`door3_rh_wiring.lean:296-321`, +21). `hTopDeriv`/`hBotDeriv` at
+  1000 reduce to one closed-ball sup C=1000 on closedBall 0 12
+  (sliver_edge :322-370) with no banked C numeral — open, deriv-owned.
+  No premZeta/premGamma floors at edge heights (all at Re 0.395/0.2/
+  0.105). CONSEQUENCE: retire the 11 example ratio; re-instantiate
+  adapters at feasible m<=1/2 once edge/zeta banks (1)/(2) + deriv
+  banks (3) per the filed spec. EDGE-NEXT2 tasked (m-half
+  re-instantiation shapes + bottomStrip/grid pivot).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740

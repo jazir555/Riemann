@@ -293,6 +293,27 @@ theorem hSliver_of_edgeNumericData_011
     hTopLower hTopDeriv Door3SliverNonvan.sliver_example_gate_top
     hBotLower hBotDeriv gate_bottom_011
 
+/-- EDGE-NEXT sweep note (filed, not fixed): residual supplier spec at the example
+ratio `11/1000`. None of the four `hSliver_of_edgeNumericData_011` premises above
+matches a banked in-tree numeral, so none is forced here.
+* `hTopLower`/`hBotLower` at `11` are infeasible as stated: the banked consumer-form
+endpoint norms equal `1/2` at `x = 0`
+(`Door3SliverEdge.edgeTop_consumer_norm_at_zero` / `edgeBot_consumer_norm_at_zero`,
+`door3_sliver_edge.lean:221-234`, sharpness `:203-210`), and
+`(0 : ℝ) ∈ Set.Icc (-10) 10`, so any closable uniform `mT`/`mB` must satisfy
+`m ≤ 1/2`. Missing numeral: a *uniform* lower `m ≤ 1/2` over `Set.Icc (-10) 10`
+at edge heights `s = I*x` (top) / `s = 1 + I*x` (bottom); owned by the edge/zeta
+lane (needs `‖ζ‖` floors at `Re s = 0` / `Re s = 1`, where no `premZeta`/`premGamma`
+floor is banked — existing floors sit at grid `Re ∈ {0.395, 0.2, 0.105}` centers,
+`door3_premise_zeta.lean:66-98`).
+* `hTopDeriv`/`hBotDeriv` at `1000` each reduce to one closed-ball sup `C = 1000`
+on `Metric.closedBall 0 12` via `Door3SliverEdge.uniform_top_deriv_of_closedBall` /
+`uniform_bot_deriv_of_closedBall` (`door3_sliver_edge.lean:322-370`); no banked `C`
+numeral exists in-tree (open premise there too). Owned by the deriv lane. -/
+def edge011_topLower_missing : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖
+
 /-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
 same uniform outer-bound certificates that feed the sliver: top/bottom strip
 premises plus the two numeric width gates (`δ ≥ 0.01`). This is the
