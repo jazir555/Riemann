@@ -4640,6 +4640,25 @@ sorry-free infrastructure and the complete commit ledger above.
   + width gates; bottom-strip `hb`/`hB` + `B/(1/2)<=1`; grid-fine `Hgrid`;
   lower main-band conjugated strip. Standing sweep clause active:
   WAVE2-EDGE owns rh_wiring build-error sweep (WAVE2-EDGE tasked).
+- 2026-09-17 WAVE2-EDGE (background `ses_f528adbb2ffe6nHonnAT7jETe9`):
+  sweep partial in `door3_rh_wiring.lean` (+15, grep-clean): new
+  `xiCentralEdgeStrips10_of_uniformStrips_011:278` (delta=11/1000,
+  both width numerals `norm_num`-closed, only two uniform-strip
+  premises left) + `#print axioms:341`. Fast path: 1 live owner
+  respected, 2 dead locks (12728/22384) deleted. Builds: 2 guarded
+  attempts, both 900s timeouts in cold Mathlib phase (1907-2376/2703;
+  reference: 09-09 log BUILD-EXIT=0, 8705 jobs, axioms clean, for the
+  8-theorem version); background `bgp_0ad9284f7001zMSl7jS6n0184J`
+  queued behind live peer; oleans absent so full rebuild exceeds
+  15-min windows — module green stays queue-phase. HONEST RESIDUALS:
+  CutR10 ball-sup `<=0.04` BLOCKED (reach `<=12.87`;
+  joint needs `||z(1/2+8.45i)||<=0.64`, implausible below first zero
+  t~=14.13; poly*pi*Gamma alone ~=0.062>0.04); CutL10 `hLower` owned
+  by zeta lane (needs slow-rtail>=1.4 vs `||z||~=1.549`); edge
+  mT/MT numerals unbanked (sliver file has gate arithmetic only);
+  ratio gates `hGateT/hGateB`, mirrored left ball-sup/sliver, joint
+  `hSliver`, bottom `hb/hB/hM`, grid `Hgrid` all explicit premises.
+  WAVE3-EDGE tasked (sweep + ratio-gate/left-ball-sup push).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via

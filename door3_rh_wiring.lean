@@ -272,6 +272,20 @@ theorem xiCentralEdgeStrips10_of_uniformStrips
     have h := hstripB z.re hx z.im hgt hhigh
     rwa [hpoint] at h
 
+/-- Interior edge strips at the example width `11/1000 = 0.011`: the two
+width numerals (`1/2 - 11/1000 < 0.49`, `-0.49 < -(1/2) + 11/1000`) are closed
+by `norm_num`, leaving only the two uniform strip premises. -/
+theorem xiCentralEdgeStrips10_of_uniformStrips_011
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - 11 / 1000 < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + 11 / 1000 →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0) :
+    RHProofScaffold.XiCentralEdgeStrips10 :=
+  xiCentralEdgeStrips10_of_uniformStrips (δT := (11 / 1000 : ℝ)) (δB := (11 / 1000 : ℝ))
+    hstripT (by norm_num) hstripB (by norm_num)
+
 /-- `BottomStripObligations` from the uniform real-axis minorant + tube sup
 (re-export of the `door3_zeta_cutoff` bridge with the residual premises made
 explicit at the wiring site). -/
@@ -324,5 +338,6 @@ end Door3RHWiring
 #print axioms Door3RHWiring.hSliver_of_edgeNumericData
 #print axioms Door3RHWiring.hSliver_of_topNumericData_via_conj
 #print axioms Door3RHWiring.xiCentralEdgeStrips10_of_uniformStrips
+#print axioms Door3RHWiring.xiCentralEdgeStrips10_of_uniformStrips_011
 #print axioms Door3RHWiring.bottomStrip_obligations_of_uniform_closed
 #print axioms Door3RHWiring.mainBand_upper_of_strip_and_grid
