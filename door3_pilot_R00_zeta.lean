@@ -2486,6 +2486,15 @@ theorem sSCUT_delta8p_sharp_mem :
   have hpi_hi := Real.pi_lt_d4
   constructor <;> linarith
 
+/-- Reduced phase `δ₁₀' = θ₁₀ - 7π ∈ (1.0346, 1.0354)` (mirror of `δ₈'`). -/
+theorem sSCUT_delta10p_sharp_mem :
+    (1.0346 : ℝ) < 10 * Real.log 10 - 7 * Real.pi ∧
+    10 * Real.log 10 - 7 * Real.pi < (1.0354 : ℝ) := by
+  have hth := sSCUT_theta10_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
 /-- Signed cosine UPPER `cos(10*log 8) ≤ -(1/4)` (quadrant-II `δ₈'` via the
 odd-multiple flip `cos θ₈ = -cos δ₈'` + quadratic lower on `δ₈'`). -/
 theorem sSCUT_cos10log8_le_neg_quarter :

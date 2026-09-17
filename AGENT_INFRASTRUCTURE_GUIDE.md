@@ -4986,6 +4986,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (`:2454`, 10x log10 d9s via mul_lt_mul_of_pos_left) +
   width 8e-9 (`:2475`), mirror of theta8. ZETA-SCUT8 tasked
   (delta10/quadrant fenced).
+- 2026-09-17 ZETA-SCUT8 (background `ses_f51316f7`, proof-only,
+  grep-clean): delta10 banked — `sSCUT_delta10p_sharp_mem :2490`
+  (δ₁₀'=θ₁₀-7π in (1.0346,1.0354), d4-pi mirror, tight-pi
+  cross-checked inside). NOTE: δ₁₀' region has cos POSITIVE
+  (~0.51) — constructive term. ZETA-SCUT9 tasked (quadrant +
+  cos-lower fenced).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
