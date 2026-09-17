@@ -176,13 +176,17 @@ theorem R00_eta_S2_norm_ge :
 
 /-! ## Honest eta-factor UPPER at R00 (`≤ 3`, triangle + `2^0.605 ≤ 2`). -/
 
-theorem R00_denom_re : (1 - sR00).re = (0.605 : ℝ) := by rfl
+theorem R00_denom_re : (1 - sR00).re = (0.605 : ℝ) := by
+  rw [Complex.sub_re, Complex.one_re, sR00_re]
+  norm_num
 
 theorem R00_cF_upper : ‖(1 : ℂ) - ((2 : ℝ) : ℂ) ^ (1 - sR00)‖ ≤ 3 := by
   have h2pos : (0 : ℝ) < 2 := by norm_num
   have hnorm : ‖(((2 : ℝ) : ℂ) ^ (1 - sR00))‖ = (2 : ℝ) ^ (0.605 : ℝ) := by
     have h := Complex.norm_cpow_eq_rpow_re_of_pos h2pos (1 - sR00)
-    have hre : (1 - sR00).re = (0.605 : ℝ) := rfl
+    have hre : (1 - sR00).re = (0.605 : ℝ) := by
+      rw [Complex.sub_re, Complex.one_re, sR00_re]
+      norm_num
     rw [hre] at h
     exact h
   have hpow_le : (2 : ℝ) ^ (0.605 : ℝ) ≤ 2 := by
@@ -274,7 +278,9 @@ theorem R00_cF_253 : ‖(1 : ℂ) - ((2 : ℝ) : ℂ) ^ (1 - sR00)‖ ≤ (2.53 
   have h2pos : (0 : ℝ) < 2 := by norm_num
   have hnorm : ‖(((2 : ℝ) : ℂ) ^ (1 - sR00))‖ = (2 : ℝ) ^ (0.605 : ℝ) := by
     have h := Complex.norm_cpow_eq_rpow_re_of_pos h2pos (1 - sR00)
-    have hre : (1 - sR00).re = (0.605 : ℝ) := rfl
+    have hre : (1 - sR00).re = (0.605 : ℝ) := by
+      rw [Complex.sub_re, Complex.one_re, sR00_re]
+      norm_num
     rw [hre] at h
     exact h
   have hpow_le : (2 : ℝ) ^ (0.605 : ℝ) ≤ (1.53 : ℝ) := R00_rpow0605_le_153

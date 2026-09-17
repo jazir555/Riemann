@@ -169,7 +169,6 @@ theorem prefix_R05_cpow2_re :
     have h : zs_R05.re = (0.395 : ℝ) := rfl
     have e : (-zs_R05).re = -(zs_R05.re) := rfl
     rw [e, h]
-    norm_num
   have him_w : (-zs_R05).im = (0.75 : ℝ) := by
     have h : zs_R05.im = (-0.75 : ℝ) := rfl
     have e : (-zs_R05).im = -(zs_R05.im) := rfl
@@ -206,7 +205,6 @@ theorem prefix_R05_cpow2_im :
     have h : zs_R05.re = (0.395 : ℝ) := rfl
     have e : (-zs_R05).re = -(zs_R05.re) := rfl
     rw [e, h]
-    norm_num
   have him_w : (-zs_R05).im = (0.75 : ℝ) := by
     have h : zs_R05.im = (-0.75 : ℝ) := rfl
     have e : (-zs_R05).im = -(zs_R05.im) := rfl
@@ -243,12 +241,10 @@ theorem prefix_R06_cpow2_re :
     have h : zs_R06.re = (0.395 : ℝ) := rfl
     have e : (-zs_R06).re = -(zs_R06.re) := rfl
     rw [e, h]
-    norm_num
   have him_w : (-zs_R06).im = (-1.25 : ℝ) := by
     have h : zs_R06.im = (1.25 : ℝ) := rfl
     have e : (-zs_R06).im = -(zs_R06.im) := rfl
     rw [e, h]
-    norm_num
   have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
   have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-zs_R06)).re
@@ -280,12 +276,10 @@ theorem prefix_R06_cpow2_im :
     have h : zs_R06.re = (0.395 : ℝ) := rfl
     have e : (-zs_R06).re = -(zs_R06.re) := rfl
     rw [e, h]
-    norm_num
   have him_w : (-zs_R06).im = (-1.25 : ℝ) := by
     have h : zs_R06.im = (1.25 : ℝ) := rfl
     have e : (-zs_R06).im = -(zs_R06.im) := rfl
     rw [e, h]
-    norm_num
   have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
   have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-zs_R06)).re

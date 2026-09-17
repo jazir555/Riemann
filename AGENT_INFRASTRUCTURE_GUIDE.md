@@ -4746,6 +4746,18 @@ sorry-free infrastructure and the complete commit ledger above.
   `CS_zeta_of_S2c:1344` + `CS_S2c_shortfall_187:1352` (shortfall
   `1.368`, was `2.292`, gain `0.924` — biggest yet). Floor still
   fails; next patch must grow slow / sharpen tail (ETA-NEXT3 tasked).
+- 2026-09-17 ETA-NEXT3 (background `ses_f5159d975ffebkioUz4tF3gsjZ`):
+  BUILD-EXIT=0 in 25s, grep-clean. S6 route HONESTLY REGRESSED
+  (log bridges + rpowpers `:1383-1552`: real S6 `0.25<0.26=S4`,
+  does not substitute complex slow; S6-at-1.87 shortfall `2.368`
+  vs S2c `1.368`). cF-shave fallback landed: cos lower `-0.05->-0.04`
+  (`:1590`, true ~-0.0336) + `2^0.605<=1.525` (`:1648`) →
+  cF `1.87->1.86` (`:1749`), need `2.604`, shortfall
+  `1.368->1.354` (shave `0.014`). Also banked from tree: orphaned
+  sweep fixes of uncertain attribution (scan-clean, fix-shaped, kept) —
+  pilot `rfl`→explicit-`rw` for 3 `.re` proofs, premise_zeta removal
+  of 6 stray post-`rw` `norm_num`s (would fail builds as no-goals).
+  Next: complex slow beyond S2 or cos→-0.0336 tightening (ETA-NEXT4).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
