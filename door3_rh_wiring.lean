@@ -1164,6 +1164,75 @@ theorem gridH_c30_of_R30 (h : CentralCoverAssembly.R30_leaf_obligations) :
     ((7.5, 10, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R30_mem_gridFine rfl
 
+/-- Banked `c31 = (-10, -7.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R31_H_instance` at the banked membership
+`R31_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R31_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.05 * radius ≤ ‖ξ‖` at `s = 0.105 - 8.75·I`, uniform
+`‖ξ'‖ ≤ 0.05` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4217` (`R31_leaf_obligations`) and `:4246`
+(`R31_H_instance`). -/
+theorem gridH_c31_of_R31 (h : CentralCoverAssembly.R31_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R31_H_instance h
+    ((-10, -7.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R31_mem_gridFine rfl
+
+/-- Banked `c32 = (-8, -5.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R32_H_instance` at the banked membership
+`R32_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R32_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.105 - 6.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4301` (`R32_leaf_obligations`) and `:4330`
+(`R32_H_instance`). -/
+theorem gridH_c32_of_R32 (h : CentralCoverAssembly.R32_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R32_H_instance h
+    ((-8, -5.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R32_mem_gridFine rfl
+
+/-- Banked `c33 = (-6, -3.5, 0.3, 0.49)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R33_H_instance` at the banked membership
+`R33_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R33_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.105 - 4.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:4385` (`R33_leaf_obligations`) and `:4414`
+(`R33_H_instance`). -/
+theorem gridH_c33_of_R33 (h : CentralCoverAssembly.R33_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R33_H_instance h
+    ((-6, -3.5, 0.3, 0.49) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R33_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
