@@ -4688,6 +4688,16 @@ sorry-free infrastructure and the complete commit ledger above.
   adapters at feasible m<=1/2 once edge/zeta banks (1)/(2) + deriv
   banks (3) per the filed spec. EDGE-NEXT2 tasked (m-half
   re-instantiation shapes + bottomStrip/grid pivot).
+- 2026-09-17 EDGE-NEXT2 (background `ses_f5150312`, proof-only,
+  grep-clean): m-half shapes banked — `hSliver_of_topNumericData_half_
+  via_conj:340`, `hSliver_of_edgeNumericData_half:360`,
+  `xiCentralEdgeStrips10_of_uniformStrips_half:387` (gates close by
+  `norm_num` once MT/MB<50 fed); pivot `gridH_c00_of_R00:409` banks
+  the c00 leaf of `Hgrid` via sorry-free `R00_H_instance` (residual:
+  R00 leaf obligations only — center + deriv 0.05, unprovable-in-
+  Mathlib per assembly notes). Bottom-minorant pivot rejected
+  (only x=0 point banked, still modulo open ball sup). EDGE-NEXT3
+  tasked (next grid leaves c01+ replication).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740

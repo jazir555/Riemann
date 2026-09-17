@@ -314,6 +314,111 @@ def edge011_topLower_missing : Prop :=
   ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
     (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖
 
+/-- EDGE-NEXT2 (filed, not fixed): feasible `m = 1/2` adapters + one banked
+grid-cell leaf. `ses_f51527e69` refuted the `m = 11` ratio above: the banked
+consumer-form endpoint norms equal `1/2` at `x = 0`
+(`Door3SliverEdge.edgeTop_consumer_norm_at_zero` /
+`edgeBot_consumer_norm_at_zero`), and `(0 : ℝ) ∈ Set.Icc (-10) 10`, so any
+closable uniform `m` satisfies `m ≤ 1/2`. The three sliver/strip theorems
+below fix `mT = mB = 1/2` (the maximal closable uniform value; `0 < 1/2`
+closed by `norm_num`) and leave every `MT`/`MB` numeral inside explicit
+premises (deriv caps, `δ`-intervals, `δ ≤ 1` side conditions, `0.01 < δ`
+width gates, strip nonvanishing) — ready for the day edge/zeta lane to feed
+the numerals. The fourth theorem banks the `c00` leaf of the grid-fine
+`Hgrid` premise from the sorry-free `R00` fencing assembly (conditional only
+on the two `R00_leaf_obligations` enclosures). Pivot rationale: the uniform
+bottom minorant has NO banked uniform input (only the `x = 0` point
+`xiShiftedEntire_zero_minorant`, still modulo the open ball sup), while the
+`R00` cell has its full fencing package proved — so the grid-cell instance
+is the bankable step. -/
+
+/-- `hSliver` from TOP numeric data at the feasible uniform `mT = 1/2`,
+bottom via proved conjugation. Mirrors `hSliver_of_topNumericData_011_via_conj`
+with `mT` fixed at the maximal closable value; the `MT` numeral (deriv cap,
+`δ`-interval, `δ ≤ 1` side condition, width gate) stays entirely in explicit
+premises for the day edge/zeta lane. -/
+theorem hSliver_of_topNumericData_half_via_conj (MT : ℝ)
+    (hMT : 0 < MT)
+    (hδTle : (1 / 2 : ℝ) / MT ≤ 1)
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / MT) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ MT)
+    (hGateT : (0.01 : ℝ) < (1 / 2 : ℝ) / MT) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  hSliver_of_topNumericData_via_conj (1 / 2 : ℝ) MT
+    (by norm_num) hMT hδTle hTopLower hTopDeriv hGateT
+
+/-- `hSliver` from explicit numeric edge data at feasible `mT = mB = 1/2`:
+mirrors `hSliver_of_edgeNumericData_011` with both uniform lowers fixed at
+the maximal closable value; both `MT`/`MB` numerals stay in explicit
+premises. Residual: the four supplier bounds plus the two width gates and
+the two `δ ≤ 1` side conditions. -/
+theorem hSliver_of_edgeNumericData_half (MT MB : ℝ)
+    (hMT : 0 < MT) (hMB : 0 < MB)
+    (hδTle : (1 / 2 : ℝ) / MT ≤ 1) (hδBle : (1 / 2 : ℝ) / MB ≤ 1)
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / MT) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ MT)
+    (hGateT : (0.01 : ℝ) < (1 / 2 : ℝ) / MT)
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / MB),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ MB)
+    (hGateB : (0.01 : ℝ) < (1 / 2 : ℝ) / MB) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  hSliver_of_edgeNumericData (1 / 2 : ℝ) MT (1 / 2 : ℝ) MB
+    (by norm_num) hMT (by norm_num) hMB hδTle hδBle
+    hTopLower hTopDeriv hGateT hBotLower hBotDeriv hGateB
+
+/-- Interior edge strips at feasible widths `δT = (1/2)/MT`,
+`δB = (1/2)/MB`: mirrors `xiCentralEdgeStrips10_of_uniformStrips_011` with
+the `m = 11`, `M = 1000` numerals replaced by the feasible `m = 1/2` shape;
+both width gates stay explicit premises (they close by `norm_num` once the
+day lane feeds `MT`/`MB` numerals with `(1/2)/M > 0.01`). -/
+theorem xiCentralEdgeStrips10_of_uniformStrips_half (MT MB : ℝ)
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - (1 / 2 : ℝ) / MT < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / MT < 0.49)
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / MB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / MB) :
+    RHProofScaffold.XiCentralEdgeStrips10 :=
+  xiCentralEdgeStrips10_of_uniformStrips (δT := (1 / 2 : ℝ) / MT) (δB := (1 / 2 : ℝ) / MB)
+    hstripT hwidthT hstripB hwidthB
+
+/-- Banked `c00 = (-10, -7.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R00_H_instance` at the banked membership
+`R00_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R00_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.05 * radius ≤ ‖ξ‖` at `s = 0.395 - 8.75·I`, uniform
+`‖ξ'‖ ≤ 0.05` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1172-1129`. -/
+theorem gridH_c00_of_R00 (h : CentralCoverAssembly.R00_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R00_H_instance h
+    ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R00_mem_gridFine rfl
+
 /-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
 same uniform outer-bound certificates that feed the sliver: top/bottom strip
 premises plus the two numeric width gates (`δ ≥ 0.01`). This is the
@@ -413,3 +518,7 @@ end Door3RHWiring
 #print axioms Door3RHWiring.xiCentralEdgeStrips10_of_uniformStrips_011
 #print axioms Door3RHWiring.bottomStrip_obligations_of_uniform_closed
 #print axioms Door3RHWiring.mainBand_upper_of_strip_and_grid
+#print axioms Door3RHWiring.hSliver_of_topNumericData_half_via_conj
+#print axioms Door3RHWiring.hSliver_of_edgeNumericData_half
+#print axioms Door3RHWiring.xiCentralEdgeStrips10_of_uniformStrips_half
+#print axioms Door3RHWiring.gridH_c00_of_R00
