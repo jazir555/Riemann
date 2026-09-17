@@ -4673,6 +4673,13 @@ sorry-free infrastructure and the complete commit ledger above.
   green in a free window; CutR10 `<=0.04` unreachable, CutL10 zeta-owned,
   `mT/MT` beyond 11/1000 unbanked, mirrored left ball-sup unmatched.
   WAVE4-EDGE tasked (sweep + bottom-gate mirror).
+- 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
+  in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
+  zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
+  cleared (dead owner, zero live builders). Uncommitted in-flight work
+  survived on disk: `door3_R02_ball_advance.lean` +161,
+  `door3_pilot_R00_zeta.lean` +114 (both preserved, to be verified not
+  discarded). All five lanes relaunched as RESUME waves below.
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
