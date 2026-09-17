@@ -4838,6 +4838,15 @@ sorry-free infrastructure and the complete commit ledger above.
   DIRECT complex lower at Re~=1.2 (Stirling-disc enclosure — major
   new machinery, absent from Mathlib+repo). All 7 numerators open.
   GAMMA-ENCLOSURE tasked (Euler-product lower scope).
+- 2026-09-17 GAMMA-ENCLOSURE (background `ses_f514a86e`, proof-only,
+  grep-clean): Euler-product survey — Mathlib has ONLY `GammaSeq` +
+  `tendsto_Gamma` (no product formula; only sine Euler product
+  nearby); gamma_product banks UPPERS only; no rate/tail support.
+  Banked E10 scaffold `:1352-1485` (norms, prod1<=22.25, L1 norm
+  identity, L2 rate spec `||Seq1-Gamma||<=0.037`, 0.044 lower,
+  `0.00657<=||Gamma||` feed). N=1 approximant ~=0.045 (6.8x
+  headroom). Residual: L1+L2 open; all 7 numerators open.
+  GAMMA-RATE tasked (L2 rate bound or E09 scaffold replication).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
