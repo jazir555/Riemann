@@ -4729,6 +4729,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean): 3 more leaves — `gridH_c19_of_R19:901`,
   `gridH_c20_of_R20:924`, `gridH_c21_of_R21:947` (no skips).
   Leaves done 21/40 — PAST HALFWAY. EDGE-NEXT10 tasked (c22+ run).
+- 2026-09-17 EDGE-NEXT10 (background `ses_f51468e2`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c22_of_R22:970`,
+  `gridH_c23_of_R23:993`, `gridH_c24_of_R24:1016` (no skips) +
+  sweep note: assembly `:3416` labels R22 tier (0.002,0.05) but
+  obligations/instance use (0.002,0.07) — doc-level inconsistency
+  filed. Leaves done 24/40. EDGE-NEXT11 tasked (c25+ run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4869,6 +4875,12 @@ sorry-free infrastructure and the complete commit ledger above.
   norms 3.82/4.24, prod1<=16.20, L1 0.061 lower, L2<=0.044 spec,
   `0.01638<=||Gamma||` feed). Scaffolds done 2/7 cells (E10/E09).
   GAMMA-SCAFFOLD tasked (E08+E07 replication).
+- 2026-09-17 GAMMA-SCAFFOLD (background `ses_f51468e2`, proof-only,
+  grep-clean): E08+E07 scaffolds banked — E08 `:1718-1851` (norms
+  2.89/3.43, prod1<=9.92, L1 0.100, L2<=0.046, feed 0.0528),
+  E07 `:1898-2031` (norms 2.02/2.74, prod1<=5.54, L1 0.180,
+  L2<=0.015, feed 0.164). Scaffolds done 4/7. L2 rate (all cells)
+  awaits the Binet leaf. GAMMA-SCAFFOLD2 tasked (E06+E05+E01).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,

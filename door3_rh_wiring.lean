@@ -957,6 +957,75 @@ theorem gridH_c21_of_R21 (h : CentralCoverAssembly.R21_leaf_obligations) :
     ((-10, -7.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R21_mem_gridFine rfl
 
+/-- Banked `c22 = (-8, -5.5, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R22_H_instance` at the banked membership
+`R22_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R22_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.2 - 6.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:3459` (`R22_leaf_obligations`) and `:3488`
+(`R22_H_instance`). -/
+theorem gridH_c22_of_R22 (h : CentralCoverAssembly.R22_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R22_H_instance h
+    ((-8, -5.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R22_mem_gridFine rfl
+
+/-- Banked `c23 = (-6, -3.5, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R23_H_instance` at the banked membership
+`R23_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R23_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.2 - 4.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:3543` (`R23_leaf_obligations`) and `:3572`
+(`R23_H_instance`). -/
+theorem gridH_c23_of_R23 (h : CentralCoverAssembly.R23_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R23_H_instance h
+    ((-6, -3.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R23_mem_gridFine rfl
+
+/-- Banked `c24 = (-4, -1.5, 0.2, 0.4)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R24_H_instance` at the banked membership
+`R24_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R24_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.2 - 2.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:3627` (`R24_leaf_obligations`) and `:3656`
+(`R24_H_instance`). -/
+theorem gridH_c24_of_R24 (h : CentralCoverAssembly.R24_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R24_H_instance h
+    ((-4, -1.5, 0.2, 0.4) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R24_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
