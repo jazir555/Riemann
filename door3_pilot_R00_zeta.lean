@@ -2576,6 +2576,65 @@ theorem sSCUT_cos10log10_le_neg_half :
   rw [key]
   linarith
 
+/-- `10^(-1/2) ≤ 1` (trivial rpow decay upper, mirror of
+`R00_rpow_four_neg0395_le`; no estimated numerics). -/
+theorem sSCUT_rpow10_neg_le_one : (10 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ 1 := by
+  have h : (10 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (10 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at h
+  exact h
+
+/-- Cpow real-part split for `10^{-s}` at sCut (mirror of
+`sSCUT_cpow8_neg_re`). -/
+theorem sSCUT_cpow10_neg_re : ((((10 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (10 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 10) := by
+  have h10pos : (0 : ℝ) < 10 := by norm_num
+  have hxC : ((10 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h10pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((10 : ℝ) : ℂ) = (((Real.log 10 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h10pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 10 : ℝ)) : ℂ)).re = Real.log 10 := Complex.ofReal_re _
+  have hzim : ((((Real.log 10 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 10 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 10 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 10 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 10) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 10 * (-(1 / 2 : ℝ)))
+      = (10 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h10pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 10))
+      = Real.cos (10 * Real.log 10) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(10^{-sCut}) ≤ -(r₁₀/2)` (nonneg `r₁₀` × signed
+cosine upper `cos θ₁₀ ≤ -1/2`). -/
+theorem sSCUT_cpow10_neg_Re_upper :
+    ((((10 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ -((10 : ℝ) ^ (-(1 / 2 : ℝ)) / 2) := by
+  rw [sSCUT_cpow10_neg_re]
+  have hr0 : (0 : ℝ) ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc := sSCUT_cos10log10_le_neg_half
+  have hmul : (10 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 10)
+      ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 2)) :=
+    mul_le_mul_of_nonneg_left hc hr0
+  have hsign : (10 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 2))
+      = -((10 : ℝ) ^ (-(1 / 2 : ℝ)) / 2) := by ring
+  linarith
+
 /-- Cpow real-part split for `8^{-s}` at sCut (mirror of
 `sSCUT_cpow3_neg_re`). -/
 theorem sSCUT_cpow8_neg_re : ((((8 : ℝ)) : ℂ) ^ (-sSCUT)).re

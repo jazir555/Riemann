@@ -5008,6 +5008,14 @@ sorry-free infrastructure and the complete commit ledger above.
   0.464). So n=10 is DESTRUCTIVE at full phase (like n=3); the
   +0.51 lives on the reduced phase only. ZETA-SCUT10 tasked
   (cpow10 Re-upper + shard honesty check).
+- 2026-09-17 ZETA-SCUT10 (background `ses_f512e53d`, proof-only,
+  grep-clean): cpow10 Re-upper banked — `sSCUT_rpow10_neg_le_one
+  :2581` (r10<=1 helper), `sSCUT_cpow10_neg_re :2589` (split
+  mirror), `sSCUT_cpow10_neg_Re_upper :2625`
+  (Re(10^-sCut)<=-(r10/2), soundly NON-numeric — agent refused
+  the false -1/2 constant since r10~=0.32). PAYOFF VISIBLE:
+  k=9 odd → eta9 = -10^-s → Re(eta9) >= +r10/2 constructive.
+  ZETA-SCUT11 tasked (eta9 Re-lower + shard reassembly).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
