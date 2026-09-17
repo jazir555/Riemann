@@ -4698,6 +4698,12 @@ sorry-free infrastructure and the complete commit ledger above.
   Mathlib per assembly notes). Bottom-minorant pivot rejected
   (only x=0 point banked, still modulo open ball sup). EDGE-NEXT3
   tasked (next grid leaves c01+ replication).
+- 2026-09-17 EDGE-NEXT3 (background `ses_f514de0e`, proof-only,
+  grep-clean): 2 more grid leaves — `gridH_c02_of_R02:510` +
+  `gridH_c03_of_R03:533` (same Hgrid shape; R01 skipped by design).
+  Leaves done 3/40; each residual = that cell's leaf obligations
+  (center + deriv tier, unprovable-in-Mathlib per assembly).
+  EDGE-NEXT4 tasked (c04+ replication run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740

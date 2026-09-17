@@ -496,6 +496,53 @@ theorem mainBand_upper_of_strip_and_grid
     exact closed_inner_nonvanishing_of_fenced_grid_fine Hgrid
       (le_of_lt hx_lo) (le_of_lt hx_hi) (le_of_lt hle) hy_le
 
+/-- Banked `c02 = (-8, -5.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R02_H_instance` at the banked membership
+`R02_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R02_leaf_obligations` only — the two numerical enclosures
+(`0.002 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.395 - 6.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1470` (`R02_leaf_obligations`) and `:1499`
+(`R02_H_instance`). `R01` is skipped by design: it has no
+`R01_mem_gridFine` (row-overlap cell, would be false). -/
+theorem gridH_c02_of_R02 (h : CentralCoverAssembly.R02_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R02_H_instance h
+    ((-8, -5.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R02_mem_gridFine rfl
+
+/-- Banked `c03 = (-6, -3.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R03_H_instance` at the banked membership
+`R03_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R03_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.395 - 4.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1556` (`R03_leaf_obligations`) and `:1585`
+(`R03_H_instance`). -/
+theorem gridH_c03_of_R03 (h : CentralCoverAssembly.R03_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R03_H_instance h
+    ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R03_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
@@ -522,3 +569,5 @@ end Door3RHWiring
 #print axioms Door3RHWiring.hSliver_of_edgeNumericData_half
 #print axioms Door3RHWiring.xiCentralEdgeStrips10_of_uniformStrips_half
 #print axioms Door3RHWiring.gridH_c00_of_R00
+#print axioms Door3RHWiring.gridH_c02_of_R02
+#print axioms Door3RHWiring.gridH_c03_of_R03
