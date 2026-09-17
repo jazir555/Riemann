@@ -4787,6 +4787,17 @@ sorry-free infrastructure and the complete commit ledger above.
   E09 0.01638 / E10 0.00657) for the STIRLING-DISC wave — needs Gamma
   lower bounds at shifted w+1 points, new machinery. GAMMA-STIRLING
   tasked (survey + first numerator attempt).
+- 2026-09-17 GAMMA-STIRLING (background `ses_f514eab3`, proof-only,
+  grep-clean): survey banked — Mathlib has NO complex-Gamma norm
+  lower (only add_one/reflection, real-only convexity); gamma_low
+  34 denominator uppers + 0/30 numerators; real-0.77 transfer
+  unsound; stirling files uppers-only. E05 attempt NOT closed (best
+  conditional 0.38 < 0.645). Banked `premGamma_refl_lower_of_uppers`
+  (generic reflection lower) + `premGamma_E05shift_refl_form` (E05
+  instance) + missing-machinery spec. KEY VERDICT: reflection lane
+  quantitatively DEAD (budget S*G<=4.87 vs banked S~=6.5 alone) —
+  needs DIRECT complex lower at Re~=1.2. All 7 numerators open.
+  GAMMA-STIRLING2 tasked (smallest-first E10 0.00657).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
@@ -4818,6 +4829,15 @@ sorry-free infrastructure and the complete commit ledger above.
   div_const chain + uniform majorant for concrete DG). Residual:
   UG/UZ/DZ downstream; tier far. DERIV-NEXT4 tasked (UZ value cap
   or zeta-obligation spec).
+- 2026-09-17 DERIV-NEXT4 (background `ses_f514e619`, proof-only,
+  grep-clean): 4-factor value side complete modulo UZ —
+  `R02_polyPiGammaZetaValUp_of_caps:873`,
+  `R02_polyPiGammaZetaVal_cap_disc_of_zeta:883`
+  (`||P*Q*G*Z||<=1680*UZ`), `R02_zetaVal_missingNumeral_spec:909`.
+  UZ VERDICT: `||zeta||<=10` NOT satisfiable (best banked uppers
+  1012/934, both non-imported; premZeta/CS family prove LOWERS —
+  wrong direction). UG=40 banked; DG open per obligation.
+  DERIV-NEXT5 tasked (DZ assembly shape or zeta-upper lane ping).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`

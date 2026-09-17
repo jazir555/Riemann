@@ -1117,4 +1117,132 @@ theorem premGamma_E10_threshold_ok :
     (0.002 : ℝ) + 0.05 * 1.26 ≤ (34 : ℝ) * 0.7 * 0.0015 * 1.9 := by
   norm_num
 
+/-! ## STIRLING-DISC wave (GAMMA-STIRLING): E05 numerator survey + stepping-stone.
+
+Survey (read-only, this turn):
+* Mathlib banks NO complex-Gamma norm lower. Banked pieces: functional
+  equation `Complex.Gamma_add_one`; reflection
+  `Complex.Gamma_mul_Gamma_one_sub` (Beta.lean:397-398); convexity
+  `Real.convexOn_Gamma` / `Real.convexOn_log_Gamma` (real-only);
+  integral domination `D3SG_Gamma_norm_le_real`
+  (`door3_stirling_gamma.lean:8`, an UPPER — wrong direction for numerators).
+* `door3_gamma_low.lean`: shift infra (`shift_norm_one`, `shift_lower`,
+  `shift_lower_two`, `:58-92`) + 34 denominator factor uppers CLOSED, 0 of 30
+  numerator lowers closed.
+* `door3_gamma_real_low.lean:220`: `gamma_low_77`, uniform real lower on
+  `Icc 1 2.1` — real-only, cannot transfer to `‖Γ(w+k)‖` with `|Im| > 0`
+  (would reverse `D3SG_Gamma_norm_le_real`).
+* `door3_gamma_feed.lean`: 24 conditional implications with complex numerator
+  hypotheses explicitly undischarged; E05 / E06 / R36 / R26 / R25 / R35 OPEN
+  even conditionally at `c = 0.77` (`feed_open_E05`, `feed_open_E06`).
+* `door3_stirling_gamma.lean`: UPPERS only (`D3SG_TierC_gamma_wide`,
+  `D3SG_decay_sigma`, real caps `≤ 4 / ≤ 1.1 / ≤ 20 / ≤ 200 / ≤ 1 / ≤ 2`).
+* `door3_stirling_rem.lean:193`: generic reflection bridge
+  `D3SR_gamma_lower_of_refl` (needs sine upper `S` + companion upper `G`);
+  `door3_complex_wendel.lean:102` sine upper `sin_norm_le`
+  (`‖sin z‖ ≤ 2 * exp |Im|`), `:328` `lower_inner` at `0.38`-scale conditional
+  on an unproved `exp` premise, `:380` `inner_big`.
+
+Easiest-numerator attempt (E05, `0.645 ≤ ‖Γ(w_E05 + 1)‖` at
+`w + 1 = 1.1975 - 0.375i`): NOT closed. No banked complex lower reaches
+`0.645` with exact numerals — the best conditional (`lower_inner`-scale
+`0.38` at `|Im| = 0.375`) sits below the floor, and the real `0.77` cannot
+transfer (unsound direction; numerically false at `|Im| > 0` in general).
+E06 (`0.66` at `|Im| = 0.625`) is strictly worse by Im-discount. Nothing is
+forced: the floor stays open.
+
+Stepping-stone banked below (reusable, Mathlib-only so no new imports):
+generic reflection-form lower with explicit upper premises, plus its E05
+shifted-point instance. Missing-machinery spec follows the instance.
+-/
+
+/-- Generic reflection-form lower with explicit upper premises (mirrors
+`D3SR_gamma_lower_of_refl` + the Tier-C denominator comparison; reproved
+here Mathlib-only since this file does not import the rem lane). -/
+theorem premGamma_refl_lower_of_uppers (z : ℂ) (S G : ℝ)
+    (hS : ‖Complex.sin (Real.pi * z)‖ ≤ S)
+    (hGup : ‖Complex.Gamma (1 - z)‖ ≤ G)
+    (hSpos : 0 < S) (hGpos : 0 < G)
+    (hsin : Complex.sin (Real.pi * z) ≠ 0)
+    (hGne : Complex.Gamma (1 - z) ≠ 0) :
+    Real.pi / (S * G) ≤ ‖Complex.Gamma z‖ := by
+  have hrefl := Complex.Gamma_mul_Gamma_one_sub z
+  have hsinNorm : (0 : ℝ) < ‖Complex.sin (Real.pi * z)‖ :=
+    lt_of_le_of_ne' (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hsin))
+  have hGNorm : (0 : ℝ) < ‖Complex.Gamma (1 - z)‖ :=
+    lt_of_le_of_ne' (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hGne))
+  have hpi : ‖((Real.pi : ℝ) : ℂ)‖ = Real.pi :=
+    Complex.norm_of_nonneg (le_of_lt Real.pi_pos)
+  have hnorm : ‖Complex.Gamma z‖ * ‖Complex.Gamma (1 - z)‖ =
+      Real.pi / ‖Complex.sin (Real.pi * z)‖ := by
+    have h := congrArg Norm.norm hrefl
+    rw [norm_mul, norm_div, hpi] at h
+    exact h
+  have heq : ‖Complex.Gamma z‖ =
+      Real.pi / (‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖) := by
+    rw [eq_div_iff_mul_eq (ne_of_gt (mul_pos hsinNorm hGNorm))]
+    have h2 : ‖Complex.Gamma z‖
+          * (‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖)
+        = (‖Complex.Gamma z‖ * ‖Complex.Gamma (1 - z)‖)
+          * ‖Complex.sin (Real.pi * z)‖ := by
+      ring
+    rw [h2, hnorm, div_mul_cancel₀ _ (ne_of_gt hsinNorm)]
+  have hden : ‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖ ≤ S * G :=
+    mul_le_mul hS hGup (norm_nonneg _) (le_of_lt hSpos)
+  have hBIG : (0 : ℝ) < S * G := mul_pos hSpos hGpos
+  have hle : Real.pi / (S * G) ≤
+      Real.pi / (‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖) := by
+    rw [div_le_div_left Real.pi_pos hBIG (mul_pos hsinNorm hGNorm)]
+    exact hden
+  exact le_trans hle (le_of_eq heq.symm)
+
+/-- E05 shifted-point instance: reflection-form lower at `w_E05 + 1`
+with the sine upper `S` and companion upper `G` as explicit premises.
+Feeds `premGamma_E05_ge_of_shift` once `S * G ≤ π / 0.645` numerals land. -/
+theorem premGamma_E05shift_refl_form (S G : ℝ)
+    (hS : ‖Complex.sin (Real.pi *
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤ S)
+    (hGup : ‖Complex.Gamma (1 -
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤ G)
+    (hSpos : 0 < S) (hGpos : 0 < G)
+    (hsin : Complex.sin (Real.pi *
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) ≠ 0)
+    (hGne : Complex.Gamma (1 -
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) ≠ 0) :
+    Real.pi / (S * G) ≤ ‖Complex.Gamma
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ :=
+  premGamma_refl_lower_of_uppers _ S G hS hGup hSpos hGpos hsin hGne
+
+/-! ## Missing-machinery spec (filed, not fixed).
+
+Exact theorem needed (E05 shifted numerator):
+`theorem premGamma_E05_num_ge : (0.645 : ℝ) ≤ ‖Complex.Gamma
+((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖`
+(and the 6 siblings `0.66 / 0.164 / 0.0314 / 0.0528 / 0.01638 / 0.00657`
+at the E06 / E07 / E01 / E08 / E09 / E10 shifted points).
+
+Host: the Stirling-disc enclosure file (`door3_gamma_disc.lean` shape or a
+new `Mathlib`-only disc leaf) — NOT this premise file, so the floors stay
+honestly open until the enclosure lands.
+
+API it needs: a direct complex-Gamma lower at `Re ≈ 1.2` (Stirling disc /
+Taylor enclosure with explicit remainder, or Binet integral with explicit
+bounds). Neither is banked in Mathlib (no `Complex.logGamma`, no
+Stirling-with-remainder, no Gauss digamma rep) or in-repo.
+
+Why reflection cannot supply it (hand evaluation, honest): closing `0.645`
+via `premGamma_E05shift_refl_form` needs `S * G ≤ π / 0.645 ≈ 4.87`, but the
+banked sine upper alone gives `S ≈ 2 * exp(π * 0.375) ≈ 6.5 > 4.87`, and the
+companion point `1 - (w+1) = -0.1975 + 0.375i` sits `0.42` from the pole at
+`0` (true `‖Γ‖ ≈ 2.4`), so no valid upper `G` can repair the product.
+E06 (`|Im| = 0.625`, budget `π / 0.66 ≈ 4.76`, `S ≈ 14`) is worse. The
+reflection lane is quantitatively dead for all 7 E-row shifted numerators;
+a genuine disc enclosure is required.
+
+Residual: all 7 shifted numerators stay open
+(`0.645 / 0.66 / 0.164 / 0.0314 / 0.0528 / 0.01638 / 0.00657` lower bounds
+on `‖Gamma(w+1)‖` at the 7 E-row shifted points); no floor closed or forced
+this turn.
+-/
+
 end Door3PremiseGamma

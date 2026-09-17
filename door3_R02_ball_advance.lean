@@ -867,6 +867,49 @@ theorem R02_polyPiGammaVal_cap_disc {s : ℂ}
   have heq : (42 : ℝ) * 40 = 1680 := by norm_num
   linarith
 
+/-- Generic 4-factor value upper from a banked 3-factor cap plus a zeta
+value cap (pure `norm_mul`, no deriv needed; `UZ` stays an explicit
+premise). -/
+theorem R02_polyPiGammaZetaValUp_of_caps (APQG AZ : ℂ) (VPQG UZ : ℝ)
+    (hVPQG : ‖APQG‖ ≤ VPQG) (hVZ : ‖AZ‖ ≤ UZ)
+    (hVPQG0 : 0 ≤ VPQG) :
+    ‖APQG * AZ‖ ≤ VPQG * UZ := by
+  rw [norm_mul]
+  exact mul_le_mul hVPQG hVZ (norm_nonneg _) hVPQG0
+
+/-- Banked-1680 4-factor VALUE instance on the R02-disc `s`-rect:
+`‖P * Q * G * Z‖ ≤ 1680 * UZ` from `R02_polyPiGammaVal_cap_disc` plus an
+explicit zeta cap `‖zeta s‖ ≤ UZ`. Value side is complete modulo `UZ`. -/
+theorem R02_polyPiGammaZetaVal_cap_disc_of_zeta (UZ : ℝ) {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (hZ : ‖zeta s‖ ≤ UZ) :
+    ‖DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s *
+      DerivCauchyBridge.gammaOf s * zeta s‖ ≤ 1680 * UZ := by
+  have hPQG := R02_polyPiGammaVal_cap_disc hre_lo hre_hi him_lo him_hi
+  exact R02_polyPiGammaZetaValUp_of_caps
+    (DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s *
+      DerivCauchyBridge.gammaOf s) (zeta s) 1680 UZ hPQG hZ (by norm_num)
+
+/-- UZ VALUE-cap missing-numeral spec (filed, not fixed): uniform
+`‖zeta s‖ ≤ 10` on the R02-disc `s`-rect `Re ∈ [0.05,0.74]`,
+`Im ∈ [-8.25,-5.25]` (statement-identical to the zeta-lane
+`DerivCauchyBridge.R02_zeta_upper_obligation`,
+`central_cover_assembly.lean:6493`, READ-ONLY — owning lane: zeta lane).
+Not satisfiable this turn: banked best uppers `≤ 1012`
+(`R02Unconditional.R02_zeta_upper_unconditional`,
+`riemann_hypothesis_newsection.lean:1055`, not imported here) and `≤ 934`
+(`R02_D3_zeta_upper_934`, `zeta_rigorous.lean:32566`, not imported here)
+both exceed `10`; `premZeta_*` floors (`door3_premise_zeta.lean`, e.g.
+`1.9 ≤ ‖zeta zs_R00‖`) and the `CS_zeta_of_parts` family
+(`door3_cell_suppliers.lean:284`, incl. `CS_zeta_of_S2/S2b/S2c/S2d/S2e/S4/S6`)
+prove LOWER bounds — wrong direction for a `≤ 10` upper. `UG` is banked
+(`R02_gammaVal_cap_disc`, `UG = 40`); the DG deriv premise stays open
+(`R02_gammaDeriv_obligation`; Gamma-deriv machinery tasked separately). -/
+def R02_zetaVal_missingNumeral_spec : Prop :=
+  ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖zeta s‖ ≤ 10
+
 /-- Generic `(PQ) * G` deriv upper from value + deriv caps (two-term Leibniz
 norm; `PQ` is treated as one banked factor). -/
 theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)
@@ -1051,6 +1094,8 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_polyPiGammaVal_prod1680
 #print axioms R02_polyPiGammaValUp_of_caps
 #print axioms R02_polyPiGammaVal_cap_disc
+#print axioms R02_polyPiGammaZetaValUp_of_caps
+#print axioms R02_polyPiGammaZetaVal_cap_disc_of_zeta
 #print axioms R02_pqGammaDerivUp_of_factorCaps
 #print axioms R02_pqGammaDeriv_prod2186
 #print axioms R02_pqGammaDerivUp_bankedPQG_shape
