@@ -4753,6 +4753,14 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean): 3 more leaves — `gridH_c34_of_R34:1246`,
   `gridH_c35_of_R35:1269`, `gridH_c36_of_R36:1292` (no skips).
   Leaves done 36/40 — FINAL 4. EDGE-NEXT15 tasked (c37+ last run).
+- 2026-09-17 EDGE-NEXT15 (background `ses_f5140f30`, proof-only,
+  grep-clean): GRID REPLICATION COMPLETE — `gridH_c37_of_R37:1315`,
+  `gridH_c38_of_R38:1338`, `gridH_c39_of_R39:1361`,
+  `gridH_c40_of_R40:1384` + COUNT `gridH_leaf_count_done:1401`.
+  FINAL 40/40 gridFine leaves banked (R01 sole skip by design).
+  Wiring lane structural work DONE; remaining: supplier numerals
+  (leaf obligations), m-half premises, + full-file typecheck.
+  EDGE-SWEEP tasked (whole-file green build).
 - 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
