@@ -4545,11 +4545,19 @@ sorry-free infrastructure and the complete commit ledger above.
   needs `Complex.cpow` phase/norm split at sCenter); `CS_complex_S2_Re_ge_one`
   /`CS_complex_S2_abs_ge_one` one premise nearer (`CS_rpow2_head_upper`
   already `CS_rpow2_proved`). No sibling files touched (WAVE3-ETA tasked).
-- 2026-09-17 WAVE1-ZETA-PILOT (file observed pre-report
-  `door3_pilot_R00_zeta.lean`, registered; formal report pending):
-  R00 floor-1.9 pilot stages slow `1/5<=||S2||`, tail `<=23`
-  (M=1/M=4 via `zetaCell_even_remainder_le`, `||sR00||<=8.76`),
-  factor `<=3`; cert value `(1/5-23)/3=-38/5` FAILS `1.9*cF+tail<=slow`
-  honestly (`1/5<1.9*3+23`); best unconditional floor banked
-  `0<=||zeta sR00||`. No sorry (grep clean). Await agent report
-  before doc-closing this line.
+- 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
+  committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
+  registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
+  `CS_zeta_of_parts`-shaped bridge — slow `1/5<=||S2||`
+  (`R00_eta_S2_norm_ge`, reverse triangle, t-independent),
+  tails `<=23` at M=1/M=4 (`R00_eta_tail_M1_le/M4_le` via
+  `zetaCell_even_remainder_le`, proved `||sR00||<=8.76`),
+  factor `<=3` (`R00_cF_upper`, triangle + `2^0.605<=2`).
+  HONEST WALL: cert value `(1/5-23)/3=-38/5` vs floor 1.9
+  (shortfall 9.5; `1/5<1.9*3+23` fails, no close claimed);
+  N=8 gap `0.6-23-0.95<0` (0.6 labelled estimate). Builds deferred
+  (2x 900000ms consumed by `GUARD-WAIT` behind live sibling builder;
+  agent scheduled 30m self-wakeup to retry). Lemma-name audit done
+  (`div_le_div_iff_of_pos_right`, `inv_le_inv0`,
+  `norm_cpow_eq_rpow_re_of_pos` in-tree). Next: build-verify warm +
+  larger-N slow or tighter tail/factor (WAVE2-ZETA tasked).
