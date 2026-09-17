@@ -4789,6 +4789,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (`‖term₅‖≥0.52`). Gap UNCHANGED honestly (needs n=3,4 Re floors
   + inv_re bridge — open, documented). ZETA-NEXT4 tasked (n=3,4
   Re floors + term₅ assembly).
+- 2026-09-17 ZETA-NEXT4 (background `ses_f514a86e`, proof-only,
+  grep-clean): n=3,4 Re floors banked (`R00_phase3/4 :1144-1168`,
+  theta shifts `:1176/:1186`, cos floors `:1200/:1206`, cpow splits
+  `:1233/:1269`, Re floors `:1305/:1324`, inv_re bridge
+  `:1333-1355`, eta Re floors `:1366-1399`, `R00_pair1_Re_ge_neg160
+  :1411`) but S5 assembly STALLS (`||S5||>=-2.37`, weaker than 0;
+  R00 phases destructive, cos φ3~=-0.982). Gap unchanged 4.621.
+  LANE VERDICT: R00 Re-route exhausted (same oscillation wall as
+  suppliers S6) — redirect to sCut slow-sum (N=4096>=21/10, OA26
+  banked rtail leg; cutoff lane's hSlow). ZETA-SCUT tasked.
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`

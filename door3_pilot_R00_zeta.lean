@@ -1112,4 +1112,440 @@ theorem R00_best_unconditional : (0 : ℝ) ≤ ‖zeta sR00‖ :=
 #print axioms R00_eta_fifth_eq
 #print axioms R00_eta_fifth_norm_ge_052
 
+/-! ## ZETA-NEXT4 phase-aware slow terms (`n = 3, 4`) + `inv_re` bridge + S5 assembly.
+
+* Phase windows (mirror the term-5 recipe `R00_phase5_ge/le`):
+  `φ₃ = 8.75·log 3 ∈ [9.21287, 9.94263]` via `R00_log_three_ge/le`
+  (`8.75·1.0529 = 9.212875`, `8.75·1.1363 = 9.942625`);
+  `φ₄ = 8.75·log 4 ∈ [12.13007, 12.13009]` via `R00_log_four_ge/le`
+  (`8.75·1.386294 = 12.1300725`, `8.75·1.386296 = 12.13009`).
+* `2kπ` shifts: `θ₃ = φ₃ - 2π ∈ [2.92, 3.66]` (near `π`: destructive phase,
+  true `cos ≈ -0.98`, so only the signed floor `cos ≥ -1` is banked);
+  `θ₄ = φ₄ - 2π - 2π ∈ [-0.44, -0.43] ⊆ [-π/2, π/2]` (via `pi_gt_d6` /
+  `pi_lt_d6`), so `cos(8.75·log 4) ≥ 0` by `cos_nonneg` + `cos_sub_two_pi`
+  (true `≈ 0.906`, large margin).
+* Cpow real-part splits at R00 for `n = 3, 4` (mirror `R00_cpow5_neg_re`):
+  `n^(-0.395)·cos(8.75·log n)`; floors `-1` (`n = 3`, trivial amplitude
+  upper + `neg_one_le_cos`) and `≥ 0` (`n = 4`, nonnegative amplitude
+  times the cosine floor).
+* `inv_re` bridge (eta-term form to Re form): `((((n:ℕ)):ℂ)^sR00)⁻¹`
+  `= ((((n:ℝ)):ℂ)^(-sR00))` via `(Complex.cpow_neg _ _).symm`, so each
+  eta-term real part equals the cpow Re form above. Gives
+  `Re(term 2) ≥ -1`, `Re(term 3) ≥ -0.60` (minus sign + `cos_le_one` +
+  banked `R00_rpow4_neg0395_le_060`), `Re(term 4) ≥ 0`.
+* Honest assembly: `‖S₅‖ ≥ 0.23 - 1 - 0.60 - 1 = -2.37` (reverse triangle
+  from `R00_eta_S2_norm_ge_023`), weaker than trivial `0`; the `n = 3`
+  phase is destructive (`θ₃ ≈ π`) and `term 3` carries the eta minus
+  sign, so phase-aware slow does NOT grow here. Binding slow stays
+  `0.23`; certificate recomputed with identical numerals
+  (`186/2530`, gap `4621/1000 = 4.621`, shortfall `4621/2530`). -/
+
+/-- R00 phase lower for `n = 3` (`8.75 * 1.0529 = 9.212875`). -/
+theorem R00_phase3_ge : (9.21287 : ℝ) ≤ 8.75 * Real.log 3 := by
+  have h := R00_log_three_ge
+  have hmul : (8.75 : ℝ) * (1.0529) ≤ 8.75 * Real.log 3 :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (9.21287 : ℝ) ≤ (8.75 : ℝ) * (1.0529) := by norm_num
+  linarith
+
+/-- R00 phase upper for `n = 3` (`8.75 * 1.1363 = 9.942625 ≤ 9.94263`). -/
+theorem R00_phase3_le : 8.75 * Real.log 3 ≤ (9.94263 : ℝ) := by
+  have h := R00_log_three_le
+  have hmul : (8.75 : ℝ) * Real.log 3 ≤ 8.75 * (1.1363) :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (8.75 : ℝ) * (1.1363) ≤ (9.94263 : ℝ) := by norm_num
+  linarith
+
+/-- R00 phase lower for `n = 4` (`8.75 * 1.386294 = 12.1300725`). -/
+theorem R00_phase4_ge : (12.13007 : ℝ) ≤ 8.75 * Real.log 4 := by
+  have h := R00_log_four_ge
+  have hmul : (8.75 : ℝ) * (1.386294) ≤ 8.75 * Real.log 4 :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (12.13007 : ℝ) ≤ (8.75 : ℝ) * (1.386294) := by norm_num
+  linarith
+
+/-- R00 phase upper for `n = 4` (`8.75 * 1.386296 = 12.13009`). -/
+theorem R00_phase4_le : 8.75 * Real.log 4 ≤ (12.13009 : ℝ) := by
+  have h := R00_log_four_le
+  have hmul : (8.75 : ℝ) * Real.log 4 ≤ 8.75 * (1.386296) :=
+    mul_le_mul_of_nonneg_left h (by norm_num)
+  have hcap : (8.75 : ℝ) * (1.386296) ≤ (12.13009 : ℝ) := by norm_num
+  linarith
+
+/-- Shifted phase window for `n = 3` (`φ₃ - 2π ∈ [2.92, 3.66]`, near `π`). -/
+theorem R00_theta3_shift_mem :
+    (2.92 : ℝ) ≤ 8.75 * Real.log 3 - 2 * Real.pi ∧
+      8.75 * Real.log 3 - 2 * Real.pi ≤ (3.66 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := R00_phase3_ge
+  have hhi := R00_phase3_le
+  constructor <;> linarith
+
+/-- Shifted phase window for `n = 4` (`φ₄ - 2π - 2π ∈ [-0.44, -0.43]`). -/
+theorem R00_theta4_shift_mem :
+    (-(0.44) : ℝ) ≤ 8.75 * Real.log 4 - 2 * Real.pi - 2 * Real.pi ∧
+      8.75 * Real.log 4 - 2 * Real.pi - 2 * Real.pi ≤ (-(0.43) : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := R00_phase4_ge
+  have hhi := R00_phase4_le
+  have hpi2 : 2 * Real.pi + 2 * Real.pi
+      ≤ 2 * (3.141593 : ℝ) + 2 * (3.141593 : ℝ) := by
+    linarith
+  constructor <;> linarith
+
+/-- Signed cosine floor at R00 for `n = 3` (`cos ≥ -1`; the shifted phase
+sits near `π`, so no nonnegative floor is available). -/
+theorem R00_cos_875log3_ge_neg1 : (-1 : ℝ) ≤ Real.cos (8.75 * Real.log 3) :=
+  Real.neg_one_le_cos _
+
+/-- Phase-aware cosine floor at R00 for `n = 4` (`cos(8.75·log 4) ≥ 0`).
+Route: shift by `2·2π` into `[-π/2, π/2]` via the phase caps above +
+`pi_gt_d6` / `pi_lt_d6`, then `cos_nonneg` (mirrors `R00_cos_875log5_nonneg`). -/
+theorem R00_cos_875log4_nonneg : (0 : ℝ) ≤ Real.cos (8.75 * Real.log 4) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo : -(Real.pi / 2) ≤ 8.75 * Real.log 4 - 2 * Real.pi - 2 * Real.pi := by
+    have hmul : (8.75 : ℝ) * (1.386294) ≤ 8.75 * Real.log 4 :=
+      mul_le_mul_of_nonneg_left R00_log_four_ge (by norm_num)
+    have hcap : (12.13007 : ℝ) ≤ (8.75 : ℝ) * (1.386294) := by norm_num
+    have hpi2 : 2 * Real.pi + 2 * Real.pi
+        ≤ 2 * (3.141593 : ℝ) + 2 * (3.141593 : ℝ) := by
+      linarith
+    have hpin : (0 : ℝ) ≤ Real.pi := by linarith
+    linarith
+  have hhi : 8.75 * Real.log 4 - 2 * Real.pi - 2 * Real.pi ≤ Real.pi / 2 := by
+    have hmul : (8.75 : ℝ) * Real.log 4 ≤ 8.75 * (1.386296) :=
+      mul_le_mul_of_nonneg_left R00_log_four_le (by norm_num)
+    have hcap : (8.75 : ℝ) * (1.386296) ≤ (12.13009 : ℝ) := by norm_num
+    linarith
+  have hnn := Real.cos_nonneg_of_neg_pi_div_two_le_of_le hlo hhi
+  have hper1 := Real.cos_sub_two_pi (8.75 * Real.log 4 - 2 * Real.pi)
+  have hper2 := Real.cos_sub_two_pi (8.75 * Real.log 4)
+  have heq : Real.cos (8.75 * Real.log 4 - 2 * Real.pi - 2 * Real.pi)
+      = Real.cos (8.75 * Real.log 4) := by
+    rw [hper1, hper2]
+  rw [heq] at hnn
+  exact hnn
+
+/-- Cpow real-part split at R00 for `n = 3` (mirrors `R00_cpow5_neg_re`). -/
+theorem R00_cpow3_neg_re : ((((3 : ℝ)) : ℂ) ^ (-sR00)).re
+    = (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 3) := by
+  have h3pos : (0 : ℝ) < 3 := by norm_num
+  have hxC : ((3 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h3pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((3 : ℝ) : ℂ) = (((Real.log 3 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h3pos)).symm
+  rw [hlog]
+  have hre_w : (-sR00).re = (-(0.395 : ℝ)) := by
+    have e : (-sR00).re = -(sR00.re) := rfl
+    rw [e, sR00_re]
+  have him_w : (-sR00).im = (8.75 : ℝ) := by
+    have e : (-sR00).im = -(sR00.im) := rfl
+    rw [e, sR00_im]
+    norm_num
+  have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
+  have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-sR00)).re
+      = Real.log 3 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 3 : ℝ)) : ℂ) * (-sR00)).im
+      = Real.log 3 * (8.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 3 * (-(0.395 : ℝ)))
+      = (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h3pos _).symm
+  have hcos : Real.cos (Real.log 3 * (8.75 : ℝ))
+      = Real.cos (8.75 * Real.log 3) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split at R00 for `n = 4` (mirrors `R00_cpow5_neg_re`;
+`log 4 = 2·log 2` is used only upstream in the phase caps). -/
+theorem R00_cpow4_neg_re : ((((4 : ℝ)) : ℂ) ^ (-sR00)).re
+    = (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 4) := by
+  have h4pos : (0 : ℝ) < 4 := by norm_num
+  have hxC : ((4 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h4pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((4 : ℝ) : ℂ) = (((Real.log 4 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h4pos)).symm
+  rw [hlog]
+  have hre_w : (-sR00).re = (-(0.395 : ℝ)) := by
+    have e : (-sR00).re = -(sR00.re) := rfl
+    rw [e, sR00_re]
+  have him_w : (-sR00).im = (8.75 : ℝ) := by
+    have e : (-sR00).im = -(sR00.im) := rfl
+    rw [e, sR00_im]
+    norm_num
+  have hzre : ((((Real.log 4 : ℝ)) : ℂ)).re = Real.log 4 := Complex.ofReal_re _
+  have hzim : ((((Real.log 4 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 4 : ℝ)) : ℂ) * (-sR00)).re
+      = Real.log 4 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 4 : ℝ)) : ℂ) * (-sR00)).im
+      = Real.log 4 * (8.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 4 * (-(0.395 : ℝ)))
+      = (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h4pos _).symm
+  have hcos : Real.cos (Real.log 4 * (8.75 : ℝ))
+      = Real.cos (8.75 * Real.log 4) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Phase-aware slow floor at R00 for `n = 3` (signed: amplitude `≤ 1`
+times `cos ≥ -1`). -/
+theorem R00_cpow3_neg_Re_ge_neg1 :
+    (-1 : ℝ) ≤ ((((3 : ℝ)) : ℂ) ^ (-sR00)).re := by
+  rw [R00_cpow3_neg_re]
+  have hamp_le : (3 : ℝ) ^ (-(0.395 : ℝ)) ≤ 1 := by
+    have h : (3 : ℝ) ^ (-(0.395 : ℝ)) ≤ (3 : ℝ) ^ (0 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+    rw [Real.rpow_zero] at h
+    exact h
+  have hcos := R00_cos_875log3_ge_neg1
+  have hr0 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have h1 : (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 3)
+      ≥ (3 : ℝ) ^ (-(0.395 : ℝ)) * (-1) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (3 : ℝ) ^ (-(0.395 : ℝ)) * (-1) ≥ -1 := by
+    linarith
+  linarith
+
+/-- Phase-aware slow floor at R00 for `n = 4` (nonnegative). -/
+theorem R00_cpow4_neg_Re_nonneg :
+    (0 : ℝ) ≤ ((((4 : ℝ)) : ℂ) ^ (-sR00)).re := by
+  rw [R00_cpow4_neg_re]
+  have hcos := R00_cos_875log4_nonneg
+  have hr0 : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  exact mul_nonneg hr0 hcos
+
+/-- `inv_re` bridge for `n = 3` (eta-term inverse form to cpow Re form). -/
+theorem R00_inv_three_cpow_re_eq :
+    (((((3 : ℕ)) : ℂ) ^ sR00)⁻¹).re
+      = (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 3) := by
+  have h3n : ((((3 : ℕ)) : ℂ)) = (3 : ℂ) := by norm_cast
+  have h3r : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  have hcp : ((((3 : ℝ)) : ℂ) ^ sR00)⁻¹ = ((((3 : ℝ)) : ℂ) ^ (-sR00)) :=
+    (Complex.cpow_neg _ _).symm
+  rw [h3n, h3r, hcp]
+  exact R00_cpow3_neg_re
+
+/-- `inv_re` bridge for `n = 4` (eta-term inverse form to cpow Re form). -/
+theorem R00_inv_four_cpow_re_eq :
+    (((((4 : ℕ)) : ℂ) ^ sR00)⁻¹).re
+      = (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 4) := by
+  have h4n : ((((4 : ℕ)) : ℂ)) = (4 : ℂ) := by norm_cast
+  have h4r : ((4 : ℂ)) = ((((4 : ℝ)) : ℂ)) := by simp
+  have hcp : ((((4 : ℝ)) : ℂ) ^ sR00)⁻¹ = ((((4 : ℝ)) : ℂ) ^ (-sR00)) :=
+    (Complex.cpow_neg _ _).symm
+  rw [h4n, h4r, hcp]
+  exact R00_cpow4_neg_re
+
+/-- `inv_re` bridge for `n = 5` (eta-term inverse form to cpow Re form). -/
+theorem R00_inv_five_cpow_re_eq :
+    (((((5 : ℕ)) : ℂ) ^ sR00)⁻¹).re
+      = (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 5) := by
+  have h5n : ((((5 : ℕ)) : ℂ)) = (5 : ℂ) := by norm_cast
+  have h5r : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+  have hcp : ((((5 : ℝ)) : ℂ) ^ sR00)⁻¹ = ((((5 : ℝ)) : ℂ) ^ (-sR00)) :=
+    (Complex.cpow_neg _ _).symm
+  rw [h5n, h5r, hcp]
+  exact R00_cpow5_neg_re
+
+/-- Real part of the R00 third eta term (`-1 ≤ Re term 2`). -/
+theorem R00_eta_third_Re_ge_neg1 :
+    (-1 : ℝ) ≤ (etaDirichletTerm sR00 2).re := by
+  rw [R00_eta_third_eq]
+  have h := R00_cpow3_neg_Re_ge_neg1
+  have h3n : ((((3 : ℕ)) : ℂ)) = (3 : ℂ) := by norm_cast
+  have h3r : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  have hcp : ((((3 : ℝ)) : ℂ) ^ sR00)⁻¹ = ((((3 : ℝ)) : ℂ) ^ (-sR00)) :=
+    (Complex.cpow_neg _ _).symm
+  rw [h3n, h3r, hcp]
+  exact h
+
+/-- Real part of the R00 fourth eta term (`-0.60 ≤ Re term 3`; the eta
+minus sign flips the nonnegative `n = 4` inverse floor, capped by the
+banked amplitude upper and `cos_le_one`). -/
+theorem R00_eta_fourth_Re_ge_neg060 :
+    (-(0.60) : ℝ) ≤ (etaDirichletTerm sR00 3).re := by
+  rw [R00_eta_fourth_eq, Complex.neg_re]
+  have hup : (((((4 : ℕ)) : ℂ) ^ sR00)⁻¹).re ≤ (0.60 : ℝ) := by
+    rw [R00_inv_four_cpow_re_eq]
+    have hamp := R00_rpow4_neg0395_le_060
+    have hcos_le := Real.cos_le_one (8.75 * Real.log 4)
+    have hcos_nn := R00_cos_875log4_nonneg
+    have hamp_nn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+      le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+    have hprod : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (8.75 * Real.log 4)
+        ≤ (0.60 : ℝ) * 1 :=
+      mul_le_mul hamp hcos_le hcos_nn (by norm_num)
+    have heq : (0.60 : ℝ) * 1 = 0.60 := by norm_num
+    linarith
+  linarith
+
+/-- Real part of the R00 fifth eta term (`0 ≤ Re term 4`, via the bridge
+to the banked cpow floor). -/
+theorem R00_eta_fifth_Re_nonneg :
+    (0 : ℝ) ≤ (etaDirichletTerm sR00 4).re := by
+  rw [R00_eta_fifth_eq]
+  have h := R00_cpow5_neg_Re_nonneg
+  have h5n : ((((5 : ℕ)) : ℂ)) = (5 : ℂ) := by norm_cast
+  have h5r : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+  have hcp : ((((5 : ℝ)) : ℂ) ^ sR00)⁻¹ = ((((5 : ℝ)) : ℂ) ^ (-sR00)) :=
+    (Complex.cpow_neg _ _).symm
+  rw [h5n, h5r, hcp]
+  exact h
+
+/-- Phase-aware first-pair real part at R00 (`-1.60 ≤ Re(term 2 + term 3)`). -/
+theorem R00_pair1_Re_ge_neg160 :
+    (-(1.60) : ℝ) ≤ (etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3).re := by
+  rw [Complex.add_re]
+  have h2 := R00_eta_third_Re_ge_neg1
+  have h3 := R00_eta_fourth_Re_ge_neg060
+  linarith
+
+/-- Modulus of the R00 fifth eta term (`≤ 1`, trivial decay). -/
+theorem R00_eta_fifth_norm_le_one :
+    ‖((((5 : ℕ) : ℂ) ^ sR00)⁻¹)‖ ≤ (1 : ℝ) := by
+  have h5n : ((((5 : ℕ)) : ℂ)) = (5 : ℂ) := by norm_cast
+  have h5r : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+  rw [h5n, h5r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 5), sR00_re]
+  have heq : (((5 : ℝ) ^ (0.395 : ℝ)))⁻¹ = (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5) _).symm
+  rw [heq]
+  have hle : (5 : ℝ) ^ (-(0.395 : ℝ)) ≤ (5 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- R00 five-term eta partial sum split at `S₂` (`S₅ = S₂ + t₂ + t₃ + t₄`). -/
+theorem R00_eta_S5_eq :
+    (∑ k ∈ Finset.range 5, etaDirichletTerm sR00 k)
+      = (∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3
+        + etaDirichletTerm sR00 4 := by
+  rw [show (5 : ℕ) = 4 + 1 by norm_num, Finset.sum_range_succ,
+    show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ,
+    show (3 : ℕ) = 2 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Honest S5 stall witness at R00 (`-2.37 ≤ ‖S₅‖`; reverse triangle from
+the binding `0.23` S2 floor minus the three extra term uppers — weaker
+than trivial `0`, so phase-aware slow does not grow and the binding slow
+stays `0.23`). -/
+theorem R00_eta_S5_norm_ge_neg237 :
+    (-2.37 : ℝ) ≤ ‖∑ k ∈ Finset.range 5, etaDirichletTerm sR00 k‖ := by
+  rw [R00_eta_S5_eq]
+  have hS2 := R00_eta_S2_norm_ge_023
+  have hb := R00_eta_third_norm_le_one
+  have hc := R00_eta_fourth_norm_le_060
+  have hd := R00_eta_fifth_norm_le_one
+  have h1 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2‖ + ‖etaDirichletTerm sR00 2‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k) + etaDirichletTerm sR00 2)
+      (etaDirichletTerm sR00 2)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2) - etaDirichletTerm sR00 2)
+        = (∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k) := by abel
+    rw [heq] at h
+    exact h
+  have h2 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3‖
+        + ‖etaDirichletTerm sR00 3‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3)
+      (etaDirichletTerm sR00 3)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3)
+        - etaDirichletTerm sR00 3)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+          + etaDirichletTerm sR00 2) := by abel
+    rw [heq] at h
+    exact h
+  have h3 : ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3‖
+      ≤ ‖(∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3
+        + etaDirichletTerm sR00 4‖ + ‖etaDirichletTerm sR00 4‖ := by
+    have h := norm_sub_le
+      ((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3
+        + etaDirichletTerm sR00 4)
+      (etaDirichletTerm sR00 4)
+    have heq : (((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3
+        + etaDirichletTerm sR00 4) - etaDirichletTerm sR00 4)
+        = ((∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k)
+          + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3) := by abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- Exact certificate value with phase-aware slow attempt (binding slow
+stays `0.23` by the S5 stall): `(0.23 - 0.044)/2.53 = 186/2530`. -/
+theorem R00_cert_value_023_M8388608_phase5_eq :
+    (((0.23 : ℝ) - 0.044) / 2.53) = (186 / 2530 : ℝ) := by
+  norm_num
+
+/-- The phase-5 certificate value still sits below the `1.9` floor. -/
+theorem R00_cert_023_M8388608_phase5_below_floor : (186 / 2530 : ℝ) < 1.9 := by
+  norm_num
+
+/-- Threshold form of the remaining miss with phase-5 slow attempt. -/
+theorem R00_bridge_need_open_023_M8388608_phase5 :
+    (0.23 : ℝ) < 1.9 * 2.53 + 0.044 := by
+  norm_num
+
+/-- Exact threshold gap that remains: `(1.9 * 2.53 + 0.044) - 0.23`. -/
+theorem R00_gap_023_M8388608_phase5_eq :
+    ((1.9 * 2.53 + 0.044 : ℝ) - 0.23) = (4621 / 1000 : ℝ) := by
+  norm_num
+
+/-- Exact shortfall of the phase-5 certificate below the floor. -/
+theorem R00_shortfall_023_M8388608_phase5_eq :
+    ((1.9 : ℝ) - (186 / 2530)) = (4621 / 2530 : ℝ) := by
+  norm_num
+
+#print axioms R00_phase3_ge
+#print axioms R00_phase3_le
+#print axioms R00_phase4_ge
+#print axioms R00_phase4_le
+#print axioms R00_theta3_shift_mem
+#print axioms R00_theta4_shift_mem
+#print axioms R00_cos_875log3_ge_neg1
+#print axioms R00_cos_875log4_nonneg
+#print axioms R00_cpow3_neg_re
+#print axioms R00_cpow4_neg_re
+#print axioms R00_cpow3_neg_Re_ge_neg1
+#print axioms R00_cpow4_neg_Re_nonneg
+#print axioms R00_inv_three_cpow_re_eq
+#print axioms R00_inv_four_cpow_re_eq
+#print axioms R00_inv_five_cpow_re_eq
+#print axioms R00_eta_third_Re_ge_neg1
+#print axioms R00_eta_fourth_Re_ge_neg060
+#print axioms R00_eta_fifth_Re_nonneg
+#print axioms R00_pair1_Re_ge_neg160
+#print axioms R00_eta_fifth_norm_le_one
+#print axioms R00_eta_S5_eq
+#print axioms R00_eta_S5_norm_ge_neg237
+#print axioms R00_cert_value_023_M8388608_phase5_eq
+#print axioms R00_gap_023_M8388608_phase5_eq
+#print axioms R00_shortfall_023_M8388608_phase5_eq
+
 end Door3PilotR00Zeta
