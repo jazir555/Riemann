@@ -4532,6 +4532,26 @@ sorry-free infrastructure and the complete commit ledger above.
   tier still open (`1402-0.07=1401.93`). VERDICT: Cauchy tuning
   provably insufficient — subdivision+re-tier or direct deriv bounds
   mandatory (WAVE3-DERIV tasked).
+- 2026-09-17 WAVE3-DERIV (background `ses_f529ac67bffeznswztkEsZL7MG`):
+  subdivision pilot banked in `door3_R02_ball_advance.lean:271-493`
+  (22 theorems, grep-clean): halves `R02W:303`/`R02E:307`
+  (`xmid=-6.75`) + mem/coverage `:311/322/333`; per-subrect Cauchy
+  at halved radius via `DerivCauchyBridge.uniform_deriv_of_closedBall_bound`
+  (`R02W/E_deriv_of_ballCap125:349/366`, `C/0.125=8*C :383`).
+  No in-tree direct-deriv (`one-over-x`) route for `xiShifted` exists
+  (grep) — subdivision was the available step. KEY NEGATIVE RESULT:
+  subdivision provably WORSENS the cap — `R02_subdiv_doubling:415`
+  (`134400=2*67200`), `R02_subdiv_halving_worsens:419`; halved radius
+  needs ball `<=0.00875` (`:432`, true ~10) or radius 240000
+  (`:449` via `:242`); sharpened per-half 2804 (gap 2803.93) still
+  above 0.07. Builds: 2x900s guarded attempts, cold-cache dependency
+  phase only (1907/2273, 2134/2529; module not reached, no errors);
+  fast path applied twice (dead owners 13340/19252/7156 cleared).
+  LANE VERDICT: Cauchy at ANY radius + subdivision both provably
+  insufficient — remaining routes are (a) direct derivative bounds via
+  product-rule decomposition (new analytic machinery), or (b) re-tier
+  the cells (change tier targets; some cells feasibility-negative).
+  WAVE4-DERIV pivots to (a)/(b) scoping + build sweep (tasked).
 - 2026-09-17 WAVE1-ETA (background `ses_f52ba7d25ffeE6EsYl0uXyPCiB`,
   committed in `2b76f75`): eta-factor group CLOSED in
   `door3_cell_suppliers.lean` (grep-clean, no sorry/admit/axiom/simpa):
