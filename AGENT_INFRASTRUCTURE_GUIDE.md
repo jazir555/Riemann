@@ -4862,6 +4862,13 @@ sorry-free infrastructure and the complete commit ledger above.
   on RED file (bridge-exposed errors :2982/:3442/:3728/:3887) —
   ETA-SWEEP must verify this content too. ETA-SWEEP tasked
   (fix-all + green, build owner).
+- 2026-09-17 ETA-SWEEP (background `ses_f51316f7`): GREEN RESTORED
+  (verified `...-20260917-030149.log` tail: 8688 jobs, all new
+  content incl. 4-split verified, zero sorryAx). Fixes: dropped
+  redundant `abel` (`:2981-2`), `sub_im`-before-`add_im` reorder
+  (`:2982`), `+ring` x4 after sq_norm rewrites
+  (`:3443/:3730/:3890/:4050`, mirrors green pattern). Bridge
+  unblocked. BRIDGE-VERIFY tasked (rebuild bridge).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -5133,6 +5140,17 @@ sorry-free infrastructure and the complete commit ledger above.
   expected-dead as filed; closable leaf needs L<=0.671 or N=6
   (true Seq6 ~0.695). GAMMA-N5B tasked (E05 finite lower
   L<=0.671 + N=6 fallback).
+- 2026-09-17 GAMMA-N5B (background `ses_f513a091`, proof-only,
+  grep-clean): ACHIEVABLE finite lower banked — quotient
+  `816/1237.68~=0.6593` in `[0.645,0.671]` (rpow5-frac lower
+  1.36^26<=3125, cpow5 norm>=6.8, s+2..5 uppers 3.22/4.22/5.22/
+  6.21, prod5<=1237.68, `:3079-3255`) + CORRECTED closure
+  (finite 0.659 + rate budget 0.014 → 0.645, `:3335-3352`; old
+  0.725 shape kept). Two one-char paren repairs (link `:3000`,
+  cpow5 `:3013`); SAME slip flagged at `:2693/:2749/:2901`
+  (unfixed, sweep-noted — parse errors, will break build).
+  GAMMA-PAREN tasked (3 paren fixes + first premise_gamma
+  build).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,

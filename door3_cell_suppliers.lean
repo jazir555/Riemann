@@ -2979,8 +2979,7 @@ theorem CS_S6C_Im_link :
     have h5 : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
     have h6 : ((6 : ℂ)) = ((((6 : ℝ)) : ℂ)) := by simp
     rw [h5, h6]
-    abel
-  rw [hEq, Complex.add_im, Complex.sub_im,
+  rw [hEq, Complex.sub_im, Complex.add_im,
     CS_cpow5_sCenter_im, CS_cpow6_sCenter_im]
 
 /-- Conditional S6 Im lower via the alternating sum (explicit `S₄`
@@ -3441,6 +3440,7 @@ theorem CS_complex_S4_abs_ge_pyth :
   have hIm := CS_complex_S4_Im_ge_07017
   have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
   have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
     pow_le_pow_left₀ (by norm_num) hRe 2
   have hIm2 : (0.7017 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
@@ -3727,6 +3727,7 @@ theorem CS_complex_S4_abs_ge_182 :
   have hIm := CS_complex_S4_Im_ge_09480
   have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
   have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
     pow_le_pow_left₀ (by norm_num) hRe 2
   have hIm2 : (0.9480 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
@@ -3886,6 +3887,7 @@ theorem CS_complex_S4_abs_ge_190 :
   have hIm := CS_complex_S4_Im_ge_11005
   have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
   have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
     pow_le_pow_left₀ (by norm_num) hRe 2
   have hIm2 : (1.1005 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
@@ -4045,6 +4047,7 @@ theorem CS_complex_S4_abs_ge_194 :
   have hIm := CS_complex_S4_Im_ge_11592
   have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
   have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
     pow_le_pow_left₀ (by norm_num) hRe 2
   have hIm2 : (1.1592 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=

@@ -2997,7 +2997,7 @@ at E05 shifted `s = w_E05 + 1`, extending the `N = 4` spec shape
 unfolding was not instantiated this turn. Filed ONLY at `N = 5` alongside N = 4. -/
 def premGamma_E05_GammaSeq5_link : Prop :=
   ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ =
-    ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ * 120 /
+    ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ * 120 /
       (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
@@ -3010,7 +3010,7 @@ def premGamma_E05_GammaSeq5_link : Prop :=
 is FALSE). Feeds the Re-ceiling numerator `6.88 * 120 = 825.6` once `link` +
 Re lowers land. Filed ONLY at `N = 5` alongside N = 4. -/
 def premGamma_E05_cpow5_upper_needed : Prop :=
-  ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (6.88 : ℝ)
 
 /-- Missing rate L2 at `N = 5` (filed, not proved): quantitative `GammaSeq`
@@ -3042,6 +3042,320 @@ theorem premGamma_E05_Gamma_lower_of_Seq5_rate
     (0.645 : ℝ) ≤
       ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ := by
   unfold premGamma_E05_GammaSeq5_rate_needed at hRate
+  have htri : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ +
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ := by
+    have h := norm_add_le
+      (Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))
+      (Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))
+    rw [sub_add_cancel] at h
+    exact h
+  linarith
+
+/-! ## GAMMA-N5B: E05 N = 5 ACHIEVABLE finite lower + corrected closure (banked).
+
+Audit (exact arithmetic, Python-checked this turn): the dead `0.725` finite
+premise above is superseded (kept, not deleted) by an achievable finite lower.
+At E05 shifted `s = w_E05 / 2 + 1` (`Re s = 1.1975`, `Im s = -0.375`):
+* cpow lower: `‖(5 : ℂ) ^ s‖ = 5 ^ 1.1975 ≥ 6.8` (TRUE `≈ 6.87095`) via
+  `Complex.norm_cpow_eq_rpow_re_of_pos` plus `5 ^ 1.1975 = 5 * 5 ^ 0.1975 ≥
+  5 * 5 ^ (5/26) ≥ 5 * 1.36 = 6.8` (`5/26 ≤ 0.1975`; `1.36^26 = 2964.91 ≤
+  3125 = 5^5`, all `norm_num`).
+* denominator norm uppers (`sq_norm` shapes, extending banked `‖s‖ ≤ 1.26`,
+  `‖s+1‖ ≤ 2.23`): `‖s+2‖ ≤ 3.22` (`3.1975^2 + 0.375^2 = 10.36463125 ≤
+  3.22^2`), `‖s+3‖ ≤ 4.22`, `‖s+4‖ ≤ 5.22`, `‖s+5‖ ≤ 6.21`; product
+  `1.26 * 2.23 * 3.22 * 4.22 * 5.22 * 6.21 = 1237.672763886384 ≤ 1237.68`.
+* quotient: `120 * 6.8 / 1237.68 = 816 / 1237.68 ≈ 0.65929804 ∈ [0.645, 0.671]`
+  — achievable (`≤` true Seq5 `~0.67146`) and clearing the gate. Filed finite
+  `L = 0.659` (`0.659 * 1237.68 = 815.63112 ≤ 816`).
+* corrected closure: finite `0.659` + rate budget `0.014` (`0.659 - 0.014 =
+  0.645` exact) gives the shifted floor `0.645`.
+-/
+
+/-- E05 `5 ^ (5/26)` integer-root lower: `1.36 ≤ 5 ^ (5/26)`
+(`1.36^26 = 2964.91 ≤ 3125 = 5^5`; `5 ^ (5/26) ≈ 1.36275`). -/
+theorem premGamma_E05_rpow5_frac_lower :
+    (1.36 : ℝ) ≤ (5 : ℝ) ^ ((5 / 26 : ℝ)) := by
+  have hR : (((5 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) = (5 : ℝ) ^ (5 : ℕ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+    have e : (5 / 26 : ℝ) * (((26 : ℕ)) : ℝ) = ((5 : ℕ) : ℝ) := by norm_num
+    rw [e, Real.rpow_natCast]
+  have hint : (1.36 : ℝ) ^ (26 : ℕ) ≤ (((5 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) := by
+    rw [hR]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num : 26 ≠ 0)
+    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _) hint
+
+/-- E05 `5 ^ 1.1975` lower: `6.8 ≤ 5 ^ 1.1975` (TRUE `≈ 6.87095`).
+Splits `1.1975 = 1 + 0.1975`, uses `5/26 ≤ 0.1975` monotonicity plus the
+fraction lower above (`5 * 1.36 = 6.8`). -/
+theorem premGamma_E05_rpow5_Re_lower :
+    (6.8 : ℝ) ≤ (5 : ℝ) ^ ((1.1975 : ℝ)) := by
+  have hexp : (1.1975 : ℝ) = 1 + 0.1975 := by norm_num
+  have hfrac : (5 / 26 : ℝ) ≤ 0.1975 := by norm_num
+  have hmono : (5 : ℝ) ^ ((5 / 26) : ℝ) ≤ (5 : ℝ) ^ ((0.1975) : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : ℝ) ≤ 5) hfrac
+  have h136 : (1.36 : ℝ) ≤ (5 : ℝ) ^ ((0.1975) : ℝ) :=
+    le_trans premGamma_E05_rpow5_frac_lower hmono
+  have h68 : (6.8 : ℝ) = 5 * 1.36 := by norm_num
+  rw [hexp, Real.rpow_add (show (0 : ℝ) < 5 by norm_num), Real.rpow_one, h68]
+  exact mul_le_mul_of_nonneg_left h136 (by norm_num : (0 : ℝ) ≤ 5)
+
+/-- E05 shifted cpow norm lower: `6.8 ≤ ‖(5 : ℂ) ^ s‖` at `s = w_E05 / 2 + 1`. -/
+theorem premGamma_E05_cpow5_norm_lower :
+    (6.8 : ℝ) ≤ ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ := by
+  have hre : (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hbase : ((5 : ℝ) : ℂ) = (5 : ℂ) := by simp
+  have hcn := Complex.norm_cpow_eq_rpow_re_of_pos (show (0 : ℝ) < 5 by norm_num)
+    (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))
+  rw [← hbase, hcn, hre]
+  exact premGamma_E05_rpow5_Re_lower
+
+/-- E05 shifted `s+2` norm: `‖(w_E05 + 1) + 1 + 1‖ ≤ 3.22`
+(TRUE `≈ 3.2194`; `3.1975^2 + 0.375^2 = 10.36463125 ≤ 3.22^2`). -/
+theorem premGamma_E05shift_add2_norm_le :
+    ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ ≤ (3.22 : ℝ) := by
+  have hre : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).re
+      = (3.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re, Complex.one_re, Complex.one_re]
+    norm_num
+  have him : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im, Complex.one_im, Complex.one_im]
+    norm_num
+  have h2 : ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ ^ 2
+      ≤ (3.22 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (3.22 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E05 shifted `s+3` norm: `‖s + 3‖ ≤ 4.22`
+(TRUE `≈ 4.2142`; `4.1975^2 + 0.375^2 = 17.75963125 ≤ 4.22^2`). -/
+theorem premGamma_E05shift_add3_norm_le :
+    ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ ≤ (4.22 : ℝ) := by
+  have hre : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).re
+      = (4.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re]
+    norm_num
+  have him : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im]
+    norm_num
+  have h2 : ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ ^ 2
+      ≤ (4.22 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (4.22 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E05 shifted `s+4` norm: `‖s + 4‖ ≤ 5.22`
+(TRUE `≈ 5.2110`; `5.1975^2 + 0.375^2 = 27.15463125 ≤ 5.22^2`). -/
+theorem premGamma_E05shift_add4_norm_le :
+    ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ ≤ (5.22 : ℝ) := by
+  have hre : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).re
+      = (5.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re]
+    norm_num
+  have him : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im]
+    norm_num
+  have h2 : ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
+      ≤ (5.22 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (5.22 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E05 shifted `s+5` norm: `‖s + 5‖ ≤ 6.21`
+(TRUE `≈ 6.2088`; `6.1975^2 + 0.375^2 = 38.54963125 ≤ 6.21^2`). -/
+theorem premGamma_E05shift_add5_norm_le :
+    ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ ≤ (6.21 : ℝ) := by
+  have hre : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).re
+      = (6.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re,
+      Complex.one_re]
+    norm_num
+  have him : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im,
+      Complex.one_im]
+    norm_num
+  have h2 : ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
+      ≤ (6.21 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (6.21 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E05 `N = 5` denominator norm-product upper, right-nested to match
+`premGamma_E05_GammaSeq5_link` (`1237.672763886384 ≤ 1237.68`). -/
+theorem premGamma_E05_prod5_le :
+    ‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+          (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+            (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+              ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖)))) ≤
+      (1237.68 : ℝ) := by
+  have h45 := mul_le_mul premGamma_E05shift_add4_norm_le premGamma_E05shift_add5_norm_le
+    (norm_nonneg _) (by norm_num)
+  have h345 := mul_le_mul premGamma_E05shift_add3_norm_le h45
+    (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
+  have h2345 := mul_le_mul premGamma_E05shift_add2_norm_le h345
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))) (by norm_num)
+  have h12345 := mul_le_mul premGamma_E05shift_succ_norm_le h2345
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
+      (mul_nonneg (norm_nonneg _) (norm_nonneg _)))) (by norm_num)
+  have h012345 := mul_le_mul premGamma_E05shift_norm_le h12345
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
+      (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))))) (by norm_num)
+  have heq : (1.26 : ℝ) * (2.23 * (3.22 * (4.22 * (5.22 * 6.21)))) = 1237.672763886384 := by
+    norm_num
+  rw [heq] at h012345
+  exact le_trans h012345 (by norm_num : (1237.672763886384 : ℝ) ≤ 1237.68)
+
+/-- E05 `N = 5` ACHIEVABLE finite lower: `0.659 ≤ ‖GammaSeq s 5‖`, conditional
+on the filed `N = 5` link identity. From cpow lower `6.8` + denominator upper
+`1237.68` (`0.659 * 1237.68 = 815.63112 ≤ 816 = 6.8 * 120`). -/
+theorem premGamma_E05_Seq5_finite_lower (hLink : premGamma_E05_GammaSeq5_link) :
+    (0.659 : ℝ) ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ := by
+  unfold premGamma_E05_GammaSeq5_link at hLink
+  have hRight := premGamma_E05_prod5_le
+  have hDeq : (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖) =
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) := by
+    ring
+  have hD : (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖) ≤
+      (1237.68 : ℝ) := by
+    rw [hDeq]
+    exact hRight
+  have hre0 : (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hspos : (0 : ℝ) <
+      ‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ := by
+    have h := Complex.abs_re_le_norm
+      (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))
+    rw [hre0] at h
+    have habs : |(1.1975 : ℝ)| = 1.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 1.1975)
+    rw [habs] at h
+    linarith
+  have hposR : (0 : ℝ) <
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) :=
+    mul_pos hspos (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
+      (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)))))
+  have hDpos : (0 : ℝ) <
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖) := by
+    rw [hDeq]
+    exact hposR
+  have hC := premGamma_E05_cpow5_norm_lower
+  rw [hLink, le_div_iff₀ hDpos]
+  have h1 : (0.659 : ℝ) *
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖) ≤
+      0.659 * 1237.68 := mul_le_mul_of_nonneg_left hD (by norm_num : (0 : ℝ) ≤ 0.659)
+  have h2 : (6.8 : ℝ) * 120 ≤
+      ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ * 120 :=
+    mul_le_mul_of_nonneg_right hC (by norm_num : (0 : ℝ) ≤ 120)
+  have h3 : (0.659 : ℝ) * 1237.68 ≤ 6.8 * 120 := by norm_num
+  linarith
+
+/-- Corrected rate L2 at `N = 5` (filed, not proved): quantitative `GammaSeq`
+convergence at E05 shifted point with budget `0.014` (`0.659 - 0.014 = 0.645`
+exact). Supersedes `premGamma_E05_GammaSeq5_rate_needed` (`0.08`, tied to the
+dead `0.725` finite premise); host is the same Stirling-disc / Binet-enclosure
+leaf, NOT this file. -/
+def premGamma_E05_GammaSeq5_rate_needed_corr : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.014 : ℝ)
+
+/-- E05 `N = 5` corrected rate-budget arithmetic: `0.645 + 0.014 ≤ 816 / 1237.68`
+(`≈ 0.659 ≤ 0.65929804`). -/
+theorem premGamma_E05_N5_rate_budget_corr_arith :
+    (0.645 : ℝ) + 0.014 ≤ 816 / 1237.68 := by
+  norm_num
+
+/-- E05 `N = 5` corrected limit-closure conditional: achievable finite Seq5
+lower `0.659` plus rate `0.014` gives the shifted floor `0.645`
+(`0.659 - 0.014 = 0.645` exact). Feeds `premGamma_E05_ge_of_shift` once the
+`N = 5` link unfolds and the corrected rate leaf lands. Unlike the `0.725`
+conditional above, the finite premise here is banked achievable
+(`premGamma_E05_Seq5_finite_lower`). -/
+theorem premGamma_E05_Gamma_lower_of_Seq5_rate_corr
+    (hSeq : (0.659 : ℝ) ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖)
+    (hRate : premGamma_E05_GammaSeq5_rate_needed_corr) :
+    (0.645 : ℝ) ≤
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ := by
+  unfold premGamma_E05_GammaSeq5_rate_needed_corr at hRate
   have htri : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ ≤
       ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
         Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ +
