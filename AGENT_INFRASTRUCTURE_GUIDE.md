@@ -4887,6 +4887,14 @@ sorry-free infrastructure and the complete commit ledger above.
   E07 `:1898-2031` (norms 2.02/2.74, prod1<=5.54, L1 0.180,
   L2<=0.015, feed 0.164). Scaffolds done 4/7. L2 rate (all cells)
   awaits the Binet leaf. GAMMA-SCAFFOLD2 tasked (E06+E05+E01).
+- 2026-09-17 GAMMA-SCAFFOLD2 (background `ses_f514500b`, proof-only,
+  grep-clean): E06+E05+E01 scaffolds banked — E06 `:2084-2218`
+  (L1 0.320, L2<=0.015, feed 0.300 — PARTIAL, N=1 ceiling 0.38<0.66
+  floor, needs N>=2/Binet), E05 `:2271-2405` (L1 0.355, L2<=0.014,
+  feed 0.340 — PARTIAL, ceiling 0.357<0.645), E01 `:2452-2585`
+  (feed 0.0314 FULL). Scaffolds done 7/7. Full feeds 5/7 (E06/E05
+  partial). Remaining gamma work: L2 Binet-leaf rates (7 cells) +
+  E06/E05 full floors. GAMMA-BINET tasked (Binet rate leaf).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
