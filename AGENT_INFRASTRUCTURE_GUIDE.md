@@ -4778,6 +4778,19 @@ sorry-free infrastructure and the complete commit ledger above.
   ball-sup + hM premises; uniform hb still residual). Wiring file
   GREEN twice. Edge structural work COMPLETE — lane redirects to
   ZETA-UPPER (deriv's `UZ<=10` gap). EDGE-DONE; ZETA-UPPER tasked.
+- 2026-09-17 ZETA-UPPER (background `ses_f51359d4`, survey-only,
+  touched NOTHING): obligation exact (`:6493`, `zeta=riemannZeta`
+  by rfl); assembly-ready instance ALREADY banked (`:890`,
+  `1680*UZ` shape). KEY FIND: `R02_D3_zeta_upper_934`
+  (zeta_rigorous `:32566`) has the SAME full R02 rect,
+  unconditional (eta-tail M=1 + cvtFactor route); importable from
+  any `import zeta_rigorous` file (R02-ball file doesn't import
+  it — hence "non-imported" in spec). Tail-machinery sweep: all
+  wrong-target/too-weak (best sub-rect <=125 on Re>=0.25 strip;
+  eta sums need M>=2.3e30 terms for r<=5 — dead). Ladder 934→10
+  (93.4x) needs FE+Stirling+convexity, not longer sums. ACTIONABLE:
+  bridge UZ=934 NOW (tiny new module importing both + rfl +
+  instantiate 4-factor cap at 1680*934). ZETA-BRIDGE tasked.
 - 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
