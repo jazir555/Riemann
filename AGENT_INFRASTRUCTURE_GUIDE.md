@@ -4717,6 +4717,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean): 3 more leaves — `gridH_c10_of_R10:694`,
   `gridH_c11_of_R11:717`, `gridH_c12_of_R12:740` (no skips).
   Leaves done 12/40. EDGE-NEXT7 tasked (c13+ replication run).
+- 2026-09-17 EDGE-NEXT7 (background `ses_f514975d`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c13_of_R13:763`,
+  `gridH_c14_of_R14:786`, `gridH_c15_of_R15:809` (no skips).
+  Leaves done 15/40. EDGE-NEXT8 tasked (c16+ replication run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
