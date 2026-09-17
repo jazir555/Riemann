@@ -2402,6 +2402,28 @@ theorem sSCUT_log_eight_eq : Real.log 8 = 3 * Real.log 2 := by
     Door3CellSuppliers.CS_log_four_eq]
   ring
 
+/-- Composite log bridge `log 10 = log 2 + log 5` (`10 = 2·5` via
+`Real.log_mul`; mirror of `sSCUT_log_nine_eq` / `CS_log_six_eq`). -/
+theorem sSCUT_log_ten_eq : Real.log 10 = Real.log 2 + Real.log 5 := by
+  have h10 : (10 : ℝ) = 2 * 5 := by norm_num
+  rw [h10, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 10` lower (`2.3025850926 ≤ log 10` from d9 `log 2` / `log 5`). -/
+theorem sSCUT_log_ten_ge : (2.3025850926 : ℝ) ≤ Real.log 10 := by
+  have h10 := sSCUT_log_ten_eq
+  have h2 := Real.log_two_gt_d9
+  have h5 := Real.log_five_gt_d9
+  have c : (0.6931471803 : ℝ) + 1.6094379123 = 2.3025850926 := by norm_num
+  linarith
+
+/-- `log 10` upper (`log 10 ≤ 2.3025850934` from d9 `log 2` / `log 5`). -/
+theorem sSCUT_log_ten_le : Real.log 10 ≤ (2.3025850934 : ℝ) := by
+  have h10 := sSCUT_log_ten_eq
+  have h2 := Real.log_two_lt_d9
+  have h5 := Real.log_five_lt_d9
+  have c : (0.6931471808 : ℝ) + 1.6094379126 = 2.3025850934 := by norm_num
+  linarith
+
 /-- Sharp `n = 8` phase window (`10*log 8 ∈ (20.794415409, 20.794415424)`
 via `sSCUT_log_eight_eq` + d9; enabler for the `δ₈'` recipe). -/
 theorem sSCUT_theta8_sharp_mem :

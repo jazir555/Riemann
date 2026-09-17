@@ -4956,6 +4956,11 @@ sorry-free infrastructure and the complete commit ledger above.
   no report text, no tree writes (pilot clean of its work; scratch
   txts removed). Second empty this wave-set; fenced briefs help.
   ZETA-SCUT6 tasked (n=10-ONLY fenced brief).
+- 2026-09-17 ZETA-SCUT6 (background `ses_f5133c8b`, proof-only,
+  grep-clean): fenced brief WORKS — 3 theorems, no drift:
+  `sSCUT_log_ten_eq:2407` (log10=log2+log5 via log_mul),
+  `sSCUT_log_ten_ge/le:2412/:2420` (2.3025850926–34 via d9s).
+  ZETA-SCUT7 tasked (n=10 phase/window fenced).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
