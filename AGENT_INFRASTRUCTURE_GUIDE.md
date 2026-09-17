@@ -4968,6 +4968,16 @@ sorry-free infrastructure and the complete commit ledger above.
   stays N=4 (no N=5 move). Residual: Seq4 FINITE lower (cpow
   lower + s+2/3/4 norm uppers unbanked) + rate leaf (absent
   repo-wide). GAMMA-N4B tasked (Seq4 finite lower).
+- 2026-09-17 GAMMA-N4B (background `ses_f513fa90`, no-edit turn):
+  QUOTIENT GATE FAILS — Seq4 finite lower maxes at ~=0.557-0.565
+  (exact Decimal audit: U2/U3/U4 = 3.26/4.25/5.24 razor-thin;
+  126.0/226.106 ~= 0.5572, true/truth ~= 0.5651) vs 0.687 gate.
+  The 0.687 was the Re-CEILING (approximant upper), NOT an
+  achievable lower — `Gamma_lower_of_Seq4_rate`'s finite premise
+  can never discharge via this shape. N=4 route DEAD for E06.
+  Next: E05 N-ladder may differ (different point), else direct
+  Stirling/Binet lower is the only route. GAMMA-N4C tasked (E05
+  ladder + floor-truth check).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
