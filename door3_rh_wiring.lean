@@ -314,7 +314,7 @@ def edge011_topLower_missing : Prop :=
   ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
     (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖
 
-/-- EDGE-NEXT2 (filed, not fixed): feasible `m = 1/2` adapters + one banked
+/- EDGE-NEXT2 (filed, not fixed): feasible `m = 1/2` adapters + one banked
 grid-cell leaf. `ses_f51527e69` refuted the `m = 11` ratio above: the banked
 consumer-form endpoint norms equal `1/2` at `x = 0`
 (`Door3SliverEdge.edgeTop_consumer_norm_at_zero` /
@@ -379,6 +379,36 @@ theorem hSliver_of_edgeNumericData_half (MT MB : ℝ)
     (by norm_num) hMT (by norm_num) hMB hδTle hδBle
     hTopLower hTopDeriv hGateT hBotLower hBotDeriv hGateB
 
+/-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
+same uniform outer-bound certificates that feed the sliver: top/bottom strip
+premises plus the two numeric width gates (`δ ≥ 0.01`). This is the
+CENTER (`hTopLower`/`hBotLower`) + DERIV (`hTopDeriv`/`hBotDeriv`) +
+outer-bound (width-gate) packaging of the edge-strip lane. -/
+theorem xiCentralEdgeStrips10_of_uniformStrips
+    {δT δB : ℝ}
+    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - δT < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthT : (1 / 2 : ℝ) - δT < 0.49)
+    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + δB) :
+    RHProofScaffold.XiCentralEdgeStrips10 := by
+  intro z hx_lo hx_hi hgt hlt hne hs
+  have hx : z.re ∈ Set.Icc (-10 : ℝ) (10 : ℝ) :=
+    ⟨le_of_lt hx_lo, le_of_lt hx_hi⟩
+  have hpoint : ((z.re : ℂ) + Complex.I * (z.im : ℂ)) = z :=
+    Door3SliverNonvan.sliver_point_eq_vertical z
+  rcases hs with h | h
+  · have hlow : (1 / 2 : ℝ) - δT < z.im := lt_of_lt_of_le hwidthT h
+    have h := hstripT z.re hx z.im hlow hlt
+    rwa [hpoint] at h
+  · have hhigh : z.im < -(1 / 2 : ℝ) + δB := lt_of_le_of_lt h hwidthB
+    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
+    have h := hstripB z.re hx z.im hgt' hhigh
+    rwa [hpoint] at h
+
 /-- Interior edge strips at feasible widths `δT = (1/2)/MT`,
 `δB = (1/2)/MB`: mirrors `xiCentralEdgeStrips10_of_uniformStrips_011` with
 the `m = 11`, `M = 1000` numerals replaced by the feasible `m = 1/2` shape;
@@ -418,36 +448,6 @@ theorem gridH_c00_of_R00 (h : CentralCoverAssembly.R00_leaf_obligations) :
   CentralCoverAssembly.R00_H_instance h
     ((-10, -7.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R00_mem_gridFine rfl
-
-/-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
-same uniform outer-bound certificates that feed the sliver: top/bottom strip
-premises plus the two numeric width gates (`δ ≥ 0.01`). This is the
-CENTER (`hTopLower`/`hBotLower`) + DERIV (`hTopDeriv`/`hBotDeriv`) +
-outer-bound (width-gate) packaging of the edge-strip lane. -/
-theorem xiCentralEdgeStrips10_of_uniformStrips
-    {δT δB : ℝ}
-    (hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
-      (1 / 2 : ℝ) - δT < y → y < (1 / 2 : ℝ) →
-        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
-    (hwidthT : (1 / 2 : ℝ) - δT < 0.49)
-    (hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
-      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + δB →
-        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
-    (hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + δB) :
-    RHProofScaffold.XiCentralEdgeStrips10 := by
-  intro z hx_lo hx_hi hgt hlt hne hs
-  have hx : z.re ∈ Set.Icc (-10 : ℝ) (10 : ℝ) :=
-    ⟨le_of_lt hx_lo, le_of_lt hx_hi⟩
-  have hpoint : ((z.re : ℂ) + Complex.I * (z.im : ℂ)) = z :=
-    Door3SliverNonvan.sliver_point_eq_vertical z
-  rcases hs with h | h
-  · have hlow : (1 / 2 : ℝ) - δT < z.im := lt_of_lt_of_le hwidthT h
-    have h := hstripT z.re hx z.im hlow hlt
-    rwa [hpoint] at h
-  · have hhigh : z.im < -(1 / 2 : ℝ) + δB := lt_of_le_of_lt h hwidthB
-    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
-    have h := hstripB z.re hx z.im hgt' hhigh
-    rwa [hpoint] at h
 
 /-- Interior edge strips at the example width `11/1000 = 0.011`: the two
 width numerals (`1/2 - 11/1000 < 0.49`, `-0.49 < -(1/2) + 11/1000`) are closed
