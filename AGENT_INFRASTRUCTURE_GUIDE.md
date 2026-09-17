@@ -363,6 +363,14 @@ move on. Spinning helps no one.
   - If it exists OR a `lake.exe` process is running, wait ~10s and retry. A lock older than
     25 min **with no live lake/lean process** is stale — delete it (the wrapper does this
     automatically and logs `GUARD-AUTOCLEARED`).
+  - **Dead-owner fast path (2026-09-17 finding: a dead owner blocked all agents for hours
+    because everyone kept `GUARD-WAIT`ing).** Before waiting, read the lock content
+    (`Get-Content .lake_build_lock` → `<ownerPID> <timestamp>`) and check owner liveness
+    (`Get-Process -Id <ownerPID>`) plus live builders
+    (`Get-Process -Name "lake","lean"`). If the owner PID is dead AND no live
+    `lake`/`lean` process exists, the lock is definitively stale **regardless of age** —
+    delete it immediately and proceed (do NOT wait out the 25-min autoclear). Never delete
+    a lock whose owner is alive or while any `lake`/`lean` process runs.
   - Release: `Remove-Item <lock>` in a `finally` block, only if you created it.
 - Heavy imports → set Bash `timeout` up to **900000 ms**.
 
