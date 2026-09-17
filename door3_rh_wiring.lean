@@ -319,7 +319,8 @@ theorem xiCentralEdgeStrips10_of_uniformStrips
     have h := hstripT z.re hx z.im hlow hlt
     rwa [hpoint] at h
   · have hhigh : z.im < -(1 / 2 : ℝ) + δB := lt_of_le_of_lt h hwidthB
-    have h := hstripB z.re hx z.im hgt hhigh
+    have hgt' : -(1 / 2 : ℝ) < z.im := by linarith
+    have h := hstripB z.re hx z.im hgt' hhigh
     rwa [hpoint] at h
 
 /-- Interior edge strips at the example width `11/1000 = 0.011`: the two

@@ -462,11 +462,7 @@ theorem CS_rpow0605_proved : CS_rpow0605_upper := by
   have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
   have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
       1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
-    rw [show (4 : ℕ) = 3 + 1 from rfl, Finset.sum_range_succ,
-      show (3 : ℕ) = 2 + 1 from rfl, Finset.sum_range_succ,
-      show (2 : ℕ) = 1 + 1 from rfl, Finset.sum_range_succ,
-      show (1 : ℕ) = 0 + 1 from rfl, Finset.sum_range_succ,
-      Finset.sum_range_zero]
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
     rw [e0, e1, e2f, e3f]
     ring
   have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
@@ -512,6 +508,22 @@ theorem CS_factor_need : (1.4 : ℝ) * 2.53 = 3.542 := by
 /-- Complex-head ceiling note, quantified: even `1.03` (above the proved
 `1`) falls short of `1.4`. -/
 theorem CS_head14_gap : (1.03 : ℝ) < 1.4 := by
+  norm_num
+
+/-- S2 feed into the zeta assembly (exact instantiation shape): with the
+now-unconditional complex-head lower `slow = 1` (`CS_complex_S2_abs_proved`),
+`tail = 0`, and the banked factor cap `cF = 2.53` (`CS_etaFactor_proved`),
+`CS_zeta_of_parts` applies directly — the `hNeed` hypothesis is the
+unclosable `3.542 ≤ 1` (see `CS_S2_shortfall`), so the `1.4` floor still
+fails; the patch must grow `slow` (larger `N`) and sharpen `cF`/`tail`. -/
+theorem CS_zeta_of_S2 (Z : ℝ)
+    (hLink : (1 : ℝ) - 0 ≤ 2.53 * Z) (hNeed : (1.4 : ℝ) * 2.53 + 0 ≤ 1) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1 0 2.53 Z (by norm_num) hLink hNeed
+
+/-- Exact remaining shortfall numeral (honest floor report): the `1.4`
+need at `cF = 2.53` exceeds the unconditional `slow = 1` by `2.542`. -/
+theorem CS_S2_shortfall : (1.4 : ℝ) * 2.53 - 1 = 2.542 := by
   norm_num
 
 /-! ## §B. Wide-`Λ₀ ≤ 479` on the fat `s`-rect (FE + Stirling route)

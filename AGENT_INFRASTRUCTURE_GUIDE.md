@@ -4707,6 +4707,22 @@ sorry-free infrastructure and the complete commit ledger above.
     11/1000; residual only 4 supplier bounds). `hSliver` at 011 now
     needs only supplier numerals.
   Eta (sole build owner) still running; sweep turns queued per lane.
+- 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
+  FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
+  BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`
+  motive-mismatch on Lean v4.33.0-rc1) → sweep fix (`simp only
+  [Finset.sum_range_succ, Finset.sum_range_zero]`) → BUILD-EXIT 0
+  (`[8688/8688] Built door3_cell_suppliers`, axioms standard
+  `[propext, Classical.choice, Quot.sound]`, no sorryAx; verified in
+  `...-20260917-020605.log` tail). New: `CS_zeta_of_S2:519` (exact S2
+  instantiation) + `CS_S2_shortfall:526` (gap `1.4*2.53-1=2.542` —
+  `CS_zeta14_residual` still OPEN: needs slow growth + cF/tail
+  sharpening). Fast path cleared 10 dead locks, never touched live
+  owners. Cache now WARM — subsequent lane builds are cheap; build
+  ownership rotates (sweep clause stays until all backlog green).
+  Also in tree: 3-line wiring fix (`hgt`→`hgt'` via `linarith` in
+  `xiCentralEdgeStrips10_of_uniformStrips`, attribution uncertain —
+  found uncommitted, scan-clean, committed here).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
