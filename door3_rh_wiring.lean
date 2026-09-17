@@ -260,6 +260,39 @@ theorem hSliver_of_topNumericData_011_via_conj
     (by norm_num) (by norm_num) (by norm_num)
     hTopLower hTopDeriv Door3SliverNonvan.sliver_example_gate_top
 
+/-- Bottom ratio gate at the example ratio `11/1000`, proved directly: no
+banked `sliver_example_gate_bottom` exists in `door3_sliver_nonvan.lean`
+(only `sliver_example_gate_top:460-461`), so this closes the same
+`0.01 < 11/1000` arithmetic by `norm_num` with short numerals. -/
+theorem gate_bottom_011 : (0.01 : ℝ) < 11 / 1000 := by norm_num
+
+/-- `hSliver` from explicit numeric edge data at `11/1000` on both edges:
+instantiates `hSliver_of_edgeNumericData` at `mT = mB = 11`, `MT = MB = 1000`
+exactly as `hSliver_of_topNumericData_011_via_conj` did for the top-only
+adapter. The top gate is closed by the banked `sliver_example_gate_top`,
+the bottom gate by the directly proved `gate_bottom_011` (plus `norm_num`
+side conditions), leaving only the four supplier bounds
+(`hTopLower`/`hTopDeriv`/`hBotLower`/`hBotDeriv`) as residual premises. -/
+theorem hSliver_of_edgeNumericData_011
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - 11 / 1000) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ))
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + 11 / 1000),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ)) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  hSliver_of_edgeNumericData (11 : ℝ) (1000 : ℝ) (11 : ℝ) (1000 : ℝ)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (by norm_num) (by norm_num)
+    hTopLower hTopDeriv Door3SliverNonvan.sliver_example_gate_top
+    hBotLower hBotDeriv gate_bottom_011
+
 /-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
 same uniform outer-bound certificates that feed the sliver: top/bottom strip
 premises plus the two numeric width gates (`δ ≥ 0.01`). This is the

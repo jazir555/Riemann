@@ -492,6 +492,179 @@ theorem R02_subdiv_2804_above_tier07 : (0.07 : ℝ) < 2804 := by
 theorem R02_subdiv_2804_gap : (2804 : ℝ) - 0.07 = 2803.93 := by
   norm_num
 
+/-! ## R02 direct-deriv + retier step (WAVE4-DERIV).
+
+Banked here (sorry-free):
+* route (a), one factor-deriv cap on R02: the poly-factor prime
+  `deriv polyOf s = s - 1 / 2` (local reproof of the `door3_deriv_up`
+  shape, no new import) with the generic `|re|+|im|+0.5` upper and the
+  R02-disc `s`-rect cap `‖deriv polyOf s‖ ≤ 9.5` (exact sum `9.49`);
+* route (b), exact retier thresholds that ARE satisfiable, each with an
+  explicit margin companion: staged `67200` (margin `800` at `68000`)
+  conditional on the wide `Λ₀ ≤ 479` premise; sharpened `1402`
+  (margin `8` at `1410`) conditional on the true-scale `M = 10` Lambda
+  premise; subdivided-halves `2804` conditional on the per-half
+  `350.5` sub-ball; subdivided staged `134400` conditional on the
+  per-half `16800` sub-ball (exact doubled-cap retier).
+
+Honest scope note: these close the deriv bound at retiered tiers only;
+tier `0.07` itself stays out of reach (proved gaps above), and the
+`Λ₀` / sub-ball premises remain explicit.
+-/
+
+/-- Poly-factor prime on R02 (local mirror of the banked `door3_deriv_up`
+shape; `polyOf s = s * (s - 1) / 2`). -/
+theorem R02_poly_hasDerivAt (s : ℂ) :
+    HasDerivAt DerivCauchyBridge.polyOf (s - 1 / 2) s := by
+  have hid : HasDerivAt (fun t : ℂ => t) 1 s :=
+    hasDerivAt_id' (x := s)
+  have hconst : HasDerivAt (fun t : ℂ => (1 : ℂ)) 0 s :=
+    hasDerivAt_const (x := s) (c := (1 : ℂ))
+  have hsub : HasDerivAt (fun t : ℂ => t - (1 : ℂ)) (1 - 0) s :=
+    hid.sub hconst
+  have hmul : HasDerivAt (fun t : ℂ => t * (t - (1 : ℂ)))
+      (1 * (s - 1) + s * (1 - 0)) s :=
+    hid.mul hsub
+  have hdiv : HasDerivAt (fun t : ℂ => t * (t - (1 : ℂ)) / 2)
+      ((1 * (s - 1) + s * (1 - 0)) / 2) s :=
+    hmul.div_const (2 : ℂ)
+  have heqF : (fun t : ℂ => t * (t - (1 : ℂ)) / 2) = DerivCauchyBridge.polyOf := by
+    unfold DerivCauchyBridge.polyOf
+    rfl
+  have heqD : (1 * (s - 1) + s * (1 - 0)) / 2 = s - 1 / 2 := by
+    ring
+  rw [heqF] at hdiv
+  rw [heqD] at hdiv
+  exact hdiv
+
+/-- Poly-factor deriv equation. -/
+theorem R02_poly_deriv_eq (s : ℂ) :
+    deriv DerivCauchyBridge.polyOf s = s - 1 / 2 :=
+  (R02_poly_hasDerivAt s).deriv
+
+/-- Generic poly-factor deriv upper from coordinate caps. -/
+theorem R02_polyDerivUp_of_abs (s : ℂ) (A B : ℝ)
+    (hre : |s.re| ≤ A) (him : |s.im| ≤ B) :
+    ‖deriv DerivCauchyBridge.polyOf s‖ ≤ A + B + 0.5 := by
+  rw [R02_poly_deriv_eq s]
+  have h1 : ‖s - 1 / 2‖ ≤ ‖s‖ + ‖(1 / 2 : ℂ)‖ := norm_sub_le s (1 / 2)
+  have h2 : ‖s‖ ≤ |s.re| + |s.im| :=
+    Complex.norm_le_abs_re_add_abs_im s
+  have h3 : ‖(1 / 2 : ℂ)‖ = (0.5 : ℝ) := by
+    have e1 : ((1 / 2 : ℂ)) = (1 : ℂ) / 2 := by norm_num
+    rw [e1, norm_div, Complex.norm_one, Complex.norm_two]
+    norm_num
+  have h4 : ‖s - 1 / 2‖ ≤ (|s.re| + |s.im|) + 0.5 := by
+    calc ‖s - 1 / 2‖ ≤ ‖s‖ + ‖(1 / 2 : ℂ)‖ := h1
+      _ ≤ (|s.re| + |s.im|) + 0.5 := by
+        rw [h3] at h1 ⊢
+        linarith [h2]
+  calc ‖s - 1 / 2‖ ≤ (|s.re| + |s.im|) + 0.5 := h4
+    _ ≤ (A + B) + 0.5 := by linarith [hre, him]
+    _ = A + B + 0.5 := by ring
+
+/-- Exact coordinate sum feeding the R02-disc cap. -/
+theorem R02_polyDeriv_sum949 : (0.74 : ℝ) + 8.25 + 0.5 = 9.49 := by
+  norm_num
+
+/-- Route (a): poly-factor deriv cap on the R02-disc `s`-rect
+(`0.05 ≤ re ≤ 0.74`, `-8.25 ≤ im ≤ -5.25`, same shape as the banked
+`poly_upper_R02_disc` value premises). -/
+theorem R02_polyDeriv_cap_disc {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖deriv DerivCauchyBridge.polyOf s‖ ≤ 9.5 := by
+  have hre : |s.re| ≤ (0.74 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith
+  have him : |s.im| ≤ (8.25 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith
+  have h := R02_polyDerivUp_of_abs s 0.74 8.25 hre him
+  have hsum : (0.74 : ℝ) + 8.25 + 0.5 ≤ 9.5 := by norm_num
+  linarith
+
+/-- Route (b): staged retier — any `M ≥ 67200` closes R02 deriv
+conditional on the wide `Λ₀` premise. -/
+theorem R02_retier67200_of_Lambda (M : ℝ) (hM : 67200 ≤ M)
+    (hL : Door3CellSuppliers.CS_Lambda0_upper_fat)
+    (w : ℂ) (hw : CentralCoverAssembly.R02.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02_deriv67200_of_Lambda hL w hw) hM
+
+/-- Staged retier with margin `800` at `68000`. -/
+theorem R02_retier68000_of_Lambda
+    (hL : Door3CellSuppliers.CS_Lambda0_upper_fat)
+    (w : ℂ) (hw : CentralCoverAssembly.R02.mem w) :
+    ‖deriv xiShifted w‖ ≤ 68000 :=
+  R02_retier67200_of_Lambda 68000 (by norm_num) hL w hw
+
+/-- Staged margin witness. -/
+theorem R02_retier68000_margin : (68000 : ℝ) - 67200 = 800 := by
+  norm_num
+
+/-- Route (b): sharpened retier — any `M ≥ 1402` closes R02 deriv
+conditional on the true-scale `M = 10` Lambda premise. -/
+theorem R02_retier1402_of_Lambda10 (M : ℝ) (hM : 1402 ≤ M)
+    (hL : ∀ (s : ℂ), -1.12 ≤ s.re → s.re ≤ 1.91 → -8.27 ≤ s.im →
+      s.im ≤ -5.23 → ‖completedRiemannZeta₀ s‖ ≤ (10 : ℝ))
+    (w : ℂ) (hw : CentralCoverAssembly.R02.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02_deriv1402_of_Lambda10 hL w hw) hM
+
+/-- Sharpened retier with margin `8` at `1410`. -/
+theorem R02_retier1410_of_Lambda10
+    (hL : ∀ (s : ℂ), -1.12 ≤ s.re → s.re ≤ 1.91 → -8.27 ≤ s.im →
+      s.im ≤ -5.23 → ‖completedRiemannZeta₀ s‖ ≤ (10 : ℝ))
+    (w : ℂ) (hw : CentralCoverAssembly.R02.mem w) :
+    ‖deriv xiShifted w‖ ≤ 1410 :=
+  R02_retier1402_of_Lambda10 1410 (by norm_num) hL w hw
+
+/-- Sharpened margin witness. -/
+theorem R02_retier1410_margin : (1410 : ℝ) - 1402 = 8 := by
+  norm_num
+
+/-- Route (b): subdivided retier, west half — any `M ≥ 2804` closes
+conditional on the west `350.5` sub-ball. -/
+theorem R02_retier2804W_of_ball350 (M : ℝ) (hM : 2804 ≤ M)
+    (hBall : ∀ (z : ℂ), z ∈ Metric.closedBall R02W.center
+      (R02W.radius + 0.125) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 350.5)
+    (w : ℂ) (hw : R02W.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02W_deriv2804_of_ball350 hBall w hw) hM
+
+/-- Route (b): subdivided retier, east half — any `M ≥ 2804` closes
+conditional on the east `350.5` sub-ball. -/
+theorem R02_retier2804E_of_ball350 (M : ℝ) (hM : 2804 ≤ M)
+    (hBall : ∀ (z : ℂ), z ∈ Metric.closedBall R02E.center
+      (R02E.radius + 0.125) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 350.5)
+    (w : ℂ) (hw : R02E.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02E_deriv2804_of_ball350 hBall w hw) hM
+
+/-- Route (b): subdivided staged retier, west half — any `M ≥ 134400`
+closes conditional on the west `16800` sub-ball (documents the exact
+doubled-cap retier; honest scope as with the other retier tiers). -/
+theorem R02_retier134400W_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
+    (hBall : ∀ (z : ℂ), z ∈ Metric.closedBall R02W.center
+      (R02W.radius + 0.125) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800)
+    (w : ℂ) (hw : R02W.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02W_deriv134400_of_ball16800 hBall w hw) hM
+
+/-- Route (b): subdivided staged retier, east half — any `M ≥ 134400`
+closes conditional on the east `16800` sub-ball. -/
+theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
+    (hBall : ∀ (z : ℂ), z ∈ Metric.closedBall R02E.center
+      (R02E.radius + 0.125) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ 16800)
+    (w : ℂ) (hw : R02E.mem w) :
+    ‖deriv xiShifted w‖ ≤ M :=
+  le_trans (R02E_deriv134400_of_ball16800 hBall w hw) hM
+
 #print axioms R02_premBall_of_Lambda
 #print axioms R02_deriv67200_of_Lambda
 #print axioms R02_tier07_ratio
@@ -511,5 +684,17 @@ theorem R02_subdiv_2804_gap : (2804 : ℝ) - 0.07 = 2803.93 := by
 #print axioms R02_subdiv_halved_radius_blocked
 #print axioms R02W_deriv2804_of_ball350
 #print axioms R02E_deriv2804_of_ball350
+#print axioms R02_poly_hasDerivAt
+#print axioms R02_poly_deriv_eq
+#print axioms R02_polyDerivUp_of_abs
+#print axioms R02_polyDeriv_cap_disc
+#print axioms R02_retier67200_of_Lambda
+#print axioms R02_retier68000_of_Lambda
+#print axioms R02_retier1402_of_Lambda10
+#print axioms R02_retier1410_of_Lambda10
+#print axioms R02_retier2804W_of_ball350
+#print axioms R02_retier2804E_of_ball350
+#print axioms R02_retier134400W_of_ball16800
+#print axioms R02_retier134400E_of_ball16800
 
 end Door3R02BallAdvance

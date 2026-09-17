@@ -4679,7 +4679,34 @@ sorry-free infrastructure and the complete commit ledger above.
   cleared (dead owner, zero live builders). Uncommitted in-flight work
   survived on disk: `door3_R02_ball_advance.lean` +161,
   `door3_pilot_R00_zeta.lean` +114 (both preserved, to be verified not
-  discarded). All five lanes relaunched as RESUME waves below.
+  discarded).   All five lanes relaunched as RESUME waves below.
+- 2026-09-17 RESUME-SERIAL (post-reboot, single-build discipline: eta sole
+  build owner; gamma/deriv/zeta/edge proof-only, no builds invoked):
+  - GAMMA (`ses_f52ba7d20ffecMv174X8nWLPVS`, proof-only, grep-clean):
+    banked `premGamma_E05_wnorm_le:723`, `premGamma_E05_ge_of_shift:744`,
+    `premGamma_E05_threshold_ok:766`, `premGamma_E06_wnorm_le:781`,
+    `premGamma_E06_ge_of_shift:802` — E05/E06 floors reduced to explicit
+    numerator premises for the Stirling-disc wave (banked routes provably
+    short: inner-big 0.38-scale, feed 1.33<1.5). Sweep notes filed.
+  - DERIV (`ses_f527bc931ffe6P5HlHQYe5Oyqa`, proof-only, grep-clean):
+    route (a) first factor-deriv cap `R02_polyDeriv_cap_disc:573`
+    (`||deriv polyOf||<=9.5` on R02) + hasDerivAt chain `:517-567`;
+    route (b) retier table completed `:589-660` (67200->68000,
+    1402->1410, 2804W/E, 134400W/E, all with margins); fixed a
+    9.51-vs-9.5 `norm_num` failure pre-build. Tier 0.07 unclosed by design.
+  - ZETA (`ses_f527cba53ffeVH6VQZ1uK2vra3`, proof-only, grep-clean):
+    step-2 tail push via `2^21` (`R00_eta_tail_M2097152_le:413`,
+    tail `<=0.087`; S4/S8 and M=16 provably weaker — documented).
+    New cert `113/2530~=0.0447`, gap `2347/500=4.694` (was 15.707),
+    shortfall `~=1.855` (was 6.208); wall +4.35. Sweep notes filed
+    (incl. pre-existing `div_le_div_iff_of_pos_right` fix pointer).
+  - EDGE (`ses_f523ca414ffeKXqhAULrvFnfjG`, proof-only, +33, grep-clean):
+    bottom gate closed symmetric with top — `gate_bottom_011:267`
+    (direct, no banked bottom numeral exists) +
+    `hSliver_of_edgeNumericData_011:276` (full edge adapter at
+    11/1000; residual only 4 supplier bounds). `hSliver` at 011 now
+    needs only supplier numerals.
+  Eta (sole build owner) still running; sweep turns queued per lane.
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via

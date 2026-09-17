@@ -10,7 +10,7 @@ open scoped BigOperators
 noncomputable section
 
 /-!
-# Door 3 pilot zeta-center lower: R00 (floor 1.9), N ≤ 8 honest wall.
+# Door 3 pilot zeta-center lower: R00 (floor 1.9), honest wall (step 2: M = 2^21 tail).
 
 Target: `Door3PremiseZeta.premZeta_R00`, i.e. `(1.9 : ℝ) ≤ ‖zeta zs_R00‖`
 with `zs_R00 = ⟨0.395, -8.75⟩` (`door3_premise_zeta.lean:66,102`).
@@ -354,6 +354,111 @@ theorem R00_shortfall_253_M8_eq :
     ((1.9 : ℝ) - (-1090 / 253)) = (15707 / 2530 : ℝ) := by
   norm_num
 
+/-! ## Wall push, step 2: large-M tail (`M = 2097152 = 2^21`, `‖G - S₄₁₉₄₃₀₄‖ ≤ 0.087`).
+
+Route mirrors the banked `zetaCellS0_M2097152` chain
+(`zeta_rigorous.lean:2739`): `21 * 0.395 = 8.295 ≥ 8`, so
+`M^{0.395} = 2^{8.295} ≥ 2^8 = 256` (integer-exponent comparison, no
+estimated numerics). Tail drops `11.1 → 0.087`
+(`8.76 * ((1/256)/0.395) = 219/2528 ≈ 0.08663 ≤ 0.087`).
+Slow stays `1/5` (proved `R00_eta_S2_norm_ge`), factor stays `2.53`
+(proved `R00_cF_253`): reverse-triangle slow lowers cannot beat `1/5`
+(extra S₄/S₈ terms only add norm uncertainty), so the tail is the pushed link.
+New certificate value `(1/5 - 0.087)/2.53 = 113/2530 ≈ 0.0447` vs the
+old `-1090/253 ≈ -4.308`: the wall moves `+4.35`. The threshold
+`1.9 * 2.53 + 0.087 = 4.894 ≤ 0.2` STILL FAILS (gap `4.694`;
+old gap `15.707`), so `premZeta_R00` is still not discharged. Honest
+shortfall of the new certificate below the floor:
+`1.9 - 113/2530 = 2347/1265 ≈ 1.855` (old shortfall `6.208`). -/
+
+/-- Rpow base numeral for the large-M tail (`2097152 = 2^21`). -/
+theorem R00_M2097152_eq : ((((2097152 : ℕ)) : ℝ)) = (2 : ℝ) ^ (21 : ℕ) := by
+  norm_num
+
+/-- Rpow lower for the large-M tail (`256 ≤ M^{0.395}` via
+`21 * 0.395 = 8.295 ≥ 8`; mirrors `zetaCellS0_M2097152_rpow_ge`). -/
+theorem R00_rpow_M2097152_ge :
+    (256 : ℝ) ≤ ((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)) := by
+  rw [R00_M2097152_eq]
+  have h1 : (((2 : ℝ) ^ (21 : ℕ)) ^ (0.395 : ℝ)) = (2 : ℝ) ^ (((((21 : ℕ)) : ℝ)) * (0.395 : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+  rw [h1]
+  have hexp_ge : (8 : ℝ) ≤ (((((21 : ℕ)) : ℝ)) * (0.395 : ℝ)) := by norm_num
+  have h2 : (2 : ℝ) ^ (8 : ℝ) ≤ (2 : ℝ) ^ (((((21 : ℕ)) : ℝ)) * (0.395 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_ge
+  have e8 : (8 : ℝ) = ((((8 : ℕ)) : ℝ)) := by norm_num
+  have h3 : (2 : ℝ) ^ (8 : ℝ) = 256 := by
+    rw [e8, Real.rpow_natCast]
+    norm_num
+  linarith
+
+/-- Rpow numeral for the large-M tail (`M^{-0.395} ≤ 1/256`). -/
+theorem R00_rpow_M2097152_neg0395_le :
+    (2097152 : ℝ) ^ (-0.395 : ℝ) ≤ 1 / 256 := by
+  have hM : (2097152 : ℝ) = ((((2097152 : ℕ)) : ℝ)) := by norm_cast
+  rw [hM]
+  have hMpos : (0 : ℝ) < ((((2097152 : ℕ)) : ℝ)) := by
+    rw [R00_M2097152_eq]
+    positivity
+  have hge := R00_rpow_M2097152_ge
+  have hpos : (0 : ℝ) < ((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hneg : ((((2097152 : ℕ)) : ℝ) ^ (-0.395 : ℝ)) = (((((2097152 : ℕ)) : ℝ) ^ (0.395 : ℝ))⁻¹) := by
+    rw [show (-0.395 : ℝ) = -(0.395 : ℝ) by norm_num,
+      Real.rpow_neg hMpos.le]
+  rw [hneg, show (1 / 256 : ℝ) = ((256 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hge
+
+/-- Genuine R00 paired tail at `M = 2097152` (`‖G - S₄₁₉₄₃₀₄‖ ≤ 0.087`). -/
+theorem R00_eta_tail_M2097152_le :
+    ‖(∑' m, etaPairTerm sR00 m) -
+      (∑ k ∈ Finset.range 4194304, etaDirichletTerm sR00 k)‖ ≤ (0.087 : ℝ) := by
+  have hs : 0 < sR00.re := by
+    rw [sR00_re]
+    norm_num
+  have hC : ‖sR00‖ ≤ (8.76 : ℝ) := sR00_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 2097152 (by norm_num)
+  have h2M : 2 * 2097152 = 4194304 := by norm_num
+  rw [h2M] at hgen
+  have hre : sR00.re = (0.395 : ℝ) := sR00_re
+  rw [hre] at hgen
+  have hMc : ((((2097152 : ℕ)) : ℝ)) = (2097152 : ℝ) := by norm_cast
+  rw [hMc] at hgen
+  have hcap : (2097152 : ℝ) ^ (-0.395 : ℝ) ≤ 1 / 256 :=
+    R00_rpow_M2097152_neg0395_le
+  have hdiv : (2097152 : ℝ) ^ (-0.395 : ℝ) / (0.395 : ℝ) ≤ (1 / 256 : ℝ) / (0.395 : ℝ) := by
+    rw [div_le_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 0.395)]
+    exact hcap
+  have hmul : (8.76 : ℝ) * ((2097152 : ℝ) ^ (-0.395 : ℝ) / (0.395 : ℝ)) ≤
+      (8.76 : ℝ) * ((1 / 256 : ℝ) / (0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv (by norm_num)
+  have hnum : (8.76 : ℝ) * ((1 / 256 : ℝ) / (0.395 : ℝ)) ≤ (0.087 : ℝ) := by norm_num
+  linarith
+
+/-- Exact new certificate value: `(1/5 - 0.087)/2.53 = 113/2530`. -/
+theorem R00_cert_value_253_M2097152_eq :
+    (((1 / 5 : ℝ) - 0.087) / 2.53) = (113 / 2530 : ℝ) := by
+  norm_num
+
+/-- The new certificate value still sits below the `1.9` floor. -/
+theorem R00_cert_253_M2097152_below_floor : (113 / 2530 : ℝ) < 1.9 := by
+  norm_num
+
+/-- Threshold form of the remaining miss: `1/5 < 1.9 * 2.53 + 0.087`. -/
+theorem R00_bridge_need_open_253_M2097152 : (1 / 5 : ℝ) < 1.9 * 2.53 + 0.087 := by
+  norm_num
+
+/-- Exact threshold gap that remains: `(1.9 * 2.53 + 0.087) - 1/5 = 2347/500`. -/
+theorem R00_gap_253_M2097152_eq :
+    ((1.9 * 2.53 + 0.087 : ℝ) - 1 / 5) = (2347 / 500 : ℝ) := by
+  norm_num
+
+/-- Exact shortfall of the new certificate below the floor:
+`1.9 - 113/2530 = 2347/1265 ≈ 1.855` (old shortfall `6.208`). -/
+theorem R00_shortfall_253_M2097152_eq :
+    ((1.9 : ℝ) - (113 / 2530)) = (2347 / 1265 : ℝ) := by
+  norm_num
+
 /-! ## Best honest unconditional floor banked here. -/
 
 /-- Best honest unconditional lower bound available in this closure. -/
@@ -378,5 +483,14 @@ theorem R00_best_unconditional : (0 : ℝ) ≤ ‖zeta sR00‖ :=
 #print axioms R00_bridge_need_open_253_M8
 #print axioms R00_gap_253_M8_eq
 #print axioms R00_shortfall_253_M8_eq
+#print axioms R00_M2097152_eq
+#print axioms R00_rpow_M2097152_ge
+#print axioms R00_rpow_M2097152_neg0395_le
+#print axioms R00_eta_tail_M2097152_le
+#print axioms R00_cert_value_253_M2097152_eq
+#print axioms R00_cert_253_M2097152_below_floor
+#print axioms R00_bridge_need_open_253_M2097152
+#print axioms R00_gap_253_M2097152_eq
+#print axioms R00_shortfall_253_M2097152_eq
 
 end Door3PilotR00Zeta
