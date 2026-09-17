@@ -3413,7 +3413,7 @@ theorem R21_H_instance (h : R21_leaf_obligations)
   exact ⟨R21, 0.002, 0.05, rfl, rfl, rfl, rfl, R21_strip_lo, R21_strip_hi,
     fine_eps_outer_pos, h.2, h.1⟩
 
-/-! ### R22 = (-8, -5.5, 0.2, 0.4), outer tier `(0.002,0.05)` -/
+/-! ### R22 = (-8, -5.5, 0.2, 0.4), outer tier `(0.002,0.07)` -/
 
 /-- Upper-row cell `(-8,-5.5) × (0.2,0.4)` (outer tier). -/
 def R22 : CellProofEngine.Rect2D :=

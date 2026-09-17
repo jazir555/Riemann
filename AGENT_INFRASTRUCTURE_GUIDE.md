@@ -4735,6 +4735,12 @@ sorry-free infrastructure and the complete commit ledger above.
   sweep note: assembly `:3416` labels R22 tier (0.002,0.05) but
   obligations/instance use (0.002,0.07) — doc-level inconsistency
   filed. Leaves done 24/40. EDGE-NEXT11 tasked (c25+ run).
+- 2026-09-17 EDGE-NEXT11 (background `ses_f514500b`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c25_of_R25:1039`,
+  `gridH_c26_of_R26:1062`, `gridH_c27_of_R27:1085` (no skips) +
+  authorized doc-only fix (assembly `:3416` R22 tier label
+  `(0.002,0.05)`→`(0.002,0.07)` in `/-!` comment; 1 line, no code).
+  Leaves done 27/40. EDGE-NEXT12 tasked (c28+ run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
