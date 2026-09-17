@@ -4943,6 +4943,13 @@ sorry-free infrastructure and the complete commit ledger above.
   had NO errors (`deriv zeta s` resolves; sorryAx was transitive
   fallout). Fixes UNVERIFIED (budget consumed by diagnostic run).
   DERIV-VERIFY tasked (one rebuild to confirm green).
+- 2026-09-17 DERIV-VERIFY (background `ses_f514591a`, build-capable):
+  BUILD-EXIT=1, ONE residual error, fixed: `:160` binder was
+  linter-silenced `_hM0` so `:180` `hM0` unbound → renamed to `hM0`
+  (trivially correct). Sweep lane `:924-971` clean on its own
+  (`deriv zeta s` resolves; UZ10 instance clean axioms). 4 sorryAx
+  infos traced solely to `:180`. Fix UNVERIFIED (budget consumed).
+  DERIV-VERIFY2 tasked (one rebuild to confirm green).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`

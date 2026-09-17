@@ -157,7 +157,7 @@ theorem R02_cauchy_scales_4C (C : ℝ) : C / (0.25 : ℝ) = 4 * C := by
 
 /-- Generic R02 ball-sup assembly at any Lambda cap `M ≥ 0` (the staged
 `CS_ballSup16800_of_Lambda0` is the `M = 479` case). -/
-theorem R02_ballSup_of_LambdaCap (M : ℝ) (_hM0 : 0 ≤ M)
+theorem R02_ballSup_of_LambdaCap (M : ℝ) (hM0 : 0 ≤ M)
     (hL : ∀ (s : ℂ), -1.12 ≤ s.re → s.re ≤ 1.91 → -8.27 ≤ s.im →
       s.im ≤ -5.23 → ‖completedRiemannZeta₀ s‖ ≤ M)
     (z : ℂ)
