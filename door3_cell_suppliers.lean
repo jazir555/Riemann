@@ -3423,6 +3423,54 @@ banked Re-route `0.95` (Pythagoras `Re+Im` pair out of scope). -/
 theorem CS_ImS6_below_Re : (0.1517 : ℝ) < (0.95 : ℝ) := by
   norm_num
 
+/-! ## §A11. Complex S4 Pythagoras `‖S₄‖ ≥ 1.71` (ETA-NEXT10)
+
+KEY UNLOCK: `|S₄| ≥ sqrt(1.56^2 + 0.7017^2) ≈ 1.71` beats `1.56`.
+Numerals (Python-verified): `1.56^2 = 2.4336`, `0.7017^2 = 0.49238289`,
+sum `= 2.92598289 ≥ 2.9241 = 1.71^2`; `1.72^2 = 2.9584` fails, so `1.71`
+is the largest 2-decimal that proves. Shortfall at `cF = 1.853`:
+`1.4 * 1.853 - 1.71 = 0.8842`. -/
+
+/-- Complex-S4 Pythagoras absolute value `≥ 1.71` (PROVED, unconditional):
+`‖S₄‖^2 = Re^2 + Im^2 ≥ 1.56^2 + 0.7017^2 = 2.92598289 ≥ 2.9241 = 1.71^2`
+via `Complex.sq_norm` (mirror of `CS_complex_S2_abs_ge_125`), then
+`Real.sqrt` monotone. -/
+theorem CS_complex_S4_abs_ge_pyth :
+    (1.71 : ℝ) ≤ ‖CS_S4C‖ := by
+  have hRe := CS_complex_S4_Re_ge_156
+  have hIm := CS_complex_S4_Im_ge_07017
+  have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+  have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hRe 2
+  have hIm2 : (0.7017 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hIm 2
+  have hsq_ge : (1.71 : ℝ) ^ 2 ≤ ‖CS_S4C‖ ^ 2 := by
+    have h171 : (1.71 : ℝ) ^ 2 = 2.9241 := by norm_num
+    have hsum : (1.56 : ℝ) ^ 2 + (0.7017 : ℝ) ^ 2 = 2.92598289 := by norm_num
+    have hle_num : (2.9241 : ℝ) ≤ 2.92598289 := by norm_num
+    rw [hsq_eq]
+    linarith
+  calc (1.71 : ℝ) = Real.sqrt ((1.71 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖CS_S4C‖ ^ 2) := Real.sqrt_le_sqrt hsq_ge
+    _ = ‖CS_S4C‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- S4b feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S4`): with complex-S4-Pythagoras `slow = 1.71`, `tail = 0`,
+`cF = 1.853`, `CS_zeta_of_parts` applies directly — `hNeed` is still
+the unclosable `2.5942 ≤ 1.71` (see `CS_S4b_shortfall_1853`). -/
+theorem CS_zeta_of_S4b (Z : ℝ)
+    (hLink : (1.71 : ℝ) - 0 ≤ 1.853 * Z) (hNeed : (1.4 : ℝ) * 1.853 + 0 ≤ 1.71) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.71 0 1.853 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.853` exceeds complex-S4-Pythagoras `slow = 1.71` by `0.8842`
+(was `1.0342`; gain `0.15`). -/
+theorem CS_S4b_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.71 = 0.8842 := by
+  norm_num
+
 #print axioms CS_cpow1_sCenter_im
 #print axioms CS_cpow2_sCenter_im
 #print axioms CS_cpow3_sCenter_im

@@ -4784,6 +4784,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (0.1517<0.95); S4 1.0342 stands. KEY UNLOCK: Re+Im Pythagoras
   pair gives |S4|>=sqrt(1.56^2+0.7017^2)~=1.71 > 1.56.
   ETA-NEXT10 tasked (S4 Pythagoras pair + feed).
+- 2026-09-17 ETA-NEXT10 (background `ses_f513be6f`, proof-only,
+  grep-clean): S4 PYTHAGORAS PAIR banked — `CS_complex_S4_abs_ge_
+  pyth:3438` (`||S4||>=1.71`, largest 2-decimal: `1.71^2=2.9241`
+  vs sum `2.92598289`, margin +0.00188; 1.72 fails) +
+  `CS_zeta_of_S4b:3463` + `CS_S4b_shortfall_1853:3471`
+  (shortfall `0.8842`, was `1.0342` — FIRST SUB-1.0).
+  Slow 1.56->1.71. Next: Im headroom huge (banked 0.7017 vs true
+  ~1.307) — tighten sin2/sin4/Im3 windows (ETA-NEXT11).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4998,6 +5006,14 @@ sorry-free infrastructure and the complete commit ledger above.
   insufficient, mirrors E06) but Seq5 ~0.67146 / Seq6 ~0.69538
   CLEAR — N=5 viable for E05. GAMMA-N5 tasked (E05 N=5
   approximant + specs).
+- 2026-09-17 GAMMA-N5 (background `ses_f513c3f9`, proof-only,
+  grep-clean): E05 N=5 banked (`:2981-3038`: Reprod>=1137.66,
+  ceiling 825.6/1137.66~=0.72570 clears 0.645, link, cpow5<=6.88
+  — 6.87 FALSE, filed 6.88 — rate<=0.08, closure). SAME LESSON
+  as E06: filed finite 0.725 exceeds true Seq5 ~0.671 — closure
+  expected-dead as filed; closable leaf needs L<=0.671 or N=6
+  (true Seq6 ~0.695). GAMMA-N5B tasked (E05 finite lower
+  L<=0.671 + N=6 fallback).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,

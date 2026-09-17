@@ -2956,4 +2956,102 @@ theorem premGamma_E05_Gamma_lower_of_Seq4_rate
     exact h
   linarith
 
+/-! ## GAMMA-N5: E05 N = 5 approximant norm identity + rate spec (filed, not fixed).
+
+Honesty check (exact arithmetic, Python-checked this turn): the N = 5 Re-ceiling
+`825.6 / 1137.66 ≈ 0.72570` clears `0.645`
+(`premGamma_E05_N5_ceiling_arith` banked), so the ladder does NOT move to N = 6
+for necessity. Product
+`1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975 * 6.1975 ≈ 1137.67102 ≥ 1137.66`;
+cpow TRUE `5 ^ 1.1975 ≈ 6.87095 ≤ 6.88` (`6.87` would be FALSE, so `6.88` is the
+filed upper) with `6.88 * 120 = 825.6` exact. Rate budget `0.08`:
+`0.645 + 0.08 = 0.725 ≤ 825.6 / 1137.66` (margin `≈ 0.00070`;
+`0.725 * 1137.66 = 824.8035 ≤ 825.6`). Sufficiency still open: the ceiling is
+an approximant UPPER (needs cpow upper + denominator Re lowers); the Gamma
+LOWER needs a finite Seq5 LOWER (needs cpow lower + denominator norm uppers)
+plus the rate below — filed as explicit premises only. Sweep note (not fixed):
+mpmath triage puts true Seq5 at E05 `~0.671 < 0.725` finite-lower premise, so
+this maximal-`L` conditional is expected-dead for sufficiency (mirrors N = 4);
+a closable leaf would need `L ≤ 0.671` or the N = 6 rung.
+-/
+
+/-- E05 `N = 5` Re-product lower:
+`1137.66 ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975 * 6.1975`
+(TRUE `≈ 1137.67102`). -/
+theorem premGamma_E05_N5_Reprod_lower :
+    (1137.66 : ℝ) ≤ 1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975 * 6.1975 := by
+  norm_num
+
+/-- E05 `N = 5` ceiling arithmetic: Re-ceiling clearing the floor
+(`825.6 / 1137.66 ≈ 0.72570 > 0.645`). Necessity lower bound only. -/
+theorem premGamma_E05_N5_ceiling_arith :
+    (0.645 : ℝ) < 825.6 / 1137.66 := by
+  norm_num
+
+/-- Missing link L1 at `N = 5` (filed, not proved): `GammaSeq s 5` norm identity
+at E05 shifted `s = w_E05 + 1`, extending the `N = 4` spec shape
+(`premGamma_E05_GammaSeq4_link`). Unfolds
+`Complex.GammaSeq s 5 = (5 : ℂ) ^ s * 120 / (s * (s+1) * (s+2) * (s+3) * (s+4) * (s+5))`
+(`GammaSeq` at `Beta.lean:230`, `5 ! = 120`, `prod_range_succ`), then `norm_div` /
+`norm_mul` / `norm_pow`. Needs only Mathlib; left open because the cpow
+unfolding was not instantiated this turn. Filed ONLY at `N = 5` alongside N = 4. -/
+def premGamma_E05_GammaSeq5_link : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ =
+    ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ * 120 /
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖)
+
+/-- Cpow-upper requirement at `N = 5` (filed, not proved): optimistic-but-sound
+`‖(5 : ℂ) ^ s‖ ≤ 6.88` at E05 shifted `s` (TRUE `5 ^ 1.1975 ≈ 6.87095`; `6.87`
+is FALSE). Feeds the Re-ceiling numerator `6.88 * 120 = 825.6` once `link` +
+Re lowers land. Filed ONLY at `N = 5` alongside N = 4. -/
+def premGamma_E05_cpow5_upper_needed : Prop :=
+  ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+    (6.88 : ℝ)
+
+/-- Missing rate L2 at `N = 5` (filed, not proved): quantitative `GammaSeq`
+convergence at E05 shifted point with budget `0.08` (`0.725 - 0.08 = 0.645`
+exact; `0.725 ≤ 825.6 / 1137.66` banked below). Host: a Stirling-disc /
+Binet-enclosure leaf or an explicit `GammaSeq` rate lemma; NOT this file.
+Filed ONLY at `N = 5` alongside N = 4. -/
+def premGamma_E05_GammaSeq5_rate_needed : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.08 : ℝ)
+
+/-- E05 `N = 5` rate-budget arithmetic: `0.645 + 0.08 ≤ 825.6 / 1137.66`
+(`≈ 0.725 ≤ 0.72570`). -/
+theorem premGamma_E05_N5_rate_budget_arith :
+    (0.645 : ℝ) + 0.08 ≤ 825.6 / 1137.66 := by
+  norm_num
+
+/-- E05 `N = 5` limit-closure conditional: finite Seq5 lower `0.725` plus rate
+`0.08` gives the shifted floor `0.645` (`0.725 - 0.08 = 0.645` exact). Feeds
+`premGamma_E05_ge_of_shift` once the Seq5 finite lower (from `link` + cpow
+lower + denominator norm uppers) and the rate leaf land. Sufficiency open:
+true Seq5 `~0.671` triage sits below the `0.725` finite-lower premise, so this
+conditional is NOT claimed closed. -/
+theorem premGamma_E05_Gamma_lower_of_Seq5_rate
+    (hSeq : (0.725 : ℝ) ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖)
+    (hRate : premGamma_E05_GammaSeq5_rate_needed) :
+    (0.645 : ℝ) ≤
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ := by
+  unfold premGamma_E05_GammaSeq5_rate_needed at hRate
+  have htri : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ +
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))‖ := by
+    have h := norm_add_le
+      (Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))
+      (Complex.Gamma (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))
+    rw [sub_add_cancel] at h
+    exact h
+  linarith
+
 end Door3PremiseGamma
