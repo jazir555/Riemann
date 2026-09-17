@@ -4765,6 +4765,15 @@ sorry-free infrastructure and the complete commit ledger above.
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
   retry, tighter brief).
+- 2026-09-17 ETA-NEXT8 (background `ses_f5142ea5`, proof-only,
+  grep-clean): Im route HONEST STALL — Im splits n=5,6 banked
+  (`:2742/:2778`, exp_im mirrors), sin bounds (`sin5<=-0.99 :2816`,
+  `sin6<=0 :2877`), Im5 bracket `[-0.55,-0.5148]` (`:2924/:2946`),
+  Im6 nonpos (`:2963`), S6-Im link (`:2972`), conditional
+  (`:2989`) + abs-link (`:2998`). 5-term Im strictly negative,
+  6-term nonpos — no unconditional Im(S6)>0 (needs Im(S4) lower,
+  out of scope). S4 1.0342 stands; true Im(S6)~=1.00<1.56 noted.
+  ETA-NEXT9 tasked (Im(S4) lower n=1..4).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740

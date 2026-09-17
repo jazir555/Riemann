@@ -2710,4 +2710,306 @@ theorem CS_S6C_shortfall_1853 : (1.4 : ℝ) * 1.853 - 0.95 = 1.6442 := by
 #print axioms CS_complex_S6_abs_ge_095
 #print axioms CS_S6C_shortfall_1853
 
+/-! ## §A9. Complex S6 Im splits for n=5,6 ONLY (ETA-NEXT8 retry; ETA-NEXT7 EMPTY)
+
+TIGHTER BRIEF compliance: read banked S6 assembly (`CS_S6C_Re_eq:2598` +
+`CS_cpow5/6` Re splits `:2322/:2358`); prove Im splits for n=5,6 ONLY via
+`Complex.cpow_def_of_ne_zero` + `Complex.exp_im`, mirroring the Re splits
+token-for-token with banked `log5`/`log6` bounds; then Im(S6) lower via the
+alternating sum (`CS_S4C` + 5,6 tail, no 2,3,4 Im reproofs); then
+`‖S6‖ ≥ Im(S6)`; STOP honestly (no zeta feed / shortfall recompute forced).
+
+Honest outcome (STALL, do not force):
+* 5-term Im is STRICTLY NEGATIVE: `r₅·sin φ₅ ≤ -0.5148` (`r₅ ≥ 0.52`
+  banked `CS_rpow5neg_lower_proved`, `sin φ₅ ≤ -0.99` proved below via
+  `φ₅ = 7π/2 + d`, `d ∈ [-0.14, 0]`, `sin φ₅ = -cos d ≤ -0.99`).
+* 6-term Im is NON-POSITIVE: `r₆·sin φ₆ ≤ 0` (`r₆ ≥ 0`,
+  `sin φ₆ ≤ 0` proved below via `e = φ₆ - 4π ∈ [-π, 0]` negation route).
+* Tail lower: `r₅·sin φ₅ ≥ -0.55` (`r₅ ≤ 0.55`, `sin ≥ -1`), so
+  `Im(S₆) = Im(S₄) + tail ≥ Im(S₄) - 0.55` (conditional on explicit `S₄`
+  premise `Y ≤ Im(S₄)`; unconditional positivity is OUT OF SCOPE per
+  ONLY-5,6 and is NOT claimed).
+* Hence no unconditional `Im(S₆) > 0` slow is closed here; live best
+  STANDS: complex-S4 `slow = 1.56`, `cF = 1.853`,
+  shortfall `1.4·1.853 - 1.56 = 1.0342` (`CS_S4_shortfall_1853`).
+  True values (`Re(S₆) ≈ 1.366`, `Im(S₆) ≈ 1.00`, `|S₆| ≈ 1.70`) are
+  consistent with this stall (Im-only `≈ 1.00 < 1.56` cannot beat S4
+  alone; Pythagoras route needs a proved `Re+Im` pair, out of scope). -/
+
+/-- Cpow imaginary-part split for `5^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow5_sCenter_re`: `(-s).re = -0.395`, `(-s).im = 6.75`,
+`Complex.exp_im` + `sin` in place of `Complex.exp_re` + `cos`). -/
+theorem CS_cpow5_sCenter_im : ((((5 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5) := by
+  have h5pos : (0 : ℝ) < 5 := by norm_num
+  have hxC : ((5 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h5pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((5 : ℝ) : ℂ) = (((Real.log 5 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h5pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 5 : ℝ)) : ℂ)).re = Real.log 5 := Complex.ofReal_re _
+  have hzim : ((((Real.log 5 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 5 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 5 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 5 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 5 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 5 * (-(0.395 : ℝ)))
+      = (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h5pos _).symm
+  have hsin : Real.sin (Real.log 5 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 5) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `6^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow6_sCenter_re`). -/
+theorem CS_cpow6_sCenter_im : ((((6 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (6 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 6) := by
+  have h6pos : (0 : ℝ) < 6 := by norm_num
+  have hxC : ((6 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h6pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((6 : ℝ) : ℂ) = (((Real.log 6 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h6pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 6 : ℝ)) : ℂ)).re = Real.log 6 := Complex.ofReal_re _
+  have hzim : ((((Real.log 6 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 6 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 6 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 6 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 6 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 6 * (-(0.395 : ℝ)))
+      = (6 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h6pos _).symm
+  have hsin : Real.sin (Real.log 6 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 6) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Sine upper at `φ₅ = 6.75·log 5` (`≤ -0.99`; TRUE `≈ -0.991`).
+Route (mirror of `CS_cos5_lower_neg014`): `d = φ₅ - 7π/2 ∈ [-0.14, 0]`,
+`φ₅ = (3π/2 + d) + 2π`, `sin φ₅ = -cos d ≤ -0.99`
+(`cos d ≥ 1 - d²/2 ≥ 0.99`). -/
+theorem CS_sin5_upper_neg099 :
+    Real.sin (6.75 * Real.log 5) ≤ (-0.99 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h5lo := CS_log_five_ge
+  have h5hi := CS_log_five_le
+  have hlo : (10.8634 : ℝ) ≤ 6.75 * Real.log 5 := by
+    have hmul : 6.75 * (16094 / 10000 : ℝ) ≤ 6.75 * Real.log 5 :=
+      mul_le_mul_of_nonneg_left h5lo (by norm_num)
+    have hcap : (10.8634 : ℝ) ≤ 6.75 * (16094 / 10000) := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 5 ≤ (10.8642 : ℝ) := by
+    have hmul : 6.75 * Real.log 5 ≤ 6.75 * (16095 / 10000 : ℝ) :=
+      mul_le_mul_of_nonneg_left h5hi (by norm_num)
+    have hcap : (6.75 : ℝ) * (16095 / 10000) ≤ 10.8642 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 5 with hx_def
+  set d : ℝ := x - 7 * Real.pi / 2 with hd_def
+  have hd_lo : (-0.14 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have h32eq : (3 : ℝ) * Real.pi / 2 = Real.pi + Real.pi / 2 := by
+    ring
+  have hcos32 : Real.cos (3 * Real.pi / 2) = 0 := by
+    rw [h32eq, Real.cos_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin32 : Real.sin (3 * Real.pi / 2) = -1 := by
+    rw [h32eq, Real.sin_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hx_eq : x = (3 * Real.pi / 2 + d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hsin_mid : Real.sin x = Real.sin (3 * Real.pi / 2 + d) := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  have hsin_eq : Real.sin (3 * Real.pi / 2 + d) = -Real.cos d := by
+    rw [Real.sin_add, hsin32, hcos32]
+    ring
+  have hsq : d ^ 2 ≤ (0.14 : ℝ) ^ 2 := by
+    have h1 : (0 : ℝ) ≤ d + 0.14 := by linarith
+    have h2 : (0 : ℝ) ≤ -d := by linarith
+    nlinarith [mul_nonneg h1 h2]
+  have hcosd_lo : (0.99 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hnum : (0.99 : ℝ) ≤ 1 - (0.14 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hsin_mid, hsin_eq]
+  linarith
+
+/-- Sine nonpositivity at `φ₆ = 6.75·log 6` (TRUE `≈ -0.454 ≤ 0`).
+Route: `φ₆ ∈ [11.7857, 12.3492]` from banked composite `log6` bounds, so
+`e = φ₆ - 4π ∈ [-π, 0]`; `sin φ₆ = sin e = -sin(-e) ≤ 0` via
+`Real.sin_add_two_pi` (twice) + `Real.sin_nonneg_of_nonneg_of_le_pi`
+on `-e ∈ [0, π]` (negation route, no new sin machinery). -/
+theorem CS_sin6_nonpos :
+    Real.sin (6.75 * Real.log 6) ≤ (0 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h6lo := CS_log_six_ge
+  have h6hi := CS_log_six_le
+  have hlo : (11.7857 : ℝ) ≤ 6.75 * Real.log 6 := by
+    have hmul : 6.75 * (1.74604 : ℝ) ≤ 6.75 * Real.log 6 :=
+      mul_le_mul_of_nonneg_left h6lo (by norm_num)
+    have hcap : (11.7857 : ℝ) ≤ 6.75 * 1.74604 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 6 ≤ (12.3492 : ℝ) := by
+    have hmul : 6.75 * Real.log 6 ≤ 6.75 * 1.8295 :=
+      mul_le_mul_of_nonneg_left h6hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.8295 ≤ 12.3492 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 6 with hx_def
+  set e : ℝ := x - 2 * Real.pi - 2 * Real.pi with he_def
+  have hne0 : (0 : ℝ) ≤ -e := by
+    rw [he_def]
+    linarith
+  have hne_pi : -e ≤ Real.pi := by
+    rw [he_def]
+    linarith
+  have hnn : (0 : ℝ) ≤ Real.sin (-e) :=
+    Real.sin_nonneg_of_nonneg_of_le_pi hne0 hne_pi
+  have hneg : Real.sin e = -Real.sin (-e) := by
+    have h := Real.sin_neg (x := -e)
+    rw [neg_neg] at h
+    exact h
+  have hx_eq : x = e + 2 * Real.pi + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hsin_eq : Real.sin x = Real.sin e := by
+    have h1 : Real.sin (e + 2 * Real.pi + 2 * Real.pi)
+        = Real.sin (e + 2 * Real.pi) := Real.sin_add_two_pi _
+    have h2 : Real.sin (e + 2 * Real.pi) = Real.sin e :=
+      Real.sin_add_two_pi _
+    rw [hx_eq]
+    exact h1.trans h2
+  rw [hsin_eq, hneg]
+  linarith
+
+/-- 5-term Im lower (`≥ -0.55`; TRUE `≈ -0.5247`): `r₅ ≤ 0.55`
+(banked) and `sin φ₅ ≥ -1`. -/
+theorem CS_Im5_ge_neg055 :
+    (-0.55 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5) := by
+  have hr0 : (0 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (5 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.55 : ℝ) :=
+    CS_rpow5neg_upper055_proved
+  have hslo : (-1 : ℝ) ≤ Real.sin (6.75 * Real.log 5) :=
+    Real.neg_one_le_sin _
+  have h1 : (5 : ℝ) ^ (-(0.395 : ℝ)) * (-1)
+      ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5) :=
+    mul_le_mul_of_nonneg_left hslo hr0
+  have hring : (5 : ℝ) ^ (-(0.395 : ℝ)) * (-1)
+      = -((5 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h2 : (-0.55 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) * (-1) := by
+    rw [hring]
+    linarith
+  linarith
+
+/-- 5-term Im HONEST UPPER (STALL numeral): `r₅·sin φ₅ ≤ -0.5148 < 0`
+(`r₅ ≥ 0.52` banked `CS_rpow5neg_lower_proved`, `sin φ₅ ≤ -0.99` above).
+The 5-term is strictly negative — no force. -/
+theorem CS_Im5_le_neg05148 :
+    (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5) ≤ (-0.5148 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hrl : (0.52 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow5neg_lower_proved
+  have hsup : Real.sin (6.75 * Real.log 5) ≤ (-0.99 : ℝ) :=
+    CS_sin5_upper_neg099
+  have h1 : (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5)
+      ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) * (-0.99) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (5 : ℝ) ^ (-(0.395 : ℝ)) * (-0.99) ≤ (0.52 : ℝ) * (-0.99) :=
+    mul_le_mul_of_nonpos_right hrl (by norm_num)
+  have hmul : (0.52 : ℝ) * (-0.99) = -0.5148 := by norm_num
+  linarith
+
+/-- 6-term Im non-positive (`r₆·sin φ₆ ≤ 0`; TRUE `≈ -0.223`). -/
+theorem CS_Im6_nonpos :
+    (6 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 6) ≤ (0 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (6 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hs : Real.sin (6.75 * Real.log 6) ≤ 0 := CS_sin6_nonpos
+  exact mul_nonpos_of_nonneg_of_nonpos hr0 hs
+
+/-- S6 Im link via the alternating sum (`CS_S6C = CS_S4C + 5^{-s} - 6^{-s}`
+as `ℂ`, then `.im` + the two new Im splits; NO 2,3,4 Im reproofs needed). -/
+theorem CS_S6C_Im_link :
+    (CS_S6C).im = (CS_S4C).im
+      + (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 5)
+      - (6 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 6) := by
+  have hEq : CS_S6C = CS_S4C + ((((5 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter))
+      - ((((6 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)) := by
+    unfold CS_S6C CS_S4C
+    have h5 : ((5 : ℂ)) = ((((5 : ℝ)) : ℂ)) := by simp
+    have h6 : ((6 : ℂ)) = ((((6 : ℝ)) : ℂ)) := by simp
+    rw [h5, h6]
+    abel
+  rw [hEq, Complex.add_im, Complex.sub_im,
+    CS_cpow5_sCenter_im, CS_cpow6_sCenter_im]
+
+/-- Conditional S6 Im lower via the alternating sum (explicit `S₄`
+premise only): from `Y ≤ Im(S₄)`, `Im(S₆) ≥ Y - 0.55`
+(tail `≥ -0.55`, 6-term `≥ 0` contribution via `CS_Im6_nonpos`). -/
+theorem CS_complex_S6_Im_ge_of_S4 (Y : ℝ) (hS4 : Y ≤ (CS_S4C).im) :
+    Y - 0.55 ≤ (CS_S6C).im := by
+  have hLink := CS_S6C_Im_link
+  have hT5 := CS_Im5_ge_neg055
+  have hT6 := CS_Im6_nonpos
+  linarith
+
+/-- `‖S₆‖ ≥ Im(S₆)` triangle step (mirror of `CS_complex_S6_abs_ge_095`
+with `abs_im_le_norm`). -/
+theorem CS_complex_S6_abs_ge_Im :
+    (CS_S6C).im ≤ ‖CS_S6C‖ := by
+  have h1 := Complex.abs_im_le_norm (CS_S6C)
+  have h2 := le_abs_self ((CS_S6C).im)
+  linarith
+
+#print axioms CS_cpow5_sCenter_im
+#print axioms CS_cpow6_sCenter_im
+#print axioms CS_sin5_upper_neg099
+#print axioms CS_sin6_nonpos
+#print axioms CS_Im5_ge_neg055
+#print axioms CS_Im5_le_neg05148
+#print axioms CS_Im6_nonpos
+#print axioms CS_S6C_Im_link
+#print axioms CS_complex_S6_Im_ge_of_S4
+#print axioms CS_complex_S6_abs_ge_Im
+
 end Door3CellSuppliers
