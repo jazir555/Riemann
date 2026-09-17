@@ -2356,4 +2356,323 @@ theorem sSCUT_cpow3_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hnp := sSCUT_cpow3_neg_Re_nonpos
   linarith
 
+/-! ## sCut S3b shard (ZETA-SCUT3b): the `k = 7 / n = 8` signed gain (`+1/12`)
+— and why the `S₈` shard still does NOT grow (honest).
+
+Outcome: composite bridge `log 8 = 3·log 2` (`sSCUT_log_eight_eq`, mirror of
+the `log 12` recipe) + d9 gives the sharp window
+`10*log 8 ∈ (20.794415409, 20.794415424)` (width `1.5e-8`). Reduced phase
+`δ₈' = θ₈ - 7π ∈ (-1.1968, -1.1960)`; the odd multiple flips the sign, so
+`cos θ₈ = -cos δ₈' ≤ -(1/4)` (`sSCUT_cos10log8_le_neg_quarter`, via
+`Real.cos_add_two_pi ×3 + Real.cos_add_pi` and the quadratic lower
+`1 - x²/2 ≤ cos x` with `|δ₈'| ≤ 1.1968`, i.e. `cos δ₈' ≥ 0.2838 ≥ 1/4`).
+Cpow split mirror gives `Re(8^{-sCut}) = r₈·cos θ₈ ≤ -(1/12)`
+(`sSCUT_cpow8_Re_le_neg`, with `r₈ = 8^{-1/2} ≥ 1/3` from `√8 ≤ 3`).
+Parity transfer (odd `k = 7`, `eta₇ = -(8^{-sCut})` via `Complex.cpow_neg`):
+`Re(eta₇) ≥ +1/12` (`sSCUT_eta7_Re_ge`) — the candidate gain from the S3
+parity table, banked.
+
+Shard sum (honest, no growth): `Re(S₂) ≥ 2/7` (`sSCUT_S2_Re_ge`, from
+`Re(eta₁) ≥ -5/7` via the banked `sSCUT_cpow2_Re_mem` upper) plus trivial
+`Re ≥ -1` floors for `k = 2..6` (via `Complex.abs_re_le_norm` + the banked
+`≤ 1` norm uppers) plus `+1/12` gives `Re(S₈) ≥ -389/84`
+(`sSCUT_S8_Re_ge_neg389div84`), hence `‖S₈‖ ≥ -389/84` (vs the older
+`-40/7`: gain `13/12`, exactly the `t₇` allowance flip `-1 → +1/12`).
+Since `-389/84 < 0 < 21/10`, binding slow stays `2/7`
+(`sSCUT_S2_slow`); shortfall vs the `21/10` bar unchanged at `127/70`.
+
+Exact weakness (STOP, do not force): the five `Re ≥ -1` floors for
+`n = 3..7` carry no phase info — `n = 3` provably hurts-or-neutral
+(`cos θ₃ ≤ 0` banked, but even `k` needs `cos ≥ +c`); `n = 4, 6` have
+positive cosine (odd `k` needs negative); `n = 5, 7` need `cos LOWERS`
+requiring `log 5` / `log 7` d9 bounds absent from Mathlib (must be created
+in-file; `log 7` BLOCKED per the S3 table). Until signed `Re` lowers
+replace at least `~1.9` of the `-5` trivial allowance, no `S₈₊` shard
+reaches `21/10`.
+
+Sweep notes FILED (not fixed): S3 `(i)-(ii)` (`121/70` vs true `127/70`)
+untouched above.
+-/
+
+/-- Composite log bridge `log 8 = 3·log 2` (`8 = 4·2` +
+`Door3CellSuppliers.CS_log_four_eq`; mirror of `sSCUT_log_twelve_eq`). -/
+theorem sSCUT_log_eight_eq : Real.log 8 = 3 * Real.log 2 := by
+  have h8 : (8 : ℝ) = 4 * 2 := by norm_num
+  rw [h8, Real.log_mul (by norm_num) (by norm_num),
+    Door3CellSuppliers.CS_log_four_eq]
+  ring
+
+/-- Sharp `n = 8` phase window (`10*log 8 ∈ (20.794415409, 20.794415424)`
+via `sSCUT_log_eight_eq` + d9; enabler for the `δ₈'` recipe). -/
+theorem sSCUT_theta8_sharp_mem :
+    (20.794415409 : ℝ) < 10 * Real.log 8 ∧
+    10 * Real.log 8 < (20.794415424 : ℝ) := by
+  have h8 := sSCUT_log_eight_eq
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have hsum_lo : (2.0794415409 : ℝ) < 3 * Real.log 2 := by
+    have c : 3 * (0.6931471803 : ℝ) = 2.0794415409 := by norm_num
+    linarith
+  have hsum_hi : 3 * Real.log 2 < (2.0794415424 : ℝ) := by
+    have c : 3 * (0.6931471808 : ℝ) = 2.0794415424 := by norm_num
+    linarith
+  have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 2.0794415409 = 20.794415409 := by norm_num
+  have c2 : (10 : ℝ) * 2.0794415424 = 20.794415424 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the sharp `n = 8` window (`1.5e-8`). -/
+theorem sSCUT_theta8_sharp_width_eq :
+    (20.794415424 : ℝ) - 20.794415409 = (0.000000015 : ℝ) := by
+  norm_num
+
+/-- Reduced phase `δ₈' = θ₈ - 7π ∈ (-1.1968, -1.1960)` (odd multiple: next
+step gets `cos θ₈ = -cos δ₈'` — the signed-upper recipe). -/
+theorem sSCUT_delta8p_sharp_mem :
+    (-1.1968 : ℝ) < 10 * Real.log 8 - 7 * Real.pi ∧
+    10 * Real.log 8 - 7 * Real.pi < (-1.1960 : ℝ) := by
+  have hth := sSCUT_theta8_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Signed cosine UPPER `cos(10*log 8) ≤ -(1/4)` (quadrant-II `δ₈'` via the
+odd-multiple flip `cos θ₈ = -cos δ₈'` + quadratic lower on `δ₈'`). -/
+theorem sSCUT_cos10log8_le_neg_quarter :
+    Real.cos (10 * Real.log 8) ≤ (-(1 / 4) : ℝ) := by
+  have hδ := sSCUT_delta8p_sharp_mem
+  have key : Real.cos ((10 * Real.log 8 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 8 - 7 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_pi]
+  have e2 : (10 * Real.log 8 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi = 10 * Real.log 8 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (1.1968 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 8 - 7 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 8 - 7 * Real.pi)
+    have hsq : (10 * Real.log 8 - 7 * Real.pi) ^ 2 ≤ (1.1968 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 1.1968 - (10 * Real.log 8 - 7 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 8 - 7 * Real.pi) + 1.1968 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (1.1968 - (10 * Real.log 8 - 7 * Real.pi))
+          * ((10 * Real.log 8 - 7 * Real.pi) + 1.1968)
+          = (1.1968 : ℝ) ^ 2 - (10 * Real.log 8 - 7 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (1 / 4 : ℝ) ≤ 1 - (1.1968 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- Cpow real-part split for `8^{-s}` at sCut (mirror of
+`sSCUT_cpow3_neg_re`). -/
+theorem sSCUT_cpow8_neg_re : ((((8 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (8 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 8) := by
+  have h8pos : (0 : ℝ) < 8 := by norm_num
+  have hxC : ((8 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h8pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((8 : ℝ) : ℂ) = (((Real.log 8 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h8pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 8 : ℝ)) : ℂ)).re = Real.log 8 := Complex.ofReal_re _
+  have hzim : ((((Real.log 8 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 8 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 8 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 8 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 8) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 8 * (-(1 / 2 : ℝ)))
+      = (8 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h8pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 8))
+      = Real.cos (10 * Real.log 8) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `8^(1/2) ≤ 3` (mirror of the `sSCUT_sqrt2_le` root step; `8 ≤ 3^2`). -/
+theorem sSCUT_sqrt8_le : (8 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
+  have hpow : (8 : ℝ) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : ((((8 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 8 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((8 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']; exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `1/3 ≤ r₈ = 8^(-1/2)` (inverse of the root step; mirror of
+`sSCUT_rpow2_neg_ge`). -/
+theorem sSCUT_rpow8_neg_ge : (1 / 3 : ℝ) ≤ (8 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt8_le
+  have hpos : (0 : ℝ) < (8 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (8 : ℝ) ^ (-(1 / 2 : ℝ)) = (((8 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8)]
+  rw [hneg, show (1 / 3 : ℝ) = ((3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow signed UPPER `Re(8^{-sCut}) ≤ -(1/12)` (nonneg `r₈` × signed
+cosine upper, then `r₈ ≥ 1/3`). -/
+theorem sSCUT_cpow8_Re_le_neg :
+    ((((8 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(1 / 12) : ℝ) := by
+  rw [sSCUT_cpow8_neg_re]
+  have hr0 : (0 : ℝ) ≤ (8 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow8_neg_ge
+  have hc := sSCUT_cos10log8_le_neg_quarter
+  have hmul : (8 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 8)
+      ≤ (8 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 4)) :=
+    mul_le_mul_of_nonneg_left hc hr0
+  have h2 : (1 / 3 : ℝ) * (1 / 4) ≤ (8 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have heq : (1 / 3 : ℝ) * (1 / 4) = 1 / 12 := by norm_num
+  have hsign : (8 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 4))
+      = -((8 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4)) := by ring
+  linarith
+
+/-- Eta bridge `eta₇ = -(8^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(8^s)⁻¹` into `8^{-s}`). -/
+theorem sSCUT_eta7_eq_neg_cpow8 :
+    etaDirichletTerm sSCUT 7 = -((((8 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (7 + 1 : ℕ) = 8 := rfl
+  have hcast : ((((7 + 1 : ℕ)) : ℂ)) = ((((8 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (7 : ℕ) = -1 := by norm_num
+  have h8cast : ((((8 : ℕ)) : ℂ)) = ((((8 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h8cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (odd `k = 7`): `Re(eta₇) ≥ +1/12` (negated cpow signed
+upper). -/
+theorem sSCUT_eta7_Re_ge : (1 / 12 : ℝ) ≤ (etaDirichletTerm sSCUT 7).re := by
+  have h := sSCUT_cpow8_Re_le_neg
+  rw [sSCUT_eta7_eq_neg_cpow8, Complex.neg_re, sSCUT_cpow8_neg_re]
+  rw [sSCUT_cpow8_neg_re] at h
+  linarith
+
+/-- Eta bridge `eta₁ = -(2^{-sCut})` (odd `k`; mirror of the `t₇` bridge). -/
+theorem sSCUT_eta1_eq_neg_cpow2 :
+    etaDirichletTerm sSCUT 1 = -((((2 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (1 + 1 : ℕ) = 2 := rfl
+  have hcast : ((((1 + 1 : ℕ)) : ℂ)) = ((((2 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (1 : ℕ) = -1 := by norm_num
+  have h2cast : ((((2 : ℕ)) : ℂ)) = ((((2 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h2cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- `Re(eta₁) ≥ -(5/7)` (negated `sSCUT_cpow2_Re_mem` upper). -/
+theorem sSCUT_eta1_Re_ge_neg :
+    (-(5 / 7) : ℝ) ≤ (etaDirichletTerm sSCUT 1).re := by
+  have h := sSCUT_cpow2_Re_mem
+  rw [sSCUT_eta1_eq_neg_cpow2, Complex.neg_re, sSCUT_cpow2_neg_re]
+  linarith [h.2]
+
+/-- `Re(S₂) ≥ 2/7` at sCut (`1 + Re(eta₁) ≥ 1 - 5/7`). -/
+theorem sSCUT_S2_Re_ge :
+    (2 / 7 : ℝ) ≤ (∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k).re := by
+  have h0 : etaDirichletTerm sSCUT 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  have hS2 : (∑ k ∈ Finset.range 2, etaDirichletTerm sSCUT k)
+      = 1 + etaDirichletTerm sSCUT 1 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero,
+      zero_add, h0]
+  have he1 := sSCUT_eta1_Re_ge_neg
+  rw [hS2, Complex.add_re, Complex.one_re]
+  linarith
+
+/-- Trivial `Re` floor `Re(eta₂) ≥ -1` (`|Re| ≤ ‖·‖ ≤ 1` banked). -/
+theorem sSCUT_eta2_Re_ge_neg_one :
+    (-1 : ℝ) ≤ (etaDirichletTerm sSCUT 2).re := by
+  have h := sSCUT_eta_third_norm_le_one
+  have habs := Complex.abs_re_le_norm (etaDirichletTerm sSCUT 2)
+  have hle := abs_le.mp habs
+  linarith [hle.1]
+
+/-- Trivial `Re` floor `Re(eta₃) ≥ -1` (`|Re| ≤ ‖·‖ ≤ 1` banked). -/
+theorem sSCUT_eta3_Re_ge_neg_one :
+    (-1 : ℝ) ≤ (etaDirichletTerm sSCUT 3).re := by
+  have h := sSCUT_eta_fourth_norm_le_one
+  have habs := Complex.abs_re_le_norm (etaDirichletTerm sSCUT 3)
+  have hle := abs_le.mp habs
+  linarith [hle.1]
+
+/-- Trivial `Re` floor `Re(eta₄) ≥ -1` (`|Re| ≤ ‖·‖ ≤ 1` banked). -/
+theorem sSCUT_eta4_Re_ge_neg_one :
+    (-1 : ℝ) ≤ (etaDirichletTerm sSCUT 4).re := by
+  have h := sSCUT_eta_fifth_norm_le_one
+  have habs := Complex.abs_re_le_norm (etaDirichletTerm sSCUT 4)
+  have hle := abs_le.mp habs
+  linarith [hle.1]
+
+/-- Trivial `Re` floor `Re(eta₅) ≥ -1` (`|Re| ≤ ‖·‖ ≤ 1` banked). -/
+theorem sSCUT_eta5_Re_ge_neg_one :
+    (-1 : ℝ) ≤ (etaDirichletTerm sSCUT 5).re := by
+  have h := sSCUT_eta_sixth_norm_le_one
+  have habs := Complex.abs_re_le_norm (etaDirichletTerm sSCUT 5)
+  have hle := abs_le.mp habs
+  linarith [hle.1]
+
+/-- Trivial `Re` floor `Re(eta₆) ≥ -1` (`|Re| ≤ ‖·‖ ≤ 1` banked). -/
+theorem sSCUT_eta6_Re_ge_neg_one :
+    (-1 : ℝ) ≤ (etaDirichletTerm sSCUT 6).re := by
+  have h := sSCUT_eta_seventh_norm_le_one
+  have habs := Complex.abs_re_le_norm (etaDirichletTerm sSCUT 6)
+  have hle := abs_le.mp habs
+  linarith [hle.1]
+
+/-- Honest 8-term `Re` shard floor (`-389/84 ≤ Re(S₈)`:
+`2/7 - 5 + 1/12`; the `+1/12` is the banked `t₇` signed gain). -/
+theorem sSCUT_S8_Re_ge_neg389div84 :
+    (-389 / 84 : ℝ) ≤ (∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k).re := by
+  rw [sSCUT_S8_eq, Complex.add_re, Complex.add_re, Complex.add_re,
+    Complex.add_re, Complex.add_re, Complex.add_re]
+  have hS2 := sSCUT_S2_Re_ge
+  have h2 := sSCUT_eta2_Re_ge_neg_one
+  have h3 := sSCUT_eta3_Re_ge_neg_one
+  have h4 := sSCUT_eta4_Re_ge_neg_one
+  have h5 := sSCUT_eta5_Re_ge_neg_one
+  have h6 := sSCUT_eta6_Re_ge_neg_one
+  have h7 := sSCUT_eta7_Re_ge
+  have hgap : (2 / 7 : ℝ) + (-1) + (-1) + (-1) + (-1) + (-1) + (1 / 12)
+      = (-389 / 84) := by norm_num
+  linarith
+
+/-- Honest 8-term norm shard floor (`-389/84 ≤ ‖S₈‖`, via `Re ≤ ‖·‖`;
+stronger than `-40/7` by exactly `13/12`, still negative — no growth). -/
+theorem sSCUT_S8_norm_ge_neg389div84 :
+    (-389 / 84 : ℝ) ≤ ‖∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k‖ := by
+  have h := sSCUT_S8_Re_ge_neg389div84
+  have hrn := Complex.re_le_norm
+    (∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+  linarith
+
+/-- Shard floor vs the `21/10` bar (gap `21/10 + 389/84 = 2827/420`). -/
+theorem sSCUT_S8_gap_eq :
+    ((21 / 10 : ℝ) - (-389 / 84)) = (2827 / 420 : ℝ) := by
+  norm_num
+
+/-- Shard floor sits below the bar (binding slow stays `2/7`; STOP). -/
+theorem sSCUT_S8_floor_below_bar : (-389 / 84 : ℝ) < (21 / 10 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

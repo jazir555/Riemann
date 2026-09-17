@@ -4882,6 +4882,16 @@ sorry-free infrastructure and the complete commit ledger above.
   nonpos + cpow split + `Re3<=0` (`:2183-2353`). Parity-correct
   next targets filed (k=7/n=8 need cos UPPERS). Slow stays 2/7.
   ZETA-SCUT3 tasked (k=7/n=8 cos-upper shard).
+- 2026-09-17 ZETA-SCUT3 (background `ses_f513f2a1`, proof-only,
+  grep-clean): k=7/n=8 shard banked — log8=3log2 (`:2399`), sharp
+  theta8 (width 1.5e-8), `cos<=-1/4` (`:2442`, -cosδ route),
+  cpow split, r8>=1/3, `Re(eta7)>=+1/12` (`:2566`, parity payoff),
+  S2-Re>=2/7 (`:2590`), trivial Re>=-1 n=2..6, S8 floor -389/84
+  (`:2645`, +13/12 over old -40/7 stall but still negative).
+  Slow stays 2/7, shortfall 127/70. Exact weakness: five
+  phaseless -1 floors; n=3 neutral-or-worse, n=4/6 cos-positive,
+  n=5/7 need absent log5/log7 d9. ZETA-SCUT4 tasked (log5/7
+  inventory + application or new slow idea).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
