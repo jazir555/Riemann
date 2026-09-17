@@ -4623,3 +4623,19 @@ sorry-free infrastructure and the complete commit ledger above.
   (`div_le_div_iff_of_pos_right`, `inv_le_inv0`,
   `norm_cpow_eq_rpow_re_of_pos` in-tree). Next: build-verify warm +
   larger-N slow or tighter tail/factor (WAVE2-ZETA tasked).
+- 2026-09-17 WAVE2-ZETA (background `ses_f529b17f6ffe9CDfGPVaOreM3r`):
+  wall pushed one step in `door3_pilot_R00_zeta.lean:269-355`,
+  grep-clean: `R00_rpow0605_le_153:269` (reuses banked
+  `CS_rpow0605_proved`), `R00_cF_253:273` (factor 3->2.53),
+  `R00_rpow_eight_neg0395_le_half:289` (`8^-0.395<=1/2` via `8=2^3`,
+  `3*0.395=1.185>=1`, no estimated numerics),
+  `R00_eta_tail_M8_le:310` (tail 23->11.1 at M=8/S16 via
+  `zetaCell_even_remainder_le`) + exact gap numerals `:334-353`
+  (all `norm_num`). New cert `(1/5-11.1)/2.53=-1090/253≈-4.308`
+  vs old `-38/5=-7.6` (wall +3.29); threshold `1.9*2.53+11.1=15.907`
+  STILL FAILS, exact gap `15707/1000=15.707` (old 28.5), shortfall
+  `≈6.208` (old 9.5) — `premZeta_R00` not discharged, documented
+  honestly. Build NOT verified (lock owner dead but live builders
+  held it continuously; fast path correctly refused deletion; 2x900s
+  GUARD-WAIT timeouts). Standing sweep clause active: WAVE3-ZETA owns
+  pilot build-error sweep + next push (WAVE3-ZETA tasked).
