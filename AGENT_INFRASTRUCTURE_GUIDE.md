@@ -4510,6 +4510,28 @@ sorry-free infrastructure and the complete commit ledger above.
   module build verification pending (rebuild warm). Next: (i) discharge
   Lambda0<=479 or FE step, (ii) direct deriv/subdivision re-tier,
   (iii) warm rebuild verify (WAVE2-DERIV tasked).
+- 2026-09-17 WAVE2-DERIV (background `ses_f52aaefacffep3MKAVWS69wG2V`):
+  `door3_R02_ball_advance.lean` 117->282 lines, 13 new theorems,
+  grep-clean (no sorry/admit/axiom/simpa). Build BLOCKED honestly
+  (14x GUARD-WAIT 0.4->10.6min, timeout; predates the dead-owner
+  fast-path fix — its wait was the stale 18600 lock, since cleared).
+  Lambda0 discharge: unconditional FE+Stirling needs Gamma/right-zeta
+  caps absent from Mathlib+repo, so `<=479` stays premise; proved
+  `R02_FE_step_of_Lambda:184` (wide premise yields FE-step M:=479,
+  strictly weaker residual) + generic `R02_ballSup_of_LambdaCap:160`
+  (any M>=0 gives ball `0.5+35*M`). Deriv narrowing: generic
+  `R02_deriv_of_ballCap:141` (cap C gives `C/0.25`),
+  `R02_cauchy_scales_4C:155`; M=10 true-scale chain:
+  `R02_ball_assembly10_value:190` (`350.5`),
+  `R02_ballSup350_of_Lambda10:194`,
+  `R02_ball_sharpening_factor47:208` (47x),
+  `R02_deriv1402_of_Lambda10:212` (deriv `<=1402`, drop 65798).
+  Blocking proved: `R02_tier07_needs_ball00175:233`
+  (`C/0.25<=0.07` needs `C<=0.0175` vs true ~10, gap 571x),
+  `R02_tier07_needs_radius240000:242` (needs R>=240000 vs 1.51);
+  tier still open (`1402-0.07=1401.93`). VERDICT: Cauchy tuning
+  provably insufficient — subdivision+re-tier or direct deriv bounds
+  mandatory (WAVE3-DERIV tasked).
 - 2026-09-17 WAVE1-ETA (background `ses_f52ba7d25ffeE6EsYl0uXyPCiB`,
   committed in `2b76f75`): eta-factor group CLOSED in
   `door3_cell_suppliers.lean` (grep-clean, no sorry/admit/axiom/simpa):
