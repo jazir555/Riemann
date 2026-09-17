@@ -584,6 +584,112 @@ theorem R02_polyDeriv_cap_disc {s : ℂ}
   have hsum : (0.74 : ℝ) + 8.25 + 0.5 ≤ 9.5 := by norm_num
   linarith
 
+/-- Pi-factor exponent prime on R02 (local mirror of the banked `door3_deriv_up`
+`piExp_hasDerivAt` shape, no new import). -/
+theorem R02_piExp_hasDerivAt (s : ℂ) :
+    HasDerivAt (fun t : ℂ => -((t : ℂ) / 2)) (-(1 / 2 : ℂ)) s := by
+  have hid : HasDerivAt (fun t : ℂ => t) 1 s :=
+    hasDerivAt_id' (x := s)
+  have hdiv : HasDerivAt (fun t : ℂ => t / 2) (1 / 2) s :=
+    hid.div_const (2 : ℂ)
+  have hneg : HasDerivAt (-(fun t : ℂ => t / 2)) (-(1 / 2)) s :=
+    hdiv.neg
+  have heq : (-(fun t : ℂ => t / 2)) = (fun t : ℂ => -(t / 2)) := rfl
+  rw [heq] at hneg
+  exact hneg
+
+/-- Pi-factor prime on R02 (local mirror of the banked `door3_deriv_up`
+`pi_hasDerivAt` shape via `const_cpow`; `piOf s = π ^ (-(s / 2))`). -/
+theorem R02_pi_hasDerivAt (s : ℂ) :
+    HasDerivAt DerivCauchyBridge.piOf
+      (DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) * (-(1 / 2 : ℂ))) s := by
+  have hc0 : ((Real.pi : ℂ) ≠ 0) := by
+    exact_mod_cast Real.pi_pos.ne'
+  have hf : HasDerivAt (fun t : ℂ => -((t : ℂ) / 2)) (-(1 / 2 : ℂ)) s :=
+    R02_piExp_hasDerivAt s
+  have h := hf.const_cpow (c := (Real.pi : ℂ)) (Or.inl hc0)
+  have heqF : (fun t : ℂ => ((Real.pi : ℂ) ^ (-(t / 2)))) =
+      DerivCauchyBridge.piOf := by
+    unfold DerivCauchyBridge.piOf
+    rfl
+  rw [heqF] at h
+  exact h
+
+/-- Pi-factor deriv equation. -/
+theorem R02_pi_deriv_eq (s : ℂ) :
+    deriv DerivCauchyBridge.piOf s =
+      DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) * (-(1 / 2 : ℂ)) :=
+  (R02_pi_hasDerivAt s).deriv
+
+/-- Log-pi norm cap (local mirror of the banked `door3_deriv_up`
+`logPi_norm_le` shape, no new import). -/
+theorem R02_logPi_norm_le : ‖Complex.log (Real.pi : ℂ)‖ ≤ (2.15 : ℝ) := by
+  have hlogEq : Complex.log (Real.pi : ℂ) = ((Real.log Real.pi : ℝ) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt Real.pi_pos)).symm
+  rw [hlogEq, Complex.norm_real, Real.norm_eq_abs]
+  have hnn : 0 ≤ Real.log Real.pi := by
+    apply Real.log_nonneg
+    linarith [Real.pi_gt_three]
+  rw [abs_of_nonneg hnn]
+  have h1 : Real.log Real.pi ≤ Real.pi - 1 :=
+    Real.log_le_sub_one_of_pos Real.pi_pos
+  have h2 : Real.pi < 3.1416 := Real.pi_lt_d2
+  norm_num at h1 h2 ⊢
+  linarith
+
+/-- Generic pi-factor deriv upper from a value upper. -/
+theorem R02_piDerivUp_of_upper (s : ℂ) (U : ℝ)
+    (hU : ‖DerivCauchyBridge.piOf s‖ ≤ U) :
+    ‖deriv DerivCauchyBridge.piOf s‖ ≤ U * 2.15 / 2 := by
+  have hder : deriv DerivCauchyBridge.piOf s =
+      DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) * (-(1 / 2 : ℂ)) :=
+    (R02_pi_hasDerivAt s).deriv
+  rw [hder]
+  have e1 : ‖DerivCauchyBridge.piOf s * Complex.log (Real.pi : ℂ) *
+      (-(1 / 2 : ℂ))‖ =
+      ‖DerivCauchyBridge.piOf s‖ * ‖Complex.log (Real.pi : ℂ)‖ *
+        ‖(-(1 / 2 : ℂ))‖ := by
+    rw [norm_mul, norm_mul]
+  rw [e1]
+  have hn : ‖(-(1 / 2 : ℂ))‖ = (0.5 : ℝ) := by
+    rw [norm_neg]
+    have e2 : ((1 / 2 : ℂ)) = (1 : ℂ) / 2 := by norm_num
+    rw [e2, norm_div, Complex.norm_one, Complex.norm_two]
+    norm_num
+  rw [hn]
+  have hlog := R02_logPi_norm_le
+  have hnn1 : 0 ≤ ‖DerivCauchyBridge.piOf s‖ := norm_nonneg _
+  have hnn2 : 0 ≤ ‖Complex.log (Real.pi : ℂ)‖ := norm_nonneg _
+  have step1 : ‖DerivCauchyBridge.piOf s‖ * ‖Complex.log (Real.pi : ℂ)‖ ≤
+      U * 2.15 :=
+    mul_le_mul hU hlog hnn1 (by norm_num)
+  have step2 : ‖DerivCauchyBridge.piOf s‖ * ‖Complex.log (Real.pi : ℂ)‖ * 0.5 ≤
+      U * 2.15 * 0.5 :=
+    mul_le_mul_of_nonneg_right step1 (by norm_num)
+  have fin : U * 2.15 * 0.5 = U * 2.15 / 2 := by ring
+  rw [fin] at step2
+  exact step2
+
+/-- Pi-factor value cap on the R02-disc `s`-rect (banked hypothesis-free
+`DerivCauchyBridge.pi_upper_R02_disc`, needs only `0.05 ≤ s.re`). -/
+theorem R02_piVal_cap_disc {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
+    ‖DerivCauchyBridge.piOf s‖ ≤ 1 :=
+  DerivCauchyBridge.pi_upper_R02_disc hre_lo
+
+/-- Exact product feeding the R02-disc pi-deriv cap. -/
+theorem R02_piDeriv_prod1075 : (1 : ℝ) * 2.15 / 2 = 1.075 := by
+  norm_num
+
+/-- Pi-factor deriv cap on the R02-disc `s`-rect
+(`0.05 ≤ re ≤ 0.74`, `-8.25 ≤ im ≤ -5.25`; value side needs only the
+`re` floor, matching the banked `pi_upper_R02_disc` premise). -/
+theorem R02_piDeriv_cap_disc {s : ℂ} (hre_lo : 0.05 ≤ s.re) :
+    ‖deriv DerivCauchyBridge.piOf s‖ ≤ 1.075 := by
+  have hU := R02_piVal_cap_disc hre_lo
+  have h := R02_piDerivUp_of_upper s 1 hU
+  have hprod : (1 : ℝ) * 2.15 / 2 ≤ 1.075 := by norm_num
+  linarith
+
 /-- Route (b): staged retier — any `M ≥ 67200` closes R02 deriv
 conditional on the wide `Λ₀` premise. -/
 theorem R02_retier67200_of_Lambda (M : ℝ) (hM : 67200 ≤ M)
@@ -688,6 +794,14 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_poly_deriv_eq
 #print axioms R02_polyDerivUp_of_abs
 #print axioms R02_polyDeriv_cap_disc
+#print axioms R02_piExp_hasDerivAt
+#print axioms R02_pi_hasDerivAt
+#print axioms R02_pi_deriv_eq
+#print axioms R02_logPi_norm_le
+#print axioms R02_piDerivUp_of_upper
+#print axioms R02_piVal_cap_disc
+#print axioms R02_piDeriv_prod1075
+#print axioms R02_piDeriv_cap_disc
 #print axioms R02_retier67200_of_Lambda
 #print axioms R02_retier68000_of_Lambda
 #print axioms R02_retier1402_of_Lambda10

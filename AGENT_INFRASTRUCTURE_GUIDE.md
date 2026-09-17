@@ -4715,6 +4715,18 @@ sorry-free infrastructure and the complete commit ledger above.
   was the nearest uncovered). Residual: E01/E08/E09/E10 floors +
   E05/E06/E07 numerators (0.645/0.66/0.164) for Stirling-disc wave.
   GAMMA-NEXT2 tasked (E01 or E08 shift-reduction).
+- 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
+  grep-clean): second factor-deriv cap — fPi (only NEXT factor with
+  full majorants): `R02_piExp_hasDerivAt:589`,
+  `R02_pi_hasDerivAt:603` (via banked `const_cpow` pattern),
+  `R02_pi_deriv_eq:619`, `R02_logPi_norm_le:626` (`||log pi||<=2.15`),
+  `R02_piDerivUp_of_upper:641`, `R02_piVal_cap_disc:675` (from banked
+  `pi_upper_R02_disc`), `R02_piDeriv_prod1075:680`,
+  `R02_piDeriv_cap_disc:686` (`||deriv piOf||<=1.075` on R02-disc).
+  Residual: fGamma cap blocked (no Gamma deriv majorant in-tree;
+  Cauchy fallback 60000 recorded in deriv_up); fZeta cap blocked
+  behind `R02_zeta_upper_obligation`. DERIV-NEXT2 tasked (poly+pi
+  partial-product assembly or Gamma-gap unit).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`
