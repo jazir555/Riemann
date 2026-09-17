@@ -4521,6 +4521,22 @@ sorry-free infrastructure and the complete commit ledger above.
   `CS_sine_upper_20128`, `CS_reflection_link`, `CS_S2C_Re_eq`,
   `CS_cos675_nonpos`. Next: verify build green, then adjacent
   micro-lemma (WAVE2-ETA tasked).
+- 2026-09-17 WAVE2-ETA (background `ses_f52a3cb4effe9P2RdJummGtb4M`):
+  build verification HONEST-NEGATIVE (serialization respected): orphaned
+  wave-1 builder dead at `[1288/1756]`, no `BUILD-EXIT`; mutex held by
+  dead owner with 4 sibling builds queued, one bounded attempt
+  (`-RetrySec 30 -MaxWaitSec 300`) hit `GUARD-TIMEOUT` after 10x
+  `GUARD-WAIT` (5.2->10.2min); no second lake started, lock untouched.
+  Full green stays patch-phase (1700-8600 cold modules). Lemma CLOSED:
+  `CS_cos675_nonpos_proved`, `door3_cell_suppliers.lean:318` (+21 lines):
+  `Real.cos_nonpos_of_pi_div_two_le_of_le` with banked `CS_eta_phase1_lt`
+  (`6.75*log2<4.679<=1.5*pi`, `pi_gt_d6`) + floor `4.6787<=6.75*log2`
+  (`CS_log2_ge`) above `pi/2` (`pi_lt_d6`); true cos~-0.03364, margin
+  0.0334 (Python-verified); grep-clean, same discipline. Residual: next
+  adjacent `CS_S2C_Re_eq:305` (cpow Re identity, strictly bigger;
+  needs `Complex.cpow` phase/norm split at sCenter); `CS_complex_S2_Re_ge_one`
+  /`CS_complex_S2_abs_ge_one` one premise nearer (`CS_rpow2_head_upper`
+  already `CS_rpow2_proved`). No sibling files touched (WAVE3-ETA tasked).
 - 2026-09-17 WAVE1-ZETA-PILOT (file observed pre-report
   `door3_pilot_R00_zeta.lean`, registered; formal report pending):
   R00 floor-1.9 pilot stages slow `1/5<=||S2||`, tail `<=23`

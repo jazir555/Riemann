@@ -310,6 +310,27 @@ def CS_S2C_Re_eq : Prop :=
 `cos(6.75·log 2) ≈ -0.0338 ≤ 0`). -/
 def CS_cos675_nonpos : Prop := Real.cos (6.75 * Real.log 2) ≤ 0
 
+/-- CLOSED: cosine nonpositivity at the head phase (true value
+`cos(6.75·log 2) ≈ -0.0338 ≤ 0`). Route: `Real.cos_nonpos_of_pi_div_two_le_of_le`
+with the banked phase cap `CS_eta_phase1_lt` (`6.75·log 2 < 4.679 ≤ 1.5·π`
+via `Real.pi_gt_d6`) and the floor `4.6787 ≤ 6.75·log 2` (via `CS_log2_ge`)
+above `π/2` (via `Real.pi_lt_d6`). -/
+theorem CS_cos675_nonpos_proved : CS_cos675_nonpos := by
+  show Real.cos (6.75 * Real.log 2) ≤ 0
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphase := CS_eta_phase1_lt
+  have hlo : (4.6787 : ℝ) ≤ 6.75 * Real.log 2 := by
+    have h2 := CS_log2_ge
+    have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2.le (by norm_num)
+    have hcap : (4.6787 : ℝ) ≤ 6.75 * 0.693147 := by
+      norm_num
+    linarith
+  have h1 : Real.pi / 2 ≤ 6.75 * Real.log 2 := by linarith
+  have h2 : 6.75 * Real.log 2 ≤ Real.pi + Real.pi / 2 := by linarith
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
 /-- Complex N=2 head real part `≥ 1` (conditional on TRUE premises:
 `r ≤ 0.77`, `cos ≤ 0` give `1 - r·cos ≥ 1`). -/
 theorem CS_complex_S2_Re_ge_one (hEq : CS_S2C_Re_eq) (hCos0 : CS_cos675_nonpos)
