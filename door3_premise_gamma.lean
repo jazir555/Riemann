@@ -2723,4 +2723,98 @@ theorem premGamma_E06_N2_dead_of_upper
   have hceil : (4.60 : ℝ) / 8.41 < 0.66 := premGamma_E06_N2_ceiling_arith
   linarith
 
+/-! ## GAMMA-N4: E06 N = 4 approximant norm identity + rate spec (filed, not fixed).
+
+Honesty check (exact arithmetic, Python-checked this turn): the N = 4 Re-ceiling
+`126.24 / 183.56 ≈ 0.68773` clears `0.66` (`premGamma_E06_N4_ceiling_arith`
+banked), so the ladder does NOT move to N = 5 for necessity. Product
+`1.1975 * 2.1975 * 3.1975 * 4.1975 * 5.1975 ≈ 183.56935 ≥ 183.56`; cpow TRUEs
+`2 ^ 1.1975 ≈ 2.29342 ≤ 2.30`, `3 ^ 1.1975 ≈ 3.72694 ≤ 3.73`,
+`4 ^ 1.1975 ≈ 5.25977 ≤ 5.26` with `5.26 * 24 = 126.24` exact. Rate budget
+`0.027`: `0.66 + 0.027 = 0.687 ≤ 126.24 / 183.56` (margin `≈ 0.00073`).
+`0.688` is round-up only (`0.688 * 183.56 = 126.28928 > 126.24`), so `0.028`
+is NOT banked; `0.027` is the filed budget. Sufficiency still open: the
+ceiling is an approximant UPPER (needs cpow upper + denominator Re lowers);
+the Gamma LOWER needs a finite Seq4 LOWER (needs cpow lower + denominator
+norm uppers) plus the rate below — filed as explicit premises only.
+-/
+
+/-- Missing link L1 at `N = 4` (filed, not proved): `GammaSeq s 4` norm identity
+at E06 shifted `s = w_E06 + 1`, extending the `N = 2` spec shape
+(`premGamma_E06_GammaSeq2_link`). Unfolds
+`Complex.GammaSeq s 4 = (4 : ℂ) ^ s * 24 / (s * (s+1) * (s+2) * (s+3) * (s+4))`
+(`GammaSeq` at `Beta.lean:230`, `4 ! = 24`, `prod_range_succ`), then `norm_div` /
+`norm_mul` / `norm_pow`. Needs only Mathlib; left open because the cpow
+unfolding was not instantiated this turn. -/
+def premGamma_E06_GammaSeq4_link : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4‖ =
+    ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ * 24 /
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖)
+
+/-- Cpow-upper requirement at `N = 4` (filed, not proved): optimistic-but-sound
+`‖(4 : ℂ) ^ s‖ ≤ 5.26` at E06 shifted `s` (TRUE `4 ^ 1.1975 ≈ 5.25977`).
+Feeds the Re-ceiling numerator `5.26 * 24 = 126.24` once `link` + Re lowers land. -/
+def premGamma_E06_cpow4_upper_needed : Prop :=
+  ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+    (5.26 : ℝ)
+
+/-- Missing rate L2 at `N = 4` (filed, not proved): quantitative `GammaSeq`
+convergence at E06 shifted point with budget `0.027` (`0.687 - 0.027 = 0.66`
+exact; `0.687 ≤ 126.24 / 183.56` banked below). Host: a Stirling-disc /
+Binet-enclosure leaf or an explicit `GammaSeq` rate lemma; NOT this file. -/
+def premGamma_E06_GammaSeq4_rate_needed : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.027 : ℝ)
+
+/-- E06 `N = 4` rate-budget arithmetic: `0.66 + 0.027 ≤ 126.24 / 183.56`
+(`≈ 0.687 ≤ 0.68773`). The `0.688` headline is round-up; `0.027` is the sound
+filed budget. -/
+theorem premGamma_E06_N4_rate_budget_arith :
+    (0.66 : ℝ) + 0.027 ≤ 126.24 / 183.56 := by
+  norm_num
+
+/-- E06 `N = 4` limit-closure conditional: finite Seq4 lower `0.687` plus rate
+`0.027` gives the shifted floor `0.66` (`0.687 - 0.027 = 0.66` exact). Feeds
+`premGamma_E06_ge_of_shift` once the Seq4 finite lower (from `link` + cpow
+lower + denominator norm uppers) and the rate leaf land. -/
+theorem premGamma_E06_Gamma_lower_of_Seq4_rate
+    (hSeq : (0.687 : ℝ) ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4‖)
+    (hRate : premGamma_E06_GammaSeq4_rate_needed) :
+    (0.66 : ℝ) ≤
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ := by
+  unfold premGamma_E06_GammaSeq4_rate_needed at hRate
+  have htri : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4‖ ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ +
+      ‖Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ := by
+    have h := norm_add_le
+      (Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4 -
+        Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))
+      (Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))
+    rw [sub_add_cancel] at h
+    exact h
+  linarith
+
+/-- N-ladder cpow-upper requirements list for sufficiency auditing (filed, not
+proved): which cpow norms at which point the ceiling leaf must bound. All at
+E06 shifted `s = w_E06 + 1` (`Re s = 1.1975`): base `2` for `N = 2`
+(TRUE `≈ 2.29342`), base `3` for `N = 3` (TRUE `≈ 3.72694`), base `4` for
+`N = 4` (TRUE `≈ 5.25977`). Denominators are Re lowers
+(`premGamma_E06_N4_Reprod_lower`); the Gamma LOWER additionally needs a cpow
+LOWER + denominator norm uppers + `premGamma_E06_GammaSeq4_rate_needed` —
+that lower is NOT claimed here. -/
+def premGamma_E06_Nladder_cpow_uppers_needed : Prop :=
+  (‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+    (2.30 : ℝ)) ∧
+  (‖(((3 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+    (3.73 : ℝ)) ∧
+  (‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+    (5.26 : ℝ))
+
 end Door3PremiseGamma

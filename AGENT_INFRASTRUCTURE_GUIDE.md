@@ -4939,6 +4939,17 @@ sorry-free infrastructure and the complete commit ledger above.
   clearing (necessity only) + N=2 link/rate specs filed.
   E06 0.66 / E05 0.645 stay open. GAMMA-N4 tasked (E06 N=4
   approximant + cpow uppers).
+- 2026-09-17 GAMMA-N4 (background `ses_f51413b5`, proof-only,
+  grep-clean): E06 N=4 link filed — `GammaSeq4_link:2749`
+  (5-factor norm identity matching 183.56),
+  `cpow4_upper_needed:2761` (`||4^s||<=5.26`, true ~=5.25977),
+  `GammaSeq4_rate_needed:2769` (`<=0.027`, `0.687-0.027=0.66`
+  exact), `N4_rate_budget_arith:2777`,
+  `Gamma_lower_of_Seq4_rate:2785` (finite+rate→0.66 closure),
+  `Nladder_cpow_uppers_needed:2812` (2.30/3.73/5.26). Ladder
+  stays N=4 (no N=5 move). Residual: Seq4 FINITE lower (cpow
+  lower + s+2/3/4 norm uppers unbanked) + rate leaf (absent
+  repo-wide). GAMMA-N4B tasked (Seq4 finite lower).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
