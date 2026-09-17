@@ -4659,6 +4659,20 @@ sorry-free infrastructure and the complete commit ledger above.
   ratio gates `hGateT/hGateB`, mirrored left ball-sup/sliver, joint
   `hSliver`, bottom `hb/hB/hM`, grid `Hgrid` all explicit premises.
   WAVE3-EDGE tasked (sweep + ratio-gate/left-ball-sup push).
+- 2026-09-17 WAVE3-EDGE (background `ses_f526a9b73ffeyMmYwAY25CMn0D`):
+  top sliver gate closed in `door3_rh_wiring.lean:250` (+17, grep-clean):
+  `hSliver_of_topNumericData_011_via_conj` instantiates the `:230`
+  top-only adapter at `mT=11, MT=1000`, closing
+  `hGateT : 0.01<11/1000` with banked
+  `Door3SliverNonvan.sliver_example_gate_top` (`:460-461`) + `norm_num`
+  sides; residual only supplier bounds `hTopLower`/`hTopDeriv` at those
+  numerals. Lock: owner rotated 16068->17740, live every check —
+  correctly never deleted (3x900s GUARD-WAIT, ages to 35.6min, live
+  builders veto autoclear); no BUILD-EXIT, no diagnostics to fix;
+  last green remains `b9ada92` 8-theorem reference. Residual: verify
+  green in a free window; CutR10 `<=0.04` unreachable, CutL10 zeta-owned,
+  `mT/MT` beyond 11/1000 unbanked, mirrored left ball-sup unmatched.
+  WAVE4-EDGE tasked (sweep + bottom-gate mirror).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via

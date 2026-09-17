@@ -243,6 +243,23 @@ theorem hSliver_of_topNumericData_via_conj (mT MT : ℝ)
     Door3SliverNonvan.sliver_hSliver_of_topNumericData_via_conj mT MT
       hmT hMT hδTle hTopLower hTopDeriv hGateT z heq hgt hlt hne hs
 
+/-- `hSliver` from TOP numeric data at the example ratio `11/1000`, bottom via
+proved conjugation: the ratio gate `0.01 < 11/1000` is closed by the banked
+`sliver_example_gate_top` (plus `norm_num` side conditions), leaving only the
+two supplier bounds (`hTopLower`/`hTopDeriv`) as residual premises. -/
+theorem hSliver_of_topNumericData_011_via_conj
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (11 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - 11 / 1000) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ)) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  hSliver_of_topNumericData_via_conj (11 : ℝ) (1000 : ℝ)
+    (by norm_num) (by norm_num) (by norm_num)
+    hTopLower hTopDeriv Door3SliverNonvan.sliver_example_gate_top
+
 /-- Interior edge strips (`0.49 ≤ |Im| < 1/2` on `-10 < Re < 10`) from the
 same uniform outer-bound certificates that feed the sliver: top/bottom strip
 premises plus the two numeric width gates (`δ ≥ 0.01`). This is the
