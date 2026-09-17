@@ -543,6 +543,75 @@ theorem gridH_c03_of_R03 (h : CentralCoverAssembly.R03_leaf_obligations) :
     ((-6, -3.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
     CentralCoverAssembly.R03_mem_gridFine rfl
 
+/-- Banked `c04 = (-4, -1.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R04_H_instance` at the banked membership
+`R04_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R04_leaf_obligations` only — the two numerical enclosures
+(`0.05 + 0.07 * radius ≤ ‖ξ‖` at `s = 0.395 - 2.75·I`, uniform
+`‖ξ'‖ ≤ 0.07` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1642` (`R04_leaf_obligations`) and `:1671`
+(`R04_H_instance`). -/
+theorem gridH_c04_of_R04 (h : CentralCoverAssembly.R04_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R04_H_instance h
+    ((-4, -1.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R04_mem_gridFine rfl
+
+/-- Banked `c05 = (-2, 0.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R05_H_instance` at the banked membership
+`R05_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R05_leaf_obligations` only — the two numerical enclosures
+(`0.15 + 0.06 * radius ≤ ‖ξ‖` at `s = 0.395 - 0.75·I`, uniform
+`‖ξ'‖ ≤ 0.06` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1728` (`R05_leaf_obligations`) and `:1757`
+(`R05_H_instance`). -/
+theorem gridH_c05_of_R05 (h : CentralCoverAssembly.R05_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R05_H_instance h
+    ((-2, 0.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R05_mem_gridFine rfl
+
+/-- Banked `c06 = (0, 2.5, 0.01, 0.2)` leaf of the grid-fine `Hgrid`
+premise (consumed by `mainBand_upper_of_strip_and_grid` via
+`closed_inner_nonvanishing_of_fenced_grid_fine`): re-exports the sorry-free
+`CentralCoverAssembly.R06_H_instance` at the banked membership
+`R06_mem_gridFine`, in exactly the `Hgrid` existential shape. Honest
+residual: `R06_leaf_obligations` only — the two numerical enclosures
+(`0.15 + 0.06 * radius ≤ ‖ξ‖` at `s = 0.395 + 1.25·I`, uniform
+`‖ξ'‖ ≤ 0.06` on the rect), unprovable in Mathlib per
+`central_cover_assembly.lean:1814` (`R06_leaf_obligations`) and `:1843`
+(`R06_H_instance`). -/
+theorem gridH_c06_of_R06 (h : CentralCoverAssembly.R06_leaf_obligations) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).1 ∧
+      R.x1 = ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.1 ∧
+      R.y0 = ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.1 ∧
+      R.y1 = ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ).2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  CentralCoverAssembly.R06_H_instance h
+    ((0, 2.5, 0.01, 0.2) : ℝ × ℝ × ℝ × ℝ)
+    CentralCoverAssembly.R06_mem_gridFine rfl
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
@@ -571,3 +640,6 @@ end Door3RHWiring
 #print axioms Door3RHWiring.gridH_c00_of_R00
 #print axioms Door3RHWiring.gridH_c02_of_R02
 #print axioms Door3RHWiring.gridH_c03_of_R03
+#print axioms Door3RHWiring.gridH_c04_of_R04
+#print axioms Door3RHWiring.gridH_c05_of_R05
+#print axioms Door3RHWiring.gridH_c06_of_R06

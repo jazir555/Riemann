@@ -4704,6 +4704,11 @@ sorry-free infrastructure and the complete commit ledger above.
   Leaves done 3/40; each residual = that cell's leaf obligations
   (center + deriv tier, unprovable-in-Mathlib per assembly).
   EDGE-NEXT4 tasked (c04+ replication run).
+- 2026-09-17 EDGE-NEXT4 (background `ses_f514d34e`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c04_of_R04:556`,
+  `gridH_c05_of_R05:579`, `gridH_c06_of_R06:602` (no skips in
+  R04–R06; R01 sole skip by design). Leaves done 6/40.
+  EDGE-NEXT5 tasked (c07+ replication run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
