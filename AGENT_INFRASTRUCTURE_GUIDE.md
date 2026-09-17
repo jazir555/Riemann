@@ -4774,6 +4774,16 @@ sorry-free infrastructure and the complete commit ledger above.
   6-term nonpos — no unconditional Im(S6)>0 (needs Im(S4) lower,
   out of scope). S4 1.0342 stands; true Im(S6)~=1.00<1.56 noted.
   ETA-NEXT9 tasked (Im(S4) lower n=1..4).
+- 2026-09-17 ETA-NEXT9 (background `ses_f513e6fd`, proof-only,
+  grep-clean): Im(S4) LOWER banked — splits n=1..4 (`:3039-3148`),
+  sin windows (`sin2<=-0.99 :3186`, `sin3>=0 :3245`,
+  `sin4<=0.068 :3285` via sin_add+banked pi lemmas),
+  `CS_complex_S4_Im_ge_07017:3396` (Im>=0.7425-0.0408=0.7017;
+  true ~=1.307), `CS_complex_S6_Im_ge_01517:3407` + abs
+  (`:3415`) + below-Re note (`:3423`). Honest stall on S6
+  (0.1517<0.95); S4 1.0342 stands. KEY UNLOCK: Re+Im Pythagoras
+  pair gives |S4|>=sqrt(1.56^2+0.7017^2)~=1.71 > 1.56.
+  ETA-NEXT10 tasked (S4 Pythagoras pair + feed).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740

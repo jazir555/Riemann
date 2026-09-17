@@ -3012,4 +3012,431 @@ theorem CS_complex_S6_abs_ge_Im :
 #print axioms CS_complex_S6_Im_ge_of_S4
 #print axioms CS_complex_S6_abs_ge_Im
 
+/-! ## §A10. Complex S4 Im splits for n=1..4 + Im(S4) LOWER (ETA-NEXT9)
+
+Token-for-token mirrors of the n=5,6 Im splits (`cpow_def_of_ne_zero` +
+`exp_im`) with banked log bounds (`log1 = 0` exact via `Real.log_one`,
+`log2` 6-digit, `log3` coarse, `log4 = 2·log2` exact); sin-phase windows
+per n; then `Im(S4)` LOWER with exact numerals.
+
+Honest outcome (STALL, do not force):
+* `Im₂ = r₂·sin φ₂ ≤ -0.7425` (`r₂ ≥ 0.75` banked, `sin φ₂ ≤ -0.99`
+  via `φ₂ - 3π/2 ∈ [-0.14, 0]`, `sin = -cos`, quadratic floor).
+* `Im₃ = r₃·sin φ₃ ≥ 0` (`r₃ ≥ 0`, `sin φ₃ ≥ 0` via `φ₃ - 2π ∈ [0, π]`).
+* `Im₄ = r₄·sin φ₄ ≤ 0.0408` (`r₄ ≤ 0.60` banked, `sin φ₄ ≤ 0.068`
+  via `δ = 3π - φ₄ ∈ [0, 0.068]`, `sin φ₄ = sin δ ≤ δ`).
+* Hence `Im(S₄) = -Im₂ + Im₃ - Im₄ ≥ 0.7425 - 0.0408 = 0.7017`
+  (TRUE `≈ 1.307`; weak but unconditional and committable).
+* Tail: `Im(S₆) ≥ Im(S₄) - 0.55 ≥ 0.1517` (via banked
+  `CS_complex_S6_Im_ge_of_S4` + `CS_Im5_ge_neg055` + `CS_Im6_nonpos`).
+* `0.1517 < 0.95`: the Im-only route does NOT beat the banked Re-route
+  (`CS_complex_S6_Re_ge_095`); live best STANDS (complex-S4 `slow = 1.56`,
+  `cF = 1.853`, shortfall `1.0342`). True `|S₆| ≈ 1.70` needs the
+  proved `Re+Im` Pythagoras pair (out of scope this turn). -/
+
+/-- Cpow imaginary-part split for `1^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow5_sCenter_im`; `log 1 = 0` exact). -/
+theorem CS_cpow1_sCenter_im : ((((1 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (1 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 1) := by
+  have h1pos : (0 : ℝ) < 1 := by norm_num
+  have hxC : ((1 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h1pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((1 : ℝ) : ℂ) = (((Real.log 1 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h1pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 1 : ℝ)) : ℂ)).re = Real.log 1 := Complex.ofReal_re _
+  have hzim : ((((Real.log 1 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 1 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 1 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 1 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 1 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 1 * (-(0.395 : ℝ)))
+      = (1 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h1pos _).symm
+  have hsin : Real.sin (Real.log 1 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 1) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `2^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow2_sCenter_re`: `Complex.exp_im` + `sin` in place of
+`Complex.exp_re` + `cos`). -/
+theorem CS_cpow2_sCenter_im : ((((2 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2) := by
+  have h2pos : (0 : ℝ) < 2 := by norm_num
+  have hxC : ((2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h2pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((2 : ℝ) : ℂ) = (((Real.log 2 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h2pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
+  have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 2 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 2 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 2 * (-(0.395 : ℝ)))
+      = (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h2pos _).symm
+  have hsin : Real.sin (Real.log 2 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 2) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `3^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow3_sCenter_re`). -/
+theorem CS_cpow3_sCenter_im : ((((3 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) := by
+  have h3pos : (0 : ℝ) < 3 := by norm_num
+  have hxC : ((3 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h3pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((3 : ℝ) : ℂ) = (((Real.log 3 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h3pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
+  have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 3 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 3 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 3 * (-(0.395 : ℝ)))
+      = (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h3pos _).symm
+  have hsin : Real.sin (Real.log 3 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 3) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `4^{-s}` at `sCenter` (token-for-token
+mirror of `CS_cpow4_sCenter_re`). -/
+theorem CS_cpow4_sCenter_im : ((((4 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4) := by
+  have h4pos : (0 : ℝ) < 4 := by norm_num
+  have hxC : ((4 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h4pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((4 : ℝ) : ℂ) = (((Real.log 4 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h4pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 4 : ℝ)) : ℂ)).re = Real.log 4 := Complex.ofReal_re _
+  have hzim : ((((Real.log 4 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 4 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 4 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 4 * (-(0.395 : ℝ)))
+      = (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h4pos _).symm
+  have hsin : Real.sin (Real.log 4 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 4) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Sine upper at `φ₂ = 6.75·log 2` (`≤ -0.99`; TRUE `≈ -0.9994`).
+Route (mirror of `CS_sin5_upper_neg099` without the `2π` shift):
+`d = φ₂ - 3π/2 ∈ [-0.14, 0]`, `sin φ₂ = -cos d ≤ -0.99`
+(`cos d ≥ 1 - d²/2 ≥ 0.99`). -/
+theorem CS_sin2_upper_neg099 :
+    Real.sin (6.75 * Real.log 2) ≤ (-0.99 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h2lo := CS_log2_ge
+  have h2hi := CS_log2_le
+  have hlo : (4.67874 : ℝ) ≤ 6.75 * Real.log 2 := by
+    have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+    have hcap : (4.67874 : ℝ) ≤ 6.75 * 0.693147 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 2 ≤ (4.67875 : ℝ) := by
+    have hmul : 6.75 * Real.log 2 ≤ 6.75 * (0.693148 : ℝ) :=
+      mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+    have hcap : (6.75 : ℝ) * 0.693148 ≤ 4.67875 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 2 with hx_def
+  set d : ℝ := x - 3 * Real.pi / 2 with hd_def
+  have hd_lo : (-0.14 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have h32eq : (3 : ℝ) * Real.pi / 2 = Real.pi + Real.pi / 2 := by
+    ring
+  have hcos32 : Real.cos (3 * Real.pi / 2) = 0 := by
+    rw [h32eq, Real.cos_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin32 : Real.sin (3 * Real.pi / 2) = -1 := by
+    rw [h32eq, Real.sin_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hx_eq : x = 3 * Real.pi / 2 + d := by
+    rw [hd_def]
+    ring
+  have hsin_eq : Real.sin (3 * Real.pi / 2 + d) = -Real.cos d := by
+    rw [Real.sin_add, hsin32, hcos32]
+    ring
+  have hsq : d ^ 2 ≤ (0.14 : ℝ) ^ 2 := by
+    have h1 : (0 : ℝ) ≤ d + 0.14 := by linarith
+    have h2 : (0 : ℝ) ≤ -d := by linarith
+    nlinarith [mul_nonneg h1 h2]
+  have hcosd_lo : (0.99 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hnum : (0.99 : ℝ) ≤ 1 - (0.14 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hx_eq, hsin_eq]
+  linarith
+
+/-- Sine nonnegativity at `φ₃ = 6.75·log 3` (TRUE `≈ 0.905 ≥ 0`).
+Route (mirror of `CS_cos3_nonneg`): `φ₃ ∈ [7.10707, 7.67003]` from
+banked coarse `log3` bounds, so `e = φ₃ - 2π ∈ [0, π]` and
+`sin φ₃ = sin e ≥ 0` via `Real.sin_add_two_pi` +
+`Real.sin_nonneg_of_nonneg_of_le_pi`. -/
+theorem CS_sin3_nonneg :
+    (0 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h3lo := CS_log_three_ge
+  have h3hi := CS_log_three_le
+  have hlo : (7.10707 : ℝ) ≤ 6.75 * Real.log 3 := by
+    have hmul : 6.75 * (1.0529 : ℝ) ≤ 6.75 * Real.log 3 :=
+      mul_le_mul_of_nonneg_left h3lo (by norm_num)
+    have hcap : (7.10707 : ℝ) ≤ 6.75 * 1.0529 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 3 ≤ (7.67003 : ℝ) := by
+    have hmul : 6.75 * Real.log 3 ≤ 6.75 * 1.1363 :=
+      mul_le_mul_of_nonneg_left h3hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.1363 ≤ 7.67003 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : (0 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ Real.pi := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hsin_eq : Real.sin x = Real.sin e := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  rw [hsin_eq]
+  exact Real.sin_nonneg_of_nonneg_of_le_pi he_lo he_hi
+
+/-- Sine upper at `φ₄ = 6.75·log 4` (`≤ 0.068`; TRUE `≈ 0.0673`).
+Route: `φ₄ ∈ [9.35748, 9.35750]` via `CS_log_four_eq` + 6-digit `log2`
+bounds, so `δ = 3π - φ₄ ∈ [0, 0.068]`; `φ₄ = (π - δ) + 2π`,
+`sin φ₄ = sin(π - δ) = sin δ ≤ δ ≤ 0.068` via `Real.sin_add_two_pi`
++ a `Real.sin_add` expansion (banked `sin_pi`/`cos_pi`/`sin_neg` only)
++ `Real.sin_le`. -/
+theorem CS_sin4_upper_0068 :
+    Real.sin (6.75 * Real.log 4) ≤ (0.068 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h4 : Real.log 4 = 2 * Real.log 2 := CS_log_four_eq
+  have h2lo := CS_log2_ge
+  have h2hi := CS_log2_le
+  have hphi_lo : (9.35748 : ℝ) ≤ 6.75 * Real.log 4 := by
+    rw [h4]
+    have hmul : 13.5 * (0.693147 : ℝ) ≤ 13.5 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+    have hcap : (9.35748 : ℝ) ≤ 13.5 * 0.693147 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  have hphi_hi : 6.75 * Real.log 4 ≤ (9.35750 : ℝ) := by
+    rw [h4]
+    have hmul : 13.5 * Real.log 2 ≤ 13.5 * 0.693148 :=
+      mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+    have hcap : (13.5 : ℝ) * 0.693148 ≤ 9.35750 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  set x : ℝ := 6.75 * Real.log 4 with hx_def
+  set d : ℝ := 3 * Real.pi - x with hd_def
+  have hd_lo : (0 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.068 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hx_eq : x = (Real.pi - d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hsin2pi : Real.sin x = Real.sin (Real.pi - d) := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  have hpi_sub : Real.sin (Real.pi - d) = Real.sin d := by
+    have h1 : Real.pi - d = Real.pi + (-d) := by ring
+    rw [h1, Real.sin_add, Real.sin_pi, Real.cos_pi]
+    have h2 : Real.sin (-d) = -Real.sin d := Real.sin_neg (x := d)
+    rw [h2]
+    ring
+  have hle : Real.sin d ≤ d := Real.sin_le hd_lo
+  rw [hsin2pi, hpi_sub]
+  linarith
+
+/-- 2-term Im HONEST UPPER (`≤ -0.7425`; TRUE `≈ -0.7600`):
+`r₂ ≥ 0.75` banked, `sin φ₂ ≤ -0.99` above. -/
+theorem CS_Im2_le_neg07425 :
+    (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2) ≤ (-0.7425 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hrl : (0.75 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow2_low075_proved
+  have hsup : Real.sin (6.75 * Real.log 2) ≤ (-0.99 : ℝ) :=
+    CS_sin2_upper_neg099
+  have h1 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2)
+      ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) * (-0.99) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * (-0.99) ≤ (0.75 : ℝ) * (-0.99) :=
+    mul_le_mul_of_nonpos_right hrl (by norm_num)
+  have hmul : (0.75 : ℝ) * (-0.99) = -0.7425 := by norm_num
+  linarith
+
+/-- 3-term Im nonnegativity (`≥ 0`; TRUE `≈ 0.586`): `r₃ ≥ 0`,
+`sin φ₃ ≥ 0` above. -/
+theorem CS_Im3_nonneg :
+    (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) := by
+  have hr0 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hs : (0 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := CS_sin3_nonneg
+  exact mul_nonneg hr0 hs
+
+/-- 4-term Im upper (`≤ 0.0408`; TRUE `≈ 0.0389`): `r₄ ≤ 0.60`
+banked, `sin φ₄ ≤ 0.068` above (`0.60·0.068 = 0.0408`). -/
+theorem CS_Im4_le_00408 :
+    (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4) ≤ (0.0408 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ) :=
+    CS_rpow4neg_upper_proved
+  have hsup : Real.sin (6.75 * Real.log 4) ≤ (0.068 : ℝ) :=
+    CS_sin4_upper_0068
+  have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4)
+      ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) * (0.068 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (4 : ℝ) ^ (-(0.395 : ℝ)) * (0.068 : ℝ) ≤ (0.60 : ℝ) * (0.068 : ℝ) :=
+    mul_le_mul_of_nonneg_right hru (by norm_num)
+  have hmul : (0.60 : ℝ) * (0.068 : ℝ) = 0.0408 := by norm_num
+  linarith
+
+/-- Imaginary-part identity for the complex S4 (cast + `sub_im` /
+`add_im` / `one_im` + the three per-term cpow Im splits; the `1` term
+contributes `0`). -/
+theorem CS_S4C_Im_eq :
+    (CS_S4C).im = 0 - (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2)
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3)
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4) := by
+  unfold CS_S4C
+  have h2 : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have h3 : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  have h4c : ((4 : ℂ)) = ((((4 : ℝ)) : ℂ)) := by simp
+  rw [h2, h3, h4c]
+  simp only [Complex.add_im, Complex.sub_im, Complex.one_im,
+    CS_cpow2_sCenter_im, CS_cpow3_sCenter_im, CS_cpow4_sCenter_im]
+
+/-- Complex-S4 imaginary part `≥ 0.7017` (PROVED, unconditional):
+`-Im₂ ≥ 0.7425`, `Im₃ ≥ 0`, `-Im₄ ≥ -0.0408`, so
+`Im(S₄) ≥ 0.7425 - 0.0408 = 0.7017` (TRUE `≈ 1.307`). -/
+theorem CS_complex_S4_Im_ge_07017 :
+    (0.7017 : ℝ) ≤ (CS_S4C).im := by
+  have hEq := CS_S4C_Im_eq
+  have hT2 := CS_Im2_le_neg07425
+  have hT3 := CS_Im3_nonneg
+  have hT4 := CS_Im4_le_00408
+  rw [hEq]
+  linarith
+
+/-- Unconditional S6 Im lower `≥ 0.1517` via the banked conditional link:
+`Im(S₆) ≥ Im(S₄) - 0.55 ≥ 0.7017 - 0.55 = 0.1517`. -/
+theorem CS_complex_S6_Im_ge_01517 :
+    (0.1517 : ℝ) ≤ (CS_S6C).im := by
+  have hS4 : (0.7017 : ℝ) ≤ (CS_S4C).im := CS_complex_S4_Im_ge_07017
+  have h := CS_complex_S6_Im_ge_of_S4 0.7017 hS4
+  have hnum : (0.7017 : ℝ) - 0.55 = 0.1517 := by norm_num
+  linarith
+
+/-- `‖S₆‖ ≥ 0.1517` triangle step (`‖z‖ ≥ Im z`). -/
+theorem CS_complex_S6_abs_ge_01517 :
+    (0.1517 : ℝ) ≤ ‖CS_S6C‖ := by
+  have hIm := CS_complex_S6_Im_ge_01517
+  have hle : (CS_S6C).im ≤ ‖CS_S6C‖ := CS_complex_S6_abs_ge_Im
+  linarith
+
+/-- Honest stall numeral: the new Im-only `0.1517` does NOT beat the
+banked Re-route `0.95` (Pythagoras `Re+Im` pair out of scope). -/
+theorem CS_ImS6_below_Re : (0.1517 : ℝ) < (0.95 : ℝ) := by
+  norm_num
+
+#print axioms CS_cpow1_sCenter_im
+#print axioms CS_cpow2_sCenter_im
+#print axioms CS_cpow3_sCenter_im
+#print axioms CS_cpow4_sCenter_im
+#print axioms CS_sin2_upper_neg099
+#print axioms CS_sin3_nonneg
+#print axioms CS_sin4_upper_0068
+#print axioms CS_Im2_le_neg07425
+#print axioms CS_Im3_nonneg
+#print axioms CS_Im4_le_00408
+#print axioms CS_S4C_Im_eq
+#print axioms CS_complex_S4_Im_ge_07017
+#print axioms CS_complex_S6_Im_ge_01517
+#print axioms CS_complex_S6_abs_ge_01517
+#print axioms CS_ImS6_below_Re
+
 end Door3CellSuppliers
