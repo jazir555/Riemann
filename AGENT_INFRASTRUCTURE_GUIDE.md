@@ -4582,6 +4582,31 @@ sorry-free infrastructure and the complete commit ledger above.
   `CS_complex_S2_abs_ge_one` dischargeable (all three premises now
   closed: S2C + cos675 + rpow2). Standing sweep clause active:
   WAVE4-ETA owns suppliers build-error sweep (WAVE4-ETA tasked).
+- 2026-09-17 WAVE1-EDGE (background `ses_f52ba7d11ffe2qDtg1yOVVnRST`,
+  committed in `2b76f75`): `door3_rh_wiring.lean` extended +194 lines,
+  12 new theorems, grep-clean (imports +`door3_cutL10_remainders`,
+  `door3_sliver_nonvan`, `door3_closed_cover`; no cycles):
+  `cutL10_gamma_banked:140` (conjugacy over right-lane Stirling cert,
+  transitively hypothesis-free), `cutL10_zeta_of_etaCert:144`
+  (eta-numeral adapter `hSdef/hSlow/hTail/hEnough/hLower`),
+  `cutL10_deriv_of_ballSup:157`, `cutL10_fencing_of_etaCert_and_ballSup:165`
+  (full `CellFencingHypotheses CutL10 0.001 0.04`),
+  `hLeft_of_cutL10_fencing:182` (exact `hLeft` capstone shape),
+  `xiCutoffLines10_of_both_fencings:193`, `hSliver_of_edgeNumericData:205`
+  / `hSliver_of_topNumericData_via_conj:230` (exact `hSliver` from
+  outer-bound CENTER+DERIV+width gates),
+  `xiCentralEdgeStrips10_of_uniformStrips:251` (first derivation of
+  edge strips from uniform certs — no prior one existed),
+  `bottomStrip_obligations_of_uniform_closed:278`,
+  `mainBand_upper_of_strip_and_grid:292` (upper main band from bottom
+  strip + closed-grid fencing), `#print axioms` lines throughout.
+  Builds: 2x900s consumed by GUARD-WAIT + one ACQUIRED killed mid-build
+  by timeout; retry via agent 25m wakeup (queue had 22 live builders).
+  Residual (exact premises): CutR10 `hSdef/hSlow/hTail/hEnough` + ball-sup
+  `<=0.04`; CutL10 `hLower` + `hProd`/`hJoint`; edge outer-bound numerals
+  + width gates; bottom-strip `hb`/`hB` + `B/(1/2)<=1`; grid-fine `Hgrid`;
+  lower main-band conjugated strip. Standing sweep clause active:
+  WAVE2-EDGE owns rh_wiring build-error sweep (WAVE2-EDGE tasked).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
