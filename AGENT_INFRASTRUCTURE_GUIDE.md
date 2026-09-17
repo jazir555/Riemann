@@ -4721,6 +4721,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean): 3 more leaves — `gridH_c13_of_R13:763`,
   `gridH_c14_of_R14:786`, `gridH_c15_of_R15:809` (no skips).
   Leaves done 15/40. EDGE-NEXT8 tasked (c16+ replication run).
+- 2026-09-17 EDGE-NEXT8 (background `ses_f5149011`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c16_of_R16:832`,
+  `gridH_c17_of_R17:855`, `gridH_c18_of_R18:878` (no skips).
+  Leaves done 18/40. EDGE-NEXT9 tasked (c19+ replication run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4959,6 +4963,17 @@ sorry-free infrastructure and the complete commit ledger above.
   gain `0.31` — biggest slow gain). BUILD-EXIT 1→0 in 35s
   (self-fixed `add_comm` rewrite mismatch). Slow 1.25->1.56, needs
   >=2.5942 still. ETA-NEXT6 tasked (complex S6 slow).
+- 2026-09-17 ETA-NEXT6 (background `ses_f514d8ab`, build owner,
+  grep-clean): S6 HONEST REGRESSION — cpow5/6 splits `:2322/:2358`,
+  rpow5/6 bounds, cos5 bracket `[-0.14,0]` (`:2447/:2484`), cos6>=0
+  (`:2550`, upper trivially-signed fallback documented),
+  `CS_complex_S6_Re_ge_095:2621` (`Re>=0.953>=0.95`) +
+  S6 feed (shortfall `1.6442` vs S4 `1.0342`, regression 0.61).
+  BUILD-EXIT 1→0 in 36s (self-fixed redundant `ring`). KEY FIND:
+  true Re(S6)~=1.366 < Re(S4)~=1.874 (series oscillates; Re-only
+  S6 cannot beat S4) but |S6|~=1.70 > 1.56 — the IM ROUTE
+  (Im(S6) lower) would beat S4. S4 1.0342 stands as live best.
+  ETA-NEXT7 tasked (Im(S6) lower route).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
