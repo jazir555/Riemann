@@ -4763,6 +4763,14 @@ sorry-free infrastructure and the complete commit ledger above.
   pre-computed (E09: |w|~=3.6304→M=3.64, num 0.01638; E10:
   |w|~=4.3795→M=4.38, num 0.00657). Residual: E09/E10 triples +
   5 numerators. GAMMA-NEXT4 tasked (E09+E10, numerals ready).
+- 2026-09-17 GAMMA-NEXT4 (background `ses_f514f6c31`, proof-only,
+  grep-clean): E09+E10 triples banked (`:1015-1116`, all numerals
+  Python-verified) — E-ROW SHIFT-REDUCTION COVERAGE COMPLETE
+  (E01/E05/E06/E07/E08/E09/E10). Residual: 7 shifted numerators
+  (E05 0.645 / E06 0.66 / E07 0.164 / E01 0.0314 / E08 0.0528 /
+  E09 0.01638 / E10 0.00657) for the STIRLING-DISC wave — needs Gamma
+  lower bounds at shifted w+1 points, new machinery. GAMMA-STIRLING
+  tasked (survey + first numerator attempt).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
