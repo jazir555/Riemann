@@ -910,6 +910,66 @@ def R02_zetaVal_missingNumeral_spec : Prop :=
   ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
     ‖zeta s‖ ≤ 10
 
+/-- Full 4-factor DERIV assembly with banked `PQ` caps and banked Gamma value
+`UG = 40`: with `Vpq = 42`, `Dpq = 54.65`, `UG = 40` the downstream bound is
+`54.65 * 40 * UZ + 42 * DG * UZ + 42 * 40 * DZ`.
+Mirrors `R02_fullDerivUp_bankedPQ_shape` (:817) with the banked Gamma value
+cap folded in (`hVG : ‖AG‖ ≤ 40`, discharged on-rect by
+`R02_gammaVal_cap_disc` below); `UZ DG DZ` stay explicit premises and no
+analyticity is assumed — only the three-term Leibniz norm from
+`R02_fullDerivUp_of_factorCaps`. Residual owners: `UZ` zeta-upper lane
+(`R02_zetaVal_missingNumeral_spec`, unsatisfiable from banked uppers — zeta
+lane owns it); `DG` Gamma-deriv machinery (`R02_gammaDeriv_obligation`,
+tasked separately); `DZ` zeta-deriv lane (no banked cap in-tree; owner TBD). -/
+theorem R02_fullDerivUp_bankedPQG_shape (UZ DG DZ : ℝ)
+    (APQ APQ' AG AG' AZ AZ' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ 40) (hVZ : ‖AZ‖ ≤ UZ)
+    (hDG : ‖AG'‖ ≤ DG) (hDZ : ‖AZ'‖ ≤ DZ)
+    (hUZ0 : 0 ≤ UZ) (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ) :
+    ‖APQ' * AG * AZ + APQ * AG' * AZ + APQ * AG * AZ'‖ ≤
+      54.65 * 40 * UZ + 42 * DG * UZ + 42 * 40 * DZ :=
+  R02_fullDerivUp_bankedPQ_shape 40 UZ DG DZ
+    APQ APQ' AG AG' AZ AZ' hVpq hDpq hVG hVZ hDG hDZ
+    (by norm_num) hUZ0 hDG0 hDZ0
+
+/-- Zeta-deriv gap as a taskable unit (obligation, not a proof): the exact
+statement the full 4-factor deriv assembly still needs is
+`‖deriv zeta s‖ ≤ DZ` uniformly on the R02-disc `s`-rect.
+No zeta-deriv cap is banked in-tree, so `DZ` remains open (owner TBD —
+zeta-deriv lane; mirrors `R02_gammaDeriv_obligation`). -/
+def R02_zetaDeriv_obligation (DZ : ℝ) : Prop :=
+  ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖deriv zeta s‖ ≤ DZ
+
+/-- Banked-`UZ = 10` instance of the full 4-factor DERIV assembly: the bound
+fires as `54.65 * 40 * 10 + 42 * DG * 10 + 42 * 40 * DZ` the day the zeta
+lane banks `R02_zetaVal_missingNumeral_spec` (`‖zeta s‖ ≤ 10` on the rect).
+Exact firing condition: `hZ10` (zeta-upper obligation) + the four rect
+hypotheses + `‖APQ‖ ≤ 42`, `‖APQ'‖ ≤ 54.65`, `‖AG‖ ≤ 40` (discharged
+on-rect by `R02_polyPiVal_cap_disc` / `R02_polyPiDeriv_cap_disc` /
+`R02_gammaVal_cap_disc`) + explicit `DG` / `DZ` caps with nonnegativity.
+Honest status: `hZ10` is NOT satisfiable this turn (banked best uppers
+`≤ 1012` / `≤ 934` exceed `10`; see the `R02_zetaVal_missingNumeral_spec`
+docstring) and `DG` / `DZ` stay open — so this instance is armed but
+unfired. -/
+theorem R02_fullDerivUp_bankedUZ10_of_zetaUpper (DG DZ : ℝ) {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (APQ APQ' AG AG' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ 40)
+    (hDG : ‖AG'‖ ≤ DG) (hDZ : ‖deriv zeta s‖ ≤ DZ)
+    (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ)
+    (hZ10 : R02_zetaVal_missingNumeral_spec) :
+    ‖APQ' * AG * zeta s + APQ * AG' * zeta s + APQ * AG * deriv zeta s‖ ≤
+      54.65 * 40 * 10 + 42 * DG * 10 + 42 * 40 * DZ := by
+  have hVZ : ‖zeta s‖ ≤ (10 : ℝ) :=
+    hZ10 s hre_lo hre_hi him_lo him_hi
+  exact R02_fullDerivUp_bankedPQG_shape 10 DG DZ
+    APQ APQ' AG AG' (zeta s) (deriv zeta s)
+    hVpq hDpq hVG hVZ hDG hDZ (by norm_num) hDG0 hDZ0
+
 /-- Generic `(PQ) * G` deriv upper from value + deriv caps (two-term Leibniz
 norm; `PQ` is treated as one banked factor). -/
 theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)
@@ -1096,6 +1156,8 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_polyPiGammaVal_cap_disc
 #print axioms R02_polyPiGammaZetaValUp_of_caps
 #print axioms R02_polyPiGammaZetaVal_cap_disc_of_zeta
+#print axioms R02_fullDerivUp_bankedPQG_shape
+#print axioms R02_fullDerivUp_bankedUZ10_of_zetaUpper
 #print axioms R02_pqGammaDerivUp_of_factorCaps
 #print axioms R02_pqGammaDeriv_prod2186
 #print axioms R02_pqGammaDerivUp_bankedPQG_shape

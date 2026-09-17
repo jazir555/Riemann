@@ -4709,6 +4709,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `gridH_c05_of_R05:579`, `gridH_c06_of_R06:602` (no skips in
   R04–R06; R01 sole skip by design). Leaves done 6/40.
   EDGE-NEXT5 tasked (c07+ replication run).
+- 2026-09-17 EDGE-NEXT5 (background `ses_f514c548`, proof-only,
+  grep-clean): 3 more leaves — `gridH_c07_of_R07:625`,
+  `gridH_c08_of_R08:648`, `gridH_c09_of_R09:671` (no skips).
+  Leaves done 9/40. EDGE-NEXT6 tasked (c10+ replication run).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4803,6 +4807,16 @@ sorry-free infrastructure and the complete commit ledger above.
   quantitatively DEAD (budget S*G<=4.87 vs banked S~=6.5 alone) —
   needs DIRECT complex lower at Re~=1.2. All 7 numerators open.
   GAMMA-STIRLING2 tasked (smallest-first E10 0.00657).
+- 2026-09-17 GAMMA-STIRLING2 (background `ses_f514c90d`, proof-only,
+  grep-clean): all crude routes DEAD on easiest numerator E10 —
+  integral-rep (upper-only banked step, no phase control), product/
+  factorial (pushes need to harder Re; real transfer unsound),
+  reflection (banked `premGamma_E10shift_refl_form` but budget
+  478.17 vs sin~1.8M). Exact shortfall 3285x banked
+  (`premGamma_E10_crude_shortfall_factor/gap`). VERDICT: needs
+  DIRECT complex lower at Re~=1.2 (Stirling-disc enclosure — major
+  new machinery, absent from Mathlib+repo). All 7 numerators open.
+  GAMMA-ENCLOSURE tasked (Euler-product lower scope).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
@@ -4843,6 +4857,17 @@ sorry-free infrastructure and the complete commit ledger above.
   1012/934, both non-imported; premZeta/CS family prove LOWERS —
   wrong direction). UG=40 banked; DG open per obligation.
   DERIV-NEXT5 tasked (DZ assembly shape or zeta-upper lane ping).
+- 2026-09-17 DERIV-NEXT5 (background `ses_f514c90d`, proof-only,
+  grep-clean, NOT typechecked — no lean allowed this turn):
+  full 4-factor deriv assembly — `R02_fullDerivUp_bankedPQG_shape:924`
+  (`54.65*40*UZ + 42*DG*UZ + 42*40*DZ`, no analyticity),
+  `R02_zetaDeriv_obligation:941` (filed DZ spec on R02 rect),
+  `R02_fullDerivUp_bankedUZ10_of_zetaUpper:956` (banked-UZ=10
+  instance, fires on `hZ10` + banked caps + DG/DZ).
+  Armed but unfired (`hZ10` unsatisfiable — best 1012/934;
+  DG/DZ open). Residual owners: UZ→zeta-upper, DG→Gamma-deriv,
+  DZ→zeta-deriv (TBD, no banked cap). DERIV-SWEEP tasked (typecheck
+  the assembly + fix elaboration).
 - 2026-09-17 ETA-GREEN (background `ses_f526dc748ffenfLd6GzxVEOeSP`):
   FIRST GREEN LANE MODULE — `door3_cell_suppliers.lean` builds green:
   BUILD-EXIT 1 (single `hsum` rewrite failure, `rw [show (4:N)=3+1]`

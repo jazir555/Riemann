@@ -1245,4 +1245,74 @@ on `‖Gamma(w+1)‖` at the 7 E-row shifted points); no floor closed or forced
 this turn.
 -/
 
+/-! ## GAMMA-STIRLING2: E10 smallest-first crude attempt (filed, not forced).
+
+Target: `0.00657 ≤ ‖Gamma (w_E10 + 1)‖` at `w_E10 + 1 = 1.1975 + 4.375i`
+(banked E10 shift triple: `premGamma_E10_wnorm_le` (`‖w‖ ≤ 4.38`),
+`premGamma_E10_ge_of_shift` (`0.00657 / 4.38 = 0.0015`), `premGamma_E10_threshold_ok`).
+
+Route A — integral representation: DEAD as a lower lane. Mathlib banks
+`Complex.Gamma_eq_integral` (`Basic.lean:318`) + `Real.Gamma_eq_integral`
+(`Basic.lean:404`), and the only banked norm-through-integral step is
+`MeasureTheory.norm_integral_le_integral_norm`, used by
+`D3SG_Gamma_norm_le_real` (`door3_stirling_gamma.lean:8`):
+`‖Gamma w‖ ≤ Gamma (w.re)`. Wrong direction for a numerator lower; reverse
+triangle / phase control on `t^(w-1)` over `Ioi 0` is not banked. No exact
+numerals attempted (nothing sound to instantiate).
+
+Route B — product / factorial shift-down: DEAD without a new complex lower.
+Banked `premGamma_shift_norm_one` / `premGamma_shift_lower` give
+`‖Gamma (w+1)‖ = ‖w‖ * ‖Gamma w‖`, so a lower on the E10 numerator needs a
+lower at `w_E10 = 0.1975 + 4.375i` (Re smaller, strictly harder). The only
+banked real lower `gamma_low_77` (`door3_gamma_real_low.lean:220`, `0.77` on
+`Icc 1 2.1`) cannot transfer: `D3SG_Gamma_norm_le_real` runs
+complex ≤ real (upper), and the transfer is numerically false at `|Im| > 0`.
+No exact numerals attempted (would reverse a banked inequality).
+
+Route C — reflection form at E10 height: QUANTIATIVELY DEAD by orders.
+`premGamma_refl_lower_of_uppers` shape is banked below as
+`premGamma_E10shift_refl_form` (explicit `S / G` premises, mirrors
+`premGamma_E05shift_refl_form`). Closing `0.00657` needs
+`S * G ≤ π / 0.00657 ≈ 478.17`, but the banked sine upper alone
+(`sin_norm_le`: `‖sin z‖ ≤ 2 * exp |Im|`, `|Im| = π * 4.375 ≈ 13.74`)
+is `≈ 1.8M`, and the banked outer envelope at this height
+(`outer_small` in `door3_complex_wendel.lean:359`, explicit `pi / exp`
+premises) is `π / (2 * exp(π * 4.375) * 1.25) ≤ 0.000002`, i.e. `3285x`
+below `0.00657` (`0.000002 * 3285 = 0.00657`). Companion point
+`1 - (w+1) = -0.1975 - 4.375i` has `Re < 0`, so no Tier-C companion upper
+applies either. Nothing is forced: numerator stays open.
+-/
+
+/-- E10 shifted-point instance: reflection-form lower at `w_E10 + 1`
+with the sine upper `S` and companion upper `G` as explicit premises.
+Mirrors `premGamma_E05shift_refl_form`; feeds `premGamma_E10_ge_of_shift`
+once `S * G ≤ π / 0.00657` numerals land (see shortfall below: no banked
+`S / G` pair reaches this budget). -/
+theorem premGamma_E10shift_refl_form (S G : ℝ)
+    (hS : ‖Complex.sin (Real.pi *
+      ((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤ S)
+    (hGup : ‖Complex.Gamma (1 -
+      ((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1))‖ ≤ G)
+    (hSpos : 0 < S) (hGpos : 0 < G)
+    (hsin : Complex.sin (Real.pi *
+      ((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1)) ≠ 0)
+    (hGne : Complex.Gamma (1 -
+      ((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1)) ≠ 0) :
+    Real.pi / (S * G) ≤ ‖Complex.Gamma
+      ((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1)‖ :=
+  premGamma_refl_lower_of_uppers _ S G hS hGup hSpos hGpos hsin hGne
+
+/-- E10 crude shortfall factor (pure arithmetic): the banked outer reflection
+envelope `0.000002` at `|Im| = 4.375` sits `3285x` below the needed `0.00657`.
+Mirrors the `outer_small` scale (`door3_complex_wendel.lean:359-364`); no
+floor is closed. -/
+theorem premGamma_E10_crude_shortfall_factor :
+    (0.000002 : ℝ) * 3285 = 0.00657 := by
+  norm_num
+
+/-- E10 crude gap (pure arithmetic): envelope strictly below target. -/
+theorem premGamma_E10_crude_gap :
+    (0.000002 : ℝ) < (0.00657 : ℝ) := by
+  norm_num
+
 end Door3PremiseGamma
