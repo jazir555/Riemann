@@ -465,6 +465,196 @@ theorem R00_shortfall_253_M2097152_eq :
     ((1.9 : ℝ) - (113 / 2530)) = (2347 / 1265 : ℝ) := by
   norm_num
 
+/-! ## ZETA-NEXT slow push: S4 attempt (weak, negative) + S2 tightening `0.20 → 0.23`.
+
+* S4 route: `S₄ = 1 - a + b - c` with `a = (2^s)⁻¹`, `b = (3^s)⁻¹`,
+  `c = (4^s)⁻¹`. Term uppers `‖b‖ ≤ 1` (trivial decay) and `‖c‖ ≤ 0.60`
+  (banked `CS_rpow4neg_upper_proved`, same real numeral, `t`-independent).
+  Reverse triangle from the tightened S2 (`0.23`) gives only
+  `‖S₄‖ ≥ 0.23 - 1 - 0.60 = -1.37`, weaker than trivial `0 ≤ ‖S₄‖`.
+  So complex S4 does NOT grow slow here (R00 phases `8.75·log n` are not
+  constructive; real-σ `CS_etaS4_uncond` shape does not transfer).
+  Banked honestly as `R00_eta_S4_norm_ge_neg137`.
+* S2 tightening: `‖a‖ = 2^{-0.395} ≤ 0.77` via banked
+  `CS_rpow2_proved` (same real numeral, `t`-independent; true `≈ 0.7605`),
+  replacing `4/5 = 0.80` from `zetaCellS0_rpow_0395_ge`. Hence
+  `‖S₂‖ ≥ 1 - 0.77 = 0.23` (`R00_eta_S2_norm_ge_023`).
+* New certificate `(0.23 - 0.087)/2.53 = 143/2530 ≈ 0.0565`
+  (was `113/2530 ≈ 0.0447`): wall moves `+30/2530 ≈ +0.0119`.
+  Threshold `1.9 * 2.53 + 0.087 = 4.894 ≤ 0.23` STILL FAILS
+  (gap `2332/500 = 4.664`; old gap `2347/500 = 4.694`), so
+  `premZeta_R00` is still not discharged. Honest shortfall:
+  `1.9 - 143/2530 = 2332/1265 ≈ 1.844` (old `2347/1265 ≈ 1.855`). -/
+
+/-- Banked `2^{-0.395} ≤ 0.77` reused at R00 (same real numeral, `t`-independent). -/
+theorem R00_rpow2_neg0395_le_077 : (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.77 : ℝ) :=
+  Door3CellSuppliers.CS_rpow2_proved
+
+/-- Tighter modulus of the R00 second eta term (`≤ 0.77` via banked cap). -/
+theorem R00_eta_second_norm_le_077 :
+    ‖((((2 : ℕ) : ℂ) ^ sR00)⁻¹)‖ ≤ (0.77 : ℝ) := by
+  have h2eq : ((((2 : ℕ)) : ℂ)) = (2 : ℂ) := by norm_cast
+  rw [h2eq, norm_inv, two_cpow_norm, sR00_re]
+  have h77 : (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.77 : ℝ) :=
+    Door3CellSuppliers.CS_rpow2_proved
+  have heq : (((2 : ℝ) ^ (0.395 : ℝ)))⁻¹ = (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2) _).symm
+  rw [heq]
+  exact h77
+
+/-- Tightened R00 finite-sum lower bound (`0.23 ≤ ‖S₂‖`, reverse triangle). -/
+theorem R00_eta_S2_norm_ge_023 :
+    (0.23 : ℝ) ≤ ‖∑ k ∈ Finset.range 2, etaDirichletTerm sR00 k‖ := by
+  rw [R00_eta_S2_eq]
+  have hX := R00_eta_second_norm_le_077
+  have h := norm_add_le
+    (1 - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹))
+    ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+  rw [sub_add_cancel] at h
+  rw [norm_one] at h
+  linarith
+
+/-- Banked `4^{-0.395} ≤ 0.60` reused at R00 (same real numeral, `t`-independent). -/
+theorem R00_rpow4_neg0395_le_060 : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ) :=
+  Door3CellSuppliers.CS_rpow4neg_upper_proved
+
+/-- R00 third eta term in closed form (`term 2 = (3^s)⁻¹`). -/
+theorem R00_eta_third_eq :
+    etaDirichletTerm sR00 2 = ((((3 : ℕ) : ℂ) ^ sR00)⁻¹) := by
+  have e : (2 + 1 : ℕ) = 3 := rfl
+  have hcast : ((((2 + 1 : ℕ)) : ℂ)) = ((((3 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (2 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- R00 fourth eta term in closed form (`term 3 = -(4^s)⁻¹`). -/
+theorem R00_eta_fourth_eq :
+    etaDirichletTerm sR00 3 = -((((4 : ℕ) : ℂ) ^ sR00)⁻¹) := by
+  have e : (3 + 1 : ℕ) = 4 := rfl
+  have hcast : ((((3 + 1 : ℕ)) : ℂ)) = ((((4 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (3 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- R00 four-term eta partial sum in closed form. -/
+theorem R00_eta_S4_eq :
+    (∑ k ∈ Finset.range 4, etaDirichletTerm sR00 k)
+      = 1 - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹) - ((((4 : ℕ) : ℂ) ^ sR00)⁻¹) := by
+  have hsum : (∑ k ∈ Finset.range 4, etaDirichletTerm sR00 k)
+      = etaDirichletTerm sR00 0 + etaDirichletTerm sR00 1
+        + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3 := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  have h0 : etaDirichletTerm sR00 0 = 1 := by
+    have h01 : (0 + 1 : ℕ) = 1 := rfl
+    have hcast : ((((0 + 1 : ℕ)) : ℂ)) = 1 := by
+      rw [h01, Nat.cast_one]
+    simp only [etaDirichletTerm, pow_zero, hcast, Complex.one_cpow, div_one]
+  have h1 : etaDirichletTerm sR00 1
+      = -((((2 : ℕ) : ℂ) ^ sR00)⁻¹) := by
+    unfold etaDirichletTerm
+    rw [pow_one]
+    rw [show (((1 + 1 : ℕ) : ℂ)) = ((((2 : ℕ)) : ℂ)) by norm_num]
+    rw [neg_div, one_div]
+  rw [hsum, h0, h1, R00_eta_third_eq, R00_eta_fourth_eq]
+  ring
+
+/-- Modulus of the R00 third eta term (`3^{-0.395} ≤ 1`, trivial decay). -/
+theorem R00_eta_third_norm_le_one :
+    ‖((((3 : ℕ) : ℂ) ^ sR00)⁻¹)‖ ≤ (1 : ℝ) := by
+  have h3n : ((((3 : ℕ)) : ℂ)) = (3 : ℂ) := by norm_cast
+  have h3r : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  rw [h3n, h3r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 3), sR00_re]
+  have heq : (((3 : ℝ) ^ (0.395 : ℝ)))⁻¹ = (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3) _).symm
+  rw [heq]
+  have hle : (3 : ℝ) ^ (-(0.395 : ℝ)) ≤ (3 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at hle
+  exact hle
+
+/-- Modulus of the R00 fourth eta term (`≤ 0.60` via banked cap). -/
+theorem R00_eta_fourth_norm_le_060 :
+    ‖((((4 : ℕ) : ℂ) ^ sR00)⁻¹)‖ ≤ (0.60 : ℝ) := by
+  have h4n : ((((4 : ℕ)) : ℂ)) = (4 : ℂ) := by norm_cast
+  have h4r : ((4 : ℂ)) = ((((4 : ℝ)) : ℂ)) := by simp
+  rw [h4n, h4r, norm_inv,
+    Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 4), sR00_re]
+  have h60 : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ) :=
+    Door3CellSuppliers.CS_rpow4neg_upper_proved
+  have heq : (((4 : ℝ) ^ (0.395 : ℝ)))⁻¹ = (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4) _).symm
+  rw [heq]
+  exact h60
+
+/-- Honest weak S4 floor at R00 (`-1.37 ≤ ‖S₄‖`; reverse triangle from
+tightened S2 minus the two extra term uppers — weaker than `0`, so S4
+does not grow slow). -/
+theorem R00_eta_S4_norm_ge_neg137 :
+    (-1.37 : ℝ) ≤ ‖∑ k ∈ Finset.range 4, etaDirichletTerm sR00 k‖ := by
+  rw [R00_eta_S4_eq]
+  have hS2 : (0.23 : ℝ) ≤ ‖((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹))‖ := by
+    have h := R00_eta_S2_norm_ge_023
+    rw [R00_eta_S2_eq] at h
+    exact h
+  have hb := R00_eta_third_norm_le_one
+  have hc := R00_eta_fourth_norm_le_060
+  have hA : ‖((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+      + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹))‖
+      ≤ ‖((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹) - ((((4 : ℕ) : ℂ) ^ sR00)⁻¹))‖
+        + ‖((((4 : ℕ) : ℂ) ^ sR00)⁻¹)‖ := by
+    have h := norm_add_le
+      ((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹) - ((((4 : ℕ) : ℂ) ^ sR00)⁻¹))
+      ((((4 : ℕ) : ℂ) ^ sR00)⁻¹)
+    have heq : (((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹) - ((((4 : ℕ) : ℂ) ^ sR00)⁻¹))
+        + ((((4 : ℕ) : ℂ) ^ sR00)⁻¹))
+        = ((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+          + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹)) := by abel
+    rw [heq] at h
+    exact h
+  have hB : ‖((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹))‖
+      ≤ ‖((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹))‖
+        + ‖((((3 : ℕ) : ℂ) ^ sR00)⁻¹)‖ := by
+    have h := norm_sub_le
+      ((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹))
+      ((((3 : ℕ) : ℂ) ^ sR00)⁻¹)
+    have heq : (((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)
+        + ((((3 : ℕ) : ℂ) ^ sR00)⁻¹)) - ((((3 : ℕ) : ℂ) ^ sR00)⁻¹))
+        = ((1 : ℂ) - ((((2 : ℕ) : ℂ) ^ sR00)⁻¹)) := by abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- Exact new certificate value with tightened slow: `(0.23 - 0.087)/2.53`. -/
+theorem R00_cert_value_023_M2097152_eq :
+    (((0.23 : ℝ) - 0.087) / 2.53) = (143 / 2530 : ℝ) := by
+  norm_num
+
+/-- The tightened certificate value still sits below the `1.9` floor. -/
+theorem R00_cert_023_M2097152_below_floor : (143 / 2530 : ℝ) < 1.9 := by
+  norm_num
+
+/-- Threshold form of the remaining miss with tightened slow. -/
+theorem R00_bridge_need_open_023_M2097152 : (0.23 : ℝ) < 1.9 * 2.53 + 0.087 := by
+  norm_num
+
+/-- Exact threshold gap that remains: `(1.9 * 2.53 + 0.087) - 0.23`. -/
+theorem R00_gap_023_M2097152_eq :
+    ((1.9 * 2.53 + 0.087 : ℝ) - 0.23) = (2332 / 500 : ℝ) := by
+  norm_num
+
+/-- Exact shortfall of the tightened certificate below the floor. -/
+theorem R00_shortfall_023_M2097152_eq :
+    ((1.9 : ℝ) - (143 / 2530)) = (2332 / 1265 : ℝ) := by
+  norm_num
+
 /-! ## Best honest unconditional floor banked here. -/
 
 /-- Best honest unconditional lower bound available in this closure. -/
@@ -498,5 +688,16 @@ theorem R00_best_unconditional : (0 : ℝ) ≤ ‖zeta sR00‖ :=
 #print axioms R00_bridge_need_open_253_M2097152
 #print axioms R00_gap_253_M2097152_eq
 #print axioms R00_shortfall_253_M2097152_eq
+#print axioms R00_rpow2_neg0395_le_077
+#print axioms R00_eta_second_norm_le_077
+#print axioms R00_eta_S2_norm_ge_023
+#print axioms R00_rpow4_neg0395_le_060
+#print axioms R00_eta_S4_eq
+#print axioms R00_eta_third_norm_le_one
+#print axioms R00_eta_fourth_norm_le_060
+#print axioms R00_eta_S4_norm_ge_neg137
+#print axioms R00_cert_value_023_M2097152_eq
+#print axioms R00_gap_023_M2097152_eq
+#print axioms R00_shortfall_023_M2097152_eq
 
 end Door3PilotR00Zeta

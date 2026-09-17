@@ -4707,6 +4707,14 @@ sorry-free infrastructure and the complete commit ledger above.
     11/1000; residual only 4 supplier bounds). `hSliver` at 011 now
     needs only supplier numerals.
   Eta (sole build owner) still running; sweep turns queued per lane.
+- 2026-09-17 ZETA-NEXT (background `ses_f51527e6b`, proof-only,
+  grep-clean): R00 slow 0.20->0.23 — S4 honestly WEAK (real phases
+  non-constructive; `-1.37<=||S4||` weaker than 0, abandoned);
+  S2 tightened t-independently (`R00_rpow2_neg0395_le_077:490`
+  reusing `CS_rpow2_proved` → `R00_eta_S2_norm_ge_023:506`).
+  Recomputed cert `143/2530~=0.0565` (+0.0119), gap `4.664` (was
+  4.694), shortfall `~=1.844` (was 1.855). `premZeta_R00` open.
+  ZETA-NEXT2 tasked (M-tail vs slow tradeoff or phase-aware slow).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
