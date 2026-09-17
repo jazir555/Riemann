@@ -4730,6 +4730,15 @@ sorry-free infrastructure and the complete commit ledger above.
   Recomputed cert `143/2530~=0.0565` (+0.0119), gap `4.664` (was
   4.694), shortfall `~=1.844` (was 1.855). `premZeta_R00` open.
   ZETA-NEXT2 tasked (M-tail vs slow tradeoff or phase-aware slow).
+- 2026-09-17 ZETA-NEXT2 (background `ses_f515060a`, proof-only,
+  grep-clean): tail-vs-slow finding — M=2^22 does NOT halve
+  (22*0.395=8.69<9, stalls at 0.087); M=2^23 halves
+  (23*0.395=9.085>=9, 512-cap → tail `<=0.044`,
+  `R00_eta_tail_M8388608_le:779` + rpow chain `:742-762`).
+  Recomputed: cert `186/2530~=0.0735` (+0.017), gap `4.621` (was
+  4.664), shortfall `~=1.827` (was 1.844). Tail hydraulics nearly
+  exhausted; phase-aware slow (needs log3/5 bridges) is the open
+  route. ZETA-NEXT3 tasked (log bridges + phase-aware slow).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
