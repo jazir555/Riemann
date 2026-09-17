@@ -2675,4 +2675,349 @@ theorem sSCUT_S8_gap_eq :
 theorem sSCUT_S8_floor_below_bar : (-389 / 84 : ℝ) < (21 / 10 : ℝ) := by
   norm_num
 
+/-! ## sCut S8b shard (ZETA-SCUT4): `n = 5` dead, `n = 7` signed gain (`+27/100`).
+
+Inventory verdict (READ-ONLY survey this turn; reuse, no duplication):
+* `Mathlib/Analysis/Complex/ExponentialBounds.lean:109-125` banks d9
+  `Real.log_five_gt_d9` (`1.6094379123 < log 5`) / `Real.log_five_lt_d9`
+  (`log 5 < 1.6094379126`); same file `:71-105` banks `log 2` / `log 3` d9.
+  `Mathlib/Analysis/SpecialFunctions/Log/*` banks only generic
+  (`log_le_sub_one_of_pos`, `log_le_log`) — no `5`/`7` numerals.
+* d9 `log 7` is ABSENT from Mathlib but PRESENT in-repo at
+  `zeta_rigorous.lean:7579-7600`: `Real.log_seven_near_10` (decimal-digit
+  `x = 6/7`, `n = 175` mirror of `log_five_near_10`) with
+  `Real.log_seven_gt_d9` (`1.9459101489 < log 7`) /
+  `Real.log_seven_lt_d9` (`log 7 < 1.9459101492`). This file already
+  `import zeta_rigorous` (`:5`), so both d9 pairs are referenced directly —
+  the S3b comment "absent from Mathlib (must be created in-file)" is now
+  stale for `7` (still true for Mathlib itself); no `2401/2400` fallback
+  (`dp_headA_log7_lo/hi`, `r05_log7_lo/hi`: `1.9458-1.9461`, width `3e-4`)
+  and no `log_five_d9`-style re-proof needed.
+* `door3_cell_suppliers.lean:1382-1392` (`CS_log_five_ge/le`) is the reuse
+  template: `have h := Real.log_five_gt_d9; norm_num at h ⊢; linarith`.
+
+Outcome (mirror of the `:2399-2566` recipe):
+* `θ₅ = 10*log 5 ∈ (16.094379123, 16.094379126)` (d9, width `3e-9`);
+  `δ₅ = θ₅ - 4π ∈ (3.5279, 3.5284) ⊂ (π, 3π/2)` so `cos θ₅ ≤ 0` and
+  `Re(5^{-sCut}) ≤ 0` — even `k = 4` needs `cos ≥ +c`, so NO positive lock
+  exists at any precision (`sSCUT_cpow5_Re_no_pos_lock`); `t₄` keeps the
+  trivial `-1` floor.
+* `θ₇ = 10*log 7 ∈ (19.459101489, 19.459101492)` (d9 via `zeta_rigorous`,
+  width `3e-9`); `δ₇ = θ₇ - 6π ∈ (0.6095, 0.6102)` (even multiple, so
+  `cos θ₇ = cos δ₇ ≥ 1 - 0.6102²/2 ≥ 81/100`); `r₇ = 7^{-1/2} ≥ 1/3`
+  (from `√7 ≤ 3`); `Re(7^{-sCut}) ≥ 27/100`; even `k = 6` transfers with
+  NO sign flip (`eta₆ = 7^{-sCut}`): `Re(eta₆) ≥ +27/100`.
+* Reassembled shard: `Re(S₈) ≥ 2/7 - 4 + 27/100 + 1/12 = -3529/1050`
+  (`sSCUT_S8_Re_ge_neg3529div1050`); gain over `-389/84` is exactly
+  `127/100` (the `t₆` allowance flip `-1 → +27/100`). Still negative, so
+  binding slow stays `2/7`; gap to `21/10` is `2867/525`.
+* Pivot assessed honestly (no new theorems): `n = 9`/`12` composites are
+  already sharp-banked (`sSCUT_theta9/theta12_sharp_mem`) and DEAD/HURT for
+  growth (`δ₉` gives `cos θ₉ ≈ -1` with odd-`k` flip; `δ₁₂` has odd-`k`
+  flip); `n = 10` (`log 10 = log 2 + log 5` d9 composite, `δ₁₀ ≈ 4.1763`
+  quadrant III, odd-`k` candidate) and `n = 11` (`zeta_rigorous` log-eleven
+  d9) are future lanes OUTSIDE `S₈` — not forced here.
+-/
+
+/-- Sharp `n = 5` phase window (`10*log 5 ∈ (16.094379123, 16.094379126)`
+from Mathlib d9; mirror of `sSCUT_theta3_sharp_mem`). -/
+theorem sSCUT_theta5_sharp_mem :
+    (16.094379123 : ℝ) < 10 * Real.log 5 ∧
+    10 * Real.log 5 < (16.094379126 : ℝ) := by
+  have hlo := Real.log_five_gt_d9
+  have hhi := Real.log_five_lt_d9
+  have hmul_lo := mul_lt_mul_of_pos_left hlo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hhi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 1.6094379123 = 16.094379123 := by norm_num
+  have c2 : (10 : ℝ) * 1.6094379126 = 16.094379126 := by norm_num
+  constructor <;> linarith
+
+/-- Sharp `n = 7` phase window (`10*log 7 ∈ (19.459101489, 19.459101492)`
+from `zeta_rigorous` d9; mirror of `sSCUT_theta3_sharp_mem`). -/
+theorem sSCUT_theta7_sharp_mem :
+    (19.459101489 : ℝ) < 10 * Real.log 7 ∧
+    10 * Real.log 7 < (19.459101492 : ℝ) := by
+  have hlo := Real.log_seven_gt_d9
+  have hhi := Real.log_seven_lt_d9
+  have hmul_lo := mul_lt_mul_of_pos_left hlo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hhi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 1.9459101489 = 19.459101489 := by norm_num
+  have c2 : (10 : ℝ) * 1.9459101492 = 19.459101492 := by norm_num
+  constructor <;> linarith
+
+/-- Sharp reduced phase `δ₅ = θ₅ - 4π ∈ (3.5279, 3.5284)` (via `pi_d4`). -/
+theorem sSCUT_delta5_sharp_mem :
+    (3.5279 : ℝ) < 10 * Real.log 5 - 4 * Real.pi ∧
+    10 * Real.log 5 - 4 * Real.pi < (3.5284 : ℝ) := by
+  have hth := sSCUT_theta5_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Sharp reduced phase `δ₇ = θ₇ - 6π ∈ (0.6095, 0.6102)` (via `pi_d4`). -/
+theorem sSCUT_delta7_sharp_mem :
+    (0.6095 : ℝ) < 10 * Real.log 7 - 6 * Real.pi ∧
+    10 * Real.log 7 - 6 * Real.pi < (0.6102 : ℝ) := by
+  have hth := sSCUT_theta7_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- `δ₅` sits in quadrant III (`π < δ₅ < 3π/2`). -/
+theorem sSCUT_delta5_in_quadrantIII :
+    Real.pi < 10 * Real.log 5 - 4 * Real.pi ∧
+    10 * Real.log 5 - 4 * Real.pi < 3 * Real.pi / 2 := by
+  have hth := sSCUT_delta5_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- `cos(10*log 5) ≤ 0` (quadrant-III `δ₅` + two `Real.cos_sub_two_pi`). -/
+theorem sSCUT_cos10log5_nonpos : Real.cos (10 * Real.log 5) ≤ 0 := by
+  have hδ := sSCUT_delta5_in_quadrantIII
+  have hcosδ : Real.cos (10 * Real.log 5 - 4 * Real.pi) ≤ 0 := by
+    apply Real.cos_nonpos_of_pi_div_two_le_of_le
+    · have hpi := Real.pi_pos
+      linarith [hδ.1]
+    · linarith [hδ.2]
+  have hper1 : Real.cos (10 * Real.log 5 - 2 * Real.pi)
+      = Real.cos (10 * Real.log 5) :=
+    Real.cos_sub_two_pi _
+  have hper2 : Real.cos ((10 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi)
+      = Real.cos (10 * Real.log 5 - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have e : (10 * Real.log 5 - 2 * Real.pi) - 2 * Real.pi
+      = 10 * Real.log 5 - 4 * Real.pi := by
+    ring
+  rw [e] at hper2
+  rw [hper1] at hper2
+  rw [hper2] at hcosδ
+  exact hcosδ
+
+/-- Cpow real-part split for `5^{-s}` at sCut (mirror of
+`sSCUT_cpow3_neg_re`). -/
+theorem sSCUT_cpow5_neg_re : ((((5 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (5 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 5) := by
+  have h5pos : (0 : ℝ) < 5 := by norm_num
+  have hxC : ((5 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h5pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((5 : ℝ) : ℂ) = (((Real.log 5 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h5pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 5 : ℝ)) : ℂ)).re = Real.log 5 := Complex.ofReal_re _
+  have hzim : ((((Real.log 5 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 5 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 5 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 5 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 5) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 5 * (-(1 / 2 : ℝ)))
+      = (5 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h5pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 5))
+      = Real.cos (10 * Real.log 5) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re(5^{-sCut}) ≤ 0` at cpow level (nonneg rpow × nonpos cosine). -/
+theorem sSCUT_cpow5_neg_Re_nonpos : ((((5 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ 0 := by
+  rw [sSCUT_cpow5_neg_re]
+  have hr : (0 : ℝ) ≤ (5 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc := sSCUT_cos10log5_nonpos
+  exact mul_nonpos_of_nonneg_of_nonpos hr hc
+
+/-- No positive `Re₅` lock exists at any precision (even `k = 4` needs
+`cos ≥ +c`; the sharp window kills it — mirror of
+`sSCUT_cpow3_Re_no_pos_lock`). -/
+theorem sSCUT_cpow5_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ ((((5 : ℝ)) : ℂ) ^ (-sSCUT)).re) := by
+  intro h
+  have hnp := sSCUT_cpow5_neg_Re_nonpos
+  linarith
+
+/-- Signed cosine LOWER `81/100 ≤ cos(10*log 7)` (quadrant-I `δ₇` via the
+even-multiple strip `cos θ₇ = cos δ₇` + quadratic lower on `δ₇`). -/
+theorem sSCUT_cos10log7_ge : (81 / 100 : ℝ) ≤ Real.cos (10 * Real.log 7) := by
+  have hδ := sSCUT_delta7_sharp_mem
+  set y : ℝ := 10 * Real.log 7 - 6 * Real.pi with hy_def
+  have hy_lo : (0.6095 : ℝ) < y := by rw [hy_def]; linarith [hδ.1]
+  have hy_hi : y < (0.6102 : ℝ) := by rw [hy_def]; linarith [hδ.2]
+  have hy_nn : (0 : ℝ) ≤ y := by linarith [hy_lo]
+  have hsq : y ^ 2 ≤ (0.6102 : ℝ) ^ 2 := pow_le_pow_left₀ hy_nn hy_hi.le 2
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := y)
+  have hnum : (81 / 100 : ℝ) ≤ 1 - (0.6102 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosy : (81 / 100 : ℝ) ≤ Real.cos y := by
+    have hle : 1 - (0.6102 : ℝ) ^ 2 / 2 ≤ 1 - y ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper1 : Real.cos (10 * Real.log 7 - 2 * Real.pi)
+      = Real.cos (10 * Real.log 7) :=
+    Real.cos_sub_two_pi _
+  have hper2 : Real.cos ((10 * Real.log 7 - 2 * Real.pi) - 2 * Real.pi)
+      = Real.cos (10 * Real.log 7 - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have hper3
+      : Real.cos (((10 * Real.log 7 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+      = Real.cos ((10 * Real.log 7 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have e2 : (10 * Real.log 7 - 2 * Real.pi) - 2 * Real.pi
+      = 10 * Real.log 7 - 4 * Real.pi := by
+    ring
+  have e3 : ((10 * Real.log 7 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi
+      = 10 * Real.log 7 - 6 * Real.pi := by
+    ring
+  rw [e2] at hper2
+  rw [e3] at hper3
+  have hper : Real.cos (10 * Real.log 7 - 6 * Real.pi)
+      = Real.cos (10 * Real.log 7) := by
+    rw [hper3, hper2, hper1]
+  rw [hy_def, hper] at hcosy
+  exact hcosy
+
+/-- `7^(1/2) ≤ 3` (mirror of the `sSCUT_sqrt8_le` root step; `7 ≤ 3^2`). -/
+theorem sSCUT_sqrt7_le : (7 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
+  have hpow : (7 : ℝ) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : ((((7 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 7 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((7 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']; exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `1/3 ≤ r₇ = 7^(-1/2)` (inverse of the root step; mirror of
+`sSCUT_rpow8_neg_ge`). -/
+theorem sSCUT_rpow7_neg_ge : (1 / 3 : ℝ) ≤ (7 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt7_le
+  have hpos : (0 : ℝ) < (7 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (7 : ℝ) ^ (-(1 / 2 : ℝ)) = (((7 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7)]
+  rw [hneg, show (1 / 3 : ℝ) = ((3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `7^{-s}` at sCut (mirror of
+`sSCUT_cpow8_neg_re`). -/
+theorem sSCUT_cpow7_neg_re : ((((7 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (7 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 7) := by
+  have h7pos : (0 : ℝ) < 7 := by norm_num
+  have hxC : ((7 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h7pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((7 : ℝ) : ℂ) = (((Real.log 7 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h7pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 7 : ℝ)) : ℂ)).re = Real.log 7 := Complex.ofReal_re _
+  have hzim : ((((Real.log 7 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 7 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 7 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 7 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 7) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 7 * (-(1 / 2 : ℝ)))
+      = (7 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h7pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 7))
+      = Real.cos (10 * Real.log 7) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed LOWER `27/100 ≤ Re(7^{-sCut})` (`r₇ ≥ 1/3` × cosine
+`≥ 81/100`, via two one-sided multiplies). -/
+theorem sSCUT_cpow7_Re_ge :
+    (27 / 100 : ℝ) ≤ ((((7 : ℝ)) : ℂ) ^ (-sSCUT)).re := by
+  rw [sSCUT_cpow7_neg_re]
+  have hr_lo := sSCUT_rpow7_neg_ge
+  have hr0 : (0 : ℝ) ≤ (7 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc_lo := sSCUT_cos10log7_ge
+  have h1 : (1 / 3 : ℝ) * (81 / 100)
+      ≤ (7 : ℝ) ^ (-(1 / 2 : ℝ)) * (81 / 100) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have h2 : (7 : ℝ) ^ (-(1 / 2 : ℝ)) * (81 / 100)
+      ≤ (7 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 7) :=
+    mul_le_mul_of_nonneg_left hc_lo hr0
+  have heq : (1 / 3 : ℝ) * (81 / 100) = 27 / 100 := by norm_num
+  linarith
+
+/-- Eta bridge `eta₆ = 7^{-sCut}` (even `k`; `Complex.cpow_neg` turns
+`(7^s)⁻¹` into `7^{-s}`). -/
+theorem sSCUT_eta6_eq_cpow7 :
+    etaDirichletTerm sSCUT 6 = ((((7 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (6 + 1 : ℕ) = 7 := rfl
+  have hcast : ((((6 + 1 : ℕ)) : ℂ)) = ((((7 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (6 : ℕ) = 1 := by norm_num
+  have h7cast : ((((7 : ℕ)) : ℂ)) = ((((7 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h7cast, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (even `k = 6`): `Re(eta₆) ≥ +27/100` (direct cpow signed
+lower, no sign flip). -/
+theorem sSCUT_eta6_Re_ge : (27 / 100 : ℝ) ≤ (etaDirichletTerm sSCUT 6).re := by
+  have h := sSCUT_cpow7_Re_ge
+  rw [sSCUT_eta6_eq_cpow7, sSCUT_cpow7_neg_re]
+  rw [sSCUT_cpow7_neg_re] at h
+  linarith
+
+/-- Honest 8-term `Re` shard floor with the `t₆` signed gain
+(`-3529/1050 ≤ Re(S₈)`: `2/7 - 4 + 27/100 + 1/12`, replacing `-389/84`;
+the `t₄` (`n = 5`) slot keeps `-1` since no positive lock exists). -/
+theorem sSCUT_S8_Re_ge_neg3529div1050 :
+    (-3529 / 1050 : ℝ) ≤ (∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k).re := by
+  rw [sSCUT_S8_eq, Complex.add_re, Complex.add_re, Complex.add_re,
+    Complex.add_re, Complex.add_re, Complex.add_re]
+  have hS2 := sSCUT_S2_Re_ge
+  have h2 := sSCUT_eta2_Re_ge_neg_one
+  have h3 := sSCUT_eta3_Re_ge_neg_one
+  have h4 := sSCUT_eta4_Re_ge_neg_one
+  have h5 := sSCUT_eta5_Re_ge_neg_one
+  have h6 := sSCUT_eta6_Re_ge
+  have h7 := sSCUT_eta7_Re_ge
+  have hgap : (2 / 7 : ℝ) + (-1) + (-1) + (-1) + (-1) + (27 / 100) + (1 / 12)
+      = (-3529 / 1050) := by norm_num
+  linarith
+
+/-- Honest 8-term norm shard floor with the `t₆` gain
+(`-3529/1050 ≤ ‖S₈‖`, via `Re ≤ ‖·‖`; gain `127/100` over `-389/84`,
+still negative — no growth). -/
+theorem sSCUT_S8_norm_ge_neg3529div1050 :
+    (-3529 / 1050 : ℝ) ≤ ‖∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k‖ := by
+  have h := sSCUT_S8_Re_ge_neg3529div1050
+  have hrn := Complex.re_le_norm
+    (∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+  linarith
+
+/-- Shard floor vs the `21/10` bar (gap `21/10 + 3529/1050 = 2867/525`). -/
+theorem sSCUT_S8_gap_eq_new :
+    ((21 / 10 : ℝ) - (-3529 / 1050)) = (2867 / 525 : ℝ) := by
+  norm_num
+
+/-- Shard floor sits below the bar (binding slow stays `2/7`; STOP). -/
+theorem sSCUT_S8_floor_below_bar_new :
+    (-3529 / 1050 : ℝ) < (21 / 10 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

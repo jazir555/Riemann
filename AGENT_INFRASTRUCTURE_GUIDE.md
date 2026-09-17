@@ -4801,6 +4801,17 @@ sorry-free infrastructure and the complete commit ledger above.
   (shortfall `0.8842`, was `1.0342` — FIRST SUB-1.0).
   Slow 1.56->1.71. Next: Im headroom huge (banked 0.7017 vs true
   ~1.307) — tighten sin2/sin4/Im3 windows (ETA-NEXT11).
+- 2026-09-17 ETA-NEXT11 (background `ses_f513a091`, proof-only,
+  grep-clean): all three windows tightened — sin2 d in [-0.034,0]
+  (was [-0.14,0]) → `sin<=-0.9994 :3498`; Im3 POSITIVE lower via
+  cubic floor (`sin e>=e-e^3/6`, `e in [0.82388,1.38685]`) →
+  `Im3>=0.2389 :3673`; sin4 delta<=0.0673 (razor ~1e-6 margin) →
+  `Im4<=0.04038 :3691`. Assembly: Im(S4)>=0.9480 (`:3711`, was
+  0.7017; true ~1.307, headroom now 0.36), `||S4||>=1.82 :3724`
+  (max 2-decimal; 1.83 fails), feed shortfall `0.7742 :3757`
+  (was 0.8842 — FIRST SUB-0.8). Bonus Im(S6)>=0.3980 (still
+  below Re 0.95). ETA-NEXT12 tasked (sin3 lower tightening —
+  cubic 0.379 vs true ~0.894).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4901,6 +4912,16 @@ sorry-free infrastructure and the complete commit ledger above.
   phaseless -1 floors; n=3 neutral-or-worse, n=4/6 cos-positive,
   n=5/7 need absent log5/log7 d9. ZETA-SCUT4 tasked (log5/7
   inventory + application or new slow idea).
+- 2026-09-17 ZETA-SCUT4 (background `ses_f5139ba0`, proof-only,
+  grep-clean): inventory verdict — d9 log5 EXISTS (Mathlib
+  ExpBounds), d9 log7 ABSENT from Mathlib but PRESENT in-repo
+  (zeta_rigorous :7579-7600, reused directly). Banked n=5 DEAD at
+  any precision (quadrant III, true Re3~=-0.0055 — digit bound
+  nonexistent) + n=7 SIGNED GAIN (`cos>=81/100`, r7>=1/3,
+  `Re(eta6)>=+27/100 :2979`, parity payoff). Reassembled floor
+  -3529/1050~=-3.361 (+127/100 over -389/84, still negative).
+  Slow stays 2/7. ZETA-SCUT5 tasked (n=10 composite / n=11
+  zeta-lane d9 lane).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`

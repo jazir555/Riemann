@@ -3471,6 +3471,302 @@ theorem CS_zeta_of_S4b (Z : ℝ)
 theorem CS_S4b_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.71 = 0.8842 := by
   norm_num
 
+/-! ## §A12. Tightened Door 3 S4 Im windows (ETA-NEXT11)
+
+Tightens each §A10 window where numerals allow:
+(a) sin2 `≤ -0.9994` (was `-0.99`): `d = φ₂ - 3π/2 ∈ [-0.034, 0]`
+(`φ₂ ∈ [4.67874, 4.67875]` from 6-digit `log2` bounds, `3π/2 ∈
+[4.712388, 4.7123895]` from 6-digit `π` bounds), `cos d ≥ 1 - d²/2 ≥
+1 - 0.034²/2 = 0.999422 ≥ 0.9994` (TRUE `sin φ₂ ≈ -0.9994`);
+(b) sin3 `≥ 0.3793` (was `≥ 0`): `e = φ₃ - 2π ∈ [0.82388, 1.38685]`,
+cubic floor `sin e ≥ e - e³/6 ≥ 0.82388 - 1.38685³/6 = 0.3793130 ≥
+0.3793` via `Real.sin_ge_sub_cube`, so `Im₃ ≥ 0.63 · 0.3793 =
+0.238959 ≥ 0.2389` (TRUE `Im₃ ≈ 0.586`);
+(c) sin4 `≤ 0.0673` (was `0.068`): `δ = 3π - φ₄ ∈ [0, 0.0673]`
+(`3π < 9.424779` from `π < 3.141593`, `φ₄ ≥ 9.35748` via
+`CS_log_four_eq` + 6-digit `log2` lower), so `Im₄ ≤ 0.60 · 0.0673 =
+0.04038` (TRUE `≈ 0.0389`).
+New assembly: `Im(S₄) ≥ 0.74955 + 0.2389 - 0.04038 = 0.94807 ≥ 0.9480`
+(TRUE `≈ 1.307`); Pythagoras `√(1.56² + 0.9480²) = √3.332304 ≥ 1.82`;
+shortfall at `cF = 1.853`: `1.4 · 1.853 - 1.82 = 0.7742` (was `0.8842`,
+gain `0.11`). -/
+
+/-- Sine upper at `φ₂ = 6.75·log 2` (`≤ -0.9994`; TRUE `≈ -0.9994`).
+Tightening of `CS_sin2_upper_neg099` (same route, tighter `d` window):
+`d = φ₂ - 3π/2 ∈ [-0.034, 0]`, `sin φ₂ = -cos d ≤ -0.9994`
+(`cos d ≥ 1 - d²/2 ≥ 1 - 0.034²/2 = 0.999422 ≥ 0.9994`). -/
+theorem CS_sin2_upper_neg0994 :
+    Real.sin (6.75 * Real.log 2) ≤ (-0.9994 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h2lo := CS_log2_ge
+  have h2hi := CS_log2_le
+  have hlo : (4.67874 : ℝ) ≤ 6.75 * Real.log 2 := by
+    have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+    have hcap : (4.67874 : ℝ) ≤ 6.75 * 0.693147 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 2 ≤ (4.67875 : ℝ) := by
+    have hmul : 6.75 * Real.log 2 ≤ 6.75 * (0.693148 : ℝ) :=
+      mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+    have hcap : (6.75 : ℝ) * 0.693148 ≤ 4.67875 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 2 with hx_def
+  set d : ℝ := x - 3 * Real.pi / 2 with hd_def
+  have hd_lo : (-0.034 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have h32eq : (3 : ℝ) * Real.pi / 2 = Real.pi + Real.pi / 2 := by
+    ring
+  have hcos32 : Real.cos (3 * Real.pi / 2) = 0 := by
+    rw [h32eq, Real.cos_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin32 : Real.sin (3 * Real.pi / 2) = -1 := by
+    rw [h32eq, Real.sin_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hx_eq : x = 3 * Real.pi / 2 + d := by
+    rw [hd_def]
+    ring
+  have hsin_eq : Real.sin (3 * Real.pi / 2 + d) = -Real.cos d := by
+    rw [Real.sin_add, hsin32, hcos32]
+    ring
+  have hsq : d ^ 2 ≤ (0.034 : ℝ) ^ 2 := by
+    have h1 : (0 : ℝ) ≤ d + 0.034 := by linarith
+    have h2 : (0 : ℝ) ≤ -d := by linarith
+    nlinarith [mul_nonneg h1 h2]
+  have hcosd_lo : (0.9994 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hnum : (0.9994 : ℝ) ≤ 1 - (0.034 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hx_eq, hsin_eq]
+  linarith
+
+/-- Sine POSITIVE lower at `φ₃ = 6.75·log 3` (`≥ 0.3793`; TRUE `≈ 0.905`).
+Tightening of `CS_sin3_nonneg` (same `e` window, cubic floor instead of
+nonnegativity): `φ₃ ∈ [7.10707, 7.67003]` from banked coarse `log3`
+bounds, so `e = φ₃ - 2π ∈ [0.82388, 1.38685]` and `sin φ₃ = sin e ≥
+e - e³/6 ≥ 0.82388 - 1.38685³/6 = 0.3793130 ≥ 0.3793` via
+`Real.sin_ge_sub_cube`. -/
+theorem CS_sin3_ge_03793 :
+    (0.3793 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h3lo := CS_log_three_ge
+  have h3hi := CS_log_three_le
+  have hlo : (7.10707 : ℝ) ≤ 6.75 * Real.log 3 := by
+    have hmul : 6.75 * (1.0529 : ℝ) ≤ 6.75 * Real.log 3 :=
+      mul_le_mul_of_nonneg_left h3lo (by norm_num)
+    have hcap : (7.10707 : ℝ) ≤ 6.75 * 1.0529 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 3 ≤ (7.67003 : ℝ) := by
+    have hmul : 6.75 * Real.log 3 ≤ 6.75 * 1.1363 :=
+      mul_le_mul_of_nonneg_left h3hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.1363 ≤ 7.67003 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : (0.82388 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (1.38685 : ℝ) := by
+    rw [he_def]
+    linarith
+  have he0 : (0 : ℝ) ≤ e := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hsin_eq : Real.sin x = Real.sin e := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  have hfloor := Real.sin_ge_sub_cube he0
+  have q3 : e ^ 3 ≤ (1.38685 : ℝ) ^ 3 := pow_le_pow_left₀ he0 he_hi 3
+  have hcap : (0.3793 : ℝ) ≤ (0.82388 : ℝ) - (1.38685 : ℝ) ^ 3 / 6 := by
+    norm_num
+  rw [hsin_eq]
+  linarith
+
+/-- Sine upper at `φ₄ = 6.75·log 4` (`≤ 0.0673`; TRUE `≈ 0.0673`).
+Tightening of `CS_sin4_upper_0068` (same route, tighter `δ` window):
+`φ₄ ∈ [9.35748, 9.35750]` via `CS_log_four_eq` + 6-digit `log2`
+bounds, so `δ = 3π - φ₄ ∈ [0, 0.0673]` (`3π < 9.424779`);
+`sin φ₄ = sin δ ≤ δ ≤ 0.0673`. -/
+theorem CS_sin4_upper_00673 :
+    Real.sin (6.75 * Real.log 4) ≤ (0.0673 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h4 : Real.log 4 = 2 * Real.log 2 := CS_log_four_eq
+  have h2lo := CS_log2_ge
+  have h2hi := CS_log2_le
+  have hphi_lo : (9.35748 : ℝ) ≤ 6.75 * Real.log 4 := by
+    rw [h4]
+    have hmul : 13.5 * (0.693147 : ℝ) ≤ 13.5 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+    have hcap : (9.35748 : ℝ) ≤ 13.5 * 0.693147 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  have hphi_hi : 6.75 * Real.log 4 ≤ (9.35750 : ℝ) := by
+    rw [h4]
+    have hmul : 13.5 * Real.log 2 ≤ 13.5 * 0.693148 :=
+      mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+    have hcap : (13.5 : ℝ) * 0.693148 ≤ 9.35750 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  set x : ℝ := 6.75 * Real.log 4 with hx_def
+  set d : ℝ := 3 * Real.pi - x with hd_def
+  have hd_lo : (0 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.0673 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hx_eq : x = (Real.pi - d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hsin2pi : Real.sin x = Real.sin (Real.pi - d) := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  have hpi_sub : Real.sin (Real.pi - d) = Real.sin d := by
+    have h1 : Real.pi - d = Real.pi + (-d) := by ring
+    rw [h1, Real.sin_add, Real.sin_pi, Real.cos_pi]
+    have h2 : Real.sin (-d) = -Real.sin d := Real.sin_neg (x := d)
+    rw [h2]
+    ring
+  have hle : Real.sin d ≤ d := Real.sin_le hd_lo
+  rw [hsin2pi, hpi_sub]
+  linarith
+
+/-- 2-term Im tightened upper (`≤ -0.74955`; TRUE `≈ -0.7600`):
+`r₂ ≥ 0.75` banked, `sin φ₂ ≤ -0.9994` above
+(`0.75 · (-0.9994) = -0.74955`). -/
+theorem CS_Im2_le_neg074955 :
+    (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2) ≤ (-0.74955 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hrl : (0.75 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow2_low075_proved
+  have hsup : Real.sin (6.75 * Real.log 2) ≤ (-0.9994 : ℝ) :=
+    CS_sin2_upper_neg0994
+  have h1 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 2)
+      ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) * (-0.9994) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * (-0.9994) ≤ (0.75 : ℝ) * (-0.9994) :=
+    mul_le_mul_of_nonpos_right hrl (by norm_num)
+  have hmul : (0.75 : ℝ) * (-0.9994) = -0.74955 := by norm_num
+  linarith
+
+/-- 3-term Im POSITIVE lower (`≥ 0.2389`; TRUE `≈ 0.586`):
+`r₃ ≥ 0.63` banked, `sin φ₃ ≥ 0.3793` above
+(`0.63 · 0.3793 = 0.238959 ≥ 0.2389`). -/
+theorem CS_Im3_ge_02389 :
+    (0.2389 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) := by
+  have hr : (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow3neg_lower_proved
+  have hs : (0.3793 : ℝ) ≤ Real.sin (6.75 * Real.log 3) :=
+    CS_sin3_ge_03793
+  have hs0 : (0 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := by
+    linarith
+  have h1 : (0.63 : ℝ) * 0.3793 ≤ 0.63 * Real.sin (6.75 * Real.log 3) :=
+    mul_le_mul_of_nonneg_left hs (by norm_num)
+  have h2 : (0.63 : ℝ) * Real.sin (6.75 * Real.log 3)
+      ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) :=
+    mul_le_mul_of_nonneg_right hr hs0
+  have hmul : (0.63 : ℝ) * (0.3793 : ℝ) = 0.238959 := by norm_num
+  linarith
+
+/-- 4-term Im tightened upper (`≤ 0.04038`; TRUE `≈ 0.0389`): `r₄ ≤ 0.60`
+banked, `sin φ₄ ≤ 0.0673` above (`0.60 · 0.0673 = 0.04038`). -/
+theorem CS_Im4_le_004038 :
+    (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4) ≤ (0.04038 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.60 : ℝ) :=
+    CS_rpow4neg_upper_proved
+  have hsup : Real.sin (6.75 * Real.log 4) ≤ (0.0673 : ℝ) :=
+    CS_sin4_upper_00673
+  have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 4)
+      ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) * (0.0673 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (4 : ℝ) ^ (-(0.395 : ℝ)) * (0.0673 : ℝ) ≤ (0.60 : ℝ) * (0.0673 : ℝ) :=
+    mul_le_mul_of_nonneg_right hru (by norm_num)
+  have hmul : (0.60 : ℝ) * (0.0673 : ℝ) = 0.04038 := by norm_num
+  linarith
+
+/-- Complex-S4 imaginary part `≥ 0.9480` (PROVED, unconditional):
+`-Im₂ ≥ 0.74955`, `Im₃ ≥ 0.2389`, `-Im₄ ≥ -0.04038`, so
+`Im(S₄) ≥ 0.74955 + 0.2389 - 0.04038 = 0.94807 ≥ 0.9480`
+(was `0.7017`; TRUE `≈ 1.307`). -/
+theorem CS_complex_S4_Im_ge_09480 :
+    (0.9480 : ℝ) ≤ (CS_S4C).im := by
+  have hEq := CS_S4C_Im_eq
+  have hT2 := CS_Im2_le_neg074955
+  have hT3 := CS_Im3_ge_02389
+  have hT4 := CS_Im4_le_004038
+  rw [hEq]
+  linarith
+
+/-- Complex-S4 Pythagoras absolute value `≥ 1.82` (PROVED, unconditional):
+`‖S₄‖^2 = Re^2 + Im^2 ≥ 1.56^2 + 0.9480^2 = 3.332304 ≥ 3.3124 = 1.82^2`
+via `Complex.sq_norm`, then `Real.sqrt` monotone (mirror of
+`CS_complex_S4_abs_ge_pyth`). -/
+theorem CS_complex_S4_abs_ge_182 :
+    (1.82 : ℝ) ≤ ‖CS_S4C‖ := by
+  have hRe := CS_complex_S4_Re_ge_156
+  have hIm := CS_complex_S4_Im_ge_09480
+  have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+  have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hRe 2
+  have hIm2 : (0.9480 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hIm 2
+  have hsq_ge : (1.82 : ℝ) ^ 2 ≤ ‖CS_S4C‖ ^ 2 := by
+    have h182 : (1.82 : ℝ) ^ 2 = 3.3124 := by norm_num
+    have hsum : (1.56 : ℝ) ^ 2 + (0.9480 : ℝ) ^ 2 = 3.332304 := by norm_num
+    have hle_num : (3.3124 : ℝ) ≤ 3.332304 := by norm_num
+    rw [hsq_eq]
+    linarith
+  calc (1.82 : ℝ) = Real.sqrt ((1.82 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖CS_S4C‖ ^ 2) := Real.sqrt_le_sqrt hsq_ge
+    _ = ‖CS_S4C‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- S4c feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S4b`): with complex-S4-Pythagoras `slow = 1.82`, `tail = 0`,
+`cF = 1.853`, `CS_zeta_of_parts` applies directly — `hNeed` is still
+the unclosable `2.5942 ≤ 1.82` (see `CS_S4c_shortfall_1853`). -/
+theorem CS_zeta_of_S4c (Z : ℝ)
+    (hLink : (1.82 : ℝ) - 0 ≤ 1.853 * Z) (hNeed : (1.4 : ℝ) * 1.853 + 0 ≤ 1.82) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.82 0 1.853 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.853` exceeds complex-S4-Pythagoras `slow = 1.82` by `0.7742`
+(was `0.8842`; gain `0.11`). -/
+theorem CS_S4c_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.82 = 0.7742 := by
+  norm_num
+
+/-- Unconditional S6 Im lower `≥ 0.3980` via the banked conditional link:
+`Im(S₆) ≥ Im(S₄) - 0.55 ≥ 0.9480 - 0.55 = 0.3980` (was `0.1517`; still
+below the Re-route `0.95`). -/
+theorem CS_complex_S6_Im_ge_03980 :
+    (0.3980 : ℝ) ≤ (CS_S6C).im := by
+  have hS4 : (0.9480 : ℝ) ≤ (CS_S4C).im := CS_complex_S4_Im_ge_09480
+  have h := CS_complex_S6_Im_ge_of_S4 0.9480 hS4
+  have hnum : (0.9480 : ℝ) - 0.55 = 0.3980 := by norm_num
+  linarith
+
 #print axioms CS_cpow1_sCenter_im
 #print axioms CS_cpow2_sCenter_im
 #print axioms CS_cpow3_sCenter_im
@@ -3486,5 +3782,16 @@ theorem CS_S4b_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.71 = 0.8842 := by
 #print axioms CS_complex_S6_Im_ge_01517
 #print axioms CS_complex_S6_abs_ge_01517
 #print axioms CS_ImS6_below_Re
+#print axioms CS_sin2_upper_neg0994
+#print axioms CS_sin3_ge_03793
+#print axioms CS_sin4_upper_00673
+#print axioms CS_Im2_le_neg074955
+#print axioms CS_Im3_ge_02389
+#print axioms CS_Im4_le_004038
+#print axioms CS_complex_S4_Im_ge_09480
+#print axioms CS_complex_S4_abs_ge_182
+#print axioms CS_zeta_of_S4c
+#print axioms CS_S4c_shortfall_1853
+#print axioms CS_complex_S6_Im_ge_03980
 
 end Door3CellSuppliers
