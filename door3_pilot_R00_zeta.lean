@@ -2449,6 +2449,33 @@ theorem sSCUT_theta8_sharp_width_eq :
     (20.794415424 : ℝ) - 20.794415409 = (0.000000015 : ℝ) := by
   norm_num
 
+/-- Sharp `n = 10` phase window (`10*log 10 ∈ (23.025850926, 23.025850934)`
+via `sSCUT_log_ten_eq` + d9; mirror of `sSCUT_theta8_sharp_mem`). -/
+theorem sSCUT_theta10_sharp_mem :
+    (23.025850926 : ℝ) < 10 * Real.log 10 ∧
+    10 * Real.log 10 < (23.025850934 : ℝ) := by
+  have h10 := sSCUT_log_ten_eq
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h5lo := Real.log_five_gt_d9
+  have h5hi := Real.log_five_lt_d9
+  have hsum_lo : (2.3025850926 : ℝ) < Real.log 2 + Real.log 5 := by
+    have c : (0.6931471803 : ℝ) + 1.6094379123 = 2.3025850926 := by norm_num
+    linarith
+  have hsum_hi : Real.log 2 + Real.log 5 < (2.3025850934 : ℝ) := by
+    have c : (0.6931471808 : ℝ) + 1.6094379126 = 2.3025850934 := by norm_num
+    linarith
+  have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 2.3025850926 = 23.025850926 := by norm_num
+  have c2 : (10 : ℝ) * 2.3025850934 = 23.025850934 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the sharp `n = 10` window (`8e-9`). -/
+theorem sSCUT_theta10_sharp_width_eq :
+    (23.025850934 : ℝ) - 23.025850926 = (0.000000008 : ℝ) := by
+  norm_num
+
 /-- Reduced phase `δ₈' = θ₈ - 7π ∈ (-1.1968, -1.1960)` (odd multiple: next
 step gets `cos θ₈ = -cos δ₈'` — the signed-upper recipe). -/
 theorem sSCUT_delta8p_sharp_mem :

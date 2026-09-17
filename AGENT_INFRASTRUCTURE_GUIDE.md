@@ -4791,6 +4791,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (93.4x) needs FE+Stirling+convexity, not longer sums. ACTIONABLE:
   bridge UZ=934 NOW (tiny new module importing both + rfl +
   instantiate 4-factor cap at 1680*934). ZETA-BRIDGE tasked.
+- 2026-09-17 ZETA-BRIDGE (background `ses_f5134860`): bridge FILED
+  (`door3_R02_zeta_bridge.lean` new: transfer `:22` via rfl +
+  `R02_D3_zeta_upper_934`, cap `:31` at 1680*934=1569120;
+  lakefile roots+globs registered; grep-clean) but UPSTREAM RED:
+  build reached [8701/8703] then failed INSIDE suppliers
+  (`:2982` no-goals+rewrite miss, `:3442/:3728/:3887` unsolved
+  x*x+x*x=x^2+x^2, sorryAx cascade at `:3011`) — proof-only
+  waves (:2742+ Im/S4 content) accumulated unverified past green.
+  Bridge never elaborated. ETA-SWEEP tasked (fix listed errors +
+  verify new content, build owner).
 - 2026-09-17 ETA-NEXT7 (background `ses_f5148601`): EMPTY result —
   no report text, no tree writes (suppliers clean). Im(S6) route
   NOT attempted; S4 1.0342 stands. ETA-NEXT8 tasked (Im-route
@@ -4842,6 +4852,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (max 2-decimal; 1.91 fails), feed shortfall `0.6942 :3916`
   (was 0.7742, gain 0.08). ETA-NEXT13 tasked (4-split cubic
   toward 0.7307 limit).
+- 2026-09-17 ETA-NEXT13 (background `ses_f5133c8b`, proof-only,
+  grep-clean): 4-SPLIT cubic banked — Python-tuned splits
+  (m1=0.8687/m2=0.9742/m3=1.1592, balanced F*~=0.714614),
+  `sin>=0.7145 :3942` (was 0.6214, +0.0931; limit 0.7306746),
+  `Im3>=0.4501 :4009`, `Im(S4)>=1.1592 :4029`,
+  `||S4||>=1.94 :4042` (max 2-decimal; 1.95 fails), feed
+  shortfall `0.6542 :4075` (was 0.6942, gain 0.04). NOTE: lands
+  on RED file (bridge-exposed errors :2982/:3442/:3728/:3887) —
+  ETA-SWEEP must verify this content too. ETA-SWEEP tasked
+  (fix-all + green, build owner).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4961,6 +4981,11 @@ sorry-free infrastructure and the complete commit ledger above.
   `sSCUT_log_ten_eq:2407` (log10=log2+log5 via log_mul),
   `sSCUT_log_ten_ge/le:2412/:2420` (2.3025850926–34 via d9s).
   ZETA-SCUT7 tasked (n=10 phase/window fenced).
+- 2026-09-17 ZETA-SCUT7 (background `ses_f5132905`, proof-only,
+  grep-clean): theta10 window banked — `sSCUT_theta10_sharp_mem`
+  (`:2454`, 10x log10 d9s via mul_lt_mul_of_pos_left) +
+  width 8e-9 (`:2475`), mirror of theta8. ZETA-SCUT8 tasked
+  (delta10/quadrant fenced).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`

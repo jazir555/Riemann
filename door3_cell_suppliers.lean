@@ -3916,6 +3916,165 @@ theorem CS_zeta_of_S4d (Z : ℝ)
 theorem CS_S4d_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.90 = 0.6942 := by
   norm_num
 
+/-! ## §A14. Door 3 S4 sin3 4-split tightening (ETA-NEXT13)
+
+Python-exact tuning FIRST (Decimal, exact rational check):
+`a = 0.82388`, `b = 1.38685`, `b³ = 2.6674020005691244`,
+`b³/6 = 0.44456700009485406`; balanced optimum `F* ≈ 0.714614` at
+`m ≈ (0.8687, 0.9742, 1.1592)`. Banked splits `m₁ = 0.8687`,
+`m₂ = 0.9742`, `m₃ = 1.1592` (short numerals):
+`f₁ = 0.82388 - 0.8687³/6 = 0.714620750216…`,
+`f₂ = 0.8687 - 0.9742³/6 = 0.714603375585…`,
+`f₃ = 0.9742 - 1.1592³/6 = 0.714588535552…`,
+`f₄ = 1.1592 - 1.38685³/6 = 0.714632999905…`;
+`min = 0.7145885… ≥ 0.7145` (strictly beats 2-split `0.6214` by `+0.0931`;
+monotone limit `a - a³/6 = 0.7306746…`).
+New assembly: `Im₃ ≥ 0.63 · 0.7145 = 0.450135 ≥ 0.4501` (TRUE `≈ 0.586`);
+`Im(S₄) ≥ 0.74955 + 0.4501 - 0.04038 = 1.15927 ≥ 1.1592` (was `1.1005`;
+TRUE `≈ 1.307`); Pythagoras `√(1.56² + 1.1592²) = √3.77734464 ≥ 1.94`
+(`1.94² = 3.7636`; `1.95² = 3.8025` fails); shortfall at `cF = 1.853`:
+`1.4 · 1.853 - 1.94 = 0.6542` (was `0.6942`, gain `0.04`). -/
+
+/-- Sine POSITIVE lower at `φ₃ = 6.75·log 3` (`≥ 0.7145`; TRUE `≈ 0.905`).
+4-split tightening of `CS_sin3_ge_06214` (same `e` window, cubic floor per
+branch): splits `m₁ = 0.8687`, `m₂ = 0.9742`, `m₃ = 1.1592`, each branch
+via `Real.sin_ge_sub_cube`. -/
+theorem CS_sin3_ge_07145 :
+    (0.7145 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h3lo := CS_log_three_ge
+  have h3hi := CS_log_three_le
+  have hlo : (7.10707 : ℝ) ≤ 6.75 * Real.log 3 := by
+    have hmul : 6.75 * (1.0529 : ℝ) ≤ 6.75 * Real.log 3 :=
+      mul_le_mul_of_nonneg_left h3lo (by norm_num)
+    have hcap : (7.10707 : ℝ) ≤ 6.75 * 1.0529 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 3 ≤ (7.67003 : ℝ) := by
+    have hmul : 6.75 * Real.log 3 ≤ 6.75 * 1.1363 :=
+      mul_le_mul_of_nonneg_left h3hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.1363 ≤ 7.67003 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : (0.82388 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (1.38685 : ℝ) := by
+    rw [he_def]
+    linarith
+  have he0 : (0 : ℝ) ≤ e := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hsin_eq : Real.sin x = Real.sin e := by
+    rw [hx_eq, Real.sin_add_two_pi]
+  have hfloor := Real.sin_ge_sub_cube he0
+  by_cases h1 : e ≤ (0.8687 : ℝ)
+  · have q3 : e ^ 3 ≤ (0.8687 : ℝ) ^ 3 := pow_le_pow_left₀ he0 h1 3
+    have hcap : (0.7145 : ℝ) ≤ (0.82388 : ℝ) - (0.8687 : ℝ) ^ 3 / 6 := by
+      norm_num
+    rw [hsin_eq]
+    linarith
+  · push_neg at h1
+    have hm1 : (0.8687 : ℝ) ≤ e := le_of_lt h1
+    by_cases h2 : e ≤ (0.9742 : ℝ)
+    · have q3 : e ^ 3 ≤ (0.9742 : ℝ) ^ 3 := pow_le_pow_left₀ he0 h2 3
+      have hcap : (0.7145 : ℝ) ≤ (0.8687 : ℝ) - (0.9742 : ℝ) ^ 3 / 6 := by
+        norm_num
+      rw [hsin_eq]
+      linarith
+    · push_neg at h2
+      have hm2 : (0.9742 : ℝ) ≤ e := le_of_lt h2
+      by_cases h3 : e ≤ (1.1592 : ℝ)
+      · have q3 : e ^ 3 ≤ (1.1592 : ℝ) ^ 3 := pow_le_pow_left₀ he0 h3 3
+        have hcap : (0.7145 : ℝ) ≤ (0.9742 : ℝ) - (1.1592 : ℝ) ^ 3 / 6 := by
+          norm_num
+        rw [hsin_eq]
+        linarith
+      · push_neg at h3
+        have hm3 : (1.1592 : ℝ) ≤ e := le_of_lt h3
+        have q3 : e ^ 3 ≤ (1.38685 : ℝ) ^ 3 := pow_le_pow_left₀ he0 he_hi 3
+        have hcap : (0.7145 : ℝ) ≤ (1.1592 : ℝ) - (1.38685 : ℝ) ^ 3 / 6 := by
+          norm_num
+        rw [hsin_eq]
+        linarith
+
+/-- 3-term Im POSITIVE lower (`≥ 0.4501`; TRUE `≈ 0.586`):
+`r₃ ≥ 0.63` banked, `sin φ₃ ≥ 0.7145` above
+(`0.63 · 0.7145 = 0.450135 ≥ 0.4501`). -/
+theorem CS_Im3_ge_04501 :
+    (0.4501 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) := by
+  have hr : (0.63 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow3neg_lower_proved
+  have hs : (0.7145 : ℝ) ≤ Real.sin (6.75 * Real.log 3) :=
+    CS_sin3_ge_07145
+  have hs0 : (0 : ℝ) ≤ Real.sin (6.75 * Real.log 3) := by
+    linarith
+  have h1 : (0.63 : ℝ) * 0.7145 ≤ 0.63 * Real.sin (6.75 * Real.log 3) :=
+    mul_le_mul_of_nonneg_left hs (by norm_num)
+  have h2 : (0.63 : ℝ) * Real.sin (6.75 * Real.log 3)
+      ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 3) :=
+    mul_le_mul_of_nonneg_right hr hs0
+  have hmul : (0.63 : ℝ) * (0.7145 : ℝ) = 0.450135 := by norm_num
+  linarith
+
+/-- Complex-S4 imaginary part `≥ 1.1592` (PROVED, unconditional):
+`-Im₂ ≥ 0.74955`, `Im₃ ≥ 0.4501`, `-Im₄ ≥ -0.04038`, so
+`Im(S₄) ≥ 0.74955 + 0.4501 - 0.04038 = 1.15927 ≥ 1.1592`
+(was `1.1005`; TRUE `≈ 1.307`). -/
+theorem CS_complex_S4_Im_ge_11592 :
+    (1.1592 : ℝ) ≤ (CS_S4C).im := by
+  have hEq := CS_S4C_Im_eq
+  have hT2 := CS_Im2_le_neg074955
+  have hT3 := CS_Im3_ge_04501
+  have hT4 := CS_Im4_le_004038
+  rw [hEq]
+  linarith
+
+/-- Complex-S4 Pythagoras absolute value `≥ 1.94` (PROVED, unconditional):
+`‖S₄‖^2 = Re^2 + Im^2 ≥ 1.56^2 + 1.1592^2 = 3.77734464 ≥ 3.7636 = 1.94^2`
+via `Complex.sq_norm`, then `Real.sqrt` monotone (mirror of
+`CS_complex_S4_abs_ge_190`). -/
+theorem CS_complex_S4_abs_ge_194 :
+    (1.94 : ℝ) ≤ ‖CS_S4C‖ := by
+  have hRe := CS_complex_S4_Re_ge_156
+  have hIm := CS_complex_S4_Im_ge_11592
+  have hsq_eq : ‖CS_S4C‖ ^ 2 = (CS_S4C).re ^ 2 + (CS_S4C).im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+  have hRe2 : (1.56 : ℝ) ^ 2 ≤ (CS_S4C).re ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hRe 2
+  have hIm2 : (1.1592 : ℝ) ^ 2 ≤ (CS_S4C).im ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hIm 2
+  have hsq_ge : (1.94 : ℝ) ^ 2 ≤ ‖CS_S4C‖ ^ 2 := by
+    have h190 : (1.94 : ℝ) ^ 2 = 3.7636 := by norm_num
+    have hsum : (1.56 : ℝ) ^ 2 + (1.1592 : ℝ) ^ 2 = 3.77734464 := by norm_num
+    have hle_num : (3.7636 : ℝ) ≤ 3.77734464 := by norm_num
+    rw [hsq_eq]
+    linarith
+  calc (1.94 : ℝ) = Real.sqrt ((1.94 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖CS_S4C‖ ^ 2) := Real.sqrt_le_sqrt hsq_ge
+    _ = ‖CS_S4C‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- S4e feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S4d`): with complex-S4-Pythagoras `slow = 1.94`, `tail = 0`,
+`cF = 1.853`, `CS_zeta_of_parts` applies directly — `hNeed` is still
+the unclosable `2.5942 ≤ 1.94` (see `CS_S4e_shortfall_1853`). -/
+theorem CS_zeta_of_S4e (Z : ℝ)
+    (hLink : (1.94 : ℝ) - 0 ≤ 1.853 * Z) (hNeed : (1.4 : ℝ) * 1.853 + 0 ≤ 1.94) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.94 0 1.853 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.853` exceeds complex-S4-Pythagoras `slow = 1.94` by `0.6542`
+(was `0.6942`; gain `0.04`). -/
+theorem CS_S4e_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.94 = 0.6542 := by
+  norm_num
+
 #print axioms CS_cpow1_sCenter_im
 #print axioms CS_cpow2_sCenter_im
 #print axioms CS_cpow3_sCenter_im
@@ -3948,5 +4107,11 @@ theorem CS_S4d_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.90 = 0.6942 := by
 #print axioms CS_complex_S4_abs_ge_190
 #print axioms CS_zeta_of_S4d
 #print axioms CS_S4d_shortfall_1853
+#print axioms CS_sin3_ge_07145
+#print axioms CS_Im3_ge_04501
+#print axioms CS_complex_S4_Im_ge_11592
+#print axioms CS_complex_S4_abs_ge_194
+#print axioms CS_zeta_of_S4e
+#print axioms CS_S4e_shortfall_1853
 
 end Door3CellSuppliers
