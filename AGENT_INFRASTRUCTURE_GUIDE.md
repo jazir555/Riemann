@@ -4978,6 +4978,16 @@ sorry-free infrastructure and the complete commit ledger above.
   Next: E05 N-ladder may differ (different point), else direct
   Stirling/Binet lower is the only route. GAMMA-N4C tasked (E05
   ladder + floor-truth check).
+- 2026-09-17 GAMMA-N4C (background `ses_f513e6fd`, proof-only,
+  grep-clean): FLOOR-TRUTH TRIAGE — E06 floor 0.66 TRUE (Stirling
+  ~0.6766, mpmath ~0.72978, margin tight 0.017 — NO re-tiering);
+  E05 floor 0.645 TRUE with headroom (mpmath ~0.84242, 1.306x).
+  E05 N-ladder `:2851-2890`: N=1/2/3 dead (0.38/0.547/0.633),
+  N=4 first clearing (0.688) + specs ONLY at N=4 (`:2901-2940`,
+  rate<=0.042). Triage: E05 true Seq4 ~0.638<0.645 (N=4 likely
+  insufficient, mirrors E06) but Seq5 ~0.67146 / Seq6 ~0.69538
+  CLEAR — N=5 viable for E05. GAMMA-N5 tasked (E05 N=5
+  approximant + specs).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
