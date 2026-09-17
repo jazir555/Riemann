@@ -880,4 +880,66 @@ theorem premGamma_E07_threshold_ok :
     (0.05 : ℝ) + 0.07 * 1.26 ≤ (5 : ℝ) * 0.7 * 0.1 * 1 := by
   norm_num
 
+/-! ## E01 shift-conditional closure (same pattern; numerator open).
+
+`premGamma_E01_ge` (floor 0.01, TRUE ~0.012 per `door3_gamma_feed.lean:192`)
+via `premGamma_shift_lower` with `‖w_E01‖ ≤ 3.14`
+(`0.0314 / 3.14 = 0.01`). Cell choice: both `E01` and `E08` carry banked
+wide upper legs (`premGamma_E01_le`, `premGamma_E08_le`) plus threshold
+shapes in-file (`BE_R01_threshold_check`, `BE_R08_threshold_check`);
+`E01` banked first as the lowest floor. The wide upper leg is already
+banked as `premGamma_E01_le`. The open numeral premise
+`0.0314 ≤ ‖Gamma (w+1)‖` needs the next-wave Stirling-disc enclosure at
+`w + 1 = 1.1975 - 3.125i`.
+Numerals Python-checked: `|w|^2 = 9.80463125 ≤ 3.14^2 = 9.8596`.
+-/
+
+/-- Recurrence denominator upper at E01: `‖s_E01 / 2‖ ≤ 3.14` -/
+theorem premGamma_E01_wnorm_le :
+    ‖(((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)‖ ≤ (3.14 : ℝ) := by
+  have hre : ((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)).re
+      = ((0.395 : ℝ) / 2) := by
+    rw [Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).re = (0.395 : ℝ) from rfl]
+  have him : ((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)).im
+      = (((-6.25 : ℝ)) / 2) := by
+    rw [Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).im = ((-6.25 : ℝ)) from rfl]
+  have h2 : ‖(((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)‖ ^ 2
+      ≤ (3.14 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (3.14 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E01 shift conditional: the shift-lower leg closes `premGamma_E01_ge`
+once the shifted numerator lower `0.0314 ≤ ‖Gamma (w + 1)‖` is supplied
+(`0.0314 / 3.14 = 0.01`). -/
+theorem premGamma_E01_ge_of_shift
+    (hnum : (0.0314 : ℝ) ≤ ‖Complex.Gamma
+      ((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2) + 1)‖) :
+    premGamma_E01_ge := by
+  have hw : ((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)) ≠ 0 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.zero_re] at hre
+    rw [Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).re = (0.395 : ℝ) from rfl] at hre
+    norm_num at hre
+  have h := premGamma_shift_lower
+    (((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2)
+    hw 0.0314 3.14 hnum premGamma_E01_wnorm_le (by norm_num)
+  have heq : (0.0314 : ℝ) / 3.14 = 0.01 := by norm_num
+  rw [heq] at h
+  unfold premGamma_E01_ge DerivCauchyBridge.gammaOf
+  exact h
+
+/-- E01 product threshold closes at stated floors
+(mirrors `BE_R01_threshold_check` in `door3_cells_batchE.lean`:
+`18*0.7*0.01*1.2 = 0.1512 ≥ 0.05+0.07*1.26 = 0.1382`). -/
+theorem premGamma_E01_threshold_ok :
+    (0.05 : ℝ) + 0.07 * 1.26 ≤ (18 : ℝ) * 0.7 * 0.01 * 1.2 := by
+  norm_num
+
 end Door3PremiseGamma

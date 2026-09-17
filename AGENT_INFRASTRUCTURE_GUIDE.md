@@ -4715,6 +4715,14 @@ sorry-free infrastructure and the complete commit ledger above.
   was the nearest uncovered). Residual: E01/E08/E09/E10 floors +
   E05/E06/E07 numerators (0.645/0.66/0.164) for Stirling-disc wave.
   GAMMA-NEXT2 tasked (E01 or E08 shift-reduction).
+- 2026-09-17 GAMMA-NEXT2 (background `ses_f515172b2ffeZUEW7gj5ZzTfyy`,
+  proof-only, grep-clean): E01 triple banked (`premGamma_E01_wnorm_le:898`
+  `||w||<=3.14`, `premGamma_E01_ge_of_shift:919`
+  `0.0314<=||Gamma(w+1)||→floor`, `premGamma_E01_threshold_ok:941`
+  `0.1382<=0.1512`; mirrors E07 token-for-token). E08 pre-checked for
+  next turn (`|w|^2=6.92963125<=2.64^2`, numerator `0.0528/2.64=0.02`).
+  Residual: E08/E09/E10 floors + E05/E06/E07/E01 numerators.
+  GAMMA-NEXT3 tasked (E08 triple).
 - 2026-09-17 DERIV-NEXT (background `ses_f51527e6d`, proof-only,
   grep-clean): second factor-deriv cap — fPi (only NEXT factor with
   full majorants): `R02_piExp_hasDerivAt:589`,
