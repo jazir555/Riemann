@@ -4484,3 +4484,29 @@ sorry-free infrastructure and the complete commit ledger above.
   unconditional `0.025 ≤ ‖ξ(0)‖` minorant + `bottomStrip_obligations_
   of_uniform_bounds` bridge. Residual: UNIFORM hb+hB on `-10<x<10`
   (BS lane PAUSED pending RX2's critical-line zeta numeral).
+- 2026-09-17 WAVE1-DERIV (background `ses_f52ba7d12ffegkyJAvci2Emxk6`):
+  staged `door3_R02_ball_advance.lean` (registered lakefile `RootScratch`;
+  no sorry/admit/axiom, verified by grep): `R02_premBall_of_Lambda:46`
+  + `R02_premBall_of_FE:52` (Lambda/FE premises give `premBall_R02`
+  via `CS_ballSup16800_of_Lambda0`), `R02_deriv67200_of_Lambda/FE:57/64`
+  (deriv cap 67200 on R02), `R02_cauchy_closedForm:79`
+  (`16800/0.25=67200`), `R02_tier07_mismatch/gap/ratio:83/87/91`
+  (`0.07<67200`, gap 67199.93, ratio 960000x), `R02_cauchy_ratio05/06`
+  (1344000x/1120000x), `R02_ball_assembly_value/le_cap/margin:102/106/109`
+  (`0.5+35*479=16765.5<=16800`, margin 34.5). Build: guarded wrapper
+  `door3_R02_ball_advance`, cold-cache timeout at 900000ms
+  (`[1365/8617] Built Mathlib.Order.Bounded`, no errors; stale lock
+  cleared, lock free). HONEST residual: tier-M 0/41 via Cauchy
+  (R02 needs 0.07, has 67200); `CS_Lambda0_upper_fat` (<=479, true
+  O(1)-O(10)) and FE+Stirling discharge stay explicit premises;
+  module build verification pending (rebuild warm). Next: (i) discharge
+  Lambda0<=479 or FE step, (ii) direct deriv/subdivision re-tier,
+  (iii) warm rebuild verify (WAVE2-DERIV tasked).
+- 2026-09-17 WAVE1-ZETA-PILOT (file observed pre-report
+  `door3_pilot_R00_zeta.lean`, registered; formal report pending):
+  R00 floor-1.9 pilot stages slow `1/5<=||S2||`, tail `<=23`
+  (M=1/M=4 via `zetaCell_even_remainder_le`, `||sR00||<=8.76`),
+  factor `<=3`; cert value `(1/5-23)/3=-38/5` FAILS `1.9*cF+tail<=slow`
+  honestly (`1/5<1.9*3+23`); best unconditional floor banked
+  `0<=||zeta sR00||`. No sorry (grep clean). Await agent report
+  before doc-closing this line.

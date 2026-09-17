@@ -347,6 +347,81 @@ def CS_etaFactor_upper : Prop :=
 `≈ 1.521`; patch proves like §C). -/
 def CS_rpow0605_upper : Prop := (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53
 
+/-- CLOSED: the `2^0.605` cap (`≈ 1.521 ≤ 1.53`).
+Route (upper via `Real.exp_bound'`, `n = 4`): `2^0.605 = exp(0.605·log 2)`
+with `0.605·log 2 ≤ 0.605·0.693148 ≤ 0.41936`; the degree-3 Taylor sum
+plus remainder at `0.41936` is `≈ 1.5212 ≤ 1.53`. -/
+theorem CS_rpow0605_proved : CS_rpow0605_upper := by
+  show (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53
+  have hlog : Real.log 2 < (0.693148 : ℝ) := CS_log2_le
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  set x : ℝ := 0.605 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.41936 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.605 * Real.log 2 ≤ 0.605 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.605 : ℝ) * 0.693148 ≤ (0.41936 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (2 : ℝ) ^ ((0.605 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    rw [show (4 : ℕ) = 3 + 1 from rfl, Finset.sum_range_succ,
+      show (3 : ℕ) = 2 + 1 from rfl, Finset.sum_range_succ,
+      show (2 : ℕ) = 1 + 1 from rfl, Finset.sum_range_succ,
+      show (1 : ℕ) = 0 + 1 from rfl, Finset.sum_range_succ,
+      Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.41936 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.41936 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.41936 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.41936 + (0.41936 : ℝ) ^ 2 / 2 +
+      (0.41936 : ℝ) ^ 3 / 6 + (0.41936 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.53 := by
+    norm_num
+  linarith
+
+/-- Eta-factor upper from the `2^0.605` cap (PROVED): the cpow norm is the
+real rpow (`Complex.norm_cpow_eq_rpow_re_of_pos` with `(1 - sCenter).re =
+0.605` from `R02Pilot.sCenter_re`), then `‖1 - w‖ ≤ 1 + ‖w‖`. -/
+theorem CS_etaFactor_of_rpow (h : CS_rpow0605_upper) : CS_etaFactor_upper := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.53
+  have hre : ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) := by
+    rw [Complex.sub_re, Complex.one_re, R02Pilot.sCenter_re]
+    norm_num
+  have hcast : ((2 : ℂ)) = (((2 : ℝ)) : ℂ) := by simp
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ =
+      (2 : ℝ) ^ ((0.605 : ℝ)) := by
+    rw [hcast,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2), hre]
+  have htri := norm_sub_le (1 : ℂ) ((2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+  rw [norm_one, hnorm] at htri
+  have hr : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53 := h
+  linarith
+
+/-- UNCONDITIONAL eta-factor cap (both links closed above). -/
+theorem CS_etaFactor_proved : CS_etaFactor_upper :=
+  CS_etaFactor_of_rpow CS_rpow0605_proved
+
 /-- Factor-need numeral: with the banked factor cap, `1.4` needs
 `slow ≥ 1.4 × 2.53 = 3.542 + tail` — far above the N=2 complex head
 (`≈ 1.03`), so the patch must grow `N` (and sharpen `cF`/`tail`). -/

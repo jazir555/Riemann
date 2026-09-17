@@ -703,4 +703,61 @@ Batch B R11-R20 need no factor-split gamma premise; their wide uppers are
 banked here for completeness. First-cell R02 gamma lower 0.006 stays banked.
 -/
 
+/-! ## E05 shift-conditional closure (closed implication; numerator open).
+
+`premGamma_E05_ge` (floor 1.5, TRUE ~4.4) via the shift-lower leg
+`premGamma_shift_lower` plus an explicit numeral upper on the recurrence
+denominator `‖w_E05‖ ≤ 0.43` (the wide-upper-style leg). The remaining open
+numeral premise `0.645 ≤ ‖Gamma (w_E05 + 1)‖` (with `0.645 / 0.43 = 1.5`)
+needs the next-wave Stirling-disc enclosure: banked routes fall short
+(`lower_inner` / `inner_big` in `door3_complex_wendel.lean` give `0.38`-scale;
+`feed_open_E05` in `door3_gamma_feed.lean` gives `1.33`-scale `< 1.5`).
+Nothing is forced: the absolute floor stays open.
+
+Feasibility-negative cells (NOT attempted here; stay open `Prop`s with the
+`threshold_negative` audits above): R31, R32, R39, R40, R21, R30.
+-/
+
+/-- Recurrence denominator upper at E05: `‖s_E05 / 2‖ ≤ 0.43`
+(TRUE `≈ 0.4238`). -/
+theorem premGamma_E05_wnorm_le :
+    ‖(((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)‖ ≤ (0.43 : ℝ) := by
+  have hre : ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)).re
+      = ((0.395 : ℝ) / 2) := by
+    rw [Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl]
+  have him : ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)).im
+      = (((-0.75 : ℝ)) / 2) := by
+    rw [Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = ((-0.75 : ℝ)) from rfl]
+  have h2 : ‖(((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)‖ ^ 2
+      ≤ (0.43 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (0.43 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E05 shift conditional: the shift-lower leg closes `premGamma_E05_ge`
+once the shifted numerator lower `0.645 ≤ ‖Gamma (w + 1)‖` is supplied
+(`0.645 / 0.43 = 1.5`). -/
+theorem premGamma_E05_ge_of_shift
+    (hnum : (0.645 : ℝ) ≤ ‖Complex.Gamma
+      ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖) :
+    premGamma_E05_ge := by
+  have hw : ((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)) ≠ 0 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.zero_re] at hre
+    rw [Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl] at hre
+    norm_num at hre
+  have h := premGamma_shift_lower
+    (((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2)
+    hw 0.645 0.43 hnum premGamma_E05_wnorm_le (by norm_num)
+  have heq : (0.645 : ℝ) / 0.43 = 1.5 := by norm_num
+  rw [heq] at h
+  unfold premGamma_E05_ge DerivCauchyBridge.gammaOf
+  exact h
+
 end Door3PremiseGamma
