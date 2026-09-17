@@ -4833,6 +4833,15 @@ sorry-free infrastructure and the complete commit ledger above.
   (was 0.8842 — FIRST SUB-0.8). Bonus Im(S6)>=0.3980 (still
   below Re 0.95). ETA-NEXT12 tasked (sin3 lower tightening —
   cubic 0.379 vs true ~0.894).
+- 2026-09-17 ETA-NEXT12 (background `ses_f5136278`, proof-only,
+  grep-clean): sin3 SPLIT-CUBIC — (a) exact-arithmetic stall
+  (+0.00002, no theorem), (b) no quintic in-tree (stall), (c)
+  BANKED: 2-split at m=1.066 → `sin>=0.6214 :3799` (was 0.3793;
+  monotone limit 0.7307), `Im3>=0.3914 :3850`,
+  `Im(S4)>=1.1005 :3870` (was 0.9480), `||S4||>=1.90 :3883`
+  (max 2-decimal; 1.91 fails), feed shortfall `0.6942 :3916`
+  (was 0.7742, gain 0.08). ETA-NEXT13 tasked (4-split cubic
+  toward 0.7307 limit).
 - 2026-09-17 REBOOT RECOVERY: host rebooted; all background waves died
   in flight (wave-1 gamma report never arrived; wave-4 deriv, wave-3
   zeta, wave-5 eta, wave-4 edge killed mid-turn). Stale lock 17740
@@ -4943,6 +4952,10 @@ sorry-free infrastructure and the complete commit ledger above.
   -3529/1050~=-3.361 (+127/100 over -389/84, still negative).
   Slow stays 2/7. ZETA-SCUT5 tasked (n=10 composite / n=11
   zeta-lane d9 lane).
+- 2026-09-17 ZETA-SCUT5 (background `ses_f5136278`): EMPTY result —
+  no report text, no tree writes (pilot clean of its work; scratch
+  txts removed). Second empty this wave-set; fenced briefs help.
+  ZETA-SCUT6 tasked (n=10-ONLY fenced brief).
 - 2026-09-17 GAMMA-NEXT (background `ses_f51527e70`, proof-only,
   grep-clean): E07 shift-reduction banked (`premGamma_E07_wnorm_le:836`
   `||w||<=1.64`, `premGamma_E07_ge_of_shift:857`
