@@ -1920,4 +1920,366 @@ theorem CS_S2e_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.25 = 1.3442 := by
 #print axioms CS_etaFactor_1853_proved
 #print axioms CS_S2e_shortfall_1853
 
+/-! ## §A7. Complex S4 slow growth `1.25 → 1.56` (ETA-NEXT5)
+
+Judgment on `CS_log_three_le` (coarse `≤ 1.1363`, `≥ 1.0529`, width
+`≈ 0.56` rad at `6.75×`): a proved POSITIVE `cos φ₃` lower is out of
+scope, but a NONNEG lower `cos φ₃ ≥ 0` IS available from the coarse
+interval alone (`φ₃ ∈ [7.10707, 7.67003]`, so `e = φ₃ - 2π ∈
+[0.82, 1.39] ⊂ [-π/2, π/2]`), giving `Re(w₃) ≥ 0` with no log3
+sharpening. `φ₄ = 6.75·log 4 = 13.5·log 2` is EXACT via
+`CS_log_four_eq` + 6-digit `log2` bounds (`φ₄ ∈ [9.35748, 9.35750]`),
+so `δ = 3π - φ₄ ∈ [0, 0.068]` gives `cos φ₄ = -cos δ ≤ -0.99`
+(`cos δ ≥ 1 - δ²/2 ≥ 0.99`). True `cos φ₄ ≈ -0.9977`, so `-0.99`
+carries margin. New `4^0.395 ≤ 1.74` (`exp_bound'` n=4 at
+`x ≤ 0.54759`; true `≈ 1.7292`, margin `≈ 0.01`) gives
+`r₄ = 4^-0.395 ≥ 0.57` (`0.57·1.74 = 0.9918 ≤ 1`; true `≈ 0.5783`).
+Then `Re(S₄) = 1 - Re₂ + Re₃ - Re₄ ≥ 1 - 0 + 0 + 0.5643 = 1.5643 ≥
+1.56` (`Re₂ ≤ 0` via banked `CS_cos675_nonpos_proved`, `Re₃ ≥ 0`,
+`Re₄ ≤ 0.57·(-0.99) = -0.5643`). True `Re(S₄) ≈ 1.878`,
+`|S₄| ≈ 2.288`, so `1.56` is safe. `|S₄| ≥ Re(S₄)` mirrors the
+`CS_complex_S2_abs_ge_one` triangle step (Pythagoras not needed since
+`Re` already exceeds `1.25`). New need `1.4·1.853 = 2.5942`;
+shortfall vs `slow = 1.56` is `1.0342` (was `1.3442`; gain `0.31`).
+The `1.4` floor still fails (`2.5942 ≤ 1.56` false); patch must grow
+further / sharpen `cF`/`tail`. Fallback (real-S4 tightening) NOT
+needed — complex S4 banked. -/
+
+/-- Cpow real-part split for `3^{-s}` at `sCenter` (mirror of
+`CS_cpow2_sCenter_re`: `(-s).re = -0.395`, `(-s).im = 6.75`). -/
+theorem CS_cpow3_sCenter_re : ((((3 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) := by
+  have h3pos : (0 : ℝ) < 3 := by norm_num
+  have hxC : ((3 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h3pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((3 : ℝ) : ℂ) = (((Real.log 3 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h3pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
+  have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 3 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 3 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 3 * (-(0.395 : ℝ)))
+      = (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h3pos _).symm
+  have hcos : Real.cos (Real.log 3 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 3) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `4^{-s}` at `sCenter` (mirror of
+`CS_cpow2_sCenter_re`). -/
+theorem CS_cpow4_sCenter_re : ((((4 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4) := by
+  have h4pos : (0 : ℝ) < 4 := by norm_num
+  have hxC : ((4 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h4pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((4 : ℝ) : ℂ) = (((Real.log 4 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h4pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 4 : ℝ)) : ℂ)).re = Real.log 4 := Complex.ofReal_re _
+  have hzim : ((((Real.log 4 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 4 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 4 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 4 * (-(0.395 : ℝ)))
+      = (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h4pos _).symm
+  have hcos : Real.cos (Real.log 4 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 4) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `4^0.395 ≤ 1.74` upper input (TRUE `≈ 1.7292`). -/
+def CS_rpow4pos_upper174 : Prop := (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74
+
+/-- CLOSED: `4^0.395 ≤ 1.74` via `exp_bound'` n=4 at
+`x = 0.395·log 4 = 0.79·log 2 ≤ 0.54759`. -/
+theorem CS_rpow4pos_upper174_proved : CS_rpow4pos_upper174 := by
+  show (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74
+  have hlog : Real.log 2 < (0.693148 : ℝ) := CS_log2_le
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  have h4 : Real.log 4 = 2 * Real.log 2 := CS_log_four_eq
+  have hlog4_pos : (0 : ℝ) < Real.log 4 := by
+    rw [h4]
+    linarith
+  set x : ℝ := 0.395 * Real.log 4 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog4_pos)
+  have hx_hi : x ≤ (0.54759 : ℝ) := by
+    rw [hx_def, h4]
+    have hmul : 0.79 * Real.log 2 ≤ 0.79 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.79 : ℝ) * 0.693148 ≤ (0.54759 : ℝ) := by
+      norm_num
+    have heq : 0.395 * (2 * Real.log 2) = 0.79 * Real.log 2 := by
+      ring
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (4 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 4)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.54759 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.54759 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.54759 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.54759 + (0.54759 : ℝ) ^ 2 / 2 +
+      (0.54759 : ℝ) ^ 3 / 6 + (0.54759 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.74 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- `4^-0.395 ≥ 0.57` lower input (TRUE `≈ 0.5783`). -/
+def CS_rpow4neg_lower057 : Prop := (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- CLOSED: `4^-0.395 ≥ 0.57` from `4^0.395 ≤ 1.74`
+(`0.57·1.74 = 0.9918 ≤ 1`). -/
+theorem CS_rpow4neg_lower057_proved : CS_rpow4neg_lower057 := by
+  show (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74 := CS_rpow4pos_upper174_proved
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (4 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [inv_eq_one_div]
+  have hle : (0.57 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.57 : ℝ) * 1.74 ≤ 1 := by norm_num
+    calc (0.57 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.57 * 1.74 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- Cosine nonnegativity at `φ₃ = 6.75·log 3` (TRUE `≈ 0.4244 ≥ 0`).
+Route: `φ₃ ∈ [7.10707, 7.67003]` from banked coarse `log3` bounds, so
+`e = φ₃ - 2π ∈ [-π/2, π/2]` and `cos φ₃ = cos e ≥ 0` via
+`Real.cos_add_two_pi` + `Real.cos_nonneg_of_neg_pi_div_two_le_of_le`. -/
+theorem CS_cos3_nonneg :
+    (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h3lo := CS_log_three_ge
+  have h3hi := CS_log_three_le
+  have hlo : (7.10707 : ℝ) ≤ 6.75 * Real.log 3 := by
+    have hmul : 6.75 * (1.0529 : ℝ) ≤ 6.75 * Real.log 3 :=
+      mul_le_mul_of_nonneg_left h3lo (by norm_num)
+    have hcap : (7.10707 : ℝ) ≤ 6.75 * 1.0529 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 3 ≤ (7.67003 : ℝ) := by
+    have hmul : 6.75 * Real.log 3 ≤ 6.75 * 1.1363 :=
+      mul_le_mul_of_nonneg_left h3hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.1363 ≤ 7.67003 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : -(Real.pi / 2) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonneg_of_neg_pi_div_two_le_of_le he_lo he_hi
+
+/-- Cosine upper at `φ₄ = 6.75·log 4` (`≤ -0.99`; TRUE `≈ -0.9977`).
+Route: `φ₄ ∈ [9.35748, 9.35750]` via `CS_log_four_eq` + 6-digit `log2`
+bounds, so `δ = 3π - φ₄ ∈ [0, 0.068]`; `cos φ₄ = -cos δ` via
+`(π - δ) + 2π` + `Real.cos_add_two_pi` / `Real.cos_pi_sub`, and
+`cos δ ≥ 1 - δ²/2 ≥ 0.99` via
+`Real.one_sub_sq_div_two_le_cos`. -/
+theorem CS_cos4_upper_neg099 :
+    Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h4 : Real.log 4 = 2 * Real.log 2 := CS_log_four_eq
+  have h2lo := CS_log2_ge
+  have h2hi := CS_log2_le
+  have hphi_lo : (9.35748 : ℝ) ≤ 6.75 * Real.log 4 := by
+    rw [h4]
+    have hmul : 13.5 * (0.693147 : ℝ) ≤ 13.5 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+    have hcap : (9.35748 : ℝ) ≤ 13.5 * 0.693147 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  have hphi_hi : 6.75 * Real.log 4 ≤ (9.35750 : ℝ) := by
+    rw [h4]
+    have hmul : 13.5 * Real.log 2 ≤ 13.5 * 0.693148 :=
+      mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+    have hcap : (13.5 : ℝ) * 0.693148 ≤ 9.35750 := by
+      norm_num
+    have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+      ring
+    linarith
+  set x : ℝ := 6.75 * Real.log 4 with hx_def
+  set d : ℝ := 3 * Real.pi - x with hd_def
+  have hd_lo : (0 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.068 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hx_eq : x = (Real.pi - d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = -Real.cos d := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_pi_sub]
+  have hcosd_lo : (0.99 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hsq : d ^ 2 ≤ (0.068 : ℝ) ^ 2 :=
+      pow_le_pow_left₀ hd_lo hd_hi 2
+    have hnum : (0.99 : ℝ) ≤ 1 - (0.068 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hcos_eq]
+  linarith
+
+/-- Complex S4 partial sum at `sCenter`
+(`1 - 2^{-s} + 3^{-s} - 4^{-s}`). -/
+noncomputable def CS_S4C : ℂ :=
+  (1 : ℂ) - (2 : ℂ) ^ (-R02Pilot.sCenter)
+    + (3 : ℂ) ^ (-R02Pilot.sCenter) - (4 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part identity for the complex S4 (cast + `sub_re` / `add_re` /
+`one_re` + the three per-term cpow splits). -/
+theorem CS_S4C_Re_eq :
+    (CS_S4C).re = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2)
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3)
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4) := by
+  unfold CS_S4C
+  have h2 : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have h3 : ((3 : ℂ)) = ((((3 : ℝ)) : ℂ)) := by simp
+  have h4c : ((4 : ℂ)) = ((((4 : ℝ)) : ℂ)) := by simp
+  rw [h2, h3, h4c]
+  simp only [Complex.add_re, Complex.sub_re, Complex.one_re,
+    CS_cpow2_sCenter_re, CS_cpow3_sCenter_re, CS_cpow4_sCenter_re]
+
+/-- Complex-S4 real part `≥ 1.56` (PROVED, unconditional):
+`Re₂ ≤ 0` (banked cos nonpos), `Re₃ ≥ 0` (new cos nonneg),
+`Re₄ ≤ -0.5643` (`r₄ ≥ 0.57`, `cos φ₄ ≤ -0.99`), so
+`Re(S₄) ≥ 1 + 0.5643 = 1.5643 ≥ 1.56`. -/
+theorem CS_complex_S4_Re_ge_156 :
+    (1.56 : ℝ) ≤ (CS_S4C).re := by
+  have hEq := CS_S4C_Re_eq
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr4lo : (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow4neg_lower057_proved
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 := CS_cos675_nonpos_proved
+  have hc3 : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) := CS_cos3_nonneg
+  have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) := CS_cos4_upper_neg099
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    mul_nonneg hr3 hc3
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.5643 : ℝ) := by
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.57 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.57 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.57 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.57 * (-0.99) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.57 : ℝ) * (-0.99) = -0.5643 := by norm_num
+    linarith
+  rw [hEq]
+  linarith
+
+/-- Complex-S4 absolute value `≥ 1.56` (triangle `‖z‖ ≥ Re z`,
+mirroring `CS_complex_S2_abs_ge_one`). -/
+theorem CS_complex_S4_abs_ge_156 :
+    (1.56 : ℝ) ≤ ‖CS_S4C‖ := by
+  have hRe := CS_complex_S4_Re_ge_156
+  have hle : (CS_S4C).re ≤ ‖CS_S4C‖ := by
+    have h1 := Complex.abs_re_le_norm (CS_S4C)
+    have h2 := le_abs_self ((CS_S4C).re)
+    linarith
+  linarith
+
+/-- S4 feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S2e`): with complex-S4 `slow = 1.56`, `tail = 0`,
+`cF = 1.853`, `CS_zeta_of_parts` applies directly — `hNeed` is still
+the unclosable `2.5942 ≤ 1.56` (see `CS_S4_shortfall_1853`). -/
+theorem CS_zeta_of_S4 (Z : ℝ)
+    (hLink : (1.56 : ℝ) - 0 ≤ 1.853 * Z) (hNeed : (1.4 : ℝ) * 1.853 + 0 ≤ 1.56) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.56 0 1.853 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.853` exceeds complex-S4 `slow = 1.56` by `1.0342` (was `1.3442`;
+gain `0.31`). -/
+theorem CS_S4_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.56 = 1.0342 := by
+  norm_num
+
+#print axioms CS_cpow3_sCenter_re
+#print axioms CS_cpow4_sCenter_re
+#print axioms CS_rpow4pos_upper174_proved
+#print axioms CS_rpow4neg_lower057_proved
+#print axioms CS_cos3_nonneg
+#print axioms CS_cos4_upper_neg099
+#print axioms CS_complex_S4_Re_ge_156
+#print axioms CS_complex_S4_abs_ge_156
+#print axioms CS_S4_shortfall_1853
+
 end Door3CellSuppliers

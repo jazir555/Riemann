@@ -4874,6 +4874,18 @@ sorry-free infrastructure and the complete commit ledger above.
   VERDICT: cos route nearly exhausted (-0.035 vs true -0.0336);
   binding constraint is slow (needs >=2.5942, has 1.25) — next waves
   pivot to slow growth: complex S4 slow or pilot-R00 slow (ETA-NEXT5).
+- 2026-09-17 ETA-NEXT5 (background `ses_f51538dc`, build owner,
+  grep-clean): COMPLEX S4 SLOW banked — cpow3/cpow4 splits
+  `:1950/:1986`, rpow4 bounds (`4^0.395<=1.74 :2025`,
+  `0.57<=4^-0.395 :2081`), `CS_cos3_nonneg:2101`
+  (phi3 window via coarse log3, `e=phi3-2pi` in `[-pi/2,pi/2]`),
+  `CS_cos4_upper_neg099:2141` (phi4 via log4=2log2, true ~-0.9977),
+  `CS_complex_S4_Re_ge_156:2213` (Re>=1.5643>=1.56; true Re~=1.878),
+  `CS_complex_S4_abs_ge_156:2251`, `CS_zeta_of_S4:2264` +
+  `CS_S4_shortfall_1853:2272` (shortfall `1.0342`, was `1.3442`,
+  gain `0.31` — biggest slow gain). BUILD-EXIT 1→0 in 35s
+  (self-fixed `add_comm` rewrite mismatch). Slow 1.25->1.56, needs
+  >=2.5942 still. ETA-NEXT6 tasked (complex S6 slow).
 - 2026-09-17 WAVE1-ZETA-PILOT (background `ses_f52ba7d16ffeMi8XN5lco6PPcw`,
   committed in `2b76f75`): `door3_pilot_R00_zeta.lean` (~290 lines,
   registered; grep-clean, no sorry/admit/axiom): R00 floor-1.9 pilot via
