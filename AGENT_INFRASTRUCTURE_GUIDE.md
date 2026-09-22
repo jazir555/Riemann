@@ -6152,6 +6152,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 GAMMA-N18 (background `ses_f347c2818`, proof-only,
+  grep-clean + 4 audits, premise_gamma-only commit): Seq18 meets gate
+  (0.662, gap 0.0); rate wall stands (0.646<0.66). N19 next.
+- 2026-09-22 ZETA-FLOOR1148 (background `ses_f34787c6b`, proof-only,
+  grep-clean, zeta-only commit): 1.148^20≈15.81 honest → tail 17.43 →
+  K0-16 19.712 (beats by 0.01; sanity ✓). 16^0.05 route EXHAUSTED
+  (1.149 fails); M17-tail next.
 - 2026-09-22 CELL-O (background `ses_f347e182d`, proof-only,
   grep-clean, interval-only commit): R14 poly floor 3.9 hypothesis-free
   + center conditional. Same ~7-order wall (short 18.4M).
