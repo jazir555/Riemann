@@ -2071,3 +2071,129 @@ end Door3CutL10ZetaWall
 #print axioms Door3CutL10ZetaWall.cutL10_zetaCap_needed_vs_trueProxy
 #print axioms Door3CutL10ZetaWall.cutL10_zetaSup_wall_spec
 
+/-! ## (k) CUTL Gamma-sup strip audit (append-only tail; LF)
+
+Grep baseline (this session, before edit):
+- Triple blocks: `Door3CutL10JointTriple` at `:1946-1993`
+  (`cutL10_joint_threeFactor_value` `66.95 * 3.15 * (1/100) * 3 = 6.326775`,
+  `cutL10_joint_zetaTrue_value` `3.1633875` at zeta `3/2`; gaps/ratios
+  `6.286775`/`158.169375x` and `3.1233875`/`79.0846875x` vs tier `0.04`);
+  `cutL10_thinRect_tightened_gap` at `:1439-1442`;
+  `cutL10_tierB_triple_le_floor` at `:1325-1327`.
+- ZetaWall blocks: `Door3CutL10ZetaWall` at `:2026-2065`
+  (`cutL10_zetaWall_looseness_ratio` `6 / (3/2) = 4`,
+  `cutL10_zetaWall_looseness_gap` `9/2`, `cutL10_zetaCap_needed_value`,
+  `cutL10_zetaCap_needed_vs_wall` `316.33875x`,
+  `cutL10_zetaCap_needed_vs_trueProxy` `79.0846875x`,
+  `cutL10_zetaSup_wall_spec` residual forwarder).
+- `hGammaSup` specs (all byte-for-byte `‖Gamma (s/2)‖ ≤ 1/100` on
+  `s.re ∈ [-1.06, 2.06]`, `s.im ∈ [-11.56, -8.44]`):
+  `:826-828` (`Door3CutL10BallSup.cutL10_ballSup_of_factorSups`),
+  `:1396-1398` (`Door3CutL10TierB.cutL10_tierB_sharedSup_1287_of_factorSups`),
+  `:1603-1605` (`Door3CutL10FERoute.cutL10_closedBall_sup_FEroute`);
+  gated assembly `:1316-1320`
+  (`Door3CutL10TierB.cutL10_gamma_sup_of_prodCap_gated`,
+  takes explicit `hProdCap`, no closed cap banked).
+- Banked Gamma uppers at relevant `Re` checked (strip `s/2` has
+  `Re ∈ [-0.53, 1.03]`, `Im ∈ [-5.78, -4.22]`):
+  `DerivCauchyBridge.norm_Gamma_le_realGamma`
+  (`central_cover_assembly.lean:6412`, needs `0 < z.re`, Im-uniform, no
+  exp-decay, inapplicable on the `Re ≤ 0` half and crude where applicable);
+  `gamma_upper_R02_disc ≤ 40` (`central_cover_assembly.lean:6468`, R02 disc,
+  `Im ≈ 0`); `edgeS00_gamma_upper_center ≤ 400`
+  (`central_cover_assembly.lean:6811`, `s/2` `Re = 0.0025`, `Im ≈ 0`);
+  `R02GammaDisc.gammaOf_upper_disc_R02 ≤ 0.097`
+  (`interval_arith.lean:32316`, `Re ∈ [0.05, 0.74]`, `Im ≈ 0`, `gammaOf`
+  norm, `9.7x` looser than `1/100` even before the `Im ≈ -5` mismatch);
+  `cutR10_gamma_sup_of_prodCap` (`door3_cutR10_ballsup.lean:898-902`,
+  same gated `1/100` shape, no closed product cap).
+  No Stirling exp-decay upper is banked anywhere at strip `Im ≈ -5`
+  (Mathlib Gamma has no exp-decay upper).
+
+Tighten attempt verdict: GAP (no honest strip-scale tighten banked;
+`1/100` stays the wall). `1/100` is already near-TRUE: TRUE sup
+`≈ 0.0071` (proxied exactly by `71/10000`), TRUE center `≈ 0.000651`
+(per `:640-645`, `:816-817`); wall looseness `100/71 ≈ 1.41x`,
+gap `29/10000`. Even at the TRUE-sup proxy the tightened joint stays
+BLOCKED: `66.95 * 3.15 * (71/10000) * 6 = 8.9840205` (gap `8.9440205`,
+ratio `224.6005125x`); even with generous center-TRUE zeta `3/2`:
+`2.246005125` (gap `2.206005125`, ratio `56.150128125x`). Verdict:
+blockage is the `+1`-ball poly·Gamma spread (endpoint audit
+`poly·pi·Gamma ≈ 0.062 > 0.04` before zeta at `:1028-1041`), not pi/zeta.
+Exact `hGammaSup` wall shape forwarded below as the residual premise.
+-/
+
+namespace Door3CutL10GammaWall
+
+/-- Wall looseness vs TRUE-sup proxy: `(1/100) / (71/10000) = 100/71`
+(`≈ 1.41x`: already near-true, cf. zeta wall `4x` at `:2029`). -/
+theorem cutL10_gammaWall_looseness_ratio :
+    (1 / 100 : ℝ) / (71 / 10000) = (100 / 71 : ℝ) := by
+  norm_num
+
+/-- Wall gap vs TRUE-sup proxy: `1/100 - 71/10000 = 29/10000`. -/
+theorem cutL10_gammaWall_looseness_gap :
+    ((1 / 100 : ℝ) - 71 / 10000 = (29 / 10000 : ℝ)) ∧ ((71 / 10000 : ℝ) < 1 / 100) := by
+  constructor <;> norm_num
+
+/-- Joint at the TRUE-sup proxy
+(poly `66.95` × pi `3.15` × Gamma `71/10000` × zeta `6`). -/
+theorem cutL10_joint_gammaTrue_value :
+    (((66.95 : ℝ) * 3.15) * (71 / 10000)) * 6 = (8.9840205 : ℝ) := by
+  norm_num
+
+/-- TRUE-sup joint fence `≤ 8.99` (was `12.66` at `:1899`). -/
+theorem cutL10_joint_gammaTrue_cap :
+    (((66.95 : ℝ) * 3.15) * (71 / 10000)) * 6 ≤ (8.99 : ℝ) := by
+  norm_num
+
+/-- Exact residual to the `0.04` tier: blocked, gap `8.9440205`. -/
+theorem cutL10_gammaTrue_gap_to_tier :
+    ((8.9840205 : ℝ) - 0.04 = (8.9440205 : ℝ)) ∧ ((0.04 : ℝ) < 8.9840205) := by
+  constructor <;> norm_num
+
+/-- Exact ratio to tier: `8.9840205 / 0.04 = 224.6005125`. -/
+theorem cutL10_gammaTrue_ratio_to_tier :
+    (8.9840205 : ℝ) / 0.04 = (224.6005125 : ℝ) := by
+  norm_num
+
+/-- Generous double-TRUE audit: TRUE Gamma `71/10000` plus center-TRUE
+zeta `3/2` gives `2.246005125`, still blocked. -/
+theorem cutL10_joint_gammaTrue_zetaTrue_value :
+    (((66.95 : ℝ) * 3.15) * (71 / 10000)) * (3 / 2) = (2.246005125 : ℝ) := by
+  norm_num
+
+/-- Double-TRUE gap spec (blockage is poly·Gamma spread, not zeta). -/
+theorem cutL10_gammaTrue_zetaTrue_gap_to_tier :
+    ((2.246005125 : ℝ) - 0.04 = (2.206005125 : ℝ)) ∧ ((0.04 : ℝ) < 2.246005125) := by
+  constructor <;> norm_num
+
+/-- Double-TRUE ratio: `2.246005125 / 0.04 = 56.150128125`. -/
+theorem cutL10_gammaTrue_zetaTrue_ratio_to_tier :
+    (2.246005125 : ℝ) / 0.04 = (56.150128125 : ℝ) := by
+  norm_num
+
+/-- Exact `hGammaSup` strip spec (residual premise; byte-for-byte the
+shape at `:826-828`, `:1396-1398`, and `:1603-1605`). -/
+theorem cutL10_gammaSup_wall_spec
+    (hGammaSup : ∀ (s : ℂ), (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ s.im → s.im ≤ (-8.44 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ))
+    (s : ℂ) (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ s.im) (hihi : s.im ≤ (-8.44 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ) :=
+  hGammaSup s hlo hhi hilo hihi
+
+end Door3CutL10GammaWall
+
+#print axioms Door3CutL10GammaWall.cutL10_gammaWall_looseness_ratio
+#print axioms Door3CutL10GammaWall.cutL10_gammaWall_looseness_gap
+#print axioms Door3CutL10GammaWall.cutL10_joint_gammaTrue_value
+#print axioms Door3CutL10GammaWall.cutL10_joint_gammaTrue_cap
+#print axioms Door3CutL10GammaWall.cutL10_gammaTrue_gap_to_tier
+#print axioms Door3CutL10GammaWall.cutL10_gammaTrue_ratio_to_tier
+#print axioms Door3CutL10GammaWall.cutL10_joint_gammaTrue_zetaTrue_value
+#print axioms Door3CutL10GammaWall.cutL10_gammaTrue_zetaTrue_gap_to_tier
+#print axioms Door3CutL10GammaWall.cutL10_gammaTrue_zetaTrue_ratio_to_tier
+#print axioms Door3CutL10GammaWall.cutL10_gammaSup_wall_spec
+

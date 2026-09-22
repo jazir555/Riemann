@@ -6130,6 +6130,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 ASSEMBLY-R04 (background `ses_f34864d5b`, proof-only,
+  grep-clean; swept into 16b56ca with subsetfix2): R04 leaf+H conditional
+  (`:17561-17598`). Entry filed here.
+- 2026-09-22 CUTL-GAMMA (background `ses_f34867d57`, proof-only,
+  grep-clean, cutL10-only commit): Gamma wall mapped (sup near-true
+  1.41x; true-joint 8.99/224x; double-true 2.25/56x). Blockage =
+  poly·Gamma spread (endpoint 0.062>0.04).
 - 2026-09-22 FIRSTCELL-ZETA14 (background `ses_f34876218`, proof-only,
   grep-clean, first_cell-only commit): assembly needs E≥3.542 vs 0.28
   (shortfall 3.262; even ideal S4+f4 short ~2.7). Sub-residuals: f4 cap
