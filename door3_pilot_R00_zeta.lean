@@ -4301,4 +4301,60 @@ theorem sSCUT_S9_skip8_eta10_eta12_shortfall :
       (1951921 / 388500 : ℝ) := by
   norm_num
 
+/-- Composite log bridge `log 14 = log 13 + log (14/13)` (`14 = 13·(14/13)`
+via `Real.log_mul`; mirror of `sSCUT_log_thirteen_via_twelve_eq` at `:4064`;
+tighter ratio `14/13` (`x = 1/13`) picked over `14/12` (`x = 1/6`);
+first link of the incremental base-14 chain for `k = 13`). -/
+theorem sSCUT_log_fourteen_via_thirteen_eq :
+    Real.log 14 = Real.log 13 + Real.log (14 / 13 : ℝ) := by
+  have h14 : (13 : ℝ) * (14 / 13) = 14 := by norm_num
+  have h := Real.log_mul (show (13 : ℝ) ≠ 0 by norm_num)
+    (show (14 / 13 : ℝ) ≠ 0 by norm_num)
+  rw [h14] at h
+  linarith
+
+/-- `log 14` upper (`log 14 ≤ 2.6537505948` from `sSCUT_log_thirteen_le` +
+`log (14/13) ≤ 1/13`; mirror of `sSCUT_log_thirteen_le` at `:4075` with `x = 1/13`
+via `Real.log_le_sub_one_of_pos`). -/
+theorem sSCUT_log_fourteen_le : Real.log 14 ≤ (2.6537505948 : ℝ) := by
+  have h14 := sSCUT_log_fourteen_via_thirteen_eq
+  have h13 := sSCUT_log_thirteen_le
+  have hub : Real.log (14 / 13 : ℝ) ≤ (1 / 13 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 14 / 13)
+    have he : (14 / 13 : ℝ) - 1 = (1 / 13 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.5768275178 : ℝ) + 1 / 13 ≤ (2.6537505948 : ℝ) := by norm_num
+  linarith
+
+/-- `log 14` lower (`2.6251791651 ≤ log 14` from `sSCUT_log_thirteen_ge` +
+`log (14/13) ≥ 1/14`; mirror of `sSCUT_log_thirteen_ge` at `:4088` with `x = 1/13`
+via `log (13/14) ≤ -1/14` and `log (14/13) = -log (13/14)`). -/
+theorem sSCUT_log_fourteen_ge : (2.6251791651 : ℝ) ≤ Real.log 14 := by
+  have h14 := sSCUT_log_fourteen_via_thirteen_eq
+  have h13 := sSCUT_log_thirteen_ge
+  have hub : Real.log (13 / 14 : ℝ) ≤ (-1 / 14 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 13 / 14)
+    have he : (13 / 14 : ℝ) - 1 = (-1 / 14 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (14 / 13 : ℝ) = -Real.log (13 / 14 : ℝ) := by
+    have heq : (14 / 13 : ℝ) = (13 / 14 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.6251791651 : ℝ) ≤ 2.5537505937 + 1 / 14 := by norm_num
+  rw [h14, hinv]
+  linarith
+
+/-- Phase window `θ₁₄ = 10*log 14 ∈ [26.251791651, 26.537505948]`
+(via banked `sSCUT_log_fourteen_ge/le` + `*10`; mirror of
+`sSCUT_theta13_mem` at `:4105`; non-strict since the `log 14` inputs are `≤`). -/
+theorem sSCUT_theta14_mem :
+    (26.251791651 : ℝ) ≤ 10 * Real.log 14 ∧
+    10 * Real.log 14 ≤ (26.537505948 : ℝ) := by
+  have hge := sSCUT_log_fourteen_ge
+  have hle := sSCUT_log_fourteen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.6251791651 = 26.251791651 := by norm_num
+  have c2 : (10 : ℝ) * 2.6537505948 = 26.537505948 := by norm_num
+  constructor <;> linarith
+
 end Door3PilotR00Zeta

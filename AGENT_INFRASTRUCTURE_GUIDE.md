@@ -5722,6 +5722,12 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT31 (background `ses_f374e5aec`, proof-only, grep-clean):
+  log14 window + theta14 — bridge `:4308` (log14=log13+log(14/13)) +
+  window `:4319/:4332` ([2.6251791651,2.6537505948], width ~0.0286,
+  true ~2.6391 inside) + `theta14_mem :4349` (θ∈[26.252,26.538],
+  width 0.286). δ=θ-8π≈(1.12,1.41) quadrant-II → k=13 odd flip needs
+  cos≤-c (likely gap). SCUT32 tasked (delta14/cos upper-or-gap).
 - 2026-09-22 VERIFY5 (background `ses_f374ef9ff`, sole build owner):
   GREEN — `[8689/8689] Built door3_premise_gamma (28s)`, BUILD-EXIT=0
   (attempt 1/2), zero edits, grep-clean (0 sorry/axiom/admit/RH_apply/
