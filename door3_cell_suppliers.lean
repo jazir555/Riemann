@@ -4198,4 +4198,150 @@ theorem CS_tail_next_rung_gap (T : ℝ) :
 #print axioms CS_tail_audit
 #print axioms CS_tail_next_rung_gap
 
+/-! ## §A17. cF shave `1.853 → 1.851` via `2^0.605 ≤ 1.522` (ETA-CF, proof-only)
+
+Route (banked windows only, no new estimates):
+* `x = 0.605·log 2 ≤ 0.41936` from banked `CS_log2_le`
+  (`0.605·0.693148 ≤ 0.41936`), same `exp_bound'` n=4 route as
+  `CS_rpow0605_tight_proved`; numeral `≈ 1.52119386 ≤ 1.522`
+  (margin `≈ 0.000806`), so `r = 2^0.605 ≤ 1.522` (was `1.525`).
+* Reuse banked cosine floor `CS_cos675_lower_neg0035` (`≥ -0.035`);
+  `Re w ≥ -0.035·r ≥ -0.05327`, `‖w‖ ≤ 1.522`, so
+  `‖1-w‖² ≤ 1 + 0.10654 + 1.522² = 3.423024 ≤ 1.851² = 3.426201`.
+  True `cF ≈ 1.8482`, so `1.851` carries margin `≈ 0.003177`.
+  New need `1.4·1.851 = 2.5914`; shortfall vs `slow = 1.94` is `0.6514`
+  (was `0.6542`; shave `0.0028`). Cos lane untouched (single shave). -/
+
+/-- Tightened `2^0.605 ≤ 1.522` cap input (TRUE `≈ 1.52098`). -/
+def CS_rpow0605_tight1522 : Prop := (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.522
+
+/-- CLOSED: the `1.522` cap (same `exp_bound'` n=4 route at `0.41936`;
+numeral `≈ 1.52119386 ≤ 1.522`). -/
+theorem CS_rpow0605_tight1522_proved : CS_rpow0605_tight1522 := by
+  show (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.522
+  have hlog : Real.log 2 < (0.693148 : ℝ) := CS_log2_le
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num : (1 : ℝ) < 2)
+  set x : ℝ := 0.605 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.41936 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.605 * Real.log 2 ≤ 0.605 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.605 : ℝ) * 0.693148 ≤ (0.41936 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (2 : ℝ) ^ ((0.605 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.41936 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.41936 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.41936 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.41936 + (0.41936 : ℝ) ^ 2 / 2 +
+      (0.41936 : ℝ) ^ 3 / 6 + (0.41936 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.522 := by
+    norm_num
+  linarith
+
+/-- Sharpened eta-factor cap `≤ 1.851` (TRUE `≈ 1.8482`). -/
+def CS_etaFactor_upper_1851 : Prop :=
+  ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.851
+
+/-- Phase-aware factor upper from `2^0.605 ≤ 1.522` + banked `-0.035`
+cosine floor (PROVED): `Re w ≥ -0.05327`, `‖w‖ ≤ 1.522`, so
+`‖1-w‖² ≤ 3.423024 ≤ 1.851²`. -/
+theorem CS_etaFactor_1851_of_bounds (hCap : CS_rpow0605_tight1522)
+    (hCos : (-0.035 : ℝ) ≤ Real.cos (6.75 * Real.log 2)) :
+    CS_etaFactor_upper_1851 := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.851
+  have hReEq := CS_cpow_factor_re
+  have hnormR := CS_cpow_factor_norm_eq
+  have hcast : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have hrHi : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.522 := hCap
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ ((0.605 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hRe_lo : (-0.05327 : ℝ)
+      ≤ (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re) := by
+    rw [hReEq]
+    have h1 : (-0.035 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ))
+        ≤ (2 : ℝ) ^ ((0.605 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+      have h := mul_le_mul_of_nonneg_left hCos hr0
+      linarith [h]
+    have hmul : (-0.035 : ℝ) * 1.522 = -0.05327 := by norm_num
+    have h2 : (-0.05327 : ℝ) ≤ (-0.035 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ)) := by
+      linarith
+    linarith
+  have hS_eq : ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+      = ((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))) := by
+    rw [hcast]
+  rw [hS_eq]
+  have hsq_eq : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2
+      = 1 - 2 * (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re)
+        + ‖((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.sq_norm, Complex.normSq_apply,
+      Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im]
+    ring
+  have hr2 : ((2 : ℝ) ^ ((0.605 : ℝ))) ^ 2 ≤ (1.522 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hr0 hrHi 2
+  have hsq_le : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2 ≤ (1.851 : ℝ) ^ 2 := by
+    have hnum : (1 : ℝ) - 2 * (-0.05327) + (1.522 : ℝ) ^ 2 ≤ (1.851 : ℝ) ^ 2 := by
+      norm_num
+    rw [hsq_eq, hnormR]
+    linarith
+  calc ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)))‖
+      = Real.sqrt (‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+        ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt ((1.851 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq_le
+    _ = 1.851 := Real.sqrt_sq (by norm_num)
+
+/-- UNCONDITIONAL `1.851` factor cap (both links closed above). -/
+theorem CS_etaFactor_1851_proved : CS_etaFactor_upper_1851 :=
+  CS_etaFactor_1851_of_bounds CS_rpow0605_tight1522_proved CS_cos675_lower_neg0035
+
+/-- Factor-need numeral at the shaved cap: `1.4·1.851 = 2.5914`. -/
+theorem CS_factor_need_1851 : (1.4 : ℝ) * 1.851 = 2.5914 := by
+  norm_num
+
+/-- S4f feed into the zeta assembly (exact instantiation shape, mirror of
+`CS_zeta_of_S4e`): with complex-S4-Pythagoras `slow = 1.94`, `tail = 0`,
+`cF = 1.851`, `CS_zeta_of_parts` applies directly — `hNeed` is still the
+unclosable `2.5914 ≤ 1.94` (see `CS_S4f_shortfall_1851`). -/
+theorem CS_zeta_of_S4f (Z : ℝ)
+    (hLink : (1.94 : ℝ) - 0 ≤ 1.851 * Z) (hNeed : (1.4 : ℝ) * 1.851 + 0 ≤ 1.94) :
+    1.4 ≤ Z :=
+  CS_zeta_of_parts 1.94 0 1.851 Z (by norm_num) hLink hNeed
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.851` exceeds complex-S4-Pythagoras `slow = 1.94` by `0.6514`
+(was `0.6542`; shave `0.0028`). -/
+theorem CS_S4f_shortfall_1851 : (1.4 : ℝ) * 1.851 - 1.94 = 0.6514 := by
+  norm_num
+
+#print axioms CS_rpow0605_tight1522_proved
+#print axioms CS_etaFactor_1851_proved
+#print axioms CS_S4f_shortfall_1851
+
 end Door3CellSuppliers

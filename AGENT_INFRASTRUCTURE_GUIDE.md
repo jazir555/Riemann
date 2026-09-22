@@ -5485,6 +5485,13 @@ sorry-free infrastructure and the complete commit ledger above.
   parity keeps sign → destructive ~-1/3. Shard floor stays `-2.858`,
   gap `4.958`; k=8 honestly skipped. SCUT16 tasked (S9 assembly
   skipping k=8 or tail-shave).
+- 2026-09-22 ETA-CF (background `ses_f3779c2b1`, proof-only, grep-clean,
+  suppliers-only commit): cF micro-shave `CS_rpow0605_tight1522_proved
+  :4220` (`2^0.605<=1.522`, banked `CS_log2_le` + exp_bound n=4,
+  margin 0.0008, no new windows) → `CS_etaFactor_1851_proved :4321`
+  (cF 1.853→1.851, `3.423024<=1.851²`) + `CS_S4f_shortfall_1851 :4340`
+  (need 2.5914, shortfall 0.6542→0.6514, gain 0.0028). Still short
+  honestly. Ball_advance owner fix left untouched. ETA-SLOW tasked.
 - 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
   edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
   14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,
