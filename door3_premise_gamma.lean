@@ -3976,7 +3976,7 @@ def premGamma_E06_cpow6_upper_needed : Prop :=
 /-- E06 shifted `s+6` norm: `‖s + 6‖ ≤ 7.23`
 (TRUE `≈ 7.22458`; `7.1975^2 + 0.625^2 = 52.19463125 ≤ 7.23^2`). -/
 theorem premGamma_E06shift_add6_norm_le :
-    ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ≤ (7.23 : ℝ) := by
+    ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1))‖ ≤ (7.23 : ℝ) := by
   have hre : ((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
       = (7.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
@@ -3991,7 +3991,7 @@ theorem premGamma_E06shift_add6_norm_le :
       show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).im = (1.25 : ℝ) from rfl,
       Complex.one_im]
     norm_num
-  have h2 : ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
+  have h2 : ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1))‖ ^ 2
       ≤ (7.23 : ℝ) ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
     norm_num
@@ -4254,7 +4254,7 @@ At E06 shifted `s = w_E06 + 1` (`Re s = 1.1975`, `Im s = 0.625`):
   `‖s+1‖ ≤ 2.29`, `‖s+2‖ ≤ 3.26`, `‖s+3‖ ≤ 4.25`, `‖s+4‖ ≤ 5.24`,
   `‖s+5‖ ≤ 6.23`, `‖s+6‖ ≤ 7.23`): `‖s+7‖ ≤ 8.23` (`8.1975^2 + 0.625^2 =
   67.58963125 ≤ 8.23^2`); product
-  `1.36 * 2.29 * 3.26 * 4.25 * 5.24 * 6.23 * 7.23 * 8.23 = 83818.21097691086 ≤
+  `1.36 * 2.29 * 3.26 * 4.25 * 5.24 * 6.23 * 7.23 * 8.23 = 83818.21097691085296 ≤
   83818.22` (`prod7 = prod6 * ‖s+7‖`).
 * quotient: `5040 * 10.15 / 83818.22 = 51156 / 83818.22 ≈ 0.61032 < 0.66`
   — honest achievable (`0.61 * 83818.22 = 51129.1142 ≤ 51156`).
@@ -4318,7 +4318,7 @@ def premGamma_E06_cpow7_upper_needed : Prop :=
 /-- E06 shifted `s+7` norm: `‖s + 7‖ ≤ 8.23`
 (TRUE `≈ 8.22129`; `8.1975^2 + 0.625^2 = 67.58963125 ≤ 8.23^2`). -/
 theorem premGamma_E06shift_add7_norm_le :
-    ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ≤ (8.23 : ℝ) := by
+    ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))‖ ≤ (8.23 : ℝ) := by
   have hre : (((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
       = (8.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
@@ -4333,7 +4333,7 @@ theorem premGamma_E06shift_add7_norm_le :
       show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).im = (1.25 : ℝ) from rfl,
       Complex.one_im]
     norm_num
-  have h2 : ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
+  have h2 : ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))‖ ^ 2
       ≤ (8.23 : ℝ) ^ 2 := by
     rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
     norm_num
@@ -4342,7 +4342,7 @@ theorem premGamma_E06shift_add7_norm_le :
   rwa [abs_of_nonneg (norm_nonneg _)] at habs
 
 /-- E06 `N = 7` denominator norm-product upper, right-nested to match
-`premGamma_E06_GammaSeq7_link` (`83818.21097691086 ≤ 83818.22`; `prod7 = prod6 * ‖s+7‖`). -/
+`premGamma_E06_GammaSeq7_link` (`83818.21097691085296 ≤ 83818.22`; `prod7 = prod6 * ‖s+7‖`). -/
 theorem premGamma_E06_prod7_le :
     ‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
       (‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
@@ -4369,10 +4369,10 @@ theorem premGamma_E06_prod7_le :
   have h01234567 := mul_le_mul premGamma_E06shift_norm_le h1234567
     (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
       (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))))))) (by norm_num)
-  have heq : (1.36 : ℝ) * (2.29 * (3.26 * (4.25 * (5.24 * (6.23 * (7.23 * 8.23)))))) = 83818.21097691086 := by
+  have heq : (1.36 : ℝ) * (2.29 * (3.26 * (4.25 * (5.24 * (6.23 * (7.23 * 8.23)))))) = 83818.21097691085296 := by
     norm_num
   rw [heq] at h01234567
-  exact le_trans h01234567 (by norm_num : (83818.21097691086 : ℝ) ≤ 83818.22)
+  exact le_trans h01234567 (by norm_num : (83818.21097691085296 : ℝ) ≤ 83818.22)
 
 /-- Missing link L1 at `N = 7` (filed, not proved): `GammaSeq s 7` norm identity
 at E06 shifted `s = w_E06 + 1`, extending the `N = 6` spec shape
