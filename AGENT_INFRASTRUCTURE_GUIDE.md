@@ -6057,6 +6057,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
+  grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
+  :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 SUPP-FIX (background `ses_f34918ba1`, single build owner,
+  in flight): root cause = `/--` docstrings before `#print axioms`
+  section headers (S12/S14/S16/S18); remedy doc→block `/-` at 4 sites.
+  Build verification pending; S20 tail block (+441, floor -3.27) held
+  for joint commit on GREEN.
 - 2026-09-22 ASSEMBLY-R00SUP (background `ses_f348f8e82`, proof-only,
   grep-clean, assembly-only commit): tight-sup chain (`:17180-17261`:
   C=0.0125/r=0.25 → M=0.05 exactly, meets qB≤1/40; `H_of_ball2 :17250`).
