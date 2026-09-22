@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 STIRLING-DECAY (background `ses_f34806472`, proof-only,
+  grep-clean, stirling-only commit): shift-6 reversal PROVED (0.02629 >
+  0.02213 — ladder minimum confirmed); pi/2 height-decay + reflection
+  bridge filed as specs. Reflection rebuild next.
 - 2026-09-22 CUTL-HPROD (background `ses_f347f101c`, proof-only,
   grep-clean, cutL10-only commit): single-premise (hJ) assembly — hProd
   closed/banked; SOLE open premise = hJointTier (0.04 joint sup).

@@ -3844,3 +3844,95 @@ theorem D3SG_gamNeed_outer_shift5_ratio :
     (11 : ℝ) < (0.023 : ℝ) / (0.002 : ℝ) := by norm_num
 
 #print axioms D3SG_gamNeed_outer_shift5_ratio
+
+/-! ## GAMNEED-OUTER-SHIFT6-MINIMUM + HEIGHT-DECAY SPEC (append-only, report-and-stop).
+
+Shift shapes reused (grep): `D3SG_Real_Gamma_51975_le_thirtyfive_fourseven` at `:3581`,
+`D3SG_gamNeed_outer_shift5_upper` at `:3598` (`35.47 / (4.375 ^ 5) ≈ 0.02213 ≤ 0.023`),
+gap `:3836`, ratio `:3842` (`11x`). Decay shapes reused (grep): `D3SG_decay_sigma`
+at `:1305` (`‖Γ‖ ≤ 3 * M * exp (-(1/2) * |Im|)` for `0 < σ ≤ 1`), Tier-C rect at `:1410`.
+
+Ladder minimum: shift-6 majorant `184.36 / (4.375 ^ 6) ≈ 0.02629` exceeds the shift-5
+majorant `≈ 0.02213` (growth factor `5.1975 / 4.375 = 1.188 > 1` beats the extra
+`4.375` in the denominator), so the pure-shift ladder reverses at shift-6 and cannot
+improve on `0.023`. Banked below: real cap at `6.1975`, growth factor, majorant
+reversal, shift-6 quotient arithmetic (`≤ 0.027`), and `0.023 <` shift-6 quotient.
+
+Height-decay factor: banked `c = 1 / 2` decay with `M = 20` gives
+`60 * exp (-4.375 / 2) ≈ 6.73` at the outer point, far above `0.023`, so it does not
+help the ladder. The `π / 2` rate via the Gamma reflection bridge is NOT banked;
+filed below as honest spec Props (no theorems claimed): general `π / 2` decay spec
+on `Re = 0.1975`, reflection-bridge identity spec, and the exact outer need
+(`≤ 0.002`). Six-step Gamma-shift assembly for the `0.027` majorant is also NOT
+banked (only the quotient arithmetic is).
+
+Residual: `gamNeed_outer (≤ 0.002)` OPEN (`0.023` best quotient at `:3598`, `11x` gap;
+shift-6 `≈ 0.0263 ≤ 0.027` reverses; `π / 2` decay spec filed, unproved).
+-/
+
+/-- Outer shift-6 real cap: `Real.Gamma 6.1975 ≤ 184.36`
+(`Γ 6.1975 = 5.1975 * Γ 5.1975 ≤ 5.1975 * 35.47 ≤ 184.36`). -/
+theorem D3SG_Real_Gamma_61975_le_oneeightfour_threesix :
+    Real.Gamma 6.1975 ≤ 184.36 := by
+  have hne : (5.1975 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (5.1975 + 1) = 5.1975 * Real.Gamma 5.1975 :=
+    Real.Gamma_add_one hne
+  have heq : (5.1975 : ℝ) + 1 = 6.1975 := by norm_num
+  rw [heq] at hshift
+  rw [hshift]
+  calc (5.1975 : ℝ) * Real.Gamma 5.1975
+      ≤ 5.1975 * 35.47 :=
+        mul_le_mul_of_nonneg_left D3SG_Real_Gamma_51975_le_thirtyfive_fourseven (by norm_num)
+    _ ≤ 184.36 := by norm_num
+
+#print axioms D3SG_Real_Gamma_61975_le_oneeightfour_threesix
+
+/-- Shift-6 growth factor beats the extra denominator: `5.1975 / 4.375 = 1.188`. -/
+theorem D3SG_gamNeed_outer_shift6_growth_factor :
+    (1 : ℝ) < 5.1975 / 4.375 := by norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_growth_factor
+
+/-- Shift-6 majorant reversal: the shift-6 quotient exceeds the shift-5 quotient,
+so the pure-shift ladder is at its minimum at shift-5. -/
+theorem D3SG_gamNeed_outer_shift6_majorant_reversal :
+    (35.47 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      < (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_majorant_reversal
+
+/-- Shift-6 quotient arithmetic: `184.36 / (4.375 ^ 6) ≈ 0.02629 ≤ 0.027`. -/
+theorem D3SG_gamNeed_outer_shift6_quot_upper_arith :
+    (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      ≤ (0.027 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_quot_upper_arith
+
+/-- Shift-6 does not improve on shift-5: `0.023` is below the shift-6 quotient. -/
+theorem D3SG_gamNeed_outer_shift6_above_023 :
+    (0.023 : ℝ)
+      < (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_above_023
+
+/-- Height-decay spec (`π / 2` rate on the outer line, filed not proved):
+`‖Γ s‖ ≤ 2 * exp (-(π / 2) * |Im|)` for `Re = 0.1975`. At `|Im| = 4.375` this
+gives `≈ 0.00207`, at the outer-need threshold; closing `≤ 0.002` needs the
+constant sharpened or the polynomial prefactor from the local rebuild. -/
+def D3SG_height_decay_pi2_spec : Prop :=
+  ∀ (s : ℂ), s.re = 0.1975 →
+    ‖Complex.Gamma s‖ ≤ 2 * Real.exp (-(Real.pi / 2) * |s.im|)
+
+/-- Reflection-bridge spec (filed not proved): Euler reflection at `Re = 0.1975`,
+the intended route to the `π / 2` rate rebuilt locally. -/
+def D3SG_gamma_reflection_bridge_spec : Prop :=
+  ∀ (s : ℂ), s.re = 0.1975 →
+    Complex.Gamma s * Complex.Gamma (1 - s) * Complex.sin (↑Real.pi * s)
+      = ↑Real.pi
+
+/-- Exact outer decay need (filed not proved): `‖Γ(mk 0.1975 (-4.375))‖ ≤ 0.002`. -/
+def D3SG_outer_decay_need : Prop :=
+  ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ (0.002 : ℝ)
