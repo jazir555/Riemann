@@ -6148,6 +6148,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CUTL-TIERSPEC (background `ses_f3480bec0`, proof-only,
   grep-clean, cutL10-only commit): hJoint tier spec filed + endpoint
   zeta-1 value + uniform-worsens findings (uniform route dead).
+- 2026-09-22 WENDEL-FEED (background `ses_f3480bec2`, proof-only,
+  grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
+  1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
+  opposite); cap stands alone.
 - 2026-09-22 CELL-N (background `ses_f348467ec`, proof-only,
   grep-clean, interval-only commit): R13 poly floor 11.4 hypothesis-free
   + center conditional. Same ~6-order wall (short 6.3M).

@@ -1585,4 +1585,69 @@ G1-C `13.54`, H3 bound `13.54/‖wOuter+8‖^2 + 8.63/‖wOuter‖^2`. Gap: none
 G1-as-Prop premise discharged (no residual premise retained).
 -/
 
+/-! ## 22. WENDEL-H3 feed into downstream numeric consumer (PROOF-ONLY, FENCED, no build): CLOSED.
+
+Greps (before edit, this turn, this file only):
+- `H3_outer_banked` at `:1573-1577`:
+  `‖Complex.digamma wOuter - target_outer‖ ≤ 13.54/‖wOuter+8‖^2 + 8.63/‖wOuter‖^2`
+  via `h3_outer_of_lead_normcap_G2/:1036` with `G1_outerN8_banked/:1570`,
+  `G2_outerN8_banked/:1526`;
+- `stirling_wOuter_add8` at `:848-859`: StirlingVert disc at `wOuter+8` with
+  `Im^2` denominator; producer feeding G1 (`stirling_G1expr_im2/:994`,
+  `G1_of_normcap/:1012`), not a consumer of H3;
+- `digamma_shift_wOuter_8` at `:951-963`: shift identity
+  `digamma (wOuter+8) = digamma wOuter + S_outerN8`; producer feeding the H3
+  combiner `h3_outer_of_G1_G2/:773`, not a consumer of H3;
+- downstream-consumer grep for the H3 shape `digamma wOuter - target_outer`
+  after `:1577`: zero theorems take it as hypothesis (only the residual comment
+  `:1579-1586` cites it); hence H3 is terminal in file before this section;
+- forbidden-tactic grep: zero uses in banked code below (prior hits comment-only).
+
+Attempt: neither `:848` nor `:951` consumes H3 (direction is opposite: both feed
+H3). Honest feed is downstream: bank an explicit numeric consumer taking the
+exact two-term H3 shape as hypothesis (`h3_numeric_of_bound`) via the banked
+floors `g2_norm_wOuter_lower/:1257`, `g2_norm_wOuter8_lower/:1264`, then
+discharge with `H3_outer_banked` as `H3_outer_banked_numeric`. Exact value:
+`(13.54+8.63)/4.375^2 = 22.17/19.140625 ≤ 1.16` (machine-checked `norm_num`
+goal below). No new imports; no existing lines modified.
+-/
+
+theorem h3_sq_lower_wOuter : (4.375 : ℝ) ^ 2 ≤ ‖wOuter‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wOuter_lower 2
+
+theorem h3_sq_lower_wOuter8 : (4.375 : ℝ) ^ 2 ≤ ‖wOuter + (8 : ℂ)‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wOuter8_lower 2
+
+theorem h3_div8_le : (13.54 : ℝ) / ‖wOuter + (8 : ℂ)‖ ^ 2 ≤
+    (13.54 : ℝ) / (4.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_sq_lower_wOuter8
+
+theorem h3_div0_le : (8.63 : ℝ) / ‖wOuter‖ ^ 2 ≤
+    (8.63 : ℝ) / (4.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_sq_lower_wOuter
+
+theorem h3_num_cap : (13.54 : ℝ) / (4.375 : ℝ) ^ 2 +
+    (8.63 : ℝ) / (4.375 : ℝ) ^ 2 ≤ (1.16 : ℝ) := by
+  norm_num
+
+theorem h3_numeric_of_bound
+    (hH3 : ‖Complex.digamma wOuter - target_outer‖ ≤
+      (13.54 : ℝ) / ‖wOuter + (8 : ℂ)‖ ^ 2 + (8.63 : ℝ) / ‖wOuter‖ ^ 2) :
+    ‖Complex.digamma wOuter - target_outer‖ ≤ (1.16 : ℝ) := by
+  exact le_trans hH3 (le_trans (add_le_add h3_div8_le h3_div0_le) h3_num_cap)
+
+theorem H3_outer_banked_numeric :
+    ‖Complex.digamma wOuter - target_outer‖ ≤ (1.16 : ℝ) :=
+  h3_numeric_of_bound H3_outer_banked
+
+/-! Section-22 residual (exact, no force): H3 two-term shape CLOSED via
+`H3_outer_banked/:1573`; downstream numeric consumer CLOSED via
+`H3_outer_banked_numeric` (`h3_numeric_of_bound` with `h3_div8_le`/`h3_div0_le`
+from `g2_norm_wOuter_lower/:1257`, `g2_norm_wOuter8_lower/:1264`, plus
+`h3_num_cap`). Value banked: numeric H3 cap `1.16`. Gap: none in H3 chain;
+no premise of `:848`/`:951` was narrowed because neither takes H3 (both feed
+H3); no wider Wendel consumer in file takes the H3 shape, so the numeric cap
+is the terminal consumer banked here.
+-/
+
 end Door3ComplexWendel
