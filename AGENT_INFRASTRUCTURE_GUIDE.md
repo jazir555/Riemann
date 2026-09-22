@@ -6060,6 +6060,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
   grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
   :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 GAMMA-N16 (background `ses_f349123cb`, proof-only,
+  grep-clean + 4 audits, premise_gamma-only commit): E06 Seq16 rung
+  0.657 `:8188` (ceiling 0.65769<0.66, gap 0.003, increment +0.002 —
+  still asymptoting). N17-next filed `:8438`.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
