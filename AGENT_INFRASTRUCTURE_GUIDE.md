@@ -5901,6 +5901,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 CELL-D (background `ses_f34e99bd8`, proof-only, grep-clean,
+  interval-only commit): R04 conditional FILED (no fallback needed:
+  poly 3.85 banked `:33775`, grid member `:1632`) —
+  `R04CenterAssembly.R04_center_with_poly_pi_gamma :35181` (poly 3.85 +
+  pi 1/2; open hgam/hzeta + hprod check, needs Agam·Azeta ≥ 0.0718 —
+  infeasible at banked floors like R00/R03). Cell conditionals: R00,
+  R03, R04 (all hprod-blocked).
 - 2026-09-22 FIRSTCELL-HEVEN (background `ses_f34eb32a3`, proof-only,
   grep-clean, first_cell-only commit): hEven slice FILED —
   `FC_slice_S2_of_tendsto :1112` (Tendsto+Antitone → S₂≤L, alternating-

@@ -35147,3 +35147,61 @@ theorem R03_center_with_poly_pi_gamma (Agam Azeta : ℝ)
     hpoly hpi hgam hzeta hprod
 
 end R03CenterAssembly
+
+/-!
+## R04 center assembly with banked poly/pi floors (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R03R10PolyLower.poly_lower_R04` (`3.85`): banked hypothesis-free; consumed directly below.
+* `CellUniform.pi_lower_of_re` + `R03R10PolyLower.sR04_re` (`0.395 ≤ 1/2`): gives
+  banked `1/2 ≤ ‖piPart sR04‖` hypothesis-free; no dedicated `pi_lower_R04` exists,
+  so the uniform lemma is cited explicitly.
+* `CentralCoverAssembly.R04_leaf_obligations` (`central_cover_assembly.lean:1642`):
+  shape `(0.05 + 0.07 * R04.radius ≤ ‖xiShifted R04.center‖) ∧ deriv bound`,
+  same mid tier (`ε = 0.05`, `M = 0.07`) as R03; `R04_mem_gridFine` present
+  (`central_cover_assembly.lean:1632`), so R04 is in `gridFine`.
+* Gamma (`1/10000000`, cf. `CellGammaUniform.gamma_lower_wide` /
+  `R00GammaLower.gamma_const_pos`) and zeta (`1/26`, no banked `S₂`-style head
+  for R04 in this file) stay explicit open premises.
+
+Shape: mirrors `R03CenterAssembly.R03_center_with_poly_pi_gamma :35123` but for the R04
+mid tier (`ε = 0.05`, `M = 0.07`) via the generic
+`CellUniform.center_bound_of_component_bounds` bridge. Open component premises are exactly two:
+the Gamma remainder `hgam` and the zeta lower `hzeta` (`hGam_floor`, `hZeta_floor`, `hprod` are
+numeric side conditions, not enclosures).
+-/
+
+namespace R04CenterAssembly
+
+/-- Conditional R04 center assembly: banked poly `3.85` + pi `1/2` floors are
+plugged into the generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.05 + 0.07 * 1.26) / 1.925`; at banked floors
+(`1/10000000`, `1/26`) it is infeasible, so this is filed as an honest
+conditional, not a closed bound. -/
+theorem R04_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR04‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R03R10PolyLower.sR04‖)
+    (hprod : (0.05 : ℝ) + 0.07 * 1.26 ≤ 3.85 * (1 / 2) * Agam * Azeta) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R04.radius ≤
+      ‖xiShifted CentralCoverAssembly.R04.center‖ := by
+  have hpoly := R03R10PolyLower.poly_lower_R04
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR04‖ :=
+    CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR04_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R03R10PolyLower.sR04
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R04.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R04 0.05 0.07 (by norm_num)
+    (le_of_lt CentralCoverAssembly.R04_radius_lt)
+    3.85 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+end R04CenterAssembly
