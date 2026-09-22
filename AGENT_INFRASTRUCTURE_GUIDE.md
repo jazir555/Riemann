@@ -5784,6 +5784,16 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 VERIFY16 (background `ses_f34a71696`, sole build owner):
+  GREEN — `[8689/8689] (40s)`, BUILD-EXIT=0 (attempt 2/2). Fixes (5,
+  THIRD slip family — rung-COUNT slips, not parens/numerals): nonneg
+  chains `:7251/:7253/:7255/:7257` had N12 rung counts (9/10,10/11,
+  11/12+extra,12/13+extra → need 10/11,11/12,12/13,13/14) + hpos14
+  `:7486` +1 close. N14 honest 0.653 COMPILED. Lock RELEASED.
+  LADDER-RULE EXTENDED: verify rung COUNTS (mul_nonneg/w lines = N),
+  not just balance. INFRA: VERIFY16's editor wrote CRLF again (7531
+  lines) — coordinator normalized to LF (diff 5/5). RULE: every agent
+  runs `file <f>` before finishing; CRLF = redo. GAMMA-N15 tasked.
 - 2026-09-22 GAMMA-N14 (background `ses_f34a9d8f1`, proof-only,
   grep-clean, premise_gamma +429/-0 PURE APPEND): E06 Seq14 rung —
   rpow14-frac (1.66≤14^5/26, 1.67 false), Re-lower 23.24, prod14
