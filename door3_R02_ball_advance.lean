@@ -1450,4 +1450,78 @@ def R02_DZetaPair_missingNumeral_spec (Deta : ℝ) : Prop :=
 #print axioms R02_etaWorst_normSq
 #print axioms R02_etaWorst_normSq_le_829
 
+/-- ADAPTIVE probe (fenced, append-only, no modification above): DZFIRE grep
+result + honest `DZetaPair` quotient attempt.
+
+DZFIRE grep (this file only, read-only):
+* sole eta-pair firing instance is `R02_fullDerivUp_of_etaPairDeriv :1042`;
+  no second eta-pair instance beyond `:1042` exists in-tree in this file
+  (later theorems are generic `(PQ)*G` assembly `:1070/:1098`, Gamma
+  analyticity `:1138/:1160`, zeta analyticity `:1222`, retiers `:1238-1315`,
+  and DZNUM gap specs `:1396/:1403/:1411/:1427/:1440`).
+* `Deta` (`:1055` `hTsumMaj`) and `DZetaPair` (`:1058` `hConvLe`) stay open
+  premises; `door3_R02_zeta_bridge.lean:53-68` re-exports both explicitly.
+
+`DZetaPair` numeral attempt — honest non-transfer (nothing forced):
+* ETAPRIME tsum VALUE `∑ etaDerivMajorant ≤ 8 * (π ^ 2 / 6)`
+  (`door3_eta_prime.lean:780-788`) is proved on the disc
+  `center 3, radius 1/2` (`:385-387`: every `y` has `y.re ≥ 5/2`,
+  `‖y‖ ≤ 7/2`), with majorant exponent `5/2` (`:392-396`).
+* The R02 rect needs `Re ∈ [0.05, 0.74]`, `‖s‖ ≤ 8.29` (`:1396-1404`)
+  and worst-case exponent `0.05` (`R02_etaWorstMajorant :1411`).
+  Termwise the R02 majorant dominates the disc majorant for large `m`
+  (`8.29 > 7/2` on the log piece; `(2m+1)^(-0.05-1) ≫ (2m+1)^(-5/2-1)`
+  since the base exceeds `1`), so the disc dominator
+  `8 / (m+1)^2` (`door3_eta_prime.lean:508`) does not dominate the R02
+  majorant and the disc tsum value does not transfer. Re-deriving an
+  R02-applicable `Deta` needs a fresh summability + tsum numeral for
+  `R02_etaWorstMajorant` (gap `R02_Deta_missingNumeral_spec :1427`); per
+  DZNUM rule the disc value is NOT substituted here.
+* Conversion caps `VEta = 168 / C0 = 3 / C1 = 2 / C2 = 31`
+  (`door3_eta_prime.lean:845/901/929/877`) ARE proved on the R02 rect,
+  but this file must not import that lane (cycle guard `:1019-1023`),
+  so no `C0/C1/C2/VEta` numeral is closed here either.
+What IS closed here: the pure quotient assembly below, which transports
+any supplied `Deta/VEta/C0/C1/C2` caps to the `:1058` shape
+`‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair`
+with `DZetaPair = (Deta * C0 + VEta * C1) * C2`. -/
+theorem R02_DZetaPair_quotient_of_caps (Deta VEta C0 C1 C2 : ℝ)
+    (hDeta0 : 0 ≤ Deta) (hVEta0 : 0 ≤ VEta)
+    (hC00 : 0 ≤ C0) (hC10 : 0 ≤ C1) (hC20 : 0 ≤ C2)
+    (etaDerivVal etaVal conv conv' convInv2 : ℂ)
+    (hDeriv : ‖etaDerivVal‖ ≤ Deta) (hVal : ‖etaVal‖ ≤ VEta)
+    (hC0 : ‖conv‖ ≤ C0) (hC1 : ‖conv'‖ ≤ C1) (hC2 : ‖convInv2‖ ≤ C2) :
+    ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤
+      (Deta * C0 + VEta * C1) * C2 := by
+  have n1 : ‖etaDerivVal * conv‖ ≤ Deta * C0 := by
+    rw [norm_mul]
+    exact mul_le_mul hDeriv hC0 (norm_nonneg _) hDeta0
+  have n2 : ‖etaVal * conv'‖ ≤ VEta * C1 := by
+    rw [norm_mul]
+    exact mul_le_mul hVal hC1 (norm_nonneg _) hVEta0
+  have hsub : ‖etaDerivVal * conv - etaVal * conv'‖ ≤ Deta * C0 + VEta * C1 :=
+    le_trans (norm_sub_le _ _) (add_le_add n1 n2)
+  have hcap0 : 0 ≤ Deta * C0 + VEta * C1 :=
+    add_nonneg (mul_nonneg hDeta0 hC00) (mul_nonneg hVEta0 hC10)
+  rw [norm_mul]
+  exact mul_le_mul hsub hC2 (norm_nonneg _) hcap0
+
+/-- Residual gap after the assembly above: supply R02-applicable
+`Deta/VEta/C0/C1/C2` with the rect-uniform quotient instance.
+`R02_DZetaPair_quotient_of_caps` closes the norm algebra; the five
+numerals plus the `‖etaDerivVal‖ ≤ Deta` link on the R02 rect remain
+open (Deta via `:1427`; `VEta/C0/C1/C2` banked only in the
+non-importable `door3_eta_prime.lean:845/877/901/929` lane). -/
+def R02_DZetaPair_residual_spec : Prop :=
+  ∃ (Deta VEta C0 C1 C2 DZetaPair : ℝ),
+    0 ≤ Deta ∧ 0 ≤ VEta ∧ 0 ≤ C0 ∧ 0 ≤ C1 ∧ 0 ≤ C2 ∧ 0 ≤ DZetaPair ∧
+    DZetaPair = (Deta * C0 + VEta * C1) * C2 ∧
+    ∀ (s : ℂ), 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ∀ (etaVal conv conv' convInv2 : ℂ),
+        ‖etaVal‖ ≤ VEta → ‖conv‖ ≤ C0 → ‖conv'‖ ≤ C1 → ‖convInv2‖ ≤ C2 →
+          ∀ (etaDerivVal : ℂ), ‖etaDerivVal‖ ≤ Deta →
+            ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair
+
+#print axioms R02_DZetaPair_quotient_of_caps
+
 end Door3R02BallAdvance
