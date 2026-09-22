@@ -36227,3 +36227,123 @@ theorem R15_banked_infeasible :
 #print axioms R15CenterAssembly.R15_banked_infeasible
 
 end R15CenterAssembly
+
+/-!
+## R16 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R15CenterAssembly.poly_lower_R15` (`0.4`): prior mid-corner floor at
+  `Im = -0.75`.
+* `R15CenterAssembly.R15_center_with_poly_pi_gamma`: template mirrored here
+  (mid tier `eps = 0.05`, `M = 0.07` at R15; R16 honestly uses `eps = 0.05`,
+  `M = 0.07` per the same mid-tier bridge below).
+* `R15GammaUpper.sR15` with `sR15_re = 0.3` and `sR15_im = -0.75`:
+  prior shape witness for the `0.3` real part reused at R16.
+* `R16GammaUpper.sR16` with `sR16_re = 0.3` and `sR16_im = 1.25`:
+  banked s-center reused here; no `poly_lower_R16` existed, so the poly floor is
+  newly closed below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` + `CellUniform.center_bound_of_component_bounds`:
+  generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R15CenterAssembly.R15_center_with_poly_pi_gamma` at the R16
+mid corner (`sR16 = 0.3 + 1.25 * I`), mid tier (`eps = 0.05`, `M = 0.07`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R16CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R16 s-center. -/
+theorem polyPart_norm_R16 :
+    ‖R00Enclosure.polyPart R16GammaUpper.sR16‖ =
+      (1 / 2) * ‖R16GammaUpper.sR16‖ * ‖R16GammaUpper.sR16 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR16‖ ≥ 1.28` (`1.28^2 = 1.6384 < 0.3^2 + 1.25^2 = 1.6525`). -/
+theorem norm_sR16_ge : (1.28 : ℝ) ≤ ‖R16GammaUpper.sR16‖ := by
+  have hsq : (1.28 : ℝ) ^ 2 ≤ ‖R16GammaUpper.sR16‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R16GammaUpper.sR16_re, R16GammaUpper.sR16_im]
+    norm_num
+  calc (1.28 : ℝ) = Real.sqrt ((1.28 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R16GammaUpper.sR16‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R16GammaUpper.sR16‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR16 - 1‖ ≥ 1.43` (`0.7^2 + 1.25^2 = 2.0525 > 1.43^2 = 2.0449`). -/
+theorem norm_sR16_sub_one_ge : (1.43 : ℝ) ≤ ‖R16GammaUpper.sR16 - 1‖ := by
+  have hr1 : (R16GammaUpper.sR16 - 1).re = -0.7 := by
+    simp only [Complex.sub_re, Complex.one_re, R16GammaUpper.sR16_re]
+    norm_num
+  have hi1 : (R16GammaUpper.sR16 - 1).im = 1.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R16GammaUpper.sR16_im]
+    norm_num
+  have hsq : (1.43 : ℝ) ^ 2 ≤ ‖R16GammaUpper.sR16 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.43 : ℝ) = Real.sqrt ((1.43 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R16GammaUpper.sR16 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R16GammaUpper.sR16 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.9 ≤ ‖polyPart sR16‖`
+(`1.28 * 1.43 / 2 = 0.9152 ≥ 0.9`; true `≈ 0.921`, slack `≈ 0.021`). -/
+theorem poly_lower_R16 : (0.9 : ℝ) ≤ ‖R00Enclosure.polyPart R16GammaUpper.sR16‖ := by
+  have hprod : (1.28 : ℝ) * 1.43 ≤ ‖R16GammaUpper.sR16‖ * ‖R16GammaUpper.sR16 - 1‖ :=
+    mul_le_mul norm_sR16_ge norm_sR16_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R16]
+  nlinarith [hprod]
+
+/-- Conditional R16 center assembly: banked s-center + new poly `0.9` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.05 + 0.07 * 1.26) / 0.45`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R16_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R16.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R16GammaUpper.sR16‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R16GammaUpper.sR16‖)
+    (hprod : (0.05 : ℝ) + 0.07 * 1.26 ≤ 0.9 * (1 / 2) * Agam * Azeta) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R16.radius ≤
+      ‖xiShifted CentralCoverAssembly.R16.center‖ := by
+  have hpoly := poly_lower_R16
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R16GammaUpper.sR16‖ :=
+    CellUniform.pi_lower_of_re (by rw [R16GammaUpper.sR16_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R16GammaUpper.sR16
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R16.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R16 0.05 0.07 (by norm_num) hrad
+    0.9 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact mid-tier threshold: `0.05 + 0.07 * 1.26 = 0.1382`. -/
+theorem R16_threshold_eq : (0.05 : ℝ) + 0.07 * 1.26 = 0.1382 := by norm_num
+
+/-- Exact banked base: `0.9 * (1/2) = 0.45`. -/
+theorem R16_base_eq : (0.9 : ℝ) * (1 / 2) = 0.45 := by norm_num
+
+/-- Exact residual: banked floors `0.45 / 260000000` do not clear `0.1382`
+(required `Agam * Azeta ≥ 0.1382 / 0.45 ≈ 0.3071`; banked `≈ 1.73e-09`;
+short by factor `≈ 79800000`, the ~8-order wall). -/
+theorem R16_banked_infeasible :
+    (0.9 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.05 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R16CenterAssembly.poly_lower_R16
+#print axioms R16CenterAssembly.R16_center_with_poly_pi_gamma
+#print axioms R16CenterAssembly.R16_threshold_eq
+#print axioms R16CenterAssembly.R16_banked_infeasible
+
+end R16CenterAssembly
