@@ -5247,5 +5247,347 @@ theorem CS_complex_S8_abs_ge_194_gap :
 #print axioms CS_S8C_Im_eq
 #print axioms CS_complex_S8_Im_ge_016
 #print axioms CS_complex_S8_abs_ge_194_gap
+/-! ## §A21. Complex S10 slow `0.24` (ETA-S10, Re-route only, proof-only)
+
+Honest extension of the §A19 S8 recipe to `S₁₀ = S₈ + 9^{-s} - 10^{-s}`.
+True-value check (banked windows only, no new analysis): `Re₉ ≈ -0.27`
+(`cos φ₉ ≈ -0.64`), `-Re₁₀ ≈ +0.40` (`cos φ₁₀ ≈ -0.99`), so TRUE
+`Re(S₁₀) ≈ 1.72 + 0.13 ≈ 1.84 < 1.94`; no S10 Re lower can beat the live
+best `slow = 1.94` — this floor `0.24` is honest by design.
+
+Per-term routes (banked windows only, mirrors of banked lemmas):
+* `log 9 = 2·log 3` exact (`CS_log_nine_eq`, mirror of `CS_log_eight_eq`),
+  so `log 9 ∈ [2.1058, 2.2726]` from banked `log3` bounds.
+* `log 10 = log 2 + log 5` exact (`CS_log_ten_eq`, mirror of
+  `CS_log_six_eq`), so `log 10 ∈ [2.302547, 2.302648]` from banked `log2`
+  (6-digit) + `log5` bounds.
+* Rpow: `9^0.395 ≥ 2.17`, `10^0.395 ≥ 2.32` (quadratic lower, mirrors of
+  `CS_rpow6pos_proved`); hence `r₉ ≤ 0.47`, `r₁₀ ≤ 0.44` (reciprocal steps,
+  mirrors of `CS_rpow6neg_upper_proved`).
+* Cpow Re splits for `9^{-s}`, `10^{-s}` (token mirrors of
+  `CS_cpow7_sCenter_re :4718`).
+* Trig-free Re caps: `Re₉ ≥ -0.47`, `Re₁₀ ≤ 0.44` (`-1 ≤ cos ≤ 1` only,
+  no phase window needed given the wide `log9` window).
+* Assembly: `Re(S₁₀) = Re(S₈) + Re₉ - Re₁₀ ≥ 1.15 - 0.47 - 0.44 = 0.24`.
+New need `1.4·1.851 = 2.5914`; shortfall vs `slow = 0.24` is `2.3514`
+(honest; live best STANDS at `slow = 1.94`, shortfall `0.6514`). -/
+
+/-- `log 9 = 2 * log 3` (exact, mirrors `CS_log_eight_eq`). -/
+theorem CS_log_nine_eq : Real.log 9 = 2 * Real.log 3 := by
+  have h9 : (9 : ℝ) = 3 ^ (2 : ℕ) := by norm_num
+  rw [h9, Real.log_pow]
+  norm_num
+
+/-- `log 9` lower (`2.1058 ≤ log 9` from banked `CS_log_three_ge`). -/
+theorem CS_log_nine_ge : (2.1058 : ℝ) ≤ Real.log 9 := by
+  rw [CS_log_nine_eq]
+  have h3 := CS_log_three_ge
+  have hcap : (2.1058 : ℝ) ≤ 2 * 1.0529 := by norm_num
+  linarith
+
+/-- `log 9` upper (`log 9 ≤ 2.2726` from banked `CS_log_three_le`). -/
+theorem CS_log_nine_le : Real.log 9 ≤ (2.2726 : ℝ) := by
+  rw [CS_log_nine_eq]
+  have h3 := CS_log_three_le
+  have hcap : 2 * (1.1363 : ℝ) ≤ 2.2726 := by norm_num
+  linarith
+
+/-- `log 10 = log 2 + log 5` composite bridge (mirror of `CS_log_six_eq`). -/
+theorem CS_log_ten_eq : Real.log 10 = Real.log 2 + Real.log 5 := by
+  have h10 : (10 : ℝ) = 2 * 5 := by norm_num
+  rw [h10, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 10` lower (`2.302547 ≤ log 10` from banked lowers). -/
+theorem CS_log_ten_ge : (2.302547 : ℝ) ≤ Real.log 10 := by
+  rw [CS_log_ten_eq]
+  have h2 := CS_log2_ge
+  have h5 := CS_log_five_ge
+  have hcap : (2.302547 : ℝ) ≤ 0.693147 + 16094 / 10000 := by norm_num
+  linarith
+
+/-- `log 10` upper (`log 10 ≤ 2.302648` from banked uppers). -/
+theorem CS_log_ten_le : Real.log 10 ≤ (2.302648 : ℝ) := by
+  rw [CS_log_ten_eq]
+  have h2 := CS_log2_le
+  have h5 := CS_log_five_le
+  have hcap : (0.693148 : ℝ) + 16095 / 10000 ≤ 2.302648 := by norm_num
+  linarith
+
+/-- `9^0.395 ≥ 2.17` lower input (TRUE `≈ 2.3877`). -/
+def CS_rpow9pos_lower : Prop := (2.17 : ℝ) ≤ (9 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `9^0.395 ≥ 2.17` via quadratic lower at
+`x = 0.395·log 9 > 0.83179` (uses `CS_log_nine_ge`). -/
+theorem CS_rpow9pos_lower_proved : CS_rpow9pos_lower := by
+  show (2.17 : ℝ) ≤ (9 : ℝ) ^ ((0.395 : ℝ))
+  have h9 : (2.1058 : ℝ) ≤ Real.log 9 := CS_log_nine_ge
+  have hx_lo : (0.83179 : ℝ) < 0.395 * Real.log 9 := by
+    have hmul : (0.395 : ℝ) * 2.1058 ≤ 0.395 * Real.log 9 :=
+      mul_le_mul_of_nonneg_left h9 (by norm_num)
+    have hcap : (0.83179 : ℝ) < 0.395 * 2.1058 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 9 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.83179 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.17 : ℝ) ≤ 1 + 0.83179 + (0.83179 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.17 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (9 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 9)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `9^-0.395 ≤ 0.47` upper input (TRUE `≈ 0.4188`). -/
+def CS_rpow9neg_upper : Prop := (9 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ)
+
+/-- CLOSED: `9^-0.395 ≤ 0.47` from `9^0.395 ≥ 2.17`
+(`0.47·2.17 = 1.0199 ≥ 1`). -/
+theorem CS_rpow9neg_upper_proved : CS_rpow9neg_upper := by
+  show (9 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ)
+  have hlow : (2.17 : ℝ) ≤ (9 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow9pos_lower_proved
+  have hpos : (0 : ℝ) < (9 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (9 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (9 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 9)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.47 : ℝ) * (9 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.47 * 2.17 := by norm_num
+    calc (1 : ℝ) ≤ 0.47 * 2.17 := hmul
+      _ ≤ 0.47 * (9 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `10^0.395 ≥ 2.32` lower input (TRUE `≈ 2.4842`). -/
+def CS_rpow10pos_lower : Prop := (2.32 : ℝ) ≤ (10 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `10^0.395 ≥ 2.32` via quadratic lower at
+`x = 0.395·log 10 > 0.90950` (uses `CS_log_ten_ge`). -/
+theorem CS_rpow10pos_lower_proved : CS_rpow10pos_lower := by
+  show (2.32 : ℝ) ≤ (10 : ℝ) ^ ((0.395 : ℝ))
+  have h10 : (2.302547 : ℝ) ≤ Real.log 10 := CS_log_ten_ge
+  have hx_lo : (0.90950 : ℝ) < 0.395 * Real.log 10 := by
+    have hmul : (0.395 : ℝ) * 2.302547 ≤ 0.395 * Real.log 10 :=
+      mul_le_mul_of_nonneg_left h10 (by norm_num)
+    have hcap : (0.90950 : ℝ) < 0.395 * 2.302547 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 10 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.90950 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.32 : ℝ) ≤ 1 + 0.90950 + (0.90950 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.32 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (10 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 10)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `10^-0.395 ≤ 0.44` upper input (TRUE `≈ 0.4025`). -/
+def CS_rpow10neg_upper : Prop := (10 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.44 : ℝ)
+
+/-- CLOSED: `10^-0.395 ≤ 0.44` from `10^0.395 ≥ 2.32`
+(`0.44·2.32 = 1.0208 ≥ 1`). -/
+theorem CS_rpow10neg_upper_proved : CS_rpow10neg_upper := by
+  show (10 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.44 : ℝ)
+  have hlow : (2.32 : ℝ) ≤ (10 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow10pos_lower_proved
+  have hpos : (0 : ℝ) < (10 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (10 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (10 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 10)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.44 : ℝ) * (10 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.44 * 2.32 := by norm_num
+    calc (1 : ℝ) ≤ 0.44 * 2.32 := hmul
+      _ ≤ 0.44 * (10 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `9^{-s}` at `sCenter` (token mirror of
+`CS_cpow7_sCenter_re`). -/
+theorem CS_cpow9_sCenter_re : ((((9 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (9 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 9) := by
+  have h9pos : (0 : ℝ) < 9 := by norm_num
+  have hxC : ((9 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h9pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((9 : ℝ) : ℂ) = (((Real.log 9 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h9pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 9 : ℝ)) : ℂ)).re = Real.log 9 := Complex.ofReal_re _
+  have hzim : ((((Real.log 9 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 9 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 9 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 9 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 9 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 9 * (-(0.395 : ℝ)))
+      = (9 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h9pos _).symm
+  have hcos : Real.cos (Real.log 9 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 9) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `10^{-s}` at `sCenter` (token mirror of
+`CS_cpow8_sCenter_re`). -/
+theorem CS_cpow10_sCenter_re : ((((10 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (10 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 10) := by
+  have h10pos : (0 : ℝ) < 10 := by norm_num
+  have hxC : ((10 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h10pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((10 : ℝ) : ℂ) = (((Real.log 10 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h10pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 10 : ℝ)) : ℂ)).re = Real.log 10 := Complex.ofReal_re _
+  have hzim : ((((Real.log 10 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 10 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 10 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 10 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 10 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 10 * (-(0.395 : ℝ)))
+      = (10 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h10pos _).symm
+  have hcos : Real.cos (Real.log 10 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 10) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₉ ≥ -0.47` (`r₉ ≤ 0.47`, `-1 ≤ cos`; TRUE `≈ -0.27`). -/
+theorem CS_Re9_ge_neg047 :
+    (-0.47 : ℝ) ≤ (9 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 9) := by
+  have hr0 : (0 : ℝ) ≤ (9 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (9 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ) := CS_rpow9neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 9) := Real.neg_one_le_cos _
+  have h1 : (9 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (9 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 9) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (9 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((9 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.47 : ℝ) ≤ -((9 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₁₀ ≤ 0.44` (`r₁₀ ≤ 0.44`, `cos ≤ 1`; TRUE `≈ -0.40`). -/
+theorem CS_Re10_le_044 :
+    (10 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 10) ≤ (0.44 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (10 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (10 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.44 : ℝ) := CS_rpow10neg_upper_proved
+  have hcos : Real.cos (6.75 * Real.log 10) ≤ (1 : ℝ) := Real.cos_le_one _
+  have h1 : (10 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 10)
+      ≤ (10 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (10 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (10 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Complex S10 partial sum at `sCenter` (`S₈ + 9^{-s} - 10^{-s}`). -/
+noncomputable def CS_S10C : ℂ :=
+  CS_S8C + (9 : ℂ) ^ (-R02Pilot.sCenter) - (10 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S10 (`Re(S₁₀) = Re(S₈) + Re₉ - Re₁₀`,
+mirror of `CS_S8C_Re_eq`). -/
+theorem CS_S10C_Re_eq :
+    (CS_S10C).re = (CS_S8C).re
+      + (9 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 9)
+      - (10 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 10) := by
+  unfold CS_S10C
+  have h9 : ((9 : ℂ)) = ((((9 : ℝ)) : ℂ)) := by simp
+  have h10c : ((10 : ℂ)) = ((((10 : ℝ)) : ℂ)) := by simp
+  rw [h9, h10c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow9_sCenter_re, CS_cpow10_sCenter_re]
+
+/-- Complex-S10 real part `≥ 0.24` (PROVED, unconditional):
+`Re(S₁₀) = Re(S₈) + Re₉ - Re₁₀ ≥ 1.15 - 0.47 - 0.44 = 0.24`
+(TRUE `≈ 1.84`; honest regression vs S8 `1.15` by `0.91`, trails live
+best `slow = 1.94` by design). -/
+theorem CS_complex_S10_Re_ge_024 :
+    (0.24 : ℝ) ≤ (CS_S10C).re := by
+  have hEq := CS_S10C_Re_eq
+  have hS8 := CS_complex_S8_Re_ge_115
+  have hT9 := CS_Re9_ge_neg047
+  have hT10 := CS_Re10_le_044
+  rw [hEq]
+  linarith
+
+/-- Complex-S10 absolute value `≥ 0.24` (triangle `‖z‖ ≥ Re z`,
+mirroring `CS_complex_S8_abs_ge_115`). -/
+theorem CS_complex_S10_abs_ge_024 :
+    (0.24 : ℝ) ≤ ‖CS_S10C‖ := by
+  have hRe := CS_complex_S10_Re_ge_024
+  have hle : (CS_S10C).re ≤ ‖CS_S10C‖ := by
+    have h1 := Complex.abs_re_le_norm (CS_S10C)
+    have h2 := le_abs_self ((CS_S10C).re)
+    linarith
+  linarith
+
+/-- Honest gap: the new S10 Re `0.24` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `1.70`; no S10 feed closes here
+(TRUE `Re(S₁₀) ≈ 1.84 < 1.94`). -/
+theorem CS_S10C_below_slow_gap :
+    (1.94 : ℝ) - (0.24 : ℝ) = 1.70 := by
+  norm_num
+
+/-- Exact S10 shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.851` (`2.5914`) exceeds the S10 `slow = 0.24` by `2.3514`. -/
+theorem CS_S10C_shortfall_1851 : (1.4 : ℝ) * 1.851 - 0.24 = 2.3514 := by
+  norm_num
+
+#print axioms CS_log_nine_eq
+#print axioms CS_log_nine_ge
+#print axioms CS_log_nine_le
+#print axioms CS_log_ten_eq
+#print axioms CS_log_ten_ge
+#print axioms CS_log_ten_le
+#print axioms CS_rpow9pos_lower_proved
+#print axioms CS_rpow9neg_upper_proved
+#print axioms CS_rpow10pos_lower_proved
+#print axioms CS_rpow10neg_upper_proved
+#print axioms CS_cpow9_sCenter_re
+#print axioms CS_cpow10_sCenter_re
+#print axioms CS_Re9_ge_neg047
+#print axioms CS_Re10_le_044
+#print axioms CS_S10C_Re_eq
+#print axioms CS_complex_S10_Re_ge_024
+#print axioms CS_complex_S10_abs_ge_024
+#print axioms CS_S10C_below_slow_gap
+#print axioms CS_S10C_shortfall_1851
 
 end Door3CellSuppliers

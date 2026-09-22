@@ -5621,6 +5621,19 @@ sorry-free infrastructure and the complete commit ledger above.
   parity, no flip) + shard `:3778` (multiset {0..7,9,10}, single-count,
   k=8 skipped) + shortfall `:3790` (54883/10500≈5.228). Floor
   -3.211→-3.127 (gain 0.084). SCUT24 tasked (k=11 odd-payoff?).
+- 2026-09-22 SCUT24 (background `ses_f3769fd0e`, proof-only, grep-clean,
+  pilot-only commit): log12 FIRST link — `sSCUT_log_twelve_via_eleven_eq
+  :3798` (log12 = log11 + log(12/11), 11→12 chain; sharp d9 bridge via
+  12=4·3 already at `:2191`, this enables ratio windows). Bridge only,
+  no window. Floor stays -3.127. Suppliers ETA-S10 writes left for
+  owner. SCUT25 tasked (log12 window).
+- 2026-09-22 ETA-S10 (background `ses_f376c30c6`, proof-only, grep-clean,
+  suppliers +342): S10 Re-route — log9/log10 bridges, rpow9/10 quads
+  (fresh, were absent), cpow9/10 splits, Re9≥-0.47 / Re10≤0.44 →
+  `CS_complex_S10_Re_ge_024 :5541` (0.24 = 1.15-0.47-0.44) + gap
+  `:5564` (1.70 to live 1.94) + shortfall `:5570` (2.3514). Honest:
+  true Re(S10)~1.84<1.94, Re-route cannot beat slow by design. Live
+  1.94 / shortfall 0.6514 STAND.
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494

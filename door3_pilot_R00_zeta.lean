@@ -3792,4 +3792,15 @@ theorem sSCUT_S9_skip8_eta10_shortfall :
       (54883 / 10500 : ℝ) := by
   norm_num
 
+/-- Composite log bridge `log 12 = log 11 + log (12/11)` (`12 = 11·(12/11)`
+via `Real.log_mul`; mirror of `sSCUT_log_eleven_eq` at `:3552`;
+first link of the incremental base-12 chain for `k = 11`). -/
+theorem sSCUT_log_twelve_via_eleven_eq :
+    Real.log 12 = Real.log 11 + Real.log (12 / 11 : ℝ) := by
+  have h12 : (11 : ℝ) * (12 / 11) = 12 := by norm_num
+  have h := Real.log_mul (show (11 : ℝ) ≠ 0 by norm_num)
+    (show (12 / 11 : ℝ) ≠ 0 by norm_num)
+  rw [h12] at h
+  linarith
+
 end Door3PilotR00Zeta
