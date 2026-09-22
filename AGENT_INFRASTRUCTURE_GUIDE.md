@@ -6012,6 +6012,13 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT38 (background `ses_f34efa01c`, proof-only, grep-clean,
+  pilot-only commit): k=15 CONSTRUCTIVE +1/5 — `delta16_odd_mem :4940`
+  (δ∈(-0.55,-0.54), width 0.01) + `cos10log16_le_neg :4960` (cos θ≤-4/5
+  via 9π-odd flip of 1-0.55²/2≈0.84875) + sqrt16≤4 `:4994` + r16≥1/4
+  `:5007` (exact) + split `:5019` + product ≤-1/5 `:5054` + odd bridge
+  `:5073` + `eta15_Re_ge :5086` (+0.2). Shard assembly not banked
+  (residual). SCUT39 tasked (S+eta15 floor + shortfall).
 - 2026-09-22 SCUT37 (background `ses_f34f29177`, proof-only, grep-clean,
   pilot-only commit): log16 SHARP — `log_sixteen_eq` (log16=4·log2 via
   log_pow, no sSCUT_log_two existed so d9 direct) + window

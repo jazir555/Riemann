@@ -4931,4 +4931,163 @@ theorem sSCUT_theta16_sharp_width_eq :
     (27.725887232 : ℝ) - 27.725887212 = (0.000000020 : ℝ) := by
   norm_num
 
+/-- Reduced phase `δ₁₆ = θ₁₆ - 9π ∈ (-0.55, -0.54)` (odd-multiple anchor:
+`9π ≈ 28.274` is nearest since `θ₁₆ ≈ 27.72588722` vs `8π ≈ 25.133` and
+`10π ≈ 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta15_odd_mem` at `:4616` and `sSCUT_delta9_sharp_mem` at `:2279`;
+rounded outward from the loose-pi window `[-0.548512788, -0.547612768]`
+so `linarith` closes). -/
+theorem sSCUT_delta16_odd_mem :
+    (-0.55 : ℝ) < 10 * Real.log 16 - 9 * Real.pi ∧
+    10 * Real.log 16 - 9 * Real.pi < (-0.54 : ℝ) := by
+  have hth := sSCUT_theta16_sharp_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₆` window (`0.01`). -/
+theorem sSCUT_delta16_odd_width_eq :
+    (-0.54 : ℝ) - (-0.55) = (0.01 : ℝ) := by
+  norm_num
+
+/-- Signed cosine UPPER `cos(10*log 16) ≤ -(4/5)` (odd-multiple flip
+`cos θ₁₆ = -cos δ₁₆` from the banked `δ₁₆ ∈ (-0.55, -0.54)` window
+`sSCUT_delta16_odd_mem` + quadratic floor `1 - x²/2 ≤ cos x` on
+`|δ₁₆| ≤ 0.55`; mirror of `sSCUT_cos10log9_le_neg_half` at `:3335`
+with `9π = π + 4·(2π)` in place of `7π = π + 3·(2π)`;
+`1 - 0.55²/2 = 0.84875 ≥ 0.8`, so `k = 15` (base 16) is strongly
+constructive after the odd negation flip). -/
+theorem sSCUT_cos10log16_le_neg_four_fifths :
+    Real.cos (10 * Real.log 16) ≤ (-(4 / 5) : ℝ) := by
+  have hδ := sSCUT_delta16_odd_mem
+  have key : Real.cos ((10 * Real.log 16 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 16 - 9 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_pi]
+  have e2 : (10 * Real.log 16 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 16 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (0.55 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 16 - 9 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 16 - 9 * Real.pi)
+    have hsq : (10 * Real.log 16 - 9 * Real.pi) ^ 2 ≤ (0.55 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 0.55 - (10 * Real.log 16 - 9 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 16 - 9 * Real.pi) + 0.55 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (0.55 - (10 * Real.log 16 - 9 * Real.pi))
+          * ((10 * Real.log 16 - 9 * Real.pi) + 0.55)
+          = (0.55 : ℝ) ^ 2 - (10 * Real.log 16 - 9 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (4 / 5 : ℝ) ≤ 1 - (0.55 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- `16^(1/2) ≤ 4` (mirror of the `sSCUT_sqrt9_le` root step; `16 ≤ 4^2`). -/
+theorem sSCUT_sqrt16_le : (16 : ℝ) ^ (1 / 2 : ℝ) ≤ (4 : ℝ) := by
+  have hpow : (16 : ℝ) ≤ ((4 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : ((((16 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 16 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((16 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((4 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/4 ≤ r₁₆ = 16^(-1/2)` (inverse of the root step; mirror of
+`sSCUT_rpow9_neg_ge` at `:3321`). -/
+theorem sSCUT_rpow16_neg_ge : (1 / 4 : ℝ) ≤ (16 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt16_le
+  have hpos : (0 : ℝ) < (16 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (16 : ℝ) ^ (-(1 / 2 : ℝ)) = (((16 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 16)]
+  rw [hneg, show (1 / 4 : ℝ) = ((4 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `16^{-s}` at sCut (mirror of
+`sSCUT_cpow9_neg_re` at `:3276`). -/
+theorem sSCUT_cpow16_neg_re : ((((16 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (16 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 16) := by
+  have h16pos : (0 : ℝ) < 16 := by norm_num
+  have hxC : ((16 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h16pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((16 : ℝ) : ℂ) = (((Real.log 16 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h16pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 16 : ℝ)) : ℂ)).re = Real.log 16 := Complex.ofReal_re _
+  have hzim : ((((Real.log 16 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 16 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 16 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 16 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 16) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 16 * (-(1 / 2 : ℝ)))
+      = (16 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h16pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 16))
+      = Real.cos (10 * Real.log 16) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(16^{-sCut}) ≤ -(1/5)` (nonneg `r₁₆` × signed
+cosine upper `≤ -4/5`, then `r₁₆ ≥ 1/4`; mirror of
+`sSCUT_cpow9_Re_le_neg` at `:3369`; `(1/4)·(4/5) = 1/5 = 0.2`). -/
+theorem sSCUT_cpow16_Re_le_neg :
+    ((((16 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(1 / 5) : ℝ) := by
+  rw [sSCUT_cpow16_neg_re]
+  have hr0 : (0 : ℝ) ≤ (16 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow16_neg_ge
+  have hc := sSCUT_cos10log16_le_neg_four_fifths
+  have hmul : (16 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 16)
+      ≤ (16 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(4 / 5)) :=
+    mul_le_mul_of_nonneg_left hc hr0
+  have h2 : (1 / 4 : ℝ) * (4 / 5) ≤ (16 : ℝ) ^ (-(1 / 2 : ℝ)) * (4 / 5) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have heq : (1 / 4 : ℝ) * (4 / 5) = 1 / 5 := by norm_num
+  have hsign : (16 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(4 / 5))
+      = -((16 : ℝ) ^ (-(1 / 2 : ℝ)) * (4 / 5)) := by ring
+  linarith
+
+/-- Eta bridge `eta₁₅ = -(16^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(16^s)⁻¹` into `16^{-s}`; mirror of `sSCUT_eta9_eq_neg_cpow10` at `:3179`). -/
+theorem sSCUT_eta15_eq_neg_cpow16 :
+    etaDirichletTerm sSCUT 15 = -((((16 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (15 + 1 : ℕ) = 16 := rfl
+  have hcast : ((((15 + 1 : ℕ)) : ℂ)) = ((((16 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (15 : ℕ) = -1 := by norm_num
+  have h16cast : ((((16 : ℕ)) : ℂ)) = ((((16 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h16cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (odd `k = 15`): `Re(eta₁₅) ≥ +1/5` (negated cpow signed
+upper `sSCUT_cpow16_Re_le_neg`; negation flips the upper to a lower;
+mirror of `sSCUT_eta9_Re_ge` at `:3191` with `r₁₆ = 1/4`, `c = 4/5`
+concretized: `(1/4)·(4/5) = 1/5`; gain `+0.2`, strongly constructive). -/
+theorem sSCUT_eta15_Re_ge :
+    (1 / 5 : ℝ) ≤ (etaDirichletTerm sSCUT 15).re := by
+  have h := sSCUT_cpow16_Re_le_neg
+  rw [sSCUT_eta15_eq_neg_cpow16, Complex.neg_re, sSCUT_cpow16_neg_re]
+  rw [sSCUT_cpow16_neg_re] at h
+  linarith
+
 end Door3PilotR00Zeta
