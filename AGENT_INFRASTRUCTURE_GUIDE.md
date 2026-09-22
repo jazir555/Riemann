@@ -5684,6 +5684,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (`:2970/74`, `:3057/3230/3326/3693/3984`, `:3085/89` etc.), `:3043` rw
   chaining, `:3448` S8/0.15 term bridge. Grep-clean. PILOT-SWEEP2 tasked
   (sole owner, apply 17 + rebuild).
+- 2026-09-22 PILOT-SWEEP2 (background `ses_f375b5b8a`, sole build owner):
+  GREEN — SIXTH GREEN LANE MODULE. `[8704/8704] Built
+  door3_pilot_R00_zeta (52s)`, BUILD-EXIT=0 (attempt 2/2). Fixes (+9/-22):
+  10x stray-norm_num deletions (2x replaceAll, 5+5 hre/him sites),
+  5x le_of_pow explicit args (`:3048/:3219/:3317/:3683/:3974`), `:3041`
+  rw+e2 bridge, `:3439` hr10div + add_re alignment. Zero remaining.
+  Grep-clean. ALL SIX door-3 lane files GREEN (suppliers/ball/wiring/
+  bridge/premise_gamma/pilot). Next: full-tree sweep (ALLGREEN).
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494

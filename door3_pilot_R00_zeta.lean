@@ -2967,11 +2967,9 @@ theorem sSCUT_cpow5_neg_re : ((((5 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 5 : ℝ)) : ℂ)).re = Real.log 5 := Complex.ofReal_re _
   have hzim : ((((Real.log 5 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 5 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -3040,7 +3038,7 @@ theorem sSCUT_cos10log7_ge : (81 / 100 : ℝ) ≤ Real.cos (10 * Real.log 7) := 
   rw [e3] at hper3
   have hper : Real.cos (10 * Real.log 7 - 6 * Real.pi)
       = Real.cos (10 * Real.log 7) := by
-    rw [hper3, hper2, hper1]
+    rw [hper3, e2, hper2, hper1]
   rw [hy_def, hper] at hcosy
   exact hcosy
 
@@ -3053,8 +3051,7 @@ theorem sSCUT_sqrt7_le : (7 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
     rw [e, Real.rpow_one]
   have hle : ((((7 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
     rw [hpow']; exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `1/3 ≤ r₇ = 7^(-1/2)` (inverse of the root step; mirror of
 `sSCUT_rpow8_neg_ge`). -/
@@ -3082,11 +3079,9 @@ theorem sSCUT_cpow7_neg_re : ((((7 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 7 : ℝ)) : ℂ)).re = Real.log 7 := Complex.ofReal_re _
   have hzim : ((((Real.log 7 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 7 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -3226,8 +3221,7 @@ theorem sSCUT_rpow10_neg_ge_03 : (0.3 : ℝ) ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) :
         ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by
       rw [hpow']
       exact hpow
-    exact le_of_pow_le_pow_left₀ (by norm_num)
-      (Real.rpow_pos_of_pos (by norm_num) _).le hle2
+    exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle2
   have hpos : (0 : ℝ) < (10 : ℝ) ^ (1 / 2 : ℝ) :=
     Real.rpow_pos_of_pos (by norm_num) _
   have hneg : (10 : ℝ) ^ (-(1 / 2 : ℝ)) = (((10 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
@@ -3291,11 +3285,9 @@ theorem sSCUT_cpow9_neg_re : ((((9 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 9 : ℝ)) : ℂ)).re = Real.log 9 := Complex.ofReal_re _
   have hzim : ((((Real.log 9 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 9 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -3322,8 +3314,7 @@ theorem sSCUT_sqrt9_le : (9 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
     rw [e, Real.rpow_one]
   have hle : ((((9 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
     rw [hpow']; exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `1/3 ≤ r₉ = 9^(-1/2)` (inverse of the root step; mirror of
 `sSCUT_rpow8_neg_ge`). -/
@@ -3445,7 +3436,9 @@ theorem sSCUT_S9_skip8_Re_ge :
   rw [Complex.add_re]
   have hS8e9 := sSCUT_S8_add_eta9_Re_ge
   have hr10 := sSCUT_rpow10_neg_ge_03
-  linarith
+  have hr10div : (0.15 : ℝ) ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) / 2 := by linarith [hr10]
+  rw [Complex.add_re] at hS8e9
+  linarith [hS8e9, hr10div]
 
 /-- Corrected single-count shortfall vs the `21/10` bar
 (`21/10 - (-3529/1050 + 0.15) = 11153/2100 ≈ 5.311`; replaces the
@@ -3689,8 +3682,7 @@ theorem sSCUT_sqrt11_le : (11 : ℝ) ^ (1 / 2 : ℝ) ≤ (10 / 3 : ℝ) := by
   have hle : ((((11 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by
     rw [hpow']
     exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `0.3 ≤ r₁₁ = 11^(-1/2)` (inverse of `sSCUT_sqrt11_le`; mirror of
 `sSCUT_rpow10_neg_ge_03` at `:3223`). -/
@@ -3718,11 +3710,9 @@ theorem sSCUT_cpow11_neg_re : ((((11 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 11 : ℝ)) : ℂ)).re = Real.log 11 := Complex.ofReal_re _
   have hzim : ((((Real.log 11 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 11 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -3947,11 +3937,9 @@ theorem sSCUT_cpow12_neg_re : ((((12 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 12 : ℝ)) : ℂ)).re = Real.log 12 := Complex.ofReal_re _
   have hzim : ((((Real.log 12 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 12 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -3980,8 +3968,7 @@ theorem sSCUT_sqrt12_le : (12 : ℝ) ^ (1 / 2 : ℝ) ≤ (7 / 2 : ℝ) := by
   have hle : ((((12 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ (((7 / 2 : ℝ) ^ (2 : ℕ))) := by
     rw [hpow']
     exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `2/7 ≤ r₁₂ = 12^(-1/2)` (inverse of `sSCUT_sqrt12_le`; mirror of
 `sSCUT_rpow11_neg_ge`). -/
