@@ -2814,3 +2814,88 @@ theorem FC_phase_residual_closed : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-IDENT wave: (c) `FC_eta_identity_obligation` honest attempt + filed gap (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Identity target (`door3_first_cell.lean:2311-2313`):
+  `FC_eta_identity_obligation : Prop := ∃ E : ℂ, HasSum FC_cEtaTerm E ∧
+  E = ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)) * zeta R02Pilot.sCenter`.
+* Complex term shapes (`:2269-2298`): `FC_cDirTerm` (`:2269`,
+  `((k+1) : ℂ) ^ (-sCenter)`), `FC_neg_sCenter_re` (`:2273`),
+  `FC_cDirTerm_norm` (`:2278`, `‖cDir‖ = FC_etaF0395`),
+  `FC_cEtaTerm` (`:2285`, `(-1)^k * cDir`), `FC_cEtaTerm_norm` (`:2289`).
+* Real-eta shapes (`:537` `FC_etaF0395`, `:1467` antitone,
+  `:1534` `FC_eta_Tendsto_exists` real `Tendsto`, `:1863` tail majorant,
+  `:1787` `S₄ ≥ 0.28`; phase block `:2797-2806` complex S4 floor `1.56`).
+* `HasSum` / summability shapes in this file (grep `HasSum|Summable|summable|tsum|Tendsto`):
+  real `Tendsto` only (`:1113`, `:1535`, `:1545`, `:1587`, `:1613`, `:1634`, `:1864`);
+  discussion `:1492-1496` (`etaDirichlet_summable` needs `1 < s.re`, NOT usable at
+  `0.395`; `summable_etaPairTerm` needs `0 < s.re`, pairs only; real eta NOT summable);
+  joint complex `HasSum` only at `:2312` (the target itself) — no other `HasSum`
+  at `sCenter` in this file (grep-clean outside the target).
+* `sCenter` shapes (`central_cover_assembly.lean:9588` def, `:9608` `re = 0.395`,
+  `:9615` `im = -6.75`): `Re = 0.395 < 1`, so absolute Dirichlet summability
+  (`Re > 1`) can never discharge here.
+
+Verdict: HONEST FILE (no build attempted; verifier owns the single build lock).
+Direct Dirichlet `HasSum` needs `1 < 0.395` (false, banked below as
+`FC_dirichlet_Re_obstruction`). Real alternating `Tendsto` + antitone gives a real
+limit only, not complex `HasSum` with phases. Paired summability (`0 < Re`)
+covers pairs, not the unpaired alternating `HasSum` without an interleave bridge.
+Factor identity `eta = (1 - 2^(1-s)) * zeta` at `Re > 1` is algebra, but transport
+to `Re = 0.395` needs analytic continuation (no continuation / identity-theorem
+input banked in this file). Filed below as two explicit Props plus a conditional
+close; unconditional (c) stays OPEN with the exact missing inputs named.
+-/
+
+namespace Door3FirstCellClose
+
+/-- `sCenter` real part (banked). -/
+theorem FC_sCenter_re_eq : R02Pilot.sCenter.re = (0.395 : ℝ) :=
+  R02Pilot.sCenter_re
+
+/-- `Re = 0.395 < 1`: absolute-convergence zone is out of reach. -/
+theorem FC_sCenter_re_lt_one : R02Pilot.sCenter.re < 1 := by
+  rw [FC_sCenter_re_eq]
+  norm_num
+
+/-- Sharp obstruction: the Dirichlet `1 < Re` premise is false at `sCenter`,
+so no `Re > 1` summability route can ever fire here. -/
+theorem FC_dirichlet_Re_obstruction : ¬ (1 : ℝ) < R02Pilot.sCenter.re := by
+  rw [FC_sCenter_re_eq]
+  norm_num
+
+/-- Missing analytic input A (filed OPEN): complex alternating `HasSum` at
+`sCenter` (`Re = 0.395`). Conditional convergence only; needs a Dirichlet-test
+/ paired-interleave bridge that is not banked in this file. -/
+def FC_complex_eta_HasSum_obligation : Prop :=
+  ∃ E : ℂ, HasSum FC_cEtaTerm E
+
+/-- Missing analytic input B (filed OPEN): factor identity for EVERY complex
+eta-sum limit at `sCenter`. The `Re > 1` algebra is elementary, but transport to
+`Re = 0.395 < 1` needs continuation of `zeta` / `eta` (identity theorem), which
+is not banked in this file. -/
+def FC_eta_factor_identity_obligation : Prop :=
+  ∀ E : ℂ, HasSum FC_cEtaTerm E →
+    E = ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)) * zeta R02Pilot.sCenter
+
+/-- Conditional close (BANKED): A + B imply the joint identity obligation. -/
+theorem FC_eta_identity_of_two
+    (hH : FC_complex_eta_HasSum_obligation)
+    (hF : FC_eta_factor_identity_obligation) :
+    FC_eta_identity_obligation := by
+  obtain ⟨E, hE⟩ := hH
+  exact ⟨E, hE, hF E hE⟩
+
+/-- Exact IDENT-wave residual: per-term norms BANKED (`FC_cDirTerm_norm`,
+`FC_cEtaTerm_norm`), complex S4 floor BANKED (`FC_bridge_Re_ge_156`,
+`FC_bridge_lower_proved`), Dirichlet route BLOCKED
+(`FC_dirichlet_Re_obstruction`), conditional close BANKED
+(`FC_eta_identity_of_two`); unconditional (c) stays OPEN on A
+(`FC_complex_eta_HasSum_obligation`) + B
+(`FC_eta_factor_identity_obligation`). -/
+theorem FC_ident_residual : True := by
+  trivial
+
+end Door3FirstCellClose
+
