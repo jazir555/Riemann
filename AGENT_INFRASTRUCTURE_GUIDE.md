@@ -5930,7 +5930,23 @@ sorry-free infrastructure and the complete commit ledger above.
   :1438` (center 0.02632 covers 0.0234; ball 12.864≤12.87; loosest zeta
   wall 6 vs true 1.549 4x; even granting pi→2 + zeta→3/2 product 2.01
   still 50x over 0.04; endpoint 0.062>0.04 BEFORE zeta; Cauchy+1 ball
-  sets spread). `hJoint≤0.04` premise-gated.
+  sets spread).   `hJoint≤0.04` premise-gated.
+- 2026-09-22 DERIV-PSI2 (background `ses_f34efa019`, proof-only, NO-EDIT
+  gap): D3SG 0.5-cap does NOT discharge any gamNeed (only wLeaf overlaps
+  domain, but 0.5≰0.008 62.5x weak; others miss domain ±0.25). Tight
+  0.002/0.008/0.04 numerals need D3SG shift+real-cap at Re∈{0.1,0.1975}
+  (owed per `:548-551`).
+- 2026-09-22 DERIV-PSI2 (background `ses_f34efa019`, proof-only, NO-EDIT
+  gap): D3SG 0.5-cap does NOT discharge any gamNeed (only wLeaf overlaps
+  domain, but 0.5≰0.008 62.5x weak; others miss domain ±0.25). Tight
+  0.002/0.008/0.04 numerals need D3SG shift+real-cap at Re∈{0.1,0.1975}
+  (owed per `:548-551`).
+- 2026-09-22 CUTL-ZETA (background `ses_f34efa016`, proof-only, NO-EDIT
+  gap): strip zeta wall has NO proof in-file (premise-gated by design
+  `:639-640` — needs FE+Stirling+convexity). Only closable zeta-upper
+  is Re≥3/2 Euler (inapplicable to strip). Wall stays 6; 50x-over
+  structural even granting pi+zeta improvements; blockage is +1-ball
+  spread, not zeta alone.
 - 2026-09-22 SLIVER-SPHERE (background `ses_f34f199ba`, proof-only,
   grep-clean): bottom bridge PRE-EXISTS (`:368` token mirror) → banked
   cover extension `edgeSphere_cover_half :323` (r=1/2 spheres over edge
