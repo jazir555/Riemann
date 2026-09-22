@@ -5188,6 +5188,175 @@ theorem sSCUT_theta17_mem :
   have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
   have c1 : (10 : ℝ) * 2.8314122506 = 28.314122506 := by norm_num
   have c2 : (10 : ℝ) * 2.8350887232 = 28.350887232 := by norm_num
+  /-- Reduced phase `δ₁₇ = θ₁₇ - 9π ∈ (0.039, 0.078)` (odd-multiple anchor:
+`9π ≈ 28.274` is nearest since `θ₁₇ ≈ 28.314-28.351` vs `8π ≈ 25.133` and
+`10π ≈ 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta16_odd_mem` at `:4940`;
+rounded outward from the loose-pi window `[0.039722506, 0.077387232]`
+(`28.314122506 - 9·3.1416 = 0.039722506`,
+`28.350887232 - 9·3.1415 = 0.077387232`) so `linarith` closes). -/
+theorem sSCUT_delta17_odd_mem :
+    (0.039 : ℝ) < 10 * Real.log 17 - 9 * Real.pi ∧
+    10 * Real.log 17 - 9 * Real.pi < (0.078 : ℝ) := by
+  have hth := sSCUT_theta17_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
   constructor <;> linarith
+
+/-- Exact width of the `δ₁₇` window (`0.039`). -/
+theorem sSCUT_delta17_odd_width_eq :
+    (0.078 : ℝ) - 0.039 = (0.039 : ℝ) := by
+  norm_num
+
+/-- Signed cosine UPPER `cos(10*log 17) ≤ -(9/10)` (odd-multiple flip
+`cos θ₁₇ = -cos δ₁₇` from the banked `δ₁₇ ∈ (0.039, 0.078)` window
+`sSCUT_delta17_odd_mem` + quadratic floor `1 - x²/2 ≤ cos x` on
+`|δ₁₇| ≤ 0.078`; mirror of `sSCUT_cos10log16_le_neg_four_fifths` at `:4960`
+with `9π = π + 4·(2π)` unchanged;
+`1 - 0.078^2/2 = 0.996958 ≥ 0.9`, so `k = 16` (base 17) is strongly
+destructive for even `k` after the odd negation flip:
+`cos θ₁₇ ≈ -0.997`). -/
+theorem sSCUT_cos10log17_le_neg_nine_tenths :
+    Real.cos (10 * Real.log 17) ≤ (-(9 / 10) : ℝ) := by
+  have hδ := sSCUT_delta17_odd_mem
+  have key : Real.cos ((10 * Real.log 17 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 17 - 9 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_pi]
+  have e2 : (10 * Real.log 17 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 17 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (0.078 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 17 - 9 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 17 - 9 * Real.pi)
+    have hsq : (10 * Real.log 17 - 9 * Real.pi) ^ 2 ≤ (0.078 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 0.078 - (10 * Real.log 17 - 9 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 17 - 9 * Real.pi) + 0.078 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (0.078 - (10 * Real.log 17 - 9 * Real.pi))
+          * ((10 * Real.log 17 - 9 * Real.pi) + 0.078)
+          = (0.078 : ℝ) ^ 2 - (10 * Real.log 17 - 9 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (9 / 10 : ℝ) ≤ 1 - (0.078 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- `17^(1/2) ≤ 5` (honest root step; `17 ≤ 5^2 = 25`;
+mirror of `sSCUT_sqrt15_le` at `:4684`). -/
+theorem sSCUT_sqrt17_le : (17 : ℝ) ^ (1 / 2 : ℝ) ≤ (5 : ℝ) := by
+  have hpow : (17 : ℝ) ≤ (((5 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((17 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 17 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((17 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ (((5 : ℝ) ^ (2 : ℕ))) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/5 ≤ r₁₇ = 17^(-1/2)` (inverse of `sSCUT_sqrt17_le`;
+mirror of `sSCUT_rpow15_neg_ge` at `:4697`). -/
+theorem sSCUT_rpow17_neg_ge : (1 / 5 : ℝ) ≤ (17 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt17_le
+  have hpos : (0 : ℝ) < (17 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (17 : ℝ) ^ (-(1 / 2 : ℝ)) = (((17 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 17)]
+  rw [hneg, show (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `17^{-s}` at sCut (mirror of
+`sSCUT_cpow15_neg_re` at `:4709`). -/
+theorem sSCUT_cpow17_neg_re : ((((17 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (17 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 17) := by
+  have h17pos : (0 : ℝ) < 17 := by norm_num
+  have hxC : ((17 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h17pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((17 : ℝ) : ℂ) = (((Real.log 17 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h17pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 17 : ℝ)) : ℂ)).re = Real.log 17 := Complex.ofReal_re _
+  have hzim : ((((Real.log 17 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 17 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 17 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 17 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 17) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 17 * (-(1 / 2 : ℝ)))
+      = (17 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h17pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 17))
+      = Real.cos (10 * Real.log 17) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(17^{-sCut}) ≤ -(9/50)` (nonneg `r₁₇` × signed
+cosine upper `≤ -9/10`, then `r₁₇ ≥ 1/5`; mirror of
+`sSCUT_cpow15_Re_le_neg` at `:4744`; `(1/5)·(9/10) = 9/50 = 0.18`). -/
+theorem sSCUT_cpow17_Re_le_neg :
+    ((((17 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(9 / 50) : ℝ) := by
+  rw [sSCUT_cpow17_neg_re]
+  have hr0 : (0 : ℝ) ≤ (17 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow17_neg_ge
+  have hc := sSCUT_cos10log17_le_neg_nine_tenths
+  have hcos910 : Real.cos (10 * Real.log 17) ≤ (-(9 / 10) : ℝ) := hc
+  have hmul : (17 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 17)
+      ≤ (17 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(9 / 10)) :=
+    mul_le_mul_of_nonneg_left hcos910 hr0
+  have h2 : (1 / 5 : ℝ) * (9 / 10) ≤ (17 : ℝ) ^ (-(1 / 2 : ℝ)) * (9 / 10) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have hsign : (17 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(9 / 10))
+      = -((17 : ℝ) ^ (-(1 / 2 : ℝ)) * (9 / 10)) := by ring
+  have heq : (1 / 5 : ℝ) * (9 / 10) = 9 / 50 := by norm_num
+  linarith
+
+/-- Eta bridge `eta₁₆ = 17^{-sCut}` (even `k`; mirror of
+`sSCUT_eta14_eq_cpow15` at `:4764`). -/
+theorem sSCUT_eta16_eq_cpow17 :
+    etaDirichletTerm sSCUT 16 = ((((17 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (16 + 1 : ℕ) = 17 := rfl
+  have hcast : ((((16 + 1 : ℕ)) : ℂ)) = ((((17 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (16 : ℕ) = 1 := by norm_num
+  have h17cast : ((((17 : ℕ)) : ℂ)) = ((((17 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h17cast, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (even `k = 16`): `Re(eta₁₆) ≤ -(9/50)` (direct
+cpow signed upper, no sign flip; mirror of `sSCUT_eta14_Re_le_neg` at
+`:4777`; `9/50 = 0.18 = 0.9/5`). -/
+theorem sSCUT_eta16_Re_le_neg :
+    (etaDirichletTerm sSCUT 16).re ≤ (-(9 / 50) : ℝ) := by
+  have h := sSCUT_cpow17_Re_le_neg
+  rw [sSCUT_eta16_eq_cpow17, sSCUT_cpow17_neg_re]
+  rw [sSCUT_cpow17_neg_re] at h
+  linarith
+
+/-- No positive `Re₁₆` lock exists at any precision (`Re(eta₁₆) ≤ -9/50`,
+so no `c > 0` can sit below it; mirror of `sSCUT_eta14_Re_no_pos_lock` at
+`:4787` — the `k = 16` floor is IMPOSSIBLE, honestly skipped). -/
+theorem sSCUT_eta16_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 16).re) := by
+  intro h
+  have hup := sSCUT_eta16_Re_le_neg
+  linarith
 
 end Door3PilotR00Zeta

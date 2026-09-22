@@ -5942,6 +5942,17 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SCUT41 (background `ses_f34e7b7e9`, proof-only, grep-clean,
+  pilot-only commit): k=16 DESTRUCTIVE full chain — `delta17_odd_mem
+  :5198` (δ∈(0.039,0.078), width 0.039) + width `:5207` + `cos ≤ -9/10
+  :5219` (1-0.078²/2≈0.997 via 9π-odd flip; true ≈-0.997) + sqrt17≤5
+  `:5254` + r17≥1/5 `:5267` + split `:5279` + product ≤-9/50 `:5314` +
+  even bridge `:5334` + `eta16_Re_le_neg :5346` + no-pos-lock `:5356`.
+  k=16 skip-listed (dead: k=8,11,13,14,16; growth: k=7,9,10,12,15).
+- 2026-09-22 FIRSTCELL-ANTITONE (background `ses_f34c288f9`, proof-only,
+  grep-clean, first_cell-only commit): `FC_etaF0395_antitone :1467`
+  PROVED (decreasing powers mirror). HEVEN slice now needs only
+  Tendsto input.
 - 2026-09-22 ETAPRIME-DOM-ADAPTIVE (background `ses_f34c288fb`, proof-only,
   grep-clean, eta_prime-only commit): summability CLOSED —
   dominator `B=8(m+1)^-2 :505` + p-series `:511/:528` + log-diff

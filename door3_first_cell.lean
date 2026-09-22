@@ -1441,3 +1441,48 @@ theorem FC_fat_polar_one_sub_inv_le (s : ℂ)
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-ANTITONE wave: `Antitone FC_etaF0395` direct (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Def `FC_etaF0395` (`door3_first_cell.lean:537`):
+  `(((k : ℝ) + 1) ^ (-(0.395 : ℝ)))`.
+* Decreasing-power template `etaGen_antitone` (`interval_arith.lean:390-400`):
+  `Antitone (1 / ((k + 1) ^ σ))` via `Nat.cast_le` (`exact_mod_cast` +
+  `linarith`), `Real.rpow_le_rpow (by positivity) h_le hσ`,
+  `Real.rpow_pos_of_pos`, `one_div_le_one_div_of_le`.
+* Neg-exponent bridge `Real.rpow_neg` + `inv_eq_one_div`
+  (`door3_first_cell.lean:990-992`,
+  `central_cover_assembly.lean:9684-9686`): `x ^ (-c) = 1 / x ^ c`.
+* Consumer `FC_slice_S2_of_tendsto` (`door3_first_cell.lean:1112-1130`):
+  `Antitone.alternating_series_le_tendsto hL hAnti 1` — this wave supplies
+  `hAnti`, leaving only the `Tendsto` input.
+
+Verdict: PROVED-form (pending build confirmation; PREMISE-FIXER owns lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Antitone `(k+1)^-0.395`: negative-exponent rpow decreases in `k`
+(mirrors `etaGen_antitone` via the `rpow_neg` bridge). -/
+theorem FC_etaF0395_antitone : Antitone FC_etaF0395 := by
+  intro a b hab
+  simp only [FC_etaF0395]
+  have h_le : ((a : ℝ) + 1) ≤ ((b : ℝ) + 1) := by
+    have hcast : (a : ℝ) ≤ (b : ℝ) := by exact_mod_cast hab
+    linarith
+  have hσ : (0 : ℝ) ≤ 0.395 := by norm_num
+  have h_rpow : (((a : ℝ) + 1) ^ (0.395 : ℝ)) ≤ (((b : ℝ) + 1) ^ (0.395 : ℝ)) :=
+    Real.rpow_le_rpow (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) h_le hσ
+  have h_pos : (0 : ℝ) < (((a : ℝ) + 1) ^ (0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by positivity) _
+  have e_a : (((a : ℝ) + 1) ^ (-(0.395 : ℝ))) = 1 / (((a : ℝ) + 1) ^ (0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)]
+    rw [inv_eq_one_div]
+  have e_b : (((b : ℝ) + 1) ^ (-(0.395 : ℝ))) = 1 / (((b : ℝ) + 1) ^ (0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (b : ℝ) + 1)]
+    rw [inv_eq_one_div]
+  rw [e_b, e_a]
+  exact one_div_le_one_div_of_le h_pos h_rpow
+
+end Door3FirstCellClose
+
