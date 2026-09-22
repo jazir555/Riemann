@@ -41668,3 +41668,119 @@ theorem R02_D3_K016_tight_gap :
 #print axioms R02_D3_integral105_Ioi16_le_1752
 #print axioms R02_D3_tail105_M16_le_1752
 #print axioms R02_D3_K016_tight_gap
+/-!
+## Door-3 strip endgame, step 39u (zeta lane): tighter `16^0.05` floor `1.143` + integral/tail `≤17.50`, K0-16 beats `19.802`.
+
+Grep shapes (`:41587-41662`, called only, not edited):
+`:41587` is `R02_D3_pow_1142_20_le_sixteen` (`(1.142)^20 ≤ 16` small-step caps);
+`:41609` is `R02_D3_rpow_1142_le_1605` (`1.142 ≤ 16^0.05` cleared exponent);
+`:41624` is `R02_D3_integral105_Ioi16_le_1752` (`∫ Ioi 16 ≤ 17.52`);
+`:41651` is `R02_D3_tail105_M16_le_1752` (shift-tail `≤ 17.52`);
+`:41662` is `R02_D3_K016_tight_gap` (`2.282 + 17.52 = 19.802` tie, no K0-16).
+Closed form `R02_D3_integral105_Ioi16_eq` and comparison
+`R02_D3_tail17_le_integral105_Ioi16` reused; head `R02_D3_odd105_head16_le_2282`
+(`≤ 2.282`) reused.
+
+Honest witness check for the residual route: `(1.143 : ℝ)^20 = 14.4852… ≤ 16`
+is TRUE (margin `≈ 1.51`), so the route proceeds. Small-step caps below are
+loose upper bounds with `norm_num` slack: `1.143^2 = 1.306449 ≤ 1.307`,
+`1.307^2 = 1.708249 ≤ 1.709`, `1.709 * 1.143 = 1.953387 ≤ 1.954`,
+`1.954^2 = 3.818116 ≤ 3.819`, `3.819^2 = 14.584761 ≤ 16`.
+Then `1.143 ≤ 16^0.05`; `(1.143)⁻¹ = 0.87489… ≤ 0.875` since
+`0.875 * 1.143 = 1.000125 ≥ 1`; `/0.05 = 17.50`.
+Head `2.282 + 17.50 = 19.782` beats N=13 best `19.802` by `0.02`,
+so K0-16 IS composed here. `47`-linear bar `19.458` untouched
+(`19.782 - 19.458 = 0.324`).
+-/
+/-- Cleared integer-pow cap: `(1.143)^20 ≤ 16` via small-step upper bounds. -/
+theorem R02_D3_pow_1143_20_le_sixteen : ((1.143 : ℝ)) ^ (20 : ℕ) ≤ 16 := by
+  have h2 : ((1.143 : ℝ)) ^ (2 : ℕ) ≤ (1.307 : ℝ) := by norm_num
+  have h2nn : (0 : ℝ) ≤ ((1.143 : ℝ)) ^ (2 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq : ((1.307 : ℝ)) ^ (2 : ℕ) ≤ (1.709 : ℝ) := by norm_num
+  have h4le : ((((1.143 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) ≤ ((1.307 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h2nn h2 2
+  have h44 : ((((1.143 : ℝ)) ^ (2 : ℕ))) ^ (2 : ℕ) = ((1.143 : ℝ)) ^ (4 : ℕ) := by rw [← pow_mul, show (2 * 2 : ℕ) = 4 by norm_num]
+  have g4 : ((1.143 : ℝ)) ^ (4 : ℕ) ≤ (1.709 : ℝ) := by rw [← h44]; exact le_trans h4le hsq
+  have h5mul : ((1.143 : ℝ)) ^ (4 : ℕ) * (1.143 : ℝ) = ((1.143 : ℝ)) ^ (5 : ℕ) := by have hps := pow_succ ((1.143 : ℝ)) (4 : ℕ); rw [show (4 + 1 : ℕ) = 5 by norm_num] at hps; exact hps.symm
+  have hprod : (1.709 : ℝ) * (1.143 : ℝ) ≤ (1.954 : ℝ) := by norm_num
+  have h5le : ((1.143 : ℝ)) ^ (4 : ℕ) * (1.143 : ℝ) ≤ (1.709 : ℝ) * (1.143 : ℝ) := mul_le_mul_of_nonneg_right g4 (by norm_num)
+  have g5 : ((1.143 : ℝ)) ^ (5 : ℕ) ≤ (1.954 : ℝ) := by rw [← h5mul]; exact le_trans h5le hprod
+  have h5nn : (0 : ℝ) ≤ ((1.143 : ℝ)) ^ (5 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq10 : ((1.954 : ℝ)) ^ (2 : ℕ) ≤ (3.819 : ℝ) := by norm_num
+  have h10le : ((((1.143 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) ≤ ((1.954 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h5nn g5 2
+  have h1010 : ((((1.143 : ℝ)) ^ (5 : ℕ))) ^ (2 : ℕ) = ((1.143 : ℝ)) ^ (10 : ℕ) := by rw [← pow_mul, show (5 * 2 : ℕ) = 10 by norm_num]
+  have g10 : ((1.143 : ℝ)) ^ (10 : ℕ) ≤ (3.819 : ℝ) := by rw [← h1010]; exact le_trans h10le hsq10
+  have h10nn : (0 : ℝ) ≤ ((1.143 : ℝ)) ^ (10 : ℕ) := pow_nonneg (by norm_num) _
+  have hsq20 : ((3.819 : ℝ)) ^ (2 : ℕ) ≤ (16 : ℝ) := by norm_num
+  have h20le : ((((1.143 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) ≤ ((3.819 : ℝ)) ^ (2 : ℕ) := pow_le_pow_left₀ h10nn g10 2
+  have h2020 : ((((1.143 : ℝ)) ^ (10 : ℕ))) ^ (2 : ℕ) = ((1.143 : ℝ)) ^ (20 : ℕ) := by rw [← pow_mul, show (10 * 2 : ℕ) = 20 by norm_num]
+  rw [← h2020]; exact le_trans h20le hsq20
+/-- Rpow lower: `1.143 ≤ 16^0.05` (cleared via `(1.143)^20 ≤ 16`). -/
+theorem R02_D3_rpow_1143_le_1605 : (1.143 : ℝ) ≤ (16 : ℝ) ^ (0.05 : ℝ) := by
+  by_contra hle
+  have hlt : (16 : ℝ) ^ (0.05 : ℝ) < (1.143 : ℝ) := lt_of_not_ge hle
+  have hbase : (0 : ℝ) ≤ (16 : ℝ) ^ (0.05 : ℝ) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hle_pow : ((((16 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) ≤ ((((1.143 : ℝ))) ^ (20 : ℕ)) :=
+    pow_le_pow_left₀ hbase hlt.le 20
+  have h16_eq : ((((16 : ℝ) ^ (0.05 : ℝ))) ^ (20 : ℕ)) = 16 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (0.05 : ℝ) * ((((20 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [h16_eq] at hle_pow
+  have hge := R02_D3_pow_1143_20_le_sixteen
+  linarith
+/-- Integral numeral `∫ x in Ioi 16, x^(-1.05) ≤ 17.50` (via `1.143 ≤ 16^0.05`). -/
+theorem R02_D3_integral105_Ioi16_le_1750 :
+    (∫ x : ℝ in Set.Ioi (16 : ℝ), x ^ (-1.05 : ℝ)) ≤ 17.50 := by
+  have heq := R02_D3_integral105_Ioi16_eq
+  have hfloor := R02_D3_rpow_1143_le_1605
+  have hpos : (0 : ℝ) < (16 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (16 : ℝ) ^ (-0.05 : ℝ) = ((16 : ℝ) ^ (0.05 : ℝ))⁻¹ := by
+    have e : (-0.05 : ℝ) = -(0.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((16 : ℝ) ^ (0.05 : ℝ))⁻¹ ≤ (1.143 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hfloor
+  have h0875 : (1.143 : ℝ)⁻¹ ≤ 0.875 := by norm_num
+  have hhead : (16 : ℝ) ^ (-0.05 : ℝ) ≤ 0.875 := by
+    rw [hneg]
+    exact le_trans hinv h0875
+  have hdiv : (16 : ℝ) ^ (-0.05 : ℝ) / 0.05 ≤ 0.875 / 0.05 := by
+    have e1 : (16 : ℝ) ^ (-0.05 : ℝ) / 0.05 =
+        (16 : ℝ) ^ (-0.05 : ℝ) * (0.05 : ℝ)⁻¹ := by ring
+    have e2 : (0.875 : ℝ) / 0.05 = 0.875 * (0.05 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h1750 : (0.875 : ℝ) / 0.05 = 17.50 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (16 : ℝ), x ^ (-1.05 : ℝ))
+        = (16 : ℝ) ^ (-0.05 : ℝ) / 0.05 := heq
+      _ ≤ 0.875 / 0.05 := hdiv
+      _ = 17.50 := h1750
+/-- Shift-tail numeral `∑' n, (n+17)^(-1.05) ≤ 17.50`. -/
+theorem R02_D3_tail105_M16_le_1750 :
+    (∑' n : ℕ, ((((n + 16 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 17.50 := by
+  have ecast : ((((16 : ℕ)) : ℝ)) = (16 : ℝ) := by norm_num
+  have htail : (∑' n : ℕ, ((((n + 16 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi (16 : ℝ), x ^ (-1.05 : ℝ)) := by
+    have h := R02_D3_tail17_le_integral105_Ioi16
+    rw [ecast] at h
+    exact h
+  exact le_trans htail R02_D3_integral105_Ioi16_le_1750
+/-- K0-16 CANDIDATE (beats best): head `≤ 2.282` + tail `≤ 17.50`
+gives `≤ 19.782`; numeral `2.282 + 17.50 = 19.782 < 19.802` beats N=13 best
+by `0.02`; `47`-linear bar `19.458` recorded (`19.782 - 19.458 = 0.324`). -/
+theorem R02_D3_K016_candidate_19782 :
+    ((∑ i ∈ Finset.range 16, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      (∑' n : ℕ, ((((n + 16 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))) ≤ 19.782 ∧
+    (2.282 : ℝ) + 17.50 = 19.782 ∧ (19.782 : ℝ) < 19.802 ∧
+    (19.802 : ℝ) - 19.782 = 0.02 ∧
+    (47 : ℝ) * 0.414 = 19.458 ∧ (19.782 : ℝ) - 19.458 = 0.324 := by
+  have hadd := add_le_add R02_D3_odd105_head16_le_2282 R02_D3_tail105_M16_le_1750
+  have e : (2.282 : ℝ) + 17.50 = 19.782 := by norm_num
+  refine ⟨?_, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+  linarith
+#print axioms R02_D3_pow_1143_20_le_sixteen
+#print axioms R02_D3_rpow_1143_le_1605
+#print axioms R02_D3_integral105_Ioi16_le_1750
+#print axioms R02_D3_tail105_M16_le_1750
+#print axioms R02_D3_K016_candidate_19782

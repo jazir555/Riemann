@@ -6129,6 +6129,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 ZETA-FLOOR1143 (background `ses_f34889159`, proof-only,
+  grep-clean, zeta-only commit): 16^0.05 floor →1.143 (1.143^20≈14.49
+  honest) → tail 17.50 → K0-16 candidate 19.782 `:41772` BEATS 19.802 by
+  0.02 (sanity: 1/1.143≤0.875 ✓). 47-bar gap 0.324; 1.144 next.
 - 2026-09-22 BALLADV-R02LOG (background `ses_f348b073b`, proof-only,
   grep-clean, ball_advance-only commit): log-splitter banked (linear
   (1,1,1) via rpow_one) but degrades decay toward 0.05; no_uniform_logCap
