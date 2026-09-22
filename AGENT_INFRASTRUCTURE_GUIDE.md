@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 FIRSTCELL-BRIDGE (provisional, report pending; verified
+  grep-clean +94 diff): phase-bridge shapes (cDir/cEta term norms) +
+  bridge/identity obligations filed. Reconciled on report.
 - 2026-09-22 CELL-N (background `ses_f348467ec`, proof-only,
   grep-clean, interval-only commit): R13 poly floor 11.4 hypothesis-free
   + center conditional. Same ~6-order wall (short 6.3M).

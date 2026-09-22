@@ -2229,3 +2229,97 @@ theorem FC_etaF4_residual_closed : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-BRIDGE wave: real-to-complex magnitude link + open lower/identity residual (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* ZETA14 block (`door3_first_cell.lean:2063-2135`): `FC_L_floor_of_S4_tail` (`:2063`),
+  `FC_zeta14_need_eq` (`1.4 * 2.53 = 3.542`, `:2079`), `FC_zeta_of_eta_factor`
+  (`:2085`, abstract `E ≤ F * Z` route), `FC_S4_vs_need_gap` / `FC_S4_need_shortfall`
+  (`:2096` / `:2099`), `FC_etaF4_upper_obligation` (`:2104`),
+  `FC_L_floor_of_S4_tail_F4` (`:2111`), assembly residual
+  `FC_zeta14_assembly_residual` (`:2134`, `True` marker with OPEN (a) f4 numeral +
+  (b) real-to-complex bridge + (c) complex identity). Since then (a) CLOSED by
+  `FC_etaF4_upper_proved` (`:2206`); (b)+(c) still open.
+* `sCenter` shapes (`central_cover_assembly.lean:9588` def,
+  `:9608` `sCenter_re = 0.395`, `:9615` `sCenter_im = -6.75`; this file
+  `:1991` `FC_one_sub_sCenter_re` with `(1 - sCenter).re = 0.605`,
+  `:2005` cpow-norm pattern via `Complex.norm_cpow_eq_rpow_re_of_pos`,
+  `:2015` factor cap `FC_etaZeta_factor_proved ≤ 2.53`).
+* Real-eta shapes (this file `:537` `FC_etaF0395 k = ((k:ℝ)+1) ^ (-0.395)`,
+  `:1467` antitone, `:1534` `Tendsto` limit existence, `:1863` tail majorant
+  `‖L - S₄‖ ≤ f₄`, `:1787` `S₄ ≥ 0.28`).
+* Phase shapes: `:521` `FC_eta_phase1_lt`, `:1081` `FC_eta_phase1_sharp`
+  (`6.75 * log 2 < 4.679`); no complex Dirichlet term def in this file,
+  no `HasSum` at `sCenter`, no `eta = (1 - 2^(1-s)) * zeta` instantiation
+  at `sCenter`, no `‖complex partial‖ ≥ L` floor at `t = -6.75` (grep-clean).
+* `zeta` shape (`:492` `FC_zeta14_obligation : 1.4 ≤ ‖zeta sCenter‖`).
+
+Verdict: BANK magnitude identity per term (phase factor has modulus one, so
+complex term norm equals real term; triangle then gives only an UPPER for sums,
+not the needed LOWER). File exact OPEN residual below for (b) S4-level complex
+floor and (c) `HasSum` + factor identity at `sCenter`. No build attempted
+(verifier owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Complex Dirichlet term at `sCenter`: `((k+1) : ℂ) ^ (-sCenter)`.
+Magnitude equals the real term; argument carries `-t * log(k+1)` phase with
+`t = -6.75` via `sCenter_im`. -/
+noncomputable def FC_cDirTerm (k : ℕ) : ℂ :=
+  ((((k : ℝ) + 1 : ℝ) : ℂ) ^ (-R02Pilot.sCenter))
+
+/-- `(-sCenter).re = -0.395` from `sCenter_re`. -/
+theorem FC_neg_sCenter_re : (-R02Pilot.sCenter).re = -(0.395 : ℝ) := by
+  rw [Complex.neg_re, R02Pilot.sCenter_re]
+
+/-- BANKED magnitude identity (b-part, per term): phase factor modulus one at
+cpow level, so `‖cDir‖ = real eta term`. Mirrors `FC_etaZeta_of_rpow`. -/
+theorem FC_cDirTerm_norm (k : ℕ) : ‖FC_cDirTerm k‖ = FC_etaF0395 k := by
+  have hpos : (0 : ℝ) < (k : ℝ) + 1 := by positivity
+  have hre : (-R02Pilot.sCenter).re = -(0.395 : ℝ) := FC_neg_sCenter_re
+  unfold FC_cDirTerm FC_etaF0395
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos hpos, hre]
+
+/-- Alternating complex eta term `(-1)^k * cDir`. -/
+noncomputable def FC_cEtaTerm (k : ℕ) : ℂ := (-1 : ℂ) ^ k * FC_cDirTerm k
+
+/-- BANKED: alternating sign has modulus one, so complex eta term norm equals
+real term. Upper-only consequence; lower transfer stays open (see residual). -/
+theorem FC_cEtaTerm_norm (k : ℕ) : ‖FC_cEtaTerm k‖ = FC_etaF0395 k := by
+  have hcd : ‖FC_cDirTerm k‖ = FC_etaF0395 k := FC_cDirTerm_norm k
+  have hneg1 : ‖(-1 : ℂ) ^ k‖ = 1 := by
+    rw [norm_pow]
+    have hbase : ‖(-1 : ℂ)‖ = 1 := by rw [norm_neg, norm_one]
+    rw [hbase, one_pow]
+  have hmul : ‖(-1 : ℂ) ^ k * FC_cDirTerm k‖ =
+      ‖(-1 : ℂ) ^ k‖ * ‖FC_cDirTerm k‖ := norm_mul _ _
+  have hfold : FC_cEtaTerm k = (-1 : ℂ) ^ k * FC_cDirTerm k := rfl
+  rw [hfold, hmul, hneg1, one_mul, hcd]
+
+/-- OPEN (b): S4-level real-to-complex floor. Real `S₄ ≥ 0.28` is banked
+(`FC_etaS4_uncond`); the complex `‖∑ range 4‖ ≥ 0.28` needs cos/sin interval
+floors at reduced phases `6.75 * log k` (uses `FC_eta_phase1_sharp` range).
+Value unmeasured in this file; filed open. -/
+def FC_bridge_lower_obligation : Prop :=
+  (0.28 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖
+
+/-- OPEN (c): complex eta identity at `sCenter`. Joint `HasSum` + factor form:
+the alternating complex series sums to `(1 - 2^(1-sCenter)) * zeta sCenter`.
+No `HasSum` at `Re = 0.395 < 1` banked in this file (real route has `Tendsto`
+only for real partials); needs analytic continuation, filed open. -/
+def FC_eta_identity_obligation : Prop :=
+  ∃ E : ℂ, HasSum FC_cEtaTerm E ∧
+    E = ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)) * zeta R02Pilot.sCenter
+
+/-- Exact bridge-wave residual: BANKED per-term magnitude `FC_cDirTerm_norm` +
+`FC_cEtaTerm_norm` (upper-only; triangle gives `‖∑‖ ≤ ∑ real`, not the lower);
+OPEN (b) `FC_bridge_lower_obligation` (complex S4 floor `0.28`, unmeasured) +
+OPEN (c) `FC_eta_identity_obligation` (`HasSum` + factor identity at `sCenter`).
+Hence `FC_zeta14_obligation` stays OPEN; route needs phase-coherent lower, not
+larger real-`N` alone (`S₄ + f₄ ≈ 0.84` vs need `3.542`). -/
+theorem FC_bridge_eta_residual : True := by
+  trivial
+
+end Door3FirstCellClose
+
