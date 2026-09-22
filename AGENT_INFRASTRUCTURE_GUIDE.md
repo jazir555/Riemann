@@ -6137,6 +6137,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 ZETA-FLOOR1145 (background `ses_f348305c4`, proof-only,
+  grep-clean, zeta-only commit): 1.145^20≈15.00 honest → tail 17.47 →
+  K0-16 19.752 `:42012` beats 19.766 by 0.014 (sanity ✓). 47-bar gap
+  0.294; 1.146 next.
 - 2026-09-22 WIRE-SUP1000 (background `ses_f3480f844`, proof-only,
   grep-clean, wiring-only commit): sup1000 attempt FAILS honestly —
   poly·pi joint 319488 exceeds 1000 budget (319x). Sup residuals filed;
