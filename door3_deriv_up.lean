@@ -1832,3 +1832,117 @@ theorem gap_leaf_sub_tightSup_residuals_open :
   constructor <;> norm_num
 
 end Door3DerivUp
+
+/-! ## 17. LEAF-SUB relocation spec (append-only, Props only).
+
+Grep record (read-only, before writing):
+* SUP block `:1753-1829`: `gammaDiffCont_leaf_sub :1754` banked via
+  `gammaDiffCont_leaf_sub_filled :1780`, `gammaSupOnSphere_leaf_sub_0097 :1805`
+  filled at `:1808` via `R02GammaDisc.gammaOf_upper_disc_R02`, banked `:1815`;
+  gaps `gamma_tight0097_above_0008 :1818`, `zeta_tight934_above_3 :1821`,
+  `gamma_tightSup_not_from_0097 :1824`, `zeta_tightSup_not_from_934 :1827`,
+  residuals `gap_leaf_sub_tightSup_residuals_open :1830`.
+* Leaf-sub specs: `dLeaf_sub :1478` (= 0.2 - 6.25 I), sphere bounds
+  `:1531/:1546`, zeta 934 sup `:1528/:1563`, tight needs
+  `gammaTightSup_leaf_sub :1651` (0.008), `zetaSupTightNeed_leaf_sub :1660` (3).
+* Shave factors at this center: 0.097 / 0.008 = 12.125 (gamma, 12x class),
+  934 / 3 = 311 + 1 / 3 (zeta, 311x class); true gamma ~0.026 > 0.008 so no
+  honest sup at `dLeaf_sub` can meet 0.008. Relocation filed below as exact
+  open Props only; nothing is closed here.
+-/
+
+namespace Door3DerivUp
+
+noncomputable def dLeaf_reloc : ℂ := Complex.mk 0.2 (-8.0)
+
+theorem dLeaf_reloc_re : dLeaf_reloc.re = (0.2 : ℝ) := rfl
+
+theorem dLeaf_reloc_im : dLeaf_reloc.im = (-8.0 : ℝ) := rfl
+
+def gammaTightSup_leaf_reloc : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.008
+
+def zetaSupTightNeed_leaf_reloc : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖riemannZeta z‖ ≤ 3
+
+def gammaPrimeTightNeed_leaf_reloc : Prop :=
+  ‖deriv DerivCauchyBridge.gammaOf dLeaf_reloc‖ ≤ 0.03
+
+def zetaPrimeTightNeed_leaf_reloc : Prop :=
+  ‖deriv riemannZeta dLeaf_reloc‖ ≤ 300
+
+def gammaTrueAboveTight_leaf_sub : Prop :=
+  (0.008 : ℝ) < ‖DerivCauchyBridge.gammaOf dLeaf_sub‖
+
+theorem dLeaf_reloc_sphere_re_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dLeaf_reloc 0.01) :
+    (0.05 : ℝ) ≤ z.re ∧ z.re ≤ (0.74 : ℝ) := by
+  have hdist : dist z dLeaf_reloc = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dLeaf_reloc‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dLeaf_reloc).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_reloc).re| ≤ ‖z - dLeaf_reloc‖ := Complex.abs_re_le_norm _
+      _ = 0.01 := hnorm
+  have here : (z - dLeaf_reloc).re = z.re - 0.2 := by
+    have e : (z - dLeaf_reloc).re = z.re - dLeaf_reloc.re :=
+      Complex.sub_re z dLeaf_reloc
+    rw [e, dLeaf_reloc_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+theorem dLeaf_reloc_sphere_im_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dLeaf_reloc 0.01) :
+    (-8.25 : ℝ) ≤ z.im ∧ z.im ≤ (-5.25 : ℝ) := by
+  have hdist : dist z dLeaf_reloc = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dLeaf_reloc‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(z - dLeaf_reloc).im| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_reloc).im| ≤ ‖z - dLeaf_reloc‖ := Complex.abs_im_le_norm _
+      _ = 0.01 := hnorm
+  have heim : (z - dLeaf_reloc).im = z.im - (-8.0) := by
+    have e : (z - dLeaf_reloc).im = z.im - dLeaf_reloc.im :=
+      Complex.sub_im z dLeaf_reloc
+    rw [e, dLeaf_reloc_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  constructor <;> linarith
+
+theorem dLeaf_reloc_shift_im :
+    (dLeaf_reloc - dLeaf_sub).im = (-1.75 : ℝ) := by
+  have e : (dLeaf_reloc - dLeaf_sub).im = dLeaf_reloc.im - dLeaf_sub.im :=
+    Complex.sub_im dLeaf_reloc dLeaf_sub
+  rw [e, dLeaf_reloc_im, dLeaf_sub_im]
+  norm_num
+
+theorem dLeaf_reloc_shift_re :
+    (dLeaf_reloc - dLeaf_sub).re = (0 : ℝ) := by
+  have e : (dLeaf_reloc - dLeaf_sub).re = dLeaf_reloc.re - dLeaf_sub.re :=
+    Complex.sub_re dLeaf_reloc dLeaf_sub
+  rw [e, dLeaf_reloc_re, dLeaf_sub_re]
+  norm_num
+
+theorem gamma_shave12_below_wide_leaf_sub :
+    (0.008 : ℝ) * 12 < 0.097 := by
+  norm_num
+
+theorem gamma_shave_ratio_leaf_sub :
+    (0.097 : ℝ) / 0.008 = 12.125 := by
+  norm_num
+
+theorem zeta_shave311_below_wide_leaf_sub :
+    (3 : ℝ) * 311 < 934 := by
+  norm_num
+
+theorem zeta_shave_ratio_above_311 :
+    (311 : ℝ) < 934 / 3 := by
+  norm_num
+
+theorem reloc_spec_gap_open :
+    (0.008 : ℝ) < 0.097 ∧ (3 : ℝ) < 934 ∧
+      (0.008 : ℝ) * 12 < 0.097 ∧ (3 : ℝ) * 311 < 934 := by
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+end Door3DerivUp
