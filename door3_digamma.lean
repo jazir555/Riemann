@@ -609,3 +609,110 @@ theorem psi_transport_inner (cN : ℂ) (rN : ℝ)
   psi_disc_transport wInner cN 8 rN avoid_inner hDisc
 
 end Door3Digamma
+
+/-! ## 8. Closed shifted-disc specs at N = 8 + gamNeed reuse (honest Props).
+
+Transport rungs `psi_transport_*` (`door3_digamma.lean:587-605`) take a generic
+shifted disc at `w + 8` as premise. Residual (`door3_digamma.lean:574-580`):
+closed discs `‖digamma (w + 8) − cN‖ ≤ rN` with `cN − sum = c`
+(`c ∈ {cOuter, cLeaf, cMid, cInner}`, radii `0.5 / 0.5 / 0.5 / 1`) plus
+tight gamma sups `gamNeed_*` (`door3_digamma.lean:419-425`).
+This block files the four shifted discs as exact Props with `cN := c + sum`,
+proves `cN − sum = c` in closed form, and closes the conditional step
+`psiShiftNeed_* → psiNeed_*` via the banked transport rungs.
+No unconditional disc is claimed: the `Re ~ 8.1` Stirling remainder stays open.
+-/
+
+namespace Door3Digamma
+
+open scoped BigOperators
+
+noncomputable def cNOuter : ℂ :=
+  cOuter + ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹
+
+noncomputable def cNLeaf : ℂ :=
+  cLeaf + ∑ k ∈ Finset.range 8, (wLeaf + (((k : ℕ)) : ℂ))⁻¹
+
+noncomputable def cNMid : ℂ :=
+  cMid + ∑ k ∈ Finset.range 8, (wMid + (((k : ℕ)) : ℂ))⁻¹
+
+noncomputable def cNInner : ℂ :=
+  cInner + ∑ k ∈ Finset.range 8, (wInner + (((k : ℕ)) : ℂ))⁻¹
+
+def psiShiftNeed_outer : Prop :=
+  ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cNOuter‖ ≤ (0.5 : ℝ)
+
+def psiShiftNeed_leaf : Prop :=
+  ‖Complex.digamma (wLeaf + (((8 : ℕ)) : ℂ)) − cNLeaf‖ ≤ (0.5 : ℝ)
+
+def psiShiftNeed_mid : Prop :=
+  ‖Complex.digamma (wMid + (((8 : ℕ)) : ℂ)) − cNMid‖ ≤ (0.5 : ℝ)
+
+def psiShiftNeed_inner : Prop :=
+  ‖Complex.digamma (wInner + (((8 : ℕ)) : ℂ)) − cNInner‖ ≤ (1 : ℝ)
+
+theorem cNOuter_sub :
+    cNOuter − ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹ = cOuter := by
+  unfold cNOuter
+  rw [add_sub_cancel]
+
+theorem cNLeaf_sub :
+    cNLeaf − ∑ k ∈ Finset.range 8, (wLeaf + (((k : ℕ)) : ℂ))⁻¹ = cLeaf := by
+  unfold cNLeaf
+  rw [add_sub_cancel]
+
+theorem cNMid_sub :
+    cNMid − ∑ k ∈ Finset.range 8, (wMid + (((k : ℕ)) : ℂ))⁻¹ = cMid := by
+  unfold cNMid
+  rw [add_sub_cancel]
+
+theorem cNInner_sub :
+    cNInner − ∑ k ∈ Finset.range 8, (wInner + (((k : ℕ)) : ℂ))⁻¹ = cInner := by
+  unfold cNInner
+  rw [add_sub_cancel]
+
+theorem psiShift_implies_psiNeed_outer (h : psiShiftNeed_outer) : psiNeed_outer := by
+  unfold psiShiftNeed_outer at h
+  unfold psiNeed_outer
+  have hT := psi_transport_outer cNOuter 0.5 h
+  have hEq : cNOuter − ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹ =
+    cOuter := cNOuter_sub
+  rw [hEq] at hT
+  exact hT
+
+theorem psiShift_implies_psiNeed_leaf (h : psiShiftNeed_leaf) : psiNeed_leaf := by
+  unfold psiShiftNeed_leaf at h
+  unfold psiNeed_leaf
+  have hT := psi_transport_leaf cNLeaf 0.5 h
+  have hEq : cNLeaf − ∑ k ∈ Finset.range 8, (wLeaf + (((k : ℕ)) : ℂ))⁻¹ =
+    cLeaf := cNLeaf_sub
+  rw [hEq] at hT
+  exact hT
+
+theorem psiShift_implies_psiNeed_mid (h : psiShiftNeed_mid) : psiNeed_mid := by
+  unfold psiShiftNeed_mid at h
+  unfold psiNeed_mid
+  have hT := psi_transport_mid cNMid 0.5 h
+  have hEq : cNMid − ∑ k ∈ Finset.range 8, (wMid + (((k : ℕ)) : ℂ))⁻¹ =
+    cMid := cNMid_sub
+  rw [hEq] at hT
+  exact hT
+
+theorem psiShift_implies_psiNeed_inner (h : psiShiftNeed_inner) : psiNeed_inner := by
+  unfold psiShiftNeed_inner at h
+  unfold psiNeed_inner
+  have hT := psi_transport_inner cNInner 1 h
+  have hEq : cNInner − ∑ k ∈ Finset.range 8, (wInner + (((k : ℕ)) : ℂ))⁻¹ =
+    cInner := cNInner_sub
+  rw [hEq] at hT
+  exact hT
+
+def doorShiftNeed_outer : Prop := psiShiftNeed_outer ∧ gamNeed_outer
+
+def doorShiftNeed_leaf : Prop := psiShiftNeed_leaf ∧ gamNeed_leaf
+
+def doorShiftNeed_mid : Prop := psiShiftNeed_mid ∧ gamNeed_mid
+
+def doorShiftNeed_inner : Prop := psiShiftNeed_inner ∧ gamNeed_inner
+
+end Door3Digamma

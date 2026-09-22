@@ -17074,3 +17074,75 @@ theorem R00_deriv_banked_gap_audit : (0.05 : ℝ) < 67200 := by
   norm_num
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R01 leaf+H residual pair (append-only, no redefinition)
+
+Grep (read-only, verified before writing):
+- R01 leaf: `R01_leaf_obligations` at 1288-1290 =
+  `(0.05 + 0.07 * R01.radius <= norm at R01.center) AND
+   (forall w, R01.mem w -> ||deriv xiShifted w|| <= 0.07)`.
+- R01 H: `R01_H_instance` at 1326-1336, membership-free (`c` + `hc_eq` only,
+  no `hc_mem`), conclusion shape `∃ R ε M, ... ∧ 0 < ε ∧ deriv bound ∧ budget`.
+- R00 residual shapes mirrored: `R00_center_of_tenth_lower` 16988,
+  `R00_center_residual_tenth` 16993,
+  `R00_center_obligation_of_residual_tenth` 16996,
+  `R00_deriv_residual` 17019, `R00_leaf_of_residuals` 17022,
+  `R00_H_of_residuals` 17026.
+- R00D audit at 17039-17076 left untouched: it records the R00-deriv banked
+  gap (`0.05 < 67200`) and introduces no new R00 obligation; nothing below
+  re-proves or duplicates that audit.
+
+Mirror for R01 mid tier `(ε, M) = (0.05, 0.07)`:
+- `R01_budget_lt_app` lifts `R01_radius_lt` + `fine_feasible_mid` to the true
+  radius, exactly as `R00_budget_lt_app` does for R00.
+- Center residual `0.2 <= norm at R01.center` discharges the center conjunct
+  via the budget.
+- `R01_deriv_residual` is exactly the `deriv_bound` conjunct.
+- `R01_leaf_of_residuals` rebuilds `R01_leaf_obligations` from the two residuals.
+- `R01_H_of_residuals` discharges the membership-free H shape via `R01_H_instance`.
+Value: full R01 H leaf now conditional only on two named numeric enclosures.
+Gap: center needs `0.2 <= norm` enclosure at R01 center; deriv needs uniform
+  `||deriv xiShifted|| <= 0.07` enclosure on `R01` (not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R01 mid tier on the true radius. -/
+theorem R01_budget_lt_app : (0.05 : ℝ) + 0.07 * R01.radius < 0.2 := by
+  have h := R01_radius_lt
+  have hM : 0.07 * R01.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R01_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R01.center‖) :
+    (0.05 : ℝ) + 0.07 * R01.radius ≤ ‖xiShifted R01.center‖ := by
+  have hB := R01_budget_lt_app
+  linarith
+
+def R01_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R01.center‖
+
+theorem R01_center_obligation_of_residual_two_tenths
+    (h : R01_center_residual_two_tenths) :
+    (0.05 : ℝ) + 0.07 * R01.radius ≤ ‖xiShifted R01.center‖ :=
+  R01_center_of_two_tenths_lower h
+
+def R01_deriv_residual : Prop :=
+  ∀ w, R01.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R01_leaf_of_residuals (hc : R01_center_residual_two_tenths)
+    (hd : R01_deriv_residual) : R01_leaf_obligations :=
+  ⟨R01_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R01_H_of_residuals (hc : R01_center_residual_two_tenths)
+    (hd : R01_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ)
+    (hc_eq : c = (-7.5, -5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R01_H_instance (R01_leaf_of_residuals hc hd) c hc_eq
+
+end CentralCoverAssembly

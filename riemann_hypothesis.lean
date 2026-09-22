@@ -12490,3 +12490,45 @@ theorem xiCentralEdgeStrips10_of_zeroFreeCover
   rcases C.covers z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne with
     ⟨R, _, hx0, hx1, hy0, hy1⟩
   exact R.no_zero z hx0 hx1 hy0 hy1
+
+/-- Right-tail-only feeder for the tail adapter: a one-sided off-axis bound
+    plus neg-symmetry yields the two-sided tail certificate. This narrows the
+    `tailPointwise10_of_absTail` premise from `10 < |Re|` to `10 < Re`,
+    halving the analytic domain to the right tail. -/
+theorem tailPointwise10_of_rightTail_and_negSymm
+    (hsymm : XiShiftedNegSymmetric)
+    (Hright : ∀ z : ℂ, (10 : ℝ) < z.re → -(1 : ℝ) / 2 < z.im →
+      z.im < (1 : ℝ) / 2 → z.im ≠ 0 → xiShifted z ≠ 0) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_absTail (by
+    intro z habs hgt hlt hne
+    by_cases hre : 0 ≤ z.re
+    · have habs_eq : |z.re| = z.re := abs_of_nonneg hre
+      have hright : (10 : ℝ) < z.re := by
+        rw [habs_eq] at habs
+        exact habs
+      exact Hright z hright hgt hlt hne
+    · push_neg at hre
+      let w := -z
+      have hw_re : (10 : ℝ) < w.re := by
+        dsimp [w]
+        have hneg : |z.re| = -z.re := abs_of_neg hre
+        rw [hneg] at habs
+        linarith
+      have hw_gt : -(1 : ℝ) / 2 < w.im := by
+        dsimp [w]
+        linarith
+      have hw_lt : w.im < (1 : ℝ) / 2 := by
+        dsimp [w]
+        linarith
+      have hw_ne : w.im ≠ 0 := by
+        dsimp [w]
+        intro h
+        apply hne
+        linarith
+      have hW := Hright w hw_re hw_gt hw_lt hw_ne
+      have heq : xiShifted w = xiShifted z := by
+        dsimp [w]
+        exact hsymm z hgt hlt
+      rw [heq] at hW
+      exact hW)

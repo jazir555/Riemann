@@ -6052,6 +6052,19 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, pilot-only commit): eta17 PAYOFF CLOSED — rpow18 lower
   (1/5 via sqrt18≤5) + cpow18 Re≤-3/20 + odd-negation →
   `eta17_Re ≥ +3/20=0.15 :5618`. Shard assembly next.
+- 2026-09-22 RH-TAIL (background `ses_f3493cdad`, proof-only,
+  grep-clean, RH-only commit): tail domain halved —
+  `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
+  → one-sided Hright + banked neg-symm). Hright open (right-tail
+  certificate owns).
+- 2026-09-22 ASSEMBLY-R00D (background `ses_f3492c3e0`, proof-only,
+  grep-clean, assembly-only commit): center VALUE (0.1 closes budget via
+  :1359/:1161) + deriv gap audit `0.05<67200 :17073` (only banked Cauchy
+  is 67200; no chainable premise). Deriv residual stands.
+- 2026-09-22 DIGAMMA-SPEC (background `ses_f3492c3e4`, proof-only,
+  grep-clean, digamma-only commit): shift-needs + cN-subs + implies +
+  doorShiftNeeds `:630-716` filed as honest Props (Stirling remainder
+  absent; oracle cannot close).
 - 2026-09-22 ZETA-HEAD29 (background `ses_f34951a3b`, proof-only,
   grep-clean, zeta-only commit): 29/31 head numerals (0.030/0.028) +
   M15 tail 17.61 + head15 2.254 → candidate 19.864 `:41340` (above best
