@@ -2094,3 +2094,107 @@ def wireStrip_bottom_M40_at_zero_residual : Prop :=
 end Door3RHWiring
 
 #print axioms Door3RHWiring.wireStrip_bottom_M40_at_zero_of_ballSup40
+
+/-! ## WIRE-M1000 top M1000 strip at `x = 0` (append-only, value + residual).
+
+Grep (read before filing):
+* M40 feeders banked `door3_rh_wiring.lean:1949-1990`
+  (`wireStrip_top_M40_at_zero_of_ballSup40`: pointwise `1/2` at `x = 0` via
+  `wireHtop_top_point_half_feeder` + `uniform_top_deriv_M40_of_closedBall`
+  (`door3_sliver_edge.lean:708-716`), engine
+  `BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound`,
+  transfer `xiShifted_eq_entire_on_strip`
+  (`central_cover_assembly.lean:836-840`)) and `:2040-2080`
+  (`wireStrip_bottom_M40_at_zero_of_ballSup40`, mirror via
+  `uniform_bot_deriv_M40_of_closedBall` (`:768-776`)).
+* M1000 specs `door3_rh_wiring.lean:1606-1633`: side `gate_M1000_side_closed`
+  (`:1606`, CLOSED by `norm_num`); ratio `gate_M1000_ratio_open` (`:1609`,
+  OPEN negation); width `width_M1000_top_open` (`:1613-1615`) + bottom
+  `width_M1000_bot_open` (`:1618-1620`) (both OPEN negations, so full
+  `edgeStrip_top_half_M1000` (`:1642-1665`) /
+  `edgeStrip_bottom_half_M1000` (`:1674-1718`) stay conditional on the two
+  positive width premises); deriv `hTopDeriv1000_of_ballSup1000`
+  (`:1625-1633`, `C = 1000` sup on `Metric.closedBall 0 12` via
+  `uniform_top_deriv_of_closedBall` at `d = (1/2)/1000`).
+* Sliver banked M1000 pair-closers, reference only (no re-proof here):
+  `uniform_top_deriv_M1000_of_closedBall` (`door3_sliver_edge.lean:931-939`),
+  `uniform_bot_deriv_M1000_of_closedBall` (`:942-950`),
+  `uniform_M1000_pair_of_closedBall` (`:953-968`), mono lifts
+  `ballSup40_to_ballSup1000` (`:971-977`) / `ballSup79_to_ballSup1000`
+  (`:980-986`) + pair instances (`:989-1016`).
+
+Value below: exact M40-top mirror at `d = (1/2)/1000` conditional on the
+single `C = 1000` closed-ball sup: pointwise endpoint `1/2`
+(`wireHtop_top_point_half_feeder`) + `uniform_top_deriv_M1000_of_closedBall`,
+transferred to `xiShifted` via `xiShifted_eq_entire_on_strip`. No width gate
+needed at `x = 0` (width gates `:1613-1618` constrain only the full uniform
+strips, which stay OPEN). Exact residual filed as
+`wireStrip_top_M1000_at_zero_residual`. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-M1000 top M1000 strip at `x = 0`: pointwise endpoint `1/2` plus
+closed-ball sup `C = 1000` gives `xiShifted ≠ 0` on the `δ = (1/2)/1000`
+vertical segment above `x = 0`. Chains `wireHtop_top_point_half_feeder`
+with `uniform_top_deriv_M1000_of_closedBall`; exact mirror of
+`wireStrip_top_M40_at_zero_of_ballSup40` at `d = (1/2)/1000`. -/
+theorem wireStrip_top_M1000_at_zero_of_ballSup1000
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ) (hy_low : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y)
+    (hy_top : y < (1 / 2 : ℝ)) :
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+  have hx_mem : (0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+    exact Set.mem_Icc.mpr ⟨by norm_num, by norm_num⟩
+  have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  have hTop0 : (1 / 2 : ℝ) ≤
+      ‖CentralCoverAssembly.xiShiftedEntire ((((0 : ℝ)) : ℂ) + Complex.I * ((1 / 2 : ℂ)))‖ := by
+    rw [hcast]
+    exact wireHtop_top_point_half_feeder
+  have hDeriv0 : ∀ v ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((v : ℝ)) : ℂ))‖ ≤ (1000 : ℝ) := by
+    intro v hv
+    exact Door3SliverEdge.uniform_top_deriv_M1000_of_closedBall hC 0 hx_mem v hv
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    have hres := BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable 0
+      (1 / 2 : ℝ) (1000 : ℝ) (by norm_num) (by norm_num) hTop0 hDeriv0 y hy_low
+      (le_of_lt hy_top)
+    exact hres
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hstrip_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hy_top
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  rw [hagree]
+  exact hne_ent
+
+/-- WIRE-M1000 exact residual: uniform M1000 strips still OPEN.
+The feeder above closes only the `x = 0` line at `d = (1/2)/1000`
+conditional on the `C = 1000` closed-ball sup; full edge strips need the
+uniform `1/2` lowers over `Set.Icc (-10) 10` (top + bottom) and the
+`C = 1000` sup on `Metric.closedBall 0 12` via the banked M1000
+pair-closers, plus the two positive width gates whose negations are banked
+at `:1613-1618` (`width_M1000_top_open` / `width_M1000_bot_open`). -/
+def wireStrip_top_M1000_at_zero_residual : Prop :=
+  (∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  (∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+
+end Door3RHWiring
+
+#print axioms Door3RHWiring.wireStrip_top_M1000_at_zero_of_ballSup1000

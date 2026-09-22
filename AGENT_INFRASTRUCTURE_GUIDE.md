@@ -6133,6 +6133,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 ASSEMBLY-R04 (background `ses_f34864d5b`, proof-only,
   grep-clean; swept into 16b56ca with subsetfix2): R04 leaf+H conditional
   (`:17561-17598`). Entry filed here.
+- 2026-09-22 WIRE-M1000 (background `ses_f3485c1c6`, proof-only,
+  grep-clean, wiring-only commit): top-M1000-at-zero feeder (d=(1/2)/1000
+  + ballSup1000 conditional) + residual. Bottom mirror next.
 - 2026-09-22 DIGAMMA-GAMMAREST (background `ses_f34861ca8`, proof-only,
   grep-clean, digamma-only commit): outer/leaf/mid shift chains banked
   (0.032/0.061/0.422; gaps 16x/7.6x/10.5x). Missing: height-decay bound.
