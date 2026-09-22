@@ -5504,4 +5504,122 @@ cpow signed upper). Hence NEITHER `Re(18^{-sCut}) ≤ -c·r₁₈` NOR
 theorem sSCUT_eta17_payoff_residual : (0 : ℝ) < 1 := by
   norm_num
 
+/-! ## sCut k=17 ODD payoff (close `r₁₈` lower, then cpow18 → eta17 chain).
+
+Grep first (`rpow17`/`rpow18`/`delta17` mirror in this file):
+* `sSCUT_rpow17_neg_ge` at `:5267` (`1/5 ≤ 17^{-1/2}` via `sSCUT_sqrt17_le`);
+  no `sSCUT_rpow18_neg_ge`-shape existed before this block.
+* `sSCUT_delta17_odd_mem` at `:5198` + `sSCUT_cos10log17_le_neg_nine_tenths`
+  at `:5219` is the even-`k` destructive mirror; `δ₁₈` mirror is
+  `sSCUT_delta18_odd_mem` at `:5439` + `sSCUT_cos10log18_le_neg_three_quarters`
+  at `:5459` (`cos ≤ -3/4`).
+* Odd-constructive mirror is `sSCUT_eta15_Re_ge` at `:5086`
+  (`Re(eta₁₅) ≥ +1/5` via negated `sSCUT_cpow16_Re_le_neg`).
+
+This block closes the `r₁₈` lower honestly via rpow bounds
+(`√18 ≤ 5` from `18 ≤ 25`; true `18^{-1/2} ≈ 0.2357`, banked `≥ 1/5 = 0.2`),
+then chains cpow18 → eta17 for `Re(eta₁₇) ≥ +3/20 = 0.15`
+(`(1/5)·(3/4)`; true `≈ 0.1768` unchained, banked `0.15`). -/
+
+/-- `18^(1/2) ≤ 5` (mirror of `sSCUT_sqrt17_le` at `:5254`; `18 ≤ 5^2 = 25`). -/
+theorem sSCUT_sqrt18_le : (18 : ℝ) ^ (1 / 2 : ℝ) ≤ (5 : ℝ) := by
+  have hpow : (18 : ℝ) ≤ (((5 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((18 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 18 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((18 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((5 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/5 ≤ r₁₈ = 18^(-1/2)` (inverse of `sSCUT_sqrt18_le`;
+mirror of `sSCUT_rpow17_neg_ge` at `:5267`). -/
+theorem sSCUT_rpow18_neg_ge : (1 / 5 : ℝ) ≤ (18 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt18_le
+  have hpos : (0 : ℝ) < (18 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (18 : ℝ) ^ (-(1 / 2 : ℝ)) = (((18 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 18)]
+  rw [hneg, show (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `18^{-s}` at sCut (mirror of
+`sSCUT_cpow17_neg_re` at `:5279`). -/
+theorem sSCUT_cpow18_neg_re : ((((18 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (18 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 18) := by
+  have h18pos : (0 : ℝ) < 18 := by norm_num
+  have hxC : ((18 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h18pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((18 : ℝ) : ℂ) = (((Real.log 18 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h18pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 18 : ℝ)) : ℂ)).re = Real.log 18 := Complex.ofReal_re _
+  have hzim : ((((Real.log 18 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 18 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 18 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 18 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 18) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 18 * (-(1 / 2 : ℝ)))
+      = (18 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h18pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 18))
+      = Real.cos (10 * Real.log 18) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(18^{-sCut}) ≤ -(3/20)` (nonneg `r₁₈` × signed
+cosine upper `≤ -3/4`, then `r₁₈ ≥ 1/5`; mirror of
+`sSCUT_cpow17_Re_le_neg` at `:5314`; `(1/5)·(3/4) = 3/20 = 0.15`). -/
+theorem sSCUT_cpow18_Re_le_neg :
+    ((((18 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(3 / 20) : ℝ) := by
+  rw [sSCUT_cpow18_neg_re]
+  have hr0 : (0 : ℝ) ≤ (18 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow18_neg_ge
+  have hc := sSCUT_cos10log18_le_neg_three_quarters
+  have hcos34 : Real.cos (10 * Real.log 18) ≤ (-(3 / 4) : ℝ) := hc
+  have hmul : (18 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 18)
+      ≤ (18 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(3 / 4)) :=
+    mul_le_mul_of_nonneg_left hcos34 hr0
+  have h2 : (1 / 5 : ℝ) * (3 / 4) ≤ (18 : ℝ) ^ (-(1 / 2 : ℝ)) * (3 / 4) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have hsign : (18 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(3 / 4))
+      = -((18 : ℝ) ^ (-(1 / 2 : ℝ)) * (3 / 4)) := by ring
+  have heq : (1 / 5 : ℝ) * (3 / 4) = 3 / 20 := by norm_num
+  linarith
+
+/-- Eta bridge `eta₁₇ = -(18^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(18^s)⁻¹` into `18^{-s}`; mirror of `sSCUT_eta15_eq_neg_cpow16` at `:5073`). -/
+theorem sSCUT_eta17_eq_neg_cpow18 :
+    etaDirichletTerm sSCUT 17 = -((((18 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (17 + 1 : ℕ) = 18 := rfl
+  have hcast : ((((17 + 1 : ℕ)) : ℂ)) = ((((18 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (17 : ℕ) = -1 := by norm_num
+  have h18cast : ((((18 : ℕ)) : ℂ)) = ((((18 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h18cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (odd `k = 17`): `Re(eta₁₇) ≥ +3/20` (negated cpow signed
+upper `sSCUT_cpow18_Re_le_neg`; negation flips the upper to a lower;
+mirror of `sSCUT_eta15_Re_ge` at `:5086` with `r₁₈ = 1/5`, `c = 3/4`
+concretized: `(1/5)·(3/4) = 3/20`; gain `+0.15`, constructive). -/
+theorem sSCUT_eta17_Re_ge :
+    (3 / 20 : ℝ) ≤ (etaDirichletTerm sSCUT 17).re := by
+  have h := sSCUT_cpow18_Re_le_neg
+  rw [sSCUT_eta17_eq_neg_cpow18, Complex.neg_re, sSCUT_cpow18_neg_re]
+  rw [sSCUT_cpow18_neg_re] at h
+  linarith
+
 end Door3PilotR00Zeta

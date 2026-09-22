@@ -6048,6 +6048,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, assembly-only commit): R00 leaf+H conditional
   (`leaf_of_residuals :17022` + `H_of_residuals :17026` from center+deriv
   residuals). Deriv residual (uniform ≤0.05) filed `:17019`.
+- 2026-09-22 SCUT45 (background `ses_f34938b10`, proof-only,
+  grep-clean, pilot-only commit): eta17 PAYOFF CLOSED — rpow18 lower
+  (1/5 via sqrt18≤5) + cpow18 Re≤-3/20 + odd-negation →
+  `eta17_Re ≥ +3/20=0.15 :5618`. Shard assembly next.
+- 2026-09-22 STIRLING-E05 (background `ses_f3493cda`, proof-only,
+  grep-clean, stirling-only commit): gamNeed_outer shift-2 `≤0.063
+  :2576` (via Gamma 2.1975≤1.2; 114x→31x). Leaf + E05-link still open.
 - 2026-09-22 TAIL-M20 (background `ses_f3492c3e0`, proof-only,
   grep-clean, tail-only commit): M1048576 rung `3/128≈0.0234 :881`
   (exact 2^20 mirror, 1024² verified). Ladder: M2097152 odd-floor next.
