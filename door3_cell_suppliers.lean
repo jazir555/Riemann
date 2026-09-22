@@ -4344,4 +4344,36 @@ theorem CS_S4f_shortfall_1851 : (1.4 : ℝ) * 1.851 - 1.94 = 0.6514 := by
 #print axioms CS_etaFactor_1851_proved
 #print axioms CS_S4f_shortfall_1851
 
+/-! ## §A18. S6 Im update `≥ 0.6092` via current S4 `1.1592` (ETA-SLOW)
+
+Route (banked windows only, cpow5/cpow6 sin-split reuse, no new analysis):
+* `CS_complex_S6_Im_ge_of_S4` (`Im(S₆) ≥ Y - 0.55` via `CS_Im5_ge_neg055`
+  + `CS_Im6_nonpos`, i.e. `CS_sin6_nonpos` + `r₅ ≤ 0.55` cap) at
+  `Y = 1.1592` (`CS_complex_S4_Im_ge_11592`).
+* `1.1592 - 0.55 = 0.6092` (was `0.3980` via `Y = 0.9480`; gain `0.2112`;
+  TRUE `Im(S₆) ≈ 1.42`).
+* `0.6092 < 1.1592` by exactly the `0.55` tail (`CS_complex_S6_Im_below_S4_gap`),
+  so the Im route does NOT beat current S4 Im and no Pythagoras `‖S₆‖` feed
+  closes here (would need `X > 1.1592`); live best STANDS
+  (`slow = 1.94`, `cF = 1.851`, shortfall `0.6514`). No force. -/
+
+/-- Unconditional S6 Im lower `≥ 0.6092` via the banked conditional link:
+`Im(S₆) ≥ Im(S₄) - 0.55 ≥ 1.1592 - 0.55 = 0.6092` (was `0.3980`). -/
+theorem CS_complex_S6_Im_ge_06092 :
+    (0.6092 : ℝ) ≤ (CS_S6C).im := by
+  have hS4 : (1.1592 : ℝ) ≤ (CS_S4C).im := CS_complex_S4_Im_ge_11592
+  have h := CS_complex_S6_Im_ge_of_S4 1.1592 hS4
+  have hnum : (1.1592 : ℝ) - 0.55 = 0.6092 := by norm_num
+  linarith
+
+/-- Honest gap: the new S6 Im `0.6092` trails current S4 Im `1.1592` by exactly
+the `0.55` tail, so `Im(S₆) ≥ X` with `X > 1.1592` does NOT follow here;
+best honest stays `1.1592` (`CS_complex_S4_Im_ge_11592`), `slow` stays `1.94`. -/
+theorem CS_complex_S6_Im_below_S4_gap :
+    (1.1592 : ℝ) - (0.6092 : ℝ) = 0.55 := by
+  norm_num
+
+#print axioms CS_complex_S6_Im_ge_06092
+#print axioms CS_complex_S6_Im_below_S4_gap
+
 end Door3CellSuppliers

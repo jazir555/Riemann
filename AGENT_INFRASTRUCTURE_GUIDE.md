@@ -5506,7 +5506,13 @@ sorry-free infrastructure and the complete commit ledger above.
   in-file fix: `hG.comp hHalf` → `HasDerivAt.comp s hG hHalf` (Mathlib
   comp takes point explicitly). Verifies UZ934 `:999`, gamma `:1084` +
   `:1106` + `:1140`, zeta `:1168`; axioms standard, no sorryAx.
-  Grep-clean. DG/DZ numerals stay open by design. Lock RELEASED.
+  Grep-clean. DG/DZ numerals stay open by design.   Lock RELEASED.
+- 2026-09-22 ETA-SLOW (background `ses_f3775cee4`, proof-only, grep-clean):
+  S6-Im step honest stall — `CS_complex_S6_Im_ge_06092 :4362` (0.6092
+  via S4-Im 1.1592 + Im5/Im6 negatives, gain 0.2112 over prior 0.3980,
+  true ~1.42) + `CS_complex_S6_Im_below_S4_gap :4372` (0.55 below S4).
+  0.6092<1.1592 → no Pythagoras feed; slow stays 1.94, shortfall
+  0.6514. Next: S8 terms or Re-route (ETA-S8).
 - 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
   edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
   14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,
