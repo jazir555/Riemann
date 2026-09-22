@@ -2692,7 +2692,7 @@ Unfolds `Complex.GammaSeq s 2 = (2 : ℂ) ^ s * 2 / (s * (s + 1) * (s + 2))`
 unfolding was not instantiated this turn. -/
 def premGamma_E06_GammaSeq2_link : Prop :=
   ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2‖ =
-    ‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ * 2 /
+    ‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ * 2 /
       (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖)
@@ -2748,7 +2748,7 @@ at E06 shifted `s = w_E06 + 1`, extending the `N = 2` spec shape
 unfolding was not instantiated this turn. -/
 def premGamma_E06_GammaSeq4_link : Prop :=
   ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 4‖ =
-    ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ * 24 /
+    ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ * 24 /
       (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
@@ -2759,7 +2759,7 @@ def premGamma_E06_GammaSeq4_link : Prop :=
 `‖(4 : ℂ) ^ s‖ ≤ 5.26` at E06 shifted `s` (TRUE `4 ^ 1.1975 ≈ 5.25977`).
 Feeds the Re-ceiling numerator `5.26 * 24 = 126.24` once `link` + Re lowers land. -/
 def premGamma_E06_cpow4_upper_needed : Prop :=
-  ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (5.26 : ℝ)
 
 /-- Missing rate L2 at `N = 4` (filed, not proved): quantitative `GammaSeq`
@@ -2810,11 +2810,11 @@ E06 shifted `s = w_E06 + 1` (`Re s = 1.1975`): base `2` for `N = 2`
 LOWER + denominator norm uppers + `premGamma_E06_GammaSeq4_rate_needed` —
 that lower is NOT claimed here. -/
 def premGamma_E06_Nladder_cpow_uppers_needed : Prop :=
-  (‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  (‖(((2 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (2.30 : ℝ)) ∧
-  (‖(((3 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  (‖(((3 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (3.73 : ℝ)) ∧
-  (‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  (‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (5.26 : ℝ))
 
 /-! ## GAMMA-N4C: floor-truth triage + E05 N-ladder (filed, not fixed).
@@ -2900,7 +2900,7 @@ at E05 shifted `s = w_E05 + 1`, extending the `N = 2` spec shape
 unfolding was not instantiated this turn. Filed ONLY at first-clearing `N = 4`. -/
 def premGamma_E05_GammaSeq4_link : Prop :=
   ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 4‖ =
-    ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ * 24 /
+    ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ * 24 /
       (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
         ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
@@ -2912,7 +2912,7 @@ def premGamma_E05_GammaSeq4_link : Prop :=
 `Re` as E06). Feeds the Re-ceiling numerator `5.26 * 24 = 126.24` once `link` +
 Re lowers land. Filed ONLY at first-clearing `N = 4`. -/
 def premGamma_E05_cpow4_upper_needed : Prop :=
-  ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)))‖ ≤
+  ‖(((4 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
     (5.26 : ℝ)
 
 /-- Missing rate L2 at `N = 4` (filed, not proved): quantitative `GammaSeq`

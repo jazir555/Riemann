@@ -3218,4 +3218,27 @@ theorem sSCUT_S8_add_eta9_Re_ge :
   have h9 := sSCUT_eta9_Re_ge
   linarith
 
+/-- `0.3 ≤ 10^(-1/2)` (inverse of the quadratic root step
+`10^(1/2) ≤ 10/3`; mirror of `sSCUT_rpow8_neg_ge`). -/
+theorem sSCUT_rpow10_neg_ge_03 : (0.3 : ℝ) ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle : (10 : ℝ) ^ (1 / 2 : ℝ) ≤ (10 / 3 : ℝ) := by
+    have hpow : (10 : ℝ) ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by norm_num
+    have hpow' : ((((10 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 10 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+      have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+      rw [e, Real.rpow_one]
+    have hle2 : ((((10 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)))
+        ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by
+      rw [hpow']
+      exact hpow
+    exact le_of_pow_le_pow_left₀ (by norm_num)
+      (Real.rpow_pos_of_pos (by norm_num) _).le hle2
+  have hpos : (0 : ℝ) < (10 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (10 : ℝ) ^ (-(1 / 2 : ℝ)) = (((10 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 10)]
+  rw [hneg, show (0.3 : ℝ) = ((10 / 3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
 end Door3PilotR00Zeta

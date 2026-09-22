@@ -977,6 +977,40 @@ theorem R02_fullDerivUp_bankedUZ10_of_zetaUpper (DG DZ : ℝ) {s : ℂ}
     APQ APQ' AG AG' (zeta s) (deriv zeta s)
     hVpq hDpq hVG hVZ hDG hDZ (by norm_num) hDG0 hDZ0
 
+/-- Exact banked product feeding the `UZ = 934` deriv shape. -/
+theorem R02_derivUZ934_prod2041724 : (54.65 : ℝ) * 40 * 934 = 2041724 := by
+  norm_num
+
+/-- Banked-`UZ = 934` instance of the full 4-factor DERIV assembly: the bound
+fires as `54.65 * 40 * 934 + 42 * DG * 934 + 42 * 40 * DZ` (UZ-part closes to
+`2041724` by `R02_derivUZ934_prod2041724`, so the bound is finite and closed
+modulo the explicit `DG` / `DZ` caps).
+Mirrors `R02_fullDerivUp_bankedUZ10_of_zetaUpper` token-for-token with
+`UZ := 934`: the `934` premise is re-stated here as the explicit pointwise
+hypothesis `hZ934 : ‖zeta s‖ ≤ 934` (same position/shape as `hZ10`, no import
+of the bridge file — the bridge file imports this file so this file must NOT
+import the bridge). The bridge theorem `R02_zetaVal_934_of_D3`
+(`door3_R02_zeta_bridge.lean:22`) discharges `hZ934` separately on the rect.
+`‖APQ‖ ≤ 42`, `‖APQ'‖ ≤ 54.65`, `‖AG‖ ≤ 40` are discharged on-rect by
+`R02_polyPiVal_cap_disc` / `R02_polyPiDeriv_cap_disc` /
+`R02_gammaVal_cap_disc`; `DG` (Gamma-deriv) and `DZ` (zeta-deriv) stay the
+open explicit premises with nonnegativity. First finite closed 4-factor
+deriv bound modulo `DG` / `DZ`. -/
+theorem R02_fullDerivUp_bankedUZ934_of_zeta934 (DG DZ : ℝ) {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (APQ APQ' AG AG' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ 40)
+    (hDG : ‖AG'‖ ≤ DG) (hDZ : ‖deriv zeta s‖ ≤ DZ)
+    (hDG0 : 0 ≤ DG) (hDZ0 : 0 ≤ DZ)
+    (hZ934 : ‖zeta s‖ ≤ 934) :
+    ‖APQ' * AG * zeta s + APQ * AG' * zeta s + APQ * AG * deriv zeta s‖ ≤
+      54.65 * 40 * 934 + 42 * DG * 934 + 42 * 40 * DZ := by
+  exact R02_fullDerivUp_bankedPQG_shape 934 DG DZ
+    APQ APQ' AG AG' (zeta s) (deriv zeta s)
+    hVpq hDpq hVG hZ934 hDG hDZ (by norm_num) hDG0 hDZ0
+
 /-- Generic `(PQ) * G` deriv upper from value + deriv caps (two-term Leibniz
 norm; `PQ` is treated as one banked factor). -/
 theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)

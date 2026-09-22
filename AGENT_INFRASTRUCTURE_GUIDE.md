@@ -5370,3 +5370,33 @@ sorry-free infrastructure and the complete commit ledger above.
   held it continuously; fast path correctly refused deletion; 2x900s
   GUARD-WAIT timeouts). Standing sweep clause active: WAVE3-ZETA owns
   pilot build-error sweep + next push (WAVE3-ZETA tasked).
+- 2026-09-22 INTEGRATE-GAMMA-PAREN (coordinator, in-flight diff found on
+  disk, grep-clean): 6 one-char paren repairs in
+  `door3_premise_gamma.lean` (`:2692/:2748/:2759/:2810x3/:2900/:2912`,
+  each adds one `)` to close `‖((N:ℂ)^s)‖` before `*k/`; extends the 3
+  flagged `:2693/:2749/:2901` to the full N-ladder/cpow-upper family
+  with the same pattern). Scans: zero `sorry`/`admit`/`axiom`-declare,
+  zero `simpa` tactic (only prose/comment mentions). Build UNVERIFIED
+  (no lean/lake per anti-pileup; single-owner rule holds). Next owner:
+  GAMMA-BUILD (first-ever premise_gamma guarded build + fix-all sweep).
+- 2026-09-22 INTEGRATE-SCUT12 (coordinator, in-flight diff found on disk,
+  grep-clean): `sSCUT_rpow10_neg_ge_03 :3221` (`0.3<=10^(-1/2)` via
+  `10^(1/2)<=10/3` quadratic-root step + `inv_le_inv₀`, mirror of
+  `sSCUT_rpow8_neg_ge`; `10<=(10/3)^2` by `norm_num`, `le_of_pow_le_pow_left₀`
+  for the root). Concretizes SCUT11 payoff: `r10/2>=0.15`, so
+  `S8+eta9 Re>=-3529/1050+0.15`. Numeral sound (sqrt10~=3.162<=3.333).
+  Build UNVERIFIED (proof-only lane). SCUT13 tasked (S8+eta9+eta7
+  shard reassembly with +0.15/+0.27 gains vs 21/10 bar).
+- 2026-09-22 INTEGRATE-DERIV-FIRE (coordinator, in-flight diff found on
+  disk, grep-clean): UZ=934 fires into the deriv assembly —
+  `R02_derivUZ934_prod2041724 :981` (`54.65*40*934=2041724` by
+  `norm_num`; 54.65*40=2186 exact) +
+  `R02_fullDerivUp_bankedUZ934_of_zeta934 :999` (token mirror of the
+  UZ=10 instance with `hZ934:‖zeta s‖<=934` restated explicitly, NO
+  bridge import — bridge imports this file so the direction must stay
+  one-way; bridge `R02_zetaVal_934_of_D3` discharges `hZ934` on-rect;
+  `‖APQ‖<=42`/`‖APQ'‖<=54.65`/`‖AG‖<=40` discharge on-rect; DG/DZ stay
+  explicit open premises). First FINITE closed 4-factor deriv cap modulo
+  DG/DZ: `2041724+42*DG*934+42*40*DZ`. Build UNVERIFIED (proof-only).
+  Next: DG owner (Gamma-deriv) + DZ owner (zeta-deriv) + DERIV-BUILD
+  (guarded rebuild of ball_advance to verify the new instance).
