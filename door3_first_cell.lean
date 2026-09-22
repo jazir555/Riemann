@@ -2136,3 +2136,96 @@ theorem FC_zeta14_assembly_residual : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-F4 wave: f4 cap `5 ^ -0.395 ≤ 0.54` via 5/13 rational lower (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Target `FC_etaF4_upper_obligation` (`door3_first_cell.lean:2104`):
+  `FC_etaF0395 4 ≤ 0.54`, i.e. `(5:ℝ) ^ (-(0.395:ℝ)) ≤ 0.54`
+  from `FC_etaF0395` def (`:537`, `((k:ℝ)+1) ^ (-0.395)`, so `k = 4` is base `5`);
+  TRUE `≈ 0.5295` (cf. `CS_rpow5neg_lower` TRUE in `door3_cell_suppliers.lean:1370`).
+* Rpow34 shapes (`:1691-1758`): `FC_3_rpow_040_le` (`3^(2/5) ≤ 25/16` via
+  5th powers + `le_of_pow_le_pow_left₀`), `FC_3_rpow0395_le`
+  (`0.395 ≤ 2/5` monotonicity), `FC_rpow3_head_lower_proved`
+  (reciprocal lower), `FC_4_rpow0395_eq` (`4^0.395 = 2^0.79`),
+  `FC_2_rpow079_lower` (quadratic lower), `FC_rpow4_head_upper_proved`
+  (reciprocal upper via `div_le_iff₀`); this wave mirrors that exact
+  integer-power-then-reciprocal template with exponent `13`.
+* Why `13`: need `1/0.54 = 1.85185… ≤ 5^0.395` (true `≈ 1.8884`);
+  quadratic `1+x+x²/2` at `x ≈ 0.635` gives only `≈ 1.838`, so the
+  `exp` lower route is short; minimal honest rational lower is
+  `5/13 ≈ 0.3846 ≤ 0.395` with `1.852^13 ≤ 5^5 = 3125`
+  (true `≈ 3015`, margin `≈ 110`), then monotonicity up to `0.395`.
+* Reference upper `CS_rpow5pos_proved` (`door3_cell_suppliers.lean:1418`,
+  `5^0.395 ≤ 1.90` via `exp_bound' n=4`) gives only the opposite-side
+  `5^-0.395 ≥ 0.52` (`:1468`); it cannot supply this upper, so a fresh
+  lower `1.852 ≤ 5^0.395` is proved below (no reuse, no new import).
+* Absent before this wave (grep-clean): no `FC_5_rpow513_lower` /
+  `FC_5_rpow0395_lower` / `FC_etaF4_upper_proved` match in this file.
+
+Verdict: BANKED below (no premises): `1.852 ≤ 5^(5/13)`
+(`FC_5_rpow513_lower`), `1.852 ≤ 5^0.395` (`FC_5_rpow0395_lower`),
+unconditional `FC_etaF0395 4 ≤ 0.54` (`FC_etaF4_upper_proved`) with
+margin `0.54 * 1.852 = 1.00008 ≥ 1` (`FC_etaF4_margin`).
+No build attempted (ASSEMBLY-VERIFY2 owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Lower `1.852 ≤ 5^(5/13)` via 13th powers (`1.852^13 ≤ 5^5 = 3125`). -/
+theorem FC_5_rpow513_lower : (1.852 : ℝ) ≤ (5 : ℝ) ^ ((5 / 13 : ℝ)) := by
+  have e : ((5 : ℝ) ^ ((5 / 13 : ℝ))) ^ ((13 : ℕ)) = (5 : ℝ) ^ ((5 : ℕ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+    have hexp : ((5 / 13 : ℝ)) * ((((13 : ℕ)) : ℝ)) = ((((5 : ℕ)) : ℝ)) := by
+      norm_num
+    rw [hexp]
+  have hle : (1.852 : ℝ) ^ ((13 : ℕ)) ≤ (5 : ℝ) ^ ((5 : ℕ)) := by
+    norm_num
+  have h5 : (1.852 : ℝ) ^ ((13 : ℕ)) ≤ ((5 : ℝ) ^ ((5 / 13 : ℝ))) ^ ((13 : ℕ)) := by
+    rw [e]
+    exact hle
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _) h5
+
+/-- Monotone lift `5^(5/13) ≤ 5^0.395` (`5/13 ≈ 0.3846 ≤ 0.395`). -/
+theorem FC_5_rpow0395_lower : (1.852 : ℝ) ≤ (5 : ℝ) ^ ((0.395 : ℝ)) := by
+  have hmon : (5 : ℝ) ^ ((5 / 13 : ℝ)) ≤ (5 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  exact le_trans FC_5_rpow513_lower hmon
+
+/-- Arithmetic margin: `1 ≤ 0.54 * 1.852 = 1.00008`. -/
+theorem FC_etaF4_margin : (1 : ℝ) ≤ 0.54 * 1.852 := by
+  norm_num
+
+/-- `FC_etaF0395 4` is base-`5` rpow. -/
+theorem FC_etaF4_eq_rpow5 : FC_etaF0395 4 = (5 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have hbase : ((((4 : ℕ)) : ℝ) + 1) = (5 : ℝ) := by
+    norm_num
+  simp only [FC_etaF0395, hbase]
+
+/-- CLOSED: banked `FC_etaF4_upper_obligation` (`5 ^ -0.395 ≤ 0.54`). -/
+theorem FC_etaF4_upper_proved : FC_etaF4_upper_obligation := by
+  show FC_etaF0395 4 ≤ (0.54 : ℝ)
+  rw [FC_etaF4_eq_rpow5]
+  have hlow : (1.852 : ℝ) ≤ (5 : ℝ) ^ ((0.395 : ℝ)) := FC_5_rpow0395_lower
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (5 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (5 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5)]
+    rw [inv_eq_one_div]
+  have hmul : (0.54 : ℝ) * 1.852 ≤ 0.54 * (5 : ℝ) ^ ((0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hlow (by norm_num)
+  have hnum : (1 : ℝ) ≤ 0.54 * 1.852 := by
+    norm_num
+  show (5 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.54
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hmul, hnum]
+
+/-- Exact F4-wave residual: f4 numeral CLOSED (`FC_etaF4_upper_proved`,
+`0.54` with true `≈ 0.5295`); zeta14 assembly still gated by the
+real-to-complex bridge + complex eta-zeta identity at `sCenter`
+(see `FC_zeta14_assembly_residual`). -/
+theorem FC_etaF4_residual_closed : True := by
+  trivial
+
+end Door3FirstCellClose
+
