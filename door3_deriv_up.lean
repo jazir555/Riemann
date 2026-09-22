@@ -1280,4 +1280,49 @@ theorem zetaDeriv_leaf_934_of_diffCont
 
 theorem zeta_leaf_934_number : (934 : ℝ) / 0.01 = 93400 := by norm_num
 
+/-! ## 12b. LEAF DiffContOnCl on the 0.01-ball (pole avoided).
+
+Mirror of MID (`dMid_closedBall_re_upper :1059` + `zetaDiffCont_mid_filled :1074` +
+`zetaDiffCont_mid_banked :1087`) and INNER (`dInner_closedBall_re_upper :1175` +
+`zetaDiffCont_inner_filled :1190` + `zetaDiffCont_inner_banked :1203`):
+`dLeaf.re = 0.2`, radius `0.01`, so every `z ∈ closedBall dLeaf 0.01` has
+`z.re ≤ 0.21 < 1`, hence `z ≠ 1`. -/
+
+theorem dLeaf_closedBall_re_upper {z : ℂ}
+    (hz : z ∈ Metric.closedBall dLeaf 0.01) :
+    z.re ≤ (0.21 : ℝ) := by
+  have hdist : dist z dLeaf ≤ (0.01 : ℝ) := Metric.mem_closedBall.mp hz
+  have hnorm : ‖z - dLeaf‖ ≤ (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dLeaf).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf).re| ≤ ‖z - dLeaf‖ := Complex.abs_re_le_norm _
+      _ ≤ 0.01 := hnorm
+  have here : (z - dLeaf).re = z.re - 0.2 := by
+    have e : (z - dLeaf).re = z.re - dLeaf.re := Complex.sub_re z dLeaf
+    rw [e, dLeaf_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  linarith
+
+theorem zetaDiffCont_leaf_filled :
+    DiffContOnCl ℂ riemannZeta (Metric.ball dLeaf 0.01) := by
+  apply DifferentiableOn.diffContOnCl
+  rw [Metric.closure_ball dLeaf (by norm_num : (0.01 : ℝ) ≠ 0)]
+  intro z hz
+  apply (differentiableAt_riemannZeta ?_).differentiableWithinAt
+  intro hcon
+  have hle := dLeaf_closedBall_re_upper hz
+  have e : z.re = 1 := by
+    rw [hcon]
+    exact Complex.one_re
+  linarith
+
+theorem zetaDiffCont_leaf_banked : zetaDiffCont_leaf :=
+  zetaDiffCont_leaf_filled
+
+theorem zetaDeriv_leaf_934_closed :
+    ‖deriv riemannZeta dLeaf‖ ≤ 93400 := by
+  have h := zetaDeriv_leaf_934_of_diffCont zetaDiffCont_leaf_banked
+  rw [zeta_leaf_934_number] at h
+  exact h
+
 end Door3DerivUp
