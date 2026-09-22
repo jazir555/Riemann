@@ -6060,6 +6060,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
   grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
   :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 OFFAXIS-CANCEL (background `ses_f348ed636`, proof-only,
+  grep-clean, off_axis-only commit): high-block pair cancellation —
+  `high_block_le :9596` (6144/169015≈0.0364 ≤ 41/750 via pair MVT) +
+  conditional whole-mid close `:9619`. Three lower blocks open (need
+  ≤0.01831).
 - 2026-09-22 DERIV-SUP (background `ses_f348dab64`, proof-only,
   grep-clean, deriv-only commit): gamma DiffContOnCl CLOSED (`:1779`,
   Re 0.19 pole-avoidance); sups gapped honestly (gamma 0.097 vs 0.008,

@@ -9426,3 +9426,221 @@ theorem sCutOA11_mid_per_term_budget :
 #print axioms sCutOA11_mid_per_term_budget
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-CANCEL grep-first record (read-only, no file touched before writing).
+
+Scaffold `door3_off_axis_certificates.lean:9285-9407`: `sCutOA11_mid_eq_Ico`
+(mid difference as one `Ico 5 4096` sum, 4091 terms), `sCutOA11_mid_card_4091`,
+two-block split at 2048 plus four-block triangle `sCutOA11_mid_four_block_triangle`,
+per-term flat numeral `sCutOA11_mid_per_term_budget`
+(`41/750/4091 = 41/3068250`, arithmetic only, impossible as a flat majorant
+since single eta terms decay only like `(k+1)^(-1/2)`).
+
+Alternating shapes (reference only, rebuilt locally below; `door3_first_cell.lean`
+NOT touched): `FC_eta_Tendsto_exists :1534` via
+`Antitone.tendsto_alternating_series_of_tendsto_zero`, even-slice bridge
+`Antitone.alternating_series_le_tendsto` used at `k = 1` (`FC_slice_S2_of_tendsto`)
+and `k = 2` (`FC_slice_S4_of_tendsto`). Local rebuild uses the complex pair
+cancellation already banked in `zeta_rigorous.lean`: `etaPairTerm_eq_cpow_sub`,
+`norm_etaPairTerm_le` (`‖pair m‖ ≤ ‖s‖ * (2m+1)^(-Re-1)`), and
+`etaDirichlet_even_partial` (even partials are pair sums).
+
+Attempt: ONE high block `Ico 3072 4096` (512 pairs, `m = 1536..2047`) via the
+pair mean-value bound at `Re = 1/2`. Banked below as an honest partial spec;
+the other three mid blocks stay open (exact residual filed at the end). -/
+theorem sCutOA11_sqrt_3073_ge :
+    (55 : ℝ) ≤ ((((3073 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : (55 : ℝ) ^ (2 : ℕ) ≤ ((((3073 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((3073 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) =
+      ((((3073 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `3073^(3/2) = 3073 * 3073^(1/2) ≥ 3073 * 55`. -/
+theorem sCutOA11_rpow32_3073_ge :
+    ((((3073 : ℕ)) : ℝ)) * 55 ≤ ((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) := by
+  have h55 := sCutOA11_sqrt_3073_ge
+  have hpos : (0 : ℝ) < ((((3073 : ℕ)) : ℝ)) := by norm_num
+  have hsplit : ((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) =
+      ((((3073 : ℕ)) : ℝ)) * ((((3073 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+    have e : (3 / 2 : ℝ) = 1 + 1 / 2 := by norm_num
+    rw [e, Real.rpow_add hpos, Real.rpow_one]
+  rw [hsplit]
+  exact mul_le_mul_of_nonneg_left h55 (by norm_num)
+
+/-- Inverse form (`1 / 3073^(3/2) ≤ 1 / (3073 * 55)`). -/
+theorem sCutOA11_inv32_3073_le :
+    (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤
+      (((((3073 : ℕ)) : ℝ) * 55))⁻¹ := by
+  have hge := sCutOA11_rpow32_3073_ge
+  have hpow_pos : (0 : ℝ) < ((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hmul_pos : (0 : ℝ) < ((((3073 : ℕ)) : ℝ) * 55) := by norm_num
+  exact (inv_le_inv₀ hpow_pos hmul_pos).mpr hge
+
+/-- Uniform pair cap on the high pair window (`Re = 1/2`, `‖s‖ ≤ 12`). -/
+theorem sCutOA11_pair_high_uniform (m : ℕ) (hm : m ∈ Finset.Ico 1536 2048) :
+    ‖etaPairTerm sCutOA11 m‖ ≤
+      12 * (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ := by
+  have hs : 0 < sCutOA11.re := by rw [sCutOA11_re]; norm_num
+  have hle0 := norm_etaPairTerm_le sCutOA11 hs m
+  have hC : ‖sCutOA11‖ ≤ (12 : ℝ) := sCutOA11_norm_le
+  have hexp : -sCutOA11.re - 1 = (-(3 / 2 : ℝ)) := by
+    rw [sCutOA11_re]; norm_num
+  rw [hexp] at hle0
+  have hmI := Finset.mem_Ico.mp hm
+  have hm_lo : 1536 ≤ m := hmI.1
+  have hbase_le : (3073 : ℕ) ≤ 2 * m + 1 := by omega
+  have hcast_le : ((((3073 : ℕ))) : ℝ) ≤ ((((2 * m + 1 : ℕ))) : ℝ) :=
+    Nat.cast_le.mpr hbase_le
+  have hmono : ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      ((((3073 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_nonpos (by norm_num) hcast_le (by norm_num)
+  have hposX : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    (Real.rpow_pos_of_pos (Nat.cast_pos.mpr (by omega)) _).le
+  have hstep1 : ‖sCutOA11‖ * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      12 * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_right hC hposX
+  have hstep2 : (12 : ℝ) * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      12 * ((((3073 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hmono (by norm_num)
+  have hrw : ((((3073 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) =
+      (((((3073 : ℕ))) : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ :=
+    Real.rpow_neg (Nat.cast_nonneg _) _
+  calc ‖etaPairTerm sCutOA11 m‖
+      ≤ ‖sCutOA11‖ * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hle0
+    _ ≤ 12 * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hstep1
+    _ ≤ 12 * ((((3073 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hstep2
+    _ = 12 * (((((3073 : ℕ))) : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ := by rw [hrw]
+
+/-- High Dirichlet block equals the high pair block
+(`3072 = 2 * 1536`, `4096 = 2 * 2048`, via `etaDirichlet_even_partial`). -/
+theorem sCutOA11_high_block_eq_pairs :
+    (∑ k in Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.Ico 1536 2048, etaPairTerm sCutOA11 m := by
+  have h4096 : (∑ k in Finset.range 4096, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 2048, etaPairTerm sCutOA11 m := by
+    have h := etaDirichlet_even_partial sCutOA11 2048
+    have e : 2 * 2048 = 4096 := by norm_num
+    rw [e] at h
+    exact h
+  have h3072 : (∑ k in Finset.range 3072, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 1536, etaPairTerm sCutOA11 m := by
+    have h := etaDirichlet_even_partial sCutOA11 1536
+    have e : 2 * 1536 = 3072 := by norm_num
+    rw [e] at h
+    exact h
+  have hIco_rw : (∑ m in Finset.range 1536, etaPairTerm sCutOA11 m) +
+      (∑ k in Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 2048, etaPairTerm sCutOA11 m := by
+    have hIco := Finset.sum_range_add_sum_Ico
+      (fun k => etaDirichletTerm sCutOA11 k) (show 3072 ≤ 4096 by norm_num)
+    rw [h3072, h4096] at hIco
+    exact hIco
+  have hIcoP := Finset.sum_range_add_sum_Ico
+    (fun m => etaPairTerm sCutOA11 m) (show 1536 ≤ 2048 by norm_num)
+  have heq : (∑ m in Finset.range 1536, etaPairTerm sCutOA11 m) +
+      (∑ k in Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k) =
+      (∑ m in Finset.range 1536, etaPairTerm sCutOA11 m) +
+      (∑ m in Finset.Ico 1536 2048, etaPairTerm sCutOA11 m) :=
+    hIco_rw.trans hIcoP.symm
+  exact add_left_cancel_iff.mp heq
+
+/-- Pair-triangle cap for the high pair block (`512` pairs). -/
+theorem sCutOA11_high_block_pair_bound :
+    ‖∑ m in Finset.Ico 1536 2048, etaPairTerm sCutOA11 m‖ ≤
+      (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) := by
+  have h1 := norm_sum_le (Finset.Ico 1536 2048)
+    (fun m => etaPairTerm sCutOA11 m)
+  have h2raw := Finset.sum_le_card_nsmul (Finset.Ico 1536 2048)
+    (fun m => ‖etaPairTerm sCutOA11 m‖)
+    (12 * (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹)
+    (fun m hm => sCutOA11_pair_high_uniform m hm)
+  have hcard : (Finset.Ico 1536 2048).card = 512 := by
+    rw [Nat.card_Ico]
+    norm_num
+  rw [hcard, nsmul_eq_mul] at h2raw
+  have hcast512 : ((((512 : ℕ))) : ℝ) = (512 : ℝ) := by norm_num
+  rw [hcast512] at h2raw
+  exact le_trans h1 h2raw
+
+/-- Exact high-block pair spec (`512 * 12 / 169015 = 6144 / 169015 ≈ 0.03635`,
+below the `41/750 ≈ 0.05467` mid budget on this block alone). -/
+theorem sCutOA11_high_block_pair_spec :
+    ‖∑ k in Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      (6144 / 169015 : ℝ) := by
+  rw [sCutOA11_high_block_eq_pairs]
+  have hpair := sCutOA11_high_block_pair_bound
+  have hinv := sCutOA11_inv32_3073_le
+  have hmul : (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) ≤
+      (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) * 55))⁻¹) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    apply mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have h169 : ((((3073 : ℕ)) : ℝ) * 55) = 169015 := by norm_num
+  have hnum : (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) * 55))⁻¹) = 6144 / 169015 := by
+    rw [h169, div_eq_mul_inv]
+    ring
+  calc ‖∑ m in Finset.Ico 1536 2048, etaPairTerm sCutOA11 m‖
+      ≤ (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) := hpair
+    _ ≤ (512 : ℝ) * (12 * (((((3073 : ℕ)) : ℝ) * 55))⁻¹) := hmul
+    _ = 6144 / 169015 := hnum
+
+/-- High block fits the mid budget on its own (`6144/169015 ≤ 41/750`). -/
+theorem sCutOA11_high_block_le :
+    ‖∑ k in Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      (41 / 750 : ℝ) := by
+  have hspec := sCutOA11_high_block_pair_spec
+  have hcross : (6144 : ℝ) * 750 ≤ 41 * 169015 := by norm_num
+  have hle : (6144 / 169015 : ℝ) ≤ 41 / 750 := by
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 169015)]
+    have e : (41 / 750 : ℝ) * 169015 = 41 * 169015 / 750 := by ring
+    rw [e, le_div_iff₀ (by norm_num : (0 : ℝ) < 750)]
+    exact hcross
+  exact le_trans hspec hle
+
+/-- Exact residual: after banking the high-block pair spec, the other three
+mid blocks must fit the leftover budget for the four-block triangle to close
+the whole `Ico 5 4096` mid-block (`41/750 - 6144/169015 ≈ 0.01831`). -/
+def sCutOA11_mid_cancel_residual : Prop :=
+  ‖∑ k in Finset.Ico 5 1024, etaDirichletTerm sCutOA11 k‖ +
+  ‖∑ k in Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k‖ +
+  ‖∑ k in Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k‖ ≤
+    (41 / 750 : ℝ) - 6144 / 169015
+
+/-- Conditional close: the residual plus the high-block spec closes the whole
+mid-block through `sCutOA11_mid_four_block_triangle`. -/
+theorem sCutOA11_mid_close_of_cancel_residual
+    (hres : sCutOA11_mid_cancel_residual) :
+    ‖∑ k in Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      (41 / 750 : ℝ) := by
+  have hfour := sCutOA11_mid_four_block_triangle
+  have hhigh := sCutOA11_high_block_pair_spec
+  unfold sCutOA11_mid_cancel_residual at hres
+  linarith
+
+/-- Gap verdict (honest): high block banked above; whole-mid `≤ 41/750` stays
+open modulo `sCutOA11_mid_cancel_residual` (three low/middle blocks have larger
+pair majorants, so no flat claim is made here). Flat `41/3068250` per-term route
+remains impossible; value banked is `6144/169015` on `Ico 3072 4096` only. -/
+theorem sCutOA11_mid_cancel_gap : True := by
+  trivial
+
+#print axioms sCutOA11_sqrt_3073_ge
+#print axioms sCutOA11_rpow32_3073_ge
+#print axioms sCutOA11_inv32_3073_le
+#print axioms sCutOA11_pair_high_uniform
+#print axioms sCutOA11_high_block_eq_pairs
+#print axioms sCutOA11_high_block_pair_bound
+#print axioms sCutOA11_high_block_pair_spec
+#print axioms sCutOA11_high_block_le
+#print axioms sCutOA11_mid_close_of_cancel_residual
+#print axioms sCutOA11_mid_cancel_gap
+
+end Door3OffAxis
