@@ -8314,4 +8314,212 @@ theorem CS_S20C_Im_below_slow_gap :
 #print axioms CS_S20C_Im_tail_width
 #print axioms CS_S20C_Im_below_slow_gap
 
+/-! ## S18 Im lower + S20 Im closure (ETA-S18IM, proof-only)
+
+Grep-first (read-only, before writing):
+* S16IM shapes: `CS_cpow15_sCenter_im` / `CS_cpow16_sCenter_im` (token
+  `Complex.exp_im` + `sin` mirrors), `CS_Im15_ge_neg039` / `CS_Im16_le_038`
+  (trig-free caps via `CS_rpow15neg_upper_proved` /
+  `CS_rpow16neg_upper_proved` + `Real.sin_le_one` / `Real.sin_neg`),
+  `CS_S16C_Im_eq` (link), `CS_complex_S16_Im_ge_neg317` (`-3.17` at `:7661`,
+  chains `CS_complex_S8_Im_ge_016` + `CS_S10C_Im_eq` / `CS_S12C_Im_eq` /
+  `CS_S14C_Im_eq` / `CS_S16C_Im_eq`).
+* S18 Re shapes: `CS_cpow17_sCenter_re` / `CS_cpow18_sCenter_re` (cpos splits),
+  `CS_Re17_ge_neg037` / `CS_Re18_le_037` (trig-free caps via
+  `CS_rpow17neg_upper_proved` / `CS_rpow18neg_upper_proved`), `CS_S18C_Re_eq`
+  (link), `CS_complex_S18_Re_ge_neg292` (`-2.92` at `:7130`).
+* Gap confirmed absent: no `CS_S18C_Im_eq`, no `CS_complex_S18_Im_*`
+  (grep-nil); S20 Im conditional `CS_complex_S20_Im_ge_of_S18` (`:8288`)
+  waits on `(CS_S18C).im` base.
+
+Honest Im route (banked windows only, trig-free sin caps; S18 Re `-2.92`
+and S20 Re `-3.27` untouched):
+* `CS_cpow17_sCenter_im` / `CS_cpow18_sCenter_im` (token mirrors of banked
+  `CS_cpow17_sCenter_re` / `CS_cpow18_sCenter_re` with `Complex.exp_im` +
+  `sin`; same `(-sCenter).re = -0.395` / `(-sCenter).im = 6.75` splits).
+* Trig-free Im caps: `Im₁₇ ≥ -0.37` (`r₁₇ ≤ 0.37`, `-1 ≤ sin`),
+  `Im₁₈ ≤ 0.37` (`r₁₈ ≤ 0.37`, `sin ≤ 1`) via banked
+  `CS_rpow17neg_upper_proved` / `CS_rpow18neg_upper_proved` +
+  `Real.sin_le_one` / `Real.sin_neg` only (mirrors `CS_Im15/16`, `CS_Im19/20`).
+* Link: `Im(S₁₈) = Im(S₁₆) + Im₁₇ - Im₁₈` (`CS_S18C_Im_eq`, mirror of
+  `CS_S18C_Re_eq` / `CS_S20C_Im_eq`).
+* Floor: `Im(S₁₈) ≥ -3.17 - 0.37 - 0.37 = -3.91`
+  (`CS_complex_S18_Im_ge_neg391`, chains S16 `-3.17`
+  `CS_complex_S16_Im_ge_neg317`; honest regression by `0.74`).
+* S20 closure: `Im(S₂₀) ≥ -3.91 - 0.37 - 0.35 = -4.63`
+  (`CS_complex_S20_Im_ge_neg463`, chains new S18 `-3.91` through banked
+  conditional `CS_complex_S20_Im_ge_of_S18`; tail width `0.72` banked at
+  `CS_S20C_Im_tail_width`). No residual left on S20 Im conditional.
+* Gaps honest: S18 `-3.91` trails live `slow = 1.94` by `5.85`; S20 `-4.63`
+  trails by `6.57`; best honest stays `1.94`. No force. -/
+
+/-- Cpow imaginary-part split for `17^{-s}` at `sCenter` (token mirror of
+`CS_cpow17_sCenter_re`). -/
+theorem CS_cpow17_sCenter_im : ((((17 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 17) := by
+  have h17pos : (0 : ℝ) < 17 := by norm_num
+  have hxC : ((17 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h17pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((17 : ℝ) : ℂ) = (((Real.log 17 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h17pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 17 : ℝ)) : ℂ)).re = Real.log 17 := Complex.ofReal_re _
+  have hzim : ((((Real.log 17 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 17 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 17 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 17 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 17 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 17 * (-(0.395 : ℝ)))
+      = (17 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h17pos _).symm
+  have hsin : Real.sin (Real.log 17 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 17) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `18^{-s}` at `sCenter` (token mirror of
+`CS_cpow18_sCenter_re`). -/
+theorem CS_cpow18_sCenter_im : ((((18 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 18) := by
+  have h18pos : (0 : ℝ) < 18 := by norm_num
+  have hxC : ((18 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h18pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((18 : ℝ) : ℂ) = (((Real.log 18 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h18pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 18 : ℝ)) : ℂ)).re = Real.log 18 := Complex.ofReal_re _
+  have hzim : ((((Real.log 18 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 18 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 18 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 18 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 18 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 18 * (-(0.395 : ℝ)))
+      = (18 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h18pos _).symm
+  have hsin : Real.sin (Real.log 18 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 18) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- `Im₁₇ ≥ -0.37` (`r₁₇ ≤ 0.37`, `-1 ≤ sin`; mirror of `CS_Im15_ge_neg039`). -/
+theorem CS_Im17_ge_neg037 :
+    (-0.37 : ℝ) ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 17) := by
+  have hr0 : (0 : ℝ) ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (17 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ) := CS_rpow17neg_upper_proved
+  have hsin : (-1 : ℝ) ≤ Real.sin (6.75 * Real.log 17) := by
+    have h := Real.sin_le_one (-(6.75 * Real.log 17))
+    rw [Real.sin_neg] at h
+    linarith
+  have h1 : (17 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 17) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (17 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((17 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.37 : ℝ) ≤ -((17 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Im₁₈ ≤ 0.37` (`r₁₈ ≤ 0.37`, `sin ≤ 1`; mirror of `CS_Im16_le_038`). -/
+theorem CS_Im18_le_037 :
+    (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 18) ≤ (0.37 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (18 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (18 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ) := CS_rpow18neg_upper_proved
+  have hsin : Real.sin (6.75 * Real.log 18) ≤ (1 : ℝ) := Real.sin_le_one _
+  have h1 : (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 18)
+      ≤ (18 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsin hr0
+  have h2 : (18 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (18 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Imaginary-part link for the complex S18 (`Im(S₁₈) = Im(S₁₆) + Im₁₇ - Im₁₈`,
+mirror of `CS_S18C_Re_eq` / `CS_S20C_Im_eq`). -/
+theorem CS_S18C_Im_eq :
+    (CS_S18C).im = (CS_S16C).im
+      + (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 17)
+      - (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 18) := by
+  unfold CS_S18C
+  have h17 : ((17 : ℂ)) = ((((17 : ℝ)) : ℂ)) := by simp
+  have h18c : ((18 : ℂ)) = ((((18 : ℝ)) : ℂ)) := by simp
+  rw [h17, h18c]
+  simp only [Complex.add_im, Complex.sub_im,
+    CS_cpow17_sCenter_im, CS_cpow18_sCenter_im]
+
+/-- Complex-S18 imaginary part `≥ -3.91` (PROVED, unconditional):
+`Im(S₁₈) = Im(S₁₆) + Im₁₇ - Im₁₈ ≥ -3.17 - 0.37 - 0.37 = -3.91`
+(honest trig-free regression vs S16 `-3.17` by `0.74`; chains banked S16 base
+`CS_complex_S16_Im_ge_neg317`). -/
+theorem CS_complex_S18_Im_ge_neg391 :
+    (-3.91 : ℝ) ≤ (CS_S18C).im := by
+  have hEq := CS_S18C_Im_eq
+  have hS16 := CS_complex_S16_Im_ge_neg317
+  have hT17 := CS_Im17_ge_neg037
+  have hT18 := CS_Im18_le_037
+  rw [hEq]
+  linarith
+
+/-- S18 Im tail width (honest floor report): `0.37 + 0.37 = 0.74`. -/
+theorem CS_S18C_Im_tail_width : (0.37 : ℝ) + 0.37 = 0.74 := by
+  norm_num
+
+/-- Honest gap: the new S18 Im `-3.91` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `5.85`; no S18 Im feed closes here. -/
+theorem CS_complex_S18_Im_below_slow_gap :
+    (1.94 : ℝ) - (-3.91 : ℝ) = 5.85 := by
+  norm_num
+
+/-- Unconditional S20 Im floor `≥ -4.63` (PROVED): chains the new S18 base
+`-3.91` (`CS_complex_S18_Im_ge_neg391`) through the banked S20 conditional
+`CS_complex_S20_Im_ge_of_S18` (`-3.91 - 0.37 - 0.35 = -4.63`); this discharges
+the S20 Im conditional — no residual left. -/
+theorem CS_complex_S20_Im_ge_neg463 :
+    (-4.63 : ℝ) ≤ (CS_S20C).im := by
+  have hS18 : (-3.91 : ℝ) ≤ (CS_S18C).im := CS_complex_S18_Im_ge_neg391
+  have h := CS_complex_S20_Im_ge_of_S18 (-3.91) hS18
+  have hnum : (-3.91 : ℝ) - 0.37 - 0.35 = -4.63 := by norm_num
+  linarith
+
+/-- Honest gap: the new S20 Im `-4.63` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `6.57`; no S20 Im feed closes here. -/
+theorem CS_S20C_Im_neg463_below_slow_gap :
+    (1.94 : ℝ) - (-4.63 : ℝ) = 6.57 := by
+  norm_num
+
+#print axioms CS_cpow17_sCenter_im
+#print axioms CS_cpow18_sCenter_im
+#print axioms CS_Im17_ge_neg037
+#print axioms CS_Im18_le_037
+#print axioms CS_S18C_Im_eq
+#print axioms CS_complex_S18_Im_ge_neg391
+#print axioms CS_S18C_Im_tail_width
+#print axioms CS_complex_S18_Im_below_slow_gap
+#print axioms CS_complex_S20_Im_ge_neg463
+#print axioms CS_S20C_Im_neg463_below_slow_gap
+
 end Door3CellSuppliers

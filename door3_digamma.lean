@@ -1186,3 +1186,278 @@ theorem gamLeaf_ratio_shift3 : (7 : ℝ) < (0.061 : ℝ) / (0.008 : ℝ) := by n
 theorem gamMid_ratio_shift1 : (10 : ℝ) < (0.422 : ℝ) / (0.04 : ℝ) := by norm_num
 
 end Door3Digamma
+
+/-! ## 13. Exponential height-decay attempt at Re 0.1 / 0.1975 (append-only).
+
+Grep basis (read before writing):
+- `gamNeed_*` (`door3_digamma.lean:419-425`):
+  `‖Gamma w‖ ≤ 0.002 / 0.008 / 0.04 / 4.5`.
+- Shift-chain quotients (`door3_digamma.lean:1100-1174`):
+  outer shift-3 `≤ 0.032` via `D3SG_gamNeed_outer_shift3_upper`,
+  leaf shift-3 `≤ 0.061` via `D3SG_gamNeed_leaf_shift3_upper`,
+  mid shift-1 `≤ 0.422` fresh via `‖w‖ ≥ |Im|` (`1 / 2.375`).
+  Gaps (`door3_digamma.lean:1176-1186`): `16x / 7.6x / 10.5x`.
+  All three chains use only `‖w‖ ≥ |Im|` lowers, no exponential factor.
+- Banked decay (`door3_stirling_gamma.lean:1305-1307`):
+  `D3SG_decay_sigma : ‖Gamma s‖ ≤ 3 * M * exp(-(1/2) * |s.im|)`
+  for `0 < σ ≤ 1` with `Real.Gamma σ ≤ M`.
+  Real caps citable: `D3SG_Gamma_one_two_le_one` on `[1,2]`.
+- Reflection grep (`door3_stirling_gamma.lean`): no `reflection`,
+  no `Gamma_one_sub`, no `Gamma_mul`, no `sin_pi`; only
+  `Gamma_eq_integral` (`:11`) and Stirling-type decay at rate
+  `1/2` or `1/3` (`:325,602,693,1304`). A reflection rebuild would
+  need a new Mathlib import, out of append-only scope, so it is
+  filed as residual, not attempted.
+
+Value banked here (all proofs closed, Mathlib + file-local only):
+- `wOuter_abs_im / wLeaf_abs_im / wMid_abs_im`: exact `|Im|`.
+- `realGamma_01_le_ten`: `Real.Gamma 0.1 ≤ 10` (mirror of
+  `realGamma_01975_le_six`, `door3_digamma.lean:998-1019`).
+- `gamOuter_decay_inst / gamLeaf_decay_inst / gamMid_decay_inst`:
+  `D3SG_decay_sigma` envelopes `18 * exp(-|Im|/2)` (outer/mid,
+  `M = 6`) and `30 * exp(-|Im|/2)` (leaf, `M = 10`).
+- `expOuter_upper / expLeaf_upper / expMid_upper`: crude exp uppers
+  via `1 + x ≤ exp x` inverted through `exp_add / exp_zero`
+  (no inv-compare lemma needed), then `gamOuter_decay_crude`
+  (`≤ 5.65`), `gamLeaf_decay_crude` (`≤ 11.17`),
+  `gamMid_decay_crude` (`≤ 8.23`) with gap witnesses above needs.
+  These do NOT close `gamNeed`; rate `1/2` with honest `M` is too weak.
+- Honest Stirling-with-remainder shape as Props:
+  `stirlingDecay_*` (`‖Gamma w‖ ≤ 1 * exp(-(pi/2) * |Im|)`) plus
+  `stirlingNumeric_*` (`1 * exp(...) ≤ need`) with closed
+  `stirlingCloses_* : spec → numeric → gamNeed` (`le_trans` only).
+  The specs + numerics stay open; the true `pi/2` rate is not banked.
+
+Residual (exact, still open):
+- `gamNeed_outer / leaf / mid`: need `0.002 / 0.008 / 0.04`;
+  best crude-decay uppers here `5.65 / 11.17 / 8.23`; shift-chain
+  best `0.032 / 0.061 / 0.422`. Closing needs either the true
+  `pi/2` height-decay with tight numeric exp bounds, or deeper
+  shifts with full-modulus lowers.
+- `gamNeed_inner`: dead via block 11, not re-attempted.
+- Reflection functional equation locally rebuilt: needs
+  `Gamma(z) * Gamma(1-z) = pi / sin(pi*z)` in current Mathlib
+  plus `‖sin‖` height growth; not banked, new import needed.
+-/
+
+namespace Door3Digamma
+
+theorem wOuter_abs_im : |wOuter.im| = (4.375 : ℝ) := by
+  have him : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = (-4.375 : ℝ) := rfl
+  rw [wOuter_eq_mk, him]
+  norm_num
+
+theorem wLeaf_abs_im : |wLeaf.im| = (3.375 : ℝ) := by
+  have him : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = (-3.375 : ℝ) := rfl
+  rw [wLeaf_eq_mk, him]
+  norm_num
+
+theorem wMid_abs_im : |wMid.im| = (2.375 : ℝ) := by
+  have him : (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).im = (-2.375 : ℝ) := rfl
+  rw [wMid_eq_mk, him]
+  norm_num
+
+theorem realGamma_01_le_ten : Real.Gamma (0.1 : ℝ) ≤ 10 := by
+  have hpos : (0 : ℝ) < 0.1 := by norm_num
+  have hne : (0.1 : ℝ) ≠ 0 := ne_of_gt hpos
+  have hshift : Real.Gamma (0.1 + 1) = 0.1 * Real.Gamma 0.1 :=
+    Real.Gamma_add_one hne
+  have h1 : (1 : ℝ) ≤ 0.1 + 1 := by norm_num
+  have h2 : 0.1 + 1 ≤ 2 := by norm_num
+  have hcap : Real.Gamma (0.1 + 1) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ h1 h2
+  have hdiv : Real.Gamma (0.1 : ℝ) = Real.Gamma (0.1 + 1) / 0.1 := by
+    rw [eq_div_iff_mul_eq hne]
+    rw [hshift]
+    ring
+  have h1div : Real.Gamma (0.1 + 1) / 0.1 ≤ 1 / 0.1 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hpos))
+  have h10 : (1 : ℝ) / 0.1 ≤ 10 := by
+    rw [div_le_iff₀ hpos]
+    norm_num
+  calc Real.Gamma (0.1 : ℝ) = Real.Gamma (0.1 + 1) / 0.1 := hdiv
+    _ ≤ 1 / 0.1 := h1div
+    _ ≤ 10 := h10
+
+theorem gamOuter_decay_inst :
+    ‖Complex.Gamma wOuter‖ ≤ 3 * 6 * Real.exp (-(1 / 2) * |wOuter.im|) := by
+  have hpos : (0 : ℝ) < 0.1975 := by norm_num
+  have hle1 : (0.1975 : ℝ) ≤ 1 := by norm_num
+  have hre : wOuter.re = (0.1975 : ℝ) := by
+    rw [wOuter_eq_mk]
+  have hM : (0 : ℝ) ≤ 6 := by norm_num
+  exact D3SG_decay_sigma wOuter 0.1975 6 hpos hle1 hre hM realGamma_01975_le_six
+
+theorem gamLeaf_decay_inst :
+    ‖Complex.Gamma wLeaf‖ ≤ 3 * 10 * Real.exp (-(1 / 2) * |wLeaf.im|) := by
+  have hpos : (0 : ℝ) < 0.1 := by norm_num
+  have hle1 : (0.1 : ℝ) ≤ 1 := by norm_num
+  have hre : wLeaf.re = (0.1 : ℝ) := by
+    rw [wLeaf_eq_mk]
+  have hM : (0 : ℝ) ≤ 10 := by norm_num
+  exact D3SG_decay_sigma wLeaf 0.1 10 hpos hle1 hre hM realGamma_01_le_ten
+
+theorem gamMid_decay_inst :
+    ‖Complex.Gamma wMid‖ ≤ 3 * 6 * Real.exp (-(1 / 2) * |wMid.im|) := by
+  have hpos : (0 : ℝ) < 0.1975 := by norm_num
+  have hle1 : (0.1975 : ℝ) ≤ 1 := by norm_num
+  have hre : wMid.re = (0.1975 : ℝ) := by
+    rw [wMid_eq_mk]
+  have hM : (0 : ℝ) ≤ 6 := by norm_num
+  exact D3SG_decay_sigma wMid 0.1975 6 hpos hle1 hre hM realGamma_01975_le_six
+
+theorem expOuter_upper :
+    Real.exp (-(1 / 2) * (4.375 : ℝ)) ≤ 1 / (3.1875 : ℝ) := by
+  have hExp : (1 : ℝ) + 2.1875 ≤ Real.exp (2.1875 : ℝ) :=
+    Real.add_one_le_exp (2.1875 : ℝ)
+  have hExp2 : (3.1875 : ℝ) ≤ Real.exp (2.1875 : ℝ) := by
+    linarith
+  have hAdd : (-(1 / 2 : ℝ)) * 4.375 + 2.1875 = (0 : ℝ) := by
+    norm_num
+  have hMul : Real.exp (-(1 / 2) * (4.375 : ℝ)) * Real.exp (2.1875 : ℝ) = 1 := by
+    have hAE : Real.exp (-(1 / 2) * (4.375 : ℝ)) * Real.exp (2.1875 : ℝ) =
+        Real.exp (-(1 / 2) * (4.375 : ℝ) + 2.1875) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 3.1875 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(1 / 2) * (4.375 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(1 / 2) * (4.375 : ℝ)) * 3.1875 ≤ 1 := by
+    have hMono : Real.exp (-(1 / 2) * (4.375 : ℝ)) * 3.1875 ≤
+        Real.exp (-(1 / 2) * (4.375 : ℝ)) * Real.exp (2.1875 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp2 hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem expLeaf_upper :
+    Real.exp (-(1 / 2) * (3.375 : ℝ)) ≤ 1 / (2.6875 : ℝ) := by
+  have hExp : (1 : ℝ) + 1.6875 ≤ Real.exp (1.6875 : ℝ) :=
+    Real.add_one_le_exp (1.6875 : ℝ)
+  have hExp2 : (2.6875 : ℝ) ≤ Real.exp (1.6875 : ℝ) := by
+    linarith
+  have hAdd : (-(1 / 2 : ℝ)) * 3.375 + 1.6875 = (0 : ℝ) := by
+    norm_num
+  have hMul : Real.exp (-(1 / 2) * (3.375 : ℝ)) * Real.exp (1.6875 : ℝ) = 1 := by
+    have hAE : Real.exp (-(1 / 2) * (3.375 : ℝ)) * Real.exp (1.6875 : ℝ) =
+        Real.exp (-(1 / 2) * (3.375 : ℝ) + 1.6875) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 2.6875 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(1 / 2) * (3.375 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(1 / 2) * (3.375 : ℝ)) * 2.6875 ≤ 1 := by
+    have hMono : Real.exp (-(1 / 2) * (3.375 : ℝ)) * 2.6875 ≤
+        Real.exp (-(1 / 2) * (3.375 : ℝ)) * Real.exp (1.6875 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp2 hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem expMid_upper :
+    Real.exp (-(1 / 2) * (2.375 : ℝ)) ≤ 1 / (2.1875 : ℝ) := by
+  have hExp : (1 : ℝ) + 1.1875 ≤ Real.exp (1.1875 : ℝ) :=
+    Real.add_one_le_exp (1.1875 : ℝ)
+  have hExp2 : (2.1875 : ℝ) ≤ Real.exp (1.1875 : ℝ) := by
+    linarith
+  have hAdd : (-(1 / 2 : ℝ)) * 2.375 + 1.1875 = (0 : ℝ) := by
+    norm_num
+  have hMul : Real.exp (-(1 / 2) * (2.375 : ℝ)) * Real.exp (1.1875 : ℝ) = 1 := by
+    have hAE : Real.exp (-(1 / 2) * (2.375 : ℝ)) * Real.exp (1.1875 : ℝ) =
+        Real.exp (-(1 / 2) * (2.375 : ℝ) + 1.1875) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 2.1875 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(1 / 2) * (2.375 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(1 / 2) * (2.375 : ℝ)) * 2.1875 ≤ 1 := by
+    have hMono : Real.exp (-(1 / 2) * (2.375 : ℝ)) * 2.1875 ≤
+        Real.exp (-(1 / 2) * (2.375 : ℝ)) * Real.exp (1.1875 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp2 hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem gamOuter_decay_crude : ‖Complex.Gamma wOuter‖ ≤ (5.65 : ℝ) := by
+  have hDec := gamOuter_decay_inst
+  rw [wOuter_abs_im] at hDec
+  have hExp := expOuter_upper
+  have hMono : 3 * 6 * Real.exp (-(1 / 2) * (4.375 : ℝ)) ≤
+      3 * 6 * (1 / (3.1875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 6 * (1 / (3.1875 : ℝ)) ≤ (5.65 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamLeaf_decay_crude : ‖Complex.Gamma wLeaf‖ ≤ (11.17 : ℝ) := by
+  have hDec := gamLeaf_decay_inst
+  rw [wLeaf_abs_im] at hDec
+  have hExp := expLeaf_upper
+  have hMono : 3 * 10 * Real.exp (-(1 / 2) * (3.375 : ℝ)) ≤
+      3 * 10 * (1 / (2.6875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 10 * (1 / (2.6875 : ℝ)) ≤ (11.17 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamMid_decay_crude : ‖Complex.Gamma wMid‖ ≤ (8.23 : ℝ) := by
+  have hDec := gamMid_decay_inst
+  rw [wMid_abs_im] at hDec
+  have hExp := expMid_upper
+  have hMono : 3 * 6 * Real.exp (-(1 / 2) * (2.375 : ℝ)) ≤
+      3 * 6 * (1 / (2.1875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 6 * (1 / (2.1875 : ℝ)) ≤ (8.23 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamOuter_decay_gap : (0.002 : ℝ) < (5.65 : ℝ) := by norm_num
+
+theorem gamLeaf_decay_gap : (0.008 : ℝ) < (11.17 : ℝ) := by norm_num
+
+theorem gamMid_decay_gap : (0.04 : ℝ) < (8.23 : ℝ) := by norm_num
+
+def stirlingDecay_outer : Prop :=
+  ‖Complex.Gamma wOuter‖ ≤ 1 * Real.exp (-(Real.pi / 2) * |wOuter.im|)
+
+def stirlingDecay_leaf : Prop :=
+  ‖Complex.Gamma wLeaf‖ ≤ 1 * Real.exp (-(Real.pi / 2) * |wLeaf.im|)
+
+def stirlingDecay_mid : Prop :=
+  ‖Complex.Gamma wMid‖ ≤ 1 * Real.exp (-(Real.pi / 2) * |wMid.im|)
+
+def stirlingNumeric_outer : Prop :=
+  1 * Real.exp (-(Real.pi / 2) * |wOuter.im|) ≤ (0.002 : ℝ)
+
+def stirlingNumeric_leaf : Prop :=
+  1 * Real.exp (-(Real.pi / 2) * |wLeaf.im|) ≤ (0.008 : ℝ)
+
+def stirlingNumeric_mid : Prop :=
+  1 * Real.exp (-(Real.pi / 2) * |wMid.im|) ≤ (0.04 : ℝ)
+
+theorem stirlingCloses_outer
+    (hSpec : stirlingDecay_outer) (hNum : stirlingNumeric_outer) :
+    gamNeed_outer := by
+  unfold gamNeed_outer
+  unfold stirlingDecay_outer at hSpec
+  unfold stirlingNumeric_outer at hNum
+  exact le_trans hSpec hNum
+
+theorem stirlingCloses_leaf
+    (hSpec : stirlingDecay_leaf) (hNum : stirlingNumeric_leaf) :
+    gamNeed_leaf := by
+  unfold gamNeed_leaf
+  unfold stirlingDecay_leaf at hSpec
+  unfold stirlingNumeric_leaf at hNum
+  exact le_trans hSpec hNum
+
+theorem stirlingCloses_mid
+    (hSpec : stirlingDecay_mid) (hNum : stirlingNumeric_mid) :
+    gamNeed_mid := by
+  unfold gamNeed_mid
+  unfold stirlingDecay_mid at hSpec
+  unfold stirlingNumeric_mid at hNum
+  exact le_trans hSpec hNum
+
+end Door3Digamma
