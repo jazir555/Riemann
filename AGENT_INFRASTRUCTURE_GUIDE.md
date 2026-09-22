@@ -5965,6 +5965,11 @@ sorry-free infrastructure and the complete commit ledger above.
   `h3_transport_of_shifted_disc :623` (conditional transport) + GAP
   `:638` (G1 Gauss disc at w+N [Mathlib TODO] + G2 log-shift link
   [needs Binet]). H1/H2/H3-G1/G2 open; M1 banked.
+- 2026-09-22 WENDEL-G1 (background `ses_f34eee042`, proof-only,
+  grep-clean, wendel-only commit): G1 filed as explicit Prop
+  (`G1_outerN8_prop`, Gauss disc at w+8 needs Mathlib-TODO integral +
+  real→complex move blocked by Im -4.375). H1/H2/H3-G1/G2 all open;
+  transport banked.
 - 2026-09-22 CUTL-BALL (background `ses_f34f3a726`, proof-only,
   grep-clean): ball-sup GAP structural — `cutL10_thinRect_tightened_gap
   :1438` (center 0.02632 covers 0.0234; ball 12.864≤12.87; loosest zeta

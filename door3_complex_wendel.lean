@@ -647,6 +647,67 @@ neither G1 nor G2 is banked, so H3 is NOT proved here. H2 not attempted (strictl
 farther: Binet zero feeders). No `sorry`/`admit`/`axiom`; no new imports.
 -/
 
+/-! ## 12. WENDEL-G1 attempt (PROOF-ONLY, FENCED, no build): verdict GAP, filed without force.
+
+Target (ONE large-Re point): `wOuter + 8 = mk 8.1975 (-4.375)` (Re 8.1975 > 0,
+same Im as `wOuter`; matches `door3_digamma` shift `N = 8` landing Re ~ 8.1).
+Desired G1 disc: `‖digamma (wOuter+8) - (log (wOuter+8) - 1/(2*(wOuter+8)))‖ ≤ rN`
+with `rN = C/‖wOuter+8‖^2` for explicit `C`.
+
+Integral-rep greps (before edit, this turn):
+- `Complex.GammaIntegral` def + `Complex.Gamma_eq_integral` +
+  `Real.Gamma_eq_integral` + `tendsto_partialGamma`:
+  `Mathlib/Analysis/SpecialFunctions/Gamma/Basic.lean:110,149,318`
+  (Gamma ONLY; indefinite `partialGamma` + limit to `GammaIntegral`).
+- `Complex.digamma` def `:= logDeriv Gamma`:
+  `Mathlib/Analysis/SpecialFunctions/Gamma/Digamma.lean:39`;
+  `digamma_def:41`, `digamma_apply_add_one:55`, `meromorphic_digamma:61`;
+  TODO `Digamma.lean:31` "Prove Gauss integral representation of digamma".
+  Zero hits for a digamma integral rep (no `GammaIntegral`-analogue for psi).
+- `BohrMollerup.logGammaSeq`:
+  `Mathlib/Analysis/SpecialFunctions/Gamma/BohrMollerup.lean:140`
+  (real-only, qualitative limit, no rate, no complex `logGamma`, no Binet).
+- Real secant banked: `door3_psi_slope.lean:99-114` (`slopeS/loBound/hiBound/midPt/radPt`)
+  + slope bounds; `door3_psi_slope.lean:37-44,56-59,350-366` explicitly bars
+  complex-`w` use (no complex log-Gamma convexity, no psi bridge).
+- Recurrence feeder banked: `Complex.digamma_apply_add_one` reused
+  `door3_digamma.lean:184-185,204-206`, `door3_complex_wendel.lean:619-621`;
+  transports a disc down but does not create the large-Re disc.
+
+Why recurrence + real secant does NOT honestly close G1 here:
+1. Recurrence shifts `psi w <-> psi (w+N)` exactly but needs the large-Re disc
+   as premise (`h3_transport_of_shifted_disc` above); it cannot manufacture
+   `‖psi (w+N) - cN‖ ≤ rN`.
+2. Real secant controls `(logG (X+h) - logG (X-h))/(2*h)` at real `X ~ 8.1`
+   with zero Im; `wOuter+8` has Im `-4.375`; no banked lemma moves a real
+   secant bound to a `Complex.digamma` disc at nonzero Im
+   (PSI-SLOPE M3 open; this file section 9 H1 open).
+3. Gamma-integral reps bound `‖Gamma‖` (upper-only `D3SG_Gamma_norm_le_real`),
+   not psi; differentiating under the integral to reach psi needs the missing
+   Gauss psi rep + log-Gamma remainder chain (over budget).
+
+Verdict: GAP (no force). No `sorry`/`admit`/`axiom`/`simpa`; no new imports;
+no other files touched.
+
+Exact missing piece G1 (formal shape, filed as Prop, NOT claimed):
+`G1_outerN8_prop C` below. Needs Gauss integral rep of `Complex.digamma`
+(Mathlib TODO `Digamma.lean:31`) + Stirling remainder.
+
+Note (not claimed as G1, out-of-scope provenance, for coordinator):
+`Zeta23/GammaFacts/StirlingVert.lean:483-484` `digamma_stirling` proves
+`‖psi w - log w + (1/2)/w‖ ≤ 3/Im^2` for `0 < Re w`, `1/2 ≤ |Im w|`
+via DigammaSeries (not Gauss integral), which would apply at `wOuter+8`
+(`|Im| = 4.375`) with radius `3/4.375^2` -- but denominator is `Im^2` not
+`‖w‖^2`, and importing `Zeta23.GammaFacts.StirlingVert` is outside this
+file's `Mathlib + two leaves` DAG and outside the fenced
+Gauss-integral / recurrence+secant brief, so NOT used here.
+-/
+
+noncomputable def G1_outerN8_prop (C : ℝ) : Prop :=
+  ‖Complex.digamma (wOuter + (8 : ℂ)) -
+    (Complex.log (wOuter + (8 : ℂ)) - (1 : ℂ) / (2 * (wOuter + (8 : ℂ))))‖ ≤
+    C / ‖wOuter + (8 : ℂ)‖ ^ 2
+
 This file was written without running any build; it is not machine-checked.
 -/
 
