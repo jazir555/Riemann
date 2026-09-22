@@ -970,3 +970,63 @@ G4 assembly: `VEta = 168`, `C0 = 3`, `C1 = 2`, `C2 = 31` above are banked;
 the combined `‖deriv zeta s‖ ≤ (‖etaDerivVal‖ * C0 + VEta * C1) * C2`
 is not stated until G2/G3 close.
 -/
+
+/-- DNUM numeral `Deta = 8 * (π ^ 2 / 6) ≤ 13.2` via `Real.pi_lt_d4`.
+
+Grepped before writing:
+* `Real.pi_lt_d4 : Real.pi < 3.1416` (`Mathlib/Analysis/Real/Pi/Bounds.lean`);
+* `Real.pi_pos` for nonnegativity;
+* `pow_lt_pow_left₀` for the square monotonicity.
+Stated residual: none for this numeral — `3.1416 ^ 2 = 9.86965056`,
+`8 * (9.86965056 / 6) = 13.15953408 ≤ 13.2` closed by `norm_num`. -/
+theorem etaDerivDeta_num_le :
+    8 * (Real.pi ^ 2 / 6) ≤ (13.2 : ℝ) := by
+  have hpi := Real.pi_lt_d4
+  have hpi_nn : (0 : ℝ) ≤ Real.pi := le_of_lt Real.pi_pos
+  have hsq : Real.pi ^ 2 < (3.1416 : ℝ) ^ 2 :=
+    pow_lt_pow_left₀ hpi_nn hpi (by norm_num)
+  have hdiv : Real.pi ^ 2 / 6 < (3.1416 : ℝ) ^ 2 / 6 := by
+    linarith
+  have hmul : 8 * (Real.pi ^ 2 / 6) < 8 * (((3.1416 : ℝ) ^ 2 / 6)) := by
+    linarith
+  have hcap : 8 * (((3.1416 : ℝ) ^ 2 / 6)) ≤ (13.2 : ℝ) := by
+    norm_num
+  exact le_trans (le_of_lt hmul) hcap
+
+/-- DNUM assembly on the majorant disc: `‖∑' m, etaDerivPairTerm y m‖ ≤ Deta`.
+
+Grepped before writing:
+* `Summable.tsum_le_tsum` (`door3_eta_prime.lean:228`, `:780-788`);
+* `norm_tsum_le_tsum_norm` (`Mathlib/Analysis/Normed/Group/InfiniteSum.lean:149`);
+* `Summable.of_norm_bounded` (`door3_eta_prime.lean:501-504`);
+* caps `etaConv_upper_R02 :845`, `etaVal_upper_R02 :877`,
+  `etaConvDeriv_bound_R02 :901`, `etaConvInvSq_bound_R02 :929` (DZNUM route,
+  not needed for this Deta assembly);
+* dominator value `etaDerivDominator_tsum_eq :769`,
+  majorant tsum `etaDerivMajorant_tsum_le :780`.
+No missing premise: norm-summability is closed locally via
+`Summable.of_norm_bounded` with `etaDerivMajorant_summable`. -/
+theorem etaDeriv_tsum_norm_le_Deta (y : ℂ)
+    (hy : y ∈ Metric.ball etaMajCenter etaMajRadius) :
+    ‖∑' m : ℕ, etaDerivPairTerm y m‖ ≤ 8 * (Real.pi ^ 2 / 6) := by
+  have hpoint : ∀ m : ℕ, ‖etaDerivPairTerm y m‖ ≤ etaDerivMajorant m :=
+    fun m => etaDerivMajorant_bound m y hy
+  have hFnorm : Summable (fun m : ℕ => ‖etaDerivPairTerm y m‖) := by
+    have hdom : ∀ m : ℕ, ‖(‖etaDerivPairTerm y m‖ : ℝ)‖ ≤ etaDerivMajorant m := by
+      intro m
+      rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+      exact hpoint m
+    exact Summable.of_norm_bounded etaDerivMajorant_summable hdom
+  have h1 : ‖∑' m : ℕ, etaDerivPairTerm y m‖ ≤
+      ∑' m : ℕ, ‖etaDerivPairTerm y m‖ :=
+    norm_tsum_le_tsum_norm hFnorm
+  have h2 : (∑' m : ℕ, ‖etaDerivPairTerm y m‖) ≤
+      ∑' m : ℕ, etaDerivMajorant m :=
+    Summable.tsum_le_tsum hpoint hFnorm etaDerivMajorant_summable
+  exact le_trans h1 (le_trans h2 etaDerivMajorant_tsum_le)
+
+/-- DNUM numeral assembly: `‖∑' m, etaDerivPairTerm y m‖ ≤ 13.2` on the disc. -/
+theorem etaDeriv_tsum_norm_le_132 (y : ℂ)
+    (hy : y ∈ Metric.ball etaMajCenter etaMajRadius) :
+    ‖∑' m : ℕ, etaDerivPairTerm y m‖ ≤ (13.2 : ℝ) :=
+  le_trans (etaDeriv_tsum_norm_le_Deta y hy) etaDerivDeta_num_le

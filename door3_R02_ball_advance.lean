@@ -1524,4 +1524,123 @@ def R02_DZetaPair_residual_spec : Prop :=
 
 #print axioms R02_DZetaPair_quotient_of_caps
 
+/-! ## R02 eta-worst summability attempt (DZETA2 residual, BALLADV-R02SUM).
+
+Grep record (read-only, no new import, cycle-safe):
+* target `R02_etaWorstMajorant :1411`, this file: worst-case eta-pair majorant
+  with `‖s‖ → 8.29` (`R02_etaWorst_normSq_le_829`) and worst-case exponent
+  `0.05` (smallest `s.re` on the R02-disc `s`-rect).
+* majorant shapes `door3_eta_prime.lean`: `etaDerivBound :46`
+  (per-term RHS), `etaDerivMajorant :392` (disc uniform majorant, exponent
+  `5/2`, coeff `7/2`), `etaDerivMajorant_bound :403` (pointwise link),
+  `etaDerivMajorant_summable_of_dom :501` (conditional wrapper),
+  `etaDerivDominator :508` (`8 / (m+1)^2`), `etaDerivDominator_summable :531`,
+  `etaDerivMajorant_summable :729` (unconditional, disc only),
+  `etaDerivMajorant_tsum_le :780` (`∑ ≤ 8 * (π^2/6)`, disc only).
+* DZETA2 residual specs, this file: `R02_Deta_missingNumeral_spec :1427`
+  (`∃ Deta, 0 ≤ Deta ∧ Summable R02_etaWorstMajorant ∧ tsum ≤ Deta`),
+  `R02_DZetaPair_residual_spec :1515` (quotient residual).
+
+Verdict this turn (honest, nothing forced):
+* `Summable R02_etaWorstMajorant` is NOT closed unconditionally: it needs a
+  fresh pure-power dominator at decay `1.05` with a log-factor comparison,
+  and no such dominator plus p-series fact is banked in-tree for exponent
+  `0.05`. The disc bank (`etaDerivMajorant_summable :729` /
+  `etaDerivMajorant_tsum_le :780`, exponent `5/2`) does NOT transfer: the
+  R02 exponent `-1.05` dominates `-3.5` (`R02_etaWorst_exponent_gap`) and the
+  R02 coeff `8.29` dominates `7/2` (`R02_etaWorst_coeff_above_disc`), so the
+  disc dominator `8/(m+1)^2` does not dominate the R02 majorant termwise.
+* Hence no tsum numeral is closed either; the tsum gap stays
+  `R02_Deta_missingNumeral_spec :1427`.
+* What IS banked here: nonnegativity (`R02_etaWorst_nonneg`), norm equation
+  (`R02_etaWorst_norm_eq`), the conditional wrapper
+  (`R02_etaWorst_summable_of_dom`, mirror of `:501`), the conditional tsum
+  comparison (`R02_etaWorst_tsum_le_of_dom`, mirror of `:785`), the two
+  `ℝ` non-transfer witnesses above, and the exact dominator blocker
+  (`R02_etaWorst_dominator_missing_spec`). Once a dominator is supplied,
+  `Deta := ∑' m, R02_etaWorstMajorant m` closes `:1427`.
+-/
+
+/-- Worst-case majorant is pointwise nonnegative (mirror of the banked
+`etaDerivMajorant_nonneg` shape with coeff `8.29`). -/
+theorem R02_etaWorst_nonneg (m : ℕ) : 0 ≤ R02_etaWorstMajorant m := by
+  unfold R02_etaWorstMajorant
+  have hApos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hB1le : (1 : ℝ) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 2)
+  have hAB : ((((2 * m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 2 * m + 1 ≤ 2 * m + 2)
+  have hlogB_nn : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Real.log_nonneg hB1le
+  have hlog_mono : Real.log ((((2 * m + 1 : ℕ)) : ℝ)) ≤
+      Real.log ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Real.log_le_log hApos hAB
+  have hDnn : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+      Real.log ((((2 * m + 1 : ℕ)) : ℝ)) := sub_nonneg.mpr hlog_mono
+  have hr1nn : 0 ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ) - 1) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hr2nn : 0 ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have h1 : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ) - 1) := by
+    exact mul_nonneg (mul_nonneg hlogB_nn (by norm_num)) hr1nn
+  have h2 : 0 ≤ (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+      Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+      ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ)) :=
+    mul_nonneg hDnn hr2nn
+  exact add_nonneg h1 h2
+
+/-- Norm equation for the nonnegative worst-case majorant. -/
+theorem R02_etaWorst_norm_eq (m : ℕ) :
+    ‖R02_etaWorstMajorant m‖ = R02_etaWorstMajorant m := by
+  rw [Real.norm_eq_abs, abs_of_nonneg (R02_etaWorst_nonneg m)]
+
+/-- Conditional summability wrapper (mirror of
+`etaDerivMajorant_summable_of_dom`, `door3_eta_prime.lean:501`): any norm
+dominator `B` discharges `Summable R02_etaWorstMajorant`. -/
+theorem R02_etaWorst_summable_of_dom (B : ℕ → ℝ) (hB : Summable B)
+    (hdom : ∀ m : ℕ, ‖R02_etaWorstMajorant m‖ ≤ B m) :
+    Summable R02_etaWorstMajorant :=
+  Summable.of_norm_bounded hB hdom
+
+/-- Conditional tsum comparison (mirror of the `:785` calc step): under a
+pointwise dominator the R02 tsum is bounded by the dominator tsum. -/
+theorem R02_etaWorst_tsum_le_of_dom (B : ℕ → ℝ) (hB : Summable B)
+    (hSum : Summable R02_etaWorstMajorant)
+    (hle : ∀ m : ℕ, R02_etaWorstMajorant m ≤ B m) :
+    ∑' m : ℕ, R02_etaWorstMajorant m ≤ ∑' m : ℕ, B m :=
+  Summable.tsum_le_tsum hle hSum hB
+
+/-- Exponent non-transfer witness (`ℝ` identity): the R02 decay `-1.05`
+sits strictly above the disc decay `-3.5`, so R02 terms decay slower. -/
+theorem R02_etaWorst_exponent_gap :
+    (-(5 / 2 : ℝ) - 1) < (-(0.05 : ℝ) - 1) := by
+  norm_num
+
+/-- Coefficient non-transfer witness (`ℝ` identity): `8.29` dominates the
+disc coeff `7/2` on the log piece. -/
+theorem R02_etaWorst_coeff_above_disc : (7 / 2 : ℝ) < 8.29 := by
+  norm_num
+
+/-- Exact dominator blocker (filed, not fixed): existence of a summable norm
+dominator for `R02_etaWorstMajorant`. Not satisfiable this turn: no
+pure-power dominator at decay `1.05` with log-factor comparison plus
+p-series fact is banked in-tree for exponent `0.05` (same shape as the open
+`B` premise of `etaDerivMajorant_summable_of_dom` before `:508/:531`);
+the disc dominator `8/(m+1)^2` does not dominate here by the two witnesses
+above. Supplying this blocker plus `R02_etaWorst_summable_of_dom` banks
+`Summable R02_etaWorstMajorant`, and then
+`Deta := ∑' m, R02_etaWorstMajorant m` closes
+`R02_Deta_missingNumeral_spec :1427`. -/
+def R02_etaWorst_dominator_missing_spec : Prop :=
+  ∃ (B : ℕ → ℝ), Summable B ∧ ∀ m : ℕ, ‖R02_etaWorstMajorant m‖ ≤ B m
+
+#print axioms R02_etaWorst_nonneg
+#print axioms R02_etaWorst_norm_eq
+#print axioms R02_etaWorst_summable_of_dom
+#print axioms R02_etaWorst_tsum_le_of_dom
+#print axioms R02_etaWorst_exponent_gap
+#print axioms R02_etaWorst_coeff_above_disc
+
 end Door3R02BallAdvance

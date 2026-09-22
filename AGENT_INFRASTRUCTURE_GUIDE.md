@@ -5998,6 +5998,33 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 SCUT44 (background `ses_f3495b136`, proof-only, grep-clean,
   pilot-only commit): eta17 payoff GAP filed `:5504` — r₁₈ lower missing
   blocks cpow18→eta17 bridge (would-be +0.1768 via 0.2357·3/4 unchained).
+- 2026-09-22 BALLADV-R02SUM (background `ses_f34951a3e`, proof-only,
+  grep-clean, ball_advance-only commit): R02 summable/tsum CONDITIONAL
+  wrappers (nonneg/norm/of_dom/tsum_le mirrors) + exponent/coeff gap
+  witnesses + `dominator_missing_spec :1636`. Disc tsum does NOT
+  transfer; fresh 1.05-decay dominator needed.
+- 2026-09-22 DIGAMMA-PSINEXT (background `ses_f34951a31`, proof-only,
+  grep-clean, digamma-only commit): psi transport rungs outer/leaf/mid/
+  inner `:587-605` (conditional, N=8 pattern). Shifted discs + gamNeed
+  open (Stirling remainder absent from Mathlib).
+- 2026-09-22 ETAPRIME-DNUM (background `ses_f34951a3a`, proof-only,
+  grep-clean, eta_prime-only commit): Deta numeral CLOSED (`≤13.2 :982`
+  via pi<3.1416) + norm assembly `:1009` + `:1029`. Disc Deta done;
+  R02 transfer blocked per DZNUM gap.
+- 2026-09-22 CUTL-MID2 (background `ses_f34951a37`, proof-only,
+  grep-clean, cutL10-only commit): poly 67→66.95 + joint 12.87→12.86
+  (`:1840-1860`, norm_num).   Tier gap 12.8144 (321x over 0.04) stands.
+- 2026-09-22 TAIL-MNEXT (background `ses_f34951a36`, proof-only,
+  grep-clean, tail-only commit): M524288 rung `24/724≈0.03315 :813`
+  (odd/floor shape, beats 0.046875). Ladder continues (M1048576 next).
+- 2026-09-22 ASSEMBLY-LEAF (background `ses_f34951a33`, proof-only,
+  grep-clean, assembly-only commit): R00 center conditional
+  (`of_tenth_lower :16988` + residual spec `:16993` + obligation
+  `:16996` via budget<0.1). Needs xiShifted-at-center enclosure.
+- 2026-09-22 OFFAXIS-NEXT (background `ses_f34951a35`, proof-only,
+  grep-clean, off_axis-only commit): S4096 triangle transfer `:9224` +
+  conditional feeder `:9247` + mid budget 41/750 `:9256` + residual Prop
+  `:9261` + hEnough `:9266`. Mid-block ≤41/750 open.
 - 2026-09-22 SLIVER-TOP (background `ses_f34951a38`, proof-only,
   grep-clean, sliver_edge-only commit): M40 gates/width/delta numerals
   `:690-705` + conditional M40 deriv feeder `:708` (via :343) + strict

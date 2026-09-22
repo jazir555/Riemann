@@ -562,3 +562,50 @@ theorem ratio_inner : (268.9 : ℝ) < (10.2128 : ℝ) / (0.037975 : ℝ) := by n
 -/
 
 end Door3Digamma
+
+/-! ## 7. Psi-ladder transport rung at N = 8 (append-only).
+
+Mirrors latest psi rung block (`avoid_*` + `psi_disc_transport`, cf.
+`door3_digamma.lean:239-270`): each result is the exact
+`psi_disc_transport ... 8 ... avoid_*` instance, so a large-Re disc at
+`w + 8` yields the `w`-disc with the rational sum subtracted.
+Value: conditional only; the shifted-disc premise at `Re ~ 8.1`
+remains open and is filed as residual below.
+Residual for next rung (exact): closed discs
+`‖Complex.digamma (wOuter + 8) − cN‖ ≤ rN` (and leaf/mid/inner)
+with `cN − ∑ k ∈ Finset.range 8, (w + k)⁻¹ = c`
+(`c ∈ {cOuter, cLeaf, cMid, cInner}`, radii `0.5 / 0.5 / 0.5 / 1`)
+plus tight gamma sups `gamNeed_*`; both need the explicit-remainder
+Stirling bound for `Complex.digamma` at `Re ~ 8.1` (Gauss integral rep,
+`Mathlib/.../Gamma/Digamma.lean:31` TODO) which is not in Mathlib.
+-/
+
+namespace Door3Digamma
+
+open scoped BigOperators
+
+theorem psi_transport_outer (cN : ℂ) (rN : ℝ)
+    (hDisc : ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN) :
+    ‖Complex.digamma wOuter −
+      (cN − ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN :=
+  psi_disc_transport wOuter cN 8 rN avoid_outer hDisc
+
+theorem psi_transport_leaf (cN : ℂ) (rN : ℝ)
+    (hDisc : ‖Complex.digamma (wLeaf + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN) :
+    ‖Complex.digamma wLeaf −
+      (cN − ∑ k ∈ Finset.range 8, (wLeaf + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN :=
+  psi_disc_transport wLeaf cN 8 rN avoid_leaf hDisc
+
+theorem psi_transport_mid (cN : ℂ) (rN : ℝ)
+    (hDisc : ‖Complex.digamma (wMid + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN) :
+    ‖Complex.digamma wMid −
+      (cN − ∑ k ∈ Finset.range 8, (wMid + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN :=
+  psi_disc_transport wMid cN 8 rN avoid_mid hDisc
+
+theorem psi_transport_inner (cN : ℂ) (rN : ℝ)
+    (hDisc : ‖Complex.digamma (wInner + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN) :
+    ‖Complex.digamma wInner −
+      (cN − ∑ k ∈ Finset.range 8, (wInner + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN :=
+  psi_disc_transport wInner cN 8 rN avoid_inner hDisc
+
+end Door3Digamma

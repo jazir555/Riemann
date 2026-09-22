@@ -9208,3 +9208,72 @@ theorem sCutOA11_joint_N_needs_4096 : (2 * 2048 : ℕ) = 4096 := by norm_num
 #print axioms sCutOA11_joint_N_needs_4096
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OA11 shape (grep anchor): slow `N = 5` closed via `OA11_S5_norm_ge`
+(`808/375 ≤ ‖S5‖`) + `sCutOA11_slow_closed` (`21/10 ≤ ‖S5‖`); banked tail
+`sCutOA11_eta_tail_2048_le` (`‖G - S4096‖ ≤ 7/10`); joint threshold
+`sCutOA11_hEnough_2048_threshold` needs `‖S4096‖ ≥ 21/10`. Transfer `S5 → S4096`
+is the open leg (budget `41/750`). -/
+theorem sCutOA11_shape_anchor :
+    ((808 / 375 : ℝ) - 21 / 10) = (41 / 750 : ℝ) := by norm_num
+
+/-- Unconditional transfer triangle for the `S5 → S4096` leg. -/
+theorem sCutOA11_S4096_transfer_triangle :
+    ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ -
+        ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)‖ := by
+  have htri : ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ +
+        ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k)
+      ((∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+        (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k))
+    have heq : (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+        ((∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)) =
+        (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k) := by
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- Conditional feeder: mid-block `≤ 41/750` upgrades closed `S5` floor to `S4096`. -/
+theorem sCutOA11_S4096_feeder_of_mid_le
+    (hmid : ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)‖ ≤ (41 / 750 : ℝ)) :
+    (21 / 10 : ℝ) ≤ ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have hS5 := OA11_S5_norm_ge
+  have htri := sCutOA11_S4096_transfer_triangle
+  linarith
+
+/-- Exact residual budget for the mid-block (`808/375 - 21/10 = 41/750`). -/
+theorem sCutOA11_S4096_mid_budget :
+    ((808 / 375 : ℝ) - 21 / 10) = (41 / 750 : ℝ) := by norm_num
+
+/-- Open residual as a named `Prop` (blocked: mid-block has 4091 terms, no `≤ 41/750`
+enclosure banked; `OA11_combo6` absent so no stepwise `S5 → S6` route either). -/
+def sCutOA11_S4096_mid_residual : Prop :=
+  ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+    (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)‖ ≤ (41 / 750 : ℝ)
+
+/-- Joint `hEnough` closure conditional on the named residual. -/
+theorem sCutOA11_S4096_hEnough_of_residual
+    (hres : sCutOA11_S4096_mid_residual) :
+    (7 / 5 : ℝ) + (7 / 10 : ℝ) ≤
+      ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have hslow := sCutOA11_S4096_feeder_of_mid_le hres
+  linarith
+
+#print axioms sCutOA11_shape_anchor
+#print axioms sCutOA11_S4096_transfer_triangle
+#print axioms sCutOA11_S4096_feeder_of_mid_le
+#print axioms sCutOA11_S4096_mid_budget
+#print axioms sCutOA11_S4096_hEnough_of_residual
+
+end Door3OffAxis

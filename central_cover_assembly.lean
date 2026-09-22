@@ -16970,3 +16970,31 @@ end Door3CutR10EtaFactor
 #print axioms Door3CutR10EtaFactor.cutR10_need_eq
 #print axioms Door3CutR10EtaFactor.cutR10_floor_suffices
 #print axioms Door3CutR10EtaFactor.cutR10_outer_tier_negative
+
+/-! ## ASSEMBLY-LEAF R00 center conditional close + exact residual
+
+Open spec grepped: `R00_leaf_obligations` at 1175-1177 is
+`center AND deriv` with center `(0.002 + 0.05 * R00.radius <= norm at R00.center)`.
+Banked: `R00_radius_lt` (1161), `R00_budget_lt_app` (1359),
+`sample_cell_radius_bound`, `fine_eps_outer_pos` (1032).
+Chain: budget `< 0.1`, so `0.1 <= norm at center` closes center.
+Missing premise filed as `R00_center_residual_tenth` below (needs rigorous
+enclosure for `xiShifted` at `R00.center`; not closed here).
+Deriv conjunct untouched.
+-/
+
+namespace CentralCoverAssembly
+
+theorem R00_center_of_tenth_lower (hC : (0.1 : ℝ) ≤ ‖xiShifted R00.center‖) :
+    (0.002 : ℝ) + 0.05 * R00.radius ≤ ‖xiShifted R00.center‖ := by
+  have hB := R00_budget_lt_app
+  linarith
+
+def R00_center_residual_tenth : Prop :=
+  (0.1 : ℝ) ≤ ‖xiShifted R00.center‖
+
+theorem R00_center_obligation_of_residual_tenth (h : R00_center_residual_tenth) :
+    (0.002 : ℝ) + 0.05 * R00.radius ≤ ‖xiShifted R00.center‖ :=
+  R00_center_of_tenth_lower h
+
+end CentralCoverAssembly

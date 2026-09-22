@@ -1819,3 +1819,47 @@ end Door3CutL10Middle
 #print axioms Door3CutL10Middle.cutL10_middle_tailQuarter_part_zeta
 #print axioms Door3CutL10Middle.cutL10_middle_gap
 
+/-! ## (g) CUTL cutoff tighter fence (append-only tail; LF)
+
+Cutoff fencing lane next step from grep baseline:
+- `cutL10_ballPoly_upper` (`:766`): poly `≤ 67` on the `+1` ball via `‖z‖ ≤ 11.56`.
+- `cutL10_ballSup_of_factorSups` (`:819`) / `cutL10_tierB_sharedSup_1287_of_factorSups`
+  (`:1393`): joint `≤ 12.87` from `67 * (16/5) * (1/100) * 6 = 12.864`.
+- `cutL10_thinRect_tightened_gap` (`:1439`): tightened audit `2.01` vs `0.04`.
+- `cutL10_middle_gap` (`:1806`): middle widths plus `123` numeral gap.
+
+Tightening banked here (closed numerals only): poly `67 → 66.95`
+(`(11.56^2 + 1/4)/2 = 66.9418 ≤ 66.95`), hence joint
+`66.95 * (16/5) * (1/100) * 6 = 12.8544 ≤ 12.86`, a `0.01` tighter fence
+than `12.87`. Residual stays BLOCKED: `0.04 < 12.8544`, gap `12.8144`.
+-/
+
+namespace Door3CutL10CutoffTighten
+
+/-- Tighter poly cap on the `+1` ball: `(11.56^2 + 1/4)/2 ≤ 66.95`. -/
+theorem cutL10_poly_tighter_cap :
+    ((11.56 : ℝ) ^ 2 + 1 / 4) / 2 ≤ (66.95 : ℝ) := by
+  norm_num
+
+/-- Exact poly value behind the tighter cap. -/
+theorem cutL10_poly_tighter_value :
+    ((11.56 : ℝ) ^ 2 + 1 / 4) / 2 = (66.9418 : ℝ) := by
+  norm_num
+
+/-- Exact tighter joint value with poly `66.95`. -/
+theorem cutL10_joint_tighter_value :
+    (((66.95 : ℝ) * (16 / 5)) * (1 / 100)) * 6 = (12.8544 : ℝ) := by
+  norm_num
+
+/-- Tighter joint fence `≤ 12.86` (was `12.87`). -/
+theorem cutL10_joint_tighter_cap :
+    (((66.95 : ℝ) * (16 / 5)) * (1 / 100)) * 6 ≤ (12.86 : ℝ) := by
+  norm_num
+
+/-- Exact residual to the `0.04` tier: blocked, gap `12.8144`. -/
+theorem cutL10_tighter_gap_to_tier :
+    ((12.8544 : ℝ) - 0.04 = (12.8144 : ℝ)) ∧ ((0.04 : ℝ) < 12.8544) := by
+  constructor <;> norm_num
+
+end Door3CutL10CutoffTighten
+
