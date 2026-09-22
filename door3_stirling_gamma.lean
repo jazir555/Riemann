@@ -4315,4 +4315,101 @@ theorem D3SG_gamNeed_leaf_shift5_above_056 :
       < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) := by
   norm_num
 
-#print axioms D3SG_gamNeed_leaf_shift5_above_056
+/-! ## STIRLING-FINAL-LEDGER (PROOF-ONLY, append-only, 2026-09-22).
+
+Grep first (this file):
+- disc `0.381`: `D3SG_R02_disc_upper` at `:1918` (`≤ 1/2`),
+  tight `D3SG_R02_disc_upper_tight` at `:2469` (`≤ 0.381`,
+  `1/2.625 ≈ 0.38095`, full `‖w‖ ≥ |Im|` paid).
+- E05: `D3SG_E05_rpow_fifth_root_upper` at `:1989` (`5^(1/5) ≤ 1.38`),
+  `D3SG_E05_rpow_Re_upper` at `:2006` (`5^1.1975 ≤ 6.9`),
+  `D3SG_E05_cpow5_norm_upper` at `:2021` (`≤ 6.9`),
+  lowers `D3SG_E05_add0_norm_ge` `:2040` (`1.25`), `add1` `:2064` (`2.22`),
+  `add2` `:2088` (`3.21`), `add3` `:2112` (`4.21`), `add4` `:2138` (`5.21`),
+  `add5` `:2164` (`6.20`), `D3SG_E05_prod5_norm_ge` at `:2190`,
+  conditional `D3SG_E05_GammaSeq5_upper_of_link` at `:2219` (`≤ 0.684` on `hLink`).
+- shift ladders at minima:
+  outer best `D3SG_gamNeed_outer_shift5_upper` at `:3598` (`≤ 0.023`,
+  `35.47/(4.375^5) ≈ 0.02213`), gap `:3837`, ratio `:3843` (`11x`);
+  minimum witness outer shift-6 `growth_factor` `:3891`,
+  `majorant_reversal` `:3898`, `quot_upper_arith` `:3906` (`≤ 0.027`),
+  `above_023` `:3914` (ladder minimum at shift-5).
+  leaf best `D3SG_gamNeed_leaf_shift4_upper` at `:4039` (`≤ 0.056`,
+  `7.161/(3.375^4) ≈ 0.05519`), gap `:4234`, ratio `:4240` (`7x`);
+  minimum witness leaf shift-5 `growth_factor` `:4290`,
+  `majorant_reversal` `:4297`, `quot_upper_arith` `:4305` (`≤ 0.068`),
+  `above_056` `:4313` (ladder minimum at shift-4).
+  earlier rungs kept: outer shift1 `:2282` (`0.229`), shift2 `:2576` (`0.063`),
+  shift4 `:3350` (`0.024`); leaf shift1 `:2375` (`0.297`), shift3 `:3137` (`0.061`).
+- decay banked: `D3SG_Gamma_line095_exp_decay_C3` at `:694`
+  (`‖Γ‖ ≤ 3*exp(-|Im|/2)` on `Re = 0.95`), `D3SG_decay_sigma` at `:1305`,
+  `D3SG_TierC_gamma_wide` at `:1468` (`≤ 600*exp(-|Im|/2)`).
+- reflection / decay specs (filed, not proved):
+  `D3SG_height_decay_pi2_spec` at `:3925`,
+  `D3SG_gamma_reflection_bridge_spec` at `:3931`,
+  `D3SG_outer_decay_need` at `:3937`,
+  `D3SG_reflection_rebuild_gap` at `:3967`,
+  `D3SG_reflection_missing_API` at `:3984` (5 entries).
+
+FINAL audit below conjoins closed banked quotients + gap/ratio/reversal witnesses
+in one theorem (all proved above, no new claim). Unproved specs are NOT claimed;
+they are filed in `D3SG_FINAL_residual_list`. No new imports, no rebuild.
+-/
+
+/-- FINAL ledger audit: single conjunction of every closed banked value used for
+the stirling lane plus every open-residual witness (gaps, ratios, reversals).
+
+Banked: disc `0.381` universal, E05 feeders `1.38`/`6.9`, real caps
+`Γ 0.95 ≤ 1.1`, `Γ 5.1975 ≤ 35.47`, `Γ 5.1 ≤ 29.361`, decay `3*exp` on
+`Re = 0.95`, outer best `0.023`, leaf best `0.056`.
+Residual witnesses: outer gap/ratio (`11x`), leaf gap/ratio (`7x`),
+outer shift-6 reversal + above `0.023`, leaf shift-5 reversal + above `0.056`.
+E05 `0.684` conditional and the three filed specs stay in the residual list. -/
+theorem D3SG_FINAL_ledger_audit :
+    (∀ w : ℂ, 0.025 ≤ w.re → w.re ≤ 0.37 → -4.125 ≤ w.im → w.im ≤ -2.625 →
+      ‖Complex.Gamma w‖ ≤ (0.381 : ℝ)) ∧
+    (5 : ℝ) ^ ((1 / 5 : ℝ)) ≤ (1.38 : ℝ) ∧
+    (5 : ℝ) ^ ((1.1975 : ℝ)) ≤ (6.9 : ℝ) ∧
+    Real.Gamma (0.95 : ℝ) ≤ (1.1 : ℝ) ∧
+    Real.Gamma (5.1975 : ℝ) ≤ (35.47 : ℝ) ∧
+    Real.Gamma (5.1 : ℝ) ≤ (29.361 : ℝ) ∧
+    (∀ s : ℂ, s.re = (0.95 : ℝ) →
+      ‖Complex.Gamma s‖ ≤ 3 * Real.exp (-(1 / 2) * |s.im|)) ∧
+    ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ (0.023 : ℝ) ∧
+    ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ ≤ (0.056 : ℝ) ∧
+    (0.002 : ℝ) < (0.023 : ℝ) ∧
+    (11 : ℝ) < (0.023 : ℝ) / (0.002 : ℝ) ∧
+    (0.008 : ℝ) < (0.056 : ℝ) ∧
+    (6 : ℝ) < (0.056 : ℝ) / (0.008 : ℝ) ∧
+    (35.47 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      < (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375) ∧
+    (0.023 : ℝ)
+      < (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375) ∧
+    (7.161 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375)
+      < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) ∧
+    (0.056 : ℝ)
+      < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) := by
+  exact ⟨D3SG_R02_disc_upper_tight, D3SG_E05_rpow_fifth_root_upper,
+    D3SG_E05_rpow_Re_upper, D3SG_Real_Gamma_095_le_one_one,
+    D3SG_Real_Gamma_51975_le_thirtyfive_fourseven,
+    D3SG_Real_Gamma_51_le_two_nine_three_six_one,
+    D3SG_Gamma_line095_exp_decay_C3, D3SG_gamNeed_outer_shift5_upper,
+    D3SG_gamNeed_leaf_shift4_upper, D3SG_gamNeed_outer_shift5_gap,
+    D3SG_gamNeed_outer_shift5_ratio, D3SG_gamNeed_leaf_shift4_gap,
+    D3SG_gamNeed_leaf_shift4_ratio,
+    D3SG_gamNeed_outer_shift6_majorant_reversal,
+    D3SG_gamNeed_outer_shift6_above_023,
+    D3SG_gamNeed_leaf_shift5_majorant_reversal,
+    D3SG_gamNeed_leaf_shift5_above_056⟩
+
+/-- FINAL complete residual list (filed, not proved; quotients above stand). -/
+def D3SG_FINAL_residual_list : List String :=
+  ["gamNeed_outer ≤ 0.002 OPEN (best 0.023 at :3598, 11x gap :3837/:3843; shift-6 reverses :3898/:3914)",
+    "gamNeed_leaf ≤ 0.008 OPEN (best 0.056 at :4039, 7x gap :4234/:4240; shift-5 reverses :4297/:4313)",
+    "E05 GammaSeq5 ≤ 0.684 CONDITIONAL at :2219 on N=5 norm-link (open L1, feeders 6.9 + lowers banked)",
+    "E05 tighten via 0.381 disc BLOCKED (window mismatch, see :2533)",
+    "height-decay pi-half-rate spec at :3925 FILED NOT PROVED (needs bridge + sharpened constant)",
+    "reflection-bridge identity at :3931 FILED NOT PROVED (needs Euler reflection + Beta product)",
+    "outer-decay-need ≤ 0.002 at :3937 FILED NOT PROVED (consumer of pi-half-rate)",
+    "reflection-missing-API 5 entries at :3984 (Euler reflection, Beta-Gamma product, sin strip, sin modulus, companion cap)",
+    "pure-shift ladders at minima (outer shift-5, leaf shift-4); N=6+/5+ reverse, decay c=1/2 too weak at outer"]
