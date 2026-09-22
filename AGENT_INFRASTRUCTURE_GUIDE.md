@@ -5657,6 +5657,16 @@ sorry-free infrastructure and the complete commit ledger above.
   VERDICT: 0.621<0.66 FAILS (increments +0.019/+0.012/+0.011
   shrinking; 0.579→0.598→0.61→0.621). Self-fixed 2 paren typos.
   VERIFY5 tasked (sole owner, N8 rebuild).
+- 2026-09-22 GAMMA-N9 (background `ses_f374dbefc`, proof-only,
+  grep-clean, premise_gamma +412): E06 Seq9 rung — rpow9-frac `:5019`
+  (1.52≤9^5/26), Re-lower 13.68 `:5034`, cpow9 norm `:5047` +
+  upper-needed 13.90 `:5065`, add9 ≤10.22 `:5071`, prod9 7906622.14
+  `:5099`, link (362880-num) `:5143`, rate 0.014 `:5162`, finite 0.627
+  `:5171`, below-gate `:5387` + gap 0.033 `:5392`, N10-next `:5399`.
+  VERDICT: 0.627<0.66 FAILS (increments +0.019/+0.012/+0.011/+0.006
+  shrinking — ladder may asymptote below gate; N10+ assessment
+  pending). Parens double-checked vs add8. VERIFY6 tasked (sole owner,
+  N9 rebuild).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
