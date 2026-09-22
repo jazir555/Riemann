@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 BALLADV-R02TSUM (background `ses_f3479138b`, proof-only,
+  grep-clean, ball_advance-only commit): Deta tsum CLOSED — Summable via
+  104 + p-series-1.04 ≤26 (integral test) → Deta=21795.54 (`:2614`,
+  closes `:1427`). DZetaPair numeral next.
 - 2026-09-22 ASSEMBLY-R09 (background `ses_f34778728`, proof-only,
   grep-clean, assembly-only commit): R09 leaf+H conditional (tenth +
   0.07). Post-dates GREEN; re-verify later.

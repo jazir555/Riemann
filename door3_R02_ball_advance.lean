@@ -2417,3 +2417,217 @@ def R02_etaWorst_dom105_via104_residual_spec : Prop :=
   R02_etaWorst_dom105_residual_spec
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 Deta tsum numeral via 1.04 integral tail (BALLADV-R02TSUM, proof-only).
+
+Grep record (this file only + `door3_eta_prime.lean`, read-only, before writing):
+* dominator104 shapes, this file `:2206-2419`:
+  `R02_etaWorstDominator104 :2206` (`K * ((m+1):R)^(-1.04)`),
+  `R02_etaWorstDominator104_summable :2210` (`Summable.mul_left K shift104`),
+  `R02_etaWorst_pointwise104_missing :2215`
+  (`forall m, norm majorant <= dominator104 K m`),
+  `R02_etaWorst_dominator_of_pointwise104 :2220` (one `K` discharges `:1636`),
+  `R02_etaWorst_dom104_residual_spec :2228` (`exists K >= 0, pointwise104 K`),
+  `R02_etaWorst_pointwise104_K838p29 :2384`,
+  `R02_etaWorst_dom104_residual_closed :2400`,
+  `R02_etaWorst_dominator_of_K838p29 :2405` (`:1636` closed at `K = 838.29`).
+* tsum-factor shapes, `door3_eta_prime.lean:765-788`:
+  `etaDerivDominator_tsum_eq :769` (`unfold` + `tsum_mul_left`),
+  `etaDerivMajorant_tsum_le :780` (`Summable.tsum_le_tsum` + dominator value).
+* integral-test shapes, `door3_eta_prime.lean:1127-1307`:
+  `etaR02Int_rpow105_antitone :1229`
+  (`Real.antitoneOn_rpow_Ioi_of_exponent_nonpos`),
+  `etaR02Int_rpow105_integrable :1239` (`integrableOn_Ioi_rpow_of_lt`),
+  `etaR02Int_tail2_le_integral105 :1247`
+  (`AntitoneOn.tsum_comp_add_le_integral 1`),
+  `etaR02Int_integral105_eq :1256` (`integral_Ioi_rpow_of_lt`, `= 1 / 0.05`),
+  `etaR02Int_tail2_le_20 :1272`, `etaR02Int_odd105_zero_eq_one :1284`,
+  `etaR02Int_odd105_tsum_le_21 :1291`
+  (`Summable.sum_add_tsum_nat_add 1` + `Finset.sum_range_one`).
+  Mathlib engines cited there `:1135-1137`: `Real.summable_nat_rpow_inv`,
+  `summable_nat_add_iff`, `AntitoneOn.tsum_comp_add_le_integral`,
+  `integrableOn_Ioi_rpow_of_lt`, `integral_Ioi_rpow_of_lt`,
+  `Real.antitoneOn_rpow_Ioi_of_exponent_nonpos`.
+* conditional wrappers, this file `:1602/:1609`:
+  `R02_etaWorst_summable_of_dom` (`Summable.of_norm_bounded`),
+  `R02_etaWorst_tsum_le_of_dom` (`Summable.tsum_le_tsum`).
+
+What is banked here (placeholder-free):
+* `R02_etaWorst_summable_K838p29` (unconditional `Summable` via `:1636` close).
+* `R02_etaWorstDominator104_tsum_eq` (`tsum_mul_left` factor, mirror of `:769`).
+* `R02_etaWorst_tsum_le_838p29_mul_shift`
+  (`majorant tsum <= 838.29 * shift104 tsum`, mirror of `:780`).
+* 1.04 integral tail (mirror of `:1229-1307` at `1.04`):
+  antitone, integrable, tail-vs-integral, closed form `= 1 / 0.04`,
+  tail `<= 25`, head `= 1`, shift tsum `<= 26` (`1 + 1/0.04`).
+* `R02_etaWorst_tsum_le_21795p54` (`<= 21795.54` via `838.29 * 26`)
+  and `R02_Deta_missing_closed_21795p54` closing `:1427`
+  (`R02_Deta_missingNumeral_spec`) at `Deta = 21795.54`.
+No placeholder tactics are used.
+-/
+
+/-- Unconditional summability from the closed 104 dominator at `K = 838.29`. -/
+theorem R02_etaWorst_summable_K838p29 : Summable R02_etaWorstMajorant :=
+  R02_etaWorst_summable_of_dom _ (R02_etaWorstDominator104_summable 838.29)
+    R02_etaWorst_pointwise104_K838p29
+
+/-- Dominator tsum factor at `1.04` via `tsum_mul_left` (mirror of
+`door3_eta_prime.lean:769`). -/
+theorem R02_etaWorstDominator104_tsum_eq (K : ℝ) :
+    ∑' m : ℕ, R02_etaWorstDominator104 K m =
+      K * ∑' m : ℕ, ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  unfold R02_etaWorstDominator104
+  rw [tsum_mul_left]
+
+/-- Majorant tsum sits below the factored 104 dominator tsum (mirror of
+`door3_eta_prime.lean:780`). -/
+theorem R02_etaWorst_tsum_le_838p29_mul_shift :
+    ∑' m : ℕ, R02_etaWorstMajorant m ≤
+      838.29 * ∑' m : ℕ, ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  have hPointNorm : ∀ m : ℕ, ‖R02_etaWorstMajorant m‖ ≤
+      R02_etaWorstDominator104 838.29 m :=
+    R02_etaWorst_pointwise104_K838p29
+  have hPoint : ∀ m : ℕ, R02_etaWorstMajorant m ≤
+      R02_etaWorstDominator104 838.29 m := by
+    intro m
+    have h := hPointNorm m
+    rw [R02_etaWorst_norm_eq m] at h
+    exact h
+  have hSum : Summable R02_etaWorstMajorant := R02_etaWorst_summable_K838p29
+  have hDomSum : Summable (R02_etaWorstDominator104 838.29) :=
+    R02_etaWorstDominator104_summable 838.29
+  have hle : ∑' m : ℕ, R02_etaWorstMajorant m ≤
+      ∑' m : ℕ, R02_etaWorstDominator104 838.29 m :=
+    R02_etaWorst_tsum_le_of_dom _ hDomSum hSum hPoint
+  have heq : ∑' m : ℕ, R02_etaWorstDominator104 838.29 m =
+      838.29 * ∑' m : ℕ, ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) :=
+    R02_etaWorstDominator104_tsum_eq 838.29
+  rw [heq] at hle
+  exact hle
+
+/-- Integral area at `1.04`: `1 / 0.04 = 25`. -/
+theorem R02_pseries104_area25 : (1 : ℝ) / 0.04 = 25 := by
+  norm_num
+
+/-- Head-plus-area shape: `1 + 1 / 0.04 = 26`. -/
+theorem R02_pseries104_area26 : (1 : ℝ) + 1 / 0.04 = 26 := by
+  norm_num
+
+/-- Antitone majorant `x^(-1.04)` on `Ici 1`
+(mirror of `door3_eta_prime.lean:1229` at `1.04`). -/
+theorem R02_pseries104_antitone :
+    AntitoneOn (fun x : ℝ => x ^ (-(1.04 : ℝ))) (Set.Ici ((((1 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-(1.04 : ℝ)) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.04)` on `Ioi 1`
+(mirror of `door3_eta_prime.lean:1239`). -/
+theorem R02_pseries104_integrable :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-(1.04 : ℝ)))
+      (Set.Ioi ((((1 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-(1.04 : ℝ)) < -1)
+  norm_num
+
+/-- `M = 1` integral-tail comparison for the shifted `1.04` tail
+(mirror of `door3_eta_prime.lean:1247`). -/
+theorem R02_pseries104_tail2_le_integral :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-(1.04 : ℝ))) ≤
+      (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-(1.04 : ℝ))) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 1 R02_pseries104_antitone
+    R02_pseries104_integrable (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+/-- Closed-form integral `∫ x in Ioi 1, x^(-1.04) = 1 / 0.04`
+(mirror of `door3_eta_prime.lean:1256`). -/
+theorem R02_pseries104_integral_eq :
+    (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-(1.04 : ℝ))) = 1 / 0.04 := by
+  have hlt : (-(1.04 : ℝ)) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-(1.04 : ℝ)) + 1 = -0.04 := by norm_num
+  rw [e1] at h
+  have ec : ((((1 : ℕ)) : ℝ)) ^ (-0.04 : ℝ) = (1 : ℝ) := by
+    have ecast : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    rw [ecast, Real.one_rpow]
+  rw [ec] at h
+  have e2 : (-(1 : ℝ)) / (-0.04 : ℝ) = 1 / 0.04 := by norm_num
+  exact e2 ▸ h
+
+/-- Shift-tail numeral `∑' n, (n+2)^(-1.04) ≤ 25`
+(mirror of `door3_eta_prime.lean:1272`). -/
+theorem R02_pseries104_tail2_le_25 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-(1.04 : ℝ))) ≤ 25 := by
+  have htail := R02_pseries104_tail2_le_integral
+  have hval := R02_pseries104_integral_eq
+  have h25 : (1 : ℝ) / 0.04 ≤ 25 := by norm_num
+  calc (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-(1.04 : ℝ)))
+      ≤ (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-(1.04 : ℝ))) := htail
+    _ = 1 / 0.04 := hval
+    _ ≤ 25 := h25
+
+/-- Shift head `((0+1 : ℝ))^(-1.04) = 1`
+(mirror of `door3_eta_prime.lean:1284`). -/
+theorem R02_pseries104_zero_eq_one :
+    ((((0 + 1 : ℕ)) : ℝ)) ^ (-(1.04 : ℝ)) = 1 := by
+  have e : ((((0 + 1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [e, Real.one_rpow]
+
+/-- Shift-series numeral `∑' n, (n+1)^(-1.04) ≤ 26` (head `1` + tail `≤ 25`,
+mirror of `door3_eta_prime.lean:1291`). -/
+theorem R02_pseries104_tsum_le_26 :
+    (∑' n : ℕ, ((((n + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) ≤ 26 := by
+  have hShift : Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) :=
+    R02_etaWorstShift104_summable
+  have hTailSum : Summable (fun n : ℕ => ((((n + 1 + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) :=
+    (summable_nat_add_iff 1).mpr hShift
+  have htail25 : (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) ≤ 25 :=
+    R02_pseries104_tail2_le_25
+  have htail25' : (∑' n : ℕ, (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) (n + 1)) ≤ 25 :=
+    htail25
+  have hsplit := hShift.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one, R02_pseries104_zero_eq_one] at hsplit
+  linarith
+
+/-- Product constant: `838.29 * 26 = 21795.54`. -/
+theorem R02_Deta838p29_mul26 : (838.29 : ℝ) * 26 = 21795.54 := by
+  norm_num
+
+/-- Deta tsum value: worst-case majorant tsum `≤ 21795.54`. -/
+theorem R02_etaWorst_tsum_le_21795p54 :
+    ∑' m : ℕ, R02_etaWorstMajorant m ≤ 21795.54 := by
+  have hbase := R02_etaWorst_tsum_le_838p29_mul_shift
+  have hcap := R02_pseries104_tsum_le_26
+  have hmul : 838.29 * (∑' m : ℕ, ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) ≤ 838.29 * 26 :=
+    mul_le_mul_of_nonneg_left hcap (by norm_num)
+  have heq : (838.29 : ℝ) * 26 = 21795.54 := by norm_num
+  calc ∑' m : ℕ, R02_etaWorstMajorant m
+      ≤ 838.29 * (∑' m : ℕ, ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) := hbase
+    _ ≤ 838.29 * 26 := hmul
+    _ = 21795.54 := heq
+
+/-- `:1427` closed at `Deta = 21795.54`. -/
+theorem R02_Deta_missing_closed_21795p54 : R02_Deta_missingNumeral_spec :=
+  ⟨21795.54, by norm_num, R02_etaWorst_summable_K838p29, R02_etaWorst_tsum_le_21795p54⟩
+
+#print axioms R02_etaWorst_summable_K838p29
+#print axioms R02_etaWorstDominator104_tsum_eq
+#print axioms R02_etaWorst_tsum_le_838p29_mul_shift
+#print axioms R02_pseries104_area25
+#print axioms R02_pseries104_area26
+#print axioms R02_pseries104_antitone
+#print axioms R02_pseries104_integrable
+#print axioms R02_pseries104_tail2_le_integral
+#print axioms R02_pseries104_integral_eq
+#print axioms R02_pseries104_tail2_le_25
+#print axioms R02_pseries104_zero_eq_one
+#print axioms R02_pseries104_tsum_le_26
+#print axioms R02_Deta838p29_mul26
+#print axioms R02_etaWorst_tsum_le_21795p54
+#print axioms R02_Deta_missing_closed_21795p54
+
+end Door3R02BallAdvance
