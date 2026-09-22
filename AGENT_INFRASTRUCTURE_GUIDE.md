@@ -5709,6 +5709,19 @@ sorry-free infrastructure and the complete commit ledger above.
   through N9 (ladder 0.579→0.598→0.61→0.621→0.627 all verified).
   Paren saga closed (4 waves: PAREN→N6B/N7→hre9→5350/5351).
   GAMMA-N10 tasked (proof-only; E06 N10 rung, parens pre-checked).
+- 2026-09-22 GAMMA-N10 (background `ses_f373830ae`, proof-only, no
+  report — work found on disk +436, grep-clean, coordinator-verified):
+  E06 Seq10 rung — rpow10-frac (1.55≤10^5/26), Re-lower 15.5, prod10
+  88712300.33 (=7906622.14·11.22 ✓), link (3628800-num), rate 0.014,
+  finite 0.634 (15.5·3628800=56246400 ✓), below-gate + gap 0.026,
+  N11-next filed. VERDICT: 0.634<0.66 FAILS (increments
+  +0.019/+0.012/+0.011/+0.006/+0.007 shrinking — ladder likely
+  asymptotes below gate). Coordinator paren   surgery (LADDER-RULE
+  block-net method): (1) hre10 front-run had double-tap `(('  — deleted
+  one via short `have hre10 : `+run-prefix substring anchor
+  (counting-proof, 19/18→18/18); (2) add10 stmt tail
+  `+ 1)‖` → `+ 1))‖` (18/17→18/18, N9-tail diff). Full N10 region nets
+  0, every block verified. VERIFY10 tasked (sole owner, rebuild).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
