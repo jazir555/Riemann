@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 BALLADV-R02PT104 (background `ses_f347ff8e8`, proof-only,
+  grep-clean, ball_advance-only commit): pointwise104 CLOSED (K=838.29)
+  → dom104 + `:1636` CLOSED via bridge. R02 Summable dominator DONE;
+  1.05-transfer open; tsum numeral next.
 - 2026-09-22 CUTL-FINAL (background `ses_f347b5b46`, proof-only,
   grep-clean, cutL10-only commit): FINAL gap ledger + sup/deriv of open
   hJ banked. CutL10 lane COMPLETE (sole open = hJointTier/hJ, owned by

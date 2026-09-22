@@ -2237,3 +2237,183 @@ def R02_etaWorst_dom104_residual_spec : Prop :=
 #print axioms R02_etaWorst_dominator_of_pointwise104
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 pointwise-104 close at K = 838.29 (BALLADV-R02PT104, proof-only).
+
+Grep record (this file only, read-only, before writing):
+* splitter `(100,0.01,1)` bank `R02_etaWorst_logCap_splitter_100_001_1 :2013`
+  via `R02_etaWorst_logAle100_mul :1994` (`Real.log_rpow`,
+  `Real.log_le_sub_one_of_pos`, `Real.log_le_log`, `Real.log_mul`).
+* merge block `:2137-2186` (`R02_etaWorst_firstPiece_le_split100 :2137`,
+  `R02_etaWorst_firstPiece_split100_expand :2151`,
+  `R02_etaWorst_firstPiece_rpowMerge104 :2160`,
+  `R02_etaWorst_firstPiece_le_104plus105 :2169`).
+* 104 family `R02_etaWorstShift104_summable :2190`,
+  `R02_etaWorstDominator104 :2206`,
+  `R02_etaWorstDominator104_summable :2210`.
+* pointwise104 spec `R02_etaWorst_pointwise104_missing :2215`
+  (`forall m, norm majorant <= dominator104 K m`).
+* bridge `R02_etaWorst_dominator_of_pointwise104 :2220`
+  (one `K` discharges `:1636`).
+* residual `R02_etaWorst_dom104_residual_spec :2228`
+  (`exists K >= 0, pointwise104 K`).
+* second-piece tail `R02_etaWorst_secondPiece_le_inv_mul :1812`
+  via `R02_etaWorst_logDiff_le_inv :1722`.
+* 105 residual `R02_etaWorst_dom105_residual_spec :1768` stays open:
+  `1.04 < 1.05` so a `1.04` bound is weaker and does not imply any
+  fixed-`C` `1.05` domination.
+
+What is banked here (placeholder-free):
+* constants `100 * 8.29 = 829`, `8.29 + 1 = 9.29`, `829 + 9.29 = 838.29`
+  (`K = 829 + 8.29 + 1` from the splitter shape plus both pieces).
+* second-piece merge to `A ^ (-1.05)` and the combined `A`-base bound.
+* base transfers `A ^ (-1.04) <= (m+1) ^ (-1.04)` and
+  `A ^ (-1.05) <= (m+1) ^ (-1.04)` with `A = ((2*m+1 : N) : R)`.
+* pointwise close at `K = 838.29`, dom104 residual closed, `:1636`
+  closed via the banked bridge.
+* head note: `norm_num` alone does not decide goals carrying
+  `Real.log` / `Real.rpow`, so no finite prefix closes a fixed `K` by
+  itself; the uniform tail merge below covers every `m` including head.
+* `:1768` NOT closed via 104 (exact residual restated).
+-/
+
+/-- Splitter constant: `100 * 8.29 = 829`. -/
+theorem R02_etaWorst_K104_const829 : (100 : ℝ) * 8.29 = 829 := by
+  norm_num
+
+/-- Second-piece constant: `8.29 + 1 = 9.29`. -/
+theorem R02_etaWorst_K104_const929 : (8.29 : ℝ) + 1 = 9.29 := by
+  norm_num
+
+/-- Total pointwise constant: `829 + 9.29 = 838.29`. -/
+theorem R02_etaWorst_K104_total838p29 : (829 : ℝ) + 9.29 = 838.29 := by
+  norm_num
+
+/-- Nonnegativity of the closed constant. -/
+theorem R02_etaWorst_K838p29_nonneg : (0 : ℝ) ≤ 838.29 := by
+  norm_num
+
+/-- Exponent identity linking the first-piece shape to `-1.05`. -/
+theorem R02_etaWorst_exp105_eq : (-(0.05 : ℝ) - 1) = (-(1.05 : ℝ)) := by
+  norm_num
+
+/-- Second-piece rpow merge: `A⁻¹ * A ^ (-0.05) = A ^ (-1.05)` via
+`Real.rpow_neg` + `Real.rpow_one` + `Real.rpow_add`. -/
+theorem R02_etaWorst_secondPiece_rpowMerge105 (m : ℕ) :
+    ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) =
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) := by
+  have hA : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hr1 : ((((2 * m + 1 : ℕ)) : ℝ) ^ (1 : ℝ)) = ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Real.rpow_one _
+  have hInv : ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ =
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1 : ℝ))) := by
+    have h := Real.rpow_neg (le_of_lt hA) (1 : ℝ)
+    rw [hr1] at h
+    exact h.symm
+  rw [hInv]
+  have hexp : (-(1 : ℝ)) + (-(0.05 : ℝ)) = (-(1.05 : ℝ)) := by
+    norm_num
+  have h := Real.rpow_add hA (-(1 : ℝ)) (-(0.05 : ℝ))
+  rw [hexp] at h
+  exact h.symm
+
+/-- Second piece sits below `A ^ (-1.05)`. -/
+theorem R02_etaWorst_secondPiece_le_105 (m : ℕ) :
+    (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) - Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) := by
+  have hle := R02_etaWorst_secondPiece_le_inv_mul m
+  have hMerge := R02_etaWorst_secondPiece_rpowMerge105 m
+  rw [hMerge] at hle
+  exact hle
+
+/-- Exponent step on `A >= 1`: `A ^ (-1.05) <= A ^ (-1.04)`. -/
+theorem R02_etaWorst_A105_le_A104 (m : ℕ) :
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  have h1A : (1 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have h : (1 : ℕ) ≤ 2 * m + 1 := by omega
+    exact_mod_cast h
+  exact Real.rpow_le_rpow_of_exponent_le h1A (by norm_num)
+
+/-- Base transfer at `-1.04`: `(2m+1) ^ (-1.04) <= (m+1) ^ (-1.04)`. -/
+theorem R02_etaWorst_base104_transfer (m : ℕ) :
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) ≤
+      ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  have hSmallPos : (0 : ℝ) < ((((m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hle : ((((m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have h : m + 1 ≤ 2 * m + 1 := by omega
+    exact_mod_cast h
+  exact Real.rpow_le_rpow_of_nonpos hSmallPos hle (by norm_num)
+
+/-- Combined base step: `A ^ (-1.05) <= (m+1) ^ (-1.04)`. -/
+theorem R02_etaWorst_A105_le_m104 (m : ℕ) :
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) ≤
+      ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  exact le_trans (R02_etaWorst_A105_le_A104 m) (R02_etaWorst_base104_transfer m)
+
+/-- Combined `A`-base majorant bound at `838.29`. -/
+theorem R02_etaWorst_majorant_le_838p29_A (m : ℕ) :
+    R02_etaWorstMajorant m ≤
+      838.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  have hFirst := R02_etaWorst_firstPiece_le_104plus105 m
+  have hSecond := R02_etaWorst_secondPiece_le_105 m
+  have h105le104 := R02_etaWorst_A105_le_A104 m
+  have hexp : (-(0.05 : ℝ) - 1) = (-(1.05 : ℝ)) := by
+    norm_num
+  have hrw : ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) =
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) := by
+    rw [hexp]
+  rw [hrw] at hFirst
+  have h829le : 8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ))) ≤
+      8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) :=
+    mul_le_mul_of_nonneg_left h105le104 (by norm_num)
+  have hSec104 : (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+      Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) ≤
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) :=
+    le_trans hSecond h105le104
+  unfold R02_etaWorstMajorant
+  linarith [hFirst, hSecond, h105le104, h829le, hSec104]
+
+/-- Pointwise close at the explicit splitter constant `K = 838.29`. -/
+theorem R02_etaWorst_pointwise104_K838p29 :
+    R02_etaWorst_pointwise104_missing 838.29 := by
+  intro m
+  have hNorm : ‖R02_etaWorstMajorant m‖ = R02_etaWorstMajorant m :=
+    R02_etaWorst_norm_eq m
+  have hA := R02_etaWorst_majorant_le_838p29_A m
+  have hT := R02_etaWorst_base104_transfer m
+  have hK : 838.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) ≤
+      838.29 * ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) :=
+    mul_le_mul_of_nonneg_left hT (by norm_num)
+  have hD : R02_etaWorstDominator104 838.29 m =
+      838.29 * ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := rfl
+  rw [hNorm, hD]
+  exact le_trans hA hK
+
+/-- dom104 residual closed at `K = 838.29`. -/
+theorem R02_etaWorst_dom104_residual_closed :
+    R02_etaWorst_dom104_residual_spec :=
+  ⟨838.29, R02_etaWorst_K838p29_nonneg, R02_etaWorst_pointwise104_K838p29⟩
+
+/-- Generic `:1636` blocker closed via the 104 bridge at `K = 838.29`. -/
+theorem R02_etaWorst_dominator_of_K838p29 :
+    R02_etaWorst_dominator_missing_spec :=
+  R02_etaWorst_dominator_of_pointwise104 838.29 R02_etaWorst_pointwise104_K838p29
+
+/-- `1.04 < 1.05`: the closed 104 decay is strictly weaker than 105. -/
+theorem R02_etaWorst_exp104_lt_105 : (1.04 : ℝ) < 1.05 := by
+  norm_num
+
+/-- Exact residual for `:1768`-via-104: the 105 route stays open.
+A `1.04` domination at fixed `K` does not supply any fixed-`C` `1.05`
+domination, so `R02_etaWorst_dom105_residual_spec` is NOT closed here. -/
+def R02_etaWorst_dom105_via104_residual_spec : Prop :=
+  R02_etaWorst_dom105_residual_spec
+
+end Door3R02BallAdvance
