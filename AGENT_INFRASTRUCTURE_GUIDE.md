@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 GAMMA-N17R (background `ses_f348235d0`, proof-only,
+  grep-clean + 4 audits, premise_gamma-only commit): Seq17 finite MEETS
+  0.66 (ceiling ≈0.66004, gap 0.0) — but Gamma still open (rate 0.014 →
+  0.646<0.66). Rate leaf is the wall, not the ladder. N18 next.
 - 2026-09-22 ETAPRIME-R02DOM2 (background `ses_f348f069b`, proof-only,
   grep-clean, eta_prime-only commit): integral-1.05 route (tsum ≤21 +
   second piece) — SAME log wall as ball-side (no fixed C). Both routes
