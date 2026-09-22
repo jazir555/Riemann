@@ -4395,4 +4395,158 @@ theorem sSCUT_delta14_no_flip_gap :
   refine ⟨hδ.1, hδ.2, ?_⟩
   linarith
 
+/-- Cpow real-part split for `14^{-s}` at sCut (mirror of
+`sSCUT_cpow8_neg_re` at `:2638` / `sSCUT_cpow9_neg_re` at `:3276`). -/
+theorem sSCUT_cpow14_neg_re : ((((14 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (14 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 14) := by
+  have h14pos : (0 : ℝ) < 14 := by norm_num
+  have hxC : ((14 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h14pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((14 : ℝ) : ℂ) = (((Real.log 14 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h14pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 14 : ℝ)) : ℂ)).re = Real.log 14 := Complex.ofReal_re _
+  have hzim : ((((Real.log 14 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 14 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 14 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 14 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 14) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 14 * (-(1 / 2 : ℝ)))
+      = (14 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h14pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 14))
+      = Real.cos (10 * Real.log 14) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `14^(1/2) ≤ 4` (honest root step; `14 ≤ 4^2 = 16`;
+mirror of `sSCUT_sqrt8_le` at `:2671`). -/
+theorem sSCUT_sqrt14_le : (14 : ℝ) ^ (1 / 2 : ℝ) ≤ (4 : ℝ) := by
+  have hpow : (14 : ℝ) ≤ (((4 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((14 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 14 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((14 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ (((4 : ℝ) ^ (2 : ℕ))) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/4 ≤ r₁₄ = 14^(-1/2)` (inverse of `sSCUT_sqrt14_le`;
+mirror of `sSCUT_rpow8_neg_ge` at `:2683`). -/
+theorem sSCUT_rpow14_neg_ge : (1 / 4 : ℝ) ≤ (14 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt14_le
+  have hpos : (0 : ℝ) < (14 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (14 : ℝ) ^ (-(1 / 2 : ℝ)) = (((14 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 14)]
+  rw [hneg, show (1 / 4 : ℝ) = ((4 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Signed cosine LOWER `1/100 ≤ cos(10*log 14)` (quadrant-I `δ₁₄` via the
+even-multiple strip `cos θ₁₄ = cos δ₁₄` + quadratic lower on `|δ₁₄| ≤ 1.406`;
+banked `sSCUT_delta14_even_mem` at `:4366`, mirror of `sSCUT_cos10log7_ge`
+at `:3009`; `1 - 1.406^2/2 ≈ 0.0116 ≥ 1/100`). -/
+theorem sSCUT_cos10log14_ge :
+    (1 / 100 : ℝ) ≤ Real.cos (10 * Real.log 14) := by
+  have hδ := sSCUT_delta14_even_mem
+  set y : ℝ := 10 * Real.log 14 - 8 * Real.pi with hy_def
+  have hy_lo : (1.118 : ℝ) < y := by rw [hy_def]; linarith [hδ.1]
+  have hy_hi : y < (1.406 : ℝ) := by rw [hy_def]; linarith [hδ.2]
+  have hsq : y ^ 2 ≤ (1.406 : ℝ) ^ 2 := by
+    have ha : (0 : ℝ) ≤ 1.406 - y := by linarith [hy_hi]
+    have hb : (0 : ℝ) ≤ y + 1.406 := by linarith [hy_lo]
+    have hprod := mul_nonneg ha hb
+    have heq : (1.406 - y) * (y + 1.406) = (1.406 : ℝ) ^ 2 - y ^ 2 := by ring
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := y)
+  have hnum : (1 / 100 : ℝ) ≤ 1 - (1.406 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosy : (1 / 100 : ℝ) ≤ Real.cos y := by
+    have hle : 1 - (1.406 : ℝ) ^ 2 / 2 ≤ 1 - y ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper : Real.cos (10 * Real.log 14 - 8 * Real.pi)
+      = Real.cos (10 * Real.log 14) := by
+    have h1 := Real.cos_sub_two_pi (10 * Real.log 14)
+    have h2 := Real.cos_sub_two_pi (10 * Real.log 14 - 2 * Real.pi)
+    have h3 := Real.cos_sub_two_pi
+      ((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi)
+    have h4 := Real.cos_sub_two_pi
+      (((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+    have e4 : 10 * Real.log 14 - 8 * Real.pi
+        = (((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi := by ring
+    calc Real.cos (10 * Real.log 14 - 8 * Real.pi)
+        = Real.cos ((((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) - 2 * Real.pi) := by rw [e4]
+      _ = Real.cos (((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) := h4
+      _ = Real.cos ((10 * Real.log 14 - 2 * Real.pi) - 2 * Real.pi) := h3
+      _ = Real.cos (10 * Real.log 14 - 2 * Real.pi) := h2
+      _ = Real.cos (10 * Real.log 14) := h1
+  rw [hy_def, hper] at hcosy
+  exact hcosy
+
+/-- Cpow signed LOWER `1/400 ≤ Re(14^{-sCut})` (`r₁₄ ≥ 1/4` × cosine
+`≥ 1/100`, via two one-sided multiplies; mirror of `sSCUT_cpow7_Re_ge`
+at `:3104`; the positive floor whose negation is the `eta₁₃` destructive
+upper). -/
+theorem sSCUT_cpow14_Re_ge :
+    (1 / 400 : ℝ) ≤ ((((14 : ℝ)) : ℂ) ^ (-sSCUT)).re := by
+  rw [sSCUT_cpow14_neg_re]
+  have hr_lo := sSCUT_rpow14_neg_ge
+  have hr0 : (0 : ℝ) ≤ (14 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc_lo := sSCUT_cos10log14_ge
+  have h1 : (1 / 4 : ℝ) * (1 / 100)
+      ≤ (14 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 100) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have h2 : (14 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 100)
+      ≤ (14 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 14) :=
+    mul_le_mul_of_nonneg_left hc_lo hr0
+  have heq : (1 / 4 : ℝ) * (1 / 100) = 1 / 400 := by norm_num
+  linarith
+
+/-- Eta bridge `eta₁₃ = -(14^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(14^s)⁻¹` into `14^{-s}`; mirror of `sSCUT_eta7_eq_neg_cpow8` at `:2714`). -/
+theorem sSCUT_eta13_eq_neg_cpow14 :
+    etaDirichletTerm sSCUT 13 = -((((14 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (13 + 1 : ℕ) = 14 := rfl
+  have hcast : ((((13 + 1 : ℕ)) : ℂ)) = ((((14 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (13 : ℕ) = -1 := by norm_num
+  have h14cast : ((((14 : ℕ)) : ℂ)) = ((((14 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h14cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (odd `k = 13`): `Re(eta₁₃) ≤ -(1/400)` (negated
+cpow signed lower `sSCUT_cpow14_Re_ge`; odd negation flips the positive
+floor to a negative ceiling; mirror of `sSCUT_eta11_Re_le_neg` with the
+`sSCUT_eta7` flip direction; `k = 13` joins `k = 8, 11` as honestly
+skipped — destructive/neutral, no shard growth). -/
+theorem sSCUT_eta13_Re_le_neg :
+    (etaDirichletTerm sSCUT 13).re ≤ (-(1 / 400) : ℝ) := by
+  have h := sSCUT_cpow14_Re_ge
+  rw [sSCUT_eta13_eq_neg_cpow14, Complex.neg_re, sSCUT_cpow14_neg_re]
+  rw [sSCUT_cpow14_neg_re] at h
+  linarith
+
+/-- No positive `Re₁₃` lock exists at any precision (`Re(eta₁₃) ≤ -1/400`,
+so no `c > 0` can sit below it; mirror of `sSCUT_eta11_Re_no_pos_lock` —
+the `k = 13` floor is IMPOSSIBLE, filed alongside the `k = 8, 11` skips). -/
+theorem sSCUT_eta13_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 13).re) := by
+  intro h
+  have hup := sSCUT_eta13_Re_le_neg
+  linarith
+
 end Door3PilotR00Zeta

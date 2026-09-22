@@ -5705,6 +5705,12 @@ sorry-free infrastructure and the complete commit ledger above.
   n=5 dead where OA11 n=5 lives). SMALLEST NEXT: `sSCUT_eta13_Re_le_neg`
   destructive closure (6-step recipe: cpow14 split → rpow14 → cos floor
   from `:4366` → product → odd bridge → negate; then k=14/15 growth).
+- 2026-09-22 SCUT33 (background `ses_f374839a4`, proof-only, grep-clean,
+  pilot-only commit): eta13 CLOSED 6/6 — split `:4400`, sqrt14≤4
+  `:4434` + r14≥1/4 `:4447`, cos≥1/100 `:4461` (1-1.406²/2≈0.01158),
+  product ≥1/400 `:4504`, odd bridge `:4522` + `eta13_Re_le_neg :4536`
+  (≤-1/400) + `no_pos_lock :4546`. k=13 joins k=8,11 skip list; no
+  shard growth. Premise_gamma N9 left for owner.
 - 2026-09-22 SCUT26 (background `ses_f3766f8f0`, proof-only, grep-clean):
   phase SHAPE corrected (10·log12, not 11·log12 — multiplier is t=10 in
   all mirrors `:3287/:3714`) + theta12 wide window `:3842` (θ∈[24.768,
