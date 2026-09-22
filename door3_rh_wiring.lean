@@ -1908,3 +1908,189 @@ def wireHbot_gap_residual : Prop :=
 end Door3RHWiring
 
 #print axioms Door3RHWiring.wireHbot_bot_point_half_feeder
+
+/-! ## WIRE-STRIP M40 top strip at `x = 0` (append-only, value + residual).
+
+Grep (read before filing):
+* strip spec `sliver_top_strip_of_entire_data` (`door3_sliver_nonvan.lean:305-314`):
+  needs uniform `hTop` + `hDeriv` + `mT / MT ≤ 1`; uniform `hTop` is OPEN
+  (`edgeHalf_topLower_missing`, `door3_rh_wiring.lean:1566`;
+  `wireHtop_gap_residual`, `:1862`).
+* deriv side banked conditional `hTopDeriv40_of_ballSup40`
+  (`door3_rh_wiring.lean:470-478`) via `uniform_top_deriv_of_closedBall`
+  (`door3_sliver_edge.lean:343-365`); M40 top feeder
+  `uniform_top_deriv_M40_of_closedBall` (`:708-716`); M40 pair
+  `uniform_M40_pair_of_closedBall` (`:885-899`); M1000 retier
+  `hTopDeriv1000_of_ballSup1000` (`door3_rh_wiring.lean:1625-1633`).
+* endpoint feeders banked `wireHtop_top_point_half_feeder` (`:1855-1857`),
+  `wireHbot_bot_point_half_feeder` (`:1897-1899`).
+* engine `upper_boundary_nonvanishing_from_outer_bound`
+  (`rh_certificate_infra.lean:459-465`) takes pointwise `h_top` at one `x`,
+  so `x = 0` narrows without the uniform `hTop`.
+* edge strips M40 (`edgeStrip_top_half_M40`, `:487-512`;
+  `edgeStrip_bottom_half_M40`, `:523-569`) and M1000
+  (`edgeStrip_top_half_M1000`, `:1642-1665`;
+  `edgeStrip_bottom_half_M1000`, `:1674-1718`) each need uniform
+  lower + deriv (+ width gates for M1000, OPEN per `:1613-1618`).
+
+Value below: ONE strip-narrowing feeder chaining the banked pointwise
+endpoint (`wireHtop`) with the ball-sup-40 deriv conditional, transferred
+to `xiShifted` via `xiShifted_eq_entire_on_strip`
+(`central_cover_assembly.lean:836-840`) with
+`xiShiftedEntire_differentiable` (`:828`). Uniform M40/M1000 strips stay
+conditional; exact residual filed as `wireStrip_uniform_M40_residual`. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-STRIP top M40 strip at `x = 0`: pointwise endpoint `1/2` plus
+closed-ball sup `C = 40` gives `xiShifted ≠ 0` on the `δ = (1/2)/40`
+vertical segment above `x = 0`. Chains `wireHtop_top_point_half_feeder`
+with `uniform_top_deriv_M40_of_closedBall`. -/
+theorem wireStrip_top_M40_at_zero_of_ballSup40
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ) (hy_low : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y)
+    (hy_top : y < (1 / 2 : ℝ)) :
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+  have hx_mem : (0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+    exact Set.mem_Icc.mpr ⟨by norm_num, by norm_num⟩
+  have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  have hTop0 : (1 / 2 : ℝ) ≤
+      ‖CentralCoverAssembly.xiShiftedEntire ((((0 : ℝ)) : ℂ) + Complex.I * ((1 / 2 : ℂ)))‖ := by
+    rw [hcast]
+    exact wireHtop_top_point_half_feeder
+  have hDeriv0 : ∀ v ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((v : ℝ)) : ℂ))‖ ≤ (40 : ℝ) := by
+    intro v hv
+    exact Door3SliverEdge.uniform_top_deriv_M40_of_closedBall hC 0 hx_mem v hv
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    have hres := BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable 0
+      (1 / 2 : ℝ) (40 : ℝ) (by norm_num) (by norm_num) hTop0 hDeriv0 y hy_low
+      (le_of_lt hy_top)
+    exact hres
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hstrip_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hy_top
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  rw [hagree]
+  exact hne_ent
+
+/-- WIRE-STRIP exact residual: uniform M40/M1000 strips still OPEN.
+The feeder above closes only the `x = 0` line; full edge strips need the
+uniform `1/2` lowers over `Set.Icc (-10) 10` (top + bottom) and the
+closed-ball sups (`C = 40` for M40, `C = 1000` for M1000, each on
+`Metric.closedBall 0 12` via the banked bridges), plus the two open width
+gates for M1000. -/
+def wireStrip_uniform_M40_residual : Prop :=
+  (∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  (∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+
+end Door3RHWiring
+
+#print axioms Door3RHWiring.wireStrip_top_M40_at_zero_of_ballSup40
+
+/-! ## WIRE-STRIPB bottom M40 strip at `x = 0` (append-only, value + residual).
+
+Grep (read before filing):
+* top strip feeder banked `door3_rh_wiring.lean:1949-1990`
+  (`wireStrip_top_M40_at_zero_of_ballSup40`: pointwise `1/2` at `x = 0` via
+  `wireHtop_top_point_half_feeder` + `uniform_top_deriv_M40_of_closedBall`
+  (`door3_sliver_edge.lean:708-716`), engine
+  `BoundaryProofEngine.upper_boundary_nonvanishing_from_outer_bound`,
+  transfer `xiShifted_eq_entire_on_strip`
+  (`central_cover_assembly.lean:836-840`)).
+* bottom endpoint banked `door3_rh_wiring.lean:1897-1899`
+  (`wireHbot_bot_point_half_feeder` via `Door3SliverEdge.edgeBot_single_lower`).
+* bottom M40 deriv bridge banked `uniform_bot_deriv_M40_of_closedBall`
+  (`door3_sliver_edge.lean:768-776`) via `uniform_bot_deriv_of_closedBall`
+  (`:368-376`).
+* bottom pointwise engine
+  `Door3TopEdge.lower_boundary_nonvanishing_from_outer_bound`
+  (`door3_top_edge.lean:397-443`), same pointwise shape as the top engine.
+
+Value below: exact mirror of the top feeder at `x = 0`: pointwise endpoint
+`1/2` (`wireHbot`) + ball-sup-40 deriv conditional, transferred to `xiShifted`
+via `xiShifted_eq_entire_on_strip`. Uniform bottom strip stays conditional;
+exact residual filed as `wireStrip_bottom_M40_at_zero_residual`. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-STRIPB bottom M40 strip at `x = 0`: pointwise endpoint `1/2` plus
+closed-ball sup `C = 40` gives `xiShifted ≠ 0` on the `δ = (1/2)/40`
+vertical segment below `x = 0`. Chains `wireHbot_bot_point_half_feeder`
+with `uniform_bot_deriv_M40_of_closedBall`; mirror of
+`wireStrip_top_M40_at_zero_of_ballSup40`. -/
+theorem wireStrip_bottom_M40_at_zero_of_ballSup40
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ) (hy_lo : -(1 / 2 : ℝ) < y)
+    (hy_hi : y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) :
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+  have hx_mem : (0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+    exact Set.mem_Icc.mpr ⟨by norm_num, by norm_num⟩
+  have hcast : ((1 / 2 : ℂ)) = ((((1 / 2 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  have hBot0 : (1 / 2 : ℝ) ≤
+      ‖CentralCoverAssembly.xiShiftedEntire ((((0 : ℝ)) : ℂ) - Complex.I * ((1 / 2 : ℂ)))‖ := by
+    rw [hcast]
+    exact wireHbot_bot_point_half_feeder
+  have hDeriv0 : ∀ v ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)),
+      ‖deriv CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((v : ℝ)) : ℂ))‖ ≤ (40 : ℝ) := by
+    intro v hv
+    exact Door3SliverEdge.uniform_bot_deriv_M40_of_closedBall hC 0 hx_mem v hv
+  have hne_ent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    have hres := Door3TopEdge.lower_boundary_nonvanishing_from_outer_bound
+      CentralCoverAssembly.xiShiftedEntire
+      CentralCoverAssembly.xiShiftedEntire_differentiable 0
+      (1 / 2 : ℝ) (40 : ℝ) (by norm_num) (by norm_num) hBot0 hDeriv0 y hy_lo hy_hi
+    exact hres
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hy_lo
+  have hstrip_hi : y < (1 / 2 : ℝ) := by linarith
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hstrip_hi
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  rw [hagree]
+  exact hne_ent
+
+/-- WIRE-STRIPB exact residual: uniform bottom M40 strip still OPEN.
+The feeder above closes only the `x = 0` line; the full bottom edge strip
+needs the uniform `1/2` lower over `Set.Icc (-10) 10` (cf. `wireHbot_gap_residual`)
+and the closed-ball sup `C = 40` on `Metric.closedBall 0 12` via the banked
+bottom M40 bridge. -/
+def wireStrip_bottom_M40_at_zero_residual : Prop :=
+  (∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  (∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+
+end Door3RHWiring
+
+#print axioms Door3RHWiring.wireStrip_bottom_M40_at_zero_of_ballSup40

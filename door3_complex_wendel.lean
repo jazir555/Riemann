@@ -1443,4 +1443,45 @@ Hence G2 stays Prop without `U0`; H3 stays conditional via
 residual identity; gap: norm cap `U0` + `C2` inflation.
 -/
 
+/-! ## 19. WENDEL-D D-bound audit (PROOF-ONLY, FENCED, no build): D already banked, numeric cap banked.
+
+Greps (before edit, this turn, this file only):
+- telescope 8-fold assembly (TELE agent, section 18): `g2_step_nat/:1169`,
+  `g2_telescope8/:1184`, `g2_log_endpoints/:1193`, `g2_S_align/:1203`,
+  `g2_log_link8/:1212`, `g2_residual_eq/:1357`, `g2_G2_of_telescope_normcap/:1375`.
+  NOT duplicated here.
+- D-bound piece per G2 residual (`D = 1/(2*(w+8)) - 1/(2*w)`): `g2_D_eq/:1271`
+  (`1/(2*(wOuter+8)) - 1/(2*wOuter) = (-4)/(wOuter*(wOuter+8))` via `field_simp` +
+  `ring` with `wOuter ≠ 0`, `wOuter+8 ≠ 0` from `wOuter_re/:80`, `wOuter_add8_re`),
+  `g2_D_norm_le/:1287` (`‖D‖ ≤ 4/(4.375*4.375)` via `norm_div`, `norm_mul`,
+  `g2_norm_wOuter_lower`, `g2_norm_wOuter8_lower` from `g2_denom_lower_wOuter/:1114`).
+  Both already banked; NOT re-proved here (no duplicate).
+- tactic grep `sorry|admit|axiom|simpa`: prior sections comment-only mentions;
+  zero tactic uses in banked code (this section keeps that).
+
+Attempt (honest): the D-bound piece as filed needs no new derivation — the
+identity + absolute cap are closed. This section banks only the NEW explicit
+numeral corollary `g2_D_cap_le_021` (`4/(4.375*4.375) ≤ 0.21` by `norm_num`)
+and its composition `g2_D_norm_le_021` (`‖D‖ ≤ 0.21` by `le_trans` from the
+banked `g2_D_norm_le`). No `sorry`/`admit`/`axiom`/`simpa`; no new imports;
+no other files touched; no existing lines modified.
+-/
+
+theorem g2_D_cap_le_021 : 4 / (4.375 * 4.375) ≤ (0.21 : ℝ) := by
+  norm_num
+
+theorem g2_D_norm_le_021 :
+    ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ ≤
+      (0.21 : ℝ) :=
+  le_trans g2_D_norm_le g2_D_cap_le_021
+
+/-! D residual (exact, no force): absolute D-cap banked (`g2_D_norm_le` +
+`g2_D_norm_le_021` here); `G2_outerN8_prop C2` still conditional via
+`g2_G2_of_telescope_normcap/:1375` on `hU0 : ‖wOuter‖^2 ≤ U0` plus
+`hC2 : (Qcap+Ecap+Dcap)*U0 ≤ C2`; H3 still conditional via
+`h3_outer_of_lead_normcap_G2/:1036`. Value banked here: numeral `0.21`;
+gap: norm cap `U0` + `C2` inflation (not attempted: needs `‖w‖^2 = Re^2+Im^2`
+upper-cap API, outside fenced D-numeral brief).
+-/
+
 end Door3ComplexWendel

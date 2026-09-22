@@ -6129,6 +6129,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 WENDEL-D (background `ses_f348806a4`, proof-only,
+  grep-clean, wendel-only commit): D-cap numeral 0.21 (`:1470-1473`).
+  U0 normcap + C2 inflation open.
+- 2026-09-22 WIRE-STRIPB (background `ses_f348b0739`, proof-only,
+  grep-clean, wiring-only commit): bottom-M40-at-zero mirror CLOSED
+  (+ residual). Both zero-line strips conditional on ballSup40; uniform
+  strips open.
 - 2026-09-22 DIGAMMA-GAMMANEED (background `ses_f3489af52`, proof-only,
   grep-clean, digamma-only commit): inner envelope attempt FAILS honestly
   (14.625>4.5; M≥true>4.5 blocks this route). gamNeed all four open.
