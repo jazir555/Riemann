@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 SCUT53 (background `ses_f34767ed3`, proof-only,
+  grep-clean, pilot-only commit): shard updated (F27, below bars) +
+  k=29 CONSTRUCTIVE (+0.126 via 11π anchor, biggest leg yet `:7713`).
+  Assembly F27+t29 + k=31 next.
 - 2026-09-22 OFFAXIS-BIGS (background `ses_f34752dfd`, proof-only,
   grep-clean, off_axis-only commit): S6 closed at OA11 (combo6 lower +
   amp) + S6 mid-budget. Surplus composition next.
