@@ -5917,6 +5917,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-LAMBDA0 (background `ses_f34e3fdf7`, proof-only,
+  NO-EDIT gap): Λ₀≤479 NOT closable — banked uppers cover only narrow
+  rect ([0.05,0.74]; fat rect extends to Re=-1.12/1.91 where Dirichlet
+  route invalid, needs FE); pi-upper + polar caps absent everywhere.
+  Coverage 0% of fat rect (inadmissible-extrapolation arithmetic
+  explicitly refused). Patch order: (i) piOf upper, (ii) polar caps,
+  (iii) FE+Stirling wide caps.
 - 2026-09-22 DERIV-INNER (background `ses_f34e3fdf6`, proof-only,
   grep-clean, deriv_up-only commit): INNER set filled at honest 125 —
   geometry covers (Re margins 0.135/0.095, Im margin 10.24; R02-disc
