@@ -5694,6 +5694,17 @@ sorry-free infrastructure and the complete commit ledger above.
   impossible, no force. STRATEGIC: per-term gains (+0.707 over k=7..12,
   ~0.12/term declining) cannot close gap 5.024 (~50 terms needed) —
   per-term lane PAUSED; slow-leg machinery owned by SCUT-SLOW survey.
+- 2026-09-22 SCUT-SLOW (background `ses_f374aee5a`, read-only, no
+  edits): slow machinery mapped. R00 S2/S4 shapes transfer but numerals
+  don't (σ 0.395 vs 1/2; norm route fails at both points — sCut uses Re
+  floors). R00 phases (t=8.75) don't transfer; tails do (recomputed with
+  ‖s‖≤12). S8 floor decomposed: 2/7 = Re(S2) base (reused everywhere);
+  -4 = four -1 placeholders (n=3,5 PERMANENT dead, n=7 upgraded to
+  +27/100); growth only from k≥9 locks. sCutOA11 (t=11) NEVER closed
+  its slow leg either (conditionals only; combos t=11-essential, sCut
+  n=5 dead where OA11 n=5 lives). SMALLEST NEXT: `sSCUT_eta13_Re_le_neg`
+  destructive closure (6-step recipe: cpow14 split → rpow14 → cos floor
+  from `:4366` → product → odd bridge → negate; then k=14/15 growth).
 - 2026-09-22 SCUT26 (background `ses_f3766f8f0`, proof-only, grep-clean):
   phase SHAPE corrected (10·log12, not 11·log12 — multiplier is t=10 in
   all mirrors `:3287/:3714`) + theta12 wide window `:3842` (θ∈[24.768,
