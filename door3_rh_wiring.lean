@@ -1817,3 +1817,52 @@ Verdict: GAP — no honest banked R02-disc/Dirichlet shape closes the uniform
 `cZ` floor on `I * Icc (-10) 10`. `edgeHalf_topZetaFloor_missing` stays as the
 exact missing numeral (edge/zeta lane owns it). No numeric force; no change to
 any other file; append-only note. -/
+
+/-! ## WIRE-HTOPGAP pointwise feeder + uniform residual (append-only, no force).
+
+Grep (read before filing):
+* `hTopLower` consumer shape `door3_rh_wiring.lean:209,234,252,344,364,488`
+  (= `1/2 ≤ ‖xiShiftedEntire (x + I/2)‖` on `Set.Icc (-10) 10`);
+  feasible-half adapters `:341-381`; deriv side banked via
+  `Door3SliverEdge.uniform_top_deriv_of_closedBall` (`door3_sliver_edge.lean:342-365`).
+* EDGE-HLOWER survey `:1519-1565`: `edgeS_top` (`:43-52`, `Re s = 0`),
+  `entire_top_expand` (`:122-164`), endpoint norm `= 1/2` at `x = 0`
+  (`:221-234`), sharpness (`:202-210`, `1/2` maximal closable);
+  poly block (`DerivCauchyBridge.polyOf (I*x)`, norm `0` at `x = 0`,
+  `central_cover_assembly.lean:6328,6339-6356`); pi single lower
+  `CellUniform.pi_lower_of_re` (`interval_arith.lean:1752`,
+  `1/2 ≤ ‖pi‖` for `Re ≤ 1/2`); Gamma floor MISSING at `Re = 0`;
+  zeta floor MISSING (`edgeHalf_topZetaFloor_missing`, `:1573`;
+  grid `premZeta` only at `Re ∈ {0.395, 0.2, 0.105}`,
+  `door3_premise_zeta.lean:66-98`; `Re = 0` only qualitative nonzero
+  `Door3TailEtaUpper.zeta_re_zero_nonzero`).
+* EDGE-HLOWER2 verdict `:1788-1819`: R02-disc shapes are UPPERS only
+  (wrong direction), Dirichlet lower needs `1 < Re s`, so no honest banked
+  shape closes uniform `cZ` on `I * Icc (-10) 10`.
+
+ONE honest feeder below: pointwise `1/2` leaf at `x = 0` re-exported into
+wiring namespace (banked `Door3SliverEdge.edgeTop_single_lower`; proof is one
+`exact`). This banks the endpoint leaf of the uniform target; full uniform
+`1/2` stays OPEN (poly-zero blocks the whole-interval product route at
+`x = 0`; zeta + Gamma quantitative floors at `Re = 0` remain unbanked).
+Exact residual filed as `wireHtop_gap_residual` (equals
+`edgeHalf_topLower_missing`, `:1566`). -/
+
+namespace Door3RHWiring
+
+/-- WIRE-HTOPGAP pointwise top-edge feeder at `x = 0` (maximal closable value;
+endpoint leaf of the uniform `hTopLower` target, via banked single-point numeral). -/
+theorem wireHtop_top_point_half_feeder :
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((((0 : ℝ)) : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3SliverEdge.edgeTop_single_lower
+
+/-- WIRE-HTOPGAP exact residual: uniform `1/2` floor on `Set.Icc (-10) 10`
+still OPEN (pointwise leaf above only; product route blocked at `x = 0` by the
+poly zero; zeta/Gamma quantitative floors at `Re = 0` unbanked). -/
+def wireHtop_gap_residual : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (((1 / 2 : ℝ)) : ℂ))‖
+
+end Door3RHWiring
+
+#print axioms Door3RHWiring.wireHtop_top_point_half_feeder

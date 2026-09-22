@@ -6021,6 +6021,16 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, assembly-only commit): R00 center conditional
   (`of_tenth_lower :16988` + residual spec `:16993` + obligation
   `:16996` via budget<0.1). Needs xiShifted-at-center enclosure.
+- 2026-09-22 WIRE-HTOPGAP (background `ses_f34951a3c`, proof-only,
+  grep-clean, wiring-only commit): endpoint `1/2` leaf banked into wiring
+  `:1855` (partial value) + gap residual Prop `:1862`. Uniform floor
+  still needs zeta/Gamma floors at Re=0 (edge/zeta lane owns).
+- 2026-09-22 FIRSTCELL-S4 (background `ses_f3495b129`, proof-only,
+  grep-clean, first_cell-only commit): S4 slice `:1586` + Tendsto `:1612`
+  + residuals `:1623-1649`. Numeral open (k=3,4 rpow bounds missing).
+- 2026-09-22 WENDEL-G1 (background `ses_f34951a34`, proof-only,
+  grep-clean, wendel-only commit): Im² G1-expression `:994` +
+  conditional inflation `:1012` + H3 chain `:1036`. G2 + normcaps open.
 - 2026-09-22 OFFAXIS-NEXT (background `ses_f34951a35`, proof-only,
   grep-clean, off_axis-only commit): S4096 triangle transfer `:9224` +
   conditional feeder `:9247` + mid budget 41/750 `:9256` + residual Prop
@@ -6034,6 +6044,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, RH-only commit): `xiCentralEdgeStrips10_of_zeroFreeCover
   :12487` (mirrors :12286) — Hmain+Hedge+Hcut collapse to single
   `XiCentralZeroFreeCover 10`; open = the cover itself + tail Htail.
+- 2026-09-22 GAMMA-N15 (background `ses_f34a2edf1`, proof-only,
+  grep-clean + 4 audits, premise_gamma-only commit): E06 Seq15 rung
+  0.655 `:7736` (ceiling 0.65541<0.66, gap 0.005, increment +0.002 —
+  asymptoting below gate). N16-next filed `:7974`.
+- 2026-09-22 CELL-H (background `ses_f34943443`, proof-only, grep-clean,
+  interval-only commit): R08 center conditional `:35413` (poly 13.8,
+  base 6.9; need Agam·Azeta≥0.0200, have 3.85e-9 — same 7-order wall).
 - 2026-09-22 CELL-G (background `ses_f3495b110`, proof-only, grep-clean,
   interval-only commit): R07 center conditional `:35355` (R06 mirror,
   poly 5.35 consumed). Same 7-order wall (need Agam·Azeta≥0.0517, have

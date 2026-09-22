@@ -1550,3 +1550,104 @@ theorem FC_eta_Tendsto_S2_exists :
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-S4 wave: honest larger-N even slice `S₄` + exact residual (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Def `FC_etaF0395` (`door3_first_cell.lean:537`):
+  `(((k : ℝ) + 1) ^ (-(0.395 : ℝ)))`.
+* Banked slice `FC_slice_S2_of_tendsto` (`:1112-1130`):
+  `Antitone.alternating_series_le_tendsto hL hAnti 1` → `S₂ ≤ L`.
+* Banked `Antitone FC_etaF0395` (`:1467` `FC_etaF0395_antitone`).
+* Banked `Tendsto` existence (`:1534` `FC_eta_Tendsto_exists`,
+  `:1544` `FC_eta_Tendsto_S2_exists`).
+* Absent in file (grep-clean this wave): `FC_slice_S4` / `slice_S4` (no match),
+  `HasSum` at `σ = 0.395` (only `etaDirichlet_summable` / `summable_etaPairTerm`
+  discussion `:1492-1496`, no banked `HasSum`), tail `majorant`
+  (only patch-phase comment `:946` `pair-tail majorant + eta-factor cap`,
+  no banked `‖L - S‖ ≤ R`), convergence-factor assembly
+  `etaFactor` / `‖1 - 2 ^ (1 - s)‖` (no match).
+* Term shapes grepped: `FC_etaF0395 i` in
+  `∑ i ∈ Finset.range (2 * k), (-1 : ℝ) ^ i * FC_etaF0395 i`
+  (`:544-546`, `:1113-1114`, `:1535-1536`); `S₂` closed form
+  `1 - (2 : ℝ) ^ (-(0.395 : ℝ))` (`:547-552`, `:1120-1128`).
+
+Verdict: bank ONE honest larger-N even slice `S₄ ≤ L` via banked
+`Tendsto` + `Antitone` at `k = 2` (no tail majorant used or claimed);
+numeral / tail / factor remain patch-phase residuals filed below.
+No build attempted (BRIDGE-VERIFY3 owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Honest larger-N even slice: every converged alternating limit dominates
+`S₄ = 1 - 2 ^ -σ + 3 ^ -σ - 4 ^ -σ` at `σ = 0.395`
+(`k = 2` in `Antitone.alternating_series_le_tendsto`, mirroring
+`FC_slice_S2_of_tendsto` at `k = 1`). No tail bound needed or claimed. -/
+theorem FC_slice_S4_of_tendsto (L : ℝ)
+    (hL : Filter.Tendsto
+      (fun (n : ℕ) => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+      Filter.atTop (nhds L))
+    (hAnti : Antitone FC_etaF0395) :
+    1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ L := by
+  have h_raw : (∑ i ∈ Finset.range (2 * 2), (-1 : ℝ) ^ i * FC_etaF0395 i) ≤ L :=
+    Antitone.alternating_series_le_tendsto hL hAnti 2
+  have h_eq : (∑ i ∈ Finset.range (2 * 2), (-1 : ℝ) ^ i * FC_etaF0395 i)
+      = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+        - (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+    rw [show (2 * 2 : ℕ) = 4 from by norm_num,
+      show (4 : ℕ) = 3 + 1 from by norm_num,
+      show (3 : ℕ) = 2 + 1 from by norm_num,
+      show (2 : ℕ) = 1 + 1 from by norm_num]
+    simp only [Finset.sum_range_succ, Finset.sum_range_one,
+      Finset.sum_range_zero]
+    simp only [FC_etaF0395, pow_zero, pow_one, Nat.cast_zero, Nat.cast_one,
+      Nat.cast_ofNat, Real.one_rpow]
+    ring
+  rw [← h_eq]
+  exact h_raw
+
+/-- Combined: the converged limit dominates `S₄`
+(banked `Tendsto` existence + banked antitone). -/
+theorem FC_eta_Tendsto_S4_exists :
+    ∃ L : ℝ, Filter.Tendsto
+      (fun n : ℕ => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+      Filter.atTop (nhds L) ∧ 1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ L := by
+  obtain ⟨L, hL⟩ := FC_eta_Tendsto_exists
+  exact ⟨L, hL, FC_slice_S4_of_tendsto L hL FC_etaF0395_antitone⟩
+
+/-- Missing numeral piece 1/2 for an `S₄` numeral floor: lower bound on
+`3 ^ -σ` (TRUE `≈ 0.648`, patch-phase interval arithmetic). Filed as
+obligation only; not claimed proved. -/
+def FC_rpow3_head_lower : Prop := (0.64 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- Missing numeral piece 2/2 for an `S₄` numeral floor: upper bound on
+`4 ^ -σ` (TRUE `≈ 0.578`, patch-phase interval arithmetic). Filed as
+obligation only; not claimed proved. -/
+def FC_rpow4_head_upper : Prop := (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.59 : ℝ)
+
+/-- Missing tail piece: pair-tail majorant at `σ = 0.395`
+(no banked `‖L - S₄‖ ≤ R` in file; patch phase). Filed as obligation
+shape only; not claimed proved. -/
+def FC_etaS4_tail_obligation : Prop :=
+  ∃ L R : ℝ, Filter.Tendsto
+    (fun n : ℕ => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+    Filter.atTop (nhds L) ∧
+    ‖L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)))‖ ≤ R
+
+/-- Exact S4 residual (no proof content; records the grep-clean gap):
+`S₄` slice banked above (`FC_slice_S4_of_tendsto`, `FC_eta_Tendsto_S4_exists`);
+`S₄` partial numeral OPEN (needs `FC_rpow3_head_lower` + `FC_rpow4_head_upper`
+alongside banked `FC_rpow2_head_upper`, none banked for `k = 3, 4`);
+tail majorant OPEN (`FC_etaS4_tail_obligation`, no banked majorant);
+zeta-from-eta convergence-factor assembly OPEN (no banked
+`‖1 - 2 ^ (1 - s)‖` factor at `sCenter` in file).
+True `S₄ ≈ 0.31` still short of `1.1` / `1.4`, so larger-`N` alone
+does not close `zetaLower` without the complex-phase + factor chain. -/
+theorem FC_S4_residual_gap : True := by
+  trivial
+
+end Door3FirstCellClose
+

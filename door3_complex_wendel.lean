@@ -962,4 +962,97 @@ theorem digamma_shift_wOuter_8 :
   unfold S_outerN8
   exact h
 
+/-! ## 16. WENDEL-G1 chain attempt (hEq + StirlingVert lead): GAP with exact residual.
+
+Greps (before edit, this turn, this file only):
+- `G1_outerN8_prop` at `:707` (def), `:694,719,776,829` (cites);
+  `G2_outerN8_prop` at `:770` (def), `:776` (use);
+  `S_outerN8/:761`, `cN_outerN8/:764`, `target_outer/:767`;
+- `hEq` binder at `:625,774` (`h3_outer_of_G1_G2` hypothesis shape
+  `digamma (wOuter+8) = digamma wOuter + S_outerN8`);
+  banked close `digamma_shift_wOuter_8` at `:951`;
+- H3 combiner `h3_outer_of_G1_G2` at `:773`;
+  lead `stirling_wOuter_add8` at `:848`, cap `:861`;
+- tactic greps `sorry|admit|axiom|simpa`: comment-only mentions
+  (`:648,690,757,835,886`); zero tactic uses.
+
+Attempt (honest chain): rewrite the StirlingVert lead into the exact G1
+expression shape (`half_div_eq`), bank it in native `Im^2` form
+(`stirling_G1expr_im2`), then give the exact inflation conditional
+(`G1_of_normcap`) plus the hEq+lead+G2 H3 chain
+(`h3_outer_of_lead_normcap_G2`). The `‖w‖^2`-denominator G1 as filed
+(`G1_outerN8_prop`) does NOT follow from the lead alone: `Im^2 ≤ ‖w‖^2`
+goes the wrong way, so conversion needs an explicit norm cap
+`‖wOuter+8‖^2 ≤ U` plus `3*U ≤ C*(-4.375)^2`, filed as hypotheses.
+G2 stays Prop. Hence G1/G2 open, H3 not closed here.
+No `sorry`/`admit`/`axiom`/`simpa`; no new imports; this section only.
+-/
+
+theorem half_div_eq (w : ℂ) : (1 / 2 : ℂ) / w = 1 / (2 * w) := by
+  ring
+
+theorem stirling_G1expr_im2 :
+    ‖Complex.digamma (wOuter + (8 : ℂ)) -
+      (Complex.log (wOuter + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wOuter + (8 : ℂ))))‖ ≤
+      3 / (-4.375) ^ 2 := by
+  have hhalf : (1 / 2 : ℂ) / (wOuter + (8 : ℂ)) =
+      (1 : ℂ) / (2 * (wOuter + (8 : ℂ))) :=
+    half_div_eq _
+  have hrewrite : Complex.digamma (wOuter + (8 : ℂ)) -
+      (Complex.log (wOuter + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wOuter + (8 : ℂ)))) =
+      Complex.digamma (wOuter + (8 : ℂ)) - Complex.log (wOuter + (8 : ℂ)) +
+        (1 / 2 : ℂ) / (wOuter + (8 : ℂ)) := by
+    rw [hhalf]
+    ring
+  rw [hrewrite]
+  exact stirling_wOuter_add8
+
+theorem G1_of_normcap (C U : ℝ)
+    (hU : ‖wOuter + (8 : ℂ)‖ ^ 2 ≤ U)
+    (hC : 3 * U ≤ C * (-4.375) ^ 2) :
+    G1_outerN8_prop C := by
+  have hIm2pos : (0 : ℝ) < (-4.375) ^ 2 := by
+    norm_num
+  have hne : wOuter + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wOuter_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hnormpos : (0 : ℝ) < ‖wOuter + (8 : ℂ)‖ :=
+    norm_pos_iff.mpr hne
+  have hnorm2pos : (0 : ℝ) < ‖wOuter + (8 : ℂ)‖ ^ 2 :=
+    pow_pos hnormpos 2
+  have hle : 3 / (-4.375) ^ 2 ≤ C / ‖wOuter + (8 : ℂ)‖ ^ 2 := by
+    rw [div_le_div_iff hIm2pos hnorm2pos]
+    have h3 : 3 * ‖wOuter + (8 : ℂ)‖ ^ 2 ≤ 3 * U :=
+      mul_le_mul_of_nonneg_left hU (by norm_num)
+    linarith
+  have hmain := stirling_G1expr_im2
+  unfold G1_outerN8_prop
+  exact le_trans hmain hle
+
+theorem h3_outer_of_lead_normcap_G2 (C U C2 : ℝ)
+    (hU : ‖wOuter + (8 : ℂ)‖ ^ 2 ≤ U)
+    (hC : 3 * U ≤ C * (-4.375) ^ 2)
+    (hG2 : G2_outerN8_prop C2) :
+    ‖Complex.digamma wOuter - target_outer‖ ≤
+      C / ‖wOuter + (8 : ℂ)‖ ^ 2 + C2 / ‖wOuter‖ ^ 2 := by
+  have hG1 : G1_outerN8_prop C :=
+    G1_of_normcap C U hU hC
+  have hEq : Complex.digamma (wOuter + (8 : ℂ)) =
+      Complex.digamma wOuter + S_outerN8 :=
+    digamma_shift_wOuter_8
+  exact h3_outer_of_G1_G2 C C2 hEq hG1 hG2
+
+/-! G1 residual (exact, no force): `G1_outerN8_prop C` needs
+`hU : ‖wOuter+8‖^2 ≤ U` (explicit norm cap, e.g. from
+`‖w‖^2 = Re^2+Im^2 = 8.1975^2+4.375^2`) plus
+`hC : 3*U ≤ C*(-4.375)^2` (C-inflation, hand ratio `≈ 13.54`);
+`G2_outerN8_prop C2` (log-shift link, Binet remainder, unbanked) still open;
+hence H3 via `h3_outer_of_lead_normcap_G2` stays conditional. Value banked:
+native-`Im^2` G1-expression disc `stirling_G1expr_im2`; gap: norm-cap U + G2.
+-/
+
 end Door3ComplexWendel
