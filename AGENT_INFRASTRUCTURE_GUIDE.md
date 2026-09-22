@@ -6048,6 +6048,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, assembly-only commit): R00 leaf+H conditional
   (`leaf_of_residuals :17022` + `H_of_residuals :17026` from center+deriv
   residuals). Deriv residual (uniform ≤0.05) filed `:17019`.
+- 2026-09-22 TAIL-M20 (background `ses_f3492c3e0`, proof-only,
+  grep-clean, tail-only commit): M1048576 rung `3/128≈0.0234 :881`
+  (exact 2^20 mirror, 1024² verified). Ladder: M2097152 odd-floor next.
 - 2026-09-22 DERIV-CELLD (background `ses_f34951a38`, proof-only,
   grep-clean, deriv-only commit): leaf-sub post (dLeaf-6.25I) closed
   93400 `:1616` (honest Cauchy C=934/rho=0.01; poly 6.95/val 22.74/pi
