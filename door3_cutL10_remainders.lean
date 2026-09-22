@@ -1863,3 +1863,58 @@ theorem cutL10_tighter_gap_to_tier :
 
 end Door3CutL10CutoffTighten
 
+/-! ## (h) CUTL joint multi-factor combined tighten (append-only tail; LF)
+
+Joint `12.86` vs tier `0.04` (`321.5x`): tighter fence at `:1840-1860`
+(`cutL10_poly_tighter_cap`, `cutL10_joint_tighter_value`,
+`cutL10_joint_tighter_cap`, `cutL10_tighter_gap_to_tier`) plus factor sups
+(`cutL10_ballPoly_upper` at `:766` poly `≤ 67` via `‖z‖ ≤ 11.56`,
+`cutL10_ballPi_upper` at `:791` pi `≤ 16/5` via `Real.pi_lt_d2`,
+`cutL10_ballSup_of_factorSups` at `:819` joint `≤ 12.87`).
+
+Two independent honest tightenings chained here:
+(A) poly `67 → 66.95` (banked `:1840`, exact value `66.9418` at `:1845`);
+(B) pi `16/5 = 3.2 → 3.15` (same `Real.pi_lt_d2` + `norm_num` + `linarith`
+pattern as `:805-808`, no new axiom).
+Combined joint `66.95 * 3.15 * (1/100) * 6 = 12.65355 ≤ 12.66`
+still BLOCKED vs `0.04` (gap `12.61355`, ratio `316.33875x`).
+Verdict: GAP (no route to `0.04`; blockage is poly·Gamma spread, not pi/zeta).
+-/
+
+namespace Door3CutL10JointTighten
+
+/-- Second factor tightening: pi `≤ 3.15` (was `16/5 = 3.2` at `:791`). -/
+theorem cutL10_pi_tighter_cap_315 : Real.pi ≤ (3.15 : ℝ) := by
+  have h := Real.pi_lt_d2
+  norm_num at h ⊢
+  linarith
+
+/-- Combined two-factor joint exact value
+(poly `66.95` × pi `3.15` × Gamma `1/100` × zeta `6`). -/
+theorem cutL10_joint_twoFactor_value :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * 6 = (12.65355 : ℝ) := by
+  norm_num
+
+/-- Combined two-factor joint fence `≤ 12.66` (was `12.86` at `:1855`). -/
+theorem cutL10_joint_twoFactor_cap :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * 6 ≤ (12.66 : ℝ) := by
+  norm_num
+
+/-- Exact residual to the `0.04` tier: blocked, gap `12.61355`. -/
+theorem cutL10_twoFactor_gap_to_tier :
+    ((12.65355 : ℝ) - 0.04 = (12.61355 : ℝ)) ∧ ((0.04 : ℝ) < 12.65355) := by
+  constructor <;> norm_num
+
+/-- Exact ratio to tier: `12.65355 / 0.04 = 316.33875` (was `321.5x`). -/
+theorem cutL10_twoFactor_ratio_to_tier :
+    (12.65355 : ℝ) / 0.04 = (316.33875 : ℝ) := by
+  norm_num
+
+end Door3CutL10JointTighten
+
+#print axioms Door3CutL10JointTighten.cutL10_pi_tighter_cap_315
+#print axioms Door3CutL10JointTighten.cutL10_joint_twoFactor_value
+#print axioms Door3CutL10JointTighten.cutL10_joint_twoFactor_cap
+#print axioms Door3CutL10JointTighten.cutL10_twoFactor_gap_to_tier
+#print axioms Door3CutL10JointTighten.cutL10_twoFactor_ratio_to_tier
+
