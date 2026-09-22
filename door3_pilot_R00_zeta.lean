@@ -3803,4 +3803,34 @@ theorem sSCUT_log_twelve_via_eleven_eq :
   rw [h12] at h
   linarith
 
+/-- `log 12` upper (`log 12 ≤ 2.4934941844` from `sSCUT_log_eleven_le` +
+`log (12/11) ≤ 1/11`; mirror of `sSCUT_log_eleven_le` at `:3563` with `x = 1/11`
+via `Real.log_le_sub_one_of_pos`). -/
+theorem sSCUT_log_twelve_le : Real.log 12 ≤ (2.4934941844 : ℝ) := by
+  have h12 := sSCUT_log_twelve_via_eleven_eq
+  have h11 := sSCUT_log_eleven_le
+  have hub : Real.log (12 / 11 : ℝ) ≤ (1 / 11 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 12 / 11)
+    have he : (12 / 11 : ℝ) - 1 = (1 / 11 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.4025850934 : ℝ) + 1 / 11 ≤ (2.4934941844 : ℝ) := by norm_num
+  linarith
+
+/-- `log 12` lower (`2.4768275168 ≤ log 12` from `sSCUT_log_eleven_ge` +
+`log (12/11) ≥ 1/12`; mirror of `sSCUT_log_eleven_ge` at `:3576` with `x = 1/11`
+via `log (11/12) ≤ -1/12` and `log (12/11) = -log (11/12)`). -/
+theorem sSCUT_log_twelve_ge : (2.4768275168 : ℝ) ≤ Real.log 12 := by
+  have h12 := sSCUT_log_twelve_via_eleven_eq
+  have h11 := sSCUT_log_eleven_ge
+  have hub : Real.log (11 / 12 : ℝ) ≤ (-1 / 12 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 11 / 12)
+    have he : (11 / 12 : ℝ) - 1 = (-1 / 12 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (12 / 11 : ℝ) = -Real.log (11 / 12 : ℝ) := by
+    have heq : (12 / 11 : ℝ) = (11 / 12 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.4768275168 : ℝ) ≤ 2.3934941835 + 1 / 12 := by norm_num
+  rw [h12, hinv]
+  linarith
+
 end Door3PilotR00Zeta
