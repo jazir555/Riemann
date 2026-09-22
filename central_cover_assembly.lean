@@ -17598,3 +17598,75 @@ theorem R04_H_of_residuals (hc : R04_center_residual_two_tenths)
   R04_H_instance (R04_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R05 leaf+H residual set (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R05_leaf_obligations` 1728-1730: center `(0.15 + 0.06 * R05.radius <= norm
+  at R05.center)` AND deriv `(forall w, R05.mem w -> ||deriv xiShifted w|| <= 0.06)`
+  (inner tier `(eps, M) = (0.15, 0.06)`).
+- `R05_H_instance` 1757-1767: takes `(h : R05_leaf_obligations) (c)
+  (hc_mem : c in gridFine) (hc_eq : c = (-2, 0.5, 0.01, 0.2))`, conclusion
+  `Exists R eps M, ... /\ 0 < eps /\ deriv bound /\ budget`.
+- `R05_radius_lt` 1715-1716 (`R05.radius < 1.26`); `R05_mem_gridFine` 1718-1724.
+- `fine_feasible_inner` 1029 (`0.15 + 0.06 * 1.26 < 0.3`); `fine_eps_inner_pos` 1034.
+- R04 shapes mirrored (`17562-17598`): `R04_budget_lt_app` 17563,
+  `R04_center_of_two_tenths_lower` 17569, `R04_center_residual_two_tenths` 17574,
+  `R04_center_obligation_of_residual_two_tenths` 17577, `R04_deriv_residual` 17582,
+  `R04_leaf_of_residuals` 17585, `R04_H_of_residuals` 17589.
+- Grep-clean before writing: no `R05_budget_lt_app`, `R05_center_of_three_tenths_lower`,
+  `R05_center_residual_three_tenths`, `R05_center_obligation_of_residual_three_tenths`,
+  `R05_deriv_residual`, `R05_leaf_of_residuals`, `R05_H_of_residuals` in file.
+
+Mirror for R05 inner tier `(eps, M) = (0.15, 0.06)` at `c05 = (-2, 0.5, 0.01, 0.2)`:
+budget `0.15 + 0.06 * radius < 0.3` lifts `R05_radius_lt`, so
+`0.3 <= norm at R05.center` discharges the center conjunct; deriv residual is
+exactly the second conjunct; `leaf_of` rebuilds `R05_leaf_obligations`;
+`H_of` discharges the gridFine H shape via `R05_H_instance`
+(with `hc_mem + hc_eq` per `1757`, matching R04 form).
+Value-or-gap: budget `0.15 + 0.06 * 1.26 = 0.2256 < 0.3`; full R05 H leaf now
+conditional only on two named numeric enclosures (`0.3 <= norm` at center +
+uniform `||deriv xiShifted|| <= 0.06` on `R05`, not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R05 inner tier on the true radius. -/
+theorem R05_budget_lt_app : (0.15 : ℝ) + 0.06 * R05.radius < 0.3 := by
+  have h := R05_radius_lt
+  have hM : 0.06 * R05.radius < 0.06 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R05_center_of_three_tenths_lower (hC : (0.3 : ℝ) ≤ ‖xiShifted R05.center‖) :
+    (0.15 : ℝ) + 0.06 * R05.radius ≤ ‖xiShifted R05.center‖ := by
+  have hB := R05_budget_lt_app
+  linarith
+
+def R05_center_residual_three_tenths : Prop :=
+  (0.3 : ℝ) ≤ ‖xiShifted R05.center‖
+
+theorem R05_center_obligation_of_residual_three_tenths
+    (h : R05_center_residual_three_tenths) :
+    (0.15 : ℝ) + 0.06 * R05.radius ≤ ‖xiShifted R05.center‖ :=
+  R05_center_of_three_tenths_lower h
+
+def R05_deriv_residual : Prop :=
+  ∀ w, R05.mem w → ‖deriv xiShifted w‖ ≤ (0.06 : ℝ)
+
+theorem R05_leaf_of_residuals (hc : R05_center_residual_three_tenths)
+    (hd : R05_deriv_residual) : R05_leaf_obligations :=
+  ⟨R05_center_obligation_of_residual_three_tenths hc, hd⟩
+
+theorem R05_H_of_residuals (hc : R05_center_residual_three_tenths)
+    (hd : R05_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-2, 0.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R05_H_instance (R05_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly
