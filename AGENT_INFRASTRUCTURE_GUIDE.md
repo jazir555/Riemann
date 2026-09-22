@@ -6137,6 +6137,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 SCUT49 (background `ses_f348467eb`, proof-only,
+  grep-clean, pilot-only commit): k=21 DESTRUCTIVE locked (cos≥+1/4 via
+  even 10π anchor; eta21≤-1/20 + no_pos_lock). Floor stays -2.574.
+  (SCUT48 k=19 gap co-committed.)
 - 2026-09-22 ETA-S20IM (background `ses_f348467ef`, proof-only,
   grep-clean, suppliers-only commit): Im19/20 splits + caps + S20 Im
   conditional on S18 Im base (absent) + tail width 0.72. S18 Im needed.
