@@ -4117,4 +4117,48 @@ theorem CS_S4e_shortfall_1853 : (1.4 : ℝ) * 1.853 - 1.94 = 0.6542 := by
 #print axioms CS_zeta_of_S4e
 #print axioms CS_S4e_shortfall_1853
 
+/-! ## §A15. ETA-NEXT Im-1.20 / abs-1.95 honest gap (stall, banked windows)
+
+Audit (banked windows only, reuse no new analysis):
+* Im assembly banked: `-Im₂ ≥ 0.74955` (`CS_Im2_le_neg074955`,
+  `r₂ ≥ 0.75` + `sin φ₂ ≤ -0.9994`), `Im₃ ≥ 0.4501` (`CS_Im3_ge_04501`,
+  `r₃ ≥ 0.63` + `sin φ₃ ≥ 0.7145` via `CS_sin3_ge_07145` 4-split cubic),
+  `-Im₄ ≥ -0.04038` (`CS_Im4_le_004038`, `r₄ ≤ 0.60` + `sin φ₄ ≤ 0.0673`
+  via `CS_sin4_upper_00673`); sum `0.74955 + 0.4501 - 0.04038 = 1.15927`
+  (`CS_complex_S4_Im_ge_11592` at `1.1592`, `CS_S4C_Im_eq` +
+  `CS_cpow2_sCenter_im` / `CS_cpow3_sCenter_im` / `CS_cpow4_sCenter_im` splits).
+* `1.20` needs `+0.04073` beyond that banked sum; would need
+  `sin φ₃ ≥ 0.49083 / 0.63 ≈ 0.7791` at `r₃ = 0.63`, above the cubic
+  monotone limit `0.82388 - 0.82388 ^ 3 / 6 ≈ 0.7306746` on the banked
+  `e ∈ [0.82388, 1.38685]` window (`CS_log_three_ge/le` + 6-digit `π`).
+  So `CS_complex_S4_Im_ge_12` (`≥ 1.20`) does NOT close honestly here;
+  best honest stays `1.1592`.
+* Pythagoras: `1.56 ^ 2 + 1.1592 ^ 2 = 3.77734464 < 3.8025 = 1.95 ^ 2`
+  by `0.02515536` (`CS_complex_S4_Re_ge_156` + `CS_complex_S4_Im_ge_11592`
+  via `Complex.sq_norm`), so `CS_complex_S4_abs_ge_195` (`≥ 1.95`) does
+  NOT close; best honest stays `1.94` (`CS_complex_S4_abs_ge_194`);
+  shortfall at `cF = 1.853` stays `0.6542` (`CS_S4e_shortfall_1853`;
+  need `1.4 * 1.853 = 2.5942`). -/
+
+/-- Honest gap for the `1.20` Im target: it exceeds the banked
+`0.74955 + 0.4501 - 0.04038 = 1.15927` sum by `0.04073`, so `Im(S₄) ≥ 1.20`
+does NOT follow from `CS_Im2_le_neg074955` / `CS_Im3_ge_04501` /
+`CS_Im4_le_004038`; best honest stays `1.1592`
+(`CS_complex_S4_Im_ge_11592`). -/
+theorem CS_complex_S4_Im_ge_12_gap :
+    (1.20 : ℝ) - (0.74955 + 0.4501 - 0.04038) = 0.04073 := by
+  norm_num
+
+/-- Honest gap for the `1.95` abs target: `1.95 ^ 2` exceeds
+`1.56 ^ 2 + 1.1592 ^ 2` by `0.02515536`, so `‖S₄‖ ≥ 1.95` does NOT follow
+from (`CS_complex_S4_Re_ge_156`, `CS_complex_S4_Im_ge_11592`); best honest
+stays `1.94` (`CS_complex_S4_abs_ge_194`), shortfall stays `0.6542`
+(`CS_S4e_shortfall_1853`). -/
+theorem CS_complex_S4_abs_ge_195_gap :
+    (1.95 : ℝ) ^ 2 - ((1.56 : ℝ) ^ 2 + (1.1592 : ℝ) ^ 2) = 0.02515536 := by
+  norm_num
+
+#print axioms CS_complex_S4_Im_ge_12_gap
+#print axioms CS_complex_S4_abs_ge_195_gap
+
 end Door3CellSuppliers

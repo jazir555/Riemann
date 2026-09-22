@@ -5400,3 +5400,25 @@ sorry-free infrastructure and the complete commit ledger above.
   DG/DZ: `2041724+42*DG*934+42*40*DZ`. Build UNVERIFIED (proof-only).
   Next: DG owner (Gamma-deriv) + DZ owner (zeta-deriv) + DERIV-BUILD
   (guarded rebuild of ball_advance to verify the new instance).
+- 2026-09-22 SCUT13 (background `ses_f3784cfa7`, proof-only, grep-clean):
+  shard reassembly — `sSCUT_S8_add_eta9_eta7_Re_ge :3247` (S8+eta9+eta6
+  with r10/2→0.15 via `:3221` + 27/100 via `sSCUT_eta6_Re_ge`; name
+  `eta7`=n7=Lean idx6, doc-clarified) + `sSCUT_S8_eta9_eta7_shortfall
+  :3258` (`21/10-(-3529/1050+0.15+0.27)=5293/1050~=5.041`, still short).
+  New floor `-2.941` vs bar `2.1`. SCUT14 tasked (eta8 or tail-shave).
+- 2026-09-22 DERIV-DG (background `ses_f3784cfa6`, proof-only,
+  grep-clean): analyticity link closed — `R02_gamma_hasDerivAt :1084`
+  (outer `HasDerivAt Complex.Gamma` + `div_const` + `comp`, explicit
+  pole premise unlike pi's unconditional `const_cpow`) +
+  `R02_gammaDerivUp_of_upper :1106` (halving transport, no closed log
+  factor) + `R02_gammaDeriv_missingNumeral_spec :1140` (filed-missing,
+  no uniform DG majorant in-tree per grep record:
+  DerivCauchyBridge value-only, deriv_up conditional Cauchy, digamma
+  conditional psi, GammaFacts analyticity-only). No false numeral.
+  DG-NUM tasked (uniform Gamma-prime cap) + DZ owner + DERIV-BUILD.
+- 2026-09-22 ETA-NEXT (background `ses_f3784cfa5`, proof-only,
+  grep-clean): HONEST STALL banked as gaps, no false claims —
+  `CS_complex_S4_Im_ge_12_gap :4148` (1.20 needs +0.04073; sin3 cubic
+  limit 0.7307 blocks 0.7791 need) + `CS_complex_S4_abs_ge_195_gap
+  :4157` (1.95² exceeds 1.56²+1.1592² by 0.02515536). Best stays 1.94,
+  shortfall 0.6542. Next: r/log windows or tail/cF lane (ETA-TAIL).

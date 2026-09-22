@@ -3241,4 +3241,22 @@ theorem sSCUT_rpow10_neg_ge_03 : (0.3 : ℝ) ≤ (10 : ℝ) ^ (-(1 / 2 : ℝ)) :
   rw [hneg, show (0.3 : ℝ) = ((10 / 3 : ℝ))⁻¹ by norm_num]
   exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
 
+/-- Honest `S₈ + eta₉ + eta₆` `Re` floor (`-3529/1050 + 0.15 + 0.27 ≤ Re`;
+`r₁₀/2` concretized via `0.3` lower, `27/100` is `sSCUT_eta6_Re_ge`;
+`eta₇` in the name is `n = 7`, i.e. Lean index `6`). -/
+theorem sSCUT_S8_add_eta9_eta7_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 + 0.27 ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 6).re := by
+  rw [Complex.add_re]
+  have hS8e9 := sSCUT_S8_add_eta9_Re_ge
+  have h6 := sSCUT_eta6_Re_ge
+  have hr10 := sSCUT_rpow10_neg_ge_03
+  linarith
+
+/-- Honest shortfall vs the `21/10` bar (gap `5293/1050`; still short). -/
+theorem sSCUT_S8_eta9_eta7_shortfall :
+    ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15 + 0.27)) = (5293 / 1050 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

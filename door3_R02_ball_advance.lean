@@ -1063,6 +1063,83 @@ def R02_gammaDeriv_obligation (DG : ℝ) : Prop :=
   ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
     ‖deriv DerivCauchyBridge.gammaOf s‖ ≤ DG
 
+/-- Gamma-factor prime on R02 (local mirror of the banked `door3_deriv_up`
+`pi_hasDerivAt` shape and of `Door3Digamma.gOf_hasDerivAt`, no new import):
+`gammaOf s = Complex.Gamma (s / 2)`, so the chain rule with the inner
+`s ↦ s / 2` prime (`div_const`) gives
+`HasDerivAt gammaOf (dG * (1 / 2)) s` from any outer
+`HasDerivAt Complex.Gamma dG (s / 2)`.
+Banked analyticity supplying `hG` (grep record, read-only):
+* Mathlib `Complex.differentiableAt_Gamma`
+  (`Mathlib/Analysis/SpecialFunctions/Gamma/Deriv.lean:65`, needs
+  `hs : ∀ m : ℕ, s ≠ -m`; on the R02-disc `s`-rect `(s / 2).re ∈
+  [0.025, 0.37]`, so pole-avoidance follows from `re > 0`, exactly as in
+  `Zeta23/GammaFacts.lean:70` `gamma_ne_neg_nat`);
+* `Zeta23/GammaFacts.lean:76` `analyticAt_digamma` (Gamma and its deriv
+  analytic on `0 < re`, hence `HasDerivAt` at every such point);
+* `Door3Digamma.gOf_hasDerivAt` (`door3_digamma.lean:287`, same chain for
+  the locally-defined `gOf`, definitionally `gammaOf`).
+Unlike the pi case (`const_cpow`, unconditional), the outer premise `hG`
+stays explicit because `Complex.Gamma` has poles at `-ℕ`. -/
+theorem R02_gamma_hasDerivAt (s dG : ℂ)
+    (hG : HasDerivAt Complex.Gamma dG (s / 2)) :
+    HasDerivAt DerivCauchyBridge.gammaOf (dG * ((1 : ℂ) / 2)) s := by
+  have hHalf : HasDerivAt (fun t : ℂ => t / 2) ((1 : ℂ) / 2) s :=
+    (hasDerivAt_id' (x := s)).div_const (2 : ℂ)
+  have hComp : HasDerivAt (Complex.Gamma ∘ fun t : ℂ => t / 2)
+      (dG * ((1 : ℂ) / 2)) s :=
+    hG.comp hHalf
+  have heqF : (Complex.Gamma ∘ fun t : ℂ => t / 2) =
+      DerivCauchyBridge.gammaOf := by
+    unfold DerivCauchyBridge.gammaOf
+    rfl
+  rw [heqF] at hComp
+  exact hComp
+
+/-- Generic Gamma-factor deriv upper from an outer Gamma-prime cap
+(mirror of `R02_piDerivUp_of_upper` (:641): the pi lemma folds the closed
+`log π / 2` factor into `U * 2.15 / 2`; here the outer prime `dG` has no
+closed in-tree majorant, so the cap `‖dG‖ ≤ DGhalf` stays an explicit
+premise and the chain rule contributes only the `1 / 2` halving).
+Honestly flagged: this does NOT close `DG` — it only transports an outer
+`Complex.Gamma` prime cap at `s / 2` to a `gammaOf` prime cap at `s`. -/
+theorem R02_gammaDerivUp_of_upper (s dG : ℂ) (DGhalf : ℝ)
+    (hG : HasDerivAt Complex.Gamma dG (s / 2))
+    (hDG : ‖dG‖ ≤ DGhalf) :
+    ‖deriv DerivCauchyBridge.gammaOf s‖ ≤ DGhalf / 2 := by
+  have hder : deriv DerivCauchyBridge.gammaOf s = dG * ((1 : ℂ) / 2) :=
+    (R02_gamma_hasDerivAt s dG hG).deriv
+  rw [hder, norm_mul]
+  have hhalf : ‖((1 : ℂ) / 2)‖ = (0.5 : ℝ) := by
+    rw [norm_div, norm_one, Complex.norm_two]
+    norm_num
+  rw [hhalf]
+  have hle : ‖dG‖ * 0.5 ≤ DGhalf * 0.5 :=
+    mul_le_mul_of_nonneg_right hDG (by norm_num)
+  have hfin : DGhalf * 0.5 = DGhalf / 2 := by ring
+  rw [hfin] at hle
+  exact hle
+
+/-- Gamma-deriv numeral missing-spec (filed, not fixed): existence of a
+finite uniform `‖deriv gammaOf s‖ ≤ DG` cap on the R02-disc `s`-rect
+`Re ∈ [0.05,0.74]`, `Im ∈ [-8.25,-5.25]`, i.e.
+`∃ DG, 0 ≤ DG ∧ R02_gammaDeriv_obligation DG`.
+Not satisfiable this turn (per-rule-2 no concrete numeral is attempted):
+grep record — no uniform Gamma-prime majorant is banked in-tree:
+* `DerivCauchyBridge` (`central_cover_assembly.lean:6325-6520`) banks only
+  VALUE uppers (`poly_upper_R02_disc`, `pi_upper_R02_disc`,
+  `gamma_upper_R02_disc ≤ 40`); no `HasDerivAt` / `deriv` majorant for
+  `gammaOf` there;
+* `door3_deriv_up.lean:524` `gammaDerivUp_of_sup` is conditional Cauchy
+  (needs `DiffContOnCl` + sphere sup, no numeral);
+* `door3_digamma.lean:295` `gammaPrime_le_of_psiDisc` is conditional on a
+  digamma-disc premise + Gamma-value cap (no closed numeral);
+* `Zeta23/GammaFacts.lean:76` gives analyticity only (no norm cap).
+`R02_gamma_hasDerivAt` (above) closes the analyticity link; the numeral is
+the remaining Gamma-deriv-lane item. -/
+def R02_gammaDeriv_missingNumeral_spec : Prop :=
+  ∃ DG : ℝ, 0 ≤ DG ∧ R02_gammaDeriv_obligation DG
+
 /-- The banked partial-product deriv cap stays above tier `0.07`. -/
 theorem R02_polyPi_5465_above_tier07 : (0.07 : ℝ) < 54.65 := by
   norm_num
