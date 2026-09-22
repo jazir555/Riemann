@@ -1459,3 +1459,263 @@ end Door3CutL10TierB
 #print axioms Door3CutL10TierB.cutL10_tierB_sharedSup_1287_of_factorSups
 #print axioms Door3CutL10TierB.cutL10_thinRect_tightened_gap
 
+/-! ## (e) CutL10 FE-route mirror (append-only tail; LF): strip zeta wall 6.
+
+Mirror map (read-only): `Door3CutR10BallSup` APPEND-3/APPEND-4 in
+`door3_cutR10_ballsup.lean:1562-1996` (`cutR10_zeta_leftSix_of_FE`,
+`cutR10_zeta_sup_six_of_FE`, `cutR10_closedBall_sup_FEroute`,
+`cutR10_chiFE`, `cutR10_FE_side`, `cutR10_zeta_eq_chi_mul_reflected`,
+`cutR10_zeta_of_chi_reflected`, `cutR10_hFE_sliver_of_chi`,
+`cutR10_hFE_of_chi_and_middle`, `cutR10_FE_factor_shortfall`,
+`cutR10_zeta_rightSliver_closed`, `cutR10_reflected_Euler_two_closed`).
+
+Adaptation to the CutL10 strip (`s.re in [-1.06, 2.06]`,
+`s.im in [-11.56, -8.44]`, conjugate mirror of the right
+`[8.44, 11.56]` band):
+- Right sliver `Re >= 3/2 -> <= 3` stays Euler-gated here via the
+  in-file `Door3CutL10TierB.cutL10_zeta_rightSliver_of_euler`
+  (takes explicit `hDom`/`hReal`; no closed `hDom`/`hReal` banked in
+  this file, unlike the right lane `cutR10_hDom_closed`/`cutR10_hReal_closed`).
+- FE side conditions transfer with the sign flip:
+  `(1 - t).im = -t.im in [8.44, 11.56]` (was `[-11.56, -8.44]`),
+  still nonzero, so `riemannZeta_one_sub` applies unchanged.
+- Reflected middle rect for the full-`hFE` conditional is
+  `(1 - t).re in [-0.50, 2.06]`, `(1 - t).im in [8.44, 11.56]`
+  (positive band; the mirror image of the right-lane negative band).
+- Chi cap `<= 3` is OPEN here exactly as on the right (no banked
+  `<= 3` anywhere; banked chi numerals are exponential-scale), and the
+  reflected middle `<= 2` is OPEN (Euler `Re >= 2` covers only the
+  `t.re <= -1` sliver, width `0.06` of the full `2.56` width).
+
+Verdict: GAP (no tightened wall banked). The FE route reproduces the
+`<= 6` wall CONDITIONAL on the same two OPEN premises (chi `<= 3`,
+reflected middle `<= 2`) plus the Euler-gated right sliver; nothing
+closes to a tighter numeral. Joint stays at the honest `<= 12.87`
+(`67 * (16/5) * (1/100) * 6 = 12.864`) conditional. Exact sliver-width
+shortfall banked as `cutL10_FE_sliver_width_gap` below.
+-/
+
+namespace Door3CutL10FERoute
+
+open CentralCoverAssembly
+
+/-- Local FE chi factor, same shape as Mathlib `riemannZeta_one_sub`
+(mirror of `Door3CutR10BallSup.cutR10_chiFE`; center-independent). -/
+noncomputable def cutL10_chiFE (s : ℂ) : ℂ :=
+  2 * (2 * (Real.pi : ℂ)) ^ (-s) * Complex.Gamma s *
+    Complex.cos ((Real.pi : ℂ) * s / 2)
+
+/-- FE side conditions from the negative height band:
+`Im (1 - t) = -Im t in [8.44, 11.56] ≠ 0` rules out every `s = -n`
+and `s = 1` (mirror of `cutR10_FE_side` with the sign flip). -/
+theorem cutL10_FE_side (t : ℂ)
+    (hilo : (-11.56 : ℝ) ≤ t.im) (hihi : t.im ≤ (-8.44 : ℝ)) :
+    (∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) ∧ (1 - t) ≠ 1 := by
+  have him : (1 - t).im = -t.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  constructor
+  · intro n hn
+    have hcon := congrArg Complex.im hn
+    rw [him] at hcon
+    simp at hcon
+    linarith
+  · intro hcon1
+    have hcon := congrArg Complex.im hcon1
+    rw [him] at hcon
+    simp at hcon
+    linarith
+
+/-- FE restated through the local chi: `zeta t = chi (1 - t) * zeta (1 - t)`
+(mirror of `cutR10_zeta_eq_chi_mul_reflected`). -/
+theorem cutL10_zeta_eq_chi_mul_reflected (t : ℂ)
+    (hs1 : ∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) (hs2 : (1 - t) ≠ 1) :
+    riemannZeta t = cutL10_chiFE (1 - t) * riemannZeta (1 - t) := by
+  have h := riemannZeta_one_sub (s := 1 - t) hs1 hs2
+  rw [sub_sub_cancel] at h
+  unfold cutL10_chiFE
+  exact h
+
+/-- Conditional bridge: chi cap `C` times reflected cap `Z`
+(mirror of `cutR10_zeta_of_chi_reflected`). -/
+theorem cutL10_zeta_of_chi_reflected (t : ℂ)
+    (hs1 : ∀ n : ℕ, (1 - t) ≠ -(n : ℂ)) (hs2 : (1 - t) ≠ 1)
+    (C Z : ℝ)
+    (hC : ‖cutL10_chiFE (1 - t)‖ ≤ C)
+    (hZ : ‖zeta (1 - t)‖ ≤ Z) :
+    ‖zeta t‖ ≤ C * Z := by
+  have hz : zeta t = riemannZeta t := rfl
+  have hz2 : zeta (1 - t) = riemannZeta (1 - t) := rfl
+  have hFE := cutL10_zeta_eq_chi_mul_reflected t hs1 hs2
+  have hC0 : (0 : ℝ) ≤ C := le_trans (norm_nonneg _) hC
+  have hZr : ‖riemannZeta (1 - t)‖ ≤ Z := by
+    rw [← hz2]
+    exact hZ
+  rw [hz, hFE, norm_mul]
+  exact mul_le_mul hC hZr (norm_nonneg _) hC0
+
+/-- Route-(c) left/middle step, gated on one FE-product premise
+(mirror of `cutR10_zeta_leftSix_of_FE`). -/
+theorem cutL10_zeta_leftSix_of_FE (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (3 / 2 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ s.im) (hihi : s.im ≤ (-8.44 : ℝ))
+    (hFE : ‖zeta s‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 := by
+  have heq : (3 : ℝ) * 2 = 6 := by norm_num
+  rw [heq] at hFE
+  exact hFE
+
+/-- Route-(c) uniform `‖zeta‖ ≤ 6` on the CutL10 strip rectangle from the
+Euler-gated right sliver plus one explicit FE premise on the left/middle
+(mirror of `cutR10_zeta_sup_six_of_FE`; right side via the in-file
+`cutL10_zeta_rightSliver_of_euler`, so `hDom`/`hReal` stay explicit). -/
+theorem cutL10_zeta_sup_six_of_FE (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ s.im) (hihi : s.im ≤ (-8.44 : ℝ))
+    (hDom : ∀ t : ℂ, 1 + (1 / 2 : ℝ) ≤ t.re →
+      ‖riemannZeta t‖ ≤ ‖riemannZeta (t.re : ℂ)‖)
+    (hReal : ∀ t : ℂ, 1 + (1 / 2 : ℝ) ≤ t.re →
+      ‖riemannZeta (t.re : ℂ)‖ ≤ 1 + 1 / (t.re - 1))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (-11.56 : ℝ) ≤ t.im → t.im ≤ (-8.44 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 := by
+  by_cases hR : (3 / 2 : ℝ) ≤ s.re
+  · have h3 := Door3CutL10TierB.cutL10_zeta_rightSliver_of_euler s
+      (hDom s (by linarith)) (hReal s (by linarith)) hR
+    linarith
+  · push_neg at hR
+    have h6 := hFE s hlo (le_of_lt hR) hilo hihi
+    have heq : (3 : ℝ) * 2 = 6 := by norm_num
+    rw [heq] at h6
+    exact h6
+
+/-- Zero-free joint `≤ 12.87` via route (c) on the CutL10 ball:
+closed product identity plus the FE zeta sup above plus the Stirling
+Gamma premise (same numerals `67 * (16/5) * (1/100) * 6 = 12.864`;
+mirror of `cutR10_closedBall_sup_FEroute`). -/
+theorem cutL10_closedBall_sup_FEroute
+    (hDom : ∀ t : ℂ, 1 + (1 / 2 : ℝ) ≤ t.re →
+      ‖riemannZeta t‖ ≤ ‖riemannZeta (t.re : ℂ)‖)
+    (hReal : ∀ t : ℂ, 1 + (1 / 2 : ℝ) ≤ t.re →
+      ‖riemannZeta (t.re : ℂ)‖ ≤ 1 + 1 / (t.re - 1))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (-11.56 : ℝ) ≤ t.im → t.im ≤ (-8.44 : ℝ) → ‖zeta t‖ ≤ 3 * 2)
+    (hGammaSup : ∀ s : ℂ, (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ s.im → s.im ≤ (-8.44 : ℝ) →
+      ‖Complex.Gamma (s / 2)‖ ≤ (1 / 100 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (12.87 : ℝ) := by
+  intro z hz
+  have hP : xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) *
+      ((Real.pi : ℂ) ^ (-(shiftedS z / 2))) *
+      (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)) :=
+    Door3CutL10TierB.cutL10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  have hpoly := Door3CutL10BallSup.cutL10_ballPoly_upper z hz
+  have hpi := Door3CutL10BallSup.cutL10_ballPi_upper z hz
+  have hre := Door3CutL10BallSup.cutL10_mem_ball_shiftedS_re_bounds z hz
+  have him := Door3CutL10BallSup.cutL10_mem_ball_shiftedS_im_bounds z hz
+  have hz2 : ‖zeta (shiftedS z)‖ ≤ (6 : ℝ) :=
+    cutL10_zeta_sup_six_of_FE _ hre.1 hre.2 him.1 him.2 hDom hReal hFE
+  have hG : ‖Complex.Gamma (shiftedS z / 2)‖ ≤ (1 / 100 : ℝ) :=
+    hGammaSup _ hre.1 hre.2 him.1 him.2
+  have g1 : ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ ≤ (67 : ℝ) * (16 / 5) :=
+    mul_le_mul hpoly hpi (norm_nonneg _) (by norm_num)
+  have g2 : (‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖ ≤ ((67 : ℝ) * (16 / 5)) * (1 / 100) :=
+    mul_le_mul g1 hG (norm_nonneg _) (by norm_num)
+  have g3 : ((‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖) *
+        ‖Complex.Gamma (shiftedS z / 2)‖) * ‖zeta (shiftedS z)‖ ≤
+        (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 :=
+    mul_le_mul g2 hz2 (norm_nonneg _) (by norm_num)
+  have hcap : (((67 : ℝ) * (16 / 5)) * (1 / 100)) * 6 ≤ (12.87 : ℝ) := by
+    norm_num
+  exact le_trans g3 hcap
+
+/-- Sliver `hFE` conditional on chi `≤ 3` plus one reflected `≤ 2`
+(mirror of `cutR10_hFE_sliver_of_chi`; reflected premise explicit since
+no closed reflected-Euler bank exists in this file). -/
+theorem cutL10_hFE_sliver_of_chi_and_reflected (t : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (-1 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ t.im) (hihi : t.im ≤ (-8.44 : ℝ))
+    (hChi : ‖cutL10_chiFE (1 - t)‖ ≤ 3)
+    (hRef : ‖zeta (1 - t)‖ ≤ 2) :
+    ‖zeta t‖ ≤ 3 * 2 := by
+  have hside := cutL10_FE_side t hilo hihi
+  exact cutL10_zeta_of_chi_reflected t hside.1 hside.2 3 2 hChi hRef
+
+/-- Full-`hFE` residual as an explicit conditional: chi `≤ 3` on the left
+rectangle plus reflected `≤ 2` on `(1 - t).re in [-0.50, 2.06]`,
+`(1 - t).im in [8.44, 11.56]` give the exact `hFE` premise shape
+(mirror of `cutR10_hFE_of_chi_and_middle`; note the reflected band is
+the POSITIVE conjugate image). The second premise is the open middle
+strip; the first is the open chi cap. -/
+theorem cutL10_hFE_of_chi_and_middle
+    (hChi : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (-11.56 : ℝ) ≤ t.im → t.im ≤ (-8.44 : ℝ) →
+      ‖cutL10_chiFE (1 - t)‖ ≤ 3)
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (8.44 : ℝ) ≤ u.im → u.im ≤ (11.56 : ℝ) →
+      ‖zeta u‖ ≤ 2) :
+    ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (-11.56 : ℝ) ≤ t.im → t.im ≤ (-8.44 : ℝ) →
+      ‖zeta t‖ ≤ 3 * 2 := by
+  intro t hlo hhi hilo hihi
+  have hside := cutL10_FE_side t hilo hihi
+  have hre1 : (-0.50 : ℝ) ≤ (1 - t).re := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have hre2 : (1 - t).re ≤ (2.06 : ℝ) := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have him1 : (8.44 : ℝ) ≤ (1 - t).im := by
+    have heq : (1 - t).im = -t.im := by
+      rw [Complex.sub_im, Complex.one_im, zero_sub]
+    rw [heq]
+    linarith
+  have him2 : (1 - t).im ≤ (11.56 : ℝ) := by
+    have heq : (1 - t).im = -t.im := by
+      rw [Complex.sub_im, Complex.one_im, zero_sub]
+    rw [heq]
+    linarith
+  have hC := hChi t hlo hhi hilo hihi
+  have hZ := hMid (1 - t) hre1 hre2 him1 him2
+  exact cutL10_zeta_of_chi_reflected t hside.1 hside.2 3 2 hC hZ
+
+/-- Shortfall for full-rectangle `≤ 2` (mirror of
+`cutR10_FE_factor_shortfall`; center-independent arithmetic): any FE
+product with chi `≥ 2.08` and reflected zeta `≥ 1` already exceeds 2. -/
+theorem cutL10_FE_factor_shortfall (chi right : ℝ)
+    (hchi : (2.08 : ℝ) ≤ chi) (hr : (1 : ℝ) ≤ right)
+    (hchi0 : (0 : ℝ) ≤ chi) :
+    (2 : ℝ) < chi * right := by
+  have hmul : chi * (1 : ℝ) ≤ chi * right :=
+    mul_le_mul_of_nonneg_left hr hchi0
+  rw [mul_one] at hmul
+  linarith
+
+/-- Exact sliver-width gap: reflected Euler (`Re ≥ 2`, i.e. `t.re ≤ -1`)
+covers only width `0.06` of the full `2.56`-wide `hFE` domain
+(`-1.06` to `3/2`), so the middle `(-1, 3/2]` stays OPEN. -/
+theorem cutL10_FE_sliver_width_gap :
+    ((-1 : ℝ) - (-1.06) = (0.06 : ℝ))
+      ∧ ((0.06 : ℝ) < (3 / 2 : ℝ) - (-1.06)) := by
+  constructor <;> norm_num
+
+end Door3CutL10FERoute
+
+#print axioms Door3CutL10FERoute.cutL10_FE_side
+#print axioms Door3CutL10FERoute.cutL10_zeta_eq_chi_mul_reflected
+#print axioms Door3CutL10FERoute.cutL10_zeta_of_chi_reflected
+#print axioms Door3CutL10FERoute.cutL10_zeta_leftSix_of_FE
+#print axioms Door3CutL10FERoute.cutL10_zeta_sup_six_of_FE
+#print axioms Door3CutL10FERoute.cutL10_closedBall_sup_FEroute
+#print axioms Door3CutL10FERoute.cutL10_hFE_sliver_of_chi_and_reflected
+#print axioms Door3CutL10FERoute.cutL10_hFE_of_chi_and_middle
+#print axioms Door3CutL10FERoute.cutL10_FE_factor_shortfall
+#print axioms Door3CutL10FERoute.cutL10_FE_sliver_width_gap
+
