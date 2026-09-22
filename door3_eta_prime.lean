@@ -376,3 +376,126 @@ theorem etaPairCpow_hasDerivAt (m : ℕ) (s : ℂ) :
     rfl
   rw [hFunEq, hDerivEq] at hSub
   exact hSub
+
+/-- MAJORANT disc: center `3`, radius `1 / 2`, so every `y` in the ball
+has `5 / 2 ≤ y.re` (hence `0 < y.re`). -/
+noncomputable def etaMajCenter : ℂ := ((3 : ℝ) : ℂ)
+
+noncomputable def etaMajRadius : ℝ := 1 / 2
+
+/-- The single uniform majorant on the disc above, assembled from the RHS of
+`etaDerivBound` (`:43-46`) with `‖s‖` replaced by `7 / 2` and `s.re`
+replaced by the worst-case exponent `5 / 2`. -/
+noncomputable def etaDerivMajorant (m : ℕ) : ℝ :=
+  Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2) *
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(5 / 2 : ℝ) - 1)) +
+    (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) - Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(5 / 2 : ℝ)))
+
+/-- Pointwise majorant bound on the explicit disc, from `etaDerivPair_bound`
+(`:133-134`) plus worst-case `‖y‖` / rpow monotonicity.
+Cited shapes: `Complex.abs_re_le_norm`, `Real.rpow_le_rpow_of_exponent_le`,
+`Real.log_le_log`, `Real.log_nonneg`, `Summable.of_norm_bounded` (latter used
+only by the conditional wrapper below). -/
+theorem etaDerivMajorant_bound (m : ℕ) (y : ℂ)
+    (hy : y ∈ Metric.ball etaMajCenter etaMajRadius) :
+    ‖etaDerivPairTerm y m‖ ≤ etaDerivMajorant m := by
+  have hball : dist y etaMajCenter < etaMajRadius := Metric.mem_ball.mp hy
+  have hR : etaMajRadius = 1 / 2 := by rfl
+  rw [hR] at hball
+  have hdist : ‖y - etaMajCenter‖ < 1 / 2 := by
+    rw [dist_eq_norm] at hball
+    exact hball
+  have hc_re : etaMajCenter.re = 3 := by
+    unfold etaMajCenter
+    rw [Complex.ofReal_re]
+  have hc_norm : ‖etaMajCenter‖ = 3 := by
+    unfold etaMajCenter
+    have hnn : (0 : ℝ) ≤ 3 := by norm_num
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hnn]
+  have hre_abs : |y.re - etaMajCenter.re| ≤ ‖y - etaMajCenter‖ := by
+    have h := Complex.abs_re_le_norm (y - etaMajCenter)
+    rw [Complex.sub_re] at h
+    exact h
+  rw [hc_re] at hre_abs
+  have hre_lo : 5 / 2 ≤ y.re := by
+    have hlt : |y.re - 3| < 1 / 2 := lt_of_le_of_lt hre_abs hdist
+    have h := (abs_lt.mp hlt).1
+    linarith
+  have hypos : 0 < y.re := by linarith
+  have hnorm_y : ‖y‖ ≤ 7 / 2 := by
+    have htri : ‖y‖ ≤ ‖etaMajCenter‖ + ‖y - etaMajCenter‖ := by
+      have heq : y = etaMajCenter + (y - etaMajCenter) :=
+        add_sub_cancel _ _
+      rw [heq]
+      exact norm_add_le _ _
+    rw [hc_norm] at htri
+    linarith
+  have hApos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have h1le : (1 : ℝ) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 1)
+  have hB1le : (1 : ℝ) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 2)
+  have hAB : ((((2 * m + 1 : ℕ)) : ℝ)) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) := by
+    exact_mod_cast (by omega : 2 * m + 1 ≤ 2 * m + 2)
+  have hlogB_nn : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Real.log_nonneg hB1le
+  have hlog_mono : Real.log ((((2 * m + 1 : ℕ)) : ℝ)) ≤
+      Real.log ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Real.log_le_log hApos hAB
+  have hDnn : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+      Real.log ((((2 * m + 1 : ℕ)) : ℝ)) := sub_nonneg.mpr hlog_mono
+  have hexp1 : -y.re - 1 ≤ -(5 / 2 : ℝ) - 1 := by linarith
+  have hexp2 : -y.re ≤ -(5 / 2 : ℝ) := by linarith
+  have hrpow1 : ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1) :=
+    Real.rpow_le_rpow_of_exponent_le h1le hexp1
+  have hrpow2 : ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le h1le hexp2
+  have hbound_y := etaDerivPair_bound y hypos m
+  have hle : etaDerivBound y m ≤ etaDerivMajorant m := by
+    unfold etaDerivBound etaDerivMajorant
+    have hCnn : 0 ≤ Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2) :=
+      mul_nonneg hlogB_nn (by norm_num)
+    have hXnn : 0 ≤ ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) :=
+      Real.rpow_nonneg (le_of_lt hApos) _
+    have ha : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * ‖y‖ ≤
+        Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2) :=
+      mul_le_mul_of_nonneg_left hnorm_y hlogB_nn
+    have hb : (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * ‖y‖) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) ≤
+        (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2)) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) :=
+      mul_le_mul_of_nonneg_right ha hXnn
+    have hc : (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2)) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) ≤
+        (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2)) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1) :=
+      mul_le_mul_of_nonneg_left hrpow1 hCnn
+    have e1 : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * ‖y‖ *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re - 1) ≤
+        Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * (7 / 2) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1) :=
+      le_trans hb hc
+    have e2 : (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+        Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-y.re) ≤
+        (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+          Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+        ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ)) :=
+      mul_le_mul_of_nonneg_left hrpow2 hDnn
+    exact add_le_add e1 e2
+  exact le_trans hbound_y hle
+
+/-- SUMMABILITY, conditional wrapper (GAP noted).
+Unconditional `Summable etaDerivMajorant` is not yet banked: it needs an
+explicit pure-power dominator with a log-factor comparison plus a banked
+p-series summability fact. This wrapper reduces it to any such dominator
+`B`, so the `:297` bridge premise `Summable u` is discharged as soon as a
+concrete `B` with `hB` and `hdom` is supplied. -/
+theorem etaDerivMajorant_summable_of_dom (B : ℕ → ℝ) (hB : Summable B)
+    (hdom : ∀ m : ℕ, ‖etaDerivMajorant m‖ ≤ B m) :
+    Summable etaDerivMajorant :=
+  Summable.of_norm_bounded hB hdom

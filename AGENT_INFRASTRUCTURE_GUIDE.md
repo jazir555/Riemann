@@ -5901,6 +5901,17 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-PSI3 (background `ses_f34e828b3`, proof-only, NO-EDIT
+  gap): psiNeed_inner NOT closable — same blocker (complex disc at
+  8.1975-0.375i; real secant barred; StirlingVert precondition fails).
+  All psiNeed (outer/leaf/mid/inner) now gapped with exact blockers.
+- 2026-09-22 ETAPRIME-MAJ (background `ses_f34eaca44`, proof-only,
+  grep-clean, eta_prime-only commit): majorant PARTIAL — disc
+  (3,1/2) `:382/:384` + `etaDerivMajorant :389` (from `etaDerivBound`
+  RHS) + pointwise bound `:400` + conditional summability `:498`
+  (from any dominator B). GAP: unconditional `Summable u` needs
+  explicit B + log-domination + p-series (not banked). Bridge `:297`
+  closable once B lands (u/hderiv/hbound ready).
 - 2026-09-22 CELL-D (background `ses_f34e99bd8`, proof-only, grep-clean,
   interval-only commit): R04 conditional FILED (no fallback needed:
   poly 3.85 banked `:33775`, grid member `:1632`) —
