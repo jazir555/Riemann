@@ -2082,3 +2082,158 @@ theorem R02_etaWorst_rpow_add_delta001 (A : ℝ) (hA : 0 < A) :
 #print axioms R02_etaWorst_rpow_add_delta001
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 first-piece merge + 1.04 p-series assembly (BALLADV-R02MERGE, proof-only).
+
+Grep record (this file only, read-only, before writing):
+* splitter block `R02_etaWorst_logCap_splitter_residual :1949`
+  (`log (2m+2) ≤ eps * (2m+1)^delta + C'`), banked `(1,1,1) :1955`,
+  small-delta bank `(100,0.01,1) :2013-2014`
+  (`R02_etaWorst_logCap_splitter_100_001_1` via `Real.log_rpow`,
+  `Real.log_le_sub_one_of_pos`, `Real.log_le_log`, `Real.log_mul`).
+* delta block `:1964-1988` (`R02_etaWorst_logAle100_mul :1994`,
+  `R02_etaWorst_delta001_exp104 :2047` (`1.05 - 0.01 = 1.04`),
+  `R02_etaWorst_exp104_gt_one :2051`, `R02_etaWorst_delta001_negExp104 :2055`,
+  `R02_etaWorst_rpow_add_delta001 :2061` via `Real.rpow_add`).
+* dominator summability `R02_etaWorstDominator105_summable :1707`
+  (`Summable.mul_left C R02_etaWorstShift105_summable`, p-series at `1.05`).
+* pointwise spec `R02_etaWorst_pointwise105_missing C :1755`
+  (`∀ m, ‖majorant m‖ ≤ dominator105 C m`).
+* open target `R02_etaWorst_dom105_residual_spec :1768`
+  (`∃ C ≥ 0, pointwise105 C`).
+
+What is banked here (honest, append-only, placeholder-free):
+* first-piece split `R02_etaWorst_firstPiece_le_split100` (splitter `(100,0.01,1)`
+  multiplied by `8.29 * A^(-0.05-1)`, `A = ((2*m+1 : ℕ) : ℝ)`);
+* split expansion `R02_etaWorst_firstPiece_split100_expand`
+  (`(100*r+1)*8.29*s = 829*(r*s)+8.29*s` by `ring`, `100*8.29 = 829`);
+* rpow merge `R02_etaWorst_firstPiece_rpowMerge104`
+  (`A^0.01 * A^(-0.05-1) = A^(-1.04)` via banked `:2061`);
+* combined first-piece bound `R02_etaWorst_firstPiece_le_104plus105`
+  (`≤ 829*A^(-1.04) + 8.29*A^(-0.05-1)`);
+* p-series at `1.04`: `R02_etaWorstShift104_summable` (mirror of `:1690`
+  via `Real.summable_nat_rpow_inv` + `summable_nat_add_iff`),
+  `R02_etaWorstDominator104` + `R02_etaWorstDominator104_summable`
+  (mirror of `:1707` via `Summable.mul_left`);
+* bridge `R02_etaWorst_dominator_of_pointwise104` (one `K` with the `1.04`
+  pointwise bound discharges `:1636`).
+
+What stays open (exact residual, `:1768` NOT closed):
+* `R02_etaWorst_dom104_residual_spec` (`∃ K ≥ 0, pointwise104 K`): the full
+  majorant `‖R02_etaWorstMajorant m‖ ≤ K*(m+1)^(-1.04)` still needs the
+  `(2m+1)`-to-`(m+1)` base comparison for both pieces plus the second-piece
+  `A^(-1)*A^(-0.05) = A^(-1.05) ≤ const*(m+1)^(-1.04)` merge, neither of
+  which is banked here.
+* Hence `R02_etaWorst_dom105_residual_spec :1768` stays open: a `1.04`-decay
+  bound is strictly weaker than `1.05` (ratio `A^0.01` unbounded by
+  `R02_etaWorst_log_unbounded`-shape growth), so it does not imply any fixed-`C`
+  `1.05` domination. No tsum numeral is closed; no fixed `C`/`K` value supplied.
+-/
+
+/-- First-piece split at `(100,0.01,1)`: the log factor is replaced by the
+banked small-delta cap, keeping the `A^(-0.05-1)` factor. -/
+theorem R02_etaWorst_firstPiece_le_split100 (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) ≤
+      (100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) + 1) * 8.29 *
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := by
+  have hlog : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤
+      100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) + 1 :=
+    R02_etaWorst_logCap_splitter_100_001_1 m
+  have h1 : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 ≤
+      (100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) + 1) * 8.29 :=
+    mul_le_mul_of_nonneg_right hlog (by norm_num)
+  exact mul_le_mul_of_nonneg_right h1 (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+
+/-- Split expansion: `(100*r+1)*8.29*s = 829*(r*s)+8.29*s`. -/
+theorem R02_etaWorst_firstPiece_split100_expand (m : ℕ) :
+    (100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) + 1) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) =
+      829 * ((((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) *
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1))) +
+        8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := by
+  ring
+
+/-- Rpow merge for the split first term at `delta = 0.01`. -/
+theorem R02_etaWorst_firstPiece_rpowMerge104 (m : ℕ) :
+    (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) =
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) := by
+  have hA : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  exact R02_etaWorst_rpow_add_delta001 _ hA
+
+/-- Combined first-piece bound: `≤ 829*A^(-1.04) + 8.29*A^(-0.05-1)`. -/
+theorem R02_etaWorst_firstPiece_le_104plus105 (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) ≤
+      829 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) +
+        8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := by
+  have hle := R02_etaWorst_firstPiece_le_split100 m
+  have hexpand := R02_etaWorst_firstPiece_split100_expand m
+  have hmerge := R02_etaWorst_firstPiece_rpowMerge104 m
+  calc Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1))
+        ≤ (100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) + 1) * 8.29 *
+          ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := hle
+    _ = 829 * ((((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) *
+          ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1))) +
+          8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := hexpand
+    _ = 829 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ))) +
+          8.29 * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := by
+        rw [hmerge]
+
+/-- Shift-series summability at `1.04 > 1` (p-series route, mirror of
+`:1690`). -/
+theorem R02_etaWorstShift104_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) := by
+  have hp : (1 : ℝ) < 1.04 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (1.04 : ℝ)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp
+  have hshift :
+      Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (1.04 : ℝ)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (1.04 : ℝ)))⁻¹) := by
+    funext m
+    exact Real.rpow_neg (Nat.cast_nonneg _) _
+  rw [heq]
+  exact hshift
+
+/-- Fresh pure-power dominator at decay `1.04`: `K * ((m+1):ℝ)^(-1.04)`. -/
+noncomputable def R02_etaWorstDominator104 (K : ℝ) (m : ℕ) : ℝ :=
+  K * ((((m + 1 : ℕ)) : ℝ) ^ (-(1.04 : ℝ)))
+
+/-- Dominator summability at any constant `K` (mirror of `:1707`). -/
+theorem R02_etaWorstDominator104_summable (K : ℝ) :
+    Summable (R02_etaWorstDominator104 K) :=
+  Summable.mul_left K R02_etaWorstShift104_summable
+
+/-- Exact pointwise blocker at decay `1.04` (filed, not fixed). -/
+def R02_etaWorst_pointwise104_missing (K : ℝ) : Prop :=
+  ∀ m : ℕ, ‖R02_etaWorstMajorant m‖ ≤ R02_etaWorstDominator104 K m
+
+/-- Bridge: one pointwise `K` at `1.04` plus the banked dominator summability
+discharges the generic `:1636` blocker (not the `1.05`-specific `:1768`). -/
+theorem R02_etaWorst_dominator_of_pointwise104 (K : ℝ)
+    (hle : R02_etaWorst_pointwise104_missing K) :
+    R02_etaWorst_dominator_missing_spec :=
+  ⟨R02_etaWorstDominator104 K, R02_etaWorstDominator104_summable K, hle⟩
+
+/-- Exact residual for the `1.04`-decay route: existence of a fixed `K ≥ 0`
+with the pointwise bound. This plus the banked `1.04` summability would close
+`:1636`; it does NOT close `:1768` (`1.05`), which stays open. -/
+def R02_etaWorst_dom104_residual_spec : Prop :=
+  ∃ K : ℝ, 0 ≤ K ∧ R02_etaWorst_pointwise104_missing K
+
+#print axioms R02_etaWorst_firstPiece_le_split100
+#print axioms R02_etaWorst_firstPiece_split100_expand
+#print axioms R02_etaWorst_firstPiece_rpowMerge104
+#print axioms R02_etaWorst_firstPiece_le_104plus105
+#print axioms R02_etaWorstShift104_summable
+#print axioms R02_etaWorstDominator104_summable
+#print axioms R02_etaWorst_dominator_of_pointwise104
+
+end Door3R02BallAdvance

@@ -6137,6 +6137,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 BALLADV-R02MERGE (background `ses_f348235d2`, proof-only,
+  grep-clean, ball_advance-only commit): first-piece 1.04-merge +
+  summable dominator104 family. Pointwise104 open.
 - 2026-09-22 SLIVER-PIBALL (background `ses_f34864d5c`, proof-only,
   grep-clean, sliver_edge-only commit): pi ≤4096 on ball-12 + poly·pi ≤
   319488. KEY FINDING: Gamma/zeta uniform uppers on full ball-12 are
