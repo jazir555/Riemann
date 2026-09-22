@@ -5991,6 +5991,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `S2_exists :1544` (same L + S₂ lower). hEven analytic inputs COMPLETE
   (Antitone + Tendsto + slice all banked); zetaLower still numerically
   open (0.23 vs 1.1/1.4).
+- 2026-09-22 CELL-G (background `ses_f3495b110`, proof-only, grep-clean,
+  interval-only commit): R07 center conditional `:35355` (R06 mirror,
+  poly 5.35 consumed). Same 7-order wall (need Agam·Azeta≥0.0517, have
+  ~3.85e-9); hgam/hzeta/hprod open.
 - 2026-09-22 SCUT43 (background `ses_f34976120`, proof-only, grep-clean,
   pilot-only commit): k=17 CONSTRUCTIVE — `delta18_odd_mem :5439`
   (δ∈(0.595,0.666) via theta18+loose-pi) +   `cos10log18_le_neg_3/4 :5459`
