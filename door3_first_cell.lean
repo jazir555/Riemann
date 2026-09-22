@@ -951,3 +951,59 @@ to discharge `FC_zeta14_obligation`; (v) deeper reflected Gamma chain
 
 end Door3FirstCellClose
 
+/-! ## R02-CELL wave: rpow head-upper banked (fenced to this file only)
+
+Route mirrors `Door3CellSuppliers.CS_rpow2_proved` (read-only reference, no
+import added): `2^-0.395 = 1 / 2^0.395 ≤ 0.77` from `2^0.395 =
+exp(0.395 * log 2) ≥ 1.2988` (quadratic Taylor lower
+`Real.quadratic_le_exp_of_nonneg` at `x = 0.395 * log 2 > 0.2737`);
+`1 / 1.2988 ≈ 0.76992 ≤ 0.77`. TRUE `≈ 0.7605`.
+-/
+
+namespace Door3FirstCellClose
+
+/-- Local `log 2` lower, 6 digits (mirrors `CS_log2_ge`; no new import). -/
+theorem FC_log2_ge_aux : (0.693147 : ℝ) < Real.log 2 := by
+  have h9 := Real.log_two_gt_d9
+  linarith
+
+/-- CLOSED: banked `FC_rpow2_head_upper` (`2^-0.395 ≤ 0.77`). -/
+theorem FC_rpow2_head_upper_proved : FC_rpow2_head_upper := by
+  have hlog : (0.693147 : ℝ) < Real.log 2 := FC_log2_ge_aux
+  have hx_lo : (0.2737 : ℝ) < 0.395 * Real.log 2 := by linarith
+  set x : ℝ := 0.395 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.2737 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (1.2988 : ℝ) ≤ 1 + 0.2737 + (0.2737 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (1.2988 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (2 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hpos : (0 : ℝ) < (2 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (2 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (2 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [inv_eq_one_div]
+  have h12 : (1.2988 : ℝ) ≤ (2 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [hrpow]
+    exact hchain
+  have hmul : (0.77 : ℝ) * 1.2988 ≤ 0.77 * (2 : ℝ) ^ ((0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left h12 (by norm_num)
+  have hnum : (1 : ℝ) ≤ 0.77 * 1.2988 := by norm_num
+  show (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.77
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hmul, hnum]
+
+/-- Honest unlocked step: unconditional real-`σ` head floor `S₂ ≥ 0.23`. -/
+theorem FC_etaS2_uncond :
+    (0.23 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+  FC_etaS2_ge_023 FC_rpow2_head_upper_proved
+
+end Door3FirstCellClose
+

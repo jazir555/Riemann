@@ -5727,7 +5727,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (attempt 1/2), ZERO edits (coordinator surgery held), grep-clean.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
-  verified green. Lock RELEASED. GAMMA-N11 tasked (proof-only).
+  verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 R02-CELL (background `ses_f350a352a`, proof-only,
+  grep-clean, first_cell-only commit): rpow2-head CLOSED —
+  `FC_log2_ge_aux :966` + `FC_rpow2_head_upper_proved :971`
+  (2^-0.395≤0.77, CS_rpow2 mirror, no new estimates) + unlocked
+  `FC_etaS2_uncond :1004` (0.23≤1-2^-0.395). R02 residual minus one
+  (zeta14/derivTier/hEven/Lambda0/gamma-0.008 remain). `.kilo/kilo.jsonc`
+  runtime churn left uncommitted; premise_gamma N11 left for owner.
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
