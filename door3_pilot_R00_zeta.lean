@@ -4607,4 +4607,40 @@ theorem sSCUT_theta15_mem :
   have c2 : (10 : ℝ) * 2.7251791663 = 27.251791663 := by norm_num
   constructor <;> linarith
 
+/-- Reduced phase `δ₁₅ = θ₁₅ - 9π ∈ (-1.356, -1.021)` (odd-multiple anchor:
+`9π ≈ 28.274` is nearest since `θ₁₅ ≈ 26.92-27.25` vs `8π ≈ 25.133` and
+`10π ≈ 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta13_even_mem` at `:4127`; rounded outward from the loose-pi
+window `[-1.355941683, -1.021708337]` so `linarith` closes on either loose or
+tight `pi_d4`). -/
+theorem sSCUT_delta15_odd_mem :
+    (-1.356 : ℝ) < 10 * Real.log 15 - 9 * Real.pi ∧
+    10 * Real.log 15 - 9 * Real.pi < (-1.021 : ℝ) := by
+  have hth := sSCUT_theta15_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₅` window (`0.335`). -/
+theorem sSCUT_delta15_odd_width_eq :
+    (-1.021 : ℝ) - (-1.356) = (0.335 : ℝ) := by
+  norm_num
+
+/-- Honest no-constructive verdict (quadrant gap, not a bound): the exact window
+`δ₁₅ ∈ (-1.356, -1.021)` sits strictly inside `(-π/2, 0)` (caps `-π/2 < -1.356`
+via `Real.pi_gt_d4` and `-1.021 < 0`), i.e. `cos δ₁₅ > 0` (`≈ +0.52..+0.21`).
+The `9π` anchor is ODD (`9π = 8π + π`), so `cos θ₁₅ = -cos δ₁₅ < 0`
+(`≈ -0.52..-0.21`); even `k = 14` (base 15) needs `cos θ₁₅ ≥ +c` for a
+constructive lower — which cannot close here. The quadratic
+`1 - 1.356^2/2 ≈ 0.081` floors `cos δ₁₅`, not `cos θ₁₅`. Filed as gap,
+not forced. -/
+theorem sSCUT_delta15_no_construct_gap :
+    (-1.356 : ℝ) < 10 * Real.log 15 - 9 * Real.pi ∧
+    10 * Real.log 15 - 9 * Real.pi < (-1.021 : ℝ) ∧
+    -(Real.pi / 2) < (-1.356 : ℝ) ∧ (-1.021 : ℝ) < 0 := by
+  have hδ := sSCUT_delta15_odd_mem
+  have hpi_lo := Real.pi_gt_d4
+  refine ⟨hδ.1, hδ.2, ?_, by norm_num⟩
+  linarith
+
 end Door3PilotR00Zeta
