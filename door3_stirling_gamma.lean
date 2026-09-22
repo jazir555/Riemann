@@ -3552,3 +3552,295 @@ theorem D3SG_gamNeed_outer_shift4_ratio :
     (11 : ℝ) < (0.024 : ℝ) / (0.002 : ℝ) := by norm_num
 
 #print axioms D3SG_gamNeed_outer_shift4_ratio
+
+/-! ## GAMNEED-OUTER-SHIFT5: honest shift-5 mirror at `‖Γ wOuter‖`.
+
+Shift shapes reused (grep): `D3SG_Real_Gamma_41975_le_eight_fourfive` at `:3334`,
+`D3SG_gamNeed_outer_shift4_upper` at `:3350` (`‖Γ(mk 0.1975 (-4.375))‖ ≤ 0.024`
+via `8.45 / (4.375 ^ 4) ≈ 0.02306`), gap `:3545`, ratio `:3551` (`12x`).
+
+Outer shift-5 mirror (honest, same chain at outer point): `wOuter+5` has
+`Re = 5.1975`, so `‖Γ(w+5)‖ ≤ Real.Gamma 5.1975 ≤ 35.47` by domination +
+`D3SG_Real_Gamma_51975_le_thirtyfive_fourseven`
+(`Γ 5.1975 = 4.1975 * Γ 4.1975 ≤ 4.1975 * 8.45 ≤ 35.47`, reusing
+`D3SG_Real_Gamma_41975_le_eight_fourfive`). Paying `‖w‖ ≥ 4.375`,
+`‖w+1‖ ≥ 4.375`, `‖w+2‖ ≥ 4.375`, `‖w+3‖ ≥ 4.375`, `‖w+4‖ ≥ 4.375`
+(`|Im|` lowers) gives
+`‖Γ w‖ ≤ 35.47 / (4.375 ^ 5) ≈ 0.02213 ≤ 0.023`.
+That is `0.023 / 0.002 = 11.5`, i.e. `11x` above `0.002`: IMPROVES the
+shift-4 `12x` gap but does NOT close `gamNeed_outer`. Filed as quotient +
+gap + ratio below; residual stands.
+
+Residual: `gamNeed_outer (≤ 0.002)` OPEN (`0.023` banked here, `11x` gap;
+prior `0.024` at `:3350` superseded as best quotient but gap remains);
+`gamNeed_leaf (≤ 0.008)` OPEN (`0.061` banked at `:3137`, `7x` gap).
+-/
+
+/-- Outer shift-5 real cap: `Real.Gamma 5.1975 ≤ 35.47`
+(`Γ 5.1975 = 4.1975 * Γ 4.1975 ≤ 4.1975 * 8.45 ≤ 35.47`). -/
+theorem D3SG_Real_Gamma_51975_le_thirtyfive_fourseven :
+    Real.Gamma 5.1975 ≤ 35.47 := by
+  have hne : (4.1975 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (4.1975 + 1) = 4.1975 * Real.Gamma 4.1975 :=
+    Real.Gamma_add_one hne
+  have heq : (4.1975 : ℝ) + 1 = 5.1975 := by norm_num
+  rw [heq] at hshift
+  rw [hshift]
+  calc (4.1975 : ℝ) * Real.Gamma 4.1975
+      ≤ 4.1975 * 8.45 :=
+        mul_le_mul_of_nonneg_left D3SG_Real_Gamma_41975_le_eight_fourfive (by norm_num)
+    _ ≤ 35.47 := by norm_num
+
+#print axioms D3SG_Real_Gamma_51975_le_thirtyfive_fourseven
+
+/-- Outer shift-5 quotient: `‖Γ(mk 0.1975 (-4.375))‖ ≤ 0.023`
+(`35.47 / (4.375 ^ 5) ≈ 0.02213`). Five-step shift into `Re = 5.1975`. -/
+theorem D3SG_gamNeed_outer_shift5_upper :
+    ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ (0.023 : ℝ) := by
+  have hre5 : (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1)).re
+      = (5.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.one_re, Complex.one_re, Complex.one_re,
+      Complex.one_re, Complex.one_re,
+      show (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).re = (0.1975 : ℝ) from rfl]
+    norm_num
+  have him_w : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = (-4.375 : ℝ) := rfl
+  have him_w1 : (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)).im
+      = (-4.375 : ℝ) := by
+    rw [Complex.add_im, Complex.one_im, him_w]
+    norm_num
+  have him_w2 : ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1)).im
+      = (-4.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.one_im, Complex.one_im, him_w]
+    norm_num
+  have him_w3 : (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1)).im
+      = (-4.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.one_im, Complex.one_im, Complex.one_im, him_w]
+    norm_num
+  have him_w4 : ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1)).im
+      = (-4.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im, him_w]
+    norm_num
+  have habs_w : |(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im| = (4.375 : ℝ) := by
+    rw [him_w, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+    norm_num
+  have habs_w1 : |(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)).im|
+      = (4.375 : ℝ) := by
+    rw [him_w1, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+    norm_num
+  have habs_w2 : |((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1)).im|
+      = (4.375 : ℝ) := by
+    rw [him_w2, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+    norm_num
+  have habs_w3 : |(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1)).im|
+      = (4.375 : ℝ) := by
+    rw [him_w3, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+    norm_num
+  have habs_w4 : |((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1)).im|
+      = (4.375 : ℝ) := by
+    rw [him_w4, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+    norm_num
+  have hnorm_w : (4.375 : ℝ) ≤ ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ := by
+    have h := Complex.abs_im_le_norm (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))
+    rw [habs_w] at h
+    exact h
+  have hnorm_w1 : (4.375 : ℝ)
+      ≤ ‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ := by
+    have h := Complex.abs_im_le_norm (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))
+    rw [habs_w1] at h
+    exact h
+  have hnorm_w2 : (4.375 : ℝ)
+      ≤ ‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ := by
+    have h := Complex.abs_im_le_norm ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))
+    rw [habs_w2] at h
+    exact h
+  have hnorm_w3 : (4.375 : ℝ)
+      ≤ ‖(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ := by
+    have h := Complex.abs_im_le_norm (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))
+    rw [habs_w3] at h
+    exact h
+  have hnorm_w4 : (4.375 : ℝ)
+      ≤ ‖((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖ := by
+    have h := Complex.abs_im_le_norm ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))
+    rw [habs_w4] at h
+    exact h
+  have hw0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) ≠ 0 := by
+    intro h
+    have him0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w] at him0
+    norm_num at him0
+  have hw10 : (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)) ≠ 0 := by
+    intro h
+    have him0 : ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w1] at him0
+    norm_num at him0
+  have hw20 : ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1)) ≠ 0 := by
+    intro h
+    have him0 : (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w2] at him0
+    norm_num at him0
+  have hw30 : (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1)) ≠ 0 := by
+    intro h
+    have him0 : ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w3] at him0
+    norm_num at him0
+  have hw40 : ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1)) ≠ 0 := by
+    intro h
+    have him0 : (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w4] at him0
+    norm_num at him0
+  have hG1 : Complex.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))
+      = (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) *
+        Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) :=
+    Complex.Gamma_add_one _ hw0
+  have hG2 : Complex.Gamma ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))
+      = (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)) *
+        Complex.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)) :=
+    Complex.Gamma_add_one _ hw10
+  have hG3 : Complex.Gamma (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))
+      = ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1)) *
+        Complex.Gamma ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1)) :=
+    Complex.Gamma_add_one _ hw20
+  have hG4 : Complex.Gamma ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))
+      = (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1)) *
+        Complex.Gamma (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1)) :=
+    Complex.Gamma_add_one _ hw30
+  have hG5 : Complex.Gamma (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1))
+      = ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1)) *
+        Complex.Gamma ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1)) :=
+    Complex.Gamma_add_one _ hw40
+  have hGn1 : ‖Complex.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖
+      = ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ := by
+    rw [hG1, norm_mul]
+  have hGn2 : ‖Complex.Gamma ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖
+      = ‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+        ‖Complex.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ := by
+    rw [hG2, norm_mul]
+  have hGn3 : ‖Complex.Gamma (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖
+      = ‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ *
+        ‖Complex.Gamma ((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ := by
+    rw [hG3, norm_mul]
+  have hGn4 : ‖Complex.Gamma ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖
+      = ‖(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ *
+        ‖Complex.Gamma (((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ := by
+    rw [hG4, norm_mul]
+  have hGn5 : ‖Complex.Gamma (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1))‖
+      = ‖((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖ *
+        ‖Complex.Gamma ((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖ := by
+    rw [hG5, norm_mul]
+  have hRe5_pos : (0 : ℝ)
+      < (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1)).re := by
+    rw [hre5]
+    norm_num
+  have hDom : ‖Complex.Gamma (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1))‖
+      ≤ Real.Gamma (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1)).re :=
+    D3SG_Gamma_norm_le_real _ hRe5_pos
+  rw [hre5] at hDom
+  have hCap : ‖Complex.Gamma (((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1) + 1))‖
+      ≤ (35.47 : ℝ) :=
+    le_trans hDom D3SG_Real_Gamma_51975_le_thirtyfive_fourseven
+  have hMul : ‖((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖ *
+      (‖(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ *
+        (‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ *
+          (‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+            (‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+              ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖))))
+      ≤ (35.47 : ℝ) := by
+    rw [← hGn1, ← hGn2, ← hGn3, ← hGn4, ← hGn5]
+    exact hCap
+  have hGamma_nn : (0 : ℝ)
+      ≤ ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ :=
+    norm_nonneg _
+  have hmono1 : (4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+      ≤ ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ :=
+    mul_le_mul_of_nonneg_right hnorm_w hGamma_nn
+  have hmono2 : (4.375 : ℝ) * ((4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖)
+      ≤ ‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+        (‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+          ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖) :=
+    mul_le_mul hnorm_w1 hmono1
+      (mul_nonneg (by norm_num : (0 : ℝ) ≤ 4.375) hGamma_nn)
+      (norm_nonneg _)
+  have hmono3 : (4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖))
+      ≤ ‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ *
+        (‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+          (‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+            ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖)) :=
+    mul_le_mul hnorm_w2 hmono2
+      (mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 4.375)
+        (by norm_num : (0 : ℝ) ≤ 4.375)) hGamma_nn)
+      (norm_nonneg _)
+  have hmono4 : (4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖)))
+      ≤ ‖(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ *
+        (‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ *
+          (‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+            (‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+              ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖))) :=
+    mul_le_mul hnorm_w3 hmono3
+      (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 4.375)
+        (by norm_num : (0 : ℝ) ≤ 4.375)) (by norm_num : (0 : ℝ) ≤ 4.375)) hGamma_nn)
+      (norm_nonneg _)
+  have hmono5 : (4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖))))
+      ≤ ‖((((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1) + 1))‖ *
+        (‖(((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1) + 1))‖ *
+          (‖((((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1) + 1))‖ *
+            (‖(((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1))‖ *
+              (‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+                ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖)))) :=
+    mul_le_mul hnorm_w4 hmono4
+      (mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 4.375)
+        (by norm_num : (0 : ℝ) ≤ 4.375)) (by norm_num : (0 : ℝ) ≤ 4.375))
+        (by norm_num : (0 : ℝ) ≤ 4.375)) hGamma_nn)
+      (norm_nonneg _)
+  have hle : (4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖))))
+      ≤ (35.47 : ℝ) :=
+    le_trans hmono5 hMul
+  have hle2 : ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+      * (4.375 * 4.375 * 4.375 * 4.375 * 4.375) ≤ (35.47 : ℝ) := by
+    have heq : ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+        * (4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+        = (4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ) * ((4.375 : ℝ)
+          * ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖)))) := by
+      ring
+    rw [heq]
+    exact hle
+  have hdiv : ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+      ≤ (35.47 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 4.375 * 4.375 * 4.375 * 4.375 * 4.375)]
+    exact hle2
+  have h023 : (35.47 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375) ≤ (0.023 : ℝ) := by norm_num
+  exact le_trans hdiv h023
+
+#print axioms D3SG_gamNeed_outer_shift5_upper
+
+/-- Outer shift-5 gap: `0.023` is above `0.002` (gap, no close). -/
+theorem D3SG_gamNeed_outer_shift5_gap :
+    (0.002 : ℝ) < (0.023 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_outer_shift5_gap
+
+/-- Outer shift-5 ratio: `0.023 / 0.002 = 11.5`, so gap factor exceeds `11`. -/
+theorem D3SG_gamNeed_outer_shift5_ratio :
+    (11 : ℝ) < (0.023 : ℝ) / (0.002 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_outer_shift5_ratio

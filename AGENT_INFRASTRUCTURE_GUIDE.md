@@ -6137,6 +6137,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 STIRLING-SHIFT5 (background `ses_f3483a389`, proof-only,
+  grep-clean, stirling-only commit): outer shift-5 `≤0.023` (12x→11x).
+  Ladder near minimum (shift-6 factorial growth reverses gains); decay
+  route needed next.
 - 2026-09-22 WENDEL-H3 (background `ses_f3483686e`, proof-only,
   grep-clean, wendel-only commit): G1 banked (13.54 via U0-route mirror)
   + H3_outer CLOSED (`:1573`). G1/G2/H3 all banked; consumer feed next.
