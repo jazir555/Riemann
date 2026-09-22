@@ -6152,9 +6152,16 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 CUTL-AUDIT (background `ses_f347cffe6`, proof-only,
+  grep-clean, cutL10-only commit): consistency chain banked (poly→joint→
+  endpoint→uniform ordering, no contradictions).
+- 2026-09-22 SCUT51 (background `ses_f347f101b`, proof-only, grep-clean,
+  pilot-only commit): k=25 gap (quad 0.169<1/4; true destructive).
+  Floor stays -2.574.
 - 2026-09-22 ETA-S22 (background `ses_f347f4d1d`, proof-only,
-  grep-clean, suppliers-only commit): S22 Re floor -3.62 (log21/22 phase)
-  + Im conditional on S20 base (composable to unconditional via -4.63).
+  grep-clean, suppliers-only commit): S22 Re -3.62 (phase-aware Re22≤0,
+  recovers 0.34) + Im UNCONDITIONAL -5.32 (composed via S20 -4.63).
+  Gaps 5.56/7.26; S24 next.
 - 2026-09-22 ASSEMBLY-R06 (background `ses_f348209bb`, duplicate-guard,
   zero-diff): R06 full set already present (`:1771-1855`, pre-existing);
   no write. Entry filed; R07 next.

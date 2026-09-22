@@ -6792,3 +6792,201 @@ theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_residual 
   norm_num
 
 end Door3PilotR00Zeta
+
+namespace Door3PilotR00Zeta
+
+/-! ## sCut k=25 ODD shard (fourth link): `log 26` bridge + `theta26` window.
+
+`k = 25` is ODD so `eta25 = -26^{-sCut}`; constructive iff
+`cos(10*log 26) <= -c`. Grep first (shapes in this file, no duplication):
+* `sSCUT_log_twentyfour_via_twentythree_eq` at `:6544`,
+  `sSCUT_log_twentyfour_le` at `:6556`, `sSCUT_log_twentyfour_ge` at `:6570`,
+  `sSCUT_theta24_mem` at `:6587`, `sSCUT_delta24_even_mem` at `:6605`,
+  `sSCUT_delta24_even_width_eq` at `:6614`,
+  `sSCUT_cos10log24_quad_floor_eq` at `:6620`,
+  `sSCUT_cos10log24_ge_quarter` at `:6632`,
+  `sSCUT_cpow24_Re_ge` at `:6727`, `sSCUT_eta23_eq_neg_cpow24` at `:6745`,
+  `sSCUT_eta23_Re_le_neg` at `:6758`,
+  `sSCUT_eta23_Re_no_pos_lock` at `:6769`,
+  `sSCUT_eta23_payoff_residual` at `:6781` (odd-`k` destructive mirror).
+* `sSCUT_log_twentytwo_via_twentyone_eq` at `:6206`,
+  `sSCUT_log_twentytwo_le` at `:6218`, `sSCUT_log_twentytwo_ge` at `:6232`,
+  `sSCUT_theta22_mem` at `:6249`, `sSCUT_delta22_even_mem` at `:6267`
+  (even-anchor recipe reused below).
+* Prior legs dead, not re-attempted here: `k = 18` even-destructive
+  (`sSCUT_eta18_Re_no_pos_lock` at `:5971`), `k = 19` odd no-close
+  (`sSCUT_eta19_payoff_residual` at `:6113`), `k = 21` odd destructive
+  (`sSCUT_eta21_Re_no_pos_lock` at `:6431`), `k = 23` odd destructive
+  (`sSCUT_eta23_Re_no_pos_lock` at `:6769`, in-flight agent owns that base).
+* No `sSCUT_log_twentyfive` / `sSCUT_log_twentysix` / `sSCUT_theta26` /
+  `sSCUT_delta26` shape existed before this block; base is banked
+  `sSCUT_log_twentyfour_ge/le` plus tight ratios `25/24` (`x = 1/24`)
+  and `26/25` (`x = 1/25`). Mirror of the `log 23` / `log 24`
+  third-link recipe (`:6500`-`:6582`).
+
+Honest outcome filed here: `log 25` in `[3.2078179054, 3.2303179081]`,
+`log 26` in `[3.2462794438, 3.2703179081]`,
+`theta26 = 10*log 26` in `[32.462794438, 32.703179081]`,
+`delta26 = theta26 - 10*pi` in `(1.046, 1.289)` via loose `pi` bounds
+(`Real.pi_gt_d4/lt_d4`). Nearest anchor is even `10*pi`, so no odd flip:
+`cos theta26 = cos delta26 >= 1 - 1.289^2/2 = 0.1692395`, which sits below
+`1/4`, so the `>= 1/4`-shaped positive floor cannot close here
+(true `cos ~= +0.40`, destructive for odd `k`). Hence no cos floor is
+banked in this block; exact gap filed alongside the theta/delta windows.
+All proofs close with `norm_num` / `linarith` / `ring` / `rw` only. -/
+
+/-- Composite log bridge `log 25 = log 24 + log (25/24)` (`25 = 24*(25/24)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentyfour_via_twentythree_eq` at `:6544`;
+ratio `25/24` (`x = 1/24`); grepped base bridges `sSCUT_log_twentyfour_ge/le`;
+first link of the incremental base-26 chain for `k = 25`). -/
+theorem sSCUT_log_twentyfive_via_twentyfour_eq :
+    Real.log 25 = Real.log 24 + Real.log (25 / 24 : ℝ) := by
+  have h25 : (24 : ℝ) * (25 / 24) = 25 := by norm_num
+  have h := Real.log_mul (show (24 : ℝ) ≠ 0 by norm_num)
+    (show (25 / 24 : ℝ) ≠ 0 by norm_num)
+  rw [h25] at h
+  linarith
+
+/-- `log 25` upper (`log 25 <= 3.2303179081` from `sSCUT_log_twentyfour_le` +
+`log (25/24) <= 1/24`; mirror of `sSCUT_log_twentyfour_le` at `:6556` with `x = 1/24`
+via `Real.log_le_sub_one_of_pos`; `3.1886512414 + 1/24 = 3.2303179080666...`,
+so `3.2303179081` holds outward). -/
+theorem sSCUT_log_twentyfive_le : Real.log 25 ≤ (3.2303179081 : ℝ) := by
+  have h25 := sSCUT_log_twentyfive_via_twentyfour_eq
+  have h24 := sSCUT_log_twentyfour_le
+  have hub : Real.log (25 / 24 : ℝ) ≤ (1 / 24 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 25 / 24)
+    have he : (25 / 24 : ℝ) - 1 = (1 / 24 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.1886512414 : ℝ) + 1 / 24 ≤ (3.2303179081 : ℝ) := by norm_num
+  linarith
+
+/-- `log 25` lower (`3.2078179054 <= log 25` from `sSCUT_log_twentyfour_ge` +
+`log (25/24) >= 1/25`; mirror of `sSCUT_log_twentyfour_ge` at `:6570` with `x = 1/24`
+via `log (24/25) <= -1/25` and `log (25/24) = -log (24/25)`;
+`3.1678179054 + 1/25 = 3.2078179054` exactly). -/
+theorem sSCUT_log_twentyfive_ge : (3.2078179054 : ℝ) ≤ Real.log 25 := by
+  have h25 := sSCUT_log_twentyfive_via_twentyfour_eq
+  have h24 := sSCUT_log_twentyfour_ge
+  have hub : Real.log (24 / 25 : ℝ) ≤ (-1 / 25 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 24 / 25)
+    have he : (24 / 25 : ℝ) - 1 = (-1 / 25 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (25 / 24 : ℝ) = -Real.log (24 / 25 : ℝ) := by
+    have heq : (25 / 24 : ℝ) = (24 / 25 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.2078179054 : ℝ) ≤ 3.1678179054 + 1 / 25 := by norm_num
+  rw [h25, hinv]
+  linarith
+
+/-- Composite log bridge `log 26 = log 25 + log (26/25)` (`26 = 25*(26/25)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentyfive_via_twentyfour_eq` above;
+ratio `26/25` (`x = 1/25`); grepped base bridges `sSCUT_log_twentyfive_ge/le`;
+second link of the incremental base-26 chain for `k = 25`). -/
+theorem sSCUT_log_twentysix_via_twentyfive_eq :
+    Real.log 26 = Real.log 25 + Real.log (26 / 25 : ℝ) := by
+  have h26 : (25 : ℝ) * (26 / 25) = 26 := by norm_num
+  have h := Real.log_mul (show (25 : ℝ) ≠ 0 by norm_num)
+    (show (26 / 25 : ℝ) ≠ 0 by norm_num)
+  rw [h26] at h
+  linarith
+
+/-- `log 26` upper (`log 26 <= 3.2703179081` from `sSCUT_log_twentyfive_le` +
+`log (26/25) <= 1/25`; mirror of `sSCUT_log_twentyfive_le` above with `x = 1/25`
+via `Real.log_le_sub_one_of_pos`; `3.2303179081 + 1/25 = 3.2703179081` exactly). -/
+theorem sSCUT_log_twentysix_le : Real.log 26 ≤ (3.2703179081 : ℝ) := by
+  have h26 := sSCUT_log_twentysix_via_twentyfive_eq
+  have h25 := sSCUT_log_twentyfive_le
+  have hub : Real.log (26 / 25 : ℝ) ≤ (1 / 25 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 26 / 25)
+    have he : (26 / 25 : ℝ) - 1 = (1 / 25 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.2303179081 : ℝ) + 1 / 25 ≤ (3.2703179081 : ℝ) := by norm_num
+  linarith
+
+/-- `log 26` lower (`3.2462794438 <= log 26` from `sSCUT_log_twentyfive_ge` +
+`log (26/25) >= 1/26`; mirror of `sSCUT_log_twentyfive_ge` above with `x = 1/25`
+via `log (25/26) <= -1/26` and `log (26/25) = -log (25/26)`;
+`3.2078179054 + 1/26 = 3.2462794438615...`, so `3.2462794438` holds). -/
+theorem sSCUT_log_twentysix_ge : (3.2462794438 : ℝ) ≤ Real.log 26 := by
+  have h26 := sSCUT_log_twentysix_via_twentyfive_eq
+  have h25 := sSCUT_log_twentyfive_ge
+  have hub : Real.log (25 / 26 : ℝ) ≤ (-1 / 26 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 25 / 26)
+    have he : (25 / 26 : ℝ) - 1 = (-1 / 26 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (26 / 25 : ℝ) = -Real.log (25 / 26 : ℝ) := by
+    have heq : (26 / 25 : ℝ) = (25 / 26 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.2462794438 : ℝ) ≤ 3.2078179054 + 1 / 26 := by norm_num
+  rw [h26, hinv]
+  linarith
+
+/-- Phase window `theta26 = 10*log 26 in [32.462794438, 32.703179081]`
+(via banked `sSCUT_log_twentysix_ge/le` + `*10`; mirror of
+`sSCUT_theta24_mem` at `:6587`; non-strict since the `log 26` inputs are `<=`). -/
+theorem sSCUT_theta26_mem :
+    (32.462794438 : ℝ) ≤ 10 * Real.log 26 ∧
+    10 * Real.log 26 ≤ (32.703179081 : ℝ) := by
+  have hge := sSCUT_log_twentysix_ge
+  have hle := sSCUT_log_twentysix_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 3.2462794438 = 32.462794438 := by norm_num
+  have c2 : (10 : ℝ) * 3.2703179081 = 32.703179081 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta26 = theta26 - 10*pi in (1.046, 1.289)` (even anchor:
+`10*pi ~= 31.416` is nearest since `theta26 ~= 32.463-32.703` vs
+`9*pi ~= 28.274` and `11*pi ~= 34.558`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta24_even_mem` at `:6605` with the even anchor;
+rounded outward from the loose-pi window `[1.046794438, 1.288179081]`
+(`32.462794438 - 10*3.1416 = 1.046794438`,
+`32.703179081 - 10*3.1415 = 1.288179081`) so `linarith` closes). -/
+theorem sSCUT_delta26_even_mem :
+    (1.046 : ℝ) < 10 * Real.log 26 - 10 * Real.pi ∧
+    10 * Real.log 26 - 10 * Real.pi < (1.289 : ℝ) := by
+  have hth := sSCUT_theta26_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta26` window (`0.243`). -/
+theorem sSCUT_delta26_even_width_eq :
+    (1.289 : ℝ) - 1.046 = (0.243 : ℝ) := by
+  norm_num
+
+/-- Exact quadratic floor at the window cap
+(`1 - 1.289^2/2 = 0.1692395`; `1.289^2 = 1.661521`). -/
+theorem sSCUT_cos10log26_quad_floor_eq :
+    (1 - (1.289 : ℝ) ^ 2 / 2) = (0.1692395 : ℝ) := by
+  norm_num
+
+/-- Honest no-close gap: the quadratic floor sits below `1/4`
+(`0.1692395 < 1/4`), so the even-anchor signed lower
+`cos(10*log 26) >= 1/4` cannot close via `1 - x^2/2 <= cos x` on
+`|delta26| <= 1.289`; no cos floor banked here (nearest anchor is even
+`10*pi` with small positive cosine, likewise not `<= -c` for odd `k`);
+exact gap filed, not forced. -/
+theorem sSCUT_delta26_no_quarter_gap :
+    (1 - (1.289 : ℝ) ^ 2 / 2) < (1 / 4 : ℝ) := by
+  norm_num
+
+/-- Eta25 payoff RESIDUAL (`k = 25` ODD, base 26): `cos(10*log 26) <= -c`
+is NOT banked (gap `sSCUT_delta26_no_quarter_gap`: quad floor
+`0.1692395 < 1/4`); hence neither `Re(26^{-sCut}) <= -c*r26` nor
+`Re(eta25) >= +...` is banked here; one branch only, no force. Next link needed:
+a tighter `delta26` window or a different anchor/lemma route. -/
+theorem sSCUT_eta25_payoff_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+/-- Shard assembly residual: `t25` adds no constructive gain
+(no `sSCUT_cos10log26` floor, `sSCUT_eta25_payoff_residual` blocks the
+`Re(eta25) >= +c` leg); combined honest floor stays at
+`F17 = -1000096/388500` (`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq`),
+still below both bars (`21/10 = 2.1`, `1507/905`); shortfalls unchanged;
+next constructive legs still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_eta25_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+end Door3PilotR00Zeta

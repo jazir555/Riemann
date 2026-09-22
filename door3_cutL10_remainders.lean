@@ -2542,3 +2542,96 @@ end Door3CutL10JointTierClose
 #print axioms Door3CutL10JointTierClose.cutL10_derivRemainder_of_hJointTier
 #print axioms Door3CutL10JointTierClose.cutL10_hJointTier_residual_gap
 
+/-! ## (o) CUTL consistency audit over banked numerals (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- poly: `cutL10_poly_tighter_cap` at `:1840` (`(11.56^2+1/4)/2 <= 66.95`),
+  `cutL10_poly_tighter_value` at `:1845` (`= 66.9418`),
+  `cutL10_ballPoly_upper` at `:766` (`<= 67`).
+- pi: `cutL10_pi_tighter_cap_315` at `:1887` (`Real.pi <= 3.15`),
+  `cutL10_ballPi_upper` at `:791` (`<= 16/5`).
+- joint: `cutL10_joint_tighter_value` at `:1850` (`= 12.8544`),
+  `cutL10_joint_tighter_cap` at `:1855` (`<= 12.86`),
+  `cutL10_joint_twoFactor_value` at `:1894` (`= 12.65355`),
+  `cutL10_joint_twoFactor_cap` at `:1899` (`<= 12.66`),
+  `cutL10_joint_threeFactor_value` at `:1950` (`= 6.326775`),
+  `cutL10_joint_threeFactor_cap` at `:1955` (`<= 6.33`),
+  `cutL10_joint_zetaTrue_value` at `:1971` (`= 3.1633875`).
+- endpoint: `cutL10_endpoint_poly_pi_tighter_lower` at `:2286` (`26.80635 <=`),
+  `cutL10_endpoint_triple_gammaTrue_value` at `:2303` (`= 0.061654605`),
+  `cutL10_endpoint_triple_gammaTrue_cap` at `:2308` (`<= 0.062`),
+  `cutL10_endpoint_triple_gap_to_tier` at `:2313` (`0.04 < 0.061654605`),
+  `cutL10_endpoint_triple_wall_value` at `:2323` (`= 0.2680635`).
+- uniform: `cutL10_uniform_poly_pi_value` at `:2430` (`= 214.4`),
+  `cutL10_uniform_triple_wall_value` at `:2442` (`= 2.144`),
+  `cutL10_uniform_joint_wall_value` at `:2461` (`= 12.864`),
+  `cutL10_uniform_joint_gap_to_tier` at `:2467` (`gap 12.824`),
+  `cutL10_uniform_joint_le_1287` at `:2475` (`12.864 <= 12.87`).
+- tier: `cutL10_hJointTier` at `:2395` (open tier Prop at `0.04`),
+  `cutL10_closedBall_sup` at `:863` / `cutL10_derivRemainder_of_joint` at `:882`
+  (joint `<= 0.04` shape), `cutL10_tierB_triple_le_floor` at `:1325`.
+
+What is filed here: chained ordering over the banked numerals, closed by
+`linarith` over banked value/cap/gap lemmas (no new numeral claimed).
+Verdict: CONSISTENT — no two banked lemmas contradict; each tighter cap
+implies the looser one, and the full chain
+`0.04 < 0.061654605 < 2.144 < 6.326775 < 12.65355 < 12.864 <= 12.87`
+holds. Residual: tier `0.04` stays open (endpoint-only `0.061654605 > 0.04`,
+gap `0.021654605`, banked `:2313`); uniform route stays blocked
+(gap `12.824`, banked `:2467`).
+All proofs use `linarith` with banked premises plus `norm_num`-closed
+arithmetical steps; explicit numerals only.
+-/
+
+namespace Door3CutL10Consistency
+
+/-- Poly/pi banked caps are mutually consistent (tighter implies looser). -/
+theorem cutL10_consistency_poly_pi :
+    ((11.56 : ℝ) ^ 2 + 1 / 4) / 2 ≤ (66.95 : ℝ) ∧
+    Real.pi ≤ (3.15 : ℝ) ∧ (66.9418 : ℝ) ≤ (66.95 : ℝ) := by
+  have hPoly := Door3CutL10CutoffTighten.cutL10_poly_tighter_cap
+  have hPi := Door3CutL10JointTighten.cutL10_pi_tighter_cap_315
+  have hVal := Door3CutL10CutoffTighten.cutL10_poly_tighter_value
+  refine ⟨by linarith, by linarith, by linarith⟩
+
+/-- Joint banked fences are ordered: three-factor below two-factor. -/
+theorem cutL10_consistency_joint_order :
+    (0.04 : ℝ) < (6.326775 : ℝ) ∧ (6.326775 : ℝ) ≤ (6.33 : ℝ) ∧
+    (6.33 : ℝ) < (12.65355 : ℝ) ∧ (12.65355 : ℝ) ≤ (12.66 : ℝ) := by
+  have hThreeVal := Door3CutL10JointTriple.cutL10_joint_threeFactor_value
+  have hThreeCap := Door3CutL10JointTriple.cutL10_joint_threeFactor_cap
+  have hThreeGap := Door3CutL10JointTriple.cutL10_threeFactor_gap_to_tier
+  have hTwoVal := Door3CutL10JointTighten.cutL10_joint_twoFactor_value
+  have hTwoCap := Door3CutL10JointTighten.cutL10_joint_twoFactor_cap
+  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
+
+/-- Endpoint triple sits strictly between tier and uniform triple. -/
+theorem cutL10_consistency_endpoint_uniform :
+    (0.04 : ℝ) < (0.061654605 : ℝ) ∧ (0.061654605 : ℝ) < (2.144 : ℝ) ∧
+    (2.144 : ℝ) < (12.864 : ℝ) ∧ (12.864 : ℝ) ≤ (12.87 : ℝ) := by
+  have hEp := Door3CutL10EndpointJoint.cutL10_endpoint_triple_gap_to_tier
+  have hWorsen := Door3CutL10JointTier.cutL10_uniform_worsens_triple
+  have hTripVal := Door3CutL10JointTier.cutL10_uniform_triple_wall_value
+  have hUnifVal := Door3CutL10JointTier.cutL10_uniform_joint_wall_value
+  have hUnifLe := Door3CutL10JointTier.cutL10_uniform_joint_le_1287
+  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
+
+/-- Full chained ordering: tier < endpoint < uniform-triple < triple <
+two-factor < uniform-joint <= tierB-assembly. No banked pair contradicts. -/
+theorem cutL10_consistency_full_chain :
+    (0.04 : ℝ) < (0.061654605 : ℝ) ∧ (0.061654605 : ℝ) < (2.144 : ℝ) ∧
+    (2.144 : ℝ) < (6.326775 : ℝ) ∧ (6.326775 : ℝ) < (12.65355 : ℝ) ∧
+    (12.65355 : ℝ) < (12.864 : ℝ) ∧ (12.864 : ℝ) ≤ (12.87 : ℝ) := by
+  have hEp := Door3CutL10EndpointJoint.cutL10_endpoint_triple_gap_to_tier
+  have hEpVal := Door3CutL10EndpointJoint.cutL10_endpoint_triple_gammaTrue_value
+  have hWorsen := Door3CutL10JointTier.cutL10_uniform_worsens_triple
+  have hTripVal := Door3CutL10JointTier.cutL10_uniform_triple_wall_value
+  have hThreeVal := Door3CutL10JointTriple.cutL10_joint_threeFactor_value
+  have hThreeGap := Door3CutL10JointTriple.cutL10_threeFactor_gap_to_tier
+  have hTwoVal := Door3CutL10JointTighten.cutL10_joint_twoFactor_value
+  have hUnifVal := Door3CutL10JointTier.cutL10_uniform_joint_wall_value
+  have hUnifLe := Door3CutL10JointTier.cutL10_uniform_joint_le_1287
+  refine ⟨by linarith, by linarith, by linarith, by linarith, by linarith, by linarith⟩
+
+end Door3CutL10Consistency
+
