@@ -2252,3 +2252,103 @@ theorem D3SG_E05_GammaSeq5_upper_of_link
   linarith
 
 #print axioms D3SG_E05_GammaSeq5_upper_of_link
+
+/-! ## GAMNEED-OUTER-ADAPTIVE: honest shift-1 attempt at `‖Γ wOuter‖ ≤ 0.002`.
+
+RATE grep (2026-09-22): `D3SG_E05_GammaSeq5_upper_of_link` PRESENT at
+`2219-2254` (conditional Seq5 upper `≤ 0.684`). No silent gap there.
+Shift shapes reused: `D3SG_gamma_shift_norm`, `D3SG_Gamma_norm_le_real`,
+`D3SG_Gamma_one_two_le_one`, plus the R02 one-step template
+`D3SG_R02_disc_upper` (`Gamma_add_one` + `[1,2]` real cap + `‖w‖ ≥ |Im|`).
+
+Target: `gamNeed_outer` (`door3_digamma.lean:419`) `‖Γ wOuter‖ ≤ 0.002`
+at `wOuter = sOuter / 2`, `sOuter = mk 0.395 (-8.75)`, i.e.
+`wOuter = mk 0.1975 (-4.375)` (`Re = 0.1975`, `Im = -4.375`).
+This is the TIGHTEST of the four leaves, so no loose-cap claim is made.
+
+Attempt (`N = 1` shift-up + real cap, R02 shape):
+`w + 1` has `Re = 1.1975 ∈ [1,2]`, so `‖Γ(w+1)‖ ≤ 1` by domination +
+`D3SG_Gamma_one_two_le_one`; paying `‖w‖ ≥ |Im| = 4.375` gives
+`‖Γ w‖ ≤ 1 / 4.375 ≈ 0.22857 ≤ 0.229`.
+That is `≈ 114x` above `0.002`: honest GAP, banked below as
+quotient (`0.229`) + gap (`0.002 < 0.229`, ratio `114 < 0.229/0.002`).
+No force toward `0.002`; `N = 2+` would tighten toward `≈ 0.06/0.03`
+but keeps a double-digit gap (large-`Im` decay factor unbanked here),
+so it is recorded as residual, not attempted in this fenced step.
+-/
+
+/-- Adaptive outer shift-1 quotient: `‖Γ(mk 0.1975 (-4.375))‖ ≤ 0.229`
+(`1 / 4.375 ≈ 0.22857`). R02-shaped one-step shift into `[1,2]`. -/
+theorem D3SG_gamNeed_outer_shift1_upper :
+    ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ (0.229 : ℝ) := by
+  have hre1 : ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.one_re,
+      show (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).re = (0.1975 : ℝ) from rfl]
+    norm_num
+  have him_abs : (4.375 : ℝ) ≤ ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ := by
+    have him_eq : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = (-4.375 : ℝ) := rfl
+    have habs : |(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im| = (4.375 : ℝ) := by
+      rw [him_eq, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
+      norm_num
+    rw [← habs]
+    exact Complex.abs_im_le_norm _
+  have hw0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) ≠ 0 := by
+    intro h
+    have him0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = 0 := by
+      rw [h]
+      simp
+    rw [show (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = (-4.375 : ℝ) from rfl] at him0
+    norm_num at him0
+  have hG : Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)
+      = (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) *
+        Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) :=
+    Complex.Gamma_add_one _ hw0
+  have hGn : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)‖
+      = ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ := by
+    rw [hG, norm_mul]
+  have hRe1_pos : (0 : ℝ) < ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_lo : (1 : ℝ) ≤ ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_hi : ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re ≤ 2 := by
+    rw [hre1]
+    norm_num
+  have hDom : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)‖
+      ≤ Real.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re) :=
+    D3SG_Gamma_norm_le_real _ hRe1_pos
+  have hRealCap : Real.Gamma (((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1).re) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ hRe1_lo hRe1_hi
+  have hCap1 : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) + 1)‖ ≤ 1 :=
+    le_trans hDom hRealCap
+  have hMul : ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+      ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ 1 := by
+    rw [← hGn]
+    exact hCap1
+  have hmono : (4.375 : ℝ) *
+      ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+      ≤ ‖(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ :=
+    mul_le_mul_of_nonneg_right him_abs (norm_nonneg _)
+  have hle1 : ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖
+      ≤ 1 / (4.375 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 4.375), mul_comm]
+    exact le_trans hmono hMul
+  have h229 : (1 : ℝ) / (4.375 : ℝ) ≤ (0.229 : ℝ) := by norm_num
+  exact le_trans hle1 h229
+
+#print axioms D3SG_gamNeed_outer_shift1_upper
+
+/-- Adaptive outer gap: shift-1 quotient `0.229` is above `0.002` (gap, no close). -/
+theorem D3SG_gamNeed_outer_shift1_gap :
+    (0.002 : ℝ) < (0.229 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_outer_shift1_gap
+
+/-- Adaptive outer ratio: `0.229 / 0.002 ≈ 114.5`, so gap factor exceeds `114`. -/
+theorem D3SG_gamNeed_outer_shift1_ratio :
+    (114 : ℝ) < (0.229 : ℝ) / (0.002 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_outer_shift1_ratio

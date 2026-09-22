@@ -5934,6 +5934,25 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 STIRLING-RATE (background `ses_f34efa018`, proof-only,
+  grep-clean, stirling-only commit): E05 Seq5 UPPER banked (rpow ≤1.38
+  `:1989`, Re 6.9 `:2006`, cpow5 `:2021`, add-lowers `:2040-2164`,
+  prod ≥1211.37 `:2190`, upper ≤0.684 `:2219` = 828/1211.37; brackets
+  true 0.671 with finite 0.659; conditional on L1; rate needs
+  convergence estimate, not upper+lower).
+- 2026-09-22 STIRLING-GAMMANEED2-ADAPTIVE (background `ses_f34c288f7`,
+  proof-only, grep-clean, same commit): gamNeed_outer via shift → 0.229
+  (1/4.375; gap 114x vs 0.002; n=2 →0.3155 worse). Below-true pattern
+  holds (mid unclosable, outer 114x over). Tight numerals need
+  re-measurement or different w.
+- 2026-09-22 EDGE-RETIER (background `ses_f34c288f8`, proof-only,
+  grep-clean, wiring-only commit): MT=1000 retier HONEST-FAIL on gates —
+  triple (1/2,1000,0.0005): side closed, ratio + both widths OPEN
+  (negations banked `:1609/:1613/:1618`; no (m,1000) with m≤1/2 passes
+  since M<50 required). Retiered conditionals `:1642/:1674` (+deriv→C
+  reduction) banked with open width premises. SQUEEZE documented:
+  gates need M<50, product needs C≥joint≫40 — feasible window may be
+  empty; needs adjudication.
 - 2026-09-22 ETA-S16-ADAPTIVE (background `ses_f34c289aa`, proof-only,
   grep-clean, suppliers-only commit): branch (a) — S14 numerals
   re-verified honest + S16 extended (log15/16 bridges, rpow15/16 quads

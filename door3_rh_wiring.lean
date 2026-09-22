@@ -1581,6 +1581,142 @@ def edgeHalf_topGammaFloor_missing : Prop :=
   ∃ cG : ℝ, 0 < cG ∧ ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
     cG ≤ ‖Complex.Gamma ((Complex.I * ((x : ℂ))) / 2)‖
 
+/-! ## EDGE-RETIER MT=1000 strip instances (filed, conditional, no force).
+
+BALLSUP-SURVEY verdict: ball-12 `C = 40` INFEASIBLE by product; retier to the
+`MT = MB = 1000` shape (`:310-312` deriv-to-ball-sup reduction) or abandon
+product. Honest arithmetic at the feasible uniform `m = 1/2`, `M = 1000`
+(`δ = (1/2)/1000 = 0.0005`):
+
+* `δ ≤ 1`: CLOSED (`0.0005 ≤ 1` by `norm_num`, banked below).
+* ratio gate `0.01 < δ`: OPEN (FAILS — `0.0005 < 0.01`, negation banked below).
+* width gates `1/2 - δ < 0.49` / `-0.49 < -(1/2) + δ` (each ⟺ `δ > 0.01`):
+  OPEN (FAIL — `0.4995 < 0.49` false, negations banked below).
+
+Feasible triple closest to banked shapes: `(m, M, δ) = (1/2, 40, 0.0125)`
+(already banked as `edgeStrip_top_half_M40` / `edgeStrip_bottom_half_M40`,
+both gates closed by `norm_num`). No `(m, M)` with `M = 1000`, `m ≤ 1/2`
+passes the gate (`(1/2)/M > 0.01 ⟺ M < 50`), and `m ≤ 1/2` is maximal closable
+(`door3_sliver_edge.lean:202-210` sharpness, `(0) ∈ Icc (-10) 10`).
+So the `M = 1000` instances below stay CONDITIONAL on the open width
+premises plus the two supplier premises; deriv side reduces to one
+closed-ball sup `C = 1000` via the banked bridge. -/
+
+/-- `δ ≤ 1` side condition at `M = 1000`: CLOSED by `norm_num`. -/
+theorem gate_M1000_side_closed : (1 / 2 : ℝ) / (1000 : ℝ) ≤ 1 := by norm_num
+
+/-- Ratio gate at `M = 1000`: OPEN (fails); negation banked as exact status. -/
+theorem gate_M1000_ratio_open : ¬ (0.01 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ) := by
+  norm_num
+
+/-- Top width gate at `M = 1000`: OPEN (fails); negation banked as status. -/
+theorem width_M1000_top_open :
+    ¬ (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ) := by
+  norm_num
+
+/-- Bottom width gate at `M = 1000`: OPEN (fails); negation banked as status. -/
+theorem width_M1000_bot_open :
+    ¬ (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) := by
+  norm_num
+
+/-- `hTopDeriv` at `MT = 1000` from one closed-ball sup `C = 1000` on
+`Metric.closedBall 0 12` (via banked `Door3SliverEdge.uniform_top_deriv_of_closedBall`
+at `d = (1/2)/1000`; `d ≤ 1` by `norm_num`). -/
+theorem hTopDeriv1000_of_ballSup1000
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖xiShiftedEntire z‖ ≤ (1000 : ℝ)) :
+    ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ) := by
+  intro x hx y hy
+  exact Door3SliverEdge.uniform_top_deriv_of_closedBall
+    ((1 / 2 : ℝ) / (1000 : ℝ)) (1000 : ℝ) (by norm_num) hC x hx y hy
+
+/-- Top-only edge strips retiered at feasible `m = 1/2`, `MT = 1000`
+(`δ = (1/2)/1000`): top strip from `sliver_top_strip_of_entire_data`, bottom
+via proved `sliver_bottom_of_top_via_conj`, packaged by
+`xiCentralEdgeStrips10_of_uniformStrips`. Side `δ ≤ 1` closed by `norm_num`;
+both width gates stay EXPLICIT premises (OPEN per `width_M1000_top_open` /
+`width_M1000_bot_open`, so no `norm_num` force here). Residual: the two
+supplier premises plus the two open width premises. -/
+theorem edgeStrip_top_half_M1000
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ))
+    (hWidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ))
+    (hWidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) :
+    RHProofScaffold.XiCentralEdgeStrips10 := by
+  have hδle : (1 / 2 : ℝ) / (1000 : ℝ) ≤ 1 := by norm_num
+  have hpos : 0 < (1 / 2 : ℝ) / (1000 : ℝ) := by norm_num
+  have hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_low hy_top
+    exact Door3SliverNonvan.sliver_top_strip_of_entire_data (1 / 2 : ℝ) (1000 : ℝ)
+      (by norm_num) (by norm_num) hTopLower hTopDeriv hδle x hx y hy_low hy_top
+  have hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_lo hy_hi
+    exact Door3SliverNonvan.sliver_bottom_of_top_via_conj
+      ((1 / 2 : ℝ) / (1000 : ℝ)) hpos hδle hstripT x hx y hy_lo hy_hi
+  exact xiCentralEdgeStrips10_of_uniformStrips hstripT hWidthT hstripB hWidthB
+
+/-- Bottom-only edge strips retiered at feasible `m = 1/2`, `MB = 1000`
+(`δ = (1/2)/1000`): conj mirror of `edgeStrip_top_half_M1000` (bottom strip
+from `sliver_bottom_strip_of_entire_data`, top via proved conjugation inline,
+`sliver_star_vertical` + `sliver_conj_transfer_general`). Side `δ ≤ 1`
+closed by `norm_num`; both width gates stay EXPLICIT premises (OPEN per
+`width_M1000_top_open` / `width_M1000_bot_open`). Residual: the two supplier
+premises plus the two open width premises. -/
+theorem edgeStrip_bottom_half_M1000
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ))
+    (hWidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ))
+    (hWidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) :
+    RHProofScaffold.XiCentralEdgeStrips10 := by
+  have hδle : (1 / 2 : ℝ) / (1000 : ℝ) ≤ 1 := by norm_num
+  have hpos : 0 < (1 / 2 : ℝ) / (1000 : ℝ) := by norm_num
+  have hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_lo hy_hi
+    exact Door3SliverNonvan.sliver_bottom_strip_of_entire_data (1 / 2 : ℝ) (1000 : ℝ)
+      (by norm_num) (by norm_num) hBotLower hBotDeriv hδle x hx y hy_lo hy_hi
+  have hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_low hy_top
+    have hy_neg_lo : -(1 / 2 : ℝ) < -y := by linarith
+    have hy_neg_hi : -y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) := by linarith
+    have hne_mirror : xiShifted ((x : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) ≠ 0 :=
+      hstripB x hx (-y) hy_neg_lo hy_neg_hi
+    have him : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im = -y := by simp
+    have him_lo : -(1 / 2 : ℝ) < ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im := by
+      rw [him]
+      linarith
+    have him_hi : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im < (1 / 2 : ℝ) := by
+      rw [him]
+      linarith
+    have hstar : xiShifted
+        (star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))) ≠ 0 :=
+      Door3SliverNonvan.sliver_conj_transfer_general _ him_lo him_hi hne_mirror
+    have hbase : star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) =
+        ((x : ℝ) : ℂ) + Complex.I * ((y : ℝ) : ℂ) := by
+      have h := Door3SliverNonvan.sliver_star_vertical x (-y)
+      have hcast : (((-(-y : ℝ) : ℝ)) : ℂ) = ((y : ℝ) : ℂ) := by
+        rw [neg_neg]
+      rw [hcast] at h
+      exact h
+    rw [hbase] at hstar
+    exact hstar
+  exact xiCentralEdgeStrips10_of_uniformStrips hstripT hWidthT hstripB hWidthB
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
