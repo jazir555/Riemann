@@ -1055,4 +1055,89 @@ hence H3 via `h3_outer_of_lead_normcap_G2` stays conditional. Value banked:
 native-`Im^2` G1-expression disc `stirling_G1expr_im2`; gap: norm-cap U + G2.
 -/
 
+/-! ## 17. WENDEL-G2 chain attempt (PROOF-ONLY, FENCED, no build): GAP with exact residual.
+
+Greps (before edit, this turn, this file only):
+- `G2_outerN8_prop` at `:770` (def), `:776` (H3 combiner use), `:1039` (lead-chain use),
+  `:1053` (G1-residual cites as open);
+- `S_outerN8/:761`, `cN_outerN8/:764`, `target_outer/:767`;
+- `hEq` shape at `:625,774`; banked close `digamma_shift_wOuter_8` at `:951`;
+- lead banked: `stirling_wOuter_add8/:848`, `stirling_G1expr_im2/:994`;
+  conditionals `G1_of_normcap/:1012`, `h3_outer_of_lead_normcap_G2/:1036`;
+- tactic grep `sorry|admit|axiom|simpa`: comment-only mentions, zero tactic uses.
+- banked-leaf grep (read-only): `D3SG_*` no `Complex.log`, no `1/(2*w)`;
+  `D3SR_*` names complex log-Gamma/Binet remainder unbanked (`:272-281`);
+  in-repo `Binet` is Fibonacci/CrossProduct only; `Complex.logGamma` absent as API.
+- StirlingVert lead audit (read-only, same DAG as section 14):
+  finite-interval pair `integral_inv_add_eq_log_sub` + `integral_inv_add_eq`
+  (`StirlingVert.lean:68,98`) gives the per-step log identity with `eps` remainder;
+  `norm_eps_le` (`:136`) bounds each `eps`; `digamma_stirling` (`:483`) is the
+  tsum-closed psi disc already used for G1. Nothing banked gives the 8-fold
+  telescoped `‖w‖^2`-denominator G2 directly; the step + finite-sum work below
+  is the honest mirror of the G1 route at finite N.
+
+Attempt (honest mirror of G1 route): G1 went lead (`digamma_stirling`) ->
+rewrite (`half_div_eq`) -> native-`Im^2` disc (`stirling_G1expr_im2`) ->
+inflation conditional (`G1_of_normcap`). Here the mirror is per-step log
+identity (`g2_log_step`, from the same StirlingVert finite-interval pair) ->
+telescope over 8 steps -> eps-sum + `1/(2w)`-endpoint bounds -> `G2_outerN8_prop`.
+Banked here (proved, no new axioms): the per-step identity at general `w`
+plus its `wOuter` eps bound and denominator floor. The 8-fold telescoping sum
+identity plus the explicit `C2` assembly is NOT banked (needs the `Finset.sum`
+telescope over `Complex.log` steps with `ℝ`-to-`ℕ` cast alignment plus the
+`S_outerN8`/`cN_outerN8`/`target_outer` fold, over budget for this fenced turn).
+Hence G2 stays Prop, H3 stays conditional via `h3_outer_of_lead_normcap_G2`.
+No `sorry`/`admit`/`axiom`/`simpa`; no new imports; this section only.
+-/
+
+theorem g2_log_step (w : ℂ) (hw : 0 < w.re) (m : ℝ) (hm : 0 ≤ m) :
+    Complex.log ((((m + 1 : ℝ)) : ℂ) + w) - Complex.log ((m : ℂ) + w) =
+      ((m : ℂ) + w)⁻¹ - (1 / 2 : ℂ) / ((m : ℂ) + w) ^ 2 +
+        Zeta23.StirlingVert.eps w m := by
+  exact (Zeta23.StirlingVert.integral_inv_add_eq_log_sub (w := w) (m := m) hw hm).symm.trans
+    (Zeta23.StirlingVert.integral_inv_add_eq (w := w) (m := m) hw hm)
+
+theorem g2_eps_bound_wOuter (m : ℝ) (hm : 0 ≤ m) :
+    ‖Zeta23.StirlingVert.eps wOuter m‖ ≤
+      1 / (3 * ‖(m : ℂ) + wOuter‖ ^ 2 * 4.375) := by
+  have ht : (1 / 2 : ℝ) ≤ |wOuter.im| := by
+    rw [wOuter_im]
+    norm_num
+  have h := Zeta23.StirlingVert.norm_eps_le (w := wOuter) (m := m)
+    wOuter_re_pos ht hm
+  have him : |wOuter.im| = (4.375 : ℝ) := by
+    rw [wOuter_im]
+    norm_num
+  rw [him] at h
+  exact h
+
+theorem g2_denom_lower_wOuter (m : ℝ) :
+    (4.375 : ℝ) ≤ ‖(m : ℂ) + wOuter‖ := by
+  have hle : |(((m : ℂ) + wOuter)).im| ≤ ‖(m : ℂ) + wOuter‖ :=
+    Complex.abs_im_le_norm _
+  have him2 : ((((m : ℂ) + wOuter)).im) = (-4.375 : ℝ) := by
+    simp [wOuter_im]
+  have habs : |((((m : ℂ) + wOuter)).im)| = (4.375 : ℝ) := by
+    rw [him2]
+    norm_num
+  linarith
+
+/-! G2 residual (exact, no force): with `g2_log_step` at `w := wOuter`,
+`m := (k : ℝ)` for `k = 0..7`, telescoping gives
+`log (wOuter+8) - log wOuter = S_outerN8 - (1/2) * T + E` where
+`T = ∑ k ∈ range 8, ((k:ℂ)+wOuter)⁻¹^2`-shape and
+`E = ∑ k ∈ range 8, eps wOuter (k:ℝ)`; then
+`(cN_outerN8 - S_outerN8) - target_outer = -(1/2)*T + E - D` with
+`D = 1/(2*(wOuter+8)) - 1/(2*wOuter)`. Each summand is controlled by
+`g2_eps_bound_wOuter` + `g2_denom_lower_wOuter`, but the 8-fold
+`Finset.sum_range_succ` telescope plus the `S/cN/target` fold to the exact
+`G2_outerN8_prop C2` shape is not assembled here. Value banked: per-step
+identity `g2_log_step`, eps cap `g2_eps_bound_wOuter`, floor
+`g2_denom_lower_wOuter`; hEq banked (`digamma_shift_wOuter_8`); G1 conditional
+chain banked (`stirling_G1expr_im2`, `G1_of_normcap`, `h3_outer_of_lead_normcap_G2`).
+Gap: 8-fold telescope assembly + explicit `C2` (hand estimate `C2 ~ 10` from
+`8/(2*19.14) + 8/(3*19.14*4.375) + 4/19.14` times `‖wOuter‖^2`, not claimed checked).
+Hence H3 not closed here.
+-/
+
 end Door3ComplexWendel

@@ -1630,3 +1630,93 @@ theorem gap_leaf_sub_total_open :
   norm_num
 
 end Door3DerivUp
+
+/-! ## 15. DERIV-GAMMAP leaf-sub tight specs (append-only).
+
+Grep record (read-only, before writing):
+* leaf-sub closed: `zetaDeriv_leaf_sub_934_closed :1616` (93400).
+* Leibniz gap: `gap_leaf_sub_gamma_alone :1622`, `gap_leaf_sub_total_open :1626`.
+* DG spec: `gammaDerivUp_of_sup :525` (C / rho shape).
+* Tight value scale: `tightGamma_leaf :669` (= 0.008).
+Wide gamma-prime 60000 and wide zeta-prime 93400 each exceed leaf-sub
+M prime 0.15. Tight chain below derives 0.8-scale gamma-prime from a
+0.008-scale sphere sup via `:525`, and 300-scale zeta-prime from a
+3-scale sphere sup via `zetaDerivUp_of_sup`. Ultimate Leibniz needs
+(DG <= 0.03, DZ <= 300) stay open as exact Props. No new premise
+for `dLeaf` is chained here; only `dLeaf_sub` specs are filed.
+-/
+
+namespace Door3DerivUp
+
+def gammaTightSup_leaf_sub : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.008
+
+def gammaPrimeTightNeed_leaf_sub : Prop :=
+  ‖deriv DerivCauchyBridge.gammaOf dLeaf_sub‖ ≤ 0.03
+
+def gammaPrimeCauchyTight_leaf_sub : Prop :=
+  ‖deriv DerivCauchyBridge.gammaOf dLeaf_sub‖ ≤ 0.8
+
+def zetaSupTightNeed_leaf_sub : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖riemannZeta z‖ ≤ 3
+
+def zetaPrimeTightNeed_leaf_sub : Prop :=
+  ‖deriv riemannZeta dLeaf_sub‖ ≤ 300
+
+theorem gamma_tightChain_number : (0.008 : ℝ) / 0.01 = 0.8 := by
+  norm_num
+
+theorem zeta_tightChain_number : (3 : ℝ) / 0.01 = 300 := by
+  norm_num
+
+theorem gammaPrime_leaf_sub_of_tightSup
+    (hd : DiffContOnCl ℂ DerivCauchyBridge.gammaOf (Metric.ball dLeaf_sub 0.01))
+    (hC : gammaTightSup_leaf_sub) :
+    ‖deriv DerivCauchyBridge.gammaOf dLeaf_sub‖ ≤ 0.8 := by
+  unfold gammaTightSup_leaf_sub at hC
+  have h := gammaDerivUp_of_sup dLeaf_sub 0.01 0.008 (by norm_num) hd hC
+  rw [gamma_tightChain_number] at h
+  exact h
+
+theorem gammaPrimeCauchyTight_of_tightSup
+    (hd : DiffContOnCl ℂ DerivCauchyBridge.gammaOf (Metric.ball dLeaf_sub 0.01))
+    (hC : gammaTightSup_leaf_sub) :
+    gammaPrimeCauchyTight_leaf_sub := by
+  unfold gammaPrimeCauchyTight_leaf_sub
+  exact gammaPrime_leaf_sub_of_tightSup hd hC
+
+theorem zetaPrime_leaf_sub_of_tightSup3
+    (hd : DiffContOnCl ℂ riemannZeta (Metric.ball dLeaf_sub 0.01))
+    (hC : zetaSupTightNeed_leaf_sub) :
+    ‖deriv riemannZeta dLeaf_sub‖ ≤ 300 := by
+  unfold zetaSupTightNeed_leaf_sub at hC
+  have h := zetaDerivUp_of_sup dLeaf_sub 0.01 3 (by norm_num) hd hC
+  rw [zeta_tightChain_number] at h
+  exact h
+
+theorem zetaPrimeTight_of_sup3
+    (hd : DiffContOnCl ℂ riemannZeta (Metric.ball dLeaf_sub 0.01))
+    (hC : zetaSupTightNeed_leaf_sub) :
+    zetaPrimeTightNeed_leaf_sub := by
+  unfold zetaPrimeTightNeed_leaf_sub
+  exact zetaPrime_leaf_sub_of_tightSup3 hd hC
+
+theorem gap_leaf_sub_tightNeed_below_wide_gamma :
+    (0.03 : ℝ) < 600 / 0.01 := by
+  norm_num
+
+theorem gap_leaf_sub_tightChain_above_need :
+    (0.03 : ℝ) < 0.8 := by
+  norm_num
+
+theorem gap_leaf_sub_tightZeta_below_wide :
+    (300 : ℝ) < 934 / 0.01 := by
+  norm_num
+
+theorem gap_leaf_sub_tightChain_total_open :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.008 * 3 + 22.74 * 1.075 * 0.008 * 3 +
+        22.74 * 1 * 0.8 * 3 + 22.74 * 1 * 0.008 * 300 := by
+  norm_num
+
+end Door3DerivUp

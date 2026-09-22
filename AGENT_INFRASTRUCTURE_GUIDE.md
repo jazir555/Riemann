@@ -6057,6 +6057,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 DERIV-GAMMAP (background `ses_f3490d9f5`, proof-only,
+  grep-clean, deriv-only commit): tight-chain specs (sups/needs `:1651-
+  1663`) + Cauchy chains (0.8/300 `:1672-1697`) + gaps (`:1704-1716`:
+  0.03<0.8, total ~109.9>0.15). DiffCont + sphere sups open.
+- 2026-09-22 WENDEL-G2 (background `ses_f349123d2`, proof-only,
+  grep-clean, wendel-only commit): G2 per-step pieces (`:1093-1114`:
+  log identity + eps cap + denom floor). 8-fold telescope unassembled;
+  H3 conditional.
 - 2026-09-22 ASSEMBLY-R01 (background `ses_f3490a842`, proof-only,
   grep-clean, assembly-only commit): R01 leaf+H conditional
   (`:17111-17148`, two-tenths center + 0.07 deriv residuals, R00 mirror).
