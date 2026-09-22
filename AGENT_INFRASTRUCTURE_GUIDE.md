@@ -5670,8 +5670,20 @@ sorry-free infrastructure and the complete commit ledger above.
   def ≤0.52, proved inline `hStrong : 2.02≤7^0.395` via quadratic lower
   `1+0.74607+0.74607²/2≥2.02`, `0.52·2.02=1.0504≥1`; coordinator checked
   `2.02≤~2.156` sound). Axioms standard, no sorryAx. Full eta backlog
-  (S8/S8IM/cF-1851/S10/S6Im) COMPILED. Lock RELEASED. PILOT-BUILD
+  (S8/S8IM/cF-1851/S10/S6Im) COMPILED.   Lock RELEASED. PILOT-BUILD
   tasked (sole owner, first pilot build).
+- 2026-09-22 PILOT-BUILD (background `ses_f37622079`, sole build owner):
+  BUILD-EXIT=1 x2 (first-ever pilot build; 32 errors → 17 remaining, all
+  15 in-scope cleared). Fixes (pilot-only, +16/-21): S5 norm bridges
+  `:1498` (t2/t3/t4 via eta_eq + norm_neg), `le_of_pow` metavar x2
+  (`:1643/:2684`, explicit base/nonneg), stray-`norm_num` deletions x8
+  (cpow2/3/8/10 hre/him pairs), `mul_le_mul` args `:1717`, FALSE theta9
+  numeral `:2225` (`2.197224578`→`...576`, off 4e-10 — second false
+  literal caught in pilot lane), cos10log10 rw→linarith `:2574`.
+  Remaining 17 all prescribed same-family: 12x No-goals/le_of_pow
+  (`:2970/74`, `:3057/3230/3326/3693/3984`, `:3085/89` etc.), `:3043` rw
+  chaining, `:3448` S8/0.15 term bridge. Grep-clean. PILOT-SWEEP2 tasked
+  (sole owner, apply 17 + rebuild).
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494

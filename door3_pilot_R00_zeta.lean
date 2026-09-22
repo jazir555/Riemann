@@ -1495,7 +1495,13 @@ theorem R00_eta_S5_norm_ge_neg237 :
           + etaDirichletTerm sR00 2 + etaDirichletTerm sR00 3) := by abel
     rw [heq] at h
     exact h
-  linarith
+  have t2 : ‖etaDirichletTerm sR00 2‖ ≤ (1 : ℝ) := by
+    rw [R00_eta_third_eq]; exact hb
+  have t3 : ‖etaDirichletTerm sR00 3‖ ≤ (0.60 : ℝ) := by
+    rw [R00_eta_fourth_eq, norm_neg]; exact hc
+  have t4 : ‖etaDirichletTerm sR00 4‖ ≤ (1 : ℝ) := by
+    rw [R00_eta_fifth_eq]; exact hd
+  linarith [hS2, h1, h2, h3, t2, t3, t4]
 
 /-- Exact certificate value with phase-aware slow attempt (binding slow
 stays `0.23` by the S5 stall): `(0.23 - 0.044)/2.53 = 186/2530`. -/
@@ -1639,8 +1645,7 @@ theorem sSCUT_sqrt2_le : (2 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 / 2 : ℝ) := by
     norm_num
   have hle : (((2 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ)) ≤ ((3 / 2 : ℝ) ^ (2 : ℕ)) := by
     rw [hpow']; exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `r₂ = 2^(-1/2) ≤ 5/7` (inverse of the root step). -/
 theorem sSCUT_rpow2_neg_le : (2 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (5 / 7 : ℝ) := by
@@ -1678,11 +1683,9 @@ theorem sSCUT_cpow2_neg_re : ((((2 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
   have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -1714,7 +1717,7 @@ theorem sSCUT_cpow2_Re_mem :
   constructor
   · have hmul : (2 / 3 : ℝ) * (3 / 4 : ℝ)
         ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2) :=
-      mul_le_mul hr_lo hc_lo hc0 (by norm_num)
+      mul_le_mul hr_lo hc_lo (by norm_num) hr0
     have heq : (2 / 3 : ℝ) * (3 / 4 : ℝ) = 1 / 2 := by norm_num
     linarith
   · have hmul : (2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 2)
@@ -2211,23 +2214,23 @@ theorem sSCUT_theta3_sharp_width_eq :
     (10.986122888 : ℝ) - 10.986122885 = (0.000000003 : ℝ) := by
   norm_num
 
-/-- Sharp `n = 9` phase window (`10*log 9 ∈ (21.97224577, 21.97224578)`
+/-- Sharp `n = 9` phase window (`10*log 9 ∈ (21.97224577, 21.972245776)`
 via `sSCUT_log_nine_eq` + d9; enabler for the `δ₉` recipe). -/
 theorem sSCUT_theta9_sharp_mem :
-    (21.97224577 : ℝ) < 10 * Real.log 9 ∧ 10 * Real.log 9 < (21.97224578 : ℝ) := by
+    (21.97224577 : ℝ) < 10 * Real.log 9 ∧ 10 * Real.log 9 < (21.972245776 : ℝ) := by
   have h9 := sSCUT_log_nine_eq
   have h3lo := Real.log_three_gt_d9
   have h3hi := Real.log_three_lt_d9
   have hsum_lo : (2.197224577 : ℝ) < 2 * Real.log 3 := by
     have c : 2 * (1.0986122885 : ℝ) = 2.197224577 := by norm_num
     linarith
-  have hsum_hi : 2 * Real.log 3 < (2.197224578 : ℝ) := by
-    have c : 2 * (1.0986122888 : ℝ) = 2.197224578 := by norm_num
+  have hsum_hi : 2 * Real.log 3 < (2.1972245776 : ℝ) := by
+    have c : 2 * (1.0986122888 : ℝ) = 2.1972245776 := by norm_num
     linarith
   have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
   have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
   have c1 : (10 : ℝ) * 2.197224577 = 21.97224577 := by norm_num
-  have c2 : (10 : ℝ) * 2.197224578 = 21.97224578 := by norm_num
+  have c2 : (10 : ℝ) * 2.1972245776 = 21.972245776 := by norm_num
   constructor <;> linarith
 
 /-- Sharp `n = 12` phase window (`10*log 12 ∈ (24.849066491, 24.849066504)`
@@ -2317,11 +2320,9 @@ theorem sSCUT_cpow3_neg_re : ((((3 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
   have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -2571,8 +2572,7 @@ theorem sSCUT_cos10log10_le_neg_half :
       have hnum : (1 / 2 : ℝ) ≤ (0.5353 : ℝ) - (0.5354 : ℝ) ^ 3 / 6 := by
         norm_num
       linarith
-    rw [hrewrite]
-    linarith
+    linarith [hrewrite, hmono, hcube, hfloor]
   rw [key]
   linarith
 
@@ -2598,11 +2598,9 @@ theorem sSCUT_cpow10_neg_re : ((((10 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 10 : ℝ)) : ℂ)).re = Real.log 10 := Complex.ofReal_re _
   have hzim : ((((Real.log 10 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 10 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -2649,11 +2647,9 @@ theorem sSCUT_cpow8_neg_re : ((((8 : ℝ)) : ℂ) ^ (-sSCUT)).re
   have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
     have e : (-sSCUT).re = -(sSCUT.re) := rfl
     rw [e, sSCUT_re]
-    norm_num
   have him_w : (-sSCUT).im = (-10 : ℝ) := by
     have e : (-sSCUT).im = -(sSCUT.im) := rfl
     rw [e, sSCUT_im]
-    norm_num
   have hzre : ((((Real.log 8 : ℝ)) : ℂ)).re = Real.log 8 := Complex.ofReal_re _
   have hzim : ((((Real.log 8 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
   have harg_re : ((((Real.log 8 : ℝ)) : ℂ) * (-sSCUT)).re
@@ -2680,8 +2676,7 @@ theorem sSCUT_sqrt8_le : (8 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
     rw [e, Real.rpow_one]
   have hle : ((((8 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
     rw [hpow']; exact hpow
-  exact le_of_pow_le_pow_left₀ (by norm_num)
-    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
 
 /-- `1/3 ≤ r₈ = 8^(-1/2)` (inverse of the root step; mirror of
 `sSCUT_rpow2_neg_ge`). -/
