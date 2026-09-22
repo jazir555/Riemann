@@ -5611,5 +5611,13 @@ sorry-free infrastructure and the complete commit ledger above.
   / Re8≤0.0475 → `CS_complex_S8_Re_ge_115 :4980` (1.15 = 0.95+0.2494-
   0.0475, true ~1.716) + below-slow gap `:5003` (0.79) + shortfall
   `:5009` (1.4414 at cF 1.851). Honest: beats S6-Re 0.95, trails S4-Re
-  1.56 and live 1.94 (true |S8|~1.901). Live best STANDS (0.6514).
+  1.56 and live 1.94 (true |S8|~1.901).   Live best STANDS (0.6514).
   Next: S8-Im route (ETA-S8IM).
+- 2026-09-22 ETA-S8IM (background `ses_f376ddb3c`, proof-only, grep-clean,
+  suppliers-only commit): S8-Im lower banked — cpow7/8_im splits
+  `:5049/:5085`, sin7≥0.055 `:5123` / sin8≤1 `:5169`, Im7≥0.0236
+  `:5174` / Im8≤0.47 `:5192` → `CS_complex_S8_Im_ge_016 :5224` (0.16,
+  true ~1.231) + Pythagoras gap `:5237` (1.15²+0.16²=1.3481 vs
+  1.94²=3.7636, gap 2.4155; needs Im≥1.564 — no force). S8 pair gives
+  ~1.161; true |S8|~1.901 confirms stall. Live 1.94 STANDS.
+  Premise_gamma 8-line tweak left for VERIFY3 owner.

@@ -5027,10 +5027,225 @@ theorem CS_S8C_shortfall_1851 : (1.4 : ℝ) * 1.851 - 1.15 = 1.4414 := by
 #print axioms CS_cos8_upper_0101
 #print axioms CS_Re7_ge_02494
 #print axioms CS_Re8_le_00475
-#print axioms CS_S8C_Re_eq
-#print axioms CS_complex_S8_Re_ge_115
-#print axioms CS_complex_S8_abs_ge_115
-#print axioms CS_S8C_below_slow_gap
-#print axioms CS_S8C_shortfall_1851
+/-! ## §A20. Complex S8 Im lower + Pythagoras gap (ETA-S8IM, proof-only)
+
+Honest Im route (banked windows only, sin-split reuse, no new analysis):
+* `CS_cpow7_sCenter_im` / `CS_cpow8_sCenter_im` (token mirrors of
+  `CS_cpow7_sCenter_re :4718` / `CS_cpow8_sCenter_re :4754` with
+  `Complex.exp_im` + `sin`).
+* `sin φ₇ ≥ 0.055`: `φ₇ ∈ [12.7494, 13.47435]`, `e₇ = φ₇ - 4π ∈ [0.18, 0.908]`,
+  `sin φ₇ = sin e₇ ≥ e₇ - e₇³/6 ≥ 0.18 - 0.908³/6 = 0.055231… ≥ 0.055`
+  (`Real.sin_ge_sub_cube`, mirror of the `CS_sin3_ge_03793` cubic floor).
+* `sin φ₈ ≤ 1` (`Real.sin_le_one`, no window needed).
+* `Im₇ ≥ 0.0236` (`r₇ ≥ 0.43` + `sin φ₇ ≥ 0.055`; `0.43·0.055 = 0.02365`);
+  `Im₈ ≤ 0.47` (`r₈ ≤ 0.47` + `sin φ₈ ≤ 1`).
+* Assembly: `Im(S₈) = Im(S₆) + Im₇ - Im₈ ≥ 0.6092 + 0.0236 - 0.47 = 0.1628
+  ≥ 0.16` (uses `CS_complex_S6_Im_ge_06092`).
+* Pythagoras: `1.15² + 0.16² = 1.3481 < 3.7636 = 1.94²` by `2.4155`, so
+  `‖S₈‖ ≥ 1.94` does NOT follow; best honest stays `1.94`. No force. -/
+
+/-- Cpow imaginary-part split for `7^{-s}` at `sCenter` (token mirror of
+`CS_cpow7_sCenter_re`). -/
+theorem CS_cpow7_sCenter_im : ((((7 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 7) := by
+  have h7pos : (0 : ℝ) < 7 := by norm_num
+  have hxC : ((7 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h7pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((7 : ℝ) : ℂ) = (((Real.log 7 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h7pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 7 : ℝ)) : ℂ)).re = Real.log 7 := Complex.ofReal_re _
+  have hzim : ((((Real.log 7 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 7 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 7 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 7 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 7 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 7 * (-(0.395 : ℝ)))
+      = (7 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h7pos _).symm
+  have hsin : Real.sin (Real.log 7 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 7) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Cpow imaginary-part split for `8^{-s}` at `sCenter` (token mirror of
+`CS_cpow8_sCenter_re`). -/
+theorem CS_cpow8_sCenter_im : ((((8 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).im
+    = (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 8) := by
+  have h8pos : (0 : ℝ) < 8 := by norm_num
+  have hxC : ((8 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h8pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((8 : ℝ) : ℂ) = (((Real.log 8 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h8pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 8 : ℝ)) : ℂ)).re = Real.log 8 := Complex.ofReal_re _
+  have hzim : ((((Real.log 8 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 8 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 8 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 8 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 8 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 8 * (-(0.395 : ℝ)))
+      = (8 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h8pos _).symm
+  have hsin : Real.sin (Real.log 8 * (6.75 : ℝ))
+      = Real.sin (6.75 * Real.log 8) := by
+    rw [mul_comm]
+  rw [Complex.exp_im, harg_re, harg_im, hexp, hsin]
+
+/-- Sine lower at `φ₇ = 6.75·log 7` (`≥ 0.055`; TRUE `≈ 0.538`).
+Route: `φ₇ ∈ [12.7494, 13.47435]` (same window as `CS_cos7_lower_058`), so
+`e = φ₇ - 4π ∈ [0.18, 0.908]` and `sin φ₇ = sin e ≥ e - e³/6 ≥ 0.055`
+via `Real.sin_ge_sub_cube` (mirror of `CS_sin3_ge_03793`). -/
+theorem CS_sin7_ge_0055 :
+    (0.055 : ℝ) ≤ Real.sin (6.75 * Real.log 7) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h7lo := CS_log_seven_ge
+  have h7hi := CS_log_seven_le
+  have hlo : (12.7494 : ℝ) ≤ 6.75 * Real.log 7 := by
+    have hmul : 6.75 * (1.8888 : ℝ) ≤ 6.75 * Real.log 7 :=
+      mul_le_mul_of_nonneg_left h7lo (by norm_num)
+    have hcap : (12.7494 : ℝ) ≤ 6.75 * 1.8888 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 7 ≤ (13.47435 : ℝ) := by
+    have hmul : 6.75 * Real.log 7 ≤ 6.75 * (1.9962 : ℝ) :=
+      mul_le_mul_of_nonneg_left h7hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.9962 ≤ 13.47435 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 7 with hx_def
+  set e : ℝ := x - 4 * Real.pi with he_def
+  have he_lo : (0.18 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (0.908 : ℝ) := by
+    rw [he_def]
+    linarith
+  have he0 : (0 : ℝ) ≤ e := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hsin_eq : Real.sin x = Real.sin e := by
+    have h1 : Real.sin (e + 2 * Real.pi + 2 * Real.pi)
+        = Real.sin (e + 2 * Real.pi) := Real.sin_add_two_pi _
+    have h2 : Real.sin (e + 2 * Real.pi) = Real.sin e :=
+      Real.sin_add_two_pi _
+    rw [hx_eq]
+    exact h1.trans h2
+  have hfloor := Real.sin_ge_sub_cube he0
+  have q3 : e ^ 3 ≤ (0.908 : ℝ) ^ 3 := pow_le_pow_left₀ he0 he_hi 3
+  have hcap : (0.055 : ℝ) ≤ (0.18 : ℝ) - (0.908 : ℝ) ^ 3 / 6 := by
+    norm_num
+  rw [hsin_eq]
+  linarith
+
+/-- Sine cap at `φ₈ = 6.75·log 8` (`≤ 1`; TRUE `≈ 0.9949`). -/
+theorem CS_sin8_le_one :
+    Real.sin (6.75 * Real.log 8) ≤ (1 : ℝ) :=
+  Real.sin_le_one _
+
+/-- `Im₇ ≥ 0.0236` (`r₇ ≥ 0.43`, `sin φ₇ ≥ 0.055`; TRUE `≈ 0.249`). -/
+theorem CS_Im7_ge_00236 :
+    (0.0236 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 7) := by
+  have hr : (0.43 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) :=
+    CS_rpow7neg_lower_proved
+  have hs : (0.055 : ℝ) ≤ Real.sin (6.75 * Real.log 7) :=
+    CS_sin7_ge_0055
+  have hs0 : (0 : ℝ) ≤ Real.sin (6.75 * Real.log 7) := by
+    linarith
+  have h1 : (0.43 : ℝ) * 0.055 ≤ 0.43 * Real.sin (6.75 * Real.log 7) :=
+    mul_le_mul_of_nonneg_left hs (by norm_num)
+  have h2 : (0.43 : ℝ) * Real.sin (6.75 * Real.log 7)
+      ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 7) :=
+    mul_le_mul_of_nonneg_right hr hs0
+  have hmul : (0.43 : ℝ) * (0.055 : ℝ) = 0.02365 := by norm_num
+  have hcap : (0.0236 : ℝ) ≤ 0.02365 := by norm_num
+  linarith
+
+/-- `Im₈ ≤ 0.47` (`r₈ ≤ 0.47`, `sin φ₈ ≤ 1`; TRUE `≈ 0.4376`). -/
+theorem CS_Im8_le_047 :
+    (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 8) ≤ (0.47 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (8 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (8 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ) :=
+    CS_rpow8neg_upper_proved
+  have hsup : Real.sin (6.75 * Real.log 8) ≤ (1 : ℝ) := CS_sin8_le_one
+  have h1 : (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 8)
+      ≤ (8 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hsup hr0
+  have h2 : (8 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ)
+      ≤ (0.47 : ℝ) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_right hru (by norm_num)
+  have hmul : (0.47 : ℝ) * (1 : ℝ) = 0.47 := by norm_num
+  linarith
+
+/-- Imaginary-part link for the complex S8 (`Im(S₈) = Im(S₆) + Im₇ - Im₈`,
+mirror of `CS_S8C_Re_eq`). -/
+theorem CS_S8C_Im_eq :
+    (CS_S8C).im = (CS_S6C).im
+      + (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 7)
+      - (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.sin (6.75 * Real.log 8) := by
+  unfold CS_S8C
+  have h7 : ((7 : ℂ)) = ((((7 : ℝ)) : ℂ)) := by simp
+  have h8c : ((8 : ℂ)) = ((((8 : ℝ)) : ℂ)) := by simp
+  rw [h7, h8c]
+  simp only [Complex.add_im, Complex.sub_im,
+    CS_cpow7_sCenter_im, CS_cpow8_sCenter_im]
+
+/-- Complex-S8 imaginary part `≥ 0.16` (PROVED, unconditional):
+`Im(S₈) = Im(S₆) + Im₇ - Im₈ ≥ 0.6092 + 0.0236 - 0.47 = 0.1628 ≥ 0.16`
+(TRUE `≈ 1.231`). -/
+theorem CS_complex_S8_Im_ge_016 :
+    (0.16 : ℝ) ≤ (CS_S8C).im := by
+  have hEq := CS_S8C_Im_eq
+  have hS6 := CS_complex_S6_Im_ge_06092
+  have hT7 := CS_Im7_ge_00236
+  have hT8 := CS_Im8_le_047
+  rw [hEq]
+  linarith
+
+/-- Honest Pythagoras gap for S8: `1.94²` exceeds `1.15² + 0.16²` by `2.4155`,
+so `‖S₈‖ ≥ 1.94` does NOT follow from (`CS_complex_S8_Re_ge_115`,
+`CS_complex_S8_Im_ge_016`); best honest stays `1.94`
+(`CS_complex_S4_abs_ge_194`). No force. -/
+theorem CS_complex_S8_abs_ge_194_gap :
+    (1.94 : ℝ) ^ 2 - ((1.15 : ℝ) ^ 2 + (0.16 : ℝ) ^ 2) = 2.4155 := by
+  norm_num
+
+#print axioms CS_cpow7_sCenter_im
+#print axioms CS_cpow8_sCenter_im
+#print axioms CS_sin7_ge_0055
+#print axioms CS_sin8_le_one
+#print axioms CS_Im7_ge_00236
+#print axioms CS_Im8_le_047
+#print axioms CS_S8C_Im_eq
+#print axioms CS_complex_S8_Im_ge_016
+#print axioms CS_complex_S8_abs_ge_194_gap
 
 end Door3CellSuppliers
