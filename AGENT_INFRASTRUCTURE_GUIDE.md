@@ -5720,8 +5720,14 @@ sorry-free infrastructure and the complete commit ledger above.
   block-net method): (1) hre10 front-run had double-tap `(('  — deleted
   one via short `have hre10 : `+run-prefix substring anchor
   (counting-proof, 19/18→18/18); (2) add10 stmt tail
-  `+ 1)‖` → `+ 1))‖` (18/17→18/18, N9-tail diff). Full N10 region nets
+  `+ 1)‖` → `+ 1))‖` (18/17→18/18, N9-tail diff).   Full N10 region nets
   0, every block verified. VERIFY10 tasked (sole owner, rebuild).
+- 2026-09-22 VERIFY10 (background `ses_f350dc4db`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (66s)`, BUILD-EXIT=0
+  (attempt 1/2), ZERO edits (coordinator surgery held), grep-clean.
+  N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
+  `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
+  verified green. Lock RELEASED. GAMMA-N11 tasked (proof-only).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
