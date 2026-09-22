@@ -6152,6 +6152,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 CELL-O (background `ses_f347e182d`, proof-only,
+  grep-clean, interval-only commit): R14 poly floor 3.9 hypothesis-free
+  + center conditional. Same ~7-order wall (short 18.4M).
+- 2026-09-22 WENDEL-H3MID (background `ses_f347983ea`, proof-only,
+  grep-clean, wendel-only commit): H3 mid CLOSED (G1 38.75 + G2 9.20,
+  numeric 8.51 `:2672`). Inner open.
 - 2026-09-22 SCUT52 (background `ses_f347b5b43`, proof-only,
   grep-clean, pilot-only commit): k=27 CONSTRUCTIVE (+0.0107 via 11π odd
   anchor; eta27≥+0.0107 `:7299`). First odd-constructive since k=17.

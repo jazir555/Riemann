@@ -2170,3 +2170,516 @@ theorem H3_leaf_banked_numeric :
 -/
 
 end Door3ComplexWendel
+
+/-! ## 24. WENDEL-H3MID mid mirror (PROOF-ONLY, FENCED, no build): H3 CLOSED + numeric.
+
+Greps (before edit, this turn, this file only):
+- H3_outer chain: `H3_outer_banked` with `G1_outerN8_banked` + `G2_outerN8_banked`
+  via `h3_outer_of_G1_G2`; shift `digamma_shift_wOuter_8`; lead `stirling_wOuter_add8`.
+- H3_leaf chain (section 23, not duplicated): `H3_leaf_banked` via
+  `h3_leaf_of_G1_G2` with `G1_leafN8_banked` (U `77.01`, C `20.30`) and
+  `G2_leafN8_banked` (U0 `11.41`, C2 `8.82`); shift `digamma_shift_wLeaf_8`;
+  lead `stirling_wLeaf_add8`; telescope `g2_telescope8_leaf` + `g2_log_link8_leaf`
+  + `g2_residual_eq_leaf`; numeric `H3_leaf_banked_numeric` cap `2.56`.
+- wMid specs: `wMid` def `Complex.mk 0.1975 (-2.375)`, `wMid_re`, `wMid_im`;
+  zero hits for `S_mid`, `cN_mid`, `target_mid`, `G1_mid`, `G2_mid`, `H3_mid`,
+  `wMid_add8`, `stirling_wMid`, `g2_mid`, `wMid_shift` before this section.
+- generic reuse (proved earlier, reused here): `digamma_shift_nat`,
+  `digamma_shift_8fold`, `shift_avoid_of_re_pos`, `g2_log_step`, `half_div_eq`,
+  `Zeta23.StirlingVert.digamma_stirling`, `Zeta23.StirlingVert.norm_eps_le`.
+
+Mirror at mid coords with N = 8: `wMid + 8 = mk 8.1975 (-2.375)`
+(Re 8.1975 > 0, |Im| 2.375 >= 1/2). Every outer/leaf step with `2.375`
+in place of `4.375`/`3.375` and `wMid` in place of `wOuter`/`wLeaf`.
+Values: `‖wMid‖^2 = 0.1975^2+2.375^2 = 5.67963125 <= 5.68`;
+`‖wMid+8‖^2 = 8.1975^2+2.375^2 = 72.83963125 <= 72.84`;
+G1 `3*72.84 = 218.52 <= 38.75*5.640625 = 218.57421875`;
+G2 `(Qcap+Ecap+Dcap)*5.68 <= 9.20` with `Qcap = 8*(1/2)/2.375^2`,
+`Ecap = 8/(3*2.375^2*2.375)`, `Dcap = 4/(2.375*2.375)`; numeric
+`(38.75+9.20)/2.375^2 <= 8.51`. This section only; no other file touched.
+-/
+
+namespace Door3ComplexWendel
+
+noncomputable def S_midN8 : ℂ :=
+  ∑ k ∈ Finset.range 8, (wMid + (k : ℂ))⁻¹
+
+noncomputable def cN_midN8 : ℂ :=
+  Complex.log (wMid + (8 : ℂ)) - (1 : ℂ) / (2 * (wMid + (8 : ℂ)))
+
+noncomputable def target_mid : ℂ :=
+  Complex.log wMid - (1 : ℂ) / (2 * wMid)
+
+noncomputable def G1_midN8_prop (C : ℝ) : Prop :=
+  ‖Complex.digamma (wMid + (8 : ℂ)) -
+    (Complex.log (wMid + (8 : ℂ)) - (1 : ℂ) / (2 * (wMid + (8 : ℂ))))‖ ≤
+    C / ‖wMid + (8 : ℂ)‖ ^ 2
+
+noncomputable def G2_midN8_prop (C2 : ℝ) : Prop :=
+  ‖(cN_midN8 - S_midN8) - target_mid‖ ≤ C2 / ‖wMid‖ ^ 2
+
+theorem wMid_re_pos : 0 < wMid.re := by
+  rw [wMid_re]
+  norm_num
+
+theorem wMid_shift_avoid (k : ℕ) (hk : k ≤ 8) (m : ℕ) :
+    (wMid + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) :=
+  shift_avoid_of_re_pos wMid 8 wMid_re_pos k hk m
+
+theorem digamma_shift_wMid_8 :
+    Complex.digamma (wMid + (8 : ℂ)) =
+      Complex.digamma wMid + S_midN8 := by
+  have hAvoid : ∀ (k : ℕ), k ≤ 8 → ∀ (m : ℕ),
+      (wMid + ((k : ℕ) : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+    intro k hk m
+    exact wMid_shift_avoid k hk m
+  have h := digamma_shift_8fold wMid hAvoid
+  have hcast8 : (((8 : ℕ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast8] at h
+  unfold S_midN8
+  exact h
+
+theorem wMid_add8_re : (wMid + (8 : ℂ)).re = 8.1975 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_re, wMid_re, Complex.natCast_re]
+  norm_num
+
+theorem wMid_add8_im : (wMid + (8 : ℂ)).im = -2.375 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_im, wMid_im, Complex.natCast_im]
+  norm_num
+
+theorem stirling_wMid_add8 :
+    ‖Complex.digamma (wMid + (8 : ℂ)) - Complex.log (wMid + (8 : ℂ)) +
+      (1 / 2 : ℂ) / (wMid + (8 : ℂ))‖ ≤ 3 / (-2.375) ^ 2 := by
+  have hre : (0 : ℝ) < (wMid + (8 : ℂ)).re := by
+    rw [wMid_add8_re]
+    norm_num
+  have him : (1 / 2 : ℝ) ≤ |(wMid + (8 : ℂ)).im| := by
+    rw [wMid_add8_im]
+    norm_num
+  have h := Zeta23.StirlingVert.digamma_stirling (w := wMid + (8 : ℂ)) hre him
+  rw [wMid_add8_im] at h
+  exact h
+
+theorem stirling_G1expr_mid_im2 :
+    ‖Complex.digamma (wMid + (8 : ℂ)) -
+      (Complex.log (wMid + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wMid + (8 : ℂ))))‖ ≤
+      3 / (-2.375) ^ 2 := by
+  have hhalf : (1 / 2 : ℂ) / (wMid + (8 : ℂ)) =
+      (1 : ℂ) / (2 * (wMid + (8 : ℂ))) :=
+    half_div_eq _
+  have hrewrite : Complex.digamma (wMid + (8 : ℂ)) -
+      (Complex.log (wMid + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wMid + (8 : ℂ)))) =
+      Complex.digamma (wMid + (8 : ℂ)) - Complex.log (wMid + (8 : ℂ)) +
+        (1 / 2 : ℂ) / (wMid + (8 : ℂ)) := by
+    rw [hhalf]
+    ring
+  rw [hrewrite]
+  exact stirling_wMid_add8
+
+theorem G1_mid_of_normcap (C U : ℝ)
+    (hU : ‖wMid + (8 : ℂ)‖ ^ 2 ≤ U)
+    (hC : 3 * U ≤ C * (-2.375) ^ 2) :
+    G1_midN8_prop C := by
+  have hIm2pos : (0 : ℝ) < (-2.375) ^ 2 := by
+    norm_num
+  have hne : wMid + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wMid_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hnormpos : (0 : ℝ) < ‖wMid + (8 : ℂ)‖ :=
+    norm_pos_iff.mpr hne
+  have hnorm2pos : (0 : ℝ) < ‖wMid + (8 : ℂ)‖ ^ 2 :=
+    pow_pos hnormpos 2
+  have hle : 3 / (-2.375) ^ 2 ≤ C / ‖wMid + (8 : ℂ)‖ ^ 2 := by
+    rw [div_le_div_iff hIm2pos hnorm2pos]
+    have h3 : 3 * ‖wMid + (8 : ℂ)‖ ^ 2 ≤ 3 * U :=
+      mul_le_mul_of_nonneg_left hU (by norm_num)
+    linarith
+  have hmain := stirling_G1expr_mid_im2
+  unfold G1_midN8_prop
+  exact le_trans hmain hle
+
+theorem wMid8_norm_sq_U : ‖wMid + (8 : ℂ)‖ ^ 2 ≤ (72.84 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wMid_add8_re, wMid_add8_im]
+  norm_num
+
+theorem g1_mid_C_inflation_3875 :
+    3 * (72.84 : ℝ) ≤ (38.75 : ℝ) * (-2.375) ^ 2 := by
+  norm_num
+
+theorem G1_midN8_banked : G1_midN8_prop 38.75 :=
+  G1_mid_of_normcap 38.75 72.84 wMid8_norm_sq_U g1_mid_C_inflation_3875
+
+theorem h3_mid_of_G1_G2 (C1 C2 : ℝ)
+    (hEq : Complex.digamma (wMid + (8 : ℂ)) =
+      Complex.digamma wMid + S_midN8)
+    (hG1 : G1_midN8_prop C1) (hG2 : G2_midN8_prop C2) :
+    ‖Complex.digamma wMid - target_mid‖ ≤
+      C1 / ‖wMid + (8 : ℂ)‖ ^ 2 + C2 / ‖wMid‖ ^ 2 := by
+  have hDisc : ‖Complex.digamma (wMid + (8 : ℂ)) - cN_midN8‖ ≤
+      C1 / ‖wMid + (8 : ℂ)‖ ^ 2 := hG1
+  have hLink : ‖(cN_midN8 - S_midN8) - target_mid‖ ≤
+      C2 / ‖wMid‖ ^ 2 := hG2
+  have hT : ‖Complex.digamma wMid - (cN_midN8 - S_midN8)‖ ≤
+      C1 / ‖wMid + (8 : ℂ)‖ ^ 2 := by
+    have hSame : Complex.digamma wMid - (cN_midN8 - S_midN8) =
+        Complex.digamma (wMid + (8 : ℂ)) - cN_midN8 := by
+      rw [hEq]
+      ring
+    rw [hSame]
+    exact hDisc
+  have hSplit : Complex.digamma wMid - target_mid =
+      (Complex.digamma wMid - (cN_midN8 - S_midN8)) +
+        ((cN_midN8 - S_midN8) - target_mid) := by
+    ring
+  calc ‖Complex.digamma wMid - target_mid‖
+      ≤ ‖Complex.digamma wMid - (cN_midN8 - S_midN8)‖ +
+        ‖(cN_midN8 - S_midN8) - target_mid‖ := by
+          rw [hSplit]
+          exact norm_add_le _ _
+    _ ≤ C1 / ‖wMid + (8 : ℂ)‖ ^ 2 + C2 / ‖wMid‖ ^ 2 :=
+          add_le_add hT hLink
+
+theorem g2_eps_bound_wMid (m : ℝ) (hm : 0 ≤ m) :
+    ‖Zeta23.StirlingVert.eps wMid m‖ ≤
+      1 / (3 * ‖(m : ℂ) + wMid‖ ^ 2 * 2.375) := by
+  have ht : (1 / 2 : ℝ) ≤ |wMid.im| := by
+    rw [wMid_im]
+    norm_num
+  have h := Zeta23.StirlingVert.norm_eps_le (w := wMid) (m := m)
+    wMid_re_pos ht hm
+  have him : |wMid.im| = (2.375 : ℝ) := by
+    rw [wMid_im]
+    norm_num
+  rw [him] at h
+  exact h
+
+theorem g2_denom_lower_wMid (m : ℝ) :
+    (2.375 : ℝ) ≤ ‖(m : ℂ) + wMid‖ := by
+  have hle : |(((m : ℂ) + wMid)).im| ≤ ‖(m : ℂ) + wMid‖ :=
+    Complex.abs_im_le_norm _
+  have him2 : ((((m : ℂ) + wMid)).im) = (-2.375 : ℝ) := by
+    simp [wMid_im]
+  have habs : |((((m : ℂ) + wMid)).im)| = (2.375 : ℝ) := by
+    rw [him2]
+    norm_num
+  linarith
+
+theorem g2_step_nat_mid (k : ℕ) :
+    Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wMid) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wMid) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2 +
+        Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)) := by
+  have h := g2_log_step wMid wMid_re_pos (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hnat : ((k + 1 : ℕ) : ℝ) = (((k : ℕ) : ℝ) + 1 : ℝ) := by
+    push_cast
+    ring
+  have hbridge : ((((k + 1 : ℕ) : ℝ)) : ℂ) = ((((((k : ℕ) : ℝ) + 1 : ℝ))) : ℂ) := by
+    rw [hnat]
+  rw [hbridge]
+  exact h
+
+theorem g2_telescope8_mid :
+    ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wMid) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wMid)) =
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wMid) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wMid) := by
+  have h := Finset.sum_range_sub
+    (fun j : ℕ => Complex.log (((((j : ℕ) : ℝ)) : ℂ) + wMid)) 8
+  exact h
+
+theorem g2_log_endpoints_mid :
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wMid) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wMid) =
+    Complex.log (wMid + (8 : ℂ)) - Complex.log wMid := by
+  have h8 : ((((8 : ℕ) : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  have h0 : ((((0 : ℕ) : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [h8, h0, zero_add, add_comm (8 : ℂ) wMid]
+
+theorem g2_S_align_mid :
+    ∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ = S_midN8 := by
+  unfold S_midN8
+  apply Finset.sum_congr rfl
+  intro k _
+  have hcast : ((((k : ℕ) : ℝ)) : ℂ) = ((k : ℕ) : ℂ) := by
+    simp
+  rw [hcast, add_comm _ wMid]
+
+theorem g2_log_link8_mid :
+    Complex.log (wMid + (8 : ℂ)) - Complex.log wMid =
+    S_midN8 -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) := by
+  have hTel := g2_telescope8_mid
+  have hEnd := g2_log_endpoints_mid
+  have hStep : ∀ k ∈ Finset.range 8,
+      (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wMid) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wMid)) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2 +
+        Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)) := by
+    intro k _
+    exact g2_step_nat_mid k
+  have hSum : ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wMid) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wMid)) =
+      ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2 +
+        Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) :=
+    Finset.sum_congr rfl hStep
+  have hSplit : ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ -
+      (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2 +
+      Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) =
+      (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹) -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) := by
+    rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  calc Complex.log (wMid + (8 : ℂ)) - Complex.log wMid
+      = Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wMid) -
+        Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wMid) := hEnd.symm
+    _ = ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wMid) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wMid)) := hTel.symm
+    _ = ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2 +
+        Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) := hSum
+    _ = (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wMid)⁻¹) -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) :=
+      hSplit
+    _ = S_midN8 -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))) := by
+      rw [g2_S_align_mid]
+
+theorem g2_norm_wMid_lower : (2.375 : ℝ) ≤ ‖wMid‖ := by
+  have h := g2_denom_lower_wMid 0
+  have hcast : (((0 : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [hcast, zero_add] at h
+  exact h
+
+theorem g2_norm_wMid8_lower : (2.375 : ℝ) ≤ ‖wMid + (8 : ℂ)‖ := by
+  have h := g2_denom_lower_wMid 8
+  have hcast : (((8 : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast, add_comm] at h
+  exact h
+
+theorem g2_D_eq_mid :
+    (1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid) =
+      (-4 : ℂ) / (wMid * (wMid + (8 : ℂ))) := by
+  have hw0 : wMid ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wMid_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hw80 : wMid + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wMid_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  field_simp
+  ring
+
+theorem g2_D_norm_le_mid :
+    ‖(1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)‖ ≤
+      4 / (2.375 * 2.375) := by
+  have hlow0 := g2_norm_wMid_lower
+  have hlow8 := g2_norm_wMid8_lower
+  have hpos0 : (0 : ℝ) < ‖wMid‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hpos8 : (0 : ℝ) < ‖wMid + (8 : ℂ)‖ := lt_of_lt_of_le (by norm_num) hlow8
+  have hfloor : (2.375 * 2.375 : ℝ) ≤ ‖wMid‖ * ‖wMid + (8 : ℂ)‖ :=
+    mul_le_mul hlow0 hlow8 (by norm_num) (le_of_lt hpos0)
+  have h4 : ‖(-4 : ℂ)‖ = (4 : ℝ) := by
+    simp
+    norm_num
+  rw [g2_D_eq_mid, norm_div, norm_mul, h4]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor
+
+theorem g2_Q_unif_mid (k : ℕ) :
+    ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖ ≤
+      (1 / 2 : ℝ) / (2.375) ^ 2 := by
+  have hfloor := g2_denom_lower_wMid (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (2.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have hhalf : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp
+    norm_num
+  rw [norm_div, norm_pow, hhalf]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hsq
+
+theorem g2_eps_unif_mid (k : ℕ) :
+    ‖Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖ ≤
+      1 / (3 * (2.375) ^ 2 * 2.375) := by
+  have hbound := g2_eps_bound_wMid (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hfloor := g2_denom_lower_wMid (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (2.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have h3a : 3 * (2.375 : ℝ) ^ 2 ≤ 3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ ^ 2 :=
+    mul_le_mul_of_nonneg_left hsq (by norm_num)
+  have hfloor2 : 3 * (2.375 : ℝ) ^ 2 * 2.375 ≤
+      3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ ^ 2 * 2.375 :=
+    mul_le_mul_of_nonneg_right h3a (by norm_num)
+  have hle : 1 / (3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wMid‖ ^ 2 * 2.375) ≤
+      1 / (3 * (2.375) ^ 2 * 2.375) :=
+    div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor2
+  exact le_trans hbound hle
+
+theorem g2_Q_sum_le_mid :
+    ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖ ≤
+      8 * ((1 / 2 : ℝ) / (2.375) ^ 2) := by
+  calc ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖
+      ≤ ∑ k in Finset.range 8, ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, ((1 / 2 : ℝ) / (2.375) ^ 2) :=
+        Finset.sum_le_sum (fun k _ => g2_Q_unif_mid k)
+    _ = 8 * ((1 / 2 : ℝ) / (2.375) ^ 2) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_eps_sum_le_mid :
+    ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖ ≤
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) := by
+  calc ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖
+      ≤ ∑ k in Finset.range 8, ‖Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, (1 / (3 * (2.375) ^ 2 * 2.375)) :=
+        Finset.sum_le_sum (fun k _ => g2_eps_unif_mid k)
+    _ = 8 * (1 / (3 * (2.375) ^ 2 * 2.375)) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_residual_eq_mid :
+    (cN_midN8 - S_midN8) - target_mid =
+      (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)))) -
+      ((1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)) := by
+  have hLink := g2_log_link8_mid
+  unfold cN_midN8 target_mid
+  calc (Complex.log (wMid + (8 : ℂ)) - 1 / (2 * (wMid + (8 : ℂ))) - S_midN8) -
+        (Complex.log wMid - 1 / (2 * wMid))
+      = (Complex.log (wMid + (8 : ℂ)) - Complex.log wMid - S_midN8) -
+        ((1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)) := by
+          ring
+    _ = (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)) := by
+          rw [hLink]
+          ring
+
+theorem g2_G2_of_telescope_normcap_mid (C2 U0 : ℝ)
+    (hU0 : ‖wMid‖ ^ 2 ≤ U0)
+    (hC2 : (8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375)) * U0 ≤ C2) :
+    G2_midN8_prop C2 := by
+  have hRes := g2_residual_eq_mid
+  have hQ := g2_Q_sum_le_mid
+  have hE := g2_eps_sum_le_mid
+  have hD := g2_D_norm_le_mid
+  have hlow0 := g2_norm_wMid_lower
+  have hnormpos : (0 : ℝ) < ‖wMid‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hnorm2pos : (0 : ℝ) < ‖wMid‖ ^ 2 := pow_pos hnormpos 2
+  have hA : (0 : ℝ) ≤ 8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375) := by
+    norm_num
+  have htri : ‖(cN_midN8 - S_midN8) - target_mid‖ ≤
+      8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375) := by
+    have hstep : ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid))‖ ≤
+        ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖ +
+        ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖ +
+        ‖(1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)‖ := by
+      calc ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)))) -
+          ((1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid))‖
+          ≤ ‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2) +
+            (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ)))‖ +
+            ‖(1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)‖ :=
+              norm_sub_le _ _
+        _ ≤ (‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2)‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖) +
+            ‖(1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)‖ :=
+              add_le_add (norm_add_le _ _) le_rfl
+        _ = ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wMid) ^ 2‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wMid (((k : ℕ) : ℝ))‖ +
+            ‖(1 : ℂ) / (2 * (wMid + (8 : ℂ))) - (1 : ℂ) / (2 * wMid)‖ := by
+              rw [norm_neg]
+    rw [hRes] at hstep
+    exact le_trans hstep (add_le_add (add_le_add hQ hE) hD)
+  have hle : 8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375) ≤
+      C2 / ‖wMid‖ ^ 2 := by
+    rw [le_div_iff₀ hnorm2pos]
+    calc (8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+        8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375)) * ‖wMid‖ ^ 2
+        ≤ (8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+          8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375)) * U0 :=
+            mul_le_mul_of_nonneg_left hU0 hA
+      _ ≤ C2 := hC2
+  unfold G2_midN8_prop
+  exact le_trans htri hle
+
+theorem wMid_norm_sq_U0 : ‖wMid‖ ^ 2 ≤ (5.68 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wMid_re, wMid_im]
+  norm_num
+
+theorem g2_mid_C2_inflation_920 :
+    (8 * ((1 / 2 : ℝ) / (2.375) ^ 2) +
+      8 * (1 / (3 * (2.375) ^ 2 * 2.375)) + 4 / (2.375 * 2.375)) * 5.68 ≤
+      (9.20 : ℝ) := by
+  norm_num
+
+theorem G2_midN8_banked : G2_midN8_prop 9.20 :=
+  g2_G2_of_telescope_normcap_mid 9.20 5.68 wMid_norm_sq_U0
+    g2_mid_C2_inflation_920
+
+theorem H3_mid_banked :
+    ‖Complex.digamma wMid - target_mid‖ ≤
+      (38.75 : ℝ) / ‖wMid + (8 : ℂ)‖ ^ 2 + (9.20 : ℝ) / ‖wMid‖ ^ 2 :=
+  h3_mid_of_G1_G2 38.75 9.20 digamma_shift_wMid_8 G1_midN8_banked
+    G2_midN8_banked
+
+theorem h3_mid_sq_lower : (2.375 : ℝ) ^ 2 ≤ ‖wMid‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wMid_lower 2
+
+theorem h3_mid_sq_lower8 : (2.375 : ℝ) ^ 2 ≤ ‖wMid + (8 : ℂ)‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wMid8_lower 2
+
+theorem h3_mid_div8_le : (38.75 : ℝ) / ‖wMid + (8 : ℂ)‖ ^ 2 ≤
+    (38.75 : ℝ) / (2.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_mid_sq_lower8
+
+theorem h3_mid_div0_le : (9.20 : ℝ) / ‖wMid‖ ^ 2 ≤
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_mid_sq_lower
+
+theorem h3_mid_num_cap : (38.75 : ℝ) / (2.375 : ℝ) ^ 2 +
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 ≤ (8.51 : ℝ) := by
+  norm_num
+
+theorem H3_mid_banked_numeric :
+    ‖Complex.digamma wMid - target_mid‖ ≤ (8.51 : ℝ) := by
+  have hH3 := H3_mid_banked
+  have hcap := add_le_add h3_mid_div8_le h3_mid_div0_le
+  exact le_trans hH3 (le_trans hcap h3_mid_num_cap)
+
+/-! Section-24 residual: H3 mid mirror CLOSED via `H3_mid_banked` (G1
+`G1_midN8_banked` with U `72.84` + C `38.75`; G2 `G2_midN8_banked` with U0
+`5.68` + C2 `9.20`; shift `digamma_shift_wMid_8`) plus numeric `8.51` via
+`H3_mid_banked_numeric`. Inner center open (no mirror attempted here).
+-/
+
+end Door3ComplexWendel
+
