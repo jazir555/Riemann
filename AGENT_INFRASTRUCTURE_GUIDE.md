@@ -5942,6 +5942,11 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 TAIL-M131072 (background `ses_f34b9c7e9`, proof-only,
+  grep-clean, tail-only commit): generic M=131072 tail —
+  `M131072_rpow_ge :599` (362≤√131072, 362²=131044) + `r_131072_le
+  :615` + `eta_tail_131072_le :641` (‖G-S262144‖≤24/362≈0.0663) +
+  comparison `:656` (0.0663<0.09375). Ladder: …→0.1326→0.09375→0.0663.
 - 2026-09-22 TAIL-M65536 (background `ses_f34bba11c`, proof-only,
   grep-clean, tail-only commit): generic M=65536 tail —
   `M65536_rpow_eq :535` (256 exact) + `r_65536_le :561` + `eta_tail_

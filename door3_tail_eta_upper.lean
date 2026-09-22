@@ -592,6 +592,75 @@ constant (`3/32 = 0.09375 < 24/181 ≈ 0.1326`). -/
 theorem tail_65536_lt_32768 : (3 / 32 : ℝ) < (24 / 181 : ℝ) := by
   norm_num
 
+/-- Rpow lower for the generic `M = 131072` tail (`362 ≤ 131072^{1/2}`;
+generic mirror of `M65536_rpow_eq` at `:535` and `M32768_rpow_ge` at `:471`;
+honest floor via `362^2 = 131044 ≤ 131072` by `norm_num`;
+`131072 = 2^17` so root `256·√2 ≈ 362.04` is NOT exact, unlike `65536`). -/
+theorem M131072_rpow_ge :
+    (362 : ℝ) ≤ ((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((362 : ℝ) ^ (2 : ℕ)) ≤ ((((131072 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((131072 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Generic `M = 131072` tail-decay bound at `Re = 1/2`
+(`12·(M^{-1/2})/(1/2) = 24/362`; generic mirror of `r_65536_le`
+at `:561` and `r_32768_le` at `:487`; decay recomputed honestly with
+`norm_num` via `M131072_rpow_ge`; tightest honest `T''''' = 24/362 ≈ 0.0663`
+for the `362` root lower). -/
+theorem r_131072_le :
+    (12 : ℝ) * ((((((131072 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤
+      (24 / 362 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((131072 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := M131072_rpow_ge
+  have hrw : ((((131072 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (362 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (362 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((131072 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((362 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((362 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (24 / 362 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Generic paired tail at `M = 131072` (`‖G - S262144‖ ≤ 24/362`; generic mirror
+of `eta_tail_65536_le` at `:577` and `eta_tail_32768_le` at `:513`
+— numerals use only `Re = 1/2` and `‖s‖ ≤ 12`). -/
+theorem eta_tail_131072_le {s : ℂ} (hre : s.re = (1 / 2 : ℝ))
+    (hC : ‖s‖ ≤ (12 : ℝ)) :
+    ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range (2 * 131072), etaDirichletTerm s k)‖ ≤
+      (24 / 362 : ℝ) := by
+  have hs : 0 < s.re := by rw [hre]; norm_num
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 131072 (by norm_num)
+  have h2M : 2 * 131072 = 262144 := by norm_num
+  rw [h2M] at hgen
+  rw [hre] at hgen
+  have hr := r_131072_le
+  linarith
+
+/-- The `M = 131072` constant honestly improves on the banked `M = 65536`
+constant (`24/362 ≈ 0.0663 < 3/32 = 0.09375`). -/
+theorem tail_131072_lt_65536 : (24 / 362 : ℝ) < (3 / 32 : ℝ) := by
+  norm_num
+
+#print axioms M131072_rpow_ge
+#print axioms r_131072_le
+#print axioms eta_tail_131072_le
+#print axioms tail_131072_lt_65536
+
 #print axioms M65536_rpow_eq
 #print axioms r_65536_le
 #print axioms eta_tail_65536_le
