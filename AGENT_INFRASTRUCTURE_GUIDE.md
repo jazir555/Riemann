@@ -6129,6 +6129,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 DIGAMMA-GAMMANEED (background `ses_f3489af52`, proof-only,
+  grep-clean, digamma-only commit): inner envelope attempt FAILS honestly
+  (14.625>4.5; M≥true>4.5 blocks this route). gamNeed all four open.
 - 2026-09-22 SLIVER-POLY79 (background `ses_f3489af54`, proof-only,
   grep-clean, sliver_edge-only commit): poly ≤78/79 on closedBall-12
   CLOSED (`:1049-1084`, 12·13/2). Product still needs pi/Gamma/zeta

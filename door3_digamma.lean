@@ -940,3 +940,106 @@ def psiOuterCloseRemainder (L : ℂ) (r2 : ℝ) : Prop :=
 -/
 
 end Door3Digamma
+
+/-! ## 11. ONE gamNeed real-cap attempt at inner Re 0.1975 (append-only).
+
+Grep basis (read before writing):
+- gamNeed specs (`door3_digamma.lean:419-425`):
+  `‖Gamma w‖ ≤ 0.002 / 0.008 / 0.04 / 4.5`.
+- shiftNeeds (`door3_digamma.lean:642-652`):
+  `psiShiftNeed_*` discs at `w + 8` with radii `0.5 / 0.5 / 0.5 / 1`.
+- doorShiftNeed (`door3_digamma.lean:710-716`):
+  `psiShiftNeed_* ∧ gamNeed_*`.
+- D3SG decay at Re 0.95 does not cover Re 0.1 / 0.1975; generic
+  `D3SG_decay_sigma` (`door3_stirling_gamma.lean:1305-1307`) plus
+  `D3SG_Gamma_one_two_le_one` (`door3_stirling_gamma.lean:1366-1378`)
+  are citable without new imports (header already imports
+  `door3_stirling_gamma`). Stirling shift chains elsewhere in that file
+  are reference only; the real cap below is rebuilt locally from
+  Mathlib convexity plus `Real.Gamma_add_one`.
+
+Attempt (inner, most favorable: target 4.5, `|Im| = 0.375`):
+- `realGamma_01975_le_six`: `Real.Gamma 0.1975 ≤ 6` via `Gamma 1.1975 ≤ 1`.
+- `gamInner_decay_inst`: `‖Gamma wInner‖ ≤ 18 * exp(-|Im| / 2)`
+  via `D3SG_decay_sigma` with `M = 6`.
+- `exp_neg01875_lower` plus `gamInner_envelope_exceeds`: the envelope is
+  at least `14.625`, hence above `4.5`; this route does not close
+  `gamNeed_inner`.
+
+Residual (exact, still open):
+- `gamNeed_inner` (`door3_digamma.lean:425`): needs `‖Gamma wInner‖ ≤ 4.5`;
+  rebuilt route yields only `≤ 18 * exp(-0.1875)` with
+  `exp(-0.1875) ≥ 0.8125`. Closing through this envelope would need
+  `exp(-0.1875) ≤ 0.25`, contrary to the lower bound. A tighter `M`
+  cannot help here: an honest `M` must bound `Real.Gamma 0.1975`
+  (true value above 4.5), while `3 * M * 0.8125 ≤ 4.5` would need
+  `M ≤ 1.85`. Fresh idea owed: direct complex enclosure or sharper
+  Im-decay at Re 0.1975.
+- `gamNeed_outer / leaf / mid` untouched here; same envelope shape with
+  larger `|Im|` but much smaller targets `0.002 / 0.008 / 0.04`.
+- Hence `doorShiftNeed_inner` stays as filed condition with only this
+  attempt logged.
+-/
+
+namespace Door3Digamma
+
+theorem wInner_eq_mk : wInner = Complex.mk (0.1975 : ℝ) (-0.375 : ℝ) := by
+  unfold wInner
+  exact wireInner
+
+theorem wInner_re_eq : wInner.re = (0.1975 : ℝ) := by
+  rw [wInner_eq_mk]
+
+theorem wInner_abs_im : |wInner.im| = (0.375 : ℝ) := by
+  have him : (Complex.mk (0.1975 : ℝ) (-0.375 : ℝ)).im = (-0.375 : ℝ) := rfl
+  rw [wInner_eq_mk, him]
+  norm_num
+
+theorem realGamma_01975_le_six : Real.Gamma (0.1975 : ℝ) ≤ 6 := by
+  have hpos : (0 : ℝ) < 0.1975 := by norm_num
+  have hne : (0.1975 : ℝ) ≠ 0 := ne_of_gt hpos
+  have hshift : Real.Gamma (0.1975 + 1) = 0.1975 * Real.Gamma 0.1975 :=
+    Real.Gamma_add_one hne
+  have h1 : (1 : ℝ) ≤ 0.1975 + 1 := by norm_num
+  have h2 : 0.1975 + 1 ≤ 2 := by norm_num
+  have hcap : Real.Gamma (0.1975 + 1) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ h1 h2
+  have hdiv : Real.Gamma (0.1975 : ℝ) = Real.Gamma (0.1975 + 1) / 0.1975 := by
+    rw [eq_div_iff_mul_eq hne]
+    rw [hshift]
+    ring
+  have h1div : Real.Gamma (0.1975 + 1) / 0.1975 ≤ 1 / 0.1975 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_right hcap (inv_nonneg.mpr (le_of_lt hpos))
+  have h6 : (1 : ℝ) / 0.1975 ≤ 6 := by
+    rw [div_le_iff₀ hpos]
+    norm_num
+  calc Real.Gamma (0.1975 : ℝ) = Real.Gamma (0.1975 + 1) / 0.1975 := hdiv
+    _ ≤ 1 / 0.1975 := h1div
+    _ ≤ 6 := h6
+
+theorem gamInner_decay_inst :
+    ‖Complex.Gamma wInner‖ ≤ 3 * 6 * Real.exp (-(1 / 2) * |wInner.im|) := by
+  have hpos : (0 : ℝ) < 0.1975 := by norm_num
+  have hle1 : (0.1975 : ℝ) ≤ 1 := by norm_num
+  have hre : wInner.re = (0.1975 : ℝ) := wInner_re_eq
+  have hM : (0 : ℝ) ≤ 6 := by norm_num
+  have hcap : Real.Gamma (0.1975 : ℝ) ≤ 6 := realGamma_01975_le_six
+  exact D3SG_decay_sigma wInner 0.1975 6 hpos hle1 hre hM hcap
+
+theorem exp_neg01875_lower : (0.8125 : ℝ) ≤ Real.exp (-(1 / 2) * 0.375) := by
+  have h := Real.add_one_le_exp (-(1 / 2 : ℝ) * 0.375)
+  have heq : (1 : ℝ) + (-(1 / 2) * 0.375) = 0.8125 := by norm_num
+  rw [heq] at h
+  exact h
+
+theorem gamInner_envelope_exceeds :
+    (4.5 : ℝ) < 3 * 6 * Real.exp (-(1 / 2) * |wInner.im|) := by
+  rw [wInner_abs_im]
+  have hlow := exp_neg01875_lower
+  have hmul : 3 * 6 * (0.8125 : ℝ) ≤ 3 * 6 * Real.exp (-(1 / 2) * 0.375) :=
+    mul_le_mul_of_nonneg_left hlow (by norm_num)
+  have hnum : (4.5 : ℝ) < 3 * 6 * 0.8125 := by norm_num
+  linarith
+
+end Door3Digamma
