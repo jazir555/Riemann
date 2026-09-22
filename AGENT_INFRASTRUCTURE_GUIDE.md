@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ASSEMBLY-R06R11 (background `ses_f34738bc5`, proof-only,
+  grep-clean, assembly-only commit): R06 residual set (three-tenths +
+  0.06, fills noted gap) + R11 leaf+H conditional (tenth + 0.05).
+  Post-dates GREEN; re-verify later.
 - 2026-09-22 CELL-Q (background `ses_f3473d414`, proof-only,
   grep-clean, interval-only commit): R16 poly floor 0.9 hypothesis-free
   + center conditional. Same ~8-order wall (short 80M).
