@@ -5864,6 +5864,13 @@ sorry-free infrastructure and the complete commit ledger above.
   cos θ=-cos δ<0, but k=14 EVEN needs +c — no lower banked, no force.
   k=14 neutral/destructive (skip-list candidate pending lock). Wiring
   EDGE-DERIV writes left for owner.
+- 2026-09-22 SCUT36 (background `ses_f35060021`, proof-only, grep-clean,
+  pilot-only commit): eta14 DESTRUCTIVE-LOCK — `cos10log15_le_neg
+  :4649` (cos θ≤-0.08 via 9π-odd flip of 1-1.356²/2≈0.0806 floor) +
+  sqrt15≤4 `:4684` + r15≥1/4 `:4697` + split `:4709` + product
+  ≤-1/50 `:4744` + even bridge `:4764` + `eta14_Re_le_neg :4777`
+  (≤-0.02) + `no_pos_lock :4787`. k=14 skip-listed (k=8,11,13,14 dead;
+  growth only k=7,9,10,12). Premise_gamma VERIFY11 writes left.
 - 2026-09-22 SCUT31 (background `ses_f374e5aec`, proof-only, grep-clean):
   log14 window + theta14 — bridge `:4308` (log14=log13+log(14/13)) +
   window `:4319/:4332` ([2.6251791651,2.6537505948], width ~0.0286,
