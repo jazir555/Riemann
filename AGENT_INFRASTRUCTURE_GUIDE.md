@@ -6133,6 +6133,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 ASSEMBLY-R04 (background `ses_f34864d5b`, proof-only,
   grep-clean; swept into 16b56ca with subsetfix2): R04 leaf+H conditional
   (`:17561-17598`). Entry filed here.
+- 2026-09-22 ZETA-FLOOR1144 (background `ses_f34852c1f`, proof-only,
+  grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
+  K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
+  refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
 - 2026-09-22 WIRE-M1000 (background `ses_f3485c1c6`, proof-only,
   grep-clean, wiring-only commit): top-M1000-at-zero feeder (d=(1/2)/1000
   + ballSup1000 conditional) + residual. Bottom mirror next.
