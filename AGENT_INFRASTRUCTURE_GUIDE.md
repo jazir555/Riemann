@@ -5934,6 +5934,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 STIRLING-GAMMANEED (background `ses_f34df805e`, proof-only,
+  NO-EDIT gap — MAJOR FINDING): `gamNeed_mid` 0.04 is BELOW TRUE
+  (≈0.0463 by Stirling √(2π)·|y|^{x-1/2}·e^{-π|y|/2}) — UNCLOSABLE by
+  any sound upper (shift pays 1/2.383→0.4196, 10.49x over; n=2 →0.3155;
+  TierC/CHI routes worse; R02-disc N/A by 0.25). Honest-vs-true gap
+  1.15x. IMPLICATION: gamNeed_mid premise needs TRUE re-measurement
+  (≥0.05) or different wMid — edge-lane budget audit owed. Outer/leaf
+  not attempted.
 - 2026-09-22 FIRSTCELL-LAMBDA0 (background `ses_f34e3fdf7`, proof-only,
   NO-EDIT gap): Λ₀≤479 NOT closable — banked uppers cover only narrow
   rect ([0.05,0.74]; fat rect extends to Re=-1.12/1.91 where Dirichlet
