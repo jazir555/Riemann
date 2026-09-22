@@ -6044,6 +6044,14 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, RH-only commit): `xiCentralEdgeStrips10_of_zeroFreeCover
   :12487` (mirrors :12286) — Hmain+Hedge+Hcut collapse to single
   `XiCentralZeroFreeCover 10`; open = the cover itself + tail Htail.
+- 2026-09-22 DERIV-CELLD (background `ses_f34951a38`, proof-only,
+  grep-clean, deriv-only commit): leaf-sub post (dLeaf-6.25I) closed
+  93400 `:1616` (honest Cauchy C=934/rho=0.01; poly 6.95/val 22.74/pi
+  banked). Leibniz gap filed `:1622/:1626` (60000/93400 vs 0.15).
+- 2026-09-22 SLIVER-BOT (background `ses_f34938b0e`, proof-only,
+  grep-clean, sliver_edge-only commit): bottom M40 feeder `:768`
+  (mirror of :708) + gap narrowings `:779-800` (ceiling 1/2). MB=40
+  reduced to ball-sup premise; uniform lowers stay open.
 - 2026-09-22 GAMMA-N15 (background `ses_f34a2edf1`, proof-only,
   grep-clean + 4 audits, premise_gamma-only commit): E06 Seq15 rung
   0.655 `:7736` (ceiling 0.65541<0.66, gap 0.005, increment +0.002 —

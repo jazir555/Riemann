@@ -1442,3 +1442,191 @@ theorem zetaDeriv_outer_125_closed :
   exact h
 
 end Door3DerivUp
+
+/-! ## 14. Cell-D analogue leaf-sub (dLeaf_sub = 0.2 - 6.25 I) at R02-disc 934.
+
+Grep record (read-only, before writing):
+* closed leaf shape: `zetaSupOnSphere_leaf_934_filled :1264`,
+  `zetaSup_leaf_934_banked :1271`,
+  `zetaDeriv_leaf_934_of_diffCont :1274`,
+  `zeta_leaf_934_number :1281` (`934 / 0.01 = 93400`),
+  `zetaDiffCont_leaf_filled :1306`, `zetaDiffCont_leaf_banked :1319`,
+  `zetaDeriv_leaf_934_closed :1322`.
+* DG specs: `gamma_wide_num :498` (C = 600 on Re in [0.01, 1.9]),
+  `gammaDerivUp_of_sup :525`, `gammaGap_leaf_shape :545`
+  (C / rho = 600 / 0.01 = 60000), `tightGamma_leaf :669` (= 0.008 premise),
+  `tightGammaNeed_leaf :678`.
+* DZ specs: `zetaDerivUp_of_sup :625`, `zetaSupOnSphere_leaf :604` (10, untouched),
+  `zetaSupOnSphere_leaf_934 :1229` (934, used here).
+
+Next post: second leaf-subcell center in batch D (R22 class), shifted +0.5 in Im
+from dLeaf so the 0.01-sphere stays inside the R02 rect
+(Re in [0.05, 0.74], Im in [-8.25, -5.25]) with honest margins.
+Geometry:
+* Re 0.2 gives sphere Re in [0.19, 0.21], margins 0.14 below 0.05 and 0.53 above.
+* Im -6.25 gives sphere Im in [-6.26, -6.24], margins 1.99 below -8.25
+  and 0.99 above -5.25.
+Hence `R02_D3_zeta_upper_934` covers the whole sphere at 934, Cauchy gives
+93400, pole avoided since Re stays at most 0.21 < 1.
+Poly / pi uppers are direct instances of the banked generic lemmas.
+DG / DZ tight numerals stay open: gamma-prime 60000 and zeta-prime 93400 each
+exceed leaf M prime 0.15 by orders of magnitude; filed as exact gap below.
+-/
+
+namespace Door3DerivUp
+
+noncomputable def dLeaf_sub : ℂ := Complex.mk 0.2 (-6.25)
+
+theorem dLeaf_sub_re : dLeaf_sub.re = (0.2 : ℝ) := rfl
+
+theorem dLeaf_sub_im : dLeaf_sub.im = (-6.25 : ℝ) := rfl
+
+theorem polyUp_leaf_sub : ‖deriv DerivCauchyBridge.polyOf dLeaf_sub‖ ≤ 6.95 := by
+  have hre : |dLeaf_sub.re| ≤ (0.2 : ℝ) := by
+    rw [dLeaf_sub_re]
+    rw [abs_of_nonneg (by norm_num)]
+  have him : |dLeaf_sub.im| ≤ (6.25 : ℝ) := by
+    rw [dLeaf_sub_im]
+    rw [abs_of_neg (by norm_num)]
+    norm_num
+  have h := poly_derivUp_of_abs dLeaf_sub 0.2 6.25 hre him
+  norm_num at h ⊢
+  linarith
+
+theorem polyVal_leaf_sub : ‖DerivCauchyBridge.polyOf dLeaf_sub‖ ≤ 22.74 := by
+  have hs : ‖dLeaf_sub‖ ≤ (6.45 : ℝ) := by
+    have h := Complex.norm_le_abs_re_add_abs_im dLeaf_sub
+    rw [dLeaf_sub_re, dLeaf_sub_im] at h
+    rw [abs_of_nonneg (by norm_num), abs_of_neg (by norm_num)] at h
+    norm_num at h ⊢
+    linarith
+  have hs1 : ‖dLeaf_sub - 1‖ ≤ (7.05 : ℝ) := by
+    have hre1 : (dLeaf_sub - 1).re = (-0.8 : ℝ) := by
+      have e : (dLeaf_sub - 1).re = dLeaf_sub.re - 1 := Complex.sub_re dLeaf_sub 1
+      rw [e, dLeaf_sub_re]
+      norm_num
+    have him1 : (dLeaf_sub - 1).im = (-6.25 : ℝ) := by
+      have e : (dLeaf_sub - 1).im = dLeaf_sub.im := Complex.sub_im dLeaf_sub 1
+      rw [e, dLeaf_sub_im]
+    have h := Complex.norm_le_abs_re_add_abs_im (dLeaf_sub - 1)
+    rw [hre1, him1] at h
+    rw [abs_of_neg (by norm_num), abs_of_neg (by norm_num)] at h
+    norm_num at h ⊢
+    linarith
+  have h := polyValUp_of_norm dLeaf_sub 6.45 7.05 hs hs1
+  norm_num at h ⊢
+  linarith
+
+theorem piVal_leaf_sub : ‖DerivCauchyBridge.piOf dLeaf_sub‖ ≤ 1 :=
+  Door3PremisePi.piOf_le_one_of_re_nonneg dLeaf_sub (by rw [dLeaf_sub_re]; norm_num)
+
+theorem piUp_leaf_sub : ‖deriv DerivCauchyBridge.piOf dLeaf_sub‖ ≤ 1.075 := by
+  have h := pi_derivUp_of_upper dLeaf_sub 1 piVal_leaf_sub
+  norm_num at h ⊢
+  linarith
+
+def zetaSupOnSphere_leaf_sub_934 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖riemannZeta z‖ ≤ 934
+
+theorem dLeaf_sub_sphere_re_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dLeaf_sub 0.01) :
+    (0.05 : ℝ) ≤ z.re ∧ z.re ≤ (0.74 : ℝ) := by
+  have hdist : dist z dLeaf_sub = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dLeaf_sub‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dLeaf_sub).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_sub).re| ≤ ‖z - dLeaf_sub‖ := Complex.abs_re_le_norm _
+      _ = 0.01 := hnorm
+  have here : (z - dLeaf_sub).re = z.re - 0.2 := by
+    have e : (z - dLeaf_sub).re = z.re - dLeaf_sub.re := Complex.sub_re z dLeaf_sub
+    rw [e, dLeaf_sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+theorem dLeaf_sub_sphere_im_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dLeaf_sub 0.01) :
+    (-8.25 : ℝ) ≤ z.im ∧ z.im ≤ (-5.25 : ℝ) := by
+  have hdist : dist z dLeaf_sub = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dLeaf_sub‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(z - dLeaf_sub).im| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_sub).im| ≤ ‖z - dLeaf_sub‖ := Complex.abs_im_le_norm _
+      _ = 0.01 := hnorm
+  have heim : (z - dLeaf_sub).im = z.im - (-6.25) := by
+    have e : (z - dLeaf_sub).im = z.im - dLeaf_sub.im := Complex.sub_im z dLeaf_sub
+    rw [e, dLeaf_sub_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  have himlo : (-6.26 : ℝ) ≤ z.im := by linarith
+  have himhi : z.im ≤ (-6.24 : ℝ) := by linarith
+  constructor <;> linarith
+
+theorem zetaSupOnSphere_leaf_sub_934_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖riemannZeta z‖ ≤ 934 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dLeaf_sub_sphere_re_bounds hz
+  obtain ⟨him_lo, him_hi⟩ := dLeaf_sub_sphere_im_bounds hz
+  exact R02_D3_zeta_upper_934 z hre_lo hre_hi him_lo him_hi
+
+theorem zetaSup_leaf_sub_934_banked : zetaSupOnSphere_leaf_sub_934 :=
+  zetaSupOnSphere_leaf_sub_934_filled
+
+def zetaDiffCont_leaf_sub : Prop :=
+  DiffContOnCl ℂ riemannZeta (Metric.ball dLeaf_sub 0.01)
+
+theorem dLeaf_sub_closedBall_re_upper {z : ℂ}
+    (hz : z ∈ Metric.closedBall dLeaf_sub 0.01) :
+    z.re ≤ (0.21 : ℝ) := by
+  have hdist : dist z dLeaf_sub ≤ (0.01 : ℝ) := Metric.mem_closedBall.mp hz
+  have hnorm : ‖z - dLeaf_sub‖ ≤ (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dLeaf_sub).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_sub).re| ≤ ‖z - dLeaf_sub‖ := Complex.abs_re_le_norm _
+      _ ≤ 0.01 := hnorm
+  have here : (z - dLeaf_sub).re = z.re - 0.2 := by
+    have e : (z - dLeaf_sub).re = z.re - dLeaf_sub.re := Complex.sub_re z dLeaf_sub
+    rw [e, dLeaf_sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  linarith
+
+theorem zetaDiffCont_leaf_sub_filled :
+    DiffContOnCl ℂ riemannZeta (Metric.ball dLeaf_sub 0.01) := by
+  apply DifferentiableOn.diffContOnCl
+  rw [Metric.closure_ball dLeaf_sub (by norm_num : (0.01 : ℝ) ≠ 0)]
+  intro z hz
+  apply (differentiableAt_riemannZeta ?_).differentiableWithinAt
+  intro hcon
+  have hle := dLeaf_sub_closedBall_re_upper hz
+  have e : z.re = 1 := by
+    rw [hcon]
+    exact Complex.one_re
+  linarith
+
+theorem zetaDiffCont_leaf_sub_banked : zetaDiffCont_leaf_sub :=
+  zetaDiffCont_leaf_sub_filled
+
+theorem zetaDeriv_leaf_sub_934_of_diffCont
+    (hd : zetaDiffCont_leaf_sub) :
+    ‖deriv riemannZeta dLeaf_sub‖ ≤ 934 / 0.01 := by
+  unfold zetaDiffCont_leaf_sub at hd
+  exact zetaDerivUp_of_sup dLeaf_sub 0.01 934 (by norm_num) hd
+    zetaSupOnSphere_leaf_sub_934_filled
+
+theorem zeta_leaf_sub_934_number : (934 : ℝ) / 0.01 = 93400 := by norm_num
+
+theorem zetaDeriv_leaf_sub_934_closed :
+    ‖deriv riemannZeta dLeaf_sub‖ ≤ 93400 := by
+  have h := zetaDeriv_leaf_sub_934_of_diffCont zetaDiffCont_leaf_sub_banked
+  rw [zeta_leaf_sub_934_number] at h
+  exact h
+
+theorem gap_leaf_sub_gamma_alone :
+    (0.15 : ℝ) < 22.74 * 1 * (600 / 0.01) * 3 := by
+  norm_num
+
+theorem gap_leaf_sub_total_open :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.008 * 3 + 22.74 * 1.075 * 0.008 * 3 +
+        22.74 * 1 * (600 / 0.01) * 3 + 22.74 * 1 * 0.008 * (934 / 0.01) := by
+  norm_num
+
+end Door3DerivUp

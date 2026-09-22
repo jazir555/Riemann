@@ -745,4 +745,62 @@ theorem uniform_bot_lower_gap_51 :
         ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
   apply uniform_bot_lower_not_gt_half _ (by norm_num)
 
+/-! ### (K) Bottom M40 deriv feeder mirror + gap narrowing
+
+Grepped base:
+* top feeder `uniform_top_deriv_M40_of_closedBall :708` via `uniform_top_deriv_of_closedBall :343`;
+* bottom bridges `uniform_bot_deriv_of_closedBall :368`,
+  `uniform_bot_deriv_of_closedBall_half :418`;
+* repo grep for `uniform_bot_deriv_M40` finds only the top `:708` hit, so the
+  bottom M40 feeder is open before this section.
+What is added here: `m40_gate_bot`, the bottom M40 feeder via `:368`,
+  and tighter gaps `501 / 1000`, `1001 / 2000` on both arms.
+Residual (open, not forced): uniform `1 / 2` lowers over `Icc (-10) 10`
+  and closed-ball sup `C = 40` on `closedBall 0 12` stay as premises;
+  repo grep shows only upper bounds for `completedRiemannZeta₀`
+  and no uniform edge lower at `1 / 2`, so `hBotLower` / `hBotDeriv` for M40
+  are reduced to ball-sup-40 here, not closed. -/
+
+/-- M40 gate on bottom: `0.01 < (1 / 2) / 40` (mirror of `m40_gate_top`). -/
+theorem m40_gate_bot : (0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+
+/-- Edge-bottom M40 feeder bridge: closed-ball sup `40` gives deriv `40` on the M40 strip. -/
+theorem uniform_bot_deriv_M40_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ))) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ) := by
+  exact uniform_bot_deriv_of_closedBall ((1 / 2 : ℝ) / (40 : ℝ)) (40 : ℝ)
+    (by norm_num) hC x hx y hy
+
+/-- Tighter gap: `501 / 1000` is not a uniform top lower. -/
+theorem uniform_top_lower_gap_501 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (501 / 1000 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_top_lower_not_gt_half _ (by norm_num)
+
+/-- Tighter gap: `501 / 1000` is not a uniform bottom lower. -/
+theorem uniform_bot_lower_gap_501 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (501 / 1000 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_bot_lower_not_gt_half _ (by norm_num)
+
+/-- Tighter gap: `1001 / 2000` is not a uniform top lower. -/
+theorem uniform_top_lower_gap_1001_2000 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (1001 / 2000 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_top_lower_not_gt_half _ (by norm_num)
+
+/-- Tighter gap: `1001 / 2000` is not a uniform bottom lower. -/
+theorem uniform_bot_lower_gap_1001_2000 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (1001 / 2000 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_bot_lower_not_gt_half _ (by norm_num)
+
 end Door3SliverEdge
