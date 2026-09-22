@@ -6164,6 +6164,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 OFFAXIS-BIGS (background `ses_f34752dfd`, proof-only,
+  grep-clean, off_axis-only commit): S6 closed at OA11 (combo6 lower +
+  amp) + S6 mid-budget. Surplus composition next.
+- 2026-09-22 TAIL-NEXT (background `ses_f347516b5`, proof-only,
+  grep-clean, tail-only commit): M67108864 exact rung 3/1024 (8192²).
+  M27 odd next.
 - 2026-09-22 RH-SYMM (background `ses_f3475ed34`, proof-only,
   grep-clean, RH-only commit): symmetry CLOSED (`tailNegSymm_closed
   :12652`) + narrowed tail conditionals (asymptotic/exponential/

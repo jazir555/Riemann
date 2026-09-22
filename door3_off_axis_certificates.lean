@@ -9851,3 +9851,298 @@ theorem sCutOA11_midhigh_gap : True := by
   trivial
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-BIGS grep-first record (read-only before append).
+
+S5 slow shapes at `door3_off_axis_certificates.lean:8893-9208`:
+`OA11_inv_cpow_re_im` (Re/Im of `(k^s)^{-1}`), `OA11_eta_term1_eq/term2_eq/
+term3_eq/term4_eq`, floors `OA11_eta_term1_re_add_im_ge` (`21/50`),
+`OA11_eta_term2_re_add_im_ge` (`171/250`), `OA11_eta_term3_re_add_im_ge`
+(`3/5`), `OA11_eta_term4_re_add_im_ge` (`66/125`), split `OA11_S5_eq`,
+sum `OA11_S5_re_add_im_ge` (`404/125`), norm `OA11_S5_norm_ge`
+(`808/375`), closed `sCutOA11_slow_closed` (`21/10`), shortfall
+`sCutOA11_S5_shortfall` (`-41/750`), surplus `sCutOA11_S5_surplus`
+(`41/750`), budget `sCutOA11_S4096_mid_budget`, residual
+`sCutOA11_S4096_mid_residual` (`S4096 - S5 <= 41/750`).
+Combos `OA11_combo2/3/4/5_lower` + amps `OA11_amp2/3/4/5_ge` banked;
+`OA11_combo6` absent (open leg).
+
+3BLOCK residual at `:9376-9403/9611-9644/9829-9850`:
+scaffold `sCutOA11_mid_four_block_triangle`, high spec
+`sCutOA11_high_block_pair_spec` (`6144/169015`), midhigh spec
+`sCutOA11_midhigh_block_pair_spec` (`6144/92205`), honest comparison
+`sCutOA11_midhigh_exceeds_leftover`, negative residual
+`sCutOA11_mid_low_residual_after_midhigh`, conditional close
+`sCutOA11_mid_close_of_midhigh_residual`, gap `sCutOA11_midhigh_gap`.
+Flat pair-triangle dead: `6144/92205 > 41/750 - 6144/169015`.
+
+Attempt below: larger exact partial S6 at OA11 (add `k = 5`, `n = 6`
+leg `-(6^s)^{-1}`, shape `amp*(sin-cos)`). Bank norm lower for S6,
+raising surplus `41/750 -> 173/2250`; file exact S6 residual. -/
+theorem OA11BIGS_log_six_eq :
+    Real.log 6 = Real.log 2 + Real.log 3 := by
+  have h6 : (6 : ℝ) = 2 * 3 := by norm_num
+  rw [h6, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- Phase `11 * log 6` in `[19.7093, 19.7094]` (from `log_two/log_three` d9
+via `OA11BIGS_log_six_eq`). -/
+theorem OA11BIGS_theta6_mem :
+    (19.7093 : ℝ) ≤ 11 * Real.log 6 ∧ 11 * Real.log 6 ≤ (19.7094 : ℝ) := by
+  have h6 : Real.log 6 = Real.log 2 + Real.log 3 := OA11BIGS_log_six_eq
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have h3lo := Real.log_three_gt_d9
+  have h3hi := Real.log_three_lt_d9
+  have hlo : (19.7093 : ℝ) ≤ 11 * (0.6931471803 + 1.0986122885) := by norm_num
+  have hhi : 11 * (0.6931471808 + 1.0986122888) ≤ (19.7094 : ℝ) := by norm_num
+  have e1 := mul_lt_mul_of_pos_left h2lo (by norm_num : (0 : ℝ) < 11)
+  have e2 := mul_lt_mul_of_pos_left h2hi (by norm_num : (0 : ℝ) < 11)
+  have e3 := mul_lt_mul_of_pos_left h3lo (by norm_num : (0 : ℝ) < 11)
+  have e4 := mul_lt_mul_of_pos_left h3hi (by norm_num : (0 : ℝ) < 11)
+  rw [h6]
+  constructor <;> linarith
+
+/-- Reduced phase `11 * log 6 - 6 * pi` in `[0.8597, 0.8694]` (from
+`OA11BIGS_theta6_mem` and `pi_d4`). -/
+theorem OA11BIGS_delta6_mem :
+    (0.8597 : ℝ) ≤ 11 * Real.log 6 - 6 * Real.pi ∧
+    11 * Real.log 6 - 6 * Real.pi ≤ (0.8694 : ℝ) := by
+  have hth := OA11BIGS_theta6_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Combo `sin (11 * log 6) - cos (11 * log 6) >= 1 / 12`
+(triple-periodicity + cubic floor + quartic ceiling on `theta - 6*pi`). -/
+theorem OA11BIGS_combo6_lower :
+    (1 / 12 : ℝ) ≤ Real.sin (11 * Real.log 6) - Real.cos (11 * Real.log 6) := by
+  have hmem := OA11BIGS_delta6_mem
+  have hw_lo := hmem.1
+  have hw_hi := hmem.2
+  have hw_nn : (0 : ℝ) ≤ 11 * Real.log 6 - 6 * Real.pi := by linarith
+  have hper1s : Real.sin (11 * Real.log 6 - 2 * Real.pi) =
+      Real.sin (11 * Real.log 6) := Real.sin_sub_two_pi _
+  have hper2s : Real.sin ((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.sin (11 * Real.log 6 - 2 * Real.pi) := Real.sin_sub_two_pi _
+  have hper3s : Real.sin (((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) -
+      2 * Real.pi) = Real.sin ((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.sin_sub_two_pi _
+  have hper1c : Real.cos (11 * Real.log 6 - 2 * Real.pi) =
+      Real.cos (11 * Real.log 6) := Real.cos_sub_two_pi _
+  have hper2c : Real.cos ((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) =
+      Real.cos (11 * Real.log 6 - 2 * Real.pi) := Real.cos_sub_two_pi _
+  have hper3c : Real.cos (((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) -
+      2 * Real.pi) = Real.cos ((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) :=
+    Real.cos_sub_two_pi _
+  have e : (((11 * Real.log 6 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi) =
+      (11 * Real.log 6 - 6 * Real.pi) := by ring
+  have hpers : Real.sin (11 * Real.log 6 - 6 * Real.pi) =
+      Real.sin (11 * Real.log 6) := by
+    rw [← e]
+    linarith [hper1s, hper2s, hper3s]
+  have hperc : Real.cos (11 * Real.log 6 - 6 * Real.pi) =
+      Real.cos (11 * Real.log 6) := by
+    rw [← e]
+    linarith [hper1c, hper2c, hper3c]
+  have hsin_lo := Real.sin_ge_sub_cube hw_nn
+  have hcube : (11 * Real.log 6 - 6 * Real.pi) ^ 3 ≤ (0.8694 : ℝ) ^ 3 :=
+    pow_le_pow_left₀ hw_nn hw_hi 3
+  have hcos_hi := CG_cos_le_quartic hw_nn
+  have hsq : (0.8597 : ℝ) ^ 2 ≤ (11 * Real.log 6 - 6 * Real.pi) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hw_lo 2
+  have hfour : (11 * Real.log 6 - 6 * Real.pi) ^ 4 ≤ (0.8694 : ℝ) ^ 4 :=
+    pow_le_pow_left₀ hw_nn hw_hi 4
+  have hnums : (0.75 : ℝ) ≤ 0.8597 - (0.8694 : ℝ) ^ 3 / 6 := by norm_num
+  have hnumc : 1 - (0.8597 : ℝ) ^ 2 / 2 + (0.8694 : ℝ) ^ 4 / 24 ≤ (0.66 : ℝ) := by
+    norm_num
+  have hsin : (0.75 : ℝ) ≤ Real.sin (11 * Real.log 6) := by
+    have h1 : (0.8597 : ℝ) - (0.8694 : ℝ) ^ 3 / 6 ≤
+        (11 * Real.log 6 - 6 * Real.pi) -
+          (11 * Real.log 6 - 6 * Real.pi) ^ 3 / 6 := by
+      linarith
+    rw [← hpers]
+    linarith
+  have hcos : Real.cos (11 * Real.log 6) ≤ (0.66 : ℝ) := by
+    have h1 : 1 - (11 * Real.log 6 - 6 * Real.pi) ^ 2 / 2 +
+        (11 * Real.log 6 - 6 * Real.pi) ^ 4 / 24 ≤
+        1 - (0.8597 : ℝ) ^ 2 / 2 + (0.8694 : ℝ) ^ 4 / 24 := by
+      linarith
+    rw [← hperc]
+    linarith
+  linarith
+
+/-- Amplitude floor `2 / 5 <= 6 ^ (-(1 / 2))` via `(5 / 2) ^ 2 >= 6`. -/
+theorem OA11BIGS_amp6_ge : (2 / 5 : ℝ) ≤ (6 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hsqrt := OA11_sqrt_le_of_sq_le (show (0 : ℝ) ≤ 6 by norm_num)
+    (show (0 : ℝ) ≤ 5 / 2 by norm_num)
+    (show (6 : ℝ) ≤ (5 / 2 : ℝ) ^ (2 : ℕ) by norm_num)
+  have hpos : (0 : ℝ) < (6 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (6 : ℝ) ^ (-(1 / 2 : ℝ)) = (((6 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (2 / 5 : ℝ) = (((5 / 2 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hsqrt
+
+/-- OA11 eta term 5 in closed form (`term 5 = -(6^s)^{-1}`). -/
+theorem OA11BIGS_eta_term5_eq :
+    etaDirichletTerm sCutOA11 5 = -((((6 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (5 + 1 : ℕ) = 6 := rfl
+  have hcast : ((((5 + 1 : ℕ)) : ℂ)) = ((((6 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (5 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- OA11 term 5 `Re + Im` floor (`1/30` from `2/5 * 1/12`). -/
+theorem OA11BIGS_eta_term5_re_add_im_ge :
+    (1 / 30 : ℝ) ≤ (etaDirichletTerm sCutOA11 5).re + (etaDirichletTerm sCutOA11 5).im := by
+  have hinv := OA11_inv_cpow_re_im 6 (by norm_num)
+  have hre := hinv.1
+  have him := hinv.2
+  have hcast : ((((6 : ℕ)) : ℝ)) = (6 : ℝ) := by norm_num
+  rw [hcast] at hre him
+  have hcombo := OA11BIGS_combo6_lower
+  have hamp := OA11BIGS_amp6_ge
+  have heq := OA11BIGS_eta_term5_eq
+  rw [heq, Complex.neg_re, Complex.neg_im, hre, him]
+  have hsin : Real.sin (-(11 * Real.log 6)) = -(Real.sin (11 * Real.log 6)) := Real.sin_neg _
+  rw [hsin]
+  have hprod : (2 / 5 : ℝ) * (1 / 12 : ℝ) ≤ (6 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.sin (11 * Real.log 6) - Real.cos (11 * Real.log 6)) :=
+    mul_le_mul hamp hcombo (by norm_num) (le_of_lt (Real.rpow_pos_of_pos (by norm_num) _))
+  have heq2 : (2 / 5 : ℝ) * (1 / 12 : ℝ) = (1 / 30 : ℝ) := by norm_num
+  have hring : -((6 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (11 * Real.log 6)) + -((6 : ℝ) ^ (-(1 / 2 : ℝ)) * -(Real.sin (11 * Real.log 6))) = (6 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.sin (11 * Real.log 6) - Real.cos (11 * Real.log 6)) := by
+    ring
+  linarith
+
+/-- Six-term split (`S6 = S5 + t5`). -/
+theorem OA11BIGS_S6_eq :
+    (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 5 := by
+  rw [show (6 : ℕ) = 5 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Six-term `Re + Im` sum (`2449/750` from `404/125 + 1/30`). -/
+theorem OA11BIGS_S6_re_add_im_ge :
+    (2449 / 750 : ℝ) ≤ (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re + (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im := by
+  rw [OA11BIGS_S6_eq, Complex.add_re, Complex.add_im]
+  have h5 := OA11_S5_re_add_im_ge
+  have ht := OA11BIGS_eta_term5_re_add_im_ge
+  have heq : (404 / 125 : ℝ) + 1 / 30 = 2449 / 750 := by norm_num
+  linarith
+
+/-- Six-term norm floor via Pythagoras (`2449/1125` from `(2449/750)/sqrt 2`
+with `sqrt 2 <= 3/2`; raises S5 floor `808/375`). -/
+theorem OA11BIGS_S6_norm_ge :
+    (2449 / 1125 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ := by
+  have hsum := OA11BIGS_S6_re_add_im_ge
+  have hsq_eq : ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2 =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re ^ 2 +
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
+  have hsq_sum : ((∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re +
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im) ^ 2 ≤
+      2 * ((∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re ^ 2 +
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im ^ 2) := by
+    nlinarith [sq_nonneg ((∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re -
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im)]
+  have h2449 : (2449 / 750 : ℝ) ^ 2 ≤ ((∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).re +
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k).im) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hsum 2
+  have h2449_le_2norm : (2449 / 750 : ℝ) ^ 2 ≤ 2 * ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+    linarith
+  have heq2449 : (2449 / 1125 : ℝ) ^ 2 = (2449 / 750 : ℝ) ^ 2 * (4 / 9 : ℝ) := by norm_num
+  have h2449_le : (2449 / 1125 : ℝ) ^ 2 ≤ ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+    have hmul : (2449 / 750 : ℝ) ^ 2 * (4 / 9 : ℝ) ≤ (2 * ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2) * (4 / 9 : ℝ) :=
+      mul_le_mul_of_nonneg_right h2449_le_2norm (by norm_num)
+    have heq89 : (2 * ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2) * (4 / 9 : ℝ) =
+        (8 / 9 : ℝ) * (‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2) := by
+      ring
+    have hnn : (0 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2 := sq_nonneg _
+    have h89 : (8 / 9 : ℝ) * (‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2) ≤
+        ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+      linarith
+    linarith
+  calc (2449 / 1125 : ℝ) = Real.sqrt ((2449 / 1125 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ^ 2) :=
+        Real.sqrt_le_sqrt h2449_le
+    _ = ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ :=
+        Real.sqrt_sq (norm_nonneg _)
+
+/-- S6 surplus over the `21/10` bar (`2449/1125 - 21/10 = 173/2250`). -/
+theorem sCutOA11BIGS_S6_surplus :
+    ((2449 / 1125 : ℝ) - 21 / 10) = (173 / 2250 : ℝ) := by norm_num
+
+/-- S6 meets the slow bar (bigger partial budget). -/
+theorem sCutOA11BIGS_S6_closed :
+    (21 / 10 : ℝ) ≤ ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ := by
+  have h := OA11BIGS_S6_norm_ge
+  have hle : (21 / 10 : ℝ) ≤ (2449 / 1125 : ℝ) := by norm_num
+  linarith
+
+/-- Exact S6 residual budget for the `S6 -> S4096` leg
+(`2449/1125 - 21/10 = 173/2250`, up from S5 `41/750 = 123/2250`). -/
+theorem sCutOA11BIGS_S6_mid_budget :
+    ((2449 / 1125 : ℝ) - 21 / 10) = (173 / 2250 : ℝ) := by norm_num
+
+/-- Open residual as a named `Prop` (mid-block `Ico 6 4096` has 4090 terms,
+no `<= 173/2250` enclosure banked here). -/
+def sCutOA11BIGS_S6_mid_residual : Prop :=
+  ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+    (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)‖ ≤ (173 / 2250 : ℝ)
+
+/-- Unconditional transfer triangle for the `S6 -> S4096` leg. -/
+theorem sCutOA11BIGS_S4096_transfer_triangle :
+    ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ -
+        ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)‖ := by
+  have htri : ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ +
+        ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k)
+      ((∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+        (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k))
+    have heq : (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+        ((∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+          (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)) =
+        (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k) := by
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- Conditional feeder: mid-block `<= 173/2250` upgrades closed `S6` floor to `S4096`. -/
+theorem sCutOA11BIGS_S4096_feeder_of_mid_le
+    (hmid : ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k)‖ ≤ (173 / 2250 : ℝ)) :
+    (21 / 10 : ℝ) ≤ ‖∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have hS6 := OA11BIGS_S6_norm_ge
+  have htri := sCutOA11BIGS_S4096_transfer_triangle
+  linarith
+
+/-- Gap verdict (honest): S6 banked as `2449/1125` on `range 6` only
+(surplus `173/2250`, up from S5 `41/750`); whole-mid `<= 173/2250` stays
+open modulo `sCutOA11BIGS_S6_mid_residual`; flat pair-triangle route still
+dead since `6144/92205 > 173/2250 - 6144/169015`. Value banked is
+`2449/1125`; no flat claim made. -/
+theorem sCutOA11BIGS_S6_gap : True := by
+  trivial
+
+#print axioms OA11BIGS_log_six_eq
+#print axioms OA11BIGS_theta6_mem
+#print axioms OA11BIGS_delta6_mem
+#print axioms OA11BIGS_combo6_lower
+#print axioms OA11BIGS_amp6_ge
+#print axioms OA11BIGS_eta_term5_re_add_im_ge
+#print axioms OA11BIGS_S6_re_add_im_ge
+#print axioms OA11BIGS_S6_norm_ge
+#print axioms sCutOA11BIGS_S6_closed
+
+end Door3OffAxis
