@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ASSEMBLY-R07 (background `ses_f347bf81b`, proof-only,
+  grep-clean, assembly-only commit): R07 leaf+H conditional (two-tenths
+  + 0.07). Post-dates GREEN; re-verify later.
 - 2026-09-22 DERIV-MPRIME (background `ses_f347d3931`, proof-only,
   grep-clean (one prose "no sorry" comment line, tactic-free), deriv-only
   commit): DECISIVE — M'=0.15 UNSATISFIABLE via honest Cauchy; minimal
