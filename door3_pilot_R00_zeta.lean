@@ -4056,4 +4056,47 @@ theorem sSCUT_eta11_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hup := sSCUT_eta11_Re_le_neg
   linarith
 
+/-- Composite log bridge `log 13 = log 12 + log (13/12)` (`13 = 12·(13/12)`
+via `Real.log_mul`; mirror of `sSCUT_log_twelve_via_eleven_eq`;
+grepped base bridges: `sSCUT_log_twelve_via_eleven_eq` and `sSCUT_log_eleven_eq`
+both banked — tighter ratio `13/12` (`x = 1/12`) picked over `13/11`
+(`x = 2/11`); first link of the incremental base-13 chain for `k = 12`). -/
+theorem sSCUT_log_thirteen_via_twelve_eq :
+    Real.log 13 = Real.log 12 + Real.log (13 / 12 : ℝ) := by
+  have h13 : (12 : ℝ) * (13 / 12) = 13 := by norm_num
+  have h := Real.log_mul (show (12 : ℝ) ≠ 0 by norm_num)
+    (show (13 / 12 : ℝ) ≠ 0 by norm_num)
+  rw [h13] at h
+  linarith
+
+/-- `log 13` upper (`log 13 ≤ 2.5768275178` from `sSCUT_log_twelve_le` +
+`log (13/12) ≤ 1/12`; mirror of `sSCUT_log_twelve_le` with `x = 1/12`
+via `Real.log_le_sub_one_of_pos`). -/
+theorem sSCUT_log_thirteen_le : Real.log 13 ≤ (2.5768275178 : ℝ) := by
+  have h13 := sSCUT_log_thirteen_via_twelve_eq
+  have h12 := sSCUT_log_twelve_le
+  have hub : Real.log (13 / 12 : ℝ) ≤ (1 / 12 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 13 / 12)
+    have he : (13 / 12 : ℝ) - 1 = (1 / 12 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.4934941844 : ℝ) + 1 / 12 ≤ (2.5768275178 : ℝ) := by norm_num
+  linarith
+
+/-- `log 13` lower (`2.5537505937 ≤ log 13` from `sSCUT_log_twelve_ge` +
+`log (13/12) ≥ 1/13`; mirror of `sSCUT_log_twelve_ge` with `x = 1/12`
+via `log (12/13) ≤ -1/13` and `log (13/12) = -log (12/13)`). -/
+theorem sSCUT_log_thirteen_ge : (2.5537505937 : ℝ) ≤ Real.log 13 := by
+  have h13 := sSCUT_log_thirteen_via_twelve_eq
+  have h12 := sSCUT_log_twelve_ge
+  have hub : Real.log (12 / 13 : ℝ) ≤ (-1 / 13 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 12 / 13)
+    have he : (12 / 13 : ℝ) - 1 = (-1 / 13 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (13 / 12 : ℝ) = -Real.log (12 / 13 : ℝ) := by
+    have heq : (13 / 12 : ℝ) = (12 / 13 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.5537505937 : ℝ) ≤ 2.4768275168 + 1 / 13 := by norm_num
+  rw [h13, hinv]
+  linarith
+
 end Door3PilotR00Zeta

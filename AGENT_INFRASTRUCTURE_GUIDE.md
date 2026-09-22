@@ -5686,6 +5686,26 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SCUT28 (background `ses_f3752af34`, proof-only, grep-clean):
+  log13 FIRST link — bridge `:4064` (log13=log12+log(13/12), tighter
+  13/12 ratio picked) + window `:4075/:4088` ([2.5537505937,
+  2.5768275178], width ~0.023, true ~2.565 inside). Next: theta13
+  (implied [25.54,25.77], NOT banked) + cos sign (k=12 even).
+- 2026-09-22 BINET-SURVEY (background `ses_f3752af33`, read-only, no
+  edits): L2 rate leaf absent confirmed — no Binet/Stirling-remainder/
+  logGamma/GammaSeq-rate in Mathlib (BohrMollerup qualitative,
+  Beta.lean DCT-only, Stirling factorial-only, Digamma TODO Gauss
+  rep); repo: product UPPERS only, Wendel/Gauss/digamma-remainder all
+  unbanked hypotheses. SMALLEST RATE: E05 N=5 `rate_needed_corr :3402`
+  (≤0.014) feeding `:3419` (0.659+0.014→0.645); host must be
+  Stirling-disc/Binet leaf, NOT premise file.
+- 2026-09-22 DZ-SURVEY (background `ses_f3752af33`, read-only, no
+  edits): DZ DEAD honestly — no uniform `‖deriv zeta‖` on R02 in-tree
+  or Mathlib (Cauchy conditional unfilled, 1000-instances wrong
+  centers, eta-pair termwise shapes disconnected from tsum-deriv link,
+  vonMangoldt Re>1 only). Revive routes: (i) DiffContOnCl+sphere sup →
+  Cauchy (likely huge/useless); (ii) tsum-differentiation of eta-pair
+  chain (shapes half-exist, assembly missing).
 - 2026-09-22 SUPP-VERIFY (background `ses_f37683d44`, sole build owner):
   GREEN — `[8688/8688] Built door3_cell_suppliers (109s)`, BUILD-EXIT=0
   (attempt 2/2; attempt 1 two errors). Fixes: `CS_log_seven_eq :4452`
