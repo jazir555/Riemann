@@ -668,6 +668,81 @@ theorem m_half_existence_of_zero :
       constructor
       · linarith [hxpair.1, min_le_right δ1 δ2, hδ1pos]
       · linarith [hxpair.2, min_le_right δ1 δ2]
-    exact h2 x hx2
+/-! ### (J) M40 gates + strict `m ≤ 1 / 2` ceilings (top-owned feeder arithmetic)
+
+Grepped base:
+* ceilings `uniform_top_lower_le_half :502`, `uniform_bot_lower_le_half :516`;
+* covers `edgeSphere_cover :303`, `edgeSphere_cover_half :323`;
+* deriv bridges `uniform_top_deriv_of_closedBall :343`,
+  `uniform_top_deriv_of_closedBall_half :393` (+ bottom mirrors);
+* M40 strips banked outside this file in `door3_rh_wiring.lean`
+  (`edgeStrip_top_half_M40 :487`, `edgeStrip_bottom_half_M40 :523`).
+What is added here: M40 gate/width/delta numerals (`δ = (1 / 2) / 40`),
+  the closed-ball-40 to top-deriv-40 bridge instance, and strict
+  `m > 1 / 2` impossibility + explicit gap numerals.
+Residual (open, not forced): uniform `1 / 2` lowers over `Icc (-10) 10`
+  and closed-ball sup `C = 40` on `closedBall 0 12` stay as premises;
+  repo grep shows only upper bounds for `completedRiemannZeta₀`
+  and no uniform edge lower at `1 / 2`, so `hTopLower`/`hTopDeriv` for M40
+  are not closed here. -/
+
+/-- M40 gate on top: `0.01 < (1 / 2) / 40`. -/
+theorem m40_gate_top : (0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+
+/-- M40 width on top: `1 / 2 - (1 / 2) / 40 < 0.49`. -/
+theorem m40_width_top : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ) := by norm_num
+
+/-- M40 width on bottom. -/
+theorem m40_width_bot : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+
+/-- M40 delta is positive. -/
+theorem m40_delta_pos : (0 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+
+/-- M40 delta fits the `d ≤ 1` side condition of the closed-ball bridges. -/
+theorem m40_delta_le_one : (1 / 2 : ℝ) / (40 : ℝ) ≤ 1 := by norm_num
+
+/-- M40 delta value: `(1 / 2) / 40 = 1 / 80`. -/
+theorem m40_delta_eq : (1 / 2 : ℝ) / (40 : ℝ) = (1 / 80 : ℝ) := by norm_num
+
+/-- Edge-top M40 feeder bridge: closed-ball sup `40` gives deriv `40` on the M40 strip. -/
+theorem uniform_top_deriv_M40_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ)) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ) := by
+  exact uniform_top_deriv_of_closedBall ((1 / 2 : ℝ) / (40 : ℝ)) (40 : ℝ)
+    (by norm_num) hC x hx y hy
+
+/-- No uniform top lower exceeds `1 / 2`. -/
+theorem uniform_top_lower_not_gt_half (m : ℝ) (hgt : (1 / 2 : ℝ) < m) :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      m ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  intro h
+  have hle := uniform_top_lower_le_half m h
+  linarith
+
+/-- No uniform bottom lower exceeds `1 / 2`. -/
+theorem uniform_bot_lower_not_gt_half (m : ℝ) (hgt : (1 / 2 : ℝ) < m) :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      m ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  intro h
+  have hle := uniform_bot_lower_le_half m h
+  linarith
+
+/-- Explicit gap: `51 / 100` is not a uniform top lower. -/
+theorem uniform_top_lower_gap_51 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (51 / 100 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_top_lower_not_gt_half _ (by norm_num)
+
+/-- Explicit gap: `51 / 100` is not a uniform bottom lower. -/
+theorem uniform_bot_lower_gap_51 :
+    ¬ ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      (51 / 100 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  apply uniform_bot_lower_not_gt_half _ (by norm_num)
 
 end Door3SliverEdge

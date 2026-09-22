@@ -5489,4 +5489,19 @@ theorem sSCUT_cos10log18_le_neg_three_quarters :
   rw [key]
   linarith
 
+/-- eta17 cpow/Re payoff RESIDUAL (k = 17 ODD, base 18): `cos(10·log 18) ≤ -3/4`
+is banked (`sSCUT_cos10log18_le_neg_three_quarters` at `:5459`), but the
+`r₁₈` lower (`sSCUT_rpow18_neg_ge`-shape : `(c : ℝ) ≤ (18 : ℝ) ^ (-(1/2:ℝ))`)
+is NOT banked in this file, and no `sSCUT_cpow18_neg_re` /
+`sSCUT_cpow18_Re_le_neg`-shape exists here (grep `rpow18|cpow18|eta17` hits
+only `:5182`-`:5459` bridge/theta/delta/cos lines; `eta₁₆`-payoff mirror is
+` sSCUT_eta16_eq_cpow17` at `:5334` + `sSCUT_eta16_Re_le_neg` at `:5346`;
+odd-constructive mirror would be `sSCUT_eta15_Re_ge` at `:5086` via negated
+cpow signed upper). Hence NEITHER `Re(18^{-sCut}) ≤ -c·r₁₈` NOR
+`Re(eta₁₇) ≥ +…` is banked here; one branch only, no force. Next link needed:
+`r₁₈` lower (e.g. `1/5 ≤ 18^{-1/2}` via `√18 ≤ 5`), then cpow split, then
+`eta₁₇ = -18^{-sCut}` bridge. -/
+theorem sSCUT_eta17_payoff_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta

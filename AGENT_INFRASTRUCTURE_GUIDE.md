@@ -5995,6 +5995,14 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, stirling-only commit): R02 disc-upper tightened 0.5→0.381
   `:2469` (‖w‖≥2.625 full-Im floor). gamNeed outer/leaf still open
   (114x/37x).
+- 2026-09-22 SCUT44 (background `ses_f3495b136`, proof-only, grep-clean,
+  pilot-only commit): eta17 payoff GAP filed `:5504` — r₁₈ lower missing
+  blocks cpow18→eta17 bridge (would-be +0.1768 via 0.2357·3/4 unchained).
+- 2026-09-22 SLIVER-TOP (background `ses_f34951a38`, proof-only,
+  grep-clean, sliver_edge-only commit): M40 gates/width/delta numerals
+  `:690-705` + conditional M40 deriv feeder `:708` (via :343) + strict
+  m>1/2 impossibility `:719/:727` + 51/100 gaps `:735/:742`. hTopLower/
+  hBotLower/hC stay open premises.
 - 2026-09-22 RH-EDGE (background `ses_f34951a32`, proof-only,
   grep-clean, RH-only commit): `xiCentralEdgeStrips10_of_zeroFreeCover
   :12487` (mirrors :12286) — Hmain+Hedge+Hcut collapse to single
