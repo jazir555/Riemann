@@ -6044,6 +6044,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, RH-only commit): `xiCentralEdgeStrips10_of_zeroFreeCover
   :12487` (mirrors :12286) — Hmain+Hedge+Hcut collapse to single
   `XiCentralZeroFreeCover 10`; open = the cover itself + tail Htail.
+- 2026-09-22 ASSEMBLY-H2 (background `ses_f3493cdab`, proof-only,
+  grep-clean, assembly-only commit): R00 leaf+H conditional
+  (`leaf_of_residuals :17022` + `H_of_residuals :17026` from center+deriv
+  residuals). Deriv residual (uniform ≤0.05) filed `:17019`.
 - 2026-09-22 DERIV-CELLD (background `ses_f34951a38`, proof-only,
   grep-clean, deriv-only commit): leaf-sub post (dLeaf-6.25I) closed
   93400 `:1616` (honest Cauchy C=934/rho=0.01; poly 6.95/val 22.74/pi

@@ -16998,3 +16998,79 @@ theorem R00_center_obligation_of_residual_tenth (h : R00_center_residual_tenth) 
   R00_center_of_tenth_lower h
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-LEAF R00 deriv residual + combined H conditional close
+
+Open spec grepped: `R00_leaf_obligations` at 1175-1177 is `center AND deriv`.
+Center part already reduced: `R00_center_of_tenth_lower` (16988) +
+`R00_center_residual_tenth` (16993).
+This block files the second conjunct as an explicit residual and combines:
+- `R00_deriv_residual` is exactly the `deriv_bound` conjunct.
+- `R00_leaf_of_residuals` rebuilds `R00_leaf_obligations` from the two residuals.
+- `R00_H_of_residuals` discharges the `H` conclusion shape used by
+  `R00_H_instance` (1212).
+Value: full `H` leaf now conditional only on two named numeric enclosures.
+Gap: `deriv` needs a uniform `‖deriv xiShifted‖ ≤ 0.05` enclosure on `R00`
+  (Cauchy estimate on strip via `xiShiftedEntire_differentiable`; not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+def R00_deriv_residual : Prop :=
+  ∀ w, R00.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ)
+
+theorem R00_leaf_of_residuals (hc : R00_center_residual_tenth)
+    (hd : R00_deriv_residual) : R00_leaf_obligations :=
+  ⟨R00_center_obligation_of_residual_tenth hc, hd⟩
+
+theorem R00_H_of_residuals (hc : R00_center_residual_tenth)
+    (hd : R00_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-10, -7.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R00_H_instance (R00_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R00D deriv-conditional attempt audit (append-only, no redefinition)
+
+Grep (read-only, verified before writing):
+- Leaf: `R00_leaf_obligations` at 1175-1177 =
+  `(0.002 + 0.05 * R00.radius <= norm at R00.center) AND
+   (forall w, R00.mem w -> ||deriv xiShifted w|| <= 0.05)`.
+- Center conditional banked: `R00_center_of_tenth_lower` 16988,
+  `R00_center_residual_tenth` 16993, `R00_center_obligation_of_residual_tenth` 16996,
+  via `R00_budget_lt_app` 1359 + `R00_radius_lt` 1161.
+- Deriv specs in this file: `uniform_deriv_of_sphere_bound` 6201,
+  `uniform_deriv_of_closedBall_bound` 6233 (`M = C / r` supplier shape),
+  `R02_deriv_bound_of_zeta_upper` 6550 (`16800 / 0.25 = 67200`, R02 only),
+  `deriv_gap_conditional` 9736 (`0.05 < 67200`).
+- Deriv specs outside this file (not chainable here without new import +
+  new sup enclosure): `door3_deriv_certs.R00_deriv_bound_of_sup` (generic `f`,
+  needs `ball R00c 2` sup `qB <= 1/40`), `R00_deriv_bound_of_xi_conds` /
+  `R00_deriv_bound_of_joint_conds` (for `xiFourShapeAt`, need `GammaSupCond` /
+  `ZetaSupCond` / `JointGZSupCond` + `DiffContOnCl`), `door3_premise_tier`
+  `premDeriv_R00_of_ball` (gives `<= 67200`, mismatch `0.05 < 67200`),
+  `door3_tier_direct.tierDirect_R00_le` (restates tier, no proof of tier).
+
+Attempt: no banked premise in `central_cover_assembly.lean` yields
+`forall w, R00.mem w -> ||deriv xiShifted w|| <= 0.05`.
+The only banked Cauchy value here is `67200` (R02 route), which exceeds the
+`0.05` tier (gap below). Hence the deriv conditional cannot be closed by
+chaining; the exact residual `R00_deriv_residual` at 17019
+(second conjunct of `R00_leaf_obligations`) stands as the missing premise.
+Deriv conjunct untouched; no new obligation introduced below.
+-/
+
+namespace CentralCoverAssembly
+
+/-- Banked Cauchy value exceeds the R00 tier: `67200` does not meet `0.05`,
+so the R02-style sup route cannot discharge `R00_deriv_residual`. -/
+theorem R00_deriv_banked_gap_audit : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+end CentralCoverAssembly
