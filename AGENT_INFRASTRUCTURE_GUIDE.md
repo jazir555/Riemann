@@ -5914,6 +5914,11 @@ sorry-free infrastructure and the complete commit ledger above.
   REFUTED (edgePoly_top 0 gives entire=1/2, norm exactly 1/2). So m=1/2
   is the OPTIMAL ceiling: m>1/2 infeasible, m=1/2 open (needs zeta₀
   bounds for x≠0). Bottom mirror (mB≤1/2) left for patch.
+- 2026-09-22 SLIVER-MB (background `ses_f34e99bd9`, proof-only,
+  grep-clean, sliver_edge-only commit): bottom ceiling CLOSED —
+  `uniform_bot_lower_le_half :516` (exact token mirror of `:502` via
+  `edgeBot_consumer_norm_at_zero`; no adaptation needed). Top+bottom
+  ≤1/2 ceilings both banked; m=1/2 existence still open both arms.
 - 2026-09-22 CELL-C (background `ses_f34ec61fc`, proof-only, grep-clean,
   interval-only commit): R03 conditional FILED (R01 correctly skipped:
   obligation exists `:1288` but NO grid membership by design `:1244`) —

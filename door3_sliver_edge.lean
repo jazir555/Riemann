@@ -512,4 +512,18 @@ theorem uniform_top_lower_le_half (m : ℝ)
   rw [edgeTop_consumer_norm_at_zero] at h0
   exact h0
 
+/-- Sharp ceiling for uniform bottom lowers: no `m > 1 / 2` works; `1 / 2` is best possible. -/
+theorem uniform_bot_lower_le_half (m : ℝ)
+    (h : ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      m ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) :
+    m ≤ (1 / 2 : ℝ) := by
+  have h0mem : (0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+    rw [Set.mem_Icc]
+    constructor
+    · norm_num
+    · norm_num
+  have h0 := h 0 h0mem
+  rw [edgeBot_consumer_norm_at_zero] at h0
+  exact h0
+
 end Door3SliverEdge
