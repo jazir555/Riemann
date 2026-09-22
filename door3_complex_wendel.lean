@@ -2856,3 +2856,123 @@ conditional via `h3_inner_of_G1_G2`. No numeric cap banked here.
 
 end Door3ComplexWendel
 
+/-! ## 26. WENDEL-FINAL ledger (PROOF-ONLY, FENCED, no build): single audit, then STOP.
+
+Greps (before edit, this turn, this file only):
+- outer: `G1_outerN8_banked/:1570` (C 13.54), `G2_outerN8_banked/:1526` (C2 8.63),
+  `H3_outer_banked/:1573` two-term, `H3_outer_banked_numeric/:1639` cap 1.16,
+  `wOuter_norm_sq_U0/:1516` (19.18), `wOuter8_norm_sq_U/:1562` (86.34);
+- leaf: `G1_leafN8_banked/:1804` (C 20.30), `G2_leafN8_banked/:2132` (C2 8.82),
+  `H3_leaf_banked/:2136` two-term, `H3_leaf_banked_numeric/:2160` cap 2.56,
+  `wLeaf_norm_sq_U0/:2122` (11.41), `wLeaf8_norm_sq_U/:1796` (77.01);
+- mid: `G1_midN8_banked/:2316` (C 38.75), `G2_midN8_banked/:2644` (C2 9.20),
+  `H3_mid_banked/:2648` two-term, `H3_mid_banked_numeric/:2672` cap 8.51,
+  `wMid_norm_sq_U0/:2634` (5.68), `wMid8_norm_sq_U/:2308` (72.84);
+- inner: `S_innerN8/:2722`, `cN_innerN8/:2725`, `target_inner/:2728`,
+  `G1_innerN8_prop/:2731` (open Prop), `G2_innerN8_prop/:2736` (open Prop),
+  `digamma_shift_wInner_8/:2747` (banked hEq), `h3_inner_of_G1_G2/:2771`
+  (conditional combiner), `wInner_norm_sq_U0/:2826` (0.18),
+  `wInner8_norm_sq_U/:2830` (67.34), `inner_im_abs_lt_half/:2834`,
+  `inner_add8_im_abs_lt_half/:2838` (blocker pair, |Im| = 0.375 < 1/2);
+- discounts: `lower_outer/:263`, `lower_leaf/:285`, `lower_mid/:307`,
+  `lower_inner/:329`; caps `gamma_cap_08025/:186`, `gamma_cap_09/:198`;
+- banked-code tactic check: prior hits comment-only; this section adds zero
+  new hits and uses only `exact`/`have`/`rw` style steps.
+
+Banked here (this section only, no new imports, no existing lines modified):
+`wendel_inner_H3_conditional` (hEq eliminated via `digamma_shift_wInner_8`,
+leaving exactly the two open Props as premises) and `wendel_final_ledger`
+(single conjunction of every closed wendel-lane value listed above plus the
+inner blocker pair and all eight norm-sq caps). Open Props stay open and are
+filed in the residual note below; nothing is forced.
+-/
+
+namespace Door3ComplexWendel
+
+theorem wendel_inner_H3_conditional (C1 C2 : ℝ)
+    (hG1 : G1_innerN8_prop C1) (hG2 : G2_innerN8_prop C2) :
+    ‖Complex.digamma wInner - target_inner‖ ≤
+      C1 / ‖wInner + (8 : ℂ)‖ ^ 2 + C2 / ‖wInner‖ ^ 2 :=
+  h3_inner_of_G1_G2 C1 C2 digamma_shift_wInner_8 hG1 hG2
+
+theorem wendel_final_ledger :
+    G1_outerN8_prop 13.54 ∧
+    G2_outerN8_prop 8.63 ∧
+    (‖Complex.digamma wOuter - target_outer‖ ≤
+      (13.54 : ℝ) / ‖wOuter + (8 : ℂ)‖ ^ 2 + (8.63 : ℝ) / ‖wOuter‖ ^ 2) ∧
+    (‖Complex.digamma wOuter - target_outer‖ ≤ (1.16 : ℝ)) ∧
+    G1_leafN8_prop 20.30 ∧
+    G2_leafN8_prop 8.82 ∧
+    (‖Complex.digamma wLeaf - target_leaf‖ ≤
+      (20.30 : ℝ) / ‖wLeaf + (8 : ℂ)‖ ^ 2 + (8.82 : ℝ) / ‖wLeaf‖ ^ 2) ∧
+    (‖Complex.digamma wLeaf - target_leaf‖ ≤ (2.56 : ℝ)) ∧
+    G1_midN8_prop 38.75 ∧
+    G2_midN8_prop 9.20 ∧
+    (‖Complex.digamma wMid - target_mid‖ ≤
+      (38.75 : ℝ) / ‖wMid + (8 : ℂ)‖ ^ 2 + (9.20 : ℝ) / ‖wMid‖ ^ 2) ∧
+    (‖Complex.digamma wMid - target_mid‖ ≤ (8.51 : ℝ)) ∧
+    (|wInner.im| < 1 / 2) ∧
+    (|(wInner + (8 : ℂ)).im| < 1 / 2) ∧
+    (‖wOuter‖ ^ 2 ≤ (19.18 : ℝ)) ∧
+    (‖wOuter + (8 : ℂ)‖ ^ 2 ≤ (86.34 : ℝ)) ∧
+    (‖wLeaf‖ ^ 2 ≤ (11.41 : ℝ)) ∧
+    (‖wLeaf + (8 : ℂ)‖ ^ 2 ≤ (77.01 : ℝ)) ∧
+    (‖wMid‖ ^ 2 ≤ (5.68 : ℝ)) ∧
+    (‖wMid + (8 : ℂ)‖ ^ 2 ≤ (72.84 : ℝ)) ∧
+    (‖wInner‖ ^ 2 ≤ (0.18 : ℝ)) ∧
+    (‖wInner + (8 : ℂ)‖ ^ 2 ≤ (67.34 : ℝ)) ∧
+    (Real.pi / (2 * Real.exp (Real.pi * 4.375) * 1.25) ≤
+      ‖Complex.Gamma wOuter‖) ∧
+    (Real.pi / (2 * Real.exp (Real.pi * 3.375) * 1.12) ≤
+      ‖Complex.Gamma wLeaf‖) ∧
+    (Real.pi / (2 * Real.exp (Real.pi * 2.375) * 1.25) ≤
+      ‖Complex.Gamma wMid‖) ∧
+    (Real.pi / (2 * Real.exp (Real.pi * 0.375) * 1.25) ≤
+      ‖Complex.Gamma wInner‖) ∧
+    (Real.Gamma 0.8025 ≤ (1.25 : ℝ)) ∧
+    (Real.Gamma 0.9 ≤ (1.12 : ℝ)) ∧
+    (Complex.digamma (wInner + (8 : ℂ)) =
+      Complex.digamma wInner + S_innerN8) := by
+  exact ⟨G1_outerN8_banked, G2_outerN8_banked, H3_outer_banked,
+    H3_outer_banked_numeric, G1_leafN8_banked, G2_leafN8_banked,
+    H3_leaf_banked, H3_leaf_banked_numeric, G1_midN8_banked, G2_midN8_banked,
+    H3_mid_banked, H3_mid_banked_numeric, inner_im_abs_lt_half,
+    inner_add8_im_abs_lt_half, wOuter_norm_sq_U0, wOuter8_norm_sq_U,
+    wLeaf_norm_sq_U0, wLeaf8_norm_sq_U, wMid_norm_sq_U0, wMid8_norm_sq_U,
+    wInner_norm_sq_U0, wInner8_norm_sq_U, lower_outer, lower_leaf,
+    lower_mid, lower_inner, gamma_cap_08025, gamma_cap_09,
+    digamma_shift_wInner_8⟩
+
+/-! FINAL residual list (complete, honest, no force):
+R1 outer CLOSED: G1 `G1_outerN8_banked` (C 13.54, U 86.34), G2
+  `G2_outerN8_banked` (C2 8.63, U0 19.18), H3 `H3_outer_banked` two-term,
+  numeric `H3_outer_banked_numeric` 1.16.
+R2 leaf CLOSED: G1 `G1_leafN8_banked` (C 20.30, U 77.01), G2
+  `G2_leafN8_banked` (C2 8.82, U0 11.41), H3 `H3_leaf_banked` two-term,
+  numeric `H3_leaf_banked_numeric` 2.56.
+R3 mid CLOSED: G1 `G1_midN8_banked` (C 38.75, U 72.84), G2
+  `G2_midN8_banked` (C2 9.20, U0 5.68), H3 `H3_mid_banked` two-term,
+  numeric `H3_mid_banked_numeric` 8.51.
+R4 inner BLOCKED (sole open lane): `G1_innerN8_prop C` open (StirlingVert
+  lead needs 1/2 <= |Im| at `wInner + 8`, fails by `inner_add8_im_abs_lt_half`
+  with |Im| = 0.375); `G2_innerN8_prop C2` open (eps caps need 1/2 <= |Im|
+  at `wInner` shifts, fails by `inner_im_abs_lt_half`); H3 conditional only
+  via `h3_inner_of_G1_G2` / `wendel_inner_H3_conditional` with banked hEq
+  `digamma_shift_wInner_8`; norm caps banked (`wInner_norm_sq_U0` 0.18,
+  `wInner8_norm_sq_U` 67.34); floors banked (`g2_denom_lower_wInner` 0.375);
+  no numeric cap banked for inner.
+R5 discount lowers CLOSED but insufficient at large |Im|: `lower_outer`
+  (~1.4e-6, formal <= 2e-6 via `outer_small`), `lower_leaf` (~3.5e-5,
+  formal <= 4e-5 via `leaf_small`), `lower_mid` (~7.3e-4, formal <= 8e-4
+  via `mid_small`), `lower_inner` (~0.39, formal >= 0.38 via `inner_big`);
+  companion caps `gamma_cap_08025` (1.25), `gamma_cap_09` (1.12);
+  sine upper `sin_norm_le` closed; Tier-C witness `tierC_outer` closed.
+R6 wider remainders untouched here: H1 Hoelder interpolation upper (section 9
+  sole premise), H2 Stirling-rate |y| factor / Binet bounds (unbanked),
+  PSI-SLOPE M2/M3/M4 (Gauss rep / bridge / tight uppers).
+Ledger verdict: outer/leaf/mid H3 CLOSED with numeric caps 1.16 / 2.56 / 8.51;
+inner H3 OPEN behind the |Im| < 1/2 blocker; file STOPs here per brief.
+-/
+
+end Door3ComplexWendel
+

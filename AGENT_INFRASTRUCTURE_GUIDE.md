@@ -6164,6 +6164,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 WENDEL-FINAL (background `ses_f34730b03`, proof-only,
+  grep-clean, wendel-only commit): FINAL 29-conjunct ledger (outer/leaf/
+  mid closed 1.16/2.56/8.51; inner blocked). Wendel lane COMPLETE.
+- 2026-09-22 BALLADV-DZETACLOSE (background `ses_f3474ca18`, proof-only,
+  grep-clean, ball_advance-only commit): DZetaPair 2037401.22 conditional
+  (sanity ✓; closes `:1440`/`:1515`). TrueRect residual owned by
+  bridge/eta lane. Ball lane COMPLETE-conditional.
 - 2026-09-22 STIRLING-FINAL (background `ses_f3472f2ed`, proof-only,
   grep-clean, stirling-only commit): FINAL ledger audit + residual list.
   Stirling lane COMPLETE-conditional (ladders at minima; decay/reflection

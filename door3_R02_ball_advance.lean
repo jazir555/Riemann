@@ -2631,3 +2631,182 @@ theorem R02_Deta_missing_closed_21795p54 : R02_Deta_missingNumeral_spec :=
 #print axioms R02_Deta_missing_closed_21795p54
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 DZetaPair numeral close (BALLADV-DZETACLOSE, proof-only).
+
+Grep record (read-only, before writing; no new import):
+* consumer `:1058` `hConvLe : ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair`
+  in `R02_fullDerivUp_of_etaPairDeriv :1042`, this file (`:1051-1058` binders).
+* quotient `R02_DZetaPair_quotient_of_caps :1488`, this file:
+  `‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ (Deta * C0 + VEta * C1) * C2`
+  from `‖etaDerivVal‖ ≤ Deta` + `‖etaVal‖ ≤ VEta` + three conversion caps.
+* `Deta` closed `:2614` `R02_Deta_missing_closed_21795p54` at `Deta = 21795.54`
+  (`Summable R02_etaWorstMajorant` via `R02_etaWorst_summable_K838p29` +
+  `R02_etaWorst_tsum_le_21795p54`).
+* R02-rect conversion-cap shapes, `door3_eta_prime.lean` (lane shapes only;
+  this file must not import that lane — cycle guard `:1019-1023` — so the
+  numerals below stay explicit hypotheses here, discharged by the bridge file
+  which imports both lanes):
+  `etaConv_upper_R02 :845` (`‖conv‖ ≤ 3` from `0.05 ≤ s.re`),
+  `etaVal_upper_R02 :877` (`‖etaHurwitz‖ ≤ 168` on the R02 rect
+  `0.05 ≤ s.re ≤ 0.74`, `-8.25 ≤ s.im ≤ -5.25`),
+  `etaConvDeriv_bound_R02 :901` (`‖conv'‖ ≤ 2` from `0.05 ≤ s.re`),
+  `etaConvInvSq_bound_R02 :929` (`‖convInv2‖ ≤ 31` from `s.re ≤ 0.74`);
+  R02 instantiation `etaConvQuotient_bound_R02 :1073`
+  (`‖...‖ ≤ (Deta * 3 + 168 * 2) * 31`, leaving only `‖etaDerivVal‖ ≤ Deta` open).
+
+What is banked here (all conditional on explicit hypotheses; nothing forced):
+* pure-`ℝ` numeral `(21795.54 * 3 + 168 * 2) * 31 = 2037401.22`
+  (`R02_DZetaPair_value2037401p22` plus product pieces);
+* abstract `Deta` link `R02_etaDerivVal_of_tsumMaj_eq` (`:1055` + `:1056` give
+  `‖etaDerivVal‖ ≤ 21795.54` by rewriting);
+* honest majorized link `R02_etaDerivVal_le_21795p54_of_majorized`
+  (any `eTerm` dominated by `R02_etaWorstMajorant` gives
+  `‖etaDerivVal‖ ≤ 21795.54` via `norm_tsum_le_tsum_norm` +
+  `Summable.tsum_le_tsum` + the closed `:2614` tsum value);
+* conditional `:1058` feed `R02_DZetaPair_le_2037401p22_of_caps` and the
+  chained `R02_DZetaPair_2037401p22_of_majorized_caps`
+  (Deta link + `168 / 3 / 2 / 31` caps through `:1488`);
+* pure-algebra spec closures `R02_DZetaPair_missing_closed_21795p54_2037401p22`
+  (`:1440` at `Deta = 21795.54`) and `R02_DZetaPair_residual_closed_2037401p22`
+  (`:1515`).
+
+Exact residual (NOT closed here): rect-uniform `‖deriv zeta s‖ ≤ 2037401.22`
+with TRUE lane values (`R02_DZetaPair_trueRect_residual_spec` below). Firing it
+needs, outside this file: (a) TRUE per-term majorization
+`‖etaDerivPairTerm s m‖ ≤ R02_etaWorstMajorant m` on the rect (eta lane owns;
+needs `‖s‖ ≤ 8.29` + exponent monotonicity at `0.05` — not in scope here),
+(b) TRUE conversion caps `:845/:877/:901/:929` + TRUE quotient identity
+`:1057` `hConvEq` (bridge file owns; it imports both lanes).
+-/
+
+/-- Product piece: `21795.54 * 3 = 65386.62`. -/
+theorem R02_DZetaPair_mul21795p54_3 : (21795.54 : ℝ) * 3 = 65386.62 := by
+  norm_num
+
+/-- Product piece: `168 * 2 = 336`. -/
+theorem R02_DZetaPair_mul168_2 : (168 : ℝ) * 2 = 336 := by
+  norm_num
+
+/-- Sum piece: `65386.62 + 336 = 65722.62`. -/
+theorem R02_DZetaPair_sum65722p62 : (65386.62 : ℝ) + 336 = 65722.62 := by
+  norm_num
+
+/-- DZetaPair numeral: `(21795.54 * 3 + 168 * 2) * 31 = 2037401.22`. -/
+theorem R02_DZetaPair_value2037401p22 :
+    ((21795.54 : ℝ) * 3 + 168 * 2) * 31 = 2037401.22 := by
+  norm_num
+
+/-- Abstract `Deta` link (`:1055` + `:1056` at `Deta = 21795.54`): the tsum cap
+plus the value equation give `‖etaDerivVal‖ ≤ 21795.54` by rewriting. -/
+theorem R02_etaDerivVal_of_tsumMaj_eq
+    (eTerm : ℕ → ℂ) (etaDerivVal : ℂ)
+    (hMaj : ‖∑' m : ℕ, eTerm m‖ ≤ 21795.54)
+    (hEq : etaDerivVal = ∑' m : ℕ, eTerm m) :
+    ‖etaDerivVal‖ ≤ 21795.54 := by
+  rw [hEq]
+  exact hMaj
+
+/-- Honest majorized `Deta` link: any `eTerm` family dominated by
+`R02_etaWorstMajorant` has its tsum value capped by the closed `:2614` numeral
+`21795.54` (mirror of `etaDeriv_tsum_norm_le_Deta`, `door3_eta_prime.lean:1009`,
+at the R02 worst-case majorant). -/
+theorem R02_etaDerivVal_le_21795p54_of_majorized
+    (eTerm : ℕ → ℂ) (etaDerivVal : ℂ)
+    (hEq : etaDerivVal = ∑' m : ℕ, eTerm m)
+    (hMaj : ∀ m : ℕ, ‖eTerm m‖ ≤ R02_etaWorstMajorant m) :
+    ‖etaDerivVal‖ ≤ 21795.54 := by
+  rw [hEq]
+  have hDomSum : Summable R02_etaWorstMajorant := R02_etaWorst_summable_K838p29
+  have hFnorm : Summable (fun m : ℕ => ‖eTerm m‖) := by
+    have hdom : ∀ m : ℕ, ‖(‖eTerm m‖ : ℝ)‖ ≤ R02_etaWorstMajorant m := by
+      intro m
+      rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+      exact hMaj m
+    exact Summable.of_norm_bounded hDomSum hdom
+  have h1 : ‖∑' m : ℕ, eTerm m‖ ≤ ∑' m : ℕ, ‖eTerm m‖ :=
+    norm_tsum_le_tsum_norm hFnorm
+  have h2 : (∑' m : ℕ, ‖eTerm m‖) ≤ ∑' m : ℕ, R02_etaWorstMajorant m :=
+    Summable.tsum_le_tsum hMaj hFnorm hDomSum
+  exact le_trans h1 (le_trans h2 R02_etaWorst_tsum_le_21795p54)
+
+/-- Conditional `:1058` feed at the banked numeral: `‖etaDerivVal‖ ≤ 21795.54`
+plus the `168 / 3 / 2 / 31` caps give `‖...‖ ≤ 2037401.22` via `:1488`. -/
+theorem R02_DZetaPair_le_2037401p22_of_caps
+    (etaDerivVal etaVal conv conv' convInv2 : ℂ)
+    (hDeriv : ‖etaDerivVal‖ ≤ 21795.54)
+    (hVal : ‖etaVal‖ ≤ 168)
+    (hC0 : ‖conv‖ ≤ 3) (hC1 : ‖conv'‖ ≤ 2) (hC2 : ‖convInv2‖ ≤ 31) :
+    ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ 2037401.22 := by
+  have h := R02_DZetaPair_quotient_of_caps 21795.54 168 3 2 31 (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    etaDerivVal etaVal conv conv' convInv2 hDeriv hVal hC0 hC1 hC2
+  rw [R02_DZetaPair_value2037401p22] at h
+  exact h
+
+/-- Chained close: majorized `eTerm` (Deta link) + `168 / 3 / 2 / 31` caps
+through `:1488` give the `:1058`-shape numeral `2037401.22`. -/
+theorem R02_DZetaPair_2037401p22_of_majorized_caps
+    (eTerm : ℕ → ℂ)
+    (etaDerivVal etaVal conv conv' convInv2 : ℂ)
+    (hEq : etaDerivVal = ∑' m : ℕ, eTerm m)
+    (hMaj : ∀ m : ℕ, ‖eTerm m‖ ≤ R02_etaWorstMajorant m)
+    (hVal : ‖etaVal‖ ≤ 168)
+    (hC0 : ‖conv‖ ≤ 3) (hC1 : ‖conv'‖ ≤ 2) (hC2 : ‖convInv2‖ ≤ 31) :
+    ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ 2037401.22 := by
+  have hDeriv : ‖etaDerivVal‖ ≤ 21795.54 :=
+    R02_etaDerivVal_le_21795p54_of_majorized eTerm etaDerivVal hEq hMaj
+  exact R02_DZetaPair_le_2037401p22_of_caps etaDerivVal etaVal conv conv' convInv2
+    hDeriv hVal hC0 hC1 hC2
+
+/-- `:1440` closed at `Deta = 21795.54` with `VEta / C0 / C1 / C2 = 168/3/2/31`
+and `DZetaPair = 2037401.22` (pure algebra via `:1488`; no lane import). -/
+theorem R02_DZetaPair_missing_closed_21795p54_2037401p22 :
+    R02_DZetaPair_missingNumeral_spec 21795.54 := by
+  refine ⟨168, 3, 2, 31, 2037401.22, by norm_num, by norm_num, by norm_num,
+    by norm_num, by norm_num, by norm_num, ?_⟩
+  intro s hre_lo hre_hi him_lo him_hi etaVal conv conv' convInv2 hVal hC0 hC1 hC2
+    etaDerivVal hDeriv
+  have h := R02_DZetaPair_quotient_of_caps 21795.54 168 3 2 31 (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    etaDerivVal etaVal conv conv' convInv2 hDeriv hVal hC0 hC1 hC2
+  rw [R02_DZetaPair_value2037401p22] at h
+  exact h
+
+/-- `:1515` closed with
+`Deta / VEta / C0 / C1 / C2 / DZetaPair = 21795.54/168/3/2/31/2037401.22`
+(pure algebra via `:1488`; no lane import). -/
+theorem R02_DZetaPair_residual_closed_2037401p22 :
+    R02_DZetaPair_residual_spec := by
+  refine ⟨21795.54, 168, 3, 2, 31, 2037401.22, by norm_num, by norm_num,
+    by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, ?_⟩
+  intro s hre_lo hre_hi him_lo him_hi etaVal conv conv' convInv2 hVal hC0 hC1 hC2
+    etaDerivVal hDeriv
+  have h := R02_DZetaPair_quotient_of_caps 21795.54 168 3 2 31 (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    etaDerivVal etaVal conv conv' convInv2 hDeriv hVal hC0 hC1 hC2
+  rw [R02_DZetaPair_value2037401p22] at h
+  exact h
+
+/-- Exact residual (filed, not fixed): rect-uniform `‖deriv zeta s‖ ≤ 2037401.22`
+with TRUE lane values is NOT closed here. Firing needs, outside this file,
+the TRUE per-term majorization on the rect, the TRUE caps `:845/:877/:901/:929`,
+and the TRUE quotient identity `:1057` (bridge file owns all three). -/
+def R02_DZetaPair_trueRect_residual_spec : Prop :=
+  ∀ (s : ℂ), 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖deriv zeta s‖ ≤ 2037401.22
+
+#print axioms R02_DZetaPair_mul21795p54_3
+#print axioms R02_DZetaPair_mul168_2
+#print axioms R02_DZetaPair_sum65722p62
+#print axioms R02_DZetaPair_value2037401p22
+#print axioms R02_etaDerivVal_of_tsumMaj_eq
+#print axioms R02_etaDerivVal_le_21795p54_of_majorized
+#print axioms R02_DZetaPair_le_2037401p22_of_caps
+#print axioms R02_DZetaPair_2037401p22_of_majorized_caps
+#print axioms R02_DZetaPair_missing_closed_21795p54_2037401p22
+#print axioms R02_DZetaPair_residual_closed_2037401p22
+
+end Door3R02BallAdvance
