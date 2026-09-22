@@ -5641,6 +5641,17 @@ sorry-free infrastructure and the complete commit ledger above.
   Seq7 COMPILED (add6/add7/prod6/prod7 chains in green target). Only
   2 pre-existing unused-var linters.   Lock RELEASED. SUPP-VERIFY tasked
   (sole owner, suppliers S8/S10 backlog).
+- 2026-09-22 STRIP-SURVEY (background `ses_f3753c475`, read-only, no
+  edits): assumption map `:12149-:12263` (Hmain/Hedge/Htail/Hcut +
+  `:12186/:12204/:12238` bridges all proved-conditional); banked: width
+  gates at 011, CutL10/CutR10 geometry + mem + either-split, sharp 1/2
+  endpoint norms (m=11 infeasible, m≤1/2 necessary), m=1/2 adapters
+  (gates stay premises), cutoff Gamma banked, deriv-reduction bridge
+  (edge deriv ≤ closedBall-0-12 sup C). OPEN: uniform edge lowers at
+  m≤1/2, deriv caps M<50 (or ball C), CutR10/CutL10 fencing (ball ≤0.04
+  blocked at ~0.062), hLeft/hSliver capstones. SMALLEST NEXT:
+  `edgeStrip_top_half_M40` (top-only, m=1/2, MT=40: gates close by
+  norm_num, 2 supplier premises) — smaller than any cutoff lemma.
 - 2026-09-22 SCUT25 (background `ses_f37683d3d`, proof-only, grep-clean):
   log12 window — `le :3809` (≤2.4934941844 via log(12/11)≤1/11) +
   `ge :3822` (≥2.4768275168 via log(11/12)≤-1/12; slacks ~1e-10,
