@@ -5784,6 +5784,15 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 GAMMA-N14 (background `ses_f34a9d8f1`, proof-only,
+  grep-clean, premise_gamma +429/-0 PURE APPEND): E06 Seq14 rung —
+  rpow14-frac (1.66≤14^5/26, 1.67 false), Re-lower 23.24, prod14
+  3101706860268.06, link (87178291200-num, factorial by decide),
+  rate 0.014, finite 0.653 (23.24·87178291200/3101706860268.06≈0.65320,
+  coordinator-verified), below-gate + gap 0.007 + N15-next. VERDICT:
+  0.653<0.66 FAILS (+0.006; 2-dec windows provably cap below gate —
+  1.67^26>537824). Discipline full (nets/diff/stale-grep/LF).
+  VERIFY16 tasked (sole owner, rebuild).
 - 2026-09-22 VERIFY15 (background `ses_f34acd972`, sole build owner):
   GREEN — `[8689/8689] (41s)`, BUILD-EXIT=0 (attempt 2/2). Fixes (3
   stale-numeral copy-pastes from N12 block, NEW slip family — not
