@@ -5648,6 +5648,15 @@ sorry-free infrastructure and the complete commit ledger above.
   Seq7 COMPILED (add6/add7/prod6/prod7 chains in green target). Only
   2 pre-existing unused-var linters. Lock RELEASED. SUPP-VERIFY tasked
   (sole owner, suppliers S8/S10 backlog).
+- 2026-09-22 GAMMA-N8 (background `ses_f3753c477`, proof-only,
+  grep-clean, premise_gamma +388): E06 Seq8 rung — rpow8-frac `:4633`
+  (1.49≤8^5/26, 1.50 false), Re-lower 11.92 `:4648`, cpow8 norm `:4661`
+  + upper-needed 12.07 `:4679`, add8 ≤9.23 `:4685`, prod8 773642.09
+  `:4711`, link (40320-num) `:4752`, rate 0.014 `:4770`, finite 0.621
+  `:4779`, below-gate `:4975` + gap 0.039 `:4980`, N9-next `:4987`.
+  VERDICT: 0.621<0.66 FAILS (increments +0.019/+0.012/+0.011
+  shrinking; 0.579→0.598→0.61→0.621). Self-fixed 2 paren typos.
+  VERIFY5 tasked (sole owner, N8 rebuild).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
