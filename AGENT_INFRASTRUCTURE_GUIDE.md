@@ -5655,6 +5655,12 @@ sorry-free infrastructure and the complete commit ledger above.
   -0.49<-0.4875). Exactly 2 supplier premises open (hTopLower uniform
   1/2 on Icc(-10,10) at Im=1/2; hTopDeriv ≤40 on strip). Smallest edge
   residual is now 2 numerals.
+- 2026-09-22 EDGE-DERIV (background `ses_f3506fe93`, proof-only,
+  grep-clean, wiring-only commit): hTopDeriv REDUCTION —
+  `hTopDeriv40_of_ballSup40 :470` (hTopDeriv ⇐ ball-sup-40 on
+  closedBall 0 12 via banked `uniform_top_deriv_of_closedBall` at
+  d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe). Residual:
+  hTopLower (1/2 uniform) + ball-sup-40 numeral.
 - 2026-09-22 GAMMA-N8 (background `ses_f3753c477`, proof-only,
   grep-clean, premise_gamma +388): E06 Seq8 rung — rpow8-frac `:4633`
   (1.49≤8^5/26, 1.50 false), Re-lower 11.92 `:4648`, cpow8 norm `:4661`

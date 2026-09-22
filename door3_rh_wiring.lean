@@ -4,6 +4,7 @@ import door3_gamma_cutoff
 import door3_zeta_cutoff
 import door3_cutL10_remainders
 import door3_sliver_nonvan
+import door3_sliver_edge
 import door3_closed_cover
 
 /-! # Downstream CutR10 wiring (import-cycle-free zone)
@@ -462,6 +463,19 @@ theorem xiCentralEdgeStrips10_of_uniformStrips_011
     RHProofScaffold.XiCentralEdgeStrips10 :=
   xiCentralEdgeStrips10_of_uniformStrips (δT := (11 / 1000 : ℝ)) (δB := (11 / 1000 : ℝ))
     hstripT (by norm_num) hstripB (by norm_num)
+
+/-- `hTopDeriv` at `MT = 40` from one closed-ball sup `C = 40` on
+`Metric.closedBall 0 12` (via banked `Door3SliverEdge.uniform_top_deriv_of_closedBall`
+at `d = (1/2)/40`; `d ≤ 1` by `norm_num`). -/
+theorem hTopDeriv40_of_ballSup40
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖xiShiftedEntire z‖ ≤ (40 : ℝ)) :
+    ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ) := by
+  intro x hx y hy
+  exact Door3SliverEdge.uniform_top_deriv_of_closedBall
+    ((1 / 2 : ℝ) / (40 : ℝ)) (40 : ℝ) (by norm_num) hC x hx y hy
 
 /-- Top-only edge strips at feasible `m = 1/2`, `MT = 40` (`δ = (1/2)/40`):
 top strip from `sliver_top_strip_of_entire_data`, bottom via proved
