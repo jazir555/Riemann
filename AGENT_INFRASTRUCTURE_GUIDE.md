@@ -5701,6 +5701,14 @@ sorry-free infrastructure and the complete commit ledger above.
   term must net 0), verify programmatically, rebuild. LADDER-RULE
   EXTENDED: balance-check proof lines too, not just type lines.
   VERIFY9 tasked (sole owner).
+- 2026-09-22 VERIFY9 (background `ses_f37399012`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (27s)`, BUILD-EXIT=0
+  (attempt 1/2). Fix: one trailing `)` off 5351 (8/9→8/8, N8 mirror
+  7/7 confirmed programmatically). Zero errors/sorries; only 2
+  pre-existing linters. N9 honest 0.627 COMPILED. Premise_gamma GREEN
+  through N9 (ladder 0.579→0.598→0.61→0.621→0.627 all verified).
+  Paren saga closed (4 waves: PAREN→N6B/N7→hre9→5350/5351).
+  GAMMA-N10 tasked (proof-only; E06 N10 rung, parens pre-checked).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical

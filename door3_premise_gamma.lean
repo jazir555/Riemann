@@ -5348,7 +5348,7 @@ theorem premGamma_E06_Seq9_finite_lower (hLink : premGamma_E06_GammaSeq9_link) :
                     (‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
                       (‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
                         ‖(((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖))))))))) :=
-    mul_pos hspos (mul_pos hpos1 (mul_pos hpos2 (mul_pos hpos3 (mul_pos hpos4 (mul_pos hpos5 (mul_pos hpos6 (mul_pos hpos7 (mul_pos hpos8 hpos9)))))))))
+    mul_pos hspos (mul_pos hpos1 (mul_pos hpos2 (mul_pos hpos3 (mul_pos hpos4 (mul_pos hpos5 (mul_pos hpos6 (mul_pos hpos7 (mul_pos hpos8 hpos9))))))))
   have hDpos : (0 : ℝ) <
       (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
       ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
