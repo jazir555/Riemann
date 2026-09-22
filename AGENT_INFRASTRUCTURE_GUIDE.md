@@ -6152,6 +6152,11 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 DERIV-MPRIME (background `ses_f347d3931`, proof-only,
+  grep-clean (one prose "no sorry" comment line, tactic-free), deriv-only
+  commit): DECISIVE — M'=0.15 UNSATISFIABLE via honest Cauchy; minimal
+  honest M' ≈ 414884 (`:2428`). Downstream must move (tight spheres/
+  primes, leaf M' 6 orders). Lane verdict next.
 - 2026-09-22 ZETA-FLOOR1146 (background `ses_f347eb727`, proof-only,
   grep-clean, zeta-only commit): 1.146^20≈15.26 honest → tail 17.454 →
   K0-16 19.736 `:42133` beats 19.752 by 0.016 (sanity ✓). 47-bar gap

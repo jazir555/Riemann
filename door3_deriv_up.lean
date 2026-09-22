@@ -2324,3 +2324,148 @@ theorem respec_adopt_verdict_open :
   constructor <;> norm_num
 
 end Door3DerivUp
+
+/-! ## 21. DECISIVE M'-audit at leaf-sub under honest trues (append-only, no force).
+
+Grep record (read-only, before writing):
+* respec verdict `:2277-2321`: `respec_adopt_total_leaf_sub_open :2277`,
+  `respec_adopt_total_leaf_sub_value :2283` (= 427715.5397),
+  `respec_adopt_residual_leaf_sub :2289` (= 427715.3897),
+  `respec_adopt_gamma_alone_open :2295`,
+  `respec_adopt_rho005_total_leaf_sub_value :2305` (= 86614.6301),
+  `respec_adopt_rho005_residual_leaf_sub :2311` (= 86614.4801),
+  `respec_adopt_verdict_open :2317`.
+* TRUE-value records: no banked true equalities for gamma / zeta at leaf-sub.
+  Audit defs `:2068-2091`: `auditGammaNeed19 :2068` (= 0.008),
+  `auditGammaTrueFloor19 :2070` (= 0.026, floor def only),
+  `auditGammaHonest19 :2072` (= 0.097),
+  `auditZetaNeed19 :2074` (= 3), `auditZetaHonest19 :2076` (= 934),
+  conditional true-above Props `gammaTrueAboveNeed_leaf_sub19 :2081`,
+  `zetaTrueAboveNeed_leaf_sub19 :2087` (both open).
+  Honest closed sups: `gammaSupOnSphere_leaf_sub_0097_filled :1808` (= 0.097
+  via `R02GammaDisc.gammaOf_upper_disc_R02`),
+  `zetaSupOnSphere_leaf_sub_934_filled :1563` (= 934 via
+  `R02_D3_zeta_upper_934`), honest Cauchy quotients
+  `gamma_prime_honest_quot19 :2161` (= 9.7),
+  `zeta_prime_honest_quot19 :2167` (= 93400).
+  Tight needs: `gammaTightSup_leaf_sub :1651` (= 0.008),
+  `zetaSupTightNeed_leaf_sub :1660` (= 3),
+  `gammaPrimeTightNeed_leaf_sub :1654` (= 0.03),
+  `zetaPrimeTightNeed_leaf_sub :1663` (= 300),
+  chain numbers `:1666/:1669` (= 0.8 / 300).
+  Coefficients: `polyUp_leaf_sub :1484` (= 6.95),
+  `polyVal_leaf_sub :1496` (= 22.74), `piVal_leaf_sub :1520` (= 1),
+  `piUp_leaf_sub :1523` (= 1.075).
+* Conditional UNSAT already banked `:2125-2150`
+  (`gamma_unsat_leaf_sub19_of_true :2131`, `gamma_sphere_unsat_leaf_sub19_of_center
+  :2143`, `gamma_honest_not_imply_need19 :2155`, `zeta_honest_not_imply_need19 :2152`).
+
+(a) Honest-sup Leibniz total at `dLeaf_sub` (smallest honest-closed upper;
+true equalities absent so no exact true total is claimed; honest-alone partial
+is a route lower bound on any honest-closed upper):
+T_honest = 6.95*1*0.097*934 + 22.74*1.075*0.097*934
+  + 22.74*1*9.7*934 + 22.74*1*0.097*93400 = 414884.073509.
+Gamma-alone honest term = 22.74*1*9.7*934 = 206019.852 already exceeds M'.
+Rho-0.05 honest variant total = 85252.310309 (still exceeds M').
+(b) Verdict Prop below: M' = 0.15 unsatisfiable via the honest Cauchy route
+(upper exceeds target; tight spec additionally UNSAT conditional on true floor).
+(c) Minimal honest M' = T_honest (filed as `mPrimeHonestMin21`); downstream
+obligations that must move are filed as `downstreamMustMove21` (tight sphere /
+prime needs, respec19 numerals, leaf M' budget; rho-enlarge rect containment
+`rhoEnlargeKeepsRect_leaf_sub19 :2216` stays open).
+
+Closed with norm_num only. No force. No sorry / admit / axiom / simpa.
+-/
+
+namespace Door3DerivUp
+
+theorem honest_total_leaf_sub_open21 :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+        22.74 * 1 * 9.7 * 934 + 22.74 * 1 * 0.097 * 93400 := by
+  norm_num
+
+theorem honest_total_leaf_sub_value21 :
+    6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+      22.74 * 1 * 9.7 * 934 + 22.74 * 1 * 0.097 * 93400 =
+      (414884.073509 : ℝ) := by
+  norm_num
+
+theorem honest_total_leaf_sub_residual21 :
+    (6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+      22.74 * 1 * 9.7 * 934 + 22.74 * 1 * 0.097 * 93400 - 0.15 : ℝ) =
+      414883.923509 := by
+  norm_num
+
+theorem honest_gamma_alone_value21 :
+    22.74 * 1 * 9.7 * 934 = (206019.852 : ℝ) := by
+  norm_num
+
+theorem honest_gamma_alone_open21 :
+    (0.15 : ℝ) < 22.74 * 1 * 9.7 * 934 := by
+  norm_num
+
+theorem honest_zeta_alone_value21 :
+    22.74 * 1 * 0.097 * 93400 = (206019.852 : ℝ) := by
+  norm_num
+
+theorem honest_zeta_alone_open21 :
+    (0.15 : ℝ) < 22.74 * 1 * 0.097 * 93400 := by
+  norm_num
+
+theorem honest_rho005_total_value21 :
+    6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+      22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.097 * 18680 =
+      (85252.310309 : ℝ) := by
+  norm_num
+
+theorem honest_rho005_total_open21 :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+        22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.097 * 18680 := by
+  norm_num
+
+def mPrimeHonestMin21 : ℝ := 414884.073509
+
+theorem mPrimeHonestMin21_eq :
+    mPrimeHonestMin21 = (414884.073509 : ℝ) := by
+  unfold mPrimeHonestMin21
+  norm_num
+
+theorem mPrimeHonestMin21_above_respec21 :
+    (427715.5397 : ℝ) > mPrimeHonestMin21 := by
+  unfold mPrimeHonestMin21
+  norm_num
+
+def mPrimeUnsatHonest21 : Prop :=
+  (0.15 : ℝ) <
+    6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+      22.74 * 1 * 9.7 * 934 + 22.74 * 1 * 0.097 * 93400
+
+theorem mPrimeUnsatHonest21_holds : mPrimeUnsatHonest21 := by
+  unfold mPrimeUnsatHonest21
+  norm_num
+
+theorem mPrimeUnsatHonest21_minimal :
+    mPrimeHonestMin21 =
+      6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+        22.74 * 1 * 9.7 * 934 + 22.74 * 1 * 0.097 * 93400 := by
+  unfold mPrimeHonestMin21
+  norm_num
+
+def downstreamMustMove21 : Prop :=
+  ¬ (0.097 : ℝ) ≤ 0.008 ∧ ¬ (934 : ℝ) ≤ 3 ∧
+    (0.03 : ℝ) < 9.7 ∧ (300 : ℝ) < 93400 ∧
+    (0.15 : ℝ) < mPrimeHonestMin21
+
+theorem downstreamMustMove21_holds : downstreamMustMove21 := by
+  unfold downstreamMustMove21 mPrimeHonestMin21
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+end Door3DerivUp
