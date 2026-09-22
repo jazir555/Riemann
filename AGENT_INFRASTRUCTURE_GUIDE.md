@@ -5901,6 +5901,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-FILL2 (background `ses_f34efa01a`, proof-only, NO-EDIT
+  gap): OUTER set (dOuter Im≈-8.75, outside R02-disc) — best honest
+  covering numeral is tail-quarter 125 (next 151/431/525 family), none
+  reach premised 10. `zetaDiffCont_outer` provable in principle
+  (off-pole-1) but conjunction fails on sup. Needs FE/Stirling far-tail
+  ≤10 at Im≈-8.75 or outer-budget retier to 125/525-scale.
 - 2026-09-22 ZETA-HEAD (background `ses_f34f3a72a`, proof-only,
   grep-clean, zeta_rigorous-only commit): head-N=4 tightening 934→923 —
   `R02_D3_S4_le :32614` (head ≤4) + `pairLim_upper_S4 :32688` (4+162 via
