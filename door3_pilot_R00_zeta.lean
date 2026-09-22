@@ -3587,4 +3587,48 @@ theorem sSCUT_log_eleven_ge : (2.3934941835 : ℝ) ≤ Real.log 11 := by
   rw [h11, hinv]
   linarith
 
+/-- Phase window `θ₁₁ = 10*log 11 ∈ [23.934941835, 24.025850934]`
+(via banked `sSCUT_log_eleven_ge/le` + `*10`; mirror of
+`sSCUT_theta10_sharp_mem`; non-strict since the `log 11` inputs are `≤`). -/
+theorem sSCUT_theta11_mem :
+    (23.934941835 : ℝ) ≤ 10 * Real.log 11 ∧
+    10 * Real.log 11 ≤ (24.025850934 : ℝ) := by
+  have hge := sSCUT_log_eleven_ge
+  have hle := sSCUT_log_eleven_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.3934941835 = 23.934941835 := by norm_num
+  have c2 : (10 : ℝ) * 2.4025850934 = 24.025850934 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the `θ₁₁` window (`0.090909099`). -/
+theorem sSCUT_theta11_width_eq :
+    (24.025850934 : ℝ) - 23.934941835 = (0.090909099 : ℝ) := by
+  norm_num
+
+/-- Reduced phase `δ₁₁' = θ₁₁ - 7π ∈ (1.943741835, 2.035350934)` (nearest
+odd-multiple anchor: `7π ≈ 21.99` vs `9π ≈ 28.27`; `θ₁₁ ≈ 24.0` so `7π`
+is nearest; strict since `Real.pi_gt_d4/lt_d4` are strict; mirror of
+`sSCUT_delta10p_sharp_mem`). -/
+theorem sSCUT_delta11p_mem :
+    (1.943741835 : ℝ) < 10 * Real.log 11 - 7 * Real.pi ∧
+    10 * Real.log 11 - 7 * Real.pi < (2.035350934 : ℝ) := by
+  have hth := sSCUT_theta11_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₁'` window (`0.091609099`). -/
+theorem sSCUT_delta11_width_eq :
+    (2.035350934 : ℝ) - 1.943741835 = (0.091609099 : ℝ) := by
+  norm_num
+
+/-- Window-gap verdict (honest, too-wide): the `δ₁₁'` window spans more than
+`0.09`, so it cannot fit any `±0.02` close (`0.04` span); moreover
+`|δ₁₁'| ≥ 1.94 makes the quadratic floor `1 - x²/2` negative, so the
+`δ₉`-style `cos ≤ -1/2` signed upper does NOT close — filed as gap, not bound. -/
+theorem sSCUT_delta11_window_gap :
+    (0.09 : ℝ) < (2.035350934 : ℝ) - 1.943741835 := by
+  norm_num
+
 end Door3PilotR00Zeta

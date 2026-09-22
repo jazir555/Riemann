@@ -5596,5 +5596,12 @@ sorry-free infrastructure and the complete commit ledger above.
   log11 window FIRST link — `sSCUT_log_eleven_eq :3552` (log11 = log10
   + log(11/10)) + `le :3563` (≤2.4025850934 via log(11/10)≤1/10) +
   `ge :3576` (≥2.3934941835 via log(10/11)≤-1/11; margin ~9e-13,
-  norm_num-closed). Window [2.3935,2.4026] width ~0.009 (ratio-bound
+  norm_num-closed).   Window [2.3935,2.4026] width ~0.009 (ratio-bound
   limited vs log10 d9 8e-9). Next: cos(10·log11) (SCUT21).
+- 2026-09-22 SCUT21 (background `ses_f37705f4`, proof-only, grep-clean):
+  theta11/delta11 windows banked — `theta11_mem :3593` (θ∈[23.935,
+  24.026], width 0.0909) + `delta11p_mem :3613` (δ'=θ-7π∈(1.944,
+  2.035), width 0.0916) + `window_gap :3630` (0.09<width). Cos verdict:
+  TOO-WIDE honestly (|δ'|≥1.94 kills the 1-x²/2 route; no signed upper
+  filed). NOTE for next: 8π≈25.13 is nearer θ than 7π (δ≈-1.1..-1.2) —
+  k=10 may be CONSTRUCTIVE, not destructive. SCUT22 tasked (8π check).
