@@ -5784,6 +5784,14 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 VERIFY15 (background `ses_f34acd972`, sole build owner):
+  GREEN — `[8689/8689] (41s)`, BUILD-EXIT=0 (attempt 2/2). Fixes (3
+  stale-numeral copy-pastes from N12 block, NEW slip family — not
+  parens): `:7065` hre13 13.1975→14.1975; `:7079` h1 0.645→0.647 both
+  sides; `:7082` h2 base 12→13. N13 honest 0.647 COMPILED. Lock
+  RELEASED. LADDER-RULE EXTENDED: after mirroring, grep the new block
+  for ALL old-rung numerals (N-1 values must not appear). GAMMA-N14
+  tasked (proof-only).
 - 2026-09-22 PREMISE-VERIFY (background `ses_f34b784df`, sole build owner):
   GREEN — `[8689/8689] Built door3_premise_gamma (36s)`, BUILD-EXIT=0
   (attempt 1/2), ZERO edits (6416 fix held; stirling-green upstream
