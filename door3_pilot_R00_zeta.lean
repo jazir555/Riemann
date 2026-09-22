@@ -3509,4 +3509,41 @@ theorem sSCUT_S9_skip8_plus_one_gap_eq :
       (9053 / 2100 : ℝ) := by
   norm_num
 
+/-- Eta bridge `eta₁₀ = 11^{-sCut}` (even `k`; mirror of
+`sSCUT_eta8_eq_cpow9`). -/
+theorem sSCUT_eta10_eq_cpow11 :
+    etaDirichletTerm sSCUT 10 = ((((11 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (10 + 1 : ℕ) = 11 := rfl
+  have hcast : ((((10 + 1 : ℕ)) : ℂ)) = ((((11 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (10 : ℕ) = 1 := by norm_num
+  have h11cast : ((((11 : ℕ)) : ℂ)) = ((((11 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h11cast, one_div, Complex.cpow_neg]
+
+/-- Conditional symbolic eta UPPER (even `k = 10`): `Re(eta₁₀) ≤ -(r₁₁/2)`
+under the explicit `11^{-s}` signed-upper hypothesis `h11`.
+Honest status: NO unconditional lock is banked here. The banked `:2625`
+`sSCUT_cpow10_neg_Re_upper` is base-10 (`n = 10`, i.e. Lean index `9`) and
+does NOT transfer to base-11 (`n = 11`, Lean index `10`); no `log 11`,
+`cpow11`, or `r₁₁`-lower lemma is banked in this file (`:2161` records
+`n = 11` BLOCKED, `r11` grep empty). `r₁₁` stays symbolic. -/
+theorem sSCUT_eta10_Re_le_neg
+    (h11 : ((((11 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ -((11 : ℝ) ^ (-(1 / 2 : ℝ)) / 2)) :
+    (etaDirichletTerm sSCUT 10).re ≤ -((11 : ℝ) ^ (-(1 / 2 : ℝ)) / 2) := by
+  rw [sSCUT_eta10_eq_cpow11]
+  exact h11
+
+/-- Conditional no-positive-`Re₁₀` lock: under the same explicit `h11`
+hypothesis no `c > 0` can sit below `Re(eta₁₀)` (mirror of
+`sSCUT_eta8_Re_no_pos_lock` at eta level; conditional only — no
+unconditional `k = 10` impossibility is banked). -/
+theorem sSCUT_eta10_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c)
+    (h11 : ((((11 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ -((11 : ℝ) ^ (-(1 / 2 : ℝ)) / 2)) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 10).re) := by
+  intro h
+  have hup := sSCUT_eta10_Re_le_neg h11
+  have hr0 : (0 : ℝ) ≤ (11 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  linarith
+
 end Door3PilotR00Zeta

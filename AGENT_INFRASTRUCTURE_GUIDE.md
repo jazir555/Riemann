@@ -5575,3 +5575,11 @@ sorry-free infrastructure and the complete commit ledger above.
   center/deriv numeral for any R00-R40 cell). Residual: 40x
   `RNN_leaf_obligations` + CutR10/CutL10 slow-sum/ball-sups + sliver
   MT/MB<50 + bottom-strip hb=0.025/B-tube — all cross-lane numerals.
+- 2026-09-22 SCUT19 (background `ses_f377370f9`, proof-only, grep-clean):
+  k=10 triple banked CONDITIONAL — `sSCUT_eta10_eq_cpow11 :3514`
+  (even-k bridge) + `sSCUT_eta10_Re_le_neg :3530` (symbolic Re≤-r11/2,
+  gated on explicit `h11`) + `no_pos_lock :3540`. NO unconditional
+  lock: base mismatch caught — banked `:2534/:2625` are base-10
+  (n=10/idx9), do NOT transfer to base-11 (r11/log11/cpow11 absent).
+  Blocker chain filed: log11 → cos(10·log11) → cpow11_re →
+  cpow11_Re_upper → rpow11_neg_ge. SCUT20 tasked (log11 bound).
