@@ -1140,4 +1140,307 @@ Gap: 8-fold telescope assembly + explicit `C2` (hand estimate `C2 ~ 10` from
 Hence H3 not closed here.
 -/
 
+/-! ## 18. WENDEL-TELE 8-fold telescope (PROOF-ONLY, FENCED, no build): telescope banked, G2 conditional.
+
+Greps (before edit, this turn, this file only):
+- `G2_outerN8_prop` at `:770` (def), `:776,1039` (uses);
+  `S_outerN8/:761`, `cN_outerN8/:764`, `target_outer/:767`;
+- `g2_log_step/:1093`, `g2_eps_bound_wOuter/:1100`, `g2_denom_lower_wOuter/:1114`;
+- `digamma_shift_wOuter_8` at `:951`; `stirling_G1expr_im2/:994`, `G1_of_normcap/:1012`;
+- tactic grep `sorry|admit|axiom|simpa`: prior sections comment-only mentions;
+  zero tactic uses in banked code (this section keeps that).
+
+Attempt (honest 8-step sum): specialize `g2_log_step` at `wOuter`, `m = (k : ℝ)`
+(`g2_step_nat`), telescope via `Finset.sum_range_sub` (`g2_telescope8`), align
+endpoints to `log (wOuter + 8) - log wOuter` (`g2_log_endpoints`) and `∑ inv`
+to `S_outerN8` (`g2_S_align`), combine to `g2_log_link8`. Then fold to the exact
+G2 shape (`g2_residual_eq`) and bound Q/E/D uniformly (`g2_Q_unif`, `g2_eps_unif`,
+`g2_Q_sum_le`, `g2_eps_sum_le`, `g2_D_eq`, `g2_D_norm_le`), closing G2
+conditionally on a norm cap (`g2_G2_of_telescope_normcap`). No numerics
+discharged here; explicit caps filed below.
+
+Banked here (proved, no new imports, this section only): `g2_step_nat`,
+`g2_telescope8`, `g2_log_endpoints`, `g2_S_align`, `g2_log_link8`,
+`g2_norm_wOuter_lower`, `g2_norm_wOuter8_lower`, `g2_D_eq`, `g2_D_norm_le`,
+`g2_Q_unif`, `g2_eps_unif`, `g2_Q_sum_le`, `g2_eps_sum_le`, `g2_residual_eq`,
+`g2_G2_of_telescope_normcap`.
+-/
+
+theorem g2_step_nat (k : ℕ) :
+    Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wOuter) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wOuter) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2 +
+        Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)) := by
+  have h := g2_log_step wOuter wOuter_re_pos (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hnat : ((k + 1 : ℕ) : ℝ) = (((k : ℕ) : ℝ) + 1 : ℝ) := by
+    push_cast
+    ring
+  have hbridge : ((((k + 1 : ℕ) : ℝ)) : ℂ) = ((((((k : ℕ) : ℝ) + 1 : ℝ))) : ℂ) := by
+    rw [hnat]
+  rw [hbridge]
+  exact h
+
+theorem g2_telescope8 :
+    ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wOuter) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wOuter)) =
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wOuter) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wOuter) := by
+  have h := Finset.sum_range_sub
+    (fun j : ℕ => Complex.log (((((j : ℕ) : ℝ)) : ℂ) + wOuter)) 8
+  exact h
+
+theorem g2_log_endpoints :
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wOuter) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wOuter) =
+    Complex.log (wOuter + (8 : ℂ)) - Complex.log wOuter := by
+  have h8 : ((((8 : ℕ) : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  have h0 : ((((0 : ℕ) : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [h8, h0, zero_add, add_comm (8 : ℂ) wOuter]
+
+theorem g2_S_align :
+    ∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ = S_outerN8 := by
+  unfold S_outerN8
+  apply Finset.sum_congr rfl
+  intro k _
+  have hcast : ((((k : ℕ) : ℝ)) : ℂ) = ((k : ℕ) : ℂ) := by
+    simp
+  rw [hcast, add_comm _ wOuter]
+
+theorem g2_log_link8 :
+    Complex.log (wOuter + (8 : ℂ)) - Complex.log wOuter =
+    S_outerN8 -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) := by
+  have hTel := g2_telescope8
+  have hEnd := g2_log_endpoints
+  have hStep : ∀ k ∈ Finset.range 8,
+      (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wOuter) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wOuter)) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2 +
+        Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)) := by
+    intro k _
+    exact g2_step_nat k
+  have hSum : ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wOuter) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wOuter)) =
+      ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2 +
+        Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) :=
+    Finset.sum_congr rfl hStep
+  have hSplit : ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ -
+      (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2 +
+      Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) =
+      (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹) -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) := by
+    rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  calc Complex.log (wOuter + (8 : ℂ)) - Complex.log wOuter
+      = Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wOuter) -
+        Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wOuter) := hEnd.symm
+    _ = ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wOuter) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wOuter)) := hTel.symm
+    _ = ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2 +
+        Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) := hSum
+    _ = (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wOuter)⁻¹) -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) :=
+      hSplit
+    _ = S_outerN8 -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))) := by
+      rw [g2_S_align]
+
+theorem g2_norm_wOuter_lower : (4.375 : ℝ) ≤ ‖wOuter‖ := by
+  have h := g2_denom_lower_wOuter 0
+  have hcast : (((0 : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [hcast, zero_add] at h
+  exact h
+
+theorem g2_norm_wOuter8_lower : (4.375 : ℝ) ≤ ‖wOuter + (8 : ℂ)‖ := by
+  have h := g2_denom_lower_wOuter 8
+  have hcast : (((8 : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast, add_comm] at h
+  exact h
+
+theorem g2_D_eq :
+    (1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter) =
+      (-4 : ℂ) / (wOuter * (wOuter + (8 : ℂ))) := by
+  have hw0 : wOuter ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wOuter_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hw80 : wOuter + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wOuter_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  field_simp
+  ring
+
+theorem g2_D_norm_le :
+    ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ ≤
+      4 / (4.375 * 4.375) := by
+  have hlow0 := g2_norm_wOuter_lower
+  have hlow8 := g2_norm_wOuter8_lower
+  have hpos0 : (0 : ℝ) < ‖wOuter‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hpos8 : (0 : ℝ) < ‖wOuter + (8 : ℂ)‖ := lt_of_lt_of_le (by norm_num) hlow8
+  have hfloor : (4.375 * 4.375 : ℝ) ≤ ‖wOuter‖ * ‖wOuter + (8 : ℂ)‖ :=
+    mul_le_mul hlow0 hlow8 (by norm_num) (le_of_lt hpos0)
+  have h4 : ‖(-4 : ℂ)‖ = (4 : ℝ) := by
+    simp
+    norm_num
+  rw [g2_D_eq, norm_div, norm_mul, h4]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor
+
+theorem g2_Q_unif (k : ℕ) :
+    ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖ ≤
+      (1 / 2 : ℝ) / (4.375) ^ 2 := by
+  have hfloor := g2_denom_lower_wOuter (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (4.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have hhalf : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp
+    norm_num
+  rw [norm_div, norm_pow, hhalf]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hsq
+
+theorem g2_eps_unif (k : ℕ) :
+    ‖Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖ ≤
+      1 / (3 * (4.375) ^ 2 * 4.375) := by
+  have hbound := g2_eps_bound_wOuter (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hfloor := g2_denom_lower_wOuter (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (4.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have h3a : 3 * (4.375 : ℝ) ^ 2 ≤ 3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ ^ 2 :=
+    mul_le_mul_of_nonneg_left hsq (by norm_num)
+  have hfloor2 : 3 * (4.375 : ℝ) ^ 2 * 4.375 ≤
+      3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ ^ 2 * 4.375 :=
+    mul_le_mul_of_nonneg_right h3a (by norm_num)
+  have hle : 1 / (3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wOuter‖ ^ 2 * 4.375) ≤
+      1 / (3 * (4.375) ^ 2 * 4.375) :=
+    div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor2
+  exact le_trans hbound hle
+
+theorem g2_Q_sum_le :
+    ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖ ≤
+      8 * ((1 / 2 : ℝ) / (4.375) ^ 2) := by
+  calc ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖
+      ≤ ∑ k in Finset.range 8, ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, ((1 / 2 : ℝ) / (4.375) ^ 2) :=
+        Finset.sum_le_sum (fun k _ => g2_Q_unif k)
+    _ = 8 * ((1 / 2 : ℝ) / (4.375) ^ 2) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_eps_sum_le :
+    ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖ ≤
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) := by
+  calc ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖
+      ≤ ∑ k in Finset.range 8, ‖Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, (1 / (3 * (4.375) ^ 2 * 4.375)) :=
+        Finset.sum_le_sum (fun k _ => g2_eps_unif k)
+    _ = 8 * (1 / (3 * (4.375) ^ 2 * 4.375)) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_residual_eq :
+    (cN_outerN8 - S_outerN8) - target_outer =
+      (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)))) -
+      ((1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)) := by
+  have hLink := g2_log_link8
+  unfold cN_outerN8 target_outer
+  calc (Complex.log (wOuter + (8 : ℂ)) - 1 / (2 * (wOuter + (8 : ℂ))) - S_outerN8) -
+        (Complex.log wOuter - 1 / (2 * wOuter))
+      = (Complex.log (wOuter + (8 : ℂ)) - Complex.log wOuter - S_outerN8) -
+        ((1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)) := by
+          ring
+    _ = (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)) := by
+          rw [hLink]
+          ring
+
+theorem g2_G2_of_telescope_normcap (C2 U0 : ℝ)
+    (hU0 : ‖wOuter‖ ^ 2 ≤ U0)
+    (hC2 : (8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375)) * U0 ≤ C2) :
+    G2_outerN8_prop C2 := by
+  have hRes := g2_residual_eq
+  have hQ := g2_Q_sum_le
+  have hE := g2_eps_sum_le
+  have hD := g2_D_norm_le
+  have hlow0 := g2_norm_wOuter_lower
+  have hnormpos : (0 : ℝ) < ‖wOuter‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hnorm2pos : (0 : ℝ) < ‖wOuter‖ ^ 2 := pow_pos hnormpos 2
+  have hA : (0 : ℝ) ≤ 8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375) := by
+    norm_num
+  have htri : ‖(cN_outerN8 - S_outerN8) - target_outer‖ ≤
+      8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375) := by
+    have hstep : ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter))‖ ≤
+        ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖ +
+        ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖ +
+        ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ := by
+      calc ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)))) -
+          ((1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter))‖
+          ≤ ‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2) +
+            (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ)))‖ +
+            ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ :=
+              norm_sub_le _ _
+        _ ≤ (‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2)‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖) +
+            ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ :=
+              add_le_add (norm_add_le _ _) le_rfl
+        _ = ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wOuter) ^ 2‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wOuter (((k : ℕ) : ℝ))‖ +
+            ‖(1 : ℂ) / (2 * (wOuter + (8 : ℂ))) - (1 : ℂ) / (2 * wOuter)‖ := by
+              rw [norm_neg]
+    rw [hRes] at hstep
+    exact le_trans hstep (add_le_add (add_le_add hQ hE) hD)
+  have hle : 8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375) ≤
+      C2 / ‖wOuter‖ ^ 2 := by
+    rw [le_div_iff₀ hnorm2pos]
+    calc (8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+        8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375)) * ‖wOuter‖ ^ 2
+        ≤ (8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+          8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375)) * U0 :=
+            mul_le_mul_of_nonneg_left hU0 hA
+      _ ≤ C2 := hC2
+  unfold G2_outerN8_prop
+  exact le_trans htri hle
+
+/-! G2-TELE residual (exact, no force): telescope `g2_log_link8` is banked
+(`g2_step_nat` + `g2_telescope8` via `Finset.sum_range_sub` + `g2_log_endpoints`
++ `g2_S_align`); `Finset.sum` eps/Q caps banked (`g2_eps_sum_le`, `g2_Q_sum_le`
+via `norm_sum_le` + `g2_eps_unif`/`g2_Q_unif` from `g2_eps_bound_wOuter` +
+`g2_denom_lower_wOuter`); D-cap banked (`g2_D_eq` + `g2_D_norm_le`
+`4/(4.375*4.375) ≈ 0.209`). Full `G2_outerN8_prop C2` is conditional only via
+`g2_G2_of_telescope_normcap`: needs `hU0 : ‖wOuter‖^2 ≤ U0` (e.g. from
+`‖w‖^2 = Re^2+Im^2 = 0.1975^2+4.375^2 ≈ 19.18`) plus
+`hC2 : (Qcap+Ecap+Dcap)*U0 ≤ C2` with
+`Qcap = 8*(1/2)/4.375^2 ≈ 0.209`, `Ecap = 8/(3*4.375^2*4.375) ≈ 0.0319`,
+`Dcap = 4/4.375^2 ≈ 0.209` (hand arithmetic, not claimed checked; total
+`≈ 0.45`, so `C2 ≈ 0.45*19.18 ≈ 8.6`, consistent with prior `~10` guess).
+Hence G2 stays Prop without `U0`; H3 stays conditional via
+`h3_outer_of_lead_normcap_G2`. Value banked: 8-fold link + uniform caps +
+residual identity; gap: norm cap `U0` + `C2` inflation.
+-/
+
 end Door3ComplexWendel

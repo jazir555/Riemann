@@ -6096,6 +6096,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 16^0.05 floor 1.136→1.142 (via
   1.142^20≤16) → tail 17.52, candidate TIES 19.802 `:41662`. 0.344
   persists; 1.143 route open.
+- 2026-09-22 STIRLING-LEAF3 (background `ses_f348ad91a`, proof-only,
+  grep-clean, stirling-only commit): leaf shift-3 `≤0.061` (via Gamma
+  3.1≤2.31; 12x→7x). Outer 16x / leaf 7x stand.
+- 2026-09-22 WENDEL-TELE (provisional, report pending; verified
+  grep-clean +303 diff): telescope assembly attempt. Reconciled on
+  report.
 - 2026-09-22 TAIL-M24 (background `ses_f348a1e0e`, proof-only,
   grep-clean, tail-only commit): M16777216 exact rung `3/512≈0.00586
   :1145` (4096² verified). Next M33554432 odd.
