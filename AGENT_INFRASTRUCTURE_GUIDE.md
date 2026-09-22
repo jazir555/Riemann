@@ -5698,6 +5698,13 @@ sorry-free infrastructure and the complete commit ledger above.
   13/12 ratio picked) + window `:4075/:4088` ([2.5537505937,
   2.5768275178], width ~0.023, true ~2.565 inside). Next: theta13
   (implied [25.54,25.77], NOT banked) + cos sign (k=12 even).
+- 2026-09-22 SCUT29 (background `ses_f375116de`, proof-only, grep-clean,
+  pilot-only commit): k=12 CONSTRUCTIVE — `theta13_mem :4105`
+  (θ∈[25.538,25.768], width 0.231) + `delta13_even_mem :4127`
+  (δ=θ-8π∈(0.404,0.637)) + `cos10log13_ge :4144` (cos≥3/4 via
+  1-0.637²/2≈0.797; true ~0.87, margin good). Even parity → eta12 gain
+  ≈ r13·0.75 ≈ 0.21 pending r13 chain. Premise_gamma N8 left for owner.
+  SCUT30 tasked (r13/cpow13/eta12 gain).
 - 2026-09-22 BINET-SURVEY (background `ses_f3752af33`, read-only, no
   edits): L2 rate leaf absent confirmed — no Binet/Stirling-remainder/
   logGamma/GammaSeq-rate in Mathlib (BohrMollerup qualitative,

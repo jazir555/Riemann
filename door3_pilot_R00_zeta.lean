@@ -4099,4 +4099,85 @@ theorem sSCUT_log_thirteen_ge : (2.5537505937 : ℝ) ≤ Real.log 13 := by
   rw [h13, hinv]
   linarith
 
+/-- Phase window `θ₁₃ = 10*log 13 ∈ [25.537505937, 25.768275178]`
+(via banked `sSCUT_log_thirteen_ge/le` + `*10`; mirror of
+`sSCUT_theta11_mem` at `:3581`; non-strict since the `log 13` inputs are `≤`). -/
+theorem sSCUT_theta13_mem :
+    (25.537505937 : ℝ) ≤ 10 * Real.log 13 ∧
+    10 * Real.log 13 ≤ (25.768275178 : ℝ) := by
+  have hge := sSCUT_log_thirteen_ge
+  have hle := sSCUT_log_thirteen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.5537505937 = 25.537505937 := by norm_num
+  have c2 : (10 : ℝ) * 2.5768275178 = 25.768275178 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the `θ₁₃` window (`0.230769241`). -/
+theorem sSCUT_theta13_width_eq :
+    (25.768275178 : ℝ) - 25.537505937 = (0.230769241 : ℝ) := by
+  norm_num
+
+/-- Reduced phase `δ₁₃ = θ₁₃ - 8π ∈ (0.404, 0.637)` (even-multiple anchor:
+`8π ≈ 25.133` is nearest since `θ₁₃ ≈ 25.54-25.77` vs `7π ≈ 21.99` and
+`9π ≈ 28.27`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta11_even_mem` at `:3625`; rounded outward from the loose-pi
+window `[0.404705937, 0.636275178]` so `linarith` closes on either loose or
+tight `pi_d4`). -/
+theorem sSCUT_delta13_even_mem :
+    (0.404 : ℝ) < 10 * Real.log 13 - 8 * Real.pi ∧
+    10 * Real.log 13 - 8 * Real.pi < (0.637 : ℝ) := by
+  have hth := sSCUT_theta13_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₃` window (`0.233`). -/
+theorem sSCUT_delta13_even_width_eq :
+    (0.637 : ℝ) - 0.404 = (0.233 : ℝ) := by
+  norm_num
+
+/-- Signed cosine LOWER `3/4 ≤ cos(10*log 13)` (quadrant-I `δ₁₃` via the
+even-multiple strip `cos θ₁₃ = cos δ₁₃` + quadratic lower on `|δ₁₃| ≤ 0.637`;
+mirror of `sSCUT_cos10log11_ge` at `:3635`; `1 - 0.637^2/2 ≈ 0.797 ≥ 3/4`,
+so `k = 12` (base 13) is CONSTRUCTIVE). -/
+theorem sSCUT_cos10log13_ge :
+    (3 / 4 : ℝ) ≤ Real.cos (10 * Real.log 13) := by
+  have hδ := sSCUT_delta13_even_mem
+  set y : ℝ := 10 * Real.log 13 - 8 * Real.pi with hy_def
+  have hy_lo : (0.404 : ℝ) < y := by rw [hy_def]; linarith [hδ.1]
+  have hy_hi : y < (0.637 : ℝ) := by rw [hy_def]; linarith [hδ.2]
+  have hsq : y ^ 2 ≤ (0.637 : ℝ) ^ 2 := by
+    have ha : (0 : ℝ) ≤ 0.637 - y := by linarith [hy_hi]
+    have hb : (0 : ℝ) ≤ y + 0.637 := by linarith [hy_lo]
+    have hprod := mul_nonneg ha hb
+    have heq : (0.637 - y) * (y + 0.637) = (0.637 : ℝ) ^ 2 - y ^ 2 := by ring
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := y)
+  have hnum : (3 / 4 : ℝ) ≤ 1 - (0.637 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosy : (3 / 4 : ℝ) ≤ Real.cos y := by
+    have hle : 1 - (0.637 : ℝ) ^ 2 / 2 ≤ 1 - y ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper : Real.cos (10 * Real.log 13 - 8 * Real.pi)
+      = Real.cos (10 * Real.log 13) := by
+    have h1 := Real.cos_sub_two_pi (10 * Real.log 13)
+    have h2 := Real.cos_sub_two_pi (10 * Real.log 13 - 2 * Real.pi)
+    have h3 := Real.cos_sub_two_pi
+      ((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi)
+    have h4 := Real.cos_sub_two_pi
+      (((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+    have e4 : 10 * Real.log 13 - 8 * Real.pi
+        = (((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi := by ring
+    calc Real.cos (10 * Real.log 13 - 8 * Real.pi)
+        = Real.cos ((((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) - 2 * Real.pi) := by rw [e4]
+      _ = Real.cos (((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) := h4
+      _ = Real.cos ((10 * Real.log 13 - 2 * Real.pi) - 2 * Real.pi) := h3
+      _ = Real.cos (10 * Real.log 13 - 2 * Real.pi) := h2
+      _ = Real.cos (10 * Real.log 13) := h1
+  rw [hy_def, hper] at hcosy
+  exact hcosy
+
 end Door3PilotR00Zeta
