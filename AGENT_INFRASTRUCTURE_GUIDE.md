@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 ZETA-M16 (background `ses_f348ff455`, proof-only,
+  grep-clean, zeta-only commit): M16 pair (32/33 numerals 0.027) +
+  head16 2.282 + M16 tail 17.61 → candidate 19.892 `:41564` (above best;
+  tail stuck at 17.61). Tighter 16^0.05 floor next.
 - 2026-09-22 SCUT46-SHARD (background `ses_f34902743`, proof-only,
   grep-clean, pilot-only commit): shard assembly with eta17 — floor
   `-2.774 :S9_skip8…` honest sum of banked payoffs (8 theorems). Still
