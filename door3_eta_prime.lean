@@ -741,3 +741,175 @@ theorem etaPairCpow_eq_etaPairTerm (m : ℕ) (s : ℂ) :
     etaPairCpow m s = zeta_rigorous.etaPairTerm s m := by
   unfold etaPairCpow
   rw [zeta_rigorous.etaPairTerm_eq_cpow_sub]
+
+/-!
+## DZNUM residual: conversion-factor quotient caps on the R02 rect.
+
+Rect hypotheses (match `R02_D3_*` in `zeta_rigorous`):
+`0.05 ≤ s.re`, `s.re ≤ 0.74`, `-8.25 ≤ s.im`, `s.im ≤ -5.25`.
+
+Quotient shape: `deriv zeta s = (etaDerivVal * conv - etaVal * conv') * convInv2`
+with `conv s = 1 - 2 ^ (1 - s)`, `conv' s = 2 ^ (1 - s) * log 2`,
+`convInv2 s = ((conv s)⁻¹) ^ 2`. Caps banked below:
+* `C0`: `‖conv‖ ≤ 3`;
+* `C1`: `‖conv'‖ ≤ 2`;
+* `C2`: `‖convInv2‖ ≤ 31` from `0.18 ≤ ‖conv‖`;
+* `VEta`: `‖etaHurwitz s‖ ≤ 168` (eta-value cap).
+-/
+
+/-- Conversion factor `conv s = 1 - 2 ^ (1 - s)` (matches `etaRHS` factor). -/
+noncomputable def etaConv (s : ℂ) : ℂ :=
+  1 - (2 : ℂ) ^ ((1 : ℂ) - s)
+
+/-- Conversion-factor derivative value `2 ^ (1 - s) * log 2`. -/
+noncomputable def etaConvDeriv (s : ℂ) : ℂ :=
+  (2 : ℂ) ^ ((1 : ℂ) - s) * Complex.log 2
+
+/-- Squared inverse factor for the quotient `(...)/conv^2`. -/
+noncomputable def etaConvInvSq (s : ℂ) : ℂ :=
+  ((etaConv s)⁻¹) ^ 2
+
+/-- Lower bound `0.18 ≤ ‖conv‖` for `s.re ≤ 0.74`: direct restatement of
+banked `zeta_rigorous.R02_D3_cvtFactor_ge` via the new import. -/
+theorem etaConv_ge_R02 (s : ℂ) (hre_hi : s.re ≤ 0.74) :
+    (0.18 : ℝ) ≤ ‖etaConv s‖ := by
+  unfold etaConv
+  exact zeta_rigorous.R02_D3_cvtFactor_ge s hre_hi
+
+/-- `conv s ≠ 0` on the R02 rect (from the `0.18` lower bound). -/
+theorem etaConv_ne_R02 (s : ℂ) (hre_hi : s.re ≤ 0.74) :
+    etaConv s ≠ 0 := by
+  have hpos : (0 : ℝ) < ‖etaConv s‖ :=
+    lt_of_lt_of_le (by norm_num) (etaConv_ge_R02 s hre_hi)
+  exact norm_pos_iff.mp hpos
+
+/-- Upper cap `C0`: `‖conv‖ ≤ 3` for `0.05 ≤ s.re`.
+`‖1 - w‖ ≤ 1 + ‖w‖` plus `‖2 ^ (1 - s)‖ = 2 ^ (1 - s.re) ≤ 2 ^ 1 = 2`. -/
+theorem etaConv_upper_R02 (s : ℂ) (hre_lo : 0.05 ≤ s.re) :
+    ‖etaConv s‖ ≤ 3 := by
+  have hre1 : (((1 : ℂ) - s).re) = 1 - s.re := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hbase : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ = (2 : ℝ) ^ (((1 : ℂ) - s).re) := by
+    rw [hbase]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hexp_le : (((1 : ℂ) - s).re) ≤ 1 := by
+    rw [hre1]
+    linarith
+  have hw_le : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 2 := by
+    rw [hnorm]
+    have hle : (2 : ℝ) ^ (((1 : ℂ) - s).re) ≤ (2 : ℝ) ^ (1 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_le
+    rw [Real.rpow_one] at hle
+    exact hle
+  have htri : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤
+      ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ :=
+    norm_sub_le _ _
+  have h1 : ‖(1 : ℂ)‖ + ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 1 + 2 := by
+    rw [norm_one]
+    exact add_le_add_left hw_le 1
+  have hle : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 1 + 2 :=
+    le_trans htri h1
+  have hfold : etaConv s = (1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - s) := by
+    rfl
+  rw [hfold]
+  linarith
+
+/-- Eta-value cap `VEta`: `‖etaHurwitz s‖ ≤ 168` on the R02 rect, from
+`R02_D3_pairLim_upper` plus `etaPairLim_eq_etaHurwitz_of_pos`. -/
+theorem etaVal_upper_R02 (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖zeta_rigorous.etaHurwitz s‖ ≤ 168 := by
+  have hspos : 0 < s.re := by linarith
+  have hPair := zeta_rigorous.R02_D3_pairLim_upper s hre_lo hre_hi him_lo him_hi
+  have hEq := zeta_rigorous.etaPairLim_eq_etaHurwitz_of_pos hspos
+  rw [← hEq]
+  exact hPair
+
+/-- `‖log 2‖ ≤ 1` for the complex log, via `Complex.ofReal_log` and
+`dp_log2_hi/lo` (already imported via `door3_dp_terms`). -/
+theorem Complex_log2_norm_le_one : ‖Complex.log (2 : ℂ)‖ ≤ 1 := by
+  have hbase : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have hlog : Complex.log (2 : ℂ) = ((((Real.log 2 : ℝ))) : ℂ) := by
+    rw [hbase]
+    exact (Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 2)).symm
+  rw [hlog, Complex.norm_real, Real.norm_eq_abs]
+  have hhi := dp_log2_hi
+  have hlo := dp_log2_lo
+  have habs : |Real.log 2| ≤ 1 := abs_le.mpr ⟨by linarith, by linarith⟩
+  exact habs
+
+/-- Upper cap `C1`: `‖conv'‖ ≤ 2` for `0.05 ≤ s.re`.
+Product of `‖2 ^ (1 - s)‖ ≤ 2` and `‖log 2‖ ≤ 1`. -/
+theorem etaConvDeriv_bound_R02 (s : ℂ) (hre_lo : 0.05 ≤ s.re) :
+    ‖etaConvDeriv s‖ ≤ 2 := by
+  have hre1 : (((1 : ℂ) - s).re) = 1 - s.re := by
+    rw [Complex.sub_re, Complex.one_re]
+  have hbase : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by norm_cast
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ = (2 : ℝ) ^ (((1 : ℂ) - s).re) := by
+    rw [hbase]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have hexp_le : (((1 : ℂ) - s).re) ≤ 1 := by
+    rw [hre1]
+    linarith
+  have hw_le : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ ≤ 2 := by
+    rw [hnorm]
+    have hle : (2 : ℝ) ^ (((1 : ℂ) - s).re) ≤ (2 : ℝ) ^ (1 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp_le
+    rw [Real.rpow_one] at hle
+    exact hle
+  have hlog_le := Complex_log2_norm_le_one
+  unfold etaConvDeriv
+  rw [norm_mul]
+  have hmul : ‖(2 : ℂ) ^ ((1 : ℂ) - s)‖ * ‖Complex.log 2‖ ≤ 2 * 1 :=
+    mul_le_mul hw_le hlog_le (norm_nonneg _) (by norm_num)
+  rw [mul_one] at hmul
+  exact hmul
+
+/-- Upper cap `C2`: `‖convInv2‖ ≤ 31` for `s.re ≤ 0.74`.
+From `0.18 ≤ ‖conv‖`: `‖conv‖⁻¹ ≤ 0.18⁻¹`, square gives
+`0.18⁻¹ ^ 2 = 30.864... ≤ 31`. -/
+theorem etaConvInvSq_bound_R02 (s : ℂ) (hre_hi : s.re ≤ 0.74) :
+    ‖etaConvInvSq s‖ ≤ 31 := by
+  have hge := etaConv_ge_R02 s hre_hi
+  have hpos : (0 : ℝ) < ‖etaConv s‖ :=
+    lt_of_lt_of_le (by norm_num) hge
+  have hinv_le : ‖etaConv s‖⁻¹ ≤ ((0.18 : ℝ))⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hge
+  have hpow_le : (‖etaConv s‖⁻¹) ^ 2 ≤ (((0.18 : ℝ))⁻¹) ^ 2 :=
+    pow_le_pow_left₀ (inv_nonneg.mpr (le_of_lt hpos)) hinv_le 2
+  have hval : ((((0.18 : ℝ))⁻¹) ^ 2) ≤ 31 := by norm_num
+  have hnorm : ‖etaConvInvSq s‖ = (‖etaConv s‖⁻¹) ^ 2 := by
+    unfold etaConvInvSq
+    rw [norm_pow, norm_inv]
+  rw [hnorm]
+  exact le_trans hpow_le hval
+
+/-!
+## GAP FILE (not forced): what remains for the DZNUM derivative quotient.
+
+G1 `conv HasDerivAt`: `HasDerivAt etaConv (etaConvDeriv s) s` is not banked.
+Route: `HasDerivAt` of `fun t => (1 : ℂ) - t` composed with
+`HasDerivAt.const_cpow` for base `2` (mirrors `etaPairCpow_hasDerivAt`),
+then sub from constant `1`. Needs the exact `const_cpow` derivative shape
+`2 ^ (1 - s) * log 2 * (-1)` folded with negation; left open rather than
+guessing the lemma form.
+
+G2 `deriv zeta` quotient identity:
+`deriv riemannZeta s = (etaDerivVal * conv - etaVal * conv') * convInv2`
+needs differentiability of `riemannZeta` on the R02 rect plus the quotient
+rule applied to `etaHurwitz s = conv s * riemannZeta s`
+(`etaHurwitz_eq_etaRHS_compl` specialization). No `riemannZeta`
+differentiability lemma is imported here; left open.
+
+G3 `etaDerivVal` cap: `‖deriv etaHurwitz s‖` on the R02 rect needs the
+uniform-derivative bridge `etaPair_tsum_hasDerivAt_of_uniformBound` with
+`u := etaDerivMajorant` (`etaDerivMajorant_summable` banked) plus the
+pair-tsum to `etaHurwitz` identity on a disc covering the R02 rect.
+The tsum-derivative value `∑' m, etaDerivPairTerm s m` has no numeric cap
+yet; left open.
+
+G4 assembly: `VEta = 168`, `C0 = 3`, `C1 = 2`, `C2 = 31` above are banked;
+the combined `‖deriv zeta s‖ ≤ (‖etaDerivVal‖ * C0 + VEta * C1) * C2`
+is not stated until G2/G3 close.
+-/

@@ -8961,3 +8961,228 @@ theorem OA11_inv_cpow_re_im (k : ℕ) (hk : (0 : ℝ) < ((k : ℕ) : ℝ)) :
 #print axioms OA11_inv_cpow_re_im
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OA11 eta term 1 equals negated inverse (`-1 / 2^s = -(2^s)⁻¹`). -/
+theorem OA11_eta_term1_eq :
+    etaDirichletTerm sCutOA11 1 = -((((2 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have h : etaDirichletTerm sCutOA11 1 = -1 / ((((2 : ℕ)) : ℂ) ^ sCutOA11) := by
+    simp only [etaDirichletTerm]
+    norm_num
+  rw [h, neg_div, one_div]
+
+/-- OA11 eta term 2 in closed form (`term 2 = (3^s)⁻¹`). -/
+theorem OA11_eta_term2_eq :
+    etaDirichletTerm sCutOA11 2 = ((((3 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (2 + 1 : ℕ) = 3 := rfl
+  have hcast : ((((2 + 1 : ℕ)) : ℂ)) = ((((3 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (2 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 eta term 3 in closed form (`term 3 = -(4^s)⁻¹`). -/
+theorem OA11_eta_term3_eq :
+    etaDirichletTerm sCutOA11 3 = -((((4 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (3 + 1 : ℕ) = 4 := rfl
+  have hcast : ((((3 + 1 : ℕ)) : ℂ)) = ((((4 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (3 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, neg_div, one_div]
+
+/-- OA11 eta term 4 in closed form (`term 4 = (5^s)⁻¹`). -/
+theorem OA11_eta_term4_eq :
+    etaDirichletTerm sCutOA11 4 = ((((5 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (4 + 1 : ℕ) = 5 := rfl
+  have hcast : ((((4 + 1 : ℕ)) : ℂ)) = ((((5 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (4 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 0 `Re + Im = 1`. -/
+theorem OA11_eta_term0_re_add_im_eq :
+    (etaDirichletTerm sCutOA11 0).re + (etaDirichletTerm sCutOA11 0).im = 1 := by
+  have h0 : etaDirichletTerm sCutOA11 0 = 1 := by
+    simp only [etaDirichletTerm]
+    simp
+  rw [h0, Complex.one_re, Complex.one_im]
+  norm_num
+
+/-- OA11 term 1 `Re + Im` floor (`21/50` from `7/10 * 3/5`). -/
+theorem OA11_eta_term1_re_add_im_ge :
+    (21 / 50 : ℝ) ≤ (etaDirichletTerm sCutOA11 1).re + (etaDirichletTerm sCutOA11 1).im := by
+  have hinv := OA11_inv_cpow_re_im 2 (by norm_num)
+  have hre := hinv.1
+  have him := hinv.2
+  have hcast : ((((2 : ℕ)) : ℝ)) = (2 : ℝ) := by norm_num
+  rw [hcast] at hre him
+  have hcombo := OA11_combo2_lower
+  have hamp := OA11_amp2_ge
+  have heq := OA11_eta_term1_eq
+  rw [heq, Complex.neg_re, Complex.neg_im, hre, him]
+  have hsin : Real.sin (-(11 * Real.log 2)) = -(Real.sin (11 * Real.log 2)) := Real.sin_neg _
+  rw [hsin]
+  have hprod : (7 / 10 : ℝ) * (3 / 5 : ℝ) ≤ (2 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.sin (11 * Real.log 2) - Real.cos (11 * Real.log 2)) :=
+    mul_le_mul hamp hcombo (by norm_num) (le_of_lt (Real.rpow_pos_of_pos (by norm_num) _))
+  have heq2 : (7 / 10 : ℝ) * (3 / 5 : ℝ) = (21 / 50 : ℝ) := by norm_num
+  have hring : -((2 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (11 * Real.log 2)) + -((2 : ℝ) ^ (-(1 / 2 : ℝ)) * -(Real.sin (11 * Real.log 2))) = (2 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.sin (11 * Real.log 2) - Real.cos (11 * Real.log 2)) := by
+    ring
+  linarith
+
+/-- OA11 term 2 `Re + Im` floor (`171/250` from `57/100 * 6/5`). -/
+theorem OA11_eta_term2_re_add_im_ge :
+    (171 / 250 : ℝ) ≤ (etaDirichletTerm sCutOA11 2).re + (etaDirichletTerm sCutOA11 2).im := by
+  have hinv := OA11_inv_cpow_re_im 3 (by norm_num)
+  have hre := hinv.1
+  have him := hinv.2
+  have hcast : ((((3 : ℕ)) : ℝ)) = (3 : ℝ) := by norm_num
+  rw [hcast] at hre him
+  have hcombo := OA11_combo3_lower
+  have hamp := OA11_amp3_ge
+  have heq := OA11_eta_term2_eq
+  rw [heq, hre, him]
+  have hsin : Real.sin (-(11 * Real.log 3)) = -(Real.sin (11 * Real.log 3)) := Real.sin_neg _
+  rw [hsin]
+  have hprod : (57 / 100 : ℝ) * (6 / 5 : ℝ) ≤ (3 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.cos (11 * Real.log 3) - Real.sin (11 * Real.log 3)) :=
+    mul_le_mul hamp hcombo (by norm_num) (le_of_lt (Real.rpow_pos_of_pos (by norm_num) _))
+  have heq2 : (57 / 100 : ℝ) * (6 / 5 : ℝ) = (171 / 250 : ℝ) := by norm_num
+  have hring : (3 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (11 * Real.log 3) + (3 : ℝ) ^ (-(1 / 2 : ℝ)) * -(Real.sin (11 * Real.log 3)) = (3 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.cos (11 * Real.log 3) - Real.sin (11 * Real.log 3)) := by
+    ring
+  linarith
+
+/-- OA11 term 3 `Re + Im` floor (`3/5` from `1/2 * 6/5`). -/
+theorem OA11_eta_term3_re_add_im_ge :
+    (3 / 5 : ℝ) ≤ (etaDirichletTerm sCutOA11 3).re + (etaDirichletTerm sCutOA11 3).im := by
+  have hinv := OA11_inv_cpow_re_im 4 (by norm_num)
+  have hre := hinv.1
+  have him := hinv.2
+  have hcast : ((((4 : ℕ)) : ℝ)) = (4 : ℝ) := by norm_num
+  rw [hcast] at hre him
+  have hcombo := OA11_combo4_lower
+  have hamp_eq := OA11_amp4_eq
+  have heq := OA11_eta_term3_eq
+  rw [heq, Complex.neg_re, Complex.neg_im, hre, him]
+  have hsin : Real.sin (-(11 * Real.log 4)) = -(Real.sin (11 * Real.log 4)) := Real.sin_neg _
+  rw [hsin]
+  rw [hamp_eq]
+  have hprod : (1 / 2 : ℝ) * (6 / 5 : ℝ) ≤ (1 / 2 : ℝ) * (Real.sin (11 * Real.log 4) - Real.cos (11 * Real.log 4)) :=
+    mul_le_mul_of_nonneg_left hcombo (by norm_num)
+  have heq2 : (1 / 2 : ℝ) * (6 / 5 : ℝ) = (3 / 5 : ℝ) := by norm_num
+  have hring : -((1 / 2 : ℝ) * Real.cos (11 * Real.log 4)) + -((1 / 2 : ℝ) * -(Real.sin (11 * Real.log 4))) = (1 / 2 : ℝ) * (Real.sin (11 * Real.log 4) - Real.cos (11 * Real.log 4)) := by
+    ring
+  linarith
+
+/-- OA11 term 4 `Re + Im` floor (`66/125` from `11/25 * 6/5`). -/
+theorem OA11_eta_term4_re_add_im_ge :
+    (66 / 125 : ℝ) ≤ (etaDirichletTerm sCutOA11 4).re + (etaDirichletTerm sCutOA11 4).im := by
+  have hinv := OA11_inv_cpow_re_im 5 (by norm_num)
+  have hre := hinv.1
+  have him := hinv.2
+  have hcast : ((((5 : ℕ)) : ℝ)) = (5 : ℝ) := by norm_num
+  rw [hcast] at hre him
+  have hcombo := OA11_combo5_lower
+  have hamp := OA11_amp5_ge
+  have heq := OA11_eta_term4_eq
+  rw [heq, hre, him]
+  have hsin : Real.sin (-(11 * Real.log 5)) = -(Real.sin (11 * Real.log 5)) := Real.sin_neg _
+  rw [hsin]
+  have hprod : (11 / 25 : ℝ) * (6 / 5 : ℝ) ≤ (5 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.cos (11 * Real.log 5) - Real.sin (11 * Real.log 5)) :=
+    mul_le_mul hamp hcombo (by norm_num) (le_of_lt (Real.rpow_pos_of_pos (by norm_num) _))
+  have heq2 : (11 / 25 : ℝ) * (6 / 5 : ℝ) = (66 / 125 : ℝ) := by norm_num
+  have hring : (5 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (11 * Real.log 5) + (5 : ℝ) ^ (-(1 / 2 : ℝ)) * -(Real.sin (11 * Real.log 5)) = (5 : ℝ) ^ (-(1 / 2 : ℝ)) * (Real.cos (11 * Real.log 5) - Real.sin (11 * Real.log 5)) := by
+    ring
+  linarith
+
+/-- Five-term split (`S5 = t0 + t1 + t2 + t3 + t4`). -/
+theorem OA11_S5_eq :
+    (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k) =
+      etaDirichletTerm sCutOA11 0 + etaDirichletTerm sCutOA11 1 +
+      etaDirichletTerm sCutOA11 2 + etaDirichletTerm sCutOA11 3 +
+      etaDirichletTerm sCutOA11 4 := by
+  rw [show (5 : ℕ) = 4 + 1 by norm_num, Finset.sum_range_succ,
+    show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ,
+    show (3 : ℕ) = 2 + 1 by norm_num, Finset.sum_range_succ,
+    show (2 : ℕ) = 1 + 1 by norm_num, Finset.sum_range_succ,
+    show (1 : ℕ) = 0 + 1 by norm_num, Finset.sum_range_succ,
+    Finset.sum_range_zero, zero_add]
+  abel
+
+/-- Five-term `Re + Im` sum (`404/125 = 3.232` from `1 + 21/50 + 171/250 + 3/5 + 66/125`). -/
+theorem OA11_S5_re_add_im_ge :
+    (404 / 125 : ℝ) ≤ (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re + (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im := by
+  rw [OA11_S5_eq, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+    Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im]
+  have h0 := OA11_eta_term0_re_add_im_eq
+  have h1 := OA11_eta_term1_re_add_im_ge
+  have h2 := OA11_eta_term2_re_add_im_ge
+  have h3 := OA11_eta_term3_re_add_im_ge
+  have h4 := OA11_eta_term4_re_add_im_ge
+  have heq : (1 : ℝ) + 21 / 50 + 171 / 250 + 3 / 5 + 66 / 125 = 404 / 125 := by norm_num
+  linarith
+
+/-- Five-term norm floor via Pythagoras (`808/375 ≈ 2.1547` from `(404/125)/√2` with `√2 ≤ 3/2`
+squared: `(808/375)^2 = (404/125)^2 * 4/9 ≤ 2‖S‖^2 * 4/9 = 8/9‖S‖^2 ≤ ‖S‖^2`). -/
+theorem OA11_S5_norm_ge :
+    (808 / 375 : ℝ) ≤ ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ := by
+  have hsum := OA11_S5_re_add_im_ge
+  have hsq_eq : ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2 =
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re ^ 2 +
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    ring
+  have hsq_sum : ((∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re +
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im) ^ 2 ≤
+      2 * ((∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re ^ 2 +
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im ^ 2) := by
+    nlinarith [sq_nonneg ((∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re -
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im)]
+  have h404 : (404 / 125 : ℝ) ^ 2 ≤ ((∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).re +
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k).im) ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hsum 2
+  have h404_le_2norm : (404 / 125 : ℝ) ^ 2 ≤ 2 * ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+    linarith
+  have heq808 : (808 / 375 : ℝ) ^ 2 = (404 / 125 : ℝ) ^ 2 * (4 / 9 : ℝ) := by norm_num
+  have h808_le : (808 / 375 : ℝ) ^ 2 ≤ ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+    have hmul : (404 / 125 : ℝ) ^ 2 * (4 / 9 : ℝ) ≤ (2 * ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2) * (4 / 9 : ℝ) :=
+      mul_le_mul_of_nonneg_right h404_le_2norm (by norm_num)
+    have heq89 : (2 * ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2) * (4 / 9 : ℝ) =
+        (8 / 9 : ℝ) * (‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2) := by
+      ring
+    have hnn : (0 : ℝ) ≤ ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2 := sq_nonneg _
+    have h89 : (8 / 9 : ℝ) * (‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2) ≤
+        ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2 := by
+      linarith
+    linarith
+  calc (808 / 375 : ℝ) = Real.sqrt ((808 / 375 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ ^ 2) :=
+        Real.sqrt_le_sqrt h808_le
+    _ = ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ :=
+        Real.sqrt_sq (norm_nonneg _)
+
+/-- Closed slow leg at `N = 5` (`21/10 ≤ 808/375 ≤ ‖S5‖`; `N = 5` only — tail for `S5`
+is not the banked `7/10` for `S4096`, so the `M = 2048` threshold still needs `S4096`). -/
+theorem sCutOA11_slow_closed :
+    (21 / 10 : ℝ) ≤ ‖∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k‖ := by
+  have h := OA11_S5_norm_ge
+  have hle : (21 / 10 : ℝ) ≤ (808 / 375 : ℝ) := by norm_num
+  linarith
+
+/-- Exact shortfall numeral for the `N = 5` closure (`21/10 - 808/375 = -41/750 ≤ 0`). -/
+theorem sCutOA11_S5_shortfall :
+    ((21 / 10 : ℝ) - 808 / 375) = (-41 / 750 : ℝ) := by norm_num
+
+#print axioms OA11_eta_term1_eq
+#print axioms OA11_eta_term2_eq
+#print axioms OA11_eta_term3_eq
+#print axioms OA11_eta_term4_eq
+#print axioms OA11_S5_re_add_im_ge
+#print axioms OA11_S5_norm_ge
+#print axioms sCutOA11_slow_closed
+#print axioms sCutOA11_S5_shortfall
+
+end Door3OffAxis

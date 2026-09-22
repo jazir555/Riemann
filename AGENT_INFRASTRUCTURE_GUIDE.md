@@ -5984,6 +5984,28 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 OA11-SLOW (silent completion, coordinator-integrated from
+  disk, proof-only, grep-clean, off_axis-only commit): t=11 slow CLOSED
+  at N=5 — term eqs + Re+Im floors + `S5_re_add_im_ge` (=404/125) +
+  `S5_norm_ge` (808/375) + `sCutOA11_slow_closed :9169` (21/10≤808/375,
+  surplus 41/750) + shortfall. Honest caveat: tail is S4096-scale.
+  off_axis NEVER BUILT — first build queued.
+- 2026-09-22 CUTL-MIDDLE (silent completion, coordinator-integrated,
+  proof-only, grep-clean, cutL10-only commit): middle PART-COVER —
+  reflected Euler sliver (conditional ≤2) + tailQuarter part (≤125 on
+  overlap) + `cutL10_middle_gap :1806` (full ≤2 stays OPEN, true ≈4).
+  Partial progress, no force.
+- 2026-09-22 ETAPRIME-QUOT (silent completion, coordinator-integrated,
+  proof-only, grep-clean, eta_prime-only commit): conversion caps
+  BANKED — conv defs + `etaConv_ge_R02` (≥0.18 restated) + upper ≤3
+  (1+2^0.95≈2.93) + VEta=168 + log2≤1 + C1=2 + C2=31 (0.18⁻²≈30.86) +
+  G1-G4 gaps filed (HasDerivAt/deriv-eq/bridge/assembly). DZ residual:
+  G2/G3 proofs + Deta/DZetaPair numerals.
+- 2026-09-22 FE-EXPDECAY-ADAPTIVE (silent completion, coordinator-
+  integrated, proof-only, grep-clean, zeta_rigorous-only commit):
+  expDecay FILED (not proved) — obligation Prop + conditional closure
+  + banked ≤4 + Im/arg windows. Zero banked content for the decay
+  itself; unblocks chi≤8 once discharged.
 - 2026-09-22 STIRLING-FIXER (background `ses_f34bc837b`, sole build owner):
   GREEN — `[8682 jobs]` BUILD-EXIT=0 (attempt 2/2). Fixes (11 lines):
   `:1998` rpow_nonneg→explicit `0≤1.38`; `:2197` prod5 tail -1 `)`;

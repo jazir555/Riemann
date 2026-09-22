@@ -40973,3 +40973,64 @@ theorem sCutBox_eta_tail_M64_budget :
 #print axioms sCutBox_eta_tail_half_missed
 #print axioms sCutBox_eta_tail_M32_budget
 #print axioms sCutBox_eta_tail_M64_budget
+
+/-!
+## FE-SURVEY smallest-next (ADAPTIVE fenced): `R02_gamma_expDecay_box`.
+
+(a) HEAD check: grepped `pairLim_upper_S4|zeta_upper_92` — only committed
+`R02_D3_pairLim_upper_S4` (`:32688`) and `R02_D3_zeta_upper_923` (`:32746`);
+no newer uncommitted HEAD work exists. Nothing to verify/extend.
+
+(b) Attempted `‖Γ(1-s)‖ ≤ 4*exp(-1.58*|Im|)` on the R02 box
+(`s.re ∈ [0.05,0.74]`, `s.im ∈ [-8.25,-5.25]`, so `(1-s).re ∈ [0.26,0.95]`,
+`|Im| ∈ [5.25,8.25]`) from banked pieces:
+`R02_D3_Gamma_norm_le_Real_Gamma` (Euler-integral domination) +
+`R02_D3_Real_Gamma_le_four` / `R02_D3_Gamma_le` (`≤ 4`, no decay) +
+step-22/23 shift identities (polynomial `6/|Im|^3` only).
+Mathlib has no complex-Gamma exp-decay upper (cf. step-19 header), so the
+`exp(-1.58*|Im|)` factor does NOT close honestly from banked material.
+Filed below as an explicit obligation `Prop` + conditional closure + gap
+numerals (no force, no sorry). Unblocks chi≤8 → ratio → zeta≤10 once
+the Stirling remainder is discharged.
+-/
+
+/-- Obligation `R02_gamma_expDecay_box`: exp-decay Gamma cap on the R02 box. -/
+def R02_gamma_expDecay_box : Prop :=
+  ∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+    ‖Complex.Gamma (1 - s)‖ ≤ 4 * Real.exp (-1.58 * |s.im|)
+
+/-- Conditional closure: the obligation implies the pointwise box bound. -/
+theorem R02_gamma_expDecay_box_of_obligation (hG : R02_gamma_expDecay_box)
+    (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 4 * Real.exp (-1.58 * |s.im|) :=
+  hG s hre_lo hre_hi him_lo him_hi
+
+/-- Banked (decay-free) cap on the same box: `‖Γ(1-s)‖ ≤ 4`. -/
+theorem R02_gamma_expDecay_box_banked_four (s : ℂ)
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74) :
+    ‖Complex.Gamma (1 - s)‖ ≤ 4 :=
+  R02_D3_Gamma_le s hre_lo hre_hi
+
+/-- Box imaginary floor: `5.25 ≤ |Im|` on the R02 box. -/
+theorem R02_gamma_expDecay_box_im_abs_lo (s : ℂ)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    (5.25 : ℝ) ≤ |s.im| := by
+  have hnonpos : s.im ≤ 0 := by linarith
+  rw [abs_of_nonpos hnonpos]
+  linarith
+
+/-- Decay argument is strictly negative on the box. -/
+theorem R02_gamma_expDecay_box_decay_arg_neg (s : ℂ)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25) :
+    -1.58 * |s.im| < 0 := by
+  have habs : (5.25 : ℝ) ≤ |s.im| :=
+    R02_gamma_expDecay_box_im_abs_lo s him_lo him_hi
+  have hpos : (0 : ℝ) < |s.im| := by linarith
+  have hneg : (-1.58 : ℝ) < 0 := by norm_num
+  exact mul_neg_of_neg_of_pos hneg hpos
+
+#print axioms R02_gamma_expDecay_box_of_obligation
+#print axioms R02_gamma_expDecay_box_banked_four
+#print axioms R02_gamma_expDecay_box_im_abs_lo
+#print axioms R02_gamma_expDecay_box_decay_arg_neg

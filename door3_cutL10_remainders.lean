@@ -1,5 +1,6 @@
 import central_cover_assembly
 import zeta_rigorous
+import door3_tail_eta_upper
 
 /-! # Door-3 CutL10 remainder interface + fencing assembly (cover lane, left cutoff)
 
@@ -1718,4 +1719,103 @@ end Door3CutL10FERoute
 #print axioms Door3CutL10FERoute.cutL10_hFE_of_chi_and_middle
 #print axioms Door3CutL10FERoute.cutL10_FE_factor_shortfall
 #print axioms Door3CutL10FERoute.cutL10_FE_sliver_width_gap
+
+/-! ## (f) CUTL-FE reflected middle partial (append-only tail; LF)
+
+Target (CUTL-FE residual, from `Door3CutL10FERoute.cutL10_hFE_of_chi_and_middle`):
+  `hMid : ∀ u, (-0.50) ≤ u.re → u.re ≤ 2.06 → 8.44 ≤ u.im → u.im ≤ 11.56 → ‖zeta u‖ ≤ 2`
+(TRUE value ≈ 4 at center, so `≤ 2` is aspirational; Euler covers only the `Re ≥ 2` sliver).
+
+Covering-shape grep (this session, before edit):
+- Euler `TailZetaUpper.zeta_rightEdge_B2` (`riemann_hypothesis_newsection.lean:1195`):
+  `Re ≥ 2 → ‖zeta‖ ≤ 2`, Im-uniform. On the middle rect covers only
+  `u.re ∈ [2, 2.06]` (width `0.06` of full `2.56`). In-file mirror is conditional
+  (`Door3CutL10TierB.cutL10_zeta_euler_step` at `:1260` plus
+  `cutL10_zeta_rightSliver_of_euler` at `:1273` take explicit `hDom`/`hReal`;
+  no closed `hDom`/`hReal` bank exists in this file, unlike the right lane
+  `cutR10_hDom_closed`/`cutR10_hReal_closed` at `door3_cutR10_ballsup.lean:1056,1068`),
+  so the reflected Euler sliver below stays conditional on the two Euler premises.
+- Tail-quarter `Door3TailEtaUpper.zeta_upper_tail_quarter`
+  (`door3_tail_eta_upper.lean:167`): `1/4 ≤ re → re ≤ 1/2 → |im| ≤ 11 →
+  ‖riemannZeta‖ ≤ 125`. Overlaps the middle rect honestly on
+  `re ∈ [1/4, 1/2]`, `im ∈ [8.44, 11]` (re-width `0.25`; im-height `2.56` of full
+  `3.12`; im cap `11` excludes `(11, 11.56]`), but at numeral `125`, NOT `2`.
+  Banked below at its honest numeral via the added `import door3_tail_eta_upper`
+  (same import shape as `door3_zeta_cutoff.lean:3`); gap recorded, no force.
+- Linear/convexity: repo grep for `norm_le_interp|threeLines|convex` finds only
+  Hadamard/zero-free infrastructure with no applicable `‖zeta‖ ≤ 2` instance on
+  `Re ∈ [-0.5, 2.06]`, `Im ≈ 8-11`. Nothing linear covers the middle.
+
+Verdict: PART-COVERED (no force). Euler sliver (conditional `≤ 2`) plus
+tail-quarter overlap (honest `≤ 125`) banked; full `≤ 2` stays OPEN.
+Exact widths plus numeral gap in `cutL10_middle_gap`.
+-/
+
+namespace Door3CutL10Middle
+
+open CentralCoverAssembly
+
+/-- Conditional reflected Euler `≤ 2`: `t.re ≤ -1` gives `(1 - t).re ≥ 2`, hence
+`‖zeta (1 - t)‖ ≤ 2` from the in-file generic Euler step at `δ = 1`.
+Mirror of `cutR10_reflected_Euler_two_closed`
+(`door3_cutR10_ballsup.lean:1920`) but conditional on the two Euler premises
+(no closed `hDom`/`hReal` bank in this file). -/
+theorem cutL10_reflected_euler_two_of_euler (t : ℂ)
+    (hDom : ‖riemannZeta (1 - t)‖ ≤ ‖riemannZeta ((1 - t).re : ℂ)‖)
+    (hReal : ‖riemannZeta ((1 - t).re : ℂ)‖ ≤ 1 + 1 / ((1 - t).re - 1))
+    (ht : t.re ≤ (-1 : ℝ)) :
+    ‖zeta (1 - t)‖ ≤ 2 := by
+  have hre : (1 : ℝ) + 1 ≤ (1 - t).re := by
+    have heq : (1 - t).re = 1 - t.re := by simp
+    rw [heq]
+    linarith
+  have h := Door3CutL10TierB.cutL10_zeta_euler_step (1 - t) hDom hReal 1
+    (by norm_num) hre
+  have heq : (1 : ℝ) + 1 / (1 : ℝ) = 2 := by norm_num
+  rw [heq] at h
+  have hz : zeta (1 - t) = riemannZeta (1 - t) := rfl
+  rw [hz]
+  exact h
+
+/-- Tail-quarter honest PART on the middle-rect overlap:
+`u.re ∈ [1/4, 1/2]`, `u.im ∈ [8.44, 11]` gives `‖riemannZeta u‖ ≤ 125`
+(honest numeral, NOT `2`). Uses `Door3TailEtaUpper.zeta_upper_tail_quarter`
+(`door3_tail_eta_upper.lean:167`). -/
+theorem cutL10_middle_tailQuarter_part (u : ℂ)
+    (hre1 : (1 / 4 : ℝ) ≤ u.re) (hre2 : u.re ≤ (1 / 2 : ℝ))
+    (him1 : (8.44 : ℝ) ≤ u.im) (him2 : u.im ≤ (11 : ℝ)) :
+    ‖riemannZeta u‖ ≤ (125 : ℝ) := by
+  have him : |u.im| ≤ (11 : ℝ) := by
+    rw [abs_le]
+    constructor <;> linarith
+  exact Door3TailEtaUpper.zeta_upper_tail_quarter hre1 hre2 him
+
+/-- Same PART in `zeta` form (definitionally `rfl`). -/
+theorem cutL10_middle_tailQuarter_part_zeta (u : ℂ)
+    (hre1 : (1 / 4 : ℝ) ≤ u.re) (hre2 : u.re ≤ (1 / 2 : ℝ))
+    (him1 : (8.44 : ℝ) ≤ u.im) (him2 : u.im ≤ (11 : ℝ)) :
+    ‖zeta u‖ ≤ (125 : ℝ) := by
+  have hz : zeta u = riemannZeta u := rfl
+  rw [hz]
+  exact cutL10_middle_tailQuarter_part u hre1 hre2 him1 him2
+
+/-- Exact middle-gap audit (no force): full middle width `2.56`; Euler-`≤ 2`
+sliver width `0.06` (conditional); tail-quarter honest overlap re-width `0.25`
+at numeral `125` (numeral gap `123` above the `≤ 2` need); im cap `11` leaves
+the `(11, 11.56]` top strip (height `0.56`) outside tail-quarter. -/
+theorem cutL10_middle_gap :
+    ((2.06 : ℝ) - (-0.50) = (2.56 : ℝ))
+      ∧ ((2.06 : ℝ) - 2 = (0.06 : ℝ))
+      ∧ ((1 / 2 : ℝ) - 1 / 4 = (0.25 : ℝ))
+      ∧ ((11.56 : ℝ) - 11 = (0.56 : ℝ))
+      ∧ ((125 : ℝ) - 2 = (123 : ℝ))
+      ∧ ((0.06 : ℝ) < (2.56 : ℝ)) := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+end Door3CutL10Middle
+
+#print axioms Door3CutL10Middle.cutL10_reflected_euler_two_of_euler
+#print axioms Door3CutL10Middle.cutL10_middle_tailQuarter_part
+#print axioms Door3CutL10Middle.cutL10_middle_tailQuarter_part_zeta
+#print axioms Door3CutL10Middle.cutL10_middle_gap
 
