@@ -5984,6 +5984,31 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 CELL-F (background `ses_f34c288f6`, proof-only, grep-clean,
+  interval-only commit): R06 conditional FILED —
+  `R06CenterAssembly.R06_center_with_poly_pi_gamma :35297` (poly 0.88 +
+  pi 1/2; open hgam/hzeta + hprod). Cell conditionals: R00/R03/R04/R05/
+  R06 (all hprod-blocked at banked floors).
+- 2026-09-22 STIRLING-LEAF-SHIFT (background `ses_f349a43e9`, proof-only,
+  grep-clean): gamNeed_leaf via shift → 0.297 (1/3.375; gap 37x vs
+  0.008; n=2+ unbanked). Below-true pattern holds across all gamNeed
+  (mid unclosable, outer 114x, leaf 37x) — re-measurement owed.
+- 2026-09-22 EDGE-HLOWER2 (background `ses_f349a43ef`, proof-only,
+  grep-clean, wiring doc-only commit): HLOWER Props confirmed on disk
+  (no re-file) + zeta-feeder attempt filed as honest-fail doc
+  `:1788-1820` — R02 shapes are UPPERS (wrong direction+domain),
+  Dirichlet needs Re>1, grid floors miss Re=0, qualitative-only at
+  edge. hTopLower gap stands (product blocked, 1/2 ceiling optimal).
+- 2026-09-22 OA11-S6 (background `ses_f349a43e8`, proof-only, grep-clean,
+  off_axis-only commit): combo6 ABSENT (repo-wide grep empty) → N-gap
+  certs filed, not S6 extension — `S5_surplus :9193` (41/750) +
+  `slow_Ngap_closed :9199` + `joint_N_needs_4096 :9204`. Residual is
+  S5→S4096 slow extension (mate banked M=2048 tail), not S5→S6.
+- 2026-09-22 TAIL-M262144 (background `ses_f349a43e8`, proof-only,
+  grep-clean, tail-only commit): generic M=262144 tail —
+  `M262144_rpow_eq :663` (512 exact) + `r_262144_le :689` +
+  `eta_tail_262144_le :705` (‖G-S524288‖≤3/64=0.046875) + comparison
+  `:720` (0.046875<0.0663). Ladder: …→0.09375→0.0663→0.046875.
 - 2026-09-22 OA11-SLOW (silent completion, coordinator-integrated from
   disk, proof-only, grep-clean, off_axis-only commit): t=11 slow CLOSED
   at N=5 — term eqs + Re+Im floors + `S5_re_add_im_ge` (=404/125) +
@@ -6444,6 +6469,11 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT42 (background `ses_f349a43f3`, proof-only, grep-clean,
+  pilot-only commit): log18 FIRST link + theta18 — bridge `:5379`
+  (log18=log17+log(18/17), tighter 18/17 picked) + window `:5390/:5404`
+  ([2.8869678061,2.8939122527], true ~2.8904 inside) + `theta18_mem
+  :5421` (θ∈[28.870,28.939]). Next: delta18/cos (k=17 odd needs ≤-c).
 - 2026-09-22 SCUT40 (background `ses_f34ea1e89`, proof-only, grep-clean,
   pilot-only commit): log17 FIRST link + theta17 — bridge `:5140`
   (log17=log16+log(17/16), sharp d9-exact base) + window `:5151/:5165`

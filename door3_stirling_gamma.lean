@@ -2353,3 +2353,96 @@ theorem D3SG_gamNeed_outer_shift1_ratio :
     (114 : ℝ) < (0.229 : ℝ) / (0.002 : ℝ) := by norm_num
 
 #print axioms D3SG_gamNeed_outer_shift1_ratio
+
+/-! ## GAMNEED-LEAF-ADAPTIVE: honest shift-1 attempt at `‖Γ wLeaf‖ ≤ 0.008`.
+
+Target: `gamNeed_leaf` (`door3_digamma.lean:421`) `‖Γ wLeaf‖ ≤ 0.008`
+at `wLeaf = mk 0.1 (-3.375)` (`Re = 0.1`, `Im = -3.375`).
+
+Attempt (`N = 1` shift-up + real cap, R02 / outer shape, `‖w‖` paid explicitly):
+`w + 1` has `Re = 1.1 ∈ [1,2]`, so `‖Γ(w+1)‖ ≤ 1` by domination +
+`D3SG_Gamma_one_two_le_one`; paying `‖w‖ ≥ |Im| = 3.375` gives
+`‖Γ w‖ ≤ 1 / 3.375 ≈ 0.29630 ≤ 0.297`.
+That is `≈ 37x` above `0.008`: honest GAP, banked below as
+quotient (`0.297`) + gap (`0.008 < 0.297`, ratio `37 < 0.297/0.008`).
+No force toward `0.008`; `N = 2+` would tighten but keeps a large gap
+(large-`Im` decay factor unbanked here), so it is recorded as residual,
+not attempted in this fenced step.
+-/
+
+/-- Adaptive leaf shift-1 quotient: `‖Γ(mk 0.1 (-3.375))‖ ≤ 0.297`
+(`1 / 3.375 ≈ 0.29630`). R02 / outer-shaped one-step shift into `[1,2]`. -/
+theorem D3SG_gamNeed_leaf_shift1_upper :
+    ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ ≤ (0.297 : ℝ) := by
+  have hre1 : ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re = (1.1 : ℝ) := by
+    rw [Complex.add_re, Complex.one_re,
+      show (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).re = (0.1 : ℝ) from rfl]
+    norm_num
+  have him_abs : (3.375 : ℝ) ≤ ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ := by
+    have him_eq : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = (-3.375 : ℝ) := rfl
+    have habs : |(Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im| = (3.375 : ℝ) := by
+      rw [him_eq, abs_of_neg (by norm_num : (-3.375 : ℝ) < 0)]
+      norm_num
+    have h := Complex.abs_im_le_norm (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))
+    rw [habs] at h
+    exact h
+  have hw0 : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) ≠ 0 := by
+    intro h
+    have him0 : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = 0 := by
+      rw [h]
+      simp
+    rw [show (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = (-3.375 : ℝ) from rfl] at him0
+    norm_num at him0
+  have hG : Complex.Gamma ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)
+      = (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) *
+        Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) :=
+    Complex.Gamma_add_one _ hw0
+  have hGn : ‖Complex.Gamma ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)‖
+      = ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ := by
+    rw [hG, norm_mul]
+  have hRe1_pos : (0 : ℝ) < ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_lo : (1 : ℝ) ≤ ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_hi : ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re ≤ 2 := by
+    rw [hre1]
+    norm_num
+  have hDom : ‖Complex.Gamma ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)‖
+      ≤ Real.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re) :=
+    D3SG_Gamma_norm_le_real _ hRe1_pos
+  have hRealCap : Real.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1).re) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ hRe1_lo hRe1_hi
+  have hCap1 : ‖Complex.Gamma ((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)‖ ≤ 1 :=
+    le_trans hDom hRealCap
+  have hMul : ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+      ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ ≤ 1 := by
+    rw [← hGn]
+    exact hCap1
+  have hmono : (3.375 : ℝ) *
+      ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+      ≤ ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ :=
+    mul_le_mul_of_nonneg_right him_abs (norm_nonneg _)
+  have hle1 : ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+      ≤ 1 / (3.375 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 3.375), mul_comm]
+    exact le_trans hmono hMul
+  have h297 : (1 : ℝ) / (3.375 : ℝ) ≤ (0.297 : ℝ) := by norm_num
+  exact le_trans hle1 h297
+
+#print axioms D3SG_gamNeed_leaf_shift1_upper
+
+/-- Adaptive leaf gap: shift-1 quotient `0.297` is above `0.008` (gap, no close). -/
+theorem D3SG_gamNeed_leaf_shift1_gap :
+    (0.008 : ℝ) < (0.297 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift1_gap
+
+/-- Adaptive leaf ratio: `0.297 / 0.008 = 37.125`, so gap factor exceeds `37`. -/
+theorem D3SG_gamNeed_leaf_shift1_ratio :
+    (37 : ℝ) < (0.297 : ℝ) / (0.008 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift1_ratio

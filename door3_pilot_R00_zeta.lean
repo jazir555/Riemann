@@ -5359,4 +5359,74 @@ theorem sSCUT_eta16_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hup := sSCUT_eta16_Re_le_neg
   linarith
 
+/-! ## sCut k=17 ODD shard (first link): `log 18` bridge + `θ₁₈` window.
+
+`k = 17` is ODD so `eta₁₇ = -18^{-sCut}`; constructive iff
+`cos(10·log 18) ≤ -c`. Key: `log 18 = log 17 + log (18/17)` with banked
+`log 17` base (`sSCUT_log_seventeen_ge/le`) plus tight ratio `18/17`
+(`x = 1/17`). Base choice: `log 16` is sharper d9-exact (width 2e-9) but
+ratio `9/8` (`x = 1/8`, width 1/72 ≈ 0.01389) is wider than `18/17`
+(`x = 1/17`, width 1/306 ≈ 0.00327); total via-17 width ≈ 0.00695 vs
+via-16 ≈ 0.01389, so via-17 is tighter. Mirror of the `log 17` first-link
+recipe (`sSCUT_log_seventeen_via_sixteen_eq` at `:5140`,
+`sSCUT_log_seventeen_le` at `:5151`, `sSCUT_log_seventeen_ge` at `:5165`,
+`sSCUT_theta17_mem` at `:5182`). Next: `δ₁₈` / cos. -/
+
+/-- Composite log bridge `log 18 = log 17 + log (18/17)` (`18 = 17·(18/17)`
+via `Real.log_mul`; mirror of `sSCUT_log_seventeen_via_sixteen_eq` at `:5140`;
+ratio `18/17` (`x = 1/17`); grepped base bridges `sSCUT_log_seventeen_ge/le`;
+first link of the incremental base-18 chain for `k = 17`). -/
+theorem sSCUT_log_eighteen_via_seventeen_eq :
+    Real.log 18 = Real.log 17 + Real.log (18 / 17 : ℝ) := by
+  have h18 : (17 : ℝ) * (18 / 17) = 18 := by norm_num
+  have h := Real.log_mul (show (17 : ℝ) ≠ 0 by norm_num)
+    (show (18 / 17 : ℝ) ≠ 0 by norm_num)
+  rw [h18] at h
+  linarith
+
+/-- `log 18` upper (`log 18 ≤ 2.8939122527` from `sSCUT_log_seventeen_le` +
+`log (18/17) ≤ 1/17`; mirror of `sSCUT_log_seventeen_le` at `:5151` with `x = 1/17`
+via `Real.log_le_sub_one_of_pos`; `2.8350887232 + 1/17 = 2.893912252611…`). -/
+theorem sSCUT_log_eighteen_le : Real.log 18 ≤ (2.8939122527 : ℝ) := by
+  have h18 := sSCUT_log_eighteen_via_seventeen_eq
+  have h17 := sSCUT_log_seventeen_le
+  have hub : Real.log (18 / 17 : ℝ) ≤ (1 / 17 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 18 / 17)
+    have he : (18 / 17 : ℝ) - 1 = (1 / 17 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.8350887232 : ℝ) + 1 / 17 ≤ (2.8939122527 : ℝ) := by norm_num
+  linarith
+
+/-- `log 18` lower (`2.8869678061 ≤ log 18` from `sSCUT_log_seventeen_ge` +
+`log (18/17) ≥ 1/18`; mirror of `sSCUT_log_seventeen_ge` at `:5165` with `x = 1/17`
+via `log (17/18) ≤ -1/18` and `log (18/17) = -log (17/18)`;
+`2.8314122506 + 1/18 = 2.886967806155…`, so `2.8869678061` holds). -/
+theorem sSCUT_log_eighteen_ge : (2.8869678061 : ℝ) ≤ Real.log 18 := by
+  have h18 := sSCUT_log_eighteen_via_seventeen_eq
+  have h17 := sSCUT_log_seventeen_ge
+  have hub : Real.log (17 / 18 : ℝ) ≤ (-1 / 18 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 17 / 18)
+    have he : (17 / 18 : ℝ) - 1 = (-1 / 18 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (18 / 17 : ℝ) = -Real.log (17 / 18 : ℝ) := by
+    have heq : (18 / 17 : ℝ) = (17 / 18 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.8869678061 : ℝ) ≤ 2.8314122506 + 1 / 18 := by norm_num
+  rw [h18, hinv]
+  linarith
+
+/-- Phase window `θ₁₈ = 10*log 18 ∈ [28.869678061, 28.939122527]`
+(via banked `sSCUT_log_eighteen_ge/le` + `*10`; mirror of
+`sSCUT_theta17_mem` at `:5182`; non-strict since the `log 18` inputs are `≤`). -/
+theorem sSCUT_theta18_mem :
+    (28.869678061 : ℝ) ≤ 10 * Real.log 18 ∧
+    10 * Real.log 18 ≤ (28.939122527 : ℝ) := by
+  have hge := sSCUT_log_eighteen_ge
+  have hle := sSCUT_log_eighteen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.8869678061 = 28.869678061 := by norm_num
+  have c2 : (10 : ℝ) * 2.8939122527 = 28.939122527 := by norm_num
+  constructor <;> linarith
+
 end Door3PilotR00Zeta

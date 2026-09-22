@@ -1784,3 +1784,36 @@ end Door3RHWiring
 #print axioms Door3RHWiring.gridH_c40_of_R40
 #print axioms Door3RHWiring.gridH_leaf_count_done
 #print axioms Door3RHWiring.bottomStrip_baseBounds_at_zero_of_ballSup
+
+/-! ## EDGE-HLOWER2 zeta-floor feeder attempt (filed, not forced): GAP
+
+Target: `edgeHalf_topZetaFloor_missing` (`:1573`): uniform `cZ ≤ ‖zeta (I*x)‖`
+for `x ∈ Set.Icc (-10) 10` (top edge, `Re s = 0` line via banked
+`Door3SliverEdge.edgeS_top`, `door3_sliver_edge.lean:43-52`).
+
+Shapes tried (all read before filing, none forced):
+* R02 disc: banked shapes are UPPERS only, wrong direction for a floor —
+  `DerivCauchyBridge.R02_zeta_upper_obligation`
+  (`central_cover_assembly.lean:6170`, `‖zeta s‖ ≤ 10` on the disc `s`-rect),
+  `P1_R02_unconditional`
+  (`riemann_hypothesis_newsection.lean:14047`, same `≤ 10` on
+  `Re ∈ [0.05, 0.74]`, `Im ∈ [-8.25, -5.25]`), `R02_zeta_upper_unconditional`
+  (`:1055`, `≤ 1012`). Upper bounds cannot yield a positive lower `cZ`;
+  domain also mismatches (`Re ≥ 0.05`, negative `Im` strip vs `Re = 0`,
+  `|x| ≤ 10`).
+* Dirichlet series: banked lower `riemannZeta_abs_lower_bound_of_re_gt_one`
+  (`ApproxZetaLowerBound.lean:61`) needs `1 < Re s`; inapplicable at `Re = 0`.
+  Universal trivial lower (`:116`) is `0`, not a positive `cZ`.
+* Grid floors: banked `premZeta` points sit at `Re ∈ {0.395, 0.2, 0.105}`
+  (`door3_premise_zeta.lean:66-98`); none is on the `Re = 0` edge line.
+* `Re = 0` banked content is qualitative nonzero only, no numeral:
+  `Door3TailEtaUpper.zeta_re_zero_nonzero` (`Re = 0`, `Im ≠ 0` → nonzero),
+  `xiShifted_ne_zero_on_top_edge_proved`
+  (`door3_boundary_real.lean:107`, `x ≠ 0`, no numeral),
+  `exists_top_edge_compact_lower_bound` (`door3_top_edge.lean:546`,
+  existential `m`, not a usable `cZ` numeral).
+
+Verdict: GAP — no honest banked R02-disc/Dirichlet shape closes the uniform
+`cZ` floor on `I * Icc (-10) 10`. `edgeHalf_topZetaFloor_missing` stays as the
+exact missing numeral (edge/zeta lane owns it). No numeric force; no change to
+any other file; append-only note. -/

@@ -9186,3 +9186,25 @@ theorem sCutOA11_S5_shortfall :
 #print axioms sCutOA11_S5_shortfall
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+
+/-- S5 surplus over the `21/10` bar (positive form of `sCutOA11_S5_shortfall`). -/
+theorem sCutOA11_S5_surplus :
+    ((808 / 375 : ℝ) - 21 / 10) = (41 / 750 : ℝ) := by norm_num
+
+/-- N-gap for the slow bar: `N = 5` already meets `21/10`, so zero further terms are
+needed for the slow leg (joint `hEnough` still needs `N = 4096` to mate the banked
+`M = 2048` tail `sCutOA11_eta_tail_2048_le` via `sCutOA11_hEnough_2048_threshold`). -/
+theorem sCutOA11_slow_Ngap_closed :
+    (21 / 10 : ℝ) ≤ (808 / 375 : ℝ) := by norm_num
+
+/-- Joint-assembly N-gap numeral: the banked tail lives at `2 * 2048 = 4096` terms,
+so the residual slow extension is `S5 → S4096`, not `S5 → S6` (`OA11_combo6` absent). -/
+theorem sCutOA11_joint_N_needs_4096 : (2 * 2048 : ℕ) = 4096 := by norm_num
+
+#print axioms sCutOA11_S5_surplus
+#print axioms sCutOA11_slow_Ngap_closed
+#print axioms sCutOA11_joint_N_needs_4096
+
+end Door3OffAxis
