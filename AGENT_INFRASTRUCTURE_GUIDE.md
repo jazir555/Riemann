@@ -5901,6 +5901,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-BALL (background `ses_f34eee043`, proof-only,
+  grep-clean, first_cell-only commit): prefactor tighten 35→34.5
+  ((8.27²+0.25)/2≈34.321) → ballSup 16765.5→16526 (headroom 34.5→274
+  vs 16800); Λ₀≤479 STILL the unproved premise (gap stands, doc table
+  :415 stale at 35 — cosmetic only). No overlap issue (ZETA committed
+  first, hunks disjoint).
 - 2026-09-22 SLIVER-R12 (background `ses_f34eee041`, proof-only,
   grep-clean, sliver_edge-only commit): r=1/2 deriv bridges BANKED —
   `uniform_top_deriv_of_closedBall_half :393` + bot mirror `:418`

@@ -813,12 +813,12 @@ theorem FC_norm_quarter : ‖((1 / 4 : ℂ))‖ = (1 / 4 : ℝ) := by
   rw [e14, Complex.norm_real]
   exact Real.norm_of_nonneg (by norm_num)
 
-/-- Entire-form prefactor cap on the fat ball: `‖(z^2 + 1/4)/2‖ ≤ 35`
+/-- Entire-form prefactor cap on the fat ball: `‖(z^2 + 1/4)/2‖ ≤ 34.5`
 (triangle-loose: `(8.27^2 + 0.25)/2 ≈ 34.33`). -/
 theorem FC_fatPrefactor_upper (z : ℂ)
     (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
       (Door3FirstCell.FC_rect.radius + 0.25)) :
-    ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ ≤ 35 := by
+    ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ ≤ 34.5 := by
   have hzn : ‖z‖ ≤ 8.27 := FC_fatNorm_upper z hz
   have hsq : ‖z ^ 2‖ ≤ (8.27 : ℝ) ^ 2 := by
     rw [norm_pow]
@@ -830,7 +830,7 @@ theorem FC_fatPrefactor_upper (z : ℂ)
   have hdiv : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2‖ = ‖z ^ 2 + (1 / 4 : ℂ)‖ / 2 := by
     rw [norm_div, Complex.norm_two]
   rw [hdiv]
-  have hcalc : ((8.27 : ℝ) ^ 2 + 1 / 4) / 2 ≤ 35 := by norm_num
+  have hcalc : ((8.27 : ℝ) ^ 2 + 1 / 4) / 2 ≤ 34.5 := by norm_num
   linarith [hadd, hcalc]
 
 /-- Wide `Λ₀` premise on the fat `s`-rect (`≤ 479`; TRUE with large margin:
@@ -842,7 +842,7 @@ def FC_Lambda0_upper_fat : Prop :=
     ‖completedRiemannZeta₀ s‖ ≤ 479
 
 /-- Fat-ball sup `16800` from the prefactor cap + the wide `Λ₀` premise:
-`‖entire z‖ ≤ 1/2 + 35 * 479 = 16765.5 ≤ 16800`. -/
+`‖entire z‖ ≤ 1/2 + 34.5 * 479 = 16526 ≤ 16800`. -/
 theorem FC_ballSup16800_of_Lambda0 (hL : FC_Lambda0_upper_fat) (z : ℂ)
     (hz : z ∈ Metric.closedBall Door3FirstCell.FC_rect.center
       (Door3FirstCell.FC_rect.radius + 0.25)) :
@@ -853,7 +853,7 @@ theorem FC_ballSup16800_of_Lambda0 (hL : FC_Lambda0_upper_fat) (z : ℂ)
     hL _ hs.1 hs.2.1 hs.2.2.1 hs.2.2.2
   unfold CentralCoverAssembly.xiShiftedEntire
   have hprod : ‖(z ^ 2 + (1 / 4 : ℂ)) / 2 *
-      completedRiemannZeta₀ ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ 35 * 479 := by
+      completedRiemannZeta₀ ((1 / 2 : ℂ) + Complex.I * z)‖ ≤ 34.5 * 479 := by
     rw [norm_mul]
     exact mul_le_mul hP hLam (norm_nonneg _) (by norm_num)
   have htot := norm_sub_le ((1 / 2 : ℂ))
