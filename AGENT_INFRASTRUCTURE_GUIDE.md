@@ -5789,7 +5789,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (attempt 1/2), ZERO edits (6416 fix held; stirling-green upstream
   unblocked). N12 honest 0.645 COMPILED (prod1..prod12 chain verified
   in build). Ladder 0.579→...→0.639→0.645 all verified green (gap
-  0.015). Lock RELEASED. GAMMA-N13 tasked (proof-only).
+  0.015).   Lock RELEASED. GAMMA-N13 tasked (proof-only).
+- 2026-09-22 GAMMA-N13 (background `ses_f34b6074d`, proof-only,
+  grep-clean, premise_gamma +412/-0 PURE APPEND): E06 Seq13 rung —
+  rpow13-frac (1.63≤13^5/26, 1.64 false), Re-lower 21.19, prod13
+  203791515129.31, link (6227020800-num, factorial by decide),
+  rate 0.014, finite 0.647 (21.19·6227020800/203791515129.31≈0.64748,
+  coordinator-verified), below-gate + gap 0.013 + N14-next. VERDICT:
+  0.647<0.66 FAILS (+0.002; increments dying: ...+0.006/+0.005/+0.006/
+  +0.002). Discipline EXEMPLARY: 27/27 blocks net 0, LF preserved,
+  diff only intended. VERIFY15 tasked (sole owner, rebuild).
 - 2026-09-22 PREMISE-FIXER (background `ses_f34c289ac`, sole build owner):
   6416 fix APPLIED (12→11 closers, block nets 0, N11 mirror confirmed,
   uniqueness pre/post-checked) but build BLOCKED UPSTREAM — stirling
