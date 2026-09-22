@@ -3987,3 +3987,257 @@ def D3SG_reflection_missing_API : List String :=
     "Complex.sin strip nonvanishing at Re 0.1975",
     "Complex.sin modulus pi-half-rate estimate",
     "Gamma (1 - s) companion cap at Re 0.8025"]
+
+/-! ## GAMNEED-LEAF-SHIFT4 (STIRLING-LEAF4, 2026-09-22).
+
+Grep first (this file unless noted):
+* leaf shift-3 shape: `D3SG_Real_Gamma_31_le_two_three_one` at `:3121`
+  (`Real.Gamma 3.1 ≤ 2.31` via `Γ 3.1 = 2.1 * Γ 2.1`, reusing
+  `D3SG_Real_Gamma_21_le_one_one`), quotient
+  `D3SG_gamNeed_leaf_shift3_upper` at `:3137` (`‖Γ(mk 0.1 (-3.375))‖ ≤ 0.061`
+  via `2.31 / (3.375 ^ 3) ≈ 0.06009`, three-step shift into `Re = 3.1`,
+  `‖w‖ ≥ 3.375`, `‖w+1‖ ≥ 3.375`, `‖w+2‖ ≥ 3.375` from `|Im|` lowers),
+  gap `:3291`, ratio `:3297` (`7x`).
+* outer shift-4 shape (four-step template): `D3SG_Real_Gamma_41975_le_eight_fourfive`
+  at `:3334`, quotient `D3SG_gamNeed_outer_shift4_upper` at `:3350`
+  (`8.45 / (4.375 ^ 4) ≈ 0.02306`, four-step shift into `Re = 4.1975`).
+
+Leaf shift-4 mirror (honest, same chain at leaf point): `wLeaf+4` has
+`Re = 4.1`, so `‖Γ(w+4)‖ ≤ Real.Gamma 4.1 ≤ 7.161` by domination +
+`D3SG_Real_Gamma_41_le_seven_one_six_one`
+(`Γ 4.1 = 3.1 * Γ 3.1 ≤ 3.1 * 2.31 = 7.161`, reusing
+`D3SG_Real_Gamma_31_le_two_three_one`). Paying `‖w‖ ≥ 3.375`,
+`‖w+1‖ ≥ 3.375`, `‖w+2‖ ≥ 3.375`, `‖w+3‖ ≥ 3.375` (`|Im|` lowers) gives
+`‖Γ w‖ ≤ 7.161 / (3.375 ^ 4) ≈ 0.05519 ≤ 0.056`.
+That is `0.056 / 0.008 = 7`, i.e. `7x` above `0.008`: MARGINAL over the
+shift-3 `0.061 (7x)` quotient but does NOT close `gamNeed_leaf`. Filed as
+quotient + gap + ratio below; residual stands.
+
+Residual: `gamNeed_outer (≤ 0.002)` OPEN (`0.023` best at `:3598`, `11x` gap);
+`gamNeed_leaf (≤ 0.008)` OPEN (`0.056` banked here, `7x` area; prior `0.061`
+at `:3137` superseded as best quotient but gap remains).
+-/
+
+/-- Leaf shift-4 real cap: `Real.Gamma 4.1 ≤ 7.161`
+(`Γ 4.1 = 3.1 * Γ 3.1 ≤ 3.1 * 2.31 = 7.161`). -/
+theorem D3SG_Real_Gamma_41_le_seven_one_six_one : Real.Gamma 4.1 ≤ 7.161 := by
+  have hne : (3.1 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (3.1 + 1) = 3.1 * Real.Gamma 3.1 :=
+    Real.Gamma_add_one hne
+  have heq : (3.1 : ℝ) + 1 = 4.1 := by norm_num
+  rw [heq] at hshift
+  rw [hshift]
+  calc (3.1 : ℝ) * Real.Gamma 3.1
+      ≤ 3.1 * 2.31 :=
+        mul_le_mul_of_nonneg_left D3SG_Real_Gamma_31_le_two_three_one (by norm_num)
+    _ ≤ 7.161 := by norm_num
+
+#print axioms D3SG_Real_Gamma_41_le_seven_one_six_one
+
+/-- Leaf shift-4 quotient: `‖Γ(mk 0.1 (-3.375))‖ ≤ 0.056`
+(`7.161 / (3.375 ^ 4) ≈ 0.05519`). Four-step shift into `Re = 4.1`. -/
+theorem D3SG_gamNeed_leaf_shift4_upper :
+    ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ ≤ (0.056 : ℝ) := by
+  have hre4 : ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1).re
+      = (4.1 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re,
+      show (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).re = (0.1 : ℝ) from rfl]
+    norm_num
+  have him_w : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = (-3.375 : ℝ) := rfl
+  have him_w1 : (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)).im
+      = (-3.375 : ℝ) := by
+    rw [Complex.add_im, Complex.one_im, him_w]
+    norm_num
+  have him_w2 : ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1)).im
+      = (-3.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.one_im, Complex.one_im, him_w]
+    norm_num
+  have him_w3 : (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)).im
+      = (-3.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.one_im, Complex.one_im, Complex.one_im, him_w]
+    norm_num
+  have habs_w : |(Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im| = (3.375 : ℝ) := by
+    rw [him_w, abs_of_neg (by norm_num : (-3.375 : ℝ) < 0)]
+    norm_num
+  have habs_w1 : |(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)).im|
+      = (3.375 : ℝ) := by
+    rw [him_w1, abs_of_neg (by norm_num : (-3.375 : ℝ) < 0)]
+    norm_num
+  have habs_w2 : |((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1)).im|
+      = (3.375 : ℝ) := by
+    rw [him_w2, abs_of_neg (by norm_num : (-3.375 : ℝ) < 0)]
+    norm_num
+  have habs_w3 : |(((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)).im|
+      = (3.375 : ℝ) := by
+    rw [him_w3, abs_of_neg (by norm_num : (-3.375 : ℝ) < 0)]
+    norm_num
+  have hnorm_w : (3.375 : ℝ) ≤ ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ := by
+    have h := Complex.abs_im_le_norm (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))
+    rw [habs_w] at h
+    exact h
+  have hnorm_w1 : (3.375 : ℝ)
+      ≤ ‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ := by
+    have h := Complex.abs_im_le_norm (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))
+    rw [habs_w1] at h
+    exact h
+  have hnorm_w2 : (3.375 : ℝ)
+      ≤ ‖((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ := by
+    have h := Complex.abs_im_le_norm ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))
+    rw [habs_w2] at h
+    exact h
+  have hnorm_w3 : (3.375 : ℝ)
+      ≤ ‖(((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖ := by
+    have h := Complex.abs_im_le_norm (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))
+    rw [habs_w3] at h
+    exact h
+  have hw0 : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) ≠ 0 := by
+    intro h
+    have him0 : (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w] at him0
+    norm_num at him0
+  have hw10 : (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)) ≠ 0 := by
+    intro h
+    have him0 : ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w1] at him0
+    norm_num at him0
+  have hw20 : ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1)) ≠ 0 := by
+    intro h
+    have him0 : (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w2] at him0
+    norm_num at him0
+  have hw30 : (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) ≠ 0 := by
+    intro h
+    have him0 : ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))).im = 0 := by
+      rw [h]
+      simp
+    rw [him_w3] at him0
+    norm_num at him0
+  have hG1 : Complex.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))
+      = (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) *
+        Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) :=
+    Complex.Gamma_add_one _ hw0
+  have hG2 : Complex.Gamma ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))
+      = (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)) *
+        Complex.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1)) :=
+    Complex.Gamma_add_one _ hw10
+  have hG3 : Complex.Gamma (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))
+      = ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1)) *
+        Complex.Gamma ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1)) :=
+    Complex.Gamma_add_one _ hw20
+  have hG4 : Complex.Gamma ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1)
+      = (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) *
+        Complex.Gamma (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) :=
+    Complex.Gamma_add_one _ hw30
+  have hGn1 : ‖Complex.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖
+      = ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ := by
+    rw [hG1, norm_mul]
+  have hGn2 : ‖Complex.Gamma ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖
+      = ‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ *
+        ‖Complex.Gamma (((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ := by
+    rw [hG2, norm_mul]
+  have hGn3 : ‖Complex.Gamma (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖
+      = ‖((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ *
+        ‖Complex.Gamma ((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ := by
+    rw [hG3, norm_mul]
+  have hGn4 : ‖Complex.Gamma ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1)‖
+      = ‖(((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖ *
+        ‖Complex.Gamma (((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖ := by
+    rw [hG4, norm_mul]
+  have hRe4_pos : (0 : ℝ)
+      < ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1).re := by
+    rw [hre4]
+    norm_num
+  have hDom : ‖Complex.Gamma ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1)‖
+      ≤ Real.Gamma ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1).re :=
+    D3SG_Gamma_norm_le_real _ hRe4_pos
+  rw [hre4] at hDom
+  have hCap : ‖Complex.Gamma ((((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1)) + 1)‖
+      ≤ (7.161 : ℝ) :=
+    le_trans hDom D3SG_Real_Gamma_41_le_seven_one_six_one
+  have hMul : ‖(((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖ *
+      (‖((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ *
+        (‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ *
+          (‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+            ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖)))
+      ≤ (7.161 : ℝ) := by
+    rw [← hGn1, ← hGn2, ← hGn3, ← hGn4]
+    exact hCap
+  have hGamma_nn : (0 : ℝ)
+      ≤ ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ :=
+    norm_nonneg _
+  have hmono1 : (3.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+      ≤ ‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ :=
+    mul_le_mul_of_nonneg_right hnorm_w hGamma_nn
+  have hmono2 : (3.375 : ℝ) * ((3.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖)
+      ≤ ‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ *
+        (‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+          ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖) :=
+    mul_le_mul hnorm_w1 hmono1
+      (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3.375) hGamma_nn)
+      (norm_nonneg _)
+  have hmono3 : (3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖))
+      ≤ ‖((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ *
+        (‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ *
+          (‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+            ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖)) :=
+    mul_le_mul hnorm_w2 hmono2
+      (mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3.375)
+        (by norm_num : (0 : ℝ) ≤ 3.375)) hGamma_nn)
+      (norm_nonneg _)
+  have hmono4 : (3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖)))
+      ≤ ‖(((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1) + 1))‖ *
+        (‖((((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1) + 1))‖ *
+          (‖(((Complex.mk (0.1 : ℝ) (-3.375 : ℝ)) + 1))‖ *
+            (‖(Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖ *
+              ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖))) :=
+    mul_le_mul hnorm_w3 hmono3
+      (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3.375)
+        (by norm_num : (0 : ℝ) ≤ 3.375)) (by norm_num : (0 : ℝ) ≤ 3.375)) hGamma_nn)
+      (norm_nonneg _)
+  have hle : (3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ)
+      * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖)))
+      ≤ (7.161 : ℝ) :=
+    le_trans hmono4 hMul
+  have hle2 : ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+      * (3.375 * 3.375 * 3.375 * 3.375) ≤ (7.161 : ℝ) := by
+    have heq : ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+        * (3.375 * 3.375 * 3.375 * 3.375)
+        = (3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ) * ((3.375 : ℝ)
+          * ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖))) := by
+      ring
+    rw [heq]
+    exact hle
+  have hdiv : ‖Complex.Gamma (Complex.mk (0.1 : ℝ) (-3.375 : ℝ))‖
+      ≤ (7.161 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 3.375 * 3.375 * 3.375 * 3.375)]
+    exact hle2
+  have h056 : (7.161 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375) ≤ (0.056 : ℝ) := by norm_num
+  exact le_trans hdiv h056
+
+#print axioms D3SG_gamNeed_leaf_shift4_upper
+
+/-- Leaf shift-4 gap: `0.056` is above `0.008` (gap, no close). -/
+theorem D3SG_gamNeed_leaf_shift4_gap :
+    (0.008 : ℝ) < (0.056 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift4_gap
+
+/-- Leaf shift-4 ratio: `0.056 / 0.008 = 7`, so gap factor exceeds `6`. -/
+theorem D3SG_gamNeed_leaf_shift4_ratio :
+    (6 : ℝ) < (0.056 : ℝ) / (0.008 : ℝ) := by norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift4_ratio
