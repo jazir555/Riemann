@@ -1046,4 +1046,77 @@ theorem zetaDeriv_mid_125_of_diffCont
 
 theorem zeta_mid_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
 
+/-! ## 11. INNER sphere at honest tail-quarter 125 (dInner = 0.395 - 0.75 I).
+
+Geometry check (margins honest, no force):
+* `dInner.re = 0.395`, radius `0.01` gives `z.re ∈ [0.385, 0.405]` on the
+  sphere, inside tail-quarter `[1/4, 1/2]` with margins `0.135` below
+  (`0.385 - 0.25`) and `0.095` above (`0.5 - 0.405`).
+* `dInner.im = -0.75`, radius `0.01` gives `z.im ∈ [-0.76, -0.74]`, so
+  `|z.im| ≤ 0.76 ≤ 11` with margin `10.24`.
+* Tail-quarter domain (`door3_tail_eta_upper.lean:167-170`):
+  `1/4 ≤ s.re`, `s.re ≤ 1/2`, `|s.im| ≤ 11` gives `‖riemannZeta s‖ ≤ 125`.
+  Hence the whole `0.01`-sphere over `dInner` is covered at `125`, NOT `10`.
+  The pre-existing `zetaSupOnSphere_inner` (`≤ 10`) is left untouched and
+  NOT claimed here; the filled instance below is restated at `125` only.
+* R02-disc numeral 934 (`zeta_rigorous.lean:32566-32568`):
+  `Re ∈ [0.05, 0.74]`, `Im ∈ [-8.25, -5.25]` gives `‖riemannZeta s‖ ≤ 934`.
+  `dInner.im = -0.75` lies outside `[-8.25, -5.25]` (above by `4.5`), so the
+  R02-disc numeral is inapplicable here; only tail-quarter 125 is used. -/
+
+def zetaSupOnSphere_inner_125 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dInner 0.01 → ‖riemannZeta z‖ ≤ 125
+
+theorem dInner_sphere_re_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dInner 0.01) :
+    (1 / 4 : ℝ) ≤ z.re ∧ z.re ≤ (1 / 2 : ℝ) := by
+  have hdist : dist z dInner = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dInner‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dInner).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dInner).re| ≤ ‖z - dInner‖ := Complex.abs_re_le_norm _
+      _ = 0.01 := hnorm
+  have here : (z - dInner).re = z.re - 0.395 := by
+    have e : (z - dInner).re = z.re - dInner.re := Complex.sub_re z dInner
+    rw [e, dInner_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+theorem dInner_sphere_im_bound {z : ℂ}
+    (hz : z ∈ Metric.sphere dInner 0.01) :
+    |z.im| ≤ (11 : ℝ) := by
+  have hdist : dist z dInner = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dInner‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(z - dInner).im| ≤ (0.01 : ℝ) := by
+    calc |(z - dInner).im| ≤ ‖z - dInner‖ := Complex.abs_im_le_norm _
+      _ = 0.01 := hnorm
+  have heim : (z - dInner).im = z.im - (-0.75) := by
+    have e : (z - dInner).im = z.im - dInner.im := Complex.sub_im z dInner
+    rw [e, dInner_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  have himlo : (-0.76 : ℝ) ≤ z.im := by linarith
+  have himhi : z.im ≤ (-0.74 : ℝ) := by linarith
+  rw [abs_le]
+  constructor <;> linarith
+
+theorem zetaSupOnSphere_inner_125_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dInner 0.01 → ‖riemannZeta z‖ ≤ 125 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dInner_sphere_re_bounds hz
+  have him := dInner_sphere_im_bound hz
+  exact Door3TailEtaUpper.zeta_upper_tail_quarter hre_lo hre_hi him
+
+theorem zetaSup_inner_125_banked : zetaSupOnSphere_inner_125 :=
+  zetaSupOnSphere_inner_125_filled
+
+theorem zetaDeriv_inner_125_of_diffCont
+    (hd : zetaDiffCont_inner) :
+    ‖deriv riemannZeta dInner‖ ≤ 125 / 0.01 := by
+  unfold zetaDiffCont_inner at hd
+  exact zetaDerivUp_of_sup dInner 0.01 125 (by norm_num) hd
+    zetaSupOnSphere_inner_125_filled
+
+theorem zeta_inner_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
+
 end Door3DerivUp

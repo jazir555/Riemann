@@ -5917,6 +5917,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-INNER (background `ses_f34e3fdf6`, proof-only,
+  grep-clean, deriv_up-only commit): INNER set filled at honest 125 —
+  geometry covers (Re margins 0.135/0.095, Im margin 10.24; R02-disc
+  N/A by 4.5) + `zetaSupOnSphere_inner_125_filled :1103` +
+  `zetaDeriv_inner_125_of_diffCont :1113` (deriv ≤12500 modulo
+  DiffCont). Subdivision sets now: leaf/mid/inner/outer = gap/125/125/
+  gap-at-125-scale (leaf truly open, outer best-125). Gamma 60000.
 - 2026-09-22 SLIVER-EXIST (background `ses_f34e828b2`, proof-only,
   grep-clean, sliver_edge-only commit): PARTIAL existence —
   edge-norm continuity at 0 (value 1/2) → m=1/4 uniform on
