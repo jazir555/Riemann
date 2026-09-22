@@ -325,3 +325,54 @@ theorem etaPair_tsum_deriv_of_uniformBound
     deriv (fun z => ∑' m, pairFn m z) y = ∑' m, etaDerivPairTerm y m :=
   (etaPair_tsum_hasDerivAt_of_uniformBound pairFn u c R hu hderiv hbound
     y₀ hy₀ h0 y hy).deriv
+
+/-- Local cpow-difference mirror of the banked `etaPairTerm_eq_cpow_sub` shape
+(no new import; `zeta_rigorous` stays out of the closure). -/
+noncomputable def etaPairCpow (m : ℕ) (s : ℂ) : ℂ :=
+  (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-s)) -
+    (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-s))
+
+/-- TERMWISE link, one shape: `HasDerivAt` of the cpow-difference pair with
+derivative `etaDerivPairTerm`. From banked `HasDerivAt.const_cpow`
+(`Mathlib/Analysis/SpecialFunctions/Pow/Deriv.lean:214`) plus
+`Complex.ofReal_log`, matching the closed form `etaPairDeriv_term`. -/
+theorem etaPairCpow_hasDerivAt (m : ℕ) (s : ℂ) :
+    HasDerivAt (etaPairCpow m) (etaDerivPairTerm s m) s := by
+  have hAposR : (0 : ℝ) < (((2 * m + 1 : ℕ) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hBposR : (0 : ℝ) < (((2 * m + 2 : ℕ) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hAne : (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ≠ 0 := by
+    exact_mod_cast ne_of_gt hAposR
+  have hBne : (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ≠ 0 := by
+    exact_mod_cast ne_of_gt hBposR
+  have hf : HasDerivAt (fun t : ℂ => -t) (-1 : ℂ) s :=
+    hasDerivAt_neg' s
+  have hA : HasDerivAt (fun t : ℂ => (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-t)))
+      (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-s) *
+        Complex.log (((((2 * m + 1 : ℕ) : ℝ)) : ℂ)) * (-1)) s :=
+    hf.const_cpow (c := (((((2 * m + 1 : ℕ) : ℝ)) : ℂ)) (Or.inl hAne)
+  have hB : HasDerivAt (fun t : ℂ => (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-t)))
+      (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-s) *
+        Complex.log (((((2 * m + 2 : ℕ) : ℝ)) : ℂ)) * (-1)) s :=
+    hf.const_cpow (c := (((((2 * m + 2 : ℕ) : ℝ)) : ℂ)) (Or.inl hBne)
+  have hSub := hA.sub hB
+  have hlogA : Complex.log (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) =
+      (((Real.log (((2 * m + 1 : ℕ) : ℝ))) : ℝ) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt hAposR)).symm
+  have hlogB : Complex.log (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) =
+      (((Real.log (((2 * m + 2 : ℕ) : ℝ))) : ℝ) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt hBposR)).symm
+  have hDerivEq : (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-s) *
+      Complex.log (((((2 * m + 1 : ℕ) : ℝ)) : ℂ)) * (-1) -
+        (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-s) *
+          Complex.log (((((2 * m + 2 : ℕ) : ℝ)) : ℂ)) * (-1)) =
+      etaDerivPairTerm s m := by
+    rw [etaPairDeriv_term, hlogA, hlogB, Complex.ofReal_neg, Complex.ofReal_neg]
+    ring
+  have hFunEq : (fun t : ℂ => (((((2 * m + 1 : ℕ) : ℝ)) : ℂ) ^ (-t)) -
+      (((((2 * m + 2 : ℕ) : ℝ)) : ℂ) ^ (-t))) = etaPairCpow m := by
+    funext t
+    rfl
+  rw [hFunEq, hDerivEq] at hSub
+  exact hSub

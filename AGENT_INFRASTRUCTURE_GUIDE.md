@@ -5901,6 +5901,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETAPRIME-TERM (background `ses_f34efa018`, proof-only,
+  grep-clean, eta_prime-only commit): termwise link PROVED —
+  `etaPairCpow` def (cpow-difference mirror, no import) +
+  `etaPairCpow_hasDerivAt :339` (via `const_cpow` + `ofReal_log` +
+  banked `etaPairDeriv_term`; Mathlib cites checked). Residual:
+  summable majorant from `etaDerivPair_bound` + identification with
+  `zeta_rigorous.etaPairTerm` (import withheld).
 - 2026-09-22 FIRSTCELL-BALL (background `ses_f34eee043`, proof-only,
   grep-clean, first_cell-only commit): prefactor tighten 35→34.5
   ((8.27²+0.25)/2≈34.321) → ballSup 16765.5→16526 (headroom 34.5→274
