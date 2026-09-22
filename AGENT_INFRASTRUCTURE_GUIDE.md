@@ -5784,6 +5784,12 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 PREMISE-VERIFY (background `ses_f34b784df`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (36s)`, BUILD-EXIT=0
+  (attempt 1/2), ZERO edits (6416 fix held; stirling-green upstream
+  unblocked). N12 honest 0.645 COMPILED (prod1..prod12 chain verified
+  in build). Ladder 0.579→...→0.639→0.645 all verified green (gap
+  0.015). Lock RELEASED. GAMMA-N13 tasked (proof-only).
 - 2026-09-22 PREMISE-FIXER (background `ses_f34c289ac`, sole build owner):
   6416 fix APPLIED (12→11 closers, block nets 0, N11 mirror confirmed,
   uniqueness pre/post-checked) but build BLOCKED UPSTREAM — stirling
