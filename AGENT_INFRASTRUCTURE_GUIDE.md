@@ -5947,6 +5947,12 @@ sorry-free infrastructure and the complete commit ledger above.
   abs_im_le_norm; Im bounds exclude 0/1) + fat wrappers `:1429/:1436`.
   PiOf-upper untouched (PIUPPER's lane). Lambda0 patch: (ii) done,
   (i)+(iii) owed.
+- 2026-09-22 FIRSTCELL-PIUPPER (background `ses_f34df8061`, proof-only,
+  grep-clean): patch item (i) DONE — `FC_pi_rpow_056_le_two :1284`
+  (π^0.56≤2 via 3.1416^9≤2^16 16th-power descent, margin ~5%) +
+  `FC_piOf_upper_fat :1330` (‖piOf‖≤2 on fat rect, max at Re=-1.12;
+  true ≈1.898). Rode into 567827d with POLAR's block (guide entry
+  added here belatedly). Lambda0 patch: (i)+(ii) done, (iii) owed.
 - 2026-09-22 DERIV-DIFFCONT (background `ses_f34df805f`, proof-only,
   grep-clean, deriv_up-only commit): `zetaDiffCont_mid` CLOSED-syntactic
   — `dMid_closedBall_re_upper :1059` + `:1074` (differentiableAt off
