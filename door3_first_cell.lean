@@ -1131,3 +1131,122 @@ theorem FC_slice_S2_of_tendsto (L : ℝ)
 
 end Door3FirstCellClose
 
+/-! ## R02-CELL4 wave: reflected U-chain one-step attempt + exact gap (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Reflection identity `Complex.Gamma_mul_Gamma_one_sub`
+  (`Mathlib/Analysis/SpecialFunctions/Gamma/Beta.lean:398`):
+  `Gamma z * Gamma (1 - z) = π / sin (π * z)`.
+* Reflection lower shapes reusing it at `w = sR02/2`:
+  `R02GammaLower.gamma_lower_R02_center` (`interval_arith.lean:32507`,
+  `S = 30000`, `U = 0.05`), `R02SineSharp.gamma_lower_R02_sharp` (`:33531`,
+  `S = 20128`, `U = 0.026`).
+* Sine-floor banked pieces: `R02GammaLower.sin_upper_R02` (`:32443`,
+  `≤ 30000`), `R02SineSharp.sin_upper_R02_sharp` (`:33481`, `≤ 20128`,
+  true `≈ 20125.7` — near-perfect, so no S-tightening can cover the gap;
+  see `FC_gamma0008_S_overage` in R02-CELL2).
+* Reflected-upper banked pieces: `R02GammaUpper.gamma_one_sub_half_upper_R02`
+  (12-shift, `U = 0.05`), `R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep`
+  (`:33021`, 21-shift, `U = 0.026`, true `U ≈ 0.018`); base re/im
+  `R02GammaUpper.zUpR02_re/im` (`:8507/:8512`).
+
+ONE honest reflected step attempted here: extend the banked 21-shift chain by ONE
+shift (`+21` floor / nonvanishing / `Real.Gamma` + `Complex.Gamma` one-step
+unfolds, all PROVED below from banked re/im only). The full 22-shift combination
+(denominator product `q21` + numerator/division assembly) is patch phase — NOT
+filed as proved.
+
+Verdict: UPPER-or-GAP = GAP. One shift tightens `U` by at most the factor
+`21.8025/22.06 ≤ 0.9884`, i.e. `U ≤ 0.0257` even crediting the full step — still
+above the `0.0195` need (`20128 × 0.0195 = 392.496 ≤ 392.7`). Exact gaps filed
+below (`U` shortfall `0.0062`; `S·U` overage `124.59`). No force, no
+`premise_gamma` touch.
+-/
+
+namespace Door3FirstCellClose
+
+/-- Reflected-point re at `+21`: `Re(1 - sR02/2 + 21) = 21.8025`
+(mirrors `R02GammaUpperDeep.norm_zUpR02D_20_ge`; banked `zUpR02_re` only). -/
+theorem FC_refl22_re : (1 - R02GammaUpper.sR02 / 2 + 21).re = 21.8025 := by
+  simp only [Complex.add_re, R02GammaUpper.zUpR02_re, Complex.re_ofNat]
+  norm_num
+
+/-- Reflected-point im at `+21`: `Im(1 - sR02/2 + 21) = 3.375`. -/
+theorem FC_refl22_im : (1 - R02GammaUpper.sR02 / 2 + 21).im = 3.375 := by
+  simp only [Complex.add_im, R02GammaUpper.zUpR02_im, Complex.im_ofNat]
+  norm_num
+
+/-- Denominator floor `c21 = 22.06 ≤ ‖1 - sR02/2 + 21‖`
+(`22.06^2 = 486.6436 ≤ 21.8025^2 + 3.375^2`; sqrt pattern mirrors
+`R02GammaUpperDeep.norm_zUpR02D_20_ge`). -/
+theorem FC_refl22_floor :
+    (22.06 : ℝ) ≤ ‖1 - R02GammaUpper.sR02 / 2 + 21‖ := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 21).re = 21.8025 := FC_refl22_re
+  have him : (1 - R02GammaUpper.sR02 / 2 + 21).im = 3.375 := FC_refl22_im
+  have hsq : (22.06 : ℝ) ^ 2 ≤ ‖1 - R02GammaUpper.sR02 / 2 + 21‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  calc (22.06 : ℝ) = Real.sqrt ((22.06 : ℝ) ^ 2) :=
+        (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖1 - R02GammaUpper.sR02 / 2 + 21‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖1 - R02GammaUpper.sR02 / 2 + 21‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- Nonvanishing at `+21` (mirrors `R02GammaUpperDeep.zUpR02D_add20_ne0`). -/
+theorem FC_refl22_ne0 : (1 - R02GammaUpper.sR02 / 2 + 21) ≠ 0 := by
+  have hre : (1 - R02GammaUpper.sR02 / 2 + 21).re = 21.8025 := FC_refl22_re
+  intro h
+  rw [h, Complex.zero_re] at hre
+  norm_num at hre
+
+/-- One-step real-Gamma unfold toward `n = 22` (mirrors
+`R02GammaUpperDeep.realGamma_218025_num`; small numerals only). -/
+theorem FC_realGamma_228025_step :
+    Real.Gamma 22.8025 ≤ 21.8025 * Real.Gamma 21.8025 := by
+  have h : Real.Gamma (21.8025 + 1) = 21.8025 * Real.Gamma 21.8025 :=
+    Real.Gamma_add_one (by norm_num)
+  have heq : (21.8025 : ℝ) + 1 = 22.8025 := by norm_num
+  rw [heq] at h
+  exact h.le
+
+/-- One-step complex-Gamma unfold toward `n = 22` (mirrors the `e20` step of
+`R02GammaUpperDeep.gamma_one_sub_half_upper_R02_deep`). -/
+theorem FC_gamma_step22 :
+    Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 22)
+      = (1 - R02GammaUpper.sR02 / 2 + 21)
+        * Complex.Gamma (1 - R02GammaUpper.sR02 / 2 + 21) := by
+  have h : (1 - R02GammaUpper.sR02 / 2 + 22)
+      = ((1 - R02GammaUpper.sR02 / 2 + 21) + 1) := by ring
+  rw [h]
+  exact Complex.Gamma_add_one _ FC_refl22_ne0
+
+/-- Per-step tightening factor of the `+21 → +22` extension:
+`21.8025/22.06 ≤ 0.9884` (numerator grows by `21.8025`, denominator floor by
+`22.06`; deeper shifts asymptote to `1`, so later steps help even less). -/
+theorem FC_step_factor : (21.8025 : ℝ) / 22.06 ≤ 0.9884 := by
+  rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 22.06)]
+  norm_num
+
+/-- Best `U` one honest shift can deliver: `0.026 × 0.9884 ≤ 0.0257`
+(credits the full floor-to-cap improvement of the `+21 → +22` step against the
+banked `U = 0.026`). -/
+theorem FC_onestep_U_cap : (0.026 : ℝ) * 0.9884 ≤ 0.0257 := by norm_num
+
+/-- One-step `S·U` product cap with banked `S = 20128`: `≤ 517.29`. -/
+theorem FC_onestep_SU_le : (20128 : ℝ) * 0.0257 ≤ 517.29 := by norm_num
+
+/-- One-step product still exceeds the `0.008` cap `392.7`
+(`392.7 < 20128 × 0.0257`). -/
+theorem FC_onestep_gap : (392.7 : ℝ) < 20128 * 0.0257 := by norm_num
+
+/-- Exact `S·U` overage after one honest shift: `392.7 + 124.59 = 517.29`
+(only `6.04` better than the banked `130.628` overage at `523.328`). -/
+theorem FC_onestep_overage : (392.7 : ℝ) + 124.59 = 517.29 := by norm_num
+
+/-- Exact gap at the failing U-window: need `≤ 0.0195`, one step gives `0.0257`. -/
+theorem FC_U22_window_gap : (0.0195 : ℝ) < 0.0257 := by norm_num
+
+/-- U shortfall numeral: `0.0257 - 0.0195 = 0.0062`. -/
+theorem FC_U22_shortfall : (0.0257 : ℝ) - 0.0195 = 0.0062 := by norm_num
+
+end Door3FirstCellClose
+

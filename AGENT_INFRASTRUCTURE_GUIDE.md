@@ -5917,6 +5917,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-GAMMA (background `ses_f34e828b2`, proof-only,
+  grep-clean, first_cell-only commit): reflected U-chain GAP — refl22
+  point/floor/step/factor banked (`:1170/:1175/:1182/:1195/:1203/:1213/
+  :1225`), one shift credits 0.9884 → U≤0.0257 (S·U≤517.29 vs 392.7,
+  over 124.59 — only 6.04 better than banked 130.628). U-window short
+  0.0062 (0.0257 vs 0.0195). Full 22-shift assembly stays patch phase.
+  Pilot/sliver_edge writes left for owners.
 - 2026-09-22 DERIV-FILL3 (background `ses_f34e828b7`, proof-only,
   grep-clean, deriv_up-only commit): MID set filled at honest 125 (NOT
   10) — geometry covers (Re margins 0.135/0.095, Im margin 6.24) via
