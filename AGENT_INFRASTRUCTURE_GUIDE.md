@@ -6060,6 +6060,30 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
   grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
   :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
+  grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
+  Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 CUTL-TIER3 (background `ses_f348f5209`, proof-only,
+  grep-clean, cutL10-only commit): three-factor joint 6.33 (zeta 6→3
+  honest halve; 158x) + zeta-true 3.16 (79x). Tier 0.04 stands; hJoint
+  gaps quantified (6.29/3.12).
+- 2026-09-22 DIGAMMA-HNEG (background `ses_f348f8e84`, proof-only,
+  grep-clean, digamma-only commit): hne/hG CLOSED at all four centers
+  (`:789-813` via Gamma_ne_zero + differentiableAt) + gammaPrime bounds
+  conditional on shiftNeeds (`:817-838`). Each doorShiftNeed now exactly
+  psiShiftNeed+gamNeed.
+- 2026-09-22 WIRE-STRIP (background `ses_f348e8e51`, proof-only,
+  grep-clean, wiring-only commit): top-M40-at-zero strip feeder (endpoint
+  + ballSup40 conditional) + uniform-M40 residual Prop. Uniform strip
+  owned by edge/zeta.
+- 2026-09-22 CELL-J (background `ses_f348e54fb`, proof-only,
+  grep-clean, interval-only commit): R10 center conditional `:35566`
+  (poly 38.3, base 19.15; need Agam·Azeta≥0.00339, have 3.85e-9 —
+  same ~6-order wall).
+- 2026-09-22 BALLADV-R02PT (background `ses_f348e8e57`, proof-only,
+  grep-clean, ball_advance-only commit): dominator nonneg + second-piece
+  bound banked; first-piece obstruction spec filed (log-vs-power at
+  small m). Pointwise still open.
 - 2026-09-22 SUPP-FIX (background `ses_f34918ba1`, single build owner,
   in flight): root cause = `/--` docstrings before `#print axioms`
   section headers (S12/S14/S16/S18); remedy doc→block `/-` at 4 sites.
