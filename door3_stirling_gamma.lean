@@ -1908,3 +1908,57 @@ theorem D3SG_chi_refl_product_le (t : ℂ)
   exact mul_le_mul hC hZ (norm_nonneg _) hC0
 
 #print axioms D3SG_chi_refl_product_le
+
+/-- R02 disc upper via one-step recurrence shift into the banked `[1,2]` cap.
+For `w.re ∈ [0.025,0.37]`, `w.im ∈ [-4.125,-2.625]`: `w + 1` has
+`Re ∈ [1.025,1.37] ⊆ [1,2]`, so `‖Γ(w+1)‖ ≤ Real.Gamma ≤ 1` by
+`D3SG_Gamma_norm_le_real` + `D3SG_Gamma_one_two_le_one`; paying
+`‖w‖ ≥ |Im| ≥ 2.625 ≥ 2` via `Complex.Gamma_add_one` gives `‖Γ w‖ ≤ 1/2`.
+This is the DG-leaf / E05-E06 complex-Γ disc piece on the R02 w-plane. -/
+theorem D3SG_R02_disc_upper (w : ℂ)
+    (hre_lo : 0.025 ≤ w.re) (hre_hi : w.re ≤ 0.37)
+    (him_lo : -4.125 ≤ w.im) (him_hi : w.im ≤ -2.625) :
+    ‖Complex.Gamma w‖ ≤ 1 / 2 := by
+  have him_neg : w.im < 0 := by linarith
+  have him_abs : (2.625 : ℝ) ≤ |w.im| := by
+    rw [abs_of_neg him_neg]
+    linarith
+  have hw_norm_ge : (2.625 : ℝ) ≤ ‖w‖ :=
+    le_trans him_abs (Complex.abs_im_le_norm w)
+  have hNorm2 : (2 : ℝ) ≤ ‖w‖ := by linarith
+  have hw0 : w ≠ 0 := by
+    intro h
+    have him0 : w.im = 0 := by
+      rw [h]
+      simp
+    linarith
+  have hG : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw0
+  have hGn : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [hG, norm_mul]
+  have hre1_eq : (w + 1).re = w.re + 1 := by simp
+  have hRe1_pos : (0 : ℝ) < (w + 1).re := by
+    rw [hre1_eq]
+    linarith
+  have hRe1_lo : (1 : ℝ) ≤ (w + 1).re := by
+    rw [hre1_eq]
+    linarith
+  have hRe1_hi : (w + 1).re ≤ 2 := by
+    rw [hre1_eq]
+    linarith
+  have hDom : ‖Complex.Gamma (w + 1)‖ ≤ Real.Gamma (w + 1).re :=
+    D3SG_Gamma_norm_le_real (w + 1) hRe1_pos
+  have hRealCap : Real.Gamma (w + 1).re ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ hRe1_lo hRe1_hi
+  have hCap1 : ‖Complex.Gamma (w + 1)‖ ≤ 1 :=
+    le_trans hDom hRealCap
+  have hMul : ‖w‖ * ‖Complex.Gamma w‖ ≤ 1 := by
+    rw [← hGn]
+    exact hCap1
+  have hGamma_nn : (0 : ℝ) ≤ ‖Complex.Gamma w‖ := norm_nonneg _
+  have h2Mul : 2 * ‖Complex.Gamma w‖ ≤ ‖w‖ * ‖Complex.Gamma w‖ :=
+    mul_le_mul_of_nonneg_right hNorm2 hGamma_nn
+  have h2le1 : 2 * ‖Complex.Gamma w‖ ≤ 1 := le_trans h2Mul hMul
+  linarith
+
+#print axioms D3SG_R02_disc_upper

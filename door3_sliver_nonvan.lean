@@ -586,5 +586,24 @@ theorem sliver_hSliver_of_topNumericData_via_conj (mT : ℝ) (MT : ℝ)
   exact Door3SliverNonvan.hSliver_of_uniformData hstripT hwidth hstripB hwidthB z heq hgt
     hlt hne hs
 
+/-- `hSliver` from TOP numeric data at feasible `mT = 1/2`, `MT = 40`, bottom via
+proved conjugation. Mirrors `hSliver_of_topNumericData_011_via_conj`
+(`door3_rh_wiring.lean:251`) with `mT` fixed at the maximal closable uniform value;
+the gate `(0.01 < (1/2)/40)` and side conditions close by `norm_num`, leaving only
+the two supplier bounds (`hTopLower`/`hTopDeriv`) as residual premises. -/
+theorem sliver_hSliver_of_topHalf_M40_via_conj
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ),
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  Door3SliverNonvan.sliver_hSliver_of_topNumericData_via_conj (1 / 2 : ℝ) (40 : ℝ)
+    (by norm_num) (by norm_num) (by norm_num)
+    hTopLower hTopDeriv (by norm_num)
+
 end Door3SliverNonvan
 

@@ -595,6 +595,58 @@ Remainder (precise missing-lemma names):
   `π/(2·e^{π|y|}·C)` — rate `π ≈ 3.14` in the exponent — so no tuning of
   this lane can reach large-`|Im|` floors. Full complex Stirling is required.
 
+/-! ## 11. H3 attempt (WENDEL-H2 wave): verdict GAP, filed without force.
+
+Greps (this file + banked leaves, before edit):
+- this file: zero hits for `Complex.log`, `1 / (2`, `digamma_apply_add_one`,
+  `Binet`, `logGamma` outside comments (only M2 Gauss-rep mentions `:44,469,592-593`).
+- banked `D3SG_*` (`door3_stirling_gamma`): uppers / shift-norm / real caps only
+  (`D3SG_Gamma_norm_le_real`, `D3SG_gamma_shift_norm`); no `log w`, no `1/(2*w)`.
+- banked `D3SR_*` (`door3_stirling_rem:63-265`): real Wendel / slope / reflection
+  lower only; `:272-281` names M2 (Binet / complex log-Gamma remainder, unbanked)
+  and M3 (Gauss digamma rep, Mathlib TODO, unbanked).
+- Mathlib banked feeder: `Complex.digamma_apply_add_one`
+  (reused `door3_digamma.lean:183-185` `psi_up_one`, `:187-223` `psi_shift_nat`).
+- Mathlib TODO (unbanked): Gauss integral rep of digamma
+  (`door3_stirling_rem:277-281`, `door3_digamma.lean:14,45,53,555`).
+
+Pick: H3 over H2. H2/Binet has zero feeders anywhere (in-repo Binet unsupported);
+H3 has one banked recurrence feeder. H3 still does NOT close from banked pieces:
+`‖digamma w - (log w - 1/(2*w))‖ ≤ C/‖w‖^2` needs a Gauss disc at a large shift
+plus the log-shift expansion, both unbanked. Filed below as explicit hypotheses.
+-/
+
+theorem digamma_shift_banked (w : ℂ) (h : ∀ m : ℕ, w ≠ -(m : ℂ)) :
+    Complex.digamma (w + 1) = Complex.digamma w + w⁻¹ :=
+  Complex.digamma_apply_add_one w h
+
+theorem h3_transport_of_shifted_disc (w cN S : ℂ) (N : ℕ) (rN : ℝ)
+    (hEq : Complex.digamma (w + ((N : ℕ) : ℂ)) = Complex.digamma w + S)
+    (hDisc : ‖Complex.digamma (w + ((N : ℕ) : ℂ)) - cN‖ ≤ rN) :
+    ‖Complex.digamma w - (cN - S)‖ ≤ rN := by
+  have hEq2 : Complex.digamma w =
+      Complex.digamma (w + ((N : ℕ) : ℂ)) - S := by
+    rw [hEq]
+    ring
+  have hSame : Complex.digamma w - (cN - S) =
+      Complex.digamma (w + ((N : ℕ) : ℂ)) - cN := by
+    rw [hEq2]
+    ring
+  rw [hSame]
+  exact hDisc
+
+/-! H3 GAP (exact missing feeders, no force):
+G1 (Gauss disc, unbanked): `‖digamma (w+N) - (log (w+N) - 1/(2*(w+N)))‖ ≤ rN`
+  with `rN = C/‖w+N‖^2` for the four `w` centers at some explicit `N, C`.
+  Needs the Gauss integral rep of `Complex.digamma` (Mathlib TODO cited above).
+G2 (log-shift link, unbanked): `‖(cN - S) - (log w - 1/(2*w))‖` bound where
+  `S = ∑ k ∈ range N, (w+k)⁻¹`, i.e. the Stirling log-expansion of the
+  recurrence sum. Needs complex log-Gamma remainder / Binet bounds (unbanked).
+With G1+G2, `h3_transport_of_shifted_disc` + triangle inequality would yield H3;
+neither G1 nor G2 is banked, so H3 is NOT proved here. H2 not attempted (strictly
+farther: Binet zero feeders). No `sorry`/`admit`/`axiom`; no new imports.
+-/
+
 This file was written without running any build; it is not machine-checked.
 -/
 

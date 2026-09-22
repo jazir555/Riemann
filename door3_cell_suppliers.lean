@@ -6121,4 +6121,353 @@ theorem CS_S4f_shortfall_1850 : (1.4 : ℝ) * 1.85 - 1.94 = 0.65 := by
 #print axioms CS_etaFactor_1850_proved
 #print axioms CS_S4f_shortfall_1850
 
+/-- S14 rung (k=13,14; honest stall): trig-free Re floor
+`Re(S₁₄) = Re(S₁₂) + Re₁₃ - Re₁₄ ≥ -0.60 - 0.41 - 0.40 = -1.41`.
+TRUE `Re(S₁₄)` trails live best `slow = 1.94` by design — this floor
+`-1.41` is honest (worse than S12 `-0.60`, no force).
+
+Per-term routes (banked windows only, mirrors of banked lemmas):
+* `log 13 = log 12 + log(13/12)` (`CS_log_thirteen_eq`, mirror of
+  `CS_log_eleven_eq`), so `log 13 ∈ [2.5160, 2.6061]` from banked
+  `CS_log_twelve_ge/le` + `log(13/12) ∈ [1/13, 1/12]`.
+* `log 14 = log 7 + log 2` exact (`CS_log_fourteen_eq`, mirror of
+  `CS_log_twelve_eq`), so `log 14 ∈ [2.5819, 2.6894]` from banked
+  `CS_log_seven_ge/le` + `CS_log2_ge/le`.
+* Rpow: `13^0.395 ≥ 2.48`, `14^0.395 ≥ 2.53` (quadratic lowers, mirrors of
+  `CS_rpow11pos_lower_proved`); hence `r₁₃ ≤ 0.41`, `r₁₄ ≤ 0.40`
+  (reciprocal steps, mirrors of `CS_rpow11neg_upper_proved`).
+* Cpow Re splits for `13^{-s}`, `14^{-s}` (token mirrors of
+  `CS_cpow11_sCenter_re`).
+* Trig-free Re caps: `Re₁₃ ≥ -0.41`, `Re₁₄ ≤ 0.40` (`-1 ≤ cos ≤ 1` only).
+* Assembly: `Re(S₁₄) = Re(S₁₂) + Re₁₃ - Re₁₄ ≥ -0.60 - 0.41 - 0.40 = -1.41`.
+Reuses banked `CS_cpow11_sCenter_re`, `CS_cpow12_sCenter_re`,
+`CS_rpow11neg_upper_proved`, `CS_rpow12neg_upper_proved` via S12 base
+`CS_complex_S12_Re_ge_neg060`; no S11/S12 rebuild. -/
+
+/-- `log(13/12)` upper (`≤ 1/12`, mirrors `CS_log1110_upper`). -/
+theorem CS_log1312_upper : Real.log (13 / 12 : ℝ) ≤ (1 / 12 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 13 / 12)
+  have he : (13 / 12 : ℝ) - 1 = (1 / 12 : ℝ) := by norm_num
+  linarith
+
+/-- `log(13/12)` lower (`≥ 1/13` via `log(13/12) = -log(12/13)`, mirrors
+`CS_log1110_lower`). -/
+theorem CS_log1312_lower : (1 / 13 : ℝ) ≤ Real.log (13 / 12 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 12 / 13)
+  have he : (12 / 13 : ℝ) - 1 = (-(1 / 13) : ℝ) := by norm_num
+  have hinv : Real.log (13 / 12 : ℝ) = -Real.log (12 / 13 : ℝ) := by
+    have heq : (13 / 12 : ℝ) = (12 / 13 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 13 = log 12 + log(13/12)` composite bridge (mirror of
+`CS_log_eleven_eq`). -/
+theorem CS_log_thirteen_eq :
+    Real.log 13 = Real.log 12 + Real.log (13 / 12 : ℝ) := by
+  have h13 : (13 : ℝ) = 12 * (13 / 12) := by norm_num
+  conv_lhs => rw [h13]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 13` lower (`2.5160 ≤ log 13` from `CS_log_twelve_ge` +
+`CS_log1312_lower`). -/
+theorem CS_log_thirteen_ge : (2.5160 : ℝ) ≤ Real.log 13 := by
+  rw [CS_log_thirteen_eq]
+  have h12 := CS_log_twelve_ge
+  have h1312 := CS_log1312_lower
+  have hcap : (2.5160 : ℝ) ≤ 2.4391 + 1 / 13 := by norm_num
+  linarith
+
+/-- `log 13` upper (`log 13 ≤ 2.6061` from `CS_log_twelve_le` +
+`CS_log1312_upper`). -/
+theorem CS_log_thirteen_le : Real.log 13 ≤ (2.6061 : ℝ) := by
+  rw [CS_log_thirteen_eq]
+  have h12 := CS_log_twelve_le
+  have h1312 := CS_log1312_upper
+  have hcap : (2.5227 : ℝ) + 1 / 12 ≤ 2.6061 := by norm_num
+  linarith
+
+/-- `log 14 = log 7 + log 2` composite bridge (mirror of
+`CS_log_twelve_eq`). -/
+theorem CS_log_fourteen_eq : Real.log 14 = Real.log 7 + Real.log 2 := by
+  have h14 : (14 : ℝ) = 7 * 2 := by norm_num
+  rw [h14, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 14` lower (`2.5819 ≤ log 14` from banked lowers). -/
+theorem CS_log_fourteen_ge : (2.5819 : ℝ) ≤ Real.log 14 := by
+  rw [CS_log_fourteen_eq]
+  have h7 := CS_log_seven_ge
+  have h2 := CS_log2_ge
+  have hcap : (2.5819 : ℝ) ≤ 1.8888 + 0.693147 := by norm_num
+  linarith
+
+/-- `log 14` upper (`log 14 ≤ 2.6894` from banked uppers). -/
+theorem CS_log_fourteen_le : Real.log 14 ≤ (2.6894 : ℝ) := by
+  rw [CS_log_fourteen_eq]
+  have h7 := CS_log_seven_le
+  have h2 := CS_log2_le
+  have hcap : (1.9962 : ℝ) + 0.693148 ≤ 2.6894 := by norm_num
+  linarith
+
+/-- `13^0.395 ≥ 2.48` lower input (TRUE `≈ 2.75`). -/
+def CS_rpow13pos_lower : Prop := (2.48 : ℝ) ≤ (13 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `13^0.395 ≥ 2.48` via quadratic lower at
+`x = 0.395·log 13 > 0.99380` (uses `CS_log_thirteen_ge`). -/
+theorem CS_rpow13pos_lower_proved : CS_rpow13pos_lower := by
+  show (2.48 : ℝ) ≤ (13 : ℝ) ^ ((0.395 : ℝ))
+  have h13 : (2.5160 : ℝ) ≤ Real.log 13 := CS_log_thirteen_ge
+  have hx_lo : (0.99380 : ℝ) < 0.395 * Real.log 13 := by
+    have hmul : (0.395 : ℝ) * 2.5160 ≤ 0.395 * Real.log 13 :=
+      mul_le_mul_of_nonneg_left h13 (by norm_num)
+    have hcap : (0.99380 : ℝ) < 0.395 * 2.5160 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 13 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.99380 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.48 : ℝ) ≤ 1 + 0.99380 + (0.99380 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.48 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (13 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 13)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `13^-0.395 ≤ 0.41` upper input (TRUE `≈ 0.363`). -/
+def CS_rpow13neg_upper : Prop := (13 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.41 : ℝ)
+
+/-- CLOSED: `13^-0.395 ≤ 0.41` from `13^0.395 ≥ 2.48`
+(`0.41·2.48 = 1.0168 ≥ 1`). -/
+theorem CS_rpow13neg_upper_proved : CS_rpow13neg_upper := by
+  show (13 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.41 : ℝ)
+  have hlow : (2.48 : ℝ) ≤ (13 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow13pos_lower_proved
+  have hpos : (0 : ℝ) < (13 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (13 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (13 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 13)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.41 : ℝ) * (13 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.41 * 2.48 := by norm_num
+    calc (1 : ℝ) ≤ 0.41 * 2.48 := hmul
+      _ ≤ 0.41 * (13 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `14^0.395 ≥ 2.53` lower input (TRUE `≈ 2.84`). -/
+def CS_rpow14pos_lower : Prop := (2.53 : ℝ) ≤ (14 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `14^0.395 ≥ 2.53` via quadratic lower at
+`x = 0.395·log 14 > 1.01984` (uses `CS_log_fourteen_ge`). -/
+theorem CS_rpow14pos_lower_proved : CS_rpow14pos_lower := by
+  show (2.53 : ℝ) ≤ (14 : ℝ) ^ ((0.395 : ℝ))
+  have h14 : (2.5819 : ℝ) ≤ Real.log 14 := CS_log_fourteen_ge
+  have hx_lo : (1.01984 : ℝ) < 0.395 * Real.log 14 := by
+    have hmul : (0.395 : ℝ) * 2.5819 ≤ 0.395 * Real.log 14 :=
+      mul_le_mul_of_nonneg_left h14 (by norm_num)
+    have hcap : (1.01984 : ℝ) < 0.395 * 2.5819 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 14 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.01984 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.53 : ℝ) ≤ 1 + 1.01984 + (1.01984 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.53 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (14 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 14)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `14^-0.395 ≤ 0.40` upper input (TRUE `≈ 0.353`). -/
+def CS_rpow14neg_upper : Prop := (14 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.40 : ℝ)
+
+/-- CLOSED: `14^-0.395 ≤ 0.40` from `14^0.395 ≥ 2.53`
+(`0.40·2.53 = 1.012 ≥ 1`). -/
+theorem CS_rpow14neg_upper_proved : CS_rpow14neg_upper := by
+  show (14 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.40 : ℝ)
+  have hlow : (2.53 : ℝ) ≤ (14 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow14pos_lower_proved
+  have hpos : (0 : ℝ) < (14 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (14 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (14 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 14)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.40 : ℝ) * (14 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.40 * 2.53 := by norm_num
+    calc (1 : ℝ) ≤ 0.40 * 2.53 := hmul
+      _ ≤ 0.40 * (14 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `13^{-s}` at `sCenter` (token mirror of
+`CS_cpow11_sCenter_re`). -/
+theorem CS_cpow13_sCenter_re : ((((13 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (13 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 13) := by
+  have h13pos : (0 : ℝ) < 13 := by norm_num
+  have hxC : ((13 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h13pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((13 : ℝ) : ℂ) = (((Real.log 13 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h13pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 13 : ℝ)) : ℂ)).re = Real.log 13 := Complex.ofReal_re _
+  have hzim : ((((Real.log 13 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 13 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 13 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 13 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 13 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 13 * (-(0.395 : ℝ)))
+      = (13 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h13pos _).symm
+  have hcos : Real.cos (Real.log 13 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 13) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `14^{-s}` at `sCenter` (token mirror of
+`CS_cpow12_sCenter_re`). -/
+theorem CS_cpow14_sCenter_re : ((((14 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (14 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 14) := by
+  have h14pos : (0 : ℝ) < 14 := by norm_num
+  have hxC : ((14 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h14pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((14 : ℝ) : ℂ) = (((Real.log 14 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h14pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 14 : ℝ)) : ℂ)).re = Real.log 14 := Complex.ofReal_re _
+  have hzim : ((((Real.log 14 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 14 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 14 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 14 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 14 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 14 * (-(0.395 : ℝ)))
+      = (14 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h14pos _).symm
+  have hcos : Real.cos (Real.log 14 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 14) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₁₃ ≥ -0.41` (`r₁₃ ≤ 0.41`, `-1 ≤ cos`; TRUE `≈ -0.31`). -/
+theorem CS_Re13_ge_neg041 :
+    (-0.41 : ℝ) ≤ (13 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 13) := by
+  have hr0 : (0 : ℝ) ≤ (13 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (13 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.41 : ℝ) := CS_rpow13neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 13) := Real.neg_one_le_cos _
+  have h1 : (13 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (13 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 13) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (13 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((13 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.41 : ℝ) ≤ -((13 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₁₄ ≤ 0.40` (`r₁₄ ≤ 0.40`, `cos ≤ 1`; TRUE `≈ -0.16`). -/
+theorem CS_Re14_le_040 :
+    (14 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 14) ≤ (0.40 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (14 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (14 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.40 : ℝ) := CS_rpow14neg_upper_proved
+  have hcos : Real.cos (6.75 * Real.log 14) ≤ (1 : ℝ) := Real.cos_le_one _
+  have h1 : (14 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 14)
+      ≤ (14 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (14 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (14 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Complex S14 partial sum at `sCenter` (`S₁₂ + 13^{-s} - 14^{-s}`). -/
+noncomputable def CS_S14C : ℂ :=
+  CS_S12C + (13 : ℂ) ^ (-R02Pilot.sCenter) - (14 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S14 (`Re(S₁₄) = Re(S₁₂) + Re₁₃ - Re₁₄`,
+mirror of `CS_S12C_Re_eq`). -/
+theorem CS_S14C_Re_eq :
+    (CS_S14C).re = (CS_S12C).re
+      + (13 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 13)
+      - (14 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 14) := by
+  unfold CS_S14C
+  have h13 : ((13 : ℂ)) = ((((13 : ℝ)) : ℂ)) := by simp
+  have h14c : ((14 : ℂ)) = ((((14 : ℝ)) : ℂ)) := by simp
+  rw [h13, h14c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow13_sCenter_re, CS_cpow14_sCenter_re]
+
+/-- Complex-S14 real part `≥ -1.41` (PROVED, unconditional):
+`Re(S₁₄) = Re(S₁₂) + Re₁₃ - Re₁₄ ≥ -0.60 - 0.41 - 0.40 = -1.41`
+(honest regression vs S12 `-0.60` by `0.81`, trails live
+best `slow = 1.94` by design; reuses banked S12 base
+`CS_complex_S12_Re_ge_neg060` plus banked `CS_cpow11/12`,
+`CS_rpow11/12` transitively). -/
+theorem CS_complex_S14_Re_ge_neg141 :
+    (-1.41 : ℝ) ≤ (CS_S14C).re := by
+  have hEq := CS_S14C_Re_eq
+  have hS12 := CS_complex_S12_Re_ge_neg060
+  have hT13 := CS_Re13_ge_neg041
+  have hT14 := CS_Re14_le_040
+  rw [hEq]
+  linarith
+
+/-- Honest gap: the new S14 Re `-1.41` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `3.35`; no S14 feed closes here. -/
+theorem CS_S14C_below_slow_gap :
+    (1.94 : ℝ) - (-1.41 : ℝ) = 3.35 := by
+  norm_num
+
+#print axioms CS_log1312_upper
+#print axioms CS_log1312_lower
+#print axioms CS_log_thirteen_eq
+#print axioms CS_log_thirteen_ge
+#print axioms CS_log_thirteen_le
+#print axioms CS_log_fourteen_eq
+#print axioms CS_log_fourteen_ge
+#print axioms CS_log_fourteen_le
+#print axioms CS_rpow13pos_lower_proved
+#print axioms CS_rpow13neg_upper_proved
+#print axioms CS_rpow14pos_lower_proved
+#print axioms CS_rpow14neg_upper_proved
+#print axioms CS_cpow13_sCenter_re
+#print axioms CS_cpow14_sCenter_re
+#print axioms CS_Re13_ge_neg041
+#print axioms CS_Re14_le_040
+#print axioms CS_S14C_Re_eq
+#print axioms CS_complex_S14_Re_ge_neg141
+#print axioms CS_S14C_below_slow_gap
+
 end Door3CellSuppliers

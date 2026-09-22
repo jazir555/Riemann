@@ -4877,4 +4877,58 @@ theorem sSCUT_S9_skip8_eta10_eta12_shortfall_8192_lt :
     (322722751 / 70318500 : ℝ) < (1951921 / 388500 : ℝ) := by
   norm_num
 
+/-! ## sCut k=15 ODD shard (first link): sharp `log 16` + `θ₁₆` windows.
+
+`k = 15` is ODD so `eta₁₅ = -16^{-sCut}`; the term is constructive iff
+`cos(10·log 16) ≤ -c`. Key: `log 16 = 4·log 2` EXACT (power of two), so the
+sharp window comes straight from banked d9 `log 2`
+(`Real.log_two_gt_d9` / `Real.log_two_lt_d9`, same shape as
+`sSCUT_theta8_sharp_mem`) with no ratio slack. Next: `δ₁₆` / cos flip. -/
+
+/-- Composite log bridge `log 16 = 4·log 2` (`16 = 2^4` via `Real.log_pow`;
+mirror of `Door3CellSuppliers.CS_log_four_eq`). -/
+theorem sSCUT_log_sixteen_eq : Real.log 16 = 4 * Real.log 2 := by
+  have h16 : (16 : ℝ) = 2 ^ (4 : ℕ) := by norm_num
+  rw [h16, Real.log_pow]
+  norm_num
+
+/-- Sharp `log 16` lower (`4 * 0.6931471803 = 2.7725887212` from d9). -/
+theorem sSCUT_log_sixteen_ge : (2.7725887212 : ℝ) ≤ Real.log 16 := by
+  have h16 := sSCUT_log_sixteen_eq
+  have h2 := Real.log_two_gt_d9
+  have c : 4 * (0.6931471803 : ℝ) = 2.7725887212 := by norm_num
+  linarith
+
+/-- Sharp `log 16` upper (`4 * 0.6931471808 = 2.7725887232` from d9). -/
+theorem sSCUT_log_sixteen_le : Real.log 16 ≤ (2.7725887232 : ℝ) := by
+  have h16 := sSCUT_log_sixteen_eq
+  have h2 := Real.log_two_lt_d9
+  have c : 4 * (0.6931471808 : ℝ) = 2.7725887232 := by norm_num
+  linarith
+
+/-- Sharp `n = 16` phase window (`10*log 16 ∈ (27.725887212, 27.725887232)`
+via `sSCUT_log_sixteen_eq` + d9; enabler for the `δ₁₆` recipe). -/
+theorem sSCUT_theta16_sharp_mem :
+    (27.725887212 : ℝ) < 10 * Real.log 16 ∧
+    10 * Real.log 16 < (27.725887232 : ℝ) := by
+  have h16 := sSCUT_log_sixteen_eq
+  have h2lo := Real.log_two_gt_d9
+  have h2hi := Real.log_two_lt_d9
+  have hsum_lo : (2.7725887212 : ℝ) < 4 * Real.log 2 := by
+    have c : 4 * (0.6931471803 : ℝ) = 2.7725887212 := by norm_num
+    linarith
+  have hsum_hi : 4 * Real.log 2 < (2.7725887232 : ℝ) := by
+    have c : 4 * (0.6931471808 : ℝ) = 2.7725887232 := by norm_num
+    linarith
+  have hmul_lo := mul_lt_mul_of_pos_left hsum_lo (by norm_num : (0 : ℝ) < 10)
+  have hmul_hi := mul_lt_mul_of_pos_left hsum_hi (by norm_num : (0 : ℝ) < 10)
+  have c1 : (10 : ℝ) * 2.7725887212 = 27.725887212 := by norm_num
+  have c2 : (10 : ℝ) * 2.7725887232 = 27.725887232 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the sharp `n = 16` window (`2e-8`). -/
+theorem sSCUT_theta16_sharp_width_eq :
+    (27.725887232 : ℝ) - 27.725887212 = (0.000000020 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

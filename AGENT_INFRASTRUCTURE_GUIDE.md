@@ -5661,6 +5661,10 @@ sorry-free infrastructure and the complete commit ledger above.
   closedBall 0 12 via banked `uniform_top_deriv_of_closedBall` at
   d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe).   Residual:
   hTopLower (1/2 uniform) + ball-sup-40 numeral.
+- 2026-09-22 SLIVER-MID (background `ses_f34f3a727`, proof-only,
+  grep-clean): `sliver_hSliver_of_topHalf_M40_via_conj :594`
+  (feasible mT=1/2/MT=40 top-only hSliver, mirror of `_011`; gates
+  norm_num). 2 premises open (hTopLower 1/2, hTopDeriv 40).
 - 2026-09-22 DERIV-PSI (background `ses_f34f3a72c`, proof-only, NO-EDIT
   honest gap): `psiNeed_outer` NOT closable via recurrence-transport —
   best banked disc is a REAL secant (slopeS at Im=0), no bridge to
@@ -5883,6 +5887,18 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 STIRLING-DISC (background `ses_f34f3a729`, proof-only,
+  grep-clean, stirling-only commit): R02 Gamma disc upper PROVED —
+  `D3SG_R02_disc_upper :1918` (‖Γw‖≤1/2 on Re∈[0.025,0.37],
+  Im∈[-4.125,-2.625]: w+1 shift into [1,2]-cap ‖Γ‖≤1, ‖w‖≥|Im|≥2.625,
+  1/2.625≈0.381≤0.5). Unconditional from banked windows. Feeds DG/G
+  premises + rate leaves (G-cap consumer).
+- 2026-09-22 WENDEL-H2 (background `ses_f34f3a728`, proof-only,
+  grep-clean, wendel-only commit): H3 picked over H2 (H2 zero feeders)
+  — `digamma_shift_banked :619` (closed recurrence wrapper) +
+  `h3_transport_of_shifted_disc :623` (conditional transport) + GAP
+  `:638` (G1 Gauss disc at w+N [Mathlib TODO] + G2 log-shift link
+  [needs Binet]). H1/H2/H3-G1/G2 open; M1 banked.
 - 2026-09-22 R02-CELL2 (background `ses_f34f5d1a4`, proof-only,
   grep-clean, first_cell-only commit): gammaLower-0.008 GAP (not
   closed) — S-window dead (need S≤15104, banked 20128, +5024 over;
@@ -5922,6 +5938,18 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT37 (background `ses_f34f29177`, proof-only, grep-clean,
+  pilot-only commit): log16 SHARP — `log_sixteen_eq` (log16=4·log2 via
+  log_pow, no sSCUT_log_two existed so d9 direct) + window
+  `:4896+` ([2.7725887212,2.7725887232], width 2e-9, exact power-of-2)
+  + `theta16_sharp_mem :4911` (width 2e-8). Next: delta16/cos flip
+  (k=15 odd needs cos≤-c).
+- 2026-09-22 ETA-S14 (background `ses_f34f3a72f`, proof-only,
+  grep-clean, suppliers-only commit): S14 even ladder for record —
+  log13/14 bridges, rpow13/14 quads (0.41·2.48=1.0168, 0.40·2.53=1.012),
+  cpow13/14 splits, Re13≥-0.41/Re14≤0.40 → floor -1.41 `:6438`
+  (-0.60-0.81) + gap 3.35 `:6449`. Worse than S12; live 1.94 stands.
+  Even ladder S4→S14 complete (1.56/0.95/1.15/0.24/-0.60/-1.41).
 - 2026-09-22 SCUT-TAIL (background `ses_f34f5d1a2`, proof-only,
   grep-clean, pilot-only commit): M=8192 tail tighten —
   `M8192_rpow_ge :4797` (181/2≤8192^1/2, 8190.25≤8192) + `r_8192_le
