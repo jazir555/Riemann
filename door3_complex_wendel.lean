@@ -867,4 +867,99 @@ theorem stirling_wOuter_add8_cap :
 This file was written without running any build; it is not machine-checked.
 -/
 
+/-! ## 15. WENDEL-HEQ 8-fold shift (PROOF-ONLY, FENCED): BANKED.
+
+Greps (before edit, this turn):
+- exact one-step shift `digamma_shift_banked` at `:620-622`:
+  `(w : ℂ) (h : ∀ m : ℕ, w ≠ -(m : ℂ)) :
+   Complex.digamma (w + 1) = Complex.digamma w + w⁻¹`
+  proved by `Complex.digamma_apply_add_one`.
+- pole-avoidance pattern mirrored from `door3_digamma.lean:247-258`
+  (`shift_avoid_of_re_pos` + `avoid_outer` at `N = 8`): Re-positive
+  center gives `(w + (k : ℂ)) ≠ -((m : ℕ) : ℂ)` via `Complex.re`.
+- `h3_outer_of_G1_G2` hypothesis `:774-775`:
+  `Complex.digamma (wOuter + (8 : ℂ)) = Complex.digamma wOuter + S_outerN8`.
+
+Banked here (proved, induction on `digamma_shift_banked`, no new axioms):
+`digamma_shift_nat` (general N) → `digamma_shift_8fold` (N = 8) →
+`digamma_shift_wOuter_8` (exact `hEq` shape for `h3_outer_of_G1_G2`).
+H3 then needs only G1 + G2. No `sorry`/`admit`/`axiom`; no `simpa` tactic;
+no new imports; no other files touched.
+-/
+
+theorem wOuter_re_pos : 0 < wOuter.re := by
+  rw [wOuter_re]
+  norm_num
+
+theorem shift_avoid_of_re_pos (w : ℂ) (N : ℕ) (hw : 0 < w.re) (k : ℕ)
+    (hk : k ≤ N) (m : ℕ) : (w + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+  intro hCon
+  have hR := congrArg Complex.re hCon
+  simp only [Complex.add_re, Complex.natCast_re, Complex.neg_re] at hR
+  have hm : (0 : ℝ) ≤ (((m : ℕ)) : ℝ) := Nat.cast_nonneg m
+  have hk0 : (0 : ℝ) ≤ (((k : ℕ)) : ℝ) := Nat.cast_nonneg k
+  linarith
+
+theorem wOuter_shift_avoid (k : ℕ) (hk : k ≤ 8) (m : ℕ) :
+    (wOuter + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) :=
+  shift_avoid_of_re_pos wOuter 8 wOuter_re_pos k hk m
+
+theorem digamma_shift_nat (w : ℂ) (N : ℕ)
+    (h : ∀ (k : ℕ), k ≤ N → ∀ (m : ℕ), (w + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ)) :
+    Complex.digamma (w + (((N : ℕ)) : ℂ)) =
+      Complex.digamma w + ∑ k ∈ Finset.range N, (w + (((k : ℕ)) : ℂ))⁻¹ := by
+  revert h
+  induction N with
+  | zero =>
+    intro _
+    simp
+  | succ n ih =>
+    intro h
+    have hle : ∀ (k : ℕ), k ≤ n → ∀ (m : ℕ), (w + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+      intro k hk m
+      exact h k (le_trans hk (Nat.le_succ n)) m
+    have ihw := ih hle
+    have hcast : (((n + 1 : ℕ)) : ℂ) = (((n : ℕ)) : ℂ) + 1 := by
+      push_cast
+    have hstep : Complex.digamma ((w + (((n : ℕ)) : ℂ)) + 1) =
+        Complex.digamma (w + (((n : ℕ)) : ℂ)) + (w + (((n : ℕ)) : ℂ))⁻¹ :=
+      digamma_shift_banked _ (h n (Nat.le_succ n))
+    have hsum : ∑ k ∈ Finset.range (n + 1), (w + (((k : ℕ)) : ℂ))⁻¹ =
+        (∑ k ∈ Finset.range n, (w + (((k : ℕ)) : ℂ))⁻¹) +
+          (w + (((n : ℕ)) : ℂ))⁻¹ :=
+      Finset.sum_range_succ _ n
+    calc Complex.digamma (w + (((n + 1 : ℕ)) : ℂ))
+        = Complex.digamma ((w + (((n : ℕ)) : ℂ)) + 1) := by
+          rw [hcast, add_assoc]
+      _ = Complex.digamma (w + (((n : ℕ)) : ℂ)) +
+          (w + (((n : ℕ)) : ℂ))⁻¹ := hstep
+      _ = (Complex.digamma w +
+          ∑ k ∈ Finset.range n, (w + (((k : ℕ)) : ℂ))⁻¹) +
+          (w + (((n : ℕ)) : ℂ))⁻¹ := by
+          rw [ihw]
+      _ = Complex.digamma w +
+          ∑ k ∈ Finset.range (n + 1), (w + (((k : ℕ)) : ℂ))⁻¹ := by
+          rw [hsum]
+          ring
+
+theorem digamma_shift_8fold (w : ℂ)
+    (h : ∀ (k : ℕ), k ≤ 8 → ∀ (m : ℕ), (w + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ)) :
+    Complex.digamma (w + (((8 : ℕ)) : ℂ)) =
+      Complex.digamma w + ∑ k ∈ Finset.range 8, (w + (((k : ℕ)) : ℂ))⁻¹ :=
+  digamma_shift_nat w 8 h
+
+theorem digamma_shift_wOuter_8 :
+    Complex.digamma (wOuter + (8 : ℂ)) =
+      Complex.digamma wOuter + S_outerN8 := by
+  have hAvoid : ∀ (k : ℕ), k ≤ 8 → ∀ (m : ℕ),
+      (wOuter + ((k : ℕ) : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+    intro k hk m
+    exact wOuter_shift_avoid k hk m
+  have h := digamma_shift_8fold wOuter hAvoid
+  have hcast8 : (((8 : ℕ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast8] at h
+  unfold S_outerN8
+  exact h
+
 end Door3ComplexWendel

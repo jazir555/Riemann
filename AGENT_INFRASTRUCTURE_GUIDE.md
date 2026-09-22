@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 WENDEL-HEQ (background `ses_f34de0cab`, proof-only,
+  grep-clean, wendel-only commit): shift identity PROVED —
+  `wOuter_re_pos :890` + `shift_avoid_of_re_pos :894` (local mirror) +
+  `wOuter_shift_avoid :903` + `digamma_shift_nat :907` (general-N
+  induction) + `digamma_shift_8fold :945` + `digamma_shift_wOuter_8
+  :951` (exact hEq shape). H3's hEq premise DISCHARGED; H3 needs only
+  G1+G2 Props now.
 - 2026-09-22 FIRSTCELL-POLAR (background `ses_f34deca25`, proof-only,
   grep-clean, first_cell-only commit): patch item (ii) DONE — polar
   caps `‖1/s‖,‖1/(1-s)‖ ≤ 0.20` (`:1412/:1420`, 1/5.23≈0.1912 via
