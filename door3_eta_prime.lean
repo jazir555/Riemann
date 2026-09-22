@@ -1111,3 +1111,257 @@ def etaR02_hConvLe_residual_spec : Prop :=
     (∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
       ∀ etaDerivVal : ℂ, etaDerivVal = ∑' m, etaDerivPairTerm s m →
         ‖etaDerivVal‖ ≤ Deta)
+
+/-!
+## R02 Deta-link: INTEGRAL-comparison dominator (complementary to ball-side R02DOM p-series route).
+
+Grep record (read-only, before writing; this file only appended below):
+* residual `:1109` `etaR02_hConvLe_residual_spec`: needs `‖∑' m, etaDerivPairTerm s m‖ ≤ Deta`
+  uniformly on R02 rect `0.05 ≤ s.re ≤ 0.74`, `-8.25 ≤ s.im ≤ -5.25`.
+* R02 rect shapes: `zeta_rigorous.R02_D3_pairLim_upper :32536`,
+  `R02_D3_cvtFactor_ge` (used at `:830-834`), `etaVal_upper_R02 :877`,
+  `R02_etaWorstMajorant` (`door3_R02_ball_advance.lean:1411`,
+  `log * 8.29 * (2m+1)^(-0.05-1) + diff * (2m+1)^(-0.05)`),
+  `R02_etaWorst_normSq_le_829` (`‖s‖ ≤ 8.29`); ball-side R02DOM p-series attempt
+  `:1650-1769` (`R02_etaWorstDominator105`, shift summability, pointwise blocker).
+* integral-comparison shapes (reference only, rebuilt locally; `zeta_rigorous` untouched):
+  `R02_D3_shift105_summable :34827`, `R02_D3_odd105_le_shift :34843`,
+  `R02_D3_odd105_summable :34852`, `R02_D3_rpow105_antitone :34867`,
+  `R02_D3_rpow105_integrable :34876`, `R02_D3_tail2_le_integral105 :34882`,
+  `R02_D3_integral105_eq :34901` (`= 1 / 0.05`), `R02_D3_tail2_le_20 :34916`,
+  `R02_D3_odd105_tsum_le_21 :34933`; `tail105_M15`-style
+  (`R02_D3_tail105_M15_le_1761 :41284`) is the same `1.05`-decay integral-tail
+  pattern at larger `M`, reference only.
+* Mathlib engines: `Real.summable_nat_rpow_inv`, `summable_nat_add_iff`,
+  `AntitoneOn.tsum_comp_add_le_integral`, `integrableOn_Ioi_rpow_of_lt`,
+  `integral_Ioi_rpow_of_lt`, `Real.antitoneOn_rpow_Ioi_of_exponent_nonpos`.
+
+What is banked here (integral route, different construction from ball-side p-series):
+* local R02 majorant `etaDerivMajorantR02` (mirror of worst-case shape, exponent `0.05`);
+* full `1.05`-decay integral tail locally: shift/odd summability, antitone,
+  integrability, tail-vs-integral, closed form `1 / 0.05`, tail `≤ 20`, odd tsum `≤ 21`;
+* second majorant piece dominated by the odd `1.05` power (log-difference fold).
+What stays open (exact blocker, filed not forced):
+* first-piece log factor `log (2m+2) * 8.29 * (2m+1)^(-1.05)` has no fixed-`C`
+  pure-power cap (log grows without bound vs pure power); crude `log ≤ id`
+  gives divergent exponent `-0.05`. So no value for `:1109` is filed this turn.
+-/
+
+/-- R02 worst-case majorant, local rebuild of the `R02_etaWorstMajorant` shape
+(`door3_R02_ball_advance.lean:1411`): `etaDerivBound` RHS with `‖s‖ → 8.29`
+and `s.re → 0.05` (worst case on the R02 rect). -/
+noncomputable def etaDerivMajorantR02 (m : ℕ) : ℝ :=
+  Real.log (((2 * m + 2 : ℕ)) : ℝ) * 8.29 *
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) +
+    (Real.log (((2 * m + 2 : ℕ)) : ℝ) -
+      Real.log (((2 * m + 1 : ℕ)) : ℝ)) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ)))
+
+/-- Nonnegativity of the local R02 majorant (mirror of `etaDerivMajorant_nonneg :582`). -/
+theorem etaDerivMajorantR02_nonneg (m : ℕ) : 0 ≤ etaDerivMajorantR02 m := by
+  unfold etaDerivMajorantR02
+  have hApos : (0 : ℝ) < (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hB1le : (1 : ℝ) ≤ (((((2 * m + 2 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 2)
+  have hAB : (((((2 * m + 1 : ℕ)) : ℝ))) ≤ (((((2 * m + 2 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 2 * m + 1 ≤ 2 * m + 2)
+  have hlogB_nn : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Real.log_nonneg hB1le
+  have hlog_mono : Real.log (((((2 * m + 1 : ℕ)) : ℝ))) ≤
+      Real.log (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Real.log_le_log hApos hAB
+  have hDnn : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ))) := sub_nonneg.mpr hlog_mono
+  have hr7nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ) - 1)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hr5nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have h1 : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * 8.29 *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ) - 1)) := by
+    exact mul_nonneg (mul_nonneg hlogB_nn (by norm_num)) hr7nn
+  have h2 : 0 ≤ (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) :=
+    mul_nonneg hDnn hr5nn
+  exact add_nonneg h1 h2
+
+/-- Shift-series summability `(n+1)^(-1.05)` via `Real.summable_nat_rpow_inv`
+(local rebuild of `zeta_rigorous.R02_D3_shift105_summable :34827`). -/
+theorem etaR02Int_shift105_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+  have hp1 : (1 : ℝ) < (0.05 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((0.05 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift :
+      Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.05 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((0.05 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : (-1.05 : ℝ) = -((0.05 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Odd-vs-shift pointwise `(2n+1)^(-1.05) ≤ (n+1)^(-1.05)`
+(local rebuild of `R02_D3_odd105_le_shift :34843`). -/
+theorem etaR02Int_odd105_le_shift (n : ℕ) :
+    ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤
+      ((((n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+  have hm_pos : (0 : ℝ) < ((((n + 1 : ℕ)) : ℝ)) := Nat.cast_pos.mpr (by omega)
+  have hm_le : ((((n + 1 : ℕ)) : ℝ)) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_le.mpr (by omega)
+  have hexp : (-1.05 : ℝ) ≤ 0 := by norm_num
+  exact Real.rpow_le_rpow_of_nonpos hm_pos hm_le hexp
+
+/-- Odd-series summability via norm comparison with the shift series
+(local rebuild of `R02_D3_odd105_summable :34852`). -/
+theorem etaR02Int_odd105_summable :
+    Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+  apply Summable.of_norm_bounded etaR02Int_shift105_summable
+  intro n
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]
+  exact etaR02Int_odd105_le_shift n
+
+/-- Antitone majorant `x^(-1.05)` on `Ici 1`
+(local rebuild of `R02_D3_rpow105_antitone :34867`). -/
+theorem etaR02Int_rpow105_antitone :
+    AntitoneOn (fun x : ℝ => x ^ (-1.05 : ℝ)) (Set.Ici ((((1 : ℕ)) : ℝ))) := by
+  apply (Real.antitoneOn_rpow_Ioi_of_exponent_nonpos (by norm_num : (-1.05 : ℝ) ≤ 0)).mono
+  intro x hx
+  simp only [Set.mem_Ici, Set.mem_Ioi] at hx ⊢
+  have h1 : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  linarith
+
+/-- Integrability of `x^(-1.05)` on `Ioi 1`
+(local rebuild of `R02_D3_rpow105_integrable :34876`). -/
+theorem etaR02Int_rpow105_integrable :
+    MeasureTheory.IntegrableOn (fun x : ℝ => x ^ (-1.05 : ℝ))
+      (Set.Ioi ((((1 : ℕ)) : ℝ))) := by
+  apply integrableOn_Ioi_rpow_of_lt (by norm_num : (-1.05 : ℝ) < -1)
+  norm_num
+
+/-- `M = 1` integral-tail comparison for the shifted tail
+(local rebuild of `R02_D3_tail2_le_integral105 :34882`). -/
+theorem etaR02Int_tail2_le_integral105 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := by
+  exact AntitoneOn.tsum_comp_add_le_integral 1 etaR02Int_rpow105_antitone
+    etaR02Int_rpow105_integrable (fun t ht => Real.rpow_nonneg
+      (le_of_lt (lt_of_le_of_lt (Nat.cast_nonneg _) (Set.mem_Ioi.mp ht))) _)
+
+/-- Closed-form integral `∫ x in Ioi 1, x^(-1.05) = 1 / 0.05`
+(local rebuild of `R02_D3_integral105_eq :34901`). -/
+theorem etaR02Int_integral105_eq :
+    (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) = 1 / 0.05 := by
+  have hlt : (-1.05 : ℝ) < -1 := by norm_num
+  have hc : (0 : ℝ) < ((((1 : ℕ)) : ℝ)) := by norm_num
+  have h := integral_Ioi_rpow_of_lt hlt hc
+  have e1 : (-1.05 : ℝ) + 1 = -0.05 := by norm_num
+  rw [e1] at h
+  have ec : ((((1 : ℕ)) : ℝ)) ^ (-0.05 : ℝ) = (1 : ℝ) := by
+    have ecast : ((((1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+    rw [ecast, Real.one_rpow]
+  rw [ec] at h
+  have e2 : (-(1 : ℝ)) / (-0.05 : ℝ) = 1 / 0.05 := by norm_num
+  exact e2 ▸ h
+
+/-- Shift-tail numeral `∑' n, (n+2)^(-1.05) ≤ 20`
+(local rebuild of `R02_D3_tail2_le_20 :34916`). -/
+theorem etaR02Int_tail2_le_20 :
+    (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 20 := by
+  have htail := etaR02Int_tail2_le_integral105
+  have hval := etaR02Int_integral105_eq
+  have h20 : (1 : ℝ) / 0.05 ≤ 20 := by norm_num
+  calc (∑' n : ℕ, ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))
+      ≤ (∫ x : ℝ in Set.Ioi ((((1 : ℕ)) : ℝ)), x ^ (-1.05 : ℝ)) := htail
+    _ = 1 / 0.05 := hval
+    _ ≤ 20 := h20
+
+/-- Odd head `((2*0+1):ℝ)^(-1.05) = 1`
+(local rebuild of `R02_D3_odd105_zero_eq_one :34927`). -/
+theorem etaR02Int_odd105_zero_eq_one :
+    ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) = 1 := by
+  have e : ((((2 * 0 + 1 : ℕ)) : ℝ)) = (1 : ℝ) := by norm_num
+  rw [e, Real.one_rpow]
+
+/-- K0 cap `∑' n, (2n+1)^(-1.05) ≤ 21` (head `1` + tail `≤ 20`)
+(local rebuild of `R02_D3_odd105_tsum_le_21 :34933`). -/
+theorem etaR02Int_odd105_tsum_le_21 :
+    (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 21 := by
+  have hOddShift :
+      Summable (fun n : ℕ => ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr etaR02Int_odd105_summable
+  have hShiftShift :
+      Summable (fun n : ℕ => ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) :=
+    (summable_nat_add_iff 1).mpr etaR02Int_shift105_summable
+  have hle : ∀ n : ℕ, ((((2 * (n + 1) + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤
+      ((((n + 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    exact etaR02Int_odd105_le_shift (n + 1)
+  have htail_mono := hOddShift.tsum_le_tsum hle hShiftShift
+  have htail20 := etaR02Int_tail2_le_20
+  have hsplit := etaR02Int_odd105_summable.sum_add_tsum_nat_add 1
+  rw [Finset.sum_range_one, etaR02Int_odd105_zero_eq_one] at hsplit
+  linarith
+
+/-- Second R02 majorant piece dominated by the odd `1.05` power.
+Uses banked `eta_logDiff_le :547` plus an `Real.rpow_add` fold
+`x⁻¹ * x^(-0.05) = x^(-1.05)` (mirror of the `:657-663` fold shape). -/
+theorem etaDerivMajorantR02_second_le_odd105 (m : ℕ) :
+    (Real.log (((2 * m + 2 : ℕ)) : ℝ) -
+      Real.log (((2 * m + 1 : ℕ)) : ℝ)) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+  have hApos : (0 : ℝ) < (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hlogD := eta_logDiff_le m
+  have hrpow_nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hstep : (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) ≤
+      (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) :=
+    mul_le_mul_of_nonneg_right hlogD hrpow_nn
+  have hneg1 : (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1 : ℝ)) =
+      (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ := by
+    have h := Real.rpow_neg (le_of_lt hApos) (1 : ℝ)
+    rw [Real.rpow_one] at h
+    exact h
+  have hadd : (-1 : ℝ) + (-(0.05 : ℝ)) = (-1.05 : ℝ) := by norm_num
+  have hfold : (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) =
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+    calc (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ *
+        (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ)))
+        = (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1 : ℝ)) *
+          (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(0.05 : ℝ))) := by
+          rw [hneg1]
+      _ = (((((2 * m + 1 : ℕ)) : ℝ)) ^ ((-1 : ℝ) + (-(0.05 : ℝ)))) := by
+          rw [← Real.rpow_add hApos]
+      _ = (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) := by
+          rw [hadd]
+  rw [hfold] at hstep
+  exact hstep
+
+/-- Exact pointwise blocker for the integral route (filed, not forced):
+a fixed `C` dominating the full R02 majorant by the odd `1.05` power.
+The second piece is already controlled by
+`etaDerivMajorantR02_second_le_odd105`; the first piece
+`log (2m+2) * 8.29 * (2m+1)^(-1.05)` carries the unbounded log factor,
+so no fixed `C` is supplied this turn (same obstruction as ball-side
+`R02_etaWorst_pointwise105_missing`, here against the integral `≤ 21` base). -/
+def etaR02Int_pointwise_missing (C : ℝ) : Prop :=
+  ∀ m : ℕ, etaDerivMajorantR02 m ≤
+    C * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))
+
+/-- Exact residual for the integral-comparison R02 dominator: existence of a
+fixed `C ≥ 0` with the pointwise bound. Integral summability/value
+(`etaR02Int_odd105_summable`, `etaR02Int_odd105_tsum_le_21`) are banked, so this
+pointwise `C` is the only gap to a `Summable etaDerivMajorantR02` dominator
+and hence to the `:1109` residual `etaR02_hConvLe_residual_spec`. No tsum
+numeral for `etaDerivMajorantR02` and no value for `:1109` are filed here. -/
+def etaR02Int_dom_residual_spec : Prop :=
+  ∃ C : ℝ, 0 ≤ C ∧ etaR02Int_pointwise_missing C

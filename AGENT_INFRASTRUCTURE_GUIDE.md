@@ -6152,6 +6152,11 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ETAPRIME-R02DOM2 (background `ses_f348f069b`, proof-only,
+  grep-clean, eta_prime-only commit): integral-1.05 route (tsum ≤21 +
+  second piece) — SAME log wall as ball-side (no fixed C). Both routes
+  confirm obstruction; live route = ball-side DELTA splitter. Eta_prime
+  lane COMPLETE (disc done); R02 wall owned by ball lane.
 - 2026-09-22 SLIVER-PUNCT (background `ses_f34802ebf`, proof-only,
   grep-clean, sliver_edge-only commit): punctured-domain framework —
   pole-inside proved, poly·pi restricts (319488), four-factor conditional
