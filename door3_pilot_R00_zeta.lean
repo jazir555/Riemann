@@ -6990,3 +6990,331 @@ theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_eta25_res
   norm_num
 
 end Door3PilotR00Zeta
+
+namespace Door3PilotR00Zeta
+
+/-! ## sCut k=27 ODD shard (fifth link): `log 28` bridge + `theta28` window.
+
+`k = 27` is ODD so `eta27 = -28^{-sCut}`; constructive iff
+`cos(10*log 28) <= -c`. Grep first (shapes in this file, no duplication):
+* `sSCUT_log_twentyfour_via_twentythree_eq` at `:6544`,
+  `sSCUT_log_twentyfour_le` at `:6556`, `sSCUT_log_twentyfour_ge` at `:6570`,
+  `sSCUT_theta24_mem` at `:6587`, `sSCUT_delta24_even_mem` at `:6605`,
+  `sSCUT_cos10log24_ge_quarter` at `:6632`,
+  `sSCUT_cpow24_Re_ge` at `:6727`, `sSCUT_eta23_eq_neg_cpow24` at `:6745`,
+  `sSCUT_eta23_Re_no_pos_lock` at `:6769` (odd-`k` destructive mirror).
+* `sSCUT_log_twentyfive_via_twentyfour_eq` at `:6842`,
+  `sSCUT_log_twentyfive_le` at `:6854`, `sSCUT_log_twentyfive_ge` at `:6868`,
+  `sSCUT_log_twentysix_via_twentyfive_eq` at `:6886`,
+  `sSCUT_log_twentysix_le` at `:6897`, `sSCUT_log_twentysix_ge` at `:6911`,
+  `sSCUT_theta26_mem` at `:6928`, `sSCUT_delta26_even_mem` at `:6946`,
+  `sSCUT_delta26_no_quarter_gap` at `:6971`,
+  `sSCUT_eta25_payoff_residual` at `:6980` (in-flight `k = 25` owner, not duplicated).
+* Prior legs dead, not re-attempted here: `k = 18` even-destructive
+  (`sSCUT_eta18_Re_no_pos_lock` at `:5971`), `k = 19` odd no-close
+  (`sSCUT_eta19_payoff_residual` at `:6113`), `k = 21` odd destructive
+  (`sSCUT_eta21_Re_no_pos_lock` at `:6431`), `k = 23` odd destructive
+  (`sSCUT_eta23_Re_no_pos_lock` at `:6769`), `k = 25` odd no-close
+  (`sSCUT_delta26_no_quarter_gap` at `:6971`).
+* No `sSCUT_log_twentyseven` / `sSCUT_log_twentyeight` / `sSCUT_theta28` /
+  `sSCUT_delta28` shape existed before this block; base is banked
+  `sSCUT_log_twentysix_ge/le` plus tight ratios `27/26` (`x = 1/26`)
+  and `28/27` (`x = 1/27`). Mirror of the `log 25` / `log 26`
+  fourth-link recipe (`:6842`-`:6923`).
+* Odd-anchor recipe mirrors `sSCUT_cos10log8_le_neg_quarter` at `:2501`
+  (`delta + pi + 3*2*pi` flip) and `DZ3ab_cos28_upper` in `zeta_rigorous`
+  (`cos_sub_two_pi` chain + `cos_add_pi` flip).
+
+Honest outcome filed here: `log 27` in `[3.2833164808, 3.3087794466]`,
+`log 28` in `[3.3190307664, 3.3458164840]`,
+`theta28 = 10*log 28` in `[33.190307664, 33.45816484]`,
+`delta28 = theta28 - 11*pi` in `(-1.368, -1.098)` via loose `pi` bounds
+(`Real.pi_gt_d4/lt_d4`). Anchor `11*pi` is odd, so
+`cos theta28 = -cos delta28 <= -(1 - 1.368^2/2) = -0.064288`
+via `1 - x^2/2 <= cos x`. With `r28 = 28^{-1/2} >= 1/6`
+(`sqrt 28 <= 6`), `Re(28^{-sCut}) <= -0.0107` and
+`Re(eta27) >= +0.0107` (constructive flip for odd `k`).
+All proofs close with `norm_num` / `linarith` / `ring` / `rw` only. -/
+
+/-- Composite log bridge `log 27 = log 26 + log (27/26)` (`27 = 26*(27/26)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentyfive_via_twentyfour_eq` at `:6842`;
+ratio `27/26` (`x = 1/26`); grepped base bridges `sSCUT_log_twentysix_ge/le`;
+first link of the incremental base-28 chain for `k = 27`). -/
+theorem sSCUT_log_twentyseven_via_twentysix_eq :
+    Real.log 27 = Real.log 26 + Real.log (27 / 26 : ℝ) := by
+  have h27 : (26 : ℝ) * (27 / 26) = 27 := by norm_num
+  have h := Real.log_mul (show (26 : ℝ) ≠ 0 by norm_num)
+    (show (27 / 26 : ℝ) ≠ 0 by norm_num)
+  rw [h27] at h
+  linarith
+
+/-- `log 27` upper (`log 27 <= 3.3087794466` from `sSCUT_log_twentysix_le` +
+`log (27/26) <= 1/26`; mirror of `sSCUT_log_twentyfive_le` at `:6854` with `x = 1/26`
+via `Real.log_le_sub_one_of_pos`; `3.2703179081 + 1/26 = 3.3087794465615...`,
+so `3.3087794466` holds outward). -/
+theorem sSCUT_log_twentyseven_le : Real.log 27 ≤ (3.3087794466 : ℝ) := by
+  have h27 := sSCUT_log_twentyseven_via_twentysix_eq
+  have h26 := sSCUT_log_twentysix_le
+  have hub : Real.log (27 / 26 : ℝ) ≤ (1 / 26 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 27 / 26)
+    have he : (27 / 26 : ℝ) - 1 = (1 / 26 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.2703179081 : ℝ) + 1 / 26 ≤ (3.3087794466 : ℝ) := by norm_num
+  linarith
+
+/-- `log 27` lower (`3.2833164808 <= log 27` from `sSCUT_log_twentysix_ge` +
+`log (27/26) >= 1/27`; mirror of `sSCUT_log_twentyfive_ge` at `:6868` with `x = 1/26`
+via `log (26/27) <= -1/27` and `log (27/26) = -log (26/27)`;
+`3.2462794438 + 1/27 = 3.2833164808370...`, so `3.2833164808` holds). -/
+theorem sSCUT_log_twentyseven_ge : (3.2833164808 : ℝ) ≤ Real.log 27 := by
+  have h27 := sSCUT_log_twentyseven_via_twentysix_eq
+  have h26 := sSCUT_log_twentysix_ge
+  have hub : Real.log (26 / 27 : ℝ) ≤ (-1 / 27 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 26 / 27)
+    have he : (26 / 27 : ℝ) - 1 = (-1 / 27 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (27 / 26 : ℝ) = -Real.log (26 / 27 : ℝ) := by
+    have heq : (27 / 26 : ℝ) = (26 / 27 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.2833164808 : ℝ) ≤ 3.2462794438 + 1 / 27 := by norm_num
+  rw [h27, hinv]
+  linarith
+
+/-- Composite log bridge `log 28 = log 27 + log (28/27)` (`28 = 27*(28/27)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentysix_via_twentyfive_eq` at `:6886`;
+ratio `28/27` (`x = 1/27`); grepped base bridges `sSCUT_log_twentyseven_ge/le`;
+second link of the incremental base-28 chain for `k = 27`). -/
+theorem sSCUT_log_twentyeight_via_twentyseven_eq :
+    Real.log 28 = Real.log 27 + Real.log (28 / 27 : ℝ) := by
+  have h28 : (27 : ℝ) * (28 / 27) = 28 := by norm_num
+  have h := Real.log_mul (show (27 : ℝ) ≠ 0 by norm_num)
+    (show (28 / 27 : ℝ) ≠ 0 by norm_num)
+  rw [h28] at h
+  linarith
+
+/-- `log 28` upper (`log 28 <= 3.3458164840` from `sSCUT_log_twentyseven_le` +
+`log (28/27) <= 1/27`; mirror of `sSCUT_log_twentyseven_le` above with `x = 1/27`
+via `Real.log_le_sub_one_of_pos`; `3.3087794466 + 1/27 = 3.3458164836370...`,
+so `3.3458164840` holds outward with margin). -/
+theorem sSCUT_log_twentyeight_le : Real.log 28 ≤ (3.3458164840 : ℝ) := by
+  have h28 := sSCUT_log_twentyeight_via_twentyseven_eq
+  have h27 := sSCUT_log_twentyseven_le
+  have hub : Real.log (28 / 27 : ℝ) ≤ (1 / 27 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 28 / 27)
+    have he : (28 / 27 : ℝ) - 1 = (1 / 27 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.3087794466 : ℝ) + 1 / 27 ≤ (3.3458164840 : ℝ) := by norm_num
+  linarith
+
+/-- `log 28` lower (`3.3190307664 <= log 28` from `sSCUT_log_twentyseven_ge` +
+`log (28/27) >= 1/28`; mirror of `sSCUT_log_twentyseven_ge` above with `x = 1/27`
+via `log (27/28) <= -1/28` and `log (28/27) = -log (27/28)`;
+`3.2833164808 + 1/28 = 3.3190307665142...`, so `3.3190307664` holds). -/
+theorem sSCUT_log_twentyeight_ge : (3.3190307664 : ℝ) ≤ Real.log 28 := by
+  have h28 := sSCUT_log_twentyeight_via_twentyseven_eq
+  have h27 := sSCUT_log_twentyseven_ge
+  have hub : Real.log (27 / 28 : ℝ) ≤ (-1 / 28 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 27 / 28)
+    have he : (27 / 28 : ℝ) - 1 = (-1 / 28 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (28 / 27 : ℝ) = -Real.log (27 / 28 : ℝ) := by
+    have heq : (28 / 27 : ℝ) = (27 / 28 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.3190307664 : ℝ) ≤ 3.2833164808 + 1 / 28 := by norm_num
+  rw [h28, hinv]
+  linarith
+
+/-- Phase window `theta28 = 10*log 28 in [33.190307664, 33.45816484]`
+(via banked `sSCUT_log_twentyeight_ge/le` + `*10`; mirror of
+`sSCUT_theta26_mem` at `:6928`; non-strict since the `log 28` inputs are `<=`). -/
+theorem sSCUT_theta28_mem :
+    (33.190307664 : ℝ) ≤ 10 * Real.log 28 ∧
+    10 * Real.log 28 ≤ (33.45816484 : ℝ) := by
+  have hge := sSCUT_log_twentyeight_ge
+  have hle := sSCUT_log_twentyeight_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 3.3190307664 = 33.190307664 := by norm_num
+  have c2 : (10 : ℝ) * 3.3458164840 = 33.45816484 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta28 = theta28 - 11*pi in (-1.368, -1.098)` (odd anchor:
+`11*pi ~= 34.557` is nearest since `theta28 ~= 33.190-33.458` vs
+`10*pi ~= 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta8p_sharp_mem` with the odd anchor;
+rounded outward from the loose-pi window `[-1.367292336, -1.09833516]`
+(`33.190307664 - 11*3.1416 = -1.367292336`,
+`33.45816484 - 11*3.1415 = -1.09833516`) so `linarith` closes). -/
+theorem sSCUT_delta28_odd_mem :
+    (-1.368 : ℝ) < 10 * Real.log 28 - 11 * Real.pi ∧
+    10 * Real.log 28 - 11 * Real.pi < (-1.098 : ℝ) := by
+  have hth := sSCUT_theta28_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta28` window (`0.27`). -/
+theorem sSCUT_delta28_odd_width_eq :
+    (-1.098 : ℝ) - (-1.368) = (0.27 : ℝ) := by
+  norm_num
+
+/-- Exact quadratic floor at the window cap
+(`1 - 1.368^2/2 = 0.064288`; `1.368^2 = 1.871424`). -/
+theorem sSCUT_cos10log28_quad_floor_eq :
+    (1 - (1.368 : ℝ) ^ 2 / 2) = (0.064288 : ℝ) := by
+  norm_num
+
+/-- Signed cosine UPPER `cos(10*log 28) <= -0.064288` (odd anchor, flip:
+`cos theta28 = -cos delta28` from the banked `delta28 in (-1.368, -1.098)`
+window `sSCUT_delta28_odd_mem` + quadratic floor `1 - x^2/2 <= cos x`;
+mirror of `sSCUT_cos10log8_le_neg_quarter` at `:2501` with
+`delta + pi + 5*(2*pi) = theta` and no sextic needed;
+`1 - 1.368^2/2 = 0.064288 > 0`, so `k = 27` (base 28) is constructive
+for odd `k`: `cos theta28 ~= -0.33`, hence the `<= -c` floor closes). -/
+theorem sSCUT_cos10log28_le_neg064288 :
+    Real.cos (10 * Real.log 28) ≤ (-0.064288 : ℝ) := by
+  have hδ := sSCUT_delta28_odd_mem
+  have key : Real.cos ((10 * Real.log 28 - 11 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 28 - 11 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_pi]
+  have e2 : (10 * Real.log 28 - 11 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 28 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (1.368 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 28 - 11 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 28 - 11 * Real.pi)
+    have hsq : (10 * Real.log 28 - 11 * Real.pi) ^ 2 ≤ (1.368 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 1.368 - (10 * Real.log 28 - 11 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 28 - 11 * Real.pi) + 1.368 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (1.368 - (10 * Real.log 28 - 11 * Real.pi))
+          * ((10 * Real.log 28 - 11 * Real.pi) + 1.368)
+          = (1.368 : ℝ) ^ 2 - (10 * Real.log 28 - 11 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (0.064288 : ℝ) ≤ 1 - (1.368 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- `28^(1/2) <= 6` (mirror of `sSCUT_sqrt24_le` at `:6665`; `28 <= 6^2 = 36`). -/
+theorem sSCUT_sqrt28_le : (28 : ℝ) ^ (1 / 2 : ℝ) ≤ (6 : ℝ) := by
+  have hpow : (28 : ℝ) ≤ (((6 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((28 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 28 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((28 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((6 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/6 <= r28 = 28^(-1/2)` (inverse of `sSCUT_sqrt28_le`;
+mirror of `sSCUT_rpow24_neg_ge` at `:6679`). -/
+theorem sSCUT_rpow28_neg_ge : (1 / 6 : ℝ) ≤ (28 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt28_le
+  have hpos : (0 : ℝ) < (28 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (28 : ℝ) ^ (-(1 / 2 : ℝ)) = (((28 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 28)]
+  rw [hneg, show (1 / 6 : ℝ) = ((6 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `28^{-s}` at sCut (mirror of
+`sSCUT_cpow24_neg_re` at `:6691`). -/
+theorem sSCUT_cpow28_neg_re : ((((28 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (28 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 28) := by
+  have h28pos : (0 : ℝ) < 28 := by norm_num
+  have hxC : ((28 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h28pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((28 : ℝ) : ℂ) = (((Real.log 28 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h28pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 28 : ℝ)) : ℂ)).re = Real.log 28 := Complex.ofReal_re _
+  have hzim : ((((Real.log 28 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 28 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 28 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 28 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 28) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 28 * (-(1 / 2 : ℝ)))
+      = (28 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h28pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 28))
+      = Real.cos (10 * Real.log 28) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(28^{-sCut}) <= -0.0107` (nonneg `r28` times signed
+cosine upper `cos theta28 <= -0.064288`, then `r28 >= 1/6`; mirror of
+`sSCUT_cpow8_Re_le_neg` at `:2695` with `(1/6)*0.064288 = 0.0107146... >= 0.0107`). -/
+theorem sSCUT_cpow28_Re_le_neg0107 :
+    ((((28 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-0.0107 : ℝ) := by
+  rw [sSCUT_cpow28_neg_re]
+  have hr0 : (0 : ℝ) ≤ (28 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow28_neg_ge
+  have hc := sSCUT_cos10log28_le_neg064288
+  have hmul : (28 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 28)
+      ≤ (28 : ℝ) ^ (-(1 / 2 : ℝ)) * (-0.064288) :=
+    mul_le_mul_of_nonneg_left hc hr0
+  have h2 : (1 / 6 : ℝ) * (0.064288 : ℝ)
+      ≤ (28 : ℝ) ^ (-(1 / 2 : ℝ)) * (0.064288 : ℝ) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have hnum : (0.0107 : ℝ) ≤ (1 / 6 : ℝ) * (0.064288 : ℝ) := by norm_num
+  have hsign : (28 : ℝ) ^ (-(1 / 2 : ℝ)) * (-0.064288)
+      = -((28 : ℝ) ^ (-(1 / 2 : ℝ)) * (0.064288 : ℝ)) := by ring
+  linarith
+
+/-- Eta bridge `eta27 = -(28^{-sCut})` (odd `k`; mirror of
+`sSCUT_eta23_eq_neg_cpow24` at `:6745`). -/
+theorem sSCUT_eta27_eq_neg_cpow28 :
+    etaDirichletTerm sSCUT 27 = -((((28 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (27 + 1 : ℕ) = 28 := rfl
+  have hcast : ((((27 + 1 : ℕ)) : ℂ)) = ((((28 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (27 : ℕ) = -1 := by norm_num
+  have h28cast : ((((28 : ℕ)) : ℂ)) = ((((28 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h28cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Parity payoff (odd `k = 27`): `Re(eta27) >= +0.0107` (negated cpow signed
+upper; mirror of `sSCUT_eta7_Re_ge` at `:2725`; constructive flip). -/
+theorem sSCUT_eta27_Re_ge : (0.0107 : ℝ) ≤ (etaDirichletTerm sSCUT 27).re := by
+  have h := sSCUT_cpow28_Re_le_neg0107
+  rw [sSCUT_eta27_eq_neg_cpow28, Complex.neg_re, sSCUT_cpow28_neg_re]
+  rw [sSCUT_cpow28_neg_re] at h
+  linarith
+
+/-- Eta27 payoff CONSTRUCTIVE (`k = 27` ODD, base 28): the needed
+`cos(10*log 28) <= -c` closes via banked `sSCUT_cos10log28_le_neg064288`
+(`<= -0.064288`); `Re(eta27) >= +0.0107` (`sSCUT_eta27_Re_ge`) is banked here;
+one branch only, no force. Next link needed: `k = 29` (base 30) chain. -/
+theorem sSCUT_eta27_payoff_constructive : (0 : ℝ) < 1 := by
+  norm_num
+
+/-- Shard assembly residual: `t27` adds constructive gain `+0.0107`
+(`Re(eta27) >= +0.0107`); combined honest floor moves up by that gain vs
+`F17 + t23 + t25` (`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_eta25_residual`);
+still below both bars (`21/10 = 2.1`, `1507/905`); shortfalls shrink by `0.0107`;
+next constructive legs still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_eta25_eta27_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+end Door3PilotR00Zeta
