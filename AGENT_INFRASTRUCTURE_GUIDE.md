@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 ASSEMBLY-R01 (background `ses_f3490a842`, proof-only,
+  grep-clean, assembly-only commit): R01 leaf+H conditional
+  (`:17111-17148`, two-tenths center + 0.07 deriv residuals, R00 mirror).
+  R00D audit untouched.
 - 2026-09-22 TAIL-M21 (background `ses_f349070c9`, proof-only,
   grep-clean, tail-only commit): M2097152 odd rung `24/1448=3/181≈
   0.0166 :950` (honest floor 1448²=2096704; stub 2096512 corrected).
