@@ -4451,7 +4451,8 @@ theorem CS_log76_lower : (1 / 7 : ℝ) ≤ Real.log (7 / 6 : ℝ) := by
 /-- `log 7 = log 6 + log(7/6)` composite bridge (mirror of `CS_log_six_eq`). -/
 theorem CS_log_seven_eq : Real.log 7 = Real.log 6 + Real.log (7 / 6 : ℝ) := by
   have h7 : (7 : ℝ) = 6 * (7 / 6) := by norm_num
-  rw [h7, Real.log_mul (by norm_num) (by norm_num)]
+  conv_lhs => rw [h7]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
 
 /-- `log 7` lower (`1.8888 ≤ log 7` from `CS_log_six_ge` + `CS_log76_lower`). -/
 theorem CS_log_seven_ge : (1.8888 : ℝ) ≤ Real.log 7 := by
@@ -4573,21 +4574,45 @@ theorem CS_rpow7neg_lower_proved : CS_rpow7neg_lower := by
 /-- `7^-0.395 ≤ 0.52` upper input (TRUE `≈ 0.4636`). -/
 def CS_rpow7neg_upper : Prop := (7 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.52 : ℝ)
 
-/-- CLOSED: `7^-0.395 ≤ 0.52` from `7^0.395 ≥ 1.92`
-(`0.52·1.92 = 0.9984 ≤ 1`). -/
+/-- CLOSED: `7^-0.395 ≤ 0.52` from `7^0.395 ≥ 2.02`
+(`0.52·2.02 = 1.0504 ≥ 1`; the `2.02` is the same quadratic lower as
+`CS_rpow7pos_lower_proved` with the `1.92` cap tightened — the banked
+`1.92` alone gives `0.52·1.92 = 0.9984 < 1` and cannot close this step). -/
 theorem CS_rpow7neg_upper_proved : CS_rpow7neg_upper := by
   show (7 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.52 : ℝ)
-  have hlow : (1.92 : ℝ) ≤ (7 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow7pos_lower_proved
+  have hStrong : (2.02 : ℝ) ≤ (7 : ℝ) ^ ((0.395 : ℝ)) := by
+    have h7 : (1.8888 : ℝ) ≤ Real.log 7 := CS_log_seven_ge
+    have hx_lo : (0.74607 : ℝ) < 0.395 * Real.log 7 := by
+      have hmul : (0.395 : ℝ) * 1.8888 ≤ 0.395 * Real.log 7 :=
+        mul_le_mul_of_nonneg_left h7 (by norm_num)
+      have hcap : (0.74607 : ℝ) < 0.395 * 1.8888 := by norm_num
+      linarith
+    set x : ℝ := 0.395 * Real.log 7 with hx_def
+    have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+    have hsq : (0.74607 : ℝ) ^ 2 ≤ x ^ 2 :=
+      pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+    have hquad := Real.quadratic_le_exp_of_nonneg hx0
+    have hbase : (2.02 : ℝ) ≤ 1 + 0.74607 + (0.74607 : ℝ) ^ 2 / 2 := by
+      norm_num
+    have hchain : (2.02 : ℝ) ≤ Real.exp x := by
+      linarith [hquad, hsq, hx_lo, hbase]
+    have hrpow : (7 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+      rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 7)]
+      congr 1
+      rw [hx_def]
+      ring
+    rw [hrpow]
+    exact hchain
   have hpos : (0 : ℝ) < (7 : ℝ) ^ ((0.395 : ℝ)) :=
     Real.rpow_pos_of_pos (by norm_num) _
   have hInv : (7 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (7 : ℝ) ^ ((0.395 : ℝ)) := by
     rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7)]
     rw [inv_eq_one_div]
   have hle : (1 : ℝ) ≤ (0.52 : ℝ) * (7 : ℝ) ^ ((0.395 : ℝ)) := by
-    have hmul : (1 : ℝ) ≤ 0.52 * 1.92 := by norm_num
-    calc (1 : ℝ) ≤ 0.52 * 1.92 := hmul
+    have hmul : (1 : ℝ) ≤ 0.52 * 2.02 := by norm_num
+    calc (1 : ℝ) ≤ 0.52 * 2.02 := hmul
       _ ≤ 0.52 * (7 : ℝ) ^ ((0.395 : ℝ)) :=
-        mul_le_mul_of_nonneg_left hlow (by norm_num)
+        mul_le_mul_of_nonneg_left hStrong (by norm_num)
   rw [hInv, div_le_iff₀ hpos]
   linarith [hle]
 

@@ -5662,6 +5662,16 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SUPP-VERIFY (background `ses_f37683d44`, sole build owner):
+  GREEN — `[8688/8688] Built door3_cell_suppliers (109s)`, BUILD-EXIT=0
+  (attempt 2/2; attempt 1 two errors). Fixes: `CS_log_seven_eq :4452`
+  (`conv_lhs => rw [h7]` — bare rw poisoned RHS 7/6) +
+  `CS_rpow7neg_upper_proved :4583` (`0.52·1.92=0.9984<1` trap — kept
+  def ≤0.52, proved inline `hStrong : 2.02≤7^0.395` via quadratic lower
+  `1+0.74607+0.74607²/2≥2.02`, `0.52·2.02=1.0504≥1`; coordinator checked
+  `2.02≤~2.156` sound). Axioms standard, no sorryAx. Full eta backlog
+  (S8/S8IM/cF-1851/S10/S6Im) COMPILED. Lock RELEASED. PILOT-BUILD
+  tasked (sole owner, first pilot build).
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494
