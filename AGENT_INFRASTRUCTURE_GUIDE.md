@@ -5692,6 +5692,15 @@ sorry-free infrastructure and the complete commit ledger above.
   -9 balances. Coordinator did NOT hand-edit (hand-counting failed
   twice before) — owner to verify counts programmatically before/after
   + rebuild. VERIFY8 tasked (sole owner).
+- 2026-09-22 VERIFY8 (background `ses_f373ba0bb`, sole build owner):
+  5350 fix APPLIED (15/24, block 5340-5350 sums 0, N8 mirror confirmed)
+  but build still RED — paired compensating error exposed on proof line
+  5351 (`mul_pos` chain 8/9 net -1 vs N8 4941 mirror 7/7). PATTERN: N9
+  agent wrote +1 close on BOTH type tail (5350) and proof tail (5351).
+  PRESCRIPTION: delete exactly ONE trailing `)` on 5351 (→8/8; proof
+  term must net 0), verify programmatically, rebuild. LADDER-RULE
+  EXTENDED: balance-check proof lines too, not just type lines.
+  VERIFY9 tasked (sole owner).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
