@@ -6137,6 +6137,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 BALLADV-R02DELTA (background `ses_f34856317`, proof-only,
+  grep-clean, ball_advance-only commit): small-delta splitter (100,0.01,1)
+  + exp 1.04>1 + rpow-add merge lemmas. First-piece merge + p-series
+  assembly still open.
+- 2026-09-22 GAMMA-N17 (background `ses_f348a8aaf`, zero-diff, no commit):
+  agent returned empty; rung not banked. N17 retasked.
 - 2026-09-22 WIRE-M1000 (background `ses_f3485c1c6`, proof-only,
   grep-clean, wiring-only commit): top-M1000-at-zero feeder (d=(1/2)/1000
   + ballSup1000 conditional) + residual. Bottom mirror next.

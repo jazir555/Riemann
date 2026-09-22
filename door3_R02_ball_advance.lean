@@ -1961,6 +1961,111 @@ theorem R02_etaWorst_logCap_splitter_banked11 :
   rw [hrw]
   linarith
 
+/-! ## R02 small-delta splitter (BALLADV-R02DELTA, proof-only).
+
+Grep record (read-only, before writing):
+* splitter spec `R02_etaWorst_logCap_splitter_residual :1949-1951`
+  (`log (2m+2) ≤ eps * (2m+1)^delta + C'`), banked instance
+  `R02_etaWorst_logCap_splitter_banked11 :1955` (`(1,1,1)` via `Real.rpow_one`).
+* rpow shapes in-tree: `Real.rpow_one` (used at `:1959-1960`),
+  `Real.rpow_nonneg` (used at `:1904`), `Real.log_le_sub_one_of_pos`
+  (used at `:1877`), `Real.log_rpow` / `Real.rpow_pos_of_pos` /
+  `Real.rpow_add` / `Real.rpow_le_rpow` / `Real.log_le_log` / `Real.log_mul`
+  (Mathlib, verified by grep before writing).
+
+Small-delta attempt with explicit `(eps, delta, C') = (100, 0.01, 1)`:
+* `R02_etaWorst_logAle100_mul` (per-`m` scaled `log ≤ x - 1` via `Real.log_rpow`:
+  `0.01 * log A = log (A^0.01) ≤ A^0.01`, hence `log A ≤ 100 * A^0.01`);
+* `R02_etaWorst_logCap_splitter_100_001_1` banks
+  `R02_etaWorst_logCap_splitter_residual 100 0.01 1` via the `B ≤ 2 * A`
+  split (`2m+2 ≤ 2*(2m+1)` by `omega`), `Real.log_le_log`,
+  `Real.log_mul`, `Real.log 2 ≤ 1`, plus the scaled cap.
+* exponent survival: `R02_etaWorst_delta001_exp104` (`1.05 - 0.01 = 1.04`),
+  `R02_etaWorst_exp104_gt_one` (`1 < 1.04`), and the rpow merge
+  `R02_etaWorst_rpow_add_delta001`
+  (`A^0.01 * A^(-0.05-1) = A^(-1.04)` via `Real.rpow_add`), so the
+  first-piece decay shifts from `1.05` to `1.04`, still above `1`.
+-/
+
+/-- Scaled log cap at `delta = 0.01`: `log A ≤ 100 * A^0.01`
+for `A = ((2*m+1 : ℕ) : ℝ)`, from `log (A^0.01) = 0.01 * log A`
+(`Real.log_rpow`) capped by `log y ≤ y - 1`
+(`Real.log_le_sub_one_of_pos`). -/
+theorem R02_etaWorst_logAle100_mul (m : ℕ) :
+    Real.log ((((2 * m + 1 : ℕ)) : ℝ)) ≤
+      100 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) := by
+  have hApos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hypos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ) :=
+    Real.rpow_pos_of_pos hApos _
+  have hlogy_le :
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) ≤
+        (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) - 1 :=
+    Real.log_le_sub_one_of_pos hypos
+  have hlogy_eq :
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)) ^ (0.01 : ℝ)) =
+        (0.01 : ℝ) * Real.log ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Real.log_rpow hApos _
+  linarith
+
+/-- Small-delta splitter banked at `(eps, delta, C') = (100, 0.01, 1)`:
+`log (2m+2) ≤ 100 * (2m+1)^0.01 + 1` for every `m`. -/
+theorem R02_etaWorst_logCap_splitter_100_001_1 :
+    R02_etaWorst_logCap_splitter_residual 100 0.01 1 := by
+  intro m
+  have hApos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hBpos : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hNat : (2 * m + 2 : ℕ) ≤ 2 * (2 * m + 1 : ℕ) := by omega
+  have hle2 : ((((2 * m + 2 : ℕ)) : ℝ)) ≤ ((((2 * (2 * m + 1) : ℕ)) : ℝ)) := by
+    exact_mod_cast hNat
+  have hcast : ((((2 * (2 * m + 1) : ℕ)) : ℝ)) =
+      2 * ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    push_cast
+    ring
+  have hBle : ((((2 * m + 2 : ℕ)) : ℝ)) ≤ 2 * ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    rw [← hcast]
+    exact hle2
+  have hlogBle : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤
+      Real.log (2 * ((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Real.log_le_log hBpos hBle
+  have hlog2A : Real.log (2 * ((((2 * m + 1 : ℕ)) : ℝ))) =
+      Real.log 2 + Real.log ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Real.log_mul (by norm_num) (ne_of_gt hApos)
+  have hlog2le1 : Real.log (2 : ℝ) ≤ 1 := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)
+    linarith
+  have hlogAle := R02_etaWorst_logAle100_mul m
+  have hcomb : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤
+      Real.log 2 + Real.log ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    rw [← hlog2A]
+    exact hlogBle
+  linarith
+
+/-- Exponent survival at `delta = 0.01`: `1.05 - 0.01 = 1.04`. -/
+theorem R02_etaWorst_delta001_exp104 : (1.05 : ℝ) - 0.01 = 1.04 := by
+  norm_num
+
+/-- Surviving exponent still exceeds `1`. -/
+theorem R02_etaWorst_exp104_gt_one : (1 : ℝ) < 1.04 := by
+  norm_num
+
+/-- Negated exponent form feeding the first-piece merge. -/
+theorem R02_etaWorst_delta001_negExp104 :
+    (-(0.05 : ℝ) - 1) + 0.01 = -(1.04 : ℝ) := by
+  norm_num
+
+/-- Rpow merge for the first piece at `delta = 0.01`:
+`A^0.01 * A^(-0.05-1) = A^(-1.04)` via `Real.rpow_add`. -/
+theorem R02_etaWorst_rpow_add_delta001 (A : ℝ) (hA : 0 < A) :
+    A ^ (0.01 : ℝ) * A ^ (-(0.05 : ℝ) - 1) = A ^ (-(1.04 : ℝ)) := by
+  have hexp : (0.01 : ℝ) + (-(0.05 : ℝ) - 1) = -(1.04 : ℝ) := by
+    norm_num
+  have h := Real.rpow_add hA (0.01 : ℝ) (-(0.05 : ℝ) - 1)
+  rw [hexp] at h
+  exact h.symm
+
 #print axioms R02_etaWorst_logBp_le_subOne
 #print axioms R02_etaWorst_logCap_linear_splitter
 #print axioms R02_etaWorst_firstPiece_le_linearMul
@@ -1969,5 +2074,11 @@ theorem R02_etaWorst_logCap_splitter_banked11 :
 #print axioms R02_etaWorst_log_unbounded
 #print axioms R02_etaWorst_no_uniform_logCap
 #print axioms R02_etaWorst_logCap_splitter_banked11
+#print axioms R02_etaWorst_logAle100_mul
+#print axioms R02_etaWorst_logCap_splitter_100_001_1
+#print axioms R02_etaWorst_delta001_exp104
+#print axioms R02_etaWorst_exp104_gt_one
+#print axioms R02_etaWorst_delta001_negExp104
+#print axioms R02_etaWorst_rpow_add_delta001
 
 end Door3R02BallAdvance
