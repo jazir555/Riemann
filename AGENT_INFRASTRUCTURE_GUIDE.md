@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-DIFFCONT-OUTER (background `ses_f34d89884`, proof-only,
+  grep-clean, deriv_up-only commit): OUTER deriv CLOSED —
+  outer-125 sup (`:1378`, tail-quarter covers: Re margins +Im 8.76≤11;
+  R02-disc N/A by 0.5) + DiffCont `:1422/:1435` (pole avoided) +
+  `zetaDeriv_outer_125_closed :1438` (≤12500, NO open premises). ALL
+  FOUR subdivision derivs CLOSED (mid/inner/outer 12500, leaf 93400).
+  Tight ≤1000/≤10 still needs zeta lane; gamma 60000.
 - 2026-09-22 DERIV-DIFFCONT-LEAF (background `ses_f34d9935e`, proof-only,
   grep-clean, deriv_up-only commit): LEAF deriv CLOSED —
   `dLeaf_closedBall_re_upper :1291` + filled `:1306` + banked `:1319` +

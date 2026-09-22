@@ -1325,4 +1325,120 @@ theorem zetaDeriv_leaf_934_closed :
   rw [zeta_leaf_934_number] at h
   exact h
 
+/-! ## 13. OUTER sphere at honest tail-quarter 125 (dOuter = 0.395 - 8.75 I).
+
+Geometry check (margins honest, no force):
+* `dOuter.re = 0.395`, radius `0.01` gives `z.re ∈ [0.385, 0.405]` on the
+  sphere, inside tail-quarter `[1/4, 1/2]` with margins `0.135` below
+  (`0.385 - 0.25`) and `0.095` above (`0.5 - 0.405`).
+* `dOuter.im = -8.75`, radius `0.01` gives `z.im ∈ [-8.76, -8.74]`, so
+  `|z.im| ≤ 8.76 ≤ 11` with margin `2.24`.
+* Tail-quarter domain (`door3_tail_eta_upper.lean:167-170`):
+  `1/4 ≤ s.re`, `s.re ≤ 1/2`, `|s.im| ≤ 11` gives `‖riemannZeta s‖ ≤ 125`.
+  Hence the whole `0.01`-sphere over `dOuter` is covered at `125`, NOT `10`.
+  The pre-existing `zetaSupOnSphere_outer` (`≤ 10`) is left untouched and
+  NOT claimed here; the filled instance below is restated at `125` only. -/
+
+def zetaSupOnSphere_outer_125 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dOuter 0.01 → ‖riemannZeta z‖ ≤ 125
+
+theorem dOuter_sphere_re_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dOuter 0.01) :
+    (1 / 4 : ℝ) ≤ z.re ∧ z.re ≤ (1 / 2 : ℝ) := by
+  have hdist : dist z dOuter = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dOuter‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dOuter).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dOuter).re| ≤ ‖z - dOuter‖ := Complex.abs_re_le_norm _
+      _ = 0.01 := hnorm
+  have here : (z - dOuter).re = z.re - 0.395 := by
+    have e : (z - dOuter).re = z.re - dOuter.re := Complex.sub_re z dOuter
+    rw [e, dOuter_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+theorem dOuter_sphere_im_bound {z : ℂ}
+    (hz : z ∈ Metric.sphere dOuter 0.01) :
+    |z.im| ≤ (11 : ℝ) := by
+  have hdist : dist z dOuter = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dOuter‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(z - dOuter).im| ≤ (0.01 : ℝ) := by
+    calc |(z - dOuter).im| ≤ ‖z - dOuter‖ := Complex.abs_im_le_norm _
+      _ = 0.01 := hnorm
+  have heim : (z - dOuter).im = z.im - (-8.75) := by
+    have e : (z - dOuter).im = z.im - dOuter.im := Complex.sub_im z dOuter
+    rw [e, dOuter_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  have himlo : (-8.76 : ℝ) ≤ z.im := by linarith
+  have himhi : z.im ≤ (-8.74 : ℝ) := by linarith
+  rw [abs_le]
+  constructor <;> linarith
+
+theorem zetaSupOnSphere_outer_125_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dOuter 0.01 → ‖riemannZeta z‖ ≤ 125 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dOuter_sphere_re_bounds hz
+  have him := dOuter_sphere_im_bound hz
+  exact Door3TailEtaUpper.zeta_upper_tail_quarter hre_lo hre_hi him
+
+theorem zetaSup_outer_125_banked : zetaSupOnSphere_outer_125 :=
+  zetaSupOnSphere_outer_125_filled
+
+theorem zetaDeriv_outer_125_of_diffCont
+    (hd : zetaDiffCont_outer) :
+    ‖deriv riemannZeta dOuter‖ ≤ 125 / 0.01 := by
+  unfold zetaDiffCont_outer at hd
+  exact zetaDerivUp_of_sup dOuter 0.01 125 (by norm_num) hd
+    zetaSupOnSphere_outer_125_filled
+
+theorem zeta_outer_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
+
+/-! ## 13b. OUTER DiffContOnCl on the 0.01-ball (pole avoided).
+
+Mirror of MID (`dMid_closedBall_re_upper :1059` + `zetaDiffCont_mid_filled :1074` +
+`zetaDiffCont_mid_banked :1087`), INNER (`dInner_closedBall_re_upper :1175` +
+`zetaDiffCont_inner_filled :1190` + `zetaDiffCont_inner_banked :1203`), and
+LEAF (`dLeaf_closedBall_re_upper :1291` + `zetaDiffCont_leaf_filled :1306` +
+`zetaDiffCont_leaf_banked :1319`):
+`dOuter.re = 0.395`, radius `0.01`, so every `z ∈ closedBall dOuter 0.01` has
+`z.re ≤ 0.405 < 1`, hence `z ≠ 1`. -/
+
+theorem dOuter_closedBall_re_upper {z : ℂ}
+    (hz : z ∈ Metric.closedBall dOuter 0.01) :
+    z.re ≤ (0.405 : ℝ) := by
+  have hdist : dist z dOuter ≤ (0.01 : ℝ) := Metric.mem_closedBall.mp hz
+  have hnorm : ‖z - dOuter‖ ≤ (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dOuter).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dOuter).re| ≤ ‖z - dOuter‖ := Complex.abs_re_le_norm _
+      _ ≤ 0.01 := hnorm
+  have here : (z - dOuter).re = z.re - 0.395 := by
+    have e : (z - dOuter).re = z.re - dOuter.re := Complex.sub_re z dOuter
+    rw [e, dOuter_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  linarith
+
+theorem zetaDiffCont_outer_filled :
+    DiffContOnCl ℂ riemannZeta (Metric.ball dOuter 0.01) := by
+  apply DifferentiableOn.diffContOnCl
+  rw [Metric.closure_ball dOuter (by norm_num : (0.01 : ℝ) ≠ 0)]
+  intro z hz
+  apply (differentiableAt_riemannZeta ?_).differentiableWithinAt
+  intro hcon
+  have hle := dOuter_closedBall_re_upper hz
+  have e : z.re = 1 := by
+    rw [hcon]
+    exact Complex.one_re
+  linarith
+
+theorem zetaDiffCont_outer_banked : zetaDiffCont_outer :=
+  zetaDiffCont_outer_filled
+
+theorem zetaDeriv_outer_125_closed :
+    ‖deriv riemannZeta dOuter‖ ≤ 12500 := by
+  have h := zetaDeriv_outer_125_of_diffCont zetaDiffCont_outer_banked
+  rw [zeta_outer_125_number] at h
+  exact h
+
 end Door3DerivUp
