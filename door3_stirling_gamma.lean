@@ -2446,3 +2446,73 @@ theorem D3SG_gamNeed_leaf_shift1_ratio :
     (37 : ℝ) < (0.297 : ℝ) / (0.008 : ℝ) := by norm_num
 
 #print axioms D3SG_gamNeed_leaf_shift1_ratio
+
+/-! ## DISC-UPPER-RUNG2: R02 tight `‖Γ w‖ ≤ 0.381` (same region, full `‖w‖` paid).
+
+Grep (2026-09-22): latest disc-upper rung is `D3SG_R02_disc_upper` at `:1918`
+(`‖Γ w‖ ≤ 1/2` on `Re ∈ [0.025,0.37]`, `Im ∈ [-4.125,-2.625]`).
+E05-upper `D3SG_E05_GammaSeq5_upper_of_link` at `:2219` (`≤ 0.684`, conditional).
+gamNeed gaps banked: outer `0.229` vs `0.002` (`114x`), leaf `0.297` vs `0.008`
+(`37x`) at `:2282-2448`.
+
+This rung tightens R02 from `1/2` to `0.381` by paying the full
+`‖w‖ ≥ |Im| ≥ 2.625` (`1/2.625 ≈ 0.38095 ≤ 0.381`) instead of rounding the
+denominator down to `2`. Same one-step shift into `[1,2]`
+(`D3SG_Gamma_norm_le_real` + `D3SG_Gamma_one_two_le_one`).
+
+Residual: gamNeed_outer (`≤ 0.002`) and gamNeed_leaf (`≤ 0.008`) remain open;
+shift-1 quotients above stand; `N = 2` tightenings need a `Re > 2` real cap
+(`Γ(2.1)-` style), not banked here. -/
+
+/-- R02 disc tight upper: `‖Γ w‖ ≤ 0.381` on the R02 window
+(`1 / 2.625 ≈ 0.38095`). -/
+theorem D3SG_R02_disc_upper_tight (w : ℂ)
+    (hre_lo : 0.025 ≤ w.re) (hre_hi : w.re ≤ 0.37)
+    (him_lo : -4.125 ≤ w.im) (him_hi : w.im ≤ -2.625) :
+    ‖Complex.Gamma w‖ ≤ (0.381 : ℝ) := by
+  have him_neg : w.im < 0 := by linarith
+  have him_abs : (2.625 : ℝ) ≤ |w.im| := by
+    rw [abs_of_neg him_neg]
+    linarith
+  have hw_norm_ge : (2.625 : ℝ) ≤ ‖w‖ :=
+    le_trans him_abs (Complex.abs_im_le_norm w)
+  have hw0 : w ≠ 0 := by
+    intro h
+    have him0 : w.im = 0 := by
+      rw [h]
+      simp
+    linarith
+  have hG : Complex.Gamma (w + 1) = w * Complex.Gamma w :=
+    Complex.Gamma_add_one w hw0
+  have hGn : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ := by
+    rw [hG, norm_mul]
+  have hre1_eq : (w + 1).re = w.re + 1 := by simp
+  have hRe1_pos : (0 : ℝ) < (w + 1).re := by
+    rw [hre1_eq]
+    linarith
+  have hRe1_lo : (1 : ℝ) ≤ (w + 1).re := by
+    rw [hre1_eq]
+    linarith
+  have hRe1_hi : (w + 1).re ≤ 2 := by
+    rw [hre1_eq]
+    linarith
+  have hDom : ‖Complex.Gamma (w + 1)‖ ≤ Real.Gamma (w + 1).re :=
+    D3SG_Gamma_norm_le_real (w + 1) hRe1_pos
+  have hRealCap : Real.Gamma (w + 1).re ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ hRe1_lo hRe1_hi
+  have hCap1 : ‖Complex.Gamma (w + 1)‖ ≤ 1 :=
+    le_trans hDom hRealCap
+  have hMul : ‖w‖ * ‖Complex.Gamma w‖ ≤ 1 := by
+    rw [← hGn]
+    exact hCap1
+  have hGamma_nn : (0 : ℝ) ≤ ‖Complex.Gamma w‖ := norm_nonneg _
+  have h2625Mul : (2.625 : ℝ) * ‖Complex.Gamma w‖ ≤ ‖w‖ * ‖Complex.Gamma w‖ :=
+    mul_le_mul_of_nonneg_right hw_norm_ge hGamma_nn
+  have hle : (2.625 : ℝ) * ‖Complex.Gamma w‖ ≤ 1 := le_trans h2625Mul hMul
+  have hdiv : ‖Complex.Gamma w‖ ≤ 1 / (2.625 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 2.625), mul_comm]
+    exact hle
+  have h381 : (1 : ℝ) / (2.625 : ℝ) ≤ (0.381 : ℝ) := by norm_num
+  exact le_trans hdiv h381
+
+#print axioms D3SG_R02_disc_upper_tight

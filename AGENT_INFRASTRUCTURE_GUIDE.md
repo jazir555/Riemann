@@ -5991,6 +5991,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `S2_exists :1544` (same L + S₂ lower). hEven analytic inputs COMPLETE
   (Antitone + Tendsto + slice all banked); zetaLower still numerically
   open (0.23 vs 1.1/1.4).
+- 2026-09-22 STIRLING-DISC2 (background `ses_f34951a35`, proof-only,
+  grep-clean, stirling-only commit): R02 disc-upper tightened 0.5→0.381
+  `:2469` (‖w‖≥2.625 full-Im floor). gamNeed outer/leaf still open
+  (114x/37x).
+- 2026-09-22 RH-EDGE (background `ses_f34951a32`, proof-only,
+  grep-clean, RH-only commit): `xiCentralEdgeStrips10_of_zeroFreeCover
+  :12487` (mirrors :12286) — Hmain+Hedge+Hcut collapse to single
+  `XiCentralZeroFreeCover 10`; open = the cover itself + tail Htail.
 - 2026-09-22 CELL-G (background `ses_f3495b110`, proof-only, grep-clean,
   interval-only commit): R07 center conditional `:35355` (R06 mirror,
   poly 5.35 consumed). Same 7-order wall (need Agam·Azeta≥0.0517, have

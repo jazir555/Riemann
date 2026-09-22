@@ -12474,3 +12474,19 @@ theorem zero_free_vertical_band_two_sided_unconditional
 #print axioms RHProofScaffold.Challenge2.challenge2_certificate
 #print axioms RHProofScaffold.Challenge2.riemann_hypothesis_of_challenge2
 #print axioms RHProofScaffold.ClosedCertificate.remainingQuadrant_10_closed
+
+/-- Edge-strip feed from the pre-existing generic cover at `X = 10`.
+    Narrows the `Hedge : XiCentralEdgeStrips10` premise of
+    `rh_from_mainBand10_edgeStrips10_tail10_cutoff` to the same
+    `XiCentralZeroFreeCover 10` supplier that already feeds `Hmain`
+    (`xiCentralMainBand10_of_zeroFreeCover`) and `Hcut`
+    (`xiCutoffLines10_of_zeroFreeCover`). Residuals after this feed:
+    edge strips closed conditional on the cover; `Hcut` already closed
+    conditional on the same cover; tail `|Re| > 10` remains the open
+    analytic input (via `tailPointwise10_of_absTail`). -/
+theorem xiCentralEdgeStrips10_of_zeroFreeCover
+    (C : XiCentralZeroFreeCover (10 : ℝ)) : XiCentralEdgeStrips10 := by
+  intro z hx_lo hx_hi hgt hlt hne _
+  rcases C.covers z (le_of_lt hx_lo) (le_of_lt hx_hi) hgt hlt hne with
+    ⟨R, _, hx0, hx1, hy0, hy1⟩
+  exact R.no_zero z hx0 hx1 hy0 hy1
