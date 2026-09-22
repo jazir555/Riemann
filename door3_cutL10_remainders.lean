@@ -2478,3 +2478,67 @@ theorem cutL10_uniform_joint_le_1287 :
 
 end Door3CutL10JointTier
 
+/-! ## (n) CUTL hProd-closed joint-tier assembly + exact residual (append-only tail; LF)
+
+Grep baseline (this session, before edit):
+- Tier spec `Door3CutL10JointTier.cutL10_hJointTier` at `:2395-2400`
+  (open tier Prop, byte-for-byte the `hJoint` binder shape at `:868-872`).
+- Tier wiring `cutL10_sup_of_hJointTier_and_hProd` at `:2404-2415`
+  (takes explicit `hProd` + `hJ`, gives exact `0.04` ball sup).
+- hProd shape at `:1226-1231`: `cutL10_hProd_closed (z : ℂ)`
+  `(hz : z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1))`
+  `: xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)) * ...`
+  byte-for-byte the `hProd` binder used at `:2405-2408`, `:864-867`, `:883-886`.
+  CLOSED (no premises beyond `hz`; proved from `completedRiemannZeta₀_eq_polar_plus_xi`
+  plus poly cancellations, in-file at `:1227-1258`).
+
+What is filed here:
+(A) `cutL10_sup_of_hJointTier_closed_hProd`: the `:2404` wiring with `hProd`
+    discharged by the banked-closed `:1227`, leaving the single open premise `hJ`.
+(B) `cutL10_derivRemainder_of_hJointTier`: deriv `0.04` remainder from (A)
+    through the banked Cauchy adapter
+    `Door3CutL10Center.cutL10_derivRemainder_of_closedBall_sup`.
+(C) Residual: `hProd` CLOSED (banked `:1227`); `hJointTier` stays OPEN.
+    Endpoint-only floor at zeta `= 1` is `0.061654605 > 0.04`
+    (gap `0.021654605`, ratio `1.541365125x`, banked `:2237-2343` and `:2418-2427`);
+    uniform joint at walls is `12.864` (gap `12.824`, banked `:2461-2471`).
+    Verdict: GAP on the tier; assembly is conditional on the one open tier Prop.
+All numerals closed by `norm_num`; explicit binders only.
+-/
+
+namespace Door3CutL10JointTierClose
+
+open CentralCoverAssembly
+
+/-- Tier sup with closed `hProd`: the `:2404` wiring with the `:1227`
+closed product identity, leaving only the open tier Prop. -/
+theorem cutL10_sup_of_hJointTier_closed_hProd
+    (hJ : Door3CutL10JointTier.cutL10_hJointTier) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) := by
+  intro z hz
+  have hP := Door3CutL10TierB.cutL10_hProd_closed z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  exact hJ z hz
+
+/-- Deriv remainder from the single open tier premise (chains (A)
+through the banked Cauchy adapter). -/
+theorem cutL10_derivRemainder_of_hJointTier
+    (hJ : Door3CutL10JointTier.cutL10_hJointTier) :
+    Door3CutL10Center.cutL10_derivRemainder 0.04 := by
+  have hC := cutL10_sup_of_hJointTier_closed_hProd hJ
+  exact Door3CutL10Center.cutL10_derivRemainder_of_closedBall_sup hC
+
+/-- Exact residual: `hProd` needs no premise beyond `hz` (banked `:1227`);
+the tier stays open with endpoint-only gap `0.021654605` even at zeta `= 1`. -/
+theorem cutL10_hJointTier_residual_gap :
+    ((0.04 : ℝ) < (0.061654605 : ℝ) * 1) ∧
+    (((0.061654605 : ℝ) * 1 - 0.04) = (0.021654605 : ℝ)) := by
+  constructor <;> norm_num
+
+end Door3CutL10JointTierClose
+
+#print axioms Door3CutL10JointTierClose.cutL10_sup_of_hJointTier_closed_hProd
+#print axioms Door3CutL10JointTierClose.cutL10_derivRemainder_of_hJointTier
+#print axioms Door3CutL10JointTierClose.cutL10_hJointTier_residual_gap
+

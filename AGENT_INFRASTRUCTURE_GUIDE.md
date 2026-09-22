@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 CUTL-HPROD (background `ses_f347f101c`, proof-only,
+  grep-clean, cutL10-only commit): single-premise (hJ) assembly — hProd
+  closed/banked; SOLE open premise = hJointTier (0.04 joint sup).
 - 2026-09-22 DERIV-READOPT (background `ses_f347fc804`, proof-only,
   grep-clean, deriv-only commit): respec adoption FAILS honestly — open
   by 427715 (rho 0.01) / 86614 (rho 0.05). M'=0.15 unreachable with
