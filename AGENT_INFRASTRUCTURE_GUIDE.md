@@ -5528,8 +5528,16 @@ sorry-free infrastructure and the complete commit ledger above.
   (any E with F+E≥21/10 needs E≥11153/2100≈5.311), `plus_one_still_short
   :3501` + `plus_one_gap_eq :3507` (even ideal +1 leaves residual
   9053/2100≈4.311). k=10..4095 must supply ≥5.311 Re (tail-inclusive
-  ≥6.011); single rung provably insufficient. `hEnough` open. SCUT19
+  ≥6.011); single rung provably insufficient.   `hEnough` open. SCUT19
   tasked (k=10 destructive eta-lock, mirroring k=8).
+- 2026-09-22 GAMMA-VERIFY2 (background `ses_f3774d7cf`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (53s)`, BUILD-EXIT=0
+  (attempt 1/2), zero errors, no edits, grep-clean, lock RELEASED.
+  SCOPE HONESTY: build log 02:56:13 predates N6B completion, so this
+  verifies the N6 (Seq5, dc4ce9c) content it explicitly checked
+  (`:3738/:3558/:3560/:3885/:3890`); N6B Seq6 content (abc2b34, through
+  `:4234`) stays UNVERIFIED. Rebuild held until GAMMA-N7 reports (same
+  file in flight), then VERIFY3 covers N6B+N7 together. Lock FREE.
 - 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
   edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
   14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,
