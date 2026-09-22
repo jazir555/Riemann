@@ -1486,3 +1486,67 @@ theorem FC_etaF0395_antitone : Antitone FC_etaF0395 := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-TENDSTO wave: `Tendsto` existence for `FC_etaF0395` partials (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* `etaDirichlet_summable` (`zeta_rigorous.lean:401`): needs `1 < s.re`,
+  NOT applicable at `0.395`.
+* `summable_etaPairTerm` (`zeta_rigorous.lean:919`): needs `0 < s.re`,
+  covers complex pairs but NOT needed for the real alternating route
+  (real eta is NOT summable: `eta_not_summable` in `zeta_rigorous`).
+* Real route banked: `EtaGenReal.etaGen_terms_tendsto_zero`
+  (`interval_arith.lean:404`, `0 < σ`), `EtaGenReal.etaGen_antitone`
+  (`:390`), `Antitone.tendsto_alternating_series_of_tendsto_zero`
+  (Mathlib, used at `zeta_rigorous.lean:60`, `interval_arith.lean:458`).
+* Consumer `FC_slice_S2_of_tendsto` (`:1112`): needs
+  `Tendsto (fun n => ∑ i in range n, (-1)^i * FC_etaF0395 i)` plus
+  `Antitone FC_etaF0395` (latter PROVED `:1467`).
+
+Verdict: PROVED-form (pending build confirmation; BRIDGE-VERIFY2 owns
+the single build lock, no build attempted here).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Bridge: `FC_etaF0395` equals `EtaGenReal.etaGenTerm 0.395` pointwise
+(via `Real.rpow_neg`). -/
+theorem FC_etaF0395_eq_etaGen (k : ℕ) :
+    FC_etaF0395 k = EtaGenReal.etaGenTerm (0.395 : ℝ) k := by
+  simp only [FC_etaF0395, EtaGenReal.etaGenTerm]
+  rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (k : ℝ) + 1)]
+  rw [inv_eq_one_div]
+
+/-- Vanishing: `FC_etaF0395` tends to zero (banked
+`etaGen_terms_tendsto_zero` at `σ = 0.395`). -/
+theorem FC_etaF0395_tendsto_zero :
+    Filter.Tendsto FC_etaF0395 Filter.atTop (nhds 0) := by
+  have hσ : (0 : ℝ) < 0.395 := by norm_num
+  have hGen := EtaGenReal.etaGen_terms_tendsto_zero (σ := (0.395 : ℝ)) hσ
+  have hEq : (fun k : ℕ => EtaGenReal.etaGenTerm (0.395 : ℝ) k) =
+      FC_etaF0395 := by
+    funext k
+    exact (FC_etaF0395_eq_etaGen k).symm
+  rw [hEq] at hGen
+  exact hGen
+
+/-- Tendsto existence: full real alternating partials at `σ = 0.395`
+converge (alternating-series test from banked antitone plus vanishing). -/
+theorem FC_eta_Tendsto_exists :
+    ∃ L : ℝ, Filter.Tendsto
+      (fun n : ℕ => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+      Filter.atTop (nhds L) := by
+  obtain ⟨L, hL⟩ := Antitone.tendsto_alternating_series_of_tendsto_zero
+    (f := FC_etaF0395) FC_etaF0395_antitone FC_etaF0395_tendsto_zero
+  exact ⟨L, hL⟩
+
+/-- Combined: the converged limit dominates `S₂` (feeds
+`FC_slice_S2_of_tendsto` with banked antitone). -/
+theorem FC_eta_Tendsto_S2_exists :
+    ∃ L : ℝ, Filter.Tendsto
+      (fun n : ℕ => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+      Filter.atTop (nhds L) ∧ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ L := by
+  obtain ⟨L, hL⟩ := FC_eta_Tendsto_exists
+  exact ⟨L, hL, FC_slice_S2_of_tendsto L hL FC_etaF0395_antitone⟩
+
+end Door3FirstCellClose
+

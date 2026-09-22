@@ -5984,6 +5984,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-TENDSTO (background `ses_f349a43ed`, proof-only,
+  grep-clean, first_cell-only commit): Tendsto input PROVED —
+  `FC_etaF0395_eq_etaGen :1513` + `tendsto_zero :1521` (banked vanishing
+  rewrite) + `FC_eta_Tendsto_exists :1534` (alternating-series test) +
+  `S2_exists :1544` (same L + S₂ lower). hEven analytic inputs COMPLETE
+  (Antitone + Tendsto + slice all banked); zetaLower still numerically
+  open (0.23 vs 1.1/1.4).
 - 2026-09-22 ETA-S18 (background `ses_f349a43f1`, proof-only, grep-clean,
   suppliers-only commit): S18 rung — log17/18 bridges, rpow17/18 quads
   (0.37·2.74≈1.014/0.37·2.71≈1.003, thin), cpow17/18 splits,
