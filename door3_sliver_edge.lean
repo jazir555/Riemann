@@ -526,4 +526,148 @@ theorem uniform_bot_lower_le_half (m : ℝ)
   rw [edgeBot_consumer_norm_at_zero] at h0
   exact h0
 
+/-! ### (I) honest partial existence near zero (half-optimal `1 / 4`)
+
+What is banked here: continuity of the edge norm at `x = 0` (value `1 / 2`)
+yields a small symmetric interval where the norm stays above `1 / 4`
+(half of optimal). This is a genuine positive uniform lower on a restricted
+range, proved with no zeta input.
+
+What is NOT claimed: uniform `1 / 2` over `Set.Icc (-10) 10`, uniform `1 / 2`
+on any non-singleton interval, or uniform `1 / 2` away from zero. Those need
+pointwise lower bounds on `completedRiemannZeta₀` at `I * x` (`x ≠ 0`, top arm)
+and at `1 + I * x` (bottom arm) controlling the correction terms in
+`entire_top_expand` / `entire_bot_expand` via `edgePoly_top` / `edgePoly_bot`.
+Repo grep finds only upper bounds for `completedRiemannZeta₀`
+(`door3_cell_suppliers.lean:992` norm `≤ 479`,
+`door3_first_cell.lean:842` norm `≤ 479`,
+`door3_R02_ball_advance.lean:162` norm `≤ M`), plus order/tail upper premises
+in `riemann_hypothesis.lean`; no lower bound at `I * x` or `1 + I * x`.
+So full `m = 1 / 2` existence stays open; no force here. -/
+
+/-- Top edge norm map is continuous. -/
+theorem topEdgeNorm_continuous :
+    Continuous (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) := by
+  have hmap : Continuous (fun x : ℝ => (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))) := by
+    fun_prop
+  exact (CentralCoverAssembly.xiShiftedEntire_differentiable.continuous.comp hmap).norm
+
+/-- Bottom edge norm map is continuous. -/
+theorem botEdgeNorm_continuous :
+    Continuous (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) := by
+  have hmap : Continuous (fun x : ℝ => (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))) := by
+    fun_prop
+  exact (CentralCoverAssembly.xiShiftedEntire_differentiable.continuous.comp hmap).norm
+
+/-- Half-optimal uniform lower near zero, top arm: some `δ > 0` gives `1 / 4` on `Icc (-δ) δ`. -/
+theorem m_half_existence_of_zero_top :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ (x : ℝ), x ∈ Set.Icc (-δ) δ →
+      (1 / 4 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
+  have hFcont : Continuous (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) :=
+    topEdgeNorm_continuous
+  have hcontAt : ContinuousAt (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) 0 :=
+    hFcont.continuousAt
+  rw [Metric.continuousAt_iff] at hcontAt
+  obtain ⟨δ, hδpos, hδ⟩ := hcontAt (1 / 4 : ℝ) (by norm_num)
+  refine ⟨δ, hδpos, ?_⟩
+  intro x hx
+  have hxpair := Set.mem_Icc.mp hx
+  have habs : |x| < δ := by
+    rw [abs_lt]
+    constructor
+    · linarith [hxpair.1]
+    · linarith [hxpair.2]
+  have hdistx : dist x (0 : ℝ) < δ := by
+    rw [Real.dist_eq, sub_zero]
+    exact habs
+  have hFx := hδ x hdistx
+  have hFxR : dist
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖
+      ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ <
+      (1 / 4 : ℝ) := hFx
+  have h0norm : ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) +
+      Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ = (1 / 2 : ℝ) :=
+    edgeTop_consumer_norm_at_zero
+  rw [h0norm] at hFxR
+  have hFx2 : dist
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖
+      (1 / 2 : ℝ) < (1 / 4 : ℝ) := hFxR
+  rw [Real.dist_eq] at hFx2
+  rw [abs_lt] at hFx2
+  linarith [hFx2.1]
+
+/-- Half-optimal uniform lower near zero, bottom arm. -/
+theorem m_half_existence_of_zero_bot :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ (x : ℝ), x ∈ Set.Icc (-δ) δ →
+      (1 / 4 : ℝ) ≤
+        ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) := by
+  have hFcont : Continuous (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) :=
+    botEdgeNorm_continuous
+  have hcontAt : ContinuousAt (fun x : ℝ =>
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) 0 :=
+    hFcont.continuousAt
+  rw [Metric.continuousAt_iff] at hcontAt
+  obtain ⟨δ, hδpos, hδ⟩ := hcontAt (1 / 4 : ℝ) (by norm_num)
+  refine ⟨δ, hδpos, ?_⟩
+  intro x hx
+  have hxpair := Set.mem_Icc.mp hx
+  have habs : |x| < δ := by
+    rw [abs_lt]
+    constructor
+    · linarith [hxpair.1]
+    · linarith [hxpair.2]
+  have hdistx : dist x (0 : ℝ) < δ := by
+    rw [Real.dist_eq, sub_zero]
+    exact habs
+  have hFx := hδ x hdistx
+  have hFxR : dist
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖
+      ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ <
+      (1 / 4 : ℝ) := hFx
+  have h0norm : ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) -
+      Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ = (1 / 2 : ℝ) :=
+    edgeBot_consumer_norm_at_zero
+  rw [h0norm] at hFxR
+  have hFx2 : dist
+      ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖
+      (1 / 2 : ℝ) < (1 / 4 : ℝ) := hFxR
+  rw [Real.dist_eq] at hFx2
+  rw [abs_lt] at hFx2
+  linarith [hFx2.1]
+
+/-- Combined honest partial existence near zero: one `δ > 0` works for both arms at `1 / 4`. -/
+theorem m_half_existence_of_zero :
+    ∃ δ : ℝ, 0 < δ ∧
+      (∀ (x : ℝ), x ∈ Set.Icc (-δ) δ →
+        (1 / 4 : ℝ) ≤
+          ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) ∧
+      (∀ (x : ℝ), x ∈ Set.Icc (-δ) δ →
+        (1 / 4 : ℝ) ≤
+          ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) := by
+  obtain ⟨δ1, hδ1pos, h1⟩ := m_half_existence_of_zero_top
+  obtain ⟨δ2, hδ2pos, h2⟩ := m_half_existence_of_zero_bot
+  refine ⟨min δ1 δ2, lt_min hδ1pos hδ2pos, ?_, ?_⟩
+  · intro x hx
+    have hxpair := Set.mem_Icc.mp hx
+    have hx1 : x ∈ Set.Icc (-δ1) δ1 := by
+      apply Set.mem_Icc.mpr
+      constructor
+      · linarith [hxpair.1, min_le_left δ1 δ2, hδ2pos]
+      · linarith [hxpair.2, min_le_left δ1 δ2]
+    exact h1 x hx1
+  · intro x hx
+    have hxpair := Set.mem_Icc.mp hx
+    have hx2 : x ∈ Set.Icc (-δ2) δ2 := by
+      apply Set.mem_Icc.mpr
+      constructor
+      · linarith [hxpair.1, min_le_right δ1 δ2, hδ1pos]
+      · linarith [hxpair.2, min_le_right δ1 δ2]
+    exact h2 x hx2
+
 end Door3SliverEdge

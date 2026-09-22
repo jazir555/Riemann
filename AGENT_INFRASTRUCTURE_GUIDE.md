@@ -5917,6 +5917,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SLIVER-EXIST (background `ses_f34e828b2`, proof-only,
+  grep-clean, sliver_edge-only commit): PARTIAL existence —
+  edge-norm continuity at 0 (value 1/2) → m=1/4 uniform on
+  Icc(-δ,δ) both arms (`:549/:557/:565/:605/:645`, no zeta input).
+  Full m=1/2 still needs zeta₀ lowers for x≠0 (none banked anywhere —
+  only uppers). Ceilings stand optimal-if-held.
 - 2026-09-22 FIRSTCELL-GAMMA (background `ses_f34e828b2`, proof-only,
   grep-clean, first_cell-only commit): reflected U-chain GAP — refl22
   point/floor/step/factor banked (`:1170/:1175/:1182/:1195/:1203/:1213/
