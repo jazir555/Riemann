@@ -6164,8 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
-- 2026-09-22 WENDEL-H3INNER (provisional, report pending; verified
-  grep-clean diff): inner H3 mirror attempt. Reconciled on report.
+- 2026-09-22 WENDEL-H3INNER (background `ses_f34761659`, proof-only,
+  grep-clean, wendel-only commit): inner H3 BLOCKED honestly (|Im|=0.375
+  < 1/2 breaks StirlingVert lead + eps caps at wInner and wInner+8).
+  Outer/leaf/mid closed (1.16/2.56/8.51); inner conditional only.
 - 2026-09-22 SLIVER-FINAL (background `ses_f3477e17d`, proof-only,
   grep-clean, sliver_edge-only commit): FINAL ledger (banked halves
   re-exported; 8 residuals filed). Sliver lane COMPLETE.
