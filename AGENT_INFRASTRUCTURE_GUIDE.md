@@ -5887,6 +5887,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-ZETA (background `ses_f34f29174`, proof-only,
+  grep-clean, first_cell-only commit): phase sharpen 4.73→4.679
+  (`6.75×0.693148=4.678749 :1081`, margin 0.00025) but zetaLower OPEN —
+  gaps banked: S2-window 0.23 vs 1.1 short 0.87 `:1092`, vs 1.4 short
+  1.17 `:1099`, ideal complex N=2 short 0.1 `:1103`. Needs larger-N
+  slow + tail + factor assembly (patch phase). Zeta_rigorous writes
+  left for owner.
 - 2026-09-22 DERIV-DZFIRE (background `ses_f34f29175`, proof-only,
   grep-clean, ball_advance-only commit): second assembly
   `R02_fullDerivUp_of_etaPairDeriv :1042` (same UZ=934 shape as `:999`

@@ -1055,3 +1055,52 @@ theorem FC_gamma0008_U_gap : (0.0196 : ℝ) < 0.026 := by norm_num
 
 end Door3FirstCellClose
 
+/-! ## R02-CELL3 wave: hEven-domination one-window tightening + exact gap (fenced)
+
+hEven route grep: `FC_eta0395_S2_le` (`:544`, even-partial template `k = 1`
+→ `S₂`), `FC_zeta14_obligation` (`:492`, `1.4` floor), `FC_zeta11_of_14`
+(`:496`), `FC_rpow2_head_upper_proved` (`:971`, CLOSED),
+`FC_etaS2_uncond` (`:1004`, `S₂ ≥ 0.23`).
+ONE honest window: phase cap `4.73` (`FC_eta_phase1_lt` `:521`) → `4.679`
+via new 6-digit `log 2` upper (mirrors `CS_log2_le` / `CS_eta_phase1_lt`,
+no new estimates).
+Verdict: `zetaLower-1.1` stays OPEN — real-`S₂` window `0.23` short by
+`0.87` vs `1.1` (`1.17` vs `1.4`); even ideal complex `N = 2` `slow = 1`
+short by `0.1` vs `1.1` (`0.4` vs `1.4`). No force.
+-/
+
+namespace Door3FirstCellClose
+
+/-- Local `log 2` upper, 6 digits (mirrors `CS_log2_le`; no new import). -/
+theorem FC_log2_le_aux : Real.log 2 < (0.693148 : ℝ) := by
+  have h9 := Real.log_two_lt_d9
+  linarith
+
+/-- Sharpened head-phase upper at `t = -6.75`: `6.75 * log 2 < 4.679`
+(`6.75 × 0.693148 = 4.678749`; tightens `FC_eta_phase1_lt` `4.73 → 4.679`). -/
+theorem FC_eta_phase1_sharp : (6.75 : ℝ) * Real.log 2 < 4.679 := by
+  have h := FC_log2_le_aux
+  have hpos : (0 : ℝ) < 6.75 := by norm_num
+  have hm := mul_lt_mul_of_pos_left h hpos
+  norm_num at hm
+  linarith
+
+/-- Exact gap: real-`S₂` hEven window `0.23` short of `1.1` by `0.87`. -/
+theorem FC_hEven_S2_gap_11 : (0.23 : ℝ) < 1.1 := by norm_num
+
+/-- Exact shortfall numeral vs `1.1`: `1.1 - 0.23 = 0.87`. -/
+theorem FC_hEven_S2_shortfall_11 : (1.1 : ℝ) - 0.23 = 0.87 := by norm_num
+
+/-- Exact gap: real-`S₂` hEven window `0.23` short of `1.4` by `1.17`
+(mirrors `CS_N2_slow_gap` shape at the FC numerals). -/
+theorem FC_hEven_S2_gap_14 : (0.23 : ℝ) < (1.4 : ℝ) * 1 + 0 := by norm_num
+
+/-- Exact shortfall numeral vs `1.4`: `1.4 - 0.23 = 1.17`. -/
+theorem FC_hEven_S2_shortfall_14 : (1.4 : ℝ) - 0.23 = 1.17 := by norm_num
+
+/-- Complex-`N = 2` ceiling note, quantified: even ideal `slow = 1` falls
+short of `1.1` (needs larger-`N` slow; patch phase). -/
+theorem FC_hEven_complexS2_gap_11 : (1 : ℝ) < 1.1 := by norm_num
+
+end Door3FirstCellClose
+
