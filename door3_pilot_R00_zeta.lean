@@ -3833,4 +3833,54 @@ theorem sSCUT_log_twelve_ge : (2.4768275168 : ℝ) ≤ Real.log 12 := by
   rw [h12, hinv]
   linarith
 
+/-- Phase window `θ₁₂ = 10*log 12 ∈ [24.768275168, 24.934941844]`
+(via banked `sSCUT_log_twelve_ge/le` + `*10`; phase shape `10*log 12`
+confirmed against the cpow mirrors `sSCUT_cpow9_neg_re` (`:3287`,
+`cos (10*log 9)` for base 9) and `sSCUT_cpow11_neg_re` (`:3714`,
+`cos (10*log 11)` for base 11): multiplier is `t = 10`, not `11`;
+non-strict since the `log 12` inputs are `≤`). -/
+theorem sSCUT_theta12_wide_mem :
+    (24.768275168 : ℝ) ≤ 10 * Real.log 12 ∧
+    10 * Real.log 12 ≤ (24.934941844 : ℝ) := by
+  have hge := sSCUT_log_twelve_ge
+  have hle := sSCUT_log_twelve_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.4768275168 = 24.768275168 := by norm_num
+  have c2 : (10 : ℝ) * 2.4934941844 = 24.934941844 := by norm_num
+  constructor <;> linarith
+
+/-- Exact width of the wide `θ₁₂` window (`0.166666676`). -/
+theorem sSCUT_theta12_wide_width_eq :
+    (24.934941844 : ℝ) - 24.768275168 = (0.166666676 : ℝ) := by
+  norm_num
+
+/-- Reduced phase `δ₁₂' = θ₁₂ - 7π ∈ (2.777075168, 2.944441844)` (nearest
+odd-multiple anchor: `7π ≈ 21.99` vs `9π ≈ 28.27`; `θ₁₂ ≈ 24.77-24.93`
+so `7π` is nearest; strict since `Real.pi_gt_d4/lt_d4` are strict; mirror of
+`sSCUT_delta11p_mem`). -/
+theorem sSCUT_delta12p_wide_mem :
+    (2.777075168 : ℝ) < 10 * Real.log 12 - 7 * Real.pi ∧
+    10 * Real.log 12 - 7 * Real.pi < (2.944441844 : ℝ) := by
+  have hth := sSCUT_theta12_wide_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the wide `δ₁₂'` window (`0.167366676`). -/
+theorem sSCUT_delta12_wide_width_eq :
+    (2.944441844 : ℝ) - 2.777075168 = (0.167366676 : ℝ) := by
+  norm_num
+
+/-- Window-gap verdict (honest, too-wide): the wide `δ₁₂'` window spans more
+than `0.09`, so it cannot fit any `±0.02` close (`0.04` span); the
+`θ₁₂` width `0.166666676` is an order of magnitude above the sharp
+`n = 12` recipe width, so no `cos (10*log 12) ≤ -1/2` signed upper is
+banked here — filed as gap, not bound (mirror of
+`sSCUT_delta11_window_gap`; odd `k = 11` negation-flip needs the cosine
+upper, which does NOT close on this wide window). -/
+theorem sSCUT_delta12_wide_window_gap :
+    (0.09 : ℝ) < (2.944441844 : ℝ) - 2.777075168 := by
+  norm_num
+
 end Door3PilotR00Zeta

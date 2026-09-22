@@ -5644,8 +5644,16 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 SCUT25 (background `ses_f37683d3d`, proof-only, grep-clean):
   log12 window — `le :3809` (≤2.4934941844 via log(12/11)≤1/11) +
   `ge :3822` (≥2.4768275168 via log(11/12)≤-1/12; slacks ~1e-10,
-  norm_num-closed). Window [2.4768,2.4935] width ~0.0167, true ~2.4849
+  norm_num-closed).   Window [2.4768,2.4935] width ~0.0167, true ~2.4849
   inside. Next: theta12/cos (SCUT26).
+- 2026-09-22 SCUT26 (background `ses_f3766f8f0`, proof-only, grep-clean):
+  phase SHAPE corrected (10·log12, not 11·log12 — multiplier is t=10 in
+  all mirrors `:3287/:3714`) + theta12 wide window `:3842` (θ∈[24.768,
+  24.935], width 0.167) + delta12' `:3862` (δ'∈(2.777,2.944), width
+  0.167) + gap `:3882`. Cos verdict: GAP honestly (sharp θ≈24.849 has
+  cos≈+0.96 → odd-k flip recipe FAILS; k=11 likely DESTRUCTIVE via
+  sharp `:2235/:2287`, not constructive). SCUT27 tasked (eta11
+  destructive lock via sharp).
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494
