@@ -6148,6 +6148,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CUTL-TIERSPEC (background `ses_f3480bec0`, proof-only,
   grep-clean, cutL10-only commit): hJoint tier spec filed + endpoint
   zeta-1 value + uniform-worsens findings (uniform route dead).
+- 2026-09-22 CELL-N (background `ses_f348467ec`, proof-only,
+  grep-clean, interval-only commit): R13 poly floor 11.4 hypothesis-free
+  + center conditional. Same ~6-order wall (short 6.3M).
 - 2026-09-22 SCUT50 (background `ses_f34819126`, proof-only,
   grep-clean, pilot-only commit): k=23 DESTRUCTIVE (cos≥1/4 via quad
   0.888; eta23≤-1/20 + no_pos_lock `:6758-6769`). Floor stays -2.574.
