@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETAPRIME-DOM-ADAPTIVE (background `ses_f34c288fb`, proof-only,
+  grep-clean, eta_prime-only commit): summability CLOSED —
+  dominator `B=8(m+1)^-2 :505` + p-series `:511/:528` + log-diff
+  `:535/:544` + domination `:612/:718` → `etaDerivMajorant_summable
+  :726` UNCONDITIONAL (MAJ confirmed present first). Tsum bridge
+  `:297` premises now all banked (u/hderiv/hbound). DZ-chain residual:
+  etaPairCpow identification + conversion quotient caps + DG.
 - 2026-09-22 BALLADV-DZNUM-ADAPTIVE (background `ses_f34c288fd`, proof-only,
   grep-clean, ball_advance-only commit): DZFIRE verified present +
   worst-case scaffolding — `R02_etaWorst_normSq :1396` (0.74²+8.25²=

@@ -499,3 +499,230 @@ theorem etaDerivMajorant_summable_of_dom (B : ℕ → ℝ) (hB : Summable B)
     (hdom : ∀ m : ℕ, ‖etaDerivMajorant m‖ ≤ B m) :
     Summable etaDerivMajorant :=
   Summable.of_norm_bounded hB hdom
+
+/-- DOMINATOR: explicit pure-power `B m = 8 / (m+1)^2` in rpow form.
+Shape `C * ((m+1):R)^(-2)`; `p = 2 > 1` for the p-series route. -/
+noncomputable def etaDerivDominator (m : ℕ) : ℝ :=
+  8 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ))
+
+/-- Shift-series summability `(m+1)^(-2)` via `Real.summable_nat_rpow_inv`
+plus `summable_nat_add_iff` (mirrors `R02_D3_shift195_summable`,
+`d3shift32_summable7` shapes). -/
+theorem etaDerivShift2_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by
+  have hp1 : (1 : ℝ) < (1 : ℝ) + 1 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ ((1 : ℝ) + 1)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp1
+  have hshift :
+      Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((1 : ℝ) + 1)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ ((1 : ℝ) + 1)))⁻¹) := by
+    funext m
+    have eR : (-2 : ℝ) = -((1 : ℝ) + 1) := by norm_num
+    rw [eR, Real.rpow_neg (Nat.cast_nonneg _)]
+  rw [heq]
+  exact hshift
+
+/-- Dominator summability via `Summable.mul_left`. -/
+theorem etaDerivDominator_summable : Summable etaDerivDominator := by
+  have h2 := etaDerivShift2_summable
+  unfold etaDerivDominator
+  exact Summable.mul_left 8 h2
+
+/-- Log-factor bound `log (2m+2) ≤ (2m+2)` from
+`Real.log_le_sub_one_of_pos`. -/
+theorem eta_logBp_le (m : ℕ) :
+    Real.log (((((2 * m + 2 : ℕ)) : ℝ))) ≤ (((((2 * m + 2 : ℕ)) : ℝ))) := by
+  have hpos : (0 : ℝ) < (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have h := Real.log_le_sub_one_of_pos hpos
+  linarith
+
+/-- Log-difference bound `log(2m+2) - log(2m+1) ≤ (2m+1)⁻¹` from
+`Real.log_le_sub_one_of_pos` applied to the ratio plus `Real.log_div`. -/
+theorem eta_logDiff_le (m : ℕ) :
+    Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ))) ≤
+      (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ := by
+  have hApos : (0 : ℝ) < (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hBpos : (0 : ℝ) < (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hAne : (((((2 * m + 1 : ℕ)) : ℝ))) ≠ 0 := ne_of_gt hApos
+  have hBeq : (((((2 * m + 2 : ℕ)) : ℝ))) =
+      (((((2 * m + 1 : ℕ)) : ℝ))) + 1 := by
+    have heq : 2 * m + 1 + 1 = 2 * m + 2 := by omega
+    calc (((((2 * m + 2 : ℕ)) : ℝ)))
+        = (((((2 * m + 1 + 1 : ℕ)) : ℝ))) := by rw [heq]
+      _ = (((((2 * m + 1 : ℕ)) : ℝ))) + 1 := by
+          rw [Nat.cast_add, Nat.cast_one]
+  have hratio_pos :
+      (0 : ℝ) < (((((2 * m + 2 : ℕ)) : ℝ))) / (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    div_pos hBpos hApos
+  have hlog_le :=
+    Real.log_le_sub_one_of_pos hratio_pos
+  have hlog_eq : Real.log ((((((2 * m + 2 : ℕ)) : ℝ))) /
+      (((((2 * m + 1 : ℕ)) : ℝ)))) =
+      Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+        Real.log (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Real.log_div (ne_of_gt hBpos) (ne_of_gt hApos)
+  have hratio_eq : (((((2 * m + 2 : ℕ)) : ℝ))) /
+      (((((2 * m + 1 : ℕ)) : ℝ))) - 1 =
+      (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ := by
+    rw [hBeq]
+    field_simp
+    ring
+  linarith
+
+/-- Majorant is nonnegative (both pieces). -/
+theorem etaDerivMajorant_nonneg (m : ℕ) : 0 ≤ etaDerivMajorant m := by
+  unfold etaDerivMajorant
+  have hApos : (0 : ℝ) < (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hB1le : (1 : ℝ) ≤ (((((2 * m + 2 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 2)
+  have hAB : (((((2 * m + 1 : ℕ)) : ℝ))) ≤ (((((2 * m + 2 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 2 * m + 1 ≤ 2 * m + 2)
+  have hlogB_nn : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Real.log_nonneg hB1le
+  have hlog_mono : Real.log (((((2 * m + 1 : ℕ)) : ℝ))) ≤
+      Real.log (((((2 * m + 2 : ℕ)) : ℝ))) :=
+    Real.log_le_log hApos hAB
+  have hDnn : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ))) := sub_nonneg.mpr hlog_mono
+  have hr7nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hr5nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have h1 : 0 ≤ Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) := by
+    exact mul_nonneg (mul_nonneg hlogB_nn (by norm_num)) hr7nn
+  have h2 : 0 ≤ (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) :=
+    mul_nonneg hDnn hr5nn
+  exact add_nonneg h1 h2
+
+/-- Pure-power domination `etaDerivMajorant m ≤ etaDerivDominator m`.
+Crude log bounds (`eta_logBp_le`, `eta_logDiff_le`) plus rpow
+monotonicity (`Real.rpow_le_rpow_of_nonpos`,
+`Real.rpow_le_rpow_of_exponent_le`) and one `Real.rpow_add`
+fold for `n * n^(-7/2) = n^(-5/2)`. -/
+theorem etaDerivMajorant_le_dominator (m : ℕ) :
+    etaDerivMajorant m ≤ etaDerivDominator m := by
+  have hApos : (0 : ℝ) < (((((2 * m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have hn1pos : (0 : ℝ) < (((((m + 1 : ℕ)) : ℝ))) :=
+    Nat.cast_pos.mpr (by omega)
+  have h1leA : (1 : ℝ) ≤ (((((2 * m + 1 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 1 ≤ 2 * m + 1)
+  have h1len1 : (1 : ℝ) ≤ (((((m + 1 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : 1 ≤ m + 1)
+  have hn1leA : (((((m + 1 : ℕ)) : ℝ))) ≤ (((((2 * m + 1 : ℕ)) : ℝ))) := by
+    exact_mod_cast (by omega : m + 1 ≤ 2 * m + 1)
+  have hBp_eq : (((((2 * m + 2 : ℕ)) : ℝ))) = 2 * (((((m + 1 : ℕ)) : ℝ))) := by
+    have heqN : 2 * m + 2 = 2 * (m + 1) := by omega
+    calc (((((2 * m + 2 : ℕ)) : ℝ)))
+        = (((((2 * (m + 1) : ℕ)) : ℝ))) := by rw [heqN]
+      _ = 2 * (((((m + 1 : ℕ)) : ℝ))) := by push_cast; ring
+  have he7 : (-(5 / 2 : ℝ) - 1) ≤ 0 := by norm_num
+  have he5 : (-(5 / 2 : ℝ)) ≤ 0 := by norm_num
+  have he52 : (-(5 / 2 : ℝ)) ≤ (-2 : ℝ) := by norm_num
+  have hlogBp := eta_logBp_le m
+  have hlogD := eta_logDiff_le m
+  have hr7nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hr5nn : 0 ≤ (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hn17nn : 0 ≤ (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) :=
+    Real.rpow_nonneg (Nat.cast_nonneg _) _
+  have hr7mono : (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) ≤
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) :=
+    Real.rpow_le_rpow_of_nonpos hn1pos hn1leA he7
+  have hr5mono : (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) :=
+    Real.rpow_le_rpow_of_nonpos hn1pos hn1leA he5
+  have h52mono : (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le h1len1 he52
+  have hDle1 : Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ))) ≤ 1 := by
+    have hinv : (((((2 * m + 1 : ℕ)) : ℝ)))⁻¹ ≤ 1 :=
+      inv_le_one_of_one_le₀ h1leA
+    exact le_trans hlogD hinv
+  have hfold : (((((m + 1 : ℕ)) : ℝ))) *
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) =
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) := by
+    have hn1_eq : (((((m + 1 : ℕ)) : ℝ))) =
+        (((((m + 1 : ℕ)) : ℝ)) ^ (1 : ℝ)) := (Real.rpow_one _).symm
+    have h1 : (1 : ℝ) + (-(5 / 2 : ℝ) - 1) = -(5 / 2 : ℝ) := by ring
+    rw [hn1_eq, ← Real.rpow_add hn1pos, h1]
+  have eT1a : Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) ≤
+      (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) := by
+    have ha : Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) ≤
+        (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) :=
+      mul_le_mul_of_nonneg_right hlogBp (by norm_num)
+    exact mul_le_mul_of_nonneg_right ha hn17nn
+  have eT1b : (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) =
+      7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) := by
+    rw [hBp_eq, ← hfold]
+    ring
+  have eT1 : Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) ≤
+      7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by
+    have hstep : (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+        (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) ≤
+        7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by
+      rw [eT1b]
+      have hmul : 7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+          7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) :=
+        mul_le_mul_of_nonneg_left h52mono (by norm_num)
+      exact hmul
+    exact le_trans eT1a hstep
+  have eT2 : (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+      Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+      1 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by
+    have ha : (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+        Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+        (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+        1 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) :=
+      mul_le_mul_of_nonneg_right hDle1 hr5nn
+    have hb : 1 * (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+        1 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by
+      have hle : (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+          (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) :=
+        le_trans hr5mono h52mono
+      exact mul_le_mul_of_nonneg_left hle (by norm_num)
+    exact le_trans ha hb
+  unfold etaDerivMajorant etaDerivDominator
+  have hfin : Real.log (((((2 * m + 2 : ℕ)) : ℝ))) * (7 / 2) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ) - 1)) +
+      (Real.log (((((2 * m + 2 : ℕ)) : ℝ))) -
+        Real.log (((((2 * m + 1 : ℕ)) : ℝ)))) *
+      (((((2 * m + 1 : ℕ)) : ℝ)) ^ (-(5 / 2 : ℝ))) ≤
+      7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) +
+      1 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) :=
+    add_le_add eT1 eT2
+  have hrw : 7 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) +
+      1 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) =
+      8 * (((((m + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) := by ring
+  rw [hrw] at hfin
+  exact hfin
+
+/-- Norm domination for the existing conditional wrapper. -/
+theorem etaDerivMajorant_norm_le_dominator (m : ℕ) :
+    ‖etaDerivMajorant m‖ ≤ etaDerivDominator m := by
+  have hnn := etaDerivMajorant_nonneg m
+  have hle := etaDerivMajorant_le_dominator m
+  rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+  exact hle
+
+/-- Unconditional summability: discharges `etaDerivMajorant_summable_of_dom`. -/
+theorem etaDerivMajorant_summable : Summable etaDerivMajorant :=
+  etaDerivMajorant_summable_of_dom etaDerivDominator
+    etaDerivDominator_summable etaDerivMajorant_norm_le_dominator
