@@ -5619,5 +5619,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `:5174` / Im8≤0.47 `:5192` → `CS_complex_S8_Im_ge_016 :5224` (0.16,
   true ~1.231) + Pythagoras gap `:5237` (1.15²+0.16²=1.3481 vs
   1.94²=3.7636, gap 2.4155; needs Im≥1.564 — no force). S8 pair gives
-  ~1.161; true |S8|~1.901 confirms stall. Live 1.94 STANDS.
+  ~1.161; true |S8|~1.901 confirms stall.   Live 1.94 STANDS.
   Premise_gamma 8-line tweak left for VERIFY3 owner.
+- 2026-09-22 SCUT22 (background `ses_f376e9806`, proof-only, grep-clean):
+  k=10 CONSTRUCTIVE flip — `sSCUT_delta11_even_mem :3637` (θ-8π ∈
+  (-1.198,-1.106)) + `sSCUT_cos10log11_ge :3647` (cos ≥ 7/25 = 0.28 via
+  |δ|≤1.2 quadratic floor 1-x²/2; true ~0.41, margin good). Even parity
+  keeps sign → Re(eta₁₀) ≥ +r11·0.28 constructive (NOT destructive —
+  8π nearer than 7π). Product floor needs r11 lower (follow-up).
+  SCUT23 tasked (r11 lower + eta10 gain).

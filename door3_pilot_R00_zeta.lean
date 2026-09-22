@@ -3631,4 +3631,56 @@ theorem sSCUT_delta11_window_gap :
     (0.09 : ℝ) < (2.035350934 : ℝ) - 1.943741835 := by
   norm_num
 
+/-- Reduced phase `δ₁₁ = θ₁₁ - 8π ∈ (-1.198, -1.106)` (even-multiple anchor:
+`8π ≈ 25.13` is nearer than `7π ≈ 21.99`; strict via `Real.pi_gt_d4/lt_d4`;
+mirror of `sSCUT_delta11p_mem`). -/
+theorem sSCUT_delta11_even_mem :
+    (-1.198 : ℝ) < 10 * Real.log 11 - 8 * Real.pi ∧
+    10 * Real.log 11 - 8 * Real.pi < (-1.106 : ℝ) := by
+  have hth := sSCUT_theta11_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Signed cosine LOWER `7/25 ≤ cos(10*log 11)` (quadrant-IV `δ₁₁` via the
+even-multiple strip `cos θ₁₁ = cos δ₁₁` + quadratic lower on `|δ₁₁| ≤ 1.2`). -/
+theorem sSCUT_cos10log11_ge :
+    (7 / 25 : ℝ) ≤ Real.cos (10 * Real.log 11) := by
+  have hδ := sSCUT_delta11_even_mem
+  set y : ℝ := 10 * Real.log 11 - 8 * Real.pi with hy_def
+  have hy_lo : (-1.198 : ℝ) < y := by rw [hy_def]; linarith [hδ.1]
+  have hy_hi : y < (-1.106 : ℝ) := by rw [hy_def]; linarith [hδ.2]
+  have hsq : y ^ 2 ≤ (1.2 : ℝ) ^ 2 := by
+    have ha : (0 : ℝ) ≤ 1.2 - y := by linarith [hy_hi]
+    have hb : (0 : ℝ) ≤ y + 1.2 := by linarith [hy_lo]
+    have hprod := mul_nonneg ha hb
+    have heq : (1.2 - y) * (y + 1.2) = (1.2 : ℝ) ^ 2 - y ^ 2 := by ring
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := y)
+  have hnum : (7 / 25 : ℝ) ≤ 1 - (1.2 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosy : (7 / 25 : ℝ) ≤ Real.cos y := by
+    have hle : 1 - (1.2 : ℝ) ^ 2 / 2 ≤ 1 - y ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper : Real.cos (10 * Real.log 11 - 8 * Real.pi)
+      = Real.cos (10 * Real.log 11) := by
+    have h1 := Real.cos_sub_two_pi (10 * Real.log 11)
+    have h2 := Real.cos_sub_two_pi (10 * Real.log 11 - 2 * Real.pi)
+    have h3 := Real.cos_sub_two_pi
+      ((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi)
+    have h4 := Real.cos_sub_two_pi
+      (((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+    have e4 : 10 * Real.log 11 - 8 * Real.pi
+        = (((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi := by ring
+    calc Real.cos (10 * Real.log 11 - 8 * Real.pi)
+        = Real.cos ((((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) - 2 * Real.pi) := by rw [e4]
+      _ = Real.cos (((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) := h4
+      _ = Real.cos ((10 * Real.log 11 - 2 * Real.pi) - 2 * Real.pi) := h3
+      _ = Real.cos (10 * Real.log 11 - 2 * Real.pi) := h2
+      _ = Real.cos (10 * Real.log 11) := h1
+  rw [hy_def, hper] at hcosy
+  exact hcosy
+
 end Door3PilotR00Zeta
