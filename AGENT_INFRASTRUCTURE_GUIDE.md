@@ -5714,6 +5714,14 @@ sorry-free infrastructure and the complete commit ledger above.
   1-0.637²/2≈0.797; true ~0.87, margin good). Even parity → eta12 gain
   ≈ r13·0.75 ≈ 0.21 pending r13 chain. Premise_gamma N8 left for owner.
   SCUT30 tasked (r13/cpow13/eta12 gain).
+- 2026-09-22 SCUT30 (background `ses_f374f864c`, proof-only, grep-clean):
+  eta12 gain — `sqrt13_le :4186` (≤37/10, 13≤13.69; (10/3)² shortcut
+  correctly NOT reused) + `rpow13_neg_ge :4200` (r13≥10/37≈0.2703) +
+  split `:4212` + product `:4247` (15/74 = 10/37·3/4, coordinator-
+  verified) + `eta12_Re_ge :4276` (+0.2027) + shard `:4286`
+  ({0..7,9,10,12}, single-count) + shortfall `:4299`
+  (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
+  Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
 - 2026-09-22 BINET-SURVEY (background `ses_f3752af33`, read-only, no
   edits): L2 rate leaf absent confirmed — no Binet/Stirling-remainder/
   logGamma/GammaSeq-rate in Mathlib (BohrMollerup qualitative,
