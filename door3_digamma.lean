@@ -1043,3 +1043,146 @@ theorem gamInner_envelope_exceeds :
   linarith
 
 end Door3Digamma
+
+/-! ## 12. Outer/leaf/mid shift-chain quotients vs gamNeed (append-only).
+
+Grep basis (read before writing):
+- `gamNeed_outer / leaf / mid / inner` (`door3_digamma.lean:419-425`):
+  `‖Gamma w‖ ≤ 0.002 / 0.008 / 0.04 / 4.5` (DERIVUP tightGamma numerals).
+- Inner attempt (`door3_digamma.lean:944-1045`): `realGamma_01975_le_six`
+  (`Real.Gamma 0.1975 ≤ 6`), `gamInner_decay_inst`
+  (`‖Gamma wInner‖ ≤ 18 * exp(-0.5 * |Im|)`), `exp_neg01875_lower`,
+  `gamInner_envelope_exceeds` (`4.5 < 18 * exp(-0.1875)`). Inner route dead:
+  honest `M = 6` already exceeds the `4.5` need, and the true value at
+  `Re = 0.1975, Im = -0.375` sits above `4.5`, so no tightening of this
+  envelope can close `gamNeed_inner`. Not re-attempted here.
+- Banked shift quotients in `door3_stirling_gamma` (cited without new imports):
+  outer shift-3 `D3SG_gamNeed_outer_shift3_upper` (`≤ 0.032`),
+  leaf shift-3 `D3SG_gamNeed_leaf_shift3_upper` (`≤ 0.061`).
+  No mid shift quotient is banked there; mid is proved fresh below (shift-1).
+- Wires (`door3_digamma.lean:126-140`): `wireOuter / wireLeaf / wireMid`
+  give `w = mk 0.1975 (-4.375) / mk 0.1 (-3.375) / mk 0.1975 (-2.375)`.
+
+Honest true-vs-need check:
+- Inner need `4.5`: true value above need (dead, per block 11). Filed as is.
+- Outer need `0.002` at `|Im| = 4.375`, leaf need `0.008` at `|Im| = 3.375`,
+  mid need `0.04` at `|Im| = 2.375`: true values are below needs by the
+  large-height decay (exponential in `|Im|`), so these three are closable in
+  principle. The crude `‖w‖ ≥ |Im|` shift-chains banked here do NOT close
+  them (quotients `0.032 / 0.061 / 0.422` all exceed needs); the missing
+  piece is the exponential height-decay factor, which is not banked.
+  Banked below: transports of the two best outer/leaf quotients, one fresh
+  mid shift-1 quotient, plus exact gap/ratio witnesses. Nothing is forced.
+
+Residual (exact, still open):
+- `gamNeed_outer` (`:419`): needs `≤ 0.002`; best here `0.032` (`16x` gap).
+- `gamNeed_leaf` (`:421`): needs `≤ 0.008`; best here `0.061` (`7.6x` gap).
+- `gamNeed_mid` (`:423`): needs `≤ 0.04`; best here `0.422` (`10.5x` gap).
+  Closing any of them needs either deeper shifts with full-modulus lowers
+  or, honestly, the exponential height-decay bound at large `|Im|`.
+- `gamNeed_inner` (`:425`): dead via block 11; fresh idea owed.
+-/
+
+namespace Door3Digamma
+
+theorem wOuter_eq_mk : wOuter = Complex.mk (0.1975 : ℝ) (-4.375 : ℝ) := by
+  unfold wOuter
+  exact wireOuter
+
+theorem wLeaf_eq_mk : wLeaf = Complex.mk (0.1 : ℝ) (-3.375 : ℝ) := by
+  unfold wLeaf
+  exact wireLeaf
+
+theorem wMid_eq_mk : wMid = Complex.mk (0.1975 : ℝ) (-2.375 : ℝ) := by
+  unfold wMid
+  exact wireMid
+
+theorem gamOuter_quotient_shift3 :
+    ‖Complex.Gamma wOuter‖ ≤ (0.032 : ℝ) := by
+  rw [wOuter_eq_mk]
+  exact D3SG_gamNeed_outer_shift3_upper
+
+theorem gamLeaf_quotient_shift3 :
+    ‖Complex.Gamma wLeaf‖ ≤ (0.061 : ℝ) := by
+  rw [wLeaf_eq_mk]
+  exact D3SG_gamNeed_leaf_shift3_upper
+
+theorem gamMid_mk_shift1_upper :
+    ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ ≤ (0.422 : ℝ) := by
+  have hre1 : ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.one_re,
+      show (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).re = (0.1975 : ℝ) from rfl]
+    norm_num
+  have him_abs : (2.375 : ℝ) ≤ ‖(Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ := by
+    have him_eq : (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).im = (-2.375 : ℝ) := rfl
+    have habs : |(Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).im| = (2.375 : ℝ) := by
+      rw [him_eq, abs_of_neg (by norm_num : (-2.375 : ℝ) < 0)]
+      norm_num
+    have h := Complex.abs_im_le_norm (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))
+    rw [habs] at h
+    exact h
+  have hw0 : (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) ≠ 0 := by
+    intro h
+    have him0 : (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).im = 0 := by
+      rw [h]
+      simp
+    rw [show (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)).im = (-2.375 : ℝ) from rfl] at him0
+    norm_num at him0
+  have hG : Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1)
+      = (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) *
+        Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) :=
+    Complex.Gamma_add_one _ hw0
+  have hGn : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1)‖
+      = ‖(Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ := by
+    rw [hG, norm_mul]
+  have hRe1_pos : (0 : ℝ) < ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_lo : (1 : ℝ) ≤ ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re := by
+    rw [hre1]
+    norm_num
+  have hRe1_hi : ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re ≤ 2 := by
+    rw [hre1]
+    norm_num
+  have hDom : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1)‖
+      ≤ Real.Gamma (((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re) :=
+    D3SG_Gamma_norm_le_real _ hRe1_pos
+  have hRealCap : Real.Gamma (((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1).re) ≤ 1 :=
+    D3SG_Gamma_one_two_le_one _ hRe1_lo hRe1_hi
+  have hCap1 : ‖Complex.Gamma ((Complex.mk (0.1975 : ℝ) (-2.375 : ℝ)) + 1)‖ ≤ 1 :=
+    le_trans hDom hRealCap
+  have hMul : ‖(Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ *
+      ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ ≤ 1 := by
+    rw [← hGn]
+    exact hCap1
+  have hmono : (2.375 : ℝ) *
+      ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖
+      ≤ ‖(Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ *
+        ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖ :=
+    mul_le_mul_of_nonneg_right him_abs (norm_nonneg _)
+  have hle1 : ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-2.375 : ℝ))‖
+      ≤ 1 / (2.375 : ℝ) := by
+    rw [le_div_iff₀ (by norm_num : (0 : ℝ) < 2.375), mul_comm]
+    exact le_trans hmono hMul
+  have h422 : (1 : ℝ) / (2.375 : ℝ) ≤ (0.422 : ℝ) := by norm_num
+  exact le_trans hle1 h422
+
+theorem gamMid_quotient_shift1 :
+    ‖Complex.Gamma wMid‖ ≤ (0.422 : ℝ) := by
+  rw [wMid_eq_mk]
+  exact gamMid_mk_shift1_upper
+
+theorem gamOuter_gap_shift3 : (0.002 : ℝ) < (0.032 : ℝ) := by norm_num
+
+theorem gamLeaf_gap_shift3 : (0.008 : ℝ) < (0.061 : ℝ) := by norm_num
+
+theorem gamMid_gap_shift1 : (0.04 : ℝ) < (0.422 : ℝ) := by norm_num
+
+theorem gamOuter_ratio_shift3 : (15 : ℝ) < (0.032 : ℝ) / (0.002 : ℝ) := by norm_num
+
+theorem gamLeaf_ratio_shift3 : (7 : ℝ) < (0.061 : ℝ) / (0.008 : ℝ) := by norm_num
+
+theorem gamMid_ratio_shift1 : (10 : ℝ) < (0.422 : ℝ) / (0.04 : ℝ) := by norm_num
+
+end Door3Digamma

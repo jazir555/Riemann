@@ -1484,4 +1484,55 @@ gap: norm cap `U0` + `C2` inflation (not attempted: needs `‖w‖^2 = Re^2+Im^2
 upper-cap API, outside fenced D-numeral brief).
 -/
 
+/-! ## 20. WENDEL-U0 normcap + C2 inflation (PROOF-ONLY, FENCED, no build): G2 CLOSED.
+
+Greps (before edit, this turn, this file only):
+- wOuter specs: `wOuter/:72` def `Complex.mk 0.1975 (-4.375)`,
+  `wOuter_re/:80`, `wOuter_im/:82`; `wOuter_re_pos/:890`,
+  `g2_denom_lower_wOuter/:1114`, `g2_norm_wOuter_lower/:1257`;
+- D-cap: `g2_D_eq/:1271`, `g2_D_norm_le/:1287` (`‖D‖ ≤ 4/(4.375*4.375)`),
+  numeral `g2_D_cap_le_021` + `g2_D_norm_le_021/:1473` (`≤ 0.21`);
+- residual identity + conditional: `g2_residual_eq/:1357`,
+  `g2_G2_of_telescope_normcap/:1375` needs `hU0 : ‖wOuter‖^2 ≤ U0` plus
+  `hC2 : (Qcap+Ecap+Dcap)*U0 ≤ C2` with `Qcap = 8*((1/2)/4.375^2)`,
+  `Ecap = 8*(1/(3*4.375^2*4.375))`, `Dcap = 4/(4.375*4.375)`;
+- `G2_outerN8_prop/:770` def, uses `:776,1039,1379,1426`;
+- tactic grep `sorry|admit|axiom|simpa`: prior sections comment-only mentions;
+  zero tactic uses in banked code (this section keeps that).
+
+Banked here (proved, no new imports, this section only):
+`wOuter_norm_sq_U0` (U0 via Re^2+Im^2) + `g2_C2_inflation_863`
+((Qcap+Ecap+Dcap)*U0 numeral) chain via `g2_G2_of_telescope_normcap`
+to close `G2_outerN8_prop 8.63` as `G2_outerN8_banked`.
+Exact values: `‖wOuter‖^2 = 0.1975^2+4.375^2 = 19.17963125 ≤ 19.18`;
+`Qcap = 256/1225 ≈ 0.20898`, `Ecap = 4096/128625 ≈ 0.03184`,
+`Dcap = 256/1225 ≈ 0.20898`, sum `= 57856/128625 ≈ 0.44980`,
+times `19.18 = 55483904/6431250 ≈ 8.62723 ≤ 8.63` (hand arithmetic;
+machine-checked shape is the `norm_num` goals below).
+No `sorry`/`admit`/`axiom`/`simpa`; no new imports; no other files touched;
+no existing lines modified.
+-/
+
+theorem wOuter_norm_sq_U0 : ‖wOuter‖ ^ 2 ≤ (19.18 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wOuter_re, wOuter_im]
+  norm_num
+
+theorem g2_C2_inflation_863 :
+    (8 * ((1 / 2 : ℝ) / (4.375) ^ 2) +
+      8 * (1 / (3 * (4.375) ^ 2 * 4.375)) + 4 / (4.375 * 4.375)) * 19.18 ≤
+      (8.63 : ℝ) := by
+  norm_num
+
+theorem G2_outerN8_banked : G2_outerN8_prop 8.63 :=
+  g2_G2_of_telescope_normcap 8.63 19.18 wOuter_norm_sq_U0 g2_C2_inflation_863
+
+/-! U0+C2 residual (exact, no force): `G2_outerN8_prop 8.63` CLOSED via
+`G2_outerN8_banked` (`wOuter_norm_sq_U0` + `g2_C2_inflation_863` into
+`g2_G2_of_telescope_normcap/:1375` with `g2_residual_eq/:1357`,
+`g2_Q_sum_le`/`g2_eps_sum_le`/`g2_D_norm_le` caps). H3 via
+`h3_outer_of_lead_normcap_G2/:1036` still needs G1 normcap
+(`‖wOuter+8‖^2 ≤ U`, `3*U ≤ C*(-4.375)^2`); G1-as-filed stays Prop here.
+Value banked: U0 `19.18`, C2 `8.63`; gap: G1-U + C-inflation (not in brief).
+-/
+
 end Door3ComplexWendel
