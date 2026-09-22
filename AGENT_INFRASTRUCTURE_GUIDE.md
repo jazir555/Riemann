@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 DERIV-READOPT (background `ses_f347fc804`, proof-only,
+  grep-clean, deriv-only commit): respec adoption FAILS honestly — open
+  by 427715 (rho 0.01) / 86614 (rho 0.05). M'=0.15 unreachable with
+  honest bounds; M'-audit next.
 - 2026-09-22 FIRSTCELL-BRIDGE (provisional, report pending; verified
   grep-clean +94 diff): phase-bridge shapes (cDir/cEta term norms) +
   bridge/identity obligations filed. Reconciled on report.

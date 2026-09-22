@@ -2249,3 +2249,78 @@ theorem respec_proposal_holds19 : respecProposal19 := by
   constructor <;> norm_num
 
 end Door3DerivUp
+
+/-! ## 20. Respec adoption: Leibniz recomputation under respec19 values (append-only).
+
+Grep record (read-only, before writing):
+* respec proposal `:2173-2242`: `gammaSupRespec19 :2173` (= 0.1),
+  `zetaSupRespec19 :2175` (= 934), `gammaPrimeRespec19 :2177` (= 10),
+  `zetaPrimeRespec19 :2179` (= 93400), fits `:2181/:2186/:2191/:2196/:2201`,
+  rho-enlarge quotients `rho_enlarge_gamma_quot19 :2206` (0.097 / 0.05 = 1.94),
+  `rho_enlarge_zeta_quot19 :2209` (934 / 0.05 = 18680),
+  `respecProposal19 :2238`, `respec_proposal_holds19 :2242`.
+* Leibniz gap shapes: `gap_leaf_sub_gamma_alone :1622`,
+  `gap_leaf_sub_total_open :1626` (tight 0.008 / 3 / 0.8 / 300 vs M' 0.15),
+  `gap_leaf_sub_tightChain_total_open :1716`.
+* Leaf-sub Leibniz coefficients (banked `:1484/:1496/:1520/:1523`):
+  poly deriv 6.95, poly value 22.74, pi value 1, pi deriv 1.075.
+
+Adoption recomputation at `dLeaf_sub` vs leaf M' = 0.15, with respec values
+vG = 0.1, vZ = 934, nG = 10, nZ = 93400 (rho = 0.01 chain), and rho-enlarge
+variant nG = 1.94, nZ = 18680 (rho = 0.05 chain from `:2206/:2209`).
+Verdict: respec does NOT close; exact totals and residuals filed below.
+Closed with norm_num only.
+-/
+
+namespace Door3DerivUp
+
+theorem respec_adopt_total_leaf_sub_open :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+        22.74 * 1 * 10 * 934 + 22.74 * 1 * 0.1 * 93400 := by
+  norm_num
+
+theorem respec_adopt_total_leaf_sub_value :
+    6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+      22.74 * 1 * 10 * 934 + 22.74 * 1 * 0.1 * 93400 =
+      (427715.5397 : ℝ) := by
+  norm_num
+
+theorem respec_adopt_residual_leaf_sub :
+    (6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+      22.74 * 1 * 10 * 934 + 22.74 * 1 * 0.1 * 93400 - 0.15 : ℝ) =
+      427715.3897 := by
+  norm_num
+
+theorem respec_adopt_gamma_alone_open :
+    (0.15 : ℝ) < 22.74 * 1 * 10 * 934 := by
+  norm_num
+
+theorem respec_adopt_rho005_total_leaf_sub_open :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+        22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.1 * 18680 := by
+  norm_num
+
+theorem respec_adopt_rho005_total_leaf_sub_value :
+    6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+      22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.1 * 18680 =
+      (86614.6301 : ℝ) := by
+  norm_num
+
+theorem respec_adopt_rho005_residual_leaf_sub :
+    (6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+      22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.1 * 18680 - 0.15 : ℝ) =
+      86614.4801 := by
+  norm_num
+
+theorem respec_adopt_verdict_open :
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+        22.74 * 1 * 10 * 934 + 22.74 * 1 * 0.1 * 93400 ∧
+    (0.15 : ℝ) <
+      6.95 * 1 * 0.1 * 934 + 22.74 * 1.075 * 0.1 * 934 +
+        22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.1 * 18680 := by
+  constructor <;> norm_num
+
+end Door3DerivUp
