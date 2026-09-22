@@ -2299,3 +2299,77 @@ def wireStrip_bottom_M1000_at_zero_residual : Prop :=
 end Door3RHWiring
 
 #print axioms Door3RHWiring.wireStrip_bottom_M1000_at_zero_of_ballSup1000
+
+/-! ## WIRE-SUP1000 C=1000 sup assembly attempt on `closedBall 0 12` (append-only, value + residual).
+
+Status: M40+M1000 zero-line strips DONE (top+bottom, conditional on ball sups).
+Open = the sup premises themselves.
+- `wireStrip_top_M40_at_zero_of_ballSup40` (`door3_rh_wiring.lean:1949-1990`, C=40 top at x=0)
+- `wireStrip_bottom_M40_at_zero_of_ballSup40` (`:2040-2080`, C=40 bottom at x=0)
+- `wireStrip_top_M1000_at_zero_of_ballSup1000` (`:2141-2182`, C=1000 top at x=0)
+- `wireStrip_bottom_M1000_at_zero_of_ballSup1000` (`:2243-2283`, C=1000 bottom at x=0)
+
+Grepped feeders + sup specs (read before filing, reference only):
+- pointwise endpoints `wireHtop_top_point_half_feeder` (`:1855-1857`),
+  `wireHbot_bot_point_half_feeder` (`:1897-1899`)
+- M40 bridges `uniform_top_deriv_M40_of_closedBall` (`door3_sliver_edge.lean:708-716`),
+  `uniform_bot_deriv_M40_of_closedBall` (`:768-776`)
+- M1000 bridges `uniform_top_deriv_M1000_of_closedBall` (`:931-939`),
+  `uniform_bot_deriv_M1000_of_closedBall` (`:942-950`),
+  `uniform_M1000_pair_of_closedBall` (`:953-968`)
+- mono lifts `ballSup40_to_ballSup1000` (`:971-977`),
+  `ballSup79_to_ballSup1000` (`:980-986`), pairs `:989-1016`
+- sliver factors `poly_upper_closedBall12_le78` (`:1049-1076`),
+  `poly_upper_closedBall12` (`:1079-1084`, <=79),
+  `piOf_upper_closedBall12` (`:1146-1163`, <=4096),
+  `poly_pi_upper_closedBall12` (`:1166-1180`, joint <=319488)
+- Gamma/zeta uppers on ball-12: NONE banked (grep `Gamma.*closedBall|zeta.*closedBall`
+  finds only the residual note `:1111-1116`: s=0 Gamma pole, s=1 zeta pole in ball)
+
+Value-or-gap: poly <=79 + pi <=4096 + joint <=319488 rebuild locally below and CLOSE
+by direct re-export. Joint 319488 alone already exceeds 1000, so the product route
+cannot reach C=1000 even before Gamma/zeta. Full C=1000 sup stays OPEN.
+Residual: Gamma upper + zeta upper on ball-12 are the exact missing factors;
+poles at s=0 / s=1 lie in `closedBall 0 12`, so uniform full-ball uppers are not
+supplied anywhere in-tree.
+-/
+
+namespace Door3RHWiring
+
+/-- WIRE-SUP1000 target: C=1000 sup on `closedBall 0 12` (OPEN premise for all four
+zero-line strips above). -/
+def sup1000_closedBall12_target : Prop :=
+  ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ)
+
+/-- WIRE-SUP1000 exact residual: Gamma + zeta uppers are the missing factors.
+No banked lemma supplies either on `closedBall 0 12`; poles at s=0 (Gamma)
+and s=1 (zeta) lie in the ball per the sliver residual note. -/
+def sup1000_gammaZeta_residual : Prop :=
+  (∀ s ∈ Metric.closedBall (0 : ℂ) 12, ‖Complex.Gamma (s / 2)‖ ≤ (1000 : ℝ)) ∧
+  (∀ s ∈ Metric.closedBall (0 : ℂ) 12, ‖zeta s‖ ≤ (1000 : ℝ))
+
+/-- WIRE-SUP1000 value: poly <=79 on `closedBall 0 12` (rebuilt locally by re-export). -/
+theorem wireSup1000_poly_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (79 : ℝ) :=
+  Door3SliverEdge.poly_upper_closedBall12 hs
+
+/-- WIRE-SUP1000 value: pi <=4096 on `closedBall 0 12` (rebuilt locally by re-export). -/
+theorem wireSup1000_pi_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ) :=
+  Door3SliverEdge.piOf_upper_closedBall12 hs
+
+/-- WIRE-SUP1000 value: joint poly-pi <=319488 on `closedBall 0 12` (rebuilt locally).
+Already exceeds 1000, so the product route cannot close C=1000. -/
+theorem wireSup1000_polyPi_joint_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ) :=
+  Door3SliverEdge.poly_pi_upper_closedBall12 hs
+
+/-- WIRE-SUP1000 honest gap: joint 319488 exceeds the 1000 budget. -/
+theorem wireSup1000_joint_exceeds_budget : (1000 : ℝ) < (319488 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
