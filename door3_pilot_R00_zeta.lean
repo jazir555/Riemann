@@ -3546,4 +3546,45 @@ theorem sSCUT_eta10_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c)
     le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
   linarith
 
+/-- Composite log bridge `log 11 = log 10 + log (11/10)` (`11 = 10·(11/10)`
+via `Real.log_mul`; mirror of `sSCUT_log_ten_eq` / `CS_log_six_eq`;
+first link of the base-11 chain for `k = 10`). -/
+theorem sSCUT_log_eleven_eq :
+    Real.log 11 = Real.log 10 + Real.log (11 / 10 : ℝ) := by
+  have h11 : (10 : ℝ) * (11 / 10) = 11 := by norm_num
+  have h := Real.log_mul (show (10 : ℝ) ≠ 0 by norm_num)
+    (show (11 / 10 : ℝ) ≠ 0 by norm_num)
+  rw [h11] at h
+  linarith
+
+/-- `log 11` upper (`log 11 ≤ 2.4025850934` from `sSCUT_log_ten_le` +
+`log (11/10) ≤ 1/10`; `CS_log_three_le` pattern via
+`Real.log_le_sub_one_of_pos`). -/
+theorem sSCUT_log_eleven_le : Real.log 11 ≤ (2.4025850934 : ℝ) := by
+  have h11 := sSCUT_log_eleven_eq
+  have h10 := sSCUT_log_ten_le
+  have hub : Real.log (11 / 10 : ℝ) ≤ (1 / 10 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 11 / 10)
+    have he : (11 / 10 : ℝ) - 1 = (1 / 10 : ℝ) := by norm_num
+    linarith
+  have c : (2.3025850934 : ℝ) + 1 / 10 = 2.4025850934 := by norm_num
+  linarith
+
+/-- `log 11` lower (`2.3934941835 ≤ log 11` from `sSCUT_log_ten_ge` +
+`log (11/10) ≥ 1/11`; `CS_log_three_ge` pattern via `log (10/11) ≤ -1/11`
+and `log (11/10) = -log (10/11)`). -/
+theorem sSCUT_log_eleven_ge : (2.3934941835 : ℝ) ≤ Real.log 11 := by
+  have h11 := sSCUT_log_eleven_eq
+  have h10 := sSCUT_log_ten_ge
+  have hub : Real.log (10 / 11 : ℝ) ≤ (-1 / 11 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 10 / 11)
+    have he : (10 / 11 : ℝ) - 1 = (-1 / 11 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (11 / 10 : ℝ) = -Real.log (10 / 11 : ℝ) := by
+    have heq : (11 / 10 : ℝ) = (10 / 11 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.3934941835 : ℝ) ≤ 2.3025850926 + 1 / 11 := by norm_num
+  rw [h11, hinv]
+  linarith
+
 end Door3PilotR00Zeta

@@ -5592,3 +5592,9 @@ sorry-free infrastructure and the complete commit ledger above.
   VERDICT: 0.61<0.66 FAILS honestly (+0.012 over N6; 0.579→0.598→0.61,
   gaps 0.081→0.062→0.05). Ladder to N8. VERIFY3 tasked (sole owner,
   N6B+N7 rebuild).
+- 2026-09-22 SCUT20 (background `ses_f377196bc`, proof-only, grep-clean):
+  log11 window FIRST link — `sSCUT_log_eleven_eq :3552` (log11 = log10
+  + log(11/10)) + `le :3563` (≤2.4025850934 via log(11/10)≤1/10) +
+  `ge :3576` (≥2.3934941835 via log(10/11)≤-1/11; margin ~9e-13,
+  norm_num-closed). Window [2.3935,2.4026] width ~0.009 (ratio-bound
+  limited vs log10 d9 8e-9). Next: cos(10·log11) (SCUT21).
