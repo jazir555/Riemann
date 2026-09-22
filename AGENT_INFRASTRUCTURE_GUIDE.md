@@ -5461,7 +5461,16 @@ sorry-free infrastructure and the complete commit ledger above.
   ball_advance to verify UZ934+DG/DZ additions).
 - 2026-09-22 ETA-TAIL (background `ses_f377b6b50`, proof-only,
   grep-clean): audit-only — `CS_tail_audit :4186` + `CS_tail_next_rung_gap
-  :4193` (tail is already `0`/floor in-file; no `zetaCell` instantiation
+  :4193` (  tail is already `0`/floor in-file; no `zetaCell` instantiation
   exists, imports Mathlib+assembly only; banked rpow are head caps not
   M^{-σ} majorants, so no free tightening). KEY FIND: binding is NOT
   tail (any T>0 worsens `0.6542+T`) — needs slow or cF. ETA-CF tasked.
+- 2026-09-22 GAMMA-N5C (background `ses_f3779c2b2`, proof-only,
+  no-edit): VERIFIED already-closed — E05 Seq5 achievable finite lower
+  `L=0.659` banked in-file (`premGamma_E05_Seq5_finite_lower :3260`,
+  `816/1237.68~=0.6593` via rpow5-frac `:3086`, cpow5 norm `:3114`,
+  prod5 `1237.68 :3232`) + corrected closure `:3419` (0.659+rate 0.014
+  →0.645, rate `:3402` open). `L∈[0.645,0.671]`, surplus +0.014,
+  headroom 0.012 to true ~0.671; dead filed 0.725 kept at `:3045`.
+  No edit (GREEN preserved). E05 floor conditional only on link+rate
+  (Binet/Stirling host). GAMMA-N6 tasked (E06 N=5 rung mirror).
