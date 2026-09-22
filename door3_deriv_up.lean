@@ -1166,18 +1166,48 @@ theorem zetaDeriv_inner_125_of_diffCont
 
 theorem zeta_inner_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
 
-/-! ## 11b. INNER closed attempt — exact gap (DERIV-WIRE).
+/-! ## 11b. INNER DiffContOnCl on the 0.01-ball (pole avoided).
 
-Same pattern as `zetaDeriv_mid_125_closed` would be
-`zetaDeriv_inner_125_of_diffCont` applied to a closed `zetaDiffCont_inner`
-plus `zetaSupOnSphere_inner_125_filled` (`:1150`) and `zeta_inner_125_number`.
-Status: `zetaDiffCont_inner` (prop `DiffContOnCl ℂ riemannZeta
-(Metric.ball dInner 0.01)`, `:622`) has NO filled/banked proof in this file;
-only the conditional `zetaDeriv_inner_125_of_diffCont` (`:1160`) exists.
-Hence `zetaDeriv_inner_125_closed : ‖deriv riemannZeta dInner‖ ≤ 12500`
-with NO open premises is NOT banked here. Single residual:
-prove `DiffContOnCl ℂ riemannZeta (Metric.ball dInner 0.01)` (pole avoided:
-`dInner.re = 0.395`, radius `0.01`), then close by the MID pattern. -/
+Mirror of MID (`dMid_closedBall_re_upper :1059` + `zetaDiffCont_mid_filled :1074` +
+`zetaDiffCont_mid_banked :1087`): `dInner.re = 0.395`, radius `0.01`, so every
+`z ∈ closedBall dInner 0.01` has `z.re ≤ 0.405 < 1`, hence `z ≠ 1`. -/
+
+theorem dInner_closedBall_re_upper {z : ℂ}
+    (hz : z ∈ Metric.closedBall dInner 0.01) :
+    z.re ≤ (0.405 : ℝ) := by
+  have hdist : dist z dInner ≤ (0.01 : ℝ) := Metric.mem_closedBall.mp hz
+  have hnorm : ‖z - dInner‖ ≤ (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dInner).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dInner).re| ≤ ‖z - dInner‖ := Complex.abs_re_le_norm _
+      _ ≤ 0.01 := hnorm
+  have here : (z - dInner).re = z.re - 0.395 := by
+    have e : (z - dInner).re = z.re - dInner.re := Complex.sub_re z dInner
+    rw [e, dInner_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  linarith
+
+theorem zetaDiffCont_inner_filled :
+    DiffContOnCl ℂ riemannZeta (Metric.ball dInner 0.01) := by
+  apply DifferentiableOn.diffContOnCl
+  rw [Metric.closure_ball dInner (by norm_num : (0.01 : ℝ) ≠ 0)]
+  intro z hz
+  apply (differentiableAt_riemannZeta ?_).differentiableWithinAt
+  intro hcon
+  have hle := dInner_closedBall_re_upper hz
+  have e : z.re = 1 := by
+    rw [hcon]
+    exact Complex.one_re
+  linarith
+
+theorem zetaDiffCont_inner_banked : zetaDiffCont_inner :=
+  zetaDiffCont_inner_filled
+
+theorem zetaDeriv_inner_125_closed :
+    ‖deriv riemannZeta dInner‖ ≤ 12500 := by
+  have h := zetaDeriv_inner_125_of_diffCont zetaDiffCont_inner_banked
+  rw [zeta_inner_125_number] at h
+  exact h
 
 /-! ## 12. LEAF sphere at honest R02-disc 934 (dLeaf = 0.2 - 6.75 I).
 
