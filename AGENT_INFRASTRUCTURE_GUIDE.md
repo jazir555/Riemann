@@ -6129,6 +6129,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 CUTL-ZETA (background `ses_f348b0738`, proof-only,
+  grep-clean, cutL10-only commit): zeta wall quantified (6 = 4x over
+  3/2 proxy; need 0.019; wall 316x, proxy 79x) + wall spec `:2057`.
+  Blockage is poly·Gamma spread, not zeta.
 - 2026-09-22 CUTL-TIER3 (background `ses_f348f5209`, proof-only,
   grep-clean, cutL10-only commit): three-factor joint 6.33 (zeta 6→3
   honest halve; 158x) + zeta-true 3.16 (79x). Tier 0.04 stands; hJoint

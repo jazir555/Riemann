@@ -1918,3 +1918,156 @@ end Door3CutL10JointTighten
 #print axioms Door3CutL10JointTighten.cutL10_twoFactor_gap_to_tier
 #print axioms Door3CutL10JointTighten.cutL10_twoFactor_ratio_to_tier
 
+/-! ## (i) CUTL joint three-factor combo (append-only tail; LF)
+
+Joint `12.66` vs tier `0.04` (`316.33875x`): two-factor fence at `:1887-1919`
+(`cutL10_pi_tighter_cap_315`, `cutL10_joint_twoFactor_value`,
+`cutL10_joint_twoFactor_cap`, `cutL10_twoFactor_gap_to_tier`,
+`cutL10_twoFactor_ratio_to_tier`) plus factor sups
+(`cutL10_ballPoly_upper` at `:766` poly `≤ 67` via `‖z‖ ≤ 11.56`,
+`cutL10_ballPi_upper` at `:791` pi `≤ 16/5` via `Real.pi_lt_d2`,
+`cutL10_ballSup_of_factorSups` at `:819` joint `≤ 12.87`).
+
+Third-factor attempt (next improvable factor in the joint product):
+zeta wall `6` is the loosest banked factor (center TRUE `≈ 1.549` by
+conjugation; Gamma `1/100` is already near TRUE sup `≈ 0.0071`,
+poly `66.95` is near-exact `66.9418`, pi `3.15` is near-exact `3.14159`).
+Honest `norm_num`-only arithmetic below (no new sup claimed: zeta `3`
+and `3/2` caps are hypothetical inputs, NOT banked premises):
+(A) poly `66.95` × pi `3.15` × Gamma `1/100` × zeta `3` = `6.326775`,
+still BLOCKED vs `0.04` (gap `6.286775`, ratio `158.169375x`);
+(B) even at center-TRUE zeta `3/2`: `3.1633875`, still BLOCKED
+(gap `3.1233875`, ratio `79.0846875x`).
+Verdict: GAP (no third-factor zeta-only route to `0.04`; blockage is
+poly·Gamma spread on the `+1` ball, cf. endpoint `≈ 0.062 > 0.04`
+before zeta at `:1028-1041`).
+-/
+
+namespace Door3CutL10JointTriple
+
+/-- Three-factor joint exact value
+(poly `66.95` × pi `3.15` × Gamma `1/100` × zeta `3`). -/
+theorem cutL10_joint_threeFactor_value :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * 3 = (6.326775 : ℝ) := by
+  norm_num
+
+/-- Three-factor joint fence `≤ 6.33` (was `12.66` at `:1899`). -/
+theorem cutL10_joint_threeFactor_cap :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * 3 ≤ (6.33 : ℝ) := by
+  norm_num
+
+/-- Exact residual to the `0.04` tier: blocked, gap `6.286775`. -/
+theorem cutL10_threeFactor_gap_to_tier :
+    ((6.326775 : ℝ) - 0.04 = (6.286775 : ℝ)) ∧ ((0.04 : ℝ) < 6.326775) := by
+  constructor <;> norm_num
+
+/-- Exact ratio to tier: `6.326775 / 0.04 = 158.169375` (was `316.33875x`). -/
+theorem cutL10_threeFactor_ratio_to_tier :
+    (6.326775 : ℝ) / 0.04 = (158.169375 : ℝ) := by
+  norm_num
+
+/-- Generous center-TRUE audit: even zeta `3/2` gives `3.1633875`,
+still blocked (gap `3.1233875`, ratio `79.0846875x`). -/
+theorem cutL10_joint_zetaTrue_value :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * (3 / 2) = (3.1633875 : ℝ) := by
+  norm_num
+
+/-- Generous center-TRUE gap spec (no route via zeta alone). -/
+theorem cutL10_zetaTrue_gap_to_tier :
+    ((3.1633875 : ℝ) - 0.04 = (3.1233875 : ℝ)) ∧ ((0.04 : ℝ) < 3.1633875) := by
+  constructor <;> norm_num
+
+/-- Generous center-TRUE ratio: `3.1633875 / 0.04 = 79.0846875`. -/
+theorem cutL10_zetaTrue_ratio_to_tier :
+    (3.1633875 : ℝ) / 0.04 = (79.0846875 : ℝ) := by
+  norm_num
+
+end Door3CutL10JointTriple
+
+#print axioms Door3CutL10JointTriple.cutL10_joint_threeFactor_value
+#print axioms Door3CutL10JointTriple.cutL10_joint_threeFactor_cap
+#print axioms Door3CutL10JointTriple.cutL10_threeFactor_gap_to_tier
+#print axioms Door3CutL10JointTriple.cutL10_threeFactor_ratio_to_tier
+#print axioms Door3CutL10JointTriple.cutL10_joint_zetaTrue_value
+#print axioms Door3CutL10JointTriple.cutL10_zetaTrue_gap_to_tier
+#print axioms Door3CutL10JointTriple.cutL10_zetaTrue_ratio_to_tier
+
+/-! ## (j) CUTL zeta-sup strip-wall audit (append-only tail; LF)
+
+Grep baseline (this session, before edit):
+- Triple block `:1950-1993` (`Door3CutL10JointTriple`): joint
+  `66.95 * 3.15 * (1/100) * 3 = 6.326775 ≤ 6.33` vs tier `0.04`
+  (gap `6.286775`, ratio `158.169375x`); even at generous center-TRUE
+  proxy zeta `3/2`: `3.1633875` vs `0.04` (gap `3.1233875`,
+  ratio `79.0846875x`).
+- `hZetaSup` strip-wall specs: `:824-825`
+  (`Door3CutL10BallSup.cutL10_ballSup_of_factorSups`) and `:1394-1395`
+  (`Door3CutL10TierB.cutL10_tierB_sharedSup_1287_of_factorSups`):
+  `∀ s, -1.06 ≤ s.re → s.re ≤ 2.06 → -11.56 ≤ s.im → s.im ≤ -8.44 →
+  ‖zeta s‖ ≤ 6`.
+- Banked zeta uppers checked: tail-quarter `≤ 125` on
+  `re ∈ [1/4, 1/2]`, `im ∈ [8.44, 11]` (`:1784-1800`,
+  `cutL10_middle_tailQuarter_part`, honest numeral, looser than `6`);
+  right-sliver Euler `Re ≥ 3/2 → ‖zeta‖ ≤ 3` conditional on explicit
+  `hDom`/`hReal` (`:1273-1283`, no closed bank in this file); FE route
+  `3 * 2 = 6` conditional on OPEN chi `≤ 3` plus reflected middle `≤ 2`
+  (`:1545-1665`); R02 `934`-scale numeral is not strip-scale and gives
+  no tightening on `re ∈ [-1.06, 2.06]`, `im ∈ [-11.56, -8.44]`.
+
+Tighten attempt verdict: GAP (no honest strip-scale tighten banked;
+`6` stays the wall). Center TRUE `≈ 1.549` proxied generously by `3/2`:
+wall looseness `6 / (3/2) = 4`, gap `6 - 3/2 = 9/2`. Tier need at the
+tightened poly·pi·Gamma base `66.95 * 3.15 * (1/100) = 2.108925` is
+`‖zeta‖ ≤ 1600/84357 ≈ 0.019` (exact: base * need = `0.04`); wall is
+`316.33875x` above need, true-proxy `3/2` is `79.0846875x` above need.
+Exact `hZetaSup` wall shape forwarded below as the residual premise.
+-/
+
+namespace Door3CutL10ZetaWall
+
+/-- Wall looseness vs generous center-TRUE proxy: `6 / (3/2) = 4`. -/
+theorem cutL10_zetaWall_looseness_ratio :
+    (6 : ℝ) / (3 / 2) = (4 : ℝ) := by
+  norm_num
+
+/-- Wall gap vs generous center-TRUE proxy: `6 - 3/2 = 9/2`. -/
+theorem cutL10_zetaWall_looseness_gap :
+    ((6 : ℝ) - 3 / 2 = (9 / 2 : ℝ)) ∧ ((3 / 2 : ℝ) < 6) := by
+  constructor <;> norm_num
+
+/-- Tier need at the tightened base: `2.108925 * (1600/84357) = 0.04`
+(exact; so joint `≤ 0.04` needs `‖zeta‖ ≤ 1600/84357`). -/
+theorem cutL10_zetaCap_needed_value :
+    (((66.95 : ℝ) * 3.15) * (1 / 100)) * (1600 / 84357) = (0.04 : ℝ) := by
+  norm_num
+
+/-- Wall vs need: `6 / (1600/84357) = 316.33875` (same `316x` as `:1909`). -/
+theorem cutL10_zetaCap_needed_vs_wall :
+    (6 : ℝ) / (1600 / 84357) = (316.33875 : ℝ) := by
+  norm_num
+
+/-- True-proxy vs need: `(3/2) / (1600/84357) = 79.0846875`
+(same `79x` as `:1981`; no zeta-only route). -/
+theorem cutL10_zetaCap_needed_vs_trueProxy :
+    (3 / 2 : ℝ) / (1600 / 84357) = (79.0846875 : ℝ) := by
+  norm_num
+
+/-- Exact `hZetaSup` strip-wall spec (residual premise; byte-for-byte the
+shape at `:824-825` and `:1394-1395`). -/
+theorem cutL10_zetaSup_wall_spec
+    (hZetaSup : ∀ (s : ℂ), (-1.06 : ℝ) ≤ s.re → s.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ s.im → s.im ≤ (-8.44 : ℝ) → ‖zeta s‖ ≤ (6 : ℝ))
+    (s : ℂ) (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ s.im) (hihi : s.im ≤ (-8.44 : ℝ)) :
+    ‖zeta s‖ ≤ (6 : ℝ) :=
+  hZetaSup s hlo hhi hilo hihi
+
+end Door3CutL10ZetaWall
+
+#print axioms Door3CutL10ZetaWall.cutL10_zetaWall_looseness_ratio
+#print axioms Door3CutL10ZetaWall.cutL10_zetaWall_looseness_gap
+#print axioms Door3CutL10ZetaWall.cutL10_zetaCap_needed_value
+#print axioms Door3CutL10ZetaWall.cutL10_zetaCap_needed_vs_wall
+#print axioms Door3CutL10ZetaWall.cutL10_zetaCap_needed_vs_trueProxy
+#print axioms Door3CutL10ZetaWall.cutL10_zetaSup_wall_spec
+
