@@ -2468,4 +2468,161 @@ theorem downstreamMustMove21_holds : downstreamMustMove21 := by
   · norm_num
   constructor <;> norm_num
 
+/-! ## 22. FINAL lane verdict: MPRIME decisive, deriv-need consumers, close options.
+
+Grep record (read-only, before writing; central_cover_assembly untouched):
+* MPRIME decisive block `door3_deriv_up.lean:2382-2461`:
+  `honest_total_leaf_sub_open21 :2382` (0.15 < honest Leibniz total),
+  `honest_total_leaf_sub_value21 :2388` (= 414884.073509),
+  `honest_total_leaf_sub_residual21 :2394` (= 414883.923509),
+  `honest_gamma_alone_value21 :2400` (= 206019.852),
+  `honest_gamma_alone_open21 :2404`, `honest_zeta_alone_value21 :2408`
+  (= 206019.852), `honest_zeta_alone_open21 :2412`,
+  `honest_rho005_total_value21 :2416` (= 85252.310309),
+  `honest_rho005_total_open21 :2422`,
+  `mPrimeHonestMin21 :2428` (= 414884.073509),
+  `mPrimeHonestMin21_eq :2430`, `mPrimeUnsatHonest21 :2440`,
+  `mPrimeUnsatHonest21_holds :2445`, `mPrimeUnsatHonest21_minimal :2449`,
+  `downstreamMustMove21 :2456`, `downstreamMustMove21_holds :2461`.
+* Deriv-need consumers (`central_cover_assembly.lean`, deriv conjunct of each
+  `R.._leaf_obligations` def; def line then deriv-need line):
+  R00 def :1175 need :1177 (0.05); R01 def :1288 need :1290 (0.07);
+  R02 def :1470 need :1472 (0.07); R03 def :1556 need :1558 (0.07);
+  R04 def :1642 need :1644 (0.07); R05 def :1728 need :1730 (0.06);
+  R06 def :1814 need :1816 (0.06); R07 def :1900 need :1902 (0.07);
+  R08 def :1986 need :1988 (0.07); R09 def :2072 need :2074 (0.07);
+  R10 def :2158 need :2160 (0.05); R11 def :2533 need :2535 (0.05);
+  R12 def :2617 need :2619 (0.07); R13 def :2701 need :2703 (0.07);
+  R14 def :2785 need :2787 (0.07); R15 def :2869 need :2871 (0.06);
+  R16 def :2953 need :2955 (0.06); R17 def :3037 need :3039 (0.07);
+  R18 def :3121 need :3123 (0.07); R19 def :3205 need :3207 (0.07);
+  R20 def :3289 need :3291 (0.05); R21 def :3375 need :3377 (0.05);
+  R22 def :3459 need :3461 (0.07); R23 def :3543 need :3545 (0.07);
+  R24 def :3627 need :3629 (0.07); R25 def :3711 need :3713 (0.06);
+  R26 def :3795 need :3797 (0.06); R27 def :3879 need :3881 (0.07);
+  R28 def :3963 need :3965 (0.07); R29 def :4047 need :4049 (0.07);
+  R30 def :4131 need :4133 (0.05); R31 def :4217 need :4219 (0.05);
+  R32 def :4301 need :4303 (0.07); R33 def :4385 need :4387 (0.07);
+  R34 def :4469 need :4471 (0.07); R35 def :4553 need :4555 (0.06);
+  R36 def :4637 need :4639 (0.06); R37 def :4721 need :4723 (0.07);
+  R38 def :4805 need :4807 (0.07); R39 def :4889 need :4891 (0.07);
+  R40 def :4973 need :4975 (0.05).
+  Pattern: 0.05 tier x8 (R00 R10 R11 R20 R21 R30 R31 R40),
+  0.06 tier x8 (R05 R06 R15 R16 R25 R26 R35 R36),
+  0.07 tier x25 (all others). Every tier is 6 orders below honest.
+* What deriv_up banked (this file): leaf-sub post `dLeaf_sub :1478`
+  poly 6.95 `:1484` / value 22.74 `:1496` / pi 1 + 1.075 `:1520/:1523`,
+  zeta 934 sphere `:1563` banked `:1570`, zeta DiffCont `:1591` banked `:1604`,
+  zeta prime 93400 `:1607/:1614` closed `:1616`;
+  gamma DiffCont `:1780` banked `:1802`, gamma sphere 0.097 `:1808`
+  banked `:1815`; Cauchy chains `gammaDerivUp_of_sup :525`,
+  `zetaDerivUp_of_sup :625`, `cauchy_derivUp_of_sphere :99`,
+  tight chains `:1672/:1688` (0.8 / 300 conditional);
+  honest quotients 9.7 `:2161` and 93400 `:2167`; respec fits `:2181-2204`.
+* Six-order gap numerals used below: honest total 414884.073509 vs M 0.15
+  (residual 414883.923509); gamma-alone 206019.852 vs 0.15;
+  zeta-alone 206019.852 vs 0.15; rho-0.05 honest total 85252.310309 vs 0.15;
+  respec rho-0.01 total 427715.5397 vs 0.15; respec rho-0.05 total 86614.6301.
+
+(a) Banked: leaf-sub 93400 post + DiffCont closures + Cauchy chains.
+(b) Affected: all 41 R00-R40 deriv tiers (0.05 / 0.06 / 0.07) blocked by the
+  honest totals above (each tier < each honest term).
+(c) Close options (open Props only): adopt M >= 414884.073509, or enlarge rho
+  with rect containment `rhoEnlargeKeepsRect_leaf_sub19 :2216` (open), or move
+  centers to where true sits below need `movedCenterBelowNeed19 :2223` (open).
+
+Closed with norm_num only. No force. Filed as numeric lemmas + open Props.
+-/
+
+namespace Door3DerivUp
+
+theorem final_mprime_unsat_open :
+    (0.15 : ℝ) < (414884.073509 : ℝ) := by
+  norm_num
+
+theorem final_mprime_residual_value :
+    ((414884.073509 : ℝ) - 0.15) = (414883.923509 : ℝ) := by
+  norm_num
+
+theorem final_gamma_alone_blocks_all_tiers :
+    (0.05 : ℝ) < 22.74 * 1 * 9.7 * 934 ∧
+      (0.06 : ℝ) < 22.74 * 1 * 9.7 * 934 ∧
+      (0.07 : ℝ) < 22.74 * 1 * 9.7 * 934 := by
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+theorem final_zeta_alone_blocks_all_tiers :
+    (0.05 : ℝ) < 22.74 * 1 * 0.097 * 93400 ∧
+      (0.06 : ℝ) < 22.74 * 1 * 0.097 * 93400 ∧
+      (0.07 : ℝ) < 22.74 * 1 * 0.097 * 93400 := by
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+theorem final_honest_blocks_all_tiers :
+    (0.05 : ℝ) < mPrimeHonestMin21 ∧
+      (0.06 : ℝ) < mPrimeHonestMin21 ∧
+      (0.07 : ℝ) < mPrimeHonestMin21 := by
+  unfold mPrimeHonestMin21
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+theorem final_rho005_blocks_all_tiers :
+    (0.05 : ℝ) <
+      6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+        22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.097 * 18680 ∧
+      (0.06 : ℝ) <
+        6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+          22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.097 * 18680 ∧
+      (0.07 : ℝ) <
+        6.95 * 1 * 0.097 * 934 + 22.74 * 1.075 * 0.097 * 934 +
+          22.74 * 1 * 1.94 * 934 + 22.74 * 1 * 0.097 * 18680 := by
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+def closeByMPrimeAdoption : Prop :=
+  mPrimeHonestMin21 ≤ 414884.073509 ∧ (0.15 : ℝ) < mPrimeHonestMin21
+
+theorem closeByMPrimeAdoption_holds : closeByMPrimeAdoption := by
+  unfold closeByMPrimeAdoption mPrimeHonestMin21
+  constructor <;> norm_num
+
+def closeByRhoOrMove21 : Prop :=
+  rhoEnlargeKeepsRect_leaf_sub19 ∨ movedCenterBelowNeed19 ∨
+    weakerMPrimeRespec19 ∨ downstreamMustMove21
+
+theorem closeByRhoOrMove21_residual_open :
+    (0.05 : ℝ) < 85252.310309 ∧ (0.07 : ℝ) < 85252.310309 ∧
+      (0.15 : ℝ) < (85252.310309 : ℝ) := by
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+def finalLaneVerdict : Prop :=
+  mPrimeUnsatHonest21 ∧ downstreamMustMove21 ∧ closeByMPrimeAdoption ∧
+    (0.05 : ℝ) < mPrimeHonestMin21 ∧ (0.06 : ℝ) < mPrimeHonestMin21 ∧
+    (0.07 : ℝ) < mPrimeHonestMin21
+
+theorem finalLaneVerdict_holds : finalLaneVerdict := by
+  unfold finalLaneVerdict mPrimeUnsatHonest21 mPrimeHonestMin21
+    downstreamMustMove21 closeByMPrimeAdoption
+  constructor
+  · norm_num
+  constructor
+  · constructor
+    · norm_num
+    constructor
+    · norm_num
+    constructor
+    · norm_num
+    constructor <;> norm_num
+  constructor
+  · constructor <;> norm_num
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
 end Door3DerivUp
