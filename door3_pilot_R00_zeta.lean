@@ -3259,4 +3259,27 @@ theorem sSCUT_S8_eta9_eta7_shortfall :
     ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15 + 0.27)) = (5293 / 1050 : ℝ) := by
   norm_num
 
+/-- Honest `S₈ + eta₉ + eta₆ + eta₇` `Re` floor (`-3529/1050 + 0.15 + 0.27 + 1/12 ≤ Re`;
+base `sSCUT_S8_add_eta9_eta7_Re_ge` plus `1/12` from `sSCUT_eta7_Re_ge`;
+honest indices: `S₈` covers `k = 0..7`, plus `k = 9`, plus a second copy of
+`k = 6` (already double-counted in the base) and a second copy of `k = 7`;
+`k = 8` is skipped, no hidden terms; `eta₇/eta₈` in the name are `n = 7/8`,
+i.e. Lean indices `6/7`). -/
+theorem sSCUT_S8_add_eta9_eta7_eta8_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 + 0.27 + (1 / 12) ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 6
+        + etaDirichletTerm sSCUT 7).re := by
+  rw [Complex.add_re]
+  have hbase := sSCUT_S8_add_eta9_eta7_Re_ge
+  have h7 := sSCUT_eta7_Re_ge
+  linarith
+
+/-- Honest shortfall vs the `21/10` bar for the `+1/12` floor
+(gap `10411/2100`; still short, no close claimed). -/
+theorem sSCUT_S8_eta9_eta7_eta8_shortfall :
+    ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15 + 0.27 + (1 / 12)))
+      = (10411 / 2100 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

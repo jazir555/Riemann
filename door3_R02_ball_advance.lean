@@ -1140,6 +1140,37 @@ the remaining Gamma-deriv-lane item. -/
 def R02_gammaDeriv_missingNumeral_spec : Prop :=
   ∃ DG : ℝ, 0 ≤ DG ∧ R02_gammaDeriv_obligation DG
 
+/-- Zeta-factor prime on R02 (local mirror of `R02_gamma_hasDerivAt` (:1084),
+no new import): `zeta = riemannZeta` definitionally
+(`riemann_hypothesis.lean:16`), so any outer `HasDerivAt riemannZeta dZ s`
+transports by defeq to `HasDerivAt zeta dZ s`.
+Banked analyticity supplying `hZ` (grep record, read-only):
+* Mathlib `differentiableAt_riemannZeta`
+  (`Mathlib/NumberTheory/LSeries/RiemannZeta.lean:139`, needs `hs : s ≠ 1`;
+  on the R02-disc `s`-rect `Re ∈ [0.05,0.74]`, pole-avoidance follows from
+  `re < 1`);
+* `Zeta23.FromPNTPlus.ZetaBounds.lean:156` `analyticAt_riemannZeta`
+  (same `s ≠ 1` premise; `.deriv.differentiableAt` at `:161-163`);
+* `Zeta23.WeilEF.XiLogDeriv.lean:61` `analyticAt_riemannZeta` and
+  `Zeta23.XiPrime.Hardy.Basic.lean:156` `analyticAt_riemannZeta` (same shape).
+In-tree USE (not a new bank): `zeta_rigorous.lean:712`
+  `(differentiableAt_riemannZeta hs)` and `central_cover_assembly.lean:771`
+  (notes `differentiableAt_riemannZeta` only away from `1`);
+  `DerivCauchyBridge` (`central_cover_assembly.lean:6178-6565`) banks only
+  VALUE uppers (`R02_zeta_upper_obligation :6493`), no zeta `HasDerivAt` /
+  `deriv` majorant there.
+Unlike the Gamma case (poles at `-ℕ`, composition with `s / 2`), there is no
+inner chain: `zeta` is the alias itself, so the transport is `rfl`-defeq.
+The outer premise `hZ` stays explicit because `riemannZeta` has a pole at `1`.
+Honestly flagged: this closes the ANALYTICITY link only; it does NOT close
+`DZ` (no uniform `‖deriv zeta s‖` majorant is banked in-tree; per rule 2 no
+numeral is attempted here). -/
+theorem R02_zeta_hasDerivAt (s dZ : ℂ)
+    (hZ : HasDerivAt riemannZeta dZ s) :
+    HasDerivAt zeta dZ s := by
+  unfold zeta
+  exact hZ
+
 /-- The banked partial-product deriv cap stays above tier `0.07`. -/
 theorem R02_polyPi_5465_above_tier07 : (0.07 : ℝ) < 54.65 := by
   norm_num

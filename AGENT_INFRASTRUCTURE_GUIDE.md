@@ -5438,3 +5438,30 @@ sorry-free infrastructure and the complete commit ledger above.
   shapes matched to compiling in-file proofs. Residual: 4-char paren
   cascade corrected, UNVERIFIED — next wave runs one guarded rebuild,
   expected green. GAMMA-VERIFY tasked (sole build owner).
+- 2026-09-22 GAMMA-VERIFY (background `ses_f377b6b54`, sole build owner):
+  GREEN — FIFTH GREEN LANE MODULE. `GUARD-ACQUIRED/RELEASED` clean,
+  `[8689/8689] Built door3_premise_gamma (28s)`, BUILD-EXIT=0, zero
+  errors (paren cascade held; only 2 pre-existing `unusedVariables`
+  linters `:1171/:2721`, left per fence). Grep-clean (zero
+  sorry/admit/axiom-declare/simpa). Clears the a749821 "unverified" tag.
+  Next: E05 Seq5 finite-lower + E06 N=5 rung (GAMMA-N5C, proof-only).
+- 2026-09-22 SCUT14 (background `ses_f377b6b52`, proof-only, grep-clean):
+  `sSCUT_S8_add_eta9_eta7_eta8_Re_ge :3268` (S8+eta9+eta6+eta7 with
+  +0.15/+0.27/+1/12; honest indices: S8 k=0..7 + k=9 + second k=6,7;
+  k=8 skipped) + shortfall `:3280` (`10411/2100~=4.958`). Floor
+  `-2.858` vs bar `2.1`. SCUT15 tasked.
+- 2026-09-22 DERIV-DZ (background `ses_f377b6b51`, proof-only,
+  grep-clean): zeta analyticity CLOSED — `R02_zeta_hasDerivAt :1168`
+  (`unfold zeta; exact hZ`, `zeta:=riemannZeta` defeq `:16`; explicit
+  outer premise for pole at 1, mirrors gamma `:1084` minus s/2 chain).
+  Grep record: Mathlib `differentiableAt_riemannZeta`, ZetaBounds
+  `analyticAt_riemannZeta`, in-scope use `zeta_rigorous:712`; bridge
+  value-only, no zeta deriv majorant — DZ numeral stays open, no false
+  numeral. DG numeral + DZ cap remain; DERIV-BUILD tasked (rebuild
+  ball_advance to verify UZ934+DG/DZ additions).
+- 2026-09-22 ETA-TAIL (background `ses_f377b6b50`, proof-only,
+  grep-clean): audit-only — `CS_tail_audit :4186` + `CS_tail_next_rung_gap
+  :4193` (tail is already `0`/floor in-file; no `zetaCell` instantiation
+  exists, imports Mathlib+assembly only; banked rpow are head caps not
+  M^{-σ} majorants, so no free tightening). KEY FIND: binding is NOT
+  tail (any T>0 worsens `0.6542+T`) — needs slow or cF. ETA-CF tasked.

@@ -4161,4 +4161,41 @@ theorem CS_complex_S4_abs_ge_195_gap :
 #print axioms CS_complex_S4_Im_ge_12_gap
 #print axioms CS_complex_S4_abs_ge_195_gap
 
+/-! ## §A16. Tail audit for `CS_S4e_shortfall_1853` (ETA-TAIL, proof-only)
+
+Audit (grep 2026-09-22, this file only):
+* Tail feeding `CS_S4e_shortfall_1853 :4078` is `0`: `CS_zeta_of_S4e :4070`
+  has `hLink : 1.94 - 0 ≤ 1.853 * Z` and `hNeed : 1.4 * 1.853 + 0 ≤ 1.94`.
+* No `CS_tail_*` lemma exists in-file (grep `theorem CS_.*tail|def CS_.*tail`
+  returns only doc-table mentions, no def/theorem); no
+  `zetaCell_even_remainder_le` instantiation exists in-file (single mention is
+  the §D doc comment on `slow_N`/`tail_N`, not a lemma); imports are only
+  `Mathlib` + `central_cover_assembly`, so the remainder machine is not
+  available here.
+* Banked rpow lemmas (`CS_rpow2_proved`, `CS_rpow3pos/neg`, `CS_rpow4pos/neg`,
+  `CS_rpow5/6*`) are head-term caps/floors for `n = 2..6`, not `M^{-σ}`
+  tail majorants — no strictly tighter tail follows without new estimates.
+  Hence audit-only: no `CS_tail_sharpened`.
+* Next-rung gap: need is `1.4 * 1.853 + T ≤ 1.94` with `T ≥ 0`; at `T = 0`
+  need is `2.5942 ≤ 1.94`, shortfall `0.6542`; every `T > 0` adds `T` to the
+  shortfall (`CS_tail_next_rung_gap`), so `0` is already the floor. -/
+
+/-- Tail audit: the `S4e` feed uses `tail = 0` (`CS_zeta_of_S4e :4070`);
+need `1.4 * 1.853 + 0 = 2.5942`, shortfall `1.4 * 1.853 - 1.94 = 0.6542`
+(`CS_S4e_shortfall_1853 :4078`). -/
+theorem CS_tail_audit :
+    (1.4 : ℝ) * 1.853 + (0 : ℝ) = 2.5942 ∧
+    (1.4 : ℝ) * 1.853 - 1.94 = 0.6542 := by
+  constructor <;> norm_num
+
+/-- Gap to the next tail rung: at `slow = 1.94`, `cF = 1.853`, any tail `T`
+adds exactly `T` to the banked `0.6542` shortfall, so `T = 0` is the floor. -/
+theorem CS_tail_next_rung_gap (T : ℝ) :
+    (1.4 : ℝ) * 1.853 + T - 1.94 = 0.6542 + T := by
+  have h := CS_S4e_shortfall_1853
+  linarith
+
+#print axioms CS_tail_audit
+#print axioms CS_tail_next_rung_gap
+
 end Door3CellSuppliers
