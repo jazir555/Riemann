@@ -269,3 +269,59 @@ theorem etaDeriv_demo_R05_n2 :
   calc |Real.log 2| * ((2 : ℝ) ^ (-sR05demo.re)) ≤ 1 * 1 :=
         mul_le_mul habs_le1 hcp_le1 hnn (by norm_num)
     _ = 1 := mul_one 1
+
+/-- Bridge (DZ-SURVEY route (ii), LEMMA SHAPE, proved wrapper).
+
+Mathlib citations (grepped before writing):
+* `hasDerivAt_tsum_of_isPreconnected`, `hasDerivAt_tsum`,
+  `hasFDerivAt_tsum_of_isPreconnected` in `Mathlib/Analysis/Calculus/SmoothSeries.lean`
+  (differentiation of `∑' n, g n z` under a summable uniform derivative bound `u`);
+* `tendstoUniformlyOn_tsum` in `Mathlib/Analysis/Normed/Group/FunctionSeries.lean`
+  (summable sup-norm bound gives `TendstoUniformlyOn` of partial sums; used
+  internally by the `SmoothSeries` theorems);
+* `hasDerivAt_of_tendstoUniformlyOn`, `hasFDerivAt_of_tendstoUniformlyOn` in
+  `Mathlib/Analysis/Calculus/UniformLimitsDeriv.lean` (uniform-limit
+  differentiation engine underlying the `SmoothSeries` theorems);
+* disc topology: `Metric.isOpen_ball` in
+  `Mathlib/Topology/MetricSpace/Pseudo/Defs.lean`, `convex_ball` in
+  `Mathlib/Analysis/Normed/Module/Convex.lean`, and
+  `Convex.isPreconnected` in `Mathlib/Analysis/Convex/PathConnected.lean`.
+
+Statement: conditional `HasDerivAt` for an abstract eta-pair family `pairFn`
+on the open disc `Metric.ball c R` (whose closure `Metric.closedBall c R` is
+compact via `Metric.isCompact_closedBall`). The termwise derivative identity
+(`HasDerivAt (pairFn m)` with derivative `etaDerivPairTerm y m`) and the
+summable uniform majorant `u` are explicit premises; nothing about the true
+`zeta_rigorous.etaPairTerm`, `etaPairLim_eq_etaHurwitz_of_pos`, or
+`etaHurwitz_eq_etaRHS_compl` is imported or assumed here. -/
+theorem etaPair_tsum_hasDerivAt_of_uniformBound
+    (pairFn : ℕ → ℂ → ℂ) (u : ℕ → ℝ)
+    (c : ℂ) (R : ℝ)
+    (hu : Summable u)
+    (hderiv : ∀ m y, y ∈ Metric.ball c R →
+      HasDerivAt (pairFn m) (etaDerivPairTerm y m) y)
+    (hbound : ∀ m y, y ∈ Metric.ball c R →
+      ‖etaDerivPairTerm y m‖ ≤ u m)
+    (y₀ : ℂ) (hy₀ : y₀ ∈ Metric.ball c R)
+    (h0 : Summable (fun m => pairFn m y₀))
+    (y : ℂ) (hy : y ∈ Metric.ball c R) :
+    HasDerivAt (fun z => ∑' m, pairFn m z) (∑' m, etaDerivPairTerm y m) y :=
+  hasDerivAt_tsum_of_isPreconnected hu Metric.isOpen_ball
+    (Convex.isPreconnected (convex_ball c R)) hderiv hbound hy₀ h0 hy
+
+/-- `deriv` reading of the bridge: under the same uniform premises, `deriv`
+of the pair-tsum is the tsum of `etaDerivPairTerm`. -/
+theorem etaPair_tsum_deriv_of_uniformBound
+    (pairFn : ℕ → ℂ → ℂ) (u : ℕ → ℝ)
+    (c : ℂ) (R : ℝ)
+    (hu : Summable u)
+    (hderiv : ∀ m y, y ∈ Metric.ball c R →
+      HasDerivAt (pairFn m) (etaDerivPairTerm y m) y)
+    (hbound : ∀ m y, y ∈ Metric.ball c R →
+      ‖etaDerivPairTerm y m‖ ≤ u m)
+    (y₀ : ℂ) (hy₀ : y₀ ∈ Metric.ball c R)
+    (h0 : Summable (fun m => pairFn m y₀))
+    (y : ℂ) (hy : y ∈ Metric.ball c R) :
+    deriv (fun z => ∑' m, pairFn m z) y = ∑' m, etaDerivPairTerm y m :=
+  (etaPair_tsum_hasDerivAt_of_uniformBound pairFn u c R hu hderiv hbound
+    y₀ hy₀ h0 y hy).deriv

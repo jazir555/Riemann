@@ -5661,6 +5661,23 @@ sorry-free infrastructure and the complete commit ledger above.
   closedBall 0 12 via banked `uniform_top_deriv_of_closedBall` at
   d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe).   Residual:
   hTopLower (1/2 uniform) + ball-sup-40 numeral.
+- 2026-09-22 DERIV-PSI (background `ses_f34f3a72c`, proof-only, NO-EDIT
+  honest gap): `psiNeed_outer` NOT closable via recurrence-transport —
+  best banked disc is a REAL secant (slopeS at Im=0), no bridge to
+  `Complex.digamma` at 8.1975-4.375i (recorded `:325-328`). Gap
+  unchanged (0.003612 vs 0.000857, 4.21x). Missing: Stirling-remainder/
+  Gauss-rep for Complex.digamma or complex-Wendel secant bridge.
+- 2026-09-22 DERIV-FILL (background `ses_f34f3a72d`, proof-only, NO-EDIT
+  honest gap): dLeaf premise set NOT filled — best geometric cover is
+  934-disc (need ≤10 on sphere, 924 over / 93.4x; deriv consequence
+  93400 vs 1000). `zetaDiffCont_leaf` also unbanked. 16800 fat-ball is
+  type-wrong (xi, not zeta). Needs zeta-lane ≤10 + DiffContOnCl.
+- 2026-09-22 DERIV-ETAPRIME-LINK (background `ses_f34f3a72c`,
+  proof-only, grep-clean, eta_prime-only commit): tsum bridge PROVED —
+  `etaPair_tsum_hasDerivAt_of_uniformBound :297` + deriv reading `:314`
+  (Mathlib SmoothSeries/FunctionSeries/UniformLimitsDeriv cited).
+  Termwise identity + majorant + Hurwitz chain still missing (next).
+  Wendel/Stirling writes left for owners.
 - 2026-09-22 EDGE-BOTTOM (background `ses_f34f5d1a3`, proof-only,
   grep-clean, wiring-only commit): `edgeStrip_bottom_half_M40 :523`
   CONDITIONAL bottom mirror (lower arm direct via
