@@ -2197,3 +2197,159 @@ end Door3CutL10GammaWall
 #print axioms Door3CutL10GammaWall.cutL10_gammaTrue_zetaTrue_ratio_to_tier
 #print axioms Door3CutL10GammaWall.cutL10_gammaSup_wall_spec
 
+/-! ## (l) CUTL endpoint joint tighten (append-only tail; LF)
+
+Grep baseline (this session, before edit):
+- Endpoint route `:1028-1041`: in-ball endpoint `z0 = -8.44`
+  (`s0 = 1/2 - 8.44*I`), poly norm `35.7418`, pi lower `7/10`,
+  poly times pi `>= 24`, triple `poly * pi * Gamma approx 0.062 > 0.04`
+  before zeta, joint `<= 0.04` needs `|zeta| <= 2/3`.
+- Endpoint block: `cutL10_endpoint_poly_norm` at `:1065` (`= 35.7418`),
+  `cutL10_endpoint_pi_lower` at `:1092` (`7/10 <=`),
+  `cutL10_poly_pi_lower_endpoint` at `:1138` (`>= 24`),
+  `cutL10_joint_implies_zeta_cap` at `:1154`.
+- Gamma wall: `Door3CutL10GammaWall` at `:2126-2187`
+  (`1/100` wall, TRUE-sup proxy `71/10000`, TRUE center `~0.000651`,
+  endpoint TRUE `~0.0023` proxied exactly by `23/10000` below).
+- Zeta wall: `Door3CutL10ZetaWall` at `:2026-2065` (`6` wall,
+  center TRUE `~1.549`, need `1600/84357` at tightened base).
+
+Tighten chained here (honest, closed numerals only):
+(A) endpoint pi `7/10 -> 3/4` (same `Re = 1/2` exponent `-1/4` as the
+center `cutL10_pi_norm_lower`; same `256/81 = (4/3)^4` upper pattern as
+`cutL10_endpoint_pi_lower`, no new premise).
+(B) endpoint poly times pi `24 -> 26.80635`
+(`35.7418 * 3/4 = 26.80635` via `mul_le_mul`).
+(C) endpoint triple at TRUE-Gamma proxy `23/10000`:
+`26.80635 * 23/10000 = 0.061654605 <= 0.062`, gap `0.021654605`,
+ratio `1.541365125x` — the closest approach in the file
+(ball `12.87`, thin-rect `2.01`, triple `6.32`, zeta-true `3.16`,
+gamma-true `8.98` are all farther).
+(D) same triple at banked walls: `1/100` gives `0.2680635`
+(gap `0.2280635`); TRUE-sup `71/10000` gives `0.190325085`.
+(E) tier need at the tightened triple: even `2/3` gives
+`0.061654605 * 2/3 = 0.04110307 > 0.04`, so the `2/3` cap from
+`:1154` is insufficient for the tightened triple (exact residual).
+Verdict: GAP filed (no route to `0.04`; endpoint `~0.062` already
+exceeds tier before zeta).
+-/
+
+namespace Door3CutL10EndpointJoint
+
+/-- Endpoint pi tighter lower `3/4` (was `7/10` at `:1092`; same exponent
+`-1/4` as the center, same `256/81` upper pattern). -/
+theorem cutL10_endpoint_pi_tighter_lower :
+    (3 / 4 : ℝ) ≤ ‖((Real.pi : ℂ) ^
+      (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖ := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos]
+  have hre : (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)).re
+      = (-(1 / 4) : ℝ) := by
+    have h1 : ((((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)).re
+        = 1 / 4 := by
+      simp [Complex.div_ofNat]
+      norm_num
+    rw [Complex.neg_re, h1]
+  rw [hre]
+  have hbase : (3 / 4 : ℝ) ≤ Real.pi ^ (-(1 / 4 : ℝ)) := by
+    have hpi_le : Real.pi ≤ (256 / 81 : ℝ) := by
+      have h := Real.pi_lt_d2
+      norm_num at h ⊢
+      linarith
+    have hup : Real.pi ^ ((1 / 4 : ℝ)) ≤ (4 / 3 : ℝ) := by
+      have h14nn : (0 : ℝ) ≤ (1 / 4 : ℝ) := by norm_num
+      have hstep : Real.pi ^ ((1 / 4 : ℝ)) ≤ ((((256 / 81 : ℝ)))) ^ ((1 / 4 : ℝ)) :=
+        Real.rpow_le_rpow (le_of_lt Real.pi_pos) hpi_le h14nn
+      have hq : (256 / 81 : ℝ) = ((4 / 3 : ℝ) ^ (4 : ℕ)) := by norm_num
+      have heq : (((((4 / 3 : ℝ) ^ (4 : ℕ)))) ^ ((1 / 4 : ℝ))) = (4 / 3 : ℝ) := by
+        have hnn : (0 : ℝ) ≤ (4 / 3) := by norm_num
+        calc (((((4 / 3 : ℝ) ^ (4 : ℕ)))) ^ ((1 / 4 : ℝ)))
+            = ((4 / 3) ^ ((((4 : ℕ)) : ℝ) * (1 / 4))) := by
+              rw [← Real.rpow_natCast, ← Real.rpow_mul hnn]
+          _ = ((4 / 3) ^ (1 : ℝ)) := by
+              congr 1
+              norm_num
+          _ = (4 / 3) := Real.rpow_one _
+      rw [hq] at hstep
+      rw [heq] at hstep
+      exact hstep
+    have hpos34 : (0 : ℝ) < 3 / 4 := by norm_num
+    have hposP : (0 : ℝ) < Real.pi ^ ((1 / 4 : ℝ)) := Real.rpow_pos_of_pos Real.pi_pos _
+    have hmul : (3 / 4 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ 1 := by
+      calc (3 / 4 : ℝ) * Real.pi ^ ((1 / 4 : ℝ)) ≤ (3 / 4) * (4 / 3) :=
+            mul_le_mul_of_nonneg_left hup (by norm_num)
+        _ = 1 := by norm_num
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos), ← one_div, le_div_iff₀ hposP]
+    exact hmul
+  exact hbase
+
+/-- Endpoint poly times pi tighter lower `26.80635` (was `24` at `:1138`). -/
+theorem cutL10_endpoint_poly_pi_tighter_lower :
+    (26.80635 : ℝ) ≤ ‖(1 / 2 : ℂ) * ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+      (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖ *
+    ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖ := by
+  have hpoly := Door3CutL10TierB.cutL10_endpoint_poly_norm
+  have hpi := cutL10_endpoint_pi_tighter_lower
+  have hmul : (35.7418 : ℝ) * (3 / 4) ≤ ‖(1 / 2 : ℂ) *
+      ((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) *
+      (((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) - 1)‖ *
+    ‖((Real.pi : ℂ) ^ (-(((1 / 2 : ℂ) + Complex.I * (((-8.44 : ℝ)) : ℂ)) / 2)))‖ :=
+    mul_le_mul hpoly.ge hpi (by norm_num) (norm_nonneg _)
+  have heq : (35.7418 : ℝ) * (3 / 4) = (26.80635 : ℝ) := by norm_num
+  rw [heq] at hmul
+  exact hmul
+
+/-- Endpoint triple exact value at TRUE-Gamma proxy `23/10000`
+(`26.80635 * 23/10000 = 0.061654605`, the `~0.062` of `:1035`). -/
+theorem cutL10_endpoint_triple_gammaTrue_value :
+    ((26.80635 : ℝ) * (23 / 10000)) = (0.061654605 : ℝ) := by
+  norm_num
+
+/-- Endpoint triple fence `≤ 0.062` (closest approach). -/
+theorem cutL10_endpoint_triple_gammaTrue_cap :
+    ((26.80635 : ℝ) * (23 / 10000)) ≤ (0.062 : ℝ) := by
+  norm_num
+
+/-- Exact residual to the `0.04` tier: blocked, gap `0.021654605`. -/
+theorem cutL10_endpoint_triple_gap_to_tier :
+    ((0.061654605 : ℝ) - 0.04 = (0.021654605 : ℝ)) ∧ ((0.04 : ℝ) < 0.061654605) := by
+  constructor <;> norm_num
+
+/-- Exact ratio to tier: `0.061654605 / 0.04 = 1.541365125` (closest). -/
+theorem cutL10_endpoint_triple_ratio_to_tier :
+    (0.061654605 : ℝ) / 0.04 = (1.541365125 : ℝ) := by
+  norm_num
+
+/-- Same triple at the banked Gamma wall `1/100`: `0.2680635`. -/
+theorem cutL10_endpoint_triple_wall_value :
+    ((26.80635 : ℝ) * (1 / 100)) = (0.2680635 : ℝ) := by
+  norm_num
+
+/-- Wall residual: gap `0.2280635`. -/
+theorem cutL10_endpoint_triple_wall_gap_to_tier :
+    ((0.2680635 : ℝ) - 0.04 = (0.2280635 : ℝ)) ∧ ((0.04 : ℝ) < 0.2680635) := by
+  constructor <;> norm_num
+
+/-- Same triple at TRUE-sup proxy `71/10000`: `0.190325085`. -/
+theorem cutL10_endpoint_triple_sup_value :
+    ((26.80635 : ℝ) * (71 / 10000)) = (0.190325085 : ℝ) := by
+  norm_num
+
+/-- Tightened `2/3` check: `0.061654605 * 2/3 = 0.04110307 > 0.04`,
+so the `:1154` cap is insufficient for the tightened triple. -/
+theorem cutL10_endpoint_need_vs_twoThirds :
+    ((0.061654605 : ℝ) * (2 / 3) = (0.04110307 : ℝ)) ∧ ((0.04 : ℝ) < 0.04110307) := by
+  constructor <;> norm_num
+
+end Door3CutL10EndpointJoint
+
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_pi_tighter_lower
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_poly_pi_tighter_lower
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_gammaTrue_value
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_gammaTrue_cap
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_gap_to_tier
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_ratio_to_tier
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_wall_value
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_wall_gap_to_tier
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_sup_value
+#print axioms Door3CutL10EndpointJoint.cutL10_endpoint_need_vs_twoThirds
+

@@ -6137,6 +6137,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 WENDEL-H3 (background `ses_f3483686e`, proof-only,
+  grep-clean, wendel-only commit): G1 banked (13.54 via U0-route mirror)
+  + H3_outer CLOSED (`:1573`). G1/G2/H3 all banked; consumer feed next.
+- 2026-09-22 CUTL-ENDPOINT (background `ses_f3483fcaf`, proof-only,
+  grep-clean, cutL10-only commit): endpoint triple tightened to 0.0617
+  (1.54x over tier — closest approach; even zeta-2/3 gives 0.0411>0.04).
+  Route ~dead; tier spec next.
 - 2026-09-22 FIRSTCELL-F4 (background `ses_f348467ed`, proof-only,
   grep-clean, first_cell-only commit): f4 cap CLOSED (5^0.395≥1.852,
   0.54·1.852≥1). ZETA14 sub-residuals: bridge + eta identity open.

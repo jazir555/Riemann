@@ -1535,4 +1535,54 @@ theorem G2_outerN8_banked : G2_outerN8_prop 8.63 :=
 Value banked: U0 `19.18`, C2 `8.63`; gap: G1-U + C-inflation (not in brief).
 -/
 
+/-! ## 21. WENDEL-H3 G1-U normcap + C-inflation (PROOF-ONLY, FENCED, no build): H3 CLOSED.
+
+Greps (before edit, this turn, this file only):
+- H3 chain: `h3_outer_of_G1_G2/:774` combiner, `G1_of_normcap/:1012` conditional,
+  `h3_outer_of_lead_normcap_G2/:1036` lead-chain, `G2_outerN8_banked/:1526` G2 closed;
+- G1 shapes: `G1_outerN8_prop/:707` def, `wOuter_add8_re/:838` Re 8.1975,
+  `wOuter_add8_im/:843` Im -4.375, `stirling_wOuter_add8/:848`,
+  `stirling_G1expr_im2/:994`;
+- U0 precedent: `wOuter_norm_sq_U0/:1516` via `Complex.sq_norm`,
+  `Complex.normSq_apply`, `wOuter_re/:80`, `wOuter_im/:82`, `norm_num`,
+  `g2_C2_inflation_863/:1520`, `G2_outerN8_banked/:1526`;
+- forbidden-tactic grep: zero tactic uses in banked code below (prior hits comment-only).
+
+Attempt (honest mirror of U0 route): U0 went `Re^2+Im^2` norm cap (`wOuter_norm_sq_U0`)
+-> numeral inflation (`g2_C2_inflation_863`) -> `g2_G2_of_telescope_normcap`. Here the
+mirror is `Re^2+Im^2` cap at `wOuter+8` (`wOuter8_norm_sq_U`) -> numeral C-inflation
+(`g1_C_inflation_1354`) -> `G1_of_normcap` to close `G1_outerN8_prop 13.54` as
+`G1_outerN8_banked`, then `h3_outer_of_lead_normcap_G2` with banked `G2_outerN8_banked`
+to close H3 as `H3_outer_banked`. Exact values: `‖wOuter+8‖^2 = 8.1975^2+4.375^2
+= 67.19900625+19.140625 = 86.33963125 ≤ 86.34`; `3*86.34 = 259.02 ≤ 13.54*19.140625
+= 259.1640625` (machine-checked shapes are the `norm_num` goals below).
+No new imports; no other files touched; no existing lines modified.
+-/
+
+theorem wOuter8_norm_sq_U : ‖wOuter + (8 : ℂ)‖ ^ 2 ≤ (86.34 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wOuter_add8_re, wOuter_add8_im]
+  norm_num
+
+theorem g1_C_inflation_1354 :
+    3 * (86.34 : ℝ) ≤ (13.54 : ℝ) * (-4.375) ^ 2 := by
+  norm_num
+
+theorem G1_outerN8_banked : G1_outerN8_prop 13.54 :=
+  G1_of_normcap 13.54 86.34 wOuter8_norm_sq_U g1_C_inflation_1354
+
+theorem H3_outer_banked :
+    ‖Complex.digamma wOuter - target_outer‖ ≤
+      (13.54 : ℝ) / ‖wOuter + (8 : ℂ)‖ ^ 2 + (8.63 : ℝ) / ‖wOuter‖ ^ 2 :=
+  h3_outer_of_lead_normcap_G2 13.54 86.34 8.63 wOuter8_norm_sq_U g1_C_inflation_1354
+    G2_outerN8_banked
+
+/-! H3 residual (exact, no force): `G1_outerN8_prop 13.54` CLOSED via `G1_outerN8_banked`
+(`wOuter8_norm_sq_U` + `g1_C_inflation_1354` into `G1_of_normcap/:1012` with
+`stirling_G1expr_im2/:994`); `G2_outerN8_prop 8.63` already CLOSED via
+`G2_outerN8_banked/:1526`; H3 CLOSED via `H3_outer_banked`
+(`h3_outer_of_lead_normcap_G2/:1036` with banked G1+G2). Value banked: G1-U `86.34`,
+G1-C `13.54`, H3 bound `13.54/‖wOuter+8‖^2 + 8.63/‖wOuter‖^2`. Gap: none in H3 chain;
+G1-as-Prop premise discharged (no residual premise retained).
+-/
+
 end Door3ComplexWendel
