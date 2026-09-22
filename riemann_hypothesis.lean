@@ -12552,3 +12552,169 @@ theorem Hright_of_rightTailDistanceLowerBound10
   have hbound := T.bound z hre hgt hlt hne
   rw [hz, norm_zero] at hbound
   linarith
+
+/-!
+## RH-DIST right-tail distance routing (proof-only append)
+
+Routers already banked in this file:
+- `RHTractable.tailDistance_from_completedMinusPolar` (:6673)
+- `RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar` (:6470)
+- `XiRightTailAsymptoticLowerBoundForX.toDistanceLowerBound` (:995)
+- `Hright_of_rightTailDistanceLowerBound10` (:12546)
+
+No banked inhabitant of `RHTractable.CompletedMinusPolarTailLowerBound10`,
+`RHProofScaffold.CompletedMinusPolarTailLowerBound10`,
+`XiRightTailAsymptoticLowerBoundForX (10)`, or
+`XiRightTailDistanceLowerBoundForX (10)` was found; hence no unconditional
+`Hright` value is produced here. The defs below chain the banked routers
+conditionally and file the exact residual.
+-/
+
+/-- Conditional distance value via the RHTractable completed-minus-polar route. -/
+def rightTailDistance_of_completedMinusPolar10
+    (L : RHTractable.CompletedMinusPolarTailLowerBound10) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) :=
+  RHTractable.tailDistance_from_completedMinusPolar L
+
+/-- Conditional distance value via the scaffold completed-minus-polar route. -/
+def rightTailDistance_of_completedMinusPolar10_scaffold
+    (L : RHProofScaffold.CompletedMinusPolarTailLowerBound10) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) :=
+  RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar L
+
+/-- Conditional distance value via the asymptotic route. -/
+def rightTailDistance_of_asymptotic10
+    (A : XiRightTailAsymptoticLowerBoundForX (10 : ℝ)) :
+    XiRightTailDistanceLowerBoundForX (10 : ℝ) :=
+  A.toDistanceLowerBound
+
+/-- Conditional `Hright` value via the RHTractable completed-minus-polar route. -/
+def Hright_of_completedMinusPolarTail10
+    (L : RHTractable.CompletedMinusPolarTailLowerBound10)
+    (z : ℂ) (hre : (10 : ℝ) < z.re)
+    (hgt : -(1 : ℝ) / 2 < z.im) (hlt : z.im < (1 : ℝ) / 2)
+    (hne : z.im ≠ 0) : xiShifted z ≠ 0 :=
+  Hright_of_rightTailDistanceLowerBound10
+    (RHTractable.tailDistance_from_completedMinusPolar L)
+    z hre hgt hlt hne
+
+/-- Conditional `Hright` value via the scaffold completed-minus-polar route. -/
+def Hright_of_completedMinusPolarTail10_scaffold
+    (L : RHProofScaffold.CompletedMinusPolarTailLowerBound10)
+    (z : ℂ) (hre : (10 : ℝ) < z.re)
+    (hgt : -(1 : ℝ) / 2 < z.im) (hlt : z.im < (1 : ℝ) / 2)
+    (hne : z.im ≠ 0) : xiShifted z ≠ 0 :=
+  Hright_of_rightTailDistanceLowerBound10
+    (RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar L)
+    z hre hgt hlt hne
+
+/-- Conditional `Hright` value via the asymptotic route. -/
+def Hright_of_rightTailAsymptotic10
+    (A : XiRightTailAsymptoticLowerBoundForX (10 : ℝ))
+    (z : ℂ) (hre : (10 : ℝ) < z.re)
+    (hgt : -(1 : ℝ) / 2 < z.im) (hlt : z.im < (1 : ℝ) / 2)
+    (hne : z.im ≠ 0) : xiShifted z ≠ 0 :=
+  Hright_of_rightTailDistanceLowerBound10
+    (A.toDistanceLowerBound)
+    z hre hgt hlt hne
+
+/-- Exact residual filed by RH-DIST: to close `Hright`, supply one of
+`RHTractable.CompletedMinusPolarTailLowerBound10`,
+`RHProofScaffold.CompletedMinusPolarTailLowerBound10`, or
+`XiRightTailAsymptoticLowerBoundForX (10)`; the left-tail step still needs
+`XiShiftedNegSymmetric` via `tailPointwise10_of_rightTail_and_negSymm`. -/
+theorem Hright_residual_open_tailDistance10 :
+    True :=
+  trivial
+
+/-!
+## RH-SYMM tail symmetry closure + narrowed distance residual (proof-only append)
+
+Banked inputs used:
+- `XiShiftedNegSymmetric` (:575), field `neg_symm` (:582)
+- `classicalXi_symmetry` (:1875), hence `classicalXi_symmetry.neg_symm`
+- `XiRightTailAsymptoticLowerBoundForX.toDistanceLowerBound` (:995)
+- `tailPointwise10_of_rightTail_and_negSymm` (:12498)
+- `Hright_of_rightTailDistanceLowerBound10` (:12546)
+
+Value: symmetry premise closed unconditionally by `tailNegSymm_closed`.
+Gap: no banked inhabitant of `XiRightTailDistanceLowerBoundForX (10)`,
+`XiRightTailAsymptoticLowerBoundForX (10)`,
+`RightTailExponentialCertificate (10)`,
+`RHTractable.CompletedMinusPolarTailLowerBound10`, or
+`RHProofScaffold.CompletedMinusPolarTailLowerBound10` found;
+the only banked `Certificate`-route value (`challenge2_certificate`)
+depends on the retained RH-apply assumption (filed `:12466`-`:12476`),
+so it is not used as an unconditional discharge here.
+-/
+
+/-- Closed neg-symmetry value from the banked classical package. -/
+def tailNegSymm_closed : XiShiftedNegSymmetric :=
+  classicalXi_symmetry.neg_symm
+
+/-- Conditional `Hright` via the narrowed asymptotic-to-distance chain. -/
+def Hright_of_asymptotic_narrowed10
+    (A : XiRightTailAsymptoticLowerBoundForX (10 : ℝ))
+    (z : ℂ) (hre : (10 : ℝ) < z.re)
+    (hgt : -(1 : ℝ) / 2 < z.im) (hlt : z.im < (1 : ℝ) / 2)
+    (hne : z.im ≠ 0) : xiShifted z ≠ 0 :=
+  Hright_of_rightTailDistanceLowerBound10
+    (A.toDistanceLowerBound)
+    z hre hgt hlt hne
+
+/-- Conditional `Hright` via exponential-to-asymptotic-to-distance chain. -/
+def Hright_of_exponential_narrowed10
+    (E : RightTailExponentialCertificate (10 : ℝ))
+    (z : ℂ) (hre : (10 : ℝ) < z.re)
+    (hgt : -(1 : ℝ) / 2 < z.im) (hlt : z.im < (1 : ℝ) / 2)
+    (hne : z.im ≠ 0) : xiShifted z ≠ 0 :=
+  Hright_of_asymptotic_narrowed10
+    (rightTailAsymptotic_of_exponential E)
+    z hre hgt hlt hne
+
+/-- Conditional two-sided tail with symmetry premise closed; only distance remains. -/
+def tailPointwise10_of_distance_closedSymm
+    (T : XiRightTailDistanceLowerBoundForX (10 : ℝ)) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_rightTail_and_negSymm
+    tailNegSymm_closed
+    (Hright_of_rightTailDistanceLowerBound10 T)
+
+/-- Conditional two-sided tail via asymptotic route with symmetry closed. -/
+def tailPointwise10_of_asymptotic_closedSymm
+    (A : XiRightTailAsymptoticLowerBoundForX (10 : ℝ)) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_distance_closedSymm
+    (A.toDistanceLowerBound)
+
+/-- Conditional two-sided tail via exponential route with symmetry closed. -/
+def tailPointwise10_of_exponential_closedSymm
+    (E : RightTailExponentialCertificate (10 : ℝ)) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_asymptotic_closedSymm
+    (rightTailAsymptotic_of_exponential E)
+
+/-- Conditional two-sided tail via RHTractable completed-minus-polar route, symmetry closed. -/
+def tailPointwise10_of_completedMinusPolar_closedSymm
+    (L : RHTractable.CompletedMinusPolarTailLowerBound10) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_distance_closedSymm
+    (RHTractable.tailDistance_from_completedMinusPolar L)
+
+/-- Conditional two-sided tail via scaffold completed-minus-polar route, symmetry closed. -/
+def tailPointwise10_of_completedMinusPolar_closedSymm_scaffold
+    (L : RHProofScaffold.CompletedMinusPolarTailLowerBound10) :
+    XiTailPointwiseNonvanishingForX (10 : ℝ) :=
+  tailPointwise10_of_distance_closedSymm
+    (RHProofScaffold.xiRightTailDistanceLowerBound_from_completedMinusPolar L)
+
+/-- Exact residual filed by RH-SYMM: symmetry is closed by `tailNegSymm_closed`;
+to close `XiTailPointwiseNonvanishingForX (10)` supply one distance value
+`XiRightTailDistanceLowerBoundForX (10)`, or one of its narrowed premises
+`XiRightTailAsymptoticLowerBoundForX (10)`,
+`RightTailExponentialCertificate (10)`,
+`RHTractable.CompletedMinusPolarTailLowerBound10`, or
+`RHProofScaffold.CompletedMinusPolarTailLowerBound10`. -/
+theorem tail_residual_open_distance10 :
+    True :=
+  trivial

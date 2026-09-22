@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 RH-SYMM (background `ses_f3475ed34`, proof-only,
+  grep-clean, RH-only commit): symmetry CLOSED (`tailNegSymm_closed
+  :12652`) + narrowed tail conditionals (asymptotic/exponential/
+  completed-minus-polar routers). Distance instance still open.
 - 2026-09-22 WENDEL-H3INNER (background `ses_f34761659`, proof-only,
   grep-clean, wendel-only commit): inner H3 BLOCKED honestly (|Im|=0.375
   < 1/2 breaks StirlingVert lead + eps caps at wInner and wInner+8).
