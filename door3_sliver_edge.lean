@@ -487,4 +487,29 @@ theorem shortfall_top (mT : ℝ) (MT : ℝ) (hshort : mT / MT ≤ 0.01) :
 theorem shortfall_bot (mB : ℝ) (MB : ℝ) (hshort : mB / MB ≤ 0.01) :
     -(1 / 2 : ℝ) + mB / MB ≤ (-0.49 : ℝ) := by linarith
 
+/-! ### (H) uniform `mT = 1 / 2` feasibility adjudication (top edge)
+
+Poly-zero check at `x = 0`: `edgePoly_top 0` gives `(0 + I / 2)^2 + 1 / 4 = 0`,
+so `entire_top_expand 0` collapses to `1 / 2`, and
+`edgeTop_consumer_norm_at_zero` gives norm `1 / 2` — NOT zero.
+Hence the poly zero does NOT kill `m = 1 / 2`; it kills only `m > 1 / 2`.
+This banks the sharp ceiling: any uniform top lower over
+`Set.Icc (-10) 10` is at most `1 / 2`, so `1 / 2` would be optimal if held.
+Uniform existence of `mT = 1 / 2` itself remains open (needs pointwise
+`completedRiemannZeta₀` bounds away from `x = 0`; no force here). -/
+
+/-- Sharp ceiling for uniform top lowers: no `m > 1 / 2` works; `1 / 2` is best possible. -/
+theorem uniform_top_lower_le_half (m : ℝ)
+    (h : ∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      m ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) :
+    m ≤ (1 / 2 : ℝ) := by
+  have h0mem : (0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ) := by
+    rw [Set.mem_Icc]
+    constructor
+    · norm_num
+    · norm_num
+  have h0 := h 0 h0mem
+  rw [edgeTop_consumer_norm_at_zero] at h0
+  exact h0
+
 end Door3SliverEdge

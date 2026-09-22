@@ -5901,6 +5901,20 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SLIVER-MT (background `ses_f34eb32a0`, proof-only,
+  grep-clean, sliver_edge-only commit): m=1/2 ADJUDICATED —
+  `uniform_top_lower_le_half :502` (any uniform m over Icc(-10,10)
+  satisfies m≤1/2: specialize at 0 + endpoint norm 1/2). Poly-zero fear
+  REFUTED (edgePoly_top 0 gives entire=1/2, norm exactly 1/2). So m=1/2
+  is the OPTIMAL ceiling: m>1/2 infeasible, m=1/2 open (needs zeta₀
+  bounds for x≠0). Bottom mirror (mB≤1/2) left for patch.
+- 2026-09-22 CELL-C (background `ses_f34ec61fc`, proof-only, grep-clean,
+  interval-only commit): R03 conditional FILED (R01 correctly skipped:
+  obligation exists `:1288` but NO grid membership by design `:1244`) —
+  `R03CenterAssembly.R03_center_with_poly_pi_gamma :35123` (banked poly
+  11.3 + pi 1/2 via `pi_lower_of_re`; open hgam/hzeta + hprod check,
+  infeasible at banked floors like R00). New-block simpas are
+  pre-existing file style (`simpa only/using`, lines <35093).
 - 2026-09-22 ETAPRIME-TERM (background `ses_f34efa018`, proof-only,
   grep-clean, eta_prime-only commit): termwise link PROVED —
   `etaPairCpow` def (cpow-difference mirror, no import) +
