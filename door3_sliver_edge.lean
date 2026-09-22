@@ -389,6 +389,56 @@ theorem uniform_bot_deriv_of_closedBall (d : ℝ) (C : ℝ) (hdle : d ≤ 1)
         (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ C / 1 := h
     _ = C := by ring
 
+/-- Uniform top deriv sup from one closed-ball sup (`r = 1 / 2`, so `MT = 2 * C`). -/
+theorem uniform_top_deriv_of_closedBall_half (d : ℝ) (C : ℝ) (hdle : d ≤ 1)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C)
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc ((1 / 2 : ℝ) - d) (1 / 2 : ℝ)) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ 2 * C := by
+  have hypair := Set.mem_Icc.mp hy
+  have hyband : y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ) := by
+    apply Set.mem_Icc.mpr
+    constructor
+    · linarith [hypair.1, hdle]
+    · exact hypair.2
+  have hsphere : ∀ (z : ℂ), z ∈
+      Metric.sphere (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (1 / 2) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+    intro z hz
+    exact hC z (edgeSphere_cover_half x y hx hyband z hz)
+  have h := entire_deriv_le_of_sphere_bound
+    (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (1 / 2) C (by norm_num) hsphere
+  calc ‖deriv CentralCoverAssembly.xiShiftedEntire
+        (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ C / (1 / 2) := h
+    _ = 2 * C := by ring
+
+/-- Uniform bottom deriv sup from one closed-ball sup (`r = 1 / 2` mirror, so `MB = 2 * C`). -/
+theorem uniform_bot_deriv_of_closedBall_half (d : ℝ) (C : ℝ) (hdle : d ≤ 1)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C)
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + d)) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ 2 * C := by
+  have hypair := Set.mem_Icc.mp hy
+  have hyband : y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ) := by
+    apply Set.mem_Icc.mpr
+    constructor
+    · exact hypair.1
+    · linarith [hypair.2, hdle]
+  have hsphere : ∀ (z : ℂ), z ∈
+      Metric.sphere (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (1 / 2) →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C := by
+    intro z hz
+    exact hC z (edgeSphere_cover_half x y hx hyband z hz)
+  have h := entire_deriv_le_of_sphere_bound
+    (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (1 / 2) C (by norm_num) hsphere
+  calc ‖deriv CentralCoverAssembly.xiShiftedEntire
+        (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ C / (1 / 2) := h
+    _ = 2 * C := by ring
+
 /-! ### (G) width gates, ratios and shortfall -/
 
 /-- Top width gate iff form. -/

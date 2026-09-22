@@ -5901,6 +5901,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 SLIVER-R12 (background `ses_f34eee041`, proof-only,
+  grep-clean, sliver_edge-only commit): r=1/2 deriv bridges BANKED —
+  `uniform_top_deriv_of_closedBall_half :393` + bot mirror `:418`
+  (‖deriv‖≤2C via Cauchy C/(1/2)=2C + half-cover `:323`). Tighter
+  sphere, looser constant trade (useful iff C small). Uniform C + mT/mB
+  still premises-only.
 - 2026-09-22 BRIDGE-RE2 (background `ses_f34eeac43`, proof-only,
   grep-clean, bridge-only commit): re-export
   `R02_fullDerivUp_of_etaPairDeriv_withZ934_of_D3 :52` (fires `:1042`'s
