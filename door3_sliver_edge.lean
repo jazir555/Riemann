@@ -1598,3 +1598,122 @@ theorem puncturedStrip_quarter_subset_strip :
   exact puncturedStrip_subset_strip (1 / 4) (1 / 4) hz
 
 end Door3SliverEdge
+
+/-! ### (R) SLIVER-FINAL ledger: banked close plus complete open list
+
+Grepped before writing:
+* covers `edgeMem_norm_le :280`, `edgeSphere_cover :303`, `edgeSphere_cover_half :323`;
+* bridges `uniform_top_deriv_of_closedBall :343`, `uniform_bot_deriv_of_closedBall :368`,
+  half variants `:393` / `:418`, M40 feeders `:708` / `:768`,
+  M40 pair `:885`, M1000 feeders `:931` / `:942`, M1000 pair `:953`,
+  lifts `:971` / `:980`, pair-from-79 `:989` / pair-from-40 `:1004`;
+* M40 numerals `m40_gate_top :690`, `m40_width_top :693`, `m40_width_bot :696`,
+  `m40_delta_pos :699`, `m40_delta_le_one :702`, `m40_delta_eq :705`,
+  `m40_gate_bot :765`; M1000 numerals `m1000_delta_le_one :925`,
+  `m1000_delta_pos :928`;
+* endpoint numerals `endpoint_top_norm :189`, `endpoint_bot_norm :196`,
+  consumer zero `:221` / `:229`, single lowers `:237` / `:243`;
+* ceilings `uniform_top_lower_le_half :502`, `uniform_bot_lower_le_half :516`,
+  gaps `:735` / `:742` / `:779` / `:786` / `:793` / `:800`;
+* poly79 `poly_upper_closedBall12_le78 :1049`, `poly_upper_closedBall12 :1079`;
+* pi4096 `piOf_upper_closedBall12 :1146`, joint `poly_pi_upper_closedBall12 :1166`
+  (`319488 = 78 * 4096`), norm eq `:1135`, re bounds `:1122`;
+* punctured `puncturedBall12 :1231`, poles `:1235` / `:1240`, subset `:1245`,
+  exclusions `:1252` / `:1261`, joint restrict `:1270`,
+  specs `PuncturedGammaSup :1277` / `PuncturedZetaSup :1281`,
+  compose `:1286`, quarter `:1309` / `:1584`, quarter lemmas `:1312` / `:1320` / `:1328`,
+  `puncturedBall12z :1336`, `PuncturedEntireSup :1341`, preimages `:838` / `:1346`,
+  z-exclusions `:1356` / `:1365`;
+* strip transfer `openStrip :1422`, `puncturedStrip12z :1425`,
+  isometries `:1467` / `:1476`, mem transfer `:1487`,
+  entire-eq `:1502`, norm-eq `:1511`, four-factor bridge `:1518`,
+  strip upper `:1545`, quarter strip `:1584` / `:1587` / `:1594`;
+* hC walls `closedBall12_mem_endpoint_top :838`,
+  `ballSup_necessary_ge_half :848`, `ballSup_mono :858`,
+  `uniform_pair_of_closedBall :867`.
+
+What is banked here: one residual list def plus one conditional ledger.
+The ledger takes the full open list as an explicit premise and returns a
+conjunction of closed banked numerals, poly79, pi4096, joint 319488,
+pole findings, one punctured exclusion, both covers, one hC floor,
+and both M40 / M1000 pair closers derived from the premises.
+Nothing open is claimed as proved.
+
+Verdict (honest): banked close holds; open list stays open.
+Uniform `1 / 2` lowers over `Icc (-10) 10` are open.
+Ball-12 Entire sups `40` / `1000` / `79` are open (`40` infeasible by product
+route per section (L) survey; `79` / `1000` need Gamma / zeta uppers).
+Punctured Gamma / zeta / Entire numerals at quarter radii are open.
+The `s`-ball premise for strip transfer stays explicit.
+Full-ball deriv bridges stay conditional on the open ball premise.
+-/
+
+namespace Door3SliverEdge
+
+/-- Complete open list for the sliver lane (filed, not proved). -/
+def SliverFinalResidual (G Z C : ℝ) : Prop :=
+  (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) ∧
+  (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖) ∧
+  (∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)) ∧
+  (∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ)) ∧
+  (∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (79 : ℝ)) ∧
+  PuncturedGammaSup (1 / 4 : ℝ) (1 / 4 : ℝ) G ∧
+  PuncturedZetaSup (1 / 4 : ℝ) (1 / 4 : ℝ) Z ∧
+  PuncturedEntireSup (1 / 4 : ℝ) (1 / 4 : ℝ) C
+
+/-- SLIVER-FINAL ledger: open list as premise, banked close plus closers as result. -/
+theorem sliver_final_ledger (G Z C : ℝ) (hRes : SliverFinalResidual G Z C) :
+    ((0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ)) ∧
+    ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ)) ∧
+    ((-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) ∧
+    ((1 / 2 : ℝ) / (40 : ℝ) = (1 / 80 : ℝ)) ∧
+    ((1 / 2 : ℝ) / (1000 : ℝ) ≤ 1) ∧
+    ((1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+    ((1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire (((((0 : ℝ))) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+    (∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 → ‖CentralCoverAssembly.polyOf s‖ ≤ (78 : ℝ)) ∧
+    (∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 → ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ)) ∧
+    (∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 → ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ)) ∧
+    ((0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12) ∧
+    ((1 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12) ∧
+    ((0 : ℂ) ∉ puncturedBall12_quarter) ∧
+    (∀ (x : ℝ) (y : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) → y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ) → ‖(((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (11 : ℝ)) ∧
+    (∀ (x : ℝ) (y : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) → y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ) → ∀ (z : ℂ), z ∈ Metric.sphere (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) 1 → z ∈ Metric.closedBall (0 : ℂ) 12) ∧
+    ((1 / 2 : ℝ) ≤ (40 : ℝ)) ∧
+    ((∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ))) ∧
+    ((∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ))) := by
+  obtain ⟨hTopU, hBotU, hC40, hC1000, hC79, hGam, hZet, hEnt⟩ := hRes
+  refine And.intro m40_gate_top ?_
+  refine And.intro m40_width_top ?_
+  refine And.intro m40_width_bot ?_
+  refine And.intro m40_delta_eq ?_
+  refine And.intro m1000_delta_le_one ?_
+  refine And.intro edgeTop_single_lower ?_
+  refine And.intro edgeBot_single_lower ?_
+  refine And.intro (fun s hs => poly_upper_closedBall12_le78 hs) ?_
+  refine And.intro (fun s hs => piOf_upper_closedBall12 hs) ?_
+  refine And.intro (fun s hs => poly_pi_upper_closedBall12 hs) ?_
+  refine And.intro pole_zero_mem_ball12 ?_
+  refine And.intro pole_one_mem_ball12 ?_
+  refine And.intro puncturedBall12_quarter_excludes_zero ?_
+  refine And.intro (fun x y hx hy => edgeMem_norm_le x y hx hy) ?_
+  refine And.intro (fun x y hx hy z hz => edgeSphere_cover x y hx hy z hz) ?_
+  refine And.intro (ballSup_necessary_ge_half (40 : ℝ) hC40) ?_
+  refine And.intro (uniform_M40_pair_of_closedBall hC40) ?_
+  exact uniform_M1000_pair_of_ballSup79 hC79
+
+end Door3SliverEdge

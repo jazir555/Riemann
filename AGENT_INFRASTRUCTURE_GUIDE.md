@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 SLIVER-FINAL (background `ses_f3477e17d`, proof-only,
+  grep-clean, sliver_edge-only commit): FINAL ledger (banked halves
+  re-exported; 8 residuals filed). Sliver lane COMPLETE.
 - 2026-09-22 DIGAMMA-FINAL (background `ses_f3476d956`, proof-only,
   grep-clean, digamma-only commit): FINAL ledger (banked halves proved;
   full conditional). Digamma lane COMPLETE (R1-R12 filed).
