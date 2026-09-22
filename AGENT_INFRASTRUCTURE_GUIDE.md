@@ -5492,6 +5492,21 @@ sorry-free infrastructure and the complete commit ledger above.
   (cF 1.853→1.851, `3.423024<=1.851²`) + `CS_S4f_shortfall_1851 :4340`
   (need 2.5914, shortfall 0.6542→0.6514, gain 0.0028). Still short
   honestly. Ball_advance owner fix left untouched. ETA-SLOW tasked.
+- 2026-09-22 SCUT17 (background `ses_f37760f4d`, proof-only, grep-clean):
+  tail-transfer assembly (route a) — `sSCUT_S9_skip8_tail_floor :3466`
+  (`(S9_skip8).re-7/10`, shard `:3446` + banked tail `7/10`
+  `sSCUT_eta_tail_2048_le :2095`, `slow-tail` shape) + shortfall
+  `:3475` (`12623/2100~=6.011` vs bar 21/10; shard-only gap was
+  5.311). Route (b) not banked: eta9 is constructive (+r10/2), so the
+  `Re<=-r10/2` shape is false at k=9 (k=8 lock already at `:3413`).
+  `hEnough` NOT discharged. SCUT18 tasked (N=4096 slow leg).
+- 2026-09-22 DERIV-BUILD (background `ses_f3779c2b4`, sole build owner):
+  GREEN — `door3_R02_ball_advance` rebuilt `[8690/8690]`, BUILD-EXIT=0
+  (attempt 2/2; attempt 1 BUILD-EXIT=1 on wave-added `:1091`). One-line
+  in-file fix: `hG.comp hHalf` → `HasDerivAt.comp s hG hHalf` (Mathlib
+  comp takes point explicitly). Verifies UZ934 `:999`, gamma `:1084` +
+  `:1106` + `:1140`, zeta `:1168`; axioms standard, no sorryAx.
+  Grep-clean. DG/DZ numerals stay open by design. Lock RELEASED.
 - 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
   edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
   14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,

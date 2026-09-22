@@ -1088,7 +1088,7 @@ theorem R02_gamma_hasDerivAt (s dG : ℂ)
     (hasDerivAt_id' (x := s)).div_const (2 : ℂ)
   have hComp : HasDerivAt (Complex.Gamma ∘ fun t : ℂ => t / 2)
       (dG * ((1 : ℂ) / 2)) s :=
-    hG.comp hHalf
+    HasDerivAt.comp s hG hHalf
   have heqF : (Complex.Gamma ∘ fun t : ℂ => t / 2) =
       DerivCauchyBridge.gammaOf := by
     unfold DerivCauchyBridge.gammaOf

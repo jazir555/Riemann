@@ -3459,4 +3459,22 @@ theorem sSCUT_S9_skip8_shortfall :
     ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15)) = (11153 / 2100 : ℝ) := by
   norm_num
 
+/-- Tail-transfer assembly at sCut: single-count shard minus the `M = 2048`
+tail (`S₉_skip8 - 7/10`; `slow - tail` shape vs the `21/10` bar; shard floor
+banked at `sSCUT_S9_skip8_Re_ge`, tail numeral `7/10` banked at
+`sSCUT_eta_tail_2048_le`). -/
+theorem sSCUT_S9_skip8_tail_floor :
+    (((-3529 / 1050 : ℝ) + 0.15) - 7 / 10) ≤
+      ((((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9).re) - 7 / 10) := by
+  have h := sSCUT_S9_skip8_Re_ge
+  linarith
+
+/-- Exact gap of the tail-transfer assembly vs the `21/10` bar
+(`21/10 - (((-3529/1050) + 0.15) - 7/10) = 12623/2100 ≈ 6.011`). -/
+theorem sSCUT_S9_skip8_tail_shortfall :
+    ((21 / 10 : ℝ) - (((-3529 / 1050 : ℝ) + 0.15) - 7 / 10)) =
+      (12623 / 2100 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta
