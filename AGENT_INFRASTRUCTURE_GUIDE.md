@@ -6129,6 +6129,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 BALLADV-R02LOG (background `ses_f348b073b`, proof-only,
+  grep-clean, ball_advance-only commit): log-splitter banked (linear
+  (1,1,1) via rpow_one) but degrades decay toward 0.05; no_uniform_logCap
+  proved (delta=0 false). Small-delta>0 lane filed (`:1949-1955`).
 - 2026-09-22 DERIV-RELOC (background `ses_f3489af53`, proof-only,
   grep-clean, deriv-only commit): relocation spec filed (dLeaf_reloc
   0.2-8.0I, sphere in R02 rect; 12x/311x shaves quantified; true>need

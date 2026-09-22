@@ -1769,3 +1769,205 @@ def R02_etaWorst_dom105_residual_spec : Prop :=
   ∃ C : ℝ, 0 ≤ C ∧ R02_etaWorst_pointwise105_missing C
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 1.05-decay explicit-C attempt (BALLADV-R02PT, proof-only).
+
+Grep record (this file only, read-only):
+* majorant `R02_etaWorstMajorant :1411` (two pieces, coeff `8.29`,
+  exponents `-(0.05)-1 = -1.05` and `-0.05`).
+* dominator `R02_etaWorstDominator105 :1685` (`C * ((m+1):R)^(-1.05)`),
+  shift summability `:1690`, dominator summability `:1707`,
+  log bound `:1713`, log-difference comparison
+  `R02_etaWorst_logDiff_le_inv :1722`.
+* pointwise blocker `R02_etaWorst_pointwise105_missing C :1755`
+  (`∀ m, ‖majorant m‖ ≤ dominator C m`).
+* residual `R02_etaWorst_dom105_residual_spec :1768`
+  (`∃ C ≥ 0, pointwise C`).
+
+Attempt with explicit `C` (honest, append-only, no placeholder tactics):
+* small-`m` check: `norm_num` alone does not decide goals carrying
+  `Real.log` / `Real.rpow`, so no fixed `C` (tried `C = 10`) is closed
+  by a finite `norm_num` prefix; no value is banked here.
+* tail comparison: the second majorant piece is controlled by `:1722`
+  (banked below as `R02_etaWorst_secondPiece_le_inv_mul`).
+* obstruction: the first majorant piece carries
+  `Real.log (2*m+2)` with no uniform finite cap against the pure power,
+  so the pointwise bound at any fixed `C` stays open. The exact blocker
+  is filed below as `R02_etaWorst_dom105_firstPiece_obstruction_spec`
+  (necessary first-piece domination implied by any pointwise `C`).
+No tsum numeral is closed; `:1768` remains the exact residual.
+-/
+
+/-- Dominator is nonnegative at `0 ≤ C` (needed side-condition for any
+explicit-`C` pointwise attempt). -/
+theorem R02_etaWorstDominator105_nonneg (C : ℝ) (hC : 0 ≤ C) (m : ℕ) :
+    0 ≤ R02_etaWorstDominator105 C m := by
+  unfold R02_etaWorstDominator105
+  exact mul_nonneg hC (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+
+/-- Tail comparison for the second majorant piece via the banked
+log-difference bound `:1722`. -/
+theorem R02_etaWorst_secondPiece_le_inv_mul (m : ℕ) :
+    (Real.log ((((2 * m + 2 : ℕ)) : ℝ)) - Real.log ((((2 * m + 1 : ℕ)) : ℝ))) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ * ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ))) := by
+  exact mul_le_mul_of_nonneg_right (R02_etaWorst_logDiff_le_inv m)
+    (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+
+/-- Exact blocker for the explicit-`C` attempt: any pointwise `C` must
+dominate the log-carrying first piece at every `m`. Since
+`Real.log (2*m+2)` has no uniform finite cap, no fixed `C` value is
+supplied this turn; `:1768` stays open. -/
+def R02_etaWorst_dom105_firstPiece_obstruction_spec : Prop :=
+  ∀ C : ℝ, 0 ≤ C → R02_etaWorst_pointwise105_missing C →
+    ∀ m : ℕ, Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) ≤
+      R02_etaWorstDominator105 C m
+
+end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 log-cap splitter attempt (BALLADV-R02LOG, proof-only).
+
+Grep record (this file only, read-only):
+* obstruction spec `R02_etaWorst_dom105_firstPiece_obstruction_spec :1823`
+  (any pointwise `C` must dominate the log-carrying first piece).
+* log-difference comparison `R02_etaWorst_logDiff_le_inv :1722`
+  (controls the second majorant piece only).
+* pointwise blocker `R02_etaWorst_pointwise105_missing C :1755`,
+  residual `R02_etaWorst_dom105_residual_spec :1768`.
+
+Splitter attempt (honest, append-only, placeholder-free):
+* banked linear cap `R02_etaWorst_logBp_le_subOne`
+  (`log (2m+2) ≤ (2m+1)`, tightened from `:1713` via
+  `Real.log_le_sub_one_of_pos`), restated as splitter shape
+  `R02_etaWorst_logCap_linear_splitter` (`eps = 1`, `delta = 1`, `C' = 1`
+  on base `(2m+1)`), with first-piece corollary
+  `R02_etaWorst_firstPiece_le_linearMul` and banked rpow instance
+  `R02_etaWorst_logCap_splitter_banked11`. The linear cap leaves an extra
+  `(2m+1)` factor, so it does not fit the pure `1.05` power at a fixed `C`;
+  it degrades decay toward `0.05`.
+* head finite check: bases at `m = 0` are explicit numerals
+  (`R02_etaWorst_headBase02` / `R02_etaWorst_headBase01` by `norm_num`
+  after an `omega` rewrite); `Real.log` / `Real.rpow` head goals are not
+  decided by `norm_num`, so no head numeral for the full majorant is
+  closed here.
+* tail comparison for the second piece stays banked
+  (`R02_etaWorst_secondPiece_le_inv_mul` via `:1722`).
+* exact unboundedness blocker banked below:
+  `R02_etaWorst_log_unbounded` (for every `C` some `m` has
+  `C < log (2m+2)`), hence `R02_etaWorst_no_uniform_logCap` (no uniform
+  `C'` caps the log factor, i.e. the `delta = 0` splitter is false).
+  Small-`delta` splitters with `delta > 0` are not banked here and would
+  still shift first-piece decay from `1.05` to `1.05 - delta`.
+
+No value for `:1768` is supplied; `:1768` remains the exact residual.
+-/
+
+/-- Tightened log cap `log (2m+2) ≤ (2m+1)` from
+`Real.log_le_sub_one_of_pos` (linear splitter with `eps = 1` on the
+shifted base, `C' = 0`). -/
+theorem R02_etaWorst_logBp_le_subOne (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) := by
+  have hpos : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have h := Real.log_le_sub_one_of_pos hpos
+  have hBA : ((((2 * m + 2 : ℕ)) : ℝ)) - 1 = ((((2 * m + 1 : ℕ)) : ℝ)) := by
+    have hNat : (2 * m + 2 : ℕ) = (2 * m + 1 : ℕ) + 1 := by omega
+    rw [hNat, Nat.cast_add, Nat.cast_one]
+    ring
+  rw [hBA] at h
+  exact h
+
+/-- Splitter shape `log (2m+2) ≤ 1 * (2m+1) + 1`
+(`eps = 1`, `delta = 1`, `C' = 1` up to `Real.rpow_one`). -/
+theorem R02_etaWorst_logCap_linear_splitter (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤ ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by
+  have h := R02_etaWorst_logBp_le_subOne m
+  linarith
+
+/-- First-piece corollary of the linear cap: the log factor is replaced by
+the shifted base, leaving the extra `(2m+1)` factor that blocks the pure
+`1.05`-power fit. -/
+theorem R02_etaWorst_firstPiece_le_linearMul (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ)) * 8.29 *
+        ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) := by
+  have hlog := R02_etaWorst_logBp_le_subOne m
+  have h1 : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) * 8.29 ≤
+      ((((2 * m + 1 : ℕ)) : ℝ)) * 8.29 :=
+    mul_le_mul_of_nonneg_right hlog (by norm_num)
+  exact mul_le_mul_of_nonneg_right h1 (Real.rpow_nonneg (Nat.cast_nonneg _) _)
+
+/-- Head base at `m = 0`: `((2*0+2 : ℕ) : ℝ) = 2`. -/
+theorem R02_etaWorst_headBase02 : ((((2 * 0 + 2 : ℕ)) : ℝ)) = 2 := by
+  have h : (2 * 0 + 2 : ℕ) = 2 := by omega
+  rw [h]
+  norm_num
+
+/-- Head base at `m = 0`: `((2*0+1 : ℕ) : ℝ) = 1`. -/
+theorem R02_etaWorst_headBase01 : ((((2 * 0 + 1 : ℕ)) : ℝ)) = 1 := by
+  have h : (2 * 0 + 1 : ℕ) = 1 := by omega
+  rw [h]
+  norm_num
+
+/-- Log-factor unboundedness: for every `C` some `m` has
+`C < log (2m+2)`. Via `Real.exp C` and `exists_nat_gt`, then
+`Real.log_lt_log_iff` with `Real.log_exp`. -/
+theorem R02_etaWorst_log_unbounded (C : ℝ) :
+    ∃ m : ℕ, C < Real.log ((((2 * m + 2 : ℕ)) : ℝ)) := by
+  obtain ⟨n, hn⟩ := exists_nat_gt (Real.exp C)
+  refine ⟨n, ?_⟩
+  have hXpos : (0 : ℝ) < ((((2 * n + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hnm : n ≤ 2 * n + 2 := by omega
+  have hcast : ((n : ℕ) : ℝ) ≤ ((((2 * n + 2 : ℕ)) : ℝ)) := by
+    exact_mod_cast hnm
+  have hexp : Real.exp C < ((((2 * n + 2 : ℕ)) : ℝ)) := by
+    linarith
+  have hlt : Real.log (Real.exp C) < Real.log ((((2 * n + 2 : ℕ)) : ℝ)) :=
+    (Real.log_lt_log_iff (Real.exp_pos C) hXpos).mpr hexp
+  rw [Real.log_exp] at hlt
+  exact hlt
+
+/-- No uniform log cap: the `delta = 0` splitter is false. -/
+theorem R02_etaWorst_no_uniform_logCap :
+    ¬ ∃ C' : ℝ, ∀ m : ℕ, Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤ C' := by
+  intro h
+  obtain ⟨C', hC'⟩ := h
+  obtain ⟨m, hm⟩ := R02_etaWorst_log_unbounded C'
+  have h1 := hC' m
+  linarith
+
+/-- Generic log-cap splitter spec at small `delta`: remains the filed shape
+for any future `eps` / `delta > 0` / `C'` attempt. Only the `(1,1,1)`
+instance is banked this turn. -/
+def R02_etaWorst_logCap_splitter_residual (eps delta C' : ℝ) : Prop :=
+  ∀ m : ℕ, Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤
+    eps * ((((2 * m + 1 : ℕ)) : ℝ) ^ delta) + C'
+
+/-- Banked splitter instance `(eps, delta, C') = (1, 1, 1)` from the linear
+cap via `Real.rpow_one`. -/
+theorem R02_etaWorst_logCap_splitter_banked11 :
+    R02_etaWorst_logCap_splitter_residual 1 1 1 := by
+  intro m
+  have h := R02_etaWorst_logCap_linear_splitter m
+  have hrw : ((((2 * m + 1 : ℕ)) : ℝ) ^ (1 : ℝ)) = ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Real.rpow_one _
+  rw [hrw]
+  linarith
+
+#print axioms R02_etaWorst_logBp_le_subOne
+#print axioms R02_etaWorst_logCap_linear_splitter
+#print axioms R02_etaWorst_firstPiece_le_linearMul
+#print axioms R02_etaWorst_headBase02
+#print axioms R02_etaWorst_headBase01
+#print axioms R02_etaWorst_log_unbounded
+#print axioms R02_etaWorst_no_uniform_logCap
+#print axioms R02_etaWorst_logCap_splitter_banked11
+
+end Door3R02BallAdvance
