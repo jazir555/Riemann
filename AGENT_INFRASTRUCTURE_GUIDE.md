@@ -5503,8 +5503,17 @@ sorry-free infrastructure and the complete commit ledger above.
   3.26/4.25/5.24/6.23, prod5 1408.65 `:3713`, finite lower 0.579
   `:3742` (`816/1408.65~=0.5793`), honest-ceiling-below-gate `:3881`
   + gap 0.081 `:3886`, N6-next filed `:3893`. VERDICT: necessity
-  0.7257 clears but achievable 0.579<0.66 FAILS (no force). E06 needs
+  0.7257 clears but achievable 0.579<0.66   FAILS (no force). E06 needs
   N=6. Build UNVERIFIED (proof-only lane). GAMMA-N6B tasked (E06 N=6).
+- 2026-09-22 SCUT16 (background `ses_f37777aa7`, proof-only, grep-clean,
+  pilot-only commit): DOUBLE-COUNT REAL — S8 (`range 8`, `:1895`)
+  already contains k=6,7 in its `-3529/1050` floor (`:3152`), so `:3247`
+  summed `{0..7,9,6}` and `:3268` summed `{0..7,9,6,7}` (multiset
+  floors, kept not deleted). Corrected single-count
+  `sSCUT_S9_skip8_Re_ge :3446` (multiset `{0..7,9}`, S8+k=9, k=8
+  skipped) floor `-3529/1050+0.15≈-3.211` + shortfall `:3458`
+  (`11153/2100≈5.311`, replaces multiset 4.958). Ball_advance 2-line
+  `HasDerivAt.comp` fix left for DERIV-BUILD owner (not committed).
 - 2026-09-22 EDGE-AUDIT (background `ses_f3778800b`, proof-only, no
   edits): 40/40 gridH leaves audited (`:439-:1412`) vs suppliers —
   0/40 obligations banked (0/80 sub-enclosures). Tiers: (0.002,0.05)x8,

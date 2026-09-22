@@ -3426,4 +3426,37 @@ theorem sSCUT_eta8_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hup := sSCUT_eta8_Re_le_neg
   linarith
 
+/-- Honest S9-range assembly EXCLUDING `k = 8` (single-count correction).
+
+Double-count verdict: REAL. `S₈ = ∑ k ∈ range 8` already contains indices
+`k = 6, 7` single-counted in `sSCUT_S8_Re_ge_neg3529div1050`
+(`-3529/1050 = 2/7 - 4 + 27/100 + 1/12`). Hence `sSCUT_S8_add_eta9_eta7_Re_ge`
+(`:3247`) sums the multiset `{0,1,2,3,4,5,6,7,9,6}` (second copy of `k = 6`)
+and `sSCUT_S8_add_eta9_eta7_eta8_Re_ge` (`:3268`) sums the multiset
+`{0,1,2,3,4,5,6,7,9,6,7}` (second copies of `k = 6, 7`); their floors
+`-3529/1050 + 0.15 + 0.27` and `-3529/1050 + 0.15 + 0.27 + 1/12 ≈ -2.858`
+are multiset floors, NOT single-count `S₉` floors.
+
+This theorem banks the corrected single-count floor: index multiset summed
+exactly once is `{0,1,2,3,4,5,6,7,9}` (that is `S₈` for `k = 0..7` plus
+`k = 9` only; `k = 8` honestly skipped per `sSCUT_eta8_Re_le_neg` /
+`sSCUT_eta8_Re_no_pos_lock`; NO second copies of `k = 6, 7`). Value is the
+`:3268` floor minus the double-counted `0.27 + 1/12`, i.e.
+`-3529/1050 + 0.15` via `sSCUT_S8_add_eta9_Re_ge` + `sSCUT_rpow10_neg_ge_03`. -/
+theorem sSCUT_S9_skip8_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9).re := by
+  rw [Complex.add_re]
+  have hS8e9 := sSCUT_S8_add_eta9_Re_ge
+  have hr10 := sSCUT_rpow10_neg_ge_03
+  linarith
+
+/-- Corrected single-count shortfall vs the `21/10` bar
+(`21/10 - (-3529/1050 + 0.15) = 11153/2100 ≈ 5.311`; replaces the
+multiset gap `10411/2100` at `:3280`). -/
+theorem sSCUT_S9_skip8_shortfall :
+    ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15)) = (11153 / 2100 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta
