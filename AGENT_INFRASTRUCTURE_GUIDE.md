@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ASSEMBLY-R06 (background `ses_f348209bb`, duplicate-guard,
+  zero-diff): R06 full set already present (`:1771-1855`, pre-existing);
+  no write. Entry filed; R07 next.
 - 2026-09-22 GAMMA-N17R (background `ses_f348235d0`, proof-only,
   grep-clean + 4 audits, premise_gamma-only commit): Seq17 finite MEETS
   0.66 (ceiling ≈0.66004, gap 0.0) — but Gamma still open (rate 0.014 →
