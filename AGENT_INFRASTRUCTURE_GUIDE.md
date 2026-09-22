@@ -6060,6 +6060,22 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
   grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
   :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 DERIV-SUP (background `ses_f348dab64`, proof-only,
+  grep-clean, deriv-only commit): gamma DiffContOnCl CLOSED (`:1779`,
+  Re 0.19 pole-avoidance); sups gapped honestly (gamma 0.097 vs 0.008,
+  zeta 934 vs 3; not-sup lemmas `:1823/:1826`). Residuals open.
+- 2026-09-22 SLIVER-RET1000 (background `ses_f348c7f7b`, proof-only,
+  grep-clean, sliver_edge-only commit): M1000 pair-closers top+bottom
+  (`:931-953`) + 40/79→1000 mono lifts (`:971-1004`). C=1000 sup still
+  open (poly≤79 premise owned elsewhere).
+- 2026-09-22 ASSEMBLY-R01SUP (provisional, report pending; verified
+  grep-clean diff): R01 tight-sup chain mirror (C/0.25→0.07, H_of_ball2
+  analogues). Committed with R02 agent still in flight; reconciled on
+  reports.
+- 2026-09-22 DIGAMMA-PSI8OUT (background `ses_f348c59ea`, proof-only,
+  grep-clean, digamma-only commit): outer-shift chain reduction (2-piece
+  triangle + E1/E2 forms `:888-903`) + remainder Props (`:917-920`).
+  Stirling-remainder absence definitive; gamNeed real caps next.
 - 2026-09-22 FIRSTCELL-TAILM (background `ses_f348d225a`, proof-only,
   grep-clean, first_cell-only commit): tail majorant BANKED (`:1863`,
   S4≤L≤S5 bracket, radius f4; error-bound route honestly rejected).

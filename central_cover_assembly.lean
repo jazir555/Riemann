@@ -17334,3 +17334,121 @@ theorem R02_H_of_residuals (hc : R02_center_residual_tenth)
   R02_H_instance (R02_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R01 deriv tight-sup conditional (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R01_leaf_obligations` 1288-1290: center `(0.05 + 0.07 * R01.radius <= norm)`
+  AND deriv `(forall w, R01.mem w -> ||deriv xiShifted w|| <= 0.07)` (mid tier).
+- `R01_H_instance` 1326-1336: takes `(h) (c) (hc_eq : c = (-7.5,-5,0.01,0.2))`,
+  membership-free (no `hc_mem`); conclusion `Exists R e M, ... /\ 0 < e /\ deriv bound /\ budget`.
+- `R01_radius_lt` 1280 (`R01.radius < 1.26`); `R01_strip_lo/hi` 1264-1265.
+- R01 residuals reused, not redefined: `R01_budget_lt_app` 17111,
+  `R01_center_of_two_tenths_lower` 17117, `R01_center_residual_two_tenths` 17122,
+  `R01_center_obligation_of_residual_two_tenths` 17125, `R01_deriv_residual` 17130,
+  `R01_leaf_of_residuals` 17133, `R01_H_of_residuals` 17137.
+- R00SUP chain reused, not duplicated: `R00_strip_of_mem` 17180,
+  `R00_deriv_tight_sup` 17188, `R00_tight_div` 17193, `R00_deriv_of_tight_sup` 17197,
+  `R00_ball2_sup_tight` 17209, `R00_closedBall_radius_subset_ball2` 17214,
+  `R00_tight_of_ball2` 17223, `R00_deriv_of_ball2` 17229,
+  `R00_H_of_tight_sup` 17238, `R00_H_of_ball2` 17250 (C=0.0125/r=0.25 to 0.05).
+- Banked Cauchy: `uniform_deriv_of_closedBall_bound` 6233 (`M = C / r`).
+- R02 set untouched (other worker owns it): `R02_budget_lt_app` 17300 through
+  `R02_H_of_residuals` 17325; no R02 names below.
+- Grep-clean before writing: no `R01_strip_of_mem`, `R01_deriv_tight_sup`,
+  `R01_tight_div`, `R01_deriv_of_tight_sup`, `R01_ball2_sup_tight`,
+  `R01_closedBall_radius_subset_ball2`, `R01_tight_of_ball2`,
+  `R01_deriv_of_ball2`, `R01_H_of_tight_sup`, `R01_H_of_ball2` in file.
+
+Mirror for R01 mid tier `(e, M) = (0.05, 0.07)` at `c01 = (-7.5,-5,0.01,0.2)`:
+tighten `C` to `0.0175` at same `r = 0.25` (`0.0175 / 0.25 = 0.07`), plus a
+`ball 2` variant (`radius + 0.25 < 2` via `R01_radius_lt`). No new obligation
+beyond the two sup Props below; exact residual `R01_deriv_residual` stands
+if the sups stay open.
+Value-or-gap: budget `0.05 + 0.07 * 1.26 = 0.1382 < 0.2` (via `R01_budget_lt_app`);
+tight `0.0175` meets the `0.07` tier exactly (`0.0175 / 0.25 = 0.07`).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Every `R01` point lies strictly inside the strip. -/
+theorem R01_strip_of_mem {w : ℂ} (hw : R01.mem w) :
+    -(1 / 2 : ℝ) < w.im ∧ w.im < (1 / 2 : ℝ) := by
+  obtain ⟨_, _, hy0, hy1⟩ := hw
+  have hLo : -(1 / 2 : ℝ) < R01.y0 := R01_strip_lo
+  have hHi : R01.y1 < (1 / 2 : ℝ) := R01_strip_hi
+  constructor <;> linarith
+
+/-- Tight sup premise on the `premDeriv` ball shape: `0.0175` for the `0.07` tier. -/
+def R01_deriv_tight_sup : Prop :=
+  ∀ z ∈ Metric.closedBall R01.center (R01.radius + 0.25),
+    ‖xiShiftedEntire z‖ ≤ (0.0175 : ℝ)
+
+/-- Closed-form threshold: `0.0175 / 0.25 = 0.07`. -/
+theorem R01_tight_div : (0.0175 : ℝ) / 0.25 = 0.07 := by
+  norm_num
+
+/-- Tight sup discharges the exact deriv residual via `:6233` at `r = 0.25`. -/
+theorem R01_deriv_of_tight_sup (hBall : R01_deriv_tight_sup) :
+    R01_deriv_residual := by
+  intro w hw
+  have hStrip : ∀ u, R01.mem u → -(1 / 2 : ℝ) < u.im ∧ u.im < (1 / 2 : ℝ) :=
+    fun u hu => R01_strip_of_mem hu
+  have h := DerivCauchyBridge.uniform_deriv_of_closedBall_bound
+    R01 0.25 0.0175 (by norm_num) hStrip hBall w hw
+  have heq : (0.0175 : ℝ) / 0.25 = 0.07 := R01_tight_div
+  rw [heq] at h
+  exact h
+
+/-- `ball R01c 2` variant: same `0.0175` bound on `closedBall R01.center 2`. -/
+def R01_ball2_sup_tight : Prop :=
+  ∀ z ∈ Metric.closedBall R01.center 2,
+    ‖xiShiftedEntire z‖ ≤ (0.0175 : ℝ)
+
+/-- The `premDeriv` ball sits inside the `ball 2` (`radius < 1.26`). -/
+theorem R01_closedBall_radius_subset_ball2 :
+    Metric.closedBall R01.center (R01.radius + 0.25) ⊆
+      Metric.closedBall R01.center 2 := by
+  intro z hz
+  rw [Metric.mem_closedBall, Metric.mem_closedBall] at hz ⊢
+  have hR := R01_radius_lt
+  linarith
+
+/-- `ball 2` sup implies the tight-ball sup (same constant, subset). -/
+theorem R01_tight_of_ball2 (h : R01_ball2_sup_tight) :
+    R01_deriv_tight_sup := by
+  intro z hz
+  exact h z (R01_closedBall_radius_subset_ball2 hz)
+
+/-- `ball 2` sup discharges the exact deriv residual. -/
+theorem R01_deriv_of_ball2 (h : R01_ball2_sup_tight) :
+    R01_deriv_residual :=
+  R01_deriv_of_tight_sup (R01_tight_of_ball2 h)
+
+/-- Tight sup + center residual discharge the `H` leaf shape at `c01`
+(membership-free, via `R01_H_instance`). -/
+theorem R01_H_of_tight_sup (hc : R01_center_residual_two_tenths)
+    (hBall : R01_deriv_tight_sup)
+    (c : ℝ × ℝ × ℝ × ℝ)
+    (hc_eq : c = (-7.5, -5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R01_H_of_residuals hc (R01_deriv_of_tight_sup hBall) c hc_eq
+
+/-- `ball 2` sup + center residual discharge the `H` leaf shape at `c01`
+(membership-free, via `R01_H_instance`). -/
+theorem R01_H_of_ball2 (hc : R01_center_residual_two_tenths)
+    (hBall : R01_ball2_sup_tight)
+    (c : ℝ × ℝ × ℝ × ℝ)
+    (hc_eq : c = (-7.5, -5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R01_H_of_residuals hc (R01_deriv_of_ball2 hBall) c hc_eq
+
+end CentralCoverAssembly

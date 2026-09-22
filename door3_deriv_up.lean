@@ -1720,3 +1720,115 @@ theorem gap_leaf_sub_tightChain_total_open :
   norm_num
 
 end Door3DerivUp
+
+/-! ## 16. LEAF-SUB tight-chain: gamma DiffContOnCl closed, sphere sups residual.
+
+Grep record (read-only, before writing):
+* tight specs `:1651-1716`: `gammaTightSup_leaf_sub :1651` (sphere sup 0.008),
+  `gammaPrimeTightNeed_leaf_sub :1654` (0.03), `gammaPrimeCauchyTight_leaf_sub :1657`
+  (0.8), `zetaSupTightNeed_leaf_sub :1660` (sphere sup 3),
+  `zetaPrimeTightNeed_leaf_sub :1663` (300), chain numbers `:1666/:1669`,
+  conditional closes `:1672/:1681/:1688/:1697`, gaps `:1704/:1708/:1712/:1716`.
+* R02 zeta upper shapes: `R02_D3_zeta_upper_934`
+  (`zeta_rigorous.lean:32566`, rect Re [0.05,0.74] Im [-8.25,-5.25] gives 934),
+  `Door3TailEtaUpper.zeta_upper_tail_quarter` (`door3_tail_eta_upper.lean:167`,
+  quarter [1/4,1/2] gives 125), conditional `DerivCauchyBridge.R02_zeta_upper_obligation`
+  (`central_cover_assembly.lean:6493`, rect gives 10).
+* R02 gamma upper shapes: `R02GammaDisc.gammaOf_upper_disc_R02`
+  (`interval_arith.lean:32316`, same R02 rect gives 0.097),
+  `DerivCauchyBridge.gamma_upper_R02_disc` (`central_cover_assembly.lean:6468`,
+  gives 40), wide `gamma_wide_num` (`door3_deriv_up.lean:496`, gives 600).
+* leaf-sub geometry already banked: `dLeaf_sub_sphere_re_bounds :1531`,
+  `dLeaf_sub_sphere_im_bounds :1546`, `zetaSupOnSphere_leaf_sub_934_filled :1563`,
+  `zetaDiffCont_leaf_sub_filled :1591` (zeta DiffContOnCl closed).
+
+Outcome: gamma DiffContOnCl on `ball dLeaf_sub 0.01` is closed honestly
+(Re stays >= 0.19 so `(z/2).re > 0`, hence `z/2` avoids every `-m` pole).
+Gamma sphere sup is chained honestly at 0.097 via the landed R02 disc;
+0.097 does not imply 0.008 (gap 0.089). Zeta sphere sup stays at banked 934;
+934 does not imply 3. Both tight sups therefore filed as exact residuals.
+-/
+
+namespace Door3DerivUp
+
+def gammaDiffCont_leaf_sub : Prop :=
+  DiffContOnCl ℂ DerivCauchyBridge.gammaOf (Metric.ball dLeaf_sub 0.01)
+
+theorem dLeaf_sub_closedBall_re_lower {z : ℂ}
+    (hz : z ∈ Metric.closedBall dLeaf_sub 0.01) :
+    (0.19 : ℝ) ≤ z.re := by
+  have hdist : dist z dLeaf_sub ≤ (0.01 : ℝ) := Metric.mem_closedBall.mp hz
+  have hnorm : ‖z - dLeaf_sub‖ ≤ (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dLeaf_sub).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dLeaf_sub).re| ≤ ‖z - dLeaf_sub‖ := Complex.abs_re_le_norm _
+      _ ≤ 0.01 := hnorm
+  have here : (z - dLeaf_sub).re = z.re - 0.2 := by
+    have e : (z - dLeaf_sub).re = z.re - dLeaf_sub.re := Complex.sub_re z dLeaf_sub
+    rw [e, dLeaf_sub_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  linarith
+
+theorem dLeaf_sub_closedBall_half_re_pos {z : ℂ}
+    (hz : z ∈ Metric.closedBall dLeaf_sub 0.01) :
+    0 < (z / 2).re := by
+  have hlo := dLeaf_sub_closedBall_re_lower hz
+  have h2re : (z / 2).re = z.re / 2 := Complex.div_ofNat_re z 2
+  rw [h2re]
+  linarith
+
+theorem gammaDiffCont_leaf_sub_filled :
+    DiffContOnCl ℂ DerivCauchyBridge.gammaOf (Metric.ball dLeaf_sub 0.01) := by
+  apply DifferentiableOn.diffContOnCl
+  rw [Metric.closure_ball dLeaf_sub (by norm_num : (0.01 : ℝ) ≠ 0)]
+  intro z hz
+  have hpos : 0 < (z / 2).re := dLeaf_sub_closedBall_half_re_pos hz
+  have hNe : ∀ m : ℕ, z / 2 ≠ -(m : ℂ) := by
+    intro m hcon
+    have hneg : (z / 2).re ≤ 0 := by
+      rw [hcon, Complex.neg_re, Complex.natCast_re]
+      have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+      linarith
+    linarith
+  have hG : DifferentiableAt ℂ Complex.Gamma (z / 2) :=
+    Complex.differentiableAt_Gamma _ hNe
+  have hD : DifferentiableAt ℂ (fun s : ℂ => s / 2) z :=
+    differentiableAt_id.div_const 2
+  have h2 : DifferentiableAt ℂ (fun s : ℂ => Complex.Gamma (s / 2)) z :=
+    hG.comp z hD
+  have h2' : DifferentiableAt ℂ DerivCauchyBridge.gammaOf z := h2
+  exact h2'.differentiableWithinAt
+
+theorem gammaDiffCont_leaf_sub_banked : gammaDiffCont_leaf_sub :=
+  gammaDiffCont_leaf_sub_filled
+
+def gammaSupOnSphere_leaf_sub_0097 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.097
+
+theorem gammaSupOnSphere_leaf_sub_0097_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.097 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dLeaf_sub_sphere_re_bounds hz
+  obtain ⟨him_lo, him_hi⟩ := dLeaf_sub_sphere_im_bounds hz
+  exact R02GammaDisc.gammaOf_upper_disc_R02 hre_lo hre_hi him_lo him_hi
+
+theorem gammaSup_leaf_sub_0097_banked : gammaSupOnSphere_leaf_sub_0097 :=
+  gammaSupOnSphere_leaf_sub_0097_filled
+
+theorem gamma_tight0097_above_0008 : (0.008 : ℝ) < 0.097 := by
+  norm_num
+
+theorem zeta_tight934_above_3 : (3 : ℝ) < 934 := by
+  norm_num
+
+theorem gamma_tightSup_not_from_0097 : ¬ (0.097 : ℝ) ≤ 0.008 := by
+  norm_num
+
+theorem zeta_tightSup_not_from_934 : ¬ (934 : ℝ) ≤ 3 := by
+  norm_num
+
+theorem gap_leaf_sub_tightSup_residuals_open :
+    (0.008 : ℝ) < 0.097 ∧ (3 : ℝ) < 934 := by
+  constructor <;> norm_num
+
+end Door3DerivUp

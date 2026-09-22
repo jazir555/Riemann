@@ -716,3 +716,227 @@ def doorShiftNeed_mid : Prop := psiShiftNeed_mid ∧ gamNeed_mid
 def doorShiftNeed_inner : Prop := psiShiftNeed_inner ∧ gamNeed_inner
 
 end Door3Digamma
+
+/-! ## 9. hne/hG closed at all four centers + shift-conditional gamma-prime (append-only).
+
+Grep basis (filed specs + premise shapes, read before writing):
+- `psiShiftNeed_*` (`door3_digamma.lean:642-652`): shifted discs
+  `‖digamma (w + 8) − cN‖ ≤ r` with `cN := c + Σ k ∈ range 8, (w + k)⁻¹`
+  (`cNOuter / cNLeaf / cNMid / cNInner`, `door3_digamma.lean:630-640`), radii
+  `0.5 / 0.5 / 0.5 / 1`.
+- `gamNeed_*` (`door3_digamma.lean:419-425`): `‖Gamma w‖ ≤ 0.002 / 0.008 /
+  0.04 / 4.5` (DERIVUP `tightGamma` numerals).
+- `doorShiftNeed_*` (`door3_digamma.lean:710-716`):
+  `psiShiftNeed_* ∧ gamNeed_*`.
+- `hne` shape (`door3_digamma.lean:274,298,441,460,479,498`):
+  `Complex.Gamma w ≠ 0` at each `w ∈ {wOuter, wLeaf, wMid, wInner}`.
+- `hG` shape (`door3_digamma.lean:287,297,440,459,478,497`):
+  `HasDerivAt Complex.Gamma dG w` at each `w`.
+
+Value banked here (all proofs closed, from Mathlib + file-local lemmas only):
+- `wNoPole_*`: pole avoidance at each center from `w*_re_pos` via the
+  file-local `shift_avoid_of_re_pos` at `k = 0`.
+- `hne_*`: `Complex.Gamma w ≠ 0` via `Complex.Gamma_ne_zero`
+  (`Mathlib/.../Gamma/Beta.lean:427`) fed by `wNoPole_*`.
+- `hG_*`: `HasDerivAt` witnesses via `Complex.differentiableAt_Gamma`
+  (`Mathlib/.../Gamma/Deriv.lean:65`) fed by `wNoPole_*`, projected with
+  `DifferentiableAt.hasDerivAt`.
+- `gammaPrime_*_of_shift`: each banked `gammaPrime_*_le` quantitative bound
+  now follows from `psiShiftNeed_* ∧ gamNeed_*` alone (closed `hne / hG`
+  supplied here, `psiNeed` via the banked `psiShift_implies_psiNeed_*` rung).
+
+Residual (exact, still open — no unconditional claim made):
+- `psiShiftNeed_*` at shifted Re `8.1975 / 8.1 / 8.1975 / 8.1975`
+  (`0.1975 + 8`, `0.1 + 8` from `wireOuter / wireLeaf / wireMid / wireInner`):
+  needs the explicit-remainder Stirling bound for `Complex.digamma`
+  (e.g. `‖digamma z − (log z − 1 / (2 * z))‖ ≤ C / ‖z‖^2` with explicit `C`)
+  or equivalently the Gauss integral representation, which is the stated
+  TODO at `Mathlib/.../Gamma/Digamma.lean:31`. The banked digamma API is only
+  `digamma_zero`, `digamma_one`, `digamma_one_half`,
+  `digamma_apply_add_one`, `meromorphic_digamma`; there is no
+  `Real.digamma`, no Stirling remainder, no integral representation.
+  An integral / bound route was examined and is not available from the
+  banked API, so no `psiShiftNeed` proof is attempted here.
+- `gamNeed_*` at `Re ∈ {0.1, 0.1975}`: the banked `D3SG_*` decay line sits
+  at `Re = 0.95` (`sg_norm_le_real`, `sg_shift_one`), so fresh real caps at
+  the four centers are still owed.
+- Hence each `doorShiftNeed_*` stays a filed Prop (condition), now with
+  `hne / hG` closed and only `psiShiftNeed_* + gamNeed_*` outstanding.
+-/
+
+namespace Door3Digamma
+
+theorem wNoPole_outer (m : ℕ) : wOuter ≠ -(m : ℂ) := by
+  have h := shift_avoid_of_re_pos wOuter 8 wOuter_re_pos 0 (Nat.zero_le _) m
+  simp only [Nat.cast_zero, add_zero] at h
+  exact h
+
+theorem wNoPole_leaf (m : ℕ) : wLeaf ≠ -(m : ℂ) := by
+  have h := shift_avoid_of_re_pos wLeaf 8 wLeaf_re_pos 0 (Nat.zero_le _) m
+  simp only [Nat.cast_zero, add_zero] at h
+  exact h
+
+theorem wNoPole_mid (m : ℕ) : wMid ≠ -(m : ℂ) := by
+  have h := shift_avoid_of_re_pos wMid 8 wMid_re_pos 0 (Nat.zero_le _) m
+  simp only [Nat.cast_zero, add_zero] at h
+  exact h
+
+theorem wNoPole_inner (m : ℕ) : wInner ≠ -(m : ℂ) := by
+  have h := shift_avoid_of_re_pos wInner 8 wInner_re_pos 0 (Nat.zero_le _) m
+  simp only [Nat.cast_zero, add_zero] at h
+  exact h
+
+theorem hne_outer : Complex.Gamma wOuter ≠ 0 :=
+  Complex.Gamma_ne_zero wNoPole_outer
+
+theorem hne_leaf : Complex.Gamma wLeaf ≠ 0 :=
+  Complex.Gamma_ne_zero wNoPole_leaf
+
+theorem hne_mid : Complex.Gamma wMid ≠ 0 :=
+  Complex.Gamma_ne_zero wNoPole_mid
+
+theorem hne_inner : Complex.Gamma wInner ≠ 0 :=
+  Complex.Gamma_ne_zero wNoPole_inner
+
+theorem hG_outer :
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wOuter) wOuter :=
+  (Complex.differentiableAt_Gamma wOuter wNoPole_outer).hasDerivAt
+
+theorem hG_leaf :
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wLeaf) wLeaf :=
+  (Complex.differentiableAt_Gamma wLeaf wNoPole_leaf).hasDerivAt
+
+theorem hG_mid :
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wMid) wMid :=
+  (Complex.differentiableAt_Gamma wMid wNoPole_mid).hasDerivAt
+
+theorem hG_inner :
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wInner) wInner :=
+  (Complex.differentiableAt_Gamma wInner wNoPole_inner).hasDerivAt
+
+theorem gammaPrime_outer_of_shift (hShift : psiShiftNeed_outer)
+    (hGv : gamNeed_outer) : ‖deriv gOf sOuter‖ ≤ (0.003612 : ℝ) := by
+  have hPsi : ‖Complex.digamma wOuter − cOuter‖ ≤ (0.5 : ℝ) :=
+    psiShift_implies_psiNeed_outer hShift
+  have hGv' : ‖Complex.Gamma wOuter‖ ≤ (0.002 : ℝ) := hGv
+  exact gammaPrime_outer_le _ hG_outer hne_outer hGv' hPsi
+
+theorem gammaPrime_leaf_of_shift (hShift : psiShiftNeed_leaf)
+    (hGv : gamNeed_leaf) : ‖deriv gOf sLeaf‖ ≤ (0.013608 : ℝ) := by
+  have hPsi : ‖Complex.digamma wLeaf − cLeaf‖ ≤ (0.5 : ℝ) :=
+    psiShift_implies_psiNeed_leaf hShift
+  have hGv' : ‖Complex.Gamma wLeaf‖ ≤ (0.008 : ℝ) := hGv
+  exact gammaPrime_leaf_le _ hG_leaf hne_leaf hGv' hPsi
+
+theorem gammaPrime_mid_of_shift (hShift : psiShiftNeed_mid)
+    (hGv : gamNeed_mid) : ‖deriv gOf sMid‖ ≤ (0.06096 : ℝ) := by
+  have hPsi : ‖Complex.digamma wMid − cMid‖ ≤ (0.5 : ℝ) :=
+    psiShift_implies_psiNeed_mid hShift
+  have hGv' : ‖Complex.Gamma wMid‖ ≤ (0.04 : ℝ) := hGv
+  exact gammaPrime_mid_le _ hG_mid hne_mid hGv' hPsi
+
+theorem gammaPrime_inner_of_shift (hShift : psiShiftNeed_inner)
+    (hGv : gamNeed_inner) : ‖deriv gOf sInner‖ ≤ (10.2128 : ℝ) := by
+  have hPsi : ‖Complex.digamma wInner − cInner‖ ≤ (1 : ℝ) :=
+    psiShift_implies_psiNeed_inner hShift
+  have hGv' : ‖Complex.Gamma wInner‖ ≤ (4.5 : ℝ) := hGv
+  exact gammaPrime_inner_le _ hG_inner hne_inner hGv' hPsi
+
+end Door3Digamma
+
+/-! ## 10. Outer shifted-disc triangle attempt at N = 8 (append-only).
+
+Grep basis (read before writing):
+- Spec `psiShiftNeed_outer` (`door3_digamma.lean:642-643`):
+  `‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cNOuter‖ ≤ (0.5 : ℝ)`.
+- Center `cNOuter` (`door3_digamma.lean:630-631`):
+  `cOuter + ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹`.
+- Transport `psi_transport_outer` (`door3_digamma.lean:587-591`):
+  exact `psi_disc_transport ... 8 ... avoid_outer` instance.
+- Header imports (`door3_digamma.lean:1-2`): `Mathlib`,
+  `door3_stirling_gamma` only; no imports added here.
+- Banked citable without new imports: `D3SG_*` in
+  `door3_stirling_gamma` are Gamma-norm / shift / factor / decay bounds
+  at `Re = 0.95` and related tiers; grep over that file for
+  `digamma / Stirling remainder / psi remainder` returns only the
+  `gamNeed` target comments, i.e. no digamma remainder is banked.
+  Other in-repo digamma bounds would need new imports, so they are not
+  cited here (cycle risk, append-only scope).
+
+Attempt (honest, closed): generic two-piece triangle / chain. Any chain
+  `digamma (wOuter + 8) → L → cNOuter` needs a main remainder premise
+  plus a misclosure premise with `r1 + r2 ≤ 0.5`. Both premises are filed
+  below as exact Props; neither has a closed instantiation from the
+  banked API, so `psiShiftNeed_outer` stays open. The shifted point sits
+  at `Re = 0.1975 + 8 = 8.1975` via `wireOuter`
+  (`door3_digamma.lean:126-128`); see `wOuter8_re` below.
+-/
+
+namespace Door3Digamma
+
+open scoped BigOperators
+
+theorem wOuter8_re :
+    (wOuter + (((8 : ℕ)) : ℂ)).re = (8.1975 : ℝ) := by
+  have hw : wOuter = Complex.mk 0.1975 (-4.375) := by
+    unfold wOuter
+    exact wireOuter
+  rw [hw]
+  simp
+  norm_num
+
+theorem psiShiftNeed_outer_of_split (L : ℂ) (r1 r2 : ℝ)
+    (hMain : ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L‖ ≤ r1)
+    (hClose : ‖L − cNOuter‖ ≤ r2)
+    (hAdd : r1 + r2 ≤ (0.5 : ℝ)) :
+    psiShiftNeed_outer := by
+  unfold psiShiftNeed_outer
+  have heq : Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cNOuter =
+      (Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L) + (L − cNOuter) := by
+    ring
+  have htri : ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cNOuter‖ ≤
+      ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L‖ + ‖L − cNOuter‖ := by
+    rw [heq]
+    exact norm_add_le _ _
+  linarith [hMain, hClose, htri, hAdd]
+
+theorem psiShiftNeed_outer_of_chain (L : ℂ) (E1 E2 : ℂ) (r1 r2 : ℝ)
+    (hMain : Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L = E1)
+    (hClose : L − cNOuter = E2)
+    (hE1 : ‖E1‖ ≤ r1) (hE2 : ‖E2‖ ≤ r2)
+    (hAdd : r1 + r2 ≤ (0.5 : ℝ)) :
+    psiShiftNeed_outer := by
+  have hMainN : ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L‖ ≤ r1 := by
+    rw [hMain]
+    exact hE1
+  have hCloseN : ‖L − cNOuter‖ ≤ r2 := by
+    rw [hClose]
+    exact hE2
+  exact psiShiftNeed_outer_of_split L r1 r2 hMainN hCloseN hAdd
+
+def psiOuterMainRemainder (L : ℂ) (r1 : ℝ) : Prop :=
+  ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − L‖ ≤ r1
+
+def psiOuterCloseRemainder (L : ℂ) (r2 : ℝ) : Prop :=
+  ‖L − cNOuter‖ ≤ r2
+
+/-! Residual (exact, still open — no unconditional claim made):
+
+* `psiShiftNeed_outer` (`door3_digamma.lean:642-643`) at `Re = 8.1975`
+  (`wOuter8_re` above, via `wireOuter`): would follow from
+  `psiShiftNeed_outer_of_split` once some `L / r1 / r2` satisfies
+  `psiOuterMainRemainder L r1` and `psiOuterCloseRemainder L r2` with
+  `r1 + r2 ≤ 0.5`.
+* What is missing: the main-remainder instantiation, i.e. an
+  explicit-remainder Stirling bound for `Complex.digamma` at
+  `wOuter + 8` (e.g. `‖digamma z − (log z − 1 / (2 * z))‖ ≤ C / ‖z‖^2`
+  with explicit `C`), or equivalently the Gauss integral representation
+  noted as TODO at `Mathlib/.../Gamma/Digamma.lean:31`. The banked
+  digamma API is only `digamma_zero`, `digamma_one`, `digamma_one_half`,
+  `digamma_apply_add_one`, `meromorphic_digamma`; `D3SG_*` supplies no
+  digamma remainder. Hence no `L / r1 / r2` triple is closed here and no
+  proof of `psiShiftNeed_outer` is claimed; the chain above is the full
+  value banked in this block.
+-/
+
+end Door3Digamma

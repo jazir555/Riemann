@@ -899,4 +899,120 @@ theorem uniform_M40_pair_of_closedBall
   · intro x hx y hy
     exact uniform_bot_deriv_M40_of_closedBall hC x hx y hy
 
+/-! ### (M) M1000 pair-closer mirror + mono lift chain
+
+Grepped specs:
+* pair closers `door3_sliver_edge.lean:838-885`
+  (`closedBall12_mem_endpoint_top`, `ballSup_necessary_ge_half`, `ballSup_mono`,
+  `uniform_pair_of_closedBall`, `uniform_M40_pair_of_closedBall`);
+* wiring `door3_rh_wiring.lean:1625-1633` (`hTopDeriv1000_of_ballSup1000`,
+  `C = 1000` retier via `uniform_top_deriv_of_closedBall` at `d = (1/2)/1000`);
+* `C = 40` confirmed infeasible per (L) survey (poly floor `> 78 > 40`).
+
+What is added here (all conditional, no force on `C = 1000`):
+* M1000 delta numerals + top/bottom M1000 feeder bridges via `:343` / `:368`;
+* M1000 paired feeder closing both deriv arms from one ball-12 sup `1000`;
+* mono lifts `40 -> 1000` and `79 -> 1000` via `ballSup_mono`, plus
+  `79`-premise and `40`-premise pair closers, so the
+  `poly_upper_closedBall12 <= 79` spec feeds the `1000` shape.
+Residual (exact, open, not forced): closed-ball sup `C = 1000` on
+`closedBall 0 12` is NOT proved here; `hTopDeriv` / `hBotDeriv` for M1000 remain
+conditional on the open `hC` premise; the smallest-next numeral
+`poly_upper_closedBall12 <= 79` is owned elsewhere and enters here only as an
+explicit premise via the `79 -> 1000` lift. -/
+
+/-- M1000 delta fits the `d <= 1` side condition of the closed-ball bridges. -/
+theorem m1000_delta_le_one : (1 / 2 : ℝ) / (1000 : ℝ) ≤ 1 := by norm_num
+
+/-- M1000 delta is positive. -/
+theorem m1000_delta_pos : (0 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ) := by norm_num
+
+/-- Edge-top M1000 feeder bridge: closed-ball sup `1000` gives deriv `1000`. -/
+theorem uniform_top_deriv_M1000_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ)) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ) := by
+  exact uniform_top_deriv_of_closedBall ((1 / 2 : ℝ) / (1000 : ℝ)) (1000 : ℝ)
+    (by norm_num) hC x hx y hy
+
+/-- Edge-bottom M1000 feeder bridge: closed-ball sup `1000` gives deriv `1000`. -/
+theorem uniform_bot_deriv_M1000_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ))
+    (y : ℝ) (hy : y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ))) :
+    ‖deriv CentralCoverAssembly.xiShiftedEntire
+      (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ) := by
+  exact uniform_bot_deriv_of_closedBall ((1 / 2 : ℝ) / (1000 : ℝ)) (1000 : ℝ)
+    (by norm_num) hC x hx y hy
+
+/-- M1000 paired feeder: one ball-12 sup `1000` closes both deriv arms. -/
+theorem uniform_M1000_pair_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ)) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) := by
+  constructor
+  · intro x hx y hy
+    exact uniform_top_deriv_M1000_of_closedBall hC x hx y hy
+  · intro x hx y hy
+    exact uniform_bot_deriv_M1000_of_closedBall hC x hx y hy
+
+/-- Mono lift: ball-12 sup `40` lifts to ball-12 sup `1000`. -/
+theorem ballSup40_to_ballSup1000
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ) := by
+  intro z hz
+  exact ballSup_mono (40 : ℝ) (1000 : ℝ) (by norm_num) hC z hz
+
+/-- Mono lift: ball-12 sup `79` lifts to ball-12 sup `1000`. -/
+theorem ballSup79_to_ballSup1000
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (79 : ℝ)) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ) := by
+  intro z hz
+  exact ballSup_mono (79 : ℝ) (1000 : ℝ) (by norm_num) hC z hz
+
+/-- M1000 pair from a `79` sup: `poly_upper_closedBall12 <= 79` shape feeds `1000`. -/
+theorem uniform_M1000_pair_of_ballSup79
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (79 : ℝ)) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) := by
+  have h1000 := ballSup79_to_ballSup1000 hC
+  exact uniform_M1000_pair_of_closedBall h1000
+
+/-- M1000 pair from a `40` sup (kept for the infeasible-tier chain). -/
+theorem uniform_M1000_pair_of_ballSup40
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (1000 : ℝ)) := by
+  have h1000 := ballSup40_to_ballSup1000 hC
+  exact uniform_M1000_pair_of_closedBall h1000
+
 end Door3SliverEdge
