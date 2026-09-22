@@ -5485,3 +5485,14 @@ sorry-free infrastructure and the complete commit ledger above.
   parity keeps sign → destructive ~-1/3. Shard floor stays `-2.858`,
   gap `4.958`; k=8 honestly skipped. SCUT16 tasked (S9 assembly
   skipping k=8 or tail-shave).
+- 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
+  edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
+  14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,
+  Hadamard logDeriv, GammaFacts analyticity, digamma bridge
+  `gamma_deriv_eq` + conditional `gammaPrime_le_of_psiDisc` with gaps
+  4.21x-268.9x, Cauchy 60000 wall, deriv_certs value-only, psi_slope
+  real-only, Wendel/gamma_low value-only, ball_advance transport-only).
+  Alive only as honest-conditional (psi-disc+G or Cauchy C/ρ); closing
+  needs Stirling-remainder/Gauss for `Complex.digamma` (Mathlib TODO)
+  + tight G at Re∈[0.025,0.37]. `R02_gammaDeriv_missingNumeral_spec
+  :1140` stays open.
