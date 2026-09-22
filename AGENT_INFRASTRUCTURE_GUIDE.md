@@ -5667,6 +5667,20 @@ sorry-free infrastructure and the complete commit ledger above.
   shrinking — ladder may asymptote below gate; N10+ assessment
   pending). Parens double-checked vs add8. VERIFY6 tasked (sole owner,
   N9 rebuild).
+- 2026-09-22 VERIFY6 (background `ses_f37451931`, sole build owner):
+  BUILD-EXIT=1 x2 (fence stop). Fixed 2 paren slips (`:5109/:5195`,
+  same family). N5→N8 unaffected (zero errors outside Seq9). Remaining:
+  `hre9 :5328` has 16 opens / 17 closes (programmatic audit) — full
+  string-diff vs green hre8 `:5315` shows EXACTLY one inserted ` + 1)`
+  at pos 140 with no matching `(` (plus-count 10 vs 9, opens equal).
+  FIX: add one `(` to the front run (14→15, yielding 17/17 mirroring
+  hre8+1 level); do NOT merely delete `)` (that keeps 10 levels on
+  9-level opens = misnested). Coordinator verified the audit but could
+  not hand-type the 14-run reliably (2 failed exact-match attempts, no
+  file change) — owner to apply + confirm by build. VERIFY7 tasked.
+  LADDER-RULE (all future N-rung agents): after banking, run
+  programmatic opens/closes counts on every new line AND full-diff vs
+  the N-1 analogue; zero-diff except the one intended level.
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
