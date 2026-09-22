@@ -5605,3 +5605,11 @@ sorry-free infrastructure and the complete commit ledger above.
   TOO-WIDE honestly (|δ'|≥1.94 kills the 1-x²/2 route; no signed upper
   filed). NOTE for next: 8π≈25.13 is nearer θ than 7π (δ≈-1.1..-1.2) —
   k=10 may be CONSTRUCTIVE, not destructive. SCUT22 tasked (8π check).
+- 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
+  suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
+  rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494
+  / Re8≤0.0475 → `CS_complex_S8_Re_ge_115 :4980` (1.15 = 0.95+0.2494-
+  0.0475, true ~1.716) + below-slow gap `:5003` (0.79) + shortfall
+  `:5009` (1.4414 at cF 1.851). Honest: beats S6-Re 0.95, trails S4-Re
+  1.56 and live 1.94 (true |S8|~1.901). Live best STANDS (0.6514).
+  Next: S8-Im route (ETA-S8IM).

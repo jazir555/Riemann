@@ -4376,4 +4376,661 @@ theorem CS_complex_S6_Im_below_S4_gap :
 #print axioms CS_complex_S6_Im_ge_06092
 #print axioms CS_complex_S6_Im_below_S4_gap
 
+/-! ## §A19. Complex S8 slow `1.15` (ETA-S8, Re-route only)
+
+Honest extension of the §A8 S6 recipe to `S₈ = S₆ + 7^{-s} - 8^{-s}`.
+True values: `Re(S₈) ≈ 1.7156` (`Re₇ ≈ +0.3907` since `cos φ₇ ≈ +0.843`,
+`-Re₈ ≈ -0.0443` since `cos φ₈ ≈ +0.101`), `|S₈| ≈ 1.901 < 1.94`, so no
+S8 lower can beat the live best `slow = 1.94` — this floor `1.15` gains
+`+0.20` over S6 Re `0.95` but still trails S4 Re `1.56` by design.
+
+Per-term routes (no new analysis shapes; all mirrors of banked lemmas):
+* `log 8 = 3·log 2` exact (`CS_log_eight_eq`, mirror of `CS_log_four_eq`),
+  so `log 8 ∈ [2.079441, 2.079444]` is tight from 6-digit `log2` bounds.
+* `log 7 = log 6 + log(7/6)` (`CS_log_seven_eq`, mirror of `CS_log_six_eq`)
+  with `log(7/6) ≤ 1/6` (`Real.log_le_sub_one_of_pos`, mirror of the
+  `log(4/3)` step in `CS_log_three_ge`) and `log(7/6) = -log(6/7) ≥ 1/7`
+  (same lemma on `6/7`, mirror of the `hinv` step), so
+  `log 7 ∈ [1.8888, 1.9962]` from banked `log6` bounds.
+* Rpow: `7^0.395 ≤ 2.28`, `8^0.395 ≤ 2.28` (`exp_bound'` n=4, mirrors of
+  `CS_rpow5pos_proved`); `7^0.395 ≥ 1.92`, `8^0.395 ≥ 2.15` (quadratic
+  lower, mirrors of `CS_rpow6pos_proved`); hence `r₇ ≥ 0.43`, `r₇ ≤ 0.52`,
+  `r₈ ≥ 0.43`, `r₈ ≤ 0.47` (reciprocal steps, mirrors of
+  `CS_rpow5neg_lower_proved`).
+* `cos φ₇ ≥ 0.58`: `φ₇ ∈ [12.7494, 13.47435]`, `e₇ = φ₇ - 4π ∈ [0.18, 0.908]`,
+  `cos φ₇ = cos e₇ ≥ 1 - e₇²/2 ≥ 0.58` (double `Real.cos_add_two_pi`,
+  mirror of the `CS_cos3_nonneg` window shape).
+* `cos φ₈ ≤ 0.101`: `φ₈ ∈ [14.03622, 14.03625]`, `e₈ = φ₈ - 4π`,
+  `d = π/2 - e₈ ∈ [0.1009, 0.101]`, `cos φ₈ = cos e₈ = sin d ≤ d ≤ 0.101`
+  (`Real.cos_sub` + `Real.cos_pi_div_two` / `Real.sin_pi_div_two`,
+  mirror of the `hsin_eq` step in `CS_sin5_upper_neg099`); nonneg
+  `cos φ₈ ≥ 0` via the `[-π/2, π/2]` window (mirror of `CS_cos3_nonneg`).
+* Assembly: `Re(S₈) = Re(S₆) + Re₇ - Re₈ ≥ 0.95 + 0.2494 - 0.0475 = 1.1519
+  ≥ 1.15` (`Re₇ ≥ 0.43·0.58`, `Re₈ ≤ 0.47·0.101`, mirror of the
+  `hT5`/`hT6` steps in `CS_complex_S6_Re_ge_095`).
+New need `1.4·1.851 = 2.5914`; shortfall vs `slow = 1.15` is `1.4414`
+(honest; live best STANDS at `slow = 1.94`, shortfall `0.6514`). -/
+
+/-- `log 8 = 3 * log 2` (exact, mirrors `CS_log_four_eq`). -/
+theorem CS_log_eight_eq : Real.log 8 = 3 * Real.log 2 := by
+  have h8 : (8 : ℝ) = 2 ^ (3 : ℕ) := by norm_num
+  rw [h8, Real.log_pow]
+  norm_num
+
+/-- `log 8` lower (`2.079441 ≤ log 8` from the 6-digit `log2` lower). -/
+theorem CS_log_eight_ge : (2.079441 : ℝ) ≤ Real.log 8 := by
+  rw [CS_log_eight_eq]
+  have h2 := CS_log2_ge
+  have hcap : (2.079441 : ℝ) ≤ 3 * 0.693147 := by norm_num
+  linarith
+
+/-- `log 8` upper (`log 8 ≤ 2.079444` from the 6-digit `log2` upper). -/
+theorem CS_log_eight_le : Real.log 8 ≤ (2.079444 : ℝ) := by
+  rw [CS_log_eight_eq]
+  have h2 := CS_log2_le
+  have hcap : 3 * (0.693148 : ℝ) ≤ 2.079444 := by norm_num
+  linarith
+
+/-- `log(7/6)` upper (`≤ 1/6`, mirrors the `log(4/3)` step in
+`CS_log_three_ge`). -/
+theorem CS_log76_upper : Real.log (7 / 6 : ℝ) ≤ (1 / 6 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 7 / 6)
+  have he : (7 / 6 : ℝ) - 1 = (1 / 6 : ℝ) := by norm_num
+  linarith
+
+/-- `log(7/6)` lower (`≥ 1/7` via `log(7/6) = -log(6/7)`, mirrors the `hinv`
+step in `CS_log_three_ge`). -/
+theorem CS_log76_lower : (1 / 7 : ℝ) ≤ Real.log (7 / 6 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 6 / 7)
+  have he : (6 / 7 : ℝ) - 1 = (-(1 / 7) : ℝ) := by norm_num
+  have hinv : Real.log (7 / 6 : ℝ) = -Real.log (6 / 7 : ℝ) := by
+    have heq : (7 / 6 : ℝ) = (6 / 7 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 7 = log 6 + log(7/6)` composite bridge (mirror of `CS_log_six_eq`). -/
+theorem CS_log_seven_eq : Real.log 7 = Real.log 6 + Real.log (7 / 6 : ℝ) := by
+  have h7 : (7 : ℝ) = 6 * (7 / 6) := by norm_num
+  rw [h7, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 7` lower (`1.8888 ≤ log 7` from `CS_log_six_ge` + `CS_log76_lower`). -/
+theorem CS_log_seven_ge : (1.8888 : ℝ) ≤ Real.log 7 := by
+  rw [CS_log_seven_eq]
+  have h6 := CS_log_six_ge
+  have h76 := CS_log76_lower
+  have hcap : (1.8888 : ℝ) ≤ 1.74604 + 1 / 7 := by norm_num
+  linarith
+
+/-- `log 7` upper (`log 7 ≤ 1.9962` from `CS_log_six_le` + `CS_log76_upper`). -/
+theorem CS_log_seven_le : Real.log 7 ≤ (1.9962 : ℝ) := by
+  rw [CS_log_seven_eq]
+  have h6 := CS_log_six_le
+  have h76 := CS_log76_upper
+  have hcap : (1.8295 : ℝ) + 1 / 6 ≤ 1.9962 := by norm_num
+  linarith
+
+/-- `7^0.395 ≤ 2.28` upper input (TRUE `≈ 2.1564`). -/
+def CS_rpow7pos_upper : Prop := (7 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28
+
+/-- CLOSED: `7^0.395 ≤ 2.28` via `exp_bound'` n=4 at
+`x = 0.395·log 7 ≤ 0.78851` (uses `CS_log_seven_le`). -/
+theorem CS_rpow7pos_proved : CS_rpow7pos_upper := by
+  show (7 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28
+  have hlog : Real.log 7 ≤ (1.9962 : ℝ) := CS_log_seven_le
+  have hlog_pos : (0 : ℝ) < Real.log 7 := Real.log_pos (by norm_num : (1 : ℝ) < 7)
+  set x : ℝ := 0.395 * Real.log 7 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.78851 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.395 * Real.log 7 ≤ 0.395 * 1.9962 := by
+      apply mul_le_mul_of_nonneg_left hlog (by norm_num)
+    have hcap : (0.395 : ℝ) * 1.9962 ≤ (0.78851 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (7 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 7)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.78851 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.78851 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.78851 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.78851 + (0.78851 : ℝ) ^ 2 / 2 +
+      (0.78851 : ℝ) ^ 3 / 6 + (0.78851 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 2.28 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- `7^0.395 ≥ 1.92` lower input (TRUE `≈ 2.1564`). -/
+def CS_rpow7pos_lower : Prop := (1.92 : ℝ) ≤ (7 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `7^0.395 ≥ 1.92` via quadratic lower at
+`x = 0.395·log 7 ≥ 0.74607` (uses `CS_log_seven_ge`). -/
+theorem CS_rpow7pos_lower_proved : CS_rpow7pos_lower := by
+  show (1.92 : ℝ) ≤ (7 : ℝ) ^ ((0.395 : ℝ))
+  have h7 : (1.8888 : ℝ) ≤ Real.log 7 := CS_log_seven_ge
+  have hx_lo : (0.74607 : ℝ) < 0.395 * Real.log 7 := by
+    have hmul : (0.395 : ℝ) * 1.8888 ≤ 0.395 * Real.log 7 :=
+      mul_le_mul_of_nonneg_left h7 (by norm_num)
+    have hcap : (0.74607 : ℝ) < 0.395 * 1.8888 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 7 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.74607 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (1.92 : ℝ) ≤ 1 + 0.74607 + (0.74607 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (1.92 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (7 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 7)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `7^-0.395 ≥ 0.43` lower input (TRUE `≈ 0.4636`). -/
+def CS_rpow7neg_lower : Prop := (0.43 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- CLOSED: `7^-0.395 ≥ 0.43` from `7^0.395 ≤ 2.28`
+(`0.43·2.28 = 0.9804 ≤ 1`). -/
+theorem CS_rpow7neg_lower_proved : CS_rpow7neg_lower := by
+  show (0.43 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (7 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28 := CS_rpow7pos_proved
+  have hpos : (0 : ℝ) < (7 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (7 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (7 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7)]
+    rw [inv_eq_one_div]
+  have hle : (0.43 : ℝ) * (7 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.43 : ℝ) * 2.28 ≤ 1 := by norm_num
+    calc (0.43 : ℝ) * (7 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.43 * 2.28 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- `7^-0.395 ≤ 0.52` upper input (TRUE `≈ 0.4636`). -/
+def CS_rpow7neg_upper : Prop := (7 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.52 : ℝ)
+
+/-- CLOSED: `7^-0.395 ≤ 0.52` from `7^0.395 ≥ 1.92`
+(`0.52·1.92 = 0.9984 ≤ 1`). -/
+theorem CS_rpow7neg_upper_proved : CS_rpow7neg_upper := by
+  show (7 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.52 : ℝ)
+  have hlow : (1.92 : ℝ) ≤ (7 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow7pos_lower_proved
+  have hpos : (0 : ℝ) < (7 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (7 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (7 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 7)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.52 : ℝ) * (7 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.52 * 1.92 := by norm_num
+    calc (1 : ℝ) ≤ 0.52 * 1.92 := hmul
+      _ ≤ 0.52 * (7 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `8^0.395 ≤ 2.28` upper input (TRUE `≈ 2.2732`). -/
+def CS_rpow8pos_upper : Prop := (8 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28
+
+/-- CLOSED: `8^0.395 ≤ 2.28` via `exp_bound'` n=4 at
+`x = 0.395·log 8 ≤ 0.82139` (uses `CS_log_eight_le`). -/
+theorem CS_rpow8pos_proved : CS_rpow8pos_upper := by
+  show (8 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28
+  have hlog : Real.log 8 ≤ (2.079444 : ℝ) := CS_log_eight_le
+  have hlog_pos : (0 : ℝ) < Real.log 8 := Real.log_pos (by norm_num : (1 : ℝ) < 8)
+  set x : ℝ := 0.395 * Real.log 8 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.82139 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.395 * Real.log 8 ≤ 0.395 * 2.079444 := by
+      apply mul_le_mul_of_nonneg_left hlog (by norm_num)
+    have hcap : (0.395 : ℝ) * 2.079444 ≤ (0.82139 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (8 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 8)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.82139 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.82139 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.82139 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.82139 + (0.82139 : ℝ) ^ 2 / 2 +
+      (0.82139 : ℝ) ^ 3 / 6 + (0.82139 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 2.28 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- `8^0.395 ≥ 2.15` lower input (TRUE `≈ 2.2732`). -/
+def CS_rpow8pos_lower : Prop := (2.15 : ℝ) ≤ (8 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `8^0.395 ≥ 2.15` via quadratic lower at
+`x = 0.395·log 8 ≥ 0.82137` (uses `CS_log_eight_ge`). -/
+theorem CS_rpow8pos_lower_proved : CS_rpow8pos_lower := by
+  show (2.15 : ℝ) ≤ (8 : ℝ) ^ ((0.395 : ℝ))
+  have h8 : (2.079441 : ℝ) ≤ Real.log 8 := CS_log_eight_ge
+  have hx_lo : (0.82137 : ℝ) < 0.395 * Real.log 8 := by
+    have hmul : (0.395 : ℝ) * 2.079441 ≤ 0.395 * Real.log 8 :=
+      mul_le_mul_of_nonneg_left h8 (by norm_num)
+    have hcap : (0.82137 : ℝ) < 0.395 * 2.079441 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 8 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.82137 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.15 : ℝ) ≤ 1 + 0.82137 + (0.82137 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.15 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (8 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 8)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `8^-0.395 ≥ 0.43` lower input (TRUE `≈ 0.4399`). -/
+def CS_rpow8neg_lower : Prop := (0.43 : ℝ) ≤ (8 : ℝ) ^ (-(0.395 : ℝ))
+
+/-- CLOSED: `8^-0.395 ≥ 0.43` from `8^0.395 ≤ 2.28`
+(`0.43·2.28 = 0.9804 ≤ 1`). -/
+theorem CS_rpow8neg_lower_proved : CS_rpow8neg_lower := by
+  show (0.43 : ℝ) ≤ (8 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (8 : ℝ) ^ ((0.395 : ℝ)) ≤ 2.28 := CS_rpow8pos_proved
+  have hpos : (0 : ℝ) < (8 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (8 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (8 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8)]
+    rw [inv_eq_one_div]
+  have hle : (0.43 : ℝ) * (8 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.43 : ℝ) * 2.28 ≤ 1 := by norm_num
+    calc (0.43 : ℝ) * (8 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.43 * 2.28 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- `8^-0.395 ≤ 0.47` upper input (TRUE `≈ 0.4399`). -/
+def CS_rpow8neg_upper : Prop := (8 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ)
+
+/-- CLOSED: `8^-0.395 ≤ 0.47` from `8^0.395 ≥ 2.15`
+(`0.47·2.15 = 1.0105 ≥ 1`). -/
+theorem CS_rpow8neg_upper_proved : CS_rpow8neg_upper := by
+  show (8 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ)
+  have hlow : (2.15 : ℝ) ≤ (8 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow8pos_lower_proved
+  have hpos : (0 : ℝ) < (8 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (8 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (8 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 8)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.47 : ℝ) * (8 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.47 * 2.15 := by norm_num
+    calc (1 : ℝ) ≤ 0.47 * 2.15 := hmul
+      _ ≤ 0.47 * (8 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `7^{-s}` at `sCenter` (token mirror of
+`CS_cpow3_sCenter_re`). -/
+theorem CS_cpow7_sCenter_re : ((((7 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 7) := by
+  have h7pos : (0 : ℝ) < 7 := by norm_num
+  have hxC : ((7 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h7pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((7 : ℝ) : ℂ) = (((Real.log 7 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h7pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 7 : ℝ)) : ℂ)).re = Real.log 7 := Complex.ofReal_re _
+  have hzim : ((((Real.log 7 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 7 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 7 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 7 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 7 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 7 * (-(0.395 : ℝ)))
+      = (7 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h7pos _).symm
+  have hcos : Real.cos (Real.log 7 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 7) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `8^{-s}` at `sCenter` (token mirror of
+`CS_cpow3_sCenter_re`). -/
+theorem CS_cpow8_sCenter_re : ((((8 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 8) := by
+  have h8pos : (0 : ℝ) < 8 := by norm_num
+  have hxC : ((8 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h8pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((8 : ℝ) : ℂ) = (((Real.log 8 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h8pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 8 : ℝ)) : ℂ)).re = Real.log 8 := Complex.ofReal_re _
+  have hzim : ((((Real.log 8 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 8 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 8 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 8 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 8 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 8 * (-(0.395 : ℝ)))
+      = (8 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h8pos _).symm
+  have hcos : Real.cos (Real.log 8 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 8) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cosine lower at `φ₇ = 6.75·log 7` (`≥ 0.58`; TRUE `≈ 0.843`).
+Route: `φ₇ ∈ [12.7494, 13.47435]` from `CS_log_seven_ge/le`, so
+`e = φ₇ - 4π ∈ [0.18, 0.908]` and `cos φ₇ = cos e ≥ 1 - e²/2 ≥ 0.58`
+(double `Real.cos_add_two_pi`, mirror of the `CS_cos3_nonneg` window). -/
+theorem CS_cos7_lower_058 :
+    (0.58 : ℝ) ≤ Real.cos (6.75 * Real.log 7) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h7lo := CS_log_seven_ge
+  have h7hi := CS_log_seven_le
+  have hlo : (12.7494 : ℝ) ≤ 6.75 * Real.log 7 := by
+    have hmul : 6.75 * (1.8888 : ℝ) ≤ 6.75 * Real.log 7 :=
+      mul_le_mul_of_nonneg_left h7lo (by norm_num)
+    have hcap : (12.7494 : ℝ) ≤ 6.75 * 1.8888 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 7 ≤ (13.47435 : ℝ) := by
+    have hmul : 6.75 * Real.log 7 ≤ 6.75 * (1.9962 : ℝ) :=
+      mul_le_mul_of_nonneg_left h7hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 1.9962 ≤ 13.47435 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 7 with hx_def
+  set e : ℝ := x - 4 * Real.pi with he_def
+  have he_lo : (0.18 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (0.908 : ℝ) := by
+    rw [he_def]
+    linarith
+  have he0 : (0 : ℝ) ≤ e := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  have hsq : e ^ 2 ≤ (0.908 : ℝ) ^ 2 := pow_le_pow_left₀ he0 he_hi 2
+  have hcosd : (0.58 : ℝ) ≤ Real.cos e := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := e)
+    have hnum : (0.58 : ℝ) ≤ 1 - (0.908 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hcos_eq]
+  linarith
+
+/-- Cosine nonnegativity at `φ₈ = 6.75·log 8` (TRUE `≈ 0.101 ≥ 0`).
+Route: `φ₈ ∈ [14.03622, 14.03625]`, so `e = φ₈ - 4π ∈ [1.46984, 1.46989]`
+and `cos φ₈ = cos e ≥ 0` via `Real.cos_nonneg_of_neg_pi_div_two_le_of_le`
+(mirror of `CS_cos3_nonneg`). -/
+theorem CS_cos8_nonneg :
+    (0 : ℝ) ≤ Real.cos (6.75 * Real.log 8) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h8lo := CS_log_eight_ge
+  have h8hi := CS_log_eight_le
+  have hlo : (14.03622 : ℝ) ≤ 6.75 * Real.log 8 := by
+    have hmul : 6.75 * (2.079441 : ℝ) ≤ 6.75 * Real.log 8 :=
+      mul_le_mul_of_nonneg_left h8lo (by norm_num)
+    have hcap : (14.03622 : ℝ) ≤ 6.75 * 2.079441 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 8 ≤ (14.03625 : ℝ) := by
+    have hmul : 6.75 * Real.log 8 ≤ 6.75 * (2.079444 : ℝ) :=
+      mul_le_mul_of_nonneg_left h8hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 2.079444 ≤ 14.03625 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 8 with hx_def
+  set e : ℝ := x - 4 * Real.pi with he_def
+  have he_lo : (1.46984 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (1.46989 : ℝ) := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = e + 2 * Real.pi + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi]
+  have he_lo2 : -(Real.pi / 2) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi2 : e ≤ Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  rw [hcos_eq]
+  exact Real.cos_nonneg_of_neg_pi_div_two_le_of_le he_lo2 he_hi2
+
+/-- Cosine upper at `φ₈ = 6.75·log 8` (`≤ 0.101`; TRUE `≈ 0.101`).
+Route: `e = φ₈ - 4π ∈ [1.46984, 1.46989]`, `d = π/2 - e ∈ [0.1009, 0.101]`,
+`cos φ₈ = cos e = sin d ≤ d ≤ 0.101` (`Real.cos_sub` +
+`Real.cos_pi_div_two` / `Real.sin_pi_div_two`, mirror of the `hsin_eq`
+step in `CS_sin5_upper_neg099`). -/
+theorem CS_cos8_upper_0101 :
+    Real.cos (6.75 * Real.log 8) ≤ (0.101 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have h8lo := CS_log_eight_ge
+  have h8hi := CS_log_eight_le
+  have hlo : (14.03622 : ℝ) ≤ 6.75 * Real.log 8 := by
+    have hmul : 6.75 * (2.079441 : ℝ) ≤ 6.75 * Real.log 8 :=
+      mul_le_mul_of_nonneg_left h8lo (by norm_num)
+    have hcap : (14.03622 : ℝ) ≤ 6.75 * 2.079441 := by
+      norm_num
+    linarith
+  have hhi : 6.75 * Real.log 8 ≤ (14.03625 : ℝ) := by
+    have hmul : 6.75 * Real.log 8 ≤ 6.75 * (2.079444 : ℝ) :=
+      mul_le_mul_of_nonneg_left h8hi (by norm_num)
+    have hcap : (6.75 : ℝ) * 2.079444 ≤ 14.03625 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 8 with hx_def
+  set e : ℝ := x - 4 * Real.pi with he_def
+  have he_lo : (1.46984 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (1.46989 : ℝ) := by
+    rw [he_def]
+    linarith
+  set d : ℝ := Real.pi / 2 - e with hd_def
+  have hd_lo : (0.1009 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.101 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hd0 : (0 : ℝ) ≤ d := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have he_eq : e = Real.pi / 2 - d := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = Real.sin d := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_add_two_pi, he_eq,
+      Real.cos_sub, Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin := Real.sin_le hd0
+  rw [hcos_eq]
+  linarith
+
+/-- `Re₇ ≥ 0.2494` (`r₇ ≥ 0.43`, `cos φ₇ ≥ 0.58`; TRUE `≈ 0.3907`). -/
+theorem CS_Re7_ge_02494 :
+    (0.2494 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 7) := by
+  have hr7 : (0.43 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) := CS_rpow7neg_lower_proved
+  have hr70 : (0 : ℝ) ≤ (7 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc7 : (0.58 : ℝ) ≤ Real.cos (6.75 * Real.log 7) := CS_cos7_lower_058
+  have hmul := mul_le_mul hr7 hc7 (by norm_num) hr70
+  have hnum : (0.43 : ℝ) * 0.58 = 0.2494 := by norm_num
+  linarith
+
+/-- `Re₈ ≤ 0.0475` (`r₈ ≤ 0.47`, `cos φ₈ ≤ 0.101`; TRUE `≈ 0.0443`;
+mirror of the `hT6` step in `CS_complex_S6_Re_ge_095`). -/
+theorem CS_Re8_le_00475 :
+    (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 8) ≤ (0.0475 : ℝ) := by
+  have hr8u : (8 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.47 : ℝ) := CS_rpow8neg_upper_proved
+  have hc8lo : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 8) := CS_cos8_nonneg
+  have hc8hi : Real.cos (6.75 * Real.log 8) ≤ (0.101 : ℝ) := CS_cos8_upper_0101
+  have ha : (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 8)
+      ≤ 0.47 * Real.cos (6.75 * Real.log 8) :=
+    mul_le_mul_of_nonneg_right hr8u hc8lo
+  have hb : (0.47 : ℝ) * Real.cos (6.75 * Real.log 8) ≤ 0.47 * 0.101 :=
+    mul_le_mul_of_nonneg_left hc8hi (by norm_num)
+  have hmul : (0.47 : ℝ) * 0.101 = 0.04747 := by norm_num
+  have hcap : (0.04747 : ℝ) ≤ 0.0475 := by norm_num
+  linarith
+
+/-- Complex S8 partial sum at `sCenter` (`S₆ + 7^{-s} - 8^{-s}`). -/
+noncomputable def CS_S8C : ℂ :=
+  CS_S6C + (7 : ℂ) ^ (-R02Pilot.sCenter) - (8 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S8 (`Re(S₈) = Re(S₆) + Re₇ - Re₈`,
+mirror of the `hLink` step in `CS_complex_S6_Re_ge_095`). -/
+theorem CS_S8C_Re_eq :
+    (CS_S8C).re = (CS_S6C).re
+      + (7 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 7)
+      - (8 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 8) := by
+  unfold CS_S8C
+  have h7 : ((7 : ℂ)) = ((((7 : ℝ)) : ℂ)) := by simp
+  have h8c : ((8 : ℂ)) = ((((8 : ℝ)) : ℂ)) := by simp
+  rw [h7, h8c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow7_sCenter_re, CS_cpow8_sCenter_re]
+
+/-- Complex-S8 real part `≥ 1.15` (PROVED, unconditional):
+`Re(S₈) = Re(S₆) + Re₇ - Re₈ ≥ 0.95 + 0.2494 - 0.0475 = 1.1519 ≥ 1.15`
+(TRUE `≈ 1.7156`; honest gain `+0.20` over S6 Re `0.95`, still trails
+S4 Re `1.56` and the live `slow = 1.94`). -/
+theorem CS_complex_S8_Re_ge_115 :
+    (1.15 : ℝ) ≤ (CS_S8C).re := by
+  have hEq := CS_S8C_Re_eq
+  have hS6 := CS_complex_S6_Re_ge_095
+  have hT7 := CS_Re7_ge_02494
+  have hT8 := CS_Re8_le_00475
+  rw [hEq]
+  linarith
+
+/-- Complex-S8 absolute value `≥ 1.15` (triangle `‖z‖ ≥ Re z`,
+mirroring `CS_complex_S6_abs_ge_095`). -/
+theorem CS_complex_S8_abs_ge_115 :
+    (1.15 : ℝ) ≤ ‖CS_S8C‖ := by
+  have hRe := CS_complex_S8_Re_ge_115
+  have hle : (CS_S8C).re ≤ ‖CS_S8C‖ := by
+    have h1 := Complex.abs_re_le_norm (CS_S8C)
+    have h2 := le_abs_self ((CS_S8C).re)
+    linarith
+  linarith
+
+/-- Honest gap: the new S8 Re `1.15` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `0.79`; no S8 Pythagoras feed closes here
+(TRUE `|S₈| ≈ 1.901 < 1.94`). -/
+theorem CS_S8C_below_slow_gap :
+    (1.94 : ℝ) - (1.15 : ℝ) = 0.79 := by
+  norm_num
+
+/-- Exact S8 shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.851` (`2.5914`) exceeds the S8 `slow = 1.15` by `1.4414`. -/
+theorem CS_S8C_shortfall_1851 : (1.4 : ℝ) * 1.851 - 1.15 = 1.4414 := by
+  norm_num
+
+#print axioms CS_log_eight_eq
+#print axioms CS_log_seven_ge
+#print axioms CS_log_seven_le
+#print axioms CS_rpow7pos_proved
+#print axioms CS_rpow7pos_lower_proved
+#print axioms CS_rpow7neg_lower_proved
+#print axioms CS_rpow7neg_upper_proved
+#print axioms CS_rpow8pos_proved
+#print axioms CS_rpow8pos_lower_proved
+#print axioms CS_rpow8neg_lower_proved
+#print axioms CS_rpow8neg_upper_proved
+#print axioms CS_cpow7_sCenter_re
+#print axioms CS_cpow8_sCenter_re
+#print axioms CS_cos7_lower_058
+#print axioms CS_cos8_nonneg
+#print axioms CS_cos8_upper_0101
+#print axioms CS_Re7_ge_02494
+#print axioms CS_Re8_le_00475
+#print axioms CS_S8C_Re_eq
+#print axioms CS_complex_S8_Re_ge_115
+#print axioms CS_complex_S8_abs_ge_115
+#print axioms CS_S8C_below_slow_gap
+#print axioms CS_S8C_shortfall_1851
+
 end Door3CellSuppliers
