@@ -5496,3 +5496,11 @@ sorry-free infrastructure and the complete commit ledger above.
   needs Stirling-remainder/Gauss for `Complex.digamma` (Mathlib TODO)
   + tight G at Re∈[0.025,0.37]. `R02_gammaDeriv_missingNumeral_spec
   :1140` stays open.
+- 2026-09-22 EDGE-AUDIT (background `ses_f3778800b`, proof-only, no
+  edits): 40/40 gridH leaves audited (`:439-:1412`) vs suppliers —
+  0/40 obligations banked (0/80 sub-enclosures). Tiers: (0.002,0.05)x8,
+  (0.002,0.07)x8, (0.05,0.07)x16, (0.15,0.06)x8; R01 skipped by design.
+  Suppliers holds only zeta-lane R02Pilot + CS geometry (no xi
+  center/deriv numeral for any R00-R40 cell). Residual: 40x
+  `RNN_leaf_obligations` + CutR10/CutL10 slow-sum/ball-sups + sliver
+  MT/MB<50 + bottom-strip hb=0.025/B-tube — all cross-lane numerals.
