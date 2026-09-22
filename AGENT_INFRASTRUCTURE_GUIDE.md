@@ -5692,6 +5692,15 @@ sorry-free infrastructure and the complete commit ledger above.
   rw+e2 bridge, `:3439` hr10div + add_re alignment. Zero remaining.
   Grep-clean. ALL SIX door-3 lane files GREEN (suppliers/ball/wiring/
   bridge/premise_gamma/pilot). Next: full-tree sweep (ALLGREEN).
+- 2026-09-22 ALLGREEN (background `ses_f375628e8`, sole build owner):
+  FULL-TREE GREEN, no edits. `central_cover_assembly` BUILD-EXIT=0
+  (8687 jobs) + `riemann_hypothesis` BUILD-EXIT=0 (8685 jobs), 0 errors
+  / 0 sorryAx both, locks clean. Chain elaborates end-to-end
+  CONDITIONALLY (`:12186/:12204/:12238` bridges clean; 6 Challenge2/
+  ClosedCertificate thms still consume `RiemannHypothesisProp_apply`
+  `:12471-12476`). Residual to unconditional: 80 per-cell enclosures +
+  edge strips `:12157` + cutoff lines `:12165` (§18b.10); lanes 0 /
+  core 0 errors. Door-3 wave phase COMPLETE — all 8 modules green.
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494
