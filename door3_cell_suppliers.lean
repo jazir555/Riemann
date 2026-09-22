@@ -5979,4 +5979,146 @@ theorem CS_S12C_shortfall_1851 : (1.4 : ℝ) * 1.851 - (-0.60) = 3.1914 := by
 #print axioms CS_S12C_below_slow_gap
 #print axioms CS_S12C_shortfall_1851
 
+/-! ## §A22. cF shave `1.851 → 1.85` via cos `-0.035 → -0.034` (ETA-CF2, proof-only)
+
+Route (banked windows only, no new estimates):
+* Cosine floor `≥ -0.034`: same `cos x = sin d` route as
+  `CS_cos675_lower_neg0035` (`d = x - 3π/2`, `sin d ≥ d` on the negative
+  side). Banked `x ≥ 4.6787` (`CS_log2_ge`) and `π < 3.141593`
+  (`Real.pi_lt_d6`) give `d ≥ 4.6787 - 3·3.141593/2 = -0.0336895 ≥ -0.034`
+  (margin `≈ 0.00031`; true `cos ≈ -0.0336`).
+* Reuse banked `2^0.605 ≤ 1.522` (`CS_rpow0605_tight1522_proved`);
+  `Re w ≥ -0.034·r ≥ -0.051748`, `‖w‖ ≤ 1.522`, so
+  `‖1-w‖² ≤ 1 + 0.103496 + 1.522² = 3.41998 ≤ 1.85² = 3.4225`
+  (margin `≈ 0.00252`). True `cF ≈ 1.8482`, so `1.85` carries margin
+  `≈ 0.0018`. New need `1.4·1.85 = 2.59`; shortfall vs `slow = 1.94`
+  is `0.65` (was `0.6514`; shave `0.0014`). Cos lane now exhausted. -/
+
+/-- Cosine lower at the head phase (`≥ -0.034`; true `≈ -0.0336`). -/
+theorem CS_cos675_lower_neg0034 :
+    (-0.034 : ℝ) ≤ Real.cos (6.75 * Real.log 2) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphase_hi := CS_eta_phase1_lt
+  have hlo : (4.6787 : ℝ) ≤ 6.75 * Real.log 2 := by
+    have h2 := CS_log2_ge
+    have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+      mul_le_mul_of_nonneg_left h2.le (by norm_num)
+    have hcap : (4.6787 : ℝ) ≤ 6.75 * 0.693147 := by
+      norm_num
+    linarith
+  set x : ℝ := 6.75 * Real.log 2 with hx_def
+  set d : ℝ := x - 3 * Real.pi / 2 with hd_def
+  have hd_lo : (-0.034 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.04 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have h32eq : (3 : ℝ) * Real.pi / 2 = Real.pi + Real.pi / 2 := by
+    ring
+  have hcos32 : Real.cos (3 * Real.pi / 2) = 0 := by
+    rw [h32eq, Real.cos_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hsin32 : Real.sin (3 * Real.pi / 2) = -1 := by
+    rw [h32eq, Real.sin_add, Real.cos_pi, Real.sin_pi,
+      Real.cos_pi_div_two, Real.sin_pi_div_two]
+    ring
+  have hx_eq : x = 3 * Real.pi / 2 + d := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = Real.sin d := by
+    rw [hx_eq, Real.cos_add, hcos32, hsin32]
+    ring
+  have hsin_lb : (-0.034 : ℝ) ≤ Real.sin d := by
+    by_cases hd0 : (0 : ℝ) ≤ d
+    · have hd_pi : d ≤ Real.pi := by linarith
+      have hnn : (0 : ℝ) ≤ Real.sin d :=
+        Real.sin_nonneg_of_nonneg_of_le_pi hd0 hd_pi
+      linarith
+    · push_neg at hd0
+      have he_pos : (0 : ℝ) < -d := by linarith
+      have hle : Real.sin (-d) ≤ -d := Real.sin_le he_pos.le
+      have hneg : Real.sin d = -Real.sin (-d) := by
+        have h := Real.sin_neg (x := -d)
+        rw [neg_neg] at h
+        exact h
+      linarith
+  rw [hcos_eq]
+  exact hsin_lb
+
+/-- Sharpened eta-factor cap `≤ 1.85` (TRUE `≈ 1.8482`). -/
+def CS_etaFactor_upper_1850 : Prop :=
+  ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.85
+
+/-- Phase-aware factor upper from `2^0.605 ≤ 1.522` + the `-0.034`
+cosine floor (PROVED): `Re w ≥ -0.051748`, `‖w‖ ≤ 1.522`, so
+`‖1-w‖² ≤ 3.41998 ≤ 1.85²`. -/
+theorem CS_etaFactor_1850_of_bounds (hCap : CS_rpow0605_tight1522)
+    (hCos : (-0.034 : ℝ) ≤ Real.cos (6.75 * Real.log 2)) :
+    CS_etaFactor_upper_1850 := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 1.85
+  have hReEq := CS_cpow_factor_re
+  have hnormR := CS_cpow_factor_norm_eq
+  have hcast : ((2 : ℂ)) = ((((2 : ℝ)) : ℂ)) := by simp
+  have hrHi : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.522 := hCap
+  have hr0 : (0 : ℝ) ≤ (2 : ℝ) ^ ((0.605 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hRe_lo : (-0.051748 : ℝ)
+      ≤ (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re) := by
+    rw [hReEq]
+    have h1 : (-0.034 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ))
+        ≤ (2 : ℝ) ^ ((0.605 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+      have h := mul_le_mul_of_nonneg_left hCos hr0
+      linarith [h]
+    have hmul : (-0.034 : ℝ) * 1.522 = -0.051748 := by norm_num
+    have h2 : (-0.051748 : ℝ) ≤ (-0.034 : ℝ) * (2 : ℝ) ^ ((0.605 : ℝ)) := by
+      linarith
+    linarith
+  have hS_eq : ((1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+      = ((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))) := by
+    rw [hcast]
+  rw [hS_eq]
+  have hsq_eq : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2
+      = 1 - 2 * (((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)).re)
+        + ‖((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.sq_norm, Complex.normSq_apply,
+      Complex.normSq_apply, Complex.sub_re, Complex.one_re,
+      Complex.sub_im, Complex.one_im]
+    ring
+  have hr2 : ((2 : ℝ) ^ ((0.605 : ℝ))) ^ 2 ≤ (1.522 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ hr0 hrHi 2
+  have hsq_le : ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+      ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2 ≤ (1.85 : ℝ) ^ 2 := by
+    have hnum : (1 : ℝ) - 2 * (-0.051748) + (1.522 : ℝ) ^ 2 ≤ (1.85 : ℝ) ^ 2 := by
+      norm_num
+    rw [hsq_eq, hnormR]
+    linarith
+  calc ‖((1 : ℂ) - ((((2 : ℝ)) : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)))‖
+      = Real.sqrt (‖((1 : ℂ) - ((((2 : ℝ)) : ℂ)
+        ^ ((1 : ℂ) - R02Pilot.sCenter)))‖ ^ 2) :=
+        (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt ((1.85 : ℝ) ^ 2) := Real.sqrt_le_sqrt hsq_le
+    _ = 1.85 := Real.sqrt_sq (by norm_num)
+
+/-- UNCONDITIONAL `1.85` factor cap (both links closed above). -/
+theorem CS_etaFactor_1850_proved : CS_etaFactor_upper_1850 :=
+  CS_etaFactor_1850_of_bounds CS_rpow0605_tight1522_proved CS_cos675_lower_neg0034
+
+/-- Factor-need numeral at the shaved cap: `1.4·1.85 = 2.59`. -/
+theorem CS_factor_need_1850 : (1.4 : ℝ) * 1.85 = 2.59 := by
+  norm_num
+
+/-- Exact new shortfall numeral (honest floor report): the `1.4` need at
+`cF = 1.85` exceeds complex-S4-Pythagoras `slow = 1.94` by `0.65`
+(was `0.6514`; shave `0.0014`). -/
+theorem CS_S4f_shortfall_1850 : (1.4 : ℝ) * 1.85 - 1.94 = 0.65 := by
+  norm_num
+
+#print axioms CS_cos675_lower_neg0034
+#print axioms CS_etaFactor_1850_proved
+#print axioms CS_S4f_shortfall_1850
+
 end Door3CellSuppliers

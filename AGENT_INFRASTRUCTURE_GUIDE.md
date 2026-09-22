@@ -5805,6 +5805,17 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETA-CF2 (background `ses_f350a352d`, proof-only, grep-clean,
+  suppliers-only commit): cos shave `neg0034 :5998` (d≥-0.0336895≥-0.034,
+  margin ~0.00031, true -0.0336) → cF 1.851→1.85 (`3.41998≤1.85²`) +
+  shortfall `:6117` (0.6514→0.65, shave 0.0014). Cos lane now exhausted
+  (at true limit); rpow 1.522 margin 0.0008 untouched.
+- 2026-09-22 SCUT34 (background `ses_f350a352c`, proof-only, grep-clean,
+  pilot-only commit): log15 FIRST link + theta15 — bridge `:4558`
+  (log15=log14+log(15/14), tighter 15/14 picked) + window `:4569/:4582`
+  ([2.6918458317,2.7251791663], true ~2.708 inside) + `theta15_mem
+  :4599` (θ∈[26.918,27.252], width 0.333). Next: delta15/cos (k=14
+  even).
 - 2026-09-22 SCUT28 (background `ses_f3752af34`, proof-only, grep-clean):
   log13 FIRST link — bridge `:4064` (log13=log12+log(13/12), tighter
   13/12 ratio picked) + window `:4075/:4088` ([2.5537505937,

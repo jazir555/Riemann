@@ -4549,4 +4549,62 @@ theorem sSCUT_eta13_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hup := sSCUT_eta13_Re_le_neg
   linarith
 
+/-- Composite log bridge `log 15 = log 14 + log (15/14)` (`15 = 14·(15/14)`
+via `Real.log_mul`; mirror of `sSCUT_log_fourteen_via_thirteen_eq` at `:4308`;
+tighter ratio `15/14` (`x = 1/14`) picked over `15/13` (`x = 2/13`);
+grepped base bridges: `sSCUT_log_fourteen_ge/le` and `sSCUT_log_thirteen_ge/le`
+both banked — `14` base picked; first link of the incremental base-15 chain
+for `k = 14`). -/
+theorem sSCUT_log_fifteen_via_fourteen_eq :
+    Real.log 15 = Real.log 14 + Real.log (15 / 14 : ℝ) := by
+  have h15 : (14 : ℝ) * (15 / 14) = 15 := by norm_num
+  have h := Real.log_mul (show (14 : ℝ) ≠ 0 by norm_num)
+    (show (15 / 14 : ℝ) ≠ 0 by norm_num)
+  rw [h15] at h
+  linarith
+
+/-- `log 15` upper (`log 15 ≤ 2.7251791663` from `sSCUT_log_fourteen_le` +
+`log (15/14) ≤ 1/14`; mirror of `sSCUT_log_fourteen_le` at `:4319` with `x = 1/14`
+via `Real.log_le_sub_one_of_pos`). -/
+theorem sSCUT_log_fifteen_le : Real.log 15 ≤ (2.7251791663 : ℝ) := by
+  have h15 := sSCUT_log_fifteen_via_fourteen_eq
+  have h14 := sSCUT_log_fourteen_le
+  have hub : Real.log (15 / 14 : ℝ) ≤ (1 / 14 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 15 / 14)
+    have he : (15 / 14 : ℝ) - 1 = (1 / 14 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.6537505948 : ℝ) + 1 / 14 ≤ (2.7251791663 : ℝ) := by norm_num
+  linarith
+
+/-- `log 15` lower (`2.6918458317 ≤ log 15` from `sSCUT_log_fourteen_ge` +
+`log (15/14) ≥ 1/15`; mirror of `sSCUT_log_fourteen_ge` at `:4332` with `x = 1/14`
+via `log (14/15) ≤ -1/15` and `log (15/14) = -log (14/15)`). -/
+theorem sSCUT_log_fifteen_ge : (2.6918458317 : ℝ) ≤ Real.log 15 := by
+  have h15 := sSCUT_log_fifteen_via_fourteen_eq
+  have h14 := sSCUT_log_fourteen_ge
+  have hub : Real.log (14 / 15 : ℝ) ≤ (-1 / 15 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 14 / 15)
+    have he : (14 / 15 : ℝ) - 1 = (-1 / 15 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (15 / 14 : ℝ) = -Real.log (14 / 15 : ℝ) := by
+    have heq : (15 / 14 : ℝ) = (14 / 15 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.6918458317 : ℝ) ≤ 2.6251791651 + 1 / 15 := by norm_num
+  rw [h15, hinv]
+  linarith
+
+/-- Phase window `θ₁₅ = 10*log 15 ∈ [26.918458317, 27.251791663]`
+(via banked `sSCUT_log_fifteen_ge/le` + `*10`; mirror of
+`sSCUT_theta14_mem` at `:4349`; non-strict since the `log 15` inputs are `≤`). -/
+theorem sSCUT_theta15_mem :
+    (26.918458317 : ℝ) ≤ 10 * Real.log 15 ∧
+    10 * Real.log 15 ≤ (27.251791663 : ℝ) := by
+  have hge := sSCUT_log_fifteen_ge
+  have hle := sSCUT_log_fifteen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.6918458317 = 26.918458317 := by norm_num
+  have c2 : (10 : ℝ) * 2.7251791663 = 27.251791663 := by norm_num
+  constructor <;> linarith
+
 end Door3PilotR00Zeta
