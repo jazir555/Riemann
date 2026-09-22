@@ -5583,3 +5583,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (n=10/idx9), do NOT transfer to base-11 (r11/log11/cpow11 absent).
   Blocker chain filed: log11 → cos(10·log11) → cpow11_re →
   cpow11_Re_upper → rpow11_neg_ge. SCUT20 tasked (log11 bound).
+- 2026-09-22 GAMMA-N7 (background `ses_f377370fc`, proof-only,
+  grep-clean, premise_gamma +365): E06 Seq7 rung — rpow7-frac `:4268`
+  (1.45≤7^5/26), Re-lower 10.15 `:4283`, cpow7 norm `:4296` +
+  upper-needed 10.29 `:4314`, add7 ≤8.23 `:4320`, prod7 83818.22
+  `:4346`, link (5040-num) `:4384`, rate 0.014 `:4401`, finite 0.61
+  `:4410`, below-gate `:4587` + gap 0.05 `:4592`, N8-next `:4599`.
+  VERDICT: 0.61<0.66 FAILS honestly (+0.012 over N6; 0.579→0.598→0.61,
+  gaps 0.081→0.062→0.05). Ladder to N8. VERIFY3 tasked (sole owner,
+  N6B+N7 rebuild).

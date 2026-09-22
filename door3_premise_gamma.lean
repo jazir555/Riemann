@@ -4234,4 +4234,369 @@ the ladder moves to `N = 7` (no `N = 7` numerals banked this turn). -/
 def premGamma_E06_N7_next : Prop :=
   (0.598 : ℝ) < 0.66
 
+/-! ## GAMMA-N7-E06: E06 N = 7 HONEST achievable finite lower (banked, fails gate).
+
+Mirrors the E06 `N = 6` honest block token-for-token
+(`premGamma_E06_rpow6_frac_lower`, `premGamma_E06_rpow6_Re_lower`,
+`premGamma_E06_cpow6_norm_lower`, `premGamma_E06_cpow6_upper_needed`,
+`premGamma_E06shift_add6_norm_le`, `premGamma_E06_prod6_le`,
+`premGamma_E06_GammaSeq6_link`, `premGamma_E06_GammaSeq6_rate_needed`,
+`premGamma_E06_Seq6_finite_lower`).
+
+Audit (exact arithmetic, banked windows only — no mpmath estimate fixed):
+At E06 shifted `s = w_E06 + 1` (`Re s = 1.1975`, `Im s = 0.625`):
+* cpow lower: `‖(7 : ℂ) ^ s‖ = 7 ^ 1.1975 ≥ 10.15` (TRUE `≈ 10.28027`) via
+  `Complex.norm_cpow_eq_rpow_re_of_pos` plus `7 ^ 1.1975 = 7 * 7 ^ 0.1975 ≥
+  7 * 7 ^ (5/26) ≥ 7 * 1.45 = 10.15` (`5/26 ≤ 0.1975`; `1.45^26 ≈ 15688.01 ≤
+  16807 = 7^5`, all `norm_num`; `1.46` would be FALSE).
+* cpow upper spec (filed, not proved): `‖(7 : ℂ) ^ s‖ ≤ 10.29` (TRUE `≈ 10.28027`).
+* denominator norm uppers (`sq_norm` shapes, extending banked `‖s‖ ≤ 1.36`,
+  `‖s+1‖ ≤ 2.29`, `‖s+2‖ ≤ 3.26`, `‖s+3‖ ≤ 4.25`, `‖s+4‖ ≤ 5.24`,
+  `‖s+5‖ ≤ 6.23`, `‖s+6‖ ≤ 7.23`): `‖s+7‖ ≤ 8.23` (`8.1975^2 + 0.625^2 =
+  67.58963125 ≤ 8.23^2`); product
+  `1.36 * 2.29 * 3.26 * 4.25 * 5.24 * 6.23 * 7.23 * 8.23 = 83818.21097691086 ≤
+  83818.22` (`prod7 = prod6 * ‖s+7‖`).
+* quotient: `5040 * 10.15 / 83818.22 = 51156 / 83818.22 ≈ 0.61032 < 0.66`
+  — honest achievable (`0.61 * 83818.22 = 51129.1142 ≤ 51156`).
+* verdict: FAILS to clear `0.66` (gap `0.05`: `0.61 + 0.05 = 0.66` exact;
+  `51156 / 83818.22 < 0.66` banked). Do NOT force: file `N = 8` as next rung;
+  no `N = 8` numerals are banked this turn.
+-/
+
+/-- E06 `7 ^ (5/26)` integer-root lower: `1.45 ≤ 7 ^ (5/26)`
+(`1.45^26 ≈ 15688.01 ≤ 16807 = 7^5`). -/
+theorem premGamma_E06_rpow7_frac_lower :
+    (1.45 : ℝ) ≤ (7 : ℝ) ^ ((5 / 26 : ℝ)) := by
+  have hR : (((7 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) = (7 : ℝ) ^ (5 : ℕ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 7)]
+    have e : (5 / 26 : ℝ) * (((26 : ℕ)) : ℝ) = ((5 : ℕ) : ℝ) := by norm_num
+    rw [e, Real.rpow_natCast]
+  have hint : (1.45 : ℝ) ^ (26 : ℕ) ≤ (((7 : ℝ) ^ ((5 / 26) : ℝ)) ^ (26 : ℕ)) := by
+    rw [hR]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num : 26 ≠ 0)
+    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 7) _) hint
+
+/-- E06 `7 ^ 1.1975` lower: `10.15 ≤ 7 ^ 1.1975` (TRUE `≈ 10.28027`).
+Splits `1.1975 = 1 + 0.1975`, uses `5/26 ≤ 0.1975` monotonicity plus the
+fraction lower above (`7 * 1.45 = 10.15`). -/
+theorem premGamma_E06_rpow7_Re_lower :
+    (10.15 : ℝ) ≤ (7 : ℝ) ^ ((1.1975 : ℝ)) := by
+  have hexp : (1.1975 : ℝ) = 1 + 0.1975 := by norm_num
+  have hfrac : (5 / 26 : ℝ) ≤ 0.1975 := by norm_num
+  have hmono : (7 : ℝ) ^ ((5 / 26) : ℝ) ≤ (7 : ℝ) ^ ((0.1975) : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : ℝ) ≤ 7) hfrac
+  have h145 : (1.45 : ℝ) ≤ (7 : ℝ) ^ ((0.1975) : ℝ) :=
+    le_trans premGamma_E06_rpow7_frac_lower hmono
+  have h1015 : (10.15 : ℝ) = 7 * 1.45 := by norm_num
+  rw [hexp, Real.rpow_add (show (0 : ℝ) < 7 by norm_num), Real.rpow_one, h1015]
+  exact mul_le_mul_of_nonneg_left h145 (by norm_num : (0 : ℝ) ≤ 7)
+
+/-- E06 shifted cpow norm lower: `10.15 ≤ ‖(7 : ℂ) ^ s‖` at `s = w_E06 + 1`. -/
+theorem premGamma_E06_cpow7_norm_lower :
+    (10.15 : ℝ) ≤ ‖(((7 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ := by
+  have hre : (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hbase : ((7 : ℝ) : ℂ) = (7 : ℂ) := by simp
+  have hcn := Complex.norm_cpow_eq_rpow_re_of_pos (show (0 : ℝ) < 7 by norm_num)
+    (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))
+  rw [← hbase, hcn, hre]
+  exact premGamma_E06_rpow7_Re_lower
+
+/-- Cpow-upper requirement at `N = 7` (filed, not proved): optimistic-but-sound
+`‖(7 : ℂ) ^ s‖ ≤ 10.29` at E06 shifted `s` (TRUE `7 ^ 1.1975 ≈ 10.28027`).
+Feeds the `N = 7` Re-ceiling numerator `10.29 * 5040 = 51861.6`
+once `link` + Re lowers land. Filed ONLY at `N = 7`. -/
+def premGamma_E06_cpow7_upper_needed : Prop :=
+  ‖(((7 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
+    (10.29 : ℝ)
+
+/-- E06 shifted `s+7` norm: `‖s + 7‖ ≤ 8.23`
+(TRUE `≈ 8.22129`; `8.1975^2 + 0.625^2 = 67.58963125 ≤ 8.23^2`). -/
+theorem premGamma_E06shift_add7_norm_le :
+    ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ≤ (8.23 : ℝ) := by
+  have hre : (((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
+      = (8.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : (((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).im
+      = (0.625 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.add_im, Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).im = (1.25 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : ‖((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
+      ≤ (8.23 : ℝ) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have hnn : (0 : ℝ) ≤ (8.23 : ℝ) := by norm_num
+  have habs := abs_le_of_sq_le_sq h2 hnn
+  rwa [abs_of_nonneg (norm_nonneg _)] at habs
+
+/-- E06 `N = 7` denominator norm-product upper, right-nested to match
+`premGamma_E06_GammaSeq7_link` (`83818.21097691086 ≤ 83818.22`; `prod7 = prod6 * ‖s+7‖`). -/
+theorem premGamma_E06_prod7_le :
+    ‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+      (‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        (‖((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+          (‖(((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+            (‖((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+              (‖(((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                (‖((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                  ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖)))))) ≤
+      (83818.22 : ℝ) := by
+  have h67 := mul_le_mul premGamma_E06shift_add6_norm_le premGamma_E06shift_add7_norm_le
+    (norm_nonneg _) (by norm_num)
+  have h567 := mul_le_mul premGamma_E06shift_add5_norm_le h67
+    (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (by norm_num)
+  have h4567 := mul_le_mul premGamma_E06shift_add4_norm_le h567
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))) (by norm_num)
+  have h34567 := mul_le_mul premGamma_E06shift_add3_norm_le h4567
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)))) (by norm_num)
+  have h234567 := mul_le_mul premGamma_E06shift_add2_norm_le h34567
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))))) (by norm_num)
+  have h1234567 := mul_le_mul premGamma_E06shift_succ_norm_le h234567
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
+      (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)))))) (by norm_num)
+  have h01234567 := mul_le_mul premGamma_E06shift_norm_le h1234567
+    (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
+      (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))))))) (by norm_num)
+  have heq : (1.36 : ℝ) * (2.29 * (3.26 * (4.25 * (5.24 * (6.23 * (7.23 * 8.23)))))) = 83818.21097691086 := by
+    norm_num
+  rw [heq] at h01234567
+  exact le_trans h01234567 (by norm_num : (83818.21097691086 : ℝ) ≤ 83818.22)
+
+/-- Missing link L1 at `N = 7` (filed, not proved): `GammaSeq s 7` norm identity
+at E06 shifted `s = w_E06 + 1`, extending the `N = 6` spec shape
+(`premGamma_E06_GammaSeq6_link`). Unfolds
+`Complex.GammaSeq s 7 = (7 : ℂ) ^ s * 5040 / (s * (s+1) * (s+2) * (s+3) * (s+4) * (s+5) * (s+6) * (s+7))`
+(`GammaSeq` at `Beta.lean:230`, `7 ! = 5040`, `prod_range_succ`), then `norm_div` /
+`norm_mul` / `norm_pow`. Needs only Mathlib; left open because the cpow
+unfolding was not instantiated this turn. Filed ONLY at `N = 7`. -/
+def premGamma_E06_GammaSeq7_link : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 7‖ =
+    ‖(((7 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ * 5040 /
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1)‖ *
+        ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖)
+
+/-- Missing rate L2 at `N = 7` (filed, not proved): quantitative `GammaSeq`
+convergence at E06 shifted point with budget `0.014` (same host-leaf shape as
+`premGamma_E06_GammaSeq6_rate_needed`; `0.61 - 0.014 = 0.596 < 0.66`,
+so no closure). Host: a Stirling-disc / Binet-enclosure leaf or an explicit
+`GammaSeq` rate lemma; NOT this file. Filed ONLY at `N = 7`. -/
+def premGamma_E06_GammaSeq7_rate_needed : Prop :=
+  ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 7 -
+    Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ ≤
+    (0.014 : ℝ)
+
+/-- E06 `N = 7` HONEST finite lower: `0.61 ≤ ‖GammaSeq s 7‖`, conditional
+on the filed `N = 7` link identity. From cpow lower `10.15` + denominator upper
+`83818.22` (`0.61 * 83818.22 = 51129.1142 ≤ 51156 = 10.15 * 5040`). Below the `0.66`
+gate: do NOT feed `premGamma_E06_ge_of_shift`. -/
+theorem premGamma_E06_Seq7_finite_lower (hLink : premGamma_E06_GammaSeq7_link) :
+    (0.61 : ℝ) ≤
+      ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 7‖ := by
+  unfold premGamma_E06_GammaSeq7_link at hLink
+  have hRight := premGamma_E06_prod7_le
+  have hDeq : (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖) =
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                (‖(((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                  (‖((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                    ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖))))))) := by
+    ring
+  have hD : (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖) ≤
+      (83818.22 : ℝ) := by
+    rw [hDeq]
+    exact hRight
+  have hre0 : (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hspos : (0 : ℝ) <
+      ‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ := by
+    have h := Complex.abs_re_le_norm
+      (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))
+    rw [hre0] at h
+    have habs : |(1.1975 : ℝ)| = 1.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 1.1975)
+    rw [habs] at h
+    linarith
+  have hpos1 : (0 : ℝ) < ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)
+    have hre1 : ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)).re
+        = (2.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre1] at h
+    have habs : |(2.1975 : ℝ)| = 2.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 2.1975)
+    rw [habs] at h
+    linarith
+  have hpos2 : (0 : ℝ) < ‖((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)
+    have hre2 : ((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).re
+        = (3.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre2] at h
+    have habs : |(3.1975 : ℝ)| = 3.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 3.1975)
+    rw [habs] at h
+    linarith
+  have hpos3 : (0 : ℝ) < ‖(((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)
+    have hre3 : (((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).re
+        = (4.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre3] at h
+    have habs : |(4.1975 : ℝ)| = 4.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 4.1975)
+    rw [habs] at h
+    linarith
+  have hpos4 : (0 : ℝ) < ‖((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm ((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)
+    have hre4 : ((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).re
+        = (5.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre4] at h
+    have habs : |(5.1975 : ℝ)| = 5.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 5.1975)
+    rw [habs] at h
+    linarith
+  have hpos5 : (0 : ℝ) < ‖(((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)
+    have hre5 : (((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).re
+        = (6.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre5] at h
+    have habs : |(6.1975 : ℝ)| = 6.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 6.1975)
+    rw [habs] at h
+    linarith
+  have hpos6 : (0 : ℝ) < ‖((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm ((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)
+    have hre6 : ((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
+        = (7.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre6] at h
+    have habs : |(7.1975 : ℝ)| = 7.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 7.1975)
+    rw [habs] at h
+    linarith
+  have hpos7 : (0 : ℝ) < ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)
+    have hre7 : (((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
+        = (8.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre7] at h
+    have habs : |(8.1975 : ℝ)| = 8.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 8.1975)
+    rw [habs] at h
+    linarith
+  have hposR : (0 : ℝ) <
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                (‖(((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                  (‖((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ *
+                    ‖(((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖))))))) :=
+    mul_pos hspos (mul_pos hpos1 (mul_pos hpos2 (mul_pos hpos3 (mul_pos hpos4 (mul_pos hpos5 (mul_pos hpos6 hpos7))))))
+  have hDpos : (0 : ℝ) <
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖) := by
+    rw [hDeq]
+    exact hposR
+  have hC := premGamma_E06_cpow7_norm_lower
+  rw [hLink, le_div_iff₀ hDpos]
+  have h1 : (0.61 : ℝ) *
+      (‖((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1)‖ *
+      ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1)‖) ≤
+      0.61 * 83818.22 := mul_le_mul_of_nonneg_left hD (by norm_num : (0 : ℝ) ≤ 0.61)
+  have h2 : (10.15 : ℝ) * 5040 ≤
+      ‖(((7 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))))‖ * 5040 :=
+    mul_le_mul_of_nonneg_right hC (by norm_num : (0 : ℝ) ≤ 5040)
+  have h3 : (0.61 : ℝ) * 83818.22 ≤ 10.15 * 5040 := by norm_num
+  linarith
+
+/-- E06 `N = 7` honest-ceiling gap: `51156 / 83818.22 < 0.66`
+(`≈ 0.61032 < 0.66`). The honest achievable quotient fails the gate. -/
+theorem premGamma_E06_N7_honest_ceiling_below_gate :
+    (51156 : ℝ) / 83818.22 < 0.66 := by
+  norm_num
+
+/-- E06 `N = 7` gap arithmetic: `0.61 + 0.05 = 0.66` exact. -/
+theorem premGamma_E06_N7_gap_arith :
+    (0.61 : ℝ) + 0.05 = 0.66 := by
+  norm_num
+
+/-- E06 `N = 8` next rung (filed, not fixed): the `N = 7` honest lower `0.61`
+sits `0.05` below `0.66`, so sufficiency is NOT closed here. Do NOT force;
+the ladder moves to `N = 8` (no `N = 8` numerals banked this turn). -/
+def premGamma_E06_N8_next : Prop :=
+  (0.61 : ℝ) < 0.66
+
 end Door3PremiseGamma
