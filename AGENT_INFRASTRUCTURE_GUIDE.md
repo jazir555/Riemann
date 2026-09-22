@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 WIRE-PIVOT (background `ses_f347eb726`, proof-only,
+  grep-clean, wiring-only commit): all four zero-line strips widened to
+  neighborhoods (continuity, no new premise). Sups (40/1000) remain the
+  wall; final ledger next.
 - 2026-09-22 BALLADV-R02PT104 (background `ses_f347ff8e8`, proof-only,
   grep-clean, ball_advance-only commit): pointwise104 CLOSED (K=838.29)
   → dom104 + `:1636` CLOSED via bridge. R02 Summable dominator DONE;

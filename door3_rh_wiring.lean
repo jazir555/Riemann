@@ -2373,3 +2373,236 @@ theorem wireSup1000_joint_exceeds_budget : (1000 : ℝ) < (319488 : ℝ) := by
   norm_num
 
 end Door3RHWiring
+
+/-! ## WIRE-PIVOT zero-line strips to neighborhoods (append-only, value + residual).
+
+Grep (read before filing, reference only):
+* zero-line feeders `door3_rh_wiring.lean:1949-1990`
+  (`wireStrip_top_M40_at_zero_of_ballSup40`), `:2040-2080`
+  (`wireStrip_bottom_M40_at_zero_of_ballSup40`), `:2141-2182`
+  (`wireStrip_top_M1000_at_zero_of_ballSup1000`), `:2243-2283`
+  (`wireStrip_bottom_M1000_at_zero_of_ballSup1000`); each is the pointwise
+  endpoint `1/2` (`:1855-1857`, `:1897-1899`) plus a closed-ball sup
+  (`C = 40` / `C = 1000` on `Metric.closedBall 0 12`) via the banked
+  deriv bridges (`door3_sliver_edge.lean:708-716`, `:768-776`,
+  `:931-939`, `:942-950`, pair `:953-968`; mono lifts `:971-986`).
+* sup infeasibility `door3_rh_wiring.lean:2371-2373`
+  (`wireSup1000_joint_exceeds_budget`: `1000 < 319488`) rebuilt from
+  `poly_upper_closedBall12` (`:1079-1084`, `<= 79`),
+  `piOf_upper_closedBall12` (`:1146-1163`, `<= 4096`),
+  `poly_pi_upper_closedBall12` (`:1166-1180`, joint `<= 319488`).
+  The product route alone already exceeds the `1000` budget, so the
+  `C = 1000` sup premise stays OPEN; no uniform full-ball upper is
+  supplied in-tree (poles at `s = 0` / `s = 1` lie in the ball).
+* transfer + differentiability `central_cover_assembly.lean:828`
+  (`xiShiftedEntire_differentiable`), `:836-840`
+  (`xiShifted_eq_entire_on_strip`), `:853-864`
+  (`xiShifted_differentiableAt_of_mem_strip`); engines
+  `rh_certificate_infra.lean:459-465`
+  (`upper_boundary_nonvanishing_from_outer_bound`),
+  `door3_top_edge.lean:397-443`
+  (`lower_boundary_nonvanishing_from_outer_bound`).
+* continuity API is Mathlib-only (`Metric.continuousAt_iff`,
+  `DifferentiableAt.continuousAt`, `dist_eq_norm`).
+
+Pivot: the sup premises are infeasible as stated (`319488` vs `1000`),
+so instead of forcing the sup, widen what is already banked: each
+`x = 0` line becomes an `xiShiftedEntire` neighborhood (`|x| < δ`
+at fixed `y`) via the open-set argument (nonzero at a point plus
+continuity gives a ball where the function stays nonzero). The generic
+ball lemma below banks the principle once; the four widened feeders
+chain it with the four zero-line feeders (transferred to the entire
+extension by strip agreement at the base point).
+
+Value: four entire-level neighborhoods, conditional only on the same
+ball sups as the zero-line feeders (no new analytic premise).
+Gap filed honestly as `wirePivot_neighborhood_residual`: the `C = 1000`
+sup, both uniform `1/2` lowers, and — for neighbors off the `x = 0`
+line — `xiShifted` transfer needs strip membership of `w`
+(`xiShifted_eq_entire_on_strip` applies only for `|Im| < 1/2`).
+-/
+
+namespace Door3RHWiring
+
+/-- Generic widening principle: an entire-level nonvanishing point gives a
+ball on which the function stays nonzero (continuity plus the reverse
+triangle inequality). -/
+theorem entire_ball_nonvan_of_ne (p : ℂ)
+    (hne : CentralCoverAssembly.xiShiftedEntire p ≠ 0) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ, dist w p < δ →
+      CentralCoverAssembly.xiShiftedEntire w ≠ 0 := by
+  have hcont : ContinuousAt CentralCoverAssembly.xiShiftedEntire p :=
+    (CentralCoverAssembly.xiShiftedEntire_differentiable p).continuousAt
+  have hpos : 0 < ‖CentralCoverAssembly.xiShiftedEntire p‖ :=
+    norm_pos_iff.mpr hne
+  have heps : 0 < ‖CentralCoverAssembly.xiShiftedEntire p‖ / 2 := by
+    linarith
+  obtain ⟨δ, hδpos, hδ⟩ := Metric.continuousAt_iff.mp hcont _ heps
+  refine ⟨δ, hδpos, fun w hw => ?_⟩
+  have hdist : dist (CentralCoverAssembly.xiShiftedEntire w)
+      (CentralCoverAssembly.xiShiftedEntire p) <
+      ‖CentralCoverAssembly.xiShiftedEntire p‖ / 2 :=
+    hδ hw
+  intro h0
+  rw [dist_eq_norm] at hdist
+  rw [h0, zero_sub, norm_neg] at hdist
+  linarith
+
+/-- WIRE-PIVOT top M40 neighborhood at `x = 0`: the banked zero-line
+feeder (`wireStrip_top_M40_at_zero_of_ballSup40`) transferred to the
+entire extension, widened by `entire_ball_nonvan_of_ne`. Conditional
+only on the same `C = 40` closed-ball sup. -/
+theorem wireStrip_top_M40_neighborhood_of_ballSup40
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ) (hy_low : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y)
+    (hy_top : y < (1 / 2 : ℝ)) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+      dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+        CentralCoverAssembly.xiShiftedEntire w ≠ 0 := by
+  have hbase : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 :=
+    wireStrip_top_M40_at_zero_of_ballSup40 hC y hy_low hy_top
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by
+    linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by
+    simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hstrip_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hy_top
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  have hent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    intro h0
+    apply hbase
+    rw [hagree]
+    exact h0
+  exact entire_ball_nonvan_of_ne _ hent
+
+/-- WIRE-PIVOT bottom M40 neighborhood at `x = 0`: mirror of the top M40
+widening, chaining `wireStrip_bottom_M40_at_zero_of_ballSup40`. -/
+theorem wireStrip_bottom_M40_neighborhood_of_ballSup40
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ) (hy_lo : -(1 / 2 : ℝ) < y)
+    (hy_hi : y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+      dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+        CentralCoverAssembly.xiShiftedEntire w ≠ 0 := by
+  have hbase : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 :=
+    wireStrip_bottom_M40_at_zero_of_ballSup40 hC y hy_lo hy_hi
+  have hstrip_hi : y < (1 / 2 : ℝ) := by
+    linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by
+    simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hy_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hstrip_hi
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  have hent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    intro h0
+    apply hbase
+    rw [hagree]
+    exact h0
+  exact entire_ball_nonvan_of_ne _ hent
+
+/-- WIRE-PIVOT top M1000 neighborhood at `x = 0`: the banked zero-line
+feeder (`wireStrip_top_M1000_at_zero_of_ballSup1000`) transferred to the
+entire extension, widened by `entire_ball_nonvan_of_ne`. Conditional
+only on the same `C = 1000` closed-ball sup (which stays OPEN per the
+`319488` vs `1000` gap). -/
+theorem wireStrip_top_M1000_neighborhood_of_ballSup1000
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ) (hy_low : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y)
+    (hy_top : y < (1 / 2 : ℝ)) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+      dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+        CentralCoverAssembly.xiShiftedEntire w ≠ 0 := by
+  have hbase : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 :=
+    wireStrip_top_M1000_at_zero_of_ballSup1000 hC y hy_low hy_top
+  have hstrip_lo : -(1 / 2 : ℝ) < y := by
+    linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by
+    simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hstrip_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hy_top
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  have hent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    intro h0
+    apply hbase
+    rw [hagree]
+    exact h0
+  exact entire_ball_nonvan_of_ne _ hent
+
+/-- WIRE-PIVOT bottom M1000 neighborhood at `x = 0`: mirror of the top
+M1000 widening, chaining `wireStrip_bottom_M1000_at_zero_of_ballSup1000`. -/
+theorem wireStrip_bottom_M1000_neighborhood_of_ballSup1000
+    (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ) (hy_lo : -(1 / 2 : ℝ) < y)
+    (hy_hi : y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+      dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+        CentralCoverAssembly.xiShiftedEntire w ≠ 0 := by
+  have hbase : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 :=
+    wireStrip_bottom_M1000_at_zero_of_ballSup1000 hC y hy_lo hy_hi
+  have hstrip_hi : y < (1 / 2 : ℝ) := by
+    linarith
+  have him : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im = y := by
+    simp
+  have hgt : -(1 / 2 : ℝ) < ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im := by
+    rw [him]
+    exact hy_lo
+  have hlt : ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)).im < (1 / 2 : ℝ) := by
+    rw [him]
+    exact hstrip_hi
+  have hagree : xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) =
+      CentralCoverAssembly.xiShiftedEntire
+        ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) :=
+    CentralCoverAssembly.xiShifted_eq_entire_on_strip _ hgt hlt
+  have hent : CentralCoverAssembly.xiShiftedEntire
+      ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0 := by
+    intro h0
+    apply hbase
+    rw [hagree]
+    exact h0
+  exact entire_ball_nonvan_of_ne _ hent
+
+/-- WIRE-PIVOT exact residual: neighborhoods above are entire-level and
+per-point (`δ` depends on `y`); what remains is (a) the `C = 1000` sup on
+`Metric.closedBall 0 12` (unclosable via the product route since the
+joint poly-pi bound `319488` already exceeds `1000`), (b) both uniform
+`1/2` edge lowers over `Set.Icc (-10) 10`, and (c) for off-line
+neighbors `w`, `xiShifted` transfer needs `w` in the open strip. -/
+def wirePivot_neighborhood_residual : Prop :=
+  (∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ)) ∧
+  (∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  (∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      ((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖)
+
+end Door3RHWiring
