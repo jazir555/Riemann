@@ -1250,3 +1250,194 @@ theorem FC_U22_shortfall : (0.0257 : ℝ) - 0.0195 = 0.0062 := by norm_num
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-LAMBDA0 wave (i): `‖piOf‖` upper on the fat rect (fenced)
+
+Grep-first record (this wave, verified before writing):
+* `DerivCauchyBridge.piOf` (`central_cover_assembly.lean:6331`):
+  `((Real.pi : ℂ) ^ (-(s / 2)))`.
+* Norm bridge `Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _`
+  (`central_cover_assembly.lean:6399`, `:6738`, `:9694`; same shape in
+  `door3_cutR10_ballsup.lean:233` `ballPi_upper` for a negative-Re ball).
+* Exponent rewrites `Complex.div_ofNat_re` + `Complex.neg_re`
+  (`central_cover_assembly.lean:6400-6401`).
+* Monotonicity `Real.rpow_le_rpow_of_exponent_le` with
+  `Real.pi_gt_three` (`central_cover_assembly.lean:9704`).
+* `π ≤ 3.1416` via `le_of_lt Real.pi_lt_d4`
+  (`door3_first_cell.lean:469` pattern).
+* 16th-power `(9/16, 16)` descent via `Real.rpow_natCast`,
+  `Real.rpow_mul`, `pow_le_pow_left₀`, `abs_le_of_sq_le_sq'` iterated
+  (mirrors banked `pi_rpow_quarter_le_two`, `:9662`, which uses the
+  4th-power `(1/4, 4)` descent; 16 = 2^4 needs four sqrt steps).
+
+Honest value: `π^0.56 ≈ 1.898` (python `math.pi**0.56`; prompt `1.87`
+is ~1.5% low). Route proves the looser `≤ 2` via `0.56 ≤ 9/16` and
+`3.1416^9 ≤ 2^16` (`29809.73 ≤ 65536`, `norm_num`, numerals ≤ 6 digits).
+`‖piOf s‖ = π^(-Re/2)` is decreasing in `Re`, so on the fat rect the max
+is at minimal `Re = -1.12` (exponent `0.56`); only the lower `Re` bound is
+used (`hre_hi` kept as an explicit binder for the fat-rect shape).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Rpow cap `π^0.56 ≤ 2` via the `9/16` window (`0.56 ≤ 0.5625`,
+`3.1416^9 ≤ 2^16`). -/
+theorem FC_pi_rpow_056_le_two : Real.pi ^ (0.56 : ℝ) ≤ 2 := by
+  have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+  have hbase : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp_le : (0.56 : ℝ) ≤ 9 / 16 := by norm_num
+  have hmon : Real.pi ^ (0.56 : ℝ) ≤ Real.pi ^ ((9 / 16 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le hbase hexp_le
+  have e : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((16 : ℕ)) = Real.pi ^ ((9 : ℕ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul Real.pi_pos.le]
+    have hexp : ((9 / 16 : ℝ)) * ((((16 : ℕ)) : ℝ)) = ((((9 : ℕ)) : ℝ)) := by
+      norm_num
+    rw [hexp]
+  have hle9 : Real.pi ^ ((9 : ℕ)) ≤ (2 : ℝ) ^ ((16 : ℕ)) := by
+    have h1 : Real.pi ^ ((9 : ℕ)) ≤ (3.1416 : ℝ) ^ ((9 : ℕ)) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 9
+    have h2 : (3.1416 : ℝ) ^ ((9 : ℕ)) ≤ (2 : ℝ) ^ ((16 : ℕ)) := by norm_num
+    exact le_trans h1 h2
+  have h16 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((16 : ℕ)) ≤ (2 : ℝ) ^ ((16 : ℕ)) := by
+    rw [e]
+    exact hle9
+  have e16 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((16 : ℕ))
+      = (((Real.pi ^ ((9 / 16 : ℝ))) ^ ((8 : ℕ))) ^ ((2 : ℕ))) := by ring
+  have f16 : (2 : ℝ) ^ ((16 : ℕ)) = ((((2 : ℝ)) ^ ((8 : ℕ))) ^ ((2 : ℕ))) := by
+    ring
+  rw [e16, f16] at h16
+  have h8 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((8 : ℕ)) ≤ (2 : ℝ) ^ ((8 : ℕ)) :=
+    (abs_le_of_sq_le_sq' h16 (by norm_num)).2
+  have e8 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((8 : ℕ))
+      = (((Real.pi ^ ((9 / 16 : ℝ))) ^ ((4 : ℕ))) ^ ((2 : ℕ))) := by ring
+  have f8 : (2 : ℝ) ^ ((8 : ℕ)) = ((((2 : ℝ)) ^ ((4 : ℕ))) ^ ((2 : ℕ))) := by
+    ring
+  rw [e8, f8] at h8
+  have h4 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((4 : ℕ)) ≤ (2 : ℝ) ^ ((4 : ℕ)) :=
+    (abs_le_of_sq_le_sq' h8 (by norm_num)).2
+  have e4 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((4 : ℕ))
+      = (((Real.pi ^ ((9 / 16 : ℝ))) ^ ((2 : ℕ))) ^ ((2 : ℕ))) := by ring
+  have f4 : (2 : ℝ) ^ ((4 : ℕ)) = ((((2 : ℝ)) ^ ((2 : ℕ))) ^ ((2 : ℕ))) := by
+    ring
+  rw [e4, f4] at h4
+  have h2 : (Real.pi ^ ((9 / 16 : ℝ))) ^ ((2 : ℕ)) ≤ (2 : ℝ) ^ ((2 : ℕ)) :=
+    (abs_le_of_sq_le_sq' h4 (by norm_num)).2
+  have hcap : Real.pi ^ ((9 / 16 : ℝ)) ≤ 2 :=
+    (abs_le_of_sq_le_sq' h2 (by norm_num)).2
+  exact le_trans hmon hcap
+
+/-- Banked `‖piOf‖ ≤ 2` on the fat rect (`Re ∈ [-1.12, 1.91]`, patch item
+(i); max at minimal `Re` since `π^(-Re/2)` decreases in `Re`). -/
+theorem FC_piOf_upper_fat {s : ℂ} (hre_lo : (-1.12 : ℝ) ≤ s.re)
+    (hre_hi : s.re ≤ (1.91 : ℝ)) : ‖DerivCauchyBridge.piOf s‖ ≤ 2 := by
+  unfold DerivCauchyBridge.piOf
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _]
+  have hdiv : ((s / 2 : ℂ)).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hneg : (-(s / 2)).re = -((s / 2).re) := Complex.neg_re _
+  have hexp_eq : (-(s / 2)).re = -s.re / 2 := by rw [hneg, hdiv]; ring
+  rw [hexp_eq]
+  have hexp_le : -s.re / 2 ≤ (0.56 : ℝ) := by linarith
+  have hmon : Real.pi ^ (-s.re / 2) ≤ Real.pi ^ (0.56 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp_le
+  exact le_trans hmon FC_pi_rpow_056_le_two
+
+end Door3FirstCellClose
+
+/-! ## R02-CELL5 wave: polar caps `‖1/s‖, ‖1/(1-s)‖` on fat rect (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Inverse-norm shape `norm_inv` (`door3_off_axis_certificates.lean:2173`,
+  `door3_pilot_R00_zeta.lean:158`; `norm_div` + `norm_one` give the same
+  `‖1/s‖ = 1/‖s‖` used below).
+* Im-floor shape `Complex.abs_im_le_norm` (`central_cover_assembly.lean:6290`,
+  `:9559`; `door3_first_cell.lean:746` uses it for the fat-ball enclosure).
+* Reciprocal-monotone shape `one_div_le_one_div_of_le`
+  (`central_cover_assembly.lean:6462`; `door3_dp_headC1.lean:196`).
+* Polar identity `completedRiemannZeta₀_eq_polar_plus_xi`
+  (`door3_cutR10_ballsup.lean:357`, from `riemann_hypothesis.lean:1668`):
+  `completedRiemannZeta₀ s = 1/s + 1/(1-s) + …`, so these two caps feed the
+  wide-`Λ₀` route (patch phase FE + Stirling).
+* Im shapes `Complex.sub_im` (`door3_first_cell.lean:747`),
+  `Complex.one_im` (`:701`, `:703`).
+
+PiOf-upper lane check (NOT duplicated): no `piOf` upper in this file (only
+`FC_pi_lower_banked` `:199`); the banked `pi_upper_R02_disc`
+(`central_cover_assembly.lean:6396`) needs `0.05 ≤ s.re`, so it does NOT cover
+the fat rect (`Re ∈ [-1.12, 1.91]`). FIRSTCELL-PIUPPER owns that lane; left
+alone here.
+
+Fat rect (from `FC_fat_s_bounds` `:755`): `Re ∈ [-1.12, 1.91]`,
+`Im ∈ [-8.27, -5.23]`. Hence `|Im| ≥ 5.23` on both `s` and `1 - s`
+(`Im(1-s) = -Im(s) ∈ [5.23, 8.27]`), so `‖s‖, ‖1-s‖ ≥ 5.23` and each polar
+norm is `≤ 1/5.23 ≈ 0.1912 ≤ 0.20`. No `s ≠ 0` premise needed: the Im bounds
+already exclude `0` and `1`. No force; both caps banked honestly.
+-/
+
+namespace Door3FirstCellClose
+
+/-- Polar cap `‖1/s‖ ≤ 1/5.23` from the Im floor (`|Im| ≥ 5.23`). -/
+theorem FC_polar_inv_norm_le (s : ℂ)
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / s‖ ≤ 1 / (5.23 : ℝ) := by
+  have him_le : |s.im| ≤ ‖s‖ := Complex.abs_im_le_norm s
+  have hnonpos : s.im ≤ 0 := by linarith
+  have habs : (5.23 : ℝ) ≤ |s.im| := by
+    rw [abs_of_nonpos hnonpos]
+    linarith
+  have hnorm : (5.23 : ℝ) ≤ ‖s‖ := le_trans habs him_le
+  have hpos : (0 : ℝ) < 5.23 := by norm_num
+  have hdiv : ‖(1 : ℂ) / s‖ = 1 / ‖s‖ := by
+    rw [norm_div, norm_one]
+  rw [hdiv]
+  exact one_div_le_one_div_of_le hpos hnorm
+
+/-- Polar cap `‖1/(1-s)‖ ≤ 1/5.23` from the mirrored Im floor. -/
+theorem FC_polar_one_sub_inv_norm_le (s : ℂ)
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / (1 - s)‖ ≤ 1 / (5.23 : ℝ) := by
+  have him_eq : (1 - s).im = -s.im := by
+    rw [Complex.sub_im, Complex.one_im, zero_sub]
+  have him_le : |(1 - s).im| ≤ ‖1 - s‖ := Complex.abs_im_le_norm _
+  have hpos_im : (0 : ℝ) ≤ -s.im := by linarith
+  have habs : (5.23 : ℝ) ≤ |(1 - s).im| := by
+    rw [him_eq, abs_of_nonneg hpos_im]
+    linarith
+  have hnorm : (5.23 : ℝ) ≤ ‖1 - s‖ := le_trans habs him_le
+  have hpos : (0 : ℝ) < 5.23 := by norm_num
+  have hdiv : ‖(1 : ℂ) / (1 - s)‖ = 1 / ‖1 - s‖ := by
+    rw [norm_div, norm_one]
+  rw [hdiv]
+  exact one_div_le_one_div_of_le hpos hnorm
+
+/-- Numeric form `‖1/s‖ ≤ 0.20` (`1/5.23 ≈ 0.1912`). -/
+theorem FC_polar_inv_norm_le_020 (s : ℂ)
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / s‖ ≤ 0.20 := by
+  have h := FC_polar_inv_norm_le s him_lo him_hi
+  have hnum : (1 : ℝ) / 5.23 ≤ 0.20 := by norm_num
+  exact le_trans h hnum
+
+/-- Numeric form `‖1/(1-s)‖ ≤ 0.20`. -/
+theorem FC_polar_one_sub_inv_norm_le_020 (s : ℂ)
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / (1 - s)‖ ≤ 0.20 := by
+  have h := FC_polar_one_sub_inv_norm_le s him_lo him_hi
+  have hnum : (1 : ℝ) / 5.23 ≤ 0.20 := by norm_num
+  exact le_trans h hnum
+
+/-- Fat-rect wrapper: `‖1/s‖ ≤ 1/5.23` on `Re ∈ [-1.12, 1.91]`,
+`Im ∈ [-8.27, -5.23]` (Re bounds unused: Im floor suffices). -/
+theorem FC_fat_polar_inv_le (s : ℂ)
+    (_hre_lo : (-1.12 : ℝ) ≤ s.re) (_hre_hi : s.re ≤ (1.91 : ℝ))
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / s‖ ≤ 1 / (5.23 : ℝ) :=
+  FC_polar_inv_norm_le s him_lo him_hi
+
+/-- Fat-rect wrapper: `‖1/(1-s)‖ ≤ 1/5.23` (same rect). -/
+theorem FC_fat_polar_one_sub_inv_le (s : ℂ)
+    (_hre_lo : (-1.12 : ℝ) ≤ s.re) (_hre_hi : s.re ≤ (1.91 : ℝ))
+    (him_lo : (-8.27 : ℝ) ≤ s.im) (him_hi : s.im ≤ (-5.23 : ℝ)) :
+    ‖(1 : ℂ) / (1 - s)‖ ≤ 1 / (5.23 : ℝ) :=
+  FC_polar_one_sub_inv_norm_le s him_lo him_hi
+
+end Door3FirstCellClose
+

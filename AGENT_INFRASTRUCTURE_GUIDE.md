@@ -5934,6 +5934,23 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-POLAR (background `ses_f34deca25`, proof-only,
+  grep-clean, first_cell-only commit): patch item (ii) DONE — polar
+  caps `‖1/s‖,‖1/(1-s)‖ ≤ 0.20` (`:1412/:1420`, 1/5.23≈0.1912 via
+  abs_im_le_norm; Im bounds exclude 0/1) + fat wrappers `:1429/:1436`.
+  PiOf-upper untouched (PIUPPER's lane). Lambda0 patch: (ii) done,
+  (i)+(iii) owed.
+- 2026-09-22 DERIV-DIFFCONT (background `ses_f34df805f`, proof-only,
+  grep-clean, deriv_up-only commit): `zetaDiffCont_mid` CLOSED-syntactic
+  — `dMid_closedBall_re_upper :1059` + `:1074` (differentiableAt off
+  pole-1, Re≤0.405<1 via closure_ball) + banked `:1087`. Unverified by
+  build. Outer/leaf/inner DiffCont still open.
+- 2026-09-22 DERIV-LEAF934 (background `ses_f34deca24`, proof-only,
+  grep-clean, same commit): leaf filled at honest 934 —
+  `zetaSupOnSphere_leaf_934_filled :1215` (R02-disc covers dLeaf sphere,
+  margins 0.14+/1.49+) + `zetaDeriv_leaf_934_of_diffCont :1225`
+  (deriv ≤93400 modulo DiffCont). Pre-existing ≤10 untouched. Wiring
+  (apply banked DiffCont to close mid/inner deriv) owned by DERIV-WIRE.
 - 2026-09-22 STIRLING-GAMMANEED (background `ses_f34df805e`, proof-only,
   NO-EDIT gap — MAJOR FINDING): `gamNeed_mid` 0.04 is BELOW TRUE
   (≈0.0463 by Stirling √(2π)·|y|^{x-1/2}·e^{-π|y|/2}) — UNCLOSABLE by
