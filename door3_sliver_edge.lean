@@ -1016,3 +1016,71 @@ theorem uniform_M1000_pair_of_ballSup40
   exact uniform_M1000_pair_of_closedBall h1000
 
 end Door3SliverEdge
+
+/-! ### (N) Poly sup on closedBall 12 for M1000 closers
+
+Grepped:
+* M1000 block `door3_sliver_edge.lean:931-1004` (`uniform_top_deriv_M1000_of_closedBall`,
+  `uniform_bot_deriv_M1000_of_closedBall`, `uniform_M1000_pair_of_closedBall`,
+  `ballSup40_to_ballSup1000`, `ballSup79_to_ballSup1000`,
+  `uniform_M1000_pair_of_ballSup79`, `uniform_M1000_pair_of_ballSup40`);
+* poly shape `central_cover_assembly.lean:6328` (`polyOf s = s * (s - 1) / 2`);
+* banked poly uppers `central_cover_assembly.lean:6360` (`poly_upper_R02_disc <= 42`),
+  edge rects `<= 56` (`edgeS00_poly_upper_rect :6699` and siblings),
+  generic lower `edgeLower_poly_upper_generic :8167`.
+
+What is banked here (honest triangle route, no product claim):
+* `poly_upper_closedBall12_le78`: for `s` in `closedBall 0 12`,
+  `‖polyOf s‖ <= 78` via `‖s‖ <= 12`, `‖s - 1‖ <= 13`, `norm_mul`, `norm_div`;
+  `12 * 13 / 2 = 78`;
+* `poly_upper_closedBall12`: the `<= 79` form feeding the `79 -> 1000` lift shape.
+
+Residual (exact, open, not forced):
+* poly `<= 79` alone does not give `‖xiShiftedEntire z‖ <= 79` or `<= 1000`
+  on `closedBall 0 12`; the full product needs pi / Gamma / zeta uppers
+  on ball-12, which are not banked here;
+* M1000 deriv closers stay conditional on the `hC : ‖xiShiftedEntire‖ <= 79`
+  premise via `uniform_M1000_pair_of_ballSup79`; poly supplies only one factor.
+-/
+
+namespace Door3SliverEdge
+
+/-- Poly sup `78` on `closedBall 0 12` via triangle (`12 * 13 / 2`). -/
+theorem poly_upper_closedBall12_le78 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (78 : ℝ) := by
+  unfold CentralCoverAssembly.polyOf
+  have hdist : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (12 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hle : ‖s - 1‖ ≤ ‖s‖ + ‖(1 : ℂ)‖ := norm_sub_le s 1
+  have h1 : ‖(1 : ℂ)‖ = (1 : ℝ) := norm_one
+  have hs1 : ‖s - 1‖ ≤ (13 : ℝ) := by
+    rw [h1] at hle
+    linarith
+  have hstep1 : ‖s‖ * ‖s - 1‖ ≤ (12 : ℝ) * ‖s - 1‖ :=
+    mul_le_mul_of_nonneg_right hnorm (norm_nonneg _)
+  have hstep2 : (12 : ℝ) * ‖s - 1‖ ≤ (12 : ℝ) * (13 : ℝ) :=
+    mul_le_mul_of_nonneg_left hs1 (by norm_num)
+  have hmul : ‖s * (s - 1)‖ ≤ (12 : ℝ) * (13 : ℝ) := by
+    have hnm : ‖s * (s - 1)‖ = ‖s‖ * ‖s - 1‖ := norm_mul s (s - 1)
+    rw [hnm]
+    exact le_trans hstep1 hstep2
+  have hdiv : ‖s * (s - 1) / (2 : ℂ)‖ ≤ (12 : ℝ) * (13 : ℝ) / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith
+  have hcalc : (12 : ℝ) * (13 : ℝ) / 2 = (78 : ℝ) := by norm_num
+  rw [hcalc] at hdiv
+  exact hdiv
+
+/-- Poly sup `79` on `closedBall 0 12` (the shape feeding the `79 -> 1000` lift). -/
+theorem poly_upper_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (79 : ℝ) := by
+  have h78 := poly_upper_closedBall12_le78 hs
+  have h7879 : (78 : ℝ) ≤ (79 : ℝ) := by norm_num
+  exact le_trans h78 h7879
+
+end Door3SliverEdge

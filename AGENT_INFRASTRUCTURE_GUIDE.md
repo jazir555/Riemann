@@ -6129,6 +6129,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 SLIVER-POLY79 (background `ses_f3489af54`, proof-only,
+  grep-clean, sliver_edge-only commit): poly ≤78/79 on closedBall-12
+  CLOSED (`:1049-1084`, 12·13/2). Product still needs pi/Gamma/zeta
+  ball-12 uppers.
+- 2026-09-22 ASSEMBLY-R03 (background `ses_f34896f1e`, proof-only,
+  grep-clean, assembly-only commit): R03 leaf+H conditional
+  (`:17490-17527`, two-tenths + 0.07, R02 untouched per grep-first).
 - 2026-09-22 CUTL-ZETA (background `ses_f348b0738`, proof-only,
   grep-clean, cutL10-only commit): zeta wall quantified (6 = 4x over
   3/2 proxy; need 0.019; wall 316x, proxy 79x) + wall spec `:2057`.
