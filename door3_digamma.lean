@@ -1715,3 +1715,204 @@ theorem stirlingNumeric_mid_proof : stirlingNumeric_mid := by
   exact le_trans hMono (le_trans hInv hNum)
 
 end Door3Digamma
+
+/-! ## 15. FINAL ledger: single audit of every banked value + every open residual.
+
+Grep basis (read before writing; exact lines):
+- centers/wires: sOuter/sLeaf/sMid/sInner 94-108, re/im 110-124,
+  wireOuter/wireLeaf/wireMid/wireInner 126-140, re_pos 142-160.
+- D3SG reuse: sg_norm_le_real 164, sg_shift_one 168, sg_factor_le_one 177.
+- recurrence machinery: psi_up_one 183, psi_shift_nat 187,
+  psi_disc_down_of_up 225, psi_disc_transport 239,
+  shift_avoid_of_re_pos 247, avoid_outer/leaf/mid/inner 256-270.
+- bridge: gamma_deriv_eq 274, gOf 281, gOf_half_hasDerivAt 283,
+  gOf_hasDerivAt 287, gOf_deriv_eq 291, gammaPrime_le_of_psiDisc 295.
+- psi centers: cOuter/cLeaf/cMid/cInner 353-359, re/im 361-375,
+  cNorm_outer 377, cNorm_leaf 384, cNorm_mid 391, cNorm_inner 398.
+- needs: psiNeed_outer/leaf/mid/inner 411-417, gamNeed_outer/leaf/mid/inner
+  419-425, digamma_disc_outer/leaf/mid/inner 427-437,
+  gammaPrime_outer_le 439, gammaPrime_leaf_le 458, gammaPrime_mid_le 477,
+  gammaPrime_inner_le 496.
+- gross budgets: allow_outer 518, allow_leaf 520, allow_mid 522,
+  allow_inner 524; gaps gap_outer 528, gap_leaf 530, gap_mid 532,
+  gap_inner 534; ratios ratio_outer 536, ratio_leaf 538, ratio_mid 540,
+  ratio_inner 542.
+- ladder: psi_transport_outer 587, psi_transport_leaf 593,
+  psi_transport_mid 599, psi_transport_inner 605.
+- shifted specs: cNOuter/cNLeaf/cNMid/cNInner 630-640,
+  psiShiftNeed_outer 642, psiShiftNeed_leaf 645, psiShiftNeed_mid 648,
+  psiShiftNeed_inner 651, cNOuter_sub 654, cNLeaf_sub 659, cNMid_sub 664,
+  cNInner_sub 669, psiShift_implies_psiNeed_outer 674,
+  psiShift_implies_psiNeed_leaf 683, psiShift_implies_psiNeed_mid 692,
+  psiShift_implies_psiNeed_inner 701,
+  doorShiftNeed_outer/leaf/mid/inner 710-716.
+- hne/hG: wNoPole_outer 769, wNoPole_leaf 774, wNoPole_mid 779,
+  wNoPole_inner 784, hne_outer 789, hne_leaf 792, hne_mid 795,
+  hne_inner 798, hG_outer 801, hG_leaf 805, hG_mid 809, hG_inner 813,
+  gammaPrime_outer_of_shift 817, gammaPrime_leaf_of_shift 824,
+  gammaPrime_mid_of_shift 831, gammaPrime_inner_of_shift 838.
+- outer split: wOuter8_re 879, psiShiftNeed_outer_of_split 888,
+  psiShiftNeed_outer_of_chain 903, psiOuterMainRemainder 917,
+  psiOuterCloseRemainder 920.
+- inner cap: wInner_eq_mk 986, wInner_re_eq 990, wInner_abs_im 993,
+  realGamma_01975_le_six 998, gamInner_decay_inst 1021,
+  exp_neg01875_lower 1030, gamInner_envelope_exceeds 1036.
+- quotients: wOuter_eq_mk 1088, wLeaf_eq_mk 1092, wMid_eq_mk 1096,
+  gamOuter_quotient_shift3 1100, gamLeaf_quotient_shift3 1105,
+  gamMid_mk_shift1_upper 1110, gamMid_quotient_shift1 1171,
+  gamOuter_gap_shift3 1176, gamLeaf_gap_shift3 1178, gamMid_gap_shift1 1180,
+  gamOuter_ratio_shift3 1182, gamLeaf_ratio_shift3 1184,
+  gamMid_ratio_shift1 1186.
+- decay: wOuter_abs_im 1245, wLeaf_abs_im 1250, wMid_abs_im 1255,
+  realGamma_01_le_ten 1260, gamOuter_decay_inst 1283,
+  gamLeaf_decay_inst 1292, gamMid_decay_inst 1301, expOuter_upper 1310,
+  expLeaf_upper 1334, expMid_upper 1358, gamOuter_decay_crude 1382,
+  gamLeaf_decay_crude 1393, gamMid_decay_crude 1404,
+  gamOuter_decay_gap 1415, gamLeaf_decay_gap 1417, gamMid_decay_gap 1419.
+- height specs: stirlingDecay_outer 1421, stirlingDecay_leaf 1424,
+  stirlingDecay_mid 1427, stirlingNumeric_outer 1430,
+  stirlingNumeric_leaf 1433, stirlingNumeric_mid 1436,
+  stirlingCloses_outer 1439, stirlingCloses_leaf 1447, stirlingCloses_mid 1455.
+- height numerics: piDivTwo_ge_15 1516, expOne_ge_27 1520,
+  exp65625_ge_500 1524, exp50625_ge_125 1550, exp35625_ge_25 1565,
+  expNeg65625_le 1591, expNeg50625_le 1611, expNeg35625_le 1631,
+  stirlingNumeric_outer_proof 1651, stirlingNumeric_leaf_proof 1673,
+  stirlingNumeric_mid_proof 1695.
+- forbidden-token grep over file before this block:
+  returned empty; this block adds no such token.
+
+Verdict filed here (honest, conditional): all four groups GAP on the
+conditional gamma-prime chain (ratios 4.21 / 7.13 / 16.83 / 268.9);
+hne/hG CLOSED; transports CLOSED as conditionals; psiShiftNeed OPEN;
+gamNeed OPEN (outer/leaf/mid reduce to stirlingDecay specs since height
+numerics are now CLOSED; inner dead via block-11 envelope);
+stirlingDecay specs OPEN; stirlingNumeric specs CLOSED.
+The single audit Prop below conjoins banked numerics + closed core +
+open residual; only the banked halves are proved, the full ledger is
+filed, not proved. No unconditional disc is claimed.
+-/
+
+namespace Door3Digamma
+
+open scoped BigOperators
+
+def finalBankedNumerics : Prop :=
+  (‖cOuter‖ ≤ (3.112 : ℝ) ∧ ‖cLeaf‖ ≤ (2.902 : ℝ) ∧
+    ‖cMid‖ ≤ (2.548 : ℝ) ∧ ‖cInner‖ ≤ (3.539 : ℝ)) ∧
+  ((0.11 : ℝ) / (42.83 * 3) ≤ (0.000857 : ℝ) ∧
+    (0.15 : ℝ) / (26.24 * 3) ≤ (0.001906 : ℝ) ∧
+    (0.15 : ℝ) / (13.81 * 3) ≤ (0.003621 : ℝ) ∧
+    (0.09 : ℝ) / (0.79 * 3) ≤ (0.037975 : ℝ)) ∧
+  ((0.000857 : ℝ) < (0.003612 : ℝ) ∧ (0.001906 : ℝ) < (0.013608 : ℝ) ∧
+    (0.003621 : ℝ) < (0.06096 : ℝ) ∧ (0.037975 : ℝ) < (10.2128 : ℝ)) ∧
+  ((4.21 : ℝ) < (0.003612 : ℝ) / (0.000857 : ℝ) ∧
+    (7.13 : ℝ) < (0.013608 : ℝ) / (0.001906 : ℝ) ∧
+    (16.83 : ℝ) < (0.06096 : ℝ) / (0.003621 : ℝ) ∧
+    (268.9 : ℝ) < (10.2128 : ℝ) / (0.037975 : ℝ))
+
+theorem finalBankedNumerics_holds : finalBankedNumerics := by
+  unfold finalBankedNumerics
+  exact ⟨⟨cNorm_outer, cNorm_leaf, cNorm_mid, cNorm_inner⟩,
+    ⟨allow_outer, allow_leaf, allow_mid, allow_inner⟩,
+    ⟨gap_outer, gap_leaf, gap_mid, gap_inner⟩,
+    ⟨ratio_outer, ratio_leaf, ratio_mid, ratio_inner⟩⟩
+
+def finalClosedCore : Prop :=
+  (Complex.Gamma wOuter ≠ 0 ∧ Complex.Gamma wLeaf ≠ 0 ∧
+    Complex.Gamma wMid ≠ 0 ∧ Complex.Gamma wInner ≠ 0) ∧
+  (HasDerivAt Complex.Gamma (deriv Complex.Gamma wOuter) wOuter ∧
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wLeaf) wLeaf ∧
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wMid) wMid ∧
+    HasDerivAt Complex.Gamma (deriv Complex.Gamma wInner) wInner)
+
+theorem finalClosedCore_holds : finalClosedCore := by
+  unfold finalClosedCore
+  exact ⟨⟨hne_outer, hne_leaf, hne_mid, hne_inner⟩,
+    ⟨hG_outer, hG_leaf, hG_mid, hG_inner⟩⟩
+
+def finalTransportConj : Prop :=
+  (∀ (cN : ℂ) (rN : ℝ),
+    ‖Complex.digamma (wOuter + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN →
+    ‖Complex.digamma wOuter −
+      (cN − ∑ k ∈ Finset.range 8, (wOuter + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN) ∧
+  (∀ (cN : ℂ) (rN : ℝ),
+    ‖Complex.digamma (wLeaf + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN →
+    ‖Complex.digamma wLeaf −
+      (cN − ∑ k ∈ Finset.range 8, (wLeaf + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN) ∧
+  (∀ (cN : ℂ) (rN : ℝ),
+    ‖Complex.digamma (wMid + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN →
+    ‖Complex.digamma wMid −
+      (cN − ∑ k ∈ Finset.range 8, (wMid + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN) ∧
+  (∀ (cN : ℂ) (rN : ℝ),
+    ‖Complex.digamma (wInner + (((8 : ℕ)) : ℂ)) − cN‖ ≤ rN →
+    ‖Complex.digamma wInner −
+      (cN − ∑ k ∈ Finset.range 8, (wInner + (((k : ℕ)) : ℂ))⁻¹)‖ ≤ rN)
+
+theorem finalTransportConj_holds : finalTransportConj := by
+  unfold finalTransportConj
+  exact ⟨psi_transport_outer, psi_transport_leaf,
+    psi_transport_mid, psi_transport_inner⟩
+
+def finalHeightNumericsClosed : Prop :=
+  stirlingNumeric_outer ∧ stirlingNumeric_leaf ∧ stirlingNumeric_mid
+
+theorem finalHeightNumericsClosed_holds : finalHeightNumericsClosed := by
+  unfold finalHeightNumericsClosed
+  exact ⟨stirlingNumeric_outer_proof, stirlingNumeric_leaf_proof,
+    stirlingNumeric_mid_proof⟩
+
+def finalResidualConj : Prop :=
+  (psiShiftNeed_outer ∧ psiShiftNeed_leaf ∧
+    psiShiftNeed_mid ∧ psiShiftNeed_inner) ∧
+  (gamNeed_outer ∧ gamNeed_leaf ∧ gamNeed_mid ∧ gamNeed_inner) ∧
+  (doorShiftNeed_outer ∧ doorShiftNeed_leaf ∧
+    doorShiftNeed_mid ∧ doorShiftNeed_inner) ∧
+  (stirlingDecay_outer ∧ stirlingDecay_leaf ∧ stirlingDecay_mid)
+
+def doorFinalLedger : Prop :=
+  finalBankedNumerics ∧ finalClosedCore ∧
+    finalTransportConj ∧ finalHeightNumericsClosed ∧ finalResidualConj
+
+theorem doorFinalLedger_banked_half :
+    finalBankedNumerics ∧ finalClosedCore ∧
+      finalTransportConj ∧ finalHeightNumericsClosed := by
+  exact ⟨finalBankedNumerics_holds, finalClosedCore_holds,
+    finalTransportConj_holds, finalHeightNumericsClosed_holds⟩
+
+theorem finalVerdict_gap_outer : (0.000857 : ℝ) < (0.003612 : ℝ) :=
+  gap_outer
+
+theorem finalVerdict_gap_leaf : (0.001906 : ℝ) < (0.013608 : ℝ) :=
+  gap_leaf
+
+theorem finalVerdict_gap_mid : (0.003621 : ℝ) < (0.06096 : ℝ) :=
+  gap_mid
+
+theorem finalVerdict_gap_inner : (0.037975 : ℝ) < (10.2128 : ℝ) :=
+  gap_inner
+
+/-! Residual list (exact, complete, still open — filed, not proved):
+R1 psiShiftNeed_outer 642 at Re 8.1975, radius 0.5:
+  needs explicit-remainder Stirling bound for Complex.digamma
+  (Gauss integral rep TODO at Mathlib Gamma Digamma line 31).
+R2 psiShiftNeed_leaf 645 at Re 8.1, radius 0.5: same need as R1.
+R3 psiShiftNeed_mid 648 at Re 8.1975, radius 0.5: same need as R1.
+R4 psiShiftNeed_inner 651 at Re 8.1975, radius 1: same need as R1.
+R5 gamNeed_outer 419 need 0.002: best shift 0.032, best crude 5.65;
+  reduces via stirlingCloses_outer 1439 to stirlingDecay_outer 1421.
+R6 gamNeed_leaf 421 need 0.008: best shift 0.061, best crude 11.17;
+  reduces via stirlingCloses_leaf 1447 to stirlingDecay_leaf 1424.
+R7 gamNeed_mid 423 need 0.04: best shift 0.422, best crude 8.23;
+  reduces via stirlingCloses_mid 1455 to stirlingDecay_mid 1427.
+R8 gamNeed_inner 425 need 4.5: dead via gamInner_envelope_exceeds 1036.
+R9 stirlingDecay_outer 1421, stirlingDecay_leaf 1424, stirlingDecay_mid 1427:
+  true pi-over-2 height decay specs, unbanked.
+R10 psiOuterMainRemainder 917 / psiOuterCloseRemainder 920:
+  no L r1 r2 triple closed with r1 + r2 <= 0.5.
+R11 doorShiftNeed_outer/leaf/mid/inner 710-716: conjunctions of R1-R8.
+R12 external missing lemma: explicit C in
+  digamma z minus (log z minus 1 over (2 z)) bound, or Gauss rep.
+Ledger verdict: GAP on all four groups; lane stays conditional.
+-/
+
+end Door3Digamma

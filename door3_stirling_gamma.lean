@@ -4241,3 +4241,78 @@ theorem D3SG_gamNeed_leaf_shift4_ratio :
     (6 : ℝ) < (0.056 : ℝ) / (0.008 : ℝ) := by norm_num
 
 #print axioms D3SG_gamNeed_leaf_shift4_ratio
+
+/-! ## GAMNEED-LEAF-SHIFT5 (STIRLING-LEAF5, 2026-09-22).
+
+Grep first (this file):
+* leaf shift-4 shape: `D3SG_Real_Gamma_41_le_seven_one_six_one` at `:4023`
+  (`Real.Gamma 4.1 ≤ 7.161` via `Γ 4.1 = 3.1 * Γ 3.1`), quotient
+  `D3SG_gamNeed_leaf_shift4_upper` at `:4039` (`‖Γ(mk 0.1 (-3.375))‖ ≤ 0.056`
+  via `7.161 / (3.375 ^ 4) ≈ 0.05519`, four-step shift into `Re = 4.1`),
+  gap `:4234`, ratio `:4240` (`7x`).
+* outer shift-6 template: growth_factor at `:3891`, majorant_reversal at `:3898`,
+  quot_upper_arith at `:3906`, above_023 at `:3914` (ladder minimum at shift-5).
+
+Leaf shift-5 mirror (honest attempt): `wLeaf+5` has `Re = 5.1`, so
+`‖Γ(w+5)‖ ≤ Real.Gamma 5.1 ≤ 29.361` by domination +
+`D3SG_Real_Gamma_51_le_two_nine_three_six_one`
+(`Γ 5.1 = 4.1 * Γ 4.1 ≤ 4.1 * 7.161 = 29.3601 ≤ 29.361`). Paying
+`‖w+k‖ ≥ 3.375` for `k = 0..4` would give
+`‖Γ w‖ ≤ 29.361 / (3.375 ^ 5) ≈ 0.06705 ≤ 0.068`.
+Growth `4.1 / 3.375 ≈ 1.2148 > 1` beats the extra denominator, so the
+shift-5 majorant exceeds the shift-4 majorant (`0.05519 < 0.06705`) and lies
+above `0.056`: factorial growth reverses like outer shift-6. Ladder minimum
+is at shift-4; no full 5-step chain banked, filed as arithmetical minimum.
+
+Residual: `gamNeed_outer (≤ 0.002)` OPEN (`0.023` best at `:3598`, `11x` gap);
+`gamNeed_leaf (≤ 0.008)` OPEN (`0.056` best at `:4039`, `7x` gap; shift-5
+`0.068` reverses, minimum at shift-4).
+-/
+
+/-- Leaf shift-5 real cap: `Real.Gamma 5.1 ≤ 29.361`
+(`Γ 5.1 = 4.1 * Γ 4.1 ≤ 4.1 * 7.161 = 29.3601`). -/
+theorem D3SG_Real_Gamma_51_le_two_nine_three_six_one :
+    Real.Gamma 5.1 ≤ 29.361 := by
+  have hne : (4.1 : ℝ) ≠ 0 := by norm_num
+  have hshift : Real.Gamma (4.1 + 1) = 4.1 * Real.Gamma 4.1 :=
+    Real.Gamma_add_one hne
+  have heq : (4.1 : ℝ) + 1 = 5.1 := by norm_num
+  rw [heq] at hshift
+  rw [hshift]
+  calc (4.1 : ℝ) * Real.Gamma 4.1
+      ≤ 4.1 * 7.161 :=
+        mul_le_mul_of_nonneg_left D3SG_Real_Gamma_41_le_seven_one_six_one (by norm_num)
+    _ ≤ 29.361 := by norm_num
+
+#print axioms D3SG_Real_Gamma_51_le_two_nine_three_six_one
+
+/-- Leaf shift-5 growth factor beats the extra denominator: `4.1 / 3.375 > 1`. -/
+theorem D3SG_gamNeed_leaf_shift5_growth_factor :
+    (1 : ℝ) < 4.1 / 3.375 := by norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift5_growth_factor
+
+/-- Leaf shift-5 majorant reversal: the shift-5 quotient exceeds the shift-4
+quotient, so the pure-shift ladder is at its minimum at shift-4. -/
+theorem D3SG_gamNeed_leaf_shift5_majorant_reversal :
+    (7.161 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375)
+      < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift5_majorant_reversal
+
+/-- Leaf shift-5 quotient arithmetic: `29.361 / (3.375 ^ 5) ≈ 0.06705 ≤ 0.068`. -/
+theorem D3SG_gamNeed_leaf_shift5_quot_upper_arith :
+    (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375)
+      ≤ (0.068 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift5_quot_upper_arith
+
+/-- Leaf shift-5 does not improve on shift-4: `0.056` is below the shift-5 quotient. -/
+theorem D3SG_gamNeed_leaf_shift5_above_056 :
+    (0.056 : ℝ)
+      < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift5_above_056

@@ -6152,6 +6152,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 DIGAMMA-FINAL (background `ses_f3476d956`, proof-only,
+  grep-clean, digamma-only commit): FINAL ledger (banked halves proved;
+  full conditional). Digamma lane COMPLETE (R1-R12 filed).
+- 2026-09-22 STIRLING-LEAF5 (background `ses_f3475ed35`, proof-only,
+  grep-clean, stirling-only commit): leaf shift-5 reversal PROVED
+  (0.068 > 0.056 — minimum at shift-4). Both ladders at minimum;
+  Stirling lane COMPLETE-conditional (decay/reflection need new Mathlib).
 - 2026-09-22 BALLADV-R02TSUM (background `ses_f3479138b`, proof-only,
   grep-clean, ball_advance-only commit): Deta tsum CLOSED — Summable via
   104 + p-series-1.04 ≤26 (integral test) → Deta=21795.54 (`:2614`,
