@@ -5090,4 +5090,36 @@ theorem sSCUT_eta15_Re_ge :
   rw [sSCUT_cpow16_neg_re] at h
   linarith
 
+/-- Honest single-count shard floor with the `t₁₅` gain
+(`-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 ≤ Re(S₈ + eta₉ + eta₁₀ + eta₁₂ + eta₁₅)`; base
+`sSCUT_S9_skip8_add_eta10_eta12_Re_ge` plus `sSCUT_eta15_Re_ge`; index multiset summed
+exactly once is `{0,1,2,3,4,5,6,7,9,10,12,15}`, `k = 8, 11, 13, 14` honestly skipped;
+`k = 15 > 7` so single-count safe, no double-count). -/
+theorem sSCUT_S9_skip8_add_eta10_eta12_eta15_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 10
+        + etaDirichletTerm sSCUT 12 + etaDirichletTerm sSCUT 15).re := by
+  rw [Complex.add_re]
+  have hbase := sSCUT_S9_skip8_add_eta10_eta12_Re_ge
+  have h15 := sSCUT_eta15_Re_ge
+  linarith
+
+/-- Updated single-count shortfall vs the `21/10` bar with the `t₁₅` gain
+(`21/10 - (-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5) = 1874221/388500 ≈ 4.824`;
+replaces `1951921/388500` at `sSCUT_S9_skip8_eta10_eta12_shortfall`). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_shortfall :
+    ((21 / 10 : ℝ) - (((-3529 / 1050) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5)))) =
+      (1874221 / 388500 : ℝ) := by
+  norm_num
+
+/-- Updated single-count shortfall vs the `M = 8192` bar with the `t₁₅` gain
+(`(7/5 + 48/181) - (-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5) =
+308659051/70318500 ≈ 4.389`; mirror of `sSCUT_S9_skip8_eta10_eta12_shortfall_8192`
+with bar `1507/905` in place of `21/10`; shard floor `-1058371/388500 ≈ -2.724`). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_shortfall_8192 :
+    (((7 / 5 : ℝ) + 48 / 181) - (((-3529 / 1050) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5)))) =
+      (308659051 / 70318500 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

@@ -6056,6 +6056,12 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT39 (background `ses_f34ed6c42`, proof-only, grep-clean,
+  pilot-only commit): S+eta15 assembly — `:5098` (multiset
+  {0..7,9,10,12,15}, single-count, k=15>7 safe) + shortfalls `:5111`
+  (legacy 1874221/388500≈4.824) + `:5120` (M8192 308659051/70318500≈
+  4.389). Floor -2.924→-2.724 (+1/5). Cumulative constructive +0.907.
+  hEnough open both bars.
 - 2026-09-22 SCUT38 (background `ses_f34efa01c`, proof-only, grep-clean,
   pilot-only commit): k=15 CONSTRUCTIVE +1/5 — `delta16_odd_mem :4940`
   (δ∈(-0.55,-0.54), width 0.01) + `cos10log16_le_neg :4960` (cos θ≤-4/5
