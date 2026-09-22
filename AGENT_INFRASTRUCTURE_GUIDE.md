@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ZETA-FLOOR1147 (background `ses_f347a8933`, proof-only,
+  grep-clean, zeta-only commit): 1.147^20≈15.5 honest → tail 17.44 →
+  K0-16 19.722 (beats 19.736 by 0.014; sanity ✓). 47-bar gap 0.264;
+  1.148 next.
 - 2026-09-22 WIRE-PIVOT (background `ses_f347eb726`, proof-only,
   grep-clean, wiring-only commit): all four zero-line strips widened to
   neighborhoods (continuity, no new premise). Sups (40/1000) remain the
@@ -6168,8 +6172,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, stirling-only commit): reflection rebuild IMPOSSIBLE with
   banked API (integral + recurrence + convexity insufficient);
   missing-API list filed (Gamma_mul_Gamma_one_sub et al. need new Mathlib).
-- 2026-09-22 WENDEL-H3LEAF (provisional, report pending; verified
-  grep-clean +519 diff): leaf H3 mirror attempt. Reconciled on report.
+- 2026-09-22 WENDEL-H3LEAF (background `ses_f347dde66`, proof-only,
+  grep-clean, wendel-only commit): leaf H3 CLOSED (G1 20.30 + G2 8.82,
+  numeric 2.56 `:2160`). Mid/inner open.
 - 2026-09-22 ASSEMBLY-R07 (background `ses_f347bf81b`, proof-only,
   grep-clean, assembly-only commit): R07 leaf+H conditional (two-tenths
   + 0.07). Post-dates GREEN; re-verify later.
