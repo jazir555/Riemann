@@ -3282,4 +3282,148 @@ theorem sSCUT_S8_eta9_eta7_eta8_shortfall :
       = (10411 / 2100 : ℝ) := by
   norm_num
 
+/-- Cpow real-part split for `9^{-s}` at sCut (mirror of
+`sSCUT_cpow8_neg_re`). -/
+theorem sSCUT_cpow9_neg_re : ((((9 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (9 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 9) := by
+  have h9pos : (0 : ℝ) < 9 := by norm_num
+  have hxC : ((9 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h9pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((9 : ℝ) : ℂ) = (((Real.log 9 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h9pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 9 : ℝ)) : ℂ)).re = Real.log 9 := Complex.ofReal_re _
+  have hzim : ((((Real.log 9 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 9 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 9 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 9 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 9) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 9 * (-(1 / 2 : ℝ)))
+      = (9 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h9pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 9))
+      = Real.cos (10 * Real.log 9) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `9^(1/2) ≤ 3` (mirror of the `sSCUT_sqrt8_le` root step; `9 ≤ 3^2`). -/
+theorem sSCUT_sqrt9_le : (9 : ℝ) ^ (1 / 2 : ℝ) ≤ (3 : ℝ) := by
+  have hpow : (9 : ℝ) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : ((((9 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 9 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((9 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((3 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']; exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `1/3 ≤ r₉ = 9^(-1/2)` (inverse of the root step; mirror of
+`sSCUT_rpow8_neg_ge`). -/
+theorem sSCUT_rpow9_neg_ge : (1 / 3 : ℝ) ≤ (9 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt9_le
+  have hpos : (0 : ℝ) < (9 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (9 : ℝ) ^ (-(1 / 2 : ℝ)) = (((9 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 9)]
+  rw [hneg, show (1 / 3 : ℝ) = ((3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Signed cosine UPPER `cos(10*log 9) ≤ -(1/2)` (odd-multiple flip
+`cos θ₉ = -cos δ₉` from the banked `δ₉ ∈ (-0.019, -0.018)` window +
+quadratic lower `1 - x²/2 ≤ cos x`; mirror of
+`sSCUT_cos10log8_le_neg_quarter`). -/
+theorem sSCUT_cos10log9_le_neg_half :
+    Real.cos (10 * Real.log 9) ≤ (-(1 / 2) : ℝ) := by
+  have hδ := sSCUT_delta9_sharp_mem
+  have key : Real.cos ((10 * Real.log 9 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 9 - 7 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_pi]
+  have e2 : (10 * Real.log 9 - 7 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi = 10 * Real.log 9 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (0.019 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 9 - 7 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 9 - 7 * Real.pi)
+    have hsq : (10 * Real.log 9 - 7 * Real.pi) ^ 2 ≤ (0.019 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 0.019 - (10 * Real.log 9 - 7 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 9 - 7 * Real.pi) + 0.019 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (0.019 - (10 * Real.log 9 - 7 * Real.pi))
+          * ((10 * Real.log 9 - 7 * Real.pi) + 0.019)
+          = (0.019 : ℝ) ^ 2 - (10 * Real.log 9 - 7 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (1 / 2 : ℝ) ≤ 1 - (0.019 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- Cpow signed UPPER `Re(9^{-sCut}) ≤ -(1/6)` (nonneg `r₉` × signed
+cosine upper, then `r₉ ≥ 1/3`; mirror of `sSCUT_cpow8_Re_le_neg`). -/
+theorem sSCUT_cpow9_Re_le_neg :
+    ((((9 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(1 / 6) : ℝ) := by
+  rw [sSCUT_cpow9_neg_re]
+  have hr0 : (0 : ℝ) ≤ (9 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow9_neg_ge
+  have hc := sSCUT_cos10log9_le_neg_half
+  have hmul : (9 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 9)
+      ≤ (9 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 2)) :=
+    mul_le_mul_of_nonneg_left hc hr0
+  have h2 : (1 / 3 : ℝ) * (1 / 2) ≤ (9 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 2) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have heq : (1 / 3 : ℝ) * (1 / 2) = 1 / 6 := by norm_num
+  have hsign : (9 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 2))
+      = -((9 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 2)) := by ring
+  linarith
+
+/-- Eta bridge `eta₈ = 9^{-sCut}` (even `k`; mirror of
+`sSCUT_eta6_eq_cpow7`). -/
+theorem sSCUT_eta8_eq_cpow9 :
+    etaDirichletTerm sSCUT 8 = ((((9 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (8 + 1 : ℕ) = 9 := rfl
+  have hcast : ((((8 + 1 : ℕ)) : ℂ)) = ((((9 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (8 : ℕ) = 1 := by norm_num
+  have h9cast : ((((9 : ℕ)) : ℂ)) = ((((9 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h9cast, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (even `k = 8`): `Re(eta₈) ≤ -(1/6)` (direct
+cpow signed upper, no sign flip; `k = 8` cannot grow the shard). -/
+theorem sSCUT_eta8_Re_le_neg :
+    (etaDirichletTerm sSCUT 8).re ≤ (-(1 / 6) : ℝ) := by
+  have h := sSCUT_cpow9_Re_le_neg
+  rw [sSCUT_eta8_eq_cpow9, sSCUT_cpow9_neg_re]
+  rw [sSCUT_cpow9_neg_re] at h
+  linarith
+
+/-- No positive `Re₈` lock exists at any precision (`Re(eta₈) ≤ -1/6`,
+so no `c > 0` can sit below it; mirror of `sSCUT_cpow3_Re_no_pos_lock`
+at eta level — the `k = 8` floor is IMPOSSIBLE, honestly skipped). -/
+theorem sSCUT_eta8_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 8).re) := by
+  intro h
+  have hup := sSCUT_eta8_Re_le_neg
+  linarith
+
 end Door3PilotR00Zeta

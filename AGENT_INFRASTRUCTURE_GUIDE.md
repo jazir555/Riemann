@@ -5474,3 +5474,14 @@ sorry-free infrastructure and the complete commit ledger above.
   headroom 0.012 to true ~0.671; dead filed 0.725 kept at `:3045`.
   No edit (GREEN preserved). E05 floor conditional only on link+rate
   (Binet/Stirling host). GAMMA-N6 tasked (E06 N=5 rung mirror).
+- 2026-09-22 SCUT15 (background `ses_f3779c2b2`, proof-only, grep-clean):
+  k=8 IMPOSSIBILITY banked — `sSCUT_cpow9_neg_re :3287` (split mirror),
+  `sSCUT_sqrt9_le :3322` (`9^1/2<=3`, exact), `sSCUT_rpow9_neg_ge :3335`
+  (`r9>=1/3`, exact inverse), `sSCUT_cos10log9_le_neg_half :3349`
+  (`cos θ9<=-1/2` via banked `δ9∈(-0.019,-0.018) :2276` + `1-x²/2<=cos`,
+  `1-0.019²/2=0.9998>=1/2`), `sSCUT_cpow9_Re_le_neg` (`<=-1/6`),
+  `sSCUT_eta8_eq_cpow9 :3402` (even-k bridge), `sSCUT_eta8_Re_le_neg
+  :3413` + `sSCUT_eta8_Re_no_pos_lock :3423` (no c>0 below). Even
+  parity keeps sign → destructive ~-1/3. Shard floor stays `-2.858`,
+  gap `4.958`; k=8 honestly skipped. SCUT16 tasked (S9 assembly
+  skipping k=8 or tail-shave).
