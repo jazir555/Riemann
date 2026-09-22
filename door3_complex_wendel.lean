@@ -708,6 +708,97 @@ noncomputable def G1_outerN8_prop (C : ℝ) : Prop :=
     (Complex.log (wOuter + (8 : ℂ)) - (1 : ℂ) / (2 * (wOuter + (8 : ℂ))))‖ ≤
     C / ‖wOuter + (8 : ℂ)‖ ^ 2
 
+/-! ## 13. WENDEL-G2 attempt (PROOF-ONLY, FENCED, no build): verdict GAP, filed without force.
+
+Target (matches G1, section 12): `w = wOuter`, `N = 8`.
+Desired G2 link: `‖(cN - S) - (log w - 1/(2*w))‖ ≤ C2/‖w‖^2` where
+`cN = log (w+8) - 1/(2*(w+8))`, `S = ∑ k ∈ range 8, (w+k)⁻¹`.
+
+Log-shift greps (before edit, this turn):
+- this file: `Complex.log` only at `G1_outerN8_prop` (`:708`);
+  `1 / (2` only at `:708` (G1 shape); `cN`/`S` sum shapes only in
+  `h3_transport_of_shifted_disc` (`:623-636`) and the H3-GAP note
+  (`:642-644`); zero hits for `Binet`, `logGamma` outside comments
+  (`:591,602,606,613`); zero hits for a `Complex.log`-Taylor remainder
+  chain yielding the `log (w+N)`-to-`log w` expansion with `1/(2w)`.
+- banked `D3SG_*`: uppers / shift-norm / real caps only; no `Complex.log`,
+  no `1/(2*w)` (this file `:603-604`).
+- banked `D3SR_*` (`door3_stirling_rem:63-265`): real Wendel / slope /
+  reflection lower only; `:272-281` names the complex log-Gamma remainder /
+  Binet route as unbanked (this file `:605-607`).
+- Mathlib real log bounds (`log_le_sub_one_of_pos`, `add_one_le_exp` in
+  `Log/Basic.lean`): real-only, no complex `log` expansion, no `1/(2w)`
+  Stirling correction term.
+- Mathlib complex log Taylor (`Log/Deriv.lean:217-404`
+  `abs_log_sub_add_sum_range_le`, `hasSum_log_sub_log_of_abs_lt_one`):
+  real-variable (`x : ℝ`, `|x| < 1`) series bounds only; no
+  `Complex.log (w+k)`-vs-`Complex.log w` shift expansion at `‖w‖ ~ 4-9`
+  with nonzero Im, and nothing producing the `-1/(2w)` term.
+- `harmonic_le_one_add_log` (used `KadiriDigammaBound.lean:194`): real
+  harmonic head `H_N ≤ 1 + log N` only; no `∑ (w+k)⁻¹` vs `log` link at
+  complex shifts, no `1/(2w)` correction.
+
+Why no honest close: the G2 link is the Stirling expansion of the digamma
+recurrence sum `S = ∑ (w+k)⁻¹` against `log (w+N) - log w` with the
+`-1/(2w)` endpoint correction. Its remainder is exactly the complex
+log-Gamma / Binet remainder, unbanked everywhere (in-repo `Binet` is
+Fibonacci/CrossProduct only; `Complex.logGamma` absent as API;
+`BohrMollerup.logGammaSeq` real-only qualitative limit, no rate). The
+real-variable log Taylor bounds above cannot supply the complex shift
+expansion plus correction term. Filed below as explicit Prop, no force.
+
+Banked here (proved, no new axioms): `h3_outer_of_G1_G2` — G1 disc + G2
+link + shift identity imply the H3 disc at `wOuter` by the transport
+mechanism of `h3_transport_of_shifted_disc` plus triangle inequality.
+The shift identity itself (`hEq`) stays a hypothesis (eightfold iteration
+of `digamma_shift_banked`); G1/G2 remain Props.
+
+Verdict: GAP (no force). No `sorry`/`admit`/`axiom`/`simpa`; no new imports;
+no other files touched.
+-/
+
+noncomputable def S_outerN8 : ℂ :=
+  ∑ k ∈ Finset.range 8, (wOuter + (k : ℂ))⁻¹
+
+noncomputable def cN_outerN8 : ℂ :=
+  Complex.log (wOuter + (8 : ℂ)) - (1 : ℂ) / (2 * (wOuter + (8 : ℂ)))
+
+noncomputable def target_outer : ℂ :=
+  Complex.log wOuter - (1 : ℂ) / (2 * wOuter)
+
+noncomputable def G2_outerN8_prop (C2 : ℝ) : Prop :=
+  ‖(cN_outerN8 - S_outerN8) - target_outer‖ ≤ C2 / ‖wOuter‖ ^ 2
+
+theorem h3_outer_of_G1_G2 (C1 C2 : ℝ)
+    (hEq : Complex.digamma (wOuter + (8 : ℂ)) =
+      Complex.digamma wOuter + S_outerN8)
+    (hG1 : G1_outerN8_prop C1) (hG2 : G2_outerN8_prop C2) :
+    ‖Complex.digamma wOuter - target_outer‖ ≤
+      C1 / ‖wOuter + (8 : ℂ)‖ ^ 2 + C2 / ‖wOuter‖ ^ 2 := by
+  have hDisc : ‖Complex.digamma (wOuter + (8 : ℂ)) - cN_outerN8‖ ≤
+      C1 / ‖wOuter + (8 : ℂ)‖ ^ 2 := hG1
+  have hLink : ‖(cN_outerN8 - S_outerN8) - target_outer‖ ≤
+      C2 / ‖wOuter‖ ^ 2 := hG2
+  have hT : ‖Complex.digamma wOuter - (cN_outerN8 - S_outerN8)‖ ≤
+      C1 / ‖wOuter + (8 : ℂ)‖ ^ 2 := by
+    have hSame : Complex.digamma wOuter - (cN_outerN8 - S_outerN8) =
+        Complex.digamma (wOuter + (8 : ℂ)) - cN_outerN8 := by
+      rw [hEq]
+      ring
+    rw [hSame]
+    exact hDisc
+  have hSplit : Complex.digamma wOuter - target_outer =
+      (Complex.digamma wOuter - (cN_outerN8 - S_outerN8)) +
+        ((cN_outerN8 - S_outerN8) - target_outer) := by
+    ring
+  calc ‖Complex.digamma wOuter - target_outer‖
+      ≤ ‖Complex.digamma wOuter - (cN_outerN8 - S_outerN8)‖ +
+        ‖(cN_outerN8 - S_outerN8) - target_outer‖ := by
+          rw [hSplit]
+          exact norm_add_le _ _
+    _ ≤ C1 / ‖wOuter + (8 : ℂ)‖ ^ 2 + C2 / ‖wOuter‖ ^ 2 :=
+          add_le_add hT hLink
+
 This file was written without running any build; it is not machine-checked.
 -/
 

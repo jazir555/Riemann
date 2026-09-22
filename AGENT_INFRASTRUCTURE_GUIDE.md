@@ -5901,6 +5901,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 FIRSTCELL-HEVEN (background `ses_f34eb32a3`, proof-only,
+  grep-clean, first_cell-only commit): hEven slice FILED —
+  `FC_slice_S2_of_tendsto :1112` (Tendsto+Antitone → S₂≤L, alternating-
+  series mirror, no new estimates). Tendsto/Antitone facts stay open
+  premises (true: decreasing partials). zetaLower still OPEN (0.23 vs
+  1.1/1.4).
 - 2026-09-22 SLIVER-MT (background `ses_f34eb32a0`, proof-only,
   grep-clean, sliver_edge-only commit): m=1/2 ADJUDICATED —
   `uniform_top_lower_le_half :502` (any uniform m over Icc(-10,10)
@@ -5997,6 +6003,12 @@ sorry-free infrastructure and the complete commit ledger above.
   (`G1_outerN8_prop`, Gauss disc at w+8 needs Mathlib-TODO integral +
   real→complex move blocked by Im -4.375). H1/H2/H3-G1/G2 all open;
   transport banked.
+- 2026-09-22 WENDEL-G2 (background `ses_f34eb329c`, proof-only,
+  grep-clean, wendel-only commit): G2 filed as Prop (`G2_outerN8_prop`
+  :769, S/cN/target :760-767) + COMBINER PROVED (`h3_outer_of_G1_G2
+  :772`, G1+G2+hEq ⟹ H3, rw/ring/calc). No Taylor/log chain yields the
+  -1/(2w) correction (Mathlib log-Taylor real-only). H3 now reduces
+  explicitly to G1+G2+hEq. VERT lead in flight — left for owner.
 - 2026-09-22 CUTL-BALL (background `ses_f34f3a726`, proof-only,
   grep-clean): ball-sup GAP structural — `cutL10_thinRect_tightened_gap
   :1438` (center 0.02632 covers 0.0234; ball 12.864≤12.87; loosest zeta

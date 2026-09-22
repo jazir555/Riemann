@@ -1102,5 +1102,32 @@ theorem FC_hEven_S2_shortfall_14 : (1.4 : ℝ) - 0.23 = 1.17 := by norm_num
 short of `1.1` (needs larger-`N` slow; patch phase). -/
 theorem FC_hEven_complexS2_gap_11 : (1 : ℝ) < 1.1 := by norm_num
 
+/-- hEven Tendsto/Antitone conditional (ONE input, filed + gapped): from a
+`Tendsto` alternating-series limit plus `Antitone FC_etaF0395`, `S₂ ≤ L`.
+Uses `Antitone.alternating_series_le_tendsto` exactly as `zeta_rigorous` does;
+the `Antitone` + `Tendsto` facts themselves stay patch premises (TRUE:
+`(k+1)^-0.395` decreases in `k`; partials converge). Real-`S₂` window `0.23`
+stays short of `1.1` by `0.87` (`FC_hEven_S2_shortfall_11`), so this files the
+input without closing `zetaLower-1.1`. -/
+theorem FC_slice_S2_of_tendsto (L : ℝ)
+    (hL : Filter.Tendsto
+      (fun (n : ℕ) => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+      Filter.atTop (nhds L))
+    (hAnti : Antitone FC_etaF0395) :
+    1 - (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ L := by
+  have h_raw : (∑ i ∈ Finset.range (2 * 1), (-1 : ℝ) ^ i * FC_etaF0395 i) ≤ L :=
+    Antitone.alternating_series_le_tendsto hL hAnti 1
+  have h_eq : (∑ i ∈ Finset.range (2 * 1), (-1 : ℝ) ^ i * FC_etaF0395 i)
+      = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) := by
+    rw [show (2 * 1 : ℕ) = 2 from by norm_num,
+      show (2 : ℕ) = 1 + 1 from by norm_num]
+    simp only [Finset.sum_range_succ, Finset.sum_range_one,
+      Finset.sum_range_zero]
+    simp only [FC_etaF0395, pow_zero, pow_one, Nat.cast_zero, Nat.cast_one,
+      Real.one_rpow]
+    ring
+  rw [← h_eq]
+  exact h_raw
+
 end Door3FirstCellClose
 
