@@ -5723,4 +5723,265 @@ remain; next legs / tail tightening still open — filed, not forced. -/
 theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_residual : (0 : ℝ) < 1 := by
   norm_num
 
+/-! ## sCut k=18 EVEN shard (first link): `log 19` bridge + `theta19` window.
+
+`k = 18` is EVEN so `eta18 = +19^{-sCut}`; constructive iff
+`cos(10*log 19) >= +c`. Grep first (shapes in this file):
+* `sSCUT_theta18_mem` at `:5421` (`theta18` window),
+  `sSCUT_delta18_odd_mem` at `:5439` (`delta18` window),
+  `sSCUT_cos10log18_le_neg_three_quarters` at `:5459` (`cos18` upper),
+  `sSCUT_eta17_Re_ge` at `:5618` (odd-constructive mirror).
+* `log19` bridge needs first: no `log_nineteen` shape existed before this
+  block; base is banked `sSCUT_log_eighteen_ge/le` plus tight ratio `19/18`
+  (`x = 1/18`). Mirror of the `log 18` first-link recipe
+  (`sSCUT_log_eighteen_via_seventeen_eq` at `:5379`,
+  `sSCUT_log_eighteen_le` at `:5390`, `sSCUT_log_eighteen_ge` at `:5404`,
+  `sSCUT_theta18_mem` at `:5421`).
+
+Honest outcome filed here: `log 19` in `[2.9395993850, 2.9494678083]`,
+`theta19` in `[29.39599385, 29.494678083]`, `delta19 = theta19 - 9*pi`
+in `(1.121, 1.222)` via loose `pi` bounds (`Real.pi_gt_d4/lt_d4`).
+Nearest anchor is odd `9*pi`, so `cos theta19 = -cos delta19 <= -1/4`
+(destructive for even `k`); no `>= +c` floor with `c > 0` can close.
+Exact gap filed, not forced. All proofs close with
+`norm_num` / `linarith` / `ring` / `rw` only. -/
+
+/-- Composite log bridge `log 19 = log 18 + log (19/18)` (`19 = 18*(19/18)`
+via `Real.log_mul`; mirror of `sSCUT_log_eighteen_via_seventeen_eq` at `:5379`;
+ratio `19/18` (`x = 1/18`); grepped base bridges `sSCUT_log_eighteen_ge/le`;
+first link of the incremental base-19 chain for `k = 18`). -/
+theorem sSCUT_log_nineteen_via_eighteen_eq :
+    Real.log 19 = Real.log 18 + Real.log (19 / 18 : ℝ) := by
+  have h19 : (18 : ℝ) * (19 / 18) = 19 := by norm_num
+  have h := Real.log_mul (show (18 : ℝ) ≠ 0 by norm_num)
+    (show (19 / 18 : ℝ) ≠ 0 by norm_num)
+  rw [h19] at h
+  linarith
+
+/-- `log 19` upper (`log 19 <= 2.9494678083` from `sSCUT_log_eighteen_le` +
+`log (19/18) <= 1/18`; mirror of `sSCUT_log_eighteen_le` at `:5390` with `x = 1/18`
+via `Real.log_le_sub_one_of_pos`; `2.8939122527 + 1/18 = 2.949467808255...`). -/
+theorem sSCUT_log_nineteen_le : Real.log 19 ≤ (2.9494678083 : ℝ) := by
+  have h19 := sSCUT_log_nineteen_via_eighteen_eq
+  have h18 := sSCUT_log_eighteen_le
+  have hub : Real.log (19 / 18 : ℝ) ≤ (1 / 18 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 19 / 18)
+    have he : (19 / 18 : ℝ) - 1 = (1 / 18 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.8939122527 : ℝ) + 1 / 18 ≤ (2.9494678083 : ℝ) := by norm_num
+  linarith
+
+/-- `log 19` lower (`2.9395993850 <= log 19` from `sSCUT_log_eighteen_ge` +
+`log (19/18) >= 1/19`; mirror of `sSCUT_log_eighteen_ge` at `:5404` with `x = 1/18`
+via `log (18/19) <= -1/19` and `log (19/18) = -log (18/19)`;
+`2.8869678061 + 1/19 = 2.939599385047...`, so `2.9395993850` holds). -/
+theorem sSCUT_log_nineteen_ge : (2.9395993850 : ℝ) ≤ Real.log 19 := by
+  have h19 := sSCUT_log_nineteen_via_eighteen_eq
+  have h18 := sSCUT_log_eighteen_ge
+  have hub : Real.log (18 / 19 : ℝ) ≤ (-1 / 19 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 18 / 19)
+    have he : (18 / 19 : ℝ) - 1 = (-1 / 19 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (19 / 18 : ℝ) = -Real.log (18 / 19 : ℝ) := by
+    have heq : (19 / 18 : ℝ) = (18 / 19 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.9395993850 : ℝ) ≤ 2.8869678061 + 1 / 19 := by norm_num
+  rw [h19, hinv]
+  linarith
+
+/-- Phase window `theta19 = 10*log 19 in [29.39599385, 29.494678083]`
+(via banked `sSCUT_log_nineteen_ge/le` + `*10`; mirror of
+`sSCUT_theta18_mem` at `:5421`; non-strict since the `log 19` inputs are `<=`). -/
+theorem sSCUT_theta19_mem :
+    (29.39599385 : ℝ) ≤ 10 * Real.log 19 ∧
+    10 * Real.log 19 ≤ (29.494678083 : ℝ) := by
+  have hge := sSCUT_log_nineteen_ge
+  have hle := sSCUT_log_nineteen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.9395993850 = 29.39599385 := by norm_num
+  have c2 : (10 : ℝ) * 2.9494678083 = 29.494678083 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta19 = theta19 - 9*pi in (1.121, 1.222)` (odd-multiple anchor:
+`9*pi ~= 28.274` is nearest since `theta19 ~= 29.396-29.495` vs `8*pi ~= 25.133` and
+`10*pi ~= 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta18_odd_mem` at `:5439`;
+rounded outward from the loose-pi window `[1.12159385, 1.221178083]`
+(`29.39599385 - 9*3.1416 = 1.12159385`,
+`29.494678083 - 9*3.1415 = 1.221178083`) so `linarith` closes). -/
+theorem sSCUT_delta19_odd_mem :
+    (1.121 : ℝ) < 10 * Real.log 19 - 9 * Real.pi ∧
+    10 * Real.log 19 - 9 * Real.pi < (1.222 : ℝ) := by
+  have hth := sSCUT_theta19_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta19` window (`0.101`). -/
+theorem sSCUT_delta19_odd_width_eq :
+    (1.222 : ℝ) - 1.121 = (0.101 : ℝ) := by
+  norm_num
+
+/-- Signed cosine UPPER `cos(10*log 19) <= -(1/4)` (odd-multiple flip
+`cos theta19 = -cos delta19` from the banked `delta19 in (1.121, 1.222)` window
+`sSCUT_delta19_odd_mem` + quadratic floor `1 - x^2/2 <= cos x` on
+`|delta19| <= 1.222`; mirror of `sSCUT_cos10log18_le_neg_three_quarters` at `:5459`
+with `9*pi = pi + 4*(2*pi)` unchanged;
+`1 - 1.222^2/2 = 0.253358 >= 0.25`, so `k = 18` (base 19) is destructive
+for even `k` after the odd negation flip: `cos theta19 ~= -0.39`.
+Hence no `cos >= +c` floor with `c > 0` can close; exact gap filed. -/
+theorem sSCUT_cos10log19_le_neg_quarter :
+    Real.cos (10 * Real.log 19) ≤ (-(1 / 4) : ℝ) := by
+  have hδ := sSCUT_delta19_odd_mem
+  have key : Real.cos ((10 * Real.log 19 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 19 - 9 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_pi]
+  have e2 : (10 * Real.log 19 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 19 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (1.222 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 19 - 9 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 19 - 9 * Real.pi)
+    have hsq : (10 * Real.log 19 - 9 * Real.pi) ^ 2 ≤ (1.222 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 1.222 - (10 * Real.log 19 - 9 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 19 - 9 * Real.pi) + 1.222 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (1.222 - (10 * Real.log 19 - 9 * Real.pi))
+          * ((10 * Real.log 19 - 9 * Real.pi) + 1.222)
+          = (1.222 : ℝ) ^ 2 - (10 * Real.log 19 - 9 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (1 / 4 : ℝ) ≤ 1 - (1.222 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- `19^(1/2) <= 5` (mirror of `sSCUT_sqrt18_le`; `19 <= 5^2 = 25`). -/
+theorem sSCUT_sqrt19_le : (19 : ℝ) ^ (1 / 2 : ℝ) ≤ (5 : ℝ) := by
+  have hpow : (19 : ℝ) ≤ (((5 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((19 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 19 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((19 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((5 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/5 <= r19 = 19^(-1/2)` (inverse of `sSCUT_sqrt19_le`;
+mirror of `sSCUT_rpow18_neg_ge`). -/
+theorem sSCUT_rpow19_neg_ge : (1 / 5 : ℝ) ≤ (19 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt19_le
+  have hpos : (0 : ℝ) < (19 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (19 : ℝ) ^ (-(1 / 2 : ℝ)) = (((19 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 19)]
+  rw [hneg, show (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `19^{-s}` at sCut (mirror of
+`sSCUT_cpow18_neg_re`). -/
+theorem sSCUT_cpow19_neg_re : ((((19 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (19 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 19) := by
+  have h19pos : (0 : ℝ) < 19 := by norm_num
+  have hxC : ((19 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h19pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((19 : ℝ) : ℂ) = (((Real.log 19 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h19pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 19 : ℝ)) : ℂ)).re = Real.log 19 := Complex.ofReal_re _
+  have hzim : ((((Real.log 19 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 19 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 19 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 19 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 19) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 19 * (-(1 / 2 : ℝ)))
+      = (19 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h19pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 19))
+      = Real.cos (10 * Real.log 19) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed UPPER `Re(19^{-sCut}) <= -(1/20)` (nonneg `r19` times signed
+cosine upper `<= -1/4`, then `r19 >= 1/5`; mirror of
+`sSCUT_cpow18_Re_le_neg`; `(1/5)*(1/4) = 1/20 = 0.05`). -/
+theorem sSCUT_cpow19_Re_le_neg :
+    ((((19 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (-(1 / 20) : ℝ) := by
+  rw [sSCUT_cpow19_neg_re]
+  have hr0 : (0 : ℝ) ≤ (19 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow19_neg_ge
+  have hc := sSCUT_cos10log19_le_neg_quarter
+  have hcos14 : Real.cos (10 * Real.log 19) ≤ (-(1 / 4) : ℝ) := hc
+  have hmul : (19 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 19)
+      ≤ (19 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 4)) :=
+    mul_le_mul_of_nonneg_left hcos14 hr0
+  have h2 : (1 / 5 : ℝ) * (1 / 4) ≤ (19 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have hsign : (19 : ℝ) ^ (-(1 / 2 : ℝ)) * (-(1 / 4))
+      = -((19 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4)) := by ring
+  have heq : (1 / 5 : ℝ) * (1 / 4) = 1 / 20 := by norm_num
+  linarith
+
+/-- Eta bridge `eta18 = 19^{-sCut}` (even `k`; mirror of
+`sSCUT_eta16_eq_cpow17` at `:5334`). -/
+theorem sSCUT_eta18_eq_cpow19 :
+    etaDirichletTerm sSCUT 18 = ((((19 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (18 + 1 : ℕ) = 19 := rfl
+  have hcast : ((((18 + 1 : ℕ)) : ℂ)) = ((((19 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (18 : ℕ) = 1 := by norm_num
+  have h19cast : ((((19 : ℕ)) : ℂ)) = ((((19 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h19cast, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (even `k = 18`): `Re(eta18) <= -(1/20)` (direct
+cpow signed upper, no sign flip; mirror of `sSCUT_eta16_Re_le_neg` at `:5346`;
+`1/20 = 0.05`). -/
+theorem sSCUT_eta18_Re_le_neg :
+    (etaDirichletTerm sSCUT 18).re ≤ (-(1 / 20) : ℝ) := by
+  have h := sSCUT_cpow19_Re_le_neg
+  rw [sSCUT_eta18_eq_cpow19, sSCUT_cpow19_neg_re]
+  rw [sSCUT_cpow19_neg_re] at h
+  linarith
+
+/-- No positive `Re18` lock exists at any precision (`Re(eta18) <= -1/20`,
+so no `c > 0` can sit below it; mirror of `sSCUT_eta16_Re_no_pos_lock` at `:5356`
+and the `k = 16` impossibility shape — the `k = 18` constructive floor
+`cos >= +c` is IMPOSSIBLE on banked numerals, honestly skipped). -/
+theorem sSCUT_eta18_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 18).re) := by
+  intro h
+  have hup := sSCUT_eta18_Re_le_neg
+  linarith
+
+/-- Shard assembly residual: `t18` adds no constructive gain
+(`Re(eta18) <= -1/20` destructive, `sSCUT_eta18_Re_no_pos_lock` blocks any
+`c > 0` floor); combined honest floor stays at
+`F17 = -1000096/388500 ~= -2.574` (`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq`),
+still below both bars (`21/10 = 2.1`, `1507/905 ~= 1.665`);
+shortfalls `1815946/388500` and `298111276/70318500` unchanged;
+next constructive legs still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta

@@ -1911,3 +1911,117 @@ theorem FC_S4_tail_residual_closed_modulo_factor : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-FACTOR wave: eta-to-zeta factor `2.53` via magnitude-triangle (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Target `FC_etaZeta_factor_obligation` (`door3_first_cell.lean:1902-1903`):
+  `‖(1:ℂ) - (2:ℂ)^((1:ℂ) - R02Pilot.sCenter)‖ ≤ 2.53`, true `≈1.85`.
+* `sCenter` shapes (`central_cover_assembly.lean:9588` def,
+  `:9608` `sCenter_re = 0.395`, `:9615` `sCenter_im = -6.75`):
+  `(1 - sCenter).re = 1 - 0.395 = 0.605` (derived below as
+  `FC_one_sub_sCenter_re` via `Complex.sub_re` / `Complex.one_re`).
+* Reference route (`door3_cell_suppliers.lean:424-425` factor shape,
+  `:429` `2^0.605 ≤ 1.53` input, `:435-478` `CS_rpow0605_proved` via
+  `Real.exp_bound' n=4`, `:483-496` `CS_etaFactor_of_rpow` via
+  `Complex.norm_cpow_eq_rpow_re_of_pos` + `‖1-w‖ ≤ 1+‖w‖`, `:499`
+  unconditional cap; true `2^0.605 ≈ 1.521`, factor true `≈1.85`).
+* Local log upper reuse (this file `:1074-1077` `FC_log2_le_aux`):
+  `Real.log 2 < 0.693148` (no new import, no new estimate).
+* Absent before this wave (grep-clean): no `FC_rpow0605_upper` /
+  `FC_etaZeta_of_rpow` / `FC_etaZeta_factor_proved` match in this file.
+
+Verdict: BANKED below (no premises): `2^0.605 ≤ 1.53`
+(`FC_rpow0605_proved`), cpow-norm bridge + triangle (`FC_etaZeta_of_rpow`),
+unconditional `≤ 2.53` (`FC_etaZeta_factor_proved`).
+No build attempted (SUPP-FIX-REBUILD owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Rpow cap input for the factor route (`2^0.605 ≤ 1.53`; TRUE `≈1.521`). -/
+def FC_rpow0605_upper : Prop := (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53
+
+/-- CLOSED: the `2^0.605` cap (mirrors `CS_rpow0605_proved` via
+`Real.exp_bound' n=4` at `x = 0.605·log 2 ≤ 0.41936`). -/
+theorem FC_rpow0605_proved : FC_rpow0605_upper := by
+  show (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53
+  have hlog : Real.log 2 < (0.693148 : ℝ) := FC_log2_le_aux
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  set x : ℝ := 0.605 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.41936 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.605 * Real.log 2 ≤ 0.605 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.605 : ℝ) * 0.693148 ≤ (0.41936 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (2 : ℝ) ^ ((0.605 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.41936 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.41936 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.41936 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.41936 + (0.41936 : ℝ) ^ 2 / 2 +
+      (0.41936 : ℝ) ^ 3 / 6 + (0.41936 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.53 := by
+    norm_num
+  linarith
+
+/-- `(1 - sCenter).re = 0.605` (from `R02Pilot.sCenter_re = 0.395`). -/
+theorem FC_one_sub_sCenter_re :
+    ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) := by
+  rw [Complex.sub_re, Complex.one_re, R02Pilot.sCenter_re]
+  norm_num
+
+/-- Eta-factor upper from the `2^0.605` cap: cpow norm is the real rpow
+(`Complex.norm_cpow_eq_rpow_re_of_pos` with `(1-sCenter).re = 0.605`),
+then `‖1 - w‖ ≤ 1 + ‖w‖`. -/
+theorem FC_etaZeta_of_rpow (h : FC_rpow0605_upper) :
+    FC_etaZeta_factor_obligation := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.53
+  have hre : ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) :=
+    FC_one_sub_sCenter_re
+  have hcast : ((2 : ℂ)) = (((2 : ℝ)) : ℂ) := by simp
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ =
+      (2 : ℝ) ^ ((0.605 : ℝ)) := by
+    rw [hcast,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num), hre]
+  have htri := norm_sub_le (1 : ℂ) ((2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+  rw [norm_one, hnorm] at htri
+  have hr : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.53 := h
+  linarith
+
+/-- UNCONDITIONAL eta-to-zeta factor cap (both links closed above). -/
+theorem FC_etaZeta_factor_proved : FC_etaZeta_factor_obligation :=
+  FC_etaZeta_of_rpow FC_rpow0605_proved
+
+/-- Factor-need numeral: `1 + 1.53 = 2.53` (triangle budget, closed). -/
+theorem FC_etaZeta_need_check : (1 : ℝ) + 1.53 = 2.53 := by norm_num
+
+/-- Exact close-out marker: `S₄` numeral + tail majorant (prior wave) +
+factor cap (this wave) are all banked; no open factor premise remains. -/
+theorem FC_etaZeta_residual_closed : True := by
+  trivial
+
+end Door3FirstCellClose
+

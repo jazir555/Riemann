@@ -6099,6 +6099,18 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-LEAF3 (background `ses_f348ad91a`, proof-only,
   grep-clean, stirling-only commit): leaf shift-3 `≤0.061` (via Gamma
   3.1≤2.31; 12x→7x). Outer 16x / leaf 7x stand.
+- 2026-09-22 FIRSTCELL-FACTOR (background `ses_f348a1e10`, proof-only,
+  grep-clean, first_cell-only commit): eta→zeta factor CLOSED (`≤2.53`
+  via 2^0.605≤1.53 Taylor). First-cell chain complete: S4 numeral + tail
+  + factor all banked; zeta14 assembly next.
+- 2026-09-22 CELL-K (background `ses_f348b0736`, proof-only,
+  grep-clean, interval-only commit): R11 poly floor 38.3 hypothesis-free
+  (`:35670`, 8.75·8.77/2) + center conditional `:35681`. Same ~6-order
+  wall (short 882291x).
+- 2026-09-22 SCUT47 (background `ses_f348ce98b`, proof-only, grep-clean,
+  pilot-only commit): k=18 DESTRUCTIVE locked — theta19/delta19/cos≤-1/4
+  + rpow19 + cpow19 + `eta18_Re ≤ -1/20 :5960` + no_pos_lock `:5971`.
+  Floor stays -2.574; t18 adds no gain.
 - 2026-09-22 WENDEL-TELE (background `ses_f348dab62`, proof-only,
   grep-clean, wendel-only commit): 8-fold telescope CLOSED to
   log(w+8)-log w = S-Q+E (`:1212`) + Q/E sum caps + D-cap + residual

@@ -35526,3 +35526,199 @@ theorem R09_banked_infeasible :
     (26.3 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.07 * 1.26 := by norm_num
 
 end R09CenterAssembly
+
+/-!
+## R10 center assembly with banked poly/pi floors (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R03R10PolyLower.poly_lower_R10` (`38.3`, `interval_arith.lean:34201`):
+  banked hypothesis-free; consumed directly below.
+* `CellUniform.pi_lower_of_re` + `R03R10PolyLower.sR10_re` (`0.395 ≤ 1/2`,
+  `interval_arith.lean:34157`): gives banked `1/2 ≤ ‖piPart sR10‖`
+  hypothesis-free; no dedicated `pi_lower_R10` exists, so the uniform lemma is
+  cited explicitly.
+* `CentralCoverAssembly.R10_leaf_obligations` (`central_cover_assembly.lean:2158`):
+  shape `(0.002 + 0.05 * R10.radius ≤ ‖xiShifted R10.center‖) ∧ deriv bound`,
+  outer tier (`ε = 0.002`, `M = 0.05`); `R10_mem_gridFine` present
+  (`central_cover_assembly.lean:2148`), `R10_radius_lt` at `:2145`, so R10 is in
+  `gridFine` with `radius < 1.26`.
+* Gamma (`1/10000000`, cf. `R00GammaLower.gamma_const_pos`) and zeta (`1/26`,
+  no banked `S₂`-style head for R10 in this file) stay explicit open premises.
+* Template mirror: `R09CenterAssembly.R09_center_with_poly_pi_gamma`
+  (`interval_arith.lean:35490`) for the outer tier; adapted here to the R10 outer
+  tier (`ε = 0.002`, `M = 0.05`, poly `38.3`) via the generic
+  `CellUniform.center_bound_of_component_bounds` bridge.
+
+Shape: mirrors `R09CenterAssembly.R09_center_with_poly_pi_gamma :35490` but for the R10
+outer tier (`ε = 0.002`, `M = 0.05`) via the generic
+`CellUniform.center_bound_of_component_bounds` bridge. Open component premises are exactly two:
+the Gamma remainder `hgam` and the zeta lower `hzeta` (`hGam_floor`, `hZeta_floor`, `hprod` are
+numeric side conditions, not enclosures).
+-/
+
+namespace R10CenterAssembly
+
+/-- Conditional R10 center assembly: banked poly `38.3` + pi `1/2` floors are
+plugged into the generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.002 + 0.05 * 1.26) / 19.15`; at banked floors
+(`1/10000000`, `1/26`) it is infeasible, so this is filed as an honest
+conditional, not a closed bound. -/
+theorem R10_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R03R10PolyLower.sR10‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R03R10PolyLower.sR10‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 38.3 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R10.radius ≤
+      ‖xiShifted CentralCoverAssembly.R10.center‖ := by
+  have hpoly := R03R10PolyLower.poly_lower_R10
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R03R10PolyLower.sR10‖ :=
+    CellUniform.pi_lower_of_re (by rw [R03R10PolyLower.sR10_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R03R10PolyLower.sR10
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R10.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R10 0.002 0.05 (by norm_num)
+    (le_of_lt CentralCoverAssembly.R10_radius_lt)
+    38.3 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact outer-tier threshold: `0.002 + 0.05 * 1.26 = 0.065`. -/
+theorem R10_threshold_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Exact banked base: `38.3 * (1/2) = 19.15`. -/
+theorem R10_base_eq : (38.3 : ℝ) * (1 / 2) = 19.15 := by norm_num
+
+/-- Exact residual: banked floors `19.15 / 260000000` do not clear `0.065`
+(required `Agam * Azeta ≥ 0.065 / 19.15 ≈ 0.00339`; banked `≈ 3.85e-09`;
+short by factor `≈ 882291`, the ~6-order wall). -/
+theorem R10_banked_infeasible :
+    (38.3 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by norm_num
+
+end R10CenterAssembly
+
+/-!
+## R11 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R10CenterAssembly.R10_center_with_poly_pi_gamma` (`interval_arith.lean:35566`):
+  template mirrored here (outer tier `eps = 0.002`, `M = 0.05`).
+* `R03R10PolyLower.poly_lower_R10` (`38.3`, `interval_arith.lean:34201`) +
+  `R03R10PolyLower.sR10_re` (`0.395`, `interval_arith.lean:34157`): prior bottom-row
+  floors confirming the `~38.x` scale and the `CellUniform.pi_lower_of_re` route.
+* `R11GammaUpper.sR11` (`interval_arith.lean:3086`) with `sR11_re = 0.3`
+  (`interval_arith.lean:3106`) and `sR11_im = -8.75` (`interval_arith.lean:3113`):
+  banked s-center reused here; no `poly_lower_R11` existed, so the poly floor is
+  newly closed below from those banked re/im facts.
+* `CellUniform.center_bound_of_component_bounds` (`interval_arith.lean:1772`) +
+  `CellUniform.pi_lower_of_re` (`interval_arith.lean:1752`): generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises. Radius hypothesis `hrad` is an explicit premise (no `R11_radius_lt`
+  consumed), so the conditional holds regardless of the leaf tier label.
+
+Shape: mirrors `R10CenterAssembly.R10_center_with_poly_pi_gamma :35566` at the R11
+outer corner (`sR11 = 0.3 - 8.75 * I`), outer tier (`eps = 0.002`, `M = 0.05`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R11CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R11 s-center. -/
+theorem polyPart_norm_R11 :
+    ‖R00Enclosure.polyPart R11GammaUpper.sR11‖ =
+      (1 / 2) * ‖R11GammaUpper.sR11‖ * ‖R11GammaUpper.sR11 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR11‖ ≥ 8.75` (`8.75^2 = 76.5625 < 0.3^2 + 8.75^2 = 76.6525`). -/
+theorem norm_sR11_ge : (8.75 : ℝ) ≤ ‖R11GammaUpper.sR11‖ := by
+  have hsq : (8.75 : ℝ) ^ 2 ≤ ‖R11GammaUpper.sR11‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R11GammaUpper.sR11_re, R11GammaUpper.sR11_im]
+    norm_num
+  calc (8.75 : ℝ) = Real.sqrt ((8.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R11GammaUpper.sR11‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R11GammaUpper.sR11‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR11 - 1‖ ≥ 8.77` (`0.7^2 + 8.75^2 = 77.0525 > 8.77^2 = 76.9129`). -/
+theorem norm_sR11_sub_one_ge : (8.77 : ℝ) ≤ ‖R11GammaUpper.sR11 - 1‖ := by
+  have hr1 : (R11GammaUpper.sR11 - 1).re = -0.7 := by
+    simp only [Complex.sub_re, Complex.one_re, R11GammaUpper.sR11_re]
+    norm_num
+  have hi1 : (R11GammaUpper.sR11 - 1).im = -8.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R11GammaUpper.sR11_im]
+    norm_num
+  have hsq : (8.77 : ℝ) ^ 2 ≤ ‖R11GammaUpper.sR11 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (8.77 : ℝ) = Real.sqrt ((8.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R11GammaUpper.sR11 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R11GammaUpper.sR11 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `38.3 ≤ ‖polyPart sR11‖`
+(`8.75 * 8.77 / 2 = 38.36875 ≥ 38.3`; true `≈ 38.43`, slack `≈ 0.07`). -/
+theorem poly_lower_R11 : (38.3 : ℝ) ≤ ‖R00Enclosure.polyPart R11GammaUpper.sR11‖ := by
+  have hprod : (8.75 : ℝ) * 8.77 ≤ ‖R11GammaUpper.sR11‖ * ‖R11GammaUpper.sR11 - 1‖ :=
+    mul_le_mul norm_sR11_ge norm_sR11_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R11]
+  nlinarith [hprod]
+
+/-- Conditional R11 center assembly: banked s-center + new poly `38.3` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.002 + 0.05 * 1.26) / 19.15`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R11_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R11.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R11GammaUpper.sR11‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R11GammaUpper.sR11‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 38.3 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R11.radius ≤
+      ‖xiShifted CentralCoverAssembly.R11.center‖ := by
+  have hpoly := poly_lower_R11
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R11GammaUpper.sR11‖ :=
+    CellUniform.pi_lower_of_re (by rw [R11GammaUpper.sR11_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R11GammaUpper.sR11
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R11.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R11 0.002 0.05 (by norm_num) hrad
+    38.3 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact outer-tier threshold: `0.002 + 0.05 * 1.26 = 0.065`. -/
+theorem R11_threshold_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Exact banked base: `38.3 * (1/2) = 19.15`. -/
+theorem R11_base_eq : (38.3 : ℝ) * (1 / 2) = 19.15 := by norm_num
+
+/-- Exact residual: banked floors `19.15 / 260000000` do not clear `0.065`
+(required `Agam * Azeta ≥ 0.065 / 19.15 ≈ 0.00339`; banked `≈ 3.85e-09`;
+short by factor `≈ 882291`, the ~6-order wall). -/
+theorem R11_banked_infeasible :
+    (38.3 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by norm_num
+
+#print axioms R11CenterAssembly.poly_lower_R11
+#print axioms R11CenterAssembly.R11_center_with_poly_pi_gamma
+#print axioms R11CenterAssembly.R11_threshold_eq
+#print axioms R11CenterAssembly.R11_banked_infeasible
+
+end R11CenterAssembly
