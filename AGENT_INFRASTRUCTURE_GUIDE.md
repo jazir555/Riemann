@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 CELL-I (background `ses_f349123cc`, proof-only,
+  grep-clean, interval-only commit): R09 center conditional `:35490`
+  (poly 26.3, base 13.15; need Agam·Azeta≥0.00686, have 3.85e-9 —
+  short 1.78M, same wall).
 - 2026-09-22 BALLADV-R02DOM (background `ses_f3492c3e6`, proof-only,
   grep-clean, ball_advance-only commit): 1.05-decay dominator family
   (`:1685-1771`: p-series + log-comparison banked; Summable half closed
