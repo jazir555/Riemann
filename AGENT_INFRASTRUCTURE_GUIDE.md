@@ -6152,6 +6152,13 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 FIRSTCELL-PHASE (background `ses_f347d813f`, proof-only,
+  grep-clean, first_cell-only commit): bridge lower CLOSED — Re=1.56 ≥
+  0.28 (`:2798`, phase floors k=0..3 via banked log2 + pi shifts). Sole
+  remaining: eta identity (HasSum at sCenter, analytic continuation).
+- 2026-09-22 SLIVER-STRIPPUNCT (background `ses_f347c9274`, proof-only,
+  grep-clean, sliver_edge-only commit): conditional punctured-strip sup
+  (319488·G·Z). Gamma/zeta numerals + strip-transfer limits open.
 - 2026-09-22 ZETA-FLOOR1147 (background `ses_f347a8933`, proof-only,
   grep-clean, zeta-only commit): 1.147^20≈15.5 honest → tail 17.44 →
   K0-16 19.722 (beats 19.736 by 0.014; sanity ✓). 47-bar gap 0.264;

@@ -2323,3 +2323,494 @@ theorem FC_bridge_eta_residual : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-PHASE wave: complex-S4 lower via Re + phase floors (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Bridge block (`door3_first_cell.lean:2269-2321`): `FC_cDirTerm` (`:2269`,
+  `((k+1) : ℂ) ^ (-sCenter)`), `FC_neg_sCenter_re` (`:2273`),
+  `FC_cDirTerm_norm` (`:2278`), `FC_cEtaTerm` (`:2285`,
+  `(-1)^k * cDir`), `FC_cEtaTerm_norm` (`:2289`),
+  `FC_bridge_lower_obligation` (`:2304`, `0.28 ≤ ‖∑ range 4, FC_cEtaTerm‖`),
+  `FC_eta_identity_obligation` (`:2311`), `FC_bridge_eta_residual` (`:2321`).
+* `sCenter` shapes (`central_cover_assembly.lean:9588` def,
+  `:9608` `sCenter_re = 0.395`, `:9615` `sCenter_im = -6.75`).
+* Banked log bounds (this file): `FC_log2_ge_aux` (`:966`,
+  `0.693147 < log 2`), `FC_log2_le_aux` (`:1075`, `log 2 < 0.693148`),
+  `FC_eta_phase1_sharp` (`:1081`, `6.75 * log 2 < 4.679`); no `log 3` /
+  `log 4` bounds in this file (grep-clean) — both derived below from banked
+  `log 2` + `Real.log_le_sub_one_of_pos` / `Real.log_pow` (no new estimates).
+* Taylor toolkit shapes (banked use in this file): `Real.exp_bound'` n=4
+  (`:1968`, `FC_rpow0605_proved`), `Real.quadratic_le_exp_of_nonneg`
+  (`:978`), `Real.one_sub_sq_div_two_le_cos` (`:531`); pi/cos split shapes
+  mirrored from `door3_cell_suppliers.lean:338` (`CS_cpow2_sCenter_re`),
+  `:2101` (`CS_cos3_nonneg`), `:2141` (`CS_cos4_upper_neg099`),
+  `:2213` (`CS_complex_S4_Re_ge_156`) — re-proved locally (suppliers file is
+  NOT imported here), same numerals, same lemma names from Mathlib.
+* `rpow` inputs: `FC_rpow4_head_upper_proved` is the OPPOSITE side
+  (`4^-σ ≤ 0.59`); the `4^-σ ≥ 0.57` lower below comes from a new
+  `4^0.395 ≤ 1.74` cap via `exp_bound'` + banked `log 2` upper (honest).
+
+Verdict: CLOSE (b) with value `1.56` (`Re`-only route; `sin` floors not
+needed since `Re` already exceeds the need; `k = 0` base-`1` term is exact
+via `Complex.one_cpow`). (c) stays OPEN. No build attempted (verifier owns
+the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- `log 4 = 2 * log 2` (exact, mirrors `CS_log_four_eq`). -/
+theorem FC_log4_eq : Real.log 4 = 2 * Real.log 2 := by
+  have h4 : (4 : ℝ) = 2 ^ (2 : ℕ) := by norm_num
+  rw [h4, Real.log_pow]
+  norm_num
+
+/-- `log 3` lower from banked `log 2` lower (mirrors `CS_log_three_ge`;
+no new estimates). -/
+theorem FC_log3_ge : (1.0529 : ℝ) ≤ Real.log 3 := by
+  have h2lo := FC_log2_ge_aux
+  have hub43 : Real.log (4 / 3 : ℝ) ≤ (1 / 3 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 4 / 3)
+    have he : (4 / 3 : ℝ) - 1 = (1 / 3 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (3 / 4 : ℝ) = -Real.log (4 / 3 : ℝ) := by
+    have heq : (3 / 4 : ℝ) = (4 / 3 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hmeq : (4 : ℝ) * (3 / 4) = 3 := by norm_num
+  have hlog3 : Real.log 3 = 2 * Real.log 2 + Real.log (3 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (3 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, FC_log4_eq] at h
+    exact h
+  have hfin : (1.0529 : ℝ) ≤ 2 * (0.693147 : ℝ) - (1 / 3 : ℝ) := by
+    norm_num
+  rw [hlog3, hinv]
+  linarith
+
+/-- `log 3` upper from banked `log 2` upper (mirrors `CS_log_three_le`;
+no new estimates). -/
+theorem FC_log3_le : Real.log 3 ≤ (1.1363 : ℝ) := by
+  have h2hi := FC_log2_le_aux
+  have hub34 : Real.log (3 / 4 : ℝ) ≤ (-1 / 4 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 3 / 4)
+    have he : (3 / 4 : ℝ) - 1 = (-1 / 4 : ℝ) := by norm_num
+    linarith
+  have hmeq : (4 : ℝ) * (3 / 4) = 3 := by norm_num
+  have hlog3 : Real.log 3 = 2 * Real.log 2 + Real.log (3 / 4 : ℝ) := by
+    have h := Real.log_mul (show (4 : ℝ) ≠ 0 by norm_num)
+      (show (3 / 4 : ℝ) ≠ 0 by norm_num)
+    rw [hmeq, FC_log4_eq] at h
+    exact h
+  have hfin : 2 * (0.693148 : ℝ) - (1 / 4 : ℝ) ≤ (1.1363 : ℝ) := by
+    norm_num
+  rw [hlog3]
+  linarith
+
+/-- Phase floor `4.6787 ≤ 6.75 * log 2` from banked `log 2` lower. -/
+theorem FC_phi2_lo : (4.6787 : ℝ) ≤ 6.75 * Real.log 2 := by
+  have h2 := FC_log2_ge_aux
+  have hmul : 6.75 * (0.693147 : ℝ) ≤ 6.75 * Real.log 2 :=
+    mul_le_mul_of_nonneg_left h2.le (by norm_num)
+  have hcap : (4.6787 : ℝ) ≤ 6.75 * 0.693147 := by
+    norm_num
+  linarith
+
+/-- Cosine nonpositivity at `φ₂ = 6.75 * log 2`
+(mirrors `CS_cos675_nonpos_proved`). -/
+theorem FC_cos2_nonpos : Real.cos (6.75 * Real.log 2) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphase := FC_eta_phase1_sharp
+  have hlo := FC_phi2_lo
+  have h1 : Real.pi / 2 ≤ 6.75 * Real.log 2 := by linarith
+  have h2 : 6.75 * Real.log 2 ≤ Real.pi + Real.pi / 2 := by linarith
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le h1 h2
+
+/-- Phase window lower `7.10707 ≤ 6.75 * log 3`. -/
+theorem FC_phi3_lo : (7.10707 : ℝ) ≤ 6.75 * Real.log 3 := by
+  have hmul : 6.75 * (1.0529 : ℝ) ≤ 6.75 * Real.log 3 :=
+    mul_le_mul_of_nonneg_left FC_log3_ge (by norm_num)
+  have hcap : (7.10707 : ℝ) ≤ 6.75 * 1.0529 := by
+    norm_num
+  linarith
+
+/-- Phase window upper `6.75 * log 3 ≤ 7.67003`. -/
+theorem FC_phi3_hi : 6.75 * Real.log 3 ≤ (7.67003 : ℝ) := by
+  have hmul : 6.75 * Real.log 3 ≤ 6.75 * 1.1363 :=
+    mul_le_mul_of_nonneg_left FC_log3_le (by norm_num)
+  have hcap : (6.75 : ℝ) * 1.1363 ≤ 7.67003 := by
+    norm_num
+  linarith
+
+/-- Cosine nonnegativity at `φ₃ = 6.75 * log 3` (mirrors `CS_cos3_nonneg`). -/
+theorem FC_cos3_nonneg : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := FC_phi3_lo
+  have hhi := FC_phi3_hi
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : -(Real.pi / 2) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonneg_of_neg_pi_div_two_le_of_le he_lo he_hi
+
+/-- Phase window lower `9.35748 ≤ 6.75 * log 4` (exact `log 4 = 2 log 2`). -/
+theorem FC_phi4_lo : (9.35748 : ℝ) ≤ 6.75 * Real.log 4 := by
+  rw [FC_log4_eq]
+  have h2lo := FC_log2_ge_aux
+  have hmul : 13.5 * (0.693147 : ℝ) ≤ 13.5 * Real.log 2 :=
+    mul_le_mul_of_nonneg_left h2lo.le (by norm_num)
+  have hcap : (9.35748 : ℝ) ≤ 13.5 * 0.693147 := by
+    norm_num
+  have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+    ring
+  linarith
+
+/-- Phase window upper `6.75 * log 4 ≤ 9.35750`. -/
+theorem FC_phi4_hi : 6.75 * Real.log 4 ≤ (9.35750 : ℝ) := by
+  rw [FC_log4_eq]
+  have h2hi := FC_log2_le_aux
+  have hmul : 13.5 * Real.log 2 ≤ 13.5 * 0.693148 :=
+    mul_le_mul_of_nonneg_left h2hi.le (by norm_num)
+  have hcap : (13.5 : ℝ) * 0.693148 ≤ 9.35750 := by
+    norm_num
+  have heq : 6.75 * (2 * Real.log 2) = 13.5 * Real.log 2 := by
+    ring
+  linarith
+
+/-- Cosine upper at `φ₄ = 6.75 * log 4` (`≤ -0.99`;
+mirrors `CS_cos4_upper_neg099`). -/
+theorem FC_cos4_neg099 : Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphi_lo := FC_phi4_lo
+  have hphi_hi := FC_phi4_hi
+  set x : ℝ := 6.75 * Real.log 4 with hx_def
+  set d : ℝ := 3 * Real.pi - x with hd_def
+  have hd_lo : (0 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.068 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hx_eq : x = (Real.pi - d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = -Real.cos d := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_pi_sub]
+  have hcosd_lo : (0.99 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hsq : d ^ 2 ≤ (0.068 : ℝ) ^ 2 :=
+      pow_le_pow_left₀ hd_lo hd_hi 2
+    have hnum : (0.99 : ℝ) ≤ 1 - (0.068 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hcos_eq]
+  linarith
+
+/-- `4 ^ 0.395 ≤ 1.74` via `exp_bound'` n=4 at
+`x = 0.395 * log 4 = 0.79 * log 2 ≤ 0.54759`
+(mirrors `CS_rpow4pos_upper174_proved`; banked `log 2` upper only). -/
+theorem FC_rpow4pos_le174 : (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74 := by
+  show (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74
+  have hlog : Real.log 2 < (0.693148 : ℝ) := FC_log2_le_aux
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have h4 : Real.log 4 = 2 * Real.log 2 := FC_log4_eq
+  have hlog4_pos : (0 : ℝ) < Real.log 4 := by
+    rw [h4]
+    linarith
+  set x : ℝ := 0.395 * Real.log 4 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog4_pos)
+  have hx_hi : x ≤ (0.54759 : ℝ) := by
+    rw [hx_def, h4]
+    have hmul : 0.79 * Real.log 2 ≤ 0.79 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.79 : ℝ) * 0.693148 ≤ (0.54759 : ℝ) := by
+      norm_num
+    have heq : 0.395 * (2 * Real.log 2) = 0.79 * Real.log 2 := by
+      ring
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (4 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 4)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.54759 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.54759 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.54759 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.54759 + (0.54759 : ℝ) ^ 2 / 2 +
+      (0.54759 : ℝ) ^ 3 / 6 + (0.54759 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.74 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- CLOSED: `4 ^ -0.395 ≥ 0.57` from `4 ^ 0.395 ≤ 1.74`
+(`0.57 * 1.74 = 0.9918 ≤ 1`). -/
+theorem FC_rpow4neg_ge057 : (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+  show (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.74 := FC_rpow4pos_le174
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (4 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [inv_eq_one_div]
+  have hle : (0.57 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.57 : ℝ) * 1.74 ≤ 1 := by norm_num
+    calc (0.57 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.57 * 1.74 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- Base-`1` term is exact: `(FC_cDirTerm 0).re = 1`. -/
+theorem FC_cDir0_re : (FC_cDirTerm 0).re = 1 := by
+  have h0 : ((((0 : ℕ)) : ℝ) + 1 : ℝ) = (1 : ℝ) := by norm_num
+  unfold FC_cDirTerm
+  rw [h0]
+  have hbase : ((((1 : ℝ))) : ℂ) = 1 := by simp
+  rw [hbase, Complex.one_cpow, Complex.one_re]
+
+/-- Cpow real-part split for base `2` at `sCenter`
+(mirrors `CS_cpow2_sCenter_re`). -/
+theorem FC_cDir1_re : (FC_cDirTerm 1).re
+    = (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) := by
+  have h1 : ((((1 : ℕ)) : ℝ) + 1 : ℝ) = (2 : ℝ) := by norm_num
+  unfold FC_cDirTerm
+  rw [h1]
+  have h2pos : (0 : ℝ) < 2 := by norm_num
+  have hxC : ((2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h2pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((2 : ℝ) : ℂ) = (((Real.log 2 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h2pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 2 : ℝ)) : ℂ)).re = Real.log 2 := Complex.ofReal_re _
+  have hzim : ((((Real.log 2 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 2 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 2 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 2 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 2 * (-(0.395 : ℝ)))
+      = (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h2pos _).symm
+  have hcos : Real.cos (Real.log 2 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 2) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for base `3` at `sCenter`
+(mirrors `CS_cpow3_sCenter_re`). -/
+theorem FC_cDir2_re : (FC_cDirTerm 2).re
+    = (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) := by
+  have h2 : ((((2 : ℕ)) : ℝ) + 1 : ℝ) = (3 : ℝ) := by norm_num
+  unfold FC_cDirTerm
+  rw [h2]
+  have h3pos : (0 : ℝ) < 3 := by norm_num
+  have hxC : ((3 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h3pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((3 : ℝ) : ℂ) = (((Real.log 3 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h3pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 3 : ℝ)) : ℂ)).re = Real.log 3 := Complex.ofReal_re _
+  have hzim : ((((Real.log 3 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 3 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 3 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 3 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 3 * (-(0.395 : ℝ)))
+      = (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h3pos _).symm
+  have hcos : Real.cos (Real.log 3 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 3) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for base `4` at `sCenter`
+(mirrors `CS_cpow4_sCenter_re`). -/
+theorem FC_cDir3_re : (FC_cDirTerm 3).re
+    = (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4) := by
+  have h3 : ((((3 : ℕ)) : ℝ) + 1 : ℝ) = (4 : ℝ) := by norm_num
+  unfold FC_cDirTerm
+  rw [h3]
+  have h4pos : (0 : ℝ) < 4 := by norm_num
+  have hxC : ((4 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h4pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((4 : ℝ) : ℂ) = (((Real.log 4 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h4pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 4 : ℝ)) : ℂ)).re = Real.log 4 := Complex.ofReal_re _
+  have hzim : ((((Real.log 4 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 4 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 4 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 4 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 4 * (-(0.395 : ℝ)))
+      = (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h4pos _).symm
+  have hcos : Real.cos (Real.log 4 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 4) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Alternating-sign unfolds for the four S4 terms. -/
+theorem FC_cEta0_eq : FC_cEtaTerm 0 = FC_cDirTerm 0 := by
+  simp only [FC_cEtaTerm, pow_zero, one_mul]
+
+/-- Alternating-sign unfolds for the four S4 terms. -/
+theorem FC_cEta1_eq : FC_cEtaTerm 1 = -FC_cDirTerm 1 := by
+  simp only [FC_cEtaTerm, pow_one, neg_mul, one_mul]
+
+/-- Alternating-sign unfolds for the four S4 terms. -/
+theorem FC_cEta2_eq : FC_cEtaTerm 2 = FC_cDirTerm 2 := by
+  have h2 : (-1 : ℂ) ^ (2 : ℕ) = 1 := by rw [pow_two, neg_mul_neg, mul_one]
+  simp only [FC_cEtaTerm]
+  rw [h2, one_mul]
+
+/-- Alternating-sign unfolds for the four S4 terms. -/
+theorem FC_cEta3_eq : FC_cEtaTerm 3 = -FC_cDirTerm 3 := by
+  have h2 : (-1 : ℂ) ^ (2 : ℕ) = 1 := by rw [pow_two, neg_mul_neg, mul_one]
+  have h3 : (-1 : ℂ) ^ (3 : ℕ) = -1 := by
+    have e : (3 : ℕ) = 2 + 1 := by norm_num
+    rw [e, pow_succ, h2, one_mul]
+  simp only [FC_cEtaTerm]
+  rw [h3, neg_mul, one_mul]
+
+/-- S4 complex sum in signed `cDir` form. -/
+theorem FC_S4sum_eq : (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    = FC_cDirTerm 0 - FC_cDirTerm 1 + FC_cDirTerm 2 - FC_cDirTerm 3 := by
+  have e4 : (4 : ℕ) = 3 + 1 := by norm_num
+  have e3 : (3 : ℕ) = 2 + 1 := by norm_num
+  have e2 : (2 : ℕ) = 1 + 1 := by norm_num
+  rw [e4, e3, e2]
+  simp only [Finset.sum_range_succ, Finset.sum_range_one]
+  rw [FC_cEta0_eq, FC_cEta1_eq, FC_cEta2_eq, FC_cEta3_eq]
+  ring
+
+/-- Real-part identity for the complex S4 partial sum. -/
+theorem FC_S4sum_Re_eq : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2)
+    + (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3)
+    - (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4) := by
+  rw [FC_S4sum_eq]
+  simp only [Complex.add_re, Complex.sub_re]
+  rw [FC_cDir0_re, FC_cDir1_re, FC_cDir2_re, FC_cDir3_re]
+
+/-- Complex-S4 real part `≥ 1.56`
+(mirrors `CS_complex_S4_Re_ge_156` at FC numerals). -/
+theorem FC_bridge_Re_ge_156 :
+    (1.56 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  rw [FC_S4sum_Re_eq]
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr4lo : (0.57 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    FC_rpow4neg_ge057
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 := FC_cos2_nonpos
+  have hc3 : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) := FC_cos3_nonneg
+  have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) := FC_cos4_neg099
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    mul_nonneg hr3 hc3
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.5643 : ℝ) := by
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.57 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.57) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.57 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.57 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.57 * (-0.99) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.57 : ℝ) * (-0.99) = -0.5643 := by norm_num
+    linarith
+  linarith
+
+/-- CLOSED (b): complex S4 floor `0.28` — in fact `≥ 1.56` via `Re`. -/
+theorem FC_bridge_lower_proved : FC_bridge_lower_obligation := by
+  show (0.28 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖
+  have hRe := FC_bridge_Re_ge_156
+  have hle : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+      ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+    have h1 := Complex.abs_re_le_norm (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    have h2 := le_abs_self (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    linarith
+  linarith
+
+/-- Exact phase-wave residual: (b) CLOSED (`FC_bridge_lower_proved`, value
+`1.56 ≥ 0.28`; banked phase floors `FC_cos2_nonpos` / `FC_cos3_nonneg` /
+`FC_cos4_neg099` + `FC_rpow4neg_ge057`, all from banked `log 2` bounds);
+(c) `FC_eta_identity_obligation` stays OPEN (no `HasSum` at `sCenter`). -/
+theorem FC_phase_residual_closed : True := by
+  trivial
+
+end Door3FirstCellClose
+

@@ -1371,3 +1371,230 @@ theorem puncturedBall12z_excludes_bot (ρT ρB : ℝ) (hρB : 0 < ρB) :
   linarith
 
 end Door3SliverEdge
+
+/-! ### (Q) Punctured-strip product sup via strip transfer
+
+Grepped before writing:
+* punctured defs `door3_sliver_edge.lean:1231` (`puncturedBall12`),
+  `:1309` (`puncturedBall12_quarter`), `:1336` (`puncturedBall12z`),
+  `:1341` (`PuncturedEntireSup`), `:1277` (`PuncturedGammaSup`),
+  `:1281` (`PuncturedZetaSup`), `:1286` (`fourFactor_punctured_upper`);
+* strip transfer `central_cover_assembly.lean:836`
+  (`xiShifted_eq_entire_on_strip`, needs `-(1/2) < z.im` and `z.im < 1/2`);
+* four-factor shape `central_cover_assembly.lean:6339` (`xiShifted_eq_parts`)
+  and `:6350` (`norm_xiShifted_eq_parts`) in `DerivCauchyBridge`
+  (`polyOf` / `piOf` / `gammaOf` at `:6328` / `:6331` / `:6334`,
+  with root `zeta` at the `s`-point `(1/2) + I * z`).
+
+What is banked here (all conditional, no new numerals beyond `319488` reuse):
+* `openStrip` plus `puncturedStrip12z` (intersection of `puncturedBall12z`
+  with the open strip where `Entire = Shifted`);
+* `s`-map isometries `shiftedS_dist_zero` / `shiftedS_dist_one`
+  (`dist ((1/2)+I*z) 0 = dist z (I/2)`,
+  `dist ((1/2)+I*z) 1 = dist z (-(I/2))`);
+* `shiftedS_mem_punctured_of_mem` (z-punctured distances give s-punctured
+  membership once the `s`-ball premise is supplied explicitly);
+* `entire_eq_shifted_of_mem_puncturedStrip` and the norm form, via `:836`;
+* `xiShifted_norm_eq_fourFactor_norm_DCB` (norm bridge to the
+  `DerivCauchyBridge` four-factor with root `zeta`);
+* `entire_puncturedStrip_upper` (conditional compose on the punctured strip:
+  poly-pi `319488` plus Gamma `G` plus `zeta` `Z` give
+  `‖xiShiftedEntire z‖ ≤ 319488 * G * Z` at every `z` in the punctured strip
+  whose `s`-point lies in ball-12).
+
+Value-or-gap: conditional Entire sup `319488 * G * Z` on the punctured strip
+is now banked from explicit factor premises; no Gamma / `zeta` numerals are
+banked here.
+Residual (exact, open, not forced): (a) punctured Gamma / `zeta` numeral sups
+stay open (owned elsewhere); (b) the `s`-ball premise
+`((1/2)+I*z) ∈ closedBall 0 12` is kept explicit because the `s`-map
+`z ↦ (1/2)+I*z` shifts norms by `1/2`, so `z`-ball membership alone does not
+supply it; (c) even this punctured-strip Entire sup does not close the
+full-ball `hC` needed by the deriv bridges at `:343` / `:368` / `:708` /
+`:768`, since those need `xiShiftedEntire` on full spheres of radius `1`
+about edge points, and such spheres exit the `|Im| < 1/2` strip where
+`Shifted = Entire` holds; the M1000 closers stay conditional.
+-/
+
+namespace Door3SliverEdge
+
+/-- The open strip where `Shifted = Entire` holds. -/
+def openStrip : Set ℂ := {z : ℂ | -(1 / 2 : ℝ) < z.im ∧ z.im < (1 / 2 : ℝ)}
+
+/-- Punctured strip: `z`-punctured ball intersected with the open strip. -/
+def puncturedStrip12z (ρT ρB : ℝ) : Set ℂ :=
+  {z : ℂ | z ∈ puncturedBall12z ρT ρB ∧ z ∈ openStrip}
+
+/-- Punctured strip lies in the punctured `z`-ball. -/
+theorem puncturedStrip_subset_punctured (ρT ρB : ℝ) :
+    puncturedStrip12z ρT ρB ⊆ puncturedBall12z ρT ρB := by
+  intro z hz
+  simp only [puncturedStrip12z, Set.mem_setOf_eq] at hz
+  exact hz.1
+
+/-- Punctured strip lies in the open strip. -/
+theorem puncturedStrip_subset_strip (ρT ρB : ℝ) :
+    puncturedStrip12z ρT ρB ⊆ openStrip := by
+  intro z hz
+  simp only [puncturedStrip12z, Set.mem_setOf_eq] at hz
+  exact hz.2
+
+/-- `s`-map identity at the top preimage. -/
+theorem shiftedS_eq_top_mul (z : ℂ) :
+    ((1 / 2 : ℂ) + Complex.I * z) = Complex.I * (z - Complex.I / 2) := by
+  have hI : Complex.I * (Complex.I / 2) = -(1 / 2 : ℂ) := by
+    calc Complex.I * (Complex.I / 2) = (Complex.I * Complex.I) / 2 := by ring
+      _ = -(1 / 2 : ℂ) := by rw [Complex.I_mul_I]; ring
+  have h : Complex.I * (z - Complex.I / 2) = (1 / 2 : ℂ) + Complex.I * z := by
+    calc Complex.I * (z - Complex.I / 2)
+        = Complex.I * z - Complex.I * (Complex.I / 2) := by ring
+      _ = Complex.I * z - (-(1 / 2 : ℂ)) := by rw [hI]
+      _ = (1 / 2 : ℂ) + Complex.I * z := by ring
+  exact h.symm
+
+/-- `s`-map identity at the bottom preimage. -/
+theorem shiftedS_eq_bot_mul (z : ℂ) :
+    ((1 / 2 : ℂ) + Complex.I * z) - 1 = Complex.I * (z + Complex.I / 2) := by
+  have hI : Complex.I * (Complex.I / 2) = -(1 / 2 : ℂ) := by
+    calc Complex.I * (Complex.I / 2) = (Complex.I * Complex.I) / 2 := by ring
+      _ = -(1 / 2 : ℂ) := by rw [Complex.I_mul_I]; ring
+  calc ((1 / 2 : ℂ) + Complex.I * z) - 1
+      = Complex.I * z + (-(1 / 2 : ℂ)) := by ring
+    _ = Complex.I * z + Complex.I * (Complex.I / 2) := by rw [hI]
+    _ = Complex.I * (z + Complex.I / 2) := by ring
+
+/-- Isometry at the Gamma pole: `dist s 0 = dist z (I / 2)`. -/
+theorem shiftedS_dist_zero (z : ℂ) :
+    dist ((1 / 2 : ℂ) + Complex.I * z) 0 = dist z (Complex.I / 2) := by
+  have heq : ((1 / 2 : ℂ) + Complex.I * z) - 0 =
+      Complex.I * (z - Complex.I / 2) := by
+    rw [sub_zero]
+    exact shiftedS_eq_top_mul z
+  rw [dist_eq_norm, dist_eq_norm, heq, norm_mul, Complex.norm_I, one_mul]
+
+/-- Isometry at the zeta pole: `dist s 1 = dist z (-(I / 2))`. -/
+theorem shiftedS_dist_one (z : ℂ) :
+    dist ((1 / 2 : ℂ) + Complex.I * z) 1 = dist z (-(Complex.I / 2)) := by
+  have heq : ((1 / 2 : ℂ) + Complex.I * z) - 1 =
+      Complex.I * (z - (-(Complex.I / 2))) := by
+    have h0 := shiftedS_eq_bot_mul z
+    have h1 : z + Complex.I / 2 = z - (-(Complex.I / 2)) := by ring
+    rw [h0, h1]
+  rw [dist_eq_norm, dist_eq_norm, heq, norm_mul, Complex.norm_I, one_mul]
+
+/-- `z`-punctured distances transfer to `s`-punctured membership once the
+`s`-ball premise is supplied. -/
+theorem shiftedS_mem_punctured_of_mem (ρT ρB : ℝ) {z : ℂ}
+    (hz : z ∈ puncturedStrip12z ρT ρB)
+    (hsBall : ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) 12) :
+    ((1 / 2 : ℂ) + Complex.I * z) ∈ puncturedBall12 ρT ρB := by
+  have hzP : z ∈ puncturedBall12z ρT ρB := puncturedStrip_subset_punctured ρT ρB hz
+  simp only [puncturedBall12z, Set.mem_setOf_eq] at hzP
+  obtain ⟨_, hT, hB⟩ := hzP
+  simp only [puncturedBall12, Set.mem_setOf_eq]
+  refine ⟨hsBall, ?_, ?_⟩
+  · rw [shiftedS_dist_zero]
+    exact hT
+  · rw [shiftedS_dist_one]
+    exact hB
+
+/-- Entire agrees with Shifted on the punctured strip. -/
+theorem entire_eq_shifted_of_mem_puncturedStrip (ρT ρB : ℝ) {z : ℂ}
+    (hz : z ∈ puncturedStrip12z ρT ρB) :
+    _root_.xiShifted z = CentralCoverAssembly.xiShiftedEntire z := by
+  have hS : z ∈ openStrip := puncturedStrip_subset_strip ρT ρB hz
+  simp only [openStrip, Set.mem_setOf_eq] at hS
+  obtain ⟨hgt, hlt⟩ := hS
+  exact CentralCoverAssembly.xiShifted_eq_entire_on_strip z hgt hlt
+
+/-- Norm form of the punctured-strip transfer. -/
+theorem entire_norm_eq_shifted_of_mem_puncturedStrip (ρT ρB : ℝ) {z : ℂ}
+    (hz : z ∈ puncturedStrip12z ρT ρB) :
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ = ‖_root_.xiShifted z‖ := by
+  have hEq := entire_eq_shifted_of_mem_puncturedStrip ρT ρB hz
+  rw [← hEq]
+
+/-- Norm bridge from `Shifted` to the `DerivCauchyBridge` four-factor. -/
+theorem xiShifted_norm_eq_fourFactor_norm_DCB (z : ℂ) :
+    ‖_root_.xiShifted z‖ =
+      ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+        _root_.zeta ((1 / 2 : ℂ) + Complex.I * z)‖ := by
+  have hParts := DerivCauchyBridge.norm_xiShifted_eq_parts z
+  have e0 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ =
+      ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+        ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ :=
+    norm_mul _ _
+  have e1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      _root_.zeta ((1 / 2 : ℂ) + Complex.I * z)‖ =
+      ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+        ‖_root_.zeta ((1 / 2 : ℂ) + Complex.I * z)‖ :=
+    norm_mul _ _
+  rw [e1, e0]
+  exact hParts
+
+/-- Conditional punctured-strip Entire sup from explicit factor premises. -/
+theorem entire_puncturedStrip_upper (ρT ρB G Z : ℝ) (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hGam : ∀ s : ℂ, s ∈ puncturedBall12 ρT ρB →
+      ‖DerivCauchyBridge.gammaOf s‖ ≤ G)
+    (hZet : ∀ s : ℂ, s ∈ puncturedBall12 ρT ρB →
+      ‖_root_.zeta s‖ ≤ Z)
+    (hPP : ∀ s : ℂ, s ∈ puncturedBall12 ρT ρB →
+      ‖DerivCauchyBridge.polyOf s * DerivCauchyBridge.piOf s‖ ≤ (319488 : ℝ))
+    {z : ℂ} (hz : z ∈ puncturedStrip12z ρT ρB)
+    (hsBall : ((1 / 2 : ℂ) + Complex.I * z) ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (319488 : ℝ) * G * Z := by
+  have hsMem : ((1 / 2 : ℂ) + Complex.I * z) ∈ puncturedBall12 ρT ρB :=
+    shiftedS_mem_punctured_of_mem ρT ρB hz hsBall
+  have hpp := hPP _ hsMem
+  have hg := hGam _ hsMem
+  have hzeta := hZet _ hsMem
+  have hEnt := entire_norm_eq_shifted_of_mem_puncturedStrip ρT ρB hz
+  have hFour := xiShifted_norm_eq_fourFactor_norm_DCB z
+  have hbg : (0 : ℝ) ≤ (319488 : ℝ) := by norm_num
+  have hbG : (0 : ℝ) ≤ (319488 : ℝ) * G := mul_nonneg hbg hG0
+  have e0 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ =
+      ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+        ‖DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ :=
+    norm_mul _ _
+  have e1 : ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      _root_.zeta ((1 / 2 : ℂ) + Complex.I * z)‖ =
+      ‖DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+        DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z)‖ *
+        ‖_root_.zeta ((1 / 2 : ℂ) + Complex.I * z)‖ :=
+    norm_mul _ _
+  rw [hEnt, hFour, e1, e0]
+  exact mul_le_mul (mul_le_mul hpp hg (norm_nonneg _) hbg) hzeta (norm_nonneg _) hbG
+
+/-- Quarter-radii punctured strip (explicit `1 / 4` exclusion at both poles). -/
+def puncturedStrip_quarter : Set ℂ := puncturedStrip12z (1 / 4) (1 / 4)
+
+/-- Quarter punctured strip lies in the quarter punctured `z`-ball. -/
+theorem puncturedStrip_quarter_subset :
+    puncturedStrip_quarter ⊆ puncturedBall12z (1 / 4) (1 / 4) := by
+  intro z hz
+  simp only [puncturedStrip_quarter] at hz
+  exact puncturedStrip_subset_punctured (1 / 4) (1 / 4) hz
+
+/-- Quarter punctured strip lies in the open strip. -/
+theorem puncturedStrip_quarter_subset_strip :
+    puncturedStrip_quarter ⊆ openStrip := by
+  intro z hz
+  simp only [puncturedStrip_quarter] at hz
+  exact puncturedStrip_subset_strip (1 / 4) (1 / 4) hz
+
+end Door3SliverEdge
