@@ -1461,3 +1461,257 @@ theorem stirlingCloses_mid
   exact le_trans hSpec hNum
 
 end Door3Digamma
+
+/-! ## 14. True-pi/2 numeric closures via banked pi + exp(1) windows (append-only).
+
+Grep basis (read before writing):
+- HEIGHT specs `stirlingDecay_outer / leaf / mid`
+  (`door3_digamma.lean:1421-1428`):
+  `‖Gamma w‖ ≤ 1 * exp(-(pi/2) * |Im|)`.
+- HEIGHT numerics `stirlingNumeric_outer / leaf / mid`
+  (`door3_digamma.lean:1430-1437`):
+  `1 * exp(-(pi/2) * |Im|) ≤ 0.002 / 0.008 / 0.04`.
+- Closers `stirlingCloses_*` (`door3_digamma.lean:1439-1461`):
+  `spec → numeric → gamNeed` by `le_trans` only.
+- Decay insts `gamOuter_decay_inst / gamLeaf_decay_inst / gamMid_decay_inst`
+  (`door3_digamma.lean:1283-1308`): rate-1/2 envelopes via
+  `D3SG_decay_sigma` (`door3_stirling_gamma.lean:1305-1307`).
+- Crude uppers `gamOuter_decay_crude / gamLeaf_decay_crude / gamMid_decay_crude`
+  (`door3_digamma.lean:1382-1413`): `5.65 / 11.17 / 8.23`, gaps above needs
+  (`door3_digamma.lean:1415-1419`).
+- Banked windows used here, no new imports (header already has full Mathlib):
+  `Real.pi_gt_three` (`Mathlib/.../Real/Pi/Bounds.lean:151`),
+  `Real.pi_lt_d4` (`.../Bounds.lean:172`),
+  `Real.exp_one_gt_d9` (`Mathlib/.../Complex/ExponentialBounds.lean:35`),
+  `Real.add_one_le_exp`, `Real.exp_add`, `Real.exp_le_exp`,
+  `Real.exp_one_pow` (`Mathlib/.../Pow/Real.lean:80`),
+  `pow_le_pow_left₀`.
+- Reflection route examined: `Complex.Gamma_mul_Gamma_one_sub`
+  (`Mathlib/.../Gamma/Beta.lean:397-398`) is present under the current
+  Mathlib import, so no new import would be needed to cite it. Deriving the
+  `pi/2` decay spec from it still needs explicit lower bounds on
+  `‖sin (pi * w)‖` with height growth plus a uniform lower bound on
+  `‖Gamma (1 - w)‖` at `Re ~ 0.8 / 0.9`; both are unbanked here. Hence the
+  `stirlingDecay_*` specs stay open and are filed as exact residual below.
+
+Value banked here (all proofs closed, Mathlib + file-local only):
+- `piDivTwo_ge_15`, `expOne_ge_27`.
+- `exp65625_ge_500`, `exp50625_ge_125`, `exp35625_ge_25`: tight lower bounds
+  on `exp` at `1.5 * |Im| = 6.5625 / 5.0625 / 3.5625` via `(exp 1)^n`
+  with the `2.7` window plus `1 + x ≤ exp x` for the fractional tail.
+- `expNeg65625_le`, `expNeg50625_le`, `expNeg35625_le`: inverted uppers
+  `exp(-a) ≤ 1 / C` through `exp_add / exp_zero`, mirroring the banked
+  `expOuter_upper` pattern (`door3_digamma.lean:1310-1380`).
+- `stirlingNumeric_outer_proof / leaf_proof / mid_proof`: the three HEIGHT
+  numeric Props close; with `stirlingCloses_*`, each `gamNeed` now needs
+  only its `stirlingDecay_*` spec.
+
+Residual (exact, still open):
+- `stirlingDecay_outer / leaf / mid` (`door3_digamma.lean:1421-1428`):
+  `‖Gamma w‖ ≤ 1 * exp(-(pi/2) * |Im|)` at `|Im| = 4.375 / 3.375 / 2.375`.
+-/
+
+namespace Door3Digamma
+
+theorem piDivTwo_ge_15 : (1.5 : ℝ) ≤ Real.pi / 2 := by
+  have h := Real.pi_gt_three
+  linarith
+
+theorem expOne_ge_27 : (2.7 : ℝ) ≤ Real.exp 1 := by
+  have h := Real.exp_one_gt_d9
+  linarith
+
+theorem exp65625_ge_500 : (500 : ℝ) ≤ Real.exp (6.5625 : ℝ) := by
+  have hE1 : (2.7 : ℝ) ≤ Real.exp 1 := expOne_ge_27
+  have hPow : (2.7 : ℝ) ^ 6 ≤ (Real.exp 1) ^ 6 :=
+    pow_le_pow_left₀ (by norm_num) hE1 6
+  have hCast6 : (((6 : ℕ)) : ℝ) = (6 : ℝ) := by norm_num
+  have hP : (Real.exp 1) ^ 6 = Real.exp (((6 : ℕ)) : ℝ) := Real.exp_one_pow 6
+  rw [hCast6] at hP
+  have hTail : (1.5625 : ℝ) ≤ Real.exp (0.5625 : ℝ) := by
+    have h := Real.add_one_le_exp (0.5625 : ℝ)
+    have heq : (1 : ℝ) + 0.5625 = 1.5625 := by norm_num
+    linarith
+  have hSplit : Real.exp (6 : ℝ) * Real.exp (0.5625 : ℝ) =
+      Real.exp (6.5625 : ℝ) := by
+    have hAE : Real.exp (6 : ℝ) * Real.exp (0.5625 : ℝ) =
+        Real.exp (6 + 0.5625) := by
+      rw [Real.exp_add]
+    have hAdd : (6 : ℝ) + 0.5625 = 6.5625 := by norm_num
+    rw [hAE, hAdd]
+  have hMul : (2.7 : ℝ) ^ 6 * 1.5625 ≤
+      (Real.exp 1) ^ 6 * Real.exp (0.5625 : ℝ) :=
+    mul_le_mul hPow hTail (by norm_num) (by positivity)
+  rw [hP] at hMul
+  rw [hSplit] at hMul
+  have hNum : (500 : ℝ) ≤ (2.7 : ℝ) ^ 6 * 1.5625 := by norm_num
+  exact le_trans hNum hMul
+
+theorem exp50625_ge_125 : (125 : ℝ) ≤ Real.exp (5.0625 : ℝ) := by
+  have hE1 : (2.7 : ℝ) ≤ Real.exp 1 := expOne_ge_27
+  have hPow : (2.7 : ℝ) ^ 5 ≤ (Real.exp 1) ^ 5 :=
+    pow_le_pow_left₀ (by norm_num) hE1 5
+  have hCast5 : (((5 : ℕ)) : ℝ) = (5 : ℝ) := by norm_num
+  have hP : (Real.exp 1) ^ 5 = Real.exp (((5 : ℕ)) : ℝ) := Real.exp_one_pow 5
+  rw [hCast5] at hP
+  have hMono : Real.exp (5 : ℝ) ≤ Real.exp (5.0625 : ℝ) :=
+    Real.exp_le_exp.mpr (by norm_num)
+  have hNum : (125 : ℝ) ≤ (2.7 : ℝ) ^ 5 := by norm_num
+  calc (125 : ℝ) ≤ (2.7 : ℝ) ^ 5 := hNum
+    _ ≤ (Real.exp 1) ^ 5 := hPow
+    _ = Real.exp (5 : ℝ) := hP
+    _ ≤ Real.exp (5.0625 : ℝ) := hMono
+
+theorem exp35625_ge_25 : (25 : ℝ) ≤ Real.exp (3.5625 : ℝ) := by
+  have hE1 : (2.7 : ℝ) ≤ Real.exp 1 := expOne_ge_27
+  have hPow : (2.7 : ℝ) ^ 3 ≤ (Real.exp 1) ^ 3 :=
+    pow_le_pow_left₀ (by norm_num) hE1 3
+  have hCast3 : (((3 : ℕ)) : ℝ) = (3 : ℝ) := by norm_num
+  have hP : (Real.exp 1) ^ 3 = Real.exp (((3 : ℕ)) : ℝ) := Real.exp_one_pow 3
+  rw [hCast3] at hP
+  have hTail : (1.5625 : ℝ) ≤ Real.exp (0.5625 : ℝ) := by
+    have h := Real.add_one_le_exp (0.5625 : ℝ)
+    have heq : (1 : ℝ) + 0.5625 = 1.5625 := by norm_num
+    linarith
+  have hSplit : Real.exp (3 : ℝ) * Real.exp (0.5625 : ℝ) =
+      Real.exp (3.5625 : ℝ) := by
+    have hAE : Real.exp (3 : ℝ) * Real.exp (0.5625 : ℝ) =
+        Real.exp (3 + 0.5625) := by
+      rw [Real.exp_add]
+    have hAdd : (3 : ℝ) + 0.5625 = 3.5625 := by norm_num
+    rw [hAE, hAdd]
+  have hMul : (2.7 : ℝ) ^ 3 * 1.5625 ≤
+      (Real.exp 1) ^ 3 * Real.exp (0.5625 : ℝ) :=
+    mul_le_mul hPow hTail (by norm_num) (by positivity)
+  rw [hP] at hMul
+  rw [hSplit] at hMul
+  have hNum : (25 : ℝ) ≤ (2.7 : ℝ) ^ 3 * 1.5625 := by norm_num
+  exact le_trans hNum hMul
+
+theorem expNeg65625_le :
+    Real.exp (-(6.5625 : ℝ)) ≤ 1 / (500 : ℝ) := by
+  have hExp : (500 : ℝ) ≤ Real.exp (6.5625 : ℝ) := exp65625_ge_500
+  have hAdd : (-(6.5625 : ℝ)) + 6.5625 = (0 : ℝ) := by norm_num
+  have hMul : Real.exp (-(6.5625 : ℝ)) * Real.exp (6.5625 : ℝ) = 1 := by
+    have hAE : Real.exp (-(6.5625 : ℝ)) * Real.exp (6.5625 : ℝ) =
+        Real.exp (-(6.5625 : ℝ) + 6.5625) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 500 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(6.5625 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(6.5625 : ℝ)) * 500 ≤ 1 := by
+    have hMono : Real.exp (-(6.5625 : ℝ)) * 500 ≤
+        Real.exp (-(6.5625 : ℝ)) * Real.exp (6.5625 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem expNeg50625_le :
+    Real.exp (-(5.0625 : ℝ)) ≤ 1 / (125 : ℝ) := by
+  have hExp : (125 : ℝ) ≤ Real.exp (5.0625 : ℝ) := exp50625_ge_125
+  have hAdd : (-(5.0625 : ℝ)) + 5.0625 = (0 : ℝ) := by norm_num
+  have hMul : Real.exp (-(5.0625 : ℝ)) * Real.exp (5.0625 : ℝ) = 1 := by
+    have hAE : Real.exp (-(5.0625 : ℝ)) * Real.exp (5.0625 : ℝ) =
+        Real.exp (-(5.0625 : ℝ) + 5.0625) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 125 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(5.0625 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(5.0625 : ℝ)) * 125 ≤ 1 := by
+    have hMono : Real.exp (-(5.0625 : ℝ)) * 125 ≤
+        Real.exp (-(5.0625 : ℝ)) * Real.exp (5.0625 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem expNeg35625_le :
+    Real.exp (-(3.5625 : ℝ)) ≤ 1 / (25 : ℝ) := by
+  have hExp : (25 : ℝ) ≤ Real.exp (3.5625 : ℝ) := exp35625_ge_25
+  have hAdd : (-(3.5625 : ℝ)) + 3.5625 = (0 : ℝ) := by norm_num
+  have hMul : Real.exp (-(3.5625 : ℝ)) * Real.exp (3.5625 : ℝ) = 1 := by
+    have hAE : Real.exp (-(3.5625 : ℝ)) * Real.exp (3.5625 : ℝ) =
+        Real.exp (-(3.5625 : ℝ) + 3.5625) := by
+      rw [Real.exp_add]
+    rw [hAE, hAdd, Real.exp_zero]
+  have hPos : (0 : ℝ) < 25 := by norm_num
+  have hNN : (0 : ℝ) ≤ Real.exp (-(3.5625 : ℝ)) :=
+    le_of_lt (Real.exp_pos _)
+  have hLe : Real.exp (-(3.5625 : ℝ)) * 25 ≤ 1 := by
+    have hMono : Real.exp (-(3.5625 : ℝ)) * 25 ≤
+        Real.exp (-(3.5625 : ℝ)) * Real.exp (3.5625 : ℝ) :=
+      mul_le_mul_of_nonneg_left hExp hNN
+    rw [hMul] at hMono
+    exact hMono
+  exact (le_div_iff₀ hPos).mpr hLe
+
+theorem stirlingNumeric_outer_proof : stirlingNumeric_outer := by
+  unfold stirlingNumeric_outer
+  rw [wOuter_abs_im]
+  have hPi : (1.5 : ℝ) ≤ Real.pi / 2 := piDivTwo_ge_15
+  have hArg0 : (1.5 : ℝ) * 4.375 ≤ (Real.pi / 2) * 4.375 :=
+    mul_le_mul_of_nonneg_right hPi (by norm_num)
+  have h15 : (1.5 : ℝ) * 4.375 = 6.5625 := by norm_num
+  rw [h15] at hArg0
+  have hNeg : -(Real.pi / 2) * (4.375 : ℝ) = -((Real.pi / 2) * 4.375) := by
+    ring
+  rw [hNeg]
+  have hLe : -((Real.pi / 2) * 4.375) ≤ -(6.5625 : ℝ) := neg_le_neg hArg0
+  have hMono : Real.exp (-((Real.pi / 2) * 4.375)) ≤
+      Real.exp (-(6.5625 : ℝ)) :=
+    Real.exp_le_exp.mpr hLe
+  have hInv : Real.exp (-(6.5625 : ℝ)) ≤ 1 / (500 : ℝ) := expNeg65625_le
+  have hNum : (1 : ℝ) / 500 ≤ 0.002 := by norm_num
+  have hOne : (1 : ℝ) * Real.exp (-((Real.pi / 2) * 4.375)) =
+      Real.exp (-((Real.pi / 2) * 4.375)) := by ring
+  rw [hOne]
+  exact le_trans hMono (le_trans hInv hNum)
+
+theorem stirlingNumeric_leaf_proof : stirlingNumeric_leaf := by
+  unfold stirlingNumeric_leaf
+  rw [wLeaf_abs_im]
+  have hPi : (1.5 : ℝ) ≤ Real.pi / 2 := piDivTwo_ge_15
+  have hArg0 : (1.5 : ℝ) * 3.375 ≤ (Real.pi / 2) * 3.375 :=
+    mul_le_mul_of_nonneg_right hPi (by norm_num)
+  have h15 : (1.5 : ℝ) * 3.375 = 5.0625 := by norm_num
+  rw [h15] at hArg0
+  have hNeg : -(Real.pi / 2) * (3.375 : ℝ) = -((Real.pi / 2) * 3.375) := by
+    ring
+  rw [hNeg]
+  have hLe : -((Real.pi / 2) * 3.375) ≤ -(5.0625 : ℝ) := neg_le_neg hArg0
+  have hMono : Real.exp (-((Real.pi / 2) * 3.375)) ≤
+      Real.exp (-(5.0625 : ℝ)) :=
+    Real.exp_le_exp.mpr hLe
+  have hInv : Real.exp (-(5.0625 : ℝ)) ≤ 1 / (125 : ℝ) := expNeg50625_le
+  have hNum : (1 : ℝ) / 125 ≤ 0.008 := by norm_num
+  have hOne : (1 : ℝ) * Real.exp (-((Real.pi / 2) * 3.375)) =
+      Real.exp (-((Real.pi / 2) * 3.375)) := by ring
+  rw [hOne]
+  exact le_trans hMono (le_trans hInv hNum)
+
+theorem stirlingNumeric_mid_proof : stirlingNumeric_mid := by
+  unfold stirlingNumeric_mid
+  rw [wMid_abs_im]
+  have hPi : (1.5 : ℝ) ≤ Real.pi / 2 := piDivTwo_ge_15
+  have hArg0 : (1.5 : ℝ) * 2.375 ≤ (Real.pi / 2) * 2.375 :=
+    mul_le_mul_of_nonneg_right hPi (by norm_num)
+  have h15 : (1.5 : ℝ) * 2.375 = 3.5625 := by norm_num
+  rw [h15] at hArg0
+  have hNeg : -(Real.pi / 2) * (2.375 : ℝ) = -((Real.pi / 2) * 2.375) := by
+    ring
+  rw [hNeg]
+  have hLe : -((Real.pi / 2) * 2.375) ≤ -(3.5625 : ℝ) := neg_le_neg hArg0
+  have hMono : Real.exp (-((Real.pi / 2) * 2.375)) ≤
+      Real.exp (-(3.5625 : ℝ)) :=
+    Real.exp_le_exp.mpr hLe
+  have hInv : Real.exp (-(3.5625 : ℝ)) ≤ 1 / (25 : ℝ) := expNeg35625_le
+  have hNum : (1 : ℝ) / 25 ≤ 0.04 := by norm_num
+  have hOne : (1 : ℝ) * Real.exp (-((Real.pi / 2) * 2.375)) =
+      Real.exp (-((Real.pi / 2) * 2.375)) := by ring
+  rw [hOne]
+  exact le_trans hMono (le_trans hInv hNum)
+
+end Door3Digamma

@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 DIGAMMA-PIRATE (background `ses_f347e603c`, proof-only,
+  grep-clean, digamma-only commit): stirlingNumeric proofs CLOSED
+  (exp-bound chains for outer/leaf/mid). Decay specs still open
+  (reflection missing-API).
 - 2026-09-22 DERIV-VERDICT (background `ses_f347a130a`, proof-only,
   grep-clean, deriv-only commit): FINAL lane verdict — all 41 tiers
   blocked (honest 414884 vs 0.05-0.07 needs); close options as open Props
