@@ -35034,3 +35034,58 @@ theorem matched_verdict :
 #print axioms R02MatchedX.matched_verdict
 
 end R02MatchedX
+
+/-!
+## R00 center assembly with banked poly/pi/Gamma floors (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R00Numerics.poly_lower_R00` (`30`) and `R00Numerics.pi_lower_R00` (`1/2`):
+  both banked hypothesis-free; consumed directly below.
+* `R00GammaLower.gamma_lower_center` (`1/10000000`): banked floor; cited as
+  provenance for `hGam_floor`, which the open Gamma remainder must clear.
+* `R00ZetaEM.etaCPartial_two_norm_ge` (`1/5`): the only banked `S₂`-style head
+  in this file; cited as provenance for the `1/26` zeta floor. No
+  `0.23`-threshold `S₂` head exists in this file (grep for `0.23` is empty),
+  so the `0.23` shape is NOT claimed as banked here.
+* `R00ZetaEM.zeta_lower_R00_of_eta` still needs its three analytic premises;
+  the banked `R00EtaConv.eta_limit_and_remainder` proves only `‖S₂ - L‖ ≤ 25`,
+  which does not meet the `≤ 1/10` threshold. Hence the zeta lower stays an
+  explicit open premise.
+
+Shape: mirrors `R02Uniform.R02_center_with_poly_pi_gamma` but for the R00
+outer tier (`ε = 0.002`, `M = 0.05`). Open component premises are exactly two:
+the Gamma remainder `hgam` and the zeta lower `hzeta` (`hGam_floor`,
+`hZeta_floor`, `hprod` are numeric side conditions, not enclosures).
+-/
+
+namespace R00CenterAssembly
+
+/-- Conditional R00 center assembly: banked poly `30` + pi `1/2` floors are
+plugged into the R00 bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ 0.065 / 15`; at banked floors
+(`1/10000000`, `1/26`) it is infeasible, so this is filed as an honest
+conditional, not a closed bound. -/
+theorem R00_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R00Numerics.sR00‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R00Numerics.sR00‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 30 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R00.radius ≤
+      ‖xiShifted CentralCoverAssembly.R00.center‖ := by
+  have hpoly := R00Numerics.poly_lower_R00
+  have hpi := R00Numerics.pi_lower_R00
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R00Numerics.sR00
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R00.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact R00Enclosure.R00_center_bound_of_component_bounds
+    30 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+end R00CenterAssembly

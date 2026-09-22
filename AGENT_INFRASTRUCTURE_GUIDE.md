@@ -5901,6 +5901,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 CELL-B (background `ses_f34f3a72f`, proof-only, grep-clean,
+  interval-only commit): R00 center assembly FILED conditional —
+  `R00CenterAssembly.R00_center_with_poly_pi_gamma :35068` (consumes
+  banked poly-30 + pi-1/2 + Gamma-center + eta-head-1/26; open hgam +
+  hzeta + hprod check). INFEASIBLE at banked floors (need Agam·Azeta ≥
+  0.00434, have ~1e-8 — 5 orders short; no 0.23 S2 head in-file; eta
+  remainder proves ≤25 not ≤1/10). Needs stronger Gamma lower + eta
+  remainder + eta-zeta identity.
 - 2026-09-22 DERIV-FILL2 (background `ses_f34efa01a`, proof-only, NO-EDIT
   gap): OUTER set (dOuter Im≈-8.75, outside R02-disc) — best honest
   covering numeral is tail-quarter 125 (next 151/431/525 family), none
