@@ -511,6 +511,63 @@ theorem edgeStrip_top_half_M40
     linarith
   exact xiCentralEdgeStrips10_of_uniformStrips hstripT hWidthT hstripB hwidthB
 
+/-- Bottom-only edge strips at feasible `m = 1/2`, `MB = 40` (`δ = (1/2)/40`):
+conj mirror of `edgeStrip_top_half_M40` (`Im → -Im`, `mB`/`MB` symmetric):
+bottom strip from `sliver_bottom_strip_of_entire_data`, top via proved
+conjugation from the bottom strip (inline mirror of
+`sliver_bottom_of_top_via_conj`, via `sliver_star_vertical` +
+`sliver_conj_transfer_general`), packaged by
+`xiCentralEdgeStrips10_of_uniformStrips`. Both gates (`0.01 < (1/2)/40`,
+`-0.49 < -(1/2) + (1/2)/40`) close by `norm_num`/`linarith`; residual is
+exactly the two supplier premises `hBotLower`/`hBotDeriv`. -/
+theorem edgeStrip_bottom_half_M40
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)) :
+    RHProofScaffold.XiCentralEdgeStrips10 := by
+  have hGate : (0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+  have hWidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+  have hδle : (1 / 2 : ℝ) / (40 : ℝ) ≤ 1 := by norm_num
+  have hpos : 0 < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+  have hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_lo hy_hi
+    exact Door3SliverNonvan.sliver_bottom_strip_of_entire_data (1 / 2 : ℝ) (40 : ℝ)
+      (by norm_num) (by norm_num) hBotLower hBotDeriv hδle x hx y hy_lo hy_hi
+  have hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_low hy_top
+    have hy_neg_lo : -(1 / 2 : ℝ) < -y := by linarith
+    have hy_neg_hi : -y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) := by linarith
+    have hne_mirror : xiShifted ((x : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) ≠ 0 :=
+      hstripB x hx (-y) hy_neg_lo hy_neg_hi
+    have him : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im = -y := by simp
+    have him_lo : -(1 / 2 : ℝ) < ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im := by
+      rw [him]
+      linarith
+    have him_hi : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im < (1 / 2 : ℝ) := by
+      rw [him]
+      linarith
+    have hstar : xiShifted
+        (star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))) ≠ 0 :=
+      Door3SliverNonvan.sliver_conj_transfer_general _ him_lo him_hi hne_mirror
+    have hbase : star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) =
+        ((x : ℝ) : ℂ) + Complex.I * ((y : ℝ) : ℂ) := by
+      have h := Door3SliverNonvan.sliver_star_vertical x (-y)
+      have hcast : (((-(-y : ℝ) : ℝ)) : ℂ) = ((y : ℝ) : ℂ) := by
+        rw [neg_neg]
+      rw [hcast] at h
+      exact h
+    rw [hbase] at hstar
+    exact hstar
+  have hwidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ) := by
+    linarith
+  exact xiCentralEdgeStrips10_of_uniformStrips hstripT hwidthT hstripB hwidthB
+
 /-- `BottomStripObligations` from the uniform real-axis minorant + tube sup
 (re-export of the `door3_zeta_cutoff` bridge with the residual premises made
 explicit at the wiring site). -/

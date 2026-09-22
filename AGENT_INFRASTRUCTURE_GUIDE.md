@@ -5659,8 +5659,16 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wiring-only commit): hTopDeriv REDUCTION —
   `hTopDeriv40_of_ballSup40 :470` (hTopDeriv ⇐ ball-sup-40 on
   closedBall 0 12 via banked `uniform_top_deriv_of_closedBall` at
-  d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe). Residual:
+  d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe).   Residual:
   hTopLower (1/2 uniform) + ball-sup-40 numeral.
+- 2026-09-22 EDGE-BOTTOM (background `ses_f34f5d1a3`, proof-only,
+  grep-clean, wiring-only commit): `edgeStrip_bottom_half_M40 :523`
+  CONDITIONAL bottom mirror (lower arm direct via
+  `sliver_bottom_strip_of_entire_data`; upper arm inline conj via
+  `sliver_star_vertical` + `sliver_conj_transfer_general`; gates
+  norm_num/linarith; packaged by `..._of_uniformStrips`). Residual:
+  hTopLower/hTopDeriv + hBotLower/hBotDeriv + ball sups C=40
+  (deriv lane owns C).
 - 2026-09-22 GAMMA-N8 (background `ses_f3753c477`, proof-only,
   grep-clean, premise_gamma +388): E06 Seq8 rung — rpow8-frac `:4633`
   (1.49≤8^5/26, 1.50 false), Re-lower 11.92 `:4648`, cpow8 norm `:4661`
