@@ -36104,3 +36104,126 @@ theorem R14_banked_infeasible :
 #print axioms R14CenterAssembly.R14_banked_infeasible
 
 end R14CenterAssembly
+
+/-!
+## R15 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R14CenterAssembly.poly_lower_R14` (`3.9`, `interval_arith.lean:36052`):
+  prior mid-corner floor at `Im = -2.75`.
+* `R14CenterAssembly.R14_center_with_poly_pi_gamma` (`interval_arith.lean:36063`):
+  template mirrored here (mid tier `eps = 0.05`, `M = 0.07` at R14;
+  R15 honestly uses `eps = 0.05`, `M = 0.07` per the same mid-tier bridge below).
+* `R14GammaUpper.sR14` (`interval_arith.lean:14884`) with `sR14_re = 0.3`
+  (`interval_arith.lean:14904`) and `sR14_im = -2.75` (`interval_arith.lean:14911`):
+  prior shape witness for the `0.3` real part reused at R15.
+* `R15GammaUpper.sR15` (`interval_arith.lean:15525`) with `sR15_re = 0.3`
+  (`interval_arith.lean:15545`) and `sR15_im = -0.75` (`interval_arith.lean:15552`):
+  banked s-center reused here; no `poly_lower_R15` existed, so the poly floor is
+  newly closed below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` (`interval_arith.lean:1752`) +
+  `CellUniform.center_bound_of_component_bounds` (`interval_arith.lean:1772`):
+  generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R14CenterAssembly.R14_center_with_poly_pi_gamma :36063` at the R15
+mid corner (`sR15 = 0.3 - 0.75 * I`), mid tier (`eps = 0.05`, `M = 0.07`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R15CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R15 s-center. -/
+theorem polyPart_norm_R15 :
+    ‖R00Enclosure.polyPart R15GammaUpper.sR15‖ =
+      (1 / 2) * ‖R15GammaUpper.sR15‖ * ‖R15GammaUpper.sR15 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR15‖ ≥ 0.8` (`0.8^2 = 0.64 < 0.3^2 + 0.75^2 = 0.6525`). -/
+theorem norm_sR15_ge : (0.8 : ℝ) ≤ ‖R15GammaUpper.sR15‖ := by
+  have hsq : (0.8 : ℝ) ^ 2 ≤ ‖R15GammaUpper.sR15‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R15GammaUpper.sR15_re, R15GammaUpper.sR15_im]
+    norm_num
+  calc (0.8 : ℝ) = Real.sqrt ((0.8 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R15GammaUpper.sR15‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R15GammaUpper.sR15‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR15 - 1‖ ≥ 1.02` (`0.7^2 + 0.75^2 = 1.0525 > 1.02^2 = 1.0404`). -/
+theorem norm_sR15_sub_one_ge : (1.02 : ℝ) ≤ ‖R15GammaUpper.sR15 - 1‖ := by
+  have hr1 : (R15GammaUpper.sR15 - 1).re = -0.7 := by
+    simp only [Complex.sub_re, Complex.one_re, R15GammaUpper.sR15_re]
+    norm_num
+  have hi1 : (R15GammaUpper.sR15 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R15GammaUpper.sR15_im]
+    norm_num
+  have hsq : (1.02 : ℝ) ^ 2 ≤ ‖R15GammaUpper.sR15 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.02 : ℝ) = Real.sqrt ((1.02 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R15GammaUpper.sR15 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R15GammaUpper.sR15 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.4 ≤ ‖polyPart sR15‖`
+(`0.8 * 1.02 / 2 = 0.408 ≥ 0.4`; true `≈ 0.414`, slack `≈ 0.014`). -/
+theorem poly_lower_R15 : (0.4 : ℝ) ≤ ‖R00Enclosure.polyPart R15GammaUpper.sR15‖ := by
+  have hprod : (0.8 : ℝ) * 1.02 ≤ ‖R15GammaUpper.sR15‖ * ‖R15GammaUpper.sR15 - 1‖ :=
+    mul_le_mul norm_sR15_ge norm_sR15_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R15]
+  nlinarith [hprod]
+
+/-- Conditional R15 center assembly: banked s-center + new poly `0.4` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.05 + 0.07 * 1.26) / 0.2`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R15_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R15.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R15GammaUpper.sR15‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R15GammaUpper.sR15‖)
+    (hprod : (0.05 : ℝ) + 0.07 * 1.26 ≤ 0.4 * (1 / 2) * Agam * Azeta) :
+    (0.05 : ℝ) + 0.07 * CentralCoverAssembly.R15.radius ≤
+      ‖xiShifted CentralCoverAssembly.R15.center‖ := by
+  have hpoly := poly_lower_R15
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R15GammaUpper.sR15‖ :=
+    CellUniform.pi_lower_of_re (by rw [R15GammaUpper.sR15_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R15GammaUpper.sR15
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R15.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R15 0.05 0.07 (by norm_num) hrad
+    0.4 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact mid-tier threshold: `0.05 + 0.07 * 1.26 = 0.1382`. -/
+theorem R15_threshold_eq : (0.05 : ℝ) + 0.07 * 1.26 = 0.1382 := by norm_num
+
+/-- Exact banked base: `0.4 * (1/2) = 0.2`. -/
+theorem R15_base_eq : (0.4 : ℝ) * (1 / 2) = 0.2 := by norm_num
+
+/-- Exact residual: banked floors `0.2 / 260000000` do not clear `0.1382`
+(required `Agam * Azeta ≥ 0.1382 / 0.2 = 0.691`; banked `≈ 3.85e-09`;
+short by factor `≈ 179000000`, the ~8-order wall). -/
+theorem R15_banked_infeasible :
+    (0.4 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.05 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R15CenterAssembly.poly_lower_R15
+#print axioms R15CenterAssembly.R15_center_with_poly_pi_gamma
+#print axioms R15CenterAssembly.R15_threshold_eq
+#print axioms R15CenterAssembly.R15_banked_infeasible
+
+end R15CenterAssembly

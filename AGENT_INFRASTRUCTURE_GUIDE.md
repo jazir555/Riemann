@@ -6152,6 +6152,11 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
+  grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
+  + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 WENDEL-H3INNER (provisional, report pending; verified
+  grep-clean diff): inner H3 mirror attempt. Reconciled on report.
 - 2026-09-22 SLIVER-FINAL (background `ses_f3477e17d`, proof-only,
   grep-clean, sliver_edge-only commit): FINAL ledger (banked halves
   re-exported; 8 residuals filed). Sliver lane COMPLETE.

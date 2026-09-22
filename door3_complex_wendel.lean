@@ -2683,3 +2683,176 @@ theorem H3_mid_banked_numeric :
 
 end Door3ComplexWendel
 
+/-! ## 25. WENDEL-H3INNER inner mirror (PROOF-ONLY, FENCED, no build): GAP with exact residual.
+
+Greps (before edit, this turn, this file only):
+- H3MID shapes: `S_midN8/:2204`, `cN_midN8/:2207`, `target_mid/:2210`,
+  `G1_midN8_prop/:2213`, `G2_midN8_prop/:2218`, `G1_mid_of_normcap/:2284`,
+  `wMid8_norm_sq_U/:2308`, `g1_mid_C_inflation_3875/:2312`,
+  `G1_midN8_banked/:2316` (C 38.75, U 72.84), `g2_telescope8_mid/:2389`,
+  `g2_log_endpoints_mid/:2398`, `g2_S_align_mid/:2408`,
+  `g2_log_link8_mid/:2417`, `g2_residual_eq_mid/:2562`,
+  `g2_G2_of_telescope_normcap_mid/:2580`, `wMid_norm_sq_U0/:2634`,
+  `g2_mid_C2_inflation_920/:2638`, `G2_midN8_banked/:2644` (C2 9.20, U0 5.68),
+  `H3_mid_banked/:2648`, `H3_mid_banked_numeric/:2672` cap 8.51.
+- wInner specs: `wInner/:78` def mk 0.1975 (-0.375), `wInner_re/:92`,
+  `wInner_im/:94`, `lower_inner/:329` Gamma discount only; zero hits for
+  `S_inner`, `cN_inner`, `target_inner`, `G1_inner`, `G2_inner`, `H3_inner`,
+  `wInner_add8`, `stirling_wInner`, `g2_inner`, `wInner_shift` before this section.
+- outer/leaf numerics: `H3_outer_banked_numeric/:1639` cap 1.16,
+  `H3_leaf_banked_numeric/:2160` cap 2.56.
+- generic reuse (proved earlier, reused here): `digamma_shift_nat/:907`,
+  `digamma_shift_8fold/:945`, `shift_avoid_of_re_pos/:894`.
+
+Attempt (honest mirror at inner coords with N = 8): `wInner + 8` has
+Re 8.1975 > 0 and Im -0.375, so `|Im| = 0.375 < 1 / 2`. Shift-avoid,
+8-fold shift, add8 Re/Im, Im-floor denom bounds, norm-sq caps, and the
+H3 combiner all mirror and are banked below. The StirlingVert lead does
+NOT mirror: both `digamma_stirling` and `norm_eps_le` require
+`1 / 2 ≤ |w.im|`; here the banked facts `inner_add8_im_abs_lt_half` and
+`inner_im_abs_lt_half` give `|Im| = 0.375 < 1 / 2` at `wInner + 8` and at
+`wInner`, so the G1 native disc and the G2 eps caps have no premise
+discharge at inner. Hence G1/G2 stay Props and H3 stays conditional via
+`h3_inner_of_G1_G2`. No new imports; this section only; no existing lines
+modified.
+-/
+
+namespace Door3ComplexWendel
+
+noncomputable def S_innerN8 : ℂ :=
+  ∑ k ∈ Finset.range 8, (wInner + (k : ℂ))⁻¹
+
+noncomputable def cN_innerN8 : ℂ :=
+  Complex.log (wInner + (8 : ℂ)) - (1 : ℂ) / (2 * (wInner + (8 : ℂ)))
+
+noncomputable def target_inner : ℂ :=
+  Complex.log wInner - (1 : ℂ) / (2 * wInner)
+
+noncomputable def G1_innerN8_prop (C : ℝ) : Prop :=
+  ‖Complex.digamma (wInner + (8 : ℂ)) -
+    (Complex.log (wInner + (8 : ℂ)) - (1 : ℂ) / (2 * (wInner + (8 : ℂ))))‖ ≤
+    C / ‖wInner + (8 : ℂ)‖ ^ 2
+
+noncomputable def G2_innerN8_prop (C2 : ℝ) : Prop :=
+  ‖(cN_innerN8 - S_innerN8) - target_inner‖ ≤ C2 / ‖wInner‖ ^ 2
+
+theorem wInner_re_pos : 0 < wInner.re := by
+  rw [wInner_re]
+  norm_num
+
+theorem wInner_shift_avoid (k : ℕ) (hk : k ≤ 8) (m : ℕ) :
+    (wInner + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) :=
+  shift_avoid_of_re_pos wInner 8 wInner_re_pos k hk m
+
+theorem digamma_shift_wInner_8 :
+    Complex.digamma (wInner + (8 : ℂ)) =
+      Complex.digamma wInner + S_innerN8 := by
+  have hAvoid : ∀ (k : ℕ), k ≤ 8 → ∀ (m : ℕ),
+      (wInner + ((k : ℕ) : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+    intro k hk m
+    exact wInner_shift_avoid k hk m
+  have h := digamma_shift_8fold wInner hAvoid
+  have hcast8 : (((8 : ℕ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast8] at h
+  unfold S_innerN8
+  exact h
+
+theorem wInner_add8_re : (wInner + (8 : ℂ)).re = 8.1975 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_re, wInner_re, Complex.natCast_re]
+  norm_num
+
+theorem wInner_add8_im : (wInner + (8 : ℂ)).im = -0.375 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_im, wInner_im, Complex.natCast_im]
+  norm_num
+
+theorem h3_inner_of_G1_G2 (C1 C2 : ℝ)
+    (hEq : Complex.digamma (wInner + (8 : ℂ)) =
+      Complex.digamma wInner + S_innerN8)
+    (hG1 : G1_innerN8_prop C1) (hG2 : G2_innerN8_prop C2) :
+    ‖Complex.digamma wInner - target_inner‖ ≤
+      C1 / ‖wInner + (8 : ℂ)‖ ^ 2 + C2 / ‖wInner‖ ^ 2 := by
+  have hDisc : ‖Complex.digamma (wInner + (8 : ℂ)) - cN_innerN8‖ ≤
+      C1 / ‖wInner + (8 : ℂ)‖ ^ 2 := hG1
+  have hLink : ‖(cN_innerN8 - S_innerN8) - target_inner‖ ≤
+      C2 / ‖wInner‖ ^ 2 := hG2
+  have hT : ‖Complex.digamma wInner - (cN_innerN8 - S_innerN8)‖ ≤
+      C1 / ‖wInner + (8 : ℂ)‖ ^ 2 := by
+    have hSame : Complex.digamma wInner - (cN_innerN8 - S_innerN8) =
+        Complex.digamma (wInner + (8 : ℂ)) - cN_innerN8 := by
+      rw [hEq]
+      ring
+    rw [hSame]
+    exact hDisc
+  have hSplit : Complex.digamma wInner - target_inner =
+      (Complex.digamma wInner - (cN_innerN8 - S_innerN8)) +
+        ((cN_innerN8 - S_innerN8) - target_inner) := by
+    ring
+  calc ‖Complex.digamma wInner - target_inner‖
+      ≤ ‖Complex.digamma wInner - (cN_innerN8 - S_innerN8)‖ +
+        ‖(cN_innerN8 - S_innerN8) - target_inner‖ := by
+          rw [hSplit]
+          exact norm_add_le _ _
+    _ ≤ C1 / ‖wInner + (8 : ℂ)‖ ^ 2 + C2 / ‖wInner‖ ^ 2 :=
+          add_le_add hT hLink
+
+theorem g2_denom_lower_wInner (m : ℝ) :
+    (0.375 : ℝ) ≤ ‖(m : ℂ) + wInner‖ := by
+  have hle : |(((m : ℂ) + wInner)).im| ≤ ‖(m : ℂ) + wInner‖ :=
+    Complex.abs_im_le_norm _
+  have him2 : ((((m : ℂ) + wInner)).im) = (-0.375 : ℝ) := by
+    simp [wInner_im]
+  have habs : |((((m : ℂ) + wInner)).im)| = (0.375 : ℝ) := by
+    rw [him2]
+    norm_num
+  linarith
+
+theorem g2_norm_wInner_lower : (0.375 : ℝ) ≤ ‖wInner‖ := by
+  have h := g2_denom_lower_wInner 0
+  have hcast : (((0 : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [hcast, zero_add] at h
+  exact h
+
+theorem g2_norm_wInner8_lower : (0.375 : ℝ) ≤ ‖wInner + (8 : ℂ)‖ := by
+  have h := g2_denom_lower_wInner 8
+  have hcast : (((8 : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast, add_comm] at h
+  exact h
+
+theorem wInner_norm_sq_U0 : ‖wInner‖ ^ 2 ≤ (0.18 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wInner_re, wInner_im]
+  norm_num
+
+theorem wInner8_norm_sq_U : ‖wInner + (8 : ℂ)‖ ^ 2 ≤ (67.34 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wInner_add8_re, wInner_add8_im]
+  norm_num
+
+theorem inner_im_abs_lt_half : |wInner.im| < 1 / 2 := by
+  rw [wInner_im]
+  norm_num
+
+theorem inner_add8_im_abs_lt_half : |(wInner + (8 : ℂ)).im| < 1 / 2 := by
+  rw [wInner_add8_im]
+  norm_num
+
+/-! Section-25 residual (exact, no force): banked `wInner_re_pos`,
+`wInner_shift_avoid`, `digamma_shift_wInner_8` (exact hEq shape for
+`h3_inner_of_G1_G2`), `wInner_add8_re` (8.1975), `wInner_add8_im` (-0.375),
+`h3_inner_of_G1_G2` combiner, denom floors `g2_denom_lower_wInner`,
+`g2_norm_wInner_lower`, `g2_norm_wInner8_lower` (floor 0.375), norm-sq caps
+`wInner_norm_sq_U0` (U0 0.18: 0.1975^2+0.375^2 = 0.17963125) and
+`wInner8_norm_sq_U` (U 67.34: 8.1975^2+0.375^2 = 67.33963125), plus the
+blocker `inner_im_abs_lt_half` / `inner_add8_im_abs_lt_half`
+(`|Im| = 0.375 < 1/2`). Gap: `G1_innerN8_prop C` needs the StirlingVert
+lead requiring `1/2 ≤ |Im|` at `wInner + 8` (fails by the blocker);
+`G2_innerN8_prop C2` needs the eps caps requiring `1/2 ≤ |Im|` at
+`wInner` shifts (fails by the same Im); hence H3 at `wInner` stays
+conditional via `h3_inner_of_G1_G2`. No numeric cap banked here.
+-/
+
+end Door3ComplexWendel
+
