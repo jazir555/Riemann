@@ -6057,6 +6057,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 STIRLING-LEAF2 (background `ses_f3490273a`, proof-only,
+  grep-clean, stirling-only commit): leaf shift-2 `≤0.097 :2750` (via
+  Gamma 2.1≤1.1; 37x→12x). Outer 31x / leaf 12x stand.
+- 2026-09-22 FIRSTCELL-RPOW34 (background `ses_f349123ce`, proof-only,
+  grep-clean, first_cell-only commit): k=3,4 rpow bounds → S4 numeral
+  `≥0.28 :1798` CLOSED (true ~0.31). Tail majorant + eta→zeta factor
+  open; 0.28 short of 1.1/1.4.
 - 2026-09-22 RH-HRIGHT (background `ses_f348f8e87`, proof-only,
   grep-clean, RH-only commit): Hright narrowed to right-tail
   distance-bound instance `:12546` (Rouché path rejected as wrong shape).

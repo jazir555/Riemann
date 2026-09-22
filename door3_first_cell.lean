@@ -1651,3 +1651,152 @@ theorem FC_S4_residual_gap : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-RPOW34 wave: `3^-σ` lower + `4^-σ` upper + `S₄` numeral (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* rpow2 shape `FC_log2_ge_aux` (`door3_first_cell.lean:966`) +
+  `FC_rpow2_head_upper_proved` (`:971-1001`): `2^-0.395 = 1/2^0.395 ≤ 0.77`
+  from `2^0.395 = exp(0.395*log 2) ≥ 1.2988` (quadratic Taylor lower
+  `Real.quadratic_le_exp_of_nonneg`); inversion via `Real.rpow_neg` +
+  `div_le_iff₀`.
+* rpow/power toolkit shapes (banked elsewhere in repo, no new import):
+  `Real.rpow_le_rpow_of_exponent_le` (`door3_cutR10_ballsup.lean:1116`,
+  `door3_first_cell.lean:1289`), `Real.rpow_natCast` + `Real.rpow_mul`
+  (`central_cover_assembly.lean:9664`, `door3_first_cell.lean:1291`),
+  `le_of_pow_le_pow_left₀` (`door3_cutR10_ballsup.lean:1102`),
+  `one_div_le_one_div_of_le` (`door3_first_cell.lean:1485`).
+* Residuals `:1623-1649`: `FC_rpow3_head_lower` (`:1623`,
+  `0.64 ≤ 3^-σ`, TRUE `≈ 0.648`, obligation only), `FC_rpow4_head_upper`
+  (`:1628`, `4^-σ ≤ 0.59`, TRUE `≈ 0.578`, obligation only),
+  `FC_etaS4_tail_obligation` (`:1633`), `FC_S4_residual_gap` (`:1649`, `True`).
+* Absent before this wave (grep-clean): `FC_rpow3_head_lower_proved` /
+  `FC_rpow4_head_upper_proved` (no match).
+
+Routes (closed numerals only):
+* `3^-σ ≥ 0.64` via `0.395 ≤ 2/5` + 5th-power descent
+  `3^2 = 9 ≤ (25/16)^5 = 9765625/1048576` (`norm_num`, ≤ 7 digits);
+  `1/(25/16) = 0.64`.
+* `4^-σ ≤ 0.59` via `4^0.395 = 2^0.79` + `2^0.79 = exp(0.79*log 2) ≥ 1.6973`
+  (quadratic lower at `0.5475`); `0.59 * 1.6973 = 1.001407 ≥ 1`.
+* `S₄ ≥ 0.28` via `1 - 0.77 + 0.64 - 0.59 = 0.28` (`linarith`); TRUE `≈ 0.31`.
+Tail majorant + zeta-from-eta factor stay OPEN (recorded below, not claimed).
+Honesty: closed-numeral `norm_num` + `linarith` / `ring` / `rw` only.
+No build attempted (SUPP-FIX-REBUILD owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- `3 ^ (2/5) ≤ 25/16` via 5th-power descent
+(`3^2 = 9 ≤ 9765625/1048576`). -/
+theorem FC_3_rpow_040_le : (3 : ℝ) ^ ((2 / 5 : ℝ)) ≤ 25 / 16 := by
+  have e : ((3 : ℝ) ^ ((2 / 5 : ℝ))) ^ ((5 : ℕ)) = (3 : ℝ) ^ ((2 : ℕ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+    have hexp : ((2 / 5 : ℝ)) * ((((5 : ℕ)) : ℝ)) = ((((2 : ℕ)) : ℝ)) := by
+      norm_num
+    rw [hexp]
+  have hle : (3 : ℝ) ^ ((2 : ℕ)) ≤ (25 / 16 : ℝ) ^ ((5 : ℕ)) := by
+    norm_num
+  have h5 : ((3 : ℝ) ^ ((2 / 5 : ℝ))) ^ ((5 : ℕ)) ≤ (25 / 16 : ℝ) ^ ((5 : ℕ)) := by
+    rw [e]
+    exact hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) h5
+
+/-- `3 ^ 0.395 ≤ 25/16` via `0.395 ≤ 2/5` monotonicity. -/
+theorem FC_3_rpow0395_le : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 25 / 16 := by
+  have hmon : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ (3 : ℝ) ^ ((2 / 5 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  exact le_trans hmon FC_3_rpow_040_le
+
+/-- CLOSED: banked `FC_rpow3_head_lower` (`0.64 ≤ 3 ^ -0.395`). -/
+theorem FC_rpow3_head_lower_proved : FC_rpow3_head_lower := by
+  have hle : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 25 / 16 := FC_3_rpow0395_le
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (3 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (3 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3)]
+    rw [inv_eq_one_div]
+  have hdiv : (1 : ℝ) / (25 / 16 : ℝ) ≤ 1 / (3 : ℝ) ^ ((0.395 : ℝ)) :=
+    one_div_le_one_div_of_le hpos hle
+  have heq : (0.64 : ℝ) = 1 / (25 / 16 : ℝ) := by
+    norm_num
+  show (0.64 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ))
+  rw [hInv, ← heq]
+  exact hdiv
+
+/-- `4 ^ 0.395 = 2 ^ 0.79` via `4 = 2^2` + `rpow_natCast` / `rpow_mul`. -/
+theorem FC_4_rpow0395_eq : (4 : ℝ) ^ ((0.395 : ℝ)) = (2 : ℝ) ^ ((0.79 : ℝ)) := by
+  have h4 : (4 : ℝ) = (2 : ℝ) ^ ((2 : ℕ)) := by
+    norm_num
+  rw [h4, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
+  have hexp : ((((2 : ℕ)) : ℝ)) * (0.395 : ℝ) = (0.79 : ℝ) := by
+    norm_num
+  rw [hexp]
+
+/-- `1.6973 ≤ 2 ^ 0.79` from `0.79 * log 2 > 0.5475` + quadratic lower. -/
+theorem FC_2_rpow079_lower : (1.6973 : ℝ) ≤ (2 : ℝ) ^ ((0.79 : ℝ)) := by
+  have hlog : (0.693147 : ℝ) < Real.log 2 := FC_log2_ge_aux
+  have hx_lo : (0.5475 : ℝ) < 0.79 * Real.log 2 := by
+    linarith
+  set x : ℝ := 0.79 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (0.5475 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (1.6973 : ℝ) ≤ 1 + 0.5475 + (0.5475 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (1.6973 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (2 : ℝ) ^ ((0.79 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- CLOSED: banked `FC_rpow4_head_upper` (`4 ^ -0.395 ≤ 0.59`). -/
+theorem FC_rpow4_head_upper_proved : FC_rpow4_head_upper := by
+  have h4 : (1.6973 : ℝ) ≤ (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [FC_4_rpow0395_eq]
+    exact FC_2_rpow079_lower
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (4 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [inv_eq_one_div]
+  have hmul : (0.59 : ℝ) * 1.6973 ≤ 0.59 * (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    mul_le_mul_of_nonneg_left h4 (by norm_num)
+  have hnum : (1 : ℝ) ≤ 0.59 * 1.6973 := by
+    norm_num
+  show (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.59
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hmul, hnum]
+
+/-- Conditional `S₄ ≥ 0.28` from the three head bounds
+(`1 - 0.77 + 0.64 - 0.59 = 0.28`). -/
+theorem FC_etaS4_ge_028 (h2 : FC_rpow2_head_upper) (h3 : FC_rpow3_head_lower)
+    (h4 : FC_rpow4_head_upper) :
+    (0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have e2 : (2 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.77 := h2
+  have e3 : (0.64 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) := h3
+  have e4 : (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ 0.59 := h4
+  linarith
+
+/-- Honest unlocked step: unconditional `S₄` partial numeral `≥ 0.28`. -/
+theorem FC_etaS4_uncond :
+    (0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+  FC_etaS4_ge_028 FC_rpow2_head_upper_proved FC_rpow3_head_lower_proved
+    FC_rpow4_head_upper_proved
+
+/-- S4 partial-numeral status: slice banked (`FC_slice_S4_of_tendsto`,
+`FC_eta_Tendsto_S4_exists`) + partial numeral CLOSED (`FC_etaS4_uncond`,
+`0.28`); tail majorant still OPEN (`FC_etaS4_tail_obligation`, no banked
+majorant); zeta-from-eta factor still OPEN. True `S₄ ≈ 0.31` still short of
+`1.1` / `1.4` without the complex-phase + factor chain. -/
+theorem FC_S4_partial_numeral_closed : True := by
+  trivial
+
+end Door3FirstCellClose
+
