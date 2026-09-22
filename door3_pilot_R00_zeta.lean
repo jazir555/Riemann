@@ -3683,4 +3683,113 @@ theorem sSCUT_cos10log11_ge :
   rw [hy_def, hper] at hcosy
   exact hcosy
 
+/-- `11^(1/2) ≤ 10/3` (tighter honest root step; `11 ≤ (10/3)^2 = 100/9`;
+mirror of `sSCUT_rpow10_neg_ge_03` inner step at `:3224`). -/
+theorem sSCUT_sqrt11_le : (11 : ℝ) ^ (1 / 2 : ℝ) ≤ (10 / 3 : ℝ) := by
+  have hpow : (11 : ℝ) ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by norm_num
+  have hpow' : ((((11 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 11 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((11 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((10 / 3 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `0.3 ≤ r₁₁ = 11^(-1/2)` (inverse of `sSCUT_sqrt11_le`; mirror of
+`sSCUT_rpow10_neg_ge_03` at `:3223`). -/
+theorem sSCUT_rpow11_neg_ge : (0.3 : ℝ) ≤ (11 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt11_le
+  have hpos : (0 : ℝ) < (11 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (11 : ℝ) ^ (-(1 / 2 : ℝ)) = (((11 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 11)]
+  rw [hneg, show (0.3 : ℝ) = ((10 / 3 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `11^{-s}` at sCut (mirror of
+`sSCUT_cpow9_neg_re`). -/
+theorem sSCUT_cpow11_neg_re : ((((11 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (11 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 11) := by
+  have h11pos : (0 : ℝ) < 11 := by norm_num
+  have hxC : ((11 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h11pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((11 : ℝ) : ℂ) = (((Real.log 11 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h11pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 11 : ℝ)) : ℂ)).re = Real.log 11 := Complex.ofReal_re _
+  have hzim : ((((Real.log 11 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 11 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 11 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 11 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 11) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 11 * (-(1 / 2 : ℝ)))
+      = (11 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h11pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 11))
+      = Real.cos (10 * Real.log 11) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed LOWER `21/250 ≤ Re(11^{-sCut})` (`r₁₁ ≥ 0.3` × cosine
+`≥ 7/25`, via two one-sided multiplies; mirror of `sSCUT_cpow7_Re_ge`). -/
+theorem sSCUT_cpow11_Re_ge :
+    (21 / 250 : ℝ) ≤ ((((11 : ℝ)) : ℂ) ^ (-sSCUT)).re := by
+  rw [sSCUT_cpow11_neg_re]
+  have hr_lo := sSCUT_rpow11_neg_ge
+  have hr0 : (0 : ℝ) ≤ (11 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc_lo := sSCUT_cos10log11_ge
+  have h1 : (0.3 : ℝ) * (7 / 25)
+      ≤ (11 : ℝ) ^ (-(1 / 2 : ℝ)) * (7 / 25) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have h2 : (11 : ℝ) ^ (-(1 / 2 : ℝ)) * (7 / 25)
+      ≤ (11 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 11) :=
+    mul_le_mul_of_nonneg_left hc_lo hr0
+  have heq : (0.3 : ℝ) * (7 / 25) = 21 / 250 := by norm_num
+  linarith
+
+/-- Parity payoff (even `k = 10`): `Re(eta₁₀) ≥ +21/250` (direct cpow signed
+lower, no sign flip; mirror of `sSCUT_eta6_Re_ge`). -/
+theorem sSCUT_eta10_Re_ge : (21 / 250 : ℝ) ≤ (etaDirichletTerm sSCUT 10).re := by
+  have h := sSCUT_cpow11_Re_ge
+  rw [sSCUT_eta10_eq_cpow11, sSCUT_cpow11_neg_re]
+  rw [sSCUT_cpow11_neg_re] at h
+  linarith
+
+/-- Honest single-count shard floor with the `t₁₀` gain
+(`-3529/1050 + 0.15 + 21/250 ≤ Re(S₈ + eta₉ + eta₁₀)`; base
+`sSCUT_S9_skip8_Re_ge` plus `sSCUT_eta10_Re_ge`; index multiset summed
+exactly once is `{0,1,2,3,4,5,6,7,9,10}`, `k = 8` honestly skipped). -/
+theorem sSCUT_S9_skip8_add_eta10_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 + (21 / 250) ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 10).re := by
+  rw [Complex.add_re]
+  have hbase := sSCUT_S9_skip8_Re_ge
+  have h10 := sSCUT_eta10_Re_ge
+  linarith
+
+/-- Updated single-count shortfall vs the `21/10` bar with the `t₁₀` gain
+(`21/10 - (-3529/1050 + 0.15 + 21/250) = 54883/10500 ≈ 5.228`; replaces
+`11153/2100` at `sSCUT_S9_skip8_shortfall`). -/
+theorem sSCUT_S9_skip8_eta10_shortfall :
+    ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15 + (21 / 250))) =
+      (54883 / 10500 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

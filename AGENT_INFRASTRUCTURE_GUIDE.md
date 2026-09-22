@@ -5613,6 +5613,14 @@ sorry-free infrastructure and the complete commit ledger above.
   (off 7e-12; coordinator verified via Decimal `prec=40` and fixed all
   4 spots `:4257/:4345/:4372/:4375` directly). VERIFY4 tasked (sole
   owner, rebuild to green).
+- 2026-09-22 SCUT23 (background `ses_f376bdf81`, proof-only, grep-clean):
+  eta10 gain banked — `sSCUT_sqrt11_le :3688` (11^1/2≤10/3, 11≤100/9)
+  + `sSCUT_rpow11_neg_ge :3702` (r11≥0.3, tighter pick) +
+  `sSCUT_cpow11_neg_re :3714` (split) + `sSCUT_cpow11_Re_ge`
+  (21/250 via 0.3·7/25 + `:3647`) + `sSCUT_eta10_Re_ge :3768` (even
+  parity, no flip) + shard `:3778` (multiset {0..7,9,10}, single-count,
+  k=8 skipped) + shortfall `:3790` (54883/10500≈5.228). Floor
+  -3.211→-3.127 (gain 0.084). SCUT24 tasked (k=11 odd-payoff?).
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494
