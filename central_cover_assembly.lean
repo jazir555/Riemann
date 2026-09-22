@@ -17745,3 +17745,75 @@ theorem R07_H_of_residuals (hc : R07_center_residual_two_tenths)
   R07_H_instance (R07_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-LEAF R08 center+deriv residual set (one cell, mirrors R07)
+
+- Banked in-file: `R08` 1946-1947 (`(4,6.5,0.01,0.2)`, mid tier `(0.05,0.07)`);
+  `R08_radius_lt` 1973-1974 (`R08.radius < 1.26` via `sample_cell_radius_bound`);
+  `R08_mem_gridFine` 1976-1982; `R08_leaf_obligations` 1986-1988 (center + deriv
+  conjuncts as explicit hypotheses); `R08_H_instance` 2015-2025 (takes
+  `(h : R08_leaf_obligations) (c) (hc_mem : c ∈ gridFine)`
+  `(hc_eq : c = (4, 6.5, 0.01, 0.2))`, gridFine form with `hc_mem + hc_eq`).
+- R07 shapes mirrored (`17710-17745`): `R07_budget_lt_app` 17710,
+  `R07_center_of_two_tenths_lower` 17716, `R07_center_residual_two_tenths` 17721,
+  `R07_center_obligation_of_residual_two_tenths` 17724, `R07_deriv_residual`
+  17729, `R07_leaf_of_residuals` 17732, `R07_H_of_residuals` 17736 (mid tier
+  `(0.05, 0.07)` at `c = (2, 4.5, 0.01, 0.2)` with `hc_mem + hc_eq`).
+- Grep-clean before writing: no `R08_budget_lt_app`,
+  `R08_center_of_two_tenths_lower`, `R08_center_residual_two_tenths`,
+  `R08_center_obligation_of_residual_two_tenths`, `R08_deriv_residual`,
+  `R08_leaf_of_residuals`, `R08_H_of_residuals` in file; R00-R07 sets left
+  untouched (no duplication).
+
+Mirror for R08 mid tier `(eps, M) = (0.05, 0.07)` at `c08 = (4, 6.5, 0.01, 0.2)`:
+budget `0.05 + 0.07 * radius < 0.2` lifts `R08_radius_lt`, so
+`0.2 <= norm at R08.center` discharges the center conjunct; deriv residual is
+exactly the second conjunct; `leaf_of` rebuilds `R08_leaf_obligations`;
+`H_of` discharges the gridFine H shape via `R08_H_instance`
+(with `hc_mem + hc_eq` per `2015`, matching R07 form).
+Value-or-gap: budget `0.05 + 0.07 * 1.26 = 0.1382 < 0.2`; full R08 H leaf now
+conditional only on two named numeric enclosures (`0.2 <= norm` at center +
+uniform `‖deriv xiShifted‖ <= 0.07` on `R08`, not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R08 mid tier on the true radius. -/
+theorem R08_budget_lt_app : (0.05 : ℝ) + 0.07 * R08.radius < 0.2 := by
+  have h := R08_radius_lt
+  have hM : 0.07 * R08.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R08_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R08.center‖) :
+    (0.05 : ℝ) + 0.07 * R08.radius ≤ ‖xiShifted R08.center‖ := by
+  have hB := R08_budget_lt_app
+  linarith
+
+def R08_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R08.center‖
+
+theorem R08_center_obligation_of_residual_two_tenths
+    (h : R08_center_residual_two_tenths) :
+    (0.05 : ℝ) + 0.07 * R08.radius ≤ ‖xiShifted R08.center‖ :=
+  R08_center_of_two_tenths_lower h
+
+def R08_deriv_residual : Prop :=
+  ∀ w, R08.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R08_leaf_of_residuals (hc : R08_center_residual_two_tenths)
+    (hd : R08_deriv_residual) : R08_leaf_obligations :=
+  ⟨R08_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R08_H_of_residuals (hc : R08_center_residual_two_tenths)
+    (hd : R08_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (4, 6.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R08_H_instance (R08_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly

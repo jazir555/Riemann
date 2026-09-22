@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ASSEMBLY-R08 (background `ses_f3479ddbb`, proof-only,
+  grep-clean, assembly-only commit): R08 leaf+H conditional (two-tenths
+  + 0.07). Post-dates GREEN; re-verify later.
 - 2026-09-22 FIRSTCELL-PHASE (background `ses_f347d813f`, proof-only,
   grep-clean, first_cell-only commit): bridge lower CLOSED — Re=1.56 ≥
   0.28 (`:2798`, phase floors k=0..3 via banked log2 + pi shifts). Sole
