@@ -6094,6 +6094,12 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT40 (background `ses_f34ea1e89`, proof-only, grep-clean,
+  pilot-only commit): log17 FIRST link + theta17 — bridge `:5140`
+  (log17=log16+log(17/16), sharp d9-exact base) + window `:5151/:5165`
+  ([2.8314122506,2.8350887232], width ~0.0037, true ~2.8332 inside) +
+  `theta17_mem :5182` (θ∈[28.314,28.351], width 0.037). Next: delta17/
+  cos (k=16 even needs +c).
 - 2026-09-22 SCUT39 (background `ses_f34ed6c42`, proof-only, grep-clean,
   pilot-only commit): S+eta15 assembly — `:5098` (multiset
   {0..7,9,10,12,15}, single-count, k=15>7 safe) + shortfalls `:5111`

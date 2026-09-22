@@ -5122,4 +5122,72 @@ theorem sSCUT_S9_skip8_eta10_eta12_eta15_shortfall_8192 :
       (308659051 / 70318500 : ℝ) := by
   norm_num
 
+/-! ## sCut k=16 EVEN shard (first link): `log 17` bridge + `θ₁₇` window.
+
+`k = 16` is EVEN so `eta₁₆ = +17^{-sCut}`; the term is constructive iff
+`cos(10·log 17) ≥ +c`. Key: `log 17 = log 16 + log (17/16)` with the sharp
+d9-exact `log 16` base (`sSCUT_log_sixteen_ge/le`, SCUT37 block) plus the
+tight ratio `17/16` (`x = 1/16`). Mirror of the `log 15` first-link recipe
+(`sSCUT_log_fifteen_via_fourteen_eq` at `:4558`, `sSCUT_log_fifteen_le` at
+`:4569`, `sSCUT_log_fifteen_ge` at `:4582`, `sSCUT_theta15_mem` at `:4599`).
+Next: `δ₁₇` / cos. -/
+
+/-- Composite log bridge `log 17 = log 16 + log (17/16)` (`17 = 16·(17/16)`
+via `Real.log_mul`; mirror of `sSCUT_log_fifteen_via_fourteen_eq` at `:4558`;
+ratio `17/16` (`x = 1/16`); grepped base bridges `sSCUT_log_sixteen_ge/le`
+sharp d9-exact banked at the SCUT37 block; first link of the incremental
+base-17 chain for `k = 16`). -/
+theorem sSCUT_log_seventeen_via_sixteen_eq :
+    Real.log 17 = Real.log 16 + Real.log (17 / 16 : ℝ) := by
+  have h17 : (16 : ℝ) * (17 / 16) = 17 := by norm_num
+  have h := Real.log_mul (show (16 : ℝ) ≠ 0 by norm_num)
+    (show (17 / 16 : ℝ) ≠ 0 by norm_num)
+  rw [h17] at h
+  linarith
+
+/-- `log 17` upper (`log 17 ≤ 2.8350887232` from `sSCUT_log_sixteen_le` +
+`log (17/16) ≤ 1/16`; mirror of `sSCUT_log_fifteen_le` at `:4569` with `x = 1/16`
+via `Real.log_le_sub_one_of_pos`; `2.7725887232 + 1/16 = 2.8350887232`). -/
+theorem sSCUT_log_seventeen_le : Real.log 17 ≤ (2.8350887232 : ℝ) := by
+  have h17 := sSCUT_log_seventeen_via_sixteen_eq
+  have h16 := sSCUT_log_sixteen_le
+  have hub : Real.log (17 / 16 : ℝ) ≤ (1 / 16 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 17 / 16)
+    have he : (17 / 16 : ℝ) - 1 = (1 / 16 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.7725887232 : ℝ) + 1 / 16 ≤ (2.8350887232 : ℝ) := by norm_num
+  linarith
+
+/-- `log 17` lower (`2.8314122506 ≤ log 17` from `sSCUT_log_sixteen_ge` +
+`log (17/16) ≥ 1/17`; mirror of `sSCUT_log_fifteen_ge` at `:4582` with `x = 1/16`
+via `log (16/17) ≤ -1/17` and `log (17/16) = -log (16/17)`;
+`2.7725887212 + 1/17 = 2.83141225061…`, so `2.8314122506` holds). -/
+theorem sSCUT_log_seventeen_ge : (2.8314122506 : ℝ) ≤ Real.log 17 := by
+  have h17 := sSCUT_log_seventeen_via_sixteen_eq
+  have h16 := sSCUT_log_sixteen_ge
+  have hub : Real.log (16 / 17 : ℝ) ≤ (-1 / 17 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 16 / 17)
+    have he : (16 / 17 : ℝ) - 1 = (-1 / 17 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (17 / 16 : ℝ) = -Real.log (16 / 17 : ℝ) := by
+    have heq : (17 / 16 : ℝ) = (16 / 17 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.8314122506 : ℝ) ≤ 2.7725887212 + 1 / 17 := by norm_num
+  rw [h17, hinv]
+  linarith
+
+/-- Phase window `θ₁₇ = 10*log 17 ∈ [28.314122506, 28.350887232]`
+(via banked `sSCUT_log_seventeen_ge/le` + `*10`; mirror of
+`sSCUT_theta15_mem` at `:4599`; non-strict since the `log 17` inputs are `≤`). -/
+theorem sSCUT_theta17_mem :
+    (28.314122506 : ℝ) ≤ 10 * Real.log 17 ∧
+    10 * Real.log 17 ≤ (28.350887232 : ℝ) := by
+  have hge := sSCUT_log_seventeen_ge
+  have hle := sSCUT_log_seventeen_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.8314122506 = 28.314122506 := by norm_num
+  have c2 : (10 : ℝ) * 2.8350887232 = 28.350887232 := by norm_num
+  constructor <;> linarith
+
 end Door3PilotR00Zeta
