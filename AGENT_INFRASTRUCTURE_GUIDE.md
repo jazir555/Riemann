@@ -5634,6 +5634,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `:5564` (1.70 to live 1.94) + shortfall `:5570` (2.3514). Honest:
   true Re(S10)~1.84<1.94, Re-route cannot beat slow by design. Live
   1.94 / shortfall 0.6514 STAND.
+- 2026-09-22 ETA-S12 (background `ses_f3752af36`, proof-only, grep-clean,
+  suppliers-only commit): S12 Re-route goes NEGATIVE — log11/12
+  bridges, rpow11/12 quads (fresh), cpow11/12 splits, Re11≥-0.42 /
+  Re12≤0.42 → floor `Re(S12)≥-0.60 :5928` (0.24-0.42-0.42) + gap
+  `:5951` (2.54) + shortfall `:5957` (3.1914). True ~1.68. Re-route
+  envelope declining (1.56→0.95→1.15→0.24→-0.60); S4-based live 1.94
+  STANDS unchallenged. Premise_gamma N8 writes left for owner.
 - 2026-09-22 GAMMA-VERIFY4 (background `ses_f376a82de`, sole build owner):
   GREEN — `[8689/8689] Built door3_premise_gamma (69s)`, BUILD-EXIT=0
   (attempt 1/1), zero edits (be75838 fixes held), grep-clean (0
