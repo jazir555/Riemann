@@ -6152,6 +6152,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 SLIVER-PUNCT (background `ses_f34802ebf`, proof-only,
+  grep-clean, sliver_edge-only commit): punctured-domain framework —
+  pole-inside proved, poly·pi restricts (319488), four-factor conditional
+  + punctured sup specs filed (Gamma/zeta numerals owned elsewhere).
 - 2026-09-22 STIRLING-DECAY (background `ses_f34806472`, proof-only,
   grep-clean, stirling-only commit): shift-6 reversal PROVED (0.02629 >
   0.02213 — ladder minimum confirmed); pi/2 height-decay + reflection

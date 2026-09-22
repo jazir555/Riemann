@@ -1180,3 +1180,194 @@ theorem poly_pi_upper_closedBall12 {s : ℂ}
   exact hmul
 
 end Door3SliverEdge
+
+/-! ### (P) Punctured ball-12 domain: pole finding + exact specs + partial compose
+
+Grepped before writing:
+* PIBALL block `door3_sliver_edge.lean:1088-1182` (`ball12_re_bounds`,
+  `piOf_norm_eq_ball12`, `piOf_upper_closedBall12 :1146` (`≤ 4096`),
+  `poly_pi_upper_closedBall12 :1166` (`≤ 319488`));
+* poly block `:1049-1084` (`poly_upper_closedBall12_le78`);
+* hC specs on full `closedBall 0 12` at `:344`, `:369`, `:394`, `:419`,
+  `:709`, `:769`, `:886`, `:932`, `:943`, `:954`, `:972`, `:981`, `:990`,
+  `:1005` (all `∀ z ∈ closedBall (0:ℂ) 12, ‖xiShiftedEntire z‖ ≤ C` shapes);
+* PIBALL survey `AGENT_INFRASTRUCTURE_GUIDE.md:6140-6143`: Gamma/zeta uniform
+  uppers on full ball-12 UNSUPPLIABLE (poles at `s = 0` / `s = 1` inside).
+
+KEY FINDING (formalized as `pole_zero_mem_ball12`, `pole_one_mem_ball12`):
+`s = 0` (Gamma pole: `gammaOf s = Gamma (s / 2)`,
+`central_cover_assembly.lean:6334`) and `s = 1` (`zeta = riemannZeta` pole,
+`rfl` per `door3_cutL10_remainders.lean:1218-1222`) both lie in
+`closedBall 0 12`. Hence no finite uniform Gamma / zeta sup — and no
+product-route `hC` — exists on the full closed ball; `hC` needs punctured
+domains with explicit exclusion radii, filed here as `puncturedBall12` /
+`puncturedBall12z` plus exact spec Props. The `s = 0 / 1` poles sit at the
+`z`-edge centers: `edgeS_top 0` gives `s = 0` at `z = I / 2`, `edgeS_bot 0`
+gives `s = 1` at `z = -(I / 2)`.
+
+What is banked here (proved, no new numerals beyond `1 / 4` radii):
+* poles-inside facts, punctured subset + pole-exclusion lemmas;
+* `poly_pi_upper_punctured` / `poly_pi_upper_quarter`: joint `319488`
+  restricts to the punctured domains;
+* `fourFactor_punctured_upper`: conditional compose — punctured Gamma sup `G`
+  plus punctured zeta sup `Z` give four-factor product `≤ 319488 * G * Z`.
+Value-or-gap: Gamma / zeta punctured sup NUMERALS are not banked (filed as
+exact spec Props `PuncturedGammaSup` / `PuncturedZetaSup`); the punctured
+Entire sup is filed as spec Prop `PuncturedEntireSup` only.
+Residual (exact, open, not forced): (a) punctured Gamma/zeta numeral sups stay
+open (owned elsewhere); (b) even a punctured four-factor sup bounds
+`‖poly * pi * gamma * zeta‖ = ‖xiShifted‖` (via `norm_xiShifted_eq_parts`),
+while `hC` needs `xiShiftedEntire`, and `xiShifted = xiShiftedEntire` holds
+only on the strip `|Im| < 1 / 2` (`xiShifted_eq_entire_on_strip`) — the
+radius-`1` deriv spheres exit the strip — so the punctured product sup does
+not close (punctured) `hC`; M1000 closers stay conditional via
+`uniform_M1000_pair_of_ballSup79`.
+-/
+
+namespace Door3SliverEdge
+
+/-- The `s`-domain punctured ball: `closedBall 0 12` minus neighborhoods of the
+Gamma pole `s = 0` (radius `rG`) and the zeta pole `s = 1` (radius `rZ`). -/
+def puncturedBall12 (rG rZ : ℝ) : Set ℂ :=
+  {s : ℂ | s ∈ Metric.closedBall (0 : ℂ) 12 ∧ rG ≤ dist s 0 ∧ rZ ≤ dist s 1}
+
+/-- KEY FINDING, Gamma side: the pole `s = 0` lies in `closedBall 0 12`. -/
+theorem pole_zero_mem_ball12 : (0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_self]
+  norm_num
+
+/-- KEY FINDING, zeta side: the pole `s = 1` lies in `closedBall 0 12`. -/
+theorem pole_one_mem_ball12 : (1 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right, norm_one]
+  norm_num
+
+/-- The punctured domain is contained in the full ball. -/
+theorem puncturedBall12_subset (rG rZ : ℝ) :
+    puncturedBall12 rG rZ ⊆ Metric.closedBall (0 : ℂ) 12 := by
+  intro s hs
+  simp only [puncturedBall12, Set.mem_setOf_eq] at hs
+  exact hs.1
+
+/-- The Gamma pole is excluded from the punctured domain. -/
+theorem puncturedBall12_excludes_zero (rG rZ : ℝ) (hrG : 0 < rG) :
+    (0 : ℂ) ∉ puncturedBall12 rG rZ := by
+  intro hmem
+  simp only [puncturedBall12, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, hG, _⟩ := hmem
+  rw [dist_self] at hG
+  linarith
+
+/-- The zeta pole is excluded from the punctured domain. -/
+theorem puncturedBall12_excludes_one (rG rZ : ℝ) (hrZ : 0 < rZ) :
+    (1 : ℂ) ∉ puncturedBall12 rG rZ := by
+  intro hmem
+  simp only [puncturedBall12, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, _, hZ⟩ := hmem
+  rw [dist_self] at hZ
+  linarith
+
+/-- The banked joint poly-pi sup `319488` restricts to the punctured domain. -/
+theorem poly_pi_upper_punctured (rG rZ : ℝ) {s : ℂ}
+    (hs : s ∈ puncturedBall12 rG rZ) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ) := by
+  have hball : s ∈ Metric.closedBall (0 : ℂ) 12 := puncturedBall12_subset rG rZ hs
+  exact poly_pi_upper_closedBall12 hball
+
+/-- EXACT SPEC (open): punctured Gamma sup — numeral NOT supplied here. -/
+def PuncturedGammaSup (rG rZ G : ℝ) : Prop :=
+  ∀ s : ℂ, s ∈ puncturedBall12 rG rZ → ‖CentralCoverAssembly.gammaOf s‖ ≤ G
+
+/-- EXACT SPEC (open): punctured zeta sup — numeral NOT supplied here. -/
+def PuncturedZetaSup (rG rZ Z : ℝ) : Prop :=
+  ∀ s : ℂ, s ∈ puncturedBall12 rG rZ → ‖riemannZeta s‖ ≤ Z
+
+/-- Conditional compose: punctured Gamma sup `G` plus punctured zeta sup `Z`
+give four-factor product `≤ 319488 * G * Z` on the punctured domain. -/
+theorem fourFactor_punctured_upper (rG rZ G Z : ℝ) (hG0 : 0 ≤ G) (hZ0 : 0 ≤ Z)
+    (hGam : PuncturedGammaSup rG rZ G) (hZet : PuncturedZetaSup rG rZ Z)
+    {s : ℂ} (hs : s ∈ puncturedBall12 rG rZ) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * riemannZeta s‖ ≤
+      (319488 : ℝ) * G * Z := by
+  have hpp := poly_pi_upper_punctured rG rZ hs
+  have hg := hGam s hs
+  have hz := hZet s hs
+  have hbg : (0 : ℝ) ≤ (319488 : ℝ) := by norm_num
+  have hbG : (0 : ℝ) ≤ (319488 : ℝ) * G := mul_nonneg hbg hG0
+  have e0 : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s‖ =
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ *
+        ‖CentralCoverAssembly.gammaOf s‖ := norm_mul _ _
+  have e1 : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+      CentralCoverAssembly.gammaOf s * riemannZeta s‖ =
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s *
+        CentralCoverAssembly.gammaOf s‖ * ‖riemannZeta s‖ := norm_mul _ _
+  rw [e1, e0]
+  exact mul_le_mul (mul_le_mul hpp hg (norm_nonneg _) hbg) hz (norm_nonneg _) hbG
+
+/-- Explicit exclusion radii: the quarter-punctured ball (`ρ = 1 / 4` at both poles). -/
+def puncturedBall12_quarter : Set ℂ := puncturedBall12 (1 / 4) (1 / 4)
+
+/-- Quarter radii exclude the Gamma pole (numeral). -/
+theorem puncturedBall12_quarter_excludes_zero : (0 : ℂ) ∉ puncturedBall12_quarter := by
+  intro hmem
+  simp only [puncturedBall12_quarter, puncturedBall12, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, hG, _⟩ := hmem
+  rw [dist_self] at hG
+  norm_num at hG
+
+/-- Quarter radii exclude the zeta pole (numeral). -/
+theorem puncturedBall12_quarter_excludes_one : (1 : ℂ) ∉ puncturedBall12_quarter := by
+  intro hmem
+  simp only [puncturedBall12_quarter, puncturedBall12, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, _, hZ⟩ := hmem
+  rw [dist_self] at hZ
+  norm_num at hZ
+
+/-- Joint poly-pi `319488` on the quarter-punctured domain. -/
+theorem poly_pi_upper_quarter {s : ℂ} (hs : s ∈ puncturedBall12_quarter) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ) := by
+  simp only [puncturedBall12_quarter] at hs
+  exact poly_pi_upper_punctured (1 / 4) (1 / 4) hs
+
+/-- `z`-domain punctured ball: `closedBall 0 12` minus neighborhoods of the
+edge centers `z = I / 2` (radius `ρT`, the `s = 0` preimage) and
+`z = -(I / 2)` (radius `ρB`, the `s = 1` preimage). -/
+def puncturedBall12z (ρT ρB : ℝ) : Set ℂ :=
+  {z : ℂ | z ∈ Metric.closedBall (0 : ℂ) 12 ∧
+    ρT ≤ dist z (Complex.I / 2) ∧ ρB ≤ dist z (-(Complex.I / 2))}
+
+/-- EXACT SPEC (open): punctured Entire sup — the `hC` variant; numeral NOT supplied. -/
+def PuncturedEntireSup (ρT ρB C : ℝ) : Prop :=
+  ∀ z : ℂ, z ∈ puncturedBall12z ρT ρB → ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C
+
+/-- The `s = 1` preimage `z = -(I / 2)` lies in `closedBall 0 12`
+(the `s = 0` preimage `z = I / 2` is banked as `closedBall12_mem_endpoint_top`). -/
+theorem preimage_pole_bot_mem :
+    (-(Complex.I / 2)) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right, norm_neg]
+  have h : ‖Complex.I / 2‖ = (1 / 2 : ℝ) := by
+    rw [norm_div, Complex.norm_I, Complex.norm_two]
+    norm_num
+  rw [h]
+  norm_num
+
+/-- The `s = 0` preimage `z = I / 2` is excluded from the punctured `z`-domain. -/
+theorem puncturedBall12z_excludes_top (ρT ρB : ℝ) (hρT : 0 < ρT) :
+    (Complex.I / 2) ∉ puncturedBall12z ρT ρB := by
+  intro hmem
+  simp only [puncturedBall12z, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, hT, _⟩ := hmem
+  rw [dist_self] at hT
+  linarith
+
+/-- The `s = 1` preimage `z = -(I / 2)` is excluded from the punctured `z`-domain. -/
+theorem puncturedBall12z_excludes_bot (ρT ρB : ℝ) (hρB : 0 < ρB) :
+    (-(Complex.I / 2)) ∉ puncturedBall12z ρT ρB := by
+  intro hmem
+  simp only [puncturedBall12z, Set.mem_setOf_eq] at hmem
+  obtain ⟨_, _, hB⟩ := hmem
+  rw [dist_self] at hB
+  linarith
+
+end Door3SliverEdge
