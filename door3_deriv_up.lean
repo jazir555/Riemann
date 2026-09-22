@@ -2017,3 +2017,235 @@ theorem gap_leaf_reloc_tightSup_residuals_open :
   constructor <;> norm_num
 
 end Door3DerivUp
+
+/-! ## 19. Tight-spec satisfiability audit + respec proposal (append-only, no force).
+
+Grep record (read-only, before writing):
+* leaf needs: `tightGamma_leaf :669` (= 0.008), `tightGammaNeed_leaf :678`,
+  `zetaNeed_leaf :592` with `zetaValCap_leaf :583` (= 3),
+  `zetaSupOnSphere_leaf :604` (= 10, untouched),
+  honest leaf restatements `zetaSupOnSphere_leaf_934 :1229`,
+  `zetaSupOnSphere_leaf_934_filled :1264`, `zeta_leaf_934_number :1281`.
+* leaf-sub tight needs: `gammaTightSup_leaf_sub :1651` (sphere 0.008),
+  `gammaPrimeTightNeed_leaf_sub :1654` (0.03),
+  `gammaPrimeCauchyTight_leaf_sub :1657` (0.8),
+  `zetaSupTightNeed_leaf_sub :1660` (sphere 3),
+  `zetaPrimeTightNeed_leaf_sub :1663` (300),
+  chain numbers `gamma_tightChain_number :1666`, `zeta_tightChain_number :1669`,
+  gaps `:1704/:1708/:1712/:1716`.
+* leaf-sub honest: `gammaSupOnSphere_leaf_sub_0097 :1805`,
+  `gammaSupOnSphere_leaf_sub_0097_filled :1808` via
+  `R02GammaDisc.gammaOf_upper_disc_R02`, `zetaSupOnSphere_leaf_sub_934_filled :1563`
+  via `R02_D3_zeta_upper_934`, residuals `:1818/:1821/:1824/:1827/:1830`.
+* reloc tight needs: `gammaTightSup_leaf_reloc :1862` (sphere 0.008),
+  `zetaSupTightNeed_leaf_reloc :1865` (sphere 3),
+  `gammaPrimeTightNeed_leaf_reloc :1868` (0.03),
+  `zetaPrimeTightNeed_leaf_reloc :1871` (300),
+  `gammaTrueAboveTight_leaf_sub :1874` (true-above Prop, open),
+  geometry `:1877/:1893`, gaps `:1939`.
+* reloc honest: `gammaSupOnSphere_leaf_reloc_0097_filled :1980` (= 0.097),
+  `zetaSupOnSphere_leaf_reloc_934_filled :1993` (= 934),
+  residuals `:2003/:2006/:2009/:2012/:2015`.
+* centers: `dLeaf :147` (= 0.2 - 6.75 I), `dLeaf_sub :1478` (= 0.2 - 6.25 I),
+  `dLeaf_reloc :1856` (= 0.2 - 8.0 I).
+* true-floor note in reloc header `:1849-1850`: true gamma about 0.026 above
+  0.008 at leaf centers; zeta honest 934 against need 3 (311x class).
+
+Verdict filed below as Props + numeric lemmas only:
+* gamma: need 0.008 < true floor 0.026 < honest 0.097, so each tight
+  center-value / sphere need is unsatisfiable conditional on the true floor.
+* zeta: need 3 < honest 934; honest does not imply need; satisfiability of
+  the tight sphere need stays open pending a true lower-bound record.
+* respec: gamma sphere need must move to at least honest (proposed 0.1);
+  zeta sphere need must move to honest (proposed 934); prime needs move to
+  honest Cauchy quotients (gamma 9.7 -> proposed 10, zeta 93400); larger rho
+  lowers the quotient but its rect-containment stays open as a Prop; otherwise
+  M prime must weaken or centers must move to where true sits below need.
+-/
+
+namespace Door3DerivUp
+
+def auditGammaNeed19 : ℝ := 0.008
+
+def auditGammaTrueFloor19 : ℝ := 0.026
+
+def auditGammaHonest19 : ℝ := 0.097
+
+def auditZetaNeed19 : ℝ := 3
+
+def auditZetaHonest19 : ℝ := 934
+
+def gammaTrueAboveNeed_leaf19 : Prop :=
+  (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf‖
+
+def gammaTrueAboveNeed_leaf_sub19 : Prop :=
+  (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf_sub‖
+
+def gammaTrueAboveNeed_leaf_reloc19 : Prop :=
+  (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf_reloc‖
+
+def zetaTrueAboveNeed_leaf_sub19 : Prop :=
+  (3 : ℝ) < ‖riemannZeta dLeaf_sub‖
+
+def zetaTrueAboveNeed_leaf_reloc19 : Prop :=
+  (3 : ℝ) < ‖riemannZeta dLeaf_reloc‖
+
+theorem audit_gamma_need_lt_true19 :
+    auditGammaNeed19 < auditGammaTrueFloor19 := by
+  unfold auditGammaNeed19 auditGammaTrueFloor19
+  norm_num
+
+theorem audit_gamma_true_below_honest19 :
+    auditGammaTrueFloor19 < auditGammaHonest19 := by
+  unfold auditGammaTrueFloor19 auditGammaHonest19
+  norm_num
+
+theorem audit_gamma_need_lt_honest19 :
+    auditGammaNeed19 < auditGammaHonest19 := by
+  unfold auditGammaNeed19 auditGammaHonest19
+  norm_num
+
+theorem audit_zeta_need_lt_honest19 :
+    auditZetaNeed19 < auditZetaHonest19 := by
+  unfold auditZetaNeed19 auditZetaHonest19
+  norm_num
+
+theorem audit_gamma_floor_above_need_num :
+    (0.008 : ℝ) < 0.026 := by
+  norm_num
+
+theorem audit_gamma_honest_above_floor_num :
+    (0.026 : ℝ) < 0.097 := by
+  norm_num
+
+theorem audit_zeta_honest_above_need_num :
+    (3 : ℝ) < 934 := by
+  norm_num
+
+theorem gamma_unsat_leaf19_of_true
+    (hTrue : (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf‖) :
+    ¬ (‖DerivCauchyBridge.gammaOf dLeaf‖ ≤ 0.008) := by
+  intro hNeed
+  linarith
+
+theorem gamma_unsat_leaf_sub19_of_true
+    (hTrue : (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf_sub‖) :
+    ¬ (‖DerivCauchyBridge.gammaOf dLeaf_sub‖ ≤ 0.008) := by
+  intro hNeed
+  linarith
+
+theorem gamma_unsat_leaf_reloc19_of_true
+    (hTrue : (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf_reloc‖) :
+    ¬ (‖DerivCauchyBridge.gammaOf dLeaf_reloc‖ ≤ 0.008) := by
+  intro hNeed
+  linarith
+
+theorem gamma_sphere_unsat_leaf_sub19_of_center
+    (hTrue : (0.026 : ℝ) ≤ ‖DerivCauchyBridge.gammaOf dLeaf_sub‖)
+    (hMem : dLeaf_sub ∈ Metric.sphere dLeaf_sub 0.01) :
+    ¬ gammaTightSup_leaf_sub := by
+  unfold gammaTightSup_leaf_sub
+  intro hSup
+  have hAt := hSup dLeaf_sub hMem
+  linarith
+
+theorem zeta_honest_not_imply_need19 : ¬ (934 : ℝ) ≤ 3 := by
+  norm_num
+
+theorem gamma_honest_not_imply_need19 : ¬ (0.097 : ℝ) ≤ 0.008 := by
+  norm_num
+
+theorem gamma_prime_chain_above_need19 : (0.03 : ℝ) < 0.8 := by
+  norm_num
+
+theorem gamma_prime_honest_quot19 : (0.097 : ℝ) / 0.01 = 9.7 := by
+  norm_num
+
+theorem gamma_prime_honest_above_need19 : (0.03 : ℝ) < 9.7 := by
+  norm_num
+
+theorem zeta_prime_honest_quot19 : (934 : ℝ) / 0.01 = 93400 := by
+  norm_num
+
+theorem zeta_prime_tight_below_honest19 : (300 : ℝ) < 93400 := by
+  norm_num
+
+def gammaSupRespec19 : ℝ := 0.1
+
+def zetaSupRespec19 : ℝ := 934
+
+def gammaPrimeRespec19 : ℝ := 10
+
+def zetaPrimeRespec19 : ℝ := 93400
+
+theorem gamma_honest_fits_respec19 :
+    (0.097 : ℝ) ≤ gammaSupRespec19 := by
+  unfold gammaSupRespec19
+  norm_num
+
+theorem gamma_true_fits_respec19 :
+    (0.026 : ℝ) ≤ gammaSupRespec19 := by
+  unfold gammaSupRespec19
+  norm_num
+
+theorem zeta_honest_fits_respec19 :
+    934 ≤ zetaSupRespec19 := by
+  unfold zetaSupRespec19
+  norm_num
+
+theorem gamma_prime_honest_fits_respec19 :
+    9.7 ≤ gammaPrimeRespec19 := by
+  unfold gammaPrimeRespec19
+  norm_num
+
+theorem zeta_prime_honest_fits_respec19 :
+    93400 ≤ zetaPrimeRespec19 := by
+  unfold zetaPrimeRespec19
+  norm_num
+
+theorem rho_enlarge_gamma_quot19 : (0.097 : ℝ) / 0.05 = 1.94 := by
+  norm_num
+
+theorem rho_enlarge_zeta_quot19 : (934 : ℝ) / 0.05 = 18680 := by
+  norm_num
+
+theorem rho_enlarge_gamma_below_rho001_19 :
+    (0.097 : ℝ) / 0.05 < (0.097 : ℝ) / 0.01 := by
+  norm_num
+
+def rhoEnlargeKeepsRect_leaf_sub19 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_sub 0.05 →
+    (0.05 ≤ z.re ∧ z.re ≤ 0.74 ∧ (-8.25 : ℝ) ≤ z.im ∧ z.im ≤ (-5.25 : ℝ))
+
+def weakerMPrimeRespec19 : Prop :=
+  (0.15 : ℝ) < 9.7 * 22.74 * 3 + 93400 * 22.74 * 0.1
+
+def movedCenterBelowNeed19 : Prop :=
+  ∃ c : ℂ, ‖DerivCauchyBridge.gammaOf c‖ < 0.008 ∧ ‖riemannZeta c‖ < 3
+
+def auditVerdict19 : Prop :=
+  auditGammaNeed19 < auditGammaTrueFloor19 ∧
+    auditGammaTrueFloor19 < auditGammaHonest19 ∧
+    auditZetaNeed19 < auditZetaHonest19
+
+theorem audit_verdict_holds19 : auditVerdict19 := by
+  unfold auditVerdict19 auditGammaNeed19 auditGammaTrueFloor19
+    auditGammaHonest19 auditZetaNeed19 auditZetaHonest19
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+def respecProposal19 : Prop :=
+  (0.097 : ℝ) ≤ gammaSupRespec19 ∧ 934 ≤ zetaSupRespec19 ∧
+    9.7 ≤ gammaPrimeRespec19 ∧ 93400 ≤ zetaPrimeRespec19
+
+theorem respec_proposal_holds19 : respecProposal19 := by
+  unfold respecProposal19 gammaSupRespec19 zetaSupRespec19
+    gammaPrimeRespec19 zetaPrimeRespec19
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  constructor <;> norm_num
+
+end Door3DerivUp

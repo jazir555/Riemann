@@ -6137,6 +6137,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 DERIV-RESPEC (background `ses_f3483a38b`, proof-only,
+  grep-clean, deriv-only commit): satisfiability audit — gamma tight
+  UNSAT-conditional (0.008<0.026 true floor); respec proposal (0.1/934/
+  10/93400 + rho/moved-center options). Adoption next.
 - 2026-09-22 BALLADV-R02MERGE (background `ses_f348235d2`, proof-only,
   grep-clean, ball_advance-only commit): first-piece 1.04-merge +
   summable dominator104 family. Pointwise104 open.
