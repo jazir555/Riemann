@@ -2353,3 +2353,128 @@ end Door3CutL10EndpointJoint
 #print axioms Door3CutL10EndpointJoint.cutL10_endpoint_triple_sup_value
 #print axioms Door3CutL10EndpointJoint.cutL10_endpoint_need_vs_twoThirds
 
+/-! ## (m) CUTL hJoint tier spec + strip-uniform verdict (append-only tail; LF)
+
+Grep baseline (this session, before edit):
+- Endpoint triple: `cutL10_endpoint_poly_norm` at `:1065` (`= 35.7418`),
+  `cutL10_endpoint_pi_lower` at `:1092` (`7/10 <=`),
+  `cutL10_poly_pi_lower_endpoint` at `:1138` (`>= 24`),
+  `cutL10_joint_implies_zeta_cap` at `:1154` (`2/3` cap),
+  tightened block `Door3CutL10EndpointJoint` at `:2237-2343`
+  (`26.80635`, triple `0.061654605`, gap `0.021654605`, ratio `1.541365125x`).
+- hJoint specs: `cutL10_closedBall_sup` at `:863-878`
+  (joint pointwise product `<= 0.04` + `hProd` gives `hC`),
+  `cutL10_derivRemainder_of_joint` at `:882-894`,
+  fencings at `:917-934` and `:943-960` (both take `hProd` + `hJoint`).
+- Strip walls: poly `<= 67` (`cutL10_ballPoly_upper`),
+  pi `<= 16/5` (`cutL10_ballPi_upper`), Gamma `<= 1/100` gated,
+  zeta `<= 6` gated, sharp assembly `<= 12.87`
+  (`cutL10_ballSup_of_factorSups`, `cutL10_tierB_sharedSup_1287_of_factorSups`).
+
+What is filed here:
+(A) exact open tier Prop `cutL10_hJointTier` for the `0.04` tier
+    (byte-for-byte the `hJoint` binder shape used at `:868-872`,
+    `:887-891`, `:930-934`), with best-known endpoint values;
+(B) strip-uniform attempt: uniform poly-pi sup `214.4` vs endpoint-only
+    `26.80635` (uniformity worsens `~8x` before Gamma/zeta);
+    uniform triple at banked wall `2.144` vs endpoint triple `0.061654605`
+    (`~34.7x` worse); uniform joint at walls `12.864` vs tier `0.04`
+    (`321.6x`, gap `12.824`); endpoint-only already exceeds tier
+    (`0.061654605 > 0.04`, gap `0.021654605`) even at zeta `= 1`.
+Verdict: GAP filed on both routes; endpoint route dead at `1.541365125x`
+closest, uniformity strictly worsens, no uniform route.
+No new premises; all numerals closed by `norm_num`.
+-/
+
+namespace Door3CutL10JointTier
+
+open CentralCoverAssembly
+
+/-- Exact open tier Prop for the `0.04` tier: joint pointwise product sup
+over the `+1` ball (matches the `hJoint` binder at `:868-872`). -/
+def cutL10_hJointTier : Prop :=
+  ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+    ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖
+      * ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖
+      * ‖Complex.Gamma (shiftedS z / 2)‖ * ‖zeta (shiftedS z)‖
+      ≤ (0.04 : ℝ)
+
+/-- Tier wiring: `hProd` plus the tier Prop gives the exact `0.04` ball sup
+(consumed by `cutL10_derivRemainder_of_closedBall_sup`). -/
+theorem cutL10_sup_of_hJointTier_and_hProd
+    (hProd : ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      xiShiftedEntire z = ((1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1))
+        * ((Real.pi : ℂ) ^ (-(shiftedS z / 2)))
+        * (Complex.Gamma (shiftedS z / 2)) * (zeta (shiftedS z)))
+    (hJ : cutL10_hJointTier) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) := by
+  intro z hz
+  have hP := hProd z hz
+  rw [hP, norm_mul, norm_mul, norm_mul]
+  exact hJ z hz
+
+/-- Endpoint-only joint floor at zeta `= 1`: triple value persists. -/
+theorem cutL10_endpoint_joint_zetaOne_value :
+    ((0.061654605 : ℝ) * 1 = (0.061654605 : ℝ)) := by
+  norm_num
+
+/-- Endpoint-only already exceeds tier even at zeta `= 1`
+(gap `0.021654605`, closest approach). -/
+theorem cutL10_endpoint_joint_zetaOne_gap :
+    ((0.04 : ℝ) < (0.061654605 : ℝ) * 1) ∧
+    (((0.061654605 : ℝ) * 1 - 0.04) = (0.021654605 : ℝ)) := by
+  constructor <;> norm_num
+
+/-- Strip-uniform poly-pi sup value: `67 * (16/5) = 214.4`. -/
+theorem cutL10_uniform_poly_pi_value :
+    ((67 : ℝ) * (16 / 5) = (214.4 : ℝ)) := by
+  norm_num
+
+/-- Uniformity worsens poly-pi: endpoint `26.80635 < 214.4`
+(gap `187.59365`, about `8x`). -/
+theorem cutL10_uniform_worsens_poly_pi :
+    ((26.80635 : ℝ) < (214.4 : ℝ)) ∧
+    (((214.4 : ℝ) - 26.80635) = (187.59365 : ℝ)) := by
+  constructor <;> norm_num
+
+/-- Strip-uniform triple at banked Gamma wall: `214.4 * 1/100 = 2.144`. -/
+theorem cutL10_uniform_triple_wall_value :
+    ((214.4 : ℝ) * (1 / 100) = (2.144 : ℝ)) := by
+  norm_num
+
+/-- Uniform triple vastly exceeds endpoint triple
+(`2.144 > 0.061654605`, gap `2.082345395`). -/
+theorem cutL10_uniform_worsens_triple :
+    ((0.061654605 : ℝ) < (2.144 : ℝ)) ∧
+    (((2.144 : ℝ) - 0.061654605) = (2.082345395 : ℝ)) := by
+  constructor <;> norm_num
+
+/-- Uniform triple vs endpoint wall triple
+(`2.144 > 0.2680635`, gap `1.8759365`). -/
+theorem cutL10_uniform_vs_endpoint_wall_gap :
+    ((0.2680635 : ℝ) < (2.144 : ℝ)) ∧
+    (((2.144 : ℝ) - 0.2680635) = (1.8759365 : ℝ)) := by
+  constructor <;> norm_num
+
+/-- Strip-uniform joint at walls: `2.144 * 6 = 12.864`. -/
+theorem cutL10_uniform_joint_wall_value :
+    ((2.144 : ℝ) * 6 = (12.864 : ℝ)) := by
+  norm_num
+
+/-- Uniform joint residual to tier: gap `12.824`, ratio `321.6x`.
+No uniform route to `0.04` from banked walls. -/
+theorem cutL10_uniform_joint_gap_to_tier :
+    (((12.864 : ℝ) - 0.04) = (12.824 : ℝ)) ∧ ((0.04 : ℝ) < (12.864 : ℝ)) ∧
+    (((12.864 : ℝ) / 0.04) = (321.6 : ℝ)) := by
+  constructor <;> norm_num
+  constructor <;> norm_num
+
+/-- Uniform joint cap against the landed `12.87` assembly
+(`12.864 <= 12.87`, margin `0.006`). -/
+theorem cutL10_uniform_joint_le_1287 :
+    ((12.864 : ℝ) ≤ (12.87 : ℝ)) ∧ (((12.87 : ℝ) - 12.864) = (0.006 : ℝ)) := by
+  constructor <;> norm_num
+
+end Door3CutL10JointTier
+

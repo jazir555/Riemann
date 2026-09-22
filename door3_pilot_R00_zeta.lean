@@ -6453,4 +6453,342 @@ next constructive legs still open — filed, not forced. -/
 theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_residual : (0 : ℝ) < 1 := by
   norm_num
 
+/-! ## sCut k=23 ODD shard (third link): `log 24` bridge + `theta24` window.
+
+`k = 23` is ODD so `eta23 = -24^{-sCut}`; constructive iff
+`cos(10*log 24) <= -c`. Grep first (shapes in this file):
+* `sSCUT_log_twenty_via_nineteen_eq` at `:6021`,
+  `sSCUT_log_twenty_le` at `:6032`, `sSCUT_log_twenty_ge` at `:6046`,
+  `sSCUT_theta20_mem` at `:6063`, `sSCUT_delta20_odd_mem` at `:6080`,
+  `sSCUT_cos10log20_quad_floor_eq` at `:6095`,
+  `sSCUT_delta20_no_neg_quarter_gap` at `:6104`,
+  `sSCUT_eta19_payoff_residual` at `:6113` (odd-`k` no-close mirror).
+* `sSCUT_log_twentyone_via_twenty_eq` at `:6163`,
+  `sSCUT_log_twentyone_le` at `:6174`, `sSCUT_log_twentyone_ge` at `:6188`,
+  `sSCUT_log_twentytwo_via_twentyone_eq` at `:6206`,
+  `sSCUT_log_twentytwo_le` at `:6218`, `sSCUT_log_twentytwo_ge` at `:6232`,
+  `sSCUT_theta22_mem` at `:6249`, `sSCUT_delta22_even_mem` at `:6267`,
+  `sSCUT_cos10log22_quad_floor_eq` at `:6282`,
+  `sSCUT_cos10log22_ge_quarter` at `:6294`,
+  `sSCUT_cpow22_neg_re` at `:6353`, `sSCUT_cpow22_Re_ge` at `:6389`,
+  `sSCUT_eta21_eq_neg_cpow22` at `:6407`, `sSCUT_eta21_Re_le_neg` at `:6420`,
+  `sSCUT_eta21_Re_no_pos_lock` at `:6431`,
+  `sSCUT_eta21_payoff_residual` at `:6443` (odd-`k` destructive mirror).
+* Odd-constructive mirror `sSCUT_eta17_Re_ge` at `:5618`;
+  even-destructive mirror `sSCUT_eta18_Re_le_neg` at `:5960`,
+  `sSCUT_eta18_Re_no_pos_lock` at `:5971`.
+* No `sSCUT_log_twentythree` / `sSCUT_log_twentyfour` shape existed before this
+  block; base is banked `sSCUT_log_twentytwo_ge/le` plus tight ratios `23/22`
+  (`x = 1/22`) and `24/23` (`x = 1/23`). Mirror of the `log 21` / `log 22`
+  second-link recipe (`:6163`-`:6244`).
+
+Honest outcome filed here: `log 23` in `[3.1261512388, 3.1451729805]`,
+`log 24` in `[3.1678179054, 3.1886512414]`,
+`theta24 = 10*log 24` in `[31.678179054, 31.886512414]`,
+`delta24 = theta24 - 10*pi` in `(0.262, 0.472)` via loose `pi` bounds
+(`Real.pi_gt_d4/lt_d4`). Nearest anchor is even `10*pi`, so no odd flip:
+`cos theta24 = cos delta24 >= 1 - 0.472^2/2 = 0.888608 >= 1/4`
+(destructive for odd `k`; true `cos ~= +0.93`). Hence `Re(eta23) <= -1/20`
+and no `Re >= +c` floor with `c > 0` can close. Exact gap filed alongside
+the banked floor. All proofs close with `norm_num` / `linarith` / `ring` /
+`rw` only. -/
+
+/-- Composite log bridge `log 23 = log 22 + log (23/22)` (`23 = 22*(23/22)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentytwo_via_twentyone_eq` at `:6206`;
+ratio `23/22` (`x = 1/22`); grepped base bridges `sSCUT_log_twentytwo_ge/le`;
+first link of the incremental base-24 chain for `k = 23`). -/
+theorem sSCUT_log_twentythree_via_twentytwo_eq :
+    Real.log 23 = Real.log 22 + Real.log (23 / 22 : ℝ) := by
+  have h23 : (22 : ℝ) * (23 / 22) = 23 := by norm_num
+  have h := Real.log_mul (show (22 : ℝ) ≠ 0 by norm_num)
+    (show (23 / 22 : ℝ) ≠ 0 by norm_num)
+  rw [h23] at h
+  linarith
+
+/-- `log 23` upper (`log 23 <= 3.1451729805` from `sSCUT_log_twentytwo_le` +
+`log (23/22) <= 1/22`; mirror of `sSCUT_log_twentytwo_le` at `:6218` with `x = 1/22`
+via `Real.log_le_sub_one_of_pos`; `3.0997184350 + 1/22 = 3.1451729804545...`,
+so `3.1451729805` holds outward). -/
+theorem sSCUT_log_twentythree_le : Real.log 23 ≤ (3.1451729805 : ℝ) := by
+  have h23 := sSCUT_log_twentythree_via_twentytwo_eq
+  have h22 := sSCUT_log_twentytwo_le
+  have hub : Real.log (23 / 22 : ℝ) ≤ (1 / 22 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 23 / 22)
+    have he : (23 / 22 : ℝ) - 1 = (1 / 22 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.0997184350 : ℝ) + 1 / 22 ≤ (3.1451729805 : ℝ) := by norm_num
+  linarith
+
+/-- `log 23` lower (`3.1261512388 <= log 23` from `sSCUT_log_twentytwo_ge` +
+`log (23/22) >= 1/23`; mirror of `sSCUT_log_twentytwo_ge` at `:6232` with `x = 1/22`
+via `log (22/23) <= -1/23` and `log (23/22) = -log (22/23)`;
+`3.0826729780 + 1/23 = 3.1261512388695...`, so `3.1261512388` holds). -/
+theorem sSCUT_log_twentythree_ge : (3.1261512388 : ℝ) ≤ Real.log 23 := by
+  have h23 := sSCUT_log_twentythree_via_twentytwo_eq
+  have h22 := sSCUT_log_twentytwo_ge
+  have hub : Real.log (22 / 23 : ℝ) ≤ (-1 / 23 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 22 / 23)
+    have he : (22 / 23 : ℝ) - 1 = (-1 / 23 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (23 / 22 : ℝ) = -Real.log (22 / 23 : ℝ) := by
+    have heq : (23 / 22 : ℝ) = (22 / 23 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.1261512388 : ℝ) ≤ 3.0826729780 + 1 / 23 := by norm_num
+  rw [h23, hinv]
+  linarith
+
+/-- Composite log bridge `log 24 = log 23 + log (24/23)` (`24 = 23*(24/23)`
+via `Real.log_mul`; mirror of `sSCUT_log_twentythree_via_twentytwo_eq` above;
+ratio `24/23` (`x = 1/23`); grepped base bridges `sSCUT_log_twentythree_ge/le`;
+second link of the incremental base-24 chain for `k = 23`). -/
+theorem sSCUT_log_twentyfour_via_twentythree_eq :
+    Real.log 24 = Real.log 23 + Real.log (24 / 23 : ℝ) := by
+  have h24 : (23 : ℝ) * (24 / 23) = 24 := by norm_num
+  have h := Real.log_mul (show (23 : ℝ) ≠ 0 by norm_num)
+    (show (24 / 23 : ℝ) ≠ 0 by norm_num)
+  rw [h24] at h
+  linarith
+
+/-- `log 24` upper (`log 24 <= 3.1886512414` from `sSCUT_log_twentythree_le` +
+`log (24/23) <= 1/23`; mirror of `sSCUT_log_twentythree_le` above with `x = 1/23`
+via `Real.log_le_sub_one_of_pos`; `3.1451729805 + 1/23 = 3.1886512413695...`,
+so `3.1886512414` holds outward). -/
+theorem sSCUT_log_twentyfour_le : Real.log 24 ≤ (3.1886512414 : ℝ) := by
+  have h24 := sSCUT_log_twentyfour_via_twentythree_eq
+  have h23 := sSCUT_log_twentythree_le
+  have hub : Real.log (24 / 23 : ℝ) ≤ (1 / 23 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 24 / 23)
+    have he : (24 / 23 : ℝ) - 1 = (1 / 23 : ℝ) := by norm_num
+    linarith
+  have hfin : (3.1451729805 : ℝ) + 1 / 23 ≤ (3.1886512414 : ℝ) := by norm_num
+  linarith
+
+/-- `log 24` lower (`3.1678179054 <= log 24` from `sSCUT_log_twentythree_ge` +
+`log (24/23) >= 1/24`; mirror of `sSCUT_log_twentythree_ge` above with `x = 1/23`
+via `log (23/24) <= -1/24` and `log (24/23) = -log (23/24)`;
+`3.1261512388 + 1/24 = 3.1678179054666...`, so `3.1678179054` holds). -/
+theorem sSCUT_log_twentyfour_ge : (3.1678179054 : ℝ) ≤ Real.log 24 := by
+  have h24 := sSCUT_log_twentyfour_via_twentythree_eq
+  have h23 := sSCUT_log_twentythree_ge
+  have hub : Real.log (23 / 24 : ℝ) ≤ (-1 / 24 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 23 / 24)
+    have he : (23 / 24 : ℝ) - 1 = (-1 / 24 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (24 / 23 : ℝ) = -Real.log (23 / 24 : ℝ) := by
+    have heq : (24 / 23 : ℝ) = (23 / 24 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (3.1678179054 : ℝ) ≤ 3.1261512388 + 1 / 24 := by norm_num
+  rw [h24, hinv]
+  linarith
+
+/-- Phase window `theta24 = 10*log 24 in [31.678179054, 31.886512414]`
+(via banked `sSCUT_log_twentyfour_ge/le` + `*10`; mirror of
+`sSCUT_theta22_mem` at `:6249`; non-strict since the `log 24` inputs are `<=`). -/
+theorem sSCUT_theta24_mem :
+    (31.678179054 : ℝ) ≤ 10 * Real.log 24 ∧
+    10 * Real.log 24 ≤ (31.886512414 : ℝ) := by
+  have hge := sSCUT_log_twentyfour_ge
+  have hle := sSCUT_log_twentyfour_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 3.1678179054 = 31.678179054 := by norm_num
+  have c2 : (10 : ℝ) * 3.1886512414 = 31.886512414 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta24 = theta24 - 10*pi in (0.262, 0.472)` (even anchor:
+`10*pi ~= 31.416` is nearest since `theta24 ~= 31.678-31.887` vs
+`9*pi ~= 28.274` and `11*pi ~= 34.558`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta22_even_mem` at `:6267` with the even anchor;
+rounded outward from the loose-pi window `[0.262179054, 0.471512414]`
+(`31.678179054 - 10*3.1416 = 0.262179054`,
+`31.886512414 - 10*3.1415 = 0.471512414`) so `linarith` closes). -/
+theorem sSCUT_delta24_even_mem :
+    (0.262 : ℝ) < 10 * Real.log 24 - 10 * Real.pi ∧
+    10 * Real.log 24 - 10 * Real.pi < (0.472 : ℝ) := by
+  have hth := sSCUT_theta24_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta24` window (`0.210`). -/
+theorem sSCUT_delta24_even_width_eq :
+    (0.472 : ℝ) - 0.262 = (0.210 : ℝ) := by
+  norm_num
+
+/-- Exact quadratic floor at the window cap
+(`1 - 0.472^2/2 = 0.888608`; `0.472^2 = 0.222784`). -/
+theorem sSCUT_cos10log24_quad_floor_eq :
+    (1 - (0.472 : ℝ) ^ 2 / 2) = (0.888608 : ℝ) := by
+  norm_num
+
+/-- Signed cosine LOWER `1/4 <= cos(10*log 24)` (even anchor, no flip:
+`cos theta24 = cos delta24` from the banked `delta24 in (0.262, 0.472)`
+window `sSCUT_delta24_even_mem` + quadratic floor `1 - x^2/2 <= cos x` on
+`|delta24| <= 0.472`; mirror of `sSCUT_cos10log22_ge_quarter` at `:6294`
+with `10*pi = 5*(2*pi)` and no `cos_add_pi` flip;
+`1 - 0.472^2/2 = 0.888608 >= 0.25`, so `k = 23` (base 24) is destructive
+for odd `k`: `cos theta24 ~= +0.93`, hence no `cos <= -c` floor with
+`c > 0` can close). -/
+theorem sSCUT_cos10log24_ge_quarter :
+    (1 / 4 : ℝ) ≤ Real.cos (10 * Real.log 24) := by
+  have hδ := sSCUT_delta24_even_mem
+  have key : Real.cos ((10 * Real.log 24 - 10 * Real.pi)
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = Real.cos (10 * Real.log 24 - 10 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_two_pi]
+  have e2 : (10 * Real.log 24 - 10 * Real.pi)
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 24 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (0.472 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 24 - 10 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 24 - 10 * Real.pi)
+    have hsq : (10 * Real.log 24 - 10 * Real.pi) ^ 2 ≤ (0.472 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 0.472 - (10 * Real.log 24 - 10 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 24 - 10 * Real.pi) + 0.472 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (0.472 - (10 * Real.log 24 - 10 * Real.pi))
+          * ((10 * Real.log 24 - 10 * Real.pi) + 0.472)
+          = (0.472 : ℝ) ^ 2 - (10 * Real.log 24 - 10 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (1 / 4 : ℝ) ≤ 1 - (0.472 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
+/-- `24^(1/2) <= 5` (mirror of `sSCUT_sqrt22_le` at `:6328`; `24 <= 5^2 = 25`). -/
+theorem sSCUT_sqrt24_le : (24 : ℝ) ^ (1 / 2 : ℝ) ≤ (5 : ℝ) := by
+  have hpow : (24 : ℝ) ≤ (((5 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((24 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 24 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((24 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ ((5 : ℝ) ^ (2 : ℕ)) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hle
+
+/-- `1/5 <= r24 = 24^(-1/2)` (inverse of `sSCUT_sqrt24_le`;
+mirror of `sSCUT_rpow22_neg_ge` at `:6341`). -/
+theorem sSCUT_rpow24_neg_ge : (1 / 5 : ℝ) ≤ (24 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt24_le
+  have hpos : (0 : ℝ) < (24 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (24 : ℝ) ^ (-(1 / 2 : ℝ)) = (((24 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 24)]
+  rw [hneg, show (1 / 5 : ℝ) = ((5 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow real-part split for `24^{-s}` at sCut (mirror of
+`sSCUT_cpow22_neg_re` at `:6353`). -/
+theorem sSCUT_cpow24_neg_re : ((((24 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (24 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 24) := by
+  have h24pos : (0 : ℝ) < 24 := by norm_num
+  have hxC : ((24 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h24pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((24 : ℝ) : ℂ) = (((Real.log 24 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h24pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+  have hzre : ((((Real.log 24 : ℝ)) : ℂ)).re = Real.log 24 := Complex.ofReal_re _
+  have hzim : ((((Real.log 24 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 24 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 24 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 24 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 24) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 24 * (-(1 / 2 : ℝ)))
+      = (24 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h24pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 24))
+      = Real.cos (10 * Real.log 24) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow signed LOWER `1/20 <= Re(24^{-sCut})` (nonneg `r24` times cosine
+lower `>= 1/4`, then `r24 >= 1/5`; mirror of `sSCUT_cpow22_Re_ge` at `:6389`
+with the inequality direction flipped to the even-anchor
+positive floor; `(1/5)*(1/4) = 1/20 = 0.05`). -/
+theorem sSCUT_cpow24_Re_ge :
+    (1 / 20 : ℝ) ≤ ((((24 : ℝ)) : ℂ) ^ (-sSCUT)).re := by
+  rw [sSCUT_cpow24_neg_re]
+  have hr0 : (0 : ℝ) ≤ (24 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_lo := sSCUT_rpow24_neg_ge
+  have hc := sSCUT_cos10log24_ge_quarter
+  have hcos14 : (1 / 4 : ℝ) ≤ Real.cos (10 * Real.log 24) := hc
+  have hmul : (24 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4)
+      ≤ (24 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 24) :=
+    mul_le_mul_of_nonneg_left hcos14 hr0
+  have h2 : (1 / 5 : ℝ) * (1 / 4) ≤ (24 : ℝ) ^ (-(1 / 2 : ℝ)) * (1 / 4) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have heq : (1 / 5 : ℝ) * (1 / 4) = 1 / 20 := by norm_num
+  linarith
+
+/-- Eta bridge `eta23 = -(24^{-sCut})` (odd `k`; mirror of
+`sSCUT_eta21_eq_neg_cpow22` at `:6407`). -/
+theorem sSCUT_eta23_eq_neg_cpow24 :
+    etaDirichletTerm sSCUT 23 = -((((24 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (23 + 1 : ℕ) = 24 := rfl
+  have hcast : ((((23 + 1 : ℕ)) : ℂ)) = ((((24 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (23 : ℕ) = -1 := by norm_num
+  have h24cast : ((((24 : ℕ)) : ℂ)) = ((((24 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h24cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (odd `k = 23`): `Re(eta23) <= -(1/20)` (negated
+cpow positive lower `sSCUT_cpow24_Re_ge`; negation flips the lower to an
+upper; mirror of `sSCUT_eta21_Re_le_neg` at `:6420` with the sign working
+against odd-`k` constructive: `1/20 = 0.05`). -/
+theorem sSCUT_eta23_Re_le_neg :
+    (etaDirichletTerm sSCUT 23).re ≤ (-(1 / 20) : ℝ) := by
+  have h := sSCUT_cpow24_Re_ge
+  rw [sSCUT_eta23_eq_neg_cpow24, Complex.neg_re, sSCUT_cpow24_neg_re]
+  rw [sSCUT_cpow24_neg_re] at h
+  linarith
+
+/-- No positive `Re23` lock exists at any precision (`Re(eta23) <= -1/20`,
+so no `c > 0` can sit below it; mirror of `sSCUT_eta21_Re_no_pos_lock` at
+`:6431` — the `k = 23` constructive floor `cos <= -c` is IMPOSSIBLE on
+banked numerals, honestly skipped). -/
+theorem sSCUT_eta23_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 23).re) := by
+  intro h
+  have hup := sSCUT_eta23_Re_le_neg
+  linarith
+
+/-- Eta23 payoff RESIDUAL (`k = 23` ODD, base 24): the needed
+`cos(10*log 24) <= -c` is refuted by the banked positive floor
+`sSCUT_cos10log24_ge_quarter` (`>= 1/4`); `Re(eta23) <= -1/20`
+(`sSCUT_eta23_Re_le_neg`) is destructive, and
+`sSCUT_eta23_Re_no_pos_lock` blocks any `c > 0` floor; one branch only,
+no force. Next link needed: `k = 25` (base 26) incremental chain. -/
+theorem sSCUT_eta23_payoff_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+/-- Shard assembly residual: `t23` adds no constructive gain
+(`Re(eta23) <= -1/20` destructive, `sSCUT_eta23_Re_no_pos_lock` blocks any
+`c > 0` floor); combined honest floor stays at
+`F17 = -1000096/388500 ~= -2.574` (`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq`),
+still below both bars (`21/10 = 2.1`, `1507/905 ~= 1.665`);
+shortfalls `1815946/388500` and `298111276/70318500` unchanged;
+next constructive legs still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_eta21_eta23_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta

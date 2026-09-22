@@ -6137,6 +6137,11 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 CUTL-TIERSPEC (background `ses_f3480bec0`, proof-only,
+  grep-clean, cutL10-only commit): hJoint tier spec filed + endpoint
+  zeta-1 value + uniform-worsens findings (uniform route dead).
+- 2026-09-22 SCUT50 (provisional, report pending; verified grep-clean
+  +338 diff): k=23 route attempt. Reconciled on report.
 - 2026-09-22 ETA-S18IM (background `ses_f3481bbf9`, proof-only,
   grep-clean, suppliers-only commit): S18 Im floor -3.91 (Im17/18 splits
   + S16 base) + S20 Im UNCONDITIONAL -4.63 (closes S20IM conditional).
