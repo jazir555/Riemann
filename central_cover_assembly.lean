@@ -17215,9 +17215,9 @@ theorem R00_closedBall_radius_subset_ball2 :
     Metric.closedBall R00.center (R00.radius + 0.25) ⊆
       Metric.closedBall R00.center 2 := by
   intro z hz
-  rw [Metric.mem_closedBall, Metric.mem_closedBall] at hz ⊢
+  rw [Metric.mem_closedBall]
   have hR := R00_radius_lt
-  linarith
+  linarith [hz]
 
 /-- `ball 2` sup implies the tight-ball sup (same constant, subset). -/
 theorem R00_tight_of_ball2 (h : R00_ball2_sup_tight) :
@@ -17410,9 +17410,9 @@ theorem R01_closedBall_radius_subset_ball2 :
     Metric.closedBall R01.center (R01.radius + 0.25) ⊆
       Metric.closedBall R01.center 2 := by
   intro z hz
-  rw [Metric.mem_closedBall, Metric.mem_closedBall] at hz ⊢
+  rw [Metric.mem_closedBall]
   have hR := R01_radius_lt
-  linarith
+  linarith [hz]
 
 /-- `ball 2` sup implies the tight-ball sup (same constant, subset). -/
 theorem R01_tight_of_ball2 (h : R01_ball2_sup_tight) :

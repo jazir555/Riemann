@@ -6092,6 +6092,18 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean + 4 audits, premise_gamma-only commit): E06 Seq16 rung
   0.657 `:8188` (ceiling 0.65769<0.66, gap 0.003, increment +0.002 —
   still asymptoting). N17-next filed `:8438`.
+- 2026-09-22 ZETA-FLOOR16 (background `ses_f348cbea8`, proof-only,
+  grep-clean, zeta-only commit): 16^0.05 floor 1.136→1.142 (via
+  1.142^20≤16) → tail 17.52, candidate TIES 19.802 `:41662`. 0.344
+  persists; 1.143 route open.
+- 2026-09-22 SUPP-FIX (background `ses_f34918ba1`, build owner, DONE):
+  root cause = orphan `/--` docstrings before `#print axioms` headers;
+  remedy doc→block `/-` at S12/S14/S16/S18/S20 (comment-only).
+  Suppliers parse-clean (attempt-2: zero error lines); build stopped on
+  UPSTREAM assembly:17218. S20 floor -3.27 joint-committed here.
+- 2026-09-22 ASSEMBLY-SUBSETFIX (coordinator, surgical): assembly
+  `:17218/:17413` `rw ... at hz ⊢` failed (hz already dist-form);
+  narrowed to goal-only `rw` + `linarith [hz]` (R00/R01 mirrors).
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
