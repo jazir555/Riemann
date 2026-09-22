@@ -2635,3 +2635,102 @@ theorem cutL10_consistency_full_chain :
 
 end Door3CutL10Consistency
 
+/-! ## (p) CUTL FINAL gap ledger (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- tier spec `cutL10_hJointTier` at `:2395-2400` (open tier Prop at `0.04`,
+  byte-for-byte the `hJoint` binder at `:868-872`); wiring
+  `cutL10_sup_of_hJointTier_and_hProd` at `:2404-2415`.
+- hProd closed `cutL10_hProd_closed` at `:1226-1231` (no premise beyond `hz`).
+- hProd-closed tier close `cutL10_sup_of_hJointTier_closed_hProd` at `:2515-2522`
+  plus deriv `cutL10_derivRemainder_of_hJointTier` at `:2526-2530`
+  (each takes explicit `hJ`, leaves tier open).
+- consistency `cutL10_consistency_full_chain` at `:2621-2634`
+  (`0.04 < 0.061654605 < 2.144 < 6.326775 < 12.65355 < 12.864 <= 12.87`).
+- endpoint best `cutL10_endpoint_triple_gammaTrue_value` at `:2303`
+  (`= 0.061654605`), gap at `:2313` (`- 0.04 = 0.021654605`),
+  ratio at `:2318` (`/ 0.04 = 1.541365125`); wall value at `:2323`
+  (`= 0.2680635`), wall gap at `:2328`; zeta-one gap at `:2424-2427`.
+- uniform joint `cutL10_uniform_joint_wall_value` at `:2461` (`= 12.864`),
+  gap/ratio at `:2467` (`- 0.04 = 12.824`, `/ 0.04 = 321.6`),
+  cap at `:2475` (`12.864 <= 12.87`); poly-pi at `:2430` (`= 214.4`);
+  triple wall at `:2442` (`= 2.144`).
+- thin-rect `cutL10_thinRect_tightened_gap` at `:1439` (`= 2.01`, `0.04 <`);
+  tighter `cutL10_tighter_gap_to_tier` at `:1860` (`12.8544`);
+  two-factor gap/ratio at `:1904-1910` (`12.65355`); three-factor at
+  `:1960-1966` (`6.326775`); zeta-true at `:1976-1982` (`3.1633875`);
+  gamma-true at `:2150-2157` (`8.9840205`); double-true at `:2167-2173`
+  (`2.246005125`).
+- middle `cutL10_middle_gap` at `:1806` (`125 - 2 = 123`, `0.06 < 2.56`);
+  FE sliver `cutL10_FE_sliver_width_gap` at `:1705`.
+- factor walls: poly `<= 67` at `:766`, pi `<= 16/5` at `:791`,
+  joint `<= 12.87` at `:819` and `:1393` (`67 * (16/5) * (1/100) * 6`).
+- pre-existing short simp-form lines at `:131`, `:155`, `:190` untouched
+  (append-only); pre-existing print-check lines at `:539-564`, `:1001-1021`,
+  `:1446-1461`, `:1712-1721`, `:1817-1820` untouched.
+
+What is filed here:
+(A) `cutL10_FINAL_gap_ledger`: single closed audit conjunction over the
+  headline exact numerals (endpoint best `0.061654605` with gap/ratio,
+  uniform joint `12.864` with gap/ratio/cap, thin-rect `2.01`,
+  three-factor `6.326775`, zeta-true `3.1633875`, gamma-true `8.9840205`,
+  double-true `2.246005125`, endpoint wall `0.2680635`, middle `123`,
+  sliver `0.06 < 2.56`). All closed by `norm_num`; no new premise.
+(B) `cutL10_FINAL_sup_of_open_hJ` / `cutL10_FINAL_deriv_of_open_hJ`:
+  the `:2515` / `:2526` closings restated so the residual is explicit:
+  `hProd` closed inside, `hJ : cutL10_hJointTier` stays the single open
+  premise for the `0.04` tier.
+Complete residual list (honest, nothing claimed closed beyond the above):
+  `hJointTier` open (`:2395`); `hJ` open (binder below); `hLower` zeta numeral
+  (`:925`, zeta lane); `hBanked` gamma (home file, no hypotheses);
+  `hZetaSup <= 6` + `hGammaSup <= 1/100` strip walls (`:819`, `:1393`);
+  `hDom`/`hReal` Euler premises (`:1597-1600`); `hChi <= 3` + `hMid <= 2`
+  (`:1656-1662`); `hProdCap` gated (`:1316-1321`); edge-strip `hSliverL`
+  (`:961-963`); right-lane `HR`. Verdict: GAP on `0.04`
+  (endpoint-only `0.061654605 > 0.04` even at zeta `= 1`; uniform `12.864`);
+  assembly conditional on open `hJ`.
+-/
+
+namespace Door3CutL10FinalLedger
+
+open CentralCoverAssembly
+
+/-- FINAL gap ledger: single closed audit conjunction over every headline
+exact numeral (endpoint best plus uniform joint plus tighten chain plus
+middle/FE widths). -/
+theorem cutL10_FINAL_gap_ledger :
+    (0.04 : ℝ) < (0.061654605 : ℝ)
+      ∧ (((0.061654605 : ℝ) - 0.04) = (0.021654605 : ℝ))
+      ∧ (((0.061654605 : ℝ) / 0.04) = (1.541365125 : ℝ))
+      ∧ ((0.04 : ℝ) < (12.864 : ℝ))
+      ∧ (((12.864 : ℝ) - 0.04) = (12.824 : ℝ))
+      ∧ (((12.864 : ℝ) / 0.04) = (321.6 : ℝ))
+      ∧ ((12.864 : ℝ) ≤ (12.87 : ℝ))
+      ∧ ((0.04 : ℝ) < (2.01 : ℝ))
+      ∧ ((0.04 : ℝ) < (6.326775 : ℝ))
+      ∧ ((0.04 : ℝ) < (3.1633875 : ℝ))
+      ∧ ((0.04 : ℝ) < (8.9840205 : ℝ))
+      ∧ ((0.04 : ℝ) < (2.246005125 : ℝ))
+      ∧ ((0.04 : ℝ) < (0.2680635 : ℝ))
+      ∧ (((125 : ℝ) - 2) = (123 : ℝ))
+      ∧ ((0.06 : ℝ) < (2.56 : ℝ)) := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num, by norm_num,
+    by norm_num, by norm_num, by norm_num, by norm_num, by norm_num,
+    by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-- Tier sup conditional on the single open premise `hJ`
+(`hProd` discharged inside by the closed `:1227` bank). -/
+theorem cutL10_FINAL_sup_of_open_hJ
+    (hJ : Door3CutL10JointTier.cutL10_hJointTier) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall CutL10.center (CutL10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) := by
+  exact Door3CutL10JointTierClose.cutL10_sup_of_hJointTier_closed_hProd hJ
+
+/-- Deriv `0.04` remainder conditional on the single open premise `hJ`. -/
+theorem cutL10_FINAL_deriv_of_open_hJ
+    (hJ : Door3CutL10JointTier.cutL10_hJointTier) :
+    Door3CutL10Center.cutL10_derivRemainder 0.04 := by
+  exact Door3CutL10JointTierClose.cutL10_derivRemainder_of_hJointTier hJ
+
+end Door3CutL10FinalLedger
+
