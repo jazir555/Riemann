@@ -5784,6 +5784,15 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 FE-SURVEY (background `ses_f34e1cc75`, read-only, no
+  edits): FE lane FULLY SCOPED — FE logic CLOSED (chi defs, reflection
+  bridges, Hadamard/PL/Jensen banked); only NUMERICS missing. Minimal
+  chain for zeta≤10 on R02: (1) Gamma exp-decay (ZERO content) → (2)
+  chi≤8 (conditional written, awaits hG) → (3) ratio+linear → ≤10.
+  SMALLEST-NEXT: `R02_gamma_expDecay_box` (‖Γ(1-s)‖≤4·exp(-1.58·|Im|)
+  on R02 box; box suffices, whole-line unnecessary). Polynomial
+  alternatives provably insufficient (~1000-3000x short; only exp-decay
+  cancels exp13). Same root blocks DZ/cutoff/Lambda0/zetaLower.
 - 2026-09-22 GAMMA-SHIFT-SURVEY (background `ses_f34e1cc73`, read-only,
   no edits): shift route RULED OUT for the 0.014 rate — shift bank is
   implication-only + denominator-uppers; ALL banked reals are UPPERS
