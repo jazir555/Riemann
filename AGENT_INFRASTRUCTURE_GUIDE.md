@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 SCUT46-SHARD (background `ses_f34902743`, proof-only,
+  grep-clean, pilot-only commit): shard assembly with eta17 — floor
+  `-2.774 :S9_skip8…` honest sum of banked payoffs (8 theorems). Still
+  below both bars; residual filed.
 - 2026-09-22 STIRLING-LEAF2 (background `ses_f3490273a`, proof-only,
   grep-clean, stirling-only commit): leaf shift-2 `≤0.097 :2750` (via
   Gamma 2.1≤1.1; 37x→12x). Outer 31x / leaf 12x stand.

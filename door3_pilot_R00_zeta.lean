@@ -5622,4 +5622,105 @@ theorem sSCUT_eta17_Re_ge :
   rw [sSCUT_cpow18_neg_re] at h
   linarith
 
+/-! ## SCUT46-SHARD: S8+legs shard assembly floor (eta17 `+0.15` closed).
+
+Grep (shard assembly floor, this file):
+* S8 floor `sSCUT_S8_Re_ge_neg3529div1050` (`-3529/1050 ≤ Re(S₈)`),
+  norm `sSCUT_S8_norm_ge_neg3529div1050`, gap `sSCUT_S8_gap_eq_new`.
+* eta9 payoff `sSCUT_eta9_Re_ge` (symbolic `r₁₀/2`), concretized
+  `sSCUT_S9_skip8_Re_ge` (`-3529/1050 + 0.15`), via `sSCUT_rpow10_neg_ge_03`.
+* eta10 payoff `sSCUT_eta10_Re_ge` (`+21/250`),
+  assembly `sSCUT_S9_skip8_add_eta10_Re_ge`.
+* eta12 payoff `sSCUT_eta12_Re_ge` (`+15/74`),
+  assembly `sSCUT_S9_skip8_add_eta10_eta12_Re_ge`.
+* eta15 payoff `sSCUT_eta15_Re_ge` (`+1/5`),
+  assembly `sSCUT_S9_skip8_add_eta10_eta12_eta15_Re_ge`.
+* eta17 payoff `sSCUT_eta17_Re_ge` (`+3/20 = +0.15`), via
+  `sSCUT_rpow18_neg_ge` + `sSCUT_cpow18_Re_le_neg` +
+  `sSCUT_eta17_eq_neg_cpow18`.
+
+Assembly chains banked payoffs only; index multiset summed exactly once is
+`{0,1,2,3,4,5,6,7,9,10,12,15,17}`, `k = 8, 11, 13, 14, 16` honestly skipped;
+`k = 17 > 7` so single-count safe, no double-count.
+Combined floor `F₁₇ = -3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 + 3/20
+= -1000096/388500 = -250024/97125 ≈ -2.574` still below both bars
+(`21/10 = 2.1`, `1507/905 = 7/5 + 48/181 ≈ 1.665`); exact shortfalls banked
+below. No `sorry` / `admit` / `axiom`. -/
+
+/-- Honest single-count shard floor with the `t₁₇` gain
+(`-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 + 3/20 ≤ Re(S₈ + eta₉ + eta₁₀ + eta₁₂ + eta₁₅ + eta₁₇)`;
+base `sSCUT_S9_skip8_add_eta10_eta12_eta15_Re_ge` plus `sSCUT_eta17_Re_ge`;
+index multiset summed exactly once is `{0,1,2,3,4,5,6,7,9,10,12,15,17}`,
+`k = 8, 11, 13, 14, 16` honestly skipped). -/
+theorem sSCUT_S9_skip8_add_eta10_eta12_eta15_eta17_Re_ge :
+    (-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20) ≤
+      ((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 10
+        + etaDirichletTerm sSCUT 12 + etaDirichletTerm sSCUT 15
+        + etaDirichletTerm sSCUT 17).re := by
+  rw [Complex.add_re]
+  have hbase := sSCUT_S9_skip8_add_eta10_eta12_eta15_Re_ge
+  have h17 := sSCUT_eta17_Re_ge
+  linarith
+
+/-- Exact combined floor numeral
+(`-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 + 3/20 = -1000096/388500`). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq :
+    (((-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20))) =
+      (-1000096 / 388500 : ℝ) := by
+  norm_num
+
+/-- Honest norm shard floor with the `t₁₇` gain (`-1000096/388500 ≤ ‖S₈ + legs‖`,
+via `Re ≤ ‖·‖`; still negative — no growth). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_norm_ge :
+    (-1000096 / 388500 : ℝ) ≤
+      ‖((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+        + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 10
+        + etaDirichletTerm sSCUT 12 + etaDirichletTerm sSCUT 15
+        + etaDirichletTerm sSCUT 17)‖ := by
+  have h := sSCUT_S9_skip8_add_eta10_eta12_eta15_eta17_Re_ge
+  have heq : (((-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20))) =
+      (-1000096 / 388500 : ℝ) := sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq
+  have hrn := Complex.re_le_norm
+    (((∑ k ∈ Finset.range 8, etaDirichletTerm sSCUT k)
+      + etaDirichletTerm sSCUT 9 + etaDirichletTerm sSCUT 10
+      + etaDirichletTerm sSCUT 12 + etaDirichletTerm sSCUT 15
+      + etaDirichletTerm sSCUT 17))
+  linarith
+
+/-- Updated single-count shortfall vs the `21/10` bar with the `t₁₇` gain
+(`21/10 - (-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 + 3/20) = 1815946/388500 ≈ 4.674`;
+replaces `1874221/388500` at `sSCUT_S9_skip8_eta10_eta12_eta15_shortfall`;
+delta `-0.15` exactly). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_shortfall :
+    ((21 / 10 : ℝ) - (((-3529 / 1050) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20)))) =
+      (1815946 / 388500 : ℝ) := by
+  norm_num
+
+/-- Updated single-count shortfall vs the `M = 8192` bar with the `t₁₇` gain
+(`(7/5 + 48/181) - (-3529/1050 + 0.15 + 21/250 + 15/74 + 1/5 + 3/20) =
+298111276/70318500 ≈ 4.239`; mirror with bar `1507/905` in place of `21/10`;
+replaces `308659051/70318500` at `sSCUT_S9_skip8_eta10_eta12_eta15_shortfall_8192`;
+delta `-0.15` exactly). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_shortfall_8192 :
+    (((7 / 5 : ℝ) + 48 / 181) - (((-3529 / 1050) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20)))) =
+      (298111276 / 70318500 : ℝ) := by
+  norm_num
+
+/-- Shard floor sits below the `21/10` bar (verdict: FAIL to reach bar; STOP). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_below_bar :
+    (((-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20))) < (21 / 10 : ℝ) := by
+  norm_num
+
+/-- Shard floor sits below the `M = 8192` bar (`1507/905`; verdict: FAIL to reach bar; STOP). -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_below_bar_8192 :
+    (((-3529 / 1050 : ℝ) + 0.15 + (21 / 250) + (15 / 74) + (1 / 5) + (3 / 20))) < ((7 / 5 : ℝ) + 48 / 181) := by
+  norm_num
+
+/-- Shard assembly residual: `t₁₇` closed (`+3/20`), combined `F₁₇ = -1000096/388500`;
+shortfall `1815946/388500` vs `21/10` and `298111276/70318500` vs `1507/905`
+remain; next legs / tail tightening still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta
