@@ -5422,3 +5422,19 @@ sorry-free infrastructure and the complete commit ledger above.
   limit 0.7307 blocks 0.7791 need) + `CS_complex_S4_abs_ge_195_gap
   :4157` (1.95² exceeds 1.56²+1.1592² by 0.02515536). Best stays 1.94,
   shortfall 0.6542. Next: r/log windows or tail/cF lane (ETA-TAIL).
+- 2026-09-22 GAMMA-BUILD (background `ses_f3784cfa9`, sole build owner,
+  in-file only `door3_premise_gamma.lean` +109/-42, grep-clean — zero
+  `sorry`/`admit`/`axiom`-declare/`simpa`-tactic): FIRST premise_gamma
+  GUARDED BUILDS. Build1 BUILD-EXIT=1 (8689 jobs, 64s, 37 file errors,
+  all fixed); rebuild BUILD-EXIT=1 (21s, 4 errors — own-added paren
+  cascade, fixed after, no second rebuild per fence). Fixes:
+  `premGamma_shift_lower :72` (`rw hEq at hc`, `div_le_iff₀`+`mul_comm`);
+  `premGamma_R22_threshold_ok :211` honest audit typo `0.002→0.001`
+  (`0.0892<=0.09` true; floors untouched); `Ne.symm` x2 dropped `:1177/9`;
+  `div_le_div_left`→`div_le_div_of_nonneg_left :1195` (+drop unused hBIG);
+  29x `one_re/one_im` duplicate-`rw` dedup (`:1382-3219`); `:2730`
+  missing `norm_nonneg` for linarith; `:3301-3371` `mul_pos` chain with
+  hpos1-5 (abs_re_le_norm, re 2.1975-6.1975); `:3315/27/40/53` hre paren
+  shapes matched to compiling in-file proofs. Residual: 4-char paren
+  cascade corrected, UNVERIFIED — next wave runs one guarded rebuild,
+  expected green. GAMMA-VERIFY tasked (sole build owner).

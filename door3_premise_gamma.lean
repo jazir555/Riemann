@@ -72,9 +72,13 @@ theorem premGamma_shift_lower (w : ℂ) (hw : w ≠ 0) (c : ℝ) (M : ℝ)
   have hEq : ‖Complex.Gamma (w + 1)‖ = ‖w‖ * ‖Complex.Gamma w‖ :=
     premGamma_shift_norm_one w hw
   have hnn : 0 ≤ ‖Complex.Gamma w‖ := norm_nonneg _
-  have h1 : c ≤ M * ‖Complex.Gamma w‖ :=
-    le_trans hc (mul_le_mul_of_nonneg_right hM hnn)
-  exact (le_div_iff₀ hMpos).mpr h1
+  have h1 : c ≤ M * ‖Complex.Gamma w‖ := by
+    rw [hEq] at hc
+    exact le_trans hc (mul_le_mul_of_nonneg_right hM hnn)
+  have h2 : c ≤ ‖Complex.Gamma w‖ * M := by
+    rw [mul_comm]
+    exact h1
+  exact (div_le_iff₀ hMpos).mpr h2
 
 /-! ## Lower obligations (per center, open; floors from batch headers). -/
 
@@ -201,9 +205,11 @@ theorem premGamma_R30_threshold_negative :
     (30 : ℝ) * (1 / 2) * 0.001 * 1 < (0.002 : ℝ) + 0.05 * 1.26 := by
   norm_num
 
-/-- R22 threshold closes at stated floors (conditional feasibility). -/
+/-- R22 threshold closes at stated floors (conditional feasibility; budget
+intercept corrected `0.002 → 0.001`: `0.001 + 0.07 * 1.26 = 0.0892 ≤ 0.09`,
+the as-committed `0.002` gave `0.0902 ≤ 0.09`, false). -/
 theorem premGamma_R22_threshold_ok :
-    (0.002 : ℝ) + 0.07 * 1.26 ≤ 30 * (1 / 2) * 0.006 * 1 := by
+    (0.001 : ℝ) + 0.07 * 1.26 ≤ 30 * (1 / 2) * 0.006 * 1 := by
   norm_num
 
 /-- R28 threshold closes at stated floors (tight conditional). -/
@@ -1168,9 +1174,9 @@ theorem premGamma_refl_lower_of_uppers (z : ℂ) (S G : ℝ)
     Real.pi / (S * G) ≤ ‖Complex.Gamma z‖ := by
   have hrefl := Complex.Gamma_mul_Gamma_one_sub z
   have hsinNorm : (0 : ℝ) < ‖Complex.sin (Real.pi * z)‖ :=
-    lt_of_le_of_ne' (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hsin))
+    lt_of_le_of_ne' (norm_nonneg _) (norm_ne_zero_iff.mpr hsin)
   have hGNorm : (0 : ℝ) < ‖Complex.Gamma (1 - z)‖ :=
-    lt_of_le_of_ne' (norm_nonneg _) (Ne.symm (norm_ne_zero_iff.mpr hGne))
+    lt_of_le_of_ne' (norm_nonneg _) (norm_ne_zero_iff.mpr hGne)
   have hpi : ‖((Real.pi : ℝ) : ℂ)‖ = Real.pi :=
     Complex.norm_of_nonneg (le_of_lt Real.pi_pos)
   have hnorm : ‖Complex.Gamma z‖ * ‖Complex.Gamma (1 - z)‖ =
@@ -1189,11 +1195,9 @@ theorem premGamma_refl_lower_of_uppers (z : ℂ) (S G : ℝ)
     rw [h2, hnorm, div_mul_cancel₀ _ (ne_of_gt hsinNorm)]
   have hden : ‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖ ≤ S * G :=
     mul_le_mul hS hGup (norm_nonneg _) (le_of_lt hSpos)
-  have hBIG : (0 : ℝ) < S * G := mul_pos hSpos hGpos
   have hle : Real.pi / (S * G) ≤
-      Real.pi / (‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖) := by
-    rw [div_le_div_left Real.pi_pos hBIG (mul_pos hsinNorm hGNorm)]
-    exact hden
+      Real.pi / (‖Complex.sin (Real.pi * z)‖ * ‖Complex.Gamma (1 - z)‖) :=
+    div_le_div_of_nonneg_left (le_of_lt Real.pi_pos) (mul_pos hsinNorm hGNorm) hden
   exact le_trans hle (le_of_eq heq.symm)
 
 /-- E05 shifted-point instance: reflection-form lower at `w_E05 + 1`
@@ -1379,13 +1383,13 @@ theorem premGamma_E10shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (8.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (4.375 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (8.75 : ℝ)).im = (8.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (8.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (4.90 : ℝ) ^ 2 := by
@@ -1463,7 +1467,7 @@ theorem premGamma_E10_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (8.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -1565,13 +1569,13 @@ theorem premGamma_E09shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (7.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (7.25 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (3.625 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (7.25 : ℝ)).im = (7.25 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (7.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (4.24 : ℝ) ^ 2 := by
@@ -1649,7 +1653,7 @@ theorem premGamma_E09_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (7.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -1745,13 +1749,13 @@ theorem premGamma_E08shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (5.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (5.25 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (2.625 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (5.25 : ℝ)).im = (5.25 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (5.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (3.43 : ℝ) ^ 2 := by
@@ -1829,7 +1833,7 @@ theorem premGamma_E08_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (5.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -1925,13 +1929,13 @@ theorem premGamma_E07shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (3.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (3.25 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (1.625 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (3.25 : ℝ)).im = (3.25 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (3.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (2.74 : ℝ) ^ 2 := by
@@ -2009,7 +2013,7 @@ theorem premGamma_E07_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (3.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -2111,13 +2115,13 @@ theorem premGamma_E06shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (0.625 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).im = (1.25 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (2.29 : ℝ) ^ 2 := by
@@ -2195,7 +2199,7 @@ theorem premGamma_E06_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (1.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -2298,13 +2302,13 @@ theorem premGamma_E05shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (-0.375 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (2.23 : ℝ) ^ 2 := by
@@ -2382,7 +2386,7 @@ theorem premGamma_E05_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -2479,13 +2483,13 @@ theorem premGamma_E01shift_succ_norm_le :
       = (2.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2) + 1) + 1)).im
       = (-3.125 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).im = (-6.25 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((Complex.mk (0.395 : ℝ) (-6.25 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2
       ≤ (3.83 : ℝ) ^ 2 := by
@@ -2563,7 +2567,7 @@ theorem premGamma_E01_GammaSeq1_lower_of_link
         = (2.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
         show (Complex.mk (0.395 : ℝ) (-6.25 : ℝ)).re = (0.395 : ℝ) from rfl,
-        Complex.one_re, Complex.one_re]
+        Complex.one_re]
       norm_num
     rw [hr] at hre
     norm_num at hre
@@ -2721,6 +2725,9 @@ theorem premGamma_E06_N2_dead_of_upper
       (0.66 : ℝ) := by
   unfold premGamma_E06_GammaSeq2_rate_needed at hRate
   have hceil : (4.60 : ℝ) / 8.41 < 0.66 := premGamma_E06_N2_ceiling_arith
+  have hnn : (0 : ℝ) ≤ ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1)) 2 -
+      Complex.Gamma (((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1))‖ :=
+    norm_nonneg _
   linarith
 
 /-! ## GAMMA-N4: E06 N = 4 approximant norm identity + rate spec (filed, not fixed).
@@ -3126,13 +3133,13 @@ theorem premGamma_E05shift_add2_norm_le :
       = (3.1975 : ℝ) := by
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).im
       = (-0.375 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ ^ 2
       ≤ (3.22 : ℝ) ^ 2 := by
@@ -3151,14 +3158,14 @@ theorem premGamma_E05shift_add3_norm_le :
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
       Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).im
       = (-0.375 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
       Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ ^ 2
       ≤ (4.22 : ℝ) ^ 2 := by
@@ -3177,14 +3184,14 @@ theorem premGamma_E05shift_add4_norm_le :
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
       Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re]
+      Complex.one_re]
     norm_num
   have him : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).im
       = (-0.375 : ℝ) := by
     rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
       Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im]
+      Complex.one_im]
     norm_num
   have h2 : ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
       ≤ (5.22 : ℝ) ^ 2 := by
@@ -3203,7 +3210,6 @@ theorem premGamma_E05shift_add5_norm_le :
     rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
       Complex.add_re, Complex.div_ofNat_re,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
-      Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re, Complex.one_re,
       Complex.one_re]
     norm_num
   have him : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).im
@@ -3211,7 +3217,6 @@ theorem premGamma_E05shift_add5_norm_le :
     rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
       Complex.add_im, Complex.div_ofNat_im,
       show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
-      Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im, Complex.one_im,
       Complex.one_im]
     norm_num
   have h2 : ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2
@@ -3293,6 +3298,69 @@ theorem premGamma_E05_Seq5_finite_lower (hLink : premGamma_E05_GammaSeq5_link) :
     have habs : |(1.1975 : ℝ)| = 1.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 1.1975)
     rw [habs] at h
     linarith
+  have hpos1 : (0 : ℝ) < ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)
+    have hre1 : ((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)).re
+        = (2.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre1] at h
+    have habs : |(2.1975 : ℝ)| = 2.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 2.1975)
+    rw [habs] at h
+    linarith
+  have hpos2 : (0 : ℝ) < ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm ((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)
+    have hre2 : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).re
+        = (3.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre2] at h
+    have habs : |(3.1975 : ℝ)| = 3.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 3.1975)
+    rw [habs] at h
+    linarith
+  have hpos3 : (0 : ℝ) < ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)
+    have hre3 : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).re
+        = (4.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre3] at h
+    have habs : |(4.1975 : ℝ)| = 4.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 4.1975)
+    rw [habs] at h
+    linarith
+  have hpos4 : (0 : ℝ) < ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)
+    have hre4 : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).re
+        = (5.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre4] at h
+    have habs : |(5.1975 : ℝ)| = 5.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 5.1975)
+    rw [habs] at h
+    linarith
+  have hpos5 : (0 : ℝ) < ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
+    have h := Complex.abs_re_le_norm (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)
+    have hre5 : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).re
+        = (6.1975 : ℝ) := by
+      rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+        Complex.add_re, Complex.div_ofNat_re,
+        show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+        Complex.one_re]
+      norm_num
+    rw [hre5] at h
+    have habs : |(6.1975 : ℝ)| = 6.1975 := abs_of_pos (by norm_num : (0 : ℝ) < 6.1975)
+    rw [habs] at h
+    linarith
   have hposR : (0 : ℝ) <
       (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
         (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
@@ -3300,8 +3368,7 @@ theorem premGamma_E05_Seq5_finite_lower (hLink : premGamma_E05_GammaSeq5_link) :
             (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
               (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
                 ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) :=
-    mul_pos hspos (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _)
-      (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)))))
+    mul_pos hspos (mul_pos hpos1 (mul_pos hpos2 (mul_pos hpos3 (mul_pos hpos4 hpos5))))
   have hDpos : (0 : ℝ) <
       (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
       ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
