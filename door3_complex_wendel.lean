@@ -1,6 +1,7 @@
 import Mathlib
 import door3_stirling_gamma
 import door3_stirling_rem
+import Zeta23.GammaFacts.StirlingVert
 
 /-!
 # Door-3 complex Wendel transfer: real bounds to complex Gamma (WRITE-ONLY).
@@ -798,6 +799,70 @@ theorem h3_outer_of_G1_G2 (C1 C2 : ℝ)
           exact norm_add_le _ _
     _ ≤ C1 / ‖wOuter + (8 : ℂ)‖ ^ 2 + C2 / ‖wOuter‖ ^ 2 :=
           add_le_add hT hLink
+
+/-! ## 14. WENDEL-G1 StirlingVert lead (PROOF-ONLY, FENCED, no build): native instance BANKED.
+
+Lead: `Zeta23/GammaFacts/StirlingVert.lean:483-484` `digamma_stirling`
+(qualified `Zeta23.StirlingVert.digamma_stirling`; `section Seq (:169)` adds no
+namespace component; `variable {w : ℂ}` at `:170`, so `w` is implicit;
+exact hypotheses `0 < w.re`, `1 / 2 ≤ |w.im|`; conclusion
+`‖ψ w - log w + (1/2)/w‖ ≤ 3 / w.im ^ 2`; proof body `:484-540`).
+
+Import DAG (read-only checks this turn, no cycle):
+- `StirlingVert.lean:16` imports `Zeta23.GammaFacts.Mu` + Mathlib libs only;
+  `Mu.lean:14` imports `Zeta23.Analytic.Stirling` + Mathlib only.
+- grep `door3` over the `Zeta23/` tree: zero hits, so no Zeta23 module imports
+  any `door3_*` leaf; grep `import.*door3_complex_wendel` over the repo:
+  zero hits, so nothing imports this file. Hence the added
+  `import Zeta23.GammaFacts.StirlingVert` creates no cycle.
+- Cost (not a blocker): this widens the file DAG beyond the header's
+  `Mathlib + two leaves` claim (header left intact as write-history; this
+  section records the superseding import). No other file touched.
+
+Applicability at `wOuter + 8`: `Re = 8.1975 > 0`, `Im = -4.375`,
+`|Im| = 4.375 ≥ 1/2` — both hypotheses discharge below (via a
+`((8:ℕ):ℂ) = (8:ℂ)` cast bridge since only `Complex.natCast_re/im`
+(`Basic.lean:355-356`) are simp; no `OfNat_re` simp lemma exists).
+Banked in NATIVE `Im^2` form; numeral `3 / (-4.375)^2 ≤ 0.157` by `norm_num`
+(exact value `192/1225 ≈ 0.156735`).
+
+Residual (filed, no force): the section-12 `G1_outerN8_prop` wants
+`C / ‖wOuter + 8‖^2` with `‖wOuter+8‖^2 = 8.1975^2 + 4.375^2 ≈ 86.34`,
+while the banked denominator is `Im^2 = 19.140625`. Since `Im^2 ≤ ‖w‖^2`
+the native radius goes the wrong way for small `C`; conversion needs
+`C ≥ 3 * 86.34 / 19.14 ≈ 13.54` (hand arithmetic, not claimed checked).
+So G1-as-filed stays Prop; the Gauss-`‖w‖^2`-shape claim is NOT closed here.
+No `sorry`/`admit`/`axiom`/`simpa`.
+-/
+
+theorem wOuter_add8_re : (wOuter + (8 : ℂ)).re = 8.1975 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_re, wOuter_re, Complex.natCast_re]
+  norm_num
+
+theorem wOuter_add8_im : (wOuter + (8 : ℂ)).im = -4.375 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_im, wOuter_im, Complex.natCast_im]
+  norm_num
+
+theorem stirling_wOuter_add8 :
+    ‖Complex.digamma (wOuter + (8 : ℂ)) - Complex.log (wOuter + (8 : ℂ)) +
+      (1 / 2 : ℂ) / (wOuter + (8 : ℂ))‖ ≤ 3 / (-4.375) ^ 2 := by
+  have hre : (0 : ℝ) < (wOuter + (8 : ℂ)).re := by
+    rw [wOuter_add8_re]
+    norm_num
+  have him : (1 / 2 : ℝ) ≤ |(wOuter + (8 : ℂ)).im| := by
+    rw [wOuter_add8_im]
+    norm_num
+  have h := Zeta23.StirlingVert.digamma_stirling (w := wOuter + (8 : ℂ)) hre him
+  rw [wOuter_add8_im] at h
+  exact h
+
+theorem stirling_wOuter_add8_cap :
+    ‖Complex.digamma (wOuter + (8 : ℂ)) - Complex.log (wOuter + (8 : ℂ)) +
+      (1 / 2 : ℂ) / (wOuter + (8 : ℂ))‖ ≤ 0.157 := by
+  refine le_trans stirling_wOuter_add8 ?_
+  norm_num
 
 This file was written without running any build; it is not machine-checked.
 -/

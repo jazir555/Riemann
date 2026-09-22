@@ -1962,3 +1962,293 @@ theorem D3SG_R02_disc_upper (w : ℂ)
   linarith
 
 #print axioms D3SG_R02_disc_upper
+
+/-! ## E05-SEQ5-UPPER: explicit `‖GammaSeq s 5‖ ≤ 0.684` feeder at E05 shifted `s`.
+
+At E05 shifted `s = w_E05 / 2 + 1` (`Re s = 1.1975`, `Im s = -0.375`):
+* cpow upper: `‖(5 : ℂ) ^ s‖ = 5 ^ 1.1975 ≤ 6.9` (TRUE `≈ 6.87095`) via
+  `Complex.norm_cpow_eq_rpow_re_of_pos` plus `5 ^ 1.1975 = 5 * 5 ^ 0.1975 ≤
+  5 * 5 ^ (1/5) ≤ 5 * 1.38 = 6.9` (`0.1975 ≤ 1/5`; `1.38^5 = 5.0049003168 ≥ 5`,
+  all `norm_num`).
+* denominator norm LOWERS (`sq_norm` shapes with the `Im` contribution kept,
+  mirroring the banked denominator norm UPPERS in `door3_premise_gamma.lean`):
+  `‖s‖ ≥ 1.25`, `‖s+1‖ ≥ 2.22`, `‖s+2‖ ≥ 3.21`, `‖s+3‖ ≥ 4.21`,
+  `‖s+4‖ ≥ 5.21`, `‖s+5‖ ≥ 6.20`; product
+  `1.25 * 2.22 * 3.21 * 4.21 * 5.21 * 6.20 = 1211.377571505 ≥ 1211.37`.
+* quotient: `6.9 * 120 / 1211.37 = 828 / 1211.37 ≈ 0.68352 ≤ 0.684`
+  (`0.684 * 1211.37 = 828.57708 ≥ 828`) — honest upper just above the true
+  `‖GammaSeq s 5‖ ≈ 0.6712`, inside the `0.671 + 0.014` budget window.
+* status: conditional on the `N = 5` GammaSeq norm-link identity (same open L1
+  as the filed `premGamma_E05_GammaSeq5_link` in `door3_premise_gamma.lean`;
+  NOT proved here). The `0.014` rate leaf itself (`‖Seq5 - Γ‖ ≤ 0.014`) still
+  needs a Stirling-disc / Cauchy convergence estimate elsewhere, NOT this file.
+-/
+
+/-- E05 `5 ^ (1/5)` real fifth-root upper: `5 ^ (1/5) ≤ 1.38`
+(`1.38^5 = 5.0049003168 ≥ 5`). -/
+theorem D3SG_E05_rpow_fifth_root_upper :
+    (5 : ℝ) ^ ((1 / 5 : ℝ)) ≤ (1.38 : ℝ) := by
+  have hR : (((5 : ℝ) ^ ((1 / 5) : ℝ)) ^ (5 : ℕ)) = (5 : ℝ) ^ (1 : ℕ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 5)]
+    have e : (1 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (((1 : ℕ)) : ℝ) := by norm_num
+    rw [e, Real.rpow_natCast]
+  have hint : (((5 : ℝ) ^ ((1 / 5) : ℝ)) ^ (5 : ℕ)) ≤ (1.38 : ℝ) ^ (5 : ℕ) := by
+    rw [hR]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num : 5 ≠ 0)
+    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _) hint
+
+#print axioms D3SG_E05_rpow_fifth_root_upper
+
+/-- E05 `5 ^ 1.1975` upper: `5 ^ 1.1975 ≤ 6.9` (TRUE `≈ 6.87095`).
+Splits `1.1975 = 1 + 0.1975`, uses `0.1975 ≤ 1/5` monotonicity plus the
+fifth-root upper above (`5 * 1.38 = 6.9`). -/
+theorem D3SG_E05_rpow_Re_upper :
+    (5 : ℝ) ^ ((1.1975 : ℝ)) ≤ (6.9 : ℝ) := by
+  have hexp : (1.1975 : ℝ) = 1 + 0.1975 := by norm_num
+  have hfrac : (0.1975 : ℝ) ≤ 1 / 5 := by norm_num
+  have hmono : (5 : ℝ) ^ ((0.1975) : ℝ) ≤ (5 : ℝ) ^ ((1 / 5) : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : ℝ) ≤ 5) hfrac
+  have h138 : (5 : ℝ) ^ ((0.1975) : ℝ) ≤ (1.38 : ℝ) :=
+    le_trans hmono D3SG_E05_rpow_fifth_root_upper
+  have h69 : (6.9 : ℝ) = 5 * 1.38 := by norm_num
+  rw [hexp, Real.rpow_add (show (0 : ℝ) < 5 by norm_num), Real.rpow_one, h69]
+  exact mul_le_mul_of_nonneg_left h138 (by norm_num : (0 : ℝ) ≤ 5)
+
+#print axioms D3SG_E05_rpow_Re_upper
+
+/-- E05 shifted cpow norm upper: `‖(5 : ℂ) ^ s‖ ≤ 6.9` at `s = w_E05 / 2 + 1`. -/
+theorem D3SG_E05_cpow5_norm_upper :
+    ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ ≤
+      (6.9 : ℝ) := by
+  have hre : (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have hbase : ((5 : ℝ) : ℂ) = (5 : ℂ) := by simp
+  have hcn := Complex.norm_cpow_eq_rpow_re_of_pos (show (0 : ℝ) < 5 by norm_num)
+    (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))
+  rw [← hbase, hcn, hre]
+  exact D3SG_E05_rpow_Re_upper
+
+#print axioms D3SG_E05_cpow5_norm_upper
+
+/-- E05 shifted `s` norm lower: `1.25 ≤ ‖s‖`
+(TRUE `≈ 1.25485`; `1.1975^2 + 0.375^2 = 1.57463125 ≥ 1.25^2`). -/
+theorem D3SG_E05_add0_norm_ge :
+    (1.25 : ℝ) ≤ ‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ := by
+  have hre : (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)).re
+      = (1.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (1.25 : ℝ) ^ 2 ≤ ‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (1.25 : ℝ))] at habs
+
+#print axioms D3SG_E05_add0_norm_ge
+
+/-- E05 shifted `s+1` norm lower: `2.22 ≤ ‖s + 1‖`
+(TRUE `≈ 2.22953`; `2.1975^2 + 0.375^2 = 4.96963125 ≥ 2.22^2`). -/
+theorem D3SG_E05_add1_norm_ge :
+    (2.22 : ℝ) ≤ ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ := by
+  have hre : ((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)).re
+      = (2.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : ((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (2.22 : ℝ) ^ 2 ≤ ‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (2.22 : ℝ))] at habs
+
+#print axioms D3SG_E05_add1_norm_ge
+
+/-- E05 shifted `s+2` norm lower: `3.21 ≤ ‖s + 2‖`
+(TRUE `≈ 3.21944`; `3.1975^2 + 0.375^2 = 10.36463125 ≥ 3.21^2`). -/
+theorem D3SG_E05_add2_norm_ge :
+    (3.21 : ℝ) ≤ ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ := by
+  have hre : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).re
+      = (3.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : ((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (3.21 : ℝ) ^ 2 ≤ ‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (3.21 : ℝ))] at habs
+
+#print axioms D3SG_E05_add2_norm_ge
+
+/-- E05 shifted `s+3` norm lower: `4.21 ≤ ‖s + 3‖`
+(TRUE `≈ 4.21428`; `4.1975^2 + 0.375^2 = 17.75963125 ≥ 4.21^2`). -/
+theorem D3SG_E05_add3_norm_ge :
+    (4.21 : ℝ) ≤ ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ := by
+  have hre : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).re
+      = (4.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : (((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (4.21 : ℝ) ^ 2 ≤ ‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (4.21 : ℝ))] at habs
+
+#print axioms D3SG_E05_add3_norm_ge
+
+/-- E05 shifted `s+4` norm lower: `5.21 ≤ ‖s + 4‖`
+(TRUE `≈ 5.21103`; `5.1975^2 + 0.375^2 = 27.15463125 ≥ 5.21^2`). -/
+theorem D3SG_E05_add4_norm_ge :
+    (5.21 : ℝ) ≤ ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ := by
+  have hre : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).re
+      = (5.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : ((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (5.21 : ℝ) ^ 2 ≤ ‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (5.21 : ℝ))] at habs
+
+#print axioms D3SG_E05_add4_norm_ge
+
+/-- E05 shifted `s+5` norm lower: `6.20 ≤ ‖s + 5‖`
+(TRUE `≈ 6.20884`; `6.1975^2 + 0.375^2 = 38.54963125 ≥ 6.20^2`). -/
+theorem D3SG_E05_add5_norm_ge :
+    (6.20 : ℝ) ≤ ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
+  have hre : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).re
+      = (6.1975 : ℝ) := by
+    rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
+      Complex.add_re, Complex.div_ofNat_re,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).re = (0.395 : ℝ) from rfl,
+      Complex.one_re]
+    norm_num
+  have him : (((((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1))).im
+      = (-0.375 : ℝ) := by
+    rw [Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im, Complex.add_im,
+      Complex.add_im, Complex.div_ofNat_im,
+      show (Complex.mk (0.395 : ℝ) (-0.75 : ℝ)).im = (-0.75 : ℝ) from rfl,
+      Complex.one_im]
+    norm_num
+  have h2 : (6.20 : ℝ) ^ 2 ≤ ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
+    norm_num
+  have habs := abs_le_of_sq_le_sq h2 (norm_nonneg _)
+  rwa [abs_of_nonneg (by norm_num : (0 : ℝ) ≤ (6.20 : ℝ))] at habs
+
+#print axioms D3SG_E05_add5_norm_ge
+
+/-- E05 `N = 5` denominator norm-product lower, right-nested to match the
+`N = 5` norm-link shape (`1211.377571505 ≥ 1211.37`). -/
+theorem D3SG_E05_prod5_norm_ge :
+    (1211.37 : ℝ) ≤
+    ‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+      (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+        (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+          (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+            (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+              ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) := by
+  have h45 := mul_le_mul D3SG_E05_add4_norm_ge D3SG_E05_add5_norm_ge
+    (by norm_num) (norm_nonneg _)
+  have h345 := mul_le_mul D3SG_E05_add3_norm_ge h45
+    (by norm_num) (norm_nonneg _)
+  have h2345 := mul_le_mul D3SG_E05_add2_norm_ge h345
+    (by norm_num) (norm_nonneg _)
+  have h12345 := mul_le_mul D3SG_E05_add1_norm_ge h2345
+    (by norm_num) (norm_nonneg _)
+  have h012345 := mul_le_mul D3SG_E05_add0_norm_ge h12345
+    (by norm_num) (norm_nonneg _)
+  have heq : (1.25 : ℝ) * (2.22 * (3.21 * (4.21 * (5.21 * 6.20)))) = 1211.377571505 := by
+    norm_num
+  rw [heq] at h012345
+  exact le_trans (by norm_num : (1211.37 : ℝ) ≤ 1211.377571505) h012345
+
+#print axioms D3SG_E05_prod5_norm_ge
+
+/-- E05 `N = 5` explicit Seq5 upper: `‖GammaSeq s 5‖ ≤ 0.684`, conditional on
+the `N = 5` norm-link identity (same open L1 as `premGamma_E05_GammaSeq5_link`).
+From cpow upper `6.9` + denominator lower `1211.37`
+(`6.9 * 120 = 828 ≤ 0.684 * 1211.37 = 828.57708`). -/
+theorem D3SG_E05_GammaSeq5_upper_of_link
+    (hLink : ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ =
+      ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ * 120 /
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) :
+    ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ ≤
+      (0.684 : ℝ) := by
+  have hD := D3SG_E05_prod5_norm_ge
+  have hDpos : (0 : ℝ) <
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) := by
+    linarith
+  rw [hLink, div_le_iff₀ hDpos]
+  have h1 : ‖(((5 : ℂ) ^ (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1))))‖ * 120 ≤
+      6.9 * 120 :=
+    mul_le_mul_of_nonneg_right D3SG_E05_cpow5_norm_upper (by norm_num : (0 : ℝ) ≤ 120)
+  have hD2 : (0.684 : ℝ) * 1211.37 ≤ 0.684 *
+      (‖((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)‖ *
+        (‖(((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1)‖ *
+          (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
+            (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
+              (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) :=
+    mul_le_mul_of_nonneg_left hD (by norm_num : (0 : ℝ) ≤ 0.684)
+  have h3 : (6.9 : ℝ) * 120 ≤ 0.684 * 1211.37 := by norm_num
+  linarith
+
+#print axioms D3SG_E05_GammaSeq5_upper_of_link

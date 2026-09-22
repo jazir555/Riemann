@@ -6021,6 +6021,24 @@ sorry-free infrastructure and the complete commit ledger above.
   :772`, G1+G2+hEq ⟹ H3, rw/ring/calc). No Taylor/log chain yields the
   -1/(2w) correction (Mathlib log-Taylor real-only). H3 now reduces
   explicitly to G1+G2+hEq. VERT lead in flight — left for owner.
+- 2026-09-22 WENDEL-VERT (background `ses_f34ea1e88`, proof-only,
+  grep-clean, wendel-only commit): StirlingVert lead BANKED native —
+  import (no cycle) + `wOuter_add8_re/im :838/:843` +
+  `stirling_wOuter_add8 :848` (pres discharged) + cap `:861` (≤0.157 =
+  192/1225). G1-as-filed stays Prop (C≥13.54 conversion unchecked —
+  NOT banked).
+- 2026-09-22 STIRLING-RATE (background `ses_f34efa018`, proof-only,
+  grep-clean, stirling-only commit): E05 Seq5 UPPER — fifth-root ≤1.38
+  `:1989`, Re-upper 6.9 `:2006`, cpow5 upper `:2021`, add0-5 norm LOWERS
+  1.25-6.20 (fresh), prod5 ≥1211.37 `:2190`, `GammaSeq5_upper_of_link
+  :2219` (≤0.684 = 828/1211.37≈0.68352, coordinator-verified; brackets
+  true ~0.671 with finite 0.659).   Conditional on L1; rate 0.014 still
+  needs convergence estimate.
+- 2026-09-22 DERIV-PSI2 (background `ses_f34efa019`, proof-only, NO-EDIT
+  gap): psiNeed_inner NOT closable — needs complex disc at
+  8.1975-0.375i r≤1; real secant barred (Im≠0); StirlingVert fails
+  precondition (|−0.375|<0.5) + wrong denominator. Missing: large-Re
+  complex psi disc (Gauss/Stirling) — same blocker as outer.
 - 2026-09-22 CUTL-BALL (background `ses_f34f3a726`, proof-only,
   grep-clean): ball-sup GAP structural — `cutL10_thinRect_tightened_gap
   :1438` (center 0.02632 covers 0.0234; ball 12.864≤12.87; loosest zeta
