@@ -319,6 +319,26 @@ theorem edgeSphere_cover (x : ℝ) (y : ℝ)
   rw [Metric.mem_closedBall]
   linarith [htri, hw]
 
+/-- Half-radius spheres over the edge band lie in `closedBall 0 12` (tighter-radius cover). -/
+theorem edgeSphere_cover_half (x : ℝ) (y : ℝ)
+    (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ)) (hy : y ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2 : ℝ))
+    (z : ℂ) (hz : z ∈ Metric.sphere (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (1 / 2)) :
+    z ∈ Metric.closedBall (0 : ℂ) 12 := by
+  have hw : ‖(((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ 11 :=
+    edgeMem_norm_le x y hx hy
+  have hdist : dist z (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) = 1 / 2 :=
+    Metric.mem_sphere.mp hz
+  have htri : dist z (0 : ℂ) ≤
+      dist z (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) +
+        dist (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (0 : ℂ) :=
+    dist_triangle _ _ _
+  have hw0 : dist (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ))) (0 : ℂ) =
+      ‖(((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ := by
+    rw [dist_eq_norm, sub_zero]
+  rw [hdist, hw0] at htri
+  rw [Metric.mem_closedBall]
+  linarith [htri, hw]
+
 /-- Uniform top deriv sup from one closed-ball sup (`r = 1`, so `MT = C`). -/
 theorem uniform_top_deriv_of_closedBall (d : ℝ) (C : ℝ) (hdle : d ≤ 1)
     (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →

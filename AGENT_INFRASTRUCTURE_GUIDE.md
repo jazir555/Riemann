@@ -5899,6 +5899,24 @@ sorry-free infrastructure and the complete commit ledger above.
   `h3_transport_of_shifted_disc :623` (conditional transport) + GAP
   `:638` (G1 Gauss disc at w+N [Mathlib TODO] + G2 log-shift link
   [needs Binet]). H1/H2/H3-G1/G2 open; M1 banked.
+- 2026-09-22 CUTL-BALL (background `ses_f34f3a726`, proof-only,
+  grep-clean): ball-sup GAP structural — `cutL10_thinRect_tightened_gap
+  :1438` (center 0.02632 covers 0.0234; ball 12.864≤12.87; loosest zeta
+  wall 6 vs true 1.549 4x; even granting pi→2 + zeta→3/2 product 2.01
+  still 50x over 0.04; endpoint 0.062>0.04 BEFORE zeta; Cauchy+1 ball
+  sets spread). `hJoint≤0.04` premise-gated.
+- 2026-09-22 SLIVER-SPHERE (background `ses_f34f199ba`, proof-only,
+  grep-clean): bottom bridge PRE-EXISTS (`:368` token mirror) → banked
+  cover extension `edgeSphere_cover_half :323` (r=1/2 spheres over edge
+  band in closedBall 0 12; 11+1/2≤12). Uniform numerals + C still
+  premises-only; no r=1/2 deriv bridge.
+- 2026-09-22 BALLSUP-SURVEY (background `ses_f34f3a72b`, read-only, no
+  edits): ball-12 C=40 INFEASIBLE by product route — poly alone >78 on
+  ball-12 (12.5²/2), poly·pi ≈56300 (π^5.75≈722 at Re=-11.5),
+  realistic joint ≥10⁶. R02-disc best: 40.74 conditional / 3805.12
+  unconditional; pi-tighten ≤0.972 reaches 39.59 on R02-disc only (not
+  ball-12). VERDICT: retier MT (1000-shape exists) or abandon product
+  route; smallest-next `poly_upper_closedBall12 ≤79` spec'd.
 - 2026-09-22 R02-CELL2 (background `ses_f34f5d1a4`, proof-only,
   grep-clean, first_cell-only commit): gammaLower-0.008 GAP (not
   closed) — S-window dead (need S≤15104, banked 20128, +5024 over;

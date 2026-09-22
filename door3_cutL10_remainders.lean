@@ -1425,6 +1425,21 @@ theorem cutL10_tierB_sharedSup_1287_of_factorSups
     norm_num
   exact le_trans g3 hcap
 
+/-- Thin-rect gap audit (CUTL-BALL, no force): the loosest banked factor is
+the strip zeta wall (`6` vs center TRUE `≈ 1.549` by conjugation). Even
+granting the two most generous honest single-factor tightenings available
+on the `+1` ball — pi `16/5 → 2` (`s.re ≥ -1.06` gives exponent `≤ 0.53`,
+`pi ^ 0.53 < 2`) and zeta `6 → 3/2` (center TRUE `≈ 1.549`) — the
+factor-separated product with the banked poly `67` and Gamma `1/100` caps
+is `67 * 2 * (1/100) * (3/2) = 2.01`, still `50x` over the `0.04` tier.
+Verdict: GAP (no single thin-rect factor tightening bridges `12.87 → 0.04`,
+a `321.75x` chasm); the blockage is the `+1`-ball poly·Gamma spread
+(endpoint audit: poly·pi·Gamma `≈ 0.062 > 0.04` before zeta), not pi/zeta. -/
+theorem cutL10_thinRect_tightened_gap :
+    ((67 : ℝ) * 2) * (1 / 100) * (3 / 2) = (2.01 : ℝ)
+      ∧ (0.04 : ℝ) < ((67 : ℝ) * 2) * (1 / 100) * (3 / 2) := by
+  constructor <;> norm_num
+
 end Door3CutL10TierB
 
 #print axioms Door3CutL10TierB.cutL10_endpoint_poly_norm
@@ -1442,4 +1457,5 @@ end Door3CutL10TierB
 #print axioms Door3CutL10TierB.cutL10_tierB_shrunken_fencing
 #print axioms Door3CutL10TierB.cutL10_tierB_shrunken_fencing_1287
 #print axioms Door3CutL10TierB.cutL10_tierB_sharedSup_1287_of_factorSups
+#print axioms Door3CutL10TierB.cutL10_thinRect_tightened_gap
 
