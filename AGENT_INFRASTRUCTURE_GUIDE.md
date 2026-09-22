@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TAIL-M27 (background `ses_f34724f41`, proof-only,
+  grep-clean, tail-only commit): M134217728 odd rung `24/11585<3/1024`
+  (floor 11585²=134212225 honest, margin 5503). M28 exact next.
 - 2026-09-22 ZETA-M17TAIL (background `ses_f3475919e`, proof-only,
   grep-clean, zeta-only commit): M17 pair (34/35 numerals) + tail 17.4 →
   K0-17 19.709 COMPOSED (beats 19.712 by 0.003; sanity ✓). 47-bar gap
