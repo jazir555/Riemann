@@ -5784,6 +5784,14 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 GAMMA-SHIFT-SURVEY (background `ses_f34e1cc73`, read-only,
+  no edits): shift route RULED OUT for the 0.014 rate — shift bank is
+  implication-only + denominator-uppers; ALL banked reals are UPPERS
+  (explicit no-lower audits in disc/gamma_low/premise); no
+  shift-compare machinery exists (zero hits); Binet zero feeders.
+  Ladder honest-failing confirmed (denominator products outrun cpow:
+  1237→...→14.3B). SMALLEST-NEXT = already-filed rate leaf `:3402`
+  (needs Stirling-disc/Binet host, NOT premise file).
 - 2026-09-22 GAMMA-N12 (background `ses_f34f5d1a6`, proof-only, no
   report — work found on disk +392 after CRLF→LF normalization, the
   agent's editor wrote CRLF over LF HEAD, fixed by coordinator):
