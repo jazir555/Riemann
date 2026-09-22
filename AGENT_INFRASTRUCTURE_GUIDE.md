@@ -5749,7 +5749,13 @@ sorry-free infrastructure and the complete commit ledger above.
   (copy-paste without the level's open). PRESCRIPTION: add one `(` to
   6217's front run (14→15). AUDIT LESSON: whole-rung net-0 is
   INSUFFICIENT (hDeq -1 and hpos11 +1 canceled); audit per SUB-BLOCK
-  (hDeq/hD/hpos-chain/hre/habs separately). VERIFY12 tasked.
+  (hDeq/hD/hpos-chain/hre/habs separately).   VERIFY12 tasked.
+- 2026-09-22 VERIFY12 (background `ses_f3503bb76`, sole build owner):
+  6217 fix APPLIED (17/17, progression 11-15 restored) but build still
+  RED — adjacent hre11 `:6218` needs the SAME fix (18/19, front 16→17;
+  N11 agent dropped the open on both h-inner and hre lines, N9-pattern).
+  PRESCRIPTION: add one `(` to 6218's front run (→19/19), count
+  before/after, rebuild. VERIFY13 tasked (sole owner).
 - 2026-09-22 GAMMA-N11 (background `ses_f350b3ff2`, proof-only,
   grep-clean, premise_gamma +460): E06 Seq11 rung — rpow11-frac
   (1.58≤11^5/26), Re-lower 17.38, prod11 1084064309.98, link
