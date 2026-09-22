@@ -605,5 +605,96 @@ theorem sliver_hSliver_of_topHalf_M40_via_conj
     (by norm_num) (by norm_num) (by norm_num)
     hTopLower hTopDeriv (by norm_num)
 
+/-- Top strip derived from a bottom strip via proved conjugation (mirror of
+`sliver_bottom_of_top_via_conj`, `Im → -Im` flipped). Needs `d ≤ 1` so the
+mirror point stays in the strip. Proved from the same banked
+`Door3ResidualScout.door3_conj_transfer` + `sliver_star_vertical`. -/
+theorem sliver_top_of_bottom_via_conj (d : ℝ) (hd : 0 < d) (hdle : d ≤ 1)
+    (hBot : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + d →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0)
+    (x : ℝ) (hx : x ∈ Set.Icc (-10 : ℝ) (10 : ℝ)) (y : ℝ)
+    (hy_low : (1 / 2 : ℝ) - d < y) (hy_hi : y < (1 / 2 : ℝ)) :
+    xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+  have hy_neg_lo : -(1 / 2 : ℝ) < -y := by linarith
+  have hy_neg_hi : -y < -(1 / 2 : ℝ) + d := by linarith
+  have hne_mirror : xiShifted ((x : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) ≠ 0 :=
+    hBot x hx (-y) hy_neg_lo hy_neg_hi
+  have him : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im = -y := by simp
+  have him_lo : -(1 / 2 : ℝ) < ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im := by
+    rw [him]
+    linarith
+  have him_hi : ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im < (1 / 2 : ℝ) := by
+    rw [him]
+    linarith
+  have him_lo' : (-1 / 2 : ℝ) < ((((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))).im := by
+    linarith
+  have hstar : xiShifted
+      (star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ))) ≠ 0 :=
+    Door3ResidualScout.door3_conj_transfer him_lo' him_hi hne_mirror
+  have hbase : star (((x : ℝ) : ℂ) + Complex.I * (((-y : ℝ)) : ℂ)) =
+      ((x : ℝ) : ℂ) + Complex.I * ((y : ℝ) : ℂ) := by
+    have h := sliver_star_vertical x (-y)
+    have hcast : (((-(-y : ℝ) : ℝ)) : ℂ) = ((y : ℝ) : ℂ) := by
+      rw [neg_neg]
+    rw [hcast] at h
+    exact h
+  rw [hbase] at hstar
+  exact hstar
+
+/-- End-to-end `hSliver` supply from BOTTOM numeric data only, top via proved
+conjugation. Mirror of `sliver_hSliver_of_topNumericData_via_conj`
+(`Im → -Im`, `mB`/`MB` symmetric). Residual premises: `hBotLower`, `hBotDeriv`,
+`hGateB`, `hδBle`. -/
+theorem sliver_hSliver_of_botNumericData_via_conj (mB : ℝ) (MB : ℝ)
+    (hmB : 0 < mB) (hMB : 0 < MB)
+    (hδBle : mB / MB ≤ 1)
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      mB ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + mB / MB),
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ MB)
+    (hGateB : (0.01 : ℝ) < mB / MB)
+    (z : ℂ) (heq : z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ))
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ))
+    (hne : z.im ≠ 0) (hs : (0.49 : ℝ) ≤ z.im ∨ z.im ≤ -0.49) :
+    xiShifted z ≠ 0 := by
+  have hpos : 0 < mB / MB := div_pos hmB hMB
+  have hwidth : (1 / 2 : ℝ) - mB / MB < 0.49 := by linarith
+  have hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + mB / MB := by linarith
+  have hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + mB / MB →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_lo hy_hi
+    exact sliver_bottom_strip_of_entire_data mB MB hmB hMB hBotLower hBotDeriv hδBle x hx y
+      hy_lo hy_hi
+  have hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - mB / MB < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_low hy_top
+    exact sliver_top_of_bottom_via_conj (mB / MB) hpos hδBle hstripB x hx y hy_low hy_top
+  exact Door3SliverNonvan.hSliver_of_uniformData hstripT hwidth hstripB hwidthB z heq hgt
+    hlt hne hs
+
+/-- `hSliver` from BOTTOM numeric data at feasible `mB = 1/2`, `MB = 40`, top via
+proved conjugation. Mirror of `sliver_hSliver_of_topHalf_M40_via_conj` (`:594`)
+token-for-token with bottom data + conj direction flipped;
+the gate `(0.01 < (1/2)/40)` and side conditions close by `norm_num`, leaving only
+the two supplier bounds (`hBotLower`/`hBotDeriv`) as residual premises. -/
+theorem sliver_hSliver_of_botHalf_M40_via_conj
+    (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)),
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)) :
+    ∀ z : ℂ, (z.re = (10 : ℝ) ∨ z.re = (-10 : ℝ)) →
+      -(1 / 2 : ℝ) < z.im → z.im < (1 / 2 : ℝ) → z.im ≠ 0 →
+      (0.49 ≤ z.im ∨ z.im ≤ -0.49) → xiShifted z ≠ 0 :=
+  Door3SliverNonvan.sliver_hSliver_of_botNumericData_via_conj (1 / 2 : ℝ) (40 : ℝ)
+    (by norm_num) (by norm_num) (by norm_num)
+    hBotLower hBotDeriv (by norm_num)
+
 end Door3SliverNonvan
 

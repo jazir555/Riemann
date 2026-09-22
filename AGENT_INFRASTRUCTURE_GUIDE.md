@@ -5661,6 +5661,20 @@ sorry-free infrastructure and the complete commit ledger above.
   closedBall 0 12 via banked `uniform_top_deriv_of_closedBall` at
   d=(1/2)/40, C=40; +import sliver_edge `:7`, cycle-safe).   Residual:
   hTopLower (1/2 uniform) + ball-sup-40 numeral.
+- 2026-09-22 EDGE-HLOWER (background `ses_f34f199b`, proof-only,
+  grep-clean, wiring-only commit): hTopLower GAP filed, not closed —
+  missing Props `:1566/:1573/:1580` (uniform target + zeta floor +
+  gamma floor) + gap doc. KEY FIND: poly factor norm 0 at x=0 BLOCKS
+  any product-lower route structurally (xiShifted zero-adjacent?);
+  pi-1/2 covered alone; zeta+gamma floors missing (grid floors only at
+  Re∈{0.395,0.2,0.105}). hTopLower-1/2 feasibility OPEN (may be
+  infeasible — needs adjudication vs banked endpoint 1/2 at x=0).
+- 2026-09-22 SLIVER-BOT (background `ses_f34efa017`, proof-only,
+  grep-clean): bottom-half CLOSED — `sliver_top_of_bottom_via_conj
+  :612` (flipped helper) + `sliver_hSliver_of_botNumericData_via_conj
+  :649` + `sliver_hSliver_of_botHalf_M40_via_conj :685` (mirror of
+  `:594`; conj flips cleanly, bidirectional in-strip). Residual:
+  hBotLower 1/2 + hBotDeriv 40 only.
 - 2026-09-22 SLIVER-MID (background `ses_f34f3a727`, proof-only,
   grep-clean): `sliver_hSliver_of_topHalf_M40_via_conj :594`
   (feasible mT=1/2/MT=40 top-only hSliver, mirror of `_011`; gates

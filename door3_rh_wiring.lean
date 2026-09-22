@@ -1516,6 +1516,71 @@ since `c01 = (-7.5, -5, 0.01, 0.2) ∉ gridFine` per
 `central_cover_assembly.lean:1244`, membership-free `R01_H_instance` only). -/
 theorem gridH_leaf_count_done : (40 : ℕ) = 40 := rfl
 
+/-! ## EDGE-HLOWER ξ-factorization attempt (filed, not forced): GAP
+
+Target: `hTopLower` uniform `1/2 ≤ ‖xiShiftedEntire (x + I/2)‖` on
+`Set.Icc (-10) 10` (consumer form `hSliver_of_topNumericData_half_via_conj`,
+`edgeStrip_top_half_M40`; deriv side already reducible to ball-sup-40 via
+`Door3SliverEdge.uniform_top_deriv_of_closedBall`, `door3_sliver_edge.lean:342-365`).
+
+S-mapping (banked): `Door3SliverEdge.edgeS_top` (`door3_sliver_edge.lean:43-52`):
+`1/2 + I*(x + I/2) = I*x`, so top-edge `s = I*x` has `Re s = 0`;
+`edgeS_bot` (`:54-64`): bottom `s = 1 + I*x` has `Re s = 1`.
+Entire expansion (banked, `door3_sliver_edge.lean:122-164`):
+`entire_top_expand`: `ξEntire = 1/2 - (x*(x+I)/2) * Λ₀(I*x)`;
+`entire_bot_expand`: mirror at `1 + I*x`.
+Endpoint value (banked, `:168-234`): norm `= 1/2` at `x = 0`
+(`edgeTop_consumer_norm_at_zero`, `edgeBot_consumer_norm_at_zero`);
+sharpness (`:202-210`): `m ≤ norm ↔ m ≤ 1/2` at the endpoint, so `1/2` is the
+maximal closable uniform `m`. Uniform numeral over the interval is NOT banked
+(only `uniform_lower_mono_top/bot` conditional monos, `:250-266`).
+
+Component grep at that height (all read before filing):
+* poly: `DerivCauchyBridge.polyOf (I*x) = I*x*(I*x-1)/2` has norm `0` at `x = 0`,
+  so NO uniform positive product lower over `Icc (-10) 10` exists via the
+  totalized `xiShifted_eq_parts` (`central_cover_assembly.lean:6339-6356`,
+  totalized `xiShifted`, zero at `x = 0` per `door3_boundary_endpoints`).
+  Product-lower route for the *entire* `1/2` floor is structurally blocked
+  at `x = 0` (endpoint value comes from `0 * pole → 1/2` cancellation,
+  `endpoint_top_value`, not from a product of lowers). No force attempted.
+* pi: COVERED as a single factor — `CellUniform.pi_lower_of_re`
+  (`interval_arith.lean:1752`): `1/2 ≤ ‖pi‖` for `Re ≤ 1/2`, applies at
+  `Re s = 0`. Insufficient alone (poly zero kills the product).
+* gamma: MISSING — need uniform `cΓ ≤ ‖Gamma ((I*x)/2)‖` for `x ∈ Icc (-10) 10`
+  (`Re = 0` line). Banked `premGamma` floors sit at grid `Re` values and
+  specific centers (no `Re = 0` edge-line floor banked; edge file banks only
+  Gamma *uppers* `≤ 400` at `Re = 0.005` strip centers).
+* zeta: MISSING (primary) — need uniform `cZ ≤ ‖zeta (I*x)‖` for
+  `x ∈ Icc (-10) 10` (top, `Re s = 0`; bottom mirror needs `Re s = 1`).
+  Banked grid floors exist only at `Re ∈ {0.395, 0.2, 0.105}`
+  (`door3_premise_zeta.lean:66-98`, `premZeta_R00…R40`). At edge height only
+  qualitative nonzero is banked: `Door3TailEtaUpper.zeta_re_zero_nonzero`
+  (`Re = 0`, `Im ≠ 0`), `xiShifted_ne_zero_on_top_edge_proved`
+  (`door3_boundary_real.lean:107`, `x ≠ 0`, no numeral), and the existential
+  `exists_top_edge_compact_lower_bound` (`door3_top_edge.lean:546`, some `m`,
+  not `1/2`). Single-point `0.025 ≤ ‖ξEntire 0‖`
+  (`door3_zeta_cutoff.lean:572`) does not uniformize to the edge line.
+Verdict: GAP — no honest banked component chain yields the uniform `1/2`
+floor; the two feeder Props below are the exact missing numerals (owned by
+the edge/zeta lane). No change to any other file; no numeric force. -/
+def edgeHalf_topLower_missing : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖
+
+/-- Missing zeta feeder for the top edge: quantitative floor on the `Re = 0`
+line `s = I*x` over the full `|x| ≤ 10` interval. Grid `premZeta` floors at
+`Re ∈ {0.395, 0.2, 0.105}` do not apply; only qualitative nonzero above. -/
+def edgeHalf_topZetaFloor_missing : Prop :=
+  ∃ cZ : ℝ, 0 < cZ ∧ ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    cZ ≤ ‖zeta (Complex.I * ((x : ℂ)))‖
+
+/-- Missing Gamma feeder for the top edge: quantitative floor on
+`Gamma ((I*x)/2)` over `|x| ≤ 10` (`Re = 0` line). No banked edge-line Gamma
+floor; pi single-factor lower alone cannot close the product. -/
+def edgeHalf_topGammaFloor_missing : Prop :=
+  ∃ cG : ℝ, 0 < cG ∧ ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    cG ≤ ‖Complex.Gamma ((Complex.I * ((x : ℂ))) / 2)‖
+
 end Door3RHWiring
 
 #print axioms Door3RHWiring.cutR10_gamma_banked
