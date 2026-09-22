@@ -6009,6 +6009,11 @@ sorry-free infrastructure and the complete commit ledger above.
   Re17≥-0.37/Re18≤0.37 → floor -2.92 `:7130` (-2.18-0.74) + gap 4.86
   `:7141`. Envelope declining; live 1.94 stands. Even ladder through
   S18 complete.
+- 2026-09-22 ETA-S16IM (background `ses_f34976123`, proof-only,
+  grep-clean, suppliers-only commit): Im-route built trig-free — cpow
+  Im splits 9–16 + caps (0.47→0.38) + links → `Im(S16)≥-3.17 :7661`
+  (first S16 Im floor) + below-slow gap 5.11 `:7684`. Slow STANDS
+  (both S16 floors negative; Pythagoras inapplicable).
 - 2026-09-22 ETAPRIME-TSUMVAL (background `ses_f34c288f6`, proof-only,
   grep-clean, eta_prime-only commit): tsum VALUE banked —
   `etaDerivMajorant_tsum_le :780` (∑u ≤ 8π²/6≈13.16 via dominator tsum
