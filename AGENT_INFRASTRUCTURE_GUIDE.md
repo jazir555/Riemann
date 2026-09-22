@@ -6052,6 +6052,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, pilot-only commit): eta17 PAYOFF CLOSED — rpow18 lower
   (1/5 via sqrt18≤5) + cpow18 Re≤-3/20 + odd-negation →
   `eta17_Re ≥ +3/20=0.15 :5618`. Shard assembly next.
+- 2026-09-22 ZETA-HEAD29 (background `ses_f34951a3b`, proof-only,
+  grep-clean, zeta-only commit): 29/31 head numerals (0.030/0.028) +
+  M15 tail 17.61 + head15 2.254 → candidate 19.864 `:41340` (above best
+  19.802; head growth dominates). M16 pair or tighter 15^0.05 next.
 - 2026-09-22 STIRLING-E05 (background `ses_f3493cda`, proof-only,
   grep-clean, stirling-only commit): gamNeed_outer shift-2 `≤0.063
   :2576` (via Gamma 2.1975≤1.2; 114x→31x). Leaf + E05-link still open.
