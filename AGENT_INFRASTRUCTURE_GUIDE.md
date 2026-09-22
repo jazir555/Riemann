@@ -5858,6 +5858,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 R02-CELL2 (background `ses_f34f5d1a4`, proof-only,
+  grep-clean, first_cell-only commit): gammaLower-0.008 GAP (not
+  closed) — S-window dead (need S≤15104, banked 20128, +5024 over;
+  true S saves ≤3) + U-window quantified (need U≤0.0196, banked 0.026,
+  +0.0064 over; true U≈0.018 feasible via deeper reflected chain —
+  patch phase, no premise_gamma touch). Banked: S-cap/U-cap + gaps
+  `:1023/:1035/:1039/:1042/:1054` (523.328 vs 392.7, over 130.628).
+  Wiring EDGE-BOTTOM writes left for owner.
 - 2026-09-22 ETA-CF2 (background `ses_f350a352d`, proof-only, grep-clean,
   suppliers-only commit): cos shave `neg0034 :5998` (d≥-0.0336895≥-0.034,
   margin ~0.00031, true -0.0336) → cF 1.851→1.85 (`3.41998≤1.85²`) +
@@ -5889,6 +5897,14 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 SCUT-TAIL (background `ses_f34f5d1a2`, proof-only,
+  grep-clean, pilot-only commit): M=8192 tail tighten —
+  `M8192_rpow_ge :4797` (181/2≤8192^1/2, 8190.25≤8192) + `r_8192_le
+  :4812` + `eta_tail_8192_le :4837` (‖G-S16384‖≤48/181≈0.265, was
+  7/10) + `hEnough_8192_threshold :4854` (bar 1507/905≈1.665, was
+  21/10) + shortfall `:4864` (4.589, was 5.024) + improvement
+  witnesses `:4871/:4876`. hEnough still open. First_cell/wiring
+  writes left for owners.
 - 2026-09-22 SCUT35 (background `ses_f35085cac`, proof-only, grep-clean,
   pilot-only commit): k=14 NO-CONSTRUCT gap — `delta15_odd_mem :4616`
   (δ=θ-9π∈(-1.356,-1.021), width 0.335) + `no_construct_gap :4637`

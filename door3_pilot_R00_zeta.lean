@@ -4790,4 +4790,91 @@ theorem sSCUT_eta14_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
   have hup := sSCUT_eta14_Re_le_neg
   linarith
 
+/-- Rpow lower for the sCut `M = 8192` tail (`181/2 ≤ 8192^{1/2}`; mirror of
+`sSCUT_M2048_rpow_ge` at `:2060`; honest via `(181/2)^2 = 32761/4 = 8190.25
+≤ 8192` by `norm_num`; tightest one-decimal lower since `90.6^2 = 8208.36
+> 8192`; `8192^{1/2} ≈ 90.509` vs `2048^{1/2} ≈ 45.25`). -/
+theorem sSCUT_M8192_rpow_ge :
+    (181 / 2 : ℝ) ≤ ((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((181 / 2 : ℝ) ^ (2 : ℕ)) ≤ ((((8192 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((8192 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `M = 8192` tail-decay bound at `Re = 1/2` (`24/(181/2) = 48/181 ≤ 48/181`;
+mirror of `sSCUT_r_2048_le` at `:2073`; decay `12·(M^{-1/2})/(1/2)` recomputed
+honestly with `norm_num`; tightest honest `T' = 48/181 ≈ 0.26519` for the
+`181/2` root lower, improving on `7/10`). -/
+theorem sSCUT_r_8192_le :
+    (12 : ℝ) * ((((((8192 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤ (48 / 181 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((8192 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := sSCUT_M8192_rpow_ge
+  have hrw : ((((8192 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (181 / 2 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (181 / 2 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((8192 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((181 / 2 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((181 / 2 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (48 / 181 : ℝ) := by
+    norm_num
+  linarith
+
+/-- sCut paired tail at `M = 8192` (`‖G - S16384‖ ≤ 48/181`; mirror of
+`sSCUT_eta_tail_2048_le` at `:2098` — numerals use only `Re = 1/2` and
+`‖s‖ ≤ 12`). -/
+theorem sSCUT_eta_tail_8192_le :
+    ‖(∑' m, etaPairTerm sSCUT m) -
+      (∑ k ∈ Finset.range (2 * 8192), etaDirichletTerm sSCUT k)‖ ≤
+      (48 / 181 : ℝ) := by
+  have hs : 0 < sSCUT.re := by rw [sSCUT_re]; norm_num
+  have hC : ‖sSCUT‖ ≤ (12 : ℝ) := sSCUT_norm_le
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 8192 (by norm_num)
+  have h2M : 2 * 8192 = 16384 := by norm_num
+  rw [h2M] at hgen
+  have hre : sSCUT.re = (1 / 2 : ℝ) := sSCUT_re
+  rw [hre] at hgen
+  have hr := sSCUT_r_8192_le
+  linarith
+
+/-- Closed `hEnough` threshold shape at sCut with the `M = 8192` tail
+(`7/5 + 48/181 = 1507/905`; mirror of `sSCUT_hEnough_2048_threshold` at
+`:2114`; new bar `1507/905 ≈ 1.665` vs old `21/10 = 2.1`). -/
+theorem sSCUT_hEnough_8192_threshold (slow' : ℝ) (hs : (1507 / 905 : ℝ) ≤ slow') :
+    (7 / 5 : ℝ) + (48 / 181 : ℝ) ≤ slow' := by
+  have heq : (7 / 5 : ℝ) + (48 / 181) = (1507 / 905) := by norm_num
+  linarith
+
+/-- Updated single-count shortfall vs the `M = 8192` bar with the `t₁₀+t₁₂`
+shard floor (`(7/5 + 48/181) - (-3529/1050 + 0.15 + 21/250 + 15/74) =
+322722751/70318500 ≈ 4.589`; mirror of
+`sSCUT_S9_skip8_eta10_eta12_shortfall` at `:4299` with bar `1507/905` in
+place of `21/10`; shard floor `-1136071/388500 ≈ -2.924` unchanged). -/
+theorem sSCUT_S9_skip8_eta10_eta12_shortfall_8192 :
+    (((7 / 5 : ℝ) + 48 / 181) - (((-3529 / 1050) + 0.15 + (21 / 250) + (15 / 74)))) =
+      (322722751 / 70318500 : ℝ) := by
+  norm_num
+
+/-- The `M = 8192` bar honestly improves on the `M = 2048` bar
+(`1507/905 ≈ 1.665 < 21/10 = 2.1`). -/
+theorem sSCUT_bar_8192_lt_2048 : (1507 / 905 : ℝ) < (21 / 10 : ℝ) := by
+  norm_num
+
+/-- The `M = 8192` shortfall honestly improves on the `M = 2048` shortfall
+(`322722751/70318500 ≈ 4.589 < 1951921/388500 ≈ 5.024`). -/
+theorem sSCUT_S9_skip8_eta10_eta12_shortfall_8192_lt :
+    (322722751 / 70318500 : ℝ) < (1951921 / 388500 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

@@ -1007,3 +1007,51 @@ theorem FC_etaS2_uncond :
 
 end Door3FirstCellClose
 
+/-! ## R02-CELL2 wave: `0.008`-gamma one-window attempt + exact gap (fenced)
+
+`R02SineSharp` route: banked `S = 20128`, `U = 0.026`, `S * U = 523.328`
+(`FC_gamma_banked_product`); need `S * U ≤ 392.7` (`FC_gamma0008_SUcap`).
+One-window attempt: S is already near-perfect (true `≈ 20125.7`, within
+`0.012%` per `R02SineSharp` header), so no honest S-tightening can cover the
+`130.628` overage; U needs `≤ 0.0196` (have `0.026`, true `≈ 0.018` needs a
+deeper reflected chain — patch phase, no new estimates this wave). No force.
+-/
+
+namespace Door3FirstCellClose
+
+/-- S-window cap with banked `U = 0.026`: any `0.008` close needs `S ≤ 15104`. -/
+theorem FC_gamma0008_Scap_of_bankedU (S : ℝ) (hS : (0 : ℝ) < S)
+    (h : (0.008 : ℝ) ≤ Real.pi / (S * 0.026)) : S ≤ 15104 := by
+  have hU : (0 : ℝ) < 0.026 := by norm_num
+  have hcap : S * 0.026 ≤ 392.7 :=
+    FC_gamma0008_SUcap S 0.026 hS hU h
+  have hle : (392.7 : ℝ) ≤ 15104 * 0.026 := by norm_num
+  have h2 : S * 0.026 ≤ 15104 * 0.026 := le_trans hcap hle
+  have hpos : (0 : ℝ) < 0.026 := by norm_num
+  have h3 : S ≤ 15104 := le_of_mul_le_mul_right h2 hpos
+  exact h3
+
+/-- S-gap: banked `20128` exceeds the `15104` cap by `5024`. -/
+theorem FC_gamma0008_S_gap : (15104 : ℝ) < 20128 := by norm_num
+
+/-- S-overage on the banked `U`: `20128 * 0.026 = 523.328` exceeds `392.7`
+by `130.628`; S-tightening alone is dead (true `S ≈ 20125.7` saves `≤ 3`). -/
+theorem FC_gamma0008_S_overage : (392.7 : ℝ) + 130.628 = 523.328 := by norm_num
+
+/-- U-window cap with banked `S = 20128`: any `0.008` close needs `U ≤ 0.0196`. -/
+theorem FC_gamma0008_Ucap_of_bankedS (U : ℝ) (hU : (0 : ℝ) < U)
+    (h : (0.008 : ℝ) ≤ Real.pi / (20128 * U)) : U ≤ 0.0196 := by
+  have hS : (0 : ℝ) < 20128 := by norm_num
+  have hcap : 20128 * U ≤ 392.7 :=
+    FC_gamma0008_SUcap 20128 U hS hU h
+  have hle : (392.7 : ℝ) ≤ 20128 * 0.0196 := by norm_num
+  have h2 : 20128 * U ≤ 20128 * 0.0196 := le_trans hcap hle
+  have h3 : U ≤ 0.0196 :=
+    (mul_le_mul_left hS).mp h2
+  exact h3
+
+/-- U-gap: banked `0.026` exceeds the `0.0196` cap (over by `0.0064`). -/
+theorem FC_gamma0008_U_gap : (0.0196 : ℝ) < 0.026 := by norm_num
+
+end Door3FirstCellClose
+
