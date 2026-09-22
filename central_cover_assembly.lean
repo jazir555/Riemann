@@ -17893,3 +17893,61 @@ theorem R09_H_of_residuals (hc : R09_center_residual_tenth)
   R09_H_instance (R09_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R10 tenth-residual set (append-only, no redefinition)
+
+Grep (read-only, verified before writing):
+- Leaf: `R10_leaf_obligations` at 2158-2160 =
+  `(0.002 + 0.05 * R10.radius <= norm at R10.center) AND
+   (forall w, R10.mem w -> ||deriv xiShifted w|| <= 0.05)`.
+- H: `R10_H_instance` at 2187-2197 takes `R10_leaf_obligations` plus
+  `c = (7.5, 10, 0.01, 0.2)` over `gridFine`.
+- Shape mirrored: `R09` tenth-residual set at 17859-17893
+  (`R09_budget_lt_app`, `R09_center_of_tenth_lower`,
+  `R09_center_residual_tenth`, `R09_center_obligation_of_residual_tenth`,
+  `R09_deriv_residual`, `R09_leaf_of_residuals`, `R09_H_of_residuals`),
+  with `R10` tier `(0.002, 0.05)` from its own leaf obligations.
+Value: full `H` leaf now conditional only on two named numeric enclosures.
+Gap: center needs `(0.1 <= norm at R10.center)` enclosure;
+  deriv needs uniform `||deriv xiShifted|| <= 0.05` on `R10` (not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+theorem R10_budget_lt_app : (0.002 : ℝ) + 0.05 * R10.radius < 0.1 := by
+  have h := R10_radius_lt
+  have hM : 0.05 * R10.radius < 0.05 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R10_center_of_tenth_lower (hC : (0.1 : ℝ) ≤ ‖xiShifted R10.center‖) :
+    (0.002 : ℝ) + 0.05 * R10.radius ≤ ‖xiShifted R10.center‖ := by
+  have hB := R10_budget_lt_app
+  linarith
+
+def R10_center_residual_tenth : Prop :=
+  (0.1 : ℝ) ≤ ‖xiShifted R10.center‖
+
+theorem R10_center_obligation_of_residual_tenth (h : R10_center_residual_tenth) :
+    (0.002 : ℝ) + 0.05 * R10.radius ≤ ‖xiShifted R10.center‖ :=
+  R10_center_of_tenth_lower h
+
+def R10_deriv_residual : Prop :=
+  ∀ w, R10.mem w → ‖deriv xiShifted w‖ ≤ (0.05 : ℝ)
+
+theorem R10_leaf_of_residuals (hc : R10_center_residual_tenth)
+    (hd : R10_deriv_residual) : R10_leaf_obligations :=
+  ⟨R10_center_obligation_of_residual_tenth hc, hd⟩
+
+theorem R10_H_of_residuals (hc : R10_center_residual_tenth)
+    (hd : R10_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (7.5, 10, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R10_H_instance (R10_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly
