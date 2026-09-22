@@ -1946,3 +1946,74 @@ theorem reloc_spec_gap_open :
   constructor <;> norm_num
 
 end Door3DerivUp
+
+/-! ## 18. LEAF-RELOC sphere sups via banked R02 rect (append-only, honest chain).
+
+Grep record (read-only, before writing):
+* reloc spec `:1856-1939`: `dLeaf_reloc :1856` (= 0.2 - 8.0 I),
+  `dLeaf_reloc_re :1858`, `dLeaf_reloc_im :1860`,
+  `gammaTightSup_leaf_reloc :1862` (sphere sup 0.008),
+  `zetaSupTightNeed_leaf_reloc :1865` (sphere sup 3),
+  `gammaPrimeTightNeed_leaf_reloc :1868` (0.03),
+  `zetaPrimeTightNeed_leaf_reloc :1871` (300),
+  `dLeaf_reloc_sphere_re_bounds :1877` (Re in [0.05, 0.74]),
+  `dLeaf_reloc_sphere_im_bounds :1893` (Im in [-8.25, -5.25]),
+  `reloc_spec_gap_open :1939`.
+* R02 rect shapes used before: `dLeaf_sub_sphere_re_bounds :1531`,
+  `dLeaf_sub_sphere_im_bounds :1546`, `zetaSupOnSphere_leaf_sub_934_filled :1563`
+  via `R02_D3_zeta_upper_934`, `gammaSupOnSphere_leaf_sub_0097_filled :1808`
+  via `R02GammaDisc.gammaOf_upper_disc_R02`, banked `:1570/:1815`.
+* No new imports; both R02 uppers already in scope in this file.
+* Forbidden-token check before writing: clean (no placeholders).
+
+Outcome: reloc 0.01-sphere lies in the banked R02 rect by `:1877/:1893`,
+so both R02 uppers apply directly. Gamma sphere sup closes honestly at
+0.097; zeta sphere sup closes honestly at 934. Neither implies its tight
+need (0.008 / 3); exact residual filed below as open conjunctions.
+-/
+
+namespace Door3DerivUp
+
+def gammaSupOnSphere_leaf_reloc_0097 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.097
+
+theorem gammaSupOnSphere_leaf_reloc_0097_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖DerivCauchyBridge.gammaOf z‖ ≤ 0.097 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dLeaf_reloc_sphere_re_bounds hz
+  obtain ⟨him_lo, him_hi⟩ := dLeaf_reloc_sphere_im_bounds hz
+  exact R02GammaDisc.gammaOf_upper_disc_R02 hre_lo hre_hi him_lo him_hi
+
+theorem gammaSup_leaf_reloc_0097_banked : gammaSupOnSphere_leaf_reloc_0097 :=
+  gammaSupOnSphere_leaf_reloc_0097_filled
+
+def zetaSupOnSphere_leaf_reloc_934 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖riemannZeta z‖ ≤ 934
+
+theorem zetaSupOnSphere_leaf_reloc_934_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dLeaf_reloc 0.01 → ‖riemannZeta z‖ ≤ 934 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dLeaf_reloc_sphere_re_bounds hz
+  obtain ⟨him_lo, him_hi⟩ := dLeaf_reloc_sphere_im_bounds hz
+  exact R02_D3_zeta_upper_934 z hre_lo hre_hi him_lo him_hi
+
+theorem zetaSup_leaf_reloc_934_banked : zetaSupOnSphere_leaf_reloc_934 :=
+  zetaSupOnSphere_leaf_reloc_934_filled
+
+theorem gamma_tight0097_above_0008_reloc : (0.008 : ℝ) < 0.097 := by
+  norm_num
+
+theorem zeta_tight934_above_3_reloc : (3 : ℝ) < 934 := by
+  norm_num
+
+theorem gamma_tightSup_not_from_0097_reloc : ¬ (0.097 : ℝ) ≤ 0.008 := by
+  norm_num
+
+theorem zeta_tightSup_not_from_934_reloc : ¬ (934 : ℝ) ≤ 3 := by
+  norm_num
+
+theorem gap_leaf_reloc_tightSup_residuals_open :
+    (0.008 : ℝ) < 0.097 ∧ (3 : ℝ) < 934 := by
+  constructor <;> norm_num
+
+end Door3DerivUp

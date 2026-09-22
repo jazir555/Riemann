@@ -6133,6 +6133,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 ASSEMBLY-R04 (background `ses_f34864d5b`, proof-only,
   grep-clean; swept into 16b56ca with subsetfix2): R04 leaf+H conditional
   (`:17561-17598`). Entry filed here.
+- 2026-09-22 DERIV-RELOCSUP (background `ses_f348598e2`, proof-only,
+  grep-clean, deriv-only commit): wide sups at reloc banked (0.097/934
+  via R02 uppers); tight gaps stand (0.089/931). Tight specs may be
+  unsatisfiable at these centers (true 0.026>0.008).
+- 2026-09-22 STIRLING-SHIFT4 (background `ses_f348806a6`, proof-only,
+  grep-clean, stirling-only commit): outer shift-4 `≤0.024` (16x→12x).
+  Outer 12x / leaf 7x stand.
 - 2026-09-22 CUTL-GAMMA (background `ses_f34867d57`, proof-only,
   grep-clean, cutL10-only commit): Gamma wall mapped (sup near-true
   1.41x; true-joint 8.99/224x; double-true 2.25/56x). Blockage =
