@@ -5942,6 +5942,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETAPRIME-IDENT (background `ses_f34bd1547`, proof-only,
+  grep-clean, eta_prime-only commit): identification BANKED —
+  `import zeta_rigorous :4` (DAG checked: no cycle) + header update +
+  `etaPairCpow_eq_etaPairTerm :740` (correct arg order `etaPairTerm s
+  m` per `:826`, via banked `:839`; prompt's order flagged ill-typed).
+  Tsum bridge now fully linked to zeta_rigorous shapes. Residual:
+  conversion quotient caps (VEta/C0/C1/C2).
 - 2026-09-22 TAIL-M32768 (background `ses_f34bd8ed3`, proof-only,
   grep-clean, tail-only commit): generic M=32768 tail —
   `M32768_rpow_ge :471` (181≤√32768, 181²=32761) + `r_32768_le :487` +

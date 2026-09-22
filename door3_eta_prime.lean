@@ -1,6 +1,7 @@
 import Mathlib
 import door3_dp_trig
 import door3_dp_terms
+import zeta_rigorous
 
 /-!
 # Door 3 eta-prime shapes: log-weighted pair term, two-piece bound, tail shape, R05 n=2 demo.
@@ -8,9 +9,11 @@ import door3_dp_terms
 Import closure (read-only verified before writing):
 * `door3_dp_trig` imports `Mathlib` only — upstream leaf.
 * `door3_dp_terms` imports `Mathlib` + `door3_dp_trig` — upstream leaf.
-* This file imports `Mathlib` + `door3_dp_trig` + `door3_dp_terms` only.
-  The rigorous-zeta file is not imported; the pair MVT pattern is reproved
-  locally for the weighted difference.
+* This file imports `Mathlib` + `door3_dp_trig` + `door3_dp_terms` + `zeta_rigorous`.
+  Import-DAG check (2026-09-22, read-only): `zeta_rigorous` imports only
+  `Mathlib` + `Zeta23.MV.Final`; the `Zeta23/*` tree imports no `door3_*`
+  file, so adding this import creates no cycle. The pair MVT pattern is
+  still reproved locally for the weighted difference.
 
 Recon (read-only): `etaPairTerm s m` is the sum of the two Dirichlet terms
 at `2 * m` and `2 * m + 1`, hence the cpow-difference form with bases
@@ -726,3 +729,15 @@ theorem etaDerivMajorant_norm_le_dominator (m : ℕ) :
 theorem etaDerivMajorant_summable : Summable etaDerivMajorant :=
   etaDerivMajorant_summable_of_dom etaDerivDominator
     etaDerivDominator_summable etaDerivMajorant_norm_le_dominator
+
+/-- Identification: local cpow-difference mirror equals the rigorous pair term.
+Cycle check: `zeta_rigorous` imports only `Mathlib` + `Zeta23.MV.Final`
+(`zeta_rigorous.lean:1-2`), and no `Zeta23/*` file imports any `door3_*`
+file, so `import zeta_rigorous` above creates no cycle. Proof is the banked
+`etaPairTerm_eq_cpow_sub` (`zeta_rigorous.lean:839`) read against the local
+`etaPairCpow` def (`:331-333`); note the argument order is `(m s)` locally
+vs `(s m)` in `zeta_rigorous`. -/
+theorem etaPairCpow_eq_etaPairTerm (m : ℕ) (s : ℂ) :
+    etaPairCpow m s = zeta_rigorous.etaPairTerm s m := by
+  unfold etaPairCpow
+  rw [zeta_rigorous.etaPairTerm_eq_cpow_sub]
