@@ -5639,8 +5639,21 @@ sorry-free infrastructure and the complete commit ledger above.
   (attempt 1/1), zero edits (be75838 fixes held), grep-clean (0
   sorry/axiom/admit; old `91086` gone, `91085296` x4). N6B Seq6 + N7
   Seq7 COMPILED (add6/add7/prod6/prod7 chains in green target). Only
-  2 pre-existing unused-var linters.   Lock RELEASED. SUPP-VERIFY tasked
+  2 pre-existing unused-var linters. Lock RELEASED. SUPP-VERIFY tasked
   (sole owner, suppliers S8/S10 backlog).
+- 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
+  edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
+  does not exist in-tree (guide-prose only); canonical
+  `R00/R01/..._leaf_obligations` + 40 `Target` rows. Banked: rect/
+  fencing machinery, ξ=poly·pi·gamma·zeta factorization, poly/R00-30 +
+  pi-1/2 lowers, Gamma R02-0.002/0.006 lowers (0.008 open), ζ-upper 934
+  (`:32566`, η-pair technique: head 2 + remainder 166 over cvt 0.18).
+  Gaps: ζ-upper needs 93x (→≤10), ξ'-tier 0.07 Cauchy-IMPOSSIBLE
+  (need direct deriv bounds), ζ/Gamma center-lowers open, no Mathlib
+  interval lib (hand-rolled rpow/norm_num + opaque Float trust layer).
+  Transfer: 934-technique reusable for ζ-upper half only. SMALLEST
+  NEXT: R02 first-cell attempt (5 open premises: gammaLower 0.008,
+  zetaLower 1.1, derivTier 0.07, ballSup 16800, rpow2-head 0.77).
 - 2026-09-22 STRIP-SURVEY (background `ses_f3753c475`, read-only, no
   edits): assumption map `:12149-:12263` (Hmain/Hedge/Htail/Hcut +
   `:12186/:12204/:12238` bridges all proved-conditional); banked: width
