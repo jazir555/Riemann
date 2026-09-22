@@ -5325,7 +5325,7 @@ theorem premGamma_E06_Seq9_finite_lower (hLink : premGamma_E06_GammaSeq9_link) :
     linarith
   have hpos9 : (0 : ℝ) < ‖(((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)‖ := by
     have h := Complex.abs_re_le_norm (((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1)
-    have hre9 : ((((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
+    have hre9 : (((((((((((((((Complex.mk (0.395 : ℝ) (1.25 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1) + 1))).re
         = (10.1975 : ℝ) := by
       rw [Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,
         Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re, Complex.add_re,

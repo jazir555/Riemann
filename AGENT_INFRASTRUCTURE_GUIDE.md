@@ -5681,6 +5681,17 @@ sorry-free infrastructure and the complete commit ledger above.
   LADDER-RULE (all future N-rung agents): after banking, run
   programmatic opens/closes counts on every new line AND full-diff vs
   the N-1 analogue; zero-diff except the one intended level.
+- 2026-09-22 VERIFY7 (background `ses_f373e11d5`, sole build owner):
+  hre9 FIX CONFIRMED (17/17, front-run 14→15, one-char diff) but build
+  still RED — new error `5350:142 unexpected ')'` + `5173:86` fallout.
+  Coordinator net-audit (all lines programmatically): hposR block =
+  `have` 5340 (net 0) + NINE factor lines 5341-5349 (each net +1, s..s+8)
+  + final s+9 factor 5350 (net -10). Nine +1s need final net -9 (N8
+  mirror: eight +1s 4932-4939, final 4940 net -8). PRESCRIPTION: delete
+  exactly ONE trailing `)` on 5350 (tail ‖+10×`)` → ‖+9×`)`), then net
+  -9 balances. Coordinator did NOT hand-edit (hand-counting failed
+  twice before) — owner to verify counts programmatically before/after
+  + rebuild. VERIFY8 tasked (sole owner).
 - 2026-09-22 ENCLOSURE-SURVEY (background `ses_f3753c476`, read-only, no
   edits): 80-cell binding residual inventoried. CORRECTION: `RNN` name
   does not exist in-tree (guide-prose only); canonical
