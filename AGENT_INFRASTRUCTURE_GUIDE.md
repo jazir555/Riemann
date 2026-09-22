@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 EDGE-RETIER (background `ses_f34c288f8`, proof-only,
+  grep-clean, committed 3635a21): MT=1000 retier HONEST-FAIL on gates —
+  triple (1/2,1000,0.0005): side closed, ratio + both widths OPEN
+  (negations `:1609/:1613/:1618`); no (m,1000) with m≤1/2 passes (M<50
+  required). Conditionals `:1642/:1674` banked with open widths.
+  SQUEEZE: gates need M<50, product needs C≥joint≫40 — feasible window
+  may be empty.
 - 2026-09-22 STIRLING-RATE (background `ses_f34efa018`, proof-only,
   grep-clean, stirling-only commit): E05 Seq5 UPPER banked (rpow ≤1.38
   `:1989`, Re 6.9 `:2006`, cpow5 `:2021`, add-lowers `:2040-2164`,
