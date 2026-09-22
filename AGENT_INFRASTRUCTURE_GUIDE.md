@@ -5686,6 +5686,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `ge :3822` (≥2.4768275168 via log(11/12)≤-1/12; slacks ~1e-10,
   norm_num-closed).   Window [2.4768,2.4935] width ~0.0167, true ~2.4849
   inside. Next: theta12/cos (SCUT26).
+- 2026-09-22 SCUT32 (background `ses_f374cd2e5`, proof-only, grep-clean):
+  k=13 NO-FLIP gap — `delta14_even_mem :4366` (δ∈(1.118,1.406),
+  quadrant I — brief said II, agent corrected since <π/2≈1.5708) +
+  width `:4375` (0.288) + `no_flip_gap :4389` (1.406<π/2 containment).
+  cos δ>0 → eta13=-14^{-s} negative: destructive/neutral, k=9-flip
+  impossible, no force. STRATEGIC: per-term gains (+0.707 over k=7..12,
+  ~0.12/term declining) cannot close gap 5.024 (~50 terms needed) —
+  per-term lane PAUSED; slow-leg machinery owned by SCUT-SLOW survey.
 - 2026-09-22 SCUT26 (background `ses_f3766f8f0`, proof-only, grep-clean):
   phase SHAPE corrected (10·log12, not 11·log12 — multiplier is t=10 in
   all mirrors `:3287/:3714`) + theta12 wide window `:3842` (θ∈[24.768,

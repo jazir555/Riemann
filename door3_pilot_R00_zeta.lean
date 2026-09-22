@@ -4357,4 +4357,42 @@ theorem sSCUT_theta14_mem :
   have c2 : (10 : ℝ) * 2.6537505948 = 26.537505948 := by norm_num
   constructor <;> linarith
 
+/-- Reduced phase `δ₁₄ = θ₁₄ - 8π ∈ (1.118, 1.406)` (even-multiple anchor:
+`8π ≈ 25.133` is nearest since `θ₁₄ ≈ 26.25-26.54` vs `7π ≈ 21.99` and
+`9π ≈ 28.27`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta13_even_mem` at `:4127`; rounded outward from the loose-pi
+window `[1.118991651, 1.405505948]` so `linarith` closes on either loose or
+tight `pi_d4`). -/
+theorem sSCUT_delta14_even_mem :
+    (1.118 : ℝ) < 10 * Real.log 14 - 8 * Real.pi ∧
+    10 * Real.log 14 - 8 * Real.pi < (1.406 : ℝ) := by
+  have hth := sSCUT_theta14_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₄` window (`0.288`). -/
+theorem sSCUT_delta14_even_width_eq :
+    (1.406 : ℝ) - 1.118 = (0.288 : ℝ) := by
+  norm_num
+
+/-- Honest no-flip verdict (quadrant gap, not a bound): the exact window
+`δ₁₄ ∈ (1.118, 1.406)` sits strictly inside `(0, π/2)` (cap `1.406 < π/2`
+via `Real.pi_gt_d4`), i.e. quadrant I — not quadrant II — with
+`cos δ₁₄ > 0` (`≈ +0.44..+0.16`). The even anchor `8π` gives
+`cos θ₁₄ = cos δ₁₄` (no reduction flip), and odd `k = 13` negates
+(`eta₁₃ = -14^{-sCut}`): `Re(eta₁₃) = -r₁₄·cos θ₁₄ < 0`, destructive or
+neutral. The `k = 9` flip recipe (`sSCUT_cos10log9_le_neg_half` at `:3335`:
+odd anchor `7π`, `cos θ₉ = -cos δ₉` with `δ₉ ≈ 0`, `cos ≤ -1/2`) needs
+`cos θ₁₄ ≤ -c` for some `c > 0`, which cannot close here — filed as gap,
+not forced. -/
+theorem sSCUT_delta14_no_flip_gap :
+    (1.118 : ℝ) < 10 * Real.log 14 - 8 * Real.pi ∧
+    10 * Real.log 14 - 8 * Real.pi < (1.406 : ℝ) ∧
+    (1.406 : ℝ) < Real.pi / 2 := by
+  have hδ := sSCUT_delta14_even_mem
+  have hpi_lo := Real.pi_gt_d4
+  refine ⟨hδ.1, hδ.2, ?_⟩
+  linarith
+
 end Door3PilotR00Zeta
