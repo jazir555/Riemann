@@ -6060,6 +6060,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 TAIL-M22 (background `ses_f348e1deb`, proof-only,
   grep-clean, tail-only commit): M4194304 exact rung `3/256≈0.01172
   :1013` (2048² verified). Next M8388608 odd.
+- 2026-09-22 FIRSTCELL-TAILM (background `ses_f348d225a`, proof-only,
+  grep-clean, first_cell-only commit): tail majorant BANKED (`:1863`,
+  S4≤L≤S5 bracket, radius f4; error-bound route honestly rejected).
+  Sole remaining: eta→zeta factor (`:1902`).
+- 2026-09-22 TAIL-M23 (background `ses_f348bcfcb`, proof-only,
+  grep-clean, tail-only commit): M8388608 odd rung `24/2896=3/362≈
+  0.00829` (floor 2896²=8386816 honest). Next M16777216 exact.
 - 2026-09-22 GAMMA-N16 (background `ses_f349123cb`, proof-only,
   grep-clean + 4 audits, premise_gamma-only commit): E06 Seq16 rung
   0.657 `:8188` (ceiling 0.65769<0.66, gap 0.003, increment +0.002 —

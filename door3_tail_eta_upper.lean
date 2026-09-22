@@ -1014,3 +1014,72 @@ theorem tail_4194304_lt_2097152 : (3 / 256 : ℝ) < (24 / 1448 : ℝ) := by
   norm_num
 
 end Door3TailEtaUpper
+
+namespace Door3TailEtaUpper
+
+/-- Rpow lower for the generic `M = 8388608` tail (`2896 ≤ 8388608^{1/2}`;
+generic mirror of `M2097152_rpow_ge` at `:893` and latest exact `M4194304_rpow_eq`
+at `:957`; honest floor via `2896^2 = 8386816 ≤ 8388608` by `norm_num`;
+`8388608 = 2^23` so root `2048·√2 ≈ 2896.31` is NOT exact; lower gap `1792`,
+upper witness `2897^2 = 8392609 = 8388608 + 4001`). -/
+theorem M8388608_rpow_ge :
+    (2896 : ℝ) ≤ ((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((2896 : ℝ) ^ (2 : ℕ)) ≤ ((((8388608 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((8388608 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Generic `M = 8388608` tail-decay bound at `Re = 1/2`
+(`12·(M^{-1/2})/(1/2) = 24/2896`; generic mirror of `r_2097152_le`
+at `:909` and latest exact `r_4194304_le` at `:982`; decay recomputed honestly
+with `norm_num` via `M8388608_rpow_ge`; tightest honest `T = 24/2896 = 3/362 ≈
+0.00829` for the `2896` root lower). -/
+theorem r_8388608_le :
+    (12 : ℝ) * ((((((8388608 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤
+      (24 / 2896 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((8388608 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := M8388608_rpow_ge
+  have hrw : ((((8388608 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (2896 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (2896 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((8388608 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((2896 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((2896 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (24 / 2896 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Generic paired tail at `M = 8388608` (`‖G - S16777216‖ ≤ 24/2896`; generic mirror
+of `eta_tail_2097152_le` at `:935` and latest exact `eta_tail_4194304_le` at
+`:998` — numerals use only `Re = 1/2` and `‖s‖ ≤ 12`). -/
+theorem eta_tail_8388608_le {s : ℂ} (hre : s.re = (1 / 2 : ℝ))
+    (hC : ‖s‖ ≤ (12 : ℝ)) :
+    ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range (2 * 8388608), etaDirichletTerm s k)‖ ≤
+      (24 / 2896 : ℝ) := by
+  have hs : 0 < s.re := by rw [hre]; norm_num
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 8388608 (by norm_num)
+  have h2M : 2 * 8388608 = 16777216 := by norm_num
+  rw [h2M] at hgen
+  rw [hre] at hgen
+  have hr := r_8388608_le
+  linarith
+
+/-- The `M = 8388608` constant honestly improves on the banked `M = 4194304`
+constant (`24/2896 = 3/362 ≈ 0.00829 < 3/256 = 0.01171875`). -/
+theorem tail_8388608_lt_4194304 : (24 / 2896 : ℝ) < (3 / 256 : ℝ) := by
+  norm_num
+
+end Door3TailEtaUpper

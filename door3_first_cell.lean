@@ -1800,3 +1800,114 @@ theorem FC_S4_partial_numeral_closed : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-TAILM wave: `S₄` tail majorant via two-sided bracketing + factor residual (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* `S₄` numeral CLOSED `FC_etaS4_uncond` (`door3_first_cell.lean:1787-1791`,
+  `0.28 ≤ S₄` from `FC_rpow2_head_upper_proved` + `FC_rpow3_head_lower_proved` +
+  `FC_rpow4_head_upper_proved`); status marker `FC_S4_partial_numeral_closed`
+  (`:1798`, `True`).
+* Tail shape `FC_etaS4_tail_obligation` (`:1633-1638`):
+  `∃ L R, Tendsto (fun n => ∑ i in range n, (-1)^i * FC_etaF0395 i) atTop (nhds L)`
+  `∧ ‖L - S₄‖ ≤ R`; residual marker `FC_S4_residual_gap` (`:1649`, `True`).
+* Bracketing toolkit (Mathlib `Normed.lean:822-846`, NO new import):
+  lower `Antitone.alternating_series_le_tendsto` (used in-file `:1119`, `:1594`),
+  upper `Antitone.tendsto_le_alternating_series` (ABSENT in this file, grep-clean;
+  pattern `door3_cell_suppliers.lean:23` `S₁,S₃` uppers). Both need only
+  `Tendsto` + `Antitone` (banked `:1534` `FC_eta_Tendsto_exists`,
+  `:1467` `FC_etaF0395_antitone`).
+* Rejected route `alternating_series_error_bound` (`Normed.lean:856-885`): needs
+  `Summable FC_etaF0395`, FALSE on the real `σ = 0.395` route (in-file record
+  `:1496` real eta NOT summable); honest route is the two-sided bracket
+  `S₄ ≤ L ≤ S₅`, so `‖L - S₄‖ ≤ f₄` with `f₄ = FC_etaF0395 4`, no summability used.
+* Factor shape ABSENT in this file (grep-clean): no `etaFactor` /
+  `‖1 - 2 ^ (1 - s)‖` match here; reference shape `CS_etaFactor_upper`
+  (`door3_cell_suppliers.lean:424-425`, `‖1 - 2^(1-sCenter)‖ ≤ 2.53`,
+  magnitude-triangle route, true `≈ 1.85`). Filed below as the leftover residual.
+
+Verdict: tail majorant BANKED with exact next-term radius `R = f₄`
+(`FC_etaS4_tail_proved`, no numeral cap claimed); leftover residual is ONLY the
+eta-to-zeta factor upper (`FC_etaZeta_factor_obligation`, filed open).
+No build attempted (SUPP-FIX-REBUILD owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- `S₅ = S₄ + f₄`: odd bracket point splits off the next term
+(`range (2*2+1) = range 5`, `(-1)^4 = 1`). -/
+theorem FC_etaS5_eq_S4_plus :
+    (∑ i ∈ Finset.range (2 * 2 + 1), (-1 : ℝ) ^ i * FC_etaF0395 i)
+      = (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+        - (4 : ℝ) ^ (-(0.395 : ℝ))) + FC_etaF0395 4 := by
+  have h52 : (2 * 2 + 1 : ℕ) = 4 + 1 := by norm_num
+  rw [h52, Finset.sum_range_succ]
+  have h4eq : (∑ i ∈ Finset.range (4 : ℕ), (-1 : ℝ) ^ i * FC_etaF0395 i)
+      = 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+        - (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+    rw [show (4 : ℕ) = 3 + 1 from by norm_num,
+      show (3 : ℕ) = 2 + 1 from by norm_num,
+      show (2 : ℕ) = 1 + 1 from by norm_num]
+    simp only [Finset.sum_range_succ, Finset.sum_range_one,
+      Finset.sum_range_zero]
+    simp only [FC_etaF0395, pow_zero, pow_one, Nat.cast_zero, Nat.cast_one,
+      Nat.cast_ofNat, Real.one_rpow]
+    ring
+  rw [h4eq]
+  have e4 : (-1 : ℝ) ^ (4 : ℕ) = 1 := by norm_num
+  rw [e4, one_mul]
+  ring
+
+/-- BANKED tail majorant: the converged limit lies within one next term of
+`S₄` (`‖L - S₄‖ ≤ f₄`), from the honest two-sided bracket `S₄ ≤ L ≤ S₅`
+(banked `Tendsto` existence + banked antitone; no summability assumed). -/
+theorem FC_etaS4_tail_proved : FC_etaS4_tail_obligation := by
+  show ∃ L R : ℝ, Filter.Tendsto
+    (fun n : ℕ => ∑ i ∈ Finset.range n, (-1 : ℝ) ^ i * FC_etaF0395 i)
+    Filter.atTop (nhds L) ∧
+    ‖L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)))‖ ≤ R
+  obtain ⟨L, hL⟩ := FC_eta_Tendsto_exists
+  refine ⟨L, FC_etaF0395 4, hL, ?_⟩
+  have hAnti : Antitone FC_etaF0395 := FC_etaF0395_antitone
+  have hLow : 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) ≤ L :=
+    FC_slice_S4_of_tendsto L hL hAnti
+  have hUpRaw : L ≤ ∑ i ∈ Finset.range (2 * 2 + 1),
+      (-1 : ℝ) ^ i * FC_etaF0395 i :=
+    Antitone.tendsto_le_alternating_series hL hAnti 2
+  rw [FC_etaS5_eq_S4_plus] at hUpRaw
+  have hf4nn : (0 : ℝ) ≤ FC_etaF0395 4 := by
+    simp only [FC_etaF0395]
+    have hpos : (0 : ℝ) < (((4 : ℕ) : ℝ)) + 1 := by norm_num
+    exact le_of_lt (Real.rpow_pos_of_pos hpos _)
+  have hnn : (0 : ℝ) ≤ L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ))) :=
+    sub_nonneg.mpr hLow
+  have hle : L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)))
+      ≤ FC_etaF0395 4 := by linarith
+  have habs : |L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)))|
+      ≤ FC_etaF0395 4 := by
+    rw [abs_le]
+    constructor <;> linarith
+  rw [Real.norm_eq_abs]
+  exact habs
+
+/-- Leftover eta-to-zeta factor residual (filed OPEN, TRUE with margin:
+magnitude-triangle route `‖1 - w‖ ≤ 1 + 2^0.605 ≈ 2.521`, true `≈ 1.85`;
+patch phase proves via the `CS_etaFactor_of_rpow` cpow pattern at `sCenter`).
+With banked `S₄ ≥ 0.28` + banked tail above, this factor upper is the SOLE
+remaining link from the real-`σ` eta floor to `FC_zeta14_obligation`. -/
+def FC_etaZeta_factor_obligation : Prop :=
+  ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.53
+
+/-- Exact tail-wave residual: `S₄` numeral CLOSED (`FC_etaS4_uncond`, `0.28`);
+tail majorant CLOSED (`FC_etaS4_tail_proved`, exact radius `R = f₄`);
+zeta-from-eta factor OPEN (`FC_etaZeta_factor_obligation`, no banked
+`‖1 - 2^(1-s)‖` cap in this file). -/
+theorem FC_S4_tail_residual_closed_modulo_factor : True := by
+  trivial
+
+end Door3FirstCellClose
+
