@@ -5646,8 +5646,15 @@ sorry-free infrastructure and the complete commit ledger above.
   (attempt 1/1), zero edits (be75838 fixes held), grep-clean (0
   sorry/axiom/admit; old `91086` gone, `91085296` x4). N6B Seq6 + N7
   Seq7 COMPILED (add6/add7/prod6/prod7 chains in green target). Only
-  2 pre-existing unused-var linters. Lock RELEASED. SUPP-VERIFY tasked
+  2 pre-existing unused-var linters.   Lock RELEASED. SUPP-VERIFY tasked
   (sole owner, suppliers S8/S10 backlog).
+- 2026-09-22 EDGE-STRIP (background `ses_f350a352b`, proof-only,
+  grep-clean, wiring-only commit): `edgeStrip_top_half_M40 :473`
+  CONDITIONAL top-only strip at m=1/2, MT=40 — all gates closed by
+  norm_num/linarith ((1/2)/40=0.0125: 0.01<0.0125, 0.4875<0.49,
+  -0.49<-0.4875). Exactly 2 supplier premises open (hTopLower uniform
+  1/2 on Icc(-10,10) at Im=1/2; hTopDeriv ≤40 on strip). Smallest edge
+  residual is now 2 numerals.
 - 2026-09-22 GAMMA-N8 (background `ses_f3753c477`, proof-only,
   grep-clean, premise_gamma +388): E06 Seq8 rung — rpow8-frac `:4633`
   (1.49≤8^5/26, 1.50 false), Re-lower 11.92 `:4648`, cpow8 norm `:4661`

@@ -463,6 +463,40 @@ theorem xiCentralEdgeStrips10_of_uniformStrips_011
   xiCentralEdgeStrips10_of_uniformStrips (δT := (11 / 1000 : ℝ)) (δB := (11 / 1000 : ℝ))
     hstripT (by norm_num) hstripB (by norm_num)
 
+/-- Top-only edge strips at feasible `m = 1/2`, `MT = 40` (`δ = (1/2)/40`):
+top strip from `sliver_top_strip_of_entire_data`, bottom via proved
+`sliver_bottom_of_top_via_conj`, packaged by
+`xiCentralEdgeStrips10_of_uniformStrips` (which uses
+`sliver_point_eq_vertical`). Both gates (`0.01 < (1/2)/40`,
+`1/2 - (1/2)/40 < 0.49`) close by `norm_num`; residual is exactly the two
+supplier premises `hTopLower`/`hTopDeriv`. -/
+theorem edgeStrip_top_half_M40
+    (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+      ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ),
+        ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)) :
+    RHProofScaffold.XiCentralEdgeStrips10 := by
+  have hGate : (0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+  have hWidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ) := by norm_num
+  have hδle : (1 / 2 : ℝ) / (40 : ℝ) ≤ 1 := by norm_num
+  have hpos : 0 < (1 / 2 : ℝ) / (40 : ℝ) := by norm_num
+  have hstripT : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y → y < (1 / 2 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_low hy_top
+    exact Door3SliverNonvan.sliver_top_strip_of_entire_data (1 / 2 : ℝ) (40 : ℝ)
+      (by norm_num) (by norm_num) hTopLower hTopDeriv hδle x hx y hy_low hy_top
+  have hstripB : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ), ∀ y : ℝ,
+      -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) →
+        xiShifted ((x : ℂ) + Complex.I * (y : ℂ)) ≠ 0 := by
+    intro x hx y hy_lo hy_hi
+    exact Door3SliverNonvan.sliver_bottom_of_top_via_conj
+      ((1 / 2 : ℝ) / (40 : ℝ)) hpos hδle hstripT x hx y hy_lo hy_hi
+  have hwidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) := by
+    linarith
+  exact xiCentralEdgeStrips10_of_uniformStrips hstripT hWidthT hstripB hwidthB
+
 /-- `BottomStripObligations` from the uniform real-axis minorant + tube sup
 (re-export of the `door3_zeta_cutoff` bridge with the residual premises made
 explicit at the wiring site). -/
