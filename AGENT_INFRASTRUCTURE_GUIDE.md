@@ -6152,6 +6152,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 WIRE-FINAL (background `ses_f3478c3d6`, proof-only,
+  grep-clean, wiring-only commit): FINAL ledger (26-way banked re-export
+  closed; 15 residuals filed). Wiring lane COMPLETE.
+- 2026-09-22 FIRSTCELL-FINAL (background `ses_f3475ed33`, proof-only,
+  grep-clean, first_cell-only commit): FINAL ledger (banked prefix closed;
+  6-part residual open). First-cell lane COMPLETE.
 - 2026-09-22 ASSEMBLY-R10 (background `ses_f347551ea`, proof-only,
   grep-clean, assembly-only commit): R10 leaf+H conditional (tenth +
   0.05). Notes R06 residual set absent (follow-up). Post-dates GREEN.

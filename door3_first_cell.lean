@@ -2899,3 +2899,165 @@ theorem FC_ident_residual : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-FINAL wave: single audit ledger (banked S4 + tail + factor + bridge-1.56, open identity + zeta14 + tier + Lambda0 + gamma008) (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* S4 numeral CLOSED `FC_etaS4_uncond` (`door3_first_cell.lean:1787-1791`,
+  `0.28 ≤ S4` from `FC_rpow2_head_upper_proved` + `FC_rpow3_head_lower_proved` +
+  `FC_rpow4_head_upper_proved`); marker `FC_S4_partial_numeral_closed` (`:1798`).
+* Tail majorant CLOSED `FC_etaS4_tail_proved` (`:1863-1895`,
+  `FC_etaS4_tail_obligation` shape `:1633-1638`, radius `R = FC_etaF0395 4`).
+* Factor cap CLOSED `FC_etaZeta_factor_proved` (`:2015-2016`,
+  `FC_etaZeta_factor_obligation` shape `:1902-1903`, `≤ 2.53`
+  via `FC_rpow0605_proved` + `FC_etaZeta_of_rpow`).
+* Bridge CLOSED `FC_bridge_Re_ge_156` (`:2762-2763`, `1.56 ≤ Re ∑ range 4`)
+  + `FC_bridge_lower_proved` (`:2798-2806`, `0.28 ≤ ‖∑ range 4‖`);
+  target `FC_bridge_lower_obligation` (`:2304-2305`).
+* F4 cap CLOSED `FC_etaF4_upper_proved` (`:2206-2221`,
+  `FC_etaF4_upper_obligation` shape `:2104`, `≤ 0.54`).
+* Identity OPEN `FC_eta_identity_obligation` (`:2311-2313`) split into A
+  `FC_complex_eta_HasSum_obligation` (`:2871-2872`) + B
+  `FC_eta_factor_identity_obligation` (`:2878-2880`); conditional close
+  `FC_eta_identity_of_two` (`:2883-2888`); obstruction
+  `FC_dirichlet_Re_obstruction` (`:2864`); residual `FC_ident_residual` (`:2897`).
+* Zeta14 OPEN `FC_zeta14_obligation` (`:492-493`, `1.4 ≤ ‖zeta sCenter‖`);
+  need `3.542` (`FC_zeta14_need_eq` `:2079`), gap `0.28 < 3.542`
+  (`FC_S4_vs_need_gap` `:2096`), shortfall `3.262` (`:2099`);
+  residual `FC_zeta14_assembly_residual` (`:2134`).
+* Tier OPEN `Door3FirstCell.FC_derivTier_obligation` (`:181`,
+  `0.07` tier); Cauchy floor `0.358` (`FC_cauchy_M_floor`), exclusion
+  (`FC_tier007_excluded_via_cauchy`), retier (`FC_retier_of_smallRadius`).
+* Ball OPEN `FC_Lambda0_upper_fat` (`:840-842`, `Λ₀ ≤ 479` on fat `s`-rect);
+  conditional `FC_ballSup16800_of_Lambda0` (`:846`); draft ball premise
+  `Door3FirstCell.FC_ballSup_obligation` (`:186`).
+* Gamma008 OPEN `Door3FirstCell.FC_gammaLower_obligation` (`:172-173`,
+  `0.008 ≤ ‖gammaOf sCenter‖`); rung CLOSED `0.006`
+  (`FC_gamma0006_proved` `:449-451`); gap `523.328` vs `392.7`
+  (`FC_gamma_banked_product`, `FC_gamma0008_SUcap`, `FC_gamma0008_gap`).
+
+Verdict: bank ONE audit conjunction below (all four banked values + f4 +
+rpow0605, conjoined with the complete 6-part open residual). No new
+numerals, no hidden premises; `FC_zeta14_obligation` stays OPEN.
+No build attempted (verifier owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- FINAL banked S4 numeral `0.28` (re-export of `FC_etaS4_uncond`). -/
+theorem FC_final_S4_banked :
+    (0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+  FC_etaS4_uncond
+
+/-- FINAL banked tail majorant (re-export of `FC_etaS4_tail_proved`). -/
+theorem FC_final_tail_banked : FC_etaS4_tail_obligation :=
+  FC_etaS4_tail_proved
+
+/-- FINAL banked factor cap `2.53` (re-export of `FC_etaZeta_factor_proved`). -/
+theorem FC_final_factor_banked : FC_etaZeta_factor_obligation :=
+  FC_etaZeta_factor_proved
+
+/-- FINAL banked bridge `Re ≥ 1.56` (re-export of `FC_bridge_Re_ge_156`). -/
+theorem FC_final_bridge_Re_banked :
+    (1.56 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re :=
+  FC_bridge_Re_ge_156
+
+/-- FINAL banked bridge lower `0.28` (re-export of `FC_bridge_lower_proved`). -/
+theorem FC_final_bridge_banked : FC_bridge_lower_obligation :=
+  FC_bridge_lower_proved
+
+/-- FINAL banked f4 cap `0.54` (re-export of `FC_etaF4_upper_proved`). -/
+theorem FC_final_f4_banked : FC_etaF4_upper_obligation :=
+  FC_etaF4_upper_proved
+
+/-- FINAL banked rpow cap `2^0.605 ≤ 1.53` (re-export of `FC_rpow0605_proved`). -/
+theorem FC_final_rpow0605_banked : FC_rpow0605_upper :=
+  FC_rpow0605_proved
+
+/-- Complete open residual conjunction (6 parts, all TRUE, all patch phase):
+identity-A (complex HasSum) + identity-B (factor identity) + zeta14 (`1.4`)
++ deriv-tier (`0.07`) + Lambda0-fat (`≤ 479`) + gamma008 (`0.008`). -/
+def FC_final_open_residual : Prop :=
+  FC_complex_eta_HasSum_obligation ∧
+  FC_eta_factor_identity_obligation ∧
+  FC_zeta14_obligation ∧
+  Door3FirstCell.FC_derivTier_obligation ∧
+  FC_Lambda0_upper_fat ∧
+  Door3FirstCell.FC_gammaLower_obligation
+
+/-- Single FINAL audit ledger: banked S4 numeral + banked tail + banked
+factor + banked bridge + banked f4, conjoined with the complete open
+residual above (S4, tail, factor, bridge, identity, zeta14 all represented;
+tier + Lambda0 + gamma008 included for completeness). -/
+def FC_final_ledger : Prop :=
+  ((0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+    - (4 : ℝ) ^ (-(0.395 : ℝ))) ∧
+  FC_etaS4_tail_obligation ∧
+  FC_etaZeta_factor_obligation ∧
+  FC_bridge_lower_obligation ∧
+  FC_etaF4_upper_obligation ∧
+  FC_final_open_residual
+
+/-- Banked audit: the 5-part banked prefix holds unconditionally. -/
+theorem FC_final_banked_audit :
+    ((0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ))) ∧
+    FC_etaS4_tail_obligation ∧
+    FC_etaZeta_factor_obligation ∧
+    FC_bridge_lower_obligation ∧
+    FC_etaF4_upper_obligation := by
+  exact ⟨FC_etaS4_uncond, FC_etaS4_tail_proved, FC_etaZeta_factor_proved,
+    FC_bridge_lower_proved, FC_etaF4_upper_proved⟩
+
+/-- Ledger from any open-residual witness (banked prefix supplied above). -/
+theorem FC_final_ledger_of_open (h : FC_final_open_residual) :
+    FC_final_ledger := by
+  exact ⟨FC_etaS4_uncond, FC_etaS4_tail_proved, FC_etaZeta_factor_proved,
+    FC_bridge_lower_proved, FC_etaF4_upper_proved, h⟩
+
+/-- Projection: ledger yields the open residual. -/
+theorem FC_final_open_of_ledger (h : FC_final_ledger) :
+    FC_final_open_residual := by
+  exact h.2.2.2.2.2
+
+/-- Projection: ledger yields zeta14 (hence zeta14 stays OPEN: no
+unconditional proof is claimed here, only the conditional projection). -/
+theorem FC_final_zeta14_of_ledger (h : FC_final_ledger) :
+    FC_zeta14_obligation := by
+  have ho : FC_final_open_residual := FC_final_open_of_ledger h
+  exact ho.2.2.1
+
+/-- Projection: ledger yields identity-A (complex HasSum, OPEN). -/
+theorem FC_final_identA_of_ledger (h : FC_final_ledger) :
+    FC_complex_eta_HasSum_obligation := by
+  have ho : FC_final_open_residual := FC_final_open_of_ledger h
+  exact ho.1
+
+/-- Projection: ledger yields identity-B (factor identity, OPEN). -/
+theorem FC_final_identB_of_ledger (h : FC_final_ledger) :
+    FC_eta_factor_identity_obligation := by
+  have ho : FC_final_open_residual := FC_final_open_of_ledger h
+  exact ho.2.1
+
+/-- Projection: ledger yields the joint identity obligation witness route
+(via the banked conditional close `FC_eta_identity_of_two`). -/
+theorem FC_final_identity_of_ledger (h : FC_final_ledger) :
+    FC_eta_identity_obligation := by
+  have ho : FC_final_open_residual := FC_final_open_of_ledger h
+  exact FC_eta_identity_of_two ⟨_, ho.1⟩ ho.2.1
+
+/-- Exact FINAL residual list (no proof content; honest stop):
+BANKED S4 `0.28` (`FC_final_S4_banked`), tail (`FC_final_tail_banked`,
+`R = f₄`), factor `2.53` (`FC_final_factor_banked`), bridge `1.56`
+(`FC_final_bridge_Re_banked`, `FC_final_bridge_banked`), f4 `0.54`
+(`FC_final_f4_banked`); OPEN identity-A + identity-B
+(`FC_final_identA_of_ledger`, `FC_final_identB_of_ledger`), zeta14
+(`FC_final_zeta14_of_ledger`), tier, Lambda0-fat, gamma008
+(all six packed in `FC_final_open_residual`). `FC_final_ledger` is the
+single audit conjunction; verdict: banked prefix CLOSED, full ledger OPEN
+on the 6-part residual. -/
+theorem FC_final_residual_list : True := by
+  trivial
+
+end Door3FirstCellClose
+

@@ -2606,3 +2606,207 @@ def wirePivot_neighborhood_residual : Prop :=
       ((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖)
 
 end Door3RHWiring
+
+/-! ## WIRE-FINAL ledger: endpoints + zero-line strips + neighborhoods + sup walls.
+
+Grep of feeder shapes banked in this file (read before filing):
+* endpoints: `wireHtop_top_point_half_feeder` (:1855),
+  `wireHbot_bot_point_half_feeder` (:1897)
+* M40 zero-line at `x = 0`: `wireStrip_top_M40_at_zero_of_ballSup40` (:1949),
+  `wireStrip_bottom_M40_at_zero_of_ballSup40` (:2040)
+* M1000 zero-line at `x = 0`: `wireStrip_top_M1000_at_zero_of_ballSup1000` (:2141),
+  `wireStrip_bottom_M1000_at_zero_of_ballSup1000` (:2243)
+* neighborhoods: `entire_ball_nonvan_of_ne` (:2430),
+  `wireStrip_top_M40_neighborhood_of_ballSup40` (:2455),
+  `wireStrip_bottom_M40_neighborhood_of_ballSup40` (:2489),
+  `wireStrip_top_M1000_neighborhood_of_ballSup1000` (:2526),
+  `wireStrip_bottom_M1000_neighborhood_of_ballSup1000` (:2560)
+* sup walls proved: `wireSup1000_poly_closedBall12` (:2353),
+  `wireSup1000_pi_closedBall12` (:2359),
+  `wireSup1000_polyPi_joint_closedBall12` (:2366),
+  `wireSup1000_joint_exceeds_budget` (:2372),
+  `gate_M1000_side_closed` (:1606), `gate_M1000_ratio_open` (:1609),
+  `width_M1000_top_open` (:1613), `width_M1000_bot_open` (:1618)
+* deriv bridges: `hTopDeriv40_of_ballSup40` (:470),
+  `hTopDeriv1000_of_ballSup1000` (:1625)
+* uniform conditional strips: `edgeStrip_top_half_M40` (:487),
+  `edgeStrip_bottom_half_M40` (:523), `edgeStrip_top_half_M1000` (:1642),
+  `edgeStrip_bottom_half_M1000` (:1674)
+* grid count: `gridH_leaf_count_done` (:1517)
+
+Open residuals conjoined below: `edge011_topLower_missing` (:314),
+`edgeHalf_topLower_missing` (:1566), `edgeHalf_topZetaFloor_missing` (:1573),
+`edgeHalf_topGammaFloor_missing` (:1580), `wireHtop_gap_residual` (:1862),
+`wireHbot_gap_residual` (:1904), `wireStrip_uniform_M40_residual` (:1998),
+`wireStrip_bottom_M40_at_zero_residual` (:2087),
+`wireStrip_top_M1000_at_zero_residual` (:2191),
+`wireStrip_bottom_M1000_at_zero_residual` (:2292),
+`sup1000_closedBall12_target` (:2341), `sup1000_gammaZeta_residual` (:2348),
+`wirePivot_neighborhood_residual` (:2598), plus the sup40 target and the three
+positive M1000 gates (whose negations are the banked :1609/:1613/:1618),
+defined here as `wireFinal_sup40_target` and `wireFinal_M1000_gates_open`.
+
+Verdict: the banked conjunction below holds by direct re-export (no new analysis);
+the full ledger stays OPEN exactly on the residual conjunction. -/
+
+namespace Door3RHWiring
+
+open CentralCoverAssembly
+
+/-- WIRE-FINAL open sup40 target: `C = 40` sup on `closedBall 0 12`
+(premise of all four M40 zero-line/neighborhood feeders above). -/
+def wireFinal_sup40_target : Prop :=
+  ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)
+
+/-- WIRE-FINAL open M1000 gates in positive form (each negation is banked at
+`:1609`/`:1613`/`:1618`, so this conjunction records the failing side). -/
+def wireFinal_M1000_gates_open : Prop :=
+  ((0.01 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ)) ∧
+  ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ)) ∧
+  ((-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ))
+
+/-- WIRE-FINAL complete residual list: every open residual of the wiring lane
+in one conjunction (uniform lowers, sup targets, M1000 gates, strip residuals,
+neighborhood residual). -/
+def wireFinal_residual_full : Prop :=
+  edge011_topLower_missing ∧
+  edgeHalf_topLower_missing ∧
+  edgeHalf_topZetaFloor_missing ∧
+  edgeHalf_topGammaFloor_missing ∧
+  wireHtop_gap_residual ∧
+  wireHbot_gap_residual ∧
+  wireStrip_uniform_M40_residual ∧
+  wireStrip_bottom_M40_at_zero_residual ∧
+  wireStrip_top_M1000_at_zero_residual ∧
+  wireStrip_bottom_M1000_at_zero_residual ∧
+  sup1000_closedBall12_target ∧
+  sup1000_gammaZeta_residual ∧
+  wirePivot_neighborhood_residual ∧
+  wireFinal_sup40_target ∧
+  wireFinal_M1000_gates_open
+
+/-- WIRE-FINAL banked conjunction: exact statements of every banked feeder in
+the five required shapes (endpoints, M40/M1000 zero-lines, neighborhoods,
+sup40/1000 walls, uniform strips) plus the deriv bridges and grid count. -/
+def wireFinal_banked_full : Prop :=
+  ((1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((((0 : ℝ)) : ℂ) + Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  ((1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((((0 : ℝ)) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ), (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y → y < (1 / 2 : ℝ) →
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ), -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) →
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ), (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y → y < (1 / 2 : ℝ) →
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ), -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) →
+    xiShifted ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) ≠ 0) ∧
+  (∀ (p : ℂ), CentralCoverAssembly.xiShiftedEntire p ≠ 0 →
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ, dist w p < δ →
+    CentralCoverAssembly.xiShiftedEntire w ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ), (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < y → y < (1 / 2 : ℝ) →
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+    dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+    CentralCoverAssembly.xiShiftedEntire w ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (y : ℝ), -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) →
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+    dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+    CentralCoverAssembly.xiShiftedEntire w ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ), (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < y → y < (1 / 2 : ℝ) →
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+    dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+    CentralCoverAssembly.xiShiftedEntire w ≠ 0) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (y : ℝ), -(1 / 2 : ℝ) < y → y < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ) →
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : ℂ,
+    dist w ((((0 : ℝ)) : ℂ) + Complex.I * (((y : ℝ)) : ℂ)) < δ →
+    CentralCoverAssembly.xiShiftedEntire w ≠ 0) ∧
+  (∀ {s : ℂ}, s ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (79 : ℝ)) ∧
+  (∀ {s : ℂ}, s ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ)) ∧
+  (∀ {s : ℂ}, s ∈ Metric.closedBall (0 : ℂ) 12 →
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ)) ∧
+  ((1000 : ℝ) < (319488 : ℝ)) ∧
+  ((1 / 2 : ℝ) / (1000 : ℝ) ≤ 1) ∧
+  (¬ (0.01 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ)) ∧
+  (¬ (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ)) ∧
+  (¬ (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖xiShiftedEntire z‖ ≤ (40 : ℝ))
+    (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ) →
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)) ∧
+  (∀ (hC : ∀ z ∈ Metric.closedBall (0 : ℂ) 12,
+    ‖xiShiftedEntire z‖ ≤ (1000 : ℝ))
+    (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+    ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ) →
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ)) ∧
+  (∀ (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ),
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)),
+    RHProofScaffold.XiCentralEdgeStrips10) ∧
+  (∀ (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)),
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (40 : ℝ)),
+    RHProofScaffold.XiCentralEdgeStrips10) ∧
+  (∀ (hTopLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) + Complex.I * (1 / 2 : ℂ))‖)
+    (hTopDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    ∀ y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ)) (1 / 2 : ℝ),
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ))
+    (hWidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ))
+    (hWidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)),
+    RHProofScaffold.XiCentralEdgeStrips10) ∧
+  (∀ (hBotLower : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (1 / 2 : ℂ))‖)
+    (hBotDeriv : ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    ∀ y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)),
+    ‖deriv xiShiftedEntire ((x : ℂ) + Complex.I * (y : ℂ))‖ ≤ (1000 : ℝ))
+    (hWidthT : (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) < (0.49 : ℝ))
+    (hWidthB : (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)),
+    RHProofScaffold.XiCentralEdgeStrips10) ∧
+  ((40 : ℕ) = 40)
+
+/-- WIRE-FINAL single audit: banked feeders and open residuals conjoined.
+Verdict OPEN exactly on `wireFinal_residual_full`; the banked half is closed
+by `wireFinal_banked_full_holds`. -/
+def wireFinal_ledger : Prop :=
+  wireFinal_banked_full ∧ wireFinal_residual_full
+
+/-- WIRE-FINAL banked audit proof: every banked conjunct above by direct
+re-export of the cited feeder (term proof, no new analysis). -/
+theorem wireFinal_banked_full_holds : wireFinal_banked_full :=
+  ⟨wireHtop_top_point_half_feeder, wireHbot_bot_point_half_feeder,
+    wireStrip_top_M40_at_zero_of_ballSup40, wireStrip_bottom_M40_at_zero_of_ballSup40,
+    wireStrip_top_M1000_at_zero_of_ballSup1000, wireStrip_bottom_M1000_at_zero_of_ballSup1000,
+    entire_ball_nonvan_of_ne,
+    wireStrip_top_M40_neighborhood_of_ballSup40, wireStrip_bottom_M40_neighborhood_of_ballSup40,
+    wireStrip_top_M1000_neighborhood_of_ballSup1000, wireStrip_bottom_M1000_neighborhood_of_ballSup1000,
+    wireSup1000_poly_closedBall12, wireSup1000_pi_closedBall12,
+    wireSup1000_polyPi_joint_closedBall12, wireSup1000_joint_exceeds_budget,
+    gate_M1000_side_closed, gate_M1000_ratio_open, width_M1000_top_open, width_M1000_bot_open,
+    hTopDeriv40_of_ballSup40, hTopDeriv1000_of_ballSup1000,
+    edgeStrip_top_half_M40, edgeStrip_bottom_half_M40,
+    edgeStrip_top_half_M1000, edgeStrip_bottom_half_M1000,
+    gridH_leaf_count_done⟩
+
+end Door3RHWiring
