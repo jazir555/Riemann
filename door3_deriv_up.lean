@@ -1087,6 +1087,12 @@ theorem zetaDiffCont_mid_filled :
 theorem zetaDiffCont_mid_banked : zetaDiffCont_mid :=
   zetaDiffCont_mid_filled
 
+theorem zetaDeriv_mid_125_closed :
+    ‖deriv riemannZeta dMid‖ ≤ 12500 := by
+  have h := zetaDeriv_mid_125_of_diffCont zetaDiffCont_mid_banked
+  rw [zeta_mid_125_number] at h
+  exact h
+
 /-! ## 11. INNER sphere at honest tail-quarter 125 (dInner = 0.395 - 0.75 I).
 
 Geometry check (margins honest, no force):
@@ -1159,6 +1165,19 @@ theorem zetaDeriv_inner_125_of_diffCont
     zetaSupOnSphere_inner_125_filled
 
 theorem zeta_inner_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
+
+/-! ## 11b. INNER closed attempt — exact gap (DERIV-WIRE).
+
+Same pattern as `zetaDeriv_mid_125_closed` would be
+`zetaDeriv_inner_125_of_diffCont` applied to a closed `zetaDiffCont_inner`
+plus `zetaSupOnSphere_inner_125_filled` (`:1150`) and `zeta_inner_125_number`.
+Status: `zetaDiffCont_inner` (prop `DiffContOnCl ℂ riemannZeta
+(Metric.ball dInner 0.01)`, `:622`) has NO filled/banked proof in this file;
+only the conditional `zetaDeriv_inner_125_of_diffCont` (`:1160`) exists.
+Hence `zetaDeriv_inner_125_closed : ‖deriv riemannZeta dInner‖ ≤ 12500`
+with NO open premises is NOT banked here. Single residual:
+prove `DiffContOnCl ℂ riemannZeta (Metric.ball dInner 0.01)` (pole avoided:
+`dInner.re = 0.395`, radius `0.01`), then close by the MID pattern. -/
 
 /-! ## 12. LEAF sphere at honest R02-disc 934 (dLeaf = 0.2 - 6.75 I).
 

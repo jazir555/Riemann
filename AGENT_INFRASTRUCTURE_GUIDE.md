@@ -5934,6 +5934,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-WIRE (background `ses_f34dc9616`, proof-only,
+  grep-clean, deriv_up-only commit): MID deriv CLOSED —
+  `zetaDeriv_mid_125_closed :1090` (‖deriv ζ dMid‖≤12500, NO open
+  premises: sup + DiffCont + number wired). FIRST fully-closed deriv
+  numeral. INNER same-pattern blocked on single `zetaDiffCont_inner`
+  (sup/conditional/number ready).
 - 2026-09-22 WENDEL-HEQ (background `ses_f34de0cab`, proof-only,
   grep-clean, wendel-only commit): shift identity PROVED —
   `wOuter_re_pos :890` + `shift_avoid_of_re_pos :894` (local mirror) +
