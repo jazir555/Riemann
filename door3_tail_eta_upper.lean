@@ -464,6 +464,75 @@ constant (`3/16 = 0.1875 < 48/181 ≈ 0.26519`). -/
 theorem tail_16384_lt_8192 : (3 / 16 : ℝ) < (48 / 181 : ℝ) := by
   norm_num
 
+/-- Rpow lower for the generic `M = 32768` tail (`181 ≤ 32768^{1/2}`;
+generic mirror of `M16384_rpow_eq` at `:408` and `sSCUT_M8192_rpow_ge` at
+pilot `:4797`; honest floor via `181^2 = 32761 ≤ 32768` by `norm_num`;
+`32768 = 2^15` so root `128·√2 ≈ 181.02` is NOT exact, unlike `16384`). -/
+theorem M32768_rpow_ge :
+    (181 : ℝ) ≤ ((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : ((181 : ℝ) ^ (2 : ℕ)) ≤ ((((32768 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = ((((32768 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- Generic `M = 32768` tail-decay bound at `Re = 1/2`
+(`12·(M^{-1/2})/(1/2) = 24/181`; generic mirror of `r_16384_le` at `:433`
+and `sSCUT_r_8192_le` at pilot `:4812`; decay recomputed honestly with
+`norm_num` via `M32768_rpow_ge`; tightest honest `T''' = 24/181 ≈ 0.1326`
+for the `181` root lower). -/
+theorem r_32768_le :
+    (12 : ℝ) * ((((((32768 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤
+      (24 / 181 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((32768 : ℕ)) : ℝ)) := by norm_num
+  have hApos : (0 : ℝ) < ((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos hMpos _
+  have hA_ge := M32768_rpow_ge
+  have hrw : ((((32768 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw]
+  have hInv_le : (((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ ≤ (181 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hApos (by norm_num)).mpr hA_ge
+  have hdiv_le : (((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ / (1 / 2 : ℝ) ≤
+      (181 : ℝ)⁻¹ / (1 / 2 : ℝ) :=
+    div_le_div_of_nonneg_right hInv_le (by norm_num)
+  have hmul_le : (12 : ℝ) * ((((((32768 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ /
+      (1 / 2 : ℝ)) ≤ (12 : ℝ) * ((181 : ℝ)⁻¹ / (1 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hdiv_le (by norm_num)
+  have hnum : (12 : ℝ) * ((181 : ℝ)⁻¹ / (1 / 2 : ℝ)) ≤ (24 / 181 : ℝ) := by
+    norm_num
+  linarith
+
+/-- Generic paired tail at `M = 32768` (`‖G - S65536‖ ≤ 24/181`; generic mirror
+of `eta_tail_16384_le` at `:449` and `sSCUT_eta_tail_8192_le` at pilot `:4837`
+— numerals use only `Re = 1/2` and `‖s‖ ≤ 12`). -/
+theorem eta_tail_32768_le {s : ℂ} (hre : s.re = (1 / 2 : ℝ))
+    (hC : ‖s‖ ≤ (12 : ℝ)) :
+    ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range (2 * 32768), etaDirichletTerm s k)‖ ≤
+      (24 / 181 : ℝ) := by
+  have hs : 0 < s.re := by rw [hre]; norm_num
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 32768 (by norm_num)
+  have h2M : 2 * 32768 = 65536 := by norm_num
+  rw [h2M] at hgen
+  rw [hre] at hgen
+  have hr := r_32768_le
+  linarith
+
+/-- The `M = 32768` constant honestly improves on the banked `M = 16384`
+constant (`24/181 ≈ 0.1326 < 3/16 = 0.1875`). -/
+theorem tail_32768_lt_16384 : (24 / 181 : ℝ) < (3 / 16 : ℝ) := by
+  norm_num
+
+#print axioms M32768_rpow_ge
+#print axioms r_32768_le
+#print axioms eta_tail_32768_le
+#print axioms tail_32768_lt_16384
+
 #print axioms M16384_rpow_eq
 #print axioms r_16384_le
 #print axioms eta_tail_16384_le
