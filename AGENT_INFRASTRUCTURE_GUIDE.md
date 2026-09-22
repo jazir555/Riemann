@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 OFFAXIS-MID (background `ses_f3492c3d`, proof-only,
+  grep-clean, off_axis-only commit): mid-block scaffold (Ico/card/
+  splits/triangles `:9285-9407`, 4091 terms in 4 blocks). Flat per-term
+  budget impossible (41/3068250); cancellation route needed.
 - 2026-09-22 ETAPRIME-HCONV (background `ses_f3492c3e2`, proof-only,
   grep-clean, eta_prime-only commit): quotient algebra `:1048` + R02
   caps `:1073` + numeral 11643.6 `:1090` (conditional on Deta link) +

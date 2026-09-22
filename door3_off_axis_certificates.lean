@@ -9277,3 +9277,152 @@ theorem sCutOA11_S4096_hEnough_of_residual
 #print axioms sCutOA11_S4096_hEnough_of_residual
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- Mid-block difference as one interval sum (4091 terms, `5 ≤ 4096`). -/
+theorem sCutOA11_mid_eq_Ico :
+    (∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k) =
+      ∑ k ∈ Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k := by
+  have h := Finset.sum_range_add_sum_Ico (fun k => etaDirichletTerm sCutOA11 k)
+    (show 5 ≤ 4096 by norm_num)
+  rw [← h]
+  abel
+
+/-- Norm form of the mid-block identity. -/
+theorem sCutOA11_mid_norm_eq :
+    ‖(∑ k ∈ Finset.range 4096, etaDirichletTerm sCutOA11 k) -
+      (∑ k ∈ Finset.range 5, etaDirichletTerm sCutOA11 k)‖ =
+      ‖∑ k ∈ Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k‖ := by
+  rw [sCutOA11_mid_eq_Ico]
+
+/-- Mid-block term count (`4096 - 5 = 4091`). -/
+theorem sCutOA11_mid_card_4091 : (Finset.Ico 5 4096).card = 4091 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Two-block split of the mid interval at `2048`. -/
+theorem sCutOA11_mid_split_2048 :
+    Finset.Ico 5 4096 = Finset.Ico 5 2048 ∪ Finset.Ico 2048 4096 := by
+  exact (Finset.Ico_union_Ico_eq_Ico (show (5 : ℕ) ≤ 2048 by norm_num)
+    (show 2048 ≤ 4096 by norm_num)).symm
+
+/-- Disjointness for the two-block split. -/
+theorem sCutOA11_mid_disjoint_2048 :
+    Disjoint (Finset.Ico 5 2048) (Finset.Ico 2048 4096) := by
+  exact Finset.Ico_disjoint_Ico_consecutive 5 2048 4096
+
+/-- Sum split over the two mid blocks. -/
+theorem sCutOA11_mid_sum_split_2048 :
+    ∑ k ∈ Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 5 2048, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 2048 4096, etaDirichletTerm sCutOA11 k) := by
+  rw [sCutOA11_mid_split_2048, Finset.sum_union sCutOA11_mid_disjoint_2048]
+
+/-- Triangle over the two mid blocks (scaffold; block enclosures still open). -/
+theorem sCutOA11_mid_two_block_triangle :
+    ‖∑ k ∈ Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.Ico 5 2048, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 2048 4096, etaDirichletTerm sCutOA11 k‖ := by
+  rw [sCutOA11_mid_sum_split_2048]
+  exact norm_add_le _ _
+
+/-- Low-half split at `1024`. -/
+theorem sCutOA11_mid_split_low :
+    Finset.Ico 5 2048 = Finset.Ico 5 1024 ∪ Finset.Ico 1024 2048 := by
+  exact (Finset.Ico_union_Ico_eq_Ico (show (5 : ℕ) ≤ 1024 by norm_num)
+    (show 1024 ≤ 2048 by norm_num)).symm
+
+/-- High-half split at `3072`. -/
+theorem sCutOA11_mid_split_high :
+    Finset.Ico 2048 4096 = Finset.Ico 2048 3072 ∪ Finset.Ico 3072 4096 := by
+  exact (Finset.Ico_union_Ico_eq_Ico (show (2048 : ℕ) ≤ 3072 by norm_num)
+    (show 3072 ≤ 4096 by norm_num)).symm
+
+/-- Disjointness for the low split. -/
+theorem sCutOA11_mid_disjoint_low :
+    Disjoint (Finset.Ico 5 1024) (Finset.Ico 1024 2048) := by
+  exact Finset.Ico_disjoint_Ico_consecutive 5 1024 2048
+
+/-- Disjointness for the high split. -/
+theorem sCutOA11_mid_disjoint_high :
+    Disjoint (Finset.Ico 2048 3072) (Finset.Ico 3072 4096) := by
+  exact Finset.Ico_disjoint_Ico_consecutive 2048 3072 4096
+
+/-- Block sizes (`1019 + 1024 + 1024 + 1024 = 4091`). -/
+theorem sCutOA11_mid_card_low : (Finset.Ico 5 1024).card = 1019 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Block size `1024 ≤ 2048`. -/
+theorem sCutOA11_mid_card_midlow : (Finset.Ico 1024 2048).card = 1024 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Block size `2048 ≤ 3072`. -/
+theorem sCutOA11_mid_card_midhigh : (Finset.Ico 2048 3072).card = 1024 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Block size `3072 ≤ 4096`. -/
+theorem sCutOA11_mid_card_high : (Finset.Ico 3072 4096).card = 1024 := by
+  rw [Nat.card_Ico]
+  norm_num
+
+/-- Four-block triangle scaffold (block enclosures still open; no per-term
+majorant is banked here because that route needs cancellation). -/
+theorem sCutOA11_mid_four_block_triangle :
+    ‖∑ k ∈ Finset.Ico 5 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.Ico 5 1024, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have htop := sCutOA11_mid_sum_split_2048
+  have hlow : ∑ k ∈ Finset.Ico 5 2048, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 5 1024, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k) := by
+    rw [sCutOA11_mid_split_low, Finset.sum_union sCutOA11_mid_disjoint_low]
+  have hhigh : ∑ k ∈ Finset.Ico 2048 4096, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k) := by
+    rw [sCutOA11_mid_split_high, Finset.sum_union sCutOA11_mid_disjoint_high]
+  rw [htop, hlow, hhigh]
+  have g1 := norm_add_le
+    ((∑ k ∈ Finset.Ico 5 1024, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k))
+    ((∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k))
+  have g2 := norm_add_le
+    (∑ k ∈ Finset.Ico 5 1024, etaDirichletTerm sCutOA11 k)
+    (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k)
+  have g3 := norm_add_le
+    (∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k)
+    (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k)
+  linarith
+
+/-- Per-term budget numeral if one ever tried a flat triangle over all `4091`
+terms (`41/750/4091 = 41/3068250`); filed as arithmetic only. -/
+theorem sCutOA11_mid_per_term_budget :
+    ((41 : ℝ) / 750 / 4091) = (41 / 3068250 : ℝ) := by norm_num
+
+#print axioms sCutOA11_mid_eq_Ico
+#print axioms sCutOA11_mid_norm_eq
+#print axioms sCutOA11_mid_card_4091
+#print axioms sCutOA11_mid_split_2048
+#print axioms sCutOA11_mid_disjoint_2048
+#print axioms sCutOA11_mid_sum_split_2048
+#print axioms sCutOA11_mid_two_block_triangle
+#print axioms sCutOA11_mid_split_low
+#print axioms sCutOA11_mid_split_high
+#print axioms sCutOA11_mid_disjoint_low
+#print axioms sCutOA11_mid_disjoint_high
+#print axioms sCutOA11_mid_card_low
+#print axioms sCutOA11_mid_card_midlow
+#print axioms sCutOA11_mid_card_midhigh
+#print axioms sCutOA11_mid_card_high
+#print axioms sCutOA11_mid_four_block_triangle
+#print axioms sCutOA11_mid_per_term_budget
+
+end Door3OffAxis
