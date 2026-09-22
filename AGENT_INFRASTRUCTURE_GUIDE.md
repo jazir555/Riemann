@@ -5762,7 +5762,17 @@ sorry-free infrastructure and the complete commit ledger above.
   in-pattern slip) but build still RED — hposR tail `:6242` one close
   short (block 6230-6242 nets +1; 11-deep nest closed by 10).
   PRESCRIPTION: add one `)` to 6242's tail (17/27→17/28), count
-  before/after, rebuild. VERIFY14 tasked (sole owner).
+  before/after, rebuild.   VERIFY14 tasked (sole owner).
+- 2026-09-22 VERIFY14 (background `ses_f34feaca8`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (35s)`, BUILD-EXIT=0
+  (attempt 1/2). Fix: one `)` on 6242 tail (17/27→17/28, block nets 0;
+  counts verified before/after). Zero errors/sorries; only 2
+  pre-existing linters. N11 honest 0.639 COMPILED. Ladder
+  0.579→0.598→0.61→0.621→0.627→0.634→0.639 all verified green.
+  Second paren saga closed (hDeq→hpos11→hre11→hposR, 4 waves).
+  STRATEGIC: increments +0.019/+0.012/+0.011/+0.006/+0.007/+0.005 —
+  ladder asymptoting below 0.66 gate; N12 rung marginal (~+0.004?).
+  Gamma lane decision owned by next wave (N12 vs rate-leaf machinery).
 - 2026-09-22 GAMMA-N11 (background `ses_f350b3ff2`, proof-only,
   grep-clean, premise_gamma +460): E06 Seq11 rung — rpow11-frac
   (1.58≤11^5/26), Re-lower 17.38, prod11 1084064309.98, link
