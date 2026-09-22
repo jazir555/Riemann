@@ -3477,4 +3477,36 @@ theorem sSCUT_S9_skip8_tail_shortfall :
       (12623 / 2100 : ℝ) := by
   norm_num
 
+/-- N = 4096 next-rung need at sCut (SCUT18, honest gap, no force).
+
+With the `M = 2048` tail the closed `hEnough` bar is `21/10`
+(`sSCUT_hEnough_2048_threshold`); the banked single-count shard floor is
+`F = -3529/1050 + 0.15` (`sSCUT_S9_skip8_Re_ge`, `k = 8` honestly skipped
+per `sSCUT_eta8_Re_le_neg` / `sSCUT_eta8_Re_no_pos_lock`). Hence any
+additional `Re` mass `E` from the remaining `k = 10..4095` range that would
+lift the shard floor to the bar must satisfy `E ≥ 11153/2100 ≈ 5.311`
+(the banked `sSCUT_S9_skip8_shortfall` numeral, restated conditionally). -/
+theorem sSCUT_N4096_nextRung_need (E : ℝ)
+    (h : ((-3529 / 1050 : ℝ) + 0.15) + E ≥ (21 / 10 : ℝ)) :
+    E ≥ (11153 / 2100 : ℝ) := by
+  have hgap : ((21 / 10 : ℝ) - ((-3529 / 1050) + 0.15)) = (11153 / 2100 : ℝ) :=
+    sSCUT_S9_skip8_shortfall
+  linarith
+
+/-- Even one ideal `+1` rung cannot close the single-count gap
+(`-3529/1050 + 0.15 + 1 < 21/10`): the next single term, at maximal ideal
+allowance, leaves the shard floor strictly below the bar — so the N = 4096
+slow leg needs many further rungs, not one. Pure arithmetic, no eta upper
+claimed here. -/
+theorem sSCUT_S9_skip8_plus_one_still_short :
+    (((-3529 / 1050 : ℝ) + 0.15) + 1) < (21 / 10 : ℝ) := by
+  norm_num
+
+/-- Exact residual after one ideal `+1` rung
+(`21/10 - ((-3529/1050) + 0.15 + 1) = 9053/2100 ≈ 4.311`). -/
+theorem sSCUT_S9_skip8_plus_one_gap_eq :
+    ((21 / 10 : ℝ) - (((-3529 / 1050 : ℝ) + 0.15) + 1)) =
+      (9053 / 2100 : ℝ) := by
+  norm_num
+
 end Door3PilotR00Zeta

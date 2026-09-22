@@ -5513,6 +5513,23 @@ sorry-free infrastructure and the complete commit ledger above.
   true ~1.42) + `CS_complex_S6_Im_below_S4_gap :4372` (0.55 below S4).
   0.6092<1.1592 → no Pythagoras feed; slow stays 1.94, shortfall
   0.6514. Next: S8 terms or Re-route (ETA-S8).
+- 2026-09-22 GAMMA-N6B (background `ses_f377691fd`, proof-only,
+  grep-clean, premise_gamma-only commit): E06 Seq6 rung mirrored —
+  rpow6-frac `:3926` (1.41≤6^5/26), Re-lower `:3941` (8.46), cpow6
+  norm `:3954` + upper-needed 8.56 `:3972`, add6 ≤7.23 `:3978`, prod6
+  10184.54 `:4004`, link `:4039` (720-num), rate 0.014 `:4055`,
+  finite 0.598 `:4064`, honest-below-gate `:4222` + gap 0.062 `:4227`,
+  N7-next `:4234`. VERDICT: 0.598<0.66 FAILS honestly (no force);
+  ladder moves to N=7. NOTE: landed while GAMMA-VERIFY2 builds the
+  same file — VERIFY2's result may predate these writes; re-verify
+  queued.
+- 2026-09-22 SCUT18 (background `ses_f3774d7ce`, proof-only, grep-clean):
+  honest gap (no growth forced) — `sSCUT_N4096_nextRung_need :3489`
+  (any E with F+E≥21/10 needs E≥11153/2100≈5.311), `plus_one_still_short
+  :3501` + `plus_one_gap_eq :3507` (even ideal +1 leaves residual
+  9053/2100≈4.311). k=10..4095 must supply ≥5.311 Re (tail-inclusive
+  ≥6.011); single rung provably insufficient. `hEnough` open. SCUT19
+  tasked (k=10 destructive eta-lock, mirroring k=8).
 - 2026-09-22 DG-SURVEY (background `ses_f3778800a`, proof-only, no
   edits): uniform Gamma-prime cap survey — DEAD for closed DG numeral.
   14 candidates checked (Mathlib Deriv/Digamma/BohrMollerup/GammaDeriv,
