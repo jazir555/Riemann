@@ -5784,6 +5784,14 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 PREMISE-FIXER (background `ses_f34c289ac`, sole build owner):
+  6416 fix APPLIED (12→11 closers, block nets 0, N11 mirror confirmed,
+  uniqueness pre/post-checked) but build BLOCKED UPSTREAM — stirling
+  dependency fails (4 parse errors `:1999/:2197/:2227/:2294` in RATE/
+  GAMMANEED2 committed content, never built by proof-only authors).
+  Target premise_gamma has ZERO attributed errors. Lock RELEASED.
+  STIRLING-FIXER tasked next (sole owner) — sweep clause: upstream
+  first.
 - 2026-09-22 FE-SURVEY (background `ses_f34e1cc75`, read-only, no
   edits): FE lane FULLY SCOPED — FE logic CLOSED (chi defs, reflection
   bridges, Hadamard/PL/Jensen banked); only NUMERICS missing. Minimal
