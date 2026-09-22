@@ -6057,6 +6057,10 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 RH-HRIGHT (background `ses_f348f8e87`, proof-only,
+  grep-clean, RH-only commit): Hright narrowed to right-tail
+  distance-bound instance `:12546` (Rouché path rejected as wrong shape).
+  Distance instance + neg-symm still open.
 - 2026-09-22 DERIV-GAMMAP (background `ses_f3490d9f5`, proof-only,
   grep-clean, deriv-only commit): tight-chain specs (sups/needs `:1651-
   1663`) + Cauchy chains (0.8/300 `:1672-1697`) + gaps (`:1704-1716`:

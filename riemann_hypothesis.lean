@@ -12532,3 +12532,23 @@ theorem tailPointwise10_of_rightTail_and_negSymm
         exact hsymm z hgt hlt
       rw [heq] at hW
       exact hW)
+
+/-- Right-tail distance-bound feeder for the halved tail premise `Hright`.
+    A distance-sensitive positive lower bound on `10 < Re` gives the exact
+    off-axis nonvanishing fact consumed by
+    `tailPointwise10_of_rightTail_and_negSymm`. Residual after this feed:
+    one instance `XiRightTailDistanceLowerBoundForX 10` (supplied, e.g., via
+    `tailDistance_from_completedMinusPolar` from a
+    `CompletedMinusPolarTailLowerBound10`, or via
+    `XiRightTailAsymptoticLowerBoundForX.toDistanceLowerBound`); the
+    neg-symmetry hypothesis `XiShiftedNegSymmetric` is still required by the
+    adapter for the left tail. -/
+theorem Hright_of_rightTailDistanceLowerBound10
+    (T : XiRightTailDistanceLowerBoundForX (10 : ℝ)) :
+    ∀ z : ℂ, (10 : ℝ) < z.re → -(1 : ℝ) / 2 < z.im →
+      z.im < (1 : ℝ) / 2 → z.im ≠ 0 → xiShifted z ≠ 0 := by
+  intro z hre hgt hlt hne hz
+  have hpos := T.lower_pos z.re z.im (le_of_lt hre) hne
+  have hbound := T.bound z hre hgt hlt hne
+  rw [hz, norm_zero] at hbound
+  linarith
