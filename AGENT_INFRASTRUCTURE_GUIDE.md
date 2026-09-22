@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 BALLADV-DZNUM-ADAPTIVE (background `ses_f34c288fd`, proof-only,
+  grep-clean, ball_advance-only commit): DZFIRE verified present +
+  worst-case scaffolding — `R02_etaWorst_normSq :1396` (0.74²+8.25²=
+  68.6101) + `le_829 :1403` (‖s‖≤8.29 worst factor) + majorant restate
+  `:1411` + gap specs `:1427/:1440` (no Deta/DZetaPair numerals in-tree;
+  no unconditional Summable; no conversion caps). Residual: dominator
+  B + log-comparison + p-series; VEta/C0/C1/C2; DG open.
 - 2026-09-22 TAIL-M16384 (background `ses_f34c288f6`, proof-only,
   grep-clean, tail-only commit): generic M=16384 tail —
   `M16384_rpow_eq :408` (128 exact) + `r_16384_le :433` (≤3/16, no

@@ -1377,4 +1377,77 @@ theorem R02_retier134400E_of_ball16800 (M : ℝ) (hM : 134400 ≤ M)
 #print axioms R02_retier134400W_of_ball16800
 #print axioms R02_retier134400E_of_ball16800
 
+/-- DZNUM adaptive probe (fenced, append-only): DZFIRE content verified present
+(`R02_fullDerivUp_of_etaPairDeriv :1042`, this file) with `Deta` (`:1055`
+`hTsumMaj`) and `DZetaPair` (`:1058` `hConvLe`) as open premises; re-export
+`door3_R02_zeta_bridge.lean:53-68` keeps both caps explicit. Grep record —
+bound shapes assembled from (read-only, no new import, cycle-safe):
+* `etaDerivPair_bound` (`door3_eta_prime.lean:133`), two-piece log-weighted;
+* `etaDerivBound` (`door3_eta_prime.lean:43-46`), the per-term RHS restated below;
+* `etaDeriv_tsum_shape` / `etaDeriv_tail_shape` (`door3_eta_prime.lean:216/229`);
+* uniform majorant `etaDerivMajorant` (`door3_eta_prime.lean:389-393`) with
+  pointwise link `etaDerivMajorant_bound` (`:400`) and conditional summability
+  wrapper `etaDerivMajorant_summable_of_dom` (`:498`).
+No unconditional `Summable` of any eta majorant is banked in-tree, and no
+`Deta` / `DZetaPair` numerals are banked anywhere (grep hits only the open
+premises above). Hence no numeral is closed this turn: the two `ℝ`
+identities below bank the worst-case `‖s‖` factor honestly by `norm_num`,
+and the two `Prop` specs file the exact remaining gap. -/
+theorem R02_etaWorst_normSq : (0.74 : ℝ) ^ 2 + 8.25 ^ 2 = 68.6101 := by
+  norm_num
+
+/-- Worst-case `‖s‖` cap factor: `8.29 ^ 2` dominates the R02 corner norm-square
+(`re = 0.74`, `im = -8.25`), so `‖s‖ ≤ 8.29` on the whole `s`-rect follows by
+`sq_le_sq` / `norm` monotonicity upstream; only the `ℝ` identity is banked
+here. -/
+theorem R02_etaWorst_normSq_le_829 : (68.6101 : ℝ) ≤ 8.29 ^ 2 := by
+  norm_num
+
+/-- Worst-case eta-pair majorant on the R02-disc `s`-rect, restating the
+`etaDerivBound` RHS (`door3_eta_prime.lean:43-46`) with `‖s‖` replaced by
+`8.29` (`R02_etaWorst_normSq_le_829`) and `s.re` replaced by the worst-case
+exponent `0.05` (smallest `s.re` gives the largest `(2 * m + 1) ^ (-s.re - 1)`
+and `(2 * m + 1) ^ (-s.re)` since the bases exceed `1`). -/
+noncomputable def R02_etaWorstMajorant (m : ℕ) : ℝ :=
+  Real.log (((2 * m + 2 : ℕ)) : ℝ) * 8.29 *
+    ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ) - 1)) +
+    (Real.log (((2 * m + 2 : ℕ)) : ℝ) -
+      Real.log (((2 * m + 1 : ℕ)) : ℝ)) *
+      ((((2 * m + 1 : ℕ)) : ℝ) ^ (-(0.05 : ℝ)))
+
+/-- `Deta` numeral missing-spec (filed, not fixed): existence of a finite
+`Deta` dominating the worst-case majorant tsum. Not satisfiable this turn:
+* `Summable R02_etaWorstMajorant` needs an explicit pure-power dominator with
+  a log-factor comparison plus a banked p-series fact — neither is banked
+  in-tree (same gap as `etaDerivMajorant_summable_of_dom`, whose `B` premise
+  has no supplied value);
+* hence the tsum value `∑' m, R02_etaWorstMajorant m` has no closed numeral.
+Once `Summable` is banked, `Deta := ∑' m, R02_etaWorstMajorant m` closes the
+`hTsumMaj` premise of `:1042` via the per-term domination above. -/
+def R02_Deta_missingNumeral_spec : Prop :=
+  ∃ Deta : ℝ, 0 ≤ Deta ∧ Summable R02_etaWorstMajorant ∧
+    ∑' m : ℕ, R02_etaWorstMajorant m ≤ Deta
+
+/-- `DZetaPair` numeral missing-spec (filed, not fixed): existence of eta-value
+/ conversion-factor caps (`VEta`, `C0`, `C1`, `C2`) plus the quotient cap
+`DZetaPair = (Deta * C0 + VEta * C1) * C2` holding uniformly over the
+R02-disc `s`-rect on the abstract `:1057-1058` quotient shape. Not satisfiable
+this turn: no conversion-factor caps (`conv`, `conv'`, `convInv2` — the
+eta-to-zeta factor, its derivative, and the inverse-square factor) and no
+uniform eta-value cap are banked in-tree for the R02 rect, so `C0` / `C1` /
+`C2` / `VEta` have no supplied values. Given such caps, the quotient bound
+follows by `norm_mul` / `norm_add_le` transport; the numerals are the gap. -/
+def R02_DZetaPair_missingNumeral_spec (Deta : ℝ) : Prop :=
+  ∃ (VEta C0 C1 C2 DZetaPair : ℝ),
+    0 ≤ VEta ∧ 0 ≤ C0 ∧ 0 ≤ C1 ∧ 0 ≤ C2 ∧ 0 ≤ DZetaPair ∧
+    DZetaPair = (Deta * C0 + VEta * C1) * C2 ∧
+    ∀ (s : ℂ), 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ∀ (etaVal conv conv' convInv2 : ℂ),
+        ‖etaVal‖ ≤ VEta → ‖conv‖ ≤ C0 → ‖conv'‖ ≤ C1 → ‖convInv2‖ ≤ C2 →
+          ∀ (etaDerivVal : ℂ), ‖etaDerivVal‖ ≤ Deta →
+            ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair
+
+#print axioms R02_etaWorst_normSq
+#print axioms R02_etaWorst_normSq_le_829
+
 end Door3R02BallAdvance
