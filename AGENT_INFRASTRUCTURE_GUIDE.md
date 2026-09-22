@@ -6152,6 +6152,9 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 ASSEMBLY-R09 (background `ses_f34778728`, proof-only,
+  grep-clean, assembly-only commit): R09 leaf+H conditional (tenth +
+  0.07). Post-dates GREEN; re-verify later.
 - 2026-09-22 GAMMA-N18 (background `ses_f347c2818`, proof-only,
   grep-clean + 4 audits, premise_gamma-only commit): Seq18 meets gate
   (0.662, gap 0.0); rate wall stands (0.646<0.66). N19 next.
