@@ -6099,9 +6099,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-LEAF3 (background `ses_f348ad91a`, proof-only,
   grep-clean, stirling-only commit): leaf shift-3 `≤0.061` (via Gamma
   3.1≤2.31; 12x→7x). Outer 16x / leaf 7x stand.
-- 2026-09-22 WENDEL-TELE (provisional, report pending; verified
-  grep-clean +303 diff): telescope assembly attempt. Reconciled on
-  report.
+- 2026-09-22 WENDEL-TELE (background `ses_f348dab62`, proof-only,
+  grep-clean, wendel-only commit): 8-fold telescope CLOSED to
+  log(w+8)-log w = S-Q+E (`:1212`) + Q/E sum caps + D-cap + residual
+  identity; G2 conditional on U0/C2 normcaps (`:1375`). H3 conditional.
 - 2026-09-22 TAIL-M24 (background `ses_f348a1e0e`, proof-only,
   grep-clean, tail-only commit): M16777216 exact rung `3/512≈0.00586
   :1145` (4096² verified). Next M33554432 odd.
