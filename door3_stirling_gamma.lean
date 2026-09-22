@@ -3936,3 +3936,54 @@ def D3SG_gamma_reflection_bridge_spec : Prop :=
 /-- Exact outer decay need (filed not proved): `‖Γ(mk 0.1975 (-4.375))‖ ≤ 0.002`. -/
 def D3SG_outer_decay_need : Prop :=
   ‖Complex.Gamma (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))‖ ≤ (0.002 : ℝ)
+
+/-! ## STIRLING-REFLECT proof-only audit (append-only, no rebuild)
+
+Reflection spec: `D3SG_gamma_reflection_bridge_spec` at `:3931`
+(`Gamma s * Gamma (1 - s) * sin (pi * s) = pi` for `s.re = 0.1975`).
+Height-decay spec: `D3SG_height_decay_pi2_spec` at `:3925`.
+Outer need: `D3SG_outer_decay_need` at `:3937`. All three specs are KEPT
+(filed, not proved); nothing above this block was modified.
+
+Banked Gamma shapes in this file (only usable local API, no new imports):
+- `Complex.Gamma_eq_integral` at `:11` (via `D3SG_Gamma_norm_le_real`);
+- `Real.Gamma_eq_integral` at `:14`;
+- `Complex.Gamma_add_one` at `:73` (via `D3SG_gamma_shift_norm`);
+- `Real.Gamma_add_one` at `:84,129,382,1647,1387,1431` (shifts + caps);
+- `Real.convexOn_Gamma` at `:136,389` (+ `Real.Gamma_one`, `Real.Gamma_two`);
+- `Real.Gamma_pos_of_pos` at `:218,410` (positivity for `pow_le_pow_left₀`);
+- `Complex.norm_cpow_eq_rpow_re_of_pos` at `:25` (pointwise modulus).
+Absent from this file: no `Gamma_mul_Gamma_one_sub`, no `Gamma_one_sub`,
+no `BetaIntegral`, no `sin_pi` product, no sine strip lower bound.
+
+Rebuild verdict: honest local rebuild of `:3931` from the banked list alone
+is NOT possible. The banked lemmas only give the integral on `0 < Re`,
+the `+1` recurrence, and convexity on `[1,2]`; none connects
+`Gamma s * Gamma (1 - s)` to `pi / sin (pi * s)`. That identity needs the
+Beta/Gamma product plus a sine-modulus estimate to reach the `pi / 2` rate.
+-/
+
+/-- Conjunction marker keeping the three open specs together (no claim proved). -/
+def D3SG_reflection_rebuild_gap : Prop :=
+  D3SG_height_decay_pi2_spec ∧ D3SG_gamma_reflection_bridge_spec ∧ D3SG_outer_decay_need
+
+/-- Exact missing Mathlib-side API for a future local rebuild of `:3931`.
+
+Each entry names the lemma/shape that would be needed; none is banked above:
+1. Euler reflection `Complex.Gamma_mul_Gamma_one_sub`
+   (`Gamma s * Gamma (1 - s) = pi / sin (pi * s)`; needs `s ∉ ℤ` side condition).
+2. Beta/Gamma link behind it (`Complex.BetaIntegral` product:
+   `Gamma s * Gamma t = Gamma (s + t) * Beta s t` on `0 < Re`).
+3. Sine strip nonvanishing on `Re = 0.1975`
+   (`Complex.sin (pi * s) ≠ 0` for `s.re = 0.1975`).
+4. Sine modulus two-sided estimate yielding the `pi / 2` rate
+   (`‖sin (pi * (x + iy))‖` comparable to `exp (pi * |y|) / 2`).
+5. Companion upper cap `‖Gamma (1 - s)‖ ≤ C` on `Re (1 - s) = 0.8025`
+   (already reachable in principle from `D3SG_decay_sigma`-style bounds,
+   listed here only as the consumer of items 1-4 toward `:3925`). -/
+def D3SG_reflection_missing_API : List String :=
+  ["Complex.Gamma_mul_Gamma_one_sub",
+    "Beta-Gamma product via Complex.BetaIntegral",
+    "Complex.sin strip nonvanishing at Re 0.1975",
+    "Complex.sin modulus pi-half-rate estimate",
+    "Gamma (1 - s) companion cap at Re 0.8025"]

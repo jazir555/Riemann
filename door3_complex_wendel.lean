@@ -1650,4 +1650,523 @@ H3); no wider Wendel consumer in file takes the H3 shape, so the numeric cap
 is the terminal consumer banked here.
 -/
 
+/-! ## 23. WENDEL-H3 leaf mirror (PROOF-ONLY, FENCED, no build): H3 CLOSED + numeric.
+
+Greps (before edit, this turn, this file only):
+- H3_outer chain: `H3_outer_banked/:1573` via `h3_outer_of_lead_normcap_G2/:1036`
+  with `G1_outerN8_banked/:1570` (`G1_of_normcap/:1012` + `wOuter8_norm_sq_U`
+  + `g1_C_inflation_1354` + `stirling_G1expr_im2/:994` + `half_div_eq`)
+  and `G2_outerN8_banked/:1526` (`g2_G2_of_telescope_normcap/:1375` +
+  `wOuter_norm_sq_U0/:1516` + `g2_C2_inflation_863` + `g2_residual_eq/:1357`
+  + `g2_log_link8/:1212` + `g2_step_nat/:1169` + `g2_telescope8/:1184`
+  + `g2_log_endpoints/:1193` + `g2_S_align/:1203` + caps `g2_Q_sum_le`,
+  `g2_eps_sum_le`, `g2_D_norm_le/:1287`); numeric `H3_outer_banked_numeric/:1639`
+  cap `1.16` via `h3_numeric_of_bound` + floors `g2_norm_wOuter_lower/:1257`,
+  `g2_norm_wOuter8_lower/:1264`; shift `digamma_shift_wOuter_8/:951` via
+  generic `digamma_shift_8fold` + `digamma_shift_nat`; combiner
+  `h3_outer_of_G1_G2/:773`; lead `stirling_wOuter_add8/:848`.
+- wLeaf specs: `wLeaf/:74` def `Complex.mk 0.1 (-3.375)`, `wLeaf_re/:84`,
+  `wLeaf_im/:86`; `lower_leaf` Gamma bound at `:285` (not used here);
+  no leaf H3/G1/G2/telescope defs exist before this section (zero hits for
+  `S_leaf`, `cN_leaf`, `target_leaf`, `G1_leaf`, `G2_leaf`, `H3_leaf`,
+  `wLeaf_add8`, `stirling_wLeaf`, `g2_leaf`, `wLeaf_shift`).
+- generic reuse: `digamma_shift_nat`, `digamma_shift_8fold`,
+  `shift_avoid_of_re_pos`, `g2_log_step/:1093`, `half_div_eq/:991`,
+  `Zeta23.StirlingVert.digamma_stirling`, `norm_eps_le`,
+  `integral_inv_add_eq_log_sub`, `integral_inv_add_eq`.
+
+Attempt (honest mirror at leaf coords with N = 8): `wLeaf + 8 = mk 8.1 (-3.375)`
+(Re 8.1 > 0, |Im| 3.375 >= 1/2). Mirror every outer step with `3.375`
+in place of `4.375` and `wLeaf` in place of `wOuter`: shift-avoid + 8-fold
+shift, add8 Re/Im, StirlingVert lead + G1-expression rewrite, G1 normcap
+conditional + U/C banked, per-step eps + denom floor, 8-fold telescope +
+residual identity + uniform Q/E/D caps + G2 conditional + U0/C2 banked,
+H3 combiner + two-term close + numeric consumer. Values: `‖wLeaf‖^2 =
+0.1^2+3.375^2 = 11.400625 <= 11.41`; `‖wLeaf+8‖^2 = 8.1^2+3.375^2 =
+77.000625 <= 77.01`; G1 `3*77.01 = 231.03 <= 20.30*11.390625 = 231.22...`;
+G2 `(Qcap+Ecap+Dcap)*11.41 <= 8.82` with `Qcap = 8*(1/2)/3.375^2`,
+`Ecap = 8/(3*3.375^2*3.375)`, `Dcap = 4/(3.375*3.375)`; numeric
+`(20.30+8.82)/3.375^2 <= 2.56`. No new imports; this section only.
+-/
+
+noncomputable def S_leafN8 : ℂ :=
+  ∑ k ∈ Finset.range 8, (wLeaf + (k : ℂ))⁻¹
+
+noncomputable def cN_leafN8 : ℂ :=
+  Complex.log (wLeaf + (8 : ℂ)) - (1 : ℂ) / (2 * (wLeaf + (8 : ℂ)))
+
+noncomputable def target_leaf : ℂ :=
+  Complex.log wLeaf - (1 : ℂ) / (2 * wLeaf)
+
+noncomputable def G1_leafN8_prop (C : ℝ) : Prop :=
+  ‖Complex.digamma (wLeaf + (8 : ℂ)) -
+    (Complex.log (wLeaf + (8 : ℂ)) - (1 : ℂ) / (2 * (wLeaf + (8 : ℂ))))‖ ≤
+    C / ‖wLeaf + (8 : ℂ)‖ ^ 2
+
+noncomputable def G2_leafN8_prop (C2 : ℝ) : Prop :=
+  ‖(cN_leafN8 - S_leafN8) - target_leaf‖ ≤ C2 / ‖wLeaf‖ ^ 2
+
+theorem wLeaf_re_pos : 0 < wLeaf.re := by
+  rw [wLeaf_re]
+  norm_num
+
+theorem wLeaf_shift_avoid (k : ℕ) (hk : k ≤ 8) (m : ℕ) :
+    (wLeaf + (k : ℂ)) ≠ -(((m : ℕ)) : ℂ) :=
+  shift_avoid_of_re_pos wLeaf 8 wLeaf_re_pos k hk m
+
+theorem digamma_shift_wLeaf_8 :
+    Complex.digamma (wLeaf + (8 : ℂ)) =
+      Complex.digamma wLeaf + S_leafN8 := by
+  have hAvoid : ∀ (k : ℕ), k ≤ 8 → ∀ (m : ℕ),
+      (wLeaf + ((k : ℕ) : ℂ)) ≠ -(((m : ℕ)) : ℂ) := by
+    intro k hk m
+    exact wLeaf_shift_avoid k hk m
+  have h := digamma_shift_8fold wLeaf hAvoid
+  have hcast8 : (((8 : ℕ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast8] at h
+  unfold S_leafN8
+  exact h
+
+theorem wLeaf_add8_re : (wLeaf + (8 : ℂ)).re = 8.1 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_re, wLeaf_re, Complex.natCast_re]
+  norm_num
+
+theorem wLeaf_add8_im : (wLeaf + (8 : ℂ)).im = -3.375 := by
+  have hcast : ((8 : ℕ) : ℂ) = (8 : ℂ) := by simp
+  rw [← hcast, Complex.add_im, wLeaf_im, Complex.natCast_im]
+  norm_num
+
+theorem stirling_wLeaf_add8 :
+    ‖Complex.digamma (wLeaf + (8 : ℂ)) - Complex.log (wLeaf + (8 : ℂ)) +
+      (1 / 2 : ℂ) / (wLeaf + (8 : ℂ))‖ ≤ 3 / (-3.375) ^ 2 := by
+  have hre : (0 : ℝ) < (wLeaf + (8 : ℂ)).re := by
+    rw [wLeaf_add8_re]
+    norm_num
+  have him : (1 / 2 : ℝ) ≤ |(wLeaf + (8 : ℂ)).im| := by
+    rw [wLeaf_add8_im]
+    norm_num
+  have h := Zeta23.StirlingVert.digamma_stirling (w := wLeaf + (8 : ℂ)) hre him
+  rw [wLeaf_add8_im] at h
+  exact h
+
+theorem stirling_G1expr_leaf_im2 :
+    ‖Complex.digamma (wLeaf + (8 : ℂ)) -
+      (Complex.log (wLeaf + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wLeaf + (8 : ℂ))))‖ ≤
+      3 / (-3.375) ^ 2 := by
+  have hhalf : (1 / 2 : ℂ) / (wLeaf + (8 : ℂ)) =
+      (1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) :=
+    half_div_eq _
+  have hrewrite : Complex.digamma (wLeaf + (8 : ℂ)) -
+      (Complex.log (wLeaf + (8 : ℂ)) -
+        (1 : ℂ) / (2 * (wLeaf + (8 : ℂ)))) =
+      Complex.digamma (wLeaf + (8 : ℂ)) - Complex.log (wLeaf + (8 : ℂ)) +
+        (1 / 2 : ℂ) / (wLeaf + (8 : ℂ)) := by
+    rw [hhalf]
+    ring
+  rw [hrewrite]
+  exact stirling_wLeaf_add8
+
+theorem G1_leaf_of_normcap (C U : ℝ)
+    (hU : ‖wLeaf + (8 : ℂ)‖ ^ 2 ≤ U)
+    (hC : 3 * U ≤ C * (-3.375) ^ 2) :
+    G1_leafN8_prop C := by
+  have hIm2pos : (0 : ℝ) < (-3.375) ^ 2 := by
+    norm_num
+  have hne : wLeaf + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wLeaf_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hnormpos : (0 : ℝ) < ‖wLeaf + (8 : ℂ)‖ :=
+    norm_pos_iff.mpr hne
+  have hnorm2pos : (0 : ℝ) < ‖wLeaf + (8 : ℂ)‖ ^ 2 :=
+    pow_pos hnormpos 2
+  have hle : 3 / (-3.375) ^ 2 ≤ C / ‖wLeaf + (8 : ℂ)‖ ^ 2 := by
+    rw [div_le_div_iff hIm2pos hnorm2pos]
+    have h3 : 3 * ‖wLeaf + (8 : ℂ)‖ ^ 2 ≤ 3 * U :=
+      mul_le_mul_of_nonneg_left hU (by norm_num)
+    linarith
+  have hmain := stirling_G1expr_leaf_im2
+  unfold G1_leafN8_prop
+  exact le_trans hmain hle
+
+theorem wLeaf8_norm_sq_U : ‖wLeaf + (8 : ℂ)‖ ^ 2 ≤ (77.01 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wLeaf_add8_re, wLeaf_add8_im]
+  norm_num
+
+theorem g1_leaf_C_inflation_2030 :
+    3 * (77.01 : ℝ) ≤ (20.30 : ℝ) * (-3.375) ^ 2 := by
+  norm_num
+
+theorem G1_leafN8_banked : G1_leafN8_prop 20.30 :=
+  G1_leaf_of_normcap 20.30 77.01 wLeaf8_norm_sq_U g1_leaf_C_inflation_2030
+
+theorem h3_leaf_of_G1_G2 (C1 C2 : ℝ)
+    (hEq : Complex.digamma (wLeaf + (8 : ℂ)) =
+      Complex.digamma wLeaf + S_leafN8)
+    (hG1 : G1_leafN8_prop C1) (hG2 : G2_leafN8_prop C2) :
+    ‖Complex.digamma wLeaf - target_leaf‖ ≤
+      C1 / ‖wLeaf + (8 : ℂ)‖ ^ 2 + C2 / ‖wLeaf‖ ^ 2 := by
+  have hDisc : ‖Complex.digamma (wLeaf + (8 : ℂ)) - cN_leafN8‖ ≤
+      C1 / ‖wLeaf + (8 : ℂ)‖ ^ 2 := hG1
+  have hLink : ‖(cN_leafN8 - S_leafN8) - target_leaf‖ ≤
+      C2 / ‖wLeaf‖ ^ 2 := hG2
+  have hT : ‖Complex.digamma wLeaf - (cN_leafN8 - S_leafN8)‖ ≤
+      C1 / ‖wLeaf + (8 : ℂ)‖ ^ 2 := by
+    have hSame : Complex.digamma wLeaf - (cN_leafN8 - S_leafN8) =
+        Complex.digamma (wLeaf + (8 : ℂ)) - cN_leafN8 := by
+      rw [hEq]
+      ring
+    rw [hSame]
+    exact hDisc
+  have hSplit : Complex.digamma wLeaf - target_leaf =
+      (Complex.digamma wLeaf - (cN_leafN8 - S_leafN8)) +
+        ((cN_leafN8 - S_leafN8) - target_leaf) := by
+    ring
+  calc ‖Complex.digamma wLeaf - target_leaf‖
+      ≤ ‖Complex.digamma wLeaf - (cN_leafN8 - S_leafN8)‖ +
+        ‖(cN_leafN8 - S_leafN8) - target_leaf‖ := by
+          rw [hSplit]
+          exact norm_add_le _ _
+    _ ≤ C1 / ‖wLeaf + (8 : ℂ)‖ ^ 2 + C2 / ‖wLeaf‖ ^ 2 :=
+          add_le_add hT hLink
+
+theorem g2_eps_bound_wLeaf (m : ℝ) (hm : 0 ≤ m) :
+    ‖Zeta23.StirlingVert.eps wLeaf m‖ ≤
+      1 / (3 * ‖(m : ℂ) + wLeaf‖ ^ 2 * 3.375) := by
+  have ht : (1 / 2 : ℝ) ≤ |wLeaf.im| := by
+    rw [wLeaf_im]
+    norm_num
+  have h := Zeta23.StirlingVert.norm_eps_le (w := wLeaf) (m := m)
+    wLeaf_re_pos ht hm
+  have him : |wLeaf.im| = (3.375 : ℝ) := by
+    rw [wLeaf_im]
+    norm_num
+  rw [him] at h
+  exact h
+
+theorem g2_denom_lower_wLeaf (m : ℝ) :
+    (3.375 : ℝ) ≤ ‖(m : ℂ) + wLeaf‖ := by
+  have hle : |(((m : ℂ) + wLeaf)).im| ≤ ‖(m : ℂ) + wLeaf‖ :=
+    Complex.abs_im_le_norm _
+  have him2 : ((((m : ℂ) + wLeaf)).im) = (-3.375 : ℝ) := by
+    simp [wLeaf_im]
+  have habs : |((((m : ℂ) + wLeaf)).im)| = (3.375 : ℝ) := by
+    rw [him2]
+    norm_num
+  linarith
+
+theorem g2_step_nat_leaf (k : ℕ) :
+    Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2 +
+        Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)) := by
+  have h := g2_log_step wLeaf wLeaf_re_pos (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hnat : ((k + 1 : ℕ) : ℝ) = (((k : ℕ) : ℝ) + 1 : ℝ) := by
+    push_cast
+    ring
+  have hbridge : ((((k + 1 : ℕ) : ℝ)) : ℂ) = ((((((k : ℕ) : ℝ) + 1 : ℝ))) : ℂ) := by
+    rw [hnat]
+  rw [hbridge]
+  exact h
+
+theorem g2_telescope8_leaf :
+    ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)) =
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wLeaf) := by
+  have h := Finset.sum_range_sub
+    (fun j : ℕ => Complex.log (((((j : ℕ) : ℝ)) : ℂ) + wLeaf)) 8
+  exact h
+
+theorem g2_log_endpoints_leaf :
+    Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+      Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wLeaf) =
+    Complex.log (wLeaf + (8 : ℂ)) - Complex.log wLeaf := by
+  have h8 : ((((8 : ℕ) : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  have h0 : ((((0 : ℕ) : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [h8, h0, zero_add, add_comm (8 : ℂ) wLeaf]
+
+theorem g2_S_align_leaf :
+    ∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ = S_leafN8 := by
+  unfold S_leafN8
+  apply Finset.sum_congr rfl
+  intro k _
+  have hcast : ((((k : ℕ) : ℝ)) : ℂ) = ((k : ℕ) : ℂ) := by
+    simp
+  rw [hcast, add_comm _ wLeaf]
+
+theorem g2_log_link8_leaf :
+    Complex.log (wLeaf + (8 : ℂ)) - Complex.log wLeaf =
+    S_leafN8 -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) := by
+  have hTel := g2_telescope8_leaf
+  have hEnd := g2_log_endpoints_leaf
+  have hStep : ∀ k ∈ Finset.range 8,
+      (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)) =
+      (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2 +
+        Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)) := by
+    intro k _
+    exact g2_step_nat_leaf k
+  have hSum : ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+      Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)) =
+      ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2 +
+        Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) :=
+    Finset.sum_congr rfl hStep
+  have hSplit : ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ -
+      (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2 +
+      Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) =
+      (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹) -
+      (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+      (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) := by
+    rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  calc Complex.log (wLeaf + (8 : ℂ)) - Complex.log wLeaf
+      = Complex.log (((((8 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+        Complex.log (((((0 : ℕ) : ℝ)) : ℂ) + wLeaf) := hEnd.symm
+    _ = ∑ k in Finset.range 8, (Complex.log (((((k + 1 : ℕ) : ℝ)) : ℂ) + wLeaf) -
+        Complex.log (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)) := hTel.symm
+    _ = ∑ k in Finset.range 8, ((((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹ -
+        (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2 +
+        Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) := hSum
+    _ = (∑ k in Finset.range 8, (((((k : ℕ) : ℝ)) : ℂ) + wLeaf)⁻¹) -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) :=
+      hSplit
+    _ = S_leafN8 -
+        (∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))) := by
+      rw [g2_S_align_leaf]
+
+theorem g2_norm_wLeaf_lower : (3.375 : ℝ) ≤ ‖wLeaf‖ := by
+  have h := g2_denom_lower_wLeaf 0
+  have hcast : (((0 : ℝ)) : ℂ) = (0 : ℂ) := by
+    simp
+  rw [hcast, zero_add] at h
+  exact h
+
+theorem g2_norm_wLeaf8_lower : (3.375 : ℝ) ≤ ‖wLeaf + (8 : ℂ)‖ := by
+  have h := g2_denom_lower_wLeaf 8
+  have hcast : (((8 : ℝ)) : ℂ) = (8 : ℂ) := by
+    simp
+  rw [hcast, add_comm] at h
+  exact h
+
+theorem g2_D_eq_leaf :
+    (1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf) =
+      (-4 : ℂ) / (wLeaf * (wLeaf + (8 : ℂ))) := by
+  have hw0 : wLeaf ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wLeaf_re, Complex.zero_re] at hR
+    norm_num at hR
+  have hw80 : wLeaf + (8 : ℂ) ≠ 0 := by
+    intro hCon
+    have hR := congrArg Complex.re hCon
+    rw [wLeaf_add8_re, Complex.zero_re] at hR
+    norm_num at hR
+  field_simp
+  ring
+
+theorem g2_D_norm_le_leaf :
+    ‖(1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)‖ ≤
+      4 / (3.375 * 3.375) := by
+  have hlow0 := g2_norm_wLeaf_lower
+  have hlow8 := g2_norm_wLeaf8_lower
+  have hpos0 : (0 : ℝ) < ‖wLeaf‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hpos8 : (0 : ℝ) < ‖wLeaf + (8 : ℂ)‖ := lt_of_lt_of_le (by norm_num) hlow8
+  have hfloor : (3.375 * 3.375 : ℝ) ≤ ‖wLeaf‖ * ‖wLeaf + (8 : ℂ)‖ :=
+    mul_le_mul hlow0 hlow8 (by norm_num) (le_of_lt hpos0)
+  have h4 : ‖(-4 : ℂ)‖ = (4 : ℝ) := by
+    simp
+    norm_num
+  rw [g2_D_eq_leaf, norm_div, norm_mul, h4]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor
+
+theorem g2_Q_unif_leaf (k : ℕ) :
+    ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖ ≤
+      (1 / 2 : ℝ) / (3.375) ^ 2 := by
+  have hfloor := g2_denom_lower_wLeaf (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (3.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have hhalf : ‖(1 / 2 : ℂ)‖ = (1 / 2 : ℝ) := by
+    simp
+    norm_num
+  rw [norm_div, norm_pow, hhalf]
+  exact div_le_div_of_nonneg_left (by norm_num) (by norm_num) hsq
+
+theorem g2_eps_unif_leaf (k : ℕ) :
+    ‖Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖ ≤
+      1 / (3 * (3.375) ^ 2 * 3.375) := by
+  have hbound := g2_eps_bound_wLeaf (((k : ℕ) : ℝ)) (Nat.cast_nonneg k)
+  have hfloor := g2_denom_lower_wLeaf (((k : ℕ) : ℝ))
+  have hnormpos : (0 : ℝ) < ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ :=
+    lt_of_lt_of_le (by norm_num) hfloor
+  have hsq : (3.375 : ℝ) ^ 2 ≤ ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ ^ 2 :=
+    pow_le_pow_left (by norm_num) hfloor 2
+  have h3a : 3 * (3.375 : ℝ) ^ 2 ≤ 3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ ^ 2 :=
+    mul_le_mul_of_nonneg_left hsq (by norm_num)
+  have hfloor2 : 3 * (3.375 : ℝ) ^ 2 * 3.375 ≤
+      3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ ^ 2 * 3.375 :=
+    mul_le_mul_of_nonneg_right h3a (by norm_num)
+  have hle : 1 / (3 * ‖((((k : ℕ) : ℝ)) : ℂ) + wLeaf‖ ^ 2 * 3.375) ≤
+      1 / (3 * (3.375) ^ 2 * 3.375) :=
+    div_le_div_of_nonneg_left (by norm_num) (by norm_num) hfloor2
+  exact le_trans hbound hle
+
+theorem g2_Q_sum_le_leaf :
+    ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖ ≤
+      8 * ((1 / 2 : ℝ) / (3.375) ^ 2) := by
+  calc ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖
+      ≤ ∑ k in Finset.range 8, ‖(1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, ((1 / 2 : ℝ) / (3.375) ^ 2) :=
+        Finset.sum_le_sum (fun k _ => g2_Q_unif_leaf k)
+    _ = 8 * ((1 / 2 : ℝ) / (3.375) ^ 2) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_eps_sum_le_leaf :
+    ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖ ≤
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) := by
+  calc ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖
+      ≤ ∑ k in Finset.range 8, ‖Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ k in Finset.range 8, (1 / (3 * (3.375) ^ 2 * 3.375)) :=
+        Finset.sum_le_sum (fun k _ => g2_eps_unif_leaf k)
+    _ = 8 * (1 / (3 * (3.375) ^ 2 * 3.375)) := by
+        simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+theorem g2_residual_eq_leaf :
+    (cN_leafN8 - S_leafN8) - target_leaf =
+      (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)))) -
+      ((1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)) := by
+  have hLink := g2_log_link8_leaf
+  unfold cN_leafN8 target_leaf
+  calc (Complex.log (wLeaf + (8 : ℂ)) - 1 / (2 * (wLeaf + (8 : ℂ))) - S_leafN8) -
+        (Complex.log wLeaf - 1 / (2 * wLeaf))
+      = (Complex.log (wLeaf + (8 : ℂ)) - Complex.log wLeaf - S_leafN8) -
+        ((1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)) := by
+          ring
+    _ = (-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)) := by
+          rw [hLink]
+          ring
+
+theorem g2_G2_of_telescope_normcap_leaf (C2 U0 : ℝ)
+    (hU0 : ‖wLeaf‖ ^ 2 ≤ U0)
+    (hC2 : (8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375)) * U0 ≤ C2) :
+    G2_leafN8_prop C2 := by
+  have hRes := g2_residual_eq_leaf
+  have hQ := g2_Q_sum_le_leaf
+  have hE := g2_eps_sum_le_leaf
+  have hD := g2_D_norm_le_leaf
+  have hlow0 := g2_norm_wLeaf_lower
+  have hnormpos : (0 : ℝ) < ‖wLeaf‖ := lt_of_lt_of_le (by norm_num) hlow0
+  have hnorm2pos : (0 : ℝ) < ‖wLeaf‖ ^ 2 := pow_pos hnormpos 2
+  have hA : (0 : ℝ) ≤ 8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375) := by
+    norm_num
+  have htri : ‖(cN_leafN8 - S_leafN8) - target_leaf‖ ≤
+      8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375) := by
+    have hstep : ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+        (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)))) -
+        ((1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf))‖ ≤
+        ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖ +
+        ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖ +
+        ‖(1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)‖ := by
+      calc ‖(-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+          (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)))) -
+          ((1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf))‖
+          ≤ ‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2) +
+            (∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ)))‖ +
+            ‖(1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)‖ :=
+              norm_sub_le _ _
+        _ ≤ (‖-(∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2)‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖) +
+            ‖(1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)‖ :=
+              add_le_add (norm_add_le _ _) le_rfl
+        _ = ‖∑ k in Finset.range 8, (1 / 2 : ℂ) / (((((k : ℕ) : ℝ)) : ℂ) + wLeaf) ^ 2‖ +
+            ‖∑ k in Finset.range 8, Zeta23.StirlingVert.eps wLeaf (((k : ℕ) : ℝ))‖ +
+            ‖(1 : ℂ) / (2 * (wLeaf + (8 : ℂ))) - (1 : ℂ) / (2 * wLeaf)‖ := by
+              rw [norm_neg]
+    rw [hRes] at hstep
+    exact le_trans hstep (add_le_add (add_le_add hQ hE) hD)
+  have hle : 8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375) ≤
+      C2 / ‖wLeaf‖ ^ 2 := by
+    rw [le_div_iff₀ hnorm2pos]
+    calc (8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+        8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375)) * ‖wLeaf‖ ^ 2
+        ≤ (8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+          8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375)) * U0 :=
+            mul_le_mul_of_nonneg_left hU0 hA
+      _ ≤ C2 := hC2
+  unfold G2_leafN8_prop
+  exact le_trans htri hle
+
+theorem wLeaf_norm_sq_U0 : ‖wLeaf‖ ^ 2 ≤ (11.41 : ℝ) := by
+  rw [Complex.sq_norm, Complex.normSq_apply, wLeaf_re, wLeaf_im]
+  norm_num
+
+theorem g2_leaf_C2_inflation_882 :
+    (8 * ((1 / 2 : ℝ) / (3.375) ^ 2) +
+      8 * (1 / (3 * (3.375) ^ 2 * 3.375)) + 4 / (3.375 * 3.375)) * 11.41 ≤
+      (8.82 : ℝ) := by
+  norm_num
+
+theorem G2_leafN8_banked : G2_leafN8_prop 8.82 :=
+  g2_G2_of_telescope_normcap_leaf 8.82 11.41 wLeaf_norm_sq_U0
+    g2_leaf_C2_inflation_882
+
+theorem H3_leaf_banked :
+    ‖Complex.digamma wLeaf - target_leaf‖ ≤
+      (20.30 : ℝ) / ‖wLeaf + (8 : ℂ)‖ ^ 2 + (8.82 : ℝ) / ‖wLeaf‖ ^ 2 :=
+  h3_leaf_of_G1_G2 20.30 8.82 digamma_shift_wLeaf_8 G1_leafN8_banked
+    G2_leafN8_banked
+
+theorem h3_leaf_sq_lower : (3.375 : ℝ) ^ 2 ≤ ‖wLeaf‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wLeaf_lower 2
+
+theorem h3_leaf_sq_lower8 : (3.375 : ℝ) ^ 2 ≤ ‖wLeaf + (8 : ℂ)‖ ^ 2 :=
+  pow_le_pow_left (by norm_num) g2_norm_wLeaf8_lower 2
+
+theorem h3_leaf_div8_le : (20.30 : ℝ) / ‖wLeaf + (8 : ℂ)‖ ^ 2 ≤
+    (20.30 : ℝ) / (3.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_leaf_sq_lower8
+
+theorem h3_leaf_div0_le : (8.82 : ℝ) / ‖wLeaf‖ ^ 2 ≤
+    (8.82 : ℝ) / (3.375 : ℝ) ^ 2 :=
+  div_le_div_of_nonneg_left (by norm_num) (by norm_num) h3_leaf_sq_lower
+
+theorem h3_leaf_num_cap : (20.30 : ℝ) / (3.375 : ℝ) ^ 2 +
+    (8.82 : ℝ) / (3.375 : ℝ) ^ 2 ≤ (2.56 : ℝ) := by
+  norm_num
+
+theorem H3_leaf_banked_numeric :
+    ‖Complex.digamma wLeaf - target_leaf‖ ≤ (2.56 : ℝ) := by
+  have hH3 := H3_leaf_banked
+  have hcap := add_le_add h3_leaf_div8_le h3_leaf_div0_le
+  exact le_trans hH3 (le_trans hcap h3_leaf_num_cap)
+
+/-! Section-23 residual: H3 leaf mirror CLOSED via `H3_leaf_banked` (G1
+`G1_leafN8_banked` with U `77.01` + C `20.30`; G2 `G2_leafN8_banked` with U0
+`11.41` + C2 `8.82`; shift `digamma_shift_wLeaf_8`) plus numeric `2.56` via
+`H3_leaf_banked_numeric`. Mid/inner centers open (no mirror attempted here).
+-/
+
 end Door3ComplexWendel

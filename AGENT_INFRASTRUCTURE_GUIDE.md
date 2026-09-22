@@ -6152,6 +6152,12 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, wendel-only commit): H3 terminal consumer — numeric cap
   1.16 (`:1639`, 22.17/19.14). Producers don't take H3 (direction
   opposite); cap stands alone.
+- 2026-09-22 STIRLING-REFLECT (background `ses_f347cc996`, proof-only,
+  grep-clean, stirling-only commit): reflection rebuild IMPOSSIBLE with
+  banked API (integral + recurrence + convexity insufficient);
+  missing-API list filed (Gamma_mul_Gamma_one_sub et al. need new Mathlib).
+- 2026-09-22 WENDEL-H3LEAF (provisional, report pending; verified
+  grep-clean +519 diff): leaf H3 mirror attempt. Reconciled on report.
 - 2026-09-22 ASSEMBLY-R07 (background `ses_f347bf81b`, proof-only,
   grep-clean, assembly-only commit): R07 leaf+H conditional (two-tenths
   + 0.07). Post-dates GREEN; re-verify later.
