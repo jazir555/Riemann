@@ -5654,6 +5654,14 @@ sorry-free infrastructure and the complete commit ledger above.
   cos≈+0.96 → odd-k flip recipe FAILS; k=11 likely DESTRUCTIVE via
   sharp `:2235/:2287`, not constructive). SCUT27 tasked (eta11
   destructive lock via sharp).
+- 2026-09-22 SCUT27 (background `ses_f3775d893`, proof-only, grep-clean,
+  pilot-only commit): k=11 DESTRUCTIVE-LOCK — `cos10log12_ge :3891`
+  (≥19/20 via sharp δ12), `cpow12_neg_re :3943`, `sqrt12_le :3979`
+  (≤7/2), `rpow12_neg_ge :3993` (≥2/7), `cpow12_Re_ge :4007` (≥19/70 =
+  2/7·19/20), `eta11_eq_neg_cpow12 :4048` (odd bridge) +
+  `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
+  k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
+  eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
 - 2026-09-22 ETA-S8 (background `ses_f37749d42`, proof-only, grep-clean,
   suppliers +657 greenfield S8): log bridges (log8 exact, log7 window),
   rpow7/8 quads, cpow7/8 splits, cos7≥0.58 / cos8∈[0,0.101], Re7≥0.2494

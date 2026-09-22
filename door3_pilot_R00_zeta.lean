@@ -3883,4 +3883,195 @@ theorem sSCUT_delta12_wide_window_gap :
     (0.09 : ℝ) < (2.944441844 : ℝ) - 2.777075168 := by
   norm_num
 
+/-- Sharp signed cosine LOWER `19/20 ≤ cos(10*log 12)` (even-multiple strip
+`cos θ₁₂ = cos δ₁₂` from the banked sharp `δ₁₂ ∈ (-0.2838, -0.2829)` window
+`sSCUT_delta12_sharp_mem` (`:2287`) + quadratic lower `1 - x²/2 ≤ cos x` on
+`|δ₁₂| ≤ 0.2838`; mirror of `sSCUT_cos10log11_ge`; the `k = 8`-style negative
+upper `cos ≤ -1/4` (`:3349`) does NOT close here since `cos ≈ +0.96`). -/
+theorem sSCUT_cos10log12_ge :
+    (19 / 20 : ℝ) ≤ Real.cos (10 * Real.log 12) := by
+  have hδ := sSCUT_delta12_sharp_mem
+  set y : ℝ := 10 * Real.log 12 - 8 * Real.pi with hy_def
+  have hy_lo : (-0.2838 : ℝ) < y := by rw [hy_def]; linarith [hδ.1]
+  have hy_hi : y < (-0.2829 : ℝ) := by rw [hy_def]; linarith [hδ.2]
+  have hsq : y ^ 2 ≤ (0.2838 : ℝ) ^ 2 := by
+    have ha : (0 : ℝ) ≤ 0.2838 - y := by linarith [hy_hi]
+    have hb : (0 : ℝ) ≤ y + 0.2838 := by linarith [hy_lo]
+    have hprod := mul_nonneg ha hb
+    have heq : (0.2838 - y) * (y + 0.2838) = (0.2838 : ℝ) ^ 2 - y ^ 2 := by
+      ring
+    linarith
+  have hcos_lo := Real.one_sub_sq_div_two_le_cos (x := y)
+  have hnum : (19 / 20 : ℝ) ≤ 1 - (0.2838 : ℝ) ^ 2 / 2 := by norm_num
+  have hcosy : (19 / 20 : ℝ) ≤ Real.cos y := by
+    have hle : 1 - (0.2838 : ℝ) ^ 2 / 2 ≤ 1 - y ^ 2 / 2 := by linarith [hsq]
+    linarith [hcos_lo, hle, hnum]
+  have hper : Real.cos (10 * Real.log 12 - 8 * Real.pi)
+      = Real.cos (10 * Real.log 12) := by
+    have h1 := Real.cos_sub_two_pi (10 * Real.log 12)
+    have h2 := Real.cos_sub_two_pi (10 * Real.log 12 - 2 * Real.pi)
+    have h3 := Real.cos_sub_two_pi
+      ((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi)
+    have h4 := Real.cos_sub_two_pi
+      (((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+    have e4 : 10 * Real.log 12 - 8 * Real.pi
+        = (((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi := by ring
+    calc Real.cos (10 * Real.log 12 - 8 * Real.pi)
+        = Real.cos ((((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) - 2 * Real.pi) := by rw [e4]
+      _ = Real.cos (((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi)
+          - 2 * Real.pi) := h4
+      _ = Real.cos ((10 * Real.log 12 - 2 * Real.pi) - 2 * Real.pi) := h3
+      _ = Real.cos (10 * Real.log 12 - 2 * Real.pi) := h2
+      _ = Real.cos (10 * Real.log 12) := h1
+  rw [hy_def, hper] at hcosy
+  exact hcosy
+
+/-- The `k = 8`-style negative cosine upper does NOT close on the sharp
+`n = 12` window: `¬ (cos(10*log 12) ≤ -1/4)` (sharp lower `≥ 19/20`
+contradicts any negative upper; filed as gap, not bound — mirror of
+`sSCUT_delta12_wide_window_gap` at cosine level). -/
+theorem sSCUT_cos10log12_no_neg_upper_gap :
+    ¬ (Real.cos (10 * Real.log 12) ≤ (-(1 / 4) : ℝ)) := by
+  intro h
+  have hlo := sSCUT_cos10log12_ge
+  linarith
+
+/-- Cpow real-part split for `12^{-s}` at sCut (mirror of
+`sSCUT_cpow11_neg_re`). -/
+theorem sSCUT_cpow12_neg_re : ((((12 : ℝ)) : ℂ) ^ (-sSCUT)).re
+    = (12 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 12) := by
+  have h12pos : (0 : ℝ) < 12 := by norm_num
+  have hxC : ((12 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h12pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((12 : ℝ) : ℂ) = (((Real.log 12 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h12pos)).symm
+  rw [hlog]
+  have hre_w : (-sSCUT).re = (-(1 / 2 : ℝ)) := by
+    have e : (-sSCUT).re = -(sSCUT.re) := rfl
+    rw [e, sSCUT_re]
+    norm_num
+  have him_w : (-sSCUT).im = (-10 : ℝ) := by
+    have e : (-sSCUT).im = -(sSCUT.im) := rfl
+    rw [e, sSCUT_im]
+    norm_num
+  have hzre : ((((Real.log 12 : ℝ)) : ℂ)).re = Real.log 12 := Complex.ofReal_re _
+  have hzim : ((((Real.log 12 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 12 : ℝ)) : ℂ) * (-sSCUT)).re
+      = Real.log 12 * (-(1 / 2 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 12 : ℝ)) : ℂ) * (-sSCUT)).im
+      = -(10 * Real.log 12) := by
+    rw [Complex.mul_im, hzre, hzim, hre_w, him_w]
+    ring
+  have hexp : Real.exp (Real.log 12 * (-(1 / 2 : ℝ)))
+      = (12 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    (Real.rpow_def_of_pos h12pos _).symm
+  have hcos : Real.cos (-(10 * Real.log 12))
+      = Real.cos (10 * Real.log 12) := Real.cos_neg _
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `12^(1/2) ≤ 7/2` (honest root step; `12 ≤ (7/2)^2 = 49/4`;
+mirror of `sSCUT_sqrt11_le`). -/
+theorem sSCUT_sqrt12_le : (12 : ℝ) ^ (1 / 2 : ℝ) ≤ (7 / 2 : ℝ) := by
+  have hpow : (12 : ℝ) ≤ (((7 / 2 : ℝ) ^ (2 : ℕ))) := by norm_num
+  have hpow' : ((((12 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) = 12 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hle : ((((12 : ℝ) ^ (1 / 2 : ℝ)) ^ (2 : ℕ))) ≤ (((7 / 2 : ℝ) ^ (2 : ℕ))) := by
+    rw [hpow']
+    exact hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hle
+
+/-- `2/7 ≤ r₁₂ = 12^(-1/2)` (inverse of `sSCUT_sqrt12_le`; mirror of
+`sSCUT_rpow11_neg_ge`). -/
+theorem sSCUT_rpow12_neg_ge : (2 / 7 : ℝ) ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) := by
+  have hle := sSCUT_sqrt12_le
+  have hpos : (0 : ℝ) < (12 : ℝ) ^ (1 / 2 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (12 : ℝ) ^ (-(1 / 2 : ℝ)) = (((12 : ℝ) ^ (1 / 2 : ℝ))⁻¹) := by
+    rw [show (-(1 / 2 : ℝ)) = -((1 / 2 : ℝ)) by norm_num,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 12)]
+  rw [hneg, show (2 / 7 : ℝ) = ((7 / 2 : ℝ))⁻¹ by norm_num]
+  exact (inv_le_inv₀ (by norm_num) hpos).mpr hle
+
+/-- Cpow signed LOWER `19/70 ≤ Re(12^{-sCut})` (`r₁₂ ≥ 2/7` × cosine
+`≥ 19/20`, via two one-sided multiplies; mirror of `sSCUT_cpow11_Re_ge`
+at `:3750`; the positive floor whose negation is the `eta₁₁` destructive
+upper). -/
+theorem sSCUT_cpow12_Re_ge :
+    (19 / 70 : ℝ) ≤ ((((12 : ℝ)) : ℂ) ^ (-sSCUT)).re := by
+  rw [sSCUT_cpow12_neg_re]
+  have hr_lo := sSCUT_rpow12_neg_ge
+  have hr0 : (0 : ℝ) ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc_lo := sSCUT_cos10log12_ge
+  have h1 : (2 / 7 : ℝ) * (19 / 20)
+      ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) * (19 / 20) :=
+    mul_le_mul_of_nonneg_right hr_lo (by norm_num)
+  have h2 : (12 : ℝ) ^ (-(1 / 2 : ℝ)) * (19 / 20)
+      ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 12) :=
+    mul_le_mul_of_nonneg_left hc_lo hr0
+  have heq : (2 / 7 : ℝ) * (19 / 20) = 19 / 70 := by norm_num
+  linarith
+
+/-- `12^(-1/2) ≤ 1` (trivial rpow decay upper; mirror of
+`sSCUT_rpow10_neg_le_one`). -/
+theorem sSCUT_rpow12_neg_le_one : (12 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ 1 := by
+  have h : (12 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (12 : ℝ) ^ (0 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  rw [Real.rpow_zero] at h
+  exact h
+
+/-- Cpow positive-cap UPPER `Re(12^{-sCut}) ≤ 1` (trivial cosine upper
+`cos ≤ 1` × decay `r₁₂ ≤ 1`; honest `+cap`, not sharp — the sharp window
+gives the LOWER `≥ 19/70` above, whose negation is destructive). -/
+theorem sSCUT_cpow12_Re_le_pos_cap :
+    ((((12 : ℝ)) : ℂ) ^ (-sSCUT)).re ≤ (1 : ℝ) := by
+  rw [sSCUT_cpow12_neg_re]
+  have hr0 : (0 : ℝ) ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr_hi := sSCUT_rpow12_neg_le_one
+  have hcos_hi : Real.cos (10 * Real.log 12) ≤ 1 := Real.cos_le_one _
+  have hmul : (12 : ℝ) ^ (-(1 / 2 : ℝ)) * Real.cos (10 * Real.log 12)
+      ≤ (12 : ℝ) ^ (-(1 / 2 : ℝ)) * 1 :=
+    mul_le_mul_of_nonneg_left hcos_hi hr0
+  linarith
+
+/-- Eta bridge `eta₁₁ = -(12^{-sCut})` (odd `k`; `Complex.cpow_neg` turns
+`(12^s)⁻¹` into `12^{-s}`; mirror of `sSCUT_eta9_eq_neg_cpow10`). -/
+theorem sSCUT_eta11_eq_neg_cpow12 :
+    etaDirichletTerm sSCUT 11 = -((((12 : ℝ)) : ℂ) ^ (-sSCUT)) := by
+  have e : (11 + 1 : ℕ) = 12 := rfl
+  have hcast : ((((11 + 1 : ℕ)) : ℂ)) = ((((12 : ℕ)) : ℂ)) := by rw [e]
+  have hneg : (-1 : ℂ) ^ (11 : ℕ) = -1 := by norm_num
+  have h12cast : ((((12 : ℕ)) : ℂ)) = ((((12 : ℝ)) : ℂ)) := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, h12cast, neg_div, one_div, Complex.cpow_neg]
+
+/-- Destructive eta UPPER (odd `k = 11`): `Re(eta₁₁) ≤ -(19/70)` (negated
+cpow signed lower `sSCUT_cpow12_Re_ge`; odd negation flips the positive
+floor to a negative ceiling; mirror of `sSCUT_eta8_Re_le_neg` at `:3413`
+with the `sSCUT_eta7` flip direction). -/
+theorem sSCUT_eta11_Re_le_neg :
+    (etaDirichletTerm sSCUT 11).re ≤ (-(19 / 70) : ℝ) := by
+  have h := sSCUT_cpow12_Re_ge
+  rw [sSCUT_eta11_eq_neg_cpow12, Complex.neg_re, sSCUT_cpow12_neg_re]
+  rw [sSCUT_cpow12_neg_re] at h
+  linarith
+
+/-- No positive `Re₁₁` lock exists at any precision (`Re(eta₁₁) ≤ -19/70`,
+so no `c > 0` can sit below it; mirror of `sSCUT_eta8_Re_no_pos_lock`
+at `:3423` — the `k = 11` floor is IMPOSSIBLE, honestly skipped). -/
+theorem sSCUT_eta11_Re_no_pos_lock (c : ℝ) (hc : (0 : ℝ) < c) :
+    ¬ (c ≤ (etaDirichletTerm sSCUT 11).re) := by
+  intro h
+  have hup := sSCUT_eta11_Re_le_neg
+  linarith
+
 end Door3PilotR00Zeta
