@@ -5991,6 +5991,11 @@ sorry-free infrastructure and the complete commit ledger above.
   `S2_exists :1544` (same L + S₂ lower). hEven analytic inputs COMPLETE
   (Antitone + Tendsto + slice all banked); zetaLower still numerically
   open (0.23 vs 1.1/1.4).
+- 2026-09-22 SCUT43 (background `ses_f34976120`, proof-only, grep-clean,
+  pilot-only commit): k=17 CONSTRUCTIVE — `delta18_odd_mem :5439`
+  (δ∈(0.595,0.666) via theta18+loose-pi) + `cos10log18_le_neg_3/4 :5459`
+  (1-0.666²/2=0.778 floor, 9π=π+4·2π odd-flip). Eta17 cpow/Re payoff
+  open next.
 - 2026-09-22 ETA-S18 (background `ses_f349a43f1`, proof-only, grep-clean,
   suppliers-only commit): S18 rung — log17/18 bridges, rpow17/18 quads
   (0.37·2.74≈1.014/0.37·2.71≈1.003, thin), cpow17/18 splits,

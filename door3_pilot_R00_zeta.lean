@@ -5429,4 +5429,64 @@ theorem sSCUT_theta18_mem :
   have c2 : (10 : ℝ) * 2.8939122527 = 28.939122527 := by norm_num
   constructor <;> linarith
 
+/-- Reduced phase `δ₁₈ = θ₁₈ - 9π ∈ (0.595, 0.666)` (odd-multiple anchor:
+`9π ≈ 28.274` is nearest since `θ₁₈ ≈ 28.870-28.939` vs `8π ≈ 25.133` and
+`10π ≈ 31.416`; strict via `Real.pi_gt_d4/lt_d4`; mirror of
+`sSCUT_delta16_odd_mem` at `:4940` and `sSCUT_delta17_odd_mem` at `:5198`;
+rounded outward from the loose-pi window `[0.595278061, 0.665622527]`
+(`28.869678061 - 9·3.1416 = 0.595278061`,
+`28.939122527 - 9·3.1415 = 0.665622527`) so `linarith` closes). -/
+theorem sSCUT_delta18_odd_mem :
+    (0.595 : ℝ) < 10 * Real.log 18 - 9 * Real.pi ∧
+    10 * Real.log 18 - 9 * Real.pi < (0.666 : ℝ) := by
+  have hth := sSCUT_theta18_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `δ₁₈` window (`0.071`). -/
+theorem sSCUT_delta18_odd_width_eq :
+    (0.666 : ℝ) - 0.595 = (0.071 : ℝ) := by
+  norm_num
+
+/-- Signed cosine UPPER `cos(10*log 18) ≤ -(3/4)` (odd-multiple flip
+`cos θ₁₈ = -cos δ₁₈` from the banked `δ₁₈ ∈ (0.595, 0.666)` window
+`sSCUT_delta18_odd_mem` + quadratic floor `1 - x²/2 ≤ cos x` on
+`|δ₁₈| ≤ 0.666`; mirror of `sSCUT_cos10log16_le_neg_four_fifths` at `:4960`
+with `9π = π + 4·(2π)` unchanged;
+`1 - 0.666^2/2 = 0.778222 ≥ 0.75`, so `k = 17` (base 18) is constructive
+after the odd negation flip: `cos θ₁₈ ≈ -0.8ish`). -/
+theorem sSCUT_cos10log18_le_neg_three_quarters :
+    Real.cos (10 * Real.log 18) ≤ (-(3 / 4) : ℝ) := by
+  have hδ := sSCUT_delta18_odd_mem
+  have key : Real.cos ((10 * Real.log 18 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi)
+      = -Real.cos (10 * Real.log 18 - 9 * Real.pi) := by
+    rw [Real.cos_add_two_pi, Real.cos_add_two_pi, Real.cos_add_two_pi,
+      Real.cos_add_two_pi, Real.cos_add_pi]
+  have e2 : (10 * Real.log 18 - 9 * Real.pi) + Real.pi
+      + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi + 2 * Real.pi
+      = 10 * Real.log 18 := by
+    ring
+  rw [e2] at key
+  have hcosδ : 1 - (0.666 : ℝ) ^ 2 / 2
+      ≤ Real.cos (10 * Real.log 18 - 9 * Real.pi) := by
+    have hq := Real.one_sub_sq_div_two_le_cos
+      (x := 10 * Real.log 18 - 9 * Real.pi)
+    have hsq : (10 * Real.log 18 - 9 * Real.pi) ^ 2 ≤ (0.666 : ℝ) ^ 2 := by
+      have ha : (0 : ℝ) ≤ 0.666 - (10 * Real.log 18 - 9 * Real.pi) := by
+        linarith [hδ.2]
+      have hb : (0 : ℝ) ≤ (10 * Real.log 18 - 9 * Real.pi) + 0.666 := by
+        linarith [hδ.1]
+      have hprod := mul_nonneg ha hb
+      have heq : (0.666 - (10 * Real.log 18 - 9 * Real.pi))
+          * ((10 * Real.log 18 - 9 * Real.pi) + 0.666)
+          = (0.666 : ℝ) ^ 2 - (10 * Real.log 18 - 9 * Real.pi) ^ 2 := by
+        ring
+      linarith
+    linarith
+  have hbase : (3 / 4 : ℝ) ≤ 1 - (0.666 : ℝ) ^ 2 / 2 := by norm_num
+  rw [key]
+  linarith
+
 end Door3PilotR00Zeta
