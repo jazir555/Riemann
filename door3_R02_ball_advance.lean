@@ -1644,3 +1644,128 @@ def R02_etaWorst_dominator_missing_spec : Prop :=
 #print axioms R02_etaWorst_coeff_above_disc
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 1.05-decay dominator attempt (BALLADV-R02DOM).
+
+Grep record (read-only, no new import):
+* target `R02_etaWorstMajorant :1411`, this file: worst-case eta-pair majorant
+  with `‖s‖ → 8.29` and worst-case exponent `0.05`.
+* blocker `R02_etaWorst_dominator_missing_spec :1636`, this file:
+  `∃ B, Summable B ∧ ∀ m, ‖R02_etaWorstMajorant m‖ ≤ B m`.
+* disc route `door3_eta_prime.lean`: conditional wrapper `:501`,
+  dominator `etaDerivDominator :508` (`8 * ((m+1):ℝ)^(-2)`),
+  shift summability `:511` via `Real.summable_nat_rpow_inv` plus
+  `summable_nat_add_iff`, dominator summability `:531` via `Summable.mul_left`,
+  log bound `:536` via `Real.log_le_sub_one_of_pos`.
+
+What is banked here:
+* `R02_etaWorstDominator105` (`C * ((m+1):ℝ)^(-1.05)`), pure-power shape
+  at decay `1.05 = 0.05 + 1` matching the worst-case exponent.
+* `R02_etaWorstShift105_summable` (p-series at `1.05 > 1`, mirror of `:511`).
+* `R02_etaWorstDominator105_summable` (mirror of `:531`).
+* `R02_etaWorst_logBp_le` (mirror of `:536`) and
+  `R02_etaWorst_logDiff_le_inv` (log-difference comparison for the second
+  majorant piece).
+
+What stays open (exact residual):
+* pointwise domination `R02_etaWorst_pointwise105_missing C` for any fixed `C`.
+  The first majorant piece carries `Real.log (2*m+2)` with no uniform finite
+  cap (it grows without bound relative to the pure power, ratio like `log`),
+  so no fixed `C` closes it; the second piece alone is controlled by the
+  log-difference bound above. Supplying one `C` with the pointwise bound
+  discharges `:1636` via `R02_etaWorst_dominator_of_pointwise105`, and then
+  `Deta := ∑' m, R02_etaWorstMajorant m` closes `:1427` via the banked
+  `:1602/:1609` wrappers. No tsum numeral is closed this turn.
+-/
+
+/-- Fresh pure-power dominator at decay `1.05`: `B m = C / (m+1)^1.05`
+in rpow form, matching the worst-case exponent `0.05 + 1`. -/
+noncomputable def R02_etaWorstDominator105 (C : ℝ) (m : ℕ) : ℝ :=
+  C * ((((m + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ)))
+
+/-- Shift-series summability at `1.05 > 1` (p-series route, mirror of
+`door3_eta_prime.lean:511`). -/
+theorem R02_etaWorstShift105_summable :
+    Summable (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ)))) := by
+  have hp : (1 : ℝ) < 1.05 := by norm_num
+  have hbase : Summable (fun n : ℕ => ((((n : ℝ)) ^ (1.05 : ℝ)))⁻¹) :=
+    Real.summable_nat_rpow_inv.mpr hp
+  have hshift :
+      Summable (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (1.05 : ℝ)))⁻¹) :=
+    (summable_nat_add_iff 1).mpr hbase
+  have heq : (fun n : ℕ => ((((n + 1 : ℕ)) : ℝ) ^ (-(1.05 : ℝ)))) =
+      (fun m : ℕ => ((((m + 1 : ℕ) : ℝ) ^ (1.05 : ℝ)))⁻¹) := by
+    funext m
+    exact Real.rpow_neg (Nat.cast_nonneg _) _
+  rw [heq]
+  exact hshift
+
+/-- Dominator summability at any constant `C` (mirror of
+`door3_eta_prime.lean:531`). -/
+theorem R02_etaWorstDominator105_summable (C : ℝ) :
+    Summable (R02_etaWorstDominator105 C) :=
+  Summable.mul_left C R02_etaWorstShift105_summable
+
+/-- Log-factor bound `log (2m+2) ≤ (2m+2)` (mirror of
+`door3_eta_prime.lean:536`). -/
+theorem R02_etaWorst_logBp_le (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) ≤ ((((2 * m + 2 : ℕ)) : ℝ)) := by
+  have hpos : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have h := Real.log_le_sub_one_of_pos hpos
+  linarith
+
+/-- Log-difference comparison for the second majorant piece:
+`log (2m+2) - log (2m+1) ≤ ((2m+1):ℝ)⁻¹`. -/
+theorem R02_etaWorst_logDiff_le_inv (m : ℕ) :
+    Real.log ((((2 * m + 2 : ℕ)) : ℝ)) - Real.log ((((2 * m + 1 : ℕ)) : ℝ)) ≤
+      ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+  have hApos : (0 : ℝ) < ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hBpos : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) :=
+    Nat.cast_pos.mpr (by omega)
+  have hAne : ((((2 * m + 1 : ℕ)) : ℝ)) ≠ 0 := ne_of_gt hApos
+  have hBne : ((((2 * m + 2 : ℕ)) : ℝ)) ≠ 0 := ne_of_gt hBpos
+  have hBA : ((((2 * m + 2 : ℕ)) : ℝ)) = ((((2 * m + 1 : ℕ)) : ℝ)) + 1 := by
+    have hNat : (2 * m + 2 : ℕ) = (2 * m + 1 : ℕ) + 1 := by omega
+    rw [hNat, Nat.cast_add, Nat.cast_one]
+  have hdivPos : (0 : ℝ) < ((((2 * m + 2 : ℕ)) : ℝ)) / ((((2 * m + 1 : ℕ)) : ℝ)) :=
+    div_pos hBpos hApos
+  have hlogdiv : Real.log ((((2 * m + 2 : ℕ)) : ℝ)) -
+      Real.log ((((2 * m + 1 : ℕ)) : ℝ)) =
+      Real.log ((((2 * m + 2 : ℕ)) : ℝ) / ((((2 * m + 1 : ℕ)) : ℝ))) := by
+    rw [Real.log_div hBne hAne]
+  have hle : Real.log ((((2 * m + 2 : ℕ)) : ℝ) / ((((2 * m + 1 : ℕ)) : ℝ))) ≤
+      ((((2 * m + 2 : ℕ)) : ℝ)) / ((((2 * m + 1 : ℕ)) : ℝ)) - 1 :=
+    Real.log_le_sub_one_of_pos hdivPos
+  have h1 : ((((2 * m + 1 : ℕ)) : ℝ) + 1) / ((((2 * m + 1 : ℕ)) : ℝ)) =
+      1 + ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+    rw [add_div, div_self hAne, one_div]
+  have heq : ((((2 * m + 2 : ℕ)) : ℝ)) / ((((2 * m + 1 : ℕ)) : ℝ)) - 1 =
+      ((((2 * m + 1 : ℕ)) : ℝ))⁻¹ := by
+    rw [hBA, h1, add_comm (1 : ℝ) _, add_sub_cancel]
+  rw [hlogdiv]
+  rw [heq] at hle
+  exact hle
+
+/-- Exact pointwise blocker at decay `1.05` (filed, not fixed): norm domination
+of the worst-case majorant by the fresh dominator at a fixed `C`. -/
+def R02_etaWorst_pointwise105_missing (C : ℝ) : Prop :=
+  ∀ m : ℕ, ‖R02_etaWorstMajorant m‖ ≤ R02_etaWorstDominator105 C m
+
+/-- Bridge: one pointwise `C` plus the banked dominator summability discharges
+the `:1636` blocker. -/
+theorem R02_etaWorst_dominator_of_pointwise105 (C : ℝ)
+    (hle : R02_etaWorst_pointwise105_missing C) :
+    R02_etaWorst_dominator_missing_spec :=
+  ⟨R02_etaWorstDominator105 C, R02_etaWorstDominator105_summable C, hle⟩
+
+/-- Exact residual for the `1.05`-decay route: existence of a fixed `C ≥ 0`
+with the pointwise bound. `Summable` is already banked, so this is the only
+gap to `:1636` (and hence to `:1427` via `:1602/:1609`). -/
+def R02_etaWorst_dom105_residual_spec : Prop :=
+  ∃ C : ℝ, 0 ≤ C ∧ R02_etaWorst_pointwise105_missing C
+
+end Door3R02BallAdvance

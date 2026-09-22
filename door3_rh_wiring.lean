@@ -1866,3 +1866,45 @@ def wireHtop_gap_residual : Prop :=
 end Door3RHWiring
 
 #print axioms Door3RHWiring.wireHtop_top_point_half_feeder
+
+/-! ## WIRE-HBOT pointwise bottom feeder + uniform residual (append-only, no force).
+
+Grep (read before filing):
+* Top endpoint feeder banked `door3_rh_wiring.lean:1855`
+  (`wireHtop_top_point_half_feeder`, pointwise `1/2` leaf at `x = 0` via banked
+  `Door3SliverEdge.edgeTop_single_lower`, one `exact`); residual
+  `wireHtop_gap_residual` (`:1862`, equals `edgeHalf_topLower_missing`, `:1566`).
+* Bottom shapes `door3_sliver_edge.lean:179-180` (`endpoint_bot_value`),
+  `:196-200` (`endpoint_bot_norm`), `:243-246` (`edgeBot_single_lower`,
+  `1/2 ≤ ‖xiShiftedEntire (0 - I*(1/2))‖` via `edgeBot_consumer_norm_at_zero`);
+  top mirror `:237-240` (`edgeTop_single_lower`); sharpness `:202-210`.
+* Bottom uniform consumer shape `door3_rh_wiring.lean:370-373`
+  (`hBotLower` in `hSliver_of_edgeNumericData_half`), `:524-527`
+  (`edgeStrip_bottom_half_M40`), `:1675-1676` (`edgeStrip_bottom_half_M1000`),
+  same `1/2 ≤ ‖xiShiftedEntire (x - I/2)‖` on `Set.Icc (-10) 10`.
+
+ONE honest feeder below: pointwise `1/2` leaf at `x = 0` re-exported into
+wiring namespace (banked `Door3SliverEdge.edgeBot_single_lower`; proof is one
+`exact`), exact conj mirror of `:1855`. Full uniform `1/2` stays OPEN
+(same poly-zero block at `x = 0`; bottom zeta/Gamma quantitative floors
+unbanked). Exact residual filed as `wireHbot_gap_residual`. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-HBOT pointwise bottom-edge feeder at `x = 0` (maximal closable value;
+endpoint leaf of the uniform `hBotLower` target, via banked single-point numeral;
+exact mirror of `wireHtop_top_point_half_feeder`). -/
+theorem wireHbot_bot_point_half_feeder :
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((((0 : ℝ)) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3SliverEdge.edgeBot_single_lower
+
+/-- WIRE-HBOT exact residual: uniform `1/2` floor on `Set.Icc (-10) 10`
+still OPEN (pointwise leaf above only; product route blocked at `x = 0` by the
+poly zero; bottom zeta/Gamma quantitative floors unbanked). -/
+def wireHbot_gap_residual : Prop :=
+  ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+    (1 / 2 : ℝ) ≤ ‖xiShiftedEntire ((x : ℂ) - Complex.I * (((1 / 2 : ℝ)) : ℂ))‖
+
+end Door3RHWiring
+
+#print axioms Door3RHWiring.wireHbot_bot_point_half_feeder
