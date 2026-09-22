@@ -6057,6 +6057,14 @@ sorry-free infrastructure and the complete commit ledger above.
   `tailPointwise10_of_rightTail_and_negSymm :12498` (two-sided absTail
   → one-sided Hright + banked neg-symm). Hright open (right-tail
   certificate owns).
+- 2026-09-22 ASSEMBLY-R00SUP (background `ses_f348f8e82`, proof-only,
+  grep-clean, assembly-only commit): tight-sup chain (`:17180-17261`:
+  C=0.0125/r=0.25 → M=0.05 exactly, meets qB≤1/40; `H_of_ball2 :17250`).
+  Uniform ≤0.0125 enclosure absent (Mathlib gap).
+- 2026-09-22 SLIVER-HC (background `ses_f3490d9f2`, proof-only,
+  grep-clean, sliver_edge-only commit): hC CONFIRMED survey-infeasible
+  at C=40 (poly>78 alone); instead necessary floor 1/2≤C + mono lift +
+  generic/M40 pair closers (`:838-885`). hC premise stays open.
 - 2026-09-22 ZETA-M16 (background `ses_f348ff455`, proof-only,
   grep-clean, zeta-only commit): M16 pair (32/33 numerals 0.027) +
   head16 2.282 + M16 tail 17.61 → candidate 19.892 `:41564` (above best;

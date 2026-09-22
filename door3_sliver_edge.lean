@@ -803,4 +803,100 @@ theorem uniform_bot_lower_gap_1001_2000 :
         ‖CentralCoverAssembly.xiShiftedEntire (((x : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ)))‖ := by
   apply uniform_bot_lower_not_gt_half _ (by norm_num)
 
+/-! ### (L) M40 ball-sup premise management + BALLSUP-SURVEY confirmation
+
+Grepped specs:
+* ball-sup consumers `door3_rh_wiring.lean:470-471` (`hTopDeriv40_of_ballSup40`,
+  `hC : ∀ z ∈ closedBall (0:ℂ) 12, ‖xiShiftedEntire z‖ ≤ 40`),
+  `:1625-1627` (`hTopDeriv1000_of_ballSup1000`, `C = 1000` retier);
+* bridges banked here `uniform_top_deriv_of_closedBall :343`,
+  `uniform_bot_deriv_of_closedBall :368`,
+  M40 feeders `uniform_top_deriv_M40_of_closedBall :708`,
+  `uniform_bot_deriv_M40_of_closedBall :768`;
+* BALLSUP-SURVEY (`AGENT_INFRASTRUCTURE_GUIDE.md:6544-6550`,
+  background `ses_f34f3a72b`, read-only, no edits):
+  ball-12 `C = 40` INFEASIBLE by product route — poly alone `> 78` on
+  ball-12 (`12.5^2 / 2`), poly·pi `≈ 56300` (`π^5.75 ≈ 722` at `Re = -11.5`),
+  realistic joint `≥ 10^6`; R02-disc best `40.74` conditional / `3805.12`
+  unconditional (pi-tighten `≤ 0.972` reaches `39.59` on R02-disc only,
+  not ball-12); VERDICT retier MT (1000-shape exists) or abandon product
+  route; smallest-next `poly_upper_closedBall12 ≤ 79` spec'd.
+
+What is added here (all conditional, no force on `C = 40`):
+* endpoint membership + necessary floor `C ≥ 1 / 2` for any valid ball-12 sup;
+* sup monotonicity (any banked `C` lifts to weaker `C' ≥ C`);
+* generic paired deriv feeders at arbitrary `(d, C)` and the M40 pair
+  instance, so a single `hC` closes both `hTopDeriv` and `hBotDeriv`.
+Residual (exact, open, not forced): closed-ball sup `C = 40` on
+`closedBall 0 12` is NOT proved here — per survey it is INFEASIBLE by the
+product route (poly floor `> 78 > 40`), so no `C = 40` numeral is banked;
+`hTopDeriv` / `hBotDeriv` for M40 remain conditional on the open `hC`
+premise; next step is the survey's retier/spec (`C = 1000` shape or
+`poly_upper_closedBall12 ≤ 79`), owned elsewhere. -/
+
+/-- Top endpoint lies in `closedBall 0 12` (norm `1 / 2 ≤ 12`). -/
+theorem closedBall12_mem_endpoint_top :
+    (Complex.I / 2) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have h : ‖Complex.I / 2‖ = (1 / 2 : ℝ) := by
+    rw [norm_div, Complex.norm_I]
+    norm_num
+  rw [h]
+  norm_num
+
+/-- Necessary floor: any valid ball-12 sup satisfies `1 / 2 ≤ C`. -/
+theorem ballSup_necessary_ge_half (C : ℝ)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    (1 / 2 : ℝ) ≤ C := by
+  have hmem := closedBall12_mem_endpoint_top
+  have hle := hC (Complex.I / 2) hmem
+  rw [endpoint_top_norm] at hle
+  exact hle
+
+/-- Sup monotonicity: a banked `C` lifts to any weaker `C' ≥ C`. -/
+theorem ballSup_mono (C : ℝ) (C' : ℝ) (hle : C ≤ C')
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C' := by
+  intro z hz
+  exact le_trans (hC z hz) hle
+
+/-- Generic paired deriv feeders at arbitrary `(d, C)`: one `hC` closes both arms. -/
+theorem uniform_pair_of_closedBall (d : ℝ) (C : ℝ) (hdle : d ≤ 1)
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ C) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - d) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ C) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + d) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ C) := by
+  constructor
+  · intro x hx y hy
+    exact uniform_top_deriv_of_closedBall d C hdle hC x hx y hy
+  · intro x hx y hy
+    exact uniform_bot_deriv_of_closedBall d C hdle hC x hx y hy
+
+/-- M40 paired feeder: one ball-12 sup `40` closes both deriv arms at `δ = (1/2)/40`. -/
+theorem uniform_M40_pair_of_closedBall
+    (hC : ∀ (z : ℂ), z ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.xiShiftedEntire z‖ ≤ (40 : ℝ)) :
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc ((1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ)) (1 / 2 : ℝ) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ)) ∧
+    (∀ (x : ℝ), x ∈ Set.Icc (-10 : ℝ) (10 : ℝ) →
+      ∀ (y : ℝ), y ∈ Set.Icc (-(1 / 2 : ℝ)) (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) →
+        ‖deriv CentralCoverAssembly.xiShiftedEntire
+          (((x : ℂ) + Complex.I * (((y : ℝ)) : ℂ)))‖ ≤ (40 : ℝ)) := by
+  constructor
+  · intro x hx y hy
+    exact uniform_top_deriv_M40_of_closedBall hC x hx y hy
+  · intro x hx y hy
+    exact uniform_bot_deriv_M40_of_closedBall hC x hx y hy
+
 end Door3SliverEdge
