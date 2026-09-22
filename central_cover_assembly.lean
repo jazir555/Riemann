@@ -17215,9 +17215,10 @@ theorem R00_closedBall_radius_subset_ball2 :
     Metric.closedBall R00.center (R00.radius + 0.25) ⊆
       Metric.closedBall R00.center 2 := by
   intro z hz
+  have hz' := Metric.mem_closedBall.mp hz
   rw [Metric.mem_closedBall]
   have hR := R00_radius_lt
-  linarith [hz]
+  linarith [hz', hR]
 
 /-- `ball 2` sup implies the tight-ball sup (same constant, subset). -/
 theorem R00_tight_of_ball2 (h : R00_ball2_sup_tight) :
@@ -17410,9 +17411,10 @@ theorem R01_closedBall_radius_subset_ball2 :
     Metric.closedBall R01.center (R01.radius + 0.25) ⊆
       Metric.closedBall R01.center 2 := by
   intro z hz
+  have hz' := Metric.mem_closedBall.mp hz
   rw [Metric.mem_closedBall]
   have hR := R01_radius_lt
-  linarith [hz]
+  linarith [hz', hR]
 
 /-- `ball 2` sup implies the tight-ball sup (same constant, subset). -/
 theorem R01_tight_of_ball2 (h : R01_ball2_sup_tight) :
@@ -17523,5 +17525,76 @@ theorem R03_H_of_residuals (hc : R03_center_residual_two_tenths)
       0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
       ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
   R03_H_instance (R03_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R04 leaf+H residual set (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R04_leaf_obligations` 1642-1644: center `(0.05 + 0.07 * R04.radius <= norm
+  at R04.center)` AND deriv `(forall w, R04.mem w -> ||deriv xiShifted w|| <= 0.07)`
+  (mid tier `(eps, M) = (0.05, 0.07)`).
+- `R04_H_instance` 1671-1681: takes `(h : R04_leaf_obligations) (c)
+  (hc_mem : c in gridFine) (hc_eq : c = (-4, -1.5, 0.01, 0.2))`, conclusion
+  `Exists R eps M, ... /\ 0 < eps /\ deriv bound /\ budget`.
+- `R04_radius_lt` 1629-1630 (`R04.radius < 1.26`); `R04_mem_gridFine` 1632-1638.
+- R03 shapes mirrored (`17490-17525`): `R03_budget_lt_app` 17490,
+  `R03_center_of_two_tenths_lower` 17496, `R03_center_residual_two_tenths` 17501,
+  `R03_center_obligation_of_residual_two_tenths` 17504, `R03_deriv_residual` 17509,
+  `R03_leaf_of_residuals` 17512, `R03_H_of_residuals` 17516.
+- Grep-clean before writing: no `R04_budget_lt_app`, `R04_center_of_two_tenths_lower`,
+  `R04_center_residual_two_tenths`, `R04_center_obligation_of_residual_two_tenths`,
+  `R04_deriv_residual`, `R04_leaf_of_residuals`, `R04_H_of_residuals` in file.
+
+Mirror for R04 mid tier `(eps, M) = (0.05, 0.07)` at `c04 = (-4, -1.5, 0.01, 0.2)`:
+budget `0.05 + 0.07 * radius < 0.2` lifts `R04_radius_lt`, so
+`0.2 <= norm at R04.center` discharges the center conjunct; deriv residual is
+exactly the second conjunct; `leaf_of` rebuilds `R04_leaf_obligations`;
+`H_of` discharges the gridFine H shape via `R04_H_instance`
+(with `hc_mem + hc_eq` per `1671`, matching R03 form).
+Value-or-gap: budget `0.05 + 0.07 * 1.26 = 0.1382 < 0.2`; full R04 H leaf now
+conditional only on two named numeric enclosures (`0.2 <= norm` at center +
+uniform `||deriv xiShifted|| <= 0.07` on `R04`, not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R04 mid tier on the true radius. -/
+theorem R04_budget_lt_app : (0.05 : ℝ) + 0.07 * R04.radius < 0.2 := by
+  have h := R04_radius_lt
+  have hM : 0.07 * R04.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R04_center_of_two_tenths_lower (hC : (0.2 : ℝ) ≤ ‖xiShifted R04.center‖) :
+    (0.05 : ℝ) + 0.07 * R04.radius ≤ ‖xiShifted R04.center‖ := by
+  have hB := R04_budget_lt_app
+  linarith
+
+def R04_center_residual_two_tenths : Prop :=
+  (0.2 : ℝ) ≤ ‖xiShifted R04.center‖
+
+theorem R04_center_obligation_of_residual_two_tenths
+    (h : R04_center_residual_two_tenths) :
+    (0.05 : ℝ) + 0.07 * R04.radius ≤ ‖xiShifted R04.center‖ :=
+  R04_center_of_two_tenths_lower h
+
+def R04_deriv_residual : Prop :=
+  ∀ w, R04.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R04_leaf_of_residuals (hc : R04_center_residual_two_tenths)
+    (hd : R04_deriv_residual) : R04_leaf_obligations :=
+  ⟨R04_center_obligation_of_residual_two_tenths hc, hd⟩
+
+theorem R04_H_of_residuals (hc : R04_center_residual_two_tenths)
+    (hd : R04_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-4, -1.5, 0.01, 0.2)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R04_H_instance (R04_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly

@@ -6124,11 +6124,21 @@ sorry-free infrastructure and the complete commit ledger above.
   Suppliers parse-clean (attempt-2: zero error lines); build stopped on
   UPSTREAM assembly:17218. S20 floor -3.27 joint-committed here.
 - 2026-09-22 ASSEMBLY-SUBSETFIX (coordinator, surgical): assembly
-  `:17218/:17413` `rw ... at hz ⊢` failed (hz already dist-form);
-  narrowed to goal-only `rw` + `linarith [hz]` (R00/R01 mirrors).
+  `:17218/:17413` subset lemmas — v1 (goal-only rw) failed linarith (hz
+  opaque ∈-form); v2 adds `have hz' := mem_closedBall.mp hz` +
+  `linarith [hz', hR]` per VERIFY sketch. VERIFY2 queued.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 TAIL-M25 (background `ses_f34885f9f`, proof-only,
+  grep-clean, tail-only commit): M33554432 odd rung `24/5792=3/724≈
+  0.00414 :1215` (floor 5792²=33547264 honest; prompt stub corrected).
+  Next M67108864 exact.
+- 2026-09-22 OFFAXIS-3BLOCK (background `ses_f34894883`, proof-only,
+  grep-clean, off_axis-only commit): midhigh block 0.0666 EXCEEDS
+  leftover 0.01831 — flat pair-triangle DEAD for lower blocks
+  (residual unsatisfiable -0.048, filed not claimed). Route needs bigger
+  partial budget.
 - 2026-09-22 ZETA-FLOOR1143 (background `ses_f34889159`, proof-only,
   grep-clean, zeta-only commit): 16^0.05 floor →1.143 (1.143^20≈14.49
   honest) → tail 17.50 → K0-16 candidate 19.782 `:41772` BEATS 19.802 by
