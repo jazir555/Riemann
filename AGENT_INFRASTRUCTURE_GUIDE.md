@@ -5784,6 +5784,22 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 GAMMA-N12 (background `ses_f34f5d1a6`, proof-only, no
+  report — work found on disk +392 after CRLF→LF normalization, the
+  agent's editor wrote CRLF over LF HEAD, fixed by coordinator):
+  E06 Seq12 rung — rpow12-frac (1.61≤12^5/26), Re-lower 19.32,
+  prod12 14331330177.87 (=1084064309.98·13.22), link (479001600-num),
+  rate 0.014, finite 0.645 (19.32·479001600=9254310912 ✓,
+  /14331330177.87≈0.64574 ✓), below-gate + gap 0.015. VERDICT:
+  0.645<0.66 FAILS (+0.006). KNOWN DEFECT (not yet fixed): prod12
+  final tail `:6416` one extra `)` (block 6403-6453 nets -1; N11 mirror
+  nets 0). PREMISE-FIXER tasked (sole owner, 1-char + rebuild).
+- 2026-09-22 DERIV-FILL3 (background `ses_f34e828b7`, proof-only,
+  grep-clean, deriv_up-only commit): MID set filled at honest 125 (NOT
+  10) — geometry covers (Re margins 0.135/0.095, Im margin 6.24) via
+  tail-quarter + import `:6`; `zetaSupOnSphere_mid_125_filled :1030` +
+  `zetaDeriv_mid_125_of_diffCont :1040` (deriv ≤12500 modulo
+  DiffCont). Pre-existing ≤10 untouched. INNER still open.
 - 2026-09-22 VERIFY11 (background `ses_f35068fa6`, sole build owner):
   BUILD-EXIT=1 x2 (fence stop). Fixed hDeq `:6055` (10→11 closers).
   Remaining: hpos11 helper `:6217` missing one `(` (14-run where 15
@@ -5901,6 +5917,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-FILL3 (background `ses_f34e828b7`, proof-only,
+  grep-clean, deriv_up-only commit): MID set filled at honest 125 (NOT
+  10) — geometry covers (Re margins 0.135/0.095, Im margin 6.24) via
+  tail-quarter + import `:6`; `zetaSupOnSphere_mid_125_filled :1030` +
+  `zetaDeriv_mid_125_of_diffCont :1040` (deriv ≤12500 modulo
+  DiffCont). Pre-existing ≤10 untouched. INNER still open; gamma 60000.
 - 2026-09-22 DERIV-PSI3 (background `ses_f34e828b3`, proof-only, NO-EDIT
   gap): psiNeed_inner NOT closable — same blocker (complex disc at
   8.1975-0.375i; real secant barred; StirlingVert precondition fails).

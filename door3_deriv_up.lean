@@ -3,6 +3,7 @@ import central_cover_assembly
 import door3_premise_poly
 import door3_premise_pi
 import door3_premise_gamma
+import door3_tail_eta_upper
 
 /-!
 # Door-3 local factor-derivative uppers for the subdivision plan (WRITE-ONLY).
@@ -973,5 +974,76 @@ theorem partial_mid_poly_pi :
 theorem partial_inner_poly_pi :
     0.86 * 1 * 4.5 * 3 + 0.79 * 1.075 * 4.5 * 3 < (23.06 : ℝ) := by
   norm_num
+
+/-! ## 10. MID sphere at honest tail-quarter 125 (dMid = 0.395 - 4.75 I).
+
+Geometry check (margins honest, no force):
+* `dMid.re = 0.395`, radius `0.01` gives `z.re ∈ [0.385, 0.405]` on the
+  sphere, inside tail-quarter `[1/4, 1/2]` with margins `0.135` below
+  (`0.385 - 0.25`) and `0.095` above (`0.5 - 0.405`).
+* `dMid.im = -4.75`, radius `0.01` gives `z.im ∈ [-4.76, -4.74]`, so
+  `|z.im| ≤ 4.76 ≤ 11` with margin `6.24`.
+* Tail-quarter domain (`door3_tail_eta_upper.lean:167-170`):
+  `1/4 ≤ s.re`, `s.re ≤ 1/2`, `|s.im| ≤ 11` gives `‖riemannZeta s‖ ≤ 125`.
+  Hence the whole `0.01`-sphere over `dMid` is covered at `125`, NOT `10`.
+  The pre-existing `zetaSupOnSphere_mid` (`≤ 10`) is left untouched and
+  NOT claimed here; the filled instance below is restated at `125` only.
+  `dMid` is above the R02-disc `Im ∈ [-8.25, -5.25]` strip, so no R02-disc
+  numeral is used. -/
+
+def zetaSupOnSphere_mid_125 : Prop :=
+  ∀ z : ℂ, z ∈ Metric.sphere dMid 0.01 → ‖riemannZeta z‖ ≤ 125
+
+theorem dMid_sphere_re_bounds {z : ℂ}
+    (hz : z ∈ Metric.sphere dMid 0.01) :
+    (1 / 4 : ℝ) ≤ z.re ∧ z.re ≤ (1 / 2 : ℝ) := by
+  have hdist : dist z dMid = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dMid‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have hre : |(z - dMid).re| ≤ (0.01 : ℝ) := by
+    calc |(z - dMid).re| ≤ ‖z - dMid‖ := Complex.abs_re_le_norm _
+      _ = 0.01 := hnorm
+  have here : (z - dMid).re = z.re - 0.395 := by
+    have e : (z - dMid).re = z.re - dMid.re := Complex.sub_re z dMid
+    rw [e, dMid_re]
+  rw [here] at hre
+  obtain ⟨hlo, hhi⟩ := abs_le.mp hre
+  constructor <;> linarith
+
+theorem dMid_sphere_im_bound {z : ℂ}
+    (hz : z ∈ Metric.sphere dMid 0.01) :
+    |z.im| ≤ (11 : ℝ) := by
+  have hdist : dist z dMid = (0.01 : ℝ) := Metric.mem_sphere.mp hz
+  have hnorm : ‖z - dMid‖ = (0.01 : ℝ) := by rwa [dist_eq_norm] at hdist
+  have him : |(z - dMid).im| ≤ (0.01 : ℝ) := by
+    calc |(z - dMid).im| ≤ ‖z - dMid‖ := Complex.abs_im_le_norm _
+      _ = 0.01 := hnorm
+  have heim : (z - dMid).im = z.im - (-4.75) := by
+    have e : (z - dMid).im = z.im - dMid.im := Complex.sub_im z dMid
+    rw [e, dMid_im]
+  rw [heim] at him
+  obtain ⟨hlo, hhi⟩ := abs_le.mp him
+  have himlo : (-4.76 : ℝ) ≤ z.im := by linarith
+  have himhi : z.im ≤ (-4.74 : ℝ) := by linarith
+  rw [abs_le]
+  constructor <;> linarith
+
+theorem zetaSupOnSphere_mid_125_filled :
+    ∀ z : ℂ, z ∈ Metric.sphere dMid 0.01 → ‖riemannZeta z‖ ≤ 125 := by
+  intro z hz
+  obtain ⟨hre_lo, hre_hi⟩ := dMid_sphere_re_bounds hz
+  have him := dMid_sphere_im_bound hz
+  exact Door3TailEtaUpper.zeta_upper_tail_quarter hre_lo hre_hi him
+
+theorem zetaSup_mid_125_banked : zetaSupOnSphere_mid_125 :=
+  zetaSupOnSphere_mid_125_filled
+
+theorem zetaDeriv_mid_125_of_diffCont
+    (hd : zetaDiffCont_mid) :
+    ‖deriv riemannZeta dMid‖ ≤ 125 / 0.01 := by
+  unfold zetaDiffCont_mid at hd
+  exact zetaDerivUp_of_sup dMid 0.01 125 (by norm_num) hd
+    zetaSupOnSphere_mid_125_filled
+
+theorem zeta_mid_125_number : (125 : ℝ) / 0.01 = 12500 := by norm_num
 
 end Door3DerivUp
