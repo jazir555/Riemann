@@ -5722,6 +5722,11 @@ sorry-free infrastructure and the complete commit ledger above.
   ({0..7,9,10,12}, single-count) + shortfall `:4299`
   (1951921/388500≈5.024). Floor -3.127→-2.924 (gain 0.203).
   Cumulative constructive: +0.27/+0.15/+0.084/+0.203 = +0.707.
+- 2026-09-22 VERIFY5 (background `ses_f374ef9ff`, sole build owner):
+  GREEN — `[8689/8689] Built door3_premise_gamma (28s)`, BUILD-EXIT=0
+  (attempt 1/2), zero edits, grep-clean (0 sorry/axiom/admit/RH_apply/
+  sorryAx). N8 COMPILED (`:4779/:4975/:4980` under green). Premise_gamma
+  stays GREEN (N5→N8 ladder all verified). Lock RELEASED.
 - 2026-09-22 BINET-SURVEY (background `ses_f3752af33`, read-only, no
   edits): L2 rate leaf absent confirmed — no Binet/Stirling-remainder/
   logGamma/GammaSeq-rate in Mathlib (BohrMollerup qualitative,
