@@ -401,6 +401,74 @@ lemma zeta_re_zero_nonzero {s : ℂ} (hRe : s.re = 0) (hIm : s.im ≠ 0) :
     rw [riemannZeta_one_sub hs_ne hs1, hz, mul_zero]
   exact riemannZeta_ne_zero_of_one_le_re (by rw [h1s_re]) hz1
 
+/-- Rpow value for the generic `M = 16384` tail (`16384^{1/2} = 128` exact;
+generic mirror of `sSCUT_M8192_rpow_ge` at pilot `:4797`; honest via
+`128^2 = 16384` by `norm_num`; `16384 = 2^14` so the root is exact, unlike
+`8192^{1/2} ≈ 90.509`). -/
+theorem M16384_rpow_eq :
+    ((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) = (128 : ℝ) := by
+  have hx2 : ((((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) =
+      ((((16384 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : ((1 / 2 : ℝ)) * ((((2 : ℕ)) : ℝ)) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  have hy2 : ((128 : ℝ) ^ (2 : ℕ)) = ((((16384 : ℕ)) : ℝ)) := by norm_num
+  have hx_nn : (0 : ℝ) ≤ ((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) :=
+    (Real.rpow_pos_of_pos (by norm_num) _).le
+  have hy_nn : (0 : ℝ) ≤ (128 : ℝ) := by norm_num
+  have hle1 : ((((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) ≤
+      ((128 : ℝ) ^ (2 : ℕ)) :=
+    le_of_eq (by rw [hx2, hy2])
+  have hle2 : ((128 : ℝ) ^ (2 : ℕ)) ≤
+      ((((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) :=
+    le_of_eq (by rw [hy2, hx2])
+  exact le_antisymm
+    (le_of_pow_le_pow_left₀ (by norm_num) hy_nn hle1)
+    (le_of_pow_le_pow_left₀ (by norm_num) hx_nn hle2)
+
+/-- Generic `M = 16384` tail-decay bound at `Re = 1/2`
+(`12·(M^{-1/2})/(1/2) = 24/128 = 3/16`; generic mirror of `sSCUT_r_8192_le`
+at pilot `:4812`; decay recomputed honestly with `norm_num` via the exact
+`M16384_rpow_eq`; tightest honest `T'' = 3/16 = 0.1875` for this root). -/
+theorem r_16384_le :
+    (12 : ℝ) * ((((((16384 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ)))) / (1 / 2 : ℝ)) ≤
+      (3 / 16 : ℝ) := by
+  have hMpos : (0 : ℝ) < ((((16384 : ℕ)) : ℝ)) := by norm_num
+  have hA_eq := M16384_rpow_eq
+  have hrw : ((((16384 : ℕ)) : ℝ) ^ (-(1 / 2 : ℝ))) =
+      (((((16384 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (le_of_lt hMpos) _
+  rw [hrw, hA_eq]
+  have hnum : (12 : ℝ) * (((128 : ℝ))⁻¹ / (1 / 2 : ℝ)) ≤ (3 / 16 : ℝ) := by
+    norm_num
+  exact hnum
+
+/-- Generic paired tail at `M = 16384` (`‖G - S32768‖ ≤ 3/16`; generic mirror
+of `sSCUT_eta_tail_8192_le` at pilot `:4837` — numerals use only `Re = 1/2`
+and `‖s‖ ≤ 12`). -/
+theorem eta_tail_16384_le {s : ℂ} (hre : s.re = (1 / 2 : ℝ))
+    (hC : ‖s‖ ≤ (12 : ℝ)) :
+    ‖(∑' m, etaPairTerm s m) -
+      (∑ k ∈ Finset.range (2 * 16384), etaDirichletTerm s k)‖ ≤
+      (3 / 16 : ℝ) := by
+  have hs : 0 < s.re := by rw [hre]; norm_num
+  have hgen := zetaCell_even_remainder_le hs hC (by norm_num) 16384 (by norm_num)
+  have h2M : 2 * 16384 = 32768 := by norm_num
+  rw [h2M] at hgen
+  rw [hre] at hgen
+  have hr := r_16384_le
+  linarith
+
+/-- The `M = 16384` constant honestly improves on the banked `M = 8192`
+constant (`3/16 = 0.1875 < 48/181 ≈ 0.26519`). -/
+theorem tail_16384_lt_8192 : (3 / 16 : ℝ) < (48 / 181 : ℝ) := by
+  norm_num
+
+#print axioms M16384_rpow_eq
+#print axioms r_16384_le
+#print axioms eta_tail_16384_le
+#print axioms tail_16384_lt_8192
+
 
 #print axioms zeta_real_nonzero_critical
 #print axioms zeta_real_nonzero_positive

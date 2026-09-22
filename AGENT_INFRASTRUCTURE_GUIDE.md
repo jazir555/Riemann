@@ -5934,6 +5934,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 TAIL-M16384 (background `ses_f34c288f6`, proof-only,
+  grep-clean, tail-only commit): generic M=16384 tail —
+  `M16384_rpow_eq :408` (128 exact) + `r_16384_le :433` (≤3/16, no
+  inv_le needed) + `eta_tail_16384_le :449` (‖G-S32768‖≤3/16=0.1875) +
+  comparison `:464` (0.1875<0.26519). Tighter than pilot T'. (Diff
+  1-deletion is identical re-anchor, purely append.)
 - 2026-09-22 EDGE-RETIER (background `ses_f34c288f8`, proof-only,
   grep-clean, committed 3635a21): MT=1000 retier HONEST-FAIL on gates —
   triple (1/2,1000,0.0005): side closed, ratio + both widths OPEN
