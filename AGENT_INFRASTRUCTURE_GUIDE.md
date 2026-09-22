@@ -6137,6 +6137,10 @@ sorry-free infrastructure and the complete commit ledger above.
   grep-clean, zeta-only commit): 1.144^20≈14.79 honest → tail 17.484 →
   K0-16 19.766 `:41892` beats 19.782 by 0.016 (17.48 literal honestly
   refused: 0.874·1.144<1). 47-bar gap 0.308; 1.145 next.
+- 2026-09-22 ASSEMBLY-VERIFY2 (background `ses_f34849dbf`, build owner):
+  BUILD-EXIT=0 GREEN (8687 jobs, log 163742). Covers suppliers doc-fixes
+  + S20 + assembly through R04 + subsetfix v2. MILESTONE: suppliers +
+  assembly fully verified. R05+ appends post-date the build.
 - 2026-09-22 BALLADV-R02DELTA (background `ses_f34856317`, proof-only,
   grep-clean, ball_advance-only commit): small-delta splitter (100,0.01,1)
   + exp 1.04>1 + rpow-add merge lemmas. First-piece merge + p-series
