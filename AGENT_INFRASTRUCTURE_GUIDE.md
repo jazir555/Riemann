@@ -5755,7 +5755,14 @@ sorry-free infrastructure and the complete commit ledger above.
   RED — adjacent hre11 `:6218` needs the SAME fix (18/19, front 16→17;
   N11 agent dropped the open on both h-inner and hre lines, N9-pattern).
   PRESCRIPTION: add one `(` to 6218's front run (→19/19), count
-  before/after, rebuild. VERIFY13 tasked (sole owner).
+  before/after, rebuild.   VERIFY13 tasked (sole owner).
+- 2026-09-22 VERIFY13 (background `ses_f3500f1f4`, sole build owner):
+  hre11 fix APPLIED (18/19→19/19, front 16→17) + full
+  sweep table (all `have h/hre/him/h2` 5839-EOF balanced, exactly one
+  in-pattern slip) but build still RED — hposR tail `:6242` one close
+  short (block 6230-6242 nets +1; 11-deep nest closed by 10).
+  PRESCRIPTION: add one `)` to 6242's tail (17/27→17/28), count
+  before/after, rebuild. VERIFY14 tasked (sole owner).
 - 2026-09-22 GAMMA-N11 (background `ses_f350b3ff2`, proof-only,
   grep-clean, premise_gamma +460): E06 Seq11 rung — rpow11-frac
   (1.58≤11^5/26), Re-lower 17.38, prod11 1084064309.98, link
