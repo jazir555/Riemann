@@ -5934,6 +5934,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETA-S16-ADAPTIVE (background `ses_f34c289aa`, proof-only,
+  grep-clean, suppliers-only commit): branch (a) — S14 numerals
+  re-verified honest + S16 extended (log15/16 bridges, rpow15/16 quads
+  0.39·2.59=1.0101/0.38·2.69=1.0222, cpow15/16 splits, Re15≥-0.39/
+  Re16≤0.38) → floor -2.18 `:6784` (-1.41-0.77) + gap 4.12 `:6795`.
+  Envelope declining (S14→S16); live 1.94 stands. Even ladder through
+  S16 complete.
 - 2026-09-22 CELL-E-ADAPTIVE (background `ses_f34c288fc`, proof-only,
   grep-clean, interval-only commit): R05 conditional FILED (CELL-C
   silence resolved: R03+R04 both landed, nothing unreported) —
