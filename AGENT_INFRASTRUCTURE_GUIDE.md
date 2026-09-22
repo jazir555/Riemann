@@ -5942,6 +5942,23 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 STIRLING-FIXER (background `ses_f34bc837b`, sole build owner):
+  GREEN — `[8682 jobs]` BUILD-EXIT=0 (attempt 2/2). Fixes (11 lines):
+  `:1998` rpow_nonneg→explicit `0≤1.38`; `:2197` prod5 tail -1 `)`;
+  `:2227` hLink tail +1 `)`; `:2293-95` abs_im rewrite-at-h (goal was
+  corrupted by double-occurrence rewrite). sorryAx CLEARED on all 4
+  theorems. Lock RELEASED. PREMISE-VERIFY tasked (sole owner — N12
+  chain re-audited by coordinator: eleven +1 factor lines closed by
+  -11 final, balanced; earlier scare resolved).
+- 2026-09-22 OA11-SLOW (background `ses_f34bd8ed1`, proof-only,
+  grep-clean, off_axis-only commit): t=11 slow CLOSED at N=5 —
+  term eqs `:8969-9007` + Re+Im floors (21/50, 171/250, 3/5, 66/125)
+  + `S5_re_add_im_ge :9115` (=404/125=3.232) + `S5_norm_ge :9129`
+  (808/375≈2.1547 via 8/9-factor step — coordinator could not verify
+  this algebra by hand, FLAGGED for build) + `sCutOA11_slow_closed
+  :9169` (21/10≤808/375, surplus 41/750) + shortfall `:9176`.
+  Honest caveat: tail is S4096-scale, hEnough still needs S4096 leg.
+  off_axis NEVER BUILT — needs first build (queued behind lock).
 - 2026-09-22 TAIL-M131072 (background `ses_f34b9c7e9`, proof-only,
   grep-clean, tail-only commit): generic M=131072 tail —
   `M131072_rpow_ge :599` (362≤√131072, 362²=131044) + `r_131072_le

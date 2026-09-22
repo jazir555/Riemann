@@ -1996,7 +1996,7 @@ theorem D3SG_E05_rpow_fifth_root_upper :
     rw [hR]
     norm_num
   exact le_of_pow_le_pow_left₀ (by norm_num : 5 ≠ 0)
-    (Real.rpow_nonneg (by norm_num : (0 : ℝ) ≤ 5) _) hint
+    (by norm_num : (0 : ℝ) ≤ (1.38 : ℝ)) hint
 
 #print axioms D3SG_E05_rpow_fifth_root_upper
 
@@ -2194,7 +2194,7 @@ theorem D3SG_E05_prod5_norm_ge :
         (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
           (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
             (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
-              ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) := by
+              ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖)))) := by
   have h45 := mul_le_mul D3SG_E05_add4_norm_ge D3SG_E05_add5_norm_ge
     (by norm_num) (norm_nonneg _)
   have h345 := mul_le_mul D3SG_E05_add3_norm_ge h45
@@ -2224,7 +2224,7 @@ theorem D3SG_E05_GammaSeq5_upper_of_link
           (‖((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1)‖ *
             (‖(((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1)‖ *
               (‖((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1)‖ *
-                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖))))) :
+                ‖(((((((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1) + 1) + 1) + 1) + 1) + 1)‖)))))) :
     ‖Complex.GammaSeq (((((Complex.mk (0.395 : ℝ) (-0.75 : ℝ)) : ℂ) / 2) + 1)) 5‖ ≤
       (0.684 : ℝ) := by
   have hD := D3SG_E05_prod5_norm_ge
@@ -2290,8 +2290,9 @@ theorem D3SG_gamNeed_outer_shift1_upper :
     have habs : |(Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im| = (4.375 : ℝ) := by
       rw [him_eq, abs_of_neg (by norm_num : (-4.375 : ℝ) < 0)]
       norm_num
-    rw [← habs]
-    exact Complex.abs_im_le_norm _
+    have h := Complex.abs_im_le_norm (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ))
+    rw [habs] at h
+    exact h
   have hw0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)) ≠ 0 := by
     intro h
     have him0 : (Complex.mk (0.1975 : ℝ) (-4.375 : ℝ)).im = 0 := by
