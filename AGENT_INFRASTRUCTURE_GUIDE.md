@@ -5901,6 +5901,12 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 BRIDGE-RE2 (background `ses_f34eeac43`, proof-only,
+  grep-clean, bridge-only commit): re-export
+  `R02_fullDerivUp_of_etaPairDeriv_withZ934_of_D3 :52` (fires `:1042`'s
+  hZ934 via `:22` from rect bounds; 6 eta-pair premises + DG/DZetaPair/
+  Deta left open). Bound shape unchanged
+  (54.65·40·934+42·DG·934+42·40·DZetaPair).
 - 2026-09-22 CELL-B (background `ses_f34f3a72f`, proof-only, grep-clean,
   interval-only commit): R00 center assembly FILED conditional —
   `R00CenterAssembly.R00_center_with_poly_pi_gamma :35068` (consumes
