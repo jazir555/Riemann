@@ -1084,3 +1084,99 @@ theorem poly_upper_closedBall12 {s : ℂ}
   exact le_trans h78 h7879
 
 end Door3SliverEdge
+
+/-! ### (O) Pi-factor upper on closedBall 12 + joint poly-pi sup
+
+Grepped before writing:
+* poly79 block `door3_sliver_edge.lean:1049-1084` (`poly_upper_closedBall12_le78`
+  triangle `12 * 13 / 2 = 78`; `poly_upper_closedBall12` lift to `79`);
+* pi shapes `central_cover_assembly.lean:6331` (`piOf s = (Real.pi : ℂ) ^ (-(s/2))`),
+  `:6396` (`pi_upper_R02_disc`, needs `0.05 ≤ s.re`, inapplicable on ball-12
+  where `s.re` reaches `-12`), and `door3_deriv_certs.lean:419/492/504`
+  (`fPi_shape`, norm equation, sup `≤ 4` on the R00 `s`-image with
+  `s.re ≥ -1.61`, likewise inapplicable here).
+
+What is banked here (same-domain `closedBall 0 12`, rpow route mirroring the
+banked pi proofs; the `‖s/2‖ ≤ 6` detour is not needed):
+* `ball12_re_bounds`: `s.re ∈ [-12, 12]` on `closedBall 0 12`;
+* `piOf_norm_eq_ball12`: `‖piOf s‖ = π ^ (-s.re/2)`;
+* `piOf_upper_closedBall12`: `‖piOf s‖ ≤ 4096` on `closedBall 0 12`
+  (`-s.re/2 ≤ 6`, `π ^ e ≤ π ^ 6 ≤ 4 ^ 6 = 4096`);
+* `poly_pi_upper_closedBall12`: joint two-factor
+  `‖polyOf s * piOf s‖ ≤ 319488` (`78 * 4096`) on `closedBall 0 12`.
+
+Value-or-gap: two of four product factors now have same-domain ball-12 uppers
+(`78` poly, `4096` pi, joint `319488`). No claim is made here about
+`‖xiShiftedEntire‖` on ball-12.
+Residual (exact, open, not forced): Gamma / zeta uppers on ball-12 are not
+banked here — `s = 0` puts `s/2 = 0` at the Gamma pole and `s = 1` is the zeta
+pole, both points lying in `closedBall 0 12`, so uniform uppers on the full
+closed ball are not supplied and would need punctured domains; the M1000
+deriv closers stay conditional on the open `hC` premise via
+`uniform_M1000_pair_of_ballSup79`.
+-/
+
+namespace Door3SliverEdge
+
+/-- Real-part bounds on `closedBall 0 12`. -/
+theorem ball12_re_bounds {s : ℂ} (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    (-12 : ℝ) ≤ s.re ∧ s.re ≤ (12 : ℝ) := by
+  have hdist : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (12 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hre : |s.re| ≤ ‖s‖ := Complex.abs_re_le_norm s
+  rw [abs_le] at hre
+  obtain ⟨hlo, hhi⟩ := hre
+  constructor <;> linarith
+
+/-- Norm of the pi factor: `‖π ^ (-(s/2))‖ = π ^ (-s.re/2)`. -/
+theorem piOf_norm_eq_ball12 (s : ℂ) :
+    ‖CentralCoverAssembly.piOf s‖ = Real.pi ^ (-(s.re) / 2) := by
+  unfold CentralCoverAssembly.piOf
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _]
+  congr 1
+  have h2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hneg : (-(s / 2)).re = -((s / 2).re) := Complex.neg_re _
+  rw [hneg, h2]
+  ring
+
+/-- Pi-factor upper `4096` on `closedBall 0 12`. -/
+theorem piOf_upper_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ) := by
+  rw [piOf_norm_eq_ball12]
+  obtain ⟨hlo, _⟩ := ball12_re_bounds hs
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp : -(s.re) / 2 ≤ (6 : ℝ) := by linarith
+  have hle1 : Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (6 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 hexp
+  have hle2 : Real.pi ^ (6 : ℝ) ≤ (4 : ℝ) ^ (6 : ℝ) :=
+    Real.rpow_le_rpow (le_of_lt Real.pi_pos) Real.pi_le_four (by norm_num)
+  have h4 : (4 : ℝ) ^ (6 : ℝ) = (4096 : ℝ) := by
+    have h6 : (6 : ℝ) = (((6 : ℕ)) : ℝ) := by norm_num
+    rw [h6, Real.rpow_natCast]
+    norm_num
+  calc Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (6 : ℝ) := hle1
+    _ ≤ (4 : ℝ) ^ (6 : ℝ) := hle2
+    _ = (4096 : ℝ) := h4
+
+/-- Joint poly-pi sup `319488` on `closedBall 0 12` (`78 * 4096`). -/
+theorem poly_pi_upper_closedBall12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ) := by
+  have hpoly := poly_upper_closedBall12_le78 hs
+  have hpi := piOf_upper_closedBall12 hs
+  have hnn2 : (0 : ℝ) ≤ ‖CentralCoverAssembly.piOf s‖ := norm_nonneg _
+  have hmul : ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ ≤
+      (78 : ℝ) * (4096 : ℝ) :=
+    mul_le_mul hpoly hpi hnn2 (by norm_num)
+  have hnm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ =
+      ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ :=
+    norm_mul _ _
+  have hcalc : (78 : ℝ) * (4096 : ℝ) = (319488 : ℝ) := by norm_num
+  rw [hnm, hcalc] at hmul
+  exact hmul
+
+end Door3SliverEdge
