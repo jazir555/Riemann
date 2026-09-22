@@ -5741,6 +5741,15 @@ sorry-free infrastructure and the complete commit ledger above.
   N10 honest 0.634 COMPILED (`:5587` finite + `:5823` below-gate +
   `:5828` gap 0.026). Ladder 0.579→0.598→0.61→0.621→0.627→0.634 all
   verified green.   Lock RELEASED. GAMMA-N11 tasked (proof-only).
+- 2026-09-22 VERIFY11 (background `ses_f35068fa6`, sole build owner):
+  BUILD-EXIT=1 x2 (fence stop). Fixed hDeq `:6055` (10→11 closers).
+  Remaining: hpos11 helper `:6217` missing one `(` (14-run where 15
+  needed). PROOF: rung progression `:6163/:6176/:6189/:6203/:6217`
+  front-runs should be 11/12/13/14/15 — 6217 repeats 6203's 14
+  (copy-paste without the level's open). PRESCRIPTION: add one `(` to
+  6217's front run (14→15). AUDIT LESSON: whole-rung net-0 is
+  INSUFFICIENT (hDeq -1 and hpos11 +1 canceled); audit per SUB-BLOCK
+  (hDeq/hD/hpos-chain/hre/habs separately). VERIFY12 tasked.
 - 2026-09-22 GAMMA-N11 (background `ses_f350b3ff2`, proof-only,
   grep-clean, premise_gamma +460): E06 Seq11 rung — rpow11-frac
   (1.58≤11^5/26), Re-lower 17.38, prod11 1084064309.98, link
