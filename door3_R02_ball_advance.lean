@@ -1011,6 +1011,60 @@ theorem R02_fullDerivUp_bankedUZ934_of_zeta934 (DG DZ : ℝ) {s : ℂ}
     APQ APQ' AG AG' (zeta s) (deriv zeta s)
     hVpq hDpq hVG hZ934 hDG hDZ (by norm_num) hDG0 hDZ0
 
+/-- Second assembly instance firing the eta-pair route conditionally (same
+4-factor shape as `R02_fullDerivUp_bankedUZ934_of_zeta934` with `UZ := 934`,
+but the `hDZ : ‖deriv zeta s‖ ≤ DZ` premise is replaced by explicit eta-pair
+premises — honest conditional, no force).
+
+Restated shapes (NO import of `door3_eta_prime`, to avoid any import cycle:
+grep record — `door3_eta_prime.lean:1-3` imports only `Mathlib` +
+`door3_dp_trig` + `door3_dp_terms`; `door3_R02_zeta_bridge.lean:1` imports
+this file, so this file must not import the bridge or the eta-prime lane
+in case that lane later builds on this file):
+* uniform tsum-differentiation hypothesis, restated: `hUnifSum : Summable u`
+  plus `hEtaEq : etaDerivVal = ∑' m, eTerm m` (conclusion shape of
+  `etaPair_tsum_deriv_of_uniformBound`, `door3_eta_prime.lean:314`, with the
+  abstract `pairFn`/`u`/`ball` premises discharged upstream by the caller);
+* `etaDerivPair_bound`-style majorant, restated: per-term `hTermMaj` (shape
+  of `etaDerivPair_bound`, `door3_eta_prime.lean:133`) plus the tsum cap
+  `hTsumMaj : ‖∑' m, eTerm m‖ ≤ Deta` (shape of `etaDeriv_tsum_shape` /
+  `etaDeriv_tail_shape`, `door3_eta_prime.lean:216/229`);
+* conversion-factor derivative quotient, restated: `hConvEq` writes
+  `deriv zeta s` in quotient form
+  `(etaDerivVal * conv - etaVal * conv') * convInv2` (eta-to-zeta factor
+  quotient with the inverse-square factor carried explicitly, so no `⁻¹` /
+  division reasoning is needed) and `hConvLe` caps that quotient term by
+  `DZetaPair` (stated directly on `deriv zeta s`, which is definitionally
+  `deriv riemannZeta s` via `zeta := riemannZeta`, cf. `R02_zeta_hasDerivAt`).
+`‖APQ‖ ≤ 42`, `‖APQ'‖ ≤ 54.65`, `‖AG‖ ≤ 40` discharge on-rect as in `:999`;
+`DG` stays the open Gamma-deriv premise; the eta route closes `DZetaPair`
+conditionally on the six explicit eta premises. -/
+theorem R02_fullDerivUp_of_etaPairDeriv (DG DZetaPair Deta : ℝ) {s : ℂ}
+    (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (APQ APQ' AG AG' : ℂ)
+    (hVpq : ‖APQ‖ ≤ 42) (hDpq : ‖APQ'‖ ≤ 54.65)
+    (hVG : ‖AG‖ ≤ 40)
+    (hDG : ‖AG'‖ ≤ DG)
+    (hDG0 : 0 ≤ DG) (hDZetaPair0 : 0 ≤ DZetaPair)
+    (hZ934 : ‖zeta s‖ ≤ 934)
+    (etaVal etaDerivVal conv conv' convInv2 : ℂ)
+    (eTerm : ℕ → ℂ) (u : ℕ → ℝ)
+    (hUnifSum : Summable u)
+    (hTermMaj : ∀ m : ℕ, ‖eTerm m‖ ≤ u m)
+    (hTsumMaj : ‖∑' m : ℕ, eTerm m‖ ≤ Deta)
+    (hEtaEq : etaDerivVal = ∑' m : ℕ, eTerm m)
+    (hConvEq : deriv zeta s = (etaDerivVal * conv - etaVal * conv') * convInv2)
+    (hConvLe : ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair) :
+    ‖APQ' * AG * zeta s + APQ * AG' * zeta s + APQ * AG * deriv zeta s‖ ≤
+      54.65 * 40 * 934 + 42 * DG * 934 + 42 * 40 * DZetaPair := by
+  have hDZ : ‖deriv zeta s‖ ≤ DZetaPair := by
+    rw [hConvEq]
+    exact hConvLe
+  exact R02_fullDerivUp_bankedPQG_shape 934 DG DZetaPair
+    APQ APQ' AG AG' (zeta s) (deriv zeta s)
+    hVpq hDpq hVG hZ934 hDG hDZ (by norm_num) hDG0 hDZetaPair0
+
 /-- Generic `(PQ) * G` deriv upper from value + deriv caps (two-term Leibniz
 norm; `PQ` is treated as one banked factor). -/
 theorem R02_pqGammaDerivUp_of_factorCaps (Vpq Dpq UG DG : ℝ)

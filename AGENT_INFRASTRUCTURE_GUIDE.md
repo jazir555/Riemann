@@ -5887,6 +5887,13 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 DERIV-DZFIRE (background `ses_f34f29175`, proof-only,
+  grep-clean, ball_advance-only commit): second assembly
+  `R02_fullDerivUp_of_etaPairDeriv :1042` (same UZ=934 shape as `:999`
+  but DZ replaced by 6 explicit eta-pair premises: uniform summability
+  + eta-eq + term/tsum majorants + quotient eq/cap; shapes restated, no
+  import — cycle-safe). DG still open; Deta/DZetaPair numerics owned by
+  eta-prime/zeta lanes. First_cell/zeta_rigorous writes left.
 - 2026-09-22 STIRLING-DISC (background `ses_f34f3a729`, proof-only,
   grep-clean, stirling-only commit): R02 Gamma disc upper PROVED —
   `D3SG_R02_disc_upper :1918` (‖Γw‖≤1/2 on Re∈[0.025,0.37],
