@@ -6130,6 +6130,16 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 STIRLING-SHIFT3 (background `ses_f348d2261`, proof-only,
   grep-clean, stirling-only commit): outer shift-3 `≤0.032 :2923` (via
   Gamma 3.1975≤2.64; 31x→16x). Outer 16x / leaf 12x stand.
+- 2026-09-22 FIRSTCELL-ZETA14 (background `ses_f34876218`, proof-only,
+  grep-clean, first_cell-only commit): assembly needs E≥3.542 vs 0.28
+  (shortfall 3.262; even ideal S4+f4 short ~2.7). Sub-residuals: f4 cap
+  + real→complex bridge + eta identity at sCenter.
+- 2026-09-22 CELL-L (background `ses_f3487621c`, proof-only, grep-clean,
+  interval-only commit): R12 poly floor 22.8 hypothesis-free + center
+  conditional. Same ~6-order wall (short 2.057M).
+- 2026-09-22 SCUT48 (background `ses_f3487621a`, proof-only, grep-clean,
+  pilot-only commit): k=19 no-cos gap (quad floor negative; true anchor
+  even 10π). t19 adds 0; floor stays -2.574.
 - 2026-09-22 TAIL-M25 (background `ses_f34885f9f`, proof-only,
   grep-clean, tail-only commit): M33554432 odd rung `24/5792=3/724≈
   0.00414 :1215` (floor 5792²=33547264 honest; prompt stub corrected).

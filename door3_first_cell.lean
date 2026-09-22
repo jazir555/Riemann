@@ -2025,3 +2025,114 @@ theorem FC_etaZeta_residual_closed : True := by
 
 end Door3FirstCellClose
 
+/-! ## FIRSTCELL-ZETA14 wave: zeta14 assembly attempt via S4+tail then eta-times-factor (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* S4 numeral `0.28` CLOSED `FC_etaS4_uncond` (`door3_first_cell.lean:1787-1791`,
+  `0.28 ≤ S₄` from `FC_rpow2_head_upper_proved` + `FC_rpow3_head_lower_proved` +
+  `FC_rpow4_head_upper_proved`); status marker `FC_S4_partial_numeral_closed`
+  (`:1798`, `True`).
+* Tail majorant CLOSED `FC_etaS4_tail_proved` (`:1863-1895`,
+  `FC_etaS4_tail_obligation` shape `:1633-1638`
+  `∃ L R, Tendsto … ∧ ‖L - S₄‖ ≤ R`, banked radius `R = FC_etaF0395 4`).
+* Factor cap CLOSED `FC_etaZeta_factor_proved` (`:2015-2016`,
+  `FC_etaZeta_factor_obligation` shape `:1902-1903`
+  `‖(1:ℂ) - (2:ℂ)^((1:ℂ) - R02Pilot.sCenter)‖ ≤ 2.53`
+  via `FC_rpow0605_proved` + `FC_etaZeta_of_rpow`).
+* Target shape `FC_zeta14_obligation` (`:492-493`):
+  `(1.4:ℝ) ≤ ‖zeta R02Pilot.sCenter‖`; bridge `FC_zeta11_of_14` (`:496`).
+* Absent in this file (grep-clean this wave): no complex eta-to-zeta identity
+  instantiation at `sCenter` (no `eta … = (1 - 2 ^ (1 - …)) * zeta …` match),
+  no real-to-complex phase bridge (`‖complex eta‖ ≥ L`-style floor at
+  `t = -6.75`; only real-`σ` limit `L` + phase cap `FC_eta_phase1_sharp`
+  + quad-floor demo), no `FC_etaF0395 4 ≤ _` numeral cap (needed below).
+* S4 term shape reused verbatim:
+  `1 - (2:ℝ)^(-(0.395:ℝ)) + (3:ℝ)^(-(0.395:ℝ)) - (4:ℝ)^(-(0.395:ℝ))`.
+
+Verdict: bank the two honest conditional links with closed numerals
+(L floor from S4+tail; zeta from abstract eta-times-factor with need
+`1.4 * 2.53 = 3.542`); file the exact residual (f4 numeral + real-to-complex
+bridge + complex eta-zeta identity at `sCenter`). `FC_zeta14_obligation`
+stays OPEN. No build attempted (ASSEMBLY-VERIFY owns the single build lock).
+-/
+
+namespace Door3FirstCellClose
+
+/-- Honest L floor from the banked S4 numeral plus any tail radius:
+`0.28 - R ≤ L` from `S₄ ≥ 0.28` (`FC_etaS4_uncond`) and `‖L - S₄‖ ≤ R`. -/
+theorem FC_L_floor_of_S4_tail (L R : ℝ)
+    (hTail : ‖L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)))‖ ≤ R) :
+    (0.28 : ℝ) - R ≤ L := by
+  have hS4 : (0.28 : ℝ) ≤ 1 - (2 : ℝ) ^ (-(0.395 : ℝ))
+      + (3 : ℝ) ^ (-(0.395 : ℝ)) - (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    FC_etaS4_uncond
+  have habs : |L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)))| ≤ R := by
+    rw [← Real.norm_eq_abs]
+    exact hTail
+  rw [abs_le] at habs
+  linarith [habs.1, habs.2, hS4]
+
+/-- Zeta14 need numeral: `1.4 * 2.53 = 3.542` (eta level needed for
+`‖zeta‖ ≥ 1.4` through a `≤ 2.53` factor). -/
+theorem FC_zeta14_need_eq : (1.4 : ℝ) * 2.53 = 3.542 := by norm_num
+
+/-- Honest abstract eta-times-factor link: any eta level `E ≥ 3.542` with
+`E ≤ F * Z`, `F ≤ 2.53`, `0 ≤ Z`, `0 < F` forces `1.4 ≤ Z`.
+No zeta/eta identity assumed here; callers supply `hEF` from the (missing)
+complex identity at `sCenter` plus the banked factor cap. -/
+theorem FC_zeta_of_eta_factor (E Z F : ℝ)
+    (hE : (3.542 : ℝ) ≤ E) (hEF : E ≤ F * Z) (hF : F ≤ (2.53 : ℝ))
+    (hZnn : (0 : ℝ) ≤ Z) (hFpos : (0 : ℝ) < F) : (1.4 : ℝ) ≤ Z := by
+  have h1 : (3.542 : ℝ) ≤ F * Z := le_trans hE hEF
+  have h2 : F * Z ≤ (2.53 : ℝ) * Z := mul_le_mul_of_nonneg_right hF hZnn
+  have h3 : (3.542 : ℝ) ≤ (2.53 : ℝ) * Z := le_trans h1 h2
+  have e : (2.53 : ℝ) * 1.4 = 3.542 := by norm_num
+  have h4 : (2.53 : ℝ) * 1.4 ≤ (2.53 : ℝ) * Z := by linarith [h3, e]
+  exact (mul_le_mul_left (by norm_num : (0 : ℝ) < 2.53)).mp h4
+
+/-- Gap numeral: banked partial `0.28` below need `3.542`. -/
+theorem FC_S4_vs_need_gap : (0.28 : ℝ) < 3.542 := by norm_num
+
+/-- Shortfall numeral: `3.542 - 0.28 = 3.262`. -/
+theorem FC_S4_need_shortfall : (3.542 : ℝ) - 0.28 = 3.262 := by norm_num
+
+/-- Missing numeral piece for an unconditional L floor: next-term cap
+`f₄ = FC_etaF0395 4 ≤ 0.54` (TRUE `≈ 0.53`; patch phase by interval
+arithmetic; no banked `5 ^ 0.395` estimate in this file). Filed open. -/
+def FC_etaF4_upper_obligation : Prop := FC_etaF0395 4 ≤ (0.54 : ℝ)
+
+/-- Conditional L numeral through the filed f4 cap: with
+`‖L - S₄‖ ≤ f₄` and `f₄ ≤ 0.54`, `L ≥ 0.28 - 0.54 = -0.26`.
+Honest witness that the S4+tail route alone cannot reach positive need:
+even the capped floor is negative, and the ideal tail-capped ceiling
+`S₄ + f₄ ≈ 0.84` stays below need `3.542` by `≈ 2.7`. -/
+theorem FC_L_floor_of_S4_tail_F4 (L : ℝ)
+    (hTail : ‖L - (1 - (2 : ℝ) ^ (-(0.395 : ℝ)) + (3 : ℝ) ^ (-(0.395 : ℝ))
+      - (4 : ℝ) ^ (-(0.395 : ℝ)))‖ ≤ FC_etaF0395 4)
+    (hF4 : FC_etaF4_upper_obligation) : (-0.26 : ℝ) ≤ L := by
+  have h := FC_L_floor_of_S4_tail L (FC_etaF0395 4) hTail
+  have hF : FC_etaF0395 4 ≤ (0.54 : ℝ) := hF4
+  linarith
+
+/-- Exact zeta14-assembly residual (no proof content; records the honest stop):
+BANKED: S4 numeral `0.28` (`FC_etaS4_uncond`), tail majorant `R = f₄`
+(`FC_etaS4_tail_proved`), factor cap `2.53` (`FC_etaZeta_factor_proved`),
+conditional L floor (`FC_L_floor_of_S4_tail`, incl. numeral form
+`FC_L_floor_of_S4_tail_F4`), conditional eta-times-factor arithmetic
+(`FC_zeta_of_eta_factor`) with need `3.542` (`FC_zeta14_need_eq`) and gap
+`0.28 < 3.542` shortfall `3.262` (`FC_S4_vs_need_gap`,
+`FC_S4_need_shortfall`). OPEN in order: (a) f4 numeral
+`FC_etaF4_upper_obligation` (`5 ^ -0.395 ≤ 0.54`, TRUE `≈ 0.53`);
+(b) real-to-complex bridge (no banked complex-eta floor at `t = -6.75`
+from real limit `L` in this file); (c) complex eta-zeta identity at
+`sCenter` instantiating `hEF : E ≤ F * Z` with `F ≤ 2.53`
+(`FC_zeta14_obligation` hence stays OPEN; real partial `0.28` vs need
+`3.542` is numerically infeasible through a `2.53` factor, so larger-`N`
+complex-phase work, not larger real-`N` alone, is the patch-phase route). -/
+theorem FC_zeta14_assembly_residual : True := by
+  trivial
+
+end Door3FirstCellClose
+

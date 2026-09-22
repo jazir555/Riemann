@@ -5984,4 +5984,143 @@ next constructive legs still open — filed, not forced. -/
 theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_residual : (0 : ℝ) < 1 := by
   norm_num
 
+/-! ## sCut k=19 ODD shard (first link): `log 20` bridge + `theta20` window.
+
+`k = 19` is ODD so `eta19 = -20^{-sCut}`; constructive iff
+`cos(10*log 20) <= -c`. Grep first (shapes in this file):
+* `sSCUT_log_eighteen_via_seventeen_eq` at `:5379`,
+  `sSCUT_log_eighteen_le` at `:5390`, `sSCUT_log_eighteen_ge` at `:5404`,
+  `sSCUT_theta18_mem` at `:5421`, `sSCUT_delta18_odd_mem` at `:5439`,
+  `sSCUT_cos10log18_le_neg_three_quarters` at `:5459`,
+  `sSCUT_eta17_Re_ge` at `:5618` (odd-constructive mirror).
+* `sSCUT_log_nineteen_via_eighteen_eq` at `:5753`,
+  `sSCUT_log_nineteen_le` at `:5764`, `sSCUT_log_nineteen_ge` at `:5778`,
+  `sSCUT_theta19_mem` at `:5795`, `sSCUT_delta19_odd_mem` at `:5813`,
+  `sSCUT_cos10log19_le_neg_quarter` at `:5834` (even-`k` destructive mirror).
+* No `sSCUT_log_twenty` shape existed before this block; base is banked
+  `sSCUT_log_nineteen_ge/le` plus tight ratio `20/19` (`x = 1/19`).
+  Mirror of the `log 19` first-link recipe
+  (`sSCUT_log_nineteen_via_eighteen_eq` at `:5753`,
+  `sSCUT_log_nineteen_le` at `:5764`, `sSCUT_log_nineteen_ge` at `:5778`,
+  `sSCUT_theta19_mem` at `:5795`).
+
+Honest outcome filed here: `log 20` in `[2.9895993850, 3.0020993873]`,
+`theta20` in `[29.89599385, 30.020993873]`, `delta20 = theta20 - 9*pi`
+in `(1.621, 1.748)` via loose `pi` bounds (`Real.pi_gt_d4/lt_d4`).
+Odd anchor `9*pi` kept to mirror the SCUT47 `delta19` route; the quadratic
+floor at the window cap is `1 - 1.748^2/2 = -0.527752 < 1/4`, so the
+`cos <= -1/4`-shaped upper cannot close (nearest anchor is in fact even
+`10*pi`, with `theta20 - 10*pi` in `(-1.521, -1.393)`, i.e. `cos` small
+positive — also not `<= -c`). No cos floor banked; exact gap filed, not
+forced. All proofs close with `norm_num` / `linarith` / `ring` / `rw` only. -/
+
+/-- Composite log bridge `log 20 = log 19 + log (20/19)` (`20 = 19*(20/19)`
+via `Real.log_mul`; mirror of `sSCUT_log_nineteen_via_eighteen_eq` at `:5753`;
+ratio `20/19` (`x = 1/19`); grepped base bridges `sSCUT_log_nineteen_ge/le`;
+first link of the incremental base-20 chain for `k = 19`). -/
+theorem sSCUT_log_twenty_via_nineteen_eq :
+    Real.log 20 = Real.log 19 + Real.log (20 / 19 : ℝ) := by
+  have h20 : (19 : ℝ) * (20 / 19) = 20 := by norm_num
+  have h := Real.log_mul (show (19 : ℝ) ≠ 0 by norm_num)
+    (show (20 / 19 : ℝ) ≠ 0 by norm_num)
+  rw [h20] at h
+  linarith
+
+/-- `log 20` upper (`log 20 <= 3.0020993873` from `sSCUT_log_nineteen_le` +
+`log (20/19) <= 1/19`; mirror of `sSCUT_log_nineteen_le` at `:5764` with `x = 1/19`
+via `Real.log_le_sub_one_of_pos`; `2.9494678083 + 1/19 = 3.002099387247...`). -/
+theorem sSCUT_log_twenty_le : Real.log 20 ≤ (3.0020993873 : ℝ) := by
+  have h20 := sSCUT_log_twenty_via_nineteen_eq
+  have h19 := sSCUT_log_nineteen_le
+  have hub : Real.log (20 / 19 : ℝ) ≤ (1 / 19 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 20 / 19)
+    have he : (20 / 19 : ℝ) - 1 = (1 / 19 : ℝ) := by norm_num
+    linarith
+  have hfin : (2.9494678083 : ℝ) + 1 / 19 ≤ (3.0020993873 : ℝ) := by norm_num
+  linarith
+
+/-- `log 20` lower (`2.9895993850 <= log 20` from `sSCUT_log_nineteen_ge` +
+`log (20/19) >= 1/20`; mirror of `sSCUT_log_nineteen_ge` at `:5778` with `x = 1/19`
+via `log (19/20) <= -1/20` and `log (20/19) = -log (19/20)`;
+`2.9395993850 + 1/20 = 2.9895993850` exactly). -/
+theorem sSCUT_log_twenty_ge : (2.9895993850 : ℝ) ≤ Real.log 20 := by
+  have h20 := sSCUT_log_twenty_via_nineteen_eq
+  have h19 := sSCUT_log_nineteen_ge
+  have hub : Real.log (19 / 20 : ℝ) ≤ (-1 / 20 : ℝ) := by
+    have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 19 / 20)
+    have he : (19 / 20 : ℝ) - 1 = (-1 / 20 : ℝ) := by norm_num
+    linarith
+  have hinv : Real.log (20 / 19 : ℝ) = -Real.log (19 / 20 : ℝ) := by
+    have heq : (20 / 19 : ℝ) = (19 / 20 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  have hfin : (2.9895993850 : ℝ) ≤ 2.9395993850 + 1 / 20 := by norm_num
+  rw [h20, hinv]
+  linarith
+
+/-- Phase window `theta20 = 10*log 20 in [29.89599385, 30.020993873]`
+(via banked `sSCUT_log_twenty_ge/le` + `*10`; mirror of
+`sSCUT_theta19_mem` at `:5795`; non-strict since the `log 20` inputs are `<=`). -/
+theorem sSCUT_theta20_mem :
+    (29.89599385 : ℝ) ≤ 10 * Real.log 20 ∧
+    10 * Real.log 20 ≤ (30.020993873 : ℝ) := by
+  have hge := sSCUT_log_twenty_ge
+  have hle := sSCUT_log_twenty_le
+  have hmul_lo := mul_le_mul_of_nonneg_left hge (by norm_num : (0 : ℝ) ≤ 10)
+  have hmul_hi := mul_le_mul_of_nonneg_left hle (by norm_num : (0 : ℝ) ≤ 10)
+  have c1 : (10 : ℝ) * 2.9895993850 = 29.89599385 := by norm_num
+  have c2 : (10 : ℝ) * 3.0020993873 = 30.020993873 := by norm_num
+  constructor <;> linarith
+
+/-- Reduced phase `delta20 = theta20 - 9*pi in (1.621, 1.748)` (odd-multiple anchor:
+`9*pi ~= 28.274` kept to mirror `sSCUT_delta19_odd_mem` at `:5813`; strict via
+`Real.pi_gt_d4/lt_d4`; rounded outward from the loose-pi window
+`[1.62159385, 1.747493873]`
+(`29.89599385 - 9*3.1416 = 1.62159385`,
+`30.020993873 - 9*3.1415 = 1.747493873`) so `linarith` closes). -/
+theorem sSCUT_delta20_odd_mem :
+    (1.621 : ℝ) < 10 * Real.log 20 - 9 * Real.pi ∧
+    10 * Real.log 20 - 9 * Real.pi < (1.748 : ℝ) := by
+  have hth := sSCUT_theta20_mem
+  have hpi_lo := Real.pi_gt_d4
+  have hpi_hi := Real.pi_lt_d4
+  constructor <;> linarith
+
+/-- Exact width of the `delta20` window (`0.127`). -/
+theorem sSCUT_delta20_odd_width_eq :
+    (1.748 : ℝ) - 1.621 = (0.127 : ℝ) := by
+  norm_num
+
+/-- Exact quadratic floor at the window cap
+(`1 - 1.748^2/2 = -0.527752`; `1.748^2 = 3.055504`). -/
+theorem sSCUT_cos10log20_quad_floor_eq :
+    (1 - (1.748 : ℝ) ^ 2 / 2) = (-0.527752 : ℝ) := by
+  norm_num
+
+/-- Honest no-close gap: the quadratic floor sits below `1/4`
+(`-0.527752 < 1/4`), so the SCUT47-shaped signed upper
+`cos(10*log 20) <= -(1/4)` cannot close via `1 - x^2/2 <= cos x` on
+`|delta20| <= 1.748`; no cos floor banked here (nearest anchor is even
+`10*pi` with small positive cosine, likewise not `<= -c`); exact gap filed. -/
+theorem sSCUT_delta20_no_neg_quarter_gap :
+    (1 - (1.748 : ℝ) ^ 2 / 2) < (1 / 4 : ℝ) := by
+  norm_num
+
+/-- Eta19 payoff RESIDUAL (`k = 19` ODD, base 20): `cos(10*log 20) <= -c`
+is NOT banked (gap `sSCUT_delta20_no_neg_quarter_gap`: quad floor
+`-0.527752 < 1/4`); hence neither `Re(20^{-sCut}) <= -c*r20` nor
+`Re(eta19) >= +...` is banked here; one branch only, no force. Next link needed:
+a tighter `delta20` window or a different anchor/lemma route. -/
+theorem sSCUT_eta19_payoff_residual : (0 : ℝ) < 1 := by
+  norm_num
+
+/-- Shard assembly residual: `t19` adds no constructive gain
+(no `sSCUT_cos10log20` floor, `sSCUT_eta19_payoff_residual` blocks the
+`Re(eta19) >= +c` leg); combined honest floor stays at
+`F17 = -1000096/388500 ~= -2.574` (`sSCUT_S9_skip8_eta10_eta12_eta15_eta17_floor_eq`),
+still below both bars (`21/10 = 2.1`, `1507/905 ~= 1.665`);
+shortfalls `1815946/388500` and `298111276/70318500` unchanged;
+next constructive legs still open — filed, not forced. -/
+theorem sSCUT_S9_skip8_eta10_eta12_eta15_eta17_eta18_eta19_residual : (0 : ℝ) < 1 := by
+  norm_num
+
 end Door3PilotR00Zeta
