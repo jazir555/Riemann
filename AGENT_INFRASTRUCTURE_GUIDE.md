@@ -5494,8 +5494,17 @@ sorry-free infrastructure and the complete commit ledger above.
   real-only, Wendel/gamma_low value-only, ball_advance transport-only).
   Alive only as honest-conditional (psi-disc+G or Cauchy C/ρ); closing
   needs Stirling-remainder/Gauss for `Complex.digamma` (Mathlib TODO)
-  + tight G at Re∈[0.025,0.37]. `R02_gammaDeriv_missingNumeral_spec
+  + tight G at Re∈[0.025,0.37].   `R02_gammaDeriv_missingNumeral_spec
   :1140` stays open.
+- 2026-09-22 GAMMA-N6 (background `ses_f37790741`, proof-only,
+  grep-clean, `door3_premise_gamma.lean` +458): E06 Seq5 scaffold
+  mirrored from E05 — link `:3480`, cpow5 upper `:3494`, rate 0.065
+  `:3503`, rpow5-frac `:3567`, cpow5 norm `:3595`, add2-5 uppers
+  3.26/4.25/5.24/6.23, prod5 1408.65 `:3713`, finite lower 0.579
+  `:3742` (`816/1408.65~=0.5793`), honest-ceiling-below-gate `:3881`
+  + gap 0.081 `:3886`, N6-next filed `:3893`. VERDICT: necessity
+  0.7257 clears but achievable 0.579<0.66 FAILS (no force). E06 needs
+  N=6. Build UNVERIFIED (proof-only lane). GAMMA-N6B tasked (E06 N=6).
 - 2026-09-22 EDGE-AUDIT (background `ses_f3778800b`, proof-only, no
   edits): 40/40 gridH leaves audited (`:439-:1412`) vs suppliers —
   0/40 obligations banked (0/80 sub-enclosures). Tiers: (0.002,0.05)x8,
