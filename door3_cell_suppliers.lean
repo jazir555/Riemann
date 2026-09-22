@@ -6816,4 +6816,350 @@ theorem CS_S16C_below_slow_gap :
 #print axioms CS_complex_S16_Re_ge_neg218
 #print axioms CS_S16C_below_slow_gap
 
+/-- S18 rung (k=17,18; honest stall): trig-free Re floor
+`Re(S₁₈) = Re(S₁₆) + Re₁₇ - Re₁₈ ≥ -2.18 - 0.37 - 0.37 = -2.92`.
+TRUE `Re(S₁₈)` trails live best `slow = 1.94` by design — this floor
+`-2.92` is honest (worse than S16 `-2.18`, no force).
+
+Per-term routes (banked windows only, mirrors of banked lemmas):
+* `log 17 = log 16 + log(17/16)` (`CS_log_seventeen_eq`, mirror of
+  `CS_log_fifteen_eq`), so `log 17 ∈ [2.8314, 2.8351]` from banked
+  `CS_log_sixteen_ge/le` + `log(17/16) ∈ [1/17, 1/16]`.
+* `log 18 = log 9 + log 2` exact (`CS_log_eighteen_eq`, mirror of
+  `CS_log_sixteen_eq`), so `log 18 ∈ [2.7989, 2.9658]` from banked
+  `CS_log_nine_ge/le` + `CS_log2_ge/le`.
+* Rpow: `17^0.395 ≥ 2.74`, `18^0.395 ≥ 2.71` (quadratic lowers, mirrors of
+  `CS_rpow15pos_lower_proved`); hence `r₁₇ ≤ 0.37`, `r₁₈ ≤ 0.37`
+  (reciprocal steps, mirrors of `CS_rpow15neg_upper_proved`).
+* Cpow Re splits for `17^{-s}`, `18^{-s}` (token mirrors of
+  `CS_cpow15_sCenter_re`).
+* Trig-free Re caps: `Re₁₇ ≥ -0.37`, `Re₁₈ ≤ 0.37` (`-1 ≤ cos ≤ 1` only).
+* Assembly: `Re(S₁₈) = Re(S₁₆) + Re₁₇ - Re₁₈ ≥ -2.18 - 0.37 - 0.37 = -2.92`.
+Reuses banked S16 base `CS_complex_S16_Re_ge_neg218`; no S14/S16 rebuild. -/
+
+/-- `log(17/16)` upper (`≤ 1/16`, mirrors `CS_log1514_upper`). -/
+theorem CS_log1716_upper : Real.log (17 / 16 : ℝ) ≤ (1 / 16 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 17 / 16)
+  have he : (17 / 16 : ℝ) - 1 = (1 / 16 : ℝ) := by norm_num
+  linarith
+
+/-- `log(17/16)` lower (`≥ 1/17` via `log(17/16) = -log(16/17)`, mirrors
+`CS_log1514_lower`). -/
+theorem CS_log1716_lower : (1 / 17 : ℝ) ≤ Real.log (17 / 16 : ℝ) := by
+  have h := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 16 / 17)
+  have he : (16 / 17 : ℝ) - 1 = (-(1 / 17) : ℝ) := by norm_num
+  have hinv : Real.log (17 / 16 : ℝ) = -Real.log (16 / 17 : ℝ) := by
+    have heq : (17 / 16 : ℝ) = (16 / 17 : ℝ)⁻¹ := by rw [inv_div]
+    rw [heq, Real.log_inv]
+  linarith
+
+/-- `log 17 = log 16 + log(17/16)` composite bridge (mirror of
+`CS_log_fifteen_eq`). -/
+theorem CS_log_seventeen_eq :
+    Real.log 17 = Real.log 16 + Real.log (17 / 16 : ℝ) := by
+  have h17 : (17 : ℝ) = 16 * (17 / 16) := by norm_num
+  conv_lhs => rw [h17]
+  rw [Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 17` lower (`2.8314 ≤ log 17` from `CS_log_sixteen_ge` +
+`CS_log1716_lower`). -/
+theorem CS_log_seventeen_ge : (2.8314 : ℝ) ≤ Real.log 17 := by
+  rw [CS_log_seventeen_eq]
+  have h16 := CS_log_sixteen_ge
+  have h1716 := CS_log1716_lower
+  have hcap : (2.8314 : ℝ) ≤ 2.772588 + 1 / 17 := by norm_num
+  linarith
+
+/-- `log 17` upper (`log 17 ≤ 2.8351` from `CS_log_sixteen_le` +
+`CS_log1716_upper`). -/
+theorem CS_log_seventeen_le : Real.log 17 ≤ (2.8351 : ℝ) := by
+  rw [CS_log_seventeen_eq]
+  have h16 := CS_log_sixteen_le
+  have h1716 := CS_log1716_upper
+  have hcap : (2.772592 : ℝ) + 1 / 16 ≤ 2.8351 := by norm_num
+  linarith
+
+/-- `log 18 = log 9 + log 2` composite bridge (mirror of
+`CS_log_sixteen_eq`). -/
+theorem CS_log_eighteen_eq : Real.log 18 = Real.log 9 + Real.log 2 := by
+  have h18 : (18 : ℝ) = 9 * 2 := by norm_num
+  rw [h18, Real.log_mul (by norm_num) (by norm_num)]
+
+/-- `log 18` lower (`2.7989 ≤ log 18` from banked lowers). -/
+theorem CS_log_eighteen_ge : (2.7989 : ℝ) ≤ Real.log 18 := by
+  rw [CS_log_eighteen_eq]
+  have h9 := CS_log_nine_ge
+  have h2 := CS_log2_ge
+  have hcap : (2.7989 : ℝ) ≤ 2.1058 + 0.693147 := by norm_num
+  linarith
+
+/-- `log 18` upper (`log 18 ≤ 2.9658` from banked uppers). -/
+theorem CS_log_eighteen_le : Real.log 18 ≤ (2.9658 : ℝ) := by
+  rw [CS_log_eighteen_eq]
+  have h9 := CS_log_nine_le
+  have h2 := CS_log2_le
+  have hcap : (2.2726 : ℝ) + 0.693148 ≤ 2.9658 := by norm_num
+  linarith
+
+/-- `17^0.395 ≥ 2.74` lower input (TRUE `≈ 3.06`). -/
+def CS_rpow17pos_lower : Prop := (2.74 : ℝ) ≤ (17 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `17^0.395 ≥ 2.74` via quadratic lower at
+`x = 0.395·log 17 > 1.1183` (uses `CS_log_seventeen_ge`). -/
+theorem CS_rpow17pos_lower_proved : CS_rpow17pos_lower := by
+  show (2.74 : ℝ) ≤ (17 : ℝ) ^ ((0.395 : ℝ))
+  have h17 : (2.8314 : ℝ) ≤ Real.log 17 := CS_log_seventeen_ge
+  have hx_lo : (1.1183 : ℝ) < 0.395 * Real.log 17 := by
+    have hmul : (0.395 : ℝ) * 2.8314 ≤ 0.395 * Real.log 17 :=
+      mul_le_mul_of_nonneg_left h17 (by norm_num)
+    have hcap : (1.1183 : ℝ) < 0.395 * 2.8314 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 17 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.1183 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.74 : ℝ) ≤ 1 + 1.1183 + (1.1183 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.74 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (17 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 17)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `17^-0.395 ≤ 0.37` upper input (TRUE `≈ 0.326`). -/
+def CS_rpow17neg_upper : Prop := (17 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ)
+
+/-- CLOSED: `17^-0.395 ≤ 0.37` from `17^0.395 ≥ 2.74`
+(`0.37·2.74 = 1.0138 ≥ 1`). -/
+theorem CS_rpow17neg_upper_proved : CS_rpow17neg_upper := by
+  show (17 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ)
+  have hlow : (2.74 : ℝ) ≤ (17 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow17pos_lower_proved
+  have hpos : (0 : ℝ) < (17 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (17 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (17 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 17)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.37 : ℝ) * (17 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.37 * 2.74 := by norm_num
+    calc (1 : ℝ) ≤ 0.37 * 2.74 := hmul
+      _ ≤ 0.37 * (17 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- `18^0.395 ≥ 2.71` lower input (TRUE `≈ 3.13`). -/
+def CS_rpow18pos_lower : Prop := (2.71 : ℝ) ≤ (18 : ℝ) ^ ((0.395 : ℝ))
+
+/-- CLOSED: `18^0.395 ≥ 2.71` via quadratic lower at
+`x = 0.395·log 18 > 1.1055` (uses `CS_log_eighteen_ge`). -/
+theorem CS_rpow18pos_lower_proved : CS_rpow18pos_lower := by
+  show (2.71 : ℝ) ≤ (18 : ℝ) ^ ((0.395 : ℝ))
+  have h18 : (2.7989 : ℝ) ≤ Real.log 18 := CS_log_eighteen_ge
+  have hx_lo : (1.1055 : ℝ) < 0.395 * Real.log 18 := by
+    have hmul : (0.395 : ℝ) * 2.7989 ≤ 0.395 * Real.log 18 :=
+      mul_le_mul_of_nonneg_left h18 (by norm_num)
+    have hcap : (1.1055 : ℝ) < 0.395 * 2.7989 := by norm_num
+    linarith
+  set x : ℝ := 0.395 * Real.log 18 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := le_trans (by norm_num) hx_lo.le
+  have hsq : (1.1055 : ℝ) ^ 2 ≤ x ^ 2 :=
+    pow_le_pow_left₀ (by norm_num) hx_lo.le 2
+  have hquad := Real.quadratic_le_exp_of_nonneg hx0
+  have hbase : (2.71 : ℝ) ≤ 1 + 1.1055 + (1.1055 : ℝ) ^ 2 / 2 := by
+    norm_num
+  have hchain : (2.71 : ℝ) ≤ Real.exp x := by
+    linarith [hquad, hsq, hx_lo, hbase]
+  have hrpow : (18 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 18)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  exact hchain
+
+/-- `18^-0.395 ≤ 0.37` upper input (TRUE `≈ 0.319`). -/
+def CS_rpow18neg_upper : Prop := (18 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ)
+
+/-- CLOSED: `18^-0.395 ≤ 0.37` from `18^0.395 ≥ 2.71`
+(`0.37·2.71 = 1.0027 ≥ 1`). -/
+theorem CS_rpow18neg_upper_proved : CS_rpow18neg_upper := by
+  show (18 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ)
+  have hlow : (2.71 : ℝ) ≤ (18 : ℝ) ^ ((0.395 : ℝ)) := CS_rpow18pos_lower_proved
+  have hpos : (0 : ℝ) < (18 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (18 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (18 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 18)]
+    rw [inv_eq_one_div]
+  have hle : (1 : ℝ) ≤ (0.37 : ℝ) * (18 : ℝ) ^ ((0.395 : ℝ)) := by
+    have hmul : (1 : ℝ) ≤ 0.37 * 2.71 := by norm_num
+    calc (1 : ℝ) ≤ 0.37 * 2.71 := hmul
+      _ ≤ 0.37 * (18 : ℝ) ^ ((0.395 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hlow (by norm_num)
+  rw [hInv, div_le_iff₀ hpos]
+  linarith [hle]
+
+/-- Cpow real-part split for `17^{-s}` at `sCenter` (token mirror of
+`CS_cpow15_sCenter_re`). -/
+theorem CS_cpow17_sCenter_re : ((((17 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 17) := by
+  have h17pos : (0 : ℝ) < 17 := by norm_num
+  have hxC : ((17 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h17pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((17 : ℝ) : ℂ) = (((Real.log 17 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h17pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 17 : ℝ)) : ℂ)).re = Real.log 17 := Complex.ofReal_re _
+  have hzim : ((((Real.log 17 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 17 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 17 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 17 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 17 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 17 * (-(0.395 : ℝ)))
+      = (17 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h17pos _).symm
+  have hcos : Real.cos (Real.log 17 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 17) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Cpow real-part split for `18^{-s}` at `sCenter` (token mirror of
+`CS_cpow16_sCenter_re`). -/
+theorem CS_cpow18_sCenter_re : ((((18 : ℝ)) : ℂ) ^ (-R02Pilot.sCenter)).re
+    = (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 18) := by
+  have h18pos : (0 : ℝ) < 18 := by norm_num
+  have hxC : ((18 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h18pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((18 : ℝ) : ℂ) = (((Real.log 18 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h18pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 18 : ℝ)) : ℂ)).re = Real.log 18 := Complex.ofReal_re _
+  have hzim : ((((Real.log 18 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 18 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 18 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 18 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 18 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 18 * (-(0.395 : ℝ)))
+      = (18 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h18pos _).symm
+  have hcos : Real.cos (Real.log 18 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 18) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- `Re₁₇ ≥ -0.37` (`r₁₇ ≤ 0.37`, `-1 ≤ cos`; TRUE `≈ +0.10`). -/
+theorem CS_Re17_ge_neg037 :
+    (-0.37 : ℝ) ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 17) := by
+  have hr0 : (0 : ℝ) ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (17 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ) := CS_rpow17neg_upper_proved
+  have hcos : (-1 : ℝ) ≤ Real.cos (6.75 * Real.log 17) := Real.neg_one_le_cos _
+  have h1 : (17 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ)
+      ≤ (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 17) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (17 : ℝ) ^ (-(0.395 : ℝ)) * (-1 : ℝ) = -((17 : ℝ) ^ (-(0.395 : ℝ))) := by
+    ring
+  have h3 : (-0.37 : ℝ) ≤ -((17 : ℝ) ^ (-(0.395 : ℝ))) := by
+    linarith [hru]
+  linarith
+
+/-- `Re₁₈ ≤ 0.37` (`r₁₈ ≤ 0.37`, `cos ≤ 1`; TRUE `≈ -0.31`). -/
+theorem CS_Re18_le_037 :
+    (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 18) ≤ (0.37 : ℝ) := by
+  have hr0 : (0 : ℝ) ≤ (18 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hru : (18 : ℝ) ^ (-(0.395 : ℝ)) ≤ (0.37 : ℝ) := CS_rpow18neg_upper_proved
+  have hcos : Real.cos (6.75 * Real.log 18) ≤ (1 : ℝ) := Real.cos_le_one _
+  have h1 : (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 18)
+      ≤ (18 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) :=
+    mul_le_mul_of_nonneg_left hcos hr0
+  have h2 : (18 : ℝ) ^ (-(0.395 : ℝ)) * (1 : ℝ) = (18 : ℝ) ^ (-(0.395 : ℝ)) := by
+    ring
+  linarith [hru]
+
+/-- Complex S18 partial sum at `sCenter` (`S₁₆ + 17^{-s} - 18^{-s}`). -/
+noncomputable def CS_S18C : ℂ :=
+  CS_S16C + (17 : ℂ) ^ (-R02Pilot.sCenter) - (18 : ℂ) ^ (-R02Pilot.sCenter)
+
+/-- Real-part link for the complex S18 (`Re(S₁₈) = Re(S₁₆) + Re₁₇ - Re₁₈`,
+mirror of `CS_S16C_Re_eq`). -/
+theorem CS_S18C_Re_eq :
+    (CS_S18C).re = (CS_S16C).re
+      + (17 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 17)
+      - (18 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 18) := by
+  unfold CS_S18C
+  have h17 : ((17 : ℂ)) = ((((17 : ℝ)) : ℂ)) := by simp
+  have h18c : ((18 : ℂ)) = ((((18 : ℝ)) : ℂ)) := by simp
+  rw [h17, h18c]
+  simp only [Complex.add_re, Complex.sub_re,
+    CS_cpow17_sCenter_re, CS_cpow18_sCenter_re]
+
+/-- Complex-S18 real part `≥ -2.92` (PROVED, unconditional):
+`Re(S₁₈) = Re(S₁₆) + Re₁₇ - Re₁₈ ≥ -2.18 - 0.37 - 0.37 = -2.92`
+(honest regression vs S16 `-2.18` by `0.74`, trails live
+best `slow = 1.94` by design; reuses banked S16 base
+`CS_complex_S16_Re_ge_neg218`). -/
+theorem CS_complex_S18_Re_ge_neg292 :
+    (-2.92 : ℝ) ≤ (CS_S18C).re := by
+  have hEq := CS_S18C_Re_eq
+  have hS16 := CS_complex_S16_Re_ge_neg218
+  have hT17 := CS_Re17_ge_neg037
+  have hT18 := CS_Re18_le_037
+  rw [hEq]
+  linarith
+
+/-- Honest gap: the new S18 Re `-2.92` trails the live best `slow = 1.94`
+(`CS_complex_S4_abs_ge_194`) by `4.86`; no S18 feed closes here. -/
+theorem CS_S18C_below_slow_gap :
+    (1.94 : ℝ) - (-2.92 : ℝ) = 4.86 := by
+  norm_num
+
+#print axioms CS_log1716_upper
+#print axioms CS_log1716_lower
+#print axioms CS_log_seventeen_eq
+#print axioms CS_log_seventeen_ge
+#print axioms CS_log_seventeen_le
+#print axioms CS_log_eighteen_eq
+#print axioms CS_log_eighteen_ge
+#print axioms CS_log_eighteen_le
+#print axioms CS_rpow17pos_lower_proved
+#print axioms CS_rpow17neg_upper_proved
+#print axioms CS_rpow18pos_lower_proved
+#print axioms CS_rpow18neg_upper_proved
+#print axioms CS_cpow17_sCenter_re
+#print axioms CS_cpow18_sCenter_re
+#print axioms CS_Re17_ge_neg037
+#print axioms CS_Re18_le_037
+#print axioms CS_S18C_Re_eq
+#print axioms CS_complex_S18_Re_ge_neg292
+#print axioms CS_S18C_below_slow_gap
+
 end Door3CellSuppliers

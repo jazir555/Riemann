@@ -41034,3 +41034,74 @@ theorem R02_gamma_expDecay_box_decay_arg_neg (s : ℂ)
 #print axioms R02_gamma_expDecay_box_banked_four
 #print axioms R02_gamma_expDecay_box_im_abs_lo
 #print axioms R02_gamma_expDecay_box_decay_arg_neg
+/-!
+## Door-3 strip endgame, step 39i (zeta lane): near-slice tightening `357 → 336`.
+
+Mirror of `R02_D3_zeta_linear_slice0503_tight34` with N=13 peeled K0
+`19.802` (`R02_D3_odd105_tsum_le_19802`) and lifted denom `0.62`
+(`R02_D3_eta_denom_floor_slice0503`): `19.802 / 0.62 ≤ 32`, so
+`‖ζ(z)‖ ≤ 32 * (0.5 + |Im|)` and `≤ 336` on `|Im| ≤ 10`.
+Old `357` cap kept; this banks the tighter window only.
+Far `504` (48-linear) untouched: `47`-linear needs `K0 ≤ 19.458`, gap `0.344`.
+-/
+/-- Tight near zeta linear `‖ζ‖ ≤ 32*(0.5+|Im|)` on `0.05 ≤ Re ≤ 0.3` (N=13 K0). -/
+theorem R02_D3_zeta_linear_slice0503_tight32_N13 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.3) :
+    ‖riemannZeta z‖ ≤ 32 * (0.5 + |z.im|) := by
+  have hs : (0 : ℝ) < z.re := by linarith
+  have hre_ne : z.re ≠ 1 := by intro h; linarith
+  have hexp_le : ∀ n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    intro n
+    have hn1 : (1 : ℕ) ≤ 2 * n + 1 := by omega
+    have h1 : (1 : ℝ) ≤ ((((2 * n + 1 : ℕ)) : ℝ)) := by
+      calc (1 : ℝ) = ((((1 : ℕ)) : ℝ)) := by norm_num
+        _ ≤ _ := Nat.cast_le.mpr hn1
+    have he : -z.re - 1 ≤ (-1.05 : ℝ) := by linarith
+    exact Real.rpow_le_rpow_of_exponent_le h1 he
+  have hodd_Re : Summable (fun n : ℕ => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) :=
+    Summable.of_norm_bounded R02_D3_odd105_summable (fun n => by rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)]; exact hexp_le n)
+  have hK : (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) ≤ 19.802 :=
+    le_trans (hodd_Re.tsum_le_tsum (fun n => hexp_le n) R02_D3_odd105_summable) R02_D3_odd105_tsum_le_19802
+  have hmajor : Summable (fun n : ℕ => ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := hodd_Re.mul_left ‖z‖
+  have hbound : ∀ n : ℕ, ‖etaPairTerm z n‖ ≤ ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := fun n => norm_etaPairTerm_le z hs n
+  have htsum : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1) := tsum_of_norm_bounded hmajor.hasSum hbound
+  have hfactor : (∑' n : ℕ, ‖z‖ * ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) = ‖z‖ * (∑' n : ℕ, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-z.re - 1)) := Summable.tsum_mul_left ‖z‖ hodd_Re
+  have heta : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 19.802 := le_trans htsum (by rw [hfactor]; exact mul_le_mul_of_nonneg_left hK (norm_nonneg _))
+  have hnorm : ‖z‖ ≤ 0.5 + |z.im| := by
+    have h := Complex.norm_le_abs_re_add_abs_im z
+    have habs : |z.re| ≤ (0.5 : ℝ) := by rw [abs_le]; constructor <;> linarith
+    linarith
+  have hetaLin : ‖∑' m : ℕ, etaPairTerm z m‖ ≤ 19.802 * (0.5 + |z.im|) := by
+    calc ‖∑' m : ℕ, etaPairTerm z m‖ ≤ ‖z‖ * 19.802 := heta
+      _ ≤ (0.5 + |z.im|) * 19.802 := mul_le_mul_of_nonneg_right hnorm (by norm_num)
+      _ = 19.802 * (0.5 + |z.im|) := by ring
+  have hden_ge := R02_D3_eta_denom_floor_slice0503 z hre_hi
+  have hden_pos : (0 : ℝ) < ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := lt_of_lt_of_le (by norm_num) hden_ge
+  have hZeq := zeta_of_etaPairLim_of_re_ne hs hre_ne
+  have hZnorm : ‖riemannZeta z‖ = ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by rw [hZeq, norm_div]
+  have hstep1 : ‖∑' m : ℕ, etaPairTerm z m‖ / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (19.802 * (0.5 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]; exact mul_le_mul_of_nonneg_right hetaLin (inv_nonneg.mpr hden_pos.le)
+  have hinv : (‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖)⁻¹ ≤ ((0.62 : ℝ))⁻¹ := (inv_le_inv₀ hden_pos (by norm_num)).mpr hden_ge
+  have hNnn : (0 : ℝ) ≤ 19.802 * (0.5 + |z.im|) := mul_nonneg (by norm_num) (by linarith [abs_nonneg z.im])
+  have hstep2 : (19.802 * (0.5 + |z.im|)) / ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - z)‖ ≤ (19.802 * (0.5 + |z.im|)) / 0.62 := by
+    rw [div_eq_mul_inv, div_eq_mul_inv]; exact mul_le_mul_of_nonneg_left hinv hNnn
+  have hcap : (19.802 * (0.5 + |z.im|)) / 0.62 ≤ 32 * (0.5 + |z.im|) := by
+    have hratio : (19.802 : ℝ) / 0.62 ≤ 32 := by norm_num
+    have e : (19.802 * (0.5 + |z.im|)) / 0.62 = (19.802 / 0.62) * (0.5 + |z.im|) := by ring
+    rw [e]; exact mul_le_mul_of_nonneg_right hratio (by linarith [abs_nonneg z.im])
+  rw [hZnorm]; exact le_trans (le_trans hstep1 hstep2) hcap
+/-- Tight near rect cap: `‖ζ‖ ≤ 336` on `0.05 ≤ Re ≤ 0.3`, `|Im| ≤ 10` (N=13). -/
+theorem R02_D3_zeta_rect_cap_slice0503_tight336_N13 (z : ℂ) (hre_lo : 0.05 ≤ z.re) (hre_hi : z.re ≤ 0.3) (him : |z.im| ≤ 10) :
+    ‖riemannZeta z‖ ≤ 336 := by
+  have h := R02_D3_zeta_linear_slice0503_tight32_N13 z hre_lo hre_hi
+  have hcap : (32 : ℝ) * (0.5 + |z.im|) ≤ 336 := by
+    have hX : (0.5 : ℝ) + |z.im| ≤ 10.5 := by linarith
+    calc (32 : ℝ) * (0.5 + |z.im|) ≤ 32 * 10.5 := mul_le_mul_of_nonneg_left hX (by norm_num)
+      _ = 336 := by norm_num
+  exact le_trans h hcap
+/-- Gap verdict: near `336 < 357`; drop `21`. High `151 < 336`. -/
+theorem R02_D3_zeta_rect_cap_slice0503_tight336_edge_N13 :
+    (336 : ℝ) < 357 ∧ (151 : ℝ) < 336 ∧ (357 : ℝ) - 336 = 21 := by
+  refine ⟨by norm_num, by norm_num, by norm_num⟩
+#print axioms R02_D3_zeta_linear_slice0503_tight32_N13
+#print axioms R02_D3_zeta_rect_cap_slice0503_tight336_N13
+#print axioms R02_D3_zeta_rect_cap_slice0503_tight336_edge_N13

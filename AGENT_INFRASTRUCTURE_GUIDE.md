@@ -5984,6 +5984,24 @@ sorry-free infrastructure and the complete commit ledger above.
   `eta11_Re_le_neg :4061` (≤-19/70≈-0.271) + `no_pos_lock :4071`.
   k=8-style neg-upper filed as gap `:3935` (cos≈+0.96, no force).
   eta11 honestly skipped as gain. Suppliers fixes left for SUPP-VERIFY.
+- 2026-09-22 ETA-S18 (background `ses_f349a43f1`, proof-only, grep-clean,
+  suppliers-only commit): S18 rung — log17/18 bridges, rpow17/18 quads
+  (0.37·2.74≈1.014/0.37·2.71≈1.003, thin), cpow17/18 splits,
+  Re17≥-0.37/Re18≤0.37 → floor -2.92 `:7130` (-2.18-0.74) + gap 4.86
+  `:7141`. Envelope declining; live 1.94 stands. Even ladder through
+  S18 complete.
+- 2026-09-22 ETAPRIME-TSUMVAL (background `ses_f34c288f6`, proof-only,
+  grep-clean, eta_prime-only commit): tsum VALUE banked —
+  `etaDerivMajorant_tsum_le :780` (∑u ≤ 8π²/6≈13.16 via dominator tsum
+  eq + comparison) with full chain `etaDerivShift2_tsum_eq :738`
+  (shift-Basel via hasSum_zeta_two) + `etaDerivDominator_tsum_eq :769`
+  (×8). Deta numeral feeder ready (needs R02-worst-case re-derivation
+  per DZNUM gap, not disc value; numeric ≤13.2 open).
+- 2026-09-22 ZETA-SLICE (background `ses_f34c288eb`, proof-only,
+  grep-clean, zeta_rigorous-only commit): near-slice tighten 357→336
+  (32·10.5 via N13 K0=19.802/denom 0.62; drop 21; old kept). Global
+  still 504-dominated. Gap to 47-linear: K0 19.802 vs 19.458 (0.344;
+  N15 heads net ~0.08 — doesn't close).
 - 2026-09-22 CELL-F (background `ses_f34c288f6`, proof-only, grep-clean,
   interval-only commit): R06 conditional FILED —
   `R06CenterAssembly.R06_center_with_poly_pi_gamma :35297` (poly 0.88 +

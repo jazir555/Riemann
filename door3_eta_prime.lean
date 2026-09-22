@@ -730,6 +730,63 @@ theorem etaDerivMajorant_summable : Summable etaDerivMajorant :=
   etaDerivMajorant_summable_of_dom etaDerivDominator
     etaDerivDominator_summable etaDerivMajorant_norm_le_dominator
 
+/-- Shifted Basel value in rpow form, via `hasSum_zeta_two`
+(`Mathlib/NumberTheory/ZetaValues.lean:452`) plus `Summable.tsum_eq_zero_add`
+(zero term vanishes). Cited shapes: `hasSum_zeta_two.summable/.tsum_eq`
+(`zeta_rigorous.lean:32137/32139`), `Summable.tsum_eq_zero_add`
+(`ApproxZetaLowerBound.lean:71`). -/
+theorem etaDerivShift2_tsum_eq :
+    ∑' n : ℕ, (((((n + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ)) = Real.pi ^ 2 / 6 := by
+  have hB : HasSum (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) (Real.pi ^ 2 / 6) :=
+    hasSum_zeta_two
+  have hBsum : Summable (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) :=
+    hB.summable
+  have hval : (∑' n : ℕ, (1 : ℝ) / (n : ℝ) ^ 2) = Real.pi ^ 2 / 6 :=
+    hB.tsum_eq
+  have h0 : ((fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) 0) = 0 := by
+    simp
+  have hshift := hBsum.tsum_eq_zero_add
+  have hzero : (∑' n : ℕ, (1 : ℝ) / (n : ℝ) ^ 2) =
+      ∑' n : ℕ, (1 : ℝ) / (((n + 1 : ℕ) : ℝ)) ^ 2 := by
+    rw [hshift, h0, zero_add]
+  have hterm : (fun n : ℕ => (1 : ℝ) / (((n + 1 : ℕ) : ℝ)) ^ 2) =
+      (fun n : ℕ => (((((n + 1 : ℕ)) : ℝ)) ^ (-2 : ℝ))) := by
+    funext n
+    have hnpos : (0 : ℝ) ≤ (((((n + 1 : ℕ)) : ℝ))) := Nat.cast_nonneg _
+    have eR : (-2 : ℝ) = -((2 : ℝ)) := by norm_num
+    rw [eR, Real.rpow_neg hnpos, Real.rpow_two, one_div]
+  have hshiftval : (∑' n : ℕ, (1 : ℝ) / (((n + 1 : ℕ) : ℝ)) ^ 2) =
+      Real.pi ^ 2 / 6 := by
+    rw [← hzero]
+    exact hval
+  rw [← hterm]
+  exact hshiftval
+
+/-- Dominator tsum value via `Summable.tsum_mul_left` factoring plus
+`etaDerivShift2_tsum_eq`. Cited shapes: `Summable.tsum_mul_left`
+(`zeta_rigorous.lean:2128`), `tsum_mul_left`
+(`Counterexamples/NowhereDifferentiable.lean:213`). -/
+theorem etaDerivDominator_tsum_eq :
+    ∑' m : ℕ, etaDerivDominator m = 8 * (Real.pi ^ 2 / 6) := by
+  have h2 := etaDerivShift2_tsum_eq
+  unfold etaDerivDominator
+  rw [tsum_mul_left, h2]
+
+/-- TSUM VALUE bound: majorant tsum dominated by the explicit `Deta`
+`8 * (π ^ 2 / 6)` via `Summable.tsum_le_tsum` comparison with the dominator.
+Cited shapes: `Summable.tsum_le_tsum` (`door3_eta_prime.lean:228`),
+`norm_tsum_le_tsum_norm`
+(`Mathlib/Analysis/Normed/Group/InfiniteSum.lean:149`). -/
+theorem etaDerivMajorant_tsum_le :
+    ∑' m : ℕ, etaDerivMajorant m ≤ 8 * (Real.pi ^ 2 / 6) := by
+  have hle : ∀ m : ℕ, etaDerivMajorant m ≤ etaDerivDominator m :=
+    etaDerivMajorant_le_dominator
+  have hD := etaDerivDominator_tsum_eq
+  calc ∑' m : ℕ, etaDerivMajorant m ≤ ∑' m : ℕ, etaDerivDominator m :=
+        Summable.tsum_le_tsum hle etaDerivMajorant_summable
+          etaDerivDominator_summable
+    _ = 8 * (Real.pi ^ 2 / 6) := hD
+
 /-- Identification: local cpow-difference mirror equals the rigorous pair term.
 Cycle check: `zeta_rigorous` imports only `Mathlib` + `Zeta23.MV.Final`
 (`zeta_rigorous.lean:1-2`), and no `Zeta23/*` file imports any `door3_*`
