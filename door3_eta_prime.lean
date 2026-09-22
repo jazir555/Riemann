@@ -1030,3 +1030,84 @@ theorem etaDeriv_tsum_norm_le_132 (y : ℂ)
     (hy : y ∈ Metric.ball etaMajCenter etaMajRadius) :
     ‖∑' m : ℕ, etaDerivPairTerm y m‖ ≤ (13.2 : ℝ) :=
   le_trans (etaDeriv_tsum_norm_le_Deta y hy) etaDerivDeta_num_le
+
+/-- hConvLe feed, generic quotient assembly for the `:1058` consumer shape.
+
+Grepped before writing (read-only):
+* `etaDeriv_tsum_norm_le_132 :1029` (disc `center 3, radius 1/2`, `Deta = 13.2`);
+* `etaDerivDeta_num_le :982`, `etaDeriv_tsum_norm_le_Deta :1009`;
+* caps `etaConv_upper_R02 :845` (`‖conv‖ ≤ 3`),
+  `etaVal_upper_R02 :877` (`‖etaHurwitz‖ ≤ 168`),
+  `etaConvDeriv_bound_R02 :901` (`‖conv'‖ ≤ 2`),
+  `etaConvInvSq_bound_R02 :929` (`‖convInv2‖ ≤ 31`);
+* consumer `door3_R02_ball_advance.lean:1051-1058`
+  `‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤ DZetaPair`
+  with `DZetaPair = (Deta * C0 + VEta * C1) * C2`
+  (`R02_DZetaPair_quotient_of_caps :1488`, same norm algebra).
+Proved by `norm_mul` + `norm_sub_le` transport; no rect premise needed. -/
+theorem etaQuotient_bound_of_caps (Deta VEta C0 C1 C2 : ℝ)
+    (hDeta0 : 0 ≤ Deta) (hVEta0 : 0 ≤ VEta)
+    (hC00 : 0 ≤ C0) (hC10 : 0 ≤ C1) (hC20 : 0 ≤ C2)
+    (etaDerivVal etaVal conv conv' convInv2 : ℂ)
+    (hDeriv : ‖etaDerivVal‖ ≤ Deta) (hVal : ‖etaVal‖ ≤ VEta)
+    (hC0 : ‖conv‖ ≤ C0) (hC1 : ‖conv'‖ ≤ C1) (hC2 : ‖convInv2‖ ≤ C2) :
+    ‖(etaDerivVal * conv - etaVal * conv') * convInv2‖ ≤
+      (Deta * C0 + VEta * C1) * C2 := by
+  have n1 : ‖etaDerivVal * conv‖ ≤ Deta * C0 := by
+    rw [norm_mul]
+    exact mul_le_mul hDeriv hC0 (norm_nonneg _) hDeta0
+  have n2 : ‖etaVal * conv'‖ ≤ VEta * C1 := by
+    rw [norm_mul]
+    exact mul_le_mul hVal hC1 (norm_nonneg _) hVEta0
+  have hsub : ‖etaDerivVal * conv - etaVal * conv'‖ ≤ Deta * C0 + VEta * C1 :=
+    le_trans (norm_sub_le _ _) (add_le_add n1 n2)
+  have hcap0 : 0 ≤ Deta * C0 + VEta * C1 :=
+    add_nonneg (mul_nonneg hDeta0 hC00) (mul_nonneg hVEta0 hC10)
+  rw [norm_mul]
+  exact mul_le_mul hsub hC2 (norm_nonneg _) hcap0
+
+/-- hConvLe feed, R02 instantiation with banked caps.
+Chains `etaConv_upper_R02`, `etaConvDeriv_bound_R02`,
+`etaConvInvSq_bound_R02`, `etaVal_upper_R02` into the generic assembly,
+leaving only `‖etaDerivVal‖ ≤ Deta` open (G3). -/
+theorem etaConvQuotient_bound_R02 (Deta : ℝ) (hDeta0 : 0 ≤ Deta)
+    (s : ℂ) (hre_lo : 0.05 ≤ s.re) (hre_hi : s.re ≤ 0.74)
+    (him_lo : -8.25 ≤ s.im) (him_hi : s.im ≤ -5.25)
+    (etaDerivVal : ℂ) (hDeriv : ‖etaDerivVal‖ ≤ Deta) :
+    ‖(etaDerivVal * etaConv s - zeta_rigorous.etaHurwitz s * etaConvDeriv s) *
+      etaConvInvSq s‖ ≤ (Deta * 3 + 168 * 2) * 31 := by
+  have hC0 := etaConv_upper_R02 s hre_lo
+  have hC1 := etaConvDeriv_bound_R02 s hre_lo
+  have hC2 := etaConvInvSq_bound_R02 s hre_hi
+  have hV := etaVal_upper_R02 s hre_lo hre_hi him_lo him_hi
+  exact etaQuotient_bound_of_caps Deta 168 3 2 31 hDeta0 (by norm_num)
+    (by norm_num) (by norm_num) (by norm_num) etaDerivVal
+    (zeta_rigorous.etaHurwitz s) (etaConv s) (etaConvDeriv s)
+    (etaConvInvSq s) hDeriv hV hC0 hC1 hC2
+
+/-- Pure-ℝ numeral for the R02 shape at `Deta = 13.2`: closed by `norm_num`.
+Value-only: NOT claimed as a rect bound (see residual below). -/
+theorem etaQuotient_R02_num_eq :
+    ((13.2 : ℝ) * 3 + 168 * 2) * 31 = (11643.6 : ℝ) := by
+  norm_num
+
+/-- Exact residual for the `:1058` feed on the R02 rect.
+
+What is closed above: generic quotient algebra
+`etaQuotient_bound_of_caps` plus R02-cap instantiation
+`etaConvQuotient_bound_R02` conditional on `‖etaDerivVal‖ ≤ Deta`.
+What stays open (G3 link): a uniform `Deta` with
+`etaDerivVal = ∑' m, etaDerivPairTerm s m` and
+`‖etaDerivVal‖ ≤ Deta` for all `s` with
+`0.05 ≤ s.re ≤ 0.74`, `-8.25 ≤ s.im ≤ -5.25`.
+Non-transfer note: disc value `13.2` (`etaDeriv_tsum_norm_le_132`)
+holds only for `y ∈ Metric.ball etaMajCenter etaMajRadius`
+(`y.re ≥ 5 / 2`, `‖y‖ ≤ 7 / 2`, exponent `5 / 2`);
+the R02 rect needs exponent `0.05` and `‖s‖ ≤ 8.29`,
+so the disc dominator `8 / (m+1)^2` does not dominate there
+and `11643.6` is not filed as an R02 bound. -/
+def etaR02_hConvLe_residual_spec : Prop :=
+  ∃ Deta : ℝ, 0 ≤ Deta ∧
+    (∀ s : ℂ, 0.05 ≤ s.re → s.re ≤ 0.74 → -8.25 ≤ s.im → s.im ≤ -5.25 →
+      ∀ etaDerivVal : ℂ, etaDerivVal = ∑' m, etaDerivPairTerm s m →
+        ‖etaDerivVal‖ ≤ Deta)
