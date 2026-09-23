@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ZETA-M18TAIL (background `ses_f3471df91`, proof-only,
+  grep-clean, zeta-only commit): M18 pair + tail 17.4 → 19.734, NO
+  candidate (above 19.709 by 0.025). K0 minimum at N=17 so far;
+  tighter 17^0.05 next.
 - 2026-09-22 SCUT54 (background `ses_f34721887`, proof-only,
   grep-clean, pilot-only commit): F27+t29 assembled + k=31 CONSTRUCTIVE
   (+0.16, biggest leg `:eta31_Re_ge`). Constructive run: t17/t27/t29/t31.
