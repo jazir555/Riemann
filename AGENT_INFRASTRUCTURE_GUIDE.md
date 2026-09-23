@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 CERTS-R18 (background `ses_f3452ae1b`, proof-only,
+  grep-clean, certs-only commit): R18 sup mirror + cap verdicts +
+  residual.
 - 2026-09-22 S46+AGREECLOSE (backgrounds `ses_f34536a0d`,
   `ses_f34536a09-follow`, proof-only, grep-clean): S46 trig-free
   (Re -10.08 + Im conditional); agree12 strip chain + outer
