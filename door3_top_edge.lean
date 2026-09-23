@@ -1410,3 +1410,61 @@ theorem bottom_ballSup_of_shifted_uppers {C G Z : ℝ}
   exact hb
 
 end Door3TopEdgeZetaAttempt
+
+/-! ## TOPEDGE-UNIFORM-LOWER uniform-lower attempt (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1364-1412` (`Door3TopEdgeZetaAttempt`: pole-membership
+  rebuild `pole_zero_mem_ball12_local`, `pole_one_mem_ball12_local`,
+  shift-exact joint conditional `entire_bound_of_shifted_factors`,
+  `bottom_ballSup_of_shifted_uppers` closing `bottom_ballSup_residual`
+  from Gamma/zeta uppers plus product identity).
+* banked lower bounds in this file: `exists_bottom_edge_lower_bound`
+  (`door3_top_edge.lean:170-188`, existential epsilon over any `Icc a b`
+  from compact minimum plus `xiShiftedEntire_ne_zero_bottom`),
+  `exists_bottom_edge_compact_lower_bound` (`:608-664`, existential `m`
+  over edge strip), pointwise `1 / 2` only at `x = 0`
+  (`Door3TopEdgeNeeds.lower_outer_point_half_at_zero`).
+* residual `Door3TopEdgeNeeds.bottom_uniform_lower_residual` (`:1027-1030`)
+  demands `1 / 2` uniformly over `Icc (-10) 10`; no banked lemma in this
+  file supplies `1 / 2` away from `x = 0`.
+* ball12 uppers `Door3TopEdgeGammaGap.gamma_ball12_upper_residual`,
+  `zeta_ball12_upper_residual`, `entire_eq_product_ball12_gap`
+  (`:1289-1303`) stay OPEN, so `bottom_ballSup_residual` stays OPEN.
+
+Value: `bottom_uniform_exist_lower_on_Icc10` chains the banked existential
+lower bound at `a = -10`, `b = 10`; `bottom_point_form_eq` rewrites the
+edge point to the residual point form.
+Gap (exact, OPEN): `uniform_half_open_gap` (alias of
+`bottom_uniform_lower_residual`) plus `ballSup_open_gap_40/1000` below.
+-/
+
+namespace Door3TopEdgeUniformLower
+
+open Complex Real Set Topology
+
+theorem bottom_uniform_exist_lower_on_Icc10 :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ x ∈ Set.Icc (-10 : ℝ) (10 : ℝ),
+        ε ≤ ‖CentralCoverAssembly.xiShiftedEntire ((x : ℂ) - Complex.I / 2)‖ := by
+  have hab : (-10 : ℝ) ≤ (10 : ℝ) := by norm_num
+  obtain ⟨ε, hε, h⟩ :=
+    Door3TopEdge.exists_bottom_edge_lower_bound (a := (-10 : ℝ)) (b := (10 : ℝ)) hab
+  exact ⟨ε, hε, h⟩
+
+theorem bottom_point_form_eq (x : ℝ) :
+    ((x : ℂ) - Complex.I / 2) =
+      ((x : ℂ) - Complex.I * (((1 / 2 : ℝ)) : ℂ)) := by
+  push_cast
+  ring
+
+def uniform_half_open_gap : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def ballSup_open_gap_40 : Prop :=
+  Door3TopEdgeBallSup.ballSup_full_exact_gap_40
+
+def ballSup_open_gap_1000 : Prop :=
+  Door3TopEdgeBallSup.ballSup_full_exact_gap_1000
+
+end Door3TopEdgeUniformLower

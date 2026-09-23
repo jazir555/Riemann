@@ -2322,3 +2322,119 @@ theorem cutR10_joint_exact_gap9
   cutR10_closedBall_sup_of_joint hJoint
 
 end Door3CutR10BallSup
+
+/-! # APPEND-10 (FE honest attempt + banked rechain + triple gap file; append-only tail):
+
+Grep record (read before writing, APPEND-9 tail :2244-2324):
+* Gamma best half CLOSED `≤ 1 / 2`: `cutR10_gamma_sup_half_closed :1358`,
+  rechains `:2143`, `:2200`, `:2273`.
+* Zeta edges CLOSED: `cutR10_zeta_rightSliver_closed :1073` (`Re ≥ 3/2 → ≤ 3`),
+  `cutR10_zeta_rightEdge_two_closed :1640` (`Re ≥ 2 → ≤ 2`),
+  rechains `:2280`, `:2285`.
+* Reflected Euler CLOSED `cutR10_reflected_Euler_two_closed :1920`
+  (`t.re ≤ -1 → ‖zeta (1 - t)‖ ≤ 2`); bridge
+  `cutR10_zeta_of_chi_reflected :1930`; sliver
+  `cutR10_hFE_sliver_of_chi :1948` (needs chi `≤ 3`); full
+  `cutR10_hFE_of_chi_and_middle :1962` (needs chi `≤ 3` + middle `≤ 2`).
+* Chi `≤ 3`: no banked lemma locally (record `:1864-1869`); grep for
+  chi norm finds only `:1933`, `:1951`, `:1965` premises, no closed cap.
+* Gamma `1 / 100` OPEN on `hProdCap` (`:2297`); zeta `≤ 6` OPEN on `hFE`
+  (`:2305` via `:1701`); joint `0.04` OPEN on `hJoint` (`:2314` via `:946`).
+* Joint banked sliver CLOSED `1072 / 5` via
+  `cutR10_sliver_sup_banked_closed :2064`, rechain `:2290`.
+
+Verdict here:
+* FE premise NOT closed: reflected half re-chained below by direct call;
+  sliver and full hFE re-stated below as exact conditionals on the open
+  chi cap (`≤ 3`) and open middle reflected cap (`≤ 2`); full-rect `≤ 6`
+  therefore stays gated on single explicit `hFE`.
+* Best banked Gamma stays `1 / 2`; best banked zeta stays `3` / `2` on edges;
+  best banked joint stays `1072 / 5` on the `Re ≥ 2` sliver (rechained below
+  by direct call, no new analysis).
+* Full-rect `1 / 100` stays gated on single explicit `hProdCap`;
+  exact `0.04` stays gated on single explicit `hJoint` (filed exactly below).
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Gamma best banked half rechain (`≤ 1 / 2`). -/
+theorem cutR10_gamma_best_half_rechain10 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_sup_half_closed s hlo hhi hilo hihi
+
+/-- Zeta best banked edge rechain (`Re ≥ 3/2 → ≤ 3`). -/
+theorem cutR10_zeta_edge_three_rechain10 (s : ℂ) (hs : 3 / 2 ≤ s.re) :
+    ‖zeta s‖ ≤ 3 :=
+  cutR10_zeta_rightSliver_closed s hs
+
+/-- Zeta best banked edge rechain (`Re ≥ 2 → ≤ 2`). -/
+theorem cutR10_zeta_edge_two_rechain10 (s : ℂ) (hs : (2 : ℝ) ≤ s.re) :
+    ‖zeta s‖ ≤ 2 :=
+  cutR10_zeta_rightEdge_two_closed s hs
+
+/-- Reflected Euler half rechain CLOSED (`t.re ≤ -1 → reflected ≤ 2`). -/
+theorem cutR10_reflected_Euler_two_rechain10 (t : ℂ)
+    (ht : t.re ≤ (-1 : ℝ)) :
+    ‖zeta (1 - t)‖ ≤ 2 :=
+  cutR10_reflected_Euler_two_closed t ht
+
+/-- Sliver hFE honest conditional: Euler sliver `≤ 3 * 2` given chi `≤ 3`. -/
+theorem cutR10_hFE_sliver_conditional_rechain10 (t : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ t.re) (hhi : t.re ≤ (-1 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ t.im) (hihi : t.im ≤ (11.56 : ℝ))
+    (hChi : ‖cutR10_chiFE (1 - t)‖ ≤ 3) :
+    ‖zeta t‖ ≤ 3 * 2 :=
+  cutR10_hFE_sliver_of_chi t hlo hhi hilo hihi hChi
+
+/-- Full hFE honest conditional: exact `hFE` shape given chi `≤ 3` plus
+middle reflected `≤ 2`; both premises stay open locally. -/
+theorem cutR10_hFE_full_conditional_rechain10
+    (hChi : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) →
+      ‖cutR10_chiFE (1 - t)‖ ≤ 3)
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) →
+      ‖zeta u‖ ≤ 2) :
+    ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2 :=
+  cutR10_hFE_of_chi_and_middle hChi hMid
+
+/-- Joint best banked rechain on the in-ball `Re ≥ 2` sliver (`≤ 1072 / 5`). -/
+theorem cutR10_joint_sliver_rechain10 (z : ℂ)
+    (hz : z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1))
+    (hs2 : (2 : ℝ) ≤ (shiftedS z).re) :
+    ‖xiShiftedEntire z‖ ≤ (1072 / 5 : ℝ) :=
+  cutR10_sliver_sup_banked_closed z hz hs2
+
+/-- Gamma gap: `1 / 100` gated on single explicit `hProdCap`. -/
+theorem cutR10_gamma_hundred_gap10 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+/-- Zeta gap: full-rect `≤ 6` gated on single explicit `hFE`. -/
+theorem cutR10_zeta_six_gap10 (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hFE : ∀ t : ℂ, (-1.06 : ℝ) ≤ t.re → t.re ≤ (3 / 2 : ℝ) →
+      (8.44 : ℝ) ≤ t.im → t.im ≤ (11.56 : ℝ) → ‖zeta t‖ ≤ 3 * 2) :
+    ‖zeta s‖ ≤ 6 :=
+  cutR10_zeta_sup_six_of_FE s hlo hhi hilo hihi hFE
+
+/-- Joint gap: exact `0.04` gated on single explicit `hJoint`. -/
+theorem cutR10_joint_exact_gap10
+    (hJoint : ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖(1 / 2 : ℂ) * shiftedS z * (shiftedS z - 1)‖ *
+        ‖((Real.pi : ℂ) ^ (-(shiftedS z / 2)))‖ *
+        ‖Complex.Gamma (shiftedS z / 2)‖ * ‖zeta (shiftedS z)‖
+        ≤ (0.04 : ℝ)) :
+    ∀ z : ℂ, z ∈ Metric.closedBall CutR10.center (CutR10.radius + 1) →
+      ‖xiShiftedEntire z‖ ≤ (0.04 : ℝ) :=
+  cutR10_closedBall_sup_of_joint hJoint
+
+end Door3CutR10BallSup

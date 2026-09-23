@@ -1635,3 +1635,57 @@ theorem narrow_R08_deriv_keeps_67200 (hBall : premBall_R08) (w : ℂ)
   premDeriv_R08_of_ball hBall w hw
 
 end Door3PremiseTier
+
+/-! ## 13. R09 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R08 narrow block in this file: `## 12. R08 premise-tier narrow attempt`
+  `:1585-1637` with `narrow_R08_closedForm_keeps :1619`,
+  `narrow_R08_residual_gap :1623`,
+  `narrow_R08_residual_is_mismatch :1627`,
+  `narrow_R08_deriv_keeps_67200 :1632`; R08 keeps `67200`, no chain.
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R09 chain search in `central_cover_assembly.lean` (no local chain):
+  pattern `AO_R09|AO_gamma_upper_disc_R09|R09_deriv_bound|R09_uniform|AO.*R09`
+  returns no files; pattern
+  `R09_deriv|R09_uniform|R09.*sphere|R09.*gamma|gamma.*R09|R09.*zeta|zeta.*R09|R09_zeta|R09_gamma`
+  returns only `R09_deriv_residual :17877` lines `:17877-17878`
+  (leaf residual, not a banked AO narrow chain);
+  pattern `namespace AO_` returns only `namespace AO_R02DiscUpdate :9968`
+  (R02 chain only, no `AO_R09` hit); pattern
+  `R09_leaf|R09_strip|R09_center|R09.*obligation` returns
+  `R09_strip_lo/hi :2043-2044`, `R09_leaf_obligations :2072`,
+  `R09_H_instance :2101`, `R09_center_residual_tenth :17870`,
+  `R09_deriv_residual :17877` (tier guards/residuals, not an AO chain).
+* Result below: no R09 mirror of the R02 shape exists locally, so R09 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R09_mismatch :375`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R09 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R09_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R09 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R09_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R09 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R09_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R09 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R09_deriv_keeps_67200 (hBall : premBall_R09) (w : ℂ)
+    (hw : CentralCoverAssembly.R09.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R09_of_ball hBall w hw
+
+end Door3PremiseTier
