@@ -6164,6 +6164,12 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 OFFAXIS-S20 (background `ses_f34536a0b`,
+  proof-only, grep-clean, offaxis-only commit): S20 route filed.
+- 2026-09-22 SUPPLIERS-VERIFY (background `ses_f34577a87`,
+  build-owner): GREEN door3_cell_suppliers BUILD-EXIT=0, 8688 jobs
+  (covers through S42; log guarded-build-door3_cell_suppliers-
+  20260922-172700).
 - 2026-09-22 TIER-R22 (background `ses_f34536a0a`, proof-only,
   grep-clean, tier-only commit): no R22 AO narrow chain; keeps
   67200, gap filed honestly.

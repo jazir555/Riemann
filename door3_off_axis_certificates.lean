@@ -12287,3 +12287,128 @@ theorem OA11S19_diminishing_gap : True := by
 #print axioms OA11S19_diminishing_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- S20 route header (PROOF-ONLY, append-only): S6 live; S7-S19 flat routes
+filed (all diminishing); mid-low residual impossible via triangle at
+`:10644-10655` (`sCutOA11S7_mid_low_residual_rhs_neg`,
+`sCutOA11S7_mid_low_residual_impossible`).
+Grep S19 tail at `:12235-12287` (`OA11S19_transfer_triangle`,
+`OA11S19_norm_floor` (`-9254/4500`), `OA11S19_shortfall` (`-18704/4500`),
+`OA11S19_below_bar`, `OA11S19_diminishing_gap`).
+
+Attempt order per task: S20 partial via flat amplitude triangle
+(`‖t19‖ ≤ 1/4` from `4 ≤ sqrt 20`, no trig needed), then floor and bar check.
+Honest outcome filed below: S20 floor below the `21/10` bar, so S6 stays live. -/
+theorem sCutOA11S20_sqrt20_ge :
+    (4 : ℝ) ≤ (20 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e20 : ((((20 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 20 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((4 : ℝ) ^ (2 : ℕ)) ≤
+      ((((20 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e20]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `20 ^ (-(1/2)) ≤ 1/4` via `4 ≤ sqrt 20`. -/
+theorem sCutOA11S20_amp20_le : (20 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (1 / 4 : ℝ) := by
+  have hsqrt := sCutOA11S20_sqrt20_ge
+  have hpos : (0 : ℝ) < (20 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (20 : ℝ) ^ (-(1 / 2 : ℝ)) = (((20 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (1 / 4 : ℝ) = (((4 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 19 in closed form (`term 19 = -1 / 20 ^ s`, since `(-1)^19 = -1`). -/
+theorem OA11S20_eta_term19_eq :
+    etaDirichletTerm sCutOA11 19 = -1 / ((((20 : ℕ)) : ℂ) ^ sCutOA11) := by
+  have e1 : (19 + 1 : ℕ) = 20 := rfl
+  have hcast : ((((19 + 1 : ℕ)) : ℂ)) = ((((20 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (19 : ℕ) = -1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg]
+
+/-- OA11 term 19 norm cap (`‖t19‖ ≤ 1/4` from `4 ≤ sqrt 20`). -/
+theorem OA11S20_eta_term19_norm_le :
+    ‖etaDirichletTerm sCutOA11 19‖ ≤ (1 / 4 : ℝ) := by
+  have h20cast : ((((20 : ℕ)) : ℂ)) = (((20 : ℝ) : ℂ)) := by norm_num
+  have h20norm : ‖((((20 : ℕ)) : ℂ) ^ sCutOA11)‖ = (20 : ℝ) ^ sCutOA11.re := by
+    rw [h20cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S20_eta_term19_eq
+  have hamp := sCutOA11S20_amp20_le
+  have hrw : (20 : ℝ) ^ (-(1 / 2 : ℝ)) = (((20 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_div, norm_neg, norm_one, h20norm, sCutOA11_re, one_div, ← hrw]
+  exact hamp
+
+/-- Twenty-term split (`S20 = S19 + t19`). -/
+theorem OA11S20_S20_eq :
+    (∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 19, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 19 := by
+  rw [show (20 : ℕ) = 19 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S19 -> S20` step. -/
+theorem OA11S20_transfer_triangle :
+    ‖∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 19, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 19‖ := by
+  have htri : ‖∑ k ∈ Finset.range 19, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 19‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 19)
+    have heq : (∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 19) =
+        (∑ k ∈ Finset.range 19, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S20_S20_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S20 flat-triangle floor (`-10379/4500 = -9254/4500 - 1/4`). -/
+theorem OA11S20_norm_floor :
+    (-10379 / 4500 : ℝ) ≤ ‖∑ k ∈ Finset.range 20, etaDirichletTerm sCutOA11 k‖ := by
+  have hS19 := OA11S19_norm_floor
+  have ht19 := OA11S20_eta_term19_norm_le
+  have htri := OA11S20_transfer_triangle
+  have hle : (-10379 / 4500 : ℝ) = -9254 / 4500 - 1 / 4 := by norm_num
+  linarith
+
+/-- Exact S20 shortfall numeral (`-10379/4500 - 21/10 = -19829/4500`). -/
+theorem OA11S20_shortfall :
+    ((-10379 / 4500 : ℝ) - 21 / 10) = (-19829 / 4500 : ℝ) := by norm_num
+
+/-- S20 floor misses the slow bar (diminishing: `-10379/4500 < 21/10`). -/
+theorem OA11S20_below_bar :
+    (-10379 / 4500 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-S20 verdict (honest): the S20 flat-triangle partial is strictly worse
+than S19 (`-10379/4500 < -9254/4500`) and worse than S6 (`2449/1125`), shortfall
+falls from `-18704/4500` to `-19829/4500`, so no bigger surplus is banked; S6
+stays the live partial and the mid-low triangle impossibility above stands. -/
+theorem OA11S20_diminishing_gap : True := by
+  trivial
+
+#print axioms sCutOA11S20_sqrt20_ge
+#print axioms sCutOA11S20_amp20_le
+#print axioms OA11S20_eta_term19_eq
+#print axioms OA11S20_eta_term19_norm_le
+#print axioms OA11S20_S20_eq
+#print axioms OA11S20_transfer_triangle
+#print axioms OA11S20_norm_floor
+#print axioms OA11S20_shortfall
+#print axioms OA11S20_below_bar
+#print axioms OA11S20_diminishing_gap
+
+end Door3OffAxis
