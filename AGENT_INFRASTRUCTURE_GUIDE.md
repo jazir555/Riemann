@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R17+R12C (backgrounds `ses_f345a1d25`,
+  `ses_f345a1d28`, proof-only, grep-clean): R17 no chain keeps
+  67200; R12 sup mirror + residual.
 - 2026-09-22 HMID+S15+AGREE (backgrounds `ses_f345b31f0`,
   `ses_f345b9a03`, `ses_f345b31eb`, proof-only, grep-clean): middle
   hMid remainder + gap; S15 route; agree chain stops at outer +
