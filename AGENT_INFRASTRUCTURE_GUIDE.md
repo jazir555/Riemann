@@ -6164,6 +6164,10 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 S16+R29 (backgrounds `ses_f3459bd26`,
+  `ses_f345a1d24`, proof-only, grep-clean): S16 route filed; R29
+  route (poly 26.4/base 13.2, banked infeasible; namespace-end
+  benign).
 - 2026-09-22 ETA-S40 (background `ses_f345b31f4`, proof-only,
   grep-clean, suppliers-only commit): S40 trig-free (Re -8.04 + Im
   conditional, zero deletions). S42 next.

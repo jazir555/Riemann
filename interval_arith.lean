@@ -37775,3 +37775,127 @@ theorem R28_banked_infeasible :
 #print axioms R28CenterAssembly.R28_banked_infeasible
 
 end R28CenterAssembly
+
+/-!
+## R29 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R28CenterAssembly.poly_lower_R28` (`13.9`, `:37723`) +
+  `R28_center_with_poly_pi_gamma` (`:37734`) + `R28_threshold_eq` (`0.1382`,
+  `:37761`) + `R28_base_eq` (`6.95`, `:37764`) +
+  `R28_banked_infeasible` (`:37769`) (`namespace R28CenterAssembly`, `:37687`;
+  `end R28CenterAssembly`, `:37777`): prior route template mirrored here; R29
+  honestly uses its own tier (`eps = 0.002`, `M = 0.07`) per
+  `R29_leaf_obligations` (`central_cover_assembly.lean:4047-4049`), the outer
+  tier (not the R28 mid tier).
+* `R29GammaUpper.sR29` (`:23861-23862`) with `sR29_re = 0.2` (`:23881`) and
+  `sR29_im = 7.25` (`:23888`) (`R29_center_eq`, `:23865`;
+  `R29.center = 7.25 + 0.3*I` from `R29_x0/x1/y0/y1`,
+  `central_cover_assembly.lean:4010-4013`): banked s-center reused here; no
+  `poly_lower_R29` and no `R29CenterAssembly` existed (grep no match), so the
+  poly floor is newly closed below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` (`:1752`) +
+  `CellUniform.center_bound_of_component_bounds` (`:1772`): generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R28CenterAssembly.R28_center_with_poly_pi_gamma` at the R29
+corner (`sR29 = 0.2 + 7.25 * I`), R29 tier (`eps = 0.002`, `M = 0.07`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R29CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R29 s-center. -/
+theorem polyPart_norm_R29 :
+    ‖R00Enclosure.polyPart R29GammaUpper.sR29‖ =
+      (1 / 2) * ‖R29GammaUpper.sR29‖ * ‖R29GammaUpper.sR29 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR29‖ ≥ 7.25` (`7.25^2 = 52.5625 < 0.2^2 + 7.25^2 = 52.6025`). -/
+theorem norm_sR29_ge : (7.25 : ℝ) ≤ ‖R29GammaUpper.sR29‖ := by
+  have hsq : (7.25 : ℝ) ^ 2 ≤ ‖R29GammaUpper.sR29‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R29GammaUpper.sR29_re, R29GammaUpper.sR29_im]
+    norm_num
+  calc (7.25 : ℝ) = Real.sqrt ((7.25 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R29GammaUpper.sR29‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R29GammaUpper.sR29‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR29 - 1‖ ≥ 7.29` (`0.8^2 + 7.25^2 = 53.2025 > 7.29^2 = 53.1441`). -/
+theorem norm_sR29_sub_one_ge : (7.29 : ℝ) ≤ ‖R29GammaUpper.sR29 - 1‖ := by
+  have hr1 : (R29GammaUpper.sR29 - 1).re = -0.8 := by
+    simp only [Complex.sub_re, Complex.one_re, R29GammaUpper.sR29_re]
+    norm_num
+  have hi1 : (R29GammaUpper.sR29 - 1).im = 7.25 := by
+    simp only [Complex.sub_im, Complex.one_im, R29GammaUpper.sR29_im]
+    norm_num
+  have hsq : (7.29 : ℝ) ^ 2 ≤ ‖R29GammaUpper.sR29 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (7.29 : ℝ) = Real.sqrt ((7.29 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R29GammaUpper.sR29 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R29GammaUpper.sR29 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `26.4 ≤ ‖polyPart sR29‖`
+(`7.25 * 7.29 / 2 = 26.42625 ≥ 26.4`; true `≈ 26.45`, slack `≈ 0.05`). -/
+theorem poly_lower_R29 : (26.4 : ℝ) ≤ ‖R00Enclosure.polyPart R29GammaUpper.sR29‖ := by
+  have hprod : (7.25 : ℝ) * 7.29 ≤ ‖R29GammaUpper.sR29‖ * ‖R29GammaUpper.sR29 - 1‖ :=
+    mul_le_mul norm_sR29_ge norm_sR29_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R29]
+  nlinarith [hprod]
+
+/-- Conditional R29 center assembly: banked s-center + new poly `26.4` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.002 + 0.07 * 1.26) / 13.2`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R29_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R29.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R29GammaUpper.sR29‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R29GammaUpper.sR29‖)
+    (hprod : (0.002 : ℝ) + 0.07 * 1.26 ≤ 26.4 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.07 * CentralCoverAssembly.R29.radius ≤
+      ‖xiShifted CentralCoverAssembly.R29.center‖ := by
+  have hpoly := poly_lower_R29
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R29GammaUpper.sR29‖ :=
+    CellUniform.pi_lower_of_re (by rw [R29GammaUpper.sR29_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R29GammaUpper.sR29
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R29.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R29 0.002 0.07 (by norm_num) hrad
+    26.4 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R29-tier threshold: `0.002 + 0.07 * 1.26 = 0.0902`. -/
+theorem R29_threshold_eq : (0.002 : ℝ) + 0.07 * 1.26 = 0.0902 := by norm_num
+
+/-- Exact banked base: `26.4 * (1/2) = 13.2`. -/
+theorem R29_base_eq : (26.4 : ℝ) * (1 / 2) = 13.2 := by norm_num
+
+/-- Exact residual: banked floors `13.2 / 260000000` do not clear `0.0902`
+(required `Agam * Azeta ≥ 0.0902 / 13.2 ≈ 0.006833`; banked `≈ 3.85e-09`;
+short by factor `≈ 1776667`, the ~6-7-order wall). -/
+theorem R29_banked_infeasible :
+    (26.4 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.07 * 1.26 := by norm_num
+
+#print axioms R29CenterAssembly.poly_lower_R29
+#print axioms R29CenterAssembly.R29_center_with_poly_pi_gamma
+#print axioms R29CenterAssembly.R29_threshold_eq
+#print axioms R29CenterAssembly.R29_banked_infeasible
+
+end R29CenterAssembly
