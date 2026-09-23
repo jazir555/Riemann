@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TIER-R08 (background `ses_f3464de0c`, proof-only,
+  grep-clean, tier-only commit): no R08 AO narrow chain; keeps
+  67200, gap filed honestly.
 - 2026-09-22 R04M36 (backgrounds `ses_f34647586`,
   `ses_f34647584`, proof-only, grep-clean): R04 sup mirror + cap
   verdicts + residual; M36 exact (sqrt 262144).
