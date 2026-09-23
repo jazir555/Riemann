@@ -2970,3 +2970,56 @@ theorem cutR10_joint_exact_gap14
   cutR10_joint_exact_gap13 hJoint
 
 end Door3CutR10BallSup
+
+/-! # APPEND-15 (middle rechain + honest remainder; append-only tail):
+
+Grep record (read before writing, APPEND-14 tail :2817-2972):
+* Banked middle-edge value `cutR10_middle_edge_two_closed14 :2919`
+  (Re >= 2 sub-strip, width 0.06 of 2.56, via
+  `cutR10_zeta_edge_two_rechain13`).
+* Banked full-shape gap `cutR10_middle_two_gap14 :2929`
+  (single explicit universal `hMid` premise).
+* Banked edge rechains: three `:2874`, two `:2879`, reflected `:2884`.
+* Banked joint sliver `cutR10_joint_sliver_rechain14 :2910`
+  (`1072 / 5` on in-ball Re >= 2).
+* No closed local cap on the full middle rectangle
+  `[-0.50, 2.06] x [-11.56, -8.44]` exists beyond the Re >= 2 edge;
+  every full-rect `||zeta u|| <= 2` takes the explicit universal
+  `hMid` premise (`:1966`, `:2400`, `:2518`, `:2641`, `:2765`,
+  `:2904`, `:2931`).
+* Euler banked caps cover only `Re >= 3 / 2 -> <= 3` (`:1073`)
+  and `Re >= 2 -> <= 2` (`:1640`).
+
+Honest attempt (verified locally, closure claimed only for banked edge):
+* Chained banked middle caps present locally: the only one reaching the
+  middle rectangle is the Re >= 2 edge-two cap, rechained below as
+  `cutR10_middle_edge_two_closed15` by direct call through
+  `cutR10_middle_edge_two_closed14`.
+* Remainder `Re < 2` (width 2.50 of 2.56) stays open; the full `hMid`
+  shape stays gated on the single explicit universal premise filed
+  exactly below as `cutR10_middle_two_gap15` by direct call through
+  `cutR10_middle_two_gap14`.
+No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Middle partial CLOSED rechain15: `||zeta u|| <= 2` on the `Re >= 2`
+sub-strip, by direct call to the banked APPEND-14 edge value. -/
+theorem cutR10_middle_edge_two_closed15 (u : ℂ)
+    (hlo : (-0.50 : ℝ) ≤ u.re) (hhi : u.re ≤ (2.06 : ℝ))
+    (hilo : (-11.56 : ℝ) ≤ u.im) (hihi : u.im ≤ (-8.44 : ℝ))
+    (hs2 : (2 : ℝ) ≤ u.re) :
+    ‖zeta u‖ ≤ 2 :=
+  cutR10_middle_edge_two_closed14 u hlo hhi hilo hihi hs2
+
+/-- Middle gap15: full `hMid` shape gated on the single explicit universal
+premise, by direct call to the banked APPEND-14 gap. -/
+theorem cutR10_middle_two_gap15
+    (hMid : ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) → ‖zeta u‖ ≤ 2) :
+    ∀ u : ℂ, (-0.50 : ℝ) ≤ u.re → u.re ≤ (2.06 : ℝ) →
+      (-11.56 : ℝ) ≤ u.im → u.im ≤ (-8.44 : ℝ) → ‖zeta u‖ ≤ 2 :=
+  cutR10_middle_two_gap14 hMid
+
+end Door3CutR10BallSup

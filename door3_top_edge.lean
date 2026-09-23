@@ -1791,3 +1791,68 @@ def zeta_ball25_open_gap (Z : ℝ) : Prop :=
   Door3TopEdgeBall25.zeta_ball25_upper_residual Z
 
 end Door3TopEdgeProduct
+
+/-! ## TOPEDGE-AGREE agreement-extension attempt (append-only, exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1740-1793` (`Door3TopEdgeProduct`: strip-conditional
+  `entire_eq_product_of_mem_strip` via `xiShifted_eq_entire_on_strip` plus
+  `xiShifted_eq_parts`, obstruction `outer_point_mem_ball12`,
+  `outer_point_im_eq`, `outer_point_outside_strip`).
+* banked agreement in this file: `CentralCoverAssembly.xiShifted_eq_entire_on_strip`
+  at `:289, :392, :541, :595, :653, :865, :943, :957, :1752`;
+  `CentralCoverAssembly.deriv_xiShifted_eq_entire_of_mem_strip` at `:946, :960`;
+  factor `DerivCauchyBridge.xiShifted_eq_parts` at `:1758`.
+* ball12 uppers `Door3TopEdgeGammaGap.gamma_ball12_upper_residual`,
+  `zeta_ball12_upper_residual` (`:1289-1295`), ball25 uppers
+  `Door3TopEdgeBall25.gamma_ball25_upper_residual`,
+  `zeta_ball25_upper_residual` (`:1686-1692`) stay OPEN.
+
+Value: `agree_chain_on_strip` re-chains the two banked lemmas through the
+filed strip-conditional identity; `agree_extension_blocked` plus
+`agree_chain_stops_at_outer` witness that the chain needs the upper strip
+bound at the outer ball point, which the banked obstruction refutes.
+Gap (exact, OPEN): `agree_extension_open_gap` (full-ball product gap) plus
+ball12/ball25 upper gaps below; hence `bottom_ballSup_residual` stays OPEN.
+-/
+
+namespace Door3TopEdgeAgreeExt
+
+open Complex Real Set Topology
+
+theorem agree_chain_on_strip (z : ℂ)
+    (hgt : -(1 / 2 : ℝ) < z.im) (hlt : z.im < (1 / 2 : ℝ)) :
+    CentralCoverAssembly.xiShiftedEntire z =
+      DerivCauchyBridge.polyOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.piOf ((1 / 2 : ℂ) + Complex.I * z) *
+      DerivCauchyBridge.gammaOf ((1 / 2 : ℂ) + Complex.I * z) *
+      zeta ((1 / 2 : ℂ) + Complex.I * z) :=
+  Door3TopEdgeProduct.entire_eq_product_of_mem_strip z hgt hlt
+
+theorem agree_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) := by
+  constructor
+  · exact Door3TopEdgeProduct.outer_point_mem_ball12
+  · exact Door3TopEdgeProduct.outer_point_outside_strip
+
+theorem agree_chain_stops_at_outer
+    (h : (Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) : False :=
+  Door3TopEdgeProduct.outer_point_outside_strip h
+
+def agree_extension_open_gap : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def agree_ball12_gamma_open (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def agree_ball12_zeta_open (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def agree_ball25_gamma_open (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def agree_ball25_zeta_open (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+end Door3TopEdgeAgreeExt
