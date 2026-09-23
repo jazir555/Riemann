@@ -1454,3 +1454,72 @@ theorem R00_xi_tier_of_zeta0064 {Z : ℝ} (hZ0 : 0 ≤ Z) (hZ : ZetaSupCond Z)
 #print axioms R00_xi_tier_sufficient_of_zeta0064
 #print axioms R00XiTierZetaSpec
 #print axioms R00_xi_tier_of_zeta0064
+
+/-!
+## Door-3 ZETA0064 close attempt (banked-sups rebuild → exact residual)
+
+Grep chain tail (verified before append):
+* `R00_xi_tier_sufficient_of_zeta0064` (`door3_deriv_certs.lean:1428-1434`):
+  `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`
+  (`770.944 * 0.000064 = 0.049340416 ≤ 0.05`).
+* `R00XiTierZetaSpec` (`1438-1439`): `ZetaSupCond Z ∧ Z ≤ 0.000064`.
+* `R00_xi_tier_of_zeta0064` (`1445-1451`): conditional closure CALLING
+  `R00_xi_deriv_of_gamma152_zeta` + `R00_xi_tier_sufficient_of_zeta0064`.
+* `ZetaSupCond` (`527-528`) / `JointGZSupCond` (`843-844`): conditional props
+  only; no numeral instance in this file.
+* Banked zeta uppers elsewhere are `O(1)`-to-`O(1000)` scale on disjoint rects
+  (conditional `≤ 10`, unconditional `≤ 934` / `≤ 1012`) versus the sufficient cap
+  `0.000064`; the true `|ζ| ~ 1` scale on `sImageRect` exceeds the cap by more
+  than four orders. So no banked sup discharges `R00XiTierZetaSpec`.
+
+Banked here (direct tactics only):
+* `R00_banked_zeta_scale_above_cap`: the banked `10` / `934` / `1012` scales
+  all exceed `0.000064`.
+* `R00_zeta0064_cap_excludes_banked_scale`: any `Z ≥ 10` cannot satisfy
+  `Z ≤ 0.000064`.
+* `R00_zeta0064_cap_excludes_true_scale`: any `Z ≥ 1` cannot satisfy
+  `Z ≤ 0.000064` (true-scale wall).
+* `R00Zeta0064CloseResidual`: exact missing unconditional premise
+  (`∃ Z, 0 ≤ Z ∧ ZetaSupCond Z ∧ Z ≤ 0.000064 ∧ DiffContOnCl`).
+* `R00_xi_tier_of_zeta0064_residual`: tier closure rebuilt by CALLING
+  `R00_xi_tier_of_zeta0064` under the residual.
+
+Value-or-gap: VALUE = scale-gap numerals + residual closure above;
+  GAP = unconditional `ZetaSupCond Z` with `Z ≤ 0.000064`.
+Residual (exact): supply `R00Zeta0064CloseResidual`.
+-/
+
+/-- Banked zeta scales sit far above the sufficient cap `0.000064`. -/
+theorem R00_banked_zeta_scale_above_cap :
+    (0.000064 : ℝ) < 10 ∧ (0.000064 : ℝ) < 934 ∧ (0.000064 : ℝ) < 1012 := by
+  refine ⟨?_, ?_, ?_⟩ <;> norm_num
+
+/-- Any zeta sup at the banked `10` scale cannot meet the `0.000064` cap. -/
+theorem R00_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- Any zeta sup at the true `|ζ| ~ 1` scale cannot meet the `0.000064` cap. -/
+theorem R00_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- Exact missing unconditional premise for the `zeta0064` tier closure. -/
+def R00Zeta0064CloseResidual : Prop :=
+  ∃ Z : ℝ, 0 ≤ Z ∧ ZetaSupCond Z ∧ Z ≤ 0.000064 ∧
+    DiffContOnCl ℂ xiFourShapeAt (ball R00c 2)
+
+/-- Tier closure rebuilt from the exact residual (by CALLING
+`R00_xi_tier_of_zeta0064`). -/
+theorem R00_xi_tier_of_zeta0064_residual (h : R00Zeta0064CloseResidual)
+    {w : ℂ} (hw : R00Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨Z, hZ0, hZ, hb, hd⟩ := h
+  exact R00_xi_tier_of_zeta0064 hZ0 hZ hb hd hw
+
+#print axioms R00_banked_zeta_scale_above_cap
+#print axioms R00_zeta0064_cap_excludes_banked_scale
+#print axioms R00_zeta0064_cap_excludes_true_scale
+#print axioms R00Zeta0064CloseResidual
+#print axioms R00_xi_tier_of_zeta0064_residual

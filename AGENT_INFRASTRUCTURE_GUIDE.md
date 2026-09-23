@@ -6164,6 +6164,13 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 TIER-R03 (background `ses_f346a2a8c`, proof-only,
+  grep-clean, tier-only commit): no R03 AO narrow chain banked;
+  keeps 67200, gap filed honestly.
+- 2026-09-22 CERTS-CLOSE (background `ses_f346a2a8d`, proof-only,
+  grep-clean, certs-only commit): zeta0064 cap impossibility verdict
+  (banked scale above cap, true scale above cap) + close residual
+  Prop filed. R00 sup chain closed-conditional.
 - 2026-09-22 R18+18POW (backgrounds `ses_f346b28d6`,
   `ses_f346b28d5-follow`, proof-only, grep-clean): R18 route filed
   (poly 13.8/base 6.9 vs banked 0.1382 infeasible); 1.151≤18^0.05 →

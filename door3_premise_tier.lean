@@ -1314,3 +1314,54 @@ theorem narrow_R02_163_covers : (162.96 : ℝ) ≤ 163 := by
   norm_num
 
 end Door3PremiseTier
+
+/-! ## 7. R03 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R02 narrow block in this file: `## 6. R02 premise-tier narrowing via banked AO sups`
+  `:1241-1316` with `narrow_R02_deriv_162p96_of_banked :1274`,
+  `narrow_R02_deriv_163_of_banked :1281`,
+  `narrow_R02_sphere_40p74_of_banked :1288`, closed form
+  `40.74 / 0.25 = 162.96` `:1305`, residual `0.07 < 162.96` `:1309`.
+* Banked AO R02 chain in `central_cover_assembly.lean`:
+  `namespace AO_R02DiscUpdate :9968-10264`,
+  `AO_gamma_upper_disc_R02_obligation :9975`,
+  `AO_sphere_sup_eq :9981`, `AO_M_eq :9985`,
+  `AO_R02_deriv_bound_of_zeta_upper :10063`,
+  `AO_R02_deriv_bound_163_of_zeta_upper :10078`.
+* R03 banked-chain search (no local chain): pattern
+  `AO_R03|AO_gamma_upper_disc_R03|R03.*162.96|R03.*40.74|R03.*deriv_bound.*163`
+  over repo root returns no files; pattern
+  `AO_R03|R03.*AO|AO.*R03|gamma.*R03|R03.*gamma|R03.*zeta|zeta.*R03|R03_deriv|R03_uniform|R03.*sphere`
+  in `central_cover_assembly.lean` returns only `R03_deriv_residual :17511`
+  lines `:17476-17543` (leaf residual, not a banked AO narrow chain); pattern
+  `namespace AO_|theorem AO_.*R03|def AO_.*R03|AO_gamma|AO_sphere|AO_M_eq|AO_R0`
+  returns only the R02 chain above.
+* Result below: no R03 mirror of the R02 shape exists locally, so R03 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.07 < 67200`;
+  tier `0.07` stays open by the same mismatch as `premTier_R03_mismatch :213`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R03 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no banked narrow chain exists locally. -/
+theorem narrow_R03_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R03 residual gap at the kept value: tier `0.07` stays open below `67200`. -/
+theorem narrow_R03_residual_gap : (0.07 : ℝ) < 67200 := by
+  norm_num
+
+/-- R03 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R03_residual_is_mismatch : (0.07 : ℝ) < 67200 :=
+  tier07_lt_67200
+
+/-- R03 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R03_deriv_keeps_67200 (hBall : premBall_R03) (w : ℂ)
+    (hw : CentralCoverAssembly.R03.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R03_of_ball hBall w hw
+
+end Door3PremiseTier
