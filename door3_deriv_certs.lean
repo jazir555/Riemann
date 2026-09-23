@@ -1523,3 +1523,130 @@ theorem R00_xi_tier_of_zeta0064_residual (h : R00Zeta0064CloseResidual)
 #print axioms R00_zeta0064_cap_excludes_true_scale
 #print axioms R00Zeta0064CloseResidual
 #print axioms R00_xi_tier_of_zeta0064_residual
+
+/-!
+## Door-3 R01 sup spec mirror attempt (R00 chain closed-conditional; zeta0064 cap impossible)
+
+Grep R00 chain tail (verified before append):
+* `R00_xi_tier_needs_zeta0065` (`door3_deriv_certs.lean:1416-1424`): necessary
+  gap `770.944 * Z ≤ 0.05 → Z ≤ 0.000065`.
+* `R00_xi_tier_sufficient_of_zeta0064` (`1428-1434`): sufficient cap
+  `Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`
+  (`770.944 * 0.000064 = 0.049340416 ≤ 0.05`).
+* `R00XiTierZetaSpec` (`1438-1439`): `ZetaSupCond Z ∧ Z ≤ 0.000064`.
+* `R00_xi_tier_of_zeta0064` (`1445-1451`): conditional closure CALLING
+  `R00_xi_deriv_of_gamma152_zeta` + `R00_xi_tier_sufficient_of_zeta0064`.
+* `R00_banked_zeta_scale_above_cap` (`1493-1495`): `10` / `934` / `1012`
+  all exceed `0.000064`.
+* `R00_zeta0064_cap_excludes_banked_scale` (`1498-1501`):
+  `10 ≤ Z → ¬ Z ≤ 0.000064`.
+* `R00_zeta0064_cap_excludes_true_scale` (`1504-1507`):
+  `1 ≤ Z → ¬ Z ≤ 0.000064` (true-scale wall).
+* `R00Zeta0064CloseResidual` (`1510-1512`): exact missing unconditional premise.
+* `R00_xi_tier_of_zeta0064_residual` (`1516-1519`): tier closure rebuilt by CALLING
+  `R00_xi_tier_of_zeta0064` under the residual.
+* R01 grep in this file: no matches (`R01c` / `R01Rect` / R01 s-image absent
+  locally); no banked R01 chain to call.
+
+Mirror attempt (honest, banked chains only, no invented coordinates):
+* Generic tier rule `deriv_bound_of_sphere_sup_on_ball` (`59-83`) is
+  center-independent, so the R01 generic tier closes conditionally below by
+  CALLING it with explicit `R01c` / `R01Rect` hypotheses (parameters, not
+  asserted geometry).
+* R01-specific geometry (center/rect/ball inclusion) and R01 s-image
+  Gamma/Zeta sups are absent locally; R00 numerals (`63.4 * 4 * 1.52`,
+  `770.944`, cap `0.000064`) are reused only as conditional arithmetic shape,
+  not as R01 facts.
+* zeta0064 cap impossibility carries over arithmetically at the same cap.
+
+Banked here (direct tactics only):
+* `R01_deriv_bound_of_sup_given`: R01-shape generic bound CALLING the banked
+  Cauchy rule under explicit hypotheses.
+* `R01_deriv_tier_of_sup_given`: generic tier closure (`2 * B ≤ 0.05` gives
+  `‖deriv‖ ≤ 0.05`).
+* `R01_zeta0064_cap_excludes_banked_scale` / `R01_zeta0064_cap_excludes_true_scale`:
+  cap impossibility at banked/true scales (same shape as R00).
+* `R01_xi_tier_sufficient_of_zeta0064_given`: sufficient arithmetic
+  (`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`), R00-shape numeral, conditional.
+* `R01MirrorCloseResidual`: exact missing R01 premises (parameters, not invented).
+* `R01_tier_of_mirror_residual`: closure rebuilt by CALLING the generic bound.
+
+Value-or-gap: VALUE = conditional R01 mirror + cap impossibility above;
+  GAP = unconditional R01 geometry + R01 s-image zeta sup (absent locally).
+Residual (exact): supply `R01MirrorCloseResidual`.
+-/
+
+/-- R01-shape generic deriv bound under explicit hypotheses (by CALLING the
+banked Cauchy rule; `R01c` / `R01Rect` are parameters, no coordinates invented). -/
+theorem R01_deriv_bound_of_sup_given {f : ℂ → ℂ} {R01c : ℂ} {R01Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R01c 2))
+    (hB : ∀ z ∈ closedBall R01c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R01Rect w → ‖w - R01c‖ ≤ 1.26)
+    {w : ℂ} (hw : R01Rect w) :
+    ‖deriv f w‖ ≤ 2 * B := by
+  have hle : ‖w - R01c‖ ≤ 1.26 := hsub w hw
+  have hw' : ‖w - R01c‖ + (1 / 2 : ℝ) ≤ 2 := by linarith
+  have h := deriv_bound_of_sphere_sup_on_ball hd hB
+    (show (0 : ℝ) < 1 / 2 by norm_num) hw'
+  have heq : B / (1 / 2 : ℝ) = 2 * B := by ring
+  rwa [heq] at h
+
+/-- R01-shape generic tier closure (`2 * B ≤ 0.05` gives the leaf tier). -/
+theorem R01_deriv_tier_of_sup_given {f : ℂ → ℂ} {R01c : ℂ} {R01Rect : ℂ → Prop}
+    {B : ℝ} (hd : DiffContOnCl ℂ f (ball R01c 2))
+    (hB : ∀ z ∈ closedBall R01c 2, ‖f z‖ ≤ B)
+    (hsub : ∀ w : ℂ, R01Rect w → ‖w - R01c‖ ≤ 1.26)
+    {w : ℂ} (hw : R01Rect w) (hTier : 2 * B ≤ 0.05) :
+    ‖deriv f w‖ ≤ 0.05 := by
+  have h := R01_deriv_bound_of_sup_given hd hB hsub hw
+  linarith
+
+/-- R01 cap wall at the banked scale: any `Z ≥ 10` cannot meet `0.000064`. -/
+theorem R01_zeta0064_cap_excludes_banked_scale {Z : ℝ} (h : 10 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R01 cap wall at the true `|ζ| ~ 1` scale: any `Z ≥ 1` cannot meet `0.000064`. -/
+theorem R01_zeta0064_cap_excludes_true_scale {Z : ℝ} (h : 1 ≤ Z) :
+    ¬ Z ≤ 0.000064 := by
+  intro hcap
+  linarith
+
+/-- R01-shape sufficient arithmetic at the R00 numeral (conditional only):
+`Z ≤ 0.000064 → 770.944 * Z ≤ 0.05`. -/
+theorem R01_xi_tier_sufficient_of_zeta0064_given {Z : ℝ} (h : Z ≤ 0.000064) :
+    770.944 * Z ≤ 0.05 := by
+  have hpos : (0 : ℝ) ≤ 770.944 := by norm_num
+  have h2 : (770.944 : ℝ) * Z ≤ 770.944 * 0.000064 :=
+    mul_le_mul_of_nonneg_left h hpos
+  have e : (770.944 : ℝ) * 0.000064 ≤ 0.05 := by norm_num
+  linarith
+
+/-- Exact missing R01 mirror premises (parameters; nothing asserted about the
+true R01 cell — that geometry plus R01 s-image sups are absent locally). -/
+def R01MirrorCloseResidual (R01c : ℂ) (R01Rect : ℂ → Prop) (B : ℝ) : Prop :=
+  (∀ w : ℂ, R01Rect w → w ∈ closedBall R01c 2) ∧
+  (∀ z ∈ closedBall R01c 2, ‖xiFourShapeAt z‖ ≤ B) ∧
+  2 * B ≤ 0.05 ∧ DiffContOnCl ℂ xiFourShapeAt (ball R01c 2)
+
+/-- R01 tier closure rebuilt from the exact residual (by CALLING the generic
+bound above). -/
+theorem R01_tier_of_mirror_residual {R01c : ℂ} {R01Rect : ℂ → Prop} {B : ℝ}
+    (h : R01MirrorCloseResidual R01c R01Rect B)
+    {w : ℂ} (hw : R01Rect w) : ‖deriv xiFourShapeAt w‖ ≤ 0.05 := by
+  obtain ⟨hmem, hB, hTier, hd⟩ := h
+  have hsub : ∀ u : ℂ, R01Rect u → ‖u - R01c‖ ≤ 1.26 := by
+    intro u hu
+    have h2 := hmem u hu
+    rw [mem_closedBall, dist_eq_norm] at h2
+    linarith
+  exact R01_deriv_tier_of_sup_given hd hB hsub hw hTier
+
+#print axioms R01_deriv_bound_of_sup_given
+#print axioms R01_deriv_tier_of_sup_given
+#print axioms R01_zeta0064_cap_excludes_banked_scale
+#print axioms R01_zeta0064_cap_excludes_true_scale
+#print axioms R01_xi_tier_sufficient_of_zeta0064_given
+#print axioms R01MirrorCloseResidual
+#print axioms R01_tier_of_mirror_residual
