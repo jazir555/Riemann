@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 CERTS-R08 (background `ses_f345e2579`, proof-only,
+  grep-clean, certs-only commit): R08 sup mirror + cap verdicts +
+  residual.
 - 2026-09-22 M41+R26 (backgrounds `ses_f345f16e9`,
   `ses_f345f16e7`, proof-only, grep-clean): M41 odd floor 1482910
   banked + beats-prior; R26 route (poly 0.93/base 0.465, banked
