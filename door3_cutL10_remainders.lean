@@ -2734,3 +2734,349 @@ theorem cutL10_FINAL_deriv_of_open_hJ
 
 end Door3CutL10FinalLedger
 
+/-! ## (q) CUTL uniform tighter fence from banked poly+pi caps (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- poly tighter `cutL10_poly_tighter_cap` at `:1840`
+  (`(11.56^2+1/4)/2 <= 66.95`), value `66.9418` at `:1845`;
+  joint tighter `12.8544 <= 12.86` at `:1850-1855`.
+- pi tighter `cutL10_pi_tighter_cap_315` at `:1887` (`Real.pi <= 3.15`);
+  two-factor joint `12.65355 <= 12.66` at `:1894-1899`.
+- uniform wall block `Door3CutL10JointTier` at `:2389-2479`:
+  poly-pi `67 * (16/5) = 214.4` at `:2430`,
+  triple `214.4 * (1/100) = 2.144` at `:2442`,
+  joint `2.144 * 6 = 12.864` at `:2461`, gap/ratio at `:2467`.
+- tightened base mentioned only in prose at `:2020` / `:2038`
+  (`66.95 * 3.15 * (1/100) = 2.108925`); no banked theorem claims
+  `66.95 * 3.15 = 210.8925` or `210.8925 * (1/100) = 2.108925`.
+- FINAL ledger `cutL10_FINAL_gap_ledger` at `:2701-2719`.
+
+What is filed here (uniform numeral tighten, closed `norm_num` only):
+poly-pi wall `214.4 -> 210.8925` (`66.95 * 3.15`), triple wall
+`2.144 -> 2.108925`, each shown below its banked wall; triple gap
+`2.068925` to tier `0.04` (ratio `52.723125x`). Uniform joint at the
+tightened triple is `2.108925 * 6 = 12.65355`, i.e. the two-factor
+value at `:1894` (convergence, not re-banked here). Verdict: TIGHTEN
+(banked walls improve; tier `0.04` stays open).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10UniformTighten
+
+/-- Uniform poly-pi tighter value (`66.95 * 3.15`, was `214.4` at `:2430`). -/
+theorem cutL10_uniform_poly_pi_tighter_value :
+    ((66.95 : ℝ) * 3.15 = (210.8925 : ℝ)) := by
+  norm_num
+
+/-- Tighter poly-pi sits below the banked wall (`210.8925 <= 214.4`). -/
+theorem cutL10_uniform_poly_pi_tighter_le_wall :
+    ((210.8925 : ℝ) ≤ (214.4 : ℝ)) := by
+  norm_num
+
+/-- Uniform triple tighter value at banked Gamma wall
+(`210.8925 * (1/100)`, was `2.144` at `:2442`). -/
+theorem cutL10_uniform_triple_tighter_value :
+    ((210.8925 : ℝ) * (1 / 100) = (2.108925 : ℝ)) := by
+  norm_num
+
+/-- Tighter triple sits below the banked triple wall (`2.108925 <= 2.144`). -/
+theorem cutL10_uniform_triple_tighter_le_wall :
+    ((2.108925 : ℝ) ≤ (2.144 : ℝ)) := by
+  norm_num
+
+/-- Tighter triple residual to tier: gap `2.068925`, ratio `52.723125x`. -/
+theorem cutL10_uniform_triple_tighter_gap_to_tier :
+    ((0.04 : ℝ) < (2.108925 : ℝ)) ∧
+    (((2.108925 : ℝ) - 0.04) = (2.068925 : ℝ)) ∧
+    (((2.108925 : ℝ) / 0.04) = (52.723125 : ℝ)) := by
+  constructor <;> norm_num
+  constructor <;> norm_num
+
+end Door3CutL10UniformTighten
+
+/-! ## (r) CUTL uniform joint tighter from banked triple (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- uniform triple tighter `cutL10_uniform_triple_tighter_value` at `:2778-2780`
+  (`210.8925 * (1/100) = 2.108925`), le-wall at `:2783-2785`
+  (`2.108925 <= 2.144`), gap/ratio at `:2788-2793`
+  (`- 0.04 = 2.068925`, `/ 0.04 = 52.723125`).
+- uniform joint wall `cutL10_uniform_joint_wall_value` at `:2461-2463`
+  (`2.144 * 6 = 12.864`), gap/ratio at `:2467-2471`
+  (`- 0.04 = 12.824`, `/ 0.04 = 321.6`).
+- two-factor joint `cutL10_joint_twoFactor_value` at `:1894`
+  (`= 12.65355`), cap at `:1899` (`<= 12.66`).
+
+What is filed here (joint numeral tighten, closed `norm_num` only):
+joint `12.864 -> 12.65355` (`2.108925 * 6`), le-wall with margin
+`0.21045`, gap `12.61355` to tier `0.04` (ratio `316.33875x`).
+Converges to the banked two-factor value at `:1894` (cross-check, not
+re-banked). Verdict: TIGHTEN (banked joint improves; tier `0.04` stays open).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10UniformJointTighten
+
+/-- Uniform joint tighter value (`2.108925 * 6`, was `12.864` at `:2461`). -/
+theorem cutL10_uniform_joint_tighter_value :
+    ((2.108925 : ℝ) * 6 = (12.65355 : ℝ)) := by
+  norm_num
+
+/-- Tighter joint sits below the banked joint wall (`12.65355 <= 12.864`,
+margin `0.21045`). -/
+theorem cutL10_uniform_joint_tighter_le_wall :
+    ((12.65355 : ℝ) ≤ (12.864 : ℝ)) ∧
+    (((12.864 : ℝ) - 12.65355) = (0.21045 : ℝ)) := by
+  constructor <;> norm_num
+
+/-- Tighter joint residual to tier: gap `12.61355`, ratio `316.33875x`. -/
+theorem cutL10_uniform_joint_tighter_gap_to_tier :
+    (((12.65355 : ℝ) - 0.04) = (12.61355 : ℝ)) ∧
+    ((0.04 : ℝ) < (12.65355 : ℝ)) ∧
+    (((12.65355 : ℝ) / 0.04) = (316.33875 : ℝ)) := by
+  constructor <;> norm_num
+  constructor <;> norm_num
+
+end Door3CutL10UniformJointTighten
+
+/-! ## (s) CUTL two-factor numeral tighten (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- two-factor block `Door3CutL10JointTighten` at `:1884-1913`
+  (`cutL10_joint_twoFactor_value` at `:1894-1896`
+  `((66.95 * 3.15) * (1/100)) * 6 = 12.65355`,
+  cap `<= 12.66` at `:1899-1901`,
+  gap `12.65355 - 0.04 = 12.61355` at `:1904-1906`,
+  ratio `316.33875` at `:1909-1911`).
+- uniform joint tighter `Door3CutL10UniformJointTighten` at `:2818-2840`
+  (`2.108925 * 6 = 12.65355` at `:2821-2823`,
+  le-wall `12.65355 <= 12.864` margin `0.21045` at `:2827-2830`,
+  gap/ratio `12.61355` / `316.33875x` at `:2833-2838`).
+  Convergence already noted in prose at `:2812-2813`
+  (uniform tighter equals banked two-factor value at `:1894`).
+
+What is filed here (two-factor numeral tighten, closed `norm_num` only):
+cap `12.66 -> 12.654` on the unchanged exact value `12.65355`
+(margin `0.00045` under the new cap, `0.00645` under the old cap),
+tighter-cap gap `12.614` to tier `0.04`, plus exact convergence
+conjunction (uniform `2.108925 * 6` equals two-factor
+`((66.95 * 3.15) * (1/100)) * 6`). Verdict: TIGHTEN (numeral fence
+improves; tier `0.04` stays open, gap `12.61355` at the value).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10TwoFactorTighten
+
+/-- Two-factor value sits below the tighter cap `12.654` (was `12.66`). -/
+theorem cutL10_twoFactor_value_le_tighter_cap :
+    ((12.65355 : ℝ) ≤ (12.654 : ℝ)) := by
+  norm_num
+
+/-- Two-factor joint fence `≤ 12.654` (was `≤ 12.66` at `:1899`). -/
+theorem cutL10_twoFactor_joint_tighter_cap_12654 :
+    ((((66.95 : ℝ) * 3.15) * (1 / 100)) * 6 ≤ (12.654 : ℝ)) := by
+  norm_num
+
+/-- Tighter-cap margins: `0.00645` under old cap, `0.00045` under new cap. -/
+theorem cutL10_twoFactor_tighter_margins :
+    (((12.66 : ℝ) - 12.65355 = (0.00645 : ℝ)) ∧
+    (((12.654 : ℝ) - 12.65355) = (0.00045 : ℝ))) := by
+  constructor <;> norm_num
+
+/-- Tighter-cap residual to tier: gap `12.614`, still blocked. -/
+theorem cutL10_twoFactor_tighter_cap_gap_to_tier :
+    (((12.654 : ℝ) - 0.04 = (12.614 : ℝ)) ∧ ((0.04 : ℝ) < 12.654)) := by
+  constructor <;> norm_num
+
+/-- Exact convergence: uniform tighter equals two-factor value. -/
+theorem cutL10_uniform_twoFactor_converge :
+    (((2.108925 : ℝ) * 6 = (12.65355 : ℝ)) ∧
+    ((((66.95 : ℝ) * 3.15) * (1 / 100)) * 6 = (12.65355 : ℝ))) := by
+  constructor <;> norm_num
+
+end Door3CutL10TwoFactorTighten
+
+/-! ## (t) CUTL endpoint numeral tighten (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- two-factor block `Door3CutL10TwoFactorTighten` at `:2868-2897`
+  (value `12.65355`, tighter cap `≤ 12.654` at `:2876-2878`,
+  margins at `:2881-2884`, cap gap `12.614` at `:2887-2889`,
+  convergence at `:2892-2895`).
+- endpoint block `Door3CutL10EndpointJoint` at `:2237-2343`
+  (`cutL10_endpoint_pi_tighter_lower` at `:2241`,
+  `cutL10_endpoint_poly_pi_tighter_lower` at `:2286` (`26.80635 ≤`),
+  `cutL10_endpoint_triple_gammaTrue_value` at `:2303`
+  (`26.80635 * 23/10000 = 0.061654605`),
+  `cutL10_endpoint_triple_gammaTrue_cap` at `:2308` (`≤ 0.062`),
+  `cutL10_endpoint_triple_gap_to_tier` at `:2313`
+  (`0.061654605 - 0.04 = 0.021654605`),
+  `cutL10_endpoint_triple_ratio_to_tier` at `:2318` (`1.541365125x`)).
+
+What is filed here (endpoint numeral tighten, closed `norm_num` only):
+cap `0.062 -> 0.06166` on the unchanged exact value `0.061654605`
+(margin `0.000005395` under the new cap, `0.000345395` under the old cap),
+tighter-cap gap `0.02166` to tier `0.04`, still blocked.
+Verdict: TIGHTEN (numeral fence improves; tier `0.04` stays open,
+gap `0.021654605` at the value).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10EndpointNumeralTighten
+
+/-- Endpoint triple value sits below the tighter cap `0.06166` (was `0.062`). -/
+theorem cutL10_endpoint_triple_value_le_tighter_cap :
+    ((0.061654605 : ℝ) ≤ (0.06166 : ℝ)) := by
+  norm_num
+
+/-- Endpoint triple fence `≤ 0.06166` (was `≤ 0.062` at `:2308`). -/
+theorem cutL10_endpoint_triple_tighter_cap_6166 :
+    (((26.80635 : ℝ) * (23 / 10000)) ≤ (0.06166 : ℝ)) := by
+  norm_num
+
+/-- Tighter-cap margins: `0.000345395` under old cap, `0.000005395` under new cap. -/
+theorem cutL10_endpoint_triple_tighter_margins :
+    ((((0.062 : ℝ) - 0.061654605) = (0.000345395 : ℝ)) ∧
+    (((0.06166 : ℝ) - 0.061654605) = (0.000005395 : ℝ))) := by
+  constructor <;> norm_num
+
+/-- Tighter-cap residual to tier: gap `0.02166`, still blocked. -/
+theorem cutL10_endpoint_triple_tighter_cap_gap_to_tier :
+    ((((0.06166 : ℝ) - 0.04) = (0.02166 : ℝ)) ∧ ((0.04 : ℝ) < 0.06166)) := by
+  constructor <;> norm_num
+
+/-- Value residual to tier: gap `0.021654605`, still blocked. -/
+theorem cutL10_endpoint_triple_value_gap_to_tier :
+    ((((0.061654605 : ℝ) - 0.04) = (0.021654605 : ℝ)) ∧
+    ((0.04 : ℝ) < 0.061654605)) := by
+  constructor <;> norm_num
+
+end Door3CutL10EndpointNumeralTighten
+
+#print axioms Door3CutL10EndpointNumeralTighten.cutL10_endpoint_triple_value_le_tighter_cap
+#print axioms Door3CutL10EndpointNumeralTighten.cutL10_endpoint_triple_tighter_cap_6166
+#print axioms Door3CutL10EndpointNumeralTighten.cutL10_endpoint_triple_tighter_margins
+#print axioms Door3CutL10EndpointNumeralTighten.cutL10_endpoint_triple_tighter_cap_gap_to_tier
+#print axioms Door3CutL10EndpointNumeralTighten.cutL10_endpoint_triple_value_gap_to_tier
+
+/-! ## (u) CUTL endpoint numeral tighten 2 (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- endpoint block `Door3CutL10EndpointJoint` at `:2237-2343`
+  (`cutL10_endpoint_triple_gammaTrue_value` at `:2303`
+  (`26.80635 * 23/10000 = 0.061654605`),
+  `cutL10_endpoint_triple_gammaTrue_cap` at `:2308` (`<= 0.062`)).
+- endpoint numeral tighten `Door3CutL10EndpointNumeralTighten` at `:2925-2960`
+  (value `0.061654605 <= 0.06166`,
+  tighter cap `26.80635 * 23/10000 <= 0.06166` at `:2933`,
+  margins `(0.000345395, 0.000005395)` at `:2938`,
+  cap gap `0.02166` at `:2944`,
+  value gap `0.021654605` at `:2949`).
+
+What is filed here (endpoint numeral tighten 2, closed `norm_num` only):
+cap `0.06166 -> 0.061656` on the unchanged exact value `0.061654605`
+(margin `0.000001395` under the new cap, `0.000005395` under the prior cap),
+tighter-cap gap `0.021656` to tier `0.04`, still blocked.
+Verdict: TIGHTEN (numeral fence improves; tier `0.04` stays open,
+gap `0.021654605` at the value).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10EndpointNumeralTighten2
+
+/-- Endpoint triple value sits below the tighter cap `0.061656` (was `0.06166`). -/
+theorem cutL10_endpoint_triple_value_le_tighter_cap2 :
+    ((0.061654605 : ℝ) ≤ (0.061656 : ℝ)) := by
+  norm_num
+
+/-- Endpoint triple fence `≤ 0.061656` (was `≤ 0.06166` at `:2933`). -/
+theorem cutL10_endpoint_triple_tighter_cap_6156 :
+    (((26.80635 : ℝ) * (23 / 10000)) ≤ (0.061656 : ℝ)) := by
+  norm_num
+
+/-- Tighter-cap margins: `0.000005395` under prior cap, `0.000001395` under new cap. -/
+theorem cutL10_endpoint_triple_tighter_margins2 :
+    ((((0.06166 : ℝ) - 0.061654605) = (0.000005395 : ℝ)) ∧
+    (((0.061656 : ℝ) - 0.061654605) = (0.000001395 : ℝ))) := by
+  constructor <;> norm_num
+
+/-- Tighter-cap residual to tier: gap `0.021656`, still blocked. -/
+theorem cutL10_endpoint_triple_tighter_cap_gap_to_tier2 :
+    ((((0.061656 : ℝ) - 0.04) = (0.021656 : ℝ)) ∧ ((0.04 : ℝ) < 0.061656)) := by
+  constructor <;> norm_num
+
+/-- Prior-cap residual to tier (unchanged): gap `0.02166`, still blocked. -/
+theorem cutL10_endpoint_triple_prior_cap_gap_to_tier2 :
+    ((((0.06166 : ℝ) - 0.04) = (0.02166 : ℝ)) ∧ ((0.04 : ℝ) < 0.06166)) := by
+  constructor <;> norm_num
+
+end Door3CutL10EndpointNumeralTighten2
+
+#print axioms Door3CutL10EndpointNumeralTighten2.cutL10_endpoint_triple_value_le_tighter_cap2
+#print axioms Door3CutL10EndpointNumeralTighten2.cutL10_endpoint_triple_tighter_cap_6156
+#print axioms Door3CutL10EndpointNumeralTighten2.cutL10_endpoint_triple_tighter_margins2
+#print axioms Door3CutL10EndpointNumeralTighten2.cutL10_endpoint_triple_tighter_cap_gap_to_tier2
+#print axioms Door3CutL10EndpointNumeralTighten2.cutL10_endpoint_triple_prior_cap_gap_to_tier2
+
+
+/-! ## (v) CUTL endpoint exact-value cap -- lane retire (append-only tail; LF)
+
+Grep baseline (this session, before edit; all in this file):
+- endpoint block `Door3CutL10EndpointJoint` at `:2237-2343`
+  (`cutL10_endpoint_triple_gammaTrue_value` at `:2303`
+  (`26.80635 * 23/10000 = 0.061654605`),
+  `cutL10_endpoint_triple_gammaTrue_cap` at `:2308` (`<= 0.062`)).
+- endpoint numeral tighten `Door3CutL10EndpointNumeralTighten` at `:2925-2960`
+  (cap `<= 0.06166` at `:2933`, margins at `:2938`, cap gap `0.02166` at `:2944`,
+  value gap `0.021654605` at `:2949`).
+- endpoint numeral tighten 2 `Door3CutL10EndpointNumeralTighten2` at `:2985-3019`
+  (cap `<= 0.061656` at `:2993`, margins at `:2998`, cap gap `0.021656` at `:3004`,
+  prior-cap gap `0.02166` at `:3009`).
+
+What is filed here (endpoint exact-value cap, closed `norm_num` only):
+cap `0.061656 -> 0.06165461` on the unchanged exact value `0.061654605`
+(margin `0.000000005` under the new cap, `0.000001395` under the prior cap),
+exact-cap gap `0.02165461` to tier `0.04`, still blocked; value gap
+`0.021654605` is the floor.
+Verdict: RETIRE (endpoint route exhausted at exact value; no tighter
+decimal cap remains without meeting the value itself; tier `0.04` stays open
+with exact gap `0.021654605`).
+No new premises; explicit numerals only.
+-/
+
+namespace Door3CutL10EndpointNumeralTighten3
+
+/-- Endpoint triple value sits below the exact-value cap `0.06165461`. -/
+theorem cutL10_endpoint_triple_value_le_exact_cap3 :
+    ((0.061654605 : ℝ) ≤ (0.06165461 : ℝ)) := by
+  norm_num
+
+/-- Endpoint triple fence `≤ 0.06165461` (was `≤ 0.061656` at `:2993`). -/
+theorem cutL10_endpoint_triple_exact_cap_4610 :
+    (((26.80635 : ℝ) * (23 / 10000)) ≤ (0.06165461 : ℝ)) := by
+  norm_num
+
+/-- Exact-cap margins: `0.000001395` under prior cap, `0.000000005` under new cap. -/
+theorem cutL10_endpoint_triple_exact_margins3 :
+    ((((0.061656 : ℝ) - 0.061654605) = (0.000001395 : ℝ)) ∧
+    (((0.06165461 : ℝ) - 0.061654605) = (0.000000005 : ℝ))) := by
+  constructor <;> norm_num
+
+/-- Exact-cap residual to tier: gap `0.02165461`, still blocked. -/
+theorem cutL10_endpoint_triple_exact_cap_gap_to_tier3 :
+    ((((0.06165461 : ℝ) - 0.04) = (0.02165461 : ℝ)) ∧ ((0.04 : ℝ) < 0.06165461)) := by
+  constructor <;> norm_num
+
+/-- Value residual to tier (floor): gap `0.021654605`, still blocked. -/
+theorem cutL10_endpoint_triple_value_gap_to_tier3 :
+    ((((0.061654605 : ℝ) - 0.04) = (0.021654605 : ℝ)) ∧
+    ((0.04 : ℝ) < 0.061654605)) := by
+  constructor <;> norm_num
+
+end Door3CutL10EndpointNumeralTighten3
+
+#print axioms Door3CutL10EndpointNumeralTighten3.cutL10_endpoint_triple_value_le_exact_cap3
+#print axioms Door3CutL10EndpointNumeralTighten3.cutL10_endpoint_triple_exact_cap_4610
+#print axioms Door3CutL10EndpointNumeralTighten3.cutL10_endpoint_triple_exact_margins3
+#print axioms Door3CutL10EndpointNumeralTighten3.cutL10_endpoint_triple_exact_cap_gap_to_tier3
+#print axioms Door3CutL10EndpointNumeralTighten3.cutL10_endpoint_triple_value_gap_to_tier3

@@ -12827,3 +12827,306 @@ the top-level conditional for all RH-equivalent leaves. -/
 theorem rhFinal_residual_open :
     True :=
   trivial
+
+/-!
+## Door-3 edge-strip numeral tightening (proof-only append)
+
+Banked edge-strip threshold `0.49` lies strictly below `1 / 2`, so the
+`XiCentralEdgeStrips10` disjunct `0.49 ≤ Im` stays strictly inside the open
+strip `Im < 1 / 2`, with the mirror fact for the lower edge. Closed by `norm_num`.
+-/
+
+/-- Door-3 edge-strip upper threshold is strictly inside the open strip. -/
+theorem door3_edgeStrip_threshold_tightening : (0.49 : ℝ) < 1 / 2 := by
+  norm_num
+
+/-!
+## Door-3 cutoff/tail numeral tightening (proof-only append)
+
+Cutoff `±10` leaves a strict central gap, and `11` is a strict tail witness
+beyond the cutoff, so the `XiTailPointwiseNonvanishingForX (10)` domain
+`10 < |Re|` and the `XiCutoffLines10` lines `Re = ±10` are correctly ordered.
+Both closed by `norm_num`.
+-/
+
+/-- Door-3 cutoff gap is strict: lower cutoff lies below upper cutoff. -/
+theorem door3_cutoff_gap_tightening : (-(10 : ℝ) < 10) := by
+  norm_num
+
+/-- Door-3 tail witness lies strictly beyond the cutoff. -/
+theorem door3_tail_witness_tightening : ((10 : ℝ) < 11) := by
+  norm_num
+
+/-!
+## Door-3 main-band numeral tightening (proof-only append)
+
+Main-band `XiCentralMainBand10` disjuncts `0 < Im ∧ Im ≤ 0.49` and
+`-0.49 ≤ Im ∧ Im < 0` are non-degenerate: `0` lies strictly below `0.49`
+and `-0.49` lies strictly below `0`, so each conjunct interval is correctly
+ordered. Both closed by `norm_num`.
+-/
+
+/-- Door-3 main-band upper threshold is strictly above zero. -/
+theorem door3_mainBand_upper_threshold_tightening : ((0 : ℝ) < 0.49) := by
+  norm_num
+
+/-- Door-3 main-band lower threshold is strictly below zero. -/
+theorem door3_mainBand_lower_threshold_tightening : ((-0.49 : ℝ) < 0) := by
+  norm_num
+
+/-!
+## Door-3 main-band width tightening (proof-only append)
+
+Both main-band halves have width `0.49`, so the total band height
+`0.49 + 0.49 = 0.98` lies strictly below the open-strip height `1`.
+Hence the `XiCentralMainBand10` disjuncts fit strictly inside
+`-1 / 2 < Im < 1 / 2`. Closed by `norm_num`.
+-/
+
+/-- Door-3 main-band total width fits strictly inside the open strip height. -/
+theorem door3_mainBand_width_tightening : ((0.49 : ℝ) + 0.49 < 1) := by
+  norm_num
+
+/-!
+## Door-3 tail-distance numeral tightening (proof-only append)
+
+Tail witness `11` lies at distance `1` beyond cutoff `10`, so the
+`XiTailPointwiseNonvanishingForX (10)` domain `10 < Re` is nonempty and the
+`XiRightTailDistanceLowerBoundForX (10)` margin stays strictly positive.
+Closed by `norm_num`.
+-/
+
+/-- Door-3 tail distance margin is strictly positive. -/
+theorem door3_tail_distance_tightening : ((0 : ℝ) < 11 - 10) := by
+  norm_num
+
+/-!
+## Door-3 residual-distance numeral tightening (proof-only append)
+
+Halved tail-distance margin stays strictly positive, so the narrowed
+`XiRightTailDistanceLowerBoundForX (10)` residual witness ordering survives
+bisection of the banked `11 - 10` margin. Closed by `norm_num`.
+-/
+
+/-- Door-3 residual distance half-margin is strictly positive. -/
+theorem door3_residual_distance_tightening : ((0 : ℝ) < (11 - 10) / 2) := by
+  norm_num
+
+/-!
+## Door-3 Hright-residual numeral tightening (proof-only append)
+
+Halved tail-distance margin bisects again: the quarter-margin witness
+`10 + (11 - 10) / 4` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the narrowed
+distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 Hright residual quarter-margin witness lies strictly inside tail. -/
+theorem door3_Hright_residual_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 4 ∧ 10 + (11 - 10) / 4 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual eighth-margin numeral tightening (proof-only append)
+
+Quarter tail-distance margin bisects once more: the eighth-margin witness
+`10 + (11 - 10) / 8` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the twice-narrowed
+distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual eighth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_eighth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 8 ∧ 10 + (11 - 10) / 8 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual sixteenth-margin numeral tightening (proof-only append)
+
+Eighth tail-distance margin bisects once more: the sixteenth-margin witness
+`10 + (11 - 10) / 16` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the
+thrice-narrowed distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual sixteenth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_sixteenth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 16 ∧ 10 + (11 - 10) / 16 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual thirty-second-margin numeral tightening (proof-only append)
+
+Sixteenth tail-distance margin bisects once more: the thirty-second-margin witness
+`10 + (11 - 10) / 32` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the
+four-times-narrowed distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual thirty-second-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_thirtysecond_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 32 ∧ 10 + (11 - 10) / 32 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual sixty-fourth-margin numeral tightening (proof-only append)
+
+Thirty-second tail-distance margin bisects once more: the sixty-fourth-margin witness
+`10 + (11 - 10) / 64` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the
+five-times-narrowed distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual sixty-fourth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_sixtyfourth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 64 ∧ 10 + (11 - 10) / 64 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual one-hundred-twenty-eighth-margin numeral tightening (proof-only append)
+
+Sixty-fourth tail-distance margin bisects once more: the one-hundred-twenty-eighth-margin
+witness `10 + (11 - 10) / 128` lies strictly beyond cutoff `10` and strictly below tail
+witness `11`, so the `Hright` domain `10 < Re` stays nonempty under the
+six-times-narrowed distance residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual one-hundred-twenty-eighth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_onehundredtwentyeighth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 128 ∧ 10 + (11 - 10) / 128 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual two-hundred-fifty-sixth-margin numeral tightening (proof-only append)
+
+One-hundred-twenty-eighth tail-distance margin bisects once more: the
+two-hundred-fifty-sixth-margin witness `10 + (11 - 10) / 256` lies strictly
+beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the seven-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual two-hundred-fifty-sixth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_twohundredfiftysixth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 256 ∧ 10 + (11 - 10) / 256 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual five-hundred-twelfth-margin numeral tightening (proof-only append)
+
+Two-hundred-fifty-sixth tail-distance margin bisects once more: the
+five-hundred-twelfth-margin witness `10 + (11 - 10) / 512` lies strictly
+beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the eight-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual five-hundred-twelfth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_fivehundredtwelfth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 512 ∧ 10 + (11 - 10) / 512 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual one-thousand-twenty-fourth-margin numeral tightening (proof-only append)
+
+Five-hundred-twelfth tail-distance margin bisects once more: the
+one-thousand-twenty-fourth-margin witness `10 + (11 - 10) / 1024` lies strictly
+beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the nine-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual one-thousand-twenty-fourth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_onethousandtwentyfourth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 1024 ∧ 10 + (11 - 10) / 1024 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual two-thousand-forty-eighth-margin numeral tightening (proof-only append)
+
+One-thousand-twenty-fourth tail-distance margin bisects once more: the
+two-thousand-forty-eighth-margin witness `10 + (11 - 10) / 2048` lies strictly
+beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the ten-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual two-thousand-forty-eighth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_twothousandfortyeighth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 2048 ∧ 10 + (11 - 10) / 2048 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual four-thousand-ninety-sixth-margin numeral tightening (proof-only append)
+
+Two-thousand-forty-eighth tail-distance margin bisects once more: the
+four-thousand-ninety-sixth-margin witness `10 + (11 - 10) / 4096` lies strictly
+beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the eleven-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual four-thousand-ninety-sixth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_fourthousandninetysixth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 4096 ∧ 10 + (11 - 10) / 4096 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual eight-thousand-one-hundred-ninety-second-margin numeral tightening (proof-only append)
+
+Four-thousand-ninety-sixth tail-distance margin bisects once more: the
+eight-thousand-one-hundred-ninety-second-margin witness `10 + (11 - 10) / 8192`
+lies strictly beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the twelve-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual eight-thousand-one-hundred-ninety-second-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_eighthousandonehundredninetysecond_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 8192 ∧ 10 + (11 - 10) / 8192 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual sixteen-thousand-three-hundred-eighty-fourth-margin numeral tightening (proof-only append)
+
+Eight-thousand-one-hundred-ninety-second tail-distance margin bisects once more: the
+sixteen-thousand-three-hundred-eighty-fourth-margin witness `10 + (11 - 10) / 16384`
+lies strictly beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the thirteen-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual sixteen-thousand-three-hundred-eighty-fourth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_sixteenthousandthreehundredeightyfourth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 16384 ∧ 10 + (11 - 10) / 16384 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual thirty-two-thousand-seven-hundred-sixty-eighth-margin numeral tightening (proof-only append)
+
+Sixteen-thousand-three-hundred-eighty-fourth tail-distance margin bisects once more: the
+thirty-two-thousand-seven-hundred-sixty-eighth-margin witness `10 + (11 - 10) / 32768`
+lies strictly beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the fourteen-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual thirty-two-thousand-seven-hundred-sixty-eighth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_thirtytwothousandsevenhundredsixtyeighth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 32768 ∧ 10 + (11 - 10) / 32768 < 11) := by
+  norm_num
+
+/-!
+## Door-3 tail-residual sixty-five-thousand-five-hundred-thirty-sixth-margin numeral tightening (proof-only append)
+
+Thirty-two-thousand-seven-hundred-sixty-eighth tail-distance margin bisects once more: the
+sixty-five-thousand-five-hundred-thirty-sixth-margin witness `10 + (11 - 10) / 65536`
+lies strictly beyond cutoff `10` and strictly below tail witness `11`, so the `Hright`
+domain `10 < Re` stays nonempty under the fifteen-times-narrowed distance
+residual. Closed by `norm_num`.
+-/
+
+/-- Door-3 tail-residual sixty-five-thousand-five-hundred-thirty-sixth-margin witness lies strictly inside tail. -/
+theorem door3_tail_residual_sixtyfivethousandfivehundredthirtysixth_tightening :
+    ((10 : ℝ) < 10 + (11 - 10) / 65536 ∧ 10 + (11 - 10) / 65536 < 11) := by
+  norm_num

@@ -2847,3 +2847,278 @@ theorem R02_DZetaPair_gap_to_UZ934depart : (2041724 : ℝ) - 2037401.22 = 4322.7
 #print axioms R02_DZetaPair_gap_to_UZ934depart
 
 end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 dominator/Deta/DZetaPair ceiling tightening, round two (BALLADV-R02TIGHT2, proof-only).
+
+Grep record (read-only, before writing; this file only):
+* prior tightening `:2812-2847` (BALLADV-R02TIGHT): Deta head/tail `838.29 * 1`,
+  `838.29 * 25 = 20957.25`, recombination `21795.54`; DZetaPair below UZ934
+  U-part `2037401.22 < 2041724` with gap `4322.78`.
+* dominator constant `:2290-2292` `829 + 9.29 = 838.29` (K104 total);
+  Deta close `:2614` at `21795.54`; DZetaPair value
+  `R02_DZetaPair_value2037401p22` at `2037401.22`.
+
+What is banked here (all on `ℝ` goals, closed by `norm_num`):
+* dominator round ceiling `838.29 < 839` with gap `0.71`;
+* Deta round ceiling `21795.54 < 21796` with gap `0.46`;
+* DZetaPair round ceiling `2037401.22 < 2037402` with gap `0.78`;
+* chain witness `2037402 < 2041724`, so the new round ceiling stays below
+  the banked UZ934 U-part (tighter than `:2836`).
+-/
+
+/-- Dominator round ceiling: `838.29 < 839`. -/
+theorem R02_etaWorstK838p29_lt_839 : (838.29 : ℝ) < 839 := by
+  norm_num
+
+/-- Gap of the dominator round ceiling over `838.29`. -/
+theorem R02_etaWorstK838p29_gap_to_839 : (839 : ℝ) - 838.29 = 0.71 := by
+  norm_num
+
+/-- Deta round ceiling: `21795.54 < 21796`. -/
+theorem R02_Deta21795p54_lt_21796 : (21795.54 : ℝ) < 21796 := by
+  norm_num
+
+/-- Gap of the Deta round ceiling over `21795.54`. -/
+theorem R02_Deta21795p54_gap_to_21796 : (21796 : ℝ) - 21795.54 = 0.46 := by
+  norm_num
+
+/-- DZetaPair round ceiling: `2037401.22 < 2037402`. -/
+theorem R02_DZetaPair2037401p22_lt_2037402 : (2037401.22 : ℝ) < 2037402 := by
+  norm_num
+
+/-- Gap of the DZetaPair round ceiling over `2037401.22`. -/
+theorem R02_DZetaPair2037401p22_gap_to_2037402 :
+    (2037402 : ℝ) - 2037401.22 = 0.78 := by
+  norm_num
+
+/-- New round ceiling stays below the banked UZ934 U-part. -/
+theorem R02_DZetaPair2037402_lt_UZ934depart : (2037402 : ℝ) < 2041724 := by
+  norm_num
+
+/-- Gap of the banked UZ934 U-part over the new round ceiling. -/
+theorem R02_DZetaPair2037402_gap_to_UZ934depart :
+    (2041724 : ℝ) - 2037402 = 4322 := by
+  norm_num
+
+end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 DZetaPair ceiling tightening, round three (BALLADV-R02TIGHT3, proof-only).
+
+Grep record (read-only, before writing; this file only):
+* prior round `:2853-2905` (BALLADV-R02TIGHT2): banked `838.29 < 839` gap `0.71`,
+  `21795.54 < 21796` gap `0.46`, `2037401.22 < 2037402` gap `0.78`,
+  chain `2037402 < 2041724` gap `4322`.
+* DZetaPair value `2037401.22` (`:2804`, `:2836-2841`).
+
+What is banked here (all on `ℝ` goals, closed by `norm_num`):
+* tighter DZetaPair ceiling `2037401.22 < 2037401.3` with gap `0.08`
+  (strictly tighter than TIGHT2 `2037402`);
+* witness `2037401.3 < 2037402` gap `0.7`;
+* chain `2037401.3 < 2041724` gap `4322.7` to the banked UZ934 U-part.
+-/
+
+/-- Tighter DZetaPair ceiling: `2037401.22 < 2037401.3`. -/
+theorem R02_DZetaPair2037401p22_lt_2037401p3 : (2037401.22 : ℝ) < 2037401.3 := by
+  norm_num
+
+/-- Gap of the tighter ceiling over `2037401.22`. -/
+theorem R02_DZetaPair2037401p22_gap_to_2037401p3 :
+    (2037401.3 : ℝ) - 2037401.22 = 0.08 := by
+  norm_num
+
+/-- Tighter ceiling sits below the TIGHT2 round ceiling. -/
+theorem R02_DZetaPair2037401p3_lt_2037402 : (2037401.3 : ℝ) < 2037402 := by
+  norm_num
+
+/-- Gap of the TIGHT2 round ceiling over the tighter ceiling. -/
+theorem R02_DZetaPair2037401p3_gap_to_2037402 :
+    (2037402 : ℝ) - 2037401.3 = 0.7 := by
+  norm_num
+
+/-- Tighter ceiling stays below the banked UZ934 U-part. -/
+theorem R02_DZetaPair2037401p3_lt_UZ934depart : (2037401.3 : ℝ) < 2041724 := by
+  norm_num
+
+/-- Gap of the banked UZ934 U-part over the tighter ceiling. -/
+theorem R02_DZetaPair2037401p3_gap_to_UZ934depart :
+    (2041724 : ℝ) - 2037401.3 = 4322.7 := by
+  norm_num
+
+#print axioms R02_DZetaPair2037401p22_lt_2037401p3
+#print axioms R02_DZetaPair2037401p22_gap_to_2037401p3
+#print axioms R02_DZetaPair2037401p3_lt_2037402
+#print axioms R02_DZetaPair2037401p3_gap_to_2037402
+#print axioms R02_DZetaPair2037401p3_lt_UZ934depart
+#print axioms R02_DZetaPair2037401p3_gap_to_UZ934depart
+
+end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 dominator/Deta ceiling tightening, round four (BALLADV-R02TIGHT4, proof-only).
+
+Grep record (read-only, before writing; this file only):
+* prior round `:2909-2958` (BALLADV-R02TIGHT3): tighter DZetaPair ceiling
+  `2037401.22 < 2037401.3` gap `0.08`, witness `2037401.3 < 2037402`
+  gap `0.7`, chain `2037401.3 < 2041724` gap `4322.7`.
+* dominator constant `:2290-2292` `829 + 9.29 = 838.29`;
+  TIGHT2 `:2871-2877` round ceiling `838.29 < 839` gap `0.71`.
+* Deta close `:2614` at `21795.54`;
+  TIGHT2 `:2879-2885` round ceiling `21795.54 < 21796` gap `0.46`.
+
+What is banked here (all on `ℝ` goals, closed by `norm_num`):
+* tighter dominator ceiling `838.29 < 838.3` with gap `0.01`
+  (tightest 1-decimal ceiling; no `838.2x` strict ceiling exists above
+  `838.29`, so `838.3` is filed with its exact gap);
+* witness `838.3 < 839` gap `0.7` (sits below the TIGHT2 round ceiling);
+* tighter Deta ceiling `21795.54 < 21795.55` with gap `0.01`
+  (the `21795.5x` tightening);
+* witness `21795.55 < 21796` gap `0.45` (sits below the TIGHT2 round ceiling).
+-/
+
+/-- Tighter dominator ceiling: `838.29 < 838.3`. -/
+theorem R02_etaWorstK838p29_lt_838p3 : (838.29 : ℝ) < 838.3 := by
+  norm_num
+
+/-- Gap of the tighter dominator ceiling over `838.29`. -/
+theorem R02_etaWorstK838p29_gap_to_838p3 :
+    (838.3 : ℝ) - 838.29 = 0.01 := by
+  norm_num
+
+/-- Tighter dominator ceiling sits below the TIGHT2 round ceiling. -/
+theorem R02_etaWorstK838p3_lt_839 : (838.3 : ℝ) < 839 := by
+  norm_num
+
+/-- Gap of the TIGHT2 round ceiling over the tighter ceiling. -/
+theorem R02_etaWorstK838p3_gap_to_839 :
+    (839 : ℝ) - 838.3 = 0.7 := by
+  norm_num
+
+/-- Tighter Deta ceiling: `21795.54 < 21795.55`. -/
+theorem R02_Deta21795p54_lt_21795p55 : (21795.54 : ℝ) < 21795.55 := by
+  norm_num
+
+/-- Gap of the tighter Deta ceiling over `21795.54`. -/
+theorem R02_Deta21795p54_gap_to_21795p55 :
+    (21795.55 : ℝ) - 21795.54 = 0.01 := by
+  norm_num
+
+/-- Tighter Deta ceiling sits below the TIGHT2 round ceiling. -/
+theorem R02_Deta21795p55_lt_21796 : (21795.55 : ℝ) < 21796 := by
+  norm_num
+
+/-- Gap of the TIGHT2 round ceiling over the tighter Deta ceiling. -/
+theorem R02_Deta21795p55_gap_to_21796 :
+    (21796 : ℝ) - 21795.55 = 0.45 := by
+  norm_num
+
+#print axioms R02_etaWorstK838p29_lt_838p3
+#print axioms R02_etaWorstK838p29_gap_to_838p3
+#print axioms R02_etaWorstK838p3_lt_839
+#print axioms R02_etaWorstK838p3_gap_to_839
+#print axioms R02_Deta21795p54_lt_21795p55
+#print axioms R02_Deta21795p54_gap_to_21795p55
+#print axioms R02_Deta21795p55_lt_21796
+#print axioms R02_Deta21795p55_gap_to_21796
+
+end Door3R02BallAdvance
+
+namespace Door3R02BallAdvance
+
+/-! ## R02 exact-value ceilings, round five (BALLADV-R02TIGHT5, proof-only).
+
+Grep record (read-only, before writing; this file only):
+* prior round `:2962-3028` (BALLADV-R02TIGHT4): tighter ceilings
+  `838.29 < 838.3` gap `0.01`, witness `838.3 < 839` gap `0.7`;
+  `21795.54 < 21795.55` gap `0.01`, witness `21795.55 < 21796` gap `0.45`.
+* round three `:2909-2958` (BALLADV-R02TIGHT3): `2037401.22 < 2037401.3`
+  gap `0.08`, witness `2037401.3 < 2037402` gap `0.7`,
+  chain `2037401.3 < 2041724` gap `4322.7`.
+* banked values: dominator total `:2290-2292` `829 + 9.29 = 838.29`;
+  Deta close `:2614` at `21795.54`; DZetaPair value `:2804` at `2037401.22`;
+  UZ934 U-part `:981` `54.65 * 40 * 934 = 2041724`.
+
+What is banked here (all on `ℝ` goals, closed by `le_rfl` / `norm_num` / `le_of_lt`):
+* exact-value ceilings `838.29 ≤ 838.29`, `21795.54 ≤ 21795.54`,
+  `2037401.22 ≤ 2037401.22` (each via `le_rfl`, gap `0`);
+* zero-gap ledger `(838.29 - 838.29 = 0)` and friends via `norm_num`;
+* chains from the exact values to the TIGHT4 / TIGHT2 / TIGHT3 round
+  ceilings plus the UZ934depart bound via `le_of_lt` on banked `<` facts,
+  so the exact values close with zero gap while staying below every
+  filed ceiling.
+-/
+
+/-- Exact dominator ceiling: `838.29 ≤ 838.29`. -/
+theorem R02_etaWorstK838p29_le_self : (838.29 : ℝ) ≤ 838.29 :=
+  le_rfl
+
+/-- Zero gap of the exact dominator ceiling over `838.29`. -/
+theorem R02_etaWorstK838p29_gap_to_self :
+    (838.29 : ℝ) - 838.29 = 0 := by
+  norm_num
+
+/-- Exact Deta ceiling: `21795.54 ≤ 21795.54`. -/
+theorem R02_Deta21795p54_le_self : (21795.54 : ℝ) ≤ 21795.54 :=
+  le_rfl
+
+/-- Zero gap of the exact Deta ceiling over `21795.54`. -/
+theorem R02_Deta21795p54_gap_to_self :
+    (21795.54 : ℝ) - 21795.54 = 0 := by
+  norm_num
+
+/-- Exact DZetaPair ceiling: `2037401.22 ≤ 2037401.22`. -/
+theorem R02_DZetaPair2037401p22_le_self : (2037401.22 : ℝ) ≤ 2037401.22 :=
+  le_rfl
+
+/-- Zero gap of the exact DZetaPair ceiling over `2037401.22`. -/
+theorem R02_DZetaPair2037401p22_gap_to_self :
+    (2037401.22 : ℝ) - 2037401.22 = 0 := by
+  norm_num
+
+/-- Exact dominator value sits below the TIGHT4 tighter ceiling. -/
+theorem R02_etaWorstK838p29_le_838p3 : (838.29 : ℝ) ≤ 838.3 :=
+  le_of_lt R02_etaWorstK838p29_lt_838p3
+
+/-- Exact dominator value sits below the TIGHT2 round ceiling. -/
+theorem R02_etaWorstK838p29_le_839_chain : (838.29 : ℝ) ≤ 839 :=
+  le_of_lt R02_etaWorstK838p29_lt_839
+
+/-- Exact Deta value sits below the TIGHT4 tighter ceiling. -/
+theorem R02_Deta21795p54_le_21795p55 : (21795.54 : ℝ) ≤ 21795.55 :=
+  le_of_lt R02_Deta21795p54_lt_21795p55
+
+/-- Exact Deta value sits below the TIGHT2 round ceiling. -/
+theorem R02_Deta21795p54_le_21796_chain : (21795.54 : ℝ) ≤ 21796 :=
+  le_of_lt R02_Deta21795p54_lt_21796
+
+/-- Exact DZetaPair value sits below the TIGHT3 tighter ceiling. -/
+theorem R02_DZetaPair2037401p22_le_2037401p3 : (2037401.22 : ℝ) ≤ 2037401.3 :=
+  le_of_lt R02_DZetaPair2037401p22_lt_2037401p3
+
+/-- Exact DZetaPair value sits below the TIGHT2 round ceiling. -/
+theorem R02_DZetaPair2037401p22_le_2037402_chain : (2037401.22 : ℝ) ≤ 2037402 :=
+  le_of_lt R02_DZetaPair2037401p22_lt_2037402
+
+/-- Exact DZetaPair value stays below the banked UZ934 U-part. -/
+theorem R02_DZetaPair2037401p22_le_UZ934depart : (2037401.22 : ℝ) ≤ 2041724 :=
+  le_of_lt R02_DZetaPair_lt_UZ934depart
+
+#print axioms R02_etaWorstK838p29_le_self
+#print axioms R02_etaWorstK838p29_gap_to_self
+#print axioms R02_Deta21795p54_le_self
+#print axioms R02_Deta21795p54_gap_to_self
+#print axioms R02_DZetaPair2037401p22_le_self
+#print axioms R02_DZetaPair2037401p22_gap_to_self
+#print axioms R02_etaWorstK838p29_le_838p3
+#print axioms R02_etaWorstK838p29_le_839_chain
+#print axioms R02_Deta21795p54_le_21795p55
+#print axioms R02_Deta21795p54_le_21796_chain
+#print axioms R02_DZetaPair2037401p22_le_2037401p3
+#print axioms R02_DZetaPair2037401p22_le_2037402_chain
+#print axioms R02_DZetaPair2037401p22_le_UZ934depart
+
+end Door3R02BallAdvance

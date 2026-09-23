@@ -1370,15 +1370,418 @@ def etaR02Int_dom_residual_spec : Prop :=
 `range 2` with cap `2` via `norm_num` (head `= 1`, second term `≤ 1`).
 Grepped last disc/tsum block first: `etaR02Int_odd105_tsum_le_21` (`≤ 21`). -/
 theorem etaR02Int_odd105_sum_range_two_le_two :
-    ∑ n in Finset.range 2, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 2 := by
+    Finset.sum (Finset.range 2)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 2 := by
   have h0 := etaR02Int_odd105_zero_eq_one
   have h1le : ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
     have h3 : ((((2 * 1 + 1 : ℕ)) : ℝ)) = 3 := by norm_num
     rw [h3]
     exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
-  have hsum : ∑ n in Finset.range 2, ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) =
+  have hsum : Finset.sum (Finset.range 2)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
       ((((2 * 0 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) +
       ((((2 * 1 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
     rw [Finset.sum_range_succ, Finset.sum_range_one]
   rw [hsum, h0]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 2` to
+`range 3` with cap `3` via `norm_num` (third term `5^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_two_le_two` (`≤ 2`). -/
+theorem etaR02Int_odd105_sum_range_three_le_three :
+    Finset.sum (Finset.range 3)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 3 := by
+  have hprev := etaR02Int_odd105_sum_range_two_le_two
+  have h2le : ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h5 : ((((2 * 2 + 1 : ℕ)) : ℝ)) = 5 := by norm_num
+    rw [h5]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 3)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 2)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 2 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 3` to
+`range 4` with cap `4` via `Finset.sum_range_succ` (fourth term `7^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_three_le_three` (`≤ 3`). -/
+theorem etaR02Int_odd105_sum_range_four_le_four :
+    Finset.sum (Finset.range 4)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 4 := by
+  have hprev := etaR02Int_odd105_sum_range_three_le_three
+  have h3le : ((((2 * 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h7 : ((((2 * 3 + 1 : ℕ)) : ℝ)) = 7 := by norm_num
+    rw [h7]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 4)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 3)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 3 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 4` to
+`range 5` with cap `5` via `Finset.sum_range_succ` (fifth term `9^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_four_le_four` (`≤ 4`). -/
+theorem etaR02Int_odd105_sum_range_five_le_five :
+    Finset.sum (Finset.range 5)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 5 := by
+  have hprev := etaR02Int_odd105_sum_range_four_le_four
+  have h4le : ((((2 * 4 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h9 : ((((2 * 4 + 1 : ℕ)) : ℝ)) = 9 := by norm_num
+    rw [h9]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 5)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 4)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 4 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 5` to
+`range 6` with cap `6` via `Finset.sum_range_succ` (sixth term `11^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_five_le_five` (`≤ 5`). -/
+theorem etaR02Int_odd105_sum_range_six_le_six :
+    Finset.sum (Finset.range 6)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 6 := by
+  have hprev := etaR02Int_odd105_sum_range_five_le_five
+  have h5le : ((((2 * 5 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h11 : ((((2 * 5 + 1 : ℕ)) : ℝ)) = 11 := by norm_num
+    rw [h11]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 6)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 5)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 5 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 6` to
+`range 7` with cap `7` via `Finset.sum_range_succ` (seventh term `13^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_six_le_six` (`≤ 6`). -/
+theorem etaR02Int_odd105_sum_range_seven_le_seven :
+    Finset.sum (Finset.range 7)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 7 := by
+  have hprev := etaR02Int_odd105_sum_range_six_le_six
+  have h6le : ((((2 * 6 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h13 : ((((2 * 6 + 1 : ℕ)) : ℝ)) = 13 := by norm_num
+    rw [h13]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 7)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 6)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 6 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 7` to
+`range 8` with cap `8` via `Finset.sum_range_succ` (eighth term `15^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_seven_le_seven` (`≤ 7`). -/
+theorem etaR02Int_odd105_sum_range_eight_le_eight :
+    Finset.sum (Finset.range 8)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 8 := by
+  have hprev := etaR02Int_odd105_sum_range_seven_le_seven
+  have h7le : ((((2 * 7 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h15 : ((((2 * 7 + 1 : ℕ)) : ℝ)) = 15 := by norm_num
+    rw [h15]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 8)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 7)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 7 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 8` to
+`range 9` with cap `9` via `Finset.sum_range_succ` (ninth term `17^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_eight_le_eight` (`≤ 8`). -/
+theorem etaR02Int_odd105_sum_range_nine_le_nine :
+    Finset.sum (Finset.range 9)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 9 := by
+  have hprev := etaR02Int_odd105_sum_range_eight_le_eight
+  have h8le : ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h17 : ((((2 * 8 + 1 : ℕ)) : ℝ)) = 17 := by norm_num
+    rw [h17]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 9)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 8)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 8 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 9` to
+`range 10` with cap `10` via `Finset.sum_range_succ` (tenth term `19^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_nine_le_nine` (`≤ 9`). -/
+theorem etaR02Int_odd105_sum_range_ten_le_ten :
+    Finset.sum (Finset.range 10)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 10 := by
+  have hprev := etaR02Int_odd105_sum_range_nine_le_nine
+  have h9le : ((((2 * 9 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h19 : ((((2 * 9 + 1 : ℕ)) : ℝ)) = 19 := by norm_num
+    rw [h19]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 10)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 9)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 9 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 10` to
+`range 11` with cap `11` via `Finset.sum_range_succ` (eleventh term `21^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_ten_le_ten` (`≤ 10`). -/
+theorem etaR02Int_odd105_sum_range_eleven_le_eleven :
+    Finset.sum (Finset.range 11)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 11 := by
+  have hprev := etaR02Int_odd105_sum_range_ten_le_ten
+  have h10le : ((((2 * 10 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h21 : ((((2 * 10 + 1 : ℕ)) : ℝ)) = 21 := by norm_num
+    rw [h21]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 11)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 10)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 10 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 11` to
+`range 12` with cap `12` via `Finset.sum_range_succ` (twelfth term `23^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_eleven_le_eleven` (`≤ 11`). -/
+theorem etaR02Int_odd105_sum_range_twelve_le_twelve :
+    Finset.sum (Finset.range 12)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 12 := by
+  have hprev := etaR02Int_odd105_sum_range_eleven_le_eleven
+  have h11le : ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h23 : ((((2 * 11 + 1 : ℕ)) : ℝ)) = 23 := by norm_num
+    rw [h23]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 12)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 11)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 11 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 12` to
+`range 13` with cap `13` via `Finset.sum_range_succ` (thirteenth term `25^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_twelve_le_twelve` (`≤ 12`). -/
+theorem etaR02Int_odd105_sum_range_thirteen_le_thirteen :
+    Finset.sum (Finset.range 13)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 13 := by
+  have hprev := etaR02Int_odd105_sum_range_twelve_le_twelve
+  have h12le : ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h25 : ((((2 * 12 + 1 : ℕ)) : ℝ)) = 25 := by norm_num
+    rw [h25]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 13)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 12)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 12 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 13` to
+`range 14` with cap `14` via `Finset.sum_range_succ` (fourteenth term `27^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_thirteen_le_thirteen` (`≤ 13`). -/
+theorem etaR02Int_odd105_sum_range_fourteen_le_fourteen :
+    Finset.sum (Finset.range 14)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 14 := by
+  have hprev := etaR02Int_odd105_sum_range_thirteen_le_thirteen
+  have h13le : ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h27 : ((((2 * 13 + 1 : ℕ)) : ℝ)) = 27 := by norm_num
+    rw [h27]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 14)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 13)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 13 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 14` to
+`range 15` with cap `15` via `Finset.sum_range_succ` (fifteenth term `29^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_fourteen_le_fourteen` (`≤ 14`). -/
+theorem etaR02Int_odd105_sum_range_fifteen_le_fifteen :
+    Finset.sum (Finset.range 15)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 15 := by
+  have hprev := etaR02Int_odd105_sum_range_fourteen_le_fourteen
+  have h14le : ((((2 * 14 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h29 : ((((2 * 14 + 1 : ℕ)) : ℝ)) = 29 := by norm_num
+    rw [h29]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 15)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 14)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 14 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 15` to
+`range 16` with cap `16` via `Finset.sum_range_succ` (sixteenth term `31^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_fifteen_le_fifteen` (`≤ 15`). -/
+theorem etaR02Int_odd105_sum_range_sixteen_le_sixteen :
+    Finset.sum (Finset.range 16)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 16 := by
+  have hprev := etaR02Int_odd105_sum_range_fifteen_le_fifteen
+  have h15le : ((((2 * 15 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h31 : ((((2 * 15 + 1 : ℕ)) : ℝ)) = 31 := by norm_num
+    rw [h31]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 16)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 15)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 15 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 16` to
+`range 17` with cap `17` via `Finset.sum_range_succ` (seventeenth term `33^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_sixteen_le_sixteen` (`≤ 16`). -/
+theorem etaR02Int_odd105_sum_range_seventeen_le_seventeen :
+    Finset.sum (Finset.range 17)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 17 := by
+  have hprev := etaR02Int_odd105_sum_range_sixteen_le_sixteen
+  have h16le : ((((2 * 16 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h33 : ((((2 * 16 + 1 : ℕ)) : ℝ)) = 33 := by norm_num
+    rw [h33]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 17)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 16)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 16 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 17` to
+`range 18` with cap `18` via `Finset.sum_range_succ` (eighteenth term `35^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_seventeen_le_seventeen` (`≤ 17`). -/
+theorem etaR02Int_odd105_sum_range_eighteen_le_eighteen :
+    Finset.sum (Finset.range 18)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 18 := by
+  have hprev := etaR02Int_odd105_sum_range_seventeen_le_seventeen
+  have h17le : ((((2 * 17 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h35 : ((((2 * 17 + 1 : ℕ)) : ℝ)) = 35 := by norm_num
+    rw [h35]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 18)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 17)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 17 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 18` to
+`range 19` with cap `19` via `Finset.sum_range_succ` (nineteenth term `37^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_eighteen_le_eighteen` (`≤ 18`). -/
+theorem etaR02Int_odd105_sum_range_nineteen_le_nineteen :
+    Finset.sum (Finset.range 19)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 19 := by
+  have hprev := etaR02Int_odd105_sum_range_eighteen_le_eighteen
+  have h18le : ((((2 * 18 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h37 : ((((2 * 18 + 1 : ℕ)) : ℝ)) = 37 := by norm_num
+    rw [h37]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 19)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 18)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 18 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 19` to
+`range 20` with cap `20` via `Finset.sum_range_succ` (twentieth term `39^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_nineteen_le_nineteen` (`≤ 19`).
+MILESTONE: range 1-20 all capped. -/
+theorem etaR02Int_odd105_sum_range_twenty_le_twenty :
+    Finset.sum (Finset.range 20)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 20 := by
+  have hprev := etaR02Int_odd105_sum_range_nineteen_le_nineteen
+  have h19le : ((((2 * 19 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h39 : ((((2 * 19 + 1 : ℕ)) : ℝ)) = 39 := by norm_num
+    rw [h39]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 20)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 19)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 19 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 20` to
+`range 21` with cap `21` via `Finset.sum_range_succ` (twenty-first term `41^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_twenty_le_twenty` (`≤ 20`). -/
+theorem etaR02Int_odd105_sum_range_twentyone_le_twentyone :
+    Finset.sum (Finset.range 21)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 21 := by
+  have hprev := etaR02Int_odd105_sum_range_twenty_le_twenty
+  have h20le : ((((2 * 20 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h41 : ((((2 * 20 + 1 : ℕ)) : ℝ)) = 41 := by norm_num
+    rw [h41]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 21)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 20)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 20 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
+  linarith
+
+/-- Next disc rung: extend finite odd `1.05` partial sum from `range 21` to
+`range 22` with cap `22` via `Finset.sum_range_succ` (twenty-second term `43^(-1.05) ≤ 1`).
+Grepped last disc/tsum block first: `etaR02Int_odd105_sum_range_twentyone_le_twentyone` (`≤ 21`). -/
+theorem etaR02Int_odd105_sum_range_twentytwo_le_twentytwo :
+    Finset.sum (Finset.range 22)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 22 := by
+  have hprev := etaR02Int_odd105_sum_range_twentyone_le_twentyone
+  have h21le : ((((2 * 21 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) ≤ 1 := by
+    have h43 : ((((2 * 21 + 1 : ℕ)) : ℝ)) = 43 := by norm_num
+    rw [h43]
+    exact Real.rpow_le_one_of_one_le_of_nonpos (by norm_num) (by norm_num)
+  have hsum : Finset.sum (Finset.range 22)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) =
+      Finset.sum (Finset.range 21)
+      (fun n => ((((2 * n + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      ((((2 * 21 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ) := by
+    rw [Finset.sum_range_succ]
+  rw [hsum]
   linarith

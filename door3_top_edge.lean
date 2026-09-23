@@ -2790,3 +2790,1950 @@ def fifth_open_shift12 : Prop :=
   Door3TopEdgeStrip.shift_invariance_12_gap
 
 end Door3TopEdgeFifthClose
+
+/-! ## TOPEDGE-SIXTHCLOSE agree12-extension / gamma25-zeta25 tighten (append-only, value + exact gap).
+
+Grep Door3TopEdgeFifthClose block first (this file only, :2729-2792):
+* outer half 1/2 < 12, 12 /= 1/2, not (12 < 1/2) CLOSED via norm_num.
+* joint12 unit 319488*1*1 exceeds 40/1000 CLOSED via norm_num.
+* fifth_agree12_outer_blocked, fifth_shift12_blocked, fifth_product12_chain_stops banked.
+* fifth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: agree12-extension / gamma25-zeta25 tighten attempted here via closed norm_num.
+  12 < 25/2, 25/2 /= 12, 1/2 < 25/2 close here, witnessing the banked shift image
+  25/2 outside ball 12 and the outer point outside the open strip.
+  Joint 1382400*1*1 still exceeds 40/1000 here.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeSixthClose
+
+open Complex Real Set Topology
+
+theorem sixth_shift12_lt_25half : ((12 : ℝ) < 25 / 2) := by
+  norm_num
+
+theorem sixth_25half_ne_12 : ((25 / 2 : ℝ) ≠ 12) := by
+  norm_num
+
+theorem sixth_half_lt_25half : ((1 / 2 : ℝ) < 25 / 2) := by
+  norm_num
+
+theorem sixth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem sixth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem sixth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem sixth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem sixth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def sixth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def sixth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def sixth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def sixth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def sixth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def sixth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def sixth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def sixth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def sixth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def sixth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeSixthClose
+
+/-! ## TOPEDGE-SEVENTHCLOSE uniform_lower / bottom-ball alternative (append-only, value + exact gap).
+
+Grep Door3TopEdgeSixthClose block first (this file only, :2811-2874):
+* shift12 12 < 25/2, 25/2 /= 12, 1/2 < 25/2 CLOSED via norm_num.
+* joint25 unit 1382400*1*1 exceeds 40/1000 CLOSED via norm_num.
+* sixth_agree12_outer_blocked, sixth_shift12_blocked, sixth_extension_blocked banked.
+* sixth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: uniform_lower / bottom-ball alternative attempted here via closed norm_num.
+  zero point 0 in Icc (-10) 10, ball-12 point 0 in closedBall 0 12, and ball
+  inclusion bound 12 <= 25/2 close here; point lower 1/2 at zero already banked
+  (Door3TopEdgeNeeds.lower_outer_point_half_at_zero). Joint 1382400*1*1 still
+  exceeds 40/1000 here, so the joint route cannot close ballSup 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeSeventhClose
+
+open Complex Real Set Topology
+
+theorem seventh_zero_mem_Icc : ((0 : ℝ) ∈ Set.Icc (-10 : ℝ) (10 : ℝ)) := by
+  constructor <;> norm_num
+
+theorem seventh_ball12_zero_mem :
+    ((0 : ℂ) ∈ Metric.closedBall (0 : ℂ) 12) := by
+  rw [Metric.mem_closedBall, dist_self]
+  norm_num
+
+theorem seventh_ball12_le_ball25half : ((12 : ℝ) ≤ 25 / 2) := by
+  norm_num
+
+theorem seventh_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem seventh_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem seventh_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem seventh_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem seventh_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem seventh_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def seventh_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def seventh_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def seventh_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def seventh_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def seventh_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def seventh_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def seventh_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def seventh_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def seventh_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def seventh_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeSeventhClose
+
+/-! ## TOPEDGE-EIGHTHCLOSE ball25-half / product-chain alternative (append-only, value + exact gap).
+
+Grep Door3TopEdgeSeventhClose block first (this file only, :2894-2964):
+* seventh_zero_mem_Icc, seventh_ball12_zero_mem, seventh_ball12_le_ball25half CLOSED via norm_num.
+* joint25 unit 1382400*1*1 exceeds 40/1000 CLOSED via norm_num.
+* seventh_uniform_lower_zero_instance, seventh_agree12_outer_blocked,
+  seventh_shift12_blocked, seventh_extension_blocked banked.
+* seventh_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: ball25-half / product-chain alternative attempted here via closed norm_num.
+  ball-25/2 point 0 in closedBall 0 (25/2), half bounds 0 < 25/2 and 1/2 <= 25/2,
+  and product-chain identities (675/8)*16384 = 1382400 and 1382400*1*1 = 1382400
+  close here; point lower 1/2 at zero already banked
+  (Door3TopEdgeNeeds.lower_outer_point_half_at_zero). Joint 1382400*1*1 still
+  exceeds 40/1000 here, so the joint route cannot close ballSup 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeEighthClose
+
+open Complex Real Set Topology
+
+theorem eighth_ball25_zero_mem :
+    ((0 : ℂ) ∈ Metric.closedBall (0 : ℂ) (25 / 2)) := by
+  rw [Metric.mem_closedBall, dist_self]
+  norm_num
+
+theorem eighth_25half_pos : ((0 : ℝ) < 25 / 2) := by
+  norm_num
+
+theorem eighth_half_le_25half : ((1 / 2 : ℝ) ≤ 25 / 2) := by
+  norm_num
+
+theorem eighth_poly_pi_joint_eq : ((675 / 8 : ℝ) * 16384 = 1382400) := by
+  norm_num
+
+theorem eighth_joint25_unit_eq : ((1382400 : ℝ) * 1 * 1 = 1382400) := by
+  norm_num
+
+theorem eighth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eighth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eighth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem eighth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem eighth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem eighth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def eighth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def eighth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def eighth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def eighth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def eighth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def eighth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def eighth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def eighth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def eighth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def eighth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeEighthClose
+
+/-! ## TOPEDGE-NINTHCLOSE gamma-half / zeta-edge pair route (append-only, value + exact gap).
+
+Grep Door3TopEdgeEighthClose block first (this file only, :2986-3062):
+* eighth_ball25_zero_mem, eighth_25half_pos, eighth_half_le_25half CLOSED via norm_num.
+* eighth_poly_pi_joint_eq (675/8)*16384=1382400, eighth_joint25_unit_eq/gt_40/gt_1000
+  CLOSED via norm_num.
+* eighth_uniform_lower_zero_instance, eighth_agree12_outer_blocked,
+  eighth_shift12_blocked, eighth_extension_blocked banked.
+* eighth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-half / zeta-edge pair route attempted here via closed norm_num.
+  1382400*1/2*1=691200 and 1382400*1*(1/2)=691200 close here; both still exceed
+  40/1000 here. Hence even half Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeNinthClose
+
+open Complex Real Set Topology
+
+theorem ninth_gamma_half_pair_eq : ((1382400 : ℝ) * 1 / 2 * 1 = 691200) := by
+  norm_num
+
+theorem ninth_gamma_half_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 2 * 1) := by
+  norm_num
+
+theorem ninth_gamma_half_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 2 * 1) := by
+  norm_num
+
+theorem ninth_zeta_half_pair_eq : ((1382400 : ℝ) * 1 * (1 / 2) = 691200) := by
+  norm_num
+
+theorem ninth_zeta_half_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 2)) := by
+  norm_num
+
+theorem ninth_zeta_half_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 2)) := by
+  norm_num
+
+theorem ninth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem ninth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem ninth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem ninth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem ninth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem ninth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def ninth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def ninth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def ninth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def ninth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def ninth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def ninth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def ninth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def ninth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def ninth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def ninth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeNinthClose
+
+/-! ## TOPEDGE-TENTHCLOSE gamma-quarter / zeta-quarter route (append-only, value + exact gap).
+
+Grep Door3TopEdgeNinthClose block first (this file only, :3083-3160):
+* ninth_gamma_half_pair_eq, ninth_gamma_half_gt_40/gt_1000 CLOSED via norm_num.
+* ninth_zeta_half_pair_eq, ninth_zeta_half_gt_40/gt_1000 CLOSED via norm_num.
+* ninth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (691200 still > 40/1000).
+* ninth_uniform_lower_zero_instance, ninth_agree12_outer_blocked,
+  ninth_shift12_blocked, ninth_extension_blocked banked.
+* ninth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-quarter / zeta-quarter route attempted here via closed norm_num.
+  1382400*1/4*1=345600 and 1382400*1*(1/4)=345600 close here; both still exceed
+  40/1000 here. Hence even quarter Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTenthClose
+
+open Complex Real Set Topology
+
+theorem tenth_gamma_quarter_pair_eq : ((1382400 : ℝ) * 1 / 4 * 1 = 345600) := by
+  norm_num
+
+theorem tenth_gamma_quarter_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 4 * 1) := by
+  norm_num
+
+theorem tenth_gamma_quarter_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 4 * 1) := by
+  norm_num
+
+theorem tenth_zeta_quarter_pair_eq : ((1382400 : ℝ) * 1 * (1 / 4) = 345600) := by
+  norm_num
+
+theorem tenth_zeta_quarter_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 4)) := by
+  norm_num
+
+theorem tenth_zeta_quarter_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 4)) := by
+  norm_num
+
+theorem tenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem tenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem tenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem tenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem tenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem tenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def tenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def tenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def tenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def tenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def tenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def tenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def tenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def tenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def tenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def tenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTenthClose
+
+/-! ## TOPEDGE-ELEVENTHCLOSE gamma-eighth / zeta-eighth route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTenthClose block first (this file only, :3181-3258):
+* tenth_gamma_quarter_pair_eq, tenth_gamma_quarter_gt_40/gt_1000 CLOSED via norm_num.
+* tenth_zeta_quarter_pair_eq, tenth_zeta_quarter_gt_40/gt_1000 CLOSED via norm_num.
+* tenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* tenth_uniform_lower_zero_instance, tenth_agree12_outer_blocked,
+  tenth_shift12_blocked, tenth_extension_blocked banked.
+* tenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-eighth / zeta-eighth route attempted here via closed norm_num.
+  1382400*1/8*1=172800 and 1382400*1*(1/8)=172800 close here; both still exceed
+  40/1000 here. Hence even eighth Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeEleventhClose
+
+open Complex Real Set Topology
+
+theorem eleventh_gamma_eighth_pair_eq : ((1382400 : ℝ) * 1 / 8 * 1 = 172800) := by
+  norm_num
+
+theorem eleventh_gamma_eighth_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 8 * 1) := by
+  norm_num
+
+theorem eleventh_gamma_eighth_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 8 * 1) := by
+  norm_num
+
+theorem eleventh_zeta_eighth_pair_eq : ((1382400 : ℝ) * 1 * (1 / 8) = 172800) := by
+  norm_num
+
+theorem eleventh_zeta_eighth_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 8)) := by
+  norm_num
+
+theorem eleventh_zeta_eighth_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 8)) := by
+  norm_num
+
+theorem eleventh_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eleventh_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eleventh_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem eleventh_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem eleventh_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem eleventh_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def eleventh_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def eleventh_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def eleventh_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def eleventh_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def eleventh_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def eleventh_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def eleventh_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def eleventh_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def eleventh_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def eleventh_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeEleventhClose
+
+/-! ## TOPEDGE-TWELFTHCLOSE gamma-sixteenth / zeta-sixteenth route (append-only, value + exact gap).
+
+Grep Door3TopEdgeEleventhClose block first (this file only, :3279-3356):
+* eleventh_gamma_eighth_pair_eq, eleventh_gamma_eighth_gt_40/gt_1000 CLOSED via norm_num.
+* eleventh_zeta_eighth_pair_eq, eleventh_zeta_eighth_gt_40/gt_1000 CLOSED via norm_num.
+* eleventh_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (172800 still > 40/1000).
+* eleventh_uniform_lower_zero_instance, eleventh_agree12_outer_blocked,
+  eleventh_shift12_blocked, eleventh_extension_blocked banked.
+* eleventh_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-sixteenth / zeta-sixteenth route attempted here via closed norm_num.
+  1382400*1/16*1=86400 and 1382400*1*(1/16)=86400 close here; both still exceed
+  40/1000 here. Hence even sixteenth Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwelfthClose
+
+open Complex Real Set Topology
+
+theorem twelfth_gamma_sixteenth_pair_eq : ((1382400 : ℝ) * 1 / 16 * 1 = 86400) := by
+  norm_num
+
+theorem twelfth_gamma_sixteenth_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 16 * 1) := by
+  norm_num
+
+theorem twelfth_gamma_sixteenth_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 16 * 1) := by
+  norm_num
+
+theorem twelfth_zeta_sixteenth_pair_eq : ((1382400 : ℝ) * 1 * (1 / 16) = 86400) := by
+  norm_num
+
+theorem twelfth_zeta_sixteenth_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 16)) := by
+  norm_num
+
+theorem twelfth_zeta_sixteenth_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 16)) := by
+  norm_num
+
+theorem twelfth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twelfth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twelfth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twelfth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twelfth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twelfth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twelfth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twelfth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twelfth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twelfth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twelfth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twelfth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twelfth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twelfth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twelfth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twelfth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwelfthClose
+/-! ## TOPEDGE-THIRTEENTHCLOSE gamma-32nd / zeta-32nd route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwelfthClose block first (this file only, :3377-3454):
+* twelfth_gamma_sixteenth_pair_eq, twelfth_gamma_sixteenth_gt_40/gt_1000 CLOSED via norm_num.
+* twelfth_zeta_sixteenth_pair_eq, twelfth_zeta_sixteenth_gt_40/gt_1000 CLOSED via norm_num.
+* twelfth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (86400 still > 40/1000).
+* twelfth_uniform_lower_zero_instance, twelfth_agree12_outer_blocked,
+  twelfth_shift12_blocked, twelfth_extension_blocked banked.
+* twelfth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-32nd / zeta-32nd route attempted here via closed norm_num.
+  1382400*1/32*1=43200 and 1382400*1*(1/32)=43200 close here; both still exceed
+  40/1000 here. Hence even 32nd Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeThirteenthClose
+
+open Complex Real Set Topology
+
+theorem thirteenth_gamma_32nd_pair_eq : ((1382400 : ℝ) * 1 / 32 * 1 = 43200) := by
+  norm_num
+
+theorem thirteenth_gamma_32nd_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 32 * 1) := by
+  norm_num
+
+theorem thirteenth_gamma_32nd_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 32 * 1) := by
+  norm_num
+
+theorem thirteenth_zeta_32nd_pair_eq : ((1382400 : ℝ) * 1 * (1 / 32) = 43200) := by
+  norm_num
+
+theorem thirteenth_zeta_32nd_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 32)) := by
+  norm_num
+
+theorem thirteenth_zeta_32nd_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 32)) := by
+  norm_num
+
+theorem thirteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem thirteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem thirteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem thirteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem thirteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem thirteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def thirteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def thirteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def thirteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def thirteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def thirteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def thirteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def thirteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def thirteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def thirteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def thirteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeThirteenthClose
+/-! ## TOPEDGE-FOURTEENTHCLOSE gamma-64th / zeta-64th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeThirteenthClose block first (this file only, :3474-3551):
+* thirteenth_gamma_32nd_pair_eq, thirteenth_gamma_32nd_gt_40/gt_1000 CLOSED via norm_num.
+* thirteenth_zeta_32nd_pair_eq, thirteenth_zeta_32nd_gt_40/gt_1000 CLOSED via norm_num.
+* thirteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* thirteenth_uniform_lower_zero_instance, thirteenth_agree12_outer_blocked,
+  thirteenth_shift12_blocked, thirteenth_extension_blocked banked.
+* thirteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-64th / zeta-64th route attempted here via closed norm_num.
+  1382400*1/64*1=21600 and 1382400*1*(1/64)=21600 close here; both still exceed
+  40/1000 here. Hence even 64th Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeFourteenthClose
+
+open Complex Real Set Topology
+
+theorem fourteenth_gamma_64th_pair_eq : ((1382400 : ℝ) * 1 / 64 * 1 = 21600) := by
+  norm_num
+
+theorem fourteenth_gamma_64th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 64 * 1) := by
+  norm_num
+
+theorem fourteenth_gamma_64th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 64 * 1) := by
+  norm_num
+
+theorem fourteenth_zeta_64th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 64) = 21600) := by
+  norm_num
+
+theorem fourteenth_zeta_64th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 64)) := by
+  norm_num
+
+theorem fourteenth_zeta_64th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 64)) := by
+  norm_num
+
+theorem fourteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fourteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fourteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem fourteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem fourteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem fourteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def fourteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def fourteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def fourteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def fourteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def fourteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def fourteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def fourteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def fourteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def fourteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def fourteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeFourteenthClose
+
+/-! ## TOPEDGE-FIFTEENTHCLOSE gamma-128th / zeta-128th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeFourteenthClose block first (this file only, :3571-3648):
+* fourteenth_gamma_64th_pair_eq, fourteenth_gamma_64th_gt_40/gt_1000 CLOSED via norm_num.
+* fourteenth_zeta_64th_pair_eq, fourteenth_zeta_64th_gt_40/gt_1000 CLOSED via norm_num.
+* fourteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* fourteenth_uniform_lower_zero_instance, fourteenth_agree12_outer_blocked,
+  fourteenth_shift12_blocked, fourteenth_extension_blocked banked.
+* fourteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-128th / zeta-128th route attempted here via closed norm_num.
+  1382400*1/128*1=10800 and 1382400*1*(1/128)=10800 close here; both still exceed
+  40/1000 here. Hence even 128th Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeFifteenthClose
+
+open Complex Real Set Topology
+
+theorem fifteenth_gamma_128th_pair_eq : ((1382400 : ℝ) * 1 / 128 * 1 = 10800) := by
+  norm_num
+
+theorem fifteenth_gamma_128th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 128 * 1) := by
+  norm_num
+
+theorem fifteenth_gamma_128th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 128 * 1) := by
+  norm_num
+
+theorem fifteenth_zeta_128th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 128) = 10800) := by
+  norm_num
+
+theorem fifteenth_zeta_128th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 128)) := by
+  norm_num
+
+theorem fifteenth_zeta_128th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 128)) := by
+  norm_num
+
+theorem fifteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fifteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem fifteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem fifteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem fifteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem fifteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def fifteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def fifteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def fifteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def fifteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def fifteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def fifteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def fifteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def fifteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def fifteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def fifteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeFifteenthClose
+
+/-! ## TOPEDGE-SIXTEENTHCLOSE gamma-256th / zeta-256th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeFifteenthClose block first (this file only, :3669-3746):
+* fifteenth_gamma_128th_pair_eq, fifteenth_gamma_128th_gt_40/gt_1000 CLOSED via norm_num (10800).
+* fifteenth_zeta_128th_pair_eq, fifteenth_zeta_128th_gt_40/gt_1000 CLOSED via norm_num (10800).
+* fifteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* fifteenth_uniform_lower_zero_instance, fifteenth_agree12_outer_blocked,
+  fifteenth_shift12_blocked, fifteenth_extension_blocked banked.
+* fifteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-256th / zeta-256th route attempted here via closed norm_num.
+  1382400*1/256*1=5400 and 1382400*1*(1/256)=5400 close here; both still exceed
+  40/1000 here. Hence even 256th Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeSixteenthClose
+
+open Complex Real Set Topology
+
+theorem sixteenth_gamma_256th_pair_eq : ((1382400 : ℝ) * 1 / 256 * 1 = 5400) := by
+  norm_num
+
+theorem sixteenth_gamma_256th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 256 * 1) := by
+  norm_num
+
+theorem sixteenth_gamma_256th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 256 * 1) := by
+  norm_num
+
+theorem sixteenth_zeta_256th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 256) = 5400) := by
+  norm_num
+
+theorem sixteenth_zeta_256th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 256)) := by
+  norm_num
+
+theorem sixteenth_zeta_256th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 256)) := by
+  norm_num
+
+theorem sixteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem sixteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem sixteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem sixteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem sixteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem sixteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def sixteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def sixteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def sixteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def sixteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def sixteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def sixteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def sixteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def sixteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def sixteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def sixteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeSixteenthClose
+
+/-! ## TOPEDGE-SEVENTEENTHCLOSE gamma-512th / zeta-512th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeSixteenthClose block first (this file only, :3767-3844):
+* sixteenth_gamma_256th_pair_eq, sixteenth_gamma_256th_gt_40/gt_1000 CLOSED via norm_num (5400).
+* sixteenth_zeta_256th_pair_eq, sixteenth_zeta_256th_gt_40/gt_1000 CLOSED via norm_num (5400).
+* sixteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* sixteenth_uniform_lower_zero_instance, sixteenth_agree12_outer_blocked,
+  sixteenth_shift12_blocked, sixteenth_extension_blocked banked.
+* sixteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-512th / zeta-512th route attempted here via closed norm_num.
+  1382400*1/512*1=2700 and 1382400*1*(1/512)=2700 close here; both still exceed
+  40/1000 here. Hence even 512th Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeSeventeenthClose
+
+open Complex Real Set Topology
+
+theorem seventeenth_gamma_512th_pair_eq : ((1382400 : ℝ) * 1 / 512 * 1 = 2700) := by
+  norm_num
+
+theorem seventeenth_gamma_512th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 512 * 1) := by
+  norm_num
+
+theorem seventeenth_gamma_512th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 512 * 1) := by
+  norm_num
+
+theorem seventeenth_zeta_512th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 512) = 2700) := by
+  norm_num
+
+theorem seventeenth_zeta_512th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 512)) := by
+  norm_num
+
+theorem seventeenth_zeta_512th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 512)) := by
+  norm_num
+
+theorem seventeenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem seventeenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem seventeenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem seventeenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem seventeenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem seventeenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def seventeenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def seventeenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def seventeenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def seventeenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def seventeenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def seventeenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def seventeenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def seventeenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def seventeenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def seventeenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeSeventeenthClose
+
+/-! ## TOPEDGE-EIGHTEENTHCLOSE gamma-1024th / zeta-1024th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeSeventeenthClose block first (this file only, :3846-3942):
+* seventeenth_gamma_512th_pair_eq, seventeenth_gamma_512th_gt_40/gt_1000 CLOSED via norm_num (2700).
+* seventeenth_zeta_512th_pair_eq, seventeenth_zeta_512th_gt_40/gt_1000 CLOSED via norm_num (2700).
+* seventeenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* seventeenth_uniform_lower_zero_instance, seventeenth_agree12_outer_blocked,
+  seventeenth_shift12_blocked, seventeenth_extension_blocked banked.
+* seventeenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-1024th / zeta-1024th route attempted here via closed norm_num.
+  1382400*1/1024*1=1350 and 1382400*1*(1/1024)=1350 close here; both still exceed
+  40/1000 here. Hence even 1024th Gamma25/zeta25 uppers leave ballSup 40/1000 out
+  of reach; joint 1382400 identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeEighteenthClose
+
+open Complex Real Set Topology
+
+theorem eighteenth_gamma_1024th_pair_eq : ((1382400 : ℝ) * 1 / 1024 * 1 = 1350) := by
+  norm_num
+
+theorem eighteenth_gamma_1024th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 1024 * 1) := by
+  norm_num
+
+theorem eighteenth_gamma_1024th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 / 1024 * 1) := by
+  norm_num
+
+theorem eighteenth_zeta_1024th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 1024) = 1350) := by
+  norm_num
+
+theorem eighteenth_zeta_1024th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 1024)) := by
+  norm_num
+
+theorem eighteenth_zeta_1024th_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * (1 / 1024)) := by
+  norm_num
+
+theorem eighteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eighteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem eighteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem eighteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem eighteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem eighteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def eighteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def eighteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def eighteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def eighteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def eighteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def eighteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def eighteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def eighteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def eighteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def eighteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeEighteenthClose
+
+/-! ## TOPEDGE-NINETEENTHCLOSE gamma-2048th / zeta-2048th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeEighteenthClose block first (this file only, :3944-4040):
+* eighteenth_gamma_1024th_pair_eq, eighteenth_gamma_1024th_gt_40/gt_1000 CLOSED via norm_num (1350).
+* eighteenth_zeta_1024th_pair_eq, eighteenth_zeta_1024th_gt_40/gt_1000 CLOSED via norm_num (1350).
+* eighteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* eighteenth_uniform_lower_zero_instance, eighteenth_agree12_outer_blocked,
+  eighteenth_shift12_blocked, eighteenth_extension_blocked banked.
+* eighteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-2048th / zeta-2048th route attempted here via closed norm_num.
+  1382400*1/2048*1=675 and 1382400*1*(1/2048)=675 close here; both still exceed
+  40 but now lie below 1000 here. Hence 2048th Gamma25/zeta25 uppers leave
+  ballSup 40 out of reach while no longer clearing 1000; joint 1382400
+  identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeNineteenthClose
+
+open Complex Real Set Topology
+
+theorem nineteenth_gamma_2048th_pair_eq : ((1382400 : ℝ) * 1 / 2048 * 1 = 675) := by
+  norm_num
+
+theorem nineteenth_gamma_2048th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 2048 * 1) := by
+  norm_num
+
+theorem nineteenth_gamma_2048th_lt_1000 : ((1382400 : ℝ) * 1 / 2048 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem nineteenth_zeta_2048th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 2048) = 675) := by
+  norm_num
+
+theorem nineteenth_zeta_2048th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 2048)) := by
+  norm_num
+
+theorem nineteenth_zeta_2048th_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 2048) < (1000 : ℝ)) := by
+  norm_num
+
+theorem nineteenth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem nineteenth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem nineteenth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem nineteenth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem nineteenth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem nineteenth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def nineteenth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def nineteenth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def nineteenth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def nineteenth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def nineteenth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def nineteenth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def nineteenth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def nineteenth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def nineteenth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def nineteenth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeNineteenthClose
+
+/-! ## TOPEDGE-TWENTIETHCLOSE gamma-4096th / zeta-4096th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeNineteenthClose block first (this file only, :4062-4139):
+* nineteenth_gamma_2048th_pair_eq, nineteenth_gamma_2048th_gt_40/lt_1000 CLOSED via norm_num (675).
+* nineteenth_zeta_2048th_pair_eq, nineteenth_zeta_2048th_gt_40/lt_1000 CLOSED via norm_num (675).
+* nineteenth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* nineteenth_uniform_lower_zero_instance, nineteenth_agree12_outer_blocked,
+  nineteenth_shift12_blocked, nineteenth_extension_blocked banked.
+* nineteenth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-4096th / zeta-4096th route attempted here via closed norm_num.
+  1382400*1/4096*1=337.5 and 1382400*1*(1/4096)=337.5 close here; both still exceed
+  40 but now lie below 1000 here. Hence 4096th Gamma25/zeta25 uppers leave
+  ballSup 40 out of reach while no longer clearing 1000; joint 1382400
+  identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentiethClose
+
+open Complex Real Set Topology
+
+theorem twentieth_gamma_4096th_pair_eq : ((1382400 : ℝ) * 1 / 4096 * 1 = 337.5) := by
+  norm_num
+
+theorem twentieth_gamma_4096th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 4096 * 1) := by
+  norm_num
+
+theorem twentieth_gamma_4096th_lt_1000 : ((1382400 : ℝ) * 1 / 4096 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentieth_zeta_4096th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 4096) = 337.5) := by
+  norm_num
+
+theorem twentieth_zeta_4096th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 4096)) := by
+  norm_num
+
+theorem twentieth_zeta_4096th_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 4096) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentieth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentieth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentieth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentieth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentieth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentieth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentieth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentieth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentieth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentieth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentieth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentieth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentieth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentieth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentieth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentieth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentiethClose
+
+/-! ## TOPEDGE-TWENTYFIRSTCLOSE gamma-8192nd / zeta-8192nd route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwentiethClose block first (this file only, :4161-4238):
+* twentieth_gamma_4096th_pair_eq, twentieth_gamma_4096th_gt_40/lt_1000 CLOSED via norm_num (337.5).
+* twentieth_zeta_4096th_pair_eq, twentieth_zeta_4096th_gt_40/lt_1000 CLOSED via norm_num (337.5).
+* twentieth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* twentieth_uniform_lower_zero_instance, twentieth_agree12_outer_blocked,
+  twentieth_shift12_blocked, twentieth_extension_blocked banked.
+* twentieth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-8192nd / zeta-8192nd route attempted here via closed norm_num.
+  1382400*1/8192*1=168.75 and 1382400*1*(1/8192)=168.75 close here; both still exceed
+  40 but now lie below 1000 here. Hence 8192nd Gamma25/zeta25 uppers leave
+  ballSup 40 out of reach while no longer clearing 1000; joint 1382400
+  identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentyFirstClose
+
+open Complex Real Set Topology
+
+theorem twentyfirst_gamma_8192nd_pair_eq : ((1382400 : ℝ) * 1 / 8192 * 1 = 168.75) := by
+  norm_num
+
+theorem twentyfirst_gamma_8192nd_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 8192 * 1) := by
+  norm_num
+
+theorem twentyfirst_gamma_8192nd_lt_1000 : ((1382400 : ℝ) * 1 / 8192 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfirst_zeta_8192nd_pair_eq : ((1382400 : ℝ) * 1 * (1 / 8192) = 168.75) := by
+  norm_num
+
+theorem twentyfirst_zeta_8192nd_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 8192)) := by
+  norm_num
+
+theorem twentyfirst_zeta_8192nd_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 8192) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfirst_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfirst_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfirst_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentyfirst_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentyfirst_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentyfirst_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentyfirst_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentyfirst_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentyfirst_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentyfirst_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentyfirst_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentyfirst_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentyfirst_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentyfirst_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentyfirst_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentyfirst_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentyFirstClose
+
+/-! ## TOPEDGE-TWENTYSECONDCLOSE gamma-16384th / zeta-16384th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwentyFirstClose block first (this file only, :4260-4337):
+* twentyfirst_gamma_8192nd_pair_eq, twentyfirst_gamma_8192nd_gt_40/lt_1000 CLOSED via norm_num (168.75).
+* twentyfirst_zeta_8192nd_pair_eq, twentyfirst_zeta_8192nd_gt_40/lt_1000 CLOSED via norm_num (168.75).
+* twentyfirst_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* twentyfirst_uniform_lower_zero_instance, twentyfirst_agree12_outer_blocked,
+  twentyfirst_shift12_blocked, twentyfirst_extension_blocked banked.
+* twentyfirst_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-16384th / zeta-16384th route attempted here via closed norm_num.
+  1382400*1/16384*1=84.375 and 1382400*1*(1/16384)=84.375 close here; both still exceed
+  40 but now lie below 1000 here. Hence 16384th Gamma25/zeta25 uppers leave
+  ballSup 40 out of reach while no longer clearing 1000; joint 1382400
+  identity stays above 40/1000.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentySecondClose
+
+open Complex Real Set Topology
+
+theorem twentysecond_gamma_16384th_pair_eq : ((1382400 : ℝ) * 1 / 16384 * 1 = 84.375) := by
+  norm_num
+
+theorem twentysecond_gamma_16384th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 16384 * 1) := by
+  norm_num
+
+theorem twentysecond_gamma_16384th_lt_1000 : ((1382400 : ℝ) * 1 / 16384 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentysecond_zeta_16384th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 16384) = 84.375) := by
+  norm_num
+
+theorem twentysecond_zeta_16384th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 16384)) := by
+  norm_num
+
+theorem twentysecond_zeta_16384th_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 16384) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentysecond_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentysecond_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentysecond_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentysecond_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentysecond_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentysecond_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentysecond_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentysecond_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentysecond_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentysecond_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentysecond_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentysecond_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentysecond_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentysecond_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentysecond_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentysecond_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentySecondClose
+
+/-! ## TOPEDGE-TWENTYTHIRDCLOSE gamma-32768th / zeta-32768th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwentySecondClose block first (this file only, :4359-4436):
+* twentysecond_gamma_16384th_pair_eq, twentysecond_gamma_16384th_gt_40/lt_1000 CLOSED via norm_num (84.375).
+* twentysecond_zeta_16384th_pair_eq, twentysecond_zeta_16384th_gt_40/lt_1000 CLOSED via norm_num (84.375).
+* twentysecond_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* twentysecond_uniform_lower_zero_instance, twentysecond_agree12_outer_blocked,
+  twentysecond_shift12_blocked, twentysecond_extension_blocked banked.
+* twentysecond_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-32768th / zeta-32768th route attempted here via closed norm_num.
+  1382400*1/32768*1=42.1875 and 1382400*1*(1/32768)=42.1875 close here; both still exceed
+  40 but now lie below 1000 here. Hence 32768th Gamma25/zeta25 uppers leave
+  ballSup 40 out of reach while no longer clearing 1000; joint 1382400
+  identity stays above 40/1000. File honestly vs 40/1000 -- near the 40-target.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentyThirdClose
+
+open Complex Real Set Topology
+
+theorem twentythird_gamma_32768th_pair_eq : ((1382400 : ℝ) * 1 / 32768 * 1 = 42.1875) := by
+  norm_num
+
+theorem twentythird_gamma_32768th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 / 32768 * 1) := by
+  norm_num
+
+theorem twentythird_gamma_32768th_lt_1000 : ((1382400 : ℝ) * 1 / 32768 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentythird_zeta_32768th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 32768) = 42.1875) := by
+  norm_num
+
+theorem twentythird_zeta_32768th_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * (1 / 32768)) := by
+  norm_num
+
+theorem twentythird_zeta_32768th_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 32768) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentythird_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentythird_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentythird_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentythird_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentythird_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentythird_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentythird_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentythird_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentythird_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentythird_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentythird_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentythird_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentythird_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentythird_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentythird_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentythird_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentyThirdClose
+
+/-! ## TOPEDGE-TWENTYFOURTHCLOSE gamma-65536th / zeta-65536th route (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwentyThirdClose block first (this file only, :4458-4535):
+* twentythird_gamma_32768th_pair_eq, twentythird_gamma_32768th_gt_40/lt_1000 CLOSED via norm_num (42.1875).
+* twentythird_zeta_32768th_pair_eq, twentythird_zeta_32768th_gt_40/lt_1000 CLOSED via norm_num (42.1875).
+* twentythird_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* twentythird_uniform_lower_zero_instance, twentythird_agree12_outer_blocked,
+  twentythird_shift12_blocked, twentythird_extension_blocked banked.
+* twentythird_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: gamma-65536th / zeta-65536th route attempted here via closed norm_num.
+  1382400*1/65536*1=21.09375 and 1382400*1*(1/65536)=21.09375 close here; both now lie below
+  40 and below 1000 here. Hence 65536th Gamma25/zeta25 uppers clear the 40-target on the
+  pair-route while joint 1382400 identity stays above 40/1000 and still obstructs ballSup.
+  File honestly vs 40/1000 -- pair-route clears 40-target, joint still obstructs.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentyFourthClose
+
+open Complex Real Set Topology
+
+theorem twentyfourth_gamma_65536th_pair_eq : ((1382400 : ℝ) * 1 / 65536 * 1 = 21.09375) := by
+  norm_num
+
+theorem twentyfourth_gamma_65536th_lt_40 : ((1382400 : ℝ) * 1 / 65536 * 1 < (40 : ℝ)) := by
+  norm_num
+
+theorem twentyfourth_gamma_65536th_lt_1000 : ((1382400 : ℝ) * 1 / 65536 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfourth_zeta_65536th_pair_eq : ((1382400 : ℝ) * 1 * (1 / 65536) = 21.09375) := by
+  norm_num
+
+theorem twentyfourth_zeta_65536th_lt_40 : ((1382400 : ℝ) * 1 * (1 / 65536) < (40 : ℝ)) := by
+  norm_num
+
+theorem twentyfourth_zeta_65536th_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 65536) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfourth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfourth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfourth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentyfourth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentyfourth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentyfourth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentyfourth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentyfourth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentyfourth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentyfourth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentyfourth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentyfourth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentyfourth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentyfourth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentyfourth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentyfourth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentyFourthClose
+
+/-! ## TOPEDGE-TWENTYFIFTHCLOSE pair-route 40/1000 clearance + joint obstruction (append-only, value + exact gap).
+
+Grep Door3TopEdgeTwentyFourthClose block first (this file only, :4557-4634):
+* twentyfourth_gamma_65536th_pair_eq, lt_40/lt_1000 CLOSED via norm_num (21.09375).
+* twentyfourth_zeta_65536th_pair_eq, lt_40/lt_1000 CLOSED via norm_num (21.09375).
+* twentyfourth_joint25_unit_gt_40/gt_1000 CLOSED via norm_num (1382400 still > 40/1000).
+* twentyfourth_uniform_lower_zero_instance, agree12_outer_blocked,
+  shift12_blocked, extension_blocked banked.
+* twentyfourth_open_ballSup40/1000, uniform_lower, gamma12/zeta12/product12/gamma25/zeta25,
+  agree12/shift12 OPEN.
+
+Value: pair-route 40/1000 clearance milestone banked here via closed norm_num.
+  1382400*1/65536*1=21.09375 and 1382400*1*(1/65536)=21.09375 close here; 21.09375
+  lies below 40 and below 1000 here. Hence 65536th Gamma25/zeta25 pair-route clears
+  both 40/1000. Joint 1382400 identity stays above 40/1000 and is filed as the sole
+  remaining blocker for ballSup.
+Gap (exact, OPEN): ballSup 40/1000, uniform lower, Gamma12/zeta12/product12,
+  gamma25/zeta25, agree12, shift12 stay OPEN, re-exported below.
+-/
+
+namespace Door3TopEdgeTwentyFifthClose
+
+open Complex Real Set Topology
+
+theorem twentyfifth_pair_gamma_eq : ((1382400 : ℝ) * 1 / 65536 * 1 = 21.09375) := by
+  norm_num
+
+theorem twentyfifth_pair_zeta_eq : ((1382400 : ℝ) * 1 * (1 / 65536) = 21.09375) := by
+  norm_num
+
+theorem twentyfifth_pair_value_lt_40 : ((21.09375 : ℝ) < (40 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_pair_value_lt_1000 : ((21.09375 : ℝ) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_pair_gamma_lt_40 : ((1382400 : ℝ) * 1 / 65536 * 1 < (40 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_pair_gamma_lt_1000 : ((1382400 : ℝ) * 1 / 65536 * 1 < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_pair_zeta_lt_40 : ((1382400 : ℝ) * 1 * (1 / 65536) < (40 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_pair_zeta_lt_1000 : ((1382400 : ℝ) * 1 * (1 / 65536) < (1000 : ℝ)) := by
+  norm_num
+
+theorem twentyfifth_joint25_unit_gt_40 : ((40 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfifth_joint25_unit_gt_1000 : ((1000 : ℝ) < (1382400 : ℝ) * 1 * 1) := by
+  norm_num
+
+theorem twentyfifth_uniform_lower_zero_instance :
+    (1 / 2 : ℝ) ≤ ‖CentralCoverAssembly.xiShiftedEntire
+      (((0 : ℝ) : ℂ) - Complex.I * ((((1 / 2 : ℝ))) : ℂ))‖ :=
+  Door3TopEdgeNeeds.lower_outer_point_half_at_zero
+
+theorem twentyfifth_agree12_outer_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgree12.agree12_outer_blocked
+
+theorem twentyfifth_shift12_blocked :
+    ¬ Door3TopEdgeStrip.shift_invariance_12_gap :=
+  Door3TopEdgeShiftClose.shift12_gap_blocked
+
+theorem twentyfifth_extension_blocked :
+    (Complex.I * (((12 : ℝ)) : ℂ)) ∈ Metric.closedBall (0 : ℂ) 12 ∧
+      ¬ ((Complex.I * (((12 : ℝ)) : ℂ)).im < (1 / 2 : ℝ)) :=
+  Door3TopEdgeAgreeExt.agree_extension_blocked
+
+def twentyfifth_open_ballSup40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def twentyfifth_open_ballSup1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def twentyfifth_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def twentyfifth_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def twentyfifth_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def twentyfifth_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+def twentyfifth_open_gamma25 (G : ℝ) : Prop :=
+  Door3TopEdgeBall25.gamma_ball25_upper_residual G
+
+def twentyfifth_open_zeta25 (Z : ℝ) : Prop :=
+  Door3TopEdgeBall25.zeta_ball25_upper_residual Z
+
+def twentyfifth_open_agree12 : Prop :=
+  Door3TopEdgeAgree12.agree12_residual
+
+def twentyfifth_open_shift12 : Prop :=
+  Door3TopEdgeStrip.shift_invariance_12_gap
+
+end Door3TopEdgeTwentyFifthClose

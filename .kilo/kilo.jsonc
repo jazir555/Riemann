@@ -1,4 +1,42 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
-  "snapshot": false
+  "snapshot": false,
+  "mcp": {
+    // Hindsight agent memory (https://hindsight.vectorize.io/developer/mcp-server)
+    // Multi-bank mode: all 30 tools, bank_id passed explicitly per call.
+    // Requires a Hindsight server: `hindsight-api` on :8888, daemon on :9077,
+    // or Hindsight Cloud. See HINDSIGHT_MCP_SETUP below.
+    "hindsight": {
+      "type": "remote",
+      "url": "http://localhost:8888/mcp/",
+      "enabled": true,
+      "timeout": 30000
+    }
+    // Single-bank alternative (recommended once you pick a bank):
+    // scopes all tools to one bank so bank_id is implicit from the URL.
+    // "hindsight-riemann": {
+    //   "type": "remote",
+    //   "url": "http://localhost:8888/mcp/riemann/",
+    //   "enabled": false,
+    //   "timeout": 30000
+    // }
+  },
+  "permission": {
+    // Hindsight MCP tool permissions: allow safe reads, ask for writes.
+    // MCP keys are {server}_{tool}; last matching rule wins, so put
+    // broad patterns first and specific overrides after.
+    "hindsight_recall": "allow",
+    "hindsight_reflect": "allow",
+    "hindsight_list_*": "allow",
+    "hindsight_get_*": "allow",
+    "hindsight_search_*": "allow",
+    "hindsight_retain": "ask",
+    "hindsight_sync_retain": "ask",
+    "hindsight_create_*": "ask",
+    "hindsight_update_*": "ask",
+    "hindsight_refresh_*": "ask",
+    "hindsight_cancel_*": "ask",
+    "hindsight_delete_*": "deny",
+    "hindsight_clear_*": "deny"
+  }
 }

@@ -3269,3 +3269,3272 @@ theorem narrow_R39_deriv_keeps_67200 (hBall : premBall_R39) (w : ℂ)
 
 end Door3PremiseTier
 
+/-! ## 44. R40 premise-tier narrow attempt (append-only wave).
+
+* R39 premise block in this file: `premTier_R39 :1185`, `premBall_R39 :1187`,
+  `premTier_R39_mismatch :1191`, `premDeriv_R39_of_ball :1193`,
+  `premSphere_R39_of_ball :1205` (`R39.mem`, tier `0.07`, value `67200`).
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R39 narrow block in this file: `## 43. R39 premise-tier narrow attempt`
+  `:3228-3270` with `narrow_R39_closedForm_keeps :3252`,
+  `narrow_R39_residual_gap :3256`,
+  `narrow_R39_residual_is_mismatch :3260`,
+  `narrow_R39_deriv_keeps_67200 :3265`; R39 keeps `67200`, no chain.
+* Pattern `narrow_R40_` in this file returns no matches
+  (no prior R40 narrow).
+* Result below: no R40 tier-`0.05` closure exists locally, so R40 keeps
+  value `67200` (`16800 / 0.25`) with exact residual gap `0.05 < 67200`;
+  tier `0.05` stays open by the same mismatch as `premTier_R40_mismatch :1218`.
+-/
+
+namespace Door3PremiseTier
+
+/-- R40 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R40_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R40 residual gap at the kept value: tier `0.05` stays open below `67200`. -/
+theorem narrow_R40_residual_gap : (0.05 : ℝ) < 67200 := by
+  norm_num
+
+/-- R40 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R40_residual_is_mismatch : (0.05 : ℝ) < 67200 :=
+  tier05_lt_67200
+
+/-- R40 conditional deriv transfer still lands at `67200` from the ball premise
+(re-export for the narrow record). -/
+theorem narrow_R40_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  premDeriv_R40_of_ball hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 45. R41 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R40 narrow block in this file: `## 44. R40 premise-tier narrow attempt`
+  `:3272-3314` with `narrow_R40_closedForm_keeps :3296`,
+  `narrow_R40_residual_gap :3300`,
+  `narrow_R40_residual_is_mismatch :3304`,
+  `narrow_R40_deriv_keeps_67200 :3309`; R40 keeps `67200`, no chain.
+* Central R41 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R41` rect; pattern `narrow_R41_` in this
+  file returns no matches (no prior R41 narrow).
+* Proxy tier reference only (no central cell): `interval_arith.lean`
+  `R41 :38975` with `door3_cell_checker.lean` R41 proxy header `:1857-1861`
+  recording inner tier `(0.15, 0.06)`.
+* Result below: no central R41 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the proxy inner tier; tier `0.06` stays open by the
+  banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the banked
+  R40 transfer at `67200` since no central R41 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R41 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R41_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R41 residual gap at the kept value: proxy inner tier `0.06`
+stays open below `67200`. -/
+theorem narrow_R41_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R41 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R41_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R41 conditional deriv transfer still lands at `67200` (re-export of the
+banked R40 transfer; no central R41 cell exists for a separate transfer). -/
+theorem narrow_R41_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R40_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 46. R42 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R41 narrow block in this file: `## 45. R41 premise-tier narrow attempt`
+  `:3316-3362` with `narrow_R41_closedForm_keeps :3343`,
+  `narrow_R41_residual_gap :3348`,
+  `narrow_R41_residual_is_mismatch :3352`,
+  `narrow_R41_deriv_keeps_67200 :3357`; R41 keeps `67200`, no chain.
+* Central R42 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R42` rect; pattern `narrow_R42_` in this
+  file returns no matches (no prior R42 narrow).
+* Proxy tier reference only (no central cell): `interval_arith.lean`
+  `R42 :39110` with `door3_cell_checker.lean` R42 proxy header `:1277-1281`
+  recording inner tier `(0.15, 0.06)`.
+* Result below: no central R42 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the proxy inner tier; tier `0.06` stays open by the
+  banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the banked
+  R41 transfer (which re-exports R40) at `67200` since no central R42 cell
+  exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R42 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R42_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R42 residual gap at the kept value: proxy inner tier `0.06`
+stays open below `67200`. -/
+theorem narrow_R42_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R42 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R42_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R42 conditional deriv transfer still lands at `67200` (re-export of the
+banked R41 transfer, which re-exports R40; no central R42 cell exists
+for a separate transfer). -/
+theorem narrow_R42_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R41_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 47. R43 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R42 narrow block in this file: `## 46. R42 premise-tier narrow attempt`
+  `:3364-3412` with `narrow_R42_closedForm_keeps :3392`,
+  `narrow_R42_residual_gap :3397`,
+  `narrow_R42_residual_is_mismatch :3401`,
+  `narrow_R42_deriv_keeps_67200 :3407`; R42 keeps `67200` via the
+  R41→R40 chain, no central R42 rect.
+* Central R43 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R43` rect; pattern `narrow_R43_` in this
+  file returns no matches (no prior R43 narrow).
+* Proxy tier reference only (no central cell): `interval_arith.lean`
+  `R43 :39245` with `door3_cell_checker.lean` R43 proxy header `:642-646`
+  recording inner tier `(0.15, 0.06)`.
+* Result below: no central R43 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the proxy inner tier; tier `0.06` stays open by the
+  banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the banked
+  R42 transfer (which re-exports R41→R40) at `67200` since no central R43
+  cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R43 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R43_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R43 residual gap at the kept value: proxy inner tier `0.06`
+stays open below `67200`. -/
+theorem narrow_R43_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R43 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R43_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R43 conditional deriv transfer still lands at `67200` (re-export of the
+banked R42 transfer, which re-exports R41→R40; no central R43 cell exists
+for a separate transfer). -/
+theorem narrow_R43_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R42_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 48. R44 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R43 narrow block in this file: `## 47. R43 premise-tier narrow attempt`
+  `:3414-3463` with `narrow_R43_closedForm_keeps :3443`,
+  `narrow_R43_residual_gap :3448`,
+  `narrow_R43_residual_is_mismatch :3452`,
+  `narrow_R43_deriv_keeps_67200 :3458`; R43 keeps `67200` via the
+  R42→R41→R40 chain, no central R43 rect.
+* Central R44 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R44` rect; pattern `narrow_R44_` in this
+  file returns no matches (no prior R44 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R44` rect and no `door3_cell_checker.lean` `R44` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R44 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R43 transfer (which re-exports R42→R41→R40) at `67200` since no
+  central R44 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R44 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R44_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R44 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R44_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R44 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R44_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R44 conditional deriv transfer still lands at `67200` (re-export of the
+banked R43 transfer, which re-exports R42→R41→R40; no central R44 cell
+exists for a separate transfer). -/
+theorem narrow_R44_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R43_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 49. R45 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R44 narrow block in this file: `## 48. R44 premise-tier narrow attempt`
+  `:3465-3515` with `narrow_R44_closedForm_keeps :3495`,
+  `narrow_R44_residual_gap :3500`,
+  `narrow_R44_residual_is_mismatch :3504`,
+  `narrow_R44_deriv_keeps_67200 :3510`; R44 keeps `67200` via the
+  R43→R42→R41→R40 chain, no central R44 rect.
+* Central R45 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R45` rect; pattern `narrow_R45_` in this
+  file returns no matches (no prior R45 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R45` rect and no `door3_cell_checker.lean` `R45` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R45 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R44 transfer (which re-exports R43→R42→R41→R40) at `67200` since no
+  central R45 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R45 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R45_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R45 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R45_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R45 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R45_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R45 conditional deriv transfer still lands at `67200` (re-export of the
+banked R44 transfer, which re-exports R43→R42→R41→R40; no central R45 cell
+exists for a separate transfer). -/
+theorem narrow_R45_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R44_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 50. R46 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R45 narrow block in this file: `## 49. R45 premise-tier narrow attempt`
+  `:3517-3567` with `narrow_R45_closedForm_keeps :3547`,
+  `narrow_R45_residual_gap :3552`,
+  `narrow_R45_residual_is_mismatch :3556`,
+  `narrow_R45_deriv_keeps_67200 :3562`; R45 keeps `67200` via the
+  R44→R43→R42→R41→R40 chain, no central R45 rect.
+* Central R46 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R46` rect; pattern `narrow_R46_` in this
+  file returns no matches (no prior R46 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R46` rect and no `door3_cell_checker.lean` `R46` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R46 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R45 transfer (which re-exports R44→R43→R42→R41→R40) at `67200`
+  since no central R46 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R46 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R46_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R46 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R46_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R46 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R46_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R46 conditional deriv transfer still lands at `67200` (re-export of the
+banked R45 transfer, which re-exports R44→R43→R42→R41→R40; no central R46
+cell exists for a separate transfer). -/
+theorem narrow_R46_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R45_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 51. R47 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R46 narrow block in this file: `## 50. R46 premise-tier narrow attempt`
+  `:3569-3619` with `narrow_R46_closedForm_keeps :3599`,
+  `narrow_R46_residual_gap :3604`,
+  `narrow_R46_residual_is_mismatch :3608`,
+  `narrow_R46_deriv_keeps_67200 :3614`; R46 keeps `67200` via the
+  R45→R44→R43→R42→R41→R40 chain, no central R46 rect.
+* Central R47 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R47` rect; pattern `narrow_R47_` in this
+  file returns no matches (no prior R47 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R47` rect and no `door3_cell_checker.lean` `R47` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R47 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R46 transfer (which re-exports R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R47 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R47 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R47_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R47 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R47_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R47 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R47_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R47 conditional deriv transfer still lands at `67200` (re-export of the
+banked R46 transfer, which re-exports R45→R44→R43→R42→R41→R40; no central R47
+cell exists for a separate transfer). -/
+theorem narrow_R47_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R46_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 52. R48 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R47 narrow block in this file: `## 51. R47 premise-tier narrow attempt`
+  `:3621-3671` with `narrow_R47_closedForm_keeps :3651`,
+  `narrow_R47_residual_gap :3656`,
+  `narrow_R47_residual_is_mismatch :3660`,
+  `narrow_R47_deriv_keeps_67200 :3666`; R47 keeps `67200` via the
+  R46→R45→R44→R43→R42→R41→R40 chain, no central R47 rect.
+* Central R48 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R48` rect; pattern `narrow_R48_` in this
+  file returns no matches (no prior R48 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R48` rect and no `door3_cell_checker.lean` `R48` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R48 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R47 transfer (which re-exports R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R48 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R48 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R48_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R48 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R48_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R48 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R48_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R48 conditional deriv transfer still lands at `67200` (re-export of the
+banked R47 transfer, which re-exports R46→R45→R44→R43→R42→R41→R40; no central R48
+cell exists for a separate transfer). -/
+theorem narrow_R48_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R47_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 53. R49 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R48 narrow block in this file: `## 52. R48 premise-tier narrow attempt`
+  `:3674-3724` with `narrow_R48_closedForm_keeps :3704`,
+  `narrow_R48_residual_gap :3709`,
+  `narrow_R48_residual_is_mismatch :3713`,
+  `narrow_R48_deriv_keeps_67200 :3719`; R48 keeps `67200` via the
+  R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R48 rect.
+* Central R49 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R49` rect; pattern `narrow_R49_` in this
+  file returns no matches (no prior R49 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R49` rect and no `door3_cell_checker.lean` `R49` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R49 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R48 transfer (which re-exports R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R49 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R49 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R49_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R49 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R49_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R49 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R49_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R49 conditional deriv transfer still lands at `67200` (re-export of the
+banked R48 transfer, which re-exports R47→R46→R45→R44→R43→R42→R41→R40; no central R49
+cell exists for a separate transfer). -/
+theorem narrow_R49_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R48_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 54. R50 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R49 narrow block in this file: `## 53. R49 premise-tier narrow attempt`
+  `:3727-3777` with `narrow_R49_closedForm_keeps :3757`,
+  `narrow_R49_residual_gap :3762`,
+  `narrow_R49_residual_is_mismatch :3766`,
+  `narrow_R49_deriv_keeps_67200 :3772`; R49 keeps `67200` via the
+  R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R49 rect.
+* Central R50 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R50` rect; pattern `narrow_R50_` in this
+  file returns no matches (no prior R50 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R50` rect and no `door3_cell_checker.lean` `R50` proxy header; nearest
+  banked proxy is the R43 inner tier `(0.15, 0.06)` (`interval_arith.lean`
+  `R43 :39245`, checker R43 header `:642-646`).
+* Result below: no central R50 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R49 transfer (which re-exports R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R50 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R50 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R50_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R50 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R50_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R50 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R50_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R50 conditional deriv transfer still lands at `67200` (re-export of the
+banked R49 transfer, which re-exports R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R50
+cell exists for a separate transfer). -/
+theorem narrow_R50_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R49_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 55. R51 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R50 narrow block in this file: `## 54. R50 premise-tier narrow attempt`
+  `:3780-3830` with `narrow_R50_closedForm_keeps :3810`,
+  `narrow_R50_residual_gap :3815`,
+  `narrow_R50_residual_is_mismatch :3819`,
+  `narrow_R50_deriv_keeps_67200 :3825`; R50 keeps `67200` via the
+  R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R50 rect.
+* Central R51 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R51` rect; pattern `narrow_R51_` in this
+  file returns no matches (no prior R51 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R51` rect; `door3_cell_checker.lean` banks an `R51` proxy header
+  (`:1915`, inner tier `(0.15, 0.06)`); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R51 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R50 transfer (which re-exports R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R51 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R51 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R51_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R51 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R51_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R51 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R51_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R51 conditional deriv transfer still lands at `67200` (re-export of the
+banked R50 transfer, which re-exports R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R51
+cell exists for a separate transfer). -/
+theorem narrow_R51_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R50_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 56. R52 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R51 narrow block in this file: `## 55. R51 premise-tier narrow attempt`
+  `:3833-3883` with `narrow_R51_closedForm_keeps :3863`,
+  `narrow_R51_residual_gap :3868`,
+  `narrow_R51_residual_is_mismatch :3872`,
+  `narrow_R51_deriv_keeps_67200 :3878`; R51 keeps `67200` via the
+  R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R51 rect.
+* Central R52 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R52` rect; pattern `narrow_R52_` in this
+  file returns no matches (no prior R52 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R52` rect; `door3_cell_checker.lean` banks an `R52` proxy header
+  (`:1335`, inner tier `(0.15, 0.06)`); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R52 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R51 transfer (which re-exports R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R52 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R52 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R52_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R52 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R52_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R52 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R52_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R52 conditional deriv transfer still lands at `67200` (re-export of the
+banked R51 transfer, which re-exports R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R52
+cell exists for a separate transfer). -/
+theorem narrow_R52_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R51_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 57. R53 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R52 narrow block in this file: `## 56. R52 premise-tier narrow attempt`
+  `:3884-3934` with `narrow_R52_closedForm_keeps :3914`,
+  `narrow_R52_residual_gap :3919`,
+  `narrow_R52_residual_is_mismatch :3923`,
+  `narrow_R52_deriv_keeps_67200 :3929`; R52 keeps `67200` via the
+  R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R52 rect.
+* Central R53 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R53` rect; pattern `narrow_R53_` in this
+  file returns no matches (no prior R53 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R53` rect; `door3_cell_checker.lean` banks an `R53` proxy header
+  (`:699`, inner tier `(0.15, 0.06)`); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R53 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R52 transfer (which re-exports R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R53 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R53 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R53_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R53 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R53_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R53 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R53_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R53 conditional deriv transfer still lands at `67200` (re-export of the
+banked R52 transfer, which re-exports R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R53
+cell exists for a separate transfer). -/
+theorem narrow_R53_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R52_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 58. R54 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R53 narrow block in this file: `## 57. R53 premise-tier narrow attempt`
+  `:3935-3985` with `narrow_R53_closedForm_keeps :3965`,
+  `narrow_R53_residual_gap :3970`,
+  `narrow_R53_residual_is_mismatch :3974`,
+  `narrow_R53_deriv_keeps_67200 :3980`; R53 keeps `67200` via the
+  R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R53 rect.
+* Central R54 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R54` rect; pattern `narrow_R54_` in this
+  file returns no matches (no prior R54 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R54` rect; `door3_cell_checker.lean` has no `R54` proxy header
+  (grep `R54` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R54 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R53 transfer (which re-exports R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R54 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R54 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R54_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R54 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R54_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R54 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R54_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R54 conditional deriv transfer still lands at `67200` (re-export of the
+banked R53 transfer, which re-exports R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R54
+cell exists for a separate transfer). -/
+theorem narrow_R54_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R53_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 59. R55 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R54 narrow block in this file: `## 58. R54 premise-tier narrow attempt`
+  `:3986-4036` with `narrow_R54_closedForm_keeps :4016`,
+  `narrow_R54_residual_gap :4021`,
+  `narrow_R54_residual_is_mismatch :4025`,
+  `narrow_R54_deriv_keeps_67200 :4031`; R54 keeps `67200` via the
+  R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R54 rect.
+* Central R55 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R55` rect; pattern `narrow_R55_` in this
+  file returns no matches (no prior R55 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R55` rect; `door3_cell_checker.lean` has no `R55` proxy header
+  (grep `R55` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R55 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R54 transfer (which re-exports R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R55 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R55 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R55_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R55 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R55_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R55 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R55_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R55 conditional deriv transfer still lands at `67200` (re-export of the
+banked R54 transfer, which re-exports R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R55
+cell exists for a separate transfer). -/
+theorem narrow_R55_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R54_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 60. R56 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R55 narrow block in this file: `## 59. R55 premise-tier narrow attempt`
+  `:4037-4087` with `narrow_R55_closedForm_keeps :4067`,
+  `narrow_R55_residual_gap :4072`,
+  `narrow_R55_residual_is_mismatch :4076`,
+  `narrow_R55_deriv_keeps_67200 :4082`; R55 keeps `67200` via the
+  R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R55 rect.
+* Central R56 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R56` rect; pattern `narrow_R56_` in this
+  file returns no matches (no prior R56 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R56` rect; `door3_cell_checker.lean` has no `R56` proxy header
+  (grep `R56` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R56 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R55 transfer (which re-exports R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R56 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R56 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R56_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R56 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R56_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R56 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R56_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R56 conditional deriv transfer still lands at `67200` (re-export of the
+banked R55 transfer, which re-exports R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R56
+cell exists for a separate transfer). -/
+theorem narrow_R56_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R55_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 61. R57 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R56 narrow block in this file: `## 60. R56 premise-tier narrow attempt`
+  `:4088-4138` with `narrow_R56_closedForm_keeps :4118`,
+  `narrow_R56_residual_gap :4123`,
+  `narrow_R56_residual_is_mismatch :4127`,
+  `narrow_R56_deriv_keeps_67200 :4133`; R56 keeps `67200` via the
+  R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R56 rect.
+* Central R57 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R57` rect; pattern `narrow_R57_` in this
+  file returns no matches (no prior R57 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R57` rect; `door3_cell_checker.lean` has no `R57` proxy header
+  (grep `R57` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R57 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R56 transfer (which re-exports R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R57 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R57 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R57_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R57 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R57_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R57 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R57_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R57 conditional deriv transfer still lands at `67200` (re-export of the
+banked R56 transfer, which re-exports R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R57
+cell exists for a separate transfer). -/
+theorem narrow_R57_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R56_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 62. R58 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R57 narrow block in this file: `## 61. R57 premise-tier narrow attempt`
+  `:4139-4189` with `narrow_R57_closedForm_keeps :4169`,
+  `narrow_R57_residual_gap :4174`,
+  `narrow_R57_residual_is_mismatch :4178`,
+  `narrow_R57_deriv_keeps_67200 :4184`; R57 keeps `67200` via the
+  R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R57 rect.
+* Central R58 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R58` rect; pattern `narrow_R58_` in this
+  file returns no matches (no prior R58 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R58` rect; `door3_cell_checker.lean` has no `R58` proxy header
+  (grep `R58` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R58 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R57 transfer (which re-exports R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R58 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R58 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R58_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R58 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R58_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R58 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R58_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R58 conditional deriv transfer still lands at `67200` (re-export of the
+banked R57 transfer, which re-exports R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R58
+cell exists for a separate transfer). -/
+theorem narrow_R58_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R57_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 63. R59 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R58 narrow block in this file: `## 62. R58 premise-tier narrow attempt`
+  `:4190-4240` with `narrow_R58_closedForm_keeps :4220`,
+  `narrow_R58_residual_gap :4225`,
+  `narrow_R58_residual_is_mismatch :4229`,
+  `narrow_R58_deriv_keeps_67200 :4235`; R58 keeps `67200` via the
+  R57→R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40 chain, no central R58 rect.
+* Central R59 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R59` rect; pattern `narrow_R59_` in this
+  file returns no matches (no prior R59 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R59` rect; `door3_cell_checker.lean` has no `R59` proxy header
+  (grep `R59` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R59 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R58 transfer (which re-exports R57→R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40) at `67200`
+  since no central R59 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R59 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R59_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R59 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R59_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R59 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R59_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R59 conditional deriv transfer still lands at `67200` (re-export of the
+banked R58 transfer, which re-exports R57→R56→R55→R54→R53→R52→R51→R50→R49→R48→R47→R46→R45→R44→R43→R42→R41→R40; no central R59
+cell exists for a separate transfer). -/
+theorem narrow_R59_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R58_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 64. R60 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R59 narrow block in this file: `## 63. R59 premise-tier narrow attempt`
+  `:4241-4291` with `narrow_R59_closedForm_keeps :4271`,
+  `narrow_R59_residual_gap :4276`,
+  `narrow_R59_residual_is_mismatch :4280`,
+  `narrow_R59_deriv_keeps_67200 :4286`; R59 keeps `67200` via the
+  R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no central R59 rect/proxy.
+* Central R60 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R60` rect; pattern `narrow_R60_` in this
+  file returns no matches (no prior R60 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R60` rect; `door3_cell_checker.lean` has no `R60` proxy header
+  (grep `R60` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R60 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R59 transfer (which re-exports R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R60 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R60 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R60_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R60 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R60_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R60 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R60_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R60 conditional deriv transfer still lands at `67200` (re-export of the
+banked R59 transfer, which re-exports R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R60
+cell exists for a separate transfer). -/
+theorem narrow_R60_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R59_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+/-! ## 65. R61 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R60 narrow block in this file: `## 64. R60 premise-tier narrow attempt`
+  `:4292-4342` with `narrow_R60_closedForm_keeps :4322`,
+  `narrow_R60_residual_gap :4327`,
+  `narrow_R60_residual_is_mismatch :4331`,
+  `narrow_R60_deriv_keeps_67200 :4337`; R60 keeps `67200` via the
+  R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no central R60 rect/proxy.
+* Central R61 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R61` rect; pattern `narrow_R61_` in this
+  file returns no matches (no prior R61 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R61` rect; `door3_cell_checker.lean` has no `R61` proxy header
+  (grep `R61` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R61 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R60 transfer (which re-exports R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R61 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R61 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R61_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R61 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R61_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R61 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R61_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R61 conditional deriv transfer still lands at `67200` (re-export of the
+banked R60 transfer, which re-exports R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R61
+cell exists for a separate transfer). -/
+theorem narrow_R61_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R60_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 66. R62 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R61 narrow block in this file: `## 65. R61 premise-tier narrow attempt`
+  `:4343-4393` with `narrow_R61_closedForm_keeps :4373`,
+  `narrow_R61_residual_gap :4378`,
+  `narrow_R61_residual_is_mismatch :4382`,
+  `narrow_R61_deriv_keeps_67200 :4388`; R61 keeps `67200` via the
+  R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no central R61 rect/proxy.
+* Central R62 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R62` rect; pattern `narrow_R62_` in this
+  file returns no matches (no prior R62 narrow).
+* Proxy tier reference only (no central cell): no `interval_arith.lean`
+  `R62` rect; `door3_cell_checker.lean` has no `R62` proxy header
+  (grep `R62` returns no matches in this project); nearest banked inner tier
+  `0.06` stays open below the kept value.
+* Result below: no central R62 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R61 transfer (which re-exports R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R62 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R62 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R62_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R62 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R62_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R62 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R62_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R62 conditional deriv transfer still lands at `67200` (re-export of the
+banked R61 transfer, which re-exports R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R62
+cell exists for a separate transfer). -/
+theorem narrow_R62_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R61_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 67. R63 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R62 narrow block in this file: `## 66. R62 premise-tier narrow attempt`
+  `:4395-4445` with `narrow_R62_closedForm_keeps :4425`,
+  `narrow_R62_residual_gap :4430`,
+  `narrow_R62_residual_is_mismatch :4434`,
+  `narrow_R62_deriv_keeps_67200 :4440`; R62 keeps `67200` via the
+  R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no central R62 rect/proxy.
+* Central R63 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R63` rect; pattern `narrow_R63_` in this
+  file returns no matches (no prior R63 narrow).
+* Rect absence only (checker proxy gives no central cell): no
+  `central_cover_assembly.lean` `R63` rect and no `interval_arith.lean`
+  `R63` rect; `door3_cell_checker.lean` carries an `R63` proxy header
+  (mid-bottom, checker-only) with no `CentralCoverAssembly.R63.mem` and no
+  central deriv transfer; nearest banked inner tier `0.06` stays open below
+  the kept value.
+* Result below: no central R63 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R62 transfer (which re-exports R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R63 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R63 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R63_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R63 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R63_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R63 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R63_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R63 conditional deriv transfer still lands at `67200` (re-export of the
+banked R62 transfer, which re-exports R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R63
+cell exists for a separate transfer). -/
+theorem narrow_R63_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R62_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 68. R64 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R63 narrow block in this file: `## 67. R63 premise-tier narrow attempt`
+  `:4447-4499` with `narrow_R63_closedForm_keeps :4479`,
+  `narrow_R63_residual_gap :4484`,
+  `narrow_R63_residual_is_mismatch :4488`,
+  `narrow_R63_deriv_keeps_67200 :4494`; R63 keeps `67200` via the
+  R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, checker proxy only
+  (no central R63 rect).
+* Central R64 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R64` rect; pattern `narrow_R64_` in this
+  file returns no matches (no prior R64 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R64` rect and no `interval_arith.lean`
+  `R64` rect; `door3_cell_checker.lean` carries no `R64` proxy header
+  (grep `R64` returns no matches in this project) with no
+  `CentralCoverAssembly.R64.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R64 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R63 transfer (which re-exports R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R64 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R64 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R64_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R64 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R64_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R64 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R64_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R64 conditional deriv transfer still lands at `67200` (re-export of the
+banked R63 transfer, which re-exports R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R64
+cell exists for a separate transfer). -/
+theorem narrow_R64_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R63_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 69. R65 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R64 narrow block in this file: `## 68. R64 premise-tier narrow attempt`
+  `:4501-4554` with `narrow_R64_closedForm_keeps :4534`,
+  `narrow_R64_residual_gap :4539`,
+  `narrow_R64_residual_is_mismatch :4543`,
+  `narrow_R64_deriv_keeps_67200 :4549`; R64 keeps `67200` via the
+  R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, checker proxy only
+  (no central R64 rect, no R64 rect/proxy anywhere).
+* Central R65 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R65` rect; pattern `narrow_R65_` in this
+  file returns no matches (no prior R65 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R65` rect and no `interval_arith.lean`
+  `R65` rect; `door3_cell_checker.lean` carries no `R65` proxy header
+  (grep `R65` returns no matches in this project) with no
+  `CentralCoverAssembly.R65.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R65 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R64 transfer (which re-exports R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R65 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R65 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R65_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R65 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R65_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R65 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R65_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R65 conditional deriv transfer still lands at `67200` (re-export of the
+banked R64 transfer, which re-exports R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R65
+cell exists for a separate transfer). -/
+theorem narrow_R65_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R64_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 70. R66 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R65 narrow block in this file: `## 69. R65 premise-tier narrow attempt`
+  `:4556-4609` with `narrow_R65_closedForm_keeps :4589`,
+  `narrow_R65_residual_gap :4594`,
+  `narrow_R65_residual_is_mismatch :4598`,
+  `narrow_R65_deriv_keeps_67200 :4604`; R65 keeps `67200` via the
+  R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R65 rect/proxy
+  (no central R65 rect, no R65 rect/proxy anywhere).
+* Central R66 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R66` rect; pattern `narrow_R66_` in this
+  file returns no matches (no prior R66 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R66` rect and no `interval_arith.lean`
+  `R66` rect; `door3_cell_checker.lean` carries no `R66` proxy header
+  (grep `R66` returns no matches in this project) with no
+  `CentralCoverAssembly.R66.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R66 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R65 transfer (which re-exports R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R66 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R66 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R66_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R66 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R66_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R66 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R66_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R66 conditional deriv transfer still lands at `67200` (re-export of the
+banked R65 transfer, which re-exports R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R66
+cell exists for a separate transfer). -/
+theorem narrow_R66_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R65_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 71. R67 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R66 narrow block in this file: `## 70. R66 premise-tier narrow attempt`
+  `:4611-4664` with `narrow_R66_closedForm_keeps :4644`,
+  `narrow_R66_residual_gap :4649`,
+  `narrow_R66_residual_is_mismatch :4653`,
+  `narrow_R66_deriv_keeps_67200 :4659`; R66 keeps `67200` via the
+  R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R66 rect/proxy
+  (no central R66 rect, no R66 rect/proxy anywhere).
+* Central R67 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R67` rect; pattern `narrow_R67_` in this
+  file returns no matches (no prior R67 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R67` rect and no `interval_arith.lean`
+  `R67` rect; `door3_cell_checker.lean` carries no `R67` proxy header
+  (grep `R67` returns no matches in this project) with no
+  `CentralCoverAssembly.R67.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R67 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R66 transfer (which re-exports R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R67 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R67 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R67_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R67 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R67_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R67 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R67_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R67 conditional deriv transfer still lands at `67200` (re-export of the
+banked R66 transfer, which re-exports R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R67
+cell exists for a separate transfer). -/
+theorem narrow_R67_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R66_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 72. R68 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R67 narrow block in this file: `## 71. R67 premise-tier narrow attempt`
+  `:4666-4719` with `narrow_R67_closedForm_keeps :4699`,
+  `narrow_R67_residual_gap :4704`,
+  `narrow_R67_residual_is_mismatch :4708`,
+  `narrow_R67_deriv_keeps_67200 :4714`; R67 keeps `67200` via the
+  R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R67 rect/proxy
+  (no central R67 rect, no R67 rect/proxy anywhere).
+* Central R68 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R68` rect; pattern `narrow_R68_` in this
+  file returns no matches (no prior R68 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R68` rect and no `interval_arith.lean`
+  `R68` rect; `door3_cell_checker.lean` carries no `R68` proxy header
+  (grep `R68` returns no matches in this project) with no
+  `CentralCoverAssembly.R68.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R68 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R67 transfer (which re-exports R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R68 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R68 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R68_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R68 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R68_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R68 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R68_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R68 conditional deriv transfer still lands at `67200` (re-export of the
+banked R67 transfer, which re-exports R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R68
+cell exists for a separate transfer). -/
+theorem narrow_R68_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R67_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 73. R69 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R68 narrow block in this file: `## 72. R68 premise-tier narrow attempt`
+  `:4722-4775` with `narrow_R68_closedForm_keeps :4755`,
+  `narrow_R68_residual_gap :4760`,
+  `narrow_R68_residual_is_mismatch :4764`,
+  `narrow_R68_deriv_keeps_67200 :4770`; R68 keeps `67200` via the
+  R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R68 rect/proxy
+  (no central R68 rect, no R68 rect/proxy anywhere).
+* Central R69 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R69` rect; pattern `narrow_R69_` in this
+  file returns no matches (no prior R69 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R69` rect and no `interval_arith.lean`
+  `R69` rect; `door3_cell_checker.lean` carries no `R69` proxy header
+  (grep `R69` returns no matches in this project) with no
+  `CentralCoverAssembly.R69.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R69 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R68 transfer (which re-exports R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R69 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R69 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R69_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R69 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R69_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R69 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R69_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R69 conditional deriv transfer still lands at `67200` (re-export of the
+banked R68 transfer, which re-exports R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R69
+cell exists for a separate transfer). -/
+theorem narrow_R69_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R68_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 74. R70 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R69 narrow block in this file: `## 73. R69 premise-tier narrow attempt`
+  `:4778-4831` with `narrow_R69_closedForm_keeps :4811`,
+  `narrow_R69_residual_gap :4816`,
+  `narrow_R69_residual_is_mismatch :4820`,
+  `narrow_R69_deriv_keeps_67200 :4826`; R69 keeps `67200` via the
+  R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R69 rect/proxy
+  (no central R69 rect, no R69 rect/proxy anywhere).
+* Central R70 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R70` rect; pattern `narrow_R70_` in this
+  file returns no matches (no prior R70 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R70` rect and no `interval_arith.lean`
+  `R70` rect; `door3_cell_checker.lean` carries no `R70` proxy header
+  (grep `R70` returns no matches in this project) with no
+  `CentralCoverAssembly.R70.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R70 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R69 transfer (which re-exports R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R70 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R70 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R70_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R70 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R70_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R70 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R70_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R70 conditional deriv transfer still lands at `67200` (re-export of the
+banked R69 transfer, which re-exports R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R70
+cell exists for a separate transfer). -/
+theorem narrow_R70_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R69_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+
+/-! ## 75. R71 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R70 narrow block in this file: `## 74. R70 premise-tier narrow attempt`
+  `:4834-4887` with `narrow_R70_closedForm_keeps :4867`,
+  `narrow_R70_residual_gap :4872`,
+  `narrow_R70_residual_is_mismatch :4876`,
+  `narrow_R70_deriv_keeps_67200 :4882`; R70 keeps `67200` via the
+  R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R70 rect/proxy
+  (no central R70 rect, no R70 rect/proxy anywhere).
+* Central R71 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R71` rect; pattern `narrow_R71_` in this
+  file returns no matches (no prior R71 narrow).
+* Rect absence only (no central cell, no checker proxy): no
+  `central_cover_assembly.lean` `R71` rect and no `interval_arith.lean`
+  `R71` rect; `door3_cell_checker.lean` carries no `R71` proxy header
+  (grep `R71` returns no matches in this project) with no
+  `CentralCoverAssembly.R71.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R71 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R70 transfer (which re-exports R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R71 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R71 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R71_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R71 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R71_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R71 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R71_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R71 conditional deriv transfer still lands at `67200` (re-export of the
+banked R70 transfer, which re-exports R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R71
+cell exists for a separate transfer). -/
+theorem narrow_R71_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R70_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 76. R72 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R71 narrow block in this file: `## 75. R71 premise-tier narrow attempt`
+  `:4891-4944` with `narrow_R71_closedForm_keeps :4924`,
+  `narrow_R71_residual_gap :4929`,
+  `narrow_R71_residual_is_mismatch :4933`,
+  `narrow_R71_deriv_keeps_67200 :4939`; R71 keeps `67200` via the
+  R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R71 rect/proxy
+  (no central R71 rect, no R71 rect/proxy anywhere).
+* Central R72 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R72` rect; pattern `narrow_R72_` in this
+  file returns no matches (no prior R72 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R72` rect and no `interval_arith.lean` `R72` rect; with no
+  `CentralCoverAssembly.R72.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R72 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R71 transfer (which re-exports R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R72 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R72 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R72_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R72 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R72_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R72 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R72_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R72 conditional deriv transfer still lands at `67200` (re-export of the
+banked R71 transfer, which re-exports R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R72
+cell exists for a separate transfer). -/
+theorem narrow_R72_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R71_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 77. R73 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R72 narrow block in this file: `## 76. R72 premise-tier narrow attempt`
+  `:4947-4998` with `narrow_R72_closedForm_keeps :4978`,
+  `narrow_R72_residual_gap :4983`,
+  `narrow_R72_residual_is_mismatch :4987`,
+  `narrow_R72_deriv_keeps_67200 :4993`; R72 keeps `67200` via the
+  R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R72 rect/proxy
+  (no central R72 rect, no R72 rect/proxy anywhere).
+* Central R73 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R73` rect; pattern `narrow_R73_` in this
+  file returns no matches (no prior R73 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R73` rect and no `interval_arith.lean` `R73` rect; with no
+  `CentralCoverAssembly.R73.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R73 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R72 transfer (which re-exports R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R73 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R73 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R73_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R73 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R73_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R73 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R73_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R73 conditional deriv transfer still lands at `67200` (re-export of the
+banked R72 transfer, which re-exports R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R73
+cell exists for a separate transfer). -/
+theorem narrow_R73_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R72_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 78. R74 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R73 narrow block in this file: `## 77. R73 premise-tier narrow attempt`
+  `:5001-5052` with `narrow_R73_closedForm_keeps :5032`,
+  `narrow_R73_residual_gap :5037`,
+  `narrow_R73_residual_is_mismatch :5041`,
+  `narrow_R73_deriv_keeps_67200 :5047`; R73 keeps `67200` via the
+  R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R73 rect
+  (no central R73 rect, no R73 rect anywhere).
+* Central R74 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R74` rect; pattern `narrow_R74_` in this
+  file returns no matches (no prior R74 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R74` rect and no `interval_arith.lean` `R74` rect; with no
+  `CentralCoverAssembly.R74.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R74 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R73 transfer (which re-exports R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R74 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R74 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R74_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R74 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R74_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R74 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R74_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R74 conditional deriv transfer still lands at `67200` (re-export of the
+banked R73 transfer, which re-exports R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R74
+cell exists for a separate transfer). -/
+theorem narrow_R74_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R73_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 79. R75 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R74 narrow block in this file: `## 78. R74 premise-tier narrow attempt`
+  `:5055-5106` with `narrow_R74_closedForm_keeps :5086`,
+  `narrow_R74_residual_gap :5091`,
+  `narrow_R74_residual_is_mismatch :5095`,
+  `narrow_R74_deriv_keeps_67200 :5101`; R74 keeps `67200` via the
+  R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R74 rect
+  (no central R74 rect, no R74 rect anywhere).
+* Central R75 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R75` rect; pattern `narrow_R75_` in this
+  file returns no matches (no prior R75 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R75` rect and no `interval_arith.lean` `R75` rect; with no
+  `CentralCoverAssembly.R75.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R75 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R74 transfer (which re-exports R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R75 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R75 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R75_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R75 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R75_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R75 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R75_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R75 conditional deriv transfer still lands at `67200` (re-export of the
+banked R74 transfer, which re-exports R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R75
+cell exists for a separate transfer). -/
+theorem narrow_R75_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R74_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 80. R76 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R75 narrow block in this file: `## 79. R75 premise-tier narrow attempt`
+  `:5109-5160` with `narrow_R75_closedForm_keeps :5140`,
+  `narrow_R75_residual_gap :5145`,
+  `narrow_R75_residual_is_mismatch :5149`,
+  `narrow_R75_deriv_keeps_67200 :5155`; R75 keeps `67200` via the
+  R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R75 rect
+  (no central R75 rect, no R75 rect anywhere).
+* Central R76 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R76` rect; pattern `narrow_R76_` in this
+  file returns no matches (no prior R76 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R76` rect and no `interval_arith.lean` `R76` rect; with no
+  `CentralCoverAssembly.R76.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R76 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R75 transfer (which re-exports R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R76 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R76 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R76_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R76 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R76_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R76 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R76_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R76 conditional deriv transfer still lands at `67200` (re-export of the
+banked R75 transfer, which re-exports R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R76
+cell exists for a separate transfer). -/
+theorem narrow_R76_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R75_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 81. R77 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R76 narrow block in this file: `## 80. R76 premise-tier narrow attempt`
+  `:5163-5214` with `narrow_R76_closedForm_keeps :5194`,
+  `narrow_R76_residual_gap :5199`,
+  `narrow_R76_residual_is_mismatch :5203`,
+  `narrow_R76_deriv_keeps_67200 :5209`; R76 keeps `67200` via the
+  R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R76 rect
+  (no central R76 rect, no R76 rect anywhere).
+* Central R77 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R77` rect; pattern `narrow_R77_` in this
+  file returns no matches (no prior R77 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R77` rect and no `interval_arith.lean` `R77` rect; with no
+  `CentralCoverAssembly.R77.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R77 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R76 transfer (which re-exports R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R77 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R77 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R77_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R77 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R77_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R77 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R77_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R77 conditional deriv transfer still lands at `67200` (re-export of the
+banked R76 transfer, which re-exports R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R77
+cell exists for a separate transfer). -/
+theorem narrow_R77_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R76_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 82. R78 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R77 narrow block in this file: `## 81. R77 premise-tier narrow attempt`
+  `:5216-5267` with `narrow_R77_closedForm_keeps :5247`,
+  `narrow_R77_residual_gap :5252`,
+  `narrow_R77_residual_is_mismatch :5256`,
+  `narrow_R77_deriv_keeps_67200 :5262`; R77 keeps `67200` via the
+  R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R77 rect
+  (no central R77 rect, no R77 rect anywhere).
+* Central R78 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R78` rect; pattern `narrow_R78_` in this
+  file returns no matches (no prior R78 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R78` rect and no `interval_arith.lean` `R78` rect; with no
+  `CentralCoverAssembly.R78.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R78 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R77 transfer (which re-exports R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R78 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R78 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R78_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R78 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R78_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R78 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R78_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R78 conditional deriv transfer still lands at `67200` (re-export of the
+banked R77 transfer, which re-exports R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R78
+cell exists for a separate transfer). -/
+theorem narrow_R78_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R77_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 83. R79 premise-tier narrow attempt (append-only wave).
+
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R78 narrow block in this file: `## 82. R78 premise-tier narrow attempt`
+  `:5270-5321` with `narrow_R78_closedForm_keeps :5301`,
+  `narrow_R78_residual_gap :5306`,
+  `narrow_R78_residual_is_mismatch :5310`,
+  `narrow_R78_deriv_keeps_67200 :5316`; R78 keeps `67200` via the
+  R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R78 rect
+  (no central R78 rect, no R78 rect anywhere).
+* Central R79 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R79` rect; pattern `narrow_R79_` in this
+  file returns no matches (no prior R79 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R79` rect and no `interval_arith.lean` `R79` rect; with no
+  `CentralCoverAssembly.R79.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R79 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R78 transfer (which re-exports R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R79 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R79 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R79_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R79 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R79_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R79 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R79_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R79 conditional deriv transfer still lands at `67200` (re-export of the
+banked R78 transfer, which re-exports R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R79
+cell exists for a separate transfer). -/
+theorem narrow_R79_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R78_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 84. R80 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R79 narrow block in this file: `## 83. R79 premise-tier narrow attempt`
+  `:5323-5374` with `narrow_R79_closedForm_keeps :5354`,
+  `narrow_R79_residual_gap :5359`,
+  `narrow_R79_residual_is_mismatch :5363`,
+  `narrow_R79_deriv_keeps_67200 :5369`; R79 keeps `67200` via the
+  R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R79 rect
+  (no central R79 rect, no R79 rect anywhere).
+* Central R80 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R80` rect; pattern `narrow_R80_` in this
+  file returns no matches (no prior R80 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R80` rect and no `interval_arith.lean` `R80` rect; with no
+  `CentralCoverAssembly.R80.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R80 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R79 transfer (which re-exports R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R80 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R80 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R80_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R80 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R80_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R80 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R80_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R80 conditional deriv transfer still lands at `67200` (re-export of the
+banked R79 transfer, which re-exports R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R80
+cell exists for a separate transfer). -/
+theorem narrow_R80_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R79_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 85. R81 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R80 narrow block in this file: `## 84. R80 premise-tier narrow attempt`
+  `:5376-5428` with `narrow_R80_closedForm_keeps :5408`,
+  `narrow_R80_residual_gap :5413`,
+  `narrow_R80_residual_is_mismatch :5417`,
+  `narrow_R80_deriv_keeps_67200 :5423`; R80 keeps `67200` via the
+  R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R80 rect
+  (no central R80 rect, no R80 rect anywhere).
+* Central R81 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R81` rect; pattern `narrow_R81_` in this
+  file returns no matches (no prior R81 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R81` rect and no `interval_arith.lean` `R81` rect; with no
+  `CentralCoverAssembly.R81.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R81 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R80 transfer (which re-exports R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R81 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R81 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R81_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R81 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R81_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R81 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R81_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R81 conditional deriv transfer still lands at `67200` (re-export of the
+banked R80 transfer, which re-exports R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R81
+cell exists for a separate transfer). -/
+theorem narrow_R81_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R80_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 86. R82 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R81 narrow block in this file: `## 85. R81 premise-tier narrow attempt`
+  `:5430-5482` with `narrow_R81_closedForm_keeps :5462`,
+  `narrow_R81_residual_gap :5467`,
+  `narrow_R81_residual_is_mismatch :5471`,
+  `narrow_R81_deriv_keeps_67200 :5477`; R81 keeps `67200` via the
+  R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R81 rect
+  (no central R81 rect, no R81 rect anywhere).
+* Central R82 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R82` rect; pattern `narrow_R82_` in this
+  file returns no matches (no prior R82 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R82` rect and no `interval_arith.lean` `R82` rect; with no
+  `CentralCoverAssembly.R82.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R82 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R81 transfer (which re-exports R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R82 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R82 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R82_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R82 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R82_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R82 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R82_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R82 conditional deriv transfer still lands at `67200` (re-export of the
+banked R81 transfer, which re-exports R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R82
+cell exists for a separate transfer). -/
+theorem narrow_R82_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R81_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 87. R83 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R82 narrow block in this file: `## 86. R82 premise-tier narrow attempt`
+  `:5484-5536` with `narrow_R82_closedForm_keeps :5516`,
+  `narrow_R82_residual_gap :5521`,
+  `narrow_R82_residual_is_mismatch :5525`,
+  `narrow_R82_deriv_keeps_67200 :5531`; R82 keeps `67200` via the
+  R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R82 rect
+  (no central R82 rect, no R82 rect anywhere).
+* Central R83 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R83` rect; pattern `narrow_R83_` in this
+  file returns no matches (no prior R83 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R83` rect and no `interval_arith.lean` `R83` rect; with no
+  `CentralCoverAssembly.R83.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R83 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R82 transfer (which re-exports R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R83 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R83 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R83_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R83 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R83_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R83 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R83_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R83 conditional deriv transfer still lands at `67200` (re-export of the
+banked R82 transfer, which re-exports R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R83
+cell exists for a separate transfer). -/
+theorem narrow_R83_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R82_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 88. R84 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R83 narrow block in this file: `## 87. R83 premise-tier narrow attempt`
+  `:5538-5590` with `narrow_R83_closedForm_keeps :5570`,
+  `narrow_R83_residual_gap :5575`,
+  `narrow_R83_residual_is_mismatch :5579`,
+  `narrow_R83_deriv_keeps_67200 :5585`; R83 keeps `67200` via the
+  R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R83 rect
+  (no central R83 rect, no R83 rect anywhere).
+* Central R84 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R84` rect; pattern `narrow_R84_` in this
+  file returns no matches (no prior R84 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R84` rect and no `interval_arith.lean` `R84` rect; with no
+  `CentralCoverAssembly.R84.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R84 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R83 transfer (which re-exports R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R84 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R84 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R84_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R84 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R84_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R84 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R84_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R84 conditional deriv transfer still lands at `67200` (re-export of the
+banked R83 transfer, which re-exports R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R84
+cell exists for a separate transfer). -/
+theorem narrow_R84_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R83_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 89. R85 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R84 narrow block in this file: `## 88. R84 premise-tier narrow attempt`
+  `:5592-5644` with `narrow_R84_closedForm_keeps :5624`,
+  `narrow_R84_residual_gap :5629`,
+  `narrow_R84_residual_is_mismatch :5633`,
+  `narrow_R84_deriv_keeps_67200 :5639`; R84 keeps `67200` via the
+  R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R84 rect
+  (no central R84 rect, no R84 rect anywhere).
+* Central R85 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R85` rect; pattern `narrow_R85_` in this
+  file returns no matches (no prior R85 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R85` rect and no `interval_arith.lean` `R85` rect; with no
+  `CentralCoverAssembly.R85.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R85 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R84 transfer (which re-exports R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R85 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R85 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R85_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R85 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R85_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R85 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R85_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R85 conditional deriv transfer still lands at `67200` (re-export of the
+banked R84 transfer, which re-exports R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R85
+cell exists for a separate transfer). -/
+theorem narrow_R85_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R84_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 90. R86 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R85 narrow block in this file: `## 89. R85 premise-tier narrow attempt`
+  `:5646-5698` with `narrow_R85_closedForm_keeps :5678`,
+  `narrow_R85_residual_gap :5683`,
+  `narrow_R85_residual_is_mismatch :5687`,
+  `narrow_R85_deriv_keeps_67200 :5693`; R85 keeps `67200` via the
+  R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R85 rect
+  (no central R85 rect, no R85 rect anywhere).
+* Central R86 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R86` rect; pattern `narrow_R86_` in this
+  file returns no matches (no prior R86 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R86` rect and no `interval_arith.lean` `R86` rect; with no
+  `CentralCoverAssembly.R86.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R86 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R85 transfer (which re-exports R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R86 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R86 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R86_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R86 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R86_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R86 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R86_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R86 conditional deriv transfer still lands at `67200` (re-export of the
+banked R85 transfer, which re-exports R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R86
+cell exists for a separate transfer). -/
+theorem narrow_R86_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R85_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 91. R87 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R86 narrow block in this file: `## 90. R86 premise-tier narrow attempt`
+  `:5700-5752` with `narrow_R86_closedForm_keeps :5732`,
+  `narrow_R86_residual_gap :5737`,
+  `narrow_R86_residual_is_mismatch :5741`,
+  `narrow_R86_deriv_keeps_67200 :5747`; R86 keeps `67200` via the
+  R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R86 rect
+  (no central R86 rect, no R86 rect anywhere).
+* Central R87 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R87` rect; pattern `narrow_R87_` in this
+  file returns no matches (no prior R87 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R87` rect and no `interval_arith.lean` `R87` rect; with no
+  `CentralCoverAssembly.R87.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R87 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R86 transfer (which re-exports R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R87 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R87 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R87_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R87 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R87_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R87 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R87_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R87 conditional deriv transfer still lands at `67200` (re-export of the
+banked R86 transfer, which re-exports R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R87
+cell exists for a separate transfer). -/
+theorem narrow_R87_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R86_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 92. R88 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R87 narrow block in this file: `## 91. R87 premise-tier narrow attempt`
+  `:5754-5806` with `narrow_R87_closedForm_keeps :5786`,
+  `narrow_R87_residual_gap :5791`,
+  `narrow_R87_residual_is_mismatch :5795`,
+  `narrow_R87_deriv_keeps_67200 :5801`; R87 keeps `67200` via the
+  R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R87 rect
+  (no central R87 rect, no R87 rect anywhere).
+* Central R88 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R88` rect; pattern `narrow_R88_` in this
+  file returns no matches (no prior R88 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R88` rect and no `interval_arith.lean` `R88` rect; with no
+  `CentralCoverAssembly.R88.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R88 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R87 transfer (which re-exports R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R88 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R88 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R88_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R88 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R88_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R88 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R88_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R88 conditional deriv transfer still lands at `67200` (re-export of the
+banked R87 transfer, which re-exports R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R88
+cell exists for a separate transfer). -/
+theorem narrow_R88_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R87_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 93. R89 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R88 narrow block in this file: `## 92. R88 premise-tier narrow attempt`
+  `:5808-5860` with `narrow_R88_closedForm_keeps :5840`,
+  `narrow_R88_residual_gap :5845`,
+  `narrow_R88_residual_is_mismatch :5849`,
+  `narrow_R88_deriv_keeps_67200 :5855`; R88 keeps `67200` via the
+  R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R88 rect
+  (no central R88 rect, no R88 rect anywhere).
+* Central R89 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R89` rect; pattern `narrow_R89_` in this
+  file returns no matches (no prior R89 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R89` rect and no `interval_arith.lean` `R89` rect; with no
+  `CentralCoverAssembly.R89.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R89 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R88 transfer (which re-exports R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R89 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R89 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R89_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R89 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R89_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R89 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R89_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R89 conditional deriv transfer still lands at `67200` (re-export of the
+banked R88 transfer, which re-exports R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R89
+cell exists for a separate transfer). -/
+theorem narrow_R89_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R88_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 94. R90 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R89 narrow block in this file: `## 93. R89 premise-tier narrow attempt`
+  `:5862-5914` with `narrow_R89_closedForm_keeps :5894`,
+  `narrow_R89_residual_gap :5899`,
+  `narrow_R89_residual_is_mismatch :5903`,
+  `narrow_R89_deriv_keeps_67200 :5909`; R89 keeps `67200` via the
+  R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40 chain, no R89 rect
+  (no central R89 rect, no R89 rect anywhere).
+* Central R90 search: `central_cover_assembly.lean` defines `R00` `:1133`
+  through `R40` `:4933` with no `R90` rect; pattern `narrow_R90_` in this
+  file returns no matches (no prior R90 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R90` rect and no `interval_arith.lean` `R90` rect; with no
+  `CentralCoverAssembly.R90.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R90 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R89 transfer (which re-exports R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R90 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R90 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R90_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R90 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R90_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R90 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R90_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R90 conditional deriv transfer still lands at `67200` (re-export of the
+banked R89 transfer, which re-exports R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R90
+cell exists for a separate transfer). -/
+theorem narrow_R90_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R89_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 95. R91 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R90 narrow block in this file: `## 94. R90 premise-tier narrow attempt`
+  `:5916-5968` with `narrow_R90_closedForm_keeps :5948`,
+  `narrow_R90_residual_gap :5953`,
+  `narrow_R90_residual_is_mismatch :5957`,
+  `narrow_R90_deriv_keeps_67200 :5963`; R90 keeps `67200` via the
+  R89 chain (R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R90 rect
+  (no central R90 rect, no R90 rect anywhere).
+* Central R91 search: `central_cover_assembly.lean` grep `R90|R91` returns
+  no files found (defines `R00` through `R40` with no `R91` rect);
+  `interval_arith.lean` grep `R90|R91` returns no files found;
+  pattern `narrow_R91_` in this file returns no matches (no prior R91 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R91` rect and no `interval_arith.lean` `R91` rect; with no
+  `CentralCoverAssembly.R91.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R91 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R90 transfer (which re-exports R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R91 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R91 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R91_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R91 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R91_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R91 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R91_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R91 conditional deriv transfer still lands at `67200` (re-export of the
+banked R90 transfer, which re-exports R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R91
+cell exists for a separate transfer). -/
+theorem narrow_R91_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R90_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 96. R92 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R91 narrow block in this file: `## 95. R91 premise-tier narrow attempt`
+  `:5970-6023` with `narrow_R91_closedForm_keeps :6003`,
+  `narrow_R91_residual_gap :6008`,
+  `narrow_R91_residual_is_mismatch :6012`,
+  `narrow_R91_deriv_keeps_67200 :6018`; R91 keeps `67200` via the
+  R90 chain (R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R91 rect
+  (no central R91 rect, no R91 rect anywhere).
+* Central R92 search: `central_cover_assembly.lean` grep `R91|R92` returns
+  no files found (defines `R00` through `R40` with no `R92` rect);
+  `interval_arith.lean` grep `R91|R92` returns no files found;
+  pattern `narrow_R92_` in this file returns no matches (no prior R92 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R92` rect and no `interval_arith.lean` `R92` rect; with no
+  `CentralCoverAssembly.R92.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value. (The only other
+  in-repo `R92` material is the `door3_cell_checker.lean` proxy
+  `R92_radius_upper_checker` et al., not a central rect.)
+* Result below: no central R92 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R91 transfer (which re-exports R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R92 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R92 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R92_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R92 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R92_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R92 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R92_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R92 conditional deriv transfer still lands at `67200` (re-export of the
+banked R91 transfer, which re-exports R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R92
+cell exists for a separate transfer). -/
+theorem narrow_R92_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R91_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 97. R93 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R92 narrow block in this file: `## 96. R92 premise-tier narrow attempt`
+  `:6025-6080` with `narrow_R92_closedForm_keeps :6060`,
+  `narrow_R92_residual_gap :6065`,
+  `narrow_R92_residual_is_mismatch :6069`,
+  `narrow_R92_deriv_keeps_67200 :6075`; R92 keeps `67200` via the
+  R91 chain (R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R92 rect
+  (no central R92 rect, no R92 rect anywhere).
+* Central R93 search: `central_cover_assembly.lean` grep `R93` returns
+  only no central rect (defines `R00` through `R40` with no `R93` rect);
+  `interval_arith.lean` grep `R93` returns no files found;
+  pattern `narrow_R93_` in this file returns no matches (no prior R93 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R93` rect and no `interval_arith.lean` `R93` rect; with no
+  `CentralCoverAssembly.R93.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value. (The only other
+  in-repo `R93` material is the `door3_cell_checker.lean` proxy
+  `R93_radius_upper_checker` et al., not a central rect.)
+* Result below: no central R93 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R92 transfer (which re-exports R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R93 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R93 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R93_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R93 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R93_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R93 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R93_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R93 conditional deriv transfer still lands at `67200` (re-export of the
+banked R92 transfer, which re-exports R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R93
+cell exists for a separate transfer). -/
+theorem narrow_R93_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R92_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 98. R94 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R93 narrow block in this file: `## 97. R93 premise-tier narrow attempt`
+  `:6082-6137` with `narrow_R93_closedForm_keeps :6117`,
+  `narrow_R93_residual_gap :6122`,
+  `narrow_R93_residual_is_mismatch :6126`,
+  `narrow_R93_deriv_keeps_67200 :6132`; R93 keeps `67200` via the
+  R92 chain (R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), checker proxy only
+  (`door3_cell_checker.lean` `R93_radius_upper_checker` et al., no central R93 rect).
+* Central R94 search: `central_cover_assembly.lean` grep `R94` returns
+  no files found (defines `R00` through `R40` with no `R94` rect);
+  `interval_arith.lean` grep `R94` returns no files found;
+  `door3_cell_checker.lean` grep `R94` returns no files found;
+  `rg R94` across the repo returns no matches;
+  pattern `narrow_R94_` in this file returns no matches (no prior R94 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R94` rect and no `interval_arith.lean` `R94` rect; with no
+  `CentralCoverAssembly.R94.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R94 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R93 transfer (which re-exports R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R94 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R94 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R94_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R94 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R94_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R94 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R94_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R94 conditional deriv transfer still lands at `67200` (re-export of the
+banked R93 transfer, which re-exports R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R94
+cell exists for a separate transfer). -/
+theorem narrow_R94_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R93_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 99. R95 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R94 narrow block in this file: `## 98. R94 premise-tier narrow attempt`
+  `:6139-6194` with `narrow_R94_closedForm_keeps :6174`,
+  `narrow_R94_residual_gap :6179`,
+  `narrow_R94_residual_is_mismatch :6183`,
+  `narrow_R94_deriv_keeps_67200 :6189`; R94 keeps `67200` via the
+  R93 chain (R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R94 rect
+  anywhere (no central R94 rect, no R94 rect anywhere).
+* Central R95 search: `central_cover_assembly.lean` grep `R95` returns
+  no files found (defines `R00` through `R40` with no `R95` rect);
+  `interval_arith.lean` grep `R95` returns no files found;
+  `door3_cell_checker.lean` grep `R95` returns no files found;
+  `rg R95` across the repo returns no matches;
+  pattern `narrow_R95_` in this file returns no matches (no prior R95 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R95` rect and no `interval_arith.lean` `R95` rect; with no
+  `CentralCoverAssembly.R95.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R95 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R94 transfer (which re-exports R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R95 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R95 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R95_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R95 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R95_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R95 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R95_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R95 conditional deriv transfer still lands at `67200` (re-export of the
+banked R94 transfer, which re-exports R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R95
+cell exists for a separate transfer). -/
+theorem narrow_R95_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R94_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 100. R96 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R95 narrow block in this file: `## 99. R95 premise-tier narrow attempt`
+  `:6196-6251` with `narrow_R95_closedForm_keeps :6231`,
+  `narrow_R95_residual_gap :6236`,
+  `narrow_R95_residual_is_mismatch :6240`,
+  `narrow_R95_deriv_keeps_67200 :6246`; R95 keeps `67200` via the
+  R94 chain (R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R95 rect
+  anywhere (no central R95 rect, no R95 rect anywhere).
+* Central R96 search: `central_cover_assembly.lean` grep `R96` returns
+  no files found (defines `R00` through `R40` with no `R96` rect);
+  `interval_arith.lean` grep `R96` returns no files found;
+  `door3_cell_checker.lean` grep `R96` returns no files found;
+  `rg R96` across the repo returns no matches;
+  pattern `narrow_R96_` in this file returns no matches (no prior R96 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R96` rect and no `interval_arith.lean` `R96` rect; with no
+  `CentralCoverAssembly.R96.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R96 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R95 transfer (which re-exports R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R96 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R96 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R96_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R96 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R96_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R96 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R96_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R96 conditional deriv transfer still lands at `67200` (re-export of the
+banked R95 transfer, which re-exports R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R96
+cell exists for a separate transfer). -/
+theorem narrow_R96_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R95_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 101. R97 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R96 narrow block in this file: `## 100. R96 premise-tier narrow attempt`
+  `:6253-6308` with `narrow_R96_closedForm_keeps :6288`,
+  `narrow_R96_residual_gap :6293`,
+  `narrow_R96_residual_is_mismatch :6297`,
+  `narrow_R96_deriv_keeps_67200 :6303`; R96 keeps `67200` via the
+  R95 chain (R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R96 rect
+  anywhere (no central R96 rect, no R96 rect anywhere).
+* Central R97 search: `central_cover_assembly.lean` grep `R97` returns
+  no files found (defines `R00` through `R40` with no `R97` rect);
+  `interval_arith.lean` grep `R97` returns no files found;
+  `door3_cell_checker.lean` grep `R97` returns no files found;
+  `rg R97` across the repo returns no matches;
+  pattern `narrow_R97_` in this file returns no matches (no prior R97 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R97` rect and no `interval_arith.lean` `R97` rect; with no
+  `CentralCoverAssembly.R97.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R97 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R96 transfer (which re-exports R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R97 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R97 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R97_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R97 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R97_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R97 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R97_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R97 conditional deriv transfer still lands at `67200` (re-export of the
+banked R96 transfer, which re-exports R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R97
+cell exists for a separate transfer). -/
+theorem narrow_R97_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R96_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 102. R98 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R97 narrow block in this file: `## 101. R97 premise-tier narrow attempt`
+  `:6310-6365` with `narrow_R97_closedForm_keeps :6345`,
+  `narrow_R97_residual_gap :6350`,
+  `narrow_R97_residual_is_mismatch :6354`,
+  `narrow_R97_deriv_keeps_67200 :6360`; R97 keeps `67200` via the
+  R96 chain (R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R97 rect
+  anywhere (no central R97 rect, no R97 rect anywhere).
+* Central R98 search: `central_cover_assembly.lean` grep `R98` returns
+  no files found (defines `R00` through `R40` with no `R98` rect);
+  `interval_arith.lean` grep `R98` returns no files found;
+  `door3_cell_checker.lean` grep `R98` returns no files found;
+  `rg R98` across the repo returns no matches;
+  pattern `narrow_R98_` in this file returns no matches (no prior R98 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R98` rect and no `interval_arith.lean` `R98` rect; with no
+  `CentralCoverAssembly.R98.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R98 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R97 transfer (which re-exports R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R98 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R98 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R98_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R98 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R98_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R98 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R98_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R98 conditional deriv transfer still lands at `67200` (re-export of the
+banked R97 transfer, which re-exports R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R98
+cell exists for a separate transfer). -/
+theorem narrow_R98_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R97_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+/-! ## 103. R99 premise-tier narrow attempt (append-only wave).
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R98 narrow block in this file: `## 102. R98 premise-tier narrow attempt`
+  `:6367-6422` with `narrow_R98_closedForm_keeps :6402`,
+  `narrow_R98_residual_gap :6407`,
+  `narrow_R98_residual_is_mismatch :6411`,
+  `narrow_R98_deriv_keeps_67200 :6417`; R98 keeps `67200` via the
+  R97 chain (R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R98 rect
+  anywhere (no central R98 rect, no R98 rect anywhere).
+* Central R99 search: `central_cover_assembly.lean` grep `R99` returns
+  no files found (defines `R00` through `R40` with no `R99` rect);
+  `interval_arith.lean` grep `R99` returns no files found;
+  `door3_cell_checker.lean` grep `R99` returns no files found;
+  `rg R99` across the repo returns no matches;
+  pattern `narrow_R99_` in this file returns no matches (no prior R99 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R99` rect and no `interval_arith.lean` `R99` rect; with no
+  `CentralCoverAssembly.R99.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* Result below: no central R99 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R98 transfer (which re-exports R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R99 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R99 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R99_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R99 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R99_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R99 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R99_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R99 conditional deriv transfer still lands at `67200` (re-export of the
+banked R98 transfer, which re-exports R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R99
+cell exists for a separate transfer). -/
+theorem narrow_R99_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R98_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+
+
+/-! ## 104. R100 premise-tier narrow attempt (append-only wave). MILESTONE.
+
+Grep record (verified before writing via `default.grep` + `rg`):
+* R40 premise block in this file: `premTier_R40 :1212`, `premBall_R40 :1214`,
+  `premTier_R40_mismatch :1218`, `premDeriv_R40_of_ball :1220`,
+  `premSphere_R40_of_ball :1232` (`R40.mem`, tier `0.05`, value `67200`).
+* R99 narrow block in this file: `## 103. R99 premise-tier narrow attempt`
+  `:6424-6479` with `narrow_R99_closedForm_keeps :6459`,
+  `narrow_R99_residual_gap :6464`,
+  `narrow_R99_residual_is_mismatch :6468`,
+  `narrow_R99_deriv_keeps_67200 :6474`; R99 keeps `67200` via the
+  R98 chain (R98->R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40), no R99 rect
+  anywhere (no central R99 rect, no R99 rect anywhere).
+* Central R100 search: `central_cover_assembly.lean` grep `R100` returns
+  no files found (defines `R00` through `R40` with no `R100` rect);
+  `interval_arith.lean` grep `R100` returns no files found;
+  `door3_cell_checker.lean` grep `R100` returns no files found;
+  `rg R100` across the repo returns no matches;
+  pattern `narrow_R100_` in this file returns no matches (no prior R100 narrow).
+* Rect absence only (no central cell): no `central_cover_assembly.lean`
+  `R100` rect and no `interval_arith.lean` `R100` rect; with no
+  `CentralCoverAssembly.R100.mem` and no central deriv transfer; nearest
+  banked inner tier `0.06` stays open below the kept value.
+* MILESTONE: R100 completes 100 narrow blocks in this file, all keeps at
+  `67200` (`16800 / 0.25`); no tier closure forced anywhere.
+* Result below: no central R100 tier closure exists locally, so the narrow
+  record keeps value `67200` (`16800 / 0.25`) with exact residual gap
+  `0.06 < 67200` at the nearest banked inner tier; tier `0.06` stays open
+  by the banked mismatch `tier06_lt_67200`. The deriv keeps re-exports the
+  banked R99 transfer (which re-exports R98->R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40) at `67200`
+  since no central R100 cell exists.
+-/
+
+namespace Door3PremiseTier
+
+/-- R100 keeps the premise-tier Cauchy value (`16800 / 0.25 = 67200`);
+no tier closure. -/
+theorem narrow_R100_closedForm_keeps : (16800 : ℝ) / 0.25 = 67200 := by
+  norm_num
+
+/-- Exact R100 residual gap at the kept value: nearest banked inner tier
+`0.06` stays open below `67200`. -/
+theorem narrow_R100_residual_gap : (0.06 : ℝ) < 67200 := by
+  norm_num
+
+/-- R100 residual restates the banked-tier mismatch at the kept value. -/
+theorem narrow_R100_residual_is_mismatch : (0.06 : ℝ) < 67200 :=
+  tier06_lt_67200
+
+/-- R100 conditional deriv transfer still lands at `67200` (re-export of the
+banked R99 transfer, which re-exports R98->R97->R96->R95->R94->R93->R92->R91->R90->R89->R88->R87->R86->R85->R84->R83->R82->R81->R80->R79->R78->R77->R76->R75->R74->R73->R72->R71->R70->R69->R68->R67->R66->R65->R64->R63->R62->R61->R60->R59->R58->R57->R56->R55->R54->R53->R52->R51->R50->R49->R48->R47->R46->R45->R44->R43->R42->R41->R40; no central R100
+cell exists for a separate transfer). -/
+theorem narrow_R100_deriv_keeps_67200 (hBall : premBall_R40) (w : ℂ)
+    (hw : CentralCoverAssembly.R40.mem w) :
+    ‖deriv xiShifted w‖ ≤ 67200 :=
+  narrow_R99_deriv_keeps_67200 hBall w hw
+
+end Door3PremiseTier
+

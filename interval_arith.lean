@@ -38967,3 +38967,3320 @@ theorem R40_banked_infeasible :
 #print axioms R40CenterAssembly.R40_banked_infeasible
 
 end R40CenterAssembly
+
+namespace R41CenterAssembly
+
+/-- R41 rect `x ∈ [-2, 0.5]`, `y ∈ [0.2, 0.4]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.1`, cap `1.26`). Local def mirroring the R40 route. -/
+noncomputable def R41 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, 0.2, 0.4, by norm_num, by norm_num⟩
+
+theorem R41_x0 : R41.x0 = (-2 : ℝ) := rfl
+
+theorem R41_x1 : R41.x1 = (0.5 : ℝ) := rfl
+
+theorem R41_y0 : R41.y0 = (0.2 : ℝ) := rfl
+
+theorem R41_y1 : R41.y1 = (0.4 : ℝ) := rfl
+
+/-- The R41 `s`-plane center: `s = 1/2 + I·z` at `z = R41.center`. -/
+noncomputable def sR41 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R41.center
+
+/-- `R41.center = -0.75 + 0.3·I` (from `R41_x0/x1/y0/y1`). -/
+theorem R41_center_eq :
+    R41.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.3 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R41_x0, R41_x1, R41_y0, R41_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R41_x0, R41_x1, R41_y0, R41_y1]
+    simp
+    norm_num
+
+/-- `Re sR41 = 0.2`. -/
+theorem sR41_re : sR41.re = 0.2 := by
+  unfold sR41
+  rw [R41_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR41 = -0.75`. -/
+theorem sR41_im : sR41.im = -0.75 := by
+  unfold sR41
+  rw [R41_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R41 s-center. -/
+theorem polyPart_norm_R41 :
+    ‖R00Enclosure.polyPart sR41‖ =
+      (1 / 2) * ‖sR41‖ * ‖sR41 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR41‖ ≥ 0.77` (`0.77^2 = 0.5929 < 0.2^2 + 0.75^2 = 0.6025`). -/
+theorem norm_sR41_ge : (0.77 : ℝ) ≤ ‖sR41‖ := by
+  have hsq : (0.77 : ℝ) ^ 2 ≤ ‖sR41‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR41_re, sR41_im]
+    norm_num
+  calc (0.77 : ℝ) = Real.sqrt ((0.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR41‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR41‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR41 - 1‖ ≥ 1.09` (`0.8^2 + 0.75^2 = 1.2025 > 1.09^2 = 1.1881`). -/
+theorem norm_sR41_sub_one_ge : (1.09 : ℝ) ≤ ‖sR41 - 1‖ := by
+  have hr1 : (sR41 - 1).re = -0.8 := by
+    simp only [Complex.sub_re, Complex.one_re, sR41_re]
+    norm_num
+  have hi1 : (sR41 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR41_im]
+    norm_num
+  have hsq : (1.09 : ℝ) ^ 2 ≤ ‖sR41 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.09 : ℝ) = Real.sqrt ((1.09 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR41 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR41 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.41 ≤ ‖polyPart sR41‖`
+(`0.77 * 1.09 / 2 = 0.41965 ≥ 0.41`; true `≈ 0.42`, slack `≈ 0.01`). -/
+theorem poly_lower_R41 : (0.41 : ℝ) ≤ ‖R00Enclosure.polyPart sR41‖ := by
+  have hprod : (0.77 : ℝ) * 1.09 ≤ ‖sR41‖ * ‖sR41 - 1‖ :=
+    mul_le_mul norm_sR41_ge norm_sR41_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R41]
+  nlinarith [hprod]
+
+/-- Conditional R41 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.41` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.205`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R41_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R41.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR41‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR41‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.41 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R41.radius ≤
+      ‖xiShifted R41.center‖ := by
+  have hpoly := poly_lower_R41
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR41‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR41_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR41
+      = (1 / 2 : ℂ) + Complex.I * R41.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R41 0.15 0.06 (by norm_num) hrad
+    0.41 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R41 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R41_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.41 * (1/2) = 0.205`. -/
+theorem R41_base_eq : (0.41 : ℝ) * (1 / 2) = 0.205 := by norm_num
+
+/-- Exact residual: banked floors `0.205 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.205 ≈ 1.1005`; banked `≈ 3.85e-09`;
+short by factor `≈ 286000000`, the ~8-order wall). -/
+theorem R41_banked_infeasible :
+    (0.41 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R41CenterAssembly.poly_lower_R41
+#print axioms R41CenterAssembly.R41_center_with_poly_pi_gamma
+#print axioms R41CenterAssembly.R41_threshold_eq
+#print axioms R41CenterAssembly.R41_banked_infeasible
+
+end R41CenterAssembly
+
+namespace R42CenterAssembly
+
+/-- R42 rect `x ∈ [-2, 0.5]`, `y ∈ [0.1, 0.3]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.1`, cap `1.26`). Local def mirroring the R41 route. -/
+noncomputable def R42 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, 0.1, 0.3, by norm_num, by norm_num⟩
+
+theorem R42_x0 : R42.x0 = (-2 : ℝ) := rfl
+
+theorem R42_x1 : R42.x1 = (0.5 : ℝ) := rfl
+
+theorem R42_y0 : R42.y0 = (0.1 : ℝ) := rfl
+
+theorem R42_y1 : R42.y1 = (0.3 : ℝ) := rfl
+
+/-- The R42 `s`-plane center: `s = 1/2 + I·z` at `z = R42.center`. -/
+noncomputable def sR42 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R42.center
+
+/-- `R42.center = -0.75 + 0.2·I` (from `R42_x0/x1/y0/y1`). -/
+theorem R42_center_eq :
+    R42.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.2 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R42_x0, R42_x1, R42_y0, R42_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R42_x0, R42_x1, R42_y0, R42_y1]
+    simp
+    norm_num
+
+/-- `Re sR42 = 0.3`. -/
+theorem sR42_re : sR42.re = 0.3 := by
+  unfold sR42
+  rw [R42_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR42 = -0.75`. -/
+theorem sR42_im : sR42.im = -0.75 := by
+  unfold sR42
+  rw [R42_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R42 s-center. -/
+theorem polyPart_norm_R42 :
+    ‖R00Enclosure.polyPart sR42‖ =
+      (1 / 2) * ‖sR42‖ * ‖sR42 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR42‖ ≥ 0.80` (`0.80^2 = 0.64 < 0.3^2 + 0.75^2 = 0.6525`). -/
+theorem norm_sR42_ge : (0.80 : ℝ) ≤ ‖sR42‖ := by
+  have hsq : (0.80 : ℝ) ^ 2 ≤ ‖sR42‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR42_re, sR42_im]
+    norm_num
+  calc (0.80 : ℝ) = Real.sqrt ((0.80 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR42‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR42‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR42 - 1‖ ≥ 1.02` (`0.7^2 + 0.75^2 = 1.0525 > 1.02^2 = 1.0404`). -/
+theorem norm_sR42_sub_one_ge : (1.02 : ℝ) ≤ ‖sR42 - 1‖ := by
+  have hr1 : (sR42 - 1).re = -0.7 := by
+    simp only [Complex.sub_re, Complex.one_re, sR42_re]
+    norm_num
+  have hi1 : (sR42 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR42_im]
+    norm_num
+  have hsq : (1.02 : ℝ) ^ 2 ≤ ‖sR42 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.02 : ℝ) = Real.sqrt ((1.02 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR42 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR42 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR42‖`
+(`0.80 * 1.02 / 2 = 0.408 ≥ 0.40`; true `≈ 0.414`, slack `≈ 0.014`). -/
+theorem poly_lower_R42 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR42‖ := by
+  have hprod : (0.80 : ℝ) * 1.02 ≤ ‖sR42‖ * ‖sR42 - 1‖ :=
+    mul_le_mul norm_sR42_ge norm_sR42_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R42]
+  nlinarith [hprod]
+
+/-- Conditional R42 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R42_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R42.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR42‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR42‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R42.radius ≤
+      ‖xiShifted R42.center‖ := by
+  have hpoly := poly_lower_R42
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR42‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR42_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR42
+      = (1 / 2 : ℂ) + Complex.I * R42.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R42 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R42 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R42_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R42_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R42_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R42CenterAssembly.poly_lower_R42
+#print axioms R42CenterAssembly.R42_center_with_poly_pi_gamma
+#print axioms R42CenterAssembly.R42_threshold_eq
+#print axioms R42CenterAssembly.R42_banked_infeasible
+
+end R42CenterAssembly
+
+namespace R43CenterAssembly
+
+/-- R43 rect `x ∈ [-2, 0.5]`, `y ∈ [0.01, 0.2]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R42 route. -/
+noncomputable def R43 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, 0.01, 0.2, by norm_num, by norm_num⟩
+
+theorem R43_x0 : R43.x0 = (-2 : ℝ) := rfl
+
+theorem R43_x1 : R43.x1 = (0.5 : ℝ) := rfl
+
+theorem R43_y0 : R43.y0 = (0.01 : ℝ) := rfl
+
+theorem R43_y1 : R43.y1 = (0.2 : ℝ) := rfl
+
+/-- The R43 `s`-plane center: `s = 1/2 + I·z` at `z = R43.center`. -/
+noncomputable def sR43 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R43.center
+
+/-- `R43.center = -0.75 + 0.105·I` (from `R43_x0/x1/y0/y1`). -/
+theorem R43_center_eq :
+    R43.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.105 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R43_x0, R43_x1, R43_y0, R43_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R43_x0, R43_x1, R43_y0, R43_y1]
+    simp
+    norm_num
+
+/-- `Re sR43 = 0.395`. -/
+theorem sR43_re : sR43.re = 0.395 := by
+  unfold sR43
+  rw [R43_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR43 = -0.75`. -/
+theorem sR43_im : sR43.im = -0.75 := by
+  unfold sR43
+  rw [R43_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R43 s-center. -/
+theorem polyPart_norm_R43 :
+    ‖R00Enclosure.polyPart sR43‖ =
+      (1 / 2) * ‖sR43‖ * ‖sR43 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR43‖ ≥ 0.84` (`0.84^2 = 0.7056 < 0.395^2 + 0.75^2 = 0.718525`). -/
+theorem norm_sR43_ge : (0.84 : ℝ) ≤ ‖sR43‖ := by
+  have hsq : (0.84 : ℝ) ^ 2 ≤ ‖sR43‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR43_re, sR43_im]
+    norm_num
+  calc (0.84 : ℝ) = Real.sqrt ((0.84 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR43‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR43‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR43 - 1‖ ≥ 0.96` (`0.605^2 + 0.75^2 = 0.928525 > 0.96^2 = 0.9216`). -/
+theorem norm_sR43_sub_one_ge : (0.96 : ℝ) ≤ ‖sR43 - 1‖ := by
+  have hr1 : (sR43 - 1).re = -0.605 := by
+    simp only [Complex.sub_re, Complex.one_re, sR43_re]
+    norm_num
+  have hi1 : (sR43 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR43_im]
+    norm_num
+  have hsq : (0.96 : ℝ) ^ 2 ≤ ‖sR43 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.96 : ℝ) = Real.sqrt ((0.96 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR43 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR43 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR43‖`
+(`0.84 * 0.96 / 2 = 0.4032 ≥ 0.40`; true `≈ 0.408`, slack `≈ 0.008`). -/
+theorem poly_lower_R43 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR43‖ := by
+  have hprod : (0.84 : ℝ) * 0.96 ≤ ‖sR43‖ * ‖sR43 - 1‖ :=
+    mul_le_mul norm_sR43_ge norm_sR43_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R43]
+  nlinarith [hprod]
+
+/-- Conditional R43 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R43_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R43.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR43‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR43‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R43.radius ≤
+      ‖xiShifted R43.center‖ := by
+  have hpoly := poly_lower_R43
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR43‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR43_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR43
+      = (1 / 2 : ℂ) + Complex.I * R43.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R43 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R43 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R43_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R43_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R43_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R43CenterAssembly.poly_lower_R43
+#print axioms R43CenterAssembly.R43_center_with_poly_pi_gamma
+#print axioms R43CenterAssembly.R43_threshold_eq
+#print axioms R43CenterAssembly.R43_banked_infeasible
+
+end R43CenterAssembly
+
+namespace R44CenterAssembly
+
+/-- R44 rect `x in [-2, 0.5]`, `y in [-0.09, 0.1]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R43 route. -/
+noncomputable def R44 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.09, 0.1, by norm_num, by norm_num⟩
+
+theorem R44_x0 : R44.x0 = (-2 : ℝ) := rfl
+
+theorem R44_x1 : R44.x1 = (0.5 : ℝ) := rfl
+
+theorem R44_y0 : R44.y0 = (-0.09 : ℝ) := rfl
+
+theorem R44_y1 : R44.y1 = (0.1 : ℝ) := rfl
+
+/-- The R44 `s`-plane center: `s = 1/2 + I·z` at `z = R44.center`. -/
+noncomputable def sR44 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R44.center
+
+/-- `R44.center = -0.75 + 0.005·I` (from `R44_x0/x1/y0/y1`). -/
+theorem R44_center_eq :
+    R44.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((0.005 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R44_x0, R44_x1, R44_y0, R44_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R44_x0, R44_x1, R44_y0, R44_y1]
+    simp
+    norm_num
+
+/-- `Re sR44 = 0.495`. -/
+theorem sR44_re : sR44.re = 0.495 := by
+  unfold sR44
+  rw [R44_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR44 = -0.75`. -/
+theorem sR44_im : sR44.im = -0.75 := by
+  unfold sR44
+  rw [R44_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R44 s-center. -/
+theorem polyPart_norm_R44 :
+    ‖R00Enclosure.polyPart sR44‖ =
+      (1 / 2) * ‖sR44‖ * ‖sR44 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR44‖ ≥ 0.89` (`0.89^2 = 0.7921 < 0.495^2 + 0.75^2 = 0.807525`). -/
+theorem norm_sR44_ge : (0.89 : ℝ) ≤ ‖sR44‖ := by
+  have hsq : (0.89 : ℝ) ^ 2 ≤ ‖sR44‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR44_re, sR44_im]
+    norm_num
+  calc (0.89 : ℝ) = Real.sqrt ((0.89 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR44‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR44‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR44 - 1‖ ≥ 0.90` (`0.505^2 + 0.75^2 = 0.817525 > 0.90^2 = 0.81`). -/
+theorem norm_sR44_sub_one_ge : (0.90 : ℝ) ≤ ‖sR44 - 1‖ := by
+  have hr1 : (sR44 - 1).re = -0.505 := by
+    simp only [Complex.sub_re, Complex.one_re, sR44_re]
+    norm_num
+  have hi1 : (sR44 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR44_im]
+    norm_num
+  have hsq : (0.90 : ℝ) ^ 2 ≤ ‖sR44 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.90 : ℝ) = Real.sqrt ((0.90 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR44 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR44 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR44‖`
+(`0.89 * 0.90 / 2 = 0.4005 ≥ 0.40`; true `≈ 0.408`, slack `≈ 0.008`). -/
+theorem poly_lower_R44 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR44‖ := by
+  have hprod : (0.89 : ℝ) * 0.90 ≤ ‖sR44‖ * ‖sR44 - 1‖ :=
+    mul_le_mul norm_sR44_ge norm_sR44_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R44]
+  nlinarith [hprod]
+
+/-- Conditional R44 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R44_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R44.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR44‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR44‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R44.radius ≤
+      ‖xiShifted R44.center‖ := by
+  have hpoly := poly_lower_R44
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR44‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR44_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR44
+      = (1 / 2 : ℂ) + Complex.I * R44.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R44 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R44 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R44_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R44_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R44_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R44CenterAssembly.poly_lower_R44
+#print axioms R44CenterAssembly.R44_center_with_poly_pi_gamma
+#print axioms R44CenterAssembly.R44_threshold_eq
+#print axioms R44CenterAssembly.R44_banked_infeasible
+
+end R44CenterAssembly
+
+namespace R45CenterAssembly
+
+/-- R45 rect `x in [-2, 0.5]`, `y in [-0.19, 0.0]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R44 route. -/
+noncomputable def R45 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.19, 0.0, by norm_num, by norm_num⟩
+
+theorem R45_x0 : R45.x0 = (-2 : ℝ) := rfl
+
+theorem R45_x1 : R45.x1 = (0.5 : ℝ) := rfl
+
+theorem R45_y0 : R45.y0 = (-0.19 : ℝ) := rfl
+
+theorem R45_y1 : R45.y1 = (0.0 : ℝ) := rfl
+
+/-- The R45 `s`-plane center: `s = 1/2 + I·z` at `z = R45.center`. -/
+noncomputable def sR45 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R45.center
+
+/-- `R45.center = -0.75 + -0.095·I` (from `R45_x0/x1/y0/y1`). -/
+theorem R45_center_eq :
+    R45.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.095 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R45_x0, R45_x1, R45_y0, R45_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R45_x0, R45_x1, R45_y0, R45_y1]
+    simp
+    norm_num
+
+/-- `Re sR45 = 0.595`. -/
+theorem sR45_re : sR45.re = 0.595 := by
+  unfold sR45
+  rw [R45_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR45 = -0.75`. -/
+theorem sR45_im : sR45.im = -0.75 := by
+  unfold sR45
+  rw [R45_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R45 s-center. -/
+theorem polyPart_norm_R45 :
+    ‖R00Enclosure.polyPart sR45‖ =
+      (1 / 2) * ‖sR45‖ * ‖sR45 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR45‖ ≥ 0.95` (`0.95^2 = 0.9025 < 0.595^2 + 0.75^2 = 0.916525`). -/
+theorem norm_sR45_ge : (0.95 : ℝ) ≤ ‖sR45‖ := by
+  have hsq : (0.95 : ℝ) ^ 2 ≤ ‖sR45‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR45_re, sR45_im]
+    norm_num
+  calc (0.95 : ℝ) = Real.sqrt ((0.95 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR45‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR45‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR45 - 1‖ ≥ 0.85` (`0.405^2 + 0.75^2 = 0.726525 > 0.85^2 = 0.7225`). -/
+theorem norm_sR45_sub_one_ge : (0.85 : ℝ) ≤ ‖sR45 - 1‖ := by
+  have hr1 : (sR45 - 1).re = -0.405 := by
+    simp only [Complex.sub_re, Complex.one_re, sR45_re]
+    norm_num
+  have hi1 : (sR45 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR45_im]
+    norm_num
+  have hsq : (0.85 : ℝ) ^ 2 ≤ ‖sR45 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.85 : ℝ) = Real.sqrt ((0.85 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR45 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR45 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR45‖`
+(`0.95 * 0.85 / 2 = 0.40375 ≥ 0.40`; true `≈ 0.408`, slack `≈ 0.004`). -/
+theorem poly_lower_R45 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR45‖ := by
+  have hprod : (0.95 : ℝ) * 0.85 ≤ ‖sR45‖ * ‖sR45 - 1‖ :=
+    mul_le_mul norm_sR45_ge norm_sR45_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R45]
+  nlinarith [hprod]
+
+/-- Conditional R45 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R45_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R45.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR45‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR45‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R45.radius ≤
+      ‖xiShifted R45.center‖ := by
+  have hpoly := poly_lower_R45
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR45‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR45_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR45
+      = (1 / 2 : ℂ) + Complex.I * R45.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R45 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R45 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R45_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R45_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R45_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R45CenterAssembly.poly_lower_R45
+#print axioms R45CenterAssembly.R45_center_with_poly_pi_gamma
+#print axioms R45CenterAssembly.R45_threshold_eq
+#print axioms R45CenterAssembly.R45_banked_infeasible
+
+end R45CenterAssembly
+
+namespace R46CenterAssembly
+
+/-- R46 rect `x in [-2, 0.5]`, `y in [-0.29, -0.10]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R45 route. -/
+noncomputable def R46 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.29, -0.10, by norm_num, by norm_num⟩
+
+theorem R46_x0 : R46.x0 = (-2 : ℝ) := rfl
+
+theorem R46_x1 : R46.x1 = (0.5 : ℝ) := rfl
+
+theorem R46_y0 : R46.y0 = (-0.29 : ℝ) := rfl
+
+theorem R46_y1 : R46.y1 = (-0.10 : ℝ) := rfl
+
+/-- The R46 `s`-plane center: `s = 1/2 + I·z` at `z = R46.center`. -/
+noncomputable def sR46 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R46.center
+
+/-- `R46.center = -0.75 + -0.195·I` (from `R46_x0/x1/y0/y1`). -/
+theorem R46_center_eq :
+    R46.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.195 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R46_x0, R46_x1, R46_y0, R46_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R46_x0, R46_x1, R46_y0, R46_y1]
+    simp
+    norm_num
+
+/-- `Re sR46 = 0.695`. -/
+theorem sR46_re : sR46.re = 0.695 := by
+  unfold sR46
+  rw [R46_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR46 = -0.75`. -/
+theorem sR46_im : sR46.im = -0.75 := by
+  unfold sR46
+  rw [R46_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R46 s-center. -/
+theorem polyPart_norm_R46 :
+    ‖R00Enclosure.polyPart sR46‖ =
+      (1 / 2) * ‖sR46‖ * ‖sR46 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR46‖ ≥ 1.00` (`1.00^2 = 1.0 < 0.695^2 + 0.75^2 = 1.045525`). -/
+theorem norm_sR46_ge : (1.00 : ℝ) ≤ ‖sR46‖ := by
+  have hsq : (1.00 : ℝ) ^ 2 ≤ ‖sR46‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR46_re, sR46_im]
+    norm_num
+  calc (1.00 : ℝ) = Real.sqrt ((1.00 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR46‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR46‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR46 - 1‖ ≥ 0.80` (`0.305^2 + 0.75^2 = 0.655525 > 0.80^2 = 0.64`). -/
+theorem norm_sR46_sub_one_ge : (0.80 : ℝ) ≤ ‖sR46 - 1‖ := by
+  have hr1 : (sR46 - 1).re = -0.305 := by
+    simp only [Complex.sub_re, Complex.one_re, sR46_re]
+    norm_num
+  have hi1 : (sR46 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR46_im]
+    norm_num
+  have hsq : (0.80 : ℝ) ^ 2 ≤ ‖sR46 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.80 : ℝ) = Real.sqrt ((0.80 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR46 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR46 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR46‖`
+(`1.00 * 0.80 / 2 = 0.40 ≥ 0.40`; true `≈ 0.414`, slack `≈ 0.014`). -/
+theorem poly_lower_R46 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR46‖ := by
+  have hprod : (1.00 : ℝ) * 0.80 ≤ ‖sR46‖ * ‖sR46 - 1‖ :=
+    mul_le_mul norm_sR46_ge norm_sR46_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R46]
+  nlinarith [hprod]
+
+/-- Conditional R46 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R46_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R46.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR46‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR46‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R46.radius ≤
+      ‖xiShifted R46.center‖ := by
+  have hpoly := poly_lower_R46
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR46‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR46_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR46
+      = (1 / 2 : ℂ) + Complex.I * R46.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R46 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R46 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R46_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R46_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R46_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R46CenterAssembly.poly_lower_R46
+#print axioms R46CenterAssembly.R46_center_with_poly_pi_gamma
+#print axioms R46CenterAssembly.R46_threshold_eq
+#print axioms R46CenterAssembly.R46_banked_infeasible
+
+end R46CenterAssembly
+
+namespace R47CenterAssembly
+
+/-- R47 rect `x in [-2, 0.5]`, `y in [-0.39, -0.20]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R46 route. -/
+noncomputable def R47 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.39, -0.20, by norm_num, by norm_num⟩
+
+theorem R47_x0 : R47.x0 = (-2 : ℝ) := rfl
+
+theorem R47_x1 : R47.x1 = (0.5 : ℝ) := rfl
+
+theorem R47_y0 : R47.y0 = (-0.39 : ℝ) := rfl
+
+theorem R47_y1 : R47.y1 = (-0.20 : ℝ) := rfl
+
+/-- The R47 `s`-plane center: `s = 1/2 + I·z` at `z = R47.center`. -/
+noncomputable def sR47 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R47.center
+
+/-- `R47.center = -0.75 + -0.295·I` (from `R47_x0/x1/y0/y1`). -/
+theorem R47_center_eq :
+    R47.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.295 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R47_x0, R47_x1, R47_y0, R47_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R47_x0, R47_x1, R47_y0, R47_y1]
+    simp
+    norm_num
+
+/-- `Re sR47 = 0.795`. -/
+theorem sR47_re : sR47.re = 0.795 := by
+  unfold sR47
+  rw [R47_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR47 = -0.75`. -/
+theorem sR47_im : sR47.im = -0.75 := by
+  unfold sR47
+  rw [R47_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R47 s-center. -/
+theorem polyPart_norm_R47 :
+    ‖R00Enclosure.polyPart sR47‖ =
+      (1 / 2) * ‖sR47‖ * ‖sR47 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR47‖ ≥ 1.05` (`1.05^2 = 1.1025 < 0.795^2 + 0.75^2 = 1.194525`). -/
+theorem norm_sR47_ge : (1.05 : ℝ) ≤ ‖sR47‖ := by
+  have hsq : (1.05 : ℝ) ^ 2 ≤ ‖sR47‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR47_re, sR47_im]
+    norm_num
+  calc (1.05 : ℝ) = Real.sqrt ((1.05 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR47‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR47‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR47 - 1‖ ≥ 0.77` (`0.205^2 + 0.75^2 = 0.604525 > 0.77^2 = 0.5929`). -/
+theorem norm_sR47_sub_one_ge : (0.77 : ℝ) ≤ ‖sR47 - 1‖ := by
+  have hr1 : (sR47 - 1).re = -0.205 := by
+    simp only [Complex.sub_re, Complex.one_re, sR47_re]
+    norm_num
+  have hi1 : (sR47 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR47_im]
+    norm_num
+  have hsq : (0.77 : ℝ) ^ 2 ≤ ‖sR47 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.77 : ℝ) = Real.sqrt ((0.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR47 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR47 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR47‖`
+(`1.05 * 0.77 / 2 = 0.40425 ≥ 0.40`; true `≈ 0.425`, slack `≈ 0.025`). -/
+theorem poly_lower_R47 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR47‖ := by
+  have hprod : (1.05 : ℝ) * 0.77 ≤ ‖sR47‖ * ‖sR47 - 1‖ :=
+    mul_le_mul norm_sR47_ge norm_sR47_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R47]
+  nlinarith [hprod]
+
+/-- Conditional R47 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R47_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R47.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR47‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR47‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R47.radius ≤
+      ‖xiShifted R47.center‖ := by
+  have hpoly := poly_lower_R47
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR47‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR47_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR47
+      = (1 / 2 : ℂ) + Complex.I * R47.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R47 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R47 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R47_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R47_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R47_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R47CenterAssembly.poly_lower_R47
+#print axioms R47CenterAssembly.R47_center_with_poly_pi_gamma
+#print axioms R47CenterAssembly.R47_threshold_eq
+#print axioms R47CenterAssembly.R47_banked_infeasible
+
+end R47CenterAssembly
+
+namespace R48CenterAssembly
+
+/-- R48 rect `x in [-2, 0.5]`, `y in [-0.49, -0.30]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R47 route. -/
+noncomputable def R48 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.49, -0.30, by norm_num, by norm_num⟩
+
+theorem R48_x0 : R48.x0 = (-2 : ℝ) := rfl
+
+theorem R48_x1 : R48.x1 = (0.5 : ℝ) := rfl
+
+theorem R48_y0 : R48.y0 = (-0.49 : ℝ) := rfl
+
+theorem R48_y1 : R48.y1 = (-0.30 : ℝ) := rfl
+
+/-- The R48 `s`-plane center: `s = 1/2 + I·z` at `z = R48.center`. -/
+noncomputable def sR48 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R48.center
+
+/-- `R48.center = -0.75 + -0.395·I` (from `R48_x0/x1/y0/y1`). -/
+theorem R48_center_eq :
+    R48.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R48_x0, R48_x1, R48_y0, R48_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R48_x0, R48_x1, R48_y0, R48_y1]
+    simp
+    norm_num
+
+/-- `Re sR48 = 0.895`. -/
+theorem sR48_re : sR48.re = 0.895 := by
+  unfold sR48
+  rw [R48_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR48 = -0.75`. -/
+theorem sR48_im : sR48.im = -0.75 := by
+  unfold sR48
+  rw [R48_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R48 s-center. -/
+theorem polyPart_norm_R48 :
+    ‖R00Enclosure.polyPart sR48‖ =
+      (1 / 2) * ‖sR48‖ * ‖sR48 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR48‖ ≥ 1.10` (`1.10^2 = 1.21 < 0.895^2 + 0.75^2 = 1.363525`). -/
+theorem norm_sR48_ge : (1.10 : ℝ) ≤ ‖sR48‖ := by
+  have hsq : (1.10 : ℝ) ^ 2 ≤ ‖sR48‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR48_re, sR48_im]
+    norm_num
+  calc (1.10 : ℝ) = Real.sqrt ((1.10 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR48‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR48‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR48 - 1‖ ≥ 0.75` (`0.105^2 + 0.75^2 = 0.573525 > 0.75^2 = 0.5625`). -/
+theorem norm_sR48_sub_one_ge : (0.75 : ℝ) ≤ ‖sR48 - 1‖ := by
+  have hr1 : (sR48 - 1).re = -0.105 := by
+    simp only [Complex.sub_re, Complex.one_re, sR48_re]
+    norm_num
+  have hi1 : (sR48 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR48_im]
+    norm_num
+  have hsq : (0.75 : ℝ) ^ 2 ≤ ‖sR48 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.75 : ℝ) = Real.sqrt ((0.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR48 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR48 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR48‖`
+(`1.10 * 0.75 / 2 = 0.4125 ≥ 0.40`; true `≈ 0.442`, slack `≈ 0.042`). -/
+theorem poly_lower_R48 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR48‖ := by
+  have hprod : (1.10 : ℝ) * 0.75 ≤ ‖sR48‖ * ‖sR48 - 1‖ :=
+    mul_le_mul norm_sR48_ge norm_sR48_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R48]
+  nlinarith [hprod]
+
+/-- Conditional R48 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R48_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R48.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR48‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR48‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R48.radius ≤
+      ‖xiShifted R48.center‖ := by
+  have hpoly := poly_lower_R48
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR48‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR48_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR48
+      = (1 / 2 : ℂ) + Complex.I * R48.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R48 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R48 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R48_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R48_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R48_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R48CenterAssembly.poly_lower_R48
+#print axioms R48CenterAssembly.R48_center_with_poly_pi_gamma
+#print axioms R48CenterAssembly.R48_threshold_eq
+#print axioms R48CenterAssembly.R48_banked_infeasible
+
+end R48CenterAssembly
+
+namespace R49CenterAssembly
+
+/-- R49 rect `x in [-2, 0.5]`, `y in [-0.59, -0.40]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R48 route. -/
+noncomputable def R49 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.59, -0.40, by norm_num, by norm_num⟩
+
+theorem R49_x0 : R49.x0 = (-2 : ℝ) := rfl
+
+theorem R49_x1 : R49.x1 = (0.5 : ℝ) := rfl
+
+theorem R49_y0 : R49.y0 = (-0.59 : ℝ) := rfl
+
+theorem R49_y1 : R49.y1 = (-0.40 : ℝ) := rfl
+
+/-- The R49 `s`-plane center: `s = 1/2 + I·z` at `z = R49.center`. -/
+noncomputable def sR49 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R49.center
+
+/-- `R49.center = -0.75 + -0.495·I` (from `R49_x0/x1/y0/y1`). -/
+theorem R49_center_eq :
+    R49.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R49_x0, R49_x1, R49_y0, R49_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R49_x0, R49_x1, R49_y0, R49_y1]
+    simp
+    norm_num
+
+/-- `Re sR49 = 0.995`. -/
+theorem sR49_re : sR49.re = 0.995 := by
+  unfold sR49
+  rw [R49_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR49 = -0.75`. -/
+theorem sR49_im : sR49.im = -0.75 := by
+  unfold sR49
+  rw [R49_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R49 s-center. -/
+theorem polyPart_norm_R49 :
+    ‖R00Enclosure.polyPart sR49‖ =
+      (1 / 2) * ‖sR49‖ * ‖sR49 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR49‖ ≥ 1.20` (`1.20^2 = 1.44 < 0.995^2 + 0.75^2 = 1.552525`). -/
+theorem norm_sR49_ge : (1.20 : ℝ) ≤ ‖sR49‖ := by
+  have hsq : (1.20 : ℝ) ^ 2 ≤ ‖sR49‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR49_re, sR49_im]
+    norm_num
+  calc (1.20 : ℝ) = Real.sqrt ((1.20 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR49‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR49‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR49 - 1‖ ≥ 0.75` (`0.005^2 + 0.75^2 = 0.562525 ≥ 0.75^2 = 0.5625`). -/
+theorem norm_sR49_sub_one_ge : (0.75 : ℝ) ≤ ‖sR49 - 1‖ := by
+  have hr1 : (sR49 - 1).re = -0.005 := by
+    simp only [Complex.sub_re, Complex.one_re, sR49_re]
+    norm_num
+  have hi1 : (sR49 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR49_im]
+    norm_num
+  have hsq : (0.75 : ℝ) ^ 2 ≤ ‖sR49 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.75 : ℝ) = Real.sqrt ((0.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR49 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR49 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR49‖`
+(`1.20 * 0.75 / 2 = 0.45 ≥ 0.40`; true `≈ 0.467`, slack `≈ 0.067`). -/
+theorem poly_lower_R49 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR49‖ := by
+  have hprod : (1.20 : ℝ) * 0.75 ≤ ‖sR49‖ * ‖sR49 - 1‖ :=
+    mul_le_mul norm_sR49_ge norm_sR49_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R49]
+  nlinarith [hprod]
+
+/-- Conditional R49 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R49_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R49.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR49‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR49‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R49.radius ≤
+      ‖xiShifted R49.center‖ := by
+  have hpoly := poly_lower_R49
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR49‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR49_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR49
+      = (1 / 2 : ℂ) + Complex.I * R49.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R49 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R49 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R49_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R49_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R49_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R49CenterAssembly.poly_lower_R49
+#print axioms R49CenterAssembly.R49_center_with_poly_pi_gamma
+#print axioms R49CenterAssembly.R49_threshold_eq
+#print axioms R49CenterAssembly.R49_banked_infeasible
+
+end R49CenterAssembly
+
+namespace R50CenterAssembly
+
+/-- R50 rect `x in [-2, 0.5]`, `y in [-0.69, -0.50]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R49 route. -/
+noncomputable def R50 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.69, -0.50, by norm_num, by norm_num⟩
+
+theorem R50_x0 : R50.x0 = (-2 : ℝ) := rfl
+
+theorem R50_x1 : R50.x1 = (0.5 : ℝ) := rfl
+
+theorem R50_y0 : R50.y0 = (-0.69 : ℝ) := rfl
+
+theorem R50_y1 : R50.y1 = (-0.50 : ℝ) := rfl
+
+/-- The R50 `s`-plane center: `s = 1/2 + I·z` at `z = R50.center`. -/
+noncomputable def sR50 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R50.center
+
+/-- `R50.center = -0.75 + -0.595·I` (from `R50_x0/x1/y0/y1`). -/
+theorem R50_center_eq :
+    R50.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.595 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R50_x0, R50_x1, R50_y0, R50_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R50_x0, R50_x1, R50_y0, R50_y1]
+    simp
+    norm_num
+
+/-- `Re sR50 = 1.095`. -/
+theorem sR50_re : sR50.re = 1.095 := by
+  unfold sR50
+  rw [R50_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR50 = -0.75`. -/
+theorem sR50_im : sR50.im = -0.75 := by
+  unfold sR50
+  rw [R50_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R50 s-center. -/
+theorem polyPart_norm_R50 :
+    ‖R00Enclosure.polyPart sR50‖ =
+      (1 / 2) * ‖sR50‖ * ‖sR50 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR50‖ ≥ 1.20` (`1.20^2 = 1.44 < 1.095^2 + 0.75^2 = 1.761525`). -/
+theorem norm_sR50_ge : (1.20 : ℝ) ≤ ‖sR50‖ := by
+  have hsq : (1.20 : ℝ) ^ 2 ≤ ‖sR50‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR50_re, sR50_im]
+    norm_num
+  calc (1.20 : ℝ) = Real.sqrt ((1.20 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR50‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR50‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR50 - 1‖ ≥ 0.75` (`0.095^2 + 0.75^2 = 0.571525 ≥ 0.75^2 = 0.5625`). -/
+theorem norm_sR50_sub_one_ge : (0.75 : ℝ) ≤ ‖sR50 - 1‖ := by
+  have hr1 : (sR50 - 1).re = 0.095 := by
+    simp only [Complex.sub_re, Complex.one_re, sR50_re]
+    norm_num
+  have hi1 : (sR50 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR50_im]
+    norm_num
+  have hsq : (0.75 : ℝ) ^ 2 ≤ ‖sR50 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.75 : ℝ) = Real.sqrt ((0.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR50 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR50 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR50‖`
+(`1.20 * 0.75 / 2 = 0.45 ≥ 0.40`; true `≈ 0.501`, slack `≈ 0.101`). -/
+theorem poly_lower_R50 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR50‖ := by
+  have hprod : (1.20 : ℝ) * 0.75 ≤ ‖sR50‖ * ‖sR50 - 1‖ :=
+    mul_le_mul norm_sR50_ge norm_sR50_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R50]
+  nlinarith [hprod]
+
+/-- Conditional R50 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R50_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R50.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR50‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR50‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R50.radius ≤
+      ‖xiShifted R50.center‖ := by
+  have hpoly := poly_lower_R50
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR50‖ :=
+    CellUniform.pi_lower_of_re (by rw [sR50_re]; norm_num)
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR50
+      = (1 / 2 : ℂ) + Complex.I * R50.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R50 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R50 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R50_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R50_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R50_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R50CenterAssembly.poly_lower_R50
+#print axioms R50CenterAssembly.R50_center_with_poly_pi_gamma
+#print axioms R50CenterAssembly.R50_threshold_eq
+#print axioms R50CenterAssembly.R50_banked_infeasible
+
+end R50CenterAssembly
+
+namespace R51CenterAssembly
+
+/-- R51 rect `x in [-2, 0.5]`, `y in [-0.79, -0.60]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R50 route. -/
+noncomputable def R51 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.79, -0.60, by norm_num, by norm_num⟩
+
+theorem R51_x0 : R51.x0 = (-2 : ℝ) := rfl
+
+theorem R51_x1 : R51.x1 = (0.5 : ℝ) := rfl
+
+theorem R51_y0 : R51.y0 = (-0.79 : ℝ) := rfl
+
+theorem R51_y1 : R51.y1 = (-0.60 : ℝ) := rfl
+
+/-- The R51 `s`-plane center: `s = 1/2 + I·z` at `z = R51.center`. -/
+noncomputable def sR51 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R51.center
+
+/-- `R51.center = -0.75 + -0.695·I` (from `R51_x0/x1/y0/y1`). -/
+theorem R51_center_eq :
+    R51.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.695 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R51_x0, R51_x1, R51_y0, R51_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R51_x0, R51_x1, R51_y0, R51_y1]
+    simp
+    norm_num
+
+/-- `Re sR51 = 1.195`. -/
+theorem sR51_re : sR51.re = 1.195 := by
+  unfold sR51
+  rw [R51_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR51 = -0.75`. -/
+theorem sR51_im : sR51.im = -0.75 := by
+  unfold sR51
+  rw [R51_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R51 s-center. -/
+theorem polyPart_norm_R51 :
+    ‖R00Enclosure.polyPart sR51‖ =
+      (1 / 2) * ‖sR51‖ * ‖sR51 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR51‖ ≥ 1.40` (`1.40^2 = 1.96 < 1.195^2 + 0.75^2 = 1.990525`). -/
+theorem norm_sR51_ge : (1.40 : ℝ) ≤ ‖sR51‖ := by
+  have hsq : (1.40 : ℝ) ^ 2 ≤ ‖sR51‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR51_re, sR51_im]
+    norm_num
+  calc (1.40 : ℝ) = Real.sqrt ((1.40 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR51‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR51‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR51 - 1‖ ≥ 0.77` (`0.195^2 + 0.75^2 = 0.600525 ≥ 0.77^2 = 0.5929`). -/
+theorem norm_sR51_sub_one_ge : (0.77 : ℝ) ≤ ‖sR51 - 1‖ := by
+  have hr1 : (sR51 - 1).re = 0.195 := by
+    simp only [Complex.sub_re, Complex.one_re, sR51_re]
+    norm_num
+  have hi1 : (sR51 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR51_im]
+    norm_num
+  have hsq : (0.77 : ℝ) ^ 2 ≤ ‖sR51 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.77 : ℝ) = Real.sqrt ((0.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR51 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR51 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR51‖`
+(`1.40 * 0.77 / 2 = 0.539 ≥ 0.40`; true `≈ 0.594`, slack `≈ 0.194`). -/
+theorem poly_lower_R51 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR51‖ := by
+  have hprod : (1.40 : ℝ) * 0.77 ≤ ‖sR51‖ * ‖sR51 - 1‖ :=
+    mul_le_mul norm_sR51_ge norm_sR51_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R51]
+  nlinarith [hprod]
+
+/-- `π ^ (3/5) ≤ 2` (cleared: `π ^ 3 ≤ 32` via `π < 3.1416`). -/
+theorem pi_rpow_R51_le : Real.pi ^ (3 / 5 : ℝ) ≤ 2 := by
+  have hpow : (Real.pi ^ (3 / 5 : ℝ)) ^ (5 : ℕ) ≤ (2 : ℝ) ^ (5 : ℕ) := by
+    have e : (Real.pi ^ (3 / 5 : ℝ)) ^ (5 : ℕ) = Real.pi ^ (3 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (3 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (3 : ℕ) ≤ (3.1416 : ℝ) ^ (3 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 3
+    have hnum : (3.1416 : ℝ) ^ (3 : ℕ) ≤ 32 := by norm_num
+    have h32 : (2 : ℝ) ^ (5 : ℕ) = 32 := by norm_num
+    rw [h32]
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR51` is a real rpow. -/
+theorem piPart_norm_R51 :
+    ‖R00Enclosure.piPart sR51‖ = Real.pi ^ (-(sR51.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR51 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/2 ≤ ‖piPart sR51‖`
+(`Re = 1.195 ≤ 1.2`, so `-Re/2 ≥ -3/5` and `π^(-3/5) = 1/π^(3/5) ≥ 1/2`). -/
+theorem pi_lower_R51 : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart sR51‖ := by
+  rw [piPart_norm_R51]
+  have h60 : Real.pi ^ (3 / 5 : ℝ) ≤ 2 := pi_rpow_R51_le
+  have hneg : Real.pi ^ (-(3 / 5 : ℝ)) = 1 / (Real.pi ^ (3 / 5 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 2 : ℝ) ≤ Real.pi ^ (-(3 / 5 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(3 / 5 : ℝ)) ≤ -(sR51.re) / 2 := by rw [sR51_re]; norm_num
+  calc (1 / 2 : ℝ) ≤ Real.pi ^ (-(3 / 5 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR51.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R51 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/2` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.20`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R51_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R51.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR51‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR51‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 2) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R51.radius ≤
+      ‖xiShifted R51.center‖ := by
+  have hpoly := poly_lower_R51
+  have hpi := pi_lower_R51
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR51
+      = (1 / 2 : ℂ) + Complex.I * R51.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R51 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R51 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R51_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/2) = 0.20`. -/
+theorem R51_base_eq : (0.40 : ℝ) * (1 / 2) = 0.20 := by norm_num
+
+/-- Exact residual: banked floors `0.20 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.20 = 1.128`; banked `≈ 3.85e-09`;
+short by factor `≈ 293000000`, the ~8-order wall). -/
+theorem R51_banked_infeasible :
+    (0.40 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R51CenterAssembly.poly_lower_R51
+#print axioms R51CenterAssembly.pi_lower_R51
+#print axioms R51CenterAssembly.R51_center_with_poly_pi_gamma
+#print axioms R51CenterAssembly.R51_threshold_eq
+#print axioms R51CenterAssembly.R51_banked_infeasible
+
+end R51CenterAssembly
+
+namespace R52CenterAssembly
+
+/-- R52 rect `x in [-2, 0.5]`, `y in [-0.89, -0.70]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R51 route. -/
+noncomputable def R52 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.89, -0.70, by norm_num, by norm_num⟩
+
+theorem R52_x0 : R52.x0 = (-2 : ℝ) := rfl
+
+theorem R52_x1 : R52.x1 = (0.5 : ℝ) := rfl
+
+theorem R52_y0 : R52.y0 = (-0.89 : ℝ) := rfl
+
+theorem R52_y1 : R52.y1 = (-0.70 : ℝ) := rfl
+
+/-- The R52 `s`-plane center: `s = 1/2 + I·z` at `z = R52.center`. -/
+noncomputable def sR52 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R52.center
+
+/-- `R52.center = -0.75 + -0.795·I` (from `R52_x0/x1/y0/y1`). -/
+theorem R52_center_eq :
+    R52.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.795 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R52_x0, R52_x1, R52_y0, R52_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R52_x0, R52_x1, R52_y0, R52_y1]
+    simp
+    norm_num
+
+/-- `Re sR52 = 1.295`. -/
+theorem sR52_re : sR52.re = 1.295 := by
+  unfold sR52
+  rw [R52_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR52 = -0.75`. -/
+theorem sR52_im : sR52.im = -0.75 := by
+  unfold sR52
+  rw [R52_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R52 s-center. -/
+theorem polyPart_norm_R52 :
+    ‖R00Enclosure.polyPart sR52‖ =
+      (1 / 2) * ‖sR52‖ * ‖sR52 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR52‖ ≥ 1.49` (`1.49^2 = 2.2201 < 1.295^2 + 0.75^2 = 2.239525`). -/
+theorem norm_sR52_ge : (1.49 : ℝ) ≤ ‖sR52‖ := by
+  have hsq : (1.49 : ℝ) ^ 2 ≤ ‖sR52‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR52_re, sR52_im]
+    norm_num
+  calc (1.49 : ℝ) = Real.sqrt ((1.49 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR52‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR52‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR52 - 1‖ ≥ 0.80` (`0.295^2 + 0.75^2 = 0.649525 ≥ 0.80^2 = 0.64`). -/
+theorem norm_sR52_sub_one_ge : (0.80 : ℝ) ≤ ‖sR52 - 1‖ := by
+  have hr1 : (sR52 - 1).re = 0.295 := by
+    simp only [Complex.sub_re, Complex.one_re, sR52_re]
+    norm_num
+  have hi1 : (sR52 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR52_im]
+    norm_num
+  have hsq : (0.80 : ℝ) ^ 2 ≤ ‖sR52 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.80 : ℝ) = Real.sqrt ((0.80 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR52 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR52 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR52‖`
+(`1.49 * 0.80 / 2 = 0.596 ≥ 0.40`; true `≈ 0.603`, slack `≈ 0.203`). -/
+theorem poly_lower_R52 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR52‖ := by
+  have hprod : (1.49 : ℝ) * 0.80 ≤ ‖sR52‖ * ‖sR52 - 1‖ :=
+    mul_le_mul norm_sR52_ge norm_sR52_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R52]
+  nlinarith [hprod]
+
+/-- `π ^ (2/3) ≤ 5/2` (cleared: `π ^ 2 ≤ (5/2)^3` via `π < 3.1416`). -/
+theorem pi_rpow_R52_le : Real.pi ^ (2 / 3 : ℝ) ≤ 5 / 2 := by
+  have hpow : (Real.pi ^ (2 / 3 : ℝ)) ^ (3 : ℕ) ≤ (5 / 2 : ℝ) ^ (3 : ℕ) := by
+    have e : (Real.pi ^ (2 / 3 : ℝ)) ^ (3 : ℕ) = Real.pi ^ (2 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (2 / 3 : ℝ) * (((3 : ℕ)) : ℝ) = (2 : ℝ) by norm_num]
+      rw [show (2 : ℝ) = (((2 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (2 : ℕ) ≤ (3.1416 : ℝ) ^ (2 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 2
+    have hnum : (3.1416 : ℝ) ^ (2 : ℕ) ≤ (5 / 2 : ℝ) ^ (3 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR52` is a real rpow. -/
+theorem piPart_norm_R52 :
+    ‖R00Enclosure.piPart sR52‖ = Real.pi ^ (-(sR52.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR52 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `2/5 ≤ ‖piPart sR52‖`
+(`Re = 1.295`, so `-Re/2 = -0.6475 ≥ -2/3` and `π^(-2/3) = 1/π^(2/3) ≥ 2/5`;
+the `1/2` floor is infeasible here since `π^0.6475 ≈ 2.098 > 2`). -/
+theorem pi_lower_R52 : (2 / 5 : ℝ) ≤ ‖R00Enclosure.piPart sR52‖ := by
+  rw [piPart_norm_R52]
+  have h60 : Real.pi ^ (2 / 3 : ℝ) ≤ 5 / 2 := pi_rpow_R52_le
+  have hneg : Real.pi ^ (-(2 / 3 : ℝ)) = 1 / (Real.pi ^ (2 / 3 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (2 / 5 : ℝ) ≤ Real.pi ^ (-(2 / 3 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(2 / 3 : ℝ)) ≤ -(sR52.re) / 2 := by rw [sR52_re]; norm_num
+  calc (2 / 5 : ℝ) ≤ Real.pi ^ (-(2 / 3 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR52.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R52 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `2/5` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.16`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R52_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R52.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR52‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR52‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (2 / 5) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R52.radius ≤
+      ‖xiShifted R52.center‖ := by
+  have hpoly := poly_lower_R52
+  have hpi := pi_lower_R52
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR52
+      = (1 / 2 : ℂ) + Complex.I * R52.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R52 0.15 0.06 (by norm_num) hrad
+    0.40 (2 / 5) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R52 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R52_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (2/5) = 0.16`. -/
+theorem R52_base_eq : (0.40 : ℝ) * (2 / 5) = 0.16 := by norm_num
+
+/-- Exact residual: banked floors `0.16 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.16 = 1.41`; banked `≈ 3.85e-09`;
+short by factor `≈ 366000000`, the ~8-order wall). -/
+theorem R52_banked_infeasible :
+    (0.40 : ℝ) * (2 / 5) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R52CenterAssembly.poly_lower_R52
+#print axioms R52CenterAssembly.pi_lower_R52
+#print axioms R52CenterAssembly.R52_center_with_poly_pi_gamma
+#print axioms R52CenterAssembly.R52_threshold_eq
+#print axioms R52CenterAssembly.R52_banked_infeasible
+
+end R52CenterAssembly
+
+namespace R53CenterAssembly
+
+/-- R53 rect `x in [-2, 0.5]`, `y in [-0.99, -0.80]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R52 route. -/
+noncomputable def R53 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -0.99, -0.80, by norm_num, by norm_num⟩
+
+theorem R53_x0 : R53.x0 = (-2 : ℝ) := rfl
+
+theorem R53_x1 : R53.x1 = (0.5 : ℝ) := rfl
+
+theorem R53_y0 : R53.y0 = (-0.99 : ℝ) := rfl
+
+theorem R53_y1 : R53.y1 = (-0.80 : ℝ) := rfl
+
+/-- The R53 `s`-plane center: `s = 1/2 + I·z` at `z = R53.center`. -/
+noncomputable def sR53 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R53.center
+
+/-- `R53.center = -0.75 + -0.895·I` (from `R53_x0/x1/y0/y1`). -/
+theorem R53_center_eq :
+    R53.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.895 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R53_x0, R53_x1, R53_y0, R53_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R53_x0, R53_x1, R53_y0, R53_y1]
+    simp
+    norm_num
+
+/-- `Re sR53 = 1.395`. -/
+theorem sR53_re : sR53.re = 1.395 := by
+  unfold sR53
+  rw [R53_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR53 = -0.75`. -/
+theorem sR53_im : sR53.im = -0.75 := by
+  unfold sR53
+  rw [R53_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R53 s-center. -/
+theorem polyPart_norm_R53 :
+    ‖R00Enclosure.polyPart sR53‖ =
+      (1 / 2) * ‖sR53‖ * ‖sR53 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR53‖ ≥ 1.58` (`1.58^2 = 2.4964 < 1.395^2 + 0.75^2 = 2.508525`). -/
+theorem norm_sR53_ge : (1.58 : ℝ) ≤ ‖sR53‖ := by
+  have hsq : (1.58 : ℝ) ^ 2 ≤ ‖sR53‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR53_re, sR53_im]
+    norm_num
+  calc (1.58 : ℝ) = Real.sqrt ((1.58 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR53‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR53‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR53 - 1‖ ≥ 0.84` (`0.395^2 + 0.75^2 = 0.718525 ≥ 0.84^2 = 0.7056`). -/
+theorem norm_sR53_sub_one_ge : (0.84 : ℝ) ≤ ‖sR53 - 1‖ := by
+  have hr1 : (sR53 - 1).re = 0.395 := by
+    simp only [Complex.sub_re, Complex.one_re, sR53_re]
+    norm_num
+  have hi1 : (sR53 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR53_im]
+    norm_num
+  have hsq : (0.84 : ℝ) ^ 2 ≤ ‖sR53 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.84 : ℝ) = Real.sqrt ((0.84 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR53 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR53 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR53‖`
+(`1.58 * 0.84 / 2 = 0.6636 ≥ 0.40`; true `≈ 0.671`, slack `≈ 0.271`). -/
+theorem poly_lower_R53 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR53‖ := by
+  have hprod : (1.58 : ℝ) * 0.84 ≤ ‖sR53‖ * ‖sR53 - 1‖ :=
+    mul_le_mul norm_sR53_ge norm_sR53_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R53]
+  nlinarith [hprod]
+
+/-- `π ^ (7/10) ≤ 5/2` (cleared: `π ^ 7 ≤ (5/2)^10` via `π < 3.1416`). -/
+theorem pi_rpow_R53_le : Real.pi ^ (7 / 10 : ℝ) ≤ 5 / 2 := by
+  have hpow : (Real.pi ^ (7 / 10 : ℝ)) ^ (10 : ℕ) ≤ (5 / 2 : ℝ) ^ (10 : ℕ) := by
+    have e : (Real.pi ^ (7 / 10 : ℝ)) ^ (10 : ℕ) = Real.pi ^ (7 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (7 / 10 : ℝ) * (((10 : ℕ)) : ℝ) = (7 : ℝ) by norm_num]
+      rw [show (7 : ℝ) = (((7 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (7 : ℕ) ≤ (3.1416 : ℝ) ^ (7 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 7
+    have hnum : (3.1416 : ℝ) ^ (7 : ℕ) ≤ (5 / 2 : ℝ) ^ (10 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR53` is a real rpow. -/
+theorem piPart_norm_R53 :
+    ‖R00Enclosure.piPart sR53‖ = Real.pi ^ (-(sR53.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR53 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `2/5 ≤ ‖piPart sR53‖`
+(`Re = 1.395`, so `-Re/2 = -0.6975 ≥ -7/10` and `π^(-7/10) = 1/π^(7/10) ≥ 2/5`;
+`π^0.6975 ≈ 2.22 < 2.5`, so the `2/5` floor survives one more step). -/
+theorem pi_lower_R53 : (2 / 5 : ℝ) ≤ ‖R00Enclosure.piPart sR53‖ := by
+  rw [piPart_norm_R53]
+  have h60 : Real.pi ^ (7 / 10 : ℝ) ≤ 5 / 2 := pi_rpow_R53_le
+  have hneg : Real.pi ^ (-(7 / 10 : ℝ)) = 1 / (Real.pi ^ (7 / 10 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (2 / 5 : ℝ) ≤ Real.pi ^ (-(7 / 10 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(7 / 10 : ℝ)) ≤ -(sR53.re) / 2 := by rw [sR53_re]; norm_num
+  calc (2 / 5 : ℝ) ≤ Real.pi ^ (-(7 / 10 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR53.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R53 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `2/5` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.16`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R53_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R53.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR53‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR53‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (2 / 5) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R53.radius ≤
+      ‖xiShifted R53.center‖ := by
+  have hpoly := poly_lower_R53
+  have hpi := pi_lower_R53
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR53
+      = (1 / 2 : ℂ) + Complex.I * R53.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R53 0.15 0.06 (by norm_num) hrad
+    0.40 (2 / 5) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R53 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R53_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (2/5) = 0.16`. -/
+theorem R53_base_eq : (0.40 : ℝ) * (2 / 5) = 0.16 := by norm_num
+
+/-- Exact residual: banked floors `0.16 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.16 = 1.41`; banked `≈ 3.85e-09`;
+short by factor `≈ 366000000`, the ~8-order wall). -/
+theorem R53_banked_infeasible :
+    (0.40 : ℝ) * (2 / 5) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R53CenterAssembly.poly_lower_R53
+#print axioms R53CenterAssembly.pi_lower_R53
+#print axioms R53CenterAssembly.R53_center_with_poly_pi_gamma
+#print axioms R53CenterAssembly.R53_threshold_eq
+#print axioms R53CenterAssembly.R53_banked_infeasible
+
+end R53CenterAssembly
+
+namespace R54CenterAssembly
+
+/-- R54 rect `x in [-2, 0.5]`, `y in [-1.09, -0.90]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R53 route. -/
+noncomputable def R54 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.09, -0.90, by norm_num, by norm_num⟩
+
+theorem R54_x0 : R54.x0 = (-2 : ℝ) := rfl
+
+theorem R54_x1 : R54.x1 = (0.5 : ℝ) := rfl
+
+theorem R54_y0 : R54.y0 = (-1.09 : ℝ) := rfl
+
+theorem R54_y1 : R54.y1 = (-0.90 : ℝ) := rfl
+
+/-- The R54 `s`-plane center: `s = 1/2 + I·z` at `z = R54.center`. -/
+noncomputable def sR54 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R54.center
+
+/-- `R54.center = -0.75 + -0.995·I` (from `R54_x0/x1/y0/y1`). -/
+theorem R54_center_eq :
+    R54.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-0.995 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R54_x0, R54_x1, R54_y0, R54_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R54_x0, R54_x1, R54_y0, R54_y1]
+    simp
+    norm_num
+
+/-- `Re sR54 = 1.495`. -/
+theorem sR54_re : sR54.re = 1.495 := by
+  unfold sR54
+  rw [R54_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR54 = -0.75`. -/
+theorem sR54_im : sR54.im = -0.75 := by
+  unfold sR54
+  rw [R54_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R54 s-center. -/
+theorem polyPart_norm_R54 :
+    ‖R00Enclosure.polyPart sR54‖ =
+      (1 / 2) * ‖sR54‖ * ‖sR54 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR54‖ ≥ 1.66` (`1.66^2 = 2.7556 < 1.495^2 + 0.75^2 = 2.797525`). -/
+theorem norm_sR54_ge : (1.66 : ℝ) ≤ ‖sR54‖ := by
+  have hsq : (1.66 : ℝ) ^ 2 ≤ ‖sR54‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR54_re, sR54_im]
+    norm_num
+  calc (1.66 : ℝ) = Real.sqrt ((1.66 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR54‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR54‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR54 - 1‖ ≥ 0.88` (`0.495^2 + 0.75^2 = 0.807525 ≥ 0.88^2 = 0.7744`). -/
+theorem norm_sR54_sub_one_ge : (0.88 : ℝ) ≤ ‖sR54 - 1‖ := by
+  have hr1 : (sR54 - 1).re = 0.495 := by
+    simp only [Complex.sub_re, Complex.one_re, sR54_re]
+    norm_num
+  have hi1 : (sR54 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR54_im]
+    norm_num
+  have hsq : (0.88 : ℝ) ^ 2 ≤ ‖sR54 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.88 : ℝ) = Real.sqrt ((0.88 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR54 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR54 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR54‖`
+(`1.66 * 0.88 / 2 = 0.7304 ≥ 0.40`; true `≈ 0.751`, slack `≈ 0.351`). -/
+theorem poly_lower_R54 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR54‖ := by
+  have hprod : (1.66 : ℝ) * 0.88 ≤ ‖sR54‖ * ‖sR54 - 1‖ :=
+    mul_le_mul norm_sR54_ge norm_sR54_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R54]
+  nlinarith [hprod]
+
+/-- `π ^ (3/4) ≤ 5/2` (cleared: `π ^ 3 ≤ (5/2)^4` via `π < 3.1416`). -/
+theorem pi_rpow_R54_le : Real.pi ^ (3 / 4 : ℝ) ≤ 5 / 2 := by
+  have hpow : (Real.pi ^ (3 / 4 : ℝ)) ^ (4 : ℕ) ≤ (5 / 2 : ℝ) ^ (4 : ℕ) := by
+    have e : (Real.pi ^ (3 / 4 : ℝ)) ^ (4 : ℕ) = Real.pi ^ (3 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (3 / 4 : ℝ) * (((4 : ℕ)) : ℝ) = (3 : ℝ) by norm_num]
+      rw [show (3 : ℝ) = (((3 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (3 : ℕ) ≤ (3.1416 : ℝ) ^ (3 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 3
+    have hnum : (3.1416 : ℝ) ^ (3 : ℕ) ≤ (5 / 2 : ℝ) ^ (4 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR54` is a real rpow. -/
+theorem piPart_norm_R54 :
+    ‖R00Enclosure.piPart sR54‖ = Real.pi ^ (-(sR54.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR54 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `2/5 ≤ ‖piPart sR54‖`
+(`Re = 1.495`, so `-Re/2 = -0.7475 ≥ -3/4` and `π^(-3/4) = 1/π^(3/4) ≥ 2/5`;
+`π^0.7475 ≈ 2.35 < 2.5`, so the `2/5` floor survives with the `3/4` bridge). -/
+theorem pi_lower_R54 : (2 / 5 : ℝ) ≤ ‖R00Enclosure.piPart sR54‖ := by
+  rw [piPart_norm_R54]
+  have h60 : Real.pi ^ (3 / 4 : ℝ) ≤ 5 / 2 := pi_rpow_R54_le
+  have hneg : Real.pi ^ (-(3 / 4 : ℝ)) = 1 / (Real.pi ^ (3 / 4 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (2 / 5 : ℝ) ≤ Real.pi ^ (-(3 / 4 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(3 / 4 : ℝ)) ≤ -(sR54.re) / 2 := by rw [sR54_re]; norm_num
+  calc (2 / 5 : ℝ) ≤ Real.pi ^ (-(3 / 4 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR54.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R54 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `2/5` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.16`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R54_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R54.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR54‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR54‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (2 / 5) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R54.radius ≤
+      ‖xiShifted R54.center‖ := by
+  have hpoly := poly_lower_R54
+  have hpi := pi_lower_R54
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR54
+      = (1 / 2 : ℂ) + Complex.I * R54.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R54 0.15 0.06 (by norm_num) hrad
+    0.40 (2 / 5) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R54 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R54_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (2/5) = 0.16`. -/
+theorem R54_base_eq : (0.40 : ℝ) * (2 / 5) = 0.16 := by norm_num
+
+/-- Exact residual: banked floors `0.16 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.16 = 1.41`; banked `≈ 3.85e-09`;
+short by factor `≈ 366000000`, the ~8-order wall). -/
+theorem R54_banked_infeasible :
+    (0.40 : ℝ) * (2 / 5) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R54CenterAssembly.poly_lower_R54
+#print axioms R54CenterAssembly.pi_lower_R54
+#print axioms R54CenterAssembly.R54_center_with_poly_pi_gamma
+#print axioms R54CenterAssembly.R54_threshold_eq
+#print axioms R54CenterAssembly.R54_banked_infeasible
+
+end R54CenterAssembly
+
+namespace R55CenterAssembly
+
+/-- R55 rect `x in [-2, 0.5]`, `y in [-1.19, -1.00]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R54 route. -/
+noncomputable def R55 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.19, -1.00, by norm_num, by norm_num⟩
+
+theorem R55_x0 : R55.x0 = (-2 : ℝ) := rfl
+
+theorem R55_x1 : R55.x1 = (0.5 : ℝ) := rfl
+
+theorem R55_y0 : R55.y0 = (-1.19 : ℝ) := rfl
+
+theorem R55_y1 : R55.y1 = (-1.00 : ℝ) := rfl
+
+/-- The R55 `s`-plane center: `s = 1/2 + I·z` at `z = R55.center`. -/
+noncomputable def sR55 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R55.center
+
+/-- `R55.center = -0.75 + -1.095·I` (from `R55_x0/x1/y0/y1`). -/
+theorem R55_center_eq :
+    R55.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.095 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R55_x0, R55_x1, R55_y0, R55_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R55_x0, R55_x1, R55_y0, R55_y1]
+    simp
+    norm_num
+
+/-- `Re sR55 = 1.595`. -/
+theorem sR55_re : sR55.re = 1.595 := by
+  unfold sR55
+  rw [R55_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR55 = -0.75`. -/
+theorem sR55_im : sR55.im = -0.75 := by
+  unfold sR55
+  rw [R55_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R55 s-center. -/
+theorem polyPart_norm_R55 :
+    ‖R00Enclosure.polyPart sR55‖ =
+      (1 / 2) * ‖sR55‖ * ‖sR55 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR55‖ ≥ 1.75` (`1.75^2 = 3.0625 < 1.595^2 + 0.75^2 = 3.106525`). -/
+theorem norm_sR55_ge : (1.75 : ℝ) ≤ ‖sR55‖ := by
+  have hsq : (1.75 : ℝ) ^ 2 ≤ ‖sR55‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR55_re, sR55_im]
+    norm_num
+  calc (1.75 : ℝ) = Real.sqrt ((1.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR55‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR55‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR55 - 1‖ ≥ 0.95` (`0.595^2 + 0.75^2 = 0.916525 ≥ 0.95^2 = 0.9025`). -/
+theorem norm_sR55_sub_one_ge : (0.95 : ℝ) ≤ ‖sR55 - 1‖ := by
+  have hr1 : (sR55 - 1).re = 0.595 := by
+    simp only [Complex.sub_re, Complex.one_re, sR55_re]
+    norm_num
+  have hi1 : (sR55 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR55_im]
+    norm_num
+  have hsq : (0.95 : ℝ) ^ 2 ≤ ‖sR55 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (0.95 : ℝ) = Real.sqrt ((0.95 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR55 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR55 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR55‖`
+(`1.75 * 0.95 / 2 = 0.83125 ≥ 0.40`; true `≈ 0.844`, slack `≈ 0.444`). -/
+theorem poly_lower_R55 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR55‖ := by
+  have hprod : (1.75 : ℝ) * 0.95 ≤ ‖sR55‖ * ‖sR55 - 1‖ :=
+    mul_le_mul norm_sR55_ge norm_sR55_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R55]
+  nlinarith [hprod]
+
+/-- `π ^ (4/5) ≤ 5/2` (cleared: `π ^ 4 ≤ (5/2)^5` via `π < 3.1416`). -/
+theorem pi_rpow_R55_le : Real.pi ^ (4 / 5 : ℝ) ≤ 5 / 2 := by
+  have hpow : (Real.pi ^ (4 / 5 : ℝ)) ^ (5 : ℕ) ≤ (5 / 2 : ℝ) ^ (5 : ℕ) := by
+    have e : (Real.pi ^ (4 / 5 : ℝ)) ^ (5 : ℕ) = Real.pi ^ (4 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (4 / 5 : ℝ) * (((5 : ℕ)) : ℝ) = (4 : ℝ) by norm_num]
+      rw [show (4 : ℝ) = (((4 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (4 : ℕ) ≤ (3.1416 : ℝ) ^ (4 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 4
+    have hnum : (3.1416 : ℝ) ^ (4 : ℕ) ≤ (5 / 2 : ℝ) ^ (5 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR55` is a real rpow. -/
+theorem piPart_norm_R55 :
+    ‖R00Enclosure.piPart sR55‖ = Real.pi ^ (-(sR55.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR55 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `2/5 ≤ ‖piPart sR55‖`
+(`Re = 1.595`, so `-Re/2 = -0.7975 ≥ -4/5` and `π^(-4/5) = 1/π^(4/5) ≥ 2/5`;
+`π^0.7975 ≈ 2.49 < 2.5`, so the `2/5` floor survives with the `4/5` bridge;
+pi-floor decay watch: bridge tightens `3/4 → 4/5`, slack `≈ 0.01`). -/
+theorem pi_lower_R55 : (2 / 5 : ℝ) ≤ ‖R00Enclosure.piPart sR55‖ := by
+  rw [piPart_norm_R55]
+  have h60 : Real.pi ^ (4 / 5 : ℝ) ≤ 5 / 2 := pi_rpow_R55_le
+  have hneg : Real.pi ^ (-(4 / 5 : ℝ)) = 1 / (Real.pi ^ (4 / 5 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (2 / 5 : ℝ) ≤ Real.pi ^ (-(4 / 5 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(4 / 5 : ℝ)) ≤ -(sR55.re) / 2 := by rw [sR55_re]; norm_num
+  calc (2 / 5 : ℝ) ≤ Real.pi ^ (-(4 / 5 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR55.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R55 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `2/5` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / 0.16`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R55_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R55.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR55‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR55‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (2 / 5) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R55.radius ≤
+      ‖xiShifted R55.center‖ := by
+  have hpoly := poly_lower_R55
+  have hpi := pi_lower_R55
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR55
+      = (1 / 2 : ℂ) + Complex.I * R55.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R55 0.15 0.06 (by norm_num) hrad
+    0.40 (2 / 5) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R55 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R55_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (2/5) = 0.16`. -/
+theorem R55_base_eq : (0.40 : ℝ) * (2 / 5) = 0.16 := by norm_num
+
+/-- Exact residual: banked floors `0.16 / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / 0.16 = 1.41`; banked `≈ 3.85e-09`;
+short by factor `≈ 366000000`, the ~8-order wall). -/
+theorem R55_banked_infeasible :
+    (0.40 : ℝ) * (2 / 5) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R55CenterAssembly.poly_lower_R55
+#print axioms R55CenterAssembly.pi_lower_R55
+#print axioms R55CenterAssembly.R55_center_with_poly_pi_gamma
+#print axioms R55CenterAssembly.R55_threshold_eq
+#print axioms R55CenterAssembly.R55_banked_infeasible
+
+end R55CenterAssembly
+
+namespace R56CenterAssembly
+
+/-- R56 rect `x in [-2, 0.5]`, `y in [-1.29, -1.10]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R55 route. -/
+noncomputable def R56 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.29, -1.10, by norm_num, by norm_num⟩
+
+theorem R56_x0 : R56.x0 = (-2 : ℝ) := rfl
+
+theorem R56_x1 : R56.x1 = (0.5 : ℝ) := rfl
+
+theorem R56_y0 : R56.y0 = (-1.29 : ℝ) := rfl
+
+theorem R56_y1 : R56.y1 = (-1.10 : ℝ) := rfl
+
+/-- The R56 `s`-plane center: `s = 1/2 + I·z` at `z = R56.center`. -/
+noncomputable def sR56 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R56.center
+
+/-- `R56.center = -0.75 + -1.195·I` (from `R56_x0/x1/y0/y1`). -/
+theorem R56_center_eq :
+    R56.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.195 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R56_x0, R56_x1, R56_y0, R56_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R56_x0, R56_x1, R56_y0, R56_y1]
+    simp
+    norm_num
+
+/-- `Re sR56 = 1.695`. -/
+theorem sR56_re : sR56.re = 1.695 := by
+  unfold sR56
+  rw [R56_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR56 = -0.75`. -/
+theorem sR56_im : sR56.im = -0.75 := by
+  unfold sR56
+  rw [R56_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R56 s-center. -/
+theorem polyPart_norm_R56 :
+    ‖R00Enclosure.polyPart sR56‖ =
+      (1 / 2) * ‖sR56‖ * ‖sR56 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR56‖ ≥ 1.85` (`1.85^2 = 3.4225 < 1.695^2 + 0.75^2 = 3.435525`). -/
+theorem norm_sR56_ge : (1.85 : ℝ) ≤ ‖sR56‖ := by
+  have hsq : (1.85 : ℝ) ^ 2 ≤ ‖sR56‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR56_re, sR56_im]
+    norm_num
+  calc (1.85 : ℝ) = Real.sqrt ((1.85 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR56‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR56‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR56 - 1‖ ≥ 1.02` (`0.695^2 + 0.75^2 = 1.045525 ≥ 1.02^2 = 1.0404`). -/
+theorem norm_sR56_sub_one_ge : (1.02 : ℝ) ≤ ‖sR56 - 1‖ := by
+  have hr1 : (sR56 - 1).re = 0.695 := by
+    simp only [Complex.sub_re, Complex.one_re, sR56_re]
+    norm_num
+  have hi1 : (sR56 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR56_im]
+    norm_num
+  have hsq : (1.02 : ℝ) ^ 2 ≤ ‖sR56 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.02 : ℝ) = Real.sqrt ((1.02 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR56 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR56 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR56‖`
+(`1.85 * 1.02 / 2 = 0.9435 ≥ 0.40`; true `≈ 0.948`, slack `≈ 0.548`). -/
+theorem poly_lower_R56 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR56‖ := by
+  have hprod : (1.85 : ℝ) * 1.02 ≤ ‖sR56‖ * ‖sR56 - 1‖ :=
+    mul_le_mul norm_sR56_ge norm_sR56_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R56]
+  nlinarith [hprod]
+
+/-- `π ^ (6/7) ≤ 3` (cleared: `π ^ 6 ≤ 3^7` via `π < 3.1416`). -/
+theorem pi_rpow_R56_le : Real.pi ^ (6 / 7 : ℝ) ≤ 3 := by
+  have hpow : (Real.pi ^ (6 / 7 : ℝ)) ^ (7 : ℕ) ≤ (3 : ℝ) ^ (7 : ℕ) := by
+    have e : (Real.pi ^ (6 / 7 : ℝ)) ^ (7 : ℕ) = Real.pi ^ (6 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (6 / 7 : ℝ) * (((7 : ℕ)) : ℝ) = (6 : ℝ) by norm_num]
+      rw [show (6 : ℝ) = (((6 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (6 : ℕ) ≤ (3.1416 : ℝ) ^ (6 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 6
+    have hnum : (3.1416 : ℝ) ^ (6 : ℕ) ≤ (3 : ℝ) ^ (7 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR56` is a real rpow. -/
+theorem piPart_norm_R56 :
+    ‖R00Enclosure.piPart sR56‖ = Real.pi ^ (-(sR56.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR56 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/3 ≤ ‖piPart sR56‖`
+(`Re = 1.695`, so `-Re/2 = -0.8475 ≥ -6/7` and `π^(-6/7) = 1/π^(6/7) ≥ 1/3`;
+`π^0.8475 ≈ 2.64 > 2.5`, so the `2/5` floor is infeasible here and decays to `1/3`;
+pi-floor decay watch: bridge tightens `4/5 → 6/7`, cap `5/2 → 3`). -/
+theorem pi_lower_R56 : (1 / 3 : ℝ) ≤ ‖R00Enclosure.piPart sR56‖ := by
+  rw [piPart_norm_R56]
+  have h60 : Real.pi ^ (6 / 7 : ℝ) ≤ 3 := pi_rpow_R56_le
+  have hneg : Real.pi ^ (-(6 / 7 : ℝ)) = 1 / (Real.pi ^ (6 / 7 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 3 : ℝ) ≤ Real.pi ^ (-(6 / 7 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(6 / 7 : ℝ)) ≤ -(sR56.re) / 2 := by rw [sR56_re]; norm_num
+  calc (1 / 3 : ℝ) ≤ Real.pi ^ (-(6 / 7 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR56.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R56 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/3` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 3)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R56_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R56.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR56‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR56‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 3) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R56.radius ≤
+      ‖xiShifted R56.center‖ := by
+  have hpoly := poly_lower_R56
+  have hpi := pi_lower_R56
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR56
+      = (1 / 2 : ℂ) + Complex.I * R56.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R56 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 3) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R56 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R56_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/3) = 2/15`. -/
+theorem R56_base_eq : (0.40 : ℝ) * (1 / 3) = 2 / 15 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 3) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 3) = 1.692`; banked `≈ 3.85e-09`;
+short by factor `≈ 440000000`, the ~8-order wall). -/
+theorem R56_banked_infeasible :
+    (0.40 : ℝ) * (1 / 3) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R56CenterAssembly.poly_lower_R56
+#print axioms R56CenterAssembly.pi_lower_R56
+#print axioms R56CenterAssembly.R56_center_with_poly_pi_gamma
+#print axioms R56CenterAssembly.R56_threshold_eq
+#print axioms R56CenterAssembly.R56_banked_infeasible
+
+end R56CenterAssembly
+
+
+namespace R57CenterAssembly
+
+/-- R57 rect `x in [-2, 0.5]`, `y in [-1.39, -1.20]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R56 route. -/
+noncomputable def R57 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.39, -1.20, by norm_num, by norm_num⟩
+
+theorem R57_x0 : R57.x0 = (-2 : ℝ) := rfl
+
+theorem R57_x1 : R57.x1 = (0.5 : ℝ) := rfl
+
+theorem R57_y0 : R57.y0 = (-1.39 : ℝ) := rfl
+
+theorem R57_y1 : R57.y1 = (-1.20 : ℝ) := rfl
+
+/-- The R57 `s`-plane center: `s = 1/2 + I·z` at `z = R57.center`. -/
+noncomputable def sR57 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R57.center
+
+/-- `R57.center = -0.75 + -1.295·I` (from `R57_x0/x1/y0/y1`). -/
+theorem R57_center_eq :
+    R57.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.295 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R57_x0, R57_x1, R57_y0, R57_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R57_x0, R57_x1, R57_y0, R57_y1]
+    simp
+    norm_num
+
+/-- `Re sR57 = 1.795`. -/
+theorem sR57_re : sR57.re = 1.795 := by
+  unfold sR57
+  rw [R57_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR57 = -0.75`. -/
+theorem sR57_im : sR57.im = -0.75 := by
+  unfold sR57
+  rw [R57_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R57 s-center. -/
+theorem polyPart_norm_R57 :
+    ‖R00Enclosure.polyPart sR57‖ =
+      (1 / 2) * ‖sR57‖ * ‖sR57 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR57‖ ≥ 1.94` (`1.94^2 = 3.7636 < 1.795^2 + 0.75^2 = 3.784525`). -/
+theorem norm_sR57_ge : (1.94 : ℝ) ≤ ‖sR57‖ := by
+  have hsq : (1.94 : ℝ) ^ 2 ≤ ‖sR57‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR57_re, sR57_im]
+    norm_num
+  calc (1.94 : ℝ) = Real.sqrt ((1.94 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR57‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR57‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR57 - 1‖ ≥ 1.09` (`0.795^2 + 0.75^2 = 1.194525 ≥ 1.09^2 = 1.1881`). -/
+theorem norm_sR57_sub_one_ge : (1.09 : ℝ) ≤ ‖sR57 - 1‖ := by
+  have hr1 : (sR57 - 1).re = 0.795 := by
+    simp only [Complex.sub_re, Complex.one_re, sR57_re]
+    norm_num
+  have hi1 : (sR57 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR57_im]
+    norm_num
+  have hsq : (1.09 : ℝ) ^ 2 ≤ ‖sR57 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.09 : ℝ) = Real.sqrt ((1.09 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR57 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR57 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR57‖`
+(`1.94 * 1.09 / 2 = 1.0573 ≥ 0.40`; true `≈ 1.063`, slack `≈ 0.663`). -/
+theorem poly_lower_R57 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR57‖ := by
+  have hprod : (1.94 : ℝ) * 1.09 ≤ ‖sR57‖ * ‖sR57 - 1‖ :=
+    mul_le_mul norm_sR57_ge norm_sR57_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R57]
+  nlinarith [hprod]
+
+/-- `π ^ (9/10) ≤ 3` (cleared: `π ^ 9 ≤ 3^10` via `π < 3.1416`). -/
+theorem pi_rpow_R57_le : Real.pi ^ (9 / 10 : ℝ) ≤ 3 := by
+  have hpow : (Real.pi ^ (9 / 10 : ℝ)) ^ (10 : ℕ) ≤ (3 : ℝ) ^ (10 : ℕ) := by
+    have e : (Real.pi ^ (9 / 10 : ℝ)) ^ (10 : ℕ) = Real.pi ^ (9 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (9 / 10 : ℝ) * (((10 : ℕ)) : ℝ) = (9 : ℝ) by norm_num]
+      rw [show (9 : ℝ) = (((9 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (9 : ℕ) ≤ (3.1416 : ℝ) ^ (9 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 9
+    have hnum : (3.1416 : ℝ) ^ (9 : ℕ) ≤ (3 : ℝ) ^ (10 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR57` is a real rpow. -/
+theorem piPart_norm_R57 :
+    ‖R00Enclosure.piPart sR57‖ = Real.pi ^ (-(sR57.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR57 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/3 ≤ ‖piPart sR57‖`
+(`Re = 1.795`, so `-Re/2 = -0.8975 ≥ -9/10` and `π^(-9/10) = 1/π^(9/10) ≥ 1/3`;
+`π^0.8975 ≈ 2.79 > 2.5`, so the `2/5` floor stays infeasible and the `1/3` floor holds;
+pi-floor decay watch: bridge tightens `6/7 → 9/10`, cap stays `3`). -/
+theorem pi_lower_R57 : (1 / 3 : ℝ) ≤ ‖R00Enclosure.piPart sR57‖ := by
+  rw [piPart_norm_R57]
+  have h60 : Real.pi ^ (9 / 10 : ℝ) ≤ 3 := pi_rpow_R57_le
+  have hneg : Real.pi ^ (-(9 / 10 : ℝ)) = 1 / (Real.pi ^ (9 / 10 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 3 : ℝ) ≤ Real.pi ^ (-(9 / 10 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(9 / 10 : ℝ)) ≤ -(sR57.re) / 2 := by rw [sR57_re]; norm_num
+  calc (1 / 3 : ℝ) ≤ Real.pi ^ (-(9 / 10 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR57.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R57 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/3` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 3)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R57_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R57.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR57‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR57‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 3) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R57.radius ≤
+      ‖xiShifted R57.center‖ := by
+  have hpoly := poly_lower_R57
+  have hpi := pi_lower_R57
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR57
+      = (1 / 2 : ℂ) + Complex.I * R57.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R57 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 3) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R57 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R57_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/3) = 2/15`. -/
+theorem R57_base_eq : (0.40 : ℝ) * (1 / 3) = 2 / 15 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 3) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 3) = 1.692`; banked `≈ 3.85e-09`;
+short by factor `≈ 440000000`, the ~8-order wall). -/
+theorem R57_banked_infeasible :
+    (0.40 : ℝ) * (1 / 3) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R57CenterAssembly.poly_lower_R57
+#print axioms R57CenterAssembly.pi_lower_R57
+#print axioms R57CenterAssembly.R57_center_with_poly_pi_gamma
+#print axioms R57CenterAssembly.R57_threshold_eq
+#print axioms R57CenterAssembly.R57_banked_infeasible
+
+end R57CenterAssembly
+
+
+namespace R58CenterAssembly
+
+/-- R58 rect `x in [-2, 0.5]`, `y in [-1.49, -1.30]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R57 route. -/
+noncomputable def R58 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.49, -1.30, by norm_num, by norm_num⟩
+
+theorem R58_x0 : R58.x0 = (-2 : ℝ) := rfl
+
+theorem R58_x1 : R58.x1 = (0.5 : ℝ) := rfl
+
+theorem R58_y0 : R58.y0 = (-1.49 : ℝ) := rfl
+
+theorem R58_y1 : R58.y1 = (-1.30 : ℝ) := rfl
+
+/-- The R58 `s`-plane center: `s = 1/2 + I·z` at `z = R58.center`. -/
+noncomputable def sR58 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R58.center
+
+/-- `R58.center = -0.75 + -1.395·I` (from `R58_x0/x1/y0/y1`). -/
+theorem R58_center_eq :
+    R58.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.395 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R58_x0, R58_x1, R58_y0, R58_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R58_x0, R58_x1, R58_y0, R58_y1]
+    simp
+    norm_num
+
+/-- `Re sR58 = 1.895`. -/
+theorem sR58_re : sR58.re = 1.895 := by
+  unfold sR58
+  rw [R58_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR58 = -0.75`. -/
+theorem sR58_im : sR58.im = -0.75 := by
+  unfold sR58
+  rw [R58_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R58 s-center. -/
+theorem polyPart_norm_R58 :
+    ‖R00Enclosure.polyPart sR58‖ =
+      (1 / 2) * ‖sR58‖ * ‖sR58 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR58‖ ≥ 2.03` (`2.03^2 = 4.1209 < 1.895^2 + 0.75^2 = 4.153525`). -/
+theorem norm_sR58_ge : (2.03 : ℝ) ≤ ‖sR58‖ := by
+  have hsq : (2.03 : ℝ) ^ 2 ≤ ‖sR58‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR58_re, sR58_im]
+    norm_num
+  calc (2.03 : ℝ) = Real.sqrt ((2.03 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR58‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR58‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR58 - 1‖ ≥ 1.16` (`0.895^2 + 0.75^2 = 1.363525 ≥ 1.16^2 = 1.3456`). -/
+theorem norm_sR58_sub_one_ge : (1.16 : ℝ) ≤ ‖sR58 - 1‖ := by
+  have hr1 : (sR58 - 1).re = 0.895 := by
+    simp only [Complex.sub_re, Complex.one_re, sR58_re]
+    norm_num
+  have hi1 : (sR58 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR58_im]
+    norm_num
+  have hsq : (1.16 : ℝ) ^ 2 ≤ ‖sR58 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.16 : ℝ) = Real.sqrt ((1.16 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR58 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR58 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR58‖`
+(`2.03 * 1.16 / 2 = 1.1774 ≥ 0.40`; true `≈ 1.190`, slack `≈ 0.790`). -/
+theorem poly_lower_R58 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR58‖ := by
+  have hprod : (2.03 : ℝ) * 1.16 ≤ ‖sR58‖ * ‖sR58 - 1‖ :=
+    mul_le_mul norm_sR58_ge norm_sR58_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R58]
+  nlinarith [hprod]
+
+/-- `π ^ (19/20) ≤ 3` (cleared: `π ^ 19 ≤ 3^20` via `π < 3.1416`). -/
+theorem pi_rpow_R58_le : Real.pi ^ (19 / 20 : ℝ) ≤ 3 := by
+  have hpow : (Real.pi ^ (19 / 20 : ℝ)) ^ (20 : ℕ) ≤ (3 : ℝ) ^ (20 : ℕ) := by
+    have e : (Real.pi ^ (19 / 20 : ℝ)) ^ (20 : ℕ) = Real.pi ^ (19 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (19 / 20 : ℝ) * (((20 : ℕ)) : ℝ) = (19 : ℝ) by norm_num]
+      rw [show (19 : ℝ) = (((19 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (19 : ℕ) ≤ (3.1416 : ℝ) ^ (19 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 19
+    have hnum : (3.1416 : ℝ) ^ (19 : ℕ) ≤ (3 : ℝ) ^ (20 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR58` is a real rpow. -/
+theorem piPart_norm_R58 :
+    ‖R00Enclosure.piPart sR58‖ = Real.pi ^ (-(sR58.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR58 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/3 ≤ ‖piPart sR58‖`
+(`Re = 1.895`, so `-Re/2 = -0.9475 ≥ -19/20` and `π^(-19/20) = 1/π^(19/20) ≥ 1/3`;
+`π^0.9475 ≈ 2.96 > 2.5`, so the `2/5` floor stays infeasible and the `1/3` floor holds;
+pi-floor decay watch: bridge tightens `9/10 → 19/20`, cap stays `3`). -/
+theorem pi_lower_R58 : (1 / 3 : ℝ) ≤ ‖R00Enclosure.piPart sR58‖ := by
+  rw [piPart_norm_R58]
+  have h60 : Real.pi ^ (19 / 20 : ℝ) ≤ 3 := pi_rpow_R58_le
+  have hneg : Real.pi ^ (-(19 / 20 : ℝ)) = 1 / (Real.pi ^ (19 / 20 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 3 : ℝ) ≤ Real.pi ^ (-(19 / 20 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(19 / 20 : ℝ)) ≤ -(sR58.re) / 2 := by rw [sR58_re]; norm_num
+  calc (1 / 3 : ℝ) ≤ Real.pi ^ (-(19 / 20 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR58.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R58 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/3` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 3)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R58_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R58.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR58‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR58‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 3) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R58.radius ≤
+      ‖xiShifted R58.center‖ := by
+  have hpoly := poly_lower_R58
+  have hpi := pi_lower_R58
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR58
+      = (1 / 2 : ℂ) + Complex.I * R58.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R58 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 3) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R58 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R58_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/3) = 2/15`. -/
+theorem R58_base_eq : (0.40 : ℝ) * (1 / 3) = 2 / 15 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 3) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 3) = 1.692`; banked `≈ 3.85e-09`;
+short by factor `≈ 440000000`, the ~8-order wall). -/
+theorem R58_banked_infeasible :
+    (0.40 : ℝ) * (1 / 3) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R58CenterAssembly.poly_lower_R58
+#print axioms R58CenterAssembly.pi_lower_R58
+#print axioms R58CenterAssembly.R58_center_with_poly_pi_gamma
+#print axioms R58CenterAssembly.R58_threshold_eq
+#print axioms R58CenterAssembly.R58_banked_infeasible
+
+end R58CenterAssembly
+
+namespace R59CenterAssembly
+
+/-- R59 rect `x in [-2, 0.5]`, `y in [-1.59, -1.40]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R58 route. -/
+noncomputable def R59 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.59, -1.40, by norm_num, by norm_num⟩
+
+theorem R59_x0 : R59.x0 = (-2 : ℝ) := rfl
+
+theorem R59_x1 : R59.x1 = (0.5 : ℝ) := rfl
+
+theorem R59_y0 : R59.y0 = (-1.59 : ℝ) := rfl
+
+theorem R59_y1 : R59.y1 = (-1.40 : ℝ) := rfl
+
+/-- The R59 `s`-plane center: `s = 1/2 + I·z` at `z = R59.center`. -/
+noncomputable def sR59 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R59.center
+
+/-- `R59.center = -0.75 + -1.495·I` (from `R59_x0/x1/y0/y1`). -/
+theorem R59_center_eq :
+    R59.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.495 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R59_x0, R59_x1, R59_y0, R59_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R59_x0, R59_x1, R59_y0, R59_y1]
+    simp
+    norm_num
+
+/-- `Re sR59 = 1.995`. -/
+theorem sR59_re : sR59.re = 1.995 := by
+  unfold sR59
+  rw [R59_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR59 = -0.75`. -/
+theorem sR59_im : sR59.im = -0.75 := by
+  unfold sR59
+  rw [R59_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R59 s-center. -/
+theorem polyPart_norm_R59 :
+    ‖R00Enclosure.polyPart sR59‖ =
+      (1 / 2) * ‖sR59‖ * ‖sR59 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR59‖ ≥ 2.12` (`2.12^2 = 4.4944 < 1.995^2 + 0.75^2 = 4.542525`). -/
+theorem norm_sR59_ge : (2.12 : ℝ) ≤ ‖sR59‖ := by
+  have hsq : (2.12 : ℝ) ^ 2 ≤ ‖sR59‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR59_re, sR59_im]
+    norm_num
+  calc (2.12 : ℝ) = Real.sqrt ((2.12 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR59‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR59‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR59 - 1‖ ≥ 1.23` (`0.995^2 + 0.75^2 = 1.552525 ≥ 1.23^2 = 1.5129`). -/
+theorem norm_sR59_sub_one_ge : (1.23 : ℝ) ≤ ‖sR59 - 1‖ := by
+  have hr1 : (sR59 - 1).re = 0.995 := by
+    simp only [Complex.sub_re, Complex.one_re, sR59_re]
+    norm_num
+  have hi1 : (sR59 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR59_im]
+    norm_num
+  have hsq : (1.23 : ℝ) ^ 2 ≤ ‖sR59 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.23 : ℝ) = Real.sqrt ((1.23 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR59 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR59 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR59‖`
+(`2.12 * 1.23 / 2 = 1.3038 ≥ 0.40`; true `≈ 1.328`, slack `≈ 0.928`). -/
+theorem poly_lower_R59 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR59‖ := by
+  have hprod : (2.12 : ℝ) * 1.23 ≤ ‖sR59‖ * ‖sR59 - 1‖ :=
+    mul_le_mul norm_sR59_ge norm_sR59_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R59]
+  nlinarith [hprod]
+
+/-- `π ^ (1:ℝ) ≤ 4` (direct: `π < 3.1416 < 4` via `rpow_one`). -/
+theorem pi_rpow_R59_le : Real.pi ^ (1 : ℝ) ≤ 4 := by
+  rw [Real.rpow_one]
+  linarith [Real.pi_lt_d4]
+
+/-- Norm of `piPart` at `sR59` is a real rpow. -/
+theorem piPart_norm_R59 :
+    ‖R00Enclosure.piPart sR59‖ = Real.pi ^ (-(sR59.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR59 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/4 ≤ ‖piPart sR59‖`
+(`Re = 1.995`, so `-Re/2 = -0.9975 ≥ -1` and `π^(-1) = 1/π^1 ≥ 1/4`;
+`π^0.9975 ≈ 3.13 > 3`, so the `1/3` floor stays infeasible and the `1/4` floor holds;
+pi-floor decay watch: bridge tightens `19/20 → 1`, cap `3 → 4`). -/
+theorem pi_lower_R59 : (1 / 4 : ℝ) ≤ ‖R00Enclosure.piPart sR59‖ := by
+  rw [piPart_norm_R59]
+  have h60 : Real.pi ^ (1 : ℝ) ≤ 4 := pi_rpow_R59_le
+  have hneg : Real.pi ^ (-(1 : ℝ)) = 1 / (Real.pi ^ (1 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 4 : ℝ) ≤ Real.pi ^ (-(1 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(1 : ℝ)) ≤ -(sR59.re) / 2 := by rw [sR59_re]; norm_num
+  calc (1 / 4 : ℝ) ≤ Real.pi ^ (-(1 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR59.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R59 center assembly (inner tier `0.15 + 0.06 * radius`):
+banked s-center + new poly `0.40` and pi `1/4` floors are plugged into the
+generic bridge; the Gamma remainder and zeta lower stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 4)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R59_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R59.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR59‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR59‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 4) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R59.radius ≤
+      ‖xiShifted R59.center‖ := by
+  have hpoly := poly_lower_R59
+  have hpi := pi_lower_R59
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR59
+      = (1 / 2 : ℂ) + Complex.I * R59.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R59 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 4) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R59 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R59_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/4) = 1/10`. -/
+theorem R59_base_eq : (0.40 : ℝ) * (1 / 4) = 1 / 10 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 4) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 4) = 2.256`; banked `≈ 3.85e-09`;
+short by factor `≈ 590000000`, the ~8-order wall). -/
+theorem R59_banked_infeasible :
+    (0.40 : ℝ) * (1 / 4) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R59CenterAssembly.poly_lower_R59
+#print axioms R59CenterAssembly.pi_lower_R59
+#print axioms R59CenterAssembly.R59_center_with_poly_pi_gamma
+#print axioms R59CenterAssembly.R59_threshold_eq
+#print axioms R59CenterAssembly.R59_banked_infeasible
+
+end R59CenterAssembly
+
+
+namespace R60CenterAssembly
+
+/-- R60 rect `x in [-2, 0.5]`, `y in [-1.69, -1.50]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R59 route.
+MILESTONE R60: sixtieth center in the R50+ rollout wave (R59 closed poly `0.40`
+with the pi `1 → 4` bridge at `Re 1.995`; R60 carries the same floors forward
+with the pi bridge tightened for `Re 2.095`). -/
+noncomputable def R60 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.69, -1.50, by norm_num, by norm_num⟩
+
+theorem R60_x0 : R60.x0 = (-2 : ℝ) := rfl
+
+theorem R60_x1 : R60.x1 = (0.5 : ℝ) := rfl
+
+theorem R60_y0 : R60.y0 = (-1.69 : ℝ) := rfl
+
+theorem R60_y1 : R60.y1 = (-1.50 : ℝ) := rfl
+
+/-- The R60 `s`-plane center: `s = 1/2 + I·z` at `z = R60.center`. -/
+noncomputable def sR60 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R60.center
+
+/-- `R60.center = -0.75 + -1.595·I` (from `R60_x0/x1/y0/y1`). -/
+theorem R60_center_eq :
+    R60.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.595 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R60_x0, R60_x1, R60_y0, R60_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R60_x0, R60_x1, R60_y0, R60_y1]
+    simp
+    norm_num
+
+/-- `Re sR60 = 2.095`. -/
+theorem sR60_re : sR60.re = 2.095 := by
+  unfold sR60
+  rw [R60_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR60 = -0.75`. -/
+theorem sR60_im : sR60.im = -0.75 := by
+  unfold sR60
+  rw [R60_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R60 s-center. -/
+theorem polyPart_norm_R60 :
+    ‖R00Enclosure.polyPart sR60‖ =
+      (1 / 2) * ‖sR60‖ * ‖sR60 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR60‖ ≥ 2.21` (`2.21^2 = 4.8841 < 2.095^2 + 0.75^2 = 4.951525`). -/
+theorem norm_sR60_ge : (2.21 : ℝ) ≤ ‖sR60‖ := by
+  have hsq : (2.21 : ℝ) ^ 2 ≤ ‖sR60‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR60_re, sR60_im]
+    norm_num
+  calc (2.21 : ℝ) = Real.sqrt ((2.21 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR60‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR60‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR60 - 1‖ ≥ 1.30` (`1.095^2 + 0.75^2 = 1.761525 ≥ 1.30^2 = 1.69`). -/
+theorem norm_sR60_sub_one_ge : (1.30 : ℝ) ≤ ‖sR60 - 1‖ := by
+  have hr1 : (sR60 - 1).re = 1.095 := by
+    simp only [Complex.sub_re, Complex.one_re, sR60_re]
+    norm_num
+  have hi1 : (sR60 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR60_im]
+    norm_num
+  have hsq : (1.30 : ℝ) ^ 2 ≤ ‖sR60 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.30 : ℝ) = Real.sqrt ((1.30 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR60 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR60 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR60‖`
+(`2.21 * 1.30 / 2 = 1.4365 ≥ 0.40`; true `≈ 1.477`, slack `≈ 1.07`). -/
+theorem poly_lower_R60 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR60‖ := by
+  have hprod : (2.21 : ℝ) * 1.30 ≤ ‖sR60‖ * ‖sR60 - 1‖ :=
+    mul_le_mul norm_sR60_ge norm_sR60_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R60]
+  nlinarith [hprod]
+
+/-- `π ^ (21/20) ≤ 4` (cleared: `π ^ 21 ≤ 4^20` via `π < 3.1416`). -/
+theorem pi_rpow_R60_le : Real.pi ^ (21 / 20 : ℝ) ≤ 4 := by
+  have hpow : (Real.pi ^ (21 / 20 : ℝ)) ^ (20 : ℕ) ≤ (4 : ℝ) ^ (20 : ℕ) := by
+    have e : (Real.pi ^ (21 / 20 : ℝ)) ^ (20 : ℕ) = Real.pi ^ (21 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (21 / 20 : ℝ) * (((20 : ℕ)) : ℝ) = (21 : ℝ) by norm_num]
+      rw [show (21 : ℝ) = (((21 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (21 : ℕ) ≤ (3.1416 : ℝ) ^ (21 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 21
+    have hnum : (3.1416 : ℝ) ^ (21 : ℕ) ≤ (4 : ℝ) ^ (20 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR60` is a real rpow. -/
+theorem piPart_norm_R60 :
+    ‖R00Enclosure.piPart sR60‖ = Real.pi ^ (-(sR60.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR60 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/4 ≤ ‖piPart sR60‖`
+(`Re = 2.095`, so `-Re/2 = -1.0475 ≥ -21/20` and `π^(-21/20) = 1/π^(21/20) ≥ 1/4`;
+`π^1.0475 ≈ 3.32 > 3`, so the `1/3` floor stays infeasible and the `1/4` floor holds;
+pi-floor decay watch: bridge tightens `1 → 21/20`, cap stays `4`). -/
+theorem pi_lower_R60 : (1 / 4 : ℝ) ≤ ‖R00Enclosure.piPart sR60‖ := by
+  rw [piPart_norm_R60]
+  have h60 : Real.pi ^ (21 / 20 : ℝ) ≤ 4 := pi_rpow_R60_le
+  have hneg : Real.pi ^ (-(21 / 20 : ℝ)) = 1 / (Real.pi ^ (21 / 20 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 4 : ℝ) ≤ Real.pi ^ (-(21 / 20 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h60
+  have hexp : (-(21 / 20 : ℝ)) ≤ -(sR60.re) / 2 := by rw [sR60_re]; norm_num
+  calc (1 / 4 : ℝ) ≤ Real.pi ^ (-(21 / 20 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR60.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R60 center assembly (inner tier `0.15 + 0.06 * radius`):
+MILESTONE R60 keeps the R59 floors (poly `0.40`, pi `1/4`) at the new s-center
+and plugs them into the generic bridge; the Gamma remainder and zeta lower
+stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 4)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R60_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R60.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR60‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR60‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 4) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R60.radius ≤
+      ‖xiShifted R60.center‖ := by
+  have hpoly := poly_lower_R60
+  have hpi := pi_lower_R60
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR60
+      = (1 / 2 : ℂ) + Complex.I * R60.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R60 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 4) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R60 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R60_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/4) = 1/10`. -/
+theorem R60_base_eq : (0.40 : ℝ) * (1 / 4) = 1 / 10 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 4) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 4) = 2.256`; banked `≈ 3.85e-09`;
+short by factor `≈ 590000000`, the ~8-order wall). -/
+theorem R60_banked_infeasible :
+    (0.40 : ℝ) * (1 / 4) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R60CenterAssembly.poly_lower_R60
+#print axioms R60CenterAssembly.pi_lower_R60
+#print axioms R60CenterAssembly.R60_center_with_poly_pi_gamma
+#print axioms R60CenterAssembly.R60_threshold_eq
+#print axioms R60CenterAssembly.R60_banked_infeasible
+
+end R60CenterAssembly
+
+
+namespace R61CenterAssembly
+
+/-- R61 rect `x in [-2, 0.5]`, `y in [-1.79, -1.60]` (inner tier `(0.15, 0.06)`,
+`dx = 1.25`, `dy = 0.095`, cap `1.26`). Local def mirroring the R60 route.
+MILESTONE R61 follows R60 (sixtieth center closed poly `0.40` with the pi
+`21/20` bridge at `Re 2.095`); R61 carries the same floors forward with the
+pi bridge tightened for `Re 2.195`. -/
+noncomputable def R61 : CellProofEngine.Rect2D :=
+  ⟨(-2 : ℝ), 0.5, -1.79, -1.60, by norm_num, by norm_num⟩
+
+theorem R61_x0 : R61.x0 = (-2 : ℝ) := rfl
+
+theorem R61_x1 : R61.x1 = (0.5 : ℝ) := rfl
+
+theorem R61_y0 : R61.y0 = (-1.79 : ℝ) := rfl
+
+theorem R61_y1 : R61.y1 = (-1.60 : ℝ) := rfl
+
+/-- The R61 `s`-plane center: `s = 1/2 + I·z` at `z = R61.center`. -/
+noncomputable def sR61 : ℂ :=
+  (1 / 2 : ℂ) + Complex.I * R61.center
+
+/-- `R61.center = -0.75 + -1.695·I` (from `R61_x0/x1/y0/y1`). -/
+theorem R61_center_eq :
+    R61.center =
+      (((-0.75 : ℝ))) + Complex.I * ((((-1.695 : ℝ))) : ℂ) := by
+  apply Complex.ext
+  · unfold CellProofEngine.Rect2D.center
+    rw [R61_x0, R61_x1, R61_y0, R61_y1]
+    simp
+    norm_num
+  · unfold CellProofEngine.Rect2D.center
+    rw [R61_x0, R61_x1, R61_y0, R61_y1]
+    simp
+    norm_num
+
+/-- `Re sR61 = 2.195`. -/
+theorem sR61_re : sR61.re = 2.195 := by
+  unfold sR61
+  rw [R61_center_eq]
+  simp
+  norm_num
+
+/-- `Im sR61 = -0.75`. -/
+theorem sR61_im : sR61.im = -0.75 := by
+  unfold sR61
+  rw [R61_center_eq]
+  simp
+
+/-- Norm version of `polyPart` at the banked R61 s-center. -/
+theorem polyPart_norm_R61 :
+    ‖R00Enclosure.polyPart sR61‖ =
+      (1 / 2) * ‖sR61‖ * ‖sR61 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR61‖ ≥ 2.31` (`2.31^2 = 5.3361 < 2.195^2 + 0.75^2 = 5.380525`). -/
+theorem norm_sR61_ge : (2.31 : ℝ) ≤ ‖sR61‖ := by
+  have hsq : (2.31 : ℝ) ^ 2 ≤ ‖sR61‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      sR61_re, sR61_im]
+    norm_num
+  calc (2.31 : ℝ) = Real.sqrt ((2.31 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR61‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR61‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR61 - 1‖ ≥ 1.40` (`1.195^2 + 0.75^2 = 1.990525 ≥ 1.40^2 = 1.96`). -/
+theorem norm_sR61_sub_one_ge : (1.40 : ℝ) ≤ ‖sR61 - 1‖ := by
+  have hr1 : (sR61 - 1).re = 1.195 := by
+    simp only [Complex.sub_re, Complex.one_re, sR61_re]
+    norm_num
+  have hi1 : (sR61 - 1).im = -0.75 := by
+    simp only [Complex.sub_im, Complex.one_im, sR61_im]
+    norm_num
+  have hsq : (1.40 : ℝ) ^ 2 ≤ ‖sR61 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (1.40 : ℝ) = Real.sqrt ((1.40 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖sR61 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖sR61 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `0.40 ≤ ‖polyPart sR61‖`
+(`2.31 * 1.40 / 2 = 1.617 ≥ 0.40`; true `≈ 1.641`, slack `≈ 1.24`). -/
+theorem poly_lower_R61 : (0.40 : ℝ) ≤ ‖R00Enclosure.polyPart sR61‖ := by
+  have hprod : (2.31 : ℝ) * 1.40 ≤ ‖sR61‖ * ‖sR61 - 1‖ :=
+    mul_le_mul norm_sR61_ge norm_sR61_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R61]
+  nlinarith [hprod]
+
+/-- `π ^ (11/10) ≤ 4` (cleared: `π ^ 11 ≤ 4^10` via `π < 3.1416`). -/
+theorem pi_rpow_R61_le : Real.pi ^ (11 / 10 : ℝ) ≤ 4 := by
+  have hpow : (Real.pi ^ (11 / 10 : ℝ)) ^ (10 : ℕ) ≤ (4 : ℝ) ^ (10 : ℕ) := by
+    have e : (Real.pi ^ (11 / 10 : ℝ)) ^ (10 : ℕ) = Real.pi ^ (11 : ℕ) := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (le_of_lt Real.pi_pos)]
+      rw [show (11 / 10 : ℝ) * (((10 : ℕ)) : ℝ) = (11 : ℝ) by norm_num]
+      rw [show (11 : ℝ) = (((11 : ℕ)) : ℝ) by norm_num]
+      exact Real.rpow_natCast _ _
+    rw [e]
+    have hpi_le : Real.pi ≤ 3.1416 := le_of_lt Real.pi_lt_d4
+    have hle : Real.pi ^ (11 : ℕ) ≤ (3.1416 : ℝ) ^ (11 : ℕ) :=
+      pow_le_pow_left₀ Real.pi_pos.le hpi_le 11
+    have hnum : (3.1416 : ℝ) ^ (11 : ℕ) ≤ (4 : ℝ) ^ (10 : ℕ) := by norm_num
+    exact le_trans hle hnum
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) hpow
+
+/-- Norm of `piPart` at `sR61` is a real rpow. -/
+theorem piPart_norm_R61 :
+    ‖R00Enclosure.piPart sR61‖ = Real.pi ^ (-(sR61.re) / 2) := by
+  have h := Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos (-(sR61 / 2))
+  unfold R00Enclosure.piPart
+  rw [h]
+  congr 1
+  rw [Complex.neg_re, Complex.div_ofNat_re]
+  ring
+
+/-- ENCLOSURE (hypothesis-free): `1/4 ≤ ‖piPart sR61‖`
+(`Re = 2.195`, so `-Re/2 = -1.0975 ≥ -11/10` and `π^(-11/10) = 1/π^(11/10) ≥ 1/4`;
+`π^1.0975 ≈ 3.51 > 3`, so the `1/3` floor stays infeasible and the `1/4` floor holds;
+pi-floor decay watch: bridge tightens `21/20 → 11/10`, cap stays `4`). -/
+theorem pi_lower_R61 : (1 / 4 : ℝ) ≤ ‖R00Enclosure.piPart sR61‖ := by
+  rw [piPart_norm_R61]
+  have h61 : Real.pi ^ (11 / 10 : ℝ) ≤ 4 := pi_rpow_R61_le
+  have hneg : Real.pi ^ (-(11 / 10 : ℝ)) = 1 / (Real.pi ^ (11 / 10 : ℝ)) := by
+    rw [Real.rpow_neg (le_of_lt Real.pi_pos)]
+    exact (one_div _).symm
+  have hhalf : (1 / 4 : ℝ) ≤ Real.pi ^ (-(11 / 10 : ℝ)) := by
+    rw [hneg]
+    exact one_div_le_one_div_of_le (Real.rpow_pos_of_pos Real.pi_pos _) h61
+  have hexp : (-(11 / 10 : ℝ)) ≤ -(sR61.re) / 2 := by rw [sR61_re]; norm_num
+  calc (1 / 4 : ℝ) ≤ Real.pi ^ (-(11 / 10 : ℝ)) := hhalf
+    _ ≤ Real.pi ^ (-(sR61.re) / 2) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith [Real.pi_gt_three]) hexp
+
+/-- Conditional R61 center assembly (inner tier `0.15 + 0.06 * radius`):
+MILESTONE R61 keeps the R60 floors (poly `0.40`, pi `1/4`) at the new s-center
+and plugs them into the generic bridge; the Gamma remainder and zeta lower
+stay explicit.
+The numeric check needs `Agam * Azeta ≥ (0.15 + 0.06 * 1.26) / (0.40 / 4)`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R61_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : R61.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart sR61‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta sR61‖)
+    (hprod : (0.15 : ℝ) + 0.06 * 1.26 ≤ 0.40 * (1 / 4) * Agam * Azeta) :
+    (0.15 : ℝ) + 0.06 * R61.radius ≤
+      ‖xiShifted R61.center‖ := by
+  have hpoly := poly_lower_R61
+  have hpi := pi_lower_R61
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : sR61
+      = (1 / 2 : ℂ) + Complex.I * R61.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    R61 0.15 0.06 (by norm_num) hrad
+    0.40 (1 / 4) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact R61 inner-tier threshold: `0.15 + 0.06 * 1.26 = 0.2256`. -/
+theorem R61_threshold_eq : (0.15 : ℝ) + 0.06 * 1.26 = 0.2256 := by norm_num
+
+/-- Exact banked base: `0.40 * (1/4) = 1/10`. -/
+theorem R61_base_eq : (0.40 : ℝ) * (1 / 4) = 1 / 10 := by norm_num
+
+/-- Exact residual: banked floors `(0.40 / 4) / 260000000` do not clear `0.2256`
+(required `Agam * Azeta ≥ 0.2256 / (0.40 / 4) = 2.256`; banked `≈ 3.85e-09`;
+short by factor `≈ 590000000`, the ~8-order wall). -/
+theorem R61_banked_infeasible :
+    (0.40 : ℝ) * (1 / 4) * (1 / 10000000) * (1 / 26) < (0.15 : ℝ) + 0.06 * 1.26 := by norm_num
+
+#print axioms R61CenterAssembly.poly_lower_R61
+#print axioms R61CenterAssembly.pi_lower_R61
+#print axioms R61CenterAssembly.R61_center_with_poly_pi_gamma
+#print axioms R61CenterAssembly.R61_threshold_eq
+#print axioms R61CenterAssembly.R61_banked_infeasible
+
+end R61CenterAssembly

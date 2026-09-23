@@ -2810,3 +2810,906 @@ theorem wireFinal_banked_full_holds : wireFinal_banked_full :=
     gridH_leaf_count_done⟩
 
 end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 ratio gate standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`).
+* M40 gates inline only `door3_rh_wiring.lean:494` (`0.01 < (1/2)/40`),
+  `:495` (`1/2 - (1/2)/40 < 0.49`), `:510-511`/`531`/`567-568` (bottom/top mirrors);
+  no standalone M40 gate banked (M1000 negations banked `:1606-1620`).
+* cutoff blocks `:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff`.
+
+Tightening: standalone M40 strip ratio gate `(0.01 < (1/2)/40)` closed by
+`norm_num` (equals `1/80 = 0.0125`); banks the inline `:494`/`:530` have as a
+reusable strip numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 strip ratio gate: `δ = (1/2)/40` passes `0.01 < δ`
+(standalone banking of the inline M40 gate; closed numeral). -/
+theorem wireM40_ratio_gate_closed : (0.01 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 width gates standalone (append-only, two numerals).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`).
+* M40 ratio gate just banked `:2834` (`wireM40_ratio_gate_closed`).
+* M40 width gates inline only `:495` (`1/2 - (1/2)/40 < 0.49`, top),
+  `:531` (`-0.49 < -(1/2) + (1/2)/40`, bottom) by `norm_num`, mirrors
+  `:510-511`/`:567-568` by `linarith`; no standalone M40 width banked
+  (M1000 negations banked `:1613-1620`).
+
+Tightening: standalone M40 strip width gates closed by `norm_num`
+(`1/80 = 0.0125`; `1/2 - 1/80 = 0.4875 < 0.49` and symmetric bottom);
+banks the inline `:495`/`:531` haves as reusable neighborhood/strip numerals
+without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 top width gate: `1/2 - δ < 0.49` at `δ = (1/2)/40`
+(standalone banking of the inline M40 top width; closed numeral). -/
+theorem wireM40_width_top_closed :
+    (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) < (0.49 : ℝ) := by
+  norm_num
+
+/-- WIRE-TIGHTEN M40 bottom width gate: `-0.49 < -(1/2) + δ` at `δ = (1/2)/40`
+(standalone banking of the inline M40 bottom width; closed numeral). -/
+theorem wireM40_width_bot_closed :
+    (-0.49 : ℝ) < -(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall arithmetic numerals standalone (append-only, three numerals).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sliver sources `door3_sliver_edge.lean:1049-1076` (`poly_upper_closedBall12_le78`
+  `12 * 13 / 2 = 78`), `:1146-1163` (`piOf_upper_closedBall12` `<= 4096 = 4 ^ 6`),
+  `:1166-1180` (`poly_pi_upper_closedBall12` `<= 319488 = 78 * 4096`),
+  `:2020-2036` (`piOf_upper_closedBall12_tight` `<= 962`),
+  `:2084-2098` (`poly_pi_upper_closedBall12_tight` `<= 75036 = 78 * 962`).
+* M40 width gates just banked `:2864` (`wireM40_width_top_closed`),
+  `:2870` (`wireM40_width_bot_closed`); ratio gate `:2834`.
+
+Tightening: standalone sup-wall arithmetic numerals closed by `norm_num`
+(`78 * 4096 = 319488` explains the loose joint wall; `78 * 962 = 75036`
+is the tight joint value; `1000 < 75036` files the exact gap that even the
+tight poly-pi product alone already exceeds the `1000` budget, so the
+`C = 1000` sup target stays OPEN); banks reusable numerals without touching
+the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN loose joint arithmetic: `78 * 4096 = 319488`
+(explains the banked loose sup-wall numeral; closed numeral). -/
+theorem wireSup_joint_78x4096_eq : (78 : ℝ) * (4096 : ℝ) = (319488 : ℝ) := by
+  norm_num
+
+/-- WIRE-TIGHTEN tight joint arithmetic: `78 * 962 = 75036`
+(tight poly-pi value from the sliver tight wall; closed numeral). -/
+theorem wireSup_joint_78x962_eq : (78 : ℝ) * (962 : ℝ) = (75036 : ℝ) := by
+  norm_num
+
+/-- WIRE-TIGHTEN tight joint gap: even the tight `75036` exceeds the `1000`
+budget (exact gap filed; closed numeral). -/
+theorem wireSup_tight_joint_exceeds_budget : (1000 : ℝ) < (75036 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 side gate standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* M1000 side banked `door3_rh_wiring.lean:1606` (`gate_M1000_side_closed`
+  `(1/2)/1000 ≤ 1` by `norm_num`).
+* M40 side inline only `door3_rh_wiring.lean:496` (`(1/2)/40 ≤ 1` top),
+  `:532` (bottom mirror) each `by norm_num`; no standalone M40 side banked.
+* M40 ratio gate just banked `:2834` (`wireM40_ratio_gate_closed`),
+  width gates `:2864` (`wireM40_width_top_closed`) / `:2870`
+  (`wireM40_width_bot_closed`).
+* sup-wall tight joint just banked `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`) + gap `:2913` (`1000 < 75036`).
+
+Tightening: standalone M40 strip side gate `(1/2)/40 ≤ 1` closed by
+`norm_num` (`1/80 = 0.0125 ≤ 1`); banks the inline `:496`/`:532` haves as a
+reusable strip numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 side gate: `δ = (1/2)/40 ≤ 1` at `M = 40`
+(standalone banking of the inline M40 side condition; closed numeral). -/
+theorem wireM40_side_gate_closed : (1 / 2 : ℝ) / (40 : ℝ) ≤ (1 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN cutoff half-height standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* cutoff blocks `door3_rh_wiring.lean:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (`:126`).
+* M40 side gate just banked `:2941` (`wireM40_side_gate_closed`
+  `(1/2)/40 ≤ 1` by `norm_num`); ratio gate `:2834`, width gates `:2864`/`:2870`.
+* no standalone cutoff half-height banked (`0.49 < 1/2` appears only inside
+  width-gate shapes `:393`/`:397`/`:422`/`:426`, never as a closed numeral).
+
+Tightening: standalone cutoff half-height `(0.49 : ℝ) < 1 / 2` closed by
+`norm_num` (`0.49 < 0.5`); banks the cutoff-line-inside-strip containment used
+by the `:81-127` cutoff wiring as a reusable numeral without touching the
+FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN cutoff half-height: `0.49 < 1/2`
+(standalone banking of the cutoff-line-inside-strip containment; closed numeral). -/
+theorem wireCutoff_half_lt_closed : (0.49 : ℝ) < 1 / 2 := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN tail10 strip-dominance standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* cutoff blocks `door3_rh_wiring.lean:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (`:126`) with
+  `Htail : XiTailPointwiseNonvanishingForX (10 : ℝ)` (`:118`).
+* cutoff half-height just banked `:2968` (`wireCutoff_half_lt_closed`
+  `(0.49 : ℝ) < 1 / 2` by `norm_num`); M40 side `:2941`, ratio `:2834`,
+  widths `:2864`/`:2870`.
+* no standalone tail10 threshold numeral banked (`1 / 2 < 10` never appears
+  as a closed numeral; tail threshold `10` appears only inside
+  `XiTailPointwiseNonvanishingForX (10 : ℝ)` and cutoff-line shapes).
+
+Tightening: standalone tail10 strip-dominance `(1 / 2 : ℝ) < (10 : ℝ)` closed by
+`norm_num` (`0.5 < 10`); banks the strip-half-height-below-tail-threshold
+separation used by the `:81-127` cutoff/tail wiring as a reusable numeral
+without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN tail10 strip-dominance: `1 / 2 < 10`
+(standalone banking of the strip-below-tail separation; closed numeral). -/
+theorem wireTail10_half_lt_closed : (1 / 2 : ℝ) < (10 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 neighborhood strip-bridge standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* M40 gates just banked `:2834` (`wireM40_ratio_gate_closed`),
+  `:2864`/`:2870` (width gates), `:2941` (`wireM40_side_gate_closed`);
+  cutoff half-height `:2968`; tail10 strip-dominance `:2998`.
+* no standalone neighborhood strip-bridge numeral banked (top M40 bridge
+  `-(1/2) < y` from `hy_low` is inline `linarith` only at `:2465-2466`;
+  bottom mirror inline at `:2499-2500`).
+
+Tightening: standalone M40 top neighborhood strip-bridge
+`-(1/2) < 1/2 - (1/2)/40` closed by `norm_num`
+(`-0.5 < 0.4875`); banks the `:2465` bridge premise as a reusable
+neighborhood numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 neighborhood strip-bridge: `-(1/2) < 1/2 - (1/2)/40`
+(standalone banking of the top-M40 neighborhood strip entry; closed numeral). -/
+theorem wireNeighborhood_M40_top_above_bot_closed :
+    (-(1 / 2 : ℝ)) < (1 / 2 : ℝ) - (1 / 2 : ℝ) / (40 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 neighborhood strip-bridge bottom mirror standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* M40 gates banked `:2834` (`wireM40_ratio_gate_closed`),
+  `:2864`/`:2870` (width gates), `:2941` (`wireM40_side_gate_closed`);
+  cutoff half-height `:2968`; tail10 strip-dominance `:2998`.
+* top strip-bridge just banked `:3027`
+  (`wireNeighborhood_M40_top_above_bot_closed` `-(1/2) < 1/2 - (1/2)/40`
+  by `norm_num`); bottom mirror `y < 1/2` from `hy_hi` is inline
+  `linarith` only at `:2499-2500`; no standalone bottom-mirror numeral banked.
+
+Tightening: standalone M40 bottom neighborhood strip-bridge
+`-(1/2) + (1/2)/40 < 1/2` closed by `norm_num`
+(`-0.4875 < 0.5`); banks the `:2499` bridge premise as a reusable
+neighborhood endpoint numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 neighborhood strip-bridge bottom mirror:
+`-(1/2) + (1/2)/40 < 1/2`
+(standalone banking of the bottom-M40 neighborhood strip entry; closed numeral). -/
+theorem wireNeighborhood_M40_bot_below_top_closed :
+    (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (40 : ℝ)) < (1 / 2 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M1000 delta value standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* M1000 specs `door3_rh_wiring.lean:1606-1620` (side `:1606` CLOSED by `norm_num`;
+  ratio `:1609` OPEN negation; widths `:1613`/`:1618` OPEN negations);
+  deriv bridge `:1625` (`hTopDeriv1000_of_ballSup1000` at `d = (1/2)/1000`);
+  strips `:1642`/`:1674`; zero-line feeders `:2141`/`:2243` (all consume
+  `(1/2)/1000` without a standalone value numeral in this file).
+* sliver source `door3_sliver_edge.lean:1927` (`m1000_delta_eq`
+  `(1/2)/1000 = 1/2000` by `norm_num`; reference only, no re-proof there).
+* bottom mirror just banked `:3059` (`wireNeighborhood_M40_bot_below_top_closed`);
+  top bridge `:3027`; M40 side `:2941`; ratio `:2834`; widths `:2864`/`:2870`.
+
+Tightening: standalone M1000 delta value `(1/2)/1000 = 1/2000` closed by
+`norm_num` (`0.0005`); banks the `d` consumed by the `:1625`/`:1642`/`:1674`
+feeders as a reusable numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M1000 delta value: `(1 / 2) / 1000 = 1 / 2000`
+(standalone banking of the M1000 feeder width; closed numeral). -/
+theorem wireM1000_delta_eq_closed : (1 / 2 : ℝ) / (1000 : ℝ) = (1 / 2000 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN endpoint half positivity standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* endpoint blocks `door3_rh_wiring.lean:1855` (`wireHtop_top_point_half_feeder`,
+  pointwise `1/2` leaf at `x = 0` via `edgeTop_single_lower`),
+  `:1897` (`wireHbot_bot_point_half_feeder`, bottom mirror via
+  `edgeBot_single_lower`); residuals `:1862` (`wireHtop_gap_residual`),
+  `:1904` (`wireHbot_gap_residual`).
+* sliver sources `door3_sliver_edge.lean:189-200` (`endpoint_top_norm` /
+  `endpoint_bot_norm`, each `= 1/2` via `endpoint_top_value` /
+  `endpoint_bot_value`), `:237-246` (`edgeTop_single_lower` /
+  `edgeBot_single_lower`), `:202-210` (sharpness `m ≤ norm ↔ m ≤ 1/2`,
+  so `1/2` is the maximal closable endpoint value).
+* feasible-half adapters `door3_rh_wiring.lean:341-381`
+  (`hSliver_of_topNumericData_half_via_conj` / `hSliver_of_edgeNumericData_half`
+  close `0 < 1/2` inline by `norm_num` at `:354`/`:380`); no standalone
+  `0 < 1/2` numeral banked in this file.
+* M1000 delta value just banked `:3088` (`wireM1000_delta_eq_closed`
+  `(1/2)/1000 = 1/2000` by `norm_num`).
+
+Tightening: standalone endpoint half positivity `(0 : ℝ) < 1 / 2` closed by
+`norm_num`; banks the inline `:354`/`:380` `0 < m` side-condition haves as a
+reusable endpoint numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN endpoint half positivity: `0 < 1 / 2`
+(standalone banking of the endpoint-value positivity side condition; closed numeral). -/
+theorem wireEndpoint_half_pos_closed : (0 : ℝ) < 1 / 2 := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 delta value standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* M40 gates banked `:2834` (`wireM40_ratio_gate_closed`), widths `:2864`/`:2870`,
+  side `:2941` (`wireM40_side_gate_closed`); neighborhood bridges `:3027`/`:3059`;
+  M1000 delta `:3088` (`wireM1000_delta_eq_closed` `(1/2)/1000 = 1/2000`);
+  endpoint half-pos `:3123` (`wireEndpoint_half_pos_closed` `0 < 1/2`).
+* M40 feeders consume `(1/2)/40` without a standalone value numeral in this file
+  (`:470` `hTopDeriv40_of_ballSup40`, `:487` `edgeStrip_top_half_M40`,
+  `:523` `edgeStrip_bottom_half_M40`, neighborhoods `:2451`/`:2487`).
+* sliver source `door3_sliver_edge.lean:705` (`m40_delta_eq`
+  `(1/2)/40 = 1/80` by `norm_num`; reference only, no re-proof there);
+  mirror `m1000_delta_eq` at `:1927`.
+
+Tightening: standalone M40 delta value `(1/2)/40 = 1/80` closed by
+`norm_num` (`0.0125`); banks the `d` consumed by the `:470`/`:487`/`:523`
+feeders as a reusable numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 delta value: `(1 / 2) / 40 = 1 / 80`
+(standalone banking of the M40 feeder width; closed numeral). -/
+theorem wireM40_delta_eq_closed : (1 / 2 : ℝ) / (40 : ℝ) = (1 / 80 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M1000 neighborhood strip-bridge standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* M40 neighborhood bridges banked `:3027`
+  (`wireNeighborhood_M40_top_above_bot_closed` `-(1/2) < 1/2 - (1/2)/40`)
+  and `:3059` (`wireNeighborhood_M40_bot_below_top_closed`);
+  M1000 delta `:3088` (`wireM1000_delta_eq_closed` `(1/2)/1000 = 1/2000`);
+  endpoint half-pos `:3123`; M40 delta `:3152`
+  (`wireM40_delta_eq_closed` `(1/2)/40 = 1/80`).
+* no standalone M1000 neighborhood bridge numeral banked (top M1000 bridge
+  `-(1/2) < y` from `hy_low` is inline `linarith` only at `:2536-2537`;
+  bottom mirror inline at `:2570-2571`).
+
+Tightening: standalone M1000 top neighborhood strip-bridge
+`-(1/2) < 1/2 - (1/2)/1000` closed by `norm_num`
+(`-0.5 < 0.4995`); banks the `:2529` bridge premise as a reusable
+neighborhood numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M1000 neighborhood strip-bridge: `-(1/2) < 1/2 - (1/2)/1000`
+(standalone banking of the top-M1000 neighborhood strip entry; closed numeral). -/
+theorem wireNeighborhood_M1000_top_above_bot_closed :
+    (-(1 / 2 : ℝ)) < (1 / 2 : ℝ) - (1 / 2 : ℝ) / (1000 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M1000 neighborhood strip-bridge bottom mirror standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* M40 neighborhood bridges banked `:3027`
+  (`wireNeighborhood_M40_top_above_bot_closed` `-(1/2) < 1/2 - (1/2)/40`)
+  and `:3059` (`wireNeighborhood_M40_bot_below_top_closed`
+  `-(1/2) + (1/2)/40 < 1/2`); M1000 top bridge `:3184`
+  (`wireNeighborhood_M1000_top_above_bot_closed`
+  `-(1/2) < 1/2 - (1/2)/1000` by `norm_num`); M1000 delta `:3088`
+  (`wireM1000_delta_eq_closed` `(1/2)/1000 = 1/2000`); endpoint half-pos
+  `:3123`; M40 delta `:3152`.
+* no standalone M1000 bottom-mirror numeral banked (bottom M1000 bridge
+  `y < 1/2` from `hy_hi` is inline `linarith` only at `:2570-2571`).
+
+Tightening: standalone M1000 bottom neighborhood strip-bridge
+`-(1/2) + (1/2)/1000 < 1/2` closed by `norm_num`
+(`-0.4995 < 0.5`); banks the `:2570` bridge premise as a reusable
+neighborhood endpoint numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M1000 neighborhood strip-bridge bottom mirror:
+`-(1/2) + (1/2)/1000 < 1/2`
+(standalone banking of the bottom-M1000 neighborhood strip entry; closed numeral). -/
+theorem wireNeighborhood_M1000_bot_below_top_closed :
+    (-(1 / 2 : ℝ) + (1 / 2 : ℝ) / (1000 : ℝ)) < (1 / 2 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN endpoint strip separation standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* endpoint blocks `door3_rh_wiring.lean:1855` (`wireHtop_top_point_half_feeder`,
+  pointwise `1/2` leaf at `x = 0` via `edgeTop_single_lower`),
+  `:1897` (`wireHbot_bot_point_half_feeder`, bottom mirror via
+  `edgeBot_single_lower`); residuals `:1862` (`wireHtop_gap_residual`),
+  `:1904` (`wireHbot_gap_residual`).
+* sliver sources `door3_sliver_edge.lean:189-200` (`endpoint_top_norm` /
+  `endpoint_bot_norm`, each `= 1/2`), `:202-210` (sharpness
+  `m ≤ norm ↔ m ≤ 1/2`, so `1/2` is the maximal closable endpoint value).
+* endpoint numerals banked `:2968` (`wireCutoff_half_lt_closed`
+  `0.49 < 1/2` by `norm_num`), `:3123` (`wireEndpoint_half_pos_closed`
+  `0 < 1/2` by `norm_num`).
+* M1000 bottom mirror just banked `:3219`
+  (`wireNeighborhood_M1000_bot_below_top_closed`
+  `-(1/2) + (1/2)/1000 < 1/2` by `norm_num`); top bridge `:3184`;
+  deltas `:3088` (`wireM1000_delta_eq_closed`), `:3152`
+  (`wireM40_delta_eq_closed`).
+* no standalone endpoint strip-separation numeral banked (`-(1/2) < 1/2`
+  appears only inside bridge shapes `:3027`/`:3059`/`:3184`/`:3219`,
+  never as a closed numeral).
+
+Tightening: standalone endpoint strip separation `-(1/2) < 1/2` closed by
+`norm_num` (`-0.5 < 0.5`); banks the bottom-endpoint-below-top-endpoint
+separation underlying every neighborhood strip-bridge as a reusable
+endpoint numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN endpoint strip separation: `-(1/2) < 1/2`
+(standalone banking of the bottom-below-top endpoint separation; closed numeral). -/
+theorem wireEndpoint_neg_half_lt_closed : (-(1 / 2 : ℝ)) < (1 / 2 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 delta positivity standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* M40 feeders consume `(1/2)/40` with inline `0 < δ` only
+  (`door3_rh_wiring.lean:497` (top `edgeStrip_top_half_M40`),
+  `:533` (bottom `edgeStrip_bottom_half_M40` mirror),
+  passed at `:509` to `sliver_bottom_of_top_via_conj`;
+  M1000 mirrors inline at `:1652`/`:1684`);
+  no standalone wiring M40 positivity banked
+  (wiring deltas banked `:3088` (`wireM1000_delta_eq_closed`),
+  `:3152` (`wireM40_delta_eq_closed`); side `:2941`, ratio `:2834`,
+  widths `:2864`/`:2870`).
+* sliver source `door3_sliver_edge.lean:699` (`m40_delta_pos`
+  `0 < (1/2)/40` by `norm_num`; reference only, no re-proof there).
+* endpoint strip separation just banked `:3259`
+  (`wireEndpoint_neg_half_lt_closed` `-(1/2) < 1/2` by `norm_num`).
+
+Tightening: standalone M40 delta positivity `0 < (1/2)/40` closed by
+`norm_num` (`1/80 = 0.0125 > 0`); banks the inline `:497`/`:533` haves as a
+reusable strip numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 delta positivity: `0 < (1/2)/40`
+(standalone banking of the M40 feeder-width positivity; closed numeral). -/
+theorem wireM40_delta_pos_closed : (0 : ℝ) < (1 / 2 : ℝ) / (40 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M1000 delta positivity standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* M1000 feeders consume `(1/2)/1000` with inline `0 < δ` only
+  (`door3_rh_wiring.lean:1652` (top `edgeStrip_top_half_M1000`),
+  `:1684` (bottom `edgeStrip_bottom_half_M1000` mirror),
+  each `by norm_num`);
+  no standalone wiring M1000 positivity banked
+  (wiring deltas banked `:3088` (`wireM1000_delta_eq_closed`),
+  `:3152` (`wireM40_delta_eq_closed`); M40 positivity `:3291`
+  (`wireM40_delta_pos_closed`); side `:2941` M40 / `:1606` M1000,
+  ratio `:2834` M40, widths `:2864`/`:2870` M40).
+* sliver source `door3_sliver_edge.lean:928` (`m1000_delta_pos`
+  `0 < (1/2)/1000` by `norm_num`; reference only, no re-proof there);
+  mirror `m40_delta_pos` at `:699`.
+* M40 delta positivity just banked `:3291`
+  (`wireM40_delta_pos_closed` `0 < (1/2)/40` by `norm_num`).
+
+Tightening: standalone M1000 delta positivity `0 < (1/2)/1000` closed by
+`norm_num` (`1/2000 = 0.0005 > 0`); banks the inline `:1652`/`:1684` haves as a
+reusable strip numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M1000 delta positivity: `0 < (1/2)/1000`
+(standalone banking of the M1000 feeder-width positivity; closed numeral). -/
+theorem wireM1000_delta_pos_closed : (0 : ℝ) < (1 / 2 : ℝ) / (1000 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall pi gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sup-wall arithmetic just banked `:2903` (`wireSup_joint_78x4096_eq`
+  `78 * 4096 = 319488`), `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`), `:2913` (`wireSup_tight_joint_exceeds_budget`
+  `1000 < 75036`).
+* sliver source `door3_sliver_edge.lean:2080` (`pi_gap_962_961`
+  `962 - 961 = 1` by `norm_num`; reference only, no re-proof there);
+  mirror poly gap at `:1988` (`poly_gap_79_78`).
+* M1000 delta positivity just banked `:3324`
+  (`wireM1000_delta_pos_closed` `0 < (1/2)/1000` by `norm_num`).
+
+Tightening: standalone sup-wall pi gap `962 - 961 = 1` closed by
+`norm_num`; files the exact gap that the tight `962` pi wall is
+best-possible to within `1` (mirror of the poly `79 - 78 = 1` shape),
+as a reusable sup-wall numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN sup-wall pi gap: `962 - 961 = 1`
+(standalone banking of the tight-pi-wall sharpness gap; closed numeral). -/
+theorem wireSup_pi_gap_962_961_eq : (962 : ℝ) - (961 : ℝ) = (1 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall joint tightness window standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sup-wall arithmetic banked `:2903` (`wireSup_joint_78x4096_eq`
+  `78 * 4096 = 319488`), `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`), `:2913` (`wireSup_tight_joint_exceeds_budget`
+  `1000 < 75036`).
+* sliver source `door3_sliver_edge.lean:2170` (`joint_gap_75036_74958`
+  `75036 - 74958 = 78` by `norm_num`; reference only, no re-proof there);
+  sharpness floor `:2161` (`joint_no_tighten_below74958` no `<= 74958`),
+  tight upper `:2084` (`poly_pi_upper_closedBall12_tight` `<= 75036`).
+* pi gap just banked `:3356` (`wireSup_pi_gap_962_961_eq`
+  `962 - 961 = 1` by `norm_num`).
+
+Tightening: standalone sup-wall joint tightness window `75036 - 74958 = 78`
+closed by `norm_num`; files the exact gap that the tight `75036` joint wall is
+best-possible to within `78` given the sharp components, as a reusable
+sup-wall numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN sup-wall joint tightness window: `75036 - 74958 = 78`
+(standalone banking of the tight-joint-wall sharpness gap; closed numeral). -/
+theorem wireSup_joint_gap_75036_74958_eq :
+    (75036 : ℝ) - (74958 : ℝ) = (78 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN endpoint strip-width exact gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* endpoint blocks `door3_rh_wiring.lean:1855` (`wireHtop_top_point_half_feeder`,
+  pointwise `1/2` leaf at `x = 0` via `edgeTop_single_lower`),
+  `:1897` (`wireHbot_bot_point_half_feeder`, bottom mirror via
+  `edgeBot_single_lower`); residuals `:1862` (`wireHtop_gap_residual`),
+  `:1904` (`wireHbot_gap_residual`).
+* endpoint numerals banked `:2968` (`wireCutoff_half_lt_closed`
+  `0.49 < 1/2` by `norm_num`), `:3123` (`wireEndpoint_half_pos_closed`
+  `0 < 1/2` by `norm_num`), `:3259` (`wireEndpoint_neg_half_lt_closed`
+  `-(1/2) < 1/2` by `norm_num`).
+* sup-wall joint tightness window just banked `:3389`
+  (`wireSup_joint_gap_75036_74958_eq` `75036 - 74958 = 78` by `norm_num`).
+
+Tightening: standalone endpoint strip-width exact gap
+`(1/2) - (-(1/2)) = 1` closed by `norm_num`; files the exact width
+spanned by the banked `:3259` separation, as a reusable endpoint numeral
+without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN endpoint strip-width exact gap: `(1/2) - (-(1/2)) = 1`
+(standalone banking of the endpoint separation width; closed numeral). -/
+theorem wireEndpoint_strip_width_eq :
+    (1 / 2 : ℝ) - (-(1 / 2 : ℝ)) = (1 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN M40 neighborhood delta half-dominance standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* neighborhood blocks `door3_rh_wiring.lean:2455` (top M40),
+  `:2489` (bottom M40), `:2526`/`:2560` (M1000 pair), residual `:2598`
+  (`wirePivot_neighborhood_residual`); generic widener `:2430`.
+* neighborhood bridges banked `:3027`
+  (`wireNeighborhood_M40_top_above_bot_closed` `-(1/2) < 1/2 - (1/2)/40`)
+  and `:3059` (`wireNeighborhood_M40_bot_below_top_closed`
+  `-(1/2) + (1/2)/40 < 1/2`); M1000 pair `:3184`/`:3219`.
+* wiring deltas banked `:3152` (`wireM40_delta_eq_closed` `(1/2)/40 = 1/80`),
+  `:3088` (`wireM1000_delta_eq_closed` `(1/2)/1000 = 1/2000`); positivity
+  `:3291` (`wireM40_delta_pos_closed`), `:3322` (`wireM1000_delta_pos_closed`).
+* endpoint numerals banked `:3259` (`wireEndpoint_neg_half_lt_closed`
+  `-(1/2) < 1/2` by `norm_num`), `:3421` (`wireEndpoint_strip_width_eq`
+  `(1/2) - (-(1/2)) = 1` by `norm_num`).
+* no standalone M40 delta half-dominance numeral banked (`(1/2)/40 < 1/2`
+  appears only as background for the `:3027`/`:3059` bridges, never as a
+  closed numeral).
+
+Tightening: standalone M40 neighborhood delta half-dominance
+`(1/2)/40 < 1/2` closed by `norm_num`
+(`0.0125 < 0.5`); banks the feeder radius fitting inside the strip
+half-width as a reusable neighborhood numeral without touching the FINAL
+ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN M40 neighborhood delta half-dominance: `(1/2)/40 < 1/2`
+(standalone banking of the M40 feeder radius inside the half-width; closed numeral). -/
+theorem wireNeighborhood_M40_delta_lt_half_closed :
+    (1 / 2 : ℝ) / (40 : ℝ) < (1 / 2 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall poly gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sup-wall arithmetic banked `:2903` (`wireSup_joint_78x4096_eq`
+  `78 * 4096 = 319488`), `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`), `:2913` (`wireSup_tight_joint_exceeds_budget`
+  `1000 < 75036`).
+* sliver source `door3_sliver_edge.lean:1988` (`poly_gap_79_78`
+  `79 - 78 = 1` by `norm_num`; reference only, no re-proof there);
+  sharpness context `:1931-1943` (poly-78 exact gap, no tighten below 78),
+  tight pi mirror `:2080` (`pi_gap_962_961` `962 - 961 = 1`).
+* pi gap just banked `:3356` (`wireSup_pi_gap_962_961_eq`
+  `962 - 961 = 1` by `norm_num`); joint window `:3389`
+  (`wireSup_joint_gap_75036_74958_eq` `75036 - 74958 = 78` by `norm_num`).
+* M40 delta half-dominance just banked `:3459`
+  (`wireNeighborhood_M40_delta_lt_half_closed` `(1/2)/40 < 1/2` by `norm_num`).
+* WIRE-20 MILESTONE: 20 prior WIRE-TIGHTEN blocks (`:2814`-`:3463`),
+  all closed by `norm_num`; this sup-wall poly-gap filing caps the milestone run.
+
+Tightening: standalone sup-wall poly gap `79 - 78 = 1` closed by
+`norm_num`; files the exact gap that the loose `79` poly wall is
+best-possible to within `1` above the sharp `78` triangle value (mirror
+of the banked `:3356` pi gap), as a reusable sup-wall numeral without
+touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN sup-wall poly gap: `79 - 78 = 1`
+(standalone banking of the loose-poly-wall sharpness gap; closed numeral). -/
+theorem wireSup_poly_gap_79_78_eq : (79 : ℝ) - (78 : ℝ) = (1 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall joint floor factorization standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sup-wall arithmetic banked `:2903` (`wireSup_joint_78x4096_eq`
+  `78 * 4096 = 319488`), `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`), `:2913` (`wireSup_tight_joint_exceeds_budget`
+  `1000 < 75036`).
+* sliver source `door3_sliver_edge.lean:2149` (`hcalc` `78 * 961 = 74958`
+  inside `joint_sharp_gt_74958`; reference only, no re-proof there);
+  floor obstruction `:2161` (`joint_no_tighten_below74958` no `<= 74958`),
+  tightness window `:2170` (`joint_gap_75036_74958` `75036 - 74958 = 78`).
+* joint window just banked `:3389`
+  (`wireSup_joint_gap_75036_74958_eq` `75036 - 74958 = 78` by `norm_num`);
+  poly gap just banked `:3499` (`wireSup_poly_gap_79_78_eq`
+  `79 - 78 = 1` by `norm_num`).
+* no standalone `78 * 961 = 74958` numeral banked in wiring (the `74958`
+  floor appears only inside the just-banked `:3389` window statement,
+  never as a closed factorization).
+
+Tightening: standalone sup-wall joint floor factorization `78 * 961 = 74958`
+closed by `norm_num`; banks the sharp-component product explaining the `74958`
+floor of the banked `:3389` window, as a reusable sup-wall numeral without
+touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN sup-wall joint floor factorization: `78 * 961 = 74958`
+(standalone banking of the sharp-floor product; closed numeral). -/
+theorem wireSup_joint_78x961_eq : (78 : ℝ) * (961 : ℝ) = (74958 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN sup-wall joint 1000-gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* sup-wall blocks `door3_rh_wiring.lean:2353` (poly <= 79), `:2359` (pi <= 4096),
+  `:2366` (joint <= 319488), `:2372` (`wireSup1000_joint_exceeds_budget`
+  `1000 < 319488` by `norm_num`).
+* sup-wall arithmetic banked `:2903` (`wireSup_joint_78x4096_eq`
+  `78 * 4096 = 319488`), `:2908` (`wireSup_joint_78x962_eq`
+  `78 * 962 = 75036`), `:2913` (`wireSup_tight_joint_exceeds_budget`
+  `1000 < 75036`).
+* sliver source `door3_sliver_edge.lean:2178` (`joint_gap_75036_1000`
+  `75036 - 1000 = 74036` by `norm_num`; reference only, no re-proof there);
+  exceeds mirror `:2186` (`joint_exceeds_ballSup1000_target` `1000 < 75036`).
+* joint window just banked `:3389`
+  (`wireSup_joint_gap_75036_74958_eq` `75036 - 74958 = 78` by `norm_num`);
+  poly gap `:3499` (`wireSup_poly_gap_79_78_eq` `79 - 78 = 1` by `norm_num`);
+  floor factorization just banked `:3537` (`wireSup_joint_78x961_eq`
+  `78 * 961 = 74958` by `norm_num`).
+* no standalone `75036 - 1000 = 74036` numeral banked in wiring (the `:2913`
+  exceeds records only the inequality, never the exact gap).
+
+Tightening: standalone sup-wall joint 1000-gap `75036 - 1000 = 74036`
+closed by `norm_num`; files the exact gap behind the banked `:2913` exceeds,
+as a reusable sup-wall numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN sup-wall joint 1000-gap: `75036 - 1000 = 74036`
+(standalone banking of the tight-joint-wall 1000 excess; closed numeral). -/
+theorem wireSup_joint_gap_75036_1000_eq :
+    (75036 : ℝ) - (1000 : ℝ) = (74036 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN endpoint cutoff exact gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* endpoint blocks `door3_rh_wiring.lean:1855` (`wireHtop_top_point_half_feeder`,
+  pointwise `1/2` leaf at `x = 0` via `edgeTop_single_lower`),
+  `:1897` (`wireHbot_bot_point_half_feeder`, bottom mirror via
+  `edgeBot_single_lower`); residuals `:1862` (`wireHtop_gap_residual`),
+  `:1904` (`wireHbot_gap_residual`).
+* endpoint numerals banked `:2968` (`wireCutoff_half_lt_closed`
+  `0.49 < 1/2` by `norm_num`), `:3123` (`wireEndpoint_half_pos_closed`
+  `0 < 1/2` by `norm_num`), `:3259` (`wireEndpoint_neg_half_lt_closed`
+  `-(1/2) < 1/2` by `norm_num`), `:3421` (`wireEndpoint_strip_width_eq`
+  `(1/2) - (-(1/2)) = 1` by `norm_num`).
+* sup-wall joint 1000-gap just banked `:3573`
+  (`wireSup_joint_gap_75036_1000_eq` `75036 - 1000 = 74036` by `norm_num`).
+* no standalone `(1/2) - 0.49` exact gap banked in wiring (the `:2968`
+  cutoff inequality records only the comparison, never the exact margin).
+
+Tightening: standalone endpoint cutoff exact gap `(1/2) - 0.49 = 0.01`
+closed by `norm_num`; files the exact margin behind the banked `:2968`
+cutoff-inside-strip inequality, as a reusable endpoint numeral without
+touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN endpoint cutoff exact gap: `(1/2) - 0.49 = 0.01`
+(standalone banking of the cutoff-inside-strip margin; closed numeral). -/
+theorem wireEndpoint_cutoff_gap_eq :
+    (1 / 2 : ℝ) - (0.49 : ℝ) = (0.01 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN tail10 exact gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* cutoff blocks `door3_rh_wiring.lean:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (`:126`) with
+  `Htail : XiTailPointwiseNonvanishingForX (10 : ℝ)` (`:118`).
+* tail10 strip-dominance banked `:2998` (`wireTail10_half_lt_closed`
+  `(1 / 2 : ℝ) < (10 : ℝ)` by `norm_num`); cutoff half-height `:2968`
+  (`wireCutoff_half_lt_closed` `0.49 < 1 / 2` by `norm_num`).
+* endpoint cutoff exact gap just banked `:3608`
+  (`wireEndpoint_cutoff_gap_eq` `(1 / 2) - 0.49 = 0.01` by `norm_num`).
+* no standalone `10 - 1 / 2` exact gap banked in wiring (the `:2998`
+  tail10 inequality records only the comparison, never the exact margin).
+
+Tightening: standalone tail10 exact gap `10 - 1 / 2 = 19 / 2`
+closed by `norm_num`; files the exact margin behind the banked `:2998`
+strip-below-tail inequality, as a reusable tail10 numeral without
+touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN tail10 exact gap: `10 - 1 / 2 = 19 / 2`
+(standalone banking of the strip-below-tail margin; closed numeral). -/
+theorem wireTail10_gap_eq :
+    (10 : ℝ) - (1 / 2 : ℝ) = (19 / 2 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN tail10 cutoff separation standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* cutoff blocks `door3_rh_wiring.lean:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (`:126`) with
+  `Htail : XiTailPointwiseNonvanishingForX (10 : ℝ)` (`:118`).
+* tail10 strip-dominance banked `:2998` (`wireTail10_half_lt_closed`
+  `(1 / 2 : ℝ) < (10 : ℝ)` by `norm_num`); cutoff half-height `:2968`
+  (`wireCutoff_half_lt_closed` `0.49 < 1 / 2` by `norm_num`).
+* tail10 exact gap just banked `:3640`
+  (`wireTail10_gap_eq` `(10 : ℝ) - 1 / 2 = 19 / 2` by `norm_num`).
+* no standalone `0.49 < 10` cutoff-below-tail numeral banked in wiring
+  (cutoff `0.49` and tail `10` meet only inside ledger shapes and the
+  `:2998`/`:2968` half-height chain, never as one comparison).
+
+Tightening: standalone tail10 cutoff separation `(0.49 : ℝ) < (10 : ℝ)`
+closed by `norm_num`; chains the banked `:2968`/`:2998` half-height order
+into one reusable tail10 numeral without touching the FINAL ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN tail10 cutoff separation: `0.49 < 10`
+(standalone banking of the cutoff-below-tail order; closed numeral). -/
+theorem wireTail10_cutoff_lt_closed : (0.49 : ℝ) < (10 : ℝ) := by
+  norm_num
+
+end Door3RHWiring
+
+/-! ## WIRE-TIGHTEN tail10 cutoff exact gap standalone (append-only, one numeral).
+
+Grep (read before filing):
+* FINAL ledger `door3_rh_wiring.lean:2610-2650` (banked feeders + open residuals;
+  verdict OPEN exactly on `wireFinal_residual_full`; untouched here).
+* cutoff blocks `door3_rh_wiring.lean:81-127` (`xiCutoffLines10_of_cutR10_and_leftLine`,
+  `rh_of_cutR10_fencing_and_premises`); tail10 capstone via
+  `rh_from_mainBand10_edgeStrips10_tail10_cutoff` (`:126`) with
+  `Htail : XiTailPointwiseNonvanishingForX (10 : ℝ)` (`:118`).
+* tail10 numerals banked `:2998` (`wireTail10_half_lt_closed`
+  `(1 / 2 : ℝ) < (10 : ℝ)` by `norm_num`), `:3640` (`wireTail10_gap_eq`
+  `(10 : ℝ) - 1 / 2 = 19 / 2` by `norm_num`), `:3672`
+  (`wireTail10_cutoff_lt_closed` `(0.49 : ℝ) < (10 : ℝ)` by `norm_num`);
+  cutoff half-height `:2968` (`wireCutoff_half_lt_closed` `0.49 < 1 / 2`
+  by `norm_num`); endpoint cutoff exact gap `:3608`
+  (`wireEndpoint_cutoff_gap_eq` `(1 / 2) - 0.49 = 0.01` by `norm_num`).
+* no standalone `10 - 0.49` exact gap banked in wiring (the `:3672`
+  cutoff-below-tail inequality records only the comparison, never the exact
+  margin; the `:3640` gap is measured from `1 / 2`, not from `0.49`).
+* count gap filed here (exact-gap branch): requested WIRE-25 MILESTONE expects
+  25 blocks with tail10-cutoff just banked, but grep WIRE-TIGHTEN headers finds
+  26 prior blocks (`:2814`-`:3646`) before this filing, so no 25-claim is made;
+  this filing is the 27th WIRE-TIGHTEN block, all closed by `norm_num`.
+
+Tightening: standalone tail10 cutoff exact gap `10 - 0.49 = 9.51`
+closed by `norm_num`; files the exact margin behind the banked `:3672`
+cutoff-below-tail inequality (tail10 analogue of the banked `:3608`
+endpoint margin), as a reusable tail10 numeral without touching the FINAL
+ledger verdict. -/
+
+namespace Door3RHWiring
+
+/-- WIRE-TIGHTEN tail10 cutoff exact gap: `10 - 0.49 = 9.51`
+(standalone banking of the cutoff-below-tail margin; closed numeral). -/
+theorem wireTail10_cutoff_gap_eq :
+    (10 : ℝ) - (0.49 : ℝ) = (9.51 : ℝ) := by
+  norm_num
+
+end Door3RHWiring

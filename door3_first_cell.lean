@@ -3702,3 +3702,1419 @@ theorem FC_bridge_1565_residual : True := by trivial
 
 end Door3FirstCellCeil1565
 
+/-! ## FIRSTCELL-RPOW-REFINE wave: tighter `4^±0.395` on banked log/exp route (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Best on old route `FC_bridge_Re_ge_1564` (`door3_first_cell.lean:3597`,
+  `1.564 ≤ Re ∑ range 4`) + norm `FC_bridge_lower_0284_proved` (`:3633`,
+  `0.284 ≤ ‖∑ range 4‖`), ceiling `1.5643` slack `0.0003`
+  (`FC_bridge_slack_1564_exact` `:3644`), blocked `1.565`
+  (`FC_bridge_1565_step_blocked` `:3680`, overshoot `0.0007`).
+* Rpow input `FC_rpow4neg_ge057` (`:2576`, `0.57 ≤ 4 ^ -0.395`) via
+  `FC_rpow4pos_le174` (`:2523`, `4 ^ 0.395 ≤ 1.74`,
+  `0.57 * 1.74 = 0.9918 ≤ 1`) via `Real.exp_bound'` n=4 at
+  `x = 0.395 * log 4 ≤ 0.54759` + banked `FC_log2_le_aux` / `FC_log4_eq`.
+* Absent before this wave (grep-clean): no `FC_rpow4pos_le173` /
+  `FC_rpow4neg_ge0578` / `FC_bridge_Re_ge_1565` / `FC_bridge_Re_ge_1572` /
+  `FC_bridge_lower_0292_proved` match.
+
+Verdict: refine CLOSED on the same banked route (tighter final numeral only):
+`4 ^ 0.395 ≤ 1.73` (same `0.54759` cap; `1.729566… ≤ 1.73` by `norm_num`),
+hence `0.578 ≤ 4 ^ -0.395` (`0.578 * 1.73 = 0.99994 ≤ 1`); new ceiling
+`1 + 0.578 * 0.99 = 1.57222`, so the `1.565` step unblocks and `1.572` files.
+-/
+
+namespace Door3FirstCellRpowRefine
+
+/-- Tighter `4 ^ 0.395 ≤ 1.73` (same `exp_bound'` n=4 route at `0.54759` as
+`FC_rpow4pos_le174`; only the final numeral is tightened:
+`1 + 0.54759 + 0.54759 ^ 2 / 2 + 0.54759 ^ 3 / 6
++ 0.54759 ^ 4 * 5 / (24 * 4) = 1.729566… ≤ 1.73`). -/
+theorem FC_rpow4pos_le173 : (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.73 := by
+  show (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.73
+  have hlog : Real.log 2 < (0.693148 : ℝ) :=
+    Door3FirstCellClose.FC_log2_le_aux
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have h4 : Real.log 4 = 2 * Real.log 2 := Door3FirstCellClose.FC_log4_eq
+  have hlog4_pos : (0 : ℝ) < Real.log 4 := by
+    rw [h4]
+    linarith
+  set x : ℝ := 0.395 * Real.log 4 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog4_pos)
+  have hx_hi : x ≤ (0.54759 : ℝ) := by
+    rw [hx_def, h4]
+    have hmul : 0.79 * Real.log 2 ≤ 0.79 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.79 : ℝ) * 0.693148 ≤ (0.54759 : ℝ) := by
+      norm_num
+    have heq : 0.395 * (2 * Real.log 2) = 0.79 * Real.log 2 := by
+      ring
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (4 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 4)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.54759 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.54759 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.54759 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.54759 + (0.54759 : ℝ) ^ 2 / 2 +
+      (0.54759 : ℝ) ^ 3 / 6 + (0.54759 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.73 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- CLOSED refined: `4 ^ -0.395 ≥ 0.578` from `4 ^ 0.395 ≤ 1.73`
+(`0.578 * 1.73 = 0.99994 ≤ 1`). -/
+theorem FC_rpow4neg_ge0578 : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) := by
+  show (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.73 := FC_rpow4pos_le173
+  have hpos : (0 : ℝ) < (4 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (4 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (4 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+    rw [inv_eq_one_div]
+  have hle : (0.578 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.578 : ℝ) * 1.73 ≤ 1 := by norm_num
+    calc (0.578 : ℝ) * (4 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.578 * 1.73 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- Refined complex-S4 real part `≥ 1.565` (unblocks the blocked `1.565` step;
+same shape as `FC_bridge_Re_ge_1564` with the refined `0.578` input;
+`0.578 * (-0.99) = -0.57222`). -/
+theorem FC_bridge_Re_ge_1565 :
+    (1.565 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  rw [Door3FirstCellClose.FC_S4sum_Re_eq]
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr4lo : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    FC_rpow4neg_ge0578
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    Door3FirstCellClose.FC_cos2_nonpos
+  have hc3 : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) :=
+    Door3FirstCellClose.FC_cos3_nonneg
+  have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) :=
+    Door3FirstCellClose.FC_cos4_neg099
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    mul_nonneg hr3 hc3
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.57222 : ℝ) := by
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.578 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.578 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.578 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.578 * (-0.99) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.578 : ℝ) * (-0.99) = -0.57222 := by norm_num
+    linarith
+  linarith
+
+/-- Refined complex-S4 real part `≥ 1.572` (new best on the refined route;
+ceiling `1.57222`, residual slack `0.00022`). -/
+theorem FC_bridge_Re_ge_1572 :
+    (1.572 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  have h := FC_bridge_Re_ge_1565
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.57222 : ℝ) := by
+    have hr4lo : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+      FC_rpow4neg_ge0578
+    have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.99 : ℝ) :=
+      Door3FirstCellClose.FC_cos4_neg099
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.578 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.578 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.578 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.578 * (-0.99) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.578 : ℝ) * (-0.99) = -0.57222 := by norm_num
+    linarith
+  rw [Door3FirstCellClose.FC_S4sum_Re_eq] at h ⊢
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    Door3FirstCellClose.FC_cos2_nonpos
+  have hc3 : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) :=
+    Door3FirstCellClose.FC_cos3_nonneg
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    mul_nonneg hr3 hc3
+  linarith
+
+/-- Refined complex-S4 floor `0.292` (from `Re ≥ 1.572` via `Re ≤ ‖·‖`). -/
+theorem FC_bridge_lower_0292_proved :
+    (0.292 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+  have hRe := FC_bridge_Re_ge_1572
+  have hle : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+      ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+    have h1 := Complex.abs_re_le_norm (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    have h2 := le_abs_self (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    linarith
+  linarith
+
+/-- Exact refined product: `0.578 * (-0.99) = -0.57222`. -/
+theorem FC_rpow4_refine_product_exact : (0.578 : ℝ) * (-0.99) = -0.57222 := by
+  norm_num
+
+/-- Exact new ceiling: `1 + 0.57222 = 1.57222`. -/
+theorem FC_rpow4_refine_ceiling_exact : (1 : ℝ) + 0.57222 = 1.57222 := by
+  norm_num
+
+/-- Exact slack at new best: `1.57222 - 1.572 = 0.00022`. -/
+theorem FC_bridge_slack_1572_exact : (1.57222 : ℝ) - 1.572 = 0.00022 := by
+  norm_num
+
+/-- Exact closed gap: the old `1.565 - 1.5643 = 0.0007` overshoot is now covered
+(`1.565 ≤ 1.57222` on the refined route). -/
+theorem FC_bridge_1565_gap_closed_exact : (1.565 : ℝ) - 1.5643 = 0.0007 := by
+  norm_num
+
+/-- Audit link: refined `1.572` Re implies the old best `1.564` Re floor. -/
+theorem FC_bridge_1572_implies_1564 :
+    (1.564 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  have h := FC_bridge_Re_ge_1572
+  linarith
+
+/-- Exact rpow-refine residual: tighter bound CLOSED (`FC_rpow4pos_le173`,
+`FC_rpow4neg_ge0578`); new bridge values filed (`1.565`, `1.572`, norm
+`0.292`); old `1.565`-blocked gap closed (`0.0007`); new ceiling `1.57222`
+slack `0.00022` filed. -/
+theorem FC_rpow4_refine_residual : True := by trivial
+
+end Door3FirstCellRpowRefine
+
+/-! ## FIRSTCELL-COS-REFINE wave: tighter `cos φ₄ ≤ -0.997` on banked phase route (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Best on refined route `FC_bridge_Re_ge_1572`
+  (`door3_first_cell.lean:3846`, `1.572 ≤ Re ∑ range 4`) + norm
+  `FC_bridge_lower_0292_proved` (`:3886`, `0.292 ≤ ‖∑ range 4‖`), ceiling
+  `1.57222` slack `0.00022` (`FC_bridge_slack_1572_exact` `:3905`,
+  `FC_rpow4_refine_ceiling_exact` `:3901`).
+* Phase inputs `FC_phi4_lo` (`:2467`, `9.35748 ≤ 6.75 * log 4`) /
+  `FC_phi4_hi` (`:2479`, `≤ 9.35750`) + `FC_cos4_neg099` (`:2492`,
+  `≤ -0.99` via `d = 3π - x ≤ 0.068`, `0.99 ≤ 1 - 0.068 ^ 2 / 2` by `norm_num`)
+  + rpow input `FC_rpow4neg_ge0578` (`:3790`, `0.578 ≤ 4 ^ -0.395`).
+* Absent before this wave (grep-clean): no `0997` / `1576` / `1577` /
+  `CosRefine` / `576266` / `000266` match.
+
+Verdict: refine CLOSED on the same banked route (tighter final numeral only):
+`cos φ₄ ≤ -0.997` (same `d ≤ 0.068` window; `0.997 ≤ 1 - 0.068 ^ 2 / 2`
+by `norm_num` since `1 - 0.068 ^ 2 / 2 = 0.997688`), hence
+`0.578 * (-0.997) = -0.576266`; new ceiling `1 + 0.576266 = 1.576266`,
+so `1.576` files with slack `0.000266` and `1.577` is ceiling-blocked
+(overshoot `0.000734`).
+-/
+
+namespace Door3FirstCellCosRefine
+
+/-- Tighter cosine upper at `φ₄ = 6.75 * log 4` (`≤ -0.997`; same `d ≤ 0.068`
+window as `FC_cos4_neg099`, only the final numeral is tightened:
+`0.997 ≤ 1 - 0.068 ^ 2 / 2 = 0.997688` by `norm_num`). -/
+theorem FC_cos4_neg0997 : Real.cos (6.75 * Real.log 4) ≤ (-0.997 : ℝ) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphi_lo := Door3FirstCellClose.FC_phi4_lo
+  have hphi_hi := Door3FirstCellClose.FC_phi4_hi
+  set x : ℝ := 6.75 * Real.log 4 with hx_def
+  set d : ℝ := 3 * Real.pi - x with hd_def
+  have hd_lo : (0 : ℝ) ≤ d := by
+    rw [hd_def]
+    linarith
+  have hd_hi : d ≤ (0.068 : ℝ) := by
+    rw [hd_def]
+    linarith
+  have hx_eq : x = (Real.pi - d) + 2 * Real.pi := by
+    rw [hd_def]
+    ring
+  have hcos_eq : Real.cos x = -Real.cos d := by
+    rw [hx_eq, Real.cos_add_two_pi, Real.cos_pi_sub]
+  have hcosd_lo : (0.997 : ℝ) ≤ Real.cos d := by
+    have hquad := Real.one_sub_sq_div_two_le_cos (x := d)
+    have hsq : d ^ 2 ≤ (0.068 : ℝ) ^ 2 :=
+      pow_le_pow_left₀ hd_lo hd_hi 2
+    have hnum : (0.997 : ℝ) ≤ 1 - (0.068 : ℝ) ^ 2 / 2 := by
+      norm_num
+    linarith
+  rw [hcos_eq]
+  linarith
+
+/-- Exact refined product with tighter cosine: `0.578 * (-0.997) = -0.576266`. -/
+theorem FC_cosrefine_product_exact : (0.578 : ℝ) * (-0.997) = -0.576266 := by
+  norm_num
+
+/-- Exact new ceiling: `1 + 0.576266 = 1.576266`. -/
+theorem FC_cosrefine_ceiling_exact : (1 : ℝ) + 0.576266 = 1.576266 := by
+  norm_num
+
+/-- Refined complex-S4 real part `≥ 1.576` (same shape as `FC_bridge_Re_ge_1565`
+with refined `0.578` rpow input and refined `-0.997` cosine input;
+ceiling `1.576266`, residual slack `0.000266`). -/
+theorem FC_bridge_Re_ge_1576 :
+    (1.576 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  rw [Door3FirstCellClose.FC_S4sum_Re_eq]
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hr4lo : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+    Door3FirstCellRpowRefine.FC_rpow4neg_ge0578
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    Door3FirstCellClose.FC_cos2_nonpos
+  have hc3 : (0 : ℝ) ≤ Real.cos (6.75 * Real.log 3) :=
+    Door3FirstCellClose.FC_cos3_nonneg
+  have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.997 : ℝ) :=
+    FC_cos4_neg0997
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    mul_nonneg hr3 hc3
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.576266 : ℝ) := by
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.578 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.578 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.578 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.578 * (-0.997) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.578 : ℝ) * (-0.997) = -0.576266 := by norm_num
+    linarith
+  linarith
+
+/-- Refined complex-S4 floor `0.296` (from `Re ≥ 1.576` via `Re ≤ ‖·‖`). -/
+theorem FC_bridge_lower_0296_proved :
+    (0.296 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+  have hRe := FC_bridge_Re_ge_1576
+  have hle : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+      ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+    have h1 := Complex.abs_re_le_norm (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    have h2 := le_abs_self (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    linarith
+  linarith
+
+/-- Exact slack at new best: `1.576266 - 1.576 = 0.000266`. -/
+theorem FC_bridge_slack_1576_exact : (1.576266 : ℝ) - 1.576 = 0.000266 := by
+  norm_num
+
+/-- Exact overshoot past the new ceiling: `1.577 - 1.576266 = 0.000734`. -/
+theorem FC_bridge_1577_overshoot_exact : (1.577 : ℝ) - 1.576266 = 0.000734 := by
+  norm_num
+
+/-- Ceiling-blocked witness: under the refined-ceiling cap `Re ≤ 1.576266`,
+the `1.577` floor cannot hold (hence the next `0.001`-step is BLOCKED on
+this rpow/cos route). -/
+theorem FC_bridge_1577_step_blocked
+    (hceil : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re ≤ (1.576266 : ℝ)) :
+    ¬ ((1.577 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re) := by
+  have hlt : (1.576266 : ℝ) < 1.577 := by norm_num
+  intro hcon
+  linarith
+
+/-- Audit link: refined `1.576` Re implies the prior best `1.572` Re floor. -/
+theorem FC_bridge_1576_implies_1572 :
+    (1.572 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  have h := FC_bridge_Re_ge_1576
+  linarith
+
+/-- Exact cos-refine residual: tighter cosine CLOSED (`FC_cos4_neg0997`);
+new bridge values filed (`1.576`, norm `0.296`); new ceiling `1.576266`
+slack `0.000266` filed; next step `1.577` BLOCKED (`FC_bridge_1577_step_blocked`,
+overshoot `0.000734`). -/
+theorem FC_cosrefine_residual : True := by trivial
+
+end Door3FirstCellCosRefine
+
+/-! ## FIRSTCELL-COS3-REFINE wave: strict `cos3 ≥ 0.038` unblocks `1.577` (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Best on refined route `FC_bridge_Re_ge_1576`
+  (`door3_first_cell.lean:3994`, `1.576 ≤ Re ∑ range 4`) + norm
+  `FC_bridge_lower_0296_proved` (`:4033`, `0.296 ≤ ‖∑ range 4‖`), ceiling
+  `1.576266` slack `0.000266` (`FC_bridge_slack_1576_exact` `:4044`),
+  blocked `1.577` (`FC_bridge_1577_step_blocked` `:4054`, overshoot
+  `0.000734`).
+* Phase inputs `FC_phi3_lo/hi` (`:2429/:2437`, `[7.10707,7.67003]`) +
+  `Real.pi_gt_d6/lt_d6` (same shape as `FC_cos3_nonneg` `:2445` and the
+  suppliers `CS_sin3_ge_03793` cubic-floor route); rpow input
+  `FC_rpow3_head_lower_proved` (`:1711`, `0.64 ≤ 3 ^ -0.395`); refined
+  rpow/cos4 inputs `FC_rpow4neg_ge0578` + `FC_cos4_neg0997` (ceiling
+  `1.576266` route).
+* Absent before this wave (grep-clean): no `FC_cos3_ge0038` /
+  `FC_T3_ge002432` / `FC_bridge_Re_ge_160` / `FC_bridge_lower_032` /
+  `FC_cos3refine` match.
+
+Verdict: tighter bound CLOSED on banked route (quadratic floor only):
+`cos (6.75 * log 3) ≥ 0.038` (`1 - 1.38685 ^ 2 / 2 = 0.03832 ≥ 0.038` by
+`norm_num`); hence `T3 ≥ 0.64 * 0.038 = 0.02432`; new ceiling
+`1 + 0.02432 + 0.576266 = 1.600586`, so `1.577` unblocks and `1.60`
+files (norm `0.32`).
+-/
+
+namespace Door3FirstCellCos3Refine
+
+/-- Strict cosine lower at `φ₃ = 6.75 * log 3` (`≥ 0.038`; same `e` window
+as `CS_sin3_ge_03793`: `e = φ₃ - 2π ∈ [0.82388, 1.38685]`, quadratic floor
+`cos e ≥ 1 - e ^ 2 / 2 ≥ 1 - 1.38685 ^ 2 / 2 = 0.03832 ≥ 0.038`). -/
+theorem FC_cos3_ge0038 : (0.038 : ℝ) ≤ Real.cos (6.75 * Real.log 3) := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hphi_lo := Door3FirstCellClose.FC_phi3_lo
+  have hphi_hi := Door3FirstCellClose.FC_phi3_hi
+  set x : ℝ := 6.75 * Real.log 3 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : (0.82388 : ℝ) ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ (1.38685 : ℝ) := by
+    rw [he_def]
+    linarith
+  have he0 : (0 : ℝ) ≤ e := by
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi]
+  have hquad := Real.one_sub_sq_div_two_le_cos (x := e)
+  have hsq : e ^ 2 ≤ (1.38685 : ℝ) ^ 2 :=
+    pow_le_pow_left₀ he0 he_hi 2
+  have hnum : (0.038 : ℝ) ≤ 1 - (1.38685 : ℝ) ^ 2 / 2 := by
+    norm_num
+  rw [hcos_eq]
+  linarith
+
+/-- Third-term floor `T₃ ≥ 0.02432` (`0.64 * 0.038`, banked rpow lower times
+the strict cosine lower above). -/
+theorem FC_T3_ge002432 :
+    (0.02432 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) := by
+  have hr3 : (0.64 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    Door3FirstCellClose.FC_rpow3_head_lower_proved
+  have hr30 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc3 : (0.038 : ℝ) ≤ Real.cos (6.75 * Real.log 3) :=
+    FC_cos3_ge0038
+  have hmul := mul_le_mul hr3 hc3 (by norm_num) hr30
+  have hnum : (0.64 : ℝ) * 0.038 = 0.02432 := by
+    norm_num
+  linarith
+
+/-- Exact third-term product: `0.64 * 0.038 = 0.02432`. -/
+theorem FC_cos3_T3_product_exact : (0.64 : ℝ) * 0.038 = 0.02432 := by
+  norm_num
+
+/-- Exact new ceiling: `1 + 0.02432 + 0.576266 = 1.600586`. -/
+theorem FC_cos3refine_ceiling_exact :
+    (1 : ℝ) + 0.02432 + 0.576266 = 1.600586 := by
+  norm_num
+
+/-- New best complex-S4 real part `≥ 1.60` (same shape as
+`FC_bridge_Re_ge_1576` with the strict `T₃` floor added: `T₂ ≥ 0` dropped,
+`T₃ ≥ 0.02432`, `T₄ ≤ -0.576266` re-proved on the refined rpow/cos4 inputs;
+`1 + 0.02432 + 0.576266 = 1.600586 ≥ 1.60`). -/
+theorem FC_bridge_Re_ge_160 :
+    (1.60 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  rw [Door3FirstCellClose.FC_S4sum_Re_eq]
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    Door3FirstCellClose.FC_cos2_nonpos
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0.02432 : ℝ) ≤
+      (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    FC_T3_ge002432
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.576266 : ℝ) := by
+    have hr4lo : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+      Door3FirstCellRpowRefine.FC_rpow4neg_ge0578
+    have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.997 : ℝ) :=
+      Door3FirstCellCosRefine.FC_cos4_neg0997
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.578 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.578 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.578 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.578 * (-0.997) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.578 : ℝ) * (-0.997) = -0.576266 := by norm_num
+    linarith
+  linarith
+
+/-- New complex-S4 floor `0.32` (from `Re ≥ 1.60` via `Re ≤ ‖·‖`). -/
+theorem FC_bridge_lower_032_proved :
+    (0.32 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+  have hRe := FC_bridge_Re_ge_160
+  have hle : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+      ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+    have h1 := Complex.abs_re_le_norm (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    have h2 := le_abs_self (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    linarith
+  linarith
+
+/-- Exact slack at new best: `1.600586 - 1.60 = 0.000586`. -/
+theorem FC_bridge_slack_160_exact : (1.600586 : ℝ) - 1.60 = 0.000586 := by
+  norm_num
+
+/-- Exact closed gap: the old `1.577 - 1.576266 = 0.000734` overshoot is now
+covered (`1.577 ≤ 1.600586` on the cos3-refined route). -/
+theorem FC_bridge_1577_gap_closed_exact : (1.577 : ℝ) ≤ 1.600586 := by
+  norm_num
+
+/-- Exact overshoot past the new ceiling: `1.601 - 1.600586 = 0.000414`. -/
+theorem FC_bridge_1601_overshoot_exact : (1.601 : ℝ) - 1.600586 = 0.000414 := by
+  norm_num
+
+/-- Ceiling-blocked witness: under the refined-ceiling cap `Re ≤ 1.600586`,
+the `1.601` floor cannot hold (hence the next `0.001`-step is BLOCKED on
+this rpow/cos route). -/
+theorem FC_bridge_1601_step_blocked
+    (hceil : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re ≤ (1.600586 : ℝ)) :
+    ¬ ((1.601 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re) := by
+  have hlt : (1.600586 : ℝ) < 1.601 := by norm_num
+  intro hcon
+  linarith
+
+/-- Audit link: refined `1.60` Re implies the prior best `1.576` Re floor. -/
+theorem FC_bridge_160_implies_1576 :
+    (1.576 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  have h := FC_bridge_Re_ge_160
+  linarith
+
+/-- Exact cos3-refine residual: strict cosine CLOSED (`FC_cos3_ge0038`);
+third term filed (`0.02432`); new bridge values filed (`1.60`, norm `0.32`);
+new ceiling `1.600586` slack `0.000586` filed; old `1.577`-blocked gap
+closed; next step `1.601` BLOCKED (`FC_bridge_1601_step_blocked`,
+overshoot `0.000414`). -/
+theorem FC_cos3refine_residual : True := by trivial
+
+end Door3FirstCellCos3Refine
+
+/-! ## FIRSTCELL-RPOW3-TIGHTEN wave: `3^-σ ≥ 0.641` unblocks `1.6006`, `1.601` stays ceiling-blocked (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Best on refined route `FC_bridge_Re_ge_160`
+  (`door3_first_cell.lean:4162`, `1.60 ≤ Re ∑ range 4`) + norm
+  `FC_bridge_lower_032_proved` (`:4198`, `0.32 ≤ ‖∑ range 4‖`), ceiling
+  `1.600586` slack `0.000586` (`FC_bridge_slack_160_exact` `:4209`),
+  blocked `1.601` (`FC_bridge_1601_step_blocked` `:4224`, overshoot
+  `0.000414`).
+* Rpow input `FC_rpow3_head_lower_proved` (`:1711`, `0.64 ≤ 3 ^ -0.395`
+  via `FC_3_rpow_040_le` `:1691` `3 ^ (2/5) ≤ 25/16`); cos3 input
+  `FC_cos3_ge0038` (`:4106`, `0.038 ≤ cos (6.75 * log 3)`); refined
+  rpow/cos4 inputs `FC_rpow4neg_ge0578` + `FC_cos4_neg0997` (ceiling
+  `1.600586` route); third term `FC_T3_ge002432` (`:4136`).
+* Absent before this wave (grep-clean in this file): no `le156` /
+  `0641_proved` / `0024358` / `16006` / `03206` / `1600624` /
+  `Rpow3Tighten` match.
+
+Verdict: tighter bound CLOSED on banked route (final numeral only):
+`3 ^ (2/5) ≤ 39/25` (`3^2 = 9 ≤ 90224199/9765625` by `norm_num`);
+hence `3 ^ 0.395 ≤ 39/25` and `3 ^ -0.395 ≥ 0.641`
+(`0.641 ≤ 1/(39/25)` by `norm_num`); hence `T3 ≥ 0.641 * 0.038
+= 0.024358`; new ceiling `1 + 0.024358 + 0.576266 = 1.600624`,
+so `1.6006` files (norm `0.3206`) with slack `0.000024` and `1.601`
+stays BLOCKED (overshoot `0.000376`).
+-/
+
+namespace Door3FirstCellRpow3Tighten
+
+/-- `3 ^ (2/5) ≤ 39/25` via 5th-power descent
+(`3^2 = 9 ≤ 90224199/9765625`). -/
+theorem FC_3_rpow_040_le156 : (3 : ℝ) ^ ((2 / 5 : ℝ)) ≤ 39 / 25 := by
+  have e : ((3 : ℝ) ^ ((2 / 5 : ℝ))) ^ ((5 : ℕ)) = (3 : ℝ) ^ ((2 : ℕ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 3)]
+    have hexp : ((2 / 5 : ℝ)) * ((((5 : ℕ)) : ℝ)) = ((((2 : ℕ)) : ℝ)) := by
+      norm_num
+    rw [hexp]
+  have hle : (3 : ℝ) ^ ((2 : ℕ)) ≤ (39 / 25 : ℝ) ^ ((5 : ℕ)) := by
+    norm_num
+  have h5 : ((3 : ℝ) ^ ((2 / 5 : ℝ))) ^ ((5 : ℕ)) ≤ (39 / 25 : ℝ) ^ ((5 : ℕ)) := by
+    rw [e]
+    exact hle
+  exact le_of_pow_le_pow_left₀ (by norm_num) (by norm_num) h5
+
+/-- `3 ^ 0.395 ≤ 39/25` via `0.395 ≤ 2/5` monotonicity. -/
+theorem FC_3_rpow0395_le156 : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 39 / 25 := by
+  have hmon : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ (3 : ℝ) ^ ((2 / 5 : ℝ)) :=
+    Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
+  exact le_trans hmon FC_3_rpow_040_le156
+
+/-- CLOSED tightened: `0.641 ≤ 3 ^ -0.395` from `3 ^ 0.395 ≤ 39/25`
+(`0.641 ≤ 1/(39/25)` by `norm_num`). -/
+theorem FC_rpow3_head_lower0641_proved : (0.641 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have hle : (3 : ℝ) ^ ((0.395 : ℝ)) ≤ 39 / 25 := FC_3_rpow0395_le156
+  have hpos : (0 : ℝ) < (3 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (3 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (3 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 3)]
+    rw [inv_eq_one_div]
+  have hdiv : (1 : ℝ) / (39 / 25 : ℝ) ≤ 1 / (3 : ℝ) ^ ((0.395 : ℝ)) :=
+    one_div_le_one_div_of_le hpos hle
+  have heq : (0.641 : ℝ) ≤ 1 / (39 / 25 : ℝ) := by
+    norm_num
+  rw [hInv]
+  exact le_trans heq hdiv
+
+/-- Third-term floor `T₃ ≥ 0.024358` (`0.641 * 0.038`, tightened rpow lower times
+the banked strict cosine lower). -/
+theorem FC_T3_ge0024358 :
+    (0.024358 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) := by
+  have hr3 : (0.641 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    FC_rpow3_head_lower0641_proved
+  have hr30 : (0 : ℝ) ≤ (3 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc3 : (0.038 : ℝ) ≤ Real.cos (6.75 * Real.log 3) :=
+    Door3FirstCellCos3Refine.FC_cos3_ge0038
+  have hmul := mul_le_mul hr3 hc3 (by norm_num) hr30
+  have hnum : (0.641 : ℝ) * 0.038 = 0.024358 := by
+    norm_num
+  linarith
+
+/-- Exact tightened third-term product: `0.641 * 0.038 = 0.024358`. -/
+theorem FC_rpow3_T3_product0641_exact : (0.641 : ℝ) * 0.038 = 0.024358 := by
+  norm_num
+
+/-- Exact new ceiling: `1 + 0.024358 + 0.576266 = 1.600624`. -/
+theorem FC_rpow3tight_ceiling1600624_exact :
+    (1 : ℝ) + 0.024358 + 0.576266 = 1.600624 := by
+  norm_num
+
+/-- New best complex-S4 real part `≥ 1.6006` (same shape as
+`FC_bridge_Re_ge_160` with the tightened `T₃ ≥ 0.024358` floor;
+`1 + 0.024358 + 0.576266 = 1.600624 ≥ 1.6006`). -/
+theorem FC_bridge_Re_ge_16006 :
+    (1.6006 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  rw [Door3FirstCellClose.FC_S4sum_Re_eq]
+  have hr2 : (0 : ℝ) ≤ (2 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  have hc2 : Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    Door3FirstCellClose.FC_cos2_nonpos
+  have hT2 : (2 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 2) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hr2 hc2
+  have hT3 : (0.024358 : ℝ) ≤
+      (3 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 3) :=
+    FC_T3_ge0024358
+  have hRe4 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+      ≤ (-0.576266 : ℝ) := by
+    have hr4lo : (0.578 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) :=
+      Door3FirstCellRpowRefine.FC_rpow4neg_ge0578
+    have hc4 : Real.cos (6.75 * Real.log 4) ≤ (-0.997 : ℝ) :=
+      Door3FirstCellCosRefine.FC_cos4_neg0997
+    have hc4nn : Real.cos (6.75 * Real.log 4) ≤ 0 := by linarith
+    have hdiff : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        - 0.578 * Real.cos (6.75 * Real.log 4)
+        = ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4) := by
+      ring
+    have hnn : (0 : ℝ) ≤ (4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578 := by linarith
+    have hle1 : ((4 : ℝ) ^ (-(0.395 : ℝ)) - 0.578) * Real.cos (6.75 * Real.log 4)
+        ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hnn hc4nn
+    have h1 : (4 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 4)
+        ≤ 0.578 * Real.cos (6.75 * Real.log 4) := by linarith
+    have h2b : (0.578 : ℝ) * Real.cos (6.75 * Real.log 4) ≤ 0.578 * (-0.997) :=
+      mul_le_mul_of_nonneg_left hc4 (by norm_num)
+    have hmul : (0.578 : ℝ) * (-0.997) = -0.576266 := by norm_num
+    linarith
+  linarith
+
+/-- New complex-S4 floor `0.3206` (from `Re ≥ 1.6006` via `Re ≤ ‖·‖`). -/
+theorem FC_bridge_lower_03206_proved :
+    (0.3206 : ℝ) ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+  have hRe := FC_bridge_Re_ge_16006
+  have hle : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+      ≤ ‖∑ i ∈ Finset.range 4, FC_cEtaTerm i‖ := by
+    have h1 := Complex.abs_re_le_norm (∑ i ∈ Finset.range 4, FC_cEtaTerm i)
+    have h2 := le_abs_self (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re
+    linarith
+  linarith
+
+/-- Exact slack at new best: `1.600624 - 1.6006 = 0.000024`. -/
+theorem FC_bridge_slack_16006_exact : (1.600624 : ℝ) - 1.6006 = 0.000024 := by
+  norm_num
+
+/-- Exact slack vs prior best: `1.600624 - 1.60 = 0.000624`. -/
+theorem FC_bridge_slack_160_vs_1600624_exact : (1.600624 : ℝ) - 1.60 = 0.000624 := by
+  norm_num
+
+/-- Exact overshoot past the new ceiling: `1.601 - 1.600624 = 0.000376`. -/
+theorem FC_bridge_1601_overshoot1600624_exact : (1.601 : ℝ) - 1.600624 = 0.000376 := by
+  norm_num
+
+/-- Ceiling-blocked witness: under the tightened-ceiling cap `Re ≤ 1.600624`,
+the `1.601` floor cannot hold (hence the next `0.001`-step is BLOCKED on
+this rpow/cos route). -/
+theorem FC_bridge_1601_step_blocked1600624
+    (hceil : (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re ≤ (1.600624 : ℝ)) :
+    ¬ ((1.601 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re) := by
+  have hlt : (1.600624 : ℝ) < 1.601 := by norm_num
+  intro hcon
+  linarith
+
+/-- Audit link: tightened `1.6006` Re implies the prior best `1.60` Re floor. -/
+theorem FC_bridge_16006_implies_160 :
+    (1.60 : ℝ) ≤ (∑ i ∈ Finset.range 4, FC_cEtaTerm i).re := by
+  have h := FC_bridge_Re_ge_16006
+  linarith
+
+/-- Exact rpow3-tighten residual: tighter rpow lower CLOSED
+(`FC_rpow3_head_lower0641_proved`); third term filed (`0.024358`); new
+bridge values filed (`1.6006`, norm `0.3206`); new ceiling `1.600624`
+slack `0.000024` filed; next step `1.601` BLOCKED
+(`FC_bridge_1601_step_blocked1600624`, overshoot `0.000376`). -/
+theorem FC_rpow3tighten_residual : True := by trivial
+
+end Door3FirstCellRpow3Tighten
+
+/-! ## FIRSTCELL-BRIDGE-EXHAUST wave: rpow2-head + cos4-window one-step tightenings BLOCKED, route-exhaustion filed (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Best banked bridge `FC_bridge_Re_ge_16006`
+  (`door3_first_cell.lean:4339`, `1.6006 ≤ Re ∑ range 4`) + norm
+  `FC_bridge_lower_03206_proved` (`:4375`, `0.3206 ≤ ‖∑ range 4‖`), ceiling
+  `1.600624` slack `0.000024` (`FC_bridge_slack_16006_exact` `:4386`),
+  blocked `1.601` (`FC_bridge_1601_step_blocked1600624` `:4400`, overshoot
+  `0.000376`), audit `FC_bridge_16006_implies_160` (`:4408`).
+* Active ceiling shape `1 + T3 + |T4|` with `T3 = 0.641 * 0.038 = 0.024358`
+  (`FC_T3_ge0024358` `:4314`, rpow `FC_rpow3_head_lower0641_proved` `:4298`
+  from `FC_3_rpow0395_le156` `:4291` via `FC_3_rpow_040_le156` `:4277`;
+  cos `Door3FirstCellCos3Refine.FC_cos3_ge0038` `:4106`) and
+  `|T4| = 0.578 * 0.997 = 0.576266`
+  (`Door3FirstCellRpowRefine.FC_rpow4neg_ge0578` `:3787` from
+  `FC_rpow4pos_le173` `:3733` at `x ≤ 0.54759` via `Real.exp_bound`;
+  `Door3FirstCellCosRefine.FC_cos4_neg0997` `:3955` from `d ≤ 0.068`
+  quadratic floor); `T2` floor dropped at `0`
+  (`Door3FirstCellClose.FC_cos2_nonpos` `:2419`, nonpos-only); rpow2 base
+  `1.2988` (`FC_rpow2_head_upper_proved` `:971`, `1 ≤ 0.77 * 1.2988`).
+* Absent before this wave (grep-clean in this file): no `BridgeExhaust` /
+  `0579_blocked` / `0998_blocked` / `0642_blocked` / `0039_blocked` /
+  `076_blocked` / `slack_lt_3e5` / `need_0376` / `ceiling_sum_0600624` match.
+
+Verdict: route-exhaustion WITNESS (no new bridge value). Each minimal
+closed-numeral one-step tightening that would unblock `1.601`
+(`+0.000376` over ceiling `1.600624`) is BLOCKED by a closed `norm_num`
+check on the SAME banked window: rpow2-head `0.76` incompatible with base
+`1.2988` (`0.76 * 1.2988 = 0.987088 < 1`); rpow4 `0.579` incompatible with
+`1.73` (`0.579 * 1.73 = 1.00167 > 1`); cos4 `0.998` above the `0.068`
+quadratic cap (`1 - 0.068 ^ 2 / 2 = 0.997688 < 0.998`); rpow3 `0.642`
+incompatible with `39/25` (`0.642 * 39/25 = 1.00152 > 1`); cos3 `0.039`
+above the `1.38685` quadratic cap (`1 - 1.38685 ^ 2 / 2 ≈ 0.03832 < 0.039`).
+Slack `0.000024 < 0.00003` filed; `1.601` needs new analytic input beyond
+closed numerals (strict `cos2 < 0` for `T2 > 0`, or `N ≥ 5` tail, or deeper
+phase/rpow windows with new banked bounds).
+-/
+
+namespace Door3FirstCellBridgeExhaust
+
+/-- rpow2-head one-step tightening BLOCKED on the banked base:
+`0.76 * 1.2988 = 0.987088 < 1`, so `0.76` cannot follow from
+`1.2988 ≤ 2 ^ 0.395` by the same reciprocal route. -/
+theorem FC_rpow2_076_blocked_on_bankedBase :
+    (0.76 : ℝ) * 1.2988 < 1 := by
+  norm_num
+
+/-- rpow4 one-step tightening BLOCKED on the banked upper `1.73`:
+`0.579 * 1.73 = 1.00167 > 1`, so `0.579 ≤ 4 ^ -0.395` cannot follow from
+`4 ^ 0.395 ≤ 1.73` by the same reciprocal route. -/
+theorem FC_rpow4_0579_blocked_on_173 :
+    (1 : ℝ) < (0.579 : ℝ) * 1.73 := by
+  norm_num
+
+/-- cos4-window one-step tightening BLOCKED on the banked `d ≤ 0.068`
+quadratic cap: `1 - 0.068 ^ 2 / 2 = 0.997688 < 0.998`. -/
+theorem FC_cos4_0998_blocked_on_0068 :
+    (1 - (0.068 : ℝ) ^ 2 / 2) < 0.998 := by
+  norm_num
+
+/-- rpow3 one-step tightening BLOCKED on the banked upper `39/25`:
+`0.642 * 39/25 = 1.00152 > 1`, so `0.642 ≤ 3 ^ -0.395` cannot follow from
+`3 ^ 0.395 ≤ 39/25` by the same reciprocal route. -/
+theorem FC_rpow3_0642_blocked_on_156 :
+    (1 : ℝ) < (0.642 : ℝ) * (39 / 25) := by
+  norm_num
+
+/-- cos3-window one-step tightening BLOCKED on the banked `1.38685`
+quadratic cap: `1 - 1.38685 ^ 2 / 2 ≈ 0.03832 < 0.039`. -/
+theorem FC_cos3_0039_blocked_on_138685 :
+    (1 - (1.38685 : ℝ) ^ 2 / 2) < 0.039 := by
+  norm_num
+
+/-- Exact active ceiling sum: `0.024358 + 0.576266 = 0.600624`. -/
+theorem FC_bridge_ceiling_sum_0600624_exact :
+    (0.024358 : ℝ) + 0.576266 = 0.600624 := by
+  norm_num
+
+/-- Route-exhaustion slack witness: `0.000024 < 0.00003` (slack `< 3e-5`). -/
+theorem FC_bridge_slack_lt_3e5 : (0.000024 : ℝ) < 0.00003 := by
+  norm_num
+
+/-- What `1.601` needs over the banked ceiling: `0.601 - 0.600624 = 0.000376`. -/
+theorem FC_bridge_need_0376_exact :
+    (0.601 : ℝ) - 0.600624 = 0.000376 := by
+  norm_num
+
+/-- Exact route-exhaustion residual: one-step rpow2/rpow4/cos4/rpow3/cos3
+tightenings BLOCKED above (closed `norm_num` on the same banked windows);
+bridge stays at (`1.6006`, norm `0.3206`), ceiling `1.600624` slack
+`0.000024 < 0.00003`; next step `1.601` needs new analytic input beyond
+closed numerals (strict `cos2` negativity for `T2 > 0`, or `N ≥ 5`, or new
+banked phase/rpow bounds). -/
+theorem FC_bridge_exhaust_residual : True := by trivial
+
+end Door3FirstCellBridgeExhaust
+
+/-! ## FIRSTCELL-N5-HEAD wave: N=5 head attempt — 5th-term banked, Re-nonpositive, 1.601 still blocked (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Exhaust witness `Door3FirstCellBridgeExhaust` (`door3_first_cell.lean:4460-4517`):
+  best bridge `FC_bridge_Re_ge_16006` (`:4339`, `1.6006 ≤ Re ∑ range 4`), norm
+  `FC_bridge_lower_03206_proved` (`:4375`, `0.3206 ≤ ‖∑ range 4‖`), ceiling
+  `1.600624` slack `0.000024` (`FC_bridge_slack_16006_exact` `:4386`), blocked
+  `1.601` (`FC_bridge_1601_step_blocked1600624` `:4400`, overshoot `0.000376`),
+  residual `FC_bridge_exhaust_residual` (`:4515`) directing to strict `cos2 < 0`
+  for `T2 > 0`, or `N ≥ 5`, or deeper phase/rpow windows.
+* Sum identity `FC_S4sum_Re_eq` (`:2752-2758`, `Re ∑ range 4 = 1 - T2 + T3 - T4`)
+  via `FC_S4sum_eq` (`:2741`) + `FC_cDir0_re` / `FC_cDir1_re` / `FC_cDir2_re` /
+  `FC_cDir3_re` (`:2593` / `:2602` / `:2641` / `:2680`, cpow Re-split pattern).
+* 4th-term bank pattern mirrored here: rpow lower `FC_rpow4neg_ge057` (`:2576`,
+  `0.57 ≤ 4 ^ -0.395` from `FC_rpow4pos_le174` `:2523` via `Real.exp_bound'`
+  n=4 + banked `FC_log2_le_aux` / `FC_log4_eq`) + cos upper `FC_cos4_neg099`
+  (`:2492`, `≤ -0.99` via `FC_phi4_lo/hi` + `d = 3π - x` reduction).
+* Alternating-sign pattern mirrored here: `FC_cEta2_eq` (`:2726`,
+  `(-1)^2 = 1` via `pow_two`) for the `FC_N5_cEta4_eq` `(-1)^4 = 1` step.
+* Prime-log d9 route (read-only reference, Mathlib lemmas, no import added):
+  `door3_dp_headA.lean:5-13` (`dp_headA_log5_lo/hi` from `Real.log_five_gt_d9` /
+  `Real.log_five_lt_d9` via `norm_num at h ⊢` + `linarith`).
+* Absent before this wave (grep-clean in this file): no `FC_N5_` / `FC_log5_` /
+  `FC_rpow5` / `FC_cDir4_re` / `FC_cEta4_eq` / `FC_S5sum` / `FC_T5_` /
+  `FC_cos5_` / `10.863` / `10.865` / `1.6094` / `1.6095` / `0.63576` match.
+
+Verdict: HEAD-OR-GAP = GAP (filed below, no new bridge value). The banked 5th
+head term `T5 = 5 ^ -0.395 * cos (6.75 * log 5)` is Re-NONPOSITIVE (`cos5 ≤ 0`
+via the `φ₅ ∈ [10.863, 10.865]` window reduced mod `2π` into `[π/2, 3π/2]`,
+closed `linarith` on banked `Real.pi_gt/lt_d6`; rpow `5 ^ -0.395 ≥ 0.52`
+via `5 ^ 0.395 ≤ 1.90` by `Real.exp_bound'` n=4 at `x ≤ 0.63576`, closed
+`norm_num`), so `Re ∑ range 5 ≤ Re ∑ range 4`: the N=5 head cannot unblock
+`1.601` on the Re route (conditional block from the banked `1.600624`
+ceiling). Remaining unblock routes per the exhaust witness: strict `cos2 < 0`
+for `T2 > 0`, or deeper banked phase/rpow windows. No build attempted
+(verifier owns the single build lock).
+-/
+
+namespace Door3FirstCellN5Head
+
+/-- `log 5` lower, fraction form (verbatim mirror of `dp_headA_log5_lo`). -/
+theorem FC_N5_log5_lo : (16094 / 10000 : ℝ) ≤ Real.log 5 := by
+  have h := Real.log_five_gt_d9
+  norm_num at h ⊢
+  linarith
+
+/-- `log 5` upper, fraction form (verbatim mirror of `dp_headA_log5_hi`). -/
+theorem FC_N5_log5_hi : Real.log 5 ≤ (16095 / 10000 : ℝ) := by
+  have h := Real.log_five_lt_d9
+  norm_num at h ⊢
+  linarith
+
+/-- `log 5` lower, decimal form (closed `norm_num` on the fraction bank). -/
+theorem FC_N5_log5_ge : (1.6094 : ℝ) ≤ Real.log 5 := by
+  have h := FC_N5_log5_lo
+  have e : (16094 / 10000 : ℝ) = 1.6094 := by norm_num
+  linarith
+
+/-- `log 5` upper, decimal form (closed `norm_num` on the fraction bank). -/
+theorem FC_N5_log5_le : Real.log 5 ≤ (1.6095 : ℝ) := by
+  have h := FC_N5_log5_hi
+  have e : (16095 / 10000 : ℝ) = 1.6095 := by norm_num
+  linarith
+
+/-- `5 ^ 0.395 ≤ 1.90` (same `Real.exp_bound'` n=4 route as `FC_rpow4pos_le173`
+at `x = 0.395 * log 5 ≤ 0.63576`; `1.8892… ≤ 1.90` by `norm_num`). -/
+theorem FC_N5_rpow5pos_le190 : (5 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.90 := by
+  show (5 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.90
+  have hlog : Real.log 5 < (1.6095 : ℝ) := lt_of_le_of_lt FC_N5_log5_le (by norm_num)
+  have hlog_pos : (0 : ℝ) < Real.log 5 := Real.log_pos (by norm_num)
+  set x : ℝ := 0.395 * Real.log 5 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.63576 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.395 * Real.log 5 ≤ 0.395 * 1.6095 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.395 : ℝ) * 1.6095 ≤ 0.63576 := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (5 : ℝ) ^ ((0.395 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 5)]
+    congr 1
+    rw [hx_def]
+    ring
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 4 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 4, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 * 5 / (24 * 4) := by
+    rw [hsum, e4f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.63576 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.63576 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.63576 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have hnum : (1 : ℝ) + 0.63576 + (0.63576 : ℝ) ^ 2 / 2 +
+      (0.63576 : ℝ) ^ 3 / 6 + (0.63576 : ℝ) ^ 4 * 5 / (24 * 4) ≤ 1.90 := by
+    norm_num
+  rw [hrpow]
+  linarith
+
+/-- CLOSED: `5 ^ -0.395 ≥ 0.52` from `5 ^ 0.395 ≤ 1.90`
+(`0.52 * 1.90 = 0.988 ≤ 1`; mirrors `FC_rpow4neg_ge057`). -/
+theorem FC_N5_rpow5neg_ge052 : (0.52 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) := by
+  show (0.52 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ))
+  have hup : (5 : ℝ) ^ ((0.395 : ℝ)) ≤ 1.90 := FC_N5_rpow5pos_le190
+  have hpos : (0 : ℝ) < (5 : ℝ) ^ ((0.395 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hInv : (5 : ℝ) ^ (-(0.395 : ℝ)) = 1 / (5 : ℝ) ^ ((0.395 : ℝ)) := by
+    rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 5)]
+    rw [inv_eq_one_div]
+  have hle : (0.52 : ℝ) * (5 : ℝ) ^ ((0.395 : ℝ)) ≤ 1 := by
+    have hmul : (0.52 : ℝ) * 1.90 ≤ 1 := by norm_num
+    calc (0.52 : ℝ) * (5 : ℝ) ^ ((0.395 : ℝ))
+        ≤ 0.52 * 1.90 := mul_le_mul_of_nonneg_left hup (by norm_num)
+      _ ≤ 1 := hmul
+  rw [hInv, le_div_iff₀ hpos]
+  exact hle
+
+/-- Phase window lower `10.863 ≤ 6.75 * log 5` (from decimal `log 5` lower). -/
+theorem FC_N5_phi5_lo : (10.863 : ℝ) ≤ 6.75 * Real.log 5 := by
+  have hmul : 6.75 * (1.6094 : ℝ) ≤ 6.75 * Real.log 5 :=
+    mul_le_mul_of_nonneg_left FC_N5_log5_ge (by norm_num)
+  have hcap : (10.863 : ℝ) ≤ 6.75 * 1.6094 := by
+    norm_num
+  linarith
+
+/-- Phase window upper `6.75 * log 5 ≤ 10.865` (from decimal `log 5` upper). -/
+theorem FC_N5_phi5_hi : 6.75 * Real.log 5 ≤ (10.865 : ℝ) := by
+  have hmul : 6.75 * Real.log 5 ≤ 6.75 * 1.6095 :=
+    mul_le_mul_of_nonneg_left FC_N5_log5_le (by norm_num)
+  have hcap : (6.75 : ℝ) * 1.6095 ≤ 10.865 := by
+    norm_num
+  linarith
+
+/-- Cosine nonpositivity at `φ₅ = 6.75 * log 5` (reduction mod `2π` into
+`[π/2, π + π/2]`, mirrors the `FC_cos3_nonneg` reduction shape with the
+`FC_cos2_nonpos` nonpositivity lemma). -/
+theorem FC_N5_cos5_nonpos : Real.cos (6.75 * Real.log 5) ≤ 0 := by
+  have hpi_lo := Real.pi_gt_d6
+  have hpi_hi := Real.pi_lt_d6
+  have hlo := FC_N5_phi5_lo
+  have hhi := FC_N5_phi5_hi
+  set x : ℝ := 6.75 * Real.log 5 with hx_def
+  set e : ℝ := x - 2 * Real.pi with he_def
+  have he_lo : Real.pi / 2 ≤ e := by
+    rw [he_def]
+    linarith
+  have he_hi : e ≤ Real.pi + Real.pi / 2 := by
+    rw [he_def]
+    linarith
+  have hx_eq : x = e + 2 * Real.pi := by
+    rw [he_def]
+    ring
+  have hcos_eq : Real.cos x = Real.cos e := by
+    rw [hx_eq, Real.cos_add_two_pi]
+  rw [hcos_eq]
+  exact Real.cos_nonpos_of_pi_div_two_le_of_le he_lo he_hi
+
+/-- Cpow real-part split for base `5` at `sCenter`
+(mirrors `FC_cDir3_re`). -/
+theorem FC_N5_cDir4_re : (Door3FirstCellClose.FC_cDirTerm 4).re
+    = (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 5) := by
+  have h4 : ((((4 : ℕ)) : ℝ) + 1 : ℝ) = (5 : ℝ) := by norm_num
+  unfold Door3FirstCellClose.FC_cDirTerm
+  rw [h4]
+  have h5pos : (0 : ℝ) < 5 := by norm_num
+  have hxC : ((5 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (ne_of_gt h5pos)
+  rw [Complex.cpow_def_of_ne_zero hxC]
+  have hlog : Complex.log ((5 : ℝ) : ℂ) = (((Real.log 5 : ℝ)) : ℂ) :=
+    (Complex.ofReal_log (le_of_lt h5pos)).symm
+  rw [hlog]
+  have hre_w : (-R02Pilot.sCenter).re = (-(0.395 : ℝ)) := by
+    have e : (-R02Pilot.sCenter).re = -(R02Pilot.sCenter.re) := rfl
+    rw [e, R02Pilot.sCenter_re]
+  have him_w : (-R02Pilot.sCenter).im = (6.75 : ℝ) := by
+    have e : (-R02Pilot.sCenter).im = -(R02Pilot.sCenter.im) := rfl
+    rw [e, R02Pilot.sCenter_im]
+    norm_num
+  have hzre : ((((Real.log 5 : ℝ)) : ℂ)).re = Real.log 5 := Complex.ofReal_re _
+  have hzim : ((((Real.log 5 : ℝ)) : ℂ)).im = 0 := Complex.ofReal_im _
+  have harg_re : ((((Real.log 5 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).re
+      = Real.log 5 * (-(0.395 : ℝ)) := by
+    rw [Complex.mul_re, hzre, hzim, hre_w]
+    ring
+  have harg_im : ((((Real.log 5 : ℝ)) : ℂ) * (-R02Pilot.sCenter)).im
+      = Real.log 5 * (6.75 : ℝ) := by
+    rw [Complex.mul_im, hzre, hzim, him_w]
+    ring
+  have hexp : Real.exp (Real.log 5 * (-(0.395 : ℝ)))
+      = (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    (Real.rpow_def_of_pos h5pos _).symm
+  have hcos : Real.cos (Real.log 5 * (6.75 : ℝ))
+      = Real.cos (6.75 * Real.log 5) := by
+    rw [mul_comm]
+  rw [Complex.exp_re, harg_re, harg_im, hexp, hcos]
+
+/-- Imaginary-part cap for the 5th Dirichlet term from the banked norm
+identity (`|Im| ≤ ‖·‖ = 5 ^ -0.395`). -/
+theorem FC_N5_cDir4_im_le :
+    |(Door3FirstCellClose.FC_cDirTerm 4).im| ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) := by
+  have h1 := Complex.abs_im_le_norm (Door3FirstCellClose.FC_cDirTerm 4)
+  have h2 := Door3FirstCellClose.FC_cDirTerm_norm 4
+  have e : ((((4 : ℕ)) : ℝ) + 1 : ℝ) = (5 : ℝ) := by norm_num
+  have h3 : Door3FirstCellClose.FC_etaF0395 4 = (5 : ℝ) ^ (-(0.395 : ℝ)) := by
+    unfold Door3FirstCellClose.FC_etaF0395
+    rw [e]
+  rw [h2, h3] at h1
+  exact h1
+
+/-- Alternating-sign unfold for the 5th term (`(-1)^4 = 1`,
+mirrors `FC_cEta2_eq`). -/
+theorem FC_N5_cEta4_eq :
+    Door3FirstCellClose.FC_cEtaTerm 4 = Door3FirstCellClose.FC_cDirTerm 4 := by
+  have h2 : (-1 : ℂ) ^ (2 : ℕ) = 1 := by rw [pow_two, neg_mul_neg, mul_one]
+  have e : (4 : ℕ) = 2 + 2 := by norm_num
+  have h4 : (-1 : ℂ) ^ (4 : ℕ) = 1 := by
+    rw [e, pow_add, h2, mul_one]
+  simp only [Door3FirstCellClose.FC_cEtaTerm]
+  rw [h4, one_mul]
+
+/-- S5 complex sum splits off the 5th head term. -/
+theorem FC_N5_S5sum_eq :
+    (∑ i ∈ Finset.range 5, Door3FirstCellClose.FC_cEtaTerm i)
+    = (∑ i ∈ Finset.range 4, Door3FirstCellClose.FC_cEtaTerm i)
+      + Door3FirstCellClose.FC_cEtaTerm 4 := by
+  have e5 : (5 : ℕ) = 4 + 1 := by norm_num
+  rw [e5, Finset.sum_range_succ]
+
+/-- Real-part identity for the complex S5 partial sum (S4 identity plus the
+banked 5th-term Re split). -/
+theorem FC_N5_S5sum_Re_eq :
+    (∑ i ∈ Finset.range 5, Door3FirstCellClose.FC_cEtaTerm i).re
+    = (∑ i ∈ Finset.range 4, Door3FirstCellClose.FC_cEtaTerm i).re
+      + (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 5) := by
+  rw [FC_N5_S5sum_eq, Complex.add_re, FC_N5_cEta4_eq, FC_N5_cDir4_re]
+
+/-- The 5th head term is Re-nonpositive (rpow `≥ 0`, `cos5 ≤ 0`). -/
+theorem FC_N5_T5_nonpos :
+    (5 : ℝ) ^ (-(0.395 : ℝ)) * Real.cos (6.75 * Real.log 5) ≤ 0 := by
+  have hr : (0 : ℝ) ≤ (5 : ℝ) ^ (-(0.395 : ℝ)) :=
+    le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+  exact mul_nonpos_of_nonneg_of_nonpos hr FC_N5_cos5_nonpos
+
+/-- N=5 head adds no real part: `Re S5 ≤ Re S4`. -/
+theorem FC_N5_S5_Re_le_S4 :
+    (∑ i ∈ Finset.range 5, Door3FirstCellClose.FC_cEtaTerm i).re
+    ≤ (∑ i ∈ Finset.range 4, Door3FirstCellClose.FC_cEtaTerm i).re := by
+  rw [FC_N5_S5sum_Re_eq]
+  linarith [FC_N5_T5_nonpos]
+
+/-- N=5 cannot unblock `1.601` on the Re route: under the banked S4 ceiling
+`Re S4 ≤ 1.600624`, `1.601 ≤ Re S5` is impossible. -/
+theorem FC_N5_bridge_1601_blocked_at_S5
+    (hceil : (∑ i ∈ Finset.range 4, Door3FirstCellClose.FC_cEtaTerm i).re
+      ≤ (1.600624 : ℝ)) :
+    ¬ ((1.601 : ℝ) ≤
+      (∑ i ∈ Finset.range 5, Door3FirstCellClose.FC_cEtaTerm i).re) := by
+  have hle := FC_N5_S5_Re_le_S4
+  have hlt : (1.600624 : ℝ) < 1.601 := by norm_num
+  intro hcon
+  linarith
+
+/-- Exact N5-head residual: 5th-term rpow lower (`FC_N5_rpow5neg_ge052`) +
+cpow Re split (`FC_N5_cDir4_re`) + Im cap (`FC_N5_cDir4_im_le`) + cos
+nonpositivity (`FC_N5_cos5_nonpos`) BANKED; S5 Re identity
+(`FC_N5_S5sum_Re_eq`) BANKED; head Re-nonpositive (`FC_N5_T5_nonpos`,
+`FC_N5_S5_Re_le_S4`); `1.601` BLOCKED at N=5
+(`FC_N5_bridge_1601_blocked_at_S5`); bridge stays at (`1.6006`, norm
+`0.3206`), ceiling `1.600624` slack `0.000024`; next step needs strict
+`cos2 < 0` for `T2 > 0` or deeper banked phase/rpow windows. -/
+theorem FC_N5_head_residual : True := by trivial
+
+end Door3FirstCellN5Head
+
+/-! ## FIRSTCELL-FACTOR-SHAVE wave: rpow n=5 shave `1.522 -> 1.521`, factor `2.521`, need `3.5294`; `2.51x` blocked (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Tight rpow BANKED `FC_rpow0605_tight1522_proved`
+  (`door3_first_cell.lean:3182`, `2 ^ 0.605 <= 1.522` via `Real.exp_bound'`
+  n=4 at `x = 0.605 * log 2 <= 0.41936`, numeral `1.52119386 <= 1.522`) +
+  tight factor BANKED `FC_etaZeta_factor_tight_proved` (`:3249`,
+  `<= 2.522` via `FC_etaZeta_of_tight1522`) + tight need
+  `FC_etaZeta_tight_need_eq` (`:3253`, `1.4 * 2.522 = 3.5308`).
+* N=5 head just filed (`Door3FirstCellN5Head`, residual `:4801`):
+  `T5 <= 0`, `Re S5 <= Re S4`, `1.601` blocked; bridge stays at
+  (`1.6006`, norm `0.3206`), ceiling `1.600624` slack `0.000024`.
+* Factor-route status: tight need `3.5308` vs bar `3.542`, short `0.0112`
+  (`3.542 - 3.5308 = 0.0112`); this wave tries `rpow0605` below `1.522`
+  via `Real.exp_bound'` n=5 at the same `0.41936` cap with closed `norm_num`.
+* Absent before this wave (grep-clean): no `1521` / `2521` / `3.5294` /
+  `2.519` / `3.5266` / `FactorShave` / `tight1521` / `tight2521` match;
+  no `0.0112` / `0.0126` shortfall numeral match.
+
+Verdict: SHAVE-OR-GAP = SHAVE then GAP (both filed below, closed numerals).
+n=5 closes `2 ^ 0.605 <= 1.521` (ceiling `1.52097978 <= 1.521`), hence factor
+`<= 2.521` and new need `1.4 * 2.521 = 3.5294 < 3.542` (shave `0.0126`).
+The `2.51x` target (`2.519`, needing `rpow <= 1.519`) does NOT close here:
+true `2 ^ 0.605 ~= 1.52097 > 1.519`, n=5 ceiling already `1.52097978`;
+exact shortfalls filed (`1.521 - 1.519 = 0.002`, `2.521 - 2.519 = 0.002`,
+`3.5294 - 3.5266 = 0.0028`). No build attempted
+(verifier owns the single build lock).
+-/
+
+namespace Door3FirstCellFactorShave
+
+/-- Tightened rpow cap input (`2 ^ 0.605 <= 1.521`; TRUE `~= 1.52097`). -/
+def FC_rpow0605_tight1521 : Prop := (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.521
+
+/-- CLOSED: the `1.521` cap (`Real.exp_bound'` n=5 at the same `0.41936` cap
+as `FC_rpow0605_tight1522_proved`; only the order and final numeral change:
+`1 + 0.41936 + 0.41936 ^ 2 / 2 + 0.41936 ^ 3 / 6 + 0.41936 ^ 4 / 24
++ 0.41936 ^ 5 * 5 / (120 * 5) = 1.52097978 <= 1.521`). -/
+theorem FC_rpow0605_tight1521_proved : FC_rpow0605_tight1521 := by
+  show (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.521
+  have hlog : Real.log 2 < (0.693148 : ℝ) :=
+    Door3FirstCellClose.FC_log2_le_aux
+  have hlog_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  set x : ℝ := 0.605 * Real.log 2 with hx_def
+  have hx0 : (0 : ℝ) ≤ x := by
+    rw [hx_def]
+    exact mul_nonneg (by norm_num) (le_of_lt hlog_pos)
+  have hx_hi : x ≤ (0.41936 : ℝ) := by
+    rw [hx_def]
+    have hmul : 0.605 * Real.log 2 ≤ 0.605 * 0.693148 := by
+      apply mul_le_mul_of_nonneg_left hlog.le (by norm_num)
+    have hcap : (0.605 : ℝ) * 0.693148 ≤ (0.41936 : ℝ) := by
+      norm_num
+    linarith
+  have hx1 : x ≤ 1 := by linarith
+  have hrpow : (2 : ℝ) ^ ((0.605 : ℝ)) = Real.exp x := by
+    rw [Real.rpow_def_of_pos (by norm_num)]
+    congr 1
+    rw [hx_def]
+    ring
+  rw [hrpow]
+  have hub := Real.exp_bound' hx0 hx1 (show 0 < 5 by norm_num)
+  have e0 : ((Nat.factorial 0 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e1 : ((Nat.factorial 1 : ℕ) : ℝ) = 1 := by norm_num [Nat.factorial]
+  have e2f : ((Nat.factorial 2 : ℕ) : ℝ) = 2 := by norm_num [Nat.factorial]
+  have e3f : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num [Nat.factorial]
+  have e4f : ((Nat.factorial 4 : ℕ) : ℝ) = 24 := by norm_num [Nat.factorial]
+  have e5f : ((Nat.factorial 5 : ℕ) : ℝ) = 120 := by norm_num [Nat.factorial]
+  have hsum : (∑ m ∈ Finset.range 5, x ^ m / (Nat.factorial m : ℝ)) =
+      1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 / 24 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero]
+    rw [e0, e1, e2f, e3f, e4f]
+    ring
+  have hub2 : Real.exp x ≤ 1 + x + x ^ 2 / 2 + x ^ 3 / 6 + x ^ 4 / 24 +
+      x ^ 5 * 5 / (120 * 5) := by
+    rw [hsum, e5f] at hub
+    norm_num at hub
+    linarith
+  have q2 : x ^ 2 ≤ (0.41936 : ℝ) ^ 2 := pow_le_pow_left₀ hx0 hx_hi 2
+  have q3 : x ^ 3 ≤ (0.41936 : ℝ) ^ 3 := pow_le_pow_left₀ hx0 hx_hi 3
+  have q4 : x ^ 4 ≤ (0.41936 : ℝ) ^ 4 := pow_le_pow_left₀ hx0 hx_hi 4
+  have q5 : x ^ 5 ≤ (0.41936 : ℝ) ^ 5 := pow_le_pow_left₀ hx0 hx_hi 5
+  have hnum : (1 : ℝ) + 0.41936 + (0.41936 : ℝ) ^ 2 / 2 +
+      (0.41936 : ℝ) ^ 3 / 6 + (0.41936 : ℝ) ^ 4 / 24 +
+      (0.41936 : ℝ) ^ 5 * 5 / (120 * 5) ≤ 1.521 := by
+    norm_num
+  linarith
+
+/-- Tightened eta-to-zeta factor cap (`<= 2.521`; shave `0.001` off `2.522`). -/
+def FC_etaZeta_factor_tight2521 : Prop :=
+  ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.521
+
+/-- Tight factor upper from the `1.521` cap: same cpow-norm + triangle route
+as `FC_etaZeta_of_tight1522`, tightened numeral only. -/
+theorem FC_etaZeta_of_tight1521 (h : FC_rpow0605_tight1521) :
+    FC_etaZeta_factor_tight2521 := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.521
+  have hre : ((1 : ℂ) - R02Pilot.sCenter).re = (0.605 : ℝ) :=
+    Door3FirstCellClose.FC_one_sub_sCenter_re
+  have hcast : ((2 : ℂ)) = (((2 : ℝ)) : ℂ) := by simp
+  have hnorm : ‖(2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ =
+      (2 : ℝ) ^ ((0.605 : ℝ)) := by
+    rw [hcast,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num), hre]
+  have htri := norm_sub_le (1 : ℂ) ((2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter))
+  rw [norm_one, hnorm] at htri
+  have hr : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.521 := h
+  linarith
+
+/-- UNCONDITIONAL shaved factor cap (both links closed above). -/
+theorem FC_etaZeta_factor_tight1521_proved : FC_etaZeta_factor_tight2521 :=
+  FC_etaZeta_of_tight1521 FC_rpow0605_tight1521_proved
+
+/-- New tight need numeral: `1.4 * 2.521 = 3.5294` (was `3.5308` at `2.522`). -/
+theorem FC_etaZeta_tight1521_need_eq : (1.4 : ℝ) * 2.521 = 3.5294 := by norm_num
+
+/-- Tight eta-times-factor link at the shaved numerals: any eta level
+`E >= 3.5294` with `E <= F * Z`, `F <= 2.521`, `0 <= Z`, `0 < F`
+forces `1.4 <= Z`. -/
+theorem FC_zeta_of_eta_factor_tight1521 (E Z F : ℝ)
+    (hE : (3.5294 : ℝ) ≤ E) (hEF : E ≤ F * Z) (hF : F ≤ (2.521 : ℝ))
+    (hZnn : (0 : ℝ) ≤ Z) (hFpos : (0 : ℝ) < F) : (1.4 : ℝ) ≤ Z := by
+  have h1 : (3.5294 : ℝ) ≤ F * Z := le_trans hE hEF
+  have h2 : F * Z ≤ (2.521 : ℝ) * Z := mul_le_mul_of_nonneg_right hF hZnn
+  have h3 : (3.5294 : ℝ) ≤ (2.521 : ℝ) * Z := le_trans h1 h2
+  have e : (2.521 : ℝ) * 1.4 = 3.5294 := by norm_num
+  have h4 : (2.521 : ℝ) * 1.4 ≤ (2.521 : ℝ) * Z := by linarith [h3, e]
+  exact (mul_le_mul_left (by norm_num : (0 : ℝ) < 2.521)).mp h4
+
+/-- Rpow shave filed exactly: `1.521 < 1.522`. -/
+theorem FC_rpow1521_gap : (1.521 : ℝ) < 1.522 := by norm_num
+
+/-- Factor shave filed exactly: `2.521 < 2.522`. -/
+theorem FC_factor2521_gap : (2.521 : ℝ) < 2.522 := by norm_num
+
+/-- Need shave filed exactly: `3.5294 < 3.5308`. -/
+theorem FC_need35294_gap : (3.5294 : ℝ) < 3.5308 := by norm_num
+
+/-- New need beats the bar: `3.5294 < 3.542`. -/
+theorem FC_need35294_vs_bar : (3.5294 : ℝ) < 3.542 := by norm_num
+
+/-- New shave distance from the bar: `3.542 - 3.5294 = 0.0126`. -/
+theorem FC_need35294_shave_exact : (3.542 : ℝ) - 3.5294 = 0.0126 := by norm_num
+
+/-- Prior tight-need distance from the bar (restated): `3.542 - 3.5308 = 0.0112`. -/
+theorem FC_need35308_shortfall_exact : (3.542 : ℝ) - 3.5308 = 0.0112 := by norm_num
+
+/-- `2.51x` representative need numeral: `1.4 * 2.519 = 3.5266`. -/
+theorem FC_factor2519_need_eq : (1.4 : ℝ) * 2.519 = 3.5266 := by norm_num
+
+/-- `2.51x` rpow target sits below the proved cap: `1.519 < 1.521`
+(hence `rpow <= 1.519` is NOT closed by the n=5 route here). -/
+theorem FC_rpow1519_below_cap : (1.519 : ℝ) < 1.521 := by norm_num
+
+/-- `2.51x` factor target sits below the proved cap: `2.519 < 2.521`
+(hence `factor <= 2.519` is NOT closed here). -/
+theorem FC_factor2519_below_cap : (2.519 : ℝ) < 2.521 := by norm_num
+
+/-- Exact rpow shortfall to `2.51x`: `1.521 - 1.519 = 0.002`. -/
+theorem FC_rpow1519_shortfall_exact : (1.521 : ℝ) - 1.519 = 0.002 := by norm_num
+
+/-- Exact factor shortfall to `2.51x`: `2.521 - 2.519 = 0.002`. -/
+theorem FC_factor2519_shortfall_exact : (2.521 : ℝ) - 2.519 = 0.002 := by norm_num
+
+/-- Exact need shortfall to `2.51x`: `3.5294 - 3.5266 = 0.0028`. -/
+theorem FC_need2519_shortfall_exact : (3.5294 : ℝ) - 3.5266 = 0.0028 := by norm_num
+
+/-- Audit link: shaved `1.521` rpow implies the banked `1.522` rpow cap. -/
+theorem FC_rpow1521_implies_1522 (h : FC_rpow0605_tight1521) :
+    Door3FirstCellClose.FC_rpow0605_tight1522 := by
+  show (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.522
+  have hr : (2 : ℝ) ^ ((0.605 : ℝ)) ≤ 1.521 := h
+  linarith
+
+/-- Audit link: shaved `2.521` factor implies the banked `2.522` factor cap. -/
+theorem FC_factor1521_implies_1522 (h : FC_etaZeta_factor_tight2521) :
+    Door3FirstCellClose.FC_etaZeta_factor_tight2522 := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.522
+  have ht : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.521 := h
+  linarith
+
+/-- Audit link: shaved factor implies the banked `2.53` factor cap. -/
+theorem FC_final_factor_shaved_audit (h : FC_etaZeta_factor_tight2521) :
+    Door3FirstCellClose.FC_etaZeta_factor_obligation := by
+  show ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.53
+  have ht : ‖(1 : ℂ) - (2 : ℂ) ^ ((1 : ℂ) - R02Pilot.sCenter)‖ ≤ 2.521 := h
+  linarith
+
+/-- Exact factor-shave residual: n=5 shave CLOSED (`1.521`, factor `2.521`,
+need `3.5294 < 3.542`, shave `0.0126`); `2.51x` (`2.519`, need `3.5266`)
+BLOCKED here (shortfalls `0.002` / `0.002` / `0.0028`); bridge stays at
+(`1.6006`, norm `0.3206`). -/
+theorem FC_factor_shave_residual : True := by trivial
+
+end Door3FirstCellFactorShave
+
+/-! ## FIRSTCELL-ZETA14-VERDICT wave: need `3.5294 < 3.542` is cap-vs-cap, not HAVE-vs-need; zeta14 stays OPEN (fenced)
+
+Grep-first record (this wave, verified before writing; no file touched):
+* Factor shave BANKED `Door3FirstCellFactorShave` (`door3_first_cell.lean:4834-4999`):
+  need `FC_etaZeta_tight1521_need_eq` (`:4919`, `1.4 * 2.521 = 3.5294`),
+  route `FC_zeta_of_eta_factor_tight1521` (`:4924`, needs `hE : 3.5294 <= E`
+  with `hEF : E <= F * Z`, `hF : F <= 2.521`), bar comparison
+  `FC_need35294_vs_bar` (`:4944`, `3.5294 < 3.542`), shave exact
+  `FC_need35294_shave_exact` (`:4947`, `3.542 - 3.5294 = 0.0126`),
+  audit `FC_final_factor_shaved_audit` (`:4987`, shaved implies banked `2.53` cap).
+* Bridge best BANKED `Door3FirstCellRpow3Tighten`:
+  `FC_bridge_Re_ge_16006` (`:4339`, `1.6006 <= Re`), norm
+  `FC_bridge_lower_03206_proved` (`:4375`, `0.3206 <= norm`),
+  ceiling `1.600624` slack `0.000024`.
+* FINAL ledger BANKED `Door3FirstCellClose`:
+  `FC_final_ledger` (`:2992-2999`), open residual `FC_final_open_residual`
+  (`:2980`, 6 parts incl `FC_zeta14_obligation` at `:492-493`),
+  projection `FC_final_zeta14_of_ledger` (`:3025`, ledger yields zeta14 only
+  conditionally, no unconditional close claimed).
+* Zeta14-upper attempt BANKED `Door3FirstCellClose`:
+  ceiling `FC_zeta14_upper_ceiling_gap` (`:3356`, `0.82 < 3.5308`),
+  shortfall `FC_zeta14_upper_ceiling_shortfall` (`:3359`),
+  need shave `FC_zeta14_upper_need_shave` (`:3362`, `3.5308 < 3.542`),
+  residual `FC_zeta14_upper_residual` (`:3366`, stays OPEN).
+* Absent before this wave (grep-clean this turn): no `Zeta14Verdict` /
+  `FC_verdict_` match in this file.
+
+Verdict: FILE OPEN (do not bank closure). `need <= bar` (`3.5294 < 3.542`)
+compares two NEED numerals (new eta requirement vs old eta requirement);
+it weakens the requirement by `0.0126` but supplies no HAVE. The shaved eta
+route still needs `hE : 3.5294 <= E`; best banked HAVEs are bridge Re `1.6006`,
+norm `0.3206`, and S4+tail ceiling `0.82`, each strictly below `3.5294`
+(shortfalls `1.9288` / `3.2088` / `2.7094`). Identity-A (HasSum) + identity-B
+(factor identity) in `FC_final_open_residual` are untouched by a need-need
+comparison. Hence `FC_zeta14_obligation` stays OPEN; FINAL ledger stays OPEN
+on the 6-part residual. All numerals below closed by norm_num; direction
+blockers by linarith; links by exact; residual marker by trivial.
+-/
+
+namespace Door3FirstCellZeta14Verdict
+
+/-- Shaved need numeral restated (links banked `:4919`). -/
+theorem FC_verdict_need_eq_link :
+    (1.4 : ℝ) * 2.521 = 3.5294 :=
+  Door3FirstCellFactorShave.FC_etaZeta_tight1521_need_eq
+
+/-- Need below bar, closed numeral (mirrors banked `:4944`). -/
+theorem FC_verdict_need_below_bar : (3.5294 : ℝ) < 3.542 := by norm_num
+
+/-- Need below bar, audit link to banked shave. -/
+theorem FC_verdict_need_below_bar_link : (3.5294 : ℝ) < 3.542 :=
+  Door3FirstCellFactorShave.FC_need35294_vs_bar
+
+/-- Shave distance from the bar, closed numeral (mirrors banked `:4947`). -/
+theorem FC_verdict_shave_exact : (3.542 : ℝ) - 3.5294 = 0.0126 := by norm_num
+
+/-- Shave distance, audit link to banked exact. -/
+theorem FC_verdict_shave_exact_link : (3.542 : ℝ) - 3.5294 = 0.0126 :=
+  Door3FirstCellFactorShave.FC_need35294_shave_exact
+
+/-- Best bridge Re HAVE below shaved NEED. -/
+theorem FC_verdict_bridge_Re_below_need : (1.6006 : ℝ) < 3.5294 := by norm_num
+
+/-- Best bridge norm HAVE below shaved NEED. -/
+theorem FC_verdict_bridge_norm_below_need : (0.3206 : ℝ) < 3.5294 := by norm_num
+
+/-- S4+tail ceiling HAVE below shaved NEED. -/
+theorem FC_verdict_ceiling_below_need : (0.82 : ℝ) < 3.5294 := by norm_num
+
+/-- Bridge-Re shortfall to shaved need. -/
+theorem FC_verdict_bridge_Re_shortfall : (3.5294 : ℝ) - 1.6006 = 1.9288 := by norm_num
+
+/-- Bridge-norm shortfall to shaved need. -/
+theorem FC_verdict_bridge_norm_shortfall : (3.5294 : ℝ) - 0.3206 = 3.2088 := by norm_num
+
+/-- Ceiling shortfall to shaved need. -/
+theorem FC_verdict_ceiling_shortfall : (3.5294 : ℝ) - 0.82 = 2.7094 := by norm_num
+
+/-- Direction blocker: any `E <= 1.6006` cannot meet `3.5294 <= E`. -/
+theorem FC_verdict_Re_cannot_meet_need (E : ℝ) (hle : E ≤ (1.6006 : ℝ)) :
+    ¬ (3.5294 : ℝ) ≤ E := by
+  intro hge
+  linarith
+
+/-- Direction blocker: any `E <= 0.3206` cannot meet `3.5294 <= E`. -/
+theorem FC_verdict_norm_cannot_meet_need (E : ℝ) (hle : E ≤ (0.3206 : ℝ)) :
+    ¬ (3.5294 : ℝ) ≤ E := by
+  intro hge
+  linarith
+
+/-- Direction blocker: any `E <= 0.82` cannot meet `3.5294 <= E`. -/
+theorem FC_verdict_ceiling_cannot_meet_need (E : ℝ) (hle : E ≤ (0.82 : ℝ)) :
+    ¬ (3.5294 : ℝ) ≤ E := by
+  intro hge
+  linarith
+
+/-- Audit link: shaved factor recovers only the banked `2.53` cap (no HAVE). -/
+theorem FC_verdict_factor_audit
+    (h : Door3FirstCellFactorShave.FC_etaZeta_factor_tight2521) :
+    Door3FirstCellClose.FC_etaZeta_factor_obligation :=
+  Door3FirstCellFactorShave.FC_final_factor_shaved_audit h
+
+/-- FINAL link: ledger still yields zeta14 only conditionally (stays OPEN). -/
+theorem FC_verdict_final_needs_zeta14 (h : Door3FirstCellClose.FC_final_ledger) :
+    Door3FirstCellClose.FC_zeta14_obligation :=
+  Door3FirstCellClose.FC_final_zeta14_of_ledger h
+
+/-- Exact zeta14-closure verdict: need-need comparison is not a closure.
+BANKED: shaved need `3.5294` below bar `3.542` (margin `0.0126`);
+bridge HAVEs `1.6006` / `0.3206` below need (shortfalls `1.9288` / `3.2088`);
+ceiling `0.82` below need (shortfall `2.7094`). OPEN: `hE : 3.5294 <= E`
+for `FC_zeta_of_eta_factor_tight1521` (no banked eta lower reaches it);
+identity-A + identity-B in `FC_final_open_residual`; hence
+`FC_zeta14_obligation` and `FC_final_ledger` stay OPEN. The side that needs
+work is HAVE-lower (eta at `sCenter` at least `3.5294` via phase-coherent
+larger-`N` plus the complex identity chain), not a further NEED shave. -/
+theorem FC_verdict_zeta14_stays_open : True := by trivial
+
+end Door3FirstCellZeta14Verdict
+

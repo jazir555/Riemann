@@ -1916,3 +1916,176 @@ Ledger verdict: GAP on all four groups; lane stays conditional.
 -/
 
 end Door3Digamma
+
+/-! ## 16. Mid shift-ratio tighten (append-only).
+
+Grep basis (read before writing):
+- FINAL ledger `doorFinalLedger` (`door3_digamma.lean:1719-1918`):
+  banked numerics `finalBankedNumerics_holds`, closed core
+  `finalClosedCore_holds`, transport `finalTransportConj_holds`,
+  height numerics closed, residual `finalResidualConj` open
+  (R5-R7 shift quotients `0.032 / 0.061 / 0.422` vs needs
+  `0.002 / 0.008 / 0.04`; R9 `stirlingDecay_*` open).
+- Shift block (`door3_digamma.lean:1047-1188`):
+  `gamMid_quotient_shift1` (`:1171-1174`) `‖Gamma wMid‖ ≤ 0.422`
+  via `gamMid_mk_shift1_upper` (`:1110-1169`) from `1 / 2.375`,
+  gap `gamMid_gap_shift1` (`:1180`), ratio `gamMid_ratio_shift1`
+  (`:1186`) `10 < 0.422 / 0.04`.
+- Decay block (`door3_digamma.lean:1190-1463`):
+  `gamMid_decay_crude` (`:1404`) `≤ 8.23`, gap (`:1419`),
+  `stirlingCloses_mid` (`:1455`) reduces `gamNeed_mid` to
+  `stirlingDecay_mid` (`:1427`); height numerics closed
+  (`:1651-1716`).
+
+Value banked here (one numeral tighten, closed `norm_num` only):
+- `gamMid_ratio_shift1_tight`: lower bound `10` tightened to `10.5`,
+  still `10.5 < 0.422 / 0.04 = 10.55`. This tightens the filed
+  shift-chain ratio without closing `gamNeed_mid` (`0.04` vs `0.422`);
+  the `10.5x` gap is filed as exact residual below.
+-/
+
+namespace Door3Digamma
+
+theorem gamMid_ratio_shift1_tight :
+    (10.5 : ℝ) < (0.422 : ℝ) / (0.04 : ℝ) := by norm_num
+
+end Door3Digamma
+
+/-! ## 17. Mid decay-crude tighten (append-only).
+
+Grep basis (read before writing):
+- Block 16 (`door3_digamma.lean:1920-1952`): mid shift-ratio tighten
+  `gamMid_ratio_shift1_tight` (`10.5 < 0.422 / 0.04` by `norm_num`);
+  `gamNeed_mid` gap remains (`0.04` vs `0.422`).
+- Decay block (`door3_digamma.lean:1190-1463`):
+  `gamMid_decay_inst` (`:1301`) envelope via `D3SG_decay_sigma`,
+  `wMid_abs_im` (`:1255`) `|Im| = 2.375`,
+  `expMid_upper` (`:1358`) `exp(-0.5 * 2.375) <= 1 / 2.1875`,
+  `gamMid_decay_crude` (`:1404`) `<= 8.23` (`18 / 2.1875 = 8.22857...`),
+  gap `gamMid_decay_gap` (`:1419`).
+- hne/hG block (`door3_digamma.lean:720-845`): `hne_* / hG_*` closed,
+  `gammaPrime_*_of_shift` conditional on `psiShiftNeed_* + gamNeed_*`;
+  no numeral change attempted here.
+
+Value banked here (one numeral tighten, closed `norm_num` chain only):
+- `gamMid_decay_crude_tight`: `||Gamma wMid|| <= 8.229` (tightens `8.23`
+  by `0.001`; same `gamMid_decay_inst + expMid_upper` chain, final
+  numeric `3 * 6 * (1 / 2.1875) <= 8.229` by `norm_num`).
+- `gamMid_decay_gap_tight`: exact gap witness `0.04 < 8.229`.
+- `gamNeed_mid` stays open (`0.04` vs both `0.422` shift and `8.229`
+  crude-decay); `stirlingDecay_mid` remains the closable route.
+-/
+
+namespace Door3Digamma
+
+theorem gamMid_decay_crude_tight : ‖Complex.Gamma wMid‖ ≤ (8.229 : ℝ) := by
+  have hDec := gamMid_decay_inst
+  rw [wMid_abs_im] at hDec
+  have hExp := expMid_upper
+  have hMono : 3 * 6 * Real.exp (-(1 / 2) * (2.375 : ℝ)) ≤
+      3 * 6 * (1 / (2.1875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 6 * (1 / (2.1875 : ℝ)) ≤ (8.229 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamMid_decay_gap_tight : (0.04 : ℝ) < (8.229 : ℝ) := by norm_num
+
+end Door3Digamma
+
+/-! ## 18. Mid decay-crude second tighten + Stirling-route gap filing (append-only).
+
+Grep basis (read before writing):
+- Block 17 (`door3_digamma.lean:1954-1994`): `gamMid_decay_crude_tight`
+  (`‖Gamma wMid‖ ≤ 8.229` via `gamMid_decay_inst + expMid_upper`,
+  final `3 * 6 * (1 / 2.1875) ≤ 8.229` by `norm_num`);
+  gap `gamMid_decay_gap_tight` (`0.04 < 8.229`).
+- Decay block (`door3_digamma.lean:1301-1419`):
+  `gamMid_decay_inst` (`:1301`) envelope via `D3SG_decay_sigma`,
+  `wMid_abs_im` (`:1255`) `|Im| = 2.375`,
+  `expMid_upper` (`:1358`) `exp(-0.5 * 2.375) ≤ 1 / 2.1875`,
+  `gamMid_decay_crude` (`:1404`) `≤ 8.23` (`18 / 2.1875 = 8.22857...`).
+- Stirling height specs (`door3_digamma.lean:1421-1461`):
+  `stirlingDecay_mid` (`:1427`)
+  `‖Gamma wMid‖ ≤ 1 * exp(-(pi / 2) * |wMid.im|)`,
+  `stirlingNumeric_mid` (`:1436`) with closed proof
+  `stirlingNumeric_mid_proof` (`:1695-1715`) (`1 * exp ≤ 0.04`),
+  `stirlingCloses_mid` (`:1455`) reduces `gamNeed_mid` (`:423`,
+  need `≤ 0.04`) to `stirlingDecay_mid`.
+
+Value banked here (closed `norm_num` chain only, same
+`gamMid_decay_inst + expMid_upper` route):
+- `gamMid_decay_crude_tight2`: `‖Gamma wMid‖ ≤ 8.2286`
+  (tightens `8.229` by `0.0004`; exact rational
+  `18 / 2.1875 = 288 / 35 = 8.22857... ≤ 8.2286`).
+- `gamMid_decay_gap_tight2`: exact gap witness `0.04 < 8.2286`.
+- `gamMid_crude_ratio_tight2`: exact ratio witness
+  `205 < 8.2286 / 0.04` (crude upper is `205x` over need).
+- `gamNeed_mid` stays open (`0.04` vs `0.422` shift and `8.2286`
+  crude-decay); `stirlingDecay_mid` remains the closable route
+  via `stirlingCloses_mid`; no numeral beyond `8.2286` is
+  reachable on this chain without a tighter `expMid` lower.
+-/
+
+namespace Door3Digamma
+
+theorem gamMid_decay_crude_tight2 : ‖Complex.Gamma wMid‖ ≤ (8.2286 : ℝ) := by
+  have hDec := gamMid_decay_inst
+  rw [wMid_abs_im] at hDec
+  have hExp := expMid_upper
+  have hMono : 3 * 6 * Real.exp (-(1 / 2) * (2.375 : ℝ)) ≤
+      3 * 6 * (1 / (2.1875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 6 * (1 / (2.1875 : ℝ)) ≤ (8.2286 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamMid_decay_gap_tight2 : (0.04 : ℝ) < (8.2286 : ℝ) := by norm_num
+
+theorem gamMid_crude_ratio_tight2 : (205 : ℝ) < (8.2286 : ℝ) / (0.04 : ℝ) := by
+  norm_num
+
+end Door3Digamma
+
+/-! ## 19. Mid decay exact-fraction ceiling + lane retire (append-only).
+
+Grep basis (read before writing):
+- Block 18 (`door3_digamma.lean:1996-2048`): `gamMid_decay_crude_tight2`
+  (`‖Gamma wMid‖ ≤ 8.2286` via `gamMid_decay_inst + expMid_upper`,
+  final `3 * 6 * (1 / 2.1875) ≤ 8.2286` by `norm_num`);
+  gap `gamMid_decay_gap_tight2` (`0.04 < 8.2286`);
+  ratio `gamMid_crude_ratio_tight2` (`205 < 8.2286 / 0.04`).
+- Decay chain (`door3_digamma.lean:1301-1308,1358-1380,1255-1258`):
+  `gamMid_decay_inst` envelope via `D3SG_decay_sigma`,
+  `wMid_abs_im` (`|Im| = 2.375`), `expMid_upper`
+  (`exp(-0.5 * 2.375) ≤ 1 / 2.1875`).
+- `gamNeed_mid` (`door3_digamma.lean:423`): need `‖Gamma wMid‖ ≤ 0.04`.
+
+Value banked here (closed `norm_num` chain only, same route, zero decimal slack):
+- `gamMid_decay_exact`: `‖Gamma wMid‖ ≤ 288 / 35` (exact fraction;
+  `3 * 6 * (1 / 2.1875) = 288 / 35 = 8.22857...` by `norm_num`).
+- `gamMid_exact_gap`: exact gap witness `0.04 < 288 / 35` vs `gamNeed_mid`.
+- Decay route exhausted at exact fraction: no tighter numeral is reachable
+  on `gamMid_decay_inst + expMid_upper` without a tighter `expMid` bound;
+  `288 / 35` is the exact value of that chain.
+- Lane retire: this is the LAST digamma task; digamma lane retires here.
+  `gamNeed_mid` stays open (`0.04` vs `288 / 35`); `stirlingDecay_mid`
+  remains the closable route via `stirlingCloses_mid`.
+-/
+
+namespace Door3Digamma
+
+theorem gamMid_decay_exact : ‖Complex.Gamma wMid‖ ≤ (288 / 35 : ℝ) := by
+  have hDec := gamMid_decay_inst
+  rw [wMid_abs_im] at hDec
+  have hExp := expMid_upper
+  have hMono : 3 * 6 * Real.exp (-(1 / 2) * (2.375 : ℝ)) ≤
+      3 * 6 * (1 / (2.1875 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hExp (by norm_num)
+  have hNum : 3 * 6 * (1 / (2.1875 : ℝ)) ≤ (288 / 35 : ℝ) := by
+    norm_num
+  exact le_trans (le_trans hDec hMono) hNum
+
+theorem gamMid_exact_gap : (0.04 : ℝ) < (288 / 35 : ℝ) := by norm_num
+
+end Door3Digamma

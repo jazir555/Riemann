@@ -1909,3 +1909,293 @@ theorem sliver_final_ledger (G Z C : ℝ) (hRes : SliverFinalResidual G Z C) :
   exact uniform_M1000_pair_of_ballSup79 hC79
 
 end Door3SliverEdge
+
+/-! ### (S) M1000 delta numeral tighten
+
+Grepped basis:
+* M40 delta `m40_delta_eq :705` (`(1/2)/40 = 1/80`, closed by norm_num);
+* M1000 numerals `m1000_delta_le_one :925`, `m1000_delta_pos :928` (no value eq banked);
+* M1000 feeders consume `(1/2)/1000` at `:931/:942/:953`.
+
+What is banked here: `m1000_delta_eq` (`(1/2)/1000 = 1/2000`), closed by norm_num.
+Residual: M1000 closers stay conditional on the open ball premise; no Entire sup closed here.
+-/
+
+namespace Door3SliverEdge
+
+/-- M1000 delta value: `(1 / 2) / 1000 = 1 / 2000`. -/
+theorem m1000_delta_eq : (1 / 2 : ℝ) / (1000 : ℝ) = (1 / 2000 : ℝ) := by norm_num
+
+end Door3SliverEdge
+
+/-! ### (T) Poly-78 sharpness: exact gap, no tighten below 78
+
+Grepped basis:
+* poly78 `poly_upper_closedBall12_le78 :1049` (`12 * 13 / 2 = 78` triangle);
+* poly79 lift `poly_upper_closedBall12 :1079`;
+* pi4096 `piOf_upper_closedBall12 :1146`, joint `poly_pi_upper_closedBall12 :1166`;
+* M1000 delta `m1000_delta_eq :1927` just banked.
+
+What is banked here (closed, no new analysis):
+* sharp witness `s = -12` in `closedBall 0 12` with `‖polyOf s‖ = 78`;
+* impossibility of `≤ 77` on the full ball (78 is best possible by this route);
+* arithmetic gap `79 - 78 = 1`.
+Residual: pi `4096` stays loose (true `π ^ 6` near 962); Gamma/zeta punctured numerals stay open.
+-/
+
+namespace Door3SliverEdge
+
+/-- Witness `-12` lies in `closedBall 0 12`. -/
+theorem poly_sharp_mem_neg12 :
+    ((((-12 : ℝ))) : ℂ) ∈ Metric.closedBall (0 : ℂ) 12 := by
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have h : ‖((((-12 : ℝ))) : ℂ)‖ = (12 : ℝ) := by
+    rw [Complex.norm_real, Real.norm_eq_abs]
+    norm_num
+  rw [h]
+
+/-- Poly value at `-12` is `78`. -/
+theorem poly_sharp_value_neg12 :
+    CentralCoverAssembly.polyOf ((((-12 : ℝ))) : ℂ) = (((((78 : ℝ)))) : ℂ) := by
+  unfold CentralCoverAssembly.polyOf
+  have hone : (1 : ℂ) = ((((1 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  have htwo : (2 : ℂ) = ((((2 : ℝ))) : ℂ) := by
+    push_cast
+    ring
+  rw [hone, htwo, ← Complex.ofReal_sub, ← Complex.ofReal_mul, ← Complex.ofReal_div]
+  have hreal : (((-12 : ℝ)) * (((-12 : ℝ)) - (1 : ℝ)) / (2 : ℝ)) = (78 : ℝ) := by
+    norm_num
+  rw [hreal]
+
+/-- Poly norm at `-12` is `78`. -/
+theorem poly_sharp_norm_neg12 :
+    ‖CentralCoverAssembly.polyOf ((((-12 : ℝ))) : ℂ)‖ = (78 : ℝ) := by
+  rw [poly_sharp_value_neg12, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (by norm_num : (0 : ℝ) < 78)]
+
+/-- Exact gap: no `≤ 77` poly upper holds on the full ball; `78` is best possible. -/
+theorem poly_upper_no_tighten_below78 :
+    ¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s‖ ≤ (77 : ℝ) := by
+  intro h
+  have h0 := h _ poly_sharp_mem_neg12
+  rw [poly_sharp_norm_neg12] at h0
+  norm_num at h0
+
+/-- Arithmetic gap between the `79` lift and the sharp `78`. -/
+theorem poly_gap_79_78 : (79 : ℝ) - (78 : ℝ) = (1 : ℝ) := by
+  norm_num
+
+end Door3SliverEdge
+
+/-! ### (U) Pi tighten 4096 -> 962 + sharpness floor 961
+
+Grepped basis:
+* pi4096 `piOf_upper_closedBall12 :1146` (`≤ 4096 = 4 ^ 6` via `π ≤ 4`);
+* norm eq `piOf_norm_eq_ball12 :1135`, re bounds `ball12_re_bounds :1122`;
+* poly78 sharp (T) `poly_sharp_mem_neg12`, `poly_sharp_norm_neg12`,
+  `poly_upper_no_tighten_below78`, gap `poly_gap_79_78`;
+* pi bounds `Real.pi_lt_d4` / `Real.pi_gt_d4` (`3.1415 < π < 3.1416`) already
+  used in-repo (`door3_cutL10_remainders.lean:442-443`,
+  `central_cover_assembly.lean:16866-16867`).
+
+What is banked here (closed, no new analysis):
+* `piOf_upper_closedBall12_tight`: `‖piOf s‖ ≤ 962` on `closedBall 0 12`
+  (`π ^ e ≤ π ^ 6 ≤ 3.1416 ^ 6 ≤ 962`; `3.1416 ^ 6 ≈ 961.402`);
+* `pi_rpow6_ge_961` / `pi_rpow6_gt_961`: `961 ≤ π ^ (6 : ℝ)`, strict `<`;
+* `pi_sharp_norm_neg12`: witness `s = -12` has `‖piOf s‖ = π ^ (6 : ℝ)`;
+* `pi_upper_no_tighten_le961`: no `≤ 961` pi upper holds on the full ball
+  (best-possible to within 1, mirroring poly-78 `no ≤ 77`);
+* `pi_gap_962_961`: `962 - 961 = 1`;
+* `poly_pi_upper_closedBall12_tight`: joint `≤ 75036` (`78 * 962`).
+Residual: `962` stays loose by about `0.61` above true `π ^ 6 ≈ 961.389`;
+Gamma / zeta punctured numerals stay open.
+-/
+
+namespace Door3SliverEdge
+
+/-- Tight pi-factor upper `962` on `closedBall 0 12` via `π < 3.1416`. -/
+theorem piOf_upper_closedBall12_tight {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.piOf s‖ ≤ (962 : ℝ) := by
+  rw [piOf_norm_eq_ball12]
+  obtain ⟨hlo, _⟩ := ball12_re_bounds hs
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp : -(s.re) / 2 ≤ (6 : ℝ) := by linarith
+  have hle1 : Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (6 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 hexp
+  have hpi_le : Real.pi ≤ (3.1416 : ℝ) := le_of_lt Real.pi_lt_d4
+  have hle2 : Real.pi ^ (6 : ℝ) ≤ (3.1416 : ℝ) ^ (6 : ℝ) :=
+    Real.rpow_le_rpow (le_of_lt Real.pi_pos) hpi_le (by norm_num)
+  have h6 : (6 : ℝ) = (((6 : ℕ)) : ℝ) := by norm_num
+  have hcalc : (3.1416 : ℝ) ^ (6 : ℝ) ≤ (962 : ℝ) := by
+    rw [h6, Real.rpow_natCast]
+    norm_num
+  exact le_trans (le_trans hle1 hle2) hcalc
+
+/-- Floor: `961 ≤ π ^ 6` via `3.1415 < π`. -/
+theorem pi_rpow6_ge_961 : (961 : ℝ) ≤ Real.pi ^ (6 : ℝ) := by
+  have hpi_ge : (3.1415 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_d4
+  have hle : (3.1415 : ℝ) ^ (6 : ℝ) ≤ Real.pi ^ (6 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) hpi_ge (by norm_num)
+  have h6 : (6 : ℝ) = (((6 : ℕ)) : ℝ) := by norm_num
+  have hnum : (961 : ℝ) ≤ (3.1415 : ℝ) ^ (6 : ℝ) := by
+    rw [h6, Real.rpow_natCast]
+    norm_num
+  exact le_trans hnum hle
+
+/-- Strict floor: `961 < π ^ 6`. -/
+theorem pi_rpow6_gt_961 : (961 : ℝ) < Real.pi ^ (6 : ℝ) := by
+  have hpi_ge : (3.1415 : ℝ) ≤ Real.pi := le_of_lt Real.pi_gt_d4
+  have hle : (3.1415 : ℝ) ^ (6 : ℝ) ≤ Real.pi ^ (6 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) hpi_ge (by norm_num)
+  have h6 : (6 : ℝ) = (((6 : ℕ)) : ℝ) := by norm_num
+  have hnum : (961 : ℝ) < (3.1415 : ℝ) ^ (6 : ℝ) := by
+    rw [h6, Real.rpow_natCast]
+    norm_num
+  exact lt_of_lt_of_le hnum hle
+
+/-- Pi norm at the sharp witness `s = -12` equals `π ^ 6`. -/
+theorem pi_sharp_norm_neg12 :
+    ‖CentralCoverAssembly.piOf ((((-12 : ℝ))) : ℂ)‖ = Real.pi ^ (6 : ℝ) := by
+  rw [piOf_norm_eq_ball12]
+  have hre : ((((-12 : ℝ))) : ℂ).re = (-12 : ℝ) := Complex.ofReal_re _
+  rw [hre]
+  have hexp : -(-12 : ℝ) / 2 = (6 : ℝ) := by norm_num
+  rw [hexp]
+
+/-- Exact gap: no `≤ 961` pi upper holds on the full ball; `962` is best-possible to within 1. -/
+theorem pi_upper_no_tighten_le961 :
+    ¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.piOf s‖ ≤ (961 : ℝ) := by
+  intro h
+  have h0 := h _ poly_sharp_mem_neg12
+  rw [pi_sharp_norm_neg12] at h0
+  have hgt := pi_rpow6_gt_961
+  linarith
+
+/-- Arithmetic gap between the tight `962` and the sharp floor `961`. -/
+theorem pi_gap_962_961 : (962 : ℝ) - (961 : ℝ) = (1 : ℝ) := by
+  norm_num
+
+/-- Joint tight poly-pi sup `75036` on `closedBall 0 12` (`78 * 962`). -/
+theorem poly_pi_upper_closedBall12_tight {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (75036 : ℝ) := by
+  have hpoly := poly_upper_closedBall12_le78 hs
+  have hpi := piOf_upper_closedBall12_tight hs
+  have hnn2 : (0 : ℝ) ≤ ‖CentralCoverAssembly.piOf s‖ := norm_nonneg _
+  have hmul : ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ ≤
+      (78 : ℝ) * (962 : ℝ) :=
+    mul_le_mul hpoly hpi hnn2 (by norm_num)
+  have hnm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ =
+      ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ :=
+    norm_mul _ _
+  have hcalc : (78 : ℝ) * (962 : ℝ) = (75036 : ℝ) := by norm_num
+  rw [hnm, hcalc] at hmul
+  exact hmul
+
+end Door3SliverEdge
+
+/-! ### (V) Joint 75036 verdict: best-possible given sharp components, gap vs 40/1000, route-exhaustion
+
+Grepped basis:
+* joint `poly_pi_upper_closedBall12_tight` (`≤ 75036 = 78 * 962`);
+* poly sharpness `poly_upper_no_tighten_below78` (`no ≤ 77`),
+  witness `poly_sharp_mem_neg12`, value `poly_sharp_norm_neg12` (`= 78`);
+* pi sharp-within-1 `pi_upper_no_tighten_le961` (`no ≤ 961`),
+  floor `pi_rpow6_gt_961` (`961 < π ^ 6`), witness `pi_sharp_norm_neg12`,
+  gap `pi_gap_962_961` (`962 - 961 = 1`), tight upper
+  `piOf_upper_closedBall12_tight` (`≤ 962`);
+* ball-sup targets from (L)/(M): `40` and `1000` on `closedBall 0 12`.
+
+What is banked here (closed, no new analysis):
+* `joint_sharp_norm_neg12`: joint norm at `s = -12` equals `78 * π ^ 6`;
+* `joint_sharp_gt_74958` / `joint_sharp_ge_74958`: witness exceeds `74958 = 78 * 961`;
+* `joint_no_tighten_below74958`: no `≤ 74958` joint upper holds on the full ball,
+  so `75036` is best-possible given the sharp components (within `78`);
+* `joint_gap_75036_74958`: `75036 - 74958 = 78` (tightness window);
+* `joint_gap_75036_40` / `joint_gap_75036_1000`: exact gaps `74996` / `74036`
+  vs the `40` / `1000` ball-sup targets; `joint_exceeds_*` records `40 < 75036`,
+  `1000 < 75036`, so the poly-pi route alone does not reach either target;
+* `joint_route_exhausted`: conjunction of `poly_upper_no_tighten_below78`,
+  `pi_upper_no_tighten_le961`, and `joint_no_tighten_below74958` — no further
+  closed-numeral tighten is possible on the poly-pi route; any closing of the
+  `40` / `1000` gap must come from the Gamma/zeta factors, owned elsewhere.
+Residual: Gamma/zeta punctured numerals stay open; no `C = 40` / `C = 1000`
+entire ball sup is claimed here.
+-/
+
+namespace Door3SliverEdge
+
+/-- Joint norm at the sharp witness equals `78 * π ^ 6`. -/
+theorem joint_sharp_norm_neg12 :
+    ‖CentralCoverAssembly.polyOf ((((-12 : ℝ))) : ℂ) *
+      CentralCoverAssembly.piOf ((((-12 : ℝ))) : ℂ)‖ =
+      (78 : ℝ) * Real.pi ^ (6 : ℝ) := by
+  rw [norm_mul, poly_sharp_norm_neg12, pi_sharp_norm_neg12]
+
+/-- Witness strictly exceeds `74958 = 78 * 961`. -/
+theorem joint_sharp_gt_74958 :
+    (74958 : ℝ) <
+      ‖CentralCoverAssembly.polyOf ((((-12 : ℝ))) : ℂ) *
+        CentralCoverAssembly.piOf ((((-12 : ℝ))) : ℂ)‖ := by
+  have hj := joint_sharp_norm_neg12
+  have hgt := pi_rpow6_gt_961
+  have hmul : (78 : ℝ) * (961 : ℝ) < (78 : ℝ) * Real.pi ^ (6 : ℝ) :=
+    mul_lt_mul_of_pos_left hgt (by norm_num)
+  have hcalc : (78 : ℝ) * (961 : ℝ) = (74958 : ℝ) := by norm_num
+  rw [hj, ← hcalc]
+  exact hmul
+
+/-- Witness meets `74958` (non-strict floor). -/
+theorem joint_sharp_ge_74958 :
+    (74958 : ℝ) ≤
+      ‖CentralCoverAssembly.polyOf ((((-12 : ℝ))) : ℂ) *
+        CentralCoverAssembly.piOf ((((-12 : ℝ))) : ℂ)‖ := by
+  exact le_of_lt joint_sharp_gt_74958
+
+/-- Exact floor obstruction: no `≤ 74958` joint upper holds; `75036` is best-possible given sharp parts. -/
+theorem joint_no_tighten_below74958 :
+    ¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (74958 : ℝ) := by
+  intro h
+  have h0 := h _ poly_sharp_mem_neg12
+  have hgt := joint_sharp_gt_74958
+  linarith
+
+/-- Tightness window: banked `75036` lies within `78` of the `74958` floor. -/
+theorem joint_gap_75036_74958 : (75036 : ℝ) - (74958 : ℝ) = (78 : ℝ) := by
+  norm_num
+
+/-- Exact gap vs the `40` ball-sup target. -/
+theorem joint_gap_75036_40 : (75036 : ℝ) - (40 : ℝ) = (74996 : ℝ) := by
+  norm_num
+
+/-- Exact gap vs the `1000` ball-sup target. -/
+theorem joint_gap_75036_1000 : (75036 : ℝ) - (1000 : ℝ) = (74036 : ℝ) := by
+  norm_num
+
+/-- Banked joint exceeds the `40` target. -/
+theorem joint_exceeds_ballSup40_target : (40 : ℝ) < (75036 : ℝ) := by
+  norm_num
+
+/-- Banked joint exceeds the `1000` target. -/
+theorem joint_exceeds_ballSup1000_target : (1000 : ℝ) < (75036 : ℝ) := by
+  norm_num
+
+/-- Route-exhaustion: poly (`no ≤ 77`), pi (`no ≤ 961`), and joint (`no ≤ 74958`)
+closed-numeral tightens are all blocked on this route. -/
+theorem joint_route_exhausted :
+    (¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s‖ ≤ (77 : ℝ)) ∧
+    (¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.piOf s‖ ≤ (961 : ℝ)) ∧
+    (¬ ∀ (s : ℂ), s ∈ Metric.closedBall (0 : ℂ) 12 →
+      ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (74958 : ℝ)) := by
+  refine And.intro poly_upper_no_tighten_below78 (And.intro pi_upper_no_tighten_le961 ?_)
+  exact joint_no_tighten_below74958
+
+end Door3SliverEdge

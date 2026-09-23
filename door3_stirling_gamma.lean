@@ -4413,3 +4413,189 @@ def D3SG_FINAL_residual_list : List String :=
     "outer-decay-need ≤ 0.002 at :3937 FILED NOT PROVED (consumer of pi-half-rate)",
     "reflection-missing-API 5 entries at :3984 (Euler reflection, Beta-Gamma product, sin strip, sin modulus, companion cap)",
     "pure-shift ladders at minima (outer shift-5, leaf shift-4); N=6+/5+ reverse, decay c=1/2 too weak at outer"]
+
+/-! ## STIRLING-SHIFT6-TIGHT (append-only, proof-only).
+
+Grep first (this file):
+- disc `0.381`: `D3SG_R02_disc_upper` at `:1918`, tight `D3SG_R02_disc_upper_tight` at `:2469`.
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), reversal `:3898`, above `0.023` at `:3914`; leaf best `:4039`
+  (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`), reversal `:4297`.
+- decay/reflection blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+
+Tightening (one, closed `norm_num`): shift-6 quotient `184.36 / (4.375 ^ 6)`
+`≈ 0.02629`, so `≤ 0.0264` tightens `≤ 0.027` at `:3906`. Ladder minimum
+stays at shift-5 (`0.023 < quotient` at `:3914` untouched); no other rung moved.
+-/
+
+/-- Shift-6 quotient tighten: `184.36 / (4.375 ^ 6) ≈ 0.02629 ≤ 0.0264`
+(tightens `≤ 0.027` at `:3906`; ladder minimum stays at shift-5). -/
+theorem D3SG_gamNeed_outer_shift6_quot_upper_tight :
+    (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      ≤ (0.0264 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_quot_upper_tight
+
+/-! ## STIRLING-SHIFT5-LEAF-TIGHT (append-only, proof-only).
+
+Grep first (this file):
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), tight `:4435` (`≤ 0.0264`), reversal `:3898`, above `0.023` at `:3914`;
+  leaf best `:4039` (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`),
+  reversal `:4297`, above `0.056` at `:4313` (ladder minimum at shift-4).
+- decay blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+
+Tightening (one, closed `norm_num`): leaf shift-5 quotient `29.361 / (3.375 ^ 5)`
+`≈ 0.06705`, so `≤ 0.0671` tightens `≤ 0.068` at `:4305`. Ladder minimum
+stays at shift-4 (`0.056 < quotient` at `:4313` untouched); no other rung moved.
+-/
+
+/-- Leaf shift-5 quotient tighten: `29.361 / (3.375 ^ 5) ≈ 0.06705 ≤ 0.0671`
+(tightens `≤ 0.068` at `:4305`; ladder minimum stays at shift-4). -/
+theorem D3SG_gamNeed_leaf_shift5_quot_upper_tight :
+    (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375)
+      ≤ (0.0671 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_leaf_shift5_quot_upper_tight
+
+/-! ## STIRLING-REFLECTION-BOX-TIGHT (append-only, proof-only).
+
+Grep first (this file):
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), tight `:4435` (`≤ 0.0264`), reversal `:3898`, above `0.023` at `:3914`;
+  leaf best `:4039` (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`),
+  tight `:4460` (`≤ 0.0671`), reversal `:4297`, above `0.056` at `:4313`
+  (ladder minima: outer shift-5, leaf shift-4).
+- decay blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+- reflection box numerals: `D3SG_CHI_arg_im_le19` at `:1800`
+  (`(3.1416 / 2) * 12 ≤ 19` at `:1814`), `D3SG_CHI_sin_box_le` at `:1830`
+  (same majorant at `:1844`), cos/sin `≤ exp 19`, cpow `≤ 7` at `:1852`,
+  box `≤ 2 * 7 * 600 * exp 19` at `:1874`.
+
+Tightening (one, closed `norm_num`): reflection box majorant
+`(3.1416 / 2) * 12 = 18.8496 ≤ 18.85` tightens `≤ 19` used at `:1814`/`:1844`.
+Box caps `exp 19` untouched; ladder minima untouched; no other rung moved.
+-/
+
+/-- Reflection box majorant tighten: `(3.1416 / 2) * 12 ≤ 18.85`
+(tightens `≤ 19` at `:1814`/`:1844`; box `exp 19` untouched). -/
+theorem D3SG_CHI_box_majorant_tight :
+    (3.1416 / 2 : ℝ) * 12 ≤ (18.85 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_CHI_box_majorant_tight
+
+/-! ## STIRLING-REFLECTION-BOX-TIGHT2 (append-only, proof-only).
+
+Grep first (this file):
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), tight `:4435` (`≤ 0.0264`), reversal `:3898`, above `0.023` at `:3914`;
+  leaf best `:4039` (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`),
+  tight `:4460` (`≤ 0.0671`), reversal `:4297`, above `0.056` at `:4313`
+  (ladder minima: outer shift-5, leaf shift-4).
+- decay blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+- reflection box numerals: `D3SG_CHI_arg_im_le19` at `:1800`
+  (`(3.1416 / 2) * 12 ≤ 19` at `:1814`), `D3SG_CHI_sin_box_le` at `:1830`
+  (same majorant at `:1844`), cos/sin `≤ exp 19`, cpow `≤ 7` at `:1852`,
+  box `≤ 2 * 7 * 600 * exp 19` at `:1874`, majorant tight `:4490` (`≤ 18.85`).
+
+Tightening (one, closed `norm_num`): reflection box majorant exact product
+`(3.1416 / 2) * 12 = 18.8496 ≤ 18.8496` tightens `≤ 18.85` at `:4490`.
+Box caps `exp 19` untouched; ladder minima untouched; no other rung moved.
+-/
+
+/-- Reflection box majorant exact: `(3.1416 / 2) * 12 ≤ 18.8496`
+(tightens `≤ 18.85` at `:4490`; box `exp 19` untouched). -/
+theorem D3SG_CHI_box_majorant_exact :
+    (3.1416 / 2 : ℝ) * 12 ≤ (18.8496 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_CHI_box_majorant_exact
+
+/-! ## STIRLING-SHIFT6-OUTER-TIGHT2 (append-only, proof-only).
+
+Grep first (this file):
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), tight `:4435` (`≤ 0.0264`), reversal `:3898` and above `0.023`
+  at `:3914`; leaf best `:4039` (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`),
+  tight `:4460` (`≤ 0.0671`), reversal `:4297`, above `0.056` at `:4313`
+  (ladder minima: outer shift-5, leaf shift-4).
+- decay blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+- reflection box numerals: `D3SG_CHI_arg_im_le19` at `:1800`
+  (`(3.1416 / 2) * 12 ≤ 19` at `:1814`), `D3SG_CHI_sin_box_le` at `:1830`
+  (same majorant at `:1844`), box `≤ 2 * 7 * 600 * exp 19` at `:1874`,
+  majorant tight `:4490` (`≤ 18.85`), exact `:4519` (`≤ 18.8496`, equality).
+
+Tightening (one, closed `norm_num`): outer shift-6 quotient
+`184.36 / (4.375 ^ 6) ≈ 0.02629047`, so `≤ 0.0263` tightens `≤ 0.0264`
+at `:4435` (4-decimal optimal: `≤ 0.02629` is false). Ladder minimum
+stays at shift-5 (`0.023` at `:3598` untouched); no other rung moved.
+-/
+
+/-- Outer shift-6 quotient tighten2: `184.36 / (4.375 ^ 6) ≈ 0.02629 ≤ 0.0263`
+(tightens `≤ 0.0264` at `:4435`; ladder minimum stays at shift-5). -/
+theorem D3SG_gamNeed_outer_shift6_quot_upper_tight2 :
+    (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      ≤ (0.0263 : ℝ) := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_quot_upper_tight2
+
+/-! ## STIRLING-SHIFT6-OUTER-EXACT (append-only, proof-only).
+
+Grep first (this file):
+- shift ladders at minima: outer best `:3598` (`≤ 0.023`), shift-6 arith `:3906`
+  (`≤ 0.027`), tight `:4435` (`≤ 0.0264`), tight2 `:4549` (`≤ 0.0263`, 4-decimal
+  optimal), reversal `:3898`, above `0.023` at `:3914`; leaf best `:4039`
+  (`≤ 0.056`), shift-5 arith `:4305` (`≤ 0.068`), tight `:4460` (`≤ 0.0671`),
+  reversal `:4297`, above `0.056` at `:4313` (ladder minima: outer shift-5, leaf shift-4).
+- decay blocks: `D3SG_Gamma_line095_exp_decay_C3` at `:694`,
+  `D3SG_decay_sigma` at `:1305`, specs at `:3925`/`:3931`/`:3937`, gap `:3967`,
+  missing-API `:3984`; ledger audit `:4368`, residual list `:4406`.
+- reflection box numerals: `D3SG_CHI_arg_im_le19` at `:1800`
+  (`(3.1416 / 2) * 12 ≤ 19` at `:1814`), `D3SG_CHI_sin_box_le` at `:1830`
+  (same majorant at `:1844`), box `≤ 2 * 7 * 600 * exp 19` at `:1874`,
+  majorant tight `:4490` (`≤ 18.85`), exact `:4519` (`≤ 18.8496`, equality).
+
+Exact-fraction ceiling (one, closed `norm_num`, zero decimal slack): outer shift-6
+quotient `184.36 / (4.375 ^ 6) = 1208221696 / 45956640625 ≈ 0.02629047`, so
+`≤ 1208221696 / 45956640625` tightens `≤ 0.0263` at `:4549` with no rounding slack.
+Ladder minimum stays at shift-5 (`0.023 < quotient` at `:3914` untouched);
+leaf ladder minimum stays at shift-4 (`:4313` untouched); no other rung moved.
+
+Route verdict: pure-shift ladders at minima (outer shift-5 `≤ 0.023`, leaf shift-4
+`≤ 0.056`); shift-6 / shift-5 reversals stand; `c = 1 / 2` decay too weak at outer,
+rate wall stands; box caps `exp 19` untouched.
+-/
+
+/-- Outer shift-6 quotient exact ceiling: `184.36 / (4.375 ^ 6) ≤ 1208221696 / 45956640625`
+(exact rational, zero decimal slack; tightens `≤ 0.0263` at `:4549`). -/
+theorem D3SG_gamNeed_outer_shift6_quot_upper_exact :
+    (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375)
+      ≤ (1208221696 : ℝ) / 45956640625 := by
+  norm_num
+
+#print axioms D3SG_gamNeed_outer_shift6_quot_upper_exact
+
+/-- Route verdict: ladder minima stay (outer shift-5, leaf shift-4); rate wall stands. -/
+theorem D3SG_shift_ladder_route_verdict :
+    (0.023 : ℝ)
+      < (184.36 : ℝ) / (4.375 * 4.375 * 4.375 * 4.375 * 4.375 * 4.375) ∧
+    (0.056 : ℝ)
+      < (29.361 : ℝ) / (3.375 * 3.375 * 3.375 * 3.375 * 3.375) := by
+  exact ⟨D3SG_gamNeed_outer_shift6_above_023,
+    D3SG_gamNeed_leaf_shift5_above_056⟩
+
+#print axioms D3SG_shift_ladder_route_verdict

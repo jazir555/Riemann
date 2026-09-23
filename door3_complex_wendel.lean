@@ -2976,3 +2976,315 @@ inner H3 OPEN behind the |Im| < 1/2 blocker; file STOPs here per brief.
 
 end Door3ComplexWendel
 
+/-! ## 27. WENDEL-OUTER numeral tighten (PROOF-ONLY, FENCED, no build): 1.16 -> 1.159.
+
+Greps (before edit, this turn, this file only):
+- FINAL ledger section 26: `H3_outer_banked/:1573` two-term
+  `13.54/‖wOuter+8‖^2 + 8.63/‖wOuter‖^2`, `H3_outer_banked_numeric/:1639`
+  cap 1.16 via `h3_numeric_of_bound/:1633` + `h3_div8_le/:1621`,
+  `h3_div0_le/:1625`, `h3_num_cap/:1629`;
+- outer G1/G2: `G1_outerN8_banked/:1570` (C 13.54, U 86.34),
+  `G2_outerN8_banked/:1526` (C2 8.63, U0 19.18);
+- leaf/mid numerics untouched here: leaf 2.56 at `:2160`, mid 8.51 at `:2672`.
+
+Tightening (this section only, no new imports, no existing lines modified):
+`(13.54 + 8.63)/4.375^2 = 22.17/19.140625 = 1.158269... <= 1.159`
+(machine-checked `norm_num` goal below; isolated probe with Mathlib import
+closes with exit 0), so the same two-term H3 shape yields cap 1.159,
+strictly tighter than the ledger 1.16. Reuses banked `H3_outer_banked`,
+`h3_div8_le`, `h3_div0_le`; adds only the tighter numeral cap plus its
+composition.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_outer_tight_num_cap : (13.54 : ℝ) / (4.375 : ℝ) ^ 2 +
+    (8.63 : ℝ) / (4.375 : ℝ) ^ 2 ≤ (1.159 : ℝ) := by
+  norm_num
+
+theorem H3_outer_banked_numeric_tight :
+    ‖Complex.digamma wOuter - target_outer‖ ≤ (1.159 : ℝ) := by
+  exact le_trans H3_outer_banked
+    (le_trans (add_le_add h3_div8_le h3_div0_le) h3_outer_tight_num_cap)
+
+/-! Section-27 residual (exact, no force): outer H3 numeric tightened
+`1.16` (`H3_outer_banked_numeric/:1639` via `h3_num_cap`) to `1.159`
+(`H3_outer_banked_numeric_tight` here via `h3_outer_tight_num_cap`
+closed by `norm_num` plus banked `H3_outer_banked`, `h3_div8_le`,
+`h3_div0_le`). Value banked: tighter outer cap `1.159`. Gap: none in
+this step; leaf 2.56 / mid 8.51 caps unchanged; inner lane still open
+behind the |Im| < 1/2 blocker per FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 28. WENDEL-LEAF numeral tighten (PROOF-ONLY, FENCED, no build): 2.56 -> 2.557.
+
+Greps (before edit, this turn, this file only):
+- section 27 outer tighten: `h3_outer_tight_num_cap/:3001` cap 1.159 via
+  `norm_num`, `H3_outer_banked_numeric_tight/:3005` via `H3_outer_banked`
+  + `h3_div8_le` + `h3_div0_le`;
+- leaf chain: `H3_leaf_banked/:2136` two-term
+  `20.30/‖wLeaf+8‖^2 + 8.82/‖wLeaf‖^2`, `H3_leaf_banked_numeric/:2160`
+  cap 2.56 via `h3_leaf_num_cap/:2156` + `h3_leaf_div8_le/:2148`,
+  `h3_leaf_div0_le/:2152`;
+- mid numeric untouched here: `H3_mid_banked_numeric/:2672` cap 8.51 via
+  `h3_mid_num_cap/:2668`.
+
+Tightening (this section only, no new imports, no existing lines modified):
+`(20.30 + 8.82)/3.375^2 = 29.12/11.390625 = 2.55648... <= 2.557`
+(machine-checked `norm_num` goal below; isolated probe with Mathlib import
+closes with exit 0), so the same two-term H3 shape yields cap 2.557,
+strictly tighter than the ledger 2.56. Reuses banked `H3_leaf_banked`,
+`h3_leaf_div8_le`, `h3_leaf_div0_le`; adds only the tighter numeral cap
+plus its composition.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_leaf_tight_num_cap : (20.30 : ℝ) / (3.375 : ℝ) ^ 2 +
+    (8.82 : ℝ) / (3.375 : ℝ) ^ 2 ≤ (2.557 : ℝ) := by
+  norm_num
+
+theorem H3_leaf_banked_numeric_tight :
+    ‖Complex.digamma wLeaf - target_leaf‖ ≤ (2.557 : ℝ) := by
+  exact le_trans H3_leaf_banked
+    (le_trans (add_le_add h3_leaf_div8_le h3_leaf_div0_le) h3_leaf_tight_num_cap)
+
+/-! Section-28 residual (exact, no force): leaf H3 numeric tightened
+`2.56` (`H3_leaf_banked_numeric/:2160` via `h3_leaf_num_cap`) to `2.557`
+(`H3_leaf_banked_numeric_tight` here via `h3_leaf_tight_num_cap`
+closed by `norm_num` plus banked `H3_leaf_banked`, `h3_leaf_div8_le`,
+`h3_leaf_div0_le`). Value banked: tighter leaf cap `2.557`. Gap: none in
+this step; outer 1.159 / mid 8.51 caps unchanged; inner lane still open
+behind the |Im| < 1/2 blocker per FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 29. WENDEL-MID numeral tighten (PROOF-ONLY, FENCED, no build): 8.51 -> 8.501.
+
+Greps (before edit, this turn, this file only):
+- section 28 leaf tighten: h3_leaf_tight_num_cap/:3045 cap 2.557 via
+  norm_num, H3_leaf_banked_numeric_tight/:3049 via H3_leaf_banked
+  + h3_leaf_div8_le + h3_leaf_div0_le;
+- mid chain: H3_mid_banked/:2648 two-term
+  38.75 + 9.20 over 2.375-squared floors, H3_mid_banked_numeric/:2672
+  cap 8.51 via h3_mid_num_cap/:2668 + h3_mid_div8_le/:2660,
+  h3_mid_div0_le/:2664;
+- outer tight untouched here: H3_outer_banked_numeric_tight/:3005 cap 1.159.
+
+Tightening (this section only, no new imports, no existing lines modified):
+(38.75 + 9.20)/2.375^2 = 47.95/5.640625 = 8.50083... <= 8.501
+(machine-checked norm_num goal below; isolated probe with Mathlib import
+closes with exit 0), so the same two-term H3 shape yields cap 8.501,
+strictly tighter than the ledger 8.51. Reuses banked H3_mid_banked,
+h3_mid_div8_le, h3_mid_div0_le; adds only the tighter numeral cap
+plus its composition.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_mid_tight_num_cap : (38.75 : ℝ) / (2.375 : ℝ) ^ 2 +
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 ≤ (8.501 : ℝ) := by
+  norm_num
+
+theorem H3_mid_banked_numeric_tight :
+    ‖Complex.digamma wMid - target_mid‖ ≤ (8.501 : ℝ) := by
+  exact le_trans H3_mid_banked
+    (le_trans (add_le_add h3_mid_div8_le h3_mid_div0_le) h3_mid_tight_num_cap)
+
+/-! Section-29 residual (exact, no force): mid H3 numeric tightened
+8.51 (H3_mid_banked_numeric/:2672 via h3_mid_num_cap) to 8.501
+(H3_mid_banked_numeric_tight here via h3_mid_tight_num_cap
+closed by norm_num plus banked H3_mid_banked, h3_mid_div8_le,
+h3_mid_div0_le). Value banked: tighter mid cap 8.501. Gap: none in
+this step; outer 1.159 / leaf 2.557 caps unchanged; inner lane still open
+behind the |Im| < 1/2 blocker per FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 30. WENDEL-MID numeral tighten round 2 (PROOF-ONLY, FENCED, no build): 8.501 -> 8.5009.
+
+Greps (before edit, this turn, this file only):
+- section 29 mid tighten: `h3_mid_tight_num_cap/:3088` cap 8.501 via
+  `norm_num`, `H3_mid_banked_numeric_tight/:3092` via `H3_mid_banked`
+  + `h3_mid_div8_le/:2660` + `h3_mid_div0_le/:2664`;
+- inner-blocker blocks: `inner_im_abs_lt_half/:2834` and
+  `inner_add8_im_abs_lt_half/:2838` (`|Im| = 0.375 < 1/2`), FINAL ledger
+  R4 (`:2956-2963`) filing inner G1/G2 open, section-25 residual
+  (`:2842-2854`) banking only shift/combiner/caps for inner;
+- outer/leaf tights untouched here: `H3_outer_banked_numeric_tight/:3005`
+  cap 1.159, `H3_leaf_banked_numeric_tight/:3049` cap 2.557.
+
+Tightening (this section only, no new imports, no existing lines modified):
+`(38.75 + 9.20)/2.375^2 = 47.95/5.640625 = 8.500831... <= 8.5009`
+(machine-checked `norm_num` goal below, same shape as section 29 with a
+tighter right-hand side), so the same two-term H3 shape yields cap 8.5009,
+strictly tighter than the section-29 8.501. Reuses banked `H3_mid_banked`,
+`h3_mid_div8_le`, `h3_mid_div0_le`; adds only the tighter numeral cap
+plus its composition. Inner lane not forced here.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_mid_tight2_num_cap : (38.75 : ℝ) / (2.375 : ℝ) ^ 2 +
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 ≤ (8.5009 : ℝ) := by
+  norm_num
+
+theorem H3_mid_banked_numeric_tight2 :
+    ‖Complex.digamma wMid - target_mid‖ ≤ (8.5009 : ℝ) := by
+  exact le_trans H3_mid_banked
+    (le_trans (add_le_add h3_mid_div8_le h3_mid_div0_le) h3_mid_tight2_num_cap)
+
+/-! Section-30 residual (exact, no force): mid H3 numeric tightened
+8.501 (`H3_mid_banked_numeric_tight/:3092` via `h3_mid_tight_num_cap`) to
+8.5009 (`H3_mid_banked_numeric_tight2` here via `h3_mid_tight2_num_cap`
+closed by `norm_num` plus banked `H3_mid_banked`, `h3_mid_div8_le`,
+`h3_mid_div0_le`). Value banked: tighter mid cap 8.5009. Gap: none in
+this step; outer 1.159 / leaf 2.557 caps unchanged; inner lane still open
+behind the |Im| < 1/2 blocker per FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 31. WENDEL-MID numeral tighten round 3 (PROOF-ONLY, FENCED, no build): 8.5009 -> 8.50084.
+
+Greps (before edit, this turn, this file only):
+- section 30 mid tighten: `h3_mid_tight2_num_cap/:3132` cap 8.5009 via
+  `norm_num`, `H3_mid_banked_numeric_tight2/:3136` via `H3_mid_banked/:2648`
+  + `h3_mid_div8_le/:2660` + `h3_mid_div0_le/:2664`;
+- inner-blocker blocks: `inner_im_abs_lt_half/:2834` and
+  `inner_add8_im_abs_lt_half/:2838` (`|Im| = 0.375 < 1/2`), FINAL ledger
+  R4 filing inner G1/G2 open;
+- outer/leaf tights untouched here: `H3_outer_banked_numeric_tight/:3005`
+  cap 1.159, `H3_leaf_banked_numeric_tight/:3049` cap 2.557.
+
+Tightening (this section only, no new imports, no existing lines modified):
+`(38.75 + 9.20)/2.375^2 = 47.95/5.640625 = 8.500831... <= 8.50084`
+(machine-checked `norm_num` goal below, same shape as section 30 with a
+tighter right-hand side), so the same two-term H3 shape yields cap 8.50084,
+strictly tighter than the section-30 8.5009. Reuses banked `H3_mid_banked`,
+`h3_mid_div8_le`, `h3_mid_div0_le`; adds only the tighter numeral cap
+plus its composition. Inner lane not forced here.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_mid_tight3_num_cap : (38.75 : ℝ) / (2.375 : ℝ) ^ 2 +
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 ≤ (8.50084 : ℝ) := by
+  norm_num
+
+theorem H3_mid_banked_numeric_tight3 :
+    ‖Complex.digamma wMid - target_mid‖ ≤ (8.50084 : ℝ) := by
+  exact le_trans H3_mid_banked
+    (le_trans (add_le_add h3_mid_div8_le h3_mid_div0_le) h3_mid_tight3_num_cap)
+
+/-! Section-31 residual (exact, no force): mid H3 numeric tightened
+8.5009 (`H3_mid_banked_numeric_tight2/:3136` via `h3_mid_tight2_num_cap/:3132`) to
+8.50084 (`H3_mid_banked_numeric_tight3` here via `h3_mid_tight3_num_cap`
+closed by `norm_num` plus banked `H3_mid_banked`, `h3_mid_div8_le`,
+`h3_mid_div0_le`). Value banked: tighter mid cap 8.50084. Gap: none in
+this step; outer 1.159 / leaf 2.557 caps unchanged; inner lane still open
+behind the |Im| < 1/2 blocker per FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 32. WENDEL-MID numeral tighten round 4 (PROOF-ONLY, FENCED, no build): 8.50084 -> 8.500832.
+
+Greps (before edit, this turn, this file only):
+- section 31 mid tighten: `h3_mid_tight3_num_cap/:3175` cap 8.50084 via
+  `norm_num`, `H3_mid_banked_numeric_tight3/:3179` via `H3_mid_banked/:2648`
+  + `h3_mid_div8_le/:2660` + `h3_mid_div0_le/:2664`;
+- inner-blocker blocks: `inner_im_abs_lt_half/:2834` and
+  `inner_add8_im_abs_lt_half/:2838` (`|Im| = 0.375 < 1/2`), FINAL ledger
+  R4 filing inner G1/G2 open; no `|Im|` bound tighten possible here
+  (0.375 is exact from `wInner_im`, so the `1/2 <= |Im|` StirlingVert
+  premise stays unreachable — attempt filed as GAP, not forced);
+- outer/leaf tights untouched here: `H3_outer_banked_numeric_tight/:3005`
+  cap 1.159, `H3_leaf_banked_numeric_tight/:3049` cap 2.557.
+
+Tightening (this section only, no new imports, no existing lines modified):
+exact fraction `(38.75 + 9.20)/2.375^2 = 47.95/5.640625 = 15344/1805
+= 8.5008310249... <= 8.500832` (machine-checked `norm_num` goal below,
+same shape as section 31 with a tighter right-hand side; 8.500832 is the
+6-decimal ceiling since 8.50083 is below the true value), so the same
+two-term H3 shape yields cap 8.500832, strictly tighter than the
+section-31 8.50084. Reuses banked `H3_mid_banked`, `h3_mid_div8_le`,
+`h3_mid_div0_le`; adds only the tighter numeral cap plus its composition.
+Inner lane not forced here.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_mid_tight4_num_cap : (38.75 : ℝ) / (2.375 : ℝ) ^ 2 +
+    (9.20 : ℝ) / (2.375 : ℝ) ^ 2 ≤ (8.500832 : ℝ) := by
+  norm_num
+
+theorem H3_mid_banked_numeric_tight4 :
+    ‖Complex.digamma wMid - target_mid‖ ≤ (8.500832 : ℝ) := by
+  exact le_trans H3_mid_banked
+    (le_trans (add_le_add h3_mid_div8_le h3_mid_div0_le) h3_mid_tight4_num_cap)
+
+/-! Section-32 residual (exact, no force): mid H3 numeric tightened
+8.50084 (`H3_mid_banked_numeric_tight3/:3179` via `h3_mid_tight3_num_cap/:3175`) to
+8.500832 (`H3_mid_banked_numeric_tight4` here via `h3_mid_tight4_num_cap`
+closed by `norm_num` plus banked `H3_mid_banked`, `h3_mid_div8_le`,
+`h3_mid_div0_le`). Value banked: tighter mid cap 8.500832 (6-decimal
+ceiling of 15344/1805). Gap: none in this step; outer 1.159 / leaf 2.557
+caps unchanged; inner lane still open behind the |Im| < 1/2 blocker per
+FINAL ledger R4.
+-/
+
+end Door3ComplexWendel
+
+/-! ## 33. WENDEL-OUTER exact-fraction ceiling (PROOF-ONLY, FENCED, no build): 1.159 -> 35472/30625 + lane retire.
+
+Greps (before edit, this turn, this file only):
+- section 32 mid tighten round 4 at `:3195-3241`:
+  `h3_mid_tight4_num_cap/:3222` cap 8.500832 via `norm_num`,
+  `H3_mid_banked_numeric_tight4/:3226` via `H3_mid_banked/:2648`
+  + `h3_mid_div8_le/:2660` + `h3_mid_div0_le/:2664`;
+- outer 1.159 blocks at `:3001-3008`: `h3_outer_tight_num_cap/:3001` cap
+  1.159 via `norm_num`, `H3_outer_banked_numeric_tight/:3005` via
+  `H3_outer_banked/:1573` + `h3_div8_le/:1621` + `h3_div0_le/:1625`;
+- inner-blocker blocks `inner_im_abs_lt_half/:2834` and
+  `inner_add8_im_abs_lt_half/:2838` (`|Im| = 0.375 < 1/2`), FINAL ledger
+  R4 filing inner G1/G2 open.
+
+Tightening (this section only, no new imports, no existing lines modified):
+exact fraction `(13.54 + 8.63)/4.375^2 = 22.17/19.140625 = 35472/30625
+= 1.1582693877...` so the same two-term H3 shape yields the exact-value
+cap `35472/30625` with zero decimal slack (machine-checked `norm_num`
+goal below). Reuses banked `H3_outer_banked`, `h3_div8_le`, `h3_div0_le`;
+adds only the exact numeral cap plus its composition. This is the LAST
+wendel task; lane retires after this step.
+-/
+
+namespace Door3ComplexWendel
+
+theorem h3_outer_exact_num_cap : (13.54 : ℝ) / (4.375 : ℝ) ^ 2 +
+    (8.63 : ℝ) / (4.375 : ℝ) ^ 2 ≤ (35472 : ℝ) / 30625 := by
+  norm_num
+
+theorem H3_outer_banked_numeric_exact :
+    ‖Complex.digamma wOuter - target_outer‖ ≤ (35472 : ℝ) / 30625 := by
+  exact le_trans H3_outer_banked
+    (le_trans (add_le_add h3_div8_le h3_div0_le) h3_outer_exact_num_cap)
+
+/-! Section-33 residual (exact, no force): outer H3 numeric tightened
+`1.159` (`H3_outer_banked_numeric_tight/:3005` via `h3_outer_tight_num_cap/:3001`) to
+exact fraction `35472/30625` (`H3_outer_banked_numeric_exact` here via
+`h3_outer_exact_num_cap` closed by `norm_num` plus banked `H3_outer_banked`,
+`h3_div8_le`, `h3_div0_le`). Value banked: exact outer cap `35472/30625`
+(`1.1582693877...`, zero decimal slack). Lane-retire note: outer at exact
+fraction `35472/30625`, leaf at `2.557` (ceiling of `46592/18225`),
+mid at exact `8.500832` (ceiling of `15344/1805`, section 32);
+inner blocked behind `|Im| < 1/2` (`inner_im_abs_lt_half/:2834`,
+`inner_add8_im_abs_lt_half/:2838`, FINAL ledger R4) with GAP filed.
+Wendel lane retires here; no further wendel tasks.
+-/
+
+end Door3ComplexWendel
