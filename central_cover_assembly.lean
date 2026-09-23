@@ -18107,3 +18107,72 @@ theorem R11_H_of_residuals (hc : R11_center_residual_tenth)
   R11_H_instance (R11_leaf_of_residuals hc hd) c hc_mem hc_eq
 
 end CentralCoverAssembly
+
+/-! ## ASSEMBLY-R12 leaf+H residual set (append-only, no redefinition)
+
+Grep record (read-only, verified before writing):
+- `R11` set present as model (2520-2521 radius, 2523-2529 mem,
+  2533-2535 leaf, 2562-2572 H with `hc_mem + hc_eq`).
+- `R12` base present (def 2577-2578; 2580-2583 coords; 2604-2605
+  radius_lt via `sample_cell_radius_01_bound`; 2607-2613 mem
+  `(-8, -5.5, 0.1, 0.3)`; 2617-2619 leaf with `(0.002, 0.07)`;
+  2621-2623 fencing; 2646-2656 H with `hc_mem + hc_eq`).
+- R00-R11 sets present; no `R12_budget_lt_app`,
+  `R12_center_of_tenth_lower`, `R12_center_residual_tenth`,
+  `R12_center_obligation_of_residual_tenth`, `R12_deriv_residual`,
+  `R12_leaf_of_residuals`, `R12_H_of_residuals` in file before writing.
+
+Mirror for R12 tier `(eps, M) = (0.002, 0.07)` at
+`c12 = (-8, -5.5, 0.1, 0.3)`: budget `0.002 + 0.07 * radius < 0.1`
+lifts `R12_radius_lt` (same `mul_lt_mul_of_pos_left` + `linarith`
+shape as R11), so `0.1 <= norm at R12.center` discharges the center
+conjunct; deriv residual is exactly the second conjunct; `leaf_of`
+rebuilds `R12_leaf_obligations`; `H_of` discharges the gridFine H
+shape via `R12_H_instance` (with `hc_mem + hc_eq` per `2646`,
+matching R11 form).
+Value-or-gap: budget `0.002 + 0.07 * 1.26 = 0.0902 < 0.1`; full R12 H
+leaf now conditional only on two named numeric enclosures
+(`0.1 <= norm` at center + uniform `‖deriv xiShifted‖ <= 0.07` on
+`R12`, not closed here).
+-/
+
+namespace CentralCoverAssembly
+
+/-- Numeric budget for the R12 tier on the true radius. -/
+theorem R12_budget_lt_app : (0.002 : ℝ) + 0.07 * R12.radius < 0.1 := by
+  have h := R12_radius_lt
+  have hM : 0.07 * R12.radius < 0.07 * 1.26 :=
+    mul_lt_mul_of_pos_left h (by norm_num)
+  linarith
+
+theorem R12_center_of_tenth_lower (hC : (0.1 : ℝ) ≤ ‖xiShifted R12.center‖) :
+    (0.002 : ℝ) + 0.07 * R12.radius ≤ ‖xiShifted R12.center‖ := by
+  have hB := R12_budget_lt_app
+  linarith
+
+def R12_center_residual_tenth : Prop :=
+  (0.1 : ℝ) ≤ ‖xiShifted R12.center‖
+
+theorem R12_center_obligation_of_residual_tenth (h : R12_center_residual_tenth) :
+    (0.002 : ℝ) + 0.07 * R12.radius ≤ ‖xiShifted R12.center‖ :=
+  R12_center_of_tenth_lower h
+
+def R12_deriv_residual : Prop :=
+  ∀ w, R12.mem w → ‖deriv xiShifted w‖ ≤ (0.07 : ℝ)
+
+theorem R12_leaf_of_residuals (hc : R12_center_residual_tenth)
+    (hd : R12_deriv_residual) : R12_leaf_obligations :=
+  ⟨R12_center_obligation_of_residual_tenth hc, hd⟩
+
+theorem R12_H_of_residuals (hc : R12_center_residual_tenth)
+    (hd : R12_deriv_residual)
+    (c : ℝ × ℝ × ℝ × ℝ) (hc_mem : c ∈ gridFine)
+    (hc_eq : c = (-8, -5.5, 0.1, 0.3)) :
+    ∃ (R : CellProofEngine.Rect2D) (ε M : ℝ),
+      R.x0 = c.1 ∧ R.x1 = c.2.1 ∧ R.y0 = c.2.2.1 ∧ R.y1 = c.2.2.2 ∧
+      -(1 / 2 : ℝ) < R.y0 ∧ R.y1 < (1 / 2 : ℝ) ∧
+      0 < ε ∧ (∀ w, R.mem w → ‖deriv xiShifted w‖ ≤ M) ∧
+      ε + M * R.radius ≤ ‖xiShifted R.center‖ :=
+  R12_H_instance (R12_leaf_of_residuals hc hd) c hc_mem hc_eq
+
+end CentralCoverAssembly

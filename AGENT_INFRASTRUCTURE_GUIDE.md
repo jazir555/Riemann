@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 ASSEMBLY-R12 (background `ses_f3470f02f`, proof-only,
+  grep-clean, assembly-only commit): R12 leaf+H conditional (tenth +
+  0.07). Post-dates GREEN; re-verify later.
 - 2026-09-22 ZETA-M18TAIL (background `ses_f3471df91`, proof-only,
   grep-clean, zeta-only commit): M18 pair + tail 17.4 → 19.734, NO
   candidate (above 19.709 by 0.025). K0 minimum at N=17 so far;
