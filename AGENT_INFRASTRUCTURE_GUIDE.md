@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 CELL-R31 (background `ses_f345648fc`, proof-only,
+  grep-clean, interval-only commit): R31 route (poly 38.4/base
+  19.2, banked infeasible; namespace-end benign).
 - 2026-09-22 TIER-R20 (background `ses_f345648fe`, proof-only,
   grep-clean, tier-only commit): no R20 AO narrow chain; keeps
   67200, gap filed honestly.
