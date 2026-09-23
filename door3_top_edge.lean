@@ -1128,3 +1128,130 @@ theorem bottom_uniform_deriv_of_ballSup {C : ℝ}
     _ ≤ max C 1 := hCM
 
 end Door3TopEdgeNeeds
+
+/-! ## TOPEDGE-BALLSUP ballSup premise attempt (append-only, value + exact gap).
+
+Grep (read before filing):
+* tail `door3_top_edge.lean:1044-1130` (`bottom_uniform_deriv_of_ballSup` reduces
+  uniform-deriv residual to `bottom_ballSup_residual C` on `closedBall 0 12`).
+* banked sliver factors `door3_sliver_edge.lean:1049-1084` (poly 78/79),
+  `:1146-1163` (pi 4096), `:1166-1180` (joint 319488), residual `:1111-1116`
+  (Gamma/zeta uppers absent; poles s=0/s=1 in ball).
+* wiring infeasibility `door3_rh_wiring.lean:2303-2375` (joint 319488 exceeds 1000;
+  sup1000 target + gammaZeta residual OPEN).
+* this file does NOT import the sliver file, so the two banked factors are
+  rebuilt locally below from `CentralCoverAssembly.polyOf/piOf` with the same
+  triangle/rpow proofs as banked.
+
+Value: local rebuild of poly-78, pi-4096, joint-319488 on `closedBall 0 12`,
+plus budget-exceed numerals showing the two-factor product alone cannot meet
+C=40 or C=1000.
+Gap (exact, OPEN): `Door3TopEdgeNeeds.bottom_ballSup_residual` for
+`xiShiftedEntire` stays OPEN; the full-ball Gamma/zeta uppers needed for the
+remaining product factors are not supplied in-tree (poles in ball per cited
+residuals), filed below as an explicit OPEN target.
+-/
+
+namespace Door3TopEdgeBallSup
+
+open Complex Real Set Topology
+
+theorem ballSup_poly_factor_ball12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s‖ ≤ (78 : ℝ) := by
+  unfold CentralCoverAssembly.polyOf
+  have hdist : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (12 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hle : ‖s - 1‖ ≤ ‖s‖ + ‖(1 : ℂ)‖ := norm_sub_le s 1
+  have h1 : ‖(1 : ℂ)‖ = (1 : ℝ) := norm_one
+  have hs1 : ‖s - 1‖ ≤ (13 : ℝ) := by
+    rw [h1] at hle
+    linarith
+  have hstep1 : ‖s‖ * ‖s - 1‖ ≤ (12 : ℝ) * ‖s - 1‖ :=
+    mul_le_mul_of_nonneg_right hnorm (norm_nonneg _)
+  have hstep2 : (12 : ℝ) * ‖s - 1‖ ≤ (12 : ℝ) * (13 : ℝ) :=
+    mul_le_mul_of_nonneg_left hs1 (by norm_num)
+  have hmul : ‖s * (s - 1)‖ ≤ (12 : ℝ) * (13 : ℝ) := by
+    have hnm : ‖s * (s - 1)‖ = ‖s‖ * ‖s - 1‖ := norm_mul s (s - 1)
+    rw [hnm]
+    exact le_trans hstep1 hstep2
+  have hdiv : ‖s * (s - 1) / (2 : ℂ)‖ ≤ (12 : ℝ) * (13 : ℝ) / 2 := by
+    rw [norm_div, Complex.norm_two]
+    linarith
+  have hcalc : (12 : ℝ) * (13 : ℝ) / 2 = (78 : ℝ) := by norm_num
+  rw [hcalc] at hdiv
+  exact hdiv
+
+theorem ballSup_ball12_re_bounds {s : ℂ} (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    (-12 : ℝ) ≤ s.re ∧ s.re ≤ (12 : ℝ) := by
+  have hdist : dist s (0 : ℂ) ≤ (12 : ℝ) := Metric.mem_closedBall.mp hs
+  have heq : dist s (0 : ℂ) = ‖s‖ := dist_zero_right s
+  have hnorm : ‖s‖ ≤ (12 : ℝ) := by
+    rw [heq] at hdist
+    exact hdist
+  have hre : |s.re| ≤ ‖s‖ := Complex.abs_re_le_norm s
+  rw [abs_le] at hre
+  obtain ⟨hlo, hhi⟩ := hre
+  constructor <;> linarith
+
+theorem ballSup_piOf_norm_eq (s : ℂ) :
+    ‖CentralCoverAssembly.piOf s‖ = Real.pi ^ (-(s.re) / 2) := by
+  unfold CentralCoverAssembly.piOf
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos Real.pi_pos _]
+  congr 1
+  have h2 : (s / 2).re = s.re / 2 := by rw [Complex.div_ofNat_re]
+  have hneg : (-(s / 2)).re = -((s / 2).re) := Complex.neg_re _
+  rw [hneg, h2]
+  ring
+
+theorem ballSup_pi_factor_ball12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.piOf s‖ ≤ (4096 : ℝ) := by
+  rw [ballSup_piOf_norm_eq]
+  obtain ⟨hlo, _⟩ := ballSup_ball12_re_bounds hs
+  have hpi1 : (1 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
+  have hexp : -(s.re) / 2 ≤ (6 : ℝ) := by linarith
+  have hle1 : Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (6 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hpi1 hexp
+  have hle2 : Real.pi ^ (6 : ℝ) ≤ (4 : ℝ) ^ (6 : ℝ) :=
+    Real.rpow_le_rpow (le_of_lt Real.pi_pos) Real.pi_le_four (by norm_num)
+  have h4 : (4 : ℝ) ^ (6 : ℝ) = (4096 : ℝ) := by
+    have h6 : (6 : ℝ) = (((6 : ℕ)) : ℝ) := by norm_num
+    rw [h6, Real.rpow_natCast]
+    norm_num
+  calc Real.pi ^ (-(s.re) / 2) ≤ Real.pi ^ (6 : ℝ) := hle1
+    _ ≤ (4 : ℝ) ^ (6 : ℝ) := hle2
+    _ = (4096 : ℝ) := h4
+
+theorem ballSup_polyPi_joint_ball12 {s : ℂ}
+    (hs : s ∈ Metric.closedBall (0 : ℂ) 12) :
+    ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ ≤ (319488 : ℝ) := by
+  have hpoly := ballSup_poly_factor_ball12 hs
+  have hpi := ballSup_pi_factor_ball12 hs
+  have hnn2 : (0 : ℝ) ≤ ‖CentralCoverAssembly.piOf s‖ := norm_nonneg _
+  have hmul : ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ ≤
+      (78 : ℝ) * (4096 : ℝ) :=
+    mul_le_mul hpoly hpi hnn2 (by norm_num)
+  have hnm : ‖CentralCoverAssembly.polyOf s * CentralCoverAssembly.piOf s‖ =
+      ‖CentralCoverAssembly.polyOf s‖ * ‖CentralCoverAssembly.piOf s‖ :=
+    norm_mul _ _
+  have hcalc : (78 : ℝ) * (4096 : ℝ) = (319488 : ℝ) := by norm_num
+  rw [hnm, hcalc] at hmul
+  exact hmul
+
+theorem ballSup_joint_exceeds_1000 : (1000 : ℝ) < (319488 : ℝ) := by
+  norm_num
+
+theorem ballSup_joint_exceeds_40 : (40 : ℝ) < (319488 : ℝ) := by
+  norm_num
+
+def ballSup_full_exact_gap_1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def ballSup_full_exact_gap_40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+end Door3TopEdgeBallSup

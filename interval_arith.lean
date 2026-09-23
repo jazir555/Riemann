@@ -36705,3 +36705,120 @@ theorem R19_banked_infeasible :
 #print axioms R19CenterAssembly.R19_banked_infeasible
 
 end R19CenterAssembly
+
+/-!
+## R20 center assembly with banked s-center + new poly floor (conditional, filed honest).
+
+Grep-first record (checked before writing, this file only):
+* `R19CenterAssembly.poly_lower_R19` (`26.3`) + `R19_threshold_eq` (`0.0902`,
+  mid-tier `M = 0.07`): prior route template mirrored here; R20 honestly uses
+  outer tier (`eps = 0.002`, `M = 0.05`) per `R20_leaf_obligations`
+  (`central_cover_assembly.lean:3289-3291`).
+* `R20GammaUpper.sR20` with `sR20_re = 0.3` (`:4388`) and `sR20_im = 8.75`
+  (`:4395`): banked s-center reused here; no `poly_lower_R20` existed, so the
+  poly floor is newly closed below from those banked re/im facts.
+* `CellUniform.pi_lower_of_re` (`:1752`) +
+  `CellUniform.center_bound_of_component_bounds` (`:1772`): generic bridge reused.
+* `R00GammaLower.gamma_const_pos` + `R00GammaLower.gamma_lower_center`
+  + `R00ZetaEM.etaCPartial_two_norm_ge`: cited only as shape witnesses, not as
+  discharged bounds; Gamma (`1/10000000`) and zeta (`1/26`) stay explicit open
+  premises.
+
+Shape: mirrors `R19CenterAssembly.R19_center_with_poly_pi_gamma` at the R20
+outer corner (`sR20 = 0.3 + 8.75 * I`), outer tier (`eps = 0.002`, `M = 0.05`) via
+the generic `CellUniform.center_bound_of_component_bounds` bridge. Open component
+premises are exactly two: the Gamma remainder `hgam` and the zeta lower `hzeta`
+(`hrad`, `hGam_floor`, `hZeta_floor`, `hprod` are numeric side conditions).
+-/
+
+namespace R20CenterAssembly
+
+/-- Norm version of `polyPart` at the banked R20 s-center. -/
+theorem polyPart_norm_R20 :
+    ‖R00Enclosure.polyPart R20GammaUpper.sR20‖ =
+      (1 / 2) * ‖R20GammaUpper.sR20‖ * ‖R20GammaUpper.sR20 - 1‖ := by
+  unfold R00Enclosure.polyPart
+  rw [norm_mul, norm_mul, R00Numerics.norm_half]
+
+/-- `‖sR20‖ ≥ 8.75` (`8.75^2 = 76.5625 < 0.3^2 + 8.75^2 = 76.6525`). -/
+theorem norm_sR20_ge : (8.75 : ℝ) ≤ ‖R20GammaUpper.sR20‖ := by
+  have hsq : (8.75 : ℝ) ^ 2 ≤ ‖R20GammaUpper.sR20‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply,
+      R20GammaUpper.sR20_re, R20GammaUpper.sR20_im]
+    norm_num
+  calc (8.75 : ℝ) = Real.sqrt ((8.75 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R20GammaUpper.sR20‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R20GammaUpper.sR20‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- `‖sR20 - 1‖ ≥ 8.77` (`0.7^2 + 8.75^2 = 77.0525 > 8.77^2 = 76.9129`). -/
+theorem norm_sR20_sub_one_ge : (8.77 : ℝ) ≤ ‖R20GammaUpper.sR20 - 1‖ := by
+  have hr1 : (R20GammaUpper.sR20 - 1).re = -0.7 := by
+    simp only [Complex.sub_re, Complex.one_re, R20GammaUpper.sR20_re]
+    norm_num
+  have hi1 : (R20GammaUpper.sR20 - 1).im = 8.75 := by
+    simp only [Complex.sub_im, Complex.one_im, R20GammaUpper.sR20_im]
+    norm_num
+  have hsq : (8.77 : ℝ) ^ 2 ≤ ‖R20GammaUpper.sR20 - 1‖ ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply, hr1, hi1]
+    norm_num
+  calc (8.77 : ℝ) = Real.sqrt ((8.77 : ℝ) ^ 2) := (Real.sqrt_sq (by norm_num)).symm
+    _ ≤ Real.sqrt (‖R20GammaUpper.sR20 - 1‖ ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = ‖R20GammaUpper.sR20 - 1‖ := Real.sqrt_sq (norm_nonneg _)
+
+/-- ENCLOSURE (hypothesis-free): `38.3 ≤ ‖polyPart sR20‖`
+(`8.75 * 8.77 / 2 = 38.36875 ≥ 38.3`; true `≈ 38.42`, slack `≈ 0.12`). -/
+theorem poly_lower_R20 : (38.3 : ℝ) ≤ ‖R00Enclosure.polyPart R20GammaUpper.sR20‖ := by
+  have hprod : (8.75 : ℝ) * 8.77 ≤ ‖R20GammaUpper.sR20‖ * ‖R20GammaUpper.sR20 - 1‖ :=
+    mul_le_mul norm_sR20_ge norm_sR20_sub_one_ge (by norm_num) (norm_nonneg _)
+  rw [polyPart_norm_R20]
+  nlinarith [hprod]
+
+/-- Conditional R20 center assembly: banked s-center + new poly `38.3` and pi `1/2`
+floors are plugged into the generic bridge; the Gamma remainder and zeta lower stay
+explicit. The numeric check needs `Agam * Azeta ≥ (0.002 + 0.05 * 1.26) / 19.15`;
+at banked floors (`1/10000000`, `1/26`) it is infeasible, so this is filed as an
+honest conditional, not a closed bound. -/
+theorem R20_center_with_poly_pi_gamma (Agam Azeta : ℝ)
+    (hrad : CentralCoverAssembly.R20.radius ≤ 1.26)
+    (hGam_floor : (1 / 10000000 : ℝ) ≤ Agam)
+    (hgam : Agam ≤ ‖R00Enclosure.gammaPart R20GammaUpper.sR20‖)
+    (hZeta_floor : (1 / 26 : ℝ) ≤ Azeta)
+    (hzeta : Azeta ≤ ‖zeta R20GammaUpper.sR20‖)
+    (hprod : (0.002 : ℝ) + 0.05 * 1.26 ≤ 38.3 * (1 / 2) * Agam * Azeta) :
+    (0.002 : ℝ) + 0.05 * CentralCoverAssembly.R20.radius ≤
+      ‖xiShifted CentralCoverAssembly.R20.center‖ := by
+  have hpoly := poly_lower_R20
+  have hpi : (1 / 2 : ℝ) ≤ ‖R00Enclosure.piPart R20GammaUpper.sR20‖ :=
+    CellUniform.pi_lower_of_re (by rw [R20GammaUpper.sR20_re]; norm_num)
+  have _hG := R00GammaLower.gamma_lower_center
+  have _hS2 := R00ZetaEM.etaCPartial_two_norm_ge
+  have hC0 : (0 : ℝ) ≤ Agam :=
+    le_trans (le_of_lt R00GammaLower.gamma_const_pos) hGam_floor
+  have hD0 : (0 : ℝ) ≤ Azeta :=
+    le_trans (by norm_num) hZeta_floor
+  have harg : R20GammaUpper.sR20
+      = (1 / 2 : ℂ) + Complex.I * CentralCoverAssembly.R20.center := rfl
+  rw [harg] at hpoly hpi hgam hzeta
+  exact CellUniform.center_bound_of_component_bounds
+    CentralCoverAssembly.R20 0.002 0.05 (by norm_num) hrad
+    38.3 (1 / 2) Agam Azeta (by norm_num) (by norm_num) hC0 hD0
+    hpoly hpi hgam hzeta hprod
+
+/-- Exact outer-tier threshold: `0.002 + 0.05 * 1.26 = 0.065`. -/
+theorem R20_threshold_eq : (0.002 : ℝ) + 0.05 * 1.26 = 0.065 := by norm_num
+
+/-- Exact banked base: `38.3 * (1/2) = 19.15`. -/
+theorem R20_base_eq : (38.3 : ℝ) * (1 / 2) = 19.15 := by norm_num
+
+/-- Exact residual: banked floors `19.15 / 260000000` do not clear `0.065`
+(required `Agam * Azeta ≥ 0.065 / 19.15 ≈ 0.00339`; banked `≈ 3.85e-09`;
+short by factor `≈ 882500`, the ~6-order wall). -/
+theorem R20_banked_infeasible :
+    (38.3 : ℝ) * (1 / 2) * (1 / 10000000) * (1 / 26) < (0.002 : ℝ) + 0.05 * 1.26 := by norm_num
+
+#print axioms R20CenterAssembly.poly_lower_R20
+#print axioms R20CenterAssembly.R20_center_with_poly_pi_gamma
+#print axioms R20CenterAssembly.R20_threshold_eq
+#print axioms R20CenterAssembly.R20_banked_infeasible
+
+end R20CenterAssembly
