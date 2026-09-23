@@ -6164,6 +6164,9 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 CHI+K43 (backgrounds `ses_f345f5d52`,
+  `ses_f3460c02b`, proof-only, grep-clean): APPEND-13 + chi-three
+  gap filed; k43 destructive (cap 3.49, 5th consecutive).
 - 2026-09-22 R07M12 (backgrounds `ses_f345f5d53`,
   `ses_f345f16eb`, proof-only, grep-clean): R07 sup mirror +
   residual; R12 no chain keeps 67200.
