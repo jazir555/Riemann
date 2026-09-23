@@ -2050,3 +2050,82 @@ def uniform_half_exact_gap : Prop :=
   Door3TopEdgeNeeds.bottom_uniform_lower_residual
 
 end Door3TopEdgeUniformChain
+
+/-! ## TOPEDGE-GAMMA12 ball-12 Gamma premise honest attempt (append-only, value + exact gap).
+
+Grep tail first (this file only):
+* `Door3TopEdgeBallSup` poly-78 / pi-4096 / joint-319488 (`:1159-1243`);
+* `Door3TopEdgeGammaGap.gamma_ball12_upper_residual` (`:1289-1291`) as hypothesis only;
+* local Gamma uses are only nonvanishing via `Complex.Gamma_ne_zero`
+  at `:34-39`, `:103-109`, `:159-165`; no norm upper of the form
+  `‖gammaOf s‖ ≤ G` on `closedBall 0 12` is banked in this file.
+* `Door3TopEdgeBall25` ball-25/2 uppers (`:1686-1692`) are distinct radii.
+
+Value below: monotone transport for ball-12 Gamma / zeta uppers
+(`G1 ≤ G2` lifts a banked upper), proved by transitivity of `≤`.
+Gap (exact, OPEN): no explicit numeral `G` is closed here; the
+ball-12 Gamma upper and zeta upper stay OPEN, filed as aliases below.
+-/
+
+namespace Door3TopEdgeGamma12Close
+
+open Complex Real Set Topology
+
+theorem gamma12_upper_mono {G1 G2 : ℝ} (h12 : G1 ≤ G2)
+    (hG : Door3TopEdgeGammaGap.gamma_ball12_upper_residual G1) :
+    Door3TopEdgeGammaGap.gamma_ball12_upper_residual G2 := by
+  intro s hs
+  exact le_trans (hG s hs) h12
+
+theorem zeta12_upper_mono {Z1 Z2 : ℝ} (h12 : Z1 ≤ Z2)
+    (hZ : Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z1) :
+    Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z2 := by
+  intro s hs
+  exact le_trans (hZ s hs) h12
+
+def gamma12_exact_open (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def zeta12_exact_open (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+end Door3TopEdgeGamma12Close
+
+/-! ## TOPEDGE-LEDGER-CLOSE2 final state (append-only, proof-only).
+
+Closed in this file: edge engines / strips / Cauchy data (`:12-920`),
+numerals poly-78 / pi-4096 / joint-319488 / poly-675/8 / pi-16384 /
+joint-1382400 (`:1159-1650`), conditionals and inclusions
+(`:1069-1839`, `:1497-1519`, `:1694-1719`), mono transports
+`ballSup_40_to_1000` (`:1984-1990`) and `gamma12_upper_mono` /
+`zeta12_upper_mono` (preceding block).
+Open in this file: `bottom_uniform_lower_residual` (`:1027`),
+`bottom_ballSup_residual` 40 / 1000 (`:1032`, `:1251-1255`),
+`bottom_uniform_deriv_residual` (`:1036`), ball-12 Gamma / zeta uppers
+(`:1289-1295`), full-ball product (`:1297-1303`), `12 -> 12` shift
+(`:1521-1526`), ball-25/2 Gamma / zeta uppers (`:1686-1692`).
+-/
+
+namespace Door3TopEdgeLedgerClose2
+
+open Complex Real Set Topology
+
+def ledger_open_uniform_lower : Prop :=
+  Door3TopEdgeNeeds.bottom_uniform_lower_residual
+
+def ledger_open_ballSup_40 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 40
+
+def ledger_open_ballSup_1000 : Prop :=
+  Door3TopEdgeNeeds.bottom_ballSup_residual 1000
+
+def ledger_open_gamma12 (G : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.gamma_ball12_upper_residual G
+
+def ledger_open_zeta12 (Z : ℝ) : Prop :=
+  Door3TopEdgeGammaGap.zeta_ball12_upper_residual Z
+
+def ledger_open_product12 : Prop :=
+  Door3TopEdgeGammaGap.entire_eq_product_ball12_gap
+
+end Door3TopEdgeLedgerClose2
