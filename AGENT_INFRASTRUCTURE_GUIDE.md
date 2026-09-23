@@ -6164,6 +6164,17 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 SCUT55 (background `ses_f347bb15b`, proof-only,
+  grep-clean, pilot-only commit): 7-leg assembly floors (eta10/12/15/
+  17/27/29/31) + below-bar verdicts + k33/34 log-phase bridges
+  (cos10log34≤-0.60). k35 next.
+- 2026-09-22 OFFAXIS-S7 (background `ses_f346eadb3`, proof-only,
+  grep-clean, offaxis-only commit): S7 diminishing verdict
+  (floor 1999/1125 below bar, gap -727/2250) + midlow pair spec
+  192/1025 + budget-exceed verdicts. Mid-low residual open.
+- 2026-09-22 CUTR10-SUP (background `ses_f346c3ad0`, proof-only,
+  grep-clean, cutR10-only commit): gamma-half greenfield rechain +
+  shortfall filed. Next premise next.
 - 2026-09-22 FLOOR1151 (background `ses_f346de151`, proof-only,
   grep-clean, zeta-only commit): 1.151^20≤17 → 17^0.05 tightening,
   M17 tail 17.40→17.38, K0 19.709→19.689 beats 0.02. Gap 0.231.

@@ -1994,3 +1994,37 @@ theorem cutR10_hFE_of_chi_and_middle
   exact cutR10_zeta_of_chi_reflected t hside.1 hside.2 3 2 hC hZ
 
 end Door3CutR10BallSup
+
+/-! # APPEND-5 (greenfield audit for `cutR10_gamma_sup_of_prodCap` :898-902, append-only tail; LF): gate + sup shapes + honest chain-or-residual.
+
+Grep record (as read):
+* Gate `:898-902` + `:1409-1414`: identity gate taking `hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100` to itself.
+* Sup shapes needing `1 / 100`: `:279`, `:931`, `:1724`, `:1766` (factor assemblies `67 * (16/5) * (1/100) * 6 = 12.864`).
+* Banked chain (all CLOSED): `cutR10_Gamma_norm_le_real` `:691`, `cutR10_gamma_shift_norm` `:743`, `cutR10_sq_prod` `:771`, `cutR10_Real_Gamma_103_le_one` `:808`, `cutR10_Real_Gamma_153_le_one` `:839`, `cutR10_gamma_denom_lower` `:871`, `cutR10_gamma_shift_two` `:1316`, `cutR10_Real_Gamma_mid_le_six` `:1328`, `cutR10_gamma_sup_half_closed` `:1358` (`≤ 1 / 2`).
+
+Verdict: gate NOT CLOSED to `1 / 100` from banked premises alone. Honest banked chain reaches `≤ 1 / 2` (re-proved below by direct call, no new analysis). Shortfall to `1 / 100` is exactly `50x` (`(1/2) / (1/100) = 50`). The `1 / 100` shape therefore stays gated on the single explicit Prop premise `hProdCap`, restated below with the shortfall pinned as arithmetic. No new imports; nothing else touched.
+-/
+
+namespace Door3CutR10BallSup
+
+/-- Greenfield rechain: banked closed half-cap `≤ 1 / 2` on the rectangle, via the landed `cutR10_gamma_sup_half_closed` (which itself chains domination + two-step shift + real cap + denom lower). -/
+theorem cutR10_gamma_half_greenfield_rechain (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ)) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 2 :=
+  cutR10_gamma_sup_half_closed s hlo hhi hilo hihi
+
+/-- Arithmetic shortfall: `1 / 2` to `1 / 100` is `50x`. -/
+theorem cutR10_gamma_half_to_hundred_shortfall :
+    ((1 / 2 : ℝ) / (1 / 100) = 50) := by
+  norm_num
+
+/-- Greenfield residual: exact `1 / 100` gated shape for `:898-902`, with the only delta named `hProdCap`. This does not claim closure; closure would need the `pi / 2` Stirling rate or a `20`-factor product, neither banked. -/
+theorem cutR10_gamma_sup_of_prodCap_greenfield (s : ℂ)
+    (hlo : (-1.06 : ℝ) ≤ s.re) (hhi : s.re ≤ (2.06 : ℝ))
+    (hilo : (8.44 : ℝ) ≤ s.im) (hihi : s.im ≤ (11.56 : ℝ))
+    (hProdCap : ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100) :
+    ‖Complex.Gamma (s / 2)‖ ≤ 1 / 100 :=
+  hProdCap
+
+end Door3CutR10BallSup

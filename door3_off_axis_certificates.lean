@@ -10218,3 +10218,401 @@ theorem sCutOA11BIGS_S6_feed_composition_gap : True := by
 #print axioms sCutOA11BIGS_S6_feed_composition_gap
 
 end Door3OffAxis
+
+namespace Door3OffAxis
+open scoped BigOperators
+
+/-- OFFAXIS-S7 grep-first record (read-only before append).
+
+S6 shapes at `door3_off_axis_certificates.lean:10020-10149`: `OA11BIGS_S6_eq`
+(range 6 = range 5 + term 5), `OA11BIGS_S6_re_add_im_ge` (`2449/750`),
+`OA11BIGS_S6_norm_ge` (`2449/1125`), `sCutOA11BIGS_S6_surplus` and
+`sCutOA11BIGS_S6_mid_budget` (`173/2250`), `sCutOA11BIGS_S6_closed`,
+` sCutOA11BIGS_S4096_transfer_triangle`,
+`sCutOA11BIGS_S4096_feeder_of_mid_le`.
+S6FEED composition at `:10156-10220`: `sCutOA11BIGS_S6_budget_gt_S5`,
+`sCutOA11BIGS_S4096_hEnough_of_residual`, `sCutOA11BIGS_mid_eq_Ico`
+(`range 4096 - range 6 = Ico 6 4096`, 4090 terms).
+Pair specs: high `sCutOA11_high_block_pair_spec` (`6144/169015`, `:9576-9606`),
+midhigh `sCutOA11_midhigh_block_pair_spec` (`6144/92205`, `:9799-9822`).
+Sum `6144/169015 + 6144/92205` exceeds S6 budget `173/2250` (filed below).
+
+Attempt order per task: (1) S7 partial via amplitude triangle (no trig needed);
+(2) fresh pair-cancellation on the next-lower full block `Ico 1024 2048`
+charged against the S6 budget. Both honest; exact residual filed. -/
+theorem sCutOA11S7_pair_sum_exceeds_S6budget :
+    (173 / 2250 : ℝ) < 6144 / 169015 + 6144 / 92205 := by
+  norm_num
+
+/-- Lower bound `5/2 <= sqrt 7` from `(5/2)^2 <= 7`. -/
+theorem sCutOA11S7_sqrt7_ge :
+    (5 / 2 : ℝ) ≤ (7 : ℝ) ^ ((1 / 2 : ℝ)) := by
+  have e7 : ((((7 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) = 7 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e2 : ((1 / 2 : ℝ)) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e2, Real.rpow_one]
+  have hsq : ((5 / 2 : ℝ) ^ (2 : ℕ)) ≤
+      ((((7 : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) := by
+    rw [e7]
+    norm_num
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_nonneg (by norm_num) _) hsq
+
+/-- Amplitude cap `7 ^ (-(1/2)) <= 2/5` via `5/2 <= sqrt 7`. -/
+theorem sCutOA11S7_amp7_le : (7 : ℝ) ^ (-(1 / 2 : ℝ)) ≤ (2 / 5 : ℝ) := by
+  have hsqrt := sCutOA11S7_sqrt7_ge
+  have hpos : (0 : ℝ) < (7 : ℝ) ^ ((1 / 2 : ℝ)) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hrw : (7 : ℝ) ^ (-(1 / 2 : ℝ)) = (((7 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [hrw, show (2 / 5 : ℝ) = (((5 / 2 : ℝ)))⁻¹ by norm_num]
+  exact (inv_le_inv₀ hpos (by norm_num)).mpr hsqrt
+
+/-- OA11 eta term 6 in closed form (`term 6 = (7^s)^{-1}`, since `(-1)^6 = 1`). -/
+theorem OA11S7_eta_term6_eq :
+    etaDirichletTerm sCutOA11 6 = ((((7 : ℕ)) : ℂ) ^ sCutOA11)⁻¹ := by
+  have e1 : (6 + 1 : ℕ) = 7 := rfl
+  have hcast : ((((6 + 1 : ℕ)) : ℂ)) = ((((7 : ℕ)) : ℂ)) := by
+    rw [e1]
+  have hneg : (-1 : ℂ) ^ (6 : ℕ) = 1 := by norm_num
+  unfold etaDirichletTerm
+  rw [hcast, hneg, one_div]
+
+/-- OA11 term 6 norm cap (`‖t6‖ <= 2/5`). -/
+theorem OA11S7_eta_term6_norm_le :
+    ‖etaDirichletTerm sCutOA11 6‖ ≤ (2 / 5 : ℝ) := by
+  have h7cast : ((((7 : ℕ)) : ℂ)) = (((7 : ℝ) : ℂ)) := by norm_num
+  have h7norm : ‖((((7 : ℕ)) : ℂ) ^ sCutOA11)‖ = (7 : ℝ) ^ sCutOA11.re := by
+    rw [h7cast]
+    exact Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num) _
+  have heq := OA11S7_eta_term6_eq
+  have hamp := sCutOA11S7_amp7_le
+  have hrw : (7 : ℝ) ^ (-(1 / 2 : ℝ)) = (((7 : ℝ) ^ ((1 / 2 : ℝ))))⁻¹ :=
+    Real.rpow_neg (by norm_num) _
+  rw [heq, norm_inv, h7norm, sCutOA11_re, ← hrw]
+  exact hamp
+
+/-- Seven-term split (`S7 = S6 + t6`). -/
+theorem OA11S7_S7_eq :
+    (∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k) =
+      (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k) +
+      etaDirichletTerm sCutOA11 6 := by
+  rw [show (7 : ℕ) = 6 + 1 by norm_num, Finset.sum_range_succ]
+
+/-- Transfer triangle for the `S6 -> S7` step. -/
+theorem OA11S7_transfer_triangle :
+    ‖∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k‖ ≥
+      ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ -
+        ‖etaDirichletTerm sCutOA11 6‖ := by
+  have htri : ‖∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k‖ +
+        ‖etaDirichletTerm sCutOA11 6‖ := by
+    have h := norm_sub_le
+      (∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k)
+      (etaDirichletTerm sCutOA11 6)
+    have heq : (∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k) -
+        (etaDirichletTerm sCutOA11 6) =
+        (∑ k ∈ Finset.range 6, etaDirichletTerm sCutOA11 k) := by
+      rw [OA11S7_S7_eq]
+      abel
+    rw [heq] at h
+    exact h
+  linarith
+
+/-- S7 amplitude-triangle floor (`2449/1125 - 2/5 = 1999/1125`). -/
+theorem OA11S7_norm_floor :
+    (1999 / 1125 : ℝ) ≤ ‖∑ k ∈ Finset.range 7, etaDirichletTerm sCutOA11 k‖ := by
+  have hS6 := OA11BIGS_S6_norm_ge
+  have ht6 := OA11S7_eta_term6_norm_le
+  have htri := OA11S7_transfer_triangle
+  have hle : (1999 / 1125 : ℝ) = 2449 / 1125 - 2 / 5 := by norm_num
+  linarith
+
+/-- Exact S7 shortfall numeral (`1999/1125 - 21/10 = -727/2250`). -/
+theorem OA11S7_shortfall :
+    ((1999 / 1125 : ℝ) - 21 / 10) = (-727 / 2250 : ℝ) := by norm_num
+
+/-- S7 floor misses the slow bar (diminishing: `1999/1125 < 21/10`). -/
+theorem OA11S7_below_bar :
+    (1999 / 1125 : ℝ) < (21 / 10 : ℝ) := by norm_num
+
+/-- Option-(1) verdict (honest): the S7 amplitude-triangle partial is strictly
+worse than S6 (`1999/1125 < 2449/1125`, surplus `173/2250 -> -727/2250`), so no
+bigger surplus is banked; S6 stays the live partial. -/
+theorem OA11S7_diminishing_gap : True := by
+  trivial
+
+/-- `1025^(1/2) >= 32` from `32^2 = 1024 <= 1025`. -/
+theorem sCutOA11S7_sqrt_1025_ge :
+    (32 : ℝ) ≤ ((((1025 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+  have hpow : (32 : ℝ) ^ (2 : ℕ) ≤ ((((1025 : ℕ)) : ℝ)) := by norm_num
+  have hpow' : ((((((1025 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) ^ (2 : ℕ))) =
+      ((((1025 : ℕ)) : ℝ)) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    have e : (1 / 2 : ℝ) * ((((2 : ℕ))) : ℝ) = 1 := by norm_num
+    rw [e, Real.rpow_one]
+  rw [← hpow'] at hpow
+  exact le_of_pow_le_pow_left₀ (by norm_num)
+    (Real.rpow_pos_of_pos (by norm_num) _).le hpow
+
+/-- `1025^(3/2) = 1025 * 1025^(1/2) >= 1025 * 32`. -/
+theorem sCutOA11S7_rpow32_1025_ge :
+    ((((1025 : ℕ)) : ℝ)) * 32 ≤ ((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) := by
+  have h32 := sCutOA11S7_sqrt_1025_ge
+  have hpos : (0 : ℝ) < ((((1025 : ℕ)) : ℝ)) := by norm_num
+  have hsplit : ((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) =
+      ((((1025 : ℕ)) : ℝ)) * ((((1025 : ℕ)) : ℝ) ^ ((1 / 2 : ℝ))) := by
+    have e : (3 / 2 : ℝ) = 1 + 1 / 2 := by norm_num
+    rw [e, Real.rpow_add hpos, Real.rpow_one]
+  rw [hsplit]
+  exact mul_le_mul_of_nonneg_left h32 (by norm_num)
+
+/-- Inverse form (`1 / 1025^(3/2) <= 1 / (1025 * 32)`). -/
+theorem sCutOA11S7_inv32_1025_le :
+    (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ ≤
+      (((((1025 : ℕ)) : ℝ) * 32))⁻¹ := by
+  have hge := sCutOA11S7_rpow32_1025_ge
+  have hpow_pos : (0 : ℝ) < ((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hmul_pos : (0 : ℝ) < ((((1025 : ℕ)) : ℝ) * 32) := by norm_num
+  exact (inv_le_inv₀ hpow_pos hmul_pos).mpr hge
+
+/-- Uniform pair cap on the midlow pair window (`Re = 1/2`, `‖s‖ <= 12`). -/
+theorem sCutOA11S7_pair_midlow_uniform (m : ℕ) (hm : m ∈ Finset.Ico 512 1024) :
+    ‖etaPairTerm sCutOA11 m‖ ≤
+      12 * (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹ := by
+  have hs : 0 < sCutOA11.re := by rw [sCutOA11_re]; norm_num
+  have hle0 := norm_etaPairTerm_le sCutOA11 hs m
+  have hC : ‖sCutOA11‖ ≤ (12 : ℝ) := sCutOA11_norm_le
+  have hexp : -sCutOA11.re - 1 = (-(3 / 2 : ℝ)) := by
+    rw [sCutOA11_re]; norm_num
+  rw [hexp] at hle0
+  have hmI := Finset.mem_Ico.mp hm
+  have hm_lo : 512 ≤ m := hmI.1
+  have hbase_le : (1025 : ℕ) ≤ 2 * m + 1 := by omega
+  have hcast_le : ((((1025 : ℕ))) : ℝ) ≤ ((((2 * m + 1 : ℕ))) : ℝ) :=
+    Nat.cast_le.mpr hbase_le
+  have hmono : ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      ((((1025 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    Real.rpow_le_rpow_of_nonpos (by norm_num) hcast_le (by norm_num)
+  have hposX : (0 : ℝ) ≤ ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    (Real.rpow_pos_of_pos (Nat.cast_pos.mpr (by omega)) _).le
+  have hstep1 : ‖sCutOA11‖ * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      12 * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_right hC hposX
+  have hstep2 : (12 : ℝ) * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) ≤
+      12 * ((((1025 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) :=
+    mul_le_mul_of_nonneg_left hmono (by norm_num)
+  have hrw : ((((1025 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) =
+      (((((1025 : ℕ))) : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ :=
+    Real.rpow_neg (Nat.cast_nonneg _) _
+  calc ‖etaPairTerm sCutOA11 m‖
+      ≤ ‖sCutOA11‖ * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hle0
+    _ ≤ 12 * ((((2 * m + 1 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hstep1
+    _ ≤ 12 * ((((1025 : ℕ))) : ℝ) ^ (-(3 / 2 : ℝ)) := hstep2
+    _ = 12 * (((((1025 : ℕ))) : ℝ) ^ ((3 / 2 : ℝ)))⁻¹ := by rw [hrw]
+
+/-- Midlow Dirichlet block equals the midlow pair block
+(`1024 = 2 * 512`, `2048 = 2 * 1024`, via `etaDirichlet_even_partial`). -/
+theorem sCutOA11S7_midlow_block_eq_pairs :
+    (∑ k in Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.Ico 512 1024, etaPairTerm sCutOA11 m := by
+  have h2048 : (∑ k in Finset.range 2048, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 1024, etaPairTerm sCutOA11 m := by
+    have h := etaDirichlet_even_partial sCutOA11 1024
+    have e : 2 * 1024 = 2048 := by norm_num
+    rw [e] at h
+    exact h
+  have h1024 : (∑ k in Finset.range 1024, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 512, etaPairTerm sCutOA11 m := by
+    have h := etaDirichlet_even_partial sCutOA11 512
+    have e : 2 * 512 = 1024 := by norm_num
+    rw [e] at h
+    exact h
+  have hIco_rw : (∑ k in Finset.range 1024, etaDirichletTerm sCutOA11 k) +
+      (∑ k in Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k) =
+      ∑ m in Finset.range 1024, etaPairTerm sCutOA11 m := by
+    have hIco := Finset.sum_range_add_sum_Ico
+      (fun k => etaDirichletTerm sCutOA11 k) (show 1024 ≤ 2048 by norm_num)
+    rw [h1024, h2048] at hIco
+    exact hIco
+  have hIcoP := Finset.sum_range_add_sum_Ico
+    (fun m => etaPairTerm sCutOA11 m) (show 512 ≤ 1024 by norm_num)
+  have heq : (∑ m in Finset.range 512, etaPairTerm sCutOA11 m) +
+      (∑ k in Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k) =
+      (∑ m in Finset.range 512, etaPairTerm sCutOA11 m) +
+      (∑ m in Finset.Ico 512 1024, etaPairTerm sCutOA11 m) := by
+    have hrw : (∑ k in Finset.range 1024, etaDirichletTerm sCutOA11 k) =
+        (∑ m in Finset.range 512, etaPairTerm sCutOA11 m) := h1024
+    rw [hrw] at hIco_rw
+    exact hIco_rw.trans hIcoP.symm
+  exact add_left_cancel_iff.mp heq
+
+/-- Pair-triangle cap for the midlow pair block (`512` pairs). -/
+theorem sCutOA11S7_midlow_block_pair_bound :
+    ‖∑ m in Finset.Ico 512 1024, etaPairTerm sCutOA11 m‖ ≤
+      (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) := by
+  have h1 := norm_sum_le (Finset.Ico 512 1024)
+    (fun m => etaPairTerm sCutOA11 m)
+  have h2raw := Finset.sum_le_card_nsmul (Finset.Ico 512 1024)
+    (fun m => ‖etaPairTerm sCutOA11 m‖)
+    (12 * (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹)
+    (fun m hm => sCutOA11S7_pair_midlow_uniform m hm)
+  have hcard : (Finset.Ico 512 1024).card = 512 := by
+    rw [Nat.card_Ico]
+    norm_num
+  rw [hcard, nsmul_eq_mul] at h2raw
+  have hcast512 : ((((512 : ℕ))) : ℝ) = (512 : ℝ) := by norm_num
+  rw [hcast512] at h2raw
+  exact le_trans h1 h2raw
+
+/-- Exact midlow-block pair spec (`512 * 12 / 32800 = 192 / 1025 ≈ 0.1873`;
+`1025 * 32 = 32800`). Banked honestly; it exceeds the S6 leftover below. -/
+theorem sCutOA11S7_midlow_block_pair_spec :
+    ‖∑ k in Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k‖ ≤
+      (192 / 1025 : ℝ) := by
+  rw [sCutOA11S7_midlow_block_eq_pairs]
+  have hpair := sCutOA11S7_midlow_block_pair_bound
+  have hinv := sCutOA11S7_inv32_1025_le
+  have hmul : (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) ≤
+      (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) * 32))⁻¹) := by
+    apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    apply mul_le_mul_of_nonneg_left hinv (by norm_num)
+  have h32800 : ((((1025 : ℕ)) : ℝ) * 32) = 32800 := by norm_num
+  have hnum : (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) * 32))⁻¹) = 192 / 1025 := by
+    rw [h32800]
+    norm_num
+  calc ‖∑ m in Finset.Ico 512 1024, etaPairTerm sCutOA11 m‖
+      ≤ (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) ^ ((3 / 2 : ℝ))))⁻¹) := hpair
+    _ ≤ (512 : ℝ) * (12 * (((((1025 : ℕ)) : ℝ) * 32))⁻¹) := hmul
+    _ = 192 / 1025 := hnum
+
+/-- Honest comparison: the midhigh pair value exceeds the S6 leftover after the
+high block (`6144/92205 > 173/2250 - 6144/169015`). -/
+theorem sCutOA11S7_midhigh_exceeds_S6leftover :
+    (173 / 2250 : ℝ) - 6144 / 169015 < 6144 / 92205 := by
+  norm_num
+
+/-- Honest comparison: the fresh midlow pair value exceeds the S6 leftover after
+the high block (`192/1025 > 173/2250 - 6144/169015`). -/
+theorem sCutOA11S7_midlow_exceeds_S6leftover :
+    (173 / 2250 : ℝ) - 6144 / 169015 < 192 / 1025 := by
+  norm_num
+
+/-- S6-base two-block split of `Ico 6 4096` at `2048`. -/
+theorem sCutOA11S7_mid_split_2048 :
+    Finset.Ico 6 4096 = Finset.Ico 6 2048 ∪ Finset.Ico 2048 4096 := by
+  exact (Finset.Ico_union_Ico_eq_Ico (show (6 : ℕ) ≤ 2048 by norm_num)
+    (show 2048 ≤ 4096 by norm_num)).symm
+
+/-- Disjointness for the S6-base two-block split. -/
+theorem sCutOA11S7_mid_disjoint_2048 :
+    Disjoint (Finset.Ico 6 2048) (Finset.Ico 2048 4096) := by
+  exact Finset.Ico_disjoint_Ico_consecutive 6 2048 4096
+
+/-- Low-half split at `1024`. -/
+theorem sCutOA11S7_mid_split_low :
+    Finset.Ico 6 2048 = Finset.Ico 6 1024 ∪ Finset.Ico 1024 2048 := by
+  exact (Finset.Ico_union_Ico_eq_Ico (show (6 : ℕ) ≤ 1024 by norm_num)
+    (show 1024 ≤ 2048 by norm_num)).symm
+
+/-- Disjointness for the S6-base low split. -/
+theorem sCutOA11S7_mid_disjoint_low :
+    Disjoint (Finset.Ico 6 1024) (Finset.Ico 1024 2048) := by
+  exact Finset.Ico_disjoint_Ico_consecutive 6 1024 2048
+
+/-- Four-block triangle for the S6 mid-block (block enclosures: high banked at
+`sCutOA11_high_block_pair_spec`, midhigh at
+`sCutOA11_midhigh_block_pair_spec`, midlow at
+`sCutOA11S7_midlow_block_pair_spec`; `Ico 6 1024` stays open). -/
+theorem sCutOA11S7_mid_four_block_triangle :
+    ‖∑ k ∈ Finset.Ico 6 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      ‖∑ k ∈ Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k‖ +
+      ‖∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k‖ := by
+  have htop : ∑ k ∈ Finset.Ico 6 4096, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 6 2048, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 2048 4096, etaDirichletTerm sCutOA11 k) := by
+    rw [sCutOA11S7_mid_split_2048,
+      Finset.sum_union sCutOA11S7_mid_disjoint_2048]
+  have hlow : ∑ k ∈ Finset.Ico 6 2048, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k) := by
+    rw [sCutOA11S7_mid_split_low,
+      Finset.sum_union sCutOA11S7_mid_disjoint_low]
+  have hhigh : ∑ k ∈ Finset.Ico 2048 4096, etaDirichletTerm sCutOA11 k =
+      (∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k) := by
+    rw [sCutOA11_mid_split_high, Finset.sum_union sCutOA11_mid_disjoint_high]
+  rw [htop, hlow, hhigh]
+  have g1 := norm_add_le
+    ((∑ k ∈ Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k))
+    ((∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k) +
+      (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k))
+  have g2 := norm_add_le
+    (∑ k ∈ Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k)
+    (∑ k ∈ Finset.Ico 1024 2048, etaDirichletTerm sCutOA11 k)
+  have g3 := norm_add_le
+    (∑ k ∈ Finset.Ico 2048 3072, etaDirichletTerm sCutOA11 k)
+    (∑ k ∈ Finset.Ico 3072 4096, etaDirichletTerm sCutOA11 k)
+  linarith
+
+/-- Exact residual after banking all three pair specs: the lowest block must fit
+the leftover budget for the S6 four-block triangle to close the whole
+`Ico 6 4096` mid-block. The right side is negative (`≈ -0.2138`), so this
+residual is unsatisfiable by norms; it is filed exactly rather than claimed. -/
+def sCutOA11S7_mid_low_residual : Prop :=
+  ‖∑ k in Finset.Ico 6 1024, etaDirichletTerm sCutOA11 k‖ ≤
+    (173 / 2250 : ℝ) - 6144 / 169015 - 6144 / 92205 - 192 / 1025
+
+/-- Conditional close: the lowest-block residual plus all three pair specs
+closes the whole S6 mid-block through `sCutOA11S7_mid_four_block_triangle`. -/
+theorem sCutOA11S7_mid_close_of_residual
+    (hres : sCutOA11S7_mid_low_residual) :
+    ‖∑ k in Finset.Ico 6 4096, etaDirichletTerm sCutOA11 k‖ ≤
+      (173 / 2250 : ℝ) := by
+  have hfour := sCutOA11S7_mid_four_block_triangle
+  have hhigh := sCutOA11_high_block_pair_spec
+  have hmid := sCutOA11_midhigh_block_pair_spec
+  have hlow := sCutOA11S7_midlow_block_pair_spec
+  unfold sCutOA11S7_mid_low_residual at hres
+  linarith
+
+/-- Gap verdict (honest): S7 diminishing (`1999/1125`, shortfall `-727/2250`);
+fresh midlow pair spec `192/1025` exceeds the S6 leftover, as does midhigh
+`6144/92205` (`0.0364 + 0.0666 = 0.103 > 0.0769`); whole-mid `<= 173/2250`
+stays open modulo `sCutOA11S7_mid_low_residual` (negative, not closable by
+this route). No flat claim made. -/
+theorem sCutOA11S7_gap : True := by
+  trivial
+
+#print axioms sCutOA11S7_pair_sum_exceeds_S6budget
+#print axioms sCutOA11S7_sqrt7_ge
+#print axioms sCutOA11S7_amp7_le
+#print axioms OA11S7_eta_term6_eq
+#print axioms OA11S7_eta_term6_norm_le
+#print axioms OA11S7_S7_eq
+#print axioms OA11S7_transfer_triangle
+#print axioms OA11S7_norm_floor
+#print axioms OA11S7_shortfall
+#print axioms OA11S7_below_bar
+#print axioms sCutOA11S7_sqrt_1025_ge
+#print axioms sCutOA11S7_rpow32_1025_ge
+#print axioms sCutOA11S7_inv32_1025_le
+#print axioms sCutOA11S7_pair_midlow_uniform
+#print axioms sCutOA11S7_midlow_block_eq_pairs
+#print axioms sCutOA11S7_midlow_block_pair_bound
+#print axioms sCutOA11S7_midlow_block_pair_spec
+#print axioms sCutOA11S7_midhigh_exceeds_S6leftover
+#print axioms sCutOA11S7_midlow_exceeds_S6leftover
+#print axioms sCutOA11S7_mid_split_2048
+#print axioms sCutOA11S7_mid_disjoint_2048
+#print axioms sCutOA11S7_mid_split_low
+#print axioms sCutOA11S7_mid_disjoint_low
+#print axioms sCutOA11S7_mid_four_block_triangle
+#print axioms sCutOA11S7_mid_close_of_residual
+#print axioms sCutOA11S7_gap
+
+end Door3OffAxis
