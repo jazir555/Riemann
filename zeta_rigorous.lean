@@ -42940,3 +42940,84 @@ theorem R02_D3_K017_candidate_19689 :
 #print axioms R02_D3_integral105_Ioi17_le_1738
 #print axioms R02_D3_tail105_M17_le_1738
 #print axioms R02_D3_K017_candidate_19689
+/-!
+## Door-3 strip endgame, step 39ag (zeta lane): tighter `1.151 ≤ 18^0.05`, M18 tail `≤17.38`, K0-18 exact gap vs `19.689`.
+
+Grep shapes (`:42871`, `:42737-42812`, `:42927`, called only, not edited):
+`:42871` is `R02_D3_rpow_1151_le_1705` (`1.151 ≤ 17^0.05` via `(1.151)^20 ≤ 17`);
+`:42737` is `R02_D3_integral105_Ioi18_eq` (`∫ Ioi 18 = 18^(-0.05)/0.05`);
+`:42753` is `R02_D3_rpow_115_le_1805` (`1.15 ≤ 18^0.05` chain template);
+`:42759` is `R02_D3_integral105_Ioi18_le_174` (`∫ Ioi 18 ≤ 17.4` template);
+`:42786` is `R02_D3_tail105_M18_le_174` (shift-tail `≤ 17.4` template);
+`:42796` is `R02_D3_odd105_head18_le_2334` (`≤ 2.334`);
+`:42812` is `R02_D3_K018_gap_19734` (`2.334 + 17.4 = 19.734` gap template);
+`:42927` is `R02_D3_K017_candidate_19689` (`2.309 + 17.38 = 19.689` current best).
+
+Honest witness check for this route (all `norm_num`):
+chain `1.151 ≤ 17^0.05 ≤ 18^0.05` (monotone `17 ≤ 18`);
+`(1.151)⁻¹ ≤ 0.869` since `0.869 * 1.151 = 1.000219 ≥ 1`;
+`0.869 / 0.05 = 17.38`.
+Head `2.334` reused; `2.334 + 17.38 = 19.714 > 19.689`
+above current K0-17 best by `0.025`, so NO K0-18 candidate is composed here;
+exact gap only. `47`-linear bar `19.458` untouched (`19.714 - 19.458 = 0.256`).
+Residual: M19-tail (`38/39` pair + `19^0.05` floor) left unchecked.
+-/
+/-- Rpow lower: `1.151 ≤ 18^0.05` (chains `1.151 ≤ 17^0.05` with `17 ≤ 18`). -/
+theorem R02_D3_rpow_1151_le_1805 : (1.151 : ℝ) ≤ (18 : ℝ) ^ (0.05 : ℝ) := by
+  have h1 := R02_D3_rpow_1151_le_1705
+  have h2 : (17 : ℝ) ^ (0.05 : ℝ) ≤ (18 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_le_rpow (by norm_num) (by norm_num) (by norm_num)
+  exact le_trans h1 h2
+/-- Integral numeral `∫ x in Ioi 18, x^(-1.05) ≤ 17.38` (via `1.151 ≤ 18^0.05`). -/
+theorem R02_D3_integral105_Ioi18_le_1738 :
+    (∫ x : ℝ in Set.Ioi (18 : ℝ), x ^ (-1.05 : ℝ)) ≤ 17.38 := by
+  have heq := R02_D3_integral105_Ioi18_eq
+  have hfloor := R02_D3_rpow_1151_le_1805
+  have hpos : (0 : ℝ) < (18 : ℝ) ^ (0.05 : ℝ) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hneg : (18 : ℝ) ^ (-0.05 : ℝ) = ((18 : ℝ) ^ (0.05 : ℝ))⁻¹ := by
+    have e : (-0.05 : ℝ) = -(0.05 : ℝ) := by norm_num
+    rw [e, Real.rpow_neg (by norm_num)]
+  have hinv : ((18 : ℝ) ^ (0.05 : ℝ))⁻¹ ≤ (1.151 : ℝ)⁻¹ :=
+    (inv_le_inv₀ hpos (by norm_num)).mpr hfloor
+  have h087 : (1.151 : ℝ)⁻¹ ≤ 0.869 := by norm_num
+  have hhead : (18 : ℝ) ^ (-0.05 : ℝ) ≤ 0.869 := by
+    rw [hneg]
+    exact le_trans hinv h087
+  have hdiv : (18 : ℝ) ^ (-0.05 : ℝ) / 0.05 ≤ 0.869 / 0.05 := by
+    have e1 : (18 : ℝ) ^ (-0.05 : ℝ) / 0.05 =
+        (18 : ℝ) ^ (-0.05 : ℝ) * (0.05 : ℝ)⁻¹ := by ring
+    have e2 : (0.869 : ℝ) / 0.05 = 0.869 * (0.05 : ℝ)⁻¹ := by ring
+    rw [e1, e2]
+    exact mul_le_mul_of_nonneg_right hhead (by norm_num)
+  have h174 : (0.869 : ℝ) / 0.05 = 17.38 := by norm_num
+  calc (∫ x : ℝ in Set.Ioi (18 : ℝ), x ^ (-1.05 : ℝ))
+        = (18 : ℝ) ^ (-0.05 : ℝ) / 0.05 := heq
+      _ ≤ 0.869 / 0.05 := hdiv
+      _ = 17.38 := h174
+/-- Shift-tail numeral `∑' n, (n+19)^(-1.05) ≤ 17.38`. -/
+theorem R02_D3_tail105_M18_le_1738 :
+    (∑' n : ℕ, ((((n + 18 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤ 17.38 := by
+  have ecast : ((((18 : ℕ)) : ℝ)) = (18 : ℝ) := by norm_num
+  have htail : (∑' n : ℕ, ((((n + 18 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) ≤
+      (∫ x : ℝ in Set.Ioi (18 : ℝ), x ^ (-1.05 : ℝ)) := by
+    have h := R02_D3_tail19_le_integral105_Ioi18
+    rw [ecast] at h
+    exact h
+  exact le_trans htail R02_D3_integral105_Ioi18_le_1738
+/-- EXACT GAP: M18 sum `2.334 + 17.38 = 19.714` does not beat K0-17 best `19.689`;
+`47`-linear bar `19.458` untouched. No K0-18 composed. -/
+theorem R02_D3_K018_gap_19714 :
+    ((∑ i ∈ Finset.range 18, ((((2 * i + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ)) +
+      (∑' n : ℕ, ((((n + 18 + 1 : ℕ)) : ℝ)) ^ (-1.05 : ℝ))) ≤ 19.714 ∧
+    (2.334 : ℝ) + 17.38 = 19.714 ∧ (19.689 : ℝ) < 19.714 ∧
+    (19.714 : ℝ) - 19.689 = 0.025 ∧ (19.714 : ℝ) < 19.802 ∧
+    (47 : ℝ) * 0.414 = 19.458 ∧ (19.714 : ℝ) - 19.458 = 0.256 := by
+  have hadd := add_le_add R02_D3_odd105_head18_le_2334 R02_D3_tail105_M18_le_1738
+  have e : (2.334 : ℝ) + 17.38 = 19.714 := by norm_num
+  refine ⟨?_, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num, by norm_num⟩
+  linarith
+#print axioms R02_D3_rpow_1151_le_1805
+#print axioms R02_D3_integral105_Ioi18_le_1738
+#print axioms R02_D3_tail105_M18_le_1738
+#print axioms R02_D3_K018_gap_19714

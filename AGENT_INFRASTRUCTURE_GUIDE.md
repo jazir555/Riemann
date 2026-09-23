@@ -6164,6 +6164,11 @@ sorry-free infrastructure and the complete commit ledger above.
 - 2026-09-22 CELL-P (background `ses_f34761660`, proof-only,
   grep-clean, interval-only commit): R15 poly floor 0.4 hypothesis-free
   + center conditional. Same ~8-order wall (short 179M).
+- 2026-09-22 R18+18POW (backgrounds `ses_f346b28d6`,
+  `ses_f346b28d5-follow`, proof-only, grep-clean): R18 route filed
+  (poly 13.8/base 6.9 vs banked 0.1382 infeasible); 1.151≤18^0.05 →
+  M18 tail 17.38 → K0 19.714 > 19.689, minimum CONFIRMED at N=17
+  (namespace-end reposition benign).
 - 2026-09-22 FIVE-LANE (backgrounds `ses_f346c3ad2/1/0`,
   `ses_f346b28d5`, `ses_f347082a5-follow`, proof-only, grep-clean):
   S26 rung (Re -4.30 + Im conditional, log25/26 phase); CERTS
